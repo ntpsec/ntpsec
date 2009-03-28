@@ -568,9 +568,7 @@ crypto_recv(
 			 * request the autokey values.
 			 */
 			peer->assoc = associd;
-			if (peer->cast_flags & MDF_BCLNT)
-				fstamp |= CRYPTO_FLAG_COOK;
-			else if (hismode == MODE_SERVER)
+			if (hismode == MODE_SERVER)
 				fstamp |= CRYPTO_FLAG_AUTO;
 			if (!(fstamp & CRYPTO_FLAG_TAI))
 				fstamp |= CRYPTO_FLAG_LEAP;
@@ -801,12 +799,16 @@ crypto_recv(
 			 * errors.
 			 */
 			if (vallen == (u_int)EVP_PKEY_size(host_pkey)) {
-				RSA_private_decrypt(vallen,
+				if (RSA_private_decrypt(vallen,
 				    (u_char *)ep->pkt,
 				    (u_char *)&temp32,
 				    host_pkey->pkey.rsa,
-				    RSA_PKCS1_OAEP_PADDING);
-				cookie = ntohl(temp32);
+				    RSA_PKCS1_OAEP_PADDING) <= 0) {
+					rval = XEVNT_CKY;
+					break;
+				} else {
+					cookie = ntohl(temp32);
+				}
 			} else {
 				rval = XEVNT_CKY;
 				break;
@@ -1571,8 +1573,8 @@ crypto_encrypt(
 	vp->ptr = emalloc(len);
 	ptr = vp->ptr;
 	temp32 = htonl(*cookie);
-	if (!RSA_public_encrypt(4, (u_char *)&temp32, ptr,
-	    pkey->pkey.rsa, RSA_PKCS1_OAEP_PADDING)) {
+	if (RSA_public_encrypt(4, (u_char *)&temp32, ptr,
+	    pkey->pkey.rsa, RSA_PKCS1_OAEP_PADDING) <= 0) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		free(vp->ptr);
@@ -3005,7 +3007,7 @@ cert_sign(
 		return (XEVNT_PER);
 	}
 	X509_sign(cert, sign_pkey, sign_digest);
-	if (!X509_verify(cert, sign_pkey)) {
+	if (X509_verify(cert, sign_pkey) <= 0) {
 		msyslog(LOG_ERR, "cert_sign: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);
@@ -3182,7 +3184,7 @@ cert_hike(
 		xp->flags |= CERT_ERROR;
 		return (XEVNT_CRT);
 	}
-	if (!X509_verify(cert, yp->pkey)) {
+	if (X509_verify(cert, yp->pkey) <= 0) {
 		X509_free(cert);
 		xp->flags |= CERT_ERROR;
 		return (XEVNT_VFY);
@@ -3349,7 +3351,7 @@ cert_parse(
 		/*
 		 * If certificate is self signed, verify signature.
 		 */
-		if (!X509_verify(cert, ret->pkey)) {
+		if (X509_verify(cert, ret->pkey) <= 0) {
 			msyslog(LOG_NOTICE,
 			    "cert_parse: signature not verified %s",
 			    ret->subject);

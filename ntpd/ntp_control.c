@@ -217,16 +217,17 @@ static struct ctl_var peer_var[] = {
 	{ CP_IN,	RO, "in" },		/* 38 */
 	{ CP_OUT,	RO, "out" },		/* 39 */
 	{ CP_RATE,	RO, "headway" },	/* 40 */
+	{ CP_BIAS,	RO, "bias" },		/* 41 */
 #ifdef OPENSSL
-	{ CP_FLAGS,	RO, "flags" },		/* 41 */
-	{ CP_HOST,	RO, "host" },		/* 42 */
-	{ CP_VALID,	RO, "valid" },		/* 43 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 44 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 45 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 46 */
-	{ CP_DIGEST,	RO, "signature" },	/* 47 */
+	{ CP_FLAGS,	RO, "flags" },		/* 42 */
+	{ CP_HOST,	RO, "host" },		/* 43 */
+	{ CP_VALID,	RO, "valid" },		/* 44 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 45 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 46 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 47 */
+	{ CP_DIGEST,	RO, "signature" },	/* 48 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 41/48 */
+	{ 0,		EOV, "" }		/* 42/49 */
 };
 
 
@@ -263,6 +264,7 @@ static u_char def_peer_var[] = {
 	CP_DISPERSION,
 	CP_JITTER,
 	CP_XMT,
+	CP_BIAS,
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
@@ -1552,7 +1554,7 @@ ctl_putpeer(
 
 	    case CP_PRECISION:
 		ctl_putint(peer_var[CP_PRECISION].text,
-			   peer->precision);
+			peer->precision);
 		break;
 
 	    case CP_ROOTDELAY:
@@ -1593,8 +1595,14 @@ ctl_putpeer(
 		break;
 
 	    case CP_XMT:
-		if (peer->flags & FLAG_XLEAVE)
+		if (peer->xleave != 0)
 			ctl_putdbl(peer_var[CP_XMT].text, peer->xleave *
+			    1e3);
+		break;
+
+	    case CP_BIAS:
+		if (peer->bias != 0)
+			ctl_putdbl(peer_var[CP_BIAS].text, peer->bias *
 			    1e3);
 		break;
 
