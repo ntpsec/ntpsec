@@ -1,10 +1,13 @@
+* [Bug 1141] refclock_report missing braces cause spurious "peer event:
+  clock clk_unspec" log entries
 * [Bug 873] Windows serial refclock proper TTY line discipline emulation
-* [Bug 1117] Deferred interface binding under Windows works only correctly
-  if FORCE_DNSRETRY is defined
+* [Bug 1117] Deferred interface binding under Windows works only 
+  correctly if FORCE_DNSRETRY is defined
 * [BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
-* [Bug 1014] Enable building with VC9 (in Visual Studio 2008, Visual C++ 2008, or SDK)
-* DPRINTF macro made safer, always evaluates to a statement and will not
-  misassociate an else which follows the macro
+* [Bug 1014] Enable building with VC9 (in Visual Studio 2008, Visual
+  C++ 2008, or SDK)
+* DPRINTF macro made safer, always evaluates to a statement and will
+  not misassociate an else which follows the macro
 (4.2.5p158) 2009/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * Fix [CID 72], a typo introduced at the latest fix to prettydate.c.
 (4.2.5p157) 2009/01/26 Released by Harlan Stenn <stenn@ntp.org>
