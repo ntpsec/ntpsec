@@ -1,6 +1,8 @@
+* build system email address cleanup
 * [Bug 774] parsesolaris.c does not compile under the new Solaris
 * [Bug 873] Windows serial refclock proper TTY line discipline emulation
-* [Bug 1014] Enable building with VC9 (in Visual Studio 2008, Visual C++ 2008, or SDK)
+* [Bug 1014] Enable building with VC9 (in Visual Studio 2008,
+  Visual C++ 2008, or SDK)
 * [Bug 1117] Deferred interface binding under Windows works only correctly
   if FORCE_DNSRETRY is defined
 * [BUG 1124] Lock QueryPerformanceCounter() client threads to same CPU
