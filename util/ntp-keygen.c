@@ -823,7 +823,6 @@ readkey(
 		fprintf(stderr, "Corrupt file %s or wrong key %s\n%s\n",
 		    cp, passwd, ERR_error_string(ERR_get_error(),
 		    NULL));
-		fclose(str);
 		exit (-1);
 	}
 	*estamp = gstamp;

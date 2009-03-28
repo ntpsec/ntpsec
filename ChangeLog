@@ -1,4 +1,28 @@
 * [Bug 1028] Support for W32Time authentication via Samba.
+(4.2.5p158) 2009/01/30 Released by Harlan Stenn <stenn@ntp.org>
+* Fix [CID 72], a typo introduced at the latest fix to prettydate.c.
+(4.2.5p157) 2009/01/26 Released by Harlan Stenn <stenn@ntp.org>
+* Cleanup/fixes for ntp_proto.c and ntp_crypto.c from Dave Mills.
+(4.2.5p156) 2009/01/19 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1118] Fixed sign extension for 32 bit time_t in caljulian() and prettydate().
+  Fixed some compiler warnings about missing prototypes.
+  Fixed some other simple compiler warnings.
+* [Bug 1119] [CID 52] Avoid a possible null-dereference in ntp_crypto.c.
+* [Bug 1120] [CID 51] INSIST that peer is non-null before we dereference it.
+* [Bug 1121] [CID 47] double fclose() in ntp-keygen.c.
+(4.2.5p155) 2009/01/18 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+* CHU frequency updates.
+* Design assertion fixes for ntp_crypto.c from Dave Mills.
+(4.2.5p154) 2009/01/13 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 992] support interface event change on Linux from
+  Miroslav Lichvar.
+(4.2.5p153) 2009/01/09 Released by Harlan Stenn <stenn@ntp.org>
+* Renamed gsoc_sntp/:fetch-stubs to gsoc_sntp/fetch-stubs to avoid
+  file name problems under Windows.
+  Removed German umlaut from log msg for 4.2.5p142.
+(4.2.5p152) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
+* Include (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.5p151) 2008/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Stats file logging cleanup from Dave Mills.
 (4.2.5p150) 2008/12/15 Released by Harlan Stenn <stenn@ntp.org>
@@ -26,7 +50,7 @@
 (4.2.5p143) 2008/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * sntp cleanup and fixes.
 (4.2.5p142) 2008/11/16 Released by Harlan Stenn <stenn@ntp.org>
-* Imported GSoC SNTP code from Johannes Maximilian Kühn.
+* Imported GSoC SNTP code from Johannes Maximilian Kuehn.
 (4.2.5p141) 2008/11/13 Released by Harlan Stenn <stenn@ntp.org>
 * New caltontp.c and calyearstart.c from Juergen Perlinger.
 (4.2.5p140) 2008/11/12 Released by Harlan Stenn <stenn@ntp.org>
@@ -178,6 +202,14 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+
+---
+(4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1113] Fixed build errors with recent versions of openSSL. 
+* [Sec 1111] Fix incorrect check of EVP_VerifyFinal()'s return value.
+* Update the copyright year.
+
 ---
 (4.2.4p5) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
 

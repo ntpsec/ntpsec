@@ -13,6 +13,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
+#include "ntp_assert.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -2866,6 +2867,7 @@ report_event(
 			ctl_putsys(i);
 		}
 	} else {
+		NTP_INSIST(peer != NULL);
 		rpkt.associd = htons(peer->associd);
 		rpkt.status = htons(ctlpeerstatus(peer));
 

@@ -32,7 +32,7 @@
  * This driver synchronizes the computer time using data encoded in
  * radio transmissions from Canadian time/frequency station CHU in
  * Ottawa, Ontario. Transmissions are made continuously on 3330 kHz,
- * 7335 kHz and 14670 kHz in upper sideband, compatible AM mode. An
+ * 7850 kHz and 14670 kHz in upper sideband, compatible AM mode. An
  * ordinary shortwave receiver can be tuned manually to one of these
  * frequencies or, in the case of ICOM receivers, the receiver can be
  * tuned automatically as propagation conditions change throughout the
@@ -164,7 +164,7 @@
  * dst	Canadian daylight code (opaque)
  * t	number of minutes since last synchronized
  * agc	audio gain (0 - 255)
- * ident identifier (CHU0 3330 kHz, CHU1 7335 kHz, CHU2 14670 kHz)
+ * ident identifier (CHU0 3330 kHz, CHU1 7850 kHz, CHU2 14670 kHz)
  * m	signal metric (0 - 100)
  * b	number of timecodes for the previous minute (0 - 59)
  *
@@ -436,7 +436,7 @@ static char hexchar[] = "0123456789abcdef_*=";
  * transmits on USB with carrier so we can use AM and the narrow SSB
  * filter.
  */
-static double qsy[NCHAN] = {3.330, 7.335, 14.670}; /* freq (MHz) */
+static double qsy[NCHAN] = {3.330, 7.850, 14.670}; /* freq (MHz) */
 #endif /* ICOM */
 
 /*
@@ -1515,7 +1515,7 @@ chu_newchan(
 
 	/*
 	 * The radio can be tuned to three channels: 0 (3330 kHz), 1
-	 * (7335 kHz) and 2 (14670 kHz). There are five one-minute
+	 * (7850 kHz) and 2 (14670 kHz). There are five one-minute
 	 * dwells in each cycle. During the first dwell the radio is
 	 * tuned to one of the three channels to measure the channel
 	 * metric. The channel is selected as the one least recently

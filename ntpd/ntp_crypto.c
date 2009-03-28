@@ -328,7 +328,7 @@ make_keylist(
 		    cookie, lifetime + mpoll);
 		lifetime -= mpoll;
 		if (auth_havekey(keyid) || keyid <= NTP_MAXKEY ||
-		    lifetime < 0)
+		    lifetime < 0 || tstamp == 0)
 			break;
 	}
 
@@ -687,8 +687,7 @@ crypto_recv(
 			if ((rval = crypto_iff(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "iff %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -729,8 +728,7 @@ crypto_recv(
 			if ((rval = crypto_gq(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "gq %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -770,8 +768,7 @@ crypto_recv(
 			if ((rval = crypto_mv(ep, peer)) != XEVNT_OK)
 				break;
 
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
+			peer->crypto |= CRYPTO_FLAG_VRFY;
 			peer->flash &= ~TEST8;
 			snprintf(statstr, NTP_MAXSTRLEN, "mv %s fs %u",
 			    peer->issuer, ntohl(ep->fstamp));
@@ -874,6 +871,9 @@ crypto_recv(
 			 * Install autokey values and light the
 			 * autokey bit. This is not hard.
 			 */
+			if (ep->tstamp == 0)
+				break;
+
 			if (peer->recval.ptr == NULL)
 				peer->recval.ptr =
 				    emalloc(sizeof(struct autokey));
@@ -1087,14 +1087,15 @@ crypto_xmit(
 	 * synchronized, light the error bit and go home.
 	 */
 	pkt = (u_int32 *)xpkt + *start / 4;
-	if (peer != NULL)
-		srcadr_sin = &peer->srcadr;
-	else
-		srcadr_sin = &rbufp->recv_srcadr;
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
-	if (!(opcode & CRYPTO_RESP))
-		peer->opcode = ep->opcode;
+	if (peer != NULL) {
+		srcadr_sin = &peer->srcadr;
+		if (!(opcode & CRYPTO_RESP))
+			peer->opcode = ep->opcode;
+	} else {
+		srcadr_sin = &rbufp->recv_srcadr;
+	}
 	associd = (associd_t) ntohl(ep->associd);
 	fp->associd = ep->associd;
 	len = 8;
@@ -1299,11 +1300,10 @@ crypto_xmit(
 			rval = XEVNT_LEN;
 			break;
 		}
-		if (PKT_MODE(xpkt->li_vn_mode) == MODE_SERVER) {
+		if (peer == NULL)
 			tcookie = cookie;
-		} else {
+		else
 			tcookie = peer->hcookie;
-		}
 		if ((rval = crypto_encrypt(ep, &vtemp, &tcookie)) ==
 		    XEVNT_OK) {
 			rval = crypto_send(fp, &vtemp, &len);
@@ -1446,7 +1446,7 @@ crypto_verify(
 	 * signature field lengths. The extension field length must be
 	 * long enough to contain the value header, value and signature.
 	 * Note both the value and signature field lengths are rounded
-	 * up to the next word.
+	 * up to the next word (4 octets).
 	 */
 	vallen = ntohl(ep->vallen);
 	if (vallen == 0)
@@ -1461,13 +1461,14 @@ crypto_verify(
 	/*
 	 * Check for valid timestamp and filestamp. If the timestamp is
 	 * zero, the sender is not synchronized and signatures are
-	 * disregarded. If not, the timestamp must not precede the
+	 * not possible. If nonzero the timestamp must not precede the
 	 * filestamp. The timestamp and filestamp must not precede the
-	 * corresponding values in the value structure, if present. 	 	 */
+	 * corresponding values in the value structure, if present.
+ 	 */
 	tstamp = ntohl(ep->tstamp);
 	fstamp = ntohl(ep->fstamp);
 	if (tstamp == 0)
-		return (XEVNT_OK);
+		return (XEVNT_TSP);
 
 	if (tstamp < fstamp)
 		return (XEVNT_TSP);
@@ -1485,6 +1486,14 @@ crypto_verify(
 	}
 
 	/*
+	 * At the time the certificate message is validated, the public
+	 * key in the message is not available. Thus, don't try to
+	 * verify the signature.
+	 */
+	if (opcode == (CRYPTO_CERT | CRYPTO_RESP))
+		return (XEVNT_OK);
+
+	/*
 	 * Check for valid signature length, public key and digest
 	 * algorithm.
 	 */
@@ -1493,7 +1502,7 @@ crypto_verify(
 	else
 		pkey = peer->pkey;
 	if (siglen == 0 || pkey == NULL || peer->digest == NULL)
-		return (XEVNT_OK);
+		return (XEVNT_ERR);
 
 	if (siglen != (u_int)EVP_PKEY_size(pkey))
 		return (XEVNT_SGL);
@@ -1501,11 +1510,12 @@ crypto_verify(
 	/*
 	 * Darn, I thought we would never get here. Verify the
 	 * signature. If the identity exchange is verified, light the
-	 * proventic bit.
+	 * proventic bit. What a relief.
 	 */
 	EVP_VerifyInit(&ctx, peer->digest);
 	EVP_VerifyUpdate(&ctx, (u_char *)&ep->tstamp, vallen + 12);
-	if (!EVP_VerifyFinal(&ctx, (u_char *)&ep->pkt[i], siglen, pkey))
+	if (EVP_VerifyFinal(&ctx, (u_char *)&ep->pkt[i], siglen,
+	    pkey) <= 0)
 		return (XEVNT_SIG);
 
 	if (peer->crypto & CRYPTO_FLAG_VRFY)
@@ -3016,12 +3026,14 @@ cert_sign(
 	ptr = vp->ptr;
 	i2d_X509(cert, &ptr);
 	vp->siglen = 0;
-	vp->sig = emalloc(sign_siglen);
-	EVP_SignInit(&ctx, sign_digest);
-	EVP_SignUpdate(&ctx, (u_char *)vp, 12);
-	EVP_SignUpdate(&ctx, vp->ptr, len);
-	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+	if (tstamp != 0) {
+		vp->sig = emalloc(sign_siglen);
+		EVP_SignInit(&ctx, sign_digest);
+		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
+		EVP_SignUpdate(&ctx, vp->ptr, len);
+		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
+			vp->siglen = htonl(len);
+	}
 #ifdef DEBUG
 	if (debug > 1)
 		X509_print_fp(stdout, cert);

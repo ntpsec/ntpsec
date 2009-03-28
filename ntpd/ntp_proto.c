@@ -1010,7 +1010,7 @@ receive(
 	 * interleaved modes or is horribly broken.
 	 */
 	if (L_ISZERO(&p_xmt)) {
-			peer->flash |= TEST3;		/* unsynch */
+		peer->flash |= TEST3;			/* unsynch */
 
 	/*
 	 * If the transmit timestamp duplicates a previous one, the
@@ -1136,14 +1136,10 @@ receive(
 	 */
 	peer->ppoll = max(peer->minpoll, pkt->ppoll);
 	if (hismode == MODE_SERVER && hisleap == LEAP_NOTINSYNC &&
-	    hisstratum == STRATUM_UNSPEC && &pkt->refid != 0) {
+	    hisstratum == STRATUM_UNSPEC && memcmp(&pkt->refid,
+	    "RATE", 4) == 0) {
 		peer->selbroken++;
-		if (memcmp(&pkt->refid, "RATE", 4) == 0) {
-			report_event(PEVNT_RATE, peer, NULL);
-		} else if (memcmp(&pkt->refid, "DENY", 4) == 0) {
-			peer->flash |= TEST4;	/* access denied */
-			report_event(PEVNT_DENY, peer, NULL);
-		}
+		report_event(PEVNT_RATE, peer, NULL);
 		if (pkt->ppoll > peer->minpoll)
 			peer->minpoll = peer->ppoll;
 		peer->burst = peer->retry = 0;
@@ -1724,11 +1720,11 @@ clock_update(
 		clear_all();
 		sys_leap = LEAP_NOTINSYNC;
 		sys_stratum = STRATUM_UNSPEC;
+		memcpy(&sys_refid, "STEP", 4);
 		sys_rootdelay = 0;
 		sys_rootdisp = 0;
 		L_CLR(&sys_reftime);
 		sys_jitter = LOGTOD(sys_precision);
-		memcpy(&sys_refid, "STEP", 4);
 		leapsec = 0;
 		break;
 
@@ -3416,7 +3412,7 @@ peer_unfit(
 
 	/*
 	 * A loop error occurs if the remote peer is synchronized to the
-	 * local peer of if the remote peer is synchronized to the same
+	 * local peer or if the remote peer is synchronized to the same
 	 * server as the local peer but only if the remote peer is
 	 * neither a reference clock nor an orphan.
 	 */
@@ -3511,14 +3507,13 @@ init_proto(void)
 	 */
 	sys_leap = LEAP_NOTINSYNC;
 	sys_stratum = STRATUM_UNSPEC;
+	memcpy(&sys_refid, "INIT", 4);
 	sys_peer = NULL;
 	sys_rootdelay = 0;
 	sys_rootdisp = 0;
 	L_CLR(&sys_reftime);
 	sys_jitter = 0;
 	sys_peer = NULL;
-
-	memcpy(&sys_refid, "INIT", 4);
 	sys_precision = (s_char)default_get_precision();
 	get_systime(&dummy);
 	sys_survivors = 0;
