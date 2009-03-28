@@ -43,6 +43,7 @@ typedef struct IoCompletionInfo {
 #define	recv_buf	buff_space.rbuf
 #define	trans_buf	buff_space.tbuf
 
+
 #if !defined( _W64 )
   /*
    * if ULONG_PTR needs to be defined then the build environment

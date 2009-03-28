@@ -1007,7 +1007,6 @@ getgroup:
 	 * and - lacking a hardware reference clock - I have
 	 * yet to learn about anything else that is.
 	 */
-
 #if defined(HAVE_IO_COMPLETION_PORT)
 
 	for (;;) {
