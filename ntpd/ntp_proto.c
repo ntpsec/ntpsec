@@ -830,7 +830,7 @@ receive(
 		/*
 		 * Determine whether to execute the initial volley.
 		 */
-		if (sys_bdelay > 0 || sys_bclient > 1) {
+		if (sys_bdelay != 0) {
 #ifdef OPENSSL
 			/*
 			 * If a two-way exchange is not possible,
@@ -848,11 +848,15 @@ receive(
 			 */
 			if ((peer = newpeer(&rbufp->recv_srcadr,
 			    rbufp->dstadr, MODE_BCLIENT, hisversion,
-			    pkt->ppoll, NTP_MAXDPOLL, 0, 0, 0,
-			    skeyid)) == NULL)
+			    pkt->ppoll, pkt->ppoll, 0, 0, 0,
+			    skeyid)) == NULL) {
 				sys_restricted++;
-			else
+				return;
+
+			} else {
 				peer->delay = sys_bdelay;
+				peer->bias = -sys_bdelay / 2.;
+			}
 			break;
 		}
 
@@ -865,13 +869,17 @@ receive(
 		 * is fixed at this value.
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_CLIENT, hisversion, pkt->ppoll, NTP_MAXDPOLL,
+		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
 		    FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT, 0,
 		    skeyid)) == NULL) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
-		break;
+#ifdef OPENSSL
+		if (skeyid > NTP_MAXKEY)
+			crypto_recv(peer, rbufp);
+#endif /* OPENSSL */
+		return;
 
 	/*
 	 * This is the first packet received from a symmetric active
@@ -977,6 +985,10 @@ receive(
 #endif /* OPENSSL */
 	peer->received++;
 	peer->flash &= ~PKT_TEST_MASK;
+	if (peer->flags & FLAG_XBOGUS) {
+		peer->flags &= ~FLAG_XBOGUS;
+		peer->flash |= TEST3;
+	}
 
 	/*
 	 * Next comes a rigorous schedule of timestamp checking. If the
@@ -1004,14 +1016,12 @@ receive(
 	 */
 	} else if (hismode == MODE_BROADCAST) {
 		if (!L_ISZERO(&p_org) && !(peer->flags & FLAG_XB)) {
-			peer->flags |= FLAG_XB | FLAG_IBURST;
-			peer->hmode = MODE_CLIENT;
+			peer->flags |= FLAG_XB;
+			peer->aorg = p_xmt;
 			peer->borg = rbufp->recv_time;
 			report_event(PEVNT_XLEAVE, peer, NULL);
 			return;
 		}
-		if (peer->flags & FLAG_IBURST)
-			return;
 
 	/*
 	 * Check for bogus packet in basic mode. If found, switch to
@@ -1044,7 +1054,7 @@ receive(
 	} else if (!L_ISZERO(&peer->dst) && !L_ISEQU(&p_org,
 		    &peer->dst)) {
 			peer->bogusorg++;
-			peer->flip = -peer->flip;
+			peer->flags |= FLAG_XBOGUS;
 			peer->flash |= TEST2;		/* bogus */
 	}
 
@@ -1404,11 +1414,6 @@ process_packet(
 		else
 			L_SUB(&ci, &peer->aorg);
 		LFPTOD(&ci, t21);
-		ci = peer->dst;				/* t4 - t1 */
-		if (peer->flip > 0)
-			L_SUB(&ci, &peer->borg);
-		else
-			L_SUB(&ci, &peer->aorg);
 		p_del = t21 - t34;
 		p_offset = (t21 + t34) / 2.;
 		if (p_del < 0 || p_del > 1.) {
@@ -1423,79 +1428,59 @@ process_packet(
 	} else if (peer->pmode == MODE_BROADCAST) {
 
 		/*
-		 * Calibrate delay in interleaved broadcast mode. For
-		 * basic mode the delay is calculated the old fashioned
-		 * way.
+		 * Interleaved broadcast mode. Use interleaved timestamps.
+		 * t1 = peer->borg, t2 = p_org, t3 = p_org, t4 = aorg
 		 */
-		if (peer->delay == 0) {
-
-			/*
-			 * Interleaved broadcast calibrate phase
-			 * t1 = p_org, t2 = peer->borg, t3 = peer->aorg,
-			 * t4 = peer->rec
-			 */
-			if (peer->flags & FLAG_XB) {
-				ci = peer->aorg;	/* t3 - t4 */
-				L_SUB(&ci, &peer->rec);
-				LFPTOD(&ci, t34);
-				ci = peer->borg;	/* t2 - t1 */
-				L_SUB(&ci, &p_org);
-				LFPTOD(&ci, t21);
-				ci = peer->rec;		/* t4 - t1 */
-				L_SUB(&ci, &p_org);
-				p_del = fabs(t21 - t34);
-				p_offset = -(t21 + t34) / 2.;
-				peer->aorg = p_xmt;
-				peer->borg = peer->dst;
+		if (peer->flags & FLAG_XB) { 
+			ci = p_org;			/* delay */ 
+			L_SUB(&ci, &peer->aorg);
+			LFPTOD(&ci, t34);
+			ci = p_org;			/* t2 - t1 */
+			L_SUB(&ci, &peer->borg);
+			LFPTOD(&ci, t21);
+			peer->aorg = p_xmt;
+			peer->borg = peer->dst;
+			if (t34 < 0 || t34 > 1.) {
+				sprintf(statstr,
+				    "offset %.6f delay %.6f", t21, t34);
+				report_event(PEVNT_XERR, peer, statstr);
+				return;
 			}
+			p_offset = t21;
+			peer->xleave = t34;
 
 		/*
-		 * Delay has been calibrated, either by previous volley
-		 * or configured. Offset is calculated directly
-		 * from timestamp differences adjusted by the previously
-		 * calculated delay.
+		 * Basic broadcast - use direct timestamps.
+		 * t3 = p_xmt, t4 = peer->dst
 		 */
 		} else {
-			p_del = peer->delay;
+			ci = p_xmt;		/* t3 - t4 */
+			L_SUB(&ci, &peer->dst);
+			LFPTOD(&ci, t34);
+			p_offset = t34;
+		}
+		p_del = peer->delay;
 
-			/*
-			 * Interleaved broadcast mode
-			 * t1 = peer->borg, t2 = p_org
-			 */
-			if (peer->flags & FLAG_XB) { 
-				ci = p_org;		/* delay */ 
-				L_SUB(&ci, &peer->aorg);
-				LFPTOD(&ci, t34);
-				ci = p_org;		/* t2 - t1 */
-				L_SUB(&ci, &peer->borg);
-				LFPTOD(&ci, t21);
-				p_offset = t21 + p_del / 2.;
-				peer->aorg = p_xmt;
-				peer->borg = peer->dst;
-				if (t34 < 0 || t34 > 1.) {
-					sprintf(statstr,
-					    "t21 %.6f t34 %.6f", t21,
-					    t34);
-					report_event(PEVNT_XERR, peer,
-					    statstr);
-					return;
-				}
-
-			/*
-			 * Basic broadcast - use direct timestamps.
-			 */
-			} else {
-				ci = p_xmt;		/* t3 - t4 */
-				L_SUB(&ci, &peer->dst);
-				LFPTOD(&ci, t34);
-				p_offset = t34 + p_del / 2.;
-			}
+		/*
+		 * When calibration is complete and the clock is
+		 * synchronized, the bias is calculated as the difference
+		 * between the unicast timestamp and the broadcast
+		 * timestamp. This works for both basic and interleaved
+		 * modes.
+		 */
+		if (peer->cast_flags & MDF_BCLNT) {
+			peer->cast_flags &= ~MDF_BCLNT;
+			peer->bias = peer->offset - p_offset;
+#ifdef DEBUG
+			if (debug)
+				printf(
+				    "packet: bias %f uoffset %f boffset %f\n",
+				    peer->bias, peer->offset, p_offset);
+#endif
 		}
 
 	/*
-	 * Basic mode, otherwise known as the old fashioned way. If this
-	 * is broadcast calibrate phase, save the receive timestamp for
-	 * use in the next received broadcast.
+	 * Basic mode, otherwise known as the old fashioned way.
 	 *
 	 * t1 = p_org, t2 = p_rec, t3 = p_xmt, t4 = peer->dst
 	 */
@@ -1506,17 +1491,8 @@ process_packet(
 		ci = p_rec;				/* t2 - t1 */
 		L_SUB(&ci, &p_org);
 		LFPTOD(&ci, t21);
-		ci = peer->dst;				/* t4 - t1 */
-		L_SUB(&ci, &p_org);
 		p_del = fabs(t21 - t34);
 		p_offset = (t21 + t34) / 2.;
-		if (peer->flags & FLAG_XB) {
-			peer->rec = p_rec;
-			peer->hmode = MODE_BCLIENT;
-			peer->flags &= ~FLAG_IBURST;
-			peer->burst = 0;
-			return;
-		}
 	}
 	p_offset += peer->bias;
 	p_disp = LOGTOD(sys_precision) + LOGTOD(peer->precision) +
@@ -1564,7 +1540,7 @@ process_packet(
 	peer->t34_bytes = len;
 #ifdef DEBUG
 	if (debug > 1)
-		printf("proto: t21 %.9lf %d t34 %.9lf %d\n", peer->t21,
+		printf("packet: t21 %.9lf %d t34 %.9lf %d\n", peer->t21,
 		    peer->t21_bytes, peer->t34, peer->t34_bytes);
 #endif
 	if (peer->r21 > 0 && peer->r34 > 0 && p_del > 0) {
@@ -1585,7 +1561,7 @@ process_packet(
 		t34 -= td;
 #ifdef DEBUG
 		if (debug > 1)
-			printf("proto: del %.6lf r21 %.1lf r34 %.1lf %.6lf\n",
+			printf("packet: del %.6lf r21 %.1lf r34 %.1lf %.6lf\n",
 			    p_del, peer->r21 / 1e3, peer->r34 / 1e3,
 			    td);
 #endif
@@ -1602,7 +1578,8 @@ process_packet(
 	 * client mode when the client is fit and the autokey dance is
 	 * complete.
 	 */
-	if ((peer->cast_flags & MDF_BCLNT) && !peer_unfit(peer)) {
+	if ((peer->cast_flags & MDF_BCLNT) && !(peer_unfit(peer) &
+	    TEST11)) {
 #ifdef OPENSSL
 		if (peer->flags & FLAG_SKEY) {
 			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
