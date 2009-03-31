@@ -207,7 +207,7 @@
 * [Bug 980] Direct help to stdout.
 
 ---
-(4.2.4p7)
+(4.2.4p7-RC1) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1141] refclock_report missing braces cause spurious "peer event:
   clock clk_unspec" log entries
