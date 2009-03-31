@@ -36,9 +36,9 @@ extern int async_write(int, const void *, unsigned int);
 #endif
 
 /*
- * This driver supports the NMEA GPS Receiver with
+ * This driver supports NMEA-compatible GPS receivers
  *
- * Protype was refclock_trak.c, Thanks a lot.
+ * Prototype was refclock_trak.c, Thanks a lot.
  *
  * The receiver used spits out the NMEA sentences for boat navigation.
  * And you thought it was an information superhighway.  Try a raging river
@@ -59,14 +59,26 @@ extern int async_write(int, const void *, unsigned int);
  * bit 0 - enables RMC (1)
  * bit 1 - enables GGA (2)
  * bit 2 - enables GLL (4)
- * bit 3 - enables ZGD (8) - Accord GPS Clock's custom sentence with GPS time
+ * bit 3 - enables ZDA (8) - Standard Time & Date
+ * bit 3 - enables ZDG (8) - Accord GPS Clock's custom sentence with GPS time 
+ *			     very close to standard ZDA
  * 
- * Multiple sentences may be selected except when ZDG is selected.
+ * Multiple sentences may be selected except when ZDG/ZDA is selected.
  *
- * bit 4 - selects the baudrate for serial port :
+ * bit 4/5/6 - selects the baudrate for serial port :
  *         0 for 4800 (default) 
  *         1 for 9600 
+ *         2 for 19200 
+ *         3 for 38400 
+ *         4 for 57600 
+ *         5 for 115200 
  */
+#define NMEA_MESSAGE_MASK_OLD    0x07
+#define NMEA_MESSAGE_MASK_SINGLE 0x08
+#define NMEA_MESSAGE_MASK        (NMEA_MESSAGE_MASK_OLD | NMEA_MESSAGE_MASK_SINGLE)
+
+#define NMEA_BAUDRATE_MASK       0x70
+#define NMEA_BAUDRATE_SHIFT      4
 
 /*
  * Definitions
@@ -85,13 +97,6 @@ extern int async_write(int, const void *, unsigned int);
 #define RANGEGATE	500000	/* range gate (ns) */
 
 #define LENNMEA		75	/* min timecode length */
-
-/*
- * Tables to compute the ddd of year form icky dd/mm timecode. Viva la
- * leap.
- */
-static int day1tab[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-static int day2tab[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 /*
  * Unit control structure
@@ -123,6 +128,7 @@ static	void	nmea_receive	(struct recvbuf *);
 static	void	nmea_poll	(int, struct peer *);
 static	void	gps_send	(int, const char *, struct peer *);
 static	char	*field_parse	(char *, int);
+static	int	nmea_checksum_ok(const char *);
 
 /*
  * Transfer vector
@@ -154,6 +160,8 @@ nmea_start(
 	struct refclockproc *pp;
 	int fd;
 	char device[20];
+	int baudrate;
+	char *baudtext;
 
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
@@ -162,83 +170,112 @@ nmea_start(
 	
 	/*
 	 * Opening the serial port with appropriate baudrate
-	 * based on the value of bit 4.
+	 * based on the value of bit 4/5/6
 	 */
-	if ( peer->ttl & 0x10 ) {
-		fd = refclock_open(device, 2*SPEED232, LDISC_CLK);
-		msyslog(LOG_NOTICE, 
-				"refclock_nmea : serial port baudrate set to 9600");
-	} else {
-		fd = refclock_open(device, SPEED232, LDISC_CLK);
-		msyslog(LOG_NOTICE,
-				"refclock_nmea : serial port baudrate set to 4800");
+	switch ((peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT) {
+	    case 0:
+	    case 6:
+	    case 7:
+	    default:
+		baudrate = SPEED232;
+		baudtext = "4800";
+		break;
+	    case 1:
+		baudrate = B9600;
+		baudtext = "9600";
+		break;
+	    case 2:
+		baudrate = B19200;
+		baudtext = "19200";
+		break;
+	    case 3:
+		baudrate = B38400;
+		baudtext = "38400";
+		break;
+#ifdef B57600
+	    case 4:
+		baudrate = B57600;
+		baudtext = "57600";
+		break;
+#endif
+#ifdef B115200
+	    case 5:
+		baudrate = B115200;
+		baudtext = "115200";
+		break;
+#endif
 	}
+
+	fd = refclock_open(device, baudrate, LDISC_CLK);
 	
 	/*
-	 * Checking the validity of mode field if multiple sectences
+	 * Checking the validity of mode field if multiple sentences
 	 * have been selected.
 	 */
-	if ( (peer->ttl & 0x0F) > 8 ) {
+	if ( (peer->ttl & NMEA_MESSAGE_MASK_SINGLE) && (peer->ttl & NMEA_MESSAGE_MASK_OLD) ) {
 		msyslog(LOG_ERR,
 			"refclock_nmea : invaid combination of NMEA sentences" );
 		
 		msyslog(LOG_ERR,
 			"refclock_nmea : reseting mode to standard NMEA sentences" );
-		peer->ttl = 0x07;
+		peer->ttl &= NMEA_MESSAGE_MASK_OLD;
 	}
 
 	if (fd <= 0) {
 #ifdef HAVE_READLINK
-          /* nmead support added by Jon Miner (cp_n18@yahoo.com)
-           *
-           * See http://home.hiwaay.net/~taylorc/gps/nmea-server/
-           * for information about nmead
-           *
-           * To use this, you need to create a link from /dev/gpsX to
-           * the server:port where nmead is running.  Something like this:
-           *
-           * ln -s server:port /dev/gps1
-           */
-          char buffer[80];
-          char *nmea_host;
-          int   nmea_port;
-          int   len;
-          struct hostent *he;
-          struct protoent *p;
-          struct sockaddr_in so_addr;
+		/* nmead support added by Jon Miner (cp_n18@yahoo.com)
+		 *
+		 * See http://home.hiwaay.net/~taylorc/gps/nmea-server/
+		 * for information about nmead
+		 *
+		 * To use this, you need to create a link from /dev/gpsX to
+		 * the server:port where nmead is running.  Something like this:
+		 *
+		 * ln -s server:port /dev/gps1
+		 */
+		char buffer[80];
+		char *nmea_host;
+		int   nmea_port;
+		int   len;
+		struct hostent *he;
+		struct protoent *p;
+		struct sockaddr_in so_addr;
 
-          if ((len = readlink(device,buffer,sizeof(buffer))) == -1)
-            return(0);
-          buffer[len] = 0;
+		if ((len = readlink(device,buffer,sizeof(buffer))) == -1)
+			return(0);
+		buffer[len] = 0;
 
-          if ((nmea_host = strtok(buffer,":")) == NULL)
-            return(0);
-         
-          nmea_port = atoi(strtok(NULL,":"));
+		if ((nmea_host = strtok(buffer,":")) == NULL)
+			return(0);
 
-          if ((he = gethostbyname(nmea_host)) == NULL)
-            return(0);
-          if ((p = getprotobyname("ip")) == NULL)
-            return(0);
-          so_addr.sin_family = AF_INET;
-          so_addr.sin_port = htons(nmea_port);
-          so_addr.sin_addr = *((struct in_addr *) he->h_addr);
+		nmea_port = atoi(strtok(NULL,":"));
 
-          if ((fd = socket(PF_INET,SOCK_STREAM,p->p_proto)) == -1)
-            return(0);
-          if (connect(fd,(struct sockaddr *)&so_addr,SOCKLEN(&so_addr)) == -1) {
-            close(fd);
-            return (0);
-          }
+		if ((he = gethostbyname(nmea_host)) == NULL)
+			return(0);
+		if ((p = getprotobyname("ip")) == NULL)
+			return(0);
+		so_addr.sin_family = AF_INET;
+		so_addr.sin_port = htons(nmea_port);
+		so_addr.sin_addr = *((struct in_addr *) he->h_addr);
+
+		if ((fd = socket(PF_INET,SOCK_STREAM,p->p_proto)) == -1)
+			return(0);
+		if (connect(fd,(struct sockaddr *)&so_addr,SOCKLEN(&so_addr)) == -1) {
+			close(fd);
+			return (0);
+		}
 #else
-            return (0);
+		return (0);
 #endif
-        }
+	}
+
+	msyslog(LOG_NOTICE, "refclock_nmea: serial %s open at %s bps",
+		device, baudtext);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct nmeaunit *)emalloc(sizeof(struct nmeaunit));
+	up = (struct nmeaunit *) emalloc(sizeof(*up));
 	if (up == NULL) {
 		(void) close(fd);
 		return (0);
@@ -368,8 +405,8 @@ nmea_ppsapi(
 			up->pps_params.assert_off_tu.tspec.tv_nsec = ((*fudge) - (long)(*fudge))*(-1e9);
 		} else if ((enb_clear) && (capability & PPS_OFFSETCLEAR)) {
 			/* Offset on clear */
-	                up->pps_params.mode |= PPS_OFFSETCLEAR; 
-	                up->pps_params.clear_off_tu.tspec.tv_sec = -(*fudge);
+			up->pps_params.mode |= PPS_OFFSETCLEAR; 
+			up->pps_params.clear_off_tu.tspec.tv_sec = -(*fudge);
 			up->pps_params.clear_off_tu.tspec.tv_nsec = ((*fudge) - (long)(*fudge))*(-1e9);
 		}
 	}
@@ -468,13 +505,13 @@ nmea_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	int month, day;
-	int i;
-	char *cp, *dp;
+	char *cp, *dp, *bp, *msg;
 	int cmdtype;
+	int blanking;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
-	l_fp	rd_tmp;
-	u_short	rd_lencode;
+	l_fp	rd_timestamp;
+	int	rd_lencode;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -482,42 +519,40 @@ nmea_receive(
 	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-	rd_lencode = (u_short)refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
+
+	rd_lencode = refclock_gtlin(
+			rbufp, 
+			rd_lastcode, 
+			sizeof(rd_lastcode), 
+			&rd_timestamp);
 
 	/*
 	 * There is a case that a <CR><LF> gives back a "blank" line
 	 */
 	if (rd_lencode == 0)
-	    return;
+		return;
 
-#ifdef DEBUG
-	if (debug)
-	    printf("nmea: gpsread %d %s\n", rd_lencode,
-		   rd_lastcode);
-#endif
+	DPRINTF(1, ("nmea: gpsread %d %s\n", rd_lencode, rd_lastcode));
 
 	/*
 	 * We check the timecode format and decode its contents. The
 	 * we only care about a few of them.  The most important being
 	 * the $GPRMC format
 	 * $GPRMC,hhmmss,a,fddmm.xx,n,dddmmm.xx,w,zz.z,yyy.,ddmmyy,dd,v*CC
-	 * For Magellan (ColorTrak) GLL probably datum (order of sentences)
-	 * also mode (0,1,2,3) select sentence ANY/ALL, RMC, GGA, GLL
+	 * mode (0,1,2,3) selects sentence ANY/ALL, RMC, GGA, GLL, ZDA
 	 * $GPGLL,3513.8385,S,14900.7851,E,232420.594,A*21
-  	 * $GPGGA,232420.59,3513.8385,S,14900.7851,E,1,05,3.4,00519,M,,,,*3F
-	 * $GPRMB,...
+	 * $GPGGA,232420.59,3513.8385,S,14900.7851,E,1,05,3.4,00519,M,,,,*3F
 	 * $GPRMC,232418.19,A,3513.8386,S,14900.7853,E,00.0,000.0,121199,12.,E*77
-	 * $GPAPB,...
-	 * $GPGSA,...
-	 * $GPGSV,...
-	 * $GPGSV,...
-	 */
-#define GPXXX	0
-#define GPRMC	1
-#define GPGGA	2
-#define GPGLL	4
-	
-	/* 
+	 *
+	 * Defining GPZDA to support Standard Time & Date
+	 * sentence. The sentence has the following format 
+	 *  
+	 *  $--ZDA,HHMMSS.SS,DD,MM,YYYY,TH,TM,*CS<CR><LF>
+	 *
+	 *  Apart from the familiar fields, 
+	 *  'TH'    Time zone Hours
+	 *  'TM'    Time zone Minutes
+	 *
 	 * Defining GPZDG to support Accord GPS Clock's custom NMEA 
 	 * sentence. The sentence has the following format 
 	 *  
@@ -527,134 +562,133 @@ nmea_receive(
 	 *  Apart from the familiar fields, 
 	 *  'AA.BB' denotes the signal strength( should be < 05.00 ) 
 	 *  'V'     denotes the GPS sync status : 
-	 *         '0' indicates INVALID time, 
-	 *         '1' indicates accuracy of +/-20 ms
-	 *         '2' indicates accuracy of +/-100 ns
-	 */ 
-
-#define GPZDG	8
+	 *	   '0' indicates INVALID time, 
+	 *	   '1' indicates accuracy of +/-20 ms
+	 *	   '2' indicates accuracy of +/-100 ns
+	 */
+#define GPXXX		0	/* any/all */
+#define GPRMC		1
+#define GPGGA		2
+#define GPGLL		4
+#define GPZDG_ZDA	8
 
 	cp = rd_lastcode;
 	cmdtype=0;
-	if(strncmp(cp,"$GPRMC",6)==0) {
-		cmdtype=GPRMC;
-	}
-	else if(strncmp(cp,"$GPGGA",6)==0) {
-		cmdtype=GPGGA;
-	}
-	else if(strncmp(cp,"$GPGLL",6)==0) {
-		cmdtype=GPGLL;
-	}
-	else if(strncmp(cp,"$GPZDG",6)==0) {
-		cmdtype=GPZDG;
-	}
-	else if(strncmp(cp,"$GPXXX",6)==0) {
-		cmdtype=GPXXX;
-	}
-	else
-	    return;
+	if (cp[0] == '$') {
+		/* Allow for GLGGA and GPGGA etc. */
+		msg = cp + 3;
 
-
-	/* See if I want to process this message type */
-	if ( ((peer->ttl == 0) && (cmdtype != GPRMC))
-           || ((peer->ttl != 0) && !(cmdtype & (peer->ttl & 0x0F)) ))
+		if (strncmp(msg, "RMC", 3) == 0)
+			cmdtype = GPRMC;
+		else if (strncmp(msg, "GGA", 3) == 0)
+			cmdtype = GPGGA;
+		else if (strncmp(msg, "GLL", 3) == 0)
+			cmdtype = GPGLL;
+		else if (strncmp(msg, "ZDG", 3) == 0 ||
+			 strncmp(msg, "ZDA", 3) == 0)
+			cmdtype = GPZDG_ZDA;
+		else
+			return;
+	} else
 		return;
 
-	pp->lencode = rd_lencode;
-	strcpy(pp->a_lastcode,rd_lastcode);
+	/* See if I want to process this message type */
+	if (peer->ttl && !(cmdtype & (peer->ttl & NMEA_MESSAGE_MASK)))
+		return;
+
+	/* make sure it came in clean */
+	if (0 == nmea_checksum_ok(rd_lastcode)) {
+		refclock_report(peer, CEVNT_BADREPLY);
+		return;
+	}
+
+	pp->lencode = (u_short) rd_lencode;
+	memcpy(pp->a_lastcode, rd_lastcode, pp->lencode + 1);
 	cp = pp->a_lastcode;
 
-	pp->lastrec = up->tstamp = rd_tmp;
+	pp->lastrec = up->tstamp = rd_timestamp;
 	up->pollcnt = 2;
 
-#ifdef DEBUG
-	if (debug)
-	    printf("nmea: timecode %d %s\n", pp->lencode,
-		   pp->a_lastcode);
-#endif
-
+	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
 
 	/* Grab field depending on clock string type */
-	switch( cmdtype ) {
+	switch (cmdtype) {
+
 	    case GPRMC:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
-		dp = field_parse(cp,2);
-		if( dp[0] != 'A')
+		dp = field_parse(cp, 2);
+		if (dp[0] != 'A')
 			pp->leap = LEAP_NOTINSYNC;
 		else
 			pp->leap = LEAP_NOWARNING;
 
 		/* Now point at the time field */
-		dp = field_parse(cp,1);
+		dp = field_parse(cp, 1);
 		break;
-
 
 	    case GPGGA:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
-		dp = field_parse(cp,6);
-		if( dp[0] == '0')
+		dp = field_parse(cp, 6);
+		if (dp[0] == '0')
 			pp->leap = LEAP_NOTINSYNC;
 		else
 			pp->leap = LEAP_NOWARNING;
 
 		/* Now point at the time field */
-		dp = field_parse(cp,1);
+		dp = field_parse(cp, 1);
 		break;
-
 
 	    case GPGLL:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
-		dp = field_parse(cp,6);
-		if( dp[0] != 'A')
+		dp = field_parse(cp, 6);
+		if (dp[0] != 'A')
 			pp->leap = LEAP_NOTINSYNC;
 		else
 			pp->leap = LEAP_NOWARNING;
 
 		/* Now point at the time field */
-		dp = field_parse(cp,5);
+		dp = field_parse(cp, 5);
 		break;
 	
-		case GPZDG:
+	    case GPZDG_ZDA:
 		/*
-		 * Test for synchronization.  Check for validity of GPS time.
+		 * Test for synchronization.  For $GPZDG check for validity of GPS time.
 		 */
-		dp = field_parse(cp,6);
-		if( dp[0] == '0') {
-			pp->leap = LEAP_NOTINSYNC;
-			msyslog(LOG_ERR,"ref_nmea : accord gps clk yet to sync" );
-		} else if ( (dp[0] == '1') || (dp[0] == '2') ) {
-			pp->leap = LEAP_NOWARNING;
+		if (cp[5] == 'G') {
+			dp = field_parse(cp, 6);
+			if (dp[0] == '0') 
+				pp->leap = LEAP_NOTINSYNC;
+			else 
+				pp->leap = LEAP_NOWARNING;
 		}
 
 		/* Now point at the time field */
-		dp = field_parse(cp,1);
+		dp = field_parse(cp, 1);
 		break;
 
-
-	    case GPXXX:
-		return;
 	    default:
 		return;
-
 	}
 
 	/*
 	 * Check time code format of NMEA
 	 */
-	if( !isdigit((int)dp[0]) ||
+	if (!isdigit((int)dp[0]) ||
 	    !isdigit((int)dp[1]) ||
 	    !isdigit((int)dp[2]) ||
 	    !isdigit((int)dp[3]) ||
 	    !isdigit((int)dp[4]) ||
-	    !isdigit((int)dp[5])	
-	    ) {
-		refclock_report(peer, CEVNT_BADREPLY);
+	    !isdigit((int)dp[5])) {
+
+		DPRINTF(1, ("NMEA time code %c%c%c%c%c%c non-numeric",
+			    dp[0], dp[1], dp[2], dp[3], dp[4], dp[5]));
+		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
 
@@ -664,9 +698,10 @@ nmea_receive(
 	pp->hour = ((dp[0] - '0') * 10) + dp[1] - '0';
 	pp->minute = ((dp[2] - '0') * 10) + dp[3] -  '0';
 	pp->second = ((dp[4] - '0') * 10) + dp[5] - '0';
-	/* Default to 0 milliseconds, if decimal convert milliseconds in
-	   one, two or three digits
-	*/
+	/* 
+	 * Default to 0 milliseconds, if decimal convert milliseconds in
+	 * one, two or three digits
+	 */
 	pp->nsec = 0; 
 	if (dp[6] == '.') {
 		if (isdigit((int)dp[7])) {
@@ -680,28 +715,27 @@ nmea_receive(
 		}
 	}
 
-	
 	/*
 	 * Manipulating GPS timestamp in GPZDG as the seconds field
 	 * is valid for next PPS tick. Just rolling back the second,
 	 * minute and hour fields appopriately
 	 */
-	if ( cmdtype == GPZDG ) {
-		if ( pp->second == 0 ) {
+	if (cmdtype == GPZDG_ZDA && cp[5] == 'G')
+		if (pp->second == 0) {
 			pp->second = 59;	
-			if ( pp->minute == 0 ) {
+			if (pp->minute == 0) {
 				pp->minute = 59;
-				if ( pp->hour == 0 ) {
+				if (pp->hour == 0)
 					pp->hour = 23;
-				}
 			}
-		} else {
+		} else
 			pp->second -= 1;
-		}
-	}
 
-	if (pp->hour > 23 || pp->minute > 59 || pp->second > 59
-	  || pp->nsec > 1000000000) {
+	if (pp->hour > 23 || pp->minute > 59 || 
+	    pp->second > 59 || pp->nsec > 1000000000) {
+
+		DPRINTF(1, ("NMEA hour/min/sec/nsec range %02d:%02d:%02d.%09d\n",
+			    pp->hour, pp->minute, pp->second, pp->nsec));
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
@@ -710,56 +744,129 @@ nmea_receive(
 	 * Convert date and check values.
 	 */
 	if (cmdtype==GPRMC) {
-	    dp = field_parse(cp,9);
-	    day = dp[0] - '0';
-	    day = (day * 10) + dp[1] - '0';
-	    month = dp[2] - '0';
-	    month = (month * 10) + dp[3] - '0';
-	    pp->year = dp[4] - '0';
-	    pp->year = (pp->year * 10) + dp[5] - '0';
-	}
-	else {
-	/* only time */
-	    time_t tt = time(NULL);
-	    struct tm * t = gmtime(&tt);
-	    day = t->tm_mday;
-	    month = t->tm_mon + 1;
-	    pp->year= t->tm_year;
+
+		dp = field_parse(cp,9);
+		day = dp[0] - '0';
+		day = (day * 10) + dp[1] - '0';
+		month = dp[2] - '0';
+		month = (month * 10) + dp[3] - '0';
+		pp->year = dp[4] - '0';
+		pp->year = (pp->year * 10) + dp[5] - '0';
+
+	} else if (cmdtype==GPZDG_ZDA) {
+
+		dp = field_parse(cp, 2);
+		day = 10 * (dp[0] - '0') + (dp[1] - '0');
+		dp = field_parse(cp, 3);
+		month = 10 * (dp[0] - '0') + (dp[1] - '0');
+		dp = field_parse(cp, 4);
+		pp->year = /* 1000 * (dp[0] - '0') + 100 * (dp[1] - '0') + */ 10 * (dp[2] - '0') + (dp[3] - '0');
+
+	} else {
+		/* only time */
+		time_t tt = time(NULL);
+		struct tm * t = gmtime(&tt);
+		day = t->tm_mday;
+		month = t->tm_mon + 1;
+		pp->year= t->tm_year + 1900;
 	}
 
 	if (month < 1 || month > 12 || day < 1) {
-		refclock_report(peer, CEVNT_BADTIME);
+		refclock_report(peer, CEVNT_BADDATE);
 		return;
 	}
 
-    /* Hmmmm this will be a nono for 2100,2200,2300 but I don't think I'll be here */
-    /* good thing that 2000 is a leap year */
-	/* pp->year will be 00-99 if read from GPS, 00->  (years since 1900) from tm_year */
-	if (pp->year % 4) {
-		if (day > day1tab[month - 1]) {
-			refclock_report(peer, CEVNT_BADTIME);
-			return;
-		}
-		for (i = 0; i < month - 1; i++)
-		    day += day1tab[i];
-	} else {
-		if (day > day2tab[month - 1]) {
-			refclock_report(peer, CEVNT_BADTIME);
-			return;
-		}
-		for (i = 0; i < month - 1; i++)
-		    day += day2tab[i];
+	/* pp->year will be 2 or 4 digits if read from GPS, 4 from gmtime */
+	if (pp->year < 100)
+		if (pp->year < 9)	/* year of our line of code is 2009 */
+			pp->year += 2100;
+		else
+			pp->year += 2000;
+
+	/* pp->year now 4 digits as ymd2yd requires */
+	day = ymd2yd(pp->year, month, day);
+	if (-1 == day) {
+		refclock_report(peer, CEVNT_BADDATE);
+		return;
 	}
 	pp->day = day;
 
+	/*
+	 * ntpq -c clockvar clients don't really need to know our 
+	 * position with perfect accuracy, so for privacy blank
+	 * out least significant digits.  To avoid leaking the
+	 * omitted info indirectly, also blank checksum.
+	 *
+	 * Start by pointing cp and dp at the fields with 
+	 * longitude and latitude in the last timecode.
+	 */
+	switch (cmdtype) {
+
+	    case GPGLL:
+		cp = field_parse(pp->a_lastcode, 1);
+		dp = field_parse(cp, 2);
+		break;
+
+	    case GPGGA:
+		cp = field_parse(pp->a_lastcode, 2);
+		dp = field_parse(cp, 2);
+		break;
+
+	    case GPRMC:
+		cp = field_parse(pp->a_lastcode, 3);
+		dp = field_parse(cp, 2);
+		break;
+
+	    case GPZDG_ZDA:
+	    default:
+		cp = dp = NULL;
+	}
+
+	/*
+	 * Blanking everything after the decimal point '.' is easy and 
+	 * gives enough error for at least a few neighbors to be as 
+	 * likely as you to be the one with the reflock.  We're keeping
+	 * degrees and minutes but tossing the seconds (expressed as
+	 * decimal fractions of a minute).  Degrees minutes seconds,
+	 * not hours minutes seconds.  :)
+	 */
+	bp = cp;
+	while (bp) {
+		blanking = 0;
+		while (',' != *bp) {
+			if (blanking)
+				*bp = '_';
+			else if ('.' == *bp)
+				blanking = 1;
+			bp++;
+		}
+
+		/*
+		 * blank the longitude at cp then the latitude at dp
+		 * then we're done.
+		 */
+		if (bp < dp)
+			bp = dp;
+		else
+			bp = NULL;
+	}
+
+	/*
+	 * blank the checksum, last two characters on the line
+	 */
+	if (cp) {
+		bp = pp->a_lastcode + pp->lencode - 2;
+		if (0 == bp[2])
+			bp[0] = bp[1] = '_';
+	}
 
 #ifdef HAVE_PPSAPI
 	/*
 	 * If the PPSAPI is working, rather use its timestamps.
 	 * assume that the PPS occurs on the second so blow any msec
 	 */
-	if (nmea_pps(up, &rd_tmp) == 1) {
-		pp->lastrec = up->tstamp = rd_tmp;
+	if (nmea_pps(up, &rd_timestamp) == 1) {
+		pp->lastrec = up->tstamp = rd_timestamp;
 		pp->nsec = 0;
 	}
 #endif /* HAVE_PPSAPI */
@@ -779,22 +886,21 @@ nmea_receive(
 	}
 
 
-
 	/*
 	 * Only go on if we had been polled.
 	 */
 	if (!up->polled)
-	    return;
+		return;
 	up->polled = 0;
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 
-        /* If we get here - what we got from the clock is OK, so say so */
-         refclock_report(peer, CEVNT_NOMINAL);
+	/* If we get here - what we got from the clock is OK, so say so */
+	refclock_report(peer, CEVNT_NOMINAL);
 
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-
 }
+
 
 /*
  * nmea_poll - called by the transmit procedure
@@ -821,11 +927,14 @@ nmea_poll(
 	up->polled = 1;
 
 	/*
-	 * usually nmea_receive can get a timestamp every second
+	 * usually nmea_receive can get a timestamp every second, 
+	 * but at least one Motorola unit needs prompting each
+	 * time.
 	 */
 
 	gps_send(pp->io.fd,"$PMOTG,RMC,0000*1D\r\n", peer);
 }
+
 
 /*
  *
@@ -845,11 +954,11 @@ gps_send(
 	struct peer *peer
 	)
 {
-
 	if (write(fd, cmd, strlen(cmd)) == -1) {
 		refclock_report(peer, CEVNT_FAULT);
 	}
 }
+
 
 static char *
 field_parse(
@@ -860,13 +969,59 @@ field_parse(
 	char *tp;
 	int i = fn;
 
-	for (tp = cp; *tp != '\0'; tp++) {
+	for (tp = cp; i && *tp; tp++)
 		if (*tp == ',')
-		    i--;
-		if (i == 0)
-		    break;
+			i--;
+
+	return tp;
+}
+
+
+/*
+ * nmea_checksum_ok verifies 8-bit XOR checksum is correct then returns 1
+ *
+ * format is $XXXXX,1,2,3,4*ML
+ *
+ * 8-bit XOR of characters between $ and * noninclusive is transmitted
+ * in last two chars M and L holding most and least significant nibbles
+ * in hex representation such as:
+ *
+ *   $GPGLL,5057.970,N,00146.110,E,142451,A*27
+ *   $GPVTG,089.0,T,,,15.2,N,,*7F
+ */
+int
+nmea_checksum_ok(
+	const char *sentence
+	)
+{
+	u_char my_cs;
+	u_long input_cs;
+	const char *p;
+
+	my_cs = 0;
+	p = sentence;
+
+	if ('$' != *p++)
+		return 0;
+
+	for ( ; *p && '*' != *p; p++) {
+
+		my_cs ^= *p;
 	}
-	return (++tp);
+
+	if ('*' != *p++)
+		return 0;
+
+	if (0 == p[0] || 0 == p[1] || 0 != p[2])
+		return 0;
+
+	if (0 == hextoint(p, &input_cs))
+		return 0;
+
+	if (my_cs != input_cs)
+		return 0;
+
+	return 1;
 }
 #else
 int refclock_nmea_bs;
