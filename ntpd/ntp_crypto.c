@@ -1934,7 +1934,7 @@ asn2ntp	(
 	tm.tm_wday = 0;
 	tm.tm_yday = 0;
 	tm.tm_isdst = 0;
-	return (timegm(&tm) + JAN_1970);
+	return ((u_long)timegm(&tm) + JAN_1970);
 }
 
 

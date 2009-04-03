@@ -1,3 +1,8 @@
+* [Bug 216] New interpolation scheme for Windows eliminates 1ms jitter
+* remove a bunch of #ifdef SYS_WINNT from portable code
+* 64-bit time_t cleanup for building on newer Windows compilers
+* Only set CMOS clock during ntpd exit on Windows if the computer is
+  shutting down or restarting.
 (4.2.5p161) 2009/03/31 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.5p160) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>

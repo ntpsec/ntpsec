@@ -27,9 +27,10 @@
 
 void ntservice_init();
 void UpdateSCM(DWORD);
-void ServiceControl(DWORD dwCtrlCode);
+void WINAPI ServiceControl(DWORD dwCtrlCode);
 void ntservice_shutdown();
 BOOL ntservice_isservice();
+BOOL ntservice_systemisshuttingdown();
 BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 
 #endif

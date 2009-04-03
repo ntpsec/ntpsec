@@ -150,11 +150,6 @@ reinit_timer(void)
 void
 init_timer(void)
 {
-# if defined SYS_WINNT & !defined(SYS_CYGWIN32)
-	HANDLE hToken = INVALID_HANDLE_VALUE;
-	TOKEN_PRIVILEGES tkp;
-# endif /* SYS_WINNT */
-
 	/*
 	 * Initialize...
 	 */
@@ -209,28 +204,6 @@ init_timer(void)
 	sys$setimr(0, &vmstimer, alarming, alarming, 0);
 # endif /* VMS */
 #else /* SYS_WINNT */
-	_tzset();
-
-	/*
-	 * Get privileges needed for fiddling with the clock
-	 */
-
-	/* get the current process token handle */
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-		msyslog(LOG_ERR, "OpenProcessToken failed: %m");
-		exit(1);
-	}
-	/* get the LUID for system-time privilege. */
-	LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &tkp.Privileges[0].Luid);
-	tkp.PrivilegeCount = 1;  /* one privilege to set */
-	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	/* get set-time privilege for this process. */
-	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, (PTOKEN_PRIVILEGES) NULL, 0);
-	/* cannot test return value of AdjustTokenPrivileges. */
-	if (GetLastError() != ERROR_SUCCESS) {
-		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
-	}
-
 	/*
 	 * Set up timer interrupts for every 2**EVENT_TIMEOUT seconds
 	 * Under Windows/NT, 

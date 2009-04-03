@@ -130,14 +130,14 @@ REM ****************************************************************************
 	SET UTC_SIGN=
 	
 	REM *** Now get the timezone settings from the registry
-	regedit /e %TEMP%\TZ.TMP "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-	IF NOT EXIST %TEMP%\TZ.TMP GOTO NOTZINFO
+	regedit /e %TEMP%\TZ-%GENERATED_PROGRAM%.TMP "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+	IF NOT EXIST %TEMP%\TZ-%GENERATED_PROGRAM%.TMP GOTO NOTZINFO
 
-	for /f "Tokens=1* Delims==" %%a in ('type %TEMP%\TZ.TMP') do if %%a == "ActiveTimeBias" SET ACTIVEBIAS=%%b
+	for /f "Tokens=1* Delims==" %%a in ('type %TEMP%\TZ-%GENERATED_PROGRAM%.TMP') do if %%a == "ActiveTimeBias" SET ACTIVEBIAS=%%b
 	for /f "Tokens=1* Delims=:" %%a in ('echo %ACTIVEBIAS%') do ( SET ACTIVEBIAS=%%b & SET PARTYP=%%a )
 	
 	REM *** Clean up temporary file
-	IF EXIST %TEMP%\TZ.TMP DEL %TEMP%\TZ.TMP
+	IF EXIST %TEMP%\TZ-%GENERATED_PROGRAM%.TMP DEL %TEMP%\TZ-%GENERATED_PROGRAM%.TMP
 	
 	REM *** Check if we really got a dword value from the registry ...
 	IF NOT "%PARTYP%"=="dword " goto NOTZINFO

@@ -65,7 +65,7 @@ struct timeval timeout = {0,0};
  * Windows does not abort a select select call if SIGALRM goes off
  * so a 200 ms timeout is needed
  */
-struct timeval timeout = {0,1000000/TIMER_HZ};
+struct sock_timeval timeout = {0,1000000/TIMER_HZ};
 #else
 struct timeval timeout = {60,0};
 #endif
@@ -239,7 +239,6 @@ static	void	printserver (struct server *, FILE *);
 int 	on = 1;
 WORD	wVersionRequested;
 WSADATA	wsaData;
-HANDLE	TimerThreadHandle = NULL;
 #endif /* SYS_WINNT */
 
 #ifdef NO_MAIN_ALLOWED
@@ -463,12 +462,7 @@ ntpdatemain (
 	if (debug || simple_query) {
 #ifdef HAVE_SETVBUF
 		static char buf[BUFSIZ];
-#ifdef SYS_WINNT
-		/* Win32 does not implement line buffering */
-		setvbuf(stdout, NULL, _IONBF, BUFSIZ);
-#else
 		setvbuf(stdout, buf, _IOLBF, BUFSIZ);
-#endif	/* SYS_WINNT */
 #else
 		setlinebuf(stdout);
 #endif
@@ -561,13 +555,6 @@ ntpdatemain (
 #if defined(HAVE_BSD_NICE)
 	(void) setpriority(PRIO_PROCESS, 0, NTPDATE_PRIO);
 #endif
-#ifdef SYS_WINNT
-	process_handle = GetCurrentProcess();
-	if (!SetPriorityClass(process_handle, (DWORD) REALTIME_PRIORITY_CLASS)) {
-		msyslog(LOG_ERR, "SetPriorityClass failed: %m");
-	}
-#endif /* SYS_WINNT */
-
 
 
 	initializing = 0;
@@ -1530,12 +1517,12 @@ alarming(
 void CALLBACK 
 alarming(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
 {
+	UNUSED_ARG(uTimerID); UNUSED_ARG(uMsg); UNUSED_ARG(dwUser);
+	UNUSED_ARG(dw1); UNUSED_ARG(dw2);
+
 	alarm_flag++;
 }
-#endif /* SYS_WINNT */
 
-
-#ifdef SYS_WINNT
 static void
 callTimeEndPeriod(void)
 {
@@ -1910,7 +1897,7 @@ input_handler(void)
 {
 	register int n;
 	register struct recvbuf *rb;
-	struct timeval tvzero;
+	struct sock_timeval tvzero;
 	int fromlen;
 	l_fp ts;
 	int i;

@@ -65,7 +65,6 @@ extern	u_int32	addr2refid	(struct sockaddr_storage *);
 extern	int	atoint		(const char *, long *);
 extern	int	atouint		(const char *, u_long *);
 extern	int	hextoint	(const char *, u_long *);
-extern	char *	humandate	(u_long);
 extern	char *	humanlogtime	(void);
 extern	char *	inttoa		(long);
 extern	char *	mfptoa		(u_long, u_long, short);

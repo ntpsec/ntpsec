@@ -953,7 +953,7 @@ config_other_modes(void)
 			    dequeue(my_config.manycastserver);
 
 			memset((char *)&addr_sock, 0, sizeof(addr_sock));
-			addr_sock.ss_family = addr_node->type;
+			addr_sock.ss_family = (u_short)addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
@@ -971,7 +971,7 @@ config_other_modes(void)
 			    dequeue(my_config.multicastclient);
 
 			memset((char *)&addr_sock, 0, sizeof(addr_sock));
-			addr_sock.ss_family = addr_node->type;
+			addr_sock.ss_family = (u_short)addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
@@ -1226,7 +1226,7 @@ config_access(void)
 		/* Check if the user specified a default rule */
 		if (my_node->addr) {
 			/* Resolve the specified address */
-			addr_sock.ss_family = my_node->addr->type;
+			addr_sock.ss_family = (u_short)my_node->addr->type;
 
 			if (getnetnum(my_node->addr->address,
 				      &addr_sock, 1,t_UNK) != 1) {
@@ -1247,7 +1247,7 @@ config_access(void)
 			/* Resolve the mask */
 			if (my_node->mask) {
 				memset((char *)&addr_mask, 0, sizeof(addr_mask));
-				addr_mask.ss_family = my_node->mask->type;
+				addr_mask.ss_family = (u_short)my_node->mask->type;
 				if (getnetnum(my_node->mask->address, &addr_mask, 1, t_MSK) != 1) {
 					/* Error in mask !!!
 					 * Free the node memory and move onto the next
@@ -1476,7 +1476,7 @@ config_trap(void)
 
 				/* Resolve the interface address */
 				memset((char *)&addr_sock, 0, sizeof(addr_sock));
-				addr_sock.ss_family = addr_node->type;
+				addr_sock.ss_family = (u_short)addr_node->type;
 
 				if (getnetnum(addr_node->address,
 					      &addr_sock, 1, t_UNK) != 1) {
@@ -1817,7 +1817,7 @@ config_peers(void)
 
 		/* Attempt to resolve the address */
 		memset((char *)&peeraddr, 0, sizeof(peeraddr));
-		peeraddr.ss_family = curr_peer->addr->type;
+		peeraddr.ss_family = (u_short)curr_peer->addr->type;
 
 		status = get_multiple_netnums(curr_peer->addr->address, &peeraddr, &res, 0, t_UNK);
 

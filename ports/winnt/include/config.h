@@ -54,10 +54,24 @@
 /* #define _WSPIAPI_H_ */ /* need these wrappers for ntpd.exe to load on w2k */
 #endif
 
+/*
+ * On Unix struct sock_timeval is equivalent to struct timeval.
+ * On Windows built with 64-bit time_t, sock_timeval.tv_sec is a long
+ * as required by Windows' socket() interface timeout argument, while
+ * timeval.tv_sec is time_t for the more common use as a UTC time 
+ * within NTP.
+ *
+ * winsock.h unconditionally defines struct timeval with long tv_sec
+ * instead of time_t tv_sec.  We redirect its declaration to struct 
+ * sock_timeval instead of struct timeval with a #define.
+ */
+#define	timeval sock_timeval
+
 /* Include Windows headers */
 #include <windows.h>
 #include <winsock.h>
 #include <ws2tcpip.h>
+
 
 /*
  * Some definitions we are using are missing in the headers
@@ -80,6 +94,12 @@
  * Above this line are #include lines and the few #define lines
  * needed before including headers.
  */
+
+#undef timeval	/* see sock_timeval #define and comment above */
+struct timeval {
+	time_t	tv_sec;
+	long	tv_usec;
+};
 
 /*
  * IPv6 requirements
@@ -148,8 +168,8 @@ typedef int socklen_t;
  */
 #define FORCE_DNSRETRY 1 
 
-#define OPEN_BCAST_SOCKET	1 /* for	ntp_io.c */
-#define TYPEOF_IP_MULTICAST_LOOP BOOL												
+#define OPEN_BCAST_SOCKET	1 /* for ntp_io.c */
+#define TYPEOF_IP_MULTICAST_LOOP BOOL
 #define SETSOCKOPT_ARG_CAST (const char *)
 #define HAVE_RANDOM 
 #define MAXHOSTNAMELEN 64
@@ -217,8 +237,6 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define strerror	NTstrerror
 char *NTstrerror(int errnum);
 
-int NT_set_process_priority(void);	/* Define this function */
-
 # define MCAST				/* Enable Multicast Support */
 # define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */
 
@@ -243,7 +261,7 @@ int NT_set_process_priority(void);	/* Define this function */
 # define NTP_POSIX_SOURCE
 
 # define SYSLOG_FILE			/* from libntp.mak */
-# define SYSV_TIMEOFDAY			/* for ntp_unixtime.h */
+# define HAVE_GETCLOCK
 
 # define SIZEOF_SIGNED_CHAR	1
 # define SIZEOF_INT		4	/* for ntp_types.h */
@@ -270,6 +288,10 @@ int NT_set_process_priority(void);	/* Define this function */
 #define HAVE_STRDUP	1
 #define HAVE_STRCHR	1
 #define HAVE_FCNTL_H	1
+#define HAVE_SYS_RESOURCE_H
+#define HAVE_BSD_NICE			/* emulate BSD setpriority() */
+
+typedef char *caddr_t;
 
 #ifndef _INTPTR_T_DEFINED
 typedef long intptr_t;

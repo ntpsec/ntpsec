@@ -17,6 +17,7 @@
 #include "ntp_iocompletionport.h"
 #include "transmitbuff.h"
 #include "ntp_request.h"
+#include "clockstuff.h"
 #include "ntp_io.h"
 
 /*
@@ -53,9 +54,6 @@ typedef struct IoCompletionInfo {
    */
   typedef DWORD ULONG_PTR;
 #endif
-
-/* in nt_clockstuff.c */
-extern void lock_thread_to_processor(HANDLE);
 
 /*
  * local function definitions
@@ -157,7 +155,7 @@ iocompletionthread(void *NotUsed)
 	IoCompletionInfo * lpo = NULL;
 	u_long time_next_ifscan_after_error = 0;
 
-	/* UNUSED_ARG(NotUsed); */
+	UNUSED_ARG(NotUsed);
 
 	/*
 	 *	socket and refclock receive call gettimeofday()
@@ -697,7 +695,7 @@ OnWriteComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	transmitbuf_t *buff;
 	struct interface *inter;
 
-	/* UNUSED_ARG(Bytes); */
+	UNUSED_ARG(Bytes);
 
 	buff = lpo->trans_buf;
 
