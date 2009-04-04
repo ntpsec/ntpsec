@@ -197,13 +197,18 @@ do {	\
 #define COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 /*
+ * workaround for VC6 inability to convert unsigned __int64 to double
+ */
+#define	LL_HNS	((LONGLONG)HECTONANOSECONDS)
+
+/*
  * NT native time format is 100's of nanoseconds since 1601-01-01.
  * Helpers for converting between "hectonanoseconds" and the 
  * performance counter scale from which interpolated time is
  * derived.
  */
-#define HNS2PERF(hns)	((hns) * PerfCtrFreq / HECTONANOSECONDS)
-#define PERF2HNS(ctr)	((ctr) * HECTONANOSECONDS / PerfCtrFreq)
+#define HNS2PERF(hns)	((hns) * PerfCtrFreq / LL_HNS)
+#define PERF2HNS(ctr)	((ctr) * LL_HNS / PerfCtrFreq)
 
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400	/* VS 2005 */
@@ -284,7 +289,7 @@ perf_ctr(void)
 				msyslog(LOG_INFO, 
 					"using processor cycle counter "
 					"%.3f MHz", 
-					NomPerfCtrFreq / 1e6);
+					(LONGLONG)NomPerfCtrFreq / 1e6);
 		} else {
 			use_pcc = 0;
 		}
@@ -581,9 +586,15 @@ init_winnt_time(void)
 	}
 
 	NomPerfCtrFreq = PerfCtrFreq = Freq.QuadPart;
+	/*
+	 * the cast to LONGLONG is for VC6 compatibility:
+	 * nt_clockstuff.c(586) : error C2520: conversion from
+	 * unsigned __int64 to double not implemented, use signed 
+	 * __int64
+	 */
 	msyslog(LOG_INFO, 
 		"Performance counter frequency %.3f MHz", 
-		PerfCtrFreq / 1e6);
+		(LONGLONG)PerfCtrFreq / 1e6);
 
 	/* Determine the existing system time slewing */
 	if (!GetSystemTimeAdjustment(&adjclockperiod, &clockperiod, &noslew))
@@ -631,7 +642,7 @@ init_winnt_time(void)
 
 	msyslog(LOG_INFO,
 		"Windows clock precision %.3f msec, min. slew %.3f ppm/s",
-		os_clock_precision / 1e4, 
+		(LONGLONG)os_clock_precision / 1e4, 
 		ppm_per_adjust_unit);
 
 	winnt_time_initialized = TRUE;
@@ -1178,10 +1189,11 @@ ctr_freq_timer_fired(
 	DWORD dwTimeHigh
 	)
 {
-	static FT_ULL		begin_time = {0};
-	static FT_ULL		begin_count = {0};
-	static ULONGLONG	next_period_time = 0;
-	static ULONGLONG	report_systemtime = 0;
+	static	FT_ULL		begin_time = {0};
+	static	FT_ULL		begin_count = {0};
+	static	ULONGLONG	next_period_time = 0;
+	static	ULONGLONG	report_systemtime = 0;
+	const	ULONGLONG	five_minutes = 5ui64 * 60 * HECTONANOSECONDS;
 	FT_ULL			now_time;
 	FT_ULL			now_count;
 
@@ -1233,19 +1245,18 @@ ctr_freq_timer_fired(
 	 */
 	if (!report_systemtime) 
 
-		report_systemtime = now_time.ull +
-			5 * 60 * HECTONANOSECONDS;
+		report_systemtime = now_time.ull + five_minutes;
 
 	else if (report_systemtime <= now_time.ull) {
 
-		report_systemtime +=  5 * 60 * HECTONANOSECONDS;
+		report_systemtime +=  five_minutes;
 
 		if (clock_backward_count) {
 			msyslog(LOG_WARNING, 
 				"clock would have gone backward %d times, "
 				"max %.1f usec",
 				clock_backward_count, 
-				clock_backward_max / 10.);
+				(LONGLONG)clock_backward_max / 10.);
 
 			clock_backward_max = clock_backward_count = 0;
 		}
@@ -1331,10 +1342,10 @@ tune_ctr_freq(
 	double this_freq;
 	int isneg;
 
-	/* nom_freq is constant over the run */
+	/* one-time initialization */
 	if (!report_at_count) {
 		report_at_count = 24 * 60 * 60 / tune_ctr_period;
-		nom_freq = NomPerfCtrFreq / 1e6;
+		nom_freq = (LONGLONG)NomPerfCtrFreq / 1e6;
 	}
 
 	/* delta is the per-second observed frequency this time */
@@ -1383,7 +1394,7 @@ tune_ctr_freq(
 	/* get rid of ObsPerfCtrFreq when removing the #ifdef */
 	PerfCtrFreq = ObsPerfCtrFreq;
 #endif
-	obs_freq = ObsPerfCtrFreq / 1e6;
+	obs_freq = (LONGLONG)ObsPerfCtrFreq / 1e6;
 
 	/* 
 	 * report observed ctr freq each time the estimate used during

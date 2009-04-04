@@ -72,6 +72,7 @@
 #include <winsock.h>
 #include <ws2tcpip.h>
 
+#undef timeval	/* see sock_timeval #define and comment above */
 
 /*
  * Some definitions we are using are missing in the headers
@@ -89,13 +90,13 @@
 /* #include <runtimelink.h> */	/* must come after ws2tcpip.h */
 #undef interface
 #include <process.h>
+#include <time.h>		/* time_t for timeval decl */
 
 /* ---------------------------------------------------------------------
  * Above this line are #include lines and the few #define lines
  * needed before including headers.
  */
 
-#undef timeval	/* see sock_timeval #define and comment above */
 struct timeval {
 	time_t	tv_sec;
 	long	tv_usec;
