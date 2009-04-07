@@ -279,11 +279,8 @@ main(
 	 */
 	gethostname(hostbuf, MAXHOSTNAME);
 	hostname = hostbuf;
-#ifndef SYS_WINNT
 	gettimeofday(&tv, 0);
-#else
-	gettimeofday(&tv);
-#endif
+
 	epoch = tv.tv_sec;
 
 	{

@@ -249,7 +249,7 @@ dumbclock_receive(
 	    struct tm  asserted_tm;	     /* the struct tm of the same */
 	    int        adjyear;
 	    int        adjmon;
-	    int        reality_delta;
+	    time_t     reality_delta;
 	    time_t     now;
 
 

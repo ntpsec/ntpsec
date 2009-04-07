@@ -380,10 +380,6 @@ set_process_priority(void)
 			priority_done);
 #endif /* DEBUG */
 
-#ifdef SYS_WINNT
-	priority_done += NT_set_process_priority();
-#endif
-
 #if defined(HAVE_SCHED_SETSCHEDULER)
 	if (!priority_done) {
 		extern int config_priority_override, config_priority;

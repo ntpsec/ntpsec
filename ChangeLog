@@ -1,3 +1,8 @@
+* [Bug 216] New interpolation scheme for Windows eliminates 1ms jitter
+* remove a bunch of #ifdef SYS_WINNT from portable code
+* 64-bit time_t cleanup for building on newer Windows compilers
+* Only set CMOS clock during ntpd exit on Windows if the computer is
+  shutting down or restarting.
 * [Bug 1148] NMEA reference clock improvements
 * remove deleted gsoc_sntp/utilities.o from repository so that .o build
   products can be cleaned up without corrupting the repository.
@@ -211,6 +216,7 @@
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 
+---
 * [Sec 1149] Use SO_EXCLUSIVEADDRUSE on Windows
 
 ---

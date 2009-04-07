@@ -9,7 +9,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
-static const char *months[] = {
+const char *months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
@@ -150,14 +150,16 @@ ntp2unix_tm(
 	return tm;
 }
 
+
 char *
-prettydate(
-	l_fp *ts
+common_prettydate(
+	l_fp *ts,
+	int local
 	)
 {
 	char *bp;
 	struct tm *tm;
-	time_t sec;
+	u_long sec;
 	u_long msec;
 
 	LIB_GETBUF(bp);
@@ -165,7 +167,7 @@ prettydate(
 	sec = ts->l_ui;
 	msec = ts->l_uf / 4294967;	/* fract / (2 ** 32 / 1000) */
 
-	tm = ntp2unix_tm(sec, 1);
+	tm = ntp2unix_tm(sec, local);
 	if (!tm) {
 		(void) sprintf(bp, "%08lx.%08lx  --- --- -- ---- --:--:--",
 		       (u_long)ts->l_ui, (u_long)ts->l_uf);
@@ -180,32 +182,20 @@ prettydate(
 	return bp;
 }
 
+
+char *
+prettydate(
+	l_fp *ts
+	)
+{
+	return common_prettydate(ts, 1);
+}
+
+
 char *
 gmprettydate(
 	l_fp *ts
 	)
 {
-	char *bp;
-	struct tm *tm;
-	time_t sec;
-	u_long msec;
-
-	LIB_GETBUF(bp);
-	
-	sec = ts->l_ui;
-	msec = ts->l_uf / 4294967;	/* fract / (2 ** 32 / 1000) */
-
-	tm = ntp2unix_tm(sec, 0);
-	if (!tm) {
-		(void) sprintf(bp, "%08lx.%08lx  --- --- -- ---- --:--:--",
-		       (u_long)ts->l_ui, (u_long)ts->l_uf);
-	}
-	else {
-		(void) sprintf(bp, "%08lx.%08lx  %s, %s %2d %4d %2d:%02d:%02d.%03lu",
-		       (u_long)ts->l_ui, (u_long)ts->l_uf, days[tm->tm_wday],
-		       months[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year,
-		       tm->tm_hour,tm->tm_min, tm->tm_sec, msec);
-	}
-
-	return bp;
+	return common_prettydate(ts, 0);
 }

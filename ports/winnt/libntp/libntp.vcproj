@@ -712,6 +712,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\getclock.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\getopt.c"
 				>
 				<FileConfiguration
@@ -780,24 +784,6 @@
 			<File
 				RelativePath="..\..\..\libntp\humandate.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libisc\inet_aton.c"
@@ -1576,6 +1562,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\setpriority.c"
+				>
+			</File>
+			<File
 				RelativePath="SetSystemTime.c"
 				>
 				<FileConfiguration
@@ -1818,28 +1808,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\tvtoa.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\tvtots.c"
 				>
 				<FileConfiguration
@@ -1906,26 +1874,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\utvtoa.c"
+				RelativePath=".\util_clockstuff.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\libisc\win32os.c"
@@ -2138,6 +2088,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\recvbuff.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\sys\resource.h"
 				>
 			</File>
 			<File

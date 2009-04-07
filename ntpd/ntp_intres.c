@@ -651,7 +651,7 @@ request(
 	)
 {
 	fd_set fdset;
-	struct timeval tvout;
+	struct sock_timeval tvout;
 	struct req_pkt reqpkt;
 	l_fp ts;
 	int n;

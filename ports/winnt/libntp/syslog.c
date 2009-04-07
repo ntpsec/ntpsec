@@ -131,7 +131,8 @@ void
 openlog(const char *name, int flags, ...) {
 	/* Get a handle to the Application event log */
 	hAppLog = RegisterEventSource(NULL, progname);
-	strcpy(progname, name);
+	strncpy(progname, name, sizeof(progname));
+	progname[sizeof(progname) - 1] = 0;
 }
 
 /*

@@ -14,18 +14,6 @@
 #define MAX_SERIAL 16	/* COM1-COM16 */
 
 
-int NT_set_process_priority(void)
-{
-	if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) 
-		{
-		msyslog(LOG_ERR, "SetPriorityClass: %m"); 
-		return 0;
-		}
-	else 
-		return 1;
-}
-
-
 /*
  * common_serial_open ensures duplicate opens of the same port
  * work by duplicating the handle for the 2nd open, allowing

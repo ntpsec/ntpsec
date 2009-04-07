@@ -13,8 +13,8 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	ntp_rfc2553.c numtoa.c numtohost.c octtoint.c prettydate.c \
 	ntp_random.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \
 	statestr.c strdup.c strerror.c strstr.c \
-	syssignal.c tsftomsu.c tstotv.c tvtoa.c tvtots.c \
-	uglydate.c uinttoa.c utvtoa.c ymd2yd.c \
+	syssignal.c tsftomsu.c tstotv.c tvtots.c \
+	uglydate.c uinttoa.c ymd2yd.c \
 	$(srcdir)/../libisc/assertions.c $(srcdir)/../libisc/error.c \
 	$(srcdir)/../libisc/interfaceiter.c $(srcdir)/../libisc/lib.c \
 	$(srcdir)/../libisc/log.c $(srcdir)/../libisc/md5.c \

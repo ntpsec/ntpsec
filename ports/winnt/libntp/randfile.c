@@ -44,8 +44,9 @@ init_randfile()
 	 * a .rnd file is in there.
 	 */
 	homedir = getenv("HOME");
-	if (homedir != NULL) {
-		strcpy(tmp, homedir);
+	if (homedir != NULL &&
+	    (strlen(homedir) + 5 /* \.rnd */) < sizeof(tmp)) {
+		strncpy(tmp, homedir, sizeof(tmp));
 		strcat(tmp, "\\.rnd");
 		rf = fopen(tmp, "rb");
 		if (rf != NULL) {
