@@ -118,7 +118,12 @@ ISC_LIST(limit_address_t) limit_address_list;
 #define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR,12) 
 #endif
 
-#endif
+/*
+ * Windows C runtime ioctl() can't deal properly with sockets, 
+ * map to ioctlsocket for this source file.
+ */
+#define ioctl(fd, opt, val)  ioctlsocket((fd), (opt), (u_long *)(val))
+#endif  /* SYS_WINNT */
 
 /*
  * We do asynchronous input using the SIGIO facility.  A number of
@@ -1671,6 +1676,24 @@ create_interface(
 	return interface;
 }
 
+
+#ifdef SO_EXCLUSIVEADDRUSE
+static void
+set_excladdruse(int fd)
+{
+	int one = 1;
+	int failed;
+
+	failed = setsockopt(fd, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
+			    (char *)&one, sizeof(one));
+
+	if (failed)
+		netsyslog(LOG_ERR, 
+			  "setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m", fd);
+}
+#endif  /* SO_EXCLUSIVEADDRUSE */
+
+
 /*
  * set_reuseaddr() - set/clear REUSEADDR on all sockets
  *			NB possible hole - should we be doing this on broadcast
@@ -1679,6 +1702,8 @@ create_interface(
 static void
 set_reuseaddr(int flag) {
 	struct interface *interf;
+
+#ifndef SO_EXCLUSIVEADDRUSE
 
 	for (interf = ISC_LIST_HEAD(inter_list);
 	     interf != NULL;
@@ -1701,6 +1726,7 @@ set_reuseaddr(int flag) {
 			}
 		}
 	}
+#endif /* ! SO_EXCLUSIVEADDRUSE */
 }
 
 /*
@@ -2244,7 +2270,7 @@ io_multicast_add(
 	}
 	else
 	{
-	        delete_interface(interface);  /* re-use existing interface */
+		delete_interface(interface);  /* re-use existing interface */
 		interface = NULL;
 		if (addr.ss_family == AF_INET)
 			interface = wildipv4;
@@ -2413,12 +2439,7 @@ static void init_nonblocking_io(SOCKET fd)
 #elif defined(FIONBIO)
 	{
 		int on = 1;
-# if defined(SYS_WINNT)
-
-		if (ioctlsocket(fd,FIONBIO,(u_long *) &on) == SOCKET_ERROR)
-# else
 		if (ioctl(fd,FIONBIO,&on) < 0)
-# endif
 		{
 			netsyslog(LOG_ERR, "ioctl(FIONBIO) fails on fd #%d: %m",
 				fd);
@@ -2453,33 +2474,34 @@ open_socket(
 {
 	int errval;
 	SOCKET fd;
-	int on = 1, off = 0;	/* int is OK for REUSEADR per */
-				/* http://www.kohala.com/start/mcast.api.txt */
+	/*
+	 * int is OK for REUSEADR per 
+	 * http://www.kohala.com/start/mcast.api.txt
+	 */
+	int on = 1;
+#ifndef SO_EXCLUSIVEADDRUSE
+	int off = 0;
+#endif
 
 	if ((addr->ss_family == AF_INET6) && (isc_net_probeipv6() != ISC_R_SUCCESS))
 		return (INVALID_SOCKET);
 
 	/* create a datagram (UDP) socket */
+	fd = socket(addr->ss_family, SOCK_DGRAM, 0);
+	if (INVALID_SOCKET == fd) {
 #ifndef SYS_WINNT
-	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) < 0) {
 		errval = errno;
 #else
-	if (  (fd = socket(addr->ss_family, SOCK_DGRAM, 0)) == INVALID_SOCKET) {
 		errval = WSAGetLastError();
 #endif
-		if(addr->ss_family == AF_INET)
-			netsyslog(LOG_ERR, "socket(AF_INET, SOCK_DGRAM, 0) failed on address %s: %m",
-				stoa(addr));
-		else if(addr->ss_family == AF_INET6)
-			netsyslog(LOG_ERR, "socket(AF_INET6, SOCK_DGRAM, 0) failed on address %s: %m",
-				stoa(addr));
-#ifndef SYS_WINNT
-		if (errval == EPROTONOSUPPORT || errval == EAFNOSUPPORT ||
+		netsyslog(LOG_ERR, 
+			  "socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %m",
+			  (addr->ss_family == AF_INET6) ? "6" : "",
+			  stoa(addr));
+
+		if (errval == EPROTONOSUPPORT || 
+		    errval == EAFNOSUPPORT ||
 		    errval == EPFNOSUPPORT)
-#else
-		if (errval == WSAEPROTONOSUPPORT || errval == WSAEAFNOSUPPORT ||
-		    errval == WSAEPFNOSUPPORT)
-#endif
 			return (INVALID_SOCKET);
 		msyslog(LOG_ERR, "unexpected error code %d (not PROTONOSUPPORT|AFNOSUPPORT|FPNOSUPPORT) - exiting", errval);
 		exit(1);
@@ -2498,6 +2520,7 @@ open_socket(
 	 */
 	fd = move_fd(fd);
 
+#ifndef SO_EXCLUSIVEADDRUSE
 	/*
 	 * set SO_REUSEADDR since we will be binding the same port
 	 * number on each interface according to flag
@@ -2512,6 +2535,14 @@ open_socket(
 
 		return INVALID_SOCKET;
 	}
+#else  /* SO_EXCLUSIVEADDRUSE defined */
+	/*
+	 * setting SO_EXCLUSIVEADDRUSE on the wildcard we open
+	 * first will cause more specific binds to fail.
+	 */
+	if (!(interf->flags & INT_WILDCARD))
+		set_excladdruse(fd);
+#endif
 
 	/*
 	 * IPv4 specific options go here
@@ -2590,22 +2621,24 @@ open_socket(
 			) {
 			if (addr->ss_family == AF_INET)
 				netsyslog(LOG_ERR,
-					  "bind() fd %d, family %d, port %d, addr %s, in_classd=%d flags=0x%x fails: %m",
-					  fd, addr->ss_family, (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
+					  "bind() fd %d, family AF_INET, port %d, addr %s, in_classd=%d flags=0x%x fails: %m",
+					  fd, (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
 					  stoa(addr),
-					  IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)), interf->flags);
+					  IN_CLASSD(ntohl(((struct sockaddr_in*)addr)->sin_addr.s_addr)), 
+					  flags);
 #ifdef INCLUDE_IPV6_SUPPORT
 			else if (addr->ss_family == AF_INET6)
-		                netsyslog(LOG_ERR,
-					  "bind() fd %d, family %d, port %d, scope %d, addr %s, in6_is_addr_multicast=%d flags=0x%x fails: %m",
-					  fd, addr->ss_family, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
+				netsyslog(LOG_ERR,
+					  "bind() fd %d, family AF_INET6, port %d, scope %d, addr %s, mcast=%d flags=0x%x fails: %m",
+					  fd, (int)ntohs(((struct sockaddr_in6*)addr)->sin6_port),
 # ifdef ISC_PLATFORM_HAVESCOPEID
 					  ((struct sockaddr_in6*)addr)->sin6_scope_id
 # else
 					  -1
 # endif
 					  , stoa(addr),
-					  IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), interf->flags);
+					  IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)addr)->sin6_addr), 
+					  flags);
 #endif
 		}
 
@@ -2636,7 +2669,7 @@ open_socket(
 		   addr->ss_family,
 		   (int)ntohs(((struct sockaddr_in*)addr)->sin_port),
 		   stoa(addr),
-		    interf->flags));
+		   interf->flags));
 
 	init_nonblocking_io(fd);
 	
