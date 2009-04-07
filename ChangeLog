@@ -208,6 +208,8 @@
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 
+* [Sec 1149] Use SO_EXCLUSIVEADDRUSE on Windows
+
 ---
 (4.2.4p7-RC1) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
 
