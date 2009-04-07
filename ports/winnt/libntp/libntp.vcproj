@@ -2079,6 +2079,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_debug.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_fp.h"
 				>
 			</File>

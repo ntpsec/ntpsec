@@ -1,4 +1,8 @@
+---
+* [Sec 1149] use SO_EXCLUSIVEADDRUSE on Windows
+---
 (4.2.4p7-RC1) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
+
 * [Bug 1131] UDP sockets should not use SIGPOLL on Solaris.
 * build system email address cleanup
 * [Bug 774] parsesolaris.c does not compile under the new Solaris
