@@ -1,4 +1,5 @@
 ---
+(4.2.4p7-RC2) 2009/04/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Sec 1144] limited buffer overflow in ntpq.  CVE-2009-0159
 * [Sec 1149] use SO_EXCLUSIVEADDRUSE on Windows
