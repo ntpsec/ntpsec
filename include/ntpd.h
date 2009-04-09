@@ -352,6 +352,7 @@ extern u_long	last_time;		/* time of last clock update (s) */
 extern double	last_offset;		/* last clock offset (s) */
 extern u_char	allan_xpt;		/* Allan intercept (log2 s) */
 extern double	clock_jitter;		/* clock jitter (s) */
+extern double	sys_offset;		/* system offset (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
@@ -390,8 +391,6 @@ extern double	sys_rootdisp;		/* dispersion to primary source */
 extern u_int32	sys_refid;		/* reference id */
 extern l_fp	sys_reftime;		/* last update time */
 extern struct peer *sys_peer;		/* current peer */
-extern struct peer *sys_pps;		/* current PPS peer */
-extern struct peer *sys_prefer;		/* cherished peer */
 
 /*
  * Nonspecified system state variables.
