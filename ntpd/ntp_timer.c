@@ -332,13 +332,19 @@ timer(void)
 	 * reference ID the loopback address.
 	 */
 	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
-		if (sys_leap == LEAP_NOTINSYNC)
+		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
+#ifdef OPENSSL
+			if (crypto_flags)	
+				crypto_update();
+#endif /* OPENSSL */
+		}
 		sys_stratum = sys_orphan;
 		if (sys_stratum > 1)
 			sys_refid = htonl(LOOPBACKADR);
 		else
 			memcpy(&sys_refid, "LOOP", 4);
+		sys_offset = 0;
 		sys_rootdelay = 0;
 		sys_rootdisp = sys_mindisp;
 	}

@@ -59,8 +59,6 @@ double	sys_rootdisp;		/* dispersion to primary source */
 u_int32 sys_refid;		/* reference id (network byte order) */
 l_fp	sys_reftime;		/* last update time */
 struct	peer *sys_peer;		/* current peer */
-struct	peer *sys_pps;		/* PPS peer */
-struct	peer *sys_prefer;	/* prefer peer */
 
 /*
  * Rate controls. Leaky buckets are used to throttle the packet
@@ -79,7 +77,7 @@ int	sys_bclient;		/* broadcast client enable */
 double	sys_bdelay;		/* broadcast client default delay */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
-static	double sys_offset;	/* current local clock offset */
+double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* min disp increment (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
@@ -1459,7 +1457,6 @@ process_packet(
 			LFPTOD(&ci, t34);
 			p_offset = t34;
 		}
-		p_del = peer->delay;
 
 		/*
 		 * When calibration is complete and the clock is
@@ -1470,14 +1467,11 @@ process_packet(
 		 */
 		if (peer->cast_flags & MDF_BCLNT) {
 			peer->cast_flags &= ~MDF_BCLNT;
-			peer->bias = peer->offset - p_offset;
-#ifdef DEBUG
-			if (debug)
-				printf(
-				    "packet: bias %f uoffset %f boffset %f\n",
-				    peer->bias, peer->offset, p_offset);
-#endif
+			peer->delay = (peer->offset - p_offset) * 2;
 		}
+		p_del = peer->delay;
+		p_offset += p_del / 2;
+
 
 	/*
 	 * Basic mode, otherwise known as the old fashioned way.
@@ -1603,19 +1597,22 @@ clock_update(
 	)
 {
 	double	dtemp;
-	u_long	epoch;
 	l_fp	now;
 #ifdef HAVE_LIBSCF_H
 	char	*fmri;
 #endif /* HAVE_LIBSCF_H */
 
 	/*
-	 * There must be a system peer at this point. If we just changed
-	 * the system peer, but have a newer sample from the old one,
-	 * wait until newer data are available. Note that the root
-	 * dispersion is updated even if the offset has already been
-	 * processed.
+	 * Update the remaining system state variables. 
 	 */
+	sys_peer = peer;
+	sys_epoch = peer->epoch;
+	sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
+	if (peer->stratum == STRATUM_REFCLOCK ||
+	    peer->stratum == STRATUM_UNSPEC)
+		sys_refid = peer->refid;
+	else
+		sys_refid = addr2refid(&peer->srcadr);
 	dtemp = sys_jitter + fabs(sys_offset) + peer->disp + clock_phi *
 	    (current_time - peer->update);
 #ifdef REFCLOCK
@@ -1627,18 +1624,16 @@ clock_update(
 		dtemp = sys_mindisp;
 #endif /* REFCLOCK */
 	sys_rootdisp = dtemp + peer->rootdisp;
-	if (peer->epoch <= sys_epoch)
-		return;
- 
-	epoch = peer->epoch - sys_epoch;
+	sys_rootdelay = peer->delay + peer->rootdelay;
+	sys_reftime = peer->dst;
+
 #ifdef DEBUG
 	if (debug)
 		printf(
 		    "clock_update: at %lu sample %lu associd %d\n",
 		    current_time, peer->epoch, peer->associd);
 #endif
-	sys_epoch = peer->epoch;
-	switch (local_clock(peer, epoch, sys_offset)) {
+	switch (local_clock(peer, peer->epoch, sys_offset)) {
 
 	/*
 	 * Clock exceeds panic threshold. Life as we know it ends.
@@ -1699,9 +1694,6 @@ clock_update(
 				crypto_update();
 #endif /* OPENSSL */
 		}
-		sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
-		sys_rootdelay = peer->delay + peer->rootdelay;
-		sys_reftime = peer->dst;
 
 		/*
 		 * If the leapseconds values are from file or network
@@ -2174,10 +2166,16 @@ clock_select(void)
 	double	high, low;
 	double	seljitter;
 	double	synch[NTP_MAXASSOC], error[NTP_MAXASSOC];
+	double	orphdist = 1e10;;
 	struct peer *osys_peer = NULL;
+	struct peer *sys_prefer = NULL;	/* prefer peer */
+	struct peer *typesystem = NULL;
+	struct peer *typeorphan = NULL;
+#ifdef REFCLOCK
 	struct peer *typeacts = NULL;
 	struct peer *typelocal = NULL;
-	struct peer *typesystem = NULL;
+	struct peer *typepps = NULL;
+#endif /* REFCLOCK */
 
 	static int list_alloc = 0;
 	static struct endpoint *endpoint = NULL;
@@ -2192,9 +2190,6 @@ clock_select(void)
 	 * enough to handle all associations.
 	 */
 	osys_peer = sys_peer;
-	sys_peer = NULL;
-	sys_pps = NULL;
-	sys_prefer = NULL;
 	osurv = sys_survivors;
 	sys_survivors = 0;
 #ifdef LOCKCLOCK
@@ -2246,26 +2241,42 @@ clock_select(void)
 			if (peer_unfit(peer))
 				continue;
 
-#ifdef REFCLOCK
 			/*
-			 * Don't allow the local clock or modem drivers
-			 * in the kitchen at this point. Do that later,
-			 * but only if nobody else is around. These guys
-			 * are all configured, so we never throw them
-			 * away.
+			 * If this is an orphan, choose the one with
+			 * the least distance.
 			 */
-			if (peer->refclktype == REFCLK_LOCALCLOCK
-#if defined(VMS) && defined(VMS_LOCALUNIT)
-			/* wjm: VMS_LOCALUNIT taken seriously */
-			    && REFCLOCKUNIT(&peer->srcadr) !=
-			    VMS_LOCALUNIT
-#endif	/* VMS && VMS_LOCALUNIT */
-				) {
-				typelocal = peer;
+			if (peer->stratum == sys_orphan) {
+				double	ftemp;
+
+				ftemp = addr2refid(&peer->srcadr);
+				if (ftemp < orphdist) {
+					typeorphan = peer;
+					orphdist = ftemp;
+				}
 				continue;
 			}
-			if (peer->refclktype == REFCLK_ACTS) {
-				typeacts = peer;
+#ifdef REFCLOCK
+			/*
+			 * The following are special cases. We deal
+			 * with them later.
+			 */
+			switch (peer->refclktype) { 
+			case REFCLK_LOCALCLOCK:
+				if (typelocal == NULL &&
+				    !(peer->flags & FLAG_PREFER))
+					typelocal = peer;
+				continue;
+			
+			case REFCLK_ATOM_PPS:
+				if (typepps == NULL &&
+				    !(peer->flags & FLAG_PREFER))
+					typepps = peer;
+				continue;
+
+			case REFCLK_ACTS:
+				if (typeacts == NULL &&
+				    !(peer->flags & FLAG_PREFER))
+					typeacts = peer;
 				continue;
 			}
 #endif /* REFCLOCK */
@@ -2411,13 +2422,12 @@ clock_select(void)
 			continue;
 
 		/*
-		 * The order metric is formed from the stratum times
-		 * max distance (1.) plus the root distance. It strongly
-		 * favors the lowest stratum, but a higher stratum peer
-		 * can capture the clock if the low stratum dominant
-		 * hasn't been heard for awhile.
+		 * The metric is the scaled root distance plus the peer
+		 * stratum. For compliance with the specification, both
+		 * values are multiplied by the select threshold.
 		 */
-		d = root_distance(peer) + peer->stratum * sys_maxdist;
+		d = (root_distance(peer) / sys_maxdist +
+		     peer->stratum) * sys_maxdist;
 		if (j >= NTP_MAXASSOC) {
 			if (d >= synch[j - 1])
 				continue;
@@ -2440,39 +2450,40 @@ clock_select(void)
 	nlist = j;
 
 	/*
-	 * If no survivors remain at this point, check if the local
-	 * clock or modem drivers have been found. If so, nominate one
-	 * of them as the only survivor. Otherwise, give up and leave
-	 * the island to the rats.
+	 * If no survivors remain at this point, check if the modem 
+	 * driver, orphan server or local driver have been found. If
+	 * so, nominate the first one found as the only survivor.
+	 * Otherwise, give up and leave the island to the rats.
 	 */
 	if (nlist == 0) {
 		error[0] = 0;
 		synch[0] = 0;
+		if (typeorphan != NULL) {
+			peer_list[0] = typeorphan;
+			nlist = 1;
+		}
+#ifdef REFCLOCK
 		if (typeacts != NULL) {
 			peer_list[0] = typeacts;
 			nlist = 1;
 		} else if (typelocal != NULL) {
 			peer_list[0] = typelocal;
 			nlist = 1;
-		} else {
-			if (osys_peer != NULL)
-				report_event(EVNT_NOPEER, NULL, NULL);
 		}
+#endif /* REFCLOCK */
 	}
 
 	/*
-	 * We can only trust the survivors if the number of candidates
-	 * sys_minsane is at least the number required to detect and
-	 * cast out one falsticker. For the Byzantine agreement
-	 * algorithm used here, that number is 4; however, the default
-	 * sys_minsane is 1 to speed initial synchronization. Careful
-	 * operators will tinker a higher value and use at least that
-	 * number of synchronization sources.
+	 * Mark the candidates at this point as truechimers.
 	 */
-	for (i = 0; i < nlist; i++)
+	for (i = 0; i < nlist; i++) {
 		peer_list[i]->status = CTL_PST_SEL_SELCAND;
-	if (nlist < sys_minsane)
-		return;
+#ifdef DEBUG
+		if (debug > 1)
+			printf("select: survivor %s %f\n",
+			    stoa(&peer_list[i]->srcadr), synch[i]);
+#endif
+	}
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
@@ -2505,8 +2516,11 @@ clock_select(void)
 			}
 		}
 		f = max(f, LOGTOD(sys_precision));
-		if (nlist <= sys_minclock || f <= d ||
-		    peer_list[k]->flags & (FLAG_TRUE | FLAG_PREFER)) {
+		if (nlist <= sys_minsane || nlist <= sys_minclock) {
+			break;
+
+		} else if (f <= d || peer_list[k]->flags &
+		    (FLAG_TRUE | FLAG_PREFER)) {
 			seljitter = f;
 			break;
 		}
@@ -2554,104 +2568,103 @@ clock_select(void)
 			j = i;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
-#ifdef REFCLOCK
-		if (peer->refclktype == REFCLK_ATOM_PPS)
-			sys_pps = peer;
-#endif /* REFCLOCK */
 	}
 
 	/*
 	 * Anticlockhop provisions. Ordinarily, use the first survivor
-	 * on the list. However, if the previous system peer is on the
-	 * list but not first, use it if the synchronization distance is
-	 * not greater than the accumulation over the last sys_maxhop
-	 * poll intervals.
+	 * on the survivor list, if there is one, and if there are
+	 * least sys_minsane survivors. Othersie, there are no
+	 * survivors. However, if the previous system peer is on the
+	 * list but not first, use it if the synchronization distance
+	 * is not greater than the accumulation over the last
+	 * sys_maxhop * poll intervals. Do this only if there are at
+	 * least one kitten in the litter.
 	 */
-	if (synch[j] < synch[0] + sys_mindisp + ULOGTOD(sys_poll) *
-	    sys_maxhop * clock_phi)
-		typesystem = peer_list[j];
-	else
-		typesystem = peer_list[0];
+	if (nlist > 0 && nlist >= sys_minsane) {
+		if (synch[j] < synch[0] + sys_mindisp +
+		    ULOGTOD(sys_poll) * sys_maxhop * clock_phi)
+			typesystem = peer_list[j];
+		else
+			typesystem = peer_list[0];
+	}
 
 	/*
-	 * Mitigation rules of the game. There are several types of
-	 * peers that can be selected here: (1) orphan, (2) prefer peer
-	 * (flag FLAG_PREFER) (3) pps peers (type REFCLK_ATOM_PPS), (4)
-	 * the existing system peer, if any, and (5) the head of the
-	 * survivor list.
+	 * Mitigation rules of the game. We have the pick of the
+	 * litter in typesystem if any survivors are left. If
+	 * there is a prefer peer, use its offset and jitter.
+	 * Otherwise, use the combined offset and jitter of all kitters.
 	 */
-	if (typesystem->stratum == sys_orphan) {
-		sys_peer = typesystem;
-		sys_peer->status = CTL_PST_SEL_SYSPEER;
-		sys_offset = sys_peer->offset;
-		sys_refid = addr2refid(&sys_peer->srcadr);
-		sys_jitter = LOGTOD(sys_precision);
-#ifdef DEBUG
-		if (debug > 2)
-			printf("select: orphan offset %.6f\n",
-			    sys_offset);
-#endif
-	} else if (sys_prefer) {
-
-		/*
-		 * If a pps peer is present, choose it; otherwise,
-		 * choose the prefer peer.
-		 */
-		if (sys_pps) {
-			sys_peer = sys_pps;
-			sys_peer->status = CTL_PST_SEL_PPS;
-			sys_offset = sys_peer->offset;
-#ifdef DEBUG
-			if (debug > 2)
-				printf("select: pps offset %.6f\n",
-				    sys_offset);
-#endif
+	if (typesystem != NULL) {
+		if (sys_prefer == NULL) {
+			typesystem->status = CTL_PST_SEL_SYSPEER;
+			clock_combine(peer_list, sys_survivors);
+			sys_jitter = SQRT(SQUARE(typesystem->jitter) +
+			    SQUARE(sys_jitter) + SQUARE(seljitter));
 		} else {
-			sys_peer = sys_prefer;
-			sys_peer->status = CTL_PST_SEL_SYSPEER;
-			sys_offset = sys_peer->offset;
-#ifdef DEBUG
-			if (debug > 2)
-				printf("select: prefer offset %.6f\n",
-				    sys_offset);
-#endif
+			typesystem = sys_prefer;
+			typesystem->status = CTL_PST_SEL_SYSPEER;
+			sys_offset = typesystem->offset;
+			sys_jitter = typesystem->jitter;
 		}
-		if (sys_peer->stratum == STRATUM_REFCLOCK ||
-		    sys_peer->stratum == STRATUM_UNSPEC)
-			sys_refid = sys_peer->refid;
-		else
-			sys_refid = addr2refid(&sys_peer->srcadr);
-		sys_jitter = sys_peer->jitter;
-	} else {
+#ifdef DEBUG
+		if (debug)
+			printf("select: combine offset %.9f jitter %.9f\n",
+			    sys_offset, sys_jitter);
+#endif
+	}
+#ifdef REFCLOCK
+	/*
+	 * If a PPS driver is lit and the combined offset is less than
+	 * 0.4 s, select the driver as the PPS peer and use its offset
+	 * and jitter.
+	 */
+	if (typepps != NULL && fabs(sys_offset < 0.4)) {
+		struct refclockproc *pp;
 
 		/*
-		 * Otherwise, choose the anticlockhopper.
-		 */ 
-		sys_peer = typesystem;
-		sys_peer->status = CTL_PST_SEL_SYSPEER;
-		clock_combine(peer_list, sys_survivors);
-		if (sys_peer->stratum == STRATUM_REFCLOCK ||
-		    sys_peer->stratum == STRATUM_UNSPEC)
-			sys_refid = sys_peer->refid;
-		else
-			sys_refid = addr2refid(&sys_peer->srcadr);
-		sys_jitter = SQRT(SQUARE(sys_peer->jitter) +
-		    SQUARE(sys_jitter) + SQUARE(seljitter));
+		 * If flag1 is dim, PPS is enabled only if the prefer
+		 * peer has survived the intersection algorithm and
+		 * numbers the seconds. Otherwise, some other means
+		 * must be provided to number the seconds.
+		 */
+		pp = typepps->procptr;
+		if (!(pp->sloppyclockflag & CLK_FLAG1) && sys_prefer ==
+		    NULL)
+			return;
+
+		typesystem = typepps;
+		typesystem->status = CTL_PST_SEL_PPS;
+ 		sys_offset = typesystem->offset;
+		sys_jitter = typesystem->jitter;
 #ifdef DEBUG
-		if (debug > 2)
-			printf("select: combine offset %.6f\n",
-			    sys_offset);
+		if (debug)
+			printf("select: pps offset %.9f jitter %.9f\n",
+			    sys_offset, sys_jitter);
 #endif
 	}
+#endif /* REFCLOCK */
 
 	/*
-	 * We have found the alpha male.
+	 * If there are no survivors at this point, there is no
+	 * system peer. If so and this is an old update, keep the
+	 * current statistics, but do not update the clock.
 	 */
-	sys_peer->flags |= FLAG_SYSPEER;
-	if (osys_peer != sys_peer) {
-		report_event(PEVNT_NEWPEER, sys_peer, NULL);
+	if (typesystem == NULL) {
+		if (osys_peer != NULL)
+			report_event(EVNT_NOPEER, NULL, NULL);
+		sys_peer = NULL;			
+		return;
 	}
-	clock_update(sys_peer);
+	if (typesystem->epoch <= sys_epoch)
+		return;
+
+	/*
+	 * We have found the alpha male. Wind the clock.
+	 */
+	if (osys_peer != typesystem)
+		report_event(PEVNT_NEWPEER, typesystem, NULL);
+	typesystem->flags |= FLAG_SYSPEER;
+	clock_update(typesystem);
 }
 
 
@@ -2691,13 +2704,10 @@ root_distance(
 	/*
 	 * Careful squeak here. The value returned must be greater than
 	 * the minimum root dispersion in order to avoid clockhop with
-	 * highly precise reference clocks. In orphan mode use the peer
-	 * address to fool the mitigation algorithm.
+	 * highly precise reference clocks. Note that the root distance
+	 * cannot exceed the sys_maxdist, as this is the cutoff by the
+	 * selection algorithm.
 	 */
-	if (peer->stratum == sys_orphan)
-		return (addr2refid(&peer->srcadr) / FRAC * sys_maxdist /
-		    1.);
-
 	return ((peer->delay + peer->rootdelay) / 2 + peer->disp +
 	    peer->rootdisp + clock_phi * (current_time - peer->update) +
 	    peer->jitter);
@@ -3448,7 +3458,6 @@ init_proto(void)
 	sys_rootdisp = 0;
 	L_CLR(&sys_reftime);
 	sys_jitter = 0;
-	sys_peer = NULL;
 	sys_precision = (s_char)default_get_precision();
 	get_systime(&dummy);
 	sys_survivors = 0;

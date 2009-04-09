@@ -24,17 +24,20 @@
 /*
  * This is a hack to allow a machine to use its own system clock as a
  * reference clock, i.e., to free-run using no outside clock discipline
- * source. This is useful if you want to use NTP in an isolated
- * environment with no radio clock or NIST modem available. Pick a
- * machine that you figure has a good clock oscillator and configure it
- * with this driver. Set the clock using the best means available, like
+ * source. Note that the clock selection algorithm will not select this
+ * driver unless all other sources of synchronization have been lost.
+ * This is useful if you want to use NTP in an isolated environment
+ * with no radio clock or NIST modem available. Pick a machine that you
+ * figure has a good clock oscillator and configure it with this
+ * driver. Set the clock using the best means available, like
  * eyeball-and-wristwatch. Then, point all the other machines at this
  * one or use broadcast (not multicast) mode to distribute time.
  *
  * Another application for this driver is if you want to use a
  * particular server's clock as the clock of last resort when all other
  * normal synchronization sources have gone away. This is especially
- * useful if that server has an ovenized oscillator.
+ * useful if that server has an ovenized oscillator. However, the
+ * preferred was to do this is using orphan mode. See the documentation.
  *
  * A third application for this driver is when an external discipline
  * source is available, such as the NIST "lockclock" program, which
@@ -50,31 +53,17 @@
  * oscillator. In extreme cases, this can cause clients to exceed the
  * 128-ms slew window and drop off the NTP subnet.
  *
- * THis driver includes provisions to telegraph synchronization state
- * and related variables by means of kernel variables with specially
- * modified kernels. This is done using the ntp_adjtime() syscall.
- * In the cases where another protocol or device synchronizes the local
- * host, the data given to the kernel can be slurped up by this driver
- * and distributed to clients by ordinary NTP messaging.
- *
- * In the default mode the behavior of the clock selection algorithm is
- * modified when this driver is in use. The algorithm is designed so
- * that this driver will never be selected unless no other discipline
- * source is available.
- *
  * Fudge Factors
  *
- * The stratum for this driver set at 5 by default, but it can be
- * changed by the fudge command and/or the ntpdc utility. The reference
- * ID is 127.0.0.1 by default, but can be changed using the same
- * mechanism.
+ * If fudge flag1 is lit, the leap second bit is set in the peer
+ * status word. It should be set early in the day of a leap second
+ * event and set dark on the day after the event.
  *
- * This driver provides a mechanism to trim the local clock in both time
- * and frequency, as well as a way to manipulate the leap bits. The
- * fudge time1 parameter adjusts the time, in seconds, and the fudge
- * time2 parameter adjusts the frequency, in ppm. The fudge time1
- * parameter is additive; that is, it adds an increment to the current
- * time. The fudge time2 parameter directly sets the frequency.
+ * Note the fudge time1 and time2 have been deprecated. The fudge time1
+ * was intended to apply a bias offset. This can be done using the Unix
+ * date command. The fudge time2 was intended to apply a bias frequency.
+ * This can be done using the frequency file and/or the freq
+ * configuration command.
  */
 /*
  * Local interface definitions
@@ -203,12 +192,8 @@ local_poll(
 	 * time1 (s) and a continuous frequency adjustment using fudge
 	 * time 2 (ppm).
 	 */
-	get_systime(&pp->lastrec);
-	pp->fudgetime1 += pp->fudgetime2 * 1e-6 * (current_time -
-	    poll_time);
 	poll_time = current_time;
-	refclock_process_offset(pp, pp->lastrec, pp->lastrec,
-	    pp->fudgetime1);
+	refclock_process_offset(pp, pp->lastrec, pp->lastrec, 0);
 
 	/*
 	 * If another process is disciplining the system clock, we set
@@ -248,7 +233,6 @@ local_poll(
 #endif /* KERNEL_PLL LOCKCLOCK */
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
-	pp->fudgetime1 = 0;
 }
 #else
 int refclock_local_bs;

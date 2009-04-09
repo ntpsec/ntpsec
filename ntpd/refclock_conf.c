@@ -138,7 +138,7 @@ extern	struct refclock refclock_nmea;
 #define	refclock_nmea	refclock_none
 #endif
 
-#ifdef CLOCK_ATOM
+#if defined (CLOCK_ATOM) && defined(HAVE_PPSAPI)
 extern	struct refclock	refclock_atom;
 #else
 #define refclock_atom	refclock_none

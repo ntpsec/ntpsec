@@ -1,7 +1,10 @@
+* Mitigation and PPS cleanup from Dave Mills.
 (4.2.5p161) 2009/03/31 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.5p160) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p7)
+* [Bug 1141] refclock_report missing braces cause spurious "peer event:
+  clock clk_unspec" log entries
+* Include (4.2.4p7-RC1)
 (4.2.5p159) 2009/03/28 Released by Harlan Stenn <stenn@ntp.org>
 * "bias" changes from Dave Mills.
 (4.2.5p158) 2009/01/30 Released by Harlan Stenn <stenn@ntp.org>
@@ -211,8 +214,6 @@
 ---
 (4.2.4p7-RC1) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
 
-* [Bug 1141] refclock_report missing braces cause spurious "peer event:
-  clock clk_unspec" log entries
 * [Bug 873] Windows serial refclock proper TTY line discipline emulation
 * [Bug 1117] Deferred interface binding under Windows works only 
   correctly if FORCE_DNSRETRY is defined
