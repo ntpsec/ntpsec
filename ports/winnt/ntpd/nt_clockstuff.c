@@ -92,7 +92,6 @@ static LONGLONG ls_elapsed;
 
 static void StartClockThread(void);
 static void StopClockThread(void);
-void lock_thread_to_processor(HANDLE);
 
 
 static CRITICAL_SECTION TimerCritialSection; /* lock for LastTimerCount & LastTimerTime */
