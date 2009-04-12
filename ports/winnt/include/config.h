@@ -56,7 +56,7 @@
 
 /* Include Windows headers */
 #include <windows.h>
-#include <winsock.h>
+#include <winsock2.h>
 #include <ws2tcpip.h>
 
 /*
@@ -373,6 +373,5 @@ typedef unsigned long uintptr_t;
  * Include standard stat information
  */
 #include <isc/stat.h>
-#include <ntp_rfc2553.h>
 
 #endif /* __CONFIG_H */
