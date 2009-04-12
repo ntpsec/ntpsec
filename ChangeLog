@@ -1,8 +1,13 @@
+* [Bug 1156] lock_thread_to_processor() should be declared in header
+* [Bug 1147] System errors should be logged to msyslog()
+* [Bug 787] Bug fixes for 64-bit time_t on Windows
+
+
 ---
 (4.2.4p7-RC2) 2009/04/09 Released by Harlan Stenn <stenn@ntp.org>
 
-* [Sec 1144] limited buffer overflow in ntpq.  CVE-2009-0159
-* [Sec 1149] use SO_EXCLUSIVEADDRUSE on Windows
+* [Bug 1144] limited buffer overflow in ntpq.  CVE-2009-0159
+* [Bug 1149] use SO_EXCLUSIVEADDRUSE on Windows
 
 ---
 (4.2.4p7-RC1) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
