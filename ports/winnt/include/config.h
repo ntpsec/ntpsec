@@ -4,17 +4,20 @@
 #define __CONFIG_H
 
 /*
- * we want newer prototypes from Windows so we target _WIN32_WINNT 
- * at WINXP, but we also want our binary to run on NT 4, so newer
- * functions are runtime linked and the linker /version:0x0400 
- * switch is used to override the .exe file minimum version.
- *
- * NOTE VC6 .dsw/.dsp files need to add /version:0x0400 to the link
- * command lines, I've done it for VC9.  Then remove these two lines.
+ * For newer compilers we may we want newer prototypes from Windows
+ * so we target _WIN32_WINNT at WINXP, but we also want our binary to
+ * run on NT 4, so newer functions are runtime linked and the linker
+ * /version:0x0400 * switch is used to override the .exe file minimum
+ * version. For older compilers we leave it at NT 4.0.
  */
 #ifndef _WIN32_WINNT
+#if _MSC_VER > 1400		/* At least VS 2005 */
 #define _WIN32_WINNT 0x0501
+#else				/* NT 4.0 */
+#define _WIN32_WINNT 0x0400 
 #endif
+#endif
+
 
 #define _CRT_SECURE_NO_DEPRECATE 1
 /*
@@ -345,22 +348,6 @@ typedef unsigned long uintptr_t;
 #endif /* !defined(STR_PROCESSOR) */
 
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
-
-/*
- * _beginthreadex takes sames args as CreateThread but 
- * initializes per-thread CRT state before invoking the
- * thread function, and calls _endthreadex on its
- * return instead of ExitThread.  _MSC_VER 1200 and
- * later (VC6) are known to have _beginthreadex.  If
- * you introduce support for a new compiler which 
- * has _beginthreadex in its C runtime, modify the
- * test below so that the #define lines are inactive.
- */
-#if !defined(_MSC_VER) || (_MSC_VER < 1200)
-#define _beginthreadex CreateThread
-#define _endthreadex ExitThread
-#endif
-
 /*
  * Below this line are includes which must happen after the bulk of
  * config.h is processed.  If you need to add another #include to this
