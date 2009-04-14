@@ -4488,7 +4488,12 @@ AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
-AC_CONFIG_SUBDIRS(gsoc_sntp)
-AC_CONFIG_SUBDIRS(sntp)
+dnl  it is not safe to share configuration
+dnl  cache with sntp or gsoc_sntp as they use
+dnl  different headers in a different order
+dnl  and tests for different libraries.
+dnl 
+dnl AC_CONFIG_SUBDIRS(sntp)
+dnl AC_CONFIG_SUBDIRS(gsoc_sntp)
 
 AC_OUTPUT
