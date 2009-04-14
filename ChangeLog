@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1158] support for aix6.1
 * [Bug 1157] quiet OpenSSL warnings, clean up configure.ac
 
 ---
