@@ -96,8 +96,6 @@ extern int async_write(int, const void *, unsigned int);
 #define NANOSECOND	1000000000 /* one second (ns) */
 #define RANGEGATE	500000	/* range gate (ns) */
 
-#define LENNMEA		75	/* min timecode length */
-
 /*
  * Unit control structure
  */
@@ -105,6 +103,7 @@ struct nmeaunit {
 	int	pollcnt;	/* poll message counter */
 	int	polled;		/* Hand in a sample? */
 	l_fp	tstamp;		/* timestamp of last poll */
+	int	gps_time;	/* 0 UTC, 1 GPS time */
 #ifdef HAVE_PPSAPI
 	struct timespec ts;	/* last timestamp */
 	pps_params_t pps_params; /* pps parameters */
@@ -208,19 +207,6 @@ nmea_start(
 
 	fd = refclock_open(device, baudrate, LDISC_CLK);
 	
-	/*
-	 * Checking the validity of mode field if multiple sentences
-	 * have been selected.
-	 */
-	if ( (peer->ttl & NMEA_MESSAGE_MASK_SINGLE) && (peer->ttl & NMEA_MESSAGE_MASK_OLD) ) {
-		msyslog(LOG_ERR,
-			"refclock_nmea : invaid combination of NMEA sentences" );
-		
-		msyslog(LOG_ERR,
-			"refclock_nmea : reseting mode to standard NMEA sentences" );
-		peer->ttl &= NMEA_MESSAGE_MASK_OLD;
-	}
-
 	if (fd <= 0) {
 #ifdef HAVE_READLINK
 		/* nmead support added by Jon Miner (cp_n18@yahoo.com)
@@ -275,9 +261,9 @@ nmea_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct nmeaunit *) emalloc(sizeof(*up));
-	if (up == NULL) {
-		(void) close(fd);
+	up = (struct nmeaunit *)emalloc(sizeof(*up));
+	if (!up) {
+		close(fd);
 		return (0);
 	}
 	memset((char *)up, 0, sizeof(struct nmeaunit));
@@ -287,7 +273,7 @@ nmea_start(
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		(void) close(fd);
+		close(fd);
 		free(up);
 		return (0);
 	}
@@ -507,6 +493,7 @@ nmea_receive(
 	int month, day;
 	char *cp, *dp, *bp, *msg;
 	int cmdtype;
+	int cmdtypezdg = 0;
 	int blanking;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
@@ -584,10 +571,13 @@ nmea_receive(
 			cmdtype = GPGGA;
 		else if (strncmp(msg, "GLL", 3) == 0)
 			cmdtype = GPGLL;
-		else if (strncmp(msg, "ZDG", 3) == 0 ||
-			 strncmp(msg, "ZDA", 3) == 0)
+		else if (strncmp(msg, "ZD", 2) == 0) {
 			cmdtype = GPZDG_ZDA;
-		else
+			if ('G' == msg[2])
+				cmdtypezdg = 1;
+			else if ('A' != msg[2])
+				return;
+		} else
 			return;
 	} else
 		return;
@@ -596,8 +586,16 @@ nmea_receive(
 	if (peer->ttl && !(cmdtype & (peer->ttl & NMEA_MESSAGE_MASK)))
 		return;
 
+	/* 
+	 * $GPZDG provides GPS time not UTC, and the two mix poorly.
+	 * Once have processed a $GPZDG, do not process any further
+	 * UTC sentences (all but $GPZDG currently).
+	 */
+	if (up->gps_time && !cmdtypezdg)
+		return;
+
 	/* make sure it came in clean */
-	if (0 == nmea_checksum_ok(rd_lastcode)) {
+	if (!nmea_checksum_ok(rd_lastcode)) {
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
@@ -660,13 +658,14 @@ nmea_receive(
 		/*
 		 * Test for synchronization.  For $GPZDG check for validity of GPS time.
 		 */
-		if (cp[5] == 'G') {
+		if (cmdtypezdg) {
 			dp = field_parse(cp, 6);
 			if (dp[0] == '0') 
 				pp->leap = LEAP_NOTINSYNC;
 			else 
 				pp->leap = LEAP_NOWARNING;
-		}
+		} else
+			pp->leap = LEAP_NOWARNING;
 
 		/* Now point at the time field */
 		dp = field_parse(cp, 1);
@@ -720,9 +719,9 @@ nmea_receive(
 	 * is valid for next PPS tick. Just rolling back the second,
 	 * minute and hour fields appopriately
 	 */
-	if (cmdtype == GPZDG_ZDA && cp[5] == 'G')
+	if (cmdtypezdg) {
 		if (pp->second == 0) {
-			pp->second = 59;	
+			pp->second = 59;
 			if (pp->minute == 0) {
 				pp->minute = 59;
 				if (pp->hour == 0)
@@ -730,11 +729,12 @@ nmea_receive(
 			}
 		} else
 			pp->second -= 1;
+	}
 
 	if (pp->hour > 23 || pp->minute > 59 || 
 	    pp->second > 59 || pp->nsec > 1000000000) {
 
-		DPRINTF(1, ("NMEA hour/min/sec/nsec range %02d:%02d:%02d.%09d\n",
+		DPRINTF(1, ("NMEA hour/min/sec/nsec range %02d:%02d:%02d.%09ld\n",
 			    pp->hour, pp->minute, pp->second, pp->nsec));
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
@@ -743,7 +743,7 @@ nmea_receive(
 	/*
 	 * Convert date and check values.
 	 */
-	if (cmdtype==GPRMC) {
+	if (GPRMC == cmdtype) {
 
 		dp = field_parse(cp,9);
 		day = dp[0] - '0';
@@ -753,7 +753,7 @@ nmea_receive(
 		pp->year = dp[4] - '0';
 		pp->year = (pp->year * 10) + dp[5] - '0';
 
-	} else if (cmdtype==GPZDG_ZDA) {
+	} else if (GPZDG_ZDA == cmdtype) {
 
 		dp = field_parse(cp, 2);
 		day = 10 * (dp[0] - '0') + (dp[1] - '0');
@@ -777,11 +777,12 @@ nmea_receive(
 	}
 
 	/* pp->year will be 2 or 4 digits if read from GPS, 4 from gmtime */
-	if (pp->year < 100)
+	if (pp->year < 100) {
 		if (pp->year < 9)	/* year of our line of code is 2009 */
 			pp->year += 2100;
 		else
 			pp->year += 2000;
+	}
 
 	/* pp->year now 4 digits as ymd2yd requires */
 	day = ymd2yd(pp->year, month, day);
@@ -885,6 +886,15 @@ nmea_receive(
 		return;
 	}
 
+	/*
+	 * Note that we're only using GPS timescale from now on.
+	 */
+	if (cmdtypezdg && !up->gps_time) {
+		up->gps_time = 1;
+		NLOG(NLOG_CLOCKINFO)
+			msyslog(LOG_INFO, "%s using only $GPZDG",
+				refnumtoa(&peer->srcadr));
+	}
 
 	/*
 	 * Only go on if we had been polled.
