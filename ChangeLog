@@ -1,3 +1,4 @@
+* [Bug 813] Conditional naming of Event
 * [Bug 1156] lock_thread_to_processor() should be declared in header
 * [Bug 1147] System errors should be logged to msyslog()
 * [Bug 787] Bug fixes for 64-bit time_t on Windows
