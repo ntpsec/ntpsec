@@ -32,7 +32,7 @@ dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
 AC_PROG_CC_STDC
 dnl AC_PROG_CC_C89
-# make sure CC is *some* version of ANSI.
+# We should make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
 AC_PROG_CC_C_O
 AC_PROG_CPP
@@ -3820,6 +3820,68 @@ case "$build" in
     esac
     ;;
 esac
+
+
+AC_MSG_CHECKING([if we want to build ntpsnmpd])
+AC_ARG_WITH(ntpsnmpd,
+	AC_HELP_STRING([--with-ntpsnmpd], [s Build the ntpsnmpd code?]),
+	[ans=$withval],
+	[case "$PATH_NET_SNMP_CONFIG" in
+	 /*)	ans=yes ;;
+	 *)	ans=no  ;;
+	esac])
+AC_MSG_RESULT($ans)
+
+case "$ans" in
+ yes)
+    case "$PATH_NET_SNMP_CONFIG" in
+     /*)
+	SNMP_LIBS=`$PATH_NET_SNMP_CONFIG --agent-libs`
+	AC_SUBST(SNMP_LIBS)
+	# HMS: we really want to separate CPPFLAGS and CFLAGS
+	foo=`$PATH_NET_SNMP_CONFIG --cflags`
+	SNMP_CPPFLAGS=
+	SNMP_CFLAGS=
+	for i in $foo; do
+	    case "$i" in
+	     -D*|-U*|-I*)
+		SNMP_CPPFLAGS="$SNMP_CPPFLAGS $i"
+		;;
+	    *)	SNMP_CFLAGS="$SNMP_CFLAGS $i"
+		;;
+	    esac
+	done
+	AC_SUBST(SNMP_CPPFLAGS)
+	AC_SUBST(SNMP_CFLAGS)
+
+	save_CFLAGS=$CFLAGS
+	save_CPPFLAGS=$CPPFLAGS
+	save_LIBS=$LIBS
+	CFLAGS=$SNMP_CFLAGS
+	CPPFLAGS=$SNMP_CPPFLAGS
+
+	AC_CHECK_HEADER([net-snmp/net-snmp-config.h], [MAKE_NTPSNMPD=ntpsnmpd],
+		[AC_MSG_WARN([net-snmp-config present but net-snmp headers are not available!])])
+
+	# Do this last, as we're messing up LIBS.
+
+	# check -lnetsnmp for netsnmp_daemonize
+	LIBS=`$PATH_NET_SNMP_CONFIG --libs`
+	AC_CHECK_LIB([netsnmp], [netsnmp_daemonize], [],
+		[AC_DEFINE([NEED_NETSNMP_DAEMONIZE], [1],
+			[We need to provide netsnmp_daemonize()])])
+
+	CFLAGS=$save_CFLAGS
+	CPPFLAGS=$save_CPPFLAGS
+	LIBS=$save_LIBS
+
+	;;
+     *) AC_MSG_WARN([Cannot build ntpsnmpd as desired - net-snmp-config cannot be found])
+	;;
+    esac
+    ;;
+esac
+AC_SUBST(MAKE_NTPSNMPD)
 
 
 AC_CACHE_CHECK([if we should always slew the time], ac_cv_var_slew_always,
