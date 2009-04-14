@@ -2761,6 +2761,7 @@ AC_ARG_ENABLE(TRUETIME,
 	;;
      *)
 	ntp_ok=$ntp_eac
+	ntp_ok="disabled pps_sample() gone" # delete this line alone
 	;;
     esac])
 if test "$ntp_ok" = "yes"; then
@@ -3051,14 +3052,16 @@ AC_MSG_CHECKING(if we need to make and use the parse libraries)
 ans=no
 case "$ntp_libparse" in
  yes)
+    ans=["disabled, pps_sample() has left"]
+;;
+disabled) # due to pps_sample disappearance delete these lines 
+          # and the preceding two leaving yes) ans=yes
     ans=yes
     AC_DEFINE(CLOCK_PARSE, 1, [PARSE driver interface])
     LIBPARSE=../libparse/libparse.a
     MAKE_LIBPARSE=libparse.a
     # HMS: check_y2k trips the 34 year problem now...
     false && MAKE_CHECK_Y2K=check_y2k
-    AC_DEFINE(PPS_SAMPLE, 1, [PPS auxiliary interface for ATOM?])
-    AC_DEFINE(CLOCK_ATOM)
     ;;
 esac
 AC_MSG_RESULT($ans)
