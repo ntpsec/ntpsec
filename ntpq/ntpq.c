@@ -27,8 +27,6 @@
 #ifdef SYS_WINNT
 # include <Mswsock.h>
 # include <io.h>
-#else
-# define closesocket close
 #endif /* SYS_WINNT */
 
 #if defined(HAVE_LIBREADLINE)

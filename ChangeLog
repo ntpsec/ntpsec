@@ -1,5 +1,6 @@
 * [Bug 1152] temporarily disable refclock_parse, refclock_true until
   maintainers can repair build break from pps_sample()
+* [Bug 1153] refclock_nmea should not mix UTC with GPS time
 (4.2.5p163) 2009/04/10 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.5p162) 2009/04/09 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
