@@ -76,6 +76,12 @@ static HANDLE hIoCompletionPort = NULL;
 static HANDLE WaitableIoEventHandle = NULL;
 static HANDLE WaitableExitEventHandle = NULL;
 
+#ifdef NTPNEEDNAMEDHANDLE
+#define WAITABLEIOEVENTHANDLE "WaitableIoEventHandle"
+#else
+#define WAITABLEIOEVENTHANDLE NULL
+#endif
+
 #define MAXHANDLES 3
 HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
 
@@ -274,7 +280,7 @@ init_io_completion_port(
 
 	/* Create the event used to signal an IO event
 	 */
-	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, "WaitableIoEventHandle");
+	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, WAITABLEIOEVENTHANDLE);
 	if (WaitableIoEventHandle == NULL) {
 		msyslog(LOG_ERR,
 		"Can't create I/O event handle: %m - another process may be running - EXITING");
