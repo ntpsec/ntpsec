@@ -16,6 +16,25 @@ AC_PROG_CC
 
 case "$GCC" in
  yes)
+    SAVED_CFLAGS_AC="$CFLAGS"
+    CFLAGS="$CFLAGS -Wstrict-overflow"
+    AC_CACHE_CHECK(
+	[if $CC can handle -Wstrict-overflow], 
+	ac_cv_gcc_Wstrict_overflow, 
+	[
+	    AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM([], [])],
+		[ac_cv_gcc_Wstrict_overflow=yes],
+		[ac_cv_gcc_Wstrict_overflow=no]
+	    )
+	]
+    )
+    CFLAGS="$SAVED_CFLAGS_AC"
+    SAVED_CFLAGS_AC=
+esac
+
+case "$GCC" in
+ yes)
     CFLAGS="$CFLAGS -Wall"
     # CFLAGS="$CFLAGS -Wcast-align"
     CFLAGS="$CFLAGS -Wcast-qual"
@@ -29,8 +48,10 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Wstrict-prototypes"
     # CFLAGS="$CFLAGS -Wtraditional"
     # CFLAGS="$CFLAGS -Wwrite-strings"
-
-    ;;
+    case "$ac_cv_gcc_Wstrict_overflow" in
+     yes)
+        #not yet#CFLAGS="$CFLAGS -Wstrict-overflow"
+    esac
 esac
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
@@ -90,6 +111,15 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 
 AC_C_INLINE
+
+case "$ac_cv_c_inline" in
+ '')
+    ;;
+ *)
+    AC_DEFINE(HAVE_INLINE,1,[inline keyword or macro available])
+    AC_SUBST(HAVE_INLINE)
+esac
+
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
 AC_CHECK_SIZEOF([signed char])
 AC_CHECK_SIZEOF([int])
@@ -222,16 +252,29 @@ case "$enable_ipv6" in
     ;;
 esac
 
-AC_MSG_CHECKING([for IPv6 structures])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>],
-[struct sockaddr_in6 sin6; return (0);],
-	[AC_MSG_RESULT(yes)
-	 found_ipv6=yes],
-	[AC_MSG_RESULT(no)
-	 found_ipv6=no])
+
+AC_CACHE_CHECK(
+    [for IPv6 structures],
+    ac_cv_isc_found_ipv6,
+    [
+        AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <sys/socket.h>
+			#include <netinet/in.h>
+		    ],
+		    [
+			struct sockaddr_in6 sin6;
+		    ]
+		)
+	    ],
+	    [ac_cv_isc_found_ipv6=yes],
+	    [ac_cv_isc_found_ipv6=no]
+	)
+    ]
+)
 
 #
 # See whether IPv6 support is provided via a Kame add-on.
@@ -281,127 +324,186 @@ esac
 # netinet6/in6.h is needed for.
 #
 case "$host" in
-*-bsdi4.[[01]]*)
-    ISC_PLATFORM_NEEDNETINET6IN6H="#define ISC_PLATFORM_NEEDNETINET6IN6H 1"
-    LWRES_PLATFORM_NEEDNETINET6IN6H="#define LWRES_PLATFORM_NEEDNETINET6IN6H 1"
+ *-bsdi4.[[01]]*)
+    AC_DEFINE(ISC_PLATFORM_NEEDNETINET6IN6H, 1, [Do we need netinet6/in6.h?])
+    # does anything use LWRES_PLATFORM_NEEDNETINET6IN6H?  Can't it use above?
+    AC_DEFINE(LWRES_PLATFORM_NEEDNETINET6IN6H, 1, [Do we need netinet6/in6.h?])
     isc_netinet6in6_hack="#include <netinet6/in6.h>"
     ;;
-*)
-    ISC_PLATFORM_NEEDNETINET6IN6H="#undef ISC_PLATFORM_NEEDNETINET6IN6H"
-    LWRES_PLATFORM_NEEDNETINET6IN6H="#undef LWRES_PLATFORM_NEEDNETINET6IN6H"
+ *)
     isc_netinet6in6_hack=""
-    ;;
 esac
 
 #
 # This is similar to the netinet6/in6.h issue.
 #
 case "$host" in
-*-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
-    # UnixWare
-    # ISC_PLATFORM_NEEDNETINETIN6H="#define ISC_PLATFORM_NEEDNETINETIN6H 1"
-    # LWRES_PLATFORM_NEEDNETINETIN6H="#define LWRES_PLATFORM_NEEDNETINETIN6H 1"
+ *-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
     AC_DEFINE(ISC_PLATFORM_FIXIN6ISADDR, 1,[Do we need to fix in6isaddr?])
     isc_netinetin6_hack="#include <netinet/in6.h>"
     ;;
-*)
-    # ISC_PLATFORM_NEEDNETINETIN6H="#undef ISC_PLATFORM_NEEDNETINETIN6H"
-    # LWRES_PLATFORM_NEEDNETINETIN6H="#undef LWRES_PLATFORM_NEEDNETINETIN6H"
-    # ISC_PLATFORM_FIXIN6ISADDR="#undef ISC_PLATFORM_FIXIN6ISADDR"
+ *)
     isc_netinetin6_hack=""
-    ;;
 esac
 
 
-AC_MSG_CHECKING([for struct if_laddrconf])
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <net/if6.h>
-],[ struct if_laddrconf a; ],
-	[AC_MSG_RESULT(yes)
-	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, ,
-		[ISC: have struct if_laddrconf?])],
-	[AC_MSG_RESULT(no)])
-
-AC_MSG_CHECKING([for struct if_laddrreq])
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <net/if6.h>
-],[ struct if_laddrreq a; ],
-	[AC_MSG_RESULT(yes)
-	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, ,
-		[ISC: have struct if_laddrreq?])],
-	[AC_MSG_RESULT(no)])
-
-### Beginning of problem fragment
-
-case "$found_ipv6" in
+case "$ac_cv_isc_found_ipv6" in
  yes)
-    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
+    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[have IPv6?])
 
-    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id], , ,
-[
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-$isc_netinetin6_hack
-$isc_netinet6in6_hack
-])
+    AC_CACHE_CHECK(
+	[for in6_pktinfo],
+	ac_cv_have_in6_pktinfo,
+	[
+	    AC_COMPILE_IFELSE(
+		[
+		    AC_LANG_PROGRAM(
+			[
+			    #include <sys/types.h>
+			    #include <sys/socket.h>
+			    #include <netinet/in.h>
+			    $isc_netinetin6_hack
+			    $isc_netinet6in6_hack
+			],
+			[
+			    struct in6_pktinfo xyzzy;
+			]
+		    )
+		],
+		[ac_cv_have_in6_pktinfo=yes],
+		[ac_cv_have_in6_pktinfo=no]
+	    )
+	]
+    )
 
-dnl     AC_MSG_CHECKING(for in6_pktinfo)
-dnl     AC_TRY_COMPILE([
-dnl #include <sys/types.h>
-dnl #include <sys/socket.h>
-dnl #include <netinet/in.h>
-dnl $isc_netinetin6_hack
-dnl $isc_netinet6in6_hack
-dnl ],
-dnl 	[struct in6_pktinfo xyzzy; return (0);],
-dnl 	[AC_MSG_RESULT(yes)
-dnl 	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
-dnl 		[ISC: Have struct in6_pktinfo?])],
-dnl 	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
-dnl 
-dnl     # HMS: Use HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID instead?
-dnl     AC_MSG_CHECKING(for sin6_scope_id in struct sockaddr_in6)
-dnl     AC_TRY_COMPILE([
-dnl #include <sys/types.h>
-dnl #include <sys/socket.h>
-dnl #include <netinet/in.h>
-dnl $isc_netinetin6_hack
-dnl $isc_netinet6in6_hack
-dnl ],
-dnl 	[struct sockaddr_in6 xyzzy; xyzzy.sin6_scope_id = 0; return (0);],
-dnl 	[AC_MSG_RESULT(yes)
-dnl 	 AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, ,
-dnl 		[ISC: Have sin6_scope_id?])],
-dnl 	 result="#define LWRES_HAVE_SIN6_SCOPE_ID 1"],
-dnl 	[AC_MSG_RESULT(no)
-dnl 	 ISC_PLATFORM_HAVESCOPEID="#undef ISC_PLATFORM_HAVESCOPEID"
-dnl 	 result="#undef LWRES_HAVE_SIN6_SCOPE_ID"])
-dnl     LWRES_HAVE_SIN6_SCOPE_ID="$result"
+    case "$ac_cv_have_in6_pktinfo" in
+     yes)
+	AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, , [have struct in6_pktinfo?])
+    esac
 
-    ;;
+
+    # HMS: Use HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID instead?
+    AC_CACHE_CHECK(
+	[for sockaddr_in6.sin6_scope_id],
+	ac_cv_have_sin6_scope_id,
+	[
+	    AC_COMPILE_IFELSE(
+		[
+		    AC_LANG_PROGRAM(
+			[
+			    #include <sys/types.h>
+			    #include <sys/socket.h>
+			    #include <netinet/in.h>
+			    $isc_netinetin6_hack
+			    $isc_netinet6in6_hack
+			],
+			[
+			    struct sockaddr_in6 xyzzy;
+			    xyzzy.sin6_scope_id = 0;
+			]
+		    )
+		],
+		[ac_cv_have_sin6_scope_id=yes],
+		[ac_cv_have_sin6_scope_id=no]
+	    )
+	]
+    )
+
+    case "$ac_cv_have_sin6_scope_id" in
+     yes)
+	AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, , [have sin6_scope_id?])
+    esac
 esac
 
-### End of problem fragment
 
-# We need this check run all the time...
-AC_MSG_CHECKING(for in6addr_any)
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-$isc_netinetin6_hack
-$isc_netinet6in6_hack
-$isc_in_addr6_hack
-],
-	[[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);]],
-	[AC_MSG_RESULT(yes)],
-	[AC_MSG_RESULT(no)
-	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,
-		[ISC: Need in6addr_any?])]
+# We need this check run even without ac_cv_isc_found_ipv6=yes
+
+AC_CACHE_CHECK(
+    [for in6addr_any],
+    ac_cv_have_in6addr_any,
+    [
+        AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <sys/socket.h>
+			#include <netinet/in.h>
+			$isc_netinetin6_hack
+			$isc_netinet6in6_hack
+		    ],
+		    [
+			struct in6_addr in6; 
+			in6 = in6addr_any;
+		    ]
+		)
+	    ],
+	    [ac_cv_have_in6addr_any=yes],
+	    [ac_cv_have_in6addr_any=no]
+	)
+    ]
 )
+
+case "$ac_cv_have_in6addr_any" in
+ no)
+    AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, , [missing in6addr_any?])
+esac
+
+
+AC_CACHE_CHECK(
+    [for struct if_laddrconf],
+    ac_cv_isc_struct_if_laddrconf,
+    [
+        AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <net/if6.h>
+		    ],
+		    [
+			struct if_laddrconf a;
+		    ]
+		)
+	    ],
+	    [ac_cv_isc_struct_if_laddrconf=yes],
+	    [ac_cv_isc_struct_if_laddrconf=no]
+	)
+    ]
+)
+
+case "$ac_cv_isc_struct_if_laddrconf" in
+ yes)
+    AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, , [have struct if_laddrconf?])
+esac
+
+AC_CACHE_CHECK(
+    [for struct if_laddrreq],
+    ac_cv_isc_struct_if_laddrreq,
+    [
+        AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <net/if6.h>
+		    ],
+		    [
+			struct if_laddrreq a;
+		    ]
+		)
+	    ],
+	    [ac_cv_isc_struct_if_laddrreq=yes],
+	    [ac_cv_isc_struct_if_laddrreq=no]
+	)
+    ]
+)
+
+case "$ac_cv_isc_struct_if_laddrreq" in
+ yes)
+    AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, , [have struct if_laddrreq?])
+esac
+
 
 ###
 
