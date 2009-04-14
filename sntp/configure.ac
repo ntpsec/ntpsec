@@ -12,6 +12,9 @@ AC_PROG_CC
 # It's a small library - we might as well use a static version of it.
 AC_DISABLE_SHARED
 
+m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
+m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
+
 AC_PROG_LIBTOOL
 
 # NTP has (so far) been relying on leading-edge autogen.
@@ -39,6 +42,17 @@ case "$ac_cv_cpp_warning" in
     AC_MSG_RESULT([[Enabling NO_OPTION_NAME_WARNINGS as #warning does not work]])
     ;;
 esac
+
+AC_C_INLINE
+
+case "$ac_cv_c_inline" in
+ '')
+    ;;
+ *)
+    AC_DEFINE(HAVE_INLINE,1,[inline keyword or macro available])
+    AC_SUBST(HAVE_INLINE)
+esac
+
 
 # Checks for libraries.
 

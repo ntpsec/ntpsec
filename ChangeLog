@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1157] quiet OpenSSL warnings, clean up configure.ac
+
+---
 (4.2.4p7-RC2) 2009/04/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Sec 1144] limited buffer overflow in ntpq.  CVE-2009-0159

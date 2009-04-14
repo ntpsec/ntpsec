@@ -2,13 +2,14 @@
 
 LOGF=make.log
 IAM=`hostname || uname -n`
+MYNAME=`IFS=. ; set $IAM ; echo $1`
 
 case "$1" in
  0.*)
     SIG=$1
     shift
     CONFIG_ARGS="$@"
-    KEY=`sed -e q < .buildkey`
+    KEY=`sed -e q < .buildkey-$MYNAME`
     case "$SIG" in
      $KEY) ;;
      *)
@@ -35,8 +36,6 @@ case "$CVO" in
     exit 1
     ;;
 esac
-
-MYNAME=`IFS=. ; set $IAM ; echo $1`
 
 case "$IAM" in
  *.udel.edu)
@@ -93,14 +92,14 @@ BDIR="$BDIR$KEYSUF$CCSUF"
 cd $BDIR
 
 (
-[ -f config.status ] || ../configure $CONFIG_ARGS
+[ -f config.status ] || nice -11 ../configure --config-cache $CONFIG_ARGS
 
-./config.status
+nice -12 ./config.status
 
 case "$MAKE" in
- '') make && make check
+ '') nice -16 make && nice -18 make check
      ;;
- *)  $MAKE && $MAKE check
+ *) nice -16 $MAKE && nice -18 $MAKE check
      ;;
 esac
 ) > $LOGF 2>&1
