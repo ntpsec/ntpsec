@@ -4456,6 +4456,11 @@ AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
-AC_CONFIG_SUBDIRS(sntp)
+dnl it is not safe to share configuration
+dnl cache with sntp as it uses different
+dnl headers in a different order and 
+dnl tests for different libraries.
+dnl 
+dnl AC_CONFIG_SUBDIRS(sntp)
 
 AC_OUTPUT
