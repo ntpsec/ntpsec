@@ -24,13 +24,17 @@ dnl check these early to avoid autoconf warnings
 AC_AIX
 AC_MINIX
 
+# So far, the only shared library we might use is libopts.
+# It's a small library - we might as well use a static version of it.
+AC_DISABLE_SHARED
+
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
+AC_PROG_CC_STDC
 dnl AC_PROG_CC_C89
-dnl AC_PROG_CC_STDC
 # We should make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
-AM_PROG_CC_C_O
+AC_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_YACC
 
@@ -91,18 +95,54 @@ case "${enable_libopts_install+set}" in
 esac
 LIBOPTS_CHECK(libopts)
 
-AC_MSG_CHECKING([[if $CC can handle #warning]])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[#warning foo]])],[ac_cv_cpp_warning=yes],[ac_cv_cpp_warning=no])
-AC_MSG_RESULT([$ac_cv_cpp_warning])
+AC_CACHE_CHECK(
+    [if $CC can handle @%:@warning],
+    ac_cv_cpp_warning,
+    [
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM([], [#warning foo]),
+	    [ac_cv_cpp_warning=yes],
+	    [ac_cv_cpp_warning=no],
+	)
+    ]
+)
 
 case "$ac_cv_cpp_warning" in
  no)
-    AC_DEFINE([NO_OPTION_NAME_WARNINGS], [1], [Should we avoid #warning on option name collisions?])
-    AC_MSG_RESULT([[Enabling NO_OPTION_NAME_WARNINGS as #warning does not work]])
-    ;;
+    AC_DEFINE([NO_OPTION_NAME_WARNINGS], [1], [Should we avoid @%:@warning on option name collisions?])
 esac
 
-AC_MSG_CHECKING(for bin subdirectory)
+case "$GCC" in
+ yes)
+    SAVED_CFLAGS_AC="$CFLAGS"
+    CFLAGS="$CFLAGS -Wstrict-overflow"
+    AC_CACHE_CHECK(
+	[if $CC can handle -Wstrict-overflow], 
+	ac_cv_gcc_Wstrict_overflow, 
+	[
+	    AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM([], [])],
+		[ac_cv_gcc_Wstrict_overflow=yes],
+		[ac_cv_gcc_Wstrict_overflow=no]
+	    )
+	]
+    )
+    CFLAGS="$SAVED_CFLAGS_AC"
+    SAVED_CFLAGS_AC=
+    #
+    # $ac_cv_gcc_Wstrict_overflow is tested again later to add the 
+    # flag to CFLAGS.
+    #
+    case "$ac_cv_gcc_Wstrict_overflow" in
+     yes)
+	AC_DEFINE(HAVE_GCC_WARN_STRICT_OVERFLOW, 1, 
+	    [compiling with gcc which understands -Wstrict-overflow])
+    esac
+esac
+
+
+
+AC_MSG_CHECKING([for bin subdirectory])
 AC_ARG_WITH(binsubdir,
 	AC_HELP_STRING([--with-binsubdir], [bin ={bin,sbin}]),
 	use_binsubdir="$withval", use_binsubdir="bin")
@@ -120,7 +160,7 @@ AC_MSG_RESULT($use_binsubdir)
 BINSUBDIR=$use_binsubdir
 AC_SUBST(BINSUBDIR)
 
-AC_MSG_CHECKING(if we want to use arlib)
+AC_MSG_CHECKING([if we want to use arlib])
 AC_ARG_WITH(arlib,
 	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
 	[ans=$withval], [ans=no])
@@ -169,89 +209,6 @@ case "$host" in
     ;;
 esac
 
-AC_CACHE_CHECK(if we want the windows symmetric client hack, ac_cv_wintime,
-[AC_ARG_ENABLE(wintime,
-   AC_HELP_STRING([--enable-wintime], [- Provide the windows symmetric client hack]),
-    [ans=$enableval],
-    [ans=no])
-ac_cv_wintime=$ans])
-# End of AC_CACHE_CHECK for wintime
-case "$ac_cv_wintime" in
- yes)
-    AC_DEFINE(WINTIME, ,[Do we want the windows symmetric client hack?])
-    ;;
-esac
-
-AC_CACHE_CHECK([if we want support for Samba's signing daemon], ac_cv_ntp_signd,
-[AC_ARG_ENABLE(ntp-signd,
-   AC_HELP_STRING([--enable-ntp-signd], [- Provide support for Samba's signing daemon, =/var/run/ntp_signd]),
-    [ans=$enableval],
-    [ans=no])
-ac_cv_ntp_signd=$ans])
-# End of AC_CACHE_CHECK for ntp_signd
-
-case "$ac_cv_ntp_signd" in
-	no)
-		;;
-	yes)
-		ntp_signd_path=/var/run/ntp_signd
-		;;
-	*)
-		ntp_signd_path="$ac_cv_ntp_signd"
-		;;
-esac
-
-case "$ac_cv_ntp_signd" in
- yes)
-    AC_DEFINE(HAVE_NTP_SIGND, ,[Do we want support for Samba's signing daemon?])
-    AC_DEFINE_UNQUOTED(NTP_SIGND_PATH, "$ntp_signd_path", [Path to sign daemon rendezvous socket])
-    ;;
-esac
-
-AC_CACHE_CHECK(if we should use /dev/clockctl, ac_cv_clockctl,
-[AC_ARG_ENABLE(clockctl,
-   AC_HELP_STRING([--enable-clockctl], [s Use /dev/clockctl for non-root clock control]),
-    [ans=$enableval],
-    [case "$host" in
-      *-*-netbsd*)
-	 ans=yes
-	 ;;
-      *) ans=no
-	 ;;
-     esac
-     ])
-ac_cv_clockctl=$ans])
-# End of AC_CACHE_CHECK for clockctl
-AC_CHECK_HEADERS(sys/clockctl.h)
-case "$ac_cv_clockctl$ac_cv_header_sys_clockctl_h" in
- yesyes)
-    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
-    ;;
-esac
-
-AC_CACHE_CHECK(if we have linux capabilities (libcap), ac_cv_linuxcaps,
-[AC_ARG_ENABLE(linuxcaps,
-   AC_HELP_STRING([--enable-linuxcaps], [s Use Linux capabilities for non-root clock control]),
-    [ans=$enableval],
-    [ans=no])
-ac_cv_linuxcaps=$ans])
-# End of AC_CACHE_CHECK for linuxcaps
-AC_CHECK_HEADERS(sys/capability.h)
-AC_CHECK_HEADERS(sys/prctl.h)
-case "$ac_cv_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
- yesyesyes)
-    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
-    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
-    LIBS="$LIBS -lcap"
-    ;;
-esac
-AC_CHECK_HEADERS(libscf.h)
-case "$ac_cv_header_libscf_h" in
- yes)
-    AC_SUBST(LSCF, [-lscf])
-    ;;
-esac
-AC_CHECK_FUNC(setppriv,AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[Are Solaris privileges available?]), )
 case "$build" in
  $host)
     ;;
@@ -286,10 +243,23 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Wmissing-prototypes"
     CFLAGS="$CFLAGS -Wpointer-arith"
     CFLAGS="$CFLAGS -Wshadow"
-    CFLAGS="$CFLAGS -Wstrict-prototypes"
+    #
+    # OpenSSL has a number of callback prototypes
+    # inside other function prototypes which trigger
+    # warnings with -Wstrict-prototypes, such as:
+    #
+    # int i2d_RSA_NET(const RSA *a, unsigned char **pp, 
+    #                 int (*cb)(), int sgckey);
+    #                 ^^^^^^^^^^^
+    #
+    CFLAGS="$CFLAGS -Wno-strict-prototypes"
     # CFLAGS="$CFLAGS -Wtraditional"
     # CFLAGS="$CFLAGS -Wwrite-strings"
-
+    CFLAGS="$CFLAGS -Winit-self"
+    case "$ac_cv_gcc_Wstrict_overflow" in
+     yes)
+        #not yet: CFLAGS="$CFLAGS -Wstrict-overflow"
+    esac
     ;;
 esac
 
@@ -334,7 +304,7 @@ case "$ac_busted_vpath_in_make$srcdir" in
  yes.) ;;
  *) case "`${MAKE-make} -v -f /dev/null 2>/dev/null | sed -e 's/GNU Make version \(1-9.]*\).*/\1/' -e q`" in
      '')
-	AC_MSG_ERROR(building outside of the main directory requires GNU make)
+	AC_MSG_ERROR([building outside of the main directory requires GNU make])
 	;;
      *) ;;
     esac
@@ -343,17 +313,6 @@ esac
 
 AC_SUBST(CFLAGS)dnl
 AC_SUBST(LDFLAGS)dnl
-
-# HMS: From bunnylou/cowbird
-case "$host" in
- alpha-dec-osf4.0)
-    AC_DISABLE_SHARED
-    ;;
- *) # So far, the only shared library we might use is libopts.
-    # It's a small library - we might as well use a static version of it.
-    AC_DISABLE_SHARED
-    ;;
-esac
 
 m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
 m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
@@ -501,21 +460,34 @@ AC_CHECK_HEADERS(netinet/ip.h, [], [],
 ])
 
 # Check for IPTOS_PREC
-AC_MSG_CHECKING(IPPROTO_IP IP_TOS IPTOS_LOWDELAY)
-AC_EGREP_CPP(yes,
-    [#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if HAVE_NETINET_IP_H
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#endif
-#if defined(IPPROTO_IP) && defined(IP_TOS) && defined(IPTOS_LOWDELAY)
-  yes
-#endif
-    ],
-    [AC_MSG_RESULT([yes]); AC_DEFINE(HAVE_IPTOS_SUPPORT, 1, [Do we have IPTOS support?])],
-    [AC_MSG_RESULT([no])])
+AC_CACHE_CHECK(
+    [IPPROTO_IP IP_TOS IPTOS_LOWDELAY],
+    ac_cv_ip_tos,
+    [
+	AC_EGREP_CPP(
+	    [yes],
+	    [
+		#if HAVE_SYS_TYPES_H
+		#include <sys/types.h>
+		#endif
+		#if HAVE_NETINET_IP_H
+		#include <netinet/in.h>
+		#include <netinet/ip.h>
+		#endif
+		#if defined(IPPROTO_IP) && defined(IP_TOS) && defined(IPTOS_LOWDELAY)
+		  yes
+		#endif
+	    ],
+	    [ac_cv_ip_tos=yes],
+	    [ac_cv_ip_tos=no]
+	)
+    ]
+)
+
+case "$ac_cv_ip_tos" in
+ yes)
+    AC_DEFINE(HAVE_IPTOS_SUPPORT, 1, [Do we have IPTOS support?])
+esac
 
 AC_CHECK_HEADERS(netinfo/ni.h, [AC_DEFINE(HAVE_NETINFO, 1, [NetInfo support?])])
 AC_CHECK_HEADERS(sun/audioio.h sys/audioio.h)
@@ -658,7 +630,7 @@ AC_CHECK_HEADERS(resolv.h, [], [],
 #endif
 ])
 
-AC_CACHE_CHECK(for basic volatile support, ac_cv_c_volatile,
+AC_CACHE_CHECK([for basic volatile support], ac_cv_c_volatile,
 [AC_TRY_COMPILE([],[
 volatile int x;],
 	ac_cv_c_volatile=yes,
@@ -712,7 +684,7 @@ fi
 #
 # Look for in_port_t.
 #
-AC_MSG_CHECKING(for in_port_t)
+AC_MSG_CHECKING([for in_port_t])
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>],
@@ -723,7 +695,7 @@ AC_TRY_COMPILE([
 	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Do we need our own in_port_t?])
 	])
 
-AC_CACHE_CHECK(for a fallback value for HZ, ac_cv_var_default_hz,
+AC_CACHE_CHECK([for a fallback value for HZ], ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
 case "$host" in
  alpha*-dec-osf4*|alpha*-dec-osf5*)
@@ -735,7 +707,7 @@ case "$host" in
 esac])
 AC_DEFINE_UNQUOTED(DEFAULT_HZ, $ac_cv_var_default_hz, [What is the fallback value for HZ?])
 
-AC_CACHE_CHECK(if we need to override the system's value for HZ, ac_cv_var_override_hz,
+AC_CACHE_CHECK([if we need to override the system's value for HZ], ac_cv_var_override_hz,
 [ac_cv_var_override_hz=no
 case "$host" in
  alpha*-dec-osf4*|alpha*-dec-osf5*)
@@ -779,7 +751,7 @@ dnl #endif
 dnl ], su_cv_have_boot_time=yes, su_cv_have_boot_time=no)])
 dnl AC_MSG_RESULT($su_cv_have_boot_time)
 
-AC_CACHE_CHECK(for struct rt_msghdr, ac_cv_struct_rt_msghdr,
+AC_CACHE_CHECK([for struct rt_msghdr], ac_cv_struct_rt_msghdr,
 [AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -790,7 +762,7 @@ AC_CACHE_CHECK(for struct rt_msghdr, ac_cv_struct_rt_msghdr,
 	ac_cv_struct_rt_msghdr=no)
 ])
 
-AC_CACHE_CHECK(for struct rtattr, ac_cv_struct_rtattr,
+AC_CACHE_CHECK([for struct rtattr], ac_cv_struct_rtattr,
 [AC_TRY_COMPILE([
 #include <linux/rtnetlink.h>],
 [struct rtattr p;],
@@ -806,7 +778,7 @@ if test $ac_cv_struct_rt_msghdr = yes -o $ac_cv_struct_rtattr = yes; then
 fi
 
 AC_CACHE_CHECK(
-  struct sigaction for sa_sigaction,
+  [struct sigaction for sa_sigaction],
   ac_cv_struct_sigaction_has_sa_sigaction,
   [
     AC_TRY_COMPILE(
@@ -821,7 +793,7 @@ if test $ac_cv_struct_sigaction_has_sa_sigaction = yes; then
   AC_DEFINE(HAVE_SA_SIGACTION_IN_STRUCT_SIGACTION, 1, [Obvious...])
 fi
 
-AC_CACHE_CHECK(for struct ppsclockev, ac_cv_struct_ppsclockev,
+AC_CACHE_CHECK([for struct ppsclockev], ac_cv_struct_ppsclockev,
 [AC_TRY_COMPILE([
 #include <sys/types.h>
 #ifdef HAVE_SYS_TERMIOS_H
@@ -842,7 +814,7 @@ if test $ac_cv_struct_ppsclockev = yes; then
     AC_DEFINE(HAVE_STRUCT_PPSCLOCKEV, 1, [Does a system header define struct ppsclockev?])
 fi
 
-AC_CACHE_CHECK(struct sockaddr for sa_len, ac_cv_struct_sockaddr_has_sa_len,
+AC_CACHE_CHECK([struct sockaddr for sa_len], ac_cv_struct_sockaddr_has_sa_len,
 [AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>],[
@@ -855,7 +827,7 @@ if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
     AC_DEFINE(HAVE_SA_LEN_IN_STRUCT_SOCKADDR, 1, [Should be obvious...])
 fi
 
-AC_CACHE_CHECK(for struct sockaddr_storage, ac_cv_struct_sockaddr_storage,
+AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_struct_sockaddr_storage,
 [AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -975,7 +947,7 @@ return ss->rec_size;],
     ;;
 esac
 
-AC_CACHE_CHECK(struct clockinfo for hz, ac_cv_struct_clockinfo_has_hz,
+AC_CACHE_CHECK([struct clockinfo for hz], ac_cv_struct_clockinfo_has_hz,
 [AC_TRY_COMPILE([
 #include <sys/time.h>],[
 extern struct clockinfo *pc;
@@ -987,7 +959,7 @@ if test $ac_cv_struct_clockinfo_has_hz = yes; then
     AC_DEFINE(HAVE_HZ_IN_STRUCT_CLOCKINFO, 1, [Obvious...])
 fi
 
-AC_CACHE_CHECK(struct clockinfo for tickadj, ac_cv_struct_clockinfo_has_tickadj,
+AC_CACHE_CHECK([struct clockinfo for tickadj], ac_cv_struct_clockinfo_has_tickadj,
 [AC_TRY_COMPILE([
 #include <sys/time.h>],[
 extern struct clockinfo *pc;
@@ -1043,6 +1015,15 @@ AC_CHECK_MEMBERS([struct ntptimeval.time.tv_nsec], , ,
 #endif])
 
 AC_C_INLINE
+
+case "$ac_cv_c_inline" in
+ '')
+    ;;
+ *)
+    AC_DEFINE(HAVE_INLINE,1,[inline keyword or macro available])
+    AC_SUBST(HAVE_INLINE)
+esac
+
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
 AC_CHECK_SIZEOF(signed char)
 AC_CHECK_SIZEOF(int)
@@ -1073,7 +1054,7 @@ esac
 AC_TYPE_UID_T
 
 case "$host" in
- *-*-aix[[45]]*)
+ *-*-aix[[456]]*)
 	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
 	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
 	# IBM pulls its thumbs out long enough to implement clock_settime,
@@ -1086,7 +1067,7 @@ esac
 AC_CHECK_FUNCS(daemon)
 AC_CHECK_FUNCS(finite, ,
   [AC_CHECK_FUNCS(isfinite, ,
-    [AC_MSG_CHECKING(for isfinite with <math.h>)
+    [AC_MSG_CHECKING([for isfinite with <math.h>])
     _libs=$LIBS
     LIBS="$LIBS -lm"
     AC_TRY_LINK([#include <math.h>], [float f = 0.0; isfinite(f)],
@@ -1209,7 +1190,7 @@ case "$host" in
 esac
 AC_CHECK_FUNCS(mktime)
 case "$host" in
- *-*-aix[[45]]*)
+ *-*-aix[[456]]*)
     # Just a stub.  Idiots.
     ;;
  *-*-irix[[45]]*)
@@ -1243,7 +1224,7 @@ case "$host" in
 esac
 AC_CHECK_FUNCS(plock pututline pututxline readlink recvmsg rtprio)
 case "$host" in
- *-*-aix[[45]]*)
+ *-*-aix[[456]]*)
     # Just a stub in AIX 4.  Idiots.
     ;;
  *-*-solaris2.5*)
@@ -1264,7 +1245,7 @@ AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
 AC_CHECK_FUNCS(snprintf strdup strerror strstr)
 AC_CHECK_FUNCS(timegm)
 case "$host" in
- *-*-aix[[45]]*)
+ *-*-aix[[456]]*)
     # Just stubs.  Idiots.
     ;;
  *-*-netbsd1*)
@@ -1338,7 +1319,7 @@ case "$host" in
     ;;
 esac
 
-AC_CACHE_CHECK(number of arguments to gettimeofday(), ac_cv_func_Xettimeofday_nargs,
+AC_CACHE_CHECK([number of arguments to gettimeofday()], ac_cv_func_Xettimeofday_nargs,
 [AC_TRY_COMPILE([#include <sys/time.h>],[
 gettimeofday((struct timeval*)0,(struct timezone*)0);
 settimeofday((struct timeval*)0,(struct timezone*)0);
@@ -1349,7 +1330,7 @@ if test $ac_cv_func_Xettimeofday_nargs = 1; then
 	AC_DEFINE(SYSV_TIMEOFDAY, 1, [Does Xettimeofday take 1 arg?])
 fi
 
-AC_CACHE_CHECK(number of arguments taken by setpgrp(), ac_cv_func_setpgrp_nargs,
+AC_CACHE_CHECK([number of arguments taken by setpgrp()], ac_cv_func_setpgrp_nargs,
 [AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -1367,7 +1348,7 @@ fi
 save_CFLAGS=$CFLAGS
 CFLAGS="$CFLAGS -I$srcdir/include"
 
-AC_CACHE_CHECK(argument pointer type of qsort()'s compare function and base,
+AC_CACHE_CHECK([argument pointer type of qsort()'s compare function and base],
 ac_cv_func_qsort_argtype,
 [AC_TRY_COMPILE([
 #include "l_stdlib.h"
@@ -1390,7 +1371,7 @@ esac
 
 CFLAGS=$save_CFLAGS
 
-AC_CACHE_CHECK(if we need to declare 'errno', ac_cv_decl_errno,
+AC_CACHE_CHECK([if we need to declare 'errno'], ac_cv_decl_errno,
 [AC_TRY_COMPILE([#ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif],
@@ -1408,7 +1389,7 @@ dnl MT purposes.  This makes the line "extern int h_errno" choke
 dnl the compiler.  Hopefully adding !defined(h_errno) fixes this
 dnl without breaking any other platforms.
 dnl
-AC_CACHE_CHECK(if we may declare 'h_errno', ac_cv_decl_h_errno,
+AC_CACHE_CHECK([if we may declare 'h_errno'], ac_cv_decl_h_errno,
 [AC_TRY_COMPILE([#include <sys/types.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -1441,7 +1422,7 @@ case "$ac_cv_decl_sys_errlist" in
  yes) AC_DEFINE(CHAR_SYS_ERRLIST, 1, [Declare char *sys_errlist array]) ;;
 esac
 
-AC_CACHE_CHECK(if declaring 'syscall()' is ok, ac_cv_decl_syscall,
+AC_CACHE_CHECK([if declaring 'syscall()' is ok], ac_cv_decl_syscall,
 [AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -1554,7 +1535,7 @@ case "$host" in
     ;;
 esac
 
-AC_CACHE_CHECK(if we need extra room for SO_RCVBUF, ac_cv_var_rcvbuf_slop,
+AC_CACHE_CHECK([if we need extra room for SO_RCVBUF], ac_cv_var_rcvbuf_slop,
 [ans=no
 case "$host" in
  *-*-hpux[[567]]*)
@@ -1566,7 +1547,7 @@ case "$ac_cv_var_rcvbuf_slop" in
  yes) AC_DEFINE(NEED_RCVBUF_SLOP, 1, [Do we need extra room for SO_RCVBUF? (HPUX <8)]) ;;
 esac
 
-AC_CACHE_CHECK(if we will open the broadcast socket, ac_cv_var_open_bcast_socket,
+AC_CACHE_CHECK([if we will open the broadcast socket], ac_cv_var_open_bcast_socket,
 [ans=yes
 case "$host" in
  *-*-domainos)
@@ -1578,7 +1559,7 @@ case "$ac_cv_var_open_bcast_socket" in
  yes) AC_DEFINE(OPEN_BCAST_SOCKET, 1, [Should we open the broadcast socket?]) ;;
 esac
 
-AC_CACHE_CHECK(if we want the HPUX version of FindConfig(), ac_cv_var_hpux_findconfig,
+AC_CACHE_CHECK([if we want the HPUX version of FindConfig()], ac_cv_var_hpux_findconfig,
 [ans=no
 case "$host" in
  *-*-hpux*)
@@ -1590,7 +1571,7 @@ case "$ac_cv_var_hpux_findconfig" in
  yes) AC_DEFINE(NEED_HPUX_FINDCONFIG, 1, [Do we want the HPUX FindConfig()?]) ;;
 esac
 
-AC_CACHE_CHECK(if process groups are set with -pid, ac_cv_arg_setpgrp_negpid,
+AC_CACHE_CHECK([if process groups are set with -pid], ac_cv_arg_setpgrp_negpid,
 [case "$host" in
  *-*-hpux[[567]]*)
     ans=no
@@ -1616,7 +1597,7 @@ case "$ac_cv_arg_setpgrp_negpid" in
  yes) AC_DEFINE(UDP_BACKWARDS_SETOWN, 1, [Do we set process groups with -pid?]) ;;
 esac
 
-AC_CACHE_CHECK(if we need a ctty for F_SETOWN, ac_cv_func_ctty_for_f_setown,
+AC_CACHE_CHECK([if we need a ctty for F_SETOWN], ac_cv_func_ctty_for_f_setown,
 [[case "$host" in
  *-*-bsdi[23]*)
     ans=yes
@@ -1641,7 +1622,7 @@ case "$ac_cv_func_ctty_for_f_setown" in
  yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
 esac
 
-AC_CACHE_CHECK(if the OS misses to clear cached routes when more specific routes become available, ac_cv_os_routeupdates,
+AC_CACHE_CHECK([if the OS fails to clear cached routes when more specific routes become available], ac_cv_os_routeupdates,
 [[case "$host" in
  *-*-netbsd*)
     ans=yes
@@ -1654,7 +1635,7 @@ case "$ac_cv_os_routeupdates" in
  yes) AC_DEFINE(OS_MISSES_SPECIFIC_ROUTE_UPDATES, 1, [need to recreate sockets on changed routing?]) ;;
 esac
 
-AC_CACHE_CHECK(if the OS needs the wildcard socket set to REUSEADDR for binding interface addresses, ac_cv_os_wildcardreuse,
+AC_CACHE_CHECK([if the OS needs the wildcard socket set to REUSEADDR for binding interface addresses], ac_cv_os_wildcardreuse,
 [[case "$host" in
  *-*-*linux*)
     ans=yes
@@ -1668,7 +1649,7 @@ case "$ac_cv_os_wildcardreuse" in
 esac
 
 ntp_warning='GRONK'
-AC_MSG_CHECKING(if we'll use clock_settime or settimeofday or stime)
+AC_MSG_CHECKING([if we'll use clock_settime or settimeofday or stime])
 case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
  yes*)
     ntp_warning=''
@@ -1692,11 +1673,11 @@ esac
 AC_MSG_RESULT($ans)
 case "$ntp_warning" in
  '') ;;
- *) AC_MSG_WARN(*** $ntp_warning ***)
+ *) AC_MSG_WARN([*** $ntp_warning ***])
     ;;
 esac
 
-AC_CACHE_CHECK(if we have a losing syscall(), ac_cv_var_syscall_bug,
+AC_CACHE_CHECK([if we have a losing syscall()], ac_cv_var_syscall_bug,
 [case "$host" in
  *-*-solaris2.4*)
     ans=yes
@@ -1709,7 +1690,7 @@ case "$ac_cv_var_syscall_bug" in
  yes) AC_DEFINE(SYSCALL_BUG, 1, [Buggy syscall() (Solaris2.4)?]) ;;
 esac
 
-AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
+AC_CACHE_CHECK([for SIGIO], ac_cv_hdr_def_sigio,
  AC_EGREP_CPP(yes,
   [#include <signal.h>
 #ifdef SIGIO
@@ -1718,7 +1699,7 @@ AC_CACHE_CHECK(for SIGIO, ac_cv_hdr_def_sigio,
   ], ac_cv_hdr_def_sigio=yes, ac_cv_hdr_def_sigio=no))
 
 dnl Override those system that have a losing SIGIO
-AC_CACHE_CHECK(if we want to use signalled IO, ac_cv_var_signalled_io,
+AC_CACHE_CHECK([if we want to use signalled IO], ac_cv_var_signalled_io,
 [ans=no
 case "$ac_cv_hdr_def_sigio" in
  yes)
@@ -1762,7 +1743,7 @@ case "$ac_cv_var_signalled_io" in
  yes) AC_DEFINE(HAVE_SIGNALED_IO, 1, [Can we use SIGIO for tcp and udp IO?]) ;;
 esac
 
-AC_CACHE_CHECK(for SIGPOLL, ac_cv_hdr_def_sigpoll,
+AC_CACHE_CHECK([for SIGPOLL], ac_cv_hdr_def_sigpoll,
  AC_EGREP_CPP(yes,
  [#include <signal.h>
 #ifdef SIGPOLL
@@ -1770,7 +1751,7 @@ AC_CACHE_CHECK(for SIGPOLL, ac_cv_hdr_def_sigpoll,
 #endif
  ], ac_cv_hdr_def_sigpoll=yes, ac_cv_hdr_def_sigpoll=no))
 
-AC_CACHE_CHECK(for SIGSYS, ac_cv_hdr_def_sigsys,
+AC_CACHE_CHECK([for SIGSYS], ac_cv_hdr_def_sigsys,
  AC_EGREP_CPP(yes,
  [#include <signal.h>
 #ifdef SIGSYS
@@ -1778,7 +1759,7 @@ AC_CACHE_CHECK(for SIGSYS, ac_cv_hdr_def_sigsys,
 #endif
  ], ac_cv_hdr_def_sigsys=yes, ac_cv_hdr_def_sigsys=no))
 
-AC_CACHE_CHECK(if we can use SIGPOLL for UDP I/O, ac_cv_var_use_udp_sigpoll,
+AC_CACHE_CHECK([if we can use SIGPOLL for UDP I/O], ac_cv_var_use_udp_sigpoll,
 [ans=no
 case "$ac_cv_hdr_def_sigpoll" in
  yes)
@@ -1795,7 +1776,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-sni-sysv*)
         ans=no
         ;;
-     *-*-aix[[45]]*)
+     *-*-aix[[456]]*)
         ans=no
         ;;
      *-*-hpux*)
@@ -1832,7 +1813,7 @@ case "$ac_cv_var_use_udp_sigpoll" in
  yes) AC_DEFINE(USE_UDP_SIGPOLL, 1, [Can we use SIGPOLL for UDP?]) ;;
 esac
 
-AC_CACHE_CHECK(if we can use SIGPOLL for TTY I/O, ac_cv_var_use_tty_sigpoll,
+AC_CACHE_CHECK([if we can use SIGPOLL for TTY I/O], ac_cv_var_use_tty_sigpoll,
 [ans=no
 case "$ac_cv_hdr_def_sigpoll" in
  yes)
@@ -1849,7 +1830,7 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-sni-sysv*)
         ans=no
         ;;
-     *-*-aix[[45]]*)
+     *-*-aix[[456]]*)
 	ans=no
 	;;
      *-*-hpux*)
@@ -1885,7 +1866,7 @@ esac
 
 case "$ac_cv_header_sys_sio_h" in
  yes)
-    AC_CACHE_CHECK(sys/sio.h for TIOCDCDTIMESTAMP, ac_cv_hdr_def_tiocdcdtimestamp,
+    AC_CACHE_CHECK([sys/sio.h for TIOCDCDTIMESTAMP], ac_cv_hdr_def_tiocdcdtimestamp,
      AC_EGREP_CPP(yes,
 [#include <sys/sio.h>
 #ifdef TIOCDCDTIMESTAMP
@@ -1901,7 +1882,7 @@ case "$ac_cv_hdr_def_tiocdcdtimestamp" in
     ;;
 esac
 
-AC_CACHE_CHECK(if nlist() values might require extra indirection,
+AC_CACHE_CHECK([if nlist() values might require extra indirection],
 ac_cv_var_nlist_extra_indirection,
 [ans=no
 case "$host" in
@@ -1914,7 +1895,7 @@ case "$ac_cv_var_nlist_extra_indirection" in
  yes) AC_DEFINE(NLIST_EXTRA_INDIRECTION, 1, [Might nlist() values require an extra level of indirection (AIX)?]) ;;
 esac
 
-AC_CACHE_CHECK(for a minimum recommended value of tickadj,
+AC_CACHE_CHECK([for a minimum recommended value of tickadj],
 ac_cv_var_min_rec_tickadj,
 [ans=no
 case "$host" in
@@ -1928,7 +1909,7 @@ case "$ac_cv_var_min_rec_tickadj" in
  *) AC_DEFINE_UNQUOTED(MIN_REC_TICKADJ, $ac_cv_var_min_rec_tickadj, [Should we recommend a minimum value for tickadj?]) ;;
 esac
 
-AC_CACHE_CHECK(if the TTY code permits PARENB and IGNPAR,
+AC_CACHE_CHECK([if the TTY code permits PARENB and IGNPAR],
 ac_cv_var_no_parenb_ignpar,
 [ans=no
 case "$host" in
@@ -1952,7 +1933,7 @@ case "$ac_cv_var_no_parenb_ignpar" in
  yes) AC_DEFINE(NO_PARENB_IGNPAR, 1, [Is there a problem using PARENB and IGNPAR (IRIX)?]) ;;
 esac
 
-AC_MSG_CHECKING(if we're including debugging code)
+AC_MSG_CHECKING([if we're including debugging code])
 AC_ARG_ENABLE(debugging,
    AC_HELP_STRING([--enable-debugging], [+ include debugging code]),
     [ntp_ok=$enableval], [ntp_ok=yes])
@@ -1961,7 +1942,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(if we including processing time debugging code)
+AC_MSG_CHECKING([if we including processing time debugging code])
 AC_ARG_ENABLE(debug-timing,
    AC_HELP_STRING([--enable-debug-timing], [- include processing time debugging code (costs performance)]),
     [ntp_ok=$enableval], [ntp_ok=no])
@@ -1970,30 +1951,31 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for a the number of minutes in a DST adjustment)
+AC_MSG_CHECKING([for a the number of minutes in a DST adjustment])
 AC_ARG_ENABLE(dst_minutes,
    AC_HELP_STRING([--enable-dst-minutes=60], [+ minutes per DST adjustment]),
     [ans=$enableval], [ans=60])
 AC_DEFINE_UNQUOTED(DSTMINUTES, $ans, [The number of minutes in a DST adjustment])
 AC_MSG_RESULT($ans)
 
-AC_CACHE_CHECK(if we have the tty_clk line discipline/streams module,
+AC_CACHE_CHECK([if we have the tty_clk line discipline/streams module],
  ac_cv_var_tty_clk,
  [case "$ac_cv_header_sys_clkdefs_h$ac_cv_hdr_def_tiocdcdtimestamp" in
   *yes*) ac_cv_var_tty_clk=yes ;;
+  *)     ac_cv_var_tty_clk=no ;;
  esac])
 case "$ac_cv_var_tty_clk" in
  yes) AC_DEFINE(TTYCLK, 1, [Do we have the tty_clk line discipline/streams module?]) ;;
 esac
 
-AC_CACHE_CHECK(for the ppsclock streams module,
+AC_CACHE_CHECK([for the ppsclock streams module],
  ac_cv_var_ppsclock,
  ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev)
 case "$ac_cv_var_ppsclock" in
  yes) AC_DEFINE(PPS, 1, [Do we have the ppsclock streams module?]) ;;
 esac
 
-AC_CACHE_CHECK(for kernel multicast support, ac_cv_var_mcast,
+AC_CACHE_CHECK([for kernel multicast support], ac_cv_var_mcast,
   [ac_cv_var_mcast=no
   case "$host" in
    i386-sequent-sysv4) ;;
@@ -2139,7 +2121,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 # Check for ioctls CIOGETEV
-AC_MSG_CHECKING(ioctl CIOGETEV)
+AC_MSG_CHECKING([ioctl CIOGETEV])
 if test "$ac_cv_header_sys_ppsclock_h" = "yes"; then
     AC_EGREP_CPP(yes,
     [#include <sys/ppsclock.h>
@@ -2192,7 +2174,7 @@ esac
 
 # Check for ioctls TIOCGSERIAL, TIOCSSERIAL, ASYNC_PPS_CD_POS, ASYNC_PPS_CD_NEG
 AC_CHECK_HEADER(linux/serial.h)
-AC_MSG_CHECKING(ioctl TIOCGSERIAL, TIOCSSERIAL, ASYNC_PPS_CD_POS, ASYNC_PPS_CD_NEG)
+AC_MSG_CHECKING([ioctl TIOCGSERIAL, TIOCSSERIAL, ASYNC_PPS_CD_POS, ASYNC_PPS_CD_NEG])
 case "$ac_cv_header_sys_ppsclock_h$ac_cv_header_linux_serial_h" in
   yesyes)
     AC_EGREP_CPP(yes,
@@ -2225,7 +2207,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 # Check for SHMEM_STATUS support
-AC_MSG_CHECKING(SHMEM_STATUS support)
+AC_MSG_CHECKING([SHMEM_STATUS support])
 case "$ac_cv_header_sys_mman_h" in
  yes) ntp_ok=yes ;;
  *)   ntp_ok=no  ;;
@@ -2251,7 +2233,7 @@ dnl AC_SUBST(UNIXCERT)
 ntp_refclock=no
 
 # HPUX only, and by explicit request
-AC_MSG_CHECKING(Datum/Bancomm bc635/VME interface)
+AC_MSG_CHECKING([Datum/Bancomm bc635/VME interface])
 AC_ARG_ENABLE(BANCOMM,
     AC_HELP_STRING([--enable-BANCOMM], [- Datum/Bancomm bc635/VME interface]),
     [ntp_ok=$enableval], [ntp_ok=no])
@@ -2262,11 +2244,11 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$host" in
  yes*-*-hpux*) ;;
- yes*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+ yes*) AC_MSG_WARN([*** But the expected answer is... no ***]) ;;
 esac
 
 #HPUX only, and only by explicit request
-AC_MSG_CHECKING(TrueTime GPS receiver/VME interface)
+AC_MSG_CHECKING([TrueTime GPS receiver/VME interface])
 AC_ARG_ENABLE(GPSVME,
     AC_HELP_STRING([--enable-GPSVME], [- TrueTime GPS receiver/VME interface]),
     [ntp_ok=$enableval], [ntp_ok=no])
@@ -2277,10 +2259,10 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$host" in
  yes*-*-hpux*) ;;
- yes*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+ yes*) AC_MSG_WARN([*** But the expected answer is... no ***]) ;;
 esac
 
-AC_MSG_CHECKING(for PCL720 clock support)
+AC_MSG_CHECKING([for PCL720 clock support])
 case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_i8253_h" in
  yesyesyes)
     AC_DEFINE(CLOCK_PPS720, 1, [PCL 720 clock support])
@@ -2292,14 +2274,14 @@ case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_
 esac
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(for default inclusion of all suitable non-PARSE clocks)
+AC_MSG_CHECKING([for default inclusion of all suitable non-PARSE clocks])
 AC_ARG_ENABLE(all-clocks,
     AC_HELP_STRING([--enable-all-clocks], [+ include all suitable non-PARSE clocks:]),
     [ntp_eac=$enableval], [ntp_eac=yes])
 AC_MSG_RESULT($ntp_eac)
 
 # HMS: Should we also require ac_cv_var_parse_ok?
-AC_MSG_CHECKING(if we have support for PARSE clocks)
+AC_MSG_CHECKING([if we have support for PARSE clocks])
 case "$ac_cv_var_atom_ok$ac_cv_header_termio_h$ac_cv_header_termios_h" in
  yes*yes*)
     ntp_canparse=yes
@@ -2329,7 +2311,7 @@ esac
 AC_MSG_RESULT($ntp_canshm)
 
 # Requires modem control
-AC_MSG_CHECKING(ACTS modem service)
+AC_MSG_CHECKING([ACTS modem service])
 AC_ARG_ENABLE(ACTS,
     AC_HELP_STRING([--enable-ACTS], [s ACTS modem service]),
     [ntp_ok=$enableval],
@@ -2348,7 +2330,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Arbiter 1088A/B GPS receiver)
+AC_MSG_CHECKING([Arbiter 1088A/B GPS receiver])
 AC_ARG_ENABLE(ARBITER,
     AC_HELP_STRING([--enable-ARBITER], [+ Arbiter 1088A/B GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2358,7 +2340,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Arcron MSF receiver)
+AC_MSG_CHECKING([Arcron MSF receiver])
 AC_ARG_ENABLE(ARCRON_MSF,
     AC_HELP_STRING([--enable-ARCRON-MSF], [+ Arcron MSF receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2368,7 +2350,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Austron 2200A/2201A GPS receiver)
+AC_MSG_CHECKING([Austron 2200A/2201A GPS receiver])
 AC_ARG_ENABLE(AS2201,
     AC_HELP_STRING([--enable-AS2201], [+ Austron 2200A/2201A GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2378,7 +2360,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(ATOM PPS interface)
+AC_MSG_CHECKING([ATOM PPS interface])
 AC_ARG_ENABLE(ATOM,	
     AC_HELP_STRING([--enable-ATOM], [s ATOM PPS interface]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2391,7 +2373,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Chrono-log K-series WWVB receiver)
+AC_MSG_CHECKING([Chrono-log K-series WWVB receiver])
 AC_ARG_ENABLE(CHRONOLOG,
     AC_HELP_STRING([--enable-CHRONOLOG], [+ Chrono-log K-series WWVB receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2401,7 +2383,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(CHU modem/decoder)
+AC_MSG_CHECKING([CHU modem/decoder])
 AC_ARG_ENABLE(CHU,
     AC_HELP_STRING([--enable-CHU], [+ CHU modem/decoder]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2412,7 +2394,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 ac_refclock_chu=$ntp_ok
 
-AC_MSG_CHECKING(CHU audio/decoder)
+AC_MSG_CHECKING([CHU audio/decoder])
 AC_ARG_ENABLE(AUDIO-CHU,
     AC_HELP_STRING([--enable-AUDIO-CHU], [s CHU audio/decoder]),
     [ntp_ok=$enableval],
@@ -2426,11 +2408,11 @@ fi
 AC_MSG_RESULT($ntp_ok)
 # We used to check for sunos/solaris target...
 case "$ntp_ok$ac_refclock_chu$ntp_canaudio" in
- yes*no*) AC_MSG_WARN(*** But the expected answer is...no ***) ;;
+ yes*no*) AC_MSG_WARN([*** But the expected answer is...no ***]) ;;
 esac
 
 # Not under HP-UX
-AC_MSG_CHECKING(Datum Programmable Time System)
+AC_MSG_CHECKING([Datum Programmable Time System])
 AC_ARG_ENABLE(DATUM,
     AC_HELP_STRING([--enable-DATUM], [s Datum Programmable Time System]),
     [ntp_ok=$enableval],
@@ -2447,7 +2429,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Dumb generic hh:mm:ss local clock)
+AC_MSG_CHECKING([Dumb generic hh:mm:ss local clock])
 AC_ARG_ENABLE(DUMBCLOCK,
     AC_HELP_STRING([--enable-DUMBCLOCK], [+ Dumb generic hh:mm:ss local clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2457,7 +2439,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Forum Graphic GPS)
+AC_MSG_CHECKING([Forum Graphic GPS])
 AC_ARG_ENABLE(FG,
     AC_HELP_STRING([--enable-FG], [+ Forum Graphic GPS]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2468,7 +2450,7 @@ fi
 AC_MSG_RESULT($ntp_ok)
 
 # Requires modem control
-AC_MSG_CHECKING(Heath GC-1000 WWV/WWVH receiver)
+AC_MSG_CHECKING([Heath GC-1000 WWV/WWVH receiver])
 AC_ARG_ENABLE(HEATH,
     AC_HELP_STRING([--enable-HEATH], [s Heath GC-1000 WWV/WWVH receiver]),
     [ntp_ok=$enableval],
@@ -2487,7 +2469,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for hopf serial clock device)
+AC_MSG_CHECKING([for hopf serial clock device])
 AC_ARG_ENABLE(HOPFSERIAL,
     AC_HELP_STRING([--enable-HOPFSERIAL], [+ hopf serial clock device]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2497,7 +2479,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for hopf PCI clock 6039)
+AC_MSG_CHECKING([for hopf PCI clock 6039])
 AC_ARG_ENABLE(HOPFPCI,
     AC_HELP_STRING([--enable-HOPFPCI], [+ hopf 6039 PCI board]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2507,7 +2489,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(HP 58503A GPS receiver)
+AC_MSG_CHECKING([HP 58503A GPS receiver])
 AC_ARG_ENABLE(HPGPS,
     AC_HELP_STRING([--enable-HPGPS], [+ HP 58503A GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2517,7 +2499,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(IRIG audio decoder)
+AC_MSG_CHECKING([IRIG audio decoder])
 AC_ARG_ENABLE(IRIG,
     AC_HELP_STRING([--enable-IRIG], [s IRIG audio decoder]),
     [ntp_ok=$enableval],
@@ -2531,10 +2513,10 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canaudio" in
- yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+ yesno) AC_MSG_WARN([*** But the expected answer is... no ***]) ;;
 esac
 
-AC_MSG_CHECKING(for JJY receiver)
+AC_MSG_CHECKING([for JJY receiver])
 AC_ARG_ENABLE(JJY,
     AC_HELP_STRING([--enable-JJY], [+ JJY receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2544,7 +2526,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Rockwell Jupiter GPS receiver)
+AC_MSG_CHECKING([Rockwell Jupiter GPS receiver])
 AC_ARG_ENABLE(JUPITER,
     AC_HELP_STRING([--enable-JUPITER], [s Rockwell Jupiter GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2557,7 +2539,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Leitch CSD 5300 Master Clock System Driver)
+AC_MSG_CHECKING([Leitch CSD 5300 Master Clock System Driver])
 AC_ARG_ENABLE(LEITCH,
     AC_HELP_STRING([--enable-LEITCH], [+ Leitch CSD 5300 Master Clock System Driver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2567,7 +2549,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(local clock reference)
+AC_MSG_CHECKING([local clock reference])
 AC_ARG_ENABLE(LOCAL-CLOCK,
     AC_HELP_STRING([--enable-LOCAL-CLOCK], [+ local clock reference]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2589,7 +2571,7 @@ dnl fi
 dnl AC_MSG_RESULT($ntp_ok)
 
 # Not Ultrix
-AC_MSG_CHECKING(Magnavox MX4200 GPS receiver)
+AC_MSG_CHECKING([Magnavox MX4200 GPS receiver])
 AC_ARG_ENABLE(MX4200,
     AC_HELP_STRING([--enable-MX4200 ], [s Magnavox MX4200 GPS receiver]),
     [ntp_ok=$enableval],
@@ -2608,7 +2590,7 @@ case "$ntp_ok$host" in
  yes*-*-ultrix*) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
-AC_MSG_CHECKING(for NeoClock4X receiver)
+AC_MSG_CHECKING([for NeoClock4X receiver])
 AC_ARG_ENABLE(NEOCLOCK4X,
     AC_HELP_STRING([--enable-NEOCLOCK4X], [+ NeoClock4X DCF77 / TDF receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2618,7 +2600,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(NMEA GPS receiver)
+AC_MSG_CHECKING([NMEA GPS receiver])
 AC_ARG_ENABLE(NMEA,
     AC_HELP_STRING([--enable-NMEA], [+ NMEA GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2628,7 +2610,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for ONCORE Motorola VP/UT Oncore GPS)
+AC_MSG_CHECKING([for ONCORE Motorola VP/UT Oncore GPS])
 AC_ARG_ENABLE(ONCORE,
     AC_HELP_STRING([--enable-ONCORE], [s Motorola VP/UT Oncore GPS receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2641,7 +2623,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for Palisade clock)
+AC_MSG_CHECKING([for Palisade clock])
 AC_ARG_ENABLE(PALISADE,
     AC_HELP_STRING([--enable-PALISADE], [s Palisade clock]),
     [ntp_ok=$enableval],
@@ -2659,7 +2641,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Conrad parallel port radio clock)
+AC_MSG_CHECKING([Conrad parallel port radio clock])
 AC_ARG_ENABLE(PCF,
     AC_HELP_STRING([--enable-PCF ], [+ Conrad parallel port radio clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2669,7 +2651,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(PST/Traconex 1020 WWV/WWVH receiver)
+AC_MSG_CHECKING([PST/Traconex 1020 WWV/WWVH receiver])
 AC_ARG_ENABLE(PST,
     AC_HELP_STRING([--enable-PST], [+ PST/Traconex 1020 WWV/WWVH receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2679,7 +2661,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(RIPENCC specific Trimble driver)
+AC_MSG_CHECKING([RIPENCC specific Trimble driver])
 AC_ARG_ENABLE(RIPENCC,
     AC_HELP_STRING([--enable-RIPENCC], [- RIPENCC specific Trimble driver]),
     [ntp_ok=$enableval], [ntp_ok=no])
@@ -2695,7 +2677,7 @@ AC_MSG_RESULT($ntp_ok)
 
 # Danny Meyer says SHM compiles (with a few warnings) under Win32.
 # For *IX, we need sys/ipc.h and sys/shm.h.
-AC_MSG_CHECKING(for SHM clock attached thru shared memory)
+AC_MSG_CHECKING([for SHM clock attached thru shared memory])
 AC_ARG_ENABLE(SHM,
     AC_HELP_STRING([--enable-SHM], [s SHM clock attached thru shared memory]),
     [ntp_ok=$enableval],
@@ -2709,7 +2691,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Spectracom 8170/Netclock/2 WWVB receiver)
+AC_MSG_CHECKING([Spectracom 8170/Netclock/2 WWVB receiver])
 AC_ARG_ENABLE(SPECTRACOM,
     AC_HELP_STRING([--enable-SPECTRACOM], [+ Spectracom 8170/Netclock/2 WWVB receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2719,7 +2701,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(KSI/Odetics TPRO/S GPS receiver/IRIG interface)
+AC_MSG_CHECKING([KSI/Odetics TPRO/S GPS receiver/IRIG interface])
 AC_ARG_ENABLE(TPRO,
     AC_HELP_STRING([--enable-TPRO], [s KSI/Odetics TPRO/S GPS receiver/IRIG interface]),
     [ntp_ok=$enableval],
@@ -2736,7 +2718,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ac_cv_header_sys_tpro" in
- yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+ yesno) AC_MSG_WARN([*** But the expected answer is... no ***]) ;;
 esac
 
 dnl Bug 342: longstanding unfixed bugs
@@ -2751,7 +2733,7 @@ dnl fi
 dnl AC_MSG_RESULT($ntp_ok)
 
 # Not on a vax-dec-bsd
-AC_MSG_CHECKING(Kinemetrics/TrueTime receivers)
+AC_MSG_CHECKING([Kinemetrics/TrueTime receivers])
 AC_ARG_ENABLE(TRUETIME,
     AC_HELP_STRING([--enable-TRUETIME], [s Kinemetrics/TrueTime receivers]),
     [ntp_ok=$enableval],
@@ -2764,16 +2746,17 @@ AC_ARG_ENABLE(TRUETIME,
 	ntp_ok="disabled pps_sample() gone" # delete this line alone
 	;;
     esac])
+    
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
     AC_DEFINE(CLOCK_TRUETIME, 1, [Kinemetrics/TrueTime receivers])
 fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$host" in
- yesvax-dec-bsd) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
+ yesvax-dec-bsd) AC_MSG_WARN([*** But the expected answer is... no ***]) ;;
 esac
 
-AC_MSG_CHECKING(TrueTime 560 IRIG-B decoder)
+AC_MSG_CHECKING([TrueTime 560 IRIG-B decoder])
 AC_ARG_ENABLE(TT560,
     AC_HELP_STRING([--enable-TT560], [- TrueTime 560 IRIG-B decoder]),
     [ntp_ok=$enableval], [ntp_ok=no])
@@ -2783,7 +2766,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(Ultralink M320 WWVB receiver)
+AC_MSG_CHECKING([Ultralink M320 WWVB receiver])
 AC_ARG_ENABLE(ULINK,
     AC_HELP_STRING([--enable-ULINK], [+ Ultralink WWVB receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2793,7 +2776,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(WWV receiver)
+AC_MSG_CHECKING([WWV receiver])
 AC_ARG_ENABLE(WWV,
     AC_HELP_STRING([--enable-WWV], [s WWV Audio receiver]),
     [ntp_ok=$enableval],
@@ -2810,7 +2793,7 @@ case "$ntp_ok$ntp_canaudio" in
  yesno) AC_MSG_WARN(*** But the expected answer is... no ***) ;;
 esac
 
-AC_MSG_CHECKING(for Zyfer receiver)
+AC_MSG_CHECKING([for Zyfer receiver])
 AC_ARG_ENABLE(ZYFER,
     AC_HELP_STRING([--enable-ZYFER], [+ Zyfer GPStarplus receiver]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
@@ -2820,7 +2803,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING(for default inclusion of all suitable PARSE clocks)
+AC_MSG_CHECKING([for default inclusion of all suitable PARSE clocks])
 AC_ARG_ENABLE(parse-clocks,
    AC_HELP_STRING([--enable-parse-clocks], [- include all suitable PARSE clocks:]),
     [ntp_eapc=$enableval],
@@ -2834,10 +2817,10 @@ AC_MSG_RESULT($ntp_eapc)
 
 case "$ntp_eac$ntp_eapc$ntp_canparse" in
  noyes*)
-    AC_MSG_ERROR("--enable-parse-clocks" requires "--enable-all-clocks".)
+    AC_MSG_ERROR(["--enable-parse-clocks" requires "--enable-all-clocks".])
     ;;
  yesyesno)
-    AC_MSG_ERROR(You said "--enable-parse-clocks" but PARSE isn't supported on this platform!)
+    AC_MSG_ERROR([You said "--enable-parse-clocks" but PARSE isn't supported on this platform!])
     ;;
  *) ;;
 esac
@@ -2846,7 +2829,7 @@ ntp_libparse=no
 ntp_parseutil=no
 ntp_rawdcf=no
 
-AC_MSG_CHECKING(Diem Computime Radio Clock)
+AC_MSG_CHECKING([Diem Computime Radio Clock])
 AC_ARG_ENABLE(COMPUTIME,
     AC_HELP_STRING([--enable-COMPUTIME], [s Diem Computime Radio Clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2858,11 +2841,11 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canparse" in
  yesno)
-    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
     ;;
 esac
 
-AC_MSG_CHECKING(ELV/DCF7000 clock)
+AC_MSG_CHECKING([ELV/DCF7000 clock])
 AC_ARG_ENABLE(DCF7000,
     AC_HELP_STRING([--enable-DCF7000], [s ELV/DCF7000 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2874,11 +2857,11 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canparse" in
  yesno)
-    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
     ;;
 esac
 
-AC_MSG_CHECKING(HOPF 6021 clock)
+AC_MSG_CHECKING([HOPF 6021 clock])
 AC_ARG_ENABLE(HOPF6021,
     AC_HELP_STRING([--enable-HOPF6021 ], [s HOPF 6021 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2890,11 +2873,11 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canparse" in
  yesno)
-    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
     ;;
 esac
 
-AC_MSG_CHECKING(Meinberg clocks)
+AC_MSG_CHECKING([Meinberg clocks])
 AC_ARG_ENABLE(MEINBERG,
     AC_HELP_STRING([--enable-MEINBERG], [s Meinberg clocks]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2906,11 +2889,11 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canparse" in
  yesno)
-    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
     ;;
 esac
 
-AC_MSG_CHECKING(DCF77 raw time code)
+AC_MSG_CHECKING([DCF77 raw time code])
 AC_ARG_ENABLE(RAWDCF,
     AC_HELP_STRING([--enable-RAWDCF], [s DCF77 raw time code]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2930,7 +2913,7 @@ esac
 
 case "$ntp_rawdcf" in
  yes)
-    AC_CACHE_CHECK(if we must enable parity for RAWDCF,
+    AC_CACHE_CHECK([if we must enable parity for RAWDCF],
     ac_cv_var_rawdcf_parity,
     [ans=no
     case "$host" in
@@ -2949,7 +2932,7 @@ case "$ntp_rawdcf" in
     ;;
 esac
 
-AC_MSG_CHECKING(RCC 8000 clock)
+AC_MSG_CHECKING([RCC 8000 clock])
 AC_ARG_ENABLE(RCC8000,
     AC_HELP_STRING([--enable-RCC8000], [s RCC 8000 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2965,7 +2948,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-AC_MSG_CHECKING(Schmid DCF77 clock)
+AC_MSG_CHECKING([Schmid DCF77 clock])
 AC_ARG_ENABLE(SCHMID,
     AC_HELP_STRING([--enable-SCHMID ], [s Schmid DCF77 clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2981,7 +2964,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-AC_MSG_CHECKING(Trimble GPS receiver/TAIP protocol)
+AC_MSG_CHECKING([Trimble GPS receiver/TAIP protocol])
 AC_ARG_ENABLE(TRIMTAIP,
     AC_HELP_STRING([--enable-TRIMTAIP], [s Trimble GPS receiver/TAIP protocol]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -2997,7 +2980,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-AC_MSG_CHECKING(Trimble GPS receiver/TSIP protocol)
+AC_MSG_CHECKING([Trimble GPS receiver/TSIP protocol])
 AC_ARG_ENABLE(TRIMTSIP,
     AC_HELP_STRING([--enable-TRIMTSIP], [s Trimble GPS receiver/TSIP protocol]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -3013,7 +2996,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-AC_MSG_CHECKING(WHARTON 400A Series clock)
+AC_MSG_CHECKING([WHARTON 400A Series clock])
 AC_ARG_ENABLE(WHARTON,
     AC_HELP_STRING([--enable-WHARTON], [s WHARTON 400A Series clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -3029,7 +3012,7 @@ case "$ntp_ok$ntp_canparse" in
     ;;
 esac
 
-AC_MSG_CHECKING(VARITEXT clock)
+AC_MSG_CHECKING([VARITEXT clock])
 AC_ARG_ENABLE(VARITEXT,
     AC_HELP_STRING([--enable-VARITEXT], [s VARITEXT clock]),
     [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
@@ -3041,14 +3024,14 @@ fi
 AC_MSG_RESULT($ntp_ok)
 case "$ntp_ok$ntp_canparse" in
  yesno)
-    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
     ;;
 esac
 AC_SUBST(LIBPARSE)
 AC_SUBST(MAKE_LIBPARSE)
 AC_SUBST(MAKE_LIBPARSE_KERNEL)
 AC_SUBST(MAKE_CHECK_Y2K)
-AC_MSG_CHECKING(if we need to make and use the parse libraries)
+AC_MSG_CHECKING([if we need to make and use the parse libraries])
 ans=no
 case "$ntp_libparse" in
  yes)
@@ -3077,7 +3060,7 @@ AC_SUBST(OPENSSL)
 AC_SUBST(OPENSSL_INC)
 AC_SUBST(OPENSSL_LIB)
 
-AC_MSG_CHECKING(for openssl library directory)
+AC_MSG_CHECKING([for openssl library directory])
 AC_ARG_WITH(openssl-libdir,
 	AC_HELP_STRING([--with-openssl-libdir], [+ =/something/reasonable]),
 [ans=$withval],
@@ -3121,7 +3104,7 @@ case "$ans" in
 esac
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(for openssl include directory)
+AC_MSG_CHECKING([for openssl include directory])
 AC_ARG_WITH(openssl-incdir,
 	AC_HELP_STRING([--with-openssl-incdir], [+ =/something/reasonable]),
 [ans=$withval],
@@ -3184,7 +3167,7 @@ esac
 AC_MSG_CHECKING(for the level of crypto support)
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(if we want to compile with ElectricFence)
+AC_MSG_CHECKING([if we want to compile with ElectricFence])
 AC_ARG_WITH(electricfence,
 	AC_HELP_STRING([--with-electricfence], [- compile with ElectricFence malloc debugger]),
 [ans=$withval], [ans=no])
@@ -3202,7 +3185,7 @@ esac
 AC_MSG_RESULT($ans)
 
 AC_SUBST(MAKE_CHECK_LAYOUT)
-AC_MSG_CHECKING(if we want to run check-layout)
+AC_MSG_CHECKING([if we want to run check-layout])
 case "$cross_compiling$PATH_PERL" in
  no/*)
     MAKE_CHECK_LAYOUT=check-layout
@@ -3217,7 +3200,7 @@ AC_MSG_RESULT($ans)
 AC_SUBST(TESTDCF)
 AC_SUBST(DCFD)
 
-AC_MSG_CHECKING(if we can make dcf parse utilities)
+AC_MSG_CHECKING([if we can make dcf parse utilities])
 ans=no
 if test "$ntp_parseutil" = "yes"; then
     case "$host" in
@@ -3231,7 +3214,7 @@ fi
 AC_MSG_RESULT($ans)
 
 AC_SUBST(MAKE_PARSEKMODULE)
-AC_MSG_CHECKING(if we can build kernel streams modules for parse)
+AC_MSG_CHECKING([if we can build kernel streams modules for parse])
 ans=no
 case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
  yesyes)
@@ -3254,7 +3237,7 @@ case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
 esac
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(if we need basic refclock support)
+AC_MSG_CHECKING([if we need basic refclock support])
 if test "$ntp_refclock" = "yes"; then
     AC_DEFINE(REFCLOCK, 1, [Basic refclock support?])
 fi
@@ -3280,7 +3263,7 @@ if test "$ans" = "yes"; then
 fi
 AC_MSG_RESULT($ans)
 
-AC_MSG_CHECKING(if we want QNX adjtime support)
+AC_MSG_CHECKING([if we want QNX adjtime support])
 case "$host" in
  *-*-qnx*)
     ans=yes
@@ -3293,7 +3276,7 @@ if test "$ans" = "yes"; then
 fi
 AC_MSG_RESULT($ans)
 
-AC_CACHE_CHECK(if we can read kmem, ac_cv_var_can_kmem,
+AC_CACHE_CHECK([if we can read kmem], ac_cv_var_can_kmem,
 [AC_ARG_ENABLE(kmem,
    AC_HELP_STRING([--enable-kmem], [s read /dev/kmem for tick and/or tickadj]),
     [ans=$enableval],
@@ -3335,7 +3318,7 @@ case "$ac_cv_var_can_kmem" in
  *) AC_DEFINE(NOKMEM, 1, [Should we NOT read /dev/kmem?]) ;;
 esac
 
-AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
+AC_CACHE_CHECK([if adjtime is accurate], ac_cv_var_adjtime_is_accurate,
 [AC_ARG_ENABLE(accurate-adjtime,
    AC_HELP_STRING([--enable-accurate-adjtime], [s the adjtime() call is accurate]),
     [ans=$enableval],
@@ -3352,7 +3335,7 @@ AC_CACHE_CHECK(if adjtime is accurate, ac_cv_var_adjtime_is_accurate,
       *-fujitsu-uxp*)
 	 ans=yes
 	 ;;
-      *-ibm-aix[[45]]*)
+      *-ibm-aix[[456]]*)
 	 ans=yes
 	 ;;
       *-*-*linux*)
@@ -3389,7 +3372,7 @@ case "$host" in
  *-hp-hpux*)
     ans=old_tick
     ;;
- *-ibm-aix[[345]]*)
+ *-ibm-aix[[3456]]*)
     ans=no
     ;;
  *-*-mpeix*)
@@ -3596,7 +3579,7 @@ dnl				    (RS6000 && !NOKMEM), SINIX MIPS
 
 dnl But we'll only use these "values" if we can't find anything else.
 
-AC_CACHE_CHECK(for a default value for 'tick', ac_cv_var_tick,
+AC_CACHE_CHECK([for a default value for 'tick'], ac_cv_var_tick,
 [AC_ARG_ENABLE(tick,
   AC_HELP_STRING([--enable-tick=VALUE], [s force a value for 'tick']),
     [ans=$enableval],
@@ -3632,7 +3615,7 @@ case "$ac_cv_var_tick" in
  *) AC_DEFINE_UNQUOTED(PRESET_TICK, $ac_cv_var_tick, [Preset a value for 'tick'?]) ;;
 esac
 
-AC_CACHE_CHECK(for a default value for 'tickadj', ac_cv_var_tickadj,
+AC_CACHE_CHECK([for a default value for 'tickadj'], ac_cv_var_tickadj,
 [AC_ARG_ENABLE(tickadj,
   AC_HELP_STRING([--enable-tickadj=VALUE], [s force a value for 'tickadj']),
   [ans=$enableval],
@@ -3708,15 +3691,15 @@ esac
 ac_cv_make_tickadj=yes
 case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
  nonono)	# Don't read KMEM, no presets.  Bogus.
-    AC_MSG_WARN(Can't read kmem, no PRESET_TICK or PRESET_TICKADJ.  No tickadj.)
+    AC_MSG_WARN([Can't read kmem, no PRESET_TICK or PRESET_TICKADJ.  No tickadj.])
     ac_cv_make_tickadj=no
     ;;
  nono*)		# Don't read KMEM, no PRESET_TICK but PRESET_TICKADJ.  Bogus.
-    AC_MSG_WARN(Can't read kmem but no PRESET_TICK.  No tickadj.)
+    AC_MSG_WARN([Can't read kmem but no PRESET_TICK.  No tickadj.])
     ac_cv_make_tickadj=no
     ;;
  no*no)		# Don't read KMEM, PRESET_TICK but no PRESET_TICKADJ.  Bogus.
-    AC_MSG_WARN(Can't read kmem but no PRESET_TICKADJ.  No tickadj.)
+    AC_MSG_WARN([Can't read kmem but no PRESET_TICKADJ.  No tickadj.])
     ac_cv_make_tickadj=no
     ;;
  no*)		# Don't read KMEM, PRESET_TICK and PRESET_TICKADJ.  Cool.
@@ -3724,19 +3707,19 @@ case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
  yesnono)	# Read KMEM, no presets.  Cool.
     ;;
  yesno*)	# Read KMEM, no PRESET_TICK but PRESET_TICKADJ.  Bogus.
-    AC_MSG_WARN(PRESET_TICKADJ is defined but not PRESET_TICK.  Please report this.)
+    AC_MSG_WARN([PRESET_TICKADJ is defined but not PRESET_TICK.  Please report this.])
     ;;
  yes*no)	# Read KMEM, PRESET_TICK but no PRESET_TICKADJ.  Cool.
     ;;
  yes*)		# READ KMEM, PRESET_TICK and PRESET_TICKADJ.
     ;;
  *)		# Generally bogus.
-    AC_MSG_ERROR(This shouldn't happen.)
+    AC_MSG_ERROR([This shouldn't happen.])
     ;;
 esac
 
 AC_SUBST(MAKE_NTPTIME)
-AC_CACHE_CHECK(if we want and can make the ntptime utility, ac_cv_make_ntptime,
+AC_CACHE_CHECK([if we want and can make the ntptime utility], ac_cv_make_ntptime,
 [case "$host" in
  *) case "$ac_cv_struct_ntptimeval$ac_cv_var_kernel_pll" in
      yesyes)
@@ -3779,7 +3762,17 @@ case "$host" in
     ac_cv_make_tickadj=no
     ;;
 esac
-AC_CACHE_CHECK(if we want and can make the tickadj utility, ac_cv_make_tickadj,
+
+#
+# Despite all the above, we always make tickadj.  Setting
+# ac_cv_make_tickadj before AC_CACHE_CHECK will cause a false
+# report that the configuration variable was cached.  It may
+# be better to simply remove the hunk above, I did not want
+# to remove it if there is hope it will be used again.
+#
+unset ac_cv_make_tickadj
+
+AC_CACHE_CHECK([if we want and can make the tickadj utility], ac_cv_make_tickadj,
 ac_cv_make_tickadj=yes)
 case "$ac_cv_make_tickadj" in
  yes)
@@ -3788,7 +3781,7 @@ case "$ac_cv_make_tickadj" in
 esac
 
 AC_SUBST(MAKE_TIMETRIM)
-AC_CACHE_CHECK(if we want and can make the timetrim utility, ac_cv_make_timetrim,
+AC_CACHE_CHECK([if we want and can make the timetrim utility], ac_cv_make_timetrim,
 [case "$host" in
  *-*-irix*)
     ac_cv_make_timetrim=yes
@@ -3831,7 +3824,8 @@ case "$build" in
     ;;
 esac
 
-AC_MSG_CHECKING(if we want to build ntpsnmpd)
+
+AC_MSG_CHECKING([if we want to build ntpsnmpd])
 AC_ARG_WITH(ntpsnmpd,
 	AC_HELP_STRING([--with-ntpsnmpd], [s Build the ntpsnmpd code?]),
 	[ans=$withval],
@@ -3892,7 +3886,8 @@ case "$ans" in
 esac
 AC_SUBST(MAKE_NTPSNMPD)
 
-AC_CACHE_CHECK(if we should always slew the time, ac_cv_var_slew_always,
+
+AC_CACHE_CHECK([if we should always slew the time], ac_cv_var_slew_always,
 [AC_ARG_ENABLE(slew-always,
    AC_HELP_STRING([--enable-slew-always], [s always slew the time]),
     [ans=$enableval],
@@ -3918,7 +3913,7 @@ case "$ac_cv_var_slew_always" in
  yes) AC_DEFINE(SLEWALWAYS, 1, [Slew always?]) ;;
 esac
 
-AC_CACHE_CHECK(if we should step and slew the time, ac_cv_var_step_slew,
+AC_CACHE_CHECK([if we should step and slew the time], ac_cv_var_step_slew,
 [AC_ARG_ENABLE(step-slew,
    AC_HELP_STRING([--enable-step-slew], [s step and slew the time]),
     [ans=$enableval],
@@ -3950,7 +3945,7 @@ case "$ac_cv_var_step_slew" in
  yes) AC_DEFINE(STEP_SLEW, 1, [Step, then slew the clock?]) ;;
 esac
 
-AC_CACHE_CHECK(if ntpdate should step the time, ac_cv_var_ntpdate_step,
+AC_CACHE_CHECK([if ntpdate should step the time], ac_cv_var_ntpdate_step,
 [AC_ARG_ENABLE(ntpdate-step,
    AC_HELP_STRING([--enable-ntpdate-step], [s if ntpdate should step the time]),
     [ans=$enableval],
@@ -3967,7 +3962,7 @@ case "$ac_cv_var_ntpdate_step" in
  yes) AC_DEFINE(FORCE_NTPDATE_STEP, 1, [force ntpdate to step the clock if !defined(STEP_SLEW) ?]) ;;
 esac
 
-AC_CACHE_CHECK(if we should sync TODR clock every hour, ac_cv_var_sync_todr,
+AC_CACHE_CHECK([if we should sync TODR clock every hour], ac_cv_var_sync_todr,
 [AC_ARG_ENABLE(hourly-todr-sync,
    AC_HELP_STRING([--enable-hourly-todr-sync],
 		  [s if we should sync TODR hourly]),
@@ -3987,7 +3982,7 @@ case "$ac_cv_var_sync_todr" in
  yes) AC_DEFINE(DOSYNCTODR, 1, [synch TODR hourly?]) ;;
 esac
 
-AC_CACHE_CHECK(if we should avoid kernel FLL bug, ac_cv_var_kernel_fll_bug,
+AC_CACHE_CHECK([if we should avoid kernel FLL bug], ac_cv_var_kernel_fll_bug,
 [AC_ARG_ENABLE(kernel-fll-bug,
    AC_HELP_STRING([--enable-kernel-fll-bug],
 		  [s if we should avoid a kernel FLL bug]),
@@ -4042,7 +4037,7 @@ case "$ac_cv_var_kernel_fll_bug" in
  yes) AC_DEFINE(KERNEL_FLL_BUG, 1, [Does the kernel have an FLL bug?]) ;;
 esac
 
-AC_CACHE_CHECK(if we should use the IRIG sawtooth filter, ac_cv_var_irig_sucks,
+AC_CACHE_CHECK([if we should use the IRIG sawtooth filter], ac_cv_var_irig_sucks,
 [AC_ARG_ENABLE(irig-sawtooth, 
 	AC_HELP_STRING([--enable-irig-sawtooth],
 		       [s if we should enable the IRIG sawtooth filter]),
@@ -4063,7 +4058,7 @@ case "$ac_cv_var_irig_sucks" in
  yes) AC_DEFINE(IRIG_SUCKS, 1, [Should we use the IRIG sawtooth filter?]) ;;
 esac
 
-AC_CACHE_CHECK(if we should enable NIST lockclock scheme, ac_cv_var_nist_lockclock,
+AC_CACHE_CHECK([if we should enable NIST lockclock scheme], ac_cv_var_nist_lockclock,
 [AC_ARG_ENABLE(nist, 
 	AC_HELP_STRING([--enable-nist],
 		       [- if we should enable the NIST lockclock scheme]),
@@ -4072,6 +4067,90 @@ ac_cv_var_nist_lockclock=$ans])
 case "$ac_cv_var_nist_lockclock" in
  yes) AC_DEFINE(LOCKCLOCK, 1, [Should we align with the NIST lockclock scheme?]) ;;
 esac
+
+AC_CACHE_CHECK([if we want the windows symmetric client hack], ac_cv_wintime,
+[AC_ARG_ENABLE(wintime,
+   AC_HELP_STRING([--enable-wintime], [- Provide the windows symmetric client hack]),
+    [ans=$enableval],
+    [ans=no])
+ac_cv_wintime=$ans])
+# End of AC_CACHE_CHECK for wintime
+case "$ac_cv_wintime" in
+ yes)
+    AC_DEFINE(WINTIME, ,[Do we want the windows symmetric client hack?])
+    ;;
+esac
+
+AC_CACHE_CHECK([if we want support for Samba's signing daemon], ac_cv_ntp_signd,
+[AC_ARG_ENABLE(ntp-signd,
+   AC_HELP_STRING([--enable-ntp-signd], [- Provide support for Samba's signing daemon, =/var/run/ntp_signd]),
+    [ans=$enableval],
+    [ans=no])
+ac_cv_ntp_signd=$ans])
+# End of AC_CACHE_CHECK for ntp_signd
+
+case "$ac_cv_ntp_signd" in
+	no)
+		;;
+	yes)
+		ntp_signd_path=/var/run/ntp_signd
+		;;
+	*)
+		ntp_signd_path="$ac_cv_ntp_signd"
+		;;
+esac
+
+case "$ac_cv_ntp_signd" in
+ yes)
+    AC_DEFINE(HAVE_NTP_SIGND, ,[Do we want support for Samba's signing daemon?])
+    AC_DEFINE_UNQUOTED(NTP_SIGND_PATH, "$ntp_signd_path", [Path to sign daemon rendezvous socket])
+    ;;
+esac
+
+AC_CACHE_CHECK([if we should use /dev/clockctl], ac_cv_clockctl,
+[AC_ARG_ENABLE(clockctl,
+   AC_HELP_STRING([--enable-clockctl], [s Use /dev/clockctl for non-root clock control]),
+    [ans=$enableval],
+    [case "$host" in
+      *-*-netbsd*)
+	 ans=yes
+	 ;;
+      *) ans=no
+	 ;;
+     esac
+     ])
+ac_cv_clockctl=$ans])
+# End of AC_CACHE_CHECK for clockctl
+AC_CHECK_HEADERS(sys/clockctl.h)
+case "$ac_cv_clockctl$ac_cv_header_sys_clockctl_h" in
+ yesyes)
+    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
+    ;;
+esac
+
+AC_CACHE_CHECK([if we have linux capabilities (libcap)], ac_cv_linuxcaps,
+[AC_ARG_ENABLE(linuxcaps,
+   AC_HELP_STRING([--enable-linuxcaps], [s Use Linux capabilities for non-root clock control]),
+    [ans=$enableval],
+    [ans=no])
+ac_cv_linuxcaps=$ans])
+# End of AC_CACHE_CHECK for linuxcaps
+AC_CHECK_HEADERS(sys/capability.h)
+AC_CHECK_HEADERS(sys/prctl.h)
+case "$ac_cv_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
+ yesyesyes)
+    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
+    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
+    LIBS="$LIBS -lcap"
+    ;;
+esac
+AC_CHECK_HEADERS(libscf.h)
+case "$ac_cv_header_libscf_h" in
+ yes)
+    AC_SUBST(LSCF, [-lscf])
+    ;;
+esac
+AC_CHECK_FUNC(setppriv,AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[Are Solaris privileges available?]), )
 
 #
 # ISC stuff
@@ -4088,7 +4167,7 @@ case "$enable_ipv6" in
     case "$host" in
      powerpc-ibm-aix4*) ;;
      *)
-	AC_DEFINE(WANT_IPV6, ,[ISC: Want IPv6?])
+	AC_DEFINE(WANT_IPV6, ,[configure --enable-ipv6])
 	;;
     esac
     ;;
@@ -4096,55 +4175,68 @@ case "$enable_ipv6" in
     ;;
 esac
 
-AC_MSG_CHECKING(for IPv6 structures)
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>],
-[struct sockaddr_in6 sin6; return (0);],
-	[AC_MSG_RESULT(yes)
-	 found_ipv6=yes],
-	[AC_MSG_RESULT(no)
-	 found_ipv6=no])
+
+AC_CACHE_CHECK(
+    [for IPv6 structures],
+    ac_cv_isc_found_ipv6,
+    [
+	AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <sys/socket.h>
+			#include <netinet/in.h>
+		    ],
+		    [
+			struct sockaddr_in6 sin6;
+		    ]
+		)
+	    ],
+	    [ac_cv_isc_found_ipv6=yes],
+	    [ac_cv_isc_found_ipv6=no]
+	)
+    ]
+)
 
 #
 # See whether IPv6 support is provided via a Kame add-on.
 # This is done before other IPv6 linking tests so LIBS is properly set.
 #
-AC_MSG_CHECKING(for Kame IPv6 support)
+AC_MSG_CHECKING([for Kame IPv6 support])
 AC_ARG_WITH(kame,
-	AC_HELP_STRING([--with-kame], [- =/usr/local/v6]),
+	[AC_HELP_STRING([--with-kame], [- =/usr/local/v6])],
 	use_kame="$withval", use_kame="no")
 
 
 case "$use_kame" in
-	no)
-		;;
-	yes)
-		kame_path=/usr/local/v6
-		;;
-	*)
-		kame_path="$use_kame"
-		;;
+ no)
+    ;;
+ yes)
+    kame_path=/usr/local/v6
+    ;;
+ *)
+    kame_path="$use_kame"
+    ;;
 esac
 
 case "$use_kame" in
-	no)
-		AC_MSG_RESULT(no)
-		;;
-	*)
-		if test -f $kame_path/lib/libinet6.a; then
-			AC_MSG_RESULT($kame_path/lib/libinet6.a)
-			LIBS="-L$kame_path/lib -linet6 $LIBS"
-		else
-			AC_MSG_ERROR([$kame_path/lib/libinet6.a not found.
+ no)
+    AC_MSG_RESULT(no)
+    ;;
+ *)
+    if test -f $kame_path/lib/libinet6.a; then
+	AC_MSG_RESULT($kame_path/lib/libinet6.a)
+	LIBS="-L$kame_path/lib -linet6 $LIBS"
+    else
+	AC_MSG_ERROR([$kame_path/lib/libinet6.a not found.
 
 Please choose the proper path with the following command:
 
     configure --with-kame=PATH
 ])
-		fi
-		;;
+    fi
+    ;;
 esac
 
 #
@@ -4156,139 +4248,210 @@ esac
 # netinet6/in6.h is needed for.
 #
 case "$host" in
-*-bsdi4.[[01]]*)
-	ISC_PLATFORM_NEEDNETINET6IN6H="#define ISC_PLATFORM_NEEDNETINET6IN6H 1"
-	LWRES_PLATFORM_NEEDNETINET6IN6H="#define LWRES_PLATFORM_NEEDNETINET6IN6H 1"
-	isc_netinet6in6_hack="#include <netinet6/in6.h>"
-	;;
-*)
-	ISC_PLATFORM_NEEDNETINET6IN6H="#undef ISC_PLATFORM_NEEDNETINET6IN6H"
-	LWRES_PLATFORM_NEEDNETINET6IN6H="#undef LWRES_PLATFORM_NEEDNETINET6IN6H"
-	isc_netinet6in6_hack=""
-	;;
+ *-bsdi4.[[01]]*)
+    AC_DEFINE(ISC_PLATFORM_NEEDNETINET6IN6H, 1, [Do we need netinet6/in6.h?])
+    isc_netinet6in6_hack="#include <netinet6/in6.h>"
+    ;;
+ *)
+    isc_netinet6in6_hack=""
 esac
 
 #
 # This is similar to the netinet6/in6.h issue.
 #
 case "$host" in
-*-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
-        # UnixWare
-	# ISC_PLATFORM_NEEDNETINETIN6H="#define ISC_PLATFORM_NEEDNETINETIN6H 1"
-	# LWRES_PLATFORM_NEEDNETINETIN6H="#define LWRES_PLATFORM_NEEDNETINETIN6H 1"
-	AC_DEFINE(ISC_PLATFORM_FIXIN6ISADDR, 1,[Do we need to fix in6isaddr?])
-	isc_netinetin6_hack="#include <netinet/in6.h>"
-	;;
-*)
-	# ISC_PLATFORM_NEEDNETINETIN6H="#undef ISC_PLATFORM_NEEDNETINETIN6H"
-	# LWRES_PLATFORM_NEEDNETINETIN6H="#undef LWRES_PLATFORM_NEEDNETINETIN6H"
-        # ISC_PLATFORM_FIXIN6ISADDR="#undef ISC_PLATFORM_FIXIN6ISADDR"
-	isc_netinetin6_hack=""
-	;;
+ *-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
+    AC_DEFINE(ISC_PLATFORM_FIXIN6ISADDR, 1,[Do we need to fix in6isaddr?])
+    isc_netinetin6_hack="#include <netinet/in6.h>"
+    ;;
+ *)
+    isc_netinetin6_hack=""
 esac
 
 
-AC_MSG_CHECKING([for struct if_laddrconf])
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <net/if6.h>
-],[ struct if_laddrconf a; ],
-	[AC_MSG_RESULT(yes)
-	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, ,
-		[ISC: have struct if_laddrconf?])],
-	[AC_MSG_RESULT(no)])
-
-AC_MSG_CHECKING([for struct if_laddrreq])
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <net/if6.h>
-],[ struct if_laddrreq a; ],
-	[AC_MSG_RESULT(yes)
-	 AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, ,
-		[ISC: have struct if_laddrreq?])],
-	[AC_MSG_RESULT(no)])
-
-case "$found_ipv6" in
+case "$ac_cv_isc_found_ipv6" in
  yes)
-    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[ISC: Have IPv6?])
+    AC_DEFINE(ISC_PLATFORM_HAVEIPV6, ,[have IPv6?])
 
-    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id], , ,
-[
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-$isc_netinetin6_hack
-$isc_netinet6in6_hack
-])
+    AC_CACHE_CHECK(
+	[for in6_pktinfo],
+	ac_cv_have_in6_pktinfo,
+	[
+	    AC_COMPILE_IFELSE(
+		[
+		    AC_LANG_PROGRAM(
+			[
+			    #include <sys/types.h>
+			    #include <sys/socket.h>
+			    #include <netinet/in.h>
+			    $isc_netinetin6_hack
+			    $isc_netinet6in6_hack
+			],
+			[
+			    struct in6_pktinfo xyzzy;
+			]
+		    )
+		],
+		[ac_cv_have_in6_pktinfo=yes],
+		[ac_cv_have_in6_pktinfo=no]
+	    )
+	]
+    )
 
-    AC_MSG_CHECKING(for in6_pktinfo)
-    AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-$isc_netinetin6_hack
-$isc_netinet6in6_hack
-],
-	[struct in6_pktinfo xyzzy; return (0);],
-	[AC_MSG_RESULT(yes)
-	 AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, ,
-		[ISC: Have struct in6_pktinfo?])],
-	[AC_MSG_RESULT(no -- disabling runtime ipv6 support)])
+    case "$ac_cv_have_in6_pktinfo" in
+     yes)
+	AC_DEFINE(ISC_PLATFORM_HAVEIN6PKTINFO, , [have struct in6_pktinfo?])
+    esac
+
 
     # HMS: Use HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID instead?
-    AC_MSG_CHECKING(for sin6_scope_id in struct sockaddr_in6)
-    AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-$isc_netinetin6_hack
-$isc_netinet6in6_hack
-],
-	[struct sockaddr_in6 xyzzy; xyzzy.sin6_scope_id = 0; return (0);],
-	[AC_MSG_RESULT(yes)
-	 AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, ,
-		[ISC: Have sin6_scope_id?])],
-	 result="#define LWRES_HAVE_SIN6_SCOPE_ID 1"],
-	[AC_MSG_RESULT(no)
-	 ISC_PLATFORM_HAVESCOPEID="#undef ISC_PLATFORM_HAVESCOPEID"
-	 result="#undef LWRES_HAVE_SIN6_SCOPE_ID"])
-    LWRES_HAVE_SIN6_SCOPE_ID="$result"
+    AC_CACHE_CHECK(
+	[for sockaddr_in6.sin6_scope_id],
+	ac_cv_have_sin6_scope_id,
+	[
+	    AC_COMPILE_IFELSE(
+		[
+		    AC_LANG_PROGRAM(
+			[
+			    #include <sys/types.h>
+			    #include <sys/socket.h>
+			    #include <netinet/in.h>
+			    $isc_netinetin6_hack
+			    $isc_netinet6in6_hack
+			],
+			[
+			    struct sockaddr_in6 xyzzy;
+			    xyzzy.sin6_scope_id = 0;
+			]
+		    )
+		],
+		[ac_cv_have_sin6_scope_id=yes],
+		[ac_cv_have_sin6_scope_id=no]
+	    )
+	]
+    )
 
-    ;;
+    case "$ac_cv_have_sin6_scope_id" in
+     yes)
+	AC_DEFINE(ISC_PLATFORM_HAVESCOPEID, , [have sin6_scope_id?])
+    esac
 esac
 
-# We need this check run all the time...
-AC_MSG_CHECKING(for in6addr_any)
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-$isc_netinetin6_hack
-$isc_netinet6in6_hack
-$isc_in_addr6_hack
-],
-	[[struct in6_addr in6; in6 = in6addr_any; return (in6.s6_addr[0]);]],
-	[AC_MSG_RESULT(yes)],
-	[AC_MSG_RESULT(no)
-	 AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, ,
-		[ISC: Need in6addr_any?])]
+
+# We need this check run even without ac_cv_isc_found_ipv6=yes
+
+AC_CACHE_CHECK(
+    [for in6addr_any],
+    ac_cv_have_in6addr_any,
+    [
+	AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <sys/socket.h>
+			#include <netinet/in.h>
+			$isc_netinetin6_hack
+			$isc_netinet6in6_hack
+		    ],
+		    [
+			struct in6_addr in6; 
+			in6 = in6addr_any;
+		    ]
+		)
+	    ],
+	    [ac_cv_have_in6addr_any=yes],
+	    [ac_cv_have_in6addr_any=no]
+	)
+    ]
 )
+
+case "$ac_cv_have_in6addr_any" in
+ no)
+    AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, , [missing in6addr_any?])
+esac
+
+
+AC_CACHE_CHECK(
+    [for struct if_laddrconf],
+    ac_cv_isc_struct_if_laddrconf,
+    [
+        AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <net/if6.h>
+		    ],
+		    [
+			struct if_laddrconf a;
+		    ]
+		)
+	    ],
+	    [ac_cv_isc_struct_if_laddrconf=yes],
+	    [ac_cv_isc_struct_if_laddrconf=no]
+	)
+    ]
+)
+
+case "$ac_cv_isc_struct_if_laddrconf" in
+ yes)
+    AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRCONF, , [have struct if_laddrconf?])
+esac
+
+AC_CACHE_CHECK(
+    [for struct if_laddrreq],
+    ac_cv_isc_struct_if_laddrreq,
+    [
+        AC_COMPILE_IFELSE(
+	    [
+		AC_LANG_PROGRAM(
+		    [
+			#include <sys/types.h>
+			#include <net/if6.h>
+		    ],
+		    [
+			struct if_laddrreq a;
+		    ]
+		)
+	    ],
+	    [ac_cv_isc_struct_if_laddrreq=yes],
+	    [ac_cv_isc_struct_if_laddrreq=no]
+	)
+    ]
+)
+
+case "$ac_cv_isc_struct_if_laddrreq" in
+ yes)
+    AC_DEFINE(ISC_PLATFORM_HAVEIF_LADDRREQ, , [have struct if_laddrreq?])
+esac
 
 #
 # Look for a sysctl call to get the list of network interfaces.
 #
-AC_MSG_CHECKING(for interface list sysctl)
-AC_EGREP_CPP(found_rt_iflist, [
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <sys/socket.h>
-#ifdef NET_RT_IFLIST  
-found_rt_iflist
-#endif
-],
-        [AC_MSG_RESULT(yes)
-         AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[ISC: Use iflist_sysctl?])],
-        [AC_MSG_RESULT(no)])
+AC_CACHE_CHECK(
+    [for interface list sysctl],
+    ac_cv_iflist_sysctl,
+    AC_EGREP_CPP(
+	[found_rt_iflist], 
+	[
+	    #include <sys/param.h>
+	    #include <sys/sysctl.h>
+	    #include <sys/socket.h>
+	    #ifdef NET_RT_IFLIST  
+	    found_rt_iflist
+	    #endif
+	],
+	[ac_cv_iflist_sysctl=yes],
+	[ac_cv_iflist_sysctl=no]
+    )
+)
+
+case "$ac_cv_iflist_sysctl" in
+ yes)
+    AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[have iflist_sysctl?])
+esac
+
 
 ###
 
