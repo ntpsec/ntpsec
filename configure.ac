@@ -3802,7 +3802,7 @@ esac
 # be better to simply remove the hunk above, I did not want
 # to remove it if there is hope it will be used again.
 #
-ac_cv_make_tickadj=
+unset ac_cv_make_tickadj
 
 AC_CACHE_CHECK([if we want and can make the tickadj utility], ac_cv_make_tickadj,
 ac_cv_make_tickadj=yes)
