@@ -43,6 +43,17 @@ case "$ac_cv_cpp_warning" in
     ;;
 esac
 
+AC_C_INLINE
+
+case "$ac_cv_c_inline" in
+ '')
+    ;;
+ *)
+    AC_DEFINE(HAVE_INLINE,1,[inline keyword or macro available])
+    AC_SUBST(HAVE_INLINE)
+esac
+
+
 # Checks for libraries.
 
 # Checks for header files.

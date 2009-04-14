@@ -222,6 +222,10 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+
+* [Bug 1158] support for aix6.1
+* [Bug 1157] quiet OpenSSL warnings, clean up configure.ac
 
 ---
 (4.2.4p7-RC2) 2009/04/09 Released by Harlan Stenn <stenn@ntp.org>
