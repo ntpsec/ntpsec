@@ -90,14 +90,13 @@ AC_PROG_LIBTOOL
 # Checks for libraries.
 
 AC_CHECK_FUNC(gethostent, ,
-	[AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket)])
+	[AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket])])
 AC_CHECK_FUNC(openlog, , 
-	[AC_CHECK_LIB(gen, openlog, , 
-		[AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)])])
+	[AC_SEARCH_LIBS([openlog], [gen], , 
+		[AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])])])
 
 AC_CHECK_FUNC(setsockopt, ,
-	[AC_CHECK_LIB(socket, setsockopt)
-	 AC_CHECK_LIB(xnet, setsockopt)])
+	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
 
 # Checks for header files.
 AC_HEADER_STDC
