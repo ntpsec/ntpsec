@@ -160,7 +160,7 @@ AC_MSG_CHECKING([if we want to use arlib])
 AC_ARG_WITH(arlib,
 	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
 	[ans=$withval], [ans=no])
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 if test -d $srcdir/arlib
 then
@@ -1702,7 +1702,7 @@ case "$ac_cv_func_clock_settime$ac_cv_func_settimeofday$ac_cv_func_stime" in
     ;;
 esac
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 case "$ntp_warning" in
  '') ;;
  *) AC_MSG_WARN([*** $ntp_warning ***])
@@ -1988,7 +1988,7 @@ AC_ARG_ENABLE(dst_minutes,
    AC_HELP_STRING([--enable-dst-minutes=60], [+ minutes per DST adjustment]),
     [ans=$enableval], [ans=60])
 AC_DEFINE_UNQUOTED(DSTMINUTES, $ans, [The number of minutes in a DST adjustment])
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_CACHE_CHECK([if we have the tty_clk line discipline/streams module],
  ac_cv_var_tty_clk,
@@ -2108,6 +2108,7 @@ case "$ac_cv_var_size_returned_in_buffer" in
  yes) AC_DEFINE(SIZE_RETURNED_IN_BUFFER, 1, [Does SIOCGIFCONF return size in the buffer?]) ;;
 esac
 
+dnl    vvvvv-- this is wrong, if you re-enable the switch do not cache the result
 dnl AC_CACHE_CHECK(if we want GDT surveying code, ac_cv_var_gdt_surveying,
 dnl [AC_ARG_ENABLE(gdt-surveying,	[  --enable-gdt-surveying   - include GDT survey code],
 dnl     [ans=$enableval], [ans=no])
@@ -2304,7 +2305,7 @@ case "$ac_cv_header_machine_inline_h$ac_cv_header_sys_pcl720_h$ac_cv_header_sys_
     ans=no
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([for default inclusion of all suitable non-PARSE clocks])
 AC_ARG_ENABLE(all-clocks,
@@ -3076,7 +3077,7 @@ case "$ntp_libparse" in
     AC_DEFINE(CLOCK_ATOM)
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 # AC_SUBST(RSAOBJS)
 # AC_SUBST(RSASRCS)
@@ -3131,7 +3132,7 @@ case "$ans" in
     esac
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([for openssl include directory])
 AC_ARG_WITH(openssl-incdir,
@@ -3167,7 +3168,7 @@ case "$ans" in
     esac
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_ARG_WITH(crypto,
 	AC_HELP_STRING([--with-crypto], [+ =openssl]),
@@ -3194,7 +3195,7 @@ case "$ans" in
     ;;
 esac
 AC_MSG_CHECKING(for the level of crypto support)
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we want to compile with ElectricFence])
 AC_ARG_WITH(electricfence,
@@ -3211,7 +3212,7 @@ case "$ans" in
     ans=yes
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_SUBST(MAKE_CHECK_LAYOUT)
 AC_MSG_CHECKING([if we want to run check-layout])
@@ -3224,7 +3225,7 @@ case "$cross_compiling$PATH_PERL" in
     ans=no
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_SUBST(TESTDCF)
 AC_SUBST(DCFD)
@@ -3240,7 +3241,7 @@ if test "$ntp_parseutil" = "yes"; then
 	;;
     esac
 fi
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_SUBST(MAKE_PARSEKMODULE)
 AC_MSG_CHECKING([if we can build kernel streams modules for parse])
@@ -3264,7 +3265,7 @@ case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
     esac
     ;;
 esac
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we need basic refclock support])
 if test "$ntp_refclock" = "yes"; then
@@ -3290,7 +3291,7 @@ if test "$ans" = "yes"; then
     MAKE_ADJTIMED=adjtimed
     AC_DEFINE(NEED_HPUX_ADJTIME, 1, [Do we need HPUX adjtime() library support?])
 fi
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we want QNX adjtime support])
 case "$host" in
@@ -3303,89 +3304,116 @@ esac
 if test "$ans" = "yes"; then
     AC_DEFINE(NEED_QNX_ADJTIME, 1, [Do we need the qnx adjtime call?])
 fi
-AC_MSG_RESULT($ans)
+AC_MSG_RESULT([$ans])
 
-AC_CACHE_CHECK([if we can read kmem], ac_cv_var_can_kmem,
-[AC_ARG_ENABLE(kmem,
-   AC_HELP_STRING([--enable-kmem], [s read /dev/kmem for tick and/or tickadj]),
-    [ans=$enableval],
-    [case "$ac_cv_func_nlist$ac_cv_func_K_open$ac_cv_func_kvm_open" in
-     *yes*)
-	ans=yes
-	;;
-     *) ans=no
-	;;
-    esac
-    case "$host" in
-     *-*-aix*)
-	#ans=no
-	;;
-     *-*-domainos)	# Won't be found...
-	ans=no
-	;;
-     *-*-hpux*)
-	#ans=no
-	;;
-     *-*-irix[[456]]*)
-	ans=no
-	;;
-     *-*-*linux*)
-	ans=no
-	;;
-     *-*-winnt3.5)
-	ans=no
-	;;
-     *-*-unicosmp*)
-	ans=no
-	;;
-    esac
-    ])
-ac_cv_var_can_kmem=$ans])
+AC_MSG_CHECKING([if we can read kmem])
 
-case "$ac_cv_var_can_kmem" in
- *yes*) ;;
- *) AC_DEFINE(NOKMEM, 1, [Should we NOT read /dev/kmem?]) ;;
+#  the default is to enable it if the system has the capability
+
+case "$ac_cv_func_nlist$ac_cv_func_K_open$ac_cv_func_kvm_open" in
+ *yes*)
+    ans=yes
+    ;;
+ *) ans=no
 esac
 
-AC_CACHE_CHECK([if adjtime is accurate], ac_cv_var_adjtime_is_accurate,
-[AC_ARG_ENABLE(accurate-adjtime,
-   AC_HELP_STRING([--enable-accurate-adjtime], [s the adjtime() call is accurate]),
+case "$host" in
+ *-*-domainos)	# Won't be found...
+    ans=no
+    ;;
+ *-*-hpux*)
+    #ans=no
+    ;;
+ *-*-irix[[456]]*)
+    ans=no
+    ;;
+ *-*-*linux*)
+    ans=no
+    ;;
+ *-*-winnt3.5)
+    ans=no
+    ;;
+ *-*-unicosmp*)
+    ans=no
+    ;;
+esac
+
+# --enable-kmem / --disable-kmem controls if present
+AC_ARG_ENABLE(
+    [kmem],
+    AC_HELP_STRING(
+	[--enable-kmem],
+	[s read /dev/kmem for tick and/or tickadj]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ yes)
+    can_kmem=yes
+    ;;
+ *) 
+    can_kmem=no
+    AC_DEFINE(NOKMEM, 1, [Should we NOT read /dev/kmem?])
+esac
+
+
+AC_MSG_CHECKING([if adjtime is accurate])
+
+# target-dependent defaults
+
+case "$host" in
+ i386-sequent-ptx*)
+    ans=no
+    ;;
+ i386-unknown-osf1*)
+    ans=yes
+    ;;
+ mips-sgi-irix[[456]]*)
+    ans=yes
+    ;;
+ *-fujitsu-uxp*)
+    ans=yes
+    ;;
+ *-ibm-aix[[456]]*)
+    ans=yes
+    ;;
+ *-*-*linux*)
+    ans=yes
+    ;;
+ *-*-solaris2.[[01]])
+    ans=no
+    ;;
+ *-*-solaris2*)
+    ans=yes
+    ;;
+ *-*-unicosmp*)
+    ans=yes
+    ;;
+ *) ans=no
+esac
+
+# --enable-accurate-adjtime / --disable-accurate-adjtime
+# override the default
+AC_ARG_ENABLE([accurate-adjtime],
+    AC_HELP_STRING(
+        [--enable-accurate-adjtime], 
+        [s the adjtime() call is accurate]
+    ),
     [ans=$enableval],
-    [case "$host" in
-      i386-sequent-ptx*)
-	 ans=no
-	 ;;
-      i386-unknown-osf1*)
-	 ans=yes
-	 ;;
-      mips-sgi-irix[[456]]*)
-	 ans=yes
-	 ;;
-      *-fujitsu-uxp*)
-	 ans=yes
-	 ;;
-      *-ibm-aix[[456]]*)
-	 ans=yes
-	 ;;
-      *-*-*linux*)
-	 ans=yes
-	 ;;
-      *-*-solaris2.[[01]])
-	 ans=no
-	 ;;
-      *-*-solaris2*)
-         ans=yes
-         ;;
-      *-*-unicosmp*)
-         ans=yes
-         ;;
-      *) ans=no
-	 ;;
-     esac
-     ])
-ac_cv_var_adjtime_is_accurate=$ans])
-case "$ac_cv_var_adjtime_is_accurate" in
- yes) AC_DEFINE(ADJTIME_IS_ACCURATE, 1, [Is adjtime() accurate?]) ;;
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ yes) 
+    AC_DEFINE(ADJTIME_IS_ACCURATE, 1, [Is adjtime() accurate?])
+    adjtime_is_accurate=yes
+    ;;
+ *)
+    adjtime_is_accurate=no
 esac
 
 AC_CACHE_CHECK([the name of 'tick' in the kernel],
@@ -3608,101 +3636,123 @@ dnl				    (RS6000 && !NOKMEM), SINIX MIPS
 
 dnl But we'll only use these "values" if we can't find anything else.
 
-AC_CACHE_CHECK([for a default value for 'tick'], ac_cv_var_tick,
-[AC_ARG_ENABLE(tick,
-  AC_HELP_STRING([--enable-tick=VALUE], [s force a value for 'tick']),
-    [ans=$enableval],
-    [ans=no
-     case "$host" in
-      XXX-*-pc-cygwin*)
-	 ;;
-      *-univel-sysv*)
-	 ans=10000
-	 ;;
-      *-*-irix*)
-	 ans=10000
-	 ;;
-      *-*-*linux*)
-	 ans=txc.tick
-	 ;;
-      *-*-mpeix*)
-	 ans=no
-	 ;;
-      *-*-winnt3.5)
-	 ans='(every / 10)'
-	 ;;
-      *-*-unicosmp*)
-	 ans=10000
-	 ;;
-      *)
-	 ans='1000000L/hz'
-	 ;;
-     esac])
-ac_cv_var_tick=$ans])
-case "$ac_cv_var_tick" in
+AC_MSG_CHECKING([for a default value for 'tick'])
+
+# target-dependent default for tick
+
+case "$host" in
+ *-*-pc-cygwin*)
+    AC_MSG_ERROR([tick needs work for cygwin])
+    ;;
+ *-univel-sysv*)
+    ans=10000
+    ;;
+ *-*-irix*)
+    ans=10000
+    ;;
+ *-*-*linux*)
+    ans=txc.tick
+    ;;
+ *-*-mpeix*)
+    ans=no
+    ;;
+ *-*-winnt3.5)
+    ans='(every / 10)'
+    ;;
+ *-*-unicosmp*)
+    ans=10000
+    ;;
+ *)
+    ans='1000000L/hz'
+    ;;
+esac
+
+AC_ARG_ENABLE(
+    [tick],
+    AC_HELP_STRING(
+	[--enable-tick=VALUE],
+	[s force a value for 'tick']
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
  *) AC_DEFINE_UNQUOTED(PRESET_TICK, $ac_cv_var_tick, [Preset a value for 'tick'?]) ;;
 esac
 
-AC_CACHE_CHECK([for a default value for 'tickadj'], ac_cv_var_tickadj,
-[AC_ARG_ENABLE(tickadj,
-  AC_HELP_STRING([--enable-tickadj=VALUE], [s force a value for 'tickadj']),
-  [ans=$enableval],
-  [ans='500/hz'
-  case "$host" in
-   *-fujitsu-uxp*)
-      case "$ac_cv_var_adjtime_is_accurate" in
-       yes) ans='tick/16' ;;
-      esac
-      ;;
-   XXX-*-pc-cygwin*)
-      ans=no
-      ;;
-   *-univel-sysv*)
-      ans=80
-      ;;
-   *-*-aix*)
-      case "$ac_cv_var_can_kmem" in
-       no) ans=1000 ;;
-      esac
-      ;;
-   *-*-domainos)	# Skippy: won't be found...
-      case "$ac_cv_var_can_kmem" in
-       no) ans=668 ;;
-      esac
-      ;;
-   *-*-hpux*)
-      case "$ac_cv_var_adjtime_is_accurate" in
-       yes) ans='tick/16' ;;
-      esac
-      ;;
-   *-*-irix*)
-      ans=150
-      ;;
-   *-*-mpeix*)
-      ans=no
-      ;;
-   *-*-sco3.2v5.0*)
-      ans=10000L/hz
-      ;;
-   *-*-solaris2*)
-      case "$ac_cv_var_adjtime_is_accurate" in
-       yes)
-          #ans='tick/16'
-	  ;;
-      esac
-      ;;
-   *-*-winnt3.5)
-      ans=50
-      ;;
-   *-*-unicosmp*)
-      ans=150
-      ;;
-  esac])
-ac_cv_var_tickadj=$ans])
-case "$ac_cv_var_tickadj" in
+
+AC_MSG_CHECKING([for a default value for 'tickadj'])
+
+# target-specific default
+
+ans='500/hz'
+
+case "$host" in
+ *-fujitsu-uxp*)
+    case "$adjtime_is_accurate" in
+     yes)
+         ans='tick/16'
+    esac
+    ;;
+ XXX-*-pc-cygwin*)
+    ans=no
+    ;;
+ *-univel-sysv*)
+    ans=80
+    ;;
+ *-*-aix*)
+    case "$can_kmem" in
+     no)
+	ans=1000
+    esac
+    ;;
+ *-*-domainos)	# Skippy: won't be found...
+    case "$can_kmem" in
+     no)
+	ans=668
+    esac
+    ;;
+ *-*-hpux*)
+    case "$adjtime_is_accurate" in
+     yes)
+	ans='tick/16'
+    esac
+    ;;
+ *-*-irix*)
+    ans=150
+    ;;
+ *-*-mpeix*)
+    ans=no
+    ;;
+ *-*-sco3.2v5.0*)
+    ans=10000L/hz
+    ;;
+ *-*-winnt3.5)
+    ans=50
+    ;;
+ *-*-unicosmp*)
+    ans=150
+esac
+
+AC_ARG_ENABLE(
+    [tickadj],
+    AC_HELP_STRING(
+        [--enable-tickadj=VALUE],
+        [s force a value for 'tickadj']
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+default_tickadj=$ans
+
+case "$default_tickadj" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
- *) AC_DEFINE_UNQUOTED(PRESET_TICKADJ, $ac_cv_var_tickadj, [Preset a value for 'tickadj'?]) ;;
+ *) AC_DEFINE_UNQUOTED(PRESET_TICKADJ, $default_tickadj, [Preset a value for 'tickadj'?]) ;;
 esac
 
 # Newer versions of ReliantUNIX round adjtime() values down to
@@ -3718,7 +3768,7 @@ case "$host" in
 esac
 
 ac_cv_make_tickadj=yes
-case "$ac_cv_var_can_kmem$ac_cv_var_tick$ac_cv_var_tickadj" in
+case "$can_kmem$ac_cv_var_tick$default_tickadj" in
  nonono)	# Don't read KMEM, no presets.  Bogus.
     AC_MSG_WARN([Can't read kmem, no PRESET_TICK or PRESET_TICKADJ.  No tickadj.])
     ac_cv_make_tickadj=no
@@ -3830,12 +3880,22 @@ esac
 
 AC_SUBST(MAKE_LIBNTPSIM)
 AC_SUBST(MAKE_NTPDSIM)
-AC_CACHE_CHECK([if we want to build the NTPD simulator], ac_cv_var_ntpd_sim,
-[AC_ARG_ENABLE(simulator,
-    AC_HELP_STRING([--enable-simulator], [- build/install the NTPD simulator?]),
-    [ans=$enableval], [ans=no])
-ac_cv_var_ntpd_sim=$ans])
-case "$ac_cv_var_ntpd_sim" in
+
+AC_MSG_CHECKING([if we want to build the NTPD simulator])
+
+AC_ARG_ENABLE(
+    [simulator],
+    AC_HELP_STRING(
+	[--enable-simulator],
+	[- build/install the NTPD simulator?]
+    ),
+    [ans=$enableval], 
+    [ans=no]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes)
     MAKE_NTPDSIM=ntpdsim
     MAKE_LIBNTPSIM=libntpsim.a
@@ -3847,276 +3907,388 @@ case "$build" in
     ;;
  *) case "$host" in
      *-*-vxworks*)
-        LDFLAGS="$LDFLAGS -r"
-        ;;
+	LDFLAGS="$LDFLAGS -r"
+	;;
     esac
     ;;
 esac
 
 
-AC_CACHE_CHECK([if we should always slew the time], ac_cv_var_slew_always,
-[AC_ARG_ENABLE(slew-always,
-   AC_HELP_STRING([--enable-slew-always], [s always slew the time]),
-    [ans=$enableval],
-    [case "$host" in
-      *-apple-aux[[23]]*)
-	 ans=yes
-	 ;;
-      *-*-bsdi[[012]]*)
-	 ans=no
-	 ;;
-      *-*-bsdi*)
-	 ans=yes
-	 ;;
-      *-*-openvms*)	# HMS: won't be found
-	 ans=yes
-	 ;;
-      *) ans=no
-	 ;;
-     esac
-     ])
-ac_cv_var_slew_always=$ans])
-case "$ac_cv_var_slew_always" in
+AC_MSG_CHECKING([if we should always slew the time])
+
+# target-specific defaults
+
+case "$host" in
+ *-apple-aux[[23]]*)
+    ans=yes
+    ;;
+ *-*-bsdi[[012]]*)
+    ans=no
+    ;;
+ *-*-bsdi*)
+    ans=yes
+    ;;
+ *-*-openvms*)	# HMS: won't be found
+    ans=yes
+    ;;
+ *) ans=no
+    ;;
+esac
+
+# --enable-slew-always / --disable-slew-always overrides default
+
+AC_ARG_ENABLE(
+    [slew-always],
+    AC_HELP_STRING(
+	[--enable-slew-always],
+	[s always slew the time]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes) AC_DEFINE(SLEWALWAYS, 1, [Slew always?]) ;;
 esac
 
-AC_CACHE_CHECK([if we should step and slew the time], ac_cv_var_step_slew,
-[AC_ARG_ENABLE(step-slew,
-   AC_HELP_STRING([--enable-step-slew], [s step and slew the time]),
-    [ans=$enableval],
-    [case "$host" in
-      *-sni-sysv*)
-	 ans=yes
-	 ;;
-      *-univel-sysv*)
-	 ans=no
-	 ;;
-      *-*-ptx*)
-	 ans=yes
-	 ;;
-      *-*-solaris2.1[[0-9]]*)
-	 ans=no
-	 ;;
-      *-*-solaris2.[[012]]*)
-	 ans=yes
-	 ;;
-      *-*-sysv4*)	# HMS: Does this catch Fujitsu UXP?
-	 ans=yes
-	 ;;
-      *) ans=no
-	 ;;
-     esac
-     ])
-ac_cv_var_step_slew=$ans])
-case "$ac_cv_var_step_slew" in
+AC_MSG_CHECKING([if we should step and slew the time])
+
+case "$host" in
+ *-sni-sysv*)
+    ans=yes
+    ;;
+ *-univel-sysv*)
+    ans=no
+    ;;
+ *-*-ptx*)
+    ans=yes
+    ;;
+ *-*-solaris2.1[[0-9]]*)
+    ans=no
+    ;;
+ *-*-solaris2.[[012]]*)
+    ans=yes
+    ;;
+ *-*-sysv4*)	# HMS: Does this catch Fujitsu UXP?
+    ans=yes
+    ;;
+ *) ans=no
+    ;;
+esac
+
+
+AC_ARG_ENABLE(
+    [step-slew],
+    AC_HELP_STRING(
+	[--enable-step-slew],
+	[s step and slew the time]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes) AC_DEFINE(STEP_SLEW, 1, [Step, then slew the clock?]) ;;
 esac
 
-AC_CACHE_CHECK([if ntpdate should step the time], ac_cv_var_ntpdate_step,
-[AC_ARG_ENABLE(ntpdate-step,
-   AC_HELP_STRING([--enable-ntpdate-step], [s if ntpdate should step the time]),
-    [ans=$enableval],
-    [case "$host" in
-      *-apple-aux[[23]]*)
-	 ans=yes
-	 ;;
-      *) ans=no
-	 ;;
-     esac
-     ])
-ac_cv_var_ntpdate_step=$ans])
-case "$ac_cv_var_ntpdate_step" in
+AC_MSG_CHECKING([if ntpdate should step the time])
+
+case "$host" in
+ *-apple-aux[[23]]*)
+    ans=yes
+    ;;
+ *) ans=no
+esac
+
+AC_ARG_ENABLE(
+    [ntpdate-step],
+    AC_HELP_STRING(
+	[--enable-ntpdate-step],
+	[s if ntpdate should step the time]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes) AC_DEFINE(FORCE_NTPDATE_STEP, 1, [force ntpdate to step the clock if !defined(STEP_SLEW) ?]) ;;
 esac
 
-AC_CACHE_CHECK([if we should sync TODR clock every hour], ac_cv_var_sync_todr,
-[AC_ARG_ENABLE(hourly-todr-sync,
-   AC_HELP_STRING([--enable-hourly-todr-sync],
-		  [s if we should sync TODR hourly]),
-    [ans=$enableval],
-    [case "$host" in
-      *-*-nextstep*)
-	 ans=yes
-	 ;;
-      *-*-openvms*)	# HMS: won't be found
-	 ans=yes
-	 ;;
-      *) ans=no
-	 ;;
-     esac])
-ac_cv_var_sync_todr=$ans])
+
+AC_MSG_CHECKING([if we should sync TODR clock every hour])
+
+case "$host" in
+ *-*-nextstep*)
+    ans=yes
+    ;;
+ *-*-openvms*)	# HMS: won't be found
+    ans=yes
+    ;;
+ *)
+    ans=no
+esac
+
+AC_ARG_ENABLE(
+    [hourly-todr-sync],
+    AC_HELP_STRING(
+	[--enable-hourly-todr-sync],
+	[s if we should sync TODR hourly]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
 case "$ac_cv_var_sync_todr" in
  yes) AC_DEFINE(DOSYNCTODR, 1, [synch TODR hourly?]) ;;
 esac
 
-AC_CACHE_CHECK([if we should avoid kernel FLL bug], ac_cv_var_kernel_fll_bug,
-[AC_ARG_ENABLE(kernel-fll-bug,
-   AC_HELP_STRING([--enable-kernel-fll-bug],
-		  [s if we should avoid a kernel FLL bug]),
-    [ans=$enableval],
-    [case "$host" in
-     *-*-solaris2.6)
-	 unamev=`uname -v`
-	 case "$unamev" in
-	  Generic_105181-*)
-	     old_IFS="$IFS"
-	     IFS="-"
-	     set $unamev
-	     IFS="$old_IFS"
-	     if test "$2" -ge 17
-	     then
-	        # Generic_105181-17 and higher
-	        ans=no
-	     else
-	        ans=yes
-	     fi
-	     ;;
-	  *) ans=yes
-	     ;;
-	 esac
-	 ;;
-     *-*-solaris2.7)
-	 unamev=`uname -v`
-	 case "$unamev" in
-	  Generic_106541-*)
-	     old_IFS="$IFS"
-	     IFS="-"
-	     set $unamev
-	     IFS="$old_IFS"
-	     if test "$2" -ge 07
-	     then
-	        # Generic_106541-07 and higher
-	        ans=no
-	     else
-	        ans=yes
-	     fi
-	     ;;
-	  *) ans=yes
-	     ;;
-	 esac
-	 ;;
-     *) ans=no
-	 ;;
+
+AC_MSG_CHECKING([if we should avoid kernel FLL bug])
+
+case "$host" in
+ *-*-solaris2.6)
+    unamev=`uname -v`
+    case "$unamev" in
+     Generic_105181-*)
+	old_IFS="$IFS"
+	IFS="-"
+	set $unamev
+	IFS="$old_IFS"
+	if test "$2" -ge 17
+	then
+	    # Generic_105181-17 and higher
+	    ans=no
+	else
+	    ans=yes
+	fi
+	;;
+     *) 
+	ans=yes
     esac
-    ])
-ac_cv_var_kernel_fll_bug=$ans])
-case "$ac_cv_var_kernel_fll_bug" in
+    ;;
+ *-*-solaris2.7)
+    unamev=`uname -v`
+    case "$unamev" in
+     Generic_106541-*)
+	old_IFS="$IFS"
+	IFS="-"
+	set $unamev
+	IFS="$old_IFS"
+	if test "$2" -ge 07
+	then
+	    # Generic_106541-07 and higher
+	    ans=no
+	else
+	    ans=yes
+	fi
+	;;
+     *)
+	ans=yes
+    esac
+    ;;
+ *)
+    ans=no
+esac
+
+AC_ARG_ENABLE(
+    [kernel-fll-bug],
+    AC_HELP_STRING(
+	[--enable-kernel-fll-bug],
+	[s if we should avoid a kernel FLL bug]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes) AC_DEFINE(KERNEL_FLL_BUG, 1, [Does the kernel have an FLL bug?]) ;;
 esac
 
-AC_CACHE_CHECK([if we should use the IRIG sawtooth filter], ac_cv_var_irig_sucks,
-[AC_ARG_ENABLE(irig-sawtooth, 
-	AC_HELP_STRING([--enable-irig-sawtooth],
-		       [s if we should enable the IRIG sawtooth filter]),
-    [ans=$enableval],
-    [case "$host" in
-     *-*-solaris2.[[89]])
-	ans=yes
-	;;
-     *-*-solaris2.1[[0-9]]*)
-	ans=yes
-	;;
-     *) ans=no
-	;;
-    esac
-    ])
-ac_cv_var_irig_sucks=$ans])
-case "$ac_cv_var_irig_sucks" in
+
+AC_MSG_CHECKING([if we should use the IRIG sawtooth filter])
+
+case "$host" in
+ *-*-solaris2.[[89]])
+    ans=yes
+    ;;
+ *-*-solaris2.1[[0-9]]*)
+    ans=yes
+    ;;
+ *) ans=no
+esac
+
+AC_ARG_ENABLE(
+    [irig-sawtooth], 
+    AC_HELP_STRING(
+	[--enable-irig-sawtooth],
+	[s if we should enable the IRIG sawtooth filter]
+    ),
+    [ans=$enableval]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes) AC_DEFINE(IRIG_SUCKS, 1, [Should we use the IRIG sawtooth filter?]) ;;
 esac
 
-AC_CACHE_CHECK([if we should enable NIST lockclock scheme], ac_cv_var_nist_lockclock,
-[AC_ARG_ENABLE(nist, 
-	AC_HELP_STRING([--enable-nist],
-		       [- if we should enable the NIST lockclock scheme]),
-    [ans=$enableval],[ans=no])
-ac_cv_var_nist_lockclock=$ans])
-case "$ac_cv_var_nist_lockclock" in
+
+AC_MSG_CHECKING([if we should enable NIST lockclock scheme])
+
+AC_ARG_ENABLE(
+	[nist], 
+	AC_HELP_STRING(
+	    [--enable-nist],
+	    [- if we should enable the NIST lockclock scheme]
+	),
+	[ans=$enableval],
+	[ans=no]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
  yes) AC_DEFINE(LOCKCLOCK, 1, [Should we align with the NIST lockclock scheme?]) ;;
 esac
 
-AC_CACHE_CHECK([if we want the windows symmetric client hack], ac_cv_wintime,
-[AC_ARG_ENABLE(wintime,
-   AC_HELP_STRING([--enable-wintime], [- Provide the windows symmetric client hack]),
+
+AC_MSG_CHECKING([if we want support for Samba's signing daemon])
+
+AC_ARG_ENABLE(
+    [ntp-signd],
+    AC_HELP_STRING(
+        [--enable-ntp-signd],
+        [- Provide support for Samba's signing daemon, =/var/run/ntp_signd]
+    ),
     [ans=$enableval],
-    [ans=no])
-ac_cv_wintime=$ans])
-# End of AC_CACHE_CHECK for wintime
-case "$ac_cv_wintime" in
- yes)
-    AC_DEFINE(WINTIME, ,[Do we want the windows symmetric client hack?])
+    [ans=no]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ no)
+    ntp_signd_path=
     ;;
-esac
-
-AC_CACHE_CHECK([if we want support for Samba's signing daemon], ac_cv_ntp_signd,
-[AC_ARG_ENABLE(ntp-signd,
-   AC_HELP_STRING([--enable-ntp-signd], [- Provide support for Samba's signing daemon, =/var/run/ntp_signd]),
-    [ans=$enableval],
-    [ans=no])
-ac_cv_ntp_signd=$ans])
-# End of AC_CACHE_CHECK for ntp_signd
-
-case "$ac_cv_ntp_signd" in
-	no)
-		;;
-	yes)
-		ntp_signd_path=/var/run/ntp_signd
-		;;
-	*)
-		ntp_signd_path="$ac_cv_ntp_signd"
-		;;
-esac
-
-case "$ac_cv_ntp_signd" in
  yes)
+    ntp_signd_path=/var/run/ntp_signd
+    ;;
+ *)
+    ntp_signd_path="$ntp_signd"
+esac
+
+case "$ntp_signd_path" in
+ '')
+    wintime_default=no
+    ;;
+ *)
+    wintime_default=yes
     AC_DEFINE(HAVE_NTP_SIGND, ,[Do we want support for Samba's signing daemon?])
     AC_DEFINE_UNQUOTED(NTP_SIGND_PATH, "$ntp_signd_path", [Path to sign daemon rendezvous socket])
-    ;;
 esac
 
-AC_CACHE_CHECK([if we should use /dev/clockctl], ac_cv_clockctl,
-[AC_ARG_ENABLE(clockctl,
-   AC_HELP_STRING([--enable-clockctl], [s Use /dev/clockctl for non-root clock control]),
+
+AC_MSG_CHECKING([if we want the windows symmetric client hack])
+
+# default is no, unless --enable-ntp-signd was given
+ans=$wintime_default
+unset wintime_default
+
+AC_ARG_ENABLE(
+    [wintime],
+    AC_HELP_STRING(
+        [--enable-wintime],
+        [- Provide the windows symmetric client hack]
+    ),
     [ans=$enableval],
-    [case "$host" in
-      *-*-netbsd*)
-	 ans=yes
-	 ;;
-      *) ans=no
-	 ;;
-     esac
-     ])
-ac_cv_clockctl=$ans])
-# End of AC_CACHE_CHECK for clockctl
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ yes)
+    AC_DEFINE(WINTIME, ,[Do we want the windows symmetric client hack?])
+esac
+
+
 AC_CHECK_HEADERS(sys/clockctl.h)
-case "$ac_cv_clockctl$ac_cv_header_sys_clockctl_h" in
- yesyes)
-    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
+
+AC_MSG_CHECKING([if we should use /dev/clockctl])
+
+case "$host" in
+ *-*-netbsd*)
+    ans=yes
+    ;;
+ *) ans=no
     ;;
 esac
 
-AC_CACHE_CHECK([if we have linux capabilities (libcap)], ac_cv_linuxcaps,
-[AC_ARG_ENABLE(linuxcaps,
-   AC_HELP_STRING([--enable-linuxcaps], [s Use Linux capabilities for non-root clock control]),
+AC_ARG_ENABLE(
+    [clockctl],
+    AC_HELP_STRING(
+	[--enable-clockctl],
+	[s Use /dev/clockctl for non-root clock control]
+    ),
+    [ans=$enableval]
+)
+
+case "$ac_cv_header_sys_clockctl_h" in
+ no)
+    ans=no
+esac
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ yes)
+    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
+esac
+
+
+AC_CHECK_HEADERS([sys/capability.h])
+AC_CHECK_HEADERS([sys/prctl.h])
+
+AC_MSG_CHECKING([if we have linux capabilities (libcap)])
+
+AC_ARG_ENABLE(
+    [linuxcaps],
+    AC_HELP_STRING(
+        [--enable-linuxcaps], 
+        [s Use Linux capabilities for non-root clock control]
+    ),
     [ans=$enableval],
-    [ans=no])
-ac_cv_linuxcaps=$ans])
-# End of AC_CACHE_CHECK for linuxcaps
-AC_CHECK_HEADERS(sys/capability.h)
-AC_CHECK_HEADERS(sys/prctl.h)
-case "$ac_cv_linuxcaps$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
+    [ans=no]
+)
+
+case "$ans$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
  yesyesyes)
+    ;;
+ *)
+    ans=no
+esac
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ yes)
     AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
     AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
     LIBS="$LIBS -lcap"
-    ;;
 esac
+
+
 AC_CHECK_HEADERS(libscf.h)
 case "$ac_cv_header_libscf_h" in
  yes)
     AC_SUBST(LSCF, [-lscf])
     ;;
 esac
+
 AC_CHECK_FUNC(setppriv,AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[Are Solaris privileges available?]), )
 
 #
