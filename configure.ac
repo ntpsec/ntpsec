@@ -34,7 +34,9 @@ AC_PROG_CC_STDC
 dnl AC_PROG_CC_C89
 # We should make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
-AC_PROG_CC_C_O
+# AM_PROG_CC_C_O supersets AC_PROG_CC_C_O
+AM_PROG_CC_C_O
+AC_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_YACC
 
@@ -368,13 +370,12 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNC(gethostent, ,
-  AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
-AC_CHECK_FUNC(openlog, , 
-  AC_CHECK_LIB(gen, openlog, , 
-  AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
-AC_CHECK_LIB(md5, MD5Init, , 
-  AC_CHECK_LIB(md, MD5Init))
+AC_CHECK_FUNC([gethostent], ,
+  AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket]))
+AC_CHECK_FUNC([openlog], , 
+  AC_SEARCH_LIBS([openlog], [gen], , 
+  AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])))
+AC_SEARCH_LIBS([MD5Init], [md5 md])
 AC_CHECK_FUNCS(MD5Init)
 
 NTP_LINEEDITLIBS
@@ -399,8 +400,7 @@ case "$host" in
 esac
 
 AC_CHECK_FUNC(setsockopt, ,
-	[AC_CHECK_LIB(socket, setsockopt)
-	 AC_CHECK_LIB(xnet, setsockopt)])
+	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
@@ -4488,12 +4488,7 @@ AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
-dnl  it is not safe to share configuration
-dnl  cache with sntp or gsoc_sntp as they use
-dnl  different headers in a different order
-dnl  and tests for different libraries.
-dnl 
-dnl AC_CONFIG_SUBDIRS(sntp)
-dnl AC_CONFIG_SUBDIRS(gsoc_sntp)
+AC_CONFIG_SUBDIRS(sntp)
+AC_CONFIG_SUBDIRS(gsoc_sntp)
 
 AC_OUTPUT
