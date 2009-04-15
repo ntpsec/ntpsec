@@ -224,17 +224,18 @@ struct ntp_control {
 #define	CP_IN		38
 #define	CP_OUT		39
 #define	CP_RATE		40
+#define	CP_BIAS		41
 #ifdef OPENSSL
-#define CP_FLAGS	41
-#define CP_HOST		42
-#define CP_VALID	43
-#define	CP_INITSEQ	44
-#define	CP_INITKEY	45
-#define	CP_INITTSP	46
-#define	CP_DIGEST	47
+#define CP_FLAGS	42
+#define CP_HOST		43
+#define CP_VALID	44
+#define	CP_INITSEQ	45
+#define	CP_INITKEY	46
+#define	CP_INITTSP	47
+#define	CP_DIGEST	48
 #define	CP_MAXCODE	CP_DIGEST
 #else
-#define	CP_MAXCODE	CP_RATE
+#define	CP_MAXCODE	CP_BIAS
 #endif /* OPENSSL */
 
 /*

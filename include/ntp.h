@@ -444,8 +444,9 @@ struct peer {
 #define FLAG_SKEY	0x0800  /* autokey authentication */
 #define	FLAG_XLEAVE	0x1000	/* interleaved protocol */
 #define	FLAG_XB		0x2000	/* interleaved broadcast */
+#define	FLAG_XBOGUS	0x4000	/* interleaved bogus packet */
 #ifdef	OPENSSL
-#define FLAG_ASSOC	0x4000	/* autokey request */
+#define FLAG_ASSOC	0x8000	/* autokey request */
 #endif /* OPENSSL */
 #define FLAG_ADKEY      0x00010000      /* Authenticated (or wants reply to be authenticated) using AD authentication */
 

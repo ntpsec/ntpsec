@@ -2,32 +2,24 @@
 #include "config.h"
 #endif
 
+#include "ntp_syslog.h"
+#include "ntp_stdlib.h"
 #include "clockstuff.h"
-
-DWORD units_per_tick = 0;
-DOUBLE ppm_per_adjust_unit = 0.0; /* to satisfy libntp */
 
 int
 gettimeofday(
-	struct timeval *tv
+	struct timeval *tv,
+	int ignored
 	)
 {
-	/*  Use the system time (roughly synchronised to the tick, and
-	 *  extrapolated using the system performance counter.
-	 */
+	struct timespec ts;
 
-	FILETIME StartTime;
-	ULONGLONG Time;
+	UNUSED_ARG(ignored);
 
-	GetSystemTimeAsFileTime(&StartTime);
-	Time = (((ULONGLONG) StartTime.dwHighDateTime) << 32) + 
-		(ULONGLONG) StartTime.dwLowDateTime;
+	getclock(TIMEOFDAY, &ts);
 
-	/* Convert the hecto-nano second time to tv format
-	 */
-	Time -= FILETIME_1970;
-	tv->tv_sec = (LONG) ( Time / 10000000ui64);
-	tv->tv_usec = (LONG) (( Time % 10000000ui64) / 10);
+	tv->tv_sec = ts.tv_sec;
+	tv->tv_usec = ts.tv_nsec / 10;
 
 	return 0;
 }

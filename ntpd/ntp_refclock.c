@@ -136,9 +136,10 @@ refclock_report(
 	}
 	if (pp->lastevent < 15)
 		pp->lastevent++;
-	if (pp->currentstatus != code)
+	if (pp->currentstatus != code) {
 		pp->currentstatus = code;
 		report_event(PEVNT_CLOCK, peer, ceventstr(code));
+	}
 }
 
 

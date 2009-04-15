@@ -76,7 +76,7 @@ get_systime(
 # else
 	getclock(TIMEOFDAY, &ts);
 # endif
-	now->l_i = ts.tv_sec + JAN_1970;
+	now->l_i = (int32)ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec + (ntp_random() * 2. / FRAC) * sys_tick *
 	    1e6;
 	dtemp = dtemp / 1e9 + sys_residual;

@@ -2,7 +2,9 @@
 #include "clockstuff.h"
 #include "ntp_stdlib.h"
 
-const char *	set_tod_using = "SetSystemTime";
+const char *set_tod_using = "SetSystemTime";
+
+time_stepped_callback	step_callback = NULL;
 
 int
 ntp_set_tod(
@@ -11,24 +13,24 @@ ntp_set_tod(
 	)
 {
 	SYSTEMTIME st;
-	struct tm *gmtm;
-	const time_t x = tv->tv_sec;
-	long y = tv->tv_usec;
-	(void) tzp;
+	union {
+		FILETIME ft;
+		ULONGLONG ull;
+	} t;
 
-	gmtm = gmtime(&x);
-	st.wSecond		= (WORD) gmtm->tm_sec;
-	st.wMinute		= (WORD) gmtm->tm_min;
-	st.wHour		= (WORD) gmtm->tm_hour;
-	st.wDay 		= (WORD) gmtm->tm_mday;
-	st.wMonth		= (WORD) (gmtm->tm_mon	+ 1);
-	st.wYear		= (WORD) (gmtm->tm_year + 1900);
-	st.wDayOfWeek		= (WORD) gmtm->tm_wday;
-	st.wMilliseconds	= (WORD) (y / 1000);
+	UNUSED_ARG(tzp);
 
-	if (!SetSystemTime(&st)) {
+	t.ull = FILETIME_1970 +
+		(ULONGLONG)tv->tv_sec * 10 * 1000 * 1000 +
+		(ULONGLONG)tv->tv_usec * 10;
+
+	if (!FileTimeToSystemTime(&t.ft, &st) || !SetSystemTime(&st)) {
 		msyslog(LOG_ERR, "SetSystemTime failed: %m\n");
 		return -1;
 	}
+
+	if (step_callback)
+		(*step_callback)();
+
 	return 0;
 }

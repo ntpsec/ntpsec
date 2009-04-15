@@ -383,8 +383,8 @@ struct xcmd builtins[] = {
 /*
  * Some variables used and manipulated locally
  */
-struct timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
-struct timeval tvsout = { DEFSTIMEOUT, 0 };	/* secondary time out */
+struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
+struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 l_fp delay_time;				/* delay time */
 char currenthost[LENHOSTNAME];			/* current host name */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
@@ -846,7 +846,7 @@ getresponse(
 	)
 {
 	struct ntp_control rpkt;
-	struct timeval tvo;
+	struct sock_timeval tvo;
 	u_short offsets[MAXFRAGS+1];
 	u_short counts[MAXFRAGS+1];
 	u_short offset;
@@ -2218,11 +2218,11 @@ timeout(
 	int val;
 
 	if (pcmd->nargs == 0) {
-		val = tvout.tv_sec * 1000 + tvout.tv_usec / 1000;
+		val = (int)tvout.tv_sec * 1000 + tvout.tv_usec / 1000;
 		(void) fprintf(fp, "primary timeout %d ms\n", val);
 	} else {
 		tvout.tv_sec = pcmd->argval[0].uval / 1000;
-		tvout.tv_usec = (pcmd->argval[0].uval - (tvout.tv_sec * 1000))
+		tvout.tv_usec = (pcmd->argval[0].uval - ((long)tvout.tv_sec * 1000))
 			* 1000;
 	}
 }
@@ -3231,9 +3231,9 @@ cookedprint(
 				if (!decodeuint(value, &uval))
 				    output_raw = '?';
 				else {
-					char b[10];
+					char b[12];
 
-					(void) sprintf(b, "%03lo", uval);
+					(void) snprintf(b, sizeof b, "%03lo", uval);
 					output(fp, name, b);
 				}
 				break;

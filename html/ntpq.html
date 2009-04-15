@@ -292,8 +292,15 @@
 			</tr>
 		</table>
 		<dl>
-			<dt>When the NTPv4 daemon is compiled with the OpenSSL software library, additional system variables are displayed, including some or all of the following, depending on the particular Autokey dance:</dl>
-		<table width="100%" border="1" cellspacing="2" cellpadding="2">
+			<dt>The jitter and wander statistics are exponentially-weighted RMS averages.
+				The system jitter is defined in the NTPv4 specification; the
+				clock jitter statistic is computed by the clock discipline module.
+			<dd>&nbsp;</dd>
+			<dt>When the NTPv4 daemon is compiled with the OpenSSL software library, additional
+				system variables are displayed, including some or all of the following, depending
+				on the particular Autokey dance:</dt>
+		</dl>
+<table width="100%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
 				<td>Variable</td>
 				<td>Description</td>
@@ -428,13 +435,23 @@
 				<td><tt>jitter</tt></td>
 				<td>filter jitter</td>
 			</tr>
-<tr>
+			<tr>
+				<td><tt>bias</tt></td>
+				<td>unicast/broadcast bias</td>
+			</tr>
+			<tr>
 				<td><tt>xleave</tt></td>
-				<td>interleave delay (see <a href="xleave.html">NTP Interleaved Modes </a>)</td>
+				<td>interleave delay (see <a href="xleave.html">NTP Interleaved Modes</a>)</td>
 		  </tr>
 		</table>
-		<p>When the NTPv4 daemon is compiled with the OpenSSL software library, additional peer variables are displayed, including the following:</p>
-		<table width="100%" border="1" cellspacing="2" cellpadding="2">
+	<p>The bias vaqriable is calculated when the first broadcast packet is received
+		after the calibration volley. It represents the offset of the broadcast
+		subgraph relative to the unicast subgraph. The xleave variable appears
+		only the interleaved symmetric and ingterleaved modes. It represents
+		the internal queueing, buffering and transmission delays for the preceeding
+	packet.</p>
+	<p>When the NTPv4 daemon is compiled with the OpenSSL software library, additional peer variables are displayed, including the following:</p>
+<table width="100%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
 				<td>Variable</td>
 				<td>Description</td>

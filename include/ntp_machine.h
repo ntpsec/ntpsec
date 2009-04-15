@@ -227,53 +227,11 @@ typedef unsigned long u_long;
  * make them macros for everyone else
  */
 #ifndef SYS_WINNT
-# define SOCKET	int
+typedef int SOCKET;
 # define INVALID_SOCKET	-1
 # define SOCKET_ERROR	-1
-# define closesocket close
+# define closesocket(fd)	close(fd)
 #endif
-/*
- * Windows NT
- */
-#if defined(SYS_WINNT)
-# if !defined(HAVE_CONFIG_H)  || !defined(__config)
-# include <config.h>
-# endif /* HAVE_CONFIG_H) */
-# include <windows.h>
-# include <ws2tcpip.h>
-# include <winsock2.h>
-
-# define ifreq _INTERFACE_INFO
-# define ifr_flags iiFlags
-# define ifr_addr iiAddress.AddressIn
-# define ifr_broadaddr iiBroadcastAddress.AddressIn
-# define ifr_mask iiNetmask.AddressIn
-# define zz_family sin_family
-
-# define S_IFREG _S_IFREG
-# define stat _stat
-# define isascii __isascii
-# define isatty _isatty
-# define mktemp _mktemp
-# define unlink _unlink
-# define fileno _fileno
-# define write _write
-#ifndef close
-# define close _close
-#endif
-# undef interface
-# include <process.h>
-#define getpid _getpid
-/*
- * Defining registers are not a good idea on Windows
- * This gets rid of the usage
- */
-#ifndef register
-# define register
-#endif
- typedef char *caddr_t;
-# define vsnprintf _vsnprintf
-#endif /* SYS_WINNT */
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);
 
@@ -503,8 +461,7 @@ extern char *strdup(const char *);
 
 #if !defined(HAVE_ATT_NICE) \
 	&& !defined(HAVE_BSD_NICE) \
-	&& !defined(HAVE_NO_NICE) \
-	&& !defined(SYS_WINNT)
+	&& !defined(HAVE_NO_NICE)
 #include "ERROR: You must define one of the HAVE_xx_NICE defines!"
 #endif
 

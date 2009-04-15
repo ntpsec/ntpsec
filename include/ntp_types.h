@@ -23,6 +23,13 @@
 #endif
 
 /*
+ * used to quiet compiler warnings
+ */
+#ifndef UNUSED_ARG
+#define UNUSED_ARG(arg)	((void)(arg))
+#endif
+
+/*
  * VMS DECC (v4.1), {u_char,u_short,u_long} are only in SOCKET.H,
  *			and u_int isn't defined anywhere
  */
@@ -64,6 +71,17 @@ typedef struct ntp_uint64_t { u_int32 val[2]; } ntp_uint64_t;
 typedef unsigned short associd_t; /* association ID */
 typedef u_int32 keyid_t;	/* cryptographic key ID */
 typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
+
+/*
+ * On Unix struct sock_timeval is equivalent to struct timeval.
+ * On Windows built with 64-bit time_t, sock_timeval.tv_sec is a long
+ * as required by Windows' socket() interface timeout argument, while
+ * timeval.tv_sec is time_t for the more common use as a UTC time 
+ * within NTP.
+ */
+#ifndef SYS_WINNT
+#define	sock_timeval	timeval
+#endif
 
 #endif /* _NTP_TYPES_ */
 

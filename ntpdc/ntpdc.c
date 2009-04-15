@@ -177,8 +177,8 @@ static	struct xcmd builtins[] = {
 /*
  * Some variables used and manipulated locally
  */
-static	struct timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
-static	struct timeval tvsout = { DEFSTIMEOUT, 0 };	/* secondary time out */
+static	struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
+static	struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 static	l_fp delay_time;				/* delay time */
 static	char currenthost[LENHOSTNAME];			/* current host name */
 int showhostnames = 1;					/* show host names by default */
@@ -188,18 +188,6 @@ static	int ai_fam_default;				/* default address family */
 static	SOCKET sockfd;					/* fd socket is opened on */
 static	int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
-
-#if defined (SYS_WINNT) || defined (SYS_VXWORKS)
-char password[9];
-#endif /* SYS_WINNT || SYS_VXWORKS */
-
-#ifdef SYS_WINNT
-DWORD NumberOfBytesWritten;
-
-HANDLE	TimerThreadHandle = NULL;	/* 1998/06/03 - Used in ntplib/machines.c */
-void timer(void)	{  ; };	/* 1998/06/03 - Used in ntplib/machines.c */
-
-#endif /* SYS_WINNT */
 
 /*
  * Holds data returned from queries.  We allocate INITDATASIZE
@@ -684,7 +672,7 @@ getresponse(
 	)
 {
 	struct resp_pkt rpkt;
-	struct timeval tvo;
+	struct sock_timeval tvo;
 	int items;
 	int i;
 	int size;
@@ -1015,7 +1003,7 @@ doquery(
 	int res;
 	char junk[512];
 	fd_set fds;
-	struct timeval tvzero;
+	struct sock_timeval tvzero;
 
 	/*
 	 * Check to make sure host is open

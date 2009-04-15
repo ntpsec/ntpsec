@@ -12,11 +12,6 @@
 #include <config.h>
 #endif
 
-#if defined(SYS_WINNT)
-#undef close
-#define close closesocket
-#endif
-
 #if defined(REFCLOCK) && defined(CLOCK_DUMBCLOCK)
 
 #include "ntpd.h"
@@ -27,6 +22,12 @@
 
 #include <stdio.h>
 #include <ctype.h>
+
+#ifdef SYS_WINNT
+extern int async_write(int, const void *, unsigned int);
+#undef write
+#define write(fd, data, octets)	async_write(fd, data, octets)
+#endif
 
 /*
  * This driver supports a generic dumb clock that only outputs hh:mm:ss,
@@ -248,7 +249,7 @@ dumbclock_receive(
 	    struct tm  asserted_tm;	     /* the struct tm of the same */
 	    int        adjyear;
 	    int        adjmon;
-	    int        reality_delta;
+	    time_t     reality_delta;
 	    time_t     now;
 
 

@@ -280,12 +280,8 @@ local_clock(
 	 * is most effective if the delays are highly assymetric and
 	 * clockhopping is avoided and the clock frequency wander is
 	 * relatively small.
-	 *
-	 * Note either there is no prefer peer or this update is from
-	 * the prefer peer.
 	 */
-	if (sys_huffpuff != NULL && (sys_prefer == NULL || sys_prefer ==
-	    peer)) {
+	if (sys_huffpuff != NULL) {
 		if (peer->delay < sys_huffpuff[sys_huffptr])
 			sys_huffpuff[sys_huffptr] = peer->delay;
 		if (peer->delay < sys_mindly)
@@ -675,7 +671,7 @@ local_clock(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "local_clock: offset %.9f jit %.6f freq %.3f stab %.3f poll %d\n",
+		    "local_clock: offset %.9f jit %.9f freq %.3f stab %.3f poll %d\n",
 		    clock_offset, clock_jitter, drift_comp * 1e6,
 		    clock_stability * 1e6, sys_poll);
 #endif /* DEBUG */
