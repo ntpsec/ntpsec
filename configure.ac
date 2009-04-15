@@ -3661,7 +3661,7 @@ AC_MSG_RESULT([$ans])
 
 case "$ans" in
  ''|no) ;;	# HMS: I think we can only get 'no' here...
- *) AC_DEFINE_UNQUOTED(PRESET_TICK, $ac_cv_var_tick, [Preset a value for 'tick'?]) ;;
+ *) AC_DEFINE_UNQUOTED(PRESET_TICK, [$ans], [Preset a value for 'tick'?]) ;;
 esac
 
 
