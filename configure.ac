@@ -30,11 +30,10 @@ AC_DISABLE_SHARED
 
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
-AC_PROG_CC_STDC
-dnl AC_PROG_CC_C89
-# make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
-AC_PROG_CC_C_O
+# AM_PROG_CC_C_O supersets AC_PROG_CC_C_O
+AM_PROG_CC_C_O
+AC_PROG_CC_STDC
 AC_PROG_CPP
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
@@ -340,13 +339,12 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNC(gethostent, ,
-  AC_CHECK_LIB(nsl, gethostent, , , $libxnet -lsocket))
-AC_CHECK_FUNC(openlog, , 
-  AC_CHECK_LIB(gen, openlog, , 
-  AC_CHECK_LIB(syslog, openlog, , , $libxnet -lsocket)))
-AC_CHECK_LIB(md5, MD5Init, , 
-  AC_CHECK_LIB(md, MD5Init))
+AC_CHECK_FUNC([gethostent], ,
+  AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket]))
+AC_CHECK_FUNC([openlog], , 
+  AC_SEARCH_LIBS([openlog], [gen], , 
+  AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])))
+AC_SEARCH_LIBS([MD5Init], [md5 md])
 AC_CHECK_FUNCS(MD5Init)
 
 # following block becomes on 4.2.5: NTP_LINEEDITLIBS
@@ -384,7 +382,7 @@ dnl does Strange Things with extra processes using the Posix-compatibility
 dnl real-time library, so we don't want to use it.
 
 case "$host" in
- *-*-linux*) ;;
+ *-*-*linux*) ;;
  *)
     AC_CHECK_LIB(rt, sched_setscheduler, ,
 	AC_CHECK_LIB(posix4, sched_setscheduler))
@@ -392,8 +390,7 @@ case "$host" in
 esac
 
 AC_CHECK_FUNC(setsockopt, ,
-	[AC_CHECK_LIB(socket, setsockopt)
-	 AC_CHECK_LIB(xnet, setsockopt)])
+	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
@@ -4456,11 +4453,6 @@ AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
-dnl it is not safe to share configuration
-dnl cache with sntp as it uses different
-dnl headers in a different order and 
-dnl tests for different libraries.
-dnl 
-dnl AC_CONFIG_SUBDIRS(sntp)
+AC_CONFIG_SUBDIRS(sntp)
 
 AC_OUTPUT
