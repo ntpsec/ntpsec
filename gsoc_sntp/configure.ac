@@ -14,6 +14,20 @@ AC_PREREQ([2.53])
 # Checks for programs.
 AC_PROG_CC
 
+# AC_PROG_CC_STDC has two functions.  It attempts to find a compiler
+# capable of C99, or failing that, for C89.  CC is set afterward with
+# the selected invocation, such as "gcc --std=gnu99".  Also, the
+# ac_cv_prog_cc_stdc variable is no if the compiler selected for CC
+# does not accept C89.
+
+AC_PROG_CC_STDC
+
+case "$ac_cv_prog_cc_stdc" in
+ no)
+    AC_MSG_WARN([ANSI C89/ISO C90 is the minimum to compile SNTP ]
+		[version 4.2.5 and higher.])
+esac
+
 case "$GCC" in
  yes)
     SAVED_CFLAGS_AC="$CFLAGS"
@@ -31,10 +45,7 @@ case "$GCC" in
     )
     CFLAGS="$SAVED_CFLAGS_AC"
     SAVED_CFLAGS_AC=
-esac
 
-case "$GCC" in
- yes)
     CFLAGS="$CFLAGS -Wall"
     # CFLAGS="$CFLAGS -Wcast-align"
     CFLAGS="$CFLAGS -Wcast-qual"
@@ -50,7 +61,7 @@ case "$GCC" in
     # CFLAGS="$CFLAGS -Wwrite-strings"
     case "$ac_cv_gcc_Wstrict_overflow" in
      yes)
-        #not yet#CFLAGS="$CFLAGS -Wstrict-overflow"
+	#not yet#CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
 esac
 

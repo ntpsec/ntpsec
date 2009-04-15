@@ -30,15 +30,25 @@ AC_DISABLE_SHARED
 
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
-AC_PROG_CC_STDC
-dnl AC_PROG_CC_C89
-# We should make sure CC is *some* version of ANSI.
 # Ralf Wildenhues: With per-target flags we need CC_C_O
 # AM_PROG_CC_C_O supersets AC_PROG_CC_C_O
 AM_PROG_CC_C_O
-AC_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_YACC
+
+# AC_PROG_CC_STDC has two functions.  It attempts to find a compiler
+# capable of C99, or failing that, for C89.  CC is set afterward with
+# the selected invocation, such as "gcc --std=gnu99".  Also, the
+# ac_cv_prog_cc_stdc variable is no if the compiler selected for CC
+# does not accept C89.
+
+AC_PROG_CC_STDC
+
+case "$ac_cv_prog_cc_stdc" in
+ no)
+    AC_MSG_WARN([ANSI C89/ISO C90 is the minimum to compile NTP ]
+		[version 4.2.5 and higher.])
+esac
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
 case "$host" in
@@ -260,7 +270,7 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Winit-self"
     case "$ac_cv_gcc_Wstrict_overflow" in
      yes)
-        #not yet: CFLAGS="$CFLAGS -Wstrict-overflow"
+	#not yet: CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
     ;;
 esac
@@ -4195,8 +4205,8 @@ AC_MSG_CHECKING([if we want support for Samba's signing daemon])
 AC_ARG_ENABLE(
     [ntp-signd],
     AC_HELP_STRING(
-        [--enable-ntp-signd],
-        [- Provide support for Samba's signing daemon, =/var/run/ntp_signd]
+	[--enable-ntp-signd],
+	[- Provide support for Samba's signing daemon, =/var/run/ntp_signd]
     ),
     [ans=$enableval],
     [ans=no]
@@ -4235,8 +4245,8 @@ unset wintime_default
 AC_ARG_ENABLE(
     [wintime],
     AC_HELP_STRING(
-        [--enable-wintime],
-        [- Provide the windows symmetric client hack]
+	[--enable-wintime],
+	[- Serve broken old w32time clients abusing symmetric mode]
     ),
     [ans=$enableval],
 )
