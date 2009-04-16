@@ -4179,7 +4179,7 @@ case "$ans" in
     ntp_signd_path=/var/run/ntp_signd
     ;;
  *)
-    ntp_signd_path="$ntp_signd"
+    ntp_signd_path="$ans"
 esac
 
 case "$ntp_signd_path" in
