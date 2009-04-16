@@ -4246,7 +4246,7 @@ AC_ARG_ENABLE(
     [wintime],
     AC_HELP_STRING(
 	[--enable-wintime],
-	[- Serve broken old w32time clients abusing symmetric mode]
+	[- Provide the windows symmetric client hack]
     ),
     [ans=$enableval],
 )
