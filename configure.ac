@@ -2754,7 +2754,6 @@ AC_ARG_ENABLE(TRUETIME,
 	;;
      *)
 	ntp_ok=$ntp_eac
-	ntp_ok="disabled pps_sample() gone" # delete this line alone
 	;;
     esac])
     
