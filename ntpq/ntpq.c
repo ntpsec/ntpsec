@@ -1126,11 +1126,17 @@ getresponse(
 			return ERR_TOOMUCH;
 		}
 
-		for (n = 0; n < numfrags && offset < offsets[n]; n++) {
-			/* empty body */
+		/*
+		 * Find the position for the fragment relative to any
+		 * previously received.
+		 */
+		for (n = 0; 
+		     n < numfrags && offsets[n] < offset; 
+		     n++) {
+			/* empty body */ ;
 		}
 
-		if (numfrags && (offset == offsets[n])) {
+		if (n < numfrags && offset == offsets[n]) {
 			if (debug)
 				printf("duplicate %u octets at %u "
 					"ignored, prior %u at %u\n",
