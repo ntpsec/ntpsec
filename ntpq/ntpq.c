@@ -851,6 +851,7 @@ getresponse(
 	u_short count;
 	int numfrags;
 	int seenlastfrag;
+	int shouldbesize;
 	fd_set fds;
 	int n;
 
@@ -871,305 +872,341 @@ getresponse(
 
 	FD_ZERO(&fds);
 
-    again:
-	if (numfrags == 0)
-	    tvo = tvout;
-	else
-	    tvo = tvsout;
-	
-	FD_SET(sockfd, &fds);
-	n = select(sockfd+1, &fds, (fd_set *)0, (fd_set *)0, &tvo);
+	/*
+	 * Loop until we have an error or a complete response.  Nearly all
+	 * aths to loop again use continue.
+	 */
+	for (;;) {
 
-#if 0
-	if (debug >= 1)
-	    printf("select() returns %d\n", n);
-#endif
+		if (numfrags == 0)
+		    tvo = tvout;
+		else
+		    tvo = tvsout;
+		
+		FD_SET(sockfd, &fds);
+		n = select(sockfd+1, &fds, (fd_set *)0, (fd_set *)0, &tvo);
 
-	if (n == -1) {
-		warning("select fails", "", "");
-		return -1;
-	}
-	if (n == 0) {
-		/*
-		 * Timed out.  Return what we have
-		 */
-		if (numfrags == 0) {
-			if (timeo)
-			    (void) fprintf(stderr,
-					   "%s: timed out, nothing received\n",
-					   currenthost);
-			return ERR_TIMEOUT;
-		} else {
-			if (timeo)
-			    (void) fprintf(stderr,
-					   "%s: timed out with incomplete data\n",
-					   currenthost);
-			if (debug) {
-				printf("Received fragments:\n");
-				for (n = 0; n < numfrags; n++)
-				    printf("%4d %d\n", offsets[n],
-					   counts[n]);
-				if (seenlastfrag)
-				    printf("last fragment received\n");
-				else
-				    printf("last fragment not received\n");
+		if (n == -1) {
+			warning("select fails", "", "");
+			return -1;
+		}
+		if (n == 0) {
+			/*
+			 * Timed out.  Return what we have
+			 */
+			if (numfrags == 0) {
+				if (timeo)
+				    (void) fprintf(stderr,
+						   "%s: timed out, nothing received\n",
+						   currenthost);
+				return ERR_TIMEOUT;
+			} else {
+				if (timeo)
+				    (void) fprintf(stderr,
+						   "%s: timed out with incomplete data\n",
+						   currenthost);
+				if (debug) {
+					printf("Received fragments:\n");
+					for (n = 0; n < numfrags; n++)
+					    printf("%4d %d\n", offsets[n],
+						   counts[n]);
+					if (seenlastfrag)
+					    printf("last fragment received\n");
+					else
+					    printf("last fragment not received\n");
+				}
+				return ERR_INCOMPLETE;
 			}
+		}
+
+		n = recv(sockfd, (char *)&rpkt, sizeof(rpkt), 0);
+		if (n == -1) {
+			warning("read", "", "");
+			return -1;
+		}
+
+		if (debug >= 4) {
+			int len = n, first = 8;
+			char *data = (char *)&rpkt;
+
+			printf("Packet data:\n");
+			while (len-- > 0) {
+				if (first-- == 0) {
+					printf("\n");
+					first = 7;
+				}
+				printf(" %02x", *data++ & 0xff);
+			}
+			printf("\n");
+		}
+
+		/*
+		 * Check for format errors.  Bug proofing.
+		 */
+		if (n < CTL_HEADER_LEN) {
+			if (debug)
+			    printf("Short (%d byte) packet received\n", n);
+			continue;
+		}
+		if (PKT_VERSION(rpkt.li_vn_mode) > NTP_VERSION
+		    || PKT_VERSION(rpkt.li_vn_mode) < NTP_OLDVERSION) {
+			if (debug)
+			    printf("Packet received with version %d\n",
+				   PKT_VERSION(rpkt.li_vn_mode));
+			continue;
+		}
+		if (PKT_MODE(rpkt.li_vn_mode) != MODE_CONTROL) {
+			if (debug)
+			    printf("Packet received with mode %d\n",
+				   PKT_MODE(rpkt.li_vn_mode));
+			continue;
+		}
+		if (!CTL_ISRESPONSE(rpkt.r_m_e_op)) {
+			if (debug)
+			    printf("Received request packet, wanted response\n");
+			continue;
+		}
+
+		/*
+		 * Check opcode and sequence number for a match.
+		 * Could be old data getting to us.
+		 */
+		if (ntohs(rpkt.sequence) != sequence) {
+			if (debug)
+			    printf(
+				    "Received sequnce number %d, wanted %d\n",
+				    ntohs(rpkt.sequence), sequence);
+			continue;
+		}
+		if (CTL_OP(rpkt.r_m_e_op) != opcode) {
+			if (debug)
+			    printf(
+				    "Received opcode %d, wanted %d (sequence number okay)\n",
+				    CTL_OP(rpkt.r_m_e_op), opcode);
+			continue;
+		}
+
+		/*
+		 * Check the error code.  If non-zero, return it.
+		 */
+		if (CTL_ISERROR(rpkt.r_m_e_op)) {
+			int errcode;
+
+			errcode = (ntohs(rpkt.status) >> 8) & 0xff;
+			if (debug && CTL_ISMORE(rpkt.r_m_e_op)) {
+				printf("Error code %d received on not-final packet\n",
+				       errcode);
+			}
+			if (errcode == CERR_UNSPEC)
+			    return ERR_UNSPEC;
+			return errcode;
+		}
+
+		/*
+		 * Check the association ID to make sure it matches what
+		 * we sent.
+		 */
+		if (ntohs(rpkt.associd) != associd) {
+			if (debug)
+			    printf("Association ID %d doesn't match expected %d\n",
+				   ntohs(rpkt.associd), associd);
+			/*
+			 * Hack for silly fuzzballs which, at the time of writing,
+			 * return an assID of sys.peer when queried for system variables.
+			 */
+#ifdef notdef
+			continue;
+#endif
+		}
+
+		/*
+		 * Collect offset and count.  Make sure they make sense.
+		 */
+		offset = ntohs(rpkt.offset);
+		count = ntohs(rpkt.count);
+
+		/*
+		 * validate received payload size is padded to next 32-bit
+		 * boundary and no smaller than claimed by rpkt.count
+		 */
+		if (n & 0x3) {
+			if (debug)
+				printf("Response packet not padded, "
+					"size = %d\n", n);
+			continue;
+		}
+
+		shouldbesize = (CTL_HEADER_LEN + count + 3) & ~3;
+
+		if (n < shouldbesize) {
+			printf("Response packet claims %u octets "
+				"payload, above %d received\n",
+				count,
+				n - CTL_HEADER_LEN
+				);
 			return ERR_INCOMPLETE;
 		}
-	}
 
-	n = recv(sockfd, (char *)&rpkt, sizeof(rpkt), 0);
-	if (n == -1) {
-		warning("read", "", "");
-		return -1;
-	}
+		if (debug >= 3 && shouldbesize > n) {
+			u_long key;
+			u_long *lpkt;
+			int maclen;
 
-	if (debug >= 4) {
-		int len = n, first = 8;
-		char *data = (char *)&rpkt;
+			/*
+			 * Usually we ignore authentication, but for debugging purposes
+			 * we watch it here.
+			 */
+			/* round to 8 octet boundary */
+			shouldbesize = (shouldbesize + 7) & ~7;
 
-		printf("Packet data:\n");
-		while (len-- > 0) {
-			if (first-- == 0) {
-				printf("\n");
-				first = 7;
-			}
-			printf(" %02x", *data++ & 0xff);
-		}
-		printf("\n");
-	}
-
-	/*
-	 * Check for format errors.  Bug proofing.
-	 */
-	if (n < CTL_HEADER_LEN) {
-		if (debug)
-		    printf("Short (%d byte) packet received\n", n);
-		goto again;
-	}
-	if (PKT_VERSION(rpkt.li_vn_mode) > NTP_VERSION
-	    || PKT_VERSION(rpkt.li_vn_mode) < NTP_OLDVERSION) {
-		if (debug)
-		    printf("Packet received with version %d\n",
-			   PKT_VERSION(rpkt.li_vn_mode));
-		goto again;
-	}
-	if (PKT_MODE(rpkt.li_vn_mode) != MODE_CONTROL) {
-		if (debug)
-		    printf("Packet received with mode %d\n",
-			   PKT_MODE(rpkt.li_vn_mode));
-		goto again;
-	}
-	if (!CTL_ISRESPONSE(rpkt.r_m_e_op)) {
-		if (debug)
-		    printf("Received request packet, wanted response\n");
-		goto again;
-	}
-
-	/*
-	 * Check opcode and sequence number for a match.
-	 * Could be old data getting to us.
-	 */
-	if (ntohs(rpkt.sequence) != sequence) {
-		if (debug)
-		    printf(
-			    "Received sequnce number %d, wanted %d\n",
-			    ntohs(rpkt.sequence), sequence);
-		goto again;
-	}
-	if (CTL_OP(rpkt.r_m_e_op) != opcode) {
-		if (debug)
-		    printf(
-			    "Received opcode %d, wanted %d (sequence number okay)\n",
-			    CTL_OP(rpkt.r_m_e_op), opcode);
-		goto again;
-	}
-
-	/*
-	 * Check the error code.  If non-zero, return it.
-	 */
-	if (CTL_ISERROR(rpkt.r_m_e_op)) {
-		int errcode;
-
-		errcode = (ntohs(rpkt.status) >> 8) & 0xff;
-		if (debug && CTL_ISMORE(rpkt.r_m_e_op)) {
-			printf("Error code %d received on not-final packet\n",
-			       errcode);
-		}
-		if (errcode == CERR_UNSPEC)
-		    return ERR_UNSPEC;
-		return errcode;
-	}
-
-	/*
-	 * Check the association ID to make sure it matches what
-	 * we sent.
-	 */
-	if (ntohs(rpkt.associd) != associd) {
-		if (debug)
-		    printf("Association ID %d doesn't match expected %d\n",
-			   ntohs(rpkt.associd), associd);
-		/*
-		 * Hack for silly fuzzballs which, at the time of writing,
-		 * return an assID of sys.peer when queried for system variables.
-		 */
-#ifdef notdef
-		goto again;
-#endif
-	}
-
-	/*
-	 * Collect offset and count.  Make sure they make sense.
-	 */
-	offset = ntohs(rpkt.offset);
-	count = ntohs(rpkt.count);
-
-	if (debug >= 3) {
-		int shouldbesize;
-		u_long key;
-		u_long *lpkt;
-		int maclen;
-
-		/*
-		 * Usually we ignore authentication, but for debugging purposes
-		 * we watch it here.
-		 */
-		shouldbesize = CTL_HEADER_LEN + count;
-
-		/* round to 8 octet boundary */
-		shouldbesize = (shouldbesize + 7) & ~7;
-
-		if (n & 0x3) {
-			printf("Packet not padded, size = %d\n", n);
-		} if ((maclen = n - shouldbesize) >= MIN_MAC_LEN) {
-			printf(
-				"Packet shows signs of authentication (total %d, data %d, mac %d)\n",
-				n, shouldbesize, maclen);
-			lpkt = (u_long *)&rpkt;
-			printf("%08lx %08lx %08lx %08lx %08lx %08lx\n",
-			       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 3]),
-			       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 2]),
-			       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 1]),
-			       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long)]),
-			       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) + 1]),
-			       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) + 2]));
-			key = ntohl(lpkt[(n - maclen) / sizeof(u_long)]);
-			printf("Authenticated with keyid %lu\n", (u_long)key);
-			if (key != 0 && key != info_auth_keyid) {
-				printf("We don't know that key\n");
-			} else {
-				if (authdecrypt(key, (u_int32 *)&rpkt,
-				    n - maclen, maclen)) {
-					printf("Auth okay!\n");
+			maclen = n - shouldbesize;
+			if (maclen >= MIN_MAC_LEN) {
+				printf(
+					"Packet shows signs of authentication (total %d, data %d, mac %d)\n",
+					n, shouldbesize, maclen);
+				lpkt = (u_long *)&rpkt;
+				printf("%08lx %08lx %08lx %08lx %08lx %08lx\n",
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 3]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 2]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 1]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long)]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) + 1]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) + 2]));
+				key = ntohl(lpkt[(n - maclen) / sizeof(u_long)]);
+				printf("Authenticated with keyid %lu\n", (u_long)key);
+				if (key != 0 && key != info_auth_keyid) {
+					printf("We don't know that key\n");
 				} else {
-					printf("Auth failed!\n");
+					if (authdecrypt(key, (u_int32 *)&rpkt,
+					    n - maclen, maclen)) {
+						printf("Auth okay!\n");
+					} else {
+						printf("Auth failed!\n");
+					}
 				}
 			}
 		}
-	}
 
-	if (debug >= 2)
-	    printf("Got packet, size = %d\n", n);
-	if (count > (u_short)(n-CTL_HEADER_LEN)) {
-		if (debug)
-		    printf(
-			    "Received count of %d octets, data in packet is %d\n",
-			    count, n-CTL_HEADER_LEN);
-		goto again;
-	}
-	if (count == 0 && CTL_ISMORE(rpkt.r_m_e_op)) {
-		if (debug)
-		    printf("Received count of 0 in non-final fragment\n");
-		goto again;
-	}
-	if (offset + count > sizeof(pktdata)) {
-		if (debug)
-		    printf("Offset %d, count %d, too big for buffer\n",
-			   offset, count);
-		return ERR_TOOMUCH;
-	}
-	if (seenlastfrag && !CTL_ISMORE(rpkt.r_m_e_op)) {
-		if (debug)
-		    printf("Received second last fragment packet\n");
-		goto again;
-	}
-
-	/*
-	 * So far, so good.  Record this fragment, making sure it doesn't
-	 * overlap anything.
-	 */
-	if (debug >= 2)
-	    printf("Packet okay\n");;
-
-	if (numfrags == MAXFRAGS) {
-		if (debug)
-		    printf("Number of fragments exceeds maximum\n");
-		return ERR_TOOMUCH;
-	}
-	
-	for (n = 0; n < numfrags; n++) {
-		if (offset == offsets[n])
-		    goto again;	/* duplicate */
-		if (offset < offsets[n])
-		    break;
-	}
-	
-	if ((u_short)(n > 0 && offsets[n-1] + counts[n-1]) > offset)
-	    goto overlap;
-	if (n < numfrags && (u_short)(offset + count) > offsets[n])
-	    goto overlap;
-	
-	{
-		register int i;
-		
-		for (i = numfrags; i > n; i--) {
-			offsets[i] = offsets[i-1];
-			counts[i] = counts[i-1];
+		if (debug >= 2)
+		    printf("Got packet, size = %d\n", n);
+		if ((int)count > (n - CTL_HEADER_LEN)) {
+			if (debug)
+				printf("Received count of %d octets, "
+					"data in packet is %d\n",
+					count, n-CTL_HEADER_LEN);
+			continue;
 		}
-	}
-	offsets[n] = offset;
-	counts[n] = count;
-	numfrags++;
-
-	/*
-	 * Got that stuffed in right.  Figure out if this was the last.
-	 * Record status info out of the last packet.
-	 */
-	if (!CTL_ISMORE(rpkt.r_m_e_op)) {
-		seenlastfrag = 1;
-		if (rstatus != 0)
-		    *rstatus = ntohs(rpkt.status);
-	}
-
-	/*
-	 * Copy the data into the data buffer.
-	 */
-	memmove((char *)pktdata + offset, (char *)rpkt.data, count);
-
-	/*
-	 * If we've seen the last fragment, look for holes in the sequence.
-	 * If there aren't any, we're done.
-	 */
-	if (seenlastfrag && offsets[0] == 0) {
-		for (n = 1; n < numfrags; n++) {
-			if (offsets[n-1] + counts[n-1] != offsets[n])
-			    break;
+		if (count == 0 && CTL_ISMORE(rpkt.r_m_e_op)) {
+			if (debug)
+			    printf("Received count of 0 in non-final fragment\n");
+			continue;
 		}
-		if (n == numfrags) {
-			*rsize = offsets[numfrags-1] + counts[numfrags-1];
-			return 0;
+		if (offset + count > sizeof(pktdata)) {
+			if (debug)
+			    printf("Offset %d, count %d, too big for buffer\n",
+				   offset, count);
+			return ERR_TOOMUCH;
 		}
-	}
-	goto again;
+		if (seenlastfrag && !CTL_ISMORE(rpkt.r_m_e_op)) {
+			if (debug)
+			    printf("Received second last fragment packet\n");
+			continue;
+		}
 
-    overlap:
-	/*
-	 * Print debugging message about overlapping fragments
-	 */
-	if (debug)
-	    printf("Overlapping fragments returned in response\n");
-	goto again;
-}
+		/*
+		 * So far, so good.  Record this fragment, making sure it doesn't
+		 * overlap anything.
+		 */
+		if (debug >= 2)
+		    printf("Packet okay\n");;
+
+		if (numfrags > (MAXFRAGS - 1)) {
+			if (debug)
+			    printf("Number of fragments exceeds maximum\n");
+			return ERR_TOOMUCH;
+		}
+
+		for (n = 0; n < numfrags && offset < offsets[n]; n++) {
+			/* empty body */
+		}
+
+		if (numfrags && (offset == offsets[n])) {
+			if (debug)
+				printf("duplicate %u octets at %u "
+					"ignored, prior %u at %u\n",
+					count,
+					offset,
+					counts[n],
+					offsets[n]
+					);
+			continue;
+		}
+
+		if (n > 0 && (offsets[n-1] + counts[n-1]) > offset) {
+			if (debug)
+				printf("received frag at %u overlaps "
+					"with %u octet frag at %u\n",
+					offset,
+					counts[n-1],
+					offsets[n-1]
+					);
+			continue;
+		}
+
+		if (n < numfrags && (offset + count) > offsets[n]) {
+			if (debug)
+				printf("received %u octet frag at %u "
+					"overlaps with frag at %u\n",
+					count,
+					offset,
+					offsets[n]
+					);
+			continue;
+		}
+
+		{
+			register int i;
+			
+			for (i = numfrags; i > n; i--) {
+				offsets[i] = offsets[i-1];
+				counts[i] = counts[i-1];
+			}
+		}
+		offsets[n] = offset;
+		counts[n] = count;
+		numfrags++;
+
+		/*
+		 * Got that stuffed in right.  Figure out if this was the last.
+		 * Record status info out of the last packet.
+		 */
+		if (!CTL_ISMORE(rpkt.r_m_e_op)) {
+			seenlastfrag = 1;
+			if (rstatus != 0)
+			    *rstatus = ntohs(rpkt.status);
+		}
+
+		/*
+		 * Copy the data into the data buffer.
+		 */
+		memmove((char *)pktdata + offset, (char *)rpkt.data, count);
+
+		/*
+		 * If we've seen the last fragment, look for holes in the sequence.
+		 * If there aren't any, we're done.
+		 */
+		if (seenlastfrag && offsets[0] == 0) {
+			for (n = 1; n < numfrags; n++) {
+				if (offsets[n-1] + counts[n-1] != offsets[n])
+					break;
+			}
+			if (n == numfrags) {
+				*rsize = offsets[numfrags-1] + counts[numfrags-1];
+				return 0;
+			}
+		}
+	}  /* giant for (;;) collecting response packets */
+}  /* getresponse() */
 
 
 /*
