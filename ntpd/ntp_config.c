@@ -45,7 +45,6 @@
 
 #ifdef SYS_WINNT
 # include <io.h>
-static HANDLE ResolverThreadHandle = NULL;
 HANDLE ResolverEventHandle;
 #else
 int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent process */
@@ -2725,22 +2724,24 @@ do_resolve_internal(void)
 		 * of the new process is an executable filename rather than
 		 * a function name as desired here.
 		 */
-		DWORD dwThreadId;
+		unsigned thread_id;
+		uintptr_t res_thd_handle;
+
 		fflush(stdout);
 		ResolverEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 		if (ResolverEventHandle == NULL) {
 			msyslog(LOG_ERR, "Unable to create resolver event object, can't start ntp_intres");
 			abort_resolve();
 		}
-		ResolverThreadHandle = CreateThread(
-		    NULL,			 /* no security attributes	*/
-		    0,				 /* use default stack size	*/
-		    (LPTHREAD_START_ROUTINE) ntp_intres, /* thread function		*/
-		    NULL,			 /* argument to thread function   */
-		    0,				 /* use default creation flags	  */
-		    &dwThreadId);		 /* returns the thread identifier */
-		if (ResolverThreadHandle == NULL) {
-			msyslog(LOG_ERR, "CreateThread() failed, can't start ntp_intres");
+		res_thd_handle = _beginthreadex(
+			NULL,			/* no security attributes	*/
+			0,			/* use default stack size	*/
+			ntp_intres_thread,	/* thread function		*/
+			NULL,			/* argument to thread function	*/
+			0,			/* use default creation flags	*/
+			&thread_id);		/* receives thread identifier	*/
+		if (!res_thd_handle) {
+			msyslog(LOG_ERR, "_beginthreadex ntp_intres_thread failed %m");
 			CloseHandle(ResolverEventHandle);
 			ResolverEventHandle = NULL;
 			abort_resolve();

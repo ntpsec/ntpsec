@@ -185,7 +185,7 @@ static void resolver_exit (int code)
 #ifdef SYS_WINNT
 	CloseHandle(ResolverEventHandle);
 	ResolverEventHandle = NULL;
-	ExitThread(code);	/* Just to kill the thread not the process */
+	_endthreadex(code);	/* Just to kill the thread not the process */
 #else
 	exit(code);		/* kill the forked process */
 #endif
@@ -334,6 +334,21 @@ ntp_intres(void)
 	}
 }
 
+
+#ifdef SYS_WINNT
+/*
+ * ntp_intres_thread wraps the slightly different interface of Windows
+ * thread functions and ntp_intres
+ */
+unsigned WINAPI
+ntp_intres_thread(void *UnusedThreadArg)
+{
+	UNUSED_ARG(UnusedThreadArg);
+
+	ntp_intres();
+	return 0;
+}
+#endif /* SYS_WINNT */
 
 
 /*

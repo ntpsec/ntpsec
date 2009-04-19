@@ -1,3 +1,4 @@
+* [Bug 1125] C runtime per-thread initialization on Windows
 * [Bug 1152] temporarily disable refclock_parse, refclock_true until
   maintainers can repair build break from pps_sample()
 * [Bug 1153] refclock_nmea should not mix UTC with GPS time
