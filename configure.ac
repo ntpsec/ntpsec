@@ -1624,6 +1624,9 @@ AC_CACHE_CHECK([if we need a ctty for F_SETOWN], ac_cv_func_ctty_for_f_setown,
  *-*-osf*)
     ans=yes
     ;;
+ *-*-darwin*)
+    ans=yes
+    ;;
  *) ans=no
     ;;
 esac
