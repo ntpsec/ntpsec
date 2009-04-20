@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include "ntp_machine.h"
+#include "ntp_assert.h"
 #include "ntp_fp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
@@ -182,6 +183,7 @@ get_free_recv_buffer_alloc(void)
 		create_buffers(RECV_INC);
 		buffer = get_free_recv_buffer();
 	}
+	NTP_ENSURE(NULL != buffer);
 	return (buffer);
 }
 #endif
