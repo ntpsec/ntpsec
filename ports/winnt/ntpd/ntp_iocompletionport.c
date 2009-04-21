@@ -288,10 +288,10 @@ init_io_completion_port(
 	}
 	/* Create the event used to signal an exit event
 	 */
-	WaitableExitEventHandle = CreateEvent(NULL, FALSE, FALSE, "WaitableExitEventHandle");
+	WaitableExitEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (WaitableExitEventHandle == NULL) {
 		msyslog(LOG_ERR,
-		"Can't create exit event handle: %m - another process may be running - EXITING");
+		"Can't create exit event handle: %m - EXITING");
 		exit(1);
 	}
 
