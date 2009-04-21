@@ -19,6 +19,7 @@
 #include "ntp_request.h"
 #include "clockstuff.h"
 #include "ntp_io.h"
+#include "clockstuff.h"
 
 /*
  * Request types
@@ -75,6 +76,12 @@ static HANDLE hIoCompletionPort = NULL;
 
 static HANDLE WaitableIoEventHandle = NULL;
 static HANDLE WaitableExitEventHandle = NULL;
+
+#ifdef NTPNEEDNAMEDHANDLE
+#define WAITABLEIOEVENTHANDLE "WaitableIoEventHandle"
+#else
+#define WAITABLEIOEVENTHANDLE NULL
+#endif
 
 #define MAXHANDLES 3
 HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
@@ -141,7 +148,8 @@ static void
 signal_io_completion_port_exit()
 {
 	if (!PostQueuedCompletionStatus(hIoCompletionPort, 0, 0, 0)) {
-		DPRINTF(1, ("Can't request IO thread to exit: %d\n", GetLastError()));
+		msyslog(LOG_ERR, "Can't request service thread to exit: %m");
+		exit(1);
 	}
 }
 
@@ -273,24 +281,28 @@ init_io_completion_port(
 
 	/* Create the event used to signal an IO event
 	 */
-	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
-
+	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, WAITABLEIOEVENTHANDLE);
+	if (WaitableIoEventHandle == NULL) {
+		msyslog(LOG_ERR,
+		"Can't create I/O event handle: %m - another process may be running - EXITING");
+		exit(1);
+	}
 	/* Create the event used to signal an exit event
 	 */
 	WaitableExitEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (WaitableExitEventHandle == NULL) {
+		msyslog(LOG_ERR,
+		"Can't create exit event handle: %m - EXITING");
+		exit(1);
+	}
 
 	/* Create the IO completion port
 	 */
 	hIoCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-
-#ifdef DEBUG
-	if (NULL == WaitableExitEventHandle || 
-	    NULL == WaitableIoEventHandle ||
-	    NULL == hIoCompletionPort) {
-		DPRINTF(1, ("init_io_completion_port: Can't create event or port\n"));
+	if (hIoCompletionPort == NULL) {
+		msyslog(LOG_ERR, "Can't create I/O completion port: %m");
 		exit(1);
 	}
-#endif
 
 	/*
 	 * Initialize the Wait Handles

@@ -229,6 +229,10 @@
 * [Bug 980] Direct help to stdout.
 ---
 
+* [Bug 787] Bug fixes for 64-bit time_t on Windows
+* [Bug 813] Conditional naming of Event
+* [Bug 1147] System errors should be logged to msyslog()
+* [Bug 1156] lock_thread_to_processor() should be declared in header
 * [Bug 1157] quiet OpenSSL warnings, clean up configure.ac
 * [Bug 1158] support for aix6.1
 * [Bug 1160] MacOS X is like BSD regarding F_SETOWN
