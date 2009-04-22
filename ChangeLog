@@ -1,3 +1,4 @@
+(4.2.5p164) 2009/04/22 Released by Harlan Stenn <stenn@ntp.org>
 * PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
 * [Bug 1125] C runtime per-thread initialization on Windows
