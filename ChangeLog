@@ -234,6 +234,7 @@
 * [Bug 787] Bug fixes for 64-bit time_t on Windows
 * [Bug 813] Conditional naming of Event
 * [Bug 1147] System errors should be logged to msyslog()
+* [Bug 1155] Fix compile problem on Windows with VS2005
 * [Bug 1156] lock_thread_to_processor() should be declared in header
 * [Bug 1157] quiet OpenSSL warnings, clean up configure.ac
 * [Bug 1158] support for aix6.1
