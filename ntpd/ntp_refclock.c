@@ -34,6 +34,11 @@
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
 
+#ifdef HAVE_PPSAPI
+#include "ppsapi_timepps.h"
+#include "refclock_atom.h"
+#endif /* HAVE_PPSAPI */
+
 /*
  * Reference clock support is provided here by maintaining the fiction
  * that the clock is actually a peer. As no packets are exchanged with a
@@ -73,6 +78,7 @@
 #ifdef PPS
 int	fdpps;			/* ppsclock legacy */
 #endif /* PPS */
+
 int	cal_enable;		/* enable refclock calibrate */
 
 /*
@@ -1195,4 +1201,154 @@ refclock_buginfo(
 		(refclock_conf[clktype]->clock_buginfo)(unit, bug, peer);
 }
 
+
+#ifdef HAVE_PPSAPI
+/*
+ * refclock_ppsapi - initialize/update ppsapi
+ *
+ * This routine is called after the fudge command to open the PPSAPI
+ * interface for later parameter setting after the fudge command.
+ */
+int
+refclock_ppsapi(
+	int	fddev,			/* fd device */
+	struct refclock_atom *ap	/* atom structure pointer */
+	)
+{
+	if (ap->handle == NULL) {
+		if (time_pps_create(fddev, &ap->handle) < 0) {
+			msyslog(LOG_ERR,
+			    "refclock_atom: time_pps_create failed: %m");
+			return (errno);
+		}
+	}
+	return (1);
+}
+
+
+/*
+ * refclock_params - set ppsapi parameters
+ *
+ * This routine is called to set the PPSAPI parameters after the fudge
+ * command.
+ */
+int
+refclock_params(
+	int	mode,			/* mode bits */
+	struct refclock_atom *ap	/* atom structure pointer */
+	)
+{
+	memset(&ap->pps_params, 0, sizeof(pps_params_t));
+	ap->pps_params.api_version = PPS_API_VERS_1;
+
+	/*
+	 * Solaris serial ports provide PPS pulse capture only on the
+	 * assert edge. FreeBSD serial ports provide capture on the
+	 * clear edge, while FreeBSD parallel ports provide capture
+	 * on the assert edge. Your mileage may vary.
+	 */
+	if (mode & CLK_FLAG2)
+		ap->pps_params.mode = PPS_TSFMT_TSPEC | PPS_CAPTURECLEAR;
+	else
+		ap->pps_params.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREASSERT;
+	if (time_pps_setparams(ap->handle, &ap->pps_params) < 0) {
+		msyslog(LOG_ERR,
+		    "refclock_ppsapi: time_pps_setparams failed: %m");
+		return (errno);
+	}
+
+	/*
+	 * If flag3 is lit, select the kernel PPS.
+	 */
+	if (mode & CLK_FLAG3) {
+		if (time_pps_kcbind(ap->handle, PPS_KC_HARDPPS,
+		    ap->pps_params.mode & ~PPS_TSFMT_TSPEC,
+		    PPS_TSFMT_TSPEC) < 0) {
+			if (errno != EOPNOTSUPP) { 
+				msyslog(LOG_ERR,
+				    "refclock_ppsapi: time_pps_kcbind failed: %m");
+				return (errno);
+			}
+		}
+		pps_enable = 1;
+	}
+	return (1);
+}
+
+
+/*
+ * refclock_pps - called once per second
+ *
+ * This routine is called once per second. It snatches the PPS
+ * timestamp from the kernel and saves the sign-extended fraction in
+ * a circular buffer for processing at the next poll event.
+ */
+int
+refclock_pps(
+	struct peer *peer,		/* peer structure pointer */
+	struct refclock_atom *ap,	/* atom structure pointer */
+	int	mode			/* mode bits */	
+	)
+{
+	struct refclockproc *pp;
+	pps_info_t pps_info;
+	struct timespec timeout;
+	double	dtemp;
+
+	/*
+	 * We require the clock to be synchronized before setting the
+	 * parameters. When the parameters have been set, fetch the
+	 * most recent PPS timestamp.
+	 */ 
+	pp = peer->procptr;
+	if (ap->handle == NULL)
+		return (0);
+
+	if (ap->pps_params.mode == 0 && sys_leap != LEAP_NOTINSYNC) {
+		if (refclock_params(pp->sloppyclockflag, ap) < 1)
+			return (0);
+	}
+	timeout.tv_sec = 0;
+	timeout.tv_nsec = 0;
+	memset(&pps_info, 0, sizeof(pps_info_t));
+	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC, &pps_info,
+	    &timeout) < 0) {
+		refclock_report(peer, CEVNT_FAULT);
+		return (errno);
+	}
+	timeout = ap->ts;
+	if (ap->pps_params.mode & PPS_CAPTUREASSERT)
+		ap->ts = pps_info.assert_timestamp;
+	else if (ap->pps_params.mode & PPS_CAPTURECLEAR)
+		ap->ts = pps_info.clear_timestamp;
+	else
+		return (0);
+	
+	/*
+	 * There can be zero, one or two PPS pulses between polls,
+	 * depending on the poll interval relative to the PPS interval.
+	 * The pulse must be newer and within the range gate relative
+	 * to the last pulse.
+	 */
+	if (ap->ts.tv_sec <= timeout.tv_sec || abs(ap->ts.tv_nsec -
+	    timeout.tv_nsec) > RANGEGATE)
+		return (0);
+
+	/*
+	 * Convert to signed fraction offset and stuff in median filter.
+	 */
+	pp->lastrec.l_ui = ap->ts.tv_sec + JAN_1970;
+	dtemp = ap->ts.tv_nsec / 1e9;
+	pp->lastrec.l_uf = (u_int32)(dtemp * FRAC);
+	if (dtemp > .5)
+		dtemp -= 1.;
+	SAMPLE(-(dtemp + pp->fudgetime1));
+#ifdef DEBUG
+	if (debug > 1)
+		printf("refclock_pps: %lu %f %f\n", current_time,
+		    dtemp, pp->fudgetime1);
+#endif
+	return (1);
+}
+#endif /* HAVE_PPSAPI */
 #endif /* REFCLOCK */
