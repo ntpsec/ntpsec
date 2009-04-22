@@ -11,7 +11,6 @@
 #include "ntp_refclock.h"
 #include "recvbuff.h"
 
-
 /* ntp_config.c */
 
 #define	TAI_1972	10	/* initial TAI offset (s) */

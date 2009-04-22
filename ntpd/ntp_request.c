@@ -1607,7 +1607,13 @@ do_unconf(
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
 #endif
+#if 1
 		peer_unconfig(&peeraddr, (struct interface *)0, -1);
+#else
+		/* We might be able to get rid of the peeraddr stuff */
+		peer_clear(peer, "GONE");
+		unpeer(peer);
+#endif
 		cp = (struct conf_unpeer *)
 		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
 	}
