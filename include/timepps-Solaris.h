@@ -1,6 +1,6 @@
 /***********************************************************************
  *								       *
- * Copyright (c) David L. Mills 1999-2000			       *
+ * Copyright (c) David L. Mills 1999-2009			       *
  *								       *
  * Permission to use, copy, modify, and distribute this software and   *
  * its documentation for any purpose and without fee is hereby	       *
@@ -178,12 +178,33 @@ typedef struct pps_params {
 #define assert_offset_ntpfp	assert_off_tu.ntpfp
 #define clear_offset_ntpfp	clear_off_tu.ntpfp
 
+/* addition of NTP fixed-point format */
+
+#define NTPFP_M_ADD(r_i, r_f, a_i, a_f) 	/* r += a */ \
+	do { \
+		register u_int32 lo_tmp; \
+		register u_int32 hi_tmp; \
+		\
+		lo_tmp = ((r_f) & 0xffff) + ((a_f) & 0xffff); \
+		hi_tmp = (((r_f) >> 16) & 0xffff) + (((a_f) >> 16) & 0xffff); \
+		if (lo_tmp & 0x10000) \
+			hi_tmp++; \
+		(r_f) = ((hi_tmp & 0xffff) << 16) | (lo_tmp & 0xffff); \
+		\
+		(r_i) += (a_i); \
+		if (hi_tmp & 0x10000) \
+			(r_i)++; \
+	} while (0)
+
+#define	NTPFP_L_ADDS(r, a)	NTPFP_M_ADD((r)->integral, (r)->fractional, \
+					    (int)(a)->integral, (a)->fractional)
+
 /*
  * The following definitions are architecture-dependent
  */
 
 #define PPS_CAP (PPS_CAPTUREASSERT | PPS_OFFSETASSERT | PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)
-#define PPS_RO	(PPS_CANWAIT | PPS_CANPOLL | PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)
+#define PPS_RO	(PPS_CANWAIT | PPS_CANPOLL)
 
 typedef struct {
 	int filedes;		/* file descriptor */
@@ -303,13 +324,40 @@ time_pps_setparams(
 
 	mode_in = params->mode;
 
+	/*
+	 * Only one of the time formats may be selected
+	 * if a nonzero assert offset is supplied.
+	 */
+	if ((mode_in & (PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)) ==
+	    (PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)) {
+
+		if (handle->params.assert_offset.tv_sec ||
+			handle->params.assert_offset.tv_nsec) {
+
+			errno = EINVAL;
+			return(-1);
+		}
+
+		/*
+		 * If no offset was specified but both time
+		 * format flags are used consider it harmless
+		 * but turn off PPS_TSFMT_NTPFP so getparams
+		 * will not show both formats lit.
+		 */
+		mode_in &= ~PPS_TSFMT_NTPFP;
+	}
+
 	/* turn off read-only bits */
 
 	mode_in &= ~PPS_RO;
 
-	/* test remaining bits, should only have captureassert and/or offsetassert */
+	/*
+	 * test remaining bits, should only have captureassert, 
+	 * offsetassert, and/or timestamp format bits.
+	 */
 
-	if (mode_in & ~(PPS_CAPTUREASSERT | PPS_OFFSETASSERT)) {
+	if (mode_in & ~(PPS_CAPTUREASSERT | PPS_OFFSETASSERT |
+			PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)) {
 		errno = EOPNOTSUPP;
 		return(-1);
 	}
@@ -435,32 +483,33 @@ time_pps_fetch(
 		return(-1);
 	}
 
-	/*
-	 * Apply offsets as specified. Note that only assert timestamps
-	 * are captured by this interface.
-	 */
-
 	infobuf.assert_sequence = ev.serial;
 	infobuf.assert_timestamp.tv_sec = ev.tv.tv_sec;
 	infobuf.assert_timestamp.tv_nsec = ev.tv.tv_usec * 1000;
 
-	if (handle->params.mode & PPS_OFFSETASSERT) {
-		infobuf.assert_timestamp.tv_sec  += handle->params.assert_offset.tv_sec;
-		infobuf.assert_timestamp.tv_nsec += handle->params.assert_offset.tv_nsec;
-		PPS_NORMALIZE(infobuf.assert_timestamp);
-	}
-
 	/*
-	 * Translate to specified format
+	 * Translate to specified format then apply offset
 	 */
 
 	switch (tsformat) {
 	case PPS_TSFMT_TSPEC:
-		break;		 /* timespec format requires no translation */
-
-	case PPS_TSFMT_NTPFP:	/* NTP format requires conversion to fraction form */
-		PPS_TSPECTONTP(infobuf.assert_timestamp_ntpfp);
+		/* timespec format requires no conversion */
+		if (handle->params.mode & PPS_OFFSETASSERT) {
+			infobuf.assert_timestamp.tv_sec  += 
+				handle->params.assert_offset.tv_sec;
+			infobuf.assert_timestamp.tv_nsec += 
+				handle->params.assert_offset.tv_nsec;
+			PPS_NORMALIZE(infobuf.assert_timestamp);
+		}
 		break;
+
+	case PPS_TSFMT_NTPFP:
+		/* NTP format requires conversion to fraction form */
+		PPS_TSPECTONTP(infobuf.assert_timestamp_ntpfp);
+		if (handle->params.mode & PPS_OFFSETASSERT)
+			NTPFP_L_ADDS(&infobuf.assert_timestamp_ntpfp, 
+				     &handle->params.assert_offset_ntpfp);
+		break;		
 
 	default:
 		errno = EINVAL;
