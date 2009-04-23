@@ -25,10 +25,12 @@
  * This driver furnishes an interface for pulse-per-second (PPS) signals
  * produced by a cesium clock, timing receiver or related equipment. It
  * can be used to remove accumulated jitter over a congested link and
- * retime a server before redistributing the time to clients.
+ * retime a server before redistributing the time to clients. It can 
+ *also be used as a holdover should all other synchronization sources
+ * beconme unreachable.
  *
  * Before this driver becomes active, the local clock must be set to
- * within +-500 ms by another means, such as a radio clock or NTP
+ * within +-0.4 s by another means, such as a radio clock or NTP
  * itself. There are two ways to connect the PPS signal, normally at TTL
  * levels, to the computer. One is to shift to EIA levels and connect to
  * pin 8 (DCD) of a serial port. This requires a level converter and
@@ -51,17 +53,25 @@
  * to hundreds of PPM), it's better to used the kernel support, if
  * available.
  *
+ * This deriver is subject to the mitigation rules described in the
+ * "mitigation rulse and the prefer peer" page. However, there is an
+ * important difference. If this driver becomes the PPS driver according
+ * to these rules, it is acrive only if (a) a prefer peer other than
+ * this driver is among the survivors or (b) there are no survivors and
+ * the minsane option of the tos command is zero. This is intended to
+ * support space missions where updates from other spacecraft are
+ * infrequent, but a reliable PPS signal, such as from an Ultra Stable
+ * Oscillator (USO) is available.
+ *
  * Fudge Factors
  *
- * If flag1 is dim (default) the PPS is active only if a prefer peer is
- * preset; if lit the PPS is active as long as the system clock offset is
- * synchronized and within 0.4 s. If flag2 is dim (default), the the PPS
- * signal is enabled; if lit, the PPS signal is disabled. This would not
- * make sense with this driver, but it might make sense if the PPSAPI
- * was enabled by another driver.  If flag3 is dim (default), the kernel
- * PPS support is disabled; if lit it is enabled. The time1 parameter
- * can be used to compensate for miscellaneous device driver and OS
- * delays.
+ * The PPS timestamp is captured on the rising (assert) edge if flag2 is
+ * dim (default) and on the falling (clear) edge if lit. If flag3 is dim
+ * (default), the kernel PPS support is disabled; if lit it is enabled.
+ * If flag4 is lit, each timesampt is copied to the clockstats file for
+ * later analysis. This can be useful when constructing Allan deviation
+ * plots. The time1 parameter can be used to compensate for
+ * miscellaneous device driver and OS delays.
  */
 /*
  * Interface definitions

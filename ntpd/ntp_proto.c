@@ -2416,7 +2416,7 @@ clock_select(void)
 		    high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
-
+#ifdef HAVE_PPSAPI
 		/*
 		 * Elegible PPS peers must survive the intersection
 		 * algorithm. Use the first one found, but don't
@@ -2427,6 +2427,7 @@ clock_select(void)
 				typepps = peer;
 			continue;
 		}
+#endif /* HAVE_PPSAPI */
 
 		/*
 		 * The metric is the scaled root distance plus the peer
