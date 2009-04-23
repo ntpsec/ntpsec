@@ -13,6 +13,7 @@
 #include "ntp_refclock.h"
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 #include <stdio.h>
 #include <stddef.h>
@@ -1563,22 +1564,21 @@ do_unconf(
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
 #endif
 		found = 0;
-		peer = (struct peer *)0;
-#ifdef DEBUG
-		if (debug)
-		     printf("searching for %s\n", stoa(&peeraddr));
-#endif
+		peer = NULL;
+
+		DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
+
 		while (!found) {
 			peer = findexistingpeer(&peeraddr, peer, -1);
-			if (peer == (struct peer *)0)
-			    break;
+			if (!peer)
+				break;
 			if (peer->flags & FLAG_CONFIG)
-			    found = 1;
+				found = 1;
 		}
 		if (!found)
-		    bad = 1;
+			bad = 1;
 		cp = (struct conf_unpeer *)
-		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
+			((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
 	}
 
 	if (bad) {
@@ -1592,6 +1592,7 @@ do_unconf(
 
 	items = INFO_NITEMS(inpkt->err_nitems);
 	cp = (struct conf_unpeer *)inpkt->data;
+
 	while (items-- > 0) {
 		memset(&temp_cp, 0, sizeof(temp_cp));
 		memset(&peeraddr, 0, sizeof(peeraddr));
@@ -1607,15 +1608,24 @@ do_unconf(
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 		peeraddr.ss_len = SOCKLEN(&peeraddr);
 #endif
-#if 1
-		peer_unconfig(&peeraddr, (struct interface *)0, -1);
-#else
-		/* We might be able to get rid of the peeraddr stuff */
+		found = 0;
+		peer = NULL;
+
+		while (!found) {
+			peer = findexistingpeer(&peeraddr, peer, -1);
+			if (!peer)
+				break;
+			if (peer->flags & FLAG_CONFIG)
+				found = 1;
+		}
+		NTP_INSIST(found);
+		NTP_INSIST(peer);
+
 		peer_clear(peer, "GONE");
 		unpeer(peer);
-#endif
+
 		cp = (struct conf_unpeer *)
-		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
+			((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
 	}
 
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);

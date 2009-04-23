@@ -919,21 +919,6 @@ newpeer(
 
 
 /*
- * peer_unconfig - remove the configuration bit from a peer
- *
- */
-int
-peer_unconfig(
-	struct sockaddr_storage *srcadr,
-	struct interface *dstadr,
-	int mode
-	)
-{
-	msyslog(LOG_ERR, "attempt to remove configure bit is invalid");
-	return (0);
-}
-
-/*
  * peer_clr_stats - clear peer module statiistics counters
  */
 void
