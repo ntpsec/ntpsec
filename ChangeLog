@@ -1,6 +1,7 @@
 * [Bug 833] ignore whitespace at end of remote configuration lines
 * [Bug 1033] ntpdc/ntpq crash prompting for keyid on Windows
 * [Bug 1028] Support for W32Time authentication via Samba.
+* quiet ntp_parser.c malloc redeclaration warning
 * Mitigation and PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
 * timepps-Solaris.h patches from Dave Hart.
