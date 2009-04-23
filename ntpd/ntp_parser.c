@@ -425,7 +425,7 @@
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 
 /* Enabling verbose error messages.  */
@@ -459,7 +459,7 @@ typedef union YYSTYPE
     script_info *Sim_script;
 }
 /* Line 193 of yacc.c.  */
-#line 463 "ntp_parser.c"
+#line 463 "../../ntpd/ntp_parser.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -472,7 +472,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 476 "ntp_parser.c"
+#line 476 "../../ntpd/ntp_parser.c"
 
 #ifdef short
 # undef short
@@ -2327,7 +2327,7 @@ yyreduce:
 
   case 55:
 #line 421 "ntp_parser.y"
-    { my_config.auth.requested_key = (yyvsp[(2) - (2)].Integer); }
+    { my_config.auth.request_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 56:
@@ -3230,7 +3230,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 3234 "ntp_parser.c"
+#line 3234 "../../ntpd/ntp_parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

@@ -281,7 +281,7 @@ init_auth_node(void)
 #else
 	my_config.auth.ntp_signd_socket = NULL;
 #endif
-	my_config.auth.requested_key = 0;
+	my_config.auth.request_key = 0;
 	my_config.auth.revoke = 0;
 	my_config.auth.trusted_key_list = NULL;
 }
@@ -1036,13 +1036,13 @@ config_auth(void)
 		ctl_auth_keyid = my_config.auth.control_key;
 
 	/* Requested Key Command */
-	if (my_config.auth.requested_key) {
+	if (my_config.auth.request_key) {
 #ifdef DEBUG
 		if (debug > 3)
 			printf("set info_auth_key to %08lx\n",
-			       (long unsigned int) my_config.auth.requested_key);
+			       (long unsigned int) my_config.auth.request_key);
 #endif
-		info_auth_keyid = (keyid_t) my_config.auth.requested_key;
+		info_auth_keyid = (keyid_t) my_config.auth.request_key;
 	}
 
 	/* Trusted Key Command */

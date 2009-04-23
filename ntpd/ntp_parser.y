@@ -418,7 +418,7 @@ authentication_command
 	|	T_Keysdir T_String
 			{ my_config.auth.keysdir = $2; }
 	|	T_Requestkey T_Integer
-			{ my_config.auth.requested_key = $2; }
+			{ my_config.auth.request_key = $2; }
 	|	T_Trustedkey integer_list
 			{ my_config.auth.trusted_key_list = $2; }
 	|	T_NtpSignDsocket T_String

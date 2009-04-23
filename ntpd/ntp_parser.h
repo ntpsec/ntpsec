@@ -356,7 +356,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 49 "ntp_parser.y"
+#line 51 "ntp_parser.y"
 {
     char   *String;
     double  Double;
@@ -372,7 +372,7 @@ typedef union YYSTYPE
     script_info *Sim_script;
 }
 /* Line 1529 of yacc.c.  */
-#line 376 "ntp_parser.h"
+#line 376 "../../ntpd/ntp_parser.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

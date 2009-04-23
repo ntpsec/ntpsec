@@ -89,7 +89,7 @@ struct auth_node {
     queue *crypto_cmd_list;
     char *keys;
     char *keysdir;
-    int requested_key;
+    int request_key;
     int revoke;
     queue *trusted_key_list;
     char *ntp_signd_socket;
