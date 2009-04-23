@@ -40,6 +40,8 @@
 
   struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
 
+  #define YYMALLOC	emalloc
+  #define YYFREE	free
   #define YYERROR_VERBOSE
   void yyerror (char *msg);
   extern int input_from_file;  /* 0=input from ntpq>config command buffer */
