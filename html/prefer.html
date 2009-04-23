@@ -12,7 +12,7 @@
 <img src="pic/alice11.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html"> from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>Listen carefully to what I say; it is very complicated.</p>
 <p>Last update: 
-	<!-- #BeginDate format:En2m -->19-Apr-2009  17:57<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->22-Apr-2009  14:04<!-- #EndDate -->
 UTC</p>
 <br clear="left">
 
@@ -52,7 +52,19 @@ UTC</p>
 
 </ol>
 
-<p>Phase three uses an intersection algorithm to select the truechimers from among the candidates, leaving behind the falsetickers. A server or peer configured with the <tt>true</tt> option is ipso facto a truechimer independent of this algorithm. Phase four uses a clustering algorithm to cast off statistical outliers from the truechimers until a set of survivors not less than the number pecified as the <tt>minclock</tt> option of the <tt>tos</tt> command, with default 3. Phase five uses a set of mitigation rules to select from among the survivors a system peer from which a set of system statistics can be inherited and passed along to a dependent client population. The clock offset developed from these algorithms can discipline the system clock either using the <tt>ntpd</tt> clock discipline algorithm or enable the kernel to discipline the system clock directly, as described on the <a href="kern.html">A Kernel Model for Precision Timekeeping</a> page. Phase five is the topic of this page.</p>
+<p>Phase three uses an intersection algorithm to select the truechimers from
+	among the candidates, leaving behind the falsetickers. A server or peer configured
+	with the <tt>true</tt> option is ipso facto a truechimer independent of this
+	algorithm. Phase four uses a clustering algorithm to cast off statistical outliers
+	from the truechimers until a set of survivors not less than the number specified
+	as the <tt>minclock</tt> option of the <tt>tos</tt> command, with default 3.
+	Phase five uses a set of mitigation rules to select from among the survivors
+	a system peer from which a set of system statistics can be inherited and passed
+	along to a dependent client population. The clock offset developed from these
+	algorithms can discipline the system clock either using the <tt>ntpd</tt> clock
+	discipline algorithm or enable the kernel to discipline the system clock directly,
+	as described on the <a href="kern.html">A Kernel Model for Precision Timekeeping</a> page.
+	Phase five is the topic of this page.</p>
 
 <h4 id="peer">Peer Classification</h4>
 
@@ -80,13 +92,24 @@ UTC</p>
 
 <p>In the prefer scheme the clustering algorithm is modified so that the prefer peer is never discarded; on the contrary, its potential removal becomes a rounds-termination condition. However, the prefer peer can still be discarded by the intersection algorithm as a falseticker. To avoid this, it is usually wise to increase the <tt>mindist</tt> option of the <tt>tos</tt> command from the default .005 s to something like .05 s.</p>
 
-<p>Ordinarily, the combining algorithm computes a weighted average of the survivor offsets to produce the final osynchronization sourcem. However, if a prefer peer is among the survivors, the combining algorithm is not used. Instead, the offset of the prefer peer is used exclusively as the finalsynchronization source. In the common case involving a radio clock and a flock of remote backup servers, and with the radio clock designated a prefer peer, the result is that the radio clock normally disciplines the system clock as long as the radio itself remains operational. However, if the radio fails or becomes a falseticker, the averaged backup sources continue to discipline the system clock.</p>
+<p>Ordinarily, the combining algorithm computes a weighted average of the survivor
+	offsets to produce the final synchronization source. However, if a prefer
+	peer is among the survivors, the combining algorithm is not used. Instead,
+	the offset of the prefer peer is used exclusively as the final synchronization
+	source. In the common case involving a radio clock and a flock of remote backup
+	servers, and with the radio clock designated a prefer peer, the result is that
+	the radio clock normally disciplines the system clock as long as the radio itself
+	remains operational. However, if the radio fails or becomes a falseticker,
+	the averaged backup sources continue to discipline the system clock.</p>
 
 <h4 id="miti">Mitigation Rules</h4>
 
 <p>As the selection algorithm scans the associations for selectable candidates, the modem driver and local driver are segregated for later, but only if not designated a prefer peer. If so designated, a driver is included among the candidate population. In addition, if orphan parents are found the parent with the lowest  metric is segregated for later; the others are discarded. For this purpose the metric is defined as the four-octet IPv4 address or the first four octets of the hashed IPv6 address. The resulting candidates, including any prefer peers found, are processed by the intersection to produce a possibly empty set of truechimers. The clustering algorithm ranks the truechimers first by stratum then by synchronization distance and designates the survivor with the lowest distance as the potential system peer.</p>
 
-<p>If one or more truechimers support a pulse-per-second (PPS) signal and the PPS signal is operating correcly, it is designated a PPS driver. If more than one PPS diver are found, only the first one is used. The PPS driver  is not included in the combining algorithm and is mitigated separately.</p>
+<p>If one or more truechimers support a pulse-per-second (PPS) signal and the
+	PPS signal is operating correctly, it is designated a PPS driver. If more than
+	one PPS diver are found, only the first one is used. The PPS driver is not included
+	in the combining algorithm and is mitigated separately.</p>
 
 <p>At this point we have the following contributors to the system clock discipline:</p>
 
@@ -118,16 +141,18 @@ UTC</p>
 
 <p> The <tt>minsane</tt> option of the <tt>tos</tt> command, the <tt>prefer</tt> option of the <tt>server</tt> and <tt>peer</tt> commands and the <tt>flag</tt> options of the <tt>fudge</tt> command for the PPS driver can be used with the mitigation rules to provide many useful configurations. The <tt>minsane</tt> option specifies the minimum number of survivors required to synchronized the system clock. The <tt>prefer</tt> option designates the prefer peer. The driver-dependent <tt>flag</tt> options enable the PPS driver for various conditions.</p>
 
-<p>A common scenario is  a GPS  driver  with PPS signal and designated the prefer peer. If the serial timecode from the GPS receiver is within 0.4 	s of the PPS signal, the GPS driver is designated the PPS driver and the PPS signal disciplines the system clock. If no GPS satellites are in view, or if the PPS signal is disconnected,  the GPS driver stops updating the <tt>ntpd</tt> daemon and so eventually becomes unreachable and replaced by other sources..</p>
+<p>A common scenario is a GPS driver with a serial timecode and PPS signal. The
+	PPS signal is disabled until the system clock has been set by some means, not
+	necessarily the GPS driver. If the serial timecode is within 0.4 s of the PPS
+	signal, the GPS driver is designated the PPS driver and the PPS signal disciplines
+	the system clock. If no GPS satellites are in view, or if the PPS signal is
+	disconnected, the GPS driver stops updating the system clock and so eventually
+	becomes unreachable and replaced by other sources..</p>
 
 <p>Whether or not the GPS driver disables the PPS signal when unreachable is
-at the discretion of the driver. Ordinarily, the PPS signal would be disabled in this case; however, in some cases, such as when the GPS receiver has a precision holdover oscillator, the driver may elect to continue PPS operation.</p>
+at the discretion of the driver. Ordinarily, the PPS signal would be disabled in this case; however, When the GPS receiver has a precision holdover oscillator, the driver may elect to continue PPS operation. In this case the PPS signal continues to discipline the system clock.</p>
 
-<p>If the <tt>minsane</tt> option is set to 0 and there is a prefer peer, it can be used in the same manner. However, this would normally disable the PPS driver if the prefer peer were to become unselectable. This behavior can be altered with the <tt>flag1</tt> option for the PPS driver. In the default case (dim) the behavior is as above; if lit, the prefer peer is disregarded	and the PPS driver is enabled no matter what the state of the prefer peer or if there is no designated prefer peer.</p>
-
-<p>A scenario where the latter behavior can be most useful is for a planetary orbiter fleet, for instance in the vicinity of Mars, where contact between	orbiters is only one or two times per Sol (Mars day). These orbiters have a precise timing reference based on a Ultra Stable Oscillator (USO) with accuracy in the order of a Cesium oscillator. A PPS signal is derived from the USO and can be disciplined from Earth on rare occasion or from another orbiter via NTP. In the above scenario the PPS signal disciplines the spacecraft clock between NTP updates.</p>
-
-<p>In a similar scenario a PPS signal can be used to discipline the clock between	updates produced by the modem driver. This would provide precise synchronization without needing the Internet at all.</p>
+<p>&nbsp;</p>
 
 <hr>
 <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
