@@ -67,7 +67,7 @@ char special_char[] =		/* This list of special characters */
  * ---------
  */
 
-int get_next_char(void);
+char get_next_char(void);
 
 /* Define a function to create the states of the scanner. This function
  * is used by the create_keyword_scanner function below.
@@ -290,13 +290,13 @@ FCLOSE(
  * input_from_file flag.
  */
 
-int
+char
 get_next_char(
 	void
 	)
 {
 	if (input_from_file)
-		return FGETC(ip_file);
+		return (char)FGETC(ip_file);
 	else {
 		if (remote_config.buffer[remote_config.pos] == '\0') 
 			return EOF;
@@ -458,7 +458,7 @@ is_double(
 
 static int
 is_special(
-	char ch
+	int ch
 	)
 {
 	int i;
@@ -471,7 +471,7 @@ is_special(
 
 static int
 is_EOC(
-	char ch
+	int ch
 	)
 {
 	if ((old_config_style && (ch == '\n')) ||
@@ -573,17 +573,16 @@ yylex()
 			if (yytext[i] == '"')
 				yytext[i] =  ' ';
 		}
-		/* If the last character read was an EOF, pushback a
+		/* Pushback the last character read that is not a part
+		 * of this lexeme.
+		 * If the last character read was an EOF, pushback a
 		 * newline character. This is to prevent a parse error
 		 * when there is no newline at the end of a file.
 		 */
 		if (yytext[i] == EOF)
 			push_back_char('\n');
-
-		/* Pushback the last character read that is not a part
-		 * of this lexeme.
-		 */
-		push_back_char(yytext[i]); 
+		else
+			push_back_char(yytext[i]); 
 		yytext[i] = '\0';
 	} while (i == 0);
 
