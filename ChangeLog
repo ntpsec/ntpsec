@@ -1,3 +1,4 @@
+* WWVB refclock cleanup from Dave Mills.
 * Code cleanup: requested_key -> request_key.
 * [Bug 833] ignore whitespace at end of remote configuration lines
 * [Bug 1033] ntpdc/ntpq crash prompting for keyid on Windows

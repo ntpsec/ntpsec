@@ -398,10 +398,10 @@ wwvb_receive(
 	 * timecode timestamp, but only if the PPS is not in control.
 	 */
 #ifdef HAVE_PPSAPI
-	if (peer->flags & FLAG_PPS) {
-		up->tcount++;
+	up->tcount++;
+	if (peer->flags & FLAG_PPS)
 		return;
-	}
+
 #endif /* HAVE_PPSAPI */
 	if (!refclock_process(pp))
 		refclock_report(peer, CEVNT_BADTIME);
