@@ -11,7 +11,6 @@
 #include "ntp_refclock.h"
 #include "recvbuff.h"
 
-
 /* ntp_config.c */
 
 #define	TAI_1972	10	/* initial TAI offset (s) */
@@ -62,6 +61,9 @@ extern  void    set_sys_var (const char *, u_long, u_short);
 extern	void	ntp_res_name	(struct sockaddr_storage, u_short);
 extern	void	ntp_res_recv	(void);
 extern	void	ntp_intres	(void);
+#ifdef SYS_WINNT
+extern	unsigned WINAPI	ntp_intres_thread	(void *);
+#endif
 
 /* ntp_io.c */
 typedef struct interface_info {

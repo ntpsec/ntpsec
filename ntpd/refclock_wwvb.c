@@ -17,6 +17,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#ifdef HAVE_PPSAPI
+#include "ppsapi_timepps.h"
+#include "refclock_atom.h"
+#endif /* HAVE_PPSAPI */
+
 /*
  * This driver supports the Spectracom Model 8170 and Netclock/2 WWVB
  * Synchronized Clocks and the Netclock/GPS Master Clock. Both the WWVB
@@ -84,6 +89,16 @@
  * makes no attempt to correct for the intrinsic jitter of the radio
  * itself, which is a known problem with the older radios.
  *
+ * PPS Signal Processing
+ *
+ * When PPS signal processing is enabled, and when the system clock has
+ * been set by this or another driver and the PPS signal offset is
+ * within 0.4 s of the system clock offset, the PPS signal replaces the
+ * timecode for as long as the PPS signal is active. If for some reason
+ * the PPS signal fails for one or more poll intervals, the driver
+ * reverts to the timecode. If the timecode fails for one or more poll
+ * intervals, the PPS signal is disconnected.
+ *
  * Fudge Factors
  *
  * This driver can retrieve a table of quality data maintained
@@ -113,6 +128,11 @@
  * WWVB unit control structure
  */
 struct wwvbunit {
+#ifdef HAVE_PPSAPI
+	struct refclock_atom atom; /* PPSAPI structure */
+	int	tcount;		/* timecode sample counter */
+	int	pcount;		/* PPS sample counter */
+#endif /* HAVE_PPSAPI */
 	l_fp	laststamp;	/* last receive timestamp */
 	u_char	lasthour;	/* last hour (for monitor) */
 	u_char	linect;		/* count ignored lines (for monitor */
@@ -189,7 +209,14 @@ wwvb_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
+#ifdef HAVE_PPSAPI
+	/*
+	 * Light up the PPSAPI interface.
+	 */
+	return (refclock_ppsapi(fd, &up->atom));
+#else /* HAVE_PPSAPI */
 	return (1);
+#endif /* HAVE_PPSAPI */
 }
 
 
@@ -368,8 +395,14 @@ wwvb_receive(
 
 	/*
 	 * Process the new sample in the median filter and determine the
-	 * timecode timestamp.
+	 * timecode timestamp, but only if the PPS is not in control.
 	 */
+#ifdef HAVE_PPSAPI
+	if (peer->flags & FLAG_PPS) {
+		up->tcount++;
+		return;
+	}
+#endif /* HAVE_PPSAPI */
 	if (!refclock_process(pp))
 		refclock_report(peer, CEVNT_BADTIME);
 }
@@ -403,6 +436,15 @@ wwvb_timer(
 		pollchar = 'T';
 	if (write(pp->io.fd, &pollchar, 1) != 1)
 		refclock_report(peer, CEVNT_FAULT);
+#ifdef HAVE_PPSAPI
+	if (pp->sloppyclockflag & CLK_FLAG1) {
+		if (refclock_pps(peer, &up->atom, pp->sloppyclockflag) >
+		    0) {
+			up->pcount++,
+			peer->flags |= FLAG_PPS;
+		}
+	}
+#endif /* HAVE_PPSAPI */
 }
 
 
@@ -439,10 +481,21 @@ wwvb_poll(
 	 * Process median filter samples. If none received, declare a
 	 * timeout and keep going.
 	 */
+#ifdef HAVE_PPSAPI
+	if (up->pcount == 0)
+		peer->flags &= ~FLAG_PPS;
+	if (up->tcount == 0) {
+		pp->coderecv = pp->codeproc;
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	up->pcount = up->tcount = 0;
+#else /* HAVE_PPSAPI */
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
+#endif /* HAVE_PPSAPI */
 	refclock_receive(peer);
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG

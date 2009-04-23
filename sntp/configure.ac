@@ -43,6 +43,17 @@ case "$ac_cv_cpp_warning" in
     ;;
 esac
 
+AC_C_INLINE
+
+case "$ac_cv_c_inline" in
+ '')
+    ;;
+ *)
+    AC_DEFINE(HAVE_INLINE,1,[inline keyword or macro available])
+    AC_SUBST(HAVE_INLINE)
+esac
+
+
 # Checks for libraries.
 
 # Checks for header files.
@@ -103,10 +114,10 @@ esac
 AC_FUNC_SETVBUF_REVERSED
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm])
-AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
+AC_CHECK_FUNC([gethostent], , AC_SEARCH_LIBS([gethostent], [nsl], , , [-lsocket]))
 AC_CHECK_FUNCS([gettimeofday inet_ntoa memset])
-AC_CHECK_FUNCS(socket, , AC_CHECK_LIB(socket, socket))
-AC_CHECK_FUNCS(sqrt, , AC_CHECK_LIB(m, sqrt))
+AC_CHECK_FUNCS([socket], , AC_SEARCH_LIBS([socket], [socket]))
+AC_CHECK_FUNCS([sqrt], , AC_SEARCH_LIBS([sqrt], [m]))
 AC_CHECK_FUNCS([strrchr])
 
 case "$host" in

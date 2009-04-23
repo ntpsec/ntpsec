@@ -2192,7 +2192,7 @@ clock_select(void)
 	double	high, low;
 	double	seljitter;
 	double	synch[NTP_MAXASSOC], error[NTP_MAXASSOC];
-	double	orphdist = 1e10;;
+	double	orphdist = 1e10;
 	struct peer *osys_peer = NULL;
 	struct peer *sys_prefer = NULL;	/* prefer peer */
 	struct peer *typesystem = NULL;
@@ -2269,7 +2269,8 @@ clock_select(void)
 
 			/*
 			 * If this is an orphan, choose the one with
-			 * the least distance.
+			 * the lowest metric defined as the IPv4 address
+			 * or the first 64 bits of the hashed IPv6 address.
 			 */
 			if (peer->stratum == sys_orphan) {
 				double	ftemp;
@@ -2291,12 +2292,6 @@ clock_select(void)
 				if (typelocal == NULL &&
 				    !(peer->flags & FLAG_PREFER))
 					typelocal = peer;
-				continue;
-			
-			case REFCLK_ATOM_PPS:
-				if (typepps == NULL &&
-				    !(peer->flags & FLAG_PREFER))
-					typepps = peer;
 				continue;
 
 			case REFCLK_ACTS:
@@ -2447,6 +2442,19 @@ clock_select(void)
 		    high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
+#ifdef HAVE_PPSAPI
+		/*
+		 * Elegible PPS peers must survive the intersection
+		 * algorithm. Use the first one found, but don't
+		 * include any of them in the cluster population.
+		 */
+		if (peer->flags & FLAG_PPS) {
+			if (typepps == NULL) 
+				typepps = peer;
+			continue;
+		}
+#endif /* HAVE_PPSAPI */
+
 		/*
 		 * The metric is the scaled root distance plus the peer
 		 * stratum. For compliance with the specification, both
@@ -2477,17 +2485,13 @@ clock_select(void)
 
 	/*
 	 * If no survivors remain at this point, check if the modem 
-	 * driver, orphan server or local driver have been found. If
-	 * so, nominate the first one found as the only survivor.
+	 * driver, local driver or orphan parent in that order. If so,
+	 * nominate the first one found as the only survivor.
 	 * Otherwise, give up and leave the island to the rats.
 	 */
 	if (nlist == 0) {
 		error[0] = 0;
 		synch[0] = 0;
-		if (typeorphan != NULL) {
-			peer_list[0] = typeorphan;
-			nlist = 1;
-		}
 #ifdef REFCLOCK
 		if (typeacts != NULL) {
 			peer_list[0] = typeacts;
@@ -2497,6 +2501,10 @@ clock_select(void)
 			nlist = 1;
 		}
 #endif /* REFCLOCK */
+		if (typeorphan != NULL) {
+			peer_list[0] = typeorphan;
+			nlist = 1;
+		}
 	}
 
 	/*
@@ -2642,22 +2650,14 @@ clock_select(void)
 	/*
 	 * If a PPS driver is lit and the combined offset is less than
 	 * 0.4 s, select the driver as the PPS peer and use its offset
-	 * and jitter.
+	 * and jitter. However, if this is the atom driver, use it only
+	 * if there is a prefer peer or there are no survivors and none
+	 * are required.
 	 */
-	if (typepps != NULL && fabs(sys_offset < 0.4)) {
-		struct refclockproc *pp;
-
-		/*
-		 * If flag1 is dim, PPS is enabled only if the prefer
-		 * peer has survived the intersection algorithm and
-		 * numbers the seconds. Otherwise, some other means
-		 * must be provided to number the seconds.
-		 */
-		pp = typepps->procptr;
-		if (!(pp->sloppyclockflag & CLK_FLAG1) && sys_prefer ==
-		    NULL)
-			return;
-
+	if (typepps != NULL && fabs(sys_offset < 0.4) &&
+	    (typepps->refclktype != REFCLK_ATOM_PPS ||
+	    (typepps->refclktype == REFCLK_ATOM_PPS && (sys_prefer !=
+	    NULL || (typesystem == NULL && sys_minsane == 0))))) {
 		typesystem = typepps;
 		typesystem->status = CTL_PST_SEL_PPS;
  		sys_offset = typesystem->offset;
@@ -2751,7 +2751,7 @@ peer_xmit(
 	struct pkt xpkt;	/* transmit packet */
 	int	sendlen, authlen;
 	keyid_t	xkeyid = 0;	/* transmit key ID */
-	l_fp	xmt_tx, xmt_ty;;
+	l_fp	xmt_tx, xmt_ty;
 
 	if (!peer->dstadr)	/* drop peers without interface */
 		return;
