@@ -22,6 +22,12 @@
 #ifdef SYS_WINNT
 # include <Mswsock.h>
 # include <io.h>
+# ifdef OPENSSL
+#  pragma warning(push)
+#  pragma warning(disable: 4152)
+#  include <openssl/applink.c>
+#  pragma warning(pop)
+# endif /* OPENSSL */
 #endif /* SYS_WINNT */
 
 #if defined(HAVE_LIBREADLINE)
@@ -1976,7 +1982,7 @@ getkeyid(
 #ifndef SYS_WINNT
 	if ((fi = fdopen(open("/dev/tty", 2), "r")) == NULL)
 #else
-	    if ((fi = _fdopen((int)GetStdHandle(STD_INPUT_HANDLE), "r")) == NULL)
+	if ((fi = _fdopen(open("CONIN$", _O_TEXT), "r")) == NULL)
 #endif /* SYS_WINNT */
 		fi = stdin;
 	    else

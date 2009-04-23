@@ -485,9 +485,20 @@ create_string_token(
 	char *lexeme
 	)
 {
-	errno = 0;
-	if ((yylval.String = strdup(lexeme)) == NULL &&
-	    errno == ENOMEM) {
+	char *pch;
+
+	/*
+	 * ignore end of line whitespace
+	 */
+	pch = lexeme;
+	while (*pch && isspace(*pch))
+		pch++;
+
+	if (!*pch)
+		return T_EOC;
+
+	yylval.String = strdup(lexeme);
+	if (!yylval.String) {
 		fprintf(stderr, "Could not allocate memory for: %s\n",
 			lexeme);
 		exit(1);
