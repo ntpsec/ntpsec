@@ -1,4 +1,5 @@
-* [Bug 1154] mDNS registration should be done later, repeatedly and only if asked for.
+* [Bug 1154] mDNS registration should be done later, repeatedly and only
+  if asked for.
 * [Bug 1028] Support for W32Time authentication via Samba.
 * Mitigation and PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
