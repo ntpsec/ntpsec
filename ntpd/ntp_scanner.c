@@ -3,9 +3,9 @@
  *
  * The source code for a simple lexical analyzer. 
  *
- * Written By: Sachin Kamboj
- *             University of Delaware
- *             Newark, DE 19711
+ * Written By:	Sachin Kamboj
+ *		University of Delaware
+ *		Newark, DE 19711
  * Copyright (c) 2006
  */
 
@@ -30,13 +30,13 @@
  */
 
 struct state {
-	char ch;                   /* Input character associated with the state */
-	struct state *next_state;  /* Next state to advance to on reading ch */
-	struct state *next_char;   /* Pointer to next character associated with
-				      the state */
-	int token;                 /* Token to be returned on successful parse */
-	int expect_string;         /* A boolean flag, which when set, indicates
-				      that the next token should be a string */
+	char ch;		  /* Input character associated with the state */
+	struct state *next_state; /* Next state to advance to on reading ch */
+	struct state *next_char;  /* Pointer to next character associated with
+				     the state */
+	int token;		  /* Token to be returned on successful parse */
+	int expect_string;	  /* A boolean flag, which when set, indicates
+				     that the next token should be a string */
 };
 
 
@@ -44,23 +44,22 @@ struct state {
  * ------------------------
  */
 
-#define MAX_LEXEME 1024+1    /* The maximum size of a lexeme */
-char yytext[MAX_LEXEME];     /* Buffer for storing the input text/lexeme */
-struct state *key_scanner;   /* A FSA for recognizing keywords */
+#define MAX_LEXEME 1024+1	/* The maximum size of a lexeme */
+char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
+struct state *key_scanner;	/* A FSA for recognizing keywords */
 extern int input_from_file;
 
 /* CONSTANTS 
  * ---------
  */
-#define NON_ACCEPTING 0      /* A constant that depicts a non-accepting state */
-#define MAX_LEXEME 1024+1    /* The maximum size of a lexeme */
+#define NON_ACCEPTING 0		/* A constant that depicts a non-accepting state */
 #define NO_OF_SPECIAL_CHARS 8
 
 
 /* SCANNER GLOBAL VARIABLES 
  * ------------------------
  */
-char special_char[] =        /* This list of special characters */
+char special_char[] =		/* This list of special characters */
 { '{', '}', '(', ')', ',', ';','|','=' };
  
 
@@ -68,7 +67,7 @@ char special_char[] =        /* This list of special characters */
  * ---------
  */
 
-int get_next_char(void);
+char get_next_char(void);
 
 /* Define a function to create the states of the scanner. This function
  * is used by the create_keyword_scanner function below.
@@ -88,7 +87,6 @@ create_states(
 {
 	struct state *my_state;
 	struct state *return_state = pre_state;
-    
 
 	struct state *prev_char = NULL;
 	struct state *curr_char = pre_state;
@@ -115,14 +113,13 @@ create_states(
 		my_state->next_char = curr_char;
 		my_state->token = NON_ACCEPTING;  /* Not an accepting state */
 		my_state->expect_string = NO_ARG; 
-        
+
 		if (prev_char) 
 			prev_char->next_char = my_state;
 		else
 			return_state = my_state;
 	}
-     
-    
+
 	/* Check if the next character is '\0'.
 	 * If yes, we are done with the recognition and this is an accepting
 	 * state.
@@ -218,8 +215,8 @@ F_OPEN(
 	)
 {
 	struct FILE_INFO *my_info = (struct FILE_INFO *)
-	    malloc(sizeof(struct FILE_INFO));
-    
+		malloc(sizeof(struct FILE_INFO));
+
 	if (my_info == NULL)
 		return NULL;
 	my_info->line_no = 0;
@@ -293,13 +290,13 @@ FCLOSE(
  * input_from_file flag.
  */
 
-int
+char
 get_next_char(
 	void
 	)
 {
 	if (input_from_file)
-		return FGETC(ip_file);
+		return (char)FGETC(ip_file);
 	else {
 		if (remote_config.buffer[remote_config.pos] == '\0') 
 			return EOF;
@@ -339,7 +336,7 @@ is_keyword(
 	for (i = 0; lexeme[i]; ++i) {
 		while (curr_state && (lexeme[i] != curr_state->ch))
 			curr_state = curr_state->next_char;
-        
+
 		if (curr_state && (lexeme[i] == curr_state->ch)) {
 			*expect_string = curr_state->expect_string;
 			token = curr_state->token;
@@ -366,7 +363,7 @@ is_integer(
 	/* Allow a leading minus sign */
 	if (lexeme[i] == '-')
 		++i;
-    
+
 	/* Check that all the remaining characters are digits */
 	for (; lexeme[i]; ++i) {
 		if (!isdigit(lexeme[i]))
@@ -388,7 +385,7 @@ is_double(
 	   int frac_part = 0; 
 	*/
 	int no_digits = 0;  /* Number of digits read */
-    
+
 	i = 0;
 	/* Check for an optional '+' or '-' */
 	if (lexeme[i] == '+' || lexeme[i] == '-')
@@ -397,33 +394,33 @@ is_double(
 	/* Read the integer part */
 	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
 		++no_digits;
-    
+
 	/* Check for the required decimal point */
 	if (lexeme[i] == '.')
 		++i;
 	else
 		return 0;
-    
+
 	/* Check for any digits after the decimal point */
 	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
 		++no_digits;
-    
+
 	/* The number of digits in both the decimal part and the fraction part
 	   must not be zero at this point */
 	if (no_digits == 0)
 		return 0;
-    
+
 	/* Check if we are done */
 	if (lexeme[i] == '\0')
 		return 1;
-    
+
 	/* There is still more output, read the Exponent Part */
 	if (lexeme[i] == 'e' || lexeme[i] == 'E') {
 		++i;
 	}
 	else
 		return 0;
-            
+
 	/* Read an optional Sign */
 	if (lexeme[i] == '+' || lexeme[i] == '-')
 		++i;
@@ -444,16 +441,16 @@ is_double(
 /* Host Name */
 /* static int is_host_name (char *lexeme) */
 /* { */
-/*     int i; */
-/*     for (i = 0;lexeme[i];++i) */
-/*         if (!isalnum(lexeme[i])) { */
-/* Check for two consequtive periods which are not allowed */
-/*             if (lexeme[i] == '.' && lexeme[i + 1] != '.') */
-/*                 ; */
-/*             else */
-/*                 return 0; */
-/*         } */
-/*     return 1; */
+/*	int i; */
+/*	for (i = 0;lexeme[i];++i) */
+/*	if (!isalnum(lexeme[i])) { */
+		/* Check for two consequtive periods which are not allowed */
+/*		if (lexeme[i] == '.' && lexeme[i + 1] != '.') */
+/*			; */
+/*		else */
+/*			return 0; */
+/*	} */
+/*	return 1; */
 /* } */
 
 
@@ -461,11 +458,11 @@ is_double(
 
 static int
 is_special(
-	char ch
+	int ch
 	)
 {
 	int i;
-    
+
 	for (i = 0; i < NO_OF_SPECIAL_CHARS; ++i)
 		if (ch == special_char[i])
 			return 1;
@@ -474,7 +471,7 @@ is_special(
 
 static int
 is_EOC(
-	char ch
+	int ch
 	)
 {
 	if ((old_config_style && (ch == '\n')) ||
@@ -482,15 +479,26 @@ is_EOC(
 		return 1;
 	return 0;
 }
-    
+
 static int
 create_string_token(
 	char *lexeme
 	)
 {
-	errno = 0;
-	if ((yylval.String = strdup(lexeme)) == NULL &&
-	    errno == ENOMEM) {
+	char *pch;
+
+	/*
+	 * ignore end of line whitespace
+	 */
+	pch = lexeme;
+	while (*pch && isspace(*pch))
+		pch++;
+
+	if (!*pch)
+		return T_EOC;
+
+	yylval.String = strdup(lexeme);
+	if (!yylval.String) {
 		fprintf(stderr, "Could not allocate memory for: %s\n",
 			lexeme);
 		exit(1);
@@ -498,7 +506,7 @@ create_string_token(
 	else
 		return T_String;
 }
-    
+
 
 /* Define a function that does the actual scanning 
  * Bison expects this function to be called yylex and for it to take no 
@@ -509,7 +517,7 @@ int
 yylex()
 {
 	int i, instring = 0;
-	int token;                 /* The return value/the recognized token */
+	int token;		/* The return value/the recognized token */
 	int ch;
 	static int expect_string = NO_ARG;
 
@@ -519,7 +527,7 @@ yylex()
 		       isspace(ch) &&
 		       !is_EOC(ch))
 			; /* Null Statement */
-        
+
 		if (ch == EOF) {
 			if (input_from_file == 0)
 				return 0;
@@ -545,13 +553,13 @@ yylex()
 		/* Read in the lexeme */
 		for (i = 0;(i < MAX_LEXEME) && 
 			 (yytext[i] = get_next_char()) != EOF; ++i) {
-        
+
 			/* Break on whitespace or a special character */
 			if (isspace(yytext[i]) 
 			    || ((expect_string == NO_ARG) && is_special(yytext[i]))
 			    || is_EOC(ch) || yytext[i] == '"')
 				break;
-        
+
 			/* Read the rest of the line on reading a start
 			   of comment character */
 			if (yytext[i] == '#') {
@@ -559,7 +567,7 @@ yylex()
 				       && yytext[i] != '\n')
 					; /* Null Statement */
 				break;
-			}   
+			}
 		}
 		/* Pick up all of the string inside between " marks, to
 		 * end of line.  If we make it to EOL without a
@@ -576,17 +584,16 @@ yylex()
 			if (yytext[i] == '"')
 				yytext[i] =  ' ';
 		}
-		/* If the last character read was an EOF, pushback a
+		/* Pushback the last character read that is not a part
+		 * of this lexeme.
+		 * If the last character read was an EOF, pushback a
 		 * newline character. This is to prevent a parse error
 		 * when there is no newline at the end of a file.
 		 */
 		if (yytext[i] == EOF)
 			push_back_char('\n');
-        
-		/* Pushback the last character read that is not a part
-		 * of this lexeme.
-		 */
-		push_back_char(yytext[i]); 
+		else
+			push_back_char(yytext[i]); 
 		yytext[i] = '\0';
 	} while (i == 0);
 
