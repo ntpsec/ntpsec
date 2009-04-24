@@ -2,9 +2,9 @@
  *
  * This file contains the ntpd configuration code.
  *
- * Written By: Sachin Kamboj
- *             University of Delaware
- *             Newark, DE 19711
+ * Written By:	Sachin Kamboj
+ *		University of Delaware
+ *		Newark, DE 19711
  * Some parts borrowed from the older ntp_config.c
  * Copyright (c) 2006
  */
@@ -223,6 +223,7 @@ static void config_vars(void);
 static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
 static void config_peers(void);
+static void config_unpeers(void);
 static void config_ntpd(void);
 #ifdef SIM
 static void config_sim(void);
@@ -290,6 +291,7 @@ static void
 init_syntax_tree(void)
 {
 	my_config.peers = create_queue();
+	my_config.unpeers = create_queue();
 	my_config.orphan_cmds = create_queue();
 
 	my_config.broadcastclient = 0;
@@ -540,6 +542,21 @@ create_peer_node(
 		free_node(my_node);
 		return NULL;
 	}
+	return my_node;
+}
+
+struct unpeer_node *
+create_unpeer_node(
+	struct address_node *addr
+	)
+{
+	struct unpeer_node* my_node;
+
+	my_node = (struct unpeer_node *)
+	    get_node(sizeof(struct unpeer_node));
+
+	my_node->addr = addr;
+
 	return my_node;
 }
 
@@ -802,6 +819,8 @@ struct key_tok keyword_list[] = {
 	{ "tinker",		T_Tinker,          NO_ARG },
 	{ "tos",		T_Tos,             NO_ARG },
 	{ "trap",		T_Trap,            SINGLE_ARG },
+	{ "unconfig",		T_Unconfig,        SINGLE_ARG },
+	{ "unpeer",		T_Unpeer,          SINGLE_ARG },
 	{ "default",		T_Default,         NO_ARG },
 
 /* authentication_command */
@@ -1370,7 +1389,9 @@ config_qos(void)
 {
 	struct attr_val *my_qosconfig;
 	char *s;
+#ifdef HAVE_IPTOS_SUPPORT
 	unsigned int qtos = 0;
+#endif
 
 	while(!empty(my_config.qos)) {
 		my_qosconfig = (struct attr_val *)
@@ -1440,7 +1461,7 @@ config_ttl(void)
 	while (!empty(my_config.ttl)) {
 		curr_ttl = (int *) dequeue(my_config.ttl);
 		if (i < MAX_TTL)
-			sys_ttl[i++] = *curr_ttl;
+			sys_ttl[i++] = (u_char)*curr_ttl;
 		else
 			msyslog(LOG_INFO,
 				"ttl: Number of TTL entries exceeds %d. Ignoring TTL %d...",
@@ -1515,9 +1536,9 @@ config_trap(void)
 		if (!err_flag) {
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
 			if (getnetnum(curr_trap->addr->address, &peeraddr, 1, t_UNK) != 1) {
-                err_flag = 1;
-                break;
-            }
+				err_flag = 1;
+				break;
+			}
 
 			if (port_no != 0)
 				((struct sockaddr_in6*)&peeraddr)->sin6_port = htons((u_short) port_no);
@@ -1836,7 +1857,7 @@ config_peers(void)
 		 * useful
 		 */
 		if (status == -1) {
-			/* Do nothing, apparantly we found an IPv6
+			/* Do nothing, apparently we found an IPv6
 			 * address and can't do anything about it */
 		}
 		/* Check if name resolution failed. If yes, store the
@@ -1891,6 +1912,80 @@ config_peers(void)
 		free(curr_peer->addr->address);
 		free_node(curr_peer->addr);
 		free_node(curr_peer);
+	}
+}
+
+static void
+config_unpeers(void)
+{
+	struct addrinfo *res, *res_bak;
+	struct sockaddr_storage peeraddr;
+	struct unpeer_node *curr_unpeer;
+	struct peer *peer;
+	int status;
+	int found;
+
+	while (!empty(my_config.unpeers)) {
+		curr_unpeer = (struct unpeer_node *) dequeue(my_config.unpeers);
+
+		/* Attempt to resolve the address */
+		memset((char *)&peeraddr, 0, sizeof(peeraddr));
+		peeraddr.ss_family = (u_short)curr_unpeer->addr->type;
+
+		status = get_multiple_netnums(curr_unpeer->addr->address, &peeraddr, &res, 0, t_UNK);
+
+		/* I don't know why getnetnum would return -1.
+		 * The old code had this test, so I guess it must be
+		 * useful
+		 */
+		if (status == -1) {
+			/* Do nothing, apparently we found an IPv6
+			 * address and can't do anything about it */
+		}
+		/* Check if name resolution failed. If yes, throw
+		 * up our hands.
+		 */
+		else if (status != 1) {
+			/* Do nothing */
+		}
+		/* Yippie!! Name resolution has succeeded!!!
+		 */
+		else {
+			res_bak = res;
+
+			/*
+			 * Loop through the addresses found
+			 */
+			while (res) {
+				memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+
+				found = 0;
+				peer = NULL;
+
+				DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
+
+				while (!found) {
+					peer = findexistingpeer(&peeraddr, peer, -1);
+					if (!peer)
+						break;
+					if (peer->flags & FLAG_CONFIG)
+						found = 1;
+				}
+
+				if (found) {
+					peer_clear(peer, "GONE");
+					unpeer(peer);
+				}
+
+				res = res->ai_next;
+			}
+			freeaddrinfo(res_bak);
+		}
+
+		/* Ok, everything done. Free up peer node memory */
+		free(curr_unpeer->addr->address);
+		free_node(curr_unpeer->addr);
+		free_node(curr_unpeer);
 	}
 }
 
@@ -1988,6 +2083,7 @@ config_ntpd(void)
 	config_vars();
 	config_other_modes();
 	config_peers();
+	config_unpeers();
 	config_fudge();
 	config_qos();
 }

@@ -83,6 +83,10 @@ struct peer_node {
     double bias;
 };
 
+struct unpeer_node {
+    struct address_node *addr;
+};
+
 struct auth_node {
     int autokey;
     int control_key;
@@ -124,6 +128,7 @@ enum broadcastclienttype {
 /* The syntax tree */
 struct config_tree {
     queue *peers;
+    queue *unpeers;
 
     /* Other Modes */
     int broadcastclient;
@@ -170,6 +175,7 @@ struct REMOTE_CONFIG_INFO {
 
 
 struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
+struct unpeer_node *create_unpeer_node(struct address_node *addr);
 struct address_node *create_address_node(char *addr, int type);
 queue *enqueue_in_new_queue(void *my_node);
 struct attr_val *create_attr_dval(int attr, double value);

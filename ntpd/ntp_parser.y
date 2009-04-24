@@ -201,6 +201,8 @@
 %token			T_Trustedkey
 %token			T_Ttl
 %token			T_Type
+%token			T_Unconfig
+%token			T_Unpeer
 %token			T_Version
 %token			T_Week
 %token			T_Xleave
@@ -259,6 +261,7 @@
 %type	<Queue>		tos_option_list
 %type	<Attr_val>	trap_option
 %type	<Queue>		trap_option_list
+%type	<Integer>	unpeer_keyword
 %type	<Set_var>	variable_assign
 
 /* NTP Simulator non-terminals */
@@ -304,6 +307,7 @@ command_list
 
 command :	/* NULL STATEMENT */
 	|	server_command
+	|	unpeer_command
 	|	other_mode_command
 	|	authentication_command
 	|	monitoring_command
@@ -373,11 +377,29 @@ option
 	|	T_True			{ $$ = create_attr_ival(T_Flag, FLAG_TRUE); }
 	|	T_Xleave		{ $$ = create_attr_ival(T_Flag, FLAG_XLEAVE); }
 	|	T_Ttl T_Integer		{ $$ = create_attr_ival(T_Ttl, $2); }
-        |       T_Mode T_Integer	{ $$ = create_attr_ival(T_Mode, $2); }
+	|	T_Mode T_Integer	{ $$ = create_attr_ival(T_Mode, $2); }
 	|	T_Version T_Integer	{ $$ = create_attr_ival(T_Version, $2); }
 	;
 
 
+/* unpeer commands
+ * ---------------
+ */
+
+unpeer_command
+	:	unpeer_keyword address
+		{
+			struct unpeer_node *my_node = create_unpeer_node($2);
+			if (my_node)
+				enqueue(my_config.unpeers, my_node);
+		}
+	;	
+unpeer_keyword	
+	:	T_Unconfig 	{ $$ = T_Unconfig }
+	|	T_Unpeer 	{ $$ = T_Unpeer }
+	;
+	
+	
 /* Other Modes
  * (broadcastclient manycastserver multicastclient)
  * ------------------------------------------------
