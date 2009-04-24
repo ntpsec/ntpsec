@@ -176,23 +176,25 @@
      T_Trustedkey = 392,
      T_Ttl = 393,
      T_Type = 394,
-     T_Version = 395,
-     T_Week = 396,
-     T_Xleave = 397,
-     T_Year = 398,
-     T_Flag = 399,
-     T_Void = 400,
-     T_EOC = 401,
-     T_Simulate = 402,
-     T_Beep_Delay = 403,
-     T_Sim_Duration = 404,
-     T_Server_Offset = 405,
-     T_Duration = 406,
-     T_Freq_Offset = 407,
-     T_Wander = 408,
-     T_Jitter = 409,
-     T_Prop_Delay = 410,
-     T_Proc_Delay = 411
+     T_Unconfig = 395,
+     T_Unpeer = 396,
+     T_Version = 397,
+     T_Week = 398,
+     T_Xleave = 399,
+     T_Year = 400,
+     T_Flag = 401,
+     T_Void = 402,
+     T_EOC = 403,
+     T_Simulate = 404,
+     T_Beep_Delay = 405,
+     T_Sim_Duration = 406,
+     T_Server_Offset = 407,
+     T_Duration = 408,
+     T_Freq_Offset = 409,
+     T_Wander = 410,
+     T_Jitter = 411,
+     T_Prop_Delay = 412,
+     T_Proc_Delay = 413
    };
 #endif
 /* Tokens.  */
@@ -333,23 +335,25 @@
 #define T_Trustedkey 392
 #define T_Ttl 393
 #define T_Type 394
-#define T_Version 395
-#define T_Week 396
-#define T_Xleave 397
-#define T_Year 398
-#define T_Flag 399
-#define T_Void 400
-#define T_EOC 401
-#define T_Simulate 402
-#define T_Beep_Delay 403
-#define T_Sim_Duration 404
-#define T_Server_Offset 405
-#define T_Duration 406
-#define T_Freq_Offset 407
-#define T_Wander 408
-#define T_Jitter 409
-#define T_Prop_Delay 410
-#define T_Proc_Delay 411
+#define T_Unconfig 395
+#define T_Unpeer 396
+#define T_Version 397
+#define T_Week 398
+#define T_Xleave 399
+#define T_Year 400
+#define T_Flag 401
+#define T_Void 402
+#define T_EOC 403
+#define T_Simulate 404
+#define T_Beep_Delay 405
+#define T_Sim_Duration 406
+#define T_Server_Offset 407
+#define T_Duration 408
+#define T_Freq_Offset 409
+#define T_Wander 410
+#define T_Jitter 411
+#define T_Prop_Delay 412
+#define T_Proc_Delay 413
 
 
 
@@ -372,7 +376,7 @@ typedef union YYSTYPE
     script_info *Sim_script;
 }
 /* Line 1529 of yacc.c.  */
-#line 376 "../../ntpd/ntp_parser.h"
+#line 380 "ntp_parser.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
