@@ -64,6 +64,7 @@ struct state *create_states(char *keyword,
 			    int expect_string,
 			    struct state *pre_state);
 struct state *create_keyword_scanner(struct key_tok *keyword_list);
+void delete_keyword_scanner(struct state *my_key_scanner);
 int yylex(void);
 
 struct FILE_INFO *F_OPEN(const char *path, const char *mode);

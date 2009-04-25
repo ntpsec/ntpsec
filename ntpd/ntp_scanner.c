@@ -165,7 +165,7 @@ create_keyword_scanner(
 /* Define a function to delete the keyword scanner, freeing all the allocated
  * memory
  */
-static void
+void
 delete_keyword_scanner(
 	struct state *my_key_scanner
 	)

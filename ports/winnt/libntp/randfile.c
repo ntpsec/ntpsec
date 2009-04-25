@@ -3,12 +3,7 @@
  * so that OpenSSL can work properly and securely.
  */
 
-/* Skip asynch rpc inclusion */
-#ifndef __RPCASYNC_H__
-#define __RPCASYNC_H__
-#endif
-
-#include <windows.h>
+#include <config.h>
 #include <wincrypt.h>
 
 #include <stdio.h>

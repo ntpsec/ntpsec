@@ -141,15 +141,18 @@ void msyslog(int level, const char *fmt, ...)
 #endif
 	va_list ap;
 	char buf[1025], nfmt[256];
+	int errval;
 
 	/*
 	 * Save the error value as soon as possible
 	 */
+	errval = errno;
+
 #ifdef SYS_WINNT
-	int errval = GetLastError();
-#else
-	int errval = errno;
-#endif
+	errval = GetLastError();
+	if (NO_ERROR == errval)
+		errval = errno;
+#endif /* SYS_WINNT */
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 	va_start(ap, fmt);

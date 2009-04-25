@@ -27,9 +27,6 @@
 #include "clockstuff.h"
 #include "ntp_iocompletionport.h"
 #include "isc/win32os.h"
-#ifdef DEBUG
-#include <crtdbg.h>
-#endif
 
 
 /* Handle to SCM for updating service status */
@@ -44,6 +41,12 @@ extern volatile int debug;
 
 void uninit_io_completion_port();
 int ntpdmain(int argc, char *argv[]);
+/*
+ * libisc\nt_strerror.c
+ */
+#ifdef DEBUG
+void FormatErrorFreeMem(void);
+#endif
 /*
  * Forward declarations
  */
@@ -145,6 +148,18 @@ ntservice_init() {
 		SetConsoleTitle(ConsoleTitle);
 	}
 
+	#ifdef _DEBUG
+		/* ask the runtime to dump memory leaks at exit */
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+		#ifdef WANT_LEAK_CHECK_ON_STDERR_TOO
+			/* hart: I haven't seen this work, running ntpd.exe -n from a shell */
+			/* to both a file and the debugger output window */
+			_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+			/* the file being stderr */
+			_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+		#endif
+	#endif /* _DEBUG */
+
 	atexit( ntservice_exit );
 }
 
@@ -173,11 +188,11 @@ ntservice_exit( void )
 
 	reset_winnt_time();
 
-	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service has stopped.");
+	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service is stopping.");
 
-# ifdef DEBUG
-	_CrtDumpMemoryLeaks();
-# endif 
+#ifdef _DEBUG
+	FormatErrorFreeMem();
+#endif 
 
 	if (!foreground) {
 		/* service mode, need to have the service_main routine

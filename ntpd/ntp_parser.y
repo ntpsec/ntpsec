@@ -782,12 +782,12 @@ miscellaneous_command
 	;	
 drift_parm
 	:	T_String
-		{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
-	|   T_String T_Double
-		{ enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, $2));
-		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
-	|	{ /* Null driftfile,  indicated by null string "\0" */
-		  enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
+			{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
+	|	T_String T_Double
+			{ enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, $2));
+			  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
+	|	/* Null driftfile,  indicated by null string "\0" */
+			{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
 	;
 
 variable_assign
@@ -818,12 +818,14 @@ log_config_command
 	:	T_String
 		{
 			char prefix = $1[0];
-			char *type = &($1[1]);
+			char *type = $1 + 1;
+			
 			if (prefix != '+' && prefix != '-' && prefix != '=') {
 				yyerror("Logconfig prefix is not '+', '-' or '='\n");
 			}
 			else
-				$$ = create_attr_sval(prefix, type);
+				$$ = create_attr_sval(prefix, strdup(type));
+			YYFREE($1);
 		}
 	;
 
