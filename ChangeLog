@@ -1,3 +1,4 @@
+* PPS and crypto cleanup in ntp_proto.c from Dave Mills.
 (4.2.5p165) 2009/04/23 Released by Harlan Stenn <stenn@ntp.org>
 * WWVB refclock cleanup from Dave Mills.
 * Code cleanup: requested_key -> request_key.
