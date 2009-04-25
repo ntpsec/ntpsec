@@ -2442,7 +2442,7 @@ clock_select(void)
 		    high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
-#ifdef HAVE_PPSAPI
+#ifdef REFCLOCK
 		/*
 		 * Elegible PPS peers must survive the intersection
 		 * algorithm. Use the first one found, but don't
@@ -2453,7 +2453,7 @@ clock_select(void)
 				typepps = peer;
 			continue;
 		}
-#endif /* HAVE_PPSAPI */
+#endif /* REFCLOCK */
 
 		/*
 		 * The metric is the scaled root distance plus the peer
@@ -2973,7 +2973,7 @@ peer_xmit(
 				    peer->assoc, NULL);
 			else if (peer->flags & FLAG_ASSOC)
 				exten = crypto_args(peer, CRYPTO_AUTO |
-				    CRYPTO_RESP, peer->associd, NULL);
+				    CRYPTO_RESP, peer->assoc, NULL);
 
 			/*
 			 * Wait for clock sync, then sign the
