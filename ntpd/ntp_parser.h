@@ -1,24 +1,23 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,9 +28,10 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -197,171 +197,16 @@
      T_Proc_Delay = 413
    };
 #endif
-/* Tokens.  */
-#define T_Age 258
-#define T_Allan 259
-#define T_Auth 260
-#define T_Autokey 261
-#define T_Automax 262
-#define T_Average 263
-#define T_Bclient 264
-#define T_Beacon 265
-#define T_Bias 266
-#define T_Broadcast 267
-#define T_Broadcastclient 268
-#define T_Broadcastdelay 269
-#define T_Burst 270
-#define T_Calibrate 271
-#define T_Calldelay 272
-#define T_Ceiling 273
-#define T_Clockstats 274
-#define T_Cohort 275
-#define T_ControlKey 276
-#define T_Crypto 277
-#define T_Cryptostats 278
-#define T_Day 279
-#define T_Default 280
-#define T_Disable 281
-#define T_Discard 282
-#define T_Dispersion 283
-#define T_Double 284
-#define T_Driftfile 285
-#define T_WanderThreshold 286
-#define T_Enable 287
-#define T_End 288
-#define T_False 289
-#define T_File 290
-#define T_Filegen 291
-#define T_Flag1 292
-#define T_Flag2 293
-#define T_Flag3 294
-#define T_Flag4 295
-#define T_Flake 296
-#define T_Floor 297
-#define T_Freq 298
-#define T_Fudge 299
-#define T_Host 300
-#define T_Huffpuff 301
-#define T_IPv4_address 302
-#define T_IPv6_address 303
-#define T_Iburst 304
-#define T_Ident 305
-#define T_Ignore 306
-#define T_Includefile 307
-#define T_Integer 308
-#define T_Interface 309
-#define T_Kernel 310
-#define T_Key 311
-#define T_Keys 312
-#define T_Keysdir 313
-#define T_Kod 314
-#define T_Leap 315
-#define T_Leapfile 316
-#define T_Limited 317
-#define T_Link 318
-#define T_Logconfig 319
-#define T_Logfile 320
-#define T_Loopstats 321
-#define T_Lowpriotrap 322
-#define T_Manycastclient 323
-#define T_Manycastserver 324
-#define T_Mask 325
-#define T_Maxclock 326
-#define T_Maxdist 327
-#define T_Maxhop 328
-#define T_Maxpoll 329
-#define T_Minclock 330
-#define T_Mindist 331
-#define T_Minimum 332
-#define T_Minpoll 333
-#define T_Minsane 334
-#define T_Mode 335
-#define T_Monitor 336
-#define T_Month 337
-#define T_Multicastclient 338
-#define T_Nolink 339
-#define T_Nomodify 340
-#define T_None 341
-#define T_Nopeer 342
-#define T_Noquery 343
-#define T_Noselect 344
-#define T_Noserve 345
-#define T_Notrap 346
-#define T_Notrust 347
-#define T_Novolley 348
-#define T_Ntp 349
-#define T_Ntpport 350
-#define T_NtpSignDsocket 351
-#define T_Orphan 352
-#define T_Panic 353
-#define T_Peer 354
-#define T_Peerstats 355
-#define T_Phone 356
-#define T_Pid 357
-#define T_Pidfile 358
-#define T_Pool 359
-#define T_Port 360
-#define T_Pps 361
-#define T_Preempt 362
-#define T_Prefer 363
-#define T_Protostats 364
-#define T_Pw 365
-#define T_Qos 366
-#define T_RandFile 367
-#define T_Rawstats 368
-#define T_Refid 369
-#define T_Requestkey 370
-#define T_Restrict 371
-#define T_Revoke 372
-#define T_Server 373
-#define T_Setvar 374
-#define T_Sign 375
-#define T_Statistics 376
-#define T_Stats 377
-#define T_Statsdir 378
-#define T_Step 379
-#define T_Stepout 380
-#define T_Stratum 381
-#define T_String 382
-#define T_Sysstats 383
-#define T_Tick 384
-#define T_Time1 385
-#define T_Time2 386
-#define T_Timingstats 387
-#define T_Tinker 388
-#define T_Tos 389
-#define T_Trap 390
-#define T_True 391
-#define T_Trustedkey 392
-#define T_Ttl 393
-#define T_Type 394
-#define T_Unconfig 395
-#define T_Unpeer 396
-#define T_Version 397
-#define T_Week 398
-#define T_Xleave 399
-#define T_Year 400
-#define T_Flag 401
-#define T_Void 402
-#define T_EOC 403
-#define T_Simulate 404
-#define T_Beep_Delay 405
-#define T_Sim_Duration 406
-#define T_Server_Offset 407
-#define T_Duration 408
-#define T_Freq_Offset 409
-#define T_Wander 410
-#define T_Jitter 411
-#define T_Prop_Delay 412
-#define T_Proc_Delay 413
-
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 51 "ntp_parser.y"
 {
+
+/* Line 1676 of yacc.c  */
+#line 51 "ntp_parser.y"
+
     char   *String;
     double  Double;
     int     Integer;
@@ -374,14 +219,17 @@ typedef union YYSTYPE
     /* Simulation types */
     server_info *Sim_server;
     script_info *Sim_script;
-}
-/* Line 1529 of yacc.c.  */
-#line 380 "ntp_parser.h"
-	YYSTYPE;
+
+
+
+/* Line 1676 of yacc.c  */
+#line 227 "ntp_parser.h"
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE yylval;
+
 
