@@ -6,12 +6,28 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-#if defined SYS_WINNT && defined DEBUG
-#include <crtdbg.h>
-#endif
+#if !defined(_MSC_VER) || !defined(_DEBUG)
 
-#if defined SYS_WINNT && defined DEBUG
+void *
+emalloc(
+	u_int size
+	)
+{
+	void *mem = malloc(size);
 
+	if (!mem) {
+		msyslog(LOG_ERR, "Exiting: No more memory!");
+		exit(1);
+	}
+	return mem;
+}
+
+#else /* below is _MSC_VER && _DEBUG */
+
+/*
+ * When using the debug MS CRT malloc, preserve the original caller's
+ * line and file via the emalloc macro.
+ */
 void *
 debug_emalloc(
 	u_int size,
@@ -19,30 +35,13 @@ debug_emalloc(
 	int line
 	)
 {
-	char *mem;
+	void *mem = _malloc_dbg(size, _NORMAL_BLOCK, filename, line);
 
-	if ((mem = (char *)_malloc_dbg(size, _NORMAL_BLOCK, filename, line)) == 0) {
+	if (!mem) {
 		msyslog(LOG_ERR, "Exiting: No more memory!");
 		exit(1);
 	}
 	return mem;
 }
 
-#else
-
-void *
-emalloc(
-	u_int size
-	)
-{
-	char *mem;
-
-	if ((mem = (char *)malloc(size)) == 0) {
-		msyslog(LOG_ERR, "Exiting: No more memory!");
-		exit(1);
-	}
-	return mem;
-}
-
-
-#endif
+#endif /* _MSC_VER && _DEBUG */

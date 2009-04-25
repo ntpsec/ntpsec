@@ -553,18 +553,20 @@ filegen_register(
 	return;
 }
 
-#ifdef	UNUSED
-static FILEGEN *
+
+/*
+ * filegen_unregister frees memory allocated by filegen_register for
+ * name.
+ */
+#ifdef DEBUG
+FILEGEN *
 filegen_unregister(
 	char *name
 	)
 {
 	struct filegen_entry **f = &filegen_registry;
   
-#ifdef DEBUG
-	if (debug > 3)
-	    printf("filegen_unregister(\"%s\")\n", name);
-#endif
+	DPRINTF(3, ("filegen_unregister(\"%s\")\n", name));
 
 	while (*f) {
 		if (strcmp((*f)->name,name) == 0) {

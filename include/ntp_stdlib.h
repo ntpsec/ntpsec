@@ -44,11 +44,11 @@ extern	int	authusekey	(keyid_t, int, const u_char *);
 extern	u_long	calyearstart	(u_long);
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, u_long, u_long *, u_int32 *);
-#if defined SYS_WINNT && defined DEBUG
-# define emalloc(_c) debug_emalloc(_c, __FILE__, __LINE__)
-extern	void *	debug_emalloc		(u_int, char *, int);
-#else
+#if !defined(_MSC_VER) || !defined(_DEBUG)
 extern	void *	emalloc		(u_int);
+#else
+#define		emalloc(size)	debug_emalloc(size, __FILE__, __LINE__)
+extern	void *	debug_emalloc	(u_int, char *, int);
 #endif
 extern	int	ntp_getopt	(int, char **, const char *);
 extern	void	init_auth	(void);

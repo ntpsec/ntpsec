@@ -23,6 +23,7 @@
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 #include "ntpsim.h"
 #include <ntp_random.h>
 #include <isc/net.h>
@@ -140,14 +141,21 @@ short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 short default_ai_family = AF_INET;	/* [Bug 891]: FIX ME */
 #endif
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
-char	*keysdir = NTP_KEYSDIR;	/* crypto keys directory */
+char	default_keysdir[] = NTP_KEYSDIR;
+char	*keysdir = default_keysdir;	/* crypto keys directory */
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
 int	config_priority;
 #endif
 
 const char *config_file;
-const char *ntp_signd_socket;
+char default_ntp_signd_socket[] =
+#ifdef NTP_SIGND_PATH
+					NTP_SIGND_PATH;
+#else
+					"";
+#endif
+char *ntp_signd_socket;
 #ifdef HAVE_NETINFO
 struct netinfo_config_state *config_netinfo = NULL;
 int check_netinfo = 1;
@@ -201,6 +209,10 @@ extern unsigned int qos;				/* QoS setting */
 static void call_proto_config_from_list(queue *flag_list, int able_flag);
 static void init_auth_node(void);
 static void init_syntax_tree(void);
+#ifdef DEBUG
+static void free_auth_node(void);
+       void free_syntax_tree(void);
+#endif
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
 static struct sockaddr_storage *get_next_address(struct address_node *addr);
@@ -234,6 +246,14 @@ enum gnn_type {
 	t_REF,		/* Refclock */
 	t_MSK		/* Network Mask */
 };
+
+#define DESTROY_QUEUE(q)		\
+do {					\
+	if (q) {			\
+		destroy_queue(q);	\
+		(q) = NULL;		\
+	}				\
+} while (0)
 
 static unsigned long get_pfxmatch(char **s,struct masks *m);
 static unsigned long get_match(char *s,struct masks *m);
@@ -276,15 +296,36 @@ init_auth_node(void)
 	my_config.auth.crypto_cmd_list = NULL;
 	my_config.auth.keys = NULL;
 	my_config.auth.keysdir = NULL;
-#ifdef NTP_SIGND_PATH
-	my_config.auth.ntp_signd_socket = NTP_SIGND_PATH;
-#else
-	my_config.auth.ntp_signd_socket = NULL;
-#endif
+	my_config.auth.ntp_signd_socket = default_ntp_signd_socket;
 	my_config.auth.request_key = 0;
 	my_config.auth.revoke = 0;
 	my_config.auth.trusted_key_list = NULL;
 }
+
+#ifdef DEBUG
+static void
+free_auth_node(void)
+{
+	DESTROY_QUEUE(my_config.auth.crypto_cmd_list);
+
+	if (my_config.auth.keys) {
+		free(my_config.auth.keys);
+		my_config.auth.keys = NULL;
+	}
+
+	if (my_config.auth.keysdir) {
+		free(my_config.auth.keysdir);
+		my_config.auth.keysdir = NULL;
+	}
+
+	if (my_config.auth.ntp_signd_socket != default_ntp_signd_socket) {
+		free(my_config.auth.ntp_signd_socket);
+		my_config.auth.ntp_signd_socket = default_ntp_signd_socket;
+	}
+
+	DESTROY_QUEUE(my_config.auth.trusted_key_list);
+}
+#endif /* DEBUG */
 
 static void
 init_syntax_tree(void)
@@ -316,8 +357,46 @@ init_syntax_tree(void)
 	my_config.trap = create_queue();
 	my_config.vars = create_queue();
 	my_config.sim_details = NULL;
+
 	init_auth_node();
+
+#ifdef DEBUG
+	atexit(free_syntax_tree);
+#endif
 }
+
+#ifdef DEBUG
+void
+free_syntax_tree(void)
+{
+	DESTROY_QUEUE(my_config.peers);
+	DESTROY_QUEUE(my_config.orphan_cmds);
+
+	DESTROY_QUEUE(my_config.manycastserver);
+	DESTROY_QUEUE(my_config.multicastclient);
+
+	DESTROY_QUEUE(my_config.stats_list);
+	DESTROY_QUEUE(my_config.filegen_opts);
+
+	DESTROY_QUEUE(my_config.discard_opts);
+	DESTROY_QUEUE(my_config.restrict_opts);
+
+	DESTROY_QUEUE(my_config.enable_opts);
+	DESTROY_QUEUE(my_config.disable_opts);
+	DESTROY_QUEUE(my_config.tinker);
+	DESTROY_QUEUE(my_config.fudge);
+
+	DESTROY_QUEUE(my_config.logconfig);
+	DESTROY_QUEUE(my_config.phone);
+	DESTROY_QUEUE(my_config.qos);
+	DESTROY_QUEUE(my_config.setvar);
+	DESTROY_QUEUE(my_config.ttl);
+	DESTROY_QUEUE(my_config.trap);
+	DESTROY_QUEUE(my_config.vars);
+
+	free_auth_node();
+}
+#endif /* DEBUG */
 
 /* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE
  * -----------------------------------------------
@@ -377,9 +456,9 @@ create_attr_sval(
 	my_val = (struct attr_val *)
 	    get_node(sizeof(struct attr_val));
 	my_val->attr = attr;
-	if (s == NULL)
-		s = "\0";	/* free() and strdup() glow on NULL */
-	my_val->value.s = strdup(s);
+	if (!s)			/* free() hates NULL */
+		s = strdup("");
+	my_val->value.s = s;
 	my_val->type = T_String;
 	return my_val;
 }
@@ -443,6 +522,8 @@ create_address_node(
 		(struct address_node *) get_node(sizeof(struct address_node));
 	struct isc_netaddr temp_isc_netaddr;
 
+	NTP_REQUIRE(addr);
+
 	my_node->address = addr;
 	if (type == 0) {
 		if (is_ip_address(addr, &temp_isc_netaddr)) 
@@ -451,10 +532,24 @@ create_address_node(
 			my_node->type = default_ai_family;
 	}
 	else {
-	my_node->type = type;
+		my_node->type = type;
 	}
 	return my_node;
 }
+
+
+void
+destroy_address_node(
+	struct address_node *my_node
+	)
+{
+	NTP_REQUIRE(my_node);
+	NTP_REQUIRE(my_node->address);
+
+	free(my_node->address);
+	free_node(my_node);
+}
+
 
 struct peer_node *
 create_peer_node(
@@ -532,8 +627,7 @@ create_peer_node(
 		}
 		free_node(my_val);
 	}
-	if (options)
-		destroy_queue(options);
+	DESTROY_QUEUE(options);
 
 	/* Check if errors were reported. If yes, ignore the node */
 	if (errflag) {
@@ -587,11 +681,10 @@ destroy_restrict_node(
 	 * the restrict node
 	 */
 	if (my_node->addr)
-		free_node(my_node->addr);
+		destroy_address_node(my_node->addr);
 	if (my_node->mask)
-		free_node(my_node->mask);
-	if (my_node->flags)
-		destroy_queue(my_node->flags);
+		destroy_address_node(my_node->mask);
+	DESTROY_QUEUE(my_node->flags);
 	free_node(my_node);
 }
 
@@ -689,7 +782,7 @@ create_sim_script_info(
 		}
 		free_node(my_attr_val);
 	}
-	destroy_queue(script_queue);
+	DESTROY_QUEUE(script_queue);
 	return (my_info);
 #endif
 }
@@ -783,7 +876,7 @@ struct key_tok keyword_list[] = {
 	{ "fudge",		T_Fudge,           SINGLE_ARG },
 	{ "includefile",	T_Includefile,     SINGLE_ARG },
 	{ "leapfile",		T_Leapfile,	   SINGLE_ARG },
-	{ "logconfig",		T_Logconfig,       SINGLE_ARG },
+	{ "logconfig",		T_Logconfig,       MULTIPLE_ARG },
 	{ "logfile",		T_Logfile,         SINGLE_ARG },
 	{ "manycastclient",	T_Manycastclient,  SINGLE_ARG },
 	{ "manycastserver",	T_Manycastserver,  MULTIPLE_ARG },
@@ -964,8 +1057,7 @@ config_other_modes(void)
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
 
-			free(addr_node->address);
-			free_node(addr_node);
+			destroy_address_node(addr_node);
 		}
 		sys_manycastserver = 1;
 	}
@@ -983,8 +1075,7 @@ config_other_modes(void)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
 
 
-			free(addr_node->address);
-			free_node(addr_node);
+			destroy_address_node(addr_node);
 		}
 		proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
 	}
@@ -998,27 +1089,30 @@ config_auth(void)
 	int *key_val;
 
 	/* Crypto Command */
-	if (my_config.auth.crypto_cmd_list) {
-		while (!empty(my_config.auth.crypto_cmd_list)) {
-			my_val = (struct attr_val *)
-			    dequeue(my_config.auth.crypto_cmd_list);
+	while (!empty(my_config.auth.crypto_cmd_list)) {
+		my_val = (struct attr_val *)
+		    dequeue(my_config.auth.crypto_cmd_list);
 #ifdef OPENSSL
-			crypto_config(my_val->attr, my_val->value.s);
+		crypto_config(my_val->attr, my_val->value.s);
 #endif /* OPENSSL */
-			free(my_val->value.s);
-			free_node(my_val);
-		}
-		destroy_queue(my_config.auth.crypto_cmd_list);
-		my_config.auth.crypto_cmd_list = NULL;
+		free(my_val->value.s);
+		free_node(my_val);
 	}
+	DESTROY_QUEUE(my_config.auth.crypto_cmd_list);
 
 	/* Keysdir Command */
-	if (my_config.auth.keysdir)
+	if (my_config.auth.keysdir) {
+		if (keysdir != default_keysdir)
+			free(keysdir);
 		keysdir = my_config.auth.keysdir;
+	}
 
 	/* ntp_signd_socket Command */
-	if (my_config.auth.ntp_signd_socket)
+	if (my_config.auth.ntp_signd_socket) {
+		if (ntp_signd_socket != default_ntp_signd_socket)
+			free(ntp_signd_socket);
 		ntp_signd_socket = my_config.auth.ntp_signd_socket;
+	}
 
 #ifdef OPENSSL
 	if (cryptosw) {
@@ -1046,15 +1140,12 @@ config_auth(void)
 	}
 
 	/* Trusted Key Command */
-	if (my_config.auth.trusted_key_list) {
-		while (!empty(my_config.auth.trusted_key_list)) {
-			key_val = (int *) dequeue(my_config.auth.trusted_key_list);
-			authtrust(*key_val, 1);
-			free_node(key_val);
-		}
-		destroy_queue(my_config.auth.trusted_key_list);
-		my_config.auth.trusted_key_list = NULL;
+	while (!empty(my_config.auth.trusted_key_list)) {
+		key_val = (int *) dequeue(my_config.auth.trusted_key_list);
+		authtrust(*key_val, 1);
+		free_node(key_val);
 	}
+	DESTROY_QUEUE(my_config.auth.trusted_key_list);
 
 #ifdef OPENSSL
 	/* Revoke Command */
@@ -1427,8 +1518,10 @@ config_setvar(void)
 	while (!empty(my_config.setvar)) {
 		my_node = (struct setvar_node *) dequeue(my_config.setvar);
 		set_sys_var(my_node->data, my_node->len, my_node->def);
+		free(my_node->data);
 		free_node(my_node);
 	}
+	DESTROY_QUEUE(my_config.setvar);
 }
 
 static void
@@ -1503,8 +1596,7 @@ config_trap(void)
 					err_flag = 1;
 				}
 
-				free(addr_node->address);
-				free_node(addr_node);
+				destroy_address_node(addr_node);
 			}
 			free_node(curr_opt);
 		}
@@ -1537,7 +1629,7 @@ config_trap(void)
 					"can't set trap for %s, no resources",
 					stoa(&peeraddr));
 		}
-		destroy_queue(curr_trap->options);
+		DESTROY_QUEUE(curr_trap->options);
 		free_node(curr_trap);
 	}
 }
@@ -1632,7 +1724,7 @@ config_fudge(void)
 					 (struct refclockstat *)0);
 #endif
 
-		destroy_queue(curr_fudge->options);
+		DESTROY_QUEUE(curr_fudge->options);
 		free_node(curr_fudge);
 	}
 }
@@ -1888,8 +1980,7 @@ config_peers(void)
 		}
 
 		/* Ok, everything done. Free up peer node memory */
-		free(curr_peer->addr->address);
-		free_node(curr_peer->addr);
+		destroy_address_node(curr_peer->addr);
 		free_node(curr_peer);
 	}
 }
@@ -1931,7 +2022,7 @@ config_sim(void)
 		}
 		free_node(init_stmt);
 	}
-	destroy_queue(my_config.sim_details->init_opts);
+	DESTROY_QUEUE(my_config.sim_details->init_opts);
 
 
 	/* Process the server list
@@ -1953,7 +2044,7 @@ config_sim(void)
 		  free_node(serv_info);
 		}
 	}
-	destroy_queue(my_config.sim_details->servers);
+	DESTROY_QUEUE(my_config.sim_details->servers);
 
 	/* Free the sim_node memory and set the sim_details as NULL */
 	free_node(my_config.sim_details);
@@ -2016,11 +2107,12 @@ config_remotely(void)
 #if 0
 	init_syntax_tree();
 #endif
+	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
-#ifdef DEBUG
-	if (debug > 1)
-		printf("Finished Parsing!!\n");
-#endif
+	delete_keyword_scanner(key_scanner);
+	key_scanner = NULL;
+
+	DPRINTF(1, ("Finished Parsing!!\n"));
 
 	config_ntpd();
 
@@ -2109,13 +2201,13 @@ getconfig(
 
 	/*** BULK OF THE PARSER ***/
 	ip_file = fp[curr_include_level];
-	key_scanner = create_keyword_scanner(keyword_list);
 	init_syntax_tree();
+	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
-#ifdef DEBUG
-	if (debug > 1)
-		printf("Finished Parsing!!\n");
-#endif
+	delete_keyword_scanner(key_scanner);
+	key_scanner = NULL;
+
+	DPRINTF(1, ("Finished Parsing!!\n"));
 
 	/* The actual configuration done depends on whether we are configuring the
 	 * simulator or the daemon. Perform a check and call the appropriate

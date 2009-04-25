@@ -26,6 +26,16 @@
 #define __STDC__ 1
 
 /*
+ * Enable the debug build of MS C runtime to dump leaks
+ * at exit time (currently only if run under a debugger).
+ */
+#if defined(_MSC_VER) && defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+
+/*
  * We need to include string.h first before we override strerror
  * otherwise we can get errors during the build
  */
@@ -90,7 +100,6 @@
 #include <wspiapi.h>
 #endif
 
-/* #include <runtimelink.h> */	/* must come after ws2tcpip.h */
 #undef interface
 #include <process.h>
 #include <time.h>		/* time_t for timeval decl */

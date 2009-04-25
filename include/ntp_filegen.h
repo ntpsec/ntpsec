@@ -49,3 +49,6 @@ extern	void	filegen_setup	(FILEGEN *, u_long);
 extern	void	filegen_config	(FILEGEN *, char *, u_int, u_int);
 extern	FILEGEN *filegen_get	(char *);
 extern	void	filegen_register (char *, const char *, FILEGEN *);
+#ifdef DEBUG
+extern	FILEGEN *filegen_unregister(char *);
+#endif

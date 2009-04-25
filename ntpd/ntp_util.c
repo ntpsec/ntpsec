@@ -110,8 +110,42 @@ static double prev_drift_comp;		/* last frequency update */
 static int leap_file(FILE *);
 static void record_sys_stats(void);
 
+
 /*
- * init_util - initialize the utilities
+ * uninit_util - free memory allocated by init_util
+ */
+#ifdef DEBUG
+void
+uninit_util(void)
+{
+	if (stats_drift_file) {
+		free(stats_drift_file);
+		free(stats_temp_file);
+		stats_drift_file = NULL;
+		stats_temp_file = NULL;
+	}
+	if (key_file_name) {
+		free(key_file_name);
+		key_file_name = NULL;
+	}
+	filegen_unregister("peerstats");
+	filegen_unregister("loopstats");
+	filegen_unregister("clockstats");
+	filegen_unregister("rawstats");
+	filegen_unregister("sysstats");
+	filegen_unregister("protostats");
+#ifdef OPENSSL
+	filegen_unregister("cryptostats");
+#endif /* OPENSSL */
+#ifdef DEBUG_TIMING
+	filegen_unregister("timingstats");
+#endif /* DEBUG_TIMING */
+}
+#endif /* DEBUG */
+
+
+/*
+ * init_util - initialize the utilities (ntpd included)
  */
 void
 init_util(void)
@@ -119,18 +153,21 @@ init_util(void)
 	stats_drift_file = NULL;
 	stats_temp_file = NULL;
 	key_file_name = NULL;
-	filegen_register(&statsdir[0], "peerstats", &peerstats);
-	filegen_register(&statsdir[0], "loopstats", &loopstats);
-	filegen_register(&statsdir[0], "clockstats", &clockstats);
-	filegen_register(&statsdir[0], "rawstats", &rawstats);
-	filegen_register(&statsdir[0], "sysstats", &sysstats);
-	filegen_register(&statsdir[0], "protostats", &protostats);
+	filegen_register(statsdir, "peerstats",   &peerstats);
+	filegen_register(statsdir, "loopstats",   &loopstats);
+	filegen_register(statsdir, "clockstats",  &clockstats);
+	filegen_register(statsdir, "rawstats",    &rawstats);
+	filegen_register(statsdir, "sysstats",    &sysstats);
+	filegen_register(statsdir, "protostats",  &protostats);
 #ifdef OPENSSL
-	filegen_register(&statsdir[0], "cryptostats", &cryptostats);
+	filegen_register(statsdir, "cryptostats", &cryptostats);
 #endif /* OPENSSL */
 #ifdef DEBUG_TIMING
-	filegen_register(&statsdir[0], "timingstats", &timingstats);
+	filegen_register(statsdir, "timingstats", &timingstats);
 #endif /* DEBUG_TIMING */
+#ifdef DEBUG
+	atexit(uninit_util);
+#endif /* DEBUG */
 }
 
 
@@ -345,11 +382,11 @@ stats_config(
 	 * Open and read frequency file.
 	 */
 	case STATS_FREQ_FILE:
-		if (stats_drift_file != 0) {
+		if (stats_drift_file) {
 			free(stats_drift_file);
 			free(stats_temp_file);
-			stats_drift_file = 0;
-			stats_temp_file = 0;
+			stats_drift_file = NULL;
+			stats_temp_file = NULL;
 		}
 
 		if (value == 0 || (len = strlen(value)) == 0)

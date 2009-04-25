@@ -261,7 +261,7 @@ extern int	config_priority_override;
 extern int	config_priority;
 #endif
 
-extern char const *ntp_signd_socket;
+extern char *ntp_signd_socket;
 
 /* ntp_control.c */
 extern int	num_ctl_traps;

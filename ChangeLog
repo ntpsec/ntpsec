@@ -1,3 +1,13 @@
+* [Bug 1165] Clean up small memory leaks in the  config file parser
+* Correct logconfig keyword declaration to MULTIPLE_ARG
+* Enable filename and line number leak reporting on Windows when built
+  DEBUG for all the typical C runtime allocators such as calloc,
+  malloc, and strdup.  Previously only emalloc calls were covered.
+* Add DEBUG-only code to free dynamically allocated memory that would
+  otherwise remain allocated at ntpd exit, to allow less forgivable
+  leaks to stand out in leaks reported after exit.
+* Ensure termination of strings in ports/winnt/libisc/isc_strerror.c
+  and quiet compiler warnings.
 (4.2.5p165) 2009/04/23 Released by Harlan Stenn <stenn@ntp.org>
 * WWVB refclock cleanup from Dave Mills.
 * Code cleanup: requested_key -> request_key.

@@ -59,20 +59,15 @@ void destroy_queue(queue *my_queue)
 
 void *get_node(size_t size)
 {
-    node *new_node;
-    new_node = (node *) emalloc(sizeof(node) + size);
-    if (new_node != NULL) {
-        new_node->node_next = NULL; 
-        return new_node + 1;
-    }
-    else
-        return NULL;	/* XXX: log this! */
+    node *new_node = emalloc(sizeof(*new_node) + size);
+    new_node->node_next = NULL; 
+    return new_node + 1;
 }
 
 /* Define a function to free the allocated memory for a queue node */
 void free_node(void *my_node)
 {
-    node *old_node = (node *) my_node;
+    node *old_node = my_node;
     free(old_node - 1);
 }
 
@@ -80,7 +75,7 @@ void free_node(void *my_node)
 /* Define a function to check if the queue is empty. */
 int empty(queue *my_queue)
 {
-    return (my_queue->front == NULL);
+    return (!my_queue || !my_queue->front);
 }
 
 /* Define a function to add an element to the priority queue.
