@@ -354,12 +354,10 @@ make_keylist(
 		EVP_SignInit(&ctx, sign_digest);
 		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
 		EVP_SignUpdate(&ctx, vp->ptr, sizeof(struct autokey));
-		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
+		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey)) {
 			vp->siglen = htonl(len);
-		else
-			msyslog(LOG_ERR, "make_keys: %s",
-			    ERR_error_string(ERR_get_error(), NULL));
-		peer->flags |= FLAG_ASSOC;
+			peer->flags |= FLAG_ASSOC;
+		}
 	}
 #ifdef DEBUG
 	if (debug)
@@ -2922,8 +2920,8 @@ crypto_mv(
  * remains valid until its expiration. 
  *
  * Returns
- * XEVNT_CRT	bad or missing certificate
  * XEVNT_OK	success
+ * XEVNT_CRT	bad or missing certificate
  * XEVNT_PER	host certificate expired
  * XEVNT_PUB	bad or missing public key
  * XEVNT_VFY	certificate not verified

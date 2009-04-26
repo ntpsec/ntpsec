@@ -322,8 +322,9 @@ receive(
 	int	rval;			/* cookie snatcher */
 	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
 #endif /* OPENSSL */
-
+#ifdef WINTIME
 	static unsigned char zero_key[16];
+#endif /* WINTIME */
 
 	/*
 	 * Monitor the packet and get restrictions. Note that the packet
@@ -1202,22 +1203,25 @@ receive(
 		}
 		peer->flash |= TEST8;
 		rval = crypto_recv(peer, rbufp);
-		if (rval == XEVNT_OK)
+		if (rval == XEVNT_OK) {
 			peer->unreach = 0;
-		if (rval != XEVNT_OK) {
-			report_event(PEVNT_RESTART, peer,
-			    "crypto");
-			peer_clear(peer, "CRYP");
-			peer->flash |= TEST9;		/* bad crypt */
-			if (peer->flags & FLAG_PREEMPT)
-				unpeer(peer);
+		} else {
+			if (rval == XEVNT_ERR) {
+				report_event(PEVNT_RESTART, peer,
+				    "crypto");
+				peer_clear(peer, "CRYP");
+				peer->flash |= TEST9;	/* bad crypt */
+				if (peer->flags & FLAG_PREEMPT)
+					unpeer(peer);
+			}
 			return;
+		}
 
 		/*
 		 * If server mode, verify the receive key ID matches
 		 * the transmit key ID.
 		 */
-		} else if (hismode == MODE_SERVER) {
+		if (hismode == MODE_SERVER) {
 			if (skeyid == peer->keyid)
 				peer->flash &= ~TEST8;
 
@@ -2971,7 +2975,8 @@ peer_xmit(
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
 				exten = crypto_args(peer, CRYPTO_AUTO,
 				    peer->assoc, NULL);
-			else if (peer->flags & FLAG_ASSOC)
+			else if (peer->flags & FLAG_ASSOC &&
+			    peer->crypto & CRYPTO_FLAG_SIGN)
 				exten = crypto_args(peer, CRYPTO_AUTO |
 				    CRYPTO_RESP, peer->assoc, NULL);
 
