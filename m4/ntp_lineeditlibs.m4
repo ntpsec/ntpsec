@@ -1,17 +1,16 @@
 AC_DEFUN([NTP_LINEEDITLIBS], [
-  AC_CACHE_VAL([ntp_cv_lib_lineedit], [
-    # Ralf Wildenhues: either unset ... or cache EDITLINE_LIBS
-    unset ntp_cv_lib_lineedit
     ORIG_LIBS="$LIBS"
     AC_ARG_WITH([lineeditlibs],
-        [AC_HELP_STRING([--with-lineeditlibs], [edit,editline,readline])],
-        [use_lineeditlibs="$withval"],
+	[AC_HELP_STRING([--with-lineeditlibs], [edit,editline,readline])],
+	[use_lineeditlibs="$withval"],
 	[use_lineeditlibs="edit,editline"])
 
     AC_MSG_CHECKING([line editing libraries])
     AC_MSG_RESULT([$use_lineeditlibs])
     case "$use_lineeditlibs" in
-     no) ntp_cv_lib_lineedit=no ;;
+     no) 
+	ntp_lib_lineedit=no
+	;;
      *)
 	for lineedit_lib in `echo $use_lineeditlibs | sed -e 's/,/ /'`; do
 	  for term_lib in "" termcap curses ncurses; do
@@ -21,8 +20,8 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 	    esac
 	    LIBS="$ORIG_LIBS $TRY_LIB"
 	    AC_MSG_CHECKING([for readline() with $TRY_LIB])
-	    AC_TRY_LINK_FUNC([readline], [ntp_cv_lib_lineedit="$TRY_LIB"])
-	    case "$ntp_cv_lib_lineedit" in
+	    AC_TRY_LINK_FUNC([readline], [ntp_lib_lineedit="$TRY_LIB"])
+	    case "$ntp_lib_lineedit" in
 	     '')
 		AC_MSG_RESULT([no])
 		;;
@@ -32,8 +31,8 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 		;;
 	    esac
 	    AC_MSG_CHECKING([for el_gets() with $TRY_LIB])
-	    AC_TRY_LINK_FUNC([el_gets], [ntp_cv_lib_lineedit="$TRY_LIB"])
-	    case "$ntp_cv_lib_lineedit" in
+	    AC_TRY_LINK_FUNC([el_gets], [ntp_lib_lineedit="$TRY_LIB"])
+	    case "$ntp_lib_lineedit" in
 	     '')
 		AC_MSG_RESULT([no])
 		;;
@@ -43,53 +42,60 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 		;;
 	    esac
 	  done
-	  case "$ntp_cv_lib_lineedit" in
+	  case "$ntp_lib_lineedit" in
 	   '') ;;
 	   *)  break ;;
 	  esac
 	done
 	LIBS="$ORIG_LIBS"
-	case "$ntp_cv_lib_lineedit" in
-	 '')
-	    ntp_cv_lib_lineedit="no"
-	    ;;
-	 *) EDITLINE_LIBS="$ntp_cv_lib_lineedit"
-	    AC_SUBST(EDITLINE_LIBS)
-	    ;;
-	esac
 	;;
     esac
-  ])
 
-  case "$ntp_cv_lib_lineedit" in
-   no) ;;
-   -ledit)
+    case "$ntp_lib_lineedit" in
+     '')
+	ntp_lib_lineedit="no"
+	;;
+     no)
+	;;
+     *)
+	EDITLINE_LIBS="$ntp_lib_lineedit"
+	AC_SUBST(EDITLINE_LIBS)
+	;;
+    esac
+
+    case "$ntp_lib_lineedit" in
+     no)
+	;;
+     -ledit)
 	AC_DEFINE(HAVE_LIBEDIT, 1,
-              [Define if you have libedit])
+		[Define if you have libedit])
 	# we want to also check for readline.h
 	AC_CHECK_HEADERS(histedit.h)
 	;;
-   -leditline)
+     -leditline)
 	AC_MSG_WARN([editline is not yet supported])
 	;;
-   *)
+     *)
 	AC_DEFINE(HAVE_LIBREADLINE, 1,
-              [Define if you have a readline compatible library])
+		  [Define if you have a readline compatible library])
 	AC_CHECK_HEADERS(readline.h readline/readline.h)
-	AC_CACHE_CHECK([whether readline supports history],
-	    ntp_cv_lib_lineedit_history, [
-	    ntp_cv_lib_lineedit_history="no"
-	    ORIG_LIBS="$LIBS"
-	    LIBS="$ORIG_LIBS $ntp_cv_lib_lineedit"
-	    AC_TRY_LINK_FUNC(add_history, ntp_cv_lib_lineedit_history="yes")
-	    LIBS="$ORIG_LIBS"
-	])
-	case "$ntp_cv_lib_lineedit_history" in
+	
+	AC_MSG_CHECKING([whether readline supports history])
+	
+	ntp_lib_lineedit_history="no"
+	ORIG_LIBS="$LIBS"
+	LIBS="$ORIG_LIBS $ntp_lib_lineedit"
+	AC_TRY_LINK_FUNC(add_history, ntp_lib_lineedit_history="yes")
+	LIBS="$ORIG_LIBS"
+
+	AC_MSG_RESULT([$ntp_lib_lineedit_history])
+
+	case "$ntp_lib_lineedit_history" in
 	 yes)
-		AC_DEFINE(HAVE_READLINE_HISTORY, 1,
-                    [Define if your readline library has \`add_history'])
-		AC_CHECK_HEADERS(history.h readline/history.h)
-		;;
+	    AC_DEFINE(HAVE_READLINE_HISTORY, 1,
+		      [Define if your readline library has \`add_history'])
+	    AC_CHECK_HEADERS(history.h readline/history.h)
+	    ;;
     	esac
 	;;
   esac

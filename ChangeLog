@@ -1,3 +1,4 @@
+* m4/ntp_lineeditlibs.m4: fix warnings from newer Autoconf
 * Crypto cleanup from Dave Mills.
 (4.2.5p166) 2009/04/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1165] Clean up small memory leaks in the  config file parser
