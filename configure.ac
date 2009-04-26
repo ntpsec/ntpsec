@@ -140,7 +140,7 @@ case "$GCC" in
 	]
     )
     CFLAGS="$SAVED_CFLAGS_AC"
-    SAVED_CFLAGS_AC=
+    unset SAVED_CFLAGS_AC
     #
     # $ac_cv_gcc_Wstrict_overflow is tested again later to add the 
     # flag to CFLAGS.
@@ -149,6 +149,35 @@ case "$GCC" in
      yes)
 	AC_DEFINE(HAVE_GCC_WARN_STRICT_OVERFLOW, 1, 
 	    [compiling with gcc which understands -Wstrict-overflow])
+    esac
+esac
+
+
+case "$GCC" in
+ yes)
+    SAVED_CFLAGS_AC="$CFLAGS"
+    CFLAGS="$CFLAGS -Winit-self"
+    AC_CACHE_CHECK(
+	[if $CC can handle -Winit-self], 
+	ac_cv_gcc_Winit_self, 
+	[
+	    AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM([], [])],
+		[ac_cv_gcc_Winit_self=yes],
+		[ac_cv_gcc_Winit_self=no]
+	    )
+	]
+    )
+    CFLAGS="$SAVED_CFLAGS_AC"
+    unset SAVED_CFLAGS_AC
+    #
+    # $ac_cv_gcc_Winit_self is tested again later to add the 
+    # flag to CFLAGS.
+    #
+    case "$ac_cv_gcc_Winit_self" in
+     yes)
+	AC_DEFINE(HAVE_GCC_WARN_INIT_SELF, 1, 
+	    [compiling with gcc which understands -Winit-self])
     esac
 esac
 
@@ -267,7 +296,10 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Wno-strict-prototypes"
     # CFLAGS="$CFLAGS -Wtraditional"
     # CFLAGS="$CFLAGS -Wwrite-strings"
-    CFLAGS="$CFLAGS -Winit-self"
+    case "$ac_cv_gcc_Winit_self" in
+     yes)
+	CFLAGS="$CFLAGS -Winit-self"
+    esac
     case "$ac_cv_gcc_Wstrict_overflow" in
      yes)
 	#not yet: CFLAGS="$CFLAGS -Wstrict-overflow"
