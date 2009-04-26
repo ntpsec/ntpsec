@@ -1,3 +1,4 @@
+* Remove truncation of position (blanking) code in refclock_nmea.c
 (4.2.5p167) 2009/04/26 Released by Harlan Stenn <stenn@ntp.org>
 * Crypto cleanup from Dave Mills.
 (4.2.5p166) 2009/04/25 Released by Harlan Stenn <stenn@ntp.org>

@@ -491,10 +491,9 @@ nmea_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	int month, day;
-	char *cp, *dp, *bp, *msg;
+	char *cp, *dp, *msg;
 	int cmdtype;
 	int cmdtypezdg = 0;
-	int blanking;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_timestamp;
@@ -791,75 +790,6 @@ nmea_receive(
 		return;
 	}
 	pp->day = day;
-
-	/*
-	 * ntpq -c clockvar clients don't really need to know our 
-	 * position with perfect accuracy, so for privacy blank
-	 * out least significant digits.  To avoid leaking the
-	 * omitted info indirectly, also blank checksum.
-	 *
-	 * Start by pointing cp and dp at the fields with 
-	 * longitude and latitude in the last timecode.
-	 */
-	switch (cmdtype) {
-
-	    case GPGLL:
-		cp = field_parse(pp->a_lastcode, 1);
-		dp = field_parse(cp, 2);
-		break;
-
-	    case GPGGA:
-		cp = field_parse(pp->a_lastcode, 2);
-		dp = field_parse(cp, 2);
-		break;
-
-	    case GPRMC:
-		cp = field_parse(pp->a_lastcode, 3);
-		dp = field_parse(cp, 2);
-		break;
-
-	    case GPZDG_ZDA:
-	    default:
-		cp = dp = NULL;
-	}
-
-	/*
-	 * Blanking everything after the decimal point '.' is easy and 
-	 * gives enough error for at least a few neighbors to be as 
-	 * likely as you to be the one with the reflock.  We're keeping
-	 * degrees and minutes but tossing the seconds (expressed as
-	 * decimal fractions of a minute).  Degrees minutes seconds,
-	 * not hours minutes seconds.  :)
-	 */
-	bp = cp;
-	while (bp) {
-		blanking = 0;
-		while (',' != *bp) {
-			if (blanking)
-				*bp = '_';
-			else if ('.' == *bp)
-				blanking = 1;
-			bp++;
-		}
-
-		/*
-		 * blank the longitude at cp then the latitude at dp
-		 * then we're done.
-		 */
-		if (bp < dp)
-			bp = dp;
-		else
-			bp = NULL;
-	}
-
-	/*
-	 * blank the checksum, last two characters on the line
-	 */
-	if (cp) {
-		bp = pp->a_lastcode + pp->lencode - 2;
-		if (0 == bp[2])
-			bp[0] = bp[1] = '_';
-	}
 
 #ifdef HAVE_PPSAPI
 	/*
