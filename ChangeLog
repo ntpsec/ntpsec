@@ -1,6 +1,6 @@
 ---
 
-* configure: gcc -Winit-self is used only if it is understood
+* [Bug 1167] use gcc -Winit-self only if it is understood
 
 ---
 (4.2.4p7-RC3) 2009/04/22 Released by Harlan Stenn <stenn@ntp.org>
