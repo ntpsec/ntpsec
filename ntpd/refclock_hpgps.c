@@ -532,18 +532,25 @@ hpgps_receive(
 		pp->leap = LEAP_NOTINSYNC;
 	}
 	else {
+		pp->leap = LEAP_NOWARNING;
 		switch (leapchar) {
 
-		    case '+':
-			pp->leap = LEAP_ADDSECOND;
+		    case '0':
 			break;
                      
-		    case '0':
-			pp->leap = LEAP_NOWARNING;
+		    /* See http://bugs.ntp.org/1090
+		     * Ignore leap announcements unless June or December.
+		     * Better would be to use :GPSTime? to find the month,
+		     * but that seems too likely to introduce other bugs.
+		     */
+		    case '+':
+			if ((month==6) || (month==12))
+			    pp->leap = LEAP_ADDSECOND;
 			break;
                      
 		    case '-':
-			pp->leap = LEAP_DELSECOND;
+			if ((month==6) || (month==12))
+			    pp->leap = LEAP_DELSECOND;
 			break;
                      
 		    default:

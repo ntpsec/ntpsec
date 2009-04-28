@@ -1,3 +1,4 @@
+* Fix refclock_hpgps for Bug 1090 (bogus leap seconds)
 (4.2.5p167) 2009/04/26 Released by Harlan Stenn <stenn@ntp.org>
 * Crypto cleanup from Dave Mills.
 (4.2.5p166) 2009/04/25 Released by Harlan Stenn <stenn@ntp.org>
