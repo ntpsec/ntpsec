@@ -24,7 +24,7 @@
 #define DEBUG
 
 int kod_init = 0, entryc = 0;
-char *kod_db_file;
+const char *kod_db_file;
 struct kod_entry *kod_db;
 FILE *db_s;
 
@@ -163,7 +163,7 @@ write_kod_db (
 		
 void 
 kod_init_kod_db (
-		char *db_file
+		const char *db_file
 		)
 {
 	if(kod_init)

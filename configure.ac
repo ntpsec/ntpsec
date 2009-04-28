@@ -284,16 +284,6 @@ case "$GCC" in
     CFLAGS="$CFLAGS -Wmissing-prototypes"
     CFLAGS="$CFLAGS -Wpointer-arith"
     CFLAGS="$CFLAGS -Wshadow"
-    #
-    # OpenSSL has a number of callback prototypes
-    # inside other function prototypes which trigger
-    # warnings with -Wstrict-prototypes, such as:
-    #
-    # int i2d_RSA_NET(const RSA *a, unsigned char **pp, 
-    #                 int (*cb)(), int sgckey);
-    #                 ^^^^^^^^^^^
-    #
-    CFLAGS="$CFLAGS -Wno-strict-prototypes"
     # CFLAGS="$CFLAGS -Wtraditional"
     # CFLAGS="$CFLAGS -Wwrite-strings"
     case "$ac_cv_gcc_Winit_self" in
@@ -302,9 +292,9 @@ case "$GCC" in
     esac
     case "$ac_cv_gcc_Wstrict_overflow" in
      yes)
-	#not yet: CFLAGS="$CFLAGS -Wstrict-overflow"
+	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
-    ;;
+    # if building with OpenSSL, -Wno-strict-prototypes is added later
 esac
 
 case "$host" in
@@ -3185,32 +3175,56 @@ case "$ans" in
 esac
 AC_MSG_RESULT([$ans])
 
+AC_MSG_CHECKING([if we will use crypto])
 AC_ARG_WITH(crypto,
 	AC_HELP_STRING([--with-crypto], [+ =openssl]),
 [ans=$withval], [ans=yes])
 case "$ans" in
- no) ;;
+ no)
+    ;;
  yes|openssl)
     if test -z "$OPENSSL_LIB" -o -z "$OPENSSL_INC"
     then
 	ans=no
     else
-	# We have OpenSSL inc/lib - use them.
-	ans=openssl
-	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
-	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-	case "$need_dash_r" in
-	 1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
-	    ;;
-	esac
-	AC_SUBST(LCRYPTO, [-lcrypto])
-	AC_DEFINE(OPENSSL, , [Use OpenSSL?])
-	AC_CHECK_FUNCS(EVP_md2 EVP_mdc2)
+	ans=yes
     fi
-    ;;
 esac
-AC_MSG_CHECKING(for the level of crypto support)
+ntp_openssl=$ans
 AC_MSG_RESULT([$ans])
+
+case "$ntp_openssl" in
+ yes)
+    # We have OpenSSL inc/lib - use them.
+    CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
+    LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+    case "$need_dash_r" in
+     1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
+    esac
+    AC_SUBST(LCRYPTO, [-lcrypto])
+    AC_DEFINE(OPENSSL, , [Use OpenSSL?])
+    AC_CHECK_FUNCS([EVP_md2 EVP_mdc2])
+esac
+
+#
+# OpenSSL has a number of callback prototypes inside other function
+# prototypes which trigger copious warnings with -Wstrict-prototypes,
+# (which is included in -Wall).
+#
+# An example:
+#
+# int i2d_RSA_NET(const RSA *a, unsigned char **pp, 
+#                 int (*cb)(), int sgckey);
+#                 ^^^^^^^^^^^
+#
+# The OpenSSL headers probably haven't been fixed in this regard
+# due to the hoops you have to jump through to stay compatible with
+# K&R C compilers.
+#
+case "$GCC$ntp_openssl" in
+ yesyes)
+    CFLAGS="$CFLAGS -Wno-strict-prototypes"
+esac
 
 AC_MSG_CHECKING([if we want to compile with ElectricFence])
 AC_ARG_WITH(electricfence,

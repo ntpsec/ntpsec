@@ -42,7 +42,7 @@ struct key {
 };
 
 int auth_md5(char *pkt_data, int mac_size, struct key *cmp_key);
-int auth_init(char *keyfile, struct key **keys);
+int auth_init(const char *keyfile, struct key **keys);
 void get_key(int key_id, struct key **d_key);
 
 

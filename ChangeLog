@@ -1,3 +1,7 @@
+* [Bug 1169] quiet compiler warnings
+* Re-enable gcc -Wstrict-prototypes when not building with OpenSSL
+* Enable gcc -Wstrict-overflow
+* ntpq/ntpdc emit newline after accepting password on Windows
 * m4/ntp_lineeditlibs.m4: fix warnings from newer Autoconf
 * Remove truncation of position (blanking) code in refclock_nmea.c
 (4.2.5p167) 2009/04/26 Released by Harlan Stenn <stenn@ntp.org>

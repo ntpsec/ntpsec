@@ -70,8 +70,8 @@ extern	char *	inttoa		(long);
 extern	char *	mfptoa		(u_long, u_long, short);
 extern	char *	mfptoms		(u_long, u_long, short);
 extern	const char * modetoa	(int);
-extern  const char * eventstr   (int);
-extern  const char * ceventstr  (int);
+extern  const char * eventstr	(int);
+extern  const char * ceventstr	(int);
 extern	char *	statustoa	(int, int);
 extern  const char * sysstatstr (int);
 extern  const char * peerstatstr (int);
@@ -79,8 +79,8 @@ extern  const char * clockstatstr (int);
 extern	struct sockaddr_storage* netof (struct sockaddr_storage*);
 extern	char *	numtoa		(u_int32);
 extern	char *	numtohost	(u_int32);
-extern char * socktoa           (struct sockaddr_storage *);
-extern char * socktohost        (struct sockaddr_storage *);
+extern char *	socktoa		(struct sockaddr_storage *);
+extern char *	socktohost	(struct sockaddr_storage *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	char *	refnumtoa	(struct sockaddr_storage *);
@@ -89,7 +89,7 @@ extern	char *	uinttoa		(u_long);
 
 extern	int	decodenetnum	(const char *, struct sockaddr_storage *);
 
-extern	const char *	FindConfig	(const char *);
+extern	const char * FindConfig	(const char *);
 
 extern	void	signal_no_reset (int, RETSIGTYPE (*func)(int));
 

@@ -1215,7 +1215,7 @@ refclock_ppsapi(
 	struct refclock_atom *ap	/* atom structure pointer */
 	)
 {
-	if (ap->handle == NULL) {
+	if (!ap->handle) {
 		if (time_pps_create(fddev, &ap->handle) < 0) {
 			msyslog(LOG_ERR,
 			    "refclock_atom: time_pps_create failed: %m");
@@ -1301,7 +1301,7 @@ refclock_pps(
 	 * most recent PPS timestamp.
 	 */ 
 	pp = peer->procptr;
-	if (ap->handle == NULL)
+	if (!ap->handle)
 		return (0);
 
 	if (ap->pps_params.mode == 0 && sys_leap != LEAP_NOTINSYNC) {

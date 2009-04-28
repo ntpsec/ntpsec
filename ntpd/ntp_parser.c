@@ -295,6 +295,164 @@
      T_Proc_Delay = 413
    };
 #endif
+/* Tokens.  */
+#define T_Age 258
+#define T_Allan 259
+#define T_Auth 260
+#define T_Autokey 261
+#define T_Automax 262
+#define T_Average 263
+#define T_Bclient 264
+#define T_Beacon 265
+#define T_Bias 266
+#define T_Broadcast 267
+#define T_Broadcastclient 268
+#define T_Broadcastdelay 269
+#define T_Burst 270
+#define T_Calibrate 271
+#define T_Calldelay 272
+#define T_Ceiling 273
+#define T_Clockstats 274
+#define T_Cohort 275
+#define T_ControlKey 276
+#define T_Crypto 277
+#define T_Cryptostats 278
+#define T_Day 279
+#define T_Default 280
+#define T_Disable 281
+#define T_Discard 282
+#define T_Dispersion 283
+#define T_Double 284
+#define T_Driftfile 285
+#define T_WanderThreshold 286
+#define T_Enable 287
+#define T_End 288
+#define T_False 289
+#define T_File 290
+#define T_Filegen 291
+#define T_Flag1 292
+#define T_Flag2 293
+#define T_Flag3 294
+#define T_Flag4 295
+#define T_Flake 296
+#define T_Floor 297
+#define T_Freq 298
+#define T_Fudge 299
+#define T_Host 300
+#define T_Huffpuff 301
+#define T_IPv4_address 302
+#define T_IPv6_address 303
+#define T_Iburst 304
+#define T_Ident 305
+#define T_Ignore 306
+#define T_Includefile 307
+#define T_Integer 308
+#define T_Interface 309
+#define T_Kernel 310
+#define T_Key 311
+#define T_Keys 312
+#define T_Keysdir 313
+#define T_Kod 314
+#define T_Leap 315
+#define T_Leapfile 316
+#define T_Limited 317
+#define T_Link 318
+#define T_Logconfig 319
+#define T_Logfile 320
+#define T_Loopstats 321
+#define T_Lowpriotrap 322
+#define T_Manycastclient 323
+#define T_Manycastserver 324
+#define T_Mask 325
+#define T_Maxclock 326
+#define T_Maxdist 327
+#define T_Maxhop 328
+#define T_Maxpoll 329
+#define T_Minclock 330
+#define T_Mindist 331
+#define T_Minimum 332
+#define T_Minpoll 333
+#define T_Minsane 334
+#define T_Mode 335
+#define T_Monitor 336
+#define T_Month 337
+#define T_Multicastclient 338
+#define T_Nolink 339
+#define T_Nomodify 340
+#define T_None 341
+#define T_Nopeer 342
+#define T_Noquery 343
+#define T_Noselect 344
+#define T_Noserve 345
+#define T_Notrap 346
+#define T_Notrust 347
+#define T_Novolley 348
+#define T_Ntp 349
+#define T_Ntpport 350
+#define T_NtpSignDsocket 351
+#define T_Orphan 352
+#define T_Panic 353
+#define T_Peer 354
+#define T_Peerstats 355
+#define T_Phone 356
+#define T_Pid 357
+#define T_Pidfile 358
+#define T_Pool 359
+#define T_Port 360
+#define T_Pps 361
+#define T_Preempt 362
+#define T_Prefer 363
+#define T_Protostats 364
+#define T_Pw 365
+#define T_Qos 366
+#define T_RandFile 367
+#define T_Rawstats 368
+#define T_Refid 369
+#define T_Requestkey 370
+#define T_Restrict 371
+#define T_Revoke 372
+#define T_Server 373
+#define T_Setvar 374
+#define T_Sign 375
+#define T_Statistics 376
+#define T_Stats 377
+#define T_Statsdir 378
+#define T_Step 379
+#define T_Stepout 380
+#define T_Stratum 381
+#define T_String 382
+#define T_Sysstats 383
+#define T_Tick 384
+#define T_Time1 385
+#define T_Time2 386
+#define T_Timingstats 387
+#define T_Tinker 388
+#define T_Tos 389
+#define T_Trap 390
+#define T_True 391
+#define T_Trustedkey 392
+#define T_Ttl 393
+#define T_Type 394
+#define T_Unconfig 395
+#define T_Unpeer 396
+#define T_Version 397
+#define T_Week 398
+#define T_Xleave 399
+#define T_Year 400
+#define T_Flag 401
+#define T_Void 402
+#define T_EOC 403
+#define T_Simulate 404
+#define T_Beep_Delay 405
+#define T_Sim_Duration 406
+#define T_Server_Offset 407
+#define T_Duration 408
+#define T_Freq_Offset 409
+#define T_Wander 410
+#define T_Jitter 411
+#define T_Prop_Delay 412
+#define T_Proc_Delay 413
+
 
 
 
@@ -321,7 +479,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 325 "ntp_parser.c"
+#line 483 "ntp_parser.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -333,7 +491,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 337 "ntp_parser.c"
+#line 495 "ntp_parser.c"
 
 #ifdef short
 # undef short
@@ -1995,7 +2153,7 @@ yyreduce:
 			} else if (input_from_file != 0)
 				msyslog(LOG_ERR,
 					"parse: bad boolean input flag\n");
-	;}
+	}
     break;
 
   case 19:
@@ -2006,7 +2164,7 @@ yyreduce:
 			struct peer_node *my_node =  create_peer_node((yyvsp[(1) - (3)].Integer), (yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue));
 			if (my_node)
 				enqueue(my_config.peers, my_node);
-		;}
+		}
     break;
 
   case 20:
@@ -2017,189 +2175,189 @@ yyreduce:
 			struct peer_node *my_node = create_peer_node((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Address_node), NULL);
 			if (my_node)
 				enqueue(my_config.peers, my_node);
-		;}
+		}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
 #line 343 "ntp_parser.y"
-    { (yyval.Integer) = T_Server; ;}
+    { (yyval.Integer) = T_Server; }
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
 #line 344 "ntp_parser.y"
-    { (yyval.Integer) = T_Pool; ;}
+    { (yyval.Integer) = T_Pool; }
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
 #line 345 "ntp_parser.y"
-    { (yyval.Integer) = T_Peer; ;}
+    { (yyval.Integer) = T_Peer; }
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
 #line 346 "ntp_parser.y"
-    { (yyval.Integer) = T_Broadcast; ;}
+    { (yyval.Integer) = T_Broadcast; }
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
 #line 347 "ntp_parser.y"
-    { (yyval.Integer) = T_Manycastclient; ;}
+    { (yyval.Integer) = T_Manycastclient; }
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
 #line 351 "ntp_parser.y"
-    { (yyval.Address_node) = (yyvsp[(1) - (1)].Address_node); ;}
+    { (yyval.Address_node) = (yyvsp[(1) - (1)].Address_node); }
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
 #line 352 "ntp_parser.y"
-    { (yyval.Address_node) = create_address_node((yyvsp[(2) - (2)].String), AF_INET); ;}
+    { (yyval.Address_node) = create_address_node((yyvsp[(2) - (2)].String), AF_INET); }
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
 #line 353 "ntp_parser.y"
-    { (yyval.Address_node) = create_address_node((yyvsp[(2) - (2)].String), AF_INET6); ;}
+    { (yyval.Address_node) = create_address_node((yyvsp[(2) - (2)].String), AF_INET6); }
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
 #line 357 "ntp_parser.y"
-    { (yyval.Address_node) = create_address_node((yyvsp[(1) - (1)].String), 0); ;}
+    { (yyval.Address_node) = create_address_node((yyvsp[(1) - (1)].String), 0); }
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
 #line 361 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
 #line 362 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
 #line 367 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_SKEY); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_SKEY); }
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
 #line 368 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Bias, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Bias, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
 #line 369 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_BURST); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_BURST); }
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
 #line 370 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_IBURST); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_IBURST); }
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
 #line 371 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Key, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Key, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
 #line 372 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Minpoll, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Minpoll, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
 #line 373 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Maxpoll, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Maxpoll, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
 #line 374 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_NOSELECT); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_NOSELECT); }
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
 #line 375 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_PREEMPT); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_PREEMPT); }
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
 #line 376 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_PREFER); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_PREFER); }
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
 #line 377 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_TRUE); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_TRUE); }
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
 #line 378 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_XLEAVE); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, FLAG_XLEAVE); }
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
 #line 379 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Ttl, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Ttl, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
 #line 380 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Mode, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Mode, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
 #line 381 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Version, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Version, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 47:
@@ -2210,63 +2368,63 @@ yyreduce:
 			struct unpeer_node *my_node = create_unpeer_node((yyvsp[(2) - (2)].Address_node));
 			if (my_node)
 				enqueue(my_config.unpeers, my_node);
-		;}
+		}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
 #line 398 "ntp_parser.y"
-    { (yyval.Integer) = T_Unconfig ;}
+    { (yyval.Integer) = T_Unconfig; }
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
 #line 399 "ntp_parser.y"
-    { (yyval.Integer) = T_Unpeer ;}
+    { (yyval.Integer) = T_Unpeer; }
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
 #line 410 "ntp_parser.y"
-    { my_config.broadcastclient = SIMPLE; ;}
+    { my_config.broadcastclient = SIMPLE; }
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
 #line 412 "ntp_parser.y"
-    { my_config.broadcastclient = NOVOLLEY; ;}
+    { my_config.broadcastclient = NOVOLLEY; }
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
 #line 414 "ntp_parser.y"
-    { append_queue(my_config.manycastserver, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.manycastserver, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
 #line 416 "ntp_parser.y"
-    { append_queue(my_config.multicastclient, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.multicastclient, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
 #line 427 "ntp_parser.y"
-    { my_config.auth.autokey = (yyvsp[(2) - (2)].Integer); ;}
+    { my_config.auth.autokey = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
 #line 429 "ntp_parser.y"
-    { my_config.auth.control_key = (yyvsp[(2) - (2)].Integer); ;}
+    { my_config.auth.control_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 56:
@@ -2279,217 +2437,217 @@ yyreduce:
 			else
 				my_config.auth.crypto_cmd_list = (yyvsp[(2) - (2)].Queue);
 			cryptosw++;
-		;}
+		}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
 #line 439 "ntp_parser.y"
-    { my_config.auth.keys = (yyvsp[(2) - (2)].String); ;}
+    { my_config.auth.keys = (yyvsp[(2) - (2)].String); }
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
 #line 441 "ntp_parser.y"
-    { my_config.auth.keysdir = (yyvsp[(2) - (2)].String); ;}
+    { my_config.auth.keysdir = (yyvsp[(2) - (2)].String); }
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
 #line 443 "ntp_parser.y"
-    { my_config.auth.request_key = (yyvsp[(2) - (2)].Integer); ;}
+    { my_config.auth.request_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
 #line 445 "ntp_parser.y"
-    { my_config.auth.trusted_key_list = (yyvsp[(2) - (2)].Queue); ;}
+    { my_config.auth.trusted_key_list = (yyvsp[(2) - (2)].Queue); }
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
 #line 447 "ntp_parser.y"
-    { my_config.auth.ntp_signd_socket = (yyvsp[(2) - (2)].String); ;}
+    { my_config.auth.ntp_signd_socket = (yyvsp[(2) - (2)].String); }
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
 #line 453 "ntp_parser.y"
-    { (yyval.Queue) = NULL; ;}
+    { (yyval.Queue) = NULL; }
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
 #line 457 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
 #line 458 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
 #line 463 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_PRIV, (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_PRIV, (yyvsp[(2) - (2)].String)); }
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
 #line 465 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_IDENT, (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_IDENT, (yyvsp[(2) - (2)].String)); }
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
 #line 467 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_PW, (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_PW, (yyvsp[(2) - (2)].String)); }
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
 #line 469 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_RAND, (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_RAND, (yyvsp[(2) - (2)].String)); }
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
 #line 471 "ntp_parser.y"
-    { my_config.auth.revoke = (yyvsp[(2) - (2)].Integer); ;}
+    { my_config.auth.revoke = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
 #line 473 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_SIGN, (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(CRYPTO_CONF_SIGN, (yyvsp[(2) - (2)].String)); }
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
 #line 483 "ntp_parser.y"
-    { append_queue(my_config.orphan_cmds,(yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.orphan_cmds,(yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
 #line 487 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
 #line 488 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
 #line 493 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_CEILING, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_CEILING, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
 #line 495 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_FLOOR, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_FLOOR, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 77:
 
 /* Line 1455 of yacc.c  */
 #line 497 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_COHORT, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_COHORT, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
 #line 499 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_ORPHAN, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_ORPHAN, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 79:
 
 /* Line 1455 of yacc.c  */
 #line 501 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_MINDISP, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_MINDISP, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 80:
 
 /* Line 1455 of yacc.c  */
 #line 503 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_MAXDIST, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_MAXDIST, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 81:
 
 /* Line 1455 of yacc.c  */
 #line 505 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_MINCLOCK, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_MINCLOCK, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 82:
 
 /* Line 1455 of yacc.c  */
 #line 507 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_MAXCLOCK, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_MAXCLOCK, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
 #line 509 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_MINSANE, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_MINSANE, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 84:
 
 /* Line 1455 of yacc.c  */
 #line 511 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_BEACON, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_BEACON, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 85:
 
 /* Line 1455 of yacc.c  */
 #line 513 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(PROTO_MAXHOP, (double)(yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_dval(PROTO_MAXHOP, (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 86:
 
 /* Line 1455 of yacc.c  */
 #line 523 "ntp_parser.y"
-    { append_queue(my_config.stats_list, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.stats_list, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
 #line 525 "ntp_parser.y"
-    { my_config.stats_dir = (yyvsp[(2) - (2)].String); ;}
+    { my_config.stats_dir = (yyvsp[(2) - (2)].String); }
     break;
 
   case 88:
@@ -2499,182 +2657,182 @@ yyreduce:
     {
 			enqueue(my_config.filegen_opts,
 				create_filegen_node((yyvsp[(2) - (3)].VoidPtr), (yyvsp[(3) - (3)].Queue)));
-		;}
+		}
     break;
 
   case 89:
 
 /* Line 1455 of yacc.c  */
 #line 534 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].VoidPtr)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].VoidPtr)); }
     break;
 
   case 90:
 
 /* Line 1455 of yacc.c  */
 #line 535 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].VoidPtr)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].VoidPtr)); }
     break;
 
   case 91:
 
 /* Line 1455 of yacc.c  */
 #line 540 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("clockstats"); ;}
+    { (yyval.VoidPtr) = create_pval("clockstats"); }
     break;
 
   case 92:
 
 /* Line 1455 of yacc.c  */
 #line 542 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("cryptostats"); ;}
+    { (yyval.VoidPtr) = create_pval("cryptostats"); }
     break;
 
   case 93:
 
 /* Line 1455 of yacc.c  */
 #line 544 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("loopstats"); ;}
+    { (yyval.VoidPtr) = create_pval("loopstats"); }
     break;
 
   case 94:
 
 /* Line 1455 of yacc.c  */
 #line 546 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("peerstats"); ;}
+    { (yyval.VoidPtr) = create_pval("peerstats"); }
     break;
 
   case 95:
 
 /* Line 1455 of yacc.c  */
 #line 548 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("rawstats"); ;}
+    { (yyval.VoidPtr) = create_pval("rawstats"); }
     break;
 
   case 96:
 
 /* Line 1455 of yacc.c  */
 #line 550 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("sysstats"); ;}
+    { (yyval.VoidPtr) = create_pval("sysstats"); }
     break;
 
   case 97:
 
 /* Line 1455 of yacc.c  */
 #line 552 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("timingstats"); ;}
+    { (yyval.VoidPtr) = create_pval("timingstats"); }
     break;
 
   case 98:
 
 /* Line 1455 of yacc.c  */
 #line 554 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_pval("protostats"); ;}
+    { (yyval.VoidPtr) = create_pval("protostats"); }
     break;
 
   case 99:
 
 /* Line 1455 of yacc.c  */
 #line 558 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 100:
 
 /* Line 1455 of yacc.c  */
 #line 559 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 101:
 
 /* Line 1455 of yacc.c  */
 #line 564 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(T_File, (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(T_File, (yyvsp[(2) - (2)].String)); }
     break;
 
   case 102:
 
 /* Line 1455 of yacc.c  */
 #line 566 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Type, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Type, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 103:
 
 /* Line 1455 of yacc.c  */
 #line 567 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Link); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Link); }
     break;
 
   case 104:
 
 /* Line 1455 of yacc.c  */
 #line 568 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Nolink); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Nolink); }
     break;
 
   case 105:
 
 /* Line 1455 of yacc.c  */
 #line 569 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Enable); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Enable); }
     break;
 
   case 106:
 
 /* Line 1455 of yacc.c  */
 #line 570 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Disable); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, T_Disable); }
     break;
 
   case 107:
 
 /* Line 1455 of yacc.c  */
 #line 574 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_NONE; ;}
+    { (yyval.Integer) = FILEGEN_NONE; }
     break;
 
   case 108:
 
 /* Line 1455 of yacc.c  */
 #line 575 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_PID; ;}
+    { (yyval.Integer) = FILEGEN_PID; }
     break;
 
   case 109:
 
 /* Line 1455 of yacc.c  */
 #line 576 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_DAY; ;}
+    { (yyval.Integer) = FILEGEN_DAY; }
     break;
 
   case 110:
 
 /* Line 1455 of yacc.c  */
 #line 577 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_WEEK; ;}
+    { (yyval.Integer) = FILEGEN_WEEK; }
     break;
 
   case 111:
 
 /* Line 1455 of yacc.c  */
 #line 578 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_MONTH; ;}
+    { (yyval.Integer) = FILEGEN_MONTH; }
     break;
 
   case 112:
 
 /* Line 1455 of yacc.c  */
 #line 579 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_YEAR; ;}
+    { (yyval.Integer) = FILEGEN_YEAR; }
     break;
 
   case 113:
 
 /* Line 1455 of yacc.c  */
 #line 580 "ntp_parser.y"
-    { (yyval.Integer) = FILEGEN_AGE; ;}
+    { (yyval.Integer) = FILEGEN_AGE; }
     break;
 
   case 114:
@@ -2683,7 +2841,7 @@ yyreduce:
 #line 590 "ntp_parser.y"
     {   
 			append_queue(my_config.discard_opts, (yyvsp[(2) - (2)].Queue));
-		;}
+		}
     break;
 
   case 115:
@@ -2693,7 +2851,7 @@ yyreduce:
     {
 			enqueue(my_config.restrict_opts,
 				create_restrict_node((yyvsp[(2) - (3)].Address_node), NULL, (yyvsp[(3) - (3)].Queue), ip_file->line_no));
-		;}
+		}
     break;
 
   case 116:
@@ -2703,7 +2861,7 @@ yyreduce:
     {
 			enqueue(my_config.restrict_opts,
 				create_restrict_node(NULL, NULL, (yyvsp[(3) - (3)].Queue), ip_file->line_no));
-		;}
+		}
     break;
 
   case 117:
@@ -2713,371 +2871,371 @@ yyreduce:
     {
 			enqueue(my_config.restrict_opts,
 				create_restrict_node((yyvsp[(2) - (5)].Address_node), (yyvsp[(4) - (5)].Address_node), (yyvsp[(5) - (5)].Queue), ip_file->line_no));
-		;}
+		}
     break;
 
   case 118:
 
 /* Line 1455 of yacc.c  */
 #line 611 "ntp_parser.y"
-    { (yyval.Queue) = create_queue(); ;}
+    { (yyval.Queue) = create_queue(); }
     break;
 
   case 119:
 
 /* Line 1455 of yacc.c  */
 #line 612 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].VoidPtr)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].VoidPtr)); }
     break;
 
   case 120:
 
 /* Line 1455 of yacc.c  */
 #line 616 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_TIMEOUT); ;}
+    { (yyval.VoidPtr) = create_ival(RES_TIMEOUT); }
     break;
 
   case 121:
 
 /* Line 1455 of yacc.c  */
 #line 617 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_IGNORE); ;}
+    { (yyval.VoidPtr) = create_ival(RES_IGNORE); }
     break;
 
   case 122:
 
 /* Line 1455 of yacc.c  */
 #line 618 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_KOD); ;}
+    { (yyval.VoidPtr) = create_ival(RES_KOD); }
     break;
 
   case 123:
 
 /* Line 1455 of yacc.c  */
 #line 619 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_LIMITED); ;}
+    { (yyval.VoidPtr) = create_ival(RES_LIMITED); }
     break;
 
   case 124:
 
 /* Line 1455 of yacc.c  */
 #line 620 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_LPTRAP); ;}
+    { (yyval.VoidPtr) = create_ival(RES_LPTRAP); }
     break;
 
   case 125:
 
 /* Line 1455 of yacc.c  */
 #line 621 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_NOMODIFY); ;}
+    { (yyval.VoidPtr) = create_ival(RES_NOMODIFY); }
     break;
 
   case 126:
 
 /* Line 1455 of yacc.c  */
 #line 622 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_NOPEER); ;}
+    { (yyval.VoidPtr) = create_ival(RES_NOPEER); }
     break;
 
   case 127:
 
 /* Line 1455 of yacc.c  */
 #line 623 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_NOQUERY); ;}
+    { (yyval.VoidPtr) = create_ival(RES_NOQUERY); }
     break;
 
   case 128:
 
 /* Line 1455 of yacc.c  */
 #line 624 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_DONTSERVE); ;}
+    { (yyval.VoidPtr) = create_ival(RES_DONTSERVE); }
     break;
 
   case 129:
 
 /* Line 1455 of yacc.c  */
 #line 625 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_NOTRAP); ;}
+    { (yyval.VoidPtr) = create_ival(RES_NOTRAP); }
     break;
 
   case 130:
 
 /* Line 1455 of yacc.c  */
 #line 626 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_DONTTRUST); ;}
+    { (yyval.VoidPtr) = create_ival(RES_DONTTRUST); }
     break;
 
   case 131:
 
 /* Line 1455 of yacc.c  */
 #line 627 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RESM_NTPONLY); ;}
+    { (yyval.VoidPtr) = create_ival(RESM_NTPONLY); }
     break;
 
   case 132:
 
 /* Line 1455 of yacc.c  */
 #line 628 "ntp_parser.y"
-    { (yyval.VoidPtr) = create_ival(RES_VERSION); ;}
+    { (yyval.VoidPtr) = create_ival(RES_VERSION); }
     break;
 
   case 133:
 
 /* Line 1455 of yacc.c  */
 #line 632 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 134:
 
 /* Line 1455 of yacc.c  */
 #line 633 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 135:
 
 /* Line 1455 of yacc.c  */
 #line 637 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Average, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Average, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 136:
 
 /* Line 1455 of yacc.c  */
 #line 638 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Minimum, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Minimum, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 137:
 
 /* Line 1455 of yacc.c  */
 #line 639 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Monitor, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Monitor, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 138:
 
 /* Line 1455 of yacc.c  */
 #line 648 "ntp_parser.y"
-    { enqueue(my_config.fudge, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); ;}
+    { enqueue(my_config.fudge, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); }
     break;
 
   case 139:
 
 /* Line 1455 of yacc.c  */
 #line 652 "ntp_parser.y"
-    { enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 140:
 
 /* Line 1455 of yacc.c  */
 #line 653 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 141:
 
 /* Line 1455 of yacc.c  */
 #line 658 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(CLK_HAVETIME1, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(CLK_HAVETIME1, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 142:
 
 /* Line 1455 of yacc.c  */
 #line 660 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(CLK_HAVETIME2, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(CLK_HAVETIME2, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 143:
 
 /* Line 1455 of yacc.c  */
 #line 662 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEVAL1,  (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEVAL1,  (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 144:
 
 /* Line 1455 of yacc.c  */
 #line 664 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_sval(CLK_HAVEVAL2,  (yyvsp[(2) - (2)].String)); ;}
+    { (yyval.Attr_val) = create_attr_sval(CLK_HAVEVAL2,  (yyvsp[(2) - (2)].String)); }
     break;
 
   case 145:
 
 /* Line 1455 of yacc.c  */
 #line 666 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG1, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG1, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 146:
 
 /* Line 1455 of yacc.c  */
 #line 668 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG2, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG2, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 147:
 
 /* Line 1455 of yacc.c  */
 #line 670 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG3, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG3, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 148:
 
 /* Line 1455 of yacc.c  */
 #line 672 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG4, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(CLK_HAVEFLAG4, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 149:
 
 /* Line 1455 of yacc.c  */
 #line 681 "ntp_parser.y"
-    { append_queue(my_config.enable_opts,(yyvsp[(2) - (2)].Queue));  ;}
+    { append_queue(my_config.enable_opts,(yyvsp[(2) - (2)].Queue));  }
     break;
 
   case 150:
 
 /* Line 1455 of yacc.c  */
 #line 683 "ntp_parser.y"
-    { append_queue(my_config.disable_opts,(yyvsp[(2) - (2)].Queue));  ;}
+    { append_queue(my_config.disable_opts,(yyvsp[(2) - (2)].Queue));  }
     break;
 
   case 151:
 
 /* Line 1455 of yacc.c  */
 #line 687 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 152:
 
 /* Line 1455 of yacc.c  */
 #line 688 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 153:
 
 /* Line 1455 of yacc.c  */
 #line 692 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_AUTHENTICATE); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_AUTHENTICATE); }
     break;
 
   case 154:
 
 /* Line 1455 of yacc.c  */
 #line 693 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_BROADCLIENT); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_BROADCLIENT); }
     break;
 
   case 155:
 
 /* Line 1455 of yacc.c  */
 #line 694 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_CAL); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_CAL); }
     break;
 
   case 156:
 
 /* Line 1455 of yacc.c  */
 #line 695 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_KERNEL); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_KERNEL); }
     break;
 
   case 157:
 
 /* Line 1455 of yacc.c  */
 #line 696 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_MONITOR); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_MONITOR); }
     break;
 
   case 158:
 
 /* Line 1455 of yacc.c  */
 #line 697 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_NTP); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_NTP); }
     break;
 
   case 159:
 
 /* Line 1455 of yacc.c  */
 #line 699 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_FILEGEN); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Flag, PROTO_FILEGEN); }
     break;
 
   case 160:
 
 /* Line 1455 of yacc.c  */
 #line 707 "ntp_parser.y"
-    { append_queue(my_config.tinker, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.tinker, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 161:
 
 /* Line 1455 of yacc.c  */
 #line 711 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 162:
 
 /* Line 1455 of yacc.c  */
 #line 712 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 163:
 
 /* Line 1455 of yacc.c  */
 #line 716 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_ALLAN, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_ALLAN, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 164:
 
 /* Line 1455 of yacc.c  */
 #line 717 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_PHI, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_PHI, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 165:
 
 /* Line 1455 of yacc.c  */
 #line 718 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_FREQ, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_FREQ, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 166:
 
 /* Line 1455 of yacc.c  */
 #line 719 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_HUFFPUFF, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_HUFFPUFF, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 167:
 
 /* Line 1455 of yacc.c  */
 #line 720 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_PANIC, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_PANIC, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 168:
 
 /* Line 1455 of yacc.c  */
 #line 721 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_MAX, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_MAX, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 169:
 
 /* Line 1455 of yacc.c  */
 #line 722 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(LOOP_MINSTEP, (yyvsp[(2) - (2)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(LOOP_MINSTEP, (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 170:
@@ -3098,7 +3256,7 @@ yyreduce:
 			else
 				ip_file = fp[++curr_include_level];
 			}
-		;}
+		}
     break;
 
   case 171:
@@ -3108,112 +3266,112 @@ yyreduce:
     {
 			while (curr_include_level != -1)
 				FCLOSE(fp[curr_include_level--]);
-		;}
+		}
     break;
 
   case 172:
 
 /* Line 1455 of yacc.c  */
 #line 753 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_dval(T_Broadcastdelay, (yyvsp[(2) - (2)].Double))); ;}
+    { enqueue(my_config.vars, create_attr_dval(T_Broadcastdelay, (yyvsp[(2) - (2)].Double))); }
     break;
 
   case 173:
 
 /* Line 1455 of yacc.c  */
 #line 755 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_ival(T_Calldelay, (yyvsp[(2) - (2)].Integer))); ;}
+    { enqueue(my_config.vars, create_attr_ival(T_Calldelay, (yyvsp[(2) - (2)].Integer))); }
     break;
 
   case 174:
 
 /* Line 1455 of yacc.c  */
 #line 757 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_dval(T_Tick, (yyvsp[(2) - (2)].Double))); ;}
+    { enqueue(my_config.vars, create_attr_dval(T_Tick, (yyvsp[(2) - (2)].Double))); }
     break;
 
   case 175:
 
 /* Line 1455 of yacc.c  */
 #line 759 "ntp_parser.y"
-    { /* Null action, possibly all null parms */ ;}
+    { /* Null action, possibly all null parms */ }
     break;
 
   case 176:
 
 /* Line 1455 of yacc.c  */
 #line 761 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Leapfile, (yyvsp[(2) - (2)].String))); ;}
+    { enqueue(my_config.vars, create_attr_sval(T_Leapfile, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 177:
 
 /* Line 1455 of yacc.c  */
 #line 764 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Pidfile, (yyvsp[(2) - (2)].String))); ;}
+    { enqueue(my_config.vars, create_attr_sval(T_Pidfile, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 178:
 
 /* Line 1455 of yacc.c  */
 #line 766 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Logfile, (yyvsp[(2) - (2)].String))); ;}
+    { enqueue(my_config.vars, create_attr_sval(T_Logfile, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 179:
 
 /* Line 1455 of yacc.c  */
 #line 768 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_ival(T_Automax, (yyvsp[(2) - (2)].Integer))); ;}
+    { enqueue(my_config.vars, create_attr_ival(T_Automax, (yyvsp[(2) - (2)].Integer))); }
     break;
 
   case 180:
 
 /* Line 1455 of yacc.c  */
 #line 771 "ntp_parser.y"
-    { append_queue(my_config.logconfig, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.logconfig, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 181:
 
 /* Line 1455 of yacc.c  */
 #line 773 "ntp_parser.y"
-    { append_queue(my_config.phone, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.phone, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 182:
 
 /* Line 1455 of yacc.c  */
 #line 775 "ntp_parser.y"
-    { enqueue(my_config.setvar, (yyvsp[(2) - (2)].Set_var)); ;}
+    { enqueue(my_config.setvar, (yyvsp[(2) - (2)].Set_var)); }
     break;
 
   case 183:
 
 /* Line 1455 of yacc.c  */
 #line 777 "ntp_parser.y"
-    { enqueue(my_config.trap, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); ;}
+    { enqueue(my_config.trap, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); }
     break;
 
   case 184:
 
 /* Line 1455 of yacc.c  */
 #line 779 "ntp_parser.y"
-    { append_queue(my_config.ttl, (yyvsp[(2) - (2)].Queue)); ;}
+    { append_queue(my_config.ttl, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 185:
 
 /* Line 1455 of yacc.c  */
 #line 781 "ntp_parser.y"
-    { enqueue(my_config.qos, create_attr_sval(T_Qos, (yyvsp[(2) - (2)].String))); ;}
+    { enqueue(my_config.qos, create_attr_sval(T_Qos, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 186:
 
 /* Line 1455 of yacc.c  */
 #line 785 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (1)].String))); ;}
+    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (1)].String))); }
     break;
 
   case 187:
@@ -3221,70 +3379,70 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 787 "ntp_parser.y"
     { enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, (yyvsp[(2) - (2)].Double)));
-			  enqueue(my_config.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (2)].String))); ;}
+			  enqueue(my_config.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (2)].String))); }
     break;
 
   case 188:
 
 /* Line 1455 of yacc.c  */
 #line 790 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); ;}
+    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
     break;
 
   case 189:
 
 /* Line 1455 of yacc.c  */
 #line 795 "ntp_parser.y"
-    { (yyval.Set_var) = create_setvar_node((yyvsp[(1) - (4)].String), (yyvsp[(3) - (4)].String), DEF); ;}
+    { (yyval.Set_var) = create_setvar_node((yyvsp[(1) - (4)].String), (yyvsp[(3) - (4)].String), DEF); }
     break;
 
   case 190:
 
 /* Line 1455 of yacc.c  */
 #line 797 "ntp_parser.y"
-    { (yyval.Set_var) = create_setvar_node((yyvsp[(1) - (3)].String), (yyvsp[(3) - (3)].String), 0); ;}
+    { (yyval.Set_var) = create_setvar_node((yyvsp[(1) - (3)].String), (yyvsp[(3) - (3)].String), 0); }
     break;
 
   case 191:
 
 /* Line 1455 of yacc.c  */
 #line 802 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 192:
 
 /* Line 1455 of yacc.c  */
 #line 803 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 193:
 
 /* Line 1455 of yacc.c  */
 #line 807 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival(T_Port, (yyvsp[(2) - (2)].Integer)); ;}
+    { (yyval.Attr_val) = create_attr_ival(T_Port, (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 194:
 
 /* Line 1455 of yacc.c  */
 #line 808 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_pval(T_Interface, (yyvsp[(2) - (2)].Address_node)); ;}
+    { (yyval.Attr_val) = create_attr_pval(T_Interface, (yyvsp[(2) - (2)].Address_node)); }
     break;
 
   case 195:
 
 /* Line 1455 of yacc.c  */
 #line 813 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Attr_val)); }
     break;
 
   case 196:
 
 /* Line 1455 of yacc.c  */
 #line 814 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Attr_val)); }
     break;
 
   case 197:
@@ -3301,49 +3459,49 @@ yyreduce:
 			else
 				(yyval.Attr_val) = create_attr_sval(prefix, strdup(type));
 			YYFREE((yyvsp[(1) - (1)].String));
-		;}
+		}
     break;
 
   case 198:
 
 /* Line 1455 of yacc.c  */
 #line 837 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), create_ival((yyvsp[(2) - (2)].Integer))); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), create_ival((yyvsp[(2) - (2)].Integer))); }
     break;
 
   case 199:
 
 /* Line 1455 of yacc.c  */
 #line 838 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue(create_ival((yyvsp[(1) - (1)].Integer))); ;}
+    { (yyval.Queue) = enqueue_in_new_queue(create_ival((yyvsp[(1) - (1)].Integer))); }
     break;
 
   case 200:
 
 /* Line 1455 of yacc.c  */
 #line 842 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), create_pval((yyvsp[(2) - (2)].String))); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), create_pval((yyvsp[(2) - (2)].String))); }
     break;
 
   case 201:
 
 /* Line 1455 of yacc.c  */
 #line 843 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue(create_pval((yyvsp[(1) - (1)].String))); ;}
+    { (yyval.Queue) = enqueue_in_new_queue(create_pval((yyvsp[(1) - (1)].String))); }
     break;
 
   case 202:
 
 /* Line 1455 of yacc.c  */
 #line 847 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Address_node)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Address_node)); }
     break;
 
   case 203:
 
 /* Line 1455 of yacc.c  */
 #line 848 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Address_node)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Address_node)); }
     break;
 
   case 204:
@@ -3357,35 +3515,35 @@ yyreduce:
 			}
 			else
 				(yyval.Integer) = (yyvsp[(1) - (1)].Integer);
-		;}
+		}
     break;
 
   case 205:
 
 /* Line 1455 of yacc.c  */
 #line 861 "ntp_parser.y"
-    { (yyval.Integer) = 1; ;}
+    { (yyval.Integer) = 1; }
     break;
 
   case 206:
 
 /* Line 1455 of yacc.c  */
 #line 862 "ntp_parser.y"
-    { (yyval.Integer) = 0; ;}
+    { (yyval.Integer) = 0; }
     break;
 
   case 207:
 
 /* Line 1455 of yacc.c  */
 #line 866 "ntp_parser.y"
-    { (yyval.Double) = (double)(yyvsp[(1) - (1)].Integer); ;}
+    { (yyval.Double) = (double)(yyvsp[(1) - (1)].Integer); }
     break;
 
   case 208:
 
 /* Line 1455 of yacc.c  */
 #line 867 "ntp_parser.y"
-    { (yyval.Double) = (yyvsp[(1) - (1)].Double); ;}
+    { (yyval.Double) = (yyvsp[(1) - (1)].Double); }
     break;
 
   case 209:
@@ -3397,153 +3555,153 @@ yyreduce:
 
 			/* Reset the old_config_style variable */
 			old_config_style = 1;
-		;}
+		}
     break;
 
   case 210:
 
 /* Line 1455 of yacc.c  */
 #line 890 "ntp_parser.y"
-    { old_config_style = 0; ;}
+    { old_config_style = 0; }
     break;
 
   case 211:
 
 /* Line 1455 of yacc.c  */
 #line 894 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (3)].Queue), (yyvsp[(2) - (3)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (3)].Queue), (yyvsp[(2) - (3)].Attr_val)); }
     break;
 
   case 212:
 
 /* Line 1455 of yacc.c  */
 #line 895 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (2)].Attr_val)); }
     break;
 
   case 213:
 
 /* Line 1455 of yacc.c  */
 #line 899 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Beep_Delay, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Beep_Delay, (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 214:
 
 /* Line 1455 of yacc.c  */
 #line 900 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Sim_Duration, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Sim_Duration, (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 215:
 
 /* Line 1455 of yacc.c  */
 #line 904 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Sim_server)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Sim_server)); }
     break;
 
   case 216:
 
 /* Line 1455 of yacc.c  */
 #line 905 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Sim_server)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Sim_server)); }
     break;
 
   case 217:
 
 /* Line 1455 of yacc.c  */
 #line 910 "ntp_parser.y"
-    { (yyval.Sim_server) = create_sim_server((yyvsp[(1) - (5)].Address_node), (yyvsp[(3) - (5)].Double), (yyvsp[(4) - (5)].Queue)); ;}
+    { (yyval.Sim_server) = create_sim_server((yyvsp[(1) - (5)].Address_node), (yyvsp[(3) - (5)].Double), (yyvsp[(4) - (5)].Queue)); }
     break;
 
   case 218:
 
 /* Line 1455 of yacc.c  */
 #line 914 "ntp_parser.y"
-    { (yyval.Double) = (yyvsp[(3) - (4)].Double); ;}
+    { (yyval.Double) = (yyvsp[(3) - (4)].Double); }
     break;
 
   case 219:
 
 /* Line 1455 of yacc.c  */
 #line 918 "ntp_parser.y"
-    { (yyval.Address_node) = (yyvsp[(3) - (3)].Address_node); ;}
+    { (yyval.Address_node) = (yyvsp[(3) - (3)].Address_node); }
     break;
 
   case 220:
 
 /* Line 1455 of yacc.c  */
 #line 922 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Sim_script)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (2)].Queue), (yyvsp[(2) - (2)].Sim_script)); }
     break;
 
   case 221:
 
 /* Line 1455 of yacc.c  */
 #line 923 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Sim_script)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (1)].Sim_script)); }
     break;
 
   case 222:
 
 /* Line 1455 of yacc.c  */
 #line 928 "ntp_parser.y"
-    { (yyval.Sim_script) = create_sim_script_info((yyvsp[(3) - (6)].Double), (yyvsp[(5) - (6)].Queue)); ;}
+    { (yyval.Sim_script) = create_sim_script_info((yyvsp[(3) - (6)].Double), (yyvsp[(5) - (6)].Queue)); }
     break;
 
   case 223:
 
 /* Line 1455 of yacc.c  */
 #line 932 "ntp_parser.y"
-    { (yyval.Queue) = enqueue((yyvsp[(1) - (3)].Queue), (yyvsp[(2) - (3)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue((yyvsp[(1) - (3)].Queue), (yyvsp[(2) - (3)].Attr_val)); }
     break;
 
   case 224:
 
 /* Line 1455 of yacc.c  */
 #line 933 "ntp_parser.y"
-    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (2)].Attr_val)); ;}
+    { (yyval.Queue) = enqueue_in_new_queue((yyvsp[(1) - (2)].Attr_val)); }
     break;
 
   case 225:
 
 /* Line 1455 of yacc.c  */
 #line 938 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Freq_Offset, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Freq_Offset, (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 226:
 
 /* Line 1455 of yacc.c  */
 #line 940 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Wander, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Wander, (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 227:
 
 /* Line 1455 of yacc.c  */
 #line 942 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Jitter, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Jitter, (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 228:
 
 /* Line 1455 of yacc.c  */
 #line 944 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Prop_Delay, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Prop_Delay, (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 229:
 
 /* Line 1455 of yacc.c  */
 #line 946 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_dval(T_Proc_Delay, (yyvsp[(3) - (3)].Double)); ;}
+    { (yyval.Attr_val) = create_attr_dval(T_Proc_Delay, (yyvsp[(3) - (3)].Double)); }
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 3547 "ntp_parser.c"
+#line 3705 "ntp_parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);

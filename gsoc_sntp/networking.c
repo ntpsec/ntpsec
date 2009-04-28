@@ -244,7 +244,7 @@ recv_bcst_data (
 {
 	struct timeval timeout_tv;
 	fd_set bcst_fd;
-
+	char *buf;
 	int btrue = 1;
 	int recv_bytes = 0;
 
@@ -252,22 +252,17 @@ recv_bcst_data (
 	setsockopt(rsock, SOL_SOCKET, SO_REUSEADDR, &btrue, sizeof(btrue));
 
 	if(sas->ss_family == AF_INET) {
-		struct sockaddr_in sin;
 		struct ip_mreq mdevadr;
 	
-		sin.sin_family = AF_INET;
-		sin.sin_addr.s_addr = htonl(INADDR_ANY);
-		sin.sin_port = htons(123);
-
 		if(bind(rsock, (struct sockaddr *) sas, SOCKLEN(sas)) < 0) {}
 
 
 		if(setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &btrue, sizeof(btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
-	    }
+		}
 
-		char *buf = ss_to_str(sas);
+		buf = ss_to_str(sas);
 
 		mdevadr.imr_multiaddr.s_addr = inet_addr(buf); 
 		mdevadr.imr_interface.s_addr = htonl(INADDR_ANY);
@@ -284,7 +279,7 @@ recv_bcst_data (
 
 		if (setsockopt(rsock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mdevadr, sizeof(mdevadr)) < 0) {
 			if(ENABLED_OPT(NORMALVERBOSE)) {
-				char *buf = ss_to_str(sas);
+				buf = ss_to_str(sas);
 
 				printf("sntp recv_bcst_data: Couldn't add IP membership for %s\n", buf);
 				
@@ -295,12 +290,7 @@ recv_bcst_data (
 		}
 	}
 	else if(sas->ss_family == AF_INET6) {
-		struct sockaddr_in6 sin6;
 		struct ipv6_mreq mdevadr;
-
-		sin6.sin6_family = AF_INET6;
-		sin6.sin6_addr = in6addr_any;
-		sin6.sin6_port = htons(123);
 
 		if(bind(rsock, (struct sockaddr *) sas, sizeof(sas)) < 0) {
 			if(ENABLED_OPT(NORMALVERBOSE))
@@ -318,7 +308,7 @@ recv_bcst_data (
 														 
 		if(!IN6_IS_ADDR_MULTICAST((struct in6_addr *) &mdevadr.ipv6mr_multiaddr)) {
 			if(ENABLED_OPT(NORMALVERBOSE)) {
-				char *buf = ss_to_str(sas); 
+				buf = ss_to_str(sas); 
 
 				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n", buf);
 				
@@ -330,7 +320,7 @@ recv_bcst_data (
 
 		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mdevadr, sizeof(mdevadr)) < 0) {
 			if(ENABLED_OPT(NORMALVERBOSE)) {
-				char *buf = ss_to_str(sas); 
+				buf = ss_to_str(sas); 
 
 				printf("sntp recv_bcst_data: Couldn't join group for %s\n", buf);
 				
@@ -361,7 +351,7 @@ recv_bcst_data (
 
 		case 0:
 			if(ENABLED_OPT(NORMALVERBOSE))
-				printf("sntp recv_bcst_data: select() reached timeout (%i sec), aborting.\n", timeout_tv.tv_sec);
+				printf("sntp recv_bcst_data: select() reached timeout (%li sec), aborting.\n", timeout_tv.tv_sec);
 
 			return BROADCAST_FAILED;
 			break;

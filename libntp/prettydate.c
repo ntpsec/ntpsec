@@ -9,6 +9,8 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
+static char *common_prettydate(l_fp *, int);
+
 const char *months[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -151,7 +153,7 @@ ntp2unix_tm(
 }
 
 
-char *
+static char *
 common_prettydate(
 	l_fp *ts,
 	int local
