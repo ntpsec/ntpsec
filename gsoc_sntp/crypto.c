@@ -67,7 +67,7 @@ auth_md5 (
  */
 int
 auth_init (
-		char *keyfile,
+		const char *keyfile,
 		struct key **keys
 		)
 {
@@ -75,7 +75,7 @@ auth_init (
 	struct key *prev = NULL;
 
 	register int a, line_limit;
-	int scan_cnt, line_cnt = 0, key_cnt = 0;
+	int scan_cnt, line_cnt = 0;
 	char kbuf[96];
 
 	if(keyf == NULL) {
@@ -104,7 +104,7 @@ auth_init (
 		for(a=0; a<strlen(kbuf) && a < 96; a++) {
 			if(kbuf[a] == '#') {
 				line_limit = a;
-				a = 96;
+				break;
 			}
 		}
 

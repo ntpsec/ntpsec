@@ -215,7 +215,9 @@ static void free_auth_node(void);
 #endif
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
+#if !defined(SIM)
 static struct sockaddr_storage *get_next_address(struct address_node *addr);
+#endif
 
 static void config_other_modes(void);
 static void config_auth(void);
@@ -372,6 +374,7 @@ void
 free_syntax_tree(void)
 {
 	DESTROY_QUEUE(my_config.peers);
+	DESTROY_QUEUE(my_config.unpeers);
 	DESTROY_QUEUE(my_config.orphan_cmds);
 
 	DESTROY_QUEUE(my_config.manycastserver);
@@ -805,6 +808,8 @@ create_sim_script_info(
 }
 
 
+#if !defined(SIM)
+
 #define ADDR_LENGTH 16 + 1
 
 static struct sockaddr_storage *
@@ -841,6 +846,7 @@ get_next_address(
 	freeaddrinfo(ptr);
 	return final_addr;
 }
+#endif /* !SIM */
 
 
 server_info *

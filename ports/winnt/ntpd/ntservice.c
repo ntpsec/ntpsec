@@ -148,7 +148,7 @@ ntservice_init() {
 		SetConsoleTitle(ConsoleTitle);
 	}
 
-	#ifdef _DEBUG
+	#if defined(_MSC_VER) && defined(_DEBUG)
 		/* ask the runtime to dump memory leaks at exit */
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		#ifdef WANT_LEAK_CHECK_ON_STDERR_TOO
@@ -158,7 +158,7 @@ ntservice_init() {
 			/* the file being stderr */
 			_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
 		#endif
-	#endif /* _DEBUG */
+	#endif /* _MSC_VER && _DEBUG */
 
 	atexit( ntservice_exit );
 }
@@ -190,7 +190,7 @@ ntservice_exit( void )
 
 	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service is stopping.");
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	FormatErrorFreeMem();
 #endif 
 
@@ -229,7 +229,7 @@ ServiceControl(DWORD dwCtrlCode) {
 	case SERVICE_CONTROL_PAUSE:
 	case SERVICE_CONTROL_CONTINUE:
 	case SERVICE_CONTROL_INTERROGATE:
-        default:
+	default:
 		break;
 	}
 	UpdateSCM(SERVICE_RUNNING);
@@ -301,6 +301,6 @@ OnConsoleEvent(
 	}
 
 	/* we've handled it, no more handlers should be called */
-	return TRUE;;
+	return TRUE;
 }
 

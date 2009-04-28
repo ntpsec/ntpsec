@@ -509,6 +509,9 @@ getpass(const char * prompt)
 	}
 	password[i] = '\0';
 
+	fputc('\n', stderr);
+	fflush(stderr);
+
 	return password;
 }
 #endif /* SYS_WINNT */

@@ -22,6 +22,8 @@ static char rcsid[] =
 
 #include <config.h>
 
+#ifdef ISC_PLATFORM_NEEDPTON
+
 #include <errno.h>
 #include <string.h>
 
@@ -209,3 +211,7 @@ inet_pton6(const char *src, unsigned char *dst) {
 	memcpy(dst, tmp, NS_IN6ADDRSZ);
 	return (1);
 }
+
+#else
+int inet_pton_c_not_empty;
+#endif /* ISC_PLATFORM_NEEDPTON */

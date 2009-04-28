@@ -177,6 +177,7 @@ struct REMOTE_CONFIG_INFO {
 struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
 struct unpeer_node *create_unpeer_node(struct address_node *addr);
 struct address_node *create_address_node(char *addr, int type);
+void destroy_address_node(struct address_node *my_node);
 queue *enqueue_in_new_queue(void *my_node);
 struct attr_val *create_attr_dval(int attr, double value);
 struct attr_val *create_attr_ival(int attr, int value);

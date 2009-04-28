@@ -189,7 +189,9 @@ short  		getint 			(u_char *);
 long		getlong			(u_char *);
 
 /* Thunderbolt specific function prototypes */
+#ifdef UNUSED
 static  void    sendcmd                 (struct packettx *buffer, int c);
+#endif
 static  void    sendsupercmd            (struct packettx *buffer, int c1, int c2);
 static  void    sendbyte                (struct packettx *buffer, int b);
 static  void    sendint                 (struct packettx *buffer, int a);

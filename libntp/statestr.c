@@ -82,8 +82,10 @@ struct codestring clock_codes[] = {
 	{ -1,			"clk" }
 };
 
+
+#ifdef FLASH_CODES_UNUSED
 /*
- * Flash bits
+ * Flash bits -- see ntpq.c tstflags & tstflagnames
  */
 static
 struct codestring flash_codes[] = {
@@ -102,6 +104,8 @@ struct codestring flash_codes[] = {
 	{ TEST13,		"peer_unreach" },
 	{ -1,			"flash" }
 };
+#endif
+
 
 /*
  * System events (sys)

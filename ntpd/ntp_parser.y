@@ -395,8 +395,8 @@ unpeer_command
 		}
 	;	
 unpeer_keyword	
-	:	T_Unconfig 	{ $$ = T_Unconfig }
-	|	T_Unpeer 	{ $$ = T_Unpeer }
+	:	T_Unconfig 	{ $$ = T_Unconfig; }
+	|	T_Unpeer 	{ $$ = T_Unpeer; }
 	;
 	
 	

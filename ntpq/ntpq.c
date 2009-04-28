@@ -256,12 +256,16 @@ static	int	sendpkt		(char *, int);
 static	int	getresponse	(int, int, u_short *, int *, char **, int);
 static	int	sendrequest	(int, int, int, int, char *);
 static	char *	tstflags	(u_long);
+#ifndef BUILD_AS_LIB
 static	void	getcmds		(void);
+#ifndef SYS_WINNT
 static	RETSIGTYPE abortcmd	(int);
+#endif	/* SYS_WINNT */
 static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
-static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
 static	int	getarg		(char *, int, arg_v *);
+#endif	/* BUILD_AS_LIB */
+static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
 static	int	rtdatetolfp	(char *, l_fp *);
 static	int	decodearr	(char *, int *, l_fp *);
 static	void	help		(struct parse *, FILE *);
@@ -382,7 +386,7 @@ struct xcmd builtins[] = {
 #define	MAXVARLEN	256		/* maximum length of a variable name */
 #define	MAXVALLEN	400		/* maximum length of a variable value */
 #define	MAXOUTLINE	72		/* maximum length of an output line */
-#define SCREENWIDTH     76              /* nominal screen width in columns */
+#define SCREENWIDTH	76		/* nominal screen width in columns */
 
 /*
  * Some variables used and manipulated locally
@@ -479,20 +483,20 @@ volatile int debug;
 #ifdef NO_MAIN_ALLOWED
 #ifndef BUILD_AS_LIB
 CALL(ntpq,"ntpq",ntpqmain);
-#endif
 
 void clear_globals(void)
 {
-    extern int ntp_optind;
-    showhostnames = 0;				/* don'tshow host names by default */
-    ntp_optind = 0;
-    server_entry = NULL;            /* server entry for ntp */
-    havehost = 0;				/* set to 1 when host open */
-    numassoc = 0;		/* number of cached associations */
-    numcmds = 0;
-    numhosts = 0;
+	extern int ntp_optind;
+	showhostnames = 0;	/* don'tshow host names by default */
+	ntp_optind = 0;
+	server_entry = NULL;	/* server entry for ntp */
+	havehost = 0;		/* set to 1 when host open */
+	numassoc = 0;		/* number of cached associations */
+	numcmds = 0;
+	numhosts = 0;
 }
-#endif
+#endif /* !BUILD_AS_LIB */
+#endif /* NO_MAIN_ALLOWED */
 
 /*
  * main - parse arguments and handle options
@@ -621,7 +625,7 @@ ntpqmain(
 		ADDHOST(DEFHOST);
 	} else {
 		for (; ntp_optind < argc; ntp_optind++)
-		    ADDHOST(argv[ntp_optind]);
+			ADDHOST(argv[ntp_optind]);
 	}
 
 	if (numcmds == 0 && interactive == 0
@@ -643,8 +647,8 @@ ntpqmain(
 
 		for (ihost = 0; ihost < numhosts; ihost++) {
 			if (openhost(chosts[ihost]))
-			    for (icmd = 0; icmd < numcmds; icmd++)
-				docmd(ccmds[icmd]);
+				for (icmd = 0; icmd < numcmds; icmd++)
+					docmd(ccmds[icmd]);
 		}
 	}
 #ifdef SYS_WINNT
@@ -652,7 +656,7 @@ ntpqmain(
 #endif /* SYS_WINNT */
 	return 0;
 }
-#endif // build as lib
+#endif /* !BUILD_AS_LIB */
 
 /*
  * openhost - open a socket to a host
@@ -724,21 +728,21 @@ openhost(
 	}
 
 	if (ai->ai_canonname == NULL) {
-		strncpy(temphost, stoa((struct sockaddr_storage *)ai->ai_addr),
-		    LENHOSTNAME);
-		temphost[LENHOSTNAME-1] = '\0';
+		strncpy(temphost, 
+			stoa((struct sockaddr_storage *)ai->ai_addr),
+			LENHOSTNAME);
 
 	} else {
 		strncpy(temphost, ai->ai_canonname, LENHOSTNAME);
-		temphost[LENHOSTNAME-1] = '\0';
 	}
+	temphost[LENHOSTNAME-1] = '\0';
 
 	if (debug > 2)
-	    printf("Opening host %s\n", temphost);
+		printf("Opening host %s\n", temphost);
 
 	if (havehost == 1) {
 		if (debug > 2)
-		    printf("Closing old host %s\n", currenthost);
+			printf("Closing old host %s\n", currenthost);
 		(void) closesocket(sockfd);
 		havehost = 0;
 	}
@@ -761,9 +765,13 @@ openhost(
 		int optionValue = SO_SYNCHRONOUS_NONALERT;
 		int err;
 
-		err = setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE, (char *)&optionValue, sizeof(optionValue));
-		if (err != NO_ERROR) {
-			(void) fprintf(stderr, "cannot open nonoverlapped sockets\n");
+		err = setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
+				 (char *)&optionValue, sizeof(optionValue));
+		if (err) {
+			err = WSAGetLastError();
+			fprintf(stderr,
+				"setsockopt(SO_SYNCHRONOUS_NONALERT) "
+				"error: %s\n", strerror(err));
 			exit(1);
 		}
 	}
@@ -1440,6 +1448,7 @@ doquery(
 }
 
 
+#ifndef BUILD_AS_LIB
 /*
  * getcmds - read commands from the standard input and execute them
  */
@@ -1447,35 +1456,36 @@ static void
 getcmds(void)
 {
 #if defined(HAVE_LIBREADLINE)
-        char *line;
+	char *line;
 
-        for (;;) {
-                if ((line = readline(interactive?prompt:"")) == NULL) return;
-                if (*line) add_history(line);
-                docmd(line);
-                free(line);
-        }
+	for (;;) {
+		if ((line = readline(interactive?prompt:"")) == NULL) return;
+		if (*line) add_history(line);
+		docmd(line);
+		free(line);
+	}
 #else /* not (HAVE_LIBREADLINE) */
-        char line[MAXLINE];
+	char line[MAXLINE];
 
-        for (;;) {
-                if (interactive) {
-#ifdef VMS      /* work around a problem with mixing stdout & stderr */
-                        fputs("",stdout);
+	for (;;) {
+		if (interactive) {
+#ifdef VMS	/* work around a problem with mixing stdout & stderr */
+			fputs("",stdout);
 #endif
-                        (void) fputs(prompt, stderr);
-                        (void) fflush(stderr);
-                }
+			(void) fputs(prompt, stderr);
+			(void) fflush(stderr);
+		}
 
-                if (fgets(line, sizeof line, stdin) == NULL)
-                    return;
+		if (fgets(line, sizeof line, stdin) == NULL)
+			return;
 
-                docmd(line);
-        }
+		docmd(line);
+	}
 #endif /* not (HAVE_LIBREADLINE || HAVE_LIBEDIT) */
 }
+#endif /* !BUILD_AS_LIB */
 
-#ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
+#if !defined(SYS_WINNT) && !defined(BUILD_AS_LIB)
 /*
  * abortcmd - catch interrupts and abort the current command
  */
@@ -1490,8 +1500,10 @@ abortcmd(
 	(void) fflush(stderr);
 	if (jump) longjmp(interrupt_buf, 1);
 }
-#endif	/* SYS_WINNT */
+#endif	/* !SYS_WINNT && !BUILD_AS_LIB */
 
+
+#ifndef	BUILD_AS_LIB
 /*
  * docmd - decode the command line and execute a command
  */
@@ -1542,9 +1554,9 @@ docmd(
 			break;
 		}
 		if ((xcmd->arg[i] & OPT) && (*tokens[i+1] == '>'))
-		    break;
+			break;
 		if (!getarg(tokens[i+1], (int)xcmd->arg[i], &pcmd.argval[i]))
-		    return;
+			return;
 		pcmd.nargs++;
 	}
 
@@ -1553,9 +1565,9 @@ docmd(
 		char *fname;
 
 		if (*(tokens[i]+1) != '\0')
-		    fname = tokens[i]+1;
+			fname = tokens[i]+1;
 		else if ((i+1) < ntok)
-		    fname = tokens[i+1];
+			fname = tokens[i+1];
 		else {
 			(void) fprintf(stderr, "***No file for redirect\n");
 			return;
@@ -1632,88 +1644,21 @@ tokenize(
 		 * If yes, continue reading till the next double quote
 		 */
 		else if (*cp == '\"') {
-		    ++cp;
-		    do {
-                        *sp++ = *cp++;
-                    } while ((*cp != '\"') && !ISEOL(*cp));
-		    /* HMS: a missing closing " should be an error */
-                }
-                else {
-                    do {
-			*sp++ = *cp++;
-                    } while ((*cp != '\"') && !ISSPACE(*cp) && !ISEOL(*cp));
-		    /* HMS: Why check for a " in the previous line? */
-                }
+			++cp;
+			do {
+				*sp++ = *cp++;
+			} while ((*cp != '\"') && !ISEOL(*cp));
+			/* HMS: a missing closing " should be an error */
+		}
+		else {
+			do {
+				*sp++ = *cp++;
+			} while ((*cp != '\"') && !ISSPACE(*cp) && !ISEOL(*cp));
+			/* HMS: Why check for a " in the previous line? */
+		}
 
 		*sp++ = '\0';
 	}
-}
-
-
-/*
- * findcmd - find a command in a command description table
- */
-static int
-findcmd(
-	register char *str,
-	struct xcmd *clist1,
-	struct xcmd *clist2,
-	struct xcmd **cmd
-	)
-{
-	register struct xcmd *cl;
-	register int clen;
-	int nmatch;
-	struct xcmd *nearmatch = NULL;
-	struct xcmd *clist;
-
-	clen = strlen(str);
-	nmatch = 0;
-	if (clist1 != 0)
-	    clist = clist1;
-	else if (clist2 != 0)
-	    clist = clist2;
-	else
-	    return 0;
-
-    again:
-	for (cl = clist; cl->keyword != 0; cl++) {
-		/* do a first character check, for efficiency */
-		if (*str != *(cl->keyword))
-		    continue;
-		if (strncmp(str, cl->keyword, (unsigned)clen) == 0) {
-			/*
-			 * Could be extact match, could be approximate.
-			 * Is exact if the length of the keyword is the
-			 * same as the str.
-			 */
-			if (*((cl->keyword) + clen) == '\0') {
-				*cmd = cl;
-				return 1;
-			}
-			nmatch++;
-			nearmatch = cl;
-		}
-	}
-
-	/*
-	 * See if there is more to do.  If so, go again.  Sorry about the
-	 * goto, too much looking at BSD sources...
-	 */
-	if (clist == clist1 && clist2 != 0) {
-		clist = clist2;
-		goto again;
-	}
-
-	/*
-	 * If we got extactly 1 near match, use it, else return number
-	 * of matches.
-	 */
-	if (nmatch == 1) {
-		*cmd = nearmatch;
-		return 1;
-	}
-	return nmatch;
 }
 
 
@@ -1807,6 +1752,74 @@ getarg(
 
 	return 1;
 }
+#endif	/* !BUILD_AS_LIB */
+
+
+/*
+ * findcmd - find a command in a command description table
+ */
+static int
+findcmd(
+	register char *str,
+	struct xcmd *clist1,
+	struct xcmd *clist2,
+	struct xcmd **cmd
+	)
+{
+	register struct xcmd *cl;
+	register int clen;
+	int nmatch;
+	struct xcmd *nearmatch = NULL;
+	struct xcmd *clist;
+
+	clen = strlen(str);
+	nmatch = 0;
+	if (clist1 != 0)
+	    clist = clist1;
+	else if (clist2 != 0)
+	    clist = clist2;
+	else
+	    return 0;
+
+    again:
+	for (cl = clist; cl->keyword != 0; cl++) {
+		/* do a first character check, for efficiency */
+		if (*str != *(cl->keyword))
+		    continue;
+		if (strncmp(str, cl->keyword, (unsigned)clen) == 0) {
+			/*
+			 * Could be extact match, could be approximate.
+			 * Is exact if the length of the keyword is the
+			 * same as the str.
+			 */
+			if (*((cl->keyword) + clen) == '\0') {
+				*cmd = cl;
+				return 1;
+			}
+			nmatch++;
+			nearmatch = cl;
+		}
+	}
+
+	/*
+	 * See if there is more to do.  If so, go again.  Sorry about the
+	 * goto, too much looking at BSD sources...
+	 */
+	if (clist == clist1 && clist2 != 0) {
+		clist = clist2;
+		goto again;
+	}
+
+	/*
+	 * If we got extactly 1 near match, use it, else return number
+	 * of matches.
+	 */
+	if (nmatch == 1) {
+		*cmd = nearmatch;
+		return 1;
+	}
+	return nmatch;
+}
 
 
 /*
@@ -1863,10 +1876,11 @@ nntohost(
 	)
 {
 	if (!showhostnames)
-	    return stoa(netnum);
-	if ((netnum->ss_family == AF_INET) && ISREFCLOCKADR(netnum))
-    		return refnumtoa(netnum);
-	return socktohost(netnum);
+		return stoa(netnum);
+	else if ((netnum->ss_family == AF_INET) && ISREFCLOCKADR(netnum))
+		return refnumtoa(netnum);
+	else
+		return socktohost(netnum);
 }
 
 
@@ -2010,7 +2024,7 @@ decodets(
 	 * If it starts with a 0x, decode as hex.
 	 */
 	if (*str == '0' && (*(str+1) == 'x' || *(str+1) == 'X'))
-	    return hextolfp(str+2, lfp);
+		return hextolfp(str+2, lfp);
 
 	/*
 	 * If it starts with a '"', try it as an RT-11 date.
@@ -2022,7 +2036,7 @@ decodets(
 
 		bp = buf;
 		while (*cp != '"' && *cp != '\0' && bp < &buf[29])
-		    *bp++ = *cp++;
+			*bp++ = *cp++;
 		*bp = '\0';
 		return rtdatetolfp(buf, lfp);
 	}
@@ -2032,14 +2046,15 @@ decodets(
 	 * about heuristics!
 	 */
 	if ((*str >= 'A' && *str <= 'F') || (*str >= 'a' && *str <= 'f'))
-	    return hextolfp(str, lfp);
+		return hextolfp(str, lfp);
 
 	/*
 	 * Try it as a decimal.  If this fails, try as an unquoted
 	 * RT-11 date.  This code should go away eventually.
 	 */
 	if (atolfp(str, lfp))
-	    return 1;
+		return 1;
+
 	return rtdatetolfp(str, lfp);
 }
 
@@ -2144,21 +2159,21 @@ help(
 	FILE *fp
 	)
 {
-	struct xcmd *xcp;
+	struct xcmd *xcp = NULL;	/* quiet warning */
 	char *cmd;
 	const char *list[100];
-        int word, words;
-        int row, rows;
-        int col, cols;
+	int word, words;
+	int row, rows;
+	int col, cols;
 
 	if (pcmd->nargs == 0) {
 		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
 			if (*(xcp->keyword) != '?')
-			    list[words++] = xcp->keyword;
+				list[words++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    list[words++] = xcp->keyword;
+			list[words++] = xcp->keyword;
 
 		qsort(
 #ifdef QSORT_USES_VOID_P
@@ -2171,21 +2186,22 @@ help(
 		for (word = 0; word < words; word++) {
 		 	int length = strlen(list[word]);
 			if (col < length) {
-			    col = length;
-                        }
+				col = length;
+			}
 		}
 
 		cols = SCREENWIDTH / ++col;
-                rows = (words + cols - 1) / cols;
+		rows = (words + cols - 1) / cols;
 
 		(void) fprintf(fp, "ntpq commands:\n");
 
 		for (row = 0; row < rows; row++) {
-                        for (word = row; word < words; word += rows) {
-			        (void) fprintf(fp, "%-*.*s", col, col-1, list[word]);
-                        }
-                        (void) fprintf(fp, "\n");
-                }
+			for (word = row; word < words; word += rows) {
+				(void) fprintf(fp, "%-*.*s", col, 
+						   col-1, list[word]);
+			}
+			(void) fprintf(fp, "\n");
+		}
 	} else {
 		cmd = pcmd->argval[0].string;
 		words = findcmd(cmd, builtins, opcmds, &xcp);
@@ -2322,9 +2338,10 @@ host(
 
 	if (pcmd->nargs == 0) {
 		if (havehost)
-		    (void) fprintf(fp, "current host is %s\n", currenthost);
+			(void) fprintf(fp, "current host is %s\n",
+					   currenthost);
 		else
-		    (void) fprintf(fp, "no current host\n");
+			(void) fprintf(fp, "no current host\n");
 		return;
 	}
 
@@ -2338,7 +2355,8 @@ host(
 		else {
 			if (havehost)
 				(void) fprintf(fp,
-				    "current host remains %s\n", currenthost);
+					       "current host remains %s\n",
+					       currenthost);
 			else
 				(void) fprintf(fp, "still no current host\n");
 			return;
@@ -2350,10 +2368,11 @@ host(
 		numassoc = 0;
 	} else {
 		if (havehost)
-		    (void) fprintf(fp,
-				   "current host remains %s\n", currenthost);
+			(void) fprintf(fp,
+				       "current host remains %s\n", 
+				       currenthost);
 		else
-		    (void) fprintf(fp, "still no current host\n");
+			(void) fprintf(fp, "still no current host\n");
 	}
 }
 
@@ -2442,10 +2461,10 @@ passwd(
 	}
 	pass = getpass("MD5 Password: ");
 	if (*pass == '\0')
-	    (void) fprintf(fp, "Password unchanged\n");
+		(void) fprintf(fp, "Password unchanged\n");
 	else {
-	    authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
-	    authtrust(info_auth_keyid, 1);
+		authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+		authtrust(info_auth_keyid, 1);
 	}
 }
 
@@ -3365,9 +3384,9 @@ assoccmp(
 	const struct association *ass2 = (const struct association *)t2;
 
 	if (ass1->assid < ass2->assid)
-	    return -1;
+		return -1;
 	if (ass1->assid > ass2->assid)
-	    return 1;
+		return 1;
 	return 0;
 }
 #else

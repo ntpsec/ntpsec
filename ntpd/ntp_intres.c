@@ -142,7 +142,6 @@ char *req_file;		/* name of the file with configuration info */
 /* end stuff to be filled in */
 
 
-static	RETSIGTYPE bong		(int);
 static	void	checkparent	(void);
 static	void	removeentry	(struct conf_entry *);
 static	void	addentry	(char *, int, int, int, int, u_int,

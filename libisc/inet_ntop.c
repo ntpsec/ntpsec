@@ -22,6 +22,8 @@ static char rcsid[] =
 
 #include <config.h>
 
+#ifdef ISC_PLATFORM_NEEDNTOP
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -196,3 +198,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	return (dst);
 }
 #endif /* AF_INET6 */
+
+#else
+int inet_ntop_c_not_empty;
+#endif /* ISC_PLATFORM_NEEDNTOP */

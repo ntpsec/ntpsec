@@ -961,18 +961,18 @@ mx4200_parse_t(
 	char   time_mark_valid, time_sync, op_mode;
 	int    sentence_type, valid;
 	int    year, day_of_year, month, day_of_month;
-	int    hour, minute, second, leapsec;
+	int    hour, minute, second, leapsec_warn;
 	int    oscillator_offset, time_mark_error, time_bias;
 
 	pp = peer->procptr;
 	up = (struct mx4200unit *)pp->unitptr;
 
-	leapsec = 0;  /* Not all receivers output leap second warnings (!) */
+	leapsec_warn = 0;  /* Not all receivers output leap second warnings (!) */
 	sscanf(pp->a_lastcode,
 		"$PMVXG,%d,%c,%d,%d,%d,%d:%d:%d,%c,%c,%d,%d,%d,%d",
 		&sentence_type, &time_mark_valid, &year, &month, &day_of_month,
 		&hour, &minute, &second, &time_sync, &op_mode,
-		&oscillator_offset, &time_mark_error, &time_bias, &leapsec);
+		&oscillator_offset, &time_mark_error, &time_bias, &leapsec_warn);
 
 	if (sentence_type != PMVXG_D_TRECOVOUT)
 		return ("wrong rec-type");
@@ -1005,8 +1005,8 @@ mx4200_parse_t(
 		mx4200_debug(peer,
 		    "mx4200_parse_t: bad time %02d:%02d:%02d",
 		    hour, minute, second);
-		if (leapsec != 0)
-			mx4200_debug(peer, " (leap %+d\n)", leapsec);
+		if (leapsec_warn != 0)
+			mx4200_debug(peer, " (leap %+d\n)", leapsec_warn);
 		mx4200_debug(peer, "\n");
 		refclock_report(peer, CEVNT_BADTIME);
 		return ("bad time");
@@ -1068,7 +1068,7 @@ mx4200_parse_t(
 	/*
 	 * Setup leap second indicator
 	 */
-	switch (leapsec) {
+	switch (leapsec_warn) {
 		case 0:
 			pp->leap = LEAP_NOWARNING;
 			break;
@@ -1085,12 +1085,12 @@ mx4200_parse_t(
 	/*
 	 * Any change to the leap second warning status?
 	 */
-	if (leapsec != up->last_leap ) {
+	if (leapsec_warn != up->last_leap ) {
 		msyslog(LOG_DEBUG,
 		    "mx4200: leap second warning: %d to %d (%d)",
-		    up->last_leap, leapsec, pp->leap);
+		    up->last_leap, leapsec_warn, pp->leap);
 	}
-	up->last_leap = leapsec;
+	up->last_leap = leapsec_warn;
 
 	/*
 	 * Copy time data for billboard monitoring.
@@ -1520,14 +1520,14 @@ mx4200_pps(
 	if (time_pps_fetch(up->pps_h, PPS_TSFMT_TSPEC, &(up->pps_i),
 			&timeout) < 0) {
 		mx4200_debug(peer,
-		  "mx4200_pps: time_pps_fetch: serial=%ul, %s\n",
+		  "mx4200_pps: time_pps_fetch: serial=%lu, %s\n",
 		     (unsigned long)up->pps_i.assert_sequence, strerror(errno));
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
 	}
 	if (temp_serial == up->pps_i.assert_sequence) {
 		mx4200_debug(peer,
-		   "mx4200_pps: assert_sequence serial not incrementing: %ul\n",
+		   "mx4200_pps: assert_sequence serial not incrementing: %lu\n",
 			(unsigned long)up->pps_i.assert_sequence);
 		refclock_report(peer, CEVNT_FAULT);
 		return(1);
@@ -1540,7 +1540,7 @@ mx4200_pps(
 		if (up->pps_i.assert_sequence == up->lastserial) {
 			mx4200_debug(peer, "mx4200_pps: no new pps event\n");
 		} else {
-			mx4200_debug(peer, "mx4200_pps: missed %ul pps events\n",
+			mx4200_debug(peer, "mx4200_pps: missed %lu pps events\n",
 			    up->pps_i.assert_sequence - up->lastserial - 1UL);
 		}
 		refclock_report(peer, CEVNT_FAULT);

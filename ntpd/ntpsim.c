@@ -77,7 +77,6 @@ void create_server_associations()
 
 
 /* Main Simulator Code */
-int ntpsim(int argc, char *argv[]);
 
 int ntpsim(int argc, char *argv[])
 {

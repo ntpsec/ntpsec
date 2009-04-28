@@ -30,7 +30,7 @@
 void log_msg(char *message, char type);
 void debug_msg(char *message);
 
-void init_log(char *logfile);
+void init_log(const char *logfile);
 void cleanup_log(void);
 
 #endif

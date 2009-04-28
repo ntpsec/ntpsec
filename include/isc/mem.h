@@ -1,4 +1,8 @@
 /*
+ * short-circuited NTP-local imitation of isc/mem.h
+ */
+
+/*
  * Copyright (C) 1997-2001  Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -20,12 +24,13 @@
 #ifndef ISC_MEM_H
 #define ISC_MEM_H 1
 
+#include <stdlib.h>
 #include <stdio.h>
-#include <isc/types.h>
 
-void *		
-isc_mem_get(isc_mem_t *, size_t);
-void 		
-isc_mem_put(isc_mem_t *, void *, size_t);
+
+#define	isc_mem_get(c, cnt)		malloc((cnt) ? (cnt) : 1)
+#define	isc_mem_put(c, mem, cnt)	free(mem)
+#define isc_mem_free(c, mem)		free(mem)
+#define isc_mem_strdup(c, str)		strdup(str)
 
 #endif /* ISC_MEM_H */

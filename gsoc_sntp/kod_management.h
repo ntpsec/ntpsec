@@ -30,7 +30,7 @@ int kod_entry_exists (char *search_str);
 
 void add_entry (char *hostname, char *type);
 void delete_entry (char *hostname, char *type);
-void kod_init_kod_db (char *db_file);
+void kod_init_kod_db (const char *db_file);
 void write_kod_db (void);
 void kod_atexit (void);
 

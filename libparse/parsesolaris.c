@@ -264,7 +264,7 @@ ntp_memset(
 static void
 pprintf(
 	int lev,
-	const char *form,
+	char *form,
 	...
 	)
 {
@@ -273,7 +273,7 @@ pprintf(
 	va_start(ap, form);
 
 	if (lev & parsedebug)
-	    vcmn_err(CE_CONT, (char *)form, ap);
+		vcmn_err(CE_CONT, form, ap);
 
 	va_end(ap);
 }
@@ -641,15 +641,15 @@ parserput(
 			    register parsestream_t * parse = (parsestream_t *)q->q_ptr;
 			    register mblk_t *nmp;
 			    register unsigned long ch;
-			    timestamp_t ctime;
+			    timestamp_t c_time;
 			    timespec_t hres_time;
 
 			    /*
 			     * get time on packet delivery
 			     */
 			    gethrestime(&hres_time);
-			    ctime.tv.tv_sec  = hres_time.tv_sec;
-			    ctime.tv.tv_usec = hres_time.tv_nsec / 1000;
+			    c_time.tv.tv_sec  = hres_time.tv_sec;
+			    c_time.tv.tv_usec = hres_time.tv_nsec / 1000;
 
 			    if (!(parse->parse_status & PARSE_ENABLE))
 			    {
@@ -672,7 +672,7 @@ parserput(
 					    while (mp != (mblk_t *)NULL)
 					    {
 						    ch = rdchar(&mp);
-						    if (ch != ~0 && parse_ioread(&parse->parse_io, (unsigned int)ch, &ctime))
+						    if (ch != ~0 && parse_ioread(&parse->parse_io, (unsigned int)ch, &c_time))
 						    {
 							    /*
 							     * up up and away (hopefully ...)
@@ -693,7 +693,7 @@ parserput(
 				    }
 				    else
 				    {
-					    if (parse_ioread(&parse->parse_io, (unsigned int)0, &ctime))
+					    if (parse_ioread(&parse->parse_io, (unsigned int)0, &c_time))
 					    {
 						    /*
 						     * up up and away (hopefully ...)
@@ -723,19 +723,19 @@ parserput(
 	    case M_UNHANGUP:
 		    {
 			    register parsestream_t * parse = (parsestream_t *)q->q_ptr;
-			    timestamp_t ctime;
+			    timestamp_t c_time;
 			    timespec_t hres_time;
 			    register mblk_t *nmp;
 			    register int status = cd_invert ^ (type == M_UNHANGUP);
 
 			    gethrestime(&hres_time);
-			    ctime.tv.tv_sec  = hres_time.tv_sec;
-			    ctime.tv.tv_usec = hres_time.tv_nsec / 1000;
+			    c_time.tv.tv_sec  = hres_time.tv_sec;
+			    c_time.tv.tv_usec = hres_time.tv_nsec / 1000;
 	
 			    pprintf(DD_RPUT, "parse: parserput - M_%sHANGUP\n", (type == M_HANGUP) ? "" : "UN");
 
 			    if ((parse->parse_status & PARSE_ENABLE) &&
-				parse_iopps(&parse->parse_io, status ? SYNC_ONE : SYNC_ZERO, &ctime))
+				parse_iopps(&parse->parse_io, status ? SYNC_ONE : SYNC_ZERO, &c_time))
 			    {
 				    nmp = (mblk_t *)NULL;
 				    if (canputnext(parse->parse_queue) && (nmp = allocb(sizeof(parsetime_t), BPRI_MED)))
@@ -759,7 +759,7 @@ parserput(
 	
 			    if (status)
 			    {
-				    parse->parse_ppsclockev.tv = ctime.tv;
+				    parse->parse_ppsclockev.tv = c_time.tv;
 				    ++(parse->parse_ppsclockev.serial);
 			    }
 		    }
