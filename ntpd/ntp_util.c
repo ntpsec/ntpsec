@@ -110,6 +110,13 @@ static double prev_drift_comp;		/* last frequency update */
 static int leap_file(FILE *);
 static void record_sys_stats(void);
 
+/* 
+ * Prototypes
+ */
+#ifdef DEBUG
+void	uninit_util(void);
+#endif
+
 
 /*
  * uninit_util - free memory allocated by init_util

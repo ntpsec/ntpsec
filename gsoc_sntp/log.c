@@ -67,7 +67,7 @@ void debug_msg(char *message) {
 	}
 }
 
-void init_log(char *logfile) {
+void init_log(const char *logfile) {
 	log_file = fopen(logfile, "a");
 	
 	if(log_file == NULL) {

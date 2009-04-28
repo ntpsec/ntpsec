@@ -1,4 +1,5 @@
 #include <isc/result.h>
+#include <isc/net.h>
 #include <l_stdlib.h>
 #include <ntp_fp.h>
 #include <ntp.h>
@@ -85,18 +86,18 @@ sntp_main (
 
 	/* Initialize logging system */
 	if(HAVE_OPT(FILELOG)) {
-		init_log((char *)OPT_ARG(FILELOG));
+		init_log(OPT_ARG(FILELOG));
 	}
 
 	/* If there's a specified KOD file init KOD system. 
 	 * If not and system may save to HD use default file.
 	 */
 	if(HAVE_OPT(KOD)) {
-		kod_init_kod_db((char *)OPT_ARG(KOD));
+		kod_init_kod_db(OPT_ARG(KOD));
 	}
 
 	if(HAVE_OPT(KEYFILE)) {
-		auth_init((char *)OPT_ARG(KEYFILE), &keys);
+		auth_init(OPT_ARG(KEYFILE), &keys);
 	}
 
 

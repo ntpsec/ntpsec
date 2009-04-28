@@ -938,6 +938,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntpsim.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\ntservice.h"
 				>
 			</File>

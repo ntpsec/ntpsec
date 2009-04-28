@@ -121,6 +121,7 @@ static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
  * They are taken from Markus Prosch
  */
 
+#ifdef UNUSED
 /*
  * sendcmd - Build data packet for sending
  */
@@ -130,10 +131,11 @@ sendcmd (
 	int c
 	)
 {
-        buffer->data[0] = DLE;
-        buffer->data[1] = (unsigned char)c;
-        buffer->size = 2;
+	buffer->data[0] = DLE;
+	buffer->data[1] = (unsigned char)c;
+	buffer->size = 2;
 }
+#endif
 
 /*
  * sendsupercmd - Build super data packet for sending

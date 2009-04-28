@@ -125,6 +125,7 @@ extern sim_info simulation;         /* Simulation Control Variables */
 
 /* Function Prototypes */
 
+int	 ntpsim			 (int argc, char *argv[]);
 Event    *event                  (double t, funcTkn f);
 void     sim_event_timer         (Event *e);
 int      simulate_server         (struct sockaddr_storage *serv_addr,

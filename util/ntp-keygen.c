@@ -295,16 +295,16 @@ main(
 #ifdef OPENSSL
 	passwd1 = hostbuf;
 	if (HAVE_OPT( PVT_PASSWD ))
-		passwd1 = OPT_ARG( PVT_PASSWD );
+		passwd1 = strdup(OPT_ARG( PVT_PASSWD ));
 
 	if (HAVE_OPT( GET_PVT_PASSWD ))
-		passwd2 = OPT_ARG( GET_PVT_PASSWD );
+		passwd2 = strdup(OPT_ARG( GET_PVT_PASSWD ));
 
 	if (HAVE_OPT( HOST_KEY ))
 		hostkey++;
 
 	if (HAVE_OPT( SIGN_KEY ))
-		sign = OPT_ARG( SIGN_KEY );
+		sign = strdup(OPT_ARG( SIGN_KEY ));
 
 	if (HAVE_OPT( GQ_PARAMS ))
 		gqkey++;
@@ -327,10 +327,10 @@ main(
 		scheme = OPT_ARG( CERTIFICATE );
 
 	if (HAVE_OPT( SUBJECT_NAME ))
-		hostname = OPT_ARG( SUBJECT_NAME );
+		hostname = strdup(OPT_ARG( SUBJECT_NAME ));
 
 	if (HAVE_OPT( ISSUER_NAME ))
-		groupname = OPT_ARG( ISSUER_NAME );
+		groupname = strdup(OPT_ARG( ISSUER_NAME ));
 
 	if (HAVE_OPT( PVT_CERT ))
 		exten = EXT_KEY_PRIVATE;
@@ -716,7 +716,7 @@ gen_md5(
 	int	i, j;
 
 	str = fheader("MD5key", id, groupname);
-	ntp_srandom(epoch);
+	ntp_srandom((u_long)epoch);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < 16; j++) {
 			int temp;
@@ -1825,7 +1825,7 @@ x509	(
 	cert = X509_new();
 	X509_set_version(cert, 2L);
 	serial = ASN1_INTEGER_new();
-	ASN1_INTEGER_set(serial, epoch + JAN_1970);
+	ASN1_INTEGER_set(serial, (long)epoch + JAN_1970);
 	X509_set_serialNumber(cert, serial);
 	ASN1_INTEGER_free(serial);
 	X509_time_adj(X509_get_notBefore(cert), 0L, &epoch);

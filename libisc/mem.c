@@ -1,4 +1,9 @@
 /*
+ * this file is leaving the NTP build in favor of
+ * inline macros in isc/mem.h for now
+ */
+
+/*
  * Copyright (C) 1997-2002  Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
