@@ -1042,7 +1042,7 @@ adjust_clock(
 	toffset = *offset;
 	toffset.tv_sec  = l_abs(toffset.tv_sec);
 	toffset.tv_usec = l_abs(toffset.tv_usec);
-	if (toffset.tvsec ||
+	if (toffset.tv_sec ||
 	    (!toffset.tv_sec && toffset.tv_usec > max_adj_offset_usec))
 	{
 		/*
