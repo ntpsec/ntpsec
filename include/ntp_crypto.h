@@ -100,7 +100,7 @@
  * Miscellaneous crypto stuff
  */
 #define NTP_MAXSESSION	100	/* maximum session key list entries */
-#define	NTP_MAXEXTEN	1024	/* maximum extension field size */
+#define	NTP_MAXEXTEN	2048	/* maximum extension field size */
 #define	NTP_AUTOMAX	12	/* default key list timeout (log2 s) */
 #define	KEY_REVOKE	17	/* default key revoke timeout (log2 s) */
 #define	NTP_REFRESH	19	/* default restart timeout (log2 s) */

@@ -1633,10 +1633,16 @@ clock_update(
 #endif /* HAVE_LIBSCF_H */
 
 	/*
-	 * Update the remaining system state variables. 
+	 * Update the system state variables. We do this very carefully,
+	 * as the poll interval might need to be clamped differently.
 	 */
 	sys_peer = peer;
 	sys_epoch = peer->epoch;
+	if (sys_poll < peer->minpoll)
+		sys_poll = peer->minpoll;
+	if (sys_poll > peer->maxpoll)
+		sys_poll = peer->maxpoll;
+	poll_update(peer, sys_poll);
 	sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
 	    peer->stratum == STRATUM_UNSPEC)
@@ -1663,6 +1669,11 @@ clock_update(
 		    "clock_update: at %lu sample %lu associd %d\n",
 		    current_time, peer->epoch, peer->associd);
 #endif
+
+	/*
+	 * Comes now the moment of truth. Crank the clock discipline and
+	 * see what comes out.
+	 */
 	switch (local_clock(peer, peer->epoch, sys_offset)) {
 
 	/*
@@ -2685,13 +2696,18 @@ clock_select(void)
 		sys_peer = NULL;			
 		return;
 	}
+
+	/*
+	 * Do not use old data, as this may mess up the clock discipline
+	 * stability.
+	 */
 	if (typesystem->epoch <= sys_epoch)
 		return;
 
 	/*
 	 * We have found the alpha male. Wind the clock.
 	 */
-	if (osys_peer != typesystem)
+ 	if (osys_peer != typesystem)
 		report_event(PEVNT_NEWPEER, typesystem, NULL);
 	typesystem->flags |= FLAG_SYSPEER;
 	clock_update(typesystem);

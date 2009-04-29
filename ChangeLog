@@ -1,3 +1,9 @@
+* Updates from Dave Mills:
+* ntp-keygen.c: Updates.
+* Fix the error return and syslog function ID in refclock_{param,ppsapi}.
+* Make sure syspoll is within the peer's minpoll/maxpoll bounds.
+* ntp_crypto.c: Use sign_siglen, not len. sign key filename cleanup.
+* Bump NTP_MAXEXTEN from 1024 to 2048, update values for some field lengths.
 (4.2.5p167) 2009/04/26 Released by Harlan Stenn <stenn@ntp.org>
 * Crypto cleanup from Dave Mills.
 (4.2.5p166) 2009/04/25 Released by Harlan Stenn <stenn@ntp.org>
