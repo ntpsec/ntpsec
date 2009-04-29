@@ -355,7 +355,7 @@ make_keylist(
 		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
 		EVP_SignUpdate(&ctx, vp->ptr, sizeof(struct autokey));
 		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey)) {
-			vp->siglen = htonl(len);
+			vp->siglen = htonl(sign_siglen);
 			peer->flags |= FLAG_ASSOC;
 		}
 	}
@@ -1420,8 +1420,8 @@ crypto_verify(
 
 	/*
 	 * Check for valid value header opcode, association ID and
-	 & extension field length. The request and response opcodes must
-	 & match and the response ID must match the association ID. The
+	 * extension field length. The request and response opcodes must
+	 * match and the response ID must match the association ID. The
 	 * autokey values response is the exception, as it can be sent
 	 * unsolicited.
 	 */
@@ -1588,7 +1588,7 @@ crypto_encrypt(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -1810,7 +1810,7 @@ crypto_update(void)
 		EVP_SignUpdate(&ctx, (u_char *)&pubkey, 12);
 		EVP_SignUpdate(&ctx, pubkey.ptr, ntohl(pubkey.vallen));
 		if (EVP_SignFinal(&ctx, pubkey.sig, &len, sign_pkey))
-			pubkey.siglen = htonl(len);
+			pubkey.siglen = htonl(sign_siglen);
 	}
 
 	/*
@@ -1829,7 +1829,7 @@ crypto_update(void)
 		EVP_SignUpdate(&ctx, cp->cert.ptr,
 		    ntohl(cp->cert.vallen));
 		if (EVP_SignFinal(&ctx, cp->cert.sig, &len, sign_pkey))
-			cp->cert.siglen = htonl(len);
+			cp->cert.siglen = htonl(sign_siglen);
 	}
 
 	/*
@@ -1852,7 +1852,7 @@ crypto_update(void)
 	EVP_SignUpdate(&ctx, (u_char *)&tai_leap, 12);
 	EVP_SignUpdate(&ctx, tai_leap.ptr, len);
 	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
-		tai_leap.siglen = htonl(len);
+		tai_leap.siglen = htonl(sign_siglen);
 	if (leap_sec > 0)
 		crypto_flags |= CRYPTO_FLAG_TAI;
 	snprintf(statstr, NTP_MAXSTRLEN, "signature update ts %u",
@@ -2070,7 +2070,7 @@ crypto_alice(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -2167,7 +2167,7 @@ crypto_bob(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -2372,7 +2372,7 @@ crypto_alice2(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -2469,7 +2469,7 @@ crypto_bob2(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -2698,7 +2698,7 @@ crypto_alice3(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -2798,7 +2798,7 @@ crypto_bob3(
 	EVP_SignUpdate(&ctx, (u_char *)&vp->tstamp, 12);
 	EVP_SignUpdate(&ctx, vp->ptr, len);
 	if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-		vp->siglen = htonl(len);
+		vp->siglen = htonl(sign_siglen);
 	return (XEVNT_OK);
 }
 
@@ -3032,7 +3032,7 @@ cert_sign(
 		EVP_SignUpdate(&ctx, (u_char *)vp, 12);
 		EVP_SignUpdate(&ctx, vp->ptr, len);
 		if (EVP_SignFinal(&ctx, vp->sig, &len, sign_pkey))
-			vp->siglen = htonl(len);
+			vp->siglen = htonl(sign_siglen);
 	}
 #ifdef DEBUG
 	if (debug > 1)
@@ -3775,14 +3775,9 @@ crypto_setup(void)
 	 * Load optional sign key from file "ntpkey_sign_<hostname>". If
 	 * available, it becomes the sign key.
 	 */
-	if (sign_file != NULL) {
-		snprintf(filename, MAXFILENAME, "ntpkey_sign_%s",
-		    sign_file);
-		pinfo = crypto_key(filename, passwd, NULL);
-		if (pinfo != NULL)
-		 	sign_pkey = pinfo->pkey;
-	}
-	sign_siglen = EVP_PKEY_size(sign_pkey);
+	snprintf(filename, MAXFILENAME, "ntpkey_sign_%s", sys_hostname);
+	pinfo = crypto_key(filename, passwd, NULL); if (pinfo != NULL)
+	 	sign_pkey = pinfo->pkey;
 
 	/*
 	 * Load required certificate from file "ntpkey_cert_<hostname>".
@@ -3797,6 +3792,7 @@ crypto_setup(void)
 	}
 	cert_host = cinfo;
 	sign_digest = cinfo->digest;
+	sign_siglen = EVP_PKEY_size(sign_pkey);
 	if (cinfo->flags & CERT_PRIV)
 		crypto_flags |= CRYPTO_FLAG_PRIV;
 
@@ -3864,7 +3860,7 @@ crypto_setup(void)
 	 */
 	crypto_flags |= CRYPTO_FLAG_ENAB | (cinfo->nid << 16);
 	snprintf(statstr, NTP_MAXSTRLEN,
-	    "setup 0x%x host %s %s\n", crypto_flags, sys_hostname,
+	    "setup 0x%x host %s %s", crypto_flags, sys_hostname,
 	    OBJ_nid2ln(cinfo->nid));
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG
