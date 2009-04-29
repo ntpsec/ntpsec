@@ -1,4 +1,5 @@
 ---
+(4.2.4p7-RC4) 2009/04/29 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1167] use gcc -Winit-self only if it is understood
 

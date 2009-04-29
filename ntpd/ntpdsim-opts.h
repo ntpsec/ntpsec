@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *  
- *  It has been AutoGen-ed  Wednesday April 22, 2009 at 08:05:37 AM EDT
+ *  It has been AutoGen-ed  Wednesday April 29, 2009 at 03:55:07 AM EDT
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
@@ -98,8 +98,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    43
-#define NTPDSIM_VERSION       "4.2.4p7-RC3"
-#define NTPDSIM_FULL_VERSION  "ntpdsim - NTP daemon simulation program - Ver. 4.2.4p7-RC3"
+#define NTPDSIM_VERSION       "4.2.4p7-RC4"
+#define NTPDSIM_FULL_VERSION  "ntpdsim - NTP daemon simulation program - Ver. 4.2.4p7-RC4"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
