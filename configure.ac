@@ -126,14 +126,9 @@ case "$GCC" in
     CFLAGS="$SAVED_CFLAGS_AC"
     unset SAVED_CFLAGS_AC
     #
-    # $ac_cv_gcc_Wstrict_overflow is tested again later to add the 
+    # $ac_cv_gcc_Wstrict_overflow is tested later to add the 
     # flag to CFLAGS.
     #
-    case "$ac_cv_gcc_Wstrict_overflow" in
-     yes)
-	AC_DEFINE(HAVE_GCC_WARN_STRICT_OVERFLOW, 1, 
-	    [compiling with gcc which understands -Wstrict-overflow])
-    esac
 esac
 
 
@@ -155,14 +150,9 @@ case "$GCC" in
     CFLAGS="$SAVED_CFLAGS_AC"
     unset SAVED_CFLAGS_AC
     #
-    # $ac_cv_gcc_Winit_self is tested again later to add the 
+    # $ac_cv_gcc_Winit_self is tested later to add the 
     # flag to CFLAGS.
     #
-    case "$ac_cv_gcc_Winit_self" in
-     yes)
-	AC_DEFINE(HAVE_GCC_WARN_INIT_SELF, 1, 
-	    [compiling with gcc which understands -Winit-self])
-    esac
 esac
 
 
