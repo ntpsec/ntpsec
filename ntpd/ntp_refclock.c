@@ -1218,8 +1218,8 @@ refclock_ppsapi(
 	if (!ap->handle) {
 		if (time_pps_create(fddev, &ap->handle) < 0) {
 			msyslog(LOG_ERR,
-			    "refclock_atom: time_pps_create failed: %m");
-			return (errno);
+			    "refclock_ppsapi: time_pps_create: %m");
+			return (0);
 		}
 	}
 	return (1);
@@ -1253,8 +1253,8 @@ refclock_params(
 		ap->pps_params.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREASSERT;
 	if (time_pps_setparams(ap->handle, &ap->pps_params) < 0) {
 		msyslog(LOG_ERR,
-		    "refclock_ppsapi: time_pps_setparams failed: %m");
-		return (errno);
+		    "refclock_params: time_pps_setparams: %m");
+		return (0);
 	}
 
 	/*
@@ -1266,8 +1266,8 @@ refclock_params(
 		    PPS_TSFMT_TSPEC) < 0) {
 			if (errno != EOPNOTSUPP) { 
 				msyslog(LOG_ERR,
-				    "refclock_ppsapi: time_pps_kcbind failed: %m");
-				return (errno);
+				    "refclock_params: time_pps_kcbind: %m");
+				return (0);
 			}
 		}
 		pps_enable = 1;
@@ -1314,7 +1314,7 @@ refclock_pps(
 	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC, &pps_info,
 	    &timeout) < 0) {
 		refclock_report(peer, CEVNT_FAULT);
-		return (errno);
+		return (0);
 	}
 	timeout = ap->ts;
 	if (ap->pps_params.mode & PPS_CAPTUREASSERT)

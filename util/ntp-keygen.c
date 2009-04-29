@@ -18,15 +18,17 @@
  * 	MD5 (128-bit) keys used to compute message digests in symmetric
  *	key cryptography
  *
- * ntpkey_RSAkey_<hostname>.<filestamp>
+ * ntpkey_RSAhost_<hostname>.<filestamp>
  * ntpkey_host_<hostname>
  *	RSA private/public host key pair used for public key signatures
- *	and data encryption
  *
- * ntpkey_DSAkey_<hostname>.<filestamp>
+ * ntpkey_RSAsign_<hostname>.<filestamp>
  * ntpkey_sign_<hostname>
- *	DSA private/public sign key pair used for public key signatures,
- *	but not data encryption
+ *	RSA private/public sign key pair used for public key signatures
+ *
+ * ntpkey_DSAsign_<hostname>.<filestamp>
+ * ntpkey_sign_<hostname>
+ *	DSA Private/public sign key pair used for public key signatures
  *
  * Available digest/signature schemes
  *
@@ -121,6 +123,7 @@ extern	int	ntp_getopt	(int, char **, const char *);
 #define MAXHOSTNAME	256	/* max host name length */
 #ifdef OPENSSL
 #define	PLEN		512	/* default prime modulus size (bits) */
+#define	ILEN		256	/* default identity modulus size (bits) */
 #define	MVMAX		100	/* max MV parameters */
 
 /*
@@ -161,6 +164,7 @@ char	*progname;
 int	debug = 0;		/* debug, not de bug */
 #ifdef OPENSSL
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
+u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
 #endif
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
@@ -865,7 +869,10 @@ gen_rsa(
 	 * Write the RSA parameters and keys as a RSA private key
 	 * encoded in PEM.
 	 */
-	str = fheader("RSAkey", id, hostname);
+	if (strcmp(id, "sign") == 0)
+		str = fheader("RSAsign", id, hostname);
+	else
+		str = fheader("RSAhost", id, hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
 	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
@@ -889,14 +896,18 @@ gen_dsa(
 	DSA	*dsa;		/* DSA parameters */
 	u_char	seed[20];	/* seed for parameters */
 	FILE	*str;
+	int	bits;
 
 	/*
 	 * Generate DSA parameters.
 	 */
+	bits = modulus;
+	if (bits > 1024)
+		bits = 1024;
 	fprintf(stderr,
-	    "Generating DSA parameters (%d bits)...\n", modulus);
+	    "Generating DSA parameters (%d bits)...\n", bits);
 	RAND_bytes(seed, sizeof(seed));
-	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed), NULL,
+	dsa = DSA_generate_parameters(bits, seed, sizeof(seed), NULL,
 	    NULL, cb, "DSA");
 	fprintf(stderr, "\n");
 	if (dsa == NULL) {
@@ -920,7 +931,7 @@ gen_dsa(
 	 * Write the DSA parameters and keys as a DSA private key
 	 * encoded in PEM.
 	 */
-	str = fheader("DSAkey", id, hostname);
+	str = fheader("DSAsign", id, hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
 	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
@@ -999,9 +1010,9 @@ gen_iffkey(
 	 * Generate DSA parameters for use as IFF parameters.
 	 */
 	fprintf(stderr, "Generating IFF keys (%d bits)...\n",
-	    modulus);
+	    modulus2);
 	RAND_bytes(seed, sizeof(seed));
-	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed), NULL,
+	dsa = DSA_generate_parameters(modulus2, seed, sizeof(seed), NULL,
 	    NULL, cb, "IFF");
 	fprintf(stderr, "\n");
 	if (dsa == NULL) {
@@ -1177,8 +1188,8 @@ gen_gqkey(
 	 */
 	fprintf(stderr,
 	    "Generating GQ parameters (%d bits)...\n",
-	     modulus);
-	rsa = RSA_generate_key(modulus, 3, cb, "GQ");
+	     modulus2);
+	rsa = RSA_generate_key(modulus2, 3, cb, "GQ");
 	fprintf(stderr, "\n");
 	if (rsa == NULL) {
 		fprintf(stderr, "RSA generate keys fails\n%s\n",
@@ -1410,7 +1421,7 @@ gen_mvkey(
 	n = nkeys;
 	fprintf(stderr,
 	    "Generating MV parameters for %d keys (%d bits)...\n", n,
-	    modulus / n);
+	    modulus2 / n);
 	ctx = BN_CTX_new(); u = BN_new(); v = BN_new(); w = BN_new();
 	b = BN_new(); b1 = BN_new();
 	dsa = DSA_new();
@@ -1420,7 +1431,7 @@ gen_mvkey(
 	for (j = 1; j <= n; j++) {
 		s1[j] = BN_new();
 		while (1) {
-			BN_generate_prime(s1[j], modulus / n, 0, NULL,
+			BN_generate_prime(s1[j], modulus2 / n, 0, NULL,
 			    NULL, NULL, NULL);
 			for (i = 1; i < j; i++) {
 				if (BN_cmp(s1[i], s1[j]) == 0)
@@ -1460,7 +1471,7 @@ gen_mvkey(
 		temp++;
 		j = temp % n + 1;
 		while (1) {
-			BN_generate_prime(u, modulus / n, 0, 0, NULL,
+			BN_generate_prime(u, modulus2 / n, 0, 0, NULL,
 			    NULL, NULL);
 			for (i = 1; i <= n; i++) {
 				if (BN_cmp(u, s1[i]) == 0)

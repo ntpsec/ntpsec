@@ -133,7 +133,7 @@ typedef char s_char;
 #define MAXHOP		2	/* anti-clockhop threshold */
 #define MAX_TTL		8	/* max ttl mapping vector size */
 #define	BEACON		7200	/* manycast beacon interval */
-#define NTP_MAXEXTEN	1024	/* max extension field size */
+#define NTP_MAXEXTEN	2048	/* max extension field size */
 
 /*
  * Miscellaneous stuff
@@ -634,11 +634,11 @@ struct pkt {
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64
-	 * with an RSA modulus and Diffie-Hellman prime of 64 octets
+	 * with an RSA modulus and Diffie-Hellman prime of 256 octets
 	 * and maximum host name of 128 octets, the maximum autokey
 	 * command is 152 octets and maximum autokey response is 460
 	 * octets. A packet can contain no more than one command and one
-	 * response, so the maximum total extension field length is 672
+	 * response, so the maximum total extension field length is 864
 	 * octets. But, to handle humungus certificates, the bank must
 	 * be broke.
 	 */
