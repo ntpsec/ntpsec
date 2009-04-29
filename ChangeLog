@@ -1,3 +1,4 @@
+* Include (4.2.4p7-RC4)
 * [Bug 1169] quiet compiler warnings
 * Re-enable gcc -Wstrict-prototypes when not building with OpenSSL
 * Enable gcc -Wstrict-overflow
@@ -272,6 +273,7 @@
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 ---
+(4.2.4p7-RC4) 2009/04/29 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1167] use gcc -Winit-self only if it is understood
 
