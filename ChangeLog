@@ -12,7 +12,7 @@
 * ntp_crypto.c: Use sign_siglen, not len. sign key filename cleanup.
 * Bump NTP_MAXEXTEN from 1024 to 2048, update values for some field lengths.
 * m4/ntp_lineeditlibs.m4: fix warnings from newer Autoconf
-* Remove truncation of position (blanking) code in refclock_nmea.c
+* [Bug 1166] Remove truncation of position (blanking) code in refclock_nmea.c
 (4.2.5p167) 2009/04/26 Released by Harlan Stenn <stenn@ntp.org>
 * Crypto cleanup from Dave Mills.
 (4.2.5p166) 2009/04/25 Released by Harlan Stenn <stenn@ntp.org>
