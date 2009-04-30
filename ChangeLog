@@ -1,3 +1,4 @@
+* [Bug 1171] Note that we never look for -lreadline by default.
 * [Bug 1090] Fix bogus leap seconds in refclock_hpgps.
 (4.2.5p168) 2009/04/29 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.4p7-RC4)

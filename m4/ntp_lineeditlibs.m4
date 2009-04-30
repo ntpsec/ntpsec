@@ -1,7 +1,7 @@
 AC_DEFUN([NTP_LINEEDITLIBS], [
     ORIG_LIBS="$LIBS"
     AC_ARG_WITH([lineeditlibs],
-	[AC_HELP_STRING([--with-lineeditlibs], [edit,editline,readline])],
+	[AC_HELP_STRING([--with-lineeditlibs], [edit,editline (readline may be specified if desired)])],
 	[use_lineeditlibs="$withval"],
 	[use_lineeditlibs="edit,editline"])
 
