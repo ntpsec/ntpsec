@@ -1,3 +1,4 @@
+* [Bug 1152] adjust PARSE to new refclock_pps logic
 (4.2.5p169) 2009/04/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1171] Note that we never look for -lreadline by default.
 * [Bug 1090] Fix bogus leap seconds in refclock_hpgps.

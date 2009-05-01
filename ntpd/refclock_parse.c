@@ -1,7 +1,7 @@
 /*
- * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.80 2007/08/11 12:06:29 kardel Exp
+ * /src/NTP/REPOSITORY/ntp4-dev/ntpd/refclock_parse.c,v 4.81 2009/05/01 10:15:29 kardel RELEASE_20090105_A
  *
- * refclock_parse.c,v 4.80 2007/08/11 12:06:29 kardel Exp
+ * refclock_parse.c,v 4.81 2009/05/01 10:15:29 kardel RELEASE_20090105_A
  *
  * generic reference clock driver for several DCF/GPS/MSF/... receivers
  *
@@ -15,7 +15,7 @@
  *   Currently the STREAMS module is only available for Suns running
  *   SunOS 4.x and SunOS5.x.
  *
- * Copyright (c) 1995-2007 by Frank Kardel <kardel <AT> ntp.org>
+ * Copyright (c) 1995-2009 by Frank Kardel <kardel <AT> ntp.org>
  * Copyright (c) 1989-1994 by Frank Kardel, Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,7 @@
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
+# include "refclock_atom.h"
 #endif
 
 #ifdef PPS
@@ -188,7 +189,7 @@
 #include "ieee754io.h"
 #include "recvbuff.h"
 
-static char rcsid[] = "refclock_parse.c,v 4.80 2007/08/11 12:06:29 kardel Exp";
+static char rcsid[] = "refclock_parse.c,v 4.81 2009/05/01 10:15:29 kardel RELEASE_20090105_A";
 
 /**===========================================================================
  ** external interface to ntp mechanism
@@ -405,9 +406,8 @@ struct parseunit
 	u_long        ppsserial;        /* magic cookie for ppsclock serials (avoids stale ppsclock data) */
 	int	      ppsfd;	        /* fd to ise for PPS io */
 #ifdef HAVE_PPSAPI
-        pps_handle_t  ppshandle;        /* store PPSAPI handle */
-        pps_params_t  ppsparams;        /* current PPS parameters */
         int           hardppsstate;     /* current hard pps state */
+	struct refclock_atom atom;      /* PPSAPI structure */
 #endif
 	parsetime_t   timedata;		/* last (parse module) data */
 	void         *localdata;        /* optional local, receiver-specific data */
@@ -2073,7 +2073,7 @@ local_input(
 					pps_timeout.tv_sec  = 0;
 					pps_timeout.tv_nsec = 0;
 
-					if (time_pps_fetch(parse->ppshandle, PPS_TSFMT_TSPEC, &pps_info,
+					if (time_pps_fetch(parse->atom.handle, PPS_TSFMT_TSPEC, &pps_info,
 							   &pps_timeout) == 0)
 					{
 						if (pps_info.assert_sequence + pps_info.clear_sequence != parse->ppsserial)
@@ -2621,7 +2621,7 @@ parse_shutdown(
 #ifdef HAVE_PPSAPI
 	if (parse->flags & PARSE_PPSCLOCK)
 	{
-		(void)time_pps_destroy(parse->ppshandle);
+		(void)time_pps_destroy(parse->atom.handle);
 	}
 #endif
 	if (parse->generic->io.fd != parse->ppsfd && parse->ppsfd != -1)
@@ -2684,7 +2684,7 @@ parse_hardpps(
 				        i = PPS_CAPTUREASSERT;
 			}
 		
-		if (time_pps_kcbind(parse->ppshandle, PPS_KC_HARDPPS, i,
+		if (time_pps_kcbind(parse->atom.handle, PPS_KC_HARDPPS, i,
 		    PPS_TSFMT_TSPEC) < 0) {
 		        msyslog(LOG_ERR, "PARSE receiver #%d: time_pps_kcbind failed: %m",
 				CLK_UNIT(parse->peer));
@@ -2711,23 +2711,30 @@ parse_ppsapi(
 	     struct parseunit *parse
 	)
 {
-	int cap, mode, mode1;
+	int cap, mode_ppsoffset;
 	char *cp;
 	
 	parse->flags &= ~PARSE_PPSCLOCK;
 
-	if (time_pps_getcap(parse->ppshandle, &cap) < 0) {
+	/*
+	 * collect PPSAPI offset capability - should move into generic handling
+	 */
+	if (time_pps_getcap(parse->atom.handle, &cap) < 0) {
 		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getcap failed: %m",
 			CLK_UNIT(parse->peer));
 		
 		return 0;
 	}
 
-	if (time_pps_getparams(parse->ppshandle, &parse->ppsparams) < 0) {
-		msyslog(LOG_ERR, "PARSE receiver #%d: parse_ppsapi: time_pps_getparams failed: %m",
-			CLK_UNIT(parse->peer));
+	/*
+	 * initialize generic PPSAPI interface
+	 *
+	 * we leave out CLK_FLAG3 as time_pps_kcbind()
+	 * is handled here for now. Ideally this should also
+	 * be part of the generic PPSAPI interface
+	 */
+	if (!refclock_params(parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG4), &parse->atom))
 		return 0;
-	}
 
 	/* nb. only turn things on, if someone else has turned something
 	 *	on before we get here, leave it alone!
@@ -2735,47 +2742,36 @@ parse_ppsapi(
 
 	if (parse->flags & PARSE_CLEAR) {
 		cp = "CLEAR";
-		mode = PPS_CAPTURECLEAR;
-		mode1 = PPS_OFFSETCLEAR;
+		mode_ppsoffset = PPS_OFFSETCLEAR;
 	} else {
 		cp = "ASSERT";
-		mode = PPS_CAPTUREASSERT;
-		mode1 = PPS_OFFSETASSERT;
+		mode_ppsoffset = PPS_OFFSETASSERT;
 	}
 
 	msyslog(LOG_INFO, "PARSE receiver #%d: initializing PPS to %s",
 		CLK_UNIT(parse->peer), cp);
 
-	if (!(mode & cap)) {
-	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED to initialize PPS to %s (PPS API capabilities=0x%x)",
-		  CLK_UNIT(parse->peer), cp, cap);
-	
-		return 0;
-	}
-
-	if (!(mode1 & cap)) {
+	if (!(mode_ppsoffset & cap)) {
 	  msyslog(LOG_WARNING, "PARSE receiver #%d: Cannot set PPS_%sCLEAR, this will increase jitter (PPS API capabilities=0x%x)",
 		  CLK_UNIT(parse->peer), cp, cap);
-		mode1 = 0;
+		mode_ppsoffset = 0;
 	} else {
-	        if (mode1 == PPS_OFFSETCLEAR) 
+	        if (mode_ppsoffset == PPS_OFFSETCLEAR) 
 		        {
-			        parse->ppsparams.clear_offset.tv_sec = -parse->ppsphaseadjust;
-			        parse->ppsparams.clear_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+			        parse->atom.pps_params.clear_offset.tv_sec = -parse->ppsphaseadjust;
+			        parse->atom.pps_params.clear_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
 			}
 	  
-		if (mode1 == PPS_OFFSETASSERT)
+		if (mode_ppsoffset == PPS_OFFSETASSERT)
 	                {
-		                parse->ppsparams.assert_offset.tv_sec = -parse->ppsphaseadjust;
-				parse->ppsparams.assert_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
+		                parse->atom.pps_params.assert_offset.tv_sec = -parse->ppsphaseadjust;
+				parse->atom.pps_params.assert_offset.tv_nsec = -1e9*(parse->ppsphaseadjust - (long)parse->ppsphaseadjust);
 			}
 	}
 	
-	/* only set what is legal */
+	parse->atom.pps_params.mode |= mode_ppsoffset;
 
-	parse->ppsparams.mode = (mode | mode1 | PPS_TSFMT_TSPEC) & cap;
-
-	if (time_pps_setparams(parse->ppshandle, &parse->ppsparams) < 0) {
+	if (time_pps_setparams(parse->atom.handle, &parse->atom.pps_params) < 0) {
 	  msyslog(LOG_ERR, "PARSE receiver #%d: FAILED set PPS parameters: %m",
 		  CLK_UNIT(parse->peer));
 		return 0;
@@ -2817,7 +2813,7 @@ parse_start(
 	if (!notice)
         {
 		NLOG(NLOG_CLOCKINFO) /* conditional if clause for conditional syslog */
-			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2006, Frank Kardel");
+			msyslog(LOG_INFO, "NTP PARSE support: Copyright (c) 1989-2009, Frank Kardel");
 		notice = 1;
 	}
 
@@ -3033,7 +3029,7 @@ parse_start(
 		parse->hardppsstate = PARSE_HARDPPS_DISABLE;
 		if (CLK_PPS(parse->peer))
 		{
-		  if (time_pps_create(parse->ppsfd, &parse->ppshandle) < 0) 
+		  if (!refclock_ppsapi(parse->ppsfd, &parse->atom))
 		    {
 		      msyslog(LOG_NOTICE, "PARSE receiver #%d: parse_start: could not set up PPS: %m", CLK_UNIT(parse->peer));
 		    }
@@ -3811,7 +3807,7 @@ parse_process(
 		/*
 		 * set fudge = 0.0 if already included in PPS time stamps
 		 */
-		if (parse->ppsparams.mode & (PPS_OFFSETCLEAR|PPS_OFFSETASSERT))
+		if (parse->atom.pps_params.mode & (PPS_OFFSETCLEAR|PPS_OFFSETASSERT))
 		        {
 			        ppsphaseadjust = 0.0;
 			}
@@ -4001,11 +3997,25 @@ parse_process(
 		 */
 		if (PARSE_PPS(parsetime->parse_state) && CLK_PPS(parse->peer))
 		        {
-			        (void) pps_sample(&parse->timedata.parse_ptime.fp);
+			  /* refclock_pps includes fudgetime1 - we keep the RS232 offset in there :-( */
+			        double savedtime1 = parse->generic->fudgetime1;
+
+				parse->generic->fudgetime1 = fudge;
+				
+				if (refclock_pps(parse->peer, &parse->atom,
+						 parse->flags & (CLK_FLAG1|CLK_FLAG2|CLK_FLAG3|CLK_FLAG4))) {
+					parse->peer->flags |= FLAG_PPS;
+				} else {
+					parse->peer->flags &= ~FLAG_PPS;
+				}
+
+				parse->generic->fudgetime1 = savedtime1;
+
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
 	} else {
 	        parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
+		parse->peer->flags &= ~FLAG_PPS;
 	}
 
 	/*
@@ -5744,6 +5754,9 @@ int refclock_parse_bs;
  * History:
  *
  * refclock_parse.c,v
+ * Revision 4.81  2009/05/01 10:15:29  kardel
+ * use new refclock_ppsapi interface
+ *
  * Revision 4.80  2007/08/11 12:06:29  kardel
  * update comments wrt/ to PPS
  *

@@ -3060,10 +3060,6 @@ AC_MSG_CHECKING([if we need to make and use the parse libraries])
 ans=no
 case "$ntp_libparse" in
  yes)
-    ans=["disabled, pps_sample() has left"]
-;;
-disabled) # due to pps_sample disappearance delete these lines 
-          # and the preceding two leaving yes) ans=yes
     ans=yes
     AC_DEFINE(CLOCK_PARSE, 1, [PARSE driver interface])
     LIBPARSE=../libparse/libparse.a
