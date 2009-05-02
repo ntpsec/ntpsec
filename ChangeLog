@@ -1,3 +1,4 @@
+* do not clear config.cache when it is already empty
 * loopfilter FLL/PLL crossover cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
 * ntp-keygen cleanup from Dave Mills.
