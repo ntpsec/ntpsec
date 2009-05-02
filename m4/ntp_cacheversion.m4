@@ -43,6 +43,19 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	    ;;
 	 /dev/null)
 	    ntp_cache_flush=0
+	    ;;
+	 *)
+	    # This appears to be the top-level configure file.
+	    # Do not clear the cache immediately after it is created
+	    # empty as it is noisy.  Differentiate a newly-created 
+	    # config.cache from one predating the cache version 
+	    # mechanism by looking for the first cached variable set 
+	    # by Autoconf
+	    case "$ac_cv_path_install" in
+	     '')
+		# presumably empty config.cache file
+		ntp_cache_flush=0
+	    esac
 	esac
 	;;
      *)
@@ -54,19 +67,18 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	# ntp_cv_*_cache_version vars.
 	
 	c_varname_list=`set |
-			sed 's/=.*$//' |
-			grep -F _cv_ | 
-			grep -v 'ntp_cv_.*_cache_version'
+			sed -n -e 's/=.*$//' \
+			       -e '/ntp_cv_.*_cache_version/d' \
+			       -e '/_cv_/p'
 		       `
 	for c_varname in $c_varname_list
 	do
 	    dnl use AS_UNSET([$c_varname]) eventually
-	    eval ${c_varname}=; 
-	    $as_unset $c_varname
+	    eval ${c_varname}=;  $as_unset $c_varname
 	done
 	
 	dnl use AS_UNSET([c_varname_list c_varname]) eventually
-	c_varname_list=; $as_unset c_varname_list c_varname
+	c_varname_list=;  $as_unset c_varname_list c_varname
 	
 	AC_MSG_NOTICE([$cache_file saved by another version, ignored.])
 	AC_MSG_NOTICE([configure script cache version: [$2]])
