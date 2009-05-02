@@ -140,8 +140,6 @@ static EVP_PKEY *sign_pkey = NULL; /* sign key */
 static const EVP_MD *sign_digest = NULL; /* sign digest */
 static u_int sign_siglen;	/* sign key length */
 static char *rand_file = NULL;	/* random seed file */
-static char *host_file = NULL;	/* host key file */
-static char *sign_file = NULL;	/* sign key file */
 
 /*
  * Cryptotypes
@@ -159,8 +157,7 @@ static	int	crypto_bob3	(struct exten *, struct value *);
 static	int	crypto_iff	(struct exten *, struct peer *);
 static	int	crypto_gq	(struct exten *, struct peer *);
 static	int	crypto_mv	(struct exten *, struct peer *);
-static	u_int	crypto_send	(struct exten *, struct value *,
-				    u_int *);
+static	int	crypto_send	(struct exten *, struct value *, int);
 static	tstamp_t crypto_time	(void);
 static	u_long	asn2ntp		(ASN1_TIME *);
 static	struct cert_info *cert_parse (u_char *, long, tstamp_t);
@@ -1049,7 +1046,7 @@ crypto_recv(
  *
  * Side effect: update the packet offset.
  *
- * Returns
+ * Errors
  * XEVNT_OK	success
  * XEVNT_CRT	bad or missing certificate
  * XEVNT_ERR	protocol error
@@ -1061,7 +1058,7 @@ crypto_xmit(
 	struct peer *peer,	/* peer structure pointer */
 	struct pkt *xpkt,	/* transmit packet pointer */
 	struct recvbuf *rbufp,	/* receive buffer pointer */
-	int	*start,		/* offset to extension field */
+	int	start,		/* offset to extension field */
 	struct exten *ep,	/* extension pointer */
 	keyid_t cookie		/* session cookie */
 	)
@@ -1075,10 +1072,10 @@ crypto_xmit(
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	tstamp_t tstamp;
 	u_int	vallen;
-	u_int	len;
 	struct value vtemp;
 	associd_t associd;
 	int	rval;
+	int	len;
 	keyid_t tcookie;
 
 	/*
@@ -1086,7 +1083,7 @@ crypto_xmit(
 	 * and association ID. If this is a response and the host is not
 	 * synchronized, light the error bit and go home.
 	 */
-	pkt = (u_int32 *)xpkt + *start / 4;
+	pkt = (u_int32 *)xpkt + start / 4;
 	fp = (struct exten *)pkt;
 	opcode = ntohl(ep->opcode);
 	if (peer != NULL) {
@@ -1097,8 +1094,9 @@ crypto_xmit(
 		srcadr_sin = &rbufp->recv_srcadr;
 	}
 	associd = (associd_t) ntohl(ep->associd);
-	fp->associd = ep->associd;
 	len = 8;
+	fp->opcode = htonl((opcode & 0xffff0000) | len);
+	fp->associd = ep->associd;
 	rval = XEVNT_OK;
 	tstamp = crypto_time();
 	switch (opcode & 0xffff0000) {
@@ -1110,7 +1108,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_ASSOC:
 	case CRYPTO_ASSOC | CRYPTO_RESP:
-		rval = crypto_send(fp, &hostval, &len);
+		len = crypto_send(fp, &hostval, start);
 		fp->fstamp = htonl(crypto_flags);
 		break;
 
@@ -1124,7 +1122,7 @@ crypto_xmit(
 		vtemp.fstamp = ep->fstamp;
 		vtemp.vallen = ep->vallen;
 		vtemp.ptr = (u_char *)ep->pkt;
-		rval = crypto_send(fp, &vtemp, &len);
+		len = crypto_send(fp, &vtemp, start);
 		break;
 
 	/*
@@ -1136,7 +1134,7 @@ crypto_xmit(
 		    cert_host->last)
 			rval = XEVNT_PER;
 		else
-			rval = crypto_send(fp, &cert_host->cert, &len);
+			len = crypto_send(fp, &cert_host->cert, start);
 		break;
 
 	/*
@@ -1205,7 +1203,7 @@ crypto_xmit(
 		if (tstamp == 0)
 			break;
 
-		rval = crypto_send(fp, &xp->cert, &len);
+		len = crypto_send(fp, &xp->cert, start);
 		break;
 
 	/*
@@ -1213,7 +1211,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_IFF:
 		if ((rval = crypto_alice(peer, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1223,7 +1221,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_IFF | CRYPTO_RESP:
 		if ((rval = crypto_bob(ep, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1233,7 +1231,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_GQ:
 		if ((rval = crypto_alice2(peer, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1243,7 +1241,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_GQ | CRYPTO_RESP:
 		if ((rval = crypto_bob2(ep, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1253,7 +1251,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_MV:
 		if ((rval = crypto_alice3(peer, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1263,7 +1261,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_MV | CRYPTO_RESP:
 		if ((rval = crypto_bob3(ep, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1278,7 +1276,7 @@ crypto_xmit(
 	 */
 	case CRYPTO_SIGN | CRYPTO_RESP:
 		if ((rval = cert_sign(ep, &vtemp)) == XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1288,7 +1286,7 @@ crypto_xmit(
 	 * key.
 	 */
 	case CRYPTO_COOK:
-		rval = crypto_send(fp, &pubkey, &len);
+		len = crypto_send(fp, &pubkey, start);
 		break;
 
 	/*
@@ -1306,7 +1304,7 @@ crypto_xmit(
 			tcookie = peer->hcookie;
 		if ((rval = crypto_encrypt(ep, &vtemp, &tcookie)) ==
 		    XEVNT_OK) {
-			rval = crypto_send(fp, &vtemp, &len);
+			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
 		}
 		break;
@@ -1326,7 +1324,7 @@ crypto_xmit(
 			}
 		}
 		peer->flags &= ~FLAG_ASSOC;
-		rval = crypto_send(fp, &peer->sndval, &len);
+		len = crypto_send(fp, &peer->sndval, start);
 		break;
 
 	/*
@@ -1335,18 +1333,17 @@ crypto_xmit(
 	 * empty request.
 	 */
 	case CRYPTO_LEAP | CRYPTO_RESP:
-		rval = crypto_send(fp, &tai_leap, &len);
+		len = crypto_send(fp, &tai_leap, start);
 		break;
 
 	/*
-	 * Default - Fall through for requests; for unknown responses,
-	 * flag as error.
+	 * Default - Send a valid command for unknown requests; send
+	 * an error response for unknown resonses.
 	 */
 	default:
 		if (opcode & CRYPTO_RESP)
 			rval = XEVNT_ERR;
 	}
-	fp->opcode = htonl((opcode & 0xffff0000) | len);
 
 	/*
 	 * In case of error, flame the log. If a request, toss the
@@ -1372,11 +1369,10 @@ crypto_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "crypto_xmit: flags 0x%x ext offset %d len %u code 0x%x associd %d\n",
-		    crypto_flags, *start, len, opcode >> 16, associd);
+		    "crypto_xmit: flags 0x%x offset %d len %d code 0x%x associd %d\n",
+		    crypto_flags, start, len, opcode >> 16, associd);
 #endif
-	*start += len;
-	return (rval);
+	return (len);
 }
 
 
@@ -1700,19 +1696,15 @@ crypto_args(
  * Note: it is not polite to send a nonempty signature with zero
  * timestamp or a nonzero timestamp with an empty signature, but those
  * rules are not enforced here.
- *
- * Returns
- * XEVNT_OK	success
- * XEVNT_LEN	bad field format or length
  */
-u_int
+int
 crypto_send(
 	struct exten *ep,	/* extension field pointer */
 	struct value *vp,	/* value pointer */
-	u_int	*start		/* buffer offset */
+	int	start		/* buffer offset */
 	)
 {
-	u_int	len, vallen, siglen;
+	u_int	len, vallen, siglen, opcode;
 	int	i, j;
 
 	/*
@@ -1724,8 +1716,8 @@ crypto_send(
 	len += ((vallen + 3) / 4 + 1) * 4; 
 	siglen = ntohl(vp->siglen);
 	len += ((siglen + 3) / 4 + 1) * 4; 
-	if (*start + len > NTP_MAXEXTEN - LEN_PKT_NOMAC - MAX_MAC_LEN)
-		return (XEVNT_LEN);
+	if (start + len >= sizeof(struct pkt) - MAX_MAC_LEN)
+		return (0);
 
 	/*
 	 * Copy timestamps.
@@ -1759,8 +1751,9 @@ crypto_send(
 		memcpy(&ep->pkt[i], vp->sig, siglen);
 		i += j;
 	}
-	*start += len;
-	return (XEVNT_OK);
+	opcode = ntohl(ep->opcode);
+	ep->opcode = htonl((opcode & 0xffff0000) | len); 
+	return (len);
 }
 
 
@@ -3725,9 +3718,7 @@ crypto_setup(void)
 	/*
 	 * Initialize structures.
 	 */
-	if (host_file != NULL) {
-		sys_hostname = host_file;
-	} else {
+	if (sys_hostname == NULL) {
 		gethostname(filename, MAXFILENAME);
 		sys_hostname = emalloc(strlen(filename) + 1);
 		strcpy(sys_hostname, filename);
@@ -3890,8 +3881,8 @@ crypto_config(
 	 * Set host name (host).
 	 */
 	case CRYPTO_CONF_PRIV:
-		host_file = emalloc(strlen(cp) + 1);
-		strcpy(host_file, cp);
+		sys_hostname = emalloc(strlen(cp) + 1);
+		strcpy(sys_hostname, cp);
 		break;
 
 	/*
@@ -3916,14 +3907,6 @@ crypto_config(
 	case CRYPTO_CONF_RAND:
 		rand_file = emalloc(strlen(cp) + 1);
 		strcpy(rand_file, cp);
-		break;
-
-	/*
-	 * Set sign key file name (sign).
-	 */
-	case CRYPTO_CONF_SIGN:
-		sign_file = emalloc(strlen(cp) + 1);
-		strcpy(sign_file, cp);
 		break;
 	}
 }

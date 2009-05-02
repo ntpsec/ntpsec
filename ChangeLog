@@ -1,3 +1,7 @@
+* loopfilter FLL/PLL crossover cleanup from Dave Mills.
+* Documentation updates from Dave Mills.
+* ntp-keygen cleanup from Dave Mills.
+* crypto API cleanup from Dave Mills.
 * Add NTP_CACHEVERSION mechanism to ignore incompatible config.cache
 * Enable gcc -Wstrict-overflow for gsoc_sntp as well
 (4.2.5p169) 2009/04/30 Released by Harlan Stenn <stenn@ntp.org>

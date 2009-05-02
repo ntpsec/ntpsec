@@ -3079,8 +3079,8 @@ peer_xmit(
 
 			temp32 = CRYPTO_RESP;
 			peer->cmmd->opcode |= htonl(temp32);
-			crypto_xmit(peer, &xpkt, NULL, &sendlen,
-			    peer->cmmd, 0);
+			sendlen += crypto_xmit(peer, &xpkt, NULL,
+			    sendlen, peer->cmmd, 0);
 			free(peer->cmmd);
 			peer->cmmd = NULL;
 		}
@@ -3091,8 +3091,8 @@ peer_xmit(
 		 */
 		if (exten != NULL) {
 			if (exten->opcode != 0)
-				crypto_xmit(peer, &xpkt, NULL, &sendlen,
-				    exten, 0);
+				sendlen += crypto_xmit(peer, &xpkt,
+				    NULL, sendlen, exten, 0);
 			free(exten);
 		}
 
@@ -3201,7 +3201,7 @@ fast_xmit(
 	struct pkt xpkt;	/* transmit packet structure */
 	struct pkt *rpkt;	/* receive packet structure */
 	l_fp	xmt_tx, xmt_ty;
-	int	sendlen, authlen;
+	int	sendlen;
 #ifdef OPENSSL
 	u_int32	temp32;
 #endif
@@ -3321,8 +3321,9 @@ fast_xmit(
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
 			temp32 = CRYPTO_RESP;
 			rpkt->exten[0] |= htonl(temp32);
-			crypto_xmit(NULL, &xpkt, rbufp, &sendlen,
-			    (struct exten *)rpkt->exten, cookie);
+			sendlen += crypto_xmit(NULL, &xpkt, rbufp,
+			    sendlen, (struct exten *)rpkt->exten,
+			    cookie);
 		} else {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
@@ -3333,10 +3334,7 @@ fast_xmit(
 	if (mask == NULL) {
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
 	}
-
-	authlen = authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
-	sendlen += authlen;
-
+	sendlen += authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
 #ifdef OPENSSL
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);

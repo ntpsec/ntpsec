@@ -896,18 +896,14 @@ gen_dsa(
 	DSA	*dsa;		/* DSA parameters */
 	u_char	seed[20];	/* seed for parameters */
 	FILE	*str;
-	int	bits;
 
 	/*
 	 * Generate DSA parameters.
 	 */
-	bits = modulus;
-	if (bits > 1024)
-		bits = 1024;
 	fprintf(stderr,
-	    "Generating DSA parameters (%d bits)...\n", bits);
+	    "Generating DSA parameters (%d bits)...\n", modulus);
 	RAND_bytes(seed, sizeof(seed));
-	dsa = DSA_generate_parameters(bits, seed, sizeof(seed), NULL,
+	dsa = DSA_generate_parameters(modulus, seed, sizeof(seed), NULL,
 	    NULL, cb, "DSA");
 	fprintf(stderr, "\n");
 	if (dsa == NULL) {

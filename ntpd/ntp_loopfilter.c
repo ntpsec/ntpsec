@@ -460,9 +460,8 @@ local_clock(
 			 * The FLL and PLL frequency gain constants
 			 * depend on the time constant and Allan
 			 * intercept. The PLL is always used, but
-			 * becomes ineffective at and above the Allan
-			 * intercept. The FLL is used at and above the
-			 * Allan intercept. 
+			 * becomes ineffective above the Allan intercept
+			 * where the FLL becomes effective.
 			 */
 			if (sys_poll >= allan_xpt)
 				clock_frequency += (fp_offset -
@@ -471,12 +470,12 @@ local_clock(
 				    clock_epoch) * CLOCK_FLL;
 
 			/*
-			 * For the PLL the integration interval
-			 * (numerator) is the minimum of the update
-			 * interval and time constant. This allows
-			 * oversampling, but not undersampling.
+			 * The PLL frequency gain (numerator) depends on
+			 * the minimum of the update interval and Allan
+			 * intercept. This reduces the PLL gain when the 
+			 * FLL becomes effective.
 			 */ 
-			etemp = min(ULOGTOD(sys_poll), clock_epoch);
+			etemp = min(ULOGTOD(allan_xpt), clock_epoch);
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			clock_frequency += fp_offset * etemp / (dtemp *
 			    dtemp);
@@ -698,10 +697,7 @@ adj_host_clock(
 	 * NTPv3, NTPv4 does not declare unsynchronized after one day,
 	 * since the dispersion check serves this function. Also,
 	 * since the poll interval can exceed one day, the old test
-	 * would be counterproductive. Note we do this even with
-	 * external clocks, since the clock driver will recompute the
-	 * maximum error and the local clock driver will pick it up and
-	 * pass to the common refclock routines. Very elegant.
+	 * would be counterproductive.
 	 */
 	sys_rootdisp += clock_phi;
 
@@ -716,13 +712,10 @@ adj_host_clock(
 
 	/*
 	 * Implement the phase and frequency adjustments. The gain
-	 * factor (denominator) is not allowed to increase above half
-	 * the Allan intercept. It doesn't make sense to average phase
-	 * noise in this case and helps to reduce frequency convergence
-	 * time.
-	 */
-	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(min(sys_poll,
-	    allan_xpt - 1)));
+	 * factor (denominator) increases with poll interval, so is
+	 * dominated by the FLL above the Allan intercept.
+ 	 */
+	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
 #endif /* LOCKCLOCK */
