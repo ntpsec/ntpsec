@@ -143,7 +143,7 @@ extern	struct	peer *findmanycastpeer	(struct recvbuf *);
 #ifdef OPENSSL
 extern	int	crypto_recv	(struct peer *, struct recvbuf *);
 extern	int	crypto_xmit	(struct peer *, struct pkt *,
-				    struct recvbuf *, int *,
+				    struct recvbuf *, int,
 				    struct exten *, keyid_t);
 extern	keyid_t	session_key	(struct sockaddr_storage *,
 				    struct sockaddr_storage *, keyid_t,
