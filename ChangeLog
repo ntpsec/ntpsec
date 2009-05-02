@@ -277,6 +277,11 @@
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 ---
+
+* [Bug 1172] 4.2.4p7-RC{3,4} fail to build on linux.
+* flock-build script unportable 'set -m' use removed
+
+---
 (4.2.4p7-RC4) 2009/04/29 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1167] use gcc -Winit-self only if it is understood

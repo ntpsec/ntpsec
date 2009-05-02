@@ -784,19 +784,8 @@ AC_CACHE_CHECK([for struct rt_msghdr], ac_cv_struct_rt_msghdr,
 	ac_cv_struct_rt_msghdr=no)
 ])
 
-AC_CACHE_CHECK([for struct rtattr], ac_cv_struct_rtattr,
-[AC_TRY_COMPILE([
-#include <linux/rtnetlink.h>],
-[struct rtattr p;],
-	ac_cv_struct_rtattr=yes,
-	ac_cv_struct_rtattr=no)
-])
-
-if test $ac_cv_struct_rt_msghdr = yes -o $ac_cv_struct_rtattr = yes; then
+if test $ac_cv_struct_rt_msghdr = yes; then
     AC_DEFINE(HAS_ROUTING_SOCKET, 1, [Do we have a routing socket (struct rt_msghdr)?])
-    if test $ac_cv_struct_rtattr = yes; then
-        AC_DEFINE(HAVE_RTNETLINK, 1, [Do we have Linux routing socket?])
-    fi
 fi
 
 AC_CACHE_CHECK(
