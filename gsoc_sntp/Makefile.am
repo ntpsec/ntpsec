@@ -1,7 +1,7 @@
 # Makefile.am for JMK's SNTP, by Harlan Stenn
 
 AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS= -I libopts/m4
+ACLOCAL_AMFLAGS= -I ../m4 -I libopts/m4
 
 AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a

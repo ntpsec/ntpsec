@@ -6,6 +6,7 @@
 
 #include <math.h>
 
+#include <ntp_fp.h>
 #include <ntp_types.h>
 #ifdef OPENSSL
 #include <ntp_crypto.h>

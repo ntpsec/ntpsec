@@ -2,6 +2,22 @@
 # Process this file with autoconf to produce a configure script.
 m4_include([../version.m4])
 AC_INIT([sntp], [VERSION_NUMBER])
+
+# Increment sntp_configure_cache_version by one for each change to
+# configure.ac or .m4 files which invalidates cached values from
+# previous versions.
+
+# It is not necessary to bump the version in more than one
+# configure.ac at the same time, as the cache is shared.
+# Previously used values should never be used again.
+
+sntp_configure_cache_version=0
+
+# When the version of config.cache and configure do not
+# match, NTP_CACHEVERSION will flush the cache.
+
+NTP_CACHEVERSION([sntp], [$sntp_configure_cache_version])
+
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile
@@ -61,7 +77,7 @@ case "$GCC" in
     # CFLAGS="$CFLAGS -Wwrite-strings"
     case "$ac_cv_gcc_Wstrict_overflow" in
      yes)
-	#not yet#CFLAGS="$CFLAGS -Wstrict-overflow"
+	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
 esac
 

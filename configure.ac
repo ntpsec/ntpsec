@@ -1,7 +1,23 @@
 dnl -*-fundamental-*-
 dnl Process this file with autoconf to produce a configure script.
 m4_include([version.m4])
-AC_INIT(ntp, VERSION_NUMBER)
+AC_INIT([ntp], [VERSION_NUMBER])
+
+# Increment ntp_configure_cache_version by one for each change to
+# configure.ac or .m4 files which invalidates cached values from
+# previous versions.
+
+# It is not necessary to bump the version in more than one
+# configure.ac at the same time, as the cache is shared.
+# Previously used values should never be used again.
+
+ntp_configure_cache_version=0
+
+# When the cache version of config.cache and configure do not
+# match, NTP_CACHEVERSION will flush the cache.
+
+NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
+
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile
@@ -140,7 +156,7 @@ case "$GCC" in
 	]
     )
     CFLAGS="$SAVED_CFLAGS_AC"
-    unset SAVED_CFLAGS_AC
+    $as_unset SAVED_CFLAGS_AC
     #
     # $ac_cv_gcc_Wstrict_overflow is tested later to add the 
     # flag to CFLAGS.
@@ -164,7 +180,7 @@ case "$GCC" in
 	]
     )
     CFLAGS="$SAVED_CFLAGS_AC"
-    unset SAVED_CFLAGS_AC
+    $as_unset SAVED_CFLAGS_AC
     #
     # $ac_cv_gcc_Winit_self is tested later to add the 
     # flag to CFLAGS.
@@ -3868,7 +3884,7 @@ esac
 # be better to simply remove the hunk above, I did not want
 # to remove it if there is hope it will be used again.
 #
-unset ac_cv_make_tickadj
+$as_unset ac_cv_make_tickadj
 
 AC_CACHE_CHECK([if we want and can make the tickadj utility], ac_cv_make_tickadj,
 ac_cv_make_tickadj=yes)
@@ -4278,7 +4294,7 @@ AC_MSG_CHECKING([if we want the windows symmetric client hack])
 
 # default is no, unless --enable-ntp-signd was given
 ans=$wintime_default
-unset wintime_default
+$as_unset wintime_default
 
 AC_ARG_ENABLE(
     [wintime],

@@ -1,5 +1,21 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(main.c)
+AC_INIT([msntp])
+
+# Increment msntp_configure_version by one for each
+# change to configure.ac or .m4 files which invalidates
+# cached values from previous versions.
+
+# It is not necessary to bump the version in more than one
+# configure.ac at the same time, as the cache is shared.
+# Previously used values should never be used again.
+
+msntp_configure_cache_version=0
+
+# When the version of config.cache and configure do not
+# match, NTP_CACHEVERSION will flush the cache.
+
+NTP_CACHEVERSION([msntp], [$msntp_configure_cache_version])
+
 AM_INIT_AUTOMAKE([msntp],[1.6])
 AC_CONFIG_SRCDIR([header.h])
 AC_CANONICAL_HOST
