@@ -65,11 +65,9 @@ do
          1)
             cat > .flockbuild-$i-$SIG <<ENDQUOT
 #!/bin/sh
-# enable job control
-set -m
-# set -m alone is all that's needed on Solaris
-# FreeBSD job control was disabled without ssh -tt
-# option which forces a pseudo-tty to be used.
+
+# depends on job control and expects to be invoked under ssh -tt
+
 cd $c_d
 COUNT=0
 
