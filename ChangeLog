@@ -1,4 +1,11 @@
 * [Bug 1152] adjust PARSE to new refclock_pps logic
+* Include (4.2.4p7-RC5)
+* loopfilter FLL/PLL crossover cleanup from Dave Mills.
+* Documentation updates from Dave Mills.
+* ntp-keygen cleanup from Dave Mills.
+* crypto API cleanup from Dave Mills.
+* Add NTP_CACHEVERSION mechanism to ignore incompatible config.cache
+* Enable gcc -Wstrict-overflow for gsoc_sntp as well
 (4.2.5p169) 2009/04/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1171] Note that we never look for -lreadline by default.
 * [Bug 1090] Fix bogus leap seconds in refclock_hpgps.
@@ -45,6 +52,7 @@
 * Documentation updates from Dave Mills.
 * timepps-Solaris.h patches from Dave Hart.
 (4.2.5p164) 2009/04/22 Released by Harlan Stenn <stenn@ntp.org>
+---
 * Include (4.2.4p7-RC3)
 * PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
@@ -277,6 +285,12 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+(4.2.4p7-RC5) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1172] 4.2.4p7-RC{3,4} fail to build on linux.
+* flock-build script unportable 'set -m' use removed
+
 ---
 (4.2.4p7-RC4) 2009/04/29 Released by Harlan Stenn <stenn@ntp.org>
 
