@@ -75,7 +75,6 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	do
 	    dnl use AS_UNSET([$c_varname]) eventually
 	    eval ${c_varname}=;  $as_unset $c_varname
-	    AC_MSG_NOTICE([cleared env var $c_varname])
 	done
 	
 	dnl use AS_UNSET([c_varname_list c_varname]) eventually
