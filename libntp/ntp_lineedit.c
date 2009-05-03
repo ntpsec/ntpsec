@@ -216,8 +216,6 @@ ntp_readline(
 	} else
 		line = NULL;
 
-	UNUSED_ARG(cline);
-
 #endif	/* !HAVE_READLINE_HISTORY && !HAVE_HISTEDIT_H */
 
 
