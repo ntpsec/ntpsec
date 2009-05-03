@@ -16,6 +16,16 @@ sntp_configure_cache_version=0
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
 
+# $NTP_CONFIGURE_PARENT is used to detect the top-level configure in
+# NTP_CACHEVERSION.  It is set to an empty string to indicate "known to
+# have no parent" while unset indicates no knowledge.  Just before
+# AC_CONFIG_SUBDIRS in NTP's main configure.ac, NTP_CONFIGURE_PARENT
+# is set to top.  In all NTP configure.ac files, we set it to NULL
+# if it is unset, so NTP_CACHE_VERSION does not rely on a heuristic.
+
+case "${NTP_CONFIGURE_PARENT=}" in
+esac
+
 NTP_CACHEVERSION([sntp], [$sntp_configure_cache_version])
 
 AM_INIT_AUTOMAKE

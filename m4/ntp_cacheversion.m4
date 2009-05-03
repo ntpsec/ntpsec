@@ -33,29 +33,56 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
      '')
 	# No cache, predates ntp_cv_$1_cache_version, or is empty.
 	case "$cache_file" in
-	 ../*)
-	    # Parent configure will have cleared cache once already.
-	    # This will misfire if a top-level configure is invoked
-	    # with --config-cache= value beginning with '../', is
-	    # there a better way to detect this configure was
-	    # invoked by a parent directory configure?
-	    ntp_cache_flush=0
-	    ;;
 	 /dev/null)
 	    ntp_cache_flush=0
 	    ;;
 	 *)
-	    # This appears to be the top-level configure file.
-	    # Do not clear the cache immediately after it is created
-	    # empty as it is noisy.  Differentiate a newly-created 
-	    # config.cache from one predating the cache version 
-	    # mechanism by looking for the first cached variable set 
-	    # by Autoconf
-	    case "$ac_cv_path_install" in
+	    # Is this the top-level configure, or a child invoked
+	    # by a parent via AC_CONFIG_SUBDIRS?  There is no 
+	    # reliable general way to say, so we use a variable 
+	    # NTP_CONFIGURE_PARENT set to an empty string early
+	    # in our top-level configure.ac and then set to the
+	    # simple flag value 'top' before AC_CONFIG_SUBDIRS.
+	    # Assuming only two levels of configure.ac files,
+	    # only the parent has to manage AC_CONFIG_PARENT.
+	    case "${NTP_CONFIGURE_PARENT-varnotset}" in
 	     '')
-		# presumably empty config.cache file
-		ntp_cache_flush=0
+		ntp_top_configure=1
+		;;
+	     varnotset)
+		# without a clear indication from NTP_CONFIGURE_PARENT
+		# heuristically assume we are a child configure if our
+		# cache file path begins with ../
+		case "$cache_file" in
+		 ../*)
+		    ntp_top_configure=0
+		    ;;
+		 *)
+		    ntp_top_configure=1
+		esac
+		;;
+	     *)
+		ntp_top_configure=0;
 	    esac
+	    case "$ntp_top_configure" in
+	     1)
+		# Do not clear the cache immediately after it is created
+		# empty as it is noisy.  Differentiate a newly-created 
+		# config.cache from one predating the cache version 
+		# mechanism by looking for the first cached variable set 
+		# by Autoconf
+		case "$ac_cv_path_install" in
+		 '')
+		    # empty config.cache file
+		    ntp_cache_flush=0
+		esac
+		;;
+	     0)
+		# Parent configure just created cache from empty,
+		# flushing would be counterproductive.
+		ntp_cache_flush=0;
+	    esac
+	    $as_unset ntp_top_configure
 	esac
 	;;
      *)
