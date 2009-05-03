@@ -7,6 +7,7 @@
 
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #if defined(HAVE_READLINE_HISTORY)
