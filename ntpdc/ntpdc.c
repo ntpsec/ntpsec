@@ -12,6 +12,7 @@
 #include "ntp_select.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
+#include "ntp_lineedit.h"
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
 #include "isc/net.h"
@@ -29,15 +30,6 @@
 #  pragma warning(pop)
 # endif /* OPENSSL */
 #endif /* SYS_WINNT */
-
-#if defined(HAVE_LIBREADLINE)
-# include <readline/readline.h>
-# include <readline/history.h>
-#endif /* HAVE_LIBREADLINE */
-
-#if defined (HAVE_LIBEDIT)
-# include <histedit.h>
-#endif /* HAVE_LIBEDIT */
 
 #ifdef SYS_VXWORKS
 				/* vxWorks needs mode flag -casey*/
@@ -1124,33 +1116,20 @@ again:
 static void
 getcmds(void)
 {
-#if defined(HAVE_LIBREADLINE)
-	char *line;
+	char *	line;
+	int	count;
+
+	ntp_readline_init(interactive ? prompt : NULL);
 
 	for (;;) {
-		if ((line = readline(interactive?prompt:"")) == NULL) return;
-		if (*line) add_history(line);
+		line = ntp_readline(&count);
+		if (NULL == line)
+			break;
 		docmd(line);
 		free(line);
 	}
-#else /* not (HAVE_LIBREADLINE) */
-	char line[MAXLINE];
 
-	for (;;) {
-		if (interactive) {
-#ifdef VMS	/* work around a problem with mixing stdout & stderr */
-			fputs("",stdout);
-#endif
-			(void) fputs(prompt, stderr);
-			(void) fflush(stderr);
-		}
-
-		if (fgets(line, sizeof line, stdin) == NULL)
-		    return;
-
-		docmd(line);
-	}
-#endif /* not HAVE_LIBREADLINE || HAVE_LIBEDIT */
+	ntp_readline_uninit();
 }
 
 

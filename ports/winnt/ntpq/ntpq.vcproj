@@ -311,6 +311,10 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath="..\..\..\include\ntp_lineedit.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpq\ntpq.h"
 				>
 			</File>

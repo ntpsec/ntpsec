@@ -1,3 +1,5 @@
+* [Bug 1171] line editing libs found without headers (Solaris 11)
+* [Bug 1173] NMEA refclock fails with Solaris PPSAPI
 (4.2.5p170) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1152] adjust PARSE to new refclock_pps logic
 * Include (4.2.4p7-RC5)

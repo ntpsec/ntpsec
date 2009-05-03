@@ -370,6 +370,7 @@ nmea_ppsapi(
 		return (0);
 	}
 	memset(&up->pps_params, 0, sizeof(pps_params_t));
+	up->pps_params.api_version = PPS_API_VERS_1;
 	if (enb_clear)
 		up->pps_params.mode = capability & PPS_CAPTURECLEAR;
 	else
