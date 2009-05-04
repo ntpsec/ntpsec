@@ -1,3 +1,4 @@
+* Autokey documentation cleanup from Dave Mills.
 * do not clear config.cache when it is already empty
 (4.2.5p170) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1152] adjust PARSE to new refclock_pps logic

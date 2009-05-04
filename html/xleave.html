@@ -13,8 +13,10 @@
 		<h3>NTP Interleaved Modes </h3>
 		<img src="pic/pogo4.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>You need a little magic.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61"></csobj><csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="308">July 5, 2008</csobj></p>
-		<br clear="left">
+		<p>Last update: 
+			<!-- #BeginDate format:En2m -->03-May-2009  3:37<!-- #EndDate -->
+		UTC</p>
+<br clear="left">
 		<hr>
 		<p>In the protocol described in the NTP specification and implemented today the transmit timestamp is captured before the MD5 digest is computed and the packet is sent, while the receive timestamp is captured after the packet is received.  For enhanced accuracy it is desirable to capture the timestamps as close to the wire as possible; i.e., with hardware assist or with a modified driver.</p>
 		<p> The problem is, while the receive timestamp could in principle  be piggybacked in the receive buffer, the transmit timestamp cannot ordinarily be transmitted in the same packet. A solution for this problem is the two-step or interleaved protocol described on this page and included in the the current reference implementation. In this experimental variant the transmit timestamp for one packet is actually carried in the immediately following packet. The trick, however, is to implement the interleaved protocol without changing the NTP packet header format, without compromising backwards compatibility and without compromising the error recovery properties.</p>
