@@ -43,16 +43,16 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	case "$cache_file" in
 	 ../*)
 	    ntp_top_configure=0
-dnl	    AC_MSG_WARN([[ Using heuristic, guessing this configure is ]])
-dnl	    AC_MSG_WARN([[ a child of another configure script based ]])
-dnl	    AC_MSG_WARN([[ on cache file name starting with ../]])
+	    AC_MSG_WARN([[ Using heuristic, guessing this configure is ]])
+	    AC_MSG_WARN([[ a child of another configure script based ]])
+	    AC_MSG_WARN([[ on cache file name starting with ../ ]])
 	    ;;
 	 *)
 	    ntp_top_configure=1
-dnl	    AC_MSG_WARN([[ Using heuristic, guessing this configure is ]])
-dnl	    AC_MSG_WARN([[ _not_ a child of another configure script ]])
-dnl	    AC_MSG_WARN([[ based on cache file name not starting ]])
-dnl	    AC_MSG_WARN([[ with ../]])
+	    AC_MSG_WARN([[ Using heuristic, guessing this configure is ]])
+	    AC_MSG_WARN([[ _not_ a child of another configure script ]])
+	    AC_MSG_WARN([[ based on cache file name not starting ]])
+	    AC_MSG_WARN([[ with ../ ]])
 	esac
 	;;
      *)
@@ -92,7 +92,7 @@ dnl	    AC_MSG_WARN([[ with ../]])
 		ntp_cache_flush=0;
 		;;
 	     *)
-dnl	        AC_MSG_ERROR([[NTP_CACHEVERSION var ntp_top_configure misset]])
+	        AC_MSG_ERROR([[NTP_CACHEVERSION var ntp_top_configure misset]])
 	    esac
 	esac
 	;;
