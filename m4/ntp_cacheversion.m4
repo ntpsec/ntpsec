@@ -43,16 +43,16 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	case "$cache_file" in
 	 ../*)
 	    ntp_top_configure=0
-	    AC_MSG_WARN([Using heuristic, guessing this configure is ])
-	    AC_MSG_WARN([a child of another configure script based ])
-	    AC_MSG_WARN([on cache file name starting with ../])
+dnl	    AC_MSG_WARN([[ Using heuristic, guessing this configure is ]])
+dnl	    AC_MSG_WARN([[ a child of another configure script based ]])
+dnl	    AC_MSG_WARN([[ on cache file name starting with ../]])
 	    ;;
 	 *)
 	    ntp_top_configure=1
-	    AC_MSG_WARN([Using heuristic, guessing this configure is ])
-	    AC_MSG_WARN([_not_ a child of another configure script ])
-	    AC_MSG_WARN([based on cache file name not starting ])
-	    AC_MSG_WARN([with ../])
+dnl	    AC_MSG_WARN([[ Using heuristic, guessing this configure is ]])
+dnl	    AC_MSG_WARN([[ _not_ a child of another configure script ]])
+dnl	    AC_MSG_WARN([[ based on cache file name not starting ]])
+dnl	    AC_MSG_WARN([[ with ../]])
 	esac
 	;;
      *)
@@ -92,7 +92,7 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 		ntp_cache_flush=0;
 		;;
 	     *)
-	        AC_MSG_ERROR([NTP_CACHEVERSION var ntp_top_configure misset])
+dnl	        AC_MSG_ERROR([[NTP_CACHEVERSION var ntp_top_configure misset]])
 	    esac
 	esac
 	;;
@@ -137,10 +137,10 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	dnl use AS_UNSET([c_varname_list c_varname]) eventually
 	c_varname_list=;  $as_unset c_varname_list c_varname
 	
-	AC_MSG_NOTICE([$cache_file saved by another version, ignored.])
-	AC_MSG_NOTICE([configure script cache version: [$2]])
+	AC_MSG_NOTICE([[$cache_file saved by another version, ignored.]])
+	AC_MSG_NOTICE([[configure script cache version: ]][$2])
 	c_version="${ntp_cv_[$1]_cache_version:-(no version found)}"
-	AC_MSG_NOTICE([$cache_file version: $c_version])
+	AC_MSG_NOTICE([[$cache_file version: $c_version]])
 	$as_unset c_version
     esac
 
