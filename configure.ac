@@ -11,10 +11,26 @@ AC_INIT([ntp], [VERSION_NUMBER])
 # configure.ac at the same time, as the cache is shared.
 # Previously used values should never be used again.
 
-ntp_configure_cache_version=0
+ntp_configure_cache_version=20090503
 
 # When the cache version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
+
+# $NTP_CONFIGURE_PARENT is used to detect the top-level configure in
+# NTP_CACHEVERSION.  It is set to an empty string to indicate "known to
+# have no parent" while unset indicates no knowledge.  Just before
+# AC_CONFIG_SUBDIRS in NTP's main configure.ac, NTP_CONFIGURE_PARENT
+# is set to top.  In all NTP configure.ac files, we set it to NULL
+# if it is unset, so NTP_CACHE_VERSION does not rely on a heuristic.
+# It may seem tempting to set it to '' unilaterally in this main
+# NTP configure.ac, but that would preclude someone packaging NTP
+# as part of a parent package with configure, as NTP_CACHEVERSION
+# requires parents of its users to use it as well.  When invoked by a
+# parent configure script, it would be wrong to assume we are the top
+# level configure invocation.  We must respect NTP_CONFIGURE_PARENT.
+
+case "${NTP_CONFIGURE_PARENT=}" in
+esac
 
 NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
 
@@ -4719,6 +4735,11 @@ AC_CONFIG_FILES(scripts/ntpver,		[chmod +x scripts/ntpver])
 AC_CONFIG_FILES(scripts/plot_summary,	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
+
+# $NTP_CONFIGURE_PARENT is used to detect the top-level configure in
+# NTP_CACHEVERSION (m4/ntp_cacheversion.m4)
+
+NTP_CONFIGURE_PARENT='top' ; export NTP_CONFIGURE_PARENT
 
 AC_CONFIG_SUBDIRS(sntp)
 AC_CONFIG_SUBDIRS(gsoc_sntp)

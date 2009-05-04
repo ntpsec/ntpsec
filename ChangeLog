@@ -1,5 +1,7 @@
 * Autokey documentation cleanup from Dave Mills.
-* do not clear config.cache when it is already empty
+* Fix problem linking msntp on Solaris when sntp subdir is configured
+  before parent caused by different gethostent library search order.
+* Do not clear config.cache when it is already empty.
 (4.2.5p170) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1152] adjust PARSE to new refclock_pps logic
 * Include (4.2.4p7-RC5)

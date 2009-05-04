@@ -11,7 +11,7 @@ AC_INIT([sntp], [VERSION_NUMBER])
 # configure.ac at the same time, as the cache is shared.
 # Previously used values should never be used again.
 
-sntp_configure_cache_version=0
+sntp_configure_cache_version=20090503
 
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -99,6 +99,7 @@ case "$host" in
     # -D_XOPEN_SOURCE=600 seems OK for c99
     #CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
     CPPFLAGS="$CPPFLAGS -D__EXTENSIONS__"
+    libxnet=-lxnet
     ;;
 esac
 
@@ -126,13 +127,13 @@ AC_PROG_LIBTOOL
 
 # Checks for libraries.
 
-AC_CHECK_FUNC(gethostent, ,
+AC_CHECK_FUNC([gethostent], ,
 	[AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket])])
-AC_CHECK_FUNC(openlog, , 
+AC_CHECK_FUNC([openlog], , 
 	[AC_SEARCH_LIBS([openlog], [gen], , 
 		[AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])])])
 
-AC_CHECK_FUNC(setsockopt, ,
+AC_CHECK_FUNC([setsockopt], ,
 	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
 
 # Checks for header files.

@@ -9,7 +9,7 @@ AC_INIT([msntp])
 # configure.ac at the same time, as the cache is shared.
 # Previously used values should never be used again.
 
-msntp_configure_cache_version=0
+msntp_configure_cache_version=20090503
 
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -79,6 +79,18 @@ case "$ac_cv_c_inline" in
     AC_SUBST(HAVE_INLINE)
 esac
 
+# HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
+case "$host" in
+ *-*-solaris*)
+    # see "man standards".
+    # -D_XOPEN_SOURCE=500 is probably OK for c89 and before
+    # -D_XOPEN_SOURCE=600 seems OK for c99
+    #CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
+    CPPFLAGS="$CPPFLAGS -D__EXTENSIONS__"
+    libxnet=-lxnet
+    ;;
+esac
+
 
 # Checks for libraries.
 
@@ -136,11 +148,12 @@ case "$ac_cv_have_ss_family_in_struct_ss$ac_cv_have___ss_family_in_struct_ss" in
 esac
 
 # Checks for library functions.
+AC_CHECK_FUNC([gethostent], ,
+	[AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket])])
 #AC_FUNC_MEMCMP	 dnl HMS: we don't have a memcmp.c to use here, so why bother?
 AC_FUNC_SETVBUF_REVERSED
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm])
-AC_CHECK_FUNC([gethostent], , AC_SEARCH_LIBS([gethostent], [nsl], , , [-lsocket]))
 AC_CHECK_FUNCS([gettimeofday inet_ntoa memset])
 AC_CHECK_FUNCS([socket], , AC_SEARCH_LIBS([socket], [socket]))
 AC_CHECK_FUNCS([sqrt], , AC_SEARCH_LIBS([sqrt], [m]))

@@ -24,7 +24,43 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
     AC_BEFORE([$0], [AM_CONFIG_HEADER])dnl
     AC_BEFORE([$0], [AC_PROG_CC])dnl
 
+    # Is this the top-level configure, or a child invoked
+    # by a parent via AC_CONFIG_SUBDIRS?  There is no 
+    # reliable general way to say, so we use a variable 
+    # NTP_CONFIGURE_PARENT set to an empty string early
+    # in our top-level configure.ac and then set to the
+    # simple flag value 'top' before AC_CONFIG_SUBDIRS.
+    # Assuming only two levels of configure.ac files,
+    # only the parent has to manage AC_CONFIG_PARENT.
+    case "${NTP_CONFIGURE_PARENT-varnotset}" in
+     '')
+	ntp_top_configure=1
+	;;
+     varnotset)
+	# without a clear indication from NTP_CONFIGURE_PARENT
+	# heuristically assume we are a child configure if our
+	# cache file path begins with ../
+	case "$cache_file" in
+	 ../*)
+	    ntp_top_configure=0
+	    AC_MSG_WARN([Using heuristic, guessing this configure is ])
+	    AC_MSG_WARN([a child of another configure script based ])
+	    AC_MSG_WARN([on cache file name starting with ../])
+	    ;;
+	 *)
+	    ntp_top_configure=1
+	    AC_MSG_WARN([Using heuristic, guessing this configure is ])
+	    AC_MSG_WARN([_not_ a child of another configure script ])
+	    AC_MSG_WARN([based on cache file name not starting ])
+	    AC_MSG_WARN([with ../])
+	esac
+	;;
+     *)
+	ntp_top_configure=0;
+    esac
+    
     ntp_cache_flush=1
+    
     case "$ntp_cv_[$1]_cache_version" in
      [$2])
 	# same version, good
@@ -37,33 +73,6 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	    ntp_cache_flush=0
 	    ;;
 	 *)
-	    # Is this the top-level configure, or a child invoked
-	    # by a parent via AC_CONFIG_SUBDIRS?  There is no 
-	    # reliable general way to say, so we use a variable 
-	    # NTP_CONFIGURE_PARENT set to an empty string early
-	    # in our top-level configure.ac and then set to the
-	    # simple flag value 'top' before AC_CONFIG_SUBDIRS.
-	    # Assuming only two levels of configure.ac files,
-	    # only the parent has to manage AC_CONFIG_PARENT.
-	    case "${NTP_CONFIGURE_PARENT-varnotset}" in
-	     '')
-		ntp_top_configure=1
-		;;
-	     varnotset)
-		# without a clear indication from NTP_CONFIGURE_PARENT
-		# heuristically assume we are a child configure if our
-		# cache file path begins with ../
-		case "$cache_file" in
-		 ../*)
-		    ntp_top_configure=0
-		    ;;
-		 *)
-		    ntp_top_configure=1
-		esac
-		;;
-	     *)
-		ntp_top_configure=0;
-	    esac
 	    case "$ntp_top_configure" in
 	     1)
 		# Do not clear the cache immediately after it is created
@@ -81,8 +90,10 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 		# Parent configure just created cache from empty,
 		# flushing would be counterproductive.
 		ntp_cache_flush=0;
+		;;
+	     *)
+	        AC_MSG_ERROR([NTP_CACHEVERSION var ntp_top_configure misset])
 	    esac
-	    $as_unset ntp_top_configure
 	esac
 	;;
      *)
@@ -90,14 +101,33 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
     esac
     case "$ntp_cache_flush" in
      1)
-	# Clear all *_cv_* variables except our various components' 
-	# ntp_cv_*_cache_version vars.
+        # Do we flush all variables or exclude others' version stamps?
+        
+	case "$ntp_top_configure" in
+	 1)
+	    # Clear all *_cv_* variables including our child subdirs'
+	    # ntp_cv_*_cache_version variables.  This prevents subdir
+	    # configure scripts from noticing a version mismatch just
+	    # after the top configure in the invocation cleared and
+	    # recreated the cache.
 	
-	c_varname_list=`set |
-			sed -n -e 's/=.*$//' \
-			       -e '/ntp_cv_.*_cache_version/d' \
-			       -e '/_cv_/p'
-		       `
+	    c_varname_list=`set |
+			    sed -n -e 's/=.*$//' \
+				   -e '/_cv_/p'
+			   `
+	    ;;
+	 *)
+	    # This is not the top configure this particular invocation.
+	    # Clear all *_cv_* variables sparing the version stamps
+	    # of other configure scripts, so we don't trigger
+	    # useless repeated clearings.
+
+	    c_varname_list=`set |
+			    sed -n -e 's/=.*$//' \
+				   -e '/ntp_cv_.*_cache_version/d' \
+				   -e '/_cv_/p'
+			   `
+	esac
 	for c_varname in $c_varname_list
 	do
 	    dnl use AS_UNSET([$c_varname]) eventually
@@ -117,5 +147,6 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
     # save configure version in config.cache for next time
     ntp_cv_[$1]_cache_version="[$2]"
 
-    $as_unset ntp_cache_flush
+    $as_unset ntp_cache_flush ntp_top_configure
+
 ])dnl
