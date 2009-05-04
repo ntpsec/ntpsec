@@ -3308,6 +3308,7 @@ case "$ntp_parseutil$ac_cv_header_sys_stropts_h" in
      sparc-*-solaris2*)
 	ans=parsesolaris
 	MAKE_PARSEKMODULE=parse
+	AC_CHECK_HEADERS([strings.h])
 	;;
     esac
     ;;

@@ -55,7 +55,7 @@
 # include <stdio.h>
 #else
 # include "sys/parsestreams.h"
-extern void printf (const char *, ...);
+extern int printf (const char *, ...);
 #endif
 
 static const u_char VT_INITIALISED      = 0x01;

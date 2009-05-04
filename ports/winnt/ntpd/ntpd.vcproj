@@ -2100,6 +2100,18 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libparse\clk_varitext.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\libparse\data_mbg.c"
 				>
 				<FileConfiguration

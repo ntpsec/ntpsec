@@ -8,7 +8,7 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	clocktypes.c decodenetnum.c dofptoa.c dolfptoa.c emalloc.c \
 	findconfig.c fptoa.c fptoms.c getopt.c hextoint.c \
 	hextolfp.c humandate.c icom.c inttoa.c iosignal.c \
-	lib_strbuf.c machines.c memmove.c mfptoa.c \
+	lib_strbuf.c machines.c memmove.c mfptoa.c ntp_lineedit.c \
 	mfptoms.c mktime.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
 	ntp_rfc2553.c numtoa.c numtohost.c octtoint.c prettydate.c \
 	ntp_random.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \
