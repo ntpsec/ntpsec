@@ -1,3 +1,4 @@
+(4.2.5p172) 2009/05/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1175] Instability in PLL daemon mode.
 * [Bug 1176] refclock_parse.c does not compile without PPSAPI.
 (4.2.5p171) 2009/05/04 Released by Harlan Stenn <stenn@ntp.org>
