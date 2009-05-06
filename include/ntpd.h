@@ -108,7 +108,7 @@ extern	void	block_io_and_alarm (void);
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);
-extern	int 	local_clock(struct peer *, u_long, double);
+extern	int 	local_clock(struct peer *, double);
 extern	void	adj_host_clock(void);
 extern	void	loop_config(int, double);
 extern	void	huffpuff(void);

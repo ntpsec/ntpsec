@@ -1674,7 +1674,7 @@ clock_update(
 	 * Comes now the moment of truth. Crank the clock discipline and
 	 * see what comes out.
 	 */
-	switch (local_clock(peer, peer->epoch, sys_offset)) {
+	switch (local_clock(peer, sys_offset)) {
 
 	/*
 	 * Clock exceeds panic threshold. Life as we know it ends.

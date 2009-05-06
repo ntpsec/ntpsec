@@ -121,7 +121,7 @@ double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 double	clock_codec;		/* audio codec frequency (samples/s) */
-u_long	clock_epoch;		/* interval since last update */
+static u_long clock_epoch;	/* last update */
 u_int	sys_tai;		/* TAI offset from UTC */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
@@ -204,12 +204,12 @@ init_loopfilter(void)
 int
 local_clock(
 	struct	peer *peer,	/* synch source peer structure */
-	u_long	mu,		/* measurement interval */
 	double	fp_offset	/* clock offset (s) */
 	)
 {
 	int	rval;		/* return code */
 	int	osys_poll;	/* old system poll */
+	double	mu;		/* interval since last update */
 	double	clock_frequency; /* clock frequency */
 	double	dtemp, etemp;	/* double temps */
 	char	tbuf[80];	/* report buffer */
@@ -316,7 +316,7 @@ local_clock(
 		sys_poll = peer->minpoll;
 	if (sys_poll > peer->maxpoll)
 		sys_poll = peer->maxpoll;
-	clock_epoch += mu;
+	mu = current_time - clock_epoch;
 	clock_frequency = drift_comp;
 	rval = 1;
 	if (fabs(fp_offset) > clock_max && clock_max > 0) {
@@ -339,7 +339,7 @@ local_clock(
 		 * the apparent frequency correction and step the phase.
 		 */
 		case EVNT_FREQ:
-			if (clock_epoch < clock_minstep)
+			if (mu < clock_minstep)
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
@@ -352,7 +352,7 @@ local_clock(
 		 * exceeded.
 		 */
 		case EVNT_SPIK:
-			if (clock_epoch < clock_minstep)
+			if (mu < clock_minstep)
 				return (0);
 
 			/* fall through to default */
@@ -440,7 +440,7 @@ local_clock(
 		 * update.
 		 */
 		case EVNT_FREQ:
-			if (clock_epoch < clock_minstep)
+			if (mu < clock_minstep)
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
@@ -466,8 +466,8 @@ local_clock(
 			if (sys_poll >= allan_xpt)
 				clock_frequency += (fp_offset -
 				    clock_offset) /
-				    max(ULOGTOD(sys_poll),
-				    clock_epoch) * CLOCK_FLL;
+				    max(ULOGTOD(sys_poll), mu) *
+				    CLOCK_FLL;
 
 			/*
 			 * The PLL frequency gain (numerator) depends on
@@ -475,7 +475,7 @@ local_clock(
 			 * intercept. This reduces the PLL gain when the 
 			 * FLL becomes effective.
 			 */ 
-			etemp = min(ULOGTOD(allan_xpt), clock_epoch);
+			etemp = min(ULOGTOD(allan_xpt), mu);
 			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
 			clock_frequency += fp_offset * etemp / (dtemp *
 			    dtemp);
@@ -734,13 +734,14 @@ rstclock(
 #ifdef DEBUG
 	if (debug > 1)
 		printf("local_clock: mu %lu state %d poll %d count %d\n",
-		    clock_epoch, trans, sys_poll, tc_counter);
+		    current_time - clock_epoch, trans, sys_poll,
+		    tc_counter);
 #endif
 	if (trans != state && trans != EVNT_FSET)
 		report_event(trans, NULL, NULL);
 	state = trans;
 	last_offset = clock_offset = offset;
-	clock_epoch = 0; 
+	clock_epoch = current_time; 
 }
 
 /*
@@ -776,7 +777,8 @@ direct_freq(
 		drift_comp = FREQTOD(ntv.freq);
 	}
 #endif /* KERNEL_PLL */
-	set_freq((fp_offset - clock_offset) / clock_epoch + drift_comp);
+	set_freq((fp_offset - clock_offset) / (current_time -
+	    clock_epoch) + drift_comp);
 	wander_resid = 0;
 	return (drift_comp);
 }
