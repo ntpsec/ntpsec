@@ -3992,6 +3992,7 @@ parse_process(
 		
 		refclock_process_offset(parse->generic, reftime, rectime, fudge);
 
+#ifdef HAVE_PPSAPI
 		/*
 		 * pass PPS information on to PPS clock
 		 */
@@ -4013,6 +4014,7 @@ parse_process(
 
 				parse_hardpps(parse, PARSE_HARDPPS_ENABLE);
 			}
+#endif
 	} else {
 	        parse_hardpps(parse, PARSE_HARDPPS_DISABLE);
 		parse->peer->flags &= ~FLAG_PPS;
