@@ -193,6 +193,7 @@ static	void	jjy_poll                    (int, struct peer *);
 static	void	jjy_poll_tristate_jjy01     (int, struct peer *);
 static	void	jjy_poll_cdex_jst2000       (int, struct peer *);
 static	void	jjy_poll_echokeisokuki_lt2000    (int, struct peer *);
+static  void    jjy_poll_citizentic_jjy200          (int, struct peer *);
 static	void	jjy_receive                 (struct recvbuf *);
 static	int 	jjy_receive_tristate_jjy01  (struct recvbuf *);
 static	int 	jjy_receive_cdex_jst2000    (struct recvbuf *);
