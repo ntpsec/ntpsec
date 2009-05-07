@@ -1440,6 +1440,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\ntpd\refclock_jjy.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\refclock_jupiter.c"
 				>
 				<FileConfiguration

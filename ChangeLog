@@ -1,5 +1,6 @@
 ---
 
+* [Bug 784] Make --enable-linuxcaps the default when available
 * Updated JJY reference clock driver from Takao abe
 
 ---
