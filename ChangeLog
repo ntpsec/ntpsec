@@ -63,7 +63,6 @@
 * Documentation updates from Dave Mills.
 * timepps-Solaris.h patches from Dave Hart.
 (4.2.5p164) 2009/04/22 Released by Harlan Stenn <stenn@ntp.org>
----
 * Include (4.2.4p7-RC3)
 * PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
@@ -296,6 +295,11 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+
+* [Bug 784] Make --enable-linuxcaps the default when available
+* Updated JJY reference clock driver from Takao abe
+
 ---
 (4.2.4p7-RC5) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 
