@@ -1997,10 +1997,16 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING([for a the number of minutes in a DST adjustment])
-AC_ARG_ENABLE(dst_minutes,
-   AC_HELP_STRING([--enable-dst-minutes=60], [+ minutes per DST adjustment]),
-    [ans=$enableval], [ans=60])
+AC_MSG_CHECKING([[for a the number of minutes in a DST adjustment]])
+AC_ARG_ENABLE(
+    [dst_minutes],
+    AS_HELP_STRING(
+	[--enable-dst-minutes],
+	[n minutes per DST adjustment @<:@60@:>@]	dnl @<:@ is [
+    ),
+    [ans=$enableval],
+    [ans=60]
+)
 AC_DEFINE_UNQUOTED(DSTMINUTES, $ans, [The number of minutes in a DST adjustment])
 AC_MSG_RESULT([$ans])
 
@@ -4274,7 +4280,7 @@ AC_ARG_ENABLE(
     [linuxcaps],
     AC_HELP_STRING(
 	[--enable-linuxcaps],
-	[[s Use Linux capabilities for non-root clock control]]
+	[+ Use Linux capabilities for non-root clock control]
     ),
     [ntp_have_linuxcaps=$enableval]
 )
