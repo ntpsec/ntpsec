@@ -1157,6 +1157,7 @@ doconfigure(
 #endif
 		if (dores && SOCKNUL(&(ce->peer_store))) {
 			if (!findhostaddr(ce)) {
+#ifndef IGNORE_DNS_ERRORS
 				msyslog(LOG_ERR,
 					"couldn't resolve `%s', giving up on it",
 					ce->ce_name);
@@ -1164,6 +1165,7 @@ doconfigure(
 				ce = ceremove->ce_next;
 				removeentry(ceremove);
 				continue;
+#endif
 			}
 		}
 
