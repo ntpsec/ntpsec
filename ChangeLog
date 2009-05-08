@@ -1,4 +1,5 @@
 ---
+(4.2.4p7-RC6) 2009/05/08 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 784] Make --enable-linuxcaps the default when available
 * [Bug 1179] error messages for -u/--user and -i lacking droproot

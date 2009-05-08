@@ -27,5 +27,5 @@ CLTAG=NTP_4_2_0
 # - - rcpoint gets set to 0
 # - - releasecandidate gets set to no
 # - GRONK is for -dev
-rcpoint=5
+rcpoint=6
 #rcpoint=GRONK
