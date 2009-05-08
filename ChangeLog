@@ -1,6 +1,7 @@
 ---
 
 * [Bug 784] Make --enable-linuxcaps the default when available
+* [Bug 1179] error messages for -u/--user and -i lacking droproot
 * Updated JJY reference clock driver from Takao abe
 * Log a message and exit before trying to use FD_SET with a descriptor
   larger than FD_SETSIZE, which will corrupt memory beyond the fd_set
