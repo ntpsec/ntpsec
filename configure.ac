@@ -4324,8 +4324,6 @@ esac
 
 AC_CHECK_HEADERS(sys/clockctl.h)
 
-AC_MSG_CHECKING([if we should use /dev/clockctl])
-
 case "$host" in
  *-*-netbsd*)
     ans=yes
@@ -4340,62 +4338,65 @@ AC_ARG_ENABLE(
 	[--enable-clockctl],
 	[s Use /dev/clockctl for non-root clock control]
     ),
-    [ans=$enableval]
+    [ntp_use_dev_clockctl=$enableval],
+    [ntp_use_dev_clockctl=$ac_cv_header_sys_clockctl_h]
 )
 
-case "$ac_cv_header_sys_clockctl_h" in
- no)
-    ans=no
-esac
-
-AC_MSG_RESULT([$ans])
-
-case "$ans" in
- yes)
-    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
-esac
+AC_MSG_CHECKING([[if we should use /dev/clockctl]])
+AC_MSG_RESULT([$ntp_use_dev_clockctl])
 
 
 AC_CHECK_HEADERS([sys/capability.h])
 AC_CHECK_HEADERS([sys/prctl.h])
 
-AC_MSG_CHECKING([if we have linux capabilities (libcap)])
+AC_MSG_CHECKING([[if we have linux capabilities (libcap)]])
+
+case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
+ yesyes)
+    ntp_have_linuxcaps=yes
+    ;;
+ *)
+    ntp_have_linuxcaps=no
+esac
+
+AC_MSG_RESULT([$ntp_have_linuxcaps])
+
 
 AC_ARG_ENABLE(
     [linuxcaps],
     AC_HELP_STRING(
-        [--enable-linuxcaps], 
-        [s Use Linux capabilities for non-root clock control]
+	[--enable-linuxcaps],
+	[[s Use Linux capabilities for non-root clock control]]
     ),
-    [ans=$enableval],
-    [ans=no]
+    [ntp_have_linuxcaps=$enableval]
 )
 
-case "$ans$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
- yesyesyes)
-    ;;
- *)
-    ans=no
-esac
 
-AC_MSG_RESULT([$ans])
-
-case "$ans" in
+case "$ntp_have_linuxcaps" in
  yes)
-    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
-    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
+    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[[Do we have Linux capabilities?]])
     LIBS="$LIBS -lcap"
 esac
 
 
-AC_CHECK_HEADERS(libscf.h)
+case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
+ *yes*)
+    AC_DEFINE(HAVE_DROPROOT, ,[[Can we drop root privileges?]])
+esac
+
+
+AC_CHECK_HEADERS([libscf.h])
+
 case "$ac_cv_header_libscf_h" in
  yes)
     AC_SUBST(LSCF, [-lscf])
-    ;;
 esac
 
-AC_CHECK_FUNC(setppriv,AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[Are Solaris privileges available?]), )
+AC_CHECK_FUNC(
+    [setppriv],
+    AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[[Are Solaris privileges available?]])
+)
+
 
 #
 # ISC stuff

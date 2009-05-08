@@ -1,5 +1,6 @@
 * Clean up configure.ac NTP_CACHEVERSION interface, display cache
   version when clearing.  Fixes a regression.
+* Include (4.2.4p7-RC6)
 (4.2.5p172) 2009/05/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1175] Instability in PLL daemon mode.
 * [Bug 1176] refclock_parse.c does not compile without PPSAPI.
@@ -65,7 +66,6 @@
 * Documentation updates from Dave Mills.
 * timepps-Solaris.h patches from Dave Hart.
 (4.2.5p164) 2009/04/22 Released by Harlan Stenn <stenn@ntp.org>
----
 * Include (4.2.4p7-RC3)
 * PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
@@ -298,6 +298,16 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+(4.2.4p7-RC6) 2009/05/08 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 784] Make --enable-linuxcaps the default when available
+* [Bug 1179] error messages for -u/--user and -i lacking droproot
+* Updated JJY reference clock driver from Takao Abe
+* [Bug 1071] Log a message and exit before trying to use FD_SET with a
+  descriptor larger than FD_SETSIZE, which will corrupt memory
+* On corruption of the iface list head in add_interface, log and exit
+
 ---
 (4.2.4p7-RC5) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 

@@ -80,6 +80,16 @@ getCmdOpts(
 			droproot = 1;
 			chrootdir = OPT_ARG( JAILDIR );
 #else
+			fprintf(stderr, 
+				"command line -i option (jaildir) is not supported by this binary"
+# ifndef SYS_WINNT
+				",\n" "can not drop root privileges.  See configure options\n"
+				"--enable-clockctl and --enable-linuxcaps.\n");
+# else
+				".\n");
+# endif
+			msyslog(LOG_ERR, 
+				"command line -i option (jaildir) is not supported by this binary.");
 			errflg++;
 #endif
 	}
@@ -111,8 +121,8 @@ getCmdOpts(
 		stats_config(STATS_STATSDIR, OPT_ARG( STATSDIR ));
 
 	if (HAVE_OPT( TRUSTEDKEY )) {
-		int           ct = STACKCT_OPT(  TRUSTEDKEY );
-		const char**  pp = STACKLST_OPT( TRUSTEDKEY );
+		int		ct = STACKCT_OPT(  TRUSTEDKEY );
+		const char**	pp = STACKLST_OPT( TRUSTEDKEY );
 
 		do  {
 			u_long tkey;
@@ -134,23 +144,29 @@ getCmdOpts(
 		char *ntp_optarg = OPT_ARG( USER );
 
 		droproot = 1;
-		user = malloc(strlen(ntp_optarg) + 1);
-		if (user == NULL) {
-			errflg++;
-		} else {
-			(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
-			group = rindex(user, ':');
-			if (group)
-				*group++ = '\0'; /* get rid of the ':' */
-		}
+		user = emalloc(strlen(ntp_optarg) + 1);
+		(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
+		group = rindex(user, ':');
+		if (group)
+			*group++ = '\0'; /* get rid of the ':' */
 #else
+		fprintf(stderr, 
+			"command line -u/--user option is not supported by this binary"
+# ifndef SYS_WINNT
+			",\n" "can not drop root privileges.  See configure options\n"
+			"--enable-clockctl and --enable-linuxcaps.\n");
+# else
+			".\n");
+# endif
+		msyslog(LOG_ERR, 
+			"command line -u/--user option is not supported by this binary.");
 		errflg++;
 #endif
 	}
 
 	if (HAVE_OPT( VAR )) {
-		int           ct = STACKCT_OPT(  VAR );
-		const char**  pp = STACKLST_OPT( VAR );
+		int		ct = STACKCT_OPT(  VAR );
+		const char**	pp = STACKLST_OPT( VAR );
 
 		do  {
 			const char* my_ntp_optarg = *pp++;
@@ -161,8 +177,8 @@ getCmdOpts(
 	}
 
 	if (HAVE_OPT( DVAR )) {
-		int           ct = STACKCT_OPT(  DVAR );
-		const char**  pp = STACKLST_OPT( DVAR );
+		int		ct = STACKCT_OPT(  DVAR );
+		const char**	pp = STACKLST_OPT( DVAR );
 
 		do  {
 			const char* my_ntp_optarg = *pp++;
@@ -182,9 +198,12 @@ getCmdOpts(
 		if (val >= 0)
 			interface_interval = val;
 		else {
-			msyslog(LOG_ERR,
-				"command line interface update interval %ld must be greater or equal to 0",
-				      val);
+			fprintf(stderr, 
+				"command line interface update interval %ld must not be negative\n",
+				val);
+			msyslog(LOG_ERR, 
+				"command line interface update interval %ld must not be negative",
+				val);
 			errflg++;
 		}
 	}
@@ -198,6 +217,8 @@ getCmdOpts(
 #endif /* SIM */
 
 	if (errflg || argc) {
+		if (argc)
+			fprintf(stderr, "argc after processing is <%d>\n", argc);
 		optionUsage(myOptions, 2);
 	}
 	return;
