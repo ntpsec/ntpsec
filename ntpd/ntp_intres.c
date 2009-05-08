@@ -15,11 +15,6 @@
  * might go about autoconfiguring an NTP distribution network.
  *
  */
- /*
- * For special situations define the FORCE_DNSRETRY Macro
- * to force retries even if it fails the lookup.
- * Use with extreme caution since it will then retry forever.
- */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -463,8 +458,10 @@ findhostaddr(
 	struct conf_entry *entry
 	)
 {
+	static int eai_again_seen = 0;
 	struct addrinfo *addr;
 	struct addrinfo hints;
+	int again;
 	int error;
 
 	checkparent();		/* make sure our guy is still running */
@@ -475,17 +472,14 @@ findhostaddr(
 		return 1;
 	}
 
-        if (entry->ce_name == NULL && SOCKNUL(&entry->peer_store)) {
+	if (entry->ce_name == NULL && SOCKNUL(&entry->peer_store)) {
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
 		return 0;
 	}
 
 	if (entry->ce_name) {
-#ifdef DEBUG
-		if (debug > 2)
-			msyslog(LOG_INFO, "findhostaddr: Resolving <%s>",
-				entry->ce_name);
-#endif /* DEBUG */
+		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
+			entry->ce_name);
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
@@ -508,68 +502,72 @@ findhostaddr(
 				entry->ce_config.v6_flag = 1;
 			}
 		}
-		else if (error == EAI_NONAME)
-		{
-			msyslog(LOG_ERR, "host name not found: %s", entry->ce_name);
-		}
 	} else {
-#ifdef DEBUG
-		if (debug > 2)
-			msyslog(LOG_INFO, "findhostaddr: Resolving %s>",
-				stoa(&entry->peer_store));
-#endif
+		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
+			stoa(&entry->peer_store)));
+
 		entry->ce_name = emalloc(MAXHOSTNAMELEN);
 		error = getnameinfo((const struct sockaddr *)&entry->peer_store,
 				   SOCKLEN(&entry->peer_store),
 				   (char *)&entry->ce_name, MAXHOSTNAMELEN,
 				   NULL, 0, 0);
 	}
-#ifdef DEBUG
-	if (debug > 2)
-		printf("intres: got error status of: %d\n", error);
-#endif
 
-	/*
-	 * If the resolver failed, see if the failure is
-	 * temporary. If so, return success.
-	 */
-	if (error != 0) {
-		switch (error)
-		{
+	if (0 == error) {
+
+		/* again is our return value, for success it is 1 */
+		again = 1;
+
+		DPRINTF(2, ("findhostaddr: %s resolved.\n", 
+			(entry->ce_name) ? "name" : "address"));
+	} else {
+		/*
+		 * If the resolver failed, see if the failure is
+		 * temporary. If so, return success.
+		 */
+		again = 0;
+
+		switch (error) {
+
+		case EAI_FAIL:
+			again = 1;
+			break
+
 		case EAI_AGAIN:
-			return (1);
+			again = 1;
+			eai_again_seen = 1;
+			break;
+
 		case EAI_NONAME:
-#ifndef FORCE_DNSRETRY
-			return (0);
-#else
-			return (1);
-#endif
 #if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
 		case EAI_NODATA:
 #endif
-		case EAI_FAIL:
+			msyslog(LOG_ERR, "host name not found %s%s: %s",
+				(EAI_NONAME == error) ? "EAI_NONAME" : "EAI_NODATA",
+				(eai_again_seen) ? " (permanent)" : "",
+				entry->ce_name);
+			again = !eai_again_seen;
+			break;
+
 #ifdef EAI_SYSTEM
-		case EAI_SYSTEM:
-			return (1);
+		case EAI_SYSTEM
+			/* 
+			 * EAI_SYSTEM means the real error is in errno.  We should be more
+			 * discriminating about which errno values require retrying, but
+			 * this matches existing behavior.
+			 */
+			again = 1;
+			DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n"
+				errno, strerror(errno)));
+			break;
 #endif
-		default:
-			return (0);
 		}
+
+		/* do this here to avoid perturbing errno earlier */
+		DPRINTF(2, ("intres: got error status of: %d\n", error));
 	}
 
-	if (entry->ce_name) {
-#ifdef DEBUG
-		if (debug > 2)
-			msyslog(LOG_INFO, "findhostaddr: name resolved.");
-#endif
-
-#ifdef DEBUG
-		if (debug > 2)
-			msyslog(LOG_INFO, "findhostaddr: address resolved.");
-#endif
-	}
-		   
-	return (1);
+	return again;
 }
 
 
