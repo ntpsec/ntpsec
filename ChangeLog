@@ -2,6 +2,9 @@
 
 * [Bug 784] Make --enable-linuxcaps the default when available
 * Updated JJY reference clock driver from Takao abe
+* Log a message and exit before trying to use FD_SET with a descriptor
+  larger than FD_SETSIZE, which will corrupt memory beyond the fd_set
+* On corruption of the iface list head in add_interface, log and exit
 
 ---
 (4.2.4p7-RC5) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>

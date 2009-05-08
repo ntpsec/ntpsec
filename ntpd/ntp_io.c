@@ -755,6 +755,24 @@ delete_interface(struct interface *interface)
 static void
 add_interface(struct interface *interface)
 {
+	static struct interface *listhead = NULL;
+
+	/*
+	 * For ntpd, the first few interfaces (wildcard, localhost)
+	 * will never be removed.  This means inter_list.head is
+	 * unchanging once initialized.  Take advantage of that to
+	 * watch for changes and catch corruption earlier.  This
+	 * helped track down corruption caused by using FD_SET with
+	 * a descriptor numerically larger than FD_SETSIZE.
+	 */
+	if (NULL == listhead)
+		listhead = inter_list.head;
+
+	if (listhead != inter_list.head) {
+		msyslog(LOG_ERR, "add_interface inter_list.head corrupted: was %p now %p",
+			listhead, inter_list.head);
+		exit(1);
+	}
 	/*
 	 * Calculate the address hash
 	 */
@@ -3660,6 +3678,11 @@ add_fd_to_list(SOCKET fd, enum desc_type type) {
 	 * I/O Completion Ports don't care about the select and FD_SET
 	 */
 #ifndef HAVE_IO_COMPLETION_PORT
+	if (fd < 0 || fd >= FD_SETSIZE) {
+		msyslog(LOG_ERR, "Too many sockets in use, FD_SETSIZE %d exceeded",
+			FD_SETSIZE);
+		exit(1);
+	}
 	/*
 	 * keep activefds in sync
 	 */
