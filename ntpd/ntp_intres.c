@@ -479,7 +479,7 @@ findhostaddr(
 
 	if (entry->ce_name) {
 		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
-			entry->ce_name);
+			entry->ce_name));
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
@@ -531,7 +531,7 @@ findhostaddr(
 
 		case EAI_FAIL:
 			again = 1;
-			break
+			break;
 
 		case EAI_AGAIN:
 			again = 1;
@@ -542,22 +542,22 @@ findhostaddr(
 #if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
 		case EAI_NODATA:
 #endif
-			msyslog(LOG_ERR, "host name not found %s%s: %s",
-				(EAI_NONAME == error) ? "EAI_NONAME" : "EAI_NODATA",
+			msyslog(LOG_ERR, "host name not found%s%s: %s",
+				(EAI_NONAME == error) ? "" : " EAI_NODATA",
 				(eai_again_seen) ? " (permanent)" : "",
 				entry->ce_name);
 			again = !eai_again_seen;
 			break;
 
 #ifdef EAI_SYSTEM
-		case EAI_SYSTEM
+		case EAI_SYSTEM:
 			/* 
 			 * EAI_SYSTEM means the real error is in errno.  We should be more
 			 * discriminating about which errno values require retrying, but
 			 * this matches existing behavior.
 			 */
 			again = 1;
-			DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n"
+			DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",
 				errno, strerror(errno)));
 			break;
 #endif
@@ -577,12 +577,14 @@ findhostaddr(
 static void
 openntp(void)
 {
-	struct addrinfo hints;
-	struct addrinfo *addrResult;
-	const char *localhost = "127.0.0.1";	/* Use IPv6 loopback */
+	const char	*localhost = "127.0.0.1";	/* Use IPv4 loopback */
+	struct addrinfo	hints;
+	struct addrinfo	*addr;
+	u_long		on;
+	int		err;
 
 	if (sockfd != INVALID_SOCKET)
-	    return;
+		return;
 
 	memset(&hints, 0, sizeof(hints));
 
@@ -590,52 +592,81 @@ openntp(void)
 	 * For now only bother with IPv4
 	 */
 	hints.ai_family = AF_INET;
-
 	hints.ai_socktype = SOCK_DGRAM;
-	if (getaddrinfo(localhost, "ntp", &hints, &addrResult)!=0) {
-		msyslog(LOG_ERR, "getaddrinfo failed: %m");
+
+	err = getaddrinfo(localhost, "ntp", &hints, &addr);
+
+	if (err) {
+#ifdef EAI_SYSTEM
+		if (EAI_SYSTEM == err)
+			msyslog(LOG_ERR, "getaddrinfo(%s) failed: %m",
+				localhost);
+		else
+#endif
+			msyslog(LOG_ERR, "getaddrinfo(%s) failed: %s",
+				localhost, gai_strerror(err));
 		resolver_exit(1);
 	}
-	sockfd = socket(addrResult->ai_family, addrResult->ai_socktype, 0);
 
-	if (sockfd == -1) {
+	sockfd = socket(addr->ai_family, addr->ai_socktype, 0);
+
+	if (INVALID_SOCKET == sockfd) {
 		msyslog(LOG_ERR, "socket() failed: %m");
+		resolver_exit(1);
+	}
+
+#ifndef SYS_WINNT
+	/*
+	 * On Windows only the count of sockets must be less than
+	 * FD_SETSIZE. On Unix each descriptor's value must be less
+	 * than FD_SETSIZE, as fd_set is a bit array.
+	 */
+	if (sockfd >= FD_SETSIZE) {
+		msyslog(LOG_ERR, "socket fd %d too large, FD_SETSIZE %d",
+			(int)sockfd, FD_SETSIZE);
 		resolver_exit(1);
 	}
 
 	/*
 	 * Make the socket non-blocking.  We'll wait with select()
+	 * Unix: fcntl(O_NONBLOCK) or fcntl(FNDELAY)
 	 */
-#ifndef SYS_WINNT
-#if defined(O_NONBLOCK)
+# ifdef O_NONBLOCK
 	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1) {
 		msyslog(LOG_ERR, "fcntl(O_NONBLOCK) failed: %m");
 		resolver_exit(1);
 	}
-#else
-#if defined(FNDELAY)
+# else
+#  ifdef FNDELAY
 	if (fcntl(sockfd, F_SETFL, FNDELAY) == -1) {
 		msyslog(LOG_ERR, "fcntl(FNDELAY) failed: %m");
 		resolver_exit(1);
 	}
-#else
-# include "Bletch: NEED NON BLOCKING IO"
-#endif /* FNDDELAY */
-#endif /* O_NONBLOCK */
-#else  /* SYS_WINNT */
-	{
-		int on = 1;
-		if (ioctlsocket(sockfd,FIONBIO,(u_long *) &on) == SOCKET_ERROR) {
-			msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
-			resolver_exit(1); /* Windows NT - set socket in non-blocking mode */
-		}
+#  else
+#   include "Bletch: NEED NON BLOCKING IO"
+#  endif	/* FNDDELAY */
+# endif	/* O_NONBLOCK */
+	(void)on;	/* quiet unused warning */
+#else	/* !SYS_WINNT above */
+	/*
+	 * Make the socket non-blocking.  We'll wait with select()
+	 * Windows: ioctlsocket(FIONBIO)
+	 */
+	on = 1;
+	err = ioctlsocket(sockfd, FIONBIO, &on);
+	if (SOCKET_ERROR == err) {
+		msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
+		resolver_exit(1);
 	}
 #endif /* SYS_WINNT */
-	if (connect(sockfd, addrResult->ai_addr, addrResult->ai_addrlen) == -1) {
+
+	err = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
+	if (SOCKET_ERROR == err) {
 		msyslog(LOG_ERR, "openntp: connect() failed: %m");
 		resolver_exit(1);
 	}
-	freeaddrinfo(addrResult);
+
+	freeaddrinfo(addr);
 }
 
 
@@ -662,7 +693,7 @@ request(
 	checkparent();		/* make sure our guy is still running */
 
 	if (sockfd == INVALID_SOCKET)
-	    openntp();
+		openntp();
 	
 #ifdef SYS_WINNT
 	hReadWriteEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
