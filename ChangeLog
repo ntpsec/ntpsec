@@ -298,6 +298,10 @@
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 ---
+
+* [Bug 1178] Use prior FORCE_DNSRETRY behavior as needed at runtime
+
+---
 (4.2.4p7-RC6) 2009/05/08 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 784] Make --enable-linuxcaps the default when available

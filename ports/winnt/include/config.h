@@ -175,17 +175,11 @@ typedef int socklen_t;
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
-/* 
- * FORCE_DNSRETRY will allow associations to come up later
- * if DNS isn't available at first. See bug #1117.
- */
-#define FORCE_DNSRETRY 1 
-
-#define OPEN_BCAST_SOCKET	1 /* for ntp_io.c */
-#define TYPEOF_IP_MULTICAST_LOOP BOOL
-#define SETSOCKOPT_ARG_CAST (const char *)
+#define OPEN_BCAST_SOCKET		1	/* for ntp_io.c */
+#define TYPEOF_IP_MULTICAST_LOOP	BOOL
+#define SETSOCKOPT_ARG_CAST		(const char *)
 #define HAVE_RANDOM 
-#define MAXHOSTNAMELEN 64
+#define MAXHOSTNAMELEN			64
 #define AUTOKEY
 
 /*
