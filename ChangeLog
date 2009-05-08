@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1178] Use prior FORCE_DNSRETRY behavior as needed at runtime
+
+---
 (4.2.4p7-RC5) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1172] 4.2.4p7-RC{3,4} fail to build on linux.
