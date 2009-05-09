@@ -943,7 +943,7 @@ crypto_recv(
 		case CRYPTO_LEAP | CRYPTO_RESP:
 
 			/*
-			 * Discard the message if invalid We can't
+			 * Discard the message if invalid. We can't
 			 * compare the value timestamps here, as they
 			 * can be updated by different servers.
 			 */
@@ -957,6 +957,8 @@ crypto_recv(
 			 * values and recompute the signatures.
 			 */
 			if (ntohl(ep->pkt[2]) > leap_expire) {
+				char	tbuf[80], str1 [20], str2[20];
+
 				tai_leap.tstamp = ep->tstamp;
 				tai_leap.fstamp = ep->fstamp;
 				tai_leap.vallen = ep->vallen;
@@ -964,6 +966,11 @@ crypto_recv(
 				leap_sec = ntohl(ep->pkt[1]);
 				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
+				strcpy(str1, fstostr(leap_sec));
+				snprintf(tbuf, sizeof(tbuf),
+				    "%d leap %s expire %s", leap_tai, str1,
+				    str2);
+				    report_event(EVNT_TAI, peer, tbuf);
 			}
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;

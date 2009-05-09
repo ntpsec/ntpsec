@@ -56,6 +56,7 @@ static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 u_long	leapsec;		/* leapseconds countdown */
+l_fp	sys_time;		/* current system time */
 #ifdef OPENSSL
 static	u_long revoke_timer;	/* keys revoke timer */
 static	u_long keys_timer;	/* session key timer */
@@ -250,7 +251,8 @@ timer(void)
 	 * kiss-o'-deatch function and implement the association
 	 * polling function..
 	 */
-	current_time += (1<<EVENT_TIMEOUT);
+	current_time++;
+	get_systime(&sys_time);
 	if (adjust_timer <= current_time) {
 		adjust_timer += 1;
 		adj_host_clock();
@@ -398,6 +400,8 @@ timer(void)
 	if (stats_timer <= current_time) {
 		stats_timer += HOUR;
 		write_stats();
+		if (sys_tai != 0 && sys_time.l_ui > leap_expire)
+			report_event(EVNT_LEAPVAL, NULL, NULL);
 	}
 }
 
