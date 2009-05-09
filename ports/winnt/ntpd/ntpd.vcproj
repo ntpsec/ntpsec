@@ -233,6 +233,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath="..\..\..\ntpd\cmd_args.c"
+				>
+			</File>
+			<File
 				RelativePath="nt_clockstuff.c"
 				>
 				<FileConfiguration
@@ -730,28 +734,6 @@
 			<File
 				RelativePath="..\include\clockstuff.h"
 				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\cmd_args.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\include\config.h"

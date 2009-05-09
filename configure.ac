@@ -3102,6 +3102,24 @@ case "$ntp_libparse" in
 esac
 AC_MSG_RESULT([$ans])
 
+
+AC_ARG_ENABLE(
+    [listen-read-drop],
+    AS_HELP_STRING(
+	[--enable-listen-read-drop], 
+	[+ read and drop from unused interfaces]
+    ),
+    [ans=$enableval],
+    [ans=yes]
+)
+
+case "$ans" in
+ no)
+    AC_DEFINE([NO_LISTEN_READ_DROP], 1,
+	      [[do not listen on unused interfaces]])
+esac
+
+
 # AC_SUBST(RSAOBJS)
 # AC_SUBST(RSASRCS)
 # AC_SUBST(RSADIR)
