@@ -383,12 +383,10 @@ timer(void)
 	 * Interface update timer
 	 */
 	if (interface_interval && interface_timer <= current_time) {
+
 		timer_interfacetimeout(current_time +
 		    interface_interval);
-#ifdef DEBUG
-	  	if (debug > 1)
-	 	 	printf("timer: interface update\n");
-#endif
+		DPRINTF(2, ("timer: interface update\n"));
 		interface_update(NULL, NULL);
 	}
 	

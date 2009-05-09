@@ -35,7 +35,7 @@ AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile
 dnl the 'host' machine is where the resulting stuff runs.
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) of where we should run])
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
 AC_PREREQ(2.53)
 
@@ -2004,11 +2004,33 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING([for a the number of minutes in a DST adjustment])
-AC_ARG_ENABLE(dst_minutes,
-   AC_HELP_STRING([--enable-dst-minutes=60], [+ minutes per DST adjustment]),
-    [ans=$enableval], [ans=60])
+AC_MSG_CHECKING([[for a the number of minutes in a DST adjustment]])
+AC_ARG_ENABLE(
+    [dst_minutes],
+    AS_HELP_STRING(
+	[--enable-dst-minutes],
+	[n minutes per DST adjustment @<:@60@:>@]	dnl @<:@ is [
+    ),
+    [ans=$enableval],
+    [ans=60]
+)
 AC_DEFINE_UNQUOTED(DSTMINUTES, $ans, [The number of minutes in a DST adjustment])
+AC_MSG_RESULT([$ans])
+
+AC_MSG_CHECKING([[if ntpd will retry on permanent DNS errors]])
+AC_ARG_ENABLE(
+    [ignore-dns-errors],
+    AS_HELP_STRING(
+	[--enable-ignore-dns-errors], 
+	[- retry DNS queries on any error]
+    ),
+    [ans=$enableval],
+    [ans=no]
+)
+case "$ans" in
+ yes)
+    AC_DEFINE(IGNORE_DNS_ERRORS, 1, [[Retry queries on _any_ DNS error?]])
+esac
 AC_MSG_RESULT([$ans])
 
 AC_CACHE_CHECK([if we have the tty_clk line discipline/streams module],
@@ -4366,7 +4388,7 @@ AC_ARG_ENABLE(
     [linuxcaps],
     AC_HELP_STRING(
 	[--enable-linuxcaps],
-	[[s Use Linux capabilities for non-root clock control]]
+	[+ Use Linux capabilities for non-root clock control]
     ),
     [ntp_have_linuxcaps=$enableval]
 )
