@@ -126,6 +126,8 @@ struct codestring sys_codes[] = {
 	{ EVNT_LEAP,		"leap_event" },
 	{ EVNT_CLOCKRESET,	"clock_step" },
 	{ EVNT_KERN,		"kern" },
+	{ EVNT_TAI,		"TAI" },
+	{ EVNT_LEAPVAL,		"stale_leapsecond_values" },
 	{ -1,			"" }
 };
 
@@ -149,6 +151,7 @@ struct codestring peer_codes[] = {
 	{ PEVNT_POPCORN & ~PEER_EVENT,	"popcorn" },
 	{ PEVNT_XLEAVE & ~PEER_EVENT,	"xmode" },
 	{ PEVNT_XERR & ~PEER_EVENT,	"xerr" },
+	{ PEVNT_TAI & ~PEER_EVENT,	"TAI" },
 	{ -1,				"" }
 };
 

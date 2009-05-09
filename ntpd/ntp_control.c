@@ -2797,7 +2797,7 @@ report_event(
 		ctl_sys_last_event = (u_char)err;
 		ctl_sys_num_events++;
 		snprintf(statstr, NTP_MAXSTRLEN,
-		    "0.0.0.0 %04x %02x system event: %s",
+		    "0.0.0.0 %04x %02x %s",
 		    ctlsysstatus(), err, eventstr(err));
 		if (str != NULL) {
 			strcat(statstr, " ");
@@ -2829,7 +2829,7 @@ report_event(
 #endif
 			src = stoa(&peer->srcadr);
 		snprintf(statstr, NTP_MAXSTRLEN,
-		    "%s %04x %02x peer event: %s", src,
+		    "%s %04x %02x %s", src,
 		    ctlpeerstatus(peer), err, eventstr(err));
 		if (str != NULL) {
 			strcat(statstr, " ");

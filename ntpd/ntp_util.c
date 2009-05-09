@@ -339,9 +339,11 @@ stats_config(
 	const char *invalue	/* only one type so far */
 	)
 {
-	FILE *fp;
+	FILE	*fp;
 	const char *value;
-	int len;
+	int	len;
+	char	tbuf[80];
+	char	str1[20], str2[20];
 
 	/*
 	 * Expand environment strings under Windows NT, since the
@@ -549,14 +551,18 @@ stats_config(
 			break;
 		}
 
-		if (leap_file(fp) < 0)
+		if (leap_file(fp) < 0) {
 			msyslog(LOG_ERR,
 			    "format error leapseconds file %s",
 			    value);
-		else
-			msyslog(LOG_NOTICE,
-			    "leap epoch %lu expire %lu TAI offset %d from %s",
-			    leap_sec, leap_expire, leap_tai, value);
+		} else {
+			strcpy(str1, fstostr(leap_sec));
+			strcpy(str2, fstostr(leap_expire));
+			snprintf(tbuf, sizeof(tbuf),
+			    "%d leap %s expire %s", leap_tai, str1,
+			    str2);
+			report_event(EVNT_TAI, NULL, tbuf);
+		}
 		fclose(fp);
 		break;
 
@@ -1105,3 +1111,23 @@ ntp_exit(int retval)
 	exit(retval);
 }
 #endif
+
+/*
+ * fstostr - prettyprint NTP seconds
+ */
+char * fstostr(
+	time_t	fstamp
+	)
+{
+	struct tm *tm = NULL;
+	static char str[20] = { '\0' };
+	time_t	ustamp;
+
+	ustamp = fstamp - JAN_1970;
+	tm = gmtime(&ustamp);
+	if (tm != NULL)
+		snprintf(str, sizeof(str), "%04d%02d%02d%02d%02d",
+		    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+		    tm->tm_hour, tm->tm_min);
+	return (str);
+}
