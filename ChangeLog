@@ -1,3 +1,4 @@
+* Stale leapsecond file fixes from Dave Mills.
 * Clean up configure.ac NTP_CACHEVERSION interface, display cache
   version when clearing.  Fixes a regression.
 (4.2.5p173) 2009/05/08 Released by Harlan Stenn <stenn@ntp.org>

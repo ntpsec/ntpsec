@@ -698,6 +698,9 @@ struct pkt {
 #define	EVNT_LEAP	11	/* leap event */
 #define	EVNT_CLOCKRESET	12	/* clock step */
 #define	EVNT_KERN	13	/* kernel event */
+#define	EVNT_TAI	14	/* TAI */
+#define	EVNT_LEAPVAL	15	/* stale leapsecond values */
+
 /*
  * Peer event codes
  */
@@ -716,6 +719,7 @@ struct pkt {
 #define	PEVNT_POPCORN	(13 | PEER_EVENT) /* popcorn */
 #define	PEVNT_XLEAVE	(14 | PEER_EVENT) /* interleave mode */
 #define	PEVNT_XERR	(15 | PEER_EVENT) /* interleave error */
+#define	PEVNT_TAI	(16 | PEER_EVENT) /* TAI */
 
 /*
  * Clock event codes
