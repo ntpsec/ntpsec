@@ -1085,11 +1085,6 @@ address_okay(isc_interface_t *isc_if) {
 				return (ISC_TRUE);
 			}
 	}
-	if (listen_to_virtual_ips == 0  && 
-		(strchr(isc_if->name, (int)':') != NULL)) {
-		DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
-		return (ISC_FALSE);
-	}
 	/*
 	 * Check if the interface is specific
 	 */
@@ -1100,6 +1095,11 @@ address_okay(isc_interface_t *isc_if) {
 				DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
 				return (ISC_TRUE);
 			}
+	}
+	if (listen_to_virtual_ips == 0  && 
+		(strchr(isc_if->name, (int)':') != NULL)) {
+		DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
+		return (ISC_FALSE);
 	}
 	if (interface_optioncount > 0) {
 		DPRINTF(4, ("address_okay: FAIL\n"));
@@ -1404,18 +1404,11 @@ update_interfaces(
 
 		/* 
 		 * Check to see if we are going to use the interface
-		 * If we don't use it we mark it to drop any packet
-		 * received but we still must create the socket and
-		 * bind to it. This prevents other apps binding to it
-		 * and potentially causing problems with more than one
-		 * process fiddling with the clock
 		 */
-		if (address_okay(&isc_if) == ISC_TRUE) {
-			interface.ignore_packets = ISC_FALSE;
-		}
-		else {
-			interface.ignore_packets = ISC_TRUE;
-		}
+		if (!address_okay(&isc_if))
+			continue;
+			
+		interface.ignore_packets = ISC_FALSE;
 
 		DPRINT_INTERFACE(4, (&interface, "examining ", "\n"));
 
