@@ -3120,6 +3120,24 @@ case "$ntp_libparse" in
 esac
 AC_MSG_RESULT([$ans])
 
+
+AC_ARG_ENABLE(
+    [listen-read-drop],
+    AS_HELP_STRING(
+	[--enable-listen-read-drop], 
+	[+ read and drop from unused interfaces]
+    ),
+    [ans=$enableval],
+    [ans=yes]
+)
+
+case "$ans" in
+ no)
+    AC_DEFINE([NO_LISTEN_READ_DROP], 1,
+	      [do not listen on unused interfaces])
+esac
+
+
 # AC_SUBST(RSAOBJS)
 # AC_SUBST(RSASRCS)
 # AC_SUBST(RSADIR)
@@ -4356,7 +4374,7 @@ esac
 
 AC_ARG_ENABLE(
     [clockctl],
-    AC_HELP_STRING(
+    AS_HELP_STRING(
 	[--enable-clockctl],
 	[s Use /dev/clockctl for non-root clock control]
     ),
@@ -4386,7 +4404,7 @@ AC_MSG_RESULT([$ntp_have_linuxcaps])
 
 AC_ARG_ENABLE(
     [linuxcaps],
-    AC_HELP_STRING(
+    AS_HELP_STRING(
 	[--enable-linuxcaps],
 	[+ Use Linux capabilities for non-root clock control]
     ),
@@ -4396,14 +4414,14 @@ AC_ARG_ENABLE(
 
 case "$ntp_have_linuxcaps" in
  yes)
-    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[[Do we have Linux capabilities?]])
+    AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
     LIBS="$LIBS -lcap"
 esac
 
 
 case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
  *yes*)
-    AC_DEFINE(HAVE_DROPROOT, ,[[Can we drop root privileges?]])
+    AC_DEFINE(HAVE_DROPROOT, ,[Can we drop root privileges?])
 esac
 
 
@@ -4416,7 +4434,7 @@ esac
 
 AC_CHECK_FUNC(
     [setppriv],
-    AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[[Are Solaris privileges available?]])
+    AC_DEFINE(HAVE_SOLARIS_PRIVS, ,[Are Solaris privileges available?])
 )
 
 

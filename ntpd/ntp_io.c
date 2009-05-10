@@ -1075,9 +1075,10 @@ address_okay(isc_interface_t *isc_if) {
 		return (ISC_TRUE);
 	}
 	/*
-	 * Check if the address is limit
+	 * Check if the IP address matches one given to -I, which if given
+	 * limits interfaces/addresses to be used to those listed with -I.
 	 */
-	if (ISC_LIST_HEAD(limit_address_list)!= NULL) {
+	{
 		const limit_address_t *laddr;
 		for (laddr = ISC_LIST_HEAD(limit_address_list); laddr != NULL; laddr = ISC_LIST_NEXT(laddr, link))
 			if (isc_netaddr_equal(&(isc_if->address), laddr->addr)) {
@@ -1085,15 +1086,10 @@ address_okay(isc_interface_t *isc_if) {
 				return (ISC_TRUE);
 			}
 	}
-	if (listen_to_virtual_ips == 0  && 
-		(strchr(isc_if->name, (int)':') != NULL)) {
-		DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
-		return (ISC_FALSE);
-	}
 	/*
-	 * Check if the interface is specific
+	 * Check if the interface name was specified with an -I option.
 	 */
-	if (ISC_LIST_HEAD(specific_interface_list)!= NULL) {
+	{
 		specific_interface_t *iface;
 		for (iface = ISC_LIST_HEAD(specific_interface_list); iface != NULL; iface = ISC_LIST_NEXT(iface, link))
 			if (strcasecmp(isc_if->name, iface->name) == 0) {
@@ -1101,6 +1097,19 @@ address_okay(isc_interface_t *isc_if) {
 				return (ISC_TRUE);
 			}
 	}
+	/*
+	 * Check if we are excluding virtual IPs/aliases, and if so, is
+	 * this interface such?
+	 */
+	if (listen_to_virtual_ips == 0  && 
+		(strchr(isc_if->name, (int)':') != NULL)) {
+		DPRINTF(4, ("address_okay: virtual ip/alias - FAIL\n"));
+		return (ISC_FALSE);
+	}
+	/*
+	 * If any -I options were given, only listed interfaces and
+	 * addresses are used.
+	 */
 	if (interface_optioncount > 0) {
 		DPRINTF(4, ("address_okay: FAIL\n"));
 		return (ISC_FALSE);
@@ -1414,7 +1423,11 @@ update_interfaces(
 			interface.ignore_packets = ISC_FALSE;
 		}
 		else {
+#ifndef NO_LISTEN_READ_DROP
 			interface.ignore_packets = ISC_TRUE;
+#else
+			continue;
+#endif
 		}
 
 		DPRINT_INTERFACE(4, (&interface, "examining ", "\n"));

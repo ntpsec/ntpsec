@@ -1,7 +1,8 @@
-(4.2.5p174) 2009/05/09 Released by Harlan Stenn <stenn@ntp.org>
-* Stale leapsecond file fixes from Dave Mills.
+* [Bug 1180] ntpd won't start with more than ~1000 interfaces
 * Clean up configure.ac NTP_CACHEVERSION interface, display cache
   version when clearing.  Fixes a regression.
+(4.2.5p174) 2009/05/09 Released by Harlan Stenn <stenn@ntp.org>
+* Stale leapsecond file fixes from Dave Mills.
 (4.2.5p173) 2009/05/08 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.4p7-RC6)
 (4.2.5p172) 2009/05/06 Released by Harlan Stenn <stenn@ntp.org>
@@ -13,7 +14,7 @@
 * [Bug 1173] NMEA refclock fails with Solaris PPSAPI
 * Fix problem linking msntp on Solaris when sntp subdir is configured
   before parent caused by different gethostent library search order.
-* Do not clear config.cache when it is already empty.
+* Do not clear config.cache when it is  empty.
 (4.2.5p170) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1152] adjust PARSE to new refclock_pps logic
 * Include (4.2.4p7-RC5)
