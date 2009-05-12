@@ -1,4 +1,5 @@
 ---
+(4.2.4p7-RC7) 2009/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
 * ntp.isc.org -> ntp.org cleanup.
 * [Bug 1178] Use prior FORCE_DNSRETRY behavior as needed at runtime,
