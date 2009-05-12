@@ -160,6 +160,16 @@ const char *specific_interface = NULL;        /* interface name or IP address to
  */
 int nofork = 0;			/* Fork by default */
 
+#ifdef HAVE_DNSREGISTRATION
+/*
+ * mDNS registration flag. If set, we attempt to register with the mDNS system, but only
+ * after we have synched the first time. If the attempt fails, then try again once per 
+ * minute for up to 5 times. After all, we may be starting before mDNS.
+ */
+int mdnsreg = 1;
+int mdnstries = 5;
+#endif  /* HAVE_DNSREGISTRATION */
+
 #ifdef HAVE_DROPROOT
 int droproot = 0;
 char *user = NULL;		/* User to switch to */
@@ -840,13 +850,6 @@ ntpdmain(
 	loop_config(LOOP_DRIFTCOMP, old_drift);
 	initializing = 0;
 
-#ifdef HAVE_DNSREGISTRATION
-	msyslog(LOG_INFO, "Attemping to register mDNS");
-	if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
-		msyslog(LOG_ERR, "Unable to register mDNS");
-	}
-#endif
-
 #ifdef HAVE_DROPROOT
 	if( droproot ) {
 		/* Drop super-user privileges and chroot now if the OS supports this */
@@ -1148,6 +1151,25 @@ getgroup:
 		/*
 		 * Go around again
 		 */
+
+#ifdef HAVE_DNSREGISTRATION
+		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
+			mdnsreg = current_time;
+			msyslog(LOG_INFO, "Attemping to register mDNS");
+			if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, 
+			    htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
+				if (!--mdnstries) {
+					msyslog(LOG_ERR, "Unable to register mDNS, giving up.");
+				} else {	
+					msyslog(LOG_INFO, "Unable to register mDNS, will try later.");
+				}
+			} else {
+				msyslog(LOG_INFO, "mDNS service registered.");
+				mdnsreg = 0;
+			}
+		}
+#endif /* HAVE_DNSREGISTRATION */
+
 	}
 	UNBLOCK_IO_AND_ALARM();
 	return 1;
