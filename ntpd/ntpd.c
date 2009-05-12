@@ -1081,10 +1081,10 @@ getgroup:
 			 */
 			timer();
 			was_alarmed = 0;
-                        BLOCK_IO_AND_ALARM();
+			BLOCK_IO_AND_ALARM();
 		}
 
-#endif /* HAVE_IO_COMPLETION_PORT */
+#endif /* ! HAVE_IO_COMPLETION_PORT */
 
 #ifdef DEBUG_TIMING
 		{

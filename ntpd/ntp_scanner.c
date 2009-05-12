@@ -656,5 +656,4 @@ yylex()
 			return create_string_token(yytext);
 		}
 	}
-	return 1;
 }

@@ -2814,7 +2814,7 @@ report_event(
 		char	*src;
 		u_char	errlast;
 
-		errlast = err & ~PEER_EVENT; 
+		errlast = (u_char)err & ~PEER_EVENT; 
 		if (peer->last_event == errlast)
 			peer->num_events = 0;
 		if (peer->num_events >= CTL_PEER_MAXEVENTS)
