@@ -1,3 +1,4 @@
+(4.2.5p175) 2009/05/12 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.4p7-RC7)
 * [Bug 1180] ntpd won't start with more than ~1000 interfaces
 * [Bug 1182] Documentation typos and missing bits.
