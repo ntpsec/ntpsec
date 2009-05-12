@@ -196,19 +196,16 @@ findexistingpeer(
 	 * start_peer is included so we can locate instances of the
 	 * same peer through different interfaces in the hash table.
 	 */
-	if (start_peer == 0)
+	if (NULL == start_peer)
 		peer = peer_hash[NTP_HASH_ADDR(addr)];
 	else
 		peer = start_peer->next;
 	
-	while (peer != 0) {
+	while (NULL != peer) {
 		if (SOCKCMP(addr, &peer->srcadr)
-		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)) {
-			if (mode == -1)
-				return (peer);
-			else if (peer->hmode == mode)
-				break;
-		}
+		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)
+		    && (-1 == mode || peer->hmode == mode))
+			break;
 		peer = peer->next;
 	}
 	return (peer);
@@ -820,8 +817,8 @@ newpeer(
 	    cast_flags));
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
-	peer->minpoll = max(ntp_minpoll, minpoll);
-	peer->maxpoll = min(NTP_MAXPOLL, maxpoll);
+	peer->minpoll = (u_char)max(ntp_minpoll, minpoll);
+	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags;
 #ifdef DEBUG
 	if (debug > 2) {

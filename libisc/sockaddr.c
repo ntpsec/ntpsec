@@ -371,7 +371,7 @@ isc_sockaddr_fromnetaddr(isc_sockaddr_t *sockaddr, const isc_netaddr_t *na,
 		    in_port_t port)
 {
 	memset(sockaddr, 0, sizeof(*sockaddr));
-	sockaddr->type.sin.sin_family = na->family;
+	sockaddr->type.sin.sin_family = (short)na->family;
 	switch (na->family) {
 	case AF_INET:
 		sockaddr->length = sizeof(sockaddr->type.sin);

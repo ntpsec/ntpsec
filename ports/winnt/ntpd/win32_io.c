@@ -11,7 +11,7 @@
 #include "ntp_refclock.h"
 #include "win32_io.h"
 
-#define MAX_SERIAL 16	/* COM1-COM16 */
+#define MAX_SERIAL 255	/* COM1: - COM255: */
 
 
 /*
@@ -25,7 +25,8 @@ HANDLE common_serial_open(
 	char *dev
 	)
 {
-	static HANDLE SerialHandles[MAX_SERIAL+1] = {0};
+	/* SerialHandles[0] is unused, hence MAX_SERIAL + 1 */
+	static HANDLE SerialHandles[MAX_SERIAL + 1] = {0};
 	HANDLE RetHandle;
 	int unit;
 
@@ -83,8 +84,9 @@ int pps_open(
 	/*
 	 * there never is a COM0: but this is the ntp convention
 	 */
-	_snprintf(windev, sizeof(windev)-1, "COM%d:", unit);
-	windev[sizeof(windev)-1] = 0; 
+	_snprintf(windev, sizeof(windev) - 1, "COM%d:", unit);
+	/* _snprintf doesn't always terminate */
+	windev[sizeof(windev) - 1] = 0; 
 
 	/*
 	 * open communication port handle

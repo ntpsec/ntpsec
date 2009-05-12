@@ -265,7 +265,7 @@ char *NTstrerror(int errnum);
 # define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
 # define CLOCK_NMEA
 # define CLOCK_PALISADE		/* from ntpd.mak */
-# define CLOCK_DUMBCLOCK
+/* # define CLOCK_DUMBCLOCK */	/* refclock_dumbclock.c needs work to open COMx: */
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
 # define CLOCK_JUPITER

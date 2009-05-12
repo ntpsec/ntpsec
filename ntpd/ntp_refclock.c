@@ -41,37 +41,32 @@
 
 /*
  * Reference clock support is provided here by maintaining the fiction
- * that the clock is actually a peer. As no packets are exchanged with a
- * reference clock, however, we replace the transmit, receive and packet
- * procedures with separate code to simulate them. Routines
+ * that the clock is actually a peer.  As no packets are exchanged with
+ * a reference clock, however, we replace the transmit, receive and
+ * packet procedures with separate code to simulate them.  Routines
  * refclock_transmit() and refclock_receive() maintain the peer
  * variables in a state analogous to an actual peer and pass reference
- * clock data on through the filters. Routines refclock_peer() and
+ * clock data on through the filters.  Routines refclock_peer() and
  * refclock_unpeer() are called to initialize and terminate reference
- * clock associations. A set of utility routines is included to open
+ * clock associations.  A set of utility routines is included to open
  * serial devices, process sample data, edit input lines to extract
- * embedded timestamps and to peform various debugging functions.
+ * embedded timestamps and to perform various debugging functions.
  *
  * The main interface used by these routines is the refclockproc
- * structure, which contains for most drivers the decimal equivalants of
- * the year, day, month, hour, second and millisecond/microsecond
- * decoded from the ASCII timecode. Additional information includes the
- * receive timestamp, exception report, statistics tallies, etc. In
- * addition, there may be a driver-specific unit structure used for
+ * structure, which contains for most drivers the decimal equivalants
+ * of the year, day, month, hour, second and millisecond/microsecond
+ * decoded from the ASCII timecode.  Additional information includes
+ * the receive timestamp, exception report, statistics tallies, etc. 
+ * In addition, there may be a driver-specific unit structure used for
  * local control of the device.
  *
  * The support routines are passed a pointer to the peer structure,
- * which is used for all peer-specific processing and contains a pointer
- * to the refclockproc structure, which in turn containes a pointer to
- * the unit structure, if used. The peer structure is identified by an
- * interface address in the dotted quad form 127.127.t.u (for now only
- * IPv4 addresses are used, so we need to be sure the address is it),
- * where t is the clock type and u the unit. Some legacy drivers derive
- * the refclockproc structure pointer from the table
- * typeunit[type][unit]. This interface is strongly discouraged and may
- * be abandoned in future.
+ * which is used for all peer-specific processing and contains a
+ * pointer to the refclockproc structure, which in turn contains a
+ * pointer to the unit structure, if used.  The peer structure is 
+ * identified by an interface address in the dotted quad form 
+ * 127.127.t.u, where t is the clock type and u the unit.
  */
-#define MAXUNIT 	4	/* max units */
 #define FUDGEFAC	.1	/* fudge correction factor */
 #define LF		0x0a	/* ASCII LF */
 
@@ -80,13 +75,6 @@ int	fdpps;			/* ppsclock legacy */
 #endif /* PPS */
 
 int	cal_enable;		/* enable refclock calibrate */
-
-/*
- * Type/unit peer index. Used to find the peer structure for control and
- * debugging. When all clock drivers have been converted to new style,
- * this dissapears.
- */
-static struct peer *typeunit[REFCLK_MAX + 1][MAXUNIT];
 
 /*
  * Forward declarations
@@ -120,30 +108,30 @@ refclock_report(
 
 	switch (code) {
 
-		case CEVNT_TIMEOUT:
-			pp->noreply++;
-			break;
+	case CEVNT_TIMEOUT:
+		pp->noreply++;
+		break;
 
-		case CEVNT_BADREPLY:
-			pp->badformat++;
-			break;
+	case CEVNT_BADREPLY:
+		pp->badformat++;
+		break;
 
-		case CEVNT_FAULT:
-			break;
+	case CEVNT_FAULT:
+		break;
 
-		case CEVNT_BADDATE:
-		case CEVNT_BADTIME:
-			pp->baddata++;
-			break;
+	case CEVNT_BADDATE:
+	case CEVNT_BADTIME:
+		pp->baddata++;
+		break;
 
-		default:
-			/* ignore others */
-			break;
+	default:
+		/* ignore others */
+		break;
 	}
 	if (pp->lastevent < 15)
 		pp->lastevent++;
 	if (pp->currentstatus != code) {
-		pp->currentstatus = code;
+		pp->currentstatus = (u_char)code;
 		report_event(PEVNT_CLOCK, peer, ceventstr(code));
 	}
 }
@@ -159,14 +147,11 @@ refclock_report(
 void
 init_refclock(void)
 {
-	int i, j;
+	int i;
 
-	for (i = 0; i < (int)num_refclock_conf; i++) {
+	for (i = 0; i < (int)num_refclock_conf; i++)
 		if (refclock_conf[i]->clock_init != noentry)
 			(refclock_conf[i]->clock_init)();
-		for (j = 0; j < MAXUNIT; j++)
-			typeunit[i][j] = 0;
-	}
 }
 
 
@@ -197,10 +182,10 @@ refclock_newpeer(
 	 */
 	if (peer->srcadr.ss_family != AF_INET) {
 		msyslog(LOG_ERR,
-		       "refclock_newpeer: clock address %s invalid, address family not implemented for refclock",
-                        stoa(&peer->srcadr));
-                return (0);
-        }
+			"refclock_newpeer: clock address %s invalid, address family not implemented for refclock",
+			stoa(&peer->srcadr));
+		return (0);
+	}
 	if (!ISREFCLOCKADR(&peer->srcadr)) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock address %s invalid",
@@ -209,7 +194,7 @@ refclock_newpeer(
 	}
 	clktype = (u_char)REFCLOCKTYPE(&peer->srcadr);
 	unit = REFCLOCKUNIT(&peer->srcadr);
-	if (clktype >= num_refclock_conf || unit >= MAXUNIT ||
+	if (clktype >= num_refclock_conf ||
 		refclock_conf[clktype]->clock_start == noentry) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock type %d invalid\n",
@@ -220,12 +205,8 @@ refclock_newpeer(
 	/*
 	 * Allocate and initialize interface structure
 	 */
-	pp = (struct refclockproc *)emalloc(sizeof(struct refclockproc));
-	if (pp == NULL)
-		return (0);
-
-	memset((char *)pp, 0, sizeof(struct refclockproc));
-	typeunit[clktype][unit] = peer;
+	pp = emalloc(sizeof(*pp));
+	memset(pp, 0, sizeof(*pp));
 	peer->procptr = pp;
 
 	/*
@@ -281,7 +262,7 @@ refclock_unpeer(
 	 * Wiggle the driver to release its resources, then give back
 	 * the interface structure.
 	 */
-	if (!peer->procptr)
+	if (NULL == peer->procptr)
 		return;
 
 	clktype = peer->refclktype;
@@ -289,7 +270,7 @@ refclock_unpeer(
 	if (refclock_conf[clktype]->clock_shutdown != noentry)
 		(refclock_conf[clktype]->clock_shutdown)(unit, peer);
 	free(peer->procptr);
-	peer->procptr = 0;
+	peer->procptr = NULL;
 }
 
 
@@ -1060,14 +1041,10 @@ refclock_control(
 
 	clktype = (u_char)REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
-	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
-		return;
 
-	peer = typeunit[clktype][unit];
-	if (peer == NULL)
-		return;
+	peer = findexistingpeer(srcadr, NULL, -1);
 
-	if (peer->procptr == NULL)
+	if (NULL == peer || NULL == peer->procptr)
 		return;
 
 	pp = peer->procptr;
@@ -1124,7 +1101,7 @@ refclock_control(
 		out->currentstatus = pp->currentstatus;
 		out->type = pp->type;
 		out->clockdesc = pp->clockdesc;
-		out->lencode = pp->lencode;
+		out->lencode = (u_short)pp->lencode;
 		out->p_lastcode = pp->a_lastcode;
 	}
 
@@ -1151,9 +1128,9 @@ refclock_buginfo(
 {
 	struct peer *peer;
 	struct refclockproc *pp;
-	u_char clktype;
+	int clktype;
 	int unit;
-	int i;
+	unsigned u;
 
 	/*
 	 * Check for valid address and peer structure
@@ -1166,11 +1143,10 @@ refclock_buginfo(
 
 	clktype = (u_char) REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
-	if (clktype >= num_refclock_conf || unit >= MAXUNIT)
-		return;
 
-	peer = typeunit[clktype][unit];
-	if (peer == NULL)
+	peer = findexistingpeer(srcadr, NULL, -1);
+
+	if (NULL == peer || NULL == peer->procptr)
 		return;
 
 	pp = peer->procptr;
@@ -1191,8 +1167,8 @@ refclock_buginfo(
 	bug->stimes = 0xfffffffc;
 	bug->times[0] = pp->lastref;
 	bug->times[1] = pp->lastrec;
-	for (i = 2; i < (int)bug->ntimes; i++)
-		DTOLFP(pp->filter[i - 2], &bug->times[i]);
+	for (u = 2; u < bug->ntimes; u++)
+		DTOLFP(pp->filter[u - 2], &bug->times[u]);
 
 	/*
 	 * Give the stuff to the clock
