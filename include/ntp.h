@@ -531,15 +531,16 @@ struct peer {
 
 #define SOCKCMP(sock1, sock2) \
 	(((struct sockaddr_storage *)sock1)->ss_family \
-	    == ((struct sockaddr_storage *)sock2)->ss_family ? \
- 	((struct sockaddr_storage *)sock1)->ss_family == AF_INET ? \
- 	memcmp(&((struct sockaddr_in *)sock1)->sin_addr, \
-	    &((struct sockaddr_in *)sock2)->sin_addr, \
-	    sizeof(struct in_addr)) == 0 : \
-	memcmp(&((struct sockaddr_in6 *)sock1)->sin6_addr, \
-	    &((struct sockaddr_in6 *)sock2)->sin6_addr, \
-	       sizeof(struct in6_addr)) == 0 && SOCKSCOPE(sock1, sock2) : \
-	0)
+	 == ((struct sockaddr_storage *)sock2)->ss_family \
+		? (((struct sockaddr_storage *)sock1)->ss_family == AF_INET \
+			? (memcmp(&((struct sockaddr_in *)sock1)->sin_addr, \
+				  &((struct sockaddr_in *)sock2)->sin_addr, \
+				  sizeof(struct in_addr)) == 0) \
+			: (memcmp(&((struct sockaddr_in6 *)sock1)->sin6_addr, \
+				  &((struct sockaddr_in6 *)sock2)->sin6_addr, \
+				  sizeof(struct in6_addr)) == 0) \
+			  && SOCKSCOPE(sock1, sock2)) \
+		: 0)
 
 #define SOCKNUL(sock1) \
 	(((struct sockaddr_storage *)sock1)->ss_family == AF_INET ? \
