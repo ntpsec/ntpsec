@@ -1303,7 +1303,7 @@ AC_CHECK_FUNCS(uname updwtmp updwtmpx vsnprintf vsprintf)
 
 ###
 
-# http://bugs.ntp.isc.org/737
+# http://bugs.ntp.org/737
 case "$ac_cv_func_recvmsg" in
  yes)
  AC_MSG_CHECKING([if we need extra help to define struct iovec])
