@@ -13,7 +13,7 @@
 <p>Caterpillar knows all the error codes, which is more than most of us do.</p>
 
 <p>Last update:
-<!-- #BeginDate format:En2m -->03-May-2009  3:28<!-- #EndDate -->
+<!-- #BeginDate format:En2m -->09-May-2009  3:31<!-- #EndDate -->
 UTC</p>
 <br clear="left">
 
@@ -37,11 +37,11 @@ UTC</p>
 
 <h4 id="intro">Introduction</h4>
 
-<p>This page lists the status and event messages and error codes used for status reporting and monitoring. Status words are used to display the current status of the running program. There is one system status word and a peer status word for each association. There is a clock status word for each association that supports a reference clock driver. There is a flash code for each association which shows errors found in the last packet received (pkt) and during protocol processing (peer). These are commonly viewed using the <tt>ntpq</tt> program.</p>
+<p>This page lists the status words, event messages and error codes used for <tt>ntpd</tt> reporting and monitoring. Status words are used to display the current status of the running program. There is one system status word and a peer status word for each association. There is a clock status word for each association that supports a reference clock. There is a flash code for each association which shows errors found in the last packet received (pkt) and during protocol processing (peer). These are commonly viewed using the <tt>ntpq</tt> program.</p>
 
-<p>Significant changes in program state are reported as events. There is one set of system events and a set of peer events for each association. In adition, there is a set of clock events for each association that supports a reference clock driver. Events are normally reported to the <tt>protostats</tt> file and optionally to the system log. In addition, if the trap facility is configured, traps can be reported to a remote program that can page an administrator.</p>
+<p>Significant changes in program state are reported as events. There is one set of system events and a set of peer events for each association. In adition, there is a set of clock events for each association that supports a reference clock. Events are normally reported to the <tt>protostats</tt> monitoring file and optionally to the system log. In addition, if the trap facility is configured, events can be reported to a remote program that can page an administrator.</p>
 
-<p>This page also includes a description of the error messages produced by the Autokey protocol. These messages are normally sent to the <tt>cryptostats</tt> file.</p>
+<p>This page also includes a description of the error messages produced by the Autokey protocol. These messages are normally sent to the <tt>cryptostats</tt> monitoring file.</p>
 
 <p>In the following tables the Code Field is the status or event code assigned and the Message Field a short string used for display and event reporting. The Description field contains a longer explanation of the status or event. Some messages include additional information useful for error diagnosis and performance assessment.</p>
 
@@ -107,7 +107,7 @@ UTC</p>
 </tr>
 
 <tr>
-<dt><tt>0</tt></td>
+<td><tt>0</tt></td>
 <td><tt>sync_unspec</tt></td>
 <td>not yet synchronized</td>
 </tr>
@@ -179,87 +179,99 @@ UTC</p>
 </tr>
 
 <tr>
-<td><tt>0</tt></td>
+<td><tt>00</tt></td>
 <td><tt>unspecified</tt></td>
 <td>unspecified</td>
 </tr>
 
 <tr>
-<td><tt>1</tt></td>
+<td><tt>01</tt></td>
 <td><tt>freq_not_set</tt></td>
 <td>frequency file not available</td>
 </tr>
 
 <tr>
-<td><tt>2</tt></td>
+<td><tt>02</tt></td>
 <td><tt>freq_set</tt></td>
 <td>frequency set from frequency file</td>
 </tr>
 
 <tr>
-<td><tt>3</tt></td>
+<td><tt>03</tt></td>
 <td><tt>spike_detect</tt></td>
 <td>spike detected</td>
 </tr>
 
 <tr>
-<td><tt>4</tt></td>
+<td><tt>04</tt></td>
 <td><tt>freq_mode</tt></td>
 <td>initial frequency training mode</td>
 </tr>
 
 <tr>
-<td><tt>5</tt></td>
+<td><tt>05</tt></td>
 <td><tt>clock_sync</tt></td>
 <td>clock synchronized</td>
 </tr>
 
 <tr>
-<td><tt>6</tt></td>
+<td><tt>06</tt></td>
 <td><tt>restart</tt></td>
 <td>program restart</td>
 </tr>
 
 <tr>
-<td><tt>7</tt></td>
+<td><tt>07</tt></td>
 <td><tt>panic_stop</tt></td>
 <td>clock error more than 600 s</td>
 </tr>
 
 <tr>
-<td><tt>8</tt></td>
-<dt><tt>no_system_peer</tt></td>
+<td><tt>08</tt></td>
+<td><tt>no_system_peer</tt></td>
 <td>no system peer</td>
 </tr>
 
 <tr>
-<td><tt>9</tt></td>
+<td><tt>09</tt></td>
 <td><tt>leap_armed</tt></td>
 <td>leap second armed from file or Autokey</td>
 </tr>
 
 <tr>
-<td><tt>10</tt></td>
+<td><tt>0a</tt></td>
 <td><tt>leap_disarmed</tt></td>
 <td>leap second disarmed</td>
 </tr>
 
 <tr>
-<td><tt>11</tt></td>
+<td><tt>0b</tt></td>
 <td><tt>leap_event</tt></td>
 <td>leap event</td>
 </tr>
 
 <tr>
-<td><tt>12</tt></td>
+<td><tt>0c</tt></td>
 <td><tt>clock_step</tt></td>
 <td>clock stepped</td>
 </tr>
 
 <tr>
-<td><tt>13</tt></td>
+<td><tt>0d</tt></td>
 <td><tt>kern</tt></td>
 <td>kernel information message</td>
+</tr>
+
+<tr>
+<td><tt>0e</tt></td>
+<td><tt>TAI...</tt></td>
+<td>leapsecond values update from file</td>
+</tr>
+
+<tr>
+<td><tt>0f</tt></td>
+<td><tt>stale leapsecond values</tt></td>
+<td>new NIST leapseconds file needed</td>
 </tr>
 
 </table>
@@ -299,7 +311,7 @@ UTC</p>
 <td><tt>10</tt></td>
 <td><tt>reach</tt></td>
 <td>host reachable</td>
-/tr>
+</tr>
 
 <tr>
 <td><tt>20</tt></td>
@@ -354,7 +366,7 @@ UTC</p>
 </tr>
 
 <tr>
-<dt><tt>3</tt></td>
+<td><tt>3</tt></td>
 <td><tt>sel_outlyer</tt></td>
 <td><tt>-</tt></td>
 <td>discarded by the cluster algorithm</td>
@@ -474,7 +486,7 @@ UTC</p>
 
 <tr>
 <td><tt>0d</tt></td>
-<td><tt>[popcorn/tt></td>
+<td><tt>popcorn</tt></td>
 <td>popcorn spike suppressor</td>
 </tr>
 
@@ -487,7 +499,7 @@ UTC</p>
 <tr>
 <td><tt>0f</tt></td>
 <td><tt>interleave_error</tt></td>
-<td>interleave error (recoverable)</td>
+<td>interleave error (recovered)</td>
 </tr>
 
 <tr>
@@ -512,7 +524,7 @@ vvv
 
 </table>
 
-<p>The Count Field displays the number of events since the last lockvar</tt> command, while the Event Field displays the most recent event message coded as follows:</p>
+<p>The Count Field displays the number of events since the last <tt>lockvar</tt> command, while the Event Field displays the most recent event message coded as follows:</p>
 
 <table width="100%" border="1" cellspacing="2" cellpadding="2">
 
