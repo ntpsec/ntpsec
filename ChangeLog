@@ -1,4 +1,5 @@
 * [Bug 1180] ntpd won't start with more than ~1000 interfaces
+* [Bug 1182] Documentation typos and missing bits.
 * [Bug 1183] COM port support should extend past COM3
 * [Bug 1184] ntpd is deaf when restricted to second IP on the same net
 * Clean up configure.ac NTP_CACHEVERSION interface, display cache
