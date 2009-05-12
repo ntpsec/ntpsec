@@ -300,11 +300,13 @@ static void	add_addr_to_list	(struct sockaddr_storage *, struct interface *);
 static void	delete_addr_from_list	(struct sockaddr_storage *);
 static void	delete_interface_from_list	(struct interface *);
 static struct interface *find_addr_in_list	(struct sockaddr_storage *);
+static struct interface *find_samenet_addr_in_list (struct sockaddr_storage *);
 static struct interface *find_flagged_addr_in_list (struct sockaddr_storage *, int);
 static void	create_wildcards	(u_short);
 static isc_boolean_t	address_okay	(isc_interface_t *);
 static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
 static struct interface *getinterface	(struct sockaddr_storage *, int);
+static struct interface *getsamenetinterface	(struct sockaddr_storage *, int);
 static struct interface *findlocalinterface	(struct sockaddr_storage *, int, int);
 static struct interface *findlocalcastinterface	(struct sockaddr_storage *, int);
 
@@ -3480,11 +3482,7 @@ findlocalinterface(
 			  (char *)&on, sizeof(on));
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
-#ifndef SYS_WINNT
-	if (rtn < 0)
-#else
 	if (rtn == SOCKET_ERROR)
-#endif
 	{
 		closesocket(s);
 		return NULL;
@@ -3492,31 +3490,25 @@ findlocalinterface(
 
 	rtn = getsockname(s, (struct sockaddr *)&saddr, &saddrlen);
 	closesocket(s);
-#ifndef SYS_WINNT
-	if (rtn < 0)
-#else
 	if (rtn == SOCKET_ERROR)
-#endif
 		return NULL;
 
 	DPRINTF(4, ("findlocalinterface: kernel maps %s to %s\n", stoa(addr), stoa(&saddr)));
 	
 	iface = getinterface(&saddr, flags);
+	if (NULL == iface)
+		iface = getsamenetinterface(&saddr, flags);
 
-	/* Don't both with ignore interfaces */
-	if (iface != NULL && iface->ignore_packets == ISC_TRUE)
-	{
-		return NULL;
-	}
-	else
-	{
-		return iface;
-	}
+	/* Don't return an interface which will ignore replies */
+	if (NULL != iface && iface->ignore_packets)
+		iface = NULL;
+
+	return iface;
 }
 
 /*
  * fetch an interface structure the matches the
- * address is has the given flags not set
+ * address is has the given flags NOT set
  */
 static struct interface *
 getinterface(struct sockaddr_storage *addr, int flags)
@@ -3531,6 +3523,23 @@ getinterface(struct sockaddr_storage *addr, int flags)
 	{
 		return interface;
 	}
+}
+
+/*
+ * fetch an interface structure with a local address on the same subnet
+ * as addr which has the given flags NOT set
+ */
+static struct interface *
+getsamenetinterface(struct sockaddr_storage *addr, int flags)
+{
+	struct interface *iface;
+
+	iface = find_samenet_addr_in_list(addr);
+
+	if (NULL != iface && iface->flags & flags)
+		iface = NULL;
+
+	return iface;
 }
 
 /*
@@ -3864,8 +3873,12 @@ kill_asyncio(int startfd)
  * Add and delete functions for the list of open sockets
  */
 static void
-add_fd_to_list(SOCKET fd, enum desc_type type) {
-	vsock_t *lsock = (vsock_t *)emalloc(sizeof(vsock_t));
+add_fd_to_list(
+	SOCKET fd,
+	enum desc_type type
+	)
+{
+	vsock_t *lsock = emalloc(sizeof(*lsock));
 
 	lsock->fd = fd;
 	lsock->type = type;
@@ -3890,8 +3903,10 @@ add_fd_to_list(SOCKET fd, enum desc_type type) {
 }
 
 static void
-close_and_delete_fd_from_list(SOCKET fd) {
-
+close_and_delete_fd_from_list(
+	SOCKET fd
+	) 
+{
 	vsock_t *next;
 	vsock_t *lsock = ISC_LIST_HEAD(fd_list);
 
@@ -3939,13 +3954,19 @@ close_and_delete_fd_from_list(SOCKET fd) {
 }
 
 static void
-add_addr_to_list(struct sockaddr_storage *addr, struct interface *interface){
+add_addr_to_list(
+	struct sockaddr_storage *addr,
+	struct interface *interface
+	)
+{
+	remaddr_t *laddr;
+
 #ifdef DEBUG
 	if (find_addr_in_list(addr) == NULL) {
 #endif
 		/* not there yet - add to list */
-		remaddr_t *laddr = (remaddr_t *)emalloc(sizeof(remaddr_t));
-		memcpy(&laddr->addr, addr, sizeof(struct sockaddr_storage));
+		laddr = emalloc(sizeof(*laddr));
+		memcpy(&laddr->addr, addr, sizeof(laddr->addr));
 		laddr->interface = interface;
 		
 		ISC_LIST_APPEND(remoteaddr_list, laddr, link);
@@ -3954,15 +3975,18 @@ add_addr_to_list(struct sockaddr_storage *addr, struct interface *interface){
 			    stoa(addr)));
 #ifdef DEBUG
 	} else {
-		DPRINTF(4, ("WARNING: Attempt to add duplicate addr %s to address list\n",
+		DPRINTF(4, ("WARNING: Attempt to add duplicate addr "
+			    "%s to address list\n",
 			    stoa(addr)));
 	}
 #endif
 }
 
 static void
-delete_addr_from_list(struct sockaddr_storage *addr) {
-
+delete_addr_from_list(
+	struct sockaddr_storage *addr
+	) 
+{
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 
@@ -3980,7 +4004,10 @@ delete_addr_from_list(struct sockaddr_storage *addr) {
 }
 
 static void
-delete_interface_from_list(struct interface *iface) {
+delete_interface_from_list(
+	struct interface *iface
+	)
+{
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 
@@ -3997,8 +4024,10 @@ delete_interface_from_list(struct interface *iface) {
 }
 
 static struct interface *
-find_addr_in_list(struct sockaddr_storage *addr) {
-
+find_addr_in_list(
+	struct sockaddr_storage *addr
+	) 
+{
 	remaddr_t *next;
 	remaddr_t *laddr = ISC_LIST_HEAD(remoteaddr_list);
 	DPRINTF(4, ("Searching for addr %s in list of addresses - ",
@@ -4006,15 +4035,115 @@ find_addr_in_list(struct sockaddr_storage *addr) {
 
 	while(laddr != NULL) {
 		next = ISC_LIST_NEXT(laddr, link);
+
 		if(SOCKCMP(&laddr->addr, addr)) {
 			DPRINTF(4, ("FOUND\n"));
 			return laddr->interface;
 		}
-		else
-			laddr = next;
+		
+		laddr = next;
 	}
+
 	DPRINTF(4, ("NOT FOUND\n"));
-	return NULL; /* Not found */
+	return NULL;
+}
+
+static inline isc_boolean_t
+same_network_v4(
+	struct sockaddr_in *addr1,
+	struct sockaddr_in *mask,
+	struct sockaddr_in *addr2
+	)
+{
+	return (addr1->sin_addr.s_addr & mask->sin_addr.s_addr)
+	       == (addr2->sin_addr.s_addr & mask->sin_addr.s_addr);
+}
+
+#ifdef INCLUDE_IPV6_SUPPORT
+static inline isc_boolean_t
+same_network_v6(
+	struct sockaddr_in6 *addr1,
+	struct sockaddr_in6 *mask,
+	struct sockaddr_in6 *addr2
+	)
+{
+	int i;
+
+	for (i = 0; 
+	     i < sizeof(addr1->sin6_addr.s6_addr) / 
+	         sizeof(addr1->sin6_addr.s6_addr[0]);
+	     i++)
+
+		if ((addr1->sin6_addr.s6_addr[i] &
+		     mask->sin6_addr.s6_addr[i]) 
+		    !=
+		    (addr2->sin6_addr.s6_addr[i] &
+		     mask->sin6_addr.s6_addr[i]))
+
+			return ISC_FALSE;
+
+	return ISC_TRUE;
+}
+#endif	/* INCLUDE_IPV6_SUPPORT */
+
+static isc_boolean_t
+same_network(
+	struct sockaddr_storage *addr1,
+	struct sockaddr_storage *mask,
+	struct sockaddr_storage *addr2
+	)
+{
+	if (addr1->ss_family != addr2->ss_family)
+		return ISC_FALSE;
+
+	if (AF_INET == addr1->ss_family) {
+		return same_network_v4(
+				(struct sockaddr_in *)addr1,
+				(struct sockaddr_in *)mask,
+				(struct sockaddr_in *)addr2);
+	}
+#ifdef INCLUDE_IPV6_SUPPORT
+	else if (AF_INET6 == addr1->ss_family) {
+		return same_network_v6(
+				(struct sockaddr_in6 *)addr1,
+				(struct sockaddr_in6 *)mask,
+				(struct sockaddr_in6 *)addr2);
+	}
+#endif
+	else
+		return ISC_FALSE;
+}
+
+/*
+ * Find an address in the list on the same network as addr
+ */
+static struct interface *
+find_samenet_addr_in_list(
+	struct sockaddr_storage *addr
+	) 
+{
+	remaddr_t *next;
+	remaddr_t *laddr;
+
+	DPRINTF(4, ("Searching for addr with same subnet as %s in "
+		    "list of addresses - ",
+		    stoa(addr)));
+
+	for (laddr = ISC_LIST_HEAD(remoteaddr_list);
+	     NULL != laddr;
+	     laddr = next)
+	{
+		next = ISC_LIST_NEXT(laddr, link);
+
+		if (same_network(&laddr->addr, &laddr->interface->mask,
+				 addr)) {
+			DPRINTF(4, ("FOUND\n"));
+			return laddr->interface;
+		}
+	}
+
+	DPRINTF(4, ("NOT FOUND\n"));
+	return NULL;
 }
 
 /*
