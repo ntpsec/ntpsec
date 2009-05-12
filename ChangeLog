@@ -307,6 +307,7 @@
 * [Bug 980] Direct help to stdout.
 ---
 
+* ntp.isc.org -> ntp.org cleanup.
 * [Bug 1178] Use prior FORCE_DNSRETRY behavior as needed at runtime,
   add configure --enable-ignore-dns-errors to be even more stubborn
 
