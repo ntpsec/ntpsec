@@ -30,6 +30,7 @@
 #endif /* HAVE_PPSAPI */
 
 #ifdef SYS_WINNT
+#undef write	/* ports/winnt/include/config.h: #define write _write */
 extern int async_write(int, const void *, unsigned int);
 #define write(fd, data, octets)	async_write(fd, data, octets)
 #endif
@@ -316,14 +317,17 @@ nmea_shutdown(
 	register struct nmeaunit *up;
 	struct refclockproc *pp;
 
+	UNUSED_ARG(unit);
+
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
 #ifdef HAVE_PPSAPI
-	if (up->handle != 0)
+	if (NULL != up && up->handle)
 		time_pps_destroy(up->handle);
 #endif /* HAVE_PPSAPI */
 	io_closeclock(&pp->io);
-	free(up);
+	if (NULL != up)
+		free(up);
 }
 
 #ifdef HAVE_PPSAPI
