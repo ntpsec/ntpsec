@@ -8,7 +8,7 @@
  * 		neo.venu@gmail.com, venugopal_d@pgad.gov.in
  *
  * Updated to process 'time1' fudge factor
- *              Venu Gopal May 05, 2008
+ *		Venu Gopal May 05, 2008
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -31,7 +31,6 @@
 
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);
-#undef write
 #define write(fd, data, octets)	async_write(fd, data, octets)
 #endif
 
@@ -66,12 +65,12 @@ extern int async_write(int, const void *, unsigned int);
  * Multiple sentences may be selected except when ZDG/ZDA is selected.
  *
  * bit 4/5/6 - selects the baudrate for serial port :
- *         0 for 4800 (default) 
- *         1 for 9600 
- *         2 for 19200 
- *         3 for 38400 
- *         4 for 57600 
- *         5 for 115200 
+ *		0 for 4800 (default) 
+ *		1 for 9600 
+ *		2 for 19200 
+ *		3 for 38400 
+ *		4 for 57600 
+ *		5 for 115200 
  */
 #define NMEA_MESSAGE_MASK_OLD    0x07
 #define NMEA_MESSAGE_MASK_SINGLE 0x08
@@ -612,7 +611,7 @@ nmea_receive(
 	/* Grab field depending on clock string type */
 	switch (cmdtype) {
 
-	    case GPRMC:
+	case GPRMC:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
@@ -626,7 +625,7 @@ nmea_receive(
 		dp = field_parse(cp, 1);
 		break;
 
-	    case GPGGA:
+	case GPGGA:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
@@ -640,7 +639,7 @@ nmea_receive(
 		dp = field_parse(cp, 1);
 		break;
 
-	    case GPGLL:
+	case GPGLL:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
@@ -654,7 +653,7 @@ nmea_receive(
 		dp = field_parse(cp, 5);
 		break;
 	
-	    case GPZDG_ZDA:
+	case GPZDG_ZDA:
 		/*
 		 * Test for synchronization.  For $GPZDG check for validity of GPS time.
 		 */
@@ -671,7 +670,7 @@ nmea_receive(
 		dp = field_parse(cp, 1);
 		break;
 
-	    default:
+	default:
 		return;
 	}
 
@@ -791,6 +790,83 @@ nmea_receive(
 		return;
 	}
 	pp->day = day;
+
+	/*
+	 * If "fudge 127.127.20.__ flag4 1" is configured in ntp.conf,
+	 * remove the location and checksum from the NMEA sentence
+	 * recorded as the last timecode and visible to remote users
+	 * with:
+	 *
+	 * ntpq -c clockvar <server>
+	 *
+	 * Note that this also removes the location from the clockstats
+	 * log (if it is enabled).  Some NTP operators monitor their
+	 * NMEA GPS using the change in location in clockstats over
+	 * time as as a proxy for the quality of GPS reception and
+	 * thereby time reported.
+	 */
+	if (CLK_FLAG4 & pp->sloppyclockflag) {
+		/*
+		 * Start by pointing cp and dp at the fields with 
+		 * longitude and latitude in the last timecode.
+		 */
+		switch (cmdtype) {
+
+		case GPGLL:
+			cp = field_parse(pp->a_lastcode, 1);
+			dp = field_parse(cp, 2);
+			break;
+
+		case GPGGA:
+			cp = field_parse(pp->a_lastcode, 2);
+			dp = field_parse(cp, 2);
+			break;
+
+		case GPRMC:
+			cp = field_parse(pp->a_lastcode, 3);
+			dp = field_parse(cp, 2);
+			break;
+
+		case GPZDG_ZDA:
+		default:
+			cp = dp = NULL;
+		}
+
+		/*
+		 * Blanking everything after the decimal point '.' is easy and 
+		 * gives enough error for at least a few neighbors to be as 
+		 * likely as you to be the one with the reflock.  We're keeping
+		 * degrees and minutes but tossing the seconds (expressed as
+		 * decimal fractions of a minute).  Degrees minutes seconds,
+		 * not hours minutes seconds.  :)
+		 */
+		while (cp) {
+			while (',' != *cp) {
+				if ('.' != *cp)
+					*cp = '_';
+				cp++;
+			}
+
+			/*
+			 * blank the longitude at cp then the latitude at dp
+			 * then we're done.
+			 */
+			if (cp < dp)
+				cp = dp;
+			else
+				cp = NULL;
+		}
+
+		/*
+		 * blank the checksum, last two characters on the line
+		 */
+		if (dp) {
+			cp = pp->a_lastcode + pp->lencode - 2;
+			if (0 == cp[2])
+				cp[0] = cp[1] = '_';
+		}
+
+	}
 
 #ifdef HAVE_PPSAPI
 	/*
