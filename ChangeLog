@@ -1,4 +1,9 @@
 ---
+
+* [Bug 1191] ntpd fails on Win2000 - "Address already in use" after fix
+  for [Sec 1149].
+
+---
 (4.2.4p7-RC7) 2009/05/12 Released by Harlan Stenn <stenn@ntp.org>
 
 * ntp.isc.org -> ntp.org cleanup.
