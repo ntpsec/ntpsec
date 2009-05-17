@@ -329,23 +329,29 @@ static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
  * systems are not affected by this and work correctly.
  * See Microsoft Knowledge Base Article Q263823 for details of this.
  */
-isc_result_t
-connection_reset_fix(SOCKET fd) {
+void
+connection_reset_fix(
+	SOCKET fd,
+	struct sockaddr_storage *addr
+	)
+{
 	DWORD dwBytesReturned = 0;
 	BOOL  bNewBehavior = FALSE;
 	DWORD status;
 
-	if(isc_win32os_majorversion() < 5)
-		return (ISC_R_SUCCESS); /*  NT 4.0 has no problem */
-
-	/* disable bad behavior using IOCTL: SIO_UDP_CONNRESET */
-	status = WSAIoctl(fd, SIO_UDP_CONNRESET, &bNewBehavior,
-			  sizeof(bNewBehavior), NULL, 0,
-			  &dwBytesReturned, NULL, NULL);
-	if (status != SOCKET_ERROR)
-		return (ISC_R_SUCCESS);
-	else
-		return (ISC_R_UNEXPECTED);
+	/*
+	 * disable bad behavior using IOCTL: SIO_UDP_CONNRESET
+	 * NT 4.0 has no problem
+	 */
+	if (isc_win32os_majorversion() >= 5) {
+		status = WSAIoctl(fd, SIO_UDP_CONNRESET, &bNewBehavior,
+				  sizeof(bNewBehavior), NULL, 0,
+				  &dwBytesReturned, NULL, NULL);
+		if (SOCKET_ERROR == status)
+			netsyslog(LOG_ERR, "connection_reset_fix() "
+					   "failed for address %s: %m", 
+					   stoa(addr));
+	}
 }
 #endif
 
@@ -2512,9 +2518,8 @@ open_socket(
 	 * http://www.kohala.com/start/mcast.api.txt
 	 */
 	int on = 1;
-#ifndef SO_EXCLUSIVEADDRUSE
 	int off = 0;
-#endif
+
 
 	if ((addr->ss_family == AF_INET6) && (isc_net_probeipv6() != ISC_R_SUCCESS))
 		return (INVALID_SOCKET);
@@ -2540,35 +2545,41 @@ open_socket(
 		exit(1);
 		/*NOTREACHED*/
 	}
-#ifdef SYS_WINNT
-	if (connection_reset_fix(fd) != ISC_R_SUCCESS) {
-		netsyslog(LOG_ERR, "connection_reset_fix(fd) failed on address %s: %m",
-			stoa(addr));
-	}
-#endif /* SYS_WINNT */
 
+#ifdef SYS_WINNT
+	connection_reset_fix(fd, addr);
+#endif
 	/*
 	 * Fixup the file descriptor for some systems
 	 * See bug #530 for details of the issue.
 	 */
 	fd = move_fd(fd);
 
-#ifndef SO_EXCLUSIVEADDRUSE
 	/*
 	 * set SO_REUSEADDR since we will be binding the same port
-	 * number on each interface according to flag
+	 * number on each interface according to turn_off_reuse.
+	 * This is undesirable on Windows versions starting with
+	 * Windows XP (numeric version 5.1).
 	 */
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-		       turn_off_reuse ? (char *)&off : (char *)&on, sizeof(on)))
-	{
-		netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR %s on fails on address %s: %m",
-			turn_off_reuse ? "off" : "on", stoa(addr));
+#ifdef SYS_WINNT
+	if (isc_win32os_versioncheck(5, 1, 0, 0) < 0)  /* before 5.1 */
+#endif
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+			       (char *)(turn_off_reuse 
+					? &off 
+					: &on), 
+			       sizeof(on))) {
 
-		closesocket(fd);
-
-		return INVALID_SOCKET;
-	}
-#else  /* SO_EXCLUSIVEADDRUSE defined */
+			netsyslog(LOG_ERR, "setsockopt SO_REUSEADDR %s"
+					   " fails for address %s: %m",
+					   turn_off_reuse 
+						? "off" 
+						: "on", 
+					   stoa(addr));
+			closesocket(fd);
+			return INVALID_SOCKET;
+		}
+#ifdef SO_EXCLUSIVEADDRUSE
 	/*
 	 * setting SO_EXCLUSIVEADDRUSE on the wildcard we open
 	 * first will cause more specific binds to fail.
