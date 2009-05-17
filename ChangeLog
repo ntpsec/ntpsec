@@ -1,3 +1,6 @@
+* [Bug 1174] nmea_shutdown assumes that nmea has a unit assigned
+* [Bug 1190] NMEA refclock fudge flag4 1 obscures position in timecode
+* Update NMEA refclock documentation in html/drivers/driver20.html
 (4.2.5p176) 2009/05/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1154] mDNS registration should be done later, repeatedly and only
   if asked for. (second try for fix)
