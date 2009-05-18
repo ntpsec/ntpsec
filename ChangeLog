@@ -1,3 +1,4 @@
+* Include (4.2.4p7)
 * [Bug 1174] nmea_shutdown assumes that nmea has a unit assigned
 * [Bug 1190] NMEA refclock fudge flag4 1 obscures position in timecode
 * Update NMEA refclock documentation in html/drivers/driver20.html
@@ -311,8 +312,12 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
----
 
+---
+(4.2.4p7) 2009/05/18 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Sec 1151] Remote exploit if autokey is enabled - CVE-2009-1252.
+* [Bug 1187] Update the copyright date.
 * [Bug 1191] ntpd fails on Win2000 - "Address already in use" after fix
   for [Sec 1149].
 
