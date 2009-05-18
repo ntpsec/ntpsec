@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  Wednesday May 13, 2009 at 07:47:11 AM EDT
+ *  It has been AutoGen-ed  Monday May 18, 2009 at 08:06:18 AM EDT
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpsnmpd copyright 1970-2008 David L. Mills and/or others - all rights reserved
+ * ntpsnmpd copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 tSCC zCopyright[] =
-       "ntpsnmpd copyright (c) 1970-2008 David L. Mills and/or others, all rights reserved";
+       "ntpsnmpd copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved";
 tSCC zCopyrightNotice[] =
        
 /* extracted from ../include/copyright.def near line 8 */
@@ -228,7 +228,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPSNMPD";
 tSCC   zUsageTitle[] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.5p176\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.5p177\n\
 USAGE:  %s [ -<flag> | --<name> ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
