@@ -1,4 +1,5 @@
 ---
+(4.2.4p7) 2009/05/18 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Sec 1151] Remote exploit if autokey is enabled - CVE-2009-1252.
 * [Bug 1187] Update the copyright date.

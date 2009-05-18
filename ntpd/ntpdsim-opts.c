@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.c)
  *  
- *  It has been AutoGen-ed  Tuesday May 12, 2009 at 02:33:40 AM EDT
+ *  It has been AutoGen-ed  Monday May 18, 2009 at 04:56:08 AM EDT
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpdsim copyright 1970-2008 David L. Mills and/or others - all rights reserved
+ * ntpdsim copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 tSCC zCopyright[] =
-       "ntpdsim copyright (c) 1970-2008 David L. Mills and/or others, all rights reserved";
+       "ntpdsim copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved";
 tSCC zCopyrightNotice[] =
        
 /* extracted from ../include/copyright.def near line 8 */
@@ -1072,7 +1072,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPDSIM";
 tSCC   zUsageTitle[] =
-"ntpdsim - NTP daemon simulation program - Ver. 4.2.4p7-RC7\n\
+"ntpdsim - NTP daemon simulation program - Ver. 4.2.4p7\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
