@@ -63,10 +63,6 @@ int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent p
 #include "ntp_parser.h"
 #include "ntp_data_structures.h"
 
-void yyerror (char *msg);
-
-extern int priority_done;
-
 
 /*
  * "logconfig" building blocks
@@ -426,8 +422,7 @@ create_attr_dval(
 {
 	struct attr_val *my_val;
 
-	my_val = (struct attr_val *)
-	    get_node(sizeof(struct attr_val));
+	my_val = get_node(sizeof *my_val);
 	my_val->attr = attr;
 	my_val->value.d = value;
 	my_val->type = T_Double;
@@ -442,8 +437,7 @@ create_attr_ival(
 {
 	struct attr_val *my_val;
 
-	my_val = (struct attr_val *)
-	    get_node(sizeof(struct attr_val));
+	my_val = get_node(sizeof *my_val);
 	my_val->attr = attr;
 	my_val->value.i = value;
 	my_val->type = T_Integer;
@@ -458,11 +452,10 @@ create_attr_sval(
 {
 	struct attr_val *my_val;
 
-	my_val = (struct attr_val *)
-	    get_node(sizeof(struct attr_val));
+	my_val = get_node(sizeof *my_val);
 	my_val->attr = attr;
-	if (!s)			/* free() hates NULL */
-		s = strdup("");
+	if (NULL == s)			/* free() hates NULL */
+		s = estrdup("");
 	my_val->value.s = s;
 	my_val->type = T_String;
 	return my_val;
@@ -476,8 +469,7 @@ create_attr_pval(
 {
 	struct attr_val *my_val;
 
-	my_val = (struct attr_val *)
-	    get_node(sizeof(struct attr_val));
+	my_val = get_node(sizeof *my_val);
 	my_val->attr = attr;
 	my_val->value.p = p;
 	my_val->type = T_Void;
@@ -489,7 +481,7 @@ create_ival(
 	int val
 	)
 {
-	int *p = (int *)get_node(sizeof(int));
+	int *p = get_node(sizeof *p);
 
 	*p = val;
 	return p;
@@ -500,7 +492,7 @@ create_dval(
 	double val
 	)
 {
-	double *p = (double *) get_node(sizeof(int));
+	double *p = get_node(sizeof *p);
 
 	*p = val;
 	return p;
@@ -511,7 +503,7 @@ create_pval(
 	void *val
 	)
 {
-	void **p = (void **) get_node(sizeof(void *));
+	void **p = get_node(sizeof *p);
 
 	*p = val;
 	return p;
@@ -523,22 +515,22 @@ create_address_node(
 	int type
 	)
 {
-	struct address_node *my_node = 
-		(struct address_node *) get_node(sizeof(struct address_node));
+	struct address_node *my_node;
 	struct isc_netaddr temp_isc_netaddr;
 
-	NTP_REQUIRE(addr);
+	NTP_REQUIRE(NULL != addr);
+	
+	my_node = get_node(sizeof *my_node);
 
 	my_node->address = addr;
-	if (type == 0) {
+	if (type)
+		my_node->type = type;
+	else
 		if (is_ip_address(addr, &temp_isc_netaddr)) 
 			my_node->type = temp_isc_netaddr.family;
 		else 
 			my_node->type = default_ai_family;
-	}
-	else {
-		my_node->type = type;
-	}
+
 	return my_node;
 }
 
@@ -548,8 +540,8 @@ destroy_address_node(
 	struct address_node *my_node
 	)
 {
-	NTP_REQUIRE(my_node);
-	NTP_REQUIRE(my_node->address);
+	NTP_REQUIRE(NULL != my_node);
+	NTP_REQUIRE(NULL != my_node->address);
 
 	free(my_node->address);
 	free_node(my_node);
@@ -564,10 +556,10 @@ create_peer_node(
 	)
 {
 	struct peer_node* my_node;
+	struct attr_val *my_val;
 	int errflag = 0;
 
-	my_node = (struct peer_node *)
-	    get_node(sizeof(struct peer_node));
+	my_node = get_node(sizeof *my_node);
 
 	/* Initialze node values to default */
 	my_node->minpoll = NTP_MINDPOLL;
@@ -582,12 +574,13 @@ create_peer_node(
 	my_node->host_mode = hmode;
 	my_node->addr = addr;
 
-	while (options && !empty(options)) {
-		struct attr_val *my_val = dequeue(options);
+	while (NULL != options && !empty(options)) {
+		my_val = dequeue(options);
 
 		/* Check the kind of option being set */
 		switch(my_val->attr) {
-		    case T_Minpoll:
+
+		case T_Minpoll:
 			if (my_val->value.i < NTP_MINPOLL) {
 				msyslog(LOG_INFO,
 					"minpoll: provided value (%d) is below minimum (%d)",
@@ -597,7 +590,8 @@ create_peer_node(
 			else
 				my_node->minpoll = my_val->value.i;
 			break;
-		    case T_Maxpoll:
+
+		case T_Maxpoll:
 			if (my_val->value.i > NTP_MAXPOLL) {
 				msyslog(LOG_INFO,
 					"maxpoll: provided value (%d) is above maximum (%d)",
@@ -607,7 +601,8 @@ create_peer_node(
 			else
 				my_node->maxpoll = my_val->value.i;
 			break;
-		    case T_Ttl:
+
+		case T_Ttl:
 			if (my_node->ttl >= MAX_TTL) {
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = 1;
@@ -615,20 +610,32 @@ create_peer_node(
 			else
 				my_node->ttl = my_val->value.i;
 			break;
-		    case T_Mode:
+
+		case T_Mode:
 			my_node->ttl = my_val->value.i;
 			break;
-		    case T_Key:
+
+		case T_Key:
 			my_node->peerkey = my_val->value.i;
 			break;
-		    case T_Version:
+
+		case T_Version:
 			my_node->peerversion = my_val->value.i;
 			break;
-		    case T_Flag:
+
+		case T_Flag:
 			my_node->peerflags |= my_val->value.i;
 			break;
-		    case T_Bias:
+
+		case T_Bias:
 			my_node->bias = my_val->value.d;
+			break;
+
+		default:
+			msyslog(LOG_ERR, 
+				"Unknown peer/server option token %d",
+				my_val->attr);
+			errflag = 1;
 		}
 		free_node(my_val);
 	}
@@ -637,7 +644,7 @@ create_peer_node(
 	/* Check if errors were reported. If yes, ignore the node */
 	if (errflag) {
 		free_node(my_node);
-		return NULL;
+		my_node = NULL;
 	}
 	return my_node;
 }
@@ -649,8 +656,7 @@ create_unpeer_node(
 {
 	struct unpeer_node* my_node;
 
-	my_node = (struct unpeer_node *)
-	    get_node(sizeof(struct unpeer_node));
+	my_node = get_node(sizeof *my_node);
 
 	my_node->addr = addr;
 
@@ -663,8 +669,9 @@ create_filegen_node(
 	queue *options
 	)
 {
-	struct filegen_node *my_node = (struct filegen_node *)
-	    get_node(sizeof(struct filegen_node));
+	struct filegen_node *my_node;
+	
+	my_node = get_node(sizeof *my_node);
 
 	my_node->name = (char *) *name;
 	free_node(name);
@@ -682,13 +689,15 @@ create_restrict_node(
 	int line_no
 	)
 {
-	struct restrict_node *my_node = (struct restrict_node *)
-	    get_node(sizeof(struct restrict_node));
+	struct restrict_node *my_node;
+	
+	my_node = get_node(sizeof *my_node);
 
 	my_node->addr = addr;
 	my_node->mask = mask;
 	my_node->flags = flags;
 	my_node->line_no = line_no;
+
 	return my_node;
 }
 
@@ -731,8 +740,7 @@ create_setvar_node(
 	free(val);
 
 	/* Now store the string and its length into a setvar_node */
-	my_node = (struct setvar_node *)
-	    get_node(sizeof(struct setvar_node));
+	my_node = get_node(sizeof *my_node);
 	my_node->data = s;
 	my_node->len = len1 + len2 + 2;
 	my_node->def = def;
@@ -745,9 +753,9 @@ create_addr_opts_node(
 	queue *options
 	)
 {
-	struct addr_opts_node *my_node = (struct addr_opts_node *)
-	    get_node(sizeof(struct addr_opts_node));
+	struct addr_opts_node *my_node;
 
+	my_node = get_node(sizeof *my_node);
 	my_node->addr = addr;
 	my_node->options = options;
 	return my_node;
@@ -764,8 +772,8 @@ create_sim_script_info(
 #else
 	script_info *my_info;
 	struct attr_val *my_attr_val;
-	my_info = (script_info *)get_node(sizeof(script_info));
-	/* XXX: check the return value... */
+
+	my_info = get_node(sizeof *my_info);
 
 	/* Initialize Script Info with default values*/
 	my_info->duration = duration;
@@ -777,28 +785,35 @@ create_sim_script_info(
 
 	/* Traverse the script_queue and fill out non-default values */
 	while (!empty(script_queue)) {
-		my_attr_val = (struct attr_val *) dequeue(script_queue);
+		my_attr_val = dequeue(script_queue);
 
 		/* Set the desired value */
-		switch(my_attr_val->attr) {
-		    case T_Freq_Offset:
+		switch (my_attr_val->attr) {
+
+		case T_Freq_Offset:
 			my_info->freq_offset = my_attr_val->value.d;
 			break;
-		    case T_Wander:
+
+		case T_Wander:
 			my_info->wander = my_attr_val->value.d;
 			break;
-		    case T_Jitter:
+
+		case T_Jitter:
 			my_info->jitter = my_attr_val->value.d;
 			break;
-		    case T_Prop_Delay:
+
+		case T_Prop_Delay:
 			my_info->prop_delay = my_attr_val->value.d;
 			break;
-		    case T_Proc_Delay:
+
+		case T_Proc_Delay:
 			my_info->proc_delay = my_attr_val->value.d;
 			break;
-		    default:
-			yyerror("ERROR!! Invalid script info in file\n");
-			break;
+
+		default:
+			msyslog(LOG_ERR, 
+				"Unknown script token %d",
+				my_attr_val->attr);
 		}
 		free_node(my_attr_val);
 	}
@@ -817,25 +832,23 @@ get_next_address(
 	struct address_node *addr
 	)
 {
-	static char *addr_prefix = "192.168.0.";
+	const char addr_prefix[] = "192.168.0.";
 	static int curr_addr_no = 1;
 	char addr_string[ADDR_LENGTH];
-
-	struct sockaddr_storage *final_addr = (struct sockaddr_storage *)
-	    malloc(sizeof(struct sockaddr_storage));
+	struct sockaddr_storage *final_addr;
 	struct addrinfo *ptr;
 	int retval;
+	
+	final_addr = emalloc(sizeof *final_addr);
 
 	if (addr->type == T_String) {
 		snprintf(addr_string, ADDR_LENGTH, "%s%d", addr_prefix, curr_addr_no++);
 		printf("Selecting ip address %s for hostname %s\n", addr_string, addr->address);
 		retval = getaddrinfo(addr_string, "ntp", NULL, &ptr);
-	}
-	else {
+	} else
 		retval = getaddrinfo(addr->address, "ntp", NULL, &ptr);
-	}
 
-	if (retval == 0) {
+	if (!retval) {
 		memcpy(final_addr, ptr->ai_addr, ptr->ai_addrlen);
 		fprintf(stderr, "Successful in setting ip address of simulated server to: %s\n", stoa(final_addr));
 	}
@@ -860,7 +873,8 @@ create_sim_server(
 	return NULL;
 #else
 	server_info *my_info;
-	my_info = (server_info *) get_node(sizeof(server_info));
+
+	my_info = get_node(sizeof *my_info);
 
 	my_info->server_time = server_offset;
 	my_info->addr = get_next_address(addr);
@@ -876,8 +890,9 @@ create_sim_node(
 	queue *servers
 	)
 {
-	struct sim_node *my_node = (struct sim_node *)
-	    get_node(sizeof(struct sim_node));
+	struct sim_node *my_node;
+	
+	my_node = get_node(sizeof *my_node);
 
 	my_node->init_opts = init_opts;
 	my_node->servers = servers;
@@ -920,31 +935,33 @@ struct key_tok keyword_list[] = {
 	{ "trap",		T_Trap,            SINGLE_ARG },
 	{ "unconfig",		T_Unconfig,        SINGLE_ARG },
 	{ "unpeer",		T_Unpeer,          SINGLE_ARG },
-	{ "default",		T_Default,         NO_ARG },
 
 /* authentication_command */
 	{ "controlkey",		T_ControlKey,      NO_ARG },
 	{ "crypto",		T_Crypto,          NO_ARG },
 	{ "keys",		T_Keys,            SINGLE_ARG },
 	{ "keysdir",		T_Keysdir,         SINGLE_ARG },
-	{ "ntpsigndsocket",     T_NtpSignDsocket,  SINGLE_ARG },
+	{ "ntpsigndsocket",	T_NtpSignDsocket,  SINGLE_ARG },
 	{ "requestkey",		T_Requestkey,      NO_ARG },
 	{ "revoke",		T_Revoke,          NO_ARG },
 	{ "trustedkey",		T_Trustedkey,      NO_ARG },
+/* IPv4/IPv6 protocol override flag */
+	{ "-4",			T_IPv4_flag,	   NO_ARG },
+	{ "-6",			T_IPv6_flag,	   NO_ARG },
 /* option */
 	{ "autokey",		T_Autokey,         NO_ARG },
 	{ "bias",		T_Bias,		   NO_ARG },
-	{ "burst",	        T_Burst,           NO_ARG },
-	{ "iburst",	        T_Iburst,          NO_ARG },
+	{ "burst",		T_Burst,           NO_ARG },
+	{ "iburst",		T_Iburst,          NO_ARG },
 	{ "key",		T_Key,             NO_ARG },
 	{ "maxpoll",		T_Maxpoll,         NO_ARG },
 	{ "minpoll",		T_Minpoll,         NO_ARG },
 	{ "mode",		T_Mode,            NO_ARG },
 	{ "noselect",		T_Noselect,        NO_ARG },
 	{ "preempt",		T_Preempt,         NO_ARG },
-	{ "true",	        T_True,            NO_ARG },
-	{ "prefer",	        T_Prefer,          NO_ARG },
-	{ "ttl",	        T_Ttl,             NO_ARG },
+	{ "true",		T_True,            NO_ARG },
+	{ "prefer",		T_Prefer,          NO_ARG },
+	{ "ttl",		T_Ttl,             NO_ARG },
 	{ "version",		T_Version,         NO_ARG },
 	{ "xleave",		T_Xleave,	   NO_ARG },
 /* crypto_command */
@@ -976,7 +993,7 @@ struct key_tok keyword_list[] = {
 	{ "month",		T_Month,           NO_ARG },
 	{ "none",		T_None,            NO_ARG },
 	{ "pid",		T_Pid,             NO_ARG },
-	{ "week",	        T_Week,            NO_ARG },
+	{ "week",		T_Week,            NO_ARG },
 	{ "year",		T_Year,            NO_ARG },
 /*** ORPHAN MODE COMMANDS ***/
 /* tos_option */
@@ -992,6 +1009,7 @@ struct key_tok keyword_list[] = {
 	{ "beacon",		T_Beacon,          NO_ARG },
 	{ "orphan",		T_Orphan,          NO_ARG },
 /* access_control_flag */
+	{ "default",		T_Default,         NO_ARG },
 	{ "flake",		T_Flake,	   NO_ARG },
 	{ "ignore",		T_Ignore,          NO_ARG },
 	{ "limited",		T_Limited,         NO_ARG },
@@ -1038,18 +1056,18 @@ struct key_tok keyword_list[] = {
 /* miscellaneous_command */
 	{ "port",		T_Port,            NO_ARG },
 	{ "interface",		T_Interface,       SINGLE_ARG },
-	{ "qos",		T_Qos,            NO_ARG },
+	{ "qos",		T_Qos,		   NO_ARG },
 /* simulaor commands */
 	{ "simulate",		T_Simulate,        NO_ARG },
 	{ "simulation_duration",T_Sim_Duration,	   NO_ARG },
-	{ "beep_delay",     	T_Beep_Delay,      NO_ARG },
-	{ "duration",       	T_Duration,        NO_ARG },
-	{ "server_offset",  	T_Server_Offset,   NO_ARG },
+	{ "beep_delay",		T_Beep_Delay,      NO_ARG },
+	{ "duration",		T_Duration,        NO_ARG },
+	{ "server_offset",	T_Server_Offset,   NO_ARG },
 	{ "freq_offset",	T_Freq_Offset,     NO_ARG },
-	{ "wander",         	T_Wander,          NO_ARG },
-	{ "jitter",         	T_Jitter,          NO_ARG },
-	{ "prop_delay",     	T_Prop_Delay,      NO_ARG },
-	{ "proc_delay",     	T_Proc_Delay,      NO_ARG },
+	{ "wander",		T_Wander,          NO_ARG },
+	{ "jitter",		T_Jitter,          NO_ARG },
+	{ "prop_delay",		T_Prop_Delay,      NO_ARG },
+	{ "proc_delay",		T_Proc_Delay,      NO_ARG },
 	{ NULL, 0, 0}
 };
 
@@ -1112,11 +1130,12 @@ config_auth(void)
 {
 	struct attr_val *my_val;
 	int *key_val;
+	u_char rankey[9];
+	int i;
 
 	/* Crypto Command */
 	while (!empty(my_config.auth.crypto_cmd_list)) {
-		my_val = (struct attr_val *)
-		    dequeue(my_config.auth.crypto_cmd_list);
+		my_val = dequeue(my_config.auth.crypto_cmd_list);
 #ifdef OPENSSL
 		crypto_config(my_val->attr, my_val->value.s);
 #endif /* OPENSSL */
@@ -1156,17 +1175,14 @@ config_auth(void)
 
 	/* Requested Key Command */
 	if (my_config.auth.request_key) {
-#ifdef DEBUG
-		if (debug > 3)
-			printf("set info_auth_key to %08lx\n",
-			       (long unsigned int) my_config.auth.request_key);
-#endif
+		DPRINTF(4, ("set info_auth_key to %08lx\n",
+			    (u_long) my_config.auth.request_key));
 		info_auth_keyid = (keyid_t) my_config.auth.request_key;
 	}
 
 	/* Trusted Key Command */
 	while (!empty(my_config.auth.trusted_key_list)) {
-		key_val = (int *) dequeue(my_config.auth.trusted_key_list);
+		key_val = dequeue(my_config.auth.trusted_key_list);
 		authtrust(*key_val, 1);
 		free_node(key_val);
 	}
@@ -1187,21 +1203,21 @@ config_auth(void)
 
 	/* if doesn't exist, make up one at random */
 	if (!authhavekey(req_keyid)) {
-		char rankey[9];
-		int i, j;
 
-		for (i = 0; i < 8; i++)
-			for (j = 1; j < 100; ++j) {
-				rankey[i] = (char) (ntp_random() & 0xff);
-				if (rankey[i] != 0) break;
-			}
-		rankey[8] = 0;
+		for (i = 0; i < (COUNTOF(rankey) - 1); i++)
+			do
+				rankey[i] = 
+					(u_char)(ntp_random() & 0xff);
+			while (!rankey[i]);
+
+		rankey[COUNTOF(rankey) - 1] = 0;
 
 		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
 		authtrust(req_keyid, 1);
 		if (!authhavekey(req_keyid)) {
-			msyslog(LOG_ERR, "getconfig: Couldn't generate a valid random key!");
-			/* HMS: Should this be fatal? */
+			msyslog(LOG_ERR, "getconfig: Couldn't generate"
+					 " a valid random key!");
+			exit(1);
 		}
 	}
 
@@ -1217,7 +1233,7 @@ config_tos(void)
 	struct attr_val *tos;
 
 	while (!empty(my_config.orphan_cmds)) {
-		tos = (struct attr_val *) dequeue(my_config.orphan_cmds);
+		tos = dequeue(my_config.orphan_cmds);
 		proto_config(tos->attr, 0, tos->value.d, NULL);
 		free_node(tos);
 	}
@@ -1237,7 +1253,7 @@ config_monitor(void)
 
 	/* Set the statistics directory */
 	if (my_config.stats_dir) {
-		stats_config(STATS_STATSDIR,my_config.stats_dir);
+		stats_config(STATS_STATSDIR, my_config.stats_dir);
 		free(my_config.stats_dir);
 		my_config.stats_dir = NULL;
 	}
@@ -1257,21 +1273,20 @@ config_monitor(void)
 
 	/* Turn on the specified statistics */
 	while (!empty(my_config.stats_list)) {
-		filegen_string = (char **) dequeue(my_config.stats_list);
+		filegen_string = dequeue(my_config.stats_list);
 		filegen = filegen_get(*filegen_string);
 
-#ifdef DEBUG
-		if (debug > 3)
-			printf("enabling filegen for %s statistics \"%s%s\"\n",
-			       *filegen_string, filegen->prefix, filegen->basename);
-#endif
+		DPRINTF(4, ("enabling filegen for %s statistics "
+			    "\"%s%s\"\n",
+			    *filegen_string, filegen->prefix, 
+			    filegen->basename));
 		filegen->flag |= FGEN_FLAG_ENABLED;
 		free_node(filegen_string);
 	}
 
 	/* Configure the statistics with the options */
 	while (!empty(my_config.filegen_opts)) {
-		my_node = (struct filegen_node *) dequeue(my_config.filegen_opts);
+		my_node = dequeue(my_config.filegen_opts);
 		filegen = filegen_get(my_node->name);
 
 		/* Initilize the filegen variables to their pre-configurtion states */
@@ -1280,32 +1295,53 @@ config_monitor(void)
 		filegen_file = my_node->name;
 
 		while (!empty(my_node->options)) {
-			my_opts = (struct attr_val *) dequeue(my_node->options);
+			my_opts = dequeue(my_node->options);
+
 			switch (my_opts->attr) {
-			    case T_File:
-				filegen_file = (char *) my_opts->value.p;
+
+			case T_File:
+				filegen_file = my_opts->value.p;
 				break;
-			    case T_Type:
+
+			case T_Type:
 				filegen_type = my_opts->value.i;
 				break;
-			    case T_Flag:
+
+			case T_Flag:
 				switch (my_opts->value.i) {
-				    case T_Link:
+
+				case T_Link:
 					filegen_flag |= FGEN_FLAG_LINK;
 					break;
-				    case T_Nolink:
+
+				case T_Nolink:
 					filegen_flag &= ~FGEN_FLAG_LINK;
 					break;
-				    case T_Enable:
+
+				case T_Enable:
 					filegen_flag |= FGEN_FLAG_ENABLED;
 					break;
-				    case T_Disable:
+
+				case T_Disable:
 					filegen_flag &= ~FGEN_FLAG_ENABLED;
 					break;
+
+				default:
+					msyslog(LOG_ERR, 
+						"Unknown filegen flag "
+						"token %d",
+						my_opts->value.i);
+					exit(1);
 				}
 				break;
+			default:
+				msyslog(LOG_ERR,
+					"Unknown filegen option token "
+					"%d", my_opts->attr);
+				exit(1);
 			}
-			filegen_config(filegen, filegen_file, filegen_type, filegen_flag);
+			filegen_config(filegen, filegen_file, 
+				       filegen_type, filegen_flag);
 			free_node(my_opts);
 		}
 		free_node(my_node);
@@ -1316,53 +1352,64 @@ config_monitor(void)
 static void
 config_access(void)
 {
-	struct attr_val *my_opt;
-	struct restrict_node *my_node;
-
+	struct attr_val *	my_opt;
+	struct restrict_node *	my_node;
 	struct sockaddr_storage addr_sock;
 	struct sockaddr_storage addr_mask;
-
-	int flags;
-	int mflags;
+	int			flags;
+	int			mflags;
+	int			restrict_default;
 
 	/* Configure the discard options */
 	while (!empty(my_config.discard_opts)) {
-		my_opt = (struct attr_val *)
-		    dequeue(my_config.discard_opts);
+		my_opt = dequeue(my_config.discard_opts);
+
 		switch(my_opt->attr) {
-		    case T_Average:
+
+		case T_Average:
 			ntp_minpoll = my_opt->value.i;
 			break;
-		    case T_Minimum:
+
+		case T_Minimum:
 			ntp_minpkt = my_opt->value.i;
 			break;
-		    case T_Monitor:
+
+		case T_Monitor:
 			mon_age = my_opt->value.i;
 			break;
+
+		default:
+			msyslog(LOG_ERR,
+				"Unknown discard option token %d",
+				my_opt->attr);
+			exit(1);
 		}
 		free_node(my_opt);
 	}
 
 	/* Configure the restrict options */
 	while (!empty(my_config.restrict_opts)) {
-		my_node = (struct restrict_node *)
-		    dequeue(my_config.restrict_opts);
+		my_node = dequeue(my_config.restrict_opts);
 
-		memset((char *)&addr_sock, 0, sizeof(addr_sock));
-		/* Check if the user specified a default rule */
-		if (my_node->addr) {
+		memset(&addr_sock, 0, sizeof addr_sock);
+
+		if (NULL == my_node->addr) {
+			/*
+			 * The user specified a default rule without a
+			 * -4 / -6 qualifier, add to both lists
+			 */
+			restrict_default = 1;
+			ANYSOCK(&addr_mask);
+		} else {
+			restrict_default = 0;
 			/* Resolve the specified address */
 			addr_sock.ss_family = (u_short)my_node->addr->type;
 
 			if (getnetnum(my_node->addr->address,
-				      &addr_sock, 1,t_UNK) != 1) {
+				      &addr_sock, 1, t_UNK) != 1) {
 
-				/* Error in resolving name!!!
-				 * Free the node memory and move onto the next
-				 * Restrict flag
-				 */
-				msyslog(LOG_INFO,
-					"restrict: error in resolving name: %s on line %d. Ignoring...",
+				msyslog(LOG_ERR,
+					"restrict: error in address '%s' on line %d. Ignoring...",
 					my_node->addr->address, my_node->line_no);
 				destroy_restrict_node(my_node);
 				continue;
@@ -1375,21 +1422,14 @@ config_access(void)
 				memset((char *)&addr_mask, 0, sizeof(addr_mask));
 				addr_mask.ss_family = (u_short)my_node->mask->type;
 				if (getnetnum(my_node->mask->address, &addr_mask, 1, t_MSK) != 1) {
-					/* Error in mask !!!
-					 * Free the node memory and move onto the next
-					 * Restrict flag
-					 */
-					msyslog(LOG_INFO,
-						"restrict: error in resolving mask: %s on line %d. Ignoring...",
+
+					msyslog(LOG_ERR,
+						"restrict: error in mask '%s' on line %d. Ignoring...",
 						my_node->mask->address, my_node->line_no);
 					destroy_restrict_node(my_node);
 					continue;
 				}
 			}
-		}
-		else { /* The user specified a default rule */
-			addr_sock.ss_family = default_ai_family;
-			ANYSOCK(&addr_mask);
 		}
 
 		/* Parse the flags */
@@ -1397,8 +1437,8 @@ config_access(void)
 		mflags = 0;
 
 		while (!empty(my_node->flags)) {
-			int *curr_flag = (int *) dequeue(my_node->flags);
-			if (*curr_flag == RESM_NTPONLY)
+			int *curr_flag = dequeue(my_node->flags);
+			if (RESM_NTPONLY == *curr_flag)
 				mflags |= *curr_flag;
 			else
 				flags |= *curr_flag;
@@ -1406,8 +1446,17 @@ config_access(void)
 		}
 
 		/* Set the flags */
+		if (restrict_default) {
+			addr_sock.ss_family = AF_INET;
+			hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
+				      mflags, flags);
+
+			addr_sock.ss_family = AF_INET6;
+		}
+
 		hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
 			      mflags, flags);
+
 		destroy_restrict_node(my_node);
 	}
 }
@@ -1581,31 +1630,37 @@ config_trap(void)
 	struct sockaddr_storage peeraddr;
 	struct address_node *addr_node;
 	struct interface *localaddr;
-	int port_no;
+	u_short port_no;
 	int err_flag;
 
+	/* silence warning about addr_sock potentially uninitialized */
+	addr_sock.ss_family = AF_UNSPEC;
 	port_no = 0;
-	localaddr = 0;
+	localaddr = NULL;
 
 
 	while (!empty(my_config.trap)) {
 		err_flag = 0;
-		curr_trap = (struct addr_opts_node *) dequeue(my_config.trap);
+		curr_trap = dequeue(my_config.trap);
 
 		while (!empty(curr_trap->options)) {
-			curr_opt = (struct attr_val *) dequeue(curr_trap->options);
-			if (curr_opt->attr == T_Port) {
-				port_no = curr_opt->value.i;
-				if (port_no <= 0 || port_no > 32767) {
-					msyslog(LOG_ERR, "invalid port number %d, trap ignored", port_no);
+			curr_opt = dequeue(curr_trap->options);
+			if (T_Port == curr_opt->attr) {
+				if (curr_opt->value.i < 1 
+				    || curr_opt->value.i > USHRT_MAX) {
+					msyslog(LOG_ERR,
+						"invalid port number "
+						"%d, trap ignored", 
+						curr_opt->value.i);
 					err_flag = 1;
 				}
+				port_no = (u_short)curr_opt->value.i;
 			}
-			else if (curr_opt->attr == T_Interface) {
-				addr_node = (struct address_node *) curr_opt->value.p;
+			else if (T_Interface == curr_opt->attr) {
+				addr_node = curr_opt->value.p;
 
 				/* Resolve the interface address */
-				memset((char *)&addr_sock, 0, sizeof(addr_sock));
+				memset(&addr_sock, 0, sizeof(addr_sock));
 				addr_sock.ss_family = (u_short)addr_node->type;
 
 				if (getnetnum(addr_node->address,
@@ -1616,9 +1671,10 @@ config_trap(void)
 
 				localaddr = findinterface(&addr_sock);
 
-				if (localaddr == NULL) {
+				if (NULL == localaddr) {
 					msyslog(LOG_ERR,
-						"can't find interface with address %s",
+						"can't find interface "
+						"with address %s",
 						stoa(&addr_sock));
 					err_flag = 1;
 				}
@@ -1633,17 +1689,17 @@ config_trap(void)
 		 */
 		if (!err_flag) {
 			memset((char *)&peeraddr, 0, sizeof(peeraddr));
-			if (getnetnum(curr_trap->addr->address, &peeraddr, 1, t_UNK) != 1) {
+			if (1 != getnetnum(curr_trap->addr->address,
+					   &peeraddr, 1, t_UNK)) {
 				err_flag = 1;
 				break;
 			}
 
-			if (port_no != 0)
-				((struct sockaddr_in6*)&peeraddr)->sin6_port = htons((u_short) port_no);
-			else
-				((struct sockaddr_in6*)&peeraddr)->sin6_port = htons(TRAPPORT);
+			/* port is at same location for v4 and v6 */
+			((struct sockaddr_in6*)&peeraddr)->sin6_port =
+				htons(port_no ? port_no : TRAPPORT);
 
-			if (localaddr == NULL) {
+			if (NULL == localaddr) {
 				peeraddr.ss_family = default_ai_family;
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
 			}
@@ -1653,7 +1709,7 @@ config_trap(void)
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
 					NTP_VERSION))
 				msyslog(LOG_ERR,
-					"can't set trap for %s, no resources",
+					"can't set trap for %s",
 					stoa(&peeraddr));
 		}
 		DESTROY_QUEUE(curr_trap->options);
@@ -2097,7 +2153,7 @@ config_sim(void)
 	/* Check if a simulate block was found in the configuration code.
 	 * If not, return an error and exit
 	 */
-	if (my_config.sim_details == NULL) {
+	if (NULL == my_config.sim_details) {
 		fprintf(stderr, "ERROR!! I couldn't find a \"simulate\" block for configuring the simulator.\n");
 		fprintf(stderr, "\tCheck your configuration file.\n");
 		exit(1);
@@ -2106,20 +2162,24 @@ config_sim(void)
 	/* Process the initialization statements
 	 * -------------------------------------
 	 */
-	while(!empty(my_config.sim_details->init_opts)) {
-		init_stmt = (struct attr_val *)
-		    dequeue(my_config.sim_details->init_opts);
+	while (!empty(my_config.sim_details->init_opts)) {
+		init_stmt = dequeue(my_config.sim_details->init_opts);
+
 		switch(init_stmt->attr) {
-		    case T_Beep_Delay:
+
+		case T_Beep_Delay:
 			simulation.beep_delay = init_stmt->value.d;
 			break;
-		    case T_Sim_Duration:
+
+		case T_Sim_Duration:
 			simulation.end_time = init_stmt->value.d;
 			break;
-		    default:
-			yyerror("Internal Error in parser...\n"
-				"Invalid init statement in simulator block");
-			break;
+
+		default:
+			fprintf(stderr,
+				"Unknown simulator init token %d\n",
+				init_stmt->attr);
+			exit(1);
 		}
 		free_node(init_stmt);
 	}
@@ -2129,20 +2189,19 @@ config_sim(void)
 	/* Process the server list
 	 * -----------------------
 	 */
-	simulation.num_of_servers = get_no_of_elements(my_config.sim_details->servers);
-	simulation.servers = (server_info *) malloc(simulation.num_of_servers *
-						    sizeof(server_info));
+	simulation.num_of_servers = 
+		get_no_of_elements(my_config.sim_details->servers);
+	simulation.servers = emalloc(simulation.num_of_servers 
+				     * sizeof(server_info));
 
-	for (i = 0;i < simulation.num_of_servers;++i) {
-		serv_info = (server_info *)
-		    dequeue(my_config.sim_details->servers);
-		if (!serv_info) {
-			yyerror("Internal Error in parser...\n"
-				"Tried to initialize server list but no server returned\n");
-		}
-		else {
-		  memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
-		  free_node(serv_info);
+	for (i = 0;i < simulation.num_of_servers; i++) {
+		serv_info = dequeue(my_config.sim_details->servers);
+		if (NULL == serv_info) {
+			fprintf(stderr, "Simulator server list is corrupt\n");
+			exit(1);
+		} else {
+			memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
+			free_node(serv_info);
 		}
 	}
 	DESTROY_QUEUE(my_config.sim_details->servers);
@@ -2206,9 +2265,7 @@ void
 config_remotely(void)
 {
 	input_from_file = 0;
-#if 0
-	init_syntax_tree();
-#endif
+
 	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
 	delete_keyword_scanner(key_scanner);
@@ -2589,8 +2646,9 @@ gettokens_netinfo (
 
 /*
  * getnetnum - return a net number (this is crude, but careful)
+ *
+ * returns 1 for success, and mysteriously, 0 or -1 for failure
  */
-
 static int
 getnetnum(
 	const char *num,
@@ -2611,15 +2669,18 @@ getnetnum(
 	}
 
 	memcpy(addr, res->ai_addr, res->ai_addrlen);
-#ifdef DEBUG
-	if (debug > 1)
-		printf("getnetnum given %s, got %s \n",
-		       num, stoa(addr));
-#endif
+
+	DPRINTF(2, ("getnetnum given %s, got %s\n", num, stoa(addr)));
+
 	freeaddrinfo(res);
 	return 1;
 }
 
+/*
+ * get_multiple_netnums
+ *
+ * returns 1 for success, and mysteriously, 0 or -1 for failure
+ */
 static int
 get_multiple_netnums(
 	const char *num,
@@ -2647,34 +2708,29 @@ get_multiple_netnums(
 		hints.ai_family = AF_INET;
 
 	hints.ai_socktype = SOCK_DGRAM;
-#ifdef DEBUG
-	if (debug > 3)
-		printf("getaddrinfo %s\n", num);
-#endif
+
+	DPRINTF(4, ("getaddrinfo %s\n", num));
+
 	retval = getaddrinfo(num, "ntp", &hints, &ptr);
-	if (retval != 0 ||
-	    (ptr->ai_family == AF_INET6 && isc_net_probeipv6() != ISC_R_SUCCESS)) {
+
+	if (retval ||
+	    (ptr->ai_family == AF_INET6 
+	     && isc_net_probeipv6() != ISC_R_SUCCESS)) {
+
 		if (complain)
 			msyslog(LOG_ERR,
-				"getaddrinfo: \"%s\" invalid host address, ignored",
+				"getaddrinfo: \"%s\" invalid host "
+				"address, ignored",
 				num);
-#ifdef DEBUG
-		if (debug > 0)
-			printf(
-				"getaddrinfo: \"%s\" invalid host address%s.\n",
-				num, (complain)
-				? ", ignored"
-				: "");
-#endif
-		if (retval == 0 &&
-		    ptr->ai_family == AF_INET6 &&
-		    isc_net_probeipv6() != ISC_R_SUCCESS)
-		{
+		else
+			DPRINTF(1, ("getaddrinfo: \"%s\" invalid host "
+				    "address.\n",
+				    num));
+
+		if (!retval)
 			return -1;
-		}
-		else {
+		else 
 			return 0;
-		}
 	}
 	*res = ptr;
 
@@ -2723,16 +2779,26 @@ save_resolve(
 #ifndef SYS_VXWORKS
 	if (res_fp == NULL) {
 #ifndef SYS_WINNT
-		(void) strcpy(res_file, RES_TEMPFILE);
+		strcpy(res_file, RES_TEMPFILE);
 #else
+		int len;
+
 		/* no /tmp directory under NT */
-		{
-			if(!(GetTempPath((DWORD)MAX_PATH, (LPTSTR)res_file))) {
-				msyslog(LOG_ERR, "cannot get pathname for temporary directory: %m");
-				return;
-			}
-			(void) strcat(res_file, "ntpdXXXXXX");
+		if (!GetTempPath(sizeof res_file, res_file)) {
+			msyslog(LOG_ERR, "can not get temp dir: %m");
+			exit(1);
 		}
+		
+		len = strlen(res_file);
+		if (sizeof res_file < len + sizeof "ntpdXXXXXX") {
+			msyslog(LOG_ERR,
+				"temporary directory path %s too long",
+				res_file);
+			exit(1);
+		}
+
+		memmove(res_file + len, "ntpdXXXXXX",
+			sizeof "ntpdXXXXXX");
 #endif /* SYS_WINNT */
 #ifdef HAVE_MKSTEMP
 		{
@@ -2743,7 +2809,7 @@ save_resolve(
 				res_fp = fdopen(fd, "r+");
 		}
 #else
-		(void) mktemp(res_file);
+		mktemp(res_file);
 		res_fp = fopen(res_file, "w");
 #endif
 		if (res_fp == NULL) {

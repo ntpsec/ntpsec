@@ -2,9 +2,9 @@
  *
  * The header file for a simple lexical analyzer. 
  *
- * Written By: Sachin Kamboj
- *             University of Delaware
- *             Newark, DE 19711
+ * Written By:	Sachin Kamboj
+ *		University of Delaware
+ *		Newark, DE 19711
  * Copyright (c) 2006
  */
 
@@ -22,20 +22,23 @@
 
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
-    char *keyword;             /* Keyword */
-    int token;                 /* Associated Token */
-    int expect_string;         /* A boolean flag, which when set, indicates
-                                  that the next token should be a string */
+	char *	keyword;	/* Keyword */
+	int	token;		/* Associated Token */
+	int	expect_string;	/* nonzero indicates the next token
+				   should be a string */
 };
 
 /* Structure to hold a filename, file pointer and positional info */
 struct FILE_INFO {
-    const char *fname;	       /* Path to the file */
-    FILE *fd;                  /* File Descriptor */
-    int line_no;               /* Line Number in the file being scanned */
-    int col_no;                /* Column Number in the file being scanned */
-    int prev_line_col_no;      /* Col No on the previous line when a '\n' is
-                                  seen */
+	const char *	fname;			/* Path to the file */
+	FILE *		fd;			/* File Descriptor */
+	int		line_no;		/* Line Number */
+	int		col_no;			/* Column Number */
+	int		prev_line_col_no;	/* Col No on the 
+						   previous line when a
+						   '\n' was seen */
+	int		prev_token_col_no;	/* Col No at start of
+						   token */
 };
 
 

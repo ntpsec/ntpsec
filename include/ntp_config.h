@@ -185,7 +185,7 @@ struct attr_val *create_attr_sval(int attr, char *s);
 struct attr_val *create_attr_pval(int attr, void *s);
 struct filegen_node *create_filegen_node(void **name, queue *options);
 void **create_pval(void *val);
-struct restrict_node *create_restrict_node(struct address_node *addr,struct address_node *mask,queue *flags, int line_no);
+struct restrict_node *create_restrict_node(struct address_node *addr, struct address_node *mask, queue *flags, int line_no);
 int *create_ival(int val);
 struct addr_opts_node *create_addr_opts_node(struct address_node *addr, queue *options);
 struct sim_node *create_sim_node(queue *init_opts, queue *servers);

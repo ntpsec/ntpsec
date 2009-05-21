@@ -244,7 +244,7 @@ extern	void	record_crypto_stats (struct sockaddr_storage *, const char *);
 extern	void	record_timing_stats (const char *);
 #endif
 extern  int	sock_hash (struct sockaddr_storage *);
-extern	char *	fstostr(time_t);
+extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 extern	double	old_drift;
 extern	int	drift_file_sw;
 extern	double	wander_threshold;

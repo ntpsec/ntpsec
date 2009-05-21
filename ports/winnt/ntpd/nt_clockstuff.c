@@ -193,9 +193,6 @@ do {	\
 	(t) -= HECTONANOSECONDS / 2;	\
 } while (0)
 
-/* there must be a better place for this */
-#define COUNTOF(arr) (sizeof(arr) / sizeof((arr)[0]))
-
 /*
  * workaround for VC6 inability to convert unsigned __int64 to double
  */

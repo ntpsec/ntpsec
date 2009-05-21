@@ -1,5 +1,5 @@
-#if !defined(_WIN32_IO_)
-#define _WIN32_IO_
+#ifndef WIN32_IO_H
+#define WIN32_IO_H
 
 /*  Flag definitions for compatibility
  *  ==================================
@@ -7,23 +7,23 @@
 
 #include <fcntl.h>
 
-#define NCCS 4
-#define VEOL 3
+#define NCCS	4
+#define VEOL	3
 typedef unsigned char	cc_t;
 typedef unsigned int	speed_t;
 typedef unsigned int	tcflag_t;
 
 struct termios
-  {
-    tcflag_t c_iflag;		/* input mode flags */
-    tcflag_t c_oflag;		/* output mode flags */
-    tcflag_t c_cflag;		/* control mode flags */
-    tcflag_t c_lflag;		/* local mode flags */
-    cc_t c_line;			/* line discipline */
-    cc_t c_cc[NCCS];		/* control characters */ 
-    speed_t c_ispeed;		/* input speed */
-    speed_t c_ospeed;		/* output speed */
-  };
+{
+	tcflag_t	c_iflag;	/* input mode flags */
+	tcflag_t	c_oflag;	/* output mode flags */
+	tcflag_t	c_cflag;	/* control mode flags */
+	tcflag_t	c_lflag;	/* local mode flags */
+	cc_t		c_line;		/* line discipline */
+	cc_t		c_cc[NCCS];	/* control characters */ 
+	speed_t		c_ispeed;	/* input speed */
+	speed_t		c_ospeed;	/* output speed */
+};
 
 /* c_cc characters 
 #define VINTR 0
@@ -70,68 +70,79 @@ struct termios
 #define ONLRET	0000040
 #define OFILL	0000100
 #define OFDEL	0000200
+
 #define NLDLY	0000400
-#define   NL0	0000000
-#define   NL1	0000400
+#define NL0	0000000
+#define NL1	0000400
+
 #define CRDLY	0003000
-#define   CR0	0000000
-#define   CR1	0001000
-#define   CR2	0002000
-#define   CR3	0003000
+#define CR0	0000000
+#define CR1	0001000
+#define CR2	0002000
+#define CR3	0003000
+
 #define TABDLY	0014000
-#define   TAB0	0000000
-#define   TAB1	0004000
-#define   TAB2	0010000
-#define   TAB3	0014000
-#define   XTABS	0014000
+#define TAB0	0000000
+#define TAB1	0004000
+#define TAB2	0010000
+#define TAB3	0014000
+#define XTABS	0014000
+
 #define BSDLY	0020000
-#define   BS0	0000000
-#define   BS1	0020000
+#define BS0	0000000
+#define BS1	0020000
+
 #define VTDLY	0040000
-#define   VT0	0000000
-#define   VT1	0040000
+#define VT0	0000000
+#define VT1	0040000
+
 #define FFDLY	0100000
-#define   FF0	0000000
-#define   FF1	0100000
+#define FF0	0000000
+#define FF1	0100000
 
 /* c_cflag bit meaning */
 #define CBAUD	0010017
-#define  B0	0000000		/* hang up */
-#define  B50	0000001
-#define  B75	0000002
-#define  B110	0000003
-#define  B134	0000004
-#define  B150	0000005
-#define  B200	0000006
-#define  B300	0000007
-#define  B600	0000010
-#define  B1200	0000011
-#define  B1800	0000012
-#define  B2400	0000013
-#define  B4800	0000014
-#define  B9600	0000015
-#define  B19200	0000016
-#define  B38400	0000017
-#define EXTA B19200
-#define EXTB B38400
+#define B0	0000000		/* hang up */
+#define B50	0000001
+#define B75	0000002
+#define B110	0000003
+#define B134	0000004
+#define B150	0000005
+#define B200	0000006
+#define B300	0000007
+#define B600	0000010
+#define B1200	0000011
+#define B1800	0000012
+#define B2400	0000013
+#define B4800	0000014
+#define B9600	0000015
+#define B19200	0000016
+#define B38400	0000017
+
+#define EXTA	B19200
+#define EXTB	B38400
+
 #define CSIZE	0000060
-#define   CS5	0000000
-#define   CS6	0000020
-#define   CS7	0000040
-#define   CS8	0000060
+#define CS5	0000000
+#define CS6	0000020
+#define CS7	0000040
+#define CS8	0000060
+
 #define CSTOPB	0000100
 #define CREAD	0000200
 #define PARENB	0000400
 #define PARODD	0001000
 #define HUPCL	0002000
 #define CLOCAL	0004000
+
 #define CBAUDEX 0010000
-#define  B57600  0010001
-#define  B115200 0010002
-#define  B230400 0010003
-#define  B460800 0010004
-#define CIBAUD	  002003600000	/* input baud rate (not used) */
-#define CRTSCTS	  020000000000		/* flow control */
+#define B57600  0010001
+#define B115200 0010002
+#define B230400 0010003
+#define B460800 0010004
+
+#define CIBAUD	002003600000	/* input baud rate (not used) */
+#define CRTSCTS	020000000000	/* flow control */
 
 /* c_lflag bits */
 #define ISIG	0000001
@@ -167,38 +178,37 @@ struct termios
 #define	TCSAFLUSH	2
 
 /* modem lines */
-#define TIOCM_LE        0x001
-#define TIOCM_DTR       0x002
-#define TIOCM_RTS       0x004
-#define TIOCM_ST        0x008
-#define TIOCM_SR        0x010
-#define TIOCM_CTS       0x020
-#define TIOCM_CAR       0x040
-#define TIOCM_RNG       0x080
-#define TIOCM_DSR       0x100
-#define TIOCM_CD        TIOCM_CAR
-#define TIOCM_RI        TIOCM_RNG
-#define TIOCM_OUT1      0x2000
-#define TIOCM_OUT2      0x4000
+#define TIOCM_LE	0x001
+#define TIOCM_DTR	0x002
+#define TIOCM_RTS	0x004
+#define TIOCM_ST	0x008
+#define TIOCM_SR	0x010
+#define TIOCM_CTS	0x020
+#define TIOCM_CAR	0x040
+#define TIOCM_RNG	0x080
+#define TIOCM_DSR	0x100
+#define TIOCM_CD	TIOCM_CAR
+#define TIOCM_RI	TIOCM_RNG
+#define TIOCM_OUT1	0x2000
+#define TIOCM_OUT2	0x4000
 
 /* ioctl */
-#define TIOCMGET        0x5415
-#define TIOCMSET        0x5418       
-/*
-#define cfgetospeed(dcb) dcb->BaudRate
-#define cfgetispeed(dcb) dcb->BaudRate
-#define cfsetospeed(dcb,speed) (dcb->BaudRate = (speed), 0)
-#define cfsetispeed(dcb,speed) (dcb->BaudRate = (speed), 0)
+#define TIOCMGET	0x5415
+#define TIOCMSET	0x5418
+
+/* NOP cfsetospeed() and cfsetispeed() for now */
+#define cfsetospeed(dcb, spd)	(0)
+#define cfsetispeed(dcb, spd)	(0)
 
 
 
+#if 0
 extern	BOOL	TTY_GETATTR (int fd, DCB *tio);
 extern	BOOL	TTY_SETATTR (int fd, const DCB *tio);
+#endif
 
-*/
+extern	int	ioctl		(int, int, int *);
+extern	int	tcsetattr	(int, int, const struct termios *);
+extern	int	tcgetattr	(int, struct termios *);
 
-extern int ioctl		(int, int, int *);
-extern	int	tcsetattr	(int fd, int optional_actions, const struct termios *);
-extern	int	tcgetattr	(int fd, struct termios *);
-#endif /* defined _WIN32_IO_ */
-
+#endif /* defined WIN32_IO_H */

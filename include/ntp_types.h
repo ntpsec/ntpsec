@@ -30,6 +30,11 @@
 #endif
 
 /*
+ * COUNTOF(array) - size of array in elements
+ */
+#define COUNTOF(arr)	(sizeof(arr) / sizeof((arr)[0]))
+
+/*
  * VMS DECC (v4.1), {u_char,u_short,u_long} are only in SOCKET.H,
  *			and u_int isn't defined anywhere
  */

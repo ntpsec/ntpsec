@@ -30,13 +30,6 @@
 				   for both the simulator and the daemon
 				*/
 
-  /*  #include "ntp_parser.h"     SK: Arent't we generating this using bison?
-				   This was not an issue when we were
-				   directly including the source file. However,
-				   we will need a seperate description of the
-				   tokens in the scanner.
-				*/
-
 
   struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
 
@@ -92,7 +85,6 @@
 %token			T_Dispersion
 %token	<Double>	T_Double
 %token			T_Driftfile
-%token	<Double>	T_WanderThreshold
 %token			T_Enable
 %token			T_End
 %token			T_False
@@ -108,14 +100,14 @@
 %token			T_Fudge
 %token			T_Host
 %token			T_Huffpuff
-%token			T_IPv4_address
-%token			T_IPv6_address
 %token			T_Iburst
 %token			T_Ident
 %token			T_Ignore
 %token			T_Includefile
 %token	<Integer>	T_Integer
 %token			T_Interface
+%token			T_IPv4_flag
+%token			T_IPv6_flag
 %token			T_Kernel
 %token			T_Key
 %token			T_Keys
@@ -204,6 +196,7 @@
 %token			T_Unconfig
 %token			T_Unpeer
 %token			T_Version
+%token	<Double>	T_WanderThreshold
 %token			T_Week
 %token			T_Xleave
 %token			T_Year
@@ -294,14 +287,20 @@ command_list
 		{
 			/* I will need to incorporate much more fine grained
 			 * error messages. The following should suffice for
-			 * the time being.
+			 * the time being.  ip_file->col_no is always 1 here,
+			 * and ip_file->line_no is one higher than the
+			 * problem line.  In other words, the scanner has
+			 * moved on to the start of the next line.
 			 */
 			if (input_from_file == 1) {
-				msyslog(LOG_ERR, "parse error %s line %d ignored\n",
-					ip_file->fname, ip_file->line_no);
+				msyslog(LOG_ERR, 
+					"syntax error in %s line %d, "
+					"ignored",
+					ip_file->fname,
+					ip_file->line_no - 1);
 			} else if (input_from_file != 0)
 				msyslog(LOG_ERR,
-					"parse: bad boolean input flag\n");
+					"parse: bad boolean input flag");
 	}
 	;
 
@@ -349,8 +348,8 @@ client_type
 
 address
 	:	ip_address		{ $$ = $1; }
-	|	T_IPv4_address T_String { $$ = create_address_node($2, AF_INET); }
-	|	T_IPv6_address T_String { $$ = create_address_node($2, AF_INET6); }
+	|	T_IPv4_flag T_String	{ $$ = create_address_node($2, AF_INET); }
+	|	T_IPv6_flag T_String	{ $$ = create_address_node($2, AF_INET6); }
 	;
 
 ip_address
@@ -363,7 +362,6 @@ option_list
 	;
 
 option
-/*	:	/* Null Statement	{ $$ = NULL; } */
 	:	T_Autokey		{ $$ = create_attr_ival(T_Flag, FLAG_SKEY); }
 	|	T_Bias number		{ $$ = create_attr_dval(T_Bias, $2); }
 	|	T_Burst			{ $$ = create_attr_ival(T_Flag, FLAG_BURST); }
@@ -600,6 +598,32 @@ access_control_command
 			enqueue(my_config.restrict_opts,
 				create_restrict_node(NULL, NULL, $3, ip_file->line_no));
 		}
+	|	T_Restrict T_IPv4_flag T_Default ac_flag_list
+		{
+			enqueue(my_config.restrict_opts,
+				create_restrict_node(
+					create_address_node(
+						estrdup("0.0.0.0"), 
+						AF_INET),
+					create_address_node(
+						estrdup("255.255.255.255"), 
+						AF_INET),
+					$4, 
+					ip_file->line_no));
+		}
+	|	T_Restrict T_IPv6_flag T_Default ac_flag_list
+		{
+			enqueue(my_config.restrict_opts,
+				create_restrict_node(
+					create_address_node(
+						estrdup("::"), 
+						AF_INET6),
+					create_address_node(
+						estrdup("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+						AF_INET6),
+					$4, 
+					ip_file->line_no));
+		}
 	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
 		{
 			enqueue(my_config.restrict_opts,
@@ -738,9 +762,9 @@ miscellaneous_command
 				if (fp[curr_include_level + 1] == NULL) {
 					fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig($2));
 					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig($2));
-			}
-			else
-				ip_file = fp[++curr_include_level];
+				}
+				else
+					ip_file = fp[++curr_include_level];
 			}
 		}
 	|	T_End
@@ -824,7 +848,7 @@ log_config_command
 				yyerror("Logconfig prefix is not '+', '-' or '='\n");
 			}
 			else
-				$$ = create_attr_sval(prefix, strdup(type));
+				$$ = create_attr_sval(prefix, estrdup(type));
 			YYFREE($1);
 		}
 	;
@@ -958,7 +982,11 @@ void yyerror (char *msg)
 	int retval;
 	
 	if (input_from_file)
-		msyslog(LOG_ERR, "%s\n", msg);
+		msyslog(LOG_ERR, 
+			"line %d column %d %s", 
+			ip_file->line_no,
+			ip_file->prev_token_col_no,
+			msg);
 	else {
 		/* Save the error message in the correct buffer */
 		retval = snprintf(remote_config.err_msg + remote_config.err_pos,

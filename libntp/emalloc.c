@@ -8,40 +8,101 @@
 
 #if !defined(_MSC_VER) || !defined(_DEBUG)
 
+
 void *
-emalloc(
-	u_int size
+erealloc(
+	void *	prev,
+	size_t	size
 	)
 {
-	void *mem = malloc(size);
+	void *	mem;
 
-	if (!mem) {
-		msyslog(LOG_ERR, "Exiting: No more memory!");
+	mem = realloc(prev, size);
+
+	if (NULL == mem) {
+		msyslog(LOG_ERR, "fatal out of memory (%u bytes)",
+				 (u_int)size);
 		exit(1);
 	}
+
 	return mem;
+}
+
+
+void *
+emalloc(
+	u_int	size
+	)
+{
+	return erealloc(NULL, size);
+}
+
+
+char *
+estrdup(
+	const char *	str
+	)
+{
+	char *	copy;
+
+	copy = strdup(str);
+
+	if (NULL == copy) {
+		msyslog(LOG_ERR, 
+			"fatal out of memory duplicating %d byte "
+			"string '%s'",
+			strlen(str) + 1, str);
+		exit(1);
+	}
+
+	return copy;
 }
 
 #else /* below is _MSC_VER && _DEBUG */
 
 /*
- * When using the debug MS CRT malloc, preserve the original caller's
- * line and file via the emalloc macro.
+ * When using the debug MS CRT allocator, each allocation stores the
+ * callsite __FILE__ and __LINE__, which is then displayed at process
+ * termination, to track down leaks.  We don't want all of our
+ * allocations to show up as coming from emalloc.c, so we preserve the
+ * original callsite's source file and line using macros which pass
+ * __FILE__ and __LINE__ as parameters to these routines.
  */
+
 void *
-debug_emalloc(
-	u_int size,
-	char *filename,
-	int line
+debug_erealloc(
+	void *		prev,
+	size_t		size,
+	const char *	file,		/* __FILE__ */
+	int		line		/* __LINE__ */
 	)
 {
-	void *mem = _malloc_dbg(size, _NORMAL_BLOCK, filename, line);
+	void *	mem;
 
-	if (!mem) {
-		msyslog(LOG_ERR, "Exiting: No more memory!");
+	mem = _realloc_dbg(prev, size, _NORMAL_BLOCK, file, line);
+
+	if (NULL == mem) {
+		msyslog(LOG_ERR, "fatal: out of memory in %s line %d size %u", 
+				 file, line, (u_int)size);
 		exit(1);
 	}
+
 	return mem;
+}
+
+char *
+debug_estrdup(
+	const char *	str,
+	const char *	file,		/* __FILE__ */
+	int		line		/* __LINE__ */
+	)
+{
+	char *	copy;
+
+	copy = debug_erealloc(NULL, strlen(str) + 1, file, line);
+	strcpy(copy, str);
+
+	return copy;
 }
 
 #endif /* _MSC_VER && _DEBUG */

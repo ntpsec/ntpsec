@@ -23,6 +23,7 @@
 #include "ntpsim.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
+#include "ntp_debug.h"
 
 
 /* Define a structure to hold the FSA for the keywords.
@@ -49,19 +50,18 @@ char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
 struct state *key_scanner;	/* A FSA for recognizing keywords */
 extern int input_from_file;
 
+
 /* CONSTANTS 
  * ---------
  */
 #define NON_ACCEPTING 0		/* A constant that depicts a non-accepting state */
-#define NO_OF_SPECIAL_CHARS 8
 
 
 /* SCANNER GLOBAL VARIABLES 
  * ------------------------
  */
-char special_char[] =		/* This list of special characters */
-{ '{', '}', '(', ')', ',', ';','|','=' };
- 
+const char special_chars[] = "{}(),;|=";
+
 
 /* FUNCTIONS
  * ---------
@@ -194,7 +194,7 @@ print_keyword_scanner(
 		lexeme[pos] = curr_state->ch;
 		if (curr_state->token != NON_ACCEPTING) {
 			lexeme[pos + 1] = '\0';
-			printf("%s\n",lexeme);
+			printf("%s\n", lexeme);
 		}
 		if (curr_state->next_state != NULL)
 			print_keyword_scanner(curr_state->next_state, pos + 1);
@@ -214,16 +214,18 @@ F_OPEN(
 	const char *mode
 	)
 {
-	struct FILE_INFO *my_info = (struct FILE_INFO *)
-		malloc(sizeof(struct FILE_INFO));
+	struct FILE_INFO *my_info;
 
-	if (my_info == NULL)
-		return NULL;
-	my_info->line_no = 0;
+	my_info = emalloc(sizeof *my_info);
+
+	my_info->line_no = 1;
 	my_info->col_no = 0;
+	my_info->prev_line_col_no = 0;
+	my_info->prev_token_col_no = 0;
 	my_info->fname = path;
 
-	if ((my_info->fd = fopen(path,mode)) == NULL) {
+	my_info->fd = fopen(path, mode);
+	if (NULL == my_info->fd) {
 		free(my_info);
 		return NULL;
 	}
@@ -372,102 +374,78 @@ is_integer(
 	return 1;
 }
 
+
 /* Double */
 static int
 is_double(
 	char *lexeme
 	)
 {
+	int num_digits = 0;  /* Number of digits read */
 	int i;
 
-	/* Initialize the state machine
-	   int int_part = 1;
-	   int frac_part = 0; 
-	*/
-	int no_digits = 0;  /* Number of digits read */
-
 	i = 0;
+
 	/* Check for an optional '+' or '-' */
-	if (lexeme[i] == '+' || lexeme[i] == '-')
-		++i;
+	if ('+' == lexeme[i] || '-' == lexeme[i])
+		i++;
 
 	/* Read the integer part */
-	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
-		++no_digits;
+	for (; lexeme[i] && isdigit(lexeme[i]); i++)
+		num_digits++;
 
 	/* Check for the required decimal point */
-	if (lexeme[i] == '.')
-		++i;
+	if ('.' == lexeme[i])
+		i++;
 	else
 		return 0;
 
 	/* Check for any digits after the decimal point */
-	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
-		++no_digits;
+	for (; lexeme[i] && isdigit(lexeme[i]); i++)
+		num_digits++;
 
-	/* The number of digits in both the decimal part and the fraction part
-	   must not be zero at this point */
-	if (no_digits == 0)
+	/*
+	 * The number of digits in both the decimal part and the
+	 * fraction part must not be zero at this point 
+	 */
+	if (!num_digits)
 		return 0;
 
 	/* Check if we are done */
-	if (lexeme[i] == '\0')
+	if (!lexeme[i])
 		return 1;
 
-	/* There is still more output, read the Exponent Part */
-	if (lexeme[i] == 'e' || lexeme[i] == 'E') {
-		++i;
-	}
+	/* There is still more input, read the exponent */
+	if ('e' == tolower(lexeme[i]))
+		i++;
 	else
 		return 0;
 
 	/* Read an optional Sign */
-	if (lexeme[i] == '+' || lexeme[i] == '-')
-		++i;
+	if ('+' == lexeme[i] || '-' == lexeme[i])
+		i++;
 
 	/* Now read the exponent part */
-	for (; lexeme[i] && isdigit(lexeme[i]); ++i)
-		++no_digits;
+	while (lexeme[i] && isdigit(lexeme[i]))
+		i++;
 
 	/* Check if we are done */
-	if (lexeme[i] == '\0')
+	if (!lexeme[i])
 		return 1;
 	else
 		return 0;
 }
 
 
-
-/* Host Name */
-/* static int is_host_name (char *lexeme) */
-/* { */
-/*	int i; */
-/*	for (i = 0;lexeme[i];++i) */
-/*	if (!isalnum(lexeme[i])) { */
-		/* Check for two consequtive periods which are not allowed */
-/*		if (lexeme[i] == '.' && lexeme[i + 1] != '.') */
-/*			; */
-/*		else */
-/*			return 0; */
-/*	} */
-/*	return 1; */
-/* } */
-
-
-/* Define a function to test whether a character is a special character */
-
-static int
+/* is_special() - Test whether a character is a token */
+static inline int
 is_special(
 	int ch
 	)
 {
-	int i;
-
-	for (i = 0; i < NO_OF_SPECIAL_CHARS; ++i)
-		if (ch == special_char[i])
-			return 1;
-	return 0;
+	return (int)strchr(special_chars, ch);
 }
+
 
 static int
 is_EOC(
@@ -479,6 +457,7 @@ is_EOC(
 		return 1;
 	return 0;
 }
+
 
 static int
 create_string_token(
@@ -497,24 +476,21 @@ create_string_token(
 	if (!*pch)
 		return T_EOC;
 
-	yylval.String = strdup(lexeme);
-	if (!yylval.String) {
-		fprintf(stderr, "Could not allocate memory for: %s\n",
-			lexeme);
-		exit(1);
-	}
-	else
-		return T_String;
+	yylval.String = estrdup(lexeme);
+
+	return T_String;
 }
 
 
-/* Define a function that does the actual scanning 
+/*
+ * Define a function that does the actual scanning 
  * Bison expects this function to be called yylex and for it to take no 
  * input and return an int
  */
-
 int
-yylex()
+yylex(
+	void
+	)
 {
 	int i, instring = 0;
 	int token;		/* The return value/the recognized token */
@@ -523,40 +499,42 @@ yylex()
 
 	do {
 		/* Ignore whitespace at the beginning */
-		while ((ch = get_next_char()) != EOF &&
+		while (EOF != (ch = get_next_char()) &&
 		       isspace(ch) &&
 		       !is_EOC(ch))
 			; /* Null Statement */
 
-		if (ch == EOF) {
-			if (input_from_file == 0)
+		if (EOF == ch) {
+
+			if (!input_from_file || !curr_include_level) 
 				return 0;
-			if (!(curr_include_level > 0)) 
-				return 0;
-			else { 
-				FCLOSE(fp[curr_include_level]);
-				ip_file = fp[--curr_include_level]; 
-				return T_EOC;
-			}
+
+			FCLOSE(fp[curr_include_level]);
+			ip_file = fp[--curr_include_level]; 
+			return T_EOC;
+
 		} else if (is_EOC(ch)) {
+
 			expect_string = NO_ARG;   /* Reset expect_string */
 			return T_EOC;
-		}
-		/* Check if the next character is a special character.
-		 * If yes, return the special character.
-		 */
-		else if ((expect_string == NO_ARG) && is_special(ch))
+
+		} else if (is_special(ch) && NO_ARG == expect_string)
+			/* special chars are their own token values */
 			return ch;
 		else
 			push_back_char(ch);
 
+		/* save the column of start of the token */
+		ip_file->prev_token_col_no = ip_file->col_no;
+
 		/* Read in the lexeme */
-		for (i = 0;(i < MAX_LEXEME) && 
-			 (yytext[i] = get_next_char()) != EOF; ++i) {
+		for (i = 0;
+		     (i < MAX_LEXEME) && EOF != (yytext[i] = get_next_char());
+		     i++) {
 
 			/* Break on whitespace or a special character */
 			if (isspace(yytext[i]) 
-			    || ((expect_string == NO_ARG) && is_special(yytext[i]))
+			    || (is_special(yytext[i]) && NO_ARG == expect_string)
 			    || is_EOC(ch) || yytext[i] == '"')
 				break;
 
@@ -597,10 +575,7 @@ yylex()
 		yytext[i] = '\0';
 	} while (i == 0);
 
-#ifdef DEBUG
-	if (debug >= 3)
-		printf ("yylex: Just Read: %s\n", yytext);
-#endif
+	DPRINTF(4, ("yylex: lexeme '%s'\n", yytext));
 
 	/* Now return the desired token */
 	
@@ -615,9 +590,10 @@ yylex()
 			return token;
 		else if (is_integer(yytext)) {
 			errno = 0;
-			if ((yylval.Integer = strtol(yytext,(char **) NULL, 10)) == 0
+			if ((yylval.Integer = strtol(yytext, NULL, 10)) == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
-				fprintf(stderr,"Integer cannot be represented: %s\n",
+				msyslog(LOG_ERR, 
+					"Integer cannot be represented: %s",
 					yytext);
 				exit(1);
 			}
@@ -627,7 +603,8 @@ yylex()
 		else if (is_double(yytext)) {
 			errno = 0;
 			if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
-				fprintf(stderr, "Double too large to represent: %s\n",
+				msyslog(LOG_ERR,
+					"Double too large to represent: %s",
 					yytext);
 				exit(1);
 			}
@@ -637,23 +614,38 @@ yylex()
 		else /* Default: Everything is a string */
 			return create_string_token(yytext);
 	}
-	else { 
-		/* Either expect_string is 1 or this lexeme is part of a string.
-		   Hence, we need to return T_String.
-		   
-		   ONLY EXCEPTION (sic), we might have a -4 or -6 flag.
-		   This is a terrible hack, but the grammar is ambiguous so
-		   we don't have a choice.
-		*/
-		if (strcmp(yytext, "-4") == 0)
-			return T_IPv4_address;
-		else if (strcmp(yytext, "-6") == 0)
-			return T_IPv6_address;
-		else {
-			instring = 0;
-			if (expect_string == SINGLE_ARG)
-				expect_string = NO_ARG;
-			return create_string_token(yytext);
-		}
+
+	/*
+	 * Either expect_string is 1 or this lexeme is part of a
+	 * string.  Hence, we need to return T_String.
+	 * 
+	 * _Except_ we might have a -4 or -6 flag on a an association
+	 * configuration line (server, peer, pool, etc.).
+	 *
+	 * This is a terrible hack, but the grammar is ambiguous so we
+	 * don't have a choice.  [SK]
+	 *
+	 * The ambiguity is in the keyword scanner, not ntp_parser.y.
+	 * We do not require server addresses be quoted in ntp.conf,
+	 * complicating the scanner's job.  To avoid trying (and
+	 * failing) to match an IP address or DNS name to a keyword,
+	 * the association keywords use SINGLE_ARG in the keyword
+	 * table, which tells the scanner to "expect_string", so it
+	 * does not try to match a keyword but rather expects a string
+	 * when -4/-6 modifiers to server, peer, etc. are encountered.
+	 * restrict -4 and restrict -6 parsing works correctly without
+	 * this hack, as restrict uses NO_ARG.  [DH]
+	 */
+	if ('-' == yytext[0]) {
+		if ('4' == yytext[1])
+			return T_IPv4_flag;
+		else if ('6' == yytext[1])
+			return T_IPv6_flag;
 	}
+
+	instring = 0;
+	if (SINGLE_ARG == expect_string)
+		expect_string = NO_ARG;
+
+	return create_string_token(yytext);
 }

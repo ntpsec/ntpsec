@@ -45,10 +45,15 @@ extern	u_long	calyearstart	(u_long);
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, u_long, u_long *, u_int32 *);
 #if !defined(_MSC_VER) || !defined(_DEBUG)
-extern	void *	emalloc		(u_int);
+extern	void *	emalloc		(size_t);
+extern	void *	erealloc	(void *, size_t);
+extern	char *	estrdup		(const char *);
 #else
-#define		emalloc(size)	debug_emalloc(size, __FILE__, __LINE__)
-extern	void *	debug_emalloc	(u_int, char *, int);
+extern	void *	debug_erealloc	(void *, size_t, const char *, int);
+#define		emalloc(c)	debug_erealloc(NULL, (c), __FILE__, __LINE__)
+#define		erealloc(p, c)	debug_erealloc((p), (c), __FILE__, __LINE__)
+extern	char *	debug_estrdup	(const char *, const char *, int);
+#define		estrdup(s)	debug_estrdup((s), __FILE__, __LINE__)
 #endif
 extern	int	ntp_getopt	(int, char **, const char *);
 extern	void	init_auth	(void);
@@ -79,8 +84,8 @@ extern  const char * clockstatstr (int);
 extern	struct sockaddr_storage* netof (struct sockaddr_storage*);
 extern	char *	numtoa		(u_int32);
 extern	char *	numtohost	(u_int32);
-extern char *	socktoa		(struct sockaddr_storage *);
-extern char *	socktohost	(struct sockaddr_storage *);
+extern	char *	socktoa		(struct sockaddr_storage *);
+extern	char *	socktohost	(struct sockaddr_storage *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	char *	refnumtoa	(struct sockaddr_storage *);

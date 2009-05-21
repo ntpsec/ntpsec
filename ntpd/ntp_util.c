@@ -391,32 +391,20 @@ stats_config(
 	 * Open and read frequency file.
 	 */
 	case STATS_FREQ_FILE:
-		if (stats_drift_file) {
-			free(stats_drift_file);
-			free(stats_temp_file);
-			stats_drift_file = NULL;
-			stats_temp_file = NULL;
-		}
+		if (!value || (len = strlen(value)) == 0)
+			break;
 
-		if (value == 0 || (len = strlen(value)) == 0)
-		    break;
+		stats_drift_file = erealloc(stats_drift_file, len + 1);
+		stats_temp_file = erealloc(stats_temp_file, 
+					   len + sizeof(".TEMP"));
 
-		stats_drift_file = (char*)emalloc((u_int)(len + 1));
-#if !defined(VMS)
-		stats_temp_file = (char*)emalloc((u_int)(len +
-		    sizeof(".TEMP")));
-#else
-		stats_temp_file = (char*)emalloc((u_int)(len +
-		    sizeof("-TEMP")));
-#endif /* VMS */
 		memmove(stats_drift_file, value, (unsigned)(len+1));
 		memmove(stats_temp_file, value, (unsigned)len);
+		memmove(stats_temp_file + len,
 #if !defined(VMS)
-		memmove(stats_temp_file + len, ".TEMP",
-		    sizeof(".TEMP"));
+			".TEMP", sizeof(".TEMP"));
 #else
-		memmove(stats_temp_file + len, "-TEMP",
-		    sizeof("-TEMP"));
+			"-TEMP", sizeof("-TEMP"));
 #endif /* VMS */
 
 		/*
@@ -428,8 +416,8 @@ stats_config(
 
 		if (fscanf(fp, "%lf", &old_drift) != 1) {
 			msyslog(LOG_ERR,
-			    "format error frequency file %s", 
-			    stats_drift_file);
+				"format error frequency file %s", 
+				stats_drift_file);
 			fclose(fp);
 			break;
 
@@ -1015,29 +1003,24 @@ getauthkeys(
 	int len;
 
 	len = strlen(keyfile);
-	if (len == 0)
+	if (!len)
 		return;
 	
-	if (key_file_name != NULL) {
-		free(key_file_name);
-		key_file_name = NULL;
-	}
-	if (key_file_name == NULL) {
 #ifndef SYS_WINNT
-		key_file_name = emalloc(len + 1);
+	key_file_name = erealloc(key_file_name, len + 1);
+	memmove(key_file_name, keyfile, len + 1);
 #else
-		key_file_name = emalloc(MAXPATHLEN);
-#endif
-	}
-#ifndef SYS_WINNT
- 	memmove(key_file_name, keyfile, len + 1);
-#else
+	key_file_name = erealloc(key_file_name, _MAX_PATH);
+	if (len + 1 > _MAX_PATH)
+		return;
 	if (!ExpandEnvironmentStrings(keyfile, key_file_name,
-	    MAXPATHLEN)) {
+				      _MAX_PATH)) {
 		msyslog(LOG_ERR,
-		    "ExpandEnvironmentStrings(KEY_FILE) failed: %m\n");
+			"ExpandEnvironmentStrings(KEY_FILE) failed: %m");
+		strncpy(key_file_name, keyfile, _MAX_PATH);
 	}
 #endif /* SYS_WINNT */
+
 	authreadkeys(key_file_name);
 }
 
@@ -1048,7 +1031,7 @@ getauthkeys(
 void
 rereadkeys(void)
 {
-	if (key_file_name != NULL)
+	if (NULL != key_file_name)
 		authreadkeys(key_file_name);
 }
 
@@ -1093,9 +1076,12 @@ sock_hash(
 
 	for (i = 0; i < len ; i++)
 		hashVal = 37 * hashVal + (int)*(ch + i);
-	hashVal = hashVal % 128;  /* % MON_HASH_SIZE hardcoded */
+
+#define	MON_HASH_SIZE	128	/* duplicated from ntp_monitor.c */
+
+	hashVal = hashVal % MON_HASH_SIZE;
 	if (hashVal < 0)
-		hashVal += 128;
+		hashVal += MON_HASH_SIZE;
 	return hashVal;
 }
 
@@ -1116,18 +1102,22 @@ ntp_exit(int retval)
  * fstostr - prettyprint NTP seconds
  */
 char * fstostr(
-	time_t	fstamp
+	time_t	ntp_stamp
 	)
 {
-	struct tm *tm = NULL;
-	static char str[20] = { '\0' };
-	time_t	ustamp;
+	static char	str[20];
+	struct tm *	tm;
+	time_t		unix_stamp;
 
-	ustamp = fstamp - JAN_1970;
-	tm = gmtime(&ustamp);
-	if (tm != NULL)
-		snprintf(str, sizeof(str), "%04d%02d%02d%02d%02d",
-		    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-		    tm->tm_hour, tm->tm_min);
-	return (str);
+	unix_stamp = ntp_stamp - JAN_1970;
+	tm = gmtime(&unix_stamp);
+	if (NULL != tm)
+		snprintf(str, sizeof(str),
+			 "%04d%02d%02d%02d%02d",
+			 tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+			 tm->tm_hour, tm->tm_min);
+	else
+		strcpy(str, "gmtime() error");
+
+	return str;
 }
