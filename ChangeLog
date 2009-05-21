@@ -1,3 +1,4 @@
+(4.2.5p178) 2009/05/21 Released by Harlan Stenn <stenn@ntp.org>
 * Provide erealloc() and estrdup(), a la emalloc().
 * Improve ntp.conf's parser error messages.
 * [Bug 320] "restrict default ignore" does not affect IPv6.
