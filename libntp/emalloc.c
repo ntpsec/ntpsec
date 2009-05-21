@@ -31,7 +31,7 @@ erealloc(
 
 void *
 emalloc(
-	u_int	size
+	size_t	size
 	)
 {
 	return erealloc(NULL, size);
@@ -49,9 +49,9 @@ estrdup(
 
 	if (NULL == copy) {
 		msyslog(LOG_ERR, 
-			"fatal out of memory duplicating %d byte "
+			"fatal out of memory duplicating %u byte "
 			"string '%s'",
-			strlen(str) + 1, str);
+			(u_int)strlen(str) + 1, str);
 		exit(1);
 	}
 
