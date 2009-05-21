@@ -1,3 +1,7 @@
+* Provide erealloc() and estrdup(), a la emalloc().
+* Improve ntp.conf's parser error messages.
+* [Bug 320] "restrict default ignore" does not affect IPv6.
+* [Bug 1192] "restrict -6 ..." reports a syntax error.
 (4.2.5p177) 2009/05/18 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.4p7)
 * [Bug 1174] nmea_shutdown assumes that nmea has a unit assigned
