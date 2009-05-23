@@ -3435,7 +3435,9 @@ findinterface(
 }
 
 /*
- * findlocalinterface - find local interface index corresponding to address
+ * findlocalinterface - find local interface corresponding to addr,
+ * which does not have any of flags set.  If bast is nonzero, addr is
+ * a broadcast address.
  *
  * This code attempts to find the local sending address for an outgoing
  * address by connecting a new socket to destinationaddress:NTP_PORT
@@ -3451,7 +3453,7 @@ static struct interface *
 findlocalinterface(
 	struct sockaddr_storage *addr,
 	int flags,
-	int bflag
+	int bcast
 	)
 {
 	SOCKET s;
@@ -3488,9 +3490,9 @@ findlocalinterface(
 	 * If we are looking for broadcast interface we need to set this
 	 * socket to allow broadcast
 	 */
-	if (bflag & INT_BROADCAST)
+	if (bcast)
 		setsockopt(s, SOL_SOCKET, SO_BROADCAST,
-			  (char *)&on, sizeof(on));
+			   (char *)&on, sizeof(on));
 
 	rtn = connect(s, (struct sockaddr *)&saddr, SOCKLEN(&saddr));
 	if (rtn == SOCKET_ERROR)
@@ -3507,6 +3509,15 @@ findlocalinterface(
 	DPRINTF(4, ("findlocalinterface: kernel maps %s to %s\n", stoa(addr), stoa(&saddr)));
 	
 	iface = getinterface(&saddr, flags);
+
+	/* 
+	 * if we didn't find an exact match on saddr check for an
+	 * interface on the same subnet as saddr.  This handles the
+	 * case of the address suggested by the kernel being
+	 * excluded by the user's -I and -L options to ntpd, when
+	 * another address is enabled on the same subnet.
+	 * See http://bugs.ntp.org/1184 for more detail.
+	 */
 	if (NULL == iface)
 		iface = getsamenetinterface(&saddr, flags);
 
@@ -3660,11 +3671,11 @@ findbcastinter(
 	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
-	interface = findlocalinterface(addr, INT_LOOPBACK|INT_WILDCARD, INT_BROADCAST);
+	interface = findlocalinterface(addr, INT_LOOPBACK | INT_WILDCARD, 1);
 	
 	if (interface != NULL)
 	{
-		DPRINTF(4, ("Found bcast-/mcast- interface index #%d %s\n", interface->ifnum, interface->name));
+		DPRINTF(4, ("Easily found bcast-/mcast- interface index #%d %s\n", interface->ifnum, interface->name));
 		return interface;
 	}
 

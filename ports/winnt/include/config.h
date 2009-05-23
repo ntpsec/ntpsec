@@ -143,6 +143,13 @@ typedef int socklen_t;
  */
 #define GETSOCKNAME_SOCKLEN_TYPE socklen_t
 
+/*
+ * Older SDKs do not define SO_EXCLUSIVEADDRUSE in winsock2.h
+ */
+#ifndef SO_EXCLUSIVEADDRUSE
+#define SO_EXCLUSIVEADDRUSE ((int)(~SO_REUSEADDR))
+#endif
+
 #if defined _MSC_VER && _MSC_VER < 1400
 /*
  * Use 32-bit time definitions for versions prior to VS 2005
