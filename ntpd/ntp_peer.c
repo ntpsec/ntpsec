@@ -995,7 +995,7 @@ findmanycastpeer(
 		    peer->next) {
 			if (peer->cast_flags & MDF_ACAST) {
 				NTOHL_FP(&pkt->org, &p_org);
-				if (L_ISEQU(&peer->xmt, &p_org))
+				if (L_ISEQU(&p_org, &peer->aorg))
 					return (peer);
 			}
 		}

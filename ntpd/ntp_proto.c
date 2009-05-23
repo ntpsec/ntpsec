@@ -797,11 +797,10 @@ receive(
 			sys_restricted++;
 			return;			/* not enabled */
 		}
-		if ((peer = newpeer(&rbufp->recv_srcadr,
-		    rbufp->dstadr, MODE_CLIENT,
-		    hisversion, NTP_MINDPOLL, NTP_MAXDPOLL,
-		    FLAG_IBURST | FLAG_PREEMPT, MDF_UCAST | MDF_ACLNT,
-		    0, skeyid)) == NULL) {
+		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		    MODE_CLIENT, hisversion, NTP_MINDPOLL,
+		    NTP_MAXDPOLL, FLAG_IBURST | FLAG_PREEMPT,
+		    MDF_UCAST | MDF_ACLNT, 0, skeyid)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
 		}
@@ -1062,6 +1061,8 @@ receive(
 				peer->flip = 1;
 				report_event(PEVNT_XLEAVE, peer, NULL);
 			}
+		} else {
+			L_CLR(&peer->aorg);
 		}
 
 	/*
@@ -1091,7 +1092,7 @@ receive(
 			peer->rec = p_xmt;
 		peer->dst = rbufp->recv_time;
 	}
-	L_CLR(&peer->xmt);
+	peer->xmt = p_xmt;
 
 	/*
 	 * If this is a crypto_NAK, the server cannot authenticate a

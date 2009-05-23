@@ -967,6 +967,7 @@ crypto_recv(
 				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
 				strcpy(str1, fstostr(leap_sec));
+				strcpy(str2, fstostr(leap_expire));
 				snprintf(tbuf, sizeof(tbuf),
 				    "%d leap %s expire %s", leap_tai, str1,
 				    str2);
