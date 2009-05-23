@@ -1,5 +1,6 @@
-* Bug [1193] Compile error: conflicting types for emalloc
-* xmt -> aorg timestamp cleanup from Dave Mills, reported by Dave Hart.
+* [Bug 1193] Compile error: conflicting types for emalloc
+* [Bug 1041] xmt -> aorg timestamp cleanup from Dave Mills,
+  reported by Dave Hart.
 * Leap/expire cleanup from Dave Mills.
 (4.2.5p178) 2009/05/21 Released by Harlan Stenn <stenn@ntp.org>
 * Provide erealloc() and estrdup(), a la emalloc().
