@@ -214,7 +214,7 @@ refclock_newpeer(
 	 */
 	peer->refclktype = clktype;
 	peer->refclkunit = (u_char)unit;
-	peer->flags |= FLAG_REFCLOCK | FLAG_FIXPOLL;
+	peer->flags |= FLAG_REFCLOCK;
 	peer->leap = LEAP_NOTINSYNC;
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;

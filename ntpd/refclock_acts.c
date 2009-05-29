@@ -268,7 +268,6 @@ acts_start (
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	peer->sstclktype = CTL_SST_TS_TELEPHONE;
-	peer->flags &= ~FLAG_FIXPOLL;
 	up->bufptr = pp->a_lastcode;
 	return (1);
 }

@@ -1807,8 +1807,7 @@ poll_update(
 	 * works for any association. Otherwise, clamp the poll interval
 	 * between minpoll and maxpoll.
 	 */
-	if ((peer->flags & FLAG_FIXPOLL) || (peer->cast_flags &
-	    MDF_BCLNT))
+	if (peer->cast_flags & MDF_BCLNT)
 		hpoll = peer->minpoll;
 	else
 		hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
