@@ -159,10 +159,18 @@ static	struct xcmd builtins[] = {
 /*
  * Default values we use.
  */
+#ifndef SYS_WINNT
+#define	DEFHOST		"localhost"	/* default host name */
+#else
+/* Using "localhost" with AF 0 gives a garbage response,
+ * force the IPv4 localhost numeric address works.
+ * Using 'ntpdc ::' also does not work on Windows yet.
+ */
+#define	DEFHOST		"127.0.0.1"
+#endif
 #define	DEFTIMEOUT	(5)		/* 5 second time out */
 #define	DEFSTIMEOUT	(2)		/* 2 second time out after first */
 #define	DEFDELAY	0x51EB852	/* 20 milliseconds, l_fp fraction */
-#define	DEFHOST		"localhost"	/* default host name */
 #define	LENHOSTNAME	256		/* host name is 256 characters long */
 #define	MAXCMDS		100		/* maximum commands on cmd line */
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */

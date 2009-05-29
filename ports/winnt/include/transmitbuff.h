@@ -1,10 +1,7 @@
-#if !defined __transmitbuff_h
-#define __transmitbuff_h
+#ifndef TRANSMITBUFF_H
+#define TRANSMITBUFF_H
 
 #include "ntp.h"
-#if defined HAVE_IO_COMPLETION_PORT
-# include "ntp_iocompletionport.h"
-#endif
 #include <isc/list.h>
 
 /*
@@ -17,7 +14,6 @@ typedef struct transmitbuf transmitbuf_t;
 typedef struct transmitbuf {
 	ISC_LINK(transmitbuf_t)	link;
 
-	WSABUF	wsabuf;
 	time_t	ts;		/* Time stamp for the request */
 
 	/*
@@ -46,5 +42,5 @@ extern	void	free_transmit_buffer	(transmitbuf_t *);
  */
 extern transmitbuf_t *get_free_transmit_buffer (void);
 
-#endif /* defined __transmitbuff_h */
+#endif /* TRANSMITBUFF_H */
 

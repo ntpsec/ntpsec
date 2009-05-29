@@ -268,7 +268,59 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath="..\include\config.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\isc\net.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_fp.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_io.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_machine.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_net.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_select.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_stdlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_string.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_syslog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_unixtime.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpdate\ntpdate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\syslog.h"
 				>
 			</File>
 		</Filter>

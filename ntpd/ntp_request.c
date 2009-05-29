@@ -2876,7 +2876,8 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 	ifs->sent = htonl(interface->sent);
 	ifs->notsent = htonl(interface->notsent);
 	ifs->scopeid = htonl(interface->scopeid);
-	ifs->ifindex = htonl(interface->ifindex);
+	/* ifindex was always zero, now no longer in struct interface */
+	ifs->ifindex = 0;
 	ifs->ifnum = htonl(interface->ifnum);
 	ifs->uptime = htonl(current_time - interface->starttime);
 	ifs->ignore_packets = interface->ignore_packets;

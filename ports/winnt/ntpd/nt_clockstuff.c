@@ -503,8 +503,23 @@ init_winnt_time(void)
 	}
 
 	/* Initialize random file before OpenSSL checks */
-	if(!init_randfile())
+	if (!init_randfile())
 		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
+
+#pragma warning(push)
+#pragma warning(disable: 4127) /* conditional expression is constant */
+
+#ifdef DEBUG
+	if (SIZEOF_TIME_T != sizeof(time_t)
+	    || SIZEOF_INT != sizeof(int)
+	    || SIZEOF_SIGNED_CHAR != sizeof(char)) {
+	
+		msyslog(LOG_ERR, "config.h SIZEOF_* macros wrong, fatal");
+		exit(1);
+	}
+#endif
+
+#pragma warning(pop)
 
 	/*
 	 * Get privileges needed for fiddling with the clock

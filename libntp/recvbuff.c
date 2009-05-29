@@ -69,11 +69,6 @@ static void
 initialise_buffer(recvbuf_t *buff)
 {
 	memset((char *) buff, 0, sizeof(recvbuf_t));
-
-#if defined SYS_WINNT
-	buff->wsabuff.len = RX_BUFF_SIZE;
-	buff->wsabuff.buf = (char *) buff->recv_buffer;
-#endif
 }
 
 static void

@@ -108,17 +108,6 @@ ISC_LIST(limit_address_t) limit_address_list;
 #include <transmitbuff.h>
 #include <isc/win32os.h>
 /*
- * Define this macro to control the behavior of connection
- * resets on UDP sockets.  See Microsoft KnowledgeBase Article Q263823
- * for details.
- * NOTE: This requires that Windows 2000 systems install Service Pack 2
- * or later.
- */
-#ifndef SIO_UDP_CONNRESET 
-#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR,12) 
-#endif
-
-/*
  * Windows C runtime ioctl() can't deal properly with sockets, 
  * map to ioctlsocket for this source file.
  */
@@ -530,7 +519,6 @@ init_io(void)
 		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
 		exit(1);
 	}
-	init_transmitbuff();
 #endif /* SYS_WINNT */
 
 	/*
@@ -628,7 +616,6 @@ interface_dump(struct interface *itf)
 	printf("received = %ld\n", itf->received);
 	printf("sent = %ld\n", itf->sent);
 	printf("notsent = %ld\n", itf->notsent);
-	printf("ifindex = %u\n", itf->ifindex);
 	printf("scopeid = %u\n", itf->scopeid);
 	printf("peercnt = %u\n", itf->peercnt);
 	printf("phase = %u\n", itf->phase);
@@ -640,16 +627,14 @@ interface_dump(struct interface *itf)
 static void
 print_interface(struct interface *iface, char *pfx, char *sfx)
 {
-	printf("%sinterface #%d: fd=%d, bfd=%d, name=%s, flags=0x%x, scope=%d, ifindex=%d",
+	printf("%sinterface #%d: fd=%d, bfd=%d, name=%s, flags=0x%x, scope=%d",
 	       pfx,
 	       iface->ifnum,
 	       iface->fd,
 	       iface->bfd,
 	       iface->name,
 	       iface->flags,
-	       iface->scopeid,
-	       iface->ifindex);
-	/* Leave these as three printf calls (stoa() static buffer). */
+	       iface->scopeid);
 	printf(", sin=%s",
 	       stoa((&iface->sin)));
 	if (iface->flags & INT_BROADCAST)
@@ -993,7 +978,7 @@ create_wildcards(u_short port) {
 #endif
 
 	if(okipv4 == ISC_TRUE) {
-	        struct interface *interface = new_interface(NULL);
+		struct interface *interface = new_interface(NULL);
 
 		interface->family = AF_INET;
 		interface->sin.ss_family = AF_INET;
@@ -1035,7 +1020,7 @@ create_wildcards(u_short port) {
 	 * create pseudo-interface with wildcard IPv6 address
 	 */
 	if (isc_net_probeipv6() == ISC_R_SUCCESS) {
-	        struct interface *interface = new_interface(NULL);
+		struct interface *interface = new_interface(NULL);
 
 		interface->family = AF_INET6;
 		interface->sin.ss_family = AF_INET6;
@@ -1171,8 +1156,6 @@ convert_isc_if(isc_interface_t *isc_if, struct interface *itf, u_short port) {
 		       &(isc_if->netmask.type.in6),
 		       sizeof(struct in6_addr));
 		((struct sockaddr_in6 *)&itf->mask)->sin6_port = port;
-		/* Copy the interface index */
-		itf->ifindex = isc_if->ifindex;
 	}
 #endif /* INCLUDE_IPV6_SUPPORT */
 

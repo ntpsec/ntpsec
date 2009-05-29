@@ -7,8 +7,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <process.h>
+#include <syslog.h>
+
 #include "ntp_stdlib.h"
-#include "syslog.h"
 #include "ntp_machine.h"
 #include "ntp_fp.h"
 #include "ntp.h"
@@ -17,6 +18,7 @@
 #include "ntp_iocompletionport.h"
 #include "transmitbuff.h"
 #include "ntp_request.h"
+#include "ntp_assert.h"
 #include "clockstuff.h"
 #include "ntp_io.h"
 #include "clockstuff.h"
@@ -45,16 +47,6 @@ typedef struct IoCompletionInfo {
 #define	recv_buf	buff_space.rbuf
 #define	trans_buf	buff_space.tbuf
 
-
-#if !defined( _W64 )
-  /*
-   * if ULONG_PTR needs to be defined then the build environment
-   * is pure 32 bit Windows. Since ULONG_PTR and DWORD have 
-   * the same size in 32 bit Windows we can safely define
-   * a replacement.
-   */
-  typedef DWORD ULONG_PTR;
-#endif
 
 /*
  * local function definitions
@@ -118,9 +110,7 @@ FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
 transmitbuf_t *
 get_trans_buf()
 {
-	transmitbuf_t *tb  = (transmitbuf_t *) emalloc(sizeof(transmitbuf_t));
-	tb->wsabuf.len = 0;
-	tb->wsabuf.buf = (char *) &tb->pkt;
+	transmitbuf_t *tb  = emalloc(sizeof(*tb));
 	return (tb);
 }
 
@@ -259,7 +249,7 @@ iocompletionthread(void *NotUsed)
 
 /*  Create/initialise the I/O creation port
  */
-extern void
+void
 init_io_completion_port(
 	void
 	)
@@ -277,6 +267,10 @@ init_io_completion_port(
 		msyslog(LOG_ERR, "Can't initialize Heap: %m");
 		exit(1);
 	}
+#endif
+
+#if 0	/* transmitbuff.c unused, no need to initialize it */
+	init_transmitbuff();
 #endif
 
 	/* Create the event used to signal an IO event
@@ -326,7 +320,7 @@ init_io_completion_port(
 }
 	
 
-extern void
+void
 uninit_io_completion_port(
 	void
 	)
@@ -336,6 +330,18 @@ uninit_io_completion_port(
 		*/
 		signal_io_completion_port_exit();
 	}
+}
+
+
+/*
+ * libisc/interfaceiter.c calls InitSockets(), to minimize deltas
+ * from the upstream source, we provide a no-op implementation.
+ */
+void
+InitSockets(
+	void
+	)
+{
 }
 
 
@@ -436,10 +442,10 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 
 		rc = ReadFile(
 			(HANDLE)buff->fd,
-			buff->wsabuff.buf,
-			buff->wsabuff.len,
-			&buff->wsabuff.len,
-			(LPOVERLAPPED) lpo);
+			buff->recv_buffer,
+			sizeof(buff->recv_buffer),
+			NULL,
+			(LPOVERLAPPED)lpo);
 
 		if (!rc && ERROR_IO_PENDING != GetLastError()) {
 			msyslog(LOG_ERR, "Can't read from Refclock: %m");
@@ -502,14 +508,17 @@ io_completion_port_add_clock_io(
 	IoCompletionInfo *lpo;
 	recvbuf_t *buff;
 
-	if (NULL == CreateIoCompletionPort((HANDLE)_get_osfhandle(rio->fd), hIoCompletionPort, (ULONG_PTR) rio, 0)) {
+	if (NULL == CreateIoCompletionPort(
+			(HANDLE)_get_osfhandle(rio->fd), 
+			hIoCompletionPort, 
+			(ULONG_PTR)rio,
+			0)) {
 		msyslog(LOG_ERR, "Can't add COM port to i/o completion port: %m");
 		return 1;
 	}
 
-	lpo = (IoCompletionInfo *) GetHeapAlloc("io_completion_port_add_clock_io");
-	if (lpo == NULL)
-	{
+	lpo = GetHeapAlloc("io_completion_port_add_clock_io");
+	if (NULL == lpo) {
 		msyslog(LOG_ERR, "Can't allocate heap for completion port: %m");
 		return 1;
 	}
@@ -523,41 +532,49 @@ io_completion_port_add_clock_io(
  * Queue a receiver on a socket. Returns 0 if no buffer can be queued 
  *
  *  Note: As per the winsock documentation, we use WSARecvFrom. Using
- *        ReadFile() is less efficient.
+ *	  ReadFile() is less efficient.
  */
-static unsigned long QueueSocketRecv(SOCKET s, recvbuf_t *buff, IoCompletionInfo *lpo) {
-	
-	int AddrLen;
+static unsigned long 
+QueueSocketRecv(
+	SOCKET s,
+	recvbuf_t *buff,
+	IoCompletionInfo *lpo
+	)
+{
+	WSABUF wsabuf;
+	DWORD Flags;
+	DWORD Result;
 
 	lpo->request_type = SOCK_RECV;
 	lpo->recv_buf = buff;
 
 	if (buff != NULL) {
-		DWORD BytesReceived = 0;
-		DWORD Flags = 0;
+		Flags = 0;
 		buff->fd = s;
-		AddrLen = sizeof(struct sockaddr_in);
-		buff->src_addr_len = sizeof(struct sockaddr);
+		buff->recv_srcadr_len = sizeof(buff->recv_srcadr);
+		wsabuf.buf = (char *)buff->recv_buffer;
+		wsabuf.len = sizeof(buff->recv_buffer);
 
-		if (SOCKET_ERROR == WSARecvFrom(buff->fd, &buff->wsabuff, 1, 
-						&BytesReceived, &Flags, 
-						(struct sockaddr *) &buff->recv_srcadr, (LPINT) &buff->src_addr_len, 
-						(LPOVERLAPPED) lpo, NULL)) {
-			DWORD Result = WSAGetLastError();
+		if (SOCKET_ERROR == WSARecvFrom(buff->fd, &wsabuf, 1, 
+						NULL, &Flags, 
+						(struct sockaddr *)&buff->recv_srcadr, 
+						&buff->recv_srcadr_len, 
+						(LPOVERLAPPED)lpo, NULL)) {
+			Result = GetLastError();
 			switch (Result) {
 				case NO_ERROR :
 				case WSA_IO_PENDING :
 					break ;
 
 				case WSAENOTSOCK :
-					netsyslog(LOG_ERR, "Can't read from socket, because it isn't a socket: %m");
+					msyslog(LOG_ERR, "Can't read from non-socket fd %d: %m", (int)buff->fd);
 					/* return the buffer */
 					freerecvbuf(buff);
 					return 0;
 					break;
 
 				case WSAEFAULT :
-					netsyslog(LOG_ERR, "The buffers parameter is incorrect: %m");
+					msyslog(LOG_ERR, "The buffers parameter is incorrect: %m");
 					/* return the buffer */
 					freerecvbuf(buff);
 					return 0;
@@ -586,22 +603,13 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	
 	get_systime(&arrival_time);
 
-	/*  Convert the overlapped pointer back to a recvbuf pointer.
-	*/
-	
-	/*
-	 * Check returned structures
-	 */
-	if (lpo == NULL)
-		return (1); /* Nothing to do */
+	NTP_REQUIRE(NULL != lpo);
+	NTP_REQUIRE(NULL != lpo->recv_buf);
 
-	buff = lpo->recv_buf;
 	/*
-	 * Make sure we have a buffer
+	 * Convert the overlapped pointer back to a recvbuf pointer.
 	 */
-	if (buff == NULL) {
-		return (1);
-	}
+	buff = lpo->recv_buf;
 
 	/*
 	 * If the socket is closed we get an Operation Aborted error
@@ -614,34 +622,31 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 		return (1);
 	}
 
-
 	/*
 	 * Get a new recv buffer for the replacement socket receive
 	 */
 	newbuff = get_free_recv_buffer_alloc();
 	QueueSocketRecv(inter->fd, newbuff, lpo);
 
-#ifdef DEBUG
-	if(debug > 3 && get_packet_mode(buff) == MODE_BROADCAST)
-		printf("****Accepting Broadcast packet on fd %d from %s\n", buff->fd, stoa(&buff->recv_srcadr));
-#endif
-	ignore_this = inter->ignore_packets;
-#ifdef DEBUG
-	if (debug > 3)
-		printf(" Packet mode is %d\n", get_packet_mode(buff));
-#endif
+	DPRINTF(4, ("%sfd %d %s recv packet mode is %d\n", 
+		    (MODE_BROADCAST == get_packet_mode(buff))
+			? " **** Broadcast "
+			: "",
+		    (int)buff->fd, stoa(&buff->recv_srcadr),
+		    get_packet_mode(buff)));
+
 	/*
 	 * If we keep it add some info to the structure
 	 */
-	if (Bytes > 0 && ignore_this == ISC_FALSE) {
+	if (Bytes && !inter->ignore_packets) {
 		memcpy(&buff->recv_time, &arrival_time, sizeof buff->recv_time);	
 		buff->recv_length = (int) Bytes;
 		buff->receiver = receive; 
 		buff->dstadr = inter;
-#ifdef DEBUG
-		if (debug > 1)
-			printf("Received %d bytes of fd %d in buffer %x from %s\n", Bytes, buff->fd, buff, stoa(&buff->recv_srcadr));
-#endif
+
+		DPRINTF(2, ("Received %d bytes fd %d in buffer %p from %s\n", 
+			    Bytes, (int)buff->fd, buff, stoa(&buff->recv_srcadr)));
+
 		packets_received++;
 		inter->received++;
 		add_full_recv_buffer(buff);
@@ -667,8 +672,8 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 	int n;
 
 	if (fd != INVALID_SOCKET) {
-		if (NULL == CreateIoCompletionPort((HANDLE) fd, hIoCompletionPort,
-						   (DWORD) inter, 0)) {
+		if (NULL == CreateIoCompletionPort((HANDLE)fd, 
+		    hIoCompletionPort, (ULONG_PTR)inter, 0)) {
 			msyslog(LOG_ERR, "Can't add socket to i/o completion port: %m");
 			return 1;
 		}
@@ -745,15 +750,15 @@ io_completion_port_sendto(
 	struct interface *inter,	
 	struct pkt *pkt,	
 	int len, 
-	struct sockaddr_storage* dest)
+	struct sockaddr_storage *dest)
 {
-	transmitbuf_t *buff = NULL;
+	WSABUF wsabuf;
+	transmitbuf_t *buff;
 	DWORD Result = ERROR_SUCCESS;
 	int errval;
 	int AddrLen;
 	IoCompletionInfo *lpo;
-	DWORD BytesSent = 0;
-	DWORD Flags = 0;
+	DWORD Flags;
 
 	lpo = (IoCompletionInfo *) GetHeapAlloc("io_completion_port_sendto");
 
@@ -770,16 +775,18 @@ io_completion_port_sendto(
 		}
 
 
-
 		memcpy(&buff->pkt, pkt, len);
-		buff->wsabuf.buf = buff->pkt;
-		buff->wsabuf.len = len;
+		wsabuf.buf = buff->pkt;
+		wsabuf.len = len;
 
-		AddrLen = sizeof(struct sockaddr_in);
+		AddrLen = SOCKLEN(dest);
 		lpo->request_type = SOCK_SEND;
 		lpo->trans_buf = buff;
+		Flags = 0;
 
-		Result = WSASendTo(inter->fd, &buff->wsabuf, 1, &BytesSent, Flags, (struct sockaddr *) dest, AddrLen, (LPOVERLAPPED) lpo, NULL);
+		Result = WSASendTo(inter->fd, &wsabuf, 1, NULL, Flags,
+				   (struct sockaddr *)dest, AddrLen, 
+				   (LPOVERLAPPED)lpo, NULL);
 
 		if(Result == SOCKET_ERROR)
 		{

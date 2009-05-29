@@ -180,23 +180,22 @@ struct interface {
 	struct sockaddr_storage bcast;	/* broadcast address */
 	struct sockaddr_storage mask;	/* interface mask */
 	char name[32];			/* name of interface */
-	short  family;			/* Address family */
+	u_short family;			/* Address family */
+	u_short phase;			/* phase in update cycle */
 	int flags;			/* interface flags */
 	int last_ttl;			/* last TTL specified */
 	u_int32 addr_refid;		/* IPv4 addr or IPv6 hash */
 	int num_mcast;			/* No. of IP addresses in multicast socket */
-	u_long starttime;	        /* current_time as of creation of interface structure */
+	u_long starttime;		/* current_time as of creation of interface structure */
 	volatile long received;		/* number of incoming packets */
 	long sent;			/* number of outgoing packets */
 	long notsent;			/* number of send failures */
 	u_int scopeid;			/* Scope used for Multicasting */
-	u_int ifindex;			/* interface index */
-	u_int ifnum;		        /* sequential interface instance count */
-        u_char phase;		        /* phase in update cycle */
+	u_int ifnum;			/* sequential interface instance count */
 	isc_boolean_t ignore_packets;	/* Specify whether the packet should be ignored */
-        ISC_LIST(struct peer) peers;    /* list of peers for the interface */
-        u_int peercnt;		        /* number of peers referencinf this interface - informational only */
-        ISC_LINK(struct interface) link;     /* interface list */
+	ISC_LIST(struct peer) peers;	/* list of peers for the interface */
+	u_int peercnt;			/* number of peers referencinf this interface - informational only */
+	ISC_LINK(struct interface) link;/* interface list */
 };
 
 /*

@@ -366,10 +366,18 @@ struct xcmd builtins[] = {
 /*
  * Default values we use.
  */
+#ifndef SYS_WINNT
+#define	DEFHOST		"localhost"	/* default host name */
+#else
+/* Using "localhost" with AF 0 gives a garbage response,
+ * force the IPv4 localhost numeric address works.
+ * Using 'ntpq ::' also does not work on Windows yet.
+ */
+#define	DEFHOST		"127.0.0.1"
+#endif
 #define	DEFTIMEOUT	(5)		/* 5 second time out */
 #define	DEFSTIMEOUT	(2)		/* 2 second time out after first */
 #define	DEFDELAY	0x51EB852	/* 20 milliseconds, l_fp fraction */
-#define	DEFHOST		"localhost"	/* default host name */
 #define	LENHOSTNAME	256		/* host name is 256 characters long */
 #define	MAXCMDS		100		/* maximum commands on cmd line */
 #define	MAXHOSTS	200		/* maximum hosts on cmd line */
@@ -529,10 +537,9 @@ ntpqmain(
 	}
 #endif /* SYS_WINNT */
 
-	/* Check to see if we have IPv6. Otherwise force the -4 flag */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+	/* Check to see if we have IPv6. Otherwise default to IPv4 */
+	if (isc_net_probeipv6() != ISC_R_SUCCESS)
 		ai_fam_default = AF_INET;
-	}
 
 	progname = argv[0];
 
@@ -709,11 +716,13 @@ openhost(
 #endif
 		a_info = getaddrinfo(hname, service, &hints, &ai);	
 	}
+#ifdef AI_ADDRCONFIG
 	/* Some older implementations don't like AI_ADDRCONFIG. */
 	if (a_info == EAI_BADFLAGS) {
 		hints.ai_flags = AI_CANONNAME;
 		a_info = getaddrinfo(hname, service, &hints, &ai);	
 	}
+#endif
 	if (a_info != 0) {
 		(void) fprintf(stderr, "%s\n", gai_strerror(a_info));
 		return 0;

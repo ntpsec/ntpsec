@@ -59,14 +59,12 @@ struct isc_interface {
 	isc_netaddr_t dstaddress; 	/* Destination address
 					   (point-to-point only). */
 	isc_uint32_t flags;		/* Flags; see below. */
-	unsigned int ifindex;		/* Interface Index */
-	unsigned int scopeid;		/* Scope id for Multicasting */
 };
 
 /* Interface flags. */
 
 #define INTERFACE_F_UP			0x00000001U /* Interface is up */
-#define INTERFACE_F_POINTTOPOINT	0x00000002U /*this is point-to-point interface*/
+#define INTERFACE_F_POINTTOPOINT	0x00000002U /* this is point-to-point interface*/
 #define INTERFACE_F_LOOPBACK		0x00000004U /* this is loopback interface */
 #define INTERFACE_F_BROADCAST		0x00000008U /* Broadcast is  supported */
 #define INTERFACE_F_MULTICAST		0x00000010U /* multicast is supported */

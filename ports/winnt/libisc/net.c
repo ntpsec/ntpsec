@@ -69,6 +69,7 @@ try_proto(int domain) {
 #ifdef ISC_PLATFORM_HAVEIPV6
 #ifdef WANT_IPV6
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
+#ifndef SYS_WINNT	/* code below fails, needs bind() before getsockname() */
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
 		unsigned int len;
@@ -88,6 +89,7 @@ try_proto(int domain) {
 			}
 		}
 	}
+#endif
 #endif
 #endif
 #endif
@@ -154,18 +156,14 @@ try_ipv6only(void) {
 	if (s == INVALID_SOCKET) {
 		isc__strerror(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() %s: %s",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED,
-						"failed"),
+				 "socket() failed: %s",
 				 strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
 	}
 
 	on = 1;
-	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
+	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&on, sizeof(on)) < 0) {
 		ipv6only_result = ISC_R_NOTFOUND;
 		goto close;
 	}
@@ -177,18 +175,14 @@ try_ipv6only(void) {
 	if (s == INVALID_SOCKET) {
 		isc__strerror(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() %s: %s",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED,
-						"failed"),
+				 "socket() failed: %s",
 				 strbuf);
 		ipv6only_result = ISC_R_UNEXPECTED;
 		return;
 	}
 
 	on = 1;
-	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
+	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&on, sizeof(on)) < 0) {
 		ipv6only_result = ISC_R_NOTFOUND;
 		goto close;
 	}
@@ -227,11 +221,7 @@ try_ipv6pktinfo(void) {
 	if (s == -1) {
 		isc__strerror(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "socket() %s: %s",
-				 isc_msgcat_get(isc_msgcat,
-						ISC_MSGSET_GENERAL,
-						ISC_MSG_FAILED,
-						"failed"),
+				 "socket() failed: %s",
 				 strbuf);
 		ipv6pktinfo_result = ISC_R_UNEXPECTED;
 		return;
@@ -243,7 +233,7 @@ try_ipv6pktinfo(void) {
 	optname = IPV6_PKTINFO;
 #endif
 	on = 1;
-	if (setsockopt(s, IPPROTO_IPV6, optname, &on, sizeof(on)) < 0) {
+	if (setsockopt(s, IPPROTO_IPV6, optname, (char *)&on, sizeof(on)) < 0) {
 		ipv6pktinfo_result = ISC_R_NOTFOUND;
 		goto close;
 	}

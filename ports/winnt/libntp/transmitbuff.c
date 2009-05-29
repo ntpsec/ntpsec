@@ -1,3 +1,10 @@
+/*
+ * DEAD CODE ALERT  --  for whatever reason all this wonderful stuff is
+ *			unused.  The initialization was the only code
+ *			exercised as of May 2009 when that was nipped.
+ */
+
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -35,13 +42,10 @@ static CRITICAL_SECTION TransmitLock;
 # define LOCK(lock)	EnterCriticalSection(lock)
 # define UNLOCK(lock)	LeaveCriticalSection(lock)
 
-static void 
+static inline void 
 initialise_buffer(transmitbuf *buff)
 {
-	memset((char *) buff, 0, sizeof(transmitbuf));
-
-	buff->wsabuf.len = 0;
-	buff->wsabuf.buf = (char *) &buff->pkt;
+	memset(buff, 0, sizeof(*buff));
 }
 
 static void
@@ -57,7 +61,7 @@ create_buffers(int nbufs)
 	transmitbuf_t *buf;
 	int i;
 
-	buf = (transmitbuf_t *) emalloc(nbufs*sizeof(transmitbuf_t));
+	buf = emalloc(nbufs * sizeof(*buf));
 	for (i = 0; i < nbufs; i++)
 	{
 		initialise_buffer(buf);
