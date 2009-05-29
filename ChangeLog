@@ -1,4 +1,5 @@
 * [Bug 1200] Enable IPv6 in Windows port
+* Lose FLAG_FIXPOLL, from Dave Mills.
 (4.2.5p179) 2009/05/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1041] xmt -> aorg timestamp cleanup from Dave Mills,
   reported by Dave Hart.

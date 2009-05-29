@@ -562,8 +562,8 @@ create_peer_node(
 	my_node = get_node(sizeof *my_node);
 
 	/* Initialze node values to default */
-	my_node->minpoll = NTP_MINDPOLL;
-	my_node->maxpoll = NTP_MAXDPOLL;
+	my_node->minpoll = 0;
+	my_node->maxpoll = 0;
 	my_node->ttl = 0;
 	my_node->peerversion = NTP_VERSION;
 	my_node->peerkey = 0;

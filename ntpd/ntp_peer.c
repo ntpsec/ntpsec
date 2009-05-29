@@ -817,9 +817,25 @@ newpeer(
 	    cast_flags));
 	peer->hmode = (u_char)hmode;
 	peer->version = (u_char)version;
-	peer->minpoll = (u_char)max(ntp_minpoll, minpoll);
-	peer->maxpoll = (u_char)min(NTP_MAXPOLL, maxpoll);
 	peer->flags = flags;
+
+	/*
+	 * It is an error to set minpoll less than NTP_MINPOLL or to
+	 * set maxpoll greater than NTP_MAXPOLL. However, minpoll is
+	 * clamped not greater than NTP_MAXPOLL and maxpoll is clamped
+	 * not less than NTP_MINPOLL without complaint. Finally,
+	 * minpoll is clamped not greater than maxpoll.
+	 */
+	if (minpoll == 0)
+		peer->minpoll = NTP_MINDPOLL;
+	else
+		peer->minpoll = min(minpoll, NTP_MAXPOLL);
+	if (maxpoll == 0)
+		peer->maxpoll = NTP_MAXDPOLL;
+	else
+		peer->maxpoll = max(maxpoll, NTP_MINPOLL);
+	if (peer->minpoll > peer->maxpoll)
+		peer->minpoll = peer->maxpoll;
 #ifdef DEBUG
 	if (debug > 2) {
 		if (peer->dstadr)
@@ -879,12 +895,13 @@ newpeer(
 		 * the peer timer, since the clock may have requirements
 		 * for this.
 		 */
+		if (maxpoll == 0)
+			peer->maxpoll = peer->minpoll;
 		if (!refclock_newpeer(peer)) {
 			/*
 			 * Dump it, something screwed up
 			 */
 			set_peerdstadr(peer, NULL);
-	
 			peer->next = peer_free;
 			peer_free = peer;
 			peer_free_count++;

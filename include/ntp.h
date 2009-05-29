@@ -437,7 +437,7 @@ struct peer {
 #define	FLAG_SYSPEER	0x0010	/* system peer */
 #define FLAG_PREFER	0x0020	/* prefer peer */
 #define FLAG_BURST	0x0040	/* burst mode */
-#define FLAG_FIXPOLL	0x0080	/* stick at minpoll */
+#define FLAG_PPS	0x0080	/* steered by PPS */
 #define FLAG_IBURST	0x0100	/* initial burst mode */
 #define FLAG_NOSELECT	0x0200	/* never select */
 #define FLAG_TRUE	0x0400	/* force truechimer */
@@ -445,11 +445,10 @@ struct peer {
 #define	FLAG_XLEAVE	0x1000	/* interleaved protocol */
 #define	FLAG_XB		0x2000	/* interleaved broadcast */
 #define	FLAG_XBOGUS	0x4000	/* interleaved bogus packet */
-#define	FLAG_PPS	0x8000	/* steered by PPS */
 #ifdef	OPENSSL
-#define FLAG_ASSOC	0x10000	/* autokey request */
+#define FLAG_ASSOC	0x8000	/* autokey request */
 #endif /* OPENSSL */
-#define FLAG_ADKEY      0x00010000      /* Authenticated (or wants reply to be authenticated) using AD authentication */
+#define FLAG_ADKEY      0x10000      /* Authenticated (or wants reply to be authenticated) using AD authentication */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
