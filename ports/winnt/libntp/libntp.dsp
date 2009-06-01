@@ -254,10 +254,6 @@ SOURCE=..\..\..\libisc\md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\mem.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\memmove.c
 # End Source File
 # Begin Source File
@@ -307,6 +303,10 @@ SOURCE=..\..\..\libntp\netof.c
 # Begin Source File
 
 SOURCE=..\..\..\libisc\netscope.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libntp\ntp_lineedit.c
 # End Source File
 # Begin Source File
 
@@ -394,10 +394,6 @@ SOURCE=..\..\..\libntp\tstotv.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\tvtoa.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\tvtots.c
 # End Source File
 # Begin Source File
@@ -407,10 +403,6 @@ SOURCE=..\..\..\libntp\uglydate.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\uinttoa.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\libntp\utvtoa.c
 # End Source File
 # Begin Source File
 
@@ -523,6 +515,10 @@ SOURCE=..\..\..\include\ntp_io.h
 # Begin Source File
 
 SOURCE=..\include\ntp_iocompletionport.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_lineedit.h
 # End Source File
 # Begin Source File
 
