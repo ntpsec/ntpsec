@@ -25,18 +25,18 @@ decodenetnum(
 	NTP_REQUIRE(strlen(num) < sizeof(name));
 
 	if ('[' != num[0]) 
-		np = name;
+		cp = num;
 	else {
 		cp = num + 1;
 		np = name; 
 		while (*cp && ']' != *cp)
 			*np++ = *cp++;
 		*np = 0;
-		np = name; 
+		cp = name; 
 	}
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_NUMERICHOST;
-	err = getaddrinfo(np, NULL, &hints, &ai);
+	err = getaddrinfo(cp, NULL, &hints, &ai);
 	if (err != 0)
 		return 0;
 	memcpy(netnum, ai->ai_addr, ai->ai_addrlen); 

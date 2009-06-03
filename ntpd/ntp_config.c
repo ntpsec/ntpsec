@@ -151,7 +151,7 @@ char default_ntp_signd_socket[] =
 #else
 					"";
 #endif
-char *ntp_signd_socket;
+char *ntp_signd_socket = default_ntp_signd_socket;
 #ifdef HAVE_NETINFO
 struct netinfo_config_state *config_netinfo = NULL;
 int check_netinfo = 1;
@@ -206,7 +206,6 @@ static void call_proto_config_from_list(queue *flag_list, int able_flag);
 static void init_auth_node(void);
 static void init_syntax_tree(void);
 #ifdef DEBUG
-static void free_auth_node(void);
        void free_syntax_tree(void);
 #endif
 double *create_dval(double val);
@@ -295,36 +294,11 @@ init_auth_node(void)
 	my_config.auth.crypto_cmd_list = NULL;
 	my_config.auth.keys = NULL;
 	my_config.auth.keysdir = NULL;
-	my_config.auth.ntp_signd_socket = default_ntp_signd_socket;
+	my_config.auth.ntp_signd_socket = NULL;
 	my_config.auth.request_key = 0;
 	my_config.auth.revoke = 0;
 	my_config.auth.trusted_key_list = NULL;
 }
-
-#ifdef DEBUG
-static void
-free_auth_node(void)
-{
-	DESTROY_QUEUE(my_config.auth.crypto_cmd_list);
-
-	if (my_config.auth.keys) {
-		free(my_config.auth.keys);
-		my_config.auth.keys = NULL;
-	}
-
-	if (my_config.auth.keysdir) {
-		free(my_config.auth.keysdir);
-		my_config.auth.keysdir = NULL;
-	}
-
-	if (my_config.auth.ntp_signd_socket != default_ntp_signd_socket) {
-		free(my_config.auth.ntp_signd_socket);
-		my_config.auth.ntp_signd_socket = default_ntp_signd_socket;
-	}
-
-	DESTROY_QUEUE(my_config.auth.trusted_key_list);
-}
-#endif /* DEBUG */
 
 static void
 init_syntax_tree(void)
@@ -394,8 +368,6 @@ free_syntax_tree(void)
 	DESTROY_QUEUE(my_config.ttl);
 	DESTROY_QUEUE(my_config.trap);
 	DESTROY_QUEUE(my_config.vars);
-
-	free_auth_node();
 }
 #endif /* DEBUG */
 
@@ -1128,9 +1100,9 @@ config_other_modes(void)
 static void
 config_auth(void)
 {
+	u_char rankey[9];
 	struct attr_val *my_val;
 	int *key_val;
-	u_char rankey[9];
 	int i;
 
 	/* Crypto Command */
@@ -1149,13 +1121,16 @@ config_auth(void)
 		if (keysdir != default_keysdir)
 			free(keysdir);
 		keysdir = my_config.auth.keysdir;
+		my_config.auth.keysdir = NULL;
 	}
+
 
 	/* ntp_signd_socket Command */
 	if (my_config.auth.ntp_signd_socket) {
 		if (ntp_signd_socket != default_ntp_signd_socket)
 			free(ntp_signd_socket);
 		ntp_signd_socket = my_config.auth.ntp_signd_socket;
+		my_config.auth.ntp_signd_socket = NULL;
 	}
 
 #ifdef OPENSSL
@@ -1166,8 +1141,11 @@ config_auth(void)
 #endif /* OPENSSL */
 
 	/* Keys Command */
-	if (my_config.auth.keys)
+	if (my_config.auth.keys) {
 		getauthkeys(my_config.auth.keys);
+		free(my_config.auth.keys);
+		my_config.auth.keys = NULL;
+	}
 
 	/* Control Key Command */
 	if (my_config.auth.control_key != 0)

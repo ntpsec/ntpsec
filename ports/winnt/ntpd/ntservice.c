@@ -17,7 +17,10 @@
 
 /* $Id: ntservice.c,v 1.3.2.1.10.3 2004/03/08 04:04:22 marka Exp $ */
 
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 
 #include <ntp_cmdargs.h>
@@ -148,17 +151,27 @@ ntservice_init() {
 		SetConsoleTitle(ConsoleTitle);
 	}
 
-	#if defined(_MSC_VER) && defined(_DEBUG)
+#ifdef _CRTDBG_MAP_ALLOC
 		/* ask the runtime to dump memory leaks at exit */
-		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-		#ifdef WANT_LEAK_CHECK_ON_STDERR_TOO
-			/* hart: I haven't seen this work, running ntpd.exe -n from a shell */
-			/* to both a file and the debugger output window */
-			_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-			/* the file being stderr */
+		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF
+			       | _CRTDBG_LEAK_CHECK_DF		/* report on leaks at exit */
+			       | _CRTDBG_CHECK_ALWAYS_DF	/* Check heap every alloc/dealloc */
+#ifdef MALLOC_LINT
+			       | _CRTDBG_DELAY_FREE_MEM_DF	/* Don't actually free memory */
+#endif
+			       );
+#ifdef DOES_NOT_WORK
+			/*
+			 * hart: I haven't seen this work, running ntpd.exe -n from a shell
+			 * to both a file and the debugger output window.  Docs indicate it
+			 * should cause leak report to go to stderr, but it's only seen if
+			 * ntpd runs under a debugger (in the debugger's output), even with
+			 * this block of code enabled.
+			 */
 			_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-		#endif
-	#endif /* _MSC_VER && _DEBUG */
+			_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+#endif
+#endif /* using MS debug C runtime heap, _CRTDBG_MAP_ALLOC */
 
 	atexit( ntservice_exit );
 }

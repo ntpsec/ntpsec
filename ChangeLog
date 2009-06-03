@@ -1,4 +1,5 @@
 * [Bug 1208] decodenetnum() buffer overrun on [ with no ]
+* [Bug 1211] keysdir free()d twice #ifdef DEBUG
 (4.2.5p180) 2009/05/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1200] Enable IPv6 in Windows port
 * Lose FLAG_FIXPOLL, from Dave Mills.
