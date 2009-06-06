@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 int
 decodenetnum(
@@ -15,25 +16,30 @@ decodenetnum(
 	)
 {
 	struct addrinfo hints, *ai = NULL;
-	register int err, i;
+	register int err;
 	register const char *cp;
 	char name[80];
+	char *np;
 
-	cp = num;
+	NTP_REQUIRE(num != NULL);
+	NTP_REQUIRE(strlen(num) < sizeof(name));
 
-	if (*cp == '[') {
-		cp++;
-		for (i = 0; *cp != ']'; cp++, i++)
-			name[i] = *cp;
-	name[i] = '\0';
-	num = name; 
+	if ('[' != num[0]) 
+		cp = num;
+	else {
+		cp = num + 1;
+		np = name; 
+		while (*cp && ']' != *cp)
+			*np++ = *cp++;
+		*np = 0;
+		cp = name; 
 	}
-	memset(&hints, 0, sizeof(struct addrinfo));
+	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_NUMERICHOST;
-	err = getaddrinfo(num, NULL, &hints, &ai);
+	err = getaddrinfo(cp, NULL, &hints, &ai);
 	if (err != 0)
 		return 0;
-	memcpy(netnum, (struct sockaddr_storage *)ai->ai_addr, ai->ai_addrlen); 
+	memcpy(netnum, ai->ai_addr, ai->ai_addrlen); 
 	freeaddrinfo(ai);
 	return 1;
 }

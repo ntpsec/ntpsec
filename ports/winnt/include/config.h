@@ -115,6 +115,18 @@ struct timeval {
 };
 
 /*
+ * On Unix open() works for tty (serial) devices just fine, while on
+ * Windows refclock serial devices are opened using CreateFile, a lower
+ * level than the CRT-provided descriptors, because the C runtime lacks
+ * tty APIs.  For refclocks which wish to use open() as well as or 
+ * instead of refclock_open(), tty_open() is equivalent to open() on
+ * Unix and  implemented in the Windows port similarly to
+ * refclock_open().
+ */
+extern int tty_open(char *, int, int);
+
+
+/*
  * ntp_rfc2553.h has cruft under #ifdef SYS_WINNT which is
  * appropriate for older Microsoft IPv6 definitions, such
  * as in_addr6 being the struct type.  We can differentiate
@@ -281,20 +293,23 @@ char *NTstrerror(int errnum);
 
 # define REFCLOCK			/* from ntpd.mak */
 
-# define CLOCK_LOCAL			/* from ntpd.mak */
 /* # define CLOCK_PARSE  */
-/* # define CLOCK_ATOM */
-/* # define HAVE_TIMEPPS_H */
-/* # define HAVE_PPSAPI */
+# define CLOCK_ARCRON_MSF
+# define OWN_PPS_NTP_TIMESTAMP_FROM_COUNTER	/* timepps.h */
+# define HAVE_TIMEPPS_H
+# define HAVE_PPSAPI
+# define CLOCK_ATOM
 /* # define CLOCK_SHM	*/		 /* from ntpd.mak */
 # define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
 # define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
+# define CLOCK_JUPITER
+# define CLOCK_LOCAL
 # define CLOCK_NMEA
+# define CLOCK_ONCORE
 # define CLOCK_PALISADE		/* from ntpd.mak */
 /* # define CLOCK_DUMBCLOCK */	/* refclock_dumbclock.c needs work to open COMx: */
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
-# define CLOCK_JUPITER
 
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define NTP_POSIX_SOURCE
@@ -317,6 +332,7 @@ char *NTstrerror(int errnum);
 # define HAVE_STDARG_H
 # define HAVE_NO_NICE
 # define HAVE_MKTIME
+# define HAVE_STRUCT_TIMESPEC
 # define TIME_WITH_SYS_TIME
 # define HAVE_IO_COMPLETION_PORT
 # define ISC_PLATFORM_NEEDNTOP

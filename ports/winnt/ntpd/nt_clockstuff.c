@@ -245,9 +245,53 @@ perf_ctr(void)
 		FT_ULL ft4;
 		FT_ULL ft5;
 		LONGLONG offset;
-		char *ntpd_pcc_freq_text = getenv("NTPD_PCC_FREQ");
+		char *ntpd_pcc_freq_text;
 
 		/* one-time initialization */
+
+		/*
+		 * It's time to make some more permanent knobs,
+		 * but for right now the RDTSC aka PCC dance on x86 is:
+		 *
+		 * 1.  With none of these variables defined, only QPC
+		 *     is used because there is no reliable way to
+		 *     detect counter frequency variation after ntpd
+		 *     startup implemented.
+		 * 2.  We need a better knob, but for now if you know
+		 *     your RDTSC / CPU frequency is invariant, set
+		 *     NTPD_PCC and assuming your QPC is based on the
+		 *     PCC as well, RDTSC will be substituted.
+		 * 3.  More forcefully, you can jam in a desired exact
+		 *     processor frequency, expressed in cycles per
+		 *     second by setting NTPD_PCC_FREQ=398125000, for
+		 *     example, if yor actual known CPU frequency is
+		 *     398.125 MHz, and NTPD_PCC doesn't work because
+		 *     QueryPerformanceCounter is implemented using
+		 *     another counter.  It is very easy to make ntpd
+		 *     fall down if the NTPD_PCC_FREQ value isn't very
+		 *     close to the observed RDTSC units per second.
+		 *
+		 * Items 2 and 3 could probably best be combined into one
+		 * new windows-specific command line switch such as
+		 *   ntpd --pcc
+		 * or
+		 *   ntpd --pcc=398125000
+		 *
+		 * They are currently tied to Windows because that is
+		 * the only ntpd port with its own interpolation, and
+		 * to x86/x64 because no one has ported the Windows
+		 * ntpd port to the sole remaining alternative, Intel
+		 * Itanium.
+		 */
+		ntpd_pcc_freq_text = getenv("NTPD_PCC_FREQ");
+
+		if (NULL != getenv("NTPD_QPC")
+		    || (NULL == ntpd_pcc_freq_text && NULL == getenv("NTPD_PCC"))) {
+			use_pcc = 0;
+			QueryPerformanceCounter(&ft1.li);
+			return ft1.ull;
+		}
+
 #ifdef DEBUG
 		if (!NomPerfCtrFreq) {
 			msyslog(LOG_ERR, "NomPerfCtrFreq not initialized before first perf_ctr() call");
@@ -1513,6 +1557,7 @@ interp_time(
 		this_time = baseline_times[best_index];
 		ctr_diff = ctr - baseline_counts[best_index];
 		this_time += (LONGLONG)PERF2HNS((double)ctr_diff);
+
 		return this_time;
 	}
 

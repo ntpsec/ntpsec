@@ -127,11 +127,8 @@ hopfserial_start (
 	int fd;
 	char gpsdev[20];
 
-#ifdef SYS_WINNT
-	(void) sprintf(gpsdev, "COM%d:", unit);
-#else
 	(void) sprintf(gpsdev, DEVICE, unit);
-#endif
+
 	/* LDISC_STD, LDISC_RAW
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
