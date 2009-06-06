@@ -1,5 +1,9 @@
+* [Bug 1084] PPSAPI for ntpd on Windows with DLL backends
+* [Bug 1204] Unix-style refclock device paths on Windows
+* [Bug 1205] partial fix, disable RDTSC use by default on Windows
 * [Bug 1208] decodenetnum() buffer overrun on [ with no ]
 * [Bug 1211] keysdir free()d twice #ifdef DEBUG
+* Enable ONCORE, ARCRON refclocks on Windows (untested)
 (4.2.5p180) 2009/05/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1200] Enable IPv6 in Windows port
 * Lose FLAG_FIXPOLL, from Dave Mills.

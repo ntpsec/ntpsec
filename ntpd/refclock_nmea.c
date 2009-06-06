@@ -83,11 +83,7 @@ extern int async_write(int, const void *, unsigned int);
 /*
  * Definitions
  */
-#ifdef SYS_WINNT
-# define DEVICE "COM%d:" 	/* COM 1 - 3 supported */
-#else
-# define DEVICE	"/dev/gps%d"	/* name of radio device */
-#endif
+#define DEVICE	   "/dev/gps%d"	/* name of radio device */
 #define	SPEED232	B4800	/* uart speed (4800 bps) */
 #define	PRECISION	(-9)	/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
@@ -388,16 +384,20 @@ nmea_ppsapi(
 	
 	/* Fudge time1 onto the pps in the kernel */
 	if ((enb_hardpps) && (fudge != NULL )) {
-		if ((!enb_clear) && (capability & PPS_OFFSETASSERT)) {
+		if (!enb_clear && (capability & PPS_OFFSETASSERT)) {
 			/* Offset on assert */
 			up->pps_params.mode |= PPS_OFFSETASSERT; 
-			up->pps_params.assert_off_tu.tspec.tv_sec = -(*fudge);
-			up->pps_params.assert_off_tu.tspec.tv_nsec = ((*fudge) - (long)(*fudge))*(-1e9);
-		} else if ((enb_clear) && (capability & PPS_OFFSETCLEAR)) {
+			up->pps_params.assert_off_tu.tspec.tv_sec =
+				(time_t)(-*fudge);
+			up->pps_params.assert_off_tu.tspec.tv_nsec = (long)
+				((*fudge - (long)*fudge) * -1e9);
+		} else if (enb_clear && (capability & PPS_OFFSETCLEAR)) {
 			/* Offset on clear */
 			up->pps_params.mode |= PPS_OFFSETCLEAR; 
-			up->pps_params.clear_off_tu.tspec.tv_sec = -(*fudge);
-			up->pps_params.clear_off_tu.tspec.tv_nsec = ((*fudge) - (long)(*fudge))*(-1e9);
+			up->pps_params.clear_off_tu.tspec.tv_sec =
+				(time_t)(-*fudge);
+			up->pps_params.clear_off_tu.tspec.tv_nsec = (long)
+				((*fudge - (long)*fudge) * -1e9);
 		}
 	}
 						
@@ -475,7 +475,7 @@ nmea_pps(
 		return (0);
 	up->ts = ts;
 
-	tstmp.l_ui = ts.tv_sec + JAN_1970;
+	tstmp.l_ui = (int32)(ts.tv_sec + JAN_1970);
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	tstmp.l_uf = (u_int32)dtemp;
 	*tsptr = tstmp;

@@ -88,5 +88,19 @@ typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
 #define	sock_timeval	timeval
 #endif
 
+/*
+ * On Unix open() works for tty (serial) devices just fine, while on
+ * Windows refclock serial devices are opened using CreateFile, a lower
+ * level than the CRT-provided descriptors, because the C runtime lacks
+ * tty APIs.  For refclocks which wish to use open() as well as or 
+ * instead of refclock_open(), tty_open() is equivalent to open() on
+ * Unix and  implemented in the Windows port similarly to
+ * refclock_open().
+ */
+#ifndef SYS_WINNT
+#define tty_open(f, a, m)	open(f, a, m)
+#endif
+
+
 #endif /* _NTP_TYPES_ */
 
