@@ -21,17 +21,64 @@
  */
 
 HANDLE common_serial_open(
-	char *dev
+	char *	dev,
+	char **	pwindev
 	)
 {
 	static HANDLE *	hnds = NULL;	/* handle array */
 	static int	c_hnd = 0;	/* current array size */
+	static char	windev[32];	/* return pointer into this */
 	HANDLE		handle;
 	int		unit;
 	int		prev_c_hnd;
+	char *		pch;
 
-	if (1 != sscanf(dev, "COM%d:", &unit) || unit > MAX_SERIAL)
+	/*
+	 * This is odd, but we'll take any unix device path
+	 * by looking for the initial '/' and strip off everything
+	 * before the final digits, then translate that to COM__:
+	 * maintaining backward compatibility with NTP practice of
+	 * mapping unit 0 to the nonfunctional COM0:
+	 *
+	 * To ease the job of taking the windows COMx: device names
+	 * out of reference clocks, we'll also work with those
+	 * equanimously.
+	 */
+
+	DPRINTF(1, ("common_serial_open given %s\n", dev));
+
+	pch = NULL;
+	if ('/' == dev[0]) {
+		pch = dev + strlen(dev) - 1;
+
+		//DPRINTF(1, ("common_serial_open initial %s\n", pch));
+		if (isdigit(pch[0])) {
+			while (isdigit(pch[0])) {
+				pch--;
+				//DPRINTF(1, ("common_serial_open backed up to %s\n", pch));
+			}
+			pch++;
+		}
+		DPRINTF(1, ("common_serial_open skipped to ending digits leaving %s\n", pch));
+	} else if ('c' == tolower(dev[0])
+		   && 'o' == tolower(dev[1])
+		   && 'm' == tolower(dev[2])) {
+		pch = dev + 3;
+		DPRINTF(1, ("common_serial_open skipped COM leaving %s\n", pch));
+	}
+
+	if (!pch || !isdigit(pch[0])) {
+		DPRINTF(1, ("not a digit: %s\n", pch ? pch : "[NULL]"));
 		return INVALID_HANDLE_VALUE;
+	}
+
+	if (1 != sscanf(pch, "%d", &unit) 
+	    || unit > MAX_SERIAL
+	    || unit < 0) {
+		DPRINTF(1, ("sscanf failure of %s\n", pch));
+		return INVALID_HANDLE_VALUE;
+	}
+
 
 	if (c_hnd < unit + 1) {
 		prev_c_hnd = c_hnd;
@@ -43,10 +90,12 @@ HANDLE common_serial_open(
 		       (c_hnd - prev_c_hnd) * sizeof hnds[0]);
 	}
 
-	if (NULL == hnds[unit])
-		hnds[unit] = 
-			CreateFile(
-				dev,
+	if (NULL == hnds[unit]) {
+		snprintf(windev, sizeof(windev), "\\\\.\\COM%d", unit);
+		DPRINTF(1, ("windows device %s\n", windev));
+		*pwindev = windev;
+		hnds[unit] = CreateFile(
+				windev,
 				GENERIC_READ | GENERIC_WRITE,
 				0, /* sharing prohibited */
 				NULL, /* default security */
@@ -54,6 +103,7 @@ HANDLE common_serial_open(
 				FILE_ATTRIBUTE_NORMAL
 				    | FILE_FLAG_OVERLAPPED,
 				NULL);
+	}
 
 	if (INVALID_HANDLE_VALUE == hnds[unit]) {
 		hnds[unit] = NULL;
@@ -73,41 +123,29 @@ HANDLE common_serial_open(
 }
 
 /*
- * pps_open - open serial port for PPS
+ * tty_open - open serial port for refclock special uses
  *
  * This routine opens a serial port for and returns the 
  * file descriptor if success and -1 if failure.
  */
-int pps_open(
+int tty_open(
 	char *dev,		/* device name pointer */
 	int access,		/* O_RDWR */
 	int mode		/* unused */
 	)
 {
-	HANDLE Handle;
-	char windev[3 + 3 + 1 + 1];	/* COM255:\0 */
-	int unit;
-
-	if (1 != sscanf(dev, "/dev/pps%d", &unit)
-	    || unit > MAX_SERIAL) {
-
-		errno = ENOENT;
-		return -1;
-	}
-	/*
-	 * there never is a COM0: but this is the ntp convention
-	 */
-	_snprintf(windev, sizeof(windev) - 1, "COM%d:", unit);
-	/* _snprintf doesn't always terminate */
-	windev[sizeof(windev) - 1] = 0; 
+	HANDLE	Handle;
+	char *	windev;
 
 	/*
 	 * open communication port handle
 	 */
-	Handle = common_serial_open(windev);
+	windev = NULL;
+	Handle = common_serial_open(dev, &windev);
+	windev = (windev) ? windev : dev;
 
 	if (Handle == INVALID_HANDLE_VALUE) {  
-		msyslog(LOG_ERR, "pps_open: Device %s CreateFile error: %m", windev);
+		msyslog(LOG_ERR, "tty_open: device %s CreateFile error: %m", windev);
 		errno = EMFILE; /* lie, lacking conversion from GetLastError() */
 		return -1;
 	}
@@ -127,6 +165,7 @@ int refclock_open(
 	u_int	flags		/* line discipline flags */
 	)
 {
+	char *		windev;
 	HANDLE		h;
 	COMMTIMEOUTS	timeouts;
 	DCB		dcb;
@@ -134,16 +173,18 @@ int refclock_open(
 	/*
 	 * open communication port handle
 	 */
-	h = common_serial_open(dev);
+	windev = NULL;
+	h = common_serial_open(dev, &windev);
+	windev = (windev) ? windev : dev;
 
 	if (INVALID_HANDLE_VALUE == h) {  
-		msyslog(LOG_ERR, "Device %s CreateFile error: %m", dev);
+		msyslog(LOG_ERR, "Device %s CreateFile error: %m", windev);
 		return -1;
 	}
 
 	/* Change the input/output buffers to be large. */
 	if (!SetupComm(h, 1024, 1024)) {
-		msyslog(LOG_ERR, "Device %s SetupComm error: %m", dev);
+		msyslog(LOG_ERR, "Device %s SetupComm error: %m", windev);
 		return -1;
 	}
 
@@ -151,7 +192,7 @@ int refclock_open(
 
 	if (!GetCommState(h, &dcb)) {
 		msyslog(LOG_ERR, "Device %s GetCommState error: %m",
-				 dev);
+				 windev);
 		return -1;
 	}
 
@@ -195,7 +236,7 @@ int refclock_open(
 
 	default:
 		msyslog(LOG_ERR, "Device %s unsupported baud rate "
-				 "code %u", dev, speed);
+				 "code %u", windev, speed);
 		return -1;
 	}
 
@@ -221,13 +262,13 @@ int refclock_open(
 	dcb.EofChar = 0;
 
 	if (!SetCommState(h, &dcb)) {
-		msyslog(LOG_ERR, "Device %s SetCommState error: %m", dev);
+		msyslog(LOG_ERR, "Device %s SetCommState error: %m", windev);
 		return -1;
 	}
 
 	/* watch out for CR (dcb.EvtChar) as well as the CD line */
 	if (!SetCommMask(h, EV_RXFLAG | EV_RLSD)) {
-		msyslog(LOG_ERR, "Device %s SetCommMask error: %m", dev);
+		msyslog(LOG_ERR, "Device %s SetCommMask error: %m", windev);
 		return -1;
 	}
 
@@ -239,7 +280,7 @@ int refclock_open(
 	timeouts.WriteTotalTimeoutConstant = 0;
 
 	if (!SetCommTimeouts(h, &timeouts)) {
-		msyslog(LOG_ERR, "Device %s SetCommTimeouts error: %m", dev);
+		msyslog(LOG_ERR, "Device %s SetCommTimeouts error: %m", windev);
 		return -1;
 	}
 

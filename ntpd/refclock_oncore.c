@@ -603,8 +603,12 @@ oncore_start(
 	   Note that the linuxPPS N_PPS file is just like a N_TTY, so we can do
 	     the stat below without error even though the file has already had its
 	     line discipline changed by another process.
-	*/
 
+	   The Windows port of ntpd arranges to return duplicate handles for
+	     multiple opens of the same serial device, and doesn't have inodes
+	     for serial handles, so we just open both on Windows.
+	*/
+#ifndef SYS_WINNT
 	if (stat(device1, &stat1)) {
 		stat1.st_dev = stat1.st_ino = -1;
 		sprintf(Msg, "Can't stat fd1 (%s)\n", device1);
@@ -616,6 +620,7 @@ oncore_start(
 		sprintf(Msg, "Can't stat fd2 (%s) errno = %d\n", device2, errno);
 		record_clock_stats(&(instance->peer->srcadr), Msg);
 	}
+#endif	/* !SYS_WINNT */
 
 	if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW))) {
 		sprintf(Msg, "Can't open fd1 (%s)\n", device1);
@@ -628,17 +633,20 @@ oncore_start(
 	   /dev/pps<n> file, and only check (carefully) for its existance here
 	 */
 
+#ifndef SYS_WINNT
 	if ((stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino))	/* same device here */
 		fd2 = fd1;
-	else {	/* different devices here */
-		if ((fd2=open(device2, O_RDWR)) < 0) {
+	else
+#endif	/* !SYS_WINNT */
+	{	/* different devices here */
+		if ((fd2=tty_open(device2, O_RDWR, 0777)) < 0) {
 			sprintf(Msg, "Can't open fd2 (%s)\n", device2);
 			record_clock_stats(&(instance->peer->srcadr), Msg);
 			exit(1);
 		}
 	}
 
-	/* open ppsapi soure */
+	/* open ppsapi source */
 
 	if (time_pps_create(fd2, &instance->pps_h) < 0) {
 		record_clock_stats(&(instance->peer->srcadr), "PPSAPI not found in kernel");

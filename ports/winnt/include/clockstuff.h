@@ -1,10 +1,10 @@
 #ifndef _CLOCKSTUFF_H
 #define _CLOCKSTUFF_H
 
-#include "ntp_machine.h"
 #include <time.h>
 #include <sys\timeb.h>
 
+#include "ntp_fp.h"
 #include "ntp_syslog.h"
 
 

@@ -652,15 +652,17 @@ arc_start(
 #ifdef DEBUG
 	if(debug) { printf("arc: unit %d using open().\n", unit); }
 #endif
-	fd = open(device, OPEN_FLAGS);
+	fd = tty_open(device, OPEN_FLAGS, 0777);
 	if(fd < 0) {
 #ifdef DEBUG
-		if(debug) { printf("arc: failed [open()] to open %s.\n", device); }
+		if(debug) { printf("arc: failed [tty_open()] to open %s.\n", device); }
 #endif
 		return(0);
 	}
 
+#ifndef SYS_WINNT
 	fcntl(fd, F_SETFL, 0); /* clear the descriptor flags */
+#endif
 #ifdef DEBUG
 	if(debug)
 	{ printf("arc: opened RS232 port with file descriptor %d.\n", fd); }

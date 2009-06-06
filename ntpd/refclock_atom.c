@@ -141,7 +141,7 @@ atom_start(
 	 * not necessarily the port used for the associated radio.
 	 */
 	sprintf(device, DEVICE, unit);
-	up->fddev = open(device, O_RDWR, 0777);
+	up->fddev = tty_open(device, O_RDWR, 0777);
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
 		    "refclock_atom: %s: %m", device);
