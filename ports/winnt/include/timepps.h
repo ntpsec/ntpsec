@@ -448,6 +448,7 @@ load_pps_provider(
 	if (NULL == pprov_init) {
 		fprintf(stderr, "load_pps_provider: entrypoint ppsapi_prov_init not found in %s\n", dllpath);
 		free(prov);
+		FreeLibrary(hmod);
 		return EFAULT;
 	}
 
@@ -459,6 +460,7 @@ load_pps_provider(
 
 	if (!prov->caps) {
 		free(prov);
+		FreeLibrary(hmod);
 		return EACCES;
 	}
 
@@ -473,12 +475,13 @@ load_pps_provider(
 		if (prov->full_name)
 			free(prov->full_name);
 		free(prov);
+		FreeLibrary(hmod);
 		return EINVAL;
 	}
 
 	prov->ptime_pps_create = (provtime_pps_create)
 		GetProcAddress(hmod, "prov_time_pps_create");
-	prov->ptime_pps_destroy = (provtime_pps_create)
+	prov->ptime_pps_destroy = (provtime_pps_destroy)
 		GetProcAddress(hmod, "prov_time_pps_destroy");
 	prov->ptime_pps_setparams = (provtime_pps_setparams)
 		GetProcAddress(hmod, "prov_time_pps_setparams");
@@ -498,6 +501,7 @@ load_pps_provider(
 		free(prov->short_name);
 		free(prov->full_name);
 		free(prov);
+		FreeLibrary(hmod);
 		return EINVAL;
 	}
 
@@ -623,7 +627,11 @@ time_pps_destroy(
 	err = (*punit->provider->ptime_pps_destroy)(punit, punit->context);
 
 	free(punit);
-	RETURN_PPS_ERRNO(err);
+
+	if (err)
+		RETURN_PPS_ERRNO(err);
+	else
+		return 0;
 }
 
 /*
