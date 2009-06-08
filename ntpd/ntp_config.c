@@ -626,11 +626,30 @@ create_unpeer_node(
 	struct address_node *addr
 	)
 {
-	struct unpeer_node* my_node;
+	struct unpeer_node *	my_node;
+	char *			pch;
 
-	my_node = get_node(sizeof *my_node);
+	my_node = get_node(sizeof(*my_node));
 
-	my_node->addr = addr;
+	/*
+	 * From the parser's perspective an association ID fits into
+	 * its generic T_String definition of a name/address "address".
+	 * We treat all valid 16-bit numbers as association IDs.
+	 */
+	pch = addr->address;
+	while (*pch && isdigit(*pch))
+		pch++;
+
+	if (!*pch 
+	    && 1 == sscanf(addr->address, "%u", &my_node->assocID)
+	    && my_node->assocID <= USHRT_MAX) {
+		
+		destroy_address_node(addr);
+		my_node->addr = NULL;
+	} else {
+		my_node->assocID = 0;
+		my_node->addr = addr;
+	}
 
 	return my_node;
 }
@@ -2059,11 +2078,29 @@ config_unpeers(void)
 	while (!empty(my_config.unpeers)) {
 		curr_unpeer = (struct unpeer_node *) dequeue(my_config.unpeers);
 
-		/* Attempt to resolve the address */
+		/*
+		 * Either AssocID will be zero, and we unpeer by name/
+		 * address addr, or it is nonzero and addr NULL.
+		 */
+		if (curr_unpeer->assocID) {
+			peer = findpeerbyassoc((u_int)curr_unpeer->assocID);
+			if (peer != NULL) {
+				peer_clear(peer, "GONE");
+				unpeer(peer);
+			}	
+
+			/* Ok, everything done. Free up peer node memory */
+			free_node(curr_unpeer);
+			continue;
+		}
+
+		/* Attempt to resolve the name or address */
 		memset((char *)&peeraddr, 0, sizeof(peeraddr));
 		peeraddr.ss_family = (u_short)curr_unpeer->addr->type;
 
-		status = get_multiple_netnums(curr_unpeer->addr->address, &peeraddr, &res, 0, t_UNK);
+		status = get_multiple_netnums(
+			curr_unpeer->addr->address, &peeraddr, &res, 0,
+			t_UNK);
 
 		/* I don't know why getnetnum would return -1.
 		 * The old code had this test, so I guess it must be
@@ -2114,8 +2151,7 @@ config_unpeers(void)
 		}
 
 		/* Ok, everything done. Free up peer node memory */
-		free(curr_unpeer->addr->address);
-		free_node(curr_unpeer->addr);
+		destroy_address_node(curr_unpeer->addr);
 		free_node(curr_unpeer);
 	}
 }

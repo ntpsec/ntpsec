@@ -34,19 +34,26 @@ enum {
 	SERIAL_WRITE
 };
 
+#ifdef _MSC_VER
+# pragma warning(push)
+# pragma warning(disable: 201)		/* nonstd extension nameless union */
+#endif
 
 typedef struct IoCompletionInfo {
-	OVERLAPPED			overlapped;
-	int				request_type;
+	OVERLAPPED		overlapped;	/* must be first */
+	int			request_type;
 	union {
-		recvbuf_t		*rbuf;
-		transmitbuf_t		*tbuf;
-	} buff_space;
+		recvbuf_t *	recv_buf;
+		transmitbuf_t *	trans_buf;
+	};
+#ifdef DEBUG
+	ISC_LINK(struct IoCompletionInfo)	link;
+#endif
 } IoCompletionInfo;
 
-#define	recv_buf	buff_space.rbuf
-#define	trans_buf	buff_space.tbuf
-
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
 
 /*
  * local function definitions
@@ -57,6 +64,15 @@ static int OnSocketRecv(ULONG_PTR, IoCompletionInfo *, DWORD, int);
 static int OnSerialWaitComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
 static int OnSerialReadComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
 static int OnWriteComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
+
+/* keep a list to traverse to free memory on debug builds */
+#ifdef DEBUG
+static void free_io_completion_port_mem(void);
+ISC_LIST(IoCompletionInfo)	compl_info_list;
+CRITICAL_SECTION		compl_info_lock;
+#define LOCK_COMPL()		EnterCriticalSection(&compl_info_lock);
+#define UNLOCK_COMPL()		LeaveCriticalSection(&compl_info_lock);
+#endif
 
 /* #define USE_HEAP */
 
@@ -92,6 +108,12 @@ GetHeapAlloc(char *fromfunc)
 #endif
 	DPRINTF(3, ("Allocation %d memory for %s, ptr %x\n", sizeof(IoCompletionInfo), fromfunc, lpo));
 
+#ifdef DEBUG
+	LOCK_COMPL();
+	ISC_LIST_APPEND(compl_info_list, lpo, link);
+	UNLOCK_COMPL();
+#endif
+
 	return (lpo);
 }
 
@@ -99,6 +121,12 @@ void
 FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
 {
 	DPRINTF(3, ("Freeing memory for %s, ptr %x\n", fromfunc, lpo));
+
+#ifdef DEBUG
+	LOCK_COMPL();
+	ISC_LIST_DEQUEUE(compl_info_list, lpo, link);
+	UNLOCK_COMPL();
+#endif
 
 #ifdef USE_HEAP
 	HeapFree(hHeapHandle, 0, lpo);
@@ -257,6 +285,12 @@ init_io_completion_port(
 	unsigned tid;
 	HANDLE thread;
 
+#ifdef DEBUG
+	ISC_LIST_INIT(compl_info_list);
+	InitializeCriticalSection(&compl_info_lock);
+	atexit(&free_io_completion_port_mem);
+#endif
+
 #ifdef USE_HEAP
 	/*
 	 * Create a handle to the Heap
@@ -301,8 +335,8 @@ init_io_completion_port(
 	/*
 	 * Initialize the Wait Handles
 	 */
-	WaitHandles[0] = get_io_event();
-	WaitHandles[1] = get_exit_event(); /* exit request */
+	WaitHandles[0] = WaitableIoEventHandle;
+	WaitHandles[1] = WaitableExitEventHandle; /* exit request */
 	WaitHandles[2] = get_timer_handle();
 
 	/* Have one thread servicing I/O - there were 4, but this would 
@@ -319,6 +353,31 @@ init_io_completion_port(
 	CloseHandle(thread);
 }
 	
+
+#ifdef DEBUG
+static void
+free_io_completion_port_mem(
+	void
+	)
+{
+	IoCompletionInfo *	pci;
+
+	LOCK_COMPL();
+	for (pci = ISC_LIST_HEAD(compl_info_list);
+	     pci != NULL;
+	     pci = ISC_LIST_HEAD(compl_info_list)) {
+
+		/* this handles both xmit and recv buffs */
+		if (pci->recv_buf != NULL)
+			free(pci->recv_buf);
+
+		FreeHeap(pci, "free_io_completion_port_mem");
+		/* FreeHeap() removed this item from compl_info_list */
+	}
+	UNLOCK_COMPL()
+}
+#endif	/* DEBUG */
+
 
 void
 uninit_io_completion_port(
@@ -618,6 +677,7 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	if (errstatus == WSA_OPERATION_ABORTED)
 	{
 		freerecvbuf(buff);
+		lpo->recv_buf = NULL;
 		FreeHeap(lpo, "OnSocketRecv: Socket Closed");
 		return (1);
 	}
@@ -717,6 +777,7 @@ OnWriteComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	buff = lpo->trans_buf;
 
 	free_trans_buf(buff);
+	lpo->trans_buf = NULL;
 
 	if (SOCK_SEND == lpo->request_type) {
 		switch (errstatus) {
@@ -802,8 +863,9 @@ io_completion_port_sendto(
 			 * Something bad happened
 			 */
 			default :
-				netsyslog(LOG_ERR, "WSASendTo - error sending message: %m");
+				msyslog(LOG_ERR, "WSASendTo - error sending message: %m");
 				free_trans_buf(buff);
+				lpo->trans_buf = NULL;
 				FreeHeap(lpo, "io_completion_port_sendto");
 				break;
 			}
@@ -854,13 +916,9 @@ async_write(
 	if (! buff || ! lpo) {
 		if (buff) {
 			free_trans_buf(buff);
-#ifdef DEBUG
-			if (debug)
-				printf("async_write: out of memory, \n");
-#endif
-		} else {
+			DPRINTF(1, ("async_write: out of memory\n"));
+		} else
 			msyslog(LOG_ERR, "No more transmit buffers left - data discarded");
-		}
 
 		errno = ENOMEM;
 		return -1;
@@ -870,11 +928,13 @@ async_write(
 	lpo->trans_buf = buff;
 	memcpy(&buff->pkt, data, count);
 
-	if (! WriteFile((HANDLE)_get_osfhandle(fd), buff->pkt, count, &BytesWritten, (LPOVERLAPPED) lpo) &&
-		ERROR_IO_PENDING != GetLastError()) {
+	if (!WriteFile((HANDLE)_get_osfhandle(fd), buff->pkt, count,
+		&BytesWritten, (LPOVERLAPPED)lpo)
+		&& ERROR_IO_PENDING != GetLastError()) {
 
 		msyslog(LOG_ERR, "async_write - error %m");
 		free_trans_buf(buff);
+		lpo->trans_buf = NULL;
 		FreeHeap(lpo, "async_write");
 		errno = EBADF;
 		return -1;

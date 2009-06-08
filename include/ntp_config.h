@@ -84,7 +84,8 @@ struct peer_node {
 };
 
 struct unpeer_node {
-    struct address_node *addr;
+	u_int			assocID;
+	struct address_node *	addr;
 };
 
 struct auth_node {
@@ -166,11 +167,11 @@ struct config_tree {
 
 /* Structure for holding a remote configuration command */
 struct REMOTE_CONFIG_INFO {
-    char buffer[MAXLINE];
-    char err_msg[MAXLINE];
-    int pos;
-    int err_pos;
-    int no_errors;
+	char buffer[MAXLINE];
+	char err_msg[MAXLINE];
+	int pos;
+	int err_pos;
+	int no_errors;
 };
 
 

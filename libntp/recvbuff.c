@@ -13,6 +13,12 @@
 #include "iosignal.h"
 
 #include <isc/list.h>
+
+
+#ifdef DEBUG
+static void uninit_recvbuff(void);
+#endif
+
 /*
  * Memory allocation
  */
@@ -21,7 +27,7 @@ static u_long volatile free_recvbufs;	/* number of recvbufs on freelist */
 static u_long volatile total_recvbufs;	/* total recvbufs currently in use */
 static u_long volatile lowater_adds;	/* number of times we have added memory */
 static u_long volatile buffer_shortfall;/* number of missed free receive buffers
-                                           between replenishments */
+					   between replenishments */
 
 static ISC_LIST(recvbuf_t)	full_recv_list;	/* Currently used recv buffers */
 static ISC_LIST(recvbuf_t)	free_recv_list;	/* Currently unused buffers */
@@ -80,11 +86,20 @@ create_buffers(int nbufs)
 	abuf = nbufs + buffer_shortfall;
 	buffer_shortfall = 0;
 
-	bufp = (recvbuf_t *) emalloc(abuf*sizeof(recvbuf_t));
+#ifndef DEBUG
+	bufp = emalloc(abuf * sizeof(*bufp));
+#endif
 
-	for (i = 0; i < abuf; i++)
-	{
-		memset((char *) bufp, 0, sizeof(recvbuf_t));
+	for (i = 0; i < abuf; i++) {
+#ifdef DEBUG
+		/*
+		 * Allocate each buffer individually so they can be
+		 * free()d during ntpd shutdown on DEBUG builds to
+		 * keep them out of heap leak reports.
+		 */
+		bufp = emalloc(sizeof(*bufp));
+#endif
+		memset(bufp, 0, sizeof(*bufp));
 		ISC_LIST_APPEND(free_recv_list, bufp, link);
 		bufp++;
 		free_recvbufs++;
@@ -111,7 +126,36 @@ init_recvbuff(int nbufs)
 	InitializeCriticalSection(&RecvLock);
 #endif
 
+#ifdef DEBUG
+	atexit(&uninit_recvbuff);
+#endif
 }
+
+
+#ifdef DEBUG
+static void
+uninit_recvbuff(void)
+{
+	recvbuf_t *		rb;
+
+	for (rb = ISC_LIST_HEAD(full_recv_list);
+	     rb != NULL;
+	     rb = ISC_LIST_HEAD(full_recv_list)) {
+	
+		ISC_LIST_DEQUEUE(full_recv_list, rb, link);
+		free(rb);
+	}
+
+	for (rb = ISC_LIST_HEAD(free_recv_list);
+	     rb != NULL;
+	     rb = ISC_LIST_HEAD(free_recv_list)) {
+	
+		ISC_LIST_DEQUEUE(free_recv_list, rb, link);
+		free(rb);
+	}
+}
+#endif	/* DEBUG */
+
 
 /*
  * freerecvbuf - make a single recvbuf available for reuse
