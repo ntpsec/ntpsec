@@ -27,6 +27,7 @@
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
+#include "refclock_atom.h"
 #endif /* HAVE_PPSAPI */
 
 #ifdef SYS_WINNT
@@ -96,16 +97,13 @@ extern int async_write(int, const void *, unsigned int);
  * Unit control structure
  */
 struct nmeaunit {
-	int	pollcnt;	/* poll message counter */
-	int	polled;		/* Hand in a sample? */
+#ifdef HAVE_PPSAPI
+	struct refclock_atom atom; /* PPSAPI structure */
+	int	tcount;		/* timecode sample counter */
+	int	pcount;		/* PPS sample counter */
+#endif /* HAVE_PPSAPI */
 	l_fp	tstamp;		/* timestamp of last poll */
 	int	gps_time;	/* 0 UTC, 1 GPS time */
-#ifdef HAVE_PPSAPI
-	struct timespec ts;	/* last timestamp */
-	pps_params_t pps_params; /* pps parameters */
-	pps_info_t pps_info;	/* last pps data */
-	pps_handle_t handle;	/* pps handlebars */
-#endif /* HAVE_PPSAPI */
 };
 
 /*
@@ -113,16 +111,13 @@ struct nmeaunit {
  */
 static	int	nmea_start	(int, struct peer *);
 static	void	nmea_shutdown	(int, struct peer *);
-#ifdef HAVE_PPSAPI
-static	void	nmea_control	(int, struct refclockstat *, struct
-				    refclockstat *, struct peer *);
-static	int	nmea_ppsapi	(struct peer *, int, int, double *);
-static	int	nmea_pps	(struct nmeaunit *, l_fp *);
-#endif /* HAVE_PPSAPI */
 static	void	nmea_receive	(struct recvbuf *);
 static	void	nmea_poll	(int, struct peer *);
+#ifdef HAVE_PPSAPI
+static  void	nmea_timer	(int, struct peer *);
+#endif /* HAVE_PPSAPI */
 static	void	gps_send	(int, const char *, struct peer *);
-static	char	*field_parse	(char *, int);
+static	char *	field_parse	(char *, int);
 static	int	nmea_checksum_ok(const char *);
 
 /*
@@ -130,16 +125,16 @@ static	int	nmea_checksum_ok(const char *);
  */
 struct	refclock refclock_nmea = {
 	nmea_start,		/* start up driver */
-	nmea_shutdown,	/* shut down driver */
+	nmea_shutdown,		/* shut down driver */
 	nmea_poll,		/* transmit poll message */
-#ifdef HAVE_PPSAPI
-	nmea_control,		/* fudge control */
-#else
 	noentry,		/* fudge control */
-#endif /* HAVE_PPSAPI */
 	noentry,		/* initialize driver */
 	noentry,		/* buginfo */
-	NOFLAGS			/* not used */
+#ifdef HAVE_PPSAPI
+	nmea_timer,		/* called once per second */
+#else
+	noentry,		/* timer */
+#endif
 };
 
 /*
@@ -257,12 +252,12 @@ nmea_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct nmeaunit *)emalloc(sizeof(*up));
-	if (!up) {
+	up = emalloc(sizeof(*up));
+	if (NULL == up) {
 		close(fd);
 		return (0);
 	}
-	memset((char *)up, 0, sizeof(struct nmeaunit));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = nmea_receive;
 	pp->io.srcclock = (caddr_t)peer;
@@ -281,22 +276,15 @@ nmea_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
-	up->pollcnt = 2;
-	gps_send(pp->io.fd,"$PMOTG,RMC,0000*1D\r\n", peer);
+
+	gps_send(fd,"$PMOTG,RMC,0000*1D\r\n", peer);
 
 #ifdef HAVE_PPSAPI
 	/*
-	 * Start the PPSAPI interface if it is there. Default to use
-	 * the assert edge and do not enable the kernel hardpps.
+	 * Light up the PPSAPI interface.
 	 */
-	if (time_pps_create(fd, &up->handle) < 0) {
-		up->handle = 0;
-		msyslog(LOG_ERR,
-		    "refclock_nmea: time_pps_create failed: %m");
-		return (1);
-	}
-	return(nmea_ppsapi(peer, 0, 0, NULL));
-#else
+	return (refclock_ppsapi(fd, &up->atom));
+#else /* HAVE_PPSAPI */
 	return (1);
 #endif /* HAVE_PPSAPI */
 }
@@ -317,171 +305,39 @@ nmea_shutdown(
 
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-#ifdef HAVE_PPSAPI
-	if (NULL != up && up->handle)
-		time_pps_destroy(up->handle);
-#endif /* HAVE_PPSAPI */
 	io_closeclock(&pp->io);
-	if (NULL != up)
-		free(up);
+	free(up);
 }
 
+/*
+ * nmea_timer - called once per second, fetches PPS
+ *		timestamp and stuffs in median filter.
+ */
 #ifdef HAVE_PPSAPI
-/*
- * nmea_control - fudge control
- */
 static void
-nmea_control(
-	int unit,		/* unit (not used */
-	struct refclockstat *in, /* input parameters (not uded) */
-	struct refclockstat *out, /* output parameters (not used) */
-	struct peer *peer	/* peer structure pointer */
+nmea_timer(
+	int		unit,
+	struct peer *	peer
 	)
 {
-	struct refclockproc *pp;
-
-	pp = peer->procptr;
-	nmea_ppsapi(peer, pp->sloppyclockflag & CLK_FLAG2,
-	    pp->sloppyclockflag & CLK_FLAG3, &(pp->fudgetime1));
-}
-
-
-/*
- * Initialize PPSAPI
- */
-int
-nmea_ppsapi(
-	struct peer *peer,	/* peer structure pointer */
-	int enb_clear,		/* clear enable */
-	int enb_hardpps,	/* hardpps enable */
-	double *fudge		/* fudge value for time1 */
-	)
-{
-	struct refclockproc *pp;
 	struct nmeaunit *up;
-	int capability;
+	struct refclockproc *pp;
+
+	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-	if (time_pps_getcap(up->handle, &capability) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_nmea: time_pps_getcap failed: %m");
-		return (0);
-	}
-	memset(&up->pps_params, 0, sizeof(pps_params_t));
-	up->pps_params.api_version = PPS_API_VERS_1;
-	if (enb_clear)
-		up->pps_params.mode = capability & PPS_CAPTURECLEAR;
-	else
-		up->pps_params.mode = capability & PPS_CAPTUREASSERT;
-	if (!up->pps_params.mode) {
-		msyslog(LOG_ERR,
-		    "refclock_nmea: invalid capture edge %d",
-		    !enb_clear);
-		return (0);
-	}
-	up->pps_params.mode |= PPS_TSFMT_TSPEC;
-	
-	/* Fudge time1 onto the pps in the kernel */
-	if ((enb_hardpps) && (fudge != NULL )) {
-		if (!enb_clear && (capability & PPS_OFFSETASSERT)) {
-			/* Offset on assert */
-			up->pps_params.mode |= PPS_OFFSETASSERT; 
-			up->pps_params.assert_off_tu.tspec.tv_sec =
-				(time_t)(-*fudge);
-			up->pps_params.assert_off_tu.tspec.tv_nsec = (long)
-				((*fudge - (long)*fudge) * -1e9);
-		} else if (enb_clear && (capability & PPS_OFFSETCLEAR)) {
-			/* Offset on clear */
-			up->pps_params.mode |= PPS_OFFSETCLEAR; 
-			up->pps_params.clear_off_tu.tspec.tv_sec =
-				(time_t)(-*fudge);
-			up->pps_params.clear_off_tu.tspec.tv_nsec = (long)
-				((*fudge - (long)*fudge) * -1e9);
+
+	if (pp->sloppyclockflag & CLK_FLAG1) {
+		if (refclock_pps(peer, &up->atom, pp->sloppyclockflag) >
+		    0) {
+			up->pcount++,
+			peer->flags |= FLAG_PPS;
 		}
 	}
-						
-	if (time_pps_setparams(up->handle, &up->pps_params) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_nmea: time_pps_setparams failed: %m");
-		return (0);
-	}
-	if (enb_hardpps) {
-		if (time_pps_kcbind(up->handle, PPS_KC_HARDPPS,
-				    up->pps_params.mode & 0x0F,
-				    PPS_TSFMT_TSPEC) < 0) {
-			msyslog(LOG_ERR,
-			    "refclock_nmea: time_pps_kcbind failed: %m");
-			return (0);
-		}
-		pps_enable = 1;
-	}
-	peer->precision = PPS_PRECISION;
-
-#if DEBUG
-	if (debug) {
-		time_pps_getparams(up->handle, &up->pps_params);
-		printf(
-		    "refclock_ppsapi: capability 0x%x version %d mode 0x%x kern %d\n",
-		    capability, up->pps_params.api_version,
-		    up->pps_params.mode, enb_hardpps);
-	}
-#endif
-
-	return (1);
 }
+#endif	/* HAVE_PPSAPI */
 
-/*
- * Get PPSAPI timestamps.
- *
- * Return 0 on failure and 1 on success.
- */
-static int
-nmea_pps(
-	struct nmeaunit *up,
-	l_fp *tsptr
-	)
-{
-	pps_info_t pps_info;
-	struct timespec timeout, ts;
-	double dtemp;
-	l_fp tstmp;
-
-	/*
-	 * Convert the timespec nanoseconds field to ntp l_fp units.
-	 */ 
-	if (up->handle == 0)
-		return (0);
-	timeout.tv_sec = 0;
-	timeout.tv_nsec = 0;
-	memcpy(&pps_info, &up->pps_info, sizeof(pps_info_t));
-	if (time_pps_fetch(up->handle, PPS_TSFMT_TSPEC, &up->pps_info,
-	    &timeout) < 0)
-		return (0);
-	if (up->pps_params.mode & PPS_CAPTUREASSERT) {
-		if (pps_info.assert_sequence ==
-		    up->pps_info.assert_sequence)
-			return (0);
-		ts = up->pps_info.assert_timestamp;
-	} else if (up->pps_params.mode & PPS_CAPTURECLEAR) {
-		if (pps_info.clear_sequence ==
-		    up->pps_info.clear_sequence)
-			return (0);
-		ts = up->pps_info.clear_timestamp;
-	} else {
-		return (0);
-	}
-	if ((up->ts.tv_sec == ts.tv_sec) && (up->ts.tv_nsec == ts.tv_nsec))
-		return (0);
-	up->ts = ts;
-
-	tstmp.l_ui = (int32)(ts.tv_sec + JAN_1970);
-	dtemp = ts.tv_nsec * FRAC / 1e9;
-	tstmp.l_uf = (u_int32)dtemp;
-	*tsptr = tstmp;
-	return (1);
-}
-#endif /* HAVE_PPSAPI */
 
 /*
  * nmea_receive - receive data from the serial interface
@@ -608,7 +464,6 @@ nmea_receive(
 	cp = pp->a_lastcode;
 
 	pp->lastrec = up->tstamp = rd_timestamp;
-	up->pollcnt = 2;
 
 	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
 
@@ -836,14 +691,7 @@ nmea_receive(
 			cp = dp = NULL;
 		}
 
-		/*
-		 * Blanking everything after the decimal point '.' is easy and 
-		 * gives enough error for at least a few neighbors to be as 
-		 * likely as you to be the one with the reflock.  We're keeping
-		 * degrees and minutes but tossing the seconds (expressed as
-		 * decimal fractions of a minute).  Degrees minutes seconds,
-		 * not hours minutes seconds.  :)
-		 */
+		/* Blank the entire latitude & longitude. */
 		while (cp) {
 			while (',' != *cp) {
 				if ('.' != *cp)
@@ -851,19 +699,14 @@ nmea_receive(
 				cp++;
 			}
 
-			/*
-			 * blank the longitude at cp then the latitude at dp
-			 * then we're done.
-			 */
+			/* Longitude at cp then latitude at dp */
 			if (cp < dp)
 				cp = dp;
 			else
 				cp = NULL;
 		}
 
-		/*
-		 * blank the checksum, last two characters on the line
-		 */
+		/* Blank the checksum, the last two characters */
 		if (dp) {
 			cp = pp->a_lastcode + pp->lencode - 2;
 			if (0 == cp[2])
@@ -872,33 +715,8 @@ nmea_receive(
 
 	}
 
-#ifdef HAVE_PPSAPI
 	/*
-	 * If the PPSAPI is working, rather use its timestamps.
-	 * assume that the PPS occurs on the second so blow any msec
-	 */
-	if (nmea_pps(up, &rd_timestamp) == 1) {
-		pp->lastrec = up->tstamp = rd_timestamp;
-		pp->nsec = 0;
-	}
-#endif /* HAVE_PPSAPI */
-
-	/*
-	 * Process the new sample in the median filter and determine the
-	 * reference clock offset and dispersion. We use lastrec as both
-	 * the reference time and receive time, in order to avoid being
-	 * cute, like setting the reference time later than the receive
-	 * time, which may cause a paranoid protocol module to chuck out
-	 * the data.
-	 */
-
-	if (!refclock_process(pp)) {
-		refclock_report(peer, CEVNT_BADTIME);
-		return;
-	}
-
-	/*
-	 * Note that we're only using GPS timescale from now on.
+	 * Note if we're only using GPS timescale from now on.
 	 */
 	if (cmdtypezdg && !up->gps_time) {
 		up->gps_time = 1;
@@ -908,18 +726,16 @@ nmea_receive(
 	}
 
 	/*
-	 * Only go on if we had been polled.
+	 * Process the new sample in the median filter and determine the
+	 * timecode timestamp, but only if the PPS is not in control.
 	 */
-	if (!up->polled)
+#ifdef HAVE_PPSAPI
+	up->tcount++;
+	if (peer->flags & FLAG_PPS)
 		return;
-	up->polled = 0;
-	pp->lastref = pp->lastrec;
-	refclock_receive(peer);
-
-	/* If we get here - what we got from the clock is OK, so say so */
-	refclock_report(peer, CEVNT_NOMINAL);
-
-	record_clock_stats(&peer->srcadr, pp->a_lastcode);
+#endif /* HAVE_PPSAPI */
+	if (!refclock_process(pp))
+		refclock_report(peer, CEVNT_BADTIME);
 }
 
 
@@ -940,12 +756,31 @@ nmea_poll(
 
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-	if (up->pollcnt == 0)
-	    refclock_report(peer, CEVNT_TIMEOUT);
-	else
-	    up->pollcnt--;
+
+	/*
+	 * Process median filter samples. If none received, declare a
+	 * timeout and keep going.
+	 */
+#ifdef HAVE_PPSAPI
+	if (up->pcount == 0)
+		peer->flags &= ~FLAG_PPS;
+	if (up->tcount == 0) {
+		pp->coderecv = pp->codeproc;
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+	up->pcount = up->tcount = 0;
+#else /* HAVE_PPSAPI */
+	if (pp->coderecv == pp->codeproc) {
+		refclock_report(peer, CEVNT_TIMEOUT);
+		return;
+	}
+#endif /* HAVE_PPSAPI */
+
 	pp->polls++;
-	up->polled = 1;
+	pp->lastref = pp->lastrec;
+	refclock_receive(peer);
+	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 
 	/*
 	 * usually nmea_receive can get a timestamp every second, 
@@ -1046,4 +881,4 @@ nmea_checksum_ok(
 }
 #else
 int refclock_nmea_bs;
-#endif /* REFCLOCK */
+#endif /* REFCLOCK && CLOCK_NMEA */

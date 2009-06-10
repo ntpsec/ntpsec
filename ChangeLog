@@ -1,3 +1,6 @@
+* timepps-Solaris.h pps_handle_t changed from pointer to scalar
+* NMEA refclock converted to use common PPSAPI code
+* Spectracom refclock added to Windows port of ntpd
 * [Bug 1206] Required compiler changes for Windows
 * [Bug 1084] PPSAPI for ntpd on Windows with DLL backends
 * [Bug 1204] Unix-style refclock device paths on Windows
