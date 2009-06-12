@@ -563,14 +563,14 @@ ntpdmain(
 	}
 #endif
 
+	setup_logfile();
+
 #ifdef SYS_WINNT
 	/*
 	 * Initialize the time structures and variables
 	 */
 	init_winnt_time();
 #endif
-
-	setup_logfile();
 
 	/*
 	 * Initialize random generator and public key pair

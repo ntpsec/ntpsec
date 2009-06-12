@@ -360,3 +360,27 @@ flag = {
 	Note: The kernel time discipline is disabled with this option.
 	_EndOfDoc_;
 };
+
+flag = {
+    ifdef     = SYS_WINNT;
+    name      = usepcc;
+    descrip   = "Use CPU cycle counter (Windows only)";
+    doc = <<-  _EndOfDoc_
+	Attempt to substitute the CPU counter for QueryPerformanceCounter.
+	The CPU counter and QueryPerformanceCounter are compared, and if
+	they have the same frequency, the CPU counter (RDTSC on x86) is
+	used directly, saving the overhead of a system call.
+	_EndOfDoc_;
+};
+
+flag = {
+    ifdef     = SYS_WINNT;
+    name      = pccfreq;
+    arg-type  = string;
+    descrip   = "Force CPU cycle counter use (Windows only)";
+    doc = <<-  _EndOfDoc_
+	Force substitution the CPU counter for QueryPerformanceCounter.
+	The CPU counter (RDTSC on x86) is used unconditionally with the
+	given frequency (in Hz).
+	_EndOfDoc_;
+};

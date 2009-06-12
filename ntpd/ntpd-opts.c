@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  Saturday June  6, 2009 at 07:38:41 AM EDT
+ *  It has been AutoGen-ed  Thursday June 11, 2009 at 11:04:39 PM UTC
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -388,6 +388,43 @@ tSCC    zSlewText[] =
 tSCC    zSlew_NAME[]               = "SLEW";
 tSCC    zSlew_Name[]               = "slew";
 #define SLEW_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Usepcc option description:
+ */
+#ifdef SYS_WINNT
+tSCC    zUsepccText[] =
+        "Use CPU cycle counter (Windows only)";
+tSCC    zUsepcc_NAME[]             = "USEPCC";
+tSCC    zUsepcc_Name[]             = "usepcc";
+#define USEPCC_FLAGS       (OPTST_DISABLED)
+
+#else   /* disable Usepcc */
+#define VALUE_OPT_USEPCC NO_EQUIVALENT
+#define USEPCC_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define zUsepccText       NULL
+#define zUsepcc_NAME      NULL
+#define zUsepcc_Name      NULL
+#endif  /* SYS_WINNT */
+
+/*
+ *  Pccfreq option description:
+ */
+#ifdef SYS_WINNT
+tSCC    zPccfreqText[] =
+        "Force CPU cycle counter use (Windows only)";
+tSCC    zPccfreq_NAME[]            = "PCCFREQ";
+tSCC    zPccfreq_Name[]            = "pccfreq";
+#define PCCFREQ_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+#else   /* disable Pccfreq */
+#define VALUE_OPT_PCCFREQ NO_EQUIVALENT
+#define PCCFREQ_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define zPccfreqText       NULL
+#define zPccfreq_NAME      NULL
+#define zPccfreq_Name      NULL
+#endif  /* SYS_WINNT */
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -800,6 +837,30 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSlewText, zSlew_NAME, zSlew_Name,
      /* disablement strs */ NULL, NULL },
 
+  {  /* entry idx, value */ 29, VALUE_OPT_USEPCC,
+     /* equiv idx, value */ 29, VALUE_OPT_USEPCC,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ USEPCC_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zUsepccText, zUsepcc_NAME, zUsepcc_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 30, VALUE_OPT_PCCFREQ,
+     /* equiv idx, value */ 30, VALUE_OPT_PCCFREQ,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ PCCFREQ_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zPccfreqText, zPccfreq_NAME, zPccfreq_Name,
+     /* disablement strs */ NULL, NULL },
+
 #ifdef NO_OPTIONAL_OPT_ARGS
 #  define VERSION_OPT_FLAGS     OPTST_IMM | OPTST_NO_INIT
 #else
@@ -899,7 +960,7 @@ tOptions ntpdOptions = {
       NO_EQUIVALENT /* index of '-#' option */,
       NO_EQUIVALENT /* index of default opt */
     },
-    32 /* full option count */, 29 /* user option count */
+    34 /* full option count */, 31 /* user option count */
 };
 
 /*
