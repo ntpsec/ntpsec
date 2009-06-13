@@ -28,6 +28,7 @@
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntpd.h"
+#include "../../../ntpd/ntpd-opts.h"
 
 extern double sys_residual;	/* residual from previous adjustment */
 
@@ -245,7 +246,7 @@ perf_ctr(void)
 		FT_ULL ft4;
 		FT_ULL ft5;
 		LONGLONG offset;
-		char *ntpd_pcc_freq_text;
+		const char *ntpd_pcc_freq_text;
 
 		/* one-time initialization */
 
@@ -283,10 +284,14 @@ perf_ctr(void)
 		 * ntpd port to the sole remaining alternative, Intel
 		 * Itanium.
 		 */
-		ntpd_pcc_freq_text = getenv("NTPD_PCC_FREQ");
+		if (HAVE_OPT(PCCFREQ))
+			ntpd_pcc_freq_text = OPT_ARG(PCCFREQ);
+		else
+			ntpd_pcc_freq_text = getenv("NTPD_PCC_FREQ");
 
-		if (NULL != getenv("NTPD_QPC")
-		    || (NULL == ntpd_pcc_freq_text && NULL == getenv("NTPD_PCC"))) {
+		if (!HAVE_OPT(USEPCC)
+		    && NULL == ntpd_pcc_freq_text
+		    && NULL == getenv("NTPD_PCC")) {
 			use_pcc = 0;
 			QueryPerformanceCounter(&ft1.li);
 			return ft1.ull;

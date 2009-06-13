@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  Saturday June  6, 2009 at 07:38:40 AM EDT
+ *  It has been AutoGen-ed  Thursday June 11, 2009 at 11:04:34 PM UTC
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -81,12 +81,14 @@ typedef enum {
         INDEX_OPT_VAR              = 26,
         INDEX_OPT_DVAR             = 27,
         INDEX_OPT_SLEW             = 28,
-        INDEX_OPT_VERSION          = 29,
-        INDEX_OPT_HELP             = 30,
-        INDEX_OPT_MORE_HELP        = 31
+        INDEX_OPT_USEPCC           = 29,
+        INDEX_OPT_PCCFREQ          = 30,
+        INDEX_OPT_VERSION          = 31,
+        INDEX_OPT_HELP             = 32,
+        INDEX_OPT_MORE_HELP        = 33
 } teOptIndex;
 
-#define OPTION_CT    32
+#define OPTION_CT    34
 #define NTPD_VERSION       "4.2.5p181"
 #define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.5p181"
 
@@ -231,6 +233,14 @@ typedef enum {
 #  warning undefining SLEW due to option name conflict
 #  undef   SLEW
 # endif
+# ifdef    USEPCC
+#  warning undefining USEPCC due to option name conflict
+#  undef   USEPCC
+# endif
+# ifdef    PCCFREQ
+#  warning undefining PCCFREQ due to option name conflict
+#  undef   PCCFREQ
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
@@ -261,6 +271,8 @@ typedef enum {
 # undef VAR
 # undef DVAR
 # undef SLEW
+# undef USEPCC
+# undef PCCFREQ
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /*
@@ -309,6 +321,12 @@ typedef enum {
 #define VALUE_OPT_VAR            26
 #define VALUE_OPT_DVAR           27
 #define VALUE_OPT_SLEW           'x'
+#ifdef SYS_WINNT
+#define VALUE_OPT_USEPCC         29
+#endif /* SYS_WINNT */
+#ifdef SYS_WINNT
+#define VALUE_OPT_PCCFREQ        30
+#endif /* SYS_WINNT */
 
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
 #define VALUE_OPT_HELP          '?'
