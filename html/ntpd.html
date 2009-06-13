@@ -109,6 +109,8 @@
 			<dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt>  command.<dt><tt>-l <i>logfile</i></tt>
 			<dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt>  command.<dt><tt>-L</tt>
 			<dd>Do not listen to virtual IPs. The default is to listen.
+			<dt><tt>-M</tt>
+			<dd>Raise scheduler precision to its maximum (1 msec) using timeBeginPeriod.&nbsp; (Windows only)
 			<dt><tt>-n</tt>
 			<dd>Don't fork.
 			<dt><tt>-N</tt>
@@ -130,6 +132,10 @@
 			<dd>Add a system variable listed by default.
 			<dt><tt>-x</tt>
 			<dd>Normally, the time is slewed if the offset is less than the step threshold, which is 128 ms by default, and stepped if above the threshold. This option sets the threshold to 600 s, which is well within the accuracy window to set the clock manually. Note: Since the slew rate of typical Unix kernels is limited to 0.5 ms/s, each second of adjustment requires an amortization interval of 2000 s. Thus, an adjustment as much as 600 s will take almost 14 days to complete. This option can be used with the <tt>-g</tt> and <tt>-q</tt> options. See the <tt>tinker</tt> command for other options. Note:&nbsp;The kernel time discipline is disabled with this option.
+			<dt><tt>--pccfreq <i>frequency</i></tt>
+			<dd>Substitute processor cycle counter for QueryPerformanceCounter unconditionally using the given frequency (in Hz).&nbsp; <tt>--pccfreq</tt> can be used on systems which do not use the PCC to implement QueryPerformanceCounter and have a fixed PCC frequency.&nbsp; The frequency specified must be accurate within 0.5 percent.&nbsp; <tt>--usepcc</tt> is equivalent on many systems and should be tried first, as it does not require determining the frequency of the processor cycle counter.&nbsp; For x86-compatible processors, the PCC is also referred to as <tt>RDTSC</tt>, which is the assembly-language instruction to retrieve the current value.&nbsp; (Windows only)
+			<dt><tt>--usepcc</tt>
+			<dd>Substitute processor cycle counter for QueryPerformanceCounter if they appear equivalent.&nbsp; This option should be used only if the PCC frequency is fixed.&nbsp; Power-saving functionality on many laptops varies the PCC frequency.&nbsp; (Windows only)
 		</dl>
 		<h4 id="cfg">The Configuration File</h4>
 		<p>Ordinarily, <tt>ntpd</tt> reads the <tt>ntp.conf</tt> configuration file at startup in order to determine the synchronization sources and operating modes. It is also possible to specify a working, although limited, configuration entirely on the command line, obviating the need for a configuration file. This may be particularly useful when the local host is to be configured as a broadcast client, with servers determined by listening to broadcasts at run time.</p>
