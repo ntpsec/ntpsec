@@ -7,7 +7,7 @@
 
 #include <fcntl.h>
 
-#define NCCS	4
+#define NCCS	18	/* refclock_arc.c uses VTIME (17) */
 #define VEOL	3
 typedef unsigned char	cc_t;
 typedef unsigned int	speed_t;
@@ -176,6 +176,8 @@ struct termios
 #define	TCSANOW		0
 #define	TCSADRAIN	1
 #define	TCSAFLUSH	2
+#define	VMIN		16
+#define VTIME		17
 
 /* modem lines */
 #define TIOCM_LE	0x001

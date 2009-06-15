@@ -2,8 +2,8 @@
  * ntp_request.h - definitions for the ntpd remote query facility
  */
 
-#ifndef _NTP_REQUEST_H
-#define _NTP_REQUEST_H
+#ifndef NTP_REQUEST_H
+#define NTP_REQUEST_H
 
 #include "ntp_types.h"
 #include "recvbuff.h"
@@ -668,7 +668,7 @@ struct conf_restrict {
 struct info_monitor_1 {	
 	u_int32 lasttime;	/* last packet from this host */
 	u_int32 firsttime;	/* first time we received a packet */
-	u_int32 lastdrop;        /* last time we rejected a packet due to client limitation policy */
+	u_int32 restr;		/* restrict bits (was named lastdrop) */
 	u_int32 count;		/* count of packets received */
 	u_int32 addr;		/* host address V4 style */
 	u_int32 daddr;		/* destination host address */
@@ -689,7 +689,7 @@ struct info_monitor_1 {
 struct info_monitor {	
 	u_int32 lasttime;	/* last packet from this host */
 	u_int32 firsttime;	/* first time we received a packet */
-	u_int32 lastdrop;       /* last time we rejected a packet due to client limitation policy */
+	u_int32 restr;		/* restrict bits (was named lastdrop) */
 	u_int32 count;		/* count of packets received */
 	u_int32 addr;		/* host address */
 	u_short port;		/* port number of last reception */
@@ -701,7 +701,7 @@ struct info_monitor {
 };
 
 /*
- * Structure used for returning monitor data (old format
+ * Structure used for returning monitor data (old format)
  */
 struct old_info_monitor {	
 	u_int32 lasttime;	/* last packet from this host */

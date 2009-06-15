@@ -2025,6 +2025,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_net.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_proto.h"
 				>
 			</File>

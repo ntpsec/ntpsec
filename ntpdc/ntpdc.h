@@ -34,7 +34,7 @@ typedef struct {
 	char *string;
 	long ival;
 	u_long uval;
-	struct sockaddr_storage netnum;
+	sockaddr_u netnum;
 } arg_v;
 
 /*
@@ -64,4 +64,4 @@ extern	int showhostnames;
 extern	int s_port;
 
 extern	int	doquery	(int, int, int, int, int, char *, int *, int *, char **, int, int);
-extern	char *	nntohost	(struct sockaddr_storage *);
+extern	char *	nntohost	(sockaddr_u *);

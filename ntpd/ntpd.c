@@ -269,7 +269,7 @@ init_logging(
 #  endif /* DEBUG */
 		setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
 # endif /* LOG_DAEMON */
-#endif	/* !SYS_WINNT && !VMS */
+#endif	/* !VMS */
 
 	if (log_version)
 	    NLOG(NLOG_SYSINFO) /* 'if' clause for syslog */
@@ -278,9 +278,10 @@ init_logging(
 
 
 /*
- * See if we should redirect the logfile
+ * Redirect logging to a file if requested with -l.
+ * The ntp.conf logfile directive does not use this code, see
+ * config_vars() in ntp_config.c.
  */
-
 void
 setup_logfile(
 	void
@@ -487,7 +488,8 @@ ntpdmain(
 		argv += optct;
 	}
 
-	init_logging(progname, 1);		/* Open the log file */
+	init_lib();			/* set ipv6_works flag early */
+	init_logging(progname, 1);	/* Open the log file */
 
 #ifdef HAVE_UMASK
 	{
@@ -519,9 +521,11 @@ ntpdmain(
 
 #ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;
-	if (debug)
-	    printf("%s\n", Version);
+	DPRINTF(1, ("%s\n", Version));
 #endif
+
+	/* honor -l option to log to a file instead of syslog */
+	setup_logfile();
 
 /*
  * Enable the Multi-Media Timer for Windows?
@@ -565,13 +569,11 @@ ntpdmain(
 
 #ifdef SYS_WINNT
 	/*
-	 * Initialize the time structures and variables
+	 * Start interpolation thread, must occur before first
+	 * get_systime()
 	 */
 	init_winnt_time();
 #endif
-
-	setup_logfile();
-
 	/*
 	 * Initialize random generator and public key pair
 	 */
@@ -610,8 +612,11 @@ ntpdmain(
 #if !defined(F_CLOSEM)
 			u_long s;
 			int max_fd;
-#endif /* not F_CLOSEM */
-
+#endif /* !FCLOSEM */
+			if (syslog_file != NULL) {
+				fclose(syslog_file);
+				syslog_file = NULL;
+			}
 #if defined(F_CLOSEM)
 			/*
 			 * From 'Writing Reliable AIX Daemons,' SG24-4946-00,
@@ -635,6 +640,7 @@ ntpdmain(
 			(void) dup2(0, 2);
 
 			init_logging(progname, 0);
+			/* we lost our logfile (if any) daemonizing */
 			setup_logfile();
 
 #ifdef SYS_DOMAINOS
@@ -687,8 +693,6 @@ ntpdmain(
 	}
 # endif /* NODETACH */
 #endif /* VMS */
-
-	setup_logfile();	/* We lost any redirect when we daemonized */
 
 #ifdef SCO5_CLOCK
 	/*
@@ -827,7 +831,6 @@ ntpdmain(
 	init_restrict();
 	init_mon();
 	init_timer();
-	init_lib();
 	init_request();
 	init_control();
 	init_peer();

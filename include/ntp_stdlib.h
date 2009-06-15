@@ -7,6 +7,7 @@
 
 #include "ntp_types.h"
 #include "ntp_string.h"
+#include "ntp_net.h"
 #include "l_stdlib.h"
 
 /*
@@ -62,10 +63,12 @@ extern	struct savekey *auth_findkey (keyid_t);
 extern	int	auth_moremem	(void);
 extern	int	ymd2yd		(int, int, int);
 
+/* a_md5encrypt.c */
 extern	int	MD5authdecrypt	(u_char *, u_int32 *, int, int);
 extern	int	MD5authencrypt	(u_char *, u_int32 *, int);
 extern	void	MD5auth_setkey	(keyid_t, const u_char *, const int);
-extern	u_int32	addr2refid	(struct sockaddr_storage *);
+extern	u_int32	addr2refid	(sockaddr_u *);
+
 
 extern	int	atoint		(const char *, long *);
 extern	int	atouint		(const char *, u_long *);
@@ -81,18 +84,18 @@ extern	char *	statustoa	(int, int);
 extern  const char * sysstatstr (int);
 extern  const char * peerstatstr (int);
 extern  const char * clockstatstr (int);
-extern	struct sockaddr_storage* netof (struct sockaddr_storage*);
+extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(u_int32);
 extern	char *	numtohost	(u_int32);
-extern	char *	socktoa		(struct sockaddr_storage *);
-extern	char *	socktohost	(struct sockaddr_storage *);
+extern	char *	socktoa		(sockaddr_u *);
+extern	char *	socktohost	(sockaddr_u *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
-extern	char *	refnumtoa	(struct sockaddr_storage *);
+extern	char *	refnumtoa	(sockaddr_u *);
 extern	int	tsftomsu	(u_long, int);
 extern	char *	uinttoa		(u_long);
 
-extern	int	decodenetnum	(const char *, struct sockaddr_storage *);
+extern	int	decodenetnum	(const char *, sockaddr_u *);
 
 extern	const char * FindConfig	(const char *);
 
@@ -132,6 +135,10 @@ extern u_int	cache_keylen;		/* key length */
 /* getopt.c */
 extern char *	ntp_optarg;		/* global argument pointer */
 extern int	ntp_optind;		/* global argv index */
+
+/* lib_strbuf.c */
+extern int	ipv4_works;
+extern int	ipv6_works;
 
 /* machines.c */
 extern const char *set_tod_using;

@@ -34,7 +34,7 @@ typedef union {
 	char *string;
 	long ival;
 	u_long uval;
-	struct sockaddr_storage netnum;
+	sockaddr_u netnum;
 } arg_v;
 
 /*
@@ -80,10 +80,10 @@ struct ctl_var {
 };
 
 extern	void	asciize		(int, char *, FILE *);
-extern	int	getnetnum	(const char *, struct sockaddr_storage *, char *, int);
+extern	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 extern	void	sortassoc	(void);
 extern	int	doquery		(int, int, int, int, char *, u_short *, int *, char **);
-extern	char *	nntohost	(struct sockaddr_storage *);
+extern	char *	nntohost	(sockaddr_u *);
 extern	int	decodets	(char *, l_fp *);
 extern	int	decodeuint	(char *, u_long *);
 extern	int	nextvar		(int *, char **, char **, char **);

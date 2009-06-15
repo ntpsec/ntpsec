@@ -109,7 +109,7 @@ int	peer_preempt;			/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
 static void	    getmorepeermem	 (void);
-static struct interface *select_peerinterface (struct peer *, struct sockaddr_storage *, struct interface *, u_char);
+static struct interface *select_peerinterface (struct peer *, sockaddr_u *, struct interface *, u_char);
 
 static int score(struct peer *);
 
@@ -185,7 +185,7 @@ getmorepeermem(void)
  */
 struct peer *
 findexistingpeer(
-	struct sockaddr_storage *addr,
+	sockaddr_u *addr,
 	struct peer *start_peer,
 	int mode
 	)
@@ -201,8 +201,8 @@ findexistingpeer(
 	else
 		peer = start_peer->next;
 	
-	while (NULL != peer) {
-		if (SOCKCMP(addr, &peer->srcadr)
+	while (peer != NULL) {
+		if (SOCK_EQ(addr, &peer->srcadr)
 		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)
 		    && (-1 == mode || peer->hmode == mode))
 			break;
@@ -217,7 +217,7 @@ findexistingpeer(
  */
 struct peer *
 findpeer(
-	struct sockaddr_storage *srcadr,
+	sockaddr_u *srcadr,
 	struct interface *dstadr,
 	int	pkt_mode,
 	int	*action
@@ -229,7 +229,7 @@ findpeer(
 	findpeer_calls++;
 	hash = NTP_HASH_ADDR(srcadr);
 	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
-		if (SOCKCMP(srcadr, &peer->srcadr) &&
+		if (SOCK_EQ(srcadr, &peer->srcadr) &&
 		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
 
 			/*
@@ -471,7 +471,7 @@ unpeer(
  */
 struct peer *
 peer_config(
-	struct sockaddr_storage *srcadr,
+	sockaddr_u *srcadr,
 	struct interface *dstadr,
 	int hmode,
 	int version,
@@ -492,33 +492,18 @@ peer_config(
 	 */
 	switch (hmode) {
 	case MODE_BROADCAST:
-		if(srcadr->ss_family == AF_INET) {
-			if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
-				cast_flags = MDF_MCAST;
-			else
-				cast_flags = MDF_BCAST;
-			break;
-		} else {
-                        if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
-        	                cast_flags = MDF_MCAST;
-	        	else
-                        	cast_flags = MDF_BCAST;
-                	break;
-                }
+		if (IS_MCAST(srcadr))
+			cast_flags = MDF_MCAST;
+		else
+			cast_flags = MDF_BCAST;
+		break;
+
 	case MODE_CLIENT:
-		if(srcadr->ss_family == AF_INET) {
-			if (IN_CLASSD(ntohl(((struct sockaddr_in*)srcadr)->sin_addr.s_addr)))
-				cast_flags = MDF_ACAST;
-			else
-				cast_flags = MDF_UCAST;
-			break;
-		} else {
-			if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)srcadr)->sin6_addr))
-				cast_flags = MDF_ACAST;
-			else
-				cast_flags = MDF_UCAST;
-			break;
-		}
+		if (IS_MCAST(srcadr))
+			cast_flags = MDF_ACAST;
+		else
+			cast_flags = MDF_UCAST;
+		break;
 
 	default:
 		cast_flags = MDF_UCAST;
@@ -557,12 +542,14 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 			peer->dstadr->peercnt--;
 			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer,
 			    ilink, struct peer);
+			msyslog(LOG_INFO,
+				"%s interface %s -> %s",
+				stoa(&peer->srcadr),
+				stoa(&peer->dstadr->sin),
+				(interface != NULL)
+				    ? stoa(&interface->sin)
+				    : "(null)");
 		}
-		msyslog(LOG_INFO,
-		    "set_peerdstadr(%s): change interface from %s to %s",
-		    stoa(&peer->srcadr), (peer->dstadr != NULL) ?
-		    stoa(&peer->dstadr->sin) : "<null>", (interface !=
-		    NULL) ? stoa(&interface->sin) : "<null>");
 		peer->dstadr = interface;
 		if (peer->dstadr != NULL) {
 			ISC_LIST_APPEND(peer->dstadr->peers, peer,
@@ -576,7 +563,9 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
  * attempt to re-rebind interface if necessary
  */
 static void
-peer_refresh_interface(struct peer *peer)
+peer_refresh_interface(
+	struct peer *peer
+	)
 {
 	struct interface *niface, *piface;
 
@@ -613,10 +602,10 @@ peer_refresh_interface(struct peer *peer)
 	piface = peer->dstadr;
 	set_peerdstadr(peer, niface);
 	if (peer->dstadr) {
-                /*
-                 * clear crypto if we change the local address
-                 */
-                if (peer->dstadr != piface && !(peer->cast_flags &
+		/*
+		 * clear crypto if we change the local address
+		 */
+		if (peer->dstadr != piface && !(peer->cast_flags &
 		    MDF_BCLNT))
 			peer_clear(peer, "XFAC");
 
@@ -665,7 +654,12 @@ refresh_all_peerinterfaces(void)
  * find an interface suitable for the src address
  */
 static struct interface *
-select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct interface *dstadr, u_char cast_flags)
+select_peerinterface(
+	struct peer *		peer,
+	sockaddr_u *		srcadr,
+	struct interface *	dstadr,
+	u_char			cast_flags
+	)
 {
 	struct interface *interface;
   
@@ -726,14 +720,14 @@ select_peerinterface(struct peer *peer, struct sockaddr_storage *srcadr, struct 
  */
 struct peer *
 newpeer(
-	struct sockaddr_storage *srcadr,
+	sockaddr_u *srcadr,
 	struct interface *dstadr,
 	int	hmode,
 	int	version,
 	int	minpoll,
 	int	maxpoll,
 	u_int	flags,
-	u_char cast_flags,
+	u_char	cast_flags,
 	int	ttl,
 	keyid_t	key
 	)
@@ -831,18 +825,19 @@ newpeer(
 	}
 #endif
 	
+
 	/*
 	 * Broadcast needs the socket enabled for broadcast
 	 */
-	if (cast_flags & MDF_BCAST && peer->dstadr) {
+	if ((cast_flags & MDF_BCAST) && peer->dstadr)
 		enable_broadcast(peer->dstadr, srcadr);
-	}
+
 	/*
 	 * Multicast needs the socket interface enabled for multicast
 	 */
-	if (cast_flags & MDF_MCAST && peer->dstadr) {
+	if ((cast_flags & MDF_MCAST) && peer->dstadr)
 		enable_multicast_if(peer->dstadr, srcadr);
-	}
+
 #ifdef OPENSSL
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;

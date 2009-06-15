@@ -54,7 +54,7 @@ static	void	ctl_puthex	(const char *, u_long);
 static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
 static	void	ctl_putadr	(const char *, u_int32,
-				 struct sockaddr_storage*);
+				 sockaddr_u *);
 static	void	ctl_putid	(const char *, char *);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
@@ -74,7 +74,7 @@ static	void	write_clock_status (struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
-static	struct ctl_trap *ctlfindtrap (struct sockaddr_storage *,
+static	struct ctl_trap *ctlfindtrap (sockaddr_u *,
 				      struct interface *);
 
 static	struct ctl_proc control_codes[] = {
@@ -461,7 +461,7 @@ static u_char * datapt;
 static u_char * dataend;
 static int	datalinelen;
 static int	datanotbinflag;
-static struct sockaddr_storage *rmt_addr;
+static sockaddr_u *rmt_addr;
 static struct interface *lcl_inter;
 
 static u_char	res_authenticate;
@@ -1131,7 +1131,7 @@ static void
 ctl_putadr(
 	const char *tag,
 	u_int32 addr32,
-	struct sockaddr_storage* addr
+	sockaddr_u *addr
 	)
 {
 	register char *cp;
@@ -1150,7 +1150,7 @@ ctl_putadr(
 		cq = stoa(addr);
 	while (*cq != '\0')
 		*cp++ = *cq++;
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
 /*
@@ -2603,7 +2603,7 @@ unset_trap(
  */
 int
 ctlsettrap(
-	struct sockaddr_storage *raddr,
+	sockaddr_u *raddr,
 	struct interface *linter,
 	int traptype,
 	int version
@@ -2724,7 +2724,7 @@ ctlsettrap(
  */
 int
 ctlclrtrap(
-	struct sockaddr_storage *raddr,
+	sockaddr_u *raddr,
 	struct interface *linter,
 	int traptype
 	)
@@ -2749,7 +2749,7 @@ ctlclrtrap(
  */
 static struct ctl_trap *
 ctlfindtrap(
-	struct sockaddr_storage *raddr,
+	sockaddr_u *raddr,
 	struct interface *linter
 	)
 {
@@ -2758,7 +2758,7 @@ ctlfindtrap(
 	for (tp = ctl_trap; tp < &ctl_trap[CTL_MAXTRAPS]; tp++) {
 		if ((tp->tr_flags & TRAP_INUSE)
 		    && (NSRCPORT(raddr) == NSRCPORT(&tp->tr_addr))
-		    && SOCKCMP(raddr, &tp->tr_addr)
+		    && SOCK_EQ(raddr, &tp->tr_addr)
 	 	    && (linter == tp->tr_localaddr) )
 			return (tp);
 	}

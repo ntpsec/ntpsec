@@ -155,9 +155,9 @@ struct xcmd opcmds[] = {
 	{ ":config", config,   { NTP_STR, NO, NO, NO },
 	  { "<configuration command line>", "", "", "" },
 	  "send a remote configuration command to ntpd" },
-        { "config-from-file", config_from_file, { NTP_STR, NO, NO, NO },
-          { "<configuration filename>", "", "", "" },
-          "configure ntpd using the configuration filename" },
+	{ "config-from-file", config_from_file, { NTP_STR, NO, NO, NO },
+	  { "<configuration filename>", "", "", "" },
+	  "configure ntpd using the configuration filename" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -1299,17 +1299,15 @@ prettyinterval(
 
 static char
 decodeaddrtype(
-	struct sockaddr_storage *sock
+	sockaddr_u *sock
 	)
 {
 	char ch = '-';
 	u_int32 dummy;
-	struct sockaddr_in6 *sin6;
 
-	switch(sock->ss_family) {
+	switch(AF(sock)) {
 	case AF_INET:
-		dummy = ((struct sockaddr_in *)sock)->sin_addr.s_addr;
-		dummy = ntohl(dummy);
+		dummy = SRCADR(sock);
 		ch = (char)(((dummy&0xf0000000)==0xe0000000) ? 'm' :
 			((dummy&0x000000ff)==0x000000ff) ? 'b' :
 			((dummy&0xffffffff)==0x7f000001) ? 'l' :
@@ -1317,8 +1315,7 @@ decodeaddrtype(
 			'u');
 		break;
 	case AF_INET6:
-		sin6 = (struct sockaddr_in6 *)sock;
-		if (IN6_IS_ADDR_MULTICAST(&sin6->sin6_addr))
+		if (IN6_IS_ADDR_MULTICAST(PSOCK_ADDR6(sock)))
 			ch = 'm';
 		else
 			ch = 'u';
@@ -1402,8 +1399,8 @@ doprintpeers(
 	int i;
 	int c;
 
-	struct sockaddr_storage srcadr;
-	struct sockaddr_storage dstadr;
+	sockaddr_u srcadr;
+	sockaddr_u dstadr;
 	u_long srcport = 0;
 	char *dstadr_refid = "0.0.0.0";
 	u_long stratum = 0;
@@ -1427,8 +1424,8 @@ doprintpeers(
 	memset((char *)havevar, 0, sizeof(havevar));
 	get_systime(&ts);
 	
-	memset((char *)&srcadr, 0, sizeof(struct sockaddr_storage));
-	memset((char *)&dstadr, 0, sizeof(struct sockaddr_storage));
+	ZERO_SOCK(&srcadr);
+	ZERO_SOCK(&dstadr);
 
 	/* Initialize by zeroing out estimate variables */
 	memset((char *)&estoffset, 0, sizeof(l_fp));
@@ -1437,22 +1434,23 @@ doprintpeers(
 	memset((char *)&estdisp, 0, sizeof(l_fp));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
-		struct sockaddr_storage dum_store;
+		sockaddr_u dum_store;
 
 		i = findvar(name, peer_var, 1);
 		if (i == 0)
 			continue;	/* don't know this one */
 		switch (i) {
 			case CP_SRCADR:
-			if (decodenetnum(value, &srcadr))
+			if (decodenetnum(value, &srcadr)) {
 				havevar[HAVE_SRCADR] = 1;
+			}
 			break;
 			case CP_DSTADR:
-			if (decodenetnum(value, &dum_store))
+			if (decodenetnum(value, &dum_store)) {
 				type = decodeaddrtype(&dum_store);
-			if (pvl == opeervarlist) {
-				if (decodenetnum(value, &dstadr)) {
+				if (pvl == opeervarlist) {
 					havevar[HAVE_DSTADR] = 1;
+					dstadr = dum_store;
 					dstadr_refid = stoa(&dstadr);
 				}
 			}
@@ -1470,11 +1468,10 @@ doprintpeers(
 					refid_string[i+1] = '\0';
 					dstadr_refid = refid_string;
 				} else if (decodenetnum(value, &dstadr)) {
-					if (SOCKNUL(&dstadr))
+					if (SOCK_UNSPEC(&dstadr))
 						dstadr_refid = "0.0.0.0";
-					else if ((dstadr.ss_family == AF_INET)
-					    && ISREFCLOCKADR(&dstadr))
-    						dstadr_refid =
+					else if (ISREFCLOCKADR(&dstadr))
+						dstadr_refid =
 						    refnumtoa(&dstadr);
 					else
 						dstadr_refid =
@@ -1558,7 +1555,7 @@ doprintpeers(
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
 		(void) fprintf(fp, "%-*s ", maxhostlen, currenthost);
-	if (af == 0 || srcadr.ss_family == af){
+	if (af == 0 || AF(&srcadr) == af) {
 		strcpy(clock_name, nntohost(&srcadr));
 		
 		(void) fprintf(fp,
@@ -1648,7 +1645,7 @@ dopeers(
 {
 	register int i;
 	char fullname[LENHOSTNAME];
-	struct sockaddr_storage netnum;
+	sockaddr_u netnum;
 
 	if (!dogetassoc(fp))
 		return;
@@ -1737,7 +1734,7 @@ doopeers(
 {
 	register int i;
 	char fullname[LENHOSTNAME];
-	struct sockaddr_storage netnum;
+	sockaddr_u netnum;
 
 	if (!dogetassoc(fp))
 		return;

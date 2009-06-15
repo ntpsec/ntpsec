@@ -1,5 +1,6 @@
 /*
- * ntpdc_ops.c - subroutines which are called to perform operations by xntpdc
+ * ntpdc_ops.c - subroutines which are called to perform operations by
+ *		 ntpdc
  */
 
 #ifdef HAVE_CONFIG_H
@@ -10,6 +11,7 @@
 #include <stddef.h>
 
 #include "ntpdc.h"
+#include "ntp_net.h"
 #include "ntp_control.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
@@ -25,11 +27,15 @@
 #include <arpa/inet.h>
 
 /*
- * Declarations for command handlers in here
+ * utility functions
  */
 static	int	checkitems	(int, FILE *);
 static	int	checkitemsize	(int, int);
 static	int	check1item	(int, FILE *);
+
+/*
+ * Declarations for command handlers in here
+ */
 static	void	peerlist	(struct parse *, FILE *);
 static	void	peers		(struct parse *, FILE *);
 static void	doconfig	(struct parse *pcmd, FILE *fp, int mode, int refc);
@@ -221,6 +227,84 @@ struct xcmd opcmds[] = {
  */
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
+/*
+ * SET_SS_LEN_IF_PRESENT - used by SET_ADDR, SET_ADDRS macros
+ */
+
+#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#define SET_SS_LEN_IF_PRESENT(psau)				\
+	do {							\
+		(psau)->sas.ss_len = SOCKLEN(psau);		\
+	} while (0)
+#else
+#define SET_SS_LEN_IF_PRESENT(psau)	do { } while (0)
+#endif
+
+/*
+ * SET_ADDR - setup address for v4/v6 as needed
+ */
+#define SET_ADDR(address, v6flag, v4addr, v6addr)		\
+do {								\
+	memset(&(address), 0, sizeof(address));			\
+	if (v6flag) {						\
+		AF(&(address)) = AF_INET6;			\
+		SOCK_ADDR6(&(address)) = (v6addr);		\
+	} else {						\
+		AF(&(address)) = AF_INET;			\
+		NSRCADR(&(address)) = (v4addr);			\
+	}							\
+	SET_SS_LEN_IF_PRESENT(&(address));			\
+} while (0)
+
+
+/*
+ * SET_ADDRS - setup source and destination addresses for 
+ * v4/v6 as needed
+ */
+#define SET_ADDRS(a1, a2, info, a1prefix, a2prefix)		\
+do {								\
+	memset(&(a1), 0, sizeof(a1));				\
+	memset(&(a2), 0, sizeof(a2));				\
+	if ((info)->v6_flag) {					\
+		AF(&(a1)) = AF_INET6;				\
+		AF(&(a2)) = AF_INET6;				\
+		SOCK_ADDR6(&(a1)) = (info)->a1prefix##6;	\
+		SOCK_ADDR6(&(a2)) = (info)->a2prefix##6;	\
+	} else {						\
+		AF(&(a1)) = AF_INET;				\
+		AF(&(a2)) = AF_INET;				\
+		NSRCADR(&(a1)) = (info)->a1prefix;		\
+		NSRCADR(&(a2)) = (info)->a2prefix;		\
+	}							\
+	SET_SS_LEN_IF_PRESENT(&(a1));				\
+	SET_SS_LEN_IF_PRESENT(&(a2));				\
+} while (0)
+
+
+/*
+ * SET_ADDRS - setup source and destination addresses for 
+ * v4/v6 as needed
+ */
+#if 0
+#define SET_ADDR_MASK(address, addrmask, info)			\
+do {								\
+	memset(&(address), 0, sizeof(address));			\
+	memset(&(mask), 0, sizeof(mask));			\
+	if ((info)->v6_flag) {					\
+		AF(&(address)) = AF_INET6;			\
+		AF(&(addrmask)) = AF_INET6;			\
+		SOCK_ADDR6(&(address)) = (info)->addr6;		\
+		SOCK_ADDR6(&(addrmask)) = (info)->mask6;	\
+	} else {						\
+		AF(&(address)) = AF_INET;			\
+		AF(&(addrmask)) = AF_INET;			\
+		NSRCADR(&(address)) = (info)->addr;		\
+		NSRCADR(&(addrmask)) = (info)->mask;		\
+	}							\
+	SET_SS_LEN_IF_PRESENT(&(address));			\
+	SET_SS_LEN_IF_PRESENT(&(addrmask));			\
+} while (0)
+#endif
 
 /*
  * checkitems - utility to print a message if no items were returned
@@ -280,7 +364,6 @@ check1item(
 }
 
 
-
 /*
  * peerlist - get a short list of peers
  */
@@ -292,7 +375,7 @@ peerlist(
 	)
 {
 	struct info_peer_list *plist;
-	struct sockaddr_storage paddr;
+	sockaddr_u paddr;
 	int items;
 	int itemsize;
 	int res;
@@ -318,17 +401,7 @@ again:
 	    return;
 
 	while (items > 0) {
-		memset((char *)&paddr, 0, sizeof(paddr));
-		if (plist->v6_flag != 0) {
-			GET_INADDR6(paddr) = plist->addr6;
-			paddr.ss_family = AF_INET6;
-		} else {
-			GET_INADDR(paddr) = plist->addr;
-			paddr.ss_family = AF_INET;
-		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		paddr.ss_len = SOCKLEN(&paddr);
-#endif
+		SET_ADDR(paddr, plist->v6_flag, plist->addr, plist->addr6);
 		if ((pcmd->nargs == 0) ||
 		    ((pcmd->argval->ival == 6) && (plist->v6_flag != 0)) ||
 		    ((pcmd->argval->ival == 4) && (plist->v6_flag == 0)))
@@ -378,8 +451,8 @@ dopeers(
 	)
 {
 	struct info_peer_summary *plist;
-	struct sockaddr_storage dstadr;
-	struct sockaddr_storage srcadr;
+	sockaddr_u dstadr;
+	sockaddr_u srcadr;
 	int items;
 	int itemsize;
 	int ntp_poll;
@@ -440,23 +513,7 @@ again:
 		NTOHL_FP(&(plist->offset), &tempts);
 		ntp_poll = 1<<max(min3(plist->ppoll, plist->hpoll, NTP_MAXPOLL),
 				  NTP_MINPOLL);
-		memset((char *)&dstadr, 0, sizeof(dstadr));
-		memset((char *)&srcadr, 0, sizeof(srcadr));
-		if (plist->v6_flag != 0) {
-			GET_INADDR6(dstadr) = plist->dstadr6;
-			GET_INADDR6(srcadr) = plist->srcadr6;
-			srcadr.ss_family = AF_INET6;
-			dstadr.ss_family = AF_INET6;
-		} else {
-			GET_INADDR(dstadr) = plist->dstadr;
-			GET_INADDR(srcadr) = plist->srcadr;
-			srcadr.ss_family = AF_INET;
-			dstadr.ss_family = AF_INET;
-		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		srcadr.ss_len = SOCKLEN(&srcadr);
-		dstadr.ss_len = SOCKLEN(&dstadr);
-#endif
+		SET_ADDRS(dstadr, srcadr, plist, dstadr, srcadr);
 		if ((pcmd->nargs == 0) ||
 		    ((pcmd->argval->ival == 6) && (plist->v6_flag != 0)) ||
 		    ((pcmd->argval->ival == 4) && (plist->v6_flag == 0)))
@@ -546,25 +603,10 @@ printpeer(
 {
 	register int i;
 	l_fp tempts;
-	struct sockaddr_storage srcadr, dstadr;
+	sockaddr_u srcadr, dstadr;
 	
-	memset((char *)&srcadr, 0, sizeof(srcadr));
-	memset((char *)&dstadr, 0, sizeof(dstadr));
-	if (pp->v6_flag != 0) {
-		srcadr.ss_family = AF_INET6;
-		dstadr.ss_family = AF_INET6;
-		GET_INADDR6(srcadr) = pp->srcadr6;
-		GET_INADDR6(dstadr) = pp->dstadr6;
-	} else {
-		srcadr.ss_family = AF_INET;
-		dstadr.ss_family = AF_INET;
-		GET_INADDR(srcadr) = pp->srcadr;
-		GET_INADDR(dstadr) = pp->dstadr;
-	}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	srcadr.ss_len = SOCKLEN(&srcadr);
-	dstadr.ss_len = SOCKLEN(&dstadr);
-#endif
+	SET_ADDRS(dstadr, srcadr, pp, dstadr, srcadr);
+	
 	(void) fprintf(fp, "remote %s, local %s\n",
 		       stoa(&srcadr), stoa(&dstadr));
 	(void) fprintf(fp, "hmode %s, pmode %s, stratum %d, precision %d\n",
@@ -666,8 +708,8 @@ again:
 		sendsize = v4sizeof(struct info_peer_list);
 
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 4); qitems++) {
-		if (pcmd->argval[qitems].netnum.ss_family == AF_INET) {
-			pl->addr = GET_INADDR(pcmd->argval[qitems].netnum);
+		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
+			pl->addr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
 				pl->v6_flag = 0;
 		} else {
@@ -676,7 +718,7 @@ again:
 				    "***Server doesn't understand IPv6 addresses\n");
 				return;
 			}
-			pl->addr6 = GET_INADDR6(pcmd->argval[qitems].netnum);
+			pl->addr6 = SOCK_ADDR6(&pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
 		pl->port = (u_short)s_port;
@@ -724,7 +766,7 @@ peerstats(
 	struct info_peer_stats *pp;
 	/* 4 is the maximum number of peers which will fit in a packet */
 	struct info_peer_list *pl, plist[min(MAXARGS, 4)];
-	struct sockaddr_storage src, dst;
+	sockaddr_u src, dst;
 	int qitems;
 	int items;
 	int itemsize;
@@ -739,8 +781,8 @@ again:
 
 	memset((char *)plist, 0, sizeof(struct info_peer_list) * min(MAXARGS, 4));
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 4); qitems++) {
-		if (pcmd->argval[qitems].netnum.ss_family == AF_INET) {
-			pl->addr = GET_INADDR(pcmd->argval[qitems].netnum);
+		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
+			pl->addr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
 				pl->v6_flag = 0;
 		} else {
@@ -749,7 +791,7 @@ again:
 				    "***Server doesn't understand IPv6 addresses\n");
 				return;
 			}
-			pl->addr6 = GET_INADDR6(pcmd->argval[qitems].netnum);
+			pl->addr6 = SOCK_ADDR6(&pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
 		pl->port = (u_short)s_port;
@@ -778,22 +820,22 @@ again:
 	    return;
 
 	while (items-- > 0) {
-		memset((char *)&src, 0, sizeof(src));
-		memset((char *)&dst, 0, sizeof(dst));
+		ZERO_SOCK(&dst);
+		ZERO_SOCK(&src);
 		if (pp->v6_flag != 0) {
-			GET_INADDR6(src) = pp->srcadr6;
-			GET_INADDR6(dst) = pp->dstadr6;
-			src.ss_family = AF_INET6;
-			dst.ss_family = AF_INET6;
+			AF(&dst) = AF_INET6;
+			AF(&src) = AF_INET6;
+			SOCK_ADDR6(&dst) = pp->dstadr6;
+			SOCK_ADDR6(&src) = pp->srcadr6;
 		} else {
-			GET_INADDR(src) = pp->srcadr;
-			GET_INADDR(dst) = pp->dstadr;
-			src.ss_family = AF_INET;
-			dst.ss_family = AF_INET;
+			AF(&dst) = AF_INET;
+			AF(&src) = AF_INET;
+			NSRCADR(&dst) = pp->dstadr;
+			NSRCADR(&src) = pp->srcadr;
 		}
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		src.ss_len = SOCKLEN(&src);
-		dst.ss_len = SOCKLEN(&dst);
+		src.sas.ss_len = SOCKLEN(&src);
+		dst.sas.ss_len = SOCKLEN(&dst);
 #endif
 		(void) fprintf(fp, "remote host:          %s\n",
 			       nntohost(&src));
@@ -914,7 +956,7 @@ sysinfo(
 	)
 {
 	struct info_sys *is;
-	struct sockaddr_storage peeraddr;
+	sockaddr_u peeraddr;
 	int items;
 	int itemsize;
 	int res;
@@ -940,17 +982,8 @@ again:
 	    !checkitemsize(itemsize, v4sizeof(struct info_sys)))
 	    return;
 
-	memset((char *)&peeraddr, 0, sizeof(peeraddr));
-	if (is->v6_flag != 0) {
-		GET_INADDR6(peeraddr) = is->peer6;
-		peeraddr.ss_family = AF_INET6;
-	} else {
-		GET_INADDR(peeraddr) = is->peer;
-		peeraddr.ss_family = AF_INET;
-	}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	peeraddr.ss_len = SOCKLEN(&peeraddr);
-#endif
+	SET_ADDR(peeraddr, is->v6_flag, is->peer, is->peer6);
+
 	(void) fprintf(fp, "system peer:          %s\n", nntohost(&peeraddr));
 	(void) fprintf(fp, "system peer mode:     %s\n", modetoa(is->peer_mode));
 	(void) fprintf(fp, "leap indicator:       %c%c\n",
@@ -1406,10 +1439,10 @@ again:
 	if (res)
 	    return;
 
-	memset((void *)&cpeer, 0, sizeof(cpeer));
+	memset(&cpeer, 0, sizeof(cpeer));
 
-	if (pcmd->argval[0].netnum.ss_family == AF_INET) {
-		cpeer.peeraddr = GET_INADDR(pcmd->argval[0].netnum);
+	if (IS_IPV4(&pcmd->argval[0].netnum)) {
+		cpeer.peeraddr = NSRCADR(&pcmd->argval[0].netnum);
 		if (impl_ver == IMPL_XNTPD)
 			cpeer.v6_flag = 0;
 	} else {
@@ -1418,7 +1451,7 @@ again:
 			    "***Server doesn't understand IPv6 addresses\n");
 			return;
 		}
-		cpeer.peeraddr6 = GET_INADDR6(pcmd->argval[0].netnum);
+		cpeer.peeraddr6 = SOCK_ADDR6(&pcmd->argval[0].netnum);
 		cpeer.v6_flag = 1;
 	}
 	cpeer.hmode = (u_char) mode;
@@ -1477,8 +1510,8 @@ again:
 		sendsize = v4sizeof(struct conf_unpeer);
 
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
-		if (pcmd->argval[0].netnum.ss_family == AF_INET) {
-			pl->peeraddr = GET_INADDR(pcmd->argval[qitems].netnum);
+		if (IS_IPV4(&pcmd->argval[0].netnum)) {
+			pl->peeraddr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
 				pl->v6_flag = 0;
 		} else {
@@ -1488,7 +1521,7 @@ again:
 				return;
 			}
 			pl->peeraddr6 =
-			    GET_INADDR6(pcmd->argval[qitems].netnum);
+			    SOCK_ADDR6(&pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
 		pl = (struct conf_unpeer *)((char *)pl + sendsize);
@@ -1654,8 +1687,8 @@ reslist(
 	)
 {
 	struct info_restrict *rl;
-	struct sockaddr_storage resaddr;
-	struct sockaddr_storage maskaddr;
+	sockaddr_u resaddr;
+	sockaddr_u maskaddr;
 	int items;
 	int itemsize;
 	int res;
@@ -1695,27 +1728,12 @@ again:
 		       "=====================================================================\n");
 
 	while (items > 0) {
-		memset((char *)&resaddr, 0, sizeof(resaddr));
-		memset((char *)&maskaddr, 0, sizeof(maskaddr));
+		SET_ADDRS(resaddr, maskaddr, rl, addr, mask);
 		if (rl->v6_flag != 0) {
-			GET_INADDR6(resaddr) = rl->addr6;
-			GET_INADDR6(maskaddr) = rl->mask6;
-			resaddr.ss_family = AF_INET6;
-			maskaddr.ss_family = AF_INET6;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			resaddr.ss_len = SOCKLEN(&resaddr);
-#endif
 			addr = nntohost(&resaddr);
 		} else {
-			GET_INADDR(resaddr) = rl->addr;
-			GET_INADDR(maskaddr) = rl->mask;
-			resaddr.ss_family = AF_INET;
-			maskaddr.ss_family = AF_INET;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			resaddr.ss_len = SOCKLEN(&resaddr);
-#endif
 			if ((rl->mask == (u_int32)0xffffffff))
-		    		addr = nntohost(&resaddr);
+				addr = nntohost(&resaddr);
 			else
 				addr = stoa(&resaddr);
 		}
@@ -1842,9 +1860,9 @@ again:
 	else
 		sendsize = v4sizeof(struct conf_restrict);
 
-	if (pcmd->argval[0].netnum.ss_family == AF_INET) {
-		cres.addr = GET_INADDR(pcmd->argval[0].netnum);
-		cres.mask = GET_INADDR(pcmd->argval[1].netnum);
+	if (IS_IPV4(&pcmd->argval[0].netnum)) {
+		cres.addr = NSRCADR(&pcmd->argval[0].netnum);
+		cres.mask = NSRCADR(&pcmd->argval[1].netnum);
 		if (impl_ver == IMPL_XNTPD)
 			cres.v6_flag = 0;
 	} else {
@@ -1853,7 +1871,7 @@ again:
 			    "***Server doesn't understand IPv6 addresses\n");
 			return;
 		}
-		cres.addr6 = GET_INADDR6(pcmd->argval[0].netnum);
+		cres.addr6 = SOCK_ADDR6(&pcmd->argval[0].netnum);
 		cres.v6_flag = 1;
 	}
 	cres.flags = 0;
@@ -1890,7 +1908,7 @@ again:
 	 * Make sure mask for default address is zero.  Otherwise,
 	 * make sure mask bits are contiguous.
 	 */
-	if (pcmd->argval[0].netnum.ss_family == AF_INET) {
+	if (IS_IPV4(&pcmd->argval[0].netnum)) {
 		if (cres.addr == 0) {
 			cres.mask = 0;
 		} else {
@@ -1940,8 +1958,8 @@ monlist(
 	)
 {
 	char *struct_star;
-	struct sockaddr_storage addr;
-	struct sockaddr_storage dstadr;
+	sockaddr_u addr;
+	sockaddr_u dstadr;
 	int items;
 	int itemsize;
 	int res;
@@ -1980,27 +1998,11 @@ again:
 		struct info_monitor_1 *ml = (struct info_monitor_1 *) struct_star;
 
 		(void) fprintf(fp,
-			       "remote address          port local address      count m ver code avgint  lstint\n");
+			       "remote address          port local address      count m ver rstr avgint  lstint\n");
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {
-			memset((char *)&addr, 0, sizeof(addr));
-			memset((char *)&dstadr, 0, sizeof(dstadr));
-			if (ml->v6_flag != 0) {
-				GET_INADDR6(addr) = ml->addr6;
-				addr.ss_family = AF_INET6;
-				GET_INADDR6(dstadr) = ml->daddr6;
-				dstadr.ss_family = AF_INET6;
-			} else {
-				GET_INADDR(addr) = ml->addr;
-				addr.ss_family = AF_INET;
-				GET_INADDR(dstadr) = ml->daddr;
-				dstadr.ss_family = AF_INET;
-			}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			addr.ss_len = SOCKLEN(&addr);
-			dstadr.ss_len = SOCKLEN(&dstadr);
-#endif
+			SET_ADDRS(dstadr, addr, ml, daddr, addr);
 			if ((pcmd->nargs == 0) ||
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
@@ -2012,7 +2014,7 @@ again:
 				    (u_long)ntohl(ml->count),
 				    ml->mode,
 				    ml->version,
-				    (u_long)ntohl(ml->lastdrop),
+				    (u_long)ntohl(ml->restr),
 				    (u_long)ntohl(ml->lasttime),
 				    (u_long)ntohl(ml->firsttime));
 			ml++;
@@ -2023,21 +2025,11 @@ again:
 		struct info_monitor *ml = (struct info_monitor *) struct_star;
 
 		(void) fprintf(fp,
-			       "     address               port     count mode ver code avgint  lstint\n");
+			       "     address               port     count mode ver rstr avgint  lstint\n");
 		(void) fprintf(fp,
 			       "===============================================================================\n");
 		while (items > 0) {
-			memset((char *)&dstadr, 0, sizeof(dstadr));
-			if (ml->v6_flag != 0) {
-				GET_INADDR6(dstadr) = ml->addr6;
-				dstadr.ss_family = AF_INET6;
-			} else {
-				GET_INADDR(dstadr) = ml->addr;
-				dstadr.ss_family = AF_INET;
-			}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			dstadr.ss_len = SOCKLEN(&dstadr);
-#endif
+			SET_ADDR(dstadr, ml->v6_flag, ml->addr, ml->addr6);
 			if ((pcmd->nargs == 0) ||
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
@@ -2048,7 +2040,7 @@ again:
 				    (u_long)ntohl(ml->count),
 				    ml->mode,
 				    ml->version,
-				    (u_long)ntohl(ml->lastdrop),
+				    (u_long)ntohl(ml->restr),
 				    (u_long)ntohl(ml->lasttime),
 				    (u_long)ntohl(ml->firsttime));
 			ml++;
@@ -2061,17 +2053,7 @@ again:
 		(void) fprintf(fp,
 			       "======================================================================\n");
 		while (items > 0) {
-			memset((char *)&dstadr, 0, sizeof(dstadr));
-			if (oml->v6_flag != 0) {
-				GET_INADDR6(dstadr) = oml->addr6;
-				dstadr.ss_family = AF_INET6;
-			} else {
-				GET_INADDR(dstadr) = oml->addr;
-				dstadr.ss_family = AF_INET;
-			}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			dstadr.ss_len = SOCKLEN(&dstadr);
-#endif
+			SET_ADDR(dstadr, oml->v6_flag, oml->addr, oml->addr6);
 			(void) fprintf(fp, "%-20.20s %5d %9ld %4d   %3d %9lu %9lu\n",
 				       nntohost(&dstadr),
 				       ntohs(oml->port),
@@ -2187,8 +2169,8 @@ again:
 		sendsize = v4sizeof(struct conf_unpeer);
 
 	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
-		if (pcmd->argval[qitems].netnum.ss_family == AF_INET) {
-			pl->peeraddr = GET_INADDR(pcmd->argval[qitems].netnum);
+		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
+			pl->peeraddr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
 				pl->v6_flag = 0;
 		} else {
@@ -2198,7 +2180,7 @@ again:
 				return;
 			}
 			pl->peeraddr6 =
-			    GET_INADDR6(pcmd->argval[qitems].netnum);
+			    SOCK_ADDR6(&pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
 		pl = (struct conf_unpeer *)((char *)pl + sendsize);
@@ -2382,7 +2364,7 @@ traps(
 {
 	int i;
 	struct info_trap *it;
-	struct sockaddr_storage trap_addr, local_addr;
+	sockaddr_u trap_addr, local_addr;
 	int items;
 	int itemsize;
 	int res;
@@ -2410,23 +2392,7 @@ again:
 	for (i = 0; i < items; i++ ) {
 		if (i != 0)
 		    (void) fprintf(fp, "\n");
-		memset((char *)&trap_addr, 0, sizeof(trap_addr));
-		memset((char *)&local_addr, 0, sizeof(local_addr));
-		if (it->v6_flag != 0) {
-			GET_INADDR6(trap_addr) = it->trap_address6;
-			GET_INADDR6(local_addr) = it->local_address6;
-			trap_addr.ss_family = AF_INET6;
-			local_addr.ss_family = AF_INET6;
-		} else {
-			GET_INADDR(trap_addr) = it->trap_address;
-			GET_INADDR(local_addr) = it->local_address;
-			trap_addr.ss_family = AF_INET;
-			local_addr.ss_family = AF_INET;
-		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		trap_addr.ss_len = SOCKLEN(&trap_addr);
-		local_addr.ss_len = SOCKLEN(&local_addr);
-#endif
+		SET_ADDRS(trap_addr, local_addr, it, trap_address, local_address);
 		(void) fprintf(fp, "address %s, port %d\n",
 				stoa(&trap_addr), 
 				ntohs(it->trap_port));
@@ -2500,8 +2466,8 @@ again:
 	else
 		sendsize = v4sizeof(struct conf_trap);
 
-	if (pcmd->argval[0].netnum.ss_family == AF_INET) {
-		ctrap.trap_address = GET_INADDR(pcmd->argval[0].netnum);
+	if (IS_IPV4(&pcmd->argval[0].netnum)) {
+		ctrap.trap_address = NSRCADR(&pcmd->argval[0].netnum);
 		if (impl_ver == IMPL_XNTPD)
 			ctrap.v6_flag = 0;
 	} else {
@@ -2510,7 +2476,7 @@ again:
 			    "***Server doesn't understand IPv6 addresses\n");
 			return;
 		}
-		ctrap.trap_address6 = GET_INADDR6(pcmd->argval[0].netnum);
+		ctrap.trap_address6 = SOCK_ADDR6(&pcmd->argval[0].netnum);
 		ctrap.v6_flag = 1;
 	}
 	ctrap.local_address = 0;
@@ -2518,19 +2484,18 @@ again:
 	ctrap.unused = 0;
 
 	if (pcmd->nargs > 1) {
-		ctrap.trap_port
-			= htons((u_short)(pcmd->argval[1].uval & 0xffff));
+		ctrap.trap_port	= htons((u_short)pcmd->argval[1].uval);
 		if (pcmd->nargs > 2) {
-			if (pcmd->argval[2].netnum.ss_family !=
-			    pcmd->argval[0].netnum.ss_family) {
+			if (AF(&pcmd->argval[2].netnum) !=
+			    AF(&pcmd->argval[0].netnum)) {
 				fprintf(stderr,
 				    "***Cannot mix IPv4 and IPv6 addresses\n");
 				return;
 			}
-			if (pcmd->argval[2].netnum.ss_family == AF_INET)
-				ctrap.local_address = GET_INADDR(pcmd->argval[2].netnum);
+			if (IS_IPV4(&pcmd->argval[2].netnum))
+				ctrap.local_address = NSRCADR(&pcmd->argval[2].netnum);
 			else
-				ctrap.local_address6 = GET_INADDR6(pcmd->argval[2].netnum);
+				ctrap.local_address6 = SOCK_ADDR6(&pcmd->argval[2].netnum);
 		}
 	}
 
@@ -2700,7 +2665,7 @@ clockstat(
 	struct clktype *clk;
 
 	for (qitems = 0; qitems < min(pcmd->nargs, 8); qitems++)
-	    clist[qitems] = GET_INADDR(pcmd->argval[qitems].netnum);
+		clist[qitems] = NSRCADR(&pcmd->argval[qitems].netnum);
 
 again:
 	res = doquery(impl_ver, REQ_GET_CLOCKINFO, 0, qitems,
@@ -2789,7 +2754,7 @@ fudge(
 
 	err = 0;
 	memset((char *)&fudgedata, 0, sizeof fudgedata);
-	fudgedata.clockadr = GET_INADDR(pcmd->argval[0].netnum);
+	fudgedata.clockadr = NSRCADR(&pcmd->argval[0].netnum);
 
 	if (STREQ(pcmd->argval[1].string, "time1")) {
 		fudgedata.which = htonl(FUDGE_TIME1);
@@ -2872,7 +2837,7 @@ clkbug(
 	l_fp ts;
 
 	for (qitems = 0; qitems < min(pcmd->nargs, 8); qitems++)
-	    clist[qitems] = GET_INADDR(pcmd->argval[qitems].netnum);
+		clist[qitems] = NSRCADR(&pcmd->argval[qitems].netnum);
 
 again:
 	res = doquery(impl_ver, REQ_GET_CLKBUGINFO, 0, qitems,
@@ -3096,7 +3061,7 @@ iflist(
 	)
 {
 	static char *actions = "?.+-";
-	struct sockaddr_storage saddr;
+	sockaddr_u saddr;
 
 	if (res != 0)
 	    return;
@@ -3111,16 +3076,8 @@ iflist(
 	fprintf(fp, IF_LIST_LINE);
 	
 	while (items > 0) {
-		if (ntohl(ifs->v6_flag)) {
-			memcpy((char *)&GET_INADDR6(saddr), (char *)&ifs->unaddr.addr6, sizeof(ifs->unaddr.addr6));
-			saddr.ss_family = AF_INET6;
-		} else {
-			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unaddr.addr, sizeof(ifs->unaddr.addr));
-			saddr.ss_family = AF_INET;
-		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		saddr.ss_len = SOCKLEN(&saddr);
-#endif
+		SET_ADDR(saddr, ntohl(ifs->v6_flag), 
+			 ifs->unaddr.addr.s_addr, ifs->unaddr.addr6);
 		fprintf(fp, IF_LIST_FMT,
 			ntohl(ifs->ifnum),
 			actions[(ifs->action >= 1 && ifs->action < 4) ? ifs->action : 0],
@@ -3138,24 +3095,13 @@ iflist(
 			ntohl(ifs->peercnt),
 			ntohl(ifs->uptime));
 
-		if (ntohl(ifs->v6_flag)) {
-			memcpy((char *)&GET_INADDR6(saddr), (char *)&ifs->unmask.addr6, sizeof(ifs->unmask.addr6));
-			saddr.ss_family = AF_INET6;
-		} else {
-			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unmask.addr, sizeof(ifs->unmask.addr));
-			saddr.ss_family = AF_INET;
-		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-		saddr.ss_len = SOCKLEN(&saddr);
-#endif
+		SET_ADDR(saddr, ntohl(ifs->v6_flag), 
+			 ifs->unmask.addr.s_addr, ifs->unmask.addr6);
 		fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'M');
 
 		if (!ntohl(ifs->v6_flag) && ntohl(ifs->flags) & (INT_BCASTOPEN)) {
-			memcpy((char *)&GET_INADDR(saddr), (char *)&ifs->unbcast.addr, sizeof(ifs->unbcast.addr));
-			saddr.ss_family = AF_INET;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-			saddr.ss_len = SOCKLEN(&saddr);
-#endif
+			SET_ADDR(saddr, ntohl(ifs->v6_flag), 
+				 ifs->unbcast.addr.s_addr, ifs->unbcast.addr6);
 			fprintf(fp, IF_LIST_AFMT_STR, stoa(&saddr), 'B');
 
 		}

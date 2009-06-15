@@ -1,7 +1,7 @@
 /* config.h for Windows NT */
 
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 /*
  * For newer compilers we may we want newer prototypes from Windows
@@ -115,19 +115,23 @@ struct timeval {
 };
 
 /*
- * IPv6 requirements
+ * ntp_rfc2553.h has cruft under #ifdef SYS_WINNT which is
+ * appropriate for older Microsoft IPv6 definitions, such
+ * as in_addr6 being the struct type.  We can differentiate
+ * the RFC2553-compliant newer headers because they have
+ *   #define in_addr6 in6_addr
+ * for backward compatibility.  With the newer headers,
+ * we define ISC_PLATFORM_HAVEIPV6 and disable the cruft.
  */
-/*
- * For VS.NET most of the IPv6 types and structures are defined.
- * This should depend on the contrents of the available headers, 
- * not on the compiler version.
- */
-#if defined _MSC_VER && _MSC_VER > 1200
-#define HAVE_STRUCT_SOCKADDR_STORAGE
+#ifdef in_addr6		
 #define ISC_PLATFORM_HAVEIPV6
+#define INCLUDE_IPV6_SUPPORT
+#define INCLUDE_IPV6_MULTICAST_SUPPORT
+#define ISC_PLATFORM_HAVESCOPEID
+#define HAVE_STRUCT_SOCKADDR_STORAGE
 #define ISC_PLATFORM_HAVEIN6PKTINFO
 #define NO_OPTION_NAME_WARNINGS
-#endif
+#endif	/* in_addr6 / RFC2553-compliant IPv6 headers */
 
 #ifndef _W64
 /* VC6 doesn't know about socklen_t, except if the SDK is installed */
@@ -148,6 +152,19 @@ typedef int socklen_t;
  */
 #ifndef SO_EXCLUSIVEADDRUSE
 #define SO_EXCLUSIVEADDRUSE ((int)(~SO_REUSEADDR))
+#endif
+
+/*
+ * Define this macro to control the behavior of connection
+ * resets on UDP sockets.  See Microsoft KnowledgeBase Article Q263823
+ * for details.
+ * Based on that article, it is surprising that a much newer winsock2.h
+ * does not define SIO_UDP_CONNRESET (the one that comes with VS 2008).
+ * NOTE: This requires that Windows 2000 systems install Service Pack 2
+ * or later.
+ */
+#ifndef SIO_UDP_CONNRESET 
+#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR,12) 
 #endif
 
 #if defined _MSC_VER && _MSC_VER < 1400
@@ -394,4 +411,4 @@ typedef unsigned long uintptr_t;
  */
 #include <isc/stat.h>
 
-#endif /* __CONFIG_H */
+#endif /* CONFIG_H */

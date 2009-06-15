@@ -11,7 +11,7 @@
 int
 decodenetnum(
 	const char *num,
-	struct sockaddr_storage *netnum
+	sockaddr_u *netnum
 	)
 {
 	struct addrinfo hints, *ai = NULL;
@@ -33,7 +33,7 @@ decodenetnum(
 	err = getaddrinfo(num, NULL, &hints, &ai);
 	if (err != 0)
 		return 0;
-	memcpy(netnum, (struct sockaddr_storage *)ai->ai_addr, ai->ai_addrlen); 
+	memcpy(netnum, ai->ai_addr, ai->ai_addrlen); 
 	freeaddrinfo(ai);
 	return 1;
 }

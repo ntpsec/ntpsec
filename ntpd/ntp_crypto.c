@@ -165,8 +165,7 @@ static	int	cert_sign	(struct exten *, struct value *);
 static	struct cert_info *cert_install (struct exten *, struct peer *);
 static	int	cert_hike	(struct peer *, struct cert_info *);
 static	void	cert_free	(struct cert_info *);
-static	struct pkey_info *crypto_key (char *, char *, struct
-				    sockaddr_storage *);
+static	struct pkey_info *crypto_key (char *, char *, sockaddr_u *);
 static	void	bighash		(BIGNUM *, BIGNUM *);
 static	struct cert_info *crypto_cert (char *);
 
@@ -189,8 +188,8 @@ readlink(char * link, char * file, int len) {
  */
 keyid_t
 session_key(
-	struct sockaddr_storage *srcadr, /* source address */
-	struct sockaddr_storage *dstadr, /* destination address */
+	sockaddr_u *srcadr, 	/* source address */
+	sockaddr_u *dstadr, 	/* destination address */
 	keyid_t	keyno,		/* key ID */
 	keyid_t	private,	/* private value */
 	u_long	lifetime 	/* key lifetime */
@@ -210,21 +209,19 @@ session_key(
 	 * greater than zero, install the key and call it trusted.
 	 */
 	hdlen = 0;
-	switch(srcadr->ss_family) {
+	switch(AF(srcadr)) {
 	case AF_INET:
-		header[0] =
-		    ((struct sockaddr_in *)srcadr)->sin_addr.s_addr;
-		header[1] =
-		    ((struct sockaddr_in *)dstadr)->sin_addr.s_addr;
+		header[0] = NSRCADR(srcadr);
+		header[1] = NSRCADR(dstadr);
 		header[2] = htonl(keyno);
 		header[3] = htonl(private);
 		hdlen = 4 * sizeof(u_int32);
 		break;
 
 	case AF_INET6:
-		memcpy(&header[0], &GET_INADDR6(*srcadr),
+		memcpy(&header[0], PSOCK_ADDR6(srcadr),
 		    sizeof(struct in6_addr));
-		memcpy(&header[4], &GET_INADDR6(*dstadr),
+		memcpy(&header[4], PSOCK_ADDR6(dstadr),
 		    sizeof(struct in6_addr));
 		header[8] = htonl(keyno);
 		header[9] = htonl(private);
@@ -240,13 +237,10 @@ session_key(
 		MD5auth_setkey(keyno, dgst, len);
 		authtrust(keyno, lifetime);
 	}
-#ifdef DEBUG
-	if (debug > 1)
-		printf(
-		    "session_key: %s > %s %08x %08x hash %08x life %lu\n",
+	DPRINTF(2, ("session_key: %s > %s %08x %08x hash %08x life %lu\n",
 		    stoa(srcadr), stoa(dstadr), keyno,
-		    private, keyid, lifetime);
-#endif
+		    private, keyid, lifetime));
+
 	return (keyid);
 }
 
@@ -1073,7 +1067,7 @@ crypto_xmit(
 {
 	struct exten *fp;	/* extension pointers */
 	struct cert_info *cp, *xp, *yp; /* cert info/value pointer */
-	struct sockaddr_storage *srcadr_sin; /* source address */
+	sockaddr_u *srcadr_sin; /* source address */
 	u_int32	*pkt;		/* packet pointer */
 	u_int	opcode;		/* extension field opcode */
 	char	certname[MAXHOSTNAME + 1]; /* subject name buffer */
@@ -3268,8 +3262,7 @@ cert_parse(
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->subject = emalloc(strlen(ptr) + 1);
-	strcpy(ret->subject, ptr + 3);
+	ret->subject = estrdup(ptr + 3);
 
 	/*
 	 * Extract remaining objects. Note that the NTP serial number is
@@ -3291,8 +3284,7 @@ cert_parse(
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->issuer = emalloc(strlen(ptr) + 1);
-	strcpy(ret->issuer, ptr + 3);
+	ret->issuer = estrdup(ptr + 3);
 	ret->first = asn2ntp(X509_get_notBefore(cert));
 	ret->last = asn2ntp(X509_get_notAfter(cert));
 
@@ -3433,7 +3425,7 @@ static struct pkey_info *
 crypto_key(
 	char	*cp,		/* file name */
 	char	*passwd1,	/* password */
-	struct sockaddr_storage *addr /* IP address */
+	sockaddr_u *addr 	/* IP address */
 	)
 {
 	FILE	*str;		/* file handle */

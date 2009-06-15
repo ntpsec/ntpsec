@@ -141,17 +141,19 @@ addrinfo_to_str (
 	return buf;
 }
 
-/* Convert a struct sockaddr_storage to a string containing the address in
+/* Convert a sockaddr_u to a string containing the address in
  * style of inet_ntoa
+ * Why not switch callers to use stoa from libntp?  No free() needed
+ * in that case.
  */
 char *
 ss_to_str (
-		struct sockaddr_storage *saddr
+		sockaddr_u *saddr
 		)
 {
 	char *buf = (char *) malloc(sizeof(char) * INET6_ADDRSTRLEN);
 
-	getnameinfo((struct sockaddr *) saddr, SOCKLEN(saddr), buf,
+	getnameinfo(&saddr->sa, SOCKLEN(saddr), buf,
 			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
 
 

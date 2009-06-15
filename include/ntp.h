@@ -169,6 +169,7 @@ typedef char s_char;
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
 
+
 /*
  * The interface structure is used to hold the addresses and socket
  * numbers of each of the interfaces we are using.
@@ -176,27 +177,27 @@ typedef char s_char;
 struct interface {
 	SOCKET fd;			/* socket this is opened on */
 	SOCKET bfd;			/* socket for receiving broadcasts */
-	struct sockaddr_storage sin;	/* interface address */
-	struct sockaddr_storage bcast;	/* broadcast address */
-	struct sockaddr_storage mask;	/* interface mask */
+	sockaddr_u sin;			/* interface address */
+	sockaddr_u bcast;		/* broadcast address */
+	sockaddr_u mask;		/* interface mask */
 	char name[32];			/* name of interface */
-	short  family;			/* Address family */
+	u_short family;			/* Address family */
+	u_short phase;			/* phase in update cycle */
 	int flags;			/* interface flags */
 	int last_ttl;			/* last TTL specified */
 	u_int32 addr_refid;		/* IPv4 addr or IPv6 hash */
 	int num_mcast;			/* No. of IP addresses in multicast socket */
-	u_long starttime;	        /* current_time as of creation of interface structure */
+	u_long starttime;		/* current_time as of creation of interface structure */
 	volatile long received;		/* number of incoming packets */
 	long sent;			/* number of outgoing packets */
 	long notsent;			/* number of send failures */
 	u_int scopeid;			/* Scope used for Multicasting */
 	u_int ifindex;			/* interface index */
-	u_int ifnum;		        /* sequential interface instance count */
-        u_char phase;		        /* phase in update cycle */
-	isc_boolean_t ignore_packets;	/* Specify whether the packet should be ignored */
-        ISC_LIST(struct peer) peers;    /* list of peers for the interface */
-        u_int peercnt;		        /* number of peers referencinf this interface - informational only */
-        ISC_LINK(struct interface) link;     /* interface list */
+	u_int ifnum;			/* sequential interface instance count */
+	isc_boolean_t ignore_packets;	/* listen-read-drop this? */
+	ISC_LIST(struct peer) peers;	/* list of peers for the interface */
+	u_int peercnt;			/* peers referencing this interface */
+	ISC_LINK(struct interface) link;/* interface list */
 };
 
 /*
@@ -247,9 +248,9 @@ struct interface {
 struct peer {
 	struct peer *next;	/* pointer to next association */
 	struct peer *ass_next;	/* link pointer in associd hash */
-	struct sockaddr_storage srcadr; /* address of remote host */
-	struct interface *dstadr; /* pointer to address on local host */
-        ISC_LINK(struct peer) ilink; /* interface link list */
+	sockaddr_u srcadr;	/* address of remote host */
+	struct interface *dstadr; /* local address (interface) */
+	ISC_LINK(struct peer) ilink; /* peers using this interface */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */
@@ -520,93 +521,6 @@ struct peer {
 #define REFCLK_NEOCLOCK4X	44	/* NeoClock4X DCF77 or TDF receiver */
 #define REFCLK_MAX		44	/* NeoClock4X DCF77 or TDF receiver */
 
- /*
- * Macro for sockaddr_storage structures operations
- */
-#ifdef ISC_PLATFORM_HAVESCOPEID
-#define SOCKSCOPE(sock1, sock2) (((struct sockaddr_in6 *)sock1)->sin6_scope_id == ((struct sockaddr_in6 *)sock2)->sin6_scope_id)
-#else
-#define SOCKSCOPE(sock1, sock2) 1
-#endif
-
-#define SOCKCMP(sock1, sock2) \
-	(((struct sockaddr_storage *)sock1)->ss_family \
-	 == ((struct sockaddr_storage *)sock2)->ss_family \
-		? (((struct sockaddr_storage *)sock1)->ss_family == AF_INET \
-			? (memcmp(&((struct sockaddr_in *)sock1)->sin_addr, \
-				  &((struct sockaddr_in *)sock2)->sin_addr, \
-				  sizeof(struct in_addr)) == 0) \
-			: (memcmp(&((struct sockaddr_in6 *)sock1)->sin6_addr, \
-				  &((struct sockaddr_in6 *)sock2)->sin6_addr, \
-				  sizeof(struct in6_addr)) == 0) \
-			  && SOCKSCOPE(sock1, sock2)) \
-		: 0)
-
-#define SOCKNUL(sock1) \
-	(((struct sockaddr_storage *)sock1)->ss_family == AF_INET ? \
- 	(((struct sockaddr_in *)sock1)->sin_addr.s_addr == 0) : \
- 	(IN6_IS_ADDR_UNSPECIFIED(&((struct sockaddr_in6 *)sock1)->sin6_addr)))
-
-#define SOCKLEN(sock) \
-	(((struct sockaddr_storage *)sock)->ss_family == AF_INET ? \
- 	(sizeof(struct sockaddr_in)) : (sizeof(struct sockaddr_in6)))
-
-#define ANYSOCK(sock) \
-	memset(((struct sockaddr_storage *)sock), 0, \
-	    sizeof(struct sockaddr_storage))
-
-#define ANY_INTERFACE_CHOOSE(sock) \
-	(((struct sockaddr_storage *)sock)->ss_family == AF_INET ? \
- 	any_interface : any6_interface)
-
-/*
- * We tell reference clocks from real peers by giving the reference
- * clocks an address of the form 127.127.t.u, where t is the type and
- * u is the unit number.  We define some of this here since we will need
- * some sanity checks to make sure this address isn't interpretted as
- * that of a normal peer.
- */
-#define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
-#define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
-
-#define	ISREFCLOCKADR(srcadr)	((SRCADR(srcadr) & REFCLOCK_MASK) \
-					== REFCLOCK_ADDR)
-
-/*
- * Macro for checking for invalid addresses.  This is really, really
- * gross, but is needed so no one configures a host on net 127 now that
- * we're encouraging it the the configuration file.
- */
-#define	LOOPBACKADR	0x7f000001
-#define	LOOPNETMASK	0xff000000
-
-#define	ISBADADR(srcadr)	(((SRCADR(srcadr) & LOOPNETMASK) \
-				    == (LOOPBACKADR & LOOPNETMASK)) \
-				    && (SRCADR(srcadr) != LOOPBACKADR))
-
-/*
- * Utilities for manipulating addresses and port numbers
- */
-#define	NSRCADR(src)	(((struct sockaddr_in *)src)->sin_addr.s_addr) /* address in net byte order */
-#define	NSRCPORT(src)	(((struct sockaddr_in *)src)->sin_port)	/* port in net byte order */
-#define	SRCADR(src)	(ntohl(NSRCADR((src))))	/* address in host byte order */
-#define	SRCPORT(src)	(ntohs(NSRCPORT((src))))	/* host port */
-
-#define CAST_V4(src)	((struct sockaddr_in *)&(src))
-#define CAST_V6(src)	((struct sockaddr_in6 *)&(src))
-#define GET_INADDR(src)  (CAST_V4(src)->sin_addr.s_addr)
-#define GET_INADDR6(src) (CAST_V6(src)->sin6_addr)
-
-#define SET_HOSTMASK(addr, family)	\
-	do { \
-		memset((char *)(addr), 0, sizeof(struct sockaddr_storage)); \
-		(addr)->ss_family = (family); \
-		if ((family) == AF_INET) \
-			GET_INADDR(*(addr)) = 0xffffffff; \
-		else \
-			memset(&GET_INADDR6(*(addr)), 0xff, \
-			    sizeof(struct in6_addr)); \
-	} while(0)
 
 /*
  * NTP packet format.  The mac field is optional.  It isn't really
@@ -831,7 +745,7 @@ struct mon_data {
 	int	count;			/* total packet count */
 	u_long	firsttime;		/* first time found */
 	u_long	lasttime;		/* last time found */
-	struct sockaddr_storage rmtadr;	/* address of remote host */
+	sockaddr_u rmtadr;		/* address of remote host */
 	struct interface *interface;	/* interface on which this arrived */
 	u_short	rmtport;		/* remote port last came from */
 	u_char	mode;			/* packet mode */

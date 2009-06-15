@@ -65,15 +65,10 @@ lowater_additions(void)
 	return lowater_adds;
 }
 
-static void 
+static inline void 
 initialise_buffer(recvbuf_t *buff)
 {
-	memset((char *) buff, 0, sizeof(recvbuf_t));
-
-#if defined SYS_WINNT
-	buff->wsabuff.len = RX_BUFF_SIZE;
-	buff->wsabuff.buf = (char *) buff->recv_buffer;
-#endif
+	memset(buff, 0, sizeof(*buff));
 }
 
 static void

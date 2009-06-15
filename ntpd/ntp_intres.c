@@ -50,9 +50,9 @@
  */
 struct conf_entry {
 	struct conf_entry *ce_next;
-	char *ce_name;			/* name we are trying to resolve */
-	struct conf_peer ce_config;	/* configuration info for peer */
-	struct sockaddr_storage peer_store; /* address info for both fams */
+	char *ce_name;			/* name to resolve */
+	struct conf_peer ce_config;	/* config info for peer */
+	sockaddr_u peer_store;		/* address info for both fams */
 };
 #define	ce_peeraddr	ce_config.peeraddr
 #define	ce_peeraddr6	ce_config.peeraddr6
@@ -436,7 +436,7 @@ addentry(
 #ifdef ISC_PLATFORM_HAVEIPV6
 	ce->ce_peeraddr6 = in6addr_any;
 #endif
-	ANYSOCK(&ce->peer_store);
+	ZERO_SOCK(&ce->peer_store);
 	ce->ce_hmode = (u_char)mode;
 	ce->ce_version = (u_char)version;
 	ce->ce_minpoll = (u_char)minpoll;
@@ -481,13 +481,13 @@ findhostaddr(
 
 	checkparent();		/* make sure our guy is still running */
 
-	if (entry->ce_name != NULL && !SOCKNUL(&entry->peer_store)) {
+	if (entry->ce_name != NULL && !SOCK_UNSPEC(&entry->peer_store)) {
 		/* HMS: Squawk? */
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are defined...");
 		return 1;
 	}
 
-	if (entry->ce_name == NULL && SOCKNUL(&entry->peer_store)) {
+	if (entry->ce_name == NULL && SOCK_UNSPEC(&entry->peer_store)) {
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
 		return 0;
 	}
@@ -506,14 +506,14 @@ findhostaddr(
 
 		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
 		if (error == 0) {
-			entry->peer_store = *((struct sockaddr_storage*)(addr->ai_addr));
-			if (entry->peer_store.ss_family == AF_INET) {
+			entry->peer_store = *((sockaddr_u *)(addr->ai_addr));
+			if (IS_IPV4(&entry->peer_store)) {
 				entry->ce_peeraddr =
-				    GET_INADDR(entry->peer_store);
+				    NSRCADR(&entry->peer_store);
 				entry->ce_config.v6_flag = 0;
 			} else {
 				entry->ce_peeraddr6 =
-				    GET_INADDR6(entry->peer_store);
+				    SOCK_ADDR6(&entry->peer_store);
 				entry->ce_config.v6_flag = 1;
 			}
 		}
@@ -1155,7 +1155,7 @@ doconfigure(
 			    "doconfigure: <%s> has peeraddr %s",
 			    ce->ce_name, stoa(&ce->peer_store));
 #endif
-		if (dores && SOCKNUL(&(ce->peer_store))) {
+		if (dores && SOCK_UNSPEC(&ce->peer_store)) {
 			if (!findhostaddr(ce)) {
 #ifndef IGNORE_DNS_ERRORS
 				msyslog(LOG_ERR,
@@ -1169,7 +1169,7 @@ doconfigure(
 			}
 		}
 
-		if (!SOCKNUL(&ce->peer_store)) {
+		if (!SOCK_UNSPEC(&ce->peer_store)) {
 			if (request(&ce->ce_config)) {
 				ceremove = ce;
 				ce = ceremove->ce_next;

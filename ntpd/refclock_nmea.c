@@ -246,7 +246,7 @@ nmea_start(
 
 		if ((fd = socket(PF_INET,SOCK_STREAM,p->p_proto)) == -1)
 			return(0);
-		if (connect(fd,(struct sockaddr *)&so_addr,SOCKLEN(&so_addr)) == -1) {
+		if (connect(fd,(struct sockaddr *)&so_addr, sizeof(so_addr)) == -1) {
 			close(fd);
 			return (0);
 		}
@@ -506,7 +506,7 @@ nmea_receive(
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
 

@@ -312,7 +312,7 @@ receive(
 	int     flags = 0;              /* flags with details about the authentication */
 	keyid_t	skeyid = 0;		/* key IDs */
 	u_int32	opcode = 0;		/* extension field opcode */
-	struct sockaddr_storage *dstadr_sin; /* active runway */
+	sockaddr_u *dstadr_sin; 	/* active runway */
 	struct peer *peer2;		/* aux peer structure pointer */
 	l_fp	p_org;			/* origin timestamp */
 	l_fp	p_rec;			/* receive timestamp */
@@ -633,7 +633,7 @@ receive(
 					return;	     /* no wildcard */
 				}
 				pkeyid = 0;
-				if (!SOCKNUL(&rbufp->dstadr->bcast))
+				if (!SOCK_UNSPEC(&rbufp->dstadr->bcast))
 					dstadr_sin =
 					    &rbufp->dstadr->bcast;
 			} else if (peer == NULL) {
@@ -3196,7 +3196,7 @@ fast_xmit(
 	int	xmode,		/* receive mode */
 	keyid_t	xkeyid,		/* transmit key ID */
 	char	*mask,		/* kiss code */
-	int     flags           /* Flags to indicate signing behaviour */
+	int	flags		/* Flags to indicate signing behaviour */
 	)
 {
 	struct pkt xpkt;	/* transmit packet structure */
@@ -3546,17 +3546,15 @@ proto_config(
 	int	item,
 	u_long	value,
 	double	dvalue,
-	struct sockaddr_storage* svalue
+	sockaddr_u *svalue
 	)
 {
 	/*
 	 * Figure out what he wants to change, then do it
 	 */
-#ifdef DEBUG
-	if (debug > 1)
-		printf("proto_config: code %d value %lu dvalue %lf\n",
-		    item, value, dvalue);
-#endif
+	DPRINTF(2, ("proto_config: code %d value %lu dvalue %lf\n",
+		    item, value, dvalue));
+
 	switch (item) {
 
 	/*
@@ -3665,14 +3663,14 @@ proto_config(
 	 * Miscellaneous commands
 	 */
 	case PROTO_MULTICAST_ADD: /* add group address */
-		if (svalue)
-		    io_multicast_add(*svalue);
+		if (svalue != NULL)
+			io_multicast_add(svalue);
 		sys_bclient = 1;
 		break;
 
 	case PROTO_MULTICAST_DEL: /* delete group address */
-		if (svalue)
-		    io_multicast_del(*svalue);
+		if (svalue != NULL)
+			io_multicast_del(svalue);
 		break;
 
 	default:

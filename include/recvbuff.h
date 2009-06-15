@@ -53,19 +53,18 @@ typedef struct recvbuf recvbuf_t;
 struct recvbuf {
 	ISC_LINK(recvbuf_t)	link;
 	union {
-		struct sockaddr_storage X_recv_srcadr;
+		sockaddr_u X_recv_srcadr;
 		caddr_t X_recv_srcclock;
 		struct peer *X_recv_peer;
 	} X_from_where;
 #define recv_srcadr	X_from_where.X_recv_srcadr
 #define	recv_srcclock	X_from_where.X_recv_srcclock
 #define recv_peer	X_from_where.X_recv_peer
-#if defined HAVE_IO_COMPLETION_PORT
-	WSABUF		wsabuff;
+#ifndef HAVE_IO_COMPLETION_PORT
+	sockaddr_u srcadr;		/* where packet came from */
 #else
-	struct sockaddr_storage srcadr;	/* where packet came from */
+	int recv_srcadr_len;		/* filled in on completion */
 #endif
-	int src_addr_len;		/* source address length */
 	struct interface *dstadr;	/* interface datagram arrived thru */
 	SOCKET	fd;			/* fd on which it was received */
 	int msg_flags;			/* Flags received about the packet */
@@ -76,9 +75,9 @@ struct recvbuf {
 		struct pkt X_recv_pkt;
 		u_char X_recv_buffer[RX_BUFF_SIZE];
 	} recv_space;
-	int used;
 #define	recv_pkt	recv_space.X_recv_pkt
 #define	recv_buffer	recv_space.X_recv_buffer
+	int used;			/* reference count */
 };
 
 extern	void	init_recvbuff	(int);

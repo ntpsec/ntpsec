@@ -1,8 +1,8 @@
 /*
  * Define malloc and friends.
  */
-#ifndef  _ntp_malloc_h
-#define  _ntp_malloc_h
+#ifndef NTP_MALLOC_H
+#define NTP_MALLOC_H
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -10,10 +10,10 @@
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
-#else /* HAVE_STDLIB_H */
+#else
 # ifdef HAVE_MALLOC_H
 #  include <malloc.h>
 # endif
-#endif /* HAVE_STDLIB_H */
+#endif
 
-#endif /* _ntp_malloc_h */
+#endif	/* NTP_MALLOC_H */

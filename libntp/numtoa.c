@@ -25,8 +25,10 @@ numtoa(
 
 	netnum = ntohl(num);
 	LIB_GETBUF(buf);
-	(void) sprintf(buf, "%lu.%lu.%lu.%lu", ((u_long)netnum >> 24) & 0xff,
-		       ((u_long)netnum >> 16) & 0xff, ((u_long)netnum >> 8) & 0xff,
-		       (u_long)netnum & 0xff);
+	snprintf(buf, LIB_BUFLENGTH, "%lu.%lu.%lu.%lu",
+		 ((u_long)netnum >> 24) & 0xff,
+		 ((u_long)netnum >> 16) & 0xff,
+		 ((u_long)netnum >> 8) & 0xff,
+		 (u_long)netnum & 0xff);
 	return buf;
 }

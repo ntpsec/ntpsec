@@ -2,9 +2,9 @@
  *
  * The source code for the ntp discrete event simulator. 
  *
- * Written By: Sachin Kamboj
- *             University of Delaware
- *             Newark, DE 19711
+ * Written By:	Sachin Kamboj
+ *		University of Delaware
+ *		Newark, DE 19711
  * Copyright (c) 2006
  * (Some code shamelessly based on the original NTP discrete event simulator)
  */
@@ -17,15 +17,15 @@
 
 /* Global Variable Definitions */
 
-sim_info simulation;         /* Simulation Control Variables */
-local_clock_info simclock;   /* Local Clock Variables */
-queue *event_queue;          /* Event Queue */
-queue *recv_queue;           /* Receive Queue */
-static double sys_residual = 0;     /* adjustment residue (s) */
+sim_info simulation;		/* Simulation Control Variables */
+local_clock_info simclock;	/* Local Clock Variables */
+queue *event_queue;		/* Event Queue */
+queue *recv_queue;		/* Receive Queue */
+static double sys_residual = 0;	/* adjustment residue (s) */
 
 void (*event_ptr[]) (Event *) = {
     sim_event_beep, sim_update_clocks, sim_event_timer, sim_event_recv_packet
-};                        /* Function pointer to the events */
+};			/* Function pointer to the events */
 
 
 /* Define a function to compare two events to determine which one occurs first
@@ -58,20 +58,20 @@ void create_server_associations()
 {
     int i;
     for (i = 0;i < simulation.num_of_servers;++i) {
-        printf("%s\n", stoa(simulation.servers[i].addr));
-        if (peer_config(simulation.servers[i].addr,
-                        ANY_INTERFACE_CHOOSE(simulation.servers[i].addr),
-                        MODE_CLIENT,
-                        NTP_VERSION,
-                        NTP_MINDPOLL,
-                        NTP_MAXDPOLL,
-                        0, /* peerflags */
-                        0, /* ttl */
-                        0, /* peerkey */
-                        (u_char *)"*" /* peerkeystr */) == 0) {
-            fprintf(stderr, "ERROR!! Could not create association for: %s",
-                    stoa(simulation.servers[i].addr));
-        }
+	printf("%s\n", stoa(simulation.servers[i].addr));
+	if (peer_config(simulation.servers[i].addr,
+			ANY_INTERFACE_CHOOSE(simulation.servers[i].addr),
+			MODE_CLIENT,
+			NTP_VERSION,
+			NTP_MINDPOLL,
+			NTP_MAXDPOLL,
+			0, /* peerflags */
+			0, /* ttl */
+			0, /* peerkey */
+			(u_char *)"*" /* peerkeystr */) == 0) {
+	    fprintf(stderr, "ERROR!! Could not create association for: %s",
+		    stoa(simulation.servers[i].addr));
+	}
     }
 }
 
@@ -82,7 +82,7 @@ int ntpsim(int argc, char *argv[])
 {
     Event *curr_event;
     struct timeval seed;
-    
+
     /* Initialize the local Clock 
      */
     simclock.local_time = 0;
@@ -118,21 +118,21 @@ int ntpsim(int argc, char *argv[])
     getconfig(argc, argv);
     initializing = 0;
     loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
-    
+
     /*
      * Watch out here, we want the real time, not the silly stuff.
      */
     gettimeofday(&seed, NULL);
     ntp_srandom(seed.tv_usec);
-        
+
 
     /* Initialize the event queue */
     event_queue = create_priority_queue((int(*)(void *, void*)) 
-                                        determine_event_ordering);
+					determine_event_ordering);
 
     /* Initialize the receive queue */
     recv_queue = create_priority_queue((int(*)(void *, void*))
-                                       determine_recv_buf_ordering);
+				       determine_recv_buf_ordering);
 
     /* Push a beep and a timer on the event queue */
     enqueue(event_queue, event(0, BEEP));
@@ -142,14 +142,14 @@ int ntpsim(int argc, char *argv[])
      */
     /* maxtime = simulation.sim_time + simulation.end_time;*/
     while (simulation.sim_time <= simulation.end_time &&
-           (!empty(event_queue))) {
-        curr_event = dequeue(event_queue);
-        /* Update all the clocks to the time on the event */
-        sim_update_clocks(curr_event);
-        
-        /* Execute the function associated with the event */
-        event_ptr[curr_event->function](curr_event);
-        free_node(curr_event);
+	   (!empty(event_queue))) {
+	curr_event = dequeue(event_queue);
+	/* Update all the clocks to the time on the event */
+	sim_update_clocks(curr_event);
+
+	/* Execute the function associated with the event */
+	event_ptr[curr_event->function](curr_event);
+	free_node(curr_event);
     }
     return (0);
 }
@@ -161,9 +161,9 @@ int ntpsim(int argc, char *argv[])
 Event *event(double t, funcTkn f)
 {
     Event *e;
-    
-    if ((e = (Event *)get_node(sizeof(Event))) == NULL)
-        abortsim("get_node failed in event");
+
+    if ((e = get_node(sizeof(*e))) == NULL)
+	abortsim("get_node failed in event");
     e->time = t;
     e->function = f;
     return (e);
@@ -178,24 +178,24 @@ Event *event(double t, funcTkn f)
 void sim_event_timer(Event *e)
 {
     struct recvbuf *rbuf;
-    
+
     /* Call the NTP timer.
      * This will be responsible for actually "sending the packets."
      * Since this is a simulation, the packets sent over the network
      * will be processed by the simulate_server routine below.
      */
     timer();
-    
+
     /* Process received buffers */
     while (!empty(recv_queue)) {
-        rbuf = (struct recvbuf *)dequeue(recv_queue);
-        (rbuf->receiver)(rbuf);
-        free_node(rbuf);
+	rbuf = (struct recvbuf *)dequeue(recv_queue);
+	(rbuf->receiver)(rbuf);
+	free_node(rbuf);
     }
-    
+
     /* Arm the next timer interrupt. */
     enqueue(event_queue, 
-            event(simulation.sim_time + (1 << EVENT_TIMEOUT), TIMER));
+	    event(simulation.sim_time + (1 << EVENT_TIMEOUT), TIMER));
 }
 
 
@@ -205,37 +205,37 @@ void sim_event_timer(Event *e)
  * creates a reply packet and pushes the reply packet onto the event queue
  */
 int simulate_server(
-    struct sockaddr_storage *serv_addr, /* Address of the server */
-    struct interface *inter,            /* Interface on which the reply should
-                                           be inserted */
-    struct pkt *rpkt                    /* Packet sent to the server that
-                                           needs to be processed. */
+    sockaddr_u *serv_addr,		/* Address of the server */
+    struct interface *inter,		/* Interface on which the reply should
+					   be inserted */
+    struct pkt *rpkt			/* Packet sent to the server that
+					   needs to be processed. */
 )
 {
-    struct pkt xpkt;           /* Packet to be transmitted back
-                                  to the client */
+    struct pkt xpkt;	       /* Packet to be transmitted back
+				  to the client */
     struct recvbuf rbuf;       /* Buffer for the received packet */
-    Event *e;                  /* Packet receive event */
+    Event *e;		       /* Packet receive event */
     server_info *server;       /* Pointer to the server being simulated */
     script_info *curr_script;  /* Current script being processed */
     int i;
-    double d1, d2, d3;         /* Delays while the packet is enroute */
+    double d1, d2, d3;	       /* Delays while the packet is enroute */
     double t1, t2, t3, t4;     /* The four timestamps in the packet */
 
     /* Search for the server with the desired address */
     server = NULL;
     for (i = 0; i < simulation.num_of_servers; ++i) {
-        fprintf(stderr,"Checking address: %s\n", stoa(simulation.servers[i].addr));
-        if (memcmp(simulation.servers[i].addr, serv_addr, 
-                   sizeof(struct sockaddr_storage)) == 0) { 
-            server = &simulation.servers[i];
-            break;
-        }
+	fprintf(stderr,"Checking address: %s\n", stoa(simulation.servers[i].addr));
+	if (memcmp(simulation.servers[i].addr, serv_addr, 
+		   sizeof(*serv_addr)) == 0) { 
+	    server = &simulation.servers[i];
+	    break;
+	}
     }
-    
+
     fprintf(stderr, "Received packet for: %s\n", stoa(serv_addr));
     if (server == NULL)
-        abortsim("Server with specified address not found!!!");
+	abortsim("Server with specified address not found!!!");
     
     /* Get the current script for the server */
     curr_script = server->curr_script;
@@ -251,32 +251,32 @@ int simulate_server(
     xpkt.precision = rpkt->precision;
     xpkt.rootdelay = 0;
     xpkt.rootdisp = 0;
-    
+
     /* TIMESTAMP CALCULATIONS
-            t1                           t4
-             \                          /
-          d1  \                        / d3
-               \                      /
-               t2 ----------------- t3
-                         d2
+	    t1				 t4
+	     \				/
+	  d1  \			       / d3
+	       \		      /
+	       t2 ----------------- t3
+			 d2
     */
     /* Compute the delays */
     d1 = poisson(curr_script->prop_delay, curr_script->jitter);
     d2 = poisson(curr_script->proc_delay, 0);
     d3 = poisson(curr_script->prop_delay, curr_script->jitter);
-    
+
     /* Note: In the transmitted packet: 
      * 1. t1 and t4 are times in the client according to the local clock.
      * 2. t2 and t3 are server times according to the simulated server.
      * Compute t1, t2, t3 and t4
      * Note: This function is called at time t1. 
      */
-    
+
     LFPTOD(&rpkt->xmt, t1);
     t2 = server->server_time + d1;
     t3 = server->server_time + d1 + d2;
     t4 = t1 + d1 + d2 + d3;
-    
+
     /* Save the timestamps */
     xpkt.org = rpkt->xmt;     
     DTOLFP(t2, &xpkt.rec);
@@ -292,12 +292,12 @@ int simulate_server(
     rbuf.recv_length = LEN_PKT_NOMAC;
     rbuf.recv_pkt = xpkt;
     rbuf.used = 1;
-    
-    memcpy(&rbuf.srcadr, serv_addr, sizeof(struct sockaddr_storage));
-    memcpy(&rbuf.recv_srcadr, serv_addr, sizeof(struct sockaddr_storage));
-    if ((rbuf.dstadr = malloc(sizeof(struct interface))) == NULL)
-        abortsim("malloc failed in simulate_server");
-    memcpy(rbuf.dstadr, inter, sizeof(struct interface));
+
+    memcpy(&rbuf.srcadr, serv_addr, sizeof(rbuf.srcadr));
+    memcpy(&rbuf.recv_srcadr, serv_addr, sizeof(rbuf.recv_srcadr));
+    if ((rbuf.dstadr = malloc(sizeof(*rbuf.dstadr))) == NULL)
+	abortsim("malloc failed in simulate_server");
+    memcpy(rbuf.dstadr, inter, sizeof(*rbuf.dstadr));
     /* rbuf.link = NULL; */
 
     /* Create a packet event and insert it onto the event_queue at the 
@@ -312,14 +312,14 @@ int simulate_server(
      * If not, re-enqueue the script onto the server script queue 
      */
     if (curr_script->duration > simulation.sim_time && 
-        !empty(server->script)) {
-        printf("Hello\n");
-        /* 
-         * For some reason freeing up the curr_script memory kills the
-         * simulation. Further debugging is needed to determine why.
-         * free_node(curr_script);
-         */
-        curr_script = dequeue(server->script);
+	!empty(server->script)) {
+	printf("Hello\n");
+	/* 
+	 * For some reason freeing up the curr_script memory kills the
+	 * simulation. Further debugging is needed to determine why.
+	 * free_node(curr_script);
+	 */
+	curr_script = dequeue(server->script);
     }
 
     return (0);
@@ -335,10 +335,10 @@ void sim_update_clocks (Event *e)
     double time_gap;
     double adj;
     int i;
-        
+
     /* Compute the time between the last update event and this update */
     time_gap = e->time - simulation.sim_time;
-    
+
     /* Advance the client clock */
     simclock.local_time = e->time + time_gap;
 
@@ -350,33 +350,33 @@ void sim_update_clocks (Event *e)
      * integral of samples from a Gaussian distribution.
      */
     for (i = 0;i < simulation.num_of_servers; ++i) {
-        simulation.servers[i].curr_script->freq_offset +=
-            gauss(0, time_gap * simulation.servers[i].curr_script->wander);
+	simulation.servers[i].curr_script->freq_offset +=
+	    gauss(0, time_gap * simulation.servers[i].curr_script->wander);
 
-        simulation.servers[i].server_time += time_gap * 
-            (1 + simulation.servers[i].curr_script->freq_offset);
+	simulation.servers[i].server_time += time_gap * 
+	    (1 + simulation.servers[i].curr_script->freq_offset);
     }
-    
-    
+
+
     /* Perform the adjtime() function. If the adjustment completed
      * in the previous interval, amortize the entire amount; if not,
      * carry the leftover to the next interval.
      */
-    
+
     adj = time_gap * simclock.slew;
     if (adj < fabs(simclock.adj)) {
-        if (simclock.adj < 0) {
-            simclock.adj += adj;
-            simclock.local_time -= adj;
-        } 
-        else {
-            simclock.adj -= adj;
-            simclock.local_time += adj;
-        }    
+	if (simclock.adj < 0) {
+	    simclock.adj += adj;
+	    simclock.local_time -= adj;
+	} 
+	else {
+	    simclock.adj -= adj;
+	    simclock.local_time += adj;
+	}    
     } 
     else {
-        simclock.local_time += simclock.adj;
-        simclock.adj = 0;
+	simclock.local_time += simclock.adj;
+	simclock.adj = 0;
     }
 }
 
@@ -388,15 +388,15 @@ void sim_update_clocks (Event *e)
 void sim_event_recv_packet(Event *e)
 {
     struct recvbuf *rbuf;
-    
+
     /* Allocate a receive buffer and copy the packet to it */
-    if ((rbuf = (struct recvbuf *) get_node(sizeof(struct recvbuf))) == NULL)
-        abortsim("get_node failed in sim_event_recv_packet");
-    memcpy(rbuf, &e->rcv_buf, sizeof(struct recvbuf));
-    
+    if ((rbuf = get_node(sizeof(*rbuf))) == NULL)
+	abortsim("get_node failed in sim_event_recv_packet");
+    memcpy(rbuf, &e->rcv_buf, sizeof(*rbuf));
+
     /* Store the local time in the received packet */
     DTOLFP(simclock.local_time, &rbuf->recv_time);
-    
+
     /* Insert the packet received onto the receive queue */
     enqueue(recv_queue, rbuf);
 }
@@ -418,20 +418,19 @@ void sim_event_beep(Event *e)
     enqueue(event_queue, event(e->time + simulation.beep_delay, BEEP));
 #if 0
     if(simulation.beep_delay > 0) {
-        if (first_time) {
-            printf("\t%4c    T    %4c\t%4c  T+ERR  %3c\t%5cT+ERR+NTP\n", 
-                   ' ', ' ', ' ', ' ',' ');
-            printf("\t%s\t%s\t%s\n", dash, dash, dash);
-            first_time = 0;
-            
-            printf("\t%16.6f\t%16.6f\t%16.6f\n",
-                   n->time, n->clk_time, n->ntp_time);
-            return;
-        }
-        printf("\t%16.6f\t%16.6f\t%16.6f\n",
-               simclock.local_time, 
-               
-               n->time, n->clk_time, n->ntp_time);
+	if (first_time) {
+	    printf("\t%4c    T    %4c\t%4c  T+ERR  %3c\t%5cT+ERR+NTP\n", 
+	           ' ', ' ', ' ', ' ',' ');
+	    printf("\t%s\t%s\t%s\n", dash, dash, dash);
+	    first_time = 0;
+
+	    printf("\t%16.6f\t%16.6f\t%16.6f\n",
+	           n->time, n->clk_time, n->ntp_time);
+	    return;
+	}
+	printf("\t%16.6f\t%16.6f\t%16.6f\n",
+	       simclock.local_time, 
+	       n->time, n->clk_time, n->ntp_time);
 #endif
 
 }
@@ -510,8 +509,8 @@ adj_systime(
      */
     dtemp = now + sys_residual;
     if (dtemp < 0) {
-        isneg = 1;
-        dtemp = -dtemp;
+	isneg = 1;
+	dtemp = -dtemp;
     }
     adjtv.tv_sec = (long)dtemp;
     dtemp -= adjtv.tv_sec;
@@ -526,9 +525,9 @@ adj_systime(
      * leftover.
      */
     if (isneg) {
-        adjtv.tv_sec = -adjtv.tv_sec;
-        adjtv.tv_usec = -adjtv.tv_usec;
-        sys_residual = -sys_residual;
+	adjtv.tv_sec = -adjtv.tv_sec;
+	adjtv.tv_usec = -adjtv.tv_usec;
+	sys_residual = -sys_residual;
     }
     simclock.adj = now;
 /*	ntp_node.adj = now; */
@@ -546,8 +545,8 @@ step_systime(
 {
 #ifdef DEBUG
     if (debug)
-        printf("step_systime: time %.6f adj %.6f\n",
-               simclock.local_time, now);
+	printf("step_systime: time %.6f adj %.6f\n",
+	       simclock.local_time, now);
 #endif
     simclock.local_time += now;
     return (1);

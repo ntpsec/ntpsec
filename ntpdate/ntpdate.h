@@ -15,7 +15,7 @@ extern void	loadservers	(char *cfgpath);
  */
 struct server {
 	struct server *next_server;	/* next server in build list */
-	struct sockaddr_storage srcadr;	/* address of remote host */
+	sockaddr_u srcadr;		/* address of remote host */
 	u_char version;			/* version to use */
 	u_char leap;			/* leap indicator */
 	u_char stratum;			/* stratum of remote server */

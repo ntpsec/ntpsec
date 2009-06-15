@@ -253,9 +253,9 @@ extern	int	io_addclock	(struct refclockio *);
 extern	void	io_closeclock	(struct refclockio *);
 
 #ifdef REFCLOCK
-extern	void	refclock_buginfo (struct sockaddr_storage *,
+extern	void	refclock_buginfo (sockaddr_u *,
 				    struct refclockbug *);
-extern	void	refclock_control (struct sockaddr_storage *,
+extern	void	refclock_control (sockaddr_u *,
 				    struct refclockstat *,
 				    struct refclockstat *);
 extern	int	refclock_open	(char *, u_int, u_int);
