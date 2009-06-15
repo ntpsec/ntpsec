@@ -151,7 +151,7 @@ init_restrict(void)
  */
 int
 restrictions(
-	struct sockaddr_storage *srcadr
+	sockaddr_u *srcadr
 	)
 {
 	struct restrictlist *rl;
@@ -166,14 +166,14 @@ restrictions(
 
 	res_calls++;
 	/* IPv4 source address */
-	if (srcadr->ss_family == AF_INET) {
+	if (IS_IPV4(srcadr)) {
 
 		/*
 		 * We need the host address in host order. Also need to
 		 * know whether this is from the ntp port or not.
 		 */
 		hostaddr = SRCADR(srcadr);
-		isntpport = (SRCPORT(srcadr) == NTP_PORT);
+		isntpport = (NTP_PORT == SRCPORT(srcadr));
 
 		/*
 		 * Ignore any packets with a multicast source address
@@ -205,16 +205,14 @@ restrictions(
 	}
 
 	/* IPv6 source address */
-	if (srcadr->ss_family == AF_INET6) {
+	if (IS_IPV6(srcadr)) {
 
 		/*
-		 * We need the host address in host order. Also need to
-		 * know whether this is from the ntp port or not.
+		 * We need the host address in network order. Also need
+		 * to know whether this is from the ntp port or not.
 		 */
-		hostaddr6 = GET_INADDR6(*srcadr);
-		isntpport = (ntohs((
-		    (struct sockaddr_in6 *)srcadr)->sin6_port) ==
-		    NTP_PORT);
+		hostaddr6 = SOCK_ADDR6(srcadr);
+		isntpport = (NTP_PORT == SRCPORT(srcadr));
 
 		/*
 		 * Ignore any packets with a multicast source address
@@ -259,8 +257,8 @@ restrictions(
 void
 hack_restrict(
 	int op,
-	struct sockaddr_storage *resaddr,
-	struct sockaddr_storage *resmask,
+	sockaddr_u *resaddr,
+	sockaddr_u *resmask,
 	int mflags,
 	int flags
 	)
@@ -277,12 +275,10 @@ hack_restrict(
 	memset(&addr6, 0, sizeof(struct in6_addr)); 
 	memset(&mask6, 0, sizeof(struct in6_addr)); 
 
-	if (resaddr->ss_family == AF_INET) {
-#ifdef DEBUG
-        if (debug)
-		printf("restrict: addr %08x mask %08x mflags %08x flags %08x\n",
-		    SRCADR(resaddr), SRCADR(resmask), mflags, flags);
-#endif
+	if (IS_IPV4(resaddr)) {
+
+		DPRINTF(1, ("restrict: addr %08x mask %08x mflags %08x flags %08x\n",
+			    SRCADR(resaddr), SRCADR(resmask), mflags, flags));
 
 		/*
 		 * Get address and mask in host byte order
@@ -329,10 +325,10 @@ hack_restrict(
 		}
 	}
 
-	if (resaddr->ss_family == AF_INET6) {
-		mask6 = GET_INADDR6(*resmask);
+	if (IS_IPV6(resaddr)) {
+		mask6 = SOCK_ADDR6(resmask);
 		SET_IPV6_ADDR_MASK(&addr6,
-		    &GET_INADDR6(*resaddr), &mask6);
+		    PSOCK_ADDR6(resaddr), &mask6);
 		if (IN6_IS_ADDR_UNSPECIFIED(&addr6)) {
 			rlprev6 = NULL;
 			rl6 = restrictlist6;
@@ -381,7 +377,7 @@ hack_restrict(
 	/*
 	 * Switch based on operation
 	 */
-	if (resaddr->ss_family == AF_INET) {
+	if (IS_IPV4(resaddr)) {
 		switch (op) {
 		case RESTRICT_FLAGS:
 
@@ -481,7 +477,7 @@ hack_restrict(
 		default:
 			break;
 		}
-	} else if (resaddr->ss_family == AF_INET6) {
+	} else if (IS_IPV6(resaddr)) {
 		switch (op) {
 		case RESTRICT_FLAGS:
 

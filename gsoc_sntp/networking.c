@@ -79,7 +79,7 @@ resolve_hosts (
 			for(dres=*tres[a]; dres; dres=dres->ai_next) {
 				entryc++;
 #ifdef DEBUG	
-				getnameinfo(dres->ai_addr, dres->ai_addrlen, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+				getnameinfo(dres->ai_addr, dres->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 				STDLINE
 				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", entryc, hosts[a]);
 				printf("socktype: %i ", dres->ai_socktype); 
@@ -116,7 +116,7 @@ resolve_hosts (
 
 #ifdef DEBUG
 	for(a=0; a<entryc; a++)
-		getnameinfo(result[a]->ai_addr, result[a]->ai_addrlen, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+		getnameinfo(result[a]->ai_addr, result[a]->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 		printf("%x: IP %s\n", (unsigned int) result[a], adr_buf); 
 #endif
@@ -133,34 +133,20 @@ resolve_hosts (
 void 
 create_socket (
 		SOCKET *rsock,
-		struct sockaddr_storage *dest
+		sockaddr_u *dest
 		)
 {
-	*rsock = socket(dest->ss_family, SOCK_DGRAM, 0);
+	*rsock = socket(AF(dest), SOCK_DGRAM, 0);
 
-	if(*rsock == -1)
-		if(ENABLED_OPT(NORMALVERBOSE))
-			printf("Failed to create UDP socket with family %i\n", dest->ss_family);
-
-}
-
-/* If there's nothing more to do here we might need this function 
- * Originally I thought about doing some broad-/multicast related
- * cleaning up here. 
- */
-void 
-close_socket (
-		SOCKET rsock
-		)
-{
-	close(rsock);
+	if (-1 == *rsock && ENABLED_OPT(NORMALVERBOSE))
+		printf("Failed to create UDP socket with family %d\n", AF(dest));
 }
 
 /* Send a packet */
 void
 sendpkt (
 	SOCKET rsock,
-	struct sockaddr_storage *dest,
+	sockaddr_u *dest,
 	struct pkt *pkt,
 	int len
 	)
@@ -171,12 +157,12 @@ sendpkt (
 #endif
 
 	if(ENABLED_OPT(NORMALVERBOSE)) {
-		getnameinfo((struct sockaddr *) dest, SOCKLEN(dest), adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+		getnameinfo(&dest->sa, SOCKLEN(dest), adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 		printf("sntp sendpkt: Sending packet to %s... ", adr_buf);
 	}
 
-	int cc = sendto(rsock, (char *)pkt, len, 0, (struct sockaddr *)dest, SOCKLEN(dest));
+	int cc = sendto(rsock, (char *)pkt, len, 0, &dest->sa, SOCKLEN(dest));
 
 	if (cc == SOCKET_ERROR) {
 #ifdef DEBUG
@@ -197,34 +183,31 @@ sendpkt (
 int
 recvdata (
 		SOCKET rsock,
-		struct sockaddr_storage *sender,
+		sockaddr_u *sender,
 		char *rdata,
 		int rdata_length
 	 )
 {
-	GETSOCKNAME_SOCKLEN_TYPE slen = SOCKLEN(&rsock);
+	GETSOCKNAME_SOCKLEN_TYPE slen;
+	int recvc;
+	int saved_errno;
 
 #ifdef DEBUG
 	printf("sntp recvdata: Trying to receive data from...\n");
 #endif
-
-	int recvc = recvfrom(rsock, rdata, rdata_length, 0, 
-			(struct sockaddr *) sender, &slen);
+	slen = sizeof(sender->sas);
+	recvc = recvfrom(rsock, rdata, rdata_length, 0, 
+			 &sender->sa, &slen);
 #ifdef DEBUG
-	printf("sntp recvdata: recvfrom returned...\n");
-#endif
-
-#ifdef DEBUG
-
-	if(recvc > 0) {
-		getnameinfo((struct sockaddr *)sender, SOCKLEN(sender), adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
-
-		printf("Received %i bytes from %s:\n", recvc, adr_buf);
+	if (recvc > 0) {
+		printf("Received %d bytes from %s:\n", recvc, stoa(sender));
 
 		pkt_output((struct pkt *) rdata, recvc, stdout);
 	}
 	else {
-		printf("Failure, recvc: %i\n", recvc);
+		saved_errno = errno;
+		printf("recvfrom error %d (%s)\n", errno, strerror(errno));
+		errno = saved_errno;
 	}
 #endif
 
@@ -238,8 +221,8 @@ recv_bcst_data (
 		SOCKET rsock,
 		char *rdata,
 		int rdata_len,
-		struct sockaddr_storage *sas,
-		struct sockaddr_storage *ras
+		sockaddr_u *sas,
+		sockaddr_u *ras
 	 )
 {
 	struct timeval timeout_tv;
@@ -251,10 +234,13 @@ recv_bcst_data (
 	 
 	setsockopt(rsock, SOL_SOCKET, SO_REUSEADDR, &btrue, sizeof(btrue));
 
-	if(sas->ss_family == AF_INET) {
+	if (IS_IPV4(sas)) {
 		struct ip_mreq mdevadr;
 	
-		if(bind(rsock, (struct sockaddr *) sas, SOCKLEN(sas)) < 0) {}
+		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
+			if (ENABLED_OPT(NORMALVERBOSE))
+				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
+		}
 
 
 		if(setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &btrue, sizeof(btrue)) < 0) {
@@ -262,23 +248,20 @@ recv_bcst_data (
 			return BROADCAST_FAILED;
 		}
 
-		buf = ss_to_str(sas);
-
-		mdevadr.imr_multiaddr.s_addr = inet_addr(buf); 
+		mdevadr.imr_multiaddr.s_addr = NSRCADR(sas); 
 		mdevadr.imr_interface.s_addr = htonl(INADDR_ANY);
 
-		if(mdevadr.imr_multiaddr.s_addr == -1) {
-			if(ENABLED_OPT(NORMALVERBOSE)) {
-				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n", buf);
+		if (mdevadr.imr_multiaddr.s_addr == -1) {
+			if (ENABLED_OPT(NORMALVERBOSE)) {
+				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n",
+				       stoa(sas));
 			}
 			
 			return BROADCAST_FAILED;
 		}
 
-		free(buf);
-
 		if (setsockopt(rsock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mdevadr, sizeof(mdevadr)) < 0) {
-			if(ENABLED_OPT(NORMALVERBOSE)) {
+			if (ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas);
 
 				printf("sntp recv_bcst_data: Couldn't add IP membership for %s\n", buf);
@@ -289,24 +272,24 @@ recv_bcst_data (
 			}
 		}
 	}
-	else if(sas->ss_family == AF_INET6) {
+	else if (IS_IPV6(sas)) {
 		struct ipv6_mreq mdevadr;
 
-		if(bind(rsock, (struct sockaddr *) sas, sizeof(sas)) < 0) {
-			if(ENABLED_OPT(NORMALVERBOSE))
+		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
+			if (ENABLED_OPT(NORMALVERBOSE))
 				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
 		}
 
 		if(setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
-	    }
+		}
 
-		mdevadr.ipv6mr_multiaddr = *((struct in6_addr *) sas);
+		mdevadr.ipv6mr_multiaddr = SOCK_ADDR6(sas);
 		/* FIXME    hat value for ipv6mr_interface?  Use utilities for sock to char op*/
 		/* mdevadr.ipv6mr_interface = in6addr_any; */ 
 														 
-		if(!IN6_IS_ADDR_MULTICAST((struct in6_addr *) &mdevadr.ipv6mr_multiaddr)) {
+		if(!IN6_IS_ADDR_MULTICAST(&mdevadr.ipv6mr_multiaddr)) {
 			if(ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 
 
@@ -356,22 +339,24 @@ recv_bcst_data (
 			return BROADCAST_FAILED;
 			break;
 
-/*		default: */
-			GETSOCKNAME_SOCKLEN_TYPE ss_len = SOCKLEN(ras);
+		default:
+		{
+			GETSOCKNAME_SOCKLEN_TYPE ss_len = sizeof(ras->sas);
 
-			recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, (struct sockaddr *) ras, (GETSOCKNAME_SOCKLEN_TYPE *) &ss_len);
+			recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, &ras->sa, &ss_len);
+		}
 	}
 
-	if(recv_bytes == -1) {
+	if (recv_bytes == -1) {
 		if(ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_data: Failed to receive from broad-/multicast\n");
 
 		return BROADCAST_FAILED;
 	}
 
-	if(sas->ss_family == AF_INET) 
+	if (IS_IPV4(sas)) 
 		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue, sizeof(btrue));
-	else if(sas->ss_family == AF_INET6)
+	else if (IS_IPV6(sas))
 		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue, sizeof(btrue));
 		
 	return recv_bytes;
@@ -381,23 +366,23 @@ int
 recv_bcst_pkt (
 		SOCKET rsock,
 		struct pkt *rpkt,
-		struct sockaddr_storage *sas
+		sockaddr_u *sas
 		)
 {
-	struct sockaddr_storage sender;
+	sockaddr_u sender;
 	register int a;
 	int is_authentic, has_mac = 0, orig_pkt_len;
 
-	char *rdata = (char *) malloc(sizeof(char) * 256);
+	char *rdata = malloc(sizeof(char) * 256);
 
 	int pkt_len = recv_bcst_data(rsock, rdata, 256, sas, &sender);
 
 
-	if(pkt_len < 0)
+	if (pkt_len < 0)
 		return BROADCAST_FAILED;
 
 	/* No MAC, no authentication */
-	if(pkt_len == LEN_PKT_NOMAC)
+	if (LEN_PKT_NOMAC == pkt_len)
 		has_mac = 0;
 
 	/* If there's more than just the NTP packet it should be a MAC */	
@@ -412,7 +397,7 @@ recv_bcst_pkt (
 	/* Packet too big */
 	if(pkt_len > LEN_PKT_NOMAC + MAX_MAC_LEN) {
 		if(ENABLED_OPT(NORMALVERBOSE))
-			printf("sntp recv_bcst_pkt: Received packet is too big (%i bytes), trying again to get a useable packet\n", 
+			printf("sntp recv_bcst_pkt: Received packet is too big (%i bytes), trying again to get a useFable packet\n", 
 					pkt_len);
 
 		return PACKET_UNUSEABLE;
@@ -422,8 +407,8 @@ recv_bcst_pkt (
 	pkt_len = min(pkt_len, sizeof(struct pkt));
 
 	/* Let's copy the received data to the packet structure */
-	for(a=0; a<pkt_len; a++) 
-		if(a < orig_pkt_len)
+	for (a = 0; a < pkt_len; a++) 
+		if (a < orig_pkt_len)
 			((char *)rpkt)[a] = rdata[a];
 		else
 			((char *)rpkt)[a] = 0;
@@ -431,13 +416,13 @@ recv_bcst_pkt (
 	free(rdata);
 
 	/* MAC could be useable for us */
-	if(has_mac) {
+	if (has_mac) {
 		/* Two more things that the MAC must conform to */
-		if(has_mac > MAX_MAC_LEN || has_mac % 4 != 0) {
+		if (has_mac > MAX_MAC_LEN || has_mac % 4 != 0) {
 			is_authentic = 0; /* Or should we discard this packet? */
 		}
 		else  {
-			if(has_mac == MAX_MAC_LEN) {
+			if (MAX_MAC_LEN == has_mac) {
 				struct key *pkt_key = NULL;
 
 				/* Look for the key used by the server in the specified keyfile
@@ -445,13 +430,13 @@ recv_bcst_pkt (
 				get_key(rpkt->mac[0], &pkt_key);
 
 				/* Seems like we've got a key with matching keyid */
-				if(pkt_key != NULL) {
+				if (pkt_key != NULL) {
 					/* Generate a md5sum of the packet with the key from our keyfile
 					 * and compare those md5sums */
-					if(!auth_md5((char *) rpkt, has_mac, pkt_key)) {
-						if(ENABLED_OPT(AUTHENTICATION)) {
+					if (!auth_md5((char *) rpkt, has_mac, pkt_key)) {
+						if (ENABLED_OPT(AUTHENTICATION)) {
 							/* We want a authenticated packet */
-							if(ENABLED_OPT(NORMALVERBOSE)) {
+							if (ENABLED_OPT(NORMALVERBOSE)) {
 								char *hostname = ss_to_str(sas);
 								printf("sntp recv_bcst_pkt: Broadcast packet received from %s is not authentic. Will discard this packet.\n", 
 										hostname);
@@ -463,7 +448,7 @@ recv_bcst_pkt (
 						else {
 							/* We don't know if the user wanted authentication so let's 
 							 * use it anyways */
-							if(ENABLED_OPT(NORMALVERBOSE)) {
+							if (ENABLED_OPT(NORMALVERBOSE)) {
 								char *hostname = ss_to_str(sas);
 								printf("sntp recv_bcst_pkt: Broadcast packet received from %s is not authentic. Authentication not enforced.\n", 
 										hostname);
@@ -476,7 +461,7 @@ recv_bcst_pkt (
 					}
 					else {
 						/* Yay! Things worked out! */
-						if(ENABLED_OPT(NORMALVERBOSE)) {
+						if (ENABLED_OPT(NORMALVERBOSE)) {
 							char *hostname = ss_to_str(sas);
 							printf("sntp recv_bcst_pkt: Broadcast packet received from %s successfully authenticated using key id %i.\n", 
 									hostname, rpkt->mac[0]);
@@ -492,9 +477,9 @@ recv_bcst_pkt (
 	}
 
 	/* Check for server's ntp version */
-	if(PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
+	if (PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
 		PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_pkt: Packet shows wrong version (%i)\n", 
 					PKT_VERSION(rpkt->li_vn_mode));
 
@@ -502,30 +487,30 @@ recv_bcst_pkt (
 	} 
 
 	/* We want a server to sync with */
-	if(PKT_MODE(rpkt->li_vn_mode) != MODE_BROADCAST
+	if (PKT_MODE(rpkt->li_vn_mode) != MODE_BROADCAST
 		 && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_pkt: mode %d stratum %i\n",
 			   PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
 
 		return SERVER_UNUSEABLE;
 	}
 
-	if(rpkt->stratum == STRATUM_PKT_UNSPEC) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_pkt: Stratum unspecified, going to check for KOD (stratum: %i)\n", rpkt->stratum);
 
 		char *ref_char = (char *) &rpkt->refid;
 		
 		/* If it's a KOD packet we'll just use the KOD information */
-		if(ref_char[0] != 'X') {
-			if(strncmp(ref_char, "DENY", 4))
+		if (ref_char[0] != 'X') {
+			if (strncmp(ref_char, "DENY", 4))
 				return KOD_DEMOBILIZE;
 
-			if(strncmp(ref_char, "RSTR", 4))
+			if (strncmp(ref_char, "RSTR", 4))
 				return KOD_DEMOBILIZE;
 
-			if(strncmp(ref_char, "RATE", 4))
+			if (strncmp(ref_char, "RATE", 4))
 				return KOD_RATE;
 
 			/* There are other interesting kiss codes which might be interesting for authentication */
@@ -533,8 +518,8 @@ recv_bcst_pkt (
 	}
 
 	/* If the server is not synced it's not really useable for us */
-	if(PKT_LEAP(rpkt->li_vn_mode) == LEAP_NOTINSYNC) {
-		if(ENABLED_OPT(NORMALVERBOSE)) 
+	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode)) {
+		if (ENABLED_OPT(NORMALVERBOSE)) 
 			printf("recv_bcst_pkt: Server not in sync, skipping this server\n");
 
 		return SERVER_UNUSEABLE;
@@ -555,44 +540,46 @@ recvpkt (
 		struct pkt *spkt
 	)
 {
-	struct sockaddr_storage sender;
-	char *rdata, done;
+	sockaddr_u sender;
+	char *rdata /* , done */;
 
 	register int a;
 	int has_mac, is_authentic, orig_pkt_len;
 
 
 	/* Much space, just to be sure */
-	rdata = (char *) malloc(sizeof(char) * 256);
+	rdata = malloc(sizeof(char) * 256);
 
 	int pkt_len = recvdata(rsock, &sender, rdata, 256);
 
-	if(!done) {
+#if 0	/* done uninitialized */
+	if (!done) {
 		/* Do something about it, first check for a maximum length of ntp packets,
 		 * probably that's something we can avoid 
 		 */
 	}
+#endif
 	
 	/* Some checks to see if that packet is intended for us */
 
 	/* No MAC, no authentication */
-	if(pkt_len == LEN_PKT_NOMAC)
+	if (LEN_PKT_NOMAC == pkt_len)
 		has_mac = 0;
 
 	/* If there's more than just the NTP packet it should be a MAC */	
-	else if(pkt_len > LEN_PKT_NOMAC) 
+	else if (pkt_len > LEN_PKT_NOMAC) 
 		has_mac = pkt_len - LEN_PKT_NOMAC;
 	
 	else {
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Funny packet length: %i. Discarding package.\n", pkt_len);
 
 			return PACKET_UNUSEABLE;
 	}
 
 	/* Packet too big */
-	if(pkt_len > LEN_PKT_MAC) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+	if (pkt_len > LEN_PKT_MAC) {
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Received packet is too big (%i bytes), trying again to get a useable packet\n", 
 					pkt_len);
 
@@ -602,21 +589,21 @@ recvpkt (
 	orig_pkt_len = pkt_len;
 	pkt_len = min(pkt_len, sizeof(struct pkt));
 	
-	for(a=0; a<pkt_len; a++) 
+	for (a = 0; a < pkt_len; a++) 
 		/* FIXME! */
-		if(a < orig_pkt_len)
+		if (a < orig_pkt_len)
 			((char *) rpkt)[a] = rdata[a];
 		else
 			((char *) rpkt)[a] = 0;
 
 	/* MAC could be useable for us */
-	if(has_mac) {
+	if (has_mac) {
 		/* Two more things that the MAC must conform to */
 		if(has_mac > MAX_MAC_LEN || has_mac % 4 != 0) {
 			is_authentic = 0; /* Or should we discard this packet? */
 		}
-		else  {
-			if(has_mac == MAX_MAC_LEN) {
+		else {
+			if (MAX_MAC_LEN == has_mac) {
 				struct key *pkt_key = NULL;
 				
 				/*
@@ -626,15 +613,15 @@ recvpkt (
 				get_key(rpkt->mac[0], &pkt_key);
 
 				/* Seems like we've got a key with matching keyid */
-				if(pkt_key != NULL) {
+				if (pkt_key != NULL) {
 					/*
 					 * Generate a md5sum of the packet with the key from our keyfile
 					 * and compare those md5sums 
 					 */
-					if(!auth_md5((char *) rpkt, has_mac, pkt_key)) {
-						if(ENABLED_OPT(AUTHENTICATION)) {
+					if (!auth_md5((char *) rpkt, has_mac, pkt_key)) {
+						if (ENABLED_OPT(AUTHENTICATION)) {
 							/* We want a authenticated packet */
-							if(ENABLED_OPT(NORMALVERBOSE)) {
+							if (ENABLED_OPT(NORMALVERBOSE)) {
 								char *hostname = ss_to_str(&sender);
 								printf("sntp recvpkt: Broadcast packet received from %s is not authentic. Will discard this packet.\n", 
 										hostname);
@@ -648,7 +635,7 @@ recvpkt (
 							 * We don't know if the user wanted authentication so let's 
 							 * use it anyways 
 							 */
-							if(ENABLED_OPT(NORMALVERBOSE)) {
+							if (ENABLED_OPT(NORMALVERBOSE)) {
 								char *hostname = ss_to_str(&sender);
 								printf("sntp recvpkt: Broadcast packet received from %s is not authentic. Authentication not enforced.\n", 
 										hostname);
@@ -661,7 +648,7 @@ recvpkt (
 					}
 					else {
 						/* Yay! Things worked out! */
-						if(ENABLED_OPT(NORMALVERBOSE)) {
+						if (ENABLED_OPT(NORMALVERBOSE)) {
 							char *hostname = ss_to_str(&sender);
 							printf("sntp recvpkt: Broadcast packet received from %s successfully authenticated using key id %i.\n", 
 									hostname, rpkt->mac[0]);
@@ -677,18 +664,18 @@ recvpkt (
 	}
 
 	/* Check for server's ntp version */
-	if(PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
-		PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+	if (PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
+	    PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Packet got wrong version (%i)\n", PKT_VERSION(rpkt->li_vn_mode));
 
 		return SERVER_UNUSEABLE;
 	} 
 
 	/* We want a server to sync with */
-	if(PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER
-		 && PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+	if (PKT_MODE(rpkt->li_vn_mode) != MODE_SERVER &&
+	    PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: mode %d stratum %i\n",
 			   PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
 
@@ -696,25 +683,25 @@ recvpkt (
 	}
 
 	/* Stratum is unspecified (0) check what's going on */
-	if(rpkt->stratum == STRATUM_PKT_UNSPEC) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Stratum unspecified, going to check for KOD (stratum: %i)\n", rpkt->stratum);
 
 
 		char *ref_char = (char *) &rpkt->refid;
 
-		if(ENABLED_OPT(NORMALVERBOSE)) 
+		if (ENABLED_OPT(NORMALVERBOSE)) 
 			printf("sntp recvpkt: Packet refid: %c%c%c%c\n", ref_char[0], ref_char[1], ref_char[2], ref_char[3]);
 		
 		/* If it's a KOD packet we'll just use the KOD information */
-		if(ref_char[0] != 'X') {
-			if(!strncmp(ref_char, "DENY", 4))
+		if (ref_char[0] != 'X') {
+			if (!strncmp(ref_char, "DENY", 4))
 				return KOD_DEMOBILIZE;
 
-			if(!strncmp(ref_char, "RSTR", 4))
+			if (!strncmp(ref_char, "RSTR", 4))
 				return KOD_DEMOBILIZE;
 
-			if(!strncmp(ref_char, "RATE", 4))
+			if (!strncmp(ref_char, "RATE", 4))
 				return KOD_RATE;
 
 			/* There are other interesting kiss codes which might be interesting for authentication */
@@ -722,8 +709,8 @@ recvpkt (
 	}
 
 	/* If the server is not synced it's not really useable for us */
-	if(PKT_LEAP(rpkt->li_vn_mode) == LEAP_NOTINSYNC) {
-		if(ENABLED_OPT(NORMALVERBOSE)) 
+	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode)) {
+		if (ENABLED_OPT(NORMALVERBOSE)) 
 			printf("sntp recvpkt: Server not in sync, skipping this server\n");
 
 		return SERVER_UNUSEABLE;
@@ -742,7 +729,7 @@ recvpkt (
 #endif
 	
 	if (!L_ISEQU(&rpkt->org, &spkt->xmt)) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: pkt.org and peer.xmt differ\n");
 		
 		return PACKET_UNUSEABLE;
@@ -763,14 +750,14 @@ is_reachable (
 
 	sockfd = socket(dst->ai_family, SOCK_DGRAM, 0);
 
-	if (sockfd == -1) {
+	if (-1 == sockfd) {
 #ifdef DEBUG
 		printf("is_reachable: Couldn't create socket\n");
 #endif
 		return 0;
 	}
 
-	if(connect(sockfd, dst->ai_addr, SOCKLEN(dst->ai_addr))) {
+	if (connect(sockfd, dst->ai_addr, SOCKLEN((sockaddr_u *)dst->ai_addr))) {
 		closesocket(sockfd);
 		return 0;
 	}

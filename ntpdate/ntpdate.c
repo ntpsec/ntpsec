@@ -220,14 +220,14 @@ static	void	clock_filter	(struct server *);
 static	struct server *clock_select (void);
 static	int clock_adjust	(void);
 static	void	addserver	(char *);
-static	struct server *findserver (struct sockaddr_storage *);
+static	struct server *findserver (sockaddr_u *);
 		void	timer		(void);
 static	void	init_alarm	(void);
 #ifndef SYS_WINNT
 static	RETSIGTYPE alarming (int);
 #endif /* SYS_WINNT */
 static	void	init_io 	(void);
-static	void	sendpkt 	(struct sockaddr_storage *, struct pkt *, int);
+static	void	sendpkt 	(sockaddr_u *, struct pkt *, int);
 void	input_handler	(void);
 
 static	int l_adj_systime	(l_fp *);
@@ -674,7 +674,7 @@ transmit(
 	struct pkt xpkt;
 
 	if (debug)
-		printf("transmit(%s)\n", stoa(&(server->srcadr)));
+		printf("transmit(%s)\n", stoa(&server->srcadr));
 
 	if (server->filter_nextpt < server->xmtcnt) {
 		l_fp ts;
@@ -725,18 +725,18 @@ transmit(
 		L_ADDUF(&server->xmt, sys_authdelay);
 		HTONL_FP(&server->xmt, &xpkt.xmt);
 		len = authencrypt(sys_authkey, (u_int32 *)&xpkt, LEN_PKT_NOMAC);
-		sendpkt(&(server->srcadr), &xpkt, (int)(LEN_PKT_NOMAC + len));
+		sendpkt(&server->srcadr, &xpkt, (int)(LEN_PKT_NOMAC + len));
 
 		if (debug > 1)
 			printf("transmit auth to %s\n",
-			   stoa(&(server->srcadr)));
+			   stoa(&server->srcadr));
 	} else {
 		get_systime(&(server->xmt));
 		HTONL_FP(&server->xmt, &xpkt.xmt);
-		sendpkt(&(server->srcadr), &xpkt, LEN_PKT_NOMAC);
+		sendpkt(&server->srcadr, &xpkt, LEN_PKT_NOMAC);
 
 		if (debug > 1)
-			printf("transmit to %s\n", stoa(&(server->srcadr)));
+			printf("transmit to %s\n", stoa(&server->srcadr));
 	}
 
 	/*
@@ -1305,16 +1305,16 @@ clock_adjust(void)
  *		    (non-blocking).
  */
 static int
-is_reachable (struct sockaddr_storage *dst)
+is_reachable (sockaddr_u *dst)
 {
 	SOCKET sockfd;
 
-	sockfd = socket(dst->ss_family, SOCK_DGRAM, 0);
+	sockfd = socket(AF(dst), SOCK_DGRAM, 0);
 	if (sockfd == -1) {
 		return 0;
 	}
 
-	if(connect(sockfd, (struct sockaddr *)dst, SOCKLEN(dst))) {
+	if (connect(sockfd, &dst->sa, SOCKLEN(dst))) {
 		closesocket(sockfd);
 		return 0;
 	}
@@ -1372,18 +1372,17 @@ addserver(
 	}
 #ifdef DEBUG
 	else if (debug) {
-		fprintf(stderr, "host found : %s\n", stohost((struct sockaddr_storage*)addrResult->ai_addr));
+		fprintf(stderr, "host found : %s\n", stohost((sockaddr_u *)addrResult->ai_addr));
 	}
 #endif
 
 	/* We must get all returned server in case the first one fails */
 	for (ptr = addrResult; ptr != NULL; ptr = ptr->ai_next) {
-		if (is_reachable ((struct sockaddr_storage *)ptr->ai_addr)) {
-			server = (struct server *)emalloc(sizeof(struct server));
-			memset((char *)server, 0, sizeof(struct server));
+		if (is_reachable ((sockaddr_u *)ptr->ai_addr)) {
+			server = emalloc(sizeof(*server));
+			memset(server, 0, sizeof(*server));
 
-			memset(&(server->srcadr), 0, sizeof(struct sockaddr_storage));
-			memcpy(&(server->srcadr), ptr->ai_addr, ptr->ai_addrlen);
+			memcpy(&server->srcadr, ptr->ai_addr, ptr->ai_addrlen);
 			server->event_time = ++sys_numservers;
 			if (sys_servers == NULL)
 				sys_servers = server;
@@ -1407,40 +1406,23 @@ addserver(
  */
 static struct server *
 findserver(
-	struct sockaddr_storage *addr
+	sockaddr_u *addr
 	)
 {
 	struct server *server;
 	struct server *mc_server;
-	isc_sockaddr_t laddr;
-	isc_sockaddr_t saddr;
-
-	if(addr->ss_family == AF_INET) {
-		isc_sockaddr_fromin( &laddr, &((struct sockaddr_in*)addr)->sin_addr, 0);
-	}
-	else {
-		isc_sockaddr_fromin6(&laddr, &((struct sockaddr_in6*)addr)->sin6_addr, 0);
-	}
-
 
 	mc_server = NULL;
-	if (htons(((struct sockaddr_in*)addr)->sin_port) != NTP_PORT)
+	if (SRCPORT(addr) != NTP_PORT)
 		return 0;
 
 	for (server = sys_servers; server != NULL; 
 	     server = server->next_server) {
-		
-		if(server->srcadr.ss_family == AF_INET) {
-			isc_sockaddr_fromin(&saddr, &((struct sockaddr_in*)&server->srcadr)->sin_addr, 0);
-		}
-		else {
-			isc_sockaddr_fromin6(&saddr, &((struct sockaddr_in6*)&server->srcadr)->sin6_addr, 0);
-		}
-		if (isc_sockaddr_eqaddr(&laddr, &saddr) == ISC_TRUE)
+		if (SOCK_EQ(addr, &server->srcadr))
 			return server;
 
-		if(addr->ss_family == server->srcadr.ss_family) {
-			if (isc_sockaddr_ismulticast(&saddr) == ISC_TRUE)
+		if (AF(addr) == AF(&server->srcadr)) {
+			if (IS_MCAST(&server->srcadr))
 				mc_server = server;
 		}
 	}
@@ -1454,10 +1436,10 @@ findserver(
 			complete_servers++;
 		}
 
-		server = (struct server *)emalloc(sizeof(struct server));
-		memset((char *)server, 0, sizeof(struct server));
+		server = emalloc(sizeof(*server));
+		memset(server, 0, sizeof(*server));
 
-		memcpy(&server->srcadr, addr, sizeof(struct sockaddr_storage));
+		server->srcadr = *addr;
 
 		server->event_time = ++sys_numservers;
 
@@ -1776,7 +1758,8 @@ init_io(void)
 		 * bind the socket to the NTP port
 		 */
 		if (check_ntp_port_in_use) {
-			if (bind(fd[nbsock], res->ai_addr, SOCKLEN(res->ai_addr)) < 0) {
+			if (bind(fd[nbsock], res->ai_addr, 
+				 SOCKLEN((sockaddr_u *)res->ai_addr)) < 0) {
 #ifndef SYS_WINNT
 				if (errno == EADDRINUSE)
 #else
@@ -1847,7 +1830,7 @@ init_io(void)
  */
 static void
 sendpkt(
-	struct sockaddr_storage *dest,
+	sockaddr_u *dest,
 	struct pkt *pkt,
 	int len
 	)
@@ -1862,7 +1845,7 @@ sendpkt(
 
 	/* Find a local family compatible socket to send ntp packet to ntp server */
 	for(i = 0; (i < MAX_AF); i++) {
-		if(dest->ss_family == fd_family[i]) {
+		if(AF(dest) == fd_family[i]) {
 			sock = fd[i];
 		break;
 		}
@@ -1989,7 +1972,7 @@ input_handler(void)
 
 		rb = get_free_recv_buffer();
 
-		fromlen = sizeof(struct sockaddr_storage);
+		fromlen = sizeof(rb->recv_srcadr);
 		rb->recv_length = recvfrom(fdc, (char *)&rb->recv_pkt,
 		   sizeof(rb->recv_pkt), 0,
 		   (struct sockaddr *)&rb->recv_srcadr, &fromlen);

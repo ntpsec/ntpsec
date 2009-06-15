@@ -93,7 +93,7 @@ typedef struct {
 
 typedef struct {
     double server_time;             /* Server time */
-    struct sockaddr_storage *addr;  /* Server Address */
+    sockaddr_u *addr;  		    /* Server Address */
     queue *script;                  /* Server Script */
     script_info *curr_script;       /* Current Script */
 } server_info;
@@ -128,7 +128,7 @@ extern sim_info simulation;         /* Simulation Control Variables */
 int	 ntpsim			 (int argc, char *argv[]);
 Event    *event                  (double t, funcTkn f);
 void     sim_event_timer         (Event *e);
-int      simulate_server         (struct sockaddr_storage *serv_addr,
+int      simulate_server         (sockaddr_u *serv_addr,
 				  struct interface *inter,
 				  struct pkt *rpkt);
 void     sim_update_clocks       (Event *e);

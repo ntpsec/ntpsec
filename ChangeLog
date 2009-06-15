@@ -1,3 +1,6 @@
+* Use a union for structs sockaddr, sockaddr_storage, sockaddr_in, and
+  sockaddr_in6 to remove casts and enable type checking.  Collapse
+  some previously separate IPv4/IPv6 paths into a single codepath.
 (4.2.5p181) 2009/06/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1206] Required compiler changes for Windows
 * [Bug 1084] PPSAPI for ntpd on Windows with DLL backends
@@ -13,7 +16,7 @@
 * [Bug 1041] xmt -> aorg timestamp cleanup from Dave Mills,
   reported by Dave Hart.
 * [Bug 1193] Compile error: conflicting types for emalloc.
-* [Bug 1196] VC6 winsock2.h does not define SO_EXLUSIVEADDRUSE.
+* [Bug 1196] VC6 winsock2.h does not define SO_EXCLUSIVEADDRUSE.
 * Leap/expire cleanup from Dave Mills.
 (4.2.5p178) 2009/05/21 Released by Harlan Stenn <stenn@ntp.org>
 * Provide erealloc() and estrdup(), a la emalloc().

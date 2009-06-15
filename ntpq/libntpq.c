@@ -708,10 +708,10 @@ int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize )
  * 
  ****************************************************************************/
  int ntpq_get_assoc_clocktype ( int assoc_number )
-{           
+{
     int type = 0;
     int i, rc = 0;
-    struct sockaddr_storage dum_store;
+    sockaddr_u dum_store;
     char value[LENHOSTNAME];
     char resultbuf[1024];
 
@@ -720,7 +720,7 @@ int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize )
         return -1;
     } else {
         if ( peervar_assoc != assoc_cache[assoc_number].assid ) {
-            
+
             i=ntpq_read_assoc_peervars(assoc_cache[assoc_number].assid, resultbuf, sizeof(resultbuf));
             if ( i <= 0 ) {
                 return -1;
@@ -737,7 +737,7 @@ int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize )
 
         if ( rc ) {
             if (decodenetnum(value, &dum_store)) {
-                type = ntpq_decodeaddrtype(&dum_store);
+		type = ntpq_decodeaddrtype(&dum_store);
                 return type;
             }
         }

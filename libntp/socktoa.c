@@ -2,7 +2,9 @@
  * socktoa - return a numeric host name from a sockaddr_storage structure
  */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,7 +25,7 @@
 
 char *
 socktoa(
-	struct sockaddr_storage* sock
+	sockaddr_u *sock
 	)
 {
 	register char *buffer;
@@ -31,26 +33,23 @@ socktoa(
 	LIB_GETBUF(buffer);
 
 	if (sock == NULL)
-		strcpy(buffer, "null");
-	else
-	{
+		strncpy(buffer, "(null)", LIB_BUFLENGTH);
+	else {
+		switch(AF(sock)) {
 
-		switch(sock->ss_family) {
-
-		default:
 		case AF_INET :
-			inet_ntop(AF_INET, &GET_INADDR(*sock), buffer,
+			inet_ntop(AF_INET, PSOCK_ADDR4(sock), buffer,
 			    LIB_BUFLENGTH);
 			break;
 
 		case AF_INET6 :
-			inet_ntop(AF_INET6, &GET_INADDR6(*sock), buffer,
+			inet_ntop(AF_INET6, PSOCK_ADDR6(sock), buffer,
 			    LIB_BUFLENGTH);
-#if 0
+
 		default:
-			strcpy(buffer, "unknown");
-#endif
+			strncpy(buffer, "(socktoa unknown family)",
+				LIB_BUFLENGTH);
 		}
 	}
-  	return buffer;
+	return buffer;
 }

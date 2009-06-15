@@ -18,9 +18,9 @@ extern	char	*keysdir;	/* crypto keys and leaptable directory */
 
 extern	void	getconfig	(int, char **);
 extern	void	ctl_clr_stats	(void);
-extern	int	ctlclrtrap	(struct sockaddr_storage *, struct interface *, int);
+extern	int	ctlclrtrap	(sockaddr_u *, struct interface *, int);
 extern	u_short ctlpeerstatus	(struct peer *);
-extern	int	ctlsettrap	(struct sockaddr_storage *, struct interface *, int, int);
+extern	int	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
 extern	void	init_logging	(char const *, int);
@@ -58,7 +58,7 @@ extern  void    set_var (struct ctl_var **, const char *, u_long, u_short);
 extern  void    set_sys_var (const char *, u_long, u_short);
 
 /* ntp_intres.c */
-extern	void	ntp_res_name	(struct sockaddr_storage, u_short);
+extern	void	ntp_res_name	(sockaddr_u, u_short);
 extern	void	ntp_res_recv	(void);
 extern	void	ntp_intres	(void);
 #ifdef SYS_WINNT
@@ -67,40 +67,39 @@ extern	unsigned WINAPI	ntp_intres_thread	(void *);
 
 /* ntp_io.c */
 typedef struct interface_info {
-	struct interface *interface;
-	u_char       action;
+	struct interface *	interface;
+	u_char			action;
 } interface_info_t;
 
-typedef void (*interface_receiver_t)(void *, interface_info_t *);
+typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
-extern  volatile int disable_dynamic_updates;
+extern  int	disable_dynamic_updates;
 
-extern  void    interface_enumerate (interface_receiver_t, void *);
-extern	struct interface *findinterface (struct sockaddr_storage *);
-extern  struct interface *findbcastinter (struct sockaddr_storage *);
-extern  void	enable_broadcast (struct interface *, struct sockaddr_storage *);
-extern  void	enable_multicast_if (struct interface *, struct sockaddr_storage *);
-extern	void	interface_dump	 (struct interface *);
+extern	void	interface_enumerate	(interface_receiver_t, void *);
+extern	struct interface *findinterface	(sockaddr_u *);
+extern	struct interface *findbcastinter(sockaddr_u *);
+extern	void	enable_broadcast	(struct interface *, sockaddr_u *);
+extern	void	enable_multicast_if	(struct interface *, sockaddr_u *);
+extern	void	interface_update	(interface_receiver_t, void *);
 
-extern  void    interface_update (interface_receiver_t, void *);
 extern	void	init_io 	(void);
 extern	void	input_handler	(l_fp *);
 extern	void	io_clr_stats	(void);
 extern	void	io_setbclient	(void);
-extern	void	io_unsetbclient (void);
-extern	void	io_multicast_add (struct sockaddr_storage);
-extern	void	io_multicast_del (struct sockaddr_storage);
-extern	void	kill_asyncio	 (int);
-extern	void	sendpkt 	(struct sockaddr_storage *, struct interface *, int, struct pkt *, int);
+extern	void	io_unsetbclient	(void);
+extern	void	io_multicast_add(sockaddr_u *);
+extern	void	io_multicast_del(sockaddr_u *);
+extern	void	kill_asyncio	(int);
+extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, struct pkt *, int);
 #ifdef DEBUG
-extern  void    collect_timing  (struct recvbuf *, const char *, int, l_fp *);
+extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif
 #ifdef HAVE_SIGNALED_IO
-extern	void	wait_for_signal (void);
-extern	void	unblock_io_and_alarm (void);
-extern	void	block_io_and_alarm (void);
-#define UNBLOCK_IO_AND_ALARM() unblock_io_and_alarm()
-#define BLOCK_IO_AND_ALARM() block_io_and_alarm()
+extern	void	wait_for_signal		(void);
+extern	void	unblock_io_and_alarm	(void);
+extern	void	block_io_and_alarm	(void);
+#define UNBLOCK_IO_AND_ALARM()		unblock_io_and_alarm()
+#define BLOCK_IO_AND_ALARM()		block_io_and_alarm()
 #else
 #define UNBLOCK_IO_AND_ALARM()
 #define BLOCK_IO_AND_ALARM()
@@ -124,14 +123,14 @@ extern  void    ntp_monclearinterface (struct interface *interface);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
-extern	struct peer *findexistingpeer (struct sockaddr_storage *, struct peer *, int);
-extern	struct peer *findpeer	(struct sockaddr_storage *, struct interface *, int, int *);
+extern	struct peer *findexistingpeer (sockaddr_u *, struct peer *, int);
+extern	struct peer *findpeer	(sockaddr_u *, struct interface *, int, int *);
 extern	struct peer *findpeerbyassoc (u_int);
 extern  void	set_peerdstadr	(struct peer *peer, struct interface *interface);
-extern	struct peer *newpeer	(struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t);
+extern	struct peer *newpeer	(sockaddr_u *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
-extern	struct peer *peer_config (struct sockaddr_storage *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *);
+extern	struct peer *peer_config (sockaddr_u *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces (void);
 extern	void	unpeer		(struct peer *);
@@ -145,8 +144,7 @@ extern	int	crypto_recv	(struct peer *, struct recvbuf *);
 extern	int	crypto_xmit	(struct peer *, struct pkt *,
 				    struct recvbuf *, int,
 				    struct exten *, keyid_t);
-extern	keyid_t	session_key	(struct sockaddr_storage *,
-				    struct sockaddr_storage *, keyid_t,
+extern	keyid_t	session_key	(sockaddr_u *, sockaddr_u *, keyid_t,
 				    keyid_t, u_long);
 extern	int	make_keylist	(struct peer *, struct interface *);
 extern	void	key_expire	(struct peer *);
@@ -193,7 +191,7 @@ extern	void	poll_update (struct peer *, int);
 extern	void	clear		(struct peer *);
 extern	void	clock_filter	(struct peer *, double, double, double);
 extern	void	init_proto	(void);
-extern	void	proto_config	(int, u_long, double, struct sockaddr_storage*);
+extern	void	proto_config	(int, u_long, double, sockaddr_u *);
 extern	void	proto_clr_stats (void);
 
 #ifdef	REFCLOCK
@@ -211,8 +209,8 @@ extern	void	process_private (struct recvbuf *, int);
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
-extern	int 	restrictions	(struct sockaddr_storage *);
-extern	void	hack_restrict	(int, struct sockaddr_storage *, struct sockaddr_storage *, int, int);
+extern	int 	restrictions	(sockaddr_u *);
+extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *, int, int);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);
@@ -233,17 +231,17 @@ extern u_long	sys_automax;	/* session key timeout */
 extern	void	init_util	(void);
 extern	void	write_stats	(void);
 extern	void	stats_config	(int, const char *);
-extern	void	record_peer_stats (struct sockaddr_storage *, int, double, double, double, double);
+extern	void	record_peer_stats (sockaddr_u *, int, double, double, double, double);
 extern	void	record_proto_stats (char *);
 extern	void	record_loop_stats (double, double, double, double, int);
-extern	void	record_clock_stats (struct sockaddr_storage *, const char *);
-extern	void	record_raw_stats (struct sockaddr_storage *, struct sockaddr_storage *, l_fp *, l_fp *, l_fp *, l_fp *);
+extern	void	record_clock_stats (sockaddr_u *, const char *);
+extern	void	record_raw_stats (sockaddr_u *, sockaddr_u *, l_fp *, l_fp *, l_fp *, l_fp *);
 extern	u_long	leap_month(u_long);
-extern	void	record_crypto_stats (struct sockaddr_storage *, const char *);
+extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);
 #endif
-extern  int	sock_hash (struct sockaddr_storage *);
+extern  int	sock_hash (sockaddr_u *);
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 extern	double	old_drift;
 extern	int	drift_file_sw;

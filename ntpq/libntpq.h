@@ -102,7 +102,7 @@ extern int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize 
 /* in libntpq_subs.c */
 #ifndef _LIBNTPQSUBSC
 extern int ntpq_dogetassoc(void);
-extern char ntpq_decodeaddrtype(struct sockaddr_storage *sock);
+extern char ntpq_decodeaddrtype(sockaddr_u *sock);
 extern int ntpq_doquerylist(struct ntpq_varlist *, int , int , int , u_short *, int *, char **datap );
 #endif
 

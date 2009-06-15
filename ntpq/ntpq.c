@@ -730,7 +730,7 @@ openhost(
 
 	if (ai->ai_canonname == NULL) {
 		strncpy(temphost, 
-			stoa((struct sockaddr_storage *)ai->ai_addr),
+			stoa((sockaddr_u *)ai->ai_addr),
 			LENHOSTNAME);
 
 	} else {
@@ -1818,7 +1818,7 @@ findcmd(
 int
 getnetnum(
 	const char *hname,
-	struct sockaddr_storage *num,
+	sockaddr_u *num,
 	char *fullhost,
 	int af
 	)
@@ -1826,10 +1826,8 @@ getnetnum(
 	int sockaddr_len;
 	struct addrinfo hints, *ai = NULL;
 
-	sockaddr_len = (af == AF_INET)
-			   ? sizeof(struct sockaddr_in)
-			   : sizeof(struct sockaddr_in6);
-	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	sockaddr_len = SIZEOF_SOCKADDR(af);
+	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
 	hints.ai_flags |= AI_ADDRCONFIG;
@@ -1861,12 +1859,12 @@ getnetnum(
  */
 char *
 nntohost(
-	struct sockaddr_storage *netnum
+	sockaddr_u *netnum
 	)
 {
 	if (!showhostnames)
 		return stoa(netnum);
-	else if ((netnum->ss_family == AF_INET) && ISREFCLOCKADR(netnum))
+	else if (ISREFCLOCKADR(netnum))
 		return refnumtoa(netnum);
 	else
 		return socktohost(netnum);
@@ -3163,7 +3161,7 @@ cookedprint(
 	struct ctl_var *varlist;
 	l_fp lfp;
 	long ival;
-	struct sockaddr_storage hval;
+	sockaddr_u hval;
 	u_long uval;
 	l_fp lfparr[8];
 	int narr;
@@ -3255,8 +3253,7 @@ cookedprint(
 			
 			    case RF:
 				if (decodenetnum(value, &hval)) {
-					if ((hval.ss_family == AF_INET) &&
-					    ISREFCLOCKADR(&hval))
+					if (ISREFCLOCKADR(&hval))
     						output(fp, name,
 						    refnumtoa(&hval));
 					else

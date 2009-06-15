@@ -177,20 +177,17 @@ struct netinfo_config_state {
 #endif
 
 struct REMOTE_CONFIG_INFO remote_config;  /* Remote configuration buffer and
-                                             pointer info */
+					     pointer info */
 int input_from_file = 1;     /* A boolean flag, which when set, indicates that
-                                the input is to be taken from the configuration
-                                file, instead of the remote-configuration buffer
-                             */
-/* int newline_is_special = 1; */ /* A boolean flag, which when set, implies that
-				     newlines are special characters that need to
-				     be returned as tokens */
+			        the input is to be taken from the configuration
+			        file, instead of the remote-configuration buffer
+			     */
 
 int old_config_style = 1;    /* A boolean flag, which when set,
-                              * indicates that the old configuration
-                              * format with a newline at the end of
-                              * every command is being used
-                              */
+			      * indicates that the old configuration
+			      * format with a newline at the end of
+			      * every command is being used
+			      */
 int	cryptosw;		/* crypto command called */
 
 extern int sys_maxclock;
@@ -211,7 +208,7 @@ static void init_syntax_tree(void);
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
 #if !defined(SIM)
-static struct sockaddr_storage *get_next_address(struct address_node *addr);
+static sockaddr_u *get_next_address(struct address_node *addr);
 #endif
 
 static void config_other_modes(void);
@@ -229,7 +226,7 @@ static void config_ttl(void);
 static void config_trap(void);
 static void config_fudge(void);
 static void config_vars(void);
-static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
+static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
 static void config_peers(void);
 static void config_unpeers(void);
@@ -256,9 +253,14 @@ do {					\
 static unsigned long get_pfxmatch(char **s,struct masks *m);
 static unsigned long get_match(char *s,struct masks *m);
 static unsigned long get_logmask(char *s);
-static int getnetnum(const char *num,struct sockaddr_storage *addr,int complain,enum gnn_type a_type);
-static int get_multiple_netnums(const char *num, struct sockaddr_storage *addr, struct addrinfo **res, int complain, enum gnn_type a_type);
-static void save_resolve(char *name,int mode,int version,int minpoll,int maxpoll,u_int flags,int ttl,keyid_t keyid,u_char *keystr);
+static int getnetnum(const char *num,sockaddr_u *addr, int complain,
+		     enum gnn_type a_type);
+static int get_multiple_netnums(const char *num, sockaddr_u *addr,
+				struct addrinfo **res, int complain,
+				enum gnn_type a_type);
+static void save_resolve(char *name, int mode, int version,
+			 int minpoll, int maxpoll, u_int flags,int ttl,
+			 keyid_t keyid,u_char *keystr);
 static void abort_resolve(void);
 static void do_resolve_internal(void);
 
@@ -799,7 +801,7 @@ create_sim_script_info(
 
 #define ADDR_LENGTH 16 + 1
 
-static struct sockaddr_storage *
+static sockaddr_u *
 get_next_address(
 	struct address_node *addr
 	)
@@ -807,7 +809,7 @@ get_next_address(
 	const char addr_prefix[] = "192.168.0.";
 	static int curr_addr_no = 1;
 	char addr_string[ADDR_LENGTH];
-	struct sockaddr_storage *final_addr;
+	sockaddr_u *final_addr;
 	struct addrinfo *ptr;
 	int retval;
 	
@@ -1052,25 +1054,27 @@ static void
 config_other_modes(void)
 {
 
-	struct sockaddr_storage addr_sock;
+	sockaddr_u addr_sock;
 	struct address_node *addr_node;
 
 	if (my_config.broadcastclient) {
-		proto_config(PROTO_BROADCLIENT, my_config.broadcastclient, 0., NULL);
+		proto_config(PROTO_BROADCLIENT,
+			     my_config.broadcastclient, 0., NULL);
 		my_config.broadcastclient = 0;
 	}
 
 	/* Configure the many-cast servers */
 	if (!empty(my_config.manycastserver)) {
 		while (!empty(my_config.manycastserver)) {
-			addr_node = (struct address_node *)
-			    dequeue(my_config.manycastserver);
+			addr_node = dequeue(my_config.manycastserver);
 
-			memset((char *)&addr_sock, 0, sizeof(addr_sock));
-			addr_sock.ss_family = (u_short)addr_node->type;
+			ZERO_SOCK(&addr_sock);
+			AF(&addr_sock) = (u_short)addr_node->type;
 
-			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
-				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
+			if (getnetnum(addr_node->address, &addr_sock,
+			    1, t_UNK) == 1)
+				proto_config(PROTO_MULTICAST_ADD, 0,
+					     0., &addr_sock);
 
 			destroy_address_node(addr_node);
 		}
@@ -1080,15 +1084,15 @@ config_other_modes(void)
 	/* Configure the multicast clients */
 	if (!empty(my_config.multicastclient)) {
 		while (!empty(my_config.multicastclient)) {
-			addr_node = (struct address_node *)
-			    dequeue(my_config.multicastclient);
+			addr_node = dequeue(my_config.multicastclient);
 
-			memset((char *)&addr_sock, 0, sizeof(addr_sock));
-			addr_sock.ss_family = (u_short)addr_node->type;
+			ZERO_SOCK(&addr_sock);
+			AF(&addr_sock) = (u_short)addr_node->type;
 
-			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
-				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
-
+			if (getnetnum(addr_node->address, &addr_sock,
+			    1, t_UNK) == 1)
+				proto_config(PROTO_MULTICAST_ADD, 0,
+					     0., &addr_sock);
 
 			destroy_address_node(addr_node);
 		}
@@ -1332,8 +1336,8 @@ config_access(void)
 {
 	struct attr_val *	my_opt;
 	struct restrict_node *	my_node;
-	struct sockaddr_storage addr_sock;
-	struct sockaddr_storage addr_mask;
+	sockaddr_u		addr_sock;
+	sockaddr_u		addr_mask;
 	int			flags;
 	int			mflags;
 	int			restrict_default;
@@ -1369,7 +1373,7 @@ config_access(void)
 	while (!empty(my_config.restrict_opts)) {
 		my_node = dequeue(my_config.restrict_opts);
 
-		memset(&addr_sock, 0, sizeof addr_sock);
+		ZERO_SOCK(&addr_sock);
 
 		if (NULL == my_node->addr) {
 			/*
@@ -1377,11 +1381,11 @@ config_access(void)
 			 * -4 / -6 qualifier, add to both lists
 			 */
 			restrict_default = 1;
-			ANYSOCK(&addr_mask);
+			ZERO_SOCK(&addr_mask);
 		} else {
 			restrict_default = 0;
 			/* Resolve the specified address */
-			addr_sock.ss_family = (u_short)my_node->addr->type;
+			AF(&addr_sock) = (u_short)my_node->addr->type;
 
 			if (getnetnum(my_node->addr->address,
 				      &addr_sock, 1, t_UNK) != 1) {
@@ -1393,12 +1397,12 @@ config_access(void)
 				continue;
 			}
 
-			SET_HOSTMASK(&addr_mask, addr_sock.ss_family);
+			SET_HOSTMASK(&addr_mask, AF(&addr_sock));
 
 			/* Resolve the mask */
 			if (my_node->mask) {
-				memset((char *)&addr_mask, 0, sizeof(addr_mask));
-				addr_mask.ss_family = (u_short)my_node->mask->type;
+				ZERO_SOCK(&addr_mask);
+				AF(&addr_mask) = (u_short)my_node->mask->type;
 				if (getnetnum(my_node->mask->address, &addr_mask, 1, t_MSK) != 1) {
 
 					msyslog(LOG_ERR,
@@ -1425,11 +1429,11 @@ config_access(void)
 
 		/* Set the flags */
 		if (restrict_default) {
-			addr_sock.ss_family = AF_INET;
+			AF(&addr_sock) = AF_INET;
 			hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
 				      mflags, flags);
 
-			addr_sock.ss_family = AF_INET6;
+			AF(&addr_sock) = AF_INET6;
 		}
 
 		hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
@@ -1604,15 +1608,15 @@ config_trap(void)
 
 	struct addr_opts_node *curr_trap;
 	struct attr_val *curr_opt;
-	struct sockaddr_storage addr_sock;
-	struct sockaddr_storage peeraddr;
+	sockaddr_u addr_sock;
+	sockaddr_u peeraddr;
 	struct address_node *addr_node;
 	struct interface *localaddr;
 	u_short port_no;
 	int err_flag;
 
 	/* silence warning about addr_sock potentially uninitialized */
-	addr_sock.ss_family = AF_UNSPEC;
+	AF(&addr_sock) = AF_UNSPEC;
 	port_no = 0;
 	localaddr = NULL;
 
@@ -1638,8 +1642,8 @@ config_trap(void)
 				addr_node = curr_opt->value.p;
 
 				/* Resolve the interface address */
-				memset(&addr_sock, 0, sizeof(addr_sock));
-				addr_sock.ss_family = (u_short)addr_node->type;
+				ZERO_SOCK(&addr_sock);
+				AF(&addr_sock) = (u_short)addr_node->type;
 
 				if (getnetnum(addr_node->address,
 					      &addr_sock, 1, t_UNK) != 1) {
@@ -1666,7 +1670,7 @@ config_trap(void)
 		 * and port number
 		 */
 		if (!err_flag) {
-			memset((char *)&peeraddr, 0, sizeof(peeraddr));
+			ZERO_SOCK(&peeraddr);
 			if (1 != getnetnum(curr_trap->addr->address,
 					   &peeraddr, 1, t_UNK)) {
 				err_flag = 1;
@@ -1674,15 +1678,14 @@ config_trap(void)
 			}
 
 			/* port is at same location for v4 and v6 */
-			((struct sockaddr_in6*)&peeraddr)->sin6_port =
-				htons(port_no ? port_no : TRAPPORT);
+			SET_PORT(&peeraddr, port_no ? port_no : TRAPPORT);
 
 			if (NULL == localaddr) {
-				peeraddr.ss_family = default_ai_family;
+				AF(&peeraddr) = default_ai_family;
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
 			}
 			else
-				peeraddr.ss_family = addr_sock.ss_family;
+				AF(&peeraddr) = AF(&addr_sock);
 
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
 					NTP_VERSION))
@@ -1700,7 +1703,7 @@ config_fudge(void)
 {
 	struct addr_opts_node *curr_fudge;
 	struct attr_val *curr_opt;
-	struct sockaddr_storage addr_sock;
+	sockaddr_u addr_sock;
 	struct address_node *addr_node;
 	struct refclockstat clock_stat;
 	int err_flag;
@@ -1714,7 +1717,7 @@ config_fudge(void)
 		 * ensure that it is sane
 		 */
 		addr_node = curr_fudge->addr;
-		memset((char *)&addr_sock, 0, sizeof(addr_sock));
+		ZERO_SOCK(&addr_sock);
 		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF) != 1)
 			err_flag = 1;
 
@@ -1726,7 +1729,7 @@ config_fudge(void)
 		}
 
 		/* Parse all the options to the fudge command */
-		memset((void *)&clock_stat, 0, sizeof clock_stat);
+		memset(&clock_stat, 0, sizeof(clock_stat));
 		while (!empty(curr_fudge->options)) {
 			curr_opt = (struct attr_val *) dequeue(curr_fudge->options);
 
@@ -1862,18 +1865,14 @@ config_vars(void)
  */
 static int
 is_sane_resolved_address(
-	struct sockaddr_storage peeraddr,
-	int hmode
+	sockaddr_u *	peeraddr,
+	int		hmode
 	)
 {
-	if (
-#ifdef REFCLOCK
-		!ISREFCLOCKADR(&peeraddr) &&
-#endif
-		ISBADADR(&peeraddr)) {
+	if (!ISREFCLOCKADR(peeraddr) && ISBADADR(peeraddr)) {
 		msyslog(LOG_ERR,
 			"attempt to configure invalid address %s",
-			stoa(&peeraddr));
+			stoa(peeraddr));
 		return 0;
 	}
 	/*
@@ -1881,50 +1880,21 @@ is_sane_resolved_address(
 	 * address for server/peer!
 	 * and unicast address for manycastclient!
 	 */
-	/* Check for IPv4 */
-	if (peeraddr.ss_family == AF_INET) {
-		if (((hmode == T_Server) || (hmode == T_Peer) || (hmode == T_Pool)) &&
-#ifdef REFCLOCK
-		    !ISREFCLOCKADR(&peeraddr) &&
-#endif
-		    IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
-			msyslog(LOG_ERR,
-				"attempt to configure invalid address %s",
-				stoa(&peeraddr));
-			return 0;
-		}
-		if ((hmode == T_Manycastclient) &&
-		    !IN_CLASSD(ntohl(((struct sockaddr_in*)&peeraddr)->sin_addr.s_addr))) {
-			msyslog(LOG_ERR,
-				"attempt to configure invalid address %s",
-				stoa(&peeraddr));
-			return 0;
-		}
-
+	if ((T_Server == hmode || T_Peer == hmode || T_Pool == hmode)
+	    && IS_MCAST(peeraddr)) {
+		msyslog(LOG_ERR,
+			"attempt to configure invalid address %s",
+			stoa(peeraddr));
+		return 0;
 	}
-	/* Check for IPv6 */
-	else if(peeraddr.ss_family == AF_INET6) {
-		if (((hmode == T_Server) || (hmode == T_Peer) || (hmode == T_Pool)) &&
-#ifdef REFCLOCK
-		    !ISREFCLOCKADR(&peeraddr) &&
-#endif
-		    IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
-			msyslog(LOG_ERR,
-				"attempt to configure in valid address %s",
-				stoa(&peeraddr));
-			return 0;
-		}
-		if ((hmode == T_Manycastclient) &&
-		    !IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6*)&peeraddr)->sin6_addr)) {
-			msyslog(LOG_ERR,
-				"attempt to configure in valid address %s",
-				stoa(&peeraddr));
-			return 0;
-		}
+	if (T_Manycastclient == hmode && !IS_MCAST(peeraddr)) {
+		msyslog(LOG_ERR,
+			"attempt to configure invalid address %s",
+			stoa(peeraddr));
+		return 0;
 	}
 
-	if (peeraddr.ss_family == AF_INET6 &&
-	    isc_net_probeipv6() != ISC_R_SUCCESS)
+	if (IS_IPV6(peeraddr) && !ipv6_works)
 		return 0;
 
 	/* Ok, all tests succeeded, now we can return 1 */
@@ -1959,7 +1929,7 @@ static void
 config_peers(void)
 {
 	struct addrinfo *res, *res_bak;
-	struct sockaddr_storage peeraddr;
+	sockaddr_u peeraddr;
 	struct peer_node *curr_peer;
 	int hmode;
 	int status;
@@ -1979,8 +1949,8 @@ config_peers(void)
 		hmode = get_correct_host_mode(curr_peer->host_mode);
 
 		/* Attempt to resolve the address */
-		memset((char *)&peeraddr, 0, sizeof(peeraddr));
-		peeraddr.ss_family = (u_short)curr_peer->addr->type;
+		ZERO_SOCK(&peeraddr);
+		AF(&peeraddr) = (u_short)curr_peer->addr->type;
 
 		status = get_multiple_netnums(curr_peer->addr->address, &peeraddr, &res, 0, t_UNK);
 
@@ -2024,10 +1994,12 @@ config_peers(void)
 				++i;
 				memcpy(&peeraddr, res->ai_addr,
 				    res->ai_addrlen);
-				if (is_sane_resolved_address(peeraddr,
-				    curr_peer->host_mode))
+				if (is_sane_resolved_address(
+					&peeraddr,
+					curr_peer->host_mode))
+
 					peer_config(&peeraddr,
-				        ANY_INTERFACE_CHOOSE(&peeraddr),
+					ANY_INTERFACE_CHOOSE(&peeraddr),
 					    hmode,
 					    curr_peer->peerversion,
 					    curr_peer->minpoll,
@@ -2050,7 +2022,7 @@ static void
 config_unpeers(void)
 {
 	struct addrinfo *res, *res_bak;
-	struct sockaddr_storage peeraddr;
+	sockaddr_u peeraddr;
 	struct unpeer_node *curr_unpeer;
 	struct peer *peer;
 	int status;
@@ -2060,8 +2032,8 @@ config_unpeers(void)
 		curr_unpeer = (struct unpeer_node *) dequeue(my_config.unpeers);
 
 		/* Attempt to resolve the address */
-		memset((char *)&peeraddr, 0, sizeof(peeraddr));
-		peeraddr.ss_family = (u_short)curr_unpeer->addr->type;
+		ZERO_SOCK(&peeraddr);
+		AF(&peeraddr) = (u_short)curr_unpeer->addr->type;
 
 		status = get_multiple_netnums(curr_unpeer->addr->address, &peeraddr, &res, 0, t_UNK);
 
@@ -2630,7 +2602,7 @@ gettokens_netinfo (
 static int
 getnetnum(
 	const char *num,
-	struct sockaddr_storage *addr,
+	sockaddr_u *addr,
 	int complain,
 	enum gnn_type a_type
 	)
@@ -2662,7 +2634,7 @@ getnetnum(
 static int
 get_multiple_netnums(
 	const char *num,
-	struct sockaddr_storage *addr,
+	sockaddr_u *addr,
 	struct addrinfo **res,
 	int complain,
 	enum gnn_type a_type
@@ -2674,15 +2646,15 @@ get_multiple_netnums(
 	int retval;
 
 	/* Get host address. Looking for UDP datagram connection */
-	memset(&hints, 0, sizeof (hints));
-	if (addr->ss_family == AF_INET || addr->ss_family == AF_INET6)
-		hints.ai_family = addr->ss_family;
+	memset(&hints, 0, sizeof(hints));
+	if (IS_IPV4(addr) || IS_IPV6(addr))
+		hints.ai_family = AF(addr);
 	else
 		hints.ai_family = AF_UNSPEC;
 	/*
 	 * If we don't have an IPv6 stack, just look up IPv4 addresses
 	 */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS)
+	if (!ipv6_works)
 		hints.ai_family = AF_INET;
 
 	hints.ai_socktype = SOCK_DGRAM;
@@ -2691,10 +2663,7 @@ get_multiple_netnums(
 
 	retval = getaddrinfo(num, "ntp", &hints, &ptr);
 
-	if (retval ||
-	    (ptr->ai_family == AF_INET6 
-	     && isc_net_probeipv6() != ISC_R_SUCCESS)) {
-
+	if (retval || (AF_INET6 == ptr->ai_family && !ipv6_works)) {
 		if (complain)
 			msyslog(LOG_ERR,
 				"getaddrinfo: \"%s\" invalid host "

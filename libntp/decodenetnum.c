@@ -12,7 +12,7 @@
 int
 decodenetnum(
 	const char *num,
-	struct sockaddr_storage *netnum
+	sockaddr_u *netnum
 	)
 {
 	struct addrinfo hints, *ai = NULL;

@@ -277,7 +277,7 @@ timer(void)
 			next_peer = peer->next;
 			if (peer->action && peer->nextaction <=
 			    current_time)
-	  			peer->action(peer);
+				peer->action(peer);
 
 			/*
 			 * Restrain the non-burst packet rate not more
@@ -314,7 +314,7 @@ timer(void)
 				crypto_update();
 #endif /* OPENSSL */
 		}
-		sys_stratum = sys_orphan;
+		sys_stratum = (u_char)sys_orphan;
 		if (sys_stratum > 1)
 			sys_refid = htonl(LOOPBACKADR);
 		else

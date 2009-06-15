@@ -9,7 +9,7 @@
 
 char *
 refnumtoa(
-	struct sockaddr_storage* num
+	sockaddr_u *num
 	)
 {
 	register u_int32 netnum;
@@ -18,19 +18,22 @@ refnumtoa(
 
 	LIB_GETBUF(buf);
 
-	if(num->ss_family == AF_INET) {
-		netnum = ntohl(((struct sockaddr_in*)num)->sin_addr.s_addr);
+	if (IS_IPV4(num)) {
+		netnum = SRCADR(num);
 		rclock = clockname((int)((u_long)netnum >> 8) & 0xff);
 
 		if (rclock != NULL)
-		    (void)sprintf(buf, "%s(%lu)", rclock, (u_long)netnum & 0xff);
+			snprintf(buf, LIB_BUFLENGTH, "%s(%lu)",
+				 rclock, (u_long)netnum & 0xff);
 		else
-	    	(void)sprintf(buf, "REFCLK(%lu,%lu)",
-				  ((u_long)netnum >> 8) & 0xff, (u_long)netnum & 0xff);
+			snprintf(buf, LIB_BUFLENGTH, "REFCLK(%lu,%lu)",
+				 ((u_long)netnum >> 8) & 0xff,
+				 (u_long)netnum & 0xff);
 
-	}
-	else {
-		(void)sprintf(buf, "refclock address type not implemented yet, use IPv4 refclock address.");
-	}
+	} else
+		strncpy(buf,
+			"refclock address type not implemented, use IPv4 refclock address.",
+			LIB_BUFLENGTH);
+
 	return buf;
 }

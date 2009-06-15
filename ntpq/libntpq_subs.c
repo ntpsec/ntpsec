@@ -19,7 +19,7 @@
 
 /* Function Prototypes */
 int ntpq_dogetassoc(void);
-char ntpq_decodeaddrtype(struct sockaddr_storage *sock);
+char ntpq_decodeaddrtype(sockaddr_u *sock);
 int ntpq_doquerylist(struct varlist *, int , int , int , u_short *, int *, char **datap );
 
 
@@ -38,7 +38,7 @@ int ntpq_dogetassoc(void)
 	}
 }
 
-char ntpq_decodeaddrtype(struct sockaddr_storage *sock)
+char ntpq_decodeaddrtype(sockaddr_u *sock)
 {
 	return decodeaddrtype(sock);
 }

@@ -557,7 +557,7 @@ QueueSocketRecv(
 
 		if (SOCKET_ERROR == WSARecvFrom(buff->fd, &wsabuf, 1, 
 						NULL, &Flags, 
-						(struct sockaddr *)&buff->recv_srcadr, 
+						&buff->recv_srcadr.sa, 
 						&buff->recv_srcadr_len, 
 						(LPOVERLAPPED)lpo, NULL)) {
 			Result = GetLastError();
@@ -750,7 +750,8 @@ io_completion_port_sendto(
 	struct interface *inter,	
 	struct pkt *pkt,	
 	int len, 
-	struct sockaddr_storage *dest)
+	sockaddr_u* dest
+	)
 {
 	WSABUF wsabuf;
 	transmitbuf_t *buff;
@@ -785,7 +786,7 @@ io_completion_port_sendto(
 		Flags = 0;
 
 		Result = WSASendTo(inter->fd, &wsabuf, 1, NULL, Flags,
-				   (struct sockaddr *)dest, AddrLen, 
+				   &dest->sa, AddrLen, 
 				   (LPOVERLAPPED)lpo, NULL);
 
 		if(Result == SOCKET_ERROR)
