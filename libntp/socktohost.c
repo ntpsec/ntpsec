@@ -17,15 +17,15 @@
 
 char *
 socktohost(
-	struct sockaddr_storage* sock
+	sockaddr_u *sock
 	)
 {
 	register char *buffer;
 
 	LIB_GETBUF(buffer);
-	if (getnameinfo((struct sockaddr *)sock, SOCKLEN(sock), buffer,
-	    LIB_BUFLENGTH /* NI_MAXHOST*/, NULL, 0, 0))
+	if (getnameinfo(&sock->sa, SOCKLEN(sock), buffer,
+	    LIB_BUFLENGTH, NULL, 0, 0))
 		return stoa(sock);
 
-  	return buffer;
+	return buffer;
 }

@@ -375,6 +375,12 @@ internal_current(isc_interfaceiter_t *iter) {
 	}
 
 	/*
+	 * Get the network mask.
+	 */
+	get_addr(AF_INET, &iter->current.netmask,
+		 (struct sockaddr *)&(iter->IFData.iiNetmask));
+
+	/*
 	 * If the interface is broadcast, get the broadcast address.
 	 */
 	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
@@ -387,12 +393,6 @@ internal_current(isc_interfaceiter_t *iter) {
 	if (ifNamed == FALSE)
 		sprintf(iter->current.name,
 			"TCP/IP Interface %d", iter->numIF);
-
-	/*
-	 * Get the network mask.
-	 */
-	get_addr(AF_INET, &iter->current.netmask,
-		 (struct sockaddr *)&(iter->IFData.iiNetmask));
 
 	return (ISC_R_SUCCESS);
 }

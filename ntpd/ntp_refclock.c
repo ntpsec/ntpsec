@@ -180,12 +180,6 @@ refclock_newpeer(
 	 * Check for valid clock address. If already running, shut it
 	 * down first.
 	 */
-	if (peer->srcadr.ss_family != AF_INET) {
-		msyslog(LOG_ERR,
-			"refclock_newpeer: clock address %s invalid, address family not implemented for refclock",
-			stoa(&peer->srcadr));
-		return (0);
-	}
 	if (!ISREFCLOCKADR(&peer->srcadr)) {
 		msyslog(LOG_ERR,
 			"refclock_newpeer: clock address %s invalid",
@@ -1020,7 +1014,7 @@ refclock_ioctl(
  */
 void
 refclock_control(
-	struct sockaddr_storage *srcadr,
+	sockaddr_u *srcadr,
 	struct refclockstat *in,
 	struct refclockstat *out
 	)
@@ -1033,9 +1027,6 @@ refclock_control(
 	/*
 	 * Check for valid address and running peer
 	 */
-	if (srcadr->ss_family != AF_INET)
-		return;
-
 	if (!ISREFCLOCKADR(srcadr))
 		return;
 
@@ -1122,7 +1113,7 @@ refclock_control(
  */
 void
 refclock_buginfo(
-	struct sockaddr_storage *srcadr, /* clock address */
+	sockaddr_u *srcadr,	/* clock address */
 	struct refclockbug *bug /* output structure */
 	)
 {
@@ -1135,9 +1126,6 @@ refclock_buginfo(
 	/*
 	 * Check for valid address and peer structure
 	 */
-	if (srcadr->ss_family != AF_INET)
-		return;
-
 	if (!ISREFCLOCKADR(srcadr))
 		return;
 

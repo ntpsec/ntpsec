@@ -355,19 +355,17 @@ extern	int	adj_systime	(double);
 
 extern	struct tm * ntp2unix_tm (u_long ntp, int local);
 
-#define	lfptoa(_fpv, _ndec)	mfptoa((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
-#define	lfptoms(_fpv, _ndec)	mfptoms((_fpv)->l_ui, (_fpv)->l_uf, (_ndec))
+#define	lfptoa(fpv, ndec)	mfptoa((fpv)->l_ui, (fpv)->l_uf, (ndec))
+#define	lfptoms(fpv, ndec)	mfptoms((fpv)->l_ui, (fpv)->l_uf, (ndec))
 
-#define stoa(_sin)	socktoa((_sin))
-#define stohost(_sin)	socktohost((_sin))
+#define stoa(addr)		socktoa(addr)
+#define	ntoa(addr)		stoa(addr)
+#define stohost(addr)		socktohost(addr)
 
-#define	ntoa(_sin)	stoa(_sin)
-#define	ntohost(_sin)	stohost(_sin)
-
-#define	ufptoa(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 0)
-#define	ufptoms(_fpv, _ndec)	dofptoa((_fpv), 0, (_ndec), 1)
-#define	ulfptoa(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 0)
-#define	ulfptoms(_fpv, _ndec)	dolfptoa((_fpv)->l_ui, (_fpv)->l_uf, 0, (_ndec), 1)
-#define	umfptoa(_fpi, _fpf, _ndec) dolfptoa((_fpi), (_fpf), 0, (_ndec), 0)
+#define	ufptoa(fpv, ndec)	dofptoa((fpv), 0, (ndec), 0)
+#define	ufptoms(fpv, ndec)	dofptoa((fpv), 0, (ndec), 1)
+#define	ulfptoa(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 0)
+#define	ulfptoms(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 1)
+#define	umfptoa(fpi, fpf, ndec) dolfptoa((fpi), (fpf), 0, (ndec), 0)
 
 #endif /* NTP_FP_H */

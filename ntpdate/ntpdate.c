@@ -220,14 +220,14 @@ static	void	clock_filter	(struct server *);
 static	struct server *clock_select (void);
 static	int clock_adjust	(void);
 static	void	addserver	(char *);
-static	struct server *findserver (struct sockaddr_storage *);
+static	struct server *findserver (sockaddr_u *);
 		void	timer		(void);
 static	void	init_alarm	(void);
 #ifndef SYS_WINNT
 static	RETSIGTYPE alarming (int);
 #endif /* SYS_WINNT */
 static	void	init_io 	(void);
-static	void	sendpkt 	(struct sockaddr_storage *, struct pkt *, int);
+static	void	sendpkt 	(sockaddr_u *, struct pkt *, int);
 void	input_handler	(void);
 
 static	int l_adj_systime	(l_fp *);
@@ -334,31 +334,21 @@ ntpdatemain (
 	ni_namelist *netinfoservers;
 #endif
 #ifdef SYS_WINNT
-	HANDLE process_handle;
-
-	wVersionRequested = MAKEWORD(1,1);
-	if (WSAStartup(wVersionRequested, &wsaData)) {
-		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
-		exit(1);
-	}
-
 	key_file = key_file_storage;
 
 	if (!ExpandEnvironmentStrings(KEYFILE, key_file, MAX_PATH))
-	{
 		msyslog(LOG_ERR, "ExpandEnvironmentStrings(KEYFILE) failed: %m\n");
-	}
 #endif /* SYS_WINNT */
 
 #ifdef NO_MAIN_ALLOWED
 	clear_globals();
 #endif
 
+	init_lib();	/* sets up ipv4_works, ipv6_works */
 
-	/* Check to see if we have IPv6. Otherwise force the -4 flag */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+	/* Check to see if we have IPv6. Otherwise default to IPv4 */
+	if (!ipv6_works)
 		ai_fam_templ = AF_INET;
-	}
 
 	errflg = 0;
 	progname = argv[0];
@@ -595,7 +585,7 @@ ntpdatemain (
 #else
 				if (WSAGetLastError() != WSAEINTR)
 #endif
-					netsyslog(LOG_ERR,
+					msyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 						"poll() error: %m"
 #else
@@ -604,7 +594,7 @@ ntpdatemain (
 						);
 			} else if (errno != 0) {
 #ifndef SYS_VXWORKS
-				netsyslog(LOG_DEBUG,
+				msyslog(LOG_DEBUG,
 #ifdef HAVE_POLL_H
 					"poll(): nfound = %d, error: %m",
 #else
@@ -674,7 +664,7 @@ transmit(
 	struct pkt xpkt;
 
 	if (debug)
-		printf("transmit(%s)\n", stoa(&(server->srcadr)));
+		printf("transmit(%s)\n", stoa(&server->srcadr));
 
 	if (server->filter_nextpt < server->xmtcnt) {
 		l_fp ts;
@@ -725,18 +715,18 @@ transmit(
 		L_ADDUF(&server->xmt, sys_authdelay);
 		HTONL_FP(&server->xmt, &xpkt.xmt);
 		len = authencrypt(sys_authkey, (u_int32 *)&xpkt, LEN_PKT_NOMAC);
-		sendpkt(&(server->srcadr), &xpkt, (int)(LEN_PKT_NOMAC + len));
+		sendpkt(&server->srcadr, &xpkt, (int)(LEN_PKT_NOMAC + len));
 
 		if (debug > 1)
 			printf("transmit auth to %s\n",
-			   stoa(&(server->srcadr)));
+			   stoa(&server->srcadr));
 	} else {
 		get_systime(&(server->xmt));
 		HTONL_FP(&server->xmt, &xpkt.xmt);
-		sendpkt(&(server->srcadr), &xpkt, LEN_PKT_NOMAC);
+		sendpkt(&server->srcadr, &xpkt, LEN_PKT_NOMAC);
 
 		if (debug > 1)
-			printf("transmit to %s\n", stoa(&(server->srcadr)));
+			printf("transmit to %s\n", stoa(&server->srcadr));
 	}
 
 	/*
@@ -1305,16 +1295,16 @@ clock_adjust(void)
  *		    (non-blocking).
  */
 static int
-is_reachable (struct sockaddr_storage *dst)
+is_reachable (sockaddr_u *dst)
 {
 	SOCKET sockfd;
 
-	sockfd = socket(dst->ss_family, SOCK_DGRAM, 0);
+	sockfd = socket(AF(dst), SOCK_DGRAM, 0);
 	if (sockfd == -1) {
 		return 0;
 	}
 
-	if(connect(sockfd, (struct sockaddr *)dst, SOCKLEN(dst))) {
+	if (connect(sockfd, &dst->sa, SOCKLEN(dst))) {
 		closesocket(sockfd);
 		return 0;
 	}
@@ -1372,18 +1362,17 @@ addserver(
 	}
 #ifdef DEBUG
 	else if (debug) {
-		fprintf(stderr, "host found : %s\n", stohost((struct sockaddr_storage*)addrResult->ai_addr));
+		fprintf(stderr, "host found : %s\n", stohost((sockaddr_u *)addrResult->ai_addr));
 	}
 #endif
 
 	/* We must get all returned server in case the first one fails */
 	for (ptr = addrResult; ptr != NULL; ptr = ptr->ai_next) {
-		if (is_reachable ((struct sockaddr_storage *)ptr->ai_addr)) {
-			server = (struct server *)emalloc(sizeof(struct server));
-			memset((char *)server, 0, sizeof(struct server));
+		if (is_reachable ((sockaddr_u *)ptr->ai_addr)) {
+			server = emalloc(sizeof(*server));
+			memset(server, 0, sizeof(*server));
 
-			memset(&(server->srcadr), 0, sizeof(struct sockaddr_storage));
-			memcpy(&(server->srcadr), ptr->ai_addr, ptr->ai_addrlen);
+			memcpy(&server->srcadr, ptr->ai_addr, ptr->ai_addrlen);
 			server->event_time = ++sys_numservers;
 			if (sys_servers == NULL)
 				sys_servers = server;
@@ -1407,40 +1396,23 @@ addserver(
  */
 static struct server *
 findserver(
-	struct sockaddr_storage *addr
+	sockaddr_u *addr
 	)
 {
 	struct server *server;
 	struct server *mc_server;
-	isc_sockaddr_t laddr;
-	isc_sockaddr_t saddr;
-
-	if(addr->ss_family == AF_INET) {
-		isc_sockaddr_fromin( &laddr, &((struct sockaddr_in*)addr)->sin_addr, 0);
-	}
-	else {
-		isc_sockaddr_fromin6(&laddr, &((struct sockaddr_in6*)addr)->sin6_addr, 0);
-	}
-
 
 	mc_server = NULL;
-	if (htons(((struct sockaddr_in*)addr)->sin_port) != NTP_PORT)
+	if (SRCPORT(addr) != NTP_PORT)
 		return 0;
 
 	for (server = sys_servers; server != NULL; 
 	     server = server->next_server) {
-		
-		if(server->srcadr.ss_family == AF_INET) {
-			isc_sockaddr_fromin(&saddr, &((struct sockaddr_in*)&server->srcadr)->sin_addr, 0);
-		}
-		else {
-			isc_sockaddr_fromin6(&saddr, &((struct sockaddr_in6*)&server->srcadr)->sin6_addr, 0);
-		}
-		if (isc_sockaddr_eqaddr(&laddr, &saddr) == ISC_TRUE)
+		if (SOCK_EQ(addr, &server->srcadr))
 			return server;
 
-		if(addr->ss_family == server->srcadr.ss_family) {
-			if (isc_sockaddr_ismulticast(&saddr) == ISC_TRUE)
+		if (AF(addr) == AF(&server->srcadr)) {
+			if (IS_MCAST(&server->srcadr))
 				mc_server = server;
 		}
 	}
@@ -1454,10 +1426,10 @@ findserver(
 			complete_servers++;
 		}
 
-		server = (struct server *)emalloc(sizeof(struct server));
-		memset((char *)server, 0, sizeof(struct server));
+		server = emalloc(sizeof(*server));
+		memset(server, 0, sizeof(*server));
 
-		memcpy(&server->srcadr, addr, sizeof(struct sockaddr_storage));
+		server->srcadr = *addr;
 
 		server->event_time = ++sys_numservers;
 
@@ -1725,7 +1697,7 @@ init_io(void)
 
 #ifdef SYS_WINNT
 	if (check_ntp_port_in_use && ntp_port_inuse(AF_INET, NTP_PORT)){
-		netsyslog(LOG_ERR, "the NTP socket is in use, exiting: %m");
+		msyslog(LOG_ERR, "the NTP socket is in use, exiting: %m");
 		exit(1);
 	}
 #endif
@@ -1749,13 +1721,13 @@ init_io(void)
 		    err == WSAEPFNOSUPPORT)
 #endif
 			continue;
-		netsyslog(LOG_ERR, "socket() failed: %m");
+		msyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
 		/*NOTREACHED*/
 		}
 		/* set socket to reuse address */
 		if (setsockopt(fd[nbsock], SOL_SOCKET, SO_REUSEADDR, (void*) &optval, sizeof(optval)) < 0) {
-				netsyslog(LOG_ERR, "setsockopt() SO_REUSEADDR failed: %m");
+				msyslog(LOG_ERR, "setsockopt() SO_REUSEADDR failed: %m");
 				exit(1);
 				/*NOTREACHED*/
 		}
@@ -1763,7 +1735,7 @@ init_io(void)
 		/* Restricts AF_INET6 socket to IPv6 communications (see RFC 2553bis-03) */
 		if (res->ai_family == AF_INET6)
 			if (setsockopt(fd[nbsock], IPPROTO_IPV6, IPV6_V6ONLY, (void*) &optval, sizeof(optval)) < 0) {
-				   netsyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
+				   msyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
 					exit(1);
 					/*NOTREACHED*/
 		}
@@ -1776,15 +1748,16 @@ init_io(void)
 		 * bind the socket to the NTP port
 		 */
 		if (check_ntp_port_in_use) {
-			if (bind(fd[nbsock], res->ai_addr, SOCKLEN(res->ai_addr)) < 0) {
+			if (bind(fd[nbsock], res->ai_addr, 
+				 SOCKLEN((sockaddr_u *)res->ai_addr)) < 0) {
 #ifndef SYS_WINNT
 				if (errno == EADDRINUSE)
 #else
 				if (WSAGetLastError() == WSAEADDRINUSE)
 #endif /* SYS_WINNT */
-					netsyslog(LOG_ERR, "the NTP socket is in use, exiting");
+					msyslog(LOG_ERR, "the NTP socket is in use, exiting");
 				else
-					netsyslog(LOG_ERR, "bind() fails: %m");
+					msyslog(LOG_ERR, "bind() fails: %m");
 				exit(1);
 			}
 		}
@@ -1805,24 +1778,24 @@ init_io(void)
 #ifndef SYS_WINNT
 # ifdef SYS_VXWORKS
 		{
-		int on = TRUE;
+			int on = TRUE;
 
-		if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
-		  netsyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
-			exit(1);
-		}
+			if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
+				msyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
+				exit(1);
+			}
 		}
 # else /* not SYS_VXWORKS */
 #  if defined(O_NONBLOCK)
 		if (fcntl(fd[nbsock], F_SETFL, O_NONBLOCK) < 0) {
-			netsyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
 			exit(1);
 			/*NOTREACHED*/
 		}
 #  else /* not O_NONBLOCK */
 #	if defined(FNDELAY)
 		if (fcntl(fd[nbsock], F_SETFL, FNDELAY) < 0) {
-			netsyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
 			exit(1);
 			/*NOTREACHED*/
 		}
@@ -1833,7 +1806,7 @@ init_io(void)
 # endif /* SYS_VXWORKS */
 #else /* SYS_WINNT */
 		if (ioctlsocket(fd[nbsock], FIONBIO, (u_long *) &on) == SOCKET_ERROR) {
-			netsyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
+			msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
 			exit(1);
 		}
 #endif /* SYS_WINNT */
@@ -1847,7 +1820,7 @@ init_io(void)
  */
 static void
 sendpkt(
-	struct sockaddr_storage *dest,
+	sockaddr_u *dest,
 	struct pkt *pkt,
 	int len
 	)
@@ -1862,14 +1835,14 @@ sendpkt(
 
 	/* Find a local family compatible socket to send ntp packet to ntp server */
 	for(i = 0; (i < MAX_AF); i++) {
-		if(dest->ss_family == fd_family[i]) {
+		if(AF(dest) == fd_family[i]) {
 			sock = fd[i];
 		break;
 		}
 	}
 
-	if ( sock == INVALID_SOCKET ) {
-		netsyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
+	if (INVALID_SOCKET == sock) {
+		msyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
 		exit(1);
 		/*NOTREACHED*/
 	}
@@ -1877,14 +1850,14 @@ sendpkt(
 	cc = sendto(sock, (char *)pkt, len, 0, (struct sockaddr *)dest,
 			SOCKLEN(dest));
 
-	if (cc == SOCKET_ERROR) {
+	if (SOCKET_ERROR == cc) {
 #ifndef SYS_WINNT
 		if (errno != EWOULDBLOCK && errno != ENOBUFS)
 #else
 		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS)
 #endif /* SYS_WINNT */
-			netsyslog(LOG_ERR, "sendto(%s): %m", stohost(dest));
+			msyslog(LOG_ERR, "sendto(%s): %m", stohost(dest));
 	}
 }
 
@@ -1954,7 +1927,7 @@ input_handler(void)
 			return;
 		else if (n == -1) {
 			if (errno != EINTR)
-				netsyslog(LOG_ERR,
+				msyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 					"poll() error: %m"
 #else
@@ -1989,7 +1962,7 @@ input_handler(void)
 
 		rb = get_free_recv_buffer();
 
-		fromlen = sizeof(struct sockaddr_storage);
+		fromlen = sizeof(rb->recv_srcadr);
 		rb->recv_length = recvfrom(fdc, (char *)&rb->recv_pkt,
 		   sizeof(rb->recv_pkt), 0,
 		   (struct sockaddr *)&rb->recv_srcadr, &fromlen);

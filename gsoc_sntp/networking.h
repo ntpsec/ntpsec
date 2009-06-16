@@ -54,24 +54,22 @@ int is_reachable (struct addrinfo *dst);
 
 int resolve_hosts (char **hosts, int hostc, struct addrinfo **res, int pref_family);
 
-void create_socket (SOCKET *rsock, struct sockaddr_storage *dest);
+void create_socket (SOCKET *rsock, sockaddr_u *dest);
 
-void close_socket (SOCKET rsock);
+void sendpkt (SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
 
-void sendpkt (SOCKET rsock, struct sockaddr_storage *dest, struct pkt *pkt, int len);
-
-int recvdata (SOCKET rsock, struct sockaddr_storage *sender, char *rdata, int rdata_len);
+int recvdata (SOCKET rsock, sockaddr_u *sender, char *rdata, int rdata_len);
 
 int recvpkt (SOCKET rsock, struct pkt *rpkt, struct pkt *spkt);
 
-int recv_bcst_data (SOCKET rsock, char *rdata, int rdata_len, struct sockaddr_storage *sas, struct sockaddr_storage *ras);
+int recv_bcst_data (SOCKET rsock, char *rdata, int rdata_len, sockaddr_u *sas, sockaddr_u *ras);
 
-int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, struct sockaddr_storage *sas);
+int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, sockaddr_u *sas);
 
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {
 	struct speer *next;
-	struct sockaddr_storage srcadr;
+	sockaddr_u srcadr;
 	u_char version;
 	u_char hmode;
 	u_char hpoll;

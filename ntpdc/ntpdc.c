@@ -84,7 +84,7 @@ static	void	docmd		(const char *);
 static	void	tokenize	(const char *, char **, int *);
 static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
 static	int	getarg		(char *, int, arg_v *);
-static	int	getnetnum	(const char *, struct sockaddr_storage *, char *, int);
+static	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 static	void	help		(struct parse *, FILE *);
 #ifdef QSORT_USES_VOID_P
 static	int	helpsort	(const void *, const void *);
@@ -302,18 +302,11 @@ ntpdcmain(
 	taskPrioritySet(taskIdSelf(), 100 );
 #endif
 
-#ifdef SYS_WINNT
-	if (!Win32InitSockets())
-	{
-		fprintf(stderr, "No useable winsock.dll:");
-		exit(1);
-	}
-#endif /* SYS_WINNT */
+	init_lib();	/* sets up ipv4_works, ipv6_works */
 
-	/* Check to see if we have IPv6. Otherwise force the -4 flag */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+	/* Check to see if we have IPv6. Otherwise default to IPv4 */
+	if (!ipv6_works)
 		ai_fam_default = AF_INET;
-	}
 
 	progname = argv[0];
 
@@ -544,7 +537,7 @@ openhost(
 	}
 
 	if (ai->ai_canonname == NULL) {
-		strncpy(temphost, stoa((struct sockaddr_storage *)ai->ai_addr),
+		strncpy(temphost, stoa((sockaddr_u *)ai->ai_addr),
 		    LENHOSTNAME);
 		temphost[LENHOSTNAME-1] = '\0';
 	} else {
@@ -1469,7 +1462,7 @@ getarg(
 static int
 getnetnum(
 	const char *hname,
-	struct sockaddr_storage *num,
+	sockaddr_u *num,
 	char *fullhost,
 	int af
 	)
@@ -1477,9 +1470,7 @@ getnetnum(
 	int sockaddr_len;
 	struct addrinfo hints, *ai = NULL;
 
-	sockaddr_len = (af == AF_INET)
-			   ? sizeof(struct sockaddr_in)
-			   : sizeof(struct sockaddr_in6);
+	sockaddr_len = SIZEOF_SOCKADDR(af);
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
@@ -1489,7 +1480,7 @@ getnetnum(
 	/* decodenetnum only works with addresses */
 	if (decodenetnum(hname, num)) {
 		if (fullhost != 0) {
-			getnameinfo((struct sockaddr *)num, sockaddr_len, 
+			getnameinfo(&num->sa, sockaddr_len, 
 				    fullhost, sizeof(fullhost), NULL, 0, 
 				    NI_NUMERICHOST); 
 		}
@@ -1512,13 +1503,13 @@ getnetnum(
  */
 char *
 nntohost(
-	struct sockaddr_storage *netnum
+	sockaddr_u *netnum
 	)
 {
 	if (!showhostnames)
-	    return stoa(netnum);
+		return stoa(netnum);
 
-	if ((netnum->ss_family == AF_INET) && ISREFCLOCKADR(netnum))
+	if (ISREFCLOCKADR(netnum))
 		return refnumtoa(netnum);
 	return socktohost(netnum);
 }

@@ -118,7 +118,7 @@ sntp_main (
 	int sync_data_suc = 0;
 	for(c=0; c<resc && !sync_data_suc; c++) {
 		getnameinfo(resh[c]->ai_addr, resh[c]->ai_addrlen, adr_buf, 
-				INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+				sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 		int kodc;
 		char *hostname = addrinfo_to_str(resh[c]);
@@ -187,12 +187,12 @@ on_wire (
 		/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
 		set_li_vn_mode(x_pkt, LEAP_NOTINSYNC, 4, 3);
 
-		create_socket(&sock, (struct sockaddr_storage *)host->ai_addr);
+		create_socket(&sock, (sockaddr_u *)host->ai_addr);
 
-		sendpkt(sock, (struct sockaddr_storage *)host->ai_addr, x_pkt, LEN_PKT_NOMAC);
+		sendpkt(sock, (sockaddr_u *)host->ai_addr, x_pkt, LEN_PKT_NOMAC);
 		rpktl = recvpkt(sock, r_pkt, x_pkt);
 
-		close_socket(sock);
+		closesocket(sock);
 
 		if(rpktl > 0)
 			sw_case = 1;
@@ -243,7 +243,7 @@ on_wire (
 
 			if(ENABLED_OPT(NORMALVERBOSE)) {
 				getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, 
-						INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+						sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, adr_buf);
 			}
@@ -307,7 +307,7 @@ on_wire (
 	}
 
 	char logmsg[32 + INET6_ADDRSTRLEN];
-	getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
+	getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 	snprintf(logmsg, 32 + INET6_ADDRSTRLEN, "Received no useable packet from %s!", adr_buf);
 

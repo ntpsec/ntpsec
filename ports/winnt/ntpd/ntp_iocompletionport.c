@@ -392,18 +392,6 @@ uninit_io_completion_port(
 }
 
 
-/*
- * libisc/interfaceiter.c calls InitSockets(), to minimize deltas
- * from the upstream source, we provide a no-op implementation.
- */
-void
-InitSockets(
-	void
-	)
-{
-}
-
-
 static int QueueSerialWait(struct refclockio *rio, recvbuf_t *buff, IoCompletionInfo *lpo, BOOL clear_timestamp)
 {
 	lpo->request_type = SERIAL_WAIT;
@@ -616,7 +604,7 @@ QueueSocketRecv(
 
 		if (SOCKET_ERROR == WSARecvFrom(buff->fd, &wsabuf, 1, 
 						NULL, &Flags, 
-						(struct sockaddr *)&buff->recv_srcadr, 
+						&buff->recv_srcadr.sa, 
 						&buff->recv_srcadr_len, 
 						(LPOVERLAPPED)lpo, NULL)) {
 			Result = GetLastError();
@@ -811,7 +799,8 @@ io_completion_port_sendto(
 	struct interface *inter,	
 	struct pkt *pkt,	
 	int len, 
-	struct sockaddr_storage *dest)
+	sockaddr_u* dest
+	)
 {
 	WSABUF wsabuf;
 	transmitbuf_t *buff;
@@ -846,7 +835,7 @@ io_completion_port_sendto(
 		Flags = 0;
 
 		Result = WSASendTo(inter->fd, &wsabuf, 1, NULL, Flags,
-				   (struct sockaddr *)dest, AddrLen, 
+				   &dest->sa, AddrLen, 
 				   (LPOVERLAPPED)lpo, NULL);
 
 		if(Result == SOCKET_ERROR)

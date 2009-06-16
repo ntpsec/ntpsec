@@ -86,17 +86,17 @@ MD5authdecrypt(
  * it and use the bottom 4 bytes.
  */
 u_int32
-addr2refid(struct sockaddr_storage *addr)
+addr2refid(sockaddr_u *addr)
 {
 	MD5_CTX md5;
 	u_char digest[16];
 	u_int32 addr_refid;
 
-	if (addr->ss_family == AF_INET)
-		return (GET_INADDR(*addr));
+	if (IS_IPV4(addr))
+		return (NSRCADR(addr));
 
 	MD5Init(&md5);
-	MD5Update(&md5, (u_char *)&GET_INADDR6(*addr),
+	MD5Update(&md5, (u_char *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
 	MD5Final(digest, &md5);
 	memcpy(&addr_refid, digest, 4);

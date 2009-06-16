@@ -77,3 +77,31 @@ int setpriority(
 
 	return 0; 
 }
+
+/*
+ * InitSockets -- once known as Win32InitSockets()
+ *
+ * This doesn't have much to do with setpriority but we
+ * want the routine in libntp and this is a convenient
+ * existing Windows-only libntp source file.
+ */
+void
+InitSockets(
+	void
+	)
+{
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	int err;
+
+	/* Need Winsock 2.0 or better */
+	wVersionRequested = MAKEWORD(2, 0);
+ 
+	err = WSAStartup(wVersionRequested, &wsaData);
+	if ( err != 0 ) {
+		fprintf(stderr, "No useable winsock.dll: %s\n", strerror(err));
+		SetLastError(err);
+		msyslog(LOG_ERR, "No usable winsock.dll: %m");
+		exit(1);
+	}
+}

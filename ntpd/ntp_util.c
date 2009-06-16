@@ -576,7 +576,7 @@ stats_config(
 */
 void
 record_peer_stats(
-	struct sockaddr_storage *addr,
+	sockaddr_u *addr,
 	int	status,
 	double	offset,		/* offset */
 	double	delay,		/* delay */
@@ -655,7 +655,7 @@ record_loop_stats(
  */
 void
 record_clock_stats(
-	struct sockaddr_storage *addr,
+	sockaddr_u *addr,
 	const char *text	/* timecode string */
 	)
 {
@@ -689,8 +689,8 @@ record_clock_stats(
  */
 void
 record_raw_stats(
-        struct sockaddr_storage *srcadr,
-        struct sockaddr_storage *dstadr,
+	sockaddr_u *srcadr,
+	sockaddr_u *dstadr,
 	l_fp	*t1,		/* originate timestamp */
 	l_fp	*t2,		/* receive timestamp */
 	l_fp	*t3,		/* transmit timestamp */
@@ -805,7 +805,7 @@ record_proto_stats(
  */
 void
 record_crypto_stats(
-	struct sockaddr_storage *addr,
+	sockaddr_u *addr,
 	const char *text	/* text message */
 	)
 {
@@ -1037,11 +1037,11 @@ rereadkeys(void)
 
 
 /*
- * sock_hash - hash an sockaddr_storage structure
+ * sock_hash - hash a sockaddr_u structure
  */
 int
 sock_hash(
-	struct sockaddr_storage *addr
+	sockaddr_u *addr
 	)
 {
 	int hashVal;
@@ -1056,21 +1056,21 @@ sock_hash(
 	 * fields in sockaddr_in6 that might be filled in by recvfrom(),
 	 * so just use the family, port and address.
 	 */
-	ch = (char *)&addr->ss_family;
+	ch = (char *)&AF(addr);
 	hashVal = 37 * hashVal + (int)*ch;
-	if (sizeof(addr->ss_family) > 1) {
+	if (sizeof(AF(addr)) > 1) {
 		ch++;
 		hashVal = 37 * hashVal + (int)*ch;
 	}
-	switch(addr->ss_family) {
+	switch(AF(addr)) {
 	case AF_INET:
-		ch = (char *)&((struct sockaddr_in *)addr)->sin_addr;
-		len = sizeof(struct in_addr);
+		ch = (char *)&SOCK_ADDR4(addr);
+		len = sizeof(SOCK_ADDR4(addr));
 		break;
 
 	case AF_INET6:
-		ch = (char *)&((struct sockaddr_in6 *)addr)->sin6_addr;
-		len = sizeof(struct in6_addr);
+		ch = (char *)&SOCK_ADDR6(addr);
+		len = sizeof(SOCK_ADDR6(addr));
 		break;
 	}
 

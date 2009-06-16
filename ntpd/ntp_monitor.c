@@ -212,7 +212,7 @@ ntp_monitor(
 {
 	register struct pkt *pkt;
 	register struct mon_data *md;
-        struct sockaddr_storage addr;
+        sockaddr_u addr;
 	register int hash;
 	register int mode;
 	int	interval;
@@ -234,7 +234,7 @@ ntp_monitor(
 		/*
 		 * Match address only to conserve MRU size.
 		 */
-		if (SOCKCMP(&md->rmtadr, &addr)) {
+		if (SOCK_EQ(&md->rmtadr, &addr)) {
 			interval = current_time - md->lasttime;
 			md->lasttime = current_time;
 			md->count++;

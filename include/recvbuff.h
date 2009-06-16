@@ -53,7 +53,7 @@ typedef struct recvbuf recvbuf_t;
 struct recvbuf {
 	ISC_LINK(recvbuf_t)	link;
 	union {
-		struct sockaddr_storage X_recv_srcadr;
+		sockaddr_u X_recv_srcadr;
 		caddr_t X_recv_srcclock;
 		struct peer *X_recv_peer;
 	} X_from_where;
@@ -61,7 +61,7 @@ struct recvbuf {
 #define	recv_srcclock	X_from_where.X_recv_srcclock
 #define recv_peer	X_from_where.X_recv_peer
 #ifndef HAVE_IO_COMPLETION_PORT
-	struct sockaddr_storage srcadr;	/* where packet came from */
+	sockaddr_u srcadr;		/* where packet came from */
 #else
 	int recv_srcadr_len;		/* filled in on completion */
 #endif

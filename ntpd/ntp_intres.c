@@ -50,9 +50,9 @@
  */
 struct conf_entry {
 	struct conf_entry *ce_next;
-	char *ce_name;			/* name we are trying to resolve */
-	struct conf_peer ce_config;	/* configuration info for peer */
-	struct sockaddr_storage peer_store; /* address info for both fams */
+	char *ce_name;			/* name to resolve */
+	struct conf_peer ce_config;	/* config info for peer */
+	sockaddr_u peer_store;		/* address info for both fams */
 };
 #define	ce_peeraddr	ce_config.peeraddr
 #define	ce_peeraddr6	ce_config.peeraddr6
@@ -95,7 +95,6 @@ static	int resolve_value;	/* next value of resolve timer */
 /*
  * Big hack attack
  */
-#define	LOCALHOST	0x7f000001	/* 127.0.0.1, in hex, of course */
 #define	SKEWTIME	0x08000000	/* 0.03125 seconds as a l_fp fraction */
 
 /*
@@ -415,28 +414,22 @@ addentry(
 	char *keystr
 	)
 {
-	register char *cp;
 	register struct conf_entry *ce;
-	unsigned int len;
 
 #ifdef DEBUG
 	if (debug > 1)
 		msyslog(LOG_INFO, 
-		    "intres: <%s> %d %d %d %d %x %d %x %s\n", name,
-		    mode, version, minpoll, maxpoll, flags, ttl, keyid,
+		    "intres: <%s> %d %d %d %d %x %d %x %s", name, mode,
+		    version, minpoll, maxpoll, flags, ttl, keyid,
 		    keystr);
 #endif
-	len = strlen(name) + 1;
-	cp = (char *)emalloc(len);
-	memmove(cp, name, len);
-
-	ce = (struct conf_entry *)emalloc(sizeof(struct conf_entry));
-	ce->ce_name = cp;
+	ce = emalloc(sizeof(*ce));
+	ce->ce_name = estrdup(name);
 	ce->ce_peeraddr = 0;
 #ifdef ISC_PLATFORM_HAVEIPV6
 	ce->ce_peeraddr6 = in6addr_any;
 #endif
-	ANYSOCK(&ce->peer_store);
+	ZERO_SOCK(&ce->peer_store);
 	ce->ce_hmode = (u_char)mode;
 	ce->ce_version = (u_char)version;
 	ce->ce_minpoll = (u_char)minpoll;
@@ -444,7 +437,7 @@ addentry(
 	ce->ce_flags = (u_char)flags;
 	ce->ce_ttl = (u_char)ttl;
 	ce->ce_keyid = keyid;
-	strncpy((char *)ce->ce_keystr, keystr, MAXFILENAME);
+	strncpy(ce->ce_keystr, keystr, sizeof(ce->ce_keystr));
 	ce->ce_next = NULL;
 
 	if (confentries == NULL) {
@@ -481,13 +474,13 @@ findhostaddr(
 
 	checkparent();		/* make sure our guy is still running */
 
-	if (entry->ce_name != NULL && !SOCKNUL(&entry->peer_store)) {
+	if (entry->ce_name != NULL && !SOCK_UNSPEC(&entry->peer_store)) {
 		/* HMS: Squawk? */
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are defined...");
 		return 1;
 	}
 
-	if (entry->ce_name == NULL && SOCKNUL(&entry->peer_store)) {
+	if (entry->ce_name == NULL && SOCK_UNSPEC(&entry->peer_store)) {
 		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
 		return 0;
 	}
@@ -499,21 +492,21 @@ findhostaddr(
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		/*
-		 * If the IPv6 stack is not available look only for IPv4 addresses
+		 * If IPv6 is not available look only for v4 addresses
 		 */
-		if (isc_net_probeipv6() != ISC_R_SUCCESS)
+		if (!ipv6_works)
 			hints.ai_family = AF_INET;
 
 		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
 		if (error == 0) {
-			entry->peer_store = *((struct sockaddr_storage*)(addr->ai_addr));
-			if (entry->peer_store.ss_family == AF_INET) {
+			entry->peer_store = *((sockaddr_u *)(addr->ai_addr));
+			if (IS_IPV4(&entry->peer_store)) {
 				entry->ce_peeraddr =
-				    GET_INADDR(entry->peer_store);
+				    NSRCADR(&entry->peer_store);
 				entry->ce_config.v6_flag = 0;
 			} else {
 				entry->ce_peeraddr6 =
-				    GET_INADDR6(entry->peer_store);
+				    SOCK_ADDR6(&entry->peer_store);
 				entry->ce_config.v6_flag = 1;
 			}
 		}
@@ -1155,7 +1148,7 @@ doconfigure(
 			    "doconfigure: <%s> has peeraddr %s",
 			    ce->ce_name, stoa(&ce->peer_store));
 #endif
-		if (dores && SOCKNUL(&(ce->peer_store))) {
+		if (dores && SOCK_UNSPEC(&ce->peer_store)) {
 			if (!findhostaddr(ce)) {
 #ifndef IGNORE_DNS_ERRORS
 				msyslog(LOG_ERR,
@@ -1169,7 +1162,7 @@ doconfigure(
 			}
 		}
 
-		if (!SOCKNUL(&ce->peer_store)) {
+		if (!SOCK_UNSPEC(&ce->peer_store)) {
 			if (request(&ce->ce_config)) {
 				ceremove = ce;
 				ce = ceremove->ce_next;

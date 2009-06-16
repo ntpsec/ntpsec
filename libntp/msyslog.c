@@ -114,18 +114,6 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 	*n = '\0';
 }
 
-/*
- * The externally called functions are defined here
- * but share the internal function above to fetch
- * any error message strings, This is done so that we can
- * have two different functions to perform the logging
- * since Windows gets it's error information from different
- * places depending on whether or not it's network I/O.
- * msyslog() is for general use while netsyslog() is for
- * network I/O functions. They are virtually identical
- * in implementation.
- */
-
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 void msyslog(int level, const char *fmt, ...)
 #else /* defined(__STDC__) || defined(HAVE_STDARG_H) */
@@ -153,45 +141,6 @@ void msyslog(int level, const char *fmt, ...)
 	if (NO_ERROR == errval)
 		errval = errno;
 #endif /* SYS_WINNT */
-
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-	va_start(ap, fmt);
-#else
-	va_start(ap);
-
-	level = va_arg(ap, int);
-	fmt = va_arg(ap, char *);
-#endif
-	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-
-	vsnprintf(buf, sizeof(buf), nfmt, ap);
-	addto_syslog(level, buf);
-	va_end(ap);
-}
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-void netsyslog(int level, const char *fmt, ...)
-#else /* defined(__STDC__) || defined(HAVE_STDARG_H) */
-     /*VARARGS*/
-     void netsyslog(va_alist)
-     va_dcl
-#endif /* defined(__STDC__) || defined(HAVE_STDARG_H) */
-{
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-#else
-	int level;
-	const char *fmt;
-#endif
-	va_list ap;
-	char buf[1025], nfmt[256];
-
-	/*
-	 * Save the error value as soon as possible
-	 */
-#ifdef SYS_WINNT
-	int errval = WSAGetLastError();
-#else
-	int errval = errno;
-#endif
 
 #if defined(__STDC__) || defined(HAVE_STDARG_H)
 	va_start(ap, fmt);
