@@ -25,6 +25,4 @@
 
 extern char lib_stringbuf[LIB_NUMBUFS][LIB_BUFLENGTH];
 extern int lib_nextbuf;
-extern int ipv4_works;
-extern int ipv6_works;
 extern int lib_inited;

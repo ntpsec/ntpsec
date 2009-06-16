@@ -21,12 +21,6 @@
 #ifdef HAVE_SYS_UIO_H
 # include <sys/uio.h>
 #endif
-#ifdef HAS_ROUTING_SOCKET
-# include <net/route.h>
-# ifdef HAVE_RTNETLINK
-#  include <linux/rtnetlink.h>
-# endif
-#endif
 
 #include "ntp_machine.h"
 #include "ntpd.h"
@@ -49,6 +43,13 @@
 
 #ifdef SIM
 #include "ntpsim.h"
+#endif
+
+#ifdef HAS_ROUTING_SOCKET
+# include <net/route.h>
+# ifdef HAVE_RTNETLINK
+#  include <linux/rtnetlink.h>
+# endif
 #endif
 
 
@@ -517,15 +518,6 @@ init_io(void)
 {
 #ifdef SYS_WINNT
 	init_io_completion_port();
-
-	if (!Win32InitSockets())
-	{
-		msyslog(LOG_ERR, "No useable winsock.dll: %m");
-		exit(1);
-	}
-# if 0				/* transmitbuff code unused */
-	init_transmitbuff();
-# endif
 #endif /* SYS_WINNT */
 
 	/*
@@ -1013,9 +1005,9 @@ create_wildcards(
 		interface = new_interface(NULL);
 
 		strncpy(interface->name, "wildcard", COUNTOF(interface->name));
-		interface->family =
-			AF(&interface->sin) = 
-			AF(&interface->mask) = AF_INET;
+		interface->family = AF_INET;
+		AF(&interface->sin) = AF_INET;
+		AF(&interface->mask) = AF_INET;
 		SET_ADDR4(&interface->sin, INADDR_ANY);
 		SET_PORT(&interface->sin, port);
 		SET_ONESMASK(&interface->mask);
@@ -1057,9 +1049,9 @@ create_wildcards(
 		interface = new_interface(NULL);
 
 		strncpy(interface->name, "wildcard", COUNTOF(interface->name));
-		interface->family =
-			AF(&interface->sin) = 
-			AF(&interface->mask) = AF_INET6;
+		interface->family = AF_INET6;
+		AF(&interface->sin) = AF_INET6;
+		AF(&interface->mask) = AF_INET6;
 		SET_ADDR6N(&interface->sin, in6addr_any);
 		SET_PORT(&interface->sin, port);
 		SET_SCOPE(&interface->sin, 0);
@@ -1159,24 +1151,22 @@ convert_isc_if(
 	)
 {
 	strncpy(itf->name, isc_if->name, sizeof(itf->name));
-	itf->ifindex = isc_if->ifindex;
-	itf->family = 
-		AF(&itf->sin) = 
-		AF(&itf->mask) =
-		AF(&itf->bcast) = (u_short)isc_if->af;
+	itf->family = (u_short)isc_if->af;
+	AF(&itf->sin) = itf->family;
+	AF(&itf->mask) = itf->family;
+	AF(&itf->bcast) = itf->family;
 	SET_PORT(&itf->sin, port);
 	SET_PORT(&itf->mask, port);
 	SET_PORT(&itf->bcast, port);
-	itf->scopeid = 0;
 
 	if (IS_IPV4(&itf->sin)) {
 		NSRCADR(&itf->sin) = isc_if->address.type.in.s_addr;
 		NSRCADR(&itf->mask) = isc_if->netmask.type.in.s_addr;
 
-		if((isc_if->flags & INTERFACE_F_BROADCAST) != 0) {
+		if (isc_if->flags & INTERFACE_F_BROADCAST) {
 			itf->flags |= INT_BROADCAST;
 			NSRCADR(&itf->bcast) = 
-				isc_if->broadcast.type.in.s_addr;
+			    isc_if->broadcast.type.in.s_addr;
 		}
 	}
 #ifdef INCLUDE_IPV6_SUPPORT
@@ -1184,24 +1174,23 @@ convert_isc_if(
 		SET_ADDR6N(&itf->sin, isc_if->address.type.in6);
 		SET_ADDR6N(&itf->mask, isc_if->netmask.type.in6);
 
-		SET_SCOPE(&itf->sin,
-			  isc_netaddr_getzone(&isc_if->address));
-		itf->scopeid = SCOPE(&itf->sin);
+		itf->scopeid = isc_netaddr_getzone(&isc_if->address);
+		SET_SCOPE(&itf->sin, itf->scopeid);
 	}
 #endif /* INCLUDE_IPV6_SUPPORT */
 
 
 	/* Process the rest of the flags */
 
-	itf->flags =
-		  (INTERFACE_F_UP & isc_if->flags)
-			 ? INT_UP : 0
-		| (INTERFACE_F_LOOPBACK & isc_if->flags) 
-			 ? INT_LOOPBACK : 0
-		| (INTERFACE_F_POINTTOPOINT & isc_if->flags) 
-			 ? INT_PPP : 0
-		| (INTERFACE_F_MULTICAST & isc_if->flags) 
-			 ? INT_MULTICAST : 0
+	itf->flags |=
+		  ((INTERFACE_F_UP & isc_if->flags)
+			 ? INT_UP : 0)
+		| ((INTERFACE_F_LOOPBACK & isc_if->flags) 
+			 ? INT_LOOPBACK : 0)
+		| ((INTERFACE_F_POINTTOPOINT & isc_if->flags) 
+			 ? INT_PPP : 0)
+		| ((INTERFACE_F_MULTICAST & isc_if->flags) 
+			 ? INT_MULTICAST : 0)
 		;
 }
 
@@ -2496,7 +2485,6 @@ open_socket(
 	int	on = 1;
 	int	off = 0;
 
-
 	if (IS_IPV6(addr) && !ipv6_works)
 		return INVALID_SOCKET;
 
@@ -2586,17 +2574,18 @@ open_socket(
 	 */
 	if (IS_IPV6(addr)) {
 #if defined(IPV6_V6ONLY)
-		if (setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, 
-			       (char*)&on, sizeof(on)))
-			msyslog(LOG_ERR, 
-				"setsockopt IPV6_V6ONLY on fails for address %s: %m",
+		if (isc_net_probe_ipv6only() == ISC_R_SUCCESS
+		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
+		    (char*)&on, sizeof(on)))
+			msyslog(LOG_ERR,
+				"setsockopt IPV6_V6ONLY on fails on address %s: %m",
 				stoa(addr));
 #endif /* IPV6_V6ONLY */
 #if defined(IPV6_BINDV6ONLY)
 		if (setsockopt(fd, IPPROTO_IPV6, IPV6_BINDV6ONLY,
-			       (char*)&on, sizeof(on)))
+		    (char*)&on, sizeof(on)))
 			msyslog(LOG_ERR,
-				"setsockopt IPV6_BINDV6ONLY on fails for address %s: %m",
+				"setsockopt IPV6_BINDV6ONLY on fails on address %s: %m",
 				stoa(addr));
 #endif /* IPV6_BINDV6ONLY */
 	}
@@ -2996,16 +2985,16 @@ read_network_packet(
 		return (buflen);
 	}
 
-	fromlen = sizeof(&rb->recv_srcadr.sas);
+	fromlen = sizeof(rb->recv_srcadr);
 
 #ifndef HAVE_TIMESTAMP
 	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcadr.sa, &fromlen);
 #else
-	iovec.iov_base        = (void *)&rb->recv_space;
+	iovec.iov_base        = &rb->recv_space;
 	iovec.iov_len         = sizeof(rb->recv_space);
-	msghdr.msg_name       = &rb->recv_srcadr.sas;
+	msghdr.msg_name       = &rb->recv_srcadr;
 	msghdr.msg_namelen    = fromlen;
 	msghdr.msg_iov        = &iovec;
 	msghdr.msg_iovlen     = 1;

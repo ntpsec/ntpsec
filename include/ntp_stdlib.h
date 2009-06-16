@@ -29,8 +29,6 @@
 # include <stdarg.h>
 extern	void	msyslog		(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
-extern	void	netsyslog	(int, const char *, ...)
-				__attribute__((__format__(__printf__, 2, 3)));
 
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);

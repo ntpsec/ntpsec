@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004, 2005, 2007-2009  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1999-2003  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,7 +15,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: net.h,v 1.15.12.10 2004/04/29 01:31:23 marka Exp $ */
+/* $Id: net.h,v 1.30.82.2 2009/02/16 23:47:15 tbox Exp $ */
 
 #ifndef ISC_NET_H
 #define ISC_NET_H 1
@@ -72,7 +72,7 @@
  *
  * Standards:
  *	BSD Socket API
- *	RFC 2553
+ *	RFC2553
  */
 
 /***
@@ -104,23 +104,21 @@
  * This is here because named client, interfacemgr.c, etc. use the name as
  * a variable
  */
-#undef interface 
+#undef interface
 
 #ifndef INADDR_LOOPBACK
 #define INADDR_LOOPBACK 0x7f000001UL
 #endif
 
-#ifdef ISC_PLATFORM_HAVEIPV6
 #ifndef ISC_PLATFORM_HAVEIN6PKTINFO
 struct in6_pktinfo {
 	struct in6_addr ipi6_addr;    /* src/dst IPv6 address */
 	unsigned int    ipi6_ifindex; /* send/recv interface index */
 };
 #endif
-#endif
 
 #if _MSC_VER < 1300
-#define in6addr_any isc_net_in6addrany
+#define in6addr_any isc_in6addr_any
 #define in6addr_loopback isc_in6addr_loopback
 #endif
 
@@ -157,15 +155,15 @@ typedef isc_uint16_t in_port_t;
 #define FD_CLR(fd, set) do { \
     u_int __i; \
     for (__i = 0; __i < ((fd_set FAR *)(set))->fd_count; __i++) { \
-        if (((fd_set FAR *)(set))->fd_array[__i] == (SOCKET) fd) { \
-            while (__i < ((fd_set FAR *)(set))->fd_count-1) { \
-                ((fd_set FAR *)(set))->fd_array[__i] = \
-                    ((fd_set FAR *)(set))->fd_array[__i+1]; \
-                __i++; \
-            } \
-            ((fd_set FAR *)(set))->fd_count--; \
-            break; \
-        } \
+	if (((fd_set FAR *)(set))->fd_array[__i] == (SOCKET) fd) { \
+	    while (__i < ((fd_set FAR *)(set))->fd_count-1) { \
+		((fd_set FAR *)(set))->fd_array[__i] = \
+		    ((fd_set FAR *)(set))->fd_array[__i+1]; \
+		__i++; \
+	    } \
+	    ((fd_set FAR *)(set))->fd_count--; \
+	    break; \
+	} \
     } \
 } while (0)
 
@@ -173,15 +171,15 @@ typedef isc_uint16_t in_port_t;
 #define FD_SET(fd, set) do { \
     u_int __i; \
     for (__i = 0; __i < ((fd_set FAR *)(set))->fd_count; __i++) { \
-        if (((fd_set FAR *)(set))->fd_array[__i] == (SOCKET)(fd)) { \
-            break; \
-        } \
+	if (((fd_set FAR *)(set))->fd_array[__i] == (SOCKET)(fd)) { \
+	    break; \
+	} \
     } \
     if (__i == ((fd_set FAR *)(set))->fd_count) { \
-        if (((fd_set FAR *)(set))->fd_count < FD_SETSIZE) { \
-            ((fd_set FAR *)(set))->fd_array[__i] = (SOCKET)(fd); \
-            ((fd_set FAR *)(set))->fd_count++; \
-        } \
+	if (((fd_set FAR *)(set))->fd_count < FD_SETSIZE) { \
+	    ((fd_set FAR *)(set))->fd_array[__i] = (SOCKET)(fd); \
+	    ((fd_set FAR *)(set))->fd_count++; \
+	} \
     } \
 } while (0)
 
@@ -261,6 +259,17 @@ isc_net_probeipv6(void);
  */
 
 isc_result_t
+isc_net_probeunix(void);
+/*
+ * Check if UNIX domain sockets are supported.
+ *
+ * Returns:
+ *
+ *	ISC_R_SUCCESS
+ *	ISC_R_NOTFOUND
+ */
+
+isc_result_t
 isc_net_probe_ipv6only(void);
 /*
  * Check if the system's kernel supports the IPV6_V6ONLY socket option.
@@ -297,6 +306,23 @@ isc_net_enableipv4(void);
 void
 isc_net_enableipv6(void);
 
+isc_result_t
+isc_net_getudpportrange(int af, in_port_t *low, in_port_t *high);
+/*%<
+ * Returns system's default range of ephemeral UDP ports, if defined.
+ * If the range is not available or unknown, ISC_NET_PORTRANGELOW and
+ * ISC_NET_PORTRANGEHIGH will be returned.
+ *
+ * Requires:
+ *
+ *\li	'low' and 'high' must be non NULL.
+ *
+ * Returns:
+ *
+ *\li	*low and *high will be the ports specifying the low and high ends of
+ *	the range.
+ */
+
 #ifdef ISC_PLATFORM_NEEDNTOP
 const char *
 isc_net_ntop(int af, const void *src, char *dst, size_t size);
@@ -309,16 +335,9 @@ isc_net_pton(int af, const char *src, void *dst);
 #define inet_pton isc_net_pton
 #endif
 
-#ifdef ISC_PLATFORM_NEEDATON
 int
 isc_net_aton(const char *cp, struct in_addr *addr);
 #define inet_aton isc_net_aton
-#endif
-
-/* Socket Initialization Code */
-
-BOOL
-Win32InitSockets();
 
 ISC_LANG_ENDDECLS
 

@@ -333,18 +333,6 @@ uninit_io_completion_port(
 }
 
 
-/*
- * libisc/interfaceiter.c calls InitSockets(), to minimize deltas
- * from the upstream source, we provide a no-op implementation.
- */
-void
-InitSockets(
-	void
-	)
-{
-}
-
-
 static int QueueSerialWait(struct refclockio *rio, recvbuf_t *buff, IoCompletionInfo *lpo, BOOL clear_timestamp)
 {
 	lpo->request_type = SERIAL_WAIT;
@@ -803,7 +791,7 @@ io_completion_port_sendto(
 			 * Something bad happened
 			 */
 			default :
-				netsyslog(LOG_ERR, "WSASendTo - error sending message: %m");
+				msyslog(LOG_ERR, "WSASendTo - error sending message: %m");
 				free_trans_buf(buff);
 				FreeHeap(lpo, "io_completion_port_sendto");
 				break;

@@ -65,24 +65,24 @@
 /*
  * Compatability shims with the rfc2553 API to simplify ntp.
  */
-#ifndef _NTP_RFC2553_H_
-#define _NTP_RFC2553_H_
+#ifndef NTP_RFC2553_H
+#define NTP_RFC2553_H
 
 /*
  * Ensure that we include the configuration file before we check
  * for IPV6
  */
 #include <config.h>
-
 #include <netdb.h>
-
-#include "ntp_types.h"
-
 /*
  * Don't include any additional IPv6 definitions
  * We are defining our own here.
  */
 #define ISC_IPV6_H 1
+#include <isc/net.h>
+
+#include "ntp_types.h"
+
 
  /*
  * If various macros are not defined we need to define them
@@ -293,4 +293,4 @@ char	*gai_strerror (int);
 
 #endif /* ISC_PLATFORM_HAVEIPV6 */
 
-#endif /* !_NTP_RFC2553_H_ */
+#endif /* !NTP_RFC2553_H */

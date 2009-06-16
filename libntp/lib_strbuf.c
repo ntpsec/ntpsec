@@ -6,6 +6,7 @@
 #endif
 
 #include <isc/net.h>
+#include <isc/result.h>
 #include "ntp_stdlib.h"
 #include "lib_strbuf.h"
 
@@ -25,7 +26,7 @@ void
 init_lib(void)
 {
 	lib_nextbuf = 0;
-	ipv4_works = isc_net_probeipv4();
-	ipv6_works = isc_net_probeipv6();
+	ipv4_works = (ISC_R_SUCCESS == isc_net_probeipv4());
+	ipv6_works = (ISC_R_SUCCESS == isc_net_probeipv6());
 	lib_inited = 1;
 }

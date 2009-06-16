@@ -32,23 +32,26 @@ socktoa(
 
 	LIB_GETBUF(buffer);
 
-	if (sock == NULL)
+	if (NULL == sock)
 		strncpy(buffer, "(null)", LIB_BUFLENGTH);
 	else {
 		switch(AF(sock)) {
 
-		case AF_INET :
+		case AF_INET:
+		case AF_UNSPEC:
 			inet_ntop(AF_INET, PSOCK_ADDR4(sock), buffer,
-			    LIB_BUFLENGTH);
+				  LIB_BUFLENGTH);
 			break;
 
-		case AF_INET6 :
+		case AF_INET6:
 			inet_ntop(AF_INET6, PSOCK_ADDR6(sock), buffer,
-			    LIB_BUFLENGTH);
+				  LIB_BUFLENGTH);
+			break;
 
 		default:
-			strncpy(buffer, "(socktoa unknown family)",
-				LIB_BUFLENGTH);
+			snprintf(buffer, LIB_BUFLENGTH, 
+				 "(socktoa unknown family %d)", 
+				 AF(sock));
 		}
 	}
 	return buffer;

@@ -95,7 +95,6 @@ static	int resolve_value;	/* next value of resolve timer */
 /*
  * Big hack attack
  */
-#define	LOCALHOST	0x7f000001	/* 127.0.0.1, in hex, of course */
 #define	SKEWTIME	0x08000000	/* 0.03125 seconds as a l_fp fraction */
 
 /*
@@ -415,23 +414,17 @@ addentry(
 	char *keystr
 	)
 {
-	register char *cp;
 	register struct conf_entry *ce;
-	unsigned int len;
 
 #ifdef DEBUG
 	if (debug > 1)
 		msyslog(LOG_INFO, 
-		    "intres: <%s> %d %d %d %d %x %d %x %s\n", name,
-		    mode, version, minpoll, maxpoll, flags, ttl, keyid,
+		    "intres: <%s> %d %d %d %d %x %d %x %s", name, mode,
+		    version, minpoll, maxpoll, flags, ttl, keyid,
 		    keystr);
 #endif
-	len = strlen(name) + 1;
-	cp = (char *)emalloc(len);
-	memmove(cp, name, len);
-
-	ce = (struct conf_entry *)emalloc(sizeof(struct conf_entry));
-	ce->ce_name = cp;
+	ce = emalloc(sizeof(*ce));
+	ce->ce_name = estrdup(name);
 	ce->ce_peeraddr = 0;
 #ifdef ISC_PLATFORM_HAVEIPV6
 	ce->ce_peeraddr6 = in6addr_any;
@@ -444,7 +437,7 @@ addentry(
 	ce->ce_flags = (u_char)flags;
 	ce->ce_ttl = (u_char)ttl;
 	ce->ce_keyid = keyid;
-	strncpy((char *)ce->ce_keystr, keystr, MAXFILENAME);
+	strncpy(ce->ce_keystr, keystr, sizeof(ce->ce_keystr));
 	ce->ce_next = NULL;
 
 	if (confentries == NULL) {
@@ -499,9 +492,9 @@ findhostaddr(
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		/*
-		 * If the IPv6 stack is not available look only for IPv4 addresses
+		 * If IPv6 is not available look only for v4 addresses
 		 */
-		if (isc_net_probeipv6() != ISC_R_SUCCESS)
+		if (!ipv6_works)
 			hints.ai_family = AF_INET;
 
 		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);

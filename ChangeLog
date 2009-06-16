@@ -1,3 +1,4 @@
+* [Bug 1225] Broadcast address miscalculated on Windows 4.2.5p180
 * Use a union for structs sockaddr, sockaddr_storage, sockaddr_in, and
   sockaddr_in6 to remove casts and enable type checking.  Collapse
   some previously separate IPv4/IPv6 paths into a single codepath.

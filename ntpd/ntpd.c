@@ -488,7 +488,6 @@ ntpdmain(
 		argv += optct;
 	}
 
-	init_lib();			/* set ipv6_works flag early */
 	init_logging(progname, 1);	/* Open the log file */
 
 #ifdef HAVE_UMASK
@@ -831,6 +830,7 @@ ntpdmain(
 	init_restrict();
 	init_mon();
 	init_timer();
+	init_lib();
 	init_request();
 	init_control();
 	init_peer();
@@ -1062,10 +1062,10 @@ getgroup:
 				(void)input_handler(&ts);
 			}
 			else if (nfound == -1 && errno != EINTR)
-				netsyslog(LOG_ERR, "select() error: %m");
+				msyslog(LOG_ERR, "select() error: %m");
 #  ifdef DEBUG
 			else if (debug > 5)
-				netsyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
+				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
 #  endif /* DEBUG */
 # else /* HAVE_SIGNALED_IO */
 

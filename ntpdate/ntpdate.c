@@ -334,31 +334,21 @@ ntpdatemain (
 	ni_namelist *netinfoservers;
 #endif
 #ifdef SYS_WINNT
-	HANDLE process_handle;
-
-	wVersionRequested = MAKEWORD(1,1);
-	if (WSAStartup(wVersionRequested, &wsaData)) {
-		netsyslog(LOG_ERR, "No useable winsock.dll: %m");
-		exit(1);
-	}
-
 	key_file = key_file_storage;
 
 	if (!ExpandEnvironmentStrings(KEYFILE, key_file, MAX_PATH))
-	{
 		msyslog(LOG_ERR, "ExpandEnvironmentStrings(KEYFILE) failed: %m\n");
-	}
 #endif /* SYS_WINNT */
 
 #ifdef NO_MAIN_ALLOWED
 	clear_globals();
 #endif
 
+	init_lib();	/* sets up ipv4_works, ipv6_works */
 
-	/* Check to see if we have IPv6. Otherwise force the -4 flag */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+	/* Check to see if we have IPv6. Otherwise default to IPv4 */
+	if (!ipv6_works)
 		ai_fam_templ = AF_INET;
-	}
 
 	errflg = 0;
 	progname = argv[0];
@@ -595,7 +585,7 @@ ntpdatemain (
 #else
 				if (WSAGetLastError() != WSAEINTR)
 #endif
-					netsyslog(LOG_ERR,
+					msyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 						"poll() error: %m"
 #else
@@ -604,7 +594,7 @@ ntpdatemain (
 						);
 			} else if (errno != 0) {
 #ifndef SYS_VXWORKS
-				netsyslog(LOG_DEBUG,
+				msyslog(LOG_DEBUG,
 #ifdef HAVE_POLL_H
 					"poll(): nfound = %d, error: %m",
 #else
@@ -1707,7 +1697,7 @@ init_io(void)
 
 #ifdef SYS_WINNT
 	if (check_ntp_port_in_use && ntp_port_inuse(AF_INET, NTP_PORT)){
-		netsyslog(LOG_ERR, "the NTP socket is in use, exiting: %m");
+		msyslog(LOG_ERR, "the NTP socket is in use, exiting: %m");
 		exit(1);
 	}
 #endif
@@ -1731,13 +1721,13 @@ init_io(void)
 		    err == WSAEPFNOSUPPORT)
 #endif
 			continue;
-		netsyslog(LOG_ERR, "socket() failed: %m");
+		msyslog(LOG_ERR, "socket() failed: %m");
 		exit(1);
 		/*NOTREACHED*/
 		}
 		/* set socket to reuse address */
 		if (setsockopt(fd[nbsock], SOL_SOCKET, SO_REUSEADDR, (void*) &optval, sizeof(optval)) < 0) {
-				netsyslog(LOG_ERR, "setsockopt() SO_REUSEADDR failed: %m");
+				msyslog(LOG_ERR, "setsockopt() SO_REUSEADDR failed: %m");
 				exit(1);
 				/*NOTREACHED*/
 		}
@@ -1745,7 +1735,7 @@ init_io(void)
 		/* Restricts AF_INET6 socket to IPv6 communications (see RFC 2553bis-03) */
 		if (res->ai_family == AF_INET6)
 			if (setsockopt(fd[nbsock], IPPROTO_IPV6, IPV6_V6ONLY, (void*) &optval, sizeof(optval)) < 0) {
-				   netsyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
+				   msyslog(LOG_ERR, "setsockopt() IPV6_V6ONLY failed: %m");
 					exit(1);
 					/*NOTREACHED*/
 		}
@@ -1765,9 +1755,9 @@ init_io(void)
 #else
 				if (WSAGetLastError() == WSAEADDRINUSE)
 #endif /* SYS_WINNT */
-					netsyslog(LOG_ERR, "the NTP socket is in use, exiting");
+					msyslog(LOG_ERR, "the NTP socket is in use, exiting");
 				else
-					netsyslog(LOG_ERR, "bind() fails: %m");
+					msyslog(LOG_ERR, "bind() fails: %m");
 				exit(1);
 			}
 		}
@@ -1788,24 +1778,24 @@ init_io(void)
 #ifndef SYS_WINNT
 # ifdef SYS_VXWORKS
 		{
-		int on = TRUE;
+			int on = TRUE;
 
-		if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
-		  netsyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
-			exit(1);
-		}
+			if (ioctl(fd[nbsock],FIONBIO, &on) == ERROR) {
+				msyslog(LOG_ERR, "ioctl(FIONBIO) fails: %m");
+				exit(1);
+			}
 		}
 # else /* not SYS_VXWORKS */
 #  if defined(O_NONBLOCK)
 		if (fcntl(fd[nbsock], F_SETFL, O_NONBLOCK) < 0) {
-			netsyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
 			exit(1);
 			/*NOTREACHED*/
 		}
 #  else /* not O_NONBLOCK */
 #	if defined(FNDELAY)
 		if (fcntl(fd[nbsock], F_SETFL, FNDELAY) < 0) {
-			netsyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
+			msyslog(LOG_ERR, "fcntl(FNDELAY|FASYNC) fails: %m");
 			exit(1);
 			/*NOTREACHED*/
 		}
@@ -1816,7 +1806,7 @@ init_io(void)
 # endif /* SYS_VXWORKS */
 #else /* SYS_WINNT */
 		if (ioctlsocket(fd[nbsock], FIONBIO, (u_long *) &on) == SOCKET_ERROR) {
-			netsyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
+			msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
 			exit(1);
 		}
 #endif /* SYS_WINNT */
@@ -1851,8 +1841,8 @@ sendpkt(
 		}
 	}
 
-	if ( sock == INVALID_SOCKET ) {
-		netsyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
+	if (INVALID_SOCKET == sock) {
+		msyslog(LOG_ERR, "cannot find family compatible socket to send ntp packet");
 		exit(1);
 		/*NOTREACHED*/
 	}
@@ -1860,14 +1850,14 @@ sendpkt(
 	cc = sendto(sock, (char *)pkt, len, 0, (struct sockaddr *)dest,
 			SOCKLEN(dest));
 
-	if (cc == SOCKET_ERROR) {
+	if (SOCKET_ERROR == cc) {
 #ifndef SYS_WINNT
 		if (errno != EWOULDBLOCK && errno != ENOBUFS)
 #else
 		err = WSAGetLastError();
 		if (err != WSAEWOULDBLOCK && err != WSAENOBUFS)
 #endif /* SYS_WINNT */
-			netsyslog(LOG_ERR, "sendto(%s): %m", stohost(dest));
+			msyslog(LOG_ERR, "sendto(%s): %m", stohost(dest));
 	}
 }
 
@@ -1937,7 +1927,7 @@ input_handler(void)
 			return;
 		else if (n == -1) {
 			if (errno != EINTR)
-				netsyslog(LOG_ERR,
+				msyslog(LOG_ERR,
 #ifdef HAVE_POLL_H
 					"poll() error: %m"
 #else

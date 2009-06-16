@@ -302,18 +302,11 @@ ntpdcmain(
 	taskPrioritySet(taskIdSelf(), 100 );
 #endif
 
-#ifdef SYS_WINNT
-	if (!Win32InitSockets())
-	{
-		fprintf(stderr, "No useable winsock.dll:");
-		exit(1);
-	}
-#endif /* SYS_WINNT */
+	init_lib();	/* sets up ipv4_works, ipv6_works */
 
-	/* Check to see if we have IPv6. Otherwise force the -4 flag */
-	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
+	/* Check to see if we have IPv6. Otherwise default to IPv4 */
+	if (!ipv6_works)
 		ai_fam_default = AF_INET;
-	}
 
 	progname = argv[0];
 

@@ -209,8 +209,9 @@ struct interface {
 #define INT_MULTICAST	0x010	/* can multicast out this interface */
 #define	INT_BCASTOPEN	0x020	/* broadcast socket is open */
 #define INT_MCASTOPEN	0x040	/* multicasting enabled */
-#define INT_WILDCARD    0x080   /* wildcard interface - usually skipped */
-#define INT_MCASTIF     0x100	/* bound directly to MCAST address */
+#define INT_WILDCARD	0x080   /* wildcard interface - usually skipped */
+#define INT_MCASTIF	0x100	/* bound directly to MCAST address */
+
 /*
  * Define flasher bits (tests 1 through 11 in packet procedure)
  * These reveal the state at the last grumble from the peer and are

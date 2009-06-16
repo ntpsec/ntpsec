@@ -192,7 +192,7 @@ on_wire (
 		sendpkt(sock, (sockaddr_u *)host->ai_addr, x_pkt, LEN_PKT_NOMAC);
 		rpktl = recvpkt(sock, r_pkt, x_pkt);
 
-		close_socket(sock);
+		closesocket(sock);
 
 		if(rpktl > 0)
 			sw_case = 1;
