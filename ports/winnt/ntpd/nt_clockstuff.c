@@ -20,7 +20,14 @@
 
 #ifdef HAVE_PPSAPI
 #include <timepps.h>
-#endif
+/*
+ * ports/winnt/include/timepps.h defines EOPNOTSUPP for compatibility
+ * with PPSAPI on other platforms.  ports/winnt/include/isc/net.h has
+ * #define EOPNOTSUPP WSAEOPNOTSUPP, so to avoid a macro redefinition
+ * warning undefine it.
+ */
+#undef EOPNOTSUPP
+#endif	/* HAVE_PPSAPI */
 
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"

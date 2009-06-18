@@ -1707,14 +1707,34 @@ set_excladdruse(
 {
 	int one = 1;
 	int failed;
+#ifdef SYS_WINNT
+	DWORD err;
+#endif
 
 	failed = setsockopt(fd, SOL_SOCKET, SO_EXCLUSIVEADDRUSE,
 			    (char *)&one, sizeof(one));
 
-	if (failed)
-		msyslog(LOG_ERR, 
-			"setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m",
-			(int)fd);
+	if (!failed)
+		return;
+
+#ifdef SYS_WINNT
+	/*
+	 * Prior to Windows XP setting SO_EXCLUSIVEADDRUSE can fail with
+	 * error WSAINVAL depending on service pack level and whether
+	 * the user account is in the Administrators group.  Do not 
+	 * complain if it fails that way on versions prior to XP (5.1).
+	 */
+	err = GetLastError();
+
+	if (isc_win32os_versioncheck(5, 1, 0, 0) < 0	/* < 5.1/XP */
+	    && WSAEINVAL == err)
+		return;
+
+	SetLastError(err);
+#endif
+	msyslog(LOG_ERR, 
+		"setsockopt(%d, SO_EXCLUSIVEADDRUSE, on): %m",
+		(int)fd);
 }
 #endif  /* SO_EXCLUSIVEADDRUSE */
 
