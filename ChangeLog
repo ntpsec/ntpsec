@@ -1,3 +1,4 @@
+* [Bug 1229] autokey segfaults in cert_install().
 (4.2.5p181) 2009/06/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1206] Required compiler changes for Windows
 * [Bug 1084] PPSAPI for ntpd on Windows with DLL backends

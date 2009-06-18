@@ -3060,7 +3060,7 @@ cert_install(
 	struct peer *peer	/* peer structure */
 	)
 {
-	struct cert_info *cp, *xp, *yp, **zp;
+	struct cert_info *cp, *xp, **zp;
 
 	/*
 	 * Parse and validate the signed certificate. If valid,
@@ -3092,15 +3092,14 @@ cert_install(
 			    ntohl(xp->cert.fstamp)) {
 				cert_free(cp);
 				cp = xp;
-				break;
+			} else {
+				*zp = xp->link;
+				cert_free(xp);
+				xp = NULL;
 			}
-			yp = xp;
-			xp = xp->link;
-			*zp = xp;
-			cert_free(yp);
-		} else {
-			zp = &xp->link;
+			break;
 		}
+		zp = &xp->link;
 	}
 	if (xp == NULL) {
 		cp->link = cinfo;
