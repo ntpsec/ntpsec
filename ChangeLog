@@ -1,3 +1,4 @@
+* Add missing header dependencies to the ntpdc layout verification.
 * prefer.html updates from Dave Mills.
 * [Bug 1205] Add ntpd --usepcc and --pccfreq options on Windows
 * [Bug 1215] unpeer by association ID
