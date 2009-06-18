@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  Saturday June  6, 2009 at 07:38:44 AM EDT
+# It has been AutoGen-ed  Thursday June 18, 2009 at 07:45:29 AM EDT
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -39,6 +39,7 @@ This software is released under a specialized copyright license.
 * ntpd nofork::                 nofork option (-n)
 * ntpd novirtualips::           novirtualips option (-L)
 * ntpd panicgate::              panicgate option (-g)
+* ntpd pccfreq::                pccfreq option
 * ntpd pidfile::                pidfile option (-p)
 * ntpd priority::               priority option (-P)
 * ntpd propagationdelay::       propagationdelay option (-r)
@@ -48,6 +49,7 @@ This software is released under a specialized copyright license.
 * ntpd statsdir::               statsdir option (-s)
 * ntpd trustedkey::             trustedkey option (-t)
 * ntpd updateinterval::         updateinterval option (-U)
+* ntpd usepcc::                 usepcc option
 * ntpd user::                   user option (-u)
 * ntpd var::                    var option
 @end menu
@@ -60,7 +62,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p179
+ntpd - NTP daemon program - Ver. 4.2.5p181
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -501,3 +503,36 @@ See the
 tinker
 configuration file directive for other options.
 Note: The kernel time discipline is disabled with this option.
+
+@node ntpd usepcc
+@subsection usepcc option
+@cindex ntpd-usepcc
+
+This is the ``use cpu cycle counter (windows only)'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{SYS_WINNT} during the compilation.
+@end itemize
+
+Attempt to substitute the CPU counter for QueryPerformanceCounter.
+The CPU counter and QueryPerformanceCounter are compared, and if
+they have the same frequency, the CPU counter (RDTSC on x86) is
+used directly, saving the overhead of a system call.
+
+@node ntpd pccfreq
+@subsection pccfreq option
+@cindex ntpd-pccfreq
+
+This is the ``force cpu cycle counter use (windows only)'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{SYS_WINNT} during the compilation.
+@end itemize
+
+Force substitution the CPU counter for QueryPerformanceCounter.
+The CPU counter (RDTSC on x86) is used unconditionally with the
+given frequency (in Hz).

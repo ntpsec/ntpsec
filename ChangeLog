@@ -1,3 +1,4 @@
+(4.2.5p182) 2009/06/18 Released by Harlan Stenn <stenn@ntp.org>
 * Add missing header dependencies to the ntpdc layout verification.
 * prefer.html updates from Dave Mills.
 * [Bug 1205] Add ntpd --usepcc and --pccfreq options on Windows
