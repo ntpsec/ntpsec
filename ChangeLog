@@ -1,3 +1,4 @@
+* prefer.html updates from Dave Mills.
 * [Bug 1205] Add ntpd --usepcc and --pccfreq options on Windows
 * [Bug 1215] unpeer by association ID
 * [Bug 1225] Broadcast address miscalculated on Windows 4.2.5p180
