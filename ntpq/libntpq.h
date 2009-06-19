@@ -13,6 +13,8 @@
  *
  ****************************************************************************/
 
+#include "ntp_net.h"
+
 /* general purpose buffer size */
 #define NTPQ_BUFLEN 2048
 
