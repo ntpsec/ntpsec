@@ -1,3 +1,8 @@
+* [Bug 1210] ONCORE driver terminates ntpd without logging a reason
+* [Bug 1218] Correct comment in refclock_oncore on /etc/ntp.oncore*
+  configuration file search order.
+* Change ONCORE driver to log using msyslog as well as to any
+  clockstats file.
 (4.2.5p181) 2009/06/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1206] Required compiler changes for Windows
 * [Bug 1084] PPSAPI for ntpd on Windows with DLL backends
@@ -1035,5 +1040,3 @@
 * MX4200 driver patches.
 * Jupiter driver added.
 * Palisade driver added.  Needs work (ANSI, ntoh/hton, sizeof double, ???)
-* A series of 7 patches to the ONCORE drivers message output, change to use msyslog
-*    along with the clockstats file.
