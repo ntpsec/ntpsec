@@ -1,6 +1,11 @@
 * [Bug 1196] setsockopt(SO_EXCLUSIVEADDRUSE) can fail on Windows 2000
   and earlier with WSAINVAL, do not log a complaint in that case.
-* [Bug 1231] ntpsnmpd build fails after sockaddr union changes
+* [Bug 1210] ONCORE driver terminates ntpd without logging a reason.
+* [Bug 1218] Correct comment in refclock_oncore on /etc/ntp.oncore*
+  configuration file search order.
+* Change ONCORE driver to log using msyslog as well as to any
+  clockstats file.
+* [Bug 1231] ntpsnmpd build fails after sockaddr union changes.
 (4.2.5p182) 2009/06/18 Released by Harlan Stenn <stenn@ntp.org>
 * Add missing header dependencies to the ntpdc layout verification.
 * prefer.html updates from Dave Mills.
