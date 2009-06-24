@@ -1306,7 +1306,7 @@ refclock_pps(
 	pp->lastrec.l_uf = (u_int32)(dtemp * FRAC);
 	if (dtemp > .5)
 		dtemp -= 1.;
-	SAMPLE(-(dtemp + pp->fudgetime1));
+	SAMPLE(-dtemp + pp->fudgetime1);
 #ifdef DEBUG
 	if (debug > 1)
 		printf("refclock_pps: %lu %f %f\n", current_time,

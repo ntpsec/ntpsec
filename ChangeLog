@@ -1,3 +1,4 @@
+* [Bg 1233] atom refclock fudge time1 sign flipped in 4.2.4p164.
 (4.2.5p183) 2009/06/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1196] setsockopt(SO_EXCLUSIVEADDRUSE) can fail on Windows 2000
   and earlier with WSAINVAL, do not log a complaint in that case.
