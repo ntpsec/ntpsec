@@ -1463,7 +1463,7 @@ oncore_consume(
 			for (i=1; i < rcvptr-1; i++)
 				if (rcvbuf[i] == '@' && rcvbuf[i+1] == '@')
 					break;
-#ifdef DEBUG
+#if 0
 			if (debug > 4) {
 				char	Msg[120];
 
@@ -1483,7 +1483,7 @@ oncore_consume(
 			if (!strncmp(oncore_messages[m].flag, (char *)(rcvbuf+2), (size_t) 2))
 				break;
 		if (m == l) {
-#ifdef DEBUG
+#if 0
 			if (debug > 4) {
 				char	Msg[120];
 
@@ -1513,7 +1513,7 @@ oncore_consume(
 		/* are we at the end of message? should be <Cksum><CR><LF> */
 
 		if (rcvbuf[l-2] != '\r' || rcvbuf[l-1] != '\n') {
-#ifdef DEBUG
+#if 0
 			if (debug)
 				oncore_log(instance, LOG_DEBUG, "NO <CR><LF> at end of message");
 #endif
@@ -1528,7 +1528,7 @@ oncore_consume(
 				if (oncore_messages[m].handler)
 					oncore_messages[m].handler(instance, rcvbuf, (size_t) (l-3));
 			}
-#ifdef DEBUG
+#if 0
 			else if (debug) {
 				char	Msg[120], Msg2[10];
 
@@ -1568,7 +1568,6 @@ oncore_get_timestamp(
 	struct timeval	*tsp = 0;
 #endif
 	int	current_mode;
-	u_long	i;
 	pps_params_t current_params;
 	struct timespec timeout;
 	pps_info_t pps_i;
@@ -1617,8 +1616,10 @@ oncore_get_timestamp(
 	if (instance->assert) {
 		tsp = &pps_i.assert_timestamp;
 
-#ifdef DEBUG
+#if 0
 		if (debug > 2) {
+			u_long i;
+
 			i = (u_long) pps_i.assert_sequence;
 # ifdef HAVE_STRUCT_TIMESPEC
 			sprintf(Msg, "serial/j (%lu, %lu) %ld.%09ld",
@@ -1640,8 +1641,10 @@ oncore_get_timestamp(
 	} else {
 		tsp = &pps_i.clear_timestamp;
 
-#ifdef DEBUG
+#if 0
 		if (debug > 2) {
+			u_long i;
+
 			i = (u_long) pps_i.clear_sequence;
 # ifdef HAVE_STRUCT_TIMESPEC
 			sprintf(Msg, "serial/j (%lu, %lu) %ld.%09ld",
@@ -1815,17 +1818,6 @@ oncore_get_timestamp(
 		    );
 	}
 
-#ifdef DEBUG
-	if (debug > 2) {
-		int n;
-		char	Msg2[120];
-
-		n = strlen(Msg);
-		sprintf(Msg2, "len = %d %s", n, Msg);
-		oncore_log(instance, LOG_DEBUG, Msg2);
-	}
-#endif
-
 	/* and some things I dont understand (magic ntp things) */
 
 	if (!refclock_process(instance->pp)) {
@@ -1860,6 +1852,7 @@ oncore_msg_any(
 	int idx
 	)
 {
+#if 0
 	int i;
 	const char *fmt = oncore_messages[idx].fmt;
 	const char *p;
@@ -1870,7 +1863,6 @@ oncore_msg_any(
 	struct timeval tv;
 	char	Msg[120], Msg2[10];
 
-#ifdef DEBUG
 	if (debug > 3) {
 # ifdef HAVE_GETCLOCK
 		(void) getclock(TIMEOFDAY, &ts);
@@ -2633,7 +2625,7 @@ oncore_msg_CaFaIa(
 
 		instance->timeout = 0;
 
-#ifdef DEBUG
+#if 0
 		if (debug > 2) {
 			if (buf[2] == 'I')
 				sprintf(Msg, ">>@@%ca %x %x %x", buf[2], buf[4], buf[5], buf[6]);
@@ -3653,7 +3645,7 @@ oncore_sendmsg(
 	fd = instance->ttyfd;
 	u_char cs = 0;
 
-#ifdef DEBUG
+#if 0
 	if (debug > 4) {
 		char	Msg[120];
 
@@ -3970,7 +3962,7 @@ oncore_log (
 			record_clock_stats(&(instance->peer->srcadr), msg);
 	}
 
-#ifdef DEBUG
+#if 0
 	instance->max_count++;
 	if (instance->max_count % 100 == 0) {
 		sprintf (Msg, "Max Message Length so far is %d", instance->max_len);
