@@ -1,3 +1,6 @@
+* [Bug 1234] convert NMEA driver to use common PPSAPI code
+* timepps-Solaris.h pps_handle_t changed from pointer to scalar
+* Spectracom refclock added to Windows port of ntpd
 (4.2.5p183) 2009/06/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1196] setsockopt(SO_EXCLUSIVEADDRUSE) can fail on Windows 2000
   and earlier with WSAINVAL, do not log a complaint in that case.
