@@ -1,4 +1,4 @@
-* [Bug 1234] convert NMEA driver to use common PPSAPI code
+* [Bug 1234] convert NMEA driver to use common PPSAPI code.
 * timepps-Solaris.h pps_handle_t changed from pointer to scalar
 * Spectracom refclock added to Windows port of ntpd
 (4.2.5p184) 2009/06/24 Released by Harlan Stenn <stenn@ntp.org>
