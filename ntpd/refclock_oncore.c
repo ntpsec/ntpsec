@@ -3641,10 +3641,9 @@ oncore_sendmsg(
 	)
 {
 	int	fd;
-
-	fd = instance->ttyfd;
 	u_char cs = 0;
 
+	fd = instance->ttyfd;
 #if 0
 	if (debug > 4) {
 		char	Msg[120];
