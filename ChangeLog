@@ -1,7 +1,8 @@
+* Documentation updates from Dave Mills.
 * [Bug 1234] convert NMEA driver to use common PPSAPI code.
 * timepps-Solaris.h pps_handle_t changed from pointer to scalar
 * Spectracom refclock added to Windows port of ntpd
-* Bug[1236] Declaration order fixed.
+* [Bug 1236] Declaration order fixed.
 * Bracket private ONCORE debug statements with #if 0 rather than #ifdef DEBUG
 * Delete ONCORE debug statement that is now handled elsewhere.
 (4.2.5p184) 2009/06/24 Released by Harlan Stenn <stenn@ntp.org>
