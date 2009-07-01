@@ -211,13 +211,18 @@ typedef struct {
 	pps_params_t params;	/* PPS parameters set by user */
 } pps_unit_t;
 
-typedef pps_unit_t* pps_handle_t; /* pps handlebars */
-
 /*
  *------ Here begins the implementation-specific part! ------
  */
 
 #include <errno.h>
+
+/*
+ * pps handlebars, which are required to be an opaque scalar.  This
+ * implementation uses the handle as a pointer so it must be large
+ * enough.  uintptr_t is as large as a pointer.
+ */
+typedef uintptr_t pps_handle_t; 
 
 /*
  * create PPS handle from file descriptor
@@ -229,6 +234,7 @@ time_pps_create(
 	pps_handle_t *handle	/* returned handle */
 	)
 {
+	pps_unit_t *punit;
 	int one = 1;
 
 	/*
@@ -249,16 +255,18 @@ time_pps_create(
 	 * Allocate and initialize default unit structure.
 	 */
 
-	*handle = malloc(sizeof(pps_unit_t));
-	if (!(*handle)) {
-		errno = EBADF;
+	punit = malloc(sizeof(*punit));
+	if (NULL == punit) {
+		errno = ENOMEM;
 		return (-1);	/* what, no memory? */
 	}
 
-	memset(*handle, 0, sizeof(pps_unit_t));
-	(*handle)->filedes = filedes;
-	(*handle)->params.api_version = PPS_API_VERS_1;
-	(*handle)->params.mode = PPS_CAPTUREASSERT | PPS_TSFMT_TSPEC;
+	memset(punit, 0, sizeof(*punit));
+	punit->filedes = filedes;
+	punit->params.api_version = PPS_API_VERS_1;
+	punit->params.mode = PPS_CAPTUREASSERT | PPS_TSFMT_TSPEC;
+
+	*handle = (pps_handle_t)punit;
 	return (0);
 }
 
@@ -271,6 +279,8 @@ time_pps_destroy(
 	pps_handle_t handle
 	)
 {
+	pps_unit_t *punit;
+
 	/*
 	 * Check for valid arguments and detach PPS signal.
 	 */
@@ -279,7 +289,8 @@ time_pps_destroy(
 		errno = EBADF;
 		return (-1);	/* bad handle */
 	}
-	free(handle);
+	punit = (pps_unit_t *)handle;
+	free(punit);
 	return (0);
 }
 
@@ -293,7 +304,8 @@ time_pps_setparams(
 	const pps_params_t *params
 	)
 {
-	int	mode, mode_in;
+	pps_unit_t *	punit;
+	int		mode, mode_in;
 	/*
 	 * Check for valid arguments and set parameters.
 	 */
@@ -323,6 +335,7 @@ time_pps_setparams(
 	 */
 
 	mode_in = params->mode;
+	punit = (pps_unit_t *)handle;
 
 	/*
 	 * Only one of the time formats may be selected
@@ -331,8 +344,8 @@ time_pps_setparams(
 	if ((mode_in & (PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)) ==
 	    (PPS_TSFMT_TSPEC | PPS_TSFMT_NTPFP)) {
 
-		if (handle->params.assert_offset.tv_sec ||
-			handle->params.assert_offset.tv_nsec) {
+		if (punit->params.assert_offset.tv_sec ||
+			punit->params.assert_offset.tv_nsec) {
 
 			errno = EINVAL;
 			return(-1);
@@ -366,10 +379,10 @@ time_pps_setparams(
 	 * ok, ready to go.
 	 */
 
-	mode = handle->params.mode;
-	memcpy(&handle->params, params, sizeof(pps_params_t));
-	handle->params.api_version = PPS_API_VERS_1;
-	handle->params.mode = mode | mode_in;
+	mode = punit->params.mode;
+	memcpy(&punit->params, params, sizeof(punit->params));
+	punit->params.api_version = PPS_API_VERS_1;
+	punit->params.mode = mode | mode_in;
 	return (0);
 }
 
@@ -383,6 +396,8 @@ time_pps_getparams(
 	pps_params_t *params
 	)
 {
+	pps_unit_t *	punit;
+
 	/*
 	 * Check for valid arguments and get parameters.
 	 */
@@ -397,11 +412,12 @@ time_pps_getparams(
 		return (-1);	/* bad argument */
 	}
 
-	memcpy(params, &handle->params, sizeof(pps_params_t));
+	punit = (pps_unit_t *)handle;
+	memcpy(params, &punit->params, sizeof(params));
 	return (0);
 }
 
-/* (
+/*
  * get capabilities for handle
  */
 
@@ -445,7 +461,8 @@ time_pps_fetch(
 		u_int serial;
 	} ev;
 
-	pps_info_t infobuf;
+	pps_info_t	infobuf;
+	pps_unit_t *	punit;
 
 	/*
 	 * Check for valid arguments and fetch timestamps
@@ -467,17 +484,18 @@ time_pps_fetch(
 	 */
 
 	memset(&infobuf, 0, sizeof(infobuf));
+	punit = (pps_unit_t *)handle;
 
 	/*
 	 * if not captureassert, nothing to return.
 	 */
 
-	if (!handle->params.mode & PPS_CAPTUREASSERT) {
-		memcpy(ppsinfo, &infobuf, sizeof(pps_info_t));
+	if (!punit->params.mode & PPS_CAPTUREASSERT) {
+		memcpy(ppsinfo, &infobuf, sizeof(*ppsinfo));
 		return (0);
 	}
 
-	if (ioctl(handle->filedes, TIOCGPPSEV, (caddr_t) &ev) < 0) {
+	if (ioctl(punit->filedes, TIOCGPPSEV, (caddr_t) &ev) < 0) {
 		perror("time_pps_fetch:");
 		errno = EOPNOTSUPP;
 		return(-1);
@@ -494,11 +512,11 @@ time_pps_fetch(
 	switch (tsformat) {
 	case PPS_TSFMT_TSPEC:
 		/* timespec format requires no conversion */
-		if (handle->params.mode & PPS_OFFSETASSERT) {
+		if (punit->params.mode & PPS_OFFSETASSERT) {
 			infobuf.assert_timestamp.tv_sec  += 
-				handle->params.assert_offset.tv_sec;
+				punit->params.assert_offset.tv_sec;
 			infobuf.assert_timestamp.tv_nsec += 
-				handle->params.assert_offset.tv_nsec;
+				punit->params.assert_offset.tv_nsec;
 			PPS_NORMALIZE(infobuf.assert_timestamp);
 		}
 		break;
@@ -506,9 +524,9 @@ time_pps_fetch(
 	case PPS_TSFMT_NTPFP:
 		/* NTP format requires conversion to fraction form */
 		PPS_TSPECTONTP(infobuf.assert_timestamp_ntpfp);
-		if (handle->params.mode & PPS_OFFSETASSERT)
+		if (punit->params.mode & PPS_OFFSETASSERT)
 			NTPFP_L_ADDS(&infobuf.assert_timestamp_ntpfp, 
-				     &handle->params.assert_offset_ntpfp);
+				     &punit->params.assert_offset_ntpfp);
 		break;		
 
 	default:
@@ -516,8 +534,8 @@ time_pps_fetch(
 		return (-1);
 	}
 
-	infobuf.current_mode = handle->params.mode;
-	memcpy(ppsinfo, &infobuf, sizeof(pps_info_t));
+	infobuf.current_mode = punit->params.mode;
+	memcpy(ppsinfo, &infobuf, sizeof(*ppsinfo));
 	return (0);
 }
 
@@ -529,7 +547,8 @@ static inline int
 time_pps_kcbind(
 	pps_handle_t handle,
 	const int kernel_consumer,
-	const int edge, const int tsformat
+	const int edge,
+	const int tsformat
 	)
 {
 	/*
