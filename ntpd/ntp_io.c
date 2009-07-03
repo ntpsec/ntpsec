@@ -3392,7 +3392,8 @@ findlocalcastinterface(
 	nif = findlocalinterface(addr, 0, 0);
 
 	if (nif) {
-		DPRINTF(2, ("findlocalcastinterface: kernel recommends interface #%d %s\n", nif->ifnum, nif->name));
+		DPRINTF(2, ("findlocalcastinterface: kernel recommends interface #%d %s for %s\n",
+			    nif->ifnum, nif->name, stoa(addr)));
 		return nif;
 	}
 
@@ -3436,8 +3437,8 @@ findlocalcastinterface(
 	}	/* for loop over interfaces */
 
 	if (nif != NULL)
-		DPRINTF(3, ("findlocalcastinterface: found interface #%d %s\n",
-			    nif->ifnum, nif->name));
+		DPRINTF(3, ("findlocalcastinterface: found interface #%d %s for %s\n",
+			    nif->ifnum, nif->name, stoa(addr)));
 	else
 		DPRINTF(3, ("findlocalcastinterface: no interface found for %s\n",
 			    stoa(addr)));
@@ -3838,6 +3839,12 @@ delete_interface_from_list(
 			DPRINTF(4, ("Deleted addr %s for interface #%d %s from list of addresses\n",
 				    stoa(&entry->addr), iface->ifnum,
 				    iface->name));
+			if (addr_ismulticast(&entry->addr)) {
+				/* find a new interface to use */
+				io_multicast_add(&entry->addr);
+				/* the list may have changed */
+				next = ISC_LIST_HEAD(remoteaddr_list);
+			}
 			free(entry);
 		}
 		entry = next;
