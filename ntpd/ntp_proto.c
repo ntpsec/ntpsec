@@ -841,12 +841,12 @@ receive(
 #ifdef OPENSSL
 		/*
 		 * Do not respond if Autokey and the opcode is not a
-		 * CRYPTO_ASSOC response.
+		 * CRYPTO_ASSOC response with associationn ID.
 		 */
 		if (crypto_flags && skeyid > NTP_MAXKEY && (opcode &
 		    0xffff0000) != (CRYPTO_ASSOC | CRYPTO_RESP)) {
 			sys_declined++;
-			return;
+			return;			/* protocol error */
 		}
 #endif /* OPENSSL */
 
@@ -874,7 +874,7 @@ receive(
 			    pkt->ppoll, pkt->ppoll, 0, 0, 0,
 			    skeyid)) == NULL) {
 				sys_restricted++;
-				return;
+				return;		/* ignore duplicate */
 
 			} else {
 				peer->delay = sys_bdelay;
@@ -902,7 +902,8 @@ receive(
 		if (skeyid > NTP_MAXKEY)
 			crypto_recv(peer, rbufp);
 #endif /* OPENSSL */
-		return;
+
+		return;				/* hooray */
 
 	/*
 	 * This is the first packet received from a symmetric active
@@ -910,24 +911,9 @@ receive(
 	 * mobilize a passive association. If not, kiss the frog.
 	 */
 	case AM_NEWPASS:
-
-		/*
-		 * If authentication fails, drop the packet. If Autokey,
-		 * send a crypto-NAK.
-		 */
-		if (!AUTH(restrict_mask & RES_DONTTRUST,
-		    is_authentic)) {
-#ifdef OPENSSL
-			if (crypto_flags && skeyid > NTP_MAXKEY)
-				fast_xmit(rbufp, MODE_ACTIVE, 0, NULL, 0);
-#endif /* OPENSSL */
-			sys_restricted++;
-			return;			/* access denied */
-		}
 		if (!AUTH(sys_authenticate | (restrict_mask &
-		    RES_NOPEER), is_authentic)) {
+		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
 
-#ifdef WINTIME
 			/*
 			 * If authenticated but cannot mobilize an
 			 * association, send a summetric passive
@@ -935,11 +921,16 @@ receive(
 			 * This is for drat broken Windows clients. See
 			 * Microsoft KB 875424 for preferred workaround.
 			 */
-			fast_xmit(rbufp, MODE_PASSIVE, skeyid, NULL, flags);
-#else /* WINTIME */
-			sys_restricted++;
-#endif /* WINTIME */
-			return;			/* hooray */
+			if (AUTH(restrict_mask & RES_DONTTRUST,
+			    is_authentic)) {
+				fast_xmit(rbufp, MODE_PASSIVE, skeyid,
+				    NULL, flags);
+				return;			/* hooray */
+			}
+			if (is_authentic == AUTH_ERROR) {
+				fast_xmit(rbufp, MODE_ACTIVE, 0, NULL, 0);
+				sys_restricted++;
+			}
 		}
 
 		/*
@@ -3256,18 +3247,16 @@ fast_xmit(
 		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
 	}
 
-	if (flags & FLAG_ADKEY) {
 #ifdef HAVE_NTP_SIGND
+	if (flags & FLAG_ADKEY) {
 		get_systime(&xmt_tx);
 		if (mask == NULL) {
 			HTONL_FP(&xmt_tx, &xpkt.xmt);
 		}
 		send_via_ntp_signd(rbufp, xmode, xkeyid, flags, &xpkt);
-#endif
-		/* If we don't have the support, drop the packet on the floor.  
-		   An all zero sig is compleatly bogus anyway */
 		return;
 	}
+#endif /* HAVE_NTP_SIGND */
 
 	/*
 	 * If the received packet contains a MAC, the transmitted packet
@@ -3301,7 +3290,7 @@ fast_xmit(
 	 * source-destination-key ID combination.
 	 */
 #ifdef OPENSSL
-	if (!(flags & FLAG_ADKEY) && (xkeyid > NTP_MAXKEY)) {
+	if (xkeyid > NTP_MAXKEY) {
 		keyid_t cookie;
 
 		/*
