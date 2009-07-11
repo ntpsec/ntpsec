@@ -507,9 +507,11 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 static int 
 OnSerialReadComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
-	recvbuf_t *buff;
-	struct refclockio * rio = (struct refclockio *) i;
+	recvbuf_t *		buff;
+	l_fp			cr_time;
+	struct refclockio *	rio;
 
+	rio = (struct refclockio *)i;
 	/*
 	 * Get the recvbuf pointer from the overlapped buffer.
 	 */
@@ -530,6 +532,24 @@ OnSerialReadComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 		 * have fired since the port was opened.
 		 */
 		if (rio->recvcount++) {
+			cr_time = buff->recv_time;
+			add_full_recv_buffer(buff);
+			/*
+			 * Mimic Unix line discipline and assume CR/LF
+			 * line termination.  On Unix the CR terminates
+			 * the line containing the timecode, and
+			 * immediately after the LF terminates an empty
+			 * line.  So synthesize the empty LF-terminated
+			 * line using the same CR timestamp.  Both CR
+			 * and LF are stripped by refclock_gtlin().
+			 */
+			buff = get_free_recv_buffer_alloc();
+			buff->recv_time = cr_time;
+			buff->recv_length = 0;
+			buff->fd = _get_osfhandle(rio->fd);
+			buff->receiver = rio->clock_recv;
+			buff->dstadr = NULL;
+			buff->recv_srcclock = rio->srcclock;
 			add_full_recv_buffer(buff);
 			/*
 			 * Now signal we have something to process
