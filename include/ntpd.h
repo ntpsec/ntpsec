@@ -89,8 +89,10 @@ extern	void	io_setbclient	(void);
 extern	void	io_unsetbclient	(void);
 extern	void	io_multicast_add(sockaddr_u *);
 extern	void	io_multicast_del(sockaddr_u *);
-extern	void	kill_asyncio	(int);
 extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, struct pkt *, int);
+#ifndef SYS_WINNT
+extern	void	kill_asyncio	(int);
+#endif
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif

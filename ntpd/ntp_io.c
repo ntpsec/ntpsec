@@ -3674,7 +3674,12 @@ io_closeclock(
  * On NT a SOCKET is an unsigned int so we cannot possibly keep it in
  * an array. So we use one of the ISC_LIST functions to hold the
  * socket value and use that when we want to enumerate it.
+ *
+ * This routine is called by the forked intres child process to close
+ * all open sockets.  On Windows there's no need as intres runs in
+ * the same process as a thread.
  */
+#ifndef SYS_WINNT
 void
 kill_asyncio(int startfd)
 {
@@ -3682,6 +3687,13 @@ kill_asyncio(int startfd)
 	vsock_t *next;
 
 	BLOCKIO();
+
+	/*
+	 * In the child process we do not maintain activefds and
+	 * maxactivefd.  Zeroing maxactivefd disables code which
+	 * maintains it in close_and_delete_fd_from_list().
+	 */
+	maxactivefd = 0;
 
 	lsock = ISC_LIST_HEAD(fd_list);
 	while (lsock != NULL) {
@@ -3700,6 +3712,7 @@ kill_asyncio(int startfd)
 
 	UNBLOCKIO();
 }
+#endif	/* !SYS_WINNT */
 
 /*
  * Add and delete functions for the list of open sockets
