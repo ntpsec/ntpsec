@@ -16,7 +16,7 @@
 
 <p>The skunk watches for intruders and sprays.</p>
 <p>Last update: 
-<!-- #BeginDate format:En2m -->09-May-2009  20:23<!-- #EndDate -->
+<!-- #BeginDate format:En2m -->10-Jul-2009  14:53<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 
@@ -113,17 +113,18 @@ time) in log<sub>2</sub> s with default 3.</dd>
 <dt><tt>notrust</tt></dt>
 <dd>Deny packets that are not cryptographically authenticated.</dd>
 
-<dt><tt>ntpport</tt></dt>
-<dt><tt>non-ntpport</tt></dt>
-<dd>This is actually a match algorithm modifier, rather than a restriction flag. Its presence causes the restriction entry to be matched only if the source port in the packet is the standard NTP UDP port (123). Both <tt>ntpport</tt> and <tt>non-ntpport</tt> may be specified. The <tt>ntpport</tt> is considered more specific and is sorted later in the list.</dd>
+<dt><tt>mssntp</tt></dt>
+<dd>Enable Windows Active Directory authentication. See the <a href="authopt.html">Authentication Options
+	page.</a></dd>
 
-<dt><tt>version</tt></dt>
-<dd>Deny packets that do not match the current NTP version.</dd>
-
-</dl></dd>
-
+		<dt><tt>ntpport</tt></dt>
+			<dt><tt>non-ntpport</tt></dt>
+			<dd>This is actually a match algorithm modifier, rather than a restriction flag. Its presence causes the restriction entry to be matched only if the source port in the packet is the standard NTP UDP port (123). Both <tt>ntpport</tt> and <tt>non-ntpport</tt> may be specified. The <tt>ntpport</tt> is considered more specific and is sorted later in the list.</dd>
+			<dt><tt>version</tt></dt>
+			<dd>Deny packets that do not match the current NTP version.</dd>
+		</dl>
+</dd>
 <dd>Default restriction list entries with the flags <tt>ignore, ntpport</tt>, for each of the local host's interface addresses are inserted into the table at startup to prevent the server from attempting to synchronize to its own time. A default entry is also always present, though if it is otherwise unconfigured; no flags are associated with the default entry (i.e., everything besides your own NTP server is unrestricted).</dd>
-
 </dl>
 
 <hr>
