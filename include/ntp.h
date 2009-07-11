@@ -450,7 +450,6 @@ struct peer {
 #ifdef	OPENSSL
 #define FLAG_ASSOC	0x8000	/* autokey request */
 #endif /* OPENSSL */
-#define FLAG_ADKEY      0x10000      /* Authenticated (or wants reply to be authenticated) using AD authentication */
 
 /*
  * Definitions for the clear() routine.  We use memset() to clear
@@ -794,29 +793,29 @@ struct restrictlist6 {
 /*
  * Access flags
  */
-#define	RES_IGNORE		0x001	/* ignore packet */
-#define	RES_DONTSERVE		0x002	/* access denied */
-#define	RES_DONTTRUST		0x004	/* authentication required */
-#define	RES_VERSION		0x008	/* version mismatch */
-#define	RES_NOPEER		0x010	/* new association denied */
-#define RES_LIMITED		0x020	/* packet rate exceeded */
-
+#define	RES_IGNORE		0x0001	/* ignore packet */
+#define	RES_DONTSERVE		0x0002	/* access denied */
+#define	RES_DONTTRUST		0x0004	/* authentication required */
+#define	RES_VERSION		0x0008	/* version mismatch */
+#define	RES_NOPEER		0x0010	/* new association denied */
+#define RES_LIMITED		0x0020	/* packet rate exceeded */
 #define RES_FLAGS		(RES_IGNORE | RES_DONTSERVE |\
 				    RES_DONTTRUST | RES_VERSION |\
 				    RES_NOPEER | RES_LIMITED)
 
-#define	RES_NOQUERY		0x040	/* mode 6/7 packet denied */
-#define	RES_NOMODIFY		0x080	/* mode 6/7 modify denied */
-#define	RES_NOTRAP		0x100	/* mode 6/7 set trap denied */
-#define	RES_LPTRAP		0x200	/* mode 6/7 low priority trap */
+#define	RES_NOQUERY		0x0040	/* mode 6/7 packet denied */
+#define	RES_NOMODIFY		0x0080	/* mode 6/7 modify denied */
+#define	RES_NOTRAP		0x0100	/* mode 6/7 set trap denied */
+#define	RES_LPTRAP		0x0200	/* mode 6/7 low priority trap */
 
-#define RES_KOD			0x400	/* send kiss of death packet */
-#define RES_TIMEOUT		0x800	/* timeout this entry */
+#define RES_KOD			0x0400	/* send kiss of death packet */
+#define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */
+#define RES_TIMEOUT		0x1000	/* timeout this entry */
 
 #define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |\
 				    RES_NOMODIFY | RES_NOTRAP |\
 				    RES_LPTRAP | RES_KOD |\
-				    RES_TIMEOUT)
+				    RES_MSSNTP | RES_TIMEOUT)
 
 /*
  * Match flags

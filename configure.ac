@@ -4330,35 +4330,10 @@ esac
 
 case "$ntp_signd_path" in
  '')
-    wintime_default=no
     ;;
  *)
-    wintime_default=yes
     AC_DEFINE(HAVE_NTP_SIGND, ,[Do we want support for Samba's signing daemon?])
     AC_DEFINE_UNQUOTED(NTP_SIGND_PATH, "$ntp_signd_path", [Path to sign daemon rendezvous socket])
-esac
-
-
-AC_MSG_CHECKING([if we want the windows symmetric client hack])
-
-# default is no, unless --enable-ntp-signd was given
-ans=$wintime_default
-$as_unset wintime_default
-
-AC_ARG_ENABLE(
-    [wintime],
-    AC_HELP_STRING(
-	[--enable-wintime],
-	[- Provide the windows symmetric client hack]
-    ),
-    [ans=$enableval],
-)
-
-AC_MSG_RESULT([$ans])
-
-case "$ans" in
- yes)
-    AC_DEFINE(WINTIME, ,[Do we want the windows symmetric client hack?])
 esac
 
 

@@ -1006,6 +1006,7 @@ struct key_tok keyword_list[] = {
 	{ "flake",		T_Flake,	   NO_ARG },
 	{ "ignore",		T_Ignore,          NO_ARG },
 	{ "limited",		T_Limited,         NO_ARG },
+	{ "mssntp",		T_Mssntp,	   NO_ARG },
 	{ "kod",		T_Kod,             NO_ARG },
 	{ "lowpriotrap",	T_Lowpriotrap,     NO_ARG },
 	{ "mask",		T_Mask,            NO_ARG },

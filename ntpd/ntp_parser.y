@@ -113,6 +113,7 @@
 %token			T_Keys
 %token			T_Keysdir
 %token			T_Kod
+%token			T_Mssntp
 %token			T_Leap
 %token			T_Leapfile
 %token			T_Limited
@@ -640,6 +641,7 @@ access_control_flag
 	:	T_Flake		{ $$ = create_ival(RES_TIMEOUT); }
 	|	T_Ignore	{ $$ = create_ival(RES_IGNORE); }
 	|	T_Kod		{ $$ = create_ival(RES_KOD); }
+	|	T_Mssntp	{ $$ = create_ival(RES_MSSNTP); }
 	|	T_Limited	{ $$ = create_ival(RES_LIMITED); }
 	|	T_Lowpriotrap	{ $$ = create_ival(RES_LPTRAP); }
 	|	T_Nomodify	{ $$ = create_ival(RES_NOMODIFY); }

@@ -2,7 +2,10 @@
 * [Bug 1237] Windows serial code treat CR and LF both as line
   terminators.
 * [Bug 1238] use fudge time2 for serial timecode offset in NMEA driver.
+* [Bug 1242] Remove --enable-wintime, symmetric workaround is now
+  always enabled.
 * [Bug 1244] NTP_INSIST(fd != maxactivefd) failure in intres child
+* Added restrict keyword "mssntp" for Samba4 DC operation, by Dave Mills.
 (4.2.5p186) 2009/07/08 Released by Harlan Stenn <stenn@ntp.org>
 * ntp_proto.c cleanup from Dave Mills.
 (4.2.5p185) 2009/07/01 Released by Harlan Stenn <stenn@ntp.org>
