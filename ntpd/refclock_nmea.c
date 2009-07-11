@@ -9,6 +9,11 @@
  *
  * Updated to process 'time1' fudge factor
  *		Venu Gopal May 05, 2008
+ *
+ * Converted to common PPSAPI code, separate PPS fudge time1
+ * from serial timecode fudge time2.
+ *		Dave Hart July 1, 2009
+ *		hart@ntp.org, davehart@davehart.com
  */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -333,6 +338,7 @@ nmea_timer(
 		    0) {
 			up->pcount++,
 			peer->flags |= FLAG_PPS;
+			peer->precision = PPS_PRECISION;
 		}
 	}
 }
@@ -354,6 +360,7 @@ nmea_receive(
 	char *cp, *dp, *msg;
 	int cmdtype;
 	int cmdtypezdg = 0;
+	l_fp lfp_fudgetime2;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_timestamp;
@@ -463,7 +470,10 @@ nmea_receive(
 	memcpy(pp->a_lastcode, rd_lastcode, pp->lencode + 1);
 	cp = pp->a_lastcode;
 
-	pp->lastrec = up->tstamp = rd_timestamp;
+	DTOLFP(pp->fudgetime2, &lfp_fudgetime2);
+	L_ADD(&rd_timestamp, &lfp_fudgetime2);
+	up->tstamp = rd_timestamp;
+	pp->lastrec = up->tstamp;
 
 	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
 
@@ -762,8 +772,10 @@ nmea_poll(
 	 * timeout and keep going.
 	 */
 #ifdef HAVE_PPSAPI
-	if (up->pcount == 0)
+	if (up->pcount == 0) {
 		peer->flags &= ~FLAG_PPS;
+		peer->precision = PRECISION;
+	}
 	if (up->tcount == 0) {
 		pp->coderecv = pp->codeproc;
 		refclock_report(peer, CEVNT_TIMEOUT);
