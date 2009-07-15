@@ -3249,12 +3249,12 @@ fast_xmit(
 		HTONL_FP(&sys_reftime, &xpkt.reftime);
 		xpkt.org = rpkt->xmt;
 		HTONL_FP(&rbufp->recv_time, &xpkt.rec);
+		get_systime(&xmt_tx);
 		HTONL_FP(&xmt_tx, &xpkt.xmt);
 	}
 
 #ifdef HAVE_NTP_SIGND
 	if (flags & RES_MSSNTP) {
-		get_systime(&xmt_tx);
 		send_via_ntp_signd(rbufp, xmode, xkeyid, flags, &xpkt);
 		return;
 	}
@@ -3267,7 +3267,6 @@ fast_xmit(
 	 */
 	sendlen = LEN_PKT_NOMAC;
 	if (rbufp->recv_length == sendlen) {
-		get_systime(&xmt_tx);
 		sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt,
 		    sendlen);
 #ifdef DEBUG
