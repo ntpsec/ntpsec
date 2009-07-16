@@ -13,7 +13,7 @@
 <p>Caterpillar knows all the error codes, which is more than most of us do.</p>
 
 <p>Last update:
-<!-- #BeginDate format:En2m -->09-May-2009  3:31<!-- #EndDate -->
+<!-- #BeginDate format:En2m -->11-Jul-2009  20:34<!-- #EndDate -->
 UTC</p>
 <br clear="left">
 
@@ -39,7 +39,12 @@ UTC</p>
 
 <p>This page lists the status words, event messages and error codes used for <tt>ntpd</tt> reporting and monitoring. Status words are used to display the current status of the running program. There is one system status word and a peer status word for each association. There is a clock status word for each association that supports a reference clock. There is a flash code for each association which shows errors found in the last packet received (pkt) and during protocol processing (peer). These are commonly viewed using the <tt>ntpq</tt> program.</p>
 
-<p>Significant changes in program state are reported as events. There is one set of system events and a set of peer events for each association. In adition, there is a set of clock events for each association that supports a reference clock. Events are normally reported to the <tt>protostats</tt> monitoring file and optionally to the system log. In addition, if the trap facility is configured, events can be reported to a remote program that can page an administrator.</p>
+<p>Significant changes in program state are reported as events. There is one
+	set of system events and a set of peer events for each association. In addition,
+	there is a set of clock events for each association that supports a reference
+	clock. Events are normally reported to the <tt>protostats</tt> monitoring file
+	and optionally to the system log. In addition, if the trap facility is configured,
+	events can be reported to a remote program that can page an administrator.</p>
 
 <p>This page also includes a description of the error messages produced by the Autokey protocol. These messages are normally sent to the <tt>cryptostats</tt> monitoring file.</p>
 
@@ -475,7 +480,7 @@ UTC</p>
 <tr>
 <td><tt>0b</tt></td>
 <td><tt>clock_event</tt></td>
-<td>see ckock status word</td>
+<td>see clock status word</td>
 </tr>
 
 <tr>
@@ -513,7 +518,6 @@ UTC</p>
 <h4 id="clock">Clock Status Word</h4>
 
 <p>The clock status word consists of four fields: Unused (0-7), Count (8-11) and Code (12-15). It is reported in the first line of the <tt>clockvar <i>associd</i></tt> display produced by the <tt>ntpq</tt> program.</p>
-vvv
 <table width="50%" border="1" cellspacing="2" cellpadding="2">
 
 <tr>
@@ -835,7 +839,7 @@ vvv
 <tr>
 <td><tt>0c</tt></td>
 <td><tt>bad_leapseconds</tt></td>
-<td>bad or misssing leapseconds values</td>
+<td>bad or missing leapseconds values</td>
 </tr>
 
 <tr>

@@ -51,7 +51,11 @@
 		<p>The use of cryptograpic authentication is always a good idea in any server descovery scheme. Both symmetric key and public key cryptography can be used in the same scenarios as described above for the broadast/multicast scheme.</p>
 		<h4 id="pool">Server Pool Scheme</h4>
 		<p>The idea of targeting servers on a random basis to distribute and balance the load is not a new one; however, the NTP pool scheme puts this on steroids. At present, several hundred operators around the globe have volunteered their servers for public access. In general, NTP&nbsp;is a lightweight service and servers used for other purposes don't mind an additional small load. The trick is to randomize over the population and minimize the load on any one server while retaining the advantages of multiple servers using the NTP&nbsp;mitigation algorithms.</p>
-		<p>To support this service the DNS&nbsp;for some volunteer servers as been modified to collect a number of other volunteer&nbsp;servers and return a randomized list in response to a DNS query. The client receiving this list modbilizes some or all of them just as in the other discovery schemes and casts off the excess.</p>
+		<p>To support this service the DNS&nbsp;for some volunteer servers as been
+			modified to collect a number of other volunteer&nbsp;servers and return a
+			randomized list in response to a DNS query. The client receiving this list
+			mobilizes some or all of them just as in the other discovery schemes and casts
+			off the excess.</p>
 		<p>The pool scheme is configured using one or <tt>pool</tt> commands with the DNS name <tt><i>region</i>.pool.ntp.org</tt>, where <tt><i>region</i></tt> is a region of the world, country of the region or state of the country or even the whole world if absent. The <tt>pool</tt> command can be used more than once; duplicate servers are detected and discarded. In principle, it is possible to use a configuration file containing a single line <tt>pool pool.ntp.org</tt>.</p>
 		<hr>
 		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>

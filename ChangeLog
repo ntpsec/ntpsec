@@ -1,3 +1,4 @@
+* Documentation cleanup from Dave Mills.
 (4.2.5p188) 2009/07/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1245] Broken xmt time sent in fast_xmit() of 4.2.5p187.
 (4.2.5p187) 2009/07/11 Released by Harlan Stenn <stenn@ntp.org>

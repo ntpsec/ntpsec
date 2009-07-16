@@ -39,7 +39,16 @@
 		<p>A host is configured in client mode using the <tt>server</tt> (sic) command and specifying the server DNS&nbsp;name or IPv4 or IPv6 address; the server requires no prior configuration. The <tt>iburst</tt> option described later on this page is recommended for clients, as this speeds up initial synchronization from several minutes to several seconds. The <tt>burst</tt> option described later on this page can be useful to reduce jitter on very noisy dial-up or ISDN network links.</p>
 		<p>Ordinarily, the program automatically manages the poll interval between the default minimum and maximum values. The <tt>minpoll</tt> and <tt>maxpoll</tt> options can be used to bracket the range. Unless noted otherwise, these options should not be used with reference clock drivers.</p>
 		<h4 id="symact">Symmetric Active/Passive Mode</h4>
-		<p>Symmetric active/passive mode is intended for configurations were a clique of low-stratum peers operate as mutual backups for each other. Each peer operates with one or more primary reference sources, such as a radio clock, or a set of secondary (stratu, 2) servers known to be reliable and authentic. Should one of the peers lose all reference sources or simply cease operation, the other peers will automatically reconfigure so that time and related values can flow from the surviving peers to all hosts in the subnet. In some contexts this would be described as a &quot;push-pull&quot; operation, in that the peer either pulls or pushes the time and related values depending on the particular configuration.</p>
+		<p>Symmetric active/passive mode is intended for configurations were a clique
+			of low-stratum peers operate as mutual backups for each other. Each peer operates
+			with one or more primary reference sources, such as a radio clock, or a set
+			of secondary (stratum, 2) servers known to be reliable and authentic. Should
+			one of the peers lose all reference sources or simply cease operation, the
+			other peers will automatically reconfigure so that time and related values
+			can flow from the surviving peers to all hosts in the subnet. In some contexts
+			this would be described as a &quot;push-pull&quot; operation, in that the
+			peer either pulls or pushes the time and related values depending on the particular
+			configuration.</p>
 		<p>In symmetric active mode a peer symmetric active (mode 1) message to a designated peer. If a matching configured symmetric active association is found, the designated peer returns a symmetric active message. If no matching association is found, the designated peer mobilizes a ephemeral symmetric passive association and returns a symmetric passive (mode 2) message. Since an intruder can impersonate a symmetric active peer and cause a spurious symmetric passive association to be mobilized, symmetric passive mode should always be cryptographically validated.</p>
 		<p>A peer is configured in symmetric active mode using the <tt>peer</tt> command and specifying the other peer DNS name or IPv4 or IPv6 address. The <tt>burst</tt> and <tt>iburst</tt> options should not be used in symmetric modes, as this can upset the intended symmetry of the protocol and result in spurious duplicate or dropped messages.</p>
 		<p>As symmetric modes are most often used as root servers for moderate to large subnets where rapid response is required, it is generally best to set the minimum and maximum poll intervals of each root server to the same value using the <tt>minpoll</tt> and <tt>maxpoll</tt> options.</p>
