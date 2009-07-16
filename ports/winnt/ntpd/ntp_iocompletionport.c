@@ -21,6 +21,7 @@
 #include "ntp_assert.h"
 #include "clockstuff.h"
 #include "ntp_io.h"
+#include "ntp_lists.h"
 #include "clockstuff.h"
 
 /*
@@ -47,7 +48,7 @@ typedef struct IoCompletionInfo {
 		transmitbuf_t *	trans_buf;
 	};
 #ifdef DEBUG
-	ISC_LINK(struct IoCompletionInfo)	link;
+	struct IoCompletionInfo *link;
 #endif
 } IoCompletionInfo;
 
@@ -68,10 +69,10 @@ static int OnWriteComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
 /* keep a list to traverse to free memory on debug builds */
 #ifdef DEBUG
 static void free_io_completion_port_mem(void);
-ISC_LIST(IoCompletionInfo)	compl_info_list;
-CRITICAL_SECTION		compl_info_lock;
-#define LOCK_COMPL()		EnterCriticalSection(&compl_info_lock);
-#define UNLOCK_COMPL()		LeaveCriticalSection(&compl_info_lock);
+IoCompletionInfo *	compl_info_list;
+CRITICAL_SECTION	compl_info_lock;
+#define LOCK_COMPL()	EnterCriticalSection(&compl_info_lock);
+#define UNLOCK_COMPL()	LeaveCriticalSection(&compl_info_lock);
 #endif
 
 /* #define USE_HEAP */
@@ -110,7 +111,7 @@ GetHeapAlloc(char *fromfunc)
 
 #ifdef DEBUG
 	LOCK_COMPL();
-	ISC_LIST_APPEND(compl_info_list, lpo, link);
+	LINK_SLIST(compl_info_list, lpo, link);
 	UNLOCK_COMPL();
 #endif
 
@@ -120,11 +121,14 @@ GetHeapAlloc(char *fromfunc)
 void
 FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
 {
+#ifdef DEBUG
+	IoCompletionInfo *unlinked;
+
 	DPRINTF(3, ("Freeing memory for %s, ptr %x\n", fromfunc, lpo));
 
-#ifdef DEBUG
 	LOCK_COMPL();
-	ISC_LIST_DEQUEUE(compl_info_list, lpo, link);
+	UNLINK_SLIST(unlinked, compl_info_list, lpo, link,
+	    IoCompletionInfo);
 	UNLOCK_COMPL();
 #endif
 
@@ -286,7 +290,6 @@ init_io_completion_port(
 	HANDLE thread;
 
 #ifdef DEBUG
-	ISC_LIST_INIT(compl_info_list);
 	InitializeCriticalSection(&compl_info_lock);
 	atexit(&free_io_completion_port_mem);
 #endif
@@ -363,9 +366,7 @@ free_io_completion_port_mem(
 	IoCompletionInfo *	pci;
 
 	LOCK_COMPL();
-	for (pci = ISC_LIST_HEAD(compl_info_list);
-	     pci != NULL;
-	     pci = ISC_LIST_HEAD(compl_info_list)) {
+	while ((pci = compl_info_list) != NULL) {
 
 		/* this handles both xmit and recv buffs */
 		if (pci->recv_buf != NULL)
@@ -392,7 +393,13 @@ uninit_io_completion_port(
 }
 
 
-static int QueueSerialWait(struct refclockio *rio, recvbuf_t *buff, IoCompletionInfo *lpo, BOOL clear_timestamp)
+static int
+QueueSerialWait(
+	struct refclockio *	rio,
+	recvbuf_t *		buff,
+	IoCompletionInfo *	lpo,
+	BOOL			clear_timestamp
+	)
 {
 	lpo->request_type = SERIAL_WAIT;
 	lpo->recv_buf = buff;

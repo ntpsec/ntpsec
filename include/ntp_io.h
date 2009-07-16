@@ -1,5 +1,5 @@
-#if !defined _NTP_IO_H
-#define _NTP_IO_H
+#ifndef NTP_IO_H
+#define NTP_IO_H
 /*
  * POSIX says use <fnct.h> to get O_* symbols and 
  * SEEK_SET symbol form <unistd.h>.
@@ -60,9 +60,7 @@
 
 isc_boolean_t get_broadcastclient_flag(void); /* Get the status of client broadcast */
 extern  void  add_specific_interface (const char *);
-extern  void  init_specific_interface (void);
 extern  void  add_limit_address (const isc_netaddr_t *);
-extern  void  init_limit_address (void);
 isc_boolean_t is_ip_address(const char *, isc_netaddr_t *);
 
-#endif
+#endif	/* NTP_IO_H */

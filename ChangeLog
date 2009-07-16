@@ -1,3 +1,5 @@
+* [Bug 1246] use a common template for singly-linked lists, convert most
+  doubly-linked lists to singly-linked.
 (4.2.5p185) 2009/07/01 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * [Bug 1234] convert NMEA driver to use common PPSAPI code.

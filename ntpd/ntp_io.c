@@ -26,6 +26,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "iosignal.h"
+#include "ntp_lists.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_request.h"
@@ -36,7 +37,6 @@
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
 #include <isc/interfaceiter.h>
-#include <isc/list.h>
 #include <isc/netaddr.h>
 #include <isc/result.h>
 #include <isc/sockaddr.h>
@@ -83,21 +83,21 @@ int interface_optioncount = 0;
  */
 typedef struct specific_interface specific_interface_t;
 struct specific_interface {
+	specific_interface_t *link;
 	const char *name;
-	ISC_LINK(specific_interface_t) link;
 };
 
-ISC_LIST(specific_interface_t) specific_interface_list;
+specific_interface_t *specific_interface_list;
 /*
  * limit addresses to use
  */
 typedef struct limit_address limit_address_t;
 struct limit_address {
+	limit_address_t *link;
 	const isc_netaddr_t *addr;
-	ISC_LINK(limit_address_t) link;
 };
 
-ISC_LIST(limit_address_t) limit_address_list;
+limit_address_t *limit_address_list;
 
 
 #if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
@@ -225,10 +225,12 @@ typedef struct vsock vsock_t;
 enum desc_type { FD_TYPE_SOCKET, FD_TYPE_FILE };
 
 struct vsock {
-	SOCKET			fd;
-	enum desc_type		type;
-	ISC_LINK(vsock_t)	link;
+	vsock_t	*	link;
+	SOCKET		fd;
+	enum desc_type	type;
 };
+
+vsock_t	*fd_list;
 
 #if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
 /*
@@ -239,13 +241,13 @@ struct vsock {
  * like e. g. routing sockets
  */
 struct asyncio_reader {
+	struct asyncio_reader *link;		    /* the list this is being kept in */
 	SOCKET fd;				    /* fd to be read */
 	void  *data;				    /* possibly local data */
 	void (*receiver)(struct asyncio_reader *);  /* input handler */
-	ISC_LINK(struct asyncio_reader) link;	    /* the list this is being kept in */
 };
 
-ISC_LIST(struct asyncio_reader) asyncio_reader_list;
+struct asyncio_reader *asyncio_reader_list;
 
 static void delete_asyncio_reader (struct asyncio_reader *);
 static struct asyncio_reader *new_asyncio_reader (void);
@@ -263,19 +265,17 @@ static	void	set_reuseaddr	(int);
 static	isc_boolean_t	socket_broadcast_enable	 (struct interface *, SOCKET, sockaddr_u *);
 static	isc_boolean_t	socket_broadcast_disable (struct interface *, sockaddr_u *);
 
-ISC_LIST(vsock_t)	fd_list;
-
 typedef struct remaddr remaddr_t;
 
 struct remaddr {
+	remaddr_t *		link;
 	sockaddr_u		addr;
 	struct interface *	interface;
-	ISC_LINK(remaddr_t)	link;
 };
 
-ISC_LIST(remaddr_t)       remoteaddr_list;
+remaddr_t *		remoteaddr_list;
 
-ISC_LIST(struct interface)     inter_list;
+struct interface *	inter_list;
 
 static struct interface *wildipv4 = NULL;
 static struct interface *wildipv6 = NULL;
@@ -542,16 +542,6 @@ init_io(void)
 	(void) set_signal();
 #endif
 
-	ISC_LIST_INIT(fd_list);
-
-#if !defined(HAVE_IO_COMPLETION_PORT) && defined(HAS_ROUTING_SOCKET)
-	ISC_LIST_INIT(asyncio_reader_list);
-#endif
-
-	ISC_LIST_INIT(remoteaddr_list);
-
-	ISC_LIST_INIT(inter_list);
-
 	/*
 	 * Create the sockets
 	 */
@@ -658,7 +648,6 @@ new_asyncio_reader(void)
 	reader = emalloc(sizeof(*reader));
 
 	memset(reader, 0, sizeof(*reader));
-	ISC_LINK_INIT(reader, link);
 	reader->fd = INVALID_SOCKET;
 	return reader;
 }
@@ -682,7 +671,7 @@ add_asyncio_reader(
 	struct asyncio_reader *	reader, 
 	enum desc_type		type)
 {
-	ISC_LIST_APPEND(asyncio_reader_list, reader, link);
+	LINK_SLIST(asyncio_reader_list, reader, link);
 	add_fd_to_list(reader->fd, type);
 }
 	
@@ -694,8 +683,10 @@ remove_asyncio_reader(
 	struct asyncio_reader *reader
 	)
 {
-	ISC_LIST_UNLINK_TYPE(asyncio_reader_list, reader, link,
-			     struct asyncio_reader);
+	struct asyncio_reader *unlinked;
+
+	UNLINK_SLIST(unlinked, asyncio_reader_list, reader, link,
+	    struct asyncio_reader);
 
 	if (reader->fd != INVALID_SOCKET)
 		close_and_delete_fd_from_list(reader->fd);
@@ -772,17 +763,10 @@ add_specific_interface(
 		free(naddr);
 		siface = emalloc(sizeof(*siface));
 		siface->name = if_name;
-		ISC_LINK_INIT(siface, link);
-		ISC_LIST_APPEND(specific_interface_list, siface, link);
+		LINK_TAIL_SLIST(specific_interface_list, siface, link,
+		    specific_interface_t);
 	}
 	interface_optioncount++;
-}
-
-void
-init_specific_interface(void)
-{
-	ISC_LIST_INIT(specific_interface_list);
-	init_limit_address();
 }
 
 /*
@@ -797,13 +781,8 @@ add_limit_address(
 
 	iaddr = emalloc(sizeof(*iaddr));
 	iaddr->addr = addr;
-	ISC_LIST_APPEND(limit_address_list, iaddr, link);
-}
-
-void
-init_limit_address(void)
-{
-	ISC_LIST_INIT(limit_address_list);
+	LINK_TAIL_SLIST(limit_address_list, iaddr, link,
+	    limit_address_t);
 }
 
 /*
@@ -816,16 +795,13 @@ interface_enumerate(
 	)
 {
 	interface_info_t ifi;
-	struct interface *interf;
 
 	ifi.action = IFS_EXISTS;
 	
-	for (interf = ISC_LIST_HEAD(inter_list);
-	     interf != NULL;
-	     interf = ISC_LIST_NEXT(interf, link)) {
-		ifi.interface = interf;
+	for (ifi.interface = inter_list;
+	     ifi.interface != NULL;
+	     ifi.interface = ifi.interface->link)
 		(*receiver)(data, &ifi);
-	}
 }
 
 /*
@@ -837,8 +813,6 @@ init_interface(
 	)
 {
 	memset(iface, 0, sizeof(*iface));
-	ISC_LINK_INIT(iface, link);
-	ISC_LIST_INIT(iface->peers);
 	iface->fd = INVALID_SOCKET;
 	iface->bfd = INVALID_SOCKET;
 	iface->phase = sys_interphase;
@@ -893,32 +867,12 @@ add_interface(
 	struct interface *interface
 	)
 {
-#ifdef DEBUG
-	static struct interface *listhead = NULL;
-
-	/*
-	 * For ntpd, the first few interfaces (wildcard, localhost)
-	 * will never be removed.  This means inter_list.head is
-	 * unchanging once initialized.  Take advantage of that to
-	 * watch for changes and catch corruption earlier.  This
-	 * helped track down corruption caused by using FD_SET with
-	 * a descriptor numerically larger than FD_SETSIZE.
-	 */
-	if (NULL == listhead)
-		listhead = inter_list.head;
-
-	if (listhead != inter_list.head) {
-		msyslog(LOG_ERR, "add_interface inter_list.head corrupted: was %p now %p",
-			listhead, inter_list.head);
-		exit(1);
-	}
-#endif
 	/*
 	 * Calculate the address hash
 	 */
 	interface->addr_refid = addr2refid(&interface->sin);
-	
-	ISC_LIST_APPEND(inter_list, interface, link);
+
+	LINK_SLIST(inter_list, interface, link);
 	ninterfaces++;
 }
 
@@ -932,10 +886,11 @@ remove_interface(
 	struct interface *iface
 	)
 {
+	struct interface *unlinked;
 	sockaddr_u resmask;
 
-	ISC_LIST_UNLINK_TYPE(inter_list, iface, link,
-			     struct interface);
+	UNLINK_SLIST(unlinked, inter_list, iface, link, struct
+	    interface);
 
 	delete_interface_from_list(iface);
   
@@ -1104,9 +1059,9 @@ address_okay(
 	 * Check if the IP address matches one given to -I, which limits
 	 * interfaces/addresses to be used to only those listed with -I.
 	 */
-	for (laddr = ISC_LIST_HEAD(limit_address_list);
-	     NULL != laddr;
-	     laddr = ISC_LIST_NEXT(laddr, link))
+	for (laddr = limit_address_list;
+	     laddr != NULL;
+	     laddr = laddr->link)
 		if (isc_netaddr_equal(&isc_if->address, laddr->addr)) {
 			DPRINTF(4, ("address_okay: specific interface address matched - OK\n"));
 			return (ISC_TRUE);
@@ -1114,9 +1069,9 @@ address_okay(
 	/*
 	 * Check if the interface name was specified with an -I option.
 	 */
-	for (iface = ISC_LIST_HEAD(specific_interface_list);
+	for (iface = specific_interface_list;
 	     NULL != iface; 
-	     iface = ISC_LIST_NEXT(iface, link))
+	     iface = iface->link)
 		if (!strcasecmp(isc_if->name, iface->name)) {
 			DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
 			return (ISC_TRUE);
@@ -1350,7 +1305,6 @@ update_interfaces(
 	struct interface	interface;
 	struct interface *	iface;
 	struct interface *	next;
-	struct peer *		peer;
 
 	DPRINTF(3, ("update_interfaces(%d)\n", port));
 
@@ -1542,10 +1496,10 @@ update_interfaces(
 	 * phase 2 - delete gone interfaces - reassigning peers to
 	 * other interfaces
 	 */
-	iface = ISC_LIST_HEAD(inter_list);
+	iface = inter_list;
 
 	while (iface != NULL) {
-		next = ISC_LIST_NEXT(iface, link);
+		next = iface->link;
 		  
 		if (!(iface->flags & (INT_WILDCARD | INT_MCASTIF))) {
 			/*
@@ -1570,10 +1524,8 @@ update_interfaces(
 				 * disconnect peers from deleted
 				 * interface
 				 */
-				for (peer = ISC_LIST_HEAD(iface->peers);
-				     peer != NULL;
-				     peer = ISC_LIST_HEAD(iface->peers))
-					set_peerdstadr(peer, NULL);
+				while (iface->peers != NULL)
+					set_peerdstadr(iface->peers, NULL);
 
 				/*
 				 * update globals in case we lose 
@@ -1753,9 +1705,9 @@ set_reuseaddr(
 
 #ifndef SO_EXCLUSIVEADDRUSE
 
-	for (interf = ISC_LIST_HEAD(inter_list);
+	for (interf = inter_list;
 	     interf != NULL;
-	     interf = ISC_LIST_NEXT(interf, link)) {
+	     interf = interf->link) {
 
 		if (interf->flags & INT_WILDCARD)
 			continue;
@@ -2158,9 +2110,9 @@ io_setbclient(void)
 	nif = 0;
 	set_reuseaddr(1);
 
-	for (interf = ISC_LIST_HEAD(inter_list);
+	for (interf = inter_list;
 	     interf != NULL;
-	     interf = ISC_LIST_NEXT(interf, link)) {
+	     interf = interf->link) {
 
 		if (interf->flags & (INT_WILDCARD | INT_LOOPBACK))
 			continue;
@@ -2235,9 +2187,9 @@ io_unsetbclient(void)
 {
 	struct interface *interf;
 
-	for (interf = ISC_LIST_HEAD(inter_list);
+	for (interf = inter_list;
 	     NULL != interf;
-	     interf = ISC_LIST_NEXT(interf, link))
+	     interf = interf->link)
 	{
 		if (interf->flags & INT_WILDCARD)
 			continue;
@@ -3163,9 +3115,9 @@ input_handler(
 	/*
 	 * Loop through the interfaces looking for data to read.
 	 */
-	for (interface = ISC_LIST_TAIL(inter_list);
+	for (interface = inter_list;
 	     interface != NULL;
-	     interface = ISC_LIST_PREV(interface, link)) {
+	     interface = interface->link) {
 
 		for (doing = 0; (doing < 2); doing++) {
 			if (!doing)
@@ -3192,17 +3144,14 @@ input_handler(
 	/*
 	 * scan list of asyncio readers - currently only used for routing sockets
 	 */
-	asyncio_reader = ISC_LIST_TAIL(asyncio_reader_list);
+	asyncio_reader = asyncio_reader_list;
 
 	while (asyncio_reader != NULL) {
-		struct asyncio_reader *next;
-		
-		next = ISC_LIST_PREV(asyncio_reader, link);
 		if (FD_ISSET(asyncio_reader->fd, &fds)) {
 			++select_count;
-			asyncio_reader->receiver(asyncio_reader);
+			(asyncio_reader->receiver)(asyncio_reader);
 		}
-		asyncio_reader = next;
+		asyncio_reader = asyncio_reader->link;
 	}
 #endif /* HAS_ROUTING_SOCKET */
 	
@@ -3421,9 +3370,9 @@ findlocalcastinterface(
 		       || IN6_IS_ADDR_MC_SITELOCAL(PSOCK_ADDR6(addr)));
 #endif
 
-	for (iface = ISC_LIST_HEAD(inter_list);
+	for (iface = inter_list;
 	     iface != NULL;
-	     iface = ISC_LIST_NEXT(iface, link)) 
+	     iface = iface->link) 
 	  {
 		/* use only allowed addresses */
 		if (iface->ignore_packets)
@@ -3492,9 +3441,9 @@ findbcastinter(
 	 * plan B - try to find something reasonable in our lists in
 	 * case kernel lookup doesn't help
 	 */
-	for (iface = ISC_LIST_HEAD(inter_list);
+	for (iface = inter_list;
 	     iface != NULL;
-	     iface = ISC_LIST_NEXT(iface, link)) 
+	     iface = iface->link) 
 	{
 		if (iface->flags & INT_WILDCARD)
 			continue;
@@ -3677,25 +3626,17 @@ io_closeclock(
 void
 kill_asyncio(int startfd)
 {
-	vsock_t *lsock;
-	vsock_t *next;
-
 	BLOCKIO();
 
-	lsock = ISC_LIST_HEAD(fd_list);
-	while (lsock != NULL) {
-		/*
-		 * careful here - list is being dismantled while
-		 * we scan it - setting next here insures that
-		 * we are able to correctly scan the list
-		 */
-		next = ISC_LIST_NEXT(lsock, link);
-		/*
-		 * will remove socket from list
-		 */
-		close_and_delete_fd_from_list(lsock->fd);
-		lsock = next;
-	}
+	/*
+	 * In the child process we do not maintain activefds and
+	 * maxactivefd.  Zeroing maxactivefd disables code which
+	 * maintains it in close_and_delete_fd_from_list().
+	 */
+	maxactivefd = 0;
+
+	while (fd_list != NULL)
+		close_and_delete_fd_from_list(fd_list->fd);
 
 	UNBLOCKIO();
 }
@@ -3714,7 +3655,7 @@ add_fd_to_list(
 	lsock->fd = fd;
 	lsock->type = type;
 
-	ISC_LIST_APPEND(fd_list, lsock, link);
+	LINK_SLIST(fd_list, lsock, link);
 	/*
 	 * I/O Completion Ports don't care about the select and FD_SET
 	 */
@@ -3739,55 +3680,49 @@ close_and_delete_fd_from_list(
 	SOCKET fd
 	) 
 {
-	vsock_t *next;
-	vsock_t *lsock = ISC_LIST_HEAD(fd_list);
+	vsock_t *lsock;
 
-	while(lsock != NULL) {
-		next = ISC_LIST_NEXT(lsock, link);
-		if(lsock->fd == fd) {
-			ISC_LIST_DEQUEUE_TYPE(fd_list, lsock, link,
-					      vsock_t);
+	UNLINK_EXPR_SLIST(lsock, fd_list, fd == 
+	    UNLINK_EXPR_SLIST_CURRENT()->fd, link, vsock_t);
 
-			switch (lsock->type) {
-			case FD_TYPE_SOCKET:
-				closesocket(lsock->fd);
-				break;
-
-			case FD_TYPE_FILE:
-				close(lsock->fd);
-				break;
-
-			default:
-				msyslog(LOG_ERR,
-					"internal error - illegal descriptor type %d - EXITING",
-					(int)lsock->type);
-				exit(1);
-			}
-
-			free(lsock);
-			/*
-			 * I/O Completion Ports don't care about select and fd_set
-			 */
-#ifndef HAVE_IO_COMPLETION_PORT
-			/*
-			 * remove from activefds
-			 */
-			FD_CLR(fd, &activefds);
-			
-			if (fd == maxactivefd && maxactivefd) {
-				int i;
-				NTP_INSIST(maxactivefd - 1 < FD_SETSIZE);
-				for (i = maxactivefd - 1; i >= 0; i--)
-					if (FD_ISSET(i, &activefds)) {
-						maxactivefd = i;
-						break;
-					}
-				NTP_INSIST(fd != maxactivefd);
-			}
-#endif
+	if (lsock != NULL) {
+		switch (lsock->type) {
+		case FD_TYPE_SOCKET:
+			closesocket(lsock->fd);
 			break;
+
+		case FD_TYPE_FILE:
+			close(lsock->fd);
+			break;
+
+		default:
+			msyslog(LOG_ERR,
+				"internal error - illegal descriptor type %d - EXITING",
+				(int)lsock->type);
+			exit(1);
 		}
-		lsock = next;
+
+		free(lsock);
+		/*
+		 * I/O Completion Ports don't care about select and fd_set
+		 */
+#ifndef HAVE_IO_COMPLETION_PORT
+		/*
+		 * remove from activefds
+		 */
+		FD_CLR(fd, &activefds);
+		
+		if (fd == maxactivefd && maxactivefd) {
+			int i;
+			NTP_INSIST(maxactivefd - 1 < FD_SETSIZE);
+			for (i = maxactivefd - 1; i >= 0; i--)
+				if (FD_ISSET(i, &activefds)) {
+					maxactivefd = i;
+					break;
+				}
+			NTP_INSIST(fd != maxactivefd);
+		}
+#endif
 	}
 }
 
@@ -3807,7 +3742,7 @@ add_addr_to_list(
 		memcpy(&laddr->addr, addr, sizeof(laddr->addr));
 		laddr->interface = interface;
 		
-		ISC_LIST_APPEND(remoteaddr_list, laddr, link);
+		LINK_SLIST(remoteaddr_list, laddr, link);
 		
 		DPRINTF(4, ("Added addr %s to list of addresses\n",
 			    stoa(addr)));
@@ -3824,19 +3759,16 @@ delete_addr_from_list(
 	sockaddr_u *addr
 	) 
 {
-	remaddr_t *entry;
+	remaddr_t *unlinked;
 	
-	for (entry = ISC_LIST_HEAD(remoteaddr_list);
-	     entry != NULL;
-	     entry = ISC_LIST_NEXT(entry, link))
-		if (SOCK_EQ(&entry->addr, addr)) {
-			ISC_LIST_DEQUEUE_TYPE(remoteaddr_list, entry,
-					      link, remaddr_t);
-			DPRINTF(4, ("Deleted addr %s from list of addresses\n",
-				    stoa(addr)));
-			free(entry);
-			break;
-		}
+	UNLINK_EXPR_SLIST(unlinked, remoteaddr_list, SOCK_EQ(addr,
+		&(UNLINK_EXPR_SLIST_CURRENT()->addr)), link, remaddr_t);
+
+	if (unlinked != NULL) {
+		DPRINTF(4, ("Deleted addr %s from list of addresses\n",
+			stoa(addr)));
+		free(unlinked);
+	}
 }
 
 
@@ -3845,22 +3777,15 @@ delete_interface_from_list(
 	struct interface *iface
 	)
 {
-	remaddr_t *next;
-	remaddr_t *entry;
-	
-	entry = ISC_LIST_HEAD(remoteaddr_list);
+	remaddr_t *unlinked;
 
-	while (entry != NULL) {
-		next = ISC_LIST_NEXT(entry, link);
-		if (entry->interface == iface) {
-			ISC_LIST_DEQUEUE_TYPE(remoteaddr_list, entry,
-					      link, remaddr_t);
-			DPRINTF(4, ("Deleted addr %s for interface #%d %s from list of addresses\n",
-				    stoa(&entry->addr), iface->ifnum,
-				    iface->name));
-			free(entry);
-		}
-		entry = next;
+	UNLINK_EXPR_SLIST(unlinked, remoteaddr_list, iface ==
+		UNLINK_EXPR_SLIST_CURRENT()->interface, link, remaddr_t);
+
+	if (unlinked != NULL) {
+		DPRINTF(4, ("Deleted addr %s for interface #%d %s from list of addresses\n",
+			stoa(&unlinked->addr), iface->ifnum, iface->name));
+		free(unlinked);
 	}
 }
 
@@ -3875,10 +3800,10 @@ find_addr_in_list(
 	DPRINTF(4, ("Searching for addr %s in list of addresses - ",
 		    stoa(addr)));
 
-	for (entry = ISC_LIST_HEAD(remoteaddr_list);
+	for (entry = remoteaddr_list;
 	     entry != NULL;
-	     entry = ISC_LIST_NEXT(entry, link))
-		if(SOCK_EQ(&entry->addr, addr)) {
+	     entry = entry->link)
+		if (SOCK_EQ(&entry->addr, addr)) {
 			DPRINTF(4, ("FOUND\n"));
 			return entry->interface;
 		}
@@ -3962,9 +3887,9 @@ find_samenet_addr_in_list(
 	DPRINTF(4, ("Searching for addr with same subnet as %s in list of addresses - ",
 		    stoa(addr)));
 
-	for (entry = ISC_LIST_HEAD(remoteaddr_list);
+	for (entry = remoteaddr_list;
 	     entry != NULL;
-	     entry = ISC_LIST_NEXT(entry, link))
+	     entry = entry->link)
 
 		if (same_network(&entry->addr, &entry->interface->mask,
 				 addr)) {
@@ -3991,9 +3916,9 @@ find_flagged_addr_in_list(
 	DPRINTF(4, ("Finding addr %s with flags %d in list: ",
 		    stoa(addr), flags));
 
-	for (entry = ISC_LIST_HEAD(remoteaddr_list);
+	for (entry = remoteaddr_list;
 	     entry != NULL;
-	     entry = ISC_LIST_NEXT(entry, link))
+	     entry = entry->link)
 
 		if (SOCK_EQ(&entry->addr, addr)
 		    && (entry->interface->flags & flags) == flags) {

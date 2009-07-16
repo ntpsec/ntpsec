@@ -9,10 +9,10 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 #include "ntp_io.h"
+#include "ntp_lists.h"
 #include "recvbuff.h"
 #include "iosignal.h"
 
-#include <isc/list.h>
 
 
 #ifdef DEBUG
@@ -30,7 +30,7 @@ static u_long volatile buffer_shortfall;/* number of missed free receive buffers
 					   between replenishments */
 
 static ISC_LIST(recvbuf_t)	full_recv_list;	/* Currently used recv buffers */
-static ISC_LIST(recvbuf_t)	free_recv_list;	/* Currently unused buffers */
+static recvbuf_t *		free_recv_list;	/* Currently unused buffers */
 	
 #if defined(SYS_WINNT)
 
@@ -100,7 +100,7 @@ create_buffers(int nbufs)
 		bufp = emalloc(sizeof(*bufp));
 #endif
 		memset(bufp, 0, sizeof(*bufp));
-		ISC_LIST_APPEND(free_recv_list, bufp, link);
+		LINK_SLIST(free_recv_list, bufp, link.next);
 		bufp++;
 		free_recvbufs++;
 		total_recvbufs++;
@@ -116,7 +116,6 @@ init_recvbuff(int nbufs)
 	 * Init buffer free list and stat counters
 	 */
 	ISC_LIST_INIT(full_recv_list);
-	ISC_LIST_INIT(free_recv_list);
 	free_recvbufs = total_recvbufs = 0;
 	full_recvbufs = lowater_adds = 0;
 
@@ -136,23 +135,18 @@ init_recvbuff(int nbufs)
 static void
 uninit_recvbuff(void)
 {
-	recvbuf_t *		rb;
+	recvbuf_t *rbunlinked;
 
-	for (rb = ISC_LIST_HEAD(full_recv_list);
-	     rb != NULL;
-	     rb = ISC_LIST_HEAD(full_recv_list)) {
-	
-		ISC_LIST_DEQUEUE(full_recv_list, rb, link);
-		free(rb);
+	while ((rbunlinked = ISC_LIST_HEAD(full_recv_list)) != NULL) {
+		ISC_LIST_DEQUEUE_TYPE(full_recv_list, rbunlinked, link, recvbuf_t);
+		free(rbunlinked);
 	}
 
-	for (rb = ISC_LIST_HEAD(free_recv_list);
-	     rb != NULL;
-	     rb = ISC_LIST_HEAD(free_recv_list)) {
-	
-		ISC_LIST_DEQUEUE(free_recv_list, rb, link);
-		free(rb);
-	}
+	do {
+		UNLINK_HEAD_SLIST(rbunlinked, free_recv_list, link.next);
+		if (rbunlinked != NULL)
+			free(rbunlinked);
+	} while (rbunlinked != NULL);
 }
 #endif	/* DEBUG */
 
@@ -172,7 +166,7 @@ freerecvbuf(recvbuf_t *rb)
 	(rb->used)--;
 	if (rb->used != 0)
 		msyslog(LOG_ERR, "******** freerecvbuff non-zero usage: %d *******", rb->used);
-	ISC_LIST_APPEND(free_recv_list, rb, link);
+	LINK_SLIST(free_recv_list, rb, link.next);
 	free_recvbufs++;
 	UNLOCK();
 }
@@ -186,6 +180,7 @@ add_full_recv_buffer(recvbuf_t *rb)
 		return;
 	}
 	LOCK();
+	ISC_LINK_INIT(rb, link);
 	ISC_LIST_APPEND(full_recv_list, rb, link);
 	full_recvbufs++;
 	UNLOCK();
@@ -194,20 +189,16 @@ add_full_recv_buffer(recvbuf_t *rb)
 recvbuf_t *
 get_free_recv_buffer(void)
 {
-	recvbuf_t * buffer = NULL;
+	recvbuf_t *buffer;
+
 	LOCK();
-	buffer = ISC_LIST_HEAD(free_recv_list);
-	if (buffer != NULL)
-	{
-		ISC_LIST_DEQUEUE(free_recv_list, buffer, link);
+	UNLINK_HEAD_SLIST(buffer, free_recv_list, link.next);
+	if (buffer != NULL) {
 		free_recvbufs--;
 		initialise_buffer(buffer);
 		(buffer->used)++;
-	}
-	else
-	{
+	} else
 		buffer_shortfall++;
-	}
 	UNLOCK();
 	return (buffer);
 }
@@ -216,13 +207,14 @@ get_free_recv_buffer(void)
 recvbuf_t *
 get_free_recv_buffer_alloc(void)
 {
-	recvbuf_t * buffer = get_free_recv_buffer();
-	if (buffer == NULL)
-	{
+	recvbuf_t *buffer;
+	
+	buffer = get_free_recv_buffer();
+	if (NULL == buffer) {
 		create_buffers(RECV_INC);
 		buffer = get_free_recv_buffer();
 	}
-	NTP_ENSURE(NULL != buffer);
+	NTP_ENSURE(buffer != NULL);
 	return (buffer);
 }
 #endif
@@ -236,14 +228,13 @@ get_full_recv_buffer(void)
 #ifdef HAVE_SIGNALED_IO
 	/*
 	 * make sure there are free buffers when we
-	 * wander off to do lengthy paket processing with
+	 * wander off to do lengthy packet processing with
 	 * any buffer we grab from the full list.
 	 * 
 	 * fixes malloc() interrupted by SIGIO risk
 	 * (Bug 889)
 	 */
-	rbuf = ISC_LIST_HEAD(free_recv_list);
-	if (rbuf == NULL || buffer_shortfall > 0) {
+	if (NULL == free_recv_list || buffer_shortfall > 0) {
 		/*
 		 * try to get us some more buffers
 		 */
@@ -255,18 +246,14 @@ get_full_recv_buffer(void)
 	 * try to grab a full buffer
 	 */
 	rbuf = ISC_LIST_HEAD(full_recv_list);
-	if (rbuf != NULL)
-	{
-		ISC_LIST_DEQUEUE(full_recv_list, rbuf, link);
+	if (rbuf != NULL) {
+		ISC_LIST_DEQUEUE_TYPE(full_recv_list, rbuf, link, recvbuf_t);
 		--full_recvbufs;
-	}
-	else
-	{
+	} else
 		/*
 		 * Make sure we reset the full count to 0
 		 */
 		full_recvbufs = 0;
-	}
 	UNLOCK();
 	return (rbuf);
 }

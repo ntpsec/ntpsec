@@ -483,6 +483,7 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
+						GeneratePreprocessedFile="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -845,6 +846,10 @@
 			</File>
 			<File
 				RelativePath="..\include\ntp_iocompletionport.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_lists.h"
 				>
 			</File>
 			<File

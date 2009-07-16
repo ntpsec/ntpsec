@@ -15,7 +15,6 @@
 #include <ntp_net.h>
 
 #include <isc/boolean.h>
-#include <isc/list.h>
 
 /*
  * Calendar arithmetic - contributed by G. Healton
@@ -175,28 +174,28 @@ typedef char s_char;
  * numbers of each of the interfaces we are using.
  */
 struct interface {
-	SOCKET fd;			/* socket this is opened on */
-	SOCKET bfd;			/* socket for receiving broadcasts */
-	sockaddr_u sin;			/* interface address */
-	sockaddr_u bcast;		/* broadcast address */
-	sockaddr_u mask;		/* interface mask */
-	char name[32];			/* name of interface */
-	u_short family;			/* Address family */
-	u_short phase;			/* phase in update cycle */
-	int flags;			/* interface flags */
-	int last_ttl;			/* last TTL specified */
-	u_int32 addr_refid;		/* IPv4 addr or IPv6 hash */
-	int num_mcast;			/* No. of IP addresses in multicast socket */
-	u_long starttime;		/* current_time as of creation of interface structure */
-	volatile long received;		/* number of incoming packets */
-	long sent;			/* number of outgoing packets */
-	long notsent;			/* number of send failures */
-	u_int scopeid;			/* Scope used for Multicasting */
-	u_int ifnum;			/* sequential interface instance count */
-	isc_boolean_t ignore_packets;	/* listen-read-drop this? */
-	ISC_LIST(struct peer) peers;	/* list of peers for the interface */
-	u_int peercnt;			/* peers referencing this interface */
-	ISC_LINK(struct interface) link;/* interface list */
+	struct interface *link;	/* interface list link */
+	SOCKET fd;		/* socket this is opened on */
+	SOCKET bfd;		/* socket for receiving broadcasts */
+	sockaddr_u sin;		/* interface address */
+	sockaddr_u bcast;	/* broadcast address */
+	sockaddr_u mask;	/* interface mask */
+	char name[32];		/* name of interface */
+	u_short family;		/* Address family */
+	u_short phase;		/* phase in update cycle */
+	int flags;		/* interface flags */
+	int last_ttl;		/* last TTL specified */
+	u_int32 addr_refid;	/* IPv4 addr or IPv6 hash */
+	int num_mcast;		/* No. of IP addresses in multicast socket */
+	u_long starttime;	/* current_time as of creation of interface structure */
+	volatile long received;	/* number of incoming packets */
+	long sent;		/* number of outgoing packets */
+	long notsent;		/* number of send failures */
+	u_int scopeid;		/* Scope used for Multicasting */
+	u_int ifnum;		/* sequential interface instance count */
+	isc_boolean_t ignore_packets; /* listen-read-drop this? */
+	struct peer *peers;	/* list of peers for the interface */
+	u_int peercnt;		/* peers referencing this interface */
 };
 
 /*
@@ -246,11 +245,11 @@ struct interface {
  * spec.
  */
 struct peer {
-	struct peer *next;	/* pointer to next association */
+	struct peer *next;	/* link pointer in peer hash */
 	struct peer *ass_next;	/* link pointer in associd hash */
+	struct peer *ilink;	/* list of peers for interface */
 	sockaddr_u srcadr;	/* address of remote host */
 	struct interface *dstadr; /* local address (interface) */
-	ISC_LINK(struct peer) ilink; /* peers using this interface */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */

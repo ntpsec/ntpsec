@@ -1995,6 +1995,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_lists.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_machine.h"
 				>
 			</File>

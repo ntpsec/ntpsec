@@ -522,6 +522,10 @@ SOURCE=..\..\..\include\ntp_lineedit.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\include\ntp_lists.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\include\ntp_machine.h
 # End Source File
 # Begin Source File
