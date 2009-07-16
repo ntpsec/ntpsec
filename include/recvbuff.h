@@ -1,5 +1,5 @@
-#if !defined __recvbuff_h
-#define __recvbuff_h
+#ifndef RECVBUFF_H
+#define RECVBUFF_H
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -7,8 +7,8 @@
 
 #include "ntp.h"
 #include "ntp_fp.h"
+#include "ntp_lists.h"
 
-#include <isc/list.h>
 #include <isc/result.h>
 
 /*
@@ -51,7 +51,7 @@ extern HANDLE	get_recv_buff_event (void);
 typedef struct recvbuf recvbuf_t;
 
 struct recvbuf {
-	ISC_LINK(recvbuf_t)	link;
+	ISC_LINK(recvbuf_t)	link;	/* next in list */
 	union {
 		sockaddr_u X_recv_srcadr;
 		caddr_t X_recv_srcclock;
@@ -117,5 +117,4 @@ extern	struct recvbuf *get_full_recv_buffer (void);
  */
 extern isc_boolean_t has_full_recv_buffer (void);
 
-#endif /* defined __recvbuff_h */
-
+#endif	/* RECVBUFF_H */

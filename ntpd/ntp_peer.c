@@ -9,6 +9,7 @@
 #include <sys/types.h>
 
 #include "ntpd.h"
+#include "ntp_lists.h"
 #include "ntp_stdlib.h"
 #include "ntp_control.h"
 #include <ntp_random.h>
@@ -67,8 +68,8 @@ int AM[AM_MODES][AM_MODES] = {
 
 /*
  * These routines manage the allocation of memory to peer structures
- * and the maintenance of the peer hash table. The two main entry
- * points are findpeer(), which looks for matching peer sturctures in
+ * and the maintenance of the peer hash table. The three main entry
+ * points are findpeer(), which looks for matching peer structures in
  * the peer list, newpeer(), which allocates a new peer structure and
  * adds it to the list, and unpeer(), which demobilizes the association
  * and deallocates the structure.
@@ -125,14 +126,12 @@ init_peer(void)
 	register int i;
 
 	/*
-	 * Clear hash table and counters.
+	 * Clear hash tables and counters.
 	 */
-	for (i = 0; i < NTP_HASH_SIZE; i++) {
-		peer_hash[i] = 0;
-		peer_hash_count[i] = 0;
-		assoc_hash[i] = 0;
-		assoc_hash_count[i] = 0;
-	}
+	memset(peer_hash, 0, sizeof(peer_hash));
+	memset(peer_hash_count, 0, sizeof(peer_hash_count));
+	memset(assoc_hash, 0, sizeof(assoc_hash));
+	memset(assoc_hash_count, 0, sizeof(assoc_hash_count));
 
 	/*
 	 * Clear stat counters
@@ -143,11 +142,9 @@ init_peer(void)
 	/*
 	 * Initialize peer memory.
 	 */
-	peer_free = 0;
-	for (i = 0; i < INIT_PEER_ALLOC; i++) {
-		init_peer_alloc[i].next = peer_free;
-		peer_free = &init_peer_alloc[i];
-	}
+	peer_free = NULL;
+	for (i = 0; i < INIT_PEER_ALLOC; i++)
+		LINK_SLIST(peer_free, &init_peer_alloc[i], next);
 	total_peer_structs = INIT_PEER_ALLOC;
 	peer_free_count = INIT_PEER_ALLOC;
 
@@ -170,8 +167,7 @@ getmorepeermem(void)
 	peer = (struct peer *)emalloc(INC_PEER_ALLOC *
 	    sizeof(struct peer));
 	for (i = 0; i < INC_PEER_ALLOC; i++) {
-		peer->next = peer_free;
-		peer_free = peer;
+		LINK_SLIST(peer_free, peer, next);
 		peer++;
 	}
 
@@ -397,6 +393,7 @@ unpeer(
 	struct peer *peer_to_remove
 	)
 {
+	register struct peer *unlinked;
 	int	hash;
 	char	tbuf[80];
 
@@ -418,23 +415,14 @@ unpeer(
 		refclock_unpeer(peer_to_remove);
 #endif
 	peer_to_remove->action = 0;	/* disable timeout actions */
-	if (peer_hash[hash] == peer_to_remove) {
-		peer_hash[hash] = peer_to_remove->next;
-	} else {
-		register struct peer *peer;
 
-		peer = peer_hash[hash];
-		while (peer != 0 && peer->next != peer_to_remove)
-			peer = peer->next;
-		
-		if (peer == 0) {
-			peer_hash_count[hash]++;
-			msyslog(LOG_ERR,
-			    "peer struct for %s not in table!",
-			    stoa(&peer->srcadr));
-		} else {
-			peer->next = peer_to_remove->next;
-		}
+	UNLINK_SLIST(unlinked, peer_hash[hash], peer_to_remove, next,
+	    struct peer);
+
+	if (NULL == unlinked) {
+		peer_hash_count[hash]++;
+		msyslog(LOG_ERR, "peer struct for %s not in table!",
+		    stoa(&peer_to_remove->srcadr));
 	}
 
 	/*
@@ -442,26 +430,18 @@ unpeer(
 	 */
 	hash = peer_to_remove->associd & NTP_HASH_MASK;
 	assoc_hash_count[hash]--;
-	if (assoc_hash[hash] == peer_to_remove) {
-		assoc_hash[hash] = peer_to_remove->ass_next;
-	} else {
-		register struct peer *peer;
 
-		peer = assoc_hash[hash];
-		while (peer != 0 && peer->ass_next != peer_to_remove)
-		    peer = peer->ass_next;
-		
-		if (peer == 0) {
-			assoc_hash_count[hash]++;
-			msyslog(LOG_ERR,
-			    "peer struct for %s not in association table!",
-				stoa(&peer->srcadr));
-		} else {
-			peer->ass_next = peer_to_remove->ass_next;
-		}
+	UNLINK_SLIST(unlinked, assoc_hash[hash], peer_to_remove,
+	    ass_next, struct peer);
+
+	if (NULL == unlinked) {
+		assoc_hash_count[hash]++;
+		msyslog(LOG_ERR,
+		    "peer struct for %s not in association table!",
+		    stoa(&peer_to_remove->srcadr));
 	}
-	peer_to_remove->next = peer_free;
-	peer_free = peer_to_remove;
+
+	LINK_SLIST(peer_free, peer_to_remove, next);
 	peer_free_count++;
 }
 
@@ -524,8 +504,13 @@ peer_config(
  * structures
  */
 void
-set_peerdstadr(struct peer *peer, struct interface *interface)
+set_peerdstadr(
+	struct peer *peer,
+	struct interface *interface
+	)
 {
+	struct peer *unlinked;
+
 	if (peer->dstadr != interface) {
 		if (interface != NULL && (peer->cast_flags &
 		    MDF_BCLNT) && (interface->flags & INT_MCASTIF) &&
@@ -540,8 +525,8 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 		}
 		if (peer->dstadr != NULL) {
 			peer->dstadr->peercnt--;
-			ISC_LIST_UNLINK_TYPE(peer->dstadr->peers, peer,
-			    ilink, struct peer);
+			UNLINK_SLIST(unlinked, peer->dstadr->peers,
+			    peer, ilink, struct peer);
 			msyslog(LOG_INFO,
 				"%s interface %s -> %s",
 				stoa(&peer->srcadr),
@@ -552,8 +537,7 @@ set_peerdstadr(struct peer *peer, struct interface *interface)
 		}
 		peer->dstadr = interface;
 		if (peer->dstadr != NULL) {
-			ISC_LIST_APPEND(peer->dstadr->peers, peer,
-			    ilink);
+			LINK_SLIST(peer->dstadr->peers, peer, ilink);
 			peer->dstadr->peercnt++;
 		}
 	}
@@ -759,9 +743,9 @@ newpeer(
 	 * actual interface, because that's what gets put into the peer
 	 * structure.
 	 */
-	peer = findexistingpeer(srcadr, (struct peer *)0, hmode);
-	if (dstadr != 0) {
-		while (peer != 0) {
+	peer = findexistingpeer(srcadr, NULL, hmode);
+	if (dstadr != NULL) {
+		while (peer != NULL) {
 			if (peer->dstadr == dstadr)
 				break;
 
@@ -787,13 +771,12 @@ newpeer(
 	 */
 	if (peer_free_count == 0)
 		getmorepeermem();
-	peer = peer_free;
-	peer_free = peer->next;
+	UNLINK_HEAD_SLIST(peer, peer_free, next);
 	peer_free_count--;
 	peer_associations++;
 	if (flags & FLAG_PREEMPT)
 		peer_preempt++;
-	memset((char *)peer, 0, sizeof(struct peer));
+	memset(peer, 0, sizeof(*peer));
 
 	/*
 	 * Assign an association ID and increment the system variable.
@@ -805,7 +788,6 @@ newpeer(
 	DPRINTF(3, ("newpeer: cast flags: 0x%x for address: %s\n",
 		    cast_flags, stoa(srcadr)));
 
-	ISC_LINK_INIT(peer, ilink);  /* set up interface link chain */
 	peer->srcadr = *srcadr;
 	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr,
 	    cast_flags));
@@ -823,11 +805,11 @@ newpeer(
 	if (minpoll == 0)
 		peer->minpoll = NTP_MINDPOLL;
 	else
-		peer->minpoll = min(minpoll, NTP_MAXPOLL);
+		peer->minpoll = (u_char)min(minpoll, NTP_MAXPOLL);
 	if (maxpoll == 0)
 		peer->maxpoll = NTP_MAXDPOLL;
 	else
-		peer->maxpoll = max(maxpoll, NTP_MINPOLL);
+		peer->maxpoll = (u_char)max(maxpoll, NTP_MINPOLL);
 	if (peer->minpoll > peer->maxpoll)
 		peer->minpoll = peer->maxpoll;
 #ifdef DEBUG
@@ -897,8 +879,7 @@ newpeer(
 			 * Dump it, something screwed up
 			 */
 			set_peerdstadr(peer, NULL);
-			peer->next = peer_free;
-			peer_free = peer;
+			LINK_SLIST(peer_free, peer, next);
 			peer_free_count++;
 			return (NULL);
 		}
@@ -909,12 +890,10 @@ newpeer(
 	 * Put the new peer in the hash tables.
 	 */
 	i = NTP_HASH_ADDR(&peer->srcadr);
-	peer->next = peer_hash[i];
-	peer_hash[i] = peer;
+	LINK_SLIST(peer_hash[i], peer, next);
 	peer_hash_count[i]++;
 	i = peer->associd & NTP_HASH_MASK;
-	peer->ass_next = assoc_hash[i];
-	assoc_hash[i] = peer;
+	LINK_SLIST(assoc_hash[i], peer, ass_next);
 	assoc_hash_count[i]++;
 	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
 	report_event(PEVNT_MOBIL, peer, tbuf);

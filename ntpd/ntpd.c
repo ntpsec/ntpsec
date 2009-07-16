@@ -543,16 +543,12 @@ ntpdmain(
 	/*
 	 * Limit specific interfaces
 	 */
-	init_specific_interface();
-
 	if (HAVE_OPT( INTERFACE )) {
 		int	ifacect = STACKCT_OPT( INTERFACE );
 		const char**	ifaces  = STACKLST_OPT( INTERFACE );
 
-		/* malloc space for the array of names */
-		while (ifacect-- > 0) {
+		while (ifacect-- > 0)
 			add_specific_interface(*ifaces++);
-		}
 	}
 
 	if (HAVE_OPT( NICE ))
