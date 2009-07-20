@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  Thursday July 16, 2009 at 07:51:45 AM EDT
+ *  It has been AutoGen-ed  Monday July 20, 2009 at 05:13:42 AM EDT
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 29:0:4 templates.
+ * Generated from AutoOpts 32:1:7 templates.
  */
 
 /*
@@ -24,8 +24,10 @@
  * 
  */
 
-
+#include <sys/types.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define OPTION_CODE_COMPILE 1
 #include "sntp-opts.h"
@@ -33,12 +35,16 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+/* TRANSLATORS: choose the translation for option names wisely because you
+                cannot ever change your mind. */
 tSCC zCopyright[] =
-       "sntp copyright (c) 2008 ntp.org, all rights reserved";
-tSCC zCopyrightNotice[] =
-       
+       "sntp copyright (c) 2008 ntp.org, all rights reserved"
 /* extracted from sntp-opts.def near line 17 */
+;
+tSCC zCopyrightNotice[1] =
 "";
+
 extern tUsageProc optionUsage;
 
 #ifndef NULL
@@ -183,24 +189,16 @@ tSCC    zKeyfile_Name[]            = "keyfile";
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]       = "Display usage information and exit";
-tSCC zHelp_Name[]      = "help";
-
-tSCC zMore_HelpText[]  = "Extended usage information passed thru pager";
-tSCC zMore_Help_Name[] = "more-help";
-
-tSCC zVersionText[]    = "Output version information and exit";
-tSCC zVersion_Name[]   = "version";
-
-/*
- *  Save/Load_Opts option description:
- */
+tSCC zHelpText[]          = "Display usage information and exit";
+tSCC zHelp_Name[]         = "help";
+tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+tSCC zMore_Help_Name[]    = "more-help";
+tSCC zVersionText[]       = "Output version information and exit";
+tSCC zVersion_Name[]      = "version";
 tSCC zSave_OptsText[]     = "Save the option state to a config file";
 tSCC zSave_Opts_Name[]    = "save-opts";
-
 tSCC zLoad_OptsText[]     = "Load options from a config file";
 tSCC zLoad_Opts_NAME[]    = "LOAD_OPTS";
-
 tSCC zNotLoad_Opts_Name[] = "no-load-opts";
 tSCC zNotLoad_Opts_Pfx[]  = "no";
 #define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
@@ -444,7 +442,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) \
+     /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
 			  | OPTST_DISABLE_IMM, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
@@ -480,7 +478,7 @@ job.\n\
 NTP is the Network Time Protocol (RFC 1305) and SNTP is the\n\
 Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 408 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 501 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -490,6 +488,9 @@ tSCC    zFullVersion[] = SNTP_FULL_VERSION;
 # define translate_option_strings NULL
 #endif /* ENABLE_NLS */
 
+
+#define sntp_full_usage NULL
+#define sntp_short_usage NULL
 tOptions sntpOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -499,8 +500,7 @@ tOptions sntpOptions = {
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
-    + OPTPROC_ARGS_REQ
-    + OPTPROC_HAS_IMMED ),
+    + OPTPROC_ARGS_REQ ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -513,12 +513,14 @@ tOptions sntpOptions = {
     /*
      *  Indexes to special options
      */
-    { INDEX_OPT_MORE_HELP,
-      INDEX_OPT_SAVE_OPTS,
-      NO_EQUIVALENT /* index of '-#' option */,
+    { INDEX_OPT_MORE_HELP, /* more-help option index */
+      INDEX_OPT_SAVE_OPTS, /* save option index */
+      NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    17 /* full option count */, 12 /* user option count */
+    17 /* full option count */, 12 /* user option count */,
+    sntp_full_usage, sntp_short_usage,
+    NULL, NULL
 };
 
 /*
@@ -529,25 +531,25 @@ doUsageOpt(
     tOptions*   pOptions,
     tOptDesc*   pOptDesc )
 {
+    (void)pOptions;
     USAGE( EXIT_SUCCESS );
 }
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 92 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
+extern void optionPutShell( tOptions* );
+
 int
-main( int argc, char** argv )
+main(int argc, char** argv)
 {
     int res = EXIT_SUCCESS;
     (void)optionProcess( &sntpOptions, argc, argv );
-    {
-        void optionPutShell( tOptions* );
-        optionPutShell( &sntpOptions );
-    }
+    optionPutShell( &sntpOptions );
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 514 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 633 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -590,44 +592,45 @@ translate_option_strings( void )
      *  Guard against re-translation.  It won't work.  The strings will have
      *  been changed by the first pass through this code.  One shot only.
      */
-    if (option_usage_text.field_ct == 0)
-        return;
-    /*
-     *  Do the translations.  The first pointer follows the field count field.
-     *  The field count field is the size of a pointer.
-     */
-    {
-        char** ppz = (char**)(void*)&(option_usage_text);
-        int    ix  = option_usage_text.field_ct;
+    if (option_usage_text.field_ct != 0) {
+
+        /*
+         *  Do the translations.  The first pointer follows the field count
+         *  field.  The field count field is the size of a pointer.
+         */
+        tOptDesc* pOD = sntpOptions.pOptDesc;
+        char**    ppz = (char**)(void*)&(option_usage_text);
+        int       ix  = option_usage_text.field_ct;
 
         do {
             ppz++;
             *ppz = AO_gettext(*ppz);
         } while (--ix > 0);
-    }
-    option_usage_text.field_ct = 0;
 
-    {
+        COERSION(pzCopyright);
+        COERSION(pzCopyNotice);
+        COERSION(pzFullVersion);
+        COERSION(pzUsageTitle);
+        COERSION(pzExplain);
+        COERSION(pzDetail);
+        option_usage_text.field_ct = 0;
+
+        for (ix = sntpOptions.optCt; ix > 0; ix--, pOD++)
+            coerce_it((void*)&(pOD->pzText));
+    }
+
+    if ((sntpOptions.fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
         tOptDesc* pOD = sntpOptions.pOptDesc;
-        int       ix  = sntpOptions.optCt;
+        int       ix;
 
-        for (;;) {
-            pOD->pzText           = AO_gettext(pOD->pzText);
-            pOD->pz_NAME          = AO_gettext(pOD->pz_NAME);
-            pOD->pz_Name          = AO_gettext(pOD->pz_Name);
-            pOD->pz_DisableName   = AO_gettext(pOD->pz_DisableName);
-            pOD->pz_DisablePfx    = AO_gettext(pOD->pz_DisablePfx);
-            if (--ix <= 0)
-                break;
-            pOD++;
+        for (ix = sntpOptions.optCt; ix > 0; ix--, pOD++) {
+            coerce_it((void*)&(pOD->pz_Name));
+            coerce_it((void*)&(pOD->pz_DisableName));
+            coerce_it((void*)&(pOD->pz_DisablePfx));
         }
+        /* prevent re-translation */
+        sntpOptions.fOptSet |= OPTPROC_NXLAT_OPT_CFG | OPTPROC_NXLAT_OPT;
     }
-    COERSION(pzCopyright);
-    COERSION(pzCopyNotice);
-    COERSION(pzFullVersion);
-    COERSION(pzUsageTitle);
-    COERSION(pzExplain);
-    COERSION(pzDetail);
 }
 
 #endif /* ENABLE_NLS */

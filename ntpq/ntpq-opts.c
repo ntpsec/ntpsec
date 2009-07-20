@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  Thursday July 16, 2009 at 07:46:05 AM EDT
+ *  It has been AutoGen-ed  Monday July 20, 2009 at 05:12:10 AM EDT
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 29:0:4 templates.
+ * Generated from AutoOpts 32:1:7 templates.
  */
 
 /*
@@ -24,8 +24,10 @@
  * see html/copyright.html
  */
 
-
+#include <sys/types.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define OPTION_CODE_COMPILE 1
 #include "ntpq-opts.h"
@@ -33,12 +35,16 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+/* TRANSLATORS: choose the translation for option names wisely because you
+                cannot ever change your mind. */
 tSCC zCopyright[] =
-       "ntpq copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved";
-tSCC zCopyrightNotice[] =
-       
+       "ntpq copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
+;
+tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
+
 extern tUsageProc optionUsage;
 
 /*
@@ -163,24 +169,16 @@ tSCC    zNumeric_Name[]            = "numeric";
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]       = "Display usage information and exit";
-tSCC zHelp_Name[]      = "help";
-
-tSCC zMore_HelpText[]  = "Extended usage information passed thru pager";
-tSCC zMore_Help_Name[] = "more-help";
-
-tSCC zVersionText[]    = "Output version information and exit";
-tSCC zVersion_Name[]   = "version";
-
-/*
- *  Save/Load_Opts option description:
- */
+tSCC zHelpText[]          = "Display usage information and exit";
+tSCC zHelp_Name[]         = "help";
+tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+tSCC zMore_Help_Name[]    = "more-help";
+tSCC zVersionText[]       = "Output version information and exit";
+tSCC zVersion_Name[]      = "version";
 tSCC zSave_OptsText[]     = "Save the option state to a config file";
 tSCC zSave_Opts_Name[]    = "save-opts";
-
 tSCC zLoad_OptsText[]     = "Load options from a config file";
 tSCC zLoad_Opts_NAME[]    = "LOAD_OPTS";
-
 tSCC zNotLoad_Opts_Name[] = "no-load-opts";
 tSCC zNotLoad_Opts_Pfx[]  = "no";
 #define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
@@ -394,7 +392,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) \
+     /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
 			  | OPTST_DISABLE_IMM, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
@@ -430,7 +428,7 @@ information about current state and/or changes in that state.\n\
 The same formats are used in NTPv4, although some of the\n\
 variables have changed and new ones added.\n";
 tSCC    zFullVersion[] = NTPQ_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 408 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 501 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -440,6 +438,9 @@ tSCC    zFullVersion[] = NTPQ_FULL_VERSION;
 # define translate_option_strings NULL
 #endif /* ENABLE_NLS */
 
+
+#define ntpq_full_usage NULL
+#define ntpq_short_usage NULL
 tOptions ntpqOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -448,8 +449,7 @@ tOptions ntpqOptions = {
     + OPTPROC_SHORTOPT
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
-    + OPTPROC_ENVIRON
-    + OPTPROC_HAS_IMMED ),
+    + OPTPROC_ENVIRON ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -462,12 +462,14 @@ tOptions ntpqOptions = {
     /*
      *  Indexes to special options
      */
-    { INDEX_OPT_MORE_HELP,
-      INDEX_OPT_SAVE_OPTS,
-      NO_EQUIVALENT /* index of '-#' option */,
+    { INDEX_OPT_MORE_HELP, /* more-help option index */
+      INDEX_OPT_SAVE_OPTS, /* save option index */
+      NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    13 /* full option count */, 8 /* user option count */
+    13 /* full option count */, 8 /* user option count */,
+    ntpq_full_usage, ntpq_short_usage,
+    NULL, NULL
 };
 
 /*
@@ -478,45 +480,41 @@ doUsageOpt(
     tOptions*   pOptions,
     tOptDesc*   pOptDesc )
 {
+    (void)pOptions;
     USAGE( EXIT_SUCCESS );
 }
 
 #if ! defined(TEST_NTPQ_OPTS)
 
-/* * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  *   For the set-debug-level option, when DEBUG is #define-d.
  */
 #ifdef DEBUG
 static void
-doOptSet_Debug_Level(
-    tOptions*   pOptions,
-    tOptDesc*   pOptDesc )
+doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
     /* extracted from ../include/debug-opt.def, line 29 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined DEBUG */
-
 #endif /* defined(TEST_NTPQ_OPTS) */
-
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 92 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
 
+extern void optionPutShell( tOptions* );
+
 int
-main( int argc, char** argv )
+main(int argc, char** argv)
 {
     int res = EXIT_SUCCESS;
     (void)optionProcess( &ntpqOptions, argc, argv );
-    {
-        void optionPutShell( tOptions* );
-        optionPutShell( &ntpqOptions );
-    }
+    optionPutShell( &ntpqOptions );
     return res;
 }
 #endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 514 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 633 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -559,44 +557,45 @@ translate_option_strings( void )
      *  Guard against re-translation.  It won't work.  The strings will have
      *  been changed by the first pass through this code.  One shot only.
      */
-    if (option_usage_text.field_ct == 0)
-        return;
-    /*
-     *  Do the translations.  The first pointer follows the field count field.
-     *  The field count field is the size of a pointer.
-     */
-    {
-        char** ppz = (char**)(void*)&(option_usage_text);
-        int    ix  = option_usage_text.field_ct;
+    if (option_usage_text.field_ct != 0) {
+
+        /*
+         *  Do the translations.  The first pointer follows the field count
+         *  field.  The field count field is the size of a pointer.
+         */
+        tOptDesc* pOD = ntpqOptions.pOptDesc;
+        char**    ppz = (char**)(void*)&(option_usage_text);
+        int       ix  = option_usage_text.field_ct;
 
         do {
             ppz++;
             *ppz = AO_gettext(*ppz);
         } while (--ix > 0);
-    }
-    option_usage_text.field_ct = 0;
 
-    {
+        COERSION(pzCopyright);
+        COERSION(pzCopyNotice);
+        COERSION(pzFullVersion);
+        COERSION(pzUsageTitle);
+        COERSION(pzExplain);
+        COERSION(pzDetail);
+        option_usage_text.field_ct = 0;
+
+        for (ix = ntpqOptions.optCt; ix > 0; ix--, pOD++)
+            coerce_it((void*)&(pOD->pzText));
+    }
+
+    if ((ntpqOptions.fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
         tOptDesc* pOD = ntpqOptions.pOptDesc;
-        int       ix  = ntpqOptions.optCt;
+        int       ix;
 
-        for (;;) {
-            pOD->pzText           = AO_gettext(pOD->pzText);
-            pOD->pz_NAME          = AO_gettext(pOD->pz_NAME);
-            pOD->pz_Name          = AO_gettext(pOD->pz_Name);
-            pOD->pz_DisableName   = AO_gettext(pOD->pz_DisableName);
-            pOD->pz_DisablePfx    = AO_gettext(pOD->pz_DisablePfx);
-            if (--ix <= 0)
-                break;
-            pOD++;
+        for (ix = ntpqOptions.optCt; ix > 0; ix--, pOD++) {
+            coerce_it((void*)&(pOD->pz_Name));
+            coerce_it((void*)&(pOD->pz_DisableName));
+            coerce_it((void*)&(pOD->pz_DisablePfx));
         }
+        /* prevent re-translation */
+        ntpqOptions.fOptSet |= OPTPROC_NXLAT_OPT_CFG | OPTPROC_NXLAT_OPT;
     }
-    COERSION(pzCopyright);
-    COERSION(pzCopyNotice);
-    COERSION(pzFullVersion);
-    COERSION(pzUsageTitle);
-    COERSION(pzExplain);
-    COERSION(pzDetail);
 }
 
 #endif /* ENABLE_NLS */

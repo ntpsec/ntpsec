@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  Thursday July 16, 2009 at 07:52:54 AM EDT
+ *  It has been AutoGen-ed  Monday July 20, 2009 at 05:16:04 AM EDT
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 29:0:4 templates.
+ * Generated from AutoOpts 32:1:7 templates.
  */
 
 /*
@@ -24,21 +24,28 @@
  * see html/copyright.html
  */
 
-
+#include <sys/types.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+extern FILE * option_usage_fp;
 #define OPTION_CODE_COMPILE 1
 #include "ntp-keygen-opts.h"
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
+/* TRANSLATORS: choose the translation for option names wisely because you
+                cannot ever change your mind. */
 tSCC zCopyright[] =
-       "ntp-keygen copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved";
-tSCC zCopyrightNotice[] =
-       
+       "ntp-keygen copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
+;
+tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
+
 extern tUsageProc optionUsage;
 
 /*
@@ -388,24 +395,16 @@ tSCC    zMv_Keys_Name[]            = "mv-keys";
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]       = "Display usage information and exit";
-tSCC zHelp_Name[]      = "help";
-
-tSCC zMore_HelpText[]  = "Extended usage information passed thru pager";
-tSCC zMore_Help_Name[] = "more-help";
-
-tSCC zVersionText[]    = "Output version information and exit";
-tSCC zVersion_Name[]   = "version";
-
-/*
- *  Save/Load_Opts option description:
- */
+tSCC zHelpText[]          = "Display usage information and exit";
+tSCC zHelp_Name[]         = "help";
+tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+tSCC zMore_Help_Name[]    = "more-help";
+tSCC zVersionText[]       = "Output version information and exit";
+tSCC zVersion_Name[]      = "version";
 tSCC zSave_OptsText[]     = "Save the option state to a config file";
 tSCC zSave_Opts_Name[]    = "save-opts";
-
 tSCC zLoad_OptsText[]     = "Load options from a config file";
 tSCC zLoad_Opts_NAME[]    = "LOAD_OPTS";
-
 tSCC zNotLoad_Opts_Name[] = "no-load-opts";
 tSCC zNotLoad_Opts_Pfx[]  = "no";
 #define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
@@ -754,7 +753,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) \
+     /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
 			  | OPTST_DISABLE_IMM, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
@@ -784,7 +783,7 @@ tSCC    zDetail[]     = "\n\
 If there is no new host key, look for an existing one.\n\
 If one is not found, create it.\n";
 tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 408 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 501 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -794,6 +793,9 @@ tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
 # define translate_option_strings NULL
 #endif /* ENABLE_NLS */
 
+
+#define ntp_keygen_full_usage NULL
+#define ntp_keygen_short_usage NULL
 tOptions ntp_keygenOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -803,8 +805,7 @@ tOptions ntp_keygenOptions = {
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
-    + OPTPROC_NO_ARGS
-    + OPTPROC_HAS_IMMED ),
+    + OPTPROC_NO_ARGS ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -817,12 +818,14 @@ tOptions ntp_keygenOptions = {
     /*
      *  Indexes to special options
      */
-    { INDEX_OPT_MORE_HELP,
-      INDEX_OPT_SAVE_OPTS,
-      NO_EQUIVALENT /* index of '-#' option */,
+    { INDEX_OPT_MORE_HELP, /* more-help option index */
+      INDEX_OPT_SAVE_OPTS, /* save option index */
+      NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    23 /* full option count */, 18 /* user option count */
+    23 /* full option count */, 18 /* user option count */,
+    ntp_keygen_full_usage, ntp_keygen_short_usage,
+    NULL, NULL
 };
 
 /*
@@ -833,98 +836,93 @@ doUsageOpt(
     tOptions*   pOptions,
     tOptDesc*   pOptDesc )
 {
+    (void)pOptions;
     USAGE( EXIT_SUCCESS );
 }
 
 #if ! defined(TEST_NTP_KEYGEN_OPTS)
 
-/* * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  *   For the set-debug-level option, when DEBUG is #define-d.
  */
 #ifdef DEBUG
 static void
-doOptSet_Debug_Level(
-    tOptions*   pOptions,
-    tOptDesc*   pOptDesc )
+doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
     /* extracted from ../include/debug-opt.def, line 29 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined DEBUG */
-
 #endif /* defined(TEST_NTP_KEYGEN_OPTS) */
 
-/* * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  *   For the modulus option, when OPENSSL is #define-d.
  */
 #ifdef OPENSSL
 static void
-doOptModulus(
-    tOptions*   pOptions,
-    tOptDesc*   pOptDesc )
+doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    static const struct {const int rmin, rmax;} rng[ 1 ] = {
+    static const struct {long const rmin, rmax;} rng[1] = {
         { 256, 2048 } };
-    int val;
-    int ix;
-    char const* pzIndent = "\t\t\t\t  ";
-    extern FILE* option_usage_fp;
+    long val;
+    int  ix;
+    char * pzEnd;
 
-    if (pOptDesc == NULL) /* usage is requesting range list
-                             option_usage_fp has already been set */
+    if (pOptions <= OPTPROC_EMIT_LIMIT)
         goto emit_ranges;
 
-    val = atoi( pOptDesc->optArg.argString );
+    errno = 0;
+    val = strtol(pOptDesc->optArg.argString, &pzEnd, 0);
+    if ((pOptDesc->optArg.argString == pzEnd) || (errno != 0))
+        goto bad_value;
+
+    if (*pzEnd != '\0')
+        goto bad_value;
     for (ix = 0; ix < 1; ix++) {
         if (val < rng[ix].rmin)
             continue;  /* ranges need not be ordered. */
         if (val == rng[ix].rmin)
             goto valid_return;
-        if (rng[ix].rmax == INT_MIN)
+        if (rng[ix].rmax == LONG_MIN)
             continue;
         if (val <= rng[ix].rmax)
             goto valid_return;
     }
 
+  bad_value:
+
     option_usage_fp = stderr;
-    fprintf(stderr, _("%s error:  %s option value ``%s''is out of range.\n"),
-            pOptions->pzProgName, pOptDesc->pz_Name, pOptDesc->optArg.argString);
-    pzIndent = "\t";
 
   emit_ranges:
-    fprintf( option_usage_fp, _("%sit must lie in the range: %d to %d\n"),
-             pzIndent, rng[0].rmin, rng[0].rmax );
-    if (pOptDesc == NULL)
-        return;
-
-    USAGE( EXIT_FAILURE );
-    /* NOTREACHED */
+    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
     return;
 
   valid_return:
+    if ((pOptDesc->fOptState & OPTST_ALLOC_ARG) != 0) {
+        free((void *)pOptDesc->optArg.argString);
+        pOptDesc->fOptState &= ~OPTST_ALLOC_ARG;
+    }
     pOptDesc->optArg.argInt = val;
 }
 #endif /* defined OPENSSL */
-
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 92 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_NTP_KEYGEN_OPTS) /* TEST MAIN PROCEDURE: */
 
+extern void optionPutShell( tOptions* );
+
 int
-main( int argc, char** argv )
+main(int argc, char** argv)
 {
     int res = EXIT_SUCCESS;
     (void)optionProcess( &ntp_keygenOptions, argc, argv );
-    {
-        void optionPutShell( tOptions* );
-        optionPutShell( &ntp_keygenOptions );
-    }
+    optionPutShell( &ntp_keygenOptions );
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 514 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 633 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -967,44 +965,45 @@ translate_option_strings( void )
      *  Guard against re-translation.  It won't work.  The strings will have
      *  been changed by the first pass through this code.  One shot only.
      */
-    if (option_usage_text.field_ct == 0)
-        return;
-    /*
-     *  Do the translations.  The first pointer follows the field count field.
-     *  The field count field is the size of a pointer.
-     */
-    {
-        char** ppz = (char**)(void*)&(option_usage_text);
-        int    ix  = option_usage_text.field_ct;
+    if (option_usage_text.field_ct != 0) {
+
+        /*
+         *  Do the translations.  The first pointer follows the field count
+         *  field.  The field count field is the size of a pointer.
+         */
+        tOptDesc* pOD = ntp_keygenOptions.pOptDesc;
+        char**    ppz = (char**)(void*)&(option_usage_text);
+        int       ix  = option_usage_text.field_ct;
 
         do {
             ppz++;
             *ppz = AO_gettext(*ppz);
         } while (--ix > 0);
-    }
-    option_usage_text.field_ct = 0;
 
-    {
+        COERSION(pzCopyright);
+        COERSION(pzCopyNotice);
+        COERSION(pzFullVersion);
+        COERSION(pzUsageTitle);
+        COERSION(pzExplain);
+        COERSION(pzDetail);
+        option_usage_text.field_ct = 0;
+
+        for (ix = ntp_keygenOptions.optCt; ix > 0; ix--, pOD++)
+            coerce_it((void*)&(pOD->pzText));
+    }
+
+    if ((ntp_keygenOptions.fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
         tOptDesc* pOD = ntp_keygenOptions.pOptDesc;
-        int       ix  = ntp_keygenOptions.optCt;
+        int       ix;
 
-        for (;;) {
-            pOD->pzText           = AO_gettext(pOD->pzText);
-            pOD->pz_NAME          = AO_gettext(pOD->pz_NAME);
-            pOD->pz_Name          = AO_gettext(pOD->pz_Name);
-            pOD->pz_DisableName   = AO_gettext(pOD->pz_DisableName);
-            pOD->pz_DisablePfx    = AO_gettext(pOD->pz_DisablePfx);
-            if (--ix <= 0)
-                break;
-            pOD++;
+        for (ix = ntp_keygenOptions.optCt; ix > 0; ix--, pOD++) {
+            coerce_it((void*)&(pOD->pz_Name));
+            coerce_it((void*)&(pOD->pz_DisableName));
+            coerce_it((void*)&(pOD->pz_DisablePfx));
         }
+        /* prevent re-translation */
+        ntp_keygenOptions.fOptSet |= OPTPROC_NXLAT_OPT_CFG | OPTPROC_NXLAT_OPT;
     }
-    COERSION(pzCopyright);
-    COERSION(pzCopyNotice);
-    COERSION(pzFullVersion);
-    COERSION(pzUsageTitle);
-    COERSION(pzExplain);
-    COERSION(pzDetail);
 }
 
 #endif /* ENABLE_NLS */
