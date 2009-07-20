@@ -37,6 +37,7 @@ noinst_HEADERS =	\
 	ntp_if.h	\
 	ntp_io.h	\
 	ntp_lineedit.h	\
+	ntp_lists.h	\
 	ntp_machine.h	\
 	ntp_malloc.h	\
 	ntp_md5.h	\
