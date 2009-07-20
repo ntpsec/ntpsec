@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  Monday July 20, 2009 at 05:12:10 AM EDT
+ *  It has been AutoGen-ed  Monday July 20, 2009 at 07:59:20 AM EDT
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -408,7 +408,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPQ";
 tSCC   zUsageTitle[] =
-"ntpq - standard NTP query program - Ver. 4.2.5p189\n\
+"ntpq - standard NTP query program - Ver. 4.2.5p190\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
