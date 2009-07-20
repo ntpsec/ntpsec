@@ -1354,6 +1354,7 @@ config_monitor(void)
 static void
 config_access(void)
 {
+	static int		warned_signd;
 	struct attr_val *	my_opt;
 	struct restrict_node *	my_node;
 	sockaddr_u		addr_sock;
@@ -1361,6 +1362,12 @@ config_access(void)
 	int			flags;
 	int			mflags;
 	int			restrict_default;
+	const char *		signd_warning =
+#ifdef HAVE_NTP_SIGND
+	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
+#else
+	    "mssntp restrict bit ignored, this ntpd was configured without --enable-ntp-signd.";
+#endif
 
 	/* Configure the discard options */
 	while (!empty(my_config.discard_opts)) {
@@ -1458,6 +1465,12 @@ config_access(void)
 
 		hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
 			      mflags, flags);
+
+		if ((RES_MSSNTP & flags) && !warned_signd) {
+			warned_signd = 1;
+			fprintf(stderr, "%s\n", signd_warning);
+			msyslog(LOG_WARNING, signd_warning);
+		}
 
 		destroy_restrict_node(my_node);
 	}
