@@ -1,13 +1,51 @@
 /*  -*- Mode: C -*-  */
 
-/* --- fake the preprocessor into handlng portability */
-/*
- *  Time-stamp:      "2007-02-03 17:41:06 bkorb"
+/* compat.h --- fake the preprocessor into handlng portability
  *
- * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
- * Created:          Mon Jun 30 15:54:46 1997
+ *  Time-stamp:      "2008-06-14 09:36:25 bkorb"
  *
- * $Id: compat.h,v 4.16 2007/04/27 01:10:47 bkorb Exp $
+ * $Id: compat.h,v 4.21 2009/01/01 16:51:52 bkorb Exp $
+ *
+ *  compat.h is free software.
+ *  This file is part of AutoGen.
+ *
+ *  AutoGen copyright (c) 1992-2009 by Bruce Korb - all rights reserved
+ *
+ *  AutoGen is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU General Public License as published by the
+ *  Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  AutoGen is distributed in the hope that it will be useful, but
+ *  WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along
+ *  with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  As a special exception, Bruce Korb gives permission for additional
+ *  uses of the text contained in the release of compat.h.
+ *
+ *  The exception is that, if you link the compat.h library with other
+ *  files to produce an executable, this does not by itself cause the
+ *  resulting executable to be covered by the GNU General Public License.
+ *  Your use of that executable is in no way restricted on account of
+ *  linking the compat.h library code into it.
+ *
+ *  This exception does not however invalidate any other reasons why
+ *  the executable file might be covered by the GNU General Public License.
+ *
+ *  This exception applies only to the code released by Bruce Korb under
+ *  the name compat.h.  If you copy code from other sources under the
+ *  General Public License into a copy of compat.h, as the General Public
+ *  License permits, the exception does not apply to the code that you add
+ *  in this way.  To avoid misleading anyone as to the status of such
+ *  modified files, you must delete this exception notice from them.
+ *
+ *  If you write modifications of your own for compat.h, it is your choice
+ *  whether to permit this exception to apply to your modifications.
+ *  If you do not wish that, delete this exception notice.
  */
 #ifndef COMPAT_H_GUARD
 #define COMPAT_H_GUARD 1
@@ -266,6 +304,15 @@
 #endif
 #ifndef HAVE_UINTPTR_T
   typedef unsigned long uintptr_t;
+#endif
+#ifndef HAVE_SIZE_T
+  typedef unsigned int  size_t;
+#endif
+#ifndef HAVE_WINT_T
+  typedef unsigned int  wint_t;
+#endif
+#ifndef HAVE_PID_T
+  typedef signed int    pid_t;
 #endif
 
 /* redefine these for BSD style string libraries */

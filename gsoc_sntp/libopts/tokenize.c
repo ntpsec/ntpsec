@@ -1,26 +1,28 @@
 /*
  *  This file defines the string_tokenize interface
- * Time-stamp:      "2006-06-24 15:27:49 bkorb"
+ * Time-stamp:      "2007-11-12 20:40:36 bkorb"
  *
- *  string_tokenize copyright 2005 Bruce Korb
+ *  This file is part of AutoOpts, a companion to AutoGen.
+ *  AutoOpts is free software.
+ *  AutoOpts is copyright (c) 1992-2009 by Bruce Korb - all rights reserved
  *
- *  string_tokenize is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
+ *  AutoOpts is available under any one of two licenses.  The license
+ *  in use must be one of these two and the choice is under the control
+ *  of the user of the license.
  *
- *  string_tokenize is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ *   The GNU Lesser General Public License, version 3 or later
+ *      See the files "COPYING.lgplv3" and "COPYING.gplv3"
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with string_tokenize; if not, write to:
- *             The Free Software Foundation, Inc.,
- *             51 Franklin Street, Fifth Floor,
- *             Boston, MA  02110-1301, USA.
+ *   The Modified Berkeley Software Distribution License
+ *      See the file "COPYING.mbsd"
+ *
+ *  These files have the following md5sums:
+ *
+ *  239588c55c22c60ffe159946a760a33e pkg/libopts/COPYING.gplv3
+ *  fa82ca978890795162346e661b47161a pkg/libopts/COPYING.lgplv3
+ *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
-#include <ctype.h>
+
 #include <errno.h>
 #include <stdlib.h>
 
@@ -28,7 +30,7 @@
 #define ch_t   unsigned char
 
 /* = = = START-STATIC-FORWARD = = = */
-/* static forward declarations maintained by :mkfwd */
+/* static forward declarations maintained by mk-fwd */
 static void
 copy_cooked( ch_t** ppDest, char const ** ppSrc );
 
@@ -189,7 +191,7 @@ ao_string_tokenize( char const* str )
      *  Trim leading white space.  Use "ENOENT" and a NULL return to indicate
      *  an empty string was passed.
      */
-    while (isspace( (ch_t)*str ))  str++;
+    while (IS_WHITESPACE_CHAR(*str))  str++;
     if (*str == NUL) {
     bogus_str:
         errno = ENOENT;
@@ -206,9 +208,9 @@ ao_string_tokenize( char const* str )
 
         do {
             max_token_ct++;
-            while (! isspace( *++pz ))
+            while (! IS_WHITESPACE_CHAR(*++pz))
                 if (*pz == NUL) goto found_nul;
-            while (isspace( *pz ))  pz++;
+            while (IS_WHITESPACE_CHAR(*pz))  pz++;
         } while (*pz != NUL);
 
     found_nul:
@@ -232,9 +234,9 @@ ao_string_tokenize( char const* str )
             res->tkn_list[ res->tkn_ct++ ] = pzDest;
             for (;;) {
                 int ch = (ch_t)*str;
-                if (isspace( ch )) {
+                if (IS_WHITESPACE_CHAR(ch)) {
                 found_white_space:
-                    while (isspace( (ch_t)*++str ))  ;
+                    while (IS_WHITESPACE_CHAR(*++str))  ;
                     break;
                 }
 
@@ -246,7 +248,7 @@ ao_string_tokenize( char const* str )
                         errno = EINVAL;
                         return NULL;
                     }
-                    if (isspace( (ch_t)*str ))
+                    if (IS_WHITESPACE_CHAR(*str))
                         goto found_white_space;
                     break;
 
@@ -257,7 +259,7 @@ ao_string_tokenize( char const* str )
                         errno = EINVAL;
                         return NULL;
                     }
-                    if (isspace( (ch_t)*str ))
+                    if (IS_WHITESPACE_CHAR(*str))
                         goto found_white_space;
                     break;
 

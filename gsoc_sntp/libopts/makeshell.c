@@ -1,53 +1,30 @@
 
 /*
- *  $Id: makeshell.c,v 4.20 2007/02/04 17:44:12 bkorb Exp $
- * Time-stamp:      "2007-01-27 06:05:45 bkorb"
+ *  $Id: makeshell.c,v 4.28 2009/01/01 16:51:48 bkorb Exp $
+ * Time-stamp:      "2008-07-26 16:10:51 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
- */
-
-/*
- *  Automated Options copyright 1992-2007 Bruce Korb
  *
- *  Automated Options is free software.
- *  You may redistribute it and/or modify it under the terms of the
- *  GNU General Public License, as published by the Free Software
- *  Foundation; either version 2, or (at your option) any later version.
+ *  This file is part of AutoOpts, a companion to AutoGen.
+ *  AutoOpts is free software.
+ *  AutoOpts is copyright (c) 1992-2009 by Bruce Korb - all rights reserved
  *
- *  Automated Options is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  AutoOpts is available under any one of two licenses.  The license
+ *  in use must be one of these two and the choice is under the control
+ *  of the user of the license.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with Automated Options.  See the file "COPYING".  If not,
- *  write to:  The Free Software Foundation, Inc.,
- *             51 Franklin Street, Fifth Floor,
- *             Boston, MA  02110-1301, USA.
+ *   The GNU Lesser General Public License, version 3 or later
+ *      See the files "COPYING.lgplv3" and "COPYING.gplv3"
  *
- * As a special exception, Bruce Korb gives permission for additional
- * uses of the text contained in his release of AutoOpts.
+ *   The Modified Berkeley Software Distribution License
+ *      See the file "COPYING.mbsd"
  *
- * The exception is that, if you link the AutoOpts library with other
- * files to produce an executable, this does not by itself cause the
- * resulting executable to be covered by the GNU General Public License.
- * Your use of that executable is in no way restricted on account of
- * linking the AutoOpts library code into it.
+ *  These files have the following md5sums:
  *
- * This exception does not however invalidate any other reasons why
- * the executable file might be covered by the GNU General Public License.
- *
- * This exception applies only to the code released by Bruce Korb under
- * the name AutoOpts.  If you copy code from other sources under the
- * General Public License into a copy of AutoOpts, as the General Public
- * License permits, the exception does not apply to the code that you add
- * in this way.  To avoid misleading anyone as to the status of such
- * modified files, you must delete this exception notice from them.
- *
- * If you write modifications of your own for AutoOpts, it is your choice
- * whether to permit this exception to apply to your modifications.
- * If you do not wish that, delete this exception notice.
+ *  239588c55c22c60ffe159946a760a33e pkg/libopts/COPYING.gplv3
+ *  fa82ca978890795162346e661b47161a pkg/libopts/COPYING.lgplv3
+ *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
 tOptions*  pShellParseOptions = NULL;
@@ -364,7 +341,7 @@ static char*  pzLeader  = NULL;
 static char*  pzTrailer = NULL;
 
 /* = = = START-STATIC-FORWARD = = = */
-/* static forward declarations maintained by :mkfwd */
+/* static forward declarations maintained by mk-fwd */
 static void
 textToVariable( tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD );
 
@@ -695,7 +672,7 @@ emitSetup( tOptions* pOpts )
          */
         switch (OPTST_GET_ARGTYPE(pOptDesc->fOptState)) {
         case OPARG_TYPE_ENUMERATION:
-            (*(pOptDesc->pOptProc))( (tOptions*)2UL, pOptDesc );
+            (*(pOptDesc->pOptProc))(OPTPROC_EMIT_SHELL, pOptDesc );
             pzDefault = pOptDesc->optArg.argString;
             break;
 
@@ -815,7 +792,7 @@ emitFlag( tOptions* pOpts )
         if (SKIP_OPT(pOptDesc))
             continue;
 
-        if (isprint( pOptDesc->optValue )) {
+        if (IS_GRAPHIC_CHAR(pOptDesc->optValue)) {
             printf( zOptionFlag, pOptDesc->optValue );
             printOptionAction( pOpts, pOptDesc );
         }

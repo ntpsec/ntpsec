@@ -1,57 +1,33 @@
-
 /*
- *  $Id: cook.c,v 4.10 2007/02/04 17:44:12 bkorb Exp $
- *  Time-stamp:      "2006-09-24 15:21:02 bkorb"
+ *  $Id: cook.c,v 4.17 2009/01/01 16:51:47 bkorb Exp $
+ *  Time-stamp:      "2007-11-16 22:49:11 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
- */
-
-/*
- *  Automated Options copyright 1992-2007 Bruce Korb
  *
- *  Automated Options is free software.
- *  You may redistribute it and/or modify it under the terms of the
- *  GNU General Public License, as published by the Free Software
- *  Foundation; either version 2, or (at your option) any later version.
+ *  This file is part of AutoOpts, a companion to AutoGen.
+ *  AutoOpts is free software.
+ *  AutoOpts is copyright (c) 1992-2009 by Bruce Korb - all rights reserved
  *
- *  Automated Options is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  AutoOpts is available under any one of two licenses.  The license
+ *  in use must be one of these two and the choice is under the control
+ *  of the user of the license.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with Automated Options.  See the file "COPYING".  If not,
- *  write to:  The Free Software Foundation, Inc.,
- *             51 Franklin Street, Fifth Floor,
- *             Boston, MA  02110-1301, USA.
+ *   The GNU Lesser General Public License, version 3 or later
+ *      See the files "COPYING.lgplv3" and "COPYING.gplv3"
  *
- * As a special exception, Bruce Korb gives permission for additional
- * uses of the text contained in his release of AutoOpts.
+ *   The Modified Berkeley Software Distribution License
+ *      See the file "COPYING.mbsd"
  *
- * The exception is that, if you link the AutoOpts library with other
- * files to produce an executable, this does not by itself cause the
- * resulting executable to be covered by the GNU General Public License.
- * Your use of that executable is in no way restricted on account of
- * linking the AutoOpts library code into it.
+ *  These files have the following md5sums:
  *
- * This exception does not however invalidate any other reasons why
- * the executable file might be covered by the GNU General Public License.
- *
- * This exception applies only to the code released by Bruce Korb under
- * the name AutoOpts.  If you copy code from other sources under the
- * General Public License into a copy of AutoOpts, as the General Public
- * License permits, the exception does not apply to the code that you add
- * in this way.  To avoid misleading anyone as to the status of such
- * modified files, you must delete this exception notice from them.
- *
- * If you write modifications of your own for AutoOpts, it is your choice
- * whether to permit this exception to apply to your modifications.
- * If you do not wish that, delete this exception notice.
+ *  239588c55c22c60ffe159946a760a33e pkg/libopts/COPYING.gplv3
+ *  fa82ca978890795162346e661b47161a pkg/libopts/COPYING.lgplv3
+ *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
 /* = = = START-STATIC-FORWARD = = = */
-/* static forward declarations maintained by :mkfwd */
+/* static forward declarations maintained by mk-fwd */
 /* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  ao_string_cook_escape_char
@@ -105,79 +81,42 @@ ao_string_cook_escape_char( char const* pzIn, char* pRes, u_int nl )
     case 't': *pRes = '\t'; break;
     case 'v': *pRes = '\v'; break;
 
-    case 'x':         /* HEX Escape       */
-        if (isxdigit( (int)*pzIn ))  {
-            unsigned int  val;
-            unsigned char ch = *pzIn++;
+    case 'x':
+    case 'X':         /* HEX Escape       */
+        if (IS_HEX_DIGIT_CHAR(*pzIn))  {
+            char z[4], *pz = z;
 
-            if ((ch >= 'A') && (ch <= 'F'))
-                val = 10 + (ch - 'A');
-            else if ((ch >= 'a') && (ch <= 'f'))
-                val = 10 + (ch - 'a');
-            else val = ch - '0';
-
-            ch = *pzIn;
-
-            if (! isxdigit( ch )) {
-                *pRes = val;
-                res   = 2;
-                break;
-            }
-            val <<= 4;
-            if ((ch >= 'A') && (ch <= 'F'))
-                val += 10 + (ch - 'A');
-            else if ((ch >= 'a') && (ch <= 'f'))
-                val += 10 + (ch - 'a');
-            else val += ch - '0';
-
-            res = 3;
-            *pRes = val;
+            do *(pz++) = *(pzIn++);
+            while (IS_HEX_DIGIT_CHAR(*pzIn) && (pz < z + 2));
+            *pz = NUL;
+            *pRes = (unsigned char)strtoul(z, NULL, 16);
+            res += pz - z;
         }
         break;
 
-    default:
+    case '0': case '1': case '2': case '3':
+    case '4': case '5': case '6': case '7':
+    {
         /*
          *  IF the character copied was an octal digit,
          *  THEN set the output character to an octal value
          */
-        if (isdigit( (int)*pRes ) && (*pRes < '8'))  {
-            unsigned int  val = *pRes - '0';
-            unsigned char ch  = *pzIn++;
+        char z[4], *pz = z + 1;
+        unsigned long val;
+        z[0] = *pRes;
 
-            /*
-             *  IF the second character is *not* an octal digit,
-             *  THEN save the value and bail
-             */
-            if ((ch < '0') || (ch > '7')) {
-                *pRes = val;
-                break;
-            }
+        while (IS_OCT_DIGIT_CHAR(*pzIn) && (pz < z + 3))
+            *(pz++) = *(pzIn++);
+        *pz = NUL;
+        val = strtoul(z, NULL, 8);
+        if (val > 0xFF)
+            val = 0xFF;
+        *pRes = (unsigned char)val;
+        res = pz - z;
+        break;
+    }
 
-            val = (val<<3) + (ch - '0');
-            ch  = *pzIn;
-            res = 2;
-
-            /*
-             *  IF the THIRD character is *not* an octal digit,
-             *  THEN save the value and bail
-             */
-            if ((ch < '0') || (ch > '7')) {
-                *pRes = val;
-                break;
-            }
-
-            /*
-             *  IF the new value would not be too large,
-             *  THEN add on the third and last character value
-             */
-            if ((val<<3) < 0xFF) {
-                val = (val<<3) + (ch - '0');
-                res = 3;
-            }
-
-            *pRes = val;
-            break;
-        }
+    default: ;
     }
 
     return res;
@@ -239,7 +178,7 @@ ao_string_cook( char* pzScan, int* pLineCt )
             pzS++;
 
         scan_for_quote:
-            while (isspace((int)*pzS))
+            while (IS_WHITESPACE_CHAR(*pzS))
                 if (*(pzS++) == '\n')
                     (*pLineCt)++;
 

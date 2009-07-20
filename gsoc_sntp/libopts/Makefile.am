@@ -7,18 +7,22 @@ noinst_LTLIBRARIES      = libopts.la
 endif
 libopts_la_SOURCES      = libopts.c
 libopts_la_CPPFLAGS     = -I$(top_srcdir)
-libopts_la_LDFLAGS      = -version-info  29:0:4
+libopts_la_LDFLAGS      = -version-info  32:1:7
 EXTRA_DIST              = \
-    COPYING.lgpl            COPYING.mbsd            MakeDefs.inc  \
-    README                  autoopts/options.h      autoopts/usage-txt.h  \
-    autoopts.c              autoopts.h              boolean.c  \
-    compat/windows-config.h compat/compat.h         compat/pathfind.c  \
-    compat/snprintf.c       compat/strdup.c         compat/strchr.c  \
-    configfile.c            cook.c                  enumeration.c  \
-    environment.c           genshell.c              genshell.h  \
+    COPYING.gplv3           COPYING.lgplv3          COPYING.mbsd  \
+    MakeDefs.inc            README                  ag-char-map.h  \
+    autoopts/options.h      autoopts/usage-txt.h    autoopts.c  \
+    autoopts.h              boolean.c               compat/windows-config.h  \
+    compat/compat.h         compat/pathfind.c       compat/snprintf.c  \
+    compat/strdup.c         compat/strchr.c         configfile.c  \
+    cook.c                  enumeration.c           environment.c  \
+    file.c                  genshell.c              genshell.h  \
     load.c                  m4/libopts.m4           m4/liboptschk.m4  \
     makeshell.c             nested.c                numeric.c  \
-    pgusage.c               proto.h                 putshell.c  \
+    parse-duration.c        parse-duration.h        pgusage.c  \
+    proto.h                 putshell.c              reset.c  \
     restore.c               save.c                  sort.c  \
     stack.c                 streqvcmp.c             text_mmap.c  \
-    tokenize.c              usage.c                 version.c
+    time.c                  tokenize.c              usage.c  \
+    value-type.c            value-type.h            version.c  \
+    xat-attribute.c         xat-attribute.h
