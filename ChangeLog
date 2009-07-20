@@ -1,3 +1,4 @@
+* Updated to AutoGen-5.9.8.
 * [Bug 1248] RES_MSSNTP typo in ntp_proto.c.
 * [Bug 1246] use a common template for singly-linked lists, convert most
   doubly-linked lists to singly-linked.
