@@ -573,7 +573,7 @@ receive(
 		 * This is described in Microsoft's WSPP docs, in MS-SNTP:
 		 * http://msdn.microsoft.com/en-us/library/cc212930.aspx
 		 */
-	} else if (has_mac == MAX_MAC_LEN && (restrict_mask & RES_MSNTP) &&
+	} else if (has_mac == MAX_MAC_LEN && (restrict_mask & RES_MSSNTP) &&
 	   (retcode == AM_FXMIT || retcode == AM_NEWPASS) &&
 	   (memcmp(zero_key, (char *)pkt + authlen + 4, MAX_MAC_LEN - 4) ==
 	   0)) {
