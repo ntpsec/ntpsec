@@ -1919,6 +1919,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\include\inttypes.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\sys\ioctl.h"
 				>
 			</File>

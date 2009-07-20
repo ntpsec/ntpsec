@@ -446,6 +446,10 @@ SOURCE=..\include\arpa\inet.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\include\inttypes.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\include\isc\interfaceiter.h
 # End Source File
 # Begin Source File

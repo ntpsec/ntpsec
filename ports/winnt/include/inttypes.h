@@ -1,0 +1,1 @@
+/* inttypes.h dummy for autoopts */

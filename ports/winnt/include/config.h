@@ -344,9 +344,14 @@ char *NTstrerror(int errnum);
 #define HAVE_STRCHR	1
 #define HAVE_FCNTL_H	1
 #define HAVE_SYS_RESOURCE_H
+#define HAVE_INTTYPES_H
 #define HAVE_BSD_NICE			/* emulate BSD setpriority() */
 
 typedef char *caddr_t;
+
+#ifdef _WCTYPE_T_DEFINED	/* see vc/include/crtdefs.h */
+#define HAVE_WINT_T
+#endif
 
 #ifndef _INTPTR_T_DEFINED
 typedef long intptr_t;
