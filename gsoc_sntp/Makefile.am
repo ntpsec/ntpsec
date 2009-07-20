@@ -14,7 +14,7 @@ NULL=
 ###
 noinst_PROGRAMS=	sntp
 ###
-run_ag=         cd $(srcdir) && autogen -L $(top_srcdir)/../include --writable
+run_ag=         cd $(srcdir) && autogen -L ../include --writable
 
 SUBDIRS=
 if NEED_LIBOPTS
