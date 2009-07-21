@@ -1,3 +1,4 @@
+* Updated to AutoGen-5.9.9pre1.
 (4.2.5p190) 2009/07/20 Released by Harlan Stenn <stenn@ntp.org>
 * Updated to AutoGen-5.9.8.
 * [Bug 1248] RES_MSSNTP typo in ntp_proto.c.

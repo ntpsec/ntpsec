@@ -1,7 +1,7 @@
 
 /*
- *  save.c  $Id: save.c,v 4.29 2009/01/01 16:51:49 bkorb Exp $
- * Time-stamp:      "2008-09-23 14:24:58 bkorb"
+ *  save.c  $Id: save.c,v 4.31 2009/07/21 04:01:29 bkorb Exp $
+ * Time-stamp:      "2009-07-20 20:40:28 bkorb"
  *
  *  This module's routines will take the currently set options and
  *  store them into an ".rc" file for re-interpretation the next
@@ -81,7 +81,8 @@ findDirName( tOptions* pOpts, int* p_free )
 {
     tCC*  pzDir;
 
-    if (pOpts->specOptIdx.save_opts == 0)
+    if (  (pOpts->specOptIdx.save_opts == NO_EQUIVALENT)
+       || (pOpts->specOptIdx.save_opts == 0))
         return NULL;
 
     pzDir = pOpts->pOptDesc[ pOpts->specOptIdx.save_opts ].optArg.argString;

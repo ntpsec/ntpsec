@@ -1,7 +1,7 @@
 
 /*
- *  $Id: environment.c,v 4.19 2009/01/17 22:08:07 bkorb Exp $
- * Time-stamp:      "2009-01-12 05:52:44 bkorb"
+ *  $Id: environment.c,v 4.20 2009/07/21 03:23:12 bkorb Exp $
+ * Time-stamp:      "2009-07-20 20:12:24 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -224,7 +224,8 @@ doEnvPresets( tOptions* pOpts, teEnvPresetType type )
     /*
      *  Special handling for ${PROGNAME_LOAD_OPTS}
      */
-    if (pOpts->specOptIdx.save_opts != 0) {
+    if (  (pOpts->specOptIdx.save_opts != NO_EQUIVALENT)
+       && (pOpts->specOptIdx.save_opts != 0)) {
         st.pOD = pOpts->pOptDesc + pOpts->specOptIdx.save_opts + 1;
         strcpy( pzFlagName, st.pOD->pz_NAME );
         checkEnvOpt(&st, zEnvName, pOpts, type);
