@@ -57,7 +57,11 @@ sntp_main (
 		) 
 {
 	register int c;
-	struct kod_entry **reason = NULL;
+	struct kod_entry *reason = NULL;
+	int optct;
+	int sync_data_suc = 0;
+	struct addrinfo **resh = NULL;
+	int resc;
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -78,70 +82,65 @@ sntp_main (
 
 	log_msg("Started sntp", 0);
 
-	int optct = optionProcess(&sntpOptions, argc, argv);
+	optct = optionProcess(&sntpOptions, argc, argv);
 	argc -= optct;
 	argv += optct; 
 
 	/* Parse config file if declared TODO */
 
 	/* Initialize logging system */
-	if(HAVE_OPT(FILELOG)) {
+	if (HAVE_OPT(FILELOG))
 		init_log(OPT_ARG(FILELOG));
-	}
 
 	/* If there's a specified KOD file init KOD system. 
 	 * If not and system may save to HD use default file.
 	 */
-	if(HAVE_OPT(KOD)) {
+	if (HAVE_OPT(KOD))
 		kod_init_kod_db(OPT_ARG(KOD));
-	}
 
-	if(HAVE_OPT(KEYFILE)) {
+	if (HAVE_OPT(KEYFILE))
 		auth_init(OPT_ARG(KEYFILE), &keys);
-	}
 
 
 	/* Considering employing a variable that prevents functions of doing anything until 
 	 * everything is initialized properly 
 	 */
-	struct addrinfo **resh = (struct addrinfo **) malloc(sizeof(struct addrinfo **));
-
-	int resc = resolve_hosts(argv, argc, resh, ai_fam_pref);
+	resc = resolve_hosts(argv, argc, &resh, ai_fam_pref);
 	
-	if(resc < 1) {
-		/* Error! Network down? */
+	if (resc < 1) {
+		printf("Unable to resolve hostname(s)\n");
+		return -1;
 	}
 
 	/* Select a certain ntp server according to simple criteria? For now
 	 * let's just pay attention to previous KoDs.
 	 */
-	int sync_data_suc = 0;
-	for(c=0; c<resc && !sync_data_suc; c++) {
+	for (c = 0; c < resc && !sync_data_suc; c++) {
 		getnameinfo(resh[c]->ai_addr, resh[c]->ai_addrlen, adr_buf, 
 				sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 		int kodc;
 		char *hostname = addrinfo_to_str(resh[c]);
 
-		if((kodc = search_entry(hostname, reason)) == 0 &&
-		   is_reachable(resh[c])) {
-			int ow_ret = on_wire(resh[c]);
-			if(ow_ret < 0) {
-				printf("on_wire failed for server %s!\n", hostname);
+		if ((kodc = search_entry(hostname, &reason)) == 0) {
+			if (is_reachable(resh[c])) {
+				int ow_ret = on_wire(resh[c]);
+
+				if (ow_ret < 0)
+					printf("on_wire failed for server %s!\n", hostname);
+				else
+					sync_data_suc = 1;
 			}
-			else {
-				sync_data_suc = 1;
-			}
-		}
-		else {
+		} else {
 			printf("KoD %i packages exists for %s, stopping any further communication.\n", 
 				kodc, adr_buf);
-
+			free(reason);
 		}
 
 		freeaddrinfo(resh[c]);
 		free(hostname);
 	}
+	free(resh);
 
 	return 0;
 }

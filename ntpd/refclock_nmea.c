@@ -236,6 +236,7 @@ nmea_start(
 			return(0);
 		if ((p = getprotobyname("ip")) == NULL)
 			return(0);
+		memset(&so_addr, 0, sizeof(so_addr));
 		so_addr.sin_family = AF_INET;
 		so_addr.sin_port = htons(nmea_port);
 		so_addr.sin_addr = *((struct in_addr *) he->h_addr);

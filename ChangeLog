@@ -1,3 +1,18 @@
+* [Bug 965] CID 42: ss_family uninitialized.
+* [Bug 1250] CID 53: kod_init_kod_db() overruns kod_db malloc'd buffer.
+* [Bug 1251] CID 68: search_entry() mishandles dst argument.
+* [Bug 1252] CID 32: Quiet Coverity warning with assertion.
+* [Bug 1253] CID 50: gsoc_sntp/crypto.c auth_init() always returns a 
+  list with one entry.
+* [Bug 1254] CID 56: tv_to_str() leaks a struct tm each call.
+* [Bug 1255] CID 55: pkt_output() leaks a copy of each packet.
+* [Bug 1256] CID 51: Coverity doesn't recognize our assertion macros as
+  terminal.
+* [Bug 1257] CID 57: gsoc_sntp auth_init() fails to fclose(keyfile).
+* [Bug 1258] CID 54: gsoc_sntp resolve_hosts() needs simplification.
+* [Bug 1259] CID 59: gsoc_sntp recv_bcast_data() fails to free(rdata)
+  on error paths.
+* [Bug 1260] CID 60: gsoc_sntp recvpkt() fails to free(rdata).
 * Updated to AutoGen-5.9.9pre2.
 (4.2.5p191) 2009/07/21 Released by Harlan Stenn <stenn@ntp.org>
 * Updated to AutoGen-5.9.9pre1.

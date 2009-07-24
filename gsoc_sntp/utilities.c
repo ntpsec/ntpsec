@@ -31,6 +31,9 @@ pkt_output (
 
 	unsigned char *cpy = (unsigned char *) malloc(sizeof(char) * pkt_length);		
 
+	if (NULL == cpy)
+		return;
+
 	for(a=0; a<pkt_length; a++) 
 		cpy[a] = ((unsigned char *) dpkg)[a];
 
@@ -46,6 +49,8 @@ pkt_output (
 
 	fprintf(output, "\n");
 	fprintf(output, HLINE);
+
+	free(cpy);
 }
 
 /* Output a long floating point value in hex in the style described above 
@@ -173,10 +178,12 @@ tv_to_str (
 	};
 
 	char *buf = (char *) malloc(sizeof(char) * 48);
-
 	time_t cur_time = time(NULL);
+	struct tm *tm_ptr;
 
-	struct tm *tm_ptr = (struct tm *) malloc(sizeof(struct tm));
+	if (NULL == buf)
+		return "tv_to_str() malloc(48) failed";
+
 	tm_ptr = localtime(&cur_time);
 
 
