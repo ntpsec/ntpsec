@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  Tuesday July 21, 2009 at 07:49:59 AM EDT
+ *  It has been AutoGen-ed  Friday July 24, 2009 at 07:51:31 AM EDT
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -460,7 +460,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPDC";
 tSCC   zUsageTitle[] =
-"ntpdc - vendor-specific NTP query program - Ver. 4.2.5p191\n\
+"ntpdc - vendor-specific NTP query program - Ver. 4.2.5p192\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
