@@ -809,6 +809,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_assert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_calendar.h"
 				>
 			</File>

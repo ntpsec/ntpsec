@@ -12,6 +12,7 @@
 #include "ntp_select.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 #include "ntp_lineedit.h"
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
@@ -536,6 +537,12 @@ openhost(
 		return 0;
 	}
 
+	/* 
+	 * getaddrinfo() has returned without error so ai should not 
+	 * be NULL.
+	 */
+	NTP_INSIST(ai != NULL);
+
 	if (ai->ai_canonname == NULL) {
 		strncpy(temphost, stoa((sockaddr_u *)ai->ai_addr),
 		    LENHOSTNAME);
@@ -612,8 +619,8 @@ openhost(
 		    ai->ai_addrlen) == -1)
 #endif /* SYS_VXWORKS */
 	    error("connect", "", "");
-	if (ai != NULL)
-		freeaddrinfo(ai);
+
+	freeaddrinfo(ai);
 	havehost = 1;
 	req_pkt_size = REQ_LEN_NOMAC;
 	impl_ver = IMPL_XNTPD;

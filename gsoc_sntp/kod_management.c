@@ -39,28 +39,41 @@ search_entry (
 	     )
 {
 	register int a, b, resc = 0;
-	struct kod_entry *sptr = kod_db;
+	struct kod_entry *sptr;
 
-	for(a=0; a<entryc && sptr; a++) {
-		if(!strcmp(sptr->hostname, hostname)) 
+	sptr = kod_db;
+	for (a = 0; a < entryc && sptr; a++) {
+		if (!strcmp(sptr->hostname, hostname)) 
 			resc++;
 
 		sptr = sptr->next;
 	}
 
-	dst = (struct kod_entry **) malloc(sizeof(struct kod_entry) * resc);
+	if (!resc)
+		return 0;
 
-	b=0;
-	for(a=0; a<entryc && sptr; a++) {
-		if(!strcmp(sptr->hostname, hostname)) {
-			dst[b] = sptr;
+	*dst = malloc(sizeof(struct kod_entry) * resc);
+	if (NULL == *dst)
+		return 0;
+
+	sptr = kod_db;
+	b = 0;
+	for (a = 0; a < entryc && sptr; a++) {
+		if (!strcmp(sptr->hostname, hostname)) {
+			(*dst)[b] = *sptr;
+			(*dst)[b].next = &((*dst)[b + 1]);
 			b++;
 		}
+
+		sptr = sptr->next;
 	}
+	if (b)
+		(*dst)[b - 1].next = NULL;
 
 	return resc;
 }
 
+#if 0	/* presently useless */
 int
 kod_entry_exists (
 		char *search_str
@@ -74,6 +87,7 @@ kod_entry_exists (
 	else
 		return 1;
 }
+#endif
 
 void 
 add_entry (
@@ -166,19 +180,18 @@ kod_init_kod_db (
 		const char *db_file
 		)
 {
-	if(kod_init)
-		return;
-
-#ifdef DEBUG
-	printf("Initializing KOD DB...\n");
-#endif
-
 	register int a, b;
 
 	/* Max. of 255 characters for hostname, 10 for timestamp, 4 for kisscode, 2 for format : and 1 for \n */
 	char fbuf[272];
 	char error = 0;
 
+	if (kod_init)
+		return;
+
+#ifdef DEBUG
+	printf("Initializing KOD DB...\n");
+#endif
 
 	db_s = fopen(db_file, "r");
 
@@ -200,9 +213,10 @@ kod_init_kod_db (
 	/* First let's see how many entries there are and check for right syntax */
 
 	while(!feof(db_s)) {
-		fgets(fbuf, 272, db_s);
-		
 		int sepc = 0;
+
+		fgets(fbuf, sizeof(fbuf), db_s);
+		
 		for(a=0; a<strlen(fbuf); a++) {
 			if(fbuf[a] == ':') 
 				sepc++;
@@ -210,7 +224,7 @@ kod_init_kod_db (
 			if(fbuf[a] == '\n') {
 				if(sepc != 2) {
 					char msg[80];
-					snprintf(msg, 80, "Syntax error in KOD db file %s in line %i (missing :)", db_file, (entryc + 1));
+					snprintf(msg, sizeof(msg), "Syntax error in KOD db file %s in line %i (missing :)", db_file, (entryc + 1));
 
 #ifdef DEBUG
 					debug_msg(msg);
@@ -239,20 +253,36 @@ kod_init_kod_db (
 	kod_db = (struct kod_entry *) malloc(sizeof(struct kod_entry) * entryc);
 
 	/* Read contents of file and make a linked list */
-	for(b=0; (!feof(db_s) || !ferror(db_s)) && b<entryc; b++) {
-		char *str_ptr = fgets(fbuf, 272, db_s);
+	for(b=0; !feof(db_s) && !ferror(db_s) && b < entryc; b++) {
+		char *str_ptr;
+		int j;
 
-		int j = sscanf(fbuf, "%255[^:]", (char *) &(kod_db[b].hostname));
+		str_ptr = fgets(fbuf, sizeof(fbuf), db_s);
+		if (NULL == str_ptr) {
+			error = 1;
+			break;
+		}
+
+		j = sscanf(fbuf, "%255[^:]", (char *) &(kod_db[b].hostname));
+		/* sscanf returns count of fields, not characters, so this looks iffy */
+		/* also why not a single call to sscanf combining both of these? */
 		j += sscanf(fbuf + j, "%*[^:]:%i:%4s", &kod_db[b].timestamp, (char *) &(kod_db[b].type));
 
-		if(str_ptr == NULL) {
-			b = entryc;
-			error = 1;
-		} 
-		else {
-			if(b > 0) 
-				kod_db[b-1].next = &kod_db[b];
-		}
+		kod_db[b].next = NULL;
+		if (b > 0) 
+			kod_db[b-1].next = &kod_db[b];
+	}
+
+	if (ferror(db_s) || error) {
+		char msg[80];
+
+		snprintf(msg, sizeof(msg), "An error occured while parsing the KOD db file %s", db_file);
+#ifdef DEBUG
+		debug_msg(msg);
+#endif
+		log_msg(msg, 2);
+
+		return;
 	}
 
 #ifdef DEBUG
@@ -263,21 +293,6 @@ kod_init_kod_db (
 	printf("\n");
 #endif
 
-	if(ferror(db_s) || error) {
-		char msg[80];
-		snprintf(msg, 80, "An error occured while parsing the KOD db file %s", db_file);
-
-#ifdef DEBUG
-		debug_msg(msg);
-#endif
-
-		log_msg(msg, 2);
-
-		return;
-	}
-
-
-	kod_db[b].next = NULL;
 
 	fclose(db_s);
 

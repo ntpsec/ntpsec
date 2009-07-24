@@ -30,40 +30,41 @@ int
 resolve_hosts (
 		char **hosts, 
 		int hostc, 
-		struct addrinfo **res,
+		struct addrinfo ***res,
 		int pref_family
 		) 
 {
-	register unsigned int a, b;
-	unsigned int entryc = 0; 
+	register unsigned int a;
+	unsigned int resc;
+	struct addrinfo **tres;
 
-	if(hostc < 1) 
+	if (hostc < 1 || NULL == res)
 		return 0;
 	
-	struct addrinfo ***tres = (struct addrinfo ***) malloc(sizeof(struct addrinfo **) * hostc);
+	tres = malloc(sizeof(struct addrinfo *) * hostc);
 
-	for(a=0; a<hostc; a++) {
-		tres[a] = (struct addrinfo **) malloc(sizeof(struct addrinfo));
+	for (a = 0, resc = 0; a < hostc; a++) {
+		struct addrinfo hints;
+		int error;
+
+		tres[resc] = NULL;
 
 #ifdef DEBUG
 		printf("sntp resolve_hosts: Starting host resolution for %s...\n", hosts[a]); 
 #endif
 
-		struct addrinfo hints, *dres;
-		int error;
-
 		memset(&hints, 0, sizeof(hints));
 
-		if(pref_family == 0)
+		if (AF_UNSPEC == pref_family)
 			hints.ai_family = PF_UNSPEC;
 		else 
 			hints.ai_family = pref_family;
 		
 		hints.ai_socktype = SOCK_DGRAM;
 
-		error = getaddrinfo(hosts[a], "123", &hints, tres[a]);
+		error = getaddrinfo(hosts[a], "123", &hints, &tres[resc]);
 
-		if(error) {
+		if (error) {
 			size_t msg_length = strlen(hosts[a]) + 21;
 			char *logmsg = (char *) malloc(sizeof(char) * msg_length);
 
@@ -73,60 +74,26 @@ resolve_hosts (
 #endif
 
 			log_msg(logmsg, 1);
-			res[a] = 0;
-		}
-		else {
-			for(dres=*tres[a]; dres; dres=dres->ai_next) {
-				entryc++;
-#ifdef DEBUG	
+		} else {
+#ifdef DEBUG
+			for (dres = tres[resc]; dres; dres = dres->ai_next) {
 				getnameinfo(dres->ai_addr, dres->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 				STDLINE
-				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", entryc, hosts[a]);
+				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", resc, hosts[a]);
 				printf("socktype: %i ", dres->ai_socktype); 
 				printf("protocol: %i ", dres->ai_protocol);
 				printf("Prefered socktype: %i IP: %s\n", dres->ai_socktype, adr_buf);
 				STDLINE
-#endif
 			}
+#endif
+			resc++;
 		}
 	}
-
-#ifdef DEBUG
-	printf("Retrieved %i DNS entries, continuing...\n", entryc);
-#endif
 
 	/* Make a list of the addrinfo list entries, start by counting them */
-	struct addrinfo **result = (struct addrinfo **) malloc(sizeof(struct addrinfo**) * entryc);
+	*res = realloc(tres, sizeof(struct addrinfo *) * resc);
 
-	for(a=0, b=0; a<hostc; a++) {
-		struct addrinfo *cur = *tres[a];
-
-		if(cur->ai_next == NULL) {
-			result[b] = *tres[a];
-		}
-		else {
-			struct addrinfo *seek = *tres[a];
-
-			for(; b<entryc && seek; b++) {
-				result[b] = seek;
-				seek = seek->ai_next;
-			}
-		}
-	}
-
-#ifdef DEBUG
-	for(a=0; a<entryc; a++)
-		getnameinfo(result[a]->ai_addr, result[a]->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
-
-		printf("%x: IP %s\n", (unsigned int) result[a], adr_buf); 
-#endif
-
-	*res = (struct addrinfo *) malloc(sizeof(struct addrinfo *) * entryc);
-
-	for(a=0; a<entryc; a++)
-		res[a] = result[a];
-
-	return entryc;
+	return resc;
 }
 
 /* Creates a socket and returns. */
@@ -190,7 +157,6 @@ recvdata (
 {
 	GETSOCKNAME_SOCKLEN_TYPE slen;
 	int recvc;
-	int saved_errno;
 
 #ifdef DEBUG
 	printf("sntp recvdata: Trying to receive data from...\n");
@@ -378,8 +344,11 @@ recv_bcst_pkt (
 	int pkt_len = recv_bcst_data(rsock, rdata, 256, sas, &sender);
 
 
-	if (pkt_len < 0)
+	if (pkt_len < 0) {
+		free(rdata);
+
 		return BROADCAST_FAILED;
+	}
 
 	/* No MAC, no authentication */
 	if (LEN_PKT_NOMAC == pkt_len)
@@ -391,6 +360,8 @@ recv_bcst_pkt (
 	else
 		if(ENABLED_OPT(NORMALVERBOSE)) {
 			printf("sntp recv_bcst_pkt: Funny packet length: %i. Discarding package.\n", pkt_len);
+			free(rdata);
+
 			return PACKET_UNUSEABLE;
 		}
 
@@ -399,6 +370,7 @@ recv_bcst_pkt (
 		if(ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_pkt: Received packet is too big (%i bytes), trying again to get a useFable packet\n", 
 					pkt_len);
+		free(rdata);
 
 		return PACKET_UNUSEABLE;
 	}
@@ -573,8 +545,9 @@ recvpkt (
 	else {
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Funny packet length: %i. Discarding package.\n", pkt_len);
+		free(rdata);
 
-			return PACKET_UNUSEABLE;
+		return PACKET_UNUSEABLE;
 	}
 
 	/* Packet too big */
@@ -582,6 +555,7 @@ recvpkt (
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Received packet is too big (%i bytes), trying again to get a useable packet\n", 
 					pkt_len);
+		free(rdata);
 
 		return PACKET_UNUSEABLE;
 	}
@@ -595,6 +569,9 @@ recvpkt (
 			((char *) rpkt)[a] = rdata[a];
 		else
 			((char *) rpkt)[a] = 0;
+
+	free(rdata);
+	rdata = NULL;
 
 	/* MAC could be useable for us */
 	if (has_mac) {

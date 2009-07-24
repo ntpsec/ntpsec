@@ -90,6 +90,7 @@ auth_init (
 	if(feof(keyf)) {
 		if(ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp auth_init: Key file %s is empty!\n", keyfile);
+		fclose(keyf);
 
 		return -1;
 	}
@@ -99,9 +100,9 @@ auth_init (
 		struct key *act = (struct key *) malloc(sizeof(struct key));
 		line_limit = 0;
 
-		fgets(kbuf, 96, keyf);
+		fgets(kbuf, sizeof(kbuf), keyf);
 		
-		for(a=0; a<strlen(kbuf) && a < 96; a++) {
+		for(a=0; a<strlen(kbuf) && a < sizeof(kbuf); a++) {
 			if(kbuf[a] == '#') {
 				line_limit = a;
 				break;
@@ -118,16 +119,13 @@ auth_init (
 
 		if((scan_cnt = sscanf(kbuf, "%i %c %16s", &act->key_id, &act->type, act->key_seq)) == 3) {
 			act->key_len = strlen(act->key_seq);
-	
-			if(act->type != 0) {
+			act->next = NULL;
+
+			if (NULL == prev)
 				*keys = act;
-				prev = act;
-			}
-			else {
+			else
 				prev->next = act;
-				act->next = NULL;
-				prev = act;
-			}
+			prev = act;
 
 			key_cnt++;
 

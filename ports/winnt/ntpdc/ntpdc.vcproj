@@ -317,6 +317,10 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath="..\..\..\include\ntp_assert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_lineedit.h"
 				>
 			</File>
