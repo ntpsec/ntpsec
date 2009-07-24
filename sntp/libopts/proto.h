@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Mon Jul 20 21:05:15 PDT 2009
+ * Generated Thu Jul 23 17:36:35 PDT 2009
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1

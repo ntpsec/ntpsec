@@ -1,6 +1,6 @@
 
 /*
- *  $Id: time.c,v 4.3 2009/01/01 16:51:50 bkorb Exp $
+ *  $Id: time.c,v 4.4 2009/01/01 16:49:26 bkorb Exp $
  *  Time-stamp:      "2008-11-16 14:51:48 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.

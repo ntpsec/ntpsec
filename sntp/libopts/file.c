@@ -1,7 +1,7 @@
 
 /*
- *  $Id: file.c,v 1.7 2009/01/01 16:51:47 bkorb Exp $
- *  Time-stamp:      "2008-12-06 10:15:33 bkorb"
+ *  $Id: file.c,v 4.7 2009/01/01 16:49:26 bkorb Exp $
+ *  Time-stamp:      "2009-07-23 17:23:46 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
@@ -97,7 +97,8 @@ optionFileCheck(tOptions* pOpts, tOptDesc* pOD,
                 pOpts->pUsageProc(pOpts, EXIT_FAILURE);
                 /* NOTREACHED */
             }
-            *p = '/';
+            if (p != NULL)
+                *p = DIRCH;
             break;
         }
 

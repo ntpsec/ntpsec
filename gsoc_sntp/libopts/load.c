@@ -1,6 +1,6 @@
 
 /*
- *  $Id: load.c,v 4.28 2009/01/01 16:51:48 bkorb Exp $
+ *  $Id: load.c,v 4.37 2009/01/01 16:49:26 bkorb Exp $
  *  Time-stamp:      "2008-12-06 10:16:05 bkorb"
  *
  *  This file contains the routines that deal with processing text strings

@@ -1,6 +1,6 @@
 
 /*
- *  $Id: reset.c,v 4.3 2009/01/01 16:51:49 bkorb Exp $
+ *  $Id: reset.c,v 4.6 2009/01/01 16:49:26 bkorb Exp $
  *  Time-stamp:      "2008-08-02 12:25:18 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.

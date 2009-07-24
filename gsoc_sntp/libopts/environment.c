@@ -1,6 +1,6 @@
 
 /*
- *  $Id: environment.c,v 4.20 2009/07/21 03:23:12 bkorb Exp $
+ *  $Id: environment.c,v 4.20 2009/07/21 03:21:57 bkorb Exp $
  * Time-stamp:      "2009-07-20 20:12:24 bkorb"
  *
  *  This file contains all of the routines that must be linked into

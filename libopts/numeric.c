@@ -1,7 +1,7 @@
 
 /*
- *  $Id: numeric.c,v 4.21 2009/01/17 22:08:07 bkorb Exp $
- *  Time-stamp:      "2009-01-11 18:05:28 bkorb"
+ *  $Id: numeric.c,v 4.20 2009/01/17 22:08:09 bkorb Exp $
+ *  Time-stamp:      "2009-07-23 17:25:39 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
@@ -115,15 +115,15 @@ optionNumericVal(tOptions* pOpts, tOptDesc* pOD )
     char* pz;
     long  val;
 
-    if ((pOD->fOptState & OPTST_RESET) != 0)
-        return;
-
     /*
      *  Numeric options may have a range associated with it.
      *  If it does, the usage procedure requests that it be
-     *  emitted by passing a NULL pOD pointer.
+     *  emitted by passing a NULL pOD pointer.  Also bail out
+     *  if there is no option argument or if we are being reset.
      */
-    if ((pOD == NULL) || (pOD->optArg.argString == NULL))
+    if (  (pOD == NULL)
+       || (pOD->optArg.argString == NULL)
+       || ((pOD->fOptState & OPTST_RESET) != 0))
         return;
 
     errno = 0;
@@ -158,7 +158,8 @@ optionNumericVal(tOptions* pOpts, tOptDesc* pOD )
     pOD->optArg.argInt = val;
     return;
 
-bad_number:
+    bad_number:
+
     fprintf( stderr, zNotNumber, pOpts->pzProgName, pOD->optArg.argString );
     if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
         (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
