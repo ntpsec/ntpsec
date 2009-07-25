@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  Friday July 24, 2009 at 07:52:47 AM EDT
+ *  It has been AutoGen-ed  Saturday July 25, 2009 at 07:47:09 AM EDT
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -226,7 +226,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPSNMPD";
 tSCC   zUsageTitle[] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.5p192\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.5p193\n\
 USAGE:  %s [ -<flag> | --<name> ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
