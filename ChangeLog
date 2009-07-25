@@ -1,3 +1,17 @@
+* [Bug 1261] CID 34: simulate_server() rbuf.msg_flags uninitialized.
+* [Bug 1262] CID 35: xpkt.mac uninitialized in simulate_server().
+* [Bug 1263] CID 37: CID 38: CID 40: CID 43: multiple refclocks 
+  uninitialized tm_zone (arc, chronolog, dumbclock, pcf).
+* [Bug 1264] CID 64: gsoc_sntp on_wire() frees wrong ptr receiving KoD.
+* [Bug 1265] CID 65: CID 66: gsoc_sntp on_wire() leaks x_pkt, r_pkt.
+* [Bug 1266] CID 39: datum_pts_start() uninitialized arg.c_ospeed.
+* [Bug 1267] CID 44: old sntp handle_saving() writes stack garbage to
+  file when clearing.
+* [Bug 1268] CID 63: resolve_hosts() leaks error message buffer.
+* [Bug 1269] CID 74: use assertion to ensure move_fd() does not return
+  negative descriptors.
+* [Bug 1270] CID 70: gsoc_sntp recv_bcst_data mdevadr.ipv6mr_interface
+  uninitialized.
 (4.2.5p192) 2009/07/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 965] CID 42: ss_family uninitialized.
 * [Bug 1250] CID 53: kod_init_kod_db() overruns kod_db malloc'd buffer.

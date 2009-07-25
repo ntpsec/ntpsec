@@ -240,6 +240,8 @@ chronolog_receive(
 	     * otherwise, we get the time wrong.
 	     */
 	    
+	    memset(&local, 0, sizeof(local));
+
 	    local.tm_year  = up->year;
 	    local.tm_mon   = up->month-1;
 	    local.tm_mday  = up->day;

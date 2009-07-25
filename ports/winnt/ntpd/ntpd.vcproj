@@ -1229,6 +1229,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\ntpd\refclock_chronolog.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\refclock_chu.c"
 				>
 				<FileConfiguration

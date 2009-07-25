@@ -153,21 +153,18 @@ on_wire (
 {
 	register int try;
 	SOCKET sock;
+	struct pkt *x_pkt = (struct pkt *) alloca(sizeof(struct pkt));
+	struct pkt *r_pkt = (struct pkt *) alloca(sizeof(struct pkt));
 	
 	for(try=0; try<5; try++) {
-		struct pkt *x_pkt = (struct pkt *) malloc(sizeof(struct pkt));
-		struct pkt *r_pkt = (struct pkt *) malloc(sizeof(struct pkt));
-
 		struct timeval tv_xmt, tv_dst;
-	
 		double t21, t34, delta, offset;
-
 		int error, rpktl, sw_case;
-
 		char *hostname = NULL, *ts_str = NULL;
-
 		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
 
+		memset(r_pkt, 0, sizeof(*r_pkt));
+		memset(x_pkt, 0, sizeof(*x_pkt));
 
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
 
@@ -219,13 +216,13 @@ on_wire (
 							(char *) r_pkt->refid, hostname);
 
 				char *log_str = (char *) malloc(sizeof(char) * (INET6_ADDRSTRLEN + 72));
-				snprintf(log_str, (INET6_ADDRSTRLEN + 72), 
+				snprintf(log_str, sizeof(log_str), 
 					"Received a KOD packet with code %s from %s, demobilizing all connections", 
 					(char *) &r_pkt->refid, hostname);
 
 				log_msg(log_str, 2);
 
-				free(log_msg);
+				free(log_str);
 				break;
 
 			case KOD_RATE:
@@ -308,7 +305,7 @@ on_wire (
 	char logmsg[32 + INET6_ADDRSTRLEN];
 	getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
-	snprintf(logmsg, 32 + INET6_ADDRSTRLEN, "Received no useable packet from %s!", adr_buf);
+	snprintf(logmsg, sizeof(logmsg), "Received no useable packet from %s!", adr_buf);
 
 	if(ENABLED_OPT(NORMALVERBOSE))
 		printf("sntp on_wire: Received no useable packet from %s!\n", adr_buf);

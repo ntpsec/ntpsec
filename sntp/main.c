@@ -1073,6 +1073,8 @@ C library not to trash the stack on bad numbers! */
 /* Clearing the save file is similar. */
 
     } else if (operation == save_clear) {
+	memset(&buffer, 0, sizeof(buffer));
+
         if (fseek(savefile,0l,SEEK_SET) != 0 ||
                 fwrite(&buffer,sizeof(buffer),1,savefile) != 1 ||
                 fflush(savefile) != 0 || ferror(savefile))

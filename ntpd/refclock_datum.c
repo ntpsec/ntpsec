@@ -292,6 +292,8 @@ datum_pts_start(
 
 #ifdef HAVE_TERMIOS
 
+	memset(&arg, 0, sizeof(arg));
+
 	arg.c_iflag = IGNBRK;
 	arg.c_oflag = 0;
 	arg.c_cflag = B9600 | CS8 | CREAD | PARENB | CLOCAL;

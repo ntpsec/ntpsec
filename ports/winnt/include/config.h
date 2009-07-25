@@ -298,7 +298,8 @@ char *NTstrerror(int errnum);
 # define HAVE_TIMEPPS_H
 # define HAVE_PPSAPI
 # define CLOCK_ATOM
-/* # define CLOCK_DUMBCLOCK */	/* refclock_dumbclock.c needs work to open COMx: */
+# define CLOCK_CHRONOLOG
+# define CLOCK_DUMBCLOCK
 # define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */
 # define CLOCK_HOPF_PCI		/* device 39, hopf DCF77/GPS PCI-Bus receiver  */
 # define CLOCK_JUPITER

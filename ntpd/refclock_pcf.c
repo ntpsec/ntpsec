@@ -144,6 +144,8 @@ pcf_poll(
 		return;
 	}
 
+	memset(&tm, 0, sizeof(tm));
+
 	tm.tm_mday = buf[11] * 10 + buf[10];
 	tm.tm_mon = buf[13] * 10 + buf[12] - 1;
 	tm.tm_year = buf[15] * 10 + buf[14];

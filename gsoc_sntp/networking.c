@@ -74,6 +74,7 @@ resolve_hosts (
 #endif
 
 			log_msg(logmsg, 1);
+			free(logmsg);
 		} else {
 #ifdef DEBUG
 			for (dres = tres[resc]; dres; dres = dres->ai_next) {
@@ -251,10 +252,9 @@ recv_bcst_data (
 			return BROADCAST_FAILED;
 		}
 
+		memset(&mdevadr, 0, sizeof(mdevadr));
 		mdevadr.ipv6mr_multiaddr = SOCK_ADDR6(sas);
-		/* FIXME    hat value for ipv6mr_interface?  Use utilities for sock to char op*/
-		/* mdevadr.ipv6mr_interface = in6addr_any; */ 
-														 
+
 		if(!IN6_IS_ADDR_MULTICAST(&mdevadr.ipv6mr_multiaddr)) {
 			if(ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 

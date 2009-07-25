@@ -222,6 +222,9 @@ int simulate_server(
     double d1, d2, d3;	       /* Delays while the packet is enroute */
     double t1, t2, t3, t4;     /* The four timestamps in the packet */
 
+    memset(&xpkt, 0, sizeof(xpkt));
+    memset(&rbuf, 0, sizeof(rbuf));
+
     /* Search for the server with the desired address */
     server = NULL;
     for (i = 0; i < simulation.num_of_servers; ++i) {

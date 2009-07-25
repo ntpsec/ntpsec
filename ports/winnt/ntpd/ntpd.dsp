@@ -535,6 +535,10 @@ SOURCE=..\..\..\ntpd\refclock_conf.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\refclock_chronolog.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\ntpd\refclock_datum.c
 # PROP Exclude_From_Build 1
 # End Source File

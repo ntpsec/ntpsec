@@ -375,6 +375,8 @@ move_fd(
 	SOCKET fd
 	)
 {
+	NTP_REQUIRE((int)fd >= 0);
+
 #if !defined(SYS_WINNT) && defined(F_DUPFD)
 #ifndef FD_CHUNK
 #define FD_CHUNK	10
