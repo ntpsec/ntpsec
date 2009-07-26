@@ -13,9 +13,10 @@
 		<h3>NTP Debugging Techniques</h3>
 		<img src="pic/pogo.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We make house calls and bring our own bugs.</p>
-		<p>Last update: <csobj format="ShortTime" h="25" locale="00000409" region="0" t="DateTime" w="61">02:37</csobj> UTC <csobj format="LongDate" h="25" locale="00000409" region="0" t="DateTime" w="252">Monday, March 24, 2008</csobj></p>
-		<br clear="left">
-		<h4>More Help</h4>
+		<p>Last update:
+			<!-- #BeginDate format:En2m -->16-Jul-2009  19:36<!-- #EndDate -->
+			UTC</p>
+	<h4>More Help</h4>
 		<script type="text/javascript" language="javascript" src="scripts/install.txt"></script>
 		<hr>
 		<h4>Initial Startup</h4>
@@ -48,9 +49,9 @@
 		<p>A detailed explanation of the system, peer and clock variables in the billboards is beyond the scope of this page; however, a comprehensive explanation for each one is in the NTPv4 protocol specification. The following observations will be useful in debugging and monitoring.</p>
 		<ol>
 			<li>The server has successfully synchronized to its sources if the <tt>leap</tt> peer
-				variable has value other than zero. The client has successfully synchronized
+				variable has value other than 3 (11b) The client has successfully synchronized
 				to the server when the <tt>leap</tt> system variable has value other than
-				zero.
+				3.
 			<li>The <tt>reach</tt> peer variable is an 8-bit shift register displayed in octal format. When a valid packet is received, the rightmost bit is lit. When a packet is sent, the register is shifted left one bit with 0 replacing the rightmost bit. If the <tt>reach</tt> value is nonzero, the server is reachable; otherwise, it is unreachable. Note that, even if all servers become unreachable, the system continues to show valid time to dependent applications.
 			<li>A useful indicator of miscellaneous problems is the <tt>flash</tt> peer variable, which shows the result of 13 sanity tests. It contains the <a href="decode.html#flash">flash status word</a> bits, commonly called flashers, which displays the current errors for the association. These bits should all be zero for a valid server.
 			<li>The three peer variables <tt>filtdelay</tt>, <tt>filtoffset</tt> and <tt>filtdisp</tt> show the delay, offset and jitter statistics for each of the last eight measurement rounds. These statistics and their trends are valuable performance indicators for the server, client and the network. For instance, large fluctuations in delay and jitter suggest network congestion. Missing clock filter stages suggest packet losses in the network.

@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 * Use scripts/cvo.sh in the build script to get better subdir names.
 (4.2.5p193) 2009/07/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1261] CID 34: simulate_server() rbuf.msg_flags uninitialized.
