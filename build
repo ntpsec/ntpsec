@@ -32,6 +32,9 @@ esac
 
 CVO=`./scripts/cvo.sh @cvo@`
 case "$CVO" in
+ *-*-*-*) echo "config.guess returned <$CVO>, which makes no sense to me."
+    exit 1
+    ;;
  *-*-*) ;;
  *) echo "config.guess returned <$CVO>, which makes no sense to me."
     exit 1
