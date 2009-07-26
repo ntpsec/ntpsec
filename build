@@ -30,7 +30,7 @@ esac
 #set -e
 #set -x
 
-CVO=`./config.guess`
+CVO=`./scripts/cvo.sh @cvo@`
 case "$CVO" in
  *-*-*) ;;
  *) echo "config.guess returned <$CVO>, which makes no sense to me."
