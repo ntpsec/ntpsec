@@ -29,6 +29,11 @@ case "$#" in
 	if false
 	then
 	    :
+	elif test -f /etc/debian_version
+	then
+	    set `cat /etc/debian_version`
+	    CVO_OS=debian$1
+	    CVO_KOSVER=`uname -r`
 	elif test -f /etc/mandrake-release
 	then
 	    set `cat /etc/mandrake-release`
