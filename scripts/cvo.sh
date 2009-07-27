@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# Copyright 2002, Harlan Stenn.  Used by NTP with permission.
+# Copyright 2002, 2009, Harlan Stenn.  Used by NTP with permission.
 # Author: Harlan Stenn <harlan+cvo@pfcs.com>
 
 # Possible output formats:
@@ -42,18 +42,42 @@ case "$#" in
 	elif test -f /etc/redhat-release
 	then
 	    set `cat /etc/redhat-release`
-	    case "$3" in
-	     Enterprise)
-	        CVO_OS=redhat$7.E
+	    case "$1" in
+	     CentOS)
+	        CVO_OS=centos$3
 	        ;;
-	     Linux)
-	        CVO_OS=redhat$5
+	     Fedora)
+	        CVO_OS=fedora$3
+	        ;;
+	    *)
+		case "$3" in
+		 Enterprise)
+		    CVO_OS=redhat$7.E
+		    ;;
+		 Linux)
+		    CVO_OS=redhat$5
+		    ;;
+		esac
 		;;
 	    esac
 	    CVO_KOSVER=`uname -r`
+	elif test -f /etc/slackware-version
+	then
+	    set `cat /etc/slackware-version`
+	    CVO_OS=slackware$2
+	    CVO_KOSVER=`uname -r`
+	elif test -f /etc/SuSE-release
+	then
+	    set `cat /etc/SuSE-release`
+	    CVO_OS=suse$9
+	    CVO_KOSVER=`uname -r`
 	else
 	    CVO_OS=$cvo_KERN`uname -r`
+
 	fi
+	;;
+     nto)	# QNX
+	CVO_KOSVER=`uname -r`
 	;;
      *)
 	echo "gronk - I don't understand <$CVO>!"
