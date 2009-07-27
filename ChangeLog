@@ -1,3 +1,4 @@
+(4.2.5p195) 2009/07/27 Released by Harlan Stenn <stenn@ntp.org>
 * cvo.sh: Add support for CentOS, Fedora, Slackware, SuSE.
 (4.2.5p194) 2009/07/26 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
