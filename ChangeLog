@@ -1,3 +1,4 @@
+(4.2.5p196) 2009/07/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1272] gsoc_sntp IPv6 build problems under HP-UX 10.
 * [Bug 1273] CID 10: Palisade leaks unit struct in error path.
 * [Bug 1274] CID 67: ensure resolve_hosts() output count and pointers
