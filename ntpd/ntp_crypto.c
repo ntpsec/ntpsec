@@ -1212,6 +1212,9 @@ crypto_xmit(
 	 * Send challenge in Schnorr (IFF) identity scheme.
 	 */
 	case CRYPTO_IFF:
+		if (peer == NULL)
+			break;		/* hack attack */
+
 		if ((rval = crypto_alice(peer, &vtemp)) == XEVNT_OK) {
 			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
@@ -1232,6 +1235,9 @@ crypto_xmit(
 	 * Send challenge in Guillou-Quisquater (GQ) identity scheme.
 	 */
 	case CRYPTO_GQ:
+		if (peer == NULL)
+			break;		/* hack attack */
+
 		if ((rval = crypto_alice2(peer, &vtemp)) == XEVNT_OK) {
 			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
@@ -1252,6 +1258,9 @@ crypto_xmit(
 	 * Send challenge in MV identity scheme.
 	 */
 	case CRYPTO_MV:
+		if (peer == NULL)
+			break;		/* hack attack */
+
 		if ((rval = crypto_alice3(peer, &vtemp)) == XEVNT_OK) {
 			len = crypto_send(fp, &vtemp, start);
 			value_free(&vtemp);
