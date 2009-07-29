@@ -1386,6 +1386,9 @@ triggered if the signal handling works. */
     ntp_data data;
     char text[100];
 
+    guesses[0] = 0;
+    precs[0] = 0;
+
     if (verbose > 2) {
         format_time(text,50,0.0,-1.0,0.0,-1.0,-10);
         fprintf(stderr,"Started=%.6f %s\n",current_time(JAN_1970),text);

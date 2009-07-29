@@ -1261,7 +1261,7 @@ set_wildcard_reuse(
 
 		DPRINTF(4, ("set SO_REUSEADDR to %s on %s\n", 
 			    on ? "on" : "off",
-			    stoa(any)));
+			    stoa(&any->sin)));
 	}
 }
 #endif /* OS_NEEDS_REUSEADDR_FOR_IFADDRBIND */

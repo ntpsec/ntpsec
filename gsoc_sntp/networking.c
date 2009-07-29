@@ -20,7 +20,7 @@
 char adr_buf[INET6_ADDRSTRLEN];
 
 
-/* resolve_hosts consumes an arry of hostnames/addresses and its length, stores a pointer
+/* resolve_hosts consumes an array of hostnames/addresses and its length, stores a pointer
  * to the array with the resolved hosts in res and returns the size of the array res.
  * pref_family enforces IPv4 or IPv6 depending on commandline options and system 
  * capability. If pref_family is NULL or PF_UNSPEC any compatible family will be accepted.
@@ -91,8 +91,12 @@ resolve_hosts (
 		}
 	}
 
-	/* Make a list of the addrinfo list entries, start by counting them */
-	*res = realloc(tres, sizeof(struct addrinfo *) * resc);
+	if (resc)
+		*res = realloc(tres, sizeof(struct addrinfo *) * resc);
+	else {
+		free(tres);
+		*res = NULL;
+	}
 
 	return resc;
 }
@@ -239,6 +243,7 @@ recv_bcst_data (
 			}
 		}
 	}
+#ifdef ISC_PLATFORM_HAVEIPV6
 	else if (IS_IPV6(sas)) {
 		struct ipv6_mreq mdevadr;
 
@@ -279,6 +284,7 @@ recv_bcst_data (
 			}
 		}
 	}
+#endif	/* ISC_PLATFORM_HAVEIPV6 */
 	
 	FD_ZERO(&bcst_fd);
 	FD_SET(rsock, &bcst_fd);
@@ -322,8 +328,10 @@ recv_bcst_data (
 
 	if (IS_IPV4(sas)) 
 		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue, sizeof(btrue));
+#ifdef ISC_PLATFORM_HAVEIPV6
 	else if (IS_IPV6(sas))
 		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue, sizeof(btrue));
+#endif
 		
 	return recv_bytes;
 }
