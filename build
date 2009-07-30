@@ -30,6 +30,9 @@ esac
 #set -e
 #set -x
 
+# config.guess may only be here, and some don't have . in their PATH
+PATH="$PATH:."
+
 CVO=`./scripts/cvo.sh @cvo@`
 case "$CVO" in
  *-*-*-*) echo "config.guess returned <$CVO>, which makes no sense to me."
