@@ -1,6 +1,6 @@
 
 /*
- *  $Id: boolean.c,v 4.15 2009/01/01 16:49:26 bkorb Exp $
+ *  $Id: boolean.c,v 4.17 2009/08/01 17:44:36 bkorb Exp $
  * Time-stamp:      "2008-08-03 13:06:02 bkorb"
  *
  *   Automated Options Paged Usage module.
@@ -24,8 +24,8 @@
  *
  *  These files have the following md5sums:
  *
- *  239588c55c22c60ffe159946a760a33e pkg/libopts/COPYING.gplv3
- *  fa82ca978890795162346e661b47161a pkg/libopts/COPYING.lgplv3
+ *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
+ *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 

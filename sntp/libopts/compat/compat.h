@@ -4,7 +4,7 @@
  *
  *  Time-stamp:      "2008-06-14 09:36:25 bkorb"
  *
- * $Id: compat.h,v 4.22 2009/01/01 16:49:26 bkorb Exp $
+ * $Id: compat.h,v 4.21 2009/01/01 16:51:52 bkorb Exp $
  *
  *  compat.h is free software.
  *  This file is part of AutoGen.
