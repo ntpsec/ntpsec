@@ -1887,6 +1887,10 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath="..\..\..\libopts\ag-char-map.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\binio.h"
 				>
 			</File>
@@ -1916,10 +1920,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\isc\interfaceiter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\inttypes.h"
 				>
 			</File>
 			<File

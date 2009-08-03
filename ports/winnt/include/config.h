@@ -345,7 +345,6 @@ char *NTstrerror(int errnum);
 #define HAVE_STRCHR	1
 #define HAVE_FCNTL_H	1
 #define HAVE_SYS_RESOURCE_H
-#define HAVE_INTTYPES_H
 #define HAVE_BSD_NICE			/* emulate BSD setpriority() */
 
 typedef char *caddr_t;
