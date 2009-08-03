@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  Thursday July 30, 2009 at 07:50:46 AM EDT
+ *  It has been AutoGen-ed  August  3, 2009 at 07:57:31 AM by AutoGen 5.9.9pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright 2008 ntp.org - all rights reserved
+ * sntp copyright (c) 2008 ntp.org - all rights reserved
  *
  * 
  */
@@ -458,7 +458,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.5p197\n\
+"sntp - standard SNTP program - Ver. 4.2.5p198\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {

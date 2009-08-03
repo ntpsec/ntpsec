@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  Thursday July 30, 2009 at 07:51:49 AM EDT
+ *  It has been AutoGen-ed  August  3, 2009 at 07:58:33 AM by AutoGen 5.9.9pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright 1970-2006 ntp.org - all rights reserved
+ * sntp copyright (c) 1970-2006 ntp.org - all rights reserved
  *
  *         General Public Licence for the software known as MSNTP
  *         ------------------------------------------------------
@@ -147,8 +147,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    13
-#define SNTP_VERSION       "4.2.5p197"
-#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p197"
+#define SNTP_VERSION       "4.2.5p198"
+#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p198"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
