@@ -1,6 +1,6 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.29 2009/01/17 22:08:09 bkorb Exp $
+ *  usage.c  $Id: usage.c,v 4.31 2009/08/01 17:44:37 bkorb Exp $
  * Time-stamp:      "2009-01-17 13:18:23 bkorb"
  *
  *  This module implements the default usage procedure for
@@ -29,8 +29,8 @@
  *
  *  These files have the following md5sums:
  *
- *  239588c55c22c60ffe159946a760a33e pkg/libopts/COPYING.gplv3
- *  fa82ca978890795162346e661b47161a pkg/libopts/COPYING.lgplv3
+ *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
+ *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 

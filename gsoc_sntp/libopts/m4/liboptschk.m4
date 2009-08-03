@@ -6,7 +6,7 @@ dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
 dnl Time-stamp:        "2009-07-22 18:53:27 bkorb"
-dnl Last Committed:    $Date: 2009/07/23 02:05:55 $
+dnl Last Committed:    $Date: 2009/07/23 02:07:46 $
 
 dnl This file can can be used in projects which are not available under
 dnl the GNU General Public License or the GNU Library General Public
