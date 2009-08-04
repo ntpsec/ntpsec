@@ -64,6 +64,7 @@ static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
 static  void    config          (struct parse *, FILE *);
+static 	void 	dumpcfg		(struct parse *, FILE *);
 static  void    config_from_file (struct parse *, FILE *);
 
 
@@ -71,6 +72,9 @@ static  void    config_from_file (struct parse *, FILE *);
  * Commands we understand.	Ntpdc imports this.
  */
 struct xcmd opcmds[] = {
+	{ "dumpcfg", dumpcfg, { NO, NO, NO, NO },
+		{ "", "", "", ""}, 
+		"dump ntp server configuration"},
 	{ "associations", associations, {  NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "print list of association ID's and statuses for the server's peers" },
@@ -450,7 +454,6 @@ doprintvlist(
 		}
 	}
 }
-
 
 /*
  * addvars - add variables to the variable list
@@ -1162,6 +1165,35 @@ lpassociations(
 	)
 {
 	printassoc(1, fp);
+}
+
+
+/*
+ *  * dumpcfg - dump ntp server configuration
+ */
+static void
+dumpcfg(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	char *datap;
+	int res;
+	int dsize;
+	u_short rstatus;
+	register int a = 0;
+
+	printf("%s\n", pcmd->keyword);
+
+	for(; a<pcmd->nargs; a++) 
+		printf("%s\n", pcmd->argval[a]);
+
+
+	/* For now let's just send a "signal" and have it realize the dump op */
+	res = doquery(CTL_OP_DUMPCONFIG, 0, 0, 0, (char *)0, &rstatus,
+			&dsize, &datap);
+
+	printf("ntpq: res = %i %s\n", res, datap);
 }
 
 

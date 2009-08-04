@@ -125,6 +125,47 @@ enum broadcastclienttype {
     NOVOLLEY
 };
 
+/* A fix for now to prevent the configuration from being consumed before
+ * it could be ever dumped
+ */
+struct config_tree_list {
+    s_list *peers;
+    s_list *unpeers;
+
+    /* Other Modes */
+    int broadcastclient;
+    s_list *manycastserver;
+    s_list *multicastclient;
+
+    s_list *orphan_cmds;
+
+    /* Monitoring Configuration */
+    s_list *stats_list;
+    char *stats_dir;
+    s_list *filegen_opts;
+
+    /* Access Control Configuration */
+    s_list *discard_opts;
+    s_list *restrict_opts;
+
+    s_list *fudge;
+    s_list *tinker;
+    s_list *enable_opts;
+    s_list *disable_opts;
+    struct auth_node auth;
+
+    s_list *logconfig;
+    s_list *qos;
+    s_list *phone;
+    s_list *setvar;
+    s_list *ttl;
+    s_list *trap;
+    s_list *vars;
+
+    struct sim_node *sim_details;
+};
+
+
 /* The syntax tree */
 struct config_tree {
     queue *peers;
@@ -196,6 +237,8 @@ server_info *create_sim_server(struct address_node *addr, double server_offset, 
 
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(void);
+
+int dump_config_dumper(const char *filename);
 
 
 #endif

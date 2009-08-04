@@ -106,6 +106,50 @@ queue *enqueue(queue *my_queue, void *my_node)
     return my_queue;
 }
 
+/* Create a singly-linked list copy of a priority queue 
+ */
+
+s_list *
+clone_queue (
+		queue *my_queue
+	    )
+{
+	if(empty(my_queue)) 
+		return NULL;
+
+	s_list *list = (s_list *) malloc(sizeof(s_list));
+	s_list *list_ptr = list;
+	node *my_node = my_queue->front;
+
+	list->value = (void *)(my_node + 1);
+
+	for(my_node = my_node->node_next; my_node != NULL; my_node = my_node->node_next) {
+		list_ptr->next = (s_list *) malloc(sizeof(s_list));
+		list_ptr = list_ptr->next;
+		list_ptr->value = (void *)(my_node + 1);
+		list_ptr->next = NULL;
+	}
+
+	return list;
+}
+
+
+/* Free singly-linked list 
+ */
+
+void
+free_s_list (
+		s_list *my_list
+	    )
+{
+	s_list *list_next = NULL;
+
+	for(; my_list != NULL; my_list = list_next) {
+		list_next = my_list->next;
+		free(my_list);
+	}
+}
+
 
 /* Define a function to dequeue the first element from the priority
  * queue and return it

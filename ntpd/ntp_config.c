@@ -131,6 +131,7 @@ int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
 struct config_tree my_config;		/* Root of the configuration tree */
+struct config_tree_list my_config_list;
 #if 0
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 #else
@@ -240,6 +241,8 @@ static void config_sim(void);
 static void config_ntpdsim(void);
 #endif
 void getconfig(int argc,char *argv[]);
+void clone_config(struct config_tree *config, struct config_tree_list *list);
+
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
@@ -262,6 +265,7 @@ static int get_multiple_netnums(const char *num, struct sockaddr_storage *addr, 
 static void save_resolve(char *name,int mode,int version,int minpoll,int maxpoll,u_int flags,int ttl,keyid_t keyid,u_char *keystr);
 static void abort_resolve(void);
 static void do_resolve_internal(void);
+
 
 
 /* FUNCTIONS FOR INITIALIZATION
@@ -398,6 +402,839 @@ free_syntax_tree(void)
 	free_auth_node();
 }
 #endif /* DEBUG */
+
+/* Make a copy of the config tree and store that in a singly linked list */
+
+void
+clone_config (
+		struct config_tree *config,
+		struct config_tree_list *list
+	     )
+{
+	list->peers = clone_queue(config->peers);
+	list->unpeers = clone_queue(config->unpeers);
+	list->orphan_cmds = clone_queue(config->orphan_cmds);
+
+	list->manycastserver = clone_queue(config->manycastserver);
+	list->multicastclient = clone_queue(config->multicastclient);
+	
+	list->stats_list = clone_queue(config->stats_list);
+	list->filegen_opts = clone_queue(config->filegen_opts);
+	
+	list->discard_opts = clone_queue(config->discard_opts);
+	list->restrict_opts = clone_queue(config->restrict_opts);
+	
+	list->enable_opts = clone_queue(config->enable_opts);
+	list->disable_opts = clone_queue(config->disable_opts);
+	list->tinker = clone_queue(config->tinker);
+	list->fudge = clone_queue(config->fudge);
+	
+	list->logconfig = clone_queue(config->logconfig);
+	list->phone = clone_queue(config->phone);
+	list->qos = clone_queue(config->qos);
+	list->setvar = clone_queue(config->setvar);
+	list->ttl = clone_queue(config->ttl);
+	list->trap = clone_queue(config->trap);
+	list->vars = clone_queue(config->vars);
+}
+
+/* The config dumper */
+int
+dump_config_dumper (
+		const char *filename
+		)
+{
+	printf("dump_config_dumper:\n");
+	s_list *list_ptr = NULL;
+
+	struct peer_node *peers = NULL;
+	struct unpeer_node *unpeers = NULL;
+	struct attr_val *atrv = NULL;
+	struct address_node *addr = NULL;
+	struct filegen_node *fgen_node = NULL;
+	struct restrict_node *rest_node = NULL;
+	struct addr_opts_node *addr_opts = NULL;
+	struct setvar_node *setv_node = NULL;
+
+	char **string = NULL;
+   	int *integer = NULL;
+	
+	FILE *df = fopen(filename, "w");
+
+	if(df == NULL) 
+		return -1;
+
+
+	if(my_config_list.peers != NULL) {
+		list_ptr = my_config_list.peers;
+
+		for(; 	list_ptr != NULL;
+		 	list_ptr = list_ptr->next) {
+
+			peers = (struct peer_node *) list_ptr->value; 
+		
+			/* Add other attributes to output of struct peer_node */
+			fprintf(df, "peer %s\n", (peers->addr)->address);
+		}
+	}
+	
+	if(my_config_list.unpeers != NULL) {
+		list_ptr = my_config_list.unpeers;
+		
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+			
+			unpeers = (struct unpeer_node *) list_ptr->value;
+			
+			fprintf(df, "unpeer %s\n", (unpeers->addr)->address);
+		}
+	}
+
+	if(my_config_list.orphan_cmds != NULL) {
+		list_ptr = my_config_list.orphan_cmds;
+
+		fprintf(df, "tos");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			atrv = (struct attr_val *) list_ptr->value;
+
+			switch(atrv->attr) {
+				case T_Ceiling:
+				fprintf(df, " ceiling %i", (int) atrv->value.d);
+				break;
+
+				case T_Floor:
+				fprintf(df, " floor %i", (int) atrv->value.d);
+				break;
+
+				case T_Cohort:
+				fprintf(df, " cohort ");
+
+				if(atrv->value.d) 
+					fprintf(df, "1");
+				else
+					fprintf(df, "0");
+				break;
+
+				case T_Orphan:
+				fprintf(df, " orphan %i", (int) atrv->value.d);
+				break;
+
+				case T_Mindist: 
+				fprintf(df, " mindist %f", atrv->value.d);
+				break;
+				
+				case T_Maxdist:
+				fprintf(df, " maxdist %f", atrv->value.d);
+				break;
+
+				case T_Minclock:
+				fprintf(df, " minclock %f", atrv->value.d);
+				break;
+
+				case T_Maxclock:
+				fprintf(df, " maxclock %f", atrv->value.d);
+				break;
+
+				case T_Minsane:
+				fprintf(df, " minsane %i", (int) atrv->value.d);
+				break;
+
+				case T_Beacon:
+				fprintf(df, " beacon %i", (int) atrv->value.d);
+				break;
+
+				case T_Maxhop:
+				fprintf(df, " maxhop %i", (int) atrv->value.d);
+				break;
+			}
+		}
+
+		fprintf(df, "\n");
+	}
+
+	if(my_config_list.manycastserver != NULL) {
+		list_ptr = my_config_list.manycastserver;
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			addr = (struct address_node *) list_ptr->value;
+
+			fprintf(df, "manycastserver %s\n", addr->address);
+		}
+	}
+
+	if(my_config_list.multicastclient != NULL) {
+		list_ptr = my_config_list.multicastclient;
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			addr = (struct address_node *) list_ptr->value;
+
+			fprintf(df, "multicastclient %s\n", addr->address);
+		}
+	}
+
+	if(my_config_list.stats_list != NULL) {
+		list_ptr = my_config_list.stats_list;
+
+		fprintf(df, "statistics ");
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			string = (char **) list_ptr->value;
+				
+			/* FIXME Find keyword and type of information */
+			
+			fprintf(df, "%s ", *string);	
+		}
+
+		fprintf(df, "\n");
+	}
+
+	if(my_config_list.filegen_opts != NULL) {
+		list_ptr = my_config_list.filegen_opts;
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			fprintf(df, "filegen ");
+
+			fgen_node = (struct filegen_node *) list_ptr->value;
+
+			s_list *options = clone_queue(fgen_node->options);
+			s_list *opt_ptr = options;
+
+			for(;	opt_ptr != NULL;
+				opt_ptr = opt_ptr->next) {
+				
+				atrv = (struct attr_val *) opt_ptr->value;
+
+				switch(atrv->type) {
+					case T_File:
+					fprintf(df, " file %s", atrv->value.s);
+					break;
+
+					case T_Type:
+					fprintf(df, " type ");
+					
+					switch(atrv->value.i) {
+						case T_Day:
+						fprintf(df, "day");
+						break;
+
+						case T_Month:
+						fprintf(df, "month");
+						break;
+
+						case T_None:
+						fprintf(df, "none");
+						break;
+
+						case T_Pid:
+						fprintf(df, "pid");
+						break;
+
+						case T_Week:
+						fprintf(df, "week");
+						break;
+
+						case T_Year:
+						fprintf(df, "year");
+						break;
+					}
+					break;
+
+					case T_Flag:
+					switch (atrv->value.i) {
+						case T_Link:
+						fprintf(df, " link");
+						break;
+
+						case T_Nolink:
+						fprintf(df, " nolink");
+						break;
+
+						case T_Enable:
+						fprintf(df, " enable");
+						break;
+
+						case T_Disable:
+						fprintf(df, " disable");
+						break;
+					}
+					break;
+				}
+
+			}
+
+			fprintf(df, "\n");
+		}
+	}
+
+	if(my_config_list.discard_opts != NULL) {
+		list_ptr = my_config_list.discard_opts;
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			atrv = (struct attr_val *) list_ptr->value;
+
+			/* FIXME! Not a line for each option */
+			fprintf(df, "discard ");
+
+			switch(atrv->attr) {
+				case T_Average:
+					fprintf(df, "average %i\n", atrv->value.i);
+					break;
+
+				case T_Minimum:
+					fprintf(df, "minimum %i\n", atrv->value.i);
+					break;
+
+				case T_Monitor:
+					fprintf(df, "monitor %i\n", atrv->value.i);
+			}
+
+			fprintf(df, "\n");
+		}
+	}
+
+	if(my_config_list.restrict_opts != NULL) {
+		list_ptr = my_config_list.restrict_opts;
+
+		for(;	list_ptr != NULL; 
+			list_ptr = list_ptr->next) {
+
+			rest_node = (struct restrict_node *) list_ptr->value;
+
+			fprintf(df, "restrict %s", rest_node->addr->address);
+
+			if(rest_node->mask != NULL) 
+				fprintf(df, " %s", rest_node->mask->address);
+
+			s_list *flags = clone_queue(rest_node->flags);
+			
+			for(; 	flags != NULL; flags = flags->next) {
+				int *curr_flag = flags->value;
+
+				switch(*curr_flag) {
+					case T_Flake:
+						fprintf(df, " flake");
+						break;
+
+					case T_Ignore:
+						fprintf(df, " ignore");
+						break;
+
+					case T_Limited:
+						fprintf(df, " limited");
+						break;
+
+					case T_Kod:
+						fprintf(df, " kod");
+						break;
+
+					case T_Lowpriotrap:
+						fprintf(df, " lowpriotrap");
+						break;
+
+					case T_Nomodify:
+						fprintf(df, " nomodify");
+						break;
+
+					case T_Noquery:
+						fprintf(df, " noquery");
+						break;
+
+					case T_Nopeer:
+						fprintf(df, " nopeer");
+						break;
+
+					case T_Noserve:
+						fprintf(df, " noserve");
+						break;
+
+					case T_Notrap:
+						fprintf(df, " notrap");
+						break;
+
+					case T_Notrust:
+						fprintf(df, " notrust");
+						break;
+
+					case T_Ntpport:
+						fprintf(df, " ntpport");
+						break;
+
+					case T_Version:
+						fprintf(df, " version");
+						break;
+
+					case T_Default:
+						fprintf(df, " default");
+						break;
+				}
+			}
+			
+			fprintf(df, "\n");
+		}
+	}
+
+	
+	if(my_config_list.enable_opts != NULL) {
+		list_ptr = my_config_list.enable_opts;
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			atrv = (struct attr_val *) list_ptr->value;
+
+			fprintf(df, "enable");
+
+			switch(atrv->attr) {
+				case T_Autokey: 
+				fprintf(df, " autokey");	
+				break;
+
+				case T_Bias: 
+				fprintf(df, " bias");
+				break;
+
+				case T_Burst: 
+				fprintf(df, " burst");
+				break;
+
+				case T_Iburst: 
+				fprintf(df, " iburst");
+				break;
+
+				case T_Key: 
+				fprintf(df, " key");
+				break;
+
+				case T_Maxpoll: 
+				fprintf(df, " maxpoll");
+				break;
+
+				case T_Minpoll: 
+				fprintf(df, " minpoll");
+				break;
+
+				case T_Mode: 
+				fprintf(df, " mode");
+				break;
+
+				case T_Noselect: 
+				fprintf(df, " noselect");
+				break;
+
+				case T_Preempt: 
+				fprintf(df, " preempt");
+				break;
+
+				case T_True: 
+				fprintf(df, " true");
+				break;
+
+				case T_Prefer: 
+				fprintf(df, " prefer");
+				break;
+
+				case T_Ttl: 
+				fprintf(df, " ttl");
+				break;
+
+				case T_Version: 
+				fprintf(df, " version");
+				break;
+
+				case T_Xleave: 
+				fprintf(df, " xleave");
+				break;
+			}
+		}
+	}
+
+	if(my_config_list.disable_opts != NULL) {
+		list_ptr = my_config_list.disable_opts;
+
+		fprintf(df, "disable");
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			atrv = (struct attr_val *) list_ptr->value;
+
+			switch(atrv->attr) {
+				case T_Autokey: 
+				fprintf(df, " autokey");	
+				break;
+
+				case T_Bias: 
+				fprintf(df, " bias");
+				break;
+
+				case T_Burst: 
+				fprintf(df, " burst");
+				break;
+
+				case T_Iburst: 
+				fprintf(df, " iburst");
+				break;
+
+				case T_Key: 
+				fprintf(df, " key");
+				break;
+
+				case T_Maxpoll: 
+				fprintf(df, " maxpoll");
+				break;
+
+				case T_Minpoll: 
+				fprintf(df, " minpoll");
+				break;
+
+				case T_Mode: 
+				fprintf(df, " mode");
+				break;
+
+				case T_Noselect: 
+				fprintf(df, " noselect");
+				break;
+
+				case T_Preempt: 
+				fprintf(df, " preempt");
+				break;
+
+				case T_True: 
+				fprintf(df, " true");
+				break;
+
+				case T_Prefer: 
+				fprintf(df, " prefer");
+				break;
+
+				case T_Ttl: 
+				fprintf(df, " ttl");
+				break;
+
+				case T_Version: 
+				fprintf(df, " version");
+				break;
+
+				case T_Xleave: 
+				fprintf(df, " xleave");
+				break;
+			}
+		}
+
+	}
+
+	if(my_config_list.tinker != NULL) {
+		list_ptr = my_config_list.tinker;
+
+		fprintf(df, "tinker");
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			atrv = (struct attr_val *) list_ptr->value;
+
+			switch(atrv->attr) {
+				case T_Step:	
+				     fprintf(df, " step");
+				     break;
+
+				case T_Panic: 
+				     fprintf(df, " panic");
+				     break;
+
+				case T_Dispersion: 
+				     fprintf(df, " dispersion");
+				     break;
+
+				case T_Stepout: 
+				     fprintf(df, " stepout");
+				     break;
+
+				case T_Allan: 
+				     fprintf(df, " allan");
+				     break;
+
+				case T_Huffpuff: 
+				     fprintf(df, " huffpuff");
+				     break;
+
+				case T_Freq: 
+				     fprintf(df, " freq");
+				     break;
+			}
+
+			fprintf(df, " %f", atrv->value.d);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	if(my_config_list.fudge != NULL) {
+		list_ptr = my_config_list.fudge;
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			fprintf(df, "fudge");
+
+			addr_opts = (struct addr_opts_node *) list_ptr->value;
+
+			fprintf(df, "%s", addr_opts->addr->address);
+
+			s_list *opts = clone_queue(addr_opts->options);
+
+			for(; opts != NULL; opts = opts->next) {
+				atrv = (struct attr_val *) opts->value; 
+				
+				switch(atrv->attr) {
+					case CLK_HAVETIME1:
+					fprintf(df, " time1 %f", atrv->value.d);
+					break;
+				
+					case CLK_HAVETIME2:
+					fprintf(df, " time2 %f", atrv->value.d);
+					break;
+		
+					case CLK_HAVEVAL1:
+					fprintf(df, " stratum %i", atrv->value.i);
+					break;
+
+					/* FIXME what the... is this semi-colon needed for? */
+				    	case CLK_HAVEVAL2:;
+					char refid[] = {0, 0, 0, 0, '\0'};
+
+					memcpy(refid,
+					atrv->value.s,
+					min(strlen(atrv->value.s), 4));
+					
+					fprintf(df, " refid %s", refid);
+					break;
+
+					case CLK_HAVEFLAG1:
+					if (atrv->value.i)
+						fprintf(df, " flag1 1");
+					else 
+						fprintf(df, " flag1 0");
+					break;
+			    
+					case CLK_HAVEFLAG2:
+					if (atrv->value.i)
+						fprintf(df, " flag2 1");
+					else 
+						fprintf(df, " flag2 0");
+					break;
+			    
+					case CLK_HAVEFLAG3:
+					if (atrv->value.i)
+						fprintf(df, " flag3 1");
+					else 
+						fprintf(df, " flag3 0");
+
+					break;
+			    
+					case CLK_HAVEFLAG4:
+					if (atrv->value.i)
+						fprintf(df, " flag4 1");
+					else 
+						fprintf(df, " flag4 0");
+					break;
+				}
+			}
+
+			fprintf(df, "\n");
+		}
+	}
+
+	if(my_config_list.logconfig != NULL) {
+		list_ptr = my_config_list.logconfig;
+		
+		fprintf(df, "logconfig");
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+			atrv = (struct attr_val *) list_ptr->value;
+
+			fprintf(df, " %c%s", atrv->attr, atrv->value.s);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	if(my_config_list.phone != NULL) {
+		list_ptr = my_config_list.phone;
+
+		fprintf(df, "phone");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+			string = list_ptr->value;
+
+			fprintf(df, " %s", *string);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	if(my_config_list.qos != NULL) {
+		list_ptr = my_config_list.qos;
+		
+		fprintf(df, "qos");
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+			atrv = (struct attr_val *) list_ptr->value;
+
+			fprintf(df, " %s", atrv->value.s);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	if(my_config_list.setvar != NULL) {
+		list_ptr = my_config_list.setvar;
+
+		fprintf(df, "setvar");
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+			int a = 0;
+			char *data = NULL;
+
+			setv_node = (struct setvar_node *) list_ptr->value;
+			data = setv_node->data;
+
+			fprintf(df, " ");
+
+			for(a=0; a<setv_node->len; a++) 
+				if(data[a] == '=') 
+					fprintf(df, " ");
+				else
+					fprintf(df, "%c", data[a]);
+
+			if(setv_node->def)
+				fprintf(df, " default");
+		}
+	}
+
+	if(my_config_list.ttl != NULL) {
+		list_ptr = my_config_list.ttl;
+
+		fprintf(df, "ttl");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+			integer = (int *) list_ptr->value;
+
+			fprintf(df, " %i", *integer);
+		}
+		
+		fprintf(df, "\n");
+	}
+	
+	if(my_config_list.trap != NULL) {
+		list_ptr = my_config_list.trap;
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			addr_opts = (struct addr_opts_node *) list_ptr->value;
+			addr = addr_opts->addr;
+
+			fprintf(df, "trap %s", addr->address);
+
+			s_list *options = clone_queue(addr_opts->options);
+
+			for(; 	options != NULL; 
+				options = options->next) {
+
+				atrv = (struct attr_val *) options->value;
+
+				if(atrv->attr == T_Port) {
+					fprintf(df, " port %i", atrv->value.i);
+				}
+				else {
+					if(atrv->attr == T_Interface) {
+						addr = (struct address_node *) atrv->value.p;
+
+						fprintf(df, " interface %s", addr->address);
+					}
+				}
+			}
+
+			free_s_list(options);
+
+			fprintf(df, "\n");
+		}
+	}
+
+	/* For options I didn't find documentation I'll just output its name and the cor. value */
+	if(my_config_list.vars != NULL) {
+		list_ptr = my_config_list.vars;
+
+		for(;	list_ptr != NULL;
+			list_ptr = list_ptr->next) {
+
+			atrv = (struct attr_val *) list_ptr->value;
+
+			switch (atrv->attr) {
+				case T_Broadcastdelay:
+				fprintf(df, "broadcastdelay %f\n", atrv->value.d);
+				break;
+				
+				case T_Calldelay:
+				fprintf(df, "calldelay %i\n", atrv->value.i);
+				break;
+
+				case T_Tick:
+				fprintf(df, "tick %f\n", atrv->value.d);
+				break;
+
+				case T_Driftfile:
+				fprintf(df, "driftfile %s\n", atrv->value.s);
+				break;
+			
+		    		case T_WanderThreshold:
+				fprintf(df, "wander_threshold %f\n", atrv->value.d);
+				break;
+	
+		    		case T_Leapfile:
+				fprintf(df, "leapfile %s\n", atrv->value.s);
+				break;
+
+				case T_Pidfile:
+				fprintf(df, "pidfile %s\n", atrv->value.s);
+				break;
+
+				case T_Logfile:
+				fprintf(df, "logfile %s\n", atrv->value.s);
+				break;
+#ifdef OPENSSL
+				case T_Automax:
+				fprintf(df, "automax %i\n", atrv->value.i);
+				break;
+#endif
+			}
+		}
+	}
+
+	fclose(df);
+
+	return 0;
+}
+
+	
 
 /* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE
  * -----------------------------------------------
@@ -900,6 +1737,23 @@ create_sim_node(
 }
 
 
+/* Lookup the keyword associated with token */
+/*
+char *
+token_to_str (
+		int token
+	    )
+{
+	register int a = 0;
+
+	for(; a<sizeof(keyword_list)/sizeof(struct key_tok); a++) 
+		if(keyword_list[a]->token == token)
+			return keyword_list[a]->keyword;
+
+	return NULL;
+}*/
+
+
 struct key_tok keyword_list[] = {
 	{ "automax",		T_Automax,         NO_ARG },
 	{ "broadcast",		T_Broadcast,       SINGLE_ARG },
@@ -1299,47 +2153,47 @@ config_monitor(void)
 
 			switch (my_opts->attr) {
 
-			case T_File:
-				filegen_file = my_opts->value.p;
+		case T_File:
+			filegen_file = my_opts->value.p;
+			break;
+
+		case T_Type:
+			filegen_type = my_opts->value.i;
+			break;
+
+		case T_Flag:
+			switch (my_opts->value.i) {
+
+			case T_Link:
+				filegen_flag |= FGEN_FLAG_LINK;
 				break;
 
-			case T_Type:
-				filegen_type = my_opts->value.i;
+			case T_Nolink:
+				filegen_flag &= ~FGEN_FLAG_LINK;
 				break;
 
-			case T_Flag:
-				switch (my_opts->value.i) {
-
-				case T_Link:
-					filegen_flag |= FGEN_FLAG_LINK;
-					break;
-
-				case T_Nolink:
-					filegen_flag &= ~FGEN_FLAG_LINK;
-					break;
-
-				case T_Enable:
-					filegen_flag |= FGEN_FLAG_ENABLED;
-					break;
-
-				case T_Disable:
-					filegen_flag &= ~FGEN_FLAG_ENABLED;
-					break;
-
-				default:
-					msyslog(LOG_ERR, 
-						"Unknown filegen flag "
-						"token %d",
-						my_opts->value.i);
-					exit(1);
-				}
+			case T_Enable:
+				filegen_flag |= FGEN_FLAG_ENABLED;
 				break;
+
+			case T_Disable:
+				filegen_flag &= ~FGEN_FLAG_ENABLED;
+				break;
+
 			default:
-				msyslog(LOG_ERR,
-					"Unknown filegen option token "
-					"%d", my_opts->attr);
+				msyslog(LOG_ERR, 
+					"Unknown filegen flag "
+					"token %d",
+					my_opts->value.i);
 				exit(1);
 			}
+			break;
+		default:
+			msyslog(LOG_ERR,
+				"Unknown filegen option token "
+				"%d", my_opts->attr);
+			exit(1);
+		}
 			filegen_config(filegen, filegen_file, 
 				       filegen_type, filegen_flag);
 			free_node(my_opts);
@@ -2363,6 +3217,12 @@ getconfig(
 	init_syntax_tree();
 	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
+	
+	/* Create a clone of the configuration in a singly linked list before it is
+	 * consumed. Only the information held by the priority queue is being saved.
+	 */
+	clone_config(&my_config, &my_config_list);
+
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
 

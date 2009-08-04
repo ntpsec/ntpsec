@@ -32,6 +32,14 @@ typedef struct Queue {
     int no_of_elements;
 } queue;
 
+/* Singly-linked structure to hold the same data as a priorithy queue
+ * ------------------------------------------------------------------
+ */
+
+typedef struct s_list {
+	void *value;
+	struct s_list *next;
+} s_list;
 
 /* FUNCTION PROTOTYPES
  * -------------------
@@ -47,5 +55,7 @@ int get_no_of_elements(queue *my_queue);
 void append_queue(queue *q1, queue *q2);
 int get_fifo_order(void *el1, void *el2);
 queue *create_queue(void);
+s_list *clone_queue(queue *my_queue);
+void free_s_list(s_list *my_list);
 
 #endif
