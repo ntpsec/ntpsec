@@ -55,6 +55,7 @@ struct ntp_control {
 #define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
 #define CTL_OP_CONFIGURE        8	/* configuration message */
 #define	CTL_OP_UNSETTRAP	31	/* unset trap */
+#define CTL_OP_DUMPCONFIG	9
 
 /*
  * {En,De}coding of the system status word
