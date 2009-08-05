@@ -444,7 +444,6 @@ dump_config_dumper (
 		const char *filename
 		)
 {
-	printf("dump_config_dumper:\n");
 	s_list *list_ptr = NULL;
 
 	struct peer_node *peers = NULL;
@@ -457,18 +456,24 @@ dump_config_dumper (
 	struct setvar_node *setv_node = NULL;
 
 	char **string = NULL;
-   	int *integer = NULL;
-	
+	int *integer = NULL;
+	s_list *options;
+	s_list *opt_ptr;
+	s_list *flags;
+	s_list *opts;
+	char refid[5];
 	FILE *df = fopen(filename, "w");
 
-	if(df == NULL) 
+	printf("dump_config_dumper:\n");
+
+	if (df == NULL) 
 		return -1;
 
 
-	if(my_config_list.peers != NULL) {
+	if (my_config_list.peers != NULL) {
 		list_ptr = my_config_list.peers;
 
-		for(; 	list_ptr != NULL;
+		for (; 	list_ptr != NULL;
 		 	list_ptr = list_ptr->next) {
 
 			peers = (struct peer_node *) list_ptr->value; 
@@ -478,7 +483,7 @@ dump_config_dumper (
 		}
 	}
 	
-	if(my_config_list.unpeers != NULL) {
+	if (my_config_list.unpeers != NULL) {
 		list_ptr = my_config_list.unpeers;
 		
 		for(; 	list_ptr != NULL;
@@ -490,7 +495,7 @@ dump_config_dumper (
 		}
 	}
 
-	if(my_config_list.orphan_cmds != NULL) {
+	if (my_config_list.orphan_cmds != NULL) {
 		list_ptr = my_config_list.orphan_cmds;
 
 		fprintf(df, "tos");
@@ -606,8 +611,8 @@ dump_config_dumper (
 
 			fgen_node = (struct filegen_node *) list_ptr->value;
 
-			s_list *options = clone_queue(fgen_node->options);
-			s_list *opt_ptr = options;
+			options = clone_queue(fgen_node->options);
+			opt_ptr = options;
 
 			for(;	opt_ptr != NULL;
 				opt_ptr = opt_ptr->next) {
@@ -717,7 +722,7 @@ dump_config_dumper (
 			if(rest_node->mask != NULL) 
 				fprintf(df, " %s", rest_node->mask->address);
 
-			s_list *flags = clone_queue(rest_node->flags);
+			flags = clone_queue(rest_node->flags);
 			
 			for(; 	flags != NULL; flags = flags->next) {
 				int *curr_flag = flags->value;
@@ -993,7 +998,7 @@ dump_config_dumper (
 
 			fprintf(df, "%s", addr_opts->addr->address);
 
-			s_list *opts = clone_queue(addr_opts->options);
+			opts = clone_queue(addr_opts->options);
 
 			for(; opts != NULL; opts = opts->next) {
 				atrv = (struct attr_val *) opts->value; 
@@ -1012,9 +1017,9 @@ dump_config_dumper (
 					break;
 
 					/* FIXME what the... is this semi-colon needed for? */
-				    	case CLK_HAVEVAL2:;
-					char refid[] = {0, 0, 0, 0, '\0'};
+					case CLK_HAVEVAL2:
 
+					memset(refid, 0, sizeof(refid));
 					memcpy(refid,
 					atrv->value.s,
 					min(strlen(atrv->value.s), 4));
@@ -1154,7 +1159,7 @@ dump_config_dumper (
 
 			fprintf(df, "trap %s", addr->address);
 
-			s_list *options = clone_queue(addr_opts->options);
+			options = clone_queue(addr_opts->options);
 
 			for(; 	options != NULL; 
 				options = options->next) {

@@ -114,17 +114,21 @@ clone_queue (
 		queue *my_queue
 	    )
 {
-	if(empty(my_queue)) 
+	s_list *list;
+	s_list *list_ptr;
+	node *my_node;
+
+	if (empty(my_queue)) 
 		return NULL;
 
-	s_list *list = (s_list *) malloc(sizeof(s_list));
-	s_list *list_ptr = list;
-	node *my_node = my_queue->front;
+	list = (s_list *) emalloc(sizeof(s_list));
+	list_ptr = list;
+	my_node = my_queue->front;
 
 	list->value = (void *)(my_node + 1);
 
-	for(my_node = my_node->node_next; my_node != NULL; my_node = my_node->node_next) {
-		list_ptr->next = (s_list *) malloc(sizeof(s_list));
+	for (my_node = my_node->node_next; my_node != NULL; my_node = my_node->node_next) {
+		list_ptr->next = (s_list *) emalloc(sizeof(s_list));
 		list_ptr = list_ptr->next;
 		list_ptr->value = (void *)(my_node + 1);
 		list_ptr->next = NULL;
