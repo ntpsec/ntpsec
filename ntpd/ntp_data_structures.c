@@ -72,11 +72,38 @@ void free_node(void *my_node)
 }
 
 
+void *
+next_node(
+	void *pv
+	)
+{
+	node *pn;
+
+	pn = pv;
+	pn--;
+
+	return pn->node_next;
+}
+
+
 /* Define a function to check if the queue is empty. */
 int empty(queue *my_queue)
 {
     return (!my_queue || !my_queue->front);
 }
+
+
+void *
+queue_head(
+	queue *q
+	)
+{
+	if (NULL == q->front)
+		return NULL;
+		
+	return q->front + 1;
+}
+
 
 /* Define a function to add an element to the priority queue.
  * The element is added according to its priority - 
@@ -104,54 +131,6 @@ queue *enqueue(queue *my_queue, void *my_node)
 
     ++my_queue->no_of_elements;    
     return my_queue;
-}
-
-/* Create a singly-linked list copy of a priority queue 
- */
-
-s_list *
-clone_queue (
-		queue *my_queue
-	    )
-{
-	s_list *list;
-	s_list *list_ptr;
-	node *my_node;
-
-	if (empty(my_queue)) 
-		return NULL;
-
-	list = (s_list *) emalloc(sizeof(s_list));
-	list_ptr = list;
-	my_node = my_queue->front;
-
-	list->value = (void *)(my_node + 1);
-
-	for (my_node = my_node->node_next; my_node != NULL; my_node = my_node->node_next) {
-		list_ptr->next = (s_list *) emalloc(sizeof(s_list));
-		list_ptr = list_ptr->next;
-		list_ptr->value = (void *)(my_node + 1);
-		list_ptr->next = NULL;
-	}
-
-	return list;
-}
-
-
-/* Free singly-linked list 
- */
-
-void
-free_s_list (
-		s_list *my_list
-	    )
-{
-	s_list *list_next = NULL;
-
-	for(; my_list != NULL; my_list = list_next) {
-		list_next = my_list->next;
-		free(my_list);
-	}
 }
 
 

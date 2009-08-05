@@ -48,14 +48,14 @@ queue *create_priority_queue(int (*get_order)(void *, void *));
 void destroy_queue(queue *my_queue);
 void *get_node(size_t size);
 void free_node(void *my_node);
+void *next_node(void *my_node);
 int empty(queue *my_queue);
+void *queue_head(queue *my_queue);
 queue *enqueue(queue *my_queue, void *my_node);
 void *dequeue(queue *my_queue);
 int get_no_of_elements(queue *my_queue);
 void append_queue(queue *q1, queue *q2);
 int get_fifo_order(void *el1, void *el2);
 queue *create_queue(void);
-s_list *clone_queue(queue *my_queue);
-void free_s_list(s_list *my_list);
 
 #endif

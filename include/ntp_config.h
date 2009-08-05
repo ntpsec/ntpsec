@@ -238,7 +238,7 @@ server_info *create_sim_server(struct address_node *addr, double server_offset, 
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(void);
 
-int dump_config_dumper(const char *filename);
+int dump_config_tree(struct config_tree *ptree, FILE *df);
 
 
 #endif
