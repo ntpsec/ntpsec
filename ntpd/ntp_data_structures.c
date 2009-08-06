@@ -82,7 +82,10 @@ next_node(
 	pn = pv;
 	pn--;
 
-	return pn->node_next;
+	if (pn->node_next == NULL)
+		return NULL;
+
+	return pn->node_next + 1;
 }
 
 
@@ -98,7 +101,7 @@ queue_head(
 	queue *q
 	)
 {
-	if (NULL == q->front)
+	if (NULL == q || NULL == q->front)
 		return NULL;
 		
 	return q->front + 1;

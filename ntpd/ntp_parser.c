@@ -2168,7 +2168,7 @@ yyreduce:
     {
 			struct peer_node *my_node =  create_peer_node((yyvsp[(1) - (3)].Integer), (yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue));
 			if (my_node)
-				enqueue(my_config.peers, my_node);
+				enqueue(cfgt.peers, my_node);
 		}
     break;
 
@@ -2179,7 +2179,7 @@ yyreduce:
     {
 			struct peer_node *my_node = create_peer_node((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Address_node), NULL);
 			if (my_node)
-				enqueue(my_config.peers, my_node);
+				enqueue(cfgt.peers, my_node);
 		}
     break;
 
@@ -2372,7 +2372,7 @@ yyreduce:
     {
 			struct unpeer_node *my_node = create_unpeer_node((yyvsp[(2) - (2)].Address_node));
 			if (my_node)
-				enqueue(my_config.unpeers, my_node);
+				enqueue(cfgt.unpeers, my_node);
 		}
     break;
 
@@ -2394,42 +2394,42 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 408 "ntp_parser.y"
-    { my_config.broadcastclient = SIMPLE; }
+    { cfgt.broadcastclient = SIMPLE; }
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
 #line 410 "ntp_parser.y"
-    { my_config.broadcastclient = NOVOLLEY; }
+    { cfgt.broadcastclient = NOVOLLEY; }
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
 #line 412 "ntp_parser.y"
-    { append_queue(my_config.manycastserver, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.manycastserver, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
 #line 414 "ntp_parser.y"
-    { append_queue(my_config.multicastclient, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.multicastclient, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
 #line 425 "ntp_parser.y"
-    { my_config.auth.autokey = (yyvsp[(2) - (2)].Integer); }
+    { cfgt.auth.autokey = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
 #line 427 "ntp_parser.y"
-    { my_config.auth.control_key = (yyvsp[(2) - (2)].Integer); }
+    { cfgt.auth.control_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 56:
@@ -2437,10 +2437,10 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 429 "ntp_parser.y"
     { 
-			if (my_config.auth.crypto_cmd_list != NULL)
-				append_queue(my_config.auth.crypto_cmd_list, (yyvsp[(2) - (2)].Queue));
+			if (cfgt.auth.crypto_cmd_list != NULL)
+				append_queue(cfgt.auth.crypto_cmd_list, (yyvsp[(2) - (2)].Queue));
 			else
-				my_config.auth.crypto_cmd_list = (yyvsp[(2) - (2)].Queue);
+				cfgt.auth.crypto_cmd_list = (yyvsp[(2) - (2)].Queue);
 			cryptosw++;
 		}
     break;
@@ -2449,35 +2449,35 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 437 "ntp_parser.y"
-    { my_config.auth.keys = (yyvsp[(2) - (2)].String); }
+    { cfgt.auth.keys = (yyvsp[(2) - (2)].String); }
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
 #line 439 "ntp_parser.y"
-    { my_config.auth.keysdir = (yyvsp[(2) - (2)].String); }
+    { cfgt.auth.keysdir = (yyvsp[(2) - (2)].String); }
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
 #line 441 "ntp_parser.y"
-    { my_config.auth.request_key = (yyvsp[(2) - (2)].Integer); }
+    { cfgt.auth.request_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
 #line 443 "ntp_parser.y"
-    { my_config.auth.trusted_key_list = (yyvsp[(2) - (2)].Queue); }
+    { cfgt.auth.trusted_key_list = (yyvsp[(2) - (2)].Queue); }
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
 #line 445 "ntp_parser.y"
-    { my_config.auth.ntp_signd_socket = (yyvsp[(2) - (2)].String); }
+    { cfgt.auth.ntp_signd_socket = (yyvsp[(2) - (2)].String); }
     break;
 
   case 63:
@@ -2533,7 +2533,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 469 "ntp_parser.y"
-    { my_config.auth.revoke = (yyvsp[(2) - (2)].Integer); }
+    { cfgt.auth.revoke = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 71:
@@ -2547,7 +2547,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 481 "ntp_parser.y"
-    { append_queue(my_config.orphan_cmds,(yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.orphan_cmds,(yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 73:
@@ -2645,14 +2645,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 521 "ntp_parser.y"
-    { append_queue(my_config.stats_list, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.stats_list, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 87:
 
 /* Line 1455 of yacc.c  */
 #line 523 "ntp_parser.y"
-    { my_config.stats_dir = (yyvsp[(2) - (2)].String); }
+    { cfgt.stats_dir = (yyvsp[(2) - (2)].String); }
     break;
 
   case 88:
@@ -2660,7 +2660,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 525 "ntp_parser.y"
     {
-			enqueue(my_config.filegen_opts,
+			enqueue(cfgt.filegen_opts,
 				create_filegen_node((yyvsp[(2) - (3)].VoidPtr), (yyvsp[(3) - (3)].Queue)));
 		}
     break;
@@ -2845,7 +2845,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 588 "ntp_parser.y"
     {   
-			append_queue(my_config.discard_opts, (yyvsp[(2) - (2)].Queue));
+			append_queue(cfgt.discard_opts, (yyvsp[(2) - (2)].Queue));
 		}
     break;
 
@@ -2854,7 +2854,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 592 "ntp_parser.y"
     {
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node((yyvsp[(2) - (3)].Address_node), NULL, (yyvsp[(3) - (3)].Queue), ip_file->line_no));
 		}
     break;
@@ -2864,7 +2864,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 597 "ntp_parser.y"
     {
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node(NULL, NULL, (yyvsp[(3) - (3)].Queue), ip_file->line_no));
 		}
     break;
@@ -2874,7 +2874,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 602 "ntp_parser.y"
     {
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node(
 					create_address_node(
 						estrdup("0.0.0.0"), 
@@ -2892,7 +2892,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 615 "ntp_parser.y"
     {
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node(
 					create_address_node(
 						estrdup("::"), 
@@ -2910,7 +2910,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 628 "ntp_parser.y"
     {
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node((yyvsp[(2) - (5)].Address_node), (yyvsp[(4) - (5)].Address_node), (yyvsp[(5) - (5)].Queue), ip_file->line_no));
 		}
     break;
@@ -3059,7 +3059,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 672 "ntp_parser.y"
-    { enqueue(my_config.fudge, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); }
+    { enqueue(cfgt.fudge, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); }
     break;
 
   case 141:
@@ -3136,14 +3136,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 705 "ntp_parser.y"
-    { append_queue(my_config.enable_opts,(yyvsp[(2) - (2)].Queue));  }
+    { append_queue(cfgt.enable_opts,(yyvsp[(2) - (2)].Queue));  }
     break;
 
   case 152:
 
 /* Line 1455 of yacc.c  */
 #line 707 "ntp_parser.y"
-    { append_queue(my_config.disable_opts,(yyvsp[(2) - (2)].Queue));  }
+    { append_queue(cfgt.disable_opts,(yyvsp[(2) - (2)].Queue));  }
     break;
 
   case 153:
@@ -3213,7 +3213,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 731 "ntp_parser.y"
-    { append_queue(my_config.tinker, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.tinker, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 163:
@@ -3314,21 +3314,21 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 777 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_dval(T_Broadcastdelay, (yyvsp[(2) - (2)].Double))); }
+    { enqueue(cfgt.vars, create_attr_dval(T_Broadcastdelay, (yyvsp[(2) - (2)].Double))); }
     break;
 
   case 175:
 
 /* Line 1455 of yacc.c  */
 #line 779 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_ival(T_Calldelay, (yyvsp[(2) - (2)].Integer))); }
+    { enqueue(cfgt.vars, create_attr_ival(T_Calldelay, (yyvsp[(2) - (2)].Integer))); }
     break;
 
   case 176:
 
 /* Line 1455 of yacc.c  */
 #line 781 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_dval(T_Tick, (yyvsp[(2) - (2)].Double))); }
+    { enqueue(cfgt.vars, create_attr_dval(T_Tick, (yyvsp[(2) - (2)].Double))); }
     break;
 
   case 177:
@@ -3342,92 +3342,92 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 785 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Leapfile, (yyvsp[(2) - (2)].String))); }
+    { enqueue(cfgt.vars, create_attr_sval(T_Leapfile, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 179:
 
 /* Line 1455 of yacc.c  */
 #line 788 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Pidfile, (yyvsp[(2) - (2)].String))); }
+    { enqueue(cfgt.vars, create_attr_sval(T_Pidfile, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 180:
 
 /* Line 1455 of yacc.c  */
 #line 790 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Logfile, (yyvsp[(2) - (2)].String))); }
+    { enqueue(cfgt.vars, create_attr_sval(T_Logfile, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 181:
 
 /* Line 1455 of yacc.c  */
 #line 792 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_ival(T_Automax, (yyvsp[(2) - (2)].Integer))); }
+    { enqueue(cfgt.vars, create_attr_ival(T_Automax, (yyvsp[(2) - (2)].Integer))); }
     break;
 
   case 182:
 
 /* Line 1455 of yacc.c  */
 #line 795 "ntp_parser.y"
-    { append_queue(my_config.logconfig, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.logconfig, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 183:
 
 /* Line 1455 of yacc.c  */
 #line 797 "ntp_parser.y"
-    { append_queue(my_config.phone, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.phone, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 184:
 
 /* Line 1455 of yacc.c  */
 #line 799 "ntp_parser.y"
-    { enqueue(my_config.setvar, (yyvsp[(2) - (2)].Set_var)); }
+    { enqueue(cfgt.setvar, (yyvsp[(2) - (2)].Set_var)); }
     break;
 
   case 185:
 
 /* Line 1455 of yacc.c  */
 #line 801 "ntp_parser.y"
-    { enqueue(my_config.trap, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); }
+    { enqueue(cfgt.trap, create_addr_opts_node((yyvsp[(2) - (3)].Address_node), (yyvsp[(3) - (3)].Queue))); }
     break;
 
   case 186:
 
 /* Line 1455 of yacc.c  */
 #line 803 "ntp_parser.y"
-    { append_queue(my_config.ttl, (yyvsp[(2) - (2)].Queue)); }
+    { append_queue(cfgt.ttl, (yyvsp[(2) - (2)].Queue)); }
     break;
 
   case 187:
 
 /* Line 1455 of yacc.c  */
 #line 805 "ntp_parser.y"
-    { enqueue(my_config.qos, create_attr_sval(T_Qos, (yyvsp[(2) - (2)].String))); }
+    { enqueue(cfgt.qos, create_attr_sval(T_Qos, (yyvsp[(2) - (2)].String))); }
     break;
 
   case 188:
 
 /* Line 1455 of yacc.c  */
 #line 809 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (1)].String))); }
+    { enqueue(cfgt.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (1)].String))); }
     break;
 
   case 189:
 
 /* Line 1455 of yacc.c  */
 #line 811 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, (yyvsp[(2) - (2)].Double)));
-			  enqueue(my_config.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (2)].String))); }
+    { enqueue(cfgt.vars, create_attr_dval(T_WanderThreshold, (yyvsp[(2) - (2)].Double)));
+			  enqueue(cfgt.vars, create_attr_sval(T_Driftfile, (yyvsp[(1) - (2)].String))); }
     break;
 
   case 190:
 
 /* Line 1455 of yacc.c  */
 #line 814 "ntp_parser.y"
-    { enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
+    { enqueue(cfgt.vars, create_attr_sval(T_Driftfile, "\0")); }
     break;
 
   case 191:
@@ -3592,7 +3592,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 900 "ntp_parser.y"
     {
-			my_config.sim_details = create_sim_node((yyvsp[(3) - (5)].Queue), (yyvsp[(4) - (5)].Queue));
+			cfgt.sim_details = create_sim_node((yyvsp[(3) - (5)].Queue), (yyvsp[(4) - (5)].Queue));
 
 			/* Reset the old_config_style variable */
 			old_config_style = 1;

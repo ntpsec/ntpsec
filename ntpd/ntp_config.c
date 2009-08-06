@@ -130,8 +130,8 @@ static char res_file[MAX_PATH];
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
-struct config_tree my_config;		/* Root of the configuration tree */
-struct config_tree_list my_config_list;
+struct config_tree cfgt;		/* Parser output stored here */
+struct config_tree *cfg_tree_history;	/* History of configs */
 #if 0
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 #else
@@ -208,10 +208,15 @@ static void init_auth_node(struct config_tree *);
 static void init_syntax_tree(struct config_tree *);
 #ifdef DEBUG
 static void free_auth_node(struct config_tree *);
-       void free_syntax_trees(void);
+       void free_all_config_trees(void);	/* atexit() */
+static void free_config_tree(struct config_tree *ptree);
 #endif
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
+static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
+static int get_correct_host_mode(int hmode);
+static void save_and_apply_config_tree(void);
+void getconfig(int argc,char *argv[]);
 #if !defined(SIM)
 static struct sockaddr_storage *get_next_address(struct address_node *addr);
 #endif
@@ -231,17 +236,14 @@ static void config_ttl(struct config_tree *);
 static void config_trap(struct config_tree *);
 static void config_fudge(struct config_tree *);
 static void config_vars(struct config_tree *);
-static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
-static int get_correct_host_mode(int hmode);
 static void config_peers(struct config_tree *);
 static void config_unpeers(struct config_tree *);
+
 static void config_ntpd(struct config_tree *);
 #ifdef SIM
 static void config_sim(struct config_tree *);
 static void config_ntpdsim(struct config_tree *);
 #endif
-void getconfig(int argc,char *argv[]);
-void clone_config(struct config_tree *config, struct config_tree_list *list);
 
 enum gnn_type {
 	t_UNK,		/* Unknown */
@@ -295,15 +297,7 @@ init_auth_node(
 	struct config_tree *ptree
 	)
 {
-	ptree->auth.autokey = 0;
-	ptree->auth.control_key = 0;
-	ptree->auth.crypto_cmd_list = NULL;
-	ptree->auth.keys = NULL;
-	ptree->auth.keysdir = NULL;
 	ptree->auth.ntp_signd_socket = default_ntp_signd_socket;
-	ptree->auth.request_key = 0;
-	ptree->auth.revoke = 0;
-	ptree->auth.trusted_key_list = NULL;
 }
 
 #ifdef DEBUG
@@ -338,26 +332,21 @@ init_syntax_tree(
 	struct config_tree *ptree
 	)
 {
+	memset(ptree, 0, sizeof(*ptree));
+
 	ptree->peers = create_queue();
 	ptree->unpeers = create_queue();
 	ptree->orphan_cmds = create_queue();
-
-	ptree->broadcastclient = 0;
 	ptree->manycastserver = create_queue();
 	ptree->multicastclient = create_queue();
-
 	ptree->stats_list = create_queue();
-	ptree->stats_dir = NULL;
 	ptree->filegen_opts = create_queue();
-
 	ptree->discard_opts = create_queue();
 	ptree->restrict_opts = create_queue();
-
 	ptree->enable_opts = create_queue();
 	ptree->disable_opts = create_queue();
 	ptree->tinker = create_queue();
 	ptree->fudge = create_queue();
-
 	ptree->logconfig = create_queue();
 	ptree->phone = create_queue();
 	ptree->qos = create_queue();
@@ -365,21 +354,35 @@ init_syntax_tree(
 	ptree->ttl = create_queue();
 	ptree->trap = create_queue();
 	ptree->vars = create_queue();
-	ptree->sim_details = NULL;
 
 	init_auth_node(ptree);
 
 #ifdef DEBUG
-	atexit(free_syntax_trees);
+	atexit(free_all_config_trees);
 #endif
 }
 
+
 #ifdef DEBUG
 void
-free_syntax_trees(void)
+free_all_config_trees(void)
 {
-	// !!!!
-#if 0
+	struct config_tree *ptree;
+	struct config_tree *pprior;
+
+	ptree = cfg_tree_history;
+
+	while (ptree != NULL) {
+		pprior = ptree->prior;
+		free_config_tree(ptree);
+		ptree = pprior;
+	}
+}
+
+
+static void
+free_config_tree(struct config_tree *ptree)
+{
 	DESTROY_QUEUE(ptree->peers);
 	DESTROY_QUEUE(ptree->unpeers);
 	DESTROY_QUEUE(ptree->orphan_cmds);
@@ -407,9 +410,11 @@ free_syntax_trees(void)
 	DESTROY_QUEUE(ptree->vars);
 
 	free_auth_node(ptree);
-#endif // !!!!
+
+	free(ptree);
 }
 #endif /* DEBUG */
+
 
 /* The config dumper */
 int
@@ -2055,21 +2060,16 @@ free_config_auth(
 	)
 {
 	struct attr_val *my_val;
-	int *key_val;
 
-	while (!empty(ptree->auth.crypto_cmd_list)) {
-		my_val = dequeue(ptree->auth.crypto_cmd_list);
+	while (NULL != 
+	       (my_val = dequeue(ptree->auth.crypto_cmd_list))) {
+
 		free(my_val->value.s);
 		free_node(my_val);
 	}
 	DESTROY_QUEUE(ptree->auth.crypto_cmd_list);
 
-	while (!empty(ptree->auth.trusted_key_list)) {
-		key_val = dequeue(ptree->auth.trusted_key_list);
-		free_node(key_val);
-	}
 	DESTROY_QUEUE(ptree->auth.trusted_key_list);
-
 }
 #endif	/* DEBUG */
 
@@ -3444,26 +3444,32 @@ config_ntpdsim(
 }
 #endif /* SIM */
 
+
+/*
+ * config_remotely() - implements ntpd side of ntpq :config
+ */
 void
 config_remotely(void)
 {
 	input_from_file = 0;
 
 	key_scanner = create_keyword_scanner(keyword_list);
+	init_syntax_tree(&cfgt);
 	yyparse();
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
-	config_ntpd(&my_config);
+	save_and_apply_config_tree();
 
 	input_from_file = 1;
 }
 
 
-/* ACTUAL getconfig code */
-
+/*
+ * getconfig() - process startup configuration file e.g /etc/ntp.conf
+ */
 void
 getconfig(
 	int argc,
@@ -3543,7 +3549,7 @@ getconfig(
 
 	/*** BULK OF THE PARSER ***/
 	ip_file = fp[curr_include_level];
-	init_syntax_tree(&my_config);
+	init_syntax_tree(&cfgt);
 	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
 	
@@ -3552,16 +3558,7 @@ getconfig(
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
-	/* The actual configuration done depends on whether we are configuring the
-	 * simulator or the daemon. Perform a check and call the appropriate
-	 * function as needed.
-	 */
-
-#ifndef SIM
-	config_ntpd(&my_config);
-#else
-	config_ntpdsim(&my_config);
-#endif
+	save_and_apply_config_tree();
 
 	while (curr_include_level != -1) {
 		FCLOSE(fp[curr_include_level--]);
@@ -3586,6 +3583,34 @@ getconfig(
 	}
 }
 
+
+void
+save_and_apply_config_tree(void)
+{
+	struct config_tree *prior;
+
+	/*
+	 * Keep all the configuration trees applied since startup in
+	 * a list that can be used to dump the configuration back to
+	 * a text file.
+	 */
+	prior = cfg_tree_history;
+	cfg_tree_history = emalloc(sizeof(*cfg_tree_history));
+	memcpy(cfg_tree_history, &cfgt, sizeof(*cfg_tree_history));
+	cfg_tree_history->prior = prior;
+	memset(&cfgt, 0, sizeof(cfgt));
+
+	/* The actual configuration done depends on whether we are configuring the
+	 * simulator or the daemon. Perform a check and call the appropriate
+	 * function as needed.
+	 */
+
+#ifndef SIM
+	config_ntpd(cfg_tree_history);
+#else
+	config_ntpdsim(cfg_tree_history);
+#endif
+}
 
 
 /* FUNCTIONS COPIED FROM THE OLDER ntp_config.c
@@ -3670,7 +3695,7 @@ get_netinfo_config(void)
 	ni_status status;
 	void *domain;
 	ni_id config_dir;
-       	struct netinfo_config_state *config;
+	struct netinfo_config_state *config;
 
 	if (ni_open(NULL, ".", &domain) != NI_OK) return NULL;
 
@@ -3688,12 +3713,12 @@ get_netinfo_config(void)
 		return NULL;
 	}
 
-       	config = (struct netinfo_config_state *)malloc(sizeof(struct netinfo_config_state));
-       	config->domain = domain;
-       	config->config_dir = config_dir;
-       	config->prop_index = 0;
-       	config->val_index = 0;
-       	config->val_list = NULL;
+	config = emalloc(sizeof(*config));
+	config->domain = domain;
+	config->config_dir = config_dir;
+	config->prop_index = 0;
+	config->val_index = 0;
+	config->val_list = NULL;
 
 	return config;
 }
@@ -3733,33 +3758,37 @@ gettokens_netinfo (
 	 */
   again:
 	if (!val_list) {
-	       	for (; prop_index < (sizeof(keywords)/sizeof(keywords[0])); prop_index++)
-	       	{
-		       	ni_namelist namelist;
+		for (; prop_index < COUNTOF(keywords); prop_index++)
+		{
+			ni_namelist namelist;
 			struct keyword current_prop = keywords[prop_index];
+			ni_index index;
 
 			/*
 			 * For each value associated in the property, we're going to return
 			 * a separate line. We squirrel away the values in the config state
 			 * so the next time through, we don't need to do this lookup.
 			 */
-		       	NI_INIT(&namelist);
-	       		if (ni_lookupprop(config->domain, &config->config_dir, current_prop.text, &namelist) == NI_OK) {
-				ni_index index;
+			NI_INIT(&namelist);
+			if (NI_OK == ni_lookupprop(config->domain,
+			    &config->config_dir, current_prop.text,
+			    &namelist)) {
 
 				/* Found the property, but it has no values */
 				if (namelist.ni_namelist_len == 0) continue;
 
-				if (! (val_list = config->val_list = (char**)malloc(sizeof(char*) * (namelist.ni_namelist_len + 1))))
-				{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
+				config->val_list = 
+				    emalloc(sizeof(char*) *
+				    (namelist.ni_namelist_len + 1));
+				val_list = config->val_list;
 
-				for (index = 0; index < namelist.ni_namelist_len; index++) {
-					char *value = namelist.ni_namelist_val[index];
-
-					if (! (val_list[index] = (char*)malloc(strlen(value)+1)))
-					{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
-
-					strcpy(val_list[index], value);
+				for (index = 0;
+				     index < namelist.ni_namelist_len;
+				     index++) {
+					char *value;
+					
+					value = namelist.ni_namelist_val[index];
+					val_list[index] = estrdup(value);
 				}
 				val_list[index] = NULL;
 
@@ -3771,14 +3800,14 @@ gettokens_netinfo (
 	}
 
 	/* No list; we're done here. */
-       	if (!val_list) return CONFIG_UNKNOWN;
+	if (!val_list)
+		return CONFIG_UNKNOWN;
 
 	/*
 	 * We have a list of values for the current property.
 	 * Iterate through them and return each in order.
 	 */
-	if (val_list[val_index])
-	{
+	if (val_list[val_index]) {
 		int ntok = 1;
 		int quoted = 0;
 		char *tokens = val_list[val_index];
@@ -3796,8 +3825,10 @@ gettokens_netinfo (
 				break;
 			} else {		/* must be space */
 				*tokens++ = '\0';
-				while (ISSPACE(*tokens)) tokens++;
-				if (ISEOL(*tokens)) break;
+				while (ISSPACE(*tokens))
+					tokens++;
+				if (ISEOL(*tokens))
+					break;
 			}
 		}
 
@@ -3821,7 +3852,9 @@ gettokens_netinfo (
 	/* Free val_list and reset counters. */
 	for (val_index = 0; val_list[val_index]; val_index++)
 		free(val_list[val_index]);
-       	free(val_list);	val_list = config->val_list = NULL; val_index = config->val_index = 0;
+	free(val_list);
+	val_list = config->val_list = NULL;
+	val_index = config->val_index = 0;
 
 	goto again;
 }

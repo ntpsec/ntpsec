@@ -328,13 +328,13 @@ server_command
 		{
 			struct peer_node *my_node =  create_peer_node($1, $2, $3);
 			if (my_node)
-				enqueue(my_config.peers, my_node);
+				enqueue(cfgt.peers, my_node);
 		}
 	|	client_type address
 		{
 			struct peer_node *my_node = create_peer_node($1, $2, NULL);
 			if (my_node)
-				enqueue(my_config.peers, my_node);
+				enqueue(cfgt.peers, my_node);
 		}
 	;
 
@@ -389,7 +389,7 @@ unpeer_command
 		{
 			struct unpeer_node *my_node = create_unpeer_node($2);
 			if (my_node)
-				enqueue(my_config.unpeers, my_node);
+				enqueue(cfgt.unpeers, my_node);
 		}
 	;	
 unpeer_keyword	
@@ -405,13 +405,13 @@ unpeer_keyword
 
 other_mode_command
 	:	T_Broadcastclient
-			{ my_config.broadcastclient = SIMPLE; }
+			{ cfgt.broadcastclient = SIMPLE; }
 	|	T_Broadcastclient T_Novolley
-			{ my_config.broadcastclient = NOVOLLEY; }
+			{ cfgt.broadcastclient = NOVOLLEY; }
 	|	T_Manycastserver address_list
-			{ append_queue(my_config.manycastserver, $2); }
+			{ append_queue(cfgt.manycastserver, $2); }
 	|	T_Multicastclient address_list
-			{ append_queue(my_config.multicastclient, $2); }
+			{ append_queue(cfgt.multicastclient, $2); }
 	;
 
 
@@ -422,27 +422,27 @@ other_mode_command
 
 authentication_command
 	:	T_Autokey T_Integer
-			{ my_config.auth.autokey = $2; }
+			{ cfgt.auth.autokey = $2; }
 	|	T_ControlKey T_Integer
-			{ my_config.auth.control_key = $2; }
+			{ cfgt.auth.control_key = $2; }
 	|	T_Crypto crypto_command_line
 		{ 
-			if (my_config.auth.crypto_cmd_list != NULL)
-				append_queue(my_config.auth.crypto_cmd_list, $2);
+			if (cfgt.auth.crypto_cmd_list != NULL)
+				append_queue(cfgt.auth.crypto_cmd_list, $2);
 			else
-				my_config.auth.crypto_cmd_list = $2;
+				cfgt.auth.crypto_cmd_list = $2;
 			cryptosw++;
 		}
 	|	T_Keys T_String
-			{ my_config.auth.keys = $2; }
+			{ cfgt.auth.keys = $2; }
 	|	T_Keysdir T_String
-			{ my_config.auth.keysdir = $2; }
+			{ cfgt.auth.keysdir = $2; }
 	|	T_Requestkey T_Integer
-			{ my_config.auth.request_key = $2; }
+			{ cfgt.auth.request_key = $2; }
 	|	T_Trustedkey integer_list
-			{ my_config.auth.trusted_key_list = $2; }
+			{ cfgt.auth.trusted_key_list = $2; }
 	|	T_NtpSignDsocket T_String
-			{ my_config.auth.ntp_signd_socket = $2; }
+			{ cfgt.auth.ntp_signd_socket = $2; }
 	;
 
 crypto_command_line
@@ -466,7 +466,7 @@ crypto_command
 	|	T_RandFile T_String
 			{ $$ = create_attr_sval(CRYPTO_CONF_RAND, $2); }
 	|	T_Revoke T_Integer
-			{ my_config.auth.revoke = $2; }
+			{ cfgt.auth.revoke = $2; }
 	|	T_Sign	T_String
 			{ $$ = create_attr_sval(CRYPTO_CONF_SIGN, $2); }
 	;
@@ -478,7 +478,7 @@ crypto_command
 
 orphan_mode_command
 	:	T_Tos tos_option_list
-			{ append_queue(my_config.orphan_cmds,$2); }
+			{ append_queue(cfgt.orphan_cmds,$2); }
 	;
 
 tos_option_list
@@ -518,12 +518,12 @@ tos_option
 
 monitoring_command
 	:	T_Statistics stats_list
-			{ append_queue(my_config.stats_list, $2); }
+			{ append_queue(cfgt.stats_list, $2); }
 	|	T_Statsdir T_String
-			{ my_config.stats_dir = $2; }
+			{ cfgt.stats_dir = $2; }
 	|	T_Filegen stat filegen_option_list
 		{
-			enqueue(my_config.filegen_opts,
+			enqueue(cfgt.filegen_opts,
 				create_filegen_node($2, $3));
 		}
 	;
@@ -586,21 +586,21 @@ filegen_type
 access_control_command
 	:	T_Discard discard_option_list
 		{   
-			append_queue(my_config.discard_opts, $2);
+			append_queue(cfgt.discard_opts, $2);
 		}
 	|	T_Restrict address ac_flag_list
 		{
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node($2, NULL, $3, ip_file->line_no));
 		}
 	|	T_Restrict T_Default ac_flag_list
 		{
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node(NULL, NULL, $3, ip_file->line_no));
 		}
 	|	T_Restrict T_IPv4_flag T_Default ac_flag_list
 		{
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node(
 					create_address_node(
 						estrdup("0.0.0.0"), 
@@ -613,7 +613,7 @@ access_control_command
 		}
 	|	T_Restrict T_IPv6_flag T_Default ac_flag_list
 		{
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node(
 					create_address_node(
 						estrdup("::"), 
@@ -626,7 +626,7 @@ access_control_command
 		}
 	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
 		{
-			enqueue(my_config.restrict_opts,
+			enqueue(cfgt.restrict_opts,
 				create_restrict_node($2, $4, $5, ip_file->line_no));
 		}
 	;
@@ -669,7 +669,7 @@ discard_option
 
 fudge_command
 	:	T_Fudge address fudge_factor_list
-			{ enqueue(my_config.fudge, create_addr_opts_node($2, $3)); }
+			{ enqueue(cfgt.fudge, create_addr_opts_node($2, $3)); }
 	;
 
 fudge_factor_list
@@ -702,9 +702,9 @@ fudge_factor
 
 system_option_command
 	:	T_Enable system_option_list
-			{ append_queue(my_config.enable_opts,$2);  }
+			{ append_queue(cfgt.enable_opts,$2);  }
 	|	T_Disable system_option_list
-			{ append_queue(my_config.disable_opts,$2);  }
+			{ append_queue(cfgt.disable_opts,$2);  }
 	;
 
 system_option_list
@@ -728,7 +728,7 @@ system_option
  */
 
 tinker_command
-	:	T_Tinker tinker_option_list  { append_queue(my_config.tinker, $2); }
+	:	T_Tinker tinker_option_list  { append_queue(cfgt.tinker, $2); }
 	;
 
 tinker_option_list
@@ -774,44 +774,44 @@ miscellaneous_command
 		}
 
 	|	T_Broadcastdelay number
-			{ enqueue(my_config.vars, create_attr_dval(T_Broadcastdelay, $2)); }
+			{ enqueue(cfgt.vars, create_attr_dval(T_Broadcastdelay, $2)); }
 	|	T_Calldelay T_Integer
-			{ enqueue(my_config.vars, create_attr_ival(T_Calldelay, $2)); }
+			{ enqueue(cfgt.vars, create_attr_ival(T_Calldelay, $2)); }
 	|	T_Tick number
-			{ enqueue(my_config.vars, create_attr_dval(T_Tick, $2)); }
+			{ enqueue(cfgt.vars, create_attr_dval(T_Tick, $2)); }
 	|	T_Driftfile drift_parm
 			{ /* Null action, possibly all null parms */ }
 	|	T_Leapfile T_String
-			{ enqueue(my_config.vars, create_attr_sval(T_Leapfile, $2)); }
+			{ enqueue(cfgt.vars, create_attr_sval(T_Leapfile, $2)); }
 
 	|	T_Pidfile T_String
-			{ enqueue(my_config.vars, create_attr_sval(T_Pidfile, $2)); }
+			{ enqueue(cfgt.vars, create_attr_sval(T_Pidfile, $2)); }
 	|	T_Logfile T_String
-			{ enqueue(my_config.vars, create_attr_sval(T_Logfile, $2)); }
+			{ enqueue(cfgt.vars, create_attr_sval(T_Logfile, $2)); }
 	|	T_Automax T_Integer
-			{ enqueue(my_config.vars, create_attr_ival(T_Automax, $2)); }
+			{ enqueue(cfgt.vars, create_attr_ival(T_Automax, $2)); }
 
 	|	T_Logconfig log_config_list
-			{ append_queue(my_config.logconfig, $2); }
+			{ append_queue(cfgt.logconfig, $2); }
 	|	T_Phone string_list
-			{ append_queue(my_config.phone, $2); }
+			{ append_queue(cfgt.phone, $2); }
 	|	T_Setvar variable_assign
-			{ enqueue(my_config.setvar, $2); }
+			{ enqueue(cfgt.setvar, $2); }
 	|	T_Trap ip_address trap_option_list
-			{ enqueue(my_config.trap, create_addr_opts_node($2, $3)); }
+			{ enqueue(cfgt.trap, create_addr_opts_node($2, $3)); }
 	|	T_Ttl integer_list
-			{ append_queue(my_config.ttl, $2); }
+			{ append_queue(cfgt.ttl, $2); }
 	|	T_Qos T_String
-			{ enqueue(my_config.qos, create_attr_sval(T_Qos, $2)); }
+			{ enqueue(cfgt.qos, create_attr_sval(T_Qos, $2)); }
 	;	
 drift_parm
 	:	T_String
-			{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
+			{ enqueue(cfgt.vars, create_attr_sval(T_Driftfile, $1)); }
 	|	T_String T_Double
-			{ enqueue(my_config.vars, create_attr_dval(T_WanderThreshold, $2));
-			  enqueue(my_config.vars, create_attr_sval(T_Driftfile, $1)); }
+			{ enqueue(cfgt.vars, create_attr_dval(T_WanderThreshold, $2));
+			  enqueue(cfgt.vars, create_attr_sval(T_Driftfile, $1)); }
 	|	/* Null driftfile,  indicated by null string "\0" */
-			{ enqueue(my_config.vars, create_attr_sval(T_Driftfile, "\0")); }
+			{ enqueue(cfgt.vars, create_attr_sval(T_Driftfile, "\0")); }
 	;
 
 variable_assign
@@ -898,7 +898,7 @@ number
 simulate_command
 	:	sim_conf_start '{' sim_init_statement_list sim_server_list '}'
 		{
-			my_config.sim_details = create_sim_node($3, $4);
+			cfgt.sim_details = create_sim_node($3, $4);
 
 			/* Reset the old_config_style variable */
 			old_config_style = 1;

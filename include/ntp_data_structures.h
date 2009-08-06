@@ -32,14 +32,6 @@ typedef struct Queue {
     int no_of_elements;
 } queue;
 
-/* Singly-linked structure to hold the same data as a priorithy queue
- * ------------------------------------------------------------------
- */
-
-typedef struct s_list {
-	void *value;
-	struct s_list *next;
-} s_list;
 
 /* FUNCTION PROTOTYPES
  * -------------------
