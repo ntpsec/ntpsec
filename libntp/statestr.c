@@ -198,10 +198,10 @@ getcode(
 
 	while (codetab->code != -1) {
 		if (codetab->code == code)
-		    return codetab->string;
+			return codetab->string;
 		codetab++;
 	}
-	(void) sprintf(buf, "%s_%d", codetab->string, code);
+	snprintf(buf, sizeof(buf), "%s_%d", codetab->string, code);
 	return buf;
 }
 
@@ -216,8 +216,9 @@ getevents(
 	static char buf[20];
 
 	if (cnt == 0)
-	    return "no events";
-	(void) sprintf(buf, "%d event%s", cnt, (cnt==1) ? "" : "s");
+		return "no events";
+	snprintf(buf, sizeof(buf), "%d event%s", cnt, (cnt==1) ? "" : 
+	    "s");
 	return buf;
 }
 

@@ -1108,6 +1108,7 @@ convert_isc_if(
 	)
 {
 	strncpy(itf->name, isc_if->name, sizeof(itf->name));
+	itf->name[sizeof(itf->name) - 1] = 0; /* strncpy may not */
 	itf->family = (u_short)isc_if->af;
 	AF(&itf->sin) = itf->family;
 	AF(&itf->mask) = itf->family;

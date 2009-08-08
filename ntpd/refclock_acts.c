@@ -250,9 +250,6 @@ acts_start (
 	 * Allocate and initialize unit structure
 	 */
 	up = emalloc(sizeof(struct actsunit));
-	if (up == NULL)
-		return (0);
-
 	memset(up, 0, sizeof(struct actsunit));
 	up->unit = unit;
 	pp = peer->procptr;

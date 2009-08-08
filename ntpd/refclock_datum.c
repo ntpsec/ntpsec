@@ -397,7 +397,7 @@ datum_pts_shutdown(
 			if (nunits > 1) {
 
 				temp_datum_pts_unit = (struct datum_pts_unit **)
-					malloc((nunits-1)*sizeof(struct datum_pts_unit *));
+					emalloc((nunits-1)*sizeof(struct datum_pts_unit *));
 				if (i!= 0) memcpy(temp_datum_pts_unit, datum_pts_unit,
 						  i*sizeof(struct datum_pts_unit *));
 

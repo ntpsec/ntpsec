@@ -1333,16 +1333,15 @@ ctl_putsys(
 		    register struct ctl_var *k;
 
 		    s = buf;
-		    be = buf + sizeof(buf) -
-			strlen(sys_var[CS_VARLIST].text) - 4;
-		    if (s > be)
+		    be = buf + sizeof(buf);
+		    if (s + strlen(sys_var[CS_VARLIST].text) + 4 > be)
 			    break;	/* really long var name */
 
-		    strcpy(s, sys_var[CS_VARLIST].text);
-		    strcat(s, "=\"");
+		    snprintf(s, sizeof(buf), "%s=\"",
+			sys_var[CS_VARLIST].text);
 		    s += strlen(s);
 		    t = s;
-		    for (k = sys_var; !(k->flags &EOV); k++) {
+		    for (k = sys_var; !(k->flags & EOV); k++) {
 			    if (k->flags & PADDING)
 				    continue;
 			    i = strlen(k->text);
@@ -1351,11 +1350,11 @@ ctl_putsys(
 
 			    if (s != t)
 				    *s++ = ',';
-			    strcpy(s, k->text);
+			    memcpy(s, k->text, i);
 			    s += i;
 		    }
 
-		    for (k = ext_sys_var; k && !(k->flags &EOV);
+		    for (k = ext_sys_var; k && !(k->flags & EOV);
 			 k++) {
 			    if (k->flags & PADDING)
 				    continue;
@@ -1372,7 +1371,7 @@ ctl_putsys(
 
 			    if (s != t)
 				    *s++ = ',';
-			    strncpy(s, k->text,
+			    memcpy(s, k->text,
 				    (unsigned)i);
 			    s += i;
 		    }
@@ -1440,8 +1439,8 @@ ctl_putsys(
 
 	    case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			sprintf(cbuf, "%s %s 0x%x", cp->subject,
-			    cp->issuer, cp->flags);
+			snprintf(cbuf, sizeof(cbuf), "%s %s 0x%x",
+			    cp->subject, cp->issuer, cp->flags);
 			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
 			    strlen(cbuf));
 			ctl_putfs(sys_var[CS_REVTIME].text, cp->last);
@@ -1693,16 +1692,15 @@ ctl_putpeer(
 		    register struct ctl_var *k;
 
 		    s = buf;
-		    be = buf + sizeof(buf) -
-			strlen(peer_var[CP_VARLIST].text) - 4;
-		    if (s > be)
+		    be = buf + sizeof(buf);
+		    if (s + strlen(peer_var[CP_VARLIST].text) + 4 > be)
 			    break;	/* really long var name */
 
-		    strcpy(s, peer_var[CP_VARLIST].text);
-		    strcat(s, "=\"");
+		    snprintf(s, sizeof(buf), "%s=\"",
+			peer_var[CP_VARLIST].text);
 		    s += strlen(s);
 		    t = s;
-		    for (k = peer_var; !(k->flags &EOV); k++) {
+		    for (k = peer_var; !(k->flags & EOV); k++) {
 			    if (k->flags & PADDING)
 				    continue;
 
@@ -1712,7 +1710,7 @@ ctl_putpeer(
 
 			    if (s != t)
 				    *s++ = ',';
-			    strcpy(s, k->text);
+			    memcpy(s, k->text, i);
 			    s += i;
 		    }
 		    if (s+2 >= be)
@@ -1869,12 +1867,12 @@ ctl_putclock(
 			be)
 			    break;	/* really long var name */
 
-		    strcpy(s, clock_var[CC_VARLIST].text);
-		    strcat(s, "=\"");
+		    snprintf(s, sizeof(buf), "%s=\"", 
+		        clock_var[CC_VARLIST].text);
 		    s += strlen(s);
 		    t = s;
 
-		    for (k = clock_var; !(k->flags &EOV); k++) {
+		    for (k = clock_var; !(k->flags & EOV); k++) {
 			    if (k->flags & PADDING)
 				    continue;
 
@@ -1884,7 +1882,7 @@ ctl_putclock(
 
 			    if (s != t)
 				    *s++ = ',';
-			    strcpy(s, k->text);
+			    memcpy(s, k->text, i);
 			    s += i;
 		    }
 
@@ -1905,7 +1903,7 @@ ctl_putclock(
 
 			    if (s != t)
 				    *s++ = ',';
-			    strncpy(s, k->text, (unsigned)i);
+			    memcpy(s, k->text, (unsigned)i);
 			    s += i;
 			    *s = '\0';
 		    }
@@ -2778,6 +2776,7 @@ report_event(
 {
 	char	statstr[NTP_MAXSTRLEN];
 	int	i;
+	size_t	len;
 
 	/*
 	 * Report the error to the protostats file, system log and
@@ -2800,8 +2799,9 @@ report_event(
 		    "0.0.0.0 %04x %02x %s",
 		    ctlsysstatus(), err, eventstr(err));
 		if (str != NULL) {
-			strcat(statstr, " ");
-			strcat(statstr, str);
+			len = strlen(statstr);
+			snprintf(statstr + len, sizeof(statstr) - len,
+			    " %s", str);
 		}
 		NLOG(NLOG_SYSEVENT)
 		    msyslog(LOG_INFO, statstr);
@@ -2832,8 +2832,9 @@ report_event(
 		    "%s %04x %02x %s", src,
 		    ctlpeerstatus(peer), err, eventstr(err));
 		if (str != NULL) {
-			strcat(statstr, " ");
-			strcat(statstr, str);
+			len = strlen(statstr);
+			snprintf(statstr + len, sizeof(statstr) - len,
+			    " %s", str);
 		}
 		NLOG(NLOG_PEEREVENT)
 		    msyslog(LOG_INFO, statstr);

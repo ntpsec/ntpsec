@@ -600,11 +600,8 @@ oncore_start(
 
 	/* create instance structure for this unit */
 
-	if (!(instance = (struct instance *) malloc(sizeof *instance))) {
-		perror("malloc");
-		return (0);
-	}
-	memset((char *) instance, 0, sizeof *instance);
+	instance = emalloc(sizeof(*instance));
+	memset(instance, 0, sizeof(*instance));
 
 	/* initialize miscellaneous variables */
 
@@ -929,7 +926,7 @@ oncore_init_shmem(
 	struct stat sbuf;
 	size_t shmem_length;
 
-       /*
+	/*
 	* The first thing we do is see if there is an instance->shmem_fname file (still)
 	* out there from a previous run.  If so, we copy it in and use it to initialize
 	* shmem (so we won't lose our almanac if we need it).
@@ -943,11 +940,8 @@ oncore_init_shmem(
 		fstat(fd, &sbuf);
 		shmem_old_size = sbuf.st_size;
 		if (shmem_old_size != 0) {
-			shmem_old = (u_char *) malloc((unsigned) sbuf.st_size);
-			if (shmem_old == NULL)
-				oncore_log(instance, LOG_WARNING, "ONCORE: Can't malloc buffer for shmem_old");
-			else
-				read(fd, shmem_old, shmem_old_size);
+			shmem_old = emalloc((unsigned) sbuf.st_size);
+			read(fd, shmem_old, shmem_old_size);
 		}
 		close(fd);
 	}
@@ -988,16 +982,7 @@ oncore_init_shmem(
 	}
 	shmem_length = n + 2;
 
-	buf = malloc(shmem_length);
-	if (buf == NULL) {
-		oncore_log(instance, LOG_WARNING, "ONCORE: Can't malloc buffer for shmem");
-		close(instance->shmemfd);
-		if (shmem_old)
-			free(shmem_old);
-
-		return;
-	}
-
+	buf = emalloc(shmem_length);
 	memset(buf, 0, shmem_length);
 
 	/* next build the new SHMEM buffer in memory */
@@ -1263,9 +1248,7 @@ oncore_read_config(
 			continue;
 
 		if (!strncmp(cc, "STATUS", (size_t) 6) || !strncmp(cc, "SHMEM", (size_t) 5)) {
-			i = strlen(ca);
-			instance->shmem_fname = (char *) malloc((unsigned) (i+1));
-			strcpy(instance->shmem_fname, ca);
+			instance->shmem_fname = estrdup(ca);
 			continue;
 		}
 

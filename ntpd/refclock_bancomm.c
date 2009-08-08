@@ -422,9 +422,8 @@ get_datumtime(struct vmedate *time_vme)
 	uint8_t dmy;
 	struct stfp_time stfpm;
 	
-	if ( time_vme == (struct vmedate *)NULL) {
-  	  time_vme = (struct vmedate *)malloc(sizeof(struct vmedate ));
-	}
+	if (time_vme == NULL)
+  		time_vme = emalloc(sizeof(*time_vme));
 
 	switch (tfp_type) {
 		case 1:				/* BSD, PCI, 2 32bit time words */

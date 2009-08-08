@@ -918,14 +918,18 @@ getgroup:
 			}
 		}
 
-		if( chrootdir ) {
+		if (chrootdir ) {
 			/* make sure cwd is inside the jail: */
-			if( chdir(chrootdir) ) {
+			if (chdir(chrootdir)) {
 				msyslog(LOG_ERR, "Cannot chdir() to `%s': %m", chrootdir);
 				exit (-1);
 			}
-			if( chroot(chrootdir) ) {
+			if (chroot(chrootdir)) {
 				msyslog(LOG_ERR, "Cannot chroot() to `%s': %m", chrootdir);
+				exit (-1);
+			}
+			if (chdir("/")) {
+				msyslog(LOG_ERR, "Cannot chdir() to`root after chroot(): %m");
 				exit (-1);
 			}
 		}

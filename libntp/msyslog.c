@@ -84,12 +84,12 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 	register char c;
 	register char *n;
 	register const char *f;
-
+	size_t len;
 	char *err;
 
 	n = nfmt;
 	f = fmt;
-	while ((c = *f++) != '\0' && n < (nfmt+lennfmt - 2)) {
+	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 2)) {
 		if (c != '%') {
 			*n++ = c;
 			continue;
@@ -99,12 +99,13 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 			*n++ = c;
 			continue;
 		}
-		err = 0;
 		err = strerror(errval);
+		len = strlen(err);
+
 		/* Make sure we have enough space for the error message */
-		if ((n + strlen(err)) < (nfmt + lennfmt -2)) {
-			strcpy(n, err);
-			n += strlen(err);
+		if ((n + len) < (nfmt + lennfmt - 2)) {
+			memcpy(n, err, len);
+			n += len;
 		}
 	}
 #if !defined(VMS)

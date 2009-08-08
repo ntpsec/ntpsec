@@ -431,12 +431,8 @@ do_nodename(
 #ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
 	ai->ai_addr->sa_len = sizeof(struct sockaddr);
 #endif
-	if (hints != NULL && hints->ai_flags & AI_CANONNAME) {
-		ai->ai_canonname = malloc(strlen(hp->h_name) + 1);
-		if (ai->ai_canonname == NULL)
-			return (EAI_MEMORY);
-		strcpy(ai->ai_canonname, hp->h_name);
-	}
+	if (hints != NULL && hints->ai_flags & AI_CANONNAME)
+		ai->ai_canonname = estrdup(hp->h_name);
 	return (0);
 }
 

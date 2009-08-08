@@ -22,10 +22,14 @@
  */
 #pragma warning(disable: 4127) /* conditional expression is constant */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
 #include <isc/list.h>
+#include "ntp_stdlib.h"
 
 
 /*
@@ -165,12 +169,10 @@ FormatError(int error) {
 		NULL); 
 
 	if (lpMsgBuf) {
-		lmsg = malloc(sizeof(*lmsg));
-		if (lmsg) {
-			lmsg->code = error;
-			lmsg->msg = lpMsgBuf;
-			ISC_LIST_APPEND(errormsg_list, lmsg, link);
-		}
+		lmsg = emalloc(sizeof(*lmsg));
+		lmsg->code = error;
+		lmsg->msg = lpMsgBuf;
+		ISC_LIST_APPEND(errormsg_list, lmsg, link);
 	}
 	UNLOCK(&ErrorMsgLock);
 	return (lpMsgBuf);
@@ -235,6 +237,7 @@ isc__NTstrerror(int err) {
 	#endif /* _MSC_VER */
 
 	if (!retmsg) {
+#undef strerror
 		retmsg = strerror(err);
 	}
 

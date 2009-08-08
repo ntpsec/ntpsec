@@ -19,7 +19,6 @@ int 	maxhostlen;
  * Declarations for command handlers in here
  */
 static	int checkassocid	(u_int32);
-static	char *	strsave 	(char *);
 static	struct varlist *findlistvar (struct varlist *, char *);
 static	void	doaddvlist	(struct varlist *, char *);
 static	void	dormvlist	(struct varlist *, char *);
@@ -226,29 +225,6 @@ checkassocid(
 
 
 /*
- * strsave - save a string
- * XXX - should be in libntp.a
- */
-static char *
-strsave(
-	char *str
-	)
-{
-	char *cp;
-	u_int len;
-
-	len = strlen(str) + 1;
-	if ((cp = (char *)malloc(len)) == NULL) {
-		(void) fprintf(stderr, "Malloc failed!!\n");
-		exit(1);
-	}
-
-	memmove(cp, str, len);
-	return (cp);
-}
-
-
-/*
  * findlistvar - look for the named variable in a list and return if found
  */
 static struct varlist *
@@ -291,14 +267,14 @@ doaddvlist(
 		}
 
 		if (vl->name == 0) {
-			vl->name = strsave(name);
+			vl->name = estrdup(name);
 		} else if (vl->value != 0) {
 			free(vl->value);
 			vl->value = 0;
 		}
 
 		if (value != 0)
-			vl->value = strsave(value);
+			vl->value = estrdup(value);
 	}
 }
 

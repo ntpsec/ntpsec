@@ -2232,7 +2232,7 @@ getnetinfoservers(void)
 	ni_status status;
 	void *domain;
 	ni_id confdir;
-	ni_namelist *namelist = (ni_namelist*)malloc(sizeof(ni_namelist));
+	ni_namelist *namelist = emalloc(sizeof(ni_namelist));
 
 	/* Find a time server in NetInfo */
 	if ((status = ni_open(NULL, ".", &domain)) != NI_OK) return NULL;

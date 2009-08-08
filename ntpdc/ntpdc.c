@@ -436,12 +436,8 @@ ntpdcmain(
 	/*
 	 * Initialize the packet data buffer
 	 */
-	pktdata = (char *)malloc(INITDATASIZE);
-	if (pktdata == NULL) {
-		(void) fprintf(stderr, "%s: malloc() failed!\n", progname);
-		exit(1);
-	}
 	pktdatasize = INITDATASIZE;
+	pktdata = emalloc(INITDATASIZE);
 
 	if (numcmds == 0) {
 		(void) openhost(chosts[0]);

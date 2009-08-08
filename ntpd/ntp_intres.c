@@ -247,9 +247,12 @@ ntp_intres(void)
 	(void) fclose(in);
 
 #ifdef DEBUG
-	if (!debug )
+	if (!debug)
 #endif
-		(void) unlink(req_file);
+		if (unlink(req_file))
+			msyslog(LOG_WARNING,
+				"unable to remove intres request file %s, %m",
+				req_file);
 
 	/*
 	 * Set up the timers to do first shot immediately.
@@ -437,7 +440,8 @@ addentry(
 	ce->ce_flags = (u_char)flags;
 	ce->ce_ttl = (u_char)ttl;
 	ce->ce_keyid = keyid;
-	strncpy(ce->ce_keystr, keystr, sizeof(ce->ce_keystr));
+	strncpy(ce->ce_keystr, keystr, sizeof(ce->ce_keystr) - 1);
+	ce->ce_keystr[sizeof(ce->ce_keystr) - 1] = 0;
 	ce->ce_next = NULL;
 
 	if (confentries == NULL) {

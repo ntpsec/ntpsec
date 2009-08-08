@@ -101,11 +101,12 @@ GetHeapAlloc(char *fromfunc)
 	IoCompletionInfo *lpo;
 
 #ifdef USE_HEAP
-	lpo = (IoCompletionInfo *) HeapAlloc(hHeapHandle,
-			     HEAP_ZERO_MEMORY,
-			     sizeof(IoCompletionInfo));
+	lpo = HeapAlloc(hHeapHandle,
+			HEAP_ZERO_MEMORY,
+			sizeof(IoCompletionInfo));
 #else
-	lpo = (IoCompletionInfo *) calloc(1, sizeof(*lpo));
+	lpo = emalloc(sizeof(*lpo));
+	memset(lpo, 0, sizeof(*lpo));
 #endif
 	DPRINTF(3, ("Allocation %d memory for %s, ptr %x\n", sizeof(IoCompletionInfo), fromfunc, lpo));
 
@@ -879,7 +880,9 @@ io_completion_port_sendto(
 			 * Something bad happened
 			 */
 			default :
-				msyslog(LOG_ERR, "WSASendTo - error sending message: %m");
+				msyslog(LOG_ERR,
+					"WSASendTo(%s) error %d: %s",
+					stoa(dest), errval, strerror(errval));
 				free_trans_buf(buff);
 				lpo->trans_buf = NULL;
 				FreeHeap(lpo, "io_completion_port_sendto");

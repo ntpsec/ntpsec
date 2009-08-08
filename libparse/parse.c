@@ -234,7 +234,7 @@ parse_addchar(
 		 * collect into buffer
 		 */
 		parseprintf(DD_PARSE, ("parse: parse_addchar: buffer[%d] = 0x%x\n", parseio->parse_index, ch));
-		parseio->parse_data[parseio->parse_index++] = ch;
+		parseio->parse_data[parseio->parse_index++] = (char)ch;
 		return PARSE_INP_SKIP;
 	}
 	else

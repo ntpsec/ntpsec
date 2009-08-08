@@ -110,10 +110,7 @@ recv_packet(int fd, char **buf, uint32_t *len)
 {
 	if (read_all(fd, len, sizeof(*len)) != sizeof(*len)) return -1;
 	*len = ntohl(*len);
-	(*buf) = malloc(*len);
-	if (!*buf) {
-		return -1;
-	}
+	(*buf) = emalloc(*len);
 	if (read_all(fd, *buf, *len) != *len) {
 		free(*buf);
 		return -1;

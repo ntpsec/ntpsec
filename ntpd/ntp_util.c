@@ -295,12 +295,17 @@ write_stats(void)
 			(void)fclose(fp);
 			/* atomic */
 #ifdef SYS_WINNT
-			(void) _unlink(stats_drift_file); /* rename semantics differ under NT */
+			if (_unlink(stats_drift_file)) /* rename semantics differ under NT */
+				msyslog(LOG_WARNING, 
+					"Unable to remove prior drift file %s, %m", 
+					stats_drift_file);
 #endif /* SYS_WINNT */
 
 #ifndef NO_RENAME
-			(void) rename(stats_temp_file,
-			    stats_drift_file);
+			if (rename(stats_temp_file, stats_drift_file))
+				msyslog(LOG_WARNING, 
+					"Unable to rename temp drift file %s to %s, %m", 
+					stats_temp_file, stats_drift_file);
 #else
 			/* we have no rename NFS of ftp in use */
 			if ((fp = fopen(stats_drift_file, "w")) ==

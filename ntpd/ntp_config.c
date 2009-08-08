@@ -2313,13 +2313,14 @@ getconfig(
 	/*
 	 * install a non default variable with this daemon version
 	 */
-	(void) sprintf(line, "daemon_version=\"%s\"", Version);
+	snprintf(line, sizeof(line), "daemon_version=\"%s\"", Version);
 	set_sys_var(line, strlen(line)+1, RO);
 
 	/*
 	 * Say how we're setting the time of day
 	 */
-	(void) sprintf(line, "settimeofday=\"%s\"", set_tod_using);
+	snprintf(line, sizeof(line), "settimeofday=\"%s\"",
+	    set_tod_using);
 	set_sys_var(line, strlen(line)+1, RO);
 
 	/*
@@ -2852,7 +2853,10 @@ abort_resolve(void)
 
 #ifndef SYS_VXWORKS		/* we don't open the file to begin with */
 #if !defined(VMS)
-	(void) unlink(res_file);
+	if (unlink(res_file))
+		msyslog(LOG_WARNING, 
+			"Unable to remove temporary resolver file %s, %m",
+			res_file);
 #else
 	(void) delete(res_file);
 #endif /* VMS */

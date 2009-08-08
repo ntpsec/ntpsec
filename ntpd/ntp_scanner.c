@@ -106,7 +106,7 @@ create_states(
 	if (curr_char && (keyword[0] == curr_char->ch))
 		my_state = curr_char;
 	else {
-		my_state = (struct state *) malloc(sizeof(struct state));
+		my_state = emalloc(sizeof(*my_state));
 		my_state->ch = keyword[0];  /* Store the first character
 					       of the keyword */
 		my_state->next_state = NULL;
@@ -528,9 +528,8 @@ yylex(
 		ip_file->prev_token_col_no = ip_file->col_no;
 
 		/* Read in the lexeme */
-		for (i = 0;
-		     (i < MAX_LEXEME) && EOF != (yytext[i] = get_next_char());
-		     i++) {
+		i = 0;
+		while (EOF != (yytext[i] = get_next_char())) {
 
 			/* Break on whitespace or a special character */
 			if (isspace(yytext[i]) 
@@ -546,6 +545,10 @@ yylex(
 					; /* Null Statement */
 				break;
 			}
+
+			i++;
+			if (i >= COUNTOF(yytext))
+				goto lex_too_long;
 		}
 		/* Pick up all of the string inside between " marks, to
 		 * end of line.  If we make it to EOL without a
@@ -558,6 +561,8 @@ yylex(
 			while ((yytext[i] = get_next_char()) != EOF &&
 			       yytext[i] != '"' && yytext[i] != '\n') {
 				i++;
+				if (i >= COUNTOF(yytext))
+					goto lex_too_long;
 			}
 			if (yytext[i] == '"')
 				yytext[i] =  ' ';
@@ -584,7 +589,7 @@ yylex(
 	 * returned) and that we haven't read a string.
 	 */
 	
-	if ((expect_string == NO_ARG) &&  (!instring)) {
+	if (expect_string == NO_ARG && !instring) {
 		token = is_keyword(yytext, &expect_string);
 		if (token) 
 			return token;
@@ -648,4 +653,24 @@ yylex(
 		expect_string = NO_ARG;
 
 	return create_string_token(yytext);
+
+lex_too_long:
+	yytext[min(sizeof(yytext) - 1, 50)] = 0;
+	msyslog(LOG_ERR, 
+		"configuration item on line %d longer than limit of %d, began with '%s'",
+		ip_file->line_no, sizeof(yytext) - 1, yytext);
+
+	/*
+	 * If we hit the length limit reading the startup configuration
+	 * file, abort.
+	 */
+	if (input_from_file)
+		exit(sizeof(yytext) - 1);
+
+	/*
+	 * If it's runtime configuration via ntpq :config treat it as
+	 * if the configuration text ended before the too-long lexeme,
+	 * hostname, or string.
+	 */
+	return 0;
 }
