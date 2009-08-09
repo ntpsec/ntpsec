@@ -1,3 +1,4 @@
+(4.2.5p199) 2009/08/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1279] Cleanup for warnings from Veracode static analysis.
 (4.2.5p198) 2009/08/03 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.9.9-pre5.
