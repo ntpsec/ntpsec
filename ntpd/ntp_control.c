@@ -74,6 +74,7 @@ static	void	write_clock_status (struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
+static	void	dump_config	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap (struct sockaddr_storage *,
 				      struct interface *);
 
@@ -86,6 +87,7 @@ static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_WRITECLOCK,	NOAUTH, write_clock_status },
 	{ CTL_OP_SETTRAP,	NOAUTH, set_trap },
 	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
+	{ CTL_OP_DUMPCONFIG, NOAUTH, dump_config },
         { CTL_OP_CONFIGURE,     AUTH, configure },
 	{ NO_REQUEST,		0 }
 };
@@ -542,7 +544,30 @@ ctl_error(
 	numctlerrors++;
 }
 
+/* 
+ * Call the config dumper
+ */
+void
+dump_config(
+		struct recvbuf *rbufp,
+		int restrict_mask
+		)
+{
+	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */	
+	char filename[80];
+	char reply[80];
 
+	snprintf(filename, 80, "ntp_dump%i.conf", time(NULL));
+
+	if(dump_config_dumper(filename) == -1) 
+		snprintf(reply, 80, "Couldn't dump to file %s", filename);
+	else 
+		snprintf(reply, 80, "Dumped to config file %s", filename);
+
+	ctl_putdata(reply, strlen(reply), 0);
+	ctl_flushpkt(0);
+}
+ 
 /*
  * process_control - process an incoming control message
  */
