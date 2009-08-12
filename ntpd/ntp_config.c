@@ -51,6 +51,19 @@ HANDLE ResolverEventHandle;
 int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent process */
 #endif /* SYS_WINNT */
 
+#define LINK_TAIL_SLIST_COPY(listhead, pentry, nextlink, entrytype)	\
+do {								\
+	entrytype **pptail;					\
+								\
+	pptail = &(listhead);					\
+	while (*pptail != NULL)					\
+		pptail = &((*pptail)->nextlink);		\
+								\
+	(pentry)->nextlink = NULL;				\
+	*pptail = (pentry);					\
+} while (0)
+
+
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
  * so #include these later.
@@ -131,7 +144,7 @@ int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
 struct config_tree cfgt;		/* Parser output stored here */
-struct config_tree *cfg_tree_history;	/* History of configs */
+struct config_tree *cfg_tree_history = NULL;	/* History of configs */
 #if 0
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 #else
@@ -448,9 +461,85 @@ dump_config_tree(
 	 	list_ptr = next_node(list_ptr)) {
 
 		peers = (struct peer_node *) list_ptr; 
-	
+		addr = peers->addr;
+		
 		/* Add other attributes to output of struct peer_node */
 		fprintf(df, "peer %s\n", (peers->addr)->address);
+		
+		void *fudge_ptr = queue_head(ptree->fudge);
+		if (fudge_ptr != NULL) {
+
+			for(; 	fudge_ptr != NULL;
+				fudge_ptr = next_node(fudge_ptr)) {
+
+
+				addr_opts = (struct addr_opts_node *) list_ptr;
+
+				if(!strcmp((peers->addr)->address, (addr_opts->addr)->address)) {
+
+				fprintf(df, "fudge %s", addr_opts->addr->address);
+	
+				opts = queue_head(addr_opts->options);
+
+				for(; opts != NULL; opts = next_node(opts)) {
+					atrv = (struct attr_val *) opts; 
+				
+					switch(atrv->attr) {
+						case CLK_HAVETIME1:
+						fprintf(df, " time1 %f", atrv->value.d);
+						break;
+				
+						case CLK_HAVETIME2:
+						fprintf(df, " time2 %f", atrv->value.d);
+						break;
+		
+						case CLK_HAVEVAL1:
+						fprintf(df, " stratum %i", atrv->value.i);
+						break;
+
+						case CLK_HAVEVAL2:
+						memset(refid, 0, sizeof(refid));
+						memcpy(refid, atrv->value.s,
+						    min(strlen(atrv->value.s), 4));
+					
+						fprintf(df, " refid %s", refid);
+						break;
+
+						case CLK_HAVEFLAG1:
+						if (atrv->value.i)
+							fprintf(df, " flag1 1");
+						else 
+							fprintf(df, " flag1 0");
+						break;
+			    
+						case CLK_HAVEFLAG2:
+						if (atrv->value.i)
+							fprintf(df, " flag2 1");
+						else 
+							fprintf(df, " flag2 0");
+						break;
+			    
+						case CLK_HAVEFLAG3:
+						if (atrv->value.i)
+							fprintf(df, " flag3 1");
+						else 
+							fprintf(df, " flag3 0");
+
+						break;
+			    
+						case CLK_HAVEFLAG4:
+						if (atrv->value.i)
+							fprintf(df, " flag4 1");
+						else 
+							fprintf(df, " flag4 0");
+						break;
+					}
+				}
+
+				fprintf(df, "\n");
+			  	}
+			}
+		}
 	}
 	
 	list_ptr = queue_head(ptree->unpeers);
@@ -951,78 +1040,6 @@ dump_config_tree(
 		fprintf(df, "\n");
 	}
 
-	list_ptr = queue_head(ptree->fudge);
-	if (list_ptr != NULL) {
-
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			fprintf(df, "fudge");
-
-			addr_opts = (struct addr_opts_node *) list_ptr;
-
-			fprintf(df, "%s", addr_opts->addr->address);
-
-			opts = queue_head(addr_opts->options);
-
-			for(; opts != NULL; opts = next_node(opts)) {
-				atrv = (struct attr_val *) opts; 
-				
-				switch(atrv->attr) {
-					case CLK_HAVETIME1:
-					fprintf(df, " time1 %f", atrv->value.d);
-					break;
-				
-					case CLK_HAVETIME2:
-					fprintf(df, " time2 %f", atrv->value.d);
-					break;
-		
-					case CLK_HAVEVAL1:
-					fprintf(df, " stratum %i", atrv->value.i);
-					break;
-
-					case CLK_HAVEVAL2:
-					memset(refid, 0, sizeof(refid));
-					memcpy(refid, atrv->value.s,
-					    min(strlen(atrv->value.s), 4));
-					
-					fprintf(df, " refid %s", refid);
-					break;
-
-					case CLK_HAVEFLAG1:
-					if (atrv->value.i)
-						fprintf(df, " flag1 1");
-					else 
-						fprintf(df, " flag1 0");
-					break;
-			    
-					case CLK_HAVEFLAG2:
-					if (atrv->value.i)
-						fprintf(df, " flag2 1");
-					else 
-						fprintf(df, " flag2 0");
-					break;
-			    
-					case CLK_HAVEFLAG3:
-					if (atrv->value.i)
-						fprintf(df, " flag3 1");
-					else 
-						fprintf(df, " flag3 0");
-
-					break;
-			    
-					case CLK_HAVEFLAG4:
-					if (atrv->value.i)
-						fprintf(df, " flag4 1");
-					else 
-						fprintf(df, " flag4 0");
-					break;
-				}
-			}
-
-			fprintf(df, "\n");
-		}
-	}
 
 	list_ptr = queue_head(ptree->logconfig);
 	if (list_ptr != NULL) {
@@ -3594,11 +3611,12 @@ save_and_apply_config_tree(void)
 	 * a list that can be used to dump the configuration back to
 	 * a text file.
 	 */
-	prior = cfg_tree_history;
-	cfg_tree_history = emalloc(sizeof(*cfg_tree_history));
-	memcpy(cfg_tree_history, &cfgt, sizeof(*cfg_tree_history));
-	cfg_tree_history->prior = prior;
+	prior = emalloc(sizeof(*cfg_tree_history));
+	memcpy(prior, &cfgt, sizeof(*cfg_tree_history));
 	memset(&cfgt, 0, sizeof(cfgt));
+	
+	LINK_TAIL_SLIST_COPY(cfg_tree_history, prior, prior, struct config_tree);
+
 
 	/* The actual configuration done depends on whether we are configuring the
 	 * simulator or the daemon. Perform a check and call the appropriate
