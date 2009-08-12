@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  August  9, 2009 at 07:53:58 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  August  9, 2009 at 07:52:55 AM by AutoGen 5.9.9pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -19,88 +19,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright (c) 1970-2006 ntp.org - all rights reserved
+ * sntp copyright (c) 2008 ntp.org - all rights reserved
  *
- *         General Public Licence for the software known as MSNTP
- *         ------------------------------------------------------
  * 
- * 	  (c) Copyright, N.M. Maclaren, 1996, 1997, 2000
- * 	  (c) Copyright, University of Cambridge, 1996, 1997, 2000
- * 
- * 
- * 
- * Free use of MSNTP in source and binary forms is permitted, provided that this
- * entire licence is duplicated in all copies, and that any documentation,
- * announcements, and other materials related to use acknowledge that the software
- * was developed by N.M. Maclaren (hereafter refered to as the Author) at the
- * University of Cambridge.  Neither the name of the Author nor the University of
- * Cambridge may be used to endorse or promote products derived from this material
- * without specific prior written permission.
- * 
- * The Author and the University of Cambridge retain the copyright and all other
- * legal rights to the software and make it available non-exclusively.  All users
- * must ensure that the software in all its derivations carries a copyright notice
- * in the form:
- * 	  (c) Copyright N.M. Maclaren,
- * 	  (c) Copyright University of Cambridge.
- * 
- * 
- * 
- *                            NO WARRANTY
- * 
- * Because the MSNTP software is licensed free of charge, the Author and the
- * University of Cambridge provide absolutely no warranty, either expressed or
- * implied, including, but not limited to, the implied warranties of
- * merchantability and fitness for a particular purpose.  The entire risk as to
- * the quality and performance of the MSNTP software is with you.  Should MSNTP
- * prove defective, you assume the cost of all necessary servicing or repair.
- * 
- * In no event, unless required by law, will the Author or the University of
- * Cambridge, or any other party who may modify and redistribute this software as
- * permitted in accordance with the provisions below, be liable for damages for
- * any losses whatsoever, including but not limited to lost profits, lost monies,
- * lost or corrupted data, or other special, incidental or consequential losses
- * that may arise out of the use or inability to use the MSNTP software.
- * 
- * 
- * 
- *                          COPYING POLICY
- * 
- * Permission is hereby granted for copying and distribution of copies of the
- * MSNTP source and binary files, and of any part thereof, subject to the
- * following licence conditions:
- * 
- * 1. You may distribute MSNTP or components of MSNTP, with or without additions
- * developed by you or by others.  No charge, other than an "at-cost" distribution
- * fee, may be charged for copies, derivations, or distributions of this material
- * without the express written consent of the copyright holders.
- * 
- * 2. You may also distribute MSNTP along with any other product for sale,
- * provided that the cost of the bundled package is the same regardless of whether
- * MSNTP is included or not, and provided that those interested only in MSNTP must
- * be notified that it is a product freely available from the University of
- * Cambridge.
- * 
- * 3. If you distribute MSNTP software or parts of MSNTP, with or without
- * additions developed by you or others, then you must either make available the
- * source to all portions of the MSNTP system (exclusive of any additions made by
- * you or by others) upon request, or instead you may notify anyone requesting
- * source that it is freely available from the University of Cambridge.
- * 
- * 4. You may not omit any of the copyright notices on either the source files,
- * the executable files, or the documentation.
- * 
- * 5. You may not omit transmission of this License agreement with whatever
- * portions of MSNTP that are distributed.
- * 
- * 6. Any users of this software must be notified that it is without warranty or
- * guarantee of any nature, express or implied, nor is there any fitness for use
- * represented.
- * 
- * 
- * October 1996
- * April 1997
- * October 2000
  */
 /*
  *  This file contains the programmatic interface to the Automated
@@ -131,22 +52,26 @@
  *  Enumeration of each option:
  */
 typedef enum {
-    INDEX_OPT_IPV4           =  0,
-    INDEX_OPT_IPV6           =  1,
-    INDEX_OPT_UNPRIVPORT     =  2,
-    INDEX_OPT_NORMALVERBOSE  =  3,
-    INDEX_OPT_EXTRAVERBOSE   =  4,
-    INDEX_OPT_MEGAVERBOSE    =  5,
-    INDEX_OPT_SETTIMEOFDAY   =  6,
-    INDEX_OPT_ADJTIME        =  7,
-    INDEX_OPT_VERSION        =  8,
-    INDEX_OPT_HELP           =  9,
-    INDEX_OPT_MORE_HELP      = 10,
-    INDEX_OPT_SAVE_OPTS      = 11,
-    INDEX_OPT_LOAD_OPTS      = 12
+    INDEX_OPT_IPV4            =  0,
+    INDEX_OPT_IPV6            =  1,
+    INDEX_OPT_NORMALVERBOSE   =  2,
+    INDEX_OPT_KOD             =  3,
+    INDEX_OPT_SYSLOG          =  4,
+    INDEX_OPT_FILELOG         =  5,
+    INDEX_OPT_SETTOD          =  6,
+    INDEX_OPT_ADJTIME         =  7,
+    INDEX_OPT_BROADCAST       =  8,
+    INDEX_OPT_TIMEOUT         =  9,
+    INDEX_OPT_AUTHENTICATION  = 10,
+    INDEX_OPT_KEYFILE         = 11,
+    INDEX_OPT_VERSION         = 12,
+    INDEX_OPT_HELP            = 13,
+    INDEX_OPT_MORE_HELP       = 14,
+    INDEX_OPT_SAVE_OPTS       = 15,
+    INDEX_OPT_LOAD_OPTS       = 16
 } teOptIndex;
 
-#define OPTION_CT    13
+#define OPTION_CT    17
 #define SNTP_VERSION       "4.2.5p199"
 #define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p199"
 
@@ -183,39 +108,59 @@ typedef enum {
 #  warning undefining IPV6 due to option name conflict
 #  undef   IPV6
 # endif
-# ifdef    UNPRIVPORT
-#  warning undefining UNPRIVPORT due to option name conflict
-#  undef   UNPRIVPORT
-# endif
 # ifdef    NORMALVERBOSE
 #  warning undefining NORMALVERBOSE due to option name conflict
 #  undef   NORMALVERBOSE
 # endif
-# ifdef    EXTRAVERBOSE
-#  warning undefining EXTRAVERBOSE due to option name conflict
-#  undef   EXTRAVERBOSE
+# ifdef    KOD
+#  warning undefining KOD due to option name conflict
+#  undef   KOD
 # endif
-# ifdef    MEGAVERBOSE
-#  warning undefining MEGAVERBOSE due to option name conflict
-#  undef   MEGAVERBOSE
+# ifdef    SYSLOG
+#  warning undefining SYSLOG due to option name conflict
+#  undef   SYSLOG
 # endif
-# ifdef    SETTIMEOFDAY
-#  warning undefining SETTIMEOFDAY due to option name conflict
-#  undef   SETTIMEOFDAY
+# ifdef    FILELOG
+#  warning undefining FILELOG due to option name conflict
+#  undef   FILELOG
+# endif
+# ifdef    SETTOD
+#  warning undefining SETTOD due to option name conflict
+#  undef   SETTOD
 # endif
 # ifdef    ADJTIME
 #  warning undefining ADJTIME due to option name conflict
 #  undef   ADJTIME
 # endif
+# ifdef    BROADCAST
+#  warning undefining BROADCAST due to option name conflict
+#  undef   BROADCAST
+# endif
+# ifdef    TIMEOUT
+#  warning undefining TIMEOUT due to option name conflict
+#  undef   TIMEOUT
+# endif
+# ifdef    AUTHENTICATION
+#  warning undefining AUTHENTICATION due to option name conflict
+#  undef   AUTHENTICATION
+# endif
+# ifdef    KEYFILE
+#  warning undefining KEYFILE due to option name conflict
+#  undef   KEYFILE
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
-# undef UNPRIVPORT
 # undef NORMALVERBOSE
-# undef EXTRAVERBOSE
-# undef MEGAVERBOSE
-# undef SETTIMEOFDAY
+# undef KOD
+# undef SYSLOG
+# undef FILELOG
+# undef SETTOD
 # undef ADJTIME
+# undef BROADCAST
+# undef TIMEOUT
+# undef AUTHENTICATION
+# undef KEYFILE
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -226,12 +171,18 @@ typedef enum {
 #define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
 #define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
-#define VALUE_OPT_UNPRIVPORT     'u'
-#define VALUE_OPT_NORMALVERBOSE  'v'
-#define VALUE_OPT_EXTRAVERBOSE   'V'
-#define VALUE_OPT_MEGAVERBOSE    'W'
-#define VALUE_OPT_SETTIMEOFDAY   'r'
-#define VALUE_OPT_ADJTIME        'a'
+#define VALUE_OPT_NORMALVERBOSE  'd'
+#define VALUE_OPT_KOD            'K'
+#define VALUE_OPT_SYSLOG         'p'
+#define VALUE_OPT_FILELOG        'l'
+#define VALUE_OPT_SETTOD         's'
+#define VALUE_OPT_ADJTIME        'j'
+#define VALUE_OPT_BROADCAST      'b'
+#define VALUE_OPT_TIMEOUT        't'
+#define OPT_VALUE_TIMEOUT        (DESC(TIMEOUT).optArg.argInt)
+#define VALUE_OPT_AUTHENTICATION 'a'
+#define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
+#define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       'v'

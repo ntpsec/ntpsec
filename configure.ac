@@ -4750,6 +4750,5 @@ AC_CONFIG_FILES(scripts/summary,	[chmod +x scripts/summary])
 AC_CONFIG_FILES(util/Makefile)
 
 AC_CONFIG_SUBDIRS(sntp)
-AC_CONFIG_SUBDIRS(gsoc_sntp)
 
 AC_OUTPUT

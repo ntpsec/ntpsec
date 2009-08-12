@@ -1,8 +1,4 @@
 ChangeLog
-gsoc_sntp/sntp-opts.c
-gsoc_sntp/sntp-opts.h
-gsoc_sntp/sntp-opts.texi
-gsoc_sntp/sntp.1
 ntpd/ntpd-opts.c
 ntpd/ntpd-opts.h
 ntpd/ntpd-opts.texi
