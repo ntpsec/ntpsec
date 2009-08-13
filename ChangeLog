@@ -1,4 +1,5 @@
 * sntp: out with the old, in with the new.
+(4.2.5p200) 2009/08/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1281] Build ntpd on Windows without big SDK download, burn,
   and install by checking in essentially unchanging messages.mc build
   products to avoid requiring mc.exe, which is not included with VC++
