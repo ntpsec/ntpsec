@@ -557,12 +557,23 @@ dump_config(
 	char filename[80];
 	char reply[80];
 
-	snprintf(filename, 80, "ntp_dump%i.conf", time(NULL));
+	FILE *fptr = NULL;
 
-	if(dump_config_dumper(filename) == -1) 
+	if((reqend - reqpt) == 0) {
+		snprintf(filename, 80, "ntp_dump%i.conf", time(NULL));
+	}
+	else {
+		strncpy(filename, reqpt, 80);
+	}
+
+	fptr = fopen(filename, "w+");
+
+	if(dump_all_config_trees(fptr) == -1) 
 		snprintf(reply, 80, "Couldn't dump to file %s", filename);
 	else 
 		snprintf(reply, 80, "Dumped to config file %s", filename);
+
+	fclose(fptr);
 
 	ctl_putdata(reply, strlen(reply), 0);
 	ctl_flushpkt(0);

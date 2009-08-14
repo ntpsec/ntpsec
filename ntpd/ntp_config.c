@@ -428,6 +428,21 @@ free_config_tree(struct config_tree *ptree)
 }
 #endif /* DEBUG */
 
+/* Dump all trees */
+int
+dump_all_config_trees (
+		FILE *df
+		) 
+{
+	struct config_tree *cfg_ptr = cfg_tree_history;
+	int return_value = 0;
+
+	for(; cfg_ptr != NULL; cfg_ptr = cfg_ptr->prior) 
+		return_value |= dump_config_tree(cfg_ptr, df);
+
+	return return_value;
+}
+
 
 /* The config dumper */
 int
@@ -454,7 +469,7 @@ dump_config_tree(
 	void *opts = NULL;
 	char refid[5];
 
-	printf("dump_config_tree(%p):\n", ptree);
+	printf("dump_config_tree(%p)\n", ptree);
 
 	list_ptr = queue_head(ptree->peers);
 	for (; 	list_ptr != NULL;
@@ -473,9 +488,14 @@ dump_config_tree(
 				fudge_ptr = next_node(fudge_ptr)) {
 
 
-				addr_opts = (struct addr_opts_node *) list_ptr;
+				addr_opts = (struct addr_opts_node *) fudge_ptr; 
+				struct address_node *peer_addr = peers->addr;
+				struct address_node *fudge_addr = addr_opts->addr;
 
-				if(!strcmp((peers->addr)->address, (addr_opts->addr)->address)) {
+				char *s1 = peer_addr->address;
+				char *s2 = fudge_addr->address;
+
+				if(!strcmp(s1, s2)) {
 
 				fprintf(df, "fudge %s", addr_opts->addr->address);
 	
@@ -853,7 +873,7 @@ dump_config_tree(
 
 			atrv = (struct attr_val *) list_ptr;
 
-			fprintf(df, "enable");
+			fprintf(df, "enable ");
 
 			switch(atrv->attr) {
 				case T_Autokey: 
@@ -922,7 +942,7 @@ dump_config_tree(
 	list_ptr = queue_head(ptree->disable_opts);
 	if (list_ptr != NULL) {
 
-		fprintf(df, "disable");
+		fprintf(df, "disable ");
 
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
@@ -3475,6 +3495,7 @@ config_remotely(void)
 	yyparse();
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
+	cfgt.source.attr = CONF_SOURCE_NTPQ;
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
@@ -3559,9 +3580,18 @@ getconfig(
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
 			return;
 		}
+		else {
+			cfgt.source.value.s = (char *) emalloc(strlen(alt_config_file));
+			strcpy(cfgt.source.value.s, alt_config_file);
+		}
+
 #else  /* not SYS_WINNT */
 		return;
 #endif /* not SYS_WINNT */
+	}
+	else {
+		cfgt.source.value.s = (char *) emalloc(strlen(config_file));
+		strcpy(cfgt.source.value.s, config_file);
 	}
 
 	/*** BULK OF THE PARSER ***/
@@ -3574,6 +3604,9 @@ getconfig(
 	key_scanner = NULL;
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
+
+	cfgt.source.attr = CONF_SOURCE_FILE;	
+	cfgt.timestamp = time(NULL);
 
 	save_and_apply_config_tree();
 

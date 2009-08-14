@@ -72,8 +72,8 @@ static  void    config_from_file (struct parse *, FILE *);
  * Commands we understand.	Ntpdc imports this.
  */
 struct xcmd opcmds[] = {
-	{ "dumpcfg", dumpcfg, { NO, NO, NO, NO },
-		{ "", "", "", ""}, 
+	{ "dumpcfg", dumpcfg, { NTP_STR, NO, NO, NO },
+		{ "dumpfile", "", "", ""}, 
 		"dump ntp server configuration"},
 	{ "associations", associations, {  NO, NO, NO, NO },
 	  { "", "", "", "" },
@@ -1183,17 +1183,16 @@ dumpcfg(
 	u_short rstatus;
 	register int a = 0;
 
-	printf("%s\n", pcmd->keyword);
-
-	for(; a<pcmd->nargs; a++) 
-		printf("%s\n", pcmd->argval[a]);
-
-
-	/* For now let's just send a "signal" and have it realize the dump op */
-	res = doquery(CTL_OP_DUMPCONFIG, 0, 0, 0, (char *)0, &rstatus,
-			&dsize, &datap);
-
-	printf("ntpq: res = %i %s\n", res, datap);
+	/* Is there a way to make an argument optional? */
+	if(pcmd->nargs > 0) {
+		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, strlen(pcmd->argval[0].string), 
+			pcmd->argval[0].string, &rstatus, &dsize, &datap);
+	}
+	else {
+		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, 0, (char *) 0, 
+			&rstatus, &dsize, &datap);
+		printf("No filename supplied\n");
+	}
 }
 
 
