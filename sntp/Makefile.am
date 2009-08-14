@@ -6,15 +6,12 @@ ACLOCAL_AMFLAGS= -I ../m4 -I libopts/m4
 AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 
-NULL=
-
-###
-#bindir=	${exec_prefix}/${BINSUBDIR}
-#bin_PROGRAMS=	sntp
-###
-noinst_PROGRAMS=	sntp
-###
 run_ag=         cd $(srcdir) && autogen -L ../include --writable
+
+bindir=	${exec_prefix}/${BINSUBDIR}
+bin_PROGRAMS=	sntp
+
+NULL=
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -41,6 +38,7 @@ sntp_SOURCES =		\
 	utilities.h	\
 	$(NULL)
 
+# it's in EXTRA_DIST
 #dist_man_MANS=	sntp.1
 
 EXTRA_DIST=	bincheck.mf	\
@@ -51,9 +49,7 @@ OLD_EXTRA_DIST=		\
 		autogen-version.def version.def version.m4
 BUILT_SOURCES=	check-autogen-version.def check-version.def check-version.m4 \
 		sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
-#man_MANS=	sntp.1
-noinst_MANS=	sntp.1
-
+man_MANS=	sntp.1
 
 FRC:
 check-autogen-version.def: FRC
