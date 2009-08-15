@@ -45,6 +45,11 @@
 /* Limits */
 #define MAXLINE 1024
 
+/* Configuration sources */
+
+#define CONF_SOURCE_FILE		0
+#define CONF_SOURCE_NTPQ		1
+
 
 /* Structure for storing an attribute-value pair  */
 struct attr_val {
@@ -130,6 +135,9 @@ enum broadcastclienttype {
 struct config_tree {
     struct config_tree *prior;
 
+    struct attr_val source;
+    time_t timestamp;
+
     queue *peers;
     queue *unpeers;
 
@@ -201,6 +209,7 @@ extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(void);
 
 int dump_config_tree(struct config_tree *ptree, FILE *df);
+int dump_all_config_trees(FILE *df);
 
 
 #endif
