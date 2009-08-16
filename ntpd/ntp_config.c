@@ -17,6 +17,7 @@
 # include <netinfo/ni.h>
 #endif
 
+#include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
@@ -201,7 +202,6 @@ extern unsigned int qos;				/* QoS setting */
 /* FUNCTION PROTOTYPES */
 
 static void call_proto_config_from_list(queue *flag_list, int able_flag);
-static void init_auth_node(struct config_tree *);
 static void init_syntax_tree(struct config_tree *);
 #ifdef DEBUG
 static void free_auth_node(struct config_tree *);
@@ -294,13 +294,6 @@ call_proto_config_from_list(
 	}
 }
 
-static void
-init_auth_node(
-	struct config_tree *ptree
-	)
-{
-	ptree->auth.ntp_signd_socket = default_ntp_signd_socket;
-}
 
 #ifdef DEBUG
 static void
@@ -320,12 +313,10 @@ free_auth_node(
 		ptree->auth.keysdir = NULL;
 	}
 
-	if (ptree->auth.ntp_signd_socket != default_ntp_signd_socket) {
+	if (ptree->auth.ntp_signd_socket) {
 		free(ptree->auth.ntp_signd_socket);
-		ptree->auth.ntp_signd_socket = default_ntp_signd_socket;
+		ptree->auth.ntp_signd_socket = NULL;
 	}
-
-	DESTROY_QUEUE(ptree->auth.trusted_key_list);
 }
 #endif /* DEBUG */
 
@@ -357,8 +348,6 @@ init_syntax_tree(
 	ptree->trap = create_queue();
 	ptree->vars = create_queue();
 
-	init_auth_node(ptree);
-
 #ifdef DEBUG
 	atexit(free_all_config_trees);
 #endif
@@ -370,14 +359,14 @@ void
 free_all_config_trees(void)
 {
 	struct config_tree *ptree;
-	struct config_tree *pprior;
+	struct config_tree *pnext;
 
 	ptree = cfg_tree_history;
 
 	while (ptree != NULL) {
-		pprior = ptree->prior;
+		pnext = ptree->link;
 		free_config_tree(ptree);
-		ptree = pprior;
+		ptree = pnext;
 	}
 }
 
@@ -385,6 +374,9 @@ free_all_config_trees(void)
 static void
 free_config_tree(struct config_tree *ptree)
 {
+	if (ptree->source.value.s != NULL)
+		free(ptree->source.value.s);
+
 	DESTROY_QUEUE(ptree->peers);
 	DESTROY_QUEUE(ptree->unpeers);
 	DESTROY_QUEUE(ptree->orphan_cmds);
@@ -426,7 +418,7 @@ dump_all_config_trees (
 	struct config_tree *cfg_ptr = cfg_tree_history;
 	int return_value = 0;
 
-	for(; cfg_ptr != NULL; cfg_ptr = cfg_ptr->prior) 
+	for(; cfg_ptr != NULL; cfg_ptr = cfg_ptr->link) 
 		return_value |= dump_config_tree(cfg_ptr, df);
 
 	return return_value;
@@ -455,6 +447,7 @@ dump_config_tree(
 	char *s1;
 	char *s2;
 	int *integer = NULL;
+	int *key_val;
 	void *fudge_ptr;
 	void *list_ptr = NULL;
 	void *options = NULL;
@@ -464,6 +457,27 @@ dump_config_tree(
 	char refid[5];
 
 	printf("dump_config_tree(%p)\n", ptree);
+
+	if (NULL != ptree->auth.keysdir)
+		fprintf(df, "keysdir \"%s\"\n", ptree->auth.keysdir);
+
+	if (NULL != ptree->auth.keys)
+		fprintf(df, "keys \"%s\"\n", ptree->auth.keys);
+
+	key_val = queue_head(ptree->auth.trusted_key_list);
+	if (key_val != NULL) {
+		fprintf(df, "trustedkey %d", *key_val);
+		key_val = next_node(key_val);
+		while (key_val != NULL)
+			fprintf(df, " %d", *key_val);
+		fprintf(df, "\n");
+	}
+
+	if (ptree->auth.control_key)
+		fprintf(df, "controlkey %d\n", ptree->auth.control_key);
+
+	if (ptree->auth.request_key)
+		fprintf(df, "requestkey %d\n", ptree->auth.request_key);
 
 	if (ptree->broadcastclient)
 		fprintf(df, "broadcastclient\n");
@@ -476,34 +490,36 @@ dump_config_tree(
 		addr = peers->addr;
 		
 		switch (peers->host_mode) {
+
 		default:
 			fprintf(df, "# dump error:\n"
 				"# unknown peer token %d for:\n"
 				"peer %s", peers->host_mode,
-				peers->addr->address);
+				addr->address);
 			break;
 
 		case T_Peer:
-			fprintf(df, "peer %s", peers->addr->address);
+			fprintf(df, "peer %s", addr->address);
 			break;
 
 		case T_Server:
-			fprintf(df, "server %s", peers->addr->address);
+			fprintf(df, "server %s", addr->address);
 			break;
 
 		case T_Broadcast:
-			fprintf(df, "broadcast %s",
-				peers->addr->address);
+			fprintf(df, "broadcast %s", addr->address);
 			break;
 
 		case T_Manycastclient:
-			fprintf(df, "manycastclient %s",
-				peers->addr->address);
+			fprintf(df, "manycastclient %s", addr->address);
 			break;
 		}
 
-		atrv = queue_head(peers->options);
-		while (atrv != NULL) {
+		
+		for (atrv = queue_head(peers->options); 
+		     atrv != NULL;
+		     atrv = next_node(atrv)) {
+
 			switch (atrv->attr) {
 
 			default:
@@ -597,7 +613,10 @@ dump_config_tree(
 				fprintf(df, " version %d", atrv->value.i);
 				break;
 			}
+
 		}
+
+		fprintf(df, "\n");
 
 		fudge_ptr = queue_head(ptree->fudge);
 		if (fudge_ptr != NULL) {
@@ -687,6 +706,34 @@ dump_config_tree(
 		}
 	}
 	
+	list_ptr = queue_head(ptree->manycastserver);
+	if (list_ptr != NULL) {
+		addr = (struct address_node *) list_ptr;
+		fprintf(df, "manycastserver %s", addr->address);
+		for (list_ptr = next_node(list_ptr); 	
+		     list_ptr != NULL;
+		     list_ptr = next_node(list_ptr)) {
+
+			addr = (struct address_node *) list_ptr;
+			fprintf(df, " %s", addr->address);
+		}
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->multicastclient);
+	if (list_ptr != NULL) {
+		addr = (struct address_node *) list_ptr;
+		fprintf(df, "multicastclient %s", addr->address);
+		for (list_ptr = next_node(list_ptr); 	
+		     list_ptr != NULL;
+		     list_ptr = next_node(list_ptr)) {
+
+			addr = (struct address_node *) list_ptr;
+			fprintf(df, " %s", addr->address);
+		}
+		fprintf(df, "\n");
+	}
+
 	list_ptr = queue_head(ptree->unpeers);
 	for (; 	list_ptr != NULL;
 		list_ptr = next_node(list_ptr)) {
@@ -707,88 +754,60 @@ dump_config_tree(
 			atrv = (struct attr_val *) list_ptr;
 
 			switch (atrv->attr) {
+
 			default:
 				fprintf(df, "\n# dump error:\n"
 					"# unknown tos token %d\n"
 					"tos", atrv->attr);
 				break;
 
-				case T_Ceiling:
-				fprintf(df, " ceiling %i", (int) atrv->value.d);
+			case PROTO_CEILING:
+				fprintf(df, " ceiling %d", (int) atrv->value.d);
 				break;
 
-				case T_Floor:
-				fprintf(df, " floor %i", (int) atrv->value.d);
+			case PROTO_FLOOR:
+				fprintf(df, " floor %d", (int) atrv->value.d);
 				break;
 
-				case T_Cohort:
-				fprintf(df, " cohort ");
-
-				if(atrv->value.d) 
-					fprintf(df, "1");
-				else
-					fprintf(df, "0");
+			case PROTO_COHORT:
+				fprintf(df, " cohort %d", !!(atrv->value.d));
 				break;
 
-				case T_Orphan:
-				fprintf(df, " orphan %i", (int) atrv->value.d);
+			case PROTO_ORPHAN:
+				fprintf(df, " orphan %d", (int) atrv->value.d);
 				break;
 
-				case T_Mindist: 
+			case PROTO_MINDISP:
 				fprintf(df, " mindist %f", atrv->value.d);
 				break;
 				
-				case T_Maxdist:
+			case PROTO_MAXDIST:
 				fprintf(df, " maxdist %f", atrv->value.d);
 				break;
 
-				case T_Minclock:
+			case PROTO_MINCLOCK:
 				fprintf(df, " minclock %f", atrv->value.d);
 				break;
 
-				case T_Maxclock:
+			case PROTO_MAXCLOCK:
 				fprintf(df, " maxclock %f", atrv->value.d);
 				break;
 
-				case T_Minsane:
-				fprintf(df, " minsane %i", (int) atrv->value.d);
+			case PROTO_MINSANE:
+				fprintf(df, " minsane %d", (int) atrv->value.d);
 				break;
 
-				case T_Beacon:
-				fprintf(df, " beacon %i", (int) atrv->value.d);
+			case PROTO_BEACON:
+				fprintf(df, " beacon %d", (int) atrv->value.d);
 				break;
 
-				case T_Maxhop:
-				fprintf(df, " maxhop %i", (int) atrv->value.d);
+			case PROTO_MAXHOP:
+				fprintf(df, " maxhop %d", (int) atrv->value.d);
 				break;
 			}
 		}
 
 		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->manycastserver);
-	if (list_ptr != NULL) {
-
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			addr = (struct address_node *) list_ptr;
-
-			fprintf(df, "manycastserver %s\n", addr->address);
-		}
-	}
-
-	list_ptr = queue_head(ptree->multicastclient);
-	if (list_ptr != NULL) {
-
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			addr = (struct address_node *) list_ptr;
-
-			fprintf(df, "multicastclient %s\n", addr->address);
-		}
 	}
 
 	list_ptr = queue_head(ptree->stats_list);
@@ -946,7 +965,12 @@ dump_config_tree(
 
 			rest_node = (struct restrict_node *) list_ptr;
 
-			fprintf(df, "restrict %s", rest_node->addr->address);
+			if (NULL == rest_node->addr)
+				s1 = "default";
+			else
+				s1 = rest_node->addr->address;
+
+			fprintf(df, "restrict %s", s1);
 
 			if (rest_node->mask != NULL)
 				fprintf(df, " %s", rest_node->mask->address);
@@ -957,69 +981,66 @@ dump_config_tree(
 				int *curr_flag = flags;
 
 				switch (*curr_flag) {
-				default:
-					fprintf(df, "\n# dump error:\n"
-						"# unknown restrict token %d\n"
-						"restrict %s", *curr_flag,
-						rest_node->addr->address);
-					if (rest_node->mask != NULL)
-						fprintf(df, " %s", rest_node->mask->address);
-					break;
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown restrict token %d\n"
+							"restrict %s",
+							*curr_flag,
+							s1);
+						if (rest_node->mask != NULL)
+							fprintf(df, " %s", rest_node->mask->address);
+						break;
 
-					case T_Flake:
+					case RES_TIMEOUT:	
 						fprintf(df, " flake");
 						break;
 
-					case T_Ignore:
+					case RES_IGNORE:
 						fprintf(df, " ignore");
 						break;
 
-					case T_Limited:
+					case RES_LIMITED:
 						fprintf(df, " limited");
 						break;
 
-					case T_Kod:
+					case RES_KOD:
 						fprintf(df, " kod");
 						break;
 
-					case T_Lowpriotrap:
+					case RES_LPTRAP:
 						fprintf(df, " lowpriotrap");
 						break;
 
-					case T_Nomodify:
+					case RES_NOMODIFY:
 						fprintf(df, " nomodify");
 						break;
 
-					case T_Noquery:
+					case RES_NOQUERY:
 						fprintf(df, " noquery");
 						break;
 
-					case T_Nopeer:
+					case RES_NOPEER:
 						fprintf(df, " nopeer");
 						break;
 
-					case T_Noserve:
+					case RES_DONTSERVE:
 						fprintf(df, " noserve");
 						break;
 
-					case T_Notrap:
+					case RES_NOTRAP:
 						fprintf(df, " notrap");
 						break;
 
-					case T_Notrust:
+					case RES_DONTTRUST:
 						fprintf(df, " notrust");
 						break;
 
-					case T_Ntpport:
+					case RESM_NTPONLY:
 						fprintf(df, " ntpport");
 						break;
 
-					case T_Version:
+					case RES_VERSION:
 						fprintf(df, " version");
-						break;
-
-					case T_Default:
-						fprintf(df, " default");
 						break;
 				}
 			}
@@ -1207,36 +1228,36 @@ dump_config_tree(
 					"tinker", atrv->attr);
 				break;
 
-				case T_Step:
+				case LOOP_MAX:
 				     fprintf(df, " step");
 				     break;
 
-				case T_Panic:
+				case LOOP_PANIC:
 				     fprintf(df, " panic");
 				     break;
 
-				case T_Dispersion:
+				case LOOP_PHI:
 				     fprintf(df, " dispersion");
 				     break;
 
-				case T_Stepout: 
+				case LOOP_MINSTEP:
 				     fprintf(df, " stepout");
 				     break;
 
-				case T_Allan: 
+				case LOOP_ALLAN:
 				     fprintf(df, " allan");
 				     break;
 
-				case T_Huffpuff: 
+				case LOOP_HUFFPUFF:
 				     fprintf(df, " huffpuff");
 				     break;
 
-				case T_Freq: 
+				case LOOP_FREQ:
 				     fprintf(df, " freq");
 				     break;
 			}
 
-			fprintf(df, " %f", atrv->value.d);
+			fprintf(df, " %g", atrv->value.d);
 		}
 
 		fprintf(df, "\n");
@@ -1563,7 +1584,7 @@ create_address_node(
 		else 
 			my_node->type = default_ai_family;
 
-return my_node;
+	return my_node;
 }
 
 
@@ -1591,9 +1612,9 @@ create_peer_node(
 	struct attr_val *my_val;
 	int errflag = 0;
 
-	my_node = get_node(sizeof *my_node);
+	my_node = get_node(sizeof(*my_node));
 
-	/* Initialze node values to default */
+	/* Initialize node values to default */
 	my_node->minpoll = 0;
 	my_node->maxpoll = 0;
 	my_node->ttl = 0;
@@ -2255,7 +2276,7 @@ config_auth(
 
 	/* Requested Key Command */
 	if (ptree->auth.request_key) {
-		DPRINTF(4, ("set info_auth_key to %08lx\n",
+		DPRINTF(4, ("set info_auth_keyid to %08lx\n",
 			    (u_long) ptree->auth.request_key));
 		info_auth_keyid = (keyid_t)ptree->auth.request_key;
 	}
@@ -3852,18 +3873,18 @@ getconfig(
 void
 save_and_apply_config_tree(void)
 {
-	struct config_tree *prior;
+	struct config_tree *ptree;
 
 	/*
 	 * Keep all the configuration trees applied since startup in
 	 * a list that can be used to dump the configuration back to
 	 * a text file.
 	 */
-	prior = emalloc(sizeof(*cfg_tree_history));
-	memcpy(prior, &cfgt, sizeof(*cfg_tree_history));
+	ptree = emalloc(sizeof(*ptree));
+	memcpy(ptree, &cfgt, sizeof(*ptree));
 	memset(&cfgt, 0, sizeof(cfgt));
 	
-	LINK_TAIL_SLIST(cfg_tree_history, prior, prior, struct config_tree);
+	LINK_TAIL_SLIST(cfg_tree_history, ptree, link, struct config_tree);
 
 
 	/* The actual configuration done depends on whether we are configuring the
@@ -3872,9 +3893,9 @@ save_and_apply_config_tree(void)
 	 */
 
 #ifndef SIM
-	config_ntpd(cfg_tree_history);
+	config_ntpd(ptree);
 #else
-	config_ntpdsim(cfg_tree_history);
+	config_ntpdsim(ptree);
 #endif
 }
 

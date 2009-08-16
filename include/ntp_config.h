@@ -1,5 +1,5 @@
-#ifndef __NTP_CONFIG_H__
-#define __NTP_CONFIG_H__
+#ifndef NTP_CONFIG_H
+#define NTP_CONFIG_H
 
 #include "ntp_data_structures.h"
 #include "ntpsim.h"
@@ -130,7 +130,7 @@ struct sim_node {
 
 /* The syntax tree */
 struct config_tree {
-    struct config_tree *prior;
+    struct config_tree *link;
 
     struct attr_val source;
     time_t timestamp;
@@ -209,4 +209,4 @@ int dump_config_tree(struct config_tree *ptree, FILE *df);
 int dump_all_config_trees(FILE *df);
 
 
-#endif
+#endif	/* !defined(NTP_CONFIG_H) */

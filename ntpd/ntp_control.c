@@ -557,6 +557,7 @@ dump_config(
 	char fullpath[256];
 	char filename[80];
 	char reply[80];
+	int fd;
 	FILE *fptr;
 
 	if (reqend - reqpt) {
@@ -577,9 +578,11 @@ dump_config(
 		 filename);
 #endif
 
-	fptr = fdopen(
-		open(fullpath, O_CREAT | O_TRUNC | O_EXCL | O_WRONLY, 0600), 
-		"w");
+	fd = open(fullpath, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
+	if (-1 == fd)
+		fptr = NULL;
+	else
+		fptr = fdopen(fd, "w");
 
 	if (NULL == fptr || -1 == dump_all_config_trees(fptr))
 		snprintf(reply, sizeof(reply), "Couldn't dump to file %s",
