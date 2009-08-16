@@ -125,6 +125,9 @@ void	uninit_util(void);
 void
 uninit_util(void)
 {
+#if defined(_MSC_VER) && defined (_DEBUG)
+	_CrtCheckMemory();
+#endif
 	if (stats_drift_file) {
 		free(stats_drift_file);
 		free(stats_temp_file);
@@ -147,6 +150,10 @@ uninit_util(void)
 #ifdef DEBUG_TIMING
 	filegen_unregister("timingstats");
 #endif /* DEBUG_TIMING */
+
+#if defined(_MSC_VER) && defined (_DEBUG)
+	_CrtCheckMemory();
+#endif
 }
 #endif /* DEBUG */
 

@@ -366,17 +366,31 @@ free_io_completion_port_mem(
 {
 	IoCompletionInfo *	pci;
 
+#if defined(_MSC_VER) && defined (_DEBUG)
+	_CrtCheckMemory();
+#endif
 	LOCK_COMPL();
 	while ((pci = compl_info_list) != NULL) {
 
+#if 0	/* sockaddr with received-from address in recvbuf */
+	/* is sometimes modified by system after we free it  */
+	/* triggering heap corruption warning -- find a */
+	/* better way to free it after I/O is surely done */
 		/* this handles both xmit and recv buffs */
-		if (pci->recv_buf != NULL)
+		if (pci->recv_buf != NULL) {
+			DPRINTF(1, ("freeing xmit/recv buff %p\n", pci->recv_buf));
 			free(pci->recv_buf);
+		}
+#endif
 
 		FreeHeap(pci, "free_io_completion_port_mem");
 		/* FreeHeap() removed this item from compl_info_list */
 	}
 	UNLOCK_COMPL()
+
+#if defined(_MSC_VER) && defined (_DEBUG)
+	_CrtCheckMemory();
+#endif
 }
 #endif	/* DEBUG */
 

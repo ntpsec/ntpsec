@@ -374,6 +374,10 @@ free_all_config_trees(void)
 static void
 free_config_tree(struct config_tree *ptree)
 {
+#if defined(_MSC_VER) && defined (_DEBUG)
+	_CrtCheckMemory();
+#endif
+
 	if (ptree->source.value.s != NULL)
 		free(ptree->source.value.s);
 
@@ -406,6 +410,10 @@ free_config_tree(struct config_tree *ptree)
 	free_auth_node(ptree);
 
 	free(ptree);
+
+#if defined(_MSC_VER) && defined (_DEBUG)
+	_CrtCheckMemory();
+#endif
 }
 #endif /* DEBUG */
 
@@ -494,27 +502,45 @@ dump_config_tree(
 		default:
 			fprintf(df, "# dump error:\n"
 				"# unknown peer token %d for:\n"
-				"peer %s", peers->host_mode,
-				addr->address);
+				"peer ", peers->host_mode);
 			break;
 
 		case T_Peer:
-			fprintf(df, "peer %s", addr->address);
+			fprintf(df, "peer");
 			break;
 
 		case T_Server:
-			fprintf(df, "server %s", addr->address);
+			fprintf(df, "server");
 			break;
 
 		case T_Broadcast:
-			fprintf(df, "broadcast %s", addr->address);
+			fprintf(df, "broadcast");
 			break;
 
 		case T_Manycastclient:
-			fprintf(df, "manycastclient %s", addr->address);
+			fprintf(df, "manycastclient");
 			break;
 		}
 
+		if (addr->type != AF_UNSPEC) {
+			switch (addr->type) {
+
+			default:
+				fprintf(df, "# dump error:\n"
+					"# unknown peer family %d for:\n"
+					"peer", addr->type);
+				break;
+
+			case AF_INET:
+				fprintf(df, " -4");
+				break;
+
+			case AF_INET6:
+				fprintf(df, " -6");
+				break;
+			}
+		}
+		fprintf(df, " %s", addr->address);
 		
 		for (atrv = queue_head(peers->options); 
 		     atrv != NULL;
@@ -586,7 +612,7 @@ dump_config_tree(
 				break;
 
 			case T_Bias:
-				fprintf(df, " bias %f", atrv->value.d);
+				fprintf(df, " bias %g", atrv->value.d);
 				break;
 
 			case T_Key:
@@ -650,11 +676,11 @@ dump_config_tree(
 							break;
 
 							case CLK_HAVETIME1:
-							fprintf(df, " time1 %f", atrv->value.d);
+							fprintf(df, " time1 %g", atrv->value.d);
 							break;
 					
 							case CLK_HAVETIME2:
-							fprintf(df, " time2 %f", atrv->value.d);
+							fprintf(df, " time2 %g", atrv->value.d);
 							break;
 			
 							case CLK_HAVEVAL1:
@@ -774,23 +800,23 @@ dump_config_tree(
 				break;
 
 			case PROTO_ORPHAN:
-				fprintf(df, " orphan %d", (int) atrv->value.d);
+				fprintf(df, " orphan %d", (int)atrv->value.d);
 				break;
 
 			case PROTO_MINDISP:
-				fprintf(df, " mindist %f", atrv->value.d);
+				fprintf(df, " mindist %g", atrv->value.d);
 				break;
 				
 			case PROTO_MAXDIST:
-				fprintf(df, " maxdist %f", atrv->value.d);
+				fprintf(df, " maxdist %g", atrv->value.d);
 				break;
 
 			case PROTO_MINCLOCK:
-				fprintf(df, " minclock %f", atrv->value.d);
+				fprintf(df, " minclock %d", (int)atrv->value.d);
 				break;
 
 			case PROTO_MAXCLOCK:
-				fprintf(df, " maxclock %f", atrv->value.d);
+				fprintf(df, " maxclock %d", (int)atrv->value.d);
 				break;
 
 			case PROTO_MINSANE:
@@ -1060,74 +1086,43 @@ dump_config_tree(
 
 			fprintf(df, "enable");
 
-			switch (atrv->attr) {
+			switch (atrv->value.i) {
 			default:
 				fprintf(df, "\n# dump error:\n"
 					"# unknown enable token %d\n"
-					"enable", atrv->attr);
+					"enable", atrv->value.i);
 				break;
 
-				case T_Autokey: 
-				fprintf(df, " autokey");	
+				case PROTO_AUTHENTICATE: 
+				fprintf(df, " auth");	
 				break;
 
-				case T_Bias: 
-				fprintf(df, " bias");
+				case PROTO_BROADCLIENT: 
+				fprintf(df, " bclient");
 				break;
 
-				case T_Burst: 
-				fprintf(df, " burst");
+				case PROTO_CAL: 
+				fprintf(df, " calibrate");
 				break;
 
-				case T_Iburst: 
-				fprintf(df, " iburst");
+				case PROTO_KERNEL: 
+				fprintf(df, " kernel");
 				break;
 
-				case T_Key: 
-				fprintf(df, " key");
+				case PROTO_MONITOR: 
+				fprintf(df, " monitor");
 				break;
 
-				case T_Maxpoll: 
-				fprintf(df, " maxpoll");
+				case PROTO_NTP: 
+				fprintf(df, " ntp");
 				break;
 
-				case T_Minpoll: 
-				fprintf(df, " minpoll");
-				break;
-
-				case T_Mode: 
-				fprintf(df, " mode");
-				break;
-
-				case T_Noselect: 
-				fprintf(df, " noselect");
-				break;
-
-				case T_Preempt: 
-				fprintf(df, " preempt");
-				break;
-
-				case T_True: 
-				fprintf(df, " true");
-				break;
-
-				case T_Prefer: 
-				fprintf(df, " prefer");
-				break;
-
-				case T_Ttl: 
-				fprintf(df, " ttl");
-				break;
-
-				case T_Version: 
-				fprintf(df, " version");
-				break;
-
-				case T_Xleave: 
-				fprintf(df, " xleave");
+				case PROTO_FILEGEN: 
+				fprintf(df, " stats");
 				break;
 			}
 		}
+		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->disable_opts);
@@ -1140,75 +1135,43 @@ dump_config_tree(
 
 			atrv = (struct attr_val *) list_ptr;
 
-			switch (atrv->attr) {
+			switch (atrv->value.i) {
 			default:
 				fprintf(df, "\n# dump error:\n"
 					"# unknown disable token %d\n"
-					"disable", atrv->attr);
+					"disable", atrv->value.i);
 				break;
 
-				case T_Autokey: 
-				fprintf(df, " autokey");	
+				case PROTO_AUTHENTICATE: 
+				fprintf(df, " auth");	
 				break;
 
-				case T_Bias: 
-				fprintf(df, " bias");
+				case PROTO_BROADCLIENT: 
+				fprintf(df, " bclient");
 				break;
 
-				case T_Burst: 
-				fprintf(df, " burst");
+				case PROTO_CAL: 
+				fprintf(df, " calibrate");
 				break;
 
-				case T_Iburst: 
-				fprintf(df, " iburst");
+				case PROTO_KERNEL: 
+				fprintf(df, " kernel");
 				break;
 
-				case T_Key: 
-				fprintf(df, " key");
+				case PROTO_MONITOR: 
+				fprintf(df, " monitor");
 				break;
 
-				case T_Maxpoll: 
-				fprintf(df, " maxpoll");
+				case PROTO_NTP: 
+				fprintf(df, " ntp");
 				break;
 
-				case T_Minpoll: 
-				fprintf(df, " minpoll");
-				break;
-
-				case T_Mode: 
-				fprintf(df, " mode");
-				break;
-
-				case T_Noselect: 
-				fprintf(df, " noselect");
-				break;
-
-				case T_Preempt: 
-				fprintf(df, " preempt");
-				break;
-
-				case T_True: 
-				fprintf(df, " true");
-				break;
-
-				case T_Prefer: 
-				fprintf(df, " prefer");
-				break;
-
-				case T_Ttl: 
-				fprintf(df, " ttl");
-				break;
-
-				case T_Version: 
-				fprintf(df, " version");
-				break;
-
-				case T_Xleave: 
-				fprintf(df, " xleave");
+				case PROTO_FILEGEN: 
+				fprintf(df, " stats");
 				break;
 			}
 		}
-
+		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->tinker);
@@ -1408,7 +1371,7 @@ dump_config_tree(
 				break;
 
 				case T_Broadcastdelay:
-				fprintf(df, "broadcastdelay %f\n", atrv->value.d);
+				fprintf(df, "broadcastdelay %g\n", atrv->value.d);
 				break;
 				
 				case T_Calldelay:
@@ -1416,7 +1379,7 @@ dump_config_tree(
 				break;
 
 				case T_Tick:
-				fprintf(df, "tick %f\n", atrv->value.d);
+				fprintf(df, "tick %g\n", atrv->value.d);
 				break;
 
 				case T_Driftfile:
@@ -1424,7 +1387,7 @@ dump_config_tree(
 				break;
 			
 		    		case T_WanderThreshold:
-				fprintf(df, "wander_threshold %f\n", atrv->value.d);
+				fprintf(df, "wander_threshold %g\n", atrv->value.d);
 				break;
 	
 		    		case T_Leapfile:
