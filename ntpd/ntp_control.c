@@ -554,7 +554,7 @@ dump_config(
 		)
 {
 	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */
-	char fullpath[MAX_PATH + 1];
+	char fullpath[256];
 	char filename[80];
 	char reply[80];
 	FILE *fptr;

@@ -1,3 +1,4 @@
+* Add ntpq -c dumpcfg, Google Summer of Code project of Max Kuehn
 (4.2.5p202) 2009/08/14 Released by Harlan Stenn <stenn@ntp.org>
 * install the binary and man page for sntp.
 (4.2.5p201) 2009/08/13 Released by Harlan Stenn <stenn@ntp.org>
