@@ -524,13 +524,13 @@ dump_config_tree(
 					break;
 
 				case T_Integer:
-					switch (atrv->value) {
+					switch (atrv->value.i) {
 
 					default:
 						fprintf(df, "\n# dump error:\n"
 							"# unknown peer flag 0x%x\n"
 							"# remaining options:",
-							(unsigned)atrv->value);
+							(unsigned)atrv->value.i);
 						break;
 
 					case FLAG_SKEY:
