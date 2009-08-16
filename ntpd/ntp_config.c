@@ -210,7 +210,7 @@ static void free_config_tree(struct config_tree *ptree);
 #endif
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
-static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
+static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
 static void save_and_apply_config_tree(void);
 void getconfig(int argc,char *argv[]);
@@ -2034,7 +2034,7 @@ config_other_modes(
 	if (addr_node != NULL) {
 		do {
 			memset((char *)&addr_sock, 0, sizeof(addr_sock));
-			addr_sock.ss_family = (u_short)addr_node->type;
+			AF(&addr_sock) = (u_short)addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
@@ -2049,7 +2049,7 @@ config_other_modes(
 	if (addr_node != NULL) {
 		do {
 			memset((char *)&addr_sock, 0, sizeof(addr_sock));
-			addr_sock.ss_family = (u_short)addr_node->type;
+			AF(&addr_sock) = (u_short)addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
@@ -3739,7 +3739,7 @@ save_and_apply_config_tree(void)
 	memcpy(prior, &cfgt, sizeof(*cfg_tree_history));
 	memset(&cfgt, 0, sizeof(cfgt));
 	
-	LINK_TAIL_SLIST_COPY(cfg_tree_history, prior, prior, struct config_tree);
+	LINK_TAIL_SLIST(cfg_tree_history, prior, prior, struct config_tree);
 
 
 	/* The actual configuration done depends on whether we are configuring the
