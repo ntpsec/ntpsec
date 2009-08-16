@@ -1181,13 +1181,11 @@ dumpcfg(
 	int res;
 	int dsize;
 	u_short rstatus;
-	register int a = 0;
 
 	/* Is there a way to make an argument optional? */
-	if(pcmd->nargs > 0) {
+	if(pcmd->nargs > 0)
 		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, strlen(pcmd->argval[0].string), 
 			pcmd->argval[0].string, &rstatus, &dsize, &datap);
-	}
 	else {
 		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, 0, (char *) 0, 
 			&rstatus, &dsize, &datap);

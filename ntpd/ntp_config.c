@@ -455,13 +455,18 @@ dump_config_tree(
 	struct unpeer_node *unpeers = NULL;
 	struct attr_val *atrv = NULL;
 	struct address_node *addr = NULL;
+	struct address_node *peer_addr;
+	struct address_node *fudge_addr;
 	struct filegen_node *fgen_node = NULL;
 	struct restrict_node *rest_node = NULL;
 	struct addr_opts_node *addr_opts = NULL;
 	struct setvar_node *setv_node = NULL;
 
 	char **string = NULL;
+	char *s1;
+	char *s2;
 	int *integer = NULL;
+	void *fudge_ptr;
 	void *list_ptr = NULL;
 	void *options = NULL;
 	void *opt_ptr = NULL;
@@ -481,7 +486,7 @@ dump_config_tree(
 		/* Add other attributes to output of struct peer_node */
 		fprintf(df, "peer %s\n", (peers->addr)->address);
 		
-		void *fudge_ptr = queue_head(ptree->fudge);
+		fudge_ptr = queue_head(ptree->fudge);
 		if (fudge_ptr != NULL) {
 
 			for(; 	fudge_ptr != NULL;
@@ -489,75 +494,82 @@ dump_config_tree(
 
 
 				addr_opts = (struct addr_opts_node *) fudge_ptr; 
-				struct address_node *peer_addr = peers->addr;
-				struct address_node *fudge_addr = addr_opts->addr;
+				peer_addr = peers->addr;
+				fudge_addr = addr_opts->addr;
 
-				char *s1 = peer_addr->address;
-				char *s2 = fudge_addr->address;
+				s1 = peer_addr->address;
+				s2 = fudge_addr->address;
 
-				if(!strcmp(s1, s2)) {
+				if (!strcmp(s1, s2)) {
 
-				fprintf(df, "fudge %s", addr_opts->addr->address);
-	
-				opts = queue_head(addr_opts->options);
-
-				for(; opts != NULL; opts = next_node(opts)) {
-					atrv = (struct attr_val *) opts; 
-				
-					switch(atrv->attr) {
-						case CLK_HAVETIME1:
-						fprintf(df, " time1 %f", atrv->value.d);
-						break;
-				
-						case CLK_HAVETIME2:
-						fprintf(df, " time2 %f", atrv->value.d);
-						break;
+					fprintf(df, "fudge %s", addr_opts->addr->address);
 		
-						case CLK_HAVEVAL1:
-						fprintf(df, " stratum %i", atrv->value.i);
-						break;
+					opts = queue_head(addr_opts->options);
 
-						case CLK_HAVEVAL2:
-						memset(refid, 0, sizeof(refid));
-						memcpy(refid, atrv->value.s,
-						    min(strlen(atrv->value.s), 4));
+					for(; opts != NULL; opts = next_node(opts)) {
+						atrv = (struct attr_val *) opts; 
 					
-						fprintf(df, " refid %s", refid);
-						break;
+						switch (atrv->attr) {
+						default:
+							fprintf(df, "\n# dump error:\n"
+								"# unknown fudge CLK_ value %d\n"
+								"fudge %s", atrv->attr,
+								addr_opts->addr->address);
+							break;
 
-						case CLK_HAVEFLAG1:
-						if (atrv->value.i)
-							fprintf(df, " flag1 1");
-						else 
-							fprintf(df, " flag1 0");
-						break;
-			    
-						case CLK_HAVEFLAG2:
-						if (atrv->value.i)
-							fprintf(df, " flag2 1");
-						else 
-							fprintf(df, " flag2 0");
-						break;
-			    
-						case CLK_HAVEFLAG3:
-						if (atrv->value.i)
-							fprintf(df, " flag3 1");
-						else 
-							fprintf(df, " flag3 0");
+							case CLK_HAVETIME1:
+							fprintf(df, " time1 %f", atrv->value.d);
+							break;
+					
+							case CLK_HAVETIME2:
+							fprintf(df, " time2 %f", atrv->value.d);
+							break;
+			
+							case CLK_HAVEVAL1:
+							fprintf(df, " stratum %i", atrv->value.i);
+							break;
 
-						break;
-			    
-						case CLK_HAVEFLAG4:
-						if (atrv->value.i)
-							fprintf(df, " flag4 1");
-						else 
-							fprintf(df, " flag4 0");
-						break;
+							case CLK_HAVEVAL2:
+							memset(refid, 0, sizeof(refid));
+							memcpy(refid, atrv->value.s,
+							    min(strlen(atrv->value.s), 4));
+						
+							fprintf(df, " refid %s", refid);
+							break;
+
+							case CLK_HAVEFLAG1:
+							if (atrv->value.i)
+								fprintf(df, " flag1 1");
+							else 
+								fprintf(df, " flag1 0");
+							break;
+				    
+							case CLK_HAVEFLAG2:
+							if (atrv->value.i)
+								fprintf(df, " flag2 1");
+							else 
+								fprintf(df, " flag2 0");
+							break;
+
+							case CLK_HAVEFLAG3:
+							if (atrv->value.i)
+								fprintf(df, " flag3 1");
+							else 
+								fprintf(df, " flag3 0");
+
+							break;
+
+							case CLK_HAVEFLAG4:
+							if (atrv->value.i)
+								fprintf(df, " flag4 1");
+							else 
+								fprintf(df, " flag4 0");
+							break;
+						}
 					}
-				}
 
-				fprintf(df, "\n");
-			  	}
+					fprintf(df, "\n");
+				}
 			}
 		}
 	}
@@ -581,7 +593,13 @@ dump_config_tree(
 
 			atrv = (struct attr_val *) list_ptr;
 
-			switch(atrv->attr) {
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown tos token %d\n"
+					"tos", atrv->attr);
+				break;
+
 				case T_Ceiling:
 				fprintf(df, " ceiling %i", (int) atrv->value.d);
 				break;
@@ -694,7 +712,13 @@ dump_config_tree(
 				
 				atrv = (struct attr_val *) opt_ptr;
 
-				switch(atrv->type) {
+				switch (atrv->type) {
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown filegen option token %d\n"
+						"filegen ", atrv->type);
+					break;
+
 					case T_File:
 					fprintf(df, " file %s", atrv->value.s);
 					break;
@@ -702,7 +726,13 @@ dump_config_tree(
 					case T_Type:
 					fprintf(df, " type ");
 					
-					switch(atrv->value.i) {
+					switch (atrv->value.i) {
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown filegen type token %d\n"
+							"filegen type ", atrv->value.i);
+						break;
+
 						case T_Day:
 						fprintf(df, "day");
 						break;
@@ -731,6 +761,12 @@ dump_config_tree(
 
 					case T_Flag:
 					switch (atrv->value.i) {
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown filegen flag token %d\n"
+							"filegen ", atrv->value.i);
+						break;
+
 						case T_Link:
 						fprintf(df, " link");
 						break;
@@ -766,7 +802,13 @@ dump_config_tree(
 
 			atrv = (struct attr_val *) list_ptr;
 
-			switch(atrv->attr) {
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown discard token %d\n"
+					"discard ", atrv->attr);
+				break;
+
 				case T_Average:
 					fprintf(df, " average %i", atrv->value.i);
 					break;
@@ -793,7 +835,7 @@ dump_config_tree(
 
 			fprintf(df, "restrict %s", rest_node->addr->address);
 
-			if (rest_node->mask != NULL) 
+			if (rest_node->mask != NULL)
 				fprintf(df, " %s", rest_node->mask->address);
 
 			flags = queue_head(rest_node->flags);
@@ -802,6 +844,15 @@ dump_config_tree(
 				int *curr_flag = flags;
 
 				switch (*curr_flag) {
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown restrict token %d\n"
+						"restrict %s", *curr_flag,
+						rest_node->addr->address);
+					if (rest_node->mask != NULL)
+						fprintf(df, " %s", rest_node->mask->address);
+					break;
+
 					case T_Flake:
 						fprintf(df, " flake");
 						break;
@@ -873,9 +924,15 @@ dump_config_tree(
 
 			atrv = (struct attr_val *) list_ptr;
 
-			fprintf(df, "enable ");
+			fprintf(df, "enable");
 
-			switch(atrv->attr) {
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown enable token %d\n"
+					"enable", atrv->attr);
+				break;
+
 				case T_Autokey: 
 				fprintf(df, " autokey");	
 				break;
@@ -942,14 +999,20 @@ dump_config_tree(
 	list_ptr = queue_head(ptree->disable_opts);
 	if (list_ptr != NULL) {
 
-		fprintf(df, "disable ");
+		fprintf(df, "disable");
 
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
 
 			atrv = (struct attr_val *) list_ptr;
 
-			switch(atrv->attr) {
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown disable token %d\n"
+					"disable", atrv->attr);
+				break;
+
 				case T_Autokey: 
 				fprintf(df, " autokey");	
 				break;
@@ -1024,16 +1087,22 @@ dump_config_tree(
 
 			atrv = (struct attr_val *) list_ptr;
 
-			switch(atrv->attr) {
-				case T_Step:	
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown tinker token %d\n"
+					"tinker", atrv->attr);
+				break;
+
+				case T_Step:
 				     fprintf(df, " step");
 				     break;
 
-				case T_Panic: 
+				case T_Panic:
 				     fprintf(df, " panic");
 				     break;
 
-				case T_Dispersion: 
+				case T_Dispersion:
 				     fprintf(df, " dispersion");
 				     break;
 
@@ -1165,15 +1234,22 @@ dump_config_tree(
 
 				atrv = (struct attr_val *) options;
 
-				if(atrv->attr == T_Port) {
-					fprintf(df, " port %i", atrv->value.i);
-				}
-				else {
-					if(atrv->attr == T_Interface) {
-						addr = (struct address_node *) atrv->value.p;
+				switch (atrv->attr) {
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown trap token %d\n"
+						"trap %s", atrv->attr,
+						addr->address);
+					break;
 
-						fprintf(df, " interface %s", addr->address);
-					}
+				case T_Port:
+					fprintf(df, " port %i", atrv->value.i);
+					break;
+
+				case T_Interface:
+					addr = (struct address_node *) atrv->value.p;
+					fprintf(df, " interface %s", addr->address);
+					break;
 				}
 			}
 
@@ -1191,6 +1267,12 @@ dump_config_tree(
 			atrv = (struct attr_val *) list_ptr;
 
 			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown vars token %d\n",
+					atrv->attr);
+				break;
+
 				case T_Broadcastdelay:
 				fprintf(df, "broadcastdelay %f\n", atrv->value.d);
 				break;

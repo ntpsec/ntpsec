@@ -556,22 +556,21 @@ dump_config(
 	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */	
 	char filename[80];
 	char reply[80];
+	FILE *fptr;
 
-	FILE *fptr = NULL;
-
-	if((reqend - reqpt) == 0) {
-		snprintf(filename, 80, "ntp_dump%i.conf", time(NULL));
-	}
+	if ((reqend - reqpt) == 0)
+		snprintf(filename, sizeof(filename), "ntp_dump%i.conf", time(NULL));
 	else {
-		strncpy(filename, reqpt, 80);
+		strncpy(filename, reqpt, sizeof(filename));
+		filename[sizeof(filename) - 1] = 0;
 	}
 
 	fptr = fopen(filename, "w+");
 
-	if(dump_all_config_trees(fptr) == -1) 
-		snprintf(reply, 80, "Couldn't dump to file %s", filename);
-	else 
-		snprintf(reply, 80, "Dumped to config file %s", filename);
+	if (dump_all_config_trees(fptr) == -1) 
+		snprintf(reply, sizeof(reply), "Couldn't dump to file %s", filename);
+	else
+		snprintf(reply, sizeof(reply), "Dumped to config file %s", filename);
 
 	fclose(fptr);
 
