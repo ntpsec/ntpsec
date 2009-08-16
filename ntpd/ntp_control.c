@@ -74,6 +74,7 @@ static	void	write_clock_status (struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
+static	void	dump_config	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap (sockaddr_u *,
 				      struct interface *);
 
@@ -86,7 +87,8 @@ static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_WRITECLOCK,	NOAUTH, write_clock_status },
 	{ CTL_OP_SETTRAP,	NOAUTH, set_trap },
 	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
-        { CTL_OP_CONFIGURE,     AUTH, configure },
+	{ CTL_OP_DUMPCONFIG,	NOAUTH, dump_config },
+	{ CTL_OP_CONFIGURE,	AUTH,	configure },
 	{ NO_REQUEST,		0 }
 };
 
@@ -542,7 +544,40 @@ ctl_error(
 	numctlerrors++;
 }
 
+/* 
+ * Call the config dumper
+ */
+void
+dump_config(
+		struct recvbuf *rbufp,
+		int restrict_mask
+		)
+{
+	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */	
+	char filename[80];
+	char reply[80];
+	FILE *fptr;
 
+	if ((reqend - reqpt) == 0)
+		snprintf(filename, sizeof(filename), "ntp_dump%i.conf", time(NULL));
+	else {
+		strncpy(filename, reqpt, sizeof(filename));
+		filename[sizeof(filename) - 1] = 0;
+	}
+
+	fptr = fopen(filename, "w+");
+
+	if (dump_all_config_trees(fptr) == -1) 
+		snprintf(reply, sizeof(reply), "Couldn't dump to file %s", filename);
+	else
+		snprintf(reply, sizeof(reply), "Dumped to config file %s", filename);
+
+	fclose(fptr);
+
+	ctl_putdata(reply, strlen(reply), 0);
+	ctl_flushpkt(0);
+}
+ 
 /*
  * process_control - process an incoming control message
  */

@@ -65,13 +65,12 @@ ntp_readline_init(
 	if (prompt) {
 		if (lineedit_prompt) 
 			free(lineedit_prompt);
-		lineedit_prompt = strdup(prompt);
-		success = (NULL != lineedit_prompt);
+		lineedit_prompt = estrdup(prompt);
 	}
 
 #if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
 
-	if (success && NULL == ntp_el) {
+	if (NULL == ntp_el) {
 
 		ntp_el = el_init(progname, stdin, stdout, stderr);
 		if (ntp_el) {
@@ -189,7 +188,7 @@ ntp_readline(
 	if (NULL != cline && *cline) {
 		history(ntp_hist, &hev, H_ENTER, cline);
 		*pcount = strlen(cline);
-		line = strdup(cline);
+		line = estrdup(cline);
 	} else
 		line = NULL;
 
@@ -210,7 +209,7 @@ ntp_readline(
 		fflush(stderr);
 	}
 
-	line = fgets(line_buf, sizeof line_buf, stdin);
+	line = fgets(line_buf, sizeof(line_buf), stdin);
 	if (NULL != line && *line) {
 		*pcount = strlen(line);
 		line = estrdup(line);

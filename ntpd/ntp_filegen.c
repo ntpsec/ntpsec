@@ -416,6 +416,7 @@ filegen_config(
 	)
 {
 	int file_existed = 0;
+	size_t octets;
 
 	/*
 	 * if nothing would be changed...
@@ -448,8 +449,9 @@ filegen_config(
 		    gen->flag, flag));
 
 	if (gen->basename != basename || strcmp(gen->basename, basename) != 0) {
-		gen->basename = erealloc(gen->basename, strlen(basename) + 1);
-		strcpy(gen->basename, basename);
+		octets = strlen(basename) + 1;
+		gen->basename = erealloc(gen->basename, octets);
+		memcpy(gen->basename, basename, octets);
 	}
 	gen->type = (u_char) type;
 	gen->flag = (u_char) flag;

@@ -130,7 +130,8 @@ static char res_file[MAX_PATH];
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
-struct config_tree my_config;		/* Root of the configuration tree */
+struct config_tree cfgt;		/* Parser output stored here */
+struct config_tree *cfg_tree_history = NULL;	/* History of configs */
 #if 0
 short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
 #else
@@ -200,42 +201,47 @@ extern unsigned int qos;				/* QoS setting */
 /* FUNCTION PROTOTYPES */
 
 static void call_proto_config_from_list(queue *flag_list, int able_flag);
-static void init_auth_node(void);
-static void init_syntax_tree(void);
+static void init_auth_node(struct config_tree *);
+static void init_syntax_tree(struct config_tree *);
 #ifdef DEBUG
-       void free_syntax_tree(void);
+static void free_auth_node(struct config_tree *);
+       void free_all_config_trees(void);	/* atexit() */
+static void free_config_tree(struct config_tree *ptree);
 #endif
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
+static int is_sane_resolved_address(struct sockaddr_storage peeraddr, int hmode);
+static int get_correct_host_mode(int hmode);
+static void save_and_apply_config_tree(void);
+void getconfig(int argc,char *argv[]);
 #if !defined(SIM)
 static sockaddr_u *get_next_address(struct address_node *addr);
 #endif
 
-static void config_other_modes(void);
-static void config_auth(void);
-static void config_tos(void);
-static void config_monitor(void);
-static void config_access(void);
-static void config_tinker(void);
-static void config_system_opts(void);
-static void config_logconfig(void);
-static void config_phone(void);
-static void config_qos(void);
-static void config_setvar(void);
-static void config_ttl(void);
-static void config_trap(void);
-static void config_fudge(void);
-static void config_vars(void);
-static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
-static int get_correct_host_mode(int hmode);
-static void config_peers(void);
-static void config_unpeers(void);
-static void config_ntpd(void);
+static void config_other_modes(struct config_tree *);
+static void config_auth(struct config_tree *);
+static void config_tos(struct config_tree *);
+static void config_monitor(struct config_tree *);
+static void config_access(struct config_tree *);
+static void config_tinker(struct config_tree *);
+static void config_system_opts(struct config_tree *);
+static void config_logconfig(struct config_tree *);
+static void config_phone(struct config_tree *);
+static void config_qos(struct config_tree *);
+static void config_setvar(struct config_tree *);
+static void config_ttl(struct config_tree *);
+static void config_trap(struct config_tree *);
+static void config_fudge(struct config_tree *);
+static void config_vars(struct config_tree *);
+static void config_peers(struct config_tree *);
+static void config_unpeers(struct config_tree *);
+
+static void config_ntpd(struct config_tree *);
 #ifdef SIM
-static void config_sim(void);
-static void config_ntpdsim(void);
+static void config_sim(struct config_tree *);
+static void config_ntpdsim(struct config_tree *);
 #endif
-void getconfig(int argc,char *argv[]);
+
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
@@ -265,6 +271,7 @@ static void abort_resolve(void);
 static void do_resolve_internal(void);
 
 
+
 /* FUNCTIONS FOR INITIALIZATION
  * ----------------------------
  */
@@ -278,100 +285,1027 @@ call_proto_config_from_list(
 	int flag;
 	struct attr_val *curr_flag;
 
-	while (!empty(flag_list)) {
-		curr_flag = (struct attr_val *) dequeue(flag_list);
+	curr_flag = queue_head(flag_list);
+	while (curr_flag != NULL) {
 		flag = curr_flag->value.i;
 		if (flag)
 			proto_config(flag, able, 0., NULL);
-		free_node(curr_flag);
+		curr_flag = next_node(curr_flag);
 	}
-	return;
 }
 
 static void
-init_auth_node(void)
+init_auth_node(
+	struct config_tree *ptree
+	)
 {
-	my_config.auth.autokey = 0;
-	my_config.auth.control_key = 0;
-	my_config.auth.crypto_cmd_list = NULL;
-	my_config.auth.keys = NULL;
-	my_config.auth.keysdir = NULL;
-	my_config.auth.ntp_signd_socket = NULL;
-	my_config.auth.request_key = 0;
-	my_config.auth.revoke = 0;
-	my_config.auth.trusted_key_list = NULL;
+	ptree->auth.ntp_signd_socket = default_ntp_signd_socket;
 }
-
-static void
-init_syntax_tree(void)
-{
-	my_config.peers = create_queue();
-	my_config.unpeers = create_queue();
-	my_config.orphan_cmds = create_queue();
-
-	my_config.broadcastclient = 0;
-	my_config.manycastserver = create_queue();
-	my_config.multicastclient = create_queue();
-
-	my_config.stats_list = create_queue();
-	my_config.stats_dir = NULL;
-	my_config.filegen_opts = create_queue();
-
-	my_config.discard_opts = create_queue();
-	my_config.restrict_opts = create_queue();
-
-	my_config.enable_opts = create_queue();
-	my_config.disable_opts = create_queue();
-	my_config.tinker = create_queue();
-	my_config.fudge = create_queue();
-
-	my_config.logconfig = create_queue();
-	my_config.phone = create_queue();
-	my_config.qos = create_queue();
-	my_config.setvar = create_queue();
-	my_config.ttl = create_queue();
-	my_config.trap = create_queue();
-	my_config.vars = create_queue();
-	my_config.sim_details = NULL;
-
-	init_auth_node();
 
 #ifdef DEBUG
-	atexit(free_syntax_tree);
+static void
+free_auth_node(
+	struct config_tree *ptree
+	)
+{
+	DESTROY_QUEUE(ptree->auth.crypto_cmd_list);
+
+	if (ptree->auth.keys) {
+		free(ptree->auth.keys);
+		ptree->auth.keys = NULL;
+	}
+
+	if (ptree->auth.keysdir) {
+		free(ptree->auth.keysdir);
+		ptree->auth.keysdir = NULL;
+	}
+
+	if (ptree->auth.ntp_signd_socket != default_ntp_signd_socket) {
+		free(ptree->auth.ntp_signd_socket);
+		ptree->auth.ntp_signd_socket = default_ntp_signd_socket;
+	}
+
+	DESTROY_QUEUE(ptree->auth.trusted_key_list);
+}
+#endif /* DEBUG */
+
+static void
+init_syntax_tree(
+	struct config_tree *ptree
+	)
+{
+	memset(ptree, 0, sizeof(*ptree));
+
+	ptree->peers = create_queue();
+	ptree->unpeers = create_queue();
+	ptree->orphan_cmds = create_queue();
+	ptree->manycastserver = create_queue();
+	ptree->multicastclient = create_queue();
+	ptree->stats_list = create_queue();
+	ptree->filegen_opts = create_queue();
+	ptree->discard_opts = create_queue();
+	ptree->restrict_opts = create_queue();
+	ptree->enable_opts = create_queue();
+	ptree->disable_opts = create_queue();
+	ptree->tinker = create_queue();
+	ptree->fudge = create_queue();
+	ptree->logconfig = create_queue();
+	ptree->phone = create_queue();
+	ptree->qos = create_queue();
+	ptree->setvar = create_queue();
+	ptree->ttl = create_queue();
+	ptree->trap = create_queue();
+	ptree->vars = create_queue();
+
+	init_auth_node(ptree);
+
+#ifdef DEBUG
+	atexit(free_all_config_trees);
 #endif
 }
 
+
 #ifdef DEBUG
 void
-free_syntax_tree(void)
+free_all_config_trees(void)
 {
-	DESTROY_QUEUE(my_config.peers);
-	DESTROY_QUEUE(my_config.unpeers);
-	DESTROY_QUEUE(my_config.orphan_cmds);
+	struct config_tree *ptree;
+	struct config_tree *pprior;
 
-	DESTROY_QUEUE(my_config.manycastserver);
-	DESTROY_QUEUE(my_config.multicastclient);
+	ptree = cfg_tree_history;
 
-	DESTROY_QUEUE(my_config.stats_list);
-	DESTROY_QUEUE(my_config.filegen_opts);
+	while (ptree != NULL) {
+		pprior = ptree->prior;
+		free_config_tree(ptree);
+		ptree = pprior;
+	}
+}
 
-	DESTROY_QUEUE(my_config.discard_opts);
-	DESTROY_QUEUE(my_config.restrict_opts);
 
-	DESTROY_QUEUE(my_config.enable_opts);
-	DESTROY_QUEUE(my_config.disable_opts);
-	DESTROY_QUEUE(my_config.tinker);
-	DESTROY_QUEUE(my_config.fudge);
+static void
+free_config_tree(struct config_tree *ptree)
+{
+	DESTROY_QUEUE(ptree->peers);
+	DESTROY_QUEUE(ptree->unpeers);
+	DESTROY_QUEUE(ptree->orphan_cmds);
 
-	DESTROY_QUEUE(my_config.logconfig);
-	DESTROY_QUEUE(my_config.phone);
-	DESTROY_QUEUE(my_config.qos);
-	DESTROY_QUEUE(my_config.setvar);
-	DESTROY_QUEUE(my_config.ttl);
-	DESTROY_QUEUE(my_config.trap);
-	DESTROY_QUEUE(my_config.vars);
+	DESTROY_QUEUE(ptree->manycastserver);
+	DESTROY_QUEUE(ptree->multicastclient);
+
+	DESTROY_QUEUE(ptree->stats_list);
+	DESTROY_QUEUE(ptree->filegen_opts);
+
+	DESTROY_QUEUE(ptree->discard_opts);
+	DESTROY_QUEUE(ptree->restrict_opts);
+
+	DESTROY_QUEUE(ptree->enable_opts);
+	DESTROY_QUEUE(ptree->disable_opts);
+	DESTROY_QUEUE(ptree->tinker);
+	DESTROY_QUEUE(ptree->fudge);
+
+	DESTROY_QUEUE(ptree->logconfig);
+	DESTROY_QUEUE(ptree->phone);
+	DESTROY_QUEUE(ptree->qos);
+	DESTROY_QUEUE(ptree->setvar);
+	DESTROY_QUEUE(ptree->ttl);
+	DESTROY_QUEUE(ptree->trap);
+	DESTROY_QUEUE(ptree->vars);
+
+	free_auth_node(ptree);
+
+	free(ptree);
 }
 #endif /* DEBUG */
+
+/* Dump all trees */
+int
+dump_all_config_trees (
+		FILE *df
+		) 
+{
+	struct config_tree *cfg_ptr = cfg_tree_history;
+	int return_value = 0;
+
+	for(; cfg_ptr != NULL; cfg_ptr = cfg_ptr->prior) 
+		return_value |= dump_config_tree(cfg_ptr, df);
+
+	return return_value;
+}
+
+
+/* The config dumper */
+int
+dump_config_tree(
+	struct config_tree *ptree,
+	FILE *df
+	)
+{
+	struct peer_node *peers = NULL;
+	struct unpeer_node *unpeers = NULL;
+	struct attr_val *atrv = NULL;
+	struct address_node *addr = NULL;
+	struct address_node *peer_addr;
+	struct address_node *fudge_addr;
+	struct filegen_node *fgen_node = NULL;
+	struct restrict_node *rest_node = NULL;
+	struct addr_opts_node *addr_opts = NULL;
+	struct setvar_node *setv_node = NULL;
+
+	char **string = NULL;
+	char *s1;
+	char *s2;
+	int *integer = NULL;
+	void *fudge_ptr;
+	void *list_ptr = NULL;
+	void *options = NULL;
+	void *opt_ptr = NULL;
+	void *flags = NULL;
+	void *opts = NULL;
+	char refid[5];
+
+	printf("dump_config_tree(%p)\n", ptree);
+
+	list_ptr = queue_head(ptree->peers);
+	for (; 	list_ptr != NULL;
+	 	list_ptr = next_node(list_ptr)) {
+
+		peers = (struct peer_node *) list_ptr; 
+		addr = peers->addr;
+		
+		/* Add other attributes to output of struct peer_node */
+		fprintf(df, "peer %s\n", (peers->addr)->address);
+		
+		fudge_ptr = queue_head(ptree->fudge);
+		if (fudge_ptr != NULL) {
+
+			for(; 	fudge_ptr != NULL;
+				fudge_ptr = next_node(fudge_ptr)) {
+
+
+				addr_opts = (struct addr_opts_node *) fudge_ptr; 
+				peer_addr = peers->addr;
+				fudge_addr = addr_opts->addr;
+
+				s1 = peer_addr->address;
+				s2 = fudge_addr->address;
+
+				if (!strcmp(s1, s2)) {
+
+					fprintf(df, "fudge %s", addr_opts->addr->address);
+		
+					opts = queue_head(addr_opts->options);
+
+					for(; opts != NULL; opts = next_node(opts)) {
+						atrv = (struct attr_val *) opts; 
+					
+						switch (atrv->attr) {
+						default:
+							fprintf(df, "\n# dump error:\n"
+								"# unknown fudge CLK_ value %d\n"
+								"fudge %s", atrv->attr,
+								addr_opts->addr->address);
+							break;
+
+							case CLK_HAVETIME1:
+							fprintf(df, " time1 %f", atrv->value.d);
+							break;
+					
+							case CLK_HAVETIME2:
+							fprintf(df, " time2 %f", atrv->value.d);
+							break;
+			
+							case CLK_HAVEVAL1:
+							fprintf(df, " stratum %i", atrv->value.i);
+							break;
+
+							case CLK_HAVEVAL2:
+							memset(refid, 0, sizeof(refid));
+							memcpy(refid, atrv->value.s,
+							    min(strlen(atrv->value.s), 4));
+						
+							fprintf(df, " refid %s", refid);
+							break;
+
+							case CLK_HAVEFLAG1:
+							if (atrv->value.i)
+								fprintf(df, " flag1 1");
+							else 
+								fprintf(df, " flag1 0");
+							break;
+				    
+							case CLK_HAVEFLAG2:
+							if (atrv->value.i)
+								fprintf(df, " flag2 1");
+							else 
+								fprintf(df, " flag2 0");
+							break;
+
+							case CLK_HAVEFLAG3:
+							if (atrv->value.i)
+								fprintf(df, " flag3 1");
+							else 
+								fprintf(df, " flag3 0");
+
+							break;
+
+							case CLK_HAVEFLAG4:
+							if (atrv->value.i)
+								fprintf(df, " flag4 1");
+							else 
+								fprintf(df, " flag4 0");
+							break;
+						}
+					}
+
+					fprintf(df, "\n");
+				}
+			}
+		}
+	}
+	
+	list_ptr = queue_head(ptree->unpeers);
+	for (; 	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
+		
+		unpeers = (struct unpeer_node *) list_ptr;
+		
+		fprintf(df, "unpeer %s\n", (unpeers->addr)->address);
+	}
+
+	list_ptr = queue_head(ptree->orphan_cmds);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "tos");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown tos token %d\n"
+					"tos", atrv->attr);
+				break;
+
+				case T_Ceiling:
+				fprintf(df, " ceiling %i", (int) atrv->value.d);
+				break;
+
+				case T_Floor:
+				fprintf(df, " floor %i", (int) atrv->value.d);
+				break;
+
+				case T_Cohort:
+				fprintf(df, " cohort ");
+
+				if(atrv->value.d) 
+					fprintf(df, "1");
+				else
+					fprintf(df, "0");
+				break;
+
+				case T_Orphan:
+				fprintf(df, " orphan %i", (int) atrv->value.d);
+				break;
+
+				case T_Mindist: 
+				fprintf(df, " mindist %f", atrv->value.d);
+				break;
+				
+				case T_Maxdist:
+				fprintf(df, " maxdist %f", atrv->value.d);
+				break;
+
+				case T_Minclock:
+				fprintf(df, " minclock %f", atrv->value.d);
+				break;
+
+				case T_Maxclock:
+				fprintf(df, " maxclock %f", atrv->value.d);
+				break;
+
+				case T_Minsane:
+				fprintf(df, " minsane %i", (int) atrv->value.d);
+				break;
+
+				case T_Beacon:
+				fprintf(df, " beacon %i", (int) atrv->value.d);
+				break;
+
+				case T_Maxhop:
+				fprintf(df, " maxhop %i", (int) atrv->value.d);
+				break;
+			}
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->manycastserver);
+	if (list_ptr != NULL) {
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			addr = (struct address_node *) list_ptr;
+
+			fprintf(df, "manycastserver %s\n", addr->address);
+		}
+	}
+
+	list_ptr = queue_head(ptree->multicastclient);
+	if (list_ptr != NULL) {
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			addr = (struct address_node *) list_ptr;
+
+			fprintf(df, "multicastclient %s\n", addr->address);
+		}
+	}
+
+	list_ptr = queue_head(ptree->stats_list);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "statistics ");
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			string = (char **) list_ptr;
+				
+			/* FIXME Find keyword and type of information */
+			
+			fprintf(df, "%s ", *string);	
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->filegen_opts);
+	if (list_ptr != NULL) {
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			fprintf(df, "filegen ");
+
+			fgen_node = (struct filegen_node *) list_ptr;
+
+			opt_ptr = queue_head(fgen_node->options);
+
+			for(;	opt_ptr != NULL;
+				opt_ptr = next_node(opt_ptr)) {
+				
+				atrv = (struct attr_val *) opt_ptr;
+
+				switch (atrv->type) {
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown filegen option token %d\n"
+						"filegen ", atrv->type);
+					break;
+
+					case T_File:
+					fprintf(df, " file %s", atrv->value.s);
+					break;
+
+					case T_Type:
+					fprintf(df, " type ");
+					
+					switch (atrv->value.i) {
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown filegen type token %d\n"
+							"filegen type ", atrv->value.i);
+						break;
+
+						case T_Day:
+						fprintf(df, "day");
+						break;
+
+						case T_Month:
+						fprintf(df, "month");
+						break;
+
+						case T_None:
+						fprintf(df, "none");
+						break;
+
+						case T_Pid:
+						fprintf(df, "pid");
+						break;
+
+						case T_Week:
+						fprintf(df, "week");
+						break;
+
+						case T_Year:
+						fprintf(df, "year");
+						break;
+					}
+					break;
+
+					case T_Flag:
+					switch (atrv->value.i) {
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown filegen flag token %d\n"
+							"filegen ", atrv->value.i);
+						break;
+
+						case T_Link:
+						fprintf(df, " link");
+						break;
+
+						case T_Nolink:
+						fprintf(df, " nolink");
+						break;
+
+						case T_Enable:
+						fprintf(df, " enable");
+						break;
+
+						case T_Disable:
+						fprintf(df, " disable");
+						break;
+					}
+					break;
+				}
+
+			}
+
+			fprintf(df, "\n");
+		}
+	}
+
+	list_ptr = queue_head(ptree->discard_opts);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "discard");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown discard token %d\n"
+					"discard ", atrv->attr);
+				break;
+
+				case T_Average:
+					fprintf(df, " average %i", atrv->value.i);
+					break;
+
+				case T_Minimum:
+					fprintf(df, " minimum %i", atrv->value.i);
+					break;
+
+				case T_Monitor:
+					fprintf(df, " monitor %i", atrv->value.i);
+			}
+
+		}
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->restrict_opts);
+	if (list_ptr != NULL) {
+
+		for (;	list_ptr != NULL; 
+			list_ptr = next_node(list_ptr)) {
+
+			rest_node = (struct restrict_node *) list_ptr;
+
+			fprintf(df, "restrict %s", rest_node->addr->address);
+
+			if (rest_node->mask != NULL)
+				fprintf(df, " %s", rest_node->mask->address);
+
+			flags = queue_head(rest_node->flags);
+			
+			for (; 	flags != NULL; flags = next_node(flags)) {
+				int *curr_flag = flags;
+
+				switch (*curr_flag) {
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown restrict token %d\n"
+						"restrict %s", *curr_flag,
+						rest_node->addr->address);
+					if (rest_node->mask != NULL)
+						fprintf(df, " %s", rest_node->mask->address);
+					break;
+
+					case T_Flake:
+						fprintf(df, " flake");
+						break;
+
+					case T_Ignore:
+						fprintf(df, " ignore");
+						break;
+
+					case T_Limited:
+						fprintf(df, " limited");
+						break;
+
+					case T_Kod:
+						fprintf(df, " kod");
+						break;
+
+					case T_Lowpriotrap:
+						fprintf(df, " lowpriotrap");
+						break;
+
+					case T_Nomodify:
+						fprintf(df, " nomodify");
+						break;
+
+					case T_Noquery:
+						fprintf(df, " noquery");
+						break;
+
+					case T_Nopeer:
+						fprintf(df, " nopeer");
+						break;
+
+					case T_Noserve:
+						fprintf(df, " noserve");
+						break;
+
+					case T_Notrap:
+						fprintf(df, " notrap");
+						break;
+
+					case T_Notrust:
+						fprintf(df, " notrust");
+						break;
+
+					case T_Ntpport:
+						fprintf(df, " ntpport");
+						break;
+
+					case T_Version:
+						fprintf(df, " version");
+						break;
+
+					case T_Default:
+						fprintf(df, " default");
+						break;
+				}
+			}
+			
+			fprintf(df, "\n");
+		}
+	}
+
+	
+	list_ptr = queue_head(ptree->enable_opts);
+	if (list_ptr != NULL) {
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			fprintf(df, "enable");
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown enable token %d\n"
+					"enable", atrv->attr);
+				break;
+
+				case T_Autokey: 
+				fprintf(df, " autokey");	
+				break;
+
+				case T_Bias: 
+				fprintf(df, " bias");
+				break;
+
+				case T_Burst: 
+				fprintf(df, " burst");
+				break;
+
+				case T_Iburst: 
+				fprintf(df, " iburst");
+				break;
+
+				case T_Key: 
+				fprintf(df, " key");
+				break;
+
+				case T_Maxpoll: 
+				fprintf(df, " maxpoll");
+				break;
+
+				case T_Minpoll: 
+				fprintf(df, " minpoll");
+				break;
+
+				case T_Mode: 
+				fprintf(df, " mode");
+				break;
+
+				case T_Noselect: 
+				fprintf(df, " noselect");
+				break;
+
+				case T_Preempt: 
+				fprintf(df, " preempt");
+				break;
+
+				case T_True: 
+				fprintf(df, " true");
+				break;
+
+				case T_Prefer: 
+				fprintf(df, " prefer");
+				break;
+
+				case T_Ttl: 
+				fprintf(df, " ttl");
+				break;
+
+				case T_Version: 
+				fprintf(df, " version");
+				break;
+
+				case T_Xleave: 
+				fprintf(df, " xleave");
+				break;
+			}
+		}
+	}
+
+	list_ptr = queue_head(ptree->disable_opts);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "disable");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown disable token %d\n"
+					"disable", atrv->attr);
+				break;
+
+				case T_Autokey: 
+				fprintf(df, " autokey");	
+				break;
+
+				case T_Bias: 
+				fprintf(df, " bias");
+				break;
+
+				case T_Burst: 
+				fprintf(df, " burst");
+				break;
+
+				case T_Iburst: 
+				fprintf(df, " iburst");
+				break;
+
+				case T_Key: 
+				fprintf(df, " key");
+				break;
+
+				case T_Maxpoll: 
+				fprintf(df, " maxpoll");
+				break;
+
+				case T_Minpoll: 
+				fprintf(df, " minpoll");
+				break;
+
+				case T_Mode: 
+				fprintf(df, " mode");
+				break;
+
+				case T_Noselect: 
+				fprintf(df, " noselect");
+				break;
+
+				case T_Preempt: 
+				fprintf(df, " preempt");
+				break;
+
+				case T_True: 
+				fprintf(df, " true");
+				break;
+
+				case T_Prefer: 
+				fprintf(df, " prefer");
+				break;
+
+				case T_Ttl: 
+				fprintf(df, " ttl");
+				break;
+
+				case T_Version: 
+				fprintf(df, " version");
+				break;
+
+				case T_Xleave: 
+				fprintf(df, " xleave");
+				break;
+			}
+		}
+
+	}
+
+	list_ptr = queue_head(ptree->tinker);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "tinker");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown tinker token %d\n"
+					"tinker", atrv->attr);
+				break;
+
+				case T_Step:
+				     fprintf(df, " step");
+				     break;
+
+				case T_Panic:
+				     fprintf(df, " panic");
+				     break;
+
+				case T_Dispersion:
+				     fprintf(df, " dispersion");
+				     break;
+
+				case T_Stepout: 
+				     fprintf(df, " stepout");
+				     break;
+
+				case T_Allan: 
+				     fprintf(df, " allan");
+				     break;
+
+				case T_Huffpuff: 
+				     fprintf(df, " huffpuff");
+				     break;
+
+				case T_Freq: 
+				     fprintf(df, " freq");
+				     break;
+			}
+
+			fprintf(df, " %f", atrv->value.d);
+		}
+
+		fprintf(df, "\n");
+	}
+
+
+	list_ptr = queue_head(ptree->logconfig);
+	if (list_ptr != NULL) {
+		
+		fprintf(df, "logconfig");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+			atrv = (struct attr_val *) list_ptr;
+
+			fprintf(df, " %c%s", atrv->attr, atrv->value.s);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->phone);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "phone");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+			string = list_ptr;
+
+			fprintf(df, " %s", *string);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->qos);
+	if (list_ptr != NULL) {
+		
+		fprintf(df, "qos");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+			atrv = (struct attr_val *) list_ptr;
+
+			fprintf(df, " %s", atrv->value.s);
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->setvar);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "setvar");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+			u_long a = 0;
+			char *data = NULL;
+
+			setv_node = (struct setvar_node *) list_ptr;
+			data = setv_node->data;
+
+			fprintf(df, " ");
+
+			for(a=0; a<setv_node->len; a++) 
+				if(data[a] == '=') 
+					fprintf(df, " ");
+				else
+					fprintf(df, "%c", data[a]);
+
+			if(setv_node->def)
+				fprintf(df, " default");
+		}
+	}
+
+	list_ptr = queue_head(ptree->ttl);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "ttl");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+			integer = (int *) list_ptr;
+
+			fprintf(df, " %i", *integer);
+		}
+		
+		fprintf(df, "\n");
+	}
+	
+	list_ptr = queue_head(ptree->trap);
+	if (list_ptr != NULL) {
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			addr_opts = (struct addr_opts_node *) list_ptr;
+			addr = addr_opts->addr;
+
+			fprintf(df, "trap %s", addr->address);
+
+			options = queue_head(addr_opts->options);
+
+			for(; 	options != NULL; 
+				options = next_node(options)) {
+
+				atrv = (struct attr_val *) options;
+
+				switch (atrv->attr) {
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown trap token %d\n"
+						"trap %s", atrv->attr,
+						addr->address);
+					break;
+
+				case T_Port:
+					fprintf(df, " port %i", atrv->value.i);
+					break;
+
+				case T_Interface:
+					addr = (struct address_node *) atrv->value.p;
+					fprintf(df, " interface %s", addr->address);
+					break;
+				}
+			}
+
+			fprintf(df, "\n");
+		}
+	}
+
+	/* For options I didn't find documentation I'll just output its name and the cor. value */
+	list_ptr = queue_head(ptree->vars);
+	if (list_ptr != NULL) {
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown vars token %d\n",
+					atrv->attr);
+				break;
+
+				case T_Broadcastdelay:
+				fprintf(df, "broadcastdelay %f\n", atrv->value.d);
+				break;
+				
+				case T_Calldelay:
+				fprintf(df, "calldelay %i\n", atrv->value.i);
+				break;
+
+				case T_Tick:
+				fprintf(df, "tick %f\n", atrv->value.d);
+				break;
+
+				case T_Driftfile:
+				fprintf(df, "driftfile %s\n", atrv->value.s);
+				break;
+			
+		    		case T_WanderThreshold:
+				fprintf(df, "wander_threshold %f\n", atrv->value.d);
+				break;
+	
+		    		case T_Leapfile:
+				fprintf(df, "leapfile %s\n", atrv->value.s);
+				break;
+
+				case T_Pidfile:
+				fprintf(df, "pidfile %s\n", atrv->value.s);
+				break;
+
+				case T_Logfile:
+				fprintf(df, "logfile %s\n", atrv->value.s);
+				break;
+#ifdef OPENSSL
+				case T_Automax:
+				fprintf(df, "automax %i\n", atrv->value.i);
+				break;
+#endif
+			}
+		}
+	}
+
+	return 0;
+}
+
+	
 
 /* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE
  * -----------------------------------------------
@@ -777,9 +1711,8 @@ create_sim_script_info(
 	my_info->proc_delay = PROC_DLY;
 
 	/* Traverse the script_queue and fill out non-default values */
-	while (!empty(script_queue)) {
-		my_attr_val = dequeue(script_queue);
-
+	my_attr_val = queue_head(script_queue);
+	while (my_attr_val != NULL) {
 		/* Set the desired value */
 		switch (my_attr_val->attr) {
 
@@ -808,9 +1741,7 @@ create_sim_script_info(
 				"Unknown script token %d",
 				my_attr_val->attr);
 		}
-		free_node(my_attr_val);
 	}
-	DESTROY_QUEUE(script_queue);
 	return (my_info);
 #endif
 }
@@ -891,6 +1822,23 @@ create_sim_node(
 	my_node->servers = servers;
 	return my_node;
 }
+
+
+/* Lookup the keyword associated with token */
+/*
+char *
+token_to_str (
+		int token
+	    )
+{
+	register int a = 0;
+
+	for(; a<sizeof(keyword_list)/sizeof(struct key_tok); a++) 
+		if(keyword_list[a]->token == token)
+			return keyword_list[a]->keyword;
+
+	return NULL;
+}*/
 
 
 struct key_tok keyword_list[] = {
@@ -1071,58 +2019,70 @@ struct key_tok keyword_list[] = {
  */
 
 static void
-config_other_modes(void)
+config_other_modes(
+	struct config_tree *ptree
+	)
 {
-
 	sockaddr_u addr_sock;
 	struct address_node *addr_node;
 
-	if (my_config.broadcastclient) {
-		proto_config(PROTO_BROADCLIENT,
-			     my_config.broadcastclient, 0., NULL);
-		my_config.broadcastclient = 0;
-	}
+	if (ptree->broadcastclient)
+		proto_config(PROTO_BROADCLIENT, ptree->broadcastclient, 0., NULL);
 
 	/* Configure the many-cast servers */
-	if (!empty(my_config.manycastserver)) {
-		while (!empty(my_config.manycastserver)) {
-			addr_node = dequeue(my_config.manycastserver);
+	addr_node = queue_head(ptree->manycastserver);
+	if (addr_node != NULL) {
+		do {
+			memset((char *)&addr_sock, 0, sizeof(addr_sock));
+			addr_sock.ss_family = (u_short)addr_node->type;
 
-			ZERO_SOCK(&addr_sock);
-			AF(&addr_sock) = (u_short)addr_node->type;
+			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
+				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
 
-			if (getnetnum(addr_node->address, &addr_sock,
-			    1, t_UNK) == 1)
-				proto_config(PROTO_MULTICAST_ADD, 0,
-					     0., &addr_sock);
-
-			destroy_address_node(addr_node);
-		}
+			addr_node = next_node(addr_node);
+		} while (addr_node != NULL);
 		sys_manycastserver = 1;
 	}
 
 	/* Configure the multicast clients */
-	if (!empty(my_config.multicastclient)) {
-		while (!empty(my_config.multicastclient)) {
-			addr_node = dequeue(my_config.multicastclient);
+	addr_node = queue_head(ptree->multicastclient);
+	if (addr_node != NULL) {
+		do {
+			memset((char *)&addr_sock, 0, sizeof(addr_sock));
+			addr_sock.ss_family = (u_short)addr_node->type;
 
-			ZERO_SOCK(&addr_sock);
-			AF(&addr_sock) = (u_short)addr_node->type;
+			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
+				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
 
-			if (getnetnum(addr_node->address, &addr_sock,
-			    1, t_UNK) == 1)
-				proto_config(PROTO_MULTICAST_ADD, 0,
-					     0., &addr_sock);
 
-			destroy_address_node(addr_node);
-		}
+			addr_node = next_node(addr_node);
+		} while (addr_node != NULL);
 		proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
 	}
 }
 
 
+#ifdef DEBUG
 static void
-config_auth(void)
+free_config_other_modes(
+	struct config_tree *ptree
+	)
+{
+	struct address_node *addr_node;
+
+	while (NULL != (addr_node = dequeue(ptree->manycastserver)))
+		destroy_address_node(addr_node);
+
+	while (NULL != (addr_node = dequeue(ptree->multicastclient)))
+		destroy_address_node(addr_node);
+}
+#endif	/* DEBUG */
+
+
+static void
+config_auth(
+	struct config_tree *ptree
+	)
 {
 	u_char rankey[9];
 	struct attr_val *my_val;
@@ -1130,31 +2090,27 @@ config_auth(void)
 	int i;
 
 	/* Crypto Command */
-	while (!empty(my_config.auth.crypto_cmd_list)) {
-		my_val = dequeue(my_config.auth.crypto_cmd_list);
+	my_val = queue_head(ptree->auth.crypto_cmd_list);
 #ifdef OPENSSL
+	while (my_val != NULL) {
 		crypto_config(my_val->attr, my_val->value.s);
-#endif /* OPENSSL */
-		free(my_val->value.s);
-		free_node(my_val);
+		my_val = next_node(my_val);
 	}
-	DESTROY_QUEUE(my_config.auth.crypto_cmd_list);
+#endif /* OPENSSL */
 
 	/* Keysdir Command */
-	if (my_config.auth.keysdir) {
+	if (ptree->auth.keysdir) {
 		if (keysdir != default_keysdir)
 			free(keysdir);
-		keysdir = my_config.auth.keysdir;
-		my_config.auth.keysdir = NULL;
+		keysdir = estrdup(ptree->auth.keysdir);
 	}
 
 
 	/* ntp_signd_socket Command */
-	if (my_config.auth.ntp_signd_socket) {
+	if (ptree->auth.ntp_signd_socket) {
 		if (ntp_signd_socket != default_ntp_signd_socket)
 			free(ntp_signd_socket);
-		ntp_signd_socket = my_config.auth.ntp_signd_socket;
-		my_config.auth.ntp_signd_socket = NULL;
+		ntp_signd_socket = estrdup(ptree->auth.ntp_signd_socket);
 	}
 
 #ifdef OPENSSL
@@ -1165,35 +2121,31 @@ config_auth(void)
 #endif /* OPENSSL */
 
 	/* Keys Command */
-	if (my_config.auth.keys) {
-		getauthkeys(my_config.auth.keys);
-		free(my_config.auth.keys);
-		my_config.auth.keys = NULL;
-	}
+	if (ptree->auth.keys)
+		getauthkeys(ptree->auth.keys);
 
 	/* Control Key Command */
-	if (my_config.auth.control_key != 0)
-		ctl_auth_keyid = my_config.auth.control_key;
+	if (ptree->auth.control_key)
+		ctl_auth_keyid = (keyid_t)ptree->auth.control_key;
 
 	/* Requested Key Command */
-	if (my_config.auth.request_key) {
+	if (ptree->auth.request_key) {
 		DPRINTF(4, ("set info_auth_key to %08lx\n",
-			    (u_long) my_config.auth.request_key));
-		info_auth_keyid = (keyid_t) my_config.auth.request_key;
+			    (u_long) ptree->auth.request_key));
+		info_auth_keyid = (keyid_t)ptree->auth.request_key;
 	}
 
 	/* Trusted Key Command */
-	while (!empty(my_config.auth.trusted_key_list)) {
-		key_val = dequeue(my_config.auth.trusted_key_list);
+	key_val = queue_head(ptree->auth.trusted_key_list);
+	while (key_val != NULL) {
 		authtrust(*key_val, 1);
-		free_node(key_val);
+		key_val = next_node(key_val);
 	}
-	DESTROY_QUEUE(my_config.auth.trusted_key_list);
 
 #ifdef OPENSSL
 	/* Revoke Command */
-	if (my_config.auth.revoke)
-		sys_revoke = my_config.auth.revoke;
+	if (ptree->auth.revoke)
+		sys_revoke = ptree->auth.revoke;
 #endif /* OPENSSL */
 
 #if !defined(VMS) && !defined(SYS_VXWORKS)
@@ -1229,20 +2181,63 @@ config_auth(void)
 
 }
 
+
+#ifdef DEBUG
 static void
-config_tos(void)
+free_config_auth(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *my_val;
+
+	while (NULL != 
+	       (my_val = dequeue(ptree->auth.crypto_cmd_list))) {
+
+		free(my_val->value.s);
+		free_node(my_val);
+	}
+	DESTROY_QUEUE(ptree->auth.crypto_cmd_list);
+
+	DESTROY_QUEUE(ptree->auth.trusted_key_list);
+}
+#endif	/* DEBUG */
+
+
+static void
+config_tos(
+	struct config_tree *ptree
+	)
 {
 	struct attr_val *tos;
 
-	while (!empty(my_config.orphan_cmds)) {
-		tos = dequeue(my_config.orphan_cmds);
+	tos = queue_head(ptree->orphan_cmds);
+	while (tos != NULL) {
 		proto_config(tos->attr, 0, tos->value.d, NULL);
-		free_node(tos);
+		tos = next_node(tos);
 	}
 }
 
+
+#ifdef DEBUG
 static void
-config_monitor(void)
+free_config_tos(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *tos;
+
+	while (!empty(ptree->orphan_cmds)) {
+		tos = dequeue(ptree->orphan_cmds);
+		free_node(tos);
+	}
+}
+#endif	/* DEBUG */
+
+
+static void
+config_monitor(
+	struct config_tree *ptree
+	)
 {
 	char **filegen_string;
 	FILEGEN *filegen;
@@ -1254,11 +2249,8 @@ config_monitor(void)
 	int filegen_flag;
 
 	/* Set the statistics directory */
-	if (my_config.stats_dir) {
-		stats_config(STATS_STATSDIR, my_config.stats_dir);
-		free(my_config.stats_dir);
-		my_config.stats_dir = NULL;
-	}
+	if (ptree->stats_dir)
+		stats_config(STATS_STATSDIR, ptree->stats_dir);
 
 	/* NOTE:
 	 * Calling filegen_get is brain dead. Doing a string
@@ -1274,8 +2266,8 @@ config_monitor(void)
 	 */
 
 	/* Turn on the specified statistics */
-	while (!empty(my_config.stats_list)) {
-		filegen_string = dequeue(my_config.stats_list);
+	filegen_string = queue_head(ptree->stats_list);
+	while (filegen_string != NULL) {
 		filegen = filegen_get(*filegen_string);
 
 		DPRINTF(4, ("enabling filegen for %s statistics "
@@ -1283,21 +2275,21 @@ config_monitor(void)
 			    *filegen_string, filegen->prefix, 
 			    filegen->basename));
 		filegen->flag |= FGEN_FLAG_ENABLED;
-		free_node(filegen_string);
+		filegen_string = next_node(filegen_string);
 	}
 
 	/* Configure the statistics with the options */
-	while (!empty(my_config.filegen_opts)) {
-		my_node = dequeue(my_config.filegen_opts);
+	my_node = queue_head(ptree->filegen_opts);
+	while (my_node != NULL) {
 		filegen = filegen_get(my_node->name);
 
-		/* Initilize the filegen variables to their pre-configurtion states */
+		/* Initialize the filegen variables to their pre-configurtion states */
 		filegen_flag = filegen->flag;
 		filegen_type = filegen->type;
 		filegen_file = my_node->name;
 
-		while (!empty(my_node->options)) {
-			my_opts = dequeue(my_node->options);
+		my_opts = queue_head(my_node->options);
+		while (my_opts != NULL) {
 
 			switch (my_opts->attr) {
 
@@ -1344,19 +2336,51 @@ config_monitor(void)
 			}
 			filegen_config(filegen, filegen_file, 
 				       filegen_type, filegen_flag);
-			free_node(my_opts);
+			my_opts = next_node(my_opts);
 		}
-		free_node(my_node);
+		my_node = next_node(my_node);
 	}
 }
 
 
+#ifdef DEBUG
 static void
-config_access(void)
+free_config_monitor(
+	struct config_tree *ptree
+	)
+{
+	char **filegen_string;
+	struct filegen_node *my_node;
+	struct attr_val *my_opts;
+
+	if (ptree->stats_dir) {
+		free(ptree->stats_dir);
+		ptree->stats_dir = NULL;
+	}
+
+	while (NULL != (filegen_string = dequeue(ptree->stats_list)))
+		free_node(filegen_string);
+
+	while (NULL != (my_node = dequeue(ptree->filegen_opts))) {
+
+		while (NULL != (my_opts = dequeue(my_node->options)))
+			free_node(my_opts);
+
+		free_node(my_node);
+	}
+}
+#endif	/* DEBUG */
+
+
+static void
+config_access(
+	struct config_tree *ptree
+	)
 {
 	static int		warned_signd;
 	struct attr_val *	my_opt;
 	struct restrict_node *	my_node;
+	int *			curr_flag;
 	sockaddr_u		addr_sock;
 	sockaddr_u		addr_mask;
 	int			flags;
@@ -1370,8 +2394,8 @@ config_access(void)
 #endif
 
 	/* Configure the discard options */
-	while (!empty(my_config.discard_opts)) {
-		my_opt = dequeue(my_config.discard_opts);
+	my_opt = queue_head(ptree->discard_opts);
+	while (my_opt != NULL) {
 
 		switch(my_opt->attr) {
 
@@ -1393,12 +2417,12 @@ config_access(void)
 				my_opt->attr);
 			exit(1);
 		}
-		free_node(my_opt);
+		my_opt = next_node(my_opt);
 	}
 
 	/* Configure the restrict options */
-	while (!empty(my_config.restrict_opts)) {
-		my_node = dequeue(my_config.restrict_opts);
+	my_node = queue_head(ptree->restrict_opts);
+	while (my_node != NULL) {
 
 		ZERO_SOCK(&addr_sock);
 
@@ -1420,7 +2444,6 @@ config_access(void)
 				msyslog(LOG_ERR,
 					"restrict: error in address '%s' on line %d. Ignoring...",
 					my_node->addr->address, my_node->line_no);
-				destroy_restrict_node(my_node);
 				continue;
 			}
 
@@ -1435,7 +2458,6 @@ config_access(void)
 					msyslog(LOG_ERR,
 						"restrict: error in mask '%s' on line %d. Ignoring...",
 						my_node->mask->address, my_node->line_no);
-					destroy_restrict_node(my_node);
 					continue;
 				}
 			}
@@ -1445,13 +2467,13 @@ config_access(void)
 		flags = 0;
 		mflags = 0;
 
-		while (!empty(my_node->flags)) {
-			int *curr_flag = dequeue(my_node->flags);
+		curr_flag = queue_head(my_node->flags);
+		while (curr_flag != NULL) {
 			if (RESM_NTPONLY == *curr_flag)
 				mflags |= *curr_flag;
 			else
 				flags |= *curr_flag;
-			free_node(curr_flag);
+			curr_flag = next_node(curr_flag);
 		}
 
 		/* Set the flags */
@@ -1472,81 +2494,176 @@ config_access(void)
 			msyslog(LOG_WARNING, signd_warning);
 		}
 
+		my_node = next_node(my_node);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_access(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *	my_opt;
+	struct restrict_node *	my_node;
+	int *			curr_flag;
+
+	while (NULL != (my_opt = dequeue(ptree->discard_opts)))
+		free_node(my_opt);
+
+	while (NULL != (my_node = dequeue(ptree->restrict_opts))) {
+		while (NULL != (curr_flag = dequeue(my_node->flags)))
+			free_node(curr_flag);
+
 		destroy_restrict_node(my_node);
 	}
 }
+#endif	/* DEBUG */
 
 
 static void
-config_tinker(void)
+config_tinker(
+	struct config_tree *ptree
+	)
 {
 	struct attr_val *tinker;
 
-	while (!empty(my_config.tinker)) {
-		tinker= (struct attr_val *) dequeue(my_config.tinker);
+	tinker = queue_head(ptree->tinker);
+	while (tinker != NULL) {
 		loop_config(tinker->attr, tinker->value.d);
-		free_node(tinker);
+		tinker = next_node(tinker);
 	}
 }
 
 
+#ifdef DEBUG
 static void
-config_system_opts(void)
+free_config_tinker(
+	struct config_tree *ptree
+	)
 {
+	struct attr_val *tinker;
 
-	call_proto_config_from_list(my_config.enable_opts, 1);
-	call_proto_config_from_list(my_config.disable_opts, 0);
+	while (NULL != (tinker = dequeue(ptree->tinker)))
+		free_node(tinker);
+}
+#endif	/* DEBUG */
 
+
+static void
+config_system_opts(
+	struct config_tree *ptree
+	)
+{
+	call_proto_config_from_list(ptree->enable_opts, 1);
+	call_proto_config_from_list(ptree->disable_opts, 0);
 }
 
+
+#ifdef DEBUG
 static void
-config_logconfig(void)
+free_config_system_opts(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *flag;
+
+	while (NULL != (flag = dequeue(ptree->enable_opts)))
+		free_node(flag);
+
+	while (NULL != (flag = dequeue(ptree->disable_opts)))
+		free_node(flag);
+}
+#endif	/* DEBUG */
+
+
+static void
+config_logconfig(
+	struct config_tree *ptree
+	)
 {
 	struct attr_val *my_logconfig;
 
-	while(!empty(my_config.logconfig)) {
-		my_logconfig = (struct attr_val *)
-		    dequeue(my_config.logconfig);
+	my_logconfig = queue_head(ptree->logconfig);
+	while (my_logconfig != NULL) {
+
 		switch (my_logconfig->attr) {
-		    case '+':
+		case '+':
 			ntp_syslogmask |= get_logmask(my_logconfig->value.s);
 			break;
-		    case '-':
+		case '-':
 			ntp_syslogmask &= ~get_logmask(my_logconfig->value.s);
 			break;
-		    case '=':
+		case '=':
 			ntp_syslogmask = get_logmask(my_logconfig->value.s);
 			break;
 		}
+		my_logconfig = next_node(my_logconfig);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_logconfig(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *my_logconfig;
+
+	while (NULL != (my_logconfig = dequeue(ptree->logconfig))) {		
 		free(my_logconfig->value.s);
 		free_node(my_logconfig);
 	}
 }
+#endif	/* DEBUG */
+
 
 static void
-config_phone(void)
+config_phone(
+	struct config_tree *ptree
+	)
 {
 	int i = 0;
 	char **s;
 
-	while (!empty(my_config.phone)) {
-		s = (char **) dequeue(my_config.phone);
-		if (i < MAXPHONE)
-			sys_phone[i++] = *s;
-		else {
+	s = queue_head(ptree->phone);
+	while (s != NULL) {
+		if (i < COUNTOF(sys_phone) - 1)
+			sys_phone[i++] = estrdup(*s);
+		else
 			msyslog(LOG_INFO,
 				"phone: Number of phone entries exceeds %d. Ignoring phone %s...",
-				MAXPHONE, *s);
-			free(*s);
-		}
-		free_node(s);
+				COUNTOF(sys_phone) - 1, *s);
+		s = next_node(s);
 	}
+
 	if (i)
 		sys_phone[i] = NULL;
 }
 
+
+#ifdef DEBUG
 static void
-config_qos(void)
+free_config_phone(
+	struct config_tree *ptree
+	)
+{
+	char **s;
+
+	while (NULL != (s = dequeue(ptree->phone))) {
+		free(*s);
+		free_node(s);
+	}
+}
+#endif	/* DEBUG */
+
+
+static void
+config_qos(
+	struct config_tree *ptree
+	)
 {
 	struct attr_val *my_qosconfig;
 	char *s;
@@ -1554,9 +2671,8 @@ config_qos(void)
 	unsigned int qtos = 0;
 #endif
 
-	while(!empty(my_config.qos)) {
-		my_qosconfig = (struct attr_val *)
-			dequeue(my_config.qos);
+	my_qosconfig = queue_head(ptree->qos);
+	while (my_qosconfig != NULL) {
 		s = my_qosconfig->value.s;
 #ifdef HAVE_IPTOS_SUPPORT
 		if (!strcmp(s, "lowdelay"))
@@ -1596,49 +2712,102 @@ config_qos(void)
 		 * also  consider logging a message about the action.
 		 * XXX msyslog(LOG_INFO, "QoS %s requested by config\n", s);
 		 */
+		my_qosconfig = next_node(my_qosconfig);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_qos(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *my_qosconfig;
+	char *s;
+#ifdef HAVE_IPTOS_SUPPORT
+	unsigned int qtos = 0;
+#endif
+
+	while (NULL != (my_qosconfig = dequeue(ptree->qos))) {
+		s = my_qosconfig->value.s;
 		free(s);
 		free_node(my_qosconfig);
 	}
 }
+#endif	/* DEBUG */
+
 
 static void
-config_setvar(void)
+config_setvar(
+	struct config_tree *ptree
+	)
 {
 	struct setvar_node *my_node;
 
-	while (!empty(my_config.setvar)) {
-		my_node = (struct setvar_node *) dequeue(my_config.setvar);
+	my_node = queue_head(ptree->setvar);
+	while (my_node != NULL) {
 		set_sys_var(my_node->data, my_node->len, my_node->def);
+		my_node = next_node(my_node);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_setvar(
+	struct config_tree *ptree
+	)
+{
+	struct setvar_node *my_node;
+
+	while (NULL != (my_node = dequeue(ptree->setvar))) {
 		free(my_node->data);
 		free_node(my_node);
 	}
-	DESTROY_QUEUE(my_config.setvar);
 }
+#endif	/* DEBUG */
+
 
 static void
-config_ttl(void)
+config_ttl(
+	struct config_tree *ptree
+	)
 {
 	int i = 0;
 	int *curr_ttl;
 
-	while (!empty(my_config.ttl)) {
-		curr_ttl = (int *) dequeue(my_config.ttl);
-		if (i < MAX_TTL)
+	curr_ttl = queue_head(ptree->ttl);
+	while (curr_ttl != NULL) {
+		if (i < COUNTOF(sys_ttl))
 			sys_ttl[i++] = (u_char)*curr_ttl;
 		else
 			msyslog(LOG_INFO,
 				"ttl: Number of TTL entries exceeds %d. Ignoring TTL %d...",
-				MAX_TTL, *curr_ttl);
+				COUNTOF(sys_ttl), *curr_ttl);
 
-		free_node(curr_ttl);
+		curr_ttl = next_node(curr_ttl);
 	}
 	sys_ttlmax = i - 1;
 }
 
-static void
-config_trap(void)
-{
 
+#ifdef DEBUG
+static void
+free_config_ttl(
+	struct config_tree *ptree
+	)
+{
+	/* coming DESTROY_QUEUE(ptree->ttl) is enough */
+}
+#endif	/* DEBUG */
+
+
+static void
+config_trap(
+	struct config_tree *ptree
+	)
+{
 	struct addr_opts_node *curr_trap;
 	struct attr_val *curr_opt;
 	sockaddr_u addr_sock;
@@ -1654,12 +2823,12 @@ config_trap(void)
 	localaddr = NULL;
 
 
-	while (!empty(my_config.trap)) {
+	curr_trap = queue_head(ptree->trap);
+	while (!empty(ptree->trap)) {
 		err_flag = 0;
-		curr_trap = dequeue(my_config.trap);
 
-		while (!empty(curr_trap->options)) {
-			curr_opt = dequeue(curr_trap->options);
+		curr_opt = queue_head(curr_trap->options);
+		while (curr_opt != NULL) {
 			if (T_Port == curr_opt->attr) {
 				if (curr_opt->value.i < 1 
 				    || curr_opt->value.i > USHRT_MAX) {
@@ -1688,15 +2857,12 @@ config_trap(void)
 
 				if (NULL == localaddr) {
 					msyslog(LOG_ERR,
-						"can't find interface "
-						"with address %s",
+						"can't find interface with address %s",
 						stoa(&addr_sock));
 					err_flag = 1;
 				}
-
-				destroy_address_node(addr_node);
 			}
-			free_node(curr_opt);
+			curr_opt = next_node(curr_opt);
 		}
 
 		/* Now process the trap for the specified interface
@@ -1726,13 +2892,42 @@ config_trap(void)
 					"can't set trap for %s",
 					stoa(&peeraddr));
 		}
+		curr_trap = next_node(curr_trap);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_trap(
+	struct config_tree *ptree
+	)
+{
+	struct addr_opts_node *curr_trap;
+	struct attr_val *curr_opt;
+	struct address_node *addr_node;
+
+	while (NULL != (curr_trap = dequeue(ptree->trap))) {
+		while (NULL != 
+		       (curr_opt = dequeue(curr_trap->options))) {
+
+			if (T_Interface == curr_opt->attr) {
+				addr_node = curr_opt->value.p;
+				destroy_address_node(addr_node);
+			}
+			free_node(curr_opt);
+		}
 		DESTROY_QUEUE(curr_trap->options);
 		free_node(curr_trap);
 	}
 }
+#endif	/* DEBUG */
+
 
 static void
-config_fudge(void)
+config_fudge(
+	struct config_tree *ptree
+	)
 {
 	struct addr_opts_node *curr_fudge;
 	struct attr_val *curr_opt;
@@ -1741,9 +2936,8 @@ config_fudge(void)
 	struct refclockstat clock_stat;
 	int err_flag;
 
-
-	while (!empty(my_config.fudge)) {
-		curr_fudge = (struct addr_opts_node *) dequeue(my_config.fudge);
+	curr_fudge = queue_head(ptree->fudge);
+	while (curr_fudge != NULL) {
 		err_flag = 0;
 
 		/* Get the reference clock address and
@@ -1751,68 +2945,72 @@ config_fudge(void)
 		 */
 		addr_node = curr_fudge->addr;
 		ZERO_SOCK(&addr_sock);
-		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF) != 1)
+		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF)
+		    != 1)
 			err_flag = 1;
 
 		if (!ISREFCLOCKADR(&addr_sock)) {
 			msyslog(LOG_ERR,
-				"%s is inappropriate address for the fudge command, line ignored",
+				"inappropriate address %s for the fudge command, line ignored",
 				stoa(&addr_sock));
 			err_flag = 1;
 		}
 
 		/* Parse all the options to the fudge command */
 		memset(&clock_stat, 0, sizeof(clock_stat));
-		while (!empty(curr_fudge->options)) {
-			curr_opt = (struct attr_val *) dequeue(curr_fudge->options);
-
+		curr_opt = queue_head(curr_fudge->options);
+		while (curr_opt != NULL) {
 			/* The attribute field is used to store the flag.
 			 * Set haveflags with it
 			 */
 			clock_stat.haveflags |= curr_opt->attr;
 			switch (curr_opt->attr) {
-			    case CLK_HAVETIME1:
+			case CLK_HAVETIME1:
 				clock_stat.fudgetime1 = curr_opt->value.d;
 				break;
-			    case CLK_HAVETIME2:
+			case CLK_HAVETIME2:
 				clock_stat.fudgetime2 = curr_opt->value.d;
 				break;
-			    case CLK_HAVEVAL1:
+			case CLK_HAVEVAL1:
 				clock_stat.fudgeval1 = curr_opt->value.i;
 				break;
-			    case CLK_HAVEVAL2:
+			case CLK_HAVEVAL2:
 				memcpy(&clock_stat.fudgeval2,
 				       curr_opt->value.s,
 				       min(strlen(curr_opt->value.s), 4));
-				free(curr_opt->value.s);
 				break;
-			    case CLK_HAVEFLAG1:
+			case CLK_HAVEFLAG1:
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG1;
 				else
 					clock_stat.flags &= ~CLK_FLAG1;
 				break;
-			    case CLK_HAVEFLAG2:
+			case CLK_HAVEFLAG2:
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG2;
 				else
 					clock_stat.flags &= ~CLK_FLAG2;
 				break;
-			    case CLK_HAVEFLAG3:
+			case CLK_HAVEFLAG3:
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG3;
 				else
 					clock_stat.flags &= ~CLK_FLAG3;
 				break;
-			    case CLK_HAVEFLAG4:
+			case CLK_HAVEFLAG4:
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG4;
 				else
 					clock_stat.flags &= ~CLK_FLAG4;
 				break;
+			default:
+				msyslog(LOG_ERR,
+					"Unexpected fudge internal flag 0x%x for %s\n",
+					curr_opt->attr, stoa(&addr_sock));
+				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
 
-			free_node(curr_opt);
+			curr_opt = next_node(curr_opt);
 		}
 
 #ifdef REFCLOCK
@@ -1821,51 +3019,76 @@ config_fudge(void)
 					 (struct refclockstat *)0);
 #endif
 
+		curr_fudge = next_node(curr_fudge);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_fudge(
+	struct config_tree *ptree
+	)
+{
+	struct addr_opts_node *curr_fudge;
+	struct attr_val *curr_opt;
+
+	while (NULL != (curr_fudge = dequeue(ptree->fudge))) {
+		while (NULL != (curr_opt = dequeue(curr_fudge->options))) {
+			
+			switch (curr_opt->attr) {
+			case CLK_HAVEVAL2:
+				free(curr_opt->value.s);
+			}
+
+			free_node(curr_opt);
+		}
+
 		DESTROY_QUEUE(curr_fudge->options);
 		free_node(curr_fudge);
 	}
 }
+#endif	/* DEBUG */
+
 
 static void
-config_vars(void)
+config_vars(
+	struct config_tree *ptree
+	)
 {
 	struct attr_val *curr_var;
 	FILE *new_file;
 
-	while (!empty(my_config.vars)) {
-		curr_var = (struct attr_val *) dequeue(my_config.vars);
+	curr_var = queue_head(ptree->vars);
+	while (curr_var != NULL) {
 		/* Determine which variable to set and set it */
 		switch (curr_var->attr) {
-		    case T_Broadcastdelay:
+		case T_Broadcastdelay:
 			proto_config(PROTO_BROADDELAY, 0, curr_var->value.d, NULL);
 			break;
-		    case T_Calldelay:
+		case T_Calldelay:
 			proto_config(PROTO_CALLDELAY, curr_var->value.i, 0, NULL);
 			break;
-		    case T_Tick:
+		case T_Tick:
 			proto_config(PROTO_ADJ, 0, curr_var->value.d, NULL);
 			break;
-		    case T_Driftfile:
-			if (!strcmp(curr_var->value.s, "\0")) {
+		case T_Driftfile:
+			if ('\0' == curr_var->value.s[0]) {
 				stats_drift_file = 0;
 				msyslog(LOG_INFO, "config: driftfile disabled\n");
-			} else {
+			} else
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
-				free(curr_var->value.s);
-			}
 			break;
-		    case T_WanderThreshold:
+		case T_WanderThreshold:
 			wander_threshold = curr_var->value.d;
 			break;
-		    case T_Leapfile:
+		case T_Leapfile:
 			stats_config(STATS_LEAP_FILE, curr_var->value.s);
-			free(curr_var->value.s);
 			break;
-		    case T_Pidfile:
+		case T_Pidfile:
 			stats_config(STATS_PID_FILE, curr_var->value.s);
-			free(curr_var->value.s);
 			break;
-		    case T_Logfile:
+		case T_Logfile:
 			new_file = fopen(curr_var->value.s, "a");
 			if (new_file != NULL) {
 				NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
@@ -1881,17 +3104,46 @@ config_vars(void)
 				msyslog(LOG_ERR,
 					"Cannot open log file %s",
 					curr_var->value.s);
-			free(curr_var->value.s);
 			break;
+
+		case T_Automax:
 #ifdef OPENSSL
-		    case T_Automax:
 			sys_automax = curr_var->value.i;
-			break;
 #endif
+			break;
+
+		default:
+			msyslog(LOG_ERR,
+				"config_vars(): unexpected token %d",
+				curr_var->attr);
+		}
+		curr_var = next_node(curr_var);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_vars(
+	struct config_tree *ptree
+	)
+{
+	struct attr_val *curr_var;
+
+	while (NULL != (curr_var = dequeue(ptree->vars))) {
+		/* Determine which variable to set and set it */
+		switch (curr_var->attr) {
+		case T_Driftfile:
+		case T_Leapfile:
+		case T_Pidfile:
+		case T_Logfile:
+			free(curr_var->value.s);
 		}
 		free_node(curr_var);
 	}
 }
+#endif	/* DEBUG */
+
 
 /* Define a function to check if a resolved address is sane.
  * If yes, return 1, else return 0;
@@ -1959,7 +3211,9 @@ get_correct_host_mode(
 }
 
 static void
-config_peers(void)
+config_peers(
+	struct config_tree *ptree
+	)
 {
 	struct addrinfo *res, *res_bak;
 	sockaddr_u peeraddr;
@@ -1969,9 +3223,8 @@ config_peers(void)
 	int no_needed;
 	int i;
 
-	while (!empty(my_config.peers)) {
-		curr_peer = (struct peer_node *) dequeue(my_config.peers);
-
+	curr_peer = queue_head(ptree->peers);
+	while (curr_peer != NULL) {
 		/* Find the number of associations needed.
 		 * If a pool coomand is specified, then sys_maxclock needed
 		 * else, only one is needed
@@ -2044,15 +3297,31 @@ config_peers(void)
 			}
 			freeaddrinfo(res_bak);
 		}
+		curr_peer = next_node(curr_peer);
+	}
+}
 
-		/* Ok, everything done. Free up peer node memory */
+
+#ifdef DEBUG
+static void
+free_config_peers(
+	struct config_tree *ptree
+	)
+{
+	struct peer_node *curr_peer;
+
+	while (NULL != (curr_peer = dequeue(ptree->peers))) {
 		destroy_address_node(curr_peer->addr);
 		free_node(curr_peer);
 	}
 }
+#endif	/* DEBUG */
+
 
 static void
-config_unpeers(void)
+config_unpeers(
+	struct config_tree *ptree
+	)
 {
 	struct addrinfo *res, *res_bak;
 	sockaddr_u peeraddr;
@@ -2061,8 +3330,8 @@ config_unpeers(void)
 	int status;
 	int found;
 
-	while (!empty(my_config.unpeers)) {
-		curr_unpeer = (struct unpeer_node *) dequeue(my_config.unpeers);
+	while (!empty(ptree->unpeers)) {
+		curr_unpeer = (struct unpeer_node *) dequeue(ptree->unpeers);
 
 		/*
 		 * Either AssocID will be zero, and we unpeer by name/
@@ -2142,9 +3411,28 @@ config_unpeers(void)
 	}
 }
 
+
+#ifdef DEBUG
+static void
+free_config_unpeers(
+	struct config_tree *ptree
+	)
+{
+	struct unpeer_node *curr_unpeer;
+
+	while (NULL != (curr_unpeer = dequeue(ptree->unpeers))) {
+		destroy_address_node(curr_unpeer->addr);
+		free_node(curr_unpeer);
+	}
+}
+#endif	/* DEBUG */
+
+
 #ifdef SIM
 static void
-config_sim(void)
+config_sim(
+	struct config_tree *ptree
+	)
 {
 	int i;
 	server_info *serv_info;
@@ -2153,7 +3441,7 @@ config_sim(void)
 	/* Check if a simulate block was found in the configuration code.
 	 * If not, return an error and exit
 	 */
-	if (NULL == my_config.sim_details) {
+	if (NULL == ptree->sim_details) {
 		fprintf(stderr, "ERROR!! I couldn't find a \"simulate\" block for configuring the simulator.\n");
 		fprintf(stderr, "\tCheck your configuration file.\n");
 		exit(1);
@@ -2162,8 +3450,8 @@ config_sim(void)
 	/* Process the initialization statements
 	 * -------------------------------------
 	 */
-	while (!empty(my_config.sim_details->init_opts)) {
-		init_stmt = dequeue(my_config.sim_details->init_opts);
+	init_stmt = queue_head(ptree->sim_details->init_opts);
+	while (init_stmt != NULL) {
 
 		switch(init_stmt->attr) {
 
@@ -2181,21 +3469,20 @@ config_sim(void)
 				init_stmt->attr);
 			exit(1);
 		}
-		free_node(init_stmt);
+		init_stmt = next_node(init_stmt);
 	}
-	DESTROY_QUEUE(my_config.sim_details->init_opts);
 
 
 	/* Process the server list
 	 * -----------------------
 	 */
 	simulation.num_of_servers = 
-		get_no_of_elements(my_config.sim_details->servers);
+		get_no_of_elements(ptree->sim_details->servers);
 	simulation.servers = emalloc(simulation.num_of_servers 
 				     * sizeof(server_info));
 
+	serv_info = queue_head(ptree->sim_details->servers);
 	for (i = 0;i < simulation.num_of_servers; i++) {
-		serv_info = dequeue(my_config.sim_details->servers);
 		if (NULL == serv_info) {
 			fprintf(stderr, "Simulator server list is corrupt\n");
 			exit(1);
@@ -2203,19 +3490,38 @@ config_sim(void)
 			memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
 			free_node(serv_info);
 		}
+		serv_info = next_node(serv_info);
 	}
-	DESTROY_QUEUE(my_config.sim_details->servers);
-
-	/* Free the sim_node memory and set the sim_details as NULL */
-	free_node(my_config.sim_details);
-	my_config.sim_details = NULL;
 
 	/* Create server associations */
 	printf("Creating server associations\n");
 	create_server_associations();
 	fprintf(stderr,"\tServer associations successfully created!!\n");
 }
-#endif /* SIM */
+
+
+#ifdef DEBUG
+static void
+free_config_sim(
+	struct config_tree *ptree
+	)
+{
+	server_info *serv_info;
+	struct attr_val *init_stmt;
+
+	if (NULL == ptree->sim_details)
+		return;
+
+	DESTROY_QUEUE(ptree->sim_details->init_opts);
+	DESTROY_QUEUE(ptree->sim_details->servers);
+
+	/* Free the sim_node memory and set the sim_details as NULL */
+	free_node(ptree->sim_details);
+	ptree->sim_details = NULL;
+}
+#endif	/* DEBUG */
+#endif	/* SIM */
+
 
 /* Define two different config functions. One for the daemon and the other for
  * the simulator. The simulator ignores a lot of the standard ntpd configuration
@@ -2223,64 +3529,75 @@ config_sim(void)
  */
 
 static void
-config_ntpd(void)
+config_ntpd(
+	struct config_tree *ptree
+	)
 {
-	config_monitor();
-	config_auth();
-	config_tos();
-	config_access();
-	config_tinker();
-	config_system_opts();
-	config_logconfig();
-	config_phone();
-	config_setvar();
-	config_ttl();
-	config_trap();
-	config_vars();
-	config_other_modes();
-	config_peers();
-	config_unpeers();
-	config_fudge();
-	config_qos();
+	config_monitor(ptree);
+	config_auth(ptree);
+	config_tos(ptree);
+	config_access(ptree);
+	config_tinker(ptree);
+	config_system_opts(ptree);
+	config_logconfig(ptree);
+	config_phone(ptree);
+	config_setvar(ptree);
+	config_ttl(ptree);
+	config_trap(ptree);
+	config_vars(ptree);
+	config_other_modes(ptree);
+	config_peers(ptree);
+	config_unpeers(ptree);
+	config_fudge(ptree);
+	config_qos(ptree);
 }
 
 #ifdef SIM
 static void
-config_ntpdsim(void)
+config_ntpdsim(
+	struct config_tree *ptree
+	)
 {
 	printf("Configuring Simulator...\n");
 	printf("Some ntpd-specific commands in the configuration file will be ignored.\n");
 
-	config_tos();
-	config_monitor();
-	config_tinker();
-	config_system_opts();
-	config_logconfig();
-	config_vars();
-	config_sim();
+	config_tos(ptree);
+	config_monitor(ptree);
+	config_tinker(ptree);
+	config_system_opts(ptree);
+	config_logconfig(ptree);
+	config_vars(ptree);
+	config_sim(ptree);
 }
 #endif /* SIM */
 
+
+/*
+ * config_remotely() - implements ntpd side of ntpq :config
+ */
 void
 config_remotely(void)
 {
 	input_from_file = 0;
 
 	key_scanner = create_keyword_scanner(keyword_list);
+	init_syntax_tree(&cfgt);
 	yyparse();
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
+	cfgt.source.attr = CONF_SOURCE_NTPQ;
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
-	config_ntpd();
+	save_and_apply_config_tree();
 
 	input_from_file = 1;
 }
 
 
-/* ACTUAL getconfig code */
-
+/*
+ * getconfig() - process startup configuration file e.g /etc/ntp.conf
+ */
 void
 getconfig(
 	int argc,
@@ -2354,31 +3671,35 @@ getconfig(
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
 			return;
 		}
+		else {
+			cfgt.source.value.s = (char *) emalloc(strlen(alt_config_file));
+			strcpy(cfgt.source.value.s, alt_config_file);
+		}
+
 #else  /* not SYS_WINNT */
 		return;
 #endif /* not SYS_WINNT */
 	}
+	else {
+		cfgt.source.value.s = (char *) emalloc(strlen(config_file));
+		strcpy(cfgt.source.value.s, config_file);
+	}
 
 	/*** BULK OF THE PARSER ***/
 	ip_file = fp[curr_include_level];
-	init_syntax_tree();
+	init_syntax_tree(&cfgt);
 	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
+	
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
-	/* The actual configuration done depends on whether we are configuring the
-	 * simulator or the daemon. Perform a check and call the appropriate
-	 * function as needed.
-	 */
+	cfgt.source.attr = CONF_SOURCE_FILE;	
+	cfgt.timestamp = time(NULL);
 
-#ifndef SIM
-	config_ntpd();
-#else
-	config_ntpdsim();
-#endif
+	save_and_apply_config_tree();
 
 	while (curr_include_level != -1) {
 		FCLOSE(fp[curr_include_level--]);
@@ -2403,6 +3724,35 @@ getconfig(
 	}
 }
 
+
+void
+save_and_apply_config_tree(void)
+{
+	struct config_tree *prior;
+
+	/*
+	 * Keep all the configuration trees applied since startup in
+	 * a list that can be used to dump the configuration back to
+	 * a text file.
+	 */
+	prior = emalloc(sizeof(*cfg_tree_history));
+	memcpy(prior, &cfgt, sizeof(*cfg_tree_history));
+	memset(&cfgt, 0, sizeof(cfgt));
+	
+	LINK_TAIL_SLIST_COPY(cfg_tree_history, prior, prior, struct config_tree);
+
+
+	/* The actual configuration done depends on whether we are configuring the
+	 * simulator or the daemon. Perform a check and call the appropriate
+	 * function as needed.
+	 */
+
+#ifndef SIM
+	config_ntpd(cfg_tree_history);
+#else
+	config_ntpdsim(cfg_tree_history);
+#endif
+}
 
 
 /* FUNCTIONS COPIED FROM THE OLDER ntp_config.c
@@ -2487,7 +3837,7 @@ get_netinfo_config(void)
 	ni_status status;
 	void *domain;
 	ni_id config_dir;
-       	struct netinfo_config_state *config;
+	struct netinfo_config_state *config;
 
 	if (ni_open(NULL, ".", &domain) != NI_OK) return NULL;
 
@@ -2505,12 +3855,12 @@ get_netinfo_config(void)
 		return NULL;
 	}
 
-       	config = (struct netinfo_config_state *)malloc(sizeof(struct netinfo_config_state));
-       	config->domain = domain;
-       	config->config_dir = config_dir;
-       	config->prop_index = 0;
-       	config->val_index = 0;
-       	config->val_list = NULL;
+	config = emalloc(sizeof(*config));
+	config->domain = domain;
+	config->config_dir = config_dir;
+	config->prop_index = 0;
+	config->val_index = 0;
+	config->val_list = NULL;
 
 	return config;
 }
@@ -2550,33 +3900,37 @@ gettokens_netinfo (
 	 */
   again:
 	if (!val_list) {
-	       	for (; prop_index < (sizeof(keywords)/sizeof(keywords[0])); prop_index++)
-	       	{
-		       	ni_namelist namelist;
+		for (; prop_index < COUNTOF(keywords); prop_index++)
+		{
+			ni_namelist namelist;
 			struct keyword current_prop = keywords[prop_index];
+			ni_index index;
 
 			/*
 			 * For each value associated in the property, we're going to return
 			 * a separate line. We squirrel away the values in the config state
 			 * so the next time through, we don't need to do this lookup.
 			 */
-		       	NI_INIT(&namelist);
-	       		if (ni_lookupprop(config->domain, &config->config_dir, current_prop.text, &namelist) == NI_OK) {
-				ni_index index;
+			NI_INIT(&namelist);
+			if (NI_OK == ni_lookupprop(config->domain,
+			    &config->config_dir, current_prop.text,
+			    &namelist)) {
 
 				/* Found the property, but it has no values */
 				if (namelist.ni_namelist_len == 0) continue;
 
-				if (! (val_list = config->val_list = (char**)malloc(sizeof(char*) * (namelist.ni_namelist_len + 1))))
-				{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
+				config->val_list = 
+				    emalloc(sizeof(char*) *
+				    (namelist.ni_namelist_len + 1));
+				val_list = config->val_list;
 
-				for (index = 0; index < namelist.ni_namelist_len; index++) {
-					char *value = namelist.ni_namelist_val[index];
-
-					if (! (val_list[index] = (char*)malloc(strlen(value)+1)))
-					{ msyslog(LOG_ERR, "out of memory while configuring"); break; }
-
-					strcpy(val_list[index], value);
+				for (index = 0;
+				     index < namelist.ni_namelist_len;
+				     index++) {
+					char *value;
+					
+					value = namelist.ni_namelist_val[index];
+					val_list[index] = estrdup(value);
 				}
 				val_list[index] = NULL;
 
@@ -2588,14 +3942,14 @@ gettokens_netinfo (
 	}
 
 	/* No list; we're done here. */
-       	if (!val_list) return CONFIG_UNKNOWN;
+	if (!val_list)
+		return CONFIG_UNKNOWN;
 
 	/*
 	 * We have a list of values for the current property.
 	 * Iterate through them and return each in order.
 	 */
-	if (val_list[val_index])
-	{
+	if (val_list[val_index]) {
 		int ntok = 1;
 		int quoted = 0;
 		char *tokens = val_list[val_index];
@@ -2613,8 +3967,10 @@ gettokens_netinfo (
 				break;
 			} else {		/* must be space */
 				*tokens++ = '\0';
-				while (ISSPACE(*tokens)) tokens++;
-				if (ISEOL(*tokens)) break;
+				while (ISSPACE(*tokens))
+					tokens++;
+				if (ISEOL(*tokens))
+					break;
 			}
 		}
 
@@ -2638,7 +3994,9 @@ gettokens_netinfo (
 	/* Free val_list and reset counters. */
 	for (val_index = 0; val_list[val_index]; val_index++)
 		free(val_list[val_index]);
-       	free(val_list);	val_list = config->val_list = NULL; val_index = config->val_index = 0;
+	free(val_list);
+	val_list = config->val_list = NULL;
+	val_index = config->val_index = 0;
 
 	goto again;
 }

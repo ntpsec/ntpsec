@@ -45,11 +45,11 @@ struct FILE_INFO {
 /* SCANNER GLOBAL VARIABLES 
  * ------------------------
  */
-extern struct state *key_scanner;   /* A FSA for recognizing keywords */
-extern struct config_tree my_config;/* Root of the configuration tree */
-extern int curr_include_level;      /* The current include level */
+extern struct state *key_scanner; /* A FSA for recognizing keywords */
+extern struct config_tree cfgt;	  /* Parser output stored here */
+extern int curr_include_level;    /* The current include level */
 
-extern struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
+extern struct FILE_INFO *ip_file; /* Pointer to the configuration file stream */
 
 /* VARIOUS EXTERNAL DECLARATIONS
  * -----------------------------

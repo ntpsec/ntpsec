@@ -63,6 +63,7 @@ static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
 static  void    config          (struct parse *, FILE *);
+static 	void 	dumpcfg		(struct parse *, FILE *);
 static  void    config_from_file (struct parse *, FILE *);
 
 
@@ -70,6 +71,9 @@ static  void    config_from_file (struct parse *, FILE *);
  * Commands we understand.	Ntpdc imports this.
  */
 struct xcmd opcmds[] = {
+	{ "dumpcfg", dumpcfg, { NTP_STR, NO, NO, NO },
+		{ "dumpfile", "", "", ""}, 
+		"dump ntp server configuration"},
 	{ "associations", associations, {  NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "print list of association ID's and statuses for the server's peers" },
@@ -426,7 +430,6 @@ doprintvlist(
 		}
 	}
 }
-
 
 /*
  * addvars - add variables to the variable list
@@ -1138,6 +1141,32 @@ lpassociations(
 	)
 {
 	printassoc(1, fp);
+}
+
+
+/*
+ *  * dumpcfg - dump ntp server configuration
+ */
+static void
+dumpcfg(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	char *datap;
+	int res;
+	int dsize;
+	u_short rstatus;
+
+	/* Is there a way to make an argument optional? */
+	if(pcmd->nargs > 0)
+		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, strlen(pcmd->argval[0].string), 
+			pcmd->argval[0].string, &rstatus, &dsize, &datap);
+	else {
+		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, 0, (char *) 0, 
+			&rstatus, &dsize, &datap);
+		printf("No filename supplied\n");
+	}
 }
 
 

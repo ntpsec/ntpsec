@@ -72,11 +72,41 @@ void free_node(void *my_node)
 }
 
 
+void *
+next_node(
+	void *pv
+	)
+{
+	node *pn;
+
+	pn = pv;
+	pn--;
+
+	if (pn->node_next == NULL)
+		return NULL;
+
+	return pn->node_next + 1;
+}
+
+
 /* Define a function to check if the queue is empty. */
 int empty(queue *my_queue)
 {
     return (!my_queue || !my_queue->front);
 }
+
+
+void *
+queue_head(
+	queue *q
+	)
+{
+	if (NULL == q || NULL == q->front)
+		return NULL;
+		
+	return q->front + 1;
+}
+
 
 /* Define a function to add an element to the priority queue.
  * The element is added according to its priority - 
