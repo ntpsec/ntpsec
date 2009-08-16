@@ -465,6 +465,9 @@ dump_config_tree(
 
 	printf("dump_config_tree(%p)\n", ptree);
 
+	if (ptree->broadcastclient)
+		fprintf(df, "broadcastclient\n");
+
 	list_ptr = queue_head(ptree->peers);
 	for (; 	list_ptr != NULL;
 	 	list_ptr = next_node(list_ptr)) {
@@ -472,9 +475,130 @@ dump_config_tree(
 		peers = (struct peer_node *) list_ptr; 
 		addr = peers->addr;
 		
-		/* Add other attributes to output of struct peer_node */
-		fprintf(df, "peer %s\n", (peers->addr)->address);
-		
+		switch (peers->host_mode) {
+		default:
+			fprintf(df, "# dump error:\n"
+				"# unknown peer token %d for:\n"
+				"peer %s", peers->host_mode,
+				peers->addr->address);
+			break;
+
+		case T_Peer:
+			fprintf(df, "peer %s", peers->addr->address);
+			break;
+
+		case T_Server:
+			fprintf(df, "server %s", peers->addr->address);
+			break;
+
+		case T_Broadcast:
+			fprintf(df, "broadcast %s",
+				peers->addr->address);
+			break;
+
+		case T_Manycastclient:
+			fprintf(df, "manycastclient %s",
+				peers->addr->address);
+			break;
+		}
+
+		atrv = queue_head(peers->options);
+		while (atrv != NULL) {
+			switch (atrv->attr) {
+
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown peer option token %d\n"
+					"# remaining options:",
+					atrv->attr);
+				break;
+
+			case T_Flag:
+				switch (atrv->type) {
+
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown peer flag type %d\n"
+						"# remaining options:",
+						atrv->type);
+					break;
+
+				case T_Integer:
+					switch (atrv->value) {
+
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown peer flag 0x%x\n"
+							"# remaining options:",
+							(unsigned)atrv->value);
+						break;
+
+					case FLAG_SKEY:
+						fprintf(df, " autokey");
+						break;
+
+					case FLAG_BURST:
+						fprintf(df, " burst");
+						break;
+
+					case FLAG_IBURST:
+						fprintf(df, " iburst");
+						break;
+
+					case FLAG_NOSELECT:
+						fprintf(df, " noselect");
+						break;
+
+					case FLAG_PREEMPT:
+						fprintf(df, " preempt");
+						break;
+
+					case FLAG_PREFER:
+						fprintf(df, " prefer");
+						break;
+
+					case FLAG_TRUE:
+						fprintf(df, " true");
+						break;
+
+					case FLAG_XLEAVE:
+						fprintf(df, " xleave");
+						break;
+					}
+					break;
+				}
+				break;
+
+			case T_Bias:
+				fprintf(df, " bias %f", atrv->value.d);
+				break;
+
+			case T_Key:
+				fprintf(df, " key %d", atrv->value.i);
+				break;
+
+			case T_Minpoll:
+				fprintf(df, " minpoll %d", atrv->value.i);
+				break;
+
+			case T_Maxpoll:
+				fprintf(df, " maxpoll %d", atrv->value.i);
+				break;
+
+			case T_Ttl:
+				fprintf(df, " ttl %d", atrv->value.i);
+				break;
+
+			case T_Mode:
+				fprintf(df, " mode %d", atrv->value.i);
+				break;
+
+			case T_Version:
+				fprintf(df, " version %d", atrv->value.i);
+				break;
+			}
+		}
+
 		fudge_ptr = queue_head(ptree->fudge);
 		if (fudge_ptr != NULL) {
 
@@ -1275,7 +1399,7 @@ dump_config_tree(
 				break;
 
 				case T_Driftfile:
-				fprintf(df, "driftfile %s\n", atrv->value.s);
+				fprintf(df, "driftfile \"%s\"\n", atrv->value.s);
 				break;
 			
 		    		case T_WanderThreshold:
@@ -1283,15 +1407,15 @@ dump_config_tree(
 				break;
 	
 		    		case T_Leapfile:
-				fprintf(df, "leapfile %s\n", atrv->value.s);
+				fprintf(df, "leapfile \"%s\"\n", atrv->value.s);
 				break;
 
 				case T_Pidfile:
-				fprintf(df, "pidfile %s\n", atrv->value.s);
+				fprintf(df, "pidfile \"%s\"\n", atrv->value.s);
 				break;
 
 				case T_Logfile:
-				fprintf(df, "logfile %s\n", atrv->value.s);
+				fprintf(df, "logfile \"%s\"\n", atrv->value.s);
 				break;
 #ifdef OPENSSL
 				case T_Automax:
@@ -1439,7 +1563,7 @@ create_address_node(
 		else 
 			my_node->type = default_ai_family;
 
-	return my_node;
+return my_node;
 }
 
 
@@ -1463,7 +1587,7 @@ create_peer_node(
 	queue *options
 	)
 {
-	struct peer_node* my_node;
+	struct peer_node *my_node;
 	struct attr_val *my_val;
 	int errflag = 0;
 
@@ -1481,12 +1605,13 @@ create_peer_node(
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
 	my_node->addr = addr;
+	my_node->options = options;
 
-	while (NULL != options && !empty(options)) {
-		my_val = dequeue(options);
+	my_val = queue_head(options);
+	while (my_val != NULL) {
 
 		/* Check the kind of option being set */
-		switch(my_val->attr) {
+		switch (my_val->attr) {
 
 		case T_Minpoll:
 			if (my_val->value.i < NTP_MINPOLL) {
@@ -1545,9 +1670,9 @@ create_peer_node(
 				my_val->attr);
 			errflag = 1;
 		}
-		free_node(my_val);
+
+		my_val = next_node(my_val);
 	}
-	DESTROY_QUEUE(options);
 
 	/* Check if errors were reported. If yes, ignore the node */
 	if (errflag) {
@@ -1999,7 +2124,7 @@ struct key_tok keyword_list[] = {
 	{ "port",		T_Port,            NO_ARG },
 	{ "interface",		T_Interface,       SINGLE_ARG },
 	{ "qos",		T_Qos,		   NO_ARG },
-/* simulaor commands */
+/* simulator commands */
 	{ "simulate",		T_Simulate,        NO_ARG },
 	{ "simulation_duration",T_Sim_Duration,	   NO_ARG },
 	{ "beep_delay",		T_Beep_Delay,      NO_ARG },
@@ -3204,9 +3329,7 @@ get_correct_host_mode(
 		return MODE_BROADCAST;
 		break;
 	    default:
-		fprintf(stderr, "Fatal error in client_type in ntp_config.y");
-		exit(1);
-		break;
+		return -1;
 	}
 }
 
@@ -3229,10 +3352,13 @@ config_peers(
 		 * If a pool coomand is specified, then sys_maxclock needed
 		 * else, only one is needed
 		 */
-		no_needed = (curr_peer->host_mode == T_Pool) ? sys_maxclock : 1;
+		no_needed = (T_Pool == curr_peer->host_mode)
+				? sys_maxclock
+				: 1;
 
 		/* Find the correct host-mode */
 		hmode = get_correct_host_mode(curr_peer->host_mode);
+		NTP_INSIST(hmode != -1);
 
 		/* Attempt to resolve the address */
 		ZERO_SOCK(&peeraddr);
@@ -3312,6 +3438,7 @@ free_config_peers(
 
 	while (NULL != (curr_peer = dequeue(ptree->peers))) {
 		destroy_address_node(curr_peer->addr);
+		DESTROY_QUEUE(curr_peer->options);
 		free_node(curr_peer);
 	}
 }
@@ -3647,6 +3774,8 @@ getconfig(
 
 	getCmdOpts(argc, argv);
 
+	init_syntax_tree(&cfgt);
+
 	curr_include_level = 0;
 	if (
 		(fp[curr_include_level] = F_OPEN(FindConfig(config_file), "r")) == NULL
@@ -3669,25 +3798,20 @@ getconfig(
 
 			fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(alt_config_file));
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
+
 			return;
 		}
-		else {
-			cfgt.source.value.s = (char *) emalloc(strlen(alt_config_file));
-			strcpy(cfgt.source.value.s, alt_config_file);
-		}
+		cfgt.source.value.s = estrdup(alt_config_file);
 
 #else  /* not SYS_WINNT */
 		return;
 #endif /* not SYS_WINNT */
 	}
-	else {
-		cfgt.source.value.s = (char *) emalloc(strlen(config_file));
-		strcpy(cfgt.source.value.s, config_file);
-	}
+	else
+		cfgt.source.value.s = estrdup(config_file);
 
 	/*** BULK OF THE PARSER ***/
 	ip_file = fp[curr_include_level];
-	init_syntax_tree(&cfgt);
 	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
 	

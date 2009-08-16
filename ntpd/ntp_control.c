@@ -553,26 +553,43 @@ dump_config(
 		int restrict_mask
 		)
 {
-	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */	
+	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */
+	char fullpath[MAX_PATH + 1];
 	char filename[80];
 	char reply[80];
 	FILE *fptr;
 
-	if ((reqend - reqpt) == 0)
-		snprintf(filename, sizeof(filename), "ntp_dump%i.conf", time(NULL));
-	else {
+	if (reqend - reqpt) {
 		strncpy(filename, reqpt, sizeof(filename));
 		filename[sizeof(filename) - 1] = 0;
-	}
+		if (NULL != strchr(filename, '/')
+		    || NULL != strchr(filename, '\\'))
+			snprintf(filename, sizeof(filename), 
+				 "ntp_dump%i.conf", time(NULL));
+	} else
+		snprintf(filename, sizeof(filename), "ntp_dump%i.conf",
+			 time(NULL));
 
-	fptr = fopen(filename, "w+");
+#ifndef SYS_WINNT
+	snprintf(fullpath, sizeof(fullpath), "/var/tmp/%s", filename);
+#else
+	snprintf(fullpath, sizeof(fullpath), "%s\\%s", getenv("TEMP"),
+		 filename);
+#endif
 
-	if (dump_all_config_trees(fptr) == -1) 
-		snprintf(reply, sizeof(reply), "Couldn't dump to file %s", filename);
+	fptr = fdopen(
+		open(fullpath, O_CREAT | O_TRUNC | O_EXCL | O_WRONLY, 0600), 
+		"w");
+
+	if (NULL == fptr || -1 == dump_all_config_trees(fptr))
+		snprintf(reply, sizeof(reply), "Couldn't dump to file %s",
+			 fullpath);
 	else
-		snprintf(reply, sizeof(reply), "Dumped to config file %s", filename);
+		snprintf(reply, sizeof(reply), "Dumped to config file %s",
+			 fullpath);
 
-	fclose(fptr);
+	if (NULL != fptr)
+		fclose(fptr);
 
 	ctl_putdata(reply, strlen(reply), 0);
 	ctl_flushpkt(0);

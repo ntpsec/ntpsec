@@ -79,6 +79,7 @@ struct restrict_node {
 struct peer_node {
     int host_mode;
     struct address_node *addr;
+    queue *options;
     int minpoll;
     int maxpoll;
     int ttl;
@@ -124,11 +125,6 @@ struct addr_opts_node {
 struct sim_node {
     queue *init_opts;
     queue *servers;
-};
-
-enum broadcastclienttype {
-    SIMPLE = 1,
-    NOVOLLEY
 };
 
 

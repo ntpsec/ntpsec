@@ -147,7 +147,6 @@
 %token			T_Noserve
 %token			T_Notrap
 %token			T_Notrust
-%token			T_Novolley
 %token			T_Ntp
 %token			T_Ntpport
 %token			T_NtpSignDsocket
@@ -406,9 +405,7 @@ unpeer_keyword
 
 other_mode_command
 	:	T_Broadcastclient
-			{ cfgt.broadcastclient = SIMPLE; }
-	|	T_Broadcastclient T_Novolley
-			{ cfgt.broadcastclient = NOVOLLEY; }
+			{ cfgt.broadcastclient = 1; }
 	|	T_Manycastserver address_list
 			{ append_queue(cfgt.manycastserver, $2); }
 	|	T_Multicastclient address_list
