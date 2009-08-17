@@ -1,3 +1,4 @@
+* [Bug 1286] dumpcfg omits statsdir, mangles filegen.
 (4.2.5p204) 2009/08/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1284] infinite loop in ntpd dumping more than one trustedkey
 (4.2.5p203) 2009/08/16 Released by Harlan Stenn <stenn@ntp.org>

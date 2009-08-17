@@ -511,6 +511,200 @@ dump_config_tree(
 
 	printf("dump_config_tree(%p)\n", ptree);
 
+	/* For options I didn't find documentation I'll just output its name and the cor. value */
+	list_ptr = queue_head(ptree->vars);
+	if (list_ptr != NULL) {
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown vars token %d\n",
+					atrv->attr);
+				break;
+
+				case T_Broadcastdelay:
+				fprintf(df, "broadcastdelay %g\n", atrv->value.d);
+				break;
+				
+				case T_Calldelay:
+				fprintf(df, "calldelay %i\n", atrv->value.i);
+				break;
+
+				case T_Tick:
+				fprintf(df, "tick %g\n", atrv->value.d);
+				break;
+
+				case T_Driftfile:
+				fprintf(df, "driftfile \"%s\"\n", atrv->value.s);
+				break;
+			
+		    		case T_WanderThreshold:
+				fprintf(df, "wander_threshold %g\n", atrv->value.d);
+				break;
+	
+		    		case T_Leapfile:
+				fprintf(df, "leapfile \"%s\"\n", atrv->value.s);
+				break;
+
+				case T_Pidfile:
+				fprintf(df, "pidfile \"%s\"\n", atrv->value.s);
+				break;
+
+				case T_Logfile:
+				fprintf(df, "logfile \"%s\"\n", atrv->value.s);
+				break;
+#ifdef OPENSSL
+				case T_Automax:
+				fprintf(df, "automax %i\n", atrv->value.i);
+				break;
+#endif
+			}
+		}
+	}
+
+	list_ptr = queue_head(ptree->logconfig);
+	if (list_ptr != NULL) {
+		
+		fprintf(df, "logconfig");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+			atrv = (struct attr_val *) list_ptr;
+
+			fprintf(df, " %c%s", atrv->attr, atrv->value.s);
+		}
+		fprintf(df, "\n");
+	}
+
+	if (ptree->stats_dir)
+		fprintf(df, "statsdir \"%s\"\n", ptree->stats_dir);
+
+	list_ptr = queue_head(ptree->stats_list);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "statistics");
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			string = (char **) list_ptr;
+				
+			/* FIXME Find keyword and type of information */
+			
+			fprintf(df, " %s", *string);	
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->filegen_opts);
+	if (list_ptr != NULL) {
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			fgen_node = list_ptr;
+			fprintf(df, "filegen %s", fgen_node->name);
+
+			opt_ptr = queue_head(fgen_node->options);
+
+			for(;	opt_ptr != NULL;
+				opt_ptr = next_node(opt_ptr)) {
+				
+				atrv = (struct attr_val *) opt_ptr;
+
+				switch (atrv->attr) {
+
+				default:
+					fprintf(df, "\n# dump error:\n"
+						"# unknown filegen option token %d\n"
+						"filegen %s",
+						atrv->type,
+						fgen_node->name);
+					break;
+
+				case T_File:
+					fprintf(df, " file %s", atrv->value.s);
+					break;
+
+				case T_Type:
+					fprintf(df, " type ");
+
+					switch (atrv->value.i) {
+
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown filegen type %d\n"
+							"filegen %s type ",
+							atrv->value.i,
+							fgen_node->name);
+						break;
+
+						case FILEGEN_NONE:
+						fprintf(df, "none");
+						break;
+
+						case FILEGEN_DAY:
+						fprintf(df, "day");
+						break;
+
+						case FILEGEN_MONTH:
+						fprintf(df, "month");
+						break;
+
+						case FILEGEN_PID:
+						fprintf(df, "pid");
+						break;
+
+						case FILEGEN_WEEK:
+						fprintf(df, "week");
+						break;
+
+						case FILEGEN_YEAR:
+						fprintf(df, "year");
+						break;
+					}
+					break;
+
+					case T_Flag:
+					switch (atrv->value.i) {
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown filegen flag token %d\n"
+							"filegen %s",
+							atrv->value.i,
+							fgen_node->name);
+						break;
+
+						case T_Link:
+						fprintf(df, " link");
+						break;
+
+						case T_Nolink:
+						fprintf(df, " nolink");
+						break;
+
+						case T_Enable:
+						fprintf(df, " enable");
+						break;
+
+						case T_Disable:
+						fprintf(df, " disable");
+						break;
+					}
+					break;
+				}
+
+			}
+
+			fprintf(df, "\n");
+		}
+	}
+
 	if (NULL != ptree->auth.keysdir)
 		fprintf(df, "keysdir \"%s\"\n", ptree->auth.keysdir);
 
@@ -531,6 +725,223 @@ dump_config_tree(
 
 	if (ptree->auth.request_key)
 		fprintf(df, "requestkey %d\n", ptree->auth.request_key);
+
+	list_ptr = queue_head(ptree->enable_opts);
+	if (list_ptr != NULL) {
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			fprintf(df, "enable");
+
+			switch (atrv->value.i) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown enable token %d\n"
+					"enable", atrv->value.i);
+				break;
+
+				case PROTO_AUTHENTICATE: 
+				fprintf(df, " auth");	
+				break;
+
+				case PROTO_BROADCLIENT: 
+				fprintf(df, " bclient");
+				break;
+
+				case PROTO_CAL: 
+				fprintf(df, " calibrate");
+				break;
+
+				case PROTO_KERNEL: 
+				fprintf(df, " kernel");
+				break;
+
+				case PROTO_MONITOR: 
+				fprintf(df, " monitor");
+				break;
+
+				case PROTO_NTP: 
+				fprintf(df, " ntp");
+				break;
+
+				case PROTO_FILEGEN: 
+				fprintf(df, " stats");
+				break;
+			}
+		}
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->disable_opts);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "disable");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->value.i) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown disable token %d\n"
+					"disable", atrv->value.i);
+				break;
+
+				case PROTO_AUTHENTICATE: 
+				fprintf(df, " auth");	
+				break;
+
+				case PROTO_BROADCLIENT: 
+				fprintf(df, " bclient");
+				break;
+
+				case PROTO_CAL: 
+				fprintf(df, " calibrate");
+				break;
+
+				case PROTO_KERNEL: 
+				fprintf(df, " kernel");
+				break;
+
+				case PROTO_MONITOR: 
+				fprintf(df, " monitor");
+				break;
+
+				case PROTO_NTP: 
+				fprintf(df, " ntp");
+				break;
+
+				case PROTO_FILEGEN: 
+				fprintf(df, " stats");
+				break;
+			}
+		}
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->orphan_cmds);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "tos");
+
+		for(; 	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown tos token %d\n"
+					"tos", atrv->attr);
+				break;
+
+			case PROTO_CEILING:
+				fprintf(df, " ceiling %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_FLOOR:
+				fprintf(df, " floor %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_COHORT:
+				fprintf(df, " cohort %d", !!(atrv->value.d));
+				break;
+
+			case PROTO_ORPHAN:
+				fprintf(df, " orphan %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_MINDISP:
+				fprintf(df, " mindist %g", atrv->value.d);
+				break;
+				
+			case PROTO_MAXDIST:
+				fprintf(df, " maxdist %g", atrv->value.d);
+				break;
+
+			case PROTO_MINCLOCK:
+				fprintf(df, " minclock %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_MAXCLOCK:
+				fprintf(df, " maxclock %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_MINSANE:
+				fprintf(df, " minsane %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_BEACON:
+				fprintf(df, " beacon %d", (int)atrv->value.d);
+				break;
+
+			case PROTO_MAXHOP:
+				fprintf(df, " maxhop %d", (int)atrv->value.d);
+				break;
+			}
+		}
+
+		fprintf(df, "\n");
+	}
+
+	list_ptr = queue_head(ptree->tinker);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "tinker");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = (struct attr_val *) list_ptr;
+
+			switch (atrv->attr) {
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown tinker token %d\n"
+					"tinker", atrv->attr);
+				break;
+
+				case LOOP_MAX:
+				     fprintf(df, " step");
+				     break;
+
+				case LOOP_PANIC:
+				     fprintf(df, " panic");
+				     break;
+
+				case LOOP_PHI:
+				     fprintf(df, " dispersion");
+				     break;
+
+				case LOOP_MINSTEP:
+				     fprintf(df, " stepout");
+				     break;
+
+				case LOOP_ALLAN:
+				     fprintf(df, " allan");
+				     break;
+
+				case LOOP_HUFFPUFF:
+				     fprintf(df, " huffpuff");
+				     break;
+
+				case LOOP_FREQ:
+				     fprintf(df, " freq");
+				     break;
+			}
+
+			fprintf(df, " %g", atrv->value.d);
+		}
+
+		fprintf(df, "\n");
+	}
 
 	if (ptree->broadcastclient)
 		fprintf(df, "broadcastclient\n");
@@ -713,6 +1124,7 @@ dump_config_tree(
 						atrv = (struct attr_val *) opts; 
 					
 						switch (atrv->attr) {
+
 						default:
 							fprintf(df, "\n# dump error:\n"
 								"# unknown fudge CLK_ value %d\n"
@@ -720,19 +1132,19 @@ dump_config_tree(
 								addr_opts->addr->address);
 							break;
 
-							case CLK_HAVETIME1:
+						case CLK_HAVETIME1:
 							fprintf(df, " time1 %g", atrv->value.d);
 							break;
 					
-							case CLK_HAVETIME2:
+						case CLK_HAVETIME2:
 							fprintf(df, " time2 %g", atrv->value.d);
 							break;
 			
-							case CLK_HAVEVAL1:
+						case CLK_HAVEVAL1:
 							fprintf(df, " stratum %i", atrv->value.i);
 							break;
 
-							case CLK_HAVEVAL2:
+						case CLK_HAVEVAL2:
 							memset(refid, 0, sizeof(refid));
 							memcpy(refid, atrv->value.s,
 							    min(strlen(atrv->value.s), 4));
@@ -740,37 +1152,23 @@ dump_config_tree(
 							fprintf(df, " refid %s", refid);
 							break;
 
-							case CLK_HAVEFLAG1:
-							if (atrv->value.i)
-								fprintf(df, " flag1 1");
-							else 
-								fprintf(df, " flag1 0");
+						case CLK_HAVEFLAG1:
+							fprintf(df, " flag1 %d", !!atrv->value.i);
 							break;
 				    
-							case CLK_HAVEFLAG2:
-							if (atrv->value.i)
-								fprintf(df, " flag2 1");
-							else 
-								fprintf(df, " flag2 0");
+						case CLK_HAVEFLAG2:
+							fprintf(df, " flag2 %d", !!atrv->value.i);
 							break;
 
-							case CLK_HAVEFLAG3:
-							if (atrv->value.i)
-								fprintf(df, " flag3 1");
-							else 
-								fprintf(df, " flag3 0");
-
+						case CLK_HAVEFLAG3:
+							fprintf(df, " flag3 %d", !!atrv->value.i);
 							break;
 
-							case CLK_HAVEFLAG4:
-							if (atrv->value.i)
-								fprintf(df, " flag4 1");
-							else 
-								fprintf(df, " flag4 0");
+						case CLK_HAVEFLAG4:
+							fprintf(df, " flag4 %d", !!atrv->value.i);
 							break;
 						}
 					}
-
 					fprintf(df, "\n");
 				}
 			}
@@ -812,187 +1210,6 @@ dump_config_tree(
 		unpeers = (struct unpeer_node *) list_ptr;
 		
 		fprintf(df, "unpeer %s\n", (unpeers->addr)->address);
-	}
-
-	list_ptr = queue_head(ptree->orphan_cmds);
-	if (list_ptr != NULL) {
-
-		fprintf(df, "tos");
-
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			atrv = (struct attr_val *) list_ptr;
-
-			switch (atrv->attr) {
-
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown tos token %d\n"
-					"tos", atrv->attr);
-				break;
-
-			case PROTO_CEILING:
-				fprintf(df, " ceiling %d", (int) atrv->value.d);
-				break;
-
-			case PROTO_FLOOR:
-				fprintf(df, " floor %d", (int) atrv->value.d);
-				break;
-
-			case PROTO_COHORT:
-				fprintf(df, " cohort %d", !!(atrv->value.d));
-				break;
-
-			case PROTO_ORPHAN:
-				fprintf(df, " orphan %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MINDISP:
-				fprintf(df, " mindist %g", atrv->value.d);
-				break;
-				
-			case PROTO_MAXDIST:
-				fprintf(df, " maxdist %g", atrv->value.d);
-				break;
-
-			case PROTO_MINCLOCK:
-				fprintf(df, " minclock %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MAXCLOCK:
-				fprintf(df, " maxclock %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MINSANE:
-				fprintf(df, " minsane %d", (int) atrv->value.d);
-				break;
-
-			case PROTO_BEACON:
-				fprintf(df, " beacon %d", (int) atrv->value.d);
-				break;
-
-			case PROTO_MAXHOP:
-				fprintf(df, " maxhop %d", (int) atrv->value.d);
-				break;
-			}
-		}
-
-		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->stats_list);
-	if (list_ptr != NULL) {
-
-		fprintf(df, "statistics ");
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			string = (char **) list_ptr;
-				
-			/* FIXME Find keyword and type of information */
-			
-			fprintf(df, "%s ", *string);	
-		}
-
-		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->filegen_opts);
-	if (list_ptr != NULL) {
-
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			fprintf(df, "filegen ");
-
-			fgen_node = (struct filegen_node *) list_ptr;
-
-			opt_ptr = queue_head(fgen_node->options);
-
-			for(;	opt_ptr != NULL;
-				opt_ptr = next_node(opt_ptr)) {
-				
-				atrv = (struct attr_val *) opt_ptr;
-
-				switch (atrv->type) {
-				default:
-					fprintf(df, "\n# dump error:\n"
-						"# unknown filegen option token %d\n"
-						"filegen ", atrv->type);
-					break;
-
-					case T_File:
-					fprintf(df, " file %s", atrv->value.s);
-					break;
-
-					case T_Type:
-					fprintf(df, " type ");
-					
-					switch (atrv->value.i) {
-					default:
-						fprintf(df, "\n# dump error:\n"
-							"# unknown filegen type token %d\n"
-							"filegen type ", atrv->value.i);
-						break;
-
-						case T_Day:
-						fprintf(df, "day");
-						break;
-
-						case T_Month:
-						fprintf(df, "month");
-						break;
-
-						case T_None:
-						fprintf(df, "none");
-						break;
-
-						case T_Pid:
-						fprintf(df, "pid");
-						break;
-
-						case T_Week:
-						fprintf(df, "week");
-						break;
-
-						case T_Year:
-						fprintf(df, "year");
-						break;
-					}
-					break;
-
-					case T_Flag:
-					switch (atrv->value.i) {
-					default:
-						fprintf(df, "\n# dump error:\n"
-							"# unknown filegen flag token %d\n"
-							"filegen ", atrv->value.i);
-						break;
-
-						case T_Link:
-						fprintf(df, " link");
-						break;
-
-						case T_Nolink:
-						fprintf(df, " nolink");
-						break;
-
-						case T_Enable:
-						fprintf(df, " enable");
-						break;
-
-						case T_Disable:
-						fprintf(df, " disable");
-						break;
-					}
-					break;
-				}
-
-			}
-
-			fprintf(df, "\n");
-		}
 	}
 
 	list_ptr = queue_head(ptree->discard_opts);
@@ -1115,176 +1332,8 @@ dump_config_tree(
 						break;
 				}
 			}
-			
 			fprintf(df, "\n");
 		}
-	}
-
-	
-	list_ptr = queue_head(ptree->enable_opts);
-	if (list_ptr != NULL) {
-
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			atrv = (struct attr_val *) list_ptr;
-
-			fprintf(df, "enable");
-
-			switch (atrv->value.i) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown enable token %d\n"
-					"enable", atrv->value.i);
-				break;
-
-				case PROTO_AUTHENTICATE: 
-				fprintf(df, " auth");	
-				break;
-
-				case PROTO_BROADCLIENT: 
-				fprintf(df, " bclient");
-				break;
-
-				case PROTO_CAL: 
-				fprintf(df, " calibrate");
-				break;
-
-				case PROTO_KERNEL: 
-				fprintf(df, " kernel");
-				break;
-
-				case PROTO_MONITOR: 
-				fprintf(df, " monitor");
-				break;
-
-				case PROTO_NTP: 
-				fprintf(df, " ntp");
-				break;
-
-				case PROTO_FILEGEN: 
-				fprintf(df, " stats");
-				break;
-			}
-		}
-		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->disable_opts);
-	if (list_ptr != NULL) {
-
-		fprintf(df, "disable");
-
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			atrv = (struct attr_val *) list_ptr;
-
-			switch (atrv->value.i) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown disable token %d\n"
-					"disable", atrv->value.i);
-				break;
-
-				case PROTO_AUTHENTICATE: 
-				fprintf(df, " auth");	
-				break;
-
-				case PROTO_BROADCLIENT: 
-				fprintf(df, " bclient");
-				break;
-
-				case PROTO_CAL: 
-				fprintf(df, " calibrate");
-				break;
-
-				case PROTO_KERNEL: 
-				fprintf(df, " kernel");
-				break;
-
-				case PROTO_MONITOR: 
-				fprintf(df, " monitor");
-				break;
-
-				case PROTO_NTP: 
-				fprintf(df, " ntp");
-				break;
-
-				case PROTO_FILEGEN: 
-				fprintf(df, " stats");
-				break;
-			}
-		}
-		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->tinker);
-	if (list_ptr != NULL) {
-
-		fprintf(df, "tinker");
-
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			atrv = (struct attr_val *) list_ptr;
-
-			switch (atrv->attr) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown tinker token %d\n"
-					"tinker", atrv->attr);
-				break;
-
-				case LOOP_MAX:
-				     fprintf(df, " step");
-				     break;
-
-				case LOOP_PANIC:
-				     fprintf(df, " panic");
-				     break;
-
-				case LOOP_PHI:
-				     fprintf(df, " dispersion");
-				     break;
-
-				case LOOP_MINSTEP:
-				     fprintf(df, " stepout");
-				     break;
-
-				case LOOP_ALLAN:
-				     fprintf(df, " allan");
-				     break;
-
-				case LOOP_HUFFPUFF:
-				     fprintf(df, " huffpuff");
-				     break;
-
-				case LOOP_FREQ:
-				     fprintf(df, " freq");
-				     break;
-			}
-
-			fprintf(df, " %g", atrv->value.d);
-		}
-
-		fprintf(df, "\n");
-	}
-
-
-	list_ptr = queue_head(ptree->logconfig);
-	if (list_ptr != NULL) {
-		
-		fprintf(df, "logconfig");
-
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-			atrv = (struct attr_val *) list_ptr;
-
-			fprintf(df, " %c%s", atrv->attr, atrv->value.s);
-		}
-
-		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->phone);
@@ -1385,7 +1434,7 @@ dump_config_tree(
 					break;
 
 				case T_Port:
-					fprintf(df, " port %i", atrv->value.i);
+					fprintf(df, " port %d", atrv->value.i);
 					break;
 
 				case T_Interface:
@@ -1396,62 +1445,6 @@ dump_config_tree(
 			}
 
 			fprintf(df, "\n");
-		}
-	}
-
-	/* For options I didn't find documentation I'll just output its name and the cor. value */
-	list_ptr = queue_head(ptree->vars);
-	if (list_ptr != NULL) {
-
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-
-			atrv = (struct attr_val *) list_ptr;
-
-			switch (atrv->attr) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown vars token %d\n",
-					atrv->attr);
-				break;
-
-				case T_Broadcastdelay:
-				fprintf(df, "broadcastdelay %g\n", atrv->value.d);
-				break;
-				
-				case T_Calldelay:
-				fprintf(df, "calldelay %i\n", atrv->value.i);
-				break;
-
-				case T_Tick:
-				fprintf(df, "tick %g\n", atrv->value.d);
-				break;
-
-				case T_Driftfile:
-				fprintf(df, "driftfile \"%s\"\n", atrv->value.s);
-				break;
-			
-		    		case T_WanderThreshold:
-				fprintf(df, "wander_threshold %g\n", atrv->value.d);
-				break;
-	
-		    		case T_Leapfile:
-				fprintf(df, "leapfile \"%s\"\n", atrv->value.s);
-				break;
-
-				case T_Pidfile:
-				fprintf(df, "pidfile \"%s\"\n", atrv->value.s);
-				break;
-
-				case T_Logfile:
-				fprintf(df, "logfile \"%s\"\n", atrv->value.s);
-				break;
-#ifdef OPENSSL
-				case T_Automax:
-				fprintf(df, "automax %i\n", atrv->value.i);
-				break;
-#endif
-			}
 		}
 	}
 
