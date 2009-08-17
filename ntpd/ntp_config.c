@@ -203,11 +203,35 @@ extern unsigned int qos;				/* QoS setting */
 
 static void call_proto_config_from_list(queue *flag_list, int able_flag);
 static void init_syntax_tree(struct config_tree *);
+
 #ifdef DEBUG
 static void free_auth_node(struct config_tree *);
+
+static void free_config_other_modes(struct config_tree *);
+static void free_config_auth(struct config_tree *);
+static void free_config_tos(struct config_tree *);
+static void free_config_monitor(struct config_tree *);
+static void free_config_access(struct config_tree *);
+static void free_config_tinker(struct config_tree *);
+static void free_config_system_opts(struct config_tree *);
+static void free_config_logconfig(struct config_tree *);
+static void free_config_phone(struct config_tree *);
+static void free_config_qos(struct config_tree *);
+static void free_config_setvar(struct config_tree *);
+static void free_config_ttl(struct config_tree *);
+static void free_config_trap(struct config_tree *);
+static void free_config_fudge(struct config_tree *);
+static void free_config_vars(struct config_tree *);
+static void free_config_peers(struct config_tree *);
+static void free_config_unpeers(struct config_tree *);
+#ifdef SIM
+static void free_config_sim(struct config_tree *);
+#endif
+
        void free_all_config_trees(void);	/* atexit() */
 static void free_config_tree(struct config_tree *ptree);
-#endif
+#endif	/* DEBUG */
+
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
@@ -301,8 +325,6 @@ free_auth_node(
 	struct config_tree *ptree
 	)
 {
-	DESTROY_QUEUE(ptree->auth.crypto_cmd_list);
-
 	if (ptree->auth.keys) {
 		free(ptree->auth.keys);
 		ptree->auth.keys = NULL;
@@ -347,6 +369,8 @@ init_syntax_tree(
 	ptree->ttl = create_queue();
 	ptree->trap = create_queue();
 	ptree->vars = create_queue();
+	ptree->auth.crypto_cmd_list = create_queue();
+	ptree->auth.trusted_key_list = create_queue();
 
 #ifdef DEBUG
 	atexit(free_all_config_trees);
@@ -381,24 +405,45 @@ free_config_tree(struct config_tree *ptree)
 	if (ptree->source.value.s != NULL)
 		free(ptree->source.value.s);
 
+	free_config_other_modes(ptree);
+	free_config_auth(ptree);
+	free_config_tos(ptree);
+	free_config_monitor(ptree);
+	free_config_access(ptree);
+	free_config_tinker(ptree);
+	free_config_system_opts(ptree);
+	free_config_logconfig(ptree);
+	free_config_phone(ptree);
+	free_config_qos(ptree);
+	free_config_setvar(ptree);
+	free_config_ttl(ptree);
+	free_config_trap(ptree);
+	free_config_fudge(ptree);
+	free_config_vars(ptree);
+	free_config_peers(ptree);
+	free_config_unpeers(ptree);
+#ifdef SIM
+	free_config_sim(ptree);
+#endif
+	/*
+	 * Most of these DESTROY_QUEUE()s are handled already by the
+	 * free_config_*() routines above but it's safe to use twice.
+	 * Please feel free to remove ones you verified are handled
+	 * in a free_config_*() routine.
+	 */
 	DESTROY_QUEUE(ptree->peers);
 	DESTROY_QUEUE(ptree->unpeers);
 	DESTROY_QUEUE(ptree->orphan_cmds);
-
 	DESTROY_QUEUE(ptree->manycastserver);
 	DESTROY_QUEUE(ptree->multicastclient);
-
 	DESTROY_QUEUE(ptree->stats_list);
 	DESTROY_QUEUE(ptree->filegen_opts);
-
 	DESTROY_QUEUE(ptree->discard_opts);
 	DESTROY_QUEUE(ptree->restrict_opts);
-
 	DESTROY_QUEUE(ptree->enable_opts);
 	DESTROY_QUEUE(ptree->disable_opts);
 	DESTROY_QUEUE(ptree->tinker);
 	DESTROY_QUEUE(ptree->fudge);
-
 	DESTROY_QUEUE(ptree->logconfig);
 	DESTROY_QUEUE(ptree->phone);
 	DESTROY_QUEUE(ptree->qos);
@@ -475,8 +520,8 @@ dump_config_tree(
 	key_val = queue_head(ptree->auth.trusted_key_list);
 	if (key_val != NULL) {
 		fprintf(df, "trustedkey %d", *key_val);
-		key_val = next_node(key_val);
-		while (key_val != NULL)
+
+		while (NULL != (key_val = next_node(key_val)))
 			fprintf(df, " %d", *key_val);
 		fprintf(df, "\n");
 	}
