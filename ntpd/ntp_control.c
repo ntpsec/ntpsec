@@ -2387,13 +2387,16 @@ write_variables(
 	ctl_flushpkt(0);
 }
 
-/* SK:
- * configure: remotely configure an NTP daemon
+/*
+ * configure() processes ntpq :config/config-from-file, allowing
+ *		generic runtime reconfiguration.
  */
-static void configure(struct recvbuf *rbufp,int restrict_mask)
+static void configure(
+	struct recvbuf *rbufp,
+	int restrict_mask
+	)
 {
-	int data_count;
-	int retval;
+	int data_count, retval, replace_nl;
 
 	/* I haven't yet implemented changes to an existing association.
 	 * Hence check if the association id is 0
@@ -2402,44 +2405,63 @@ static void configure(struct recvbuf *rbufp,int restrict_mask)
 		ctl_error(CERR_BADVALUE);
 		return;
 	}
-    
+
 	/* Initialize the remote config buffer */
 	data_count = reqend - reqpt;
 	memcpy(remote_config.buffer, reqpt, data_count);
-	remote_config.buffer[data_count++] = '\n';
+	if (data_count > 0
+	    && '\n' != remote_config.buffer[data_count - 1])
+		remote_config.buffer[data_count++] = '\n';
 	remote_config.buffer[data_count] = '\0';
 	remote_config.pos = 0;
 	remote_config.err_pos = 0;
 	remote_config.no_errors = 0;
 
-#ifdef DEBUG
-	if (debug > 0)
-		printf("Got Remote Configuration Command: %s\n\n", remote_config.buffer);
-#endif
+	/* do not include terminating newline in log */
+	if (data_count > 0
+	    && '\n' == remote_config.buffer[data_count - 1]) {
+		remote_config.buffer[data_count - 1] = '\0';
+		replace_nl = 1;
+	} else
+		replace_nl = 0;
 
-	config_remotely();
+	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
+		remote_config.buffer));
+	msyslog(LOG_NOTICE, "%s config: %s",
+		stoa(&rbufp->recv_srcadr),
+		remote_config.buffer);
 
-	/* Check if errors were reported. If not, output 'Config Succeeded'
-	 * Else output the error message
+	if (replace_nl)
+		remote_config.buffer[data_count - 1] = '\n';
+
+	config_remotely(&rbufp->recv_srcadr);
+
+	/* 
+	 * Check if errors were reported. If not, output 'Config
+	 * Succeeded'.  Else output the error count.  It would be nice
+	 * to output any parser error messages.
 	 */
-	printf("No_Errors %d\n", remote_config.no_errors);
-	if (remote_config.no_errors == 0) {
-		retval = snprintf(remote_config.err_msg, MAXLINE, "Config Succeeded");
-		if (retval > 0) 
-			remote_config.err_pos += retval;
-	}
+	if (0 == remote_config.no_errors)
+		retval = snprintf(remote_config.err_msg,
+				  sizeof(remote_config.err_msg),
+				  "Config Succeeded");
+	else
+		retval = snprintf(remote_config.err_msg,
+				  sizeof(remote_config.err_msg),
+				  "%d error, failure", 
+				  remote_config.no_errors);
+	if (retval > 0) 
+		remote_config.err_pos += retval;
+	
 	ctl_putdata(remote_config.err_msg, remote_config.err_pos, 0);
-
-#if 0
-	datapt = remote_config.err_msg;
-	dataend = remote_config.err_msg + remote_config.err_pos;
-	datalinelen = remote_config.err_pos;
-	datanotbinflag = 1;
-    
-	printf("Reply: %s\n\nReply_len: %d\n\n", datapt, datalinelen);
-#endif
-    
 	ctl_flushpkt(0);
+
+	DPRINTF(1, ("Reply: %s\n", remote_config.err_msg));
+
+	if (remote_config.no_errors > 0)
+		msyslog(LOG_NOTICE, "%d error in %s config",
+			remote_config.no_errors,
+			stoa(&rbufp->recv_srcadr));
 }
 
 

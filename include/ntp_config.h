@@ -203,7 +203,7 @@ script_info *create_sim_script_info(double duration, queue *script_queue);
 server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script);
 
 extern struct REMOTE_CONFIG_INFO remote_config;
-void config_remotely(void);
+void config_remotely(sockaddr_u *);
 
 int dump_config_tree(struct config_tree *ptree, FILE *df);
 int dump_all_config_trees(FILE *df);

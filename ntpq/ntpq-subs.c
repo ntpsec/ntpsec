@@ -1869,6 +1869,7 @@ config_from_file (
     int res;
     FILE *config_fd;
     char config_cmd[MAXLINE];
+    size_t config_len;
 
     if (debug > 2) {
         printf("In Config\n");
@@ -1883,13 +1884,21 @@ config_from_file (
         int i = 0;
         printf("Sending configuration file, one line at a time.\n");
         while (fgets(config_cmd, MAXLINE, config_fd) != NULL) {
+	    config_len = strlen(config_cmd);
+	    /* ensure even the last line has newline, if possible */
+	    if (config_len > 0 && config_len + 2 < sizeof(config_cmd)
+		&& '\n' != config_cmd[config_len - 1])
+		    config_cmd[config_len++] = '\n';
             ++i;
             res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(config_cmd),
                           config_cmd, &rstatus,
                           &rsize, &rdata);
-            printf("Line No: %d ", i);
+	    if (rsize > 0 && '\n' == rdata[rsize - 1])
+		    rsize--;
+	    if (rsize > 0 && '\r' == rdata[rsize - 1])
+		    rsize--;
             rdata[rsize] = '\0';
-            printf(rdata);
+	    printf("Line No: %d %s: %s", i, rdata, config_cmd);
         }
         printf("Done sending file\n");
         fclose(config_fd);

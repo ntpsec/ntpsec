@@ -508,8 +508,20 @@ dump_config_tree(
 	void *flags = NULL;
 	void *opts = NULL;
 	char refid[5];
+	char timestamp[80];
 
 	printf("dump_config_tree(%p)\n", ptree);
+
+	if (!strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S",
+		      localtime(&ptree->timestamp)))
+		timestamp[0] = '\0';
+
+	fprintf(df, "# %s %s %s\n",
+		timestamp,
+		(CONF_SOURCE_NTPQ == ptree->source.attr)
+		    ? "ntpq remote config from"
+		    : "startup configuration file",
+		ptree->source.value.s);
 
 	/* For options I didn't find documentation I'll just output its name and the cor. value */
 	list_ptr = queue_head(ptree->vars);
@@ -3725,7 +3737,9 @@ config_ntpdsim(
  * config_remotely() - implements ntpd side of ntpq :config
  */
 void
-config_remotely(void)
+config_remotely(
+	sockaddr_u *	remote_addr
+	)
 {
 	input_from_file = 0;
 
@@ -3735,6 +3749,8 @@ config_remotely(void)
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
 	cfgt.source.attr = CONF_SOURCE_NTPQ;
+	cfgt.timestamp = time(NULL);
+	cfgt.source.value.s = estrdup(stoa(remote_addr));
 
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
