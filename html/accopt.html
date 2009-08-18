@@ -24,7 +24,7 @@
 
 <p>The skunk watches for intruders and sprays.</p>
 <p>Last update: 
-<!-- #BeginDate format:En2m -->14-Jul-2009  20:34<!-- #EndDate -->
+<!-- #BeginDate format:En2m -->17-Aug-2009  20:11<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 
@@ -103,12 +103,12 @@ time) in log<sub>2</sub> s with default 3.</dd>
 	to indicate the default entry.</dd>
 
 <dd>Some flags have the effect to deny service, some  have the effect to
-	enable service and some are  conditionedl by other flags. The  flags. are
+	enable service and some are  conditioned by other flags. The  flags. are
 	not orthogonal, in that more restrictive flags will often make less restrictive
-	ones redundant. The flags that deny service are classed in two categories, those
-	that restrict time service and those that restrict informational queries and
-	attempts to do run-time reconfiguration of the server. One or more of the following
-	flags may be specified:</dd>
+	ones redundant. The flags that deny service are classed in two categories,
+	those that restrict time service and those that restrict informational queries
+	and attempts to do run-time reconfiguration of the server. One or more of the
+	following flags may be specified:</dd>
 <dd><dl>
 
 <dt><tt>flake</tt></dt>
@@ -137,7 +137,7 @@ time) in log<sub>2</sub> s with default 3.</dd>
 	denied service. This flag modifies the assignment algorithm by allowing low
 	priority traps to be overridden by later requests for normal priority traps.</dd>
 <dt><tt>mssntp</tt></dt>
-<dd>Enable Microsoft Windows MS-SNTP authenitcation using Active Directory services.
+<dd>Enable Microsoft Windows MS-SNTP authentication using Active Directory services.
 	<span class="style1">Note: Potential users should be aware that these services
 	involve a TCP connection to another process that could potentially block,
 	denying services to other users. Therefore, this flag should be used only
@@ -174,10 +174,6 @@ time) in log<sub>2</sub> s with default 3.</dd>
 	mobilized whether or not authenticated. If <tt>auth</tt> is disabled, but the <tt>notrust</tt> flag
 	is present, authentication is required only for the specified address/mask
 	range. </dd>
-
-<dt><tt>nssntp</tt></dt>
-<dd>Enable Windows Active Director authentication. See the <a href="authopt.html">Authentication
-		Options page.</a></dd>
 
 		<dt><tt>ntpport</tt></dt>
 			<dt><tt>non-ntpport</tt></dt>
