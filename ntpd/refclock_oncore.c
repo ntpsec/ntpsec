@@ -3459,7 +3459,7 @@ oncore_log(instance, LOG_DEBUG, Msg);
 
 	/* and set time to time from Computer clock */
 
-	gettimeofday(&tv, 0);
+	GETTIMEOFDAY(&tv, 0);
 	tm = gmtime((const time_t *) &tv.tv_sec);
 #if 1
 	{

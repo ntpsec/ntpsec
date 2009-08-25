@@ -1,3 +1,5 @@
+* [Bug 1289] Fix compiler files for Windows
+* [Bug 1290] use macro GETTIMEOFDAY instead of gettimeofday()
 (4.2.5p205) 2009/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * accopt.html typo fixes from Dave Mills.
 * [Bug 1285] Log ntpq :config/config-from-file events.
