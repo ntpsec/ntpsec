@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="8.00"
 	Name="ntpdc"
-	ProjectGUID="{8011C820-B3D5-4034-86EA-FFC30AE6764B}"
-	TargetFrameworkVersion="0"
+	ProjectGUID="{7A36A561-055C-420D-A4D0-1D90D24B8ECF}"
 	>
 	<Platforms>
 		<Platform
@@ -23,7 +22,6 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="version.c,*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -45,21 +43,19 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\Debug/ntpdc.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName="..\bin\Debug\ntpdc-vc90"
+				ProgramDataBaseFileName=".\Debug/"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -76,16 +72,11 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="../bin/Debug/ntpdc.exe"
-				Version="0x0400"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Debug\ntpdc.pdb"
+				ProgramDatabaseFile=".\Debug/ntpdc.pdb"
 				SubSystem="1"
-				LinkTimeCodeGeneration="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -109,6 +100,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -121,7 +115,6 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="version.c,*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -144,19 +137,17 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				PrecompiledHeaderFile=".\Release/ntpdc.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
-				ProgramDataBaseFileName="..\bin\Release\ntpdc-vc90"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -173,16 +164,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="../bin/Release/ntpdc.exe"
-				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Release\ntpdc.pdb"
+				ProgramDatabaseFile=".\Release/ntpdc.pdb"
 				SubSystem="1"
-				LinkTimeCodeGeneration="0"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -206,6 +191,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -227,7 +215,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						WarningLevel="3"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -237,7 +224,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						WarningLevel="3"
 					/>
 				</FileConfiguration>
 			</File>
@@ -251,7 +237,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						WarningLevel="3"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -261,7 +246,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						WarningLevel="3"
 					/>
 				</FileConfiguration>
 			</File>
@@ -275,7 +259,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						WarningLevel="3"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -285,7 +268,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						WarningLevel="3"
 					/>
 				</FileConfiguration>
 			</File>
@@ -316,14 +298,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath="..\..\..\include\ntp_assert.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\include\ntp_lineedit.h"
-				>
-			</File>
 			<File
 				RelativePath="..\..\..\ntpdc\ntpdc.h"
 				>

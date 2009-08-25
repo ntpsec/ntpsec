@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="8.00"
 	Name="ntpd"
-	ProjectGUID="{CB61F8BF-9637-495C-9087-E8664B400CE0}"
-	TargetFrameworkVersion="0"
+	ProjectGUID="{B01F5169-943C-4945-A017-D2427AC30191}"
 	>
 	<Platforms>
 		<Platform
@@ -23,8 +22,6 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
-			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -46,25 +43,19 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,$(OPENSSL)\include,..\..\..\libopts"
-				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="false"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				PrecompiledHeaderFile=".\Release/ntpd.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
-				ProgramDataBaseFileName="..\bin\Release\ntpd-vc90"
+				ProgramDataBaseFileName=".\Release/"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -79,19 +70,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL)\lib\libeay32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib"
 				OutputFile="../bin/Release/ntpd.exe"
-				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Release\ntpd.pdb"
+				ProgramDatabaseFile=".\Release/ntpd.pdb"
 				SubSystem="1"
-				OptimizeForWindows98="0"
-				LinkTimeCodeGeneration="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -115,6 +99,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -127,8 +114,6 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
-			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -150,27 +135,19 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
-				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
-				SmallerTypeCheck="true"
-				RuntimeLibrary="1"
-				EnableFunctionLevelLinking="true"
+				RuntimeLibrary="3"
 				PrecompiledHeaderFile=".\Debug/ntpd.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName="..\bin\Debug\ntpd-vc90"
+				ProgramDataBaseFileName=".\Debug/"
 				BrowseInformation="1"
-				WarningLevel="4"
+				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -185,19 +162,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL)\lib\libeay32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib"
 				OutputFile="../bin/Debug/ntpd.exe"
-				Version="0x0400"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Debug\ntpd.pdb"
+				ProgramDatabaseFile=".\Debug/ntpd.pdb"
 				SubSystem="1"
-				OptimizeForWindows98="0"
-				LinkTimeCodeGeneration="0"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -221,6 +192,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -235,6 +209,24 @@
 			<File
 				RelativePath="..\..\..\ntpd\cmd_args.c"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="nt_clockstuff.c"
@@ -327,6 +319,24 @@
 			<File
 				RelativePath="..\..\..\ntpd\ntp_data_structures.c"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\ntp_filegen.c"
@@ -463,6 +473,24 @@
 			<File
 				RelativePath="..\..\..\ntpd\ntp_parser.c"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\ntp_peer.c"
@@ -483,7 +511,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						GeneratePreprocessedFile="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -578,10 +605,24 @@
 			<File
 				RelativePath="..\..\..\ntpd\ntp_scanner.c"
 				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_signd.c"
-				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\ntp_timer.c"
@@ -809,10 +850,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_assert.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\include\ntp_calendar.h"
 				>
 			</File>
@@ -853,23 +890,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_lists.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\include\ntp_machine.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_malloc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\include\ntp_net.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_parser.h"
 				>
 			</File>
 			<File
@@ -890,10 +915,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_rfc2553.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_scanner.h"
 				>
 			</File>
 			<File
@@ -937,10 +958,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntpsim.h"
-				>
-			</File>
-			<File
 				RelativePath="..\include\ntservice.h"
 				>
 			</File>
@@ -981,10 +998,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\timepps.h"
-				>
-			</File>
-			<File
 				RelativePath="..\include\transmitbuff.h"
 				>
 			</File>
@@ -1013,7 +1026,7 @@
 					<Tool
 						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="..\libntp"
+						AdditionalIncludeDirectories="\ntp-dev-4.2.5p205\ports\winnt\libntp"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1022,7 +1035,7 @@
 					<Tool
 						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="..\libntp"
+						AdditionalIncludeDirectories="\ntp-dev-4.2.5p205\ports\winnt\libntp"
 					/>
 				</FileConfiguration>
 			</File>
@@ -1040,7 +1053,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						ShowIncludes="true"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1231,6 +1243,24 @@
 			<File
 				RelativePath="..\..\..\ntpd\refclock_chronolog.c"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\refclock_chu.c"
@@ -1465,10 +1495,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_jjy.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\ntpd\refclock_jupiter.c"
 				>
 				<FileConfiguration
@@ -1675,18 +1701,6 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_pcf.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
 			</File>
@@ -2101,18 +2115,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_varitext.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\libparse\data_mbg.c"
 				>
 				<FileConfiguration
@@ -2194,7 +2196,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpd&#x0D;&#x0A;"
-					AdditionalDependencies="..\scripts\mkver.bat;..\include\config.h;ntp_iocompletionport.c;win32_io.c;ntpd.c;ntp_timer.c;"
+					AdditionalDependencies="..\scripts\mkver.bat;"
 					Outputs="$(ProjectDir)version.c"
 				/>
 			</FileConfiguration>
@@ -2204,7 +2206,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpd&#x0D;&#x0A;"
-					AdditionalDependencies="..\scripts\mkver.bat;..\include\config.h;ntp_iocompletionport.c;win32_io.c;ntpd.c;ntp_timer.c;"
+					AdditionalDependencies="..\scripts\mkver.bat;"
 					Outputs="$(ProjectDir)version.c"
 				/>
 			</FileConfiguration>

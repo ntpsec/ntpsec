@@ -406,6 +406,10 @@ SOURCE=..\..\..\libntp\uinttoa.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\util_clockstuff.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\libisc\win32os.c
 # End Source File
 # Begin Source File

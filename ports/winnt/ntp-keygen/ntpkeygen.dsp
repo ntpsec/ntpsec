@@ -108,10 +108,6 @@ SOURCE=..\libntp\randfile.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\util_clockstuff.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\version.c
 # End Source File
 # End Group

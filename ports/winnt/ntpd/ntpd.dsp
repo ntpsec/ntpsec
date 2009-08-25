@@ -507,7 +507,6 @@ SOURCE=..\..\..\ntpd\refclock_arbiter.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_arc.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -517,7 +516,6 @@ SOURCE=..\..\..\ntpd\refclock_as2201.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_atom.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -604,7 +602,6 @@ SOURCE=..\..\..\ntpd\refclock_nmea.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_oncore.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -657,7 +654,6 @@ SOURCE=..\..\..\ntpd\refclock_usno.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_wwvb.c
-# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Group "Parse Lib"
