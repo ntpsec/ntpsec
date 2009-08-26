@@ -43,7 +43,7 @@ search_entry (
 	register int a, b, resc = 0;
 
 	for (a = 0; a < kod_db_cnt; a++)
-		if (!strcmp(kod_db[a]->hostname, hostname)) 
+		if (!strcmp(kod_db[a]->hostname, hostname))
 			resc++;
 
 	if (!resc)
@@ -62,7 +62,7 @@ search_entry (
 }
 
 
-void 
+void
 add_entry(
 	char *hostname,
 	char *type	/* 4 bytes not \0 terminated */
@@ -85,7 +85,7 @@ add_entry(
 }
 
 
-void 
+void
 delete_entry(
 	char *hostname,
 	char *type
@@ -105,12 +105,12 @@ delete_entry(
 	kod_db_cnt--;
 
 	if (a < kod_db_cnt)
-		memmove(&kod_db[a], &kod_db[a + 1], 
+		memmove(&kod_db[a], &kod_db[a + 1],
 			(kod_db_cnt - a) * sizeof(kod_db[0]));
 }
 
 
-void 
+void
 write_kod_db(void)
 {
 	FILE *db_s;
@@ -135,14 +135,13 @@ write_kod_db(void)
 			*pch = DIR_SEP;
 			pch = strchr(pch + 1, DIR_SEP);
 		}
+		db_s = fopen(kod_db_file, "w");
 	}
-			
-	db_s = fopen(kod_db_file, "w");
 
 	if (NULL == db_s) {
 		char msg[80];
 
-		snprintf(msg, sizeof(msg), 
+		snprintf(msg, sizeof(msg),
 			 "Can't open KOD db file %s for writing!",
 			 kod_db_file);
 #ifdef DEBUG
@@ -152,7 +151,7 @@ write_kod_db(void)
 
 		return;
 	}
-			
+
 	for (a = 0; a < kod_db_cnt; a++) {
 		fprintf(db_s, "%16.16llx %s %s\n", (unsigned long long)
 			kod_db[a]->timestamp, kod_db[a]->type,
@@ -164,7 +163,7 @@ write_kod_db(void)
 }
 
 
-void 
+void
 kod_init_kod_db(
 	const char *db_file
 	)
@@ -173,7 +172,7 @@ kod_init_kod_db(
 	 * Max. of 254 characters for hostname, 10 for timestamp, 4 for
 	 * kisscode, 2 for spaces, 1 for \n, and 1 for \0
 	 */
-	char fbuf[272];
+	char fbuf[254+10+4+2+1+1];
 	FILE *db_s;
 	int a, b, sepc;
 	unsigned long long ull;
@@ -204,7 +203,7 @@ kod_init_kod_db(
 		return;
 	}
 
-	if(ENABLED_OPT(NORMALVERBOSE)) 
+	if(ENABLED_OPT(NORMALVERBOSE))
 		printf("Starting to read KoD file %s...\n", db_file);
 	/* First let's see how many entries there are and check for right syntax */
 
@@ -214,12 +213,12 @@ kod_init_kod_db(
 		/* ignore blank lines */
 		if ('\n' == fbuf[0])
 			continue;
-		
+
 		sepc = 0;
 		for(a=0; a<strlen(fbuf); a++) {
-			if (' ' == fbuf[a]) 
+			if (' ' == fbuf[a])
 				sepc++;
-			
+
 			if ('\n' == fbuf[a]) {
 				if (sepc != 2) {
 					if (strcmp(db_file, "/dev/null")) {
@@ -234,7 +233,7 @@ kod_init_kod_db(
 						log_msg(msg, 1);
 					}
 
-					return; 
+					return;
 				}
 
 				sepc = 0;
@@ -267,7 +266,7 @@ kod_init_kod_db(
 			b--;
 			continue;
 		}
-		
+
 		kod_db[b] = emalloc(sizeof(*kod_db[b]));
 
 		if (3 != sscanf(fbuf, "%llx %4s %254s", &ull,
