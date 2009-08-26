@@ -1,7 +1,7 @@
-.TH SNTP 1 2009-08-18 "( 4.2.5p204)" "Programmer's Manual"
+.TH SNTP 1 2009-08-26 "( 4.2.5p206)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp.1)
 .\"  
-.\"  It has been AutoGen-ed  August 18, 2009 at 07:48:00 AM by AutoGen 5.9.9pre5
+.\"  It has been AutoGen-ed  August 26, 2009 at 07:52:15 AM by AutoGen 5.9.9pre5
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -177,9 +177,11 @@ produce a diagnostic.  This option should be set when there is a
 suspected problem with the server, network or the source.
 .TP
 .BR \-K " \fIstring\fP, " \--kod "=" \fIstring\fP
-Specify a file for the KOD packet storage.
+KoD history filename.
 .sp
-Specifies the file to be used to store KOD packaet information.
+Modifies the filename to be used to persist the history of KoD
+responses received from servers.  The default is
+/var/db/ntp-kod.
 .TP
 .BR \-p ", " \--syslog
 Logging with syslog.
@@ -211,18 +213,18 @@ settod.
 
 .TP
 .BR \-b " \fIstring\fP, " \--broadcast "=" \fIstring\fP
-Use broadcast packages from the broadcast address specified for synchronisation.
+Use broadcasts to the address specified for synchronisation.
 .sp
-If specified SNTP will wait 1 minute for broadcast packets
-from the broadcast address specified for synchronisation. 
-The amount of time SNTP waits can be specified with \-t.
+If specified SNTP will listen for NTP broadcasts to the
+specified broadcast address.  The default maximum wait time,
+68 seconds, can be modified with \-t.
 .TP
 .BR \-t " \fInumber\fP, " \--timeout "=" \fInumber\fP
-Specify the number of seconds until SNTP times out when waiting for broadcast packets.
+Specify the number of seconds to wait for broadcasts.
 This option takes an integer number as its argument.
 .sp
 When waiting for a broadcast packet SNTP will wait the number 
-of seconds specified and times out.
+of seconds specified before giving up.  Default 68 seconds.
 .TP
 .BR \-a " \fInumber\fP, " \--authentication "=" \fInumber\fP
 Enable authentication with the key keyno. This option is used as \-a keyno.
@@ -265,7 +267,7 @@ The \fIno-load-opts\fP form will disable the loading
 of earlier RC/INI files.  \fI--no-load-opts\fP is handled early,
 out of order.
 .TP
-.BR \-v " [{\fIv|c|n\fP}]," " \--version" "[=\fI{v|c|n}\fP]"
+.BR \- " [{\fIv|c|n\fP}]," " \--version" "[=\fI{v|c|n}\fP]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
@@ -283,14 +285,14 @@ The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .SH AUTHOR
-ntp.org
+David L. Mills and/or others
 .br
 Please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
 
 .PP
 .nf
 .na
-
+see html/copyright.html
 .fi
 .ad
 .PP

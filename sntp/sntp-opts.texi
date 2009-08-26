@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  August 18, 2009 at 07:48:01 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  August 26, 2009 at 07:52:16 AM by AutoGen 5.9.9pre5
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -98,8 +98,10 @@ suspected problem with the server, network or the source.
 @subsection kod option (-K)
 @cindex sntp-kod
 
-This is the ``specify a file for the kod packet storage'' option.
-Specifies the file to be used to store KOD packaet information.
+This is the ``kod history filename'' option.
+Modifies the filename to be used to persist the history of KoD
+responses received from servers.  The default is
+/var/db/ntp-kod.
 
 @node sntp syslog
 @subsection syslog option (-p)
@@ -166,18 +168,18 @@ settod.
 @subsection broadcast option (-b)
 @cindex sntp-broadcast
 
-This is the ``use broadcast packages from the broadcast address specified for synchronisation'' option.
-If specified SNTP will wait 1 minute for broadcast packets
-from the broadcast address specified for synchronisation. 
-The amount of time SNTP waits can be specified with -t.
+This is the ``use broadcasts to the address specified for synchronisation'' option.
+If specified SNTP will listen for NTP broadcasts to the
+specified broadcast address.  The default maximum wait time,
+68 seconds, can be modified with -t.
 
 @node sntp timeout
 @subsection timeout option (-t)
 @cindex sntp-timeout
 
-This is the ``specify the number of seconds until sntp times out when waiting for broadcast packets'' option.
+This is the ``specify the number of seconds to wait for broadcasts'' option.
 When waiting for a broadcast packet SNTP will wait the number 
-of seconds specified and times out.
+of seconds specified before giving up.  Default 68 seconds.
 
 @node sntp authentication
 @subsection authentication option (-a)
