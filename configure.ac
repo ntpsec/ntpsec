@@ -2017,7 +2017,7 @@ AC_ARG_ENABLE(
 AC_DEFINE_UNQUOTED(DSTMINUTES, $ans, [The number of minutes in a DST adjustment])
 AC_MSG_RESULT([$ans])
 
-AC_MSG_CHECKING([[if ntpd will retry on permanent DNS errors]])
+AC_MSG_CHECKING([[if ntpd will retry permanent DNS failures]])
 AC_ARG_ENABLE(
     [ignore-dns-errors],
     AS_HELP_STRING(

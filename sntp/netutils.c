@@ -112,7 +112,7 @@ void compile_header (
 		char **dst
 		)
 {
-	unsigned char *comph = (unsigned char *) malloc(sizeof(char) * 12);
+	unsigned char *comph = (unsigned char *) emalloc(sizeof(char) * 12);
 	
 	/* When declaring id_high unsigned char, will the char cast on the right side
 	 * convert to unsigned char, too?
@@ -201,7 +201,7 @@ size_t compile_query (
 
 	length += 4;
 
-	char *res = (char *) malloc(sizeof(char) * length);
+	char *res = (char *) emalloc(sizeof(char) * length);
 
 	for(a=0; a<dlength; a++) {
 		res[a] = *qname[a];
@@ -230,7 +230,7 @@ size_t compile_resource_record (
 
 	size_t length = (dlength + 10 + rdlength);
 
-	char *res = (char *) malloc(sizeof(char) * length);
+	char *res = (char *) emalloc(sizeof(char) * length);
 
 	for(a=0; a<dlength; a++) {
 		res[a] = *qname[a];
@@ -272,8 +272,8 @@ size_t domain_to_qname (
 			dotc++;
 	}
 
-	char *res = (char *) malloc(sizeof(char) * strlen(hostname) + dotc + 1);
-	char *len = (char *) malloc(sizeof(char) * dotc);
+	char *res = (char *) emalloc(sizeof(char) * strlen(hostname) + dotc + 1);
+	char *len = (char *) emalloc(sizeof(char) * dotc);
 
 	char prevd = 0;
 	for(a=0, b=0; a<strlen(hostname); a++) {

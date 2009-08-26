@@ -126,6 +126,7 @@ m4_defun([_LT_AC_LANG_CXX_CONFIG], [:])
 m4_defun([_LT_AC_LANG_F77_CONFIG], [:])
 
 AC_PROG_LIBTOOL
+NTP_DIR_SEP
 
 # Checks for libraries.
 

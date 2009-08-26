@@ -3,20 +3,12 @@
 autogen definitions options;
 
 #include autogen-version.def
+#include copyright.def
 
 prog-name      = "sntp";
 prog-title     = "standard SNTP program";
 homerc         =  $HOME, ".";
 argument       = '...';
-
-copyright = {
-    date  = "2008";
-    owner = "ntp.org";
-    eaddr = "http://bugs.ntp.org, bugs@ntp.org";
-    type  = note;
-    text  = `cat COPYRIGHT`;
-};
-
 
 long-opts;
 
@@ -72,9 +64,11 @@ flag = {
     name      = kod;
     value     = K;
     arg-type  = string;
-    descrip   = "Specify a file for the KOD packet storage";
+    descrip   = "KoD history filename";
     doc = <<-  _EndOfDoc_
-	Specifies the file to be used to store KOD packaet information.
+	Modifies the filename to be used to persist the history of KoD
+	responses received from servers.  The default is
+	/var/db/ntp-kod.
 	_EndOfDoc_;
 };
 
@@ -122,23 +116,23 @@ flag = {
 flag = {
 	name 	= broadcast;
 	value 	= b;
-	descrip	= "Use broadcast packages from the broadcast address specified for synchronisation";
+	descrip	= "Use broadcasts to the address specified for synchronisation";
 	arg-type = string;
 	doc 	= <<-  _EndOfDoc_
-	If specified SNTP will wait 1 minute for broadcast packets
-	from the broadcast address specified for synchronisation. 
-	The amount of time SNTP waits can be specified with -t.
+	If specified SNTP will listen for NTP broadcasts to the
+	specified broadcast address.  The default maximum wait time,
+	68 seconds, can be modified with -t.
 	_EndOfDoc_;
 };
 
 flag = {
 	name 	= timeout;
 	value 	= t;
-	descrip	= "Specify the number of seconds until SNTP times out when waiting for broadcast packets";
+	descrip	= "Specify the number of seconds to wait for broadcasts";
 	arg-type = number;
 	doc	= <<-  _EndOfDoc_
 	When waiting for a broadcast packet SNTP will wait the number 
-	of seconds specified and times out.
+	of seconds specified before giving up.  Default 68 seconds.
 	_EndOfDoc_;
 };
 

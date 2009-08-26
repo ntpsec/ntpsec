@@ -6,6 +6,8 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
+extern char *progname;
+
 #if !defined(_MSC_VER) || !defined(_DEBUG)
 
 
@@ -20,8 +22,11 @@ erealloc(
 	mem = realloc(prev, size);
 
 	if (NULL == mem) {
-		msyslog(LOG_ERR, "fatal out of memory (%u bytes)",
-				 (u_int)size);
+		msyslog(LOG_ERR,
+			"fatal out of memory (%u bytes)", (u_int)size);
+		fprintf(stderr,
+			"%s: fatal out of memory (%u bytes)", progname,
+			(u_int)size);
 		exit(1);
 	}
 
@@ -49,9 +54,11 @@ estrdup(
 
 	if (NULL == copy) {
 		msyslog(LOG_ERR, 
-			"fatal out of memory duplicating %u byte "
-			"string '%s'",
-			(u_int)strlen(str) + 1, str);
+			"fatal out of memory duplicating %u bytes",
+			(u_int)strlen(str) + 1);
+		fprintf(stderr, 
+			"%s: fatal out of memory duplicating %u bytes",
+			progname, (u_int)strlen(str) + 1);
 		exit(1);
 	}
 
@@ -82,8 +89,12 @@ debug_erealloc(
 	mem = _realloc_dbg(prev, size, _NORMAL_BLOCK, file, line);
 
 	if (NULL == mem) {
-		msyslog(LOG_ERR, "fatal: out of memory in %s line %d size %u", 
-				 file, line, (u_int)size);
+		msyslog(LOG_ERR,
+			"fatal: out of memory in %s line %d size %u", 
+			file, line, (u_int)size);
+		fprintf(stderr,
+			"%s: fatal: out of memory in %s line %d size %u", 
+			progname, file, line, (u_int)size);
 		exit(1);
 	}
 
@@ -98,9 +109,11 @@ debug_estrdup(
 	)
 {
 	char *	copy;
+	size_t	bytes;
 
-	copy = debug_erealloc(NULL, strlen(str) + 1, file, line);
-	strcpy(copy, str);
+	bytes = strlen(str) + 1;
+	copy = debug_erealloc(NULL, bytes, file, line);
+	memcpy(copy, str, bytes);
 
 	return copy;
 }

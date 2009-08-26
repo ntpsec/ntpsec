@@ -41,7 +41,7 @@ auth_md5 (
 	
 	MD5Init(&ctx);
 
-	char *digest_data = (char *) malloc(sizeof(char) * (LEN_PKT_NOMAC + cmp_key->key_len));
+	char *digest_data = (char *) emalloc(sizeof(char) * (LEN_PKT_NOMAC + cmp_key->key_len));
 
 	for(a=0; a<LEN_PKT_NOMAC; a++)
 		digest_data[a] = pkt_data[a];
@@ -97,7 +97,7 @@ auth_init (
 
 
 	while(!feof(keyf)) {
-		struct key *act = (struct key *) malloc(sizeof(struct key));
+		struct key *act = (struct key *) emalloc(sizeof(struct key));
 		line_limit = 0;
 
 		fgets(kbuf, sizeof(kbuf), keyf);

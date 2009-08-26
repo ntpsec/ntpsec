@@ -260,10 +260,11 @@ static void config_vars(struct config_tree *);
 static void config_peers(struct config_tree *);
 static void config_unpeers(struct config_tree *);
 
-static void config_ntpd(struct config_tree *);
 #ifdef SIM
 static void config_sim(struct config_tree *);
 static void config_ntpdsim(struct config_tree *);
+#else
+static void config_ntpd(struct config_tree *);
 #endif
 
 enum gnn_type {
@@ -2883,14 +2884,9 @@ free_config_qos(
 	)
 {
 	struct attr_val *my_qosconfig;
-	char *s;
-#ifdef HAVE_IPTOS_SUPPORT
-	unsigned int qtos = 0;
-#endif
 
 	while (NULL != (my_qosconfig = dequeue(ptree->qos))) {
-		s = my_qosconfig->value.s;
-		free(s);
+		free(my_qosconfig->value.s);
 		free_node(my_qosconfig);
 	}
 }
@@ -3667,9 +3663,6 @@ free_config_sim(
 	struct config_tree *ptree
 	)
 {
-	server_info *serv_info;
-	struct attr_val *init_stmt;
-
 	if (NULL == ptree->sim_details)
 		return;
 
@@ -3688,7 +3681,7 @@ free_config_sim(
  * the simulator. The simulator ignores a lot of the standard ntpd configuration
  * options
  */
-
+#ifndef SIM
 static void
 config_ntpd(
 	struct config_tree *ptree
@@ -3712,6 +3705,8 @@ config_ntpd(
 	config_fudge(ptree);
 	config_qos(ptree);
 }
+#endif	/* !SIM */
+
 
 #ifdef SIM
 static void
