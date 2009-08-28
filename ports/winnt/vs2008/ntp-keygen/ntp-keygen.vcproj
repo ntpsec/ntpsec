@@ -24,7 +24,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="version.c,*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -40,23 +40,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/ntpkeygen.tlb"
+				TypeLibraryName=".\Debug\ntp-keygen.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				AdditionalIncludeDirectories="..\..\ntp-keygen,..\..\include,..\..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug/ntpkeygen.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
+				PrecompiledHeaderFile=".\Debug\ntp-keygen.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
 				ProgramDataBaseFileName="..\bin\Debug\ntp-keygen-vc90"
 				BrowseInformation="1"
 				WarningLevel="4"
@@ -78,7 +78,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib $(OPENSSL)\lib\vc\libeay32MDd.lib"
-				OutputFile="../bin/Debug/ntp-keygen.exe"
+				OutputFile="..\bin\Debug\ntp-keygen.exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -103,7 +103,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ntpkeygen.bsc"
+				OutputFile=".\Debug\ntp-keygen.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -124,7 +124,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="version.c,*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -140,21 +140,21 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/ntpkeygen.tlb"
+				TypeLibraryName=".\Release\ntp-keygen.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				AdditionalIncludeDirectories="..\..\ntp-keygen,..\..\include,..\..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\..\libopts"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/ntpkeygen.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
+				PrecompiledHeaderFile=".\Release\ntp-keygen.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
 				ProgramDataBaseFileName="..\bin\Release\ntp-keygen-vc90"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -174,8 +174,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib $(OPENSSL)\lib\vc\libeay32MD.lib ..\libntp\Release\libntp.lib"
-				OutputFile="../bin/Release/ntp-keygen.exe"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL)\lib\vc\libeay32MD.lib"
+				OutputFile="..\bin\Release\ntp-keygen.exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -200,7 +200,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ntpkeygen.bsc"
+				OutputFile=".\Release\ntp-keygen.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -221,7 +221,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\..\..\libntp\getopt.c"
+				RelativePath="..\..\..\..\libntp\getopt.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -243,7 +243,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\util\ntp-keygen-opts.c"
+				RelativePath="..\..\..\..\util\ntp-keygen-opts.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -267,7 +267,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\util\ntp-keygen.c"
+				RelativePath="..\..\..\..\util\ntp-keygen.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -289,7 +289,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\ntp_random.c"
+				RelativePath="..\..\..\..\libntp\ntp_random.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -311,7 +311,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libntp\randfile.c"
+				RelativePath="..\..\libntp\randfile.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -333,7 +333,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="version.c"
+				RelativePath=".\version.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -360,7 +360,7 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="..\include\config.h"
+				RelativePath="..\..\include\config.h"
 				>
 			</File>
 		</Filter>
@@ -370,14 +370,14 @@
 			>
 		</Filter>
 		<File
-			RelativePath="..\..\..\configure"
+			RelativePath="..\..\..\..\packageinfo.sh"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpkeygen&#x0D;&#x0A;"
+					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\..\scripts\mkver.bat -P ntpkeygen&#x0D;&#x0A;"
 					Outputs="$(ProjectDir)version.c"
 				/>
 			</FileConfiguration>
@@ -386,7 +386,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpkeygen&#x0D;&#x0A;"
+					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\..\scripts\mkver.bat -P ntpkeygen&#x0D;&#x0A;"
 					Outputs="$(ProjectDir)version.c"
 				/>
 			</FileConfiguration>

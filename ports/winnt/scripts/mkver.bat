@@ -20,6 +20,8 @@ see notes/remarks directly below this header:
 #
 #
 # Changes:
+# 08/28/2009	Dave Hart	
+#				- support for building using per-compiler subdirs of winnt
 # 08/08/2006	Heiko Gerstung
 #				- bugfixed point / rcpoint errors leading to a wrong
 #				  version string 
@@ -172,23 +174,26 @@ REM ****************************************************************************
 echo off
 
 REM *****************************************************************************************************************
-REM Now grab the Version number out of the source code (using the version.m4 file...)
+REM Now grab the Version number out of the source code (using the packageinfo.sh file...)
 REM *****************************************************************************************************************
 
 	REM First, get the main NTP version number. In recent versions this must be extracted 
 	REM from a packageinfo.sh file while in earlier versions the info was available from 
 	REM a version.m4 file.
-	SET F_PACKAGEINFO_SH=..\..\..\packageinfo.sh
-	TYPE ..\..\..\packageinfo.sh | FIND /V "rcpoint=" | FIND "point=" > point.txt
-	SET F_POINT_SH=point.txt
-	
-	SET F_VERSION_M4=..\..\..\version.m4
+	SET F_PACKAGEINFO_SH=..\..\..\..\packageinfo.sh
 	IF EXIST %F_PACKAGEINFO_SH% goto VER_FROM_PACKAGE_INFO
-	IF EXIST ..\..\..\version.m4 goto VER_FROM_M4
+	REM next two lines can go away when all windows compilers are building under
+	rem ports\winnt\<compiler dir>\<binary name dir> (ports\winnt\vs2008\ntpd)
+	rem rather than ports\winnt\<binary name dir> (ports\winnt\ntpd)
+	SET F_PACKAGEINFO_SH=..\..\..\packageinfo.sh
+	IF EXIST %F_PACKAGEINFO_SH% goto VER_FROM_PACKAGE_INFO
         goto ERRNOVERF
 
 :VER_FROM_PACKAGE_INFO
 	REM Get version from packageinfo.sh file, which contains lines reading e.g.
+	
+	TYPE %F_PACKAGEINFO_SH% | FIND /V "rcpoint=" | FIND "point=" > point.txt
+	SET F_POINT_SH=point.txt
 	
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "proto=" %%F_PACKAGEINFO_SH%%') DO SET PROTO=%%a
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "major=" %%F_PACKAGEINFO_SH%%') DO SET MAJOR=%%a
@@ -218,16 +223,6 @@ REM ****************************************************************************
 
 	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%REL_CAND%%RCPOINT%
 	
-	goto VER_GET_CSET
-	
-
-:VER_FROM_M4
-	REM Get version from version.m4 file, which contains a line reading e.g.
-	REM m4_define([VERSION_NUMBER],[4.2.0b-rc1])
-	FOR /F "TOKENS=4 DELIMS==[] " %%a IN ('findstr  "VERSION_NUMBER" ..\..\..\version.m4') DO @SET VER=%%a
-	echo --- %VER% ---
-
-:VER_GET_CSET
 	REM Now we have the version info, try to add a BK ChangeSet version number
 	
 	REM ** Check if BK is installed ...
@@ -239,6 +234,11 @@ REM ****************************************************************************
 
 :NOBK
 	REM ** If that was not successful, we'll take a look into a version file, if available
+	IF EXIST ..\..\..\..\version ( 
+		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\..\version') DO @SET CSET=%%a
+	)
+	REM next if block can go away once all windows compilers are building in
+	REM ports\winnt\<compiler dir>\<binary name dir> (ports\winnt\vs2008\ntpd)
 	IF EXIST ..\..\..\version ( 
 		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\version') DO @SET CSET=%%a
 	)
@@ -247,9 +247,8 @@ REM ****************************************************************************
 	IF NOT "%CSET%"=="" SET VER=%VER%@%CSET%
 		
 	REM We can add a "crypto" identifier (-o) if we see that Crypto support is included in our build
-	IF NOT EXIST ..\include\config.h goto ERRNOCONF
-	FOR /F "TOKENS=1-3 " %%a IN ('findstr /R "^#define\ OPENSSL" ..\include\config.h') DO @SET SSL=%%c
-	IF "%SSL%"=="1" SET VER=%VER%-o
+	REM we always include openssl on windows...
+	SET VER=%VER%-o
 
 
 REM *****************************************************************************************************************
@@ -409,11 +408,7 @@ REM ****************************************************************************
 	GOTO EOF
 
 :ERRNOVERF
-    ECHO "Error: Version file not found (searching for ../../../version.m4)"
-	GOTO EOF
-
-:ERRNOCONF
-    ECHO "Error: Config.h file not found (searching for ../include/config.h)"
+    ECHO "Error: Version file not found (searching for ..\..\..\..\packageinfo.sh)"
 	GOTO EOF
 
 

@@ -38,21 +38,21 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/Instsrv.tlb"
+				TypeLibraryName=".\Debug\Instsrv.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\..\..\include,..\include,."
+				AdditionalIncludeDirectories="..\..\..\..\include,..\..\include,..\..\instsrv"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug/Instsrv.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
+				PrecompiledHeaderFile=".\Debug\Instsrv.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
 				ProgramDataBaseFileName="..\bin\Debug\instsrv-vc90"
 				BrowseInformation="1"
 				WarningLevel="4"
@@ -74,7 +74,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="oldnames.lib"
-				OutputFile="../bin/Debug/Instsrv.exe"
+				OutputFile="..\bin\Debug\Instsrv.exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -99,7 +99,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/Instsrv.bsc"
+				OutputFile=".\Debug\Instsrv.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -135,21 +135,21 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/Instsrv.tlb"
+				TypeLibraryName=".\Release\Instsrv.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\include,..\include,."
+				AdditionalIncludeDirectories="..\..\..\..\include,..\..\include,..\..\instsrv"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;_WINDOWS;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/Instsrv.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
+				PrecompiledHeaderFile=".\Release\Instsrv.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
 				ProgramDataBaseFileName="..\bin\Release\instsrv-vc90"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -170,7 +170,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="oldnames.lib"
-				OutputFile="../bin/Release/Instsrv.exe"
+				OutputFile="..\bin\Release\Instsrv.exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -194,7 +194,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/Instsrv.bsc"
+				OutputFile=".\Release\Instsrv.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -215,7 +215,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="instsrv.c"
+				RelativePath="..\..\instsrv\instsrv.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
