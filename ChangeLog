@@ -1,3 +1,4 @@
+(4.2.5p207) 2009/08/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1292] Minor Windows source tweaks for VC6-era SDK headers.
 (4.2.5p206) 2009/08/26 Released by Harlan Stenn <stenn@ntp.org>
 * accopt.html typo fixes from Dave Mills.
