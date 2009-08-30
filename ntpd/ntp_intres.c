@@ -210,12 +210,12 @@ void
 ntp_intres(void)
 {
 	FILE *in;
-	struct timeval tv;
-	fd_set fdset;
 #ifdef SYS_WINNT
 	DWORD rc;
 #else
 	int rc;
+	struct timeval tv;
+	fd_set fdset;
 #endif
 
 #ifdef DEBUG

@@ -75,7 +75,7 @@ static	void	write_clock_status (struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
-static	void	dump_config	(struct recvbuf *, int);
+static	void	save_config	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap (sockaddr_u *,
 				      struct interface *);
 
@@ -88,7 +88,7 @@ static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_WRITECLOCK,	NOAUTH, write_clock_status },
 	{ CTL_OP_SETTRAP,	NOAUTH, set_trap },
 	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
-	{ CTL_OP_DUMPCONFIG,	NOAUTH, dump_config },
+	{ CTL_OP_SAVECONFIG,	AUTH,	save_config },
 	{ CTL_OP_CONFIGURE,	AUTH,	configure },
 	{ NO_REQUEST,		0 }
 };
@@ -546,54 +546,107 @@ ctl_error(
 }
 
 /* 
- * Call the config dumper
+ * save_config - Implements ntpq -c "saveconfig <filename>"
+ *		 Writes current configuration including any runtime
+ *		 changes by ntpq's :config or config-from-file
  */
 void
-dump_config(
-		struct recvbuf *rbufp,
-		int restrict_mask
-		)
+save_config(
+	struct recvbuf *rbufp,
+	int restrict_mask
+	)
 {
-	/* Dump config to file (for now) to ntp_dumpXXXXXXXXXX.conf */
-	char fullpath[256];
-	char filename[80];
-	char reply[80];
+	char reply[128];
+#ifdef SAVECONFIG
+	char filespec[256];
+	char filename[256];
+	time_t now;
 	int fd;
 	FILE *fptr;
-
-	if (reqend - reqpt) {
-		strncpy(filename, reqpt, sizeof(filename));
-		filename[sizeof(filename) - 1] = 0;
-		if (NULL != strchr(filename, '/')
-		    || NULL != strchr(filename, '\\'))
-			snprintf(filename, sizeof(filename), 
-				 "ntp_dump%i.conf", time(NULL));
-	} else
-		snprintf(filename, sizeof(filename), "ntp_dump%i.conf",
-			 time(NULL));
-
-#ifndef SYS_WINNT
-	snprintf(fullpath, sizeof(fullpath), "/var/tmp/%s", filename);
-#else
-	snprintf(fullpath, sizeof(fullpath), "%s\\%s", getenv("TEMP"),
-		 filename);
+	const char savedconfig_eq[] = "savedconfig=";
+	size_t octets;
+	char *savedconfig;
 #endif
 
-	fd = open(fullpath, O_CREAT | O_EXCL | O_WRONLY, S_IRUSR | S_IWUSR);
+	if (restrict_mask & RES_NOMODIFY) {
+		snprintf(reply, sizeof(reply),
+			 "saveconfig prohibited by restrict ... nomodify");
+		ctl_putdata(reply, strlen(reply), 0);
+		ctl_flushpkt(0);
+		msyslog(LOG_NOTICE,
+			"saveconfig from %s rejected due to nomodify restriction",
+			stoa(&rbufp->recv_srcadr));
+		return;
+	}
+
+#ifdef SAVECONFIG
+	if (0 == reqend - reqpt)
+		return;
+
+	strncpy(filespec, reqpt, sizeof(filespec));
+	filespec[sizeof(filespec) - 1] = '\0';
+
+	time(&now);
+
+	/*
+	 * "saveconfig ." is shorthand for replacing the startup
+	 * configuration file.
+	 */
+	if ('.' == filespec[0] && '\0' == filespec[1]
+	    && NULL != cfg_tree_history)
+		strncpy(filename, cfg_tree_history->source.value.s,
+			sizeof(filename));
+	/*
+	 * allow timestamping of the saved config filename with
+	 * strftime() format such as:
+	 *   ntpq -c "saveconfig ntp-%Y%m%d-%H%M%S.conf"
+	 */
+	else if (0 == strftime(filename, sizeof(filename), filespec,
+			       localtime(&now)))
+		strncpy(filename, filespec, sizeof(filename));
+
+	filename[sizeof(filename) - 1] = '\0';
+	
+
+	fd = open(filename, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
 	if (-1 == fd)
 		fptr = NULL;
 	else
 		fptr = fdopen(fd, "w");
 
-	if (NULL == fptr || -1 == dump_all_config_trees(fptr))
-		snprintf(reply, sizeof(reply), "Couldn't dump to file %s",
-			 fullpath);
-	else
-		snprintf(reply, sizeof(reply), "Dumped to config file %s",
-			 fullpath);
+	if (NULL == fptr || -1 == dump_all_config_trees(fptr)) {
+		snprintf(reply, sizeof(reply),
+			 "Unable to save configuration to file %s",
+			 filename);
+		msyslog(LOG_ERR,
+			"saveconfig %s from %s failed", filename,
+			stoa(&rbufp->recv_srcadr));
+	} else {
+		snprintf(reply, sizeof(reply),
+			 "Configuration saved to %s",
+			 filename);
+		msyslog(LOG_NOTICE,
+			"Configuration saved to %s (requested by %s)",
+			filename, stoa(&rbufp->recv_srcadr));
+		/*
+		 * save the output filename in system variable
+		 * savedconfig, retrieved with:
+		 *   ntpq -c "rv 0 savedconfig"
+		 */
+		octets = sizeof(savedconfig_eq) + strlen(filename) + 1;
+		savedconfig = emalloc(sizeof(savedconfig_eq) 
+				      + strlen(filename) + 1);
+		snprintf(savedconfig, octets, "%s%s",
+			 savedconfig_eq, filename);
+		set_sys_var(savedconfig, octets, RO);
+	}
 
 	if (NULL != fptr)
 		fclose(fptr);
+#else	/* !SAFECONFIG follows */
+	snprintf(reply, sizeof(reply),
+		 "saveconfig unavailable, configured with --disable-saveconfig");
+#endif
 
 	ctl_putdata(reply, strlen(reply), 0);
 	ctl_flushpkt(0);
@@ -2403,6 +2456,19 @@ static void configure(
 	 */
 	if (res_associd != 0) {
 		ctl_error(CERR_BADVALUE);
+		return;
+	}
+
+	if (restrict_mask & RES_NOMODIFY) {
+		snprintf(remote_config.err_msg,
+			 sizeof(remote_config.err_msg),
+			 "runtime configuration prohibited by restrict ... nomodify");
+		ctl_putdata(remote_config.err_msg, 
+			    strlen(remote_config.err_msg), 0);
+		ctl_flushpkt(0);
+		msyslog(LOG_NOTICE,
+			"runtime config from %s rejected due to nomodify restriction",
+			stoa(&rbufp->recv_srcadr));
 		return;
 	}
 

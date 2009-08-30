@@ -48,7 +48,7 @@
 		<p>Interactive format commands consist of a keyword followed by zero to four arguments. Only enough characters of the full keyword to uniquely identify the command need be typed. The output of a command is normally sent to the standard output, but optionally the output of individual commands may be sent to a file by appending a <tt>&gt;</tt>, followed by a file name, to the command line. A number of interactive format commands are executed entirely within the <tt>ntpq</tt> program itself and do not result in NTP mode-6 requests being sent to a server. These are described following.</p>
 		<dl>
 			<dt><tt>? [<i>command_keyword</i>]</tt><br>
-				<tt>helpl [<i>command_keyword</i>]</tt>
+				<tt>help [<i>command_keyword</i>]</tt>
 			<dd>A <tt>?</tt> by itself will print a list of all the command keywords known to  <tt>ntpq</tt>. A <tt>?</tt> followed by a command keyword will print function and usage information about the command.
 			<dt><tt>addvars <i>name</i> [ = <i>value</i>] [...]</tt><br>
 				<tt>rmvars <i>name</i> [...]</tt><br>
@@ -120,9 +120,13 @@
 						<td>event count (see <a href="decode.html#peer">peer status word</a>)</td>
 					</tr>
 				</table>
-			<dt><tt>clockvar [<i>assocID</i>] [<i>name</i> [ = <i>value</i> [...]] [...]</tt>
-			<dt><tt>cv [<i>assocID</i>] [<i>name</i> [ = <i>value</i> [...] ][...]</tt>
+			<dt><tt>clockvar [<i>assocID</i>] [<i>name</i> [ = <i>value</i> [...]] [...]</tt><br>
+				<tt>cv [<i>assocID</i>] [<i>name</i> [ = <i>value</i> [...] ][...]</tt>
 			<dd>Display a list of <a href="#clock">clock variables</a> for those assocations supporting a reference clock.
+			<dt><tt>:config [...]</tt>
+			<dd>Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.
+			<dt><tt>config-from-file <i>filename</i></tt>
+			<dd>Send the each line of <i>filename</i> to the server as run-time configuration commands in the same format as the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.
 			<dt><tt>keyid</tt>
 			<dd>Specify the key ID to use for write requests.<dt><tt>lassociations</tt>
 			<dd>Perform the same function as the associations command, execept display mobilized and unmobilized associations.<dt><tt>mreadvar <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt><br>
@@ -184,15 +188,16 @@
 				</table>
 			<dt id="rv"><tt>readvar <i>assocID</i> <i>name</i> [ = <i>value</i> ] [,...]</tt><br>
 				<tt>rv <i>assocID</i> [ <i>name</i> ] [,...]</tt>
-			<dd>Display the specified variables. If the association ID is omitted or is given as zero, the variables are from the <a href="#system">system variables</a> name space, otherwise they are from the <a href="#peer">peer variables</a> name space. If no name is included, all operative variables in the name space are displayed. Multiple names are specified with comma separators and without whitespace. Note that time values are represented in milliseconds and frequency values in parts-per-million (PPM). Some NTP timestamps are represented in the format YYYYMMDDTTTT, where YYYY is the year, MM the month of year, DD the day of month and TTTT the time of day.<dt><tt>writevar <i>assocID</i> <i>name</i> = <i>value</i> [,...]</tt>
-			<dd>Write the specified variables. If the association ID is omitted or is given as zero, the variables are from the <a href="#system">system variables</a> name space, otherwise they are from the <a href="#peer">peer variables</a> name space.
-			<dt><tt>:config [...]</tt>
-			<dd>Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.</dl>
+			<dd>Display the specified variables. If the association ID is omitted or is given as zero, the variables are from the <a href="#system">system variables</a> name space, otherwise they are from the <a href="#peer">peer variables</a> name space. If no name is included, all operative variables in the name space are displayed. Multiple names are specified with comma separators and without whitespace. Note that time values are represented in milliseconds and frequency values in parts-per-million (PPM). Some NTP timestamps are represented in the format YYYYMMDDTTTT, where YYYY is the year, MM the month of year, DD the day of month and TTTT the time of day.
+			<dt><tt>saveconfig <i>filename</i></tt>
+			<dd>Write the current configuration, including any runtime modifications given with <tt>:config</tt> or <tt>config-from-file</tt>, to the ntpd host's file <i>filename</i>. A single period given for <i>filename</i> is shorthand for the startup configuration file.  <i>filename</i> can use strftime() format specifiers to substitute the current date and time, for example, <tt>saveconfig ntp-%Y%m%d-%H%M%S.conf</tt>. The filename used is stored in system variable <tt>savedconfig</tt>. Authentication is required.
+			<dt><tt>writevar <i>assocID</i> <i>name</i> = <i>value</i> [,...]</tt>
+			<dd>Write the specified variables. If the association ID is omitted or is given as zero, the variables are from the <a href="#system">system variables</a> name space, otherwise they are from the <a href="#peer">peer variables</a> name space.</dl>
 		<h4 id="status">Status Words and Kiss Codes</h4>
 		<p>The current state of the operating program is shown in a set of status words maintained by the system and each association separately. These words are displayed in the <tt>rv</tt> and <tt>as</tt> commands both in hexadecimal and decoded short tip strings. The codes, tips and short explanations are on the <a href="decode.html">Event Messages and Status Words</a> page. The page also includes a list of system and peer messages, the code for the latest of which is included in the status word.</p>
 		<p>Information resulting from protocol machine state transitions is displayed using an informal set of ASCII strings called <a href="decode.html#kiss">kiss codes</a>. The original purpose was for kiss-o'-death (KoD) packets sent by the server to advise the client of an unusual condition. They are now displayed, when appropriate, in the reference identifier field in various billboards.</p>
 		<h4 id="system">System Variables</h4>
-		<p>The following system variables apear in the <tt>rv</tt> billboard. Not all variables are displayed in some configurations.</p>
+		<p>The following system variables appear in the <tt>rv</tt> billboard. Not all variables are displayed in some configurations.</p>
 		<table width="100%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
 				<td>Variable</td>

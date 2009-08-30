@@ -4713,6 +4713,16 @@ case "$ac_cv_iflist_sysctl" in
     AC_DEFINE(HAVE_IFLIST_SYSCTL,1,[have iflist_sysctl?])
 esac
 
+###
+
+AC_MSG_CHECKING([if we want the saveconfig mechanism])
+AC_ARG_ENABLE(saveconfig,
+    AC_HELP_STRING([--enable-saveconfig], [+ saveconfig mechanism]),
+    [ntp_ok=$enableval], [ntp_ok=yes])
+if test "$ntp_ok" = "yes"; then
+    AC_DEFINE(SAVECONFIG, 1, [saveconfig mechanism])
+fi
+AC_MSG_RESULT($ntp_ok)
 
 ###
 

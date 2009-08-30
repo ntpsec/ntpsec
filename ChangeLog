@@ -1,3 +1,16 @@
+* [Bug 1293] make configuration dumper ready for release, specifically:
+* rename ntpq dumpcfg command to "saveconfig".
+* require authentication for saveconfig.
+* "restrict ... nomodify" prevents saveconfig and :config.
+* "saveconfig ." shorthand to save to startup configuration file.
+* support strftime() substitution in saveconfig arg to timestamp
+  the output filename, for example "saveconfig %Y%m%d-%H%M%S.conf".
+* display saveconfig response message from ntpd in ntpq.
+* save output filename in "savedconfig" variable, fetched with ntpq -c
+  "rv 0 savedconfig".
+* document saveconfig in html/ntpq.html.
+* add ./configure --disable-saveconfig to build a smaller ntpd.
+* log saveconfig failures and successes to syslog.
 (4.2.5p207) 2009/08/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1292] Minor Windows source tweaks for VC6-era SDK headers.
 (4.2.5p206) 2009/08/26 Released by Harlan Stenn <stenn@ntp.org>

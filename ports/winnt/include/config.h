@@ -205,7 +205,6 @@ typedef int socklen_t;
  */
 
 #pragma warning(disable: 4100) /* unreferenced formal parameter */
-#pragma warning(disable: 4101) /* unreferenced local variable */
 #pragma warning(disable: 4127) /* conditional expression is constant */
 #pragma warning(disable: 4996) /* more secure replacement available */
 
@@ -226,6 +225,7 @@ typedef int socklen_t;
 #define HAVE_RANDOM 
 #define MAXHOSTNAMELEN			64
 #define AUTOKEY
+#define SAVECONFIG			1
 
 /*
  * Multimedia timer enable

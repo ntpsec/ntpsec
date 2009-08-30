@@ -260,8 +260,8 @@ extern char	*sys_phone[];		/* ACTS phone numbers */
 extern int	config_priority_override;
 extern int	config_priority;
 #endif
-
 extern char *ntp_signd_socket;
+extern struct config_tree *cfg_tree_history;
 
 /* ntp_control.c */
 extern int	num_ctl_traps;
