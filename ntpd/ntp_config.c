@@ -463,6 +463,8 @@ free_config_tree(struct config_tree *ptree)
 }
 #endif /* DEBUG */
 
+
+#ifdef SAVECONFIG
 /* Dump all trees */
 int
 dump_all_config_trees (
@@ -1463,7 +1465,7 @@ dump_config_tree(
 
 	return 0;
 }
-
+#endif	/* SAVECONFIG */
 	
 
 /* FUNCTIONS FOR CREATING NODES ON THE SYNTAX TREE
@@ -4392,7 +4394,9 @@ abort_resolve(void)
 static void
 do_resolve_internal(void)
 {
+#ifndef SYS_WINNT
 	int i;
+#endif
 
 	if (res_fp == NULL) {
 		/* belch */

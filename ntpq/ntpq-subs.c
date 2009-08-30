@@ -62,8 +62,8 @@ static	void	lpeers		(struct parse *, FILE *);
 static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
-static  void    config          (struct parse *, FILE *);
-static 	void 	dumpcfg		(struct parse *, FILE *);
+static  void    config		(struct parse *, FILE *);
+static 	void 	saveconfig	(struct parse *, FILE *);
 static  void    config_from_file (struct parse *, FILE *);
 
 
@@ -71,9 +71,9 @@ static  void    config_from_file (struct parse *, FILE *);
  * Commands we understand.	Ntpdc imports this.
  */
 struct xcmd opcmds[] = {
-	{ "dumpcfg", dumpcfg, { NTP_STR, NO, NO, NO },
-		{ "dumpfile", "", "", ""}, 
-		"dump ntp server configuration"},
+	{ "saveconfig", saveconfig, { NTP_STR, NO, NO, NO },
+		{ "filename", "", "", ""}, 
+		"save ntpd configuration to file, . for current config file"},
 	{ "associations", associations, {  NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "print list of association ID's and statuses for the server's peers" },
@@ -1148,7 +1148,7 @@ lpassociations(
  *  * dumpcfg - dump ntp server configuration
  */
 static void
-dumpcfg(
+saveconfig(
 	struct parse *pcmd,
 	FILE *fp
 	)
@@ -1158,14 +1158,22 @@ dumpcfg(
 	int dsize;
 	u_short rstatus;
 
-	/* Is there a way to make an argument optional? */
-	if(pcmd->nargs > 0)
-		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, strlen(pcmd->argval[0].string), 
-			pcmd->argval[0].string, &rstatus, &dsize, &datap);
+	if (0 == pcmd->nargs)
+		return;
+	
+	res = doquery(CTL_OP_SAVECONFIG, 0, 1,
+		      strlen(pcmd->argval[0].string),
+		      pcmd->argval[0].string, &rstatus, &dsize,
+		      &datap);
+
+	if (res != 0)
+		return;
+
+	if (0 == dsize)
+		fprintf(fp, "(no response message, curiously)");
 	else {
-		res = doquery(CTL_OP_DUMPCONFIG, 0, 0, 0, (char *) 0, 
-			&rstatus, &dsize, &datap);
-		printf("No filename supplied\n");
+		datap[dsize] = '\0';
+		fprintf(fp, "%s", datap);
 	}
 }
 

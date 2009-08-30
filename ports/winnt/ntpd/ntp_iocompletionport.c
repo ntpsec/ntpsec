@@ -444,7 +444,6 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 	DWORD comm_mask;
 	DWORD modem_status;
 	static const l_fp zero_time = { 0 };
-	DWORD dwBytesReturned;
 	BOOL rc;
 
 	get_systime(&arrival_time);
@@ -686,7 +685,6 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
 	struct recvbuf *buff = NULL;
 	recvbuf_t *newbuff;
-	isc_boolean_t ignore_this;
 	l_fp arrival_time;
 	struct interface * inter = (struct interface *) i;
 	
