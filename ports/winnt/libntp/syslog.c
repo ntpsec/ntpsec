@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <syslog.h>
 
-#include <messages.h>
+#include "messages.h"
 
 static HANDLE hAppLog = NULL;
 static FILE *log_stream;
