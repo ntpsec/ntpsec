@@ -32,17 +32,17 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Release"
-# PROP BASE Intermediate_Dir "Release"
+# PROP BASE Output_Dir "ntpd\Release"
+# PROP BASE Intermediate_Dir "ntpd\Release"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
-# PROP Intermediate_Dir "Release"
+# PROP Output_Dir "ntpd\Release"
+# PROP Intermediate_Dir "ntpd\Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL)\inc32" /I "..\..\..\libopts" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /YX"windows.h" /FD /c
+# ADD CPP /nologo /MD /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL)\inc32" /I "..\..\..\libopts" /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /YX"windows.h" /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -50,23 +50,23 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib /nologo /subsystem:console /machine:I386 /out:"../bin/Release/ntpd.exe"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib /nologo /subsystem:console /pdb:"bin/Release/ntpd.pdb" /machine:I386 /out:"bin/Release/ntpd.exe" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "ntpd - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "Debug"
-# PROP BASE Intermediate_Dir "Debug"
+# PROP BASE Output_Dir "ntpd\Debug"
+# PROP BASE Intermediate_Dir "ntpd\Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir "ntpd\Debug"
+# PROP Intermediate_Dir "ntpd\Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL)\inc32" /I "..\..\..\libopts" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL)\inc32" /I "..\..\..\libopts" /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib /nologo /subsystem:console /debug /machine:I386 /out:"../bin/Debug/ntpd.exe" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib /nologo /subsystem:console /pdb:"bin/Debug/ntpd.pdb" /debug /machine:I386 /out:"bin/Debug/ntpd.exe" /pdbtype:sept
 
 !ENDIF 
 
@@ -93,7 +93,7 @@ SOURCE=..\..\..\ntpd\cmd_args.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\nt_clockstuff.c
+SOURCE=..\ntpd\nt_clockstuff.c
 # SUBTRACT CPP /YX
 # End Source File
 # Begin Source File
@@ -132,7 +132,7 @@ SOURCE=..\..\..\ntpd\ntp_io.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ntp_iocompletionport.c
+SOURCE=..\ntpd\ntp_iocompletionport.c
 # SUBTRACT CPP /YX
 # End Source File
 # Begin Source File
@@ -199,11 +199,11 @@ SOURCE=..\..\..\ntpd\ntpd.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ntservice.c
+SOURCE=..\ntpd\ntservice.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32_io.c
+SOURCE=..\ntpd\win32_io.c
 # SUBTRACT CPP /YX
 # End Source File
 # End Group
@@ -492,7 +492,7 @@ SOURCE=..\libntp\messages.mc
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\hopf_PCI_io.c
+SOURCE=..\ntpd\hopf_PCI_io.c
 # End Source File
 # Begin Source File
 
@@ -507,7 +507,6 @@ SOURCE=..\..\..\ntpd\refclock_arbiter.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_arc.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -517,7 +516,6 @@ SOURCE=..\..\..\ntpd\refclock_as2201.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_atom.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -604,7 +602,6 @@ SOURCE=..\..\..\ntpd\refclock_nmea.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_oncore.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -657,7 +654,6 @@ SOURCE=..\..\..\ntpd\refclock_usno.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_wwvb.c
-# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Group "Parse Lib"
