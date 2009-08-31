@@ -1,3 +1,4 @@
+* [Bug #1289] Update project files for VC6, VS2005, VS 2008
 (4.2.5p208) 2009/08/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1293] make configuration dumper ready for release, specifically:
 * rename ntpq dumpcfg command to "saveconfig".
