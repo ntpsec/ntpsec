@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="libntp"
-	ProjectGUID="{137B1CA5-DA8C-491C-8FA1-0CBD5003500A}"
+	ProjectGUID="{400FBFCB-462E-40D0-B06B-3B74E3FFFD00}"
+	TargetFrameworkVersion="0"
 	>
 	<Platforms>
 		<Platform
@@ -22,6 +23,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,11 +43,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="_DEBUG;_LIB;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
+				WholeProgramOptimization="false"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,..\..\..\libopts"
+				PreprocessorDefinitions="_DEBUG;_LIB;WIN32;SYS_WINNT;HAVE_CONFIG_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\Debug/libntp.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
@@ -53,7 +56,8 @@
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -98,6 +102,7 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -118,17 +123,23 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="NDEBUG;_LIB;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
+				WholeProgramOptimization="false"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,..\..\..\libopts"
+				PreprocessorDefinitions="NDEBUG;_LIB;WIN32;SYS_WINNT;HAVE_CONFIG_H"
+				GeneratePreprocessedFile="0"
 				StringPooling="true"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="false"
 				PrecompiledHeaderFile=".\Release/libntp.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				ProgramDataBaseFileName=".\Release\"
+				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -525,28 +536,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="dnslookup.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\dofptoa.c"
 				>
 				<FileConfiguration
@@ -701,26 +690,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="getclock.c"
+				RelativePath=".\getclock.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\getopt.c"
@@ -791,24 +762,6 @@
 			<File
 				RelativePath="..\..\..\libntp\humandate.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libisc\inet_aton.c"
@@ -1018,6 +971,7 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
+						WarningLevel="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1027,6 +981,7 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
+						WarningLevel="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -1055,24 +1010,6 @@
 			<File
 				RelativePath="..\..\..\libisc\md5.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\memmove.c"
@@ -1363,24 +1300,6 @@
 			<File
 				RelativePath="..\..\..\libntp\ntp_lineedit.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\ntp_random.c"
@@ -1603,26 +1522,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="setpriority.c"
+				RelativePath=".\setpriority.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="SetSystemTime.c"
@@ -1933,26 +1834,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="util_clockstuff.c"
+				RelativePath=".\util_clockstuff.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\libisc\win32os.c"
@@ -2004,6 +1887,10 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath="..\..\..\libopts\ag-char-map.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\binio.h"
 				>
 			</File>
@@ -2033,10 +1920,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\isc\interfaceiter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\inttypes.h"
 				>
 			</File>
 			<File
@@ -2084,11 +1967,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_assert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_calendar.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_control.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_debug.h"
 				>
 			</File>
 			<File
@@ -2121,6 +2012,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_malloc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_net.h"
 				>
 			</File>
 			<File
@@ -2173,6 +2068,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\recvbuff.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\sys\resource.h"
 				>
 			</File>
 			<File
