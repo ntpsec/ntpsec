@@ -15,6 +15,7 @@
 #include "utilities.h"
 #include "log.h"
 
+char *progname = "sntp";	/* for msyslog */
 
 int ai_fam_pref;
 volatile int debug;
@@ -27,16 +28,6 @@ int sntp_main (int argc, char **argv);
 int on_wire (struct addrinfo *host);
 int set_time (double offset);
 
-
-#if !HAVE_MALLOC
-void *
-rpl_malloc (size_t n)
-{
-	if (n == 0)
-	    n = 1;
-	return malloc (n);
-}
-#endif /* !HAVE_MALLOC */
 
 int 
 main (
@@ -61,7 +52,11 @@ sntp_main (
 	int optct;
 	int sync_data_suc = 0;
 	struct addrinfo **resh = NULL;
+	struct addrinfo *ai;
 	int resc;
+	int kodc;
+	int ow_ret;
+	char *hostname;
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -92,15 +87,33 @@ sntp_main (
 	if (HAVE_OPT(FILELOG))
 		init_log(OPT_ARG(FILELOG));
 
-	/* If there's a specified KOD file init KOD system. 
-	 * If not and system may save to HD use default file.
+	/* 
+	 * If there's a specified KOD file init KOD system.  If not use
+	 * default file.  For embedded systems with no writable
+	 * filesystem, -K /dev/null can be used to disable KoD storage.
 	 */
 	if (HAVE_OPT(KOD))
 		kod_init_kod_db(OPT_ARG(KOD));
+	else
+		kod_init_kod_db("/var/db/ntp-kod");
 
 	if (HAVE_OPT(KEYFILE))
 		auth_init(OPT_ARG(KEYFILE), &keys);
 
+#ifdef EXERCISE_KOD_DB
+	add_entry("192.168.169.170", "DENY");
+	add_entry("192.168.169.171", "DENY");
+	add_entry("192.168.169.172", "DENY");
+	add_entry("192.168.169.173", "DENY");
+	add_entry("192.168.169.174", "DENY");
+	delete_entry("192.168.169.174", "DENY");
+	delete_entry("192.168.169.172", "DENY");
+	delete_entry("192.168.169.170", "DENY");
+	if ((kodc = search_entry("192.168.169.173", &reason)) == 0)
+		printf("entry for 192.168.169.173 not found but should have been!\n");
+	else
+		free(reason);
+#endif
 
 	/* Considering employing a variable that prevents functions of doing anything until 
 	 * everything is initialized properly 
@@ -116,29 +129,27 @@ sntp_main (
 	 * let's just pay attention to previous KoDs.
 	 */
 	for (c = 0; c < resc && !sync_data_suc; c++) {
-		getnameinfo(resh[c]->ai_addr, resh[c]->ai_addrlen, adr_buf, 
-				sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
+		ai = resh[c];
+		do {
+			hostname = addrinfo_to_str(ai);
 
-		int kodc;
-		char *hostname = addrinfo_to_str(resh[c]);
-
-		if ((kodc = search_entry(hostname, &reason)) == 0) {
-			if (is_reachable(resh[c])) {
-				int ow_ret = on_wire(resh[c]);
-
-				if (ow_ret < 0)
-					printf("on_wire failed for server %s!\n", hostname);
-				else
-					sync_data_suc = 1;
+			if ((kodc = search_entry(hostname, &reason)) == 0) {
+				if (is_reachable(ai)) {
+					ow_ret = on_wire(ai);
+					if (ow_ret < 0)
+						printf("on_wire failed for server %s!\n", hostname);
+					else
+						sync_data_suc = 1;
+				}
+			} else {
+				printf("%d prior KoD%s for %s, skipping.\n", 
+					kodc, (kodc > 1) ? "s" : "", hostname);
+				free(reason);
 			}
-		} else {
-			printf("KoD %i packages exists for %s, stopping any further communication.\n", 
-				kodc, adr_buf);
-			free(reason);
-		}
-
+			free(hostname);
+			ai = ai->ai_next;
+		} while (NULL != ai);
 		freeaddrinfo(resh[c]);
-		free(hostname);
 	}
 	free(resh);
 
@@ -153,8 +164,9 @@ on_wire (
 {
 	register int try;
 	SOCKET sock;
-	struct pkt *x_pkt = (struct pkt *) alloca(sizeof(struct pkt));
-	struct pkt *r_pkt = (struct pkt *) alloca(sizeof(struct pkt));
+	struct pkt x_pkt;
+	struct pkt r_pkt;
+	char *ref;
 	
 	for(try=0; try<5; try++) {
 		struct timeval tv_xmt, tv_dst;
@@ -163,8 +175,8 @@ on_wire (
 		char *hostname = NULL, *ts_str = NULL;
 		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
 
-		memset(r_pkt, 0, sizeof(*r_pkt));
-		memset(x_pkt, 0, sizeof(*x_pkt));
+		memset(&r_pkt, 0, sizeof(r_pkt));
+		memset(&x_pkt, 0, sizeof(x_pkt));
 
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
 
@@ -176,17 +188,17 @@ on_wire (
 #endif
 
 		TVTOTS(&tv_xmt, &xmt);
-		HTONL_FP(&xmt, &(x_pkt->xmt));
+		HTONL_FP(&xmt, &(x_pkt.xmt));
 
-		x_pkt->stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
-		x_pkt->ppoll = 8;
+		x_pkt.stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
+		x_pkt.ppoll = 8;
 		/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
-		set_li_vn_mode(x_pkt, LEAP_NOTINSYNC, 4, 3);
+		set_li_vn_mode(&x_pkt, LEAP_NOTINSYNC, 4, 3);
 
 		create_socket(&sock, (sockaddr_u *)host->ai_addr);
 
-		sendpkt(sock, (sockaddr_u *)host->ai_addr, x_pkt, LEN_PKT_NOMAC);
-		rpktl = recvpkt(sock, r_pkt, x_pkt);
+		sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt, LEN_PKT_NOMAC);
+		rpktl = recvpkt(sock, &r_pkt, &x_pkt);
 
 		closesocket(sock);
 
@@ -209,16 +221,19 @@ on_wire (
 			case KOD_DEMOBILIZE:
 				/* Received a DENY or RESTR KOD packet */
 				hostname = addrinfo_to_str(host);
-				add_entry(hostname, (char *) &r_pkt->refid);
+				ref = (char *)&r_pkt.refid;
+				add_entry(hostname, ref);
 
 				if(ENABLED_OPT(NORMALVERBOSE))
-					printf("sntp on_wire: Received KOD packet with code: %s from %s, demobilizing all connections\n", 
-							(char *) r_pkt->refid, hostname);
+					printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n", 
+					       ref[0], ref[1], ref[2], ref[3],
+					       hostname);
 
-				char *log_str = (char *) malloc(sizeof(char) * (INET6_ADDRSTRLEN + 72));
-				snprintf(log_str, sizeof(log_str), 
-					"Received a KOD packet with code %s from %s, demobilizing all connections", 
-					(char *) &r_pkt->refid, hostname);
+				char *log_str = (char *) emalloc(sizeof(char) * (INET6_ADDRSTRLEN + 72));
+				snprintf(log_str, INET6_ADDRSTRLEN + 72, 
+					 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
+					 ref[0], ref[1], ref[2], ref[3],
+					 hostname);
 
 				log_msg(log_str, 2);
 
@@ -232,10 +247,10 @@ on_wire (
 			case 1:
 
 			/* Convert timestamps from network to host byte order */
-			NTOHL_FP(&r_pkt->reftime, &p_ref);
-			NTOHL_FP(&r_pkt->org, &p_org);
-			NTOHL_FP(&r_pkt->rec, &p_rec);
-			NTOHL_FP(&r_pkt->xmt, &p_xmt);
+			NTOHL_FP(&r_pkt.reftime, &p_ref);
+			NTOHL_FP(&r_pkt.org, &p_org);
+			NTOHL_FP(&r_pkt.rec, &p_rec);
+			NTOHL_FP(&r_pkt.xmt, &p_xmt);
 
 			if(ENABLED_OPT(NORMALVERBOSE)) {
 				getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, 
@@ -245,20 +260,20 @@ on_wire (
 			}
 
 #ifdef DEBUG
-			pkt_output(r_pkt, rpktl, stdout);
+			pkt_output(&r_pkt, rpktl, stdout);
 	
-			printf("sntp on_wire: rpkt->reftime:\n");
-			l_fp_output(&(r_pkt->reftime), stdout);
-			printf("sntp on_wire: rpkt->org:\n");
-			l_fp_output(&(r_pkt->org), stdout);
-			printf("sntp on_wire: rpkt->rec:\n");
-			l_fp_output(&(r_pkt->rec), stdout);
-			printf("sntp on_wire: rpkt->rec:\n");
-			l_fp_output_bin(&(r_pkt->rec), stdout);
-			printf("sntp on_wire: rpkt->rec:\n");
-			l_fp_output_dec(&(r_pkt->rec), stdout);
-			printf("sntp on_wire: rpkt->xmt:\n");
-			l_fp_output(&(r_pkt->xmt), stdout);
+			printf("sntp on_wire: r_pkt.reftime:\n");
+			l_fp_output(&(r_pkt.reftime), stdout);
+			printf("sntp on_wire: r_pkt.org:\n");
+			l_fp_output(&(r_pkt.org), stdout);
+			printf("sntp on_wire: r_pkt.rec:\n");
+			l_fp_output(&(r_pkt.rec), stdout);
+			printf("sntp on_wire: r_pkt.rec:\n");
+			l_fp_output_bin(&(r_pkt.rec), stdout);
+			printf("sntp on_wire: r_pkt.rec:\n");
+			l_fp_output_dec(&(r_pkt.rec), stdout);
+			printf("sntp on_wire: r_pkt.xmt:\n");
+			l_fp_output(&(r_pkt.xmt), stdout);
 #endif
 
 			/* Compute offset etc. */

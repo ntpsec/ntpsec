@@ -38,6 +38,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ntp_stdlib.h>
 #include <ntp_fp.h>
 #include <ntp.h>
 

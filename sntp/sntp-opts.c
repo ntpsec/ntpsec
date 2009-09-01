@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  August 18, 2009 at 07:47:59 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  August 30, 2009 at 02:59:51 AM by AutoGen 5.9.9pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -19,9 +19,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright (c) 2008 ntp.org - all rights reserved
+ * sntp copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
  *
- * 
+ * see html/copyright.html
  */
 
 #include <sys/types.h>
@@ -39,11 +39,11 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "sntp copyright (c) 2008 ntp.org, all rights reserved"
-/* extracted from sntp-opts.def near line 17 */
+       "sntp copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved"
+/* extracted from ../include/copyright.def near line 8 */
 ;
-tSCC zCopyrightNotice[1] =
-"";
+tSCC zCopyrightNotice[24] =
+"see html/copyright.html";
 
 extern tUsageProc optionUsage;
 
@@ -87,7 +87,7 @@ tSCC    zNormalverbose_Name[]      = "normalverbose";
  *  Kod option description:
  */
 tSCC    zKodText[] =
-        "Specify a file for the KOD packet storage";
+        "KoD history filename";
 tSCC    zKod_NAME[]                = "KOD";
 tSCC    zKod_Name[]                = "kod";
 #define KOD_FLAGS       (OPTST_DISABLED \
@@ -150,7 +150,7 @@ static const int
  *  Broadcast option description:
  */
 tSCC    zBroadcastText[] =
-        "Use broadcast packages from the broadcast address specified for synchronisation";
+        "Use broadcasts to the address specified for synchronisation";
 tSCC    zBroadcast_NAME[]          = "BROADCAST";
 tSCC    zBroadcast_Name[]          = "broadcast";
 #define BROADCAST_FLAGS       (OPTST_DISABLED \
@@ -160,7 +160,7 @@ tSCC    zBroadcast_Name[]          = "broadcast";
  *  Timeout option description:
  */
 tSCC    zTimeoutText[] =
-        "Specify the number of seconds until SNTP times out when waiting for broadcast packets";
+        "Specify the number of seconds to wait for broadcasts";
 tSCC    zTimeout_NAME[]            = "TIMEOUT";
 tSCC    zTimeout_Name[]            = "timeout";
 #define TIMEOUT_FLAGS       (OPTST_DISABLED \
@@ -458,7 +458,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.5p204\n\
+"sntp - standard SNTP program - Ver. 4.2.5p208\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {

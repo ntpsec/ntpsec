@@ -28,29 +28,21 @@ pkt_output (
 	   )
 {
 	register int a;
+	u_char *pkt;
 
-	unsigned char *cpy = (unsigned char *) malloc(sizeof(char) * pkt_length);		
-
-	if (NULL == cpy)
-		return;
-
-	for(a=0; a<pkt_length; a++) 
-		cpy[a] = ((unsigned char *) dpkg)[a];
-
+	pkt = (u_char *)dpkg;
 
 	fprintf(output, HLINE);
 
-	for(a=0; a<pkt_length; a++) {
-		if(a > 0 && a%8 == 0)
+	for (a = 0; a < pkt_length; a++) {
+		if (a > 0 && a % 8 == 0)
 			fprintf(output, "\n");
 
-		fprintf(output, "%i: %x \t", a, cpy[a]);
+		fprintf(output, "%d: %x \t", a, pkt[a]);
 	}
 
 	fprintf(output, "\n");
 	fprintf(output, HLINE);
-
-	free(cpy);
 }
 
 /* Output a long floating point value in hex in the style described above 
@@ -138,7 +130,7 @@ addrinfo_to_str (
 		struct addrinfo *addr
 		)
 {
-	char *buf = (char *) malloc(sizeof(char) * INET6_ADDRSTRLEN);
+	char *buf = (char *) emalloc(sizeof(char) * INET6_ADDRSTRLEN);
 
 	getnameinfo(addr->ai_addr, addr->ai_addrlen, buf, 
 			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
@@ -156,7 +148,7 @@ ss_to_str (
 		sockaddr_u *saddr
 		)
 {
-	char *buf = (char *) malloc(sizeof(char) * INET6_ADDRSTRLEN);
+	char *buf = (char *) emalloc(sizeof(char) * INET6_ADDRSTRLEN);
 
 	getnameinfo(&saddr->sa, SOCKLEN(saddr), buf,
 			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
@@ -177,12 +169,9 @@ tv_to_str (
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 
-	char *buf = (char *) malloc(sizeof(char) * 48);
+	char *buf = (char *) emalloc(sizeof(char) * 48);
 	time_t cur_time = time(NULL);
 	struct tm *tm_ptr;
-
-	if (NULL == buf)
-		return "tv_to_str() malloc(48) failed";
 
 	tm_ptr = localtime(&cur_time);
 

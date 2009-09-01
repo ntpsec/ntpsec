@@ -41,7 +41,7 @@ resolve_hosts (
 	if (hostc < 1 || NULL == res)
 		return 0;
 	
-	tres = malloc(sizeof(struct addrinfo *) * hostc);
+	tres = emalloc(sizeof(struct addrinfo *) * hostc);
 
 	for (a = 0, resc = 0; a < hostc; a++) {
 		struct addrinfo hints;
@@ -66,7 +66,7 @@ resolve_hosts (
 
 		if (error) {
 			size_t msg_length = strlen(hosts[a]) + 21;
-			char *logmsg = (char *) malloc(sizeof(char) * msg_length);
+			char *logmsg = (char *) emalloc(sizeof(char) * msg_length);
 
 			snprintf(logmsg, msg_length, "Error looking up %s", hosts[a]);
 #ifdef DEBUG
@@ -292,7 +292,7 @@ recv_bcst_data (
 	if(ENABLED_OPT(TIMEOUT)) 
 		timeout_tv.tv_sec = (int) OPT_ARG(TIMEOUT);
 	else 
-		timeout_tv.tv_sec = 60;
+		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
 	
 	switch(select(rsock + 1, &bcst_fd, 0, 0, &timeout_tv)) {
 		FD_CLR(rsock, &bcst_fd);
@@ -347,7 +347,7 @@ recv_bcst_pkt (
 	register int a;
 	int is_authentic, has_mac = 0, orig_pkt_len;
 
-	char *rdata = malloc(sizeof(char) * 256);
+	char *rdata = emalloc(sizeof(char) * 256);
 
 	int pkt_len = recv_bcst_data(rsock, rdata, 256, sas, &sender);
 
@@ -528,7 +528,7 @@ recvpkt (
 
 
 	/* Much space, just to be sure */
-	rdata = malloc(sizeof(char) * 256);
+	rdata = emalloc(sizeof(char) * 256);
 
 	int pkt_len = recvdata(rsock, &sender, rdata, 256);
 

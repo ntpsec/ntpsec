@@ -32,6 +32,7 @@
 #if defined(_MSC_VER) && defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
+#include <malloc.h>
 #include <crtdbg.h>
 /* #define MALLOC_LINT */	/* defers free() */
 #endif
@@ -141,9 +142,10 @@ extern int tty_open(char *, int, int);
 #define ISC_PLATFORM_HAVEIPV6
 #define ISC_PLATFORM_HAVESCOPEID
 #define HAVE_STRUCT_SOCKADDR_STORAGE
-#define ISC_PLATFORM_HAVEIN6PKTINFO
 #define NO_OPTION_NAME_WARNINGS
 #endif	/* in_addr6 / RFC2553-compliant IPv6 headers */
+
+#define ISC_PLATFORM_HAVEIN6PKTINFO
 
 #if !defined( _W64 )
   /*
@@ -203,7 +205,6 @@ typedef int socklen_t;
  */
 
 #pragma warning(disable: 4100) /* unreferenced formal parameter */
-#pragma warning(disable: 4101) /* unreferenced local variable */
 #pragma warning(disable: 4127) /* conditional expression is constant */
 #pragma warning(disable: 4996) /* more secure replacement available */
 
@@ -224,6 +225,7 @@ typedef int socklen_t;
 #define HAVE_RANDOM 
 #define MAXHOSTNAMELEN			64
 #define AUTOKEY
+#define SAVECONFIG			1
 
 /*
  * Multimedia timer enable

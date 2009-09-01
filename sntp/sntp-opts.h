@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  August 18, 2009 at 07:47:58 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  August 30, 2009 at 02:59:50 AM by AutoGen 5.9.9pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -19,9 +19,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright (c) 2008 ntp.org - all rights reserved
+ * sntp copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
  *
- * 
+ * see html/copyright.html
  */
 /*
  *  This file contains the programmatic interface to the Automated
@@ -72,8 +72,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    17
-#define SNTP_VERSION       "4.2.5p204"
-#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p204"
+#define SNTP_VERSION       "4.2.5p208"
+#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p208"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -185,7 +185,7 @@ typedef enum {
 #define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
-#define VALUE_OPT_VERSION       'v'
+#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
 #define VALUE_OPT_SAVE_OPTS     '>'
 #define VALUE_OPT_LOAD_OPTS     '<'
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \

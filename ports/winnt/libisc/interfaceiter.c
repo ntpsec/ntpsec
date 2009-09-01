@@ -91,7 +91,9 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 		memcpy(&dst->type.in6,
 		       &((struct sockaddr_in6 *) src)->sin6_addr,
 		       sizeof(struct in6_addr));
+#ifdef ISC_PLATFORM_HAVESCOPEID
 		dst->zone = ((struct sockaddr_in6 *) src)->sin6_scope_id;
+#endif
 		break;
 	default:
 		INSIST(0);

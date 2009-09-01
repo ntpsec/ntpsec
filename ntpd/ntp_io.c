@@ -1704,9 +1704,8 @@ set_reuseaddr(
 	int flag
 	)
 {
-	struct interface *interf;
-
 #ifndef SO_EXCLUSIVEADDRUSE
+	struct interface *interf;
 
 	for (interf = inter_list;
 	     interf != NULL;

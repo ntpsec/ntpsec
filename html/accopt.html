@@ -24,7 +24,7 @@
 
 <p>The skunk watches for intruders and sprays.</p>
 <p>Last update: 
-<!-- #BeginDate format:En2m -->17-Aug-2009  20:11<!-- #EndDate -->
+<!-- #BeginDate format:En2m -->25-Aug-2009  15:31<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 
@@ -148,7 +148,7 @@ time) in log<sub>2</sub> s with default 3.</dd>
 	are permitted.</dd>
 
 <dt><tt>noquery</tt></dt>
-<dd>Deny <tt>ntpq</tt> and <tt>ntpq</tt> queries. Time service is not affected.</dd>
+<dd>Deny <tt>ntpq</tt> and <tt>ntpdc</tt> queries. Time service is not affected.</dd>
 
 <dt><tt>nopeer</tt></dt>
 <dd>Deny packets that might  mobilize an  association unless authenticated. This
@@ -167,7 +167,7 @@ time) in log<sub>2</sub> s with default 3.</dd>
 <dt><tt>notrust</tt></dt>
 <dd>Deny packets that are not cryptographically authenticated. Note carefully
 	how this flag interacts with the <tt>auth</tt> option of the <tt>enable</tt> and <tt>disable</tt> commands.
-	If  <tt>auth</tt> is enables, which is the default, authentication is required
+	If  <tt>auth</tt> is enabled, which is the default, authentication is required
 	for all packets that might mobilize  an association.
 	If <tt>auth</tt> is
 	disabled, but the <tt>notrust</tt> flag is not present, an association can be
