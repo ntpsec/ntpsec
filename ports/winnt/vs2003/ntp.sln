@@ -1,0 +1,73 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "instsrv", "Instsrv.vcproj", "{E78B2865-843A-4EBA-9434-C8BE86647E12}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libntp", "libntp.vcproj", "{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpd", "ntpd.vcproj", "{2E4BB1C7-E8FE-48CF-904A-B105F1169626}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55} = {C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpdate", "ntpdate.vcproj", "{647A3E3F-D70E-47C2-9392-830FFC84EF8A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55} = {C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpdc", "ntpdc.vcproj", "{1D7C732A-A1D6-43F5-978D-69CE390161C6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55} = {C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpkeygen", "ntpkeygen.vcproj", "{48A390CC-217F-4462-9A0B-53D791ACCEF6}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ntpq", "ntpq.vcproj", "{0B4DE997-6C90-481F-8A92-554A155D1314}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55} = {C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{E78B2865-843A-4EBA-9434-C8BE86647E12}.Debug.ActiveCfg = Debug|Win32
+		{E78B2865-843A-4EBA-9434-C8BE86647E12}.Debug.Build.0 = Debug|Win32
+		{E78B2865-843A-4EBA-9434-C8BE86647E12}.Release.ActiveCfg = Release|Win32
+		{E78B2865-843A-4EBA-9434-C8BE86647E12}.Release.Build.0 = Release|Win32
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}.Debug.ActiveCfg = Debug|Win32
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}.Debug.Build.0 = Debug|Win32
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}.Release.ActiveCfg = Release|Win32
+		{C0DB2E48-1AF2-40D0-8F8A-CC73C47FFE55}.Release.Build.0 = Release|Win32
+		{2E4BB1C7-E8FE-48CF-904A-B105F1169626}.Debug.ActiveCfg = Debug|Win32
+		{2E4BB1C7-E8FE-48CF-904A-B105F1169626}.Debug.Build.0 = Debug|Win32
+		{2E4BB1C7-E8FE-48CF-904A-B105F1169626}.Release.ActiveCfg = Release|Win32
+		{2E4BB1C7-E8FE-48CF-904A-B105F1169626}.Release.Build.0 = Release|Win32
+		{647A3E3F-D70E-47C2-9392-830FFC84EF8A}.Debug.ActiveCfg = Debug|Win32
+		{647A3E3F-D70E-47C2-9392-830FFC84EF8A}.Debug.Build.0 = Debug|Win32
+		{647A3E3F-D70E-47C2-9392-830FFC84EF8A}.Release.ActiveCfg = Release|Win32
+		{647A3E3F-D70E-47C2-9392-830FFC84EF8A}.Release.Build.0 = Release|Win32
+		{1D7C732A-A1D6-43F5-978D-69CE390161C6}.Debug.ActiveCfg = Debug|Win32
+		{1D7C732A-A1D6-43F5-978D-69CE390161C6}.Debug.Build.0 = Debug|Win32
+		{1D7C732A-A1D6-43F5-978D-69CE390161C6}.Release.ActiveCfg = Release|Win32
+		{1D7C732A-A1D6-43F5-978D-69CE390161C6}.Release.Build.0 = Release|Win32
+		{48A390CC-217F-4462-9A0B-53D791ACCEF6}.Debug.ActiveCfg = Debug|Win32
+		{48A390CC-217F-4462-9A0B-53D791ACCEF6}.Debug.Build.0 = Debug|Win32
+		{48A390CC-217F-4462-9A0B-53D791ACCEF6}.Release.ActiveCfg = Release|Win32
+		{48A390CC-217F-4462-9A0B-53D791ACCEF6}.Release.Build.0 = Release|Win32
+		{0B4DE997-6C90-481F-8A92-554A155D1314}.Debug.ActiveCfg = Debug|Win32
+		{0B4DE997-6C90-481F-8A92-554A155D1314}.Debug.Build.0 = Debug|Win32
+		{0B4DE997-6C90-481F-8A92-554A155D1314}.Release.ActiveCfg = Release|Win32
+		{0B4DE997-6C90-481F-8A92-554A155D1314}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

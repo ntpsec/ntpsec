@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="ntpdc"
-	ProjectGUID="{8011C820-B3D5-4034-86EA-FFC30AE6764B}"
+	Name="instsrv"
+	ProjectGUID="{C3534C4D-6DF1-498E-9904-4337878A1515}"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -23,7 +23,6 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="version.c,*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -39,22 +38,22 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/ntpdc.tlb"
+				TypeLibraryName=".\Debug\Instsrv.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
-				MinimalRebuild="true"
+				AdditionalIncludeDirectories="..\..\..\..\include,..\..\include,..\..\instsrv"
+				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug/ntpdc.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName="..\bin\Debug\ntpdc-vc90"
+				PrecompiledHeaderFile=".\Debug\Instsrv.pch"
+				AssemblerListingLocation=".\Debug\"
+				ObjectFile=".\Debug\"
+				ProgramDataBaseFileName="..\bin\Debug\instsrv-vc90"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -74,14 +73,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
-				OutputFile="../bin/Debug/ntpdc.exe"
+				AdditionalDependencies="oldnames.lib"
+				OutputFile="..\bin\Debug\Instsrv.exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Debug\ntpdc.pdb"
+				ProgramDatabaseFile="..\bin\Debug\Instsrv.pdb"
 				SubSystem="1"
 				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
@@ -100,7 +99,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ntpdc.bsc"
+				OutputFile=".\Debug\Instsrv.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -121,7 +120,6 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
-			DeleteExtensionsOnClean="version.c,*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -137,22 +135,22 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/ntpdc.tlb"
+				TypeLibraryName=".\Release\Instsrv.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\..\..\include,..\..\include,..\..\instsrv"
+				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;_WINDOWS;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release/ntpdc.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName="..\bin\Release\ntpdc-vc90"
+				PrecompiledHeaderFile=".\Release\Instsrv.pch"
+				AssemblerListingLocation=".\Release\"
+				ObjectFile=".\Release\"
+				ProgramDataBaseFileName="..\bin\Release\instsrv-vc90"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -171,16 +169,15 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
-				OutputFile="../bin/Release/ntpdc.exe"
+				AdditionalDependencies="oldnames.lib"
+				OutputFile="..\bin\Release\Instsrv.exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Release\ntpdc.pdb"
+				ProgramDatabaseFile="..\bin\Release\Instsrv.pdb"
 				SubSystem="1"
-				LinkTimeCodeGeneration="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -197,7 +194,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ntpdc.bsc"
+				OutputFile=".\Release\Instsrv.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -218,79 +215,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\..\..\ntpdc\ntpdc-opts.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						WarningLevel="3"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						WarningLevel="3"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpdc\ntpdc.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						WarningLevel="3"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						WarningLevel="3"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpdc\ntpdc_ops.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						WarningLevel="3"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						WarningLevel="3"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="version.c"
+				RelativePath="..\..\instsrv\instsrv.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -316,46 +241,12 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
-			<File
-				RelativePath="..\..\..\include\ntp_assert.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\include\ntp_lineedit.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpdc\ntpdc.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 		</Filter>
-		<File
-			RelativePath="..\..\..\configure"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpdc&#x0D;&#x0A;"
-					Outputs="$(ProjectDir)version.c"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpdc&#x0D;&#x0A;"
-					Outputs="$(ProjectDir)version.c"
-				/>
-			</FileConfiguration>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

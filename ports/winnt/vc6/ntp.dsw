@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "instsrv"=".\instsrv\Instsrv.dsp" - Package Owner=<4>
+Project: "instsrv"=".\Instsrv.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libntp"=".\libntp\libntp.dsp" - Package Owner=<4>
+Project: "libntp"=".\libntp.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -27,22 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ntpd"=".\ntpd\ntpd.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libntp
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "ntpdate"=".\ntpdate\ntpdate.dsp" - Package Owner=<4>
+Project: "ntpd"=".\ntpd.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -57,7 +42,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ntpdc"=".\ntpdc\ntpdc.dsp" - Package Owner=<4>
+Project: "ntpdate"=".\ntpdate.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -72,7 +57,22 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ntpkeygen"=".\ntp-keygen\ntpkeygen.dsp" - Package Owner=<4>
+Project: "ntpdc"=".\ntpdc.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libntp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ntpkeygen"=".\ntpkeygen.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -84,7 +84,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ntpq"=".\ntpq\ntpq.dsp" - Package Owner=<4>
+Project: "ntpq"=".\ntpq.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

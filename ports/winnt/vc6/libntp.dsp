@@ -32,13 +32,13 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "Release"
-# PROP BASE Intermediate_Dir "Release"
+# PROP BASE Output_Dir "libntp\Release"
+# PROP BASE Intermediate_Dir "libntp\Release"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
-# PROP Intermediate_Dir "Release"
+# PROP Output_Dir "libntp\Release"
+# PROP Intermediate_Dir "libntp\Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MD /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL)\inc32" /I "..\..\..\libopts" /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FD /c
@@ -56,13 +56,13 @@ LIB32=link.exe -lib
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "libntp___Win32_Debug"
-# PROP BASE Intermediate_Dir "libntp___Win32_Debug"
+# PROP BASE Output_Dir "libntp\Debug"
+# PROP BASE Intermediate_Dir "libntp\Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir "libntp\Debug"
+# PROP Intermediate_Dir "libntp\Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD CPP /nologo /MDd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL)\inc32" /I "..\..\..\libopts" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /FD /GZ /c
@@ -86,11 +86,11 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\getclock.c
+SOURCE=..\libntp\getclock.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\setpriority.c
+SOURCE=..\libntp\setpriority.c
 # End Source File
 # Begin Source File
 
@@ -158,7 +158,7 @@ SOURCE=..\..\..\libntp\decodenetnum.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\dnslookup.c
+SOURCE=..\libntp\dnslookup.c
 # End Source File
 # Begin Source File
 
@@ -338,7 +338,7 @@ SOURCE=..\..\..\libntp\prettydate.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\randfile.c
+SOURCE=..\libntp\randfile.c
 # End Source File
 # Begin Source File
 
@@ -350,7 +350,7 @@ SOURCE=..\..\..\libntp\refnumtoa.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\SetSystemTime.c
+SOURCE=..\libntp\SetSystemTime.c
 # End Source File
 # Begin Source File
 
@@ -370,7 +370,7 @@ SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\syslog.c
+SOURCE=..\libntp\syslog.c
 # End Source File
 # Begin Source File
 
@@ -382,7 +382,7 @@ SOURCE=..\..\..\libntp\systime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\transmitbuff.c
+SOURCE=..\libntp\transmitbuff.c
 # End Source File
 # Begin Source File
 
@@ -403,6 +403,10 @@ SOURCE=..\..\..\libntp\uglydate.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\uinttoa.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\libntp\util_clockstuff.c
 # End Source File
 # Begin Source File
 
@@ -626,7 +630,7 @@ SOURCE=..\include\isc\win32os.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\messages.h
+SOURCE=..\libntp\messages.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -634,14 +638,14 @@ SOURCE=.\messages.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\messages.mc
+SOURCE=..\libntp\messages.mc
 
 !IF  "$(CFG)" == "libntp - Win32 Release"
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Message Compiler
 InputDir=.
-InputPath=.\messages.mc
+InputPath=..\libntp\messages.mc
 InputName=messages
 
 BuildCmds= \
@@ -662,7 +666,7 @@ BuildCmds= \
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Message Compiler
 InputDir=.
-InputPath=.\messages.mc
+InputPath=..\libntp\messages.mc
 InputName=messages
 
 BuildCmds= \

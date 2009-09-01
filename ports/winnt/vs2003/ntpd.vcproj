@@ -1,228 +1,138 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="7.10"
 	Name="ntpd"
-	ProjectGUID="{CB61F8BF-9637-495C-9087-E8664B400CE0}"
-	TargetFrameworkVersion="0"
-	>
+	SccProjectName="&quot;$/ntp/dev/ports/winnt/ntpd&quot;, JWBAAAAA"
+	SccLocalPath=".">
 	<Platforms>
 		<Platform
-			Name="Win32"
-		/>
+			Name="Win32"/>
 	</Platforms>
-	<ToolFiles>
-	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\ntpd\Release"
+			IntermediateDirectory=".\ntpd\Release"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/ntpd.tlb"
-				HeaderFileName=""
-			/>
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,$(OPENSSL)\include,..\..\..\libopts"
-				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
-				StringPooling="true"
-				ExceptionHandling="0"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="false"
-				PrecompiledHeaderFile=".\Release/ntpd.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName="..\bin\Release\ntpd-vc90"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="windows.h"
+				PrecompiledHeaderFile=".\ntpd\Release/ntpd.pch"
+				AssemblerListingLocation=".\ntpd\Release/"
+				ObjectFile=".\ntpd\Release/"
+				ProgramDataBaseFileName=".\ntpd\Release/"
 				BrowseInformation="1"
 				WarningLevel="4"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
-			/>
+				SuppressStartupBanner="TRUE"
+				CompileAs="0"/>
 			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib"
+				OutputFile="bin/Release/ntpd.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				ProgramDatabaseFile="bin/Release/ntpd.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\ntpd\Release/ntpd.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
+				Culture="1033"/>
 			<Tool
-				Name="VCPreLinkEventTool"
-			/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL)\lib\libeay32.lib"
-				OutputFile="../bin/Release/ntpd.exe"
-				Version="0x0400"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Release\ntpd.pdb"
-				SubSystem="1"
-				OptimizeForWindows98="0"
-				LinkTimeCodeGeneration="1"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="2"
-				TargetMachine="1"
-			/>
+				Name="VCXMLDataGeneratorTool"/>
 			<Tool
-				Name="VCALinkTool"
-			/>
+				Name="VCWebDeploymentTool"/>
 			<Tool
-				Name="VCManifestTool"
-			/>
+				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Release/ntpd.bsc"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory=".\ntpd\Debug"
+			IntermediateDirectory=".\ntpd\Debug"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.meta;$(TargetPath)"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/ntpd.tlb"
-				HeaderFileName=""
-			/>
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\include,$(OPENSSL)\inc32,..\..\..\libopts"
-				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
-				MinimalRebuild="true"
-				ExceptionHandling="0"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
-				SmallerTypeCheck="true"
-				RuntimeLibrary="1"
-				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Debug/ntpd.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName="..\bin\Debug\ntpd-vc90"
+				RuntimeLibrary="3"
+				PrecompiledHeaderFile=".\ntpd\Debug/ntpd.pch"
+				AssemblerListingLocation=".\ntpd\Debug/"
+				ObjectFile=".\ntpd\Debug/"
+				ProgramDataBaseFileName=".\ntpd\Debug/"
 				BrowseInformation="1"
-				WarningLevel="4"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-				CompileAs="1"
-			/>
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="4"
+				CompileAs="0"/>
 			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib"
+				OutputFile="bin/Debug/ntpd.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="bin/Debug/ntpd.pdb"
+				SubSystem="1"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\ntpd\Debug/ntpd.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-			/>
+				Culture="1033"/>
 			<Tool
-				Name="VCPreLinkEventTool"
-			/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL)\lib\libeay32.lib"
-				OutputFile="../bin/Debug/ntpd.exe"
-				Version="0x0400"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Debug\ntpd.pdb"
-				SubSystem="1"
-				OptimizeForWindows98="0"
-				LinkTimeCodeGeneration="0"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
+				Name="VCXMLDataGeneratorTool"/>
 			<Tool
-				Name="VCALinkTool"
-			/>
+				Name="VCWebDeploymentTool"/>
 			<Tool
-				Name="VCManifestTool"
-			/>
+				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ntpd.bsc"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -230,2003 +140,1971 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-			>
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\..\..\ntpd\cmd_args.c"
-				>
-			</File>
-			<File
-				RelativePath="nt_clockstuff.c"
-				>
+				RelativePath="..\..\..\ntpd\cmd_args.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_config.c"
-				>
+				RelativePath="..\ntpd\nt_clockstuff.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_control.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_crypto.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_config.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_data_structures.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_filegen.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_intres.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_control.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_io.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ntp_iocompletionport.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_crypto.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_loopfilter.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_monitor.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_data_structures.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_parser.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_peer.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						GeneratePreprocessedFile="0"
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_proto.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_filegen.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_refclock.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_request.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_intres.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_restrict.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_scanner.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_signd.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntp_timer.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_io.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_util.c"
-				>
+				RelativePath="..\ntpd\ntp_iocompletionport.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\ntpd-opts.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntpd.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_loopfilter.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="ntservice.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="win32_io.c"
-				>
+				RelativePath="..\..\..\ntpd\ntp_monitor.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_parser.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_peer.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_proto.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_refclock.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_request.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_restrict.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_scanner.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_timer.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_util.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntpd-opts.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntpd.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\ntpd\ntservice.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\ntpd\win32_io.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl"
-			>
+			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\..\..\include\ascii.h"
-				>
+				RelativePath="..\..\..\include\ascii.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\assertions.h"
-				>
+				RelativePath="..\..\..\include\isc\assertions.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\binio.h"
-				>
+				RelativePath="..\..\..\include\binio.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\boolean.h"
-				>
+				RelativePath="..\..\..\include\isc\boolean.h">
 			</File>
 			<File
-				RelativePath="..\include\clockstuff.h"
-				>
+				RelativePath="..\include\clockstuff.h">
 			</File>
 			<File
-				RelativePath="..\include\config.h"
-				>
+				RelativePath="..\include\config.h">
 			</File>
 			<File
-				RelativePath="..\include\hopf_PCI_io.h"
-				>
+				RelativePath="..\include\hopf_PCI_io.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ieee754io.h"
-				>
+				RelativePath="..\..\..\include\ieee754io.h">
 			</File>
 			<File
-				RelativePath="..\include\netinet\in.h"
-				>
+				RelativePath="..\include\netinet\in.h">
 			</File>
 			<File
-				RelativePath="..\include\arpa\inet.h"
-				>
+				RelativePath="..\include\arpa\inet.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\int.h"
-				>
+				RelativePath="..\include\isc\int.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\interfaceiter.h"
-				>
+				RelativePath="..\..\..\include\isc\interfaceiter.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\iosignal.h"
-				>
+				RelativePath="..\..\..\include\iosignal.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\ipv6.h"
-				>
+				RelativePath="..\include\isc\ipv6.h">
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\jupiter.h"
-				>
+				RelativePath="..\..\..\ntpd\jupiter.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\l_stdlib.h"
-				>
+				RelativePath="..\..\..\include\l_stdlib.h">
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\log.h"
-				>
+				RelativePath="..\..\..\libntp\log.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\mbg_gps166.h"
-				>
+				RelativePath="..\..\..\include\mbg_gps166.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\net.h"
-				>
+				RelativePath="..\include\isc\net.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\netaddr.h"
-				>
+				RelativePath="..\..\..\include\isc\netaddr.h">
 			</File>
 			<File
-				RelativePath="..\include\netdb.h"
-				>
+				RelativePath="..\include\netdb.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp.h"
-				>
+				RelativePath="..\..\..\include\ntp.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_assert.h"
-				>
+				RelativePath="..\..\..\include\ntp_calendar.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_calendar.h"
-				>
+				RelativePath="..\..\..\include\ntp_cmdargs.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_cmdargs.h"
-				>
+				RelativePath="..\..\..\include\ntp_config.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_config.h"
-				>
+				RelativePath="..\..\..\include\ntp_control.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_control.h"
-				>
+				RelativePath="..\..\..\include\ntp_debug.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_debug.h"
-				>
+				RelativePath="..\..\..\include\ntp_filegen.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_filegen.h"
-				>
+				RelativePath="..\..\..\include\ntp_fp.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_fp.h"
-				>
+				RelativePath="..\..\..\include\ntp_if.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_if.h"
-				>
+				RelativePath="..\..\..\include\ntp_io.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_io.h"
-				>
+				RelativePath="..\include\ntp_iocompletionport.h">
 			</File>
 			<File
-				RelativePath="..\include\ntp_iocompletionport.h"
-				>
+				RelativePath="..\..\..\include\ntp_machine.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_lists.h"
-				>
+				RelativePath="..\..\..\include\ntp_malloc.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_machine.h"
-				>
+				RelativePath="..\..\..\include\ntp_proto.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_malloc.h"
-				>
+				RelativePath="..\..\..\include\ntp_random.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_net.h"
-				>
+				RelativePath="..\..\..\include\ntp_refclock.h">
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_parser.h"
-				>
+				RelativePath="..\..\..\include\ntp_request.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_proto.h"
-				>
+				RelativePath="..\..\..\include\ntp_rfc2553.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_random.h"
-				>
+				RelativePath="..\..\..\include\ntp_select.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_refclock.h"
-				>
+				RelativePath="..\..\..\include\ntp_stdlib.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_request.h"
-				>
+				RelativePath="..\..\..\include\ntp_string.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_rfc2553.h"
-				>
+				RelativePath="..\..\..\include\ntp_syslog.h">
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_scanner.h"
-				>
+				RelativePath="..\include\ntp_timer.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_select.h"
-				>
+				RelativePath="..\..\..\include\ntp_tty.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_stdlib.h"
-				>
+				RelativePath="..\..\..\include\ntp_types.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_string.h"
-				>
+				RelativePath="..\..\..\include\ntp_unixtime.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_syslog.h"
-				>
+				RelativePath="..\..\..\ntpd\ntpd-opts.h">
 			</File>
 			<File
-				RelativePath="..\include\ntp_timer.h"
-				>
+				RelativePath="..\..\..\include\ntpd.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_tty.h"
-				>
+				RelativePath="..\include\ntservice.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_types.h"
-				>
+				RelativePath="..\include\isc\offset.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_unixtime.h"
-				>
+				RelativePath="..\..\..\libopts\autoopts\options.h">
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntpd-opts.h"
-				>
+				RelativePath="..\include\sys\param.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntpd.h"
-				>
+				RelativePath="..\include\isc\platform.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntpsim.h"
-				>
+				RelativePath="..\..\..\include\recvbuff.h">
 			</File>
 			<File
-				RelativePath="..\include\ntservice.h"
-				>
+				RelativePath="..\..\..\include\isc\result.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\offset.h"
-				>
+				RelativePath="..\include\sys\socket.h">
 			</File>
 			<File
-				RelativePath="..\..\..\libopts\autoopts\options.h"
-				>
+				RelativePath="..\include\syslog.h">
 			</File>
 			<File
-				RelativePath="..\include\sys\param.h"
-				>
+				RelativePath="..\include\termios.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\platform.h"
-				>
+				RelativePath="..\include\transmitbuff.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\recvbuff.h"
-				>
+				RelativePath="..\include\sys\wait.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\result.h"
-				>
+				RelativePath="..\include\win32_io.h">
 			</File>
 			<File
-				RelativePath="..\include\sys\socket.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\syslog.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\termios.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\timepps.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\transmitbuff.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\sys\wait.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\win32_io.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\isc\win32os.h"
-				>
+				RelativePath="..\include\isc\win32os.h">
 			</File>
 		</Filter>
 		<Filter
 			Name="Generated Files"
-			>
+			Filter="">
 			<File
-				RelativePath="..\libntp\messages.rc"
-				>
+				RelativePath="..\libntp\messages.rc">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="..\libntp"
-					/>
+						AdditionalIncludeDirectories="\ntp-dev-4.2.5p205\ports\winnt\libntp"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="..\libntp"
-					/>
+						AdditionalIncludeDirectories="\ntp-dev-4.2.5p205\ports\winnt\libntp"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libntp\MSG00001.bin"
-				>
+				RelativePath="..\libntp\MSG00001.bin">
 			</File>
 			<File
-				RelativePath="version.c"
-				>
+				RelativePath="version.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-						ShowIncludes="true"
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 			<File
-				RelativePath="..\libntp\messages.mc"
-				>
+				RelativePath="..\libntp\messages.mc">
 			</File>
 		</Filter>
 		<Filter
 			Name="Reference Clock"
-			>
+			Filter="">
 			<File
-				RelativePath="hopf_PCI_io.c"
-				>
+				RelativePath="..\ntpd\hopf_PCI_io.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_acts.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_acts.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_arbiter.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_arbiter.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_arc.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_as2201.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_arc.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_atom.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_bancomm.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_as2201.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_chronolog.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_chu.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_atom.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_conf.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_datum.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_bancomm.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_dumbclock.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_gpsvme.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_chronolog.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_chu.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_heath.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_conf.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_hopfpci.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_hopfser.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_hpgps.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_datum.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_irig.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_dumbclock.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_jupiter.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_leitch.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_gpsvme.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_local.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_msfees.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_heath.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_mx4200.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_hopfpci.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_nmea.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_oncore.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_palisade.c">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_palisade.h">
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\refclock_parse.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_hopfser.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_pst.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_hpgps.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_ptbacts.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_irig.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_shm.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_jjy.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_jupiter.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_tpro.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_leitch.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_trak.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_local.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_true.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_msfees.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_usno.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\refclock_mx4200.c"
-				>
+				RelativePath="..\..\..\ntpd\refclock_wwvb.c">
 				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_nmea.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_oncore.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_palisade.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_palisade.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_parse.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_pcf.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_pst.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_ptbacts.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_shm.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_tpro.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_trak.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_true.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_usno.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\refclock_wwvb.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Parse Lib"
-			>
+			Filter="">
 			<File
-				RelativePath="..\..\..\libparse\clk_computime.c"
-				>
+				RelativePath="..\..\..\libparse\clk_computime.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_dcf7000.c"
-				>
+				RelativePath="..\..\..\libparse\clk_dcf7000.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_hopf6021.c"
-				>
+				RelativePath="..\..\..\libparse\clk_hopf6021.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_meinberg.c"
-				>
+				RelativePath="..\..\..\libparse\clk_meinberg.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_rawdcf.c"
-				>
+				RelativePath="..\..\..\libparse\clk_rawdcf.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_rcc8000.c"
-				>
+				RelativePath="..\..\..\libparse\clk_rcc8000.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_schmid.c"
-				>
+				RelativePath="..\..\..\libparse\clk_schmid.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_trimtaip.c"
-				>
+				RelativePath="..\..\..\libparse\clk_trimtaip.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_trimtsip.c"
-				>
+				RelativePath="..\..\..\libparse\clk_trimtsip.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\clk_varitext.c"
-				>
+				RelativePath="..\..\..\libparse\data_mbg.c">
 				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
-					/>
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\data_mbg.c"
-				>
+				RelativePath="..\..\..\libparse\parse.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libparse\parse.c"
-				>
+				RelativePath="..\..\..\libparse\parse_conf.c">
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="2"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
+						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"
+						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\libparse\parse_conf.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\..\configure"
-			>
+			RelativePath="..\..\..\configure">
 			<FileConfiguration
-				Name="Release|Win32"
-				>
+				Name="Release|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpd&#x0D;&#x0A;"
-					AdditionalDependencies="..\scripts\mkver.bat;..\include\config.h;ntp_iocompletionport.c;win32_io.c;ntpd.c;ntp_timer.c;"
-					Outputs="$(ProjectDir)version.c"
-				/>
+					CommandLine="echo Using NT Shell Script to generate version.c
+..\scripts\mkver.bat -P ntpd
+"
+					AdditionalDependencies="..\scripts\mkver.bat;"
+					Outputs="$(ProjectDir)version.c"/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32"
-				>
+				Name="Debug|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpd&#x0D;&#x0A;"
-					AdditionalDependencies="..\scripts\mkver.bat;..\include\config.h;ntp_iocompletionport.c;win32_io.c;ntpd.c;ntp_timer.c;"
-					Outputs="$(ProjectDir)version.c"
-				/>
+					CommandLine="echo Using NT Shell Script to generate version.c
+..\scripts\mkver.bat -P ntpd
+"
+					AdditionalDependencies="..\scripts\mkver.bat;"
+					Outputs="$(ProjectDir)version.c"/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\scripts\mkver.bat"
-			>
+			RelativePath="..\scripts\mkver.bat">
 			<FileConfiguration
 				Name="Release|Win32"
-				ExcludedFromBuild="true"
-				>
+				ExcludedFromBuild="TRUE">
 				<Tool
-					Name="VCCustomBuildTool"
-				/>
+					Name="VCCustomBuildTool"/>
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Debug|Win32"
-				ExcludedFromBuild="true"
-				>
+				ExcludedFromBuild="TRUE">
 				<Tool
-					Name="VCCustomBuildTool"
-				/>
+					Name="VCCustomBuildTool"/>
 			</FileConfiguration>
 		</File>
 	</Files>
