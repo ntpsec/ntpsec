@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ntpq"
-	ProjectGUID="{EA10E04E-946B-44A6-B0AB-B5B93A160744}"
+	ProjectGUID="{4BD64547-230D-4C0E-9F2C-9D75B4CC0FC7}"
 	>
 	<Platforms>
 		<Platform
@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -134,7 +134,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

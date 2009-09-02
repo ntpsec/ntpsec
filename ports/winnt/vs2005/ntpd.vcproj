@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ntpd"
-	ProjectGUID="{F6F7E7C0-AE5E-4D7C-A17E-A3043FE68664}"
+	ProjectGUID="{DDAB6ECD-E9DF-46B2-8737-6DEF96ADA59A}"
 	>
 	<Platforms>
 		<Platform
@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -70,7 +70,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="bin/Release/ntpd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -135,7 +135,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL)\inc32,..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -162,7 +162,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL)\out32dll\libeay32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib ws2_32.lib winmm.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="bin/Debug/ntpd.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -1026,7 +1026,7 @@
 					<Tool
 						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="\ntp-dev-4.2.5p205\ports\winnt\libntp"
+						AdditionalIncludeDirectories="\ntp-dev-4.2.5p209\ports\winnt\libntp"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1035,7 +1035,7 @@
 					<Tool
 						Name="VCResourceCompilerTool"
 						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="\ntp-dev-4.2.5p205\ports\winnt\libntp"
+						AdditionalIncludeDirectories="\ntp-dev-4.2.5p209\ports\winnt\libntp"
 					/>
 				</FileConfiguration>
 			</File>

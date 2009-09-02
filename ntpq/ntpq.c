@@ -28,12 +28,6 @@
 #ifdef SYS_WINNT
 # include <Mswsock.h>
 # include <io.h>
-# ifdef OPENSSL
-#  pragma warning(push)
-#  pragma warning(disable: 4152)
-#  include <openssl/applink.c>
-#  pragma warning(pop)
-# endif /* OPENSSL */
 #endif /* SYS_WINNT */
 
 #ifdef SYS_VXWORKS
