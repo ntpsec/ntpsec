@@ -122,6 +122,10 @@
 #define PACKET_6D	0x6D	/* Supplementary Thunderbolt Tracking Stats */
 #define PACKET_41	0x41	/* Thunderbolt I dont know what this packet is, it's not documented on my manual*/
 
+/* Acutime Packets */
+#define PACKET_41A      0x41    /* GPS time */
+#define PACKET_46       0x46    /* Receiver Health */
+
 #define DLE 0x10
 #define ETX 0x03
 
@@ -188,14 +192,12 @@ double 		getdbl 			(u_char *);
 short  		getint 			(u_char *);
 long		getlong			(u_char *);
 
-/* Thunderbolt specific function prototypes */
-#ifdef UNUSED
+
 static  void    sendcmd                 (struct packettx *buffer, int c);
-#endif
 static  void    sendsupercmd            (struct packettx *buffer, int c1, int c2);
 static  void    sendbyte                (struct packettx *buffer, int b);
 static  void    sendint                 (struct packettx *buffer, int a);
 static  int     sendetx                 (struct packettx *buffer, int fd);
 static  void    init_thunderbolt        (int fd);
-
+static  void    init_acutime            (int fd);
 #endif /* PALISADE_H */

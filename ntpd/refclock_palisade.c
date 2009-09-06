@@ -62,6 +62,9 @@
  * 14/01/07: Conditinal compilation for Thunderbolt support no longer needed
  *           now we use mode 2 for decode thunderbolt packets.
  *           Fernando P. Hauscarriaga
+ *
+ * 30/08/09: Added support for Trimble Acutime Gold Receiver.
+ *           Fernando P. Hauscarriaga (fernandoph@iar.unlp.edu.ar)
  */
 
 #ifdef HAVE_CONFIG_H
@@ -113,6 +116,8 @@ int day_of_year (char *dt);
 #define CLK_TRIMBLE	0	/* Trimble Palisade */
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
+#define CLK_ACUTIME     3       /* Trimble Acutime Gold */
+#define CLK_ACUTIMEB    4       /* Trimble Actutime Gold Port B */
 
 int praecis_msg;
 static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
@@ -121,7 +126,6 @@ static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
  * They are taken from Markus Prosch
  */
 
-#ifdef UNUSED
 /*
  * sendcmd - Build data packet for sending
  */
@@ -131,11 +135,10 @@ sendcmd (
 	int c
 	)
 {
-	buffer->data[0] = DLE;
-	buffer->data[1] = (unsigned char)c;
-	buffer->size = 2;
+        *buffer->data = DLE;
+        *(buffer->data + 1) = (unsigned char)c;
+        buffer->size = 2;
 }
-#endif
 
 /*
  * sendsupercmd - Build super data packet for sending
@@ -147,9 +150,9 @@ sendsupercmd (
 	int c2
 	)
 {
-        buffer->data[0] = DLE;
-        buffer->data[1] = (unsigned char)c1;
-        buffer->data[2] = (unsigned char)c2;
+        *buffer->data = DLE;
+        *(buffer->data + 1) = (unsigned char)c1;
+        *(buffer->data + 2) = (unsigned char)c2;
         buffer->size = 3;
 }
 
@@ -163,8 +166,8 @@ sendbyte (
 	)
 {
         if (b == DLE)
-                buffer->data[buffer->size++] = DLE;
-        buffer->data[buffer->size++] = (unsigned char)b;
+                *(buffer->data+buffer->size++) = DLE;
+        *(buffer->data+buffer->size++) = (unsigned char)b;
 }
 
 /*
@@ -191,8 +194,8 @@ sendetx (
 {
         int result;
 	
-        buffer->data[buffer->size++] = DLE;
-        buffer->data[buffer->size++] = ETX;
+        *(buffer->data+buffer->size++) = DLE;
+        *(buffer->data+buffer->size++) = ETX;
         result = write(fd, buffer->data, (unsigned long)buffer->size);
 	
         if (result != -1)
@@ -210,10 +213,9 @@ init_thunderbolt (
 	int fd
 	)
 {
-	u_char buffer[256];
 	struct packettx buf;
 	
-	buf.data = buffer;
+//	buf.data = (u_char *) malloc(1);
 	
 	/* set UTC time */
 	sendsupercmd (&buf, 0x8E, 0xA2);
@@ -224,6 +226,31 @@ init_thunderbolt (
 	sendsupercmd (&buf, 0x8F, 0xA5);
 	sendint      (&buf, 0x5);
 	sendetx      (&buf, fd);
+}
+
+/*
+ * init_acutime - Prepares Acutime Receiver to be used with NTP
+ */
+static void
+init_acutime (
+	int fd
+	)
+{
+	/* Disable all outputs, Enable Event-Polling on PortA so
+	   we can ask for time packets */
+	struct packettx tx;
+
+	tx.size = 0;
+	tx.data = (u_char *) malloc(100);
+
+	sendsupercmd(&tx, 0x8E, 0xA5);
+	sendbyte(&tx, 0x02);
+	sendbyte(&tx, 0x00);
+	sendbyte(&tx, 0x00);
+	sendbyte(&tx, 0x00);
+	sendetx(&tx, fd);
+
+	free(tx.data);
 }
 
 /*
@@ -241,9 +268,11 @@ palisade_start (
 	char gpsdev[20];
 
 	struct termios tio;
-
+#ifdef SYS_WINNT
+	(void) sprintf(gpsdev, "COM%d:", unit);
+#else	
 	(void) sprintf(gpsdev, DEVICE, unit);
-
+#endif
 	/*
 	 * Open serial port. 
 	 */
@@ -264,7 +293,6 @@ palisade_start (
 #ifdef DEBUG
                 printf("Palisade(%d) tcgetattr(fd, &tio)\n",unit);
 #endif
-		close(fd);
                 return (0);
         }
 
@@ -276,6 +304,15 @@ palisade_start (
 	 */
 	up = (struct palisade_unit *) emalloc(sizeof(struct palisade_unit));
 	      
+	if (!(up)) {
+                msyslog(LOG_ERR, "Palisade(%d) emalloc: %m",unit);
+#ifdef DEBUG
+                printf("Palisade(%d) emalloc\n",unit);
+#endif
+		(void) close(fd);
+		return (0);
+	}
+
 	memset((char *)up, 0, sizeof(struct palisade_unit));
 
 	up->type = CLK_TYPE(peer);
@@ -291,7 +328,11 @@ palisade_start (
 		msyslog(LOG_NOTICE, "Palisade(%d) Thunderbolt mode enabled\n"
 			,unit);
 		tio.c_cflag = (CS8|CLOCAL|CREAD);
-		break;		
+		break;
+	    case CLK_ACUTIME:
+		msyslog(LOG_NOTICE, "Palisade(%d) Acutime Gold mode enabled\n"
+			,unit);
+		break;
 	    default:
 		msyslog(LOG_NOTICE, "Palisade(%d) mode unknown\n",unit);
 		break;
@@ -301,8 +342,6 @@ palisade_start (
 #ifdef DEBUG
                 printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
 #endif
-		close(fd);
-		free(up);
                 return 0;
         }
 
@@ -339,6 +378,8 @@ palisade_start (
 
     	if (up->type == CLK_THUNDERBOLT)
        	    	init_thunderbolt(fd);
+	if (up->type == CLK_ACUTIME)
+		init_acutime(fd);
 
 	return 1;
 }
@@ -416,7 +457,7 @@ TSIP_decode (
 	 * proper format, declare bad format and exit.
 	 */
 
-	if (up->type != CLK_THUNDERBOLT){
+	if ((up->type != CLK_THUNDERBOLT) & (up->type != CLK_ACUTIME)){
 		if ((up->rpt_buf[0] == (char) 0x41) ||
 		    (up->rpt_buf[0] == (char) 0x46) ||
 		    (up->rpt_buf[0] == (char) 0x54) ||
@@ -743,10 +784,74 @@ TSIP_decode (
 		printf("0x43\n");
 		return 0;
         }
-        else if (up->rpt_buf[0] == PACKET_41) {
-		printf("0x41\n");
+        else if ((up->rpt_buf[0] == PACKET_41) & (up->type == CLK_THUNDERBOLT)){
+		printf("Undocumented 0x41 packet on Thunderbolt\n");
 		return 0;
         }
+	else if ((up->rpt_buf[0] == PACKET_41A) & (up->type == CLK_ACUTIME)) {
+#ifdef DEBUG
+		printf("GPS TOW: %ld\n", getlong((u_char *) &mb(0)));
+		printf("GPS WN: %d\n", getint((u_char *) &mb(4)));
+		printf("GPS UTC-GPS Offser: %ld\n", getlong((u_char *) &mb(6)));
+#endif
+		return 0;
+	}
+
+	/* Health Status for Acutime Receiver */
+	else if ((up->rpt_buf[0] == PACKET_46) & (up->type == CLK_ACUTIME)) {
+		if (debug > 1)
+		/* Status Codes */
+			switch (mb(0)) {
+			    case 0x00:
+				printf ("Doing Position Fixes\n");
+				break;
+			    case 0x01:
+				printf ("Do no have GPS time yet\n");
+				break;
+			    case 0x03:
+				printf ("PDOP is too high\n");
+				break;
+			    case 0x08:
+				printf ("No usable satellites\n");
+				break;
+			    case 0x09:
+				printf ("Only 1 usable satellite\n");
+				break;
+			    case 0x0A:
+				printf ("Only 2 usable satellites\n");
+				break;
+			    case 0x0B:
+				printf ("Only 3 usable satellites\n");
+				break;
+			    case 0x0C:
+				printf("The Chosen satellite is unusable\n");
+				break;
+			}
+		/* Error Codes */
+		if (mb(1) != 0)	{
+			
+			refclock_report(peer, CEVNT_BADTIME);
+			up->polled = -1;
+			
+			if (debug > 1){
+				if (mb(1) && 0x01)
+					printf ("Signal Processor Error, reset unit.\n");
+				if (mb(1) && 0x02)
+					printf ("Alignment error, channel or chip 1, reset unit.\n");
+				if (mb(1) && 0x03)
+					printf ("Alignment error, channel or chip 2, reset unit.\n");
+				if (mb(1) && 0x04)
+					printf ("Antenna feed line fault (open or short)\n");
+				if (mb(1) && 0x05)
+					printf ("Excessive reference frequency error, refer to packet 0x2D and packet 0x4D documentation for further information\n");
+			}
+		
+		return 0;
+		}
+	}
+	else if (up->rpt_buf[0] == 0x54)
+		return 0;
+
         else if (up->rpt_buf[0] == PACKET_6D) {
 #ifdef DEBUG
 		int sats;
@@ -1048,6 +1153,9 @@ HW_poll (
 	x |= TIOCM_RTS;        /* turn on RTS  */
 
 	/* Edge trigger */
+	if (up->type == CLK_ACUTIME)
+		write (pp->io.fd, "", 1);
+		
 	if (ioctl(pp->io.fd, TIOCMSET, &x) < 0) { 
 #ifdef DEBUG
 		if (debug)
