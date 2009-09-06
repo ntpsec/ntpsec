@@ -608,7 +608,8 @@ save_config(
 	filename[sizeof(filename) - 1] = '\0';
 	
 
-	fd = open(filename, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY,
+		  S_IRUSR | S_IWUSR);
 	if (-1 == fd)
 		fptr = NULL;
 	else

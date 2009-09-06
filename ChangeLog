@@ -1,5 +1,7 @@
 * [Bug 1294] Use OPENSSL_INC and OPENSSL_LIB macros for Windows
   and remove unnecessary reference to applink.c for Windows
+* [Bug 1295] trap directive options are not optional.
+* [Bug 1297] yylex() must always set yylval before returning.
 (4.2.5p209) 2009/09/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1290] Fix to use GETTIMEOFDAY macro
 * [Bug 1289] Update project files for VC6, VS2003, VS2005, VS 2008

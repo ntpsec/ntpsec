@@ -9,7 +9,7 @@ noinst_LIBRARIES=	libntpd.a
 AM_CPPFLAGS= -I$(top_srcdir)/include -I../include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB.
 LDADD=	version.o libntpd.a @LIBPARSE@
-AM_YFLAGS=	-d -t
+AM_YFLAGS=	-d -t -r all
 
 if VPATH_HACK
 VPHACK=	vphack

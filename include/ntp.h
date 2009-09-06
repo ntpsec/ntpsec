@@ -154,7 +154,7 @@ typedef char s_char;
  * dispersion component (frequency error plus precision). The frequency
  * error component is computed as CLOCK_PHI times the difference between
  * the epoch of the time measurement and the reference time. The
- * precision componen is computed as the square root of the mean of the
+ * precision component is computed as the square root of the mean of the
  * squares of a zero-mean, uniform distribution of unit maximum
  * amplitude. Whether this makes statistical sense may be arguable.
  */
