@@ -473,19 +473,22 @@ create_string_token(
 	while (*pch && isspace(*pch))
 		pch++;
 
-	if (!*pch)
-		return T_EOC;
+	if (!*pch) {
+		yylval.Integer = T_EOC;
+		return yylval.Integer;
+	}
 
 	yylval.String = estrdup(lexeme);
-
 	return T_String;
 }
 
 
 /*
- * Define a function that does the actual scanning 
- * Bison expects this function to be called yylex and for it to take no 
- * input and return an int
+ * Define a function that does the actual scanning.
+ * Bison expects this function to be called yylex and for it to take no
+ * input and return an int.
+ * Conceptually yylex "returns" yylval as well as the actual return
+ * value representing the token or type.
  */
 int
 yylex(
@@ -493,6 +496,7 @@ yylex(
 	)
 {
 	int i, instring = 0;
+	int yylval_was_set = 0;
 	int token;		/* The return value/the recognized token */
 	int ch;
 	static int expect_string = NO_ARG;
@@ -510,18 +514,21 @@ yylex(
 				return 0;
 
 			FCLOSE(fp[curr_include_level]);
-			ip_file = fp[--curr_include_level]; 
-			return T_EOC;
+			ip_file = fp[--curr_include_level];
+			token = T_EOC;
+			goto normal_return;
 
 		} else if (is_EOC(ch)) {
 
 			expect_string = NO_ARG;   /* Reset expect_string */
-			return T_EOC;
+			token = T_EOC;
+			goto normal_return;
 
-		} else if (is_special(ch) && NO_ARG == expect_string)
+		} else if (is_special(ch) && NO_ARG == expect_string) {
 			/* special chars are their own token values */
-			return ch;
-		else
+			token = ch;
+			goto normal_return;
+		} else
 			push_back_char(ch);
 
 		/* save the column of start of the token */
@@ -580,8 +587,6 @@ yylex(
 		yytext[i] = '\0';
 	} while (i == 0);
 
-	DPRINTF(4, ("yylex: lexeme '%s'\n", yytext));
-
 	/* Now return the desired token */
 	
 	/* First make sure that the parser is *not* expecting a string
@@ -591,9 +596,10 @@ yylex(
 	
 	if (expect_string == NO_ARG && !instring) {
 		token = is_keyword(yytext, &expect_string);
-		if (token) 
-			return token;
+		if (token)
+			goto normal_return;
 		else if (is_integer(yytext)) {
+			yylval_was_set = 1;
 			errno = 0;
 			if ((yylval.Integer = strtol(yytext, NULL, 10)) == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
@@ -601,23 +607,29 @@ yylex(
 					"Integer cannot be represented: %s",
 					yytext);
 				exit(1);
+			} else {
+				token = T_Integer;
+				goto normal_return;
 			}
-			else
-				return T_Integer;
 		}
 		else if (is_double(yytext)) {
+			yylval_was_set = 1;
 			errno = 0;
 			if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
 				msyslog(LOG_ERR,
 					"Double too large to represent: %s",
 					yytext);
 				exit(1);
+			} else {
+				token = T_Double;
+				goto normal_return;
 			}
-			else
-				return T_Double;
+		} else {
+			/* Default: Everything is a string */
+			yylval_was_set = 1;
+			token = create_string_token(yytext);
+			goto normal_return;
 		}
-		else /* Default: Everything is a string */
-			return create_string_token(yytext);
 	}
 
 	/*
@@ -642,17 +654,33 @@ yylex(
 	 * this hack, as restrict uses NO_ARG.  [DH]
 	 */
 	if ('-' == yytext[0]) {
-		if ('4' == yytext[1])
-			return T_IPv4_flag;
-		else if ('6' == yytext[1])
-			return T_IPv6_flag;
+		if ('4' == yytext[1]) {
+			token = T_Ipv4_flag;
+			goto normal_return;
+		} else if ('6' == yytext[1]) {
+			token = T_Ipv6_flag;
+			goto normal_return;
+		}
 	}
 
 	instring = 0;
 	if (SINGLE_ARG == expect_string)
 		expect_string = NO_ARG;
 
-	return create_string_token(yytext);
+	yylval_was_set = 1;
+	token = create_string_token(yytext);
+
+normal_return:
+	if (T_EOC == token)
+		DPRINTF(4,("\t<end of command>\n"));
+	else
+		DPRINTF(4, ("yylex: lexeme '%s' -> %s\n", yytext,
+			    token_name(token)));
+
+	if (!yylval_was_set)
+		yylval.Integer = token;
+
+	return token;
 
 lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
@@ -672,5 +700,6 @@ lex_too_long:
 	 * if the configuration text ended before the too-long lexeme,
 	 * hostname, or string.
 	 */
+	yylval.Integer = 0;
 	return 0;
 }

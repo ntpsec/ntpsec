@@ -181,6 +181,8 @@ struct REMOTE_CONFIG_INFO {
 	int no_errors;
 };
 
+/* get text from T_ tokens */
+const char * token_name(int token);
 
 struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
 struct unpeer_node *create_unpeer_node(struct address_node *addr);
@@ -209,5 +211,6 @@ void config_remotely(sockaddr_u *);
 int dump_config_tree(struct config_tree *ptree, FILE *df);
 int dump_all_config_trees(FILE *df);
 #endif
+
 
 #endif	/* !defined(NTP_CONFIG_H) */

@@ -127,7 +127,7 @@ static char res_file[MAX_PATH];
 /*
  * Definitions of things either imported from or exported to outside
  */
-
+extern int yydebug;			/* ntp_parser.c (.y) */
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
@@ -2049,8 +2049,8 @@ struct key_tok keyword_list[] = {
 	{ "revoke",		T_Revoke,          NO_ARG },
 	{ "trustedkey",		T_Trustedkey,      NO_ARG },
 /* IPv4/IPv6 protocol override flag */
-	{ "-4",			T_IPv4_flag,	   NO_ARG },
-	{ "-6",			T_IPv6_flag,	   NO_ARG },
+	{ "-4",			T_Ipv4_flag,	   NO_ARG },
+	{ "-6",			T_Ipv6_flag,	   NO_ARG },
 /* option */
 	{ "autokey",		T_Autokey,         NO_ARG },
 	{ "bias",		T_Bias,		   NO_ARG },
@@ -2159,7 +2159,7 @@ struct key_tok keyword_list[] = {
 	{ "freq",		T_Freq,            NO_ARG },
 /* miscellaneous_command */
 	{ "port",		T_Port,            NO_ARG },
-	{ "interface",		T_Interface,       SINGLE_ARG },
+	{ "interface",		T_Interface,       NO_ARG },
 	{ "qos",		T_Qos,		   NO_ARG },
 /* simulator commands */
 	{ "simulate",		T_Simulate,        NO_ARG },
@@ -2976,13 +2976,12 @@ config_trap(
 
 	/* silence warning about addr_sock potentially uninitialized */
 	AF(&addr_sock) = AF_UNSPEC;
-	port_no = 0;
-	localaddr = NULL;
-
 
 	curr_trap = queue_head(ptree->trap);
-	while (!empty(ptree->trap)) {
+	while (curr_trap != NULL) {
 		err_flag = 0;
+		port_no = 0;
+		localaddr = NULL;
 
 		curr_opt = queue_head(curr_trap->options);
 		while (curr_opt != NULL) {
@@ -3039,8 +3038,7 @@ config_trap(
 			if (NULL == localaddr) {
 				AF(&peeraddr) = default_ai_family;
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-			}
-			else
+			} else
 				AF(&peeraddr) = AF(&addr_sock);
 
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
@@ -3846,6 +3844,9 @@ getconfig(
 		cfgt.source.value.s = estrdup(config_file);
 
 	/*** BULK OF THE PARSER ***/
+#ifdef DEBUG
+	yydebug = !!(debug >= 5);
+#endif
 	ip_file = fp[curr_include_level];
 	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();

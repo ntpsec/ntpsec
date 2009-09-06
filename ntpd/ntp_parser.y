@@ -36,10 +36,17 @@
   #define YYMALLOC	emalloc
   #define YYFREE	free
   #define YYERROR_VERBOSE
+  #define YYMAXDEPTH	1000   /* stop the madness sooner */
   void yyerror (char *msg);
-  extern int input_from_file;  /* 0=input from ntpq>config command buffer */
+  extern int input_from_file;  /* 0=input from ntpq :config */
   extern int cryptosw;
 %}
+
+/* 
+ * Enable generation of token names array even without YYDEBUG.
+ * We access via token_name() defined below.
+ */
+%token-table
 
 %union {
     char   *String;
@@ -56,166 +63,164 @@
     script_info *Sim_script;
 }
 
-/*** TERMINALS ***/
-%token			T_Age
-%token			T_Allan
-%token			T_Auth
-%token			T_Autokey
-%token			T_Automax
-%token			T_Average
-%token			T_Bclient
-%token			T_Beacon
-%token			T_Bias
-%token			T_Broadcast
-%token			T_Broadcastclient
-%token			T_Broadcastdelay
-%token			T_Burst
-%token			T_Calibrate
-%token			T_Calldelay
-%token			T_Ceiling
-%token			T_Clockstats
-%token			T_Cohort
-%token			T_ControlKey
-%token			T_Crypto
-%token			T_Cryptostats
-%token			T_Day
-%token			T_Default
-%token			T_Disable
-%token			T_Discard
-%token			T_Dispersion
+/* TERMINALS (do not appear left of colon) */
+%token	<Integer>	T_Age
+%token	<Integer>	T_Allan
+%token	<Integer>	T_Auth
+%token	<Integer>	T_Autokey
+%token	<Integer>	T_Automax
+%token	<Integer>	T_Average
+%token	<Integer>	T_Bclient
+%token	<Integer>	T_Beacon
+%token	<Integer>	T_Bias
+%token	<Integer>	T_Broadcast
+%token	<Integer>	T_Broadcastclient
+%token	<Integer>	T_Broadcastdelay
+%token	<Integer>	T_Burst
+%token	<Integer>	T_Calibrate
+%token	<Integer>	T_Calldelay
+%token	<Integer>	T_Ceiling
+%token	<Integer>	T_Clockstats
+%token	<Integer>	T_Cohort
+%token	<Integer>	T_ControlKey
+%token	<Integer>	T_Crypto
+%token	<Integer>	T_Cryptostats
+%token	<Integer>	T_Day
+%token	<Integer>	T_Default
+%token	<Integer>	T_Disable
+%token	<Integer>	T_Discard
+%token	<Integer>	T_Dispersion
 %token	<Double>	T_Double
-%token			T_Driftfile
-%token			T_Enable
-%token			T_End
-%token			T_False
-%token			T_File
-%token			T_Filegen
-%token			T_Flag1
-%token			T_Flag2
-%token			T_Flag3
-%token			T_Flag4
-%token			T_Flake
-%token			T_Floor
-%token			T_Freq
-%token			T_Fudge
-%token			T_Host
-%token			T_Huffpuff
-%token			T_Iburst
-%token			T_Ident
-%token			T_Ignore
-%token			T_Includefile
+%token	<Integer>	T_Driftfile
+%token	<Integer>	T_Enable
+%token	<Integer>	T_End
+%token	<Integer>	T_False
+%token	<Integer>	T_File
+%token	<Integer>	T_Filegen
+%token	<Integer>	T_Flag1
+%token	<Integer>	T_Flag2
+%token	<Integer>	T_Flag3
+%token	<Integer>	T_Flag4
+%token	<Integer>	T_Flake
+%token	<Integer>	T_Floor
+%token	<Integer>	T_Freq
+%token	<Integer>	T_Fudge
+%token	<Integer>	T_Host
+%token	<Integer>	T_Huffpuff
+%token	<Integer>	T_Iburst
+%token	<Integer>	T_Ident
+%token	<Integer>	T_Ignore
+%token	<Integer>	T_Includefile
 %token	<Integer>	T_Integer
-%token			T_Interface
-%token			T_IPv4_flag
-%token			T_IPv6_flag
-%token			T_Kernel
-%token			T_Key
-%token			T_Keys
-%token			T_Keysdir
-%token			T_Kod
-%token			T_Mssntp
-%token			T_Leap
-%token			T_Leapfile
-%token			T_Limited
-%token			T_Link
-%token			T_Logconfig
-%token			T_Logfile
-%token			T_Loopstats
-%token			T_Lowpriotrap
-%token			T_Manycastclient
-%token			T_Manycastserver
-%token			T_Mask
-%token			T_Maxclock
-%token			T_Maxdist
-%token			T_Maxhop
-%token			T_Maxpoll
-%token			T_Minclock
-%token			T_Mindist
-%token			T_Minimum
-%token			T_Minpoll
-%token			T_Minsane
-%token			T_Mode
-%token			T_Monitor
-%token			T_Month
-%token			T_Multicastclient
-%token			T_Nolink
-%token			T_Nomodify
-%token			T_None
-%token			T_Nopeer
-%token			T_Noquery
-%token			T_Noselect
-%token			T_Noserve
-%token			T_Notrap
-%token			T_Notrust
-%token			T_Ntp
-%token			T_Ntpport
-%token			T_NtpSignDsocket
-%token			T_Orphan
-%token			T_Panic
-%token			T_Peer
-%token			T_Peerstats
-%token			T_Phone
-%token			T_Pid
-%token			T_Pidfile
-%token			T_Pool
-%token			T_Port
-%token			T_Pps
-%token			T_Preempt
-%token			T_Prefer
-%token			T_Protostats
-%token			T_Pw
-%token			T_Qos
-%token			T_RandFile
-%token			T_Rawstats
-%token			T_Refid
-%token			T_Requestkey
-%token			T_Restrict
-%token			T_Revoke
-%token			T_Server
-%token			T_Setvar
-%token			T_Sign
-%token			T_Statistics
-%token			T_Stats
-%token			T_Statsdir
-%token			T_Step
-%token			T_Stepout
-%token			T_Stratum
+%token	<Integer>	T_Interface
+%token	<Integer>	T_Ipv4_flag
+%token	<Integer>	T_Ipv6_flag
+%token	<Integer>	T_Kernel
+%token	<Integer>	T_Key
+%token	<Integer>	T_Keys
+%token	<Integer>	T_Keysdir
+%token	<Integer>	T_Kod
+%token	<Integer>	T_Mssntp
+%token	<Integer>	T_Leapfile
+%token	<Integer>	T_Limited
+%token	<Integer>	T_Link
+%token	<Integer>	T_Logconfig
+%token	<Integer>	T_Logfile
+%token	<Integer>	T_Loopstats
+%token	<Integer>	T_Lowpriotrap
+%token	<Integer>	T_Manycastclient
+%token	<Integer>	T_Manycastserver
+%token	<Integer>	T_Mask
+%token	<Integer>	T_Maxclock
+%token	<Integer>	T_Maxdist
+%token	<Integer>	T_Maxhop
+%token	<Integer>	T_Maxpoll
+%token	<Integer>	T_Minclock
+%token	<Integer>	T_Mindist
+%token	<Integer>	T_Minimum
+%token	<Integer>	T_Minpoll
+%token	<Integer>	T_Minsane
+%token	<Integer>	T_Mode
+%token	<Integer>	T_Monitor
+%token	<Integer>	T_Month
+%token	<Integer>	T_Multicastclient
+%token	<Integer>	T_Nolink
+%token	<Integer>	T_Nomodify
+%token	<Integer>	T_None
+%token	<Integer>	T_Nopeer
+%token	<Integer>	T_Noquery
+%token	<Integer>	T_Noselect
+%token	<Integer>	T_Noserve
+%token	<Integer>	T_Notrap
+%token	<Integer>	T_Notrust
+%token	<Integer>	T_Ntp
+%token	<Integer>	T_Ntpport
+%token	<Integer>	T_NtpSignDsocket
+%token	<Integer>	T_Orphan
+%token	<Integer>	T_Panic
+%token	<Integer>	T_Peer
+%token	<Integer>	T_Peerstats
+%token	<Integer>	T_Phone
+%token	<Integer>	T_Pid
+%token	<Integer>	T_Pidfile
+%token	<Integer>	T_Pool
+%token	<Integer>	T_Port
+%token	<Integer>	T_Preempt
+%token	<Integer>	T_Prefer
+%token	<Integer>	T_Protostats
+%token	<Integer>	T_Pw
+%token	<Integer>	T_Qos
+%token	<Integer>	T_RandFile
+%token	<Integer>	T_Rawstats
+%token	<Integer>	T_Refid
+%token	<Integer>	T_Requestkey
+%token	<Integer>	T_Restrict
+%token	<Integer>	T_Revoke
+%token	<Integer>	T_Server
+%token	<Integer>	T_Setvar
+%token	<Integer>	T_Sign
+%token	<Integer>	T_Statistics
+%token	<Integer>	T_Stats
+%token	<Integer>	T_Statsdir
+%token	<Integer>	T_Step
+%token	<Integer>	T_Stepout
+%token	<Integer>	T_Stratum
 %token	<String>	T_String
-%token			T_Sysstats
-%token			T_Tick
-%token			T_Time1
-%token			T_Time2
-%token			T_Timingstats
-%token			T_Tinker
-%token			T_Tos
-%token			T_Trap
-%token			T_True
-%token			T_Trustedkey
-%token			T_Ttl
-%token			T_Type
-%token			T_Unconfig
-%token			T_Unpeer
-%token			T_Version
-%token	<Double>	T_WanderThreshold
-%token			T_Week
-%token			T_Xleave
-%token			T_Year
-%token			T_Flag		/* Not an actual token */
-%token			T_Void		/* Not an actual token */
-%token			T_EOC
+%token	<Integer>	T_Sysstats
+%token	<Integer>	T_Tick
+%token	<Integer>	T_Time1
+%token	<Integer>	T_Time2
+%token	<Integer>	T_Timingstats
+%token	<Integer>	T_Tinker
+%token	<Integer>	T_Tos
+%token	<Integer>	T_Trap
+%token	<Integer>	T_True
+%token	<Integer>	T_Trustedkey
+%token	<Integer>	T_Ttl
+%token	<Integer>	T_Type
+%token	<Integer>	T_Unconfig
+%token	<Integer>	T_Unpeer
+%token	<Integer>	T_Version
+%token	<Integer>	T_WanderThreshold	/* Not a token */
+%token	<Integer>	T_Week
+%token	<Integer>	T_Xleave
+%token	<Integer>	T_Year
+%token	<Integer>	T_Flag		/* Not an actual token */
+%token	<Integer>	T_Void		/* Not an actual token */
+%token	<Integer>	T_EOC
 
 
 /* NTP Simulator Tokens */
-%token			T_Simulate
-%token			T_Beep_Delay
-%token			T_Sim_Duration
-%token			T_Server_Offset
-%token			T_Duration
-%token			T_Freq_Offset
-%token			T_Wander
-%token			T_Jitter
-%token			T_Prop_Delay
-%token			T_Proc_Delay
+%token	<Integer>	T_Simulate
+%token	<Integer>	T_Beep_Delay
+%token	<Integer>	T_Sim_Duration
+%token	<Integer>	T_Server_Offset
+%token	<Integer>	T_Duration
+%token	<Integer>	T_Freq_Offset
+%token	<Integer>	T_Wander
+%token	<Integer>	T_Jitter
+%token	<Integer>	T_Prop_Delay
+%token	<Integer>	T_Proc_Delay
 
 
 
@@ -297,7 +302,10 @@ command_list
 					"syntax error in %s line %d, "
 					"ignored",
 					ip_file->fname,
-					ip_file->line_no - 1);
+					ip_file->line_no -
+						(ip_file->col_no == 1)
+						    ? 1
+						    : 2);
 			} else if (input_from_file != 0)
 				msyslog(LOG_ERR,
 					"parse: bad boolean input flag");
@@ -339,17 +347,17 @@ server_command
 	;
 
 client_type
-	:	T_Server	  { $$ = T_Server; }
-	|	T_Pool		  { $$ = T_Pool; }
-	|	T_Peer		  { $$ = T_Peer; }
-	|	T_Broadcast	  { $$ = T_Broadcast; }
-	|	T_Manycastclient  { $$ = T_Manycastclient; }
+	:	T_Server
+	|	T_Pool
+	|	T_Peer
+	|	T_Broadcast
+	|	T_Manycastclient
 	;
 
 address
-	:	ip_address		{ $$ = $1; }
-	|	T_IPv4_flag T_String	{ $$ = create_address_node($2, AF_INET); }
-	|	T_IPv6_flag T_String	{ $$ = create_address_node($2, AF_INET6); }
+	:	ip_address
+	|	T_Ipv4_flag T_String	{ $$ = create_address_node($2, AF_INET); }
+	|	T_Ipv6_flag T_String	{ $$ = create_address_node($2, AF_INET6); }
 	;
 
 ip_address
@@ -363,20 +371,20 @@ option_list
 
 option
 	:	T_Autokey		{ $$ = create_attr_ival(T_Flag, FLAG_SKEY); }
-	|	T_Bias number		{ $$ = create_attr_dval(T_Bias, $2); }
+	|	T_Bias number		{ $$ = create_attr_dval($1, $2); }
 	|	T_Burst			{ $$ = create_attr_ival(T_Flag, FLAG_BURST); }
 	|	T_Iburst		{ $$ = create_attr_ival(T_Flag, FLAG_IBURST); }
-	|	T_Key T_Integer		{ $$ = create_attr_ival(T_Key, $2); }
-	|	T_Minpoll T_Integer	{ $$ = create_attr_ival(T_Minpoll, $2); }
-	|	T_Maxpoll T_Integer	{ $$ = create_attr_ival(T_Maxpoll, $2); }
+	|	T_Key T_Integer		{ $$ = create_attr_ival($1, $2); }
+	|	T_Minpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
+	|	T_Maxpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
 	|	T_Noselect		{ $$ = create_attr_ival(T_Flag, FLAG_NOSELECT); }
 	|	T_Preempt		{ $$ = create_attr_ival(T_Flag, FLAG_PREEMPT); }
 	|	T_Prefer		{ $$ = create_attr_ival(T_Flag, FLAG_PREFER); }
 	|	T_True			{ $$ = create_attr_ival(T_Flag, FLAG_TRUE); }
 	|	T_Xleave		{ $$ = create_attr_ival(T_Flag, FLAG_XLEAVE); }
-	|	T_Ttl T_Integer		{ $$ = create_attr_ival(T_Ttl, $2); }
-	|	T_Mode T_Integer	{ $$ = create_attr_ival(T_Mode, $2); }
-	|	T_Version T_Integer	{ $$ = create_attr_ival(T_Version, $2); }
+	|	T_Ttl T_Integer		{ $$ = create_attr_ival($1, $2); }
+	|	T_Mode T_Integer	{ $$ = create_attr_ival($1, $2); }
+	|	T_Version T_Integer	{ $$ = create_attr_ival($1, $2); }
 	;
 
 
@@ -393,8 +401,8 @@ unpeer_command
 		}
 	;	
 unpeer_keyword	
-	:	T_Unconfig 	{ $$ = T_Unconfig; }
-	|	T_Unpeer 	{ $$ = T_Unpeer; }
+	:	T_Unconfig
+	|	T_Unpeer
 	;
 	
 	
@@ -560,10 +568,10 @@ filegen_option
 				{ $$ = create_attr_sval(T_File, $2); }
 	|	T_Type filegen_type
 				{ $$ = create_attr_ival(T_Type, $2); }
-	|	T_Link		{ $$ = create_attr_ival(T_Flag, T_Link); }
-	|	T_Nolink	{ $$ = create_attr_ival(T_Flag, T_Nolink); }
-	|	T_Enable	{ $$ = create_attr_ival(T_Flag, T_Enable); }
-	|	T_Disable	{ $$ = create_attr_ival(T_Flag, T_Disable); }
+	|	T_Link		{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Nolink	{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Enable	{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Disable	{ $$ = create_attr_ival(T_Flag, $1); }
 	;
 
 filegen_type
@@ -596,7 +604,7 @@ access_control_command
 			enqueue(cfgt.restrict_opts,
 				create_restrict_node(NULL, NULL, $3, ip_file->line_no));
 		}
-	|	T_Restrict T_IPv4_flag T_Default ac_flag_list
+	|	T_Restrict T_Ipv4_flag T_Default ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
 				create_restrict_node(
@@ -609,7 +617,7 @@ access_control_command
 					$4, 
 					ip_file->line_no));
 		}
-	|	T_Restrict T_IPv6_flag T_Default ac_flag_list
+	|	T_Restrict T_Ipv6_flag T_Default ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
 				create_restrict_node(
@@ -657,9 +665,9 @@ discard_option_list
 	;
 
 discard_option
-	:	T_Average T_Integer { $$ = create_attr_ival(T_Average, $2); }
-	|	T_Minimum T_Integer { $$ = create_attr_ival(T_Minimum, $2); }
-	|	T_Monitor T_Integer { $$ = create_attr_ival(T_Monitor, $2); }
+	:	T_Average T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Minimum T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Monitor T_Integer { $$ = create_attr_ival($1, $2); }
 	;
 
 /* Fudge Commands
@@ -773,22 +781,22 @@ miscellaneous_command
 		}
 
 	|	T_Broadcastdelay number
-			{ enqueue(cfgt.vars, create_attr_dval(T_Broadcastdelay, $2)); }
+			{ enqueue(cfgt.vars, create_attr_dval($1, $2)); }
 	|	T_Calldelay T_Integer
-			{ enqueue(cfgt.vars, create_attr_ival(T_Calldelay, $2)); }
+			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
 	|	T_Tick number
-			{ enqueue(cfgt.vars, create_attr_dval(T_Tick, $2)); }
+			{ enqueue(cfgt.vars, create_attr_dval($1, $2)); }
 	|	T_Driftfile drift_parm
 			{ /* Null action, possibly all null parms */ }
 	|	T_Leapfile T_String
-			{ enqueue(cfgt.vars, create_attr_sval(T_Leapfile, $2)); }
+			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
 
 	|	T_Pidfile T_String
-			{ enqueue(cfgt.vars, create_attr_sval(T_Pidfile, $2)); }
+			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
 	|	T_Logfile T_String
-			{ enqueue(cfgt.vars, create_attr_sval(T_Logfile, $2)); }
+			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
 	|	T_Automax T_Integer
-			{ enqueue(cfgt.vars, create_attr_ival(T_Automax, $2)); }
+			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
 
 	|	T_Logconfig log_config_list
 			{ append_queue(cfgt.logconfig, $2); }
@@ -796,13 +804,15 @@ miscellaneous_command
 			{ append_queue(cfgt.phone, $2); }
 	|	T_Setvar variable_assign
 			{ enqueue(cfgt.setvar, $2); }
+	|	T_Trap ip_address
+			{ enqueue(cfgt.trap, create_addr_opts_node($2, NULL)); }
 	|	T_Trap ip_address trap_option_list
 			{ enqueue(cfgt.trap, create_addr_opts_node($2, $3)); }
 	|	T_Ttl integer_list
 			{ append_queue(cfgt.ttl, $2); }
 	|	T_Qos T_String
-			{ enqueue(cfgt.qos, create_attr_sval(T_Qos, $2)); }
-	;	
+			{ enqueue(cfgt.qos, create_attr_sval($1, $2)); }
+	;
 drift_parm
 	:	T_String
 			{ enqueue(cfgt.vars, create_attr_sval(T_Driftfile, $1)); }
@@ -822,16 +832,17 @@ variable_assign
 
 
 trap_option_list
-	:	trap_option_list trap_option { $$ = enqueue($1, $2); }
-	|	trap_option  { $$ = enqueue_in_new_queue($1); }
+	:	trap_option_list trap_option
+				{ $$ = enqueue($1, $2); }
+	|	trap_option	{ $$ = enqueue_in_new_queue($1); }
 	;
 
 trap_option
-	:	T_Port T_Integer	{ $$ = create_attr_ival(T_Port, $2); }
-	|	T_Interface ip_address	{ $$ = create_attr_pval(T_Interface, $2); }
+	:	T_Port T_Integer	{ $$ = create_attr_ival($1, $2); }
+	|	T_Interface ip_address	{ $$ = create_attr_pval($1, $2); }
 	;
 
-	
+
 log_config_list
 	:	log_config_list log_config_command { $$ = enqueue($1, $2); }
 	|	log_config_command  { $$ = enqueue_in_new_queue($1); }
@@ -851,6 +862,7 @@ log_config_command
 			YYFREE($1);
 		}
 	;
+
 
 /* Miscellaneous Rules
  * -------------------
@@ -887,8 +899,9 @@ boolean
 
 number
 	:	T_Integer { $$ = (double)$1; }
-	|	T_Double  { $$ = $1; }
+	|	T_Double
 	;
+
 
 /* Simulator Configuration Commands
  * --------------------------------
@@ -919,8 +932,8 @@ sim_init_statement_list
 	;
 
 sim_init_statement
-	:	T_Beep_Delay '=' number   { $$ = create_attr_dval(T_Beep_Delay, $3); }
-	|	T_Sim_Duration '=' number { $$ = create_attr_dval(T_Sim_Duration, $3); }
+	:	T_Beep_Delay '=' number   { $$ = create_attr_dval($1, $3); }
+	|	T_Sim_Duration '=' number { $$ = create_attr_dval($1, $3); }
 	;
 
 sim_server_list
@@ -958,23 +971,19 @@ sim_act_stmt_list
 
 sim_act_stmt
 	:	T_Freq_Offset '=' number
-			{ $$ = create_attr_dval(T_Freq_Offset, $3); }
+			{ $$ = create_attr_dval($1, $3); }
 	|	T_Wander '=' number
-			{ $$ = create_attr_dval(T_Wander, $3); }
+			{ $$ = create_attr_dval($1, $3); }
 	|	T_Jitter '=' number
-			{ $$ = create_attr_dval(T_Jitter, $3); }
+			{ $$ = create_attr_dval($1, $3); }
 	|	T_Prop_Delay '=' number
-			{ $$ = create_attr_dval(T_Prop_Delay, $3); }
+			{ $$ = create_attr_dval($1, $3); }
 	|	T_Proc_Delay '=' number
-			{ $$ = create_attr_dval(T_Proc_Delay, $3); }
+			{ $$ = create_attr_dval($1, $3); }
 	;
 
 
 %%
-
-/* KEYWORDS
- * --------
- */
 
 void yyerror (char *msg)
 {
@@ -999,6 +1008,19 @@ void yyerror (char *msg)
 		/* Increment the number of errors */
 		++remote_config.no_errors;
 	}
+}
+
+
+/*
+ * token_name - convert T_ token integers to text
+ *		example: token_name(T_Server) returns "T_Server"
+ */
+const char *
+token_name(
+	int token
+	)
+{
+	return yytname[YYTRANSLATE(token)];
 }
 
 
