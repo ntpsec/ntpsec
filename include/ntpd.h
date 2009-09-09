@@ -83,6 +83,7 @@ extern	void	enable_multicast_if	(struct interface *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 
 extern	void	init_io 	(void);
+extern	void	io_open_sockets	(void);
 extern	void	input_handler	(l_fp *);
 extern	void	io_clr_stats	(void);
 extern	void	io_setbclient	(void);

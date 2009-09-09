@@ -1,3 +1,5 @@
+* [Bug 983] add interface ... [listen | ignore | drop] directive.
+* document interface (alias nic) and unpeer.
 (4.2.5p210) 2009/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1294] Use OPENSSL_INC and OPENSSL_LIB macros for Windows
   and remove unnecessary reference to applink.c for Windows

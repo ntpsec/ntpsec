@@ -65,6 +65,7 @@
 
 /* TERMINALS (do not appear left of colon) */
 %token	<Integer>	T_Age
+%token	<Integer>	T_All
 %token	<Integer>	T_Allan
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Autokey
@@ -92,6 +93,7 @@
 %token	<Integer>	T_Dispersion
 %token	<Double>	T_Double
 %token	<Integer>	T_Driftfile
+%token	<Integer>	T_Drop
 %token	<Integer>	T_Enable
 %token	<Integer>	T_End
 %token	<Integer>	T_False
@@ -113,7 +115,9 @@
 %token	<Integer>	T_Includefile
 %token	<Integer>	T_Integer
 %token	<Integer>	T_Interface
+%token	<Integer>	T_Ipv4
 %token	<Integer>	T_Ipv4_flag
+%token	<Integer>	T_Ipv6
 %token	<Integer>	T_Ipv6_flag
 %token	<Integer>	T_Kernel
 %token	<Integer>	T_Key
@@ -124,6 +128,7 @@
 %token	<Integer>	T_Leapfile
 %token	<Integer>	T_Limited
 %token	<Integer>	T_Link
+%token	<Integer>	T_Listen
 %token	<Integer>	T_Logconfig
 %token	<Integer>	T_Logfile
 %token	<Integer>	T_Loopstats
@@ -144,6 +149,7 @@
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
 %token	<Integer>	T_Multicastclient
+%token	<Integer>	T_Nic
 %token	<Integer>	T_Nolink
 %token	<Integer>	T_Nomodify
 %token	<Integer>	T_None
@@ -167,6 +173,7 @@
 %token	<Integer>	T_Port
 %token	<Integer>	T_Preempt
 %token	<Integer>	T_Prefer
+%token	<Integer>	T_Prefixlen
 %token	<Integer>	T_Protostats
 %token	<Integer>	T_Pw
 %token	<Integer>	T_Qos
@@ -242,9 +249,13 @@
 %type	<Attr_val>	fudge_factor
 %type	<Queue>		fudge_factor_list
 %type	<Queue>		integer_list
+%type	<Integer>	nic_rule_action
+%type	<Queue>		interface_command
+%type	<Integer>	interface_nic
 %type	<Address_node>	ip_address
 %type	<Attr_val>	log_config_command
 %type	<Queue>		log_config_list
+%type	<Integer>	nic_rule_class
 %type	<Double>	number
 %type	<Attr_val>	option
 %type	<Queue>		option_list
@@ -516,7 +527,7 @@ tos_option
 	|	T_Maxhop T_Integer
 			{ $$ = create_attr_dval(PROTO_MAXHOP, (double)$2); }
 	;
-	
+
 
 /* Monitoring Commands
  * -------------------
@@ -753,12 +764,14 @@ tinker_option
 	|	T_Stepout number    { $$ = create_attr_dval(LOOP_MINSTEP, $2); }
 	;
 
+
 /* Miscellaneous Commands
  * ----------------------
  */
 
 miscellaneous_command
-	:	T_Includefile T_String command
+	:	interface_command
+	|	T_Includefile T_String command
 		{
 			if (curr_include_level >= MAXINCLUDELEVEL) {
 				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
@@ -813,6 +826,7 @@ miscellaneous_command
 	|	T_Qos T_String
 			{ enqueue(cfgt.qos, create_attr_sval($1, $2)); }
 	;
+	
 drift_parm
 	:	T_String
 			{ enqueue(cfgt.vars, create_attr_sval(T_Driftfile, $1)); }
@@ -830,7 +844,6 @@ variable_assign
 			{ $$ = create_setvar_node($1, $3, 0); }
 	;
 
-
 trap_option_list
 	:	trap_option_list trap_option
 				{ $$ = enqueue($1, $2); }
@@ -841,7 +854,6 @@ trap_option
 	:	T_Port T_Integer	{ $$ = create_attr_ival($1, $2); }
 	|	T_Interface ip_address	{ $$ = create_attr_pval($1, $2); }
 	;
-
 
 log_config_list
 	:	log_config_list log_config_command { $$ = enqueue($1, $2); }
@@ -862,6 +874,43 @@ log_config_command
 			YYFREE($1);
 		}
 	;
+
+interface_command
+	:	interface_nic nic_rule_class nic_rule_action
+		{
+			enqueue(cfgt.nic_rules,
+				create_nic_rule_node($2, NULL, -1, $3));
+		}
+	|	interface_nic T_String T_Prefixlen T_Integer nic_rule_action
+		{
+			enqueue(cfgt.nic_rules,
+				create_nic_rule_node(0, $2, $4, $5));
+		}
+	|	interface_nic T_String nic_rule_action
+		{
+			enqueue(cfgt.nic_rules,
+				create_nic_rule_node(0, $2, -1, $3));
+		}
+	;
+
+interface_nic
+	:	T_Interface
+	|	T_Nic
+	;
+
+nic_rule_class
+	:	T_All
+	|	T_Ipv4
+	|	T_Ipv6
+	;
+
+nic_rule_action
+	:	/* listen if not specified */	{ $$ = T_Listen; }
+	|	T_Listen
+	|	T_Ignore
+	|	T_Drop
+	;
+
 
 
 /* Miscellaneous Rules

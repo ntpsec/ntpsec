@@ -117,6 +117,13 @@ struct setvar_node {
     u_short def;
 };
 
+typedef struct nic_rule_node_tag {
+    int match_class;
+    char *if_name;	/* interface name or numeric address */
+    int prefixlen;	/* -1 for not specified */
+    int action;
+} nic_rule_node;
+
 struct addr_opts_node {
     struct address_node *addr;
     queue *options;
@@ -167,6 +174,7 @@ struct config_tree {
     queue *ttl;
     queue *trap;
     queue *vars;
+    queue *nic_rules;
 
     struct sim_node *sim_details;
 };
@@ -184,7 +192,9 @@ struct REMOTE_CONFIG_INFO {
 /* get text from T_ tokens */
 const char * token_name(int token);
 
-struct peer_node *create_peer_node(int hmode, struct address_node *addr, queue *options);
+struct peer_node *create_peer_node(int hmode,
+				   struct address_node *addr,
+				   queue *options);
 struct unpeer_node *create_unpeer_node(struct address_node *addr);
 struct address_node *create_address_node(char *addr, int type);
 void destroy_address_node(struct address_node *my_node);
@@ -195,14 +205,22 @@ struct attr_val *create_attr_sval(int attr, char *s);
 struct attr_val *create_attr_pval(int attr, void *s);
 struct filegen_node *create_filegen_node(void **name, queue *options);
 void **create_pval(void *val);
-struct restrict_node *create_restrict_node(struct address_node *addr, struct address_node *mask, queue *flags, int line_no);
+struct restrict_node *create_restrict_node(struct address_node *addr,
+					   struct address_node *mask,
+					   queue *flags, int line_no);
 int *create_ival(int val);
-struct addr_opts_node *create_addr_opts_node(struct address_node *addr, queue *options);
+struct addr_opts_node *create_addr_opts_node(struct address_node *addr,
+					     queue *options);
 struct sim_node *create_sim_node(queue *init_opts, queue *servers);
-struct setvar_node *create_setvar_node(char *var, char *val, u_short def);
+struct setvar_node *create_setvar_node(char *var, char *val,
+				       u_short def);
+nic_rule_node *create_nic_rule_node(int match_class, char *if_name,
+				    int prefixlen, int action);
 
-script_info *create_sim_script_info(double duration, queue *script_queue);
-server_info *create_sim_server(struct address_node *addr, double server_offset, queue *script);
+script_info *create_sim_script_info(double duration,
+				    queue *script_queue);
+server_info *create_sim_server(struct address_node *addr,
+			       double server_offset, queue *script);
 
 extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(sockaddr_u *);

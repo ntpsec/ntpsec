@@ -77,27 +77,26 @@
 #endif  /* IPv6 Support */
 
 extern int listen_to_virtual_ips;
-int interface_optioncount = 0;
+
 /*
- * interface names to listen on
+ * NIC rule entry
  */
-typedef struct specific_interface specific_interface_t;
-struct specific_interface {
-	specific_interface_t *link;
-	const char *name;
+typedef struct nic_rule_tag nic_rule;
+
+struct nic_rule_tag {
+	nic_rule *	next;
+	nic_rule_action	action;
+	nic_rule_match	match_type;
+	char *		if_name;
+	isc_netaddr_t	netaddr;
+	int		prefixlen;
 };
 
-specific_interface_t *specific_interface_list;
 /*
- * limit addresses to use
+ * NIC rule listhead.  Entries are added at the head so that the first
+ * match in the list is the last matching rule specified.
  */
-typedef struct limit_address limit_address_t;
-struct limit_address {
-	limit_address_t *link;
-	const isc_netaddr_t *addr;
-};
-
-limit_address_t *limit_address_list;
+nic_rule *nic_rule_list;
 
 
 #if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
@@ -289,7 +288,10 @@ static struct interface *find_addr_in_list	(sockaddr_u *);
 static struct interface *find_samenet_addr_in_list (sockaddr_u *);
 static struct interface *find_flagged_addr_in_list (sockaddr_u *, int);
 static void	create_wildcards	(u_short);
-static isc_boolean_t	address_okay	(isc_interface_t *);
+#ifdef DEBUG
+static const char *action_text(nic_rule_action);
+#endif
+static nic_rule_action	interface_action	(isc_interface_t *);
 static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
 static struct interface *getinterface	(sockaddr_u *, int);
 static struct interface *getsamenetinterface	(sockaddr_u *, int);
@@ -518,31 +520,33 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
 void
 init_io(void)
 {
-#ifdef SYS_WINNT
-	init_io_completion_port();
-#endif /* SYS_WINNT */
-
 	/*
 	 * Init buffer free list and stat counters
 	 */
 	init_recvbuff(RECV_INIT);
 
-	packets_dropped = packets_received = 0;
-	packets_ignored = 0;
-	packets_sent = packets_notsent = 0;
-	handler_calls = handler_pkts = 0;
-	io_timereset = 0;
-	loopback_interface = NULL;
-	any_interface = NULL;
-	any6_interface = NULL;
-
-#ifdef REFCLOCK
-	refio = NULL;
-#endif
+#ifdef SYS_WINNT
+	init_io_completion_port();
+#endif /* SYS_WINNT */
 
 #if defined(HAVE_SIGNALED_IO)
 	(void) set_signal();
 #endif
+}
+
+
+/*
+ * io_open_sockets - call socket creation routine
+ */
+void
+io_open_sockets(void)
+{
+	static int already_opened;
+
+	if (already_opened)
+		return;
+
+	already_opened = 1;
 
 	/*
 	 * Create the sockets
@@ -553,8 +557,9 @@ init_io(void)
 
 	init_async_notifications();
 
-	DPRINTF(3, ("init_io: maxactivefd %d\n", maxactivefd));
+	DPRINTF(3, ("io_open_sockets: maxactivefd %d\n", maxactivefd));
 }
+
 
 #ifdef DEBUG
 /*
@@ -746,46 +751,6 @@ is_ip_address(
 	return (ISC_FALSE);
 }
 
-/*
- * Specific interface code
- */
-void
-add_specific_interface(
-	const char *if_name
-	)
-{
-	specific_interface_t *siface;
-	isc_netaddr_t *naddr;
-
-	naddr = emalloc(sizeof(*naddr));
-
-	if (is_ip_address(if_name, naddr)) {
-		add_limit_address(naddr);
-	} else {
-		free(naddr);
-		siface = emalloc(sizeof(*siface));
-		siface->name = if_name;
-		LINK_TAIL_SLIST(specific_interface_list, siface, link,
-		    specific_interface_t);
-	}
-	interface_optioncount++;
-}
-
-/*
- * Limit address code
- */
-void
-add_limit_address(
-	const isc_netaddr_t *addr
-	)
-{
-	limit_address_t *iaddr;
-
-	iaddr = emalloc(sizeof(*iaddr));
-	iaddr->addr = addr;
-	LINK_TAIL_SLIST(limit_address_list, iaddr, link,
-	    limit_address_t);
-}
 
 /*
  * interface list enumerator - visitor pattern
@@ -1038,65 +1003,162 @@ create_wildcards(
 }
 
 
-static isc_boolean_t
-address_okay(
+/*
+ * add_nic_rule() -- insert a rule entry at the head of nic_rule_list.
+ */
+void
+add_nic_rule(
+	nic_rule_match	match_type,
+	const char *	if_name,	/* interface name or numeric address */
+	int		prefixlen,
+	nic_rule_action	action
+	)
+{
+	nic_rule *	rule;
+	isc_boolean_t	is_ip;
+
+	rule = emalloc(sizeof(*rule));
+	rule->match_type = match_type;
+	rule->prefixlen = prefixlen;
+	rule->action = action;
+	
+	memset(&rule->netaddr, 0, sizeof(rule->netaddr));
+	rule->if_name = NULL;
+
+	if (MATCH_IFNAME == match_type)
+		rule->if_name = estrdup(if_name);
+	else if (MATCH_IFADDR == match_type) {
+		/* set rule->netaddr */
+		is_ip = is_ip_address(if_name, &rule->netaddr);
+		NTP_REQUIRE(is_ip);
+	} else
+		NTP_REQUIRE(NULL == if_name);
+
+	LINK_SLIST(nic_rule_list, rule, next);
+}
+
+
+#ifdef DEBUG
+static const char *
+action_text(
+	nic_rule_action	action
+	)
+{
+	const char *t;
+
+	switch (action) {
+
+	default:
+		t = "ERROR";	/* quiet uninit warning */
+		DPRINTF(1, ("fatal: unknown nic_rule_action %d\n",
+			    action));
+		NTP_ENSURE(0);
+		break;
+
+	case ACTION_LISTEN:
+		t = "listen";
+		break;
+
+	case ACTION_IGNORE:
+		t = "ignore";
+		break;
+
+	case ACTION_DROP:
+		t = "drop";
+		break;
+	}
+
+	return t;
+}
+#endif	/* DEBUG */
+
+
+static nic_rule_action
+interface_action(
 	isc_interface_t *isc_if
 	)
 {
-	const limit_address_t *laddr;
-	specific_interface_t *iface;
+	nic_rule *rule;
 
-
-	DPRINTF(4, ("address_okay: listen Virtual: %d, IF name: %s\n", 
-		    listen_to_virtual_ips, isc_if->name));
+	DPRINTF(4, ("interface_action: interface %s ", isc_if->name));
 
 	/*
-	 * Always allow the loopback
+	 * Always allow the loopback - required by ntp_intres
 	 */
-	if (INTERFACE_F_LOOPBACK & isc_if->flags) {
-		DPRINTF(4, ("address_okay: loopback - OK\n"));
-		return (ISC_TRUE);
+	if (isc_if->flags & INTERFACE_F_LOOPBACK) {
+		DPRINTF(4, ("loopback - listen\n"));
+		return ACTION_LISTEN;
 	}
+
+	if (!listen_to_virtual_ips
+	    && (strchr(isc_if->name, ':') != NULL)) {
+
+		DPRINTF(4, ("virtual ip - ignore\n"));
+		return ACTION_IGNORE;
+	}
+
 	/*
-	 * Check if the IP address matches one given to -I, which limits
-	 * interfaces/addresses to be used to only those listed with -I.
+	 * Find any matching NIC rule from --interface / -I or ntp.conf
+	 * interface/nic rules.
 	 */
-	for (laddr = limit_address_list;
-	     laddr != NULL;
-	     laddr = laddr->link)
-		if (isc_netaddr_equal(&isc_if->address, laddr->addr)) {
-			DPRINTF(4, ("address_okay: specific interface address matched - OK\n"));
-			return (ISC_TRUE);
+	for (rule = nic_rule_list; rule != NULL; rule = rule->next) {
+
+		switch (rule->match_type) {
+
+		case MATCH_ALL:
+			DPRINTF(4, ("nic all %s\n",
+			    action_text(rule->action)));
+			return rule->action;
+
+		case MATCH_IPV4:
+			if (AF_INET == isc_if->af) {
+				DPRINTF(4, ("nic ipv4 %s\n",
+				    action_text(rule->action)));
+				return rule->action;
+			}
+			break;
+
+		case MATCH_IPV6:
+			if (AF_INET6 == isc_if->af) {
+				DPRINTF(4, ("nic ipv6 %s\n",
+				    action_text(rule->action)));
+				return rule->action;
+			}
+			break;
+
+		case MATCH_IFADDR:
+			if (rule->prefixlen != -1) {
+				if (isc_netaddr_eqprefix(
+					&isc_if->address, &rule->netaddr,
+					rule->prefixlen)) {
+
+					DPRINTF(4, ("subnet address match - %s\n",
+					    action_text(rule->action)));
+					return rule->action;
+				}
+			} else
+				if (isc_netaddr_equal(&isc_if->address,
+					&rule->netaddr)) {
+
+					DPRINTF(4, ("address match - %s\n",
+					    action_text(rule->action)));
+					return rule->action;
+				}
+			break;
+
+		case MATCH_IFNAME:
+			if (!strcasecmp(isc_if->name, rule->if_name)) {
+
+				DPRINTF(4, ("interface name match - %s\n",
+				    action_text(rule->action)));
+				return rule->action;
+			}
+			break;
 		}
-	/*
-	 * Check if the interface name was specified with an -I option.
-	 */
-	for (iface = specific_interface_list;
-	     NULL != iface; 
-	     iface = iface->link)
-		if (!strcasecmp(isc_if->name, iface->name)) {
-			DPRINTF(4, ("address_okay: specific interface name matched - OK\n"));
-			return (ISC_TRUE);
-		}
-	/*
-	 * Check if we are excluding virtual IPs/aliases, and if so, is
-	 * this interface such?
-	 */
-	if (!listen_to_virtual_ips 
-	    && strchr(isc_if->name, ':') != NULL) {
-		DPRINTF(4, ("address_okay: virtual ip/alias - NO\n"));
-		return (ISC_FALSE);
 	}
-	/*
-	 * If any -I options were given, only listed interfaces and
-	 * addresses are used.
-	 */
-	if (interface_optioncount) {
-		DPRINTF(4, ("address_okay: not given with -I, NO\n"));
-		return (ISC_FALSE);
-	}
-	DPRINTF(4, ("address_okay: OK\n"));
-	return (ISC_TRUE);
+
+	DPRINTF(4, ("listen\n"));
+	return ACTION_LISTEN;
 }
 
 
@@ -1354,21 +1416,20 @@ update_interfaces(
 		convert_isc_if(&isc_if, &interface, port);
 
 		/* 
-		 * Check to see if we are going to use the interface
-		 * If we don't use it we mark it to drop any packet
-		 * received but we still must create the socket and
-		 * bind to it. This prevents other apps binding to it
-		 * and potentially causing problems with more than one
-		 * process fiddling with the clock
+		 * Check if and how we are going to use the interface.
 		 */
-		if (address_okay(&isc_if))
-			interface.ignore_packets = ISC_FALSE;
-		else {
-#ifndef NO_LISTEN_READ_DROP
-			interface.ignore_packets = ISC_TRUE;
-#else
+		switch (interface_action(&isc_if)) {
+
+		case ACTION_IGNORE:
 			continue;
-#endif
+
+		case ACTION_LISTEN:
+			interface.ignore_packets = ISC_FALSE;
+			break;
+
+		case ACTION_DROP:
+			interface.ignore_packets = ISC_TRUE;
+			break;
 		}
 
 		DPRINT_INTERFACE(4, (&interface, "examining ", "\n"));
