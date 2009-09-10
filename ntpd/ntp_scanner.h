@@ -37,8 +37,12 @@ struct FILE_INFO {
 	int		prev_line_col_no;	/* Col No on the 
 						   previous line when a
 						   '\n' was seen */
+	int		prev_token_line_no;	/* Line at start of
+						   token */
 	int		prev_token_col_no;	/* Col No at start of
 						   token */
+	int		err_line_no;
+	int		err_col_no;
 };
 
 

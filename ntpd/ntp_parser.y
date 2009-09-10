@@ -303,23 +303,13 @@ command_list
 		{
 			/* I will need to incorporate much more fine grained
 			 * error messages. The following should suffice for
-			 * the time being.  ip_file->col_no is always 1 here,
-			 * and ip_file->line_no is one higher than the
-			 * problem line.  In other words, the scanner has
-			 * moved on to the start of the next line.
+			 * the time being.
 			 */
-			if (input_from_file == 1) {
 				msyslog(LOG_ERR, 
-					"syntax error in %s line %d, "
-					"ignored",
+					"syntax error in %s line %d, column %d",
 					ip_file->fname,
-					ip_file->line_no -
-						(ip_file->col_no == 1)
-						    ? 1
-						    : 2);
-			} else if (input_from_file != 0)
-				msyslog(LOG_ERR,
-					"parse: bad boolean input flag");
+					ip_file->err_line_no,
+					ip_file->err_col_no);
 	}
 	;
 
@@ -876,20 +866,20 @@ log_config_command
 	;
 
 interface_command
-	:	interface_nic nic_rule_class nic_rule_action
+	:	interface_nic nic_rule_action nic_rule_class
 		{
 			enqueue(cfgt.nic_rules,
-				create_nic_rule_node($2, NULL, -1, $3));
+				create_nic_rule_node($3, NULL, -1, $2));
 		}
-	|	interface_nic T_String T_Prefixlen T_Integer nic_rule_action
+	|	interface_nic nic_rule_action T_String
 		{
 			enqueue(cfgt.nic_rules,
-				create_nic_rule_node(0, $2, $4, $5));
+				create_nic_rule_node(0, $3, -1, $2));
 		}
-	|	interface_nic T_String nic_rule_action
+	|	interface_nic nic_rule_action T_String T_Prefixlen T_Integer
 		{
 			enqueue(cfgt.nic_rules,
-				create_nic_rule_node(0, $2, -1, $3));
+				create_nic_rule_node(0, $3, $5, $2));
 		}
 	;
 
@@ -905,8 +895,7 @@ nic_rule_class
 	;
 
 nic_rule_action
-	:	/* listen if not specified */	{ $$ = T_Listen; }
-	|	T_Listen
+	:	T_Listen
 	|	T_Ignore
 	|	T_Drop
 	;
@@ -1037,18 +1026,21 @@ sim_act_stmt
 void yyerror (char *msg)
 {
 	int retval;
+
+	ip_file->err_line_no = ip_file->prev_token_line_no;
+	ip_file->err_col_no = ip_file->prev_token_col_no;
 	
-	if (input_from_file)
-		msyslog(LOG_ERR, 
-			"line %d column %d %s", 
-			ip_file->line_no,
-			ip_file->prev_token_col_no,
-			msg);
-	else {
+	msyslog(LOG_ERR, 
+		"line %d column %d %s", 
+		ip_file->err_line_no,
+		ip_file->err_col_no,
+		msg);
+	if (!input_from_file) {
 		/* Save the error message in the correct buffer */
 		retval = snprintf(remote_config.err_msg + remote_config.err_pos,
 				  MAXLINE - remote_config.err_pos,
-				  "%s\n", msg);
+				  "column %d %s",
+				  ip_file->err_col_no, msg);
 
 		/* Increment the value of err_pos */
 		if (retval > 0)

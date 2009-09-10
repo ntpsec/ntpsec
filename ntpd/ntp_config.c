@@ -1361,6 +1361,27 @@ dump_config_tree(
 
 		fprintf(df, "interface ");
 
+		switch (rule_node->action) {
+
+		default:
+			fprintf(df, "\n# dump error:\n"
+				"# unknown nic action %d\n",
+				rule_node->action);
+			break;
+
+		case T_Listen:
+			fprintf(df, "listen ");
+			break;
+
+		case T_Ignore:
+			fprintf(df, "ignore ");
+			break;
+
+		case T_Drop:
+			fprintf(df, "drop ");
+			break;
+		}
+
 		switch (rule_node->match_class) {
 
 		default:
@@ -1388,27 +1409,6 @@ dump_config_tree(
 
 		if (-1 != rule_node->prefixlen)
 			fprintf(df, " prefixlen %d", rule_node->prefixlen);
-
-		switch (rule_node->action) {
-
-		default:
-			fprintf(df, "\n# dump error:\n"
-				"# unknown nic action %d\n",
-				rule_node->action);
-			break;
-
-		case T_Listen:
-			/* listen is the default without a modifier */
-			break;
-
-		case T_Ignore:
-			fprintf(df, " ignore");
-			break;
-
-		case T_Drop:
-			fprintf(df, " drop");
-			break;
-		}
 
 		fprintf(df, "\n");
 	}
@@ -3923,8 +3923,14 @@ config_remotely(
 	)
 {
 	struct FILE_INFO remote_cuckoo;
+	char origin[128];
 
+	snprintf(origin, sizeof(origin), "remote config from %s",
+		 stoa(remote_addr));
 	memset(&remote_cuckoo, 0, sizeof(remote_cuckoo));
+	remote_cuckoo.fname = origin;
+	remote_cuckoo.line_no = 1;
+	remote_cuckoo.line_no = 1;
 	ip_file = &remote_cuckoo;
 	input_from_file = 0;
 
