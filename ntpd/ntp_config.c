@@ -199,9 +199,27 @@ extern char *leapseconds_file_name; /*name of the leapseconds file */
 extern unsigned int qos;				/* QoS setting */
 #endif /* HAVE_IPTOS_SUPPORT */
 
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+/*
+ * backwards compatibility flags
+ */
+bc_entry bc_list[] = {
+	{ T_Bc_bugXXXX,		1	}	/* default enabled */
+};
+
+/*
+ * declare an int pointer for each flag for quick testing without
+ * walking bc_list.  If the pointer is consumed by libntp rather
+ * than ntpd, declare it in a libntp source file pointing to storage
+ * initialized with the appropriate value for other libntp clients, and
+ * redirect it to point into bc_list during ntpd startup.
+ */
+int *p_bcXXXX_enabled = &bc_list[0].enabled;
+#endif
+
 /* FUNCTION PROTOTYPES */
 
-static void call_proto_config_from_list(queue *flag_list, int able_flag);
+static void apply_enable_disable(queue *q, int enable);
 static void init_syntax_tree(struct config_tree *);
 
 #ifdef DEBUG
@@ -301,25 +319,6 @@ static void do_resolve_internal(void);
  * ----------------------------
  */
 
-static void
-call_proto_config_from_list(
-	queue *flag_list,
-	int able
-	)
-{
-	int flag;
-	struct attr_val *curr_flag;
-
-	curr_flag = queue_head(flag_list);
-	while (curr_flag != NULL) {
-		flag = curr_flag->value.i;
-		if (flag)
-			proto_config(flag, able, 0., NULL);
-		curr_flag = next_node(curr_flag);
-	}
-}
-
-
 #ifdef DEBUG
 static void
 free_auth_node(
@@ -342,6 +341,7 @@ free_auth_node(
 	}
 }
 #endif /* DEBUG */
+
 
 static void
 init_syntax_tree(
@@ -512,6 +512,7 @@ dump_config_tree(
 	void *opts = NULL;
 	char refid[5];
 	char timestamp[80];
+	int enable;
 
 	printf("dump_config_tree(%p)\n", ptree);
 
@@ -741,59 +742,17 @@ dump_config_tree(
 	if (ptree->auth.request_key)
 		fprintf(df, "requestkey %d\n", ptree->auth.request_key);
 
-	list_ptr = queue_head(ptree->enable_opts);
-	if (list_ptr != NULL) {
+	/* dump enable list, then disable list */
+	for (enable = 1; enable >= 0; enable--) {
 
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+		list_ptr = (enable)
+			       ? queue_head(ptree->enable_opts)
+			       : queue_head(ptree->disable_opts);
 
-			atrv = (struct attr_val *) list_ptr;
-
-			fprintf(df, "enable");
-
-			switch (atrv->value.i) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown enable token %d\n"
-					"enable", atrv->value.i);
-				break;
-
-				case PROTO_AUTHENTICATE: 
-				fprintf(df, " auth");	
-				break;
-
-				case PROTO_BROADCLIENT: 
-				fprintf(df, " bclient");
-				break;
-
-				case PROTO_CAL: 
-				fprintf(df, " calibrate");
-				break;
-
-				case PROTO_KERNEL: 
-				fprintf(df, " kernel");
-				break;
-
-				case PROTO_MONITOR: 
-				fprintf(df, " monitor");
-				break;
-
-				case PROTO_NTP: 
-				fprintf(df, " ntp");
-				break;
-
-				case PROTO_FILEGEN: 
-				fprintf(df, " stats");
-				break;
-			}
-		}
-		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->disable_opts);
-	if (list_ptr != NULL) {
-
-		fprintf(df, "disable");
+		if (list_ptr != NULL)
+			fprintf(df, (enable)
+					? "enable"
+					: "disable");
 
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
@@ -803,41 +762,45 @@ dump_config_tree(
 			switch (atrv->value.i) {
 			default:
 				fprintf(df, "\n# dump error:\n"
-					"# unknown disable token %d\n"
-					"disable", atrv->value.i);
+					"# unknown enable/disable token %d\n"
+					"%s", atrv->value.i,
+					(enable)
+					    ? "enable"
+					    : "disable");
 				break;
 
-				case PROTO_AUTHENTICATE: 
+			case T_Auth: 
 				fprintf(df, " auth");	
 				break;
 
-				case PROTO_BROADCLIENT: 
+			case T_Bclient: 
 				fprintf(df, " bclient");
 				break;
 
-				case PROTO_CAL: 
+			case T_Calibrate: 
 				fprintf(df, " calibrate");
 				break;
 
-				case PROTO_KERNEL: 
+			case T_Kernel: 
 				fprintf(df, " kernel");
 				break;
 
-				case PROTO_MONITOR: 
+			case T_Monitor: 
 				fprintf(df, " monitor");
 				break;
 
-				case PROTO_NTP: 
+			case T_Ntp: 
 				fprintf(df, " ntp");
 				break;
 
-				case PROTO_FILEGEN: 
+			case T_Stats: 
 				fprintf(df, " stats");
 				break;
 			}
 		}
 		fprintf(df, "\n");
 	}
+
 
 	list_ptr = queue_head(ptree->orphan_cmds);
 	if (list_ptr != NULL) {
@@ -2714,12 +2677,87 @@ free_config_tinker(
 
 
 static void
+apply_enable_disable(
+	queue *	q,
+	int	enable
+	)
+{
+	struct attr_val *curr_flag;
+	int option;
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+	bc_entry *pentry;
+#endif
+
+	curr_flag = queue_head(q);
+	while (curr_flag != NULL) {
+
+		option = curr_flag->value.i;
+		switch (option) {
+
+		default:
+			msyslog(LOG_ERR,
+				"can not apply enable/disable token %d, unknown",
+				option);
+			break;
+
+		case T_Auth:
+			proto_config(PROTO_AUTHENTICATE, enable, 0., NULL);
+			break;
+
+		case T_Bclient:
+			proto_config(PROTO_BROADCLIENT, enable, 0., NULL);
+			break;
+
+		case T_Calibrate:
+			proto_config(PROTO_CAL, enable, 0., NULL);
+			break;
+
+		case T_Kernel:
+			proto_config(PROTO_KERNEL, enable, 0., NULL);
+			break;
+
+		case T_Monitor:
+			proto_config(PROTO_MONITOR, enable, 0., NULL);
+			break;
+
+		case T_Ntp:
+			proto_config(PROTO_NTP, enable, 0., NULL);
+			break;
+
+		case T_Stats:
+			proto_config(PROTO_FILEGEN, enable, 0., NULL);
+			break;
+
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+		case T_Bc_bugXXXX:
+			pentry = bc_list;
+			while (pentry->token) {
+				if (pentry->token == option)
+					break;
+				pentry++;
+			}
+			if (!pentry->token) {
+				msyslog(LOG_ERR, 
+					"compat token %d not in bc_list[]",
+					option);
+				continue;
+			}
+			pentry->enabled = enable;
+			break;
+#endif
+		}
+		curr_flag = next_node(curr_flag);
+	}
+}
+
+
+static void
 config_system_opts(
 	struct config_tree *ptree
 	)
 {
-	call_proto_config_from_list(ptree->enable_opts, 1);
-	call_proto_config_from_list(ptree->disable_opts, 0);
+	apply_enable_disable(ptree->enable_opts, 1);
+	apply_enable_disable(ptree->disable_opts, 0);
 }
 
 
@@ -3063,7 +3101,7 @@ free_config_trap(
 	struct address_node *addr_node;
 
 	while (NULL != (curr_trap = dequeue(ptree->trap))) {
-		while (NULL != 
+		while (curr_trap->options != NULL && NULL != 
 		       (curr_opt = dequeue(curr_trap->options))) {
 
 			if (T_Interface == curr_opt->attr) {
