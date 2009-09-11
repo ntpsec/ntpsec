@@ -264,6 +264,18 @@ extern int	config_priority;
 extern char *ntp_signd_socket;
 extern struct config_tree *cfg_tree_history;
 
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+/*
+ * backwards compatibility flags
+ */
+typedef struct bc_entry_tag {
+	int	token;
+	int	enabled;
+} bc_entry;
+
+extern bc_entry bc_list[];
+#endif
+
 /* ntp_control.c */
 extern int	num_ctl_traps;
 extern keyid_t	ctl_auth_keyid;		/* keyid used for authenticating write requests */

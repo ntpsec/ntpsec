@@ -434,11 +434,8 @@ authentication_command
 			{ cfgt.auth.control_key = $2; }
 	|	T_Crypto crypto_command_line
 		{ 
-			if (cfgt.auth.crypto_cmd_list != NULL)
-				append_queue(cfgt.auth.crypto_cmd_list, $2);
-			else
-				cfgt.auth.crypto_cmd_list = $2;
 			cryptosw++;
+			append_queue(cfgt.auth.crypto_cmd_list, $2);
 		}
 	|	T_Keys T_String
 			{ cfgt.auth.keys = $2; }
@@ -455,7 +452,7 @@ authentication_command
 crypto_command_line
 	:	crypto_command_list
 	|	/* Null list */
-			{ $$ = NULL; }
+			{ $$ = create_queue(); }
 	;
 
 crypto_command_list
@@ -710,9 +707,9 @@ fudge_factor
 
 system_option_command
 	:	T_Enable system_option_list
-			{ append_queue(cfgt.enable_opts,$2);  }
+			{ append_queue(cfgt.enable_opts, $2);  }
 	|	T_Disable system_option_list
-			{ append_queue(cfgt.disable_opts,$2);  }
+			{ append_queue(cfgt.disable_opts, $2);  }
 	;
 
 system_option_list
@@ -721,14 +718,13 @@ system_option_list
 	;
 
 system_option
-	:	T_Auth      { $$ = create_attr_ival(T_Flag, PROTO_AUTHENTICATE); }
-	|	T_Bclient   { $$ = create_attr_ival(T_Flag, PROTO_BROADCLIENT); }
-	|	T_Calibrate { $$ = create_attr_ival(T_Flag, PROTO_CAL); }
-	|	T_Kernel    { $$ = create_attr_ival(T_Flag, PROTO_KERNEL); }
-	|	T_Monitor   { $$ = create_attr_ival(T_Flag, PROTO_MONITOR); }
-	|	T_Ntp       { $$ = create_attr_ival(T_Flag, PROTO_NTP); }
-/*	|	T_Pps  */
-	|	T_Stats     { $$ = create_attr_ival(T_Flag, PROTO_FILEGEN); }
+	:	T_Auth      { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Bclient   { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Calibrate { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Kernel    { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Monitor   { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Ntp       { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Stats     { $$ = create_attr_ival(T_Flag, $1); }
 	;
 
 /* Tinker Commands

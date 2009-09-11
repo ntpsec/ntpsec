@@ -1,6 +1,13 @@
 * [Bug 983] add interface [listen | ignore | drop] ... directive.
+* [Bug 1243] MD5auth_setkey zero-fills key from first zero octet.
+* [Bug 1295] leftover fix, do not crash on exit in free_config_trap()
+  when "trap 1.2.3.4" is used without any further options.
 * document interface (alias nic) and unpeer.
 * Correct syntax error line & column numbers.
+* CID 79: kod_init_kod_db() fails to fclose(db_s) in two error paths.
+* CID 80: attempt to quiet Coverity false positive re: leaking "reason"
+  in main().
+* CID 81: savedconfig leaked in save_config().
 (4.2.5p210) 2009/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1294] Use OPENSSL_INC and OPENSSL_LIB macros for Windows
   and remove unnecessary reference to applink.c for Windows

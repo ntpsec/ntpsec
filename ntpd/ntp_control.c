@@ -635,11 +635,11 @@ save_config(
 		 *   ntpq -c "rv 0 savedconfig"
 		 */
 		octets = sizeof(savedconfig_eq) + strlen(filename) + 1;
-		savedconfig = emalloc(sizeof(savedconfig_eq) 
-				      + strlen(filename) + 1);
+		savedconfig = emalloc(octets);
 		snprintf(savedconfig, octets, "%s%s",
 			 savedconfig_eq, filename);
 		set_sys_var(savedconfig, octets, RO);
+		free(savedconfig);
 	}
 
 	if (NULL != fptr)

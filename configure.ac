@@ -4239,6 +4239,26 @@ case "$ans" in
 esac
 
 
+AC_MSG_CHECKING([if we want old session key behavior])
+
+AC_ARG_ENABLE(
+    [bug1243-fix],
+    AC_HELP_STRING(
+	[--enable-bug1243-fix],
+	[+ use unmodified autokey session keys]
+    ),
+    [ans=$enableval],
+    [ans=yes]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ no)
+    AC_DEFINE([DISABLE_BUG1243_FIX], 1, [use old autokey session key behavior?])
+esac
+
+
 AC_MSG_CHECKING([if we should use the IRIG sawtooth filter])
 
 case "$host" in
