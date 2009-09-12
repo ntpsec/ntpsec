@@ -211,9 +211,16 @@ do {	\
  * Helpers for converting between "hectonanoseconds" and the 
  * performance counter scale from which interpolated time is
  * derived.
+ *
+ * Once support for VC6 is dropped, the cast of PerfCtrFreq to
+ * LONGLONG can come out of PERF2HNS().  It avoids the VC6 error
+ * message:
+ * 
+ * conversion from unsigned __int64 to double not implemented, use
+ * signed __int64
  */
 #define HNS2PERF(hns)	((hns) * PerfCtrFreq / LL_HNS)
-#define PERF2HNS(ctr)	((ctr) * LL_HNS / PerfCtrFreq)
+#define PERF2HNS(ctr)	((ctr) * LL_HNS / (LONGLONG)PerfCtrFreq)
 
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400	/* VS 2005 */
@@ -1145,7 +1152,7 @@ ntp_timestamp_from_counter(
 		    Now.ll < -60 * (LONGLONG) HECTONANOSECONDS) {
 			DPRINTF(1, ("ntp_timestamp_from_counter interpolated "
 				    "time %.6fs from current\n",
-					Now.ll / (double) HECTONANOSECONDS));
+					Now.ll / (double)LL_HNS));
 			DPRINTF(1, ("interpol time %llx from  %llx\n",
 					InterpTimestamp,
 					Counterstamp));
@@ -1163,7 +1170,7 @@ ntp_timestamp_from_counter(
 		    Now.ll < -60 * (LONGLONG) HECTONANOSECONDS) {
 			DPRINTF(1, ("ntp_timestamp_from_counter serial driver system "
 				    "time %.6fs from current\n",
-				    Now.ll / (double) HECTONANOSECONDS));
+				    Now.ll / (double)LL_HNS));
 			exit(-1);
 		}
 #endif
@@ -1174,7 +1181,7 @@ ntp_timestamp_from_counter(
 	InterpTimestamp -= FILETIME_1970;
 	result->l_ui = JAN_1970 + (u_int32)(InterpTimestamp / HECTONANOSECONDS);
 	result->l_uf = (u_int32)((InterpTimestamp % HECTONANOSECONDS) *
-				 (FRAC / HECTONANOSECONDS));
+				 (FRAC / LL_HNS));
 }
 #endif  /* HAVE_PPSAPI */
 
