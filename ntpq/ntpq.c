@@ -292,6 +292,7 @@ static	int	assoccmp	(const void *, const void *);
 #else
 static	int	assoccmp	(struct association *, struct association *);
 #endif /* sgi || bsdi */
+void	ntpq_custom_opt_handler	(tOptions *, tOptDesc *);
 
 
 /*
@@ -537,6 +538,11 @@ ntpqmain(
 		argv += optct;
 	}
 
+	/*
+	 * Process options other than -c and -p, which are specially
+	 * handled by ntpq_custom_opt_handler().
+	 */
+
 	switch (WHICH_IDX_IPV4) {
 	    case INDEX_OPT_IPV4:
 		ai_fam_templ = AF_INET;
@@ -549,15 +555,6 @@ ntpqmain(
 		break;
 	}
 
-	if (HAVE_OPT(COMMAND)) {
-		int		cmdct = STACKCT_OPT( COMMAND );
-		const char**	cmds  = STACKLST_OPT( COMMAND );
-
-		while (cmdct-- > 0) {
-			ADDCMD(*cmds++);
-		}
-	}
-
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 
 	if (HAVE_OPT(INTERACTIVE)) {
@@ -566,10 +563,6 @@ ntpqmain(
 
 	if (HAVE_OPT(NUMERIC)) {
 		showhostnames = 0;
-	}
-
-	if (HAVE_OPT(PEERS)) {
-		ADDCMD("peers");
 	}
 
 #if 0
@@ -3378,3 +3371,34 @@ assoccmp(
 }
 #endif /* not QSORT_USES_VOID_P */
 
+/*
+ * ntpq_custom_opt_handler - autoopts handler for -c and -p
+ *
+ * By default, autoopts loses the relative order of -c and -p options
+ * on the command line.  This routine replaces the default handler for
+ * those routines and builds a list of commands to execute preserving
+ * the order.
+ */
+void
+ntpq_custom_opt_handler(
+	tOptions *pOptions,
+	tOptDesc *pOptDesc
+	)
+{
+	switch (pOptDesc->optValue) {
+	
+	default:
+		fprintf(stderr, 
+			"ntpq_custom_opt_handler unexpected option '%c' (%d)\n",
+			pOptDesc->optValue, pOptDesc->optValue);
+		exit(-1);
+
+	case 'c':
+		ADDCMD(pOptDesc->pzLastArg);
+		break;
+
+	case 'p':
+		ADDCMD("peers");
+		break;
+	}
+}

@@ -41,7 +41,7 @@ flag = {
     descrip   = "run a command and exit";
     max       = NOLIMIT;
     arg-name  = cmd;
-    stack-arg;
+    call-proc = ntpq_custom_opt_handler;
     doc = <<-  _EndOfDoc_
 	The following argument is interpreted as an interactive format command
 	and is added to the list of commands to be executed on the specified
@@ -56,6 +56,7 @@ flag = {
     value     = p;
     descrip   = "Print a list of the peers";
     flags-cant = interactive;
+    call-proc = ntpq_custom_opt_handler;
     doc = <<-  _EndOfDoc_
 	Print a list of the peers known to the server as well as a summary
 	of their state. This is equivalent to the 'peers' interactive command.
