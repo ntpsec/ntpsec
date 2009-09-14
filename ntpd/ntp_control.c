@@ -635,11 +635,11 @@ save_config(
 		 *   ntpq -c "rv 0 savedconfig"
 		 */
 		octets = sizeof(savedconfig_eq) + strlen(filename) + 1;
-		savedconfig = emalloc(sizeof(savedconfig_eq) 
-				      + strlen(filename) + 1);
+		savedconfig = emalloc(octets);
 		snprintf(savedconfig, octets, "%s%s",
 			 savedconfig_eq, filename);
 		set_sys_var(savedconfig, octets, RO);
+		free(savedconfig);
 	}
 
 	if (NULL != fptr)
@@ -2508,17 +2508,13 @@ static void configure(
 	 * Succeeded'.  Else output the error count.  It would be nice
 	 * to output any parser error messages.
 	 */
-	if (0 == remote_config.no_errors)
+	if (0 == remote_config.no_errors) {
 		retval = snprintf(remote_config.err_msg,
 				  sizeof(remote_config.err_msg),
 				  "Config Succeeded");
-	else
-		retval = snprintf(remote_config.err_msg,
-				  sizeof(remote_config.err_msg),
-				  "%d error, failure", 
-				  remote_config.no_errors);
-	if (retval > 0) 
-		remote_config.err_pos += retval;
+		if (retval > 0) 
+			remote_config.err_pos += retval;
+	}
 	
 	ctl_putdata(remote_config.err_msg, remote_config.err_pos, 0);
 	ctl_flushpkt(0);

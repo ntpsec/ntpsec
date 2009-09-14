@@ -199,9 +199,27 @@ extern char *leapseconds_file_name; /*name of the leapseconds file */
 extern unsigned int qos;				/* QoS setting */
 #endif /* HAVE_IPTOS_SUPPORT */
 
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+/*
+ * backwards compatibility flags
+ */
+bc_entry bc_list[] = {
+	{ T_Bc_bugXXXX,		1	}	/* default enabled */
+};
+
+/*
+ * declare an int pointer for each flag for quick testing without
+ * walking bc_list.  If the pointer is consumed by libntp rather
+ * than ntpd, declare it in a libntp source file pointing to storage
+ * initialized with the appropriate value for other libntp clients, and
+ * redirect it to point into bc_list during ntpd startup.
+ */
+int *p_bcXXXX_enabled = &bc_list[0].enabled;
+#endif
+
 /* FUNCTION PROTOTYPES */
 
-static void call_proto_config_from_list(queue *flag_list, int able_flag);
+static void apply_enable_disable(queue *q, int enable);
 static void init_syntax_tree(struct config_tree *);
 
 #ifdef DEBUG
@@ -224,6 +242,7 @@ static void free_config_fudge(struct config_tree *);
 static void free_config_vars(struct config_tree *);
 static void free_config_peers(struct config_tree *);
 static void free_config_unpeers(struct config_tree *);
+static void free_config_nic_rules(struct config_tree *);
 #ifdef SIM
 static void free_config_sim(struct config_tree *);
 #endif
@@ -259,6 +278,7 @@ static void config_fudge(struct config_tree *);
 static void config_vars(struct config_tree *);
 static void config_peers(struct config_tree *);
 static void config_unpeers(struct config_tree *);
+static void config_nic_rules(struct config_tree *);
 
 #ifdef SIM
 static void config_sim(struct config_tree *);
@@ -301,25 +321,6 @@ static void do_resolve_internal(void);
  * ----------------------------
  */
 
-static void
-call_proto_config_from_list(
-	queue *flag_list,
-	int able
-	)
-{
-	int flag;
-	struct attr_val *curr_flag;
-
-	curr_flag = queue_head(flag_list);
-	while (curr_flag != NULL) {
-		flag = curr_flag->value.i;
-		if (flag)
-			proto_config(flag, able, 0., NULL);
-		curr_flag = next_node(curr_flag);
-	}
-}
-
-
 #ifdef DEBUG
 static void
 free_auth_node(
@@ -342,6 +343,7 @@ free_auth_node(
 	}
 }
 #endif /* DEBUG */
+
 
 static void
 init_syntax_tree(
@@ -370,12 +372,9 @@ init_syntax_tree(
 	ptree->ttl = create_queue();
 	ptree->trap = create_queue();
 	ptree->vars = create_queue();
+	ptree->nic_rules = create_queue();
 	ptree->auth.crypto_cmd_list = create_queue();
 	ptree->auth.trusted_key_list = create_queue();
-
-#ifdef DEBUG
-	atexit(free_all_config_trees);
-#endif
 }
 
 
@@ -397,7 +396,9 @@ free_all_config_trees(void)
 
 
 static void
-free_config_tree(struct config_tree *ptree)
+free_config_tree(
+	struct config_tree *ptree
+	)
 {
 #if defined(_MSC_VER) && defined (_DEBUG)
 	_CrtCheckMemory();
@@ -423,6 +424,7 @@ free_config_tree(struct config_tree *ptree)
 	free_config_vars(ptree);
 	free_config_peers(ptree);
 	free_config_unpeers(ptree);
+	free_config_nic_rules(ptree);
 #ifdef SIM
 	free_config_sim(ptree);
 #endif
@@ -498,6 +500,7 @@ dump_config_tree(
 	struct restrict_node *rest_node = NULL;
 	struct addr_opts_node *addr_opts = NULL;
 	struct setvar_node *setv_node = NULL;
+	nic_rule_node *rule_node;
 
 	char **string = NULL;
 	char *s1;
@@ -512,6 +515,7 @@ dump_config_tree(
 	void *opts = NULL;
 	char refid[5];
 	char timestamp[80];
+	int enable;
 
 	printf("dump_config_tree(%p)\n", ptree);
 
@@ -741,59 +745,17 @@ dump_config_tree(
 	if (ptree->auth.request_key)
 		fprintf(df, "requestkey %d\n", ptree->auth.request_key);
 
-	list_ptr = queue_head(ptree->enable_opts);
-	if (list_ptr != NULL) {
+	/* dump enable list, then disable list */
+	for (enable = 1; enable >= 0; enable--) {
 
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+		list_ptr = (enable)
+			       ? queue_head(ptree->enable_opts)
+			       : queue_head(ptree->disable_opts);
 
-			atrv = (struct attr_val *) list_ptr;
-
-			fprintf(df, "enable");
-
-			switch (atrv->value.i) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown enable token %d\n"
-					"enable", atrv->value.i);
-				break;
-
-				case PROTO_AUTHENTICATE: 
-				fprintf(df, " auth");	
-				break;
-
-				case PROTO_BROADCLIENT: 
-				fprintf(df, " bclient");
-				break;
-
-				case PROTO_CAL: 
-				fprintf(df, " calibrate");
-				break;
-
-				case PROTO_KERNEL: 
-				fprintf(df, " kernel");
-				break;
-
-				case PROTO_MONITOR: 
-				fprintf(df, " monitor");
-				break;
-
-				case PROTO_NTP: 
-				fprintf(df, " ntp");
-				break;
-
-				case PROTO_FILEGEN: 
-				fprintf(df, " stats");
-				break;
-			}
-		}
-		fprintf(df, "\n");
-	}
-
-	list_ptr = queue_head(ptree->disable_opts);
-	if (list_ptr != NULL) {
-
-		fprintf(df, "disable");
+		if (list_ptr != NULL)
+			fprintf(df, (enable)
+					? "enable"
+					: "disable");
 
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
@@ -803,41 +765,45 @@ dump_config_tree(
 			switch (atrv->value.i) {
 			default:
 				fprintf(df, "\n# dump error:\n"
-					"# unknown disable token %d\n"
-					"disable", atrv->value.i);
+					"# unknown enable/disable token %d\n"
+					"%s", atrv->value.i,
+					(enable)
+					    ? "enable"
+					    : "disable");
 				break;
 
-				case PROTO_AUTHENTICATE: 
+			case T_Auth: 
 				fprintf(df, " auth");	
 				break;
 
-				case PROTO_BROADCLIENT: 
+			case T_Bclient: 
 				fprintf(df, " bclient");
 				break;
 
-				case PROTO_CAL: 
+			case T_Calibrate: 
 				fprintf(df, " calibrate");
 				break;
 
-				case PROTO_KERNEL: 
+			case T_Kernel: 
 				fprintf(df, " kernel");
 				break;
 
-				case PROTO_MONITOR: 
+			case T_Monitor: 
 				fprintf(df, " monitor");
 				break;
 
-				case PROTO_NTP: 
+			case T_Ntp: 
 				fprintf(df, " ntp");
 				break;
 
-				case PROTO_FILEGEN: 
+			case T_Stats: 
 				fprintf(df, " stats");
 				break;
 			}
 		}
 		fprintf(df, "\n");
 	}
+
 
 	list_ptr = queue_head(ptree->orphan_cmds);
 	if (list_ptr != NULL) {
@@ -1351,6 +1317,65 @@ dump_config_tree(
 		}
 	}
 
+	list_ptr = queue_head(ptree->nic_rules);
+	for (;	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
+		rule_node = list_ptr;
+
+		fprintf(df, "interface ");
+
+		switch (rule_node->action) {
+
+		default:
+			fprintf(df, "\n# dump error:\n"
+				"# unknown nic action %d\n",
+				rule_node->action);
+			break;
+
+		case T_Listen:
+			fprintf(df, "listen ");
+			break;
+
+		case T_Ignore:
+			fprintf(df, "ignore ");
+			break;
+
+		case T_Drop:
+			fprintf(df, "drop ");
+			break;
+		}
+
+		switch (rule_node->match_class) {
+
+		default:
+			fprintf(df, "\n# dump error:\n"
+				"# unknown nic match class %d\n",
+				rule_node->match_class);
+			break;
+
+		case 0:		/* interface name or address */
+			fprintf(df, "%s", rule_node->if_name);
+			break;
+
+		case T_All:
+			fprintf(df, "all");
+			break;
+
+		case T_Ipv4:
+			fprintf(df, "ipv4");
+			break;
+
+		case T_Ipv6:
+			fprintf(df, "ipv6");
+			break;
+		}
+
+		if (-1 != rule_node->prefixlen)
+			fprintf(df, " prefixlen %d", rule_node->prefixlen);
+
+		fprintf(df, "\n");
+	}
+
 	list_ptr = queue_head(ptree->phone);
 	if (list_ptr != NULL) {
 
@@ -1836,6 +1861,27 @@ create_setvar_node(
 	return my_node;
 }
 
+
+nic_rule_node *
+create_nic_rule_node(
+	int match_class,
+	char *if_name,	/* interface name or numeric address */
+	int prefixlen,
+	int action
+	)
+{
+	nic_rule_node *my_node;
+	
+	my_node = get_node(sizeof(*my_node));
+	my_node->match_class = match_class;
+	my_node->if_name = if_name;
+	my_node->prefixlen = prefixlen;
+	my_node->action = action;
+
+	return my_node;
+}
+
+
 struct addr_opts_node *
 create_addr_opts_node(
 	struct address_node *addr,
@@ -2161,6 +2207,14 @@ struct key_tok keyword_list[] = {
 	{ "port",		T_Port,            NO_ARG },
 	{ "interface",		T_Interface,       NO_ARG },
 	{ "qos",		T_Qos,		   NO_ARG },
+/* interface_command (ignore and interface already defined) */
+	{ "nic",		T_Nic,		   NO_ARG },
+	{ "all",		T_All,		   NO_ARG },
+	{ "ipv4",		T_Ipv4,		   NO_ARG },
+	{ "ipv6",		T_Ipv6,		   NO_ARG },
+	{ "listen",		T_Listen,	   NO_ARG },
+	{ "drop",		T_Drop,		   NO_ARG },
+	{ "prefixlen",		T_Prefixlen,	   NO_ARG },
 /* simulator commands */
 	{ "simulate",		T_Simulate,        NO_ARG },
 	{ "simulation_duration",T_Sim_Duration,	   NO_ARG },
@@ -2713,13 +2767,181 @@ free_config_tinker(
 #endif	/* DEBUG */
 
 
+/*
+ * config_nic_rules - apply interface listen/ignore/drop items
+ */
+void
+config_nic_rules(
+	struct config_tree *ptree
+	)
+{
+	nic_rule_node *	curr_node;
+	isc_netaddr_t	netaddr;
+	nic_rule_match	match_type;
+	nic_rule_action	action;
+
+	for (curr_node = queue_head(ptree->nic_rules);
+	     curr_node != NULL;
+	     curr_node = next_node(curr_node)) {
+
+		switch (curr_node->match_class) {
+
+		default:
+			msyslog(LOG_ERR,
+				"fatal unknown NIC match class %d",
+				curr_node->match_class);
+			exit(-1);
+			break;
+
+		case 0:
+			if (is_ip_address(curr_node->if_name, &netaddr))
+				match_type = MATCH_IFADDR;
+			else
+				match_type = MATCH_IFNAME;
+			break;
+
+		case T_All:
+			match_type = MATCH_ALL;
+			break;
+
+		case T_Ipv4:
+			match_type = MATCH_IPV4;
+			break;
+
+		case T_Ipv6:
+			match_type = MATCH_IPV6;
+			break;
+		}
+
+		switch (curr_node->action) {
+
+		default:
+			msyslog(LOG_ERR, 
+				"fatal unknown NIC rule action %d",
+				curr_node->action);
+			exit(-1);
+			break;
+
+		case T_Listen:
+			action = ACTION_LISTEN;
+			break;
+
+		case T_Ignore:
+			action = ACTION_IGNORE;
+			break;
+
+		case T_Drop:
+			action = ACTION_DROP;
+			break;
+		}
+
+		add_nic_rule(match_type, curr_node->if_name,
+			     curr_node->prefixlen, action);
+		timer_interfacetimeout(current_time + 2);
+	}
+}
+
+
+#ifdef DEBUG
+static void
+free_config_nic_rules(
+	struct config_tree *ptree
+	)
+{
+	nic_rule_node *curr_node;
+
+	while (NULL != (curr_node = dequeue(ptree->nic_rules))) {
+		if (curr_node->if_name != NULL)
+			free(curr_node->if_name);
+		free_node(curr_node);
+	}
+	DESTROY_QUEUE(ptree->nic_rules);
+}
+#endif	/* DEBUG */
+
+
+static void
+apply_enable_disable(
+	queue *	q,
+	int	enable
+	)
+{
+	struct attr_val *curr_flag;
+	int option;
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+	bc_entry *pentry;
+#endif
+
+	curr_flag = queue_head(q);
+	while (curr_flag != NULL) {
+
+		option = curr_flag->value.i;
+		switch (option) {
+
+		default:
+			msyslog(LOG_ERR,
+				"can not apply enable/disable token %d, unknown",
+				option);
+			break;
+
+		case T_Auth:
+			proto_config(PROTO_AUTHENTICATE, enable, 0., NULL);
+			break;
+
+		case T_Bclient:
+			proto_config(PROTO_BROADCLIENT, enable, 0., NULL);
+			break;
+
+		case T_Calibrate:
+			proto_config(PROTO_CAL, enable, 0., NULL);
+			break;
+
+		case T_Kernel:
+			proto_config(PROTO_KERNEL, enable, 0., NULL);
+			break;
+
+		case T_Monitor:
+			proto_config(PROTO_MONITOR, enable, 0., NULL);
+			break;
+
+		case T_Ntp:
+			proto_config(PROTO_NTP, enable, 0., NULL);
+			break;
+
+		case T_Stats:
+			proto_config(PROTO_FILEGEN, enable, 0., NULL);
+			break;
+
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+		case T_Bc_bugXXXX:
+			pentry = bc_list;
+			while (pentry->token) {
+				if (pentry->token == option)
+					break;
+				pentry++;
+			}
+			if (!pentry->token) {
+				msyslog(LOG_ERR, 
+					"compat token %d not in bc_list[]",
+					option);
+				continue;
+			}
+			pentry->enabled = enable;
+			break;
+#endif
+		}
+		curr_flag = next_node(curr_flag);
+	}
+}
+
+
 static void
 config_system_opts(
 	struct config_tree *ptree
 	)
 {
-	call_proto_config_from_list(ptree->enable_opts, 1);
-	call_proto_config_from_list(ptree->disable_opts, 0);
+	apply_enable_disable(ptree->enable_opts, 1);
+	apply_enable_disable(ptree->disable_opts, 0);
 }
 
 
@@ -3063,7 +3285,7 @@ free_config_trap(
 	struct address_node *addr_node;
 
 	while (NULL != (curr_trap = dequeue(ptree->trap))) {
-		while (NULL != 
+		while (curr_trap->options != NULL && NULL != 
 		       (curr_opt = dequeue(curr_trap->options))) {
 
 			if (T_Interface == curr_opt->attr) {
@@ -3687,6 +3909,8 @@ config_ntpd(
 	struct config_tree *ptree
 	)
 {
+	config_nic_rules(ptree);
+	io_open_sockets();
 	config_monitor(ptree);
 	config_auth(ptree);
 	config_tos(ptree);
@@ -3736,10 +3960,20 @@ config_remotely(
 	sockaddr_u *	remote_addr
 	)
 {
+	struct FILE_INFO remote_cuckoo;
+	char origin[128];
+
+	snprintf(origin, sizeof(origin), "remote config from %s",
+		 stoa(remote_addr));
+	memset(&remote_cuckoo, 0, sizeof(remote_cuckoo));
+	remote_cuckoo.fname = origin;
+	remote_cuckoo.line_no = 1;
+	remote_cuckoo.line_no = 1;
+	ip_file = &remote_cuckoo;
 	input_from_file = 0;
 
-	key_scanner = create_keyword_scanner(keyword_list);
 	init_syntax_tree(&cfgt);
+	key_scanner = create_keyword_scanner(keyword_list);
 	yyparse();
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
@@ -3766,6 +4000,9 @@ getconfig(
 {
 	char line[MAXLINE];
 
+#ifdef DEBUG
+	atexit(free_all_config_trees);
+#endif
 #ifndef SYS_WINNT
 	config_file = CONFIG_FILE;
 #else
@@ -3817,9 +4054,12 @@ getconfig(
 		&& check_netinfo && !(config_netinfo = get_netinfo_config())
 #endif /* HAVE_NETINFO */
 		) {
-		fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(config_file));
 		msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(config_file));
-#ifdef SYS_WINNT
+#ifndef SYS_WINNT
+		io_open_sockets();
+
+		return;
+#else
 		/* Under WinNT try alternate_config_file name, first NTP.CONF, then NTP.INI */
 
 		if ((fp[curr_include_level] = F_OPEN(FindConfig(alt_config_file), "r")) == NULL) {
@@ -3828,20 +4068,16 @@ getconfig(
 			 * Broadcast clients can sometimes run without
 			 * a configuration file.
 			 */
-
-			fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig(alt_config_file));
 			msyslog(LOG_INFO, "getconfig: Couldn't open <%s>", FindConfig(alt_config_file));
+			io_open_sockets();
 
 			return;
 		}
 		cfgt.source.value.s = estrdup(alt_config_file);
-
-#else  /* not SYS_WINNT */
-		return;
-#endif /* not SYS_WINNT */
-	}
-	else
+#endif	/* SYS_WINNT */
+	} else
 		cfgt.source.value.s = estrdup(config_file);
+
 
 	/*** BULK OF THE PARSER ***/
 #ifdef DEBUG
@@ -3861,9 +4097,8 @@ getconfig(
 
 	save_and_apply_config_tree();
 
-	while (curr_include_level != -1) {
+	while (curr_include_level != -1)
 		FCLOSE(fp[curr_include_level--]);
-	}
 
 #ifdef HAVE_NETINFO
 	if (config_netinfo)
@@ -3951,11 +4186,10 @@ get_match(
 	)
 {
 	while (m->name) {
-		if (strcmp(s, m->name) == 0) {
+		if (strcmp(s, m->name) == 0)
 			return m->mask;
-		} else {
+		else
 			m++;
-		}
 	}
 	return 0;
 }
@@ -4195,6 +4429,7 @@ getnetnum(
 	return 1;
 }
 
+
 /*
  * get_multiple_netnums
  *
@@ -4211,21 +4446,24 @@ get_multiple_netnums(
 {
 	struct addrinfo hints;
 	struct addrinfo *ptr;
-
 	int retval;
+	isc_netaddr_t ipaddr;
 
-	/* Get host address. Looking for UDP datagram connection */
 	memset(&hints, 0, sizeof(hints));
-	if (IS_IPV4(addr) || IS_IPV6(addr))
+
+	if (is_ip_address(num, &ipaddr))
+		hints.ai_flags = AI_NUMERICHOST;
+
+	if (!ipv6_works)
+		hints.ai_family = AF_INET;
+	else if (!ipv4_works)
+		hints.ai_family = AF_INET6;
+	else if (IS_IPV4(addr) || IS_IPV6(addr))
 		hints.ai_family = AF(addr);
 	else
 		hints.ai_family = AF_UNSPEC;
-	/*
-	 * If we don't have an IPv6 stack, just look up IPv4 addresses
-	 */
-	if (!ipv6_works)
-		hints.ai_family = AF_INET;
 
+	/* Get host address. Looking for UDP datagram connection */
 	hints.ai_socktype = SOCK_DGRAM;
 
 	DPRINTF(4, ("getaddrinfo %s\n", num));
@@ -4252,7 +4490,6 @@ get_multiple_netnums(
 
 	return 1;
 }
-
 
 
 #if !defined(VMS) && !defined(SYS_WINNT)

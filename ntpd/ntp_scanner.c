@@ -297,13 +297,23 @@ get_next_char(
 	void
 	)
 {
+	char ch;
+
 	if (input_from_file)
 		return (char)FGETC(ip_file);
 	else {
 		if (remote_config.buffer[remote_config.pos] == '\0') 
 			return EOF;
-		else 
-			return(remote_config.buffer[remote_config.pos++]);
+		else {
+			ip_file->col_no++;
+			ch = remote_config.buffer[remote_config.pos++];
+			if (ch == '\n') {
+				ip_file->prev_line_col_no = ip_file->col_no;
+				++ip_file->line_no;
+				ip_file->col_no = 1;
+			}
+			return ch;
+		}
 	}
 }
 
@@ -314,8 +324,16 @@ push_back_char(
 {
 	if (input_from_file)
 		UNGETC(ch, ip_file);
-	else 
+	else {
+		if (ch == '\n') {
+			ip_file->col_no = ip_file->prev_line_col_no;
+			ip_file->prev_line_col_no = -1;
+			--ip_file->line_no;
+		}
+		--ip_file->col_no;
+
 		remote_config.pos--;
+	}
 }
 
  
@@ -531,7 +549,8 @@ yylex(
 		} else
 			push_back_char(ch);
 
-		/* save the column of start of the token */
+		/* save the position of start of the token */
+		ip_file->prev_token_line_no = ip_file->line_no;
 		ip_file->prev_token_col_no = ip_file->col_no;
 
 		/* Read in the lexeme */

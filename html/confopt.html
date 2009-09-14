@@ -50,10 +50,11 @@ Walt Kelly</a>
 <h4 id="cfg">Configuration Commands</h4>
 <dl>
 	<dt id="server"><tt>server <i>address</i> [options ...]</tt><br>
-		<tt>peer <i>address</i> [</tt><tt>options ...]<br>
-		broadcast <i>address</i> [options ...]</tt><br>
-		<tt>manycastclient <i>address</i> [options ...]<br>
-		</tt><tt>pool <i>address</i> [options ...]</tt>
+		<tt>peer <i>address</i> [options ...]</tt><br>
+		<tt>broadcast <i>address</i> [options ...]</tt><br>
+		<tt>manycastclient <i>address</i> [options ...]</tt><br>
+		<tt>pool <i>address</i> [options ...]</tt><br>
+		<tt>unpeer [<i>address</i> | <i>associd</i>]</tt>
 	<dd>These commands specify the time server name or address to be used and the
 		mode in which to operate. The <i>address</i> can be either a DNS name or a
 		IPv4 or IPv6 address in standard notation. In general, multiple commands of
@@ -84,6 +85,11 @@ Walt Kelly</a>
 				on the <a href="assoc.html">Association Management</a> page. The address
 				is a DNS name in the form <tt><i>area</i>.pool.ntp.org</tt>, where <tt><i>area</i></tt> is
 				a qualifier designating the server geographic area such as <tt>us</tt> or <tt>europe</tt>.
+			<dt><tt>unpeer</tt>
+			<dd>This command removes a previously configured association. An address or association ID can
+				be used to identify the association.  Either an IP address or DNS name can be used.  This
+				command is most useful when supplied via <tt><a href="ntpq.html">ntpq</a></tt> runtime
+				configuration commands <tt>:config</tt> and <tt>config-from-file</tt>.
 		</dl>
 </dl>
 <h4 id="opt">Command Options</h4>

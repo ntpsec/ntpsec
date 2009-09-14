@@ -312,14 +312,16 @@ MD5auth_setkey(
 	 * new value.
 	 */
 	sk = key_hash[KEYHASH(keyno)];
-	while (sk != 0) {
+	while (sk != NULL) {
 		if (keyno == sk->keyid) {
+			sk->flags |= KEY_MD5;
+			sk->keylen = min(len, sizeof(sk->k.MD5_key));
+#ifndef DISABLE_BUG1243_FIX
+			memcpy(sk->k.MD5_key, key, sk->keylen);
+#else
 			strncpy((char *)sk->k.MD5_key, (const char *)key,
 			    sizeof(sk->k.MD5_key));
-			if ((sk->keylen = len) > sizeof(sk->k.MD5_key))
-			    sk->keylen = sizeof(sk->k.MD5_key);
-
-			sk->flags |= KEY_MD5;
+#endif
 			if (cache_keyid == keyno) {
 				cache_flags = 0;
 				cache_keyid = 0;
@@ -332,29 +334,29 @@ MD5auth_setkey(
 	/*
 	 * Need to allocate new structure.  Do it.
 	 */
-	if (authnumfreekeys == 0) {
-		if (auth_moremem() == 0)
-		    return;
-	}
+	if (0 == authnumfreekeys && !auth_moremem())
+		return;
 
 	sk = authfreekeys;
 	authfreekeys = sk->next;
 	authnumfreekeys--;
 
-	strncpy((char *)sk->k.MD5_key, (const char *)key,
-		sizeof(sk->k.MD5_key));
-	if ((sk->keylen = len) > sizeof(sk->k.MD5_key))
-	    sk->keylen = sizeof(sk->k.MD5_key);
-
 	sk->keyid = keyno;
 	sk->flags = KEY_MD5;
 	sk->lifetime = 0;
+	sk->keylen = min(len, sizeof(sk->k.MD5_key));
+#ifndef DISABLE_BUG1243_FIX
+	memcpy(sk->k.MD5_key, key, sk->keylen);
+#else
+	strncpy((char *)sk->k.MD5_key, (const char *)key,
+	    sizeof(sk->k.MD5_key));
+#endif
 	sk->next = key_hash[KEYHASH(keyno)];
 	key_hash[KEYHASH(keyno)] = sk;
 	authnumkeys++;
-	return;
 }
-    
+
+
 /*
  * auth_delkeys - delete all known keys, in preparation for rereading
  *		  the keys file (presumably)

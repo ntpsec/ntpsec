@@ -46,8 +46,10 @@ search_entry (
 		if (!strcmp(kod_db[a]->hostname, hostname))
 			resc++;
 
-	if (!resc)
+	if (!resc) {
+		*dst = NULL;
 		return 0;
+	}
 
 	*dst = emalloc(resc * sizeof(**dst));
 
@@ -215,7 +217,7 @@ kod_init_kod_db(
 			continue;
 
 		sepc = 0;
-		for(a=0; a<strlen(fbuf); a++) {
+		for(a = 0; a < strlen(fbuf); a++) {
 			if (' ' == fbuf[a])
 				sepc++;
 
@@ -232,6 +234,7 @@ kod_init_kod_db(
 
 						log_msg(msg, 1);
 					}
+					fclose(db_s);
 
 					return;
 				}
@@ -289,6 +292,7 @@ kod_init_kod_db(
 		debug_msg(msg);
 #endif
 		log_msg(msg, 2);
+		fclose(db_s);
 
 		return;
 	}

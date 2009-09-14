@@ -83,6 +83,7 @@ extern	void	enable_multicast_if	(struct interface *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 
 extern	void	init_io 	(void);
+extern	void	io_open_sockets	(void);
 extern	void	input_handler	(l_fp *);
 extern	void	io_clr_stats	(void);
 extern	void	io_setbclient	(void);
@@ -262,6 +263,18 @@ extern int	config_priority;
 #endif
 extern char *ntp_signd_socket;
 extern struct config_tree *cfg_tree_history;
+
+#ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
+/*
+ * backwards compatibility flags
+ */
+typedef struct bc_entry_tag {
+	int	token;
+	int	enabled;
+} bc_entry;
+
+extern bc_entry bc_list[];
+#endif
 
 /* ntp_control.c */
 extern int	num_ctl_traps;

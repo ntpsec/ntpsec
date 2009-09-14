@@ -3121,23 +3121,6 @@ esac
 AC_MSG_RESULT([$ans])
 
 
-AC_ARG_ENABLE(
-    [listen-read-drop],
-    AS_HELP_STRING(
-	[--enable-listen-read-drop], 
-	[+ read and drop from unused interfaces]
-    ),
-    [ans=$enableval],
-    [ans=yes]
-)
-
-case "$ans" in
- no)
-    AC_DEFINE([NO_LISTEN_READ_DROP], 1,
-	      [do not listen on unused interfaces])
-esac
-
-
 # AC_SUBST(RSAOBJS)
 # AC_SUBST(RSASRCS)
 # AC_SUBST(RSADIR)
@@ -4253,6 +4236,26 @@ AC_MSG_RESULT([$ans])
 
 case "$ans" in
  yes) AC_DEFINE(KERNEL_FLL_BUG, 1, [Does the kernel have an FLL bug?]) ;;
+esac
+
+
+AC_MSG_CHECKING([if we want old session key behavior])
+
+AC_ARG_ENABLE(
+    [bug1243-fix],
+    AC_HELP_STRING(
+	[--enable-bug1243-fix],
+	[+ use unmodified autokey session keys]
+    ),
+    [ans=$enableval],
+    [ans=yes]
+)
+
+AC_MSG_RESULT([$ans])
+
+case "$ans" in
+ no)
+    AC_DEFINE([DISABLE_BUG1243_FIX], 1, [use old autokey session key behavior?])
 esac
 
 

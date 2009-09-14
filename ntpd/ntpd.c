@@ -541,14 +541,27 @@ ntpdmain(
 		listen_to_virtual_ips = 0;
 
 	/*
-	 * Limit specific interfaces
+	 * --interface, listen on specified interfaces
 	 */
 	if (HAVE_OPT( INTERFACE )) {
 		int	ifacect = STACKCT_OPT( INTERFACE );
 		const char**	ifaces  = STACKLST_OPT( INTERFACE );
+		isc_netaddr_t	netaddr;
 
-		while (ifacect-- > 0)
-			add_specific_interface(*ifaces++);
+		/*
+		 * if there are any --interface / -I options, do not
+		 * listen on any other interfaces.
+		 */
+		add_nic_rule(MATCH_ALL, NULL, -1, ACTION_IGNORE);
+
+		while (ifacect-- > 0) {
+			add_nic_rule(
+				is_ip_address(*ifaces, &netaddr)
+					? MATCH_IFADDR
+					: MATCH_IFNAME,
+				*ifaces, -1, ACTION_LISTEN);
+			ifaces++;
+		}
 	}
 
 	if (HAVE_OPT( NICE ))
