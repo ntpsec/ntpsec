@@ -13,7 +13,7 @@
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->22-Jun-2009  21:24<!-- #EndDate --> 
+			<!-- #BeginDate format:En2m -->08-Sep-2009  20:59<!-- #EndDate --> 
 			UTC</p>
 		<br clear="left">
 	<h4>Related Links</h4>
@@ -52,7 +52,7 @@
 			<dd>This command allows additional configuration commands to be included from a separate file. Include files may be nested to a depth of five; upon reaching the end of any include file, command processing resumes in the previous configuration file. This option is useful for sites that run <tt>ntpd</tt> on multiple hosts, with (mostly) common options (e.g., a restriction list).</dd>
 			<dt id="leapfile"><tt>leapfile <i>leapfile</i></tt></dt>
 			<dd>This command loads the NIST leapseconds file and initializes the leapsecond values for the next leapsecond time, expiration time and TAI offset. The file can be obtained directly from NIST national time servers using <tt>ftp</tt> as the ASCII file <tt>pub/leap-seconds</tt>.</dd>
-				<p>While not strictly a security function, the Autokey protocol provides means to securely retrieve the current or updated leapsecond values from a server.</p>
+			<dd>While not strictly a security function, the Autokey protocol provides means to securely retrieve the current or updated leapsecond values from a server.</dd>
 			<dt id="logconfig"><tt>logconfig <i>configkeyword</i></tt>
 			<dd>This command controls the amount and type of output written to the system <tt>syslog</tt> facility or the alternate <tt>logfile</tt> log file. All <i><tt>configkeyword</tt></i> keywords can be prefixed with <tt>=</tt>, <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages. <tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>, <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes four types of messages can be controlled: informational messages (<tt>info</tt>), event messages (<tt>events</tt>), statistics messages (<tt>statistics</tt>) and status messages (<tt>status</tt>).
 				<p>Configuration keywords are formed by concatenating the message class with the event class. The <tt>all</tt> prefix can be used instead of a message class. A message class may also be followed by the <tt>all</tt> keyword to enable/disable all messages of the respective message class. By default, <tt>logconfig</tt> output is set to <tt>allsync</tt>.
