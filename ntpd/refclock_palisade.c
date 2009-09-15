@@ -56,15 +56,15 @@
  *	     Contact: Fernando Pablo Hauscarriaga
  * 	     E-mail: fernandoph@iar.unlp.edu.ar
  * 	     Home page: www.iar.unlp.edu.ar/~fernandoph
- *	          Instituto Argentino de Radioastronomia
- *	                    www.iar.unlp.edu.ar
+ *		  Instituto Argentino de Radioastronomia
+ *			    www.iar.unlp.edu.ar
  *
  * 14/01/07: Conditinal compilation for Thunderbolt support no longer needed
- *           now we use mode 2 for decode thunderbolt packets.
- *           Fernando P. Hauscarriaga
+ *	     now we use mode 2 for decode thunderbolt packets.
+ *	     Fernando P. Hauscarriaga
  *
  * 30/08/09: Added support for Trimble Acutime Gold Receiver.
- *           Fernando P. Hauscarriaga (fernandoph@iar.unlp.edu.ar)
+ *	     Fernando P. Hauscarriaga (fernandoph@iar.unlp.edu.ar)
  */
 
 #ifdef HAVE_CONFIG_H
@@ -116,8 +116,8 @@ int day_of_year (char *dt);
 #define CLK_TRIMBLE	0	/* Trimble Palisade */
 #define CLK_PRAECIS	1	/* Endrun Technologies Praecis */
 #define CLK_THUNDERBOLT	2	/* Trimble Thunderbolt GPS Receiver */
-#define CLK_ACUTIME     3       /* Trimble Acutime Gold */
-#define CLK_ACUTIMEB    4       /* Trimble Actutime Gold Port B */
+#define CLK_ACUTIME     3	/* Trimble Acutime Gold */
+#define CLK_ACUTIMEB    4	/* Trimble Actutime Gold Port B */
 
 int praecis_msg;
 static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
@@ -126,6 +126,7 @@ static void praecis_parse(struct recvbuf *rbufp, struct peer *peer);
  * They are taken from Markus Prosch
  */
 
+#ifdef PALISADE_SENDCMD_RESURRECTED
 /*
  * sendcmd - Build data packet for sending
  */
@@ -135,10 +136,11 @@ sendcmd (
 	int c
 	)
 {
-        *buffer->data = DLE;
-        *(buffer->data + 1) = (unsigned char)c;
-        buffer->size = 2;
+	*buffer->data = DLE;
+	*(buffer->data + 1) = (unsigned char)c;
+	buffer->size = 2;
 }
+#endif	/* PALISADE_SENDCMD_RESURRECTED */
 
 /*
  * sendsupercmd - Build super data packet for sending
@@ -150,10 +152,10 @@ sendsupercmd (
 	int c2
 	)
 {
-        *buffer->data = DLE;
-        *(buffer->data + 1) = (unsigned char)c1;
-        *(buffer->data + 2) = (unsigned char)c2;
-        buffer->size = 3;
+	*buffer->data = DLE;
+	*(buffer->data + 1) = (unsigned char)c1;
+	*(buffer->data + 2) = (unsigned char)c2;
+	buffer->size = 3;
 }
 
 /*
@@ -165,9 +167,9 @@ sendbyte (
 	int b
 	)
 {
-        if (b == DLE)
-                *(buffer->data+buffer->size++) = DLE;
-        *(buffer->data+buffer->size++) = (unsigned char)b;
+	if (b == DLE)
+		*(buffer->data+buffer->size++) = DLE;
+	*(buffer->data+buffer->size++) = (unsigned char)b;
 }
 
 /*
@@ -179,8 +181,8 @@ sendint (
 	int a
 	)
 {
-        sendbyte(buffer, (unsigned char)((a>>8) & 0xff));
-        sendbyte(buffer, (unsigned char)(a & 0xff));
+	sendbyte(buffer, (unsigned char)((a>>8) & 0xff));
+	sendbyte(buffer, (unsigned char)(a & 0xff));
 }
 
 /*
@@ -192,21 +194,21 @@ sendetx (
 	int fd
 	)
 {
-        int result;
+	int result;
 	
-        *(buffer->data+buffer->size++) = DLE;
-        *(buffer->data+buffer->size++) = ETX;
-        result = write(fd, buffer->data, (unsigned long)buffer->size);
+	*(buffer->data+buffer->size++) = DLE;
+	*(buffer->data+buffer->size++) = ETX;
+	result = write(fd, buffer->data, (unsigned long)buffer->size);
 	
-        if (result != -1)
-                return(result);
-        else
-                return (-1);
+	if (result != -1)
+		return (result);
+	else
+		return (-1);
 }
 
 /*
  * init_thunderbolt - Prepares Thunderbolt receiver to be used with
- *                    NTP (also taken from Markus Prosch).
+ *		      NTP (also taken from Markus Prosch).
  */
 static void
 init_thunderbolt (
@@ -215,7 +217,7 @@ init_thunderbolt (
 {
 	struct packettx buf;
 	
-//	buf.data = (u_char *) malloc(1);
+/*	buf.data = (u_char *) malloc(1); */
 	
 	/* set UTC time */
 	sendsupercmd (&buf, 0x8E, 0xA2);
@@ -287,27 +289,27 @@ palisade_start (
 	msyslog(LOG_NOTICE, "Palisade(%d) fd: %d dev: %s", unit, fd,
 		gpsdev);
 
-        if (tcgetattr(fd, &tio) < 0) {
-                msyslog(LOG_ERR, 
+	if (tcgetattr(fd, &tio) < 0) {
+		msyslog(LOG_ERR, 
 			"Palisade(%d) tcgetattr(fd, &tio): %m",unit);
 #ifdef DEBUG
-                printf("Palisade(%d) tcgetattr(fd, &tio)\n",unit);
+		printf("Palisade(%d) tcgetattr(fd, &tio)\n",unit);
 #endif
-                return (0);
-        }
+		return (0);
+	}
 
-        tio.c_cflag |= (PARENB|PARODD);
-        tio.c_iflag &= ~ICRNL;
+	tio.c_cflag |= (PARENB|PARODD);
+	tio.c_iflag &= ~ICRNL;
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
 	up = (struct palisade_unit *) emalloc(sizeof(struct palisade_unit));
-	      
+
 	if (!(up)) {
-                msyslog(LOG_ERR, "Palisade(%d) emalloc: %m",unit);
+		msyslog(LOG_ERR, "Palisade(%d) emalloc: %m",unit);
 #ifdef DEBUG
-                printf("Palisade(%d) emalloc\n",unit);
+		printf("Palisade(%d) emalloc\n",unit);
 #endif
 		(void) close(fd);
 		return (0);
@@ -338,12 +340,12 @@ palisade_start (
 		break;
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {
-                msyslog(LOG_ERR, "Palisade(%d) tcsetattr(fd, &tio): %m",unit);
+		msyslog(LOG_ERR, "Palisade(%d) tcsetattr(fd, &tio): %m",unit);
 #ifdef DEBUG
-                printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
+		printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
 #endif
-                return 0;
-        }
+		return 0;
+	}
 
 	pp = peer->procptr;
 	pp->io.clock_recv = palisade_io;
@@ -352,7 +354,7 @@ palisade_start (
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 #ifdef DEBUG
-                printf("Palisade(%d) io_addclock\n",unit);
+		printf("Palisade(%d) io_addclock\n",unit);
 #endif
 		(void) close(fd);
 		free(up);
@@ -374,10 +376,10 @@ palisade_start (
 	up->leap_status = 0;
 	up->unit = (short) unit;
 	up->rpt_status = TSIP_PARSED_EMPTY;
-    	up->rpt_cnt = 0;
+	up->rpt_cnt = 0;
 
-    	if (up->type == CLK_THUNDERBOLT)
-       	    	init_thunderbolt(fd);
+	if (up->type == CLK_THUNDERBOLT)
+		init_thunderbolt(fd);
 	if (up->type == CLK_ACUTIME)
 		init_acutime(fd);
 
@@ -652,7 +654,7 @@ TSIP_decode (
 				pp->leap = LEAP_ADDSECOND;  /* we ASSUME addsecond */
 			else 
 				pp->leap = LEAP_NOWARNING;
-                		
+
 #ifdef DEBUG
 			if (debug > 1) 
 				printf("TSIP_decode: unit %d: 0x%02x leap %d\n",
@@ -694,7 +696,7 @@ TSIP_decode (
 
 		    case PACKET_8FAB:
 			/* Thunderbolt Primary Timing Packet */
-	        
+
 			if (up->rpt_cnt != LENCODE_8FAB) /* check length */
 				break;
 
@@ -702,7 +704,7 @@ TSIP_decode (
 				return 0;
 
 			GPS_UTC_Offset = getint((u_char *) &mb(7));
-                
+
 			if (GPS_UTC_Offset == 0){ /* Check UTC Offset */
 #ifdef DEBUG
 				printf("TSIP_decode: UTC Offset Unknown\n");
@@ -770,24 +772,24 @@ TSIP_decode (
 			return 1;
 			break;
 
-		    default: 	
+		    default:
 			/* Ignore Packet */
 			return 0;
 		} /* switch */
-	}/* if 8F packets */	
+	} /* if 8F packets */
 
-        else if (up->rpt_buf[0] == (u_char)0x42) {
+	else if (up->rpt_buf[0] == (u_char)0x42) {
 		printf("0x42\n");
 		return 0;
-        }
-        else if (up->rpt_buf[0] == (u_char)0x43) {
+	}
+	else if (up->rpt_buf[0] == (u_char)0x43) {
 		printf("0x43\n");
 		return 0;
-        }
-        else if ((up->rpt_buf[0] == PACKET_41) & (up->type == CLK_THUNDERBOLT)){
+	}
+	else if ((up->rpt_buf[0] == PACKET_41) & (up->type == CLK_THUNDERBOLT)){
 		printf("Undocumented 0x41 packet on Thunderbolt\n");
 		return 0;
-        }
+	}
 	else if ((up->rpt_buf[0] == PACKET_41A) & (up->type == CLK_ACUTIME)) {
 #ifdef DEBUG
 		printf("GPS TOW: %ld\n", getlong((u_char *) &mb(0)));
@@ -799,6 +801,7 @@ TSIP_decode (
 
 	/* Health Status for Acutime Receiver */
 	else if ((up->rpt_buf[0] == PACKET_46) & (up->type == CLK_ACUTIME)) {
+#ifdef DEBUG
 		if (debug > 1)
 		/* Status Codes */
 			switch (mb(0)) {
@@ -827,13 +830,14 @@ TSIP_decode (
 				printf("The Chosen satellite is unusable\n");
 				break;
 			}
+#endif
 		/* Error Codes */
 		if (mb(1) != 0)	{
 			
 			refclock_report(peer, CEVNT_BADTIME);
 			up->polled = -1;
-			
-			if (debug > 1){
+#ifdef DEBUG
+			if (debug > 1) {
 				if (mb(1) && 0x01)
 					printf ("Signal Processor Error, reset unit.\n");
 				if (mb(1) && 0x02)
@@ -845,6 +849,7 @@ TSIP_decode (
 				if (mb(1) && 0x05)
 					printf ("Excessive reference frequency error, refer to packet 0x2D and packet 0x4D documentation for further information\n");
 			}
+#endif
 		
 		return 0;
 		}
@@ -852,7 +857,7 @@ TSIP_decode (
 	else if (up->rpt_buf[0] == 0x54)
 		return 0;
 
-        else if (up->rpt_buf[0] == PACKET_6D) {
+	else if (up->rpt_buf[0] == PACKET_6D) {
 #ifdef DEBUG
 		int sats;
 
@@ -871,7 +876,7 @@ TSIP_decode (
 		printf("Tracking %d Satellites\n", sats);
 #endif
 		return 0;
-        } /* else if not super packet */
+	} /* else if not super packet */
 	refclock_report(peer, CEVNT_BADREPLY);
 	up->polled = -1;
 #ifdef DEBUG
@@ -1082,11 +1087,11 @@ palisade_io (
 				up->rpt_status = TSIP_PARSED_DATA;
 				mb(up->rpt_cnt++) = 
 				    *c;
-			}       
+			}
 			else if (*c == ETX) 
 				up->rpt_status = TSIP_PARSED_FULL;
 			else 	{
-                        	/* error: start new report packet */
+				/* error: start new report packet */
 				up->rpt_status = TSIP_PARSED_DLE_1;
 				up->rpt_buf[0] = *c;
 			}
@@ -1095,11 +1100,11 @@ palisade_io (
 		    case TSIP_PARSED_FULL:
 		    case TSIP_PARSED_EMPTY:
 		    default:
-		        if ( *c != DLE)
+			if ( *c != DLE)
 				up->rpt_status = TSIP_PARSED_EMPTY;
 			else 
 				up->rpt_status = TSIP_PARSED_DLE_1;
-                        break;
+			break;
 		}
 		
 		c++;
@@ -1107,11 +1112,11 @@ palisade_io (
 		if (up->rpt_status == TSIP_PARSED_DLE_1) {
 			up->rpt_cnt = 0;
 			if (pp->sloppyclockflag & CLK_FLAG2) 
-                		/* stamp it */
+				/* stamp it */
 				get_systime(&pp->lastrec);
 		}
 		else if (up->rpt_status == TSIP_PARSED_EMPTY)
-		    	up->rpt_cnt = 0;
+			up->rpt_cnt = 0;
 
 		else if (up->rpt_cnt > BMAX) 
 			up->rpt_status =TSIP_PARSED_EMPTY;

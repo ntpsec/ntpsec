@@ -1,14 +1,16 @@
+* Documentation updates from Dave Mills.
 * [Bug 983] add interface [listen | ignore | drop] ... directive.
 * [Bug 1243] MD5auth_setkey zero-fills key from first zero octet.
 * [Bug 1295] leftover fix, do not crash on exit in free_config_trap()
   when "trap 1.2.3.4" is used without any further options.
+* [Bug 1311] 4.2.5p211 doesn't build in no-debug mode.
 * document interface (alias nic) and unpeer.
 * Correct syntax error line & column numbers.
 * CID 79: kod_init_kod_db() fails to fclose(db_s) in two error paths.
 * CID 80: attempt to quiet Coverity false positive re: leaking "reason"
   in main().
 * CID 81: savedconfig leaked in save_config().
-* Documentation updates from Dave Mills.
+>>>>>>>
 * Make the code agree with the spec and the book (Dave Mills).
 (4.2.5p211) 2009/09/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 663] respect ntpq -c and -p order on command line.

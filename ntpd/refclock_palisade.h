@@ -158,8 +158,8 @@
  */
 struct packettx
 {
-  short size;
-  u_char *data;
+	short	size;
+	u_char *data;
 };
 
 /*
@@ -171,7 +171,7 @@ struct palisade_unit {
 	char		leap_status;	/* leap second flag */
 	char		rpt_status;	/* TSIP Parser State */
 	short 		rpt_cnt;	/* TSIP packet length so far */
-	char 		rpt_buf[BMAX]; 	 /* packet assembly buffer */
+	char 		rpt_buf[BMAX]; 	/* packet assembly buffer */
 	int		type;		/* Clock mode type */
 };
 
@@ -193,11 +193,13 @@ short  		getint 			(u_char *);
 long		getlong			(u_char *);
 
 
-static  void    sendcmd                 (struct packettx *buffer, int c);
-static  void    sendsupercmd            (struct packettx *buffer, int c1, int c2);
-static  void    sendbyte                (struct packettx *buffer, int b);
-static  void    sendint                 (struct packettx *buffer, int a);
-static  int     sendetx                 (struct packettx *buffer, int fd);
-static  void    init_thunderbolt        (int fd);
-static  void    init_acutime            (int fd);
+#ifdef PALISADE_SENDCMD_RESURRECTED
+static  void	sendcmd			(struct packettx *buffer, int c);
+#endif
+static  void	sendsupercmd		(struct packettx *buffer, int c1, int c2);
+static  void	sendbyte		(struct packettx *buffer, int b);
+static  void	sendint			(struct packettx *buffer, int a);
+static  int	sendetx			(struct packettx *buffer, int fd);
+static  void	init_thunderbolt	(int fd);
+static  void	init_acutime		(int fd);
 #endif /* PALISADE_H */
