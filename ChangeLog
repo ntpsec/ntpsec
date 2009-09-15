@@ -1,3 +1,4 @@
+(4.2.5p212) 2009/09/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 983] add interface [listen | ignore | drop] ... directive.
 * [Bug 1243] MD5auth_setkey zero-fills key from first zero octet.
 * [Bug 1295] leftover fix, do not crash on exit in free_config_trap()
