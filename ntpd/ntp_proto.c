@@ -25,10 +25,6 @@
 #include "ntp_refclock.h"
 #endif
 
-#if defined(__FreeBSD__) && __FreeBSD__ >= 3
-#include <sys/sysctl.h>
-#endif
-
 /*
  * This macro defines the authentication state. If x is 1 authentication
  * is required; othewise it is optional.
@@ -78,7 +74,7 @@ double	sys_bdelay;		/* broadcast client default delay */
 int	sys_authenticate;	/* requre authentication for config */
 l_fp	sys_authdelay;		/* authentication delay */
 double	sys_offset;	/* current local clock offset */
-double	sys_mindisp = MINDISPERSE; /* min disp increment (s) */
+double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
 u_long 	sys_epoch;		/* last clock update time */
@@ -802,9 +798,9 @@ receive(
 			return;			/* not enabled */
 		}
 		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_CLIENT, hisversion, NTP_MINDPOLL,
-		    NTP_MAXDPOLL, FLAG_IBURST | FLAG_PREEMPT,
-		    MDF_UCAST | MDF_ACLNT, 0, skeyid)) == NULL) {
+		    MODE_CLIENT, hisversion, NTP_MINDPOLL, NTP_MAXDPOLL,
+		    FLAG_PREEMPT, MDF_UCAST | MDF_ACLNT, 0, skeyid)) ==
+		    NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
 		}
@@ -812,7 +808,10 @@ receive(
 		/*
 		 * We don't need these, but it warms the billboards.
 		 */
-		peer->ttl = peer2->ttl;
+		if (peer2->flags & FLAG_IBURST)
+			peer->flags |= FLAG_IBURST;
+		peer->minpoll = peer2->minpoll;
+		peer->maxpoll = peer2->maxpoll;
 		break;
 
 	/*
@@ -920,7 +919,7 @@ receive(
 
 			/*
 			 * If authenticated but cannot mobilize an
-			 * association, send a summetric passive
+			 * association, send a symmetric passive
 			 * response without mobilizing an association.
 			 * This is for drat broken Windows clients. See
 			 * Microsoft KB 875424 for preferred workaround.
@@ -1648,14 +1647,6 @@ clock_update(
 		sys_refid = addr2refid(&peer->srcadr);
 	dtemp = sys_jitter + fabs(sys_offset) + peer->disp + clock_phi *
 	    (current_time - peer->update);
-#ifdef REFCLOCK
-	if (!(peer->flags & FLAG_REFCLOCK) && sys_rootdisp <
-	    sys_mindisp)
-		dtemp = sys_mindisp;
-#else
-	if (sys_rootdisp < sys_mindisp)
-		dtemp = sys_mindisp;
-#endif /* REFCLOCK */
 	sys_rootdisp = dtemp + peer->rootdisp;
 	sys_rootdelay = peer->delay + peer->rootdelay;
 	sys_reftime = peer->dst;
@@ -1713,10 +1704,7 @@ clock_update(
 		break;
 
 	/*
-	 * Clock was slewed. Update the system stratum, leap bits, root
-	 * delay, root dispersion, reference ID and reference time.
-	 * Except for reference clocks, the minimum dispersion increment
-	 * is not less than sys_mindisp.
+	 * Clock was slewed. Handle the leapsecond stuff.
 	 */
 	case 1:
 
@@ -2626,8 +2614,8 @@ clock_select(void)
 	 * least one kitten in the litter.
 	 */
 	if (nlist > 0 && nlist >= sys_minsane) {
-		if (synch[j] < synch[0] + sys_mindisp +
-		    ULOGTOD(sys_poll) * sys_maxhop * clock_phi)
+		if (synch[j] < synch[0] + ULOGTOD(sys_poll) *
+		    sys_maxhop * clock_phi)
 			typesystem = peer_list[j];
 		else
 			typesystem = peer_list[0];
@@ -2742,6 +2730,7 @@ root_distance(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
+	double	dtemp;
 
 	/*
 	 * Careful squeak here. The value returned must be greater than
@@ -2750,9 +2739,12 @@ root_distance(
 	 * cannot exceed the sys_maxdist, as this is the cutoff by the
 	 * selection algorithm.
 	 */
-	return ((peer->delay + peer->rootdelay) / 2 + peer->disp +
+	dtemp = (peer->delay + peer->rootdelay) / 2 + peer->disp +
 	    peer->rootdisp + clock_phi * (current_time - peer->update) +
-	    peer->jitter);
+	    peer->jitter;
+	if (dtemp < sys_mindisp)
+		dtemp = sys_mindisp;
+	return (dtemp);
 }
 
 
@@ -3469,14 +3461,15 @@ default_get_precision(void)
 		if (++i >= MINLOOPS)
 			break;
 	}
+	sys_tick = tick;
 
 	/*
 	 * Find the nearest power of two.
 	 */
-	    msyslog(LOG_NOTICE, "proto: precision = %.3f usec", tick * 1e6);
+	msyslog(LOG_NOTICE, "proto: precision = %.3f usec", tick * 1e6);
 	for (i = 0; tick <= 1; i++)
 		tick *= 2;
-	if (tick - 1. > 1. - tick / 2)
+	if (tick - 1 > 1 - tick / 2)
 		i--;
 	return (-i);
 }
@@ -3626,7 +3619,7 @@ proto_config(
 		sys_minclock = (int)dvalue;
 		break;
 
-	case PROTO_MINDISP:	/* distance increment (mindist) */
+	case PROTO_MINDISP:	/* minimum distance (mindist) */
 		sys_mindisp = dvalue;
 		break;
 

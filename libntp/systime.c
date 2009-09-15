@@ -22,6 +22,9 @@
 # include <utmpx.h>
 #endif /* HAVE_UTMPX_H */
 
+
+#define	FUZZ	500e-6		/* fuzz pivot */
+
 /*
  * These routines (get_systime, step_systime, adj_systime) implement an
  * interface between the system independent NTP clock and the Unix
@@ -36,20 +39,16 @@
  * with an unbiased random fuzz.
  *
  * The sys_tick variable secifies the system clock tick interval in
- * seconds and fraction. For systems that can interpolate between timer
- * interrupts, the assumed tick interval and resolution is 1 us
- * consistent with the timeval format used by the Unix getimeofday() abd
- * adjtime() routines. With routines that use the timespec format, the
- * resolution is 1 ns. For systems that cannot interpolate, such as
- * Reliant and SCO, the resolution is as specified by the sys_tick
- * variable, which defaults to 10 ms. The default can be changed by the
- * tick configuration command. 
+ * seconds. For systems that can interpolate between timer interrupts,
+ * the resolution is presumed much less than the time to read the system
+ * clock, which is the value of sys_tick after the precision has been
+ * determined. For those systems that cannot interpolate between timer
+ * interrupts, sys_tick will be much larger in the order of 10 ms, so the
+ * fuzz should be that value. For Sunses the tick is not interpolated, but
+ * the system clock is derived from a 2-MHz oscillator, so the resolution
+ * is 500 ns and sys_tick is 500 ns.
  */
-#if defined RELIANTUNIX_CLOCK || defined SCO5_CLOCK
-double	sys_tick = .01;		/* 10 ms resolution */
-#else
-double	sys_tick = 1e-6;	/* 1 us resolution */
-#endif
+double	sys_tick = 0;		/* precision (time to read the clock) */
 double	sys_residual = 0;	/* adjustment residue (s) */
 
 #ifndef SIM
@@ -77,9 +76,12 @@ get_systime(
 	getclock(TIMEOFDAY, &ts);
 # endif
 	now->l_i = (int32)ts.tv_sec + JAN_1970;
-	dtemp = ts.tv_nsec + (ntp_random() * 2. / FRAC) * sys_tick *
-	    1e6;
-	dtemp = dtemp / 1e9 + sys_residual;
+	dtemp = 0;
+	if (sys_tick > FUZZ)
+		dtemp = ntp_random() * 2. / FRAC * sys_tick * 1e9;
+	else if (sys_tick > 0)
+		dtemp = ntp_random() * 2. / FRAC;
+	dtemp = (ts.tv_nsec + dtemp) * 1e-9 + sys_residual;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
 		now->l_i++;
@@ -98,9 +100,12 @@ get_systime(
 	 */
 	GETTIMEOFDAY(&tv, NULL);
 	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = tv.tv_usec + (ntp_random() * 2. / FRAC) * sys_tick *
-	    1e6;
-	dtemp = dtemp / 1e6 + sys_residual;
+	dtemp = 0;
+	if (sys_tick > FUZZ)
+		dtemp = ntp_random() * 2. / FRAC * sys_tick * 1e6;
+	else if (sys_tick > 0)
+		dtemp = ntp_random() * 2. / FRAC;
+	dtemp = (tv.tv_usec + dtemp) * 1e-6 + sys_residual;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
 		now->l_i++;

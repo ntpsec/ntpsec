@@ -1,3 +1,4 @@
+* Make the code agree with the spec and the book (Dave Mills).
 (4.2.5p211) 2009/09/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 663] respect ntpq -c and -p order on command line.
 * [Bug 1292] more VC6 unsigned __int64 workarounds.

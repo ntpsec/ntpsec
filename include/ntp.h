@@ -126,7 +126,7 @@ typedef char s_char;
 #define	NTP_MINCLOCK	3	/* min survivors */
 #define	NTP_MAXCLOCK	10	/* max candidates */
 #define	NTP_MAXASSOC	50	/* max associations */
-#define MINDISPERSE	.005	/* min dispersion increment */
+#define MINDISPERSE	.001	/* min distance */
 #define MAXDISTANCE	1.5	/* max root distance (select threshold) */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
 #define HUFFPUFF	900	/* huff-n'-puff sample interval (s) */

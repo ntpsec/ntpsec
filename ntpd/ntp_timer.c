@@ -321,7 +321,7 @@ timer(void)
 			memcpy(&sys_refid, "LOOP", 4);
 		sys_offset = 0;
 		sys_rootdelay = 0;
-		sys_rootdisp = sys_mindisp;
+		sys_rootdisp = 0;
 	}
 
 	/*
