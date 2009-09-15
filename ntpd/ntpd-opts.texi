@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  September  6, 2009 at 07:36:05 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  September 14, 2009 at 07:35:53 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -62,7 +62,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p187
+ntpd - NTP daemon program - Ver. 4.2.5p210
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

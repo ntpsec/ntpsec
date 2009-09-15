@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  September  6, 2009 at 07:43:29 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  September 14, 2009 at 07:43:41 AM by AutoGen 5.9.9pre5
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -90,7 +90,7 @@ tSCC    zCommandText[] =
         "run a command and exit";
 tSCC    zCommand_NAME[]            = "COMMAND";
 tSCC    zCommand_Name[]            = "command";
-#define COMMAND_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+#define COMMAND_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
@@ -203,7 +203,9 @@ static tOptProc
 /*
  *  #define map the "normal" callout procs to the test ones...
  */
+#define COMMAND_OPT_PROC optionStackArg
 #define SET_DEBUG_LEVEL_OPT_PROC optionStackArg
+#define PEERS_OPT_PROC optionStackArg
 
 
 #else /* NOT defined TEST_NTPQ_OPTS */
@@ -211,16 +213,20 @@ static tOptProc
  *  When not under test, there are different procs to use
  */
 extern tOptProc
-    optionPagedUsage, optionPrintVersion, optionStackArg;
+    ntpq_custom_opt_handler, optionPagedUsage, optionPrintVersion;
 static tOptProc
     doUsageOpt;
 
 /*
  *  #define map the "normal" callout procs
  */
+#define COMMAND_OPT_PROC ntpq_custom_opt_handler
 #define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+#define PEERS_OPT_PROC ntpq_custom_opt_handler
 
+#define COMMAND_OPT_PROC ntpq_custom_opt_handler
 #define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+#define PEERS_OPT_PROC ntpq_custom_opt_handler
 #endif /* defined(TEST_NTPQ_OPTS) */
 #ifdef TEST_NTPQ_OPTS
 # define DOVERPROC optionVersionStderr
@@ -265,7 +271,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ optionStackArg,
+     /* option proc      */ COMMAND_OPT_PROC,
      /* desc, NAME, name */ zCommandText, zCommand_NAME, zCommand_Name,
      /* disablement strs */ NULL, NULL },
 
@@ -301,7 +307,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aPeersCantList,
-     /* option proc      */ NULL,
+     /* option proc      */ PEERS_OPT_PROC,
      /* desc, NAME, name */ zPeersText, zPeers_NAME, zPeers_Name,
      /* disablement strs */ NULL, NULL },
 
@@ -408,7 +414,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPQ";
 tSCC   zUsageTitle[] =
-"ntpq - standard NTP query program - Ver. 4.2.5p210\n\
+"ntpq - standard NTP query program - Ver. 4.2.5p211\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {

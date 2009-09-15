@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  September  6, 2009 at 07:50:17 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  September 14, 2009 at 07:50:48 AM by AutoGen 5.9.9pre5
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -769,7 +769,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTP_KEYGEN";
 tSCC   zUsageTitle[] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p210\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p211\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
