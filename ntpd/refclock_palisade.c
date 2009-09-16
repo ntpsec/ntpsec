@@ -215,19 +215,22 @@ init_thunderbolt (
 	int fd
 	)
 {
-	struct packettx buf;
+	struct packettx tx;
 	
-/*	buf.data = (u_char *) malloc(1); */
-	
+	tx.size = 0;
+	tx.data = (u_char *) malloc(100);
+
 	/* set UTC time */
-	sendsupercmd (&buf, 0x8E, 0xA2);
-	sendbyte     (&buf, 0x3);
-	sendetx      (&buf, fd);
+	sendsupercmd (&tx, 0x8E, 0xA2);
+	sendbyte     (&tx, 0x3);
+	sendetx      (&tx, fd);
 	
 	/* activate packets 0x8F-AB and 0x8F-AC */
-	sendsupercmd (&buf, 0x8F, 0xA5);
-	sendint      (&buf, 0x5);
-	sendetx      (&buf, fd);
+	sendsupercmd (&tx, 0x8F, 0xA5);
+	sendint      (&tx, 0x5);
+	sendetx      (&tx, fd);
+
+	free(tx.data);
 }
 
 /*
