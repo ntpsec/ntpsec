@@ -1181,7 +1181,7 @@ ntp_timestamp_from_counter(
 	InterpTimestamp -= FILETIME_1970;
 	result->l_ui = JAN_1970 + (u_int32)(InterpTimestamp / HECTONANOSECONDS);
 	result->l_uf = (u_int32)((InterpTimestamp % HECTONANOSECONDS) *
-				 (FRAC / LL_HNS));
+				 (ULONGLONG)FRAC / HECTONANOSECONDS);
 }
 #endif  /* HAVE_PPSAPI */
 
