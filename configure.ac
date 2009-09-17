@@ -4239,7 +4239,7 @@ case "$ans" in
 esac
 
 
-AC_MSG_CHECKING([if we want old session key behavior])
+AC_MSG_CHECKING([if we want new session key behavior])
 
 AC_ARG_ENABLE(
     [bug1243-fix],

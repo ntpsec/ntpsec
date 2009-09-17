@@ -1,3 +1,6 @@
+* [Bug 1303] remove top-level "autokey" directive.
+* use "nic listen 192.168.0.0/16" instead of
+  "nic listen 192.168.0.0 prefixlen 16".
 (4.2.5p213) 2009/09/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1310] fix Thunderbolt mode in refclock_palisade.c
 (4.2.5p212) 2009/09/15 Released by Harlan Stenn <stenn@ntp.org>

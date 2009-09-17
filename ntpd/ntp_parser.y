@@ -173,7 +173,6 @@
 %token	<Integer>	T_Port
 %token	<Integer>	T_Preempt
 %token	<Integer>	T_Prefer
-%token	<Integer>	T_Prefixlen
 %token	<Integer>	T_Protostats
 %token	<Integer>	T_Pw
 %token	<Integer>	T_Qos
@@ -428,8 +427,8 @@ other_mode_command
  */
 
 authentication_command
-	:	T_Autokey T_Integer
-			{ cfgt.auth.autokey = $2; }
+	:	T_Automax T_Integer
+			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
 	|	T_ControlKey T_Integer
 			{ cfgt.auth.control_key = $2; }
 	|	T_Crypto crypto_command_line
@@ -794,8 +793,6 @@ miscellaneous_command
 			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
 	|	T_Logfile T_String
 			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
-	|	T_Automax T_Integer
-			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
 
 	|	T_Logconfig log_config_list
 			{ append_queue(cfgt.logconfig, $2); }
@@ -865,17 +862,12 @@ interface_command
 	:	interface_nic nic_rule_action nic_rule_class
 		{
 			enqueue(cfgt.nic_rules,
-				create_nic_rule_node($3, NULL, -1, $2));
+				create_nic_rule_node($3, NULL, $2));
 		}
 	|	interface_nic nic_rule_action T_String
 		{
 			enqueue(cfgt.nic_rules,
-				create_nic_rule_node(0, $3, -1, $2));
-		}
-	|	interface_nic nic_rule_action T_String T_Prefixlen T_Integer
-		{
-			enqueue(cfgt.nic_rules,
-				create_nic_rule_node(0, $3, $5, $2));
+				create_nic_rule_node(0, $3, $2));
 		}
 	;
 

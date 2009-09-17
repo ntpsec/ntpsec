@@ -95,7 +95,6 @@ struct unpeer_node {
 };
 
 struct auth_node {
-    int autokey;
     int control_key;
     queue *crypto_cmd_list;
     char *keys;
@@ -120,7 +119,6 @@ struct setvar_node {
 typedef struct nic_rule_node_tag {
     int match_class;
     char *if_name;	/* interface name or numeric address */
-    int prefixlen;	/* -1 for not specified */
     int action;
 } nic_rule_node;
 
@@ -215,7 +213,7 @@ struct sim_node *create_sim_node(queue *init_opts, queue *servers);
 struct setvar_node *create_setvar_node(char *var, char *val,
 				       u_short def);
 nic_rule_node *create_nic_rule_node(int match_class, char *if_name,
-				    int prefixlen, int action);
+				    int action);
 
 script_info *create_sim_script_info(double duration,
 				    queue *script_queue);

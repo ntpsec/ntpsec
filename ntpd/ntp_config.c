@@ -1370,9 +1370,6 @@ dump_config_tree(
 			break;
 		}
 
-		if (-1 != rule_node->prefixlen)
-			fprintf(df, " prefixlen %d", rule_node->prefixlen);
-
 		fprintf(df, "\n");
 	}
 
@@ -1866,7 +1863,6 @@ nic_rule_node *
 create_nic_rule_node(
 	int match_class,
 	char *if_name,	/* interface name or numeric address */
-	int prefixlen,
 	int action
 	)
 {
@@ -1875,7 +1871,6 @@ create_nic_rule_node(
 	my_node = get_node(sizeof(*my_node));
 	my_node->match_class = match_class;
 	my_node->if_name = if_name;
-	my_node->prefixlen = prefixlen;
 	my_node->action = action;
 
 	return my_node;
@@ -2214,7 +2209,6 @@ struct key_tok keyword_list[] = {
 	{ "ipv6",		T_Ipv6,		   NO_ARG },
 	{ "listen",		T_Listen,	   NO_ARG },
 	{ "drop",		T_Drop,		   NO_ARG },
-	{ "prefixlen",		T_Prefixlen,	   NO_ARG },
 /* simulator commands */
 	{ "simulate",		T_Simulate,        NO_ARG },
 	{ "simulation_duration",T_Sim_Duration,	   NO_ARG },
@@ -2779,10 +2773,17 @@ config_nic_rules(
 	isc_netaddr_t	netaddr;
 	nic_rule_match	match_type;
 	nic_rule_action	action;
+	char *		if_name;
+	char *		pchSlash;
+	int		prefixlen = -1;
 
 	for (curr_node = queue_head(ptree->nic_rules);
 	     curr_node != NULL;
 	     curr_node = next_node(curr_node)) {
+
+		if_name = curr_node->if_name;
+		if (if_name != NULL)
+			if_name = estrdup(if_name);
 
 		switch (curr_node->match_class) {
 
@@ -2794,10 +2795,25 @@ config_nic_rules(
 			break;
 
 		case 0:
-			if (is_ip_address(curr_node->if_name, &netaddr))
+			pchSlash = strchr(if_name, '/');
+			if (pchSlash != NULL)
+				*pchSlash = '\0';
+			if (is_ip_address(if_name, &netaddr)) {
 				match_type = MATCH_IFADDR;
-			else
+				if (pchSlash != NULL) {
+					sscanf(pchSlash + 1, "%d",
+					    &prefixlen);
+					prefixlen = max(-1, prefixlen);
+					prefixlen = min(prefixlen, 
+					    (AF_INET6 == netaddr.family)
+						? 128
+						: 32);
+				}
+			} else {
 				match_type = MATCH_IFNAME;
+				if (pchSlash != NULL)
+					*pchSlash = '/';
+			}
 			break;
 
 		case T_All:
@@ -2835,9 +2851,11 @@ config_nic_rules(
 			break;
 		}
 
-		add_nic_rule(match_type, curr_node->if_name,
-			     curr_node->prefixlen, action);
+		add_nic_rule(match_type, if_name, prefixlen,
+			     action);
 		timer_interfacetimeout(current_time + 2);
+		if (if_name != NULL)
+			free(if_name);
 	}
 }
 
