@@ -1,3 +1,4 @@
+* [Bug 1292] Workaround last VC6 unsigned __int64 kink.
 (4.2.5p214) 2009/09/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1303] remove top-level "autokey" directive.
 * use "nic listen 192.168.0.0/16" instead of
