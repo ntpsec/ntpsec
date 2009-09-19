@@ -298,6 +298,7 @@ palisade_start (
 #ifdef DEBUG
 		printf("Palisade(%d) tcgetattr(fd, &tio)\n",unit);
 #endif
+		close(fd);
 		return (0);
 	}
 
@@ -308,15 +309,6 @@ palisade_start (
 	 * Allocate and initialize unit structure
 	 */
 	up = (struct palisade_unit *) emalloc(sizeof(struct palisade_unit));
-
-	if (!(up)) {
-		msyslog(LOG_ERR, "Palisade(%d) emalloc: %m",unit);
-#ifdef DEBUG
-		printf("Palisade(%d) emalloc\n",unit);
-#endif
-		(void) close(fd);
-		return (0);
-	}
 
 	memset((char *)up, 0, sizeof(struct palisade_unit));
 
@@ -347,6 +339,8 @@ palisade_start (
 #ifdef DEBUG
 		printf("Palisade(%d) tcsetattr(fd, &tio)\n",unit);
 #endif
+		close(fd);
+		free(up);
 		return 0;
 	}
 

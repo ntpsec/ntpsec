@@ -1,4 +1,7 @@
 * [Bug 1312] ntpq/ntpdc MD5 passwords truncated to 8 chars on Suns.
+* CID 10 missing free(up); in refclock_palisade.c error return, again.
+* CID 83 added assertion to demonstrate config_nic_rules() does not
+  call strchr(NULL, '/').
 (4.2.5p215) 2009/09/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1292] Workaround last VC6 unsigned __int64 kink.
 (4.2.5p214) 2009/09/17 Released by Harlan Stenn <stenn@ntp.org>

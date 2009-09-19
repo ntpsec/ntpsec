@@ -2795,6 +2795,7 @@ config_nic_rules(
 			break;
 
 		case 0:
+			NTP_INSIST(if_name != NULL);
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
 				*pchSlash = '\0';
