@@ -1833,24 +1833,28 @@ config (
 	FILE *fp
 	)
 {
-    u_short rstatus;
-    int rsize;
-    char *rdata;
-    int res;
+	char *rcmd;
+	u_short rstatus;
+	int rsize;
+	char *rdata;
+	int res;
 
-    if (debug > 2) {
-        printf("In Config\n");
-        printf("Keyword = %s\n", pcmd->keyword);
-        printf("Command = %s\n", pcmd->argval[0].string);
-    }
-    
-    res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(pcmd->argval[0].string),
-                  pcmd->argval[0].string, &rstatus,
-                  &rsize, &rdata);
-    rdata[rsize] = '\0';
-    printf("%s\n", rdata);
+	rcmd = pcmd->argval[0].string;
 
+	if (debug > 2) {
+		printf("In Config\n");
+		printf("Keyword = %s\n", pcmd->keyword);
+		printf("Command = %s\n", rcmd);
+	}
+
+	res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(rcmd), rcmd,
+		      &rstatus, &rsize, &rdata);
+	if (rsize > 0 && '\n' == rdata[rsize - 1])
+		rsize--;
+	rdata[rsize] = '\0';
+	printf("%s\n", rdata);
 }
+
 
 /* 
  * config_from_file - remotely configure an ntpd daemon using the

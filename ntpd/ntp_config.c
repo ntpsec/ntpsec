@@ -141,6 +141,7 @@ short default_ai_family = AF_INET;	/* [Bug 891]: FIX ME */
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	default_keysdir[] = NTP_KEYSDIR;
 char	*keysdir = default_keysdir;	/* crypto keys directory */
+char *	saveconfigdir;
 #if defined(HAVE_SCHED_SETSCHEDULER)
 int	config_priority_override = 0;
 int	config_priority;
@@ -546,36 +547,41 @@ dump_config_tree(
 					atrv->attr);
 				break;
 
-				case T_Broadcastdelay:
+			case T_Broadcastdelay:
 				fprintf(df, "broadcastdelay %g\n", atrv->value.d);
 				break;
 				
-				case T_Calldelay:
+			case T_Calldelay:
 				fprintf(df, "calldelay %i\n", atrv->value.i);
 				break;
 
-				case T_Tick:
+			case T_Tick:
 				fprintf(df, "tick %g\n", atrv->value.d);
 				break;
 
-				case T_Driftfile:
+			case T_Driftfile:
 				fprintf(df, "driftfile \"%s\"\n", atrv->value.s);
 				break;
 			
-		    		case T_WanderThreshold:
+		    	case T_WanderThreshold:
 				fprintf(df, "wander_threshold %g\n", atrv->value.d);
 				break;
 	
-		    		case T_Leapfile:
+		    	case T_Leapfile:
 				fprintf(df, "leapfile \"%s\"\n", atrv->value.s);
 				break;
 
-				case T_Pidfile:
+			case T_Pidfile:
 				fprintf(df, "pidfile \"%s\"\n", atrv->value.s);
 				break;
 
-				case T_Logfile:
+			case T_Logfile:
 				fprintf(df, "logfile \"%s\"\n", atrv->value.s);
+				break;
+
+			case T_Saveconfigdir:
+				fprintf(df, "saveconfigdir \"%s\"\n",
+					atrv->value.s);
 				break;
 #ifdef OPENSSL
 				case T_Automax:
@@ -627,9 +633,10 @@ dump_config_tree(
 			list_ptr = next_node(list_ptr)) {
 
 			fgen_node = list_ptr;
-			fprintf(df, "filegen %s", fgen_node->name);
-
 			opt_ptr = queue_head(fgen_node->options);
+
+			if (opt_ptr != NULL)
+				fprintf(df, "filegen %s", fgen_node->name);
 
 			for(;	opt_ptr != NULL;
 				opt_ptr = next_node(opt_ptr)) {
@@ -1868,6 +1875,8 @@ create_nic_rule_node(
 {
 	nic_rule_node *my_node;
 	
+	NTP_REQUIRE(match_class != 0 || if_name != NULL);
+
 	my_node = get_node(sizeof(*my_node));
 	my_node->match_class = match_class;
 	my_node->if_name = if_name;
@@ -2202,6 +2211,7 @@ struct key_tok keyword_list[] = {
 	{ "port",		T_Port,            NO_ARG },
 	{ "interface",		T_Interface,       NO_ARG },
 	{ "qos",		T_Qos,		   NO_ARG },
+	{ "saveconfigdir",	T_Saveconfigdir,   SINGLE_ARG },
 /* interface_command (ignore and interface already defined) */
 	{ "nic",		T_Nic,		   NO_ARG },
 	{ "all",		T_All,		   NO_ARG },
@@ -3454,6 +3464,7 @@ config_vars(
 {
 	struct attr_val *curr_var;
 	FILE *new_file;
+	int len;
 
 	curr_var = queue_head(ptree->vars);
 	while (curr_var != NULL) {
@@ -3500,6 +3511,28 @@ config_vars(
 				msyslog(LOG_ERR,
 					"Cannot open log file %s",
 					curr_var->value.s);
+			break;
+
+		case T_Saveconfigdir:
+			if (saveconfigdir != NULL)
+				free(saveconfigdir);
+			len = strlen(curr_var->value.s);
+			if (0 == len)
+				saveconfigdir = NULL;
+			else if (DIR_SEP != curr_var->value.s[len - 1]
+#ifdef SYS_WINNT	/* slash is also a dir. sep. on Windows */
+				 && '/' != curr_var->value.s[len - 1]
+#endif
+				    ) {
+					len++;
+					saveconfigdir = emalloc(len + 1);
+					snprintf(saveconfigdir, len + 1,
+						 "%s%c",
+						 curr_var->value.s,
+						 DIR_SEP);
+				} else
+					saveconfigdir = estrdup(
+					    curr_var->value.s);
 			break;
 
 		case T_Automax:

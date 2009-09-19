@@ -182,6 +182,7 @@
 %token	<Integer>	T_Requestkey
 %token	<Integer>	T_Restrict
 %token	<Integer>	T_Revoke
+%token	<Integer>	T_Saveconfigdir
 %token	<Integer>	T_Server
 %token	<Integer>	T_Setvar
 %token	<Integer>	T_Sign
@@ -304,12 +305,12 @@ command_list
 			 * error messages. The following should suffice for
 			 * the time being.
 			 */
-				msyslog(LOG_ERR, 
-					"syntax error in %s line %d, column %d",
-					ip_file->fname,
-					ip_file->err_line_no,
-					ip_file->err_col_no);
-	}
+			msyslog(LOG_ERR, 
+				"syntax error in %s line %d, column %d",
+				ip_file->fname,
+				ip_file->err_line_no,
+				ip_file->err_col_no);
+		}
 	;
 
 command :	/* NULL STATEMENT */
@@ -523,7 +524,14 @@ monitoring_command
 	:	T_Statistics stats_list
 			{ append_queue(cfgt.stats_list, $2); }
 	|	T_Statsdir T_String
-			{ cfgt.stats_dir = $2; }
+		{
+			if (input_from_file)
+				cfgt.stats_dir = $2;
+			else {
+				free($2);
+				yyerror("statsdir remote configuration ignored");
+			}
+		}
 	|	T_Filegen stat filegen_option_list
 		{
 			enqueue(cfgt.filegen_opts,
@@ -556,17 +564,60 @@ stat
 	;
 
 filegen_option_list
-	:	filegen_option_list filegen_option { $$ = enqueue($1, $2); }
-	|	filegen_option { $$ = enqueue_in_new_queue($1); }
+	:	filegen_option_list filegen_option
+		{
+			if ($2 != NULL)
+				$$ = enqueue($1, $2);
+			else
+				$$ = $1;
+		}
+	|	filegen_option
+		{
+			if ($1 != NULL)
+				$$ = enqueue_in_new_queue($1);
+			else
+				$$ = create_queue();
+		}
 	;
 
 filegen_option
 	:	T_File T_String
-				{ $$ = create_attr_sval(T_File, $2); }
+		{
+			if (input_from_file)
+				$$ = create_attr_sval($1, $2);
+			else {
+				$$ = NULL;
+				free($2);
+				yyerror("filegen file remote configuration ignored");
+			}
+		}
 	|	T_Type filegen_type
-				{ $$ = create_attr_ival(T_Type, $2); }
-	|	T_Link		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Nolink	{ $$ = create_attr_ival(T_Flag, $1); }
+		{
+			if (input_from_file)
+				$$ = create_attr_ival($1, $2);
+			else {
+				$$ = NULL;
+				yyerror("filegen type remote configuration ignored");
+			}
+		}
+	|	T_Link
+		{
+			if (input_from_file)
+				$$ = create_attr_ival(T_Flag, $1);
+			else {
+				$$ = NULL;
+				yyerror("filegen link remote configuration ignored");
+			}
+		}
+	|	T_Nolink
+		{
+			if (input_from_file)
+				$$ = create_attr_ival(T_Flag, $1);
+			else {
+				$$ = NULL;
+				yyerror("filegen nolink remote configuration ignored");
+			}
+		}
 	|	T_Enable	{ $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Disable	{ $$ = create_attr_ival(T_Flag, $1); }
 	;
@@ -712,8 +763,20 @@ system_option_command
 	;
 
 system_option_list
-	:	system_option_list system_option  { $$ = enqueue($1, $2); }
-	|	system_option  { $$ = enqueue_in_new_queue($1); }
+	:	system_option_list system_option
+		{
+			if ($2 != NULL)
+				$$ = enqueue($1, $2);
+			else
+				$$ = $1;
+		}
+	|	system_option
+		{
+			if ($1 != NULL)
+				$$ = enqueue_in_new_queue($1);
+			else
+				$$ = create_queue();
+		}
 	;
 
 system_option
@@ -723,7 +786,15 @@ system_option
 	|	T_Kernel    { $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Monitor   { $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Ntp       { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Stats     { $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Stats     
+		{ 
+			if (input_from_file)
+				$$ = create_attr_ival(T_Flag, $1);
+			else {
+				$$ = NULL;
+				yyerror("enable/disable stats remote configuration ignored");
+			}
+		}
 	;
 
 /* Tinker Commands
@@ -792,12 +863,30 @@ miscellaneous_command
 	|	T_Pidfile T_String
 			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
 	|	T_Logfile T_String
-			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
+		{
+			if (input_from_file)
+				enqueue(cfgt.vars,
+					create_attr_sval($1, $2));
+			else {
+				free($2);
+				yyerror("logfile remote configuration ignored");
+			}
+		}
 
 	|	T_Logconfig log_config_list
 			{ append_queue(cfgt.logconfig, $2); }
 	|	T_Phone string_list
 			{ append_queue(cfgt.phone, $2); }
+	|	T_Saveconfigdir	T_String
+		{
+			if (input_from_file)
+				enqueue(cfgt.vars,
+					create_attr_sval($1, $2));
+			else {
+				free($2);
+				yyerror("saveconfigdir remote configuration ignored");
+			}
+		}
 	|	T_Setvar variable_assign
 			{ enqueue(cfgt.setvar, $2); }
 	|	T_Trap ip_address

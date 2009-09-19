@@ -271,13 +271,10 @@ palisade_start (
 	struct refclockproc *pp;
 	int fd;
 	char gpsdev[20];
-
 	struct termios tio;
-#ifdef SYS_WINNT
-	(void) sprintf(gpsdev, "COM%d:", unit);
-#else	
+
 	(void) sprintf(gpsdev, DEVICE, unit);
-#endif
+
 	/*
 	 * Open serial port. 
 	 */

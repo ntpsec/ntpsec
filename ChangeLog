@@ -1,3 +1,4 @@
+* [Bug 1300] reject remote configuration of dangerous items.
 (4.2.5p216) 2009/09/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1312] ntpq/ntpdc MD5 passwords truncated to 8 chars on Suns.
 * CID 10 missing free(up); in refclock_palisade.c error return, again.

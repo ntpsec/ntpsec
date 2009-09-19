@@ -15,6 +15,7 @@
 
 #define	TAI_1972	10	/* initial TAI offset (s) */
 extern	char	*keysdir;	/* crypto keys and leaptable directory */
+extern	char *	saveconfigdir;	/* ntpq saveconfig output directory */
 
 extern	void	getconfig	(int, char **);
 extern	void	ctl_clr_stats	(void);

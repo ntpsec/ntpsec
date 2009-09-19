@@ -513,10 +513,8 @@ ctl_error(
 	int errcode
 	)
 {
-#ifdef DEBUG
-	if (debug >= 4)
-		printf("sending control error %d\n", errcode);
-#endif
+	DPRINTF(3, ("sending control error %d\n", errcode));
+
 	/*
 	 * Fill in the fields. We assume rpkt.sequence and rpkt.associd
 	 * have already been filled in.
@@ -558,14 +556,14 @@ save_config(
 {
 	char reply[128];
 #ifdef SAVECONFIG
-	char filespec[256];
-	char filename[256];
+	char filespec[128];
+	char filename[128];
+	char fullpath[512];
+	const char savedconfig_eq[] = "savedconfig=";
+	char savedconfig[sizeof(savedconfig_eq) + sizeof(filename)];
 	time_t now;
 	int fd;
 	FILE *fptr;
-	const char savedconfig_eq[] = "savedconfig=";
-	size_t octets;
-	char *savedconfig;
 #endif
 
 	if (restrict_mask & RES_NOMODIFY) {
@@ -580,6 +578,17 @@ save_config(
 	}
 
 #ifdef SAVECONFIG
+	if (NULL == saveconfigdir) {
+		snprintf(reply, sizeof(reply),
+			 "saveconfig prohibited, no saveconfigdir configured");
+		ctl_putdata(reply, strlen(reply), 0);
+		ctl_flushpkt(0);
+		msyslog(LOG_NOTICE,
+			"saveconfig from %s rejected, no saveconfigdir",
+			stoa(&rbufp->recv_srcadr));
+		return;
+	}
+
 	if (0 == reqend - reqpt)
 		return;
 
@@ -589,26 +598,31 @@ save_config(
 	time(&now);
 
 	/*
-	 * "saveconfig ." is shorthand for replacing the startup
-	 * configuration file.
-	 */
-	if ('.' == filespec[0] && '\0' == filespec[1]
-	    && NULL != cfg_tree_history)
-		strncpy(filename, cfg_tree_history->source.value.s,
-			sizeof(filename));
-	/*
 	 * allow timestamping of the saved config filename with
 	 * strftime() format such as:
 	 *   ntpq -c "saveconfig ntp-%Y%m%d-%H%M%S.conf"
 	 */
-	else if (0 == strftime(filename, sizeof(filename), filespec,
+	if (0 == strftime(filename, sizeof(filename), filespec,
 			       localtime(&now)))
 		strncpy(filename, filespec, sizeof(filename));
 
 	filename[sizeof(filename) - 1] = '\0';
 	
+	if (strchr(filename, '\\') || strchr(filename, '/')) {
+		snprintf(reply, sizeof(reply),
+			 "saveconfig does not allow directory in filename");
+		ctl_putdata(reply, strlen(reply), 0);
+		ctl_flushpkt(0);
+		msyslog(LOG_NOTICE,
+			"saveconfig with path from %s rejected",
+			stoa(&rbufp->recv_srcadr));
+		return;
+	}
 
-	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY,
+	snprintf(fullpath, sizeof(fullpath), "%s%s",
+		 saveconfigdir, filename);
+
+	fd = open(fullpath, O_CREAT | O_TRUNC | O_WRONLY,
 		  S_IRUSR | S_IWUSR);
 	if (-1 == fd)
 		fptr = NULL;
@@ -624,27 +638,23 @@ save_config(
 			stoa(&rbufp->recv_srcadr));
 	} else {
 		snprintf(reply, sizeof(reply),
-			 "Configuration saved to %s",
-			 filename);
+			 "Configuration saved to %s", filename);
 		msyslog(LOG_NOTICE,
 			"Configuration saved to %s (requested by %s)",
-			filename, stoa(&rbufp->recv_srcadr));
+			fullpath, stoa(&rbufp->recv_srcadr));
 		/*
 		 * save the output filename in system variable
 		 * savedconfig, retrieved with:
 		 *   ntpq -c "rv 0 savedconfig"
 		 */
-		octets = sizeof(savedconfig_eq) + strlen(filename) + 1;
-		savedconfig = emalloc(octets);
-		snprintf(savedconfig, octets, "%s%s",
+		snprintf(savedconfig, sizeof(savedconfig), "%s%s",
 			 savedconfig_eq, filename);
-		set_sys_var(savedconfig, octets, RO);
-		free(savedconfig);
+		set_sys_var(savedconfig, strlen(savedconfig) + 1, RO);
 	}
 
 	if (NULL != fptr)
 		fclose(fptr);
-#else	/* !SAFECONFIG follows */
+#else	/* !SAVECONFIG follows */
 	snprintf(reply, sizeof(reply),
 		 "saveconfig unavailable, configured with --disable-saveconfig");
 #endif
@@ -652,7 +662,8 @@ save_config(
 	ctl_putdata(reply, strlen(reply), 0);
 	ctl_flushpkt(0);
 }
- 
+
+
 /*
  * process_control - process an incoming control message
  */
@@ -669,10 +680,7 @@ process_control(
 	int properlen;
 	int maclen;
 
-#ifdef DEBUG
-	if (debug > 2)
-		printf("in process_control()\n");
-#endif
+	DPRINTF(3, ("in process_control()\n"));
 
 	/*
 	 * Save the addresses for error responses
@@ -689,10 +697,7 @@ process_control(
 	if (rbufp->recv_length < CTL_HEADER_LEN
 	    || pkt->r_m_e_op & (CTL_RESPONSE|CTL_MORE|CTL_ERROR)
 	    || pkt->offset != 0) {
-#ifdef DEBUG
-		if (debug)
-			printf("invalid format in control packet\n");
-#endif
+		DPRINTF(1, ("invalid format in control packet\n"));
 		if (rbufp->recv_length < CTL_HEADER_LEN)
 			numctltooshort++;
 		if (pkt->r_m_e_op & CTL_RESPONSE)
@@ -707,11 +712,8 @@ process_control(
 	}
 	res_version = PKT_VERSION(pkt->li_vn_mode);
 	if (res_version > NTP_VERSION || res_version < NTP_OLDVERSION) {
-#ifdef DEBUG
-		if (debug)
-			printf("unknown version %d in control packet\n",
-			       res_version);
-#endif
+		DPRINTF(1, ("unknown version %d in control packet\n",
+			    res_version));
 		numctlbadversion++;
 		return;
 	}
@@ -738,6 +740,10 @@ process_control(
 	datapt = rpkt.data;
 	dataend = &(rpkt.data[CTL_MAX_DATA_LEN]);
 
+	if ((rbufp->recv_length & 0x3) != 0)
+		DPRINTF(3, ("Control packet length %d unrounded\n",
+			    rbufp->recv_length));
+
 	/*
 	 * We're set up now. Make sure we've got at least enough
 	 * incoming data space to match the count.
@@ -750,11 +756,6 @@ process_control(
 	}
 
 	properlen = req_count + CTL_HEADER_LEN;
-#ifdef DEBUG
-	if (debug > 2 && (rbufp->recv_length & 0x3) != 0)
-		printf("Packet length %d unrounded\n",
-		       rbufp->recv_length);
-#endif
 	/* round up proper len to a 8 octet boundary */
 
 	properlen = (properlen + 7) & ~7;
@@ -766,30 +767,19 @@ process_control(
 		res_keyid = ntohl(*(u_int32 *)((u_char *)pkt +
 					       properlen));
 
-#ifdef DEBUG
-		if (debug > 2)
-			printf(
-				"recv_len %d, properlen %d, wants auth with keyid %08x, MAC length=%d\n",
-				rbufp->recv_length, properlen, res_keyid, maclen);
-#endif
-		if (!authistrusted(res_keyid)) {
-#ifdef DEBUG
-			if (debug > 2)
-				printf("invalid keyid %08x\n",
-				       res_keyid);
-#endif
-		} else if (authdecrypt(res_keyid, (u_int32 *)pkt,
-				       rbufp->recv_length - maclen, maclen)) {
-#ifdef DEBUG
-			if (debug > 2)
-				printf("authenticated okay\n");
-#endif
+		DPRINTF(3, ("recv_len %d, properlen %d, wants auth with keyid %08x, MAC length=%d\n",
+			    rbufp->recv_length, properlen, res_keyid,
+			    maclen));
+
+		if (!authistrusted(res_keyid))
+			DPRINTF(3, ("invalid keyid %08x\n", res_keyid));
+		else if (authdecrypt(res_keyid, (u_int32 *)pkt,
+				     rbufp->recv_length - maclen,
+				     maclen)) {
+			DPRINTF(3, ("authenticated okay\n"));
 			res_authokay = 1;
 		} else {
-#ifdef DEBUG
-			if (debug > 2)
-				printf("authentication failed\n");
-#endif
+			DPRINTF(3, ("authentication failed\n"));
 			res_keyid = 0;
 		}
 	}
@@ -805,11 +795,8 @@ process_control(
 	 */
 	for (cc = control_codes; cc->control_code != NO_REQUEST; cc++) {
 		if (cc->control_code == res_opcode) {
-#ifdef DEBUG
-			if (debug > 2)
-				printf("opcode %d, found command handler\n",
-				       res_opcode);
-#endif
+			DPRINTF(3, ("opcode %d, found command handler\n",
+				    res_opcode));
 			if (cc->flags == AUTH
 			    && (!res_authokay
 				|| res_keyid != ctl_auth_keyid)) {
