@@ -472,6 +472,7 @@ AC_CHECK_HEADERS(md5.h, [], [],
 AC_CHECK_HEADERS(memory.h netdb.h poll.h)
 AC_CHECK_HEADERS(sched.h sgtty.h stdlib.h string.h termio.h)
 AC_CHECK_HEADERS(termios.h timepps.h timex.h unistd.h)
+
 case "$host" in
  *-*-aix*)
     AC_CHECK_HEADERS(utmpx.h)
@@ -482,6 +483,21 @@ case "$host" in
     ;;
  *) AC_CHECK_HEADERS(utmp.h utmpx.h) ;;
 esac
+
+#
+# On Suns only (so far) getpass() truncates the typed password to 8
+# characters, but getpassphrase() allows up to 257.  Most systems'
+# getpass() does not truncate, at least not so as to affect ntpq and
+# ntpdc password prompts.
+#
+# So check for getpassphrase(), but only on Sun operating systems.
+#
+
+case "$host" in
+ *-*-sunos*|*-*-solaris*)
+    AC_CHECK_FUNCS(getpassphrase)
+esac
+
 AC_CHECK_HEADERS(arpa/nameser.h)
 AC_CHECK_HEADERS(sys/socket.h)
 AC_CHECK_HEADERS(net/if.h, [], [],

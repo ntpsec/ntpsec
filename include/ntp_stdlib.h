@@ -3,12 +3,14 @@
  */
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "ntp_rfc2553.h"
 
+#include "l_stdlib.h"
+#include "ntp_rfc2553.h"
 #include "ntp_types.h"
 #include "ntp_string.h"
 #include "ntp_net.h"
-#include "l_stdlib.h"
+#include "ntp_syslog.h"
+
 
 /*
  * Handle gcc __attribute__ if available.
@@ -26,7 +28,6 @@
 # endif
 #endif
 
-# include <stdarg.h>
 extern	void	msyslog		(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
 

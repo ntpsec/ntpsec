@@ -232,6 +232,14 @@ static const char *tstflagnames[] = {
 };
 
 
+/*
+ * Use getpassphrase() if configure.ac detected it, as Suns that
+ * have it truncate the password in getpass() to 8 characters.
+ */
+#ifdef HAVE_GETPASSPHRASE
+# define	getpass(str)	getpassphrase(str)
+#endif
+
 int		ntpqmain	(int,	char **);
 /*
  * Built in command handler declarations
@@ -400,13 +408,6 @@ int havehost = 0;				/* set to 1 when host open */
 int s_port = 0;
 struct servent *server_entry = NULL;		/* server entry for ntp */
 
-#ifdef SYS_WINNT
-DWORD NumberOfBytesWritten;
-
-HANDLE	TimerThreadHandle = NULL;	/* 1998/06/03 - Used in ntplib/machines.c */
-void timer(void)	{  ; };	/* 1998/06/03 - Used in ntplib/machines.c */
-
-#endif /* SYS_WINNT */
 
 /*
  * Sequence number used for requests.  It is incremented before
@@ -1269,9 +1270,8 @@ sendrequest(
 	if (!auth && !always_auth) {
 		return sendpkt((char *)&qpkt, pktsize);
 	} else {
-		const char *pass = "\0";
-		int maclen = 0;
-		u_long my_keyid;
+		char *	pass = "\0";
+		int	maclen = 0;
 
 		/*
 		 * Pad out packet to a multiple of 8 octets to be sure
@@ -1301,17 +1301,13 @@ sendrequest(
 				  "Invalid password\n");
 				return (1);
 			}
+			authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
+			authtrust(info_auth_keyid, 1);
 		}
-		authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
-		authtrust(info_auth_keyid, 1);
 
 		/*
-		 * Stick the keyid in the packet where
-		 * cp currently points.  Cp should be aligned
-		 * properly.  Then do the encryptions.
+		 * Do the encryption.
 		 */
-		my_keyid = htonl(info_auth_keyid);
-		memcpy(&qpkt.data[qsize], &my_keyid, sizeof my_keyid);
 		maclen = authencrypt(info_auth_keyid, (u_int32 *)&qpkt,
 		    pktsize);
 		if (maclen == 0) {

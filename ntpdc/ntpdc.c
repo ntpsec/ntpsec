@@ -64,6 +64,14 @@ u_long	current_time;		/* needed by authkeys; not used */
  */
 s_char	sys_precision;		/* local clock precision (log2 s) */
 
+/*
+ * Use getpassphrase() if configure.ac detected it, as Suns that
+ * have it truncate the password in getpass() to 8 characters.
+ */
+#ifdef HAVE_GETPASSPHRASE
+# define	getpass(str)	getpassphrase(str)
+#endif
+
 int		ntpdcmain	(int,	char **);
 /*
  * Built in command handler declarations
@@ -930,7 +938,7 @@ sendrequest(
 	} else {
 		l_fp ts;
 		int maclen = 0;
-		const char *pass = "\0";
+		char *pass = "\0";
 		struct req_pkt_tail *qpktail;
 
 		qpktail = (struct req_pkt_tail *)((char *)&qpkt + req_pkt_size
@@ -956,11 +964,11 @@ sendrequest(
 				    "Invalid password\n");
 				return (1);
 			}
+			authusekey(info_auth_keyid, info_auth_keytype,
+				   (const u_char *)pass);
+			authtrust(info_auth_keyid, 1);
 		}
-		authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
-		authtrust(info_auth_keyid, 1);
 		qpkt.auth_seq = AUTH_SEQ(1, 0);
-		qpktail->keyid = htonl(info_auth_keyid);
 		get_systime(&ts);
 		L_ADD(&ts, &delay_time);
 		HTONL_FP(&ts, &qpktail->tstamp);

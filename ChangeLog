@@ -1,3 +1,4 @@
+* [Bug 1312] ntpq/ntpdc MD5 passwords truncated to 8 chars on Suns.
 (4.2.5p215) 2009/09/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1292] Workaround last VC6 unsigned __int64 kink.
 (4.2.5p214) 2009/09/17 Released by Harlan Stenn <stenn@ntp.org>
