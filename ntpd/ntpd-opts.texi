@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  September 19, 2009 at 07:37:32 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  September 20, 2009 at 07:36:09 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
