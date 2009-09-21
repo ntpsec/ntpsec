@@ -79,13 +79,12 @@ struct restrict_node {
 struct peer_node {
     int host_mode;
     struct address_node *addr;
-    queue *options;
+    queue *peerflags;
     int minpoll;
     int maxpoll;
     int ttl;
     int peerversion;
     int peerkey;
-    int peerflags;
     double bias;
 };
 
@@ -96,6 +95,7 @@ struct unpeer_node {
 
 struct auth_node {
     int control_key;
+    int cryptosw;
     queue *crypto_cmd_list;
     char *keys;
     char *keysdir;
@@ -106,14 +106,13 @@ struct auth_node {
 };
 
 struct filegen_node {
-    char *name;
-    queue *options;
+	int	filegen_token;
+	queue *	options;
 };
 
 struct setvar_node {
-    char *data;
-    u_long len;
-    u_short def;
+	char *	data;
+	int	isdefault;
 };
 
 typedef struct nic_rule_node_tag {
@@ -201,7 +200,7 @@ struct attr_val *create_attr_dval(int attr, double value);
 struct attr_val *create_attr_ival(int attr, int value);
 struct attr_val *create_attr_sval(int attr, char *s);
 struct attr_val *create_attr_pval(int attr, void *s);
-struct filegen_node *create_filegen_node(void **name, queue *options);
+struct filegen_node *create_filegen_node(int filegen_token, queue *options);
 void **create_pval(void *val);
 struct restrict_node *create_restrict_node(struct address_node *addr,
 					   struct address_node *mask,
@@ -211,7 +210,7 @@ struct addr_opts_node *create_addr_opts_node(struct address_node *addr,
 					     queue *options);
 struct sim_node *create_sim_node(queue *init_opts, queue *servers);
 struct setvar_node *create_setvar_node(char *var, char *val,
-				       u_short def);
+				       int isdefault);
 nic_rule_node *create_nic_rule_node(int match_class, char *if_name,
 				    int action);
 

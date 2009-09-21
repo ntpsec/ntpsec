@@ -151,7 +151,7 @@
      T_Protostats = 367,
      T_Pw = 368,
      T_Qos = 369,
-     T_RandFile = 370,
+     T_Randfile = 370,
      T_Rawstats = 371,
      T_Refid = 372,
      T_Requestkey = 373,
@@ -315,7 +315,7 @@
 #define T_Protostats 367
 #define T_Pw 368
 #define T_Qos 369
-#define T_RandFile 370
+#define T_Randfile 370
 #define T_Rawstats 371
 #define T_Refid 372
 #define T_Requestkey 373
@@ -373,7 +373,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 51 "ntp_parser.y"
+#line 50 "ntp_parser.y"
 
     char   *String;
     double  Double;

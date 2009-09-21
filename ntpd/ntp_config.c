@@ -491,7 +491,7 @@ dump_config_tree(
 	FILE *df
 	)
 {
-	struct peer_node *peers = NULL;
+	struct peer_node *peer = NULL;
 	struct unpeer_node *unpeers = NULL;
 	struct attr_val *atrv = NULL;
 	struct address_node *addr = NULL;
@@ -503,18 +503,17 @@ dump_config_tree(
 	struct setvar_node *setv_node = NULL;
 	nic_rule_node *rule_node;
 
-	char **string = NULL;
+	char **pstr = NULL;
 	char *s1;
 	char *s2;
-	int *integer = NULL;
+	int *intp = NULL;
 	int *key_val;
 	void *fudge_ptr;
 	void *list_ptr = NULL;
 	void *options = NULL;
 	void *opt_ptr = NULL;
-	void *flags = NULL;
+	int *flags = NULL;
 	void *opts = NULL;
-	char refid[5];
 	char timestamp[80];
 	int enable;
 
@@ -533,62 +532,48 @@ dump_config_tree(
 
 	/* For options I didn't find documentation I'll just output its name and the cor. value */
 	list_ptr = queue_head(ptree->vars);
-	if (list_ptr != NULL) {
+	for(;	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
 
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+		atrv = (struct attr_val *) list_ptr;
 
-			atrv = (struct attr_val *) list_ptr;
+		switch (atrv->attr) {
 
-			switch (atrv->attr) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown vars token %d\n",
-					atrv->attr);
-				break;
+		default:
+			fprintf(df, "\n# dump error:\n"
+				"# unknown vars token %s\n",
+				token_name(atrv->attr));
+			break;
 
-			case T_Broadcastdelay:
-				fprintf(df, "broadcastdelay %g\n", atrv->value.d);
-				break;
-				
-			case T_Calldelay:
-				fprintf(df, "calldelay %i\n", atrv->value.i);
-				break;
-
-			case T_Tick:
-				fprintf(df, "tick %g\n", atrv->value.d);
-				break;
-
-			case T_Driftfile:
-				fprintf(df, "driftfile \"%s\"\n", atrv->value.s);
-				break;
+		/* doubles */
+		case T_Broadcastdelay:
+		case T_Tick:
+		case T_WanderThreshold:
+			fprintf(df, "%s %g\n",
+				keyword(atrv->attr),
+				atrv->value.d);
+			break;
 			
-		    	case T_WanderThreshold:
-				fprintf(df, "wander_threshold %g\n", atrv->value.d);
-				break;
-	
-		    	case T_Leapfile:
-				fprintf(df, "leapfile \"%s\"\n", atrv->value.s);
-				break;
-
-			case T_Pidfile:
-				fprintf(df, "pidfile \"%s\"\n", atrv->value.s);
-				break;
-
-			case T_Logfile:
-				fprintf(df, "logfile \"%s\"\n", atrv->value.s);
-				break;
-
-			case T_Saveconfigdir:
-				fprintf(df, "saveconfigdir \"%s\"\n",
-					atrv->value.s);
-				break;
+		/* ints */
+		case T_Calldelay:
 #ifdef OPENSSL
-				case T_Automax:
-				fprintf(df, "automax %i\n", atrv->value.i);
-				break;
+		case T_Automax:
 #endif
-			}
+			fprintf(df, "%s %d\n",
+				keyword(atrv->attr),
+				atrv->value.i);
+			break;
+
+		/* strings */
+		case T_Driftfile:
+		case T_Leapfile:
+		case T_Logfile:
+		case T_Pidfile:
+		case T_Saveconfigdir:
+			fprintf(df, "%s \"%s\"\n",
+				keyword(atrv->attr),
+				atrv->value.s);
+			break;
 		}
 	}
 
@@ -599,8 +584,8 @@ dump_config_tree(
 
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
-			atrv = (struct attr_val *) list_ptr;
 
+			atrv = list_ptr;
 			fprintf(df, " %c%s", atrv->attr, atrv->value.s);
 		}
 		fprintf(df, "\n");
@@ -616,11 +601,9 @@ dump_config_tree(
 		for(; 	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
 
-			string = (char **) list_ptr;
-				
-			/* FIXME Find keyword and type of information */
+			intp = list_ptr;
 			
-			fprintf(df, " %s", *string);	
+			fprintf(df, " %s", keyword(*intp));	
 		}
 
 		fprintf(df, "\n");
@@ -636,7 +619,8 @@ dump_config_tree(
 			opt_ptr = queue_head(fgen_node->options);
 
 			if (opt_ptr != NULL)
-				fprintf(df, "filegen %s", fgen_node->name);
+				fprintf(df, "filegen %s", 
+					keyword(fgen_node->filegen_token));
 
 			for(;	opt_ptr != NULL;
 				opt_ptr = next_node(opt_ptr)) {
@@ -650,78 +634,22 @@ dump_config_tree(
 						"# unknown filegen option token %d\n"
 						"filegen %s",
 						atrv->type,
-						fgen_node->name);
+						keyword(fgen_node->filegen_token));
 					break;
 
 				case T_File:
-					fprintf(df, " file %s", atrv->value.s);
+					fprintf(df, " file %s",
+						atrv->value.s);
 					break;
 
 				case T_Type:
-					fprintf(df, " type ");
-
-					switch (atrv->value.i) {
-
-					default:
-						fprintf(df, "\n# dump error:\n"
-							"# unknown filegen type %d\n"
-							"filegen %s type ",
-							atrv->value.i,
-							fgen_node->name);
-						break;
-
-						case FILEGEN_NONE:
-						fprintf(df, "none");
-						break;
-
-						case FILEGEN_DAY:
-						fprintf(df, "day");
-						break;
-
-						case FILEGEN_MONTH:
-						fprintf(df, "month");
-						break;
-
-						case FILEGEN_PID:
-						fprintf(df, "pid");
-						break;
-
-						case FILEGEN_WEEK:
-						fprintf(df, "week");
-						break;
-
-						case FILEGEN_YEAR:
-						fprintf(df, "year");
-						break;
-					}
+					fprintf(df, " type %s",
+						keyword(atrv->value.i));
 					break;
 
-					case T_Flag:
-					switch (atrv->value.i) {
-					default:
-						fprintf(df, "\n# dump error:\n"
-							"# unknown filegen flag token %d\n"
-							"filegen %s",
-							atrv->value.i,
-							fgen_node->name);
-						break;
-
-						case T_Link:
-						fprintf(df, " link");
-						break;
-
-						case T_Nolink:
-						fprintf(df, " nolink");
-						break;
-
-						case T_Enable:
-						fprintf(df, " enable");
-						break;
-
-						case T_Disable:
-						fprintf(df, " disable");
-						break;
-					}
+				case T_Flag:
+					fprintf(df, " %s",
+						keyword(atrv->value.i));
 					break;
 				}
 
@@ -729,6 +657,23 @@ dump_config_tree(
 
 			fprintf(df, "\n");
 		}
+	}
+
+	list_ptr = queue_head(ptree->auth.crypto_cmd_list);
+	if (ptree->auth.revoke != 0 || list_ptr != NULL) {
+		fprintf(df, "crypto");
+
+		if (ptree->auth.revoke != 0)
+			fprintf(df, " revoke %d", ptree->auth.revoke);
+
+		for (;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = list_ptr;
+			fprintf(df, " %s %s", keyword(atrv->attr),
+				atrv->value.s);
+		}
+		fprintf(df, "\n");
 	}
 
 	if (NULL != ptree->auth.keysdir)
@@ -759,125 +704,64 @@ dump_config_tree(
 			       ? queue_head(ptree->enable_opts)
 			       : queue_head(ptree->disable_opts);
 
-		if (list_ptr != NULL)
+		if (list_ptr != NULL) {
 			fprintf(df, (enable)
 					? "enable"
 					: "disable");
 
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+			for(;	list_ptr != NULL;
+				list_ptr = next_node(list_ptr)) {
 
-			atrv = (struct attr_val *) list_ptr;
+				atrv = (struct attr_val *) list_ptr;
 
-			switch (atrv->value.i) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown enable/disable token %d\n"
-					"%s", atrv->value.i,
-					(enable)
-					    ? "enable"
-					    : "disable");
-				break;
-
-			case T_Auth: 
-				fprintf(df, " auth");	
-				break;
-
-			case T_Bclient: 
-				fprintf(df, " bclient");
-				break;
-
-			case T_Calibrate: 
-				fprintf(df, " calibrate");
-				break;
-
-			case T_Kernel: 
-				fprintf(df, " kernel");
-				break;
-
-			case T_Monitor: 
-				fprintf(df, " monitor");
-				break;
-
-			case T_Ntp: 
-				fprintf(df, " ntp");
-				break;
-
-			case T_Stats: 
-				fprintf(df, " stats");
-				break;
+				fprintf(df, " %s",
+					keyword(atrv->value.i));
 			}
+			fprintf(df, "\n");
 		}
-		fprintf(df, "\n");
 	}
-
 
 	list_ptr = queue_head(ptree->orphan_cmds);
-	if (list_ptr != NULL) {
-
+	if (list_ptr != NULL)
 		fprintf(df, "tos");
 
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+	for(; 	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
 
-			atrv = (struct attr_val *) list_ptr;
+		atrv = list_ptr;
 
-			switch (atrv->attr) {
+		switch (atrv->attr) {
 
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown tos token %d\n"
-					"tos", atrv->attr);
-				break;
+		default:
+			fprintf(df, "\n# dump error:\n"
+				"# unknown tos token %s\n"
+				"tos", token_name(atrv->attr));
+			break;
 
-			case PROTO_CEILING:
-				fprintf(df, " ceiling %d", (int)atrv->value.d);
-				break;
+		/* ints */
+		case T_Ceiling:
+		case T_Floor:
+		case T_Cohort:
+		case T_Orphan:
+		case T_Minclock:
+		case T_Maxclock:
+		case T_Minsane:
+		case T_Beacon:
+		case T_Maxhop:
+			fprintf(df, " %s %d", keyword(atrv->attr),
+				(int)atrv->value.d);
+			break;
 
-			case PROTO_FLOOR:
-				fprintf(df, " floor %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_COHORT:
-				fprintf(df, " cohort %d", !!(atrv->value.d));
-				break;
-
-			case PROTO_ORPHAN:
-				fprintf(df, " orphan %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MINDISP:
-				fprintf(df, " mindist %g", atrv->value.d);
-				break;
-				
-			case PROTO_MAXDIST:
-				fprintf(df, " maxdist %g", atrv->value.d);
-				break;
-
-			case PROTO_MINCLOCK:
-				fprintf(df, " minclock %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MAXCLOCK:
-				fprintf(df, " maxclock %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MINSANE:
-				fprintf(df, " minsane %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_BEACON:
-				fprintf(df, " beacon %d", (int)atrv->value.d);
-				break;
-
-			case PROTO_MAXHOP:
-				fprintf(df, " maxhop %d", (int)atrv->value.d);
-				break;
-			}
+		/* doubles */
+		case T_Mindist:
+		case T_Maxdist:
+			fprintf(df, " %s %g", keyword(atrv->attr),
+				atrv->value.d);
+			break;
 		}
-
-		fprintf(df, "\n");
 	}
+	if (queue_head(ptree->orphan_cmds) != NULL)
+		fprintf(df, "\n");
 
 	list_ptr = queue_head(ptree->tinker);
 	if (list_ptr != NULL) {
@@ -887,45 +771,9 @@ dump_config_tree(
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
 
-			atrv = (struct attr_val *) list_ptr;
-
-			switch (atrv->attr) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown tinker token %d\n"
-					"tinker", atrv->attr);
-				break;
-
-				case LOOP_MAX:
-				     fprintf(df, " step");
-				     break;
-
-				case LOOP_PANIC:
-				     fprintf(df, " panic");
-				     break;
-
-				case LOOP_PHI:
-				     fprintf(df, " dispersion");
-				     break;
-
-				case LOOP_MINSTEP:
-				     fprintf(df, " stepout");
-				     break;
-
-				case LOOP_ALLAN:
-				     fprintf(df, " allan");
-				     break;
-
-				case LOOP_HUFFPUFF:
-				     fprintf(df, " huffpuff");
-				     break;
-
-				case LOOP_FREQ:
-				     fprintf(df, " freq");
-				     break;
-			}
-
-			fprintf(df, " %g", atrv->value.d);
+			atrv = list_ptr;
+			fprintf(df, " %s %g", keyword(atrv->attr),
+				atrv->value.d);
 		}
 
 		fprintf(df, "\n");
@@ -938,227 +786,120 @@ dump_config_tree(
 	for (; 	list_ptr != NULL;
 	 	list_ptr = next_node(list_ptr)) {
 
-		peers = (struct peer_node *) list_ptr; 
-		addr = peers->addr;
-		
-		switch (peers->host_mode) {
+		peer = list_ptr; 
+		addr = peer->addr;
+		fprintf(df, "%s", keyword(peer->host_mode));
+
+		switch (addr->type) {
 
 		default:
 			fprintf(df, "# dump error:\n"
-				"# unknown peer token %d for:\n"
-				"peer ", peers->host_mode);
+				"# unknown peer family %d for:\n"
+				"peer", addr->type);
 			break;
 
-		case T_Peer:
-			fprintf(df, "peer");
+		case AF_UNSPEC:
 			break;
 
-		case T_Server:
-			fprintf(df, "server");
+		case AF_INET:
+			fprintf(df, " -4");
 			break;
 
-		case T_Broadcast:
-			fprintf(df, "broadcast");
+		case AF_INET6:
+			fprintf(df, " -6");
 			break;
-
-		case T_Manycastclient:
-			fprintf(df, "manycastclient");
-			break;
-		}
-
-		if (addr->type != AF_UNSPEC) {
-			switch (addr->type) {
-
-			default:
-				fprintf(df, "# dump error:\n"
-					"# unknown peer family %d for:\n"
-					"peer", addr->type);
-				break;
-
-			case AF_INET:
-				fprintf(df, " -4");
-				break;
-
-			case AF_INET6:
-				fprintf(df, " -6");
-				break;
-			}
 		}
 		fprintf(df, " %s", addr->address);
 		
-		for (atrv = queue_head(peers->options); 
+		if (peer->minpoll != 0)
+			fprintf(df, " minpoll %d", peer->minpoll);
+
+		if (peer->maxpoll != 0)
+			fprintf(df, " maxpoll %d", peer->maxpoll);
+
+		if (peer->ttl != 0)
+			fprintf(df, " ttl %d", peer->ttl);
+
+		if (peer->peerversion != NTP_VERSION)
+			fprintf(df, " version %d", peer->peerversion);
+
+		if (peer->peerkey != 0)
+			fprintf(df, " key %d", peer->peerkey);
+
+		if (peer->bias != 0.)
+			fprintf(df, " bias %g", peer->bias);
+
+		for (atrv = queue_head(peer->peerflags);
 		     atrv != NULL;
 		     atrv = next_node(atrv)) {
 
-			switch (atrv->attr) {
+			NTP_INSIST(T_Flag == atrv->attr);
+			NTP_INSIST(T_Integer == atrv->type);
 
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown peer option token %d\n"
-					"# remaining options:",
-					atrv->attr);
-				break;
-
-			case T_Flag:
-				switch (atrv->type) {
-
-				default:
-					fprintf(df, "\n# dump error:\n"
-						"# unknown peer flag type %d\n"
-						"# remaining options:",
-						atrv->type);
-					break;
-
-				case T_Integer:
-					switch (atrv->value.i) {
-
-					default:
-						fprintf(df, "\n# dump error:\n"
-							"# unknown peer flag 0x%x\n"
-							"# remaining options:",
-							(unsigned)atrv->value.i);
-						break;
-
-					case FLAG_SKEY:
-						fprintf(df, " autokey");
-						break;
-
-					case FLAG_BURST:
-						fprintf(df, " burst");
-						break;
-
-					case FLAG_IBURST:
-						fprintf(df, " iburst");
-						break;
-
-					case FLAG_NOSELECT:
-						fprintf(df, " noselect");
-						break;
-
-					case FLAG_PREEMPT:
-						fprintf(df, " preempt");
-						break;
-
-					case FLAG_PREFER:
-						fprintf(df, " prefer");
-						break;
-
-					case FLAG_TRUE:
-						fprintf(df, " true");
-						break;
-
-					case FLAG_XLEAVE:
-						fprintf(df, " xleave");
-						break;
-					}
-					break;
-				}
-				break;
-
-			case T_Bias:
-				fprintf(df, " bias %g", atrv->value.d);
-				break;
-
-			case T_Key:
-				fprintf(df, " key %d", atrv->value.i);
-				break;
-
-			case T_Minpoll:
-				fprintf(df, " minpoll %d", atrv->value.i);
-				break;
-
-			case T_Maxpoll:
-				fprintf(df, " maxpoll %d", atrv->value.i);
-				break;
-
-			case T_Ttl:
-				fprintf(df, " ttl %d", atrv->value.i);
-				break;
-
-			case T_Mode:
-				fprintf(df, " mode %d", atrv->value.i);
-				break;
-
-			case T_Version:
-				fprintf(df, " version %d", atrv->value.i);
-				break;
-			}
-
+			fprintf(df, " %s", keyword(atrv->value.i));
 		}
 
 		fprintf(df, "\n");
 
 		fudge_ptr = queue_head(ptree->fudge);
-		if (fudge_ptr != NULL) {
-
-			for(; 	fudge_ptr != NULL;
-				fudge_ptr = next_node(fudge_ptr)) {
+		for(; 	fudge_ptr != NULL;
+			fudge_ptr = next_node(fudge_ptr)) {
 
 
-				addr_opts = (struct addr_opts_node *) fudge_ptr; 
-				peer_addr = peers->addr;
-				fudge_addr = addr_opts->addr;
+			addr_opts = (struct addr_opts_node *) fudge_ptr; 
+			peer_addr = peer->addr;
+			fudge_addr = addr_opts->addr;
 
-				s1 = peer_addr->address;
-				s2 = fudge_addr->address;
+			s1 = peer_addr->address;
+			s2 = fudge_addr->address;
 
-				if (!strcmp(s1, s2)) {
+			if (!strcmp(s1, s2)) {
 
-					fprintf(df, "fudge %s", addr_opts->addr->address);
+				fprintf(df, "fudge %s", addr_opts->addr->address);
+	
+				opts = queue_head(addr_opts->options);
+
+				for(; opts != NULL; opts = next_node(opts)) {
+					atrv = (struct attr_val *) opts; 
+				
+					switch (atrv->attr) {
+
+					default:
+						fprintf(df, "\n# dump error:\n"
+							"# unknown fudge option %s\n"
+							"fudge %s",
+							token_name(atrv->attr),
+							addr_opts->addr->address);
+						break;
+
+					/* doubles */
+					case T_Time1:
+					case T_Time2:
+						fprintf(df, " %s %g",
+							keyword(atrv->attr),
+							atrv->value.d);
+						break;
 		
-					opts = queue_head(addr_opts->options);
+					/* ints */
+					case T_Stratum:
+					case T_Flag1:
+					case T_Flag2:
+					case T_Flag3:
+					case T_Flag4:
+						fprintf(df, " %s %d",
+							keyword(atrv->attr),
+							atrv->value.i);
+						break;
 
-					for(; opts != NULL; opts = next_node(opts)) {
-						atrv = (struct attr_val *) opts; 
-					
-						switch (atrv->attr) {
-
-						default:
-							fprintf(df, "\n# dump error:\n"
-								"# unknown fudge CLK_ value %d\n"
-								"fudge %s", atrv->attr,
-								addr_opts->addr->address);
-							break;
-
-						case CLK_HAVETIME1:
-							fprintf(df, " time1 %g", atrv->value.d);
-							break;
-					
-						case CLK_HAVETIME2:
-							fprintf(df, " time2 %g", atrv->value.d);
-							break;
-			
-						case CLK_HAVEVAL1:
-							fprintf(df, " stratum %i", atrv->value.i);
-							break;
-
-						case CLK_HAVEVAL2:
-							memset(refid, 0, sizeof(refid));
-							memcpy(refid, atrv->value.s,
-							    min(strlen(atrv->value.s), 4));
-						
-							fprintf(df, " refid %s", refid);
-							break;
-
-						case CLK_HAVEFLAG1:
-							fprintf(df, " flag1 %d", !!atrv->value.i);
-							break;
-				    
-						case CLK_HAVEFLAG2:
-							fprintf(df, " flag2 %d", !!atrv->value.i);
-							break;
-
-						case CLK_HAVEFLAG3:
-							fprintf(df, " flag3 %d", !!atrv->value.i);
-							break;
-
-						case CLK_HAVEFLAG4:
-							fprintf(df, " flag4 %d", !!atrv->value.i);
-							break;
-						}
+					/* strings */
+					case T_Refid:
+						fprintf(df, " %s %s",
+							keyword(atrv->attr),
+							atrv->value.s);
+						break;
 					}
-					fprintf(df, "\n");
 				}
+				fprintf(df, "\n");
 			}
 		}
 	}
@@ -1208,176 +949,46 @@ dump_config_tree(
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
 
-			atrv = (struct attr_val *) list_ptr;
-
-			switch (atrv->attr) {
-			default:
-				fprintf(df, "\n# dump error:\n"
-					"# unknown discard token %d\n"
-					"discard ", atrv->attr);
-				break;
-
-				case T_Average:
-					fprintf(df, " average %i", atrv->value.i);
-					break;
-
-				case T_Minimum:
-					fprintf(df, " minimum %i", atrv->value.i);
-					break;
-
-				case T_Monitor:
-					fprintf(df, " monitor %i", atrv->value.i);
-			}
-
+			atrv = list_ptr;
+			fprintf(df, " %s %d", keyword(atrv->attr),
+				atrv->value.i);
 		}
 		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->restrict_opts);
-	if (list_ptr != NULL) {
+	for (;	list_ptr != NULL; 
+		list_ptr = next_node(list_ptr)) {
 
-		for (;	list_ptr != NULL; 
-			list_ptr = next_node(list_ptr)) {
+		rest_node = list_ptr;
+		if (NULL == rest_node->addr)
+			s1 = "default";
+		else
+			s1 = rest_node->addr->address;
 
-			rest_node = (struct restrict_node *) list_ptr;
+		fprintf(df, "restrict %s", s1);
 
-			if (NULL == rest_node->addr)
-				s1 = "default";
-			else
-				s1 = rest_node->addr->address;
+		if (rest_node->mask != NULL)
+			fprintf(df, " mask %s",
+				rest_node->mask->address);
 
-			fprintf(df, "restrict %s", s1);
+		flags = queue_head(rest_node->flags);
+		for (; 	flags != NULL; flags = next_node(flags))
+			fprintf(df, " %s", keyword(*flags));
 
-			if (rest_node->mask != NULL)
-				fprintf(df, " %s", rest_node->mask->address);
-
-			flags = queue_head(rest_node->flags);
-			
-			for (; 	flags != NULL; flags = next_node(flags)) {
-				int *curr_flag = flags;
-
-				switch (*curr_flag) {
-					default:
-						fprintf(df, "\n# dump error:\n"
-							"# unknown restrict token %d\n"
-							"restrict %s",
-							*curr_flag,
-							s1);
-						if (rest_node->mask != NULL)
-							fprintf(df, " %s", rest_node->mask->address);
-						break;
-
-					case RES_TIMEOUT:	
-						fprintf(df, " flake");
-						break;
-
-					case RES_IGNORE:
-						fprintf(df, " ignore");
-						break;
-
-					case RES_LIMITED:
-						fprintf(df, " limited");
-						break;
-
-					case RES_KOD:
-						fprintf(df, " kod");
-						break;
-
-					case RES_LPTRAP:
-						fprintf(df, " lowpriotrap");
-						break;
-
-					case RES_NOMODIFY:
-						fprintf(df, " nomodify");
-						break;
-
-					case RES_NOQUERY:
-						fprintf(df, " noquery");
-						break;
-
-					case RES_NOPEER:
-						fprintf(df, " nopeer");
-						break;
-
-					case RES_DONTSERVE:
-						fprintf(df, " noserve");
-						break;
-
-					case RES_NOTRAP:
-						fprintf(df, " notrap");
-						break;
-
-					case RES_DONTTRUST:
-						fprintf(df, " notrust");
-						break;
-
-					case RESM_NTPONLY:
-						fprintf(df, " ntpport");
-						break;
-
-					case RES_VERSION:
-						fprintf(df, " version");
-						break;
-				}
-			}
-			fprintf(df, "\n");
-		}
+		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->nic_rules);
 	for (;	list_ptr != NULL;
 		list_ptr = next_node(list_ptr)) {
+
 		rule_node = list_ptr;
-
-		fprintf(df, "interface ");
-
-		switch (rule_node->action) {
-
-		default:
-			fprintf(df, "\n# dump error:\n"
-				"# unknown nic action %d\n",
-				rule_node->action);
-			break;
-
-		case T_Listen:
-			fprintf(df, "listen ");
-			break;
-
-		case T_Ignore:
-			fprintf(df, "ignore ");
-			break;
-
-		case T_Drop:
-			fprintf(df, "drop ");
-			break;
-		}
-
-		switch (rule_node->match_class) {
-
-		default:
-			fprintf(df, "\n# dump error:\n"
-				"# unknown nic match class %d\n",
-				rule_node->match_class);
-			break;
-
-		case 0:		/* interface name or address */
-			fprintf(df, "%s", rule_node->if_name);
-			break;
-
-		case T_All:
-			fprintf(df, "all");
-			break;
-
-		case T_Ipv4:
-			fprintf(df, "ipv4");
-			break;
-
-		case T_Ipv6:
-			fprintf(df, "ipv6");
-			break;
-		}
-
-		fprintf(df, "\n");
+		fprintf(df, "interface %s %s\n",
+			keyword(rule_node->action),
+			(rule_node->match_class)
+			    ? keyword(rule_node->match_class)
+			    : rule_node->if_name);
 	}
 
 	list_ptr = queue_head(ptree->phone);
@@ -1387,9 +998,9 @@ dump_config_tree(
 
 		for(; 	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
-			string = list_ptr;
 
-			fprintf(df, " %s", *string);
+			pstr = list_ptr;
+			fprintf(df, " %s", *pstr);
 		}
 
 		fprintf(df, "\n");
@@ -1402,8 +1013,8 @@ dump_config_tree(
 
 		for(;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
-			atrv = (struct attr_val *) list_ptr;
 
+			atrv = list_ptr;
 			fprintf(df, " %s", atrv->value.s);
 		}
 
@@ -1411,30 +1022,18 @@ dump_config_tree(
 	}
 
 	list_ptr = queue_head(ptree->setvar);
-	if (list_ptr != NULL) {
+	for(;	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
 
-		fprintf(df, "setvar");
+		setv_node = list_ptr;
+		fprintf(df, "setvar %s", setv_node->data);
 
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
-			u_long a = 0;
-			char *data = NULL;
+		if (setv_node->isdefault)
+			fprintf(df, " default");
 
-			setv_node = (struct setvar_node *) list_ptr;
-			data = setv_node->data;
-
-			fprintf(df, " ");
-
-			for(a=0; a<setv_node->len; a++) 
-				if(data[a] == '=') 
-					fprintf(df, " ");
-				else
-					fprintf(df, "%c", data[a]);
-
-			if(setv_node->def)
-				fprintf(df, " default");
-		}
+		fprintf(df, "\n");
 	}
+
 
 	list_ptr = queue_head(ptree->ttl);
 	if (list_ptr != NULL) {
@@ -1443,53 +1042,51 @@ dump_config_tree(
 
 		for(; 	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
-			integer = (int *) list_ptr;
 
-			fprintf(df, " %i", *integer);
+			intp = list_ptr;
+			fprintf(df, " %d", *intp);
 		}
 		
 		fprintf(df, "\n");
 	}
 	
 	list_ptr = queue_head(ptree->trap);
-	if (list_ptr != NULL) {
+	for(;	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
 
-		for(;	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+		addr_opts = list_ptr;
+		addr = addr_opts->addr;
 
-			addr_opts = (struct addr_opts_node *) list_ptr;
-			addr = addr_opts->addr;
+		fprintf(df, "trap %s", addr->address);
 
-			fprintf(df, "trap %s", addr->address);
+		options = queue_head(addr_opts->options);
 
-			options = queue_head(addr_opts->options);
+		for(; 	options != NULL; 
+			options = next_node(options)) {
 
-			for(; 	options != NULL; 
-				options = next_node(options)) {
+			atrv = options;
 
-				atrv = (struct attr_val *) options;
+			switch (atrv->attr) {
 
-				switch (atrv->attr) {
-				default:
-					fprintf(df, "\n# dump error:\n"
-						"# unknown trap token %d\n"
-						"trap %s", atrv->attr,
-						addr->address);
-					break;
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown trap token %d\n"
+					"trap %s", atrv->attr,
+					addr->address);
+				break;
 
-				case T_Port:
-					fprintf(df, " port %d", atrv->value.i);
-					break;
+			case T_Port:
+				fprintf(df, " port %d", atrv->value.i);
+				break;
 
-				case T_Interface:
-					addr = (struct address_node *) atrv->value.p;
-					fprintf(df, " interface %s", addr->address);
-					break;
-				}
+			case T_Interface:
+				addr = (struct address_node *) atrv->value.p;
+				fprintf(df, " interface %s", addr->address);
+				break;
 			}
-
-			fprintf(df, "\n");
 		}
+
+		fprintf(df, "\n");
 	}
 
 	return 0;
@@ -1614,20 +1211,13 @@ create_address_node(
 	)
 {
 	struct address_node *my_node;
-	struct isc_netaddr temp_isc_netaddr;
 
 	NTP_REQUIRE(NULL != addr);
 	
 	my_node = get_node(sizeof *my_node);
 
 	my_node->address = addr;
-	if (type)
-		my_node->type = type;
-	else
-		if (is_ip_address(addr, &temp_isc_netaddr)) 
-			my_node->type = temp_isc_netaddr.family;
-		else 
-			my_node->type = default_ai_family;
+	my_node->type = type;
 
 	return my_node;
 }
@@ -1654,7 +1244,8 @@ create_peer_node(
 	)
 {
 	struct peer_node *my_node;
-	struct attr_val *my_val;
+	struct attr_val *option;
+	int freenode;
 	int errflag = 0;
 
 	my_node = get_node(sizeof(*my_node));
@@ -1665,40 +1256,52 @@ create_peer_node(
 	my_node->ttl = 0;
 	my_node->peerversion = NTP_VERSION;
 	my_node->peerkey = 0;
-	my_node->peerflags = 0;
 	my_node->bias = 0;
+	my_node->peerflags = create_queue();
 
 	/* Now set the node to the read values */
 	my_node->host_mode = hmode;
 	my_node->addr = addr;
-	my_node->options = options;
 
-	my_val = queue_head(options);
-	while (my_val != NULL) {
+	/*
+	 * the options list mixes items that will be saved in the
+	 * peer_node as explicit members, such as minpoll, and
+	 * those that are moved from the options queue intact
+	 * to the peer_node's peerflags queue.  The options
+	 * queue is consumed and destroyed here.
+	 */
 
+	while (options && NULL != (option = dequeue(options))) {
+
+		freenode = 1;
 		/* Check the kind of option being set */
-		switch (my_val->attr) {
+		switch (option->attr) {
+
+		case T_Flag:
+			enqueue(my_node->peerflags, option); 
+			freenode = 0;
+			break;
 
 		case T_Minpoll:
-			if (my_val->value.i < NTP_MINPOLL) {
+			if (option->value.i < NTP_MINPOLL) {
 				msyslog(LOG_INFO,
 					"minpoll: provided value (%d) is below minimum (%d)",
-					my_val->value.i, NTP_MINPOLL);
+					option->value.i, NTP_MINPOLL);
 				my_node->minpoll = NTP_MINPOLL;
 			}
 			else
-				my_node->minpoll = my_val->value.i;
+				my_node->minpoll = option->value.i;
 			break;
 
 		case T_Maxpoll:
-			if (my_val->value.i > NTP_MAXPOLL) {
+			if (option->value.i > NTP_MAXPOLL) {
 				msyslog(LOG_INFO,
 					"maxpoll: provided value (%d) is above maximum (%d)",
-					my_val->value.i, NTP_MAXPOLL);
+					option->value.i, NTP_MAXPOLL);
 				my_node->maxpoll = NTP_MAXPOLL;
 			}
 			else
-				my_node->maxpoll = my_val->value.i;
+				my_node->maxpoll = option->value.i;
 			break;
 
 		case T_Ttl:
@@ -1707,38 +1310,35 @@ create_peer_node(
 				errflag = 1;
 			}
 			else
-				my_node->ttl = my_val->value.i;
+				my_node->ttl = option->value.i;
 			break;
 
 		case T_Mode:
-			my_node->ttl = my_val->value.i;
+			my_node->ttl = option->value.i;
 			break;
 
 		case T_Key:
-			my_node->peerkey = my_val->value.i;
+			my_node->peerkey = option->value.i;
 			break;
 
 		case T_Version:
-			my_node->peerversion = my_val->value.i;
-			break;
-
-		case T_Flag:
-			my_node->peerflags |= my_val->value.i;
+			my_node->peerversion = option->value.i;
 			break;
 
 		case T_Bias:
-			my_node->bias = my_val->value.d;
+			my_node->bias = option->value.d;
 			break;
 
 		default:
 			msyslog(LOG_ERR, 
-				"Unknown peer/server option token %d",
-				my_val->attr);
+				"Unknown peer/server option token %s",
+				token_name(option->attr));
 			errflag = 1;
 		}
-
-		my_val = next_node(my_val);
+		if (freenode)
+			free_node(option);
 	}
+	DESTROY_QUEUE(options);
 
 	/* Check if errors were reported. If yes, ignore the node */
 	if (errflag) {
@@ -1747,6 +1347,7 @@ create_peer_node(
 	}
 	return my_node;
 }
+
 
 struct unpeer_node *
 create_unpeer_node(
@@ -1783,18 +1384,16 @@ create_unpeer_node(
 
 struct filegen_node *
 create_filegen_node(
-	void **name,
-	queue *options
+	int	filegen_token,
+	queue *	options
 	)
 {
 	struct filegen_node *my_node;
 	
 	my_node = get_node(sizeof *my_node);
-
-	my_node->name = (char *) *name;
-	free_node(name);
-
+	my_node->filegen_token = filegen_token;
 	my_node->options = options;
+
 	return my_node;
 }
 
@@ -1838,30 +1437,25 @@ destroy_restrict_node(
 
 struct setvar_node *
 create_setvar_node(
-	char *var,
-	char *val,
-	u_short def
+	char *	var,
+	char *	val,
+	int	isdefault
 	)
 {
-	int len1 = strlen(var);
-	int len2 = strlen(val);
-	char *s = (char *) emalloc(len1 + len2 + 2);
+	int octets;
+	char *s;
 	struct setvar_node *my_node;
 
-	/* Copy the var = val to s */
-	strcpy(s, var);
-	s[len1] = '=';
-	strcpy(&s[len1 + 1], val);
-	s[len1+len2+1] = '\0';
-
+	octets = strlen(var) + strlen(val) + 4;	/* " = " + NUL */
+	s = emalloc(octets);
+	snprintf(s, octets, "%s = %s", var, val);
 	free(var);
 	free(val);
 
-	/* Now store the string and its length into a setvar_node */
+	/* Now store the string into a setvar_node */
 	my_node = get_node(sizeof *my_node);
 	my_node->data = s;
-	my_node->len = len1 + len2 + 2;
-	my_node->def = def;
+	my_node->isdefault = isdefault;
 	return my_node;
 }
 
@@ -2036,202 +1630,6 @@ create_sim_node(
 }
 
 
-/* Lookup the keyword associated with token */
-/*
-char *
-token_to_str (
-		int token
-	    )
-{
-	register int a = 0;
-
-	for(; a<sizeof(keyword_list)/sizeof(struct key_tok); a++) 
-		if(keyword_list[a]->token == token)
-			return keyword_list[a]->keyword;
-
-	return NULL;
-}*/
-
-
-struct key_tok keyword_list[] = {
-	{ "automax",		T_Automax,         NO_ARG },
-	{ "broadcast",		T_Broadcast,       SINGLE_ARG },
-	{ "broadcastclient",	T_Broadcastclient, NO_ARG },
-	{ "broadcastdelay",	T_Broadcastdelay,  NO_ARG },
-	{ "calldelay",		T_Calldelay,       NO_ARG },
-	{ "disable",		T_Disable,         NO_ARG },
-	{ "driftfile",		T_Driftfile,       SINGLE_ARG },
-	{ "enable",		T_Enable,          NO_ARG },
-	{ "end",		T_End,             NO_ARG },
-	{ "filegen",		T_Filegen,         NO_ARG },
-	{ "fudge",		T_Fudge,           SINGLE_ARG },
-	{ "includefile",	T_Includefile,     SINGLE_ARG },
-	{ "leapfile",		T_Leapfile,	   SINGLE_ARG },
-	{ "logconfig",		T_Logconfig,       MULTIPLE_ARG },
-	{ "logfile",		T_Logfile,         SINGLE_ARG },
-	{ "manycastclient",	T_Manycastclient,  SINGLE_ARG },
-	{ "manycastserver",	T_Manycastserver,  MULTIPLE_ARG },
-	{ "multicastclient",	T_Multicastclient, MULTIPLE_ARG },
-	{ "peer",		T_Peer,            SINGLE_ARG },
-	{ "phone",		T_Phone,           MULTIPLE_ARG },
-	{ "pidfile",		T_Pidfile,         SINGLE_ARG },
-	{ "pool",		T_Pool,            SINGLE_ARG },
-	{ "discard",		T_Discard,         NO_ARG },
-	{ "restrict",		T_Restrict,        NO_ARG },
-	{ "server",		T_Server,          SINGLE_ARG },
-	{ "setvar",		T_Setvar,          NO_ARG },
-	{ "statistics",		T_Statistics,      NO_ARG },
-	{ "statsdir",		T_Statsdir,        SINGLE_ARG },
-	{ "tick",		T_Tick,            NO_ARG },
-	{ "tinker",		T_Tinker,          NO_ARG },
-	{ "tos",		T_Tos,             NO_ARG },
-	{ "trap",		T_Trap,            SINGLE_ARG },
-	{ "unconfig",		T_Unconfig,        SINGLE_ARG },
-	{ "unpeer",		T_Unpeer,          SINGLE_ARG },
-
-/* authentication_command */
-	{ "controlkey",		T_ControlKey,      NO_ARG },
-	{ "crypto",		T_Crypto,          NO_ARG },
-	{ "keys",		T_Keys,            SINGLE_ARG },
-	{ "keysdir",		T_Keysdir,         SINGLE_ARG },
-	{ "ntpsigndsocket",	T_NtpSignDsocket,  SINGLE_ARG },
-	{ "requestkey",		T_Requestkey,      NO_ARG },
-	{ "revoke",		T_Revoke,          NO_ARG },
-	{ "trustedkey",		T_Trustedkey,      NO_ARG },
-/* IPv4/IPv6 protocol override flag */
-	{ "-4",			T_Ipv4_flag,	   NO_ARG },
-	{ "-6",			T_Ipv6_flag,	   NO_ARG },
-/* option */
-	{ "autokey",		T_Autokey,         NO_ARG },
-	{ "bias",		T_Bias,		   NO_ARG },
-	{ "burst",		T_Burst,           NO_ARG },
-	{ "iburst",		T_Iburst,          NO_ARG },
-	{ "key",		T_Key,             NO_ARG },
-	{ "maxpoll",		T_Maxpoll,         NO_ARG },
-	{ "minpoll",		T_Minpoll,         NO_ARG },
-	{ "mode",		T_Mode,            NO_ARG },
-	{ "noselect",		T_Noselect,        NO_ARG },
-	{ "preempt",		T_Preempt,         NO_ARG },
-	{ "true",		T_True,            NO_ARG },
-	{ "prefer",		T_Prefer,          NO_ARG },
-	{ "ttl",		T_Ttl,             NO_ARG },
-	{ "version",		T_Version,         NO_ARG },
-	{ "xleave",		T_Xleave,	   NO_ARG },
-/* crypto_command */
-	{ "host",		T_Host,            SINGLE_ARG },
-	{ "ident",		T_Ident,           SINGLE_ARG },
-	{ "pw",			T_Pw,              SINGLE_ARG },
-	{ "randfile",		T_RandFile,        SINGLE_ARG },
-	{ "sign",		T_Sign,            SINGLE_ARG },
-/*** MONITORING COMMANDS ***/
-/* stat */
-	{ "clockstats",		T_Clockstats,      NO_ARG },
-	{ "cryptostats",	T_Cryptostats,     NO_ARG },
-	{ "loopstats",		T_Loopstats,       NO_ARG },
-	{ "peerstats",		T_Peerstats,       NO_ARG },
-	{ "rawstats",		T_Rawstats,        NO_ARG },
-	{ "sysstats", 		T_Sysstats,        NO_ARG },
-	{ "protostats",		T_Protostats,	   NO_ARG },
-	{ "timingstats",	T_Timingstats,	   NO_ARG },
-/* filegen_option */
-	{ "disable",		T_Disable,         NO_ARG },
-	{ "enable",		T_Enable,          NO_ARG },
-	{ "file",		T_File,            SINGLE_ARG },
-	{ "link",		T_Link,            NO_ARG },
-	{ "nolink",		T_Nolink,          NO_ARG },
-	{ "type",		T_Type,            NO_ARG },
-/* filegen_type */
-	{ "age",		T_Age,             NO_ARG },
-	{ "day",		T_Day,             NO_ARG },
-	{ "month",		T_Month,           NO_ARG },
-	{ "none",		T_None,            NO_ARG },
-	{ "pid",		T_Pid,             NO_ARG },
-	{ "week",		T_Week,            NO_ARG },
-	{ "year",		T_Year,            NO_ARG },
-/*** ORPHAN MODE COMMANDS ***/
-/* tos_option */
-	{ "minclock",		T_Minclock,        NO_ARG },
-	{ "maxclock",		T_Maxclock,        NO_ARG },
-	{ "minsane",		T_Minsane,         NO_ARG },
-	{ "floor",		T_Floor,           NO_ARG },
-	{ "ceiling",		T_Ceiling,         NO_ARG },
-	{ "cohort",		T_Cohort,          NO_ARG },
-	{ "mindist",		T_Mindist,         NO_ARG },
-	{ "maxdist",		T_Maxdist,         NO_ARG },
-	{ "maxhop",		T_Maxhop,          NO_ARG },
-	{ "beacon",		T_Beacon,          NO_ARG },
-	{ "orphan",		T_Orphan,          NO_ARG },
-/* access_control_flag */
-	{ "default",		T_Default,         NO_ARG },
-	{ "flake",		T_Flake,	   NO_ARG },
-	{ "ignore",		T_Ignore,          NO_ARG },
-	{ "limited",		T_Limited,         NO_ARG },
-	{ "mssntp",		T_Mssntp,	   NO_ARG },
-	{ "kod",		T_Kod,             NO_ARG },
-	{ "lowpriotrap",	T_Lowpriotrap,     NO_ARG },
-	{ "mask",		T_Mask,            NO_ARG },
-	{ "nomodify",		T_Nomodify,        NO_ARG },
-	{ "nopeer",		T_Nopeer,          NO_ARG },
-	{ "noquery",		T_Noquery,         NO_ARG },
-	{ "noserve",		T_Noserve,         NO_ARG },
-	{ "notrap",		T_Notrap,          NO_ARG },
-	{ "notrust",		T_Notrust,         NO_ARG },
-	{ "ntpport",		T_Ntpport,         NO_ARG },
-	{ "version",		T_Version,         NO_ARG },
-/* discard_option */
-	{ "average",		T_Average,         NO_ARG },
-	{ "minimum",		T_Minimum,         NO_ARG },
-	{ "monitor",		T_Monitor,         NO_ARG },
-/* fudge_factor */
-	{ "flag1",		T_Flag1,           NO_ARG },
-	{ "flag2",		T_Flag2,           NO_ARG },
-	{ "flag3",		T_Flag3,           NO_ARG },
-	{ "flag4",		T_Flag4,           NO_ARG },
-	{ "refid",		T_Refid,           SINGLE_ARG },
-	{ "stratum",		T_Stratum,         NO_ARG },
-	{ "time1",		T_Time1,           NO_ARG },
-	{ "time2",		T_Time2,           NO_ARG },
-/* system_option */
-	{ "auth",		T_Auth,            NO_ARG },
-	{ "bclient",		T_Bclient,         NO_ARG },
-	{ "calibrate",		T_Calibrate,       NO_ARG },
-	{ "kernel",		T_Kernel,          NO_ARG },
-	{ "monitor",		T_Monitor,         NO_ARG },
-	{ "ntp",		T_Ntp,             NO_ARG },
-	{ "stats",		T_Stats,           NO_ARG },
-/* tinker_option */
-	{ "step",		T_Step,            NO_ARG },
-	{ "panic",		T_Panic,           NO_ARG },
-	{ "dispersion",		T_Dispersion,      NO_ARG },
-	{ "stepout",		T_Stepout,         NO_ARG },
-	{ "allan",		T_Allan,           NO_ARG },
-	{ "huffpuff",		T_Huffpuff,        NO_ARG },
-	{ "freq",		T_Freq,            NO_ARG },
-/* miscellaneous_command */
-	{ "port",		T_Port,            NO_ARG },
-	{ "interface",		T_Interface,       NO_ARG },
-	{ "qos",		T_Qos,		   NO_ARG },
-	{ "saveconfigdir",	T_Saveconfigdir,   SINGLE_ARG },
-/* interface_command (ignore and interface already defined) */
-	{ "nic",		T_Nic,		   NO_ARG },
-	{ "all",		T_All,		   NO_ARG },
-	{ "ipv4",		T_Ipv4,		   NO_ARG },
-	{ "ipv6",		T_Ipv6,		   NO_ARG },
-	{ "listen",		T_Listen,	   NO_ARG },
-	{ "drop",		T_Drop,		   NO_ARG },
-/* simulator commands */
-	{ "simulate",		T_Simulate,        NO_ARG },
-	{ "simulation_duration",T_Sim_Duration,	   NO_ARG },
-	{ "beep_delay",		T_Beep_Delay,      NO_ARG },
-	{ "duration",		T_Duration,        NO_ARG },
-	{ "server_offset",	T_Server_Offset,   NO_ARG },
-	{ "freq_offset",	T_Freq_Offset,     NO_ARG },
-	{ "wander",		T_Wander,          NO_ARG },
-	{ "jitter",		T_Jitter,          NO_ARG },
-	{ "prop_delay",		T_Prop_Delay,      NO_ARG },
-	{ "proc_delay",		T_Proc_Delay,      NO_ARG },
-	{ NULL, 0, 0}
-};
 
 
 /* FUNCTIONS FOR PERFORMING THE CONFIGURATION
@@ -2304,16 +1702,46 @@ config_auth(
 	struct config_tree *ptree
 	)
 {
-	u_char rankey[9];
+#ifdef OPENSSL
 	struct attr_val *my_val;
+	int item;
+#endif
 	int *key_val;
 	int i;
+	u_char rankey[9];
 
 	/* Crypto Command */
-	my_val = queue_head(ptree->auth.crypto_cmd_list);
 #ifdef OPENSSL
+	item = -1;	/* quiet warning */
+	my_val = queue_head(ptree->auth.crypto_cmd_list);
 	while (my_val != NULL) {
-		crypto_config(my_val->attr, my_val->value.s);
+		switch (my_val->attr) {
+
+		default:
+			NTP_INSIST(0);
+			break;
+
+		case T_Host:
+			item = CRYPTO_CONF_PRIV;
+			break;
+
+		case T_Ident:
+			item = CRYPTO_CONF_IDENT;
+			break;
+
+		case T_Pw:
+			item = CRYPTO_CONF_PW;
+			break;
+
+		case T_Randfile:
+			item = CRYPTO_CONF_RAND;
+			break;
+
+		case T_Sign:
+			item = CRYPTO_CONF_SIGN;
+			break;
+		}
+		crypto_config(item, my_val->value.s);
 		my_val = next_node(my_val);
 	}
 #endif /* OPENSSL */
@@ -2334,9 +1762,9 @@ config_auth(
 	}
 
 #ifdef OPENSSL
-	if (cryptosw) {
+	if (ptree->auth.cryptosw && !cryptosw) {
 		crypto_setup();
-		cryptosw = 0;
+		cryptosw = 1;
 	}
 #endif /* OPENSSL */
 
@@ -2363,7 +1791,7 @@ config_auth(
 	}
 
 #ifdef OPENSSL
-	/* Revoke Command */
+	/* crypto revoke command */
 	if (ptree->auth.revoke)
 		sys_revoke = ptree->auth.revoke;
 #endif /* OPENSSL */
@@ -2429,10 +1857,62 @@ config_tos(
 	)
 {
 	struct attr_val *tos;
+	int item;
 
+	item = -1;	/* quiet warning */
 	tos = queue_head(ptree->orphan_cmds);
 	while (tos != NULL) {
-		proto_config(tos->attr, 0, tos->value.d, NULL);
+		switch(tos->attr) {
+
+		default:
+			NTP_INSIST(0);
+			break;
+
+		case T_Ceiling:
+			item = PROTO_CEILING;
+			break;
+
+		case T_Floor:
+			item = PROTO_FLOOR;
+			break;
+
+		case T_Cohort:
+			item = PROTO_COHORT;
+			break;
+
+		case T_Orphan:
+			item = PROTO_ORPHAN;
+			break;
+
+		case T_Mindist:
+			item = PROTO_MINDISP;
+			break;
+
+		case T_Maxdist:
+			item = PROTO_MAXDIST;
+			break;
+
+		case T_Minclock:
+			item = PROTO_MINCLOCK;
+			break;
+
+		case T_Maxclock:
+			item = PROTO_MAXCLOCK;
+			break;
+
+		case T_Minsane:
+			item = PROTO_MINSANE;
+			break;
+
+		case T_Beacon:
+			item = PROTO_BEACON;
+			break;
+
+		case T_Maxhop:
+			item = PROTO_MAXHOP;
+			break;
+		}
+		proto_config(item, 0, tos->value.d, NULL);
 		tos = next_node(tos);
 	}
 }
@@ -2459,7 +1939,8 @@ config_monitor(
 	struct config_tree *ptree
 	)
 {
-	char **filegen_string;
+	int *pfilegen_token;
+	char *filegen_string;
 	FILEGEN *filegen;
 	struct filegen_node *my_node;
 	struct attr_val *my_opts;
@@ -2486,27 +1967,27 @@ config_monitor(
 	 */
 
 	/* Turn on the specified statistics */
-	filegen_string = queue_head(ptree->stats_list);
-	while (filegen_string != NULL) {
-		filegen = filegen_get(*filegen_string);
+	pfilegen_token = queue_head(ptree->stats_list);
+	while (pfilegen_token != NULL) {
+		filegen_string = keyword(*pfilegen_token);
+		filegen = filegen_get(filegen_string);
 
-		DPRINTF(4, ("enabling filegen for %s statistics "
-			    "\"%s%s\"\n",
-			    *filegen_string, filegen->prefix, 
+		DPRINTF(4, ("enabling filegen for %s statistics '%s%s'\n",
+			    filegen_string, filegen->prefix, 
 			    filegen->basename));
 		filegen->flag |= FGEN_FLAG_ENABLED;
-		filegen_string = next_node(filegen_string);
+		pfilegen_token = next_node(pfilegen_token);
 	}
 
 	/* Configure the statistics with the options */
 	my_node = queue_head(ptree->filegen_opts);
 	while (my_node != NULL) {
-		filegen = filegen_get(my_node->name);
+		filegen_file = keyword(my_node->filegen_token);
+		filegen = filegen_get(filegen_file);
 
 		/* Initialize the filegen variables to their pre-configurtion states */
 		filegen_flag = filegen->flag;
 		filegen_type = filegen->type;
-		filegen_file = my_node->name;
 
 		my_opts = queue_head(my_node->options);
 		while (my_opts != NULL) {
@@ -2518,7 +1999,40 @@ config_monitor(
 				break;
 
 			case T_Type:
-				filegen_type = my_opts->value.i;
+				switch (my_opts->value.i) {
+
+				default:
+					NTP_INSIST(0);
+					break;
+
+				case T_None:
+					filegen_type = FILEGEN_NONE;
+					break;
+
+				case T_Pid:
+					filegen_type = FILEGEN_PID;
+					break;
+
+				case T_Day:
+					filegen_type = FILEGEN_DAY;
+					break;
+
+				case T_Week:
+					filegen_type = FILEGEN_WEEK;
+					break;
+
+				case T_Month:
+					filegen_type = FILEGEN_MONTH;
+					break;
+
+				case T_Year:
+					filegen_type = FILEGEN_YEAR;
+					break;
+
+				case T_Age:
+					filegen_type = FILEGEN_AGE;
+					break;
+				}
 				break;
 
 			case T_Flag:
@@ -2542,16 +2056,15 @@ config_monitor(
 
 				default:
 					msyslog(LOG_ERR, 
-						"Unknown filegen flag "
-						"token %d",
+						"Unknown filegen flag token %d",
 						my_opts->value.i);
 					exit(1);
 				}
 				break;
 			default:
 				msyslog(LOG_ERR,
-					"Unknown filegen option token "
-					"%d", my_opts->attr);
+					"Unknown filegen option token %d",
+					my_opts->attr);
 				exit(1);
 			}
 			filegen_config(filegen, filegen_file, 
@@ -2689,10 +2202,68 @@ config_access(
 
 		curr_flag = queue_head(my_node->flags);
 		while (curr_flag != NULL) {
-			if (RESM_NTPONLY == *curr_flag)
-				mflags |= *curr_flag;
-			else
-				flags |= *curr_flag;
+			switch (*curr_flag) {
+
+			default:
+				NTP_INSIST(0);
+				break;
+
+			case T_Ntpport:
+				mflags |= RESM_NTPONLY;
+				break;
+
+			case T_Flake:
+				flags |= RES_TIMEOUT;
+				break;
+
+			case T_Ignore:
+				flags |= RES_IGNORE;
+				break;
+
+			case T_Kod:
+				flags |= RES_KOD;
+				break;
+
+			case T_Mssntp:
+				flags |= RES_MSSNTP;
+				break;
+
+			case T_Limited:
+				flags |= RES_LIMITED;
+				break;
+
+			case T_Lowpriotrap:
+				flags |= RES_LPTRAP;
+				break;
+
+			case T_Nomodify:
+				flags |= RES_NOMODIFY;
+				break;
+
+			case T_Nopeer:
+				flags |= RES_NOPEER;
+				break;
+
+			case T_Noquery:
+				flags |= RES_NOQUERY;
+				break;
+
+			case T_Noserve:
+				flags |= RES_DONTSERVE;
+				break;
+
+			case T_Notrap:
+				flags |= RES_NOTRAP;
+				break;
+
+			case T_Notrust:
+				flags |= RES_DONTTRUST;
+				break;
+
+			case T_Version:
+				flags |= RES_VERSION;
+				break;
+			}
 			curr_flag = next_node(curr_flag);
 		}
 
@@ -2748,10 +2319,46 @@ config_tinker(
 	)
 {
 	struct attr_val *tinker;
+	int item;
 
+	item = -1;	/* quiet warning */
 	tinker = queue_head(ptree->tinker);
 	while (tinker != NULL) {
-		loop_config(tinker->attr, tinker->value.d);
+		switch (tinker->attr) {
+
+		default:
+			NTP_INSIST(0);
+			break;
+
+		case T_Allan:
+			item = LOOP_ALLAN;
+			break;
+
+		case T_Dispersion:
+			item = LOOP_PHI;
+			break;
+
+		case T_Freq:
+			item = LOOP_FREQ;
+			break;
+
+		case T_Huffpuff:
+			item = LOOP_HUFFPUFF;
+			break;
+
+		case T_Panic:
+			item = LOOP_PANIC;
+			break;
+
+		case T_Step:
+			item = LOOP_MAX;
+			break;
+
+		case T_Stepout:
+			item = LOOP_MINSTEP;
+			break;
+		}
+		loop_config(item, tinker->value.d);
 		tinker = next_node(tinker);
 	}
 }
@@ -3155,7 +2762,10 @@ config_setvar(
 
 	my_node = queue_head(ptree->setvar);
 	while (my_node != NULL) {
-		set_sys_var(my_node->data, my_node->len, my_node->def);
+		set_sys_var(my_node->data, strlen(my_node->data) + 1,
+			    (my_node->isdefault)
+				? DEF
+				: 0);
 		my_node = next_node(my_node);
 	}
 }
@@ -3371,39 +2981,48 @@ config_fudge(
 			 */
 			clock_stat.haveflags |= curr_opt->attr;
 			switch (curr_opt->attr) {
-			case CLK_HAVETIME1:
+			case T_Time1:
+				clock_stat.haveflags |= CLK_HAVETIME1;
 				clock_stat.fudgetime1 = curr_opt->value.d;
 				break;
-			case CLK_HAVETIME2:
+			case T_Time2:
+				clock_stat.haveflags |= CLK_HAVETIME2;
 				clock_stat.fudgetime2 = curr_opt->value.d;
 				break;
-			case CLK_HAVEVAL1:
+			case T_Stratum:
+				clock_stat.haveflags |= CLK_HAVEVAL1;
 				clock_stat.fudgeval1 = curr_opt->value.i;
 				break;
-			case CLK_HAVEVAL2:
+			case T_Refid:
+				clock_stat.haveflags |= CLK_HAVEVAL2;
+				clock_stat.fudgeval2 = 0;
 				memcpy(&clock_stat.fudgeval2,
 				       curr_opt->value.s,
 				       min(strlen(curr_opt->value.s), 4));
 				break;
-			case CLK_HAVEFLAG1:
+			case T_Flag1:
+				clock_stat.haveflags |= CLK_HAVEFLAG1;
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG1;
 				else
 					clock_stat.flags &= ~CLK_FLAG1;
 				break;
-			case CLK_HAVEFLAG2:
+			case T_Flag2:
+				clock_stat.haveflags |= CLK_HAVEFLAG2;
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG2;
 				else
 					clock_stat.flags &= ~CLK_FLAG2;
 				break;
-			case CLK_HAVEFLAG3:
+			case T_Flag3:
+				clock_stat.haveflags |= CLK_HAVEFLAG3;
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG3;
 				else
 					clock_stat.flags &= ~CLK_FLAG3;
 				break;
-			case CLK_HAVEFLAG4:
+			case T_Flag4:
+				clock_stat.haveflags |= CLK_HAVEFLAG4;
 				if (curr_opt->value.i)
 					clock_stat.flags |= CLK_FLAG4;
 				else
@@ -3645,7 +3264,9 @@ config_peers(
 	struct addrinfo *res, *res_bak;
 	sockaddr_u peeraddr;
 	struct peer_node *curr_peer;
+	struct attr_val *option;
 	int hmode;
+	int peerflags;
 	int status;
 	int no_needed;
 	int i;
@@ -3664,11 +3285,55 @@ config_peers(
 		hmode = get_correct_host_mode(curr_peer->host_mode);
 		NTP_INSIST(hmode != -1);
 
+		/* translate peerflags options to bits */
+		peerflags = 0;
+		option = queue_head(curr_peer->peerflags);
+		for (;	option != NULL; option = next_node(option))
+			switch (option->value.i) {
+
+			default:
+				NTP_INSIST(0);
+				break;
+
+			case T_Autokey:
+				peerflags |= FLAG_SKEY;
+				break;
+
+			case T_Burst:
+				peerflags |= FLAG_BURST;
+				break;
+
+			case T_Iburst:
+				peerflags |= FLAG_IBURST;
+				break;
+
+			case T_Noselect:
+				peerflags |= FLAG_NOSELECT;
+				break;
+
+			case T_Preempt:
+				peerflags |= FLAG_PREEMPT;
+				break;
+
+			case T_Prefer:
+				peerflags |= FLAG_PREFER;
+				break;
+
+			case T_True:
+				peerflags |= FLAG_TRUE;
+				break;
+
+			case T_Xleave:
+				peerflags |= FLAG_XLEAVE;
+				break;
+			}
+
 		/* Attempt to resolve the address */
 		ZERO_SOCK(&peeraddr);
 		AF(&peeraddr) = (u_short)curr_peer->addr->type;
 
-		status = get_multiple_netnums(curr_peer->addr->address, &peeraddr, &res, 0, t_UNK);
+		status = get_multiple_netnums(curr_peer->addr->address,
+		    &peeraddr, &res, 0, t_UNK);
 
 		/* I don't know why getnetnum would return -1.
 		 * The old code had this test, so I guess it must be
@@ -3688,7 +3353,7 @@ config_peers(
 				     curr_peer->peerversion,
 				     curr_peer->minpoll,
 				     curr_peer->maxpoll,
-				     curr_peer->peerflags,
+				     peerflags,
 				     curr_peer->ttl,
 				     curr_peer->peerkey,
 				     (u_char *)"*");
@@ -3720,7 +3385,7 @@ config_peers(
 					    curr_peer->peerversion,
 					    curr_peer->minpoll,
 					    curr_peer->maxpoll,
-					    curr_peer->peerflags,
+					    peerflags,
 					    curr_peer->ttl,
 					    curr_peer->peerkey,
 					    (u_char *)"*");
@@ -3742,7 +3407,7 @@ free_config_peers(
 
 	while (NULL != (curr_peer = dequeue(ptree->peers))) {
 		destroy_address_node(curr_peer->addr);
-		DESTROY_QUEUE(curr_peer->options);
+		DESTROY_QUEUE(curr_peer->peerflags);
 		free_node(curr_peer);
 	}
 }
@@ -4025,7 +3690,7 @@ config_remotely(
 	input_from_file = 0;
 
 	init_syntax_tree(&cfgt);
-	key_scanner = create_keyword_scanner(keyword_list);
+	key_scanner = create_keyword_scanner();
 	yyparse();
 	delete_keyword_scanner(key_scanner);
 	key_scanner = NULL;
@@ -4136,7 +3801,7 @@ getconfig(
 	yydebug = !!(debug >= 5);
 #endif
 	ip_file = fp[curr_include_level];
-	key_scanner = create_keyword_scanner(keyword_list);
+	key_scanner = create_keyword_scanner();
 	yyparse();
 	
 	delete_keyword_scanner(key_scanner);

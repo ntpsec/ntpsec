@@ -33,11 +33,9 @@
 struct state {
 	char ch;		  /* Input character associated with the state */
 	struct state *next_state; /* Next state to advance to on reading ch */
-	struct state *next_char;  /* Pointer to next character associated with
-				     the state */
+	struct state *next_char_s;/* State to check having read any other */
 	int token;		  /* Token to be returned on successful parse */
-	int expect_string;	  /* A boolean flag, which when set, indicates
-				     that the next token should be a string */
+	follby followedby;	  /* Forces the next token(s) to T_String */
 };
 
 
@@ -45,10 +43,189 @@ struct state {
  * ------------------------
  */
 
-#define MAX_LEXEME 1024+1	/* The maximum size of a lexeme */
+#define MAX_LEXEME (1024 + 1)	/* The maximum size of a lexeme */
 char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
 struct state *key_scanner;	/* A FSA for recognizing keywords */
 extern int input_from_file;
+
+
+struct key_tok ntp_keyword_list[] = {
+{ "automax",		T_Automax,		FOLLBY_TOKEN },
+{ "broadcast",		T_Broadcast,		FOLLBY_STRING },
+{ "broadcastclient",	T_Broadcastclient,	FOLLBY_TOKEN },
+{ "broadcastdelay",	T_Broadcastdelay,	FOLLBY_TOKEN },
+{ "calldelay",		T_Calldelay,		FOLLBY_TOKEN },
+{ "disable",		T_Disable,		FOLLBY_TOKEN },
+{ "driftfile",		T_Driftfile,		FOLLBY_STRING },
+{ "enable",		T_Enable,		FOLLBY_TOKEN },
+{ "end",		T_End,			FOLLBY_TOKEN },
+{ "filegen",		T_Filegen,		FOLLBY_TOKEN },
+{ "fudge",		T_Fudge,		FOLLBY_STRING },
+{ "includefile",	T_Includefile,		FOLLBY_STRING },
+{ "leapfile",		T_Leapfile,		FOLLBY_STRING },
+{ "logconfig",		T_Logconfig,		FOLLBY_STRINGS_TO_EOC },
+{ "logfile",		T_Logfile,		FOLLBY_STRING },
+{ "manycastclient",	T_Manycastclient,	FOLLBY_STRING },
+{ "manycastserver",	T_Manycastserver,	FOLLBY_STRINGS_TO_EOC },
+{ "multicastclient",	T_Multicastclient,	FOLLBY_STRINGS_TO_EOC },
+{ "peer",		T_Peer,			FOLLBY_STRING },
+{ "phone",		T_Phone,		FOLLBY_STRINGS_TO_EOC },
+{ "pidfile",		T_Pidfile,		FOLLBY_STRING },
+{ "pool",		T_Pool,			FOLLBY_STRING },
+{ "discard",		T_Discard,		FOLLBY_TOKEN },
+{ "restrict",		T_Restrict,		FOLLBY_TOKEN },
+{ "server",		T_Server,		FOLLBY_STRING },
+{ "setvar",		T_Setvar,		FOLLBY_TOKEN },
+{ "statistics",		T_Statistics,		FOLLBY_TOKEN },
+{ "statsdir",		T_Statsdir,		FOLLBY_STRING },
+{ "tick",		T_Tick,			FOLLBY_TOKEN },
+{ "tinker",		T_Tinker,		FOLLBY_TOKEN },
+{ "tos",		T_Tos,			FOLLBY_TOKEN },
+{ "trap",		T_Trap,			FOLLBY_STRING },
+{ "unconfig",		T_Unconfig,		FOLLBY_STRING },
+{ "unpeer",		T_Unpeer,		FOLLBY_STRING },
+/* authentication_command */
+{ "controlkey",		T_ControlKey,		FOLLBY_TOKEN },
+{ "crypto",		T_Crypto,		FOLLBY_TOKEN },
+{ "keys",		T_Keys,			FOLLBY_STRING },
+{ "keysdir",		T_Keysdir,		FOLLBY_STRING },
+{ "ntpsigndsocket",	T_NtpSignDsocket,	FOLLBY_STRING },
+{ "requestkey",		T_Requestkey,		FOLLBY_TOKEN },
+{ "revoke",		T_Revoke,		FOLLBY_TOKEN },
+{ "trustedkey",		T_Trustedkey,		FOLLBY_TOKEN },
+/* IPv4/IPv6 protocol override flag */
+{ "-4",			T_Ipv4_flag,		FOLLBY_TOKEN },
+{ "-6",			T_Ipv6_flag,		FOLLBY_TOKEN },
+/* option */
+{ "autokey",		T_Autokey,		FOLLBY_TOKEN },
+{ "bias",		T_Bias,			FOLLBY_TOKEN },
+{ "burst",		T_Burst,		FOLLBY_TOKEN },
+{ "iburst",		T_Iburst,		FOLLBY_TOKEN },
+{ "key",		T_Key,			FOLLBY_TOKEN },
+{ "maxpoll",		T_Maxpoll,		FOLLBY_TOKEN },
+{ "minpoll",		T_Minpoll,		FOLLBY_TOKEN },
+{ "mode",		T_Mode,			FOLLBY_TOKEN },
+{ "noselect",		T_Noselect,		FOLLBY_TOKEN },
+{ "preempt",		T_Preempt,		FOLLBY_TOKEN },
+{ "true",		T_True,			FOLLBY_TOKEN },
+{ "prefer",		T_Prefer,		FOLLBY_TOKEN },
+{ "ttl",		T_Ttl,			FOLLBY_TOKEN },
+{ "version",		T_Version,		FOLLBY_TOKEN },
+{ "xleave",		T_Xleave,		FOLLBY_TOKEN },
+/* crypto_command */
+{ "host",		T_Host,			FOLLBY_STRING },
+{ "ident",		T_Ident,		FOLLBY_STRING },
+{ "pw",			T_Pw,			FOLLBY_STRING },
+{ "randfile",		T_Randfile,		FOLLBY_STRING },
+{ "sign",		T_Sign,			FOLLBY_STRING },
+/*** MONITORING COMMANDS ***/
+/* stat */
+{ "clockstats",		T_Clockstats,		FOLLBY_TOKEN },
+{ "cryptostats",	T_Cryptostats,		FOLLBY_TOKEN },
+{ "loopstats",		T_Loopstats,		FOLLBY_TOKEN },
+{ "peerstats",		T_Peerstats,		FOLLBY_TOKEN },
+{ "rawstats",		T_Rawstats,		FOLLBY_TOKEN },
+{ "sysstats", 		T_Sysstats,		FOLLBY_TOKEN },
+{ "protostats",		T_Protostats,		FOLLBY_TOKEN },
+{ "timingstats",	T_Timingstats,		FOLLBY_TOKEN },
+/* filegen_option */
+{ "disable",		T_Disable,		FOLLBY_TOKEN },
+{ "enable",		T_Enable,		FOLLBY_TOKEN },
+{ "file",		T_File,			FOLLBY_STRING },
+{ "link",		T_Link,			FOLLBY_TOKEN },
+{ "nolink",		T_Nolink,		FOLLBY_TOKEN },
+{ "type",		T_Type,			FOLLBY_TOKEN },
+/* filegen_type */
+{ "age",		T_Age,			FOLLBY_TOKEN },
+{ "day",		T_Day,			FOLLBY_TOKEN },
+{ "month",		T_Month,		FOLLBY_TOKEN },
+{ "none",		T_None,			FOLLBY_TOKEN },
+{ "pid",		T_Pid,			FOLLBY_TOKEN },
+{ "week",		T_Week,			FOLLBY_TOKEN },
+{ "year",		T_Year,			FOLLBY_TOKEN },
+/*** ORPHAN MODE COMMANDS ***/
+/* tos_option */
+{ "minclock",		T_Minclock,		FOLLBY_TOKEN },
+{ "maxclock",		T_Maxclock,		FOLLBY_TOKEN },
+{ "minsane",		T_Minsane,		FOLLBY_TOKEN },
+{ "floor",		T_Floor,		FOLLBY_TOKEN },
+{ "ceiling",		T_Ceiling,		FOLLBY_TOKEN },
+{ "cohort",		T_Cohort,		FOLLBY_TOKEN },
+{ "mindist",		T_Mindist,		FOLLBY_TOKEN },
+{ "maxdist",		T_Maxdist,		FOLLBY_TOKEN },
+{ "maxhop",		T_Maxhop,		FOLLBY_TOKEN },
+{ "beacon",		T_Beacon,		FOLLBY_TOKEN },
+{ "orphan",		T_Orphan,		FOLLBY_TOKEN },
+/* access_control_flag */
+{ "default",		T_Default,		FOLLBY_TOKEN },
+{ "flake",		T_Flake,		FOLLBY_TOKEN },
+{ "ignore",		T_Ignore,		FOLLBY_TOKEN },
+{ "limited",		T_Limited,		FOLLBY_TOKEN },
+{ "mssntp",		T_Mssntp,		FOLLBY_TOKEN },
+{ "kod",		T_Kod,			FOLLBY_TOKEN },
+{ "lowpriotrap",	T_Lowpriotrap,		FOLLBY_TOKEN },
+{ "mask",		T_Mask,			FOLLBY_TOKEN },
+{ "nomodify",		T_Nomodify,		FOLLBY_TOKEN },
+{ "nopeer",		T_Nopeer,		FOLLBY_TOKEN },
+{ "noquery",		T_Noquery,		FOLLBY_TOKEN },
+{ "noserve",		T_Noserve,		FOLLBY_TOKEN },
+{ "notrap",		T_Notrap,		FOLLBY_TOKEN },
+{ "notrust",		T_Notrust,		FOLLBY_TOKEN },
+{ "ntpport",		T_Ntpport,		FOLLBY_TOKEN },
+{ "version",		T_Version,		FOLLBY_TOKEN },
+/* discard_option */
+{ "average",		T_Average,		FOLLBY_TOKEN },
+{ "minimum",		T_Minimum,		FOLLBY_TOKEN },
+{ "monitor",		T_Monitor,		FOLLBY_TOKEN },
+/* fudge_factor */
+{ "flag1",		T_Flag1,		FOLLBY_TOKEN },
+{ "flag2",		T_Flag2,		FOLLBY_TOKEN },
+{ "flag3",		T_Flag3,		FOLLBY_TOKEN },
+{ "flag4",		T_Flag4,		FOLLBY_TOKEN },
+{ "refid",		T_Refid,		FOLLBY_STRING },
+{ "stratum",		T_Stratum,		FOLLBY_TOKEN },
+{ "time1",		T_Time1,		FOLLBY_TOKEN },
+{ "time2",		T_Time2,		FOLLBY_TOKEN },
+/* system_option */
+{ "auth",		T_Auth,			FOLLBY_TOKEN },
+{ "bclient",		T_Bclient,		FOLLBY_TOKEN },
+{ "calibrate",		T_Calibrate,		FOLLBY_TOKEN },
+{ "kernel",		T_Kernel,		FOLLBY_TOKEN },
+{ "monitor",		T_Monitor,		FOLLBY_TOKEN },
+{ "ntp",		T_Ntp,			FOLLBY_TOKEN },
+{ "stats",		T_Stats,		FOLLBY_TOKEN },
+/* tinker_option */
+{ "step",		T_Step,			FOLLBY_TOKEN },
+{ "panic",		T_Panic,		FOLLBY_TOKEN },
+{ "dispersion",		T_Dispersion,		FOLLBY_TOKEN },
+{ "stepout",		T_Stepout,		FOLLBY_TOKEN },
+{ "allan",		T_Allan,		FOLLBY_TOKEN },
+{ "huffpuff",		T_Huffpuff,		FOLLBY_TOKEN },
+{ "freq",		T_Freq,			FOLLBY_TOKEN },
+/* miscellaneous_command */
+{ "port",		T_Port,			FOLLBY_TOKEN },
+{ "interface",		T_Interface,		FOLLBY_TOKEN },
+{ "qos",		T_Qos,			FOLLBY_TOKEN },
+{ "saveconfigdir",	T_Saveconfigdir,	FOLLBY_STRING },
+/* interface_command (ignore and interface already defined) */
+{ "nic",		T_Nic,			FOLLBY_TOKEN },
+{ "all",		T_All,			FOLLBY_TOKEN },
+{ "ipv4",		T_Ipv4,			FOLLBY_TOKEN },
+{ "ipv6",		T_Ipv6,			FOLLBY_TOKEN },
+{ "listen",		T_Listen,		FOLLBY_TOKEN },
+{ "drop",		T_Drop,			FOLLBY_TOKEN },
+/* simulator commands */
+{ "simulate",		T_Simulate,		FOLLBY_TOKEN },
+{ "simulation_duration",T_Sim_Duration,		FOLLBY_TOKEN },
+{ "beep_delay",		T_Beep_Delay,		FOLLBY_TOKEN },
+{ "duration",		T_Duration,		FOLLBY_TOKEN },
+{ "server_offset",	T_Server_Offset,	FOLLBY_TOKEN },
+{ "freq_offset",	T_Freq_Offset,		FOLLBY_TOKEN },
+{ "wander",		T_Wander,		FOLLBY_TOKEN },
+{ "jitter",		T_Jitter,		FOLLBY_TOKEN },
+{ "prop_delay",		T_Prop_Delay,		FOLLBY_TOKEN },
+{ "proc_delay",		T_Proc_Delay,		FOLLBY_TOKEN },
+{ NULL,			0,			0	     } };
 
 
 /* CONSTANTS 
@@ -68,6 +245,8 @@ const char special_chars[] = "{}(),;|=";
  */
 
 char get_next_char(void);
+static int is_keyword(char *lexeme, follby *pfollowedby);
+
 
 /* Define a function to create the states of the scanner. This function
  * is used by the create_keyword_scanner function below.
@@ -76,46 +255,49 @@ char get_next_char(void);
  * recognizing the complete keyword, and any pre-existing state that exists
  * for some other keyword that has the same prefix as the current one.
  */
-
 struct state *
 create_states(
-	char *keyword, 
-	int token, 
-	int expect_string,
+	char *	text, 
+	int	token, 
+	follby	followedby,
 	struct state *pre_state
 	)
 {
 	struct state *my_state;
-	struct state *return_state = pre_state;
+	struct state *return_state;
+	struct state *prev_char_s;
+	struct state *curr_char_s;
 
-	struct state *prev_char = NULL;
-	struct state *curr_char = pre_state;
+	return_state = pre_state;
+	curr_char_s = pre_state;
+	prev_char_s = NULL;
 
 	/* Find the correct position to insert the state. 
 	 * All states should be in alphabetical order
 	 */
-	while (curr_char && (keyword[0] < curr_char->ch)) {
-		prev_char = curr_char;
-		curr_char = curr_char->next_char;
+	while (curr_char_s != NULL && (text[0] < curr_char_s->ch)) {
+		prev_char_s = curr_char_s;
+		curr_char_s = curr_char_s->next_char_s;
 	}
 
 	/* Check if a previously seen keyword has the same prefix as the 
 	 * current keyword. If yes, simply use the state for that keyword
 	 * as my_state 
 	 */
-	if (curr_char && (keyword[0] == curr_char->ch))
-		my_state = curr_char;
+	if (curr_char_s && (text[0] == curr_char_s->ch))
+		my_state = curr_char_s;
 	else {
 		my_state = emalloc(sizeof(*my_state));
-		my_state->ch = keyword[0];  /* Store the first character
-					       of the keyword */
+		/* Store the first character of the keyword */
+		my_state->ch = text[0]; 
 		my_state->next_state = NULL;
-		my_state->next_char = curr_char;
-		my_state->token = NON_ACCEPTING;  /* Not an accepting state */
-		my_state->expect_string = NO_ARG; 
+		my_state->next_char_s = curr_char_s;
+		/* Not an accepting state */
+		my_state->token = NON_ACCEPTING;
+		my_state->followedby = FOLLBY_TOKEN; 
 
-		if (prev_char) 
-			prev_char->next_char = my_state;
+		if (prev_char_s) 
+			prev_char_s->next_char_s = my_state;
 		else
 			return_state = my_state;
 	}
@@ -125,20 +307,16 @@ create_states(
 	 * state.
 	 * If not, we need to continue scanning
 	 */
-	if (keyword[1] == '\0') {
+	if ('\0' == text[1]) {
 		my_state->token = token;
-		my_state->expect_string = expect_string;
-	}
-	else {
-		my_state->next_state = create_states(&keyword[1], 
-						     token, 
-						     expect_string,
-						     my_state->next_state);
-	}
+		my_state->followedby = followedby;
+	} else
+		my_state->next_state = 
+		    create_states(&text[1], token, followedby,
+				  my_state->next_state);
 
 	return return_state;
 }
-
 
 
 /* Define a function that takes a list of (keyword, token) values and
@@ -146,15 +324,17 @@ create_states(
  */
 
 struct state *
-create_keyword_scanner(
-	struct key_tok *keyword_list
-	)
+create_keyword_scanner(void)
 {
-	struct state *scanner = NULL;
-	while (keyword_list->keyword != NULL) {
-		scanner = create_states(keyword_list->keyword, 
+	struct state *scanner;
+	struct key_tok *keyword_list;
+
+	keyword_list = ntp_keyword_list;
+	scanner = NULL;
+	while (keyword_list->key != NULL) {
+		scanner = create_states(keyword_list->key, 
 					keyword_list->token, 
-					keyword_list->expect_string,
+					keyword_list->followedby,
 					scanner);
 		++keyword_list;
 	}
@@ -171,7 +351,7 @@ delete_keyword_scanner(
 	)
 {
 	if (my_key_scanner) {
-		delete_keyword_scanner(my_key_scanner->next_char);
+		delete_keyword_scanner(my_key_scanner->next_char_s);
 		delete_keyword_scanner(my_key_scanner->next_state);
 		free(my_key_scanner);
 	}
@@ -198,9 +378,32 @@ print_keyword_scanner(
 		}
 		if (curr_state->next_state != NULL)
 			print_keyword_scanner(curr_state->next_state, pos + 1);
-		curr_state = curr_state->next_char;
+		curr_state = curr_state->next_char_s;
 	}
 }
+
+
+/*
+ * keyword() - Return the keyword associated with token T_ identifier
+ */
+char *
+keyword(
+	int token
+	)
+{
+	struct key_tok *keyword_list;
+
+	
+
+	for (keyword_list = ntp_keyword_list;
+	     keyword_list->key != NULL;
+	     keyword_list++) 
+		if (keyword_list->token == token)
+			return keyword_list->key;
+
+	return "(keyword not found)";
+}
+
 
 /* FILE INTERFACE
  * --------------
@@ -346,7 +549,7 @@ push_back_char(
 static int
 is_keyword(
 	char *lexeme,
-	int *expect_string
+	follby *pfollowedby
 	)
 {
 	struct state *curr_state = key_scanner;
@@ -355,15 +558,15 @@ is_keyword(
 
 	for (i = 0; lexeme[i]; ++i) {
 		while (curr_state && (lexeme[i] != curr_state->ch))
-			curr_state = curr_state->next_char;
+			curr_state = curr_state->next_char_s;
 
 		if (curr_state && (lexeme[i] == curr_state->ch)) {
-			*expect_string = curr_state->expect_string;
+			*pfollowedby = curr_state->followedby;
 			token = curr_state->token;
 			curr_state = curr_state->next_state;
 		}
 		else {
-			*expect_string = NO_ARG;
+			*pfollowedby = FOLLBY_TOKEN;
 			token = NON_ACCEPTING;
 			break;
 		}
@@ -502,7 +705,7 @@ create_string_token(
 
 
 /*
- * Define a function that does the actual scanning.
+ * yylex() - function that does the actual scanning.
  * Bison expects this function to be called yylex and for it to take no
  * input and return an int.
  * Conceptually yylex "returns" yylval as well as the actual return
@@ -517,7 +720,7 @@ yylex(
 	int yylval_was_set = 0;
 	int token;		/* The return value/the recognized token */
 	int ch;
-	static int expect_string = NO_ARG;
+	static follby followedby = FOLLBY_TOKEN;
 
 	do {
 		/* Ignore whitespace at the beginning */
@@ -538,11 +741,12 @@ yylex(
 
 		} else if (is_EOC(ch)) {
 
-			expect_string = NO_ARG;   /* Reset expect_string */
+			/* end FOLLBY_STRINGS_TO_EOC effect */
+			followedby = FOLLBY_TOKEN;
 			token = T_EOC;
 			goto normal_return;
 
-		} else if (is_special(ch) && NO_ARG == expect_string) {
+		} else if (is_special(ch) && FOLLBY_TOKEN == followedby) {
 			/* special chars are their own token values */
 			token = ch;
 			goto normal_return;
@@ -559,7 +763,7 @@ yylex(
 
 			/* Break on whitespace or a special character */
 			if (isspace(yytext[i]) 
-			    || (is_special(yytext[i]) && NO_ARG == expect_string)
+			    || (is_special(yytext[i]) && FOLLBY_TOKEN == followedby)
 			    || is_EOC(ch) || yytext[i] == '"')
 				break;
 
@@ -613,8 +817,8 @@ yylex(
 	 * returned) and that we haven't read a string.
 	 */
 	
-	if (expect_string == NO_ARG && !instring) {
-		token = is_keyword(yytext, &expect_string);
+	if (followedby == FOLLBY_TOKEN && !instring) {
+		token = is_keyword(yytext, &followedby);
 		if (token)
 			goto normal_return;
 		else if (is_integer(yytext)) {
@@ -652,8 +856,8 @@ yylex(
 	}
 
 	/*
-	 * Either expect_string is 1 or this lexeme is part of a
-	 * string.  Hence, we need to return T_String.
+	 * Either followedby is not FOLLBY_TOKEN or this lexeme is part
+	 * of a string.  Hence, we need to return T_String.
 	 * 
 	 * _Except_ we might have a -4 or -6 flag on a an association
 	 * configuration line (server, peer, pool, etc.).
@@ -665,12 +869,13 @@ yylex(
 	 * We do not require server addresses be quoted in ntp.conf,
 	 * complicating the scanner's job.  To avoid trying (and
 	 * failing) to match an IP address or DNS name to a keyword,
-	 * the association keywords use SINGLE_ARG in the keyword
-	 * table, which tells the scanner to "expect_string", so it
-	 * does not try to match a keyword but rather expects a string
-	 * when -4/-6 modifiers to server, peer, etc. are encountered.
+	 * the association keywords use FOLLBY_STRING in the keyword
+	 * table, which tells the scanner to force the next token to be
+	 * a T_String, so it does not try to match a keyword but rather
+	 * expects a string when -4/-6 modifiers to server, peer, etc.
+	 * are encountered.
 	 * restrict -4 and restrict -6 parsing works correctly without
-	 * this hack, as restrict uses NO_ARG.  [DH]
+	 * this hack, as restrict uses FOLLBY_TOKEN.  [DH]
 	 */
 	if ('-' == yytext[0]) {
 		if ('4' == yytext[1]) {
@@ -683,8 +888,8 @@ yylex(
 	}
 
 	instring = 0;
-	if (SINGLE_ARG == expect_string)
-		expect_string = NO_ARG;
+	if (FOLLBY_STRING == followedby)
+		followedby = FOLLBY_TOKEN;
 
 	yylval_was_set = 1;
 	token = create_string_token(yytext);
