@@ -81,12 +81,13 @@ extern struct FILE_INFO *fp[];
 /* VARIOUS SUBROUTINE DECLARATIONS
  * -------------------------------
  */
-extern char * keyword(int token);
-struct state *create_states(char *text, 
-			    int token, 
-			    follby followedby,
-			    struct state *pre_state);
-struct state *create_keyword_scanner(void);
+extern char *	keyword(int token);
+extern char *	quote_if_needed(char *str);
+struct state *	create_states(char *text, 
+			      int token, 
+			      follby followedby,
+			      struct state *pre_state);
+struct state *	create_keyword_scanner(void);
 void delete_keyword_scanner(struct state *my_key_scanner);
 int yylex(void);
 

@@ -610,53 +610,50 @@ dump_config_tree(
 	}
 
 	list_ptr = queue_head(ptree->filegen_opts);
-	if (list_ptr != NULL) {
+	for(; 	list_ptr != NULL;
+		list_ptr = next_node(list_ptr)) {
 
-		for(; 	list_ptr != NULL;
-			list_ptr = next_node(list_ptr)) {
+		fgen_node = list_ptr;
+		opt_ptr = queue_head(fgen_node->options);
 
-			fgen_node = list_ptr;
-			opt_ptr = queue_head(fgen_node->options);
+		if (opt_ptr != NULL)
+			fprintf(df, "filegen %s", 
+				keyword(fgen_node->filegen_token));
 
-			if (opt_ptr != NULL)
-				fprintf(df, "filegen %s", 
+		for(;	opt_ptr != NULL;
+			opt_ptr = next_node(opt_ptr)) {
+			
+			atrv = opt_ptr;
+
+			switch (atrv->attr) {
+
+			default:
+				fprintf(df, "\n# dump error:\n"
+					"# unknown filegen option token %s\n"
+					"filegen %s",
+					token_name(atrv->attr),
 					keyword(fgen_node->filegen_token));
+				break;
 
-			for(;	opt_ptr != NULL;
-				opt_ptr = next_node(opt_ptr)) {
-				
-				atrv = (struct attr_val *) opt_ptr;
+			case T_File:
+				fprintf(df, " file %s",
+					atrv->value.s);
+				break;
 
-				switch (atrv->attr) {
+			case T_Type:
+				fprintf(df, " type %s",
+					keyword(atrv->value.i));
+				break;
 
-				default:
-					fprintf(df, "\n# dump error:\n"
-						"# unknown filegen option token %d\n"
-						"filegen %s",
-						atrv->type,
-						keyword(fgen_node->filegen_token));
-					break;
-
-				case T_File:
-					fprintf(df, " file %s",
-						atrv->value.s);
-					break;
-
-				case T_Type:
-					fprintf(df, " type %s",
-						keyword(atrv->value.i));
-					break;
-
-				case T_Flag:
-					fprintf(df, " %s",
-						keyword(atrv->value.i));
-					break;
-				}
-
+			case T_Flag:
+				fprintf(df, " %s",
+					keyword(atrv->value.i));
+				break;
 			}
 
-			fprintf(df, "\n");
 		}
+
+		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->auth.crypto_cmd_list);
@@ -1026,7 +1023,11 @@ dump_config_tree(
 		list_ptr = next_node(list_ptr)) {
 
 		setv_node = list_ptr;
-		fprintf(df, "setvar %s", setv_node->data);
+		s1 = quote_if_needed(setv_node->var);
+		s2 = quote_if_needed(setv_node->val);
+		fprintf(df, "setvar %s = %s", s1, s2);
+		free(s1);
+		free(s2);
 
 		if (setv_node->isdefault)
 			fprintf(df, " default");
@@ -1442,20 +1443,19 @@ create_setvar_node(
 	int	isdefault
 	)
 {
-	int octets;
-	char *s;
+	char *	pch;
 	struct setvar_node *my_node;
 
-	octets = strlen(var) + strlen(val) + 4;	/* " = " + NUL */
-	s = emalloc(octets);
-	snprintf(s, octets, "%s = %s", var, val);
-	free(var);
-	free(val);
+	/* do not allow = in the variable name */
+	if (NULL != (pch = strchr(var, '=')))
+		*pch = '\0';
 
 	/* Now store the string into a setvar_node */
 	my_node = get_node(sizeof *my_node);
-	my_node->data = s;
+	my_node->var = var;
+	my_node->val = val;
 	my_node->isdefault = isdefault;
+
 	return my_node;
 }
 
@@ -2759,15 +2759,25 @@ config_setvar(
 	)
 {
 	struct setvar_node *my_node;
+	size_t	varlen, vallen, octets;
+	char *	str;
 
+	str = NULL;
 	my_node = queue_head(ptree->setvar);
 	while (my_node != NULL) {
-		set_sys_var(my_node->data, strlen(my_node->data) + 1,
-			    (my_node->isdefault)
-				? DEF
-				: 0);
+		varlen = strlen(my_node->var);
+		vallen = strlen(my_node->val);
+		octets = varlen + vallen + 1 + 1;
+		str = erealloc(str, octets);
+		snprintf(str, octets, "%s=%s", my_node->var,
+			 my_node->val);
+		set_sys_var(str, octets, (my_node->isdefault)
+						? DEF 
+						: 0);
 		my_node = next_node(my_node);
 	}
+	if (str != NULL)
+		free(str);
 }
 
 
@@ -2780,7 +2790,8 @@ free_config_setvar(
 	struct setvar_node *my_node;
 
 	while (NULL != (my_node = dequeue(ptree->setvar))) {
-		free(my_node->data);
+		free(my_node->var);
+		free(my_node->val);
 		free_node(my_node);
 	}
 }
@@ -2976,10 +2987,6 @@ config_fudge(
 		memset(&clock_stat, 0, sizeof(clock_stat));
 		curr_opt = queue_head(curr_fudge->options);
 		while (curr_opt != NULL) {
-			/* The attribute field is used to store the flag.
-			 * Set haveflags with it
-			 */
-			clock_stat.haveflags |= curr_opt->attr;
 			switch (curr_opt->attr) {
 			case T_Time1:
 				clock_stat.haveflags |= CLK_HAVETIME1;
@@ -3685,7 +3692,7 @@ config_remotely(
 	memset(&remote_cuckoo, 0, sizeof(remote_cuckoo));
 	remote_cuckoo.fname = origin;
 	remote_cuckoo.line_no = 1;
-	remote_cuckoo.line_no = 1;
+	remote_cuckoo.col_no = 1;
 	ip_file = &remote_cuckoo;
 	input_from_file = 0;
 

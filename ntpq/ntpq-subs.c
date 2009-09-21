@@ -54,17 +54,17 @@ static	void	radiostatus (struct parse *, FILE *);
 static	void	pstatus 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, long);
-static	int doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
-static	int dogetpeers	(struct varlist *, int, FILE *, int);
+static	int	doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
+static	int	dogetpeers	(struct varlist *, int, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
 static	void	peers		(struct parse *, FILE *);
 static	void	lpeers		(struct parse *, FILE *);
 static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
-static  void    config		(struct parse *, FILE *);
+static  void	config		(struct parse *, FILE *);
 static 	void 	saveconfig	(struct parse *, FILE *);
-static  void    config_from_file (struct parse *, FILE *);
+static  void	config_from_file(struct parse *, FILE *);
 
 
 /*
@@ -1145,7 +1145,7 @@ lpassociations(
 
 
 /*
- *  * dumpcfg - dump ntp server configuration
+ *  saveconfig - dump ntp server configuration to server file
  */
 static void
 saveconfig(
@@ -1833,25 +1833,41 @@ config (
 	FILE *fp
 	)
 {
-	char *rcmd;
+	char *cfgcmd;
 	u_short rstatus;
 	int rsize;
 	char *rdata;
 	int res;
+	int col;
+	int i;
 
-	rcmd = pcmd->argval[0].string;
+	cfgcmd = pcmd->argval[0].string;
 
 	if (debug > 2) {
 		printf("In Config\n");
 		printf("Keyword = %s\n", pcmd->keyword);
-		printf("Command = %s\n", rcmd);
+		printf("Command = %s\n", cfgcmd);
 	}
 
-	res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(rcmd), rcmd,
+	res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(cfgcmd), cfgcmd,
 		      &rstatus, &rsize, &rdata);
+
 	if (rsize > 0 && '\n' == rdata[rsize - 1])
 		rsize--;
 	rdata[rsize] = '\0';
+
+	col = -1;
+	if (1 == sscanf(rdata, "column %d syntax error", &col)
+	    && col >= 0 && (size_t)col <= strlen(cfgcmd) + 1) {
+		if (interactive) {
+			printf("______");	/* "ntpq> " */
+			printf("________");	/* ":config " */
+		} else
+			printf("%s\n", cfgcmd);
+		for (i = 1; i < col; i++)
+			putchar('_');
+		printf("^\n");
+	}
 	printf("%s\n", rdata);
 }
 

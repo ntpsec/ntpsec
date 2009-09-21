@@ -75,7 +75,7 @@ struct key_tok ntp_keyword_list[] = {
 { "discard",		T_Discard,		FOLLBY_TOKEN },
 { "restrict",		T_Restrict,		FOLLBY_TOKEN },
 { "server",		T_Server,		FOLLBY_STRING },
-{ "setvar",		T_Setvar,		FOLLBY_TOKEN },
+{ "setvar",		T_Setvar,		FOLLBY_STRING },
 { "statistics",		T_Statistics,		FOLLBY_TOKEN },
 { "statsdir",		T_Statsdir,		FOLLBY_STRING },
 { "tick",		T_Tick,			FOLLBY_TOKEN },
@@ -680,6 +680,27 @@ is_EOC(
 }
 
 
+char *
+quote_if_needed(char *str)
+{
+	char *ret;
+	size_t len;
+	size_t octets;
+
+	len = strlen(str);
+	octets = len + 2 + 1;
+	ret = emalloc(octets);
+	if ('"' != str[0] 
+	    && (strcspn(str, special_chars) < len 
+		|| strchr(str, ' ') != NULL)) {
+		snprintf(ret, octets, "\"%s\"", str);
+	} else
+		strncpy(ret, str, octets);
+
+	return ret;
+}
+
+
 static int
 create_string_token(
 	char *lexeme
@@ -749,6 +770,17 @@ yylex(
 		} else if (is_special(ch) && FOLLBY_TOKEN == followedby) {
 			/* special chars are their own token values */
 			token = ch;
+			/*
+			 * '=' implies a single string following as in:
+			 * setvar Owner = "The Boss" default
+			 * This could alternatively be handled by
+			 * removing '=' from special_chars and adding
+			 * it to the keyword table.
+			 */
+			if ('=' == ch)
+				followedby = FOLLBY_STRING;
+			yytext[0] = (char)ch;
+			yytext[1] = '\0';
 			goto normal_return;
 		} else
 			push_back_char(ch);
@@ -794,8 +826,6 @@ yylex(
 				if (i >= COUNTOF(yytext))
 					goto lex_too_long;
 			}
-			if (yytext[i] == '"')
-				yytext[i] =  ' ';
 		}
 		/* Pushback the last character read that is not a part
 		 * of this lexeme.
@@ -803,9 +833,9 @@ yylex(
 		 * newline character. This is to prevent a parse error
 		 * when there is no newline at the end of a file.
 		 */
-		if (yytext[i] == EOF)
+		if (EOF == yytext[i])
 			push_back_char('\n');
-		else
+		else if ('"' != yytext[i])
 			push_back_char(yytext[i]); 
 		yytext[i] = '\0';
 	} while (i == 0);

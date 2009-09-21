@@ -111,7 +111,8 @@ struct filegen_node {
 };
 
 struct setvar_node {
-	char *	data;
+	char *	var;
+	char *	val;
 	int	isdefault;
 };
 

@@ -1,4 +1,6 @@
 * [Bug 1314] saveconfig emits -4 and -6 on when not given.
+* correct parsing and processing of setvar directive.
+* highlight location of ntpq :config syntax errors with ^.
 * clarify (former) NO_ARG, SINGLE_ARG, MULTIPLE_ARG renaming to
   FOLLBY_TOKEN, FOLLBY_STRING, FOLLBY_STRINGS_TO_EOC.
 * parser, saveconfig cleanup to store T_ identifiers in syntax tree.

@@ -79,6 +79,8 @@ struct ctl_var {
 	const char *text;
 };
 
+extern int	interactive;	/* are we prompting? */
+
 extern	void	asciize		(int, char *, FILE *);
 extern	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 extern	void	sortassoc	(void);
