@@ -1,3 +1,4 @@
+(4.2.5p218) 2009/09/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1314] saveconfig emits -4 and -6 on when not given.
 * correct parsing and processing of setvar directive.
 * highlight location of ntpq :config syntax errors with ^.
