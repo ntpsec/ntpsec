@@ -1,3 +1,7 @@
+* [Bug 1314] saveconfig emits -4 and -6 on when not given.
+* clarify (former) NO_ARG, SINGLE_ARG, MULTIPLE_ARG renaming to
+  FOLLBY_TOKEN, FOLLBY_STRING, FOLLBY_STRINGS_TO_EOC.
+* parser, saveconfig cleanup to store T_ identifiers in syntax tree.
 (4.2.5p217) 2009/09/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1300] reject remote configuration of dangerous items.
 (4.2.5p216) 2009/09/19 Released by Harlan Stenn <stenn@ntp.org>

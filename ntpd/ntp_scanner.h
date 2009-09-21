@@ -8,10 +8,25 @@
  * Copyright (c) 2006
  */
 
-
-#define NO_ARG 0 
-#define SINGLE_ARG 1
-#define MULTIPLE_ARG 2
+/*
+ * ntp.conf syntax is slightly irregular in that some tokens such as
+ * hostnames do not require quoting even if they might otherwise be
+ * recognized as T_ terminal tokens.  This hand-crafted lexical scanner
+ * uses a "followed by" value associated with each keyword to indicate
+ * normal scanning of the next token, forced scanning of the next token
+ * alone as a T_String, or forced scanning of all tokens to the end of
+ * the command as T_String.
+ * In the past the identifiers for this functionality ended in _ARG:
+ *
+ * NO_ARG	->	FOLLBY_TOKEN
+ * SINGLE_ARG	->	FOLLBY_STRING
+ * MULTIPLE_ARG	->	FOLLBY_STRINGS_TO_EOC
+ */
+typedef enum {
+	FOLLBY_TOKEN = 0,
+	FOLLBY_STRING,
+	FOLLBY_STRINGS_TO_EOC
+} follby;
 
 #define MAXLINE		1024	/* maximum length of line */
 #define MAXINCLUDELEVEL	5	/* maximum include file levels */
@@ -22,9 +37,9 @@
 
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
-	char *	keyword;	/* Keyword */
+	char *	key;		/* Keyword */
 	int	token;		/* Associated Token */
-	int	expect_string;	/* nonzero indicates the next token
+	follby	followedby;	/* nonzero indicates the next token
 				   should be a string */
 };
 
@@ -66,11 +81,12 @@ extern struct FILE_INFO *fp[];
 /* VARIOUS SUBROUTINE DECLARATIONS
  * -------------------------------
  */
-struct state *create_states(char *keyword, 
+extern char * keyword(int token);
+struct state *create_states(char *text, 
 			    int token, 
-			    int expect_string,
+			    follby followedby,
 			    struct state *pre_state);
-struct state *create_keyword_scanner(struct key_tok *keyword_list);
+struct state *create_keyword_scanner(void);
 void delete_keyword_scanner(struct state *my_key_scanner);
 int yylex(void);
 

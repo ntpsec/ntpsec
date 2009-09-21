@@ -39,7 +39,6 @@
   #define YYMAXDEPTH	1000   /* stop the madness sooner */
   void yyerror (char *msg);
   extern int input_from_file;  /* 0=input from ntpq :config */
-  extern int cryptosw;
 %}
 
 /* 
@@ -176,7 +175,7 @@
 %token	<Integer>	T_Protostats
 %token	<Integer>	T_Pw
 %token	<Integer>	T_Qos
-%token	<Integer>	T_RandFile
+%token	<Integer>	T_Randfile
 %token	<Integer>	T_Rawstats
 %token	<Integer>	T_Refid
 %token	<Integer>	T_Requestkey
@@ -232,7 +231,7 @@
 
 
 /*** NON-TERMINALS ***/
-%type	<VoidPtr>	access_control_flag
+%type	<Integer>	access_control_flag
 %type	<Queue>		ac_flag_list
 %type	<Address_node>	address
 %type	<Queue>		address_list
@@ -259,7 +258,7 @@
 %type	<Double>	number
 %type	<Attr_val>	option
 %type	<Queue>		option_list
-%type	<VoidPtr>	stat
+%type	<Integer>	stat
 %type	<Queue>		stats_list
 %type	<Queue>		string_list
 %type	<Attr_val>	system_option
@@ -371,18 +370,18 @@ option_list
 	;
 
 option
-	:	T_Autokey		{ $$ = create_attr_ival(T_Flag, FLAG_SKEY); }
+	:	T_Autokey		{ $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Bias number		{ $$ = create_attr_dval($1, $2); }
-	|	T_Burst			{ $$ = create_attr_ival(T_Flag, FLAG_BURST); }
-	|	T_Iburst		{ $$ = create_attr_ival(T_Flag, FLAG_IBURST); }
+	|	T_Burst			{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Iburst		{ $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Key T_Integer		{ $$ = create_attr_ival($1, $2); }
 	|	T_Minpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
 	|	T_Maxpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Noselect		{ $$ = create_attr_ival(T_Flag, FLAG_NOSELECT); }
-	|	T_Preempt		{ $$ = create_attr_ival(T_Flag, FLAG_PREEMPT); }
-	|	T_Prefer		{ $$ = create_attr_ival(T_Flag, FLAG_PREFER); }
-	|	T_True			{ $$ = create_attr_ival(T_Flag, FLAG_TRUE); }
-	|	T_Xleave		{ $$ = create_attr_ival(T_Flag, FLAG_XLEAVE); }
+	|	T_Noselect		{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Preempt		{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Prefer		{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_True			{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Xleave		{ $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Ttl T_Integer		{ $$ = create_attr_ival($1, $2); }
 	|	T_Mode T_Integer	{ $$ = create_attr_ival($1, $2); }
 	|	T_Version T_Integer	{ $$ = create_attr_ival($1, $2); }
@@ -434,7 +433,7 @@ authentication_command
 			{ cfgt.auth.control_key = $2; }
 	|	T_Crypto crypto_command_line
 		{ 
-			cryptosw++;
+			cfgt.auth.cryptosw++;
 			append_queue(cfgt.auth.crypto_cmd_list, $2);
 		}
 	|	T_Keys T_String
@@ -456,23 +455,38 @@ crypto_command_line
 	;
 
 crypto_command_list
-	:	crypto_command_list crypto_command  { $$ = enqueue($1, $2); }
-	|	crypto_command { $$ = enqueue_in_new_queue($1); }
+	:	crypto_command_list crypto_command
+		{ 
+			if ($2 != NULL)
+				$$ = enqueue($1, $2);
+			else
+				$$ = $1;
+		}
+	|	crypto_command
+		{
+			if ($1 != NULL)
+				$$ = enqueue_in_new_queue($1);
+			else
+				$$ = create_queue();
+		}
 	;
 
 crypto_command
 	:	T_Host	T_String
-			{ $$ = create_attr_sval(CRYPTO_CONF_PRIV, $2); }
+			{ $$ = create_attr_sval($1, $2); }
 	|	T_Ident	T_String
-			{ $$ = create_attr_sval(CRYPTO_CONF_IDENT, $2); }
+			{ $$ = create_attr_sval($1, $2); }
 	|	T_Pw T_String
-			{ $$ = create_attr_sval(CRYPTO_CONF_PW, $2); }
-	|	T_RandFile T_String
-			{ $$ = create_attr_sval(CRYPTO_CONF_RAND, $2); }
-	|	T_Revoke T_Integer
-			{ cfgt.auth.revoke = $2; }
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Randfile T_String
+			{ $$ = create_attr_sval($1, $2); }
 	|	T_Sign	T_String
-			{ $$ = create_attr_sval(CRYPTO_CONF_SIGN, $2); }
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Revoke T_Integer
+		{
+			$$ = NULL;
+			cfgt.auth.revoke = $2;
+		}
 	;
 
 
@@ -492,27 +506,27 @@ tos_option_list
 
 tos_option
 	:	T_Ceiling T_Integer
-			{ $$ = create_attr_dval(PROTO_CEILING, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Floor T_Integer
-			{ $$ = create_attr_dval(PROTO_FLOOR, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Cohort boolean
-			{ $$ = create_attr_dval(PROTO_COHORT, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Orphan T_Integer
-			{ $$ = create_attr_dval(PROTO_ORPHAN, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Mindist number
-			{ $$ = create_attr_dval(PROTO_MINDISP, $2); }
+			{ $$ = create_attr_dval($1, $2); }
 	|	T_Maxdist number
-			{ $$ = create_attr_dval(PROTO_MAXDIST, $2); }
+			{ $$ = create_attr_dval($1, $2); }
 	|	T_Minclock number
-			{ $$ = create_attr_dval(PROTO_MINCLOCK, $2); }
+			{ $$ = create_attr_dval($1, $2); }
 	|	T_Maxclock number
-			{ $$ = create_attr_dval(PROTO_MAXCLOCK, $2); }
+			{ $$ = create_attr_dval($1, $2); }
 	|	T_Minsane T_Integer
-			{ $$ = create_attr_dval(PROTO_MINSANE, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Beacon T_Integer
-			{ $$ = create_attr_dval(PROTO_BEACON, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Maxhop T_Integer
-			{ $$ = create_attr_dval(PROTO_MAXHOP, (double)$2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	;
 
 
@@ -540,27 +554,19 @@ monitoring_command
 	;
 
 stats_list
-	:	stats_list stat { $$ = enqueue($1, $2); }
-	|	stat { $$ = enqueue_in_new_queue($1); }
+	:	stats_list stat { $$ = enqueue($1, create_ival($2)); }
+	|	stat { $$ = enqueue_in_new_queue(create_ival($1)); }
 	;
 
 stat
 	:	T_Clockstats
-			{ $$ = create_pval("clockstats"); }
 	|	T_Cryptostats
-			{ $$ = create_pval("cryptostats"); }
 	|	T_Loopstats
-			{ $$ = create_pval("loopstats"); }
 	|	T_Peerstats
-			{ $$ = create_pval("peerstats"); }
 	|	T_Rawstats
-			{ $$ = create_pval("rawstats"); }
 	|	T_Sysstats
-			{ $$ = create_pval("sysstats"); }
 	|	T_Timingstats
-			{ $$ = create_pval("timingstats"); }
 	|	T_Protostats
-			{ $$ = create_pval("protostats"); }
 	;
 
 filegen_option_list
@@ -623,13 +629,13 @@ filegen_option
 	;
 
 filegen_type
-	:	T_None	{ $$ = FILEGEN_NONE; }
-	|	T_Pid	{ $$ = FILEGEN_PID; }
-	|	T_Day	{ $$ = FILEGEN_DAY; }
-	|	T_Week	{ $$ = FILEGEN_WEEK; }
-	|	T_Month	{ $$ = FILEGEN_MONTH; }
-	|	T_Year	{ $$ = FILEGEN_YEAR; }
-	|	T_Age	{ $$ = FILEGEN_AGE; }
+	:	T_None
+	|	T_Pid
+	|	T_Day
+	|	T_Week
+	|	T_Month
+	|	T_Year
+	|	T_Age
 	;
 
 
@@ -639,7 +645,7 @@ filegen_type
 
 access_control_command
 	:	T_Discard discard_option_list
-		{   
+		{
 			append_queue(cfgt.discard_opts, $2);
 		}
 	|	T_Restrict address ac_flag_list
@@ -686,30 +692,34 @@ access_control_command
 	;
 
 ac_flag_list
-	:	/* Null statement */ { $$ = create_queue(); }
-	|	ac_flag_list access_control_flag  { $$ = enqueue($1, $2); }
+	:	/* Null statement */
+			{ $$ = create_queue(); }
+	|	ac_flag_list access_control_flag
+			{ $$ = enqueue($1, create_ival($2)); }
 	;
 
 access_control_flag
-	:	T_Flake		{ $$ = create_ival(RES_TIMEOUT); }
-	|	T_Ignore	{ $$ = create_ival(RES_IGNORE); }
-	|	T_Kod		{ $$ = create_ival(RES_KOD); }
-	|	T_Mssntp	{ $$ = create_ival(RES_MSSNTP); }
-	|	T_Limited	{ $$ = create_ival(RES_LIMITED); }
-	|	T_Lowpriotrap	{ $$ = create_ival(RES_LPTRAP); }
-	|	T_Nomodify	{ $$ = create_ival(RES_NOMODIFY); }
-	|	T_Nopeer	{ $$ = create_ival(RES_NOPEER); }
-	|	T_Noquery	{ $$ = create_ival(RES_NOQUERY); }
-	|	T_Noserve	{ $$ = create_ival(RES_DONTSERVE); }
-	|	T_Notrap	{ $$ = create_ival(RES_NOTRAP); }
-	|	T_Notrust	{ $$ = create_ival(RES_DONTTRUST); }
-	|	T_Ntpport	{ $$ = create_ival(RESM_NTPONLY); }
-	|	T_Version	{ $$ = create_ival(RES_VERSION); }
+	:	T_Flake
+	|	T_Ignore
+	|	T_Kod
+	|	T_Mssntp
+	|	T_Limited
+	|	T_Lowpriotrap
+	|	T_Nomodify
+	|	T_Nopeer
+	|	T_Noquery
+	|	T_Noserve
+	|	T_Notrap
+	|	T_Notrust
+	|	T_Ntpport
+	|	T_Version
 	;
 
 discard_option_list
-	:	discard_option_list discard_option { $$ = enqueue($1, $2); }
-	|	discard_option { $$ = enqueue_in_new_queue($1); }
+	:	discard_option_list discard_option
+			{ $$ = enqueue($1, $2); }
+	|	discard_option 
+			{ $$ = enqueue_in_new_queue($1); }
 	;
 
 discard_option
@@ -728,27 +738,21 @@ fudge_command
 	;
 
 fudge_factor_list
-	:	fudge_factor_list fudge_factor { enqueue($1, $2); }
-	|	fudge_factor { $$ = enqueue_in_new_queue($1); }
+	:	fudge_factor_list fudge_factor
+			{ enqueue($1, $2); }
+	|	fudge_factor
+			{ $$ = enqueue_in_new_queue($1); }
 	;
 	
 fudge_factor
-	:	T_Time1 number
-			{ $$ = create_attr_dval(CLK_HAVETIME1, $2); }
-	|	T_Time2 number
-			{ $$ = create_attr_dval(CLK_HAVETIME2, $2); }
-	|	T_Stratum T_Integer
-			{ $$ = create_attr_ival(CLK_HAVEVAL1,  $2); }
-	|	T_Refid T_String
-			{ $$ = create_attr_sval(CLK_HAVEVAL2,  $2); }
-	|	T_Flag1 boolean
-			{ $$ = create_attr_ival(CLK_HAVEFLAG1, $2); }
-	|	T_Flag2	boolean
-			{ $$ = create_attr_ival(CLK_HAVEFLAG2, $2); }
-	|	T_Flag3	boolean
-			{ $$ = create_attr_ival(CLK_HAVEFLAG3, $2); }
-	|	T_Flag4 boolean
-			{ $$ = create_attr_ival(CLK_HAVEFLAG4, $2); }
+	:	T_Time1 number		{ $$ = create_attr_dval($1, $2); }
+	|	T_Time2 number		{ $$ = create_attr_dval($1, $2); }
+	|	T_Stratum T_Integer	{ $$ = create_attr_ival($1, $2); }
+	|	T_Refid T_String	{ $$ = create_attr_sval($1, $2); }
+	|	T_Flag1 boolean		{ $$ = create_attr_ival($1, $2); }
+	|	T_Flag2	boolean		{ $$ = create_attr_ival($1, $2); }
+	|	T_Flag3	boolean		{ $$ = create_attr_ival($1, $2); }
+	|	T_Flag4 boolean		{ $$ = create_attr_ival($1, $2); }
 	;
 
 /* Command for System Options
@@ -811,13 +815,13 @@ tinker_option_list
 	;
 
 tinker_option
-	:	T_Allan number	    { $$ = create_attr_dval(LOOP_ALLAN, $2); }
-	|	T_Dispersion number { $$ = create_attr_dval(LOOP_PHI, $2); }
-	|	T_Freq number	    { $$ = create_attr_dval(LOOP_FREQ, $2); }
-	|	T_Huffpuff number   { $$ = create_attr_dval(LOOP_HUFFPUFF, $2); }
-	|	T_Panic number	    { $$ = create_attr_dval(LOOP_PANIC, $2); }
-	|	T_Step number	    { $$ = create_attr_dval(LOOP_MAX, $2); }
-	|	T_Stepout number    { $$ = create_attr_dval(LOOP_MINSTEP, $2); }
+	:	T_Allan number	    { $$ = create_attr_dval($1, $2); }
+	|	T_Dispersion number { $$ = create_attr_dval($1, $2); }
+	|	T_Freq number	    { $$ = create_attr_dval($1, $2); }
+	|	T_Huffpuff number   { $$ = create_attr_dval($1, $2); }
+	|	T_Panic number	    { $$ = create_attr_dval($1, $2); }
+	|	T_Step number	    { $$ = create_attr_dval($1, $2); }
+	|	T_Stepout number    { $$ = create_attr_dval($1, $2); }
 	;
 
 
@@ -911,7 +915,7 @@ drift_parm
 
 variable_assign
 	:	T_String '=' T_String T_Default
-			{ $$ = create_setvar_node($1, $3, DEF); }
+			{ $$ = create_setvar_node($1, $3, $4); }
 	|	T_String '=' T_String
 			{ $$ = create_setvar_node($1, $3, 0); }
 	;
