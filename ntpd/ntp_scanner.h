@@ -21,6 +21,10 @@
  * NO_ARG	->	FOLLBY_TOKEN
  * SINGLE_ARG	->	FOLLBY_STRING
  * MULTIPLE_ARG	->	FOLLBY_STRINGS_TO_EOC
+ *
+ * Note that some tokens use FOLLBY_TOKEN even though they sometimes
+ * are followed by strings.  FOLLBY_STRING is used only when needed to
+ * avoid the keyword scanner matching a token where a string is needed.
  */
 typedef enum {
 	FOLLBY_TOKEN = 0,

@@ -63,7 +63,9 @@ struct isc_interfaceiter {
 	INTERFACE_INFO		*pos4;		/* Current offset in IF List */
 	SOCKET_ADDRESS_LIST	*buf6;
 	unsigned int		buf6size;	/* Bytes allocated. */
-	unsigned int		pos6;
+	unsigned int		pos6;		/* buf6 index, counts down */
+	struct in6_addr		loop__1;	/* ::1 node-scope localhost */
+	struct in6_addr		loopfe80__1;	/* fe80::1 link-scope localhost */
 	isc_interface_t		current;	/* Current interface data. */
 	isc_result_t		result;		/* Last result code. */
 };
@@ -292,6 +294,17 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 			sizeof(SOCKET_ADDRESS);
 	}
 
+	/*
+	 * initialize loop__1 to [::1] and loopfe80__1 to [fe80::1].
+	 * used by internal_current6().
+	 */
+	memset(&iter->loop__1, 0, sizeof(iter->loop__1));
+	memset(&iter->loopfe80__1, 0, sizeof(iter->loopfe80__1));
+	iter->loop__1.s6_addr[15] = 1;
+	iter->loopfe80__1.s6_addr[15] = 1;
+	iter->loopfe80__1.s6_addr[0] = 0xfe;
+	iter->loopfe80__1.s6_addr[1] = 0x80;
+
 	closesocket(iter->socket);
 
  inet_only:
@@ -357,13 +370,13 @@ internal_current(isc_interfaceiter_t *iter) {
 
 	if ((flags & IFF_POINTTOPOINT) != 0) {
 		iter->current.flags |= INTERFACE_F_POINTTOPOINT;
-		sprintf(iter->current.name, "PPP Interface %d", iter->numIF);
+		sprintf(iter->current.name, "PPP %d", iter->numIF);
 		ifNamed = TRUE;
 	}
 
 	if ((flags & IFF_LOOPBACK) != 0) {
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
-		sprintf(iter->current.name, "Loopback Interface %d",
+		sprintf(iter->current.name, "v4loop %d", 
 			iter->numIF);
 		ifNamed = TRUE;
 	}
@@ -394,7 +407,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 	if (ifNamed == FALSE)
 		sprintf(iter->current.name,
-			"TCP/IP Interface %d", iter->numIF);
+			"IPv4 %d", iter->numIF);
 
 	return (ISC_R_SUCCESS);
 }
@@ -402,6 +415,8 @@ internal_current(isc_interfaceiter_t *iter) {
 static isc_result_t
 internal_current6(isc_interfaceiter_t *iter) {
 	BOOL ifNamed = FALSE;
+	struct sockaddr_in6 *psa6;
+	BOOL localhostSeen;
 	int i;
 
 	REQUIRE(VALID_IFITER(iter));
@@ -411,8 +426,33 @@ internal_current6(isc_interfaceiter_t *iter) {
 	memset(&iter->current, 0, sizeof(iter->current));
 	iter->current.af = AF_INET6;
 
-	get_addr(AF_INET6, &iter->current.address,
-		 iter->buf6->Address[iter->pos6].lpSockaddr);
+	/*
+	 * synthesize localhost ::1 before returning the rest, if ::1
+	 * is not on the list.
+	 */
+	if (iter->pos6 >= (unsigned)iter->buf6->iAddressCount) {
+		localhostSeen = FALSE;
+		for (i = 0; i < iter->buf6->iAddressCount; i++) {
+			psa6 = (struct sockaddr_in6 *)
+			       iter->buf6->Address[i].lpSockaddr;
+			if (!memcmp(&iter->loop__1, &psa6->sin6_addr,
+				    sizeof(iter->loop__1))) {
+				localhostSeen = TRUE;
+				break;
+			}
+		}
+		if (localhostSeen)
+			iter->pos6 = iter->buf6->iAddressCount - 1;
+	}
+
+	if (iter->pos6 < (unsigned)iter->buf6->iAddressCount)
+		get_addr(AF_INET6, &iter->current.address,
+			 iter->buf6->Address[iter->pos6].lpSockaddr);
+	else {
+		iter->current.address.family = AF_INET6;
+		memcpy(&iter->current.address.type.in6, &iter->loop__1,
+		       sizeof(iter->current.address.type.in6));
+	}
 
 	/*
 	 * Get interface flags.
@@ -420,12 +460,23 @@ internal_current6(isc_interfaceiter_t *iter) {
 
 	iter->current.flags = INTERFACE_F_UP | INTERFACE_F_MULTICAST;
 
-	if (ifNamed == FALSE)
-		sprintf(iter->current.name,
-			"TCP/IPv6 Interface %d", iter->pos6 + 1);
+	if (!memcmp(&iter->current.address.type.in6, &iter->loop__1,
+		    sizeof(iter->current.address.type.in6)) ||
+	    !memcmp(&iter->current.address.type.in6, &iter->loopfe80__1,
+	            sizeof(iter->current.address.type.in6))) {
 
-	for (i = 0; i< 16; i++)
-		iter->current.netmask.type.in6.s6_addr[i] = 0xff;
+		iter->current.flags |= INTERFACE_F_LOOPBACK;
+		sprintf(iter->current.name, "v6loop %d", 
+			iter->buf6->iAddressCount - iter->pos6);
+		ifNamed = TRUE;
+	}
+
+	if (ifNamed == FALSE)
+		sprintf(iter->current.name, "IPv6 %d",
+			iter->buf6->iAddressCount - iter->pos6);
+
+	memset(iter->current.netmask.type.in6.s6_addr, 0xff,
+	       sizeof(iter->current.netmask.type.in6.s6_addr));
 	iter->current.netmask.family = AF_INET6;
 	return (ISC_R_SUCCESS);
 }
@@ -484,8 +535,18 @@ isc_interfaceiter_first(isc_interfaceiter_t *iter) {
 
 	REQUIRE(VALID_IFITER(iter));
 
+	/*
+	 * SIO_ADDRESS_LIST_QUERY (used to query IPv6 addresses)
+	 * intentionally omits localhost addresses ::1 and ::fe80 in
+	 * some cases.  ntpd depends on enumerating ::1 to listen on
+	 * it, and ntpq and ntpdc default to "localhost" as the target,
+	 * so they will attempt to talk to [::1]:123 and fail. This
+	 * means we need to synthesize ::1, which we will do first,
+	 * hence + 1.
+	 */
 	if (iter->buf6 != NULL)
-		iter->pos6 = iter->buf6->iAddressCount;
+		iter->pos6 = iter->buf6->iAddressCount + 1;
+
 	iter->result = ISC_R_SUCCESS;
 	return (isc_interfaceiter_next(iter));
 }

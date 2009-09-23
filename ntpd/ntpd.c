@@ -548,12 +548,6 @@ ntpdmain(
 		const char**	ifaces  = STACKLST_OPT( INTERFACE );
 		isc_netaddr_t	netaddr;
 
-		/*
-		 * if there are any --interface / -I options, do not
-		 * listen on any other interfaces.
-		 */
-		add_nic_rule(MATCH_ALL, NULL, -1, ACTION_IGNORE);
-
 		while (ifacect-- > 0) {
 			add_nic_rule(
 				is_ip_address(*ifaces, &netaddr)

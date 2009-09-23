@@ -1,3 +1,11 @@
+* [Bug 1315] "interface ignore 0.0.0.0" is ignored.
+* add implicit "nic ignore all" rule before any rules from ntp.conf, so
+  "nic listen eth0" alone means the same as "-I eth0".
+* add wildcard match class for interface/nic rules.
+* fix mistaken carryover of prefixlen from one rule to the next.
+* Ensure IPv6 localhost address ::1 is included in libisc's Windows IPv6
+  address enumeration, allowing ntpq and ntpdc's hardcoding to 127.0.0.1 
+  on Windows to end.
 (4.2.5p218) 2009/09/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1314] saveconfig emits -4 and -6 on when not given.
 * correct parsing and processing of setvar directive.

@@ -66,6 +66,7 @@ typedef enum {
 	MATCH_ALL,
 	MATCH_IPV4,
 	MATCH_IPV6,
+	MATCH_WILDCARD,
 	MATCH_IFNAME,
 	MATCH_IFADDR
 } nic_rule_match;
@@ -81,8 +82,9 @@ typedef enum {
 } nic_rule_action;
 
 
-isc_boolean_t get_broadcastclient_flag(void);
-isc_boolean_t is_ip_address(const char *, isc_netaddr_t *);
+isc_boolean_t	get_broadcastclient_flag(void);
+isc_boolean_t	is_ip_address(const char *, isc_netaddr_t *);
+extern void	sau_from_netaddr(sockaddr_u *, const isc_netaddr_t *);
 extern void add_nic_rule(nic_rule_match match_type, const char *if_name,
 			 int prefixlen, nic_rule_action action);
 

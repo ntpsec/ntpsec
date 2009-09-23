@@ -197,7 +197,9 @@ static int		update_interfaces(u_short, interface_receiver_t, void *);
 static void		remove_interface(struct interface *);
 static struct interface *create_interface(u_short, struct interface *);
 
-static int		move_fd		(SOCKET);
+static int	move_fd			(SOCKET);
+static int	is_wildcard_addr	(sockaddr_u *);
+static int	is_wildcard_netaddr	(const isc_netaddr_t *);
 
 /*
  * Multicast functions
@@ -291,8 +293,10 @@ static void	create_wildcards	(u_short);
 #ifdef DEBUG
 static const char *action_text(nic_rule_action);
 #endif
-static nic_rule_action	interface_action	(isc_interface_t *);
-static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
+static nic_rule_action	interface_action(char *, isc_netaddr_t *,
+					 isc_uint32_t);
+static void		convert_isc_if	(isc_interface_t *,
+					 struct interface *, u_short);
 static struct interface *getinterface	(sockaddr_u *, int);
 static struct interface *getsamenetinterface	(sockaddr_u *, int);
 static struct interface *findlocalinterface	(sockaddr_u *, int, int);
@@ -918,86 +922,122 @@ create_wildcards(
 	u_short	port
 	)
 {
-	struct interface *	interface;
+	int			v4wild, v6wild;
+	sockaddr_u		wildaddr;
+	isc_netaddr_t		wnaddr;
+	nic_rule_action		action;
+	struct interface *	wildif;
 
+	/*
+	 * silence "potentially uninitialized" warnings from VC9
+	 * failing to follow the logic.  Ideally action could remain
+	 * uninitialized, and the memset be the first statement under
+	 * the first if (v4wild).
+	 */
+	action = ACTION_LISTEN;
+	memset(&wildaddr, 0, sizeof(wildaddr));
+	
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
 	 */
-	if (ipv4_works) {
-		interface = new_interface(NULL);
+	v4wild = ipv4_works;
+	if (v4wild) {
+		/* set wildaddr to the v4 wildcard address 0.0.0.0 */
+		AF(&wildaddr) = AF_INET;
+		SET_ADDR4(&wildaddr, INADDR_ANY);
+		SET_PORT(&wildaddr, port);
 
-		strncpy(interface->name, "wildcard", COUNTOF(interface->name));
-		interface->family = AF_INET;
-		AF(&interface->sin) = AF_INET;
-		AF(&interface->mask) = AF_INET;
-		SET_ADDR4(&interface->sin, INADDR_ANY);
-		SET_PORT(&interface->sin, port);
-		SET_ONESMASK(&interface->mask);
+		/* make an libisc-friendly copy */
+		isc_netaddr_fromin(&wnaddr, &wildaddr.sa4.sin_addr);
 
-		interface->flags = INT_BROADCAST | INT_UP | INT_WILDCARD;
-		interface->ignore_packets = ISC_TRUE;
+		/* check for interface/nic rules affecting the wildcard */
+		action = interface_action(NULL, &wnaddr, 0);
+		v4wild = (ACTION_IGNORE != action);
+	}
+	if (v4wild) {
+		wildif = new_interface(NULL);
+
+		strncpy(wildif->name, "v4wildcard", sizeof(wildif->name));
+		memcpy(&wildif->sin, &wildaddr, sizeof(wildif->sin));
+		wildif->family = AF_INET;
+		AF(&wildif->mask) = AF_INET;
+		SET_ONESMASK(&wildif->mask);
+
+		wildif->flags = INT_BROADCAST | INT_UP | INT_WILDCARD;
+		wildif->ignore_packets = (ACTION_DROP == action);
 #if defined(MCAST)
 		/*
 		 * enable multicast reception on the broadcast socket
 		 */
-		AF(&interface->bcast) = AF_INET;
-		SET_ADDR4(&interface->bcast, INADDR_ANY);
-		SET_PORT(&interface->bcast, port);
+		AF(&wildif->bcast) = AF_INET;
+		SET_ADDR4(&wildif->bcast, INADDR_ANY);
+		SET_PORT(&wildif->bcast, port);
 #endif /* MCAST */
-		interface->fd = open_socket(&interface->sin,
-				 0, 1, interface);
+		wildif->fd = open_socket(&wildif->sin, 0, 1, wildif);
 
-		if (interface->fd != INVALID_SOCKET) {
-			wildipv4 = interface;
-			any_interface = interface;
+		if (wildif->fd != INVALID_SOCKET) {
+			wildipv4 = wildif;
+			any_interface = wildif;
 			
-			add_addr_to_list(&interface->sin, interface);
-			add_interface(interface);
-			list_if_listening(interface);
+			add_addr_to_list(&wildif->sin, wildif);
+			add_interface(wildif);
+			list_if_listening(wildif);
 		} else {
 			msyslog(LOG_ERR, 
 				"unable to bind to wildcard address %s - another process may be running - EXITING",
-				stoa(&interface->sin));
+				stoa(&wildif->sin));
 			exit(1);
 		}
-		DPRINT_INTERFACE(2, (interface, "created ", "\n"));
+		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
 	}
 
 #ifdef INCLUDE_IPV6_SUPPORT
 	/*
 	 * create pseudo-interface with wildcard IPv6 address
 	 */
-	if (ipv6_works) {
-		interface = new_interface(NULL);
+	v6wild = ipv6_works;
+	if (v6wild) {
+		/* set wildaddr to the v6 wildcard address :: */
+		memset(&wildaddr, 0, sizeof(wildaddr));
+		AF(&wildaddr) = AF_INET6;
+		SET_ADDR6N(&wildaddr, in6addr_any);
+		SET_PORT(&wildaddr, port);
+		SET_SCOPE(&wildaddr, 0);
 
-		strncpy(interface->name, "wildcard", COUNTOF(interface->name));
-		interface->family = AF_INET6;
-		AF(&interface->sin) = AF_INET6;
-		AF(&interface->mask) = AF_INET6;
-		SET_ADDR6N(&interface->sin, in6addr_any);
-		SET_PORT(&interface->sin, port);
-		SET_SCOPE(&interface->sin, 0);
-		SET_ONESMASK(&interface->mask);
+		/* make an libisc-friendly copy */
+		isc_netaddr_fromin(&wnaddr, &wildaddr.sa4.sin_addr);
 
-		interface->flags = INT_UP | INT_WILDCARD;
-		interface->ignore_packets = ISC_TRUE;
+		/* check for interface/nic rules affecting the wildcard */
+		action = interface_action(NULL, &wnaddr, 0);
+		v6wild = (ACTION_IGNORE != action);
+	}
+	if (v6wild) {
+		wildif = new_interface(NULL);
 
-		interface->fd = open_socket(&interface->sin,
-				 0, 1, interface);
+		strncpy(wildif->name, "v6wildcard", sizeof(wildif->name));
+		memcpy(&wildif->sin, &wildaddr, sizeof(wildif->sin));
+		wildif->family = AF_INET6;
+		AF(&wildif->mask) = AF_INET6;
+		SET_ONESMASK(&wildif->mask);
 
-		if (interface->fd != INVALID_SOCKET) {
-			wildipv6 = interface;
-			any6_interface = interface;
-			add_addr_to_list(&interface->sin, interface);
-			add_interface(interface);
-			list_if_listening(interface);
+		wildif->flags = INT_UP | INT_WILDCARD;
+		wildif->ignore_packets = (ACTION_DROP == action);
+
+		wildif->fd = open_socket(&wildif->sin, 0, 1, wildif);
+
+		if (wildif->fd != INVALID_SOCKET) {
+			wildipv6 = wildif;
+			any6_interface = wildif;
+			add_addr_to_list(&wildif->sin, wildif);
+			add_interface(wildif);
+			list_if_listening(wildif);
 		} else {
 			msyslog(LOG_ERR,
 				"unable to bind to wildcard address %s - another process may be running - EXITING",
-				stoa(&interface->sin));
+				stoa(&wildif->sin));
 			exit(1);
 		}
-		DPRINT_INTERFACE(2, (interface, "created ", "\n"));
+		DPRINT_INTERFACE(2, (wildif, "created ", "\n"));
 	}
 #endif
 }
@@ -1005,6 +1045,14 @@ create_wildcards(
 
 /*
  * add_nic_rule() -- insert a rule entry at the head of nic_rule_list.
+ *
+ * If this is the first rule (whether from --interface/-I or interface
+ * or nic in ntp.conf), first add an implicit first rule to ignore all
+ * interfaces.  This, combined with interface_action()'s default in the
+ * case of no matching rules (ACTION_LISTEN) implements the traditional
+ * default behavior lacking interface configuration of either form
+ * while also treating a solitary "nic listen eth0" in ntp.conf as
+ * implying all others are ignored, just as -I eth0 does.
  */
 void
 add_nic_rule(
@@ -1017,17 +1065,26 @@ add_nic_rule(
 	nic_rule *	rule;
 	isc_boolean_t	is_ip;
 
+	if (NULL == nic_rule_list) {
+		rule = emalloc(sizeof(*rule));
+		memset(rule, 0, sizeof(*rule));
+		rule->match_type = MATCH_ALL;
+		rule->action = ACTION_IGNORE;
+		rule->prefixlen = -1;
+		LINK_SLIST(nic_rule_list, rule, next);
+	}
+
 	rule = emalloc(sizeof(*rule));
+	memset(rule, 0, sizeof(*rule));
 	rule->match_type = match_type;
 	rule->prefixlen = prefixlen;
 	rule->action = action;
 	
-	memset(&rule->netaddr, 0, sizeof(rule->netaddr));
-	rule->if_name = NULL;
-
-	if (MATCH_IFNAME == match_type)
+	if (MATCH_IFNAME == match_type) {
+		NTP_REQUIRE(NULL != if_name);
 		rule->if_name = estrdup(if_name);
-	else if (MATCH_IFADDR == match_type) {
+	} else if (MATCH_IFADDR == match_type) {
+		NTP_REQUIRE(NULL != if_name);
 		/* set rule->netaddr */
 		is_ip = is_ip_address(if_name, &rule->netaddr);
 		NTP_REQUIRE(is_ip);
@@ -1075,23 +1132,31 @@ action_text(
 
 static nic_rule_action
 interface_action(
-	isc_interface_t *isc_if
+	char *		if_name,
+	isc_netaddr_t *	if_netaddr,
+	isc_uint32_t	if_flags
 	)
 {
 	nic_rule *rule;
+	int isloopback;
 
-	DPRINTF(4, ("interface_action: interface %s ", isc_if->name));
+	DPRINTF(4, ("interface_action: interface %s ",
+		    (if_name != NULL) ? if_name : "wildcard"));
 
 	/*
-	 * Always allow the loopback - required by ntp_intres
+	 * Always listen on 127.0.0.1 - required by ntp_intres
 	 */
-	if (isc_if->flags & INTERFACE_F_LOOPBACK) {
-		DPRINTF(4, ("loopback - listen\n"));
-		return ACTION_LISTEN;
-	}
+	if (if_flags & INTERFACE_F_LOOPBACK) {
+		isloopback = 1;
+		if (AF_INET == if_netaddr->family) {
+			DPRINTF(4, ("IPv4 loopback - listen\n"));
+			return ACTION_LISTEN;
+		}
+	} else
+		isloopback = 0;
 
-	if (!listen_to_virtual_ips
-	    && (strchr(isc_if->name, ':') != NULL)) {
+	if (!listen_to_virtual_ips && if_name != NULL
+	    && (strchr(if_name, ':') != NULL)) {
 
 		DPRINTF(4, ("virtual ip - ignore\n"));
 		return ACTION_IGNORE;
@@ -1106,12 +1171,15 @@ interface_action(
 		switch (rule->match_type) {
 
 		case MATCH_ALL:
+			/* loopback excluded from MATCH_ALL */
+			if (isloopback)
+				break;
 			DPRINTF(4, ("nic all %s\n",
 			    action_text(rule->action)));
 			return rule->action;
 
 		case MATCH_IPV4:
-			if (AF_INET == isc_if->af) {
+			if (AF_INET == if_netaddr->family) {
 				DPRINTF(4, ("nic ipv4 %s\n",
 				    action_text(rule->action)));
 				return rule->action;
@@ -1119,8 +1187,16 @@ interface_action(
 			break;
 
 		case MATCH_IPV6:
-			if (AF_INET6 == isc_if->af) {
+			if (AF_INET6 == if_netaddr->family) {
 				DPRINTF(4, ("nic ipv6 %s\n",
+				    action_text(rule->action)));
+				return rule->action;
+			}
+			break;
+
+		case MATCH_WILDCARD:
+			if (is_wildcard_netaddr(if_netaddr)) {
+				DPRINTF(4, ("nic wildcard %s\n",
 				    action_text(rule->action)));
 				return rule->action;
 			}
@@ -1128,17 +1204,16 @@ interface_action(
 
 		case MATCH_IFADDR:
 			if (rule->prefixlen != -1) {
-				if (isc_netaddr_eqprefix(
-					&isc_if->address, &rule->netaddr,
-					rule->prefixlen)) {
+				if (isc_netaddr_eqprefix(if_netaddr,
+				    &rule->netaddr, rule->prefixlen)) {
 
 					DPRINTF(4, ("subnet address match - %s\n",
 					    action_text(rule->action)));
 					return rule->action;
 				}
 			} else
-				if (isc_netaddr_equal(&isc_if->address,
-					&rule->netaddr)) {
+				if (isc_netaddr_equal(if_netaddr,
+				    &rule->netaddr)) {
 
 					DPRINTF(4, ("address match - %s\n",
 					    action_text(rule->action)));
@@ -1147,7 +1222,8 @@ interface_action(
 			break;
 
 		case MATCH_IFNAME:
-			if (!strcasecmp(isc_if->name, rule->if_name)) {
+			if (if_name != NULL
+			    && !strcasecmp(if_name, rule->if_name)) {
 
 				DPRINTF(4, ("interface name match - %s\n",
 				    action_text(rule->action)));
@@ -1281,6 +1357,33 @@ interface_update(
 }
 
 
+/*
+ * sau_from_netaddr() - convert network address on-wire formats.
+ * Convert from libisc's isc_netaddr_t to NTP's sockaddr_u
+ */
+void
+sau_from_netaddr(
+	sockaddr_u *psau,
+	const isc_netaddr_t *pna
+	)
+{
+	memset(psau, 0, sizeof(*psau));
+	AF(psau) = (u_short)pna->family;
+	switch (pna->family) {
+
+	case AF_INET:
+		memcpy(&psau->sa4.sin_addr, &pna->type.in,
+		       sizeof(psau->sa4.sin_addr));
+		break;
+
+	case AF_INET6:
+		memcpy(&psau->sa6.sin6_addr, &pna->type.in6,
+		       sizeof(psau->sa6.sin6_addr));
+		break;
+	}
+}
+
+
 static int
 is_wildcard_addr(
 	sockaddr_u *psau
@@ -1295,6 +1398,19 @@ is_wildcard_addr(
 #endif
 
 	return 0;
+}
+
+
+static int
+is_wildcard_netaddr(
+	const isc_netaddr_t *pna
+	)
+{
+	sockaddr_u sau;
+
+	sau_from_netaddr(&sau, pna);
+
+	return is_wildcard_addr(&sau);
 }
 
 
@@ -1418,7 +1534,8 @@ update_interfaces(
 		/* 
 		 * Check if and how we are going to use the interface.
 		 */
-		switch (interface_action(&isc_if)) {
+		switch (interface_action(isc_if.name, &isc_if.address,
+					 isc_if.flags)) {
 
 		case ACTION_IGNORE:
 			continue;

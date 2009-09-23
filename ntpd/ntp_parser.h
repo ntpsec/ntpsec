@@ -185,21 +185,22 @@
      T_Version = 401,
      T_WanderThreshold = 402,
      T_Week = 403,
-     T_Xleave = 404,
-     T_Year = 405,
-     T_Flag = 406,
-     T_Void = 407,
-     T_EOC = 408,
-     T_Simulate = 409,
-     T_Beep_Delay = 410,
-     T_Sim_Duration = 411,
-     T_Server_Offset = 412,
-     T_Duration = 413,
-     T_Freq_Offset = 414,
-     T_Wander = 415,
-     T_Jitter = 416,
-     T_Prop_Delay = 417,
-     T_Proc_Delay = 418
+     T_Wildcard = 404,
+     T_Xleave = 405,
+     T_Year = 406,
+     T_Flag = 407,
+     T_Void = 408,
+     T_EOC = 409,
+     T_Simulate = 410,
+     T_Beep_Delay = 411,
+     T_Sim_Duration = 412,
+     T_Server_Offset = 413,
+     T_Duration = 414,
+     T_Freq_Offset = 415,
+     T_Wander = 416,
+     T_Jitter = 417,
+     T_Prop_Delay = 418,
+     T_Proc_Delay = 419
    };
 #endif
 /* Tokens.  */
@@ -349,21 +350,22 @@
 #define T_Version 401
 #define T_WanderThreshold 402
 #define T_Week 403
-#define T_Xleave 404
-#define T_Year 405
-#define T_Flag 406
-#define T_Void 407
-#define T_EOC 408
-#define T_Simulate 409
-#define T_Beep_Delay 410
-#define T_Sim_Duration 411
-#define T_Server_Offset 412
-#define T_Duration 413
-#define T_Freq_Offset 414
-#define T_Wander 415
-#define T_Jitter 416
-#define T_Prop_Delay 417
-#define T_Proc_Delay 418
+#define T_Wildcard 404
+#define T_Xleave 405
+#define T_Year 406
+#define T_Flag 407
+#define T_Void 408
+#define T_EOC 409
+#define T_Simulate 410
+#define T_Beep_Delay 411
+#define T_Sim_Duration 412
+#define T_Server_Offset 413
+#define T_Duration 414
+#define T_Freq_Offset 415
+#define T_Wander 416
+#define T_Jitter 417
+#define T_Prop_Delay 418
+#define T_Proc_Delay 419
 
 
 
@@ -391,7 +393,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 395 "ntp_parser.h"
+#line 397 "ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

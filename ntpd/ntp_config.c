@@ -2392,12 +2392,13 @@ config_nic_rules(
 	nic_rule_action	action;
 	char *		if_name;
 	char *		pchSlash;
-	int		prefixlen = -1;
+	int		prefixlen;
 
 	for (curr_node = queue_head(ptree->nic_rules);
 	     curr_node != NULL;
 	     curr_node = next_node(curr_node)) {
 
+		prefixlen = -1;
 		if_name = curr_node->if_name;
 		if (if_name != NULL)
 			if_name = estrdup(if_name);
@@ -2405,13 +2406,22 @@ config_nic_rules(
 		switch (curr_node->match_class) {
 
 		default:
-			msyslog(LOG_ERR,
-				"fatal unknown NIC match class %d",
-				curr_node->match_class);
-			exit(-1);
+			/*
+			 * this assignment quiets a gcc "may be used
+			 * uninitialized" warning and is here for no
+			 * other reason.
+			 */
+			match_type = MATCH_ALL;
+			NTP_INSIST(0);
 			break;
 
 		case 0:
+			/*
+			 * 0 is out of range for valid token T_...
+			 * and in a nic_rules_node indicates the
+			 * interface descriptor is either a name or
+			 * address, stored in if_name in either case.
+			 */
 			NTP_INSIST(if_name != NULL);
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
@@ -2445,15 +2455,22 @@ config_nic_rules(
 		case T_Ipv6:
 			match_type = MATCH_IPV6;
 			break;
+
+		case T_Wildcard:
+			match_type = MATCH_WILDCARD;
+			break;
 		}
 
 		switch (curr_node->action) {
 
 		default:
-			msyslog(LOG_ERR, 
-				"fatal unknown NIC rule action %d",
-				curr_node->action);
-			exit(-1);
+			/*
+			 * this assignment quiets a gcc "may be used
+			 * uninitialized" warning and is here for no
+			 * other reason.
+			 */
+			action = ACTION_LISTEN;
+			NTP_INSIST(0);
 			break;
 
 		case T_Listen:

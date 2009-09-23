@@ -212,6 +212,7 @@ struct key_tok ntp_keyword_list[] = {
 { "all",		T_All,			FOLLBY_TOKEN },
 { "ipv4",		T_Ipv4,			FOLLBY_TOKEN },
 { "ipv6",		T_Ipv6,			FOLLBY_TOKEN },
+{ "wildcard",		T_Wildcard,		FOLLBY_TOKEN },
 { "listen",		T_Listen,		FOLLBY_TOKEN },
 { "drop",		T_Drop,			FOLLBY_TOKEN },
 /* simulator commands */
@@ -794,16 +795,17 @@ yylex(
 		while (EOF != (yytext[i] = get_next_char())) {
 
 			/* Break on whitespace or a special character */
-			if (isspace(yytext[i]) 
-			    || (is_special(yytext[i]) && FOLLBY_TOKEN == followedby)
-			    || is_EOC(ch) || yytext[i] == '"')
+			if (isspace(yytext[i]) || is_EOC(ch) 
+			    || '"' == yytext[i]
+			    || (FOLLBY_TOKEN == followedby
+				&& is_special(yytext[i])))
 				break;
 
 			/* Read the rest of the line on reading a start
 			   of comment character */
-			if (yytext[i] == '#') {
-				while ((yytext[i] = get_next_char()) != EOF
-				       && yytext[i] != '\n')
+			if ('#' == yytext[i]) {
+				while (EOF != (yytext[i] = get_next_char())
+				       && '\n' != yytext[i])
 					; /* Null Statement */
 				break;
 			}
@@ -818,14 +820,21 @@ yylex(
 		 *
 		 * XXX - HMS: I'm not sure we want to assume the closing "
 		 */
-		if (yytext[i] == '"') {
+		if ('"' == yytext[i]) {
 			instring = 1;
-			while ((yytext[i] = get_next_char()) != EOF &&
+			while (EOF != (yytext[i] = get_next_char()) &&
 			       yytext[i] != '"' && yytext[i] != '\n') {
 				i++;
 				if (i >= COUNTOF(yytext))
 					goto lex_too_long;
 			}
+			/*
+			 * yytext[i] will be pushed back as not part of
+			 * this lexeme, but any closing quote should
+			 * not be pushed back, so we read another char.
+			 */
+			if ('"' == yytext[i])
+				yytext[i] = get_next_char();
 		}
 		/* Pushback the last character read that is not a part
 		 * of this lexeme.
@@ -835,7 +844,7 @@ yylex(
 		 */
 		if (EOF == yytext[i])
 			push_back_char('\n');
-		else if ('"' != yytext[i])
+		else
 			push_back_char(yytext[i]); 
 		yytext[i] = '\0';
 	} while (i == 0);

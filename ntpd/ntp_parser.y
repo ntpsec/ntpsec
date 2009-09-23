@@ -209,6 +209,7 @@
 %token	<Integer>	T_Version
 %token	<Integer>	T_WanderThreshold	/* Not a token */
 %token	<Integer>	T_Week
+%token	<Integer>	T_Wildcard
 %token	<Integer>	T_Xleave
 %token	<Integer>	T_Year
 %token	<Integer>	T_Flag		/* Not an actual token */
@@ -973,6 +974,7 @@ nic_rule_class
 	:	T_All
 	|	T_Ipv4
 	|	T_Ipv6
+	|	T_Wildcard
 	;
 
 nic_rule_action
