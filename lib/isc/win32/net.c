@@ -61,10 +61,10 @@ static isc_result_t	ipv6pktinfo_result = ISC_R_NOTFOUND;
 
 void InitSockets(void);
 
-
 static isc_result_t
 try_proto(int domain) {
 	SOCKET s;
+	isc_result_t result = ISC_R_SUCCESS;
 	char strbuf[ISC_STRERRORSIZE];
 	int errval;
 
@@ -166,7 +166,7 @@ try_ipv6only(void) {
 	}
 
 	on = 1;
-	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&on, sizeof(on)) < 0) {
+	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
 		ipv6only_result = ISC_R_NOTFOUND;
 		goto close;
 	}
@@ -189,7 +189,7 @@ try_ipv6only(void) {
 	}
 
 	on = 1;
-	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&on, sizeof(on)) < 0) {
+	if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0) {
 		ipv6only_result = ISC_R_NOTFOUND;
 		goto close;
 	}
@@ -197,7 +197,7 @@ try_ipv6only(void) {
 	ipv6only_result = ISC_R_SUCCESS;
 
 close:
-	closesocket(s);
+	closeocket(s);
 	return;
 #endif /* IPV6_V6ONLY */
 }

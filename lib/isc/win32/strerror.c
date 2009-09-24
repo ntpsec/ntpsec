@@ -1,55 +1,33 @@
 /*
- * Copyright (C) 2002  Internet Software Consortium.
+ * Copyright (C) 2004, 2007  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2001, 2002  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
- * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
- * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
- * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
- * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
- * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
- * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* From BIND 9 lib/isc/win32/: strerror.c,v 1.5 2002/08/01 03:52:14 mayer */
+/* $Id: strerror.c,v 1.8 2007/06/19 23:47:19 tbox Exp $ */
 
-/*
- * We don't need this warning message
- */
-#pragma warning(disable: 4127) /* conditional expression is constant */
+#include <config.h>
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
-#include <isc/list.h>
-#include "ntp_stdlib.h"
+#include <winsock2.h>
 
-
-/*
- * Messsage list
- */
-typedef struct msg_list msg_list_t;
-
-struct msg_list {
-	int code;
-	char *msg;
-	ISC_LINK(msg_list_t) link;
-};
-
-static ISC_LIST(msg_list_t) errormsg_list;
-
-BOOL initialized = FALSE;
-
-static CRITICAL_SECTION ErrorMsgLock;
-# define LOCK(lock)	EnterCriticalSection(lock)
-# define UNLOCK(lock)	LeaveCriticalSection(lock)
+#include <isc/mutex.h>
+#include <isc/once.h>
+#include <isc/print.h>
+#include <isc/strerror.h>
+#include <isc/util.h>
 
 /*
  * Forward declarations
@@ -61,26 +39,18 @@ FormatError(int error);
 char *
 GetWSAErrorMessage(int errval);
 
-static char *
-isc__NTstrerror(int err);
+char *
+NTstrerror(int err, BOOL *bfreebuf);
 
 /*
- * Initialize the error message list
+ * We need to do this this way for profiled locks.
  */
 
-void
-initialize() {
-	ISC_LIST_INIT(errormsg_list);
-	InitializeCriticalSection(&ErrorMsgLock);
-	initialized = TRUE;
+static isc_mutex_t isc_strerror_lock;
+static void init_lock(void) {
+	RUNTIME_CHECK(isc_mutex_init(&isc_strerror_lock) == ISC_R_SUCCESS);
 }
 
-char *
-NTstrerror(int errnum) {
-	if(!initialized)
-		initialize();
-	return (isc__NTstrerror(errnum));
-}
 /*
  * This routine needs to free up any buffer allocated by FormatMessage
  * if that routine gets used.
@@ -89,73 +59,36 @@ NTstrerror(int errnum) {
 void
 isc__strerror(int num, char *buf, size_t size) {
 	char *msg;
+	BOOL freebuf;
 	unsigned int unum = num;
-	if(!initialized)
-		initialize();
+	static isc_once_t once = ISC_ONCE_INIT;
 
-	msg = isc__NTstrerror(num);
-	/*
-	 * C4996 is strncpy, _snprintf may be unsafe, consider
-	 * strncpy_s, _snprintf_s instead
-	 * Those _s routines are not available with older MS
-	 * compilers and our paranoid uses are safe.  An
-	 * alternative would be to use the _s versions for
-	 * newer compilers instead of disabling warning 4996.
-	 */
-	#if defined(_MSC_VER)
-		#pragma warning(push)
-		#pragma warning(disable: 4996)
-	#endif /* _MSC_VER */
+	REQUIRE(buf != NULL);
 
-	/* 
-	 * Both strncpy and _snprintf will not null terminate in the
-	 * edge case of the message fitting but the terminator not.
-	 * This seems to be a MS-specific behavior, but our paranoid
-	 * approach should be harmless on less challenged runtimes.
-	 */
-	if (msg != NULL) {
-		strncpy(buf, msg, size - 1);
-	} else {
-		_snprintf(buf, size - 1, "Unknown error: %u", unum);
+	RUNTIME_CHECK(isc_once_do(&once, init_lock) == ISC_R_SUCCESS);
+
+	LOCK(&isc_strerror_lock);
+	freebuf = FALSE;
+	msg = NTstrerror(num, &freebuf);
+	if (msg != NULL)
+		snprintf(buf, size, "%s", msg);
+	else
+		snprintf(buf, size, "Unknown error: %u", unum);
+	if(freebuf && msg != NULL) {
+		LocalFree(msg);
 	}
-	buf[size - 1] = '\0';
-
-	#if defined(_MSC_VER)
-		#pragma warning(pop)
-	#endif /* _MSC_VER */
+	UNLOCK(&isc_strerror_lock);
 }
 
 /*
- * FormatError returns a message string for a given error code.
- * Callers should not attempt to free the string, as it is cached
- * and used again.
+ * Note this will cause a memory leak unless the memory allocated here
+ * is freed by calling LocalFree.  isc__strerror does this before unlocking.
+ * This only gets called if there is a system type of error and will likely
+ * be an unusual event.
  */
 char *
 FormatError(int error) {
 	LPVOID lpMsgBuf = NULL;
-
-	msg_list_t *lmsg; 
-
-	/*
-	 * See if we already have the error code
-	 */
-
-	LOCK(&ErrorMsgLock);
-
-	lmsg = ISC_LIST_HEAD(errormsg_list);
-	while (lmsg != NULL) {
-		if (lmsg->code == error) {
-			lpMsgBuf = lmsg->msg;
-			UNLOCK(&ErrorMsgLock);
-			return (lpMsgBuf);
-		}
-		lmsg = ISC_LIST_NEXT(lmsg, link);
-	}
-
-	/*
-	 * Not found
-	 */
-
 	FormatMessage( 
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
 		FORMAT_MESSAGE_FROM_SYSTEM | 
@@ -168,121 +101,39 @@ FormatError(int error) {
 		0,
 		NULL); 
 
-	if (lpMsgBuf) {
-		lmsg = emalloc(sizeof(*lmsg));
-		lmsg->code = error;
-		lmsg->msg = lpMsgBuf;
-		ISC_LIST_APPEND(errormsg_list, lmsg, link);
-	}
-	UNLOCK(&ErrorMsgLock);
 	return (lpMsgBuf);
 }
 
 /*
- * Free the memory allocated for error messages during shutdown to
- * increase the utility of _DEBUG MS CRT's malloc leak checks.
- *
- * ntservice_exit() calls this routine during shutdown.  (ntservice.c)
+ * This routine checks the error value and calls the WSA Windows Sockets
+ * Error message function GetWSAErrorMessage below if it's within that range
+ * since those messages are not available in the system error messages.
  */
-#ifdef _DEBUG
-void
-FormatErrorFreeMem(void) {
-	msg_list_t *entry;
-	/*
-	 * Delete the lock used to protect the error message list as
-	 * a cheap way of catching FormatError calls after this
-	 * routine has torn things down for termination.
-	 */
-	DeleteCriticalSection(&ErrorMsgLock);
-
-	entry = ISC_LIST_HEAD(errormsg_list);
-	while (entry) {
-		ISC_LIST_DEQUEUE(errormsg_list, entry, link);
-		
-		/* Memory from FormatMessage goes back via LocalFree */
-		LocalFree(entry->msg);
-		free(entry);
-
-		entry = ISC_LIST_HEAD(errormsg_list);
-	}
-}
-#endif /* _DEBUG */
-
-/*
- * This routine checks the error value and calls the WSA Windows
- * Sockets Error message function GetWSAErrorMessage below if it's
- * within that range since those messages are not available in the
- * system error messages in Windows NT 4 and earlier Windows.  With
- * Windows 2000 and later, FormatMessage will translate socket errors,
- * so GetWSAErrorMessage can be removed once Windows NT is no longer
- * supported at runtime.
- */
-static char *
-isc__NTstrerror(int err) {
+char *
+NTstrerror(int err, BOOL *bfreebuf) {
 	char *retmsg = NULL;
 
+	/* Copy the error value first in case of other errors */	
+	DWORD errval = err; 
+
+	*bfreebuf = FALSE;
+
 	/* Get the Winsock2 error messages */
-	if (err >= WSABASEERR && err <= (WSABASEERR + 1015)) {
-		retmsg = GetWSAErrorMessage(err);
+	if (errval >= WSABASEERR && errval <= (WSABASEERR + 1015)) {
+		retmsg = GetWSAErrorMessage(errval);
+		if (retmsg != NULL)
+			return (retmsg);
 	}
 	/*
-	 * C4996 here is strerror may be unsafe, consider
-	 * strerror_s instead.
-	 * strerror_s copies the message into a caller-supplied buffer,
-	 * which is not an option when providing a strerror() wrapper.
+	 * If it's not one of the standard Unix error codes,
+	 * try a system error message
 	 */
-	#if defined(_MSC_VER)
-		#pragma warning(push)
-		#pragma warning(disable: 4996)
-	#endif /* _MSC_VER */
-
-	if (!retmsg) {
-#undef strerror
-		retmsg = strerror(err);
+	if (errval > (DWORD) _sys_nerr) {
+		*bfreebuf = TRUE;
+		return (FormatError(errval));
+	} else {
+		return (strerror(errval));
 	}
-
-	#if defined(_MSC_VER)
-		#pragma warning(pop)
-	#endif /* _MSC_VER */
-
-	if (!retmsg) {
-		/*
-		 * Handle a few errno values MS strerror() doesn't,
-		 * since they only generate a subset of errno values
-		 * in the C runtime.  These are used by RFC 2783
-		 * PPSAPI timepps.h functions in ntpd on Windows.
-		 */
-
-		#ifndef ENXIO
-		#define ENXIO		6
-		#endif
-
-		#ifndef EOPNOTSUPP
-		#define EOPNOTSUPP	45
-		#endif
-
-		switch (err) {
-		    case ENXIO:
-			retmsg = "Device not configured";
-			break;
-
-		    case EOPNOTSUPP:
-			retmsg = "Operation not supported";
-			break;
-		}
-	}
-	/*
-	 * Handle Windows GetLastError error codes.  Note that some
-	 * low-numbered Windows error codes conflict with the errno
-	 * space and this routine will return the errno-related text
-	 * in preference to the GetLastError/FormatMessage text for
-	 * those conflicting values.
-	 */
-	if (!retmsg) {
-		retmsg = FormatError(err);
-	}
-
-	return (retmsg);
 }
 
 /*
@@ -292,15 +143,15 @@ void __cdecl
 NTperror(char *errmsg) {
 	/* Copy the error value first in case of other errors */
 	int errval = errno; 
+	BOOL bfreebuf = FALSE;
 	char *msg;
-	if(!initialized)
-		initialize();
 
-	msg = isc__NTstrerror(errval);
-	if (!msg) {
-		msg = "unrecognized errno";
-	}
+	msg = NTstrerror(errval, &bfreebuf);
 	fprintf(stderr, "%s: %s\n", errmsg, msg);
+	if(bfreebuf == TRUE) {
+		LocalFree(msg);
+	}
+
 }
 
 /*
@@ -517,7 +368,6 @@ GetWSAErrorMessage(int errval) {
 	return (msg);
 }
 
-#ifdef NTP_DEAD_CODE_GetCryptErrorMessage
 /*
  * These error messages are more informative about CryptAPI Errors than the
  * standard error messages
@@ -606,4 +456,4 @@ GetCryptErrorMessage(int errval) {
 	}
 	return msg;
 }
-#endif
+

@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004, 2007  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 2000, 2001, 2003  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,14 +15,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: stat.h,v 1.3.2.2.2.1 2004/03/06 08:15:17 marka Exp $ */
+/* $Id: stat.h,v 1.7 2007/06/19 23:47:20 tbox Exp $ */
 
 #ifndef ISC_STAT_H
 #define ISC_STAT_H 1
 
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <io.h>
 
 /* open() under unix allows setting of read/write permissions
  * at the owner, group and other levels.  These don't exist in NT
@@ -44,23 +42,5 @@
 #ifndef S_ISREG
 # define S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)
 #endif
-
-#define S_IFMT   _S_IFMT         /* file type mask */
-#define S_IFDIR  _S_IFDIR        /* directory */
-#define S_IFCHR  _S_IFCHR        /* character special */
-#define S_IFIFO  _S_IFIFO        /* pipe */
-#define S_IFREG  _S_IFREG        /* regular */
-#define S_IREAD  _S_IREAD        /* read permission, owner */
-#define S_IWRITE _S_IWRITE       /* write permission, owner */
-#define S_IEXEC  _S_IEXEC        /* execute/search permission, owner */
-
-#define O_RDONLY        _O_RDONLY
-#define O_WRONLY        _O_WRONLY
-#define O_RDWR          _O_RDWR
-#define O_APPEND        _O_APPEND
-#define O_CREAT         _O_CREAT
-#define O_TRUNC         _O_TRUNC
-#define O_EXCL          _O_EXCL
-
 
 #endif /* ISC_STAT_H */

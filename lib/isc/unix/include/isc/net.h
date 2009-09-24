@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004, 2005, 2007-2009  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1999-2003  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,7 +15,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: net.h,v 1.31.2.2.10.8 2004/04/29 01:31:23 marka Exp $ */
+/* $Id: net.h,v 1.48.84.2 2009/02/16 23:47:15 tbox Exp $ */
 
 #ifndef ISC_NET_H
 #define ISC_NET_H 1
@@ -24,19 +24,20 @@
  ***** Module Info
  *****/
 
-/*
+/*! \file
+ * \brief
  * Basic Networking Types
  *
  * This module is responsible for defining the following basic networking
  * types:
  *
- *		struct in_addr
- *		struct in6_addr
- *		struct in6_pktinfo
- *		struct sockaddr
- *		struct sockaddr_in
- *		struct sockaddr_in6
- *		in_port_t
+ *\li		struct in_addr
+ *\li		struct in6_addr
+ *\li		struct in6_pktinfo
+ *\li		struct sockaddr
+ *\li		struct sockaddr_in
+ *\li		struct sockaddr_in6
+ *\li		in_port_t
  *
  * It ensures that the AF_ and PF_ macros are defined.
  *
@@ -44,27 +45,27 @@
  *
  * It declares inet_aton(), inet_ntop(), and inet_pton().
  *
- * It ensures that INADDR_LOOPBACK, INADDR_ANY, IN6ADDR_ANY_INIT,
+ * It ensures that #INADDR_LOOPBACK, #INADDR_ANY, #IN6ADDR_ANY_INIT,
  * in6addr_any, and in6addr_loopback are available.
  *
  * It ensures that IN_MULTICAST() is available to check for multicast
  * addresses.
  *
  * MP:
- *	No impact.
+ *\li	No impact.
  *
  * Reliability:
- *	No anticipated impact.
+ *\li	No anticipated impact.
  *
  * Resources:
- *	N/A.
+ *\li	N/A.
  *
  * Security:
- *	No anticipated impact.
+ *\li	No anticipated impact.
  *
  * Standards:
- *	BSD Socket API
- *	RFC 2553
+ *\li	BSD Socket API
+ *\li	RFC2553
  */
 
 /***
@@ -94,19 +95,19 @@
 #include <isc/types.h>
 
 #ifdef ISC_PLATFORM_HAVEINADDR6
-#define in6_addr in_addr6	/* Required for pre RFC2133 implementations. */
+#define in6_addr in_addr6	/*%< Required for pre RFC2133 implementations. */
 #endif
 
 #ifdef ISC_PLATFORM_HAVEIPV6
-/*
+#ifndef IN6ADDR_ANY_INIT
+#ifdef s6_addr
+/*%
  * Required for some pre RFC2133 implementations.
  * IN6ADDR_ANY_INIT and IN6ADDR_LOOPBACK_INIT were added in
- * draft-ietf-ipngwg-bsd-api-04.txt or draft-ietf-ipngwg-bsd-api-05.txt.  
+ * draft-ietf-ipngwg-bsd-api-04.txt or draft-ietf-ipngwg-bsd-api-05.txt.
  * If 's6_addr' is defined then assume that there is a union and three
  * levels otherwise assume two levels required.
  */
-#ifndef IN6ADDR_ANY_INIT
-#ifdef s6_addr
 #define IN6ADDR_ANY_INIT { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } } }
 #else
 #define IN6ADDR_ANY_INIT { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 } }
@@ -115,6 +116,7 @@
 
 #ifndef IN6ADDR_LOOPBACK_INIT
 #ifdef s6_addr
+/*% IPv6 address loopback init */
 #define IN6ADDR_LOOPBACK_INIT { { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 } } }
 #else
 #define IN6ADDR_LOOPBACK_INIT { { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 } }
@@ -122,12 +124,14 @@
 #endif
 
 #ifndef IN6_IS_ADDR_V4MAPPED
+/*% Is IPv6 address V4 mapped? */
 #define IN6_IS_ADDR_V4MAPPED(x) \
 	 (memcmp((x)->s6_addr, in6addr_any.s6_addr, 10) == 0 && \
 	  (x)->s6_addr[10] == 0xff && (x)->s6_addr[11] == 0xff)
 #endif
 
 #ifndef IN6_IS_ADDR_V4COMPAT
+/*% Is IPv6 address V4 compatible? */
 #define IN6_IS_ADDR_V4COMPAT(x) \
 	 (memcmp((x)->s6_addr, in6addr_any.s6_addr, 12) == 0 && \
 	 ((x)->s6_addr[12] != 0 || (x)->s6_addr[13] != 0 || \
@@ -136,52 +140,58 @@
 #endif
 
 #ifndef IN6_IS_ADDR_MULTICAST
+/*% Is IPv6 address multicast? */
 #define IN6_IS_ADDR_MULTICAST(a)        ((a)->s6_addr[0] == 0xff)
 #endif
 
 #ifndef IN6_IS_ADDR_LINKLOCAL
+/*% Is IPv6 address linklocal? */
 #define IN6_IS_ADDR_LINKLOCAL(a) \
 	(((a)->s6_addr[0] == 0xfe) && (((a)->s6_addr[1] & 0xc0) == 0x80))
 #endif
 
 #ifndef IN6_IS_ADDR_SITELOCAL
+/*% is IPv6 address sitelocal? */
 #define IN6_IS_ADDR_SITELOCAL(a) \
 	(((a)->s6_addr[0] == 0xfe) && (((a)->s6_addr[1] & 0xc0) == 0xc0))
 #endif
 
 
 #ifndef IN6_IS_ADDR_LOOPBACK
+/*% is IPv6 address loopback? */
 #define IN6_IS_ADDR_LOOPBACK(x) \
 	(memcmp((x)->s6_addr, in6addr_loopback.s6_addr, 16) == 0)
 #endif
 #endif
 
 #ifndef AF_INET6
+/*% IPv6 */
 #define AF_INET6 99
 #endif
 
 #ifndef PF_INET6
+/*% IPv6 */
 #define PF_INET6 AF_INET6
 #endif
 
 #ifndef INADDR_LOOPBACK
+/*% inaddr loopback */
 #define INADDR_LOOPBACK 0x7f000001UL
 #endif
 
-#if 0
 #ifndef ISC_PLATFORM_HAVEIN6PKTINFO
+/*% IPv6 packet info */
 struct in6_pktinfo {
-	struct in6_addr ipi6_addr;    /* src/dst IPv6 address */
-	unsigned int    ipi6_ifindex; /* send/recv interface index */
+	struct in6_addr ipi6_addr;    /*%< src/dst IPv6 address */
+	unsigned int    ipi6_ifindex; /*%< send/recv interface index */
 };
 #endif
-#endif
 
-/*
- * Cope with a missing in6addr_any and in6addr_loopback.
- */
 #if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRANY)
 extern const struct in6_addr isc_net_in6addrany;
+/*%
+ * Cope with a missing in6addr_any and in6addr_loopback.
+ */
 #define in6addr_any isc_net_in6addrany
 #endif
 
@@ -190,11 +200,12 @@ extern const struct in6_addr isc_net_in6addrloop;
 #define in6addr_loopback isc_net_in6addrloop
 #endif
 
-/*
- * Fix UnixWare 7.1.1's broken IN6_IS_ADDR_* definitions.
- */
 #ifdef ISC_PLATFORM_FIXIN6ISADDR
 #undef  IN6_IS_ADDR_GEOGRAPHIC
+/*!
+ * \brief
+ * Fix UnixWare 7.1.1's broken IN6_IS_ADDR_* definitions.
+ */
 #define IN6_IS_ADDR_GEOGRAPHIC(a) (((a)->S6_un.S6_l[0] & 0xE0) == 0x80)
 #undef  IN6_IS_ADDR_IPX
 #define IN6_IS_ADDR_IPX(a)        (((a)->S6_un.S6_l[0] & 0xFE) == 0x04)
@@ -210,24 +221,26 @@ extern const struct in6_addr isc_net_in6addrloop;
 #define IN6_IS_ADDR_SITELOCAL(a)  (((a)->S6_un.S6_l[0] & 0xC0FF) == 0xC0FE)
 #endif /* ISC_PLATFORM_FIXIN6ISADDR */
 
-/*
+#ifdef ISC_PLATFORM_NEEDPORTT
+/*%
  * Ensure type in_port_t is defined.
  */
-#ifdef ISC_PLATFORM_NEEDPORTT
 typedef isc_uint16_t in_port_t;
 #endif
 
-/*
+#ifndef MSG_TRUNC
+/*%
  * If this system does not have MSG_TRUNC (as returned from recvmsg())
  * ISC_PLATFORM_RECVOVERFLOW will be defined.  This will enable the MSG_TRUNC
  * faking code in socket.c.
  */
-#ifndef MSG_TRUNC
 #define ISC_PLATFORM_RECVOVERFLOW
 #endif
 
+/*% IP address. */
 #define ISC__IPADDR(x)	((isc_uint32_t)htonl((isc_uint32_t)(x)))
 
+/*% Is IP address multicast? */
 #define ISC_IPADDR_ISMULTICAST(i) \
 		(((isc_uint32_t)(i) & ISC__IPADDR(0xf0000000)) \
 		 == ISC__IPADDR(0xe0000000))
@@ -244,40 +257,40 @@ ISC_LANG_BEGINDECLS
 
 isc_result_t
 isc_net_probeipv4(void);
-/*
+/*%<
  * Check if the system's kernel supports IPv4.
  *
  * Returns:
  *
- *	ISC_R_SUCCESS		IPv4 is supported.
- *	ISC_R_NOTFOUND		IPv4 is not supported.
- *	ISC_R_DISABLED		IPv4 is disabled.
- *	ISC_R_UNEXPECTED
+ *\li	#ISC_R_SUCCESS		IPv4 is supported.
+ *\li	#ISC_R_NOTFOUND		IPv4 is not supported.
+ *\li	#ISC_R_DISABLED		IPv4 is disabled.
+ *\li	#ISC_R_UNEXPECTED
  */
 
 isc_result_t
 isc_net_probeipv6(void);
-/*
+/*%<
  * Check if the system's kernel supports IPv6.
  *
  * Returns:
  *
- *	ISC_R_SUCCESS		IPv6 is supported.
- *	ISC_R_NOTFOUND		IPv6 is not supported.
- *	ISC_R_DISABLED		IPv6 is disabled.
- *	ISC_R_UNEXPECTED
+ *\li	#ISC_R_SUCCESS		IPv6 is supported.
+ *\li	#ISC_R_NOTFOUND		IPv6 is not supported.
+ *\li	#ISC_R_DISABLED		IPv6 is disabled.
+ *\li	#ISC_R_UNEXPECTED
  */
 
 isc_result_t
 isc_net_probe_ipv6only(void);
-/*
+/*%<
  * Check if the system's kernel supports the IPV6_V6ONLY socket option.
  *
  * Returns:
  *
- *	ISC_R_SUCCESS		the option is supported for both TCP and UDP.
- *	ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
- *	ISC_R_UNEXPECTED
+ *\li	#ISC_R_SUCCESS		the option is supported for both TCP and UDP.
+ *\li	#ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
+ *\li	#ISC_R_UNEXPECTED
  */
 
 isc_result_t
@@ -288,9 +301,9 @@ isc_net_probe_ipv6pktinfo(void);
  *
  * Returns:
  *
- *	ISC_R_SUCCESS		the option is supported.
- *	ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
- *	ISC_R_UNEXPECTED
+ * \li	#ISC_R_SUCCESS		the option is supported.
+ * \li	#ISC_R_NOTFOUND		IPv6 itself or the option is not supported.
+ * \li	#ISC_R_UNEXPECTED
  */
 
 void
@@ -305,6 +318,29 @@ isc_net_enableipv4(void);
 void
 isc_net_enableipv6(void);
 
+isc_result_t
+isc_net_probeunix(void);
+/*
+ * Returns whether UNIX domain sockets are supported.
+ */
+
+isc_result_t
+isc_net_getudpportrange(int af, in_port_t *low, in_port_t *high);
+/*%<
+ * Returns system's default range of ephemeral UDP ports, if defined.
+ * If the range is not available or unknown, ISC_NET_PORTRANGELOW and
+ * ISC_NET_PORTRANGEHIGH will be returned.
+ *
+ * Requires:
+ *
+ *\li	'low' and 'high' must be non NULL.
+ *
+ * Returns:
+ *
+ *\li	*low and *high will be the ports specifying the low and high ends of
+ *	the range.
+ */
+
 #ifdef ISC_PLATFORM_NEEDNTOP
 const char *
 isc_net_ntop(int af, const void *src, char *dst, size_t size);
@@ -318,11 +354,10 @@ isc_net_pton(int af, const char *src, void *dst);
 #define inet_pton isc_net_pton
 #endif
 
-#ifdef ISC_PLATFORM_NEEDATON
 int
 isc_net_aton(const char *cp, struct in_addr *addr);
+#undef inet_aton
 #define inet_aton isc_net_aton
-#endif
 
 ISC_LANG_ENDDECLS
 

@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004-2009  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1999-2003  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,9 +15,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: ifiter_ioctl.c,v 1.19.2.5.2.14 2004/06/22 04:40:23 marka Exp $ */
+/* $Id: ifiter_ioctl.c,v 1.60.120.2 2009/01/18 23:47:41 tbox Exp $ */
 
-/*
+/*! \file
+ * \brief
  * Obtain the list of network interfaces using the SIOCGLIFCONF ioctl.
  * See netintro(4).
  */
@@ -38,9 +39,7 @@
 #define lifr_addr iflr_addr
 #define lifr_name iflr_name
 #define lifr_dstaddr iflr_dstaddr
-#define lifr_broadaddr iflr_broadaddr
 #define lifr_flags iflr_flags
-#define lifr_index iflr_index
 #define ss_family sa_family
 #define LIFREQ if_laddrreq
 #else
@@ -50,9 +49,6 @@
 
 #define IFITER_MAGIC		ISC_MAGIC('I', 'F', 'I', 'T')
 #define VALID_IFITER(t)		ISC_MAGIC_VALID(t, IFITER_MAGIC)
-
-#define ISC_IF_INET6_SZ \
-    sizeof("00000000000000000000000000000001 01 80 10 80 XXXXXXloXXXXXXXX\n")
 
 struct isc_interfaceiter {
 	unsigned int		magic;		/* Magic number. */
@@ -83,7 +79,6 @@ struct isc_interfaceiter {
 	FILE *			proc;
 	char			entry[ISC_IF_INET6_SZ];
 	isc_result_t		valid;
-	isc_boolean_t		first;
 #endif
 	isc_interface_t		current;	/* Current interface data. */
 	isc_result_t		result;		/* Last result code. */
@@ -95,7 +90,7 @@ struct isc_interfaceiter {
 #endif
 
 
-/*
+/*%
  * Size of buffer for SIOCGLIFCONF, in bytes.  We assume no sane system
  * will have more than a megabyte of interface configuration data.
  */
@@ -105,7 +100,7 @@ struct isc_interfaceiter {
 #ifdef __linux
 #ifndef IF_NAMESIZE
 # ifdef IFNAMSIZ
-#  define IF_NAMESIZE  IFNAMSIZ  
+#  define IF_NAMESIZE  IFNAMSIZ
 # else
 #  define IF_NAMESIZE 16
 # endif
@@ -220,13 +215,15 @@ getbuf6(isc_interfaceiter_t *iter) {
 			 */
 			if (errno == ENOENT) {
 				isc__strerror(errno, strbuf, sizeof(strbuf));
-				UNEXPECTED_ERROR(__FILE__, __LINE__,
-						 isc_msgcat_get(isc_msgcat,
+				isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+					      ISC_LOGMODULE_INTERFACE,
+					      ISC_LOG_DEBUG(1),
+					      isc_msgcat_get(isc_msgcat,
 							ISC_MSGSET_IFITERIOCTL,
 							ISC_MSG_GETIFCONFIG,
 							"get interface "
 							"configuration: %s"),
-						 strbuf);
+					       strbuf);
 				result = ISC_R_FAILURE;
 				goto cleanup;
 			}
@@ -294,6 +291,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	isc_result_t result;
 	char strbuf[ISC_STRERRORSIZE];
 
+	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
 	REQUIRE(*iterp == NULL);
 
@@ -338,9 +336,8 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 			result = ISC_R_UNEXPECTED;
 			goto socket6_failure;
 		}
-		iter->result6 = getbuf6(iter);
-		if (iter->result6 != ISC_R_NOTIMPLEMENTED &&
-		    iter->result6 != ISC_R_SUCCESS)
+		result = iter->result6 = getbuf6(iter);
+		if (result != ISC_R_NOTIMPLEMENTED && result != ISC_R_SUCCESS)
 			goto ioctl6_failure;
 	}
 #endif
@@ -371,7 +368,6 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 #ifdef __linux
 	iter->proc = fopen("/proc/net/if_inet6", "r");
 	iter->valid = ISC_R_FAILURE;
-	iter->first = ISC_FALSE;
 #endif
 	iter->result = ISC_R_FAILURE;
 
@@ -393,7 +389,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 		(void) close(iter->socket6);
   socket6_failure:
 #endif
- 
+
 	isc_mem_put(mctx, iter, sizeof(*iter));
 	return (result);
 }
@@ -421,124 +417,6 @@ internal_current_clusteralias(isc_interfaceiter_t *iter) {
 }
 #endif
 
-#ifdef __linux
-static isc_result_t
-linux_if_inet6_next(isc_interfaceiter_t *iter) {
-	if (iter->proc != NULL &&
-	    fgets(iter->entry, sizeof(iter->entry), iter->proc) != NULL)
-		iter->valid = ISC_R_SUCCESS;
-	else
-		iter->valid = ISC_R_NOMORE;
-	return (iter->valid);
-}
-
-static void
-linux_if_inet6_first(isc_interfaceiter_t *iter) {
-	if (iter->proc != NULL) {
-		rewind(iter->proc);
-		(void)linux_if_inet6_next(iter);
-	} else
-		iter->valid = ISC_R_NOMORE;
-	iter->first = ISC_FALSE;
-}
-
-static isc_result_t
-linux_if_inet6_current(isc_interfaceiter_t *iter) {
-	char address[33];
-	char name[IF_NAMESIZE+1];
-	char strbuf[ISC_STRERRORSIZE];
-	struct in6_addr addr6;
-	struct ifreq ifreq;
-	int ifindex, prefix, scope, flags;
-	int res;
-	unsigned int i;
-
-	if (iter->valid != ISC_R_SUCCESS)
-		return (iter->valid);
-	if (iter->proc == NULL) {
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-			      "/proc/net/if_inet6:iter->proc == NULL");
-		return (ISC_R_FAILURE);
-	}
-
-	/*
-	 * Format for /proc/net/if_inet6:
-	 * (see iface_proc_info() in net/ipv6/addrconf.c)
-	 * <addr6:32> <ifindex:2> <prefix:2> <scope:2> <flags:2> <name:8>
-	 */
-	res = sscanf(iter->entry, "%32[a-f0-9] %x %x %x %x %16s\n",
-		     address, &ifindex, &prefix, &scope, &flags, name);
-	if (res != 6) {
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-			      "/proc/net/if_inet6:sscanf() -> %d (expected 6)",
-			      res);
-		return (ISC_R_FAILURE);
-	}
-	if (strlen(address) != 32) {
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-			      "/proc/net/if_inet6:strlen(%s) != 32", address);
-		return (ISC_R_FAILURE);
-	}
-	for (i = 0; i < 16; i++) {
-		unsigned char byte;
-		static const char hex[] = "0123456789abcdef";
-		byte = ((index(hex, address[i * 2]) - hex) << 4) |
-		       (index(hex, address[i * 2 + 1]) - hex);
-		addr6.s6_addr[i] = byte;
-	}
-	iter->current.af = AF_INET6;
-	/* iter->current.ifindex = ifindex; */
-	iter->current.flags = 0;
-
-	memset(&ifreq, 0, sizeof(ifreq));
-	INSIST(sizeof(ifreq.ifr_name) <= sizeof(iter->current.name));
-	strncpy(ifreq.ifr_name, name, sizeof(ifreq.ifr_name));
-
-	if (ioctl(iter->socket, SIOCGIFFLAGS, (char *) &ifreq) < 0) {
-		isc__strerror(errno, strbuf, sizeof(strbuf));
-		UNEXPECTED_ERROR(__FILE__, __LINE__,
-				 "%s: getting interface flags: %s",
-				 ifreq.ifr_name, strbuf);
-		return (ISC_R_IGNORE);
-	}
-
-	if ((ifreq.ifr_flags & IFF_UP) != 0)
-		iter->current.flags |= INTERFACE_F_UP;
-#ifdef IFF_POINTOPOINT
-	if ((ifreq.ifr_flags & IFF_POINTOPOINT) != 0) 
-		iter->current.flags |= INTERFACE_F_POINTTOPOINT;
-#endif
-	if ((ifreq.ifr_flags & IFF_LOOPBACK) != 0)
-		iter->current.flags |= INTERFACE_F_LOOPBACK;
-	if ((ifreq.ifr_flags & IFF_BROADCAST) != 0)
-		iter->current.flags |= INTERFACE_F_BROADCAST;
-#ifdef IFF_MULTICAST
-	if ((ifreq.ifr_flags & IFF_MULTICAST) != 0)
-		iter->current.flags |= INTERFACE_F_MULTICAST;
-#endif
-
-	/*
-	 * enable_multicast_if() requires scopeid for setsockopt,
-	 * so associate address with their corresponding ifindex.
-	 */
-	isc_netaddr_fromin6(&iter->current.address, &addr6);
-	isc_netaddr_setzone(&iter->current.address, (isc_uint32_t)ifindex);
-
-	for (i = 0; i < 16; i++) {
-		if (prefix > 8) {
-			addr6.s6_addr[i] = 0xff;
-			prefix -= 8;
-		} else {
-			addr6.s6_addr[i] = (0xff << (8 - prefix)) & 0xff;
-			prefix = 0;
-		}
-	}
-	isc_netaddr_fromin6(&iter->current.netmask, &addr6);
-	strncpy(iter->current.name, name, sizeof(iter->current.name));
-	return (ISC_R_SUCCESS);
-}
-#endif
-
 /*
  * Get information about the current interface to iter->current.
  * If successful, return ISC_R_SUCCESS.
@@ -559,19 +437,19 @@ internal_current4(isc_interfaceiter_t *iter) {
 	char sabuf[256];
 #endif
 	int i, bits, prefixlen;
-#ifdef __linux
-	isc_result_t result;
-#endif
 
 	REQUIRE(VALID_IFITER(iter));
-	REQUIRE (iter->pos < (unsigned int) iter->ifc.ifc_len);
 
+	if (iter->ifc.ifc_len == 0 ||
+	    iter->pos == (unsigned int)iter->ifc.ifc_len) {
 #ifdef __linux
-	result = linux_if_inet6_current(iter);
-	if (result != ISC_R_NOMORE)
-		return (result);
-	iter->first = ISC_TRUE;
+		return (linux_if_inet6_current(iter));
+#else
+		return (ISC_R_NOMORE);
 #endif
+	}
+
+	INSIST( iter->pos < (unsigned int) iter->ifc.ifc_len);
 
 	ifrp = (struct ifreq *)((char *) iter->ifc.ifc_req + iter->pos);
 
@@ -604,13 +482,11 @@ internal_current4(isc_interfaceiter_t *iter) {
 		if (iter->current.address.type.in.s_addr == htonl(INADDR_ANY))
 			return (ISC_R_IGNORE);
 		break;
-#ifdef ISC_PLATFORM_HAVEIPV6
 	case AF_INET6:
 		if (memcmp(&iter->current.address.type.in6, &in6addr_any,
 			   sizeof(in6addr_any)) == 0)
 			return (ISC_R_IGNORE);
 		break;
-#endif
 	}
 
 	/*
@@ -643,16 +519,6 @@ internal_current4(isc_interfaceiter_t *iter) {
 	if ((ifreq.ifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-	if ((ifreq.ifr_flags & IFF_BROADCAST) != 0) {
-		iter->current.flags |= INTERFACE_F_BROADCAST;
-	}
-
-#ifdef IFF_MULTICAST
-	if ((ifreq.ifr_flags & IFF_MULTICAST) != 0) {
-		iter->current.flags |= INTERFACE_F_MULTICAST;
-	}
-#endif
-
 	if (family == AF_INET)
 		goto inet;
 
@@ -672,7 +538,9 @@ internal_current4(isc_interfaceiter_t *iter) {
 	prefixlen = lifreq.lifr_addrlen;
 #else
 	isc_netaddr_format(&iter->current.address, sabuf, sizeof(sabuf));
-	UNEXPECTED_ERROR(__FILE__, __LINE__,
+	isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+		      ISC_LOGMODULE_INTERFACE,
+		      ISC_LOG_INFO,
 		      isc_msgcat_get(isc_msgcat,
 				     ISC_MSGSET_IFITERIOCTL,
 				     ISC_MSG_GETIFCONFIG,
@@ -726,27 +594,6 @@ internal_current4(isc_interfaceiter_t *iter) {
 			 (struct sockaddr *)&ifreq.ifr_dstaddr, ifreq.ifr_name);
 	}
 #endif
-	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-		/*
-		 * Ignore the HP/UX warning about "integer overflow during
-		 * conversion.  It comes from its own macro definition,
-		 * and is really hard to shut up.
-		 */
-		if (ioctl(iter->socket, SIOCGIFBRDADDR, (char *)&ifreq)
-		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETDESTADDR,
-					       "%s: getting "
-					       "broadcast address: %s"),
-					 ifreq.ifr_name, strbuf);
-			return (ISC_R_IGNORE);
-		}
-		get_addr(family, &iter->current.broadcast,
-			 (struct sockaddr *)&ifreq.ifr_broadaddr, ifreq.ifr_name);
-	}
 
 	/*
 	 * Get the network mask.
@@ -818,13 +665,11 @@ internal_current6(isc_interfaceiter_t *iter) {
 		if (iter->current.address.type.in.s_addr == htonl(INADDR_ANY))
 			return (ISC_R_IGNORE);
 		break;
-#ifdef ISC_PLATFORM_HAVEIPV6
 	case AF_INET6:
 		if (memcmp(&iter->current.address.type.in6, &in6addr_any,
 			   sizeof(in6addr_any)) == 0)
 			return (ISC_R_IGNORE);
 		break;
-#endif
 	}
 
 	/*
@@ -862,23 +707,13 @@ internal_current6(isc_interfaceiter_t *iter) {
 	if ((lifreq.lifr_flags & IFF_LOOPBACK) != 0)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-	if ((lifreq.lifr_flags & IFF_BROADCAST) != 0) {
-		iter->current.flags |= INTERFACE_F_BROADCAST;
-	}
-
-#ifdef IFF_MULTICAST
-	if ((lifreq.lifr_flags & IFF_MULTICAST) != 0) {
-		iter->current.flags |= INTERFACE_F_MULTICAST;
-	}
-#endif
-
 #ifdef IFF_POINTOPOINT
 	/*
 	 * If the interface is point-to-point, get the destination address.
 	 */
 	if ((iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0) {
 		/*
-		 * Ignore the HP/UX warning about "interger overflow during
+		 * Ignore the HP/UX warning about "integer overflow during
 		 * conversion.  It comes from its own macro definition,
 		 * and is really hard to shut up.
 		 */
@@ -899,31 +734,6 @@ internal_current6(isc_interfaceiter_t *iter) {
 			 lifreq.lifr_name);
 	}
 #endif
-
-#ifdef SIOCGLIFBRDADDR
-	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-		/*
-		 * Ignore the HP/UX warning about "integer overflow during
-		 * conversion.  It comes from its own macro definition,
-		 * and is really hard to shut up.
-		 */
-		if (ioctl(iter->socket, SIOCGLIFBRDADDR, (char *)&lifreq)
-		    < 0) {
-			isc__strerror(errno, strbuf, sizeof(strbuf));
-			UNEXPECTED_ERROR(__FILE__, __LINE__,
-				isc_msgcat_get(isc_msgcat,
-					       ISC_MSGSET_IFITERIOCTL,
-					       ISC_MSG_GETDESTADDR,
-					       "%s: getting "
-					       "broadcast address: %s"),
-					 lifreq.lifr_name, strbuf);
-			return (ISC_R_IGNORE);
-		}
-		get_addr(family, &iter->current.broadcast,
-			 (struct sockaddr *)&lifreq.lifr_broadaddr,
-			 lifreq.lifr_name);
-	}
-#endif	/* SIOCGLIFBRDADDR */
 
 	/*
 	 * Get the network mask.  Netmask already zeroed.
@@ -999,49 +809,52 @@ internal_current(isc_interfaceiter_t *iter) {
  */
 static isc_result_t
 internal_next4(isc_interfaceiter_t *iter) {
-	struct ifreq *ifrp;
-
-	REQUIRE (iter->pos < (unsigned int) iter->ifc.ifc_len);
-
-#ifdef __linux
-	if (linux_if_inet6_next(iter) == ISC_R_SUCCESS)
-		return (ISC_R_SUCCESS);
-	if (!iter->first)
-		return (ISC_R_SUCCESS);
-#endif
-	ifrp = (struct ifreq *)((char *) iter->ifc.ifc_req + iter->pos);
-
 #ifdef ISC_PLATFORM_HAVESALEN
-	if (ifrp->ifr_addr.sa_len > sizeof(struct sockaddr))
-		iter->pos += sizeof(ifrp->ifr_name) + ifrp->ifr_addr.sa_len;
-	else
+	struct ifreq *ifrp;
 #endif
-		iter->pos += sizeof(*ifrp);
 
-	if (iter->pos >= (unsigned int) iter->ifc.ifc_len)
+	if (iter->pos < (unsigned int) iter->ifc.ifc_len) {
+#ifdef ISC_PLATFORM_HAVESALEN
+		ifrp = (struct ifreq *)((char *) iter->ifc.ifc_req + iter->pos);
+
+		if (ifrp->ifr_addr.sa_len > sizeof(struct sockaddr))
+			iter->pos += sizeof(ifrp->ifr_name) +
+				     ifrp->ifr_addr.sa_len;
+		else
+#endif
+			iter->pos += sizeof(struct ifreq);
+
+	} else {
+		INSIST(iter->pos == (unsigned int) iter->ifc.ifc_len);
+#ifdef __linux
+		return (linux_if_inet6_next(iter));
+#else
 		return (ISC_R_NOMORE);
-
+#endif
+	}
 	return (ISC_R_SUCCESS);
 }
 
 #if defined(SIOCGLIFCONF) && defined(SIOCGLIFADDR)
 static isc_result_t
 internal_next6(isc_interfaceiter_t *iter) {
+#ifdef ISC_PLATFORM_HAVESALEN
 	struct LIFREQ *ifrp;
-	
+#endif
+
 	if (iter->result6 != ISC_R_SUCCESS && iter->result6 != ISC_R_IGNORE)
 		return (iter->result6);
 
 	REQUIRE(iter->pos6 < (unsigned int) iter->lifc.lifc_len);
 
+#ifdef ISC_PLATFORM_HAVESALEN
 	ifrp = (struct LIFREQ *)((char *) iter->lifc.lifc_req + iter->pos6);
 
-#ifdef ISC_PLATFORM_HAVESALEN
 	if (ifrp->lifr_addr.sa_len > sizeof(struct sockaddr))
 		iter->pos6 += sizeof(ifrp->lifr_name) + ifrp->lifr_addr.sa_len;
 	else
 #endif
-		iter->pos6 += sizeof(*ifrp);
+		iter->pos6 += sizeof(struct LIFREQ);
 
 	if (iter->pos6 >= (unsigned int) iter->lifc.lifc_len)
 		return (ISC_R_NOMORE);
