@@ -1,3 +1,4 @@
+(4.2.5p219) 2009/09/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1315] "interface ignore 0.0.0.0" is ignored.
 * add implicit "nic ignore all" rule before any rules from ntp.conf, so
   "nic listen eth0" alone means the same as "-I eth0".
