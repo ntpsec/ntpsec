@@ -5,10 +5,13 @@ ACLOCAL_AMFLAGS= -I m4 -I libopts/m4
 NULL=
 
 SUBDIRS=
-SUBDIRS+= 		\
-	scripts 	\
-	include 	\
-	ElectricFence	
+SUBDIRS+= 				\
+	scripts 			\
+	include 			\
+	lib/isc/include/isc		\
+	lib/isc/unix/include/isc	\
+	ElectricFence			\
+	$(NULL)
 if NEED_LIBOPTS
 SUBDIRS+= libopts
 endif

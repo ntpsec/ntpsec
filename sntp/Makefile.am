@@ -1,17 +1,21 @@
 # Makefile.am for JMK's SNTP, by Harlan Stenn
 
+NULL=
+
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS= -I ../m4 -I libopts/m4
 
-AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include
+AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) 			\
+		-I$(top_srcdir)/../include		\
+		-I$(top_srcdir)/../lib/isc/include	\
+		-I$(top_srcdir)/../lib/isc/unix/include	\
+		$(NULL)
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 
 run_ag=         cd $(srcdir) && autogen -L ../include --writable
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
-
-NULL=
 
 SUBDIRS=
 if NEED_LIBOPTS

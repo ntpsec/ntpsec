@@ -1,3 +1,4 @@
+NULL=
 AUTOMAKE_OPTIONS= 
 
 bindir=	${exec_prefix}/${BINSUBDIR}
@@ -6,7 +7,14 @@ bin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
 
 noinst_LIBRARIES=	libntpd.a
 
-AM_CPPFLAGS= -I$(top_srcdir)/include -I../include $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS= 	-I$(top_srcdir)/include			\
+		-I../include				\
+		-I$(top_srcdir)/lib/isc/include		\
+		-I../lib/isc/include			\
+		-I$(top_srcdir)/lib/isc/unix/include	\
+		-I../lib/isc/unix/include		\
+		$(LIBOPTS_CFLAGS)			\
+		$(NULL)
 # LDADD might need RESLIB and ADJLIB.
 LDADD=	version.o libntpd.a @LIBPARSE@
 AM_YFLAGS=	-d -t -r all

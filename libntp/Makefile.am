@@ -1,3 +1,4 @@
+NULL=
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
@@ -12,20 +13,26 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	mfptoms.c mktime.c modetoa.c mstolfp.c msutotsf.c msyslog.c netof.c \
 	ntp_rfc2553.c numtoa.c numtohost.c octtoint.c prettydate.c \
 	ntp_random.c recvbuff.c refnumtoa.c snprintf.c socktoa.c socktohost.c \
-	statestr.c strdup.c strerror.c strstr.c \
+	statestr.c strdup.c bsd_strerror.c strstr.c \
 	syssignal.c tsftomsu.c tstotv.c tvtots.c \
 	uglydate.c uinttoa.c ymd2yd.c \
-	$(srcdir)/../libisc/assertions.c $(srcdir)/../libisc/error.c \
-	$(srcdir)/../libisc/interfaceiter.c $(srcdir)/../libisc/lib.c \
-	$(srcdir)/../libisc/md5.c $(srcdir)/../libisc/msgcat.c \
-	$(srcdir)/../libisc/net.c $(srcdir)/../libisc/isc_strerror.c \
-	$(srcdir)/../libisc/inet_ntop.c $(srcdir)/../libisc/inet_pton.c \
-	$(srcdir)/../libisc/netaddr.c $(srcdir)/../libisc/sockaddr.c \
-	$(srcdir)/../libisc/netscope.c
+	$(srcdir)/../lib/isc/assertions.c $(srcdir)/../lib/isc/error.c \
+	$(srcdir)/../lib/isc/unix/interfaceiter.c $(srcdir)/../lib/isc/lib.c \
+	$(srcdir)/../lib/isc/md5.c $(srcdir)/../lib/isc/nls/msgcat.c \
+	$(srcdir)/../lib/isc/unix/net.c $(srcdir)/../lib/isc/unix/strerror.c \
+	$(srcdir)/../lib/isc/inet_ntop.c $(srcdir)/../lib/isc/inet_pton.c \
+	$(srcdir)/../lib/isc/netaddr.c $(srcdir)/../lib/isc/sockaddr.c \
+	$(srcdir)/../lib/isc/netscope.c
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c
-INCLUDES = -I$(top_srcdir)/include -I../include
+INCLUDES =	-I$(top_srcdir)/include 		\
+		-I../include				\
+		-I$(top_srcdir)/lib/isc/include		\
+		-I../lib/isc/include			\
+		-I$(top_srcdir)/lib/isc/unix/include	\
+		-I../lib/isc/unix/include		\
+		$(NULL)
 ETAGS_ARGS = Makefile.am
 
 noinst_HEADERS = lib_strbuf.h 
