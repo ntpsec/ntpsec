@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "libntp\Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL_INC)" /I "..\..\..\libopts" /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FD /c
+# ADD CPP /nologo /MD /W4 /GX /O2 /I "." /I "..\include" /I "..\..\..\include" /I "..\..\..\lib\isc\win32\include" /I "..\..\..\lib\isc\include" /I "$(OPENSSL_INC)" /I "..\..\..\libopts" /D "NDEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "libntp\Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "$(OPENSSL_INC)" /I "..\..\..\libopts" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W4 /Gm /GX /ZI /Od /I "." /I "..\include" /I "..\..\..\include" /I "..\..\..\lib\isc\win32\include" /I "..\..\..\lib\isc\include" /I "$(OPENSSL_INC)" /I "..\..\..\libopts" /D "_DEBUG" /D "_LIB" /D "WIN32" /D "_MBCS" /D "__STDC__" /D "SYS_WINNT" /D "HAVE_CONFIG_H" /D _WIN32_WINNT=0x400 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1 /D _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1 /D "_CRT_SECURE_NO_DEPRECATE" /FR /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -102,7 +102,7 @@ SOURCE=..\..\..\libntp\adjtime.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\assertions.c
+SOURCE=..\..\..\lib\isc\assertions.c
 # End Source File
 # Begin Source File
 
@@ -174,7 +174,7 @@ SOURCE=..\..\..\libntp\emalloc.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\error.c
+SOURCE=..\..\..\lib\isc\error.c
 # End Source File
 # Begin Source File
 
@@ -206,19 +206,19 @@ SOURCE=..\..\..\libntp\humandate.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\inet_aton.c
+SOURCE=..\..\..\lib\isc\inet_aton.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\inet_ntop.c
+SOURCE=..\..\..\lib\isc\inet_ntop.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\inet_pton.c
+SOURCE=..\..\..\lib\isc\inet_pton.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libisc\interfaceiter.c
+SOURCE=..\..\..\lib\isc\win32\interfaceiter.c
 # End Source File
 # Begin Source File
 
@@ -230,11 +230,11 @@ SOURCE=..\..\..\libntp\iosignal.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libisc\isc_strerror.c
+SOURCE=..\..\..\lib\isc\win32\strerror.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\lib.c
+SOURCE=..\..\..\lib\isc\lib.c
 # End Source File
 # Begin Source File
 
@@ -250,7 +250,7 @@ SOURCE=..\..\..\libntp\machines.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\md5.c
+SOURCE=..\..\..\lib\isc\md5.c
 # End Source File
 # Begin Source File
 
@@ -274,7 +274,7 @@ SOURCE=..\..\..\libntp\modetoa.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\msgcat.c
+SOURCE=..\..\..\lib\isc\nls\msgcat.c
 # End Source File
 # Begin Source File
 
@@ -290,11 +290,11 @@ SOURCE=..\..\..\libntp\msyslog.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libisc\net.c
+SOURCE=..\..\..\lib\isc\win32\net.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\netaddr.c
+SOURCE=..\..\..\lib\isc\netaddr.c
 # End Source File
 # Begin Source File
 
@@ -302,7 +302,7 @@ SOURCE=..\..\..\libntp\netof.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\netscope.c
+SOURCE=..\..\..\lib\isc\netscope.c
 # End Source File
 # Begin Source File
 
@@ -330,7 +330,7 @@ SOURCE=..\..\..\libntp\octtoint.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libisc\once.c
+SOURCE=..\..\..\lib\isc\win32\once.c
 # End Source File
 # Begin Source File
 
@@ -354,7 +354,7 @@ SOURCE=..\libntp\SetSystemTime.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libisc\sockaddr.c
+SOURCE=..\..\..\lib\isc\sockaddr.c
 # End Source File
 # Begin Source File
 
@@ -410,7 +410,7 @@ SOURCE=..\libntp\util_clockstuff.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libisc\win32os.c
+SOURCE=..\..\..\lib\isc\win32\win32os.c
 # End Source File
 # Begin Source File
 

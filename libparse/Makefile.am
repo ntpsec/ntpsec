@@ -1,3 +1,4 @@
+NULL=
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
@@ -49,7 +50,11 @@ libparse_kernel_a_LIBADD = kparse$U.o \
 			    kgpstolfp$U.o
 
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/kernel
+INCLUDES = 	-I$(top_srcdir)/include			\
+		-I$(top_srcdir)/lib/isc/include		\
+		-I$(top_srcdir)/lib/isc/unix/include	\
+		-I$(top_srcdir)/kernel			\
+		$(NULL)
 ETAGS_ARGS = Makefile.am
 
 EXTRA_DIST = parsesolaris.c parsestreams.c mkinfo_scmd.sed mkinfo_rcmd.sed info_trimble.c

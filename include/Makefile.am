@@ -3,8 +3,6 @@ AUTOMAKE_OPTIONS =
 ETAGS_ARGS = $(srcdir)/Makefile.am
 EXTRA_DIST = autogen-version.def copyright.def debug-opt.def homerc.def version.def
 
-SUBDIRS = isc
-
 NULL=
 noinst_HEADERS =	\
 	adjtime.h	\

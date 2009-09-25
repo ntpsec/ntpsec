@@ -50,7 +50,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\..\ntpd,..\..\include,..\..\..\..\include,$(OPENSSL_INC),..\..\..\..\libopts"
+				AdditionalIncludeDirectories="..\..\ntpd,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\libopts"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
 				StringPooling="true"
 				ExceptionHandling="0"
@@ -154,7 +154,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\ntpd,..\..\include,..\..\..\..\include,$(OPENSSL_INC),..\..\..\..\libopts"
+				AdditionalIncludeDirectories="..\..\ntpd,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
@@ -2186,6 +2186,26 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\scripts\mkver.bat"
+			>
+			<FileConfiguration
+				Name="Release|Win32"
+				ExcludedFromBuild="true"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug|Win32"
+				ExcludedFromBuild="true"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
 			RelativePath="..\..\..\..\packageinfo.sh"
 			>
 			<FileConfiguration
@@ -2206,26 +2226,6 @@
 					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\..\scripts\mkver.bat -P ntpd&#x0D;&#x0A;"
 					AdditionalDependencies="..\..\scripts\mkver.bat;..\..\include\config.h"
 					Outputs="$(ProjectDir)version.c"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="..\..\scripts\mkver.bat"
-			>
-			<FileConfiguration
-				Name="Release|Win32"
-				ExcludedFromBuild="true"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug|Win32"
-				ExcludedFromBuild="true"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
 				/>
 			</FileConfiguration>
 		</File>

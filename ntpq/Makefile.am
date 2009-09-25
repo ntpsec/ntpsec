@@ -1,7 +1,12 @@
+NULL=
 AUTOMAKE_OPTIONS=	
 
 bin_PROGRAMS=	ntpq
-AM_CPPFLAGS=	-I$(top_srcdir)/include $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS=	-I$(top_srcdir)/include 		\
+		-I$(top_srcdir)/lib/isc/include 	\
+		-I$(top_srcdir)/lib/isc/unix/include 	\
+		$(LIBOPTS_CFLAGS)			\
+		$(NULL)
 # LDADD might need RESLIB and ADJLIB
 ntpq_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 noinst_HEADERS=	ntpq.h

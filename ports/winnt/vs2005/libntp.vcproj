@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL_INC),..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,..\..\..\lib\isc\win32\include,..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_LIB;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,$(OPENSSL_INC),..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\include,..\..\..\include,..\..\..\lib\isc\win32\include,..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="NDEBUG;_LIB;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_WIN32_WINNT=0x400;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -217,7 +217,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\assertions.c"
+				RelativePath="..\..\..\lib\isc\assertions.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -613,7 +613,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\error.c"
+				RelativePath="..\..\..\lib\isc\error.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -811,7 +811,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\inet_aton.c"
+				RelativePath="..\..\..\lib\isc\inet_aton.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -833,7 +833,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\inet_ntop.c"
+				RelativePath="..\..\..\lib\isc\inet_ntop.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -855,7 +855,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\inet_pton.c"
+				RelativePath="..\..\..\lib\isc\inet_pton.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -877,7 +877,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libisc\interfaceiter.c"
+				RelativePath="..\..\..\lib\isc\win32\interfaceiter.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -943,7 +943,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libisc\isc_strerror.c"
+				RelativePath="..\..\..\lib\isc\win32\strerror.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -965,7 +965,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\lib.c"
+				RelativePath="..\..\..\lib\isc\lib.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1053,7 +1053,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\md5.c"
+				RelativePath="..\..\..\lib\isc\md5.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1185,7 +1185,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\msgcat.c"
+				RelativePath="..\..\..\lib\isc\nls\msgcat.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1273,7 +1273,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libisc\net.c"
+				RelativePath="..\..\..\lib\isc\win32\net.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1295,7 +1295,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\netaddr.c"
+				RelativePath="..\..\..\lib\isc\netaddr.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1339,7 +1339,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\netscope.c"
+				RelativePath="..\..\..\lib\isc\netscope.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1493,7 +1493,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libisc\once.c"
+				RelativePath="..\..\..\lib\isc\win32\once.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1647,7 +1647,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libisc\sockaddr.c"
+				RelativePath="..\..\..\lib\isc\sockaddr.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1955,7 +1955,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\libisc\win32os.c"
+				RelativePath="..\..\..\lib\isc\win32\win32os.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

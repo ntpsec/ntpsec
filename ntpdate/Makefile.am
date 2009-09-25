@@ -1,3 +1,4 @@
+NULL=
 AUTOMAKE_OPTIONS=	
 
 bindir=		${exec_prefix}/${BINSUBDIR}
@@ -6,7 +7,10 @@ bin_PROGRAMS=	ntpdate
 EXTRA_PROGRAMS=	ntptimeset
 
 ntptimeset_SOURCES=	ntptimeset.c ntptime_config.c
-AM_CPPFLAGS=	-I$(top_srcdir)/include
+AM_CPPFLAGS=	-I$(top_srcdir)/include			\
+		-I$(top_srcdir)/lib/isc/include		\
+		-I$(top_srcdir)/lib/isc/unix/include	\
+		$(NULL)
 # LDADD might need RESLIB and ADJLIB
 LDADD=		version.o ../libntp/libntp.a
 DISTCLEANFILES=	.version version.c stamp-v
