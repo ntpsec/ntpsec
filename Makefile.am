@@ -84,7 +84,7 @@ EXTRA_DIST =		\
 	\
 	conf		\
 	html		\
-	libisc		\
+	lib/isc		\
 	ports		\
 	\
 	bincheck.mf	\
