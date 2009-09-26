@@ -1,3 +1,4 @@
+* [Bug 1317] Distribute cvo.sh.
 (4.2.5p220) 2009/09/25 Released by Harlan Stenn <stenn@ntp.org>
 * Rearrange libisc code to match the upstream layout in BIND.  This is
   step one of two, changing the layout but keeping our existing libisc.
