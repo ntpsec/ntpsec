@@ -216,7 +216,7 @@ nmea_start(
 		 * ln -s server:port /dev/gps1
 		 */
 		char buffer[80];
-		char *nmea_host;
+		char *nmea_host, *nmea_tail;
 		int   nmea_port;
 		int   len;
 		struct hostent *he;
@@ -229,8 +229,10 @@ nmea_start(
 
 		if ((nmea_host = strtok(buffer,":")) == NULL)
 			return(0);
+		if ((nmea_tail = strtok(NULL,":")) == NULL)
+			return(0);
 
-		nmea_port = atoi(strtok(NULL,":"));
+		nmea_port = atoi(nmea_tail);
 
 		if ((he = gethostbyname(nmea_host)) == NULL)
 			return(0);
