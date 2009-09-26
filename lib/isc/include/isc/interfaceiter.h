@@ -53,6 +53,7 @@ struct isc_interface {
 	unsigned int af;		/*%< Address family. */
 	isc_netaddr_t address;		/*%< Local address. */
 	isc_netaddr_t netmask;		/*%< Network mask. */
+	isc_netaddr_t broadcast;	/*&< Broadcast address. */
 	isc_netaddr_t dstaddress; 	/*%< Destination address (point-to-point only). */
 	isc_uint32_t flags;		/*%< Flags; see INTERFACE flags. */
 };
@@ -63,6 +64,8 @@ struct isc_interface {
 #define INTERFACE_F_UP			0x00000001U
 #define INTERFACE_F_POINTTOPOINT	0x00000002U
 #define INTERFACE_F_LOOPBACK		0x00000004U
+#define INTERFACE_F_BROADCAST		0x00000008U
+#define INTERFACE_F_MULTICAST		0x00000010U
 /*@}*/
 
 /***

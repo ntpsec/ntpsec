@@ -309,6 +309,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\buffer.c">
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\buftvtots.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -435,28 +438,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\decodenetnum.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\..\..\lib\isc\win32\condition.c">
 			</File>
 			<File
-				RelativePath="..\libntp\dnslookup.c">
+				RelativePath="..\..\..\libntp\decodenetnum.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -559,6 +544,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\event.c">
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\findconfig.c">
@@ -855,27 +843,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\win32\strerror.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\lib\isc\lib.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -939,6 +906,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\log.c">
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\machines.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -979,6 +949,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\mem.c">
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\memmove.c">
@@ -1401,6 +1374,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\ondestroy.c">
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\prettydate.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1611,6 +1587,30 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\win32\stdtime.c">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\strerror.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\libntp\syslog.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1672,6 +1672,15 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\task.c">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\thread.c">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\time.c">
 			</File>
 			<File
 				RelativePath="..\libntp\transmitbuff.c">
@@ -1870,13 +1879,25 @@
 				RelativePath="..\..\..\include\binio.h">
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\include\isc\buffer.h">
+			</File>
+			<File
 				RelativePath="..\include\clockstuff.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\include\isc\condition.h">
 			</File>
 			<File
 				RelativePath="..\include\config.h">
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\include\isc\event.h">
+			</File>
+			<File
 				RelativePath="..\..\..\include\global.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\include\isc\hash.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\ieee754io.h">
@@ -1888,7 +1909,7 @@
 				RelativePath="..\include\arpa\inet.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\interfaceiter.h">
+				RelativePath="..\..\..\lib\isc\include\isc\interfaceiter.h">
 			</File>
 			<File
 				RelativePath="..\include\inttypes.h">
@@ -1900,7 +1921,7 @@
 				RelativePath="..\..\..\include\iosignal.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\ipv6.h">
+				RelativePath="..\..\..\lib\isc\win32\include\isc\ipv6.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\l_stdlib.h">
@@ -1909,19 +1930,25 @@
 				RelativePath="..\..\..\libntp\lib_strbuf.h">
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\include\isc\log.h">
+			</File>
+			<File
 				RelativePath="..\..\..\include\md5.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\net.h">
+				RelativePath="..\..\..\lib\isc\include\isc\mem.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\netaddr.h">
+				RelativePath="..\..\..\lib\isc\include\isc\net.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\include\isc\netaddr.h">
 			</File>
 			<File
 				RelativePath="..\include\netdb.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\netscope.h">
+				RelativePath="..\..\..\lib\isc\include\isc\netscope.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp.h">
@@ -1972,6 +1999,9 @@
 				RelativePath="..\..\..\include\ntp_select.h">
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_sprintf.h">
+			</File>
+			<File
 				RelativePath="..\..\..\include\ntp_stdlib.h">
 			</File>
 			<File
@@ -1993,6 +2023,12 @@
 				RelativePath="..\..\..\include\ntpd.h">
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\include\isc\ondestroy.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\include\isc\platform.h">
+			</File>
+			<File
 				RelativePath="..\..\..\include\recvbuff.h">
 			</File>
 			<File
@@ -2002,13 +2038,28 @@
 				RelativePath="..\include\sys\socket.h">
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\win32\include\isc\stat.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\include\isc\stdtime.h">
+			</File>
+			<File
 				RelativePath="..\include\syslog.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\include\isc\task.h">
 			</File>
 			<File
 				RelativePath="..\include\termios.h">
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\win32\include\isc\thread.h">
+			</File>
+			<File
 				RelativePath="..\include\sys\time.h">
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\win32\include\isc\time.h">
 			</File>
 			<File
 				RelativePath="..\include\transmitbuff.h">
@@ -2017,7 +2068,7 @@
 				RelativePath="..\include\win32_io.h">
 			</File>
 			<File
-				RelativePath="..\include\isc\win32os.h">
+				RelativePath="..\..\..\lib\isc\include\isc\win32os.h">
 			</File>
 		</Filter>
 		<Filter

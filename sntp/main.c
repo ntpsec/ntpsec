@@ -1,10 +1,10 @@
-#include <isc/result.h>
-#include <isc/net.h>
 #include <l_stdlib.h>
 #include <ntp_fp.h>
 #include <ntp.h>
 #include <ntp_stdlib.h>
 #include <ntp_unixtime.h>
+#include <isc/result.h>
+#include <isc/net.h>
 #include <stdio.h>
 
 #include <sntp-opts.h>

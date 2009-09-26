@@ -9,6 +9,7 @@ SUBDIRS+= 				\
 	scripts 			\
 	include 			\
 	lib/isc/include/isc		\
+	lib/isc/nothreads/include/isc	\
 	lib/isc/unix/include/isc	\
 	ElectricFence			\
 	$(NULL)
@@ -84,7 +85,7 @@ EXTRA_DIST =		\
 	\
 	conf		\
 	html		\
-	libisc		\
+	lib/isc		\
 	ports		\
 	\
 	bincheck.mf	\

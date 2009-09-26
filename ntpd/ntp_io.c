@@ -36,6 +36,7 @@
 
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
+#include <isc/mem.h>
 #include <isc/interfaceiter.h>
 #include <isc/netaddr.h>
 #include <isc/result.h>
@@ -279,20 +280,30 @@ struct interface *	inter_list;
 static struct interface *wildipv4 = NULL;
 static struct interface *wildipv6 = NULL;
 
-static void	add_fd_to_list	(SOCKET, enum desc_type);
-static void	close_and_delete_fd_from_list	(SOCKET);
-static void	add_addr_to_list	(sockaddr_u *, struct interface *);
-static void	delete_addr_from_list	(sockaddr_u *);
-static void	delete_interface_from_list	(struct interface *);
+/*
+ * allocate/free in libisc form, using emalloc/free.
+ */
+void *			ntp_memalloc		(void *, size_t);
+void			ntp_memfree		(void *, void *);
+
+static void		add_fd_to_list		(SOCKET, 
+						 enum desc_type);
 static struct interface *find_addr_in_list	(sockaddr_u *);
-static struct interface *find_samenet_addr_in_list (sockaddr_u *);
-static struct interface *find_flagged_addr_in_list (sockaddr_u *, int);
-static void	create_wildcards	(u_short);
+static struct interface *find_samenet_addr_in_list(sockaddr_u *);
+static struct interface *find_flagged_addr_in_list(sockaddr_u *, int);
+static void		delete_addr_from_list	(sockaddr_u *);
+static void		delete_interface_from_list(struct interface *);
+static void		close_and_delete_fd_from_list(SOCKET);
+static void		add_addr_to_list	(sockaddr_u *, 
+						 struct interface *);
+static void		create_wildcards	(u_short);
 #ifdef DEBUG
-static const char *action_text(nic_rule_action);
+static const char *	action_text		(nic_rule_action);
 #endif
 static nic_rule_action	interface_action	(isc_interface_t *);
-static void		convert_isc_if		(isc_interface_t *, struct interface *, u_short);
+static void		convert_isc_if		(isc_interface_t *,
+						 struct interface *, 
+						 u_short);
 static struct interface *getinterface	(sockaddr_u *, int);
 static struct interface *getsamenetinterface	(sockaddr_u *, int);
 static struct interface *findlocalinterface	(sockaddr_u *, int, int);
@@ -305,6 +316,31 @@ static struct interface *findlocalcastinterface	(sockaddr_u *);
 static inline int     read_network_packet	(SOCKET, struct interface *, l_fp);
 static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
+
+
+void *
+ntp_memalloc(
+	void *	ntpcontext,
+	size_t	octets
+	)
+{
+	UNUSED_ARG(ntpcontext);
+
+	return emalloc(octets);
+}
+
+
+void
+ntp_memfree(
+	void *	ntpcontext,
+	void *	p
+	)
+{
+	UNUSED_ARG(ntpcontext);
+
+	free(p);
+}
+
 
 #ifdef SYS_WINNT
 /*
@@ -1361,6 +1397,7 @@ update_interfaces(
 	void *			data
 	)
 {
+	static isc_mem_t *	mctx;
 	interface_info_t	ifi;
 	isc_interfaceiter_t *	iter;
 	isc_result_t		result;
@@ -1373,6 +1410,12 @@ update_interfaces(
 
 	DPRINTF(3, ("update_interfaces(%d)\n", port));
 
+	if (NULL == mctx) {
+		result = isc_mem_createx(0, 0, &ntp_memalloc,
+		    &ntp_memfree, NULL, &mctx);
+		NTP_INSIST(ISC_R_SUCCESS == result);
+	}
+
 	/*
 	 * phase one - scan interfaces
 	 * - create those that are not found
@@ -1381,7 +1424,7 @@ update_interfaces(
 
 	new_interface_found = 0;
 	iter = NULL;
-	result = isc_interfaceiter_create(NULL, &iter);
+	result = isc_interfaceiter_create(mctx, &iter);
 
 	if (result != ISC_R_SUCCESS)
 		return 0;

@@ -90,7 +90,7 @@ int
 isc_thread_key_delete(isc_thread_key_t key);
 
 void *
-isc_thread_key_getspecific(isc_thread_key);
+isc_thread_key_getspecific(isc_thread_key_t);
 
 int
 isc_thread_key_setspecific(isc_thread_key_t key, void *value);

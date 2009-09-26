@@ -5,10 +5,11 @@ NULL=
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS= -I ../m4 -I libopts/m4
 
-AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) 			\
-		-I$(top_srcdir)/../include		\
-		-I$(top_srcdir)/../lib/isc/include	\
-		-I$(top_srcdir)/../lib/isc/unix/include	\
+AM_CPPFLAGS=	$(LIBOPTS_CFLAGS) 				\
+		-I$(top_srcdir)/../include			\
+		-I$(top_srcdir)/../lib/isc/include		\
+		-I$(top_srcdir)/../lib/isc/nothreads/include	\
+		-I$(top_srcdir)/../lib/isc/unix/include		\
 		$(NULL)
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 

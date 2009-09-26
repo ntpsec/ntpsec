@@ -42,19 +42,13 @@ HANDLE hServDoneEvent = NULL;
 int accept_wildcard_if_for_winnt;
 extern volatile int debug;
 
-void uninit_io_completion_port();
-int ntpdmain(int argc, char *argv[]);
-/*
- * libisc\nt_strerror.c
- */
-#ifdef DEBUG
-void FormatErrorFreeMem(void);
-#endif
 /*
  * Forward declarations
  */
-void WINAPI ServiceControl(DWORD dwCtrlCode);
-void ntservice_exit(void);
+void		uninit_io_completion_port(void);
+int		ntpdmain(int argc, char *argv[]);
+void WINAPI	ServiceControl(DWORD dwCtrlCode);
+void		ntservice_exit(void);
 
 void WINAPI service_main( DWORD argc, LPTSTR *argv )
 {
@@ -202,10 +196,6 @@ ntservice_exit( void )
 	reset_winnt_time();
 
 	msyslog(LOG_INFO, "ntservice: The Network Time Protocol Service is stopping.");
-
-#ifdef DEBUG
-	FormatErrorFreeMem();
-#endif 
 
 	if (!foreground) {
 		/* service mode, need to have the service_main routine

@@ -719,13 +719,13 @@
 				RelativePath="..\..\..\include\ascii.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\assertions.h">
+				RelativePath="..\..\..\lib\isc\include\isc\assertions.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\binio.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\boolean.h">
+				RelativePath="..\..\..\lib\isc\include\isc\boolean.h">
 			</File>
 			<File
 				RelativePath="..\include\clockstuff.h">
@@ -749,7 +749,7 @@
 				RelativePath="..\include\isc\int.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\interfaceiter.h">
+				RelativePath="..\..\..\lib\isc\include\isc\interfaceiter.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\iosignal.h">
@@ -773,7 +773,7 @@
 				RelativePath="..\include\isc\net.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\netaddr.h">
+				RelativePath="..\..\..\lib\isc\include\isc\netaddr.h">
 			</File>
 			<File
 				RelativePath="..\include\netdb.h">
@@ -881,7 +881,7 @@
 				RelativePath="..\..\..\include\recvbuff.h">
 			</File>
 			<File
-				RelativePath="..\..\..\include\isc\result.h">
+				RelativePath="..\..\..\lib\isc\include\isc\result.h">
 			</File>
 			<File
 				RelativePath="..\include\sys\socket.h">

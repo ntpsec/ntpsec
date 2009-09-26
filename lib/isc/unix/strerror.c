@@ -30,6 +30,8 @@
 #include <isc/strerror.h>
 #include <isc/util.h>
 
+#include "l_stdlib.h"		/* NTP local change */
+
 #ifdef HAVE_STRERROR
 /*%
  * We need to do this this way for profiled locks.

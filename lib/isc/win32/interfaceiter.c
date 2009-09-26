@@ -104,6 +104,25 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 	}
 }
 
+/*
+ * Unlike on POSIX systems, Windows does not provide the broadcast
+ * address associated with each interface address, so we need to
+ * reconstruct it from the address and mask.
+ */
+
+static void
+get_broadcastaddr(isc_netaddr_t *bcastaddr, isc_netaddr_t *addr, isc_netaddr_t *netmask) {
+
+	isc_uint32_t *	b;
+	isc_uint32_t	a, n;
+
+	b = (isc_uint32_t *)&bcastaddr->type.in;
+	a = *(isc_uint32_t *)&addr->type.in;
+	n = *(isc_uint32_t *)&netmask->type.in;
+
+	*b = a | ~n;
+}
+
 isc_result_t
 isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	char strbuf[ISC_STRERRORSIZE];
@@ -331,6 +350,12 @@ internal_current(isc_interfaceiter_t *iter) {
 	if ((flags & IFF_UP) != 0)
 		iter->current.flags |= INTERFACE_F_UP;
 
+	if ((flags & IFF_BROADCAST) != 0)
+		iter->current.flags |= INTERFACE_F_BROADCAST;
+
+	if ((flags & IFF_MULTICAST) != 0)
+		iter->current.flags |= INTERFACE_F_MULTICAST;
+
 	if ((flags & IFF_POINTTOPOINT) != 0) {
 		iter->current.flags |= INTERFACE_F_POINTTOPOINT;
 		sprintf(iter->current.name, "PPP Interface %d", iter->numIF);
@@ -350,6 +375,16 @@ internal_current(isc_interfaceiter_t *iter) {
 	if ((iter->current.flags & INTERFACE_F_POINTTOPOINT) != 0) {
 		get_addr(AF_INET, &iter->current.dstaddress,
 		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
+	}
+
+	/*
+	 * If the interface is broadcast, get the broadcast address.
+	 */
+	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
+		get_addr(AF_INET, &iter->current.broadcast, 
+		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
+		/* !!! get_broadcastaddr(&iter->current.broadcast, &iter->current.address,
+				   &iter->current.netmask); */
 	}
 
 	if (ifNamed == FALSE)
@@ -384,7 +419,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 	 * Get interface flags.
 	 */
 
-	iter->current.flags = INTERFACE_F_UP;
+	iter->current.flags = INTERFACE_F_UP | INTERFACE_F_MULTICAST;
 
 	if (ifNamed == FALSE)
 		sprintf(iter->current.name,

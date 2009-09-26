@@ -725,7 +725,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\assertions.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\assertions.h"
 				>
 			</File>
 			<File
@@ -733,7 +733,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\boolean.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\boolean.h"
 				>
 			</File>
 			<File
@@ -765,7 +765,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\interfaceiter.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\interfaceiter.h"
 				>
 			</File>
 			<File
@@ -773,7 +773,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\isc\ipv6.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\ipv6.h"
 				>
 			</File>
 			<File
@@ -797,7 +797,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\netaddr.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\netaddr.h"
 				>
 			</File>
 			<File
@@ -965,7 +965,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\isc\result.h"
+				RelativePath="..\..\..\..\lib\isc\include\isc\result.h"
 				>
 			</File>
 			<File

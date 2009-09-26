@@ -5,15 +5,8 @@ ETAGS_ARGS = $(srcdir)/Makefile.am
 #EXTRA_DIST = TAGS
 
 noinst_HEADERS =	\
-	dir.h		\
-	int.h		\
-	keyboard.h	\
-	net.h		\
-	netdb.h		\
-	offset.h	\
-	stat.h		\
-	stdtime.h	\
-	strerror.h	\
-	syslog.h	\
-	time.h		\
+	condition.h	\
+	mutex.h		\
+	once.h		\
+	thread.h	\
 	$(NULL)

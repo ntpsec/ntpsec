@@ -92,6 +92,7 @@
 #define ISC_MSG_BUFFERMAX	503 /*%< "... maximum buffer size exceeded" */
 #define ISC_MSG_GETDESTADDR	504 /*%< "%s: getting destination address: %s" */
 #define ISC_MSG_GETNETMASK	505 /*%< "%s: getting netmask: %s" */
+#define ISC_MSG_GETBCSTADDR	506 /*%< "%s: getting broadcast address: %s" */
 
 #define ISC_MSG_GETIFLISTSIZE	601 /*%< "getting interface list size: ..." */
 #define ISC_MSG_GETIFLIST	602 /*%< "getting interface list: ..." */

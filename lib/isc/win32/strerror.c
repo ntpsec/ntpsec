@@ -42,6 +42,10 @@ GetWSAErrorMessage(int errval);
 char *
 NTstrerror(int err, BOOL *bfreebuf);
 
+#ifndef CRT_strerror
+#define CRT_strerror(e)	strerror(e)
+#endif
+
 /*
  * We need to do this this way for profiled locks.
  */
@@ -74,7 +78,7 @@ isc__strerror(int num, char *buf, size_t size) {
 		snprintf(buf, size, "%s", msg);
 	else
 		snprintf(buf, size, "Unknown error: %u", unum);
-	if(freebuf && msg != NULL) {
+	if (freebuf && msg != NULL) {
 		LocalFree(msg);
 	}
 	UNLOCK(&isc_strerror_lock);
@@ -110,11 +114,8 @@ FormatError(int error) {
  * since those messages are not available in the system error messages.
  */
 char *
-NTstrerror(int err, BOOL *bfreebuf) {
+NTstrerror(int errval, BOOL *bfreebuf) {
 	char *retmsg = NULL;
-
-	/* Copy the error value first in case of other errors */	
-	DWORD errval = err; 
 
 	*bfreebuf = FALSE;
 
@@ -124,16 +125,20 @@ NTstrerror(int err, BOOL *bfreebuf) {
 		if (retmsg != NULL)
 			return (retmsg);
 	}
+
+	retmsg = CRT_strerror(errval);
+
 	/*
 	 * If it's not one of the standard Unix error codes,
 	 * try a system error message
 	 */
-	if (errval > (DWORD) _sys_nerr) {
-		*bfreebuf = TRUE;
-		return (FormatError(errval));
-	} else {
-		return (strerror(errval));
+	if (retmsg == NULL) {
+		retmsg = FormatError(errval);
+		if (retmsg != NULL)
+			*bfreebuf = TRUE;
 	}
+
+	return (retmsg);
 }
 
 /*

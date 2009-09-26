@@ -216,7 +216,7 @@ SOURCE=..\..\..\include\ascii.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\assertions.h
+SOURCE=..\..\..\lib\isc\include\isc\assertions.h
 # End Source File
 # Begin Source File
 
@@ -224,7 +224,7 @@ SOURCE=..\..\..\include\binio.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\boolean.h
+SOURCE=..\..\..\lib\isc\include\isc\boolean.h
 # End Source File
 # Begin Source File
 
@@ -256,7 +256,7 @@ SOURCE=..\include\isc\int.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\interfaceiter.h
+SOURCE=..\..\..\lib\isc\include\isc\interfaceiter.h
 # End Source File
 # Begin Source File
 
@@ -288,7 +288,7 @@ SOURCE=..\include\isc\net.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\netaddr.h
+SOURCE=..\..\..\lib\isc\include\isc\netaddr.h
 # End Source File
 # Begin Source File
 
@@ -432,7 +432,7 @@ SOURCE=..\..\..\include\recvbuff.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\result.h
+SOURCE=..\..\..\lib\isc\include\isc\result.h
 # End Source File
 # Begin Source File
 

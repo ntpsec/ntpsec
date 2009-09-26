@@ -63,38 +63,47 @@
  */
 #undef ISC_PLATFORM_HAVESYSUNH
 
- /*
+/*
  * Set up a macro for importing and exporting from the DLL
+ *
+ * To build static libraries on win32, #define ISC_STATIC_WIN
  */
+#ifndef ISC_STATIC_WIN
+#define ISC_DLLEXP	__declspec(dllexport)
+#define ISC_DLLIMP	__declspec(dllimport)
+#else
+#define ISC_DLLEXP
+#define ISC_DLLIMP
+#endif
 
 #ifdef LIBISC_EXPORTS
-#define LIBISC_EXTERNAL_DATA __declspec(dllexport)
+#define LIBISC_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBISC_EXTERNAL_DATA __declspec(dllimport)
+#define LIBISC_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBISCCFG_EXPORTS
-#define LIBISCCFG_EXTERNAL_DATA __declspec(dllexport)
+#define LIBISCCFG_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBISCCFG_EXTERNAL_DATA __declspec(dllimport)
+#define LIBISCCFG_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBISCCC_EXPORTS
-#define LIBISCCC_EXTERNAL_DATA __declspec(dllexport)
+#define LIBISCCC_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBISCCC_EXTERNAL_DATA __declspec(dllimport)
+#define LIBISCCC_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBDNS_EXPORTS
-#define LIBDNS_EXTERNAL_DATA __declspec(dllexport)
+#define LIBDNS_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBDNS_EXTERNAL_DATA __declspec(dllimport)
+#define LIBDNS_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBBIND9_EXPORTS
-#define LIBBIND9_EXTERNAL_DATA __declspec(dllexport)
+#define LIBBIND9_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBBIND9_EXTERNAL_DATA __declspec(dllimport)
+#define LIBBIND9_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #endif /* ISC_PLATFORM_H */

@@ -155,13 +155,13 @@ try_proto(int domain) {
 #ifdef ISC_PLATFORM_HAVEIN6PKTINFO
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
-		unsigned int len;
+		GETSOCKNAME_SOCKLEN_TYPE len;	/* NTP local change */
 
 		/*
 		 * Check to see if IPv6 is broken, as is common on Linux.
 		 */
 		len = sizeof(sin6);
-		if (getsockname(s, (struct sockaddr *)&sin6, (void *)&len) < 0)
+		if (getsockname(s, (struct sockaddr *)&sin6, &len) < 0)
 		{
 			isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
 				      ISC_LOGMODULE_SOCKET, ISC_LOG_ERROR,
