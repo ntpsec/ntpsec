@@ -193,3 +193,30 @@ NTReportError(const char *name, const char *str) {
 
 	DeregisterEventSource(hNTAppLog);
 }
+
+
+/*
+ * ntp_strerror() - provide strerror()-compatible wrapper for libisc's
+ *		    NTstrerror(), which knows about Windows as well as
+ *		    C runtime error messages.
+ */
+extern char *NTstrerror(int err, BOOL *bfreebuf);
+
+char *
+ntp_strerror(
+	int code
+	)
+{
+	static char msgbuf[128];
+	char *	pmsg;
+	BOOL	freep;
+
+	pmsg = NTstrerror(code, &freep);
+
+	strncpy(msgbuf, pmsg, sizeof(msgbuf));
+	msgbuf[sizeof(msgbuf) - 1] = '\0';
+	if (freep)
+		LocalFree(pmsg);
+
+	return msgbuf;
+}

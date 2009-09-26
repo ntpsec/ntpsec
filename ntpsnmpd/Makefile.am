@@ -9,12 +9,13 @@ noinst_HEADERS=	ntpSnmpSubagentObject.h
 # HMS: we probably want a version.o file here, too.
 LDADD=		../ntpq/libntpq.a ../libntp/libntp.a @SNMP_LIBS@ 	\
 		$(LIBOPTS_LDADD)
-AM_CPPFLAGS=	-I$(top_srcdir)/ntpq			\
-		-I$(top_srcdir)/include 		\
-		-I$(top_srcdir)/lib/isc/include 	\
-		-I$(top_srcdir)/lib/isc/unix/include 	\
-		@SNMP_CPPFLAGS@ 			\
-		$(LIBOPTS_CFLAGS)			\
+AM_CPPFLAGS=	-I$(top_srcdir)/ntpq				\
+		-I$(top_srcdir)/include 			\
+		-I$(top_srcdir)/lib/isc/include			\
+		-I$(top_srcdir)/lib/isc/nothreads/include 	\
+		-I$(top_srcdir)/lib/isc/unix/include 		\
+		@SNMP_CPPFLAGS@ 				\
+		$(LIBOPTS_CFLAGS)				\
 		$(NULL)
 AM_CFLAGS=	@SNMP_CFLAGS@
 EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\

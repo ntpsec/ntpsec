@@ -1,21 +1,21 @@
 /*
+ * Copyright (C) 2004, 2005, 2007-2009  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 2001  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
- * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
- * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
- * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
- * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
- * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
- * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: platform.h,v 1.7 2001/11/19 22:32:04 gson Exp $ */
+/* $Id: platform.h,v 1.16.118.2 2009/02/16 23:47:15 tbox Exp $ */
 
 #ifndef ISC_PLATFORM_H
 #define ISC_PLATFORM_H 1
@@ -30,21 +30,22 @@
  *** Network.
  ***/
 
-/*
- * This should not be defined yet until we can support IPV6
- * on Windows Platforms.
- *
 #define ISC_PLATFORM_HAVEIPV6
-*/
+#if _MSC_VER > 1200
+#define ISC_PLATFORM_HAVEIN6PKTINFO
+#endif
+#define ISC_PLATFORM_HAVESCOPEID
 #define ISC_PLATFORM_NEEDPORTT
 #undef MSG_TRUNC
 #define ISC_PLATFORM_NEEDNTOP
 #define ISC_PLATFORM_NEEDPTON
-#define ISC_PLATFORM_NEEDATON
 
 #define ISC_PLATFORM_QUADFORMAT "I64"
 
 #define ISC_PLATFORM_NEEDSTRSEP
+#define ISC_PLATFORM_NEEDSTRLCPY
+#define ISC_PLATFORM_NEEDSTRLCAT
+#define ISC_PLATFORM_NEEDSTRLCPY
 
 /*
  * Used to control how extern data is linked; needed for Win32 platforms.
@@ -56,42 +57,53 @@
  * and we don't want to redeclare it.
  */
 #define ISC_PLATFORM_NONSTDHERRNO
- /*
- * Set up a macro for importing and exporting from the DLL
- */
 
-#define LIBISC_EXTERNAL_DATA 
-#if 0
-#ifdef LIBISC_EXPORTS
-#define LIBISC_EXTERNAL_DATA __declspec(dllexport)
+/*
+ * Define if the platform has <sys/un.h>.
+ */
+#undef ISC_PLATFORM_HAVESYSUNH
+
+/*
+ * Set up a macro for importing and exporting from the DLL
+ *
+ * To build static libraries on win32, #define ISC_STATIC_WIN
+ */
+#ifndef ISC_STATIC_WIN
+#define ISC_DLLEXP	__declspec(dllexport)
+#define ISC_DLLIMP	__declspec(dllimport)
 #else
-#define LIBISC_EXTERNAL_DATA __declspec(dllimport) 
+#define ISC_DLLEXP
+#define ISC_DLLIMP
+#endif
+
+#ifdef LIBISC_EXPORTS
+#define LIBISC_EXTERNAL_DATA		ISC_DLLEXP
+#else
+#define LIBISC_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBISCCFG_EXPORTS
-#define LIBISCCFG_EXTERNAL_DATA __declspec(dllexport)
+#define LIBISCCFG_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBISCCFG_EXTERNAL_DATA __declspec(dllimport) 
+#define LIBISCCFG_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBISCCC_EXPORTS
-#define LIBISCCC_EXTERNAL_DATA __declspec(dllexport)
+#define LIBISCCC_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBISCCC_EXTERNAL_DATA __declspec(dllimport) 
+#define LIBISCCC_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBDNS_EXPORTS
-#define LIBDNS_EXTERNAL_DATA __declspec(dllexport)
+#define LIBDNS_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBDNS_EXTERNAL_DATA __declspec(dllimport)
+#define LIBDNS_EXTERNAL_DATA		ISC_DLLIMP
 #endif
 
 #ifdef LIBBIND9_EXPORTS
-#define LIBBIND9_EXTERNAL_DATA __declspec(dllexport)
+#define LIBBIND9_EXTERNAL_DATA		ISC_DLLEXP
 #else
-#define LIBBIND9_EXTERNAL_DATA __declspec(dllimport)
+#define LIBBIND9_EXTERNAL_DATA		ISC_DLLIMP
 #endif
-
-#endif /* if 0 */
 
 #endif /* ISC_PLATFORM_H */

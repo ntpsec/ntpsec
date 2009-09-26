@@ -1,3 +1,9 @@
+* Update libisc code using bind-9.6.1-P1.tar.gz, rearrange our copy to
+  mirror the upstream layout (lib/isc/...), and merge in NTP-local
+  modifications to libisc.  There is a new procedure to ease future
+  libisc merges using a separate "upstream" bk repo.  That will enable
+  normal bk pull automerge to handle carrying forward any local changes
+  and should enable us to take updated libisc snapshots more often.
 * [Bug 1317] Distribute cvo.sh.
 (4.2.5p220) 2009/09/25 Released by Harlan Stenn <stenn@ntp.org>
 * Rearrange libisc code to match the upstream layout in BIND.  This is

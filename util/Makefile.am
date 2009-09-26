@@ -7,10 +7,11 @@ bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
 EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
 	ntptime pps-api precision sht testrs6000 tg tickadj timetrim
 
-AM_CPPFLAGS=	-I$(top_srcdir)/include 		\
-		-I$(top_srcdir)/lib/isc/include		\
-		-I$(top_srcdir)/lib/isc/unix/include	\
-		$(LIBOPTS_CFLAGS)			\
+AM_CPPFLAGS=	-I$(top_srcdir)/include 			\
+		-I$(top_srcdir)/lib/isc/include			\
+		-I$(top_srcdir)/lib/isc/nothreads/include	\
+		-I$(top_srcdir)/lib/isc/unix/include		\
+		$(LIBOPTS_CFLAGS)				\
 		$(NULL)
 # LDADD might need RESLIB and ADJLIB
 LDADD=		../libntp/libntp.a

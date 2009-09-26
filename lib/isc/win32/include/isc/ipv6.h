@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
- * Copyright (C) 2000-2002  Internet Software Consortium.
+ * Copyright (C) 2004, 2005, 2007  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 1999-2002  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,7 +15,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: ipv6.h,v 1.9.2.2.2.5 2004/04/19 06:39:55 marka Exp $ */
+/* $Id: ipv6.h,v 1.19 2007/06/18 23:47:49 tbox Exp $ */
 
 #ifndef ISC_IPV6_H
 #define ISC_IPV6_H 1
@@ -40,7 +40,7 @@
  *	No anticipated impact.
  *
  * Standards:
- *	RFC 2553.
+ *	RFC2553.
  */
 
 #if _MSC_VER < 1300
@@ -54,21 +54,21 @@
 #define IN6ADDR_LOOPBACK_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }}
 #endif
 
-extern const struct in6_addr isc_in6addr_any;
-extern const struct in6_addr isc_in6addr_loopback;
+LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_in6addr_any;
+LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_in6addr_loopback;
 
 /*
  * Unspecified
  */
-
 #ifndef IN6_IS_ADDR_UNSPECIFIED
-#define IN6_IS_ADDR_UNSPECIFIED(a)     (\
+#define IN6_IS_ADDR_UNSPECIFIED(a) (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
 *((u_long *)((a)->s6_addr) + 2) == 0 && \
 *((u_long *)((a)->s6_addr) + 3) == 0 \
 )
 #endif
+
 /*
  * Loopback
  */
@@ -84,7 +84,6 @@ extern const struct in6_addr isc_in6addr_loopback;
 /*
  * IPv4 compatible
  */
-#ifndef IN6_IS_ADDR_V4COMPAT
 #define IN6_IS_ADDR_V4COMPAT(a)  (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
@@ -92,25 +91,21 @@ extern const struct in6_addr isc_in6addr_loopback;
 *((u_long *)((a)->s6_addr) + 3) != 0 && \
 *((u_long *)((a)->s6_addr) + 3) != htonl(1) \
 )
-#endif
 
 /*
  * Mapped
  */
-#ifndef IN6_IS_ADDR_V4MAPPED
 #define IN6_IS_ADDR_V4MAPPED(a) (\
 *((u_long *)((a)->s6_addr)    ) == 0 && \
 *((u_long *)((a)->s6_addr) + 1) == 0 && \
 *((u_long *)((a)->s6_addr) + 2) == htonl(0x0000ffff))
-#endif
 
 /*
  * Multicast
  */
-#ifndef IN6_IS_ADDR_MULTICAST
 #define IN6_IS_ADDR_MULTICAST(a)	\
 	((a)->s6_addr[0] == 0xffU)
-#endif
+
 /*
  * Unicast link / site local.
  */

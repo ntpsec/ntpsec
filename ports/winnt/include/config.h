@@ -127,6 +127,10 @@ struct timeval {
  */
 extern int tty_open(char *, int, int);
 
+/*
+ * disable use of __declspec(dllexport) by libisc routines
+ */
+#define ISC_STATIC_WIN	1
 
 /*
  * ntp_rfc2553.h has cruft under #ifdef SYS_WINNT which is
@@ -257,6 +261,7 @@ typedef int socklen_t;
 #define write		_write
 #define strdup		_strdup
 #define stat		_stat		/*struct stat from  <sys/stat.h> */
+#define fstat		_fstat
 #define unlink		_unlink
 /*
  * punt on fchmod on Windows
@@ -286,8 +291,10 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 #define STDERR_FILENO	_fileno(stderr)
 
 /* Point to a local version for error string handling */
-# define strerror	NTstrerror
-char *NTstrerror(int errnum);
+#define CRT_strerror(e)	strerror(e)
+#define	strerror(e)	ntp_strerror(e)
+extern char *		ntp_strerror(int);
+
 
 # define MCAST				/* Enable Multicast Support */
 # define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */

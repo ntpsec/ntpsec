@@ -28,7 +28,8 @@ libparse_a_SOURCES = parse.c \
 		     binio.c \
 		     ieee754io.c \
 		     mfp_mul.c \
-		     gpstolfp.c
+		     gpstolfp.c \
+		     $(NULL)
 
 libparse_kernel_a_SOURCES = 
 libparse_kernel_a_LIBADD = kparse$U.o \
@@ -47,13 +48,15 @@ libparse_kernel_a_LIBADD = kparse$U.o \
 			    kbinio$U.o \
 			    kieee754io$U.o \
 			    kmfp_mul$U.o \
-			    kgpstolfp$U.o
+			    kgpstolfp$U.o \
+			    $(NULL)
 
 
-INCLUDES = 	-I$(top_srcdir)/include			\
-		-I$(top_srcdir)/lib/isc/include		\
-		-I$(top_srcdir)/lib/isc/unix/include	\
-		-I$(top_srcdir)/kernel			\
+INCLUDES = 	-I$(top_srcdir)/include				\
+		-I$(top_srcdir)/lib/isc/include			\
+		-I$(top_srcdir)/lib/isc/nothreads/include	\
+		-I$(top_srcdir)/lib/isc/unix/include		\
+		-I$(top_srcdir)/kernel				\
 		$(NULL)
 ETAGS_ARGS = Makefile.am
 

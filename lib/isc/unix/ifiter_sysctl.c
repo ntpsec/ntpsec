@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004, 2005, 2007  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1999-2003  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,9 +15,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: ifiter_sysctl.c,v 1.14.12.7 2004/03/08 09:04:56 marka Exp $ */
+/* $Id: ifiter_sysctl.c,v 1.25 2007/06/19 23:47:18 tbox Exp $ */
 
-/*
+/*! \file
+ * \brief
  * Obtain the list of network interfaces using sysctl.
  * See TCP/IP Illustrated Volume 2, sections 19.8, 19.14,
  * and 19.16.
@@ -71,6 +72,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	size_t bufused;
 	char strbuf[ISC_STRERRORSIZE];
 
+	REQUIRE(mctx != NULL);
 	REQUIRE(iterp != NULL);
 	REQUIRE(*iterp == NULL);
 
@@ -182,13 +184,12 @@ internal_current(isc_interfaceiter_t *iter) {
 		if ((ifam->ifam_flags & IFF_LOOPBACK) != 0)
 			iter->current.flags |= INTERFACE_F_LOOPBACK;
 
-		if ((ifam->ifam_flags & IFF_BROADCAST) != 0) {
+		if ((ifam->ifam_flags & IFF_BROADCAST) != 0)
 			iter->current.flags |= INTERFACE_F_BROADCAST;
-		}
+
 #ifdef IFF_MULTICAST
-		if ((ifam->ifam_flags & IFF_MULTICAST) != 0) {
+		if ((ifam->ifam_flags & IFF_MULTICAST) != 0)
 			iter->current.flags |= INTERFACE_F_MULTICAST;
-		}
 #endif
 
 		/*
@@ -267,7 +268,6 @@ internal_current(isc_interfaceiter_t *iter) {
 		    (iter->current.flags & INTERFACE_F_BROADCAST) != 0)
 			get_addr(family, &iter->current.broadcast, dst_sa,
 				 iter->current.name);
-
 
 		return (ISC_R_SUCCESS);
 	} else {

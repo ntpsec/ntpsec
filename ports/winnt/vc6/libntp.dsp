@@ -134,6 +134,10 @@ SOURCE=..\..\..\libntp\buftvtots.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\isc\buffer.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\caljulian.c
 # End Source File
 # Begin Source File
@@ -154,11 +158,11 @@ SOURCE=..\..\..\libntp\clocktypes.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\decodenetnum.c
+SOURCE=..\..\..\lib\isc\win32\condition.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\dnslookup.c
+SOURCE=..\..\..\libntp\decodenetnum.c
 # End Source File
 # Begin Source File
 
@@ -175,6 +179,10 @@ SOURCE=..\..\..\libntp\emalloc.c
 # Begin Source File
 
 SOURCE=..\..\..\lib\isc\error.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\isc\event.c
 # End Source File
 # Begin Source File
 
@@ -246,11 +254,19 @@ SOURCE=..\..\..\libopts\libopts.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\isc\log.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\machines.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\lib\isc\md5.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\isc\mem.c
 # End Source File
 # Begin Source File
 
@@ -334,6 +350,10 @@ SOURCE=..\..\..\lib\isc\win32\once.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\isc\ondestroy.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\prettydate.c
 # End Source File
 # Begin Source File
@@ -370,6 +390,10 @@ SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\isc\win32\stdime.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\libntp\syslog.c
 # End Source File
 # Begin Source File
@@ -379,6 +403,18 @@ SOURCE=..\..\..\libntp\syssignal.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\systime.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\isc\task.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\isc\win32\thread.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\isc\win32\time.c
 # End Source File
 # Begin Source File
 

@@ -1,36 +1,37 @@
 /*
+ * Copyright (C) 2004, 2005, 2007  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1996-2001  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
- * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
- * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
- * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
- * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
- * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
- * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
+
+/*! \file */
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char rcsid[] =
-	"$Id: inet_ntop.c,v 1.13 2001/11/27 01:56:00 gson Exp $";
+	"$Id: inet_ntop.c,v 1.19 2007/06/19 23:47:17 tbox Exp $";
 #endif /* LIBC_SCCS and not lint */
 
 #include <config.h>
-
-#ifdef ISC_PLATFORM_NEEDNTOP
 
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <isc/net.h>
+#include <isc/print.h>
 
-#include "ntp_sprintf.h"
+#include "ntp_sprintf.h"	/* NTP local change, helps SunOS 4 */
 
 #define NS_INT16SZ	 2
 #define NS_IN6ADDRSZ	16
@@ -48,12 +49,12 @@ static const char *inet_ntop6(const unsigned char *src, char *dst,
 			      size_t size);
 #endif
 
-/* char *
+/*! char *
  * isc_net_ntop(af, src, dst, size)
  *	convert a network format address to presentation format.
- * return:
+ * \return
  *	pointer to presentation format address (`dst'), or NULL (see errno).
- * author:
+ * \author 
  *	Paul Vixie, 1996.
  */
 const char *
@@ -73,15 +74,16 @@ isc_net_ntop(int af, const void *src, char *dst, size_t size)
 	/* NOTREACHED */
 }
 
-/* const char *
+/*! const char *
  * inet_ntop4(src, dst, size)
  *	format an IPv4 address
- * return:
+ * \return
  *	`dst' (as a const)
- * notes:
+ * \note
  *	(1) uses no statics
+ * \note
  *	(2) takes a unsigned char* not an in_addr as input
- * author:
+ * \author
  *	Paul Vixie, 1996.
  */
 static const char *
@@ -90,7 +92,9 @@ inet_ntop4(const unsigned char *src, char *dst, size_t size)
 	static const char *fmt = "%u.%u.%u.%u";
 	char tmp[sizeof("255.255.255.255")];
 
-	if (SPRINTF((tmp, fmt, src[0], src[1], src[2], src[3])) >= size)
+	/* NTP local change to use SNPRINTF() macro for SunOS4 compat */
+	if (SNPRINTF((tmp, sizeof(tmp), fmt, src[0], src[1], src[2],
+		      src[3])) >= size)
 	{
 		errno = ENOSPC;
 		return (NULL);
@@ -100,10 +104,10 @@ inet_ntop4(const unsigned char *src, char *dst, size_t size)
 	return (dst);
 }
 
-/* const char *
+/*! const char *
  * isc_inet_ntop6(src, dst, size)
  *	convert IPv6 binary address into presentation (printable) format
- * author:
+ * \author
  *	Paul Vixie, 1996.
  */
 #ifdef AF_INET6
@@ -131,9 +135,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	for (i = 0; i < NS_IN6ADDRSZ; i++)
 		words[i / 2] |= (src[i] << ((1 - (i % 2)) << 3));
 	best.base = -1;
-	best.len = 0;
 	cur.base = -1;
-	cur.len = 0;
 	for (i = 0; i < (NS_IN6ADDRSZ / NS_INT16SZ); i++) {
 		if (words[i] == 0) {
 			if (cur.base == -1)
@@ -179,7 +181,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 			tp += strlen(tp);
 			break;
 		}
-		tp += SPRINTF((tp, "%x", words[i]));
+		tp += SPRINTF((tp, "%x", words[i]));	/* NTP local change */
 	}
 	/* Was it a trailing run of 0x00's? */
 	if (best.base != -1 && (best.base + best.len) ==
@@ -198,7 +200,3 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size)
 	return (dst);
 }
 #endif /* AF_INET6 */
-
-#else
-int inet_ntop_c_not_empty;
-#endif /* ISC_PLATFORM_NEEDNTOP */

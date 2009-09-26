@@ -61,10 +61,10 @@ static isc_result_t	ipv6pktinfo_result = ISC_R_NOTFOUND;
 
 void InitSockets(void);
 
-
 static isc_result_t
 try_proto(int domain) {
 	SOCKET s;
+	isc_result_t result = ISC_R_SUCCESS;
 	char strbuf[ISC_STRERRORSIZE];
 	int errval;
 

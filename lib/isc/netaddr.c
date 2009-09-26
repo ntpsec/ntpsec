@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2004  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004, 2005, 2007  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1999-2002  Internet Software Consortium.
  *
- * Permission to use, copy, modify, and distribute this software for any
+ * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
@@ -15,11 +15,11 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: netaddr.c,v 1.18.12.9 2004/05/15 03:46:12 jinmei Exp $ */
+/* $Id: netaddr.c,v 1.38 2007/06/18 23:47:44 tbox Exp $ */
+
+/*! \file */
 
 #include <config.h>
-
-#define ISC_ONLY_IPV6
 
 #include <stdio.h>
 
@@ -53,6 +53,12 @@ isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {
 		    a->zone != b->zone)
 			return (ISC_FALSE);
 		break;
+#ifdef ISC_PLATFORM_HAVESYSUNH
+	case AF_UNIX:
+		if (strcmp(a->type.un, b->type.un) != 0)
+			return (ISC_FALSE);
+		break;
+#endif
 	default:
 		return (ISC_FALSE);
 	}
@@ -73,7 +79,7 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 	if (a->family != b->family)
 		return (ISC_FALSE);
 
-	if (a->zone != b->zone)
+	if (a->zone != b->zone && b->zone != 0)
 		return (ISC_FALSE);
 
 	switch (a->family) {
@@ -137,6 +143,16 @@ isc_netaddr_totext(const isc_netaddr_t *netaddr, isc_buffer_t *target) {
 	case AF_INET6:
 		type = &netaddr->type.in6;
 		break;
+#ifdef ISC_PLATFORM_HAVESYSUNH
+	case AF_UNIX:
+		alen = strlen(netaddr->type.un);
+		if (alen > isc_buffer_availablelength(target))
+			return (ISC_R_NOSPACE);
+		isc_buffer_putmem(target,
+				  (const unsigned char *)(netaddr->type.un),
+				  alen);
+		return (ISC_R_SUCCESS);
+#endif
 	default:
 		return (ISC_R_FAILURE);
 	}
@@ -190,6 +206,42 @@ isc_netaddr_format(const isc_netaddr_t *na, char *array, unsigned int size) {
 			 na->family);
 		array[size - 1] = '\0';
 	}
+}
+
+
+isc_result_t
+isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen) {
+	static const unsigned char zeros[16];
+	unsigned int nbits, nbytes, ipbytes;
+	const unsigned char *p;
+
+	switch (na->family) {
+	case AF_INET:
+		p = (const unsigned char *) &na->type.in;
+		ipbytes = 4;
+		if (prefixlen > 32)
+			return (ISC_R_RANGE);
+		break;
+	case AF_INET6:
+		p = (const unsigned char *) &na->type.in6;
+		ipbytes = 16;
+		if (prefixlen > 128)
+			return (ISC_R_RANGE);
+		break;
+	default:
+		ipbytes = 0;
+		return (ISC_R_NOTIMPLEMENTED);
+	}
+	nbytes = prefixlen / 8;
+	nbits = prefixlen % 8;
+	if (nbits != 0) {
+		if ((p[nbytes] & (0xff>>nbits)) != 0U)
+			return (ISC_R_FAILURE);
+		nbytes++;
+	}
+	if (memcmp(p + nbytes, zeros, ipbytes - nbytes) != 0)
+		return (ISC_R_FAILURE);
+	return (ISC_R_SUCCESS);
 }
 
 isc_result_t
@@ -248,6 +300,25 @@ isc_netaddr_fromin6(isc_netaddr_t *netaddr, const struct in6_addr *ina6) {
 	netaddr->type.in6 = *ina6;
 }
 
+isc_result_t
+isc_netaddr_frompath(isc_netaddr_t *netaddr, const char *path) {
+#ifdef ISC_PLATFORM_HAVESYSUNH
+        if (strlen(path) > sizeof(netaddr->type.un) - 1)
+                return (ISC_R_NOSPACE);
+
+        memset(netaddr, 0, sizeof(*netaddr));
+        netaddr->family = AF_UNIX;
+        strcpy(netaddr->type.un, path);
+        netaddr->zone = 0;
+        return (ISC_R_SUCCESS);
+#else 
+	UNUSED(netaddr);
+	UNUSED(path);
+        return (ISC_R_NOTIMPLEMENTED);
+#endif
+}
+
+
 void
 isc_netaddr_setzone(isc_netaddr_t *netaddr, isc_uint32_t zone) {
 	/* we currently only support AF_INET6. */
@@ -278,6 +349,12 @@ isc_netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
 		t->zone = 0;
 #endif
 		break;
+#ifdef ISC_PLATFORM_HAVESYSUNH
+	case AF_UNIX:
+		memcpy(t->type.un, s->type.sunix.sun_path, sizeof(t->type.un));
+		t->zone = 0;
+		break;
+#endif
 	default:
 		INSIST(0);
 	}
@@ -290,14 +367,12 @@ isc_netaddr_any(isc_netaddr_t *netaddr) {
 	netaddr->type.in.s_addr = INADDR_ANY;
 }
 
-#ifdef ISC_PLATFORM_HAVEIPV6
 void
 isc_netaddr_any6(isc_netaddr_t *netaddr) {
 	memset(netaddr, 0, sizeof(*netaddr));
 	netaddr->family = AF_INET6;
 	netaddr->type.in6 = in6addr_any;
 }
-#endif
 
 isc_boolean_t
 isc_netaddr_ismulticast(isc_netaddr_t *na) {
@@ -345,7 +420,6 @@ isc_netaddr_issitelocal(isc_netaddr_t *na) {
 	}
 }
 
-#ifdef ISC_PLATFORM_HAVEIPV6
 void
 isc_netaddr_fromv4mapped(isc_netaddr_t *t, const isc_netaddr_t *s) {
 	isc_netaddr_t *src;
@@ -360,4 +434,3 @@ isc_netaddr_fromv4mapped(isc_netaddr_t *t, const isc_netaddr_t *s) {
 	memcpy(&t->type.in, (char *)&src->type.in6 + 12, 4);
 	return;
 }
-#endif
