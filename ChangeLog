@@ -1,3 +1,4 @@
+(4.2.5p222) 2009/09/27 Released by Harlan Stenn <stenn@ntp.org>
 * Update libisc code using bind-9.6.1-P1.tar.gz, rearrange our copy to
   mirror the upstream layout (lib/isc/...), and merge in NTP-local
   modifications to libisc.  There is a new procedure to ease future
