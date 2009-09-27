@@ -10,6 +10,7 @@
 * Compiling ntp_parser.y using BSD make correctly places ntp_parser.h
   in the top-level ntpd directory instead of A.*/ntpd.
 * bootstrap script updated to remove potentially stale .deps dirs.
+* Remove unneeded Makefile.am files from the lib/isc/include tree.
 (4.2.5p221) 2009/09/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1316] segfault if refclock_nmea can't open file.
 * [Bug 1317] Distribute cvo.sh.
