@@ -30,23 +30,20 @@ esac
 #set -e
 #set -x
 
-# config.guess may only be here, and some don't have . in their PATH
-PATH="$PATH:."
-
 CVO=`./scripts/cvo.sh @cvo@`
 case "$CVO" in
- *-*-*-*) echo "config.guess returned <$CVO>, which makes no sense to me."
+ *-*-*-*) "echo scripts/cvo.sh returned <$CVO>, which makes no sense to me."
     exit 1
     ;;
  *-*-*) ;;
- *) echo "config.guess returned <$CVO>, which makes no sense to me."
+ *) echo "scripts/cvo.sh returned <$CVO>, which makes no sense to me."
     exit 1
     ;;
 esac
 
 case "$IAM" in
  *.udel.edu)
-    BDIR=A.$MYNAME
+    BASEDIR=A.$MYNAME
     CONFIG_ARGS="$CONFIG_ARGS --enable-local-libopts"
     case "$CVO" in
      *-*-ultrix*)
@@ -55,7 +52,7 @@ case "$IAM" in
     esac
     ;;
  *)
-    BDIR=A.$CVO
+    BASEDIR=A.$CVO
     ;;
 esac
 
@@ -90,7 +87,7 @@ case "$CC" in
     ;;
 esac
 
-BDIR="$BDIR$KEYSUF$CCSUF"
+BDIR="$BASEDIR$KEYSUF$CCSUF"
 
 [ -d "$BDIR" ] || mkdir $BDIR
 [ -f "$BDIR/.buildcvo" ] || echo $CVO > $BDIR/.buildcvo
@@ -100,22 +97,28 @@ BDIR="$BDIR$KEYSUF$CCSUF"
 cd $BDIR
 
 #
-# make sure we have a nice that works,
+# Make sure we have a nice that works.
+# To disable use of nice make a dummy nice script such
+# as the heredoc a few lines below and set BNICE to its
+# path.
+# 
 #
 nice true && NICEB=nice
-nice true || NICEB=./.nicebuild-$MYNAME-$SIG && (
-    cat > .nicebuild-$MYNAME-$SIG <<UNLYKUHLY
-#! /bin/sh
-shift
-\$*
-UNLYKUHLY
-    chmod +x .nicebuild-$MYNAME-$SIG
-)
+nice true || {
+	NICEB=./.nicebuild-$MYNAME-$SIG
+    	cat > .nicebuild-$MYNAME-$SIG <<-HEREDOC
+		#! /bin/sh
+		shift
+		\$*
+HEREDOC
+    	chmod +x .nicebuild-$MYNAME-$SIG
+}
 
 
 (
-[ -f config.status ] || $NICEB -7 ../configure --config-cache \
-				$CONFIG_ARGS
+[ -f config.status ] || $NICEB -7 ../configure \
+			--cache-file=../config.cache-$IAM \
+			$CONFIG_ARGS
 
 $NICEB -5 ./config.status
 
@@ -126,3 +129,7 @@ case "$MAKE" in
      ;;
 esac
 ) > $LOGF 2>&1
+
+
+# clean up if we made a dummy nice script
+[ -f .nicebuild-$MYNAME-$SIG ] && rm .nicebuild-$MYNAME-$SIG

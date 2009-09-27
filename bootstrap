@@ -110,6 +110,14 @@ done
 
 touch ntpd/ntp_parser.[ch]
 
+# remove .deps directories to handle source files
+# moved, added, or removed.  config.status will
+# regenerate dummy .Po files, which are included
+# in Makefiles
+
+rm -rf */.deps >/dev/null 2>&1
+rm -rf */*/.deps >/dev/null 2>&1
+
 cp bincheck.mf sntp/
 
 ${AUTORECONF} -i -v

@@ -21,17 +21,43 @@ AM_CPPFLAGS= 	-I$(top_srcdir)/include				\
 LDADD=	version.o libntpd.a @LIBPARSE@
 AM_YFLAGS=	-d -t -r all
 
+#
+# VPHACK and VPHACK_AFTER are enabled on non-GNU makes (such as 
+# BSD make) to work around issues specific to compiling
+# ntp_parser.y into ntp_parser.h and ntp_parser.c in a vPATH
+# configuration where we would like (for a change) the output
+# files ntp_parser.[ch] to be placed in the source directory,
+# as opposed to the build directory.  This allows a single
+# host of a flock configured with Bison to update ntp_parser.[ch]
+# used by the rest.
+# 
+
 if VPATH_HACK
 VPHACK=	vphack
+VPHACK_AFTER= vphack_after
 else
 VPHACK=
+VPHACK_AFTER=
 endif
 
 vphack:
 	test -e ntp_parser.c || ln -s $(srcdir)/ntp_parser.c .
 	test -e ntp_parser.h || ln -s $(srcdir)/ntp_parser.h .
 
-BUILT_SOURCES=	${VPHACK} ntp_parser.c ntp_parser.h	\
+#
+# ylwrap script which invokes Bison replaces ntp_parser.h
+# symlink with the updated file, when ntp_parser.h changes.
+# vphack_after detects this and copies the updated file to srcdir 
+# and re-creates the ntp_parser.h symlink in its place.
+#
+
+vphack_after:
+	test -L ntp_parser.h || ( \
+		mv ntp_parser.h $(srcdir)/ntp_parser.h && \
+		ln -s $(srcdir)/ntp_parser.h . \
+		)
+
+BUILT_SOURCES=	$(VPHACK) ntp_parser.c ntp_parser.h $(VPHACK_AFTER) \
 		ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
 
 man_MANS=	ntpd.1

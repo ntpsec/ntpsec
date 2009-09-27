@@ -4,6 +4,12 @@
   libisc merges using a separate "upstream" bk repo.  That will enable
   normal bk pull automerge to handle carrying forward any local changes
   and should enable us to take updated libisc snapshots more often.
+* Updated build and flock-build scripts.  flock-build --one is a way
+  to perform a flock-build compatible solitary build, handy for a repo
+  clone's first build on a machine with autoconf, automake, etc.
+* Compiling ntp_parser.y using BSD make correctly places ntp_parser.h
+  in the top-level ntpd directory instead of A.*/ntpd.
+* bootstrap script updated to remove potentially stale .deps dirs.
 * [Bug 1316] segfault if refclock_nmea can't open file.
 * [Bug 1317] Distribute cvo.sh.
 (4.2.5p220) 2009/09/25 Released by Harlan Stenn <stenn@ntp.org>
