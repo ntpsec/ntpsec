@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  September 25, 2009 at 07:46:25 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  September 26, 2009 at 07:41:04 AM by AutoGen 5.9.9pre5
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -51,7 +51,7 @@ This is the automatically generated usage text for ntp-keygen:
 @exampleindent 0
 @example
 Using OpenSSL version 90704f
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p210
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p220
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme

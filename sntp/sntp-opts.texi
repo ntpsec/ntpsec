@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  September 25, 2009 at 07:46:00 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  September 26, 2009 at 07:40:40 AM by AutoGen 5.9.9pre5
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -50,7 +50,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard SNTP program - Ver. 4.2.5p210
+sntp - standard SNTP program - Ver. 4.2.5p220
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... ...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
