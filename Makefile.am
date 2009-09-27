@@ -8,8 +8,6 @@ SUBDIRS=
 SUBDIRS+= 				\
 	scripts 			\
 	include 			\
-	lib/isc/include/isc		\
-	lib/isc/unix/include/isc	\
 	ElectricFence			\
 	$(NULL)
 if NEED_LIBOPTS
