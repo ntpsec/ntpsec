@@ -115,8 +115,7 @@ touch ntpd/ntp_parser.[ch]
 # regenerate dummy .Po files, which are included
 # in Makefiles
 
-rm -rf */.deps >/dev/null 2>&1
-rm -rf */*/.deps >/dev/null 2>&1
+find . -name .deps | xargs rm -rf
 
 cp bincheck.mf sntp/
 
