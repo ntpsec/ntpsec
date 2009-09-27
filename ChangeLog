@@ -4,6 +4,7 @@
   libisc merges using a separate "upstream" bk repo.  That will enable
   normal bk pull automerge to handle carrying forward any local changes
   and should enable us to take updated libisc snapshots more often.
+* [Bug 1316] segfault if refclock_nmea can't open file.
 * [Bug 1317] Distribute cvo.sh.
 (4.2.5p220) 2009/09/25 Released by Harlan Stenn <stenn@ntp.org>
 * Rearrange libisc code to match the upstream layout in BIND.  This is
