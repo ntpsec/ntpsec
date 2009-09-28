@@ -443,6 +443,8 @@ authentication_command
 			{ cfgt.auth.keysdir = $2; }
 	|	T_Requestkey T_Integer
 			{ cfgt.auth.request_key = $2; }
+	|	T_Revoke T_Integer
+			{ cfgt.auth.revoke = $2; }
 	|	T_Trustedkey integer_list
 			{ cfgt.auth.trusted_key_list = $2; }
 	|	T_NtpSignDsocket T_String
@@ -487,6 +489,10 @@ crypto_command
 		{
 			$$ = NULL;
 			cfgt.auth.revoke = $2;
+			msyslog(LOG_WARNING,
+				"'crypto revoke %d' is deprecated, "
+				"please use 'revoke %d' instead.",
+				cfgt.auth.revoke, cfgt.auth.revoke);
 		}
 	;
 
