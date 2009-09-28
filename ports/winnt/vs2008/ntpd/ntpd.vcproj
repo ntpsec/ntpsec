@@ -79,7 +79,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL)\lib\libeay32.lib"
+				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL_LIB)\vc\libeay32MD.lib"
 				OutputFile="..\bin\Release\ntpd.exe"
 				Version="0x0400"
 				LinkIncremental="1"
@@ -185,7 +185,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL)\lib\libeay32.lib"
+				AdditionalDependencies="ws2_32.lib winmm.lib $(OPENSSL_LIB)\vc\libeay32MDd.lib"
 				OutputFile="..\bin\Debug\ntpd.exe"
 				Version="0x0400"
 				LinkIncremental="1"

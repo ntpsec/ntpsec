@@ -657,11 +657,8 @@ dump_config_tree(
 	}
 
 	list_ptr = queue_head(ptree->auth.crypto_cmd_list);
-	if (ptree->auth.revoke != 0 || list_ptr != NULL) {
+	if (list_ptr != NULL) {
 		fprintf(df, "crypto");
-
-		if (ptree->auth.revoke != 0)
-			fprintf(df, " revoke %d", ptree->auth.revoke);
 
 		for (;	list_ptr != NULL;
 			list_ptr = next_node(list_ptr)) {
@@ -672,6 +669,9 @@ dump_config_tree(
 		}
 		fprintf(df, "\n");
 	}
+
+	if (ptree->auth.revoke != 0)
+		fprintf(df, "revoke %d\n", ptree->auth.revoke);
 
 	if (NULL != ptree->auth.keysdir)
 		fprintf(df, "keysdir \"%s\"\n", ptree->auth.keysdir);
