@@ -30,7 +30,12 @@ esac
 #set -e
 #set -x
 
-CVO=`./scripts/cvo.sh @cvo@`
+# scripts/cvo.sh invokes config.guess, and we want it to use the copy
+# in the top directory (alongside build) if there's not another
+# config.guess earlier on the path, so we invoke it using env to append
+# . to the PATH.
+
+CVO=`env PATH="$PATH:." scripts/cvo.sh @cvo@`
 case "$CVO" in
  *-*-*-*) "echo scripts/cvo.sh returned <$CVO>, which makes no sense to me."
     exit 1
