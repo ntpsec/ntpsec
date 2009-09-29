@@ -612,6 +612,7 @@ struct pkt {
 #define	EVNT_KERN	13	/* kernel event */
 #define	EVNT_TAI	14	/* TAI */
 #define	EVNT_LEAPVAL	15	/* stale leapsecond values */
+#define	EVNT_CLKHOP	16	/* clockhop */
 
 /*
  * Peer event codes

@@ -744,7 +744,6 @@ dump_config_tree(
 		case T_Maxclock:
 		case T_Minsane:
 		case T_Beacon:
-		case T_Maxhop:
 			fprintf(df, " %s %d", keyword(atrv->attr),
 				(int)atrv->value.d);
 			break;
@@ -1906,10 +1905,6 @@ config_tos(
 
 		case T_Beacon:
 			item = PROTO_BEACON;
-			break;
-
-		case T_Maxhop:
-			item = PROTO_MAXHOP;
 			break;
 		}
 		proto_config(item, 0, tos->value.d, NULL);

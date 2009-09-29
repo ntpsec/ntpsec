@@ -1,3 +1,4 @@
+* Clockhop and documentation fixes from Dave Mills.
 (4.2.5p223) 2009/09/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1321] build doesn't work if . isn't on $PATH.
 * [Bug 1323] Implement "revoke #" to match documentation, deprecate

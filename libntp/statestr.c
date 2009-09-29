@@ -128,6 +128,7 @@ struct codestring sys_codes[] = {
 	{ EVNT_KERN,		"kern" },
 	{ EVNT_TAI,		"TAI" },
 	{ EVNT_LEAPVAL,		"stale_leapsecond_values" },
+	{ EVNT_CLKHOP,		"clockhop" },
 	{ -1,			"" }
 };
 

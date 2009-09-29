@@ -78,7 +78,7 @@ double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
 u_long 	sys_epoch;		/* last clock update time */
-static	int sys_maxhop = MAXHOP; /* anticlockhop threshol */
+static	double sys_clockhop;	/* clockhop threshold */
 int	leap_tai;		/* TAI at next next leap */
 u_long	leap_sec;		/* next scheduled leap from file */
 u_long	leap_peers;		/* next scheduled leap from peers */
@@ -2149,8 +2149,15 @@ clock_filter(
 	 * the maximum interval between minimum samples is eight
 	 * packets.
 	 */
-	if (peer->filter_epoch[k] > peer->epoch)
-		peer->epoch = peer->filter_epoch[k];
+	if (peer->filter_epoch[k] <= peer->epoch) {
+#if DEBUG
+	if (debug)
+		printf("clock_filter: old sample %lu\n", current_time -
+		    peer->filter_epoch[k]);
+#endif
+		return;
+	}
+	peer->epoch = peer->filter_epoch[k];
 
 	/*
 	 * The mitigated sample statistics are saved for later
@@ -2162,9 +2169,9 @@ clock_filter(
 #ifdef DEBUG
 	if (debug)
 		printf(
-		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f, age %lu\n",
+		    "clock_filter: n %d off %.6f del %.6f dsp %.6f jit %.6f\n",
 		    m, peer->offset, peer->delay, peer->disp,
-		    peer->jitter, current_time - peer->filter_epoch[k]);
+		    peer->jitter);
 #endif
 	if (peer->burst == 0 || sys_leap == LEAP_NOTINSYNC)
 		clock_select();
@@ -2176,7 +2183,7 @@ clock_filter(
  *
  * LOCKCLOCK: (1) If the local clock is the prefer peer, it will always
  * be enabled, even if declared falseticker, (2) only the prefer peer
- * can be selected as the system peer, (3) if the external source is
+ * caN Be selected as the system peer, (3) if the external source is
  * down, the system leap bits are set to 11 and the stratum set to
  * infinity.
  */
@@ -2455,12 +2462,11 @@ clock_select(void)
 #endif /* REFCLOCK */
 
 		/*
-		 * The metric is the scaled root distance plus the peer
-		 * stratum. For compliance with the specification, both
-		 * values are multiplied by the select threshold.
+		 * The metric is the scaled root distance at the next
+		 * poll interval plus the peer stratum.
 		 */
-		d = (root_distance(peer) / sys_maxdist +
-		     peer->stratum) * sys_maxdist;
+		d = (root_distance(peer) + clock_phi * (peer->nextdate -
+		    current_time)) / sys_maxdist + peer->stratum;
 		if (j >= NTP_MAXASSOC) {
 			if (d >= synch[j - 1])
 				continue;
@@ -2585,7 +2591,6 @@ clock_select(void)
 	 * is always won.
 	 */
 	leap_vote = 0;
-	j = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		peer->unreach = 0;
@@ -2597,28 +2602,45 @@ clock_select(void)
 			else 
 				leap_vote++;
 		}
-		if (peer == osys_peer)
-			j = i;
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
 	}
 
 	/*
-	 * Anticlockhop provisions. Ordinarily, use the first survivor
-	 * on the survivor list, if there is one, and if there are
-	 * least sys_minsane survivors. Othersie, there are no
-	 * survivors. However, if the previous system peer is on the
-	 * list but not first, use it if the synchronization distance
-	 * is not greater than the accumulation over the last
-	 * sys_maxhop * poll intervals. Do this only if there are at
-	 * least one kitten in the litter.
+	 * Unless there are at least sys_misane survivors, leave the
+	 * building dark. Otherwise, do a clockhop dance. Ordinarily,
+	 * use the first survivor on the survivor list. However, if the
+	 * last selection is not first on the list, use it as long as
+	 * it doesn't get too old or too ugly.
 	 */
 	if (nlist > 0 && nlist >= sys_minsane) {
-		if (synch[j] < synch[0] + ULOGTOD(sys_poll) *
-		    sys_maxhop * clock_phi)
-			typesystem = peer_list[j];
-		else
-			typesystem = peer_list[0];
+		double	x;
+		char	tbuf[80];
+
+		typesystem = peer_list[0];
+		if (osys_peer == NULL || osys_peer == typesystem) {
+			sys_clockhop = 0; 
+		} else if ((x = fabs(typesystem->offset -
+		    osys_peer->offset)) < sys_mindisp) {
+			if (sys_clockhop == 0)
+				sys_clockhop = sys_mindisp;
+			else
+				sys_clockhop *= .5;
+#ifdef DEBUG
+			if (debug)
+				printf("select: clockhop %d %.6f %.6f\n",
+				    j, x, sys_clockhop);
+#endif
+			if (fabs(x) < sys_clockhop) {
+				typesystem = osys_peer;
+			} else {
+				sprintf(tbuf, "%.6f", x);
+				report_event(EVNT_CLKHOP, NULL, tbuf);
+				sys_clockhop = 0;
+			}
+		} else {
+			sys_clockhop = 0;
+		}
 	}
 
 	/*
@@ -3590,10 +3612,6 @@ proto_config(
 
 	case PROTO_CEILING:	/* stratum ceiling (ceiling) */
 		sys_ceiling = (int)dvalue;
-		break;
-
-	case PROTO_MAXHOP:	/* clockhop threshold (clockhop) */
-		sys_maxhop = (int)dvalue;
 		break;
 
 	case PROTO_COHORT:	/* cohort switch (cohort) */
