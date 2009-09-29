@@ -137,7 +137,6 @@
 %token	<Integer>	T_Mask
 %token	<Integer>	T_Maxclock
 %token	<Integer>	T_Maxdist
-%token	<Integer>	T_Maxhop
 %token	<Integer>	T_Maxpoll
 %token	<Integer>	T_Minclock
 %token	<Integer>	T_Mindist
@@ -531,8 +530,6 @@ tos_option
 	|	T_Minsane T_Integer
 			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Beacon T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
-	|	T_Maxhop T_Integer
 			{ $$ = create_attr_dval($1, (double)$2); }
 	;
 

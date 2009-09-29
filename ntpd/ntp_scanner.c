@@ -153,7 +153,6 @@ struct key_tok ntp_keyword_list[] = {
 { "cohort",		T_Cohort,		FOLLBY_TOKEN },
 { "mindist",		T_Mindist,		FOLLBY_TOKEN },
 { "maxdist",		T_Maxdist,		FOLLBY_TOKEN },
-{ "maxhop",		T_Maxhop,		FOLLBY_TOKEN },
 { "beacon",		T_Beacon,		FOLLBY_TOKEN },
 { "orphan",		T_Orphan,		FOLLBY_TOKEN },
 /* access_control_flag */
