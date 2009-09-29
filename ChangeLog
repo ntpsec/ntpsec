@@ -1,3 +1,4 @@
+(4.2.5p224) 2009/09/29 Released by Harlan Stenn <stenn@ntp.org>
 * Clockhop and documentation fixes from Dave Mills.
 * Remove "tos maxhop" ntp.conf knob.
 (4.2.5p223) 2009/09/28 Released by Harlan Stenn <stenn@ntp.org>
