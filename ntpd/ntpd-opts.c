@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  September 29, 2009 at 07:34:37 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  September 30, 2009 at 07:33:07 AM by AutoGen 5.9.9pre5
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -918,7 +918,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPD";
 tSCC   zUsageTitle[] =
-"ntpd - NTP daemon program - Ver. 4.2.5p224\n\
+"ntpd - NTP daemon program - Ver. 4.2.5p225\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 #define zRcName     NULL
 #define apzHomeList NULL

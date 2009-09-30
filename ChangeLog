@@ -1,3 +1,4 @@
+(4.2.5p225) 2009/09/30 Released by Harlan Stenn <stenn@ntp.org>
 * authopt documentation changes from Dave Mills/Dave Hart.
 * [Bug 1324] support bracketed IPv6 numeric addresses for restrict.
 (4.2.5p224) 2009/09/29 Released by Harlan Stenn <stenn@ntp.org>
