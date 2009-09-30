@@ -2149,8 +2149,9 @@ config_access(
 	}
 
 	/* Configure the restrict options */
-	my_node = queue_head(ptree->restrict_opts);
-	while (my_node != NULL) {
+	for (my_node = queue_head(ptree->restrict_opts);
+	     my_node != NULL;
+	     my_node = next_node(my_node)) {
 
 		ZERO_SOCK(&addr_sock);
 
@@ -2279,8 +2280,6 @@ config_access(
 			fprintf(stderr, "%s\n", signd_warning);
 			msyslog(LOG_WARNING, signd_warning);
 		}
-
-		my_node = next_node(my_node);
 	}
 }
 
@@ -2520,8 +2519,9 @@ apply_enable_disable(
 	bc_entry *pentry;
 #endif
 
-	curr_flag = queue_head(q);
-	while (curr_flag != NULL) {
+	for (curr_flag = queue_head(q);
+	     curr_flag != NULL;
+	     curr_flag = next_node(curr_flag)) {
 
 		option = curr_flag->value.i;
 		switch (option) {
@@ -2578,7 +2578,6 @@ apply_enable_disable(
 			break;
 #endif
 		}
-		curr_flag = next_node(curr_flag);
 	}
 }
 
@@ -2861,8 +2860,10 @@ config_trap(
 	/* silence warning about addr_sock potentially uninitialized */
 	AF(&addr_sock) = AF_UNSPEC;
 
-	curr_trap = queue_head(ptree->trap);
-	while (curr_trap != NULL) {
+	for (curr_trap = queue_head(ptree->trap);
+	     curr_trap != NULL;
+	     curr_trap = next_node(curr_trap)) {
+
 		err_flag = 0;
 		port_no = 0;
 		localaddr = NULL;
@@ -2911,10 +2912,8 @@ config_trap(
 		if (!err_flag) {
 			ZERO_SOCK(&peeraddr);
 			if (1 != getnetnum(curr_trap->addr->address,
-					   &peeraddr, 1, t_UNK)) {
-				err_flag = 1;
-				break;
-			}
+					   &peeraddr, 1, t_UNK))
+				continue;
 
 			/* port is at same location for v4 and v6 */
 			SET_PORT(&peeraddr, port_no ? port_no : TRAPPORT);
@@ -2931,7 +2930,6 @@ config_trap(
 					"can't set trap for %s",
 					stoa(&peeraddr));
 		}
-		curr_trap = next_node(curr_trap);
 	}
 }
 
@@ -3445,8 +3443,9 @@ config_unpeers(
 	int status;
 	int found;
 
-	while (!empty(ptree->unpeers)) {
-		curr_unpeer = (struct unpeer_node *) dequeue(ptree->unpeers);
+	for (curr_unpeer = queue_head(ptree->unpeers);
+	     curr_unpeer != NULL;
+	     curr_unpeer = next_node(curr_unpeer)) {
 
 		/*
 		 * Either AssocID will be zero, and we unpeer by name/
@@ -3519,10 +3518,6 @@ config_unpeers(
 			}
 			freeaddrinfo(res_bak);
 		}
-
-		/* Ok, everything done. Free up peer node memory */
-		destroy_address_node(curr_unpeer->addr);
-		free_node(curr_unpeer);
 	}
 }
 
@@ -3601,10 +3596,8 @@ config_sim(
 		if (NULL == serv_info) {
 			fprintf(stderr, "Simulator server list is corrupt\n");
 			exit(1);
-		} else {
+		} else
 			memcpy(&simulation.servers[i], serv_info, sizeof(server_info));
-			free_node(serv_info);
-		}
 		serv_info = next_node(serv_info);
 	}
 
@@ -4173,13 +4166,16 @@ getnetnum(
  */
 static int
 get_multiple_netnums(
-	const char *num,
+	const char *nameornum,
 	sockaddr_u *addr,
 	struct addrinfo **res,
 	int complain,
 	enum gnn_type a_type
 	)
 {
+	char lookbuf[1024];
+	const char *lookup;
+	char *pch;
 	struct addrinfo hints;
 	struct addrinfo *ptr;
 	int retval;
@@ -4187,39 +4183,73 @@ get_multiple_netnums(
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (is_ip_address(num, &ipaddr))
-		hints.ai_flags = AI_NUMERICHOST;
+	if (strlen(nameornum) >= sizeof(lookbuf)) {
+		NTP_INSIST(strlen(nameornum) < sizeof(lookbuf));
+		return 0;
+	}
 
-	if (!ipv6_works)
-		hints.ai_family = AF_INET;
-	else if (!ipv4_works)
-		hints.ai_family = AF_INET6;
-	else if (IS_IPV4(addr) || IS_IPV6(addr))
-		hints.ai_family = AF(addr);
-	else
-		hints.ai_family = AF_UNSPEC;
+	lookup = nameornum;
+	if (is_ip_address(nameornum, &ipaddr)) {
+		hints.ai_flags = AI_NUMERICHOST;
+		hints.ai_family = ipaddr.family;
+		if ('[' == nameornum[0]) {
+			lookup = lookbuf;
+			strncpy(lookbuf, &nameornum[1],
+				sizeof(lookbuf));
+			pch = strchr(lookbuf, ']');
+			if (pch != NULL)
+				*pch = '\0';
+		}
+		pch = strchr(lookup, '%');
+		if (pch != NULL) {
+			if (lookup != lookbuf) {
+				lookup = lookbuf;
+				strncpy(lookbuf, nameornum,
+					sizeof(lookbuf));
+				pch = strchr(lookup, '%');
+			}
+			*pch = '\0';
+		}
+	}
+
+	if (AF_INET6 == hints.ai_family && !ipv6_works)
+		return 0;
+
+	if (AF_UNSPEC == hints.ai_family) {
+		if (!ipv6_works)
+			hints.ai_family = AF_INET;
+		else if (!ipv4_works)
+			hints.ai_family = AF_INET6;
+		else if (IS_IPV4(addr) || IS_IPV6(addr))
+			hints.ai_family = AF(addr);
+	}
 
 	/* Get host address. Looking for UDP datagram connection */
 	hints.ai_socktype = SOCK_DGRAM;
 
-	DPRINTF(4, ("getaddrinfo %s\n", num));
+	DPRINTF(4, ("getaddrinfo %s%s\n", 
+		    (AF_UNSPEC == hints.ai_family)
+			? ""
+			: (AF_INET == hints.ai_family)
+				? "v4 "
+				: "v6 ",
+		    lookup));
 
-	retval = getaddrinfo(num, "ntp", &hints, &ptr);
+	retval = getaddrinfo(lookup, "ntp", &hints, &ptr);
 
 	if (retval || (AF_INET6 == ptr->ai_family && !ipv6_works)) {
 		if (complain)
 			msyslog(LOG_ERR,
-				"getaddrinfo: \"%s\" invalid host "
-				"address, ignored",
-				num);
+				"getaddrinfo: \"%s\" invalid host address, ignored",
+				lookup);
 		else
-			DPRINTF(1, ("getaddrinfo: \"%s\" invalid host "
-				    "address.\n",
-				    num));
+			DPRINTF(1, ("getaddrinfo: \"%s\" invalid host address.\n",
+				    lookup));
 
-		if (!retval)
+		if (!retval) {
+			freeaddrinfo(ptr);
 			return -1;
-		else 
+		} else 
 			return 0;
 	}
 	*res = ptr;

@@ -754,6 +754,8 @@ is_ip_address(
 {
 	struct in_addr in4;
 	struct in6_addr in6;
+	char tmpbuf[128];
+	char *pch;
 
 	NTP_REQUIRE(host != NULL);
 	NTP_REQUIRE(addr != NULL);
@@ -770,13 +772,17 @@ is_ip_address(
 	if (inet_pton(AF_INET, host, &in4) == 1) {
 		isc_netaddr_fromin(addr, &in4);
 		return (ISC_TRUE);
-	} else if (strlen(host) <= 127U) {
-		char tmpbuf[128], *d;
-
-		strcpy(tmpbuf, host);
-		d = strchr(tmpbuf, '%');
-		if (d != NULL)
-			*d = '\0';
+	} else if (sizeof(tmpbuf) > strlen(host)) {
+		if ('[' == host[0]) {
+			strncpy(tmpbuf, &host[1], sizeof(tmpbuf));
+			pch = strchr(tmpbuf, ']');
+			if (pch != NULL)
+				*pch = '\0';
+		} else
+			strncpy(tmpbuf, host, sizeof(tmpbuf));
+		pch = strchr(tmpbuf, '%');
+		if (pch != NULL)
+			*pch = '\0';
 
 		if (inet_pton(AF_INET6, tmpbuf, &in6) == 1) {
 			isc_netaddr_fromin6(addr, &in6);
