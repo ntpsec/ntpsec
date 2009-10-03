@@ -147,11 +147,11 @@ struct codestring peer_codes[] = {
 	{ PEVNT_DENY & ~PEER_EVENT,	"access_denied" },
 	{ PEVNT_ARMED & ~PEER_EVENT,	"leap_armed" },
 	{ PEVNT_NEWPEER & ~PEER_EVENT,	"sys_peer" },
-	{ PEVNT_CLOCK & ~PEER_EVENT,	"clock" },
+	{ PEVNT_CLOCK & ~PEER_EVENT,	"clock_event" },
 	{ PEVNT_AUTH & ~PEER_EVENT,	"bad_auth" },
 	{ PEVNT_POPCORN & ~PEER_EVENT,	"popcorn" },
-	{ PEVNT_XLEAVE & ~PEER_EVENT,	"xmode" },
-	{ PEVNT_XERR & ~PEER_EVENT,	"xerr" },
+	{ PEVNT_XLEAVE & ~PEER_EVENT,	"interleave_mode" },
+	{ PEVNT_XERR & ~PEER_EVENT,	"interleave_error" },
 	{ PEVNT_TAI & ~PEER_EVENT,	"TAI" },
 	{ -1,				"" }
 };

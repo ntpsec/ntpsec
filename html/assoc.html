@@ -63,7 +63,7 @@
 		<p>If no UTC sources are available to any core server, one of them can provide a simulated UTC source for all other hosts in the subnet. However, only one core server can simulate the UTC source and all direct dependents, called orphan children, must select the same one, called the orphan parent.</p>
 		<p>A host is enabled for orphan mode using the <tt>tos orphan <i>stratum</i></tt> command, where <tt><i>stratum</i></tt> is some stratum less than 16 and greater than any anticipated stratum that might occur with configured Internet time servers. However, sufficient headroom should remain so every subnet host dependent on the orphan children has stratum less than 16. Where no associations for other servers or reference clocks are configured, the orphan stratum can be set to 1. These are the same considerations that guide the local clock driver stratum selection.</p>
 		<p>A orphan parent with no sources shows reference ID <font face="Courier New, Courier, Monaco, monospace">LOOP</font>&nbsp;if
-			operating at stratum 1 and 27.0.0.1 (Unix loopback address) otherwise.
+			operating at stratum 1 and 127.0.0.1 (Unix loopback address) otherwise.
 			While ordinary NTP clients use a selection metric based on delay
 			and dispersion, orphan children use a metric computed from the IP
 			address of each core server. Each orphan child chooses the orphan
@@ -82,7 +82,13 @@
 		<p>There are two burst options where a single poll event triggers a burst of eight packets at 2-s intervals instead of the normal one packet. They should be used only with the <tt>server</tt> and <tt>pool</tt> commands, but not with reference clock drivers nor symmetric peers. The <tt>burst</tt> option sends a burst when the server is reachable, while the <tt>iburst</tt> option sends a burst when the server is unreachable. Each mode is independently of the other and both can be used at the same time. In either mode the client sends one packet, waits for the reply, then sends the remaining packets in the burst.  This may be useful to allow a modem to complete a call.</p>
 		<p>In both modes received server packets update the clock filter, which selects the best (most accurate) time values. When the last packet in the burst is sent, the next received packet updates the system variables and adjusts the system clock as if only a single packet exchange had occurred.</p>
 		<p>The <tt>iburst</tt> option is useful where the system clock must be set quickly or when the network attachment requires an initial calling or training sequence. The burst is initiated only when the server first becomes reachable. This improves accuracy with intermittent connections typical of PPP and ISDN services. Outliers due to initial dial-up delays, etc., are avoided and the client sets the clock within a few seconds after the first received packet.</p>
-		<p>The <tt>burst</tt> option can be configured in cases of excessive network jitter or when the network attachment requires an initial calling or training sequence. The burst is initiated at each poll interval when the server is reachable. The number of packets in the burst is determined by the poll interval so that the average interval between packets is no less than 16.. At a poll interval of 16 s, only one packet is sent in the burst; at 32 s, two packets are sent and so forth until at 128 s and above eight packets are sent.</p>
+		<p>The <tt>burst</tt> option can be configured in cases of excessive network
+			jitter or when the network attachment requires an initial calling or training
+			sequence. The burst is initiated at each poll interval when the server is
+			reachable. The number of packets in the burst is determined by the poll interval
+			so that the average interval between packets is no less than 16. At a poll
+			interval of 16 s, only one packet is sent in the burst; at 32 s, two packets
+			are sent and so forth until at 128 s and above eight packets are sent.</p>
 		<hr>
 		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
 	</body>

@@ -3,6 +3,8 @@
   --disable-debugging.
 * Add ntpd --saveconfigquit <filename> option for future build-time
   testing of saveconfig fidelity.
+* Clockhop and autokey cleanup from Dave Mills.
+* Documentation updates from Dave Mills.
 (4.2.5p225) 2009/09/30 Released by Harlan Stenn <stenn@ntp.org>
 * authopt documentation changes from Dave Mills/Dave Hart.
 * [Bug 1324] support bracketed IPv6 numeric addresses for restrict.
