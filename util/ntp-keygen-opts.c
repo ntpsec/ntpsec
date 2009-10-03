@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  September 30, 2009 at 07:42:23 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Saturday October  3, 2009 at 03:59:09 AM UTC
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntp-keygen copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntp-keygen copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -89,39 +89,21 @@ tSCC    zCertificate_Name[]        = "certificate";
 /*
  *  Debug_Level option description:
  */
-#ifdef DEBUG
 tSCC    zDebug_LevelText[] =
         "Increase output debug message level";
 tSCC    zDebug_Level_NAME[]        = "DEBUG_LEVEL";
 tSCC    zDebug_Level_Name[]        = "debug-level";
 #define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
 
-#else   /* disable Debug_Level */
-#define VALUE_OPT_DEBUG_LEVEL NO_EQUIVALENT
-#define DEBUG_LEVEL_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zDebug_LevelText       NULL
-#define zDebug_Level_NAME      NULL
-#define zDebug_Level_Name      NULL
-#endif  /* DEBUG */
-
 /*
  *  Set_Debug_Level option description:
  */
-#ifdef DEBUG
 tSCC    zSet_Debug_LevelText[] =
         "Set the output debug message level";
 tSCC    zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
 tSCC    zSet_Debug_Level_Name[]    = "set-debug-level";
 #define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-#else   /* disable Set_Debug_Level */
-#define VALUE_OPT_SET_DEBUG_LEVEL NO_EQUIVALENT
-#define SET_DEBUG_LEVEL_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zSet_Debug_LevelText       NULL
-#define zSet_Debug_Level_NAME      NULL
-#define zSet_Debug_Level_Name      NULL
-#endif  /* DEBUG */
 
 /*
  *  Id_Key option description:
@@ -411,11 +393,6 @@ tSCC zNotLoad_Opts_Pfx[]  = "no";
 /*
  *  Declare option callback procedures
  */
-#ifdef DEBUG
-  static tOptProc doOptSet_Debug_Level;
-#else /* not DEBUG */
-# define doOptSet_Debug_Level NULL
-#endif /* def/not DEBUG */
 #ifdef OPENSSL
   static tOptProc doOptModulus;
 #else /* not OPENSSL */
@@ -454,7 +431,7 @@ static tOptProc
 extern tOptProc
     optionPagedUsage, optionPrintVersion;
 static tOptProc
-    doUsageOpt;
+    doOptSet_Debug_Level, doUsageOpt;
 
 /*
  *  #define map the "normal" callout procs
@@ -844,16 +821,14 @@ doUsageOpt(
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   For the set-debug-level option, when DEBUG is #define-d.
+ *   For the set-debug-level option.
  */
-#ifdef DEBUG
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from ../include/debug-opt.def, line 29 */
+    /* extracted from ../include/debug-opt.def, line 27 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
-#endif /* defined DEBUG */
 #endif /* defined(TEST_NTP_KEYGEN_OPTS) */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

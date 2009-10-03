@@ -26,6 +26,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntpsim.h"
+#include "ntpd-opts.h"
 #include <ntp_random.h>
 #include <isc/net.h>
 #include <isc/result.h>
@@ -470,15 +471,18 @@ free_config_tree(
 #ifdef SAVECONFIG
 /* Dump all trees */
 int
-dump_all_config_trees (
-		FILE *df
-		) 
+dump_all_config_trees(
+	FILE *df,
+	int comment
+	) 
 {
 	struct config_tree *cfg_ptr = cfg_tree_history;
 	int return_value = 0;
 
-	for(; cfg_ptr != NULL; cfg_ptr = cfg_ptr->link) 
-		return_value |= dump_config_tree(cfg_ptr, df);
+	for (cfg_ptr = cfg_tree_history;
+	     cfg_ptr != NULL; 
+	     cfg_ptr = cfg_ptr->link) 
+		return_value |= dump_config_tree(cfg_ptr, df, comment);
 
 	return return_value;
 }
@@ -488,7 +492,8 @@ dump_all_config_trees (
 int
 dump_config_tree(
 	struct config_tree *ptree,
-	FILE *df
+	FILE *df,
+	int comment
 	)
 {
 	struct peer_node *peer = NULL;
@@ -517,18 +522,21 @@ dump_config_tree(
 	char timestamp[80];
 	int enable;
 
-	printf("dump_config_tree(%p)\n", ptree);
+	DPRINTF(1, ("dump_config_tree(%p)\n", ptree));
 
-	if (!strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S",
-		      localtime(&ptree->timestamp)))
-		timestamp[0] = '\0';
+	if (comment) {
+		if (!strftime(timestamp, sizeof(timestamp),
+			      "%Y-%m-%d %H:%M:%S",
+			      localtime(&ptree->timestamp)))
+			timestamp[0] = '\0';
 
-	fprintf(df, "# %s %s %s\n",
-		timestamp,
-		(CONF_SOURCE_NTPQ == ptree->source.attr)
-		    ? "ntpq remote config from"
-		    : "startup configuration file",
-		ptree->source.value.s);
+		fprintf(df, "# %s %s %s\n",
+			timestamp,
+			(CONF_SOURCE_NTPQ == ptree->source.attr)
+			    ? "ntpq remote config from"
+			    : "startup configuration file",
+			ptree->source.value.s);
+	}
 
 	/* For options I didn't find documentation I'll just output its name and the cor. value */
 	list_ptr = queue_head(ptree->vars);
@@ -3833,6 +3841,22 @@ getconfig(
 	if (config_netinfo)
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO */
+
+#ifdef SAVECONFIG
+	if (HAVE_OPT( SAVECONFIGQUIT )) {
+		FILE *dumpfile;
+		int dumpfailed;
+
+		dumpfile = fopen(OPT_ARG( SAVECONFIGQUIT ), "w");
+		dumpfailed = dump_all_config_trees(dumpfile, 0);
+		if (dumpfailed)
+			fprintf(stderr,
+				"--saveconfigquit %s error %d\n",
+				OPT_ARG( SAVECONFIGQUIT ),
+				dumpfailed);
+		exit(dumpfailed);
+	}
+#endif	/* SAVECONFIG */
 
 	/*
 	printf("getconfig: res_fp <%p> call_resolver: %d", res_fp, call_resolver);

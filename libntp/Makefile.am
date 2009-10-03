@@ -49,15 +49,9 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c
-INCLUDES =	-I$(top_srcdir)/include 			\
-		-I../include					\
-		-I$(top_srcdir)/lib/isc/include			\
-		-I../lib/isc/include				\
-		-I$(top_srcdir)/lib/isc/nothreads/include	\
-		-I../lib/isc/nothreads/include			\
-		-I$(top_srcdir)/lib/isc/unix/include		\
-		-I../lib/isc/unix/include			\
-		$(NULL)
+INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
+	-I$(top_srcdir)/lib/isc/nothreads/include \
+	-I$(top_srcdir)/lib/isc/unix/include
 ETAGS_ARGS = Makefile.am
 
 noinst_HEADERS = lib_strbuf.h 

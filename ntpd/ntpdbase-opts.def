@@ -1,5 +1,13 @@
 #include autogen-version.def
 
+include = <<- _EOF_
+	#ifdef __windows
+	  extern int atoi(const char *);
+	#else
+	# include <stdlib.h>
+	#endif
+	_EOF_;
+
 test-main;
 
 flag = {
@@ -68,7 +76,31 @@ flag = {
 	_EndOfDoc_;
 };
 
-#include debug-opt.def
+flag = {
+    name      = debug-level;
+    value     = d;
+    max       = NOLIMIT;
+    ifdef     = DEBUG;
+    nopreset;
+    descrip   = "Increase output debug message level";
+    doc = <<-  _EndOfDoc_
+	Increase the debugging message output level.
+	_EndOfDoc_;
+};
+
+flag = {
+    name      = set-debug-level;
+    value     = D;
+    max       = NOLIMIT;
+    ifdef     = DEBUG;
+    descrip   = "Set the output debug message level";
+    arg-type  = string;
+    flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
+    doc = <<-  _EndOfDoc_
+	Set the output debugging level.  Can be supplied multiple times,
+	but each overrides the previous value(s).
+	_EndOfDoc_;
+};
 
 flag = {
     name      = driftfile;
@@ -90,6 +122,7 @@ flag = {
 flag = {
     name      = panicgate;
     value     = g;
+    max       = NOLIMIT;
     descrip   = "Allow the first adjustment to be Big";
     doc = <<-  _EndOfDoc_
 	Normally,
@@ -257,6 +290,18 @@ flag = {
     descrip   = "Broadcast/propagation delay";
     doc = <<-  _EndOfDoc_
 	Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
+	_EndOfDoc_;
+};
+
+flag = {
+    ifdef     = SAVECONFIG;
+    name      = saveconfigquit;
+    arg-type  = string;
+    descrip   = "Save parsed configuration and quit";
+    doc = <<-  _EndOfDoc_
+	Cause ntpd to parse its startup configuration file and save an
+	equivalent to the given filename and exit.  This option was
+	designed for automated testing.
 	_EndOfDoc_;
 };
 

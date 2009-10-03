@@ -33,6 +33,7 @@
 #include "ntp.h"
 #include "ntp_unixtime.h"
 #include "ntp_assert.h"
+#include "ntpd-opts.h"
 
 /* Don't include ISC's version of IPv6 variables and structures */
 #define ISC_IPV6_H 1
@@ -581,7 +582,7 @@ io_open_sockets(void)
 {
 	static int already_opened;
 
-	if (already_opened)
+	if (already_opened || HAVE_OPT( SAVECONFIGQUIT ))
 		return;
 
 	already_opened = 1;

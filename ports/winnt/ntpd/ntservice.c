@@ -88,9 +88,15 @@ int main( int argc, char *argv[] )
 	/* Command line users should put -n in the options */
 	while (argv[i]) {
 		if (!_strnicmp(argv[i], "-d", 2) ||
+			!strcmp(argv[i], "--debug_level") ||
+			!strcmp(argv[i], "--set-debug_level") ||
 			!strcmp(argv[i], "-q") ||
+			!strcmp(argv[i], "--quit") ||
+			!strcmp(argv[i], "-?") ||
 			!strcmp(argv[i], "--help") ||
-			!strcmp(argv[i], "-n")) {
+			!strcmp(argv[i], "-n") ||
+			!strcmp(argv[i], "--nofork") ||
+			!strcmp(argv[i], "--saveconfigquit")) {
 			foreground = TRUE;
 			break;
 		}

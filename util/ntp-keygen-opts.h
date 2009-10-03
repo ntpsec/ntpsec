@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  September 30, 2009 at 07:42:22 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Saturday October  3, 2009 at 03:59:08 AM UTC
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntp-keygen copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntp-keygen copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -206,12 +206,8 @@ typedef enum {
 #ifdef OPENSSL
 #define VALUE_OPT_CERTIFICATE    'c'
 #endif /* OPENSSL */
-#ifdef DEBUG
 #define VALUE_OPT_DEBUG_LEVEL    'd'
-#endif /* DEBUG */
-#ifdef DEBUG
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
-#endif /* DEBUG */
 #ifdef OPENSSL
 #define VALUE_OPT_ID_KEY         'e'
 #endif /* OPENSSL */

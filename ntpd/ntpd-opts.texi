@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  September 30, 2009 at 07:33:10 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  Saturday October  3, 2009 at 03:52:56 AM UTC
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -44,6 +44,7 @@ This software is released under a specialized copyright license.
 * ntpd priority::               priority option (-P)
 * ntpd propagationdelay::       propagationdelay option (-r)
 * ntpd quit::                   quit option (-q)
+* ntpd saveconfigquit::         saveconfigquit option
 * ntpd set-debug-level::        set-debug-level option (-D)
 * ntpd slew::                   slew option (-x)
 * ntpd statsdir::               statsdir option (-s)
@@ -62,7 +63,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p220
+ntpd - NTP daemon program - Ver. 4.2.5p225
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -250,6 +251,13 @@ file.
 @cindex ntpd-panicgate
 
 This is the ``allow the first adjustment to be big'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+may appear an unlimited number of times.
+@end itemize
+
 Normally,
 ntpd
 exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that,
@@ -402,6 +410,22 @@ Note: The kernel time discipline is disabled with this option.
 
 This is the ``broadcast/propagation delay'' option.
 Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
+
+@node ntpd saveconfigquit
+@subsection saveconfigquit option
+@cindex ntpd-saveconfigquit
+
+This is the ``save parsed configuration and quit'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{SAVECONFIG} during the compilation.
+@end itemize
+
+Cause ntpd to parse its startup configuration file and save an
+equivalent to the given filename and exit.  This option was
+designed for automated testing.
 
 @node ntpd statsdir
 @subsection statsdir option (-s)

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  September 30, 2009 at 07:33:06 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Saturday October  3, 2009 at 03:52:54 AM UTC
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpd copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntpd copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -74,21 +74,22 @@ typedef enum {
     INDEX_OPT_PRIORITY          = 19,
     INDEX_OPT_QUIT              = 20,
     INDEX_OPT_PROPAGATIONDELAY  = 21,
-    INDEX_OPT_STATSDIR          = 22,
-    INDEX_OPT_TRUSTEDKEY        = 23,
-    INDEX_OPT_USER              = 24,
-    INDEX_OPT_UPDATEINTERVAL    = 25,
-    INDEX_OPT_VAR               = 26,
-    INDEX_OPT_DVAR              = 27,
-    INDEX_OPT_SLEW              = 28,
-    INDEX_OPT_USEPCC            = 29,
-    INDEX_OPT_PCCFREQ           = 30,
-    INDEX_OPT_VERSION           = 31,
-    INDEX_OPT_HELP              = 32,
-    INDEX_OPT_MORE_HELP         = 33
+    INDEX_OPT_SAVECONFIGQUIT    = 22,
+    INDEX_OPT_STATSDIR          = 23,
+    INDEX_OPT_TRUSTEDKEY        = 24,
+    INDEX_OPT_USER              = 25,
+    INDEX_OPT_UPDATEINTERVAL    = 26,
+    INDEX_OPT_VAR               = 27,
+    INDEX_OPT_DVAR              = 28,
+    INDEX_OPT_SLEW              = 29,
+    INDEX_OPT_USEPCC            = 30,
+    INDEX_OPT_PCCFREQ           = 31,
+    INDEX_OPT_VERSION           = 32,
+    INDEX_OPT_HELP              = 33,
+    INDEX_OPT_MORE_HELP         = 34
 } teOptIndex;
 
-#define OPTION_CT    34
+#define OPTION_CT    35
 #define NTPD_VERSION       "4.2.5p225"
 #define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.5p225"
 
@@ -205,6 +206,10 @@ typedef enum {
 #  warning undefining PROPAGATIONDELAY due to option name conflict
 #  undef   PROPAGATIONDELAY
 # endif
+# ifdef    SAVECONFIGQUIT
+#  warning undefining SAVECONFIGQUIT due to option name conflict
+#  undef   SAVECONFIGQUIT
+# endif
 # ifdef    STATSDIR
 #  warning undefining STATSDIR due to option name conflict
 #  undef   STATSDIR
@@ -264,6 +269,7 @@ typedef enum {
 # undef PRIORITY
 # undef QUIT
 # undef PROPAGATIONDELAY
+# undef SAVECONFIGQUIT
 # undef STATSDIR
 # undef TRUSTEDKEY
 # undef USER
@@ -312,6 +318,9 @@ typedef enum {
 #define OPT_VALUE_PRIORITY       (DESC(PRIORITY).optArg.argInt)
 #define VALUE_OPT_QUIT           'q'
 #define VALUE_OPT_PROPAGATIONDELAY 'r'
+#ifdef SAVECONFIG
+#define VALUE_OPT_SAVECONFIGQUIT 22
+#endif /* SAVECONFIG */
 #define VALUE_OPT_STATSDIR       's'
 #define VALUE_OPT_TRUSTEDKEY     't'
 #ifdef HAVE_DROPROOT
@@ -319,14 +328,14 @@ typedef enum {
 #endif /* HAVE_DROPROOT */
 #define VALUE_OPT_UPDATEINTERVAL 'U'
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
-#define VALUE_OPT_VAR            26
-#define VALUE_OPT_DVAR           27
+#define VALUE_OPT_VAR            27
+#define VALUE_OPT_DVAR           28
 #define VALUE_OPT_SLEW           'x'
 #ifdef SYS_WINNT
-#define VALUE_OPT_USEPCC         29
+#define VALUE_OPT_USEPCC         30
 #endif /* SYS_WINNT */
 #ifdef SYS_WINNT
-#define VALUE_OPT_PCCFREQ        30
+#define VALUE_OPT_PCCFREQ        31
 #endif /* SYS_WINNT */
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'

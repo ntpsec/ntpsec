@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  September 30, 2009 at 07:36:22 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Saturday October  3, 2009 at 03:57:53 AM UTC
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpq copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntpq copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -148,12 +148,8 @@ typedef enum {
 #define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_COMMAND        'c'
-#ifdef DEBUG
 #define VALUE_OPT_DEBUG_LEVEL    'd'
-#endif /* DEBUG */
-#ifdef DEBUG
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
-#endif /* DEBUG */
 #define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_INTERACTIVE    'i'
 #define VALUE_OPT_NUMERIC        'n'

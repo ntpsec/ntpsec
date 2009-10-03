@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  September 30, 2009 at 07:33:07 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Saturday October  3, 2009 at 03:52:55 AM UTC
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpd copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntpd copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -51,7 +51,7 @@ extern tUsageProc optionUsage;
  *  global included definitions
  */
 #ifdef __windows
-  extern int atoi(const char*);
+  extern int atoi(const char *);
 #else
 # include <stdlib.h>
 #endif
@@ -316,6 +316,25 @@ tSCC    zPropagationdelay_NAME[]   = "PROPAGATIONDELAY";
 tSCC    zPropagationdelay_Name[]   = "propagationdelay";
 #define PROPAGATIONDELAY_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+/*
+ *  Saveconfigquit option description:
+ */
+#ifdef SAVECONFIG
+tSCC    zSaveconfigquitText[] =
+        "Save parsed configuration and quit";
+tSCC    zSaveconfigquit_NAME[]     = "SAVECONFIGQUIT";
+tSCC    zSaveconfigquit_Name[]     = "saveconfigquit";
+#define SAVECONFIGQUIT_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+#else   /* disable Saveconfigquit */
+#define VALUE_OPT_SAVECONFIGQUIT NO_EQUIVALENT
+#define SAVECONFIGQUIT_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define zSaveconfigquitText       NULL
+#define zSaveconfigquit_NAME      NULL
+#define zSaveconfigquit_Name      NULL
+#endif  /* SAVECONFIG */
 
 /*
  *  Statsdir option description:
@@ -604,7 +623,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
   {  /* entry idx, value */ 9, VALUE_OPT_PANICGATE,
      /* equiv idx, value */ 9, VALUE_OPT_PANICGATE,
      /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ PANICGATE_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
@@ -757,8 +776,20 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zPropagationdelayText, zPropagationdelay_NAME, zPropagationdelay_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 22, VALUE_OPT_STATSDIR,
-     /* equiv idx, value */ 22, VALUE_OPT_STATSDIR,
+  {  /* entry idx, value */ 22, VALUE_OPT_SAVECONFIGQUIT,
+     /* equiv idx, value */ 22, VALUE_OPT_SAVECONFIGQUIT,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ SAVECONFIGQUIT_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zSaveconfigquitText, zSaveconfigquit_NAME, zSaveconfigquit_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 23, VALUE_OPT_STATSDIR,
+     /* equiv idx, value */ 23, VALUE_OPT_STATSDIR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ STATSDIR_FLAGS, 0,
@@ -769,8 +800,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zStatsdirText, zStatsdir_NAME, zStatsdir_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 23, VALUE_OPT_TRUSTEDKEY,
-     /* equiv idx, value */ 23, VALUE_OPT_TRUSTEDKEY,
+  {  /* entry idx, value */ 24, VALUE_OPT_TRUSTEDKEY,
+     /* equiv idx, value */ 24, VALUE_OPT_TRUSTEDKEY,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ TRUSTEDKEY_FLAGS, 0,
@@ -781,8 +812,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zTrustedkeyText, zTrustedkey_NAME, zTrustedkey_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 24, VALUE_OPT_USER,
-     /* equiv idx, value */ 24, VALUE_OPT_USER,
+  {  /* entry idx, value */ 25, VALUE_OPT_USER,
+     /* equiv idx, value */ 25, VALUE_OPT_USER,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USER_FLAGS, 0,
@@ -793,8 +824,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zUserText, zUser_NAME, zUser_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 25, VALUE_OPT_UPDATEINTERVAL,
-     /* equiv idx, value */ 25, VALUE_OPT_UPDATEINTERVAL,
+  {  /* entry idx, value */ 26, VALUE_OPT_UPDATEINTERVAL,
+     /* equiv idx, value */ 26, VALUE_OPT_UPDATEINTERVAL,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ UPDATEINTERVAL_FLAGS, 0,
@@ -805,8 +836,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zUpdateintervalText, zUpdateinterval_NAME, zUpdateinterval_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 26, VALUE_OPT_VAR,
-     /* equiv idx, value */ 26, VALUE_OPT_VAR,
+  {  /* entry idx, value */ 27, VALUE_OPT_VAR,
+     /* equiv idx, value */ 27, VALUE_OPT_VAR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ VAR_FLAGS, 0,
@@ -817,8 +848,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zVarText, zVar_NAME, zVar_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 27, VALUE_OPT_DVAR,
-     /* equiv idx, value */ 27, VALUE_OPT_DVAR,
+  {  /* entry idx, value */ 28, VALUE_OPT_DVAR,
+     /* equiv idx, value */ 28, VALUE_OPT_DVAR,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DVAR_FLAGS, 0,
@@ -829,8 +860,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zDvarText, zDvar_NAME, zDvar_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 28, VALUE_OPT_SLEW,
-     /* equiv idx, value */ 28, VALUE_OPT_SLEW,
+  {  /* entry idx, value */ 29, VALUE_OPT_SLEW,
+     /* equiv idx, value */ 29, VALUE_OPT_SLEW,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SLEW_FLAGS, 0,
@@ -841,8 +872,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSlewText, zSlew_NAME, zSlew_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 29, VALUE_OPT_USEPCC,
-     /* equiv idx, value */ 29, VALUE_OPT_USEPCC,
+  {  /* entry idx, value */ 30, VALUE_OPT_USEPCC,
+     /* equiv idx, value */ 30, VALUE_OPT_USEPCC,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USEPCC_FLAGS, 0,
@@ -853,8 +884,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zUsepccText, zUsepcc_NAME, zUsepcc_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 30, VALUE_OPT_PCCFREQ,
-     /* equiv idx, value */ 30, VALUE_OPT_PCCFREQ,
+  {  /* entry idx, value */ 31, VALUE_OPT_PCCFREQ,
+     /* equiv idx, value */ 31, VALUE_OPT_PCCFREQ,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PCCFREQ_FLAGS, 0,
@@ -967,7 +998,7 @@ tOptions ntpdOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    34 /* full option count */, 31 /* user option count */,
+    35 /* full option count */, 32 /* user option count */,
     ntpd_full_usage, ntpd_short_usage,
     NULL, NULL
 };
@@ -994,7 +1025,7 @@ doUsageOpt(
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from ../include/debug-opt.def, line 29 */
+    /* extracted from ntpdbase-opts.def, line 98 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined DEBUG */

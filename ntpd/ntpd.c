@@ -222,6 +222,7 @@ int		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
 void		init_logging		(char const *, int);
 void		setup_logfile		(void);
+static void	process_commandline_opts(int *, char ***);
 
 static void	assertion_failed	(const char *file, int line,
 	isc_assertiontype_t type, const char *cond);
@@ -314,6 +315,21 @@ setup_logfile(
 	}
 }
 
+
+static void
+process_commandline_opts(
+	int *pargc,
+	char ***pargv
+	)
+{
+	int optct;
+	
+	optct = optionProcess(&ntpdOptions, *pargc, *pargv);
+	*pargc -= optct;
+	*pargv += optct;
+}
+
+
 #ifdef SIM
 int
 main(
@@ -321,6 +337,8 @@ main(
 	char *argv[]
 	)
 {
+	process_commandline_opts(&argc, &argv);
+
 	return ntpsim(argc, argv);
 }
 #else /* SIM */
@@ -477,17 +495,8 @@ ntpdmain(
 #endif
 
 	progname = argv[0];
-
 	initializing = 1;		/* mark that we are initializing */
-
-	{
-		int optct = optionProcess(
-					  &ntpdOptions
-					  , argc, argv);
-		argc -= optct;
-		argv += optct;
-	}
-
+	process_commandline_opts(&argc, &argv);
 	init_logging(progname, 1);	/* Open the log file */
 
 #ifdef HAVE_UMASK
@@ -507,8 +516,7 @@ ntpdmain(
 		uid_t uid;
 
 		uid = getuid();
-		if (uid)
-		{
+		if (uid && !HAVE_OPT( SAVECONFIGQUIT )) {
 			msyslog(LOG_ERR, "ntpd: must be run as root, not uid %ld", (long)uid);
 			printf("must be run as root, not uid %ld\n", (long)uid);
 			exit(1);
@@ -534,7 +542,11 @@ ntpdmain(
 		set_mm_timer(MM_TIMER_HIRES);
 #endif
 
-	if (HAVE_OPT( NOFORK ) || HAVE_OPT( QUIT ))
+	if (HAVE_OPT( NOFORK ) || HAVE_OPT( QUIT )
+#ifdef DEBUG
+	    || debug
+#endif
+	    || HAVE_OPT( SAVECONFIGQUIT ))
 		nofork = 1;
 
 	if (HAVE_OPT( NOVIRTUALIPS ))
@@ -588,20 +600,16 @@ ntpdmain(
 	/*
 	 * Detach us from the terminal.  May need an #ifndef GIZMO.
 	 */
-	if (
-#  ifdef DEBUG
-	    !debug &&
-#  endif /* DEBUG */
-	    !nofork)
-	{
+	if (!nofork) {
 
-	/*
-	 * Install trap handlers to log errors and assertion failures.
-	 * Default handlers print to stderr which doesn't work if detached.
-	 */
-	isc_assertion_setcallback(assertion_failed);
-	isc_error_setfatal(library_fatal_error);
-	isc_error_setunexpected(library_unexpected_error);
+		/*
+		 * Install trap handlers to log errors and assertion
+		 * failures.  Default handlers print to stderr which 
+		 * doesn't work if detached.
+		 */
+		isc_assertion_setcallback(assertion_failed);
+		isc_error_setfatal(library_fatal_error);
+		isc_error_setunexpected(library_unexpected_error);
 
 #  ifndef SYS_WINNT
 #   ifdef HAVE_DAEMON
@@ -862,13 +870,13 @@ ntpdmain(
 
 #ifdef HAVE_LINUX_CAPABILITIES
 		/* set flag: keep privileges accross setuid() call (we only really need cap_sys_time): */
-		if( prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1 ) {
+		if (prctl( PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L ) == -1) {
 			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
 			exit(-1);
 		}
 #else
 		/* we need a user to switch to */
-		if( user == NULL ) {
+		if (user == NULL) {
 			msyslog(LOG_ERR, "Need user name to drop root privileges (see -u flag!)" );
 			exit(-1);
 		}

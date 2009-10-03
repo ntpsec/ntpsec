@@ -1,7 +1,7 @@
-.TH NTPD 1 2009-09-30 "( 4.2.5p225)" "Programmer's Manual"
+.TH NTPD 1 2009-10-03 "( 4.2.5p225)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd.1)
 .\"  
-.\"  It has been AutoGen-ed  September 30, 2009 at 07:33:09 AM by AutoGen 5.9.9pre5
+.\"  It has been AutoGen-ed  Saturday October  3, 2009 at 03:52:55 AM UTC
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -89,6 +89,7 @@ file.
 .TP
 .BR \-g ", " \--panicgate
 Allow the first adjustment to be Big.
+This option may appear an unlimited number of times.
 .sp
 Normally,
 ntpd
@@ -199,6 +200,13 @@ Note: The kernel time discipline is disabled with this option.
 Broadcast/propagation delay.
 .sp
 Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
+.TP
+.BR \--saveconfigquit "=\fIstring\fP"
+Save parsed configuration and quit.
+.sp
+Cause ntpd to parse its startup configuration file and save an
+equivalent to the given filename and exit.  This option was
+designed for automated testing.
 .TP
 .BR \-s " \fIstring\fP, " \--statsdir "=" \fIstring\fP
 Statistics file location.

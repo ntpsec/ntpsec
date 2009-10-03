@@ -629,7 +629,7 @@ save_config(
 	else
 		fptr = fdopen(fd, "w");
 
-	if (NULL == fptr || -1 == dump_all_config_trees(fptr)) {
+	if (NULL == fptr || -1 == dump_all_config_trees(fptr, 1)) {
 		snprintf(reply, sizeof(reply),
 			 "Unable to save configuration to file %s",
 			 filename);

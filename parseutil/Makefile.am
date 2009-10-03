@@ -3,11 +3,11 @@ NULL=
 AUTOMAKE_OPTIONS = 
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
 EXTRA_PROGRAMS = testdcf dcfd
-INCLUDES =	-I$(top_srcdir)/include				\
-		-I$(top_srcdir)/lib/isc/include			\
-		-I$(top_srcdir)/lib/isc/nothreads/include	\
-		-I$(top_srcdir)/lib/isc/unix/include		\
-		$(NULL)
+
+INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
+		-I$(top_srcdir)/lib/isc/nothreads/include \
+		-I$(top_srcdir)/lib/isc/unix/include
+
 ETAGS_ARGS = Makefile.am
 DISTCLEANFILES = $(EXTRA_PROGRAMS)
 #EXTRA_DIST= TAGS

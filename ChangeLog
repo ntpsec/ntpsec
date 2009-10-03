@@ -1,3 +1,8 @@
+[Bug 1318] Allow multiple -g options on ntpd command line.
+[Bug 1327] ntpq, ntpdc, ntp-keygen -d and -D should work with configure
+  --disable-debugging.
+* Add ntpd --saveconfigquit <filename> option for future build-time
+  testing of saveconfig fidelity.
 (4.2.5p225) 2009/09/30 Released by Harlan Stenn <stenn@ntp.org>
 * authopt documentation changes from Dave Mills/Dave Hart.
 * [Bug 1324] support bracketed IPv6 numeric addresses for restrict.

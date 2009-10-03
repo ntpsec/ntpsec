@@ -2002,12 +2002,12 @@ case "$ac_cv_var_no_parenb_ignpar" in
  yes) AC_DEFINE(NO_PARENB_IGNPAR, 1, [Is there a problem using PARENB and IGNPAR (IRIX)?]) ;;
 esac
 
-AC_MSG_CHECKING([if we're including debugging code])
+AC_MSG_CHECKING([if we're including ntpd debugging code])
 AC_ARG_ENABLE(debugging,
-   AC_HELP_STRING([--enable-debugging], [+ include debugging code]),
+   AC_HELP_STRING([--enable-debugging], [+ include ntpd debugging code]),
     [ntp_ok=$enableval], [ntp_ok=yes])
 if test "$ntp_ok" = "yes"; then
-    AC_DEFINE(DEBUG, 1, [Enable debugging?])
+    AC_DEFINE(DEBUG, 1, [Enable ntpd debugging code?])
 fi
 AC_MSG_RESULT($ntp_ok)
 

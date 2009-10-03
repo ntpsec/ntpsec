@@ -7,11 +7,11 @@ bin_PROGRAMS=	ntpdate
 EXTRA_PROGRAMS=	ntptimeset
 
 ntptimeset_SOURCES=	ntptimeset.c ntptime_config.c
-AM_CPPFLAGS=	-I$(top_srcdir)/include				\
-		-I$(top_srcdir)/lib/isc/include			\
-		-I$(top_srcdir)/lib/isc/nothreads/include	\
-		-I$(top_srcdir)/lib/isc/unix/include		\
-		$(NULL)
+
+AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
+	-I$(top_srcdir)/lib/isc/nothreads/include \
+	-I$(top_srcdir)/lib/isc/unix/include
+
 # LDADD might need RESLIB and ADJLIB
 LDADD=		version.o ../libntp/libntp.a
 DISTCLEANFILES=	.version version.c stamp-v

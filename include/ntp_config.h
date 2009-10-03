@@ -224,8 +224,8 @@ extern struct REMOTE_CONFIG_INFO remote_config;
 void config_remotely(sockaddr_u *);
 
 #ifdef SAVECONFIG
-int dump_config_tree(struct config_tree *ptree, FILE *df);
-int dump_all_config_trees(FILE *df);
+int dump_config_tree(struct config_tree *ptree, FILE *df, int comment);
+int dump_all_config_trees(FILE *df, int comment);
 #endif
 
 
