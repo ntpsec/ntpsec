@@ -1204,7 +1204,7 @@ receive(
 		} else {
 			if (rval == XEVNT_ERR) {
 				report_event(PEVNT_RESTART, peer,
-				    "crypto");
+				    "crypto error");
 				peer_clear(peer, "CRYP");
 				peer->flash |= TEST9;	/* bad crypt */
 				if (peer->flags & FLAG_PREEMPT)
@@ -1259,6 +1259,8 @@ receive(
 				    &rbufp->recv_srcadr, dstadr_sin,
 				    tkeyid, pkeyid, 0);
 			}
+			if (peer->flash & TEST8)
+				report_event(PEVNT_AUTH, peer, "keylist");
 		}
 		if (!(peer->crypto & CRYPTO_FLAG_PROV)) /* test 9 */
 			peer->flash |= TEST8;	/* bad autokey */
@@ -1269,7 +1271,8 @@ receive(
 		 * refreshed certificates and leapseconds values.
 		 */
 		if (current_time > peer->refresh) {
-			report_event(PEVNT_RESTART, peer, "timeout");
+			report_event(PEVNT_RESTART, peer,
+			    "crypto refresh");
 			peer_clear(peer, "TIME");
 			return;
 		}
@@ -2615,7 +2618,6 @@ clock_select(void)
 	 */
 	if (nlist > 0 && nlist >= sys_minsane) {
 		double	x;
-		char	tbuf[80];
 
 		typesystem = peer_list[0];
 		if (osys_peer == NULL || osys_peer == typesystem) {
@@ -2631,13 +2633,10 @@ clock_select(void)
 				printf("select: clockhop %d %.6f %.6f\n",
 				    j, x, sys_clockhop);
 #endif
-			if (fabs(x) < sys_clockhop) {
+			if (fabs(x) < sys_clockhop)
 				typesystem = osys_peer;
-			} else {
-				sprintf(tbuf, "%.6f", x);
-				report_event(EVNT_CLKHOP, NULL, tbuf);
+			else
 				sys_clockhop = 0;
-			}
 		} else {
 			sys_clockhop = 0;
 		}
@@ -2657,6 +2656,7 @@ clock_select(void)
 			    SQUARE(sys_jitter) + SQUARE(seljitter));
 		} else {
 			typesystem = sys_prefer;
+			sys_clockhop = 0;
 			typesystem->status = CTL_PST_SEL_SYSPEER;
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
@@ -2680,6 +2680,7 @@ clock_select(void)
 	    (typepps->refclktype == REFCLK_ATOM_PPS && (sys_prefer !=
 	    NULL || (typesystem == NULL && sys_minsane == 0))))) {
 		typesystem = typepps;
+		sys_clockhop = 0;
 		typesystem->status = CTL_PST_SEL_PPS;
  		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
@@ -3000,7 +3001,7 @@ peer_xmit(
 				    peer->associd, NULL);
 			else if (!(peer->crypto & CRYPTO_FLAG_AUTO))
 				exten = crypto_args(peer, CRYPTO_AUTO,
-				    peer->assoc, NULL);
+				    peer->associd, NULL);
 			else if (peer->flags & FLAG_ASSOC &&
 			    peer->crypto & CRYPTO_FLAG_SIGN)
 				exten = crypto_args(peer, CRYPTO_AUTO |

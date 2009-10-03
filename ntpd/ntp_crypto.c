@@ -844,7 +844,7 @@ crypto_recv(
 			 * autokey values.
 			 */
 			if ((rval = crypto_verify(ep, &peer->recval,
-			    peer)) != XEVNT_OK)
+			    peer)) != XEVNT_OK) 
 				break;
 
 			/*
@@ -1426,11 +1426,10 @@ crypto_verify(
 	opcode = ntohl(ep->opcode) & 0xffff0000;
 
 	/*
-	 * Check for valid value header opcode, association ID and
-	 * extension field length. The request and response opcodes must
-	 * match and the response ID must match the association ID. The
-	 * autokey values response is the exception, as it can be sent
-	 * unsolicited.
+	 * Check for valid value header, association ID and extension
+	 * field length. Remember, it is not an error to receive an
+	 * unsolicited response; however, the response ID must match
+	 * the association ID.
 	 */
 	if (opcode & CRYPTO_ERROR)
 		return (XEVNT_ERR);
@@ -1438,13 +1437,12 @@ crypto_verify(
  	if (len < VALUE_LEN)
 		return (XEVNT_LEN);
 
-	if (opcode == (CRYPTO_AUTO | CRYPTO_RESP)) {
+	if (opcode == (CRYPTO_AUTO | CRYPTO_RESP) &&
+	    peer->cast_flags & MDF_BCLNT) {
 		if (ntohl(ep->associd) != peer->assoc)
 			return (XEVNT_ERR);
 	} else {
-		if (((htonl(peer->opcode) & 0x3fff0000) !=
-		    (opcode & 0x3fff0000)) || ntohl(ep->associd) !=
-		    peer->associd)
+		if (ntohl(ep->associd) != peer->associd)
 			return (XEVNT_ERR);
 	}
 

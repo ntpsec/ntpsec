@@ -626,7 +626,7 @@ struct pkt {
 #define	PEVNT_RATE	(7 | PEER_EVENT) /* rate exceeded */
 #define	PEVNT_DENY	(8 | PEER_EVENT) /* access denied */
 #define PEVNT_ARMED	(9 | PEER_EVENT) /* leap armed */
-#define	PEVNT_NEWPEER	(10 | PEER_EVENT) /* sys peer*/
+#define	PEVNT_NEWPEER	(10 | PEER_EVENT) /* sys peer */
 #define	PEVNT_CLOCK	(11 | PEER_EVENT) /* clock event */
 #define	PEVNT_AUTH	(12 | PEER_EVENT) /* bad auth */
 #define	PEVNT_POPCORN	(13 | PEER_EVENT) /* popcorn */
