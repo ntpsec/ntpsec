@@ -821,8 +821,13 @@ dump_config_tree(
 		if (peer->maxpoll != 0)
 			fprintf(df, " maxpoll %d", peer->maxpoll);
 
-		if (peer->ttl != 0)
-			fprintf(df, " ttl %d", peer->ttl);
+		if (peer->ttl != 0) {
+			if (strlen(addr->address) > 8
+			    && !memcmp(addr->address, "127.127.", 8))
+				fprintf(df, " mode %d", peer->ttl);
+			else
+				fprintf(df, " ttl %d", peer->ttl);
+		}
 
 		if (peer->peerversion != NTP_VERSION)
 			fprintf(df, " version %d", peer->peerversion);
@@ -3842,22 +3847,6 @@ getconfig(
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO */
 
-#ifdef SAVECONFIG
-	if (HAVE_OPT( SAVECONFIGQUIT )) {
-		FILE *dumpfile;
-		int dumpfailed;
-
-		dumpfile = fopen(OPT_ARG( SAVECONFIGQUIT ), "w");
-		dumpfailed = dump_all_config_trees(dumpfile, 0);
-		if (dumpfailed)
-			fprintf(stderr,
-				"--saveconfigquit %s error %d\n",
-				OPT_ARG( SAVECONFIGQUIT ),
-				dumpfailed);
-		exit(dumpfailed);
-	}
-#endif	/* SAVECONFIG */
-
 	/*
 	printf("getconfig: res_fp <%p> call_resolver: %d", res_fp, call_resolver);
 	*/
@@ -3887,8 +3876,39 @@ save_and_apply_config_tree(void)
 	memcpy(ptree, &cfgt, sizeof(*ptree));
 	memset(&cfgt, 0, sizeof(cfgt));
 	
-	LINK_TAIL_SLIST(cfg_tree_history, ptree, link, struct config_tree);
+	LINK_TAIL_SLIST(cfg_tree_history, ptree, link,
+			struct config_tree);
 
+#ifdef SAVECONFIG
+	if (HAVE_OPT( SAVECONFIGQUIT )) {
+		FILE *dumpfile;
+		int err;
+		int dumpfailed;
+
+		dumpfile = fopen(OPT_ARG( SAVECONFIGQUIT ), "w");
+		if (NULL == dumpfile) {
+			err = errno;
+			fprintf(stderr,
+				"can not create save file %s, error %d %s\n",
+				OPT_ARG( SAVECONFIGQUIT ), err,
+				strerror(err));
+			exit(err);
+		}
+		
+		dumpfailed = dump_all_config_trees(dumpfile, 0);
+		if (dumpfailed)
+			fprintf(stderr,
+				"--saveconfigquit %s error %d\n",
+				OPT_ARG( SAVECONFIGQUIT ),
+				dumpfailed);
+		else
+			fprintf(stderr,
+				"configuration saved to %s\n",
+				OPT_ARG( SAVECONFIGQUIT ));
+
+		exit(dumpfailed);
+	}
+#endif	/* SAVECONFIG */
 
 	/* The actual configuration done depends on whether we are configuring the
 	 * simulator or the daemon. Perform a check and call the appropriate

@@ -15,6 +15,12 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 LDADD=	version.o libntpd.a @LIBPARSE@
 AM_YFLAGS=	-d -t -r all
 
+if SAVECONFIG_ENABLED
+CHECK_SAVECONFIG= check-saveconfig
+else
+CHECK_SAVECONFIG=
+endif
+
 #
 # VPHACK and VPHACK_AFTER are enabled on non-GNU makes (such as 
 # BSD make) to work around issues specific to compiling
@@ -70,6 +76,7 @@ ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntps
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
+CLEANFILES = check-saveconfig compsave.conf
 EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def \
 	refclock_msfees.c	\
 	refclock_trak.c		\
@@ -83,7 +90,7 @@ std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/version.def
 
-check-local: @MAKE_CHECK_Y2K@
+check-local: @MAKE_CHECK_Y2K@ $(CHECK_SAVECONFIG)
 	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
 
 ntpd_SOURCES =			\
@@ -176,6 +183,12 @@ $(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.def $(src
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
 $(PROGRAMS): $(LDADD)
+
+compsave.conf: ntpd $(srcdir)/complete.conf
+	./ntpd --configfile $(srcdir)/complete.conf --saveconfigquit $@
+
+check-saveconfig: $(srcdir)/complete.conf compsave.conf
+	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE) libntp.a

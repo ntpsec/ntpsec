@@ -46,7 +46,7 @@ ntpdc-layout.o: nl.c
 layout.here: ntpdc-layout
 	./ntpdc-layout > $@
 
-check-layout: ntpdc-layout layout.std layout.here
+check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 	cmp $(srcdir)/layout.std layout.here && echo stamp > $@
 
 $(PROGRAMS): $(LDADD)

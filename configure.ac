@@ -4738,9 +4738,12 @@ AC_MSG_CHECKING([if we want the saveconfig mechanism])
 AC_ARG_ENABLE(saveconfig,
     AC_HELP_STRING([--enable-saveconfig], [+ saveconfig mechanism]),
     [ntp_ok=$enableval], [ntp_ok=yes])
+ntp_saveconfig_enabled=0
 if test "$ntp_ok" = "yes"; then
+    ntp_saveconfig_enabled=1
     AC_DEFINE(SAVECONFIG, 1, [saveconfig mechanism])
 fi
+AM_CONDITIONAL([SAVECONFIG_ENABLED], [test x$ntp_saveconfig_enabled = x1])
 AC_MSG_RESULT($ntp_ok)
 
 ###
