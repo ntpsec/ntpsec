@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  Saturday October  3, 2009 at 03:59:10 AM UTC
+# It has been AutoGen-ed  October  4, 2009 at 07:48:18 AM by AutoGen 5.9.9pre5
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -87,8 +87,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /m/pogo/users/hart/.ntprc
- - reading file /m/pogo/users/hart/ntp-dev-1318-27/util/.ntprc
+ - reading file /users/stenn/.ntprc
+ - reading file /deacon/backroom/snaps/ntp-dev/util/.ntprc
  - examining environment variables named NTP_KEYGEN_*
 
 If there is no new host key, look for an existing one.

@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  Saturday October  3, 2009 at 03:57:36 AM UTC
+# It has been AutoGen-ed  October  4, 2009 at 07:41:38 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -98,8 +98,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /m/pogo/users/hart/.ntprc
- - reading file /m/pogo/users/hart/ntp-dev-1318-27/ntpdc/.ntprc
+ - reading file /users/stenn/.ntprc
+ - reading file /deacon/backroom/snaps/ntp-dev/ntpdc/.ntprc
  - examining environment variables named NTPDC_*
 
 The

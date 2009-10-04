@@ -1,3 +1,4 @@
+(4.2.5p226) 2009/10/04 Released by Harlan Stenn <stenn@ntp.org>
 [Bug 1318] Allow multiple -g options on ntpd command line.
 [Bug 1327] ntpq, ntpdc, ntp-keygen -d and -D should work with configure
   --disable-debugging.
