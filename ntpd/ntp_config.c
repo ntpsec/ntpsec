@@ -2401,7 +2401,18 @@ config_nic_rules(
 	char *		pchSlash;
 	int		prefixlen;
 
-	for (curr_node = queue_head(ptree->nic_rules);
+	curr_node = queue_head(ptree->nic_rules);
+
+	if (curr_node != NULL
+	    && (HAVE_OPT( NOVIRTUALIPS ) || HAVE_OPT( INTERFACE ))) {
+		msyslog(LOG_ERR,
+			"interface/nic rules are not allowed with --interface (-I) or --novirtualips (-L)%s",
+			(input_from_file) ? ", exiting" : "");
+		if (input_from_file)
+			exit(1);
+	}
+
+	for (;
 	     curr_node != NULL;
 	     curr_node = next_node(curr_node)) {
 
