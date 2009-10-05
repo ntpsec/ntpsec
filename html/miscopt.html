@@ -13,7 +13,7 @@
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->25-Sep-2009  20:39<!-- #EndDate --> 
+			<!-- #BeginDate format:En2m -->04-Oct-2009  21:36<!-- #EndDate --> 
 			UTC</p>
 		<br clear="left">
 	<h4>Related Links</h4>
@@ -28,7 +28,7 @@
 				<dd>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</dd>
 				<dd>The parameter <tt>tolerance</tt> is the wander threshold to skip writing the new value. If the value of wander computed from recent frequency changes is greater than this threshold the file will be updated once per hour. If below the threshold, the file will not be written.</dd>
 			<dt id="enable"><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
-				<tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt></dt>
+			<tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt></dt>
 			<dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.html"><tt>ntpdc</tt></a> utility program.
 				<dl>
 					<dt><tt>auth</tt></dt>
@@ -43,11 +43,10 @@
 					<dd>Enables the monitoring facility. See the <tt>ntpdc</tt> program and the <tt>monlist</tt> command or further information. The default for this flag is enable.</dd>
 					<dt><tt>ntp</tt></dt>
 					<dd>Enables time and frequency discipline. In effect, this switch opens and closes the feedback loop, which is useful for testing. The default for this flag is enable.</dd>
-					<dt><tt>pps</tt></dt>
-					<dd>Enables the pulse-per-second (PPS) signal when frequency and time is disciplined by the precision time kernel modifications. See the <a href="kern.html">A Kernel Model for Precision Timekeeping</a> page for further information. The default for this flag is disable.</dd>
 					<dt><tt>stats</tt></dt>
 					<dd>Enables the statistics facility. See the <a href="monopt.html">Monitoring Options</a> page for further information. The default for this flag is disable.</dd>
 				</dl>
+				</dd>
 			<dt id="includefile"><tt>includefile <i>includefile</i></tt></dt>
 			<dd>This command allows additional configuration commands to be included from a separate file. Include files may be nested to a depth of five; upon reaching the end of any include file, command processing resumes in the previous configuration file. This option is useful for sites that run <tt>ntpd</tt> on multiple hosts, with (mostly) common options (e.g., a restriction list).</dd>
 			<dt id="interface"><tt>interface [listen | ignore | drop] [all | ipv4 | ipv6 | <i>name</i> | <i>address</i>[/<i>prefixlen</i>]]</tt></dt>
@@ -55,43 +54,41 @@
 			<dt id="leapfile"><tt>leapfile <i>leapfile</i></tt></dt>
 			<dd>This command loads the NIST leapseconds file and initializes the leapsecond values for the next leapsecond time, expiration time and TAI offset. The file can be obtained directly from NIST national time servers using <tt>ftp</tt> as the ASCII file <tt>pub/leap-seconds</tt>.</dd>
 			<dd>While not strictly a security function, the Autokey protocol provides means to securely retrieve the current or updated leapsecond values from a server.</dd>
-			<dt id="logconfig"><tt>logconfig <i>configkeyword</i></tt>
-			<dd>This command controls the amount and type of output written to the system <tt>syslog</tt> facility or the alternate <tt>logfile</tt> log file. All <i><tt>configkeyword</tt></i> keywords can be prefixed with <tt>=</tt>, <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages. <tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>, <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes four types of messages can be controlled: informational messages (<tt>info</tt>), event messages (<tt>events</tt>), statistics messages (<tt>statistics</tt>) and status messages (<tt>status</tt>).
-				<p>Configuration keywords are formed by concatenating the message class with the event class. The <tt>all</tt> prefix can be used instead of a message class. A message class may also be followed by the <tt>all</tt> keyword to enable/disable all messages of the respective message class. By default, <tt>logconfig</tt> output is set to <tt>allsync</tt>.
-			</p>
-				<p>Thus, a minimal log configuration could look like this:</p>
-				<p><tt>logconfig=syncstatus +sysevents</tt></p>
-				<dl>
-					<dd>
-						<p>This would just list the synchronizations state of <tt>ntpd</tt> and the major system events. For a simple reference server, the following minimum message configuration could be useful:</p>
-				</dl>
-			<dd>
-				<p><tt>logconfig allsync +allclock</tt></p>
-				<dl>
-					<dd>
-						<p>This configuration will list all clock information and synchronization information. All other events and messages about peers, system events and so on is suppressed.</p>
-				</dl>
-			<dt id="logfile"><tt>logfile <i>logfile</i></tt>
-			<dd>This command specifies the location of an alternate log file to be used instead of the default system <tt>syslog</tt> facility. This is the same operation as the <tt>-l </tt>command line option.
+			<dt id="logconfig"><tt>logconfig <i>configkeyword</i></tt></dt>
+			<dd>This command controls the amount and type of output written to the system <tt>syslog</tt> facility or the alternate <tt>logfile</tt> log file. All <i><tt>configkeyword</tt></i> keywords can be prefixed with <tt>=</tt>, <tt>+</tt> and <tt>-</tt>, where <tt>=</tt> sets the <tt>syslogmask</tt>, <tt>+</tt> adds and <tt>-</tt> removes messages. <tt>syslog messages</tt> can be controlled in four classes (<tt>clock</tt>, <tt>peer</tt>, <tt>sys</tt> and <tt>sync</tt>). Within these classes four types of messages can be controlled: informational messages (<tt>info</tt>), event messages (<tt>events</tt>), statistics messages (<tt>statistics</tt>) and status messages (<tt>status</tt>).</dd>
+				<dd>Configuration keywords are formed by concatenating the message class with the event class. The <tt>all</tt> prefix can be used instead of a message class. A message class may also be followed by the <tt>all</tt> keyword to enable/disable all messages of the respective message class. By default, <tt>logconfig</tt> output is set to <tt>allsync</tt>.</dd>
+				<dd>Thus, a minimal log configuration could look like this:</dd>
+				<dd><tt>logconfig=syncstatus +sysevents</tt></dd>
+						<dd>This would just list the synchronizations state of <tt>ntpd</tt> and the major system events. For a simple reference server, the following minimum message configuration could be useful:</dd>
+				<dd><tt>logconfig allsync +allclock</tt></dd>
+				<dd>This configuration will list all clock information and synchronization information. All other events and messages about peers, system events and so on is suppressed.</dd>
+			<dt id="logfile"><tt>logfile <i>logfile</i></tt></dt>
+			<dd>This command specifies the location of an alternate log file to be used instead of the default system <tt>syslog</tt> facility. This is the same operation as the <tt>-l </tt>command line option.</dd>
 			<dt id="phone"><tt>phone <i>dial</i>1 <i>dial</i>2 ...</tt></dt>
 			<dd>This command is used in conjunction with the ACTS modem driver (type 18). The arguments consist of a maximum of 10 telephone numbers used to dial USNO, NIST or European time services. The Hayes command ATDT&nbsp;is normally prepended to the number, which can contain other modem control codes as well.</dd>
 			<dt id="setvar"><tt>setvar <i>variable</i> [default]</tt></dt>
-			<dd>This command adds an additional system variable. These variables can be used to distribute additional information such as the access policy. If the variable of the form <tt><i>name</i> = <i>value</i></tt> is followed by the <tt>default</tt> keyword, the variable will be listed as part of the default system variables (<tt>ntpq rv</tt> command). These additional variables serve informational purposes only. They are not related to the protocol other that they can be listed. The known protocol variables will always override any variables defined via the <tt>setvar</tt> mechanism. There are three special variables that contain the names of all variable of the same group. The <tt>sys_var_list</tt> holds the names of all system variables. The <tt>peer_var_list</tt> holds the names of all peer variables and the <tt>clock_var_list</tt> holds the names of the reference clock variables.
+			<dd>This command adds an additional system variable. These variables can be used to distribute additional information such as the access policy. If the variable of the form <tt><i>name</i> = <i>value</i></tt> is followed by the <tt>default</tt> keyword, the variable will be listed as part of the default system variables (<tt>ntpq rv</tt> command). These additional variables serve informational purposes only. They are not related to the protocol other that they can be listed. The known protocol variables will always override any variables defined via the <tt>setvar</tt> mechanism. There are three special variables that contain the names of all variable of the same group. The <tt>sys_var_list</tt> holds the names of all system variables. The <tt>peer_var_list</tt> holds the names of all peer variables and the <tt>clock_var_list</tt> holds the names of the reference clock variables.</dd>
 			<dt id="tinker"><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | freq <i>freq</i> | huffpuff <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt></dt>
-			<dd>This command alters certain system variables used by the clock discipline algorithm. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. The options are as follows:
-				<dl>
+			<dd>This command alters certain system variables used by the clock discipline algorithm. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. The options are as follows:</dd>
+				<dd><dl>
 					<dt><tt>allan <i>allan</i></tt></dt>
-					<dd>Spedifies the Allan intercept, which is a parameter of the PLL/FLL clock discipline algorithm, in seconds with default 1500 s.
+					<dd>Spedifies the Allan intercept, which is a parameter of the PLL/FLL clock discipline algorithm, in seconds with default 1500 s.</dd>
 					<dt><tt>dispersion <i>dispersion</i></tt></dt>
-					<dd>Specifies the dispersion increase rate in parts-per-million (PPM) with default 15 PPM.<dt><tt>freq <i>freq</i></tt>
-					<dd>Spedifies the frequency offset in parts-per-million (PPM) with default the value in the frequency file.<dt><tt>huffpuff <i>huffpuff</i></tt>
-					<dd>Spedifies the huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 m), but a more reasonable value is 7200 (2 hours).<dt><tt>panic <i>panic</i></tt>
-					<dd>Spedifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.<dt><tt>step <i>step</i></tt>
-					<dd>Spedifies the step threshold in seconds with default 0.128 s. If set to zero, step adjustments will never occur. Note:&nbsp;The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.<dt><tt>stepout <i>stepout</i></tt>
-					<dd>Specifies the stepout threshold in seconds with default 900 s. It If set to zero, popcorn spikes will not be suppressed.</dl>
+					<dd>Specifies the dispersion increase rate in parts-per-million (PPM) with default 15 PPM.</dd>
+					<dt><tt>freq <i>freq</i></tt></dt>
+					<dd>Spedifies the frequency offset in parts-per-million (PPM) with default the value in the frequency file.</dd>
+					<dt><tt>huffpuff <i>huffpuff</i></tt></dt>
+					<dd>Spedifies the huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 m), but a more reasonable value is 7200 (2 hours).</dd>
+					<dt><tt>panic <i>panic</i></tt></dt>
+					<dd>Spedifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.</dd>
+					<dt><tt>step <i>step</i></tt></dt>
+					<dd>Spedifies the step threshold in seconds with default 0.128 s. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.</dd>
+					<dt><tt>stepout <i>stepout</i></tt></dt>
+					<dd>Specifies the stepout threshold in seconds with default 900 s. It If set to zero, popcorn spikes will not be suppressed.</dd>
+			</dl></dd>
 			<dt id="tos"><tt>tos [ beacon <i>beacon</i> | ceiling <i>ceiling</i> | cohort {0 | 1} | floor <i>floor</i> | maxclock <i>maxclock </i>| maxdist <i>maxdist</i> | minclock <i>minclock</i> | mindist <i>mindist </i>| minsane <i>minsane</i> | orphan <i>stratum</i> ]</tt></dt>
 			<dd>This command alters certain system variables used by the the clock selection and clustering algorithms. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. It can be used to select the quality and quantity of peers used to synchronize the system clock and is most useful in dynamic server discovery schemes. The options are as follows:</dd>
-				<dl>
+				<dd><dl>
 					<dt><tt>beacon <i>beacon</i></tt></dt>
 					<dd>The manycast server sends packets at intervals of 64 s if less than  <tt>maxclock</tt> servers are available. Otherwise, it sends packets at the <i><tt>beacon</tt></i> interval in seconds. The default is 3600 s. See the <a href="manyopt.html">Automatic Server Discovery</a> page for further details.</dd>
 					<dt><tt>ceiling <i>ceiling</i></tt></dt>
@@ -117,8 +114,8 @@
 					<dd>Specify the number of servers used by the selection algorithm as the minimum to set the system clock. The default is 1 for legacy purposes; however, for critical applications the value should be somewhat higher but less than <tt>minclock</tt>.</dd>
 					<dt><tt>orphan <i>stratum</i></tt></dt>
 					<dd>Specify the orphan stratum with default 16. If less than 16 this is the stratum assumed by the root servers. See the <a href="assoc.html">Association Management</a> page for further details.</dd>
-			</dl>
-			<dt id="trap"><tt>trap <i>host_address</i> [port <i>port_number</i>] [interface <i>interface_address</i>]</tt></dt>
+			</dl></dd>
+			<dt id="trap"><tt>trap <i>host_address</i> [port <i>port_number</i>] [interface <i>interfSace_address</i>]</tt></dt>
 			<dd>This command configures a trap receiver at the given host address and port number for sending messages with the specified local interface address. If the port number is unspecified, a value of 18447 is used. If the interface address is not specified, the message is sent with a source address of the local interface the message is sent through. Note that on a multihomed host the interface used may vary from time to time with routing changes.</dd>
 				<dd>The trap receiver will generally log event messages and other information from the server in a log file. While such monitor programs may also request their own trap dynamically, configuring a trap receiver will ensure that no messages are lost when the server is started.</dd>
 			<dt id="ttl"><tt>ttl <i>hop</i> ...</tt></dt>
