@@ -760,7 +760,7 @@ process_control(
 
 	properlen = (properlen + 7) & ~7;
 	maclen = rbufp->recv_length - properlen;
-	if ((rbufp->recv_length & (sizeof(u_long) - 1)) == 0 &&
+	if ((rbufp->recv_length & 3) == 0 &&
 	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN &&
 	    sys_authenticate) {
 		res_authenticate = 1;

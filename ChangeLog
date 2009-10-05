@@ -1,3 +1,4 @@
+* [Bug 1135] :config fails with "Server disallowed request"
 * [Bug 1330] disallow interface/nic rules when --novirtualips or
   --interface are used.
 * [Bug 1332] ntpq -c 'rv 0 variablename' returns extra stuff.
