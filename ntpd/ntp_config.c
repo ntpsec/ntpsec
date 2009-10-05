@@ -2410,6 +2410,8 @@ config_nic_rules(
 			(input_from_file) ? ", exiting" : "");
 		if (input_from_file)
 			exit(1);
+		else
+			return;
 	}
 
 	for (;
