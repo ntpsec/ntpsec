@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  October  4, 2009 at 07:42:10 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Monday October  5, 2009 at 06:18:35 AM UTC
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpq copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntpq copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -66,21 +66,29 @@ extern tUsageProc optionUsage;
 #  define  EXIT_FAILURE 1
 #endif
 /*
- *  Ipv4 option description:
+ *  Ipv4 option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zIpv4Text[] =
         "Force IPv4 DNS name resolution";
 tSCC    zIpv4_NAME[]               = "IPV4";
 tSCC    zIpv4_Name[]               = "ipv4";
+static const int
+    aIpv4CantList[] = {
+    INDEX_OPT_IPV6, NO_EQUIVALENT };
 #define IPV4_FLAGS       (OPTST_DISABLED)
 
 /*
- *  Ipv6 option description:
+ *  Ipv6 option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zIpv6Text[] =
         "Force IPv6 DNS name resolution";
 tSCC    zIpv6_NAME[]               = "IPV6";
 tSCC    zIpv6_Name[]               = "ipv6";
+static const int
+    aIpv6CantList[] = {
+    INDEX_OPT_IPV4, NO_EQUIVALENT };
 #define IPV6_FLAGS       (OPTST_DISABLED)
 
 /*
@@ -147,6 +155,15 @@ tSCC    zNumericText[] =
 tSCC    zNumeric_NAME[]            = "NUMERIC";
 tSCC    zNumeric_Name[]            = "numeric";
 #define NUMERIC_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Old_Rv option description:
+ */
+tSCC    zOld_RvText[] =
+        "Always output status line with readvar";
+tSCC    zOld_Rv_NAME[]             = "OLD_RV";
+tSCC    zOld_Rv_Name[]             = "old-rv";
+#define OLD_RV_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -217,25 +234,25 @@ static tOptProc
  */
 static tOptDesc optDesc[ OPTION_CT ] = {
   {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
-     /* equiv idx, value */ NO_EQUIVALENT, 0,
+     /* equiv idx, value */ 0, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aIpv4CantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
-     /* equiv idx, value */ NOLIMIT, NOLIMIT,
-     /* equivalenced to  */ INDEX_OPT_IPV4,
+     /* equiv idx, value */ 1, VALUE_OPT_IPV6,
+     /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aIpv6CantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
      /* disablement strs */ NULL, NULL },
@@ -310,6 +327,18 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zNumericText, zNumeric_NAME, zNumeric_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 8, VALUE_OPT_OLD_RV,
+     /* equiv idx, value */ 8, VALUE_OPT_OLD_RV,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ OLD_RV_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zOld_RvText, zOld_Rv_NAME, zOld_Rv_Name,
      /* disablement strs */ NULL, NULL },
 
 #ifdef NO_OPTIONAL_OPT_ARGS
@@ -450,7 +479,7 @@ tOptions ntpqOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    13 /* full option count */, 8 /* user option count */,
+    14 /* full option count */, 9 /* user option count */,
     ntpq_full_usage, ntpq_short_usage,
     NULL, NULL
 };

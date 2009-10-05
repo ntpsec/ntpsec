@@ -1,7 +1,7 @@
-.TH NTPQ 1 2009-10-04 "( 4.2.5p226)" "Programmer's Manual"
+.TH NTPQ 1 2009-10-05 "( 4.2.5p226)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq.1)
 .\"  
-.\"  It has been AutoGen-ed  October  4, 2009 at 07:42:11 AM by AutoGen 5.9.9pre5
+.\"  It has been AutoGen-ed  Monday October  5, 2009 at 06:18:37 AM UTC
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -281,14 +281,16 @@ a timeout will be twice the timeout value set.
 .TP
 .BR \-4 ", " \--ipv4
 Force IPv4 DNS name resolution.
-This option is a member of the ipv4 class of options.
+This option must not appear in combination with any of the following options:
+ipv6.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
 .TP
 .BR \-6 ", " \--ipv6
 Force IPv6 DNS name resolution.
-This option is a member of the ipv4 class of options.
+This option must not appear in combination with any of the following options:
+ipv4.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
@@ -335,6 +337,17 @@ numeric host addresses.
 .sp
 Output all host addresses in dotted-quad numeric format rather than
 converting to the canonical host names. 
+.TP
+.BR \--old-rv
+Always output status line with readvar.
+.sp
+By default, ntpq now suppresses the associd=... line that
+precedes the output of "readvar" (alias "rv") when a single
+variable is requested, such as ntpq \-c "rv 0 offset".  This
+option causes ntpq to include both lines of output for a
+single-variable readvar.  Using an environment variable to
+preset this option in a script will enable both older and
+newer ntpq to behave identically in this regard.
 .TP
 .BR \-? , " \--help"
 Display usage information and exit.

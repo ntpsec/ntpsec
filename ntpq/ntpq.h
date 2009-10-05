@@ -90,6 +90,6 @@ extern	int	decodets	(char *, l_fp *);
 extern	int	decodeuint	(char *, u_long *);
 extern	int	nextvar		(int *, char **, char **, char **);
 extern	int	decodetime	(char *, l_fp *);
-extern	void	printvars	(int, char *, int, int, FILE *);
+extern	void	printvars	(int, char *, int, int, int, FILE *);
 extern	int	decodeint	(char *, long *);
 extern	int	findvar		(char *, struct ctl_var *, int code);

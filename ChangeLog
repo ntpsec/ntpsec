@@ -1,5 +1,6 @@
 * [Bug 1330] disallow interface/nic rules when --novirtualips or
   --interface are used.
+* [Bug 1332] ntpq -c 'rv 0 variablename' returns extra stuff.
 * Add test of ntpd --saveconfigquit fidelity using new complete.conf.
 * Documentation updates from Dave Hart/Dave Mills.
 (4.2.5p226) 2009/10/04 Released by Harlan Stenn <stenn@ntp.org>

@@ -7,8 +7,9 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
-#include "ntpq.h"
 #include "ntp_stdlib.h"
+#include "ntpq.h"
+#include "ntpq-opts.h"
 
 extern char *	chosts[];
 extern char currenthost[];
@@ -24,23 +25,25 @@ static	void	doaddvlist	(struct varlist *, char *);
 static	void	dormvlist	(struct varlist *, char *);
 static	void	doclearvlist	(struct varlist *);
 static	void	makequerydata	(struct varlist *, int *, char *);
-static	int doquerylist (struct varlist *, int, int, int, u_short *, int *, char **);
+static	int	doquerylist	(struct varlist *, int, int, int, 
+				 u_short *, int *, char **);
 static	void	doprintvlist	(struct varlist *, FILE *);
 static	void	addvars 	(struct parse *, FILE *);
 static	void	rmvars		(struct parse *, FILE *);
 static	void	clearvars	(struct parse *, FILE *);
 static	void	showvars	(struct parse *, FILE *);
-static	int dolist		(struct varlist *, int, int, int, FILE *);
+static	int	dolist		(struct varlist *, int, int, int,
+				 FILE *);
 static	void	readlist	(struct parse *, FILE *);
 static	void	writelist	(struct parse *, FILE *);
 static	void	readvar 	(struct parse *, FILE *);
 static	void	writevar	(struct parse *, FILE *);
 static	void	clocklist	(struct parse *, FILE *);
 static	void	clockvar	(struct parse *, FILE *);
-static	int findassidrange	(u_int32, u_int32, int *, int *);
+static	int	findassidrange	(u_int32, u_int32, int *, int *);
 static	void	mreadlist	(struct parse *, FILE *);
 static	void	mreadvar	(struct parse *, FILE *);
-static	int dogetassoc	(FILE *);
+static	int	dogetassoc	(FILE *);
 static	void	printassoc	(int, FILE *);
 static	void	associations	(struct parse *, FILE *);
 static	void	lassociations	(struct parse *, FILE *);
@@ -193,7 +196,7 @@ char flash3[] = " x.-+#*o"; /* flash decode for peer status version 3 */
 struct varlist {
 	char *name;
 	char *value;
-} varlist[MAXLIST] = { { 0, 0 } };
+} g_varlist[MAXLIST] = { { 0, 0 } };
 
 /*
  * Imported from ntpq.c
@@ -307,7 +310,7 @@ dormvlist(
 			free((void *)vl->name);
 			if (vl->value != 0)
 			    free(vl->value);
-			for ( ; (vl+1) < (varlist+MAXLIST)
+			for ( ; (vl+1) < (g_varlist + MAXLIST)
 				      && (vl+1)->name != 0; vl++) {
 				vl->name = (vl+1)->name;
 				vl->value = (vl+1)->value;
@@ -441,7 +444,7 @@ addvars(
 	FILE *fp
 	)
 {
-	doaddvlist(varlist, pcmd->argval[0].string);
+	doaddvlist(g_varlist, pcmd->argval[0].string);
 }
 
 
@@ -455,7 +458,7 @@ rmvars(
 	FILE *fp
 	)
 {
-	dormvlist(varlist, pcmd->argval[0].string);
+	dormvlist(g_varlist, pcmd->argval[0].string);
 }
 
 
@@ -469,7 +472,7 @@ clearvars(
 	FILE *fp
 	)
 {
-	doclearvlist(varlist);
+	doclearvlist(g_varlist);
 }
 
 
@@ -483,7 +486,7 @@ showvars(
 	FILE *fp
 	)
 {
-	doprintvlist(varlist, fp);
+	doprintvlist(g_varlist, fp);
 }
 
 
@@ -503,6 +506,16 @@ dolist(
 	int res;
 	int dsize;
 	u_short rstatus;
+	int quiet;
+
+	/*
+	 * if we're asking for specific variables don't include the
+	 * status header line in the output.
+	 */
+	if (HAVE_OPT( OLD_RV ))
+		quiet = 0;
+	else
+		quiet = (vlist->name != NULL);
 
 	res = doquerylist(vlist, op, associd, 0, &rstatus, &dsize, &datap);
 
@@ -522,8 +535,9 @@ dolist(
 		return 1;
 	}
 
-	(void) fprintf(fp,"associd=%d ",associd);
-	printvars(dsize, datap, (int)rstatus, type, fp);
+	if (!quiet)
+		fprintf(fp,"associd=%d ",associd);
+	printvars(dsize, datap, (int)rstatus, type, quiet, fp);
 	return 1;
 }
 
@@ -549,7 +563,7 @@ readlist(
 			return;
 	}
 
-	(void) dolist(varlist, associd, CTL_OP_READVAR,
+	(void) dolist(g_varlist, associd, CTL_OP_READVAR,
 			  (associd == 0) ? TYPE_SYS : TYPE_PEER, fp);
 }
 
@@ -579,7 +593,7 @@ writelist(
 			return;
 	}
 
-	res = doquerylist(varlist, CTL_OP_WRITEVAR, associd, 1, &rstatus,
+	res = doquerylist(g_varlist, CTL_OP_WRITEVAR, associd, 1, &rstatus,
 			  &dsize, &datap);
 
 	if (res != 0)
@@ -592,7 +606,7 @@ writelist(
 	else {
 		(void) fprintf(fp,"associd=%d ",associd);
 		printvars(dsize, datap, (int)rstatus,
-			  (associd != 0) ? TYPE_PEER : TYPE_SYS, fp);
+			  (associd != 0) ? TYPE_PEER : TYPE_SYS, 0, fp);
 	}
 	return;
 }
@@ -667,7 +681,10 @@ writevar(
 	else {
 		(void) fprintf(fp,"associd=%d ",associd);
 		printvars(dsize, datap, (int)rstatus,
-			  (associd != 0) ? TYPE_PEER : TYPE_SYS, fp);
+			  (associd != 0)
+			      ? TYPE_PEER 
+			      : TYPE_SYS, 
+			  0, fp);
 	}
 	return;
 }
@@ -694,7 +711,7 @@ clocklist(
 			return;
 	}
 
-	(void) dolist(varlist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
+	(void) dolist(g_varlist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
 }
 
 
@@ -806,7 +823,7 @@ mreadlist(
 	for (i = from; i <= to; i++) {
 		if (i != from)
 			(void) fprintf(fp, "\n");
-		if (!dolist(varlist, (int)assoc_cache[i].assid,
+		if (!dolist(g_varlist, (int)assoc_cache[i].assid,
 				CTL_OP_READVAR, TYPE_PEER, fp))
 			return;
 	}
@@ -840,7 +857,7 @@ mreadvar(
 	for (i = from; i <= to; i++) {
 		if (i != from)
 			(void) fprintf(fp, "\n");
-		if (!dolist(varlist, (int)assoc_cache[i].assid,
+		if (!dolist(g_varlist, (int)assoc_cache[i].assid,
 				CTL_OP_READVAR, TYPE_PEER, fp))
 			break;
 	}
@@ -1246,7 +1263,7 @@ pstatus(
 	}
 
 	(void) fprintf(fp,"associd=%d ",associd);
-	printvars(dsize, datap, (int)rstatus, TYPE_PEER, fp);
+	printvars(dsize, datap, (int)rstatus, TYPE_PEER, 0, fp);
 }
 
 

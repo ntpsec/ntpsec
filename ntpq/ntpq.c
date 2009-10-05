@@ -289,12 +289,12 @@ static	void	error		(const char *, const char *, const char *);
 static	u_long	getkeyid	(const char *);
 static	void	atoascii	(int, char *, char *);
 static	void	makeascii	(int, char *, FILE *);
-static	void	rawprint	(int, int, char *, int, FILE *);
+static	void	cookedprint	(int, int, char *, int, int, FILE *);
+static	void	rawprint	(int, int, char *, int, int, FILE *);
 static	void	startoutput	(void);
 static	void	output		(FILE *, char *, char *);
 static	void	endoutput	(FILE *);
 static	void	outputarr	(FILE *, char *, int, l_fp *);
-static	void	cookedprint	(int, int, char *, int, FILE *);
 #ifdef QSORT_USES_VOID_P
 static	int	assoccmp	(const void *, const void *);
 #else
@@ -536,27 +536,20 @@ ntpqmain(
 	 * handled by ntpq_custom_opt_handler().
 	 */
 
-	switch (WHICH_IDX_IPV4) {
-	    case INDEX_OPT_IPV4:
-		ai_fam_templ = AF_INET;
-		break;
-	    case INDEX_OPT_IPV6:
-		ai_fam_templ = AF_INET6;
-		break;
-	    default:
-		ai_fam_templ = ai_fam_default;
-		break;
-	}
-
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 
-	if (HAVE_OPT(INTERACTIVE)) {
-		interactive = 1;
-	}
+	if (HAVE_OPT(IPV4))
+		ai_fam_templ = AF_INET;
+	else if (HAVE_OPT(IPV6))
+		ai_fam_templ = AF_INET6;
+	else
+		ai_fam_templ = ai_fam_default;
 
-	if (HAVE_OPT(NUMERIC)) {
+	if (HAVE_OPT(INTERACTIVE))
+		interactive = 1;
+
+	if (HAVE_OPT(NUMERIC))
 		showhostnames = 0;
-	}
 
 #if 0
 	while ((c = ntp_getopt(argc, argv, "46c:dinp")) != EOF)
@@ -2908,13 +2901,14 @@ printvars(
 	char *data,
 	int status,
 	int sttype,
+	int quiet,
 	FILE *fp
 	)
 {
 	if (rawmode)
-	    rawprint(sttype, length, data, status, fp);
+	    rawprint(sttype, length, data, status, quiet, fp);
 	else
-	    cookedprint(sttype, length, data, status, fp);
+	    cookedprint(sttype, length, data, status, quiet, fp);
 }
 
 
@@ -2927,6 +2921,7 @@ rawprint(
 	int length,
 	char *data,
 	int status,
+	int quiet,
 	FILE *fp
 	)
 {
@@ -2939,7 +2934,8 @@ rawprint(
 	cp = data;
 	cpend = data + length;
 
-	(void) fprintf(fp, "status=0x%04x,\n", status);
+	if (!quiet)
+		(void) fprintf(fp, "status=0x%04x,\n", status);
 
 	while (cp < cpend) {
 		if (*cp == '\r') {
@@ -2948,13 +2944,12 @@ rawprint(
 			 * \n, supress this, else pretty print it.  Otherwise
 			 * just output the character.
 			 */
-			if (cp == (cpend-1) || *(cp+1) != '\n')
+			if (cp == (cpend - 1) || *(cp + 1) != '\n')
 			    makeascii(1, cp, fp);
-		} else if (isspace((int)*cp) || isprint((int)*cp)) {
+		} else if (isspace(*cp) || isprint(*cp))
 			putc(*cp, fp);
-		} else {
+		else
 			makeascii(1, cp, fp);
-		}
 		cp++;
 	}
 }
@@ -3119,6 +3114,7 @@ cookedprint(
 	int length,
 	char *data,
 	int status,
+	int quiet,
 	FILE *fp
 	)
 {
@@ -3150,8 +3146,9 @@ cookedprint(
 		return;
 	}
 
-	(void) fprintf(fp, "status=%04x %s,\n", status,
-		       statustoa(datatype, status));
+	if (!quiet)
+		(void) fprintf(fp, "status=%04x %s,\n", status,
+			       statustoa(datatype, status));
 
 	startoutput();
 	while (nextvar(&length, &data, &name, &value)) {

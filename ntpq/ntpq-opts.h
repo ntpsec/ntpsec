@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  October  4, 2009 at 07:42:09 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  Monday October  5, 2009 at 06:18:35 AM UTC
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpq copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntpq copyright 1970-2009 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -60,14 +60,15 @@ typedef enum {
     INDEX_OPT_PEERS            =  5,
     INDEX_OPT_INTERACTIVE      =  6,
     INDEX_OPT_NUMERIC          =  7,
-    INDEX_OPT_VERSION          =  8,
-    INDEX_OPT_HELP             =  9,
-    INDEX_OPT_MORE_HELP        = 10,
-    INDEX_OPT_SAVE_OPTS        = 11,
-    INDEX_OPT_LOAD_OPTS        = 12
+    INDEX_OPT_OLD_RV           =  8,
+    INDEX_OPT_VERSION          =  9,
+    INDEX_OPT_HELP             = 10,
+    INDEX_OPT_MORE_HELP        = 11,
+    INDEX_OPT_SAVE_OPTS        = 12,
+    INDEX_OPT_LOAD_OPTS        = 13
 } teOptIndex;
 
-#define OPTION_CT    13
+#define OPTION_CT    14
 #define NTPQ_VERSION       "4.2.5p226"
 #define NTPQ_FULL_VERSION  "ntpq - standard NTP query program - Ver. 4.2.5p226"
 
@@ -128,6 +129,10 @@ typedef enum {
 #  warning undefining NUMERIC due to option name conflict
 #  undef   NUMERIC
 # endif
+# ifdef    OLD_RV
+#  warning undefining OLD_RV due to option name conflict
+#  undef   OLD_RV
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
@@ -137,6 +142,7 @@ typedef enum {
 # undef PEERS
 # undef INTERACTIVE
 # undef NUMERIC
+# undef OLD_RV
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -144,8 +150,6 @@ typedef enum {
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_IPV4           '4'
-#define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
-#define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_COMMAND        'c'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
@@ -153,6 +157,7 @@ typedef enum {
 #define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_INTERACTIVE    'i'
 #define VALUE_OPT_NUMERIC        'n'
+#define VALUE_OPT_OLD_RV         8
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION

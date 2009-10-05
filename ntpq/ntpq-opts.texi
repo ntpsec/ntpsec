@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  October  4, 2009 at 07:42:13 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  Monday October  5, 2009 at 06:18:38 AM UTC
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -34,6 +34,7 @@ This software is released under a specialized copyright license.
 * ntpq ipv4::                   ipv4 option (-4)
 * ntpq ipv6::                   ipv6 option (-6)
 * ntpq numeric::                numeric option (-n)
+* ntpq old-rv::                 old-rv option
 * ntpq peers::                  peers option (-p)
 * ntpq set-debug-level::        set-debug-level option (-D)
 @end menu
@@ -78,8 +79,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /users/stenn/.ntprc
- - reading file /deacon/backroom/snaps/ntp-dev/ntpq/.ntprc
+ - reading file /m/pogo/users/hart/.ntprc
+ - reading file /m/pogo/users/hart/ntp-dev-1332/ntpq/.ntprc
  - examining environment variables named NTPQ_*
 
 The
@@ -104,7 +105,8 @@ This is the ``force ipv4 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv6.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -119,7 +121,8 @@ This is the ``force ipv6 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv4.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -209,3 +212,16 @@ to the standard output and commands read from the standard input.
 This is the ``numeric host addresses'' option.
 Output all host addresses in dotted-quad numeric format rather than
 converting to the canonical host names. 
+
+@node ntpq old-rv
+@subsection old-rv option
+@cindex ntpq-old-rv
+
+This is the ``always output status line with readvar'' option.
+By default, ntpq now suppresses the associd=... line that
+precedes the output of "readvar" (alias "rv") when a single
+variable is requested, such as ntpq -c "rv 0 offset".  This
+option causes ntpq to include both lines of output for a
+single-variable readvar.  Using an environment variable to
+preset this option in a script will enable both older and
+newer ntpq to behave identically in this regard.
