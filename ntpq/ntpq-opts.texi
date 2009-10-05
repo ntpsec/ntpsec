@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  Monday October  5, 2009 at 06:18:38 AM UTC
+# It has been AutoGen-ed  October  5, 2009 at 07:38:17 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -79,8 +79,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /m/pogo/users/hart/.ntprc
- - reading file /m/pogo/users/hart/ntp-dev-1332/ntpq/.ntprc
+ - reading file /users/stenn/.ntprc
+ - reading file /deacon/backroom/snaps/ntp-dev/ntpq/.ntprc
  - examining environment variables named NTPQ_*
 
 The

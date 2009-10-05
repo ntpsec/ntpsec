@@ -1,3 +1,4 @@
+(4.2.5p227) 2009/10/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1135] :config fails with "Server disallowed request"
 * [Bug 1330] disallow interface/nic rules when --novirtualips or
   --interface are used.
