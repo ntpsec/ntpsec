@@ -1086,14 +1086,6 @@ create_wildcards(
 
 /*
  * add_nic_rule() -- insert a rule entry at the head of nic_rule_list.
- *
- * If this is the first rule (whether from --interface/-I or interface
- * or nic in ntp.conf), first add an implicit first rule to ignore all
- * interfaces.  This, combined with interface_action()'s default in the
- * case of no matching rules (ACTION_LISTEN) implements the traditional
- * default behavior lacking interface configuration of either form
- * while also treating a solitary "nic listen eth0" in ntp.conf as
- * implying all others are ignored, just as -I eth0 does.
  */
 void
 add_nic_rule(
@@ -1105,15 +1097,6 @@ add_nic_rule(
 {
 	nic_rule *	rule;
 	isc_boolean_t	is_ip;
-
-	if (NULL == nic_rule_list) {
-		rule = emalloc(sizeof(*rule));
-		memset(rule, 0, sizeof(*rule));
-		rule->match_type = MATCH_ALL;
-		rule->action = ACTION_IGNORE;
-		rule->prefixlen = -1;
-		LINK_SLIST(nic_rule_list, rule, next);
-	}
 
 	rule = emalloc(sizeof(*rule));
 	memset(rule, 0, sizeof(*rule));
@@ -1196,13 +1179,6 @@ interface_action(
 	} else
 		isloopback = 0;
 
-	if (!listen_to_virtual_ips && if_name != NULL
-	    && (strchr(if_name, ':') != NULL)) {
-
-		DPRINTF(4, ("virtual ip - ignore\n"));
-		return ACTION_IGNORE;
-	}
-
 	/*
 	 * Find any matching NIC rule from --interface / -I or ntp.conf
 	 * interface/nic rules.
@@ -1274,8 +1250,45 @@ interface_action(
 		}
 	}
 
-	DPRINTF(4, ("listen\n"));
-	return ACTION_LISTEN;
+	/*
+	 * Unless explicitly disabled such as with "nic ignore ::1"
+	 * listen on loopback addresses.  Since ntpq and ntpdc query
+	 * "localhost" by default, which typically resolves to ::1 and
+	 * 127.0.0.1, it's useful to default to listening on both.
+	 */
+	if (isloopback) {
+		DPRINTF(4, ("default loopback listen\n"));
+		return ACTION_LISTEN;
+	}
+
+	/*
+	 * Check for "virtual IP" (colon in the interface name) after
+	 * the rules so that "ntpd --interface eth0:1 -novirtualips"
+	 * does indeed listen on eth0:1's addresses.
+	 */
+	if (!listen_to_virtual_ips && if_name != NULL
+	    && (strchr(if_name, ':') != NULL)) {
+
+		DPRINTF(4, ("virtual ip - ignore\n"));
+		return ACTION_IGNORE;
+	}
+
+	/*
+	 * If there are no --interface/-I command-line options and no
+	 * interface/nic rules in ntp.conf, the default action is to
+	 * listen.  In the presence of rules from either, the default
+	 * is to ignore.  This implements ntpd's traditional listen-
+	 * every default with no interface listen configuration, and
+	 * ensures a single -I eth0 or "nic listen eth0" means do not
+	 * listen on any other addresses.
+	 */
+	if (NULL == nic_rule_list) {
+		DPRINTF(4, ("default listen\n"));
+		return ACTION_LISTEN;
+	}
+
+	DPRINTF(4, ("implicit ignore\n"));
+	return ACTION_IGNORE;
 }
 
 
