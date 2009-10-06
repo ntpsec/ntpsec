@@ -51,7 +51,7 @@ DIST_SUBDIRS=		\
 	util		\
 	$(NULL)
 
-DISTCHECK_CONFIGURE_FLAGS=	--with-arlib --enable-local-libopts
+DISTCHECK_CONFIGURE_FLAGS=	-C --with-arlib --enable-local-libopts
 
 EXTRA_DIST =		\
 	COPYRIGHT	\
