@@ -1,3 +1,5 @@
+* Reclaim syntax tree memory after application in ntpd built with
+  configure --disable-saveconfig.
 * [Bug 1135] ntpq uses sizeof(u_long) where sizeof(u_int32) is meant.
 * [Bug 1333] ntpd --interface precedence over --novirtualips lost.
 (4.2.5p227) 2009/10/05 Released by Harlan Stenn <stenn@ntp.org>

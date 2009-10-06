@@ -41,6 +41,16 @@
 #endif	/* HAVE_IPTOS_SUPPORT */
 
 
+/*
+ * We keep config trees around for possible saveconfig use.  When
+ * built with configure --disable-saveconfig, and when built with
+ * debugging enabled, include the free_config_*() routines.  In the
+ * DEBUG case, they are used in an atexit() cleanup routine to make
+ * postmortem leak check reports more interesting.
+ */
+#if !defined(FREE_CFG_T) && (!defined(SAVECONFIG) || defined(DEBUG))
+#define FREE_CFG_T
+#endif
 
 /* Limits */
 #define MAXLINE 1024

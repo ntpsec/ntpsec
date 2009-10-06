@@ -224,7 +224,7 @@ int *p_bcXXXX_enabled = &bc_list[0].enabled;
 static void apply_enable_disable(queue *q, int enable);
 static void init_syntax_tree(struct config_tree *);
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void free_auth_node(struct config_tree *);
 
 static void free_config_other_modes(struct config_tree *);
@@ -251,7 +251,7 @@ static void free_config_sim(struct config_tree *);
 
        void free_all_config_trees(void);	/* atexit() */
 static void free_config_tree(struct config_tree *ptree);
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
@@ -323,7 +323,7 @@ static void do_resolve_internal(void);
  * ----------------------------
  */
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_auth_node(
 	struct config_tree *ptree
@@ -380,7 +380,7 @@ init_syntax_tree(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 void
 free_all_config_trees(void)
 {
@@ -465,7 +465,7 @@ free_config_tree(
 	_CrtCheckMemory();
 #endif
 }
-#endif /* DEBUG */
+#endif /* FREE_CFG_T */
 
 
 #ifdef SAVECONFIG
@@ -1692,7 +1692,7 @@ config_other_modes(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_other_modes(
 	struct config_tree *ptree
@@ -1706,7 +1706,7 @@ free_config_other_modes(
 	while (NULL != (addr_node = dequeue(ptree->multicastclient)))
 		destroy_address_node(addr_node);
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -1842,7 +1842,7 @@ config_auth(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_auth(
 	struct config_tree *ptree
@@ -1860,7 +1860,7 @@ free_config_auth(
 
 	DESTROY_QUEUE(ptree->auth.trusted_key_list);
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -1926,7 +1926,7 @@ config_tos(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_tos(
 	struct config_tree *ptree
@@ -1939,7 +1939,7 @@ free_config_tos(
 		free_node(tos);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2084,7 +2084,7 @@ config_monitor(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_monitor(
 	struct config_tree *ptree
@@ -2110,7 +2110,7 @@ free_config_monitor(
 		free_node(my_node);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2297,7 +2297,7 @@ config_access(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_access(
 	struct config_tree *ptree
@@ -2317,7 +2317,7 @@ free_config_access(
 		destroy_restrict_node(my_node);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2371,7 +2371,7 @@ config_tinker(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_tinker(
 	struct config_tree *ptree
@@ -2382,7 +2382,7 @@ free_config_tinker(
 	while (NULL != (tinker = dequeue(ptree->tinker)))
 		free_node(tinker);
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 /*
@@ -2515,7 +2515,7 @@ config_nic_rules(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_nic_rules(
 	struct config_tree *ptree
@@ -2530,7 +2530,7 @@ free_config_nic_rules(
 	}
 	DESTROY_QUEUE(ptree->nic_rules);
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2618,7 +2618,7 @@ config_system_opts(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_system_opts(
 	struct config_tree *ptree
@@ -2632,7 +2632,7 @@ free_config_system_opts(
 	while (NULL != (flag = dequeue(ptree->disable_opts)))
 		free_node(flag);
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2661,7 +2661,7 @@ config_logconfig(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_logconfig(
 	struct config_tree *ptree
@@ -2674,7 +2674,7 @@ free_config_logconfig(
 		free_node(my_logconfig);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2701,7 +2701,7 @@ config_phone(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_phone(
 	struct config_tree *ptree
@@ -2714,7 +2714,7 @@ free_config_phone(
 		free_node(s);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2774,7 +2774,7 @@ config_qos(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_qos(
 	struct config_tree *ptree
@@ -2787,7 +2787,7 @@ free_config_qos(
 		free_node(my_qosconfig);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2818,7 +2818,7 @@ config_setvar(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_setvar(
 	struct config_tree *ptree
@@ -2832,7 +2832,7 @@ free_config_setvar(
 		free_node(my_node);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2858,7 +2858,7 @@ config_ttl(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_ttl(
 	struct config_tree *ptree
@@ -2866,7 +2866,7 @@ free_config_ttl(
 {
 	/* coming DESTROY_QUEUE(ptree->ttl) is enough */
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -2960,7 +2960,7 @@ config_trap(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_trap(
 	struct config_tree *ptree
@@ -2984,7 +2984,7 @@ free_config_trap(
 		free_node(curr_trap);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -3092,7 +3092,7 @@ config_fudge(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_fudge(
 	struct config_tree *ptree
@@ -3116,7 +3116,7 @@ free_config_fudge(
 		free_node(curr_fudge);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -3213,7 +3213,7 @@ config_vars(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_vars(
 	struct config_tree *ptree
@@ -3233,7 +3233,7 @@ free_config_vars(
 		free_node(curr_var);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 /* Define a function to check if a resolved address is sane.
@@ -3440,7 +3440,7 @@ config_peers(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_peers(
 	struct config_tree *ptree
@@ -3454,7 +3454,7 @@ free_config_peers(
 		free_node(curr_peer);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 static void
@@ -3548,7 +3548,7 @@ config_unpeers(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_unpeers(
 	struct config_tree *ptree
@@ -3561,7 +3561,7 @@ free_config_unpeers(
 		free_node(curr_unpeer);
 	}
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 
 
 #ifdef SIM
@@ -3634,7 +3634,7 @@ config_sim(
 }
 
 
-#ifdef DEBUG
+#ifdef FREE_CFG_T
 static void
 free_config_sim(
 	struct config_tree *ptree
@@ -3650,7 +3650,7 @@ free_config_sim(
 	free_node(ptree->sim_details);
 	ptree->sim_details = NULL;
 }
-#endif	/* DEBUG */
+#endif	/* FREE_CFG_T */
 #endif	/* SIM */
 
 
@@ -3879,6 +3879,9 @@ void
 save_and_apply_config_tree(void)
 {
 	struct config_tree *ptree;
+#ifndef SAVECONFIG
+	struct config_tree *punlinked;
+#endif
 
 	/*
 	 * Keep all the configuration trees applied since startup in
@@ -3932,6 +3935,17 @@ save_and_apply_config_tree(void)
 	config_ntpd(ptree);
 #else
 	config_ntpdsim(ptree);
+#endif
+
+	/*
+	 * With configure --disable-saveconfig, there's no use keeping
+	 * the config tree around after application, so free it.
+	 */
+#ifndef SAVECONFIG
+	UNLINK_SLIST(punlinked, cfg_tree_history, ptree, link,
+		     struct config_tree);
+	NTP_INSIST(punlinked == ptree);
+	free_config_tree(ptree);
 #endif
 }
 
