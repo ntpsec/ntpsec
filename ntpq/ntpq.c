@@ -48,6 +48,15 @@
 int interactive = 0;		/* set to 1 when we should prompt */
 const char *prompt = "ntpq> ";	/* prompt to ask him about */
 
+/*
+ * use old readvars behavior?  --old-rv processing in ntpq resets
+ * this value based on the presence or absence of --old-rv.  It is
+ * initialized to 1 here to maintain backward compatibility with
+ * libntpq clients such as ntpsnmpd, which are free to reset it as
+ * desired.
+ */
+int	old_rv = 1;
+
 
 /*
  * for get_systime()
@@ -550,6 +559,8 @@ ntpqmain(
 
 	if (HAVE_OPT(NUMERIC))
 		showhostnames = 0;
+
+	old_rv = HAVE_OPT(OLD_RV);
 
 #if 0
 	while ((c = ntp_getopt(argc, argv, "46c:dinp")) != EOF)

@@ -80,6 +80,7 @@ struct ctl_var {
 };
 
 extern int	interactive;	/* are we prompting? */
+extern int	old_rv;		/* use old rv behavior? --old-rv */
 
 extern	void	asciize		(int, char *, FILE *);
 extern	int	getnetnum	(const char *, sockaddr_u *, char *, int);

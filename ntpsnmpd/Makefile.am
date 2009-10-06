@@ -13,7 +13,7 @@ AM_CPPFLAGS= -I$(top_srcdir)/ntpq -I$(top_srcdir)/include \
 	-I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
 	-I$(top_srcdir)/lib/isc/unix/include \
-	@SNMP_CPPFLAGS@ $(LIBOPTS_CFLAGS)
+	$(LIBOPTS_CFLAGS) @SNMP_CPPFLAGS@
 
 AM_CFLAGS=	@SNMP_CFLAGS@
 EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\

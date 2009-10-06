@@ -512,7 +512,7 @@ dolist(
 	 * if we're asking for specific variables don't include the
 	 * status header line in the output.
 	 */
-	if (HAVE_OPT( OLD_RV ))
+	if (old_rv)
 		quiet = 0;
 	else
 		quiet = (vlist->name != NULL);
