@@ -1,3 +1,4 @@
+* [Bug 1135] ntpq uses sizeof(u_long) where sizeof(u_int32) is meant.
 * [Bug 1333] ntpd --interface precedence over --novirtualips lost.
 (4.2.5p227) 2009/10/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1135] :config fails with "Server disallowed request"
@@ -8,7 +9,7 @@
 * Documentation updates from Dave Hart/Dave Mills.
 (4.2.5p226) 2009/10/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1318] Allow multiple -g options on ntpd command line.
-* [Bug 1327] ntpq, ntpdc, ntp-keygen -d and -D should work with configure
+* [Bug 1327] ntpq, ntpdc, ntp-keygen -d & -D should work with configure
   --disable-debugging.
 * Add ntpd --saveconfigquit <filename> option for future build-time
   testing of saveconfig fidelity.

@@ -77,10 +77,14 @@ ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = .version version.c
 CLEANFILES = check-saveconfig compsave.conf
-EXTRA_DIST = ntpd-opts.def ntpdbase-opts.def \
+EXTRA_DIST = \
+	complete.conf		\
+	ntpd-opts.def		\
+	ntpdbase-opts.def	\
 	refclock_msfees.c	\
 	refclock_trak.c		\
-	$(BUILT_SOURCES)
+	$(BUILT_SOURCES)	\
+	$(NULL)
 ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@

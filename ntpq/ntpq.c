@@ -1030,8 +1030,8 @@ getresponse(
 		}
 
 		if (debug >= 3 && shouldbesize > n) {
-			u_long key;
-			u_long *lpkt;
+			u_int32 key;
+			u_int32 *lpkt;
 			int maclen;
 
 			/*
@@ -1046,15 +1046,15 @@ getresponse(
 				printf(
 					"Packet shows signs of authentication (total %d, data %d, mac %d)\n",
 					n, shouldbesize, maclen);
-				lpkt = (u_long *)&rpkt;
+				lpkt = (u_int32 *)&rpkt;
 				printf("%08lx %08lx %08lx %08lx %08lx %08lx\n",
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 3]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 2]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) - 1]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long)]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) + 1]),
-				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_long) + 2]));
-				key = ntohl(lpkt[(n - maclen) / sizeof(u_long)]);
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) - 3]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) - 2]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) - 1]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32)]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) + 1]),
+				       (u_long)ntohl(lpkt[(n - maclen)/sizeof(u_int32) + 2]));
+				key = ntohl(lpkt[(n - maclen) / sizeof(u_int32)]);
 				printf("Authenticated with keyid %lu\n", (u_long)key);
 				if (key != 0 && key != info_auth_keyid) {
 					printf("We don't know that key\n");
@@ -1233,19 +1233,18 @@ sendrequest(
 	qpkt.offset = 0;
 	qpkt.count = htons((u_short)qsize);
 
+	pktsize = CTL_HEADER_LEN;
+
 	/*
-	 * If we have data, copy it in and pad it out to a 64
-	 * bit boundary.
+	 * If we have data, copy and pad it out to a 32-bit boundary.
 	 */
 	if (qsize > 0) {
-		memmove((char *)qpkt.data, qdata, (unsigned)qsize);
-		pktsize = qsize + CTL_HEADER_LEN;
-		while (pktsize & (sizeof(u_long) - 1)) {
+		memcpy(qpkt.data, qdata, (unsigned)qsize);
+		pktsize += qsize;
+		while (pktsize & (sizeof(u_int32) - 1)) {
 			qpkt.data[qsize++] = 0;
 			pktsize++;
 		}
-	} else {
-		pktsize = CTL_HEADER_LEN;
 	}
 
 	/*
