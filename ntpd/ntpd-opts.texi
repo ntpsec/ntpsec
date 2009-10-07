@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  October  6, 2009 at 04:45:18 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  October  7, 2009 at 06:32:30 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -63,7 +63,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p225
+ntpd - NTP daemon program - Ver. 4.2.5p228
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -83,6 +83,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
                                 - may appear multiple times
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
+                                - may appear multiple times
    -I Str interface      Listen on the specified interface or IP
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
@@ -94,6 +95,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -P Num priority       Process priority
    -q no  quit           Set the time and quit
    -r Str propagationdelay Broadcast/propagation delay
+      Str saveconfigquit Save parsed configuration and quit
    -s Str statsdir       Statistics file location
    -t Str trustedkey     Trusted key number
                                 - may appear multiple times

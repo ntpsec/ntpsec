@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  October  6, 2009 at 04:48:24 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  October  7, 2009 at 06:34:36 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -47,12 +47,15 @@ This is the automatically generated usage text for ntpq:
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.5p225
+ntpq - standard NTP query program - Ver. 4.2.5p228
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
+                                - prohibits these options:
+                                ipv6
    -6 no  ipv6           Force IPv6 DNS name resolution
-                                - an alternate for ipv4
+                                - prohibits these options:
+                                ipv4
    -c Str command        run a command and exit
                                 - may appear multiple times
    -d no  debug-level    Increase output debug message level
@@ -67,6 +70,7 @@ USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
                                 command
                                 peers
    -n no  numeric        numeric host addresses
+      no  old-rv         Always output status line with readvar
       opt version        Output version information and exit
    -? no  help           Display usage information and exit
    -! no  more-help      Extended usage information passed thru pager

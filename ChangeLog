@@ -1,3 +1,4 @@
+(4.2.5p229) 2009/10/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1334] ntpsnmpd undefined reference to `ntpqOptions'.
 * Change ntpsnmpd/Makefile.am include file order to fix FreeBSD build.
 (4.2.5p228) 2009/10/06 Released by Harlan Stenn <stenn@ntp.org>
