@@ -585,6 +585,9 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+
+* [Sec 1331] DoS with mode 7 packets - CVE-2009-3563.
 
 ---
 (4.2.4p7) 2009/05/18 Released by Harlan Stenn <stenn@ntp.org>
