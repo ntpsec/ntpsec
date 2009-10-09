@@ -1163,9 +1163,12 @@ interface_action(
 {
 	nic_rule *rule;
 	int isloopback;
+	int iswildcard;
 
 	DPRINTF(4, ("interface_action: interface %s ",
 		    (if_name != NULL) ? if_name : "wildcard"));
+
+	iswildcard = is_wildcard_netaddr(if_netaddr);
 
 	/*
 	 * Always listen on 127.0.0.1 - required by ntp_intres
@@ -1188,8 +1191,8 @@ interface_action(
 		switch (rule->match_type) {
 
 		case MATCH_ALL:
-			/* loopback excluded from MATCH_ALL */
-			if (isloopback)
+			/* loopback and wildcard excluded from "all" */
+			if (isloopback || iswildcard)
 				break;
 			DPRINTF(4, ("nic all %s\n",
 			    action_text(rule->action)));
@@ -1212,7 +1215,7 @@ interface_action(
 			break;
 
 		case MATCH_WILDCARD:
-			if (is_wildcard_netaddr(if_netaddr)) {
+			if (iswildcard) {
 				DPRINTF(4, ("nic wildcard %s\n",
 				    action_text(rule->action)));
 				return rule->action;
@@ -1259,6 +1262,16 @@ interface_action(
 	if (isloopback) {
 		DPRINTF(4, ("default loopback listen\n"));
 		return ACTION_LISTEN;
+	}
+
+	/*
+	 * Treat wildcard addresses specially.  If there is no explicit
+	 * "nic ... wildcard" or "nic ... 0.0.0.0" or "nic ... ::" rule
+	 * default to drop.
+	 */
+	if (iswildcard) {
+		DPRINTF(4, ("default wildcard drop\n"));
+		return ACTION_DROP;
 	}
 
 	/*
