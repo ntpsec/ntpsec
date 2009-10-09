@@ -1437,8 +1437,8 @@ crypto_verify(
  	if (len < VALUE_LEN)
 		return (XEVNT_LEN);
 
-	if (opcode == (CRYPTO_AUTO | CRYPTO_RESP) &&
-	    peer->cast_flags & MDF_BCLNT) {
+	if (opcode == (CRYPTO_AUTO | CRYPTO_RESP) && (peer->pmode ==
+	    MODE_BROADCAST || (peer->cast_flags & MDF_BCLNT))) {
 		if (ntohl(ep->associd) != peer->assoc)
 			return (XEVNT_ERR);
 	} else {

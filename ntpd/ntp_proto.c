@@ -1287,11 +1287,17 @@ receive(
 	process_packet(peer, pkt, rbufp->recv_length);
 
 	/*
-	 * In interleaved mode update the state variables.
+	 * In interleaved mode update the state variables. Also adjust the
+	 * transmit phase to avoid crossover.
 	 */
 	if (peer->flip != 0) {
 		peer->rec = p_rec;
 		peer->dst = rbufp->recv_time;
+		if (peer->nextdate - current_time < (1 << min(peer->ppoll,
+		    peer->hpoll)) / 2)
+			peer->nextdate++;
+		else
+			peer->nextdate--;
 	}
 }
 
