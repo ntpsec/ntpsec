@@ -1,3 +1,4 @@
+(4.2.5p231-RC) 2009/10/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1335] Broadcast client degraded by wildcard default change.
 (4.2.5p230-RC) 2009/10/09 Released by Harlan Stenn <stenn@ntp.org>
 * Start the 4.2.6 Release Candidate cycle.
