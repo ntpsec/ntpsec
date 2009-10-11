@@ -101,7 +101,7 @@
 extern	int	ntp_getopt	(int, char **, const char *);
 #define getopt ntp_getopt
 #define optarg ntp_optarg
-#endif /* SYS_WINNT */
+#endif	/* SYS_WINNT */
 
 #ifdef OPENSSL
 #include "openssl/bn.h"
@@ -111,6 +111,12 @@ extern	int	ntp_getopt	(int, char **, const char *);
 #include "openssl/pem.h"
 #include "openssl/x509v3.h"
 #include <openssl/objects.h>
+#ifdef SYS_WINNT
+# pragma warning(push)
+# pragma warning(disable: 4152)
+# include <openssl/applink.c>
+# pragma warning(pop)
+#endif /* SYS_WINNT */
 #endif /* OPENSSL */
 
 /*
