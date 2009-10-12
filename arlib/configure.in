@@ -25,28 +25,27 @@ AC_CHECK_TYPE(u_int32_t, ,
 #include <netinet/in.h>])
 
 AC_CACHE_CHECK([for name of NS address list], [ac_cv_var_ns_addr_list],
-	[ans=''
+	[ac_cv_var_ns_addr_list=''
 # Normal
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <resolv.h>], [ return sizeof(_res.nsaddr_list);],
-[ans=nsaddr_list],
+[ac_cv_var_ns_addr_list=nsaddr_list],
 [# Ultrix
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <resolv.h>], [ return sizeof(_res.ns_list);],
-[ans=ns_list])])
-	case "$ans" in
+[ac_cv_var_ns_addr_list=ns_list])])
+	case "$ac_cv_var_ns_addr_list" in
 	 '') AC_MSG_RESULT([???])
 	     AC_MSG_ERROR([Can't find nameserver address list in _res])
 	     ;;
-	esac
-	ac_cv_var_ns_addr_list=$ans])
-AC_DEFINE_UNQUOTED(NS_ADDR_LIST, $ans, [The name of the NS address list in _res])
+	esac])
+AC_DEFINE_UNQUOTED(NS_ADDR_LIST, $ac_cv_var_ns_addr_list, [The name of the NS address list in _res])
 
 # Checks for library functions.
 dnl AC_HEADER_STDC
