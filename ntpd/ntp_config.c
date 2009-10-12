@@ -1948,12 +1948,11 @@ config_monitor(
 	)
 {
 	int *pfilegen_token;
-	char *filegen_string;
+	const char *filegen_string;
+	const char *filegen_file;
 	FILEGEN *filegen;
 	struct filegen_node *my_node;
 	struct attr_val *my_opts;
-
-	char *filegen_file;
 	int filegen_type;
 	int filegen_flag;
 
@@ -3728,10 +3727,7 @@ config_remotely(
 	input_from_file = 0;
 
 	init_syntax_tree(&cfgt);
-	key_scanner = create_keyword_scanner();
 	yyparse();
-	delete_keyword_scanner(key_scanner);
-	key_scanner = NULL;
 	cfgt.source.attr = CONF_SOURCE_NTPQ;
 	cfgt.timestamp = time(NULL);
 	cfgt.source.value.s = estrdup(stoa(remote_addr));
@@ -3839,12 +3835,8 @@ getconfig(
 	yydebug = !!(debug >= 5);
 #endif
 	ip_file = fp[curr_include_level];
-	key_scanner = create_keyword_scanner();
 	yyparse();
 	
-	delete_keyword_scanner(key_scanner);
-	key_scanner = NULL;
-
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
 	cfgt.source.attr = CONF_SOURCE_FILE;	

@@ -58,7 +58,8 @@ vphack_after:
 		)
 
 BUILT_SOURCES=	$(VPHACK) ntp_parser.c ntp_parser.h $(VPHACK_AFTER) \
-	ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi ntpd-opts.menu
+	ntp_keyword.h ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi \
+	ntpd-opts.menu
 
 man_MANS=	ntpd.1
 
@@ -71,16 +72,18 @@ man_MANS=	ntpd.1
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
+keyword_gen_LDADD = ../libntp/libntp.a
 ntpd_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntpsim.a
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
-DISTCLEANFILES = .version version.c
-CLEANFILES = check-saveconfig compsave.conf
+DISTCLEANFILES = keyword-gen .version version.c
+CLEANFILES = check-saveconfig compsave.conf ntp_keyword.out
 EXTRA_DIST = \
 	complete.conf		\
 	ntpd-opts.def		\
 	ntpdbase-opts.def	\
+	ntp_keyword.h		\
 	refclock_msfees.c	\
 	refclock_trak.c		\
 	$(BUILT_SOURCES)	\
@@ -88,7 +91,7 @@ EXTRA_DIST = \
 ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
-EXTRA_PROGRAMS = check_y2k ntpdsim
+EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
 run_ag=		cd $(srcdir) && autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
@@ -175,6 +178,16 @@ libntpd_a_SOURCES =		\
 	refclock_wwvb.c		\
 	refclock_zyfer.c	\
 	$(NULL)
+
+ntp_keyword.out: keyword-gen
+	./keyword-gen $(srcdir)/ntp_parser.h > $@
+	grep -F -v diff_ignore_line < $(srcdir)/ntp_keyword.h > cmp1
+	grep -F -v diff_ignore_line < $@ > cmp2
+	cmp cmp1 cmp2 > /dev/null || cp $@ $(srcdir)/ntp_keyword.h
+	rm cmp1 cmp2
+
+$(srcdir)/ntp_keyword.h: ntp_keyword.out
+	echo $(srcdir)/ntp_keyword.h is unchanged > /dev/null
 
 $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
 $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)

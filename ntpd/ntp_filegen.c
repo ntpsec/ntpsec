@@ -45,8 +45,8 @@
 #define SUFFIX_SEP '.'
 
 static	void	filegen_open	(FILEGEN *, u_long);
-static	int	valid_fileref	(char *, char *);
-static	void	filegen_init	(char *, const char *, FILEGEN *);
+static	int	valid_fileref	(const char *, const char *);
+static	void	filegen_init	(const char *, const char *, FILEGEN *);
 #ifdef	DEBUG
 static	void	filegen_uninit		(FILEGEN *);
 #endif	/* DEBUG */
@@ -58,15 +58,14 @@ static	void	filegen_uninit		(FILEGEN *);
 
 static void
 filegen_init(
-	char *		prefix,
+	const char *	prefix,
 	const char *	basename,
 	FILEGEN *	fgp
 	)
 {
 	fgp->fp       = NULL;
 	fgp->prefix   = prefix;		/* Yes, this is TOTALLY lame! */
-	fgp->basename = emalloc(strlen(basename) + 1);
-	strcpy(fgp->basename, basename);
+	fgp->basename = estrdup(basename);
 	fgp->id       = 0;
 	fgp->type     = FILEGEN_DAY;
 	fgp->flag     = FGEN_FLAG_LINK; /* not yet enabled !!*/
@@ -410,7 +409,7 @@ filegen_setup(
 void
 filegen_config(
 	FILEGEN *	gen,
-	char *		basename,
+	const char *	basename,
 	u_int		type,
 	u_int		flag
 	)
@@ -421,8 +420,7 @@ filegen_config(
 	/*
 	 * if nothing would be changed...
 	 */
-	if ((basename == gen->basename || strcmp(basename, gen->basename) == 0)
-	    && type == gen->type
+	if ((strcmp(basename, gen->basename) == 0) && type == gen->type
 	    && flag == gen->flag)
 		return;
   
@@ -448,7 +446,7 @@ filegen_config(
 		    gen->type, type,
 		    gen->flag, flag));
 
-	if (gen->basename != basename || strcmp(gen->basename, basename) != 0) {
+	if (strcmp(gen->basename, basename) != 0) {
 		octets = strlen(basename) + 1;
 		gen->basename = erealloc(gen->basename, octets);
 		memcpy(gen->basename, basename, octets);
@@ -477,8 +475,8 @@ filegen_config(
  */
 static int
 valid_fileref(
-	char *	prefix,
-	char *	basename
+	const char *	prefix,
+	const char *	basename
 	)
 {
 	/*
@@ -494,7 +492,7 @@ valid_fileref(
 	 *		has to be ensured by other means
 	 * (however, it would be possible to perform some checks here...)
 	 */
-	register char *p = basename;
+	register const char *p = basename;
   
 	/*
 	 * Just to catch, dumb errors opening up the world...
@@ -528,7 +526,7 @@ static struct filegen_entry {
 
 FILEGEN *
 filegen_get(
-	char *	name
+	const char *	name
 	)
 {
 	struct filegen_entry *f = filegen_registry;
@@ -548,7 +546,7 @@ filegen_get(
 
 void
 filegen_register(
-	char *		prefix,
+	const char *	prefix,
 	const char *	name,
 	FILEGEN *	filegen
 	)
