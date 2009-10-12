@@ -291,10 +291,7 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 #define STDERR_FILENO	_fileno(stderr)
 
 /* Point to a local version for error string handling */
-#define CRT_strerror(e)	strerror(e)
 #define	strerror(e)	ntp_strerror(e)
-extern char *		ntp_strerror(int);
-
 
 # define MCAST				/* Enable Multicast Support */
 # define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */

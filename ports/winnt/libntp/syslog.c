@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <syslog.h>
 
+#include <isc/strerror.h>
+
 #include "messages.h"
 
 static HANDLE hAppLog = NULL;
@@ -197,10 +199,9 @@ NTReportError(const char *name, const char *str) {
 
 /*
  * ntp_strerror() - provide strerror()-compatible wrapper for libisc's
- *		    NTstrerror(), which knows about Windows as well as
+ *		    isc__strerror(), which knows about Windows as well as
  *		    C runtime error messages.
  */
-extern char *NTstrerror(int err, BOOL *bfreebuf);
 
 char *
 ntp_strerror(
@@ -208,15 +209,8 @@ ntp_strerror(
 	)
 {
 	static char msgbuf[128];
-	char *	pmsg;
-	BOOL	freep;
 
-	pmsg = NTstrerror(code, &freep);
-
-	strncpy(msgbuf, pmsg, sizeof(msgbuf));
-	msgbuf[sizeof(msgbuf) - 1] = '\0';
-	if (freep)
-		LocalFree(pmsg);
+	isc__strerror(code, msgbuf, sizeof(msgbuf));
 
 	return msgbuf;
 }
