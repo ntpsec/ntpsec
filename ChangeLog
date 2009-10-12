@@ -1,3 +1,4 @@
+* [Bug 1337] cast address pointer to void *
 * [Bug 1337] fix incorrect args to setsockopt(fd, IP_MULTICAST_IF,...)
 (4.2.5p231-RC) 2009/10/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1335] Broadcast client degraded by wildcard default change.
