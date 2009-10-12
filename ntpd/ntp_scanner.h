@@ -8,6 +8,9 @@
  * Copyright (c) 2006
  */
 
+#ifndef NTP_SCANNER_H
+#define NTP_SCANNER_H
+
 /*
  * ntp.conf syntax is slightly irregular in that some tokens such as
  * hostnames do not require quoting even if they might otherwise be
@@ -39,13 +42,18 @@ typedef enum {
  * ----------
  */
 
-/* Define a structure to hold a (keyword, token) pair */
-struct key_tok {
-	char *	key;		/* Keyword */
-	int	token;		/* Associated Token */
-	follby	followedby;	/* nonzero indicates the next token
-				   should be a string */
-};
+/* Define a structure to hold the FSA for the keywords.
+ * The structure is actually a trie
+ */
+
+typedef struct scan_state_tag {
+	char	ch;		/* Character this state matches on */
+	char	followedby;	/* Forces next token(s) to T_String */
+	u_short	finishes_token;	/* nonzero ID if last keyword char */
+	u_short	match_next_s;	/* next state to check matching ch */
+	u_short	other_next_s;	/* next state to check if not ch */
+} scan_state;
+
 
 /* Structure to hold a filename, file pointer and positional info */
 struct FILE_INFO {
@@ -85,14 +93,8 @@ extern struct FILE_INFO *fp[];
 /* VARIOUS SUBROUTINE DECLARATIONS
  * -------------------------------
  */
-extern char *	keyword(int token);
-extern char *	quote_if_needed(char *str);
-struct state *	create_states(char *text, 
-			      int token, 
-			      follby followedby,
-			      struct state *pre_state);
-struct state *	create_keyword_scanner(void);
-void delete_keyword_scanner(struct state *my_key_scanner);
+extern const char *keyword(int token);
+extern char *quote_if_needed(char *str);
 int yylex(void);
 
 struct FILE_INFO *F_OPEN(const char *path, const char *mode);
@@ -100,5 +102,6 @@ int FGETC(struct FILE_INFO *stream);
 int UNGETC(int ch, struct FILE_INFO *stream);
 int FCLOSE(struct FILE_INFO *stream);
 
-void print_keyword_scanner(struct state *, int);
 void push_back_char(int ch);
+
+#endif	/* NTP_SCANNER_H */
