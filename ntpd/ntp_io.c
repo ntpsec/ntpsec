@@ -2120,7 +2120,7 @@ enable_multicast_if(
 
 	case AF_INET:
 		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_IF,
-			       (char *)NSRCADR(&iface->sin),
+			       &NSRCADR(&iface->sin),
 			       sizeof(NSRCADR(&iface->sin)))) {
 
 			msyslog(LOG_ERR,
