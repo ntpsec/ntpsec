@@ -42,9 +42,12 @@ GetWSAErrorMessage(int errval);
 char *
 NTstrerror(int err, BOOL *bfreebuf);
 
-#ifndef CRT_strerror
-#define CRT_strerror(e)	strerror(e)
-#endif
+/*
+ * ntp ports/winnt/include/config.h #defines strerror() to
+ * ntp_strerror() to handle OS errors as well as CRT.  We need the
+ * CRT strerror() here so #undef.
+ */
+#undef strerror
 
 /*
  * We need to do this this way for profiled locks.
@@ -126,7 +129,7 @@ NTstrerror(int errval, BOOL *bfreebuf) {
 			return (retmsg);
 	}
 
-	retmsg = CRT_strerror(errval);
+	retmsg = strerror(errval);
 
 	/*
 	 * If it's not one of the standard Unix error codes,
