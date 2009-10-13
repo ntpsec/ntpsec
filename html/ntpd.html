@@ -105,10 +105,14 @@
 			<dd>Normally, <tt>ntpd</tt> exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that, <tt>ntpd</tt> will exit with a message to the system log. This option can be used with the <tt>-q</tt> and <tt>-x</tt> options. See the <tt>tinker</tt> command for other options.
 			<dt><tt>-i <i>jaildir</i></tt>
 			<dd>Chroot the server to the directory <i><tt>jaildir</tt></i>. This option also implies that the server attempts to drop root privileges at startup (otherwise, chroot gives very little additional security), and it is only available if the OS supports to run the server without full root privileges. You may need to also specify a <tt>-u</tt> option.
+			<dt id="--interface"><tt>-I [<i>address</i> | <i>interface name</i>]</tt>
+			<dd>Open the network address given, or all the addresses associated with the given interface name.  This option may appear multiple times. This option also implies not opening other addresses, except wildcard and localhost.  This option is deprecated.  Please consider using the configuration file <a href="miscopt.html#interface">interface</a> command, which is more versatile.
 			<dt><tt>-k <i>keyfile</i></tt>
-			<dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt>  command.<dt><tt>-l <i>logfile</i></tt>
-			<dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt>  command.<dt><tt>-L</tt>
-			<dd>Do not listen to virtual IPs. The default is to listen.
+			<dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt>  command.
+			<dt><tt>-l <i>logfile</i></tt>
+			<dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt>  command.
+			<dt id="--novirtualips"><tt>-L</tt>
+			<dd>Do not listen to virtual interfaces, defined as those with names containing a colon. This option is deprecated.  Please consider using the configuration file <a href="miscopt.html#interface">interface</a> command, which is more versatile.
 			<dt><tt>-M</tt>
 			<dd>Raise scheduler precision to its maximum (1 msec) using timeBeginPeriod.&nbsp; (Windows only)
 			<dt><tt>-n</tt>

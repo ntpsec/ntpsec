@@ -161,11 +161,16 @@ flag = {
     name      = interface;
     value     = I;
     arg-type  = string;
-    descrip   = "Listen on the specified interface or IP";
+    descrip   = "Listen on an interface name or address";
     max       = NOLIMIT;
     arg-name  = iface;
     stack-arg;
     doc = <<-  _EndOfDoc_
+	Open the network address given, or all the addresses associated with the
+	given interface name.  This option may appear multiple times.  This option
+	also implies not opening other addresses, except wildcard and localhost.
+	This option is deprecated. Please consider using the configuration file
+	interface command, which is more versatile. 
 	_EndOfDoc_;
 };
 
@@ -201,9 +206,12 @@ flag = {
 flag = {
     name      = novirtualips;
     value     = L;
-    descrip   = "Do not listen to virtual IPs";
+    descrip   = "Do not listen to virtual interfaces";
     doc = <<-  _EndOfDoc_
-	Do not listen to virtual IPs. The default is to listen.
+	Do not listen to virtual interfaces, defined as those with
+	names containing a colon.  This option is deprecated.  Please
+	consider using the configuration file interface command, which
+	is more versatile.
 	_EndOfDoc_;
 };
 
@@ -213,7 +221,9 @@ flag = {
     value     = M;
     descrip   = "Modify Multimedia Timer (Windows only)";
     doc = <<-  _EndOfDoc_
-	Set the Windows Multimedia Timer to highest resolution.
+	Set the Windows Multimedia Timer to highest resolution.  This
+	ensures the resolution does not change while ntpd is running,
+	avoiding timekeeping glitches associated with changes.
 	_EndOfDoc_;
 };
 
