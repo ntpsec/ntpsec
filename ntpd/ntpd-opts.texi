@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  October 10, 2009 at 06:32:19 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  October 14, 2009 at 04:11:30 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -297,7 +297,7 @@ option.
 @subsection interface option (-I)
 @cindex ntpd-interface
 
-This is the ``listen on the specified interface or ip'' option.
+This is the ``listen on an interface name or address'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -305,7 +305,11 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-
+Open the network address given, or all the addresses associated with the
+given interface name.  This option may appear multiple times.  This option
+also implies not opening other addresses, except wildcard and localhost.
+This option is deprecated. Please consider using the configuration file
+interface command, which is more versatile. 
 
 @node ntpd keyfile
 @subsection keyfile option (-k)
@@ -334,8 +338,11 @@ configuration file directive.
 @subsection novirtualips option (-L)
 @cindex ntpd-novirtualips
 
-This is the ``do not listen to virtual ips'' option.
-Do not listen to virtual IPs. The default is to listen.
+This is the ``do not listen to virtual interfaces'' option.
+Do not listen to virtual interfaces, defined as those with
+names containing a colon.  This option is deprecated.  Please
+consider using the configuration file interface command, which
+is more versatile.
 
 @node ntpd modifymmtimer
 @subsection modifymmtimer option (-M)
@@ -349,7 +356,9 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{SYS_WINNT} during the compilation.
 @end itemize
 
-Set the Windows Multimedia Timer to highest resolution.
+Set the Windows Multimedia Timer to highest resolution.  This
+ensures the resolution does not change while ntpd is running,
+avoiding timekeeping glitches associated with changes.
 
 @node ntpd nofork
 @subsection nofork option (-n)

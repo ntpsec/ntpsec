@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  October 10, 2009 at 06:32:16 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  October 14, 2009 at 04:11:28 AM by AutoGen 5.9.9pre5
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -207,7 +207,7 @@ tSCC    zJaildir_Name[]            = "jaildir";
  *  Interface option description:
  */
 tSCC    zInterfaceText[] =
-        "Listen on the specified interface or IP";
+        "Listen on an interface name or address";
 tSCC    zInterface_NAME[]          = "INTERFACE";
 tSCC    zInterface_Name[]          = "interface";
 #define INTERFACE_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
@@ -237,7 +237,7 @@ tSCC    zLogfile_Name[]            = "logfile";
  *  Novirtualips option description:
  */
 tSCC    zNovirtualipsText[] =
-        "Do not listen to virtual IPs";
+        "Do not listen to virtual interfaces";
 tSCC    zNovirtualips_NAME[]       = "NOVIRTUALIPS";
 tSCC    zNovirtualips_Name[]       = "novirtualips";
 #define NOVIRTUALIPS_FLAGS       (OPTST_DISABLED)
@@ -949,7 +949,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPD";
 tSCC   zUsageTitle[] =
-"ntpd - NTP daemon program - Ver. 4.2.5p231-RC\n\
+"ntpd - NTP daemon program - Ver. 4.2.5p232-RC\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 #define zRcName     NULL
 #define apzHomeList NULL

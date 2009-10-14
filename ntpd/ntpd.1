@@ -1,7 +1,7 @@
-.TH NTPD 1 2009-10-10 "( 4.2.5p231-RC)" "Programmer's Manual"
+.TH NTPD 1 2009-10-14 "( 4.2.5p232-RC)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd.1)
 .\"  
-.\"  It has been AutoGen-ed  October 10, 2009 at 06:32:18 AM by AutoGen 5.9.9pre5
+.\"  It has been AutoGen-ed  October 14, 2009 at 04:11:29 AM by AutoGen 5.9.9pre5
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -116,10 +116,14 @@ You may need to also specify a
 option.
 .TP
 .BR \-I " \fIiface\fP, " \--interface "=" \fIiface\fP
-Listen on the specified interface or IP.
+Listen on an interface name or address.
 This option may appear an unlimited number of times.
 .sp
-
+Open the network address given, or all the addresses associated with the
+given interface name.  This option may appear multiple times.  This option
+also implies not opening other addresses, except wildcard and localhost.
+This option is deprecated. Please consider using the configuration file
+interface command, which is more versatile. 
 .TP
 .BR \-k " \fIstring\fP, " \--keyfile "=" \fIstring\fP
 path to symmetric keys.
@@ -141,14 +145,19 @@ logfile logfile
 configuration file directive.
 .TP
 .BR \-L ", " \--novirtualips
-Do not listen to virtual IPs.
+Do not listen to virtual interfaces.
 .sp
-Do not listen to virtual IPs. The default is to listen.
+Do not listen to virtual interfaces, defined as those with
+names containing a colon.  This option is deprecated.  Please
+consider using the configuration file interface command, which
+is more versatile.
 .TP
 .BR \-M ", " \--modifymmtimer
 Modify Multimedia Timer (Windows only).
 .sp
-Set the Windows Multimedia Timer to highest resolution.
+Set the Windows Multimedia Timer to highest resolution.  This
+ensures the resolution does not change while ntpd is running,
+avoiding timekeeping glitches associated with changes.
 .TP
 .BR \-n ", " \--nofork
 Do not fork.

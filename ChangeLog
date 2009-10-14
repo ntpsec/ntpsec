@@ -1,3 +1,4 @@
+(4.2.5p232-RC) 2009/10/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1302] OpenSSL under Windows needs applink support.
 * [Bug 1337] fix incorrect args to setsockopt(fd, IP_MULTICAST_IF,...).
 * [Bug 1339] Fix Windows-only ntp_strerror() infinite recursion.
