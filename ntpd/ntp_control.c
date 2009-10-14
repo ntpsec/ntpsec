@@ -2950,12 +2950,11 @@ report_event(
 
 		peer->last_event = errlast;
 		peer->num_events++;
-#ifdef REFCLOCK
 		if (ISREFCLOCKADR(&peer->srcadr))
 			src = refnumtoa(&peer->srcadr);
 		else
-#endif
 			src = stoa(&peer->srcadr);
+
 		snprintf(statstr, NTP_MAXSTRLEN,
 		    "%s %04x %02x %s", src,
 		    ctlpeerstatus(peer), err, eventstr(err));

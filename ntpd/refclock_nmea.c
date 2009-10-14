@@ -104,6 +104,8 @@ extern int async_write(int, const void *, unsigned int);
 struct nmeaunit {
 #ifdef HAVE_PPSAPI
 	struct refclock_atom atom; /* PPSAPI structure */
+	int	ppsapi_tried;	/* attempt PPSAPI once */
+	int	ppsapi_lit;	/* time_pps_create() worked */
 	int	tcount;		/* timecode sample counter */
 	int	pcount;		/* PPS sample counter */
 #endif /* HAVE_PPSAPI */
@@ -119,7 +121,14 @@ static	void	nmea_shutdown	(int, struct peer *);
 static	void	nmea_receive	(struct recvbuf *);
 static	void	nmea_poll	(int, struct peer *);
 #ifdef HAVE_PPSAPI
+static	void	nmea_control	(int, struct refclockstat *,
+				 struct refclockstat *, struct peer *);
 static  void	nmea_timer	(int, struct peer *);
+#define		NMEA_CONTROL	nmea_control
+#define		NMEA_TIMER	nmea_timer
+#else
+#define		NMEA_CONTROL	noentry
+#define		NMEA_TIMER	noentry
 #endif /* HAVE_PPSAPI */
 static	void	gps_send	(int, const char *, struct peer *);
 static	char *	field_parse	(char *, int);
@@ -132,14 +141,10 @@ struct	refclock refclock_nmea = {
 	nmea_start,		/* start up driver */
 	nmea_shutdown,		/* shut down driver */
 	nmea_poll,		/* transmit poll message */
-	noentry,		/* fudge control */
+	NMEA_CONTROL,		/* fudge control */
 	noentry,		/* initialize driver */
 	noentry,		/* buginfo */
-#ifdef HAVE_PPSAPI
-	nmea_timer,		/* called once per second */
-#else
-	noentry,		/* timer */
-#endif
+	NMEA_TIMER		/* called once per second */
 };
 
 /*
@@ -254,8 +259,8 @@ nmea_start(
 #endif
 	}
 
-	msyslog(LOG_NOTICE, "refclock_nmea: serial %s open at %s bps",
-		device, baudtext);
+	msyslog(LOG_NOTICE, "%s serial %s open at %s bps",
+		refnumtoa(&peer->srcadr), device, baudtext);
 
 	/*
 	 * Allocate and initialize unit structure
@@ -287,15 +292,9 @@ nmea_start(
 
 	gps_send(fd,"$PMOTG,RMC,0000*1D\r\n", peer);
 
-#ifdef HAVE_PPSAPI
-	/*
-	 * Light up the PPSAPI interface.
-	 */
-	return (refclock_ppsapi(fd, &up->atom));
-#else /* HAVE_PPSAPI */
 	return (1);
-#endif /* HAVE_PPSAPI */
 }
+
 
 /*
  * nmea_shutdown - shut down a GPS clock
@@ -318,6 +317,60 @@ nmea_shutdown(
 }
 
 /*
+ * nmea_control - configure fudge params
+ */
+#ifdef HAVE_PPSAPI
+static void
+nmea_control(
+	int unit,
+	struct refclockstat *in_st,
+	struct refclockstat *out_st,
+	struct peer *peer
+	)
+{
+	register struct nmeaunit *up;
+	struct refclockproc *pp;
+	
+	UNUSED_ARG(unit);
+	UNUSED_ARG(in_st);
+	UNUSED_ARG(out_st);
+
+	pp = peer->procptr;
+	up = (struct nmeaunit *)pp->unitptr;
+
+	if (!(CLK_FLAG1 & pp->sloppyclockflag)) {
+		if (!up->ppsapi_tried)
+			return;
+		up->ppsapi_tried = 0;
+		if (!up->ppsapi_lit)
+			return;
+		peer->flags &= ~FLAG_PPS;
+		peer->precision = PRECISION;
+		time_pps_destroy(up->atom.handle);
+		up->atom.handle = 0;
+		up->ppsapi_lit = 0;
+		return;
+	}
+
+	if (up->ppsapi_tried)
+		return;
+	/*
+	 * Light up the PPSAPI interface.
+	 */
+	up->ppsapi_tried = 1;
+	if (refclock_ppsapi(pp->io.fd, &up->atom)) {
+		up->ppsapi_lit = 1;
+		return;
+	}
+
+	NLOG(NLOG_CLOCKINFO)
+		msyslog(LOG_WARNING, "%s flag1 1 but PPSAPI fails",
+			refnumtoa(&peer->srcadr));
+}
+#endif	/* HAVE_PPSAPI */
+
+
+/*
  * nmea_timer - called once per second, fetches PPS
  *		timestamp and stuffs in median filter.
  */
@@ -336,13 +389,11 @@ nmea_timer(
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
 
-	if (pp->sloppyclockflag & CLK_FLAG1) {
-		if (refclock_pps(peer, &up->atom, pp->sloppyclockflag) >
-		    0) {
-			up->pcount++,
-			peer->flags |= FLAG_PPS;
-			peer->precision = PPS_PRECISION;
-		}
+	if (up->ppsapi_lit &&
+	    refclock_pps(peer, &up->atom, pp->sloppyclockflag) > 0) {
+		up->pcount++,
+		peer->flags |= FLAG_PPS;
+		peer->precision = PPS_PRECISION;
 	}
 }
 #endif	/* HAVE_PPSAPI */
