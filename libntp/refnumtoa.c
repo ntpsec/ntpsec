@@ -18,7 +18,7 @@ refnumtoa(
 
 	LIB_GETBUF(buf);
 
-	if (IS_IPV4(num)) {
+	if (ISREFCLOCKADR(num)) {
 		netnum = SRCADR(num);
 		rclock = clockname((int)((u_long)netnum >> 8) & 0xff);
 
@@ -30,10 +30,7 @@ refnumtoa(
 				 ((u_long)netnum >> 8) & 0xff,
 				 (u_long)netnum & 0xff);
 
-	} else
-		strncpy(buf,
-			"refclock address type not implemented, use IPv4 refclock address.",
-			LIB_BUFLENGTH);
+	}
 
 	return buf;
 }

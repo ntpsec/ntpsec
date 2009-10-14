@@ -1,6 +1,7 @@
 * [Bug 1302] OpenSSL under Windows needs applink support.
 * [Bug 1337] fix incorrect args to setsockopt(fd, IP_MULTICAST_IF,...).
 * [Bug 1339] Fix Windows-only ntp_strerror() infinite recursion.
+* [Bug 1341] NMEA driver requires working PPSAPI #ifdef HAVE_PPSAPI.
 * Construct ntpd keyword scanner finite state machine at compile time
   rather than at runtime, shrink entries from 40+ to 8 bytes.
 * Update documentation for ntpq --old-rv, saveconfig, saveconfigdir,
