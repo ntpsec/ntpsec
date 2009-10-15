@@ -944,17 +944,17 @@ remove_interface(
 
 static void
 list_if_listening(
-	struct interface *	interface
+	struct interface *	iface
 	)
 {
-	msyslog(LOG_INFO, "Listening on interface #%d %s, %s#%d %s",
-		interface->ifnum,
-		interface->name,
-		stoa(&interface->sin),
-		SRCPORT(&interface->sin),
-		(interface->ignore_packets) 
-		    ? "Disabled"
-		    : "Enabled");
+	msyslog(LOG_INFO, "%s on %d %s %s UDP %d",
+		(iface->ignore_packets) 
+		    ? "Listen and drop"
+		    : "Listen normally",
+		iface->ifnum,
+		iface->name,
+		stoa(&iface->sin),
+		SRCPORT(&iface->sin));
 }
 
 
@@ -3540,7 +3540,7 @@ findlocalinterface(
 	 * another address is enabled on the same subnet.
 	 * See http://bugs.ntp.org/1184 for more detail.
 	 */
-	if (NULL == iface)
+	if (NULL == iface || iface->ignore_packets)
 		iface = getsamenetinterface(&saddr, flags);
 
 	/* Don't use an interface which will ignore replies */
@@ -3614,7 +3614,7 @@ findlocalcastinterface(
 	 */
 	nif = findlocalinterface(addr, 0, 0);
 
-	if (nif) {
+	if (nif != NULL && !nif->ignore_packets) {
 		DPRINTF(2, ("findlocalcastinterface: kernel recommends interface #%d %s for %s\n",
 			    nif->ifnum, nif->name, stoa(addr)));
 		return nif;
@@ -4143,7 +4143,8 @@ same_network(
 }
 
 /*
- * Find an address in the list on the same network as addr
+ * Find an address in the list on the same network as addr which is not
+ * addr.
  */
 static struct interface *
 find_samenet_addr_in_list(
@@ -4159,8 +4160,10 @@ find_samenet_addr_in_list(
 	     entry != NULL;
 	     entry = entry->link)
 
-		if (same_network(&entry->addr, &entry->interface->mask,
-				 addr)) {
+		if (!SOCK_EQ(addr, &entry->addr)
+		    && same_network(&entry->addr, 
+				    &entry->interface->mask,
+				    addr)) {
 			DPRINTF(4, ("FOUND\n"));
 			return entry->interface;
 		}

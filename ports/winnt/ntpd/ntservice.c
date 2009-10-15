@@ -111,22 +111,34 @@ int main( int argc, char *argv[] )
 	if ( isc_win32os_majorversion() <= 4 )
 		accept_wildcard_if_for_winnt = 1;
 
-	/* Command line users should put -n in the options */
+	/*
+	 * This is a hack in the Windows port of ntpd.  Before the
+	 * portable ntpd libopts processing of the command line, we
+	 * need to know if we're "daemonizing" (attempting to start as
+	 * a service).  There is undoubtedly a better way.  Legitimate
+	 * option combinations are broken by this code , such as:
+	 *   ntpd -nc debug.conf
+	 */
 	while (argv[i]) {
-		if (!_strnicmp(argv[i], "-d", 2) ||
-			!strcmp(argv[i], "-q") ||
-			!strcmp(argv[i], "--help") ||
-			!strcmp(argv[i], "-n")) {
+		if (!_strnicmp(argv[i], "-d", 2)
+		    || !strcmp(argv[i], "--debug_level")
+		    || !strcmp(argv[i], "--set-debug_level")
+		    || !strcmp(argv[i], "-q")
+		    || !strcmp(argv[i], "--quit")
+		    || !strcmp(argv[i], "-?")
+		    || !strcmp(argv[i], "--help")
+		    || !_strnicmp(argv[i], "-n", 2)
+		    || !strcmp(argv[i], "--nofork")
+		    || !strcmp(argv[i], "--saveconfigquit")) {
 			foreground = TRUE;
 			break;
 		}
 		i++;
 	}
 
-	if (foreground) {
-		/* run in console window */
+	if (foreground)			/* run in console window */
 		rc = ntpdmain(argc, argv);
-	} else {
+	else {
 		/* Start up as service */
 
 		SERVICE_TABLE_ENTRY dispatchTable[] = {

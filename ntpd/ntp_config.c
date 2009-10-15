@@ -3422,7 +3422,7 @@ config_peers(
 					curr_peer->host_mode))
 
 					peer_config(&peeraddr,
-					ANY_INTERFACE_CHOOSE(&peeraddr),
+					    NULL,
 					    hmode,
 					    curr_peer->peerversion,
 					    curr_peer->minpoll,

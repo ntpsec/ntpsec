@@ -1,3 +1,5 @@
+* [Bug 1342] ignore|drop one IPv6 address on an interface blocks all
+  addresses on that interface.
 (4.2.5p232-RC) 2009/10/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1302] OpenSSL under Windows needs applink support.
 * [Bug 1337] fix incorrect args to setsockopt(fd, IP_MULTICAST_IF,...).

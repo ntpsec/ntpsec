@@ -107,11 +107,11 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src) {
 }
 
 /*
- * Unlike on POSIX systems, Windows does not provide the broadcast
- * address associated with each interface address, so we need to
- * reconstruct it from the address and mask.
+ * Windows always provides 255.255.255.255 as the the broadcast
+ * address.  ntpd needs to know the broadcast address which will target
+ * only that network interface, not all.  Reconstruct it from the
+ * address and mask.
  */
-
 static void
 get_broadcastaddr(isc_netaddr_t *bcastaddr, isc_netaddr_t *addr, isc_netaddr_t *netmask) {
 
@@ -391,34 +391,19 @@ internal_current(isc_interfaceiter_t *iter) {
 	}
 
 	/*
-	 * If the interface is broadcast, get the broadcast address.
-	 */
-	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-		get_addr(AF_INET, &iter->current.broadcast, 
-		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
-		/* !!! get_broadcastaddr(&iter->current.broadcast, &iter->current.address,
-				   &iter->current.netmask); */
-	}
-
-	if (ifNamed == FALSE)
-		sprintf(iter->current.name,
-			"TCP/IP Interface %d", iter->numIF);
-
-	/*
 	 * Get the network mask.
 	 */
 	get_addr(AF_INET, &iter->current.netmask,
 		 (struct sockaddr *)&(iter->IFData.iiNetmask));
 
 	/*
-	 * If the interface is broadcast, get the broadcast address.
+	 * If the interface is broadcast, get the broadcast address,
+	 * based on the unicast address and network mask.
 	 */
-	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0) {
-		get_addr(AF_INET, &iter->current.broadcast, 
-		(struct sockaddr *)&(iter->IFData.iiBroadcastAddress));
-		get_broadcastaddr(&iter->current.broadcast, &iter->current.address,
-				   &iter->current.netmask);
-	}
+	if ((iter->current.flags & INTERFACE_F_BROADCAST) != 0)
+		get_broadcastaddr(&iter->current.broadcast,
+				  &iter->current.address,
+				  &iter->current.netmask);
 
 	if (ifNamed == FALSE)
 		sprintf(iter->current.name,

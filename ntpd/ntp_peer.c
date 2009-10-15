@@ -590,7 +590,7 @@ peer_refresh_interface(
 		 * clear crypto if we change the local address
 		 */
 		if (peer->dstadr != piface && !(peer->cast_flags &
-		    MDF_BCLNT))
+		    (MDF_ACAST | MDF_BCLNT)))
 			peer_clear(peer, "XFAC");
 
 		/*
