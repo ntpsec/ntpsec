@@ -51,8 +51,10 @@ EXTRA_DIST=	bincheck.mf	\
 		$(NULL)
 OLD_EXTRA_DIST=		\
 		autogen-version.def version.def version.m4
-BUILT_SOURCES=	check-autogen-version.def check-version.def check-version.m4 \
-		sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
+BUILT_SOURCES=	check-autogen-version.def check-version.def		\
+		check-version.m4 check-version.texi			\
+		sntp-opts.c sntp-opts.h sntp-opts.texi sntp-opts.menu	\
+		sntp.1 sntp.html
 man_MANS=	sntp.1
 
 FRC:
@@ -86,6 +88,16 @@ foo3:
 		echo "Installing new sntp/version.m4 file";	\
 	   fi )
 
+check-version.texi: FRC
+foo4:
+	@cd $(srcdir)					\
+	&& test -r ../include/version.texi			\
+	&& ( if cmp -s ../include/version.texi version.texi;	\
+	   then : ;					\
+	   else cp ../include/version.texi version.texi;	\
+		echo "Installing new sntp/version.texi file";	\
+	   fi )
+
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) sntp-opts.def
@@ -95,5 +107,8 @@ $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
+
+$(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi
+	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
 
 include bincheck.mf

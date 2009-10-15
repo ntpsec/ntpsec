@@ -8,7 +8,7 @@ autogen definitions options;
 prog-name      = "sntp";
 prog-title     = "standard SNTP program";
 homerc         =  $HOME, ".";
-argument       = '...';
+argument       = 'hostname-or-IP ...';
 
 long-opts;
 
@@ -166,7 +166,7 @@ flag = {
 			A  Key in a 1-to-8 character ASCII string.
 			M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
-	See more information see ntp.keys(5).
+	For more information see ntp.keys(5).
 	_EndOfDoc_;
 };
 
@@ -175,13 +175,18 @@ flag = {
 
 detail = <<-  _END_DETAIL
 .I sntp
-can be used as a SNTP client to query a NTP or SNTP server and either display
-the time or set the local system's time (given suitable privilege).  It can be
-run as an interactive command or in a
+implements the Simple Network Time Protocol, and is used
+to query an NTP or SNTP server and either
+display the time
+or
+set the local system's time (given suitable privilege).
+It can be
+run interactively from the command line or as a
 .I cron
 job.
-NTP is the Network Time Protocol (RFC 1305) and SNTP is the
-Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).
+
+NTP and SNTP are defined by draft-ietf-ntp-ntpv4-proto-11, which
+obsoletes RFC 4330 and RFC 1305.
 	_END_DETAIL;
 
 prog-man-descrip = <<-  _END_PROG_MAN_DESCRIP
@@ -285,40 +290,9 @@ and
 commands.  For example:
 .IP
 .B sntp -a ntpserver.somewhere
-.PP
-More information on how to use this utility is given in the
-.I README
-file in the distribution.  In particular, this
-.I man
-page does not describe how to set it up as a server, which needs special care
-to avoid propagating misinformation.
 .SH RETURN VALUE
-When used as a client in non-daemon mode, the program returns a zero exit
-status for success, and a non-zero one otherwise. When used as a daemon
-(either client or server), it does not return except after a serious error.
+The program returns a zero exit
+status for success, and a non-zero one otherwise.
 .SH BUGS
-The program implements the SNTP protocol, and does not provide all NTP 
-facilities.  In particular, it contains no checks against any form of spoofing.
-If this is a serious concern, some network security mechanism (like a firewall
-or even just
-.IR tcpwrappers )
-should be installed.
-.PP
-There are some errors, ambiguities and inconsistencies in the RFCs, and this
-code may not interwork with all other NTP implementations.  Any unreasonable
-restrictions should be reported as bugs to whoever is responsible.  It may
-be difficult to find out who that is.
-.PP
-The program will stop as soon as it feels that things have got out of control.
-In client daemon mode, it will usually fail during an extended period of
-network or server inaccessibility or excessively slow performance, or when the
-local clock is reset by another process.  It will then need restarting
-manually.  Experienced system administrators can write a shell script, a
-.I cron
-job or put it in
-.IR inittab ,
-to do this automatically.
-.PP
-.SH AUTHOR
-.I sntp
+Please report bugs to http://bugs.ntp.org .
 	_END_PROG_MAN_DESCRIP;

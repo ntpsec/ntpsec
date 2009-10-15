@@ -462,7 +462,7 @@ AC_CHECK_HEADER(dns_sd.h,
 case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
  yes) LIBS="-ldns_sd $LIBS" ;;
 esac
-AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h math.h)
+AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h kvm.h math.h)
 
 AC_CHECK_HEADERS(md5.h, [], [],
 [#if HAVE_SYS_TYPES_H
@@ -1246,7 +1246,12 @@ esac
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 AC_CHECK_FUNC(inet_aton, [], [AC_DEFINE(ISC_PLATFORM_NEEDATON, 1, [ISC: provide inet_aton()])])
-AC_CHECK_FUNCS(K_open kvm_open memcpy memmove memset)
+case "$ac_cv_header_kvm_h" in
+ yes)
+    AC_CHECK_FUNCS(kvm_open)
+    ;;
+esac
+AC_CHECK_FUNCS(memcpy memmove memset)
 case "$host" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.
