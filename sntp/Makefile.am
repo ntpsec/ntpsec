@@ -48,6 +48,7 @@ sntp_SOURCES =		\
 EXTRA_DIST=	bincheck.mf	\
 		COPYRIGHT	\
 		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu	\
+		sntp.texi	\
 		$(NULL)
 OLD_EXTRA_DIST=		\
 		autogen-version.def version.def version.m4
