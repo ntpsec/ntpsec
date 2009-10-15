@@ -1,3 +1,4 @@
+* [Bug 1337] cast setsockopt() v4 address pointer to void *.
 * [Bug 1342] ignore|drop one IPv6 address on an interface blocks all
   addresses on that interface.
 (4.2.5p232-RC) 2009/10/14 Released by Harlan Stenn <stenn@ntp.org>
@@ -9,6 +10,7 @@
   rather than at runtime, shrink entries from 40+ to 8 bytes.
 * Update documentation for ntpq --old-rv, saveconfig, saveconfigdir,
   ntpd -I -L and -M, and interface/nic rules. (From Dave Hart)
+* [Bug 1337] fix incorrect args to setsockopt(fd, IP_MULTICAST_IF,...)
 (4.2.5p231-RC) 2009/10/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1335] Broadcast client degraded by wildcard default change.
 (4.2.5p230-RC) 2009/10/09 Released by Harlan Stenn <stenn@ntp.org>
