@@ -1,3 +1,5 @@
+* [Bug 1339] redux, use unmodified lib/isc/win32/strerror.c and
+  move #define strerror... to a header not used by lib/isc code.
 * [Bug 1345] illegal 'grep' option prevents compilation.
 * [Bug 1346] keyword scanner broken where char defaults to unsigned.
 * [Bug 1347] ntpd/complete.conf missing multicastclient test case.

@@ -38,12 +38,6 @@
 #endif
 
 /*
- * We need to include string.h first before we override strerror
- * otherwise we can get errors during the build
- */
-#include <string.h>
-
-/*
  * We need to include stdio.h first before we #define snprintf
  * otherwise we can get errors during the build
  */
@@ -290,8 +284,18 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 #define STDOUT_FILENO	_fileno(stdout)
 #define STDERR_FILENO	_fileno(stderr)
 
-/* Point to a local version for error string handling */
-#define	strerror(e)	ntp_strerror(e)
+/*
+ * To minimize Windows-specific changes to the rest of the NTP code,
+ * particularly reference clocks, ntp_stdlib.h will
+ *
+ * #define strerror(e) ntp_strerror(e)
+ *
+ * to deal with our mixture of C runtime (open, write) and Windows
+ * (sockets, serial ports) error codes.  This is an ugly hack because
+ * both use the lowest values differently, but particularly for ntpd,
+ * it's not a problem.
+ */
+#define NTP_REDEFINE_STRERROR
 
 # define MCAST				/* Enable Multicast Support */
 # define MULTICAST_NONEWSOCKET		/* Don't create a new socket for mcast address */
