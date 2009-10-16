@@ -57,7 +57,7 @@ const char special_chars[] = "{}(),;|=";
  * ---------
  */
 
-char get_next_char(void);
+int get_next_char(void);
 static int is_keyword(char *lexeme, follby *pfollowedby);
 
 
@@ -176,7 +176,7 @@ FCLOSE(
  * input_from_file flag.
  */
 
-char
+int
 get_next_char(
 	void
 	)
@@ -184,7 +184,7 @@ get_next_char(
 	char ch;
 
 	if (input_from_file)
-		return (char)FGETC(ip_file);
+		return FGETC(ip_file);
 	else {
 		if (remote_config.buffer[remote_config.pos] == '\0') 
 			return EOF;
@@ -474,20 +474,22 @@ yylex(
 
 		/* Read in the lexeme */
 		i = 0;
-		while (EOF != (yytext[i] = get_next_char())) {
+		while (EOF != (ch = get_next_char())) {
+
+			yytext[i] = (char)ch;
 
 			/* Break on whitespace or a special character */
-			if (isspace(yytext[i]) || is_EOC(ch) 
-			    || '"' == yytext[i]
+			if (isspace(ch) || is_EOC(ch) 
+			    || '"' == ch
 			    || (FOLLBY_TOKEN == followedby
-				&& is_special(yytext[i])))
+				&& is_special(ch)))
 				break;
 
 			/* Read the rest of the line on reading a start
 			   of comment character */
-			if ('#' == yytext[i]) {
-				while (EOF != (yytext[i] = get_next_char())
-				       && '\n' != yytext[i])
+			if ('#' == ch) {
+				while (EOF != (ch = get_next_char())
+				       && '\n' != ch)
 					; /* Null Statement */
 				break;
 			}
@@ -502,11 +504,11 @@ yylex(
 		 *
 		 * XXX - HMS: I'm not sure we want to assume the closing "
 		 */
-		if ('"' == yytext[i]) {
+		if ('"' == ch) {
 			instring = 1;
-			while (EOF != (yytext[i] = get_next_char()) &&
-			       yytext[i] != '"' && yytext[i] != '\n') {
-				i++;
+			while (EOF != (ch = get_next_char()) &&
+			       ch != '"' && ch != '\n') {
+				yytext[i++] = (char)ch;
 				if (i >= COUNTOF(yytext))
 					goto lex_too_long;
 			}
@@ -515,8 +517,8 @@ yylex(
 			 * this lexeme, but any closing quote should
 			 * not be pushed back, so we read another char.
 			 */
-			if ('"' == yytext[i])
-				yytext[i] = get_next_char();
+			if ('"' == ch)
+				ch = get_next_char();
 		}
 		/* Pushback the last character read that is not a part
 		 * of this lexeme.
@@ -524,10 +526,10 @@ yylex(
 		 * newline character. This is to prevent a parse error
 		 * when there is no newline at the end of a file.
 		 */
-		if (EOF == yytext[i])
+		if (EOF == ch)
 			push_back_char('\n');
 		else
-			push_back_char(yytext[i]); 
+			push_back_char(ch); 
 		yytext[i] = '\0';
 	} while (i == 0);
 

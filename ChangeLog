@@ -1,3 +1,6 @@
+* [Bug 1345] illegal 'grep' option prevents compilation.
+* [Bug 1346] keyword scanner broken where char defaults to unsigned.
+* [Bug 1347] ntpd/complete.conf missing multicastclient test case.
 (4.2.5p233-RC) 2009/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1337] cast setsockopt() v4 address pointer to void *.
 * [Bug 1342] ignore|drop one IPv6 address on an interface blocks all

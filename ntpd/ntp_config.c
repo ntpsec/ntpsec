@@ -912,32 +912,26 @@ dump_config_tree(
 			}
 		}
 	}
-	
+
 	list_ptr = queue_head(ptree->manycastserver);
 	if (list_ptr != NULL) {
-		addr = (struct address_node *) list_ptr;
+		addr = list_ptr;
 		fprintf(df, "manycastserver %s", addr->address);
-		for (list_ptr = next_node(list_ptr); 	
-		     list_ptr != NULL;
-		     list_ptr = next_node(list_ptr)) {
-
-			addr = (struct address_node *) list_ptr;
+		for (addr = next_node(addr);
+		     addr != NULL;
+		     addr = next_node(addr))
 			fprintf(df, " %s", addr->address);
-		}
 		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->multicastclient);
 	if (list_ptr != NULL) {
-		addr = (struct address_node *) list_ptr;
+		addr = list_ptr;
 		fprintf(df, "multicastclient %s", addr->address);
-		for (list_ptr = next_node(list_ptr); 	
-		     list_ptr != NULL;
-		     list_ptr = next_node(list_ptr)) {
-
-			addr = (struct address_node *) list_ptr;
+		for (addr = next_node(addr);
+		     addr != NULL;
+		     addr = next_node(addr))
 			fprintf(df, " %s", addr->address);
-		}
 		fprintf(df, "\n");
 	}
 

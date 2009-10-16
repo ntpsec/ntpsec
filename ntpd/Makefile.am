@@ -181,8 +181,8 @@ libntpd_a_SOURCES =		\
 
 ntp_keyword.out: keyword-gen
 	./keyword-gen $(srcdir)/ntp_parser.h > $@
-	grep -F -v diff_ignore_line < $(srcdir)/ntp_keyword.h > cmp1
-	grep -F -v diff_ignore_line < $@ > cmp2
+	grep -v diff_ignore_line < $(srcdir)/ntp_keyword.h > cmp1
+	grep -v diff_ignore_line < $@ > cmp2
 	cmp cmp1 cmp2 > /dev/null || cp $@ $(srcdir)/ntp_keyword.h
 	rm cmp1 cmp2
 
