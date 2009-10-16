@@ -1,3 +1,5 @@
+* [Bug 1339] redux, use unmodified lib/isc/win32/strerror.c and
+  move #define strerror... to a header not used by lib/isc code.
 (4.2.5p233-RC) 2009/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1337] cast setsockopt() v4 address pointer to void *.
 * [Bug 1342] ignore|drop one IPv6 address on an interface blocks all

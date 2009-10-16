@@ -79,7 +79,4 @@ InitNTLogging(FILE *, int);
 void
 NTReportError(const char *, const char *);
 
-char *
-ntp_strerror(int);
-
 #endif
