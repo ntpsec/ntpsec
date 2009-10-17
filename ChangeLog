@@ -1,3 +1,4 @@
+* [Bug 1348] ntpd Windows port should wait for sendto() completion.
 (4.2.5p234-RC) 2009/10/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1339] redux, use unmodified lib/isc/win32/strerror.c and
   move #define strerror... to a header not used by lib/isc code.

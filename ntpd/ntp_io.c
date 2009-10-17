@@ -2984,18 +2984,17 @@ sendpkt(
 
 #endif /* MCAST */
 
-#if defined(HAVE_IO_COMPLETION_PORT)
-	cc = io_completion_port_sendto(inter, pkt, len, dest);
-	if (cc != ERROR_SUCCESS) {
-#else
 #ifdef SIM
 	cc = simulate_server(dest, inter, pkt);
 #else /* SIM */
+#ifndef HAVE_IO_COMPLETION_PORT
 	cc = sendto(inter->fd, (char *)pkt, (unsigned int)len, 0, 
 		    (struct sockaddr *)dest, SOCKLEN(dest));
+#else
+	cc = io_completion_port_sendto(inter, pkt, len, dest);
+#endif /* HAVE_IO_COMPLETION_PORT */
 #endif /* SIM */
 	if (cc == -1) {
-#endif
 		inter->notsent++;
 		packets_notsent++;
 	} else	{

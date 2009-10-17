@@ -418,10 +418,6 @@ SOURCE=..\..\..\lib\isc\win32\time.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\transmitbuff.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\tsftomsu.c
 # End Source File
 # Begin Source File
@@ -647,10 +643,6 @@ SOURCE=..\include\termios.h
 # Begin Source File
 
 SOURCE=..\include\sys\time.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\transmitbuff.h
 # End Source File
 # Begin Source File
 
