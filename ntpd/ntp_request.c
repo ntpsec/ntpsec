@@ -847,7 +847,7 @@ peer_info (
 			AF(&addr) = AF_INET;
 			NSRCADR(&addr) = ipl->addr;
 		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		addr.sas.ss_len = SOCKLEN(&addr);
 #endif
 		ipl++;
@@ -980,7 +980,7 @@ peer_stats (
 			AF(&addr) = AF_INET;
 			NSRCADR(&addr) = ipl->addr;
 		}	
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		addr.sas.ss_len = SOCKLEN(&addr);
 #endif
 		DPRINTF(1, ("peer_stats: looking for %s, %d, %d\n",
@@ -1406,7 +1406,7 @@ do_conf(
 
 		}
 		NSRCPORT(&peeraddr) = htons(NTP_PORT);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
 #endif
 
@@ -1570,7 +1570,7 @@ do_unconf(
 			NSRCADR(&peeraddr) = temp_cp.peeraddr;
 		}
 		SET_PORT(&peeraddr, NTP_PORT);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
 #endif
 		found = 0;
@@ -1615,7 +1615,7 @@ do_unconf(
 			NSRCADR(&peeraddr) = temp_cp.peeraddr;
 		}
 		SET_PORT(&peeraddr, NTP_PORT);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
 #endif
 		found = 0;
@@ -2099,7 +2099,7 @@ reset_peer(
 			NSRCADR(&peeraddr) = cp->peeraddr;
 		}
 
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
 #endif
 		peer = findexistingpeer(&peeraddr, NULL, -1);
@@ -2130,7 +2130,7 @@ reset_peer(
 			NSRCADR(&peeraddr) = cp->peeraddr;
 		}
 		SET_PORT(&peeraddr, 123);
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
 #endif
 		peer = findexistingpeer(&peeraddr, NULL, -1);
@@ -2636,7 +2636,7 @@ get_clock_info(
 
 	ZERO_SOCK(&addr);
 	AF(&addr) = AF_INET;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 	addr.sas.ss_len = SOCKLEN(&addr);
 #endif
 	SET_PORT(&addr, NTP_PORT);
@@ -2708,7 +2708,7 @@ set_clock_fudge(
 	while (items-- > 0) {
 		AF(&addr) = AF_INET;
 		NSRCADR(&addr) = cf->clockadr;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		addr.sas.ss_len = SOCKLEN(&addr);
 #endif
 		SET_PORT(&addr, NTP_PORT);
@@ -2775,7 +2775,7 @@ get_clkbug_info(
 
 	ZERO_SOCK(&addr);
 	AF(&addr) = AF_INET;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 	addr.sas.ss_len = SOCKLEN(&addr);
 #endif
 	SET_PORT(&addr, NTP_PORT);

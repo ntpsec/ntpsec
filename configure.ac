@@ -750,16 +750,28 @@ fi
 #
 # Look for in_port_t.
 #
-AC_MSG_CHECKING([for in_port_t])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <netinet/in.h>],
-[in_port_t port = 25; return (0);],
-	[AC_MSG_RESULT(yes)
-	],
-        [AC_MSG_RESULT(no)
-	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Do we need our own in_port_t?])
-	])
+AC_CACHE_CHECK(
+    [for in_port_t],
+    isc_cv_have_in_port_t,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#include <sys/types.h>
+		#include <netinet/in.h>
+	    ],
+	    [
+		in_port_t port = 25; 
+		return (0);
+	    ],
+	    [isc_cv_have_in_port_t=yes],
+	    [isc_cv_have_in_port_t=no]
+	)
+    ]
+)
+case "$isc_cv_have_in_port_t" in
+ no)
+	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
+esac
 
 AC_CACHE_CHECK([for a fallback value for HZ], ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
@@ -878,19 +890,6 @@ return pce->serial;],
 ])
 if test $ac_cv_struct_ppsclockev = yes; then
     AC_DEFINE(HAVE_STRUCT_PPSCLOCKEV, 1, [Does a system header define struct ppsclockev?])
-fi
-
-AC_CACHE_CHECK([struct sockaddr for sa_len], ac_cv_struct_sockaddr_has_sa_len,
-[AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>],[
-extern struct sockaddr *ps;
-return ps->sa_len;],
-	ac_cv_struct_sockaddr_has_sa_len=yes,
-	ac_cv_struct_sockaddr_has_sa_len=no)
-])
-if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
-    AC_DEFINE(HAVE_SA_LEN_IN_STRUCT_SOCKADDR, 1, [Should be obvious...])
 fi
 
 AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_struct_sockaddr_storage,

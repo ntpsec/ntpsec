@@ -229,18 +229,24 @@ if test $ac_cv_struct_sockaddr_storage = yes; then
     AC_DEFINE([HAVE_STRUCT_SOCKADDR_STORAGE], 1, [Does a system header define struct sockaddr_storage?])
 fi
 
-AC_CACHE_CHECK([for ss_family field in struct sockaddr_storage],
-		ac_cv_have_ss_family_in_struct_ss, [
+AC_CACHE_CHECK(
+    [for ss_family field in struct sockaddr_storage],
+    ac_cv_have_ss_family_in_struct_ss,
+    [
 	AC_TRY_COMPILE(
-		[
-#include <sys/types.h>
-#include <sys/socket.h>
-		],
-		[ struct sockaddr_storage s; s.ss_family = 1; ],
-		[ ac_cv_have_ss_family_in_struct_ss="yes" ],
-		[ ac_cv_have_ss_family_in_struct_ss="no" ],
+	    [
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	    ],
+	    [
+		struct sockaddr_storage s;
+		s.ss_family = 1;
+	    ],
+	    [ac_cv_have_ss_family_in_struct_ss=yes],
+	    [ac_cv_have_ss_family_in_struct_ss=no]
 	)
-])
+    ]
+)
 if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
 	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
 else
@@ -254,16 +260,21 @@ else
     esac
 fi
 
-AC_CACHE_CHECK([for __ss_family field in struct sockaddr_storage],
-		ac_cv_have___ss_family_in_struct_ss, [
+AC_CACHE_CHECK(
+    [for __ss_family field in struct sockaddr_storage],
+    ac_cv_have___ss_family_in_struct_ss,
+    [
 	AC_TRY_COMPILE(
-		[
-#include <sys/types.h>
-#include <sys/socket.h>
-		],
-		[ struct sockaddr_storage s; s.__ss_family = 1; ],
-		[ ac_cv_have___ss_family_in_struct_ss="yes" ],
-		[ ac_cv_have___ss_family_in_struct_ss="no" ]
+	    [
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	    ],
+	    [
+		struct sockaddr_storage s;
+		s.__ss_family = 1;
+	    ],
+	    [ac_cv_have___ss_family_in_struct_ss=yes],
+	    [ac_cv_have___ss_family_in_struct_ss=no]
 	)
 ])
 if test "x$ac_cv_have___ss_family_in_struct_ss" = "xyes" ; then
@@ -276,6 +287,31 @@ AH_VERBATIM([X_HAVE_SS_FAMILY_IN_SS],
 # define ss_family __ss_family
 #endif /* !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE_SA_FAMILY_IN_SS) */])
 
+#
+# Look for in_port_t.
+#
+AC_CACHE_CHECK(
+    [for in_port_t],
+    isc_cv_have_in_port_t,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#include <sys/types.h>
+		#include <netinet/in.h>
+	    ],
+	    [
+		in_port_t port = 25; 
+		return (0);
+	    ],
+	    [isc_cv_have_in_port_t=yes],
+	    [isc_cv_have_in_port_t=no]
+	)
+    ]
+)
+case "$isc_cv_have_in_port_t" in
+ no)
+	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
+esac
 
 AC_ARG_ENABLE([ipv6], [AC_HELP_STRING([--enable-ipv6], [s use IPv6?])])
 
@@ -292,12 +328,11 @@ case "$enable_ipv6" in
     ;;
 esac
 
-
 AC_CACHE_CHECK(
     [for IPv6 structures],
     ac_cv_isc_found_ipv6,
     [
-        AC_COMPILE_IFELSE(
+	AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
 		    [

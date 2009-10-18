@@ -231,7 +231,7 @@ struct xcmd opcmds[] = {
  * SET_SS_LEN_IF_PRESENT - used by SET_ADDR, SET_ADDRS macros
  */
 
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 #define SET_SS_LEN_IF_PRESENT(psau)				\
 	do {							\
 		(psau)->sas.ss_len = SOCKLEN(psau);		\
@@ -833,7 +833,7 @@ again:
 			NSRCADR(&dst) = pp->dstadr;
 			NSRCADR(&src) = pp->srcadr;
 		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		src.sas.ss_len = SOCKLEN(&src);
 		dst.sas.ss_len = SOCKLEN(&dst);
 #endif

@@ -74,11 +74,6 @@
  */
 #include <config.h>
 #include <netdb.h>
-/*
- * Don't include any additional IPv6 definitions
- * We are defining our own here.
- */
-#define ISC_IPV6_H 1
 #include <isc/net.h>
 
 #include "ntp_types.h"
@@ -97,7 +92,7 @@
 
 # define	_SS_MAXSIZE	128
 # define	_SS_ALIGNSIZE	(sizeof(ntp_uint64_t))
-# ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+# ifdef ISC_PLATFORM_HAVESALEN
 #  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t))
 #  define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(u_char) - sizeof(ntp_u_int8_t) - \
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
@@ -105,7 +100,7 @@
 #  define	_SS_PAD1SIZE	(_SS_ALIGNSIZE - sizeof(short))
 #  define	_SS_PAD2SIZE	(_SS_MAXSIZE - sizeof(short) - \
 				_SS_PAD1SIZE - _SS_ALIGNSIZE)
-# endif /* HAVE_SA_LEN_IN_STRUCT_SOCKADDR */
+# endif /* ISC_PLATFORM_HAVESALEN */
 #endif
 
 #ifndef INET6_ADDRSTRLEN
@@ -119,7 +114,7 @@
 
 #ifndef HAVE_STRUCT_SOCKADDR_STORAGE
 struct sockaddr_storage {
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 	ntp_u_int8_t	ss_len;		/* address length */
 	ntp_u_int8_t	ss_family;	/* address family */
 #else
@@ -151,87 +146,9 @@ struct sockaddr_storage {
 #endif
 
 #ifndef ISC_PLATFORM_HAVEIPV6
-/*
- * Definition of some useful macros to handle IP6 addresses
- */
-#ifdef ISC_PLATFORM_NEEDIN6ADDRANY
+
 #ifdef SYS_WINNT
-#define IN6ADDR_ANY_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }}
-#else
-#define IN6ADDR_ANY_INIT \
-	{{{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }}}
-#endif
-#endif
-
-
-/*
- * IPv6 address
- */
-#ifdef SYS_WINNT
-#define in6_addr in_addr6
-#else
-
-struct in6_addr {
-	union {
-		ntp_u_int8_t   __u6_addr8[16];
-		ntp_u_int16_t  __u6_addr16[8];
-		ntp_u_int32_t  __u6_addr32[4];
-	} __u6_addr;			/* 128-bit IP6 address */
-};
-
-#define s6_addr   __u6_addr.__u6_addr8
-#endif
-
-#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRANY)
-extern const struct in6_addr in6addr_any;
-#endif
-
-#define SIN6_LEN
-#ifndef HAVE_SOCKADDR_IN6
-struct sockaddr_in6 {
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
-	ntp_u_int8_t	sin6_len;	/* length of this struct(sa_family_t)*/
-	ntp_u_int8_t	sin6_family;	/* AF_INET6 (sa_family_t) */
-#else
-	short		sin6_family;	/* AF_INET6 (sa_family_t) */
-#endif
-	ntp_u_int16_t	sin6_port;	/* Transport layer port # (in_port_t)*/
-	ntp_u_int32_t	sin6_flowinfo;	/* IP6 flow information */
-	struct in6_addr	sin6_addr;	/* IP6 address */
-	ntp_u_int32_t	sin6_scope_id;	/* scope zone index */
-};
-#endif
-
-/*
- * Unspecified
- */
-#ifndef IN6_IS_ADDR_UNSPECIFIED
-#define IN6_IS_ADDR_UNSPECIFIED(a)	\
-	((*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[0]) == 0) &&	\
-	 (*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[4]) == 0) &&	\
-	 (*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[8]) == 0) &&	\
-	 (*(const ntp_u_int32_t *)(const void *)(&(a)->s6_addr[12]) == 0))
-#endif
-/*
- * Multicast
- */
-#ifndef IN6_IS_ADDR_MULTICAST
-#define IN6_IS_ADDR_MULTICAST(a)	((a)->s6_addr[0] == 0xff)
-#endif
-/*
- * Unicast link / site local.
- */
-#ifndef IN6_IS_ADDR_LINKLOCAL
-#define IN6_IS_ADDR_LINKLOCAL(a)	(\
-(*((u_long *)((a)->s6_addr)    ) == 0xfe) && \
-((*((u_long *)((a)->s6_addr) + 1) & 0xc0) == 0x80))
-#endif
-
-#ifndef IN6_IS_ADDR_SITELOCAL
-#define IN6_IS_ADDR_SITELOCAL(a)	(\
-(*((u_long *)((a)->s6_addr)    ) == 0xfe) && \
-((*((u_long *)((a)->s6_addr) + 1) & 0xc0) == 0xc0))
+# define in6_addr in_addr6
 #endif
 
 struct addrinfo {

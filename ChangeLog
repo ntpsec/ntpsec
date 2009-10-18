@@ -1,3 +1,4 @@
+* [Bug 1343] lib/isc build breaks on systems without IPv6 headers.
 (4.2.5p234-RC) 2009/10/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1339] redux, use unmodified lib/isc/win32/strerror.c and
   move #define strerror... to a header not used by lib/isc code.
