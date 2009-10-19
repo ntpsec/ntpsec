@@ -416,8 +416,6 @@ move_fd(
 	SOCKET fd
 	)
 {
-	NTP_REQUIRE((int)fd >= 0);
-
 #if !defined(SYS_WINNT) && defined(F_DUPFD)
 #ifndef FD_CHUNK
 #define FD_CHUNK	10
@@ -448,6 +446,8 @@ move_fd(
 #endif
 	static SOCKET socket_boundary = -1;
 	SOCKET newfd;
+
+	NTP_REQUIRE((int)fd >= 0);
 
 	/*
 	 * check whether boundary has be set up
@@ -488,6 +488,8 @@ move_fd(
 			socket_boundary);
 #endif
 	} while (socket_boundary > 0);
+#else
+	NTP_REQUIRE((int)fd >= 0);
 #endif /* !defined(SYS_WINNT) && defined(F_DUPFD) */
 	return fd;
 }
