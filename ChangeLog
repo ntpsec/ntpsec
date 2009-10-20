@@ -1,4 +1,9 @@
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.
+* Do not attempt to execute built binaries from ntpd/Makefile when
+  cross-compiling (keyword-gen and ntpd --saveconfigquit).
+* sntp/main.c: Remove duplicate global adr_buf[] (also defined in
+  networking.c) which Piotr Grudzinski identified breaking his build.
+* Correct in6addr_any test in configure.ac to attempt link too.
 (4.2.5p235-RC) 2009/10/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1343] lib/isc build breaks on systems without IPv6 headers.
 (4.2.5p234-RC) 2009/10/16 Released by Harlan Stenn <stenn@ntp.org>

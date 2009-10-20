@@ -31,6 +31,7 @@ ntp_configure_cache_version=20090503
 NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
 
 AM_INIT_AUTOMAKE
+AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile
 dnl the 'host' machine is where the resulting stuff runs.
@@ -199,7 +200,8 @@ case "$GCC" in
     #
 esac
 
-
+# Expose a cross-compilation indicator to makefiles
+AM_CONDITIONAL(NTP_CROSSCOMPILE, test $build != $host)
 
 AC_MSG_CHECKING([for bin subdirectory])
 AC_ARG_WITH(binsubdir,
@@ -4621,9 +4623,9 @@ esac
 
 AC_CACHE_CHECK(
     [for in6addr_any],
-    ac_cv_have_in6addr_any,
+    isc_cv_have_in6addr_any,
     [
-	AC_COMPILE_IFELSE(
+	AC_LINK_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
 		    [
@@ -4639,13 +4641,13 @@ AC_CACHE_CHECK(
 		    ]
 		)
 	    ],
-	    [ac_cv_have_in6addr_any=yes],
-	    [ac_cv_have_in6addr_any=no]
+	    [isc_cv_have_in6addr_any=yes],
+	    [isc_cv_have_in6addr_any=no]
 	)
     ]
 )
 
-case "$ac_cv_have_in6addr_any" in
+case "$isc_cv_have_in6addr_any" in
  no)
     AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, , [missing in6addr_any?])
 esac

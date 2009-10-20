@@ -16,9 +16,19 @@ LDADD=	version.o libntpd.a @LIBPARSE@
 AM_YFLAGS=	-d -t -r all
 
 if SAVECONFIG_ENABLED
-CHECK_SAVECONFIG= check-saveconfig
-else
+if NTP_CROSSCOMPILE
 CHECK_SAVECONFIG=
+else
+CHECK_SAVECONFIG= check-saveconfig
+endif
+else !SAVECONFIG_ENABLED
+CHECK_SAVECONFIG=
+endif
+
+if NTP_CROSSCOMPILE
+NTP_KEYWORD_OUT=ntp_keyword.dummy
+else
+NTP_KEYWORD_OUT=ntp_keyword.out
 endif
 
 #
@@ -78,7 +88,8 @@ ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntps
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = keyword-gen .version version.c
-CLEANFILES = check-saveconfig compsave.conf ntp_keyword.out
+CLEANFILES = check-saveconfig compsave.conf ntp_keyword.out \
+	ntp_keyword.dummy
 EXTRA_DIST = \
 	complete.conf		\
 	ntpd-opts.def		\
@@ -185,8 +196,11 @@ ntp_keyword.out: keyword-gen
 	grep -v diff_ignore_line < $@ > cmp2
 	cmp cmp1 cmp2 > /dev/null || cp $@ $(srcdir)/ntp_keyword.h
 	rm cmp1 cmp2
+	
+ntp_keyword.dummy:
+	echo stamp > $@
 
-$(srcdir)/ntp_keyword.h: ntp_keyword.out
+$(srcdir)/ntp_keyword.h: $(NTP_KEYWORD_OUT)
 	echo $(srcdir)/ntp_keyword.h is unchanged > /dev/null
 
 $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
