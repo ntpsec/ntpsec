@@ -588,7 +588,6 @@ AC_DEFINE(HAVE_NO_NICE, 1, [sntp does not care about 'nice'])
 AC_DEFINE(HAVE_TERMIOS, 1, [sntp does not care about TTY stuff])
 
 # Checks for library functions.
-AC_FUNC_MALLOC
 AC_CHECK_FUNCS([atexit memset socket])
 
 AC_MSG_CHECKING(for bin subdirectory)
