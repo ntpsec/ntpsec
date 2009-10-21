@@ -4437,8 +4437,26 @@ AC_CHECK_FUNC(
 # ISC stuff
 #
 
-if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
-    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[ISC: struct sockaddr as sa_len?])
+AC_CACHE_CHECK(
+    [struct sockaddr for sa_len],
+    isc_cv_platform_havesalen,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	    ],
+	    [
+		extern struct sockaddr *ps;
+		return ps->sa_len;
+	    ],
+	    [isc_cv_platform_havesalen=yes],
+	    [isc_cv_platform_havesalen=no]
+	)
+    ]
+)
+if test $isc_cv_platform_havesalen = yes; then
+    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[struct sockaddr has sa_len?])
 fi
 
 AC_ARG_ENABLE(ipv6, AC_HELP_STRING([--enable-ipv6], [s use IPv6?]))
