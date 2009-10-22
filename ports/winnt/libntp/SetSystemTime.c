@@ -2,7 +2,7 @@
 #include "clockstuff.h"
 #include "ntp_stdlib.h"
 
-const char *set_tod_using = "SetSystemTime";
+pset_tod_using		set_tod_using = NULL;
 
 time_stepped_callback	step_callback = NULL;
 

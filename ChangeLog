@@ -1,4 +1,5 @@
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.
+* [Bug 1353] ntpq "rv 0 settimeofday" always shows UNKNOWN on unix.
 * Do not attempt to execute built binaries from ntpd/Makefile when
   cross-compiling (keyword-gen and ntpd --saveconfigquit).
 * sntp/main.c: Remove duplicate global adr_buf[] (also defined in
