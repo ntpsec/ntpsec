@@ -1,3 +1,4 @@
+* Cleanup from Dave Mills.
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.
 * [Bug 1353] ntpq "rv 0 settimeofday" always shows UNKNOWN on unix.
 * Do not attempt to execute built binaries from ntpd/Makefile when

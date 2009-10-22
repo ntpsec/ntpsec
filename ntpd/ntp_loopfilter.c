@@ -154,7 +154,7 @@ int	state;			/* clock discipline state */
 u_char	sys_poll;		/* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
-static int clock_stepcnt;	/* step counter */
+static u_long last_step;	/* last clock step */
 
 /*
  * Huff-n'-puff filter variables
@@ -389,12 +389,12 @@ local_clock(
 			tc_counter = 0;
 			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
-			clock_stepcnt++;
-			if (state == EVNT_NSET || clock_stepcnt > 2) {
-				clock_stepcnt = 0;
+			if (state == EVNT_NSET || (current_time -
+			    last_step) < clock_minstep * 2) {
 				rstclock(EVNT_FREQ, 0);
 				return (rval);
 			}
+			last_step = current_time;
 			break;
 		}
 		rstclock(EVNT_SYNC, 0);
@@ -410,7 +410,6 @@ local_clock(
 		    LOGTOD(sys_precision)));
 		clock_jitter = SQRT(etemp + (dtemp - etemp) /
 		    CLOCK_AVG);
-		clock_stepcnt = 0;
 		switch (state) {
 
 		/*
