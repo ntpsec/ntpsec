@@ -1,6 +1,9 @@
 /*
  * ntp_stdlib.h - Prototypes for NTP lib.
  */
+#ifndef NTP_STDLIB_H
+#define NTP_STDLIB_H
+
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -140,7 +143,8 @@ extern int	ipv4_works;
 extern int	ipv6_works;
 
 /* machines.c */
-extern const char *set_tod_using;
+typedef void (*pset_tod_using)(const char *);
+extern pset_tod_using	set_tod_using;
 
 /* lib/isc/win32/strerror.c
  *
@@ -161,3 +165,5 @@ extern double	sys_tick;		/* adjtime() resolution */
 
 /* version.c */
 extern const char *Version;		/* version declaration */
+
+#endif	/* NTP_STDLIB_H */

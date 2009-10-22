@@ -1,3 +1,4 @@
+* [Bug 1353] ntpq "rv 0 settimeofday" always shows UNKNOWN on unix.
 (4.2.5p235-RC) 2009/10/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1343] lib/isc build breaks on systems without IPv6 headers.
 (4.2.5p234-RC) 2009/10/16 Released by Harlan Stenn <stenn@ntp.org>

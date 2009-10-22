@@ -533,6 +533,7 @@ adj_systime(
 void 
 init_winnt_time(void)
 {
+	static const char settod[] = "settimeofday=\"SetSystemTime\"";
 	char szMsgPath[MAX_PATH+1];
 	HANDLE hToken = INVALID_HANDLE_VALUE;
 	TOKEN_PRIVILEGES tkp;
@@ -614,6 +615,11 @@ init_winnt_time(void)
 
 	CloseHandle(hToken);
 	hToken = INVALID_HANDLE_VALUE;
+
+	/*
+	 * Say how we're setting the time of day
+	 */
+	set_sys_var(settod, sizeof(settod), RO);
 
 	/*
 	 * ntpd on Windows has always raised its priority, without
