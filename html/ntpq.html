@@ -14,7 +14,7 @@
 		<img src="pic/bustardfly.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>A typical NTP monitoring packet</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->15-Oct-2009  1:09<!-- #EndDate -->
+			<!-- #BeginDate format:En2m -->16-Oct-2009  19:51<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 		<h4>More Help</h4>
@@ -205,16 +205,17 @@
 			</dd>
 			<dt id="rv"><tt>readvar <i>assocID</i> <i>name</i> [ = <i>value</i> ] [,...]</tt><br>
 				<tt>rv <i>assocID</i> [ <i>name</i> ] [,...]</tt></dt>
-			<dd>Display the specified variables. If <tt><i>assocID</i></tt> is zero, the variables
-			are from the <a href="#system">system variables</a> name space, otherwise
-			they are from the <a href="#peer">peer variables</a> name space. The <tt><i>assocID</i></tt>			is
-			required, as the same name can occur in both spaces. If no <tt><i>name</i></tt> is
+			<dd>Display the specified variables. If <tt><i>assocID</i></tt> is zero, the
+				variables are from the <a href="#system">system variables</a> name space,
+				otherwise they are from the <a href="#peer">peer variables</a> name space.
+				The <tt><i>assocID</i></tt>	is required, as the same name can occur in both spaces. If no <tt><i>name</i></tt> is
 			included, all operative variables in the name space are displayed.
-			Multiple names are specified with comma separators and without whitespace.
+			In this case only, if the <tt><i>assocID</i></tt> is omitted, it is assumed zero. Multiple
+			names are specified with comma separators and without whitespace.
 			Note that time values are represented in milliseconds and frequency
-			values in parts-per-million (PPM). Some NTP timestamps are represented in
-			the format YYYYMMDDTTTT, where YYYY is the year, MM the month of year, DD
-			the day of month and TTTT the time of day.</dd>
+			values in parts-per-million (PPM). Some NTP timestamps are represented
+			in the format YYYYMMDDTTTT, where YYYY is the year, MM the month
+			of year, DD the day of month and TTTT the time of day.</dd>
 			<dt id="saveconfig"><tt>saveconfig <i>filename</i></tt></dt>
 			<dd>Write the current configuration, including any runtime modifications given with <tt>:config</tt> or <tt>config-from-file</tt>, to the ntpd host's file <i>filename</i>.  This command will be rejected by the server unless <a href="miscopt.html#saveconfigdir">saveconfigdir</a> appears in the <tt>ntpd</tt> configuration file.  <i>filename</i> can use strftime() format specifiers to substitute the current date and time, for example, <tt>saveconfig ntp-%Y%m%d-%H%M%S.conf</tt>. The filename used is stored in system variable <tt>savedconfig</tt>. Authentication is required.</dd>
 			<dt><tt>writevar <i>assocID</i> <i>name</i> = <i>value</i> [,...]</tt></dt>

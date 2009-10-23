@@ -19,7 +19,6 @@ char *progname = "sntp";	/* for msyslog */
 
 int ai_fam_pref;
 volatile int debug;
-char adr_buf[INET6_ADDRSTRLEN];
 
 struct key *keys = NULL;
 
@@ -162,6 +161,7 @@ on_wire (
 		struct addrinfo *host
 					)
 {
+	char addr_buf[INET6_ADDRSTRLEN];
 	register int try;
 	SOCKET sock;
 	struct pkt x_pkt;
@@ -252,11 +252,11 @@ on_wire (
 			NTOHL_FP(&r_pkt.rec, &p_rec);
 			NTOHL_FP(&r_pkt.xmt, &p_xmt);
 
-			if(ENABLED_OPT(NORMALVERBOSE)) {
-				getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, 
-						sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
+			if (ENABLED_OPT(NORMALVERBOSE)) {
+				getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
+						sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 
-				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, adr_buf);
+				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, addr_buf);
 			}
 
 #ifdef DEBUG
@@ -318,12 +318,12 @@ on_wire (
 	}
 
 	char logmsg[32 + INET6_ADDRSTRLEN];
-	getnameinfo(host->ai_addr, host->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
+	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 
-	snprintf(logmsg, sizeof(logmsg), "Received no useable packet from %s!", adr_buf);
+	snprintf(logmsg, sizeof(logmsg), "Received no useable packet from %s!", addr_buf);
 
-	if(ENABLED_OPT(NORMALVERBOSE))
-		printf("sntp on_wire: Received no useable packet from %s!\n", adr_buf);
+	if (ENABLED_OPT(NORMALVERBOSE))
+		printf("sntp on_wire: Received no useable packet from %s!\n", addr_buf);
 
 
 	log_msg(logmsg, 1);

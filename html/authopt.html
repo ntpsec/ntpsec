@@ -23,7 +23,7 @@
 <p>Our resident cryptographer; now you see him, now you don't.</p>
 
 <p>Last update: 
-			<!-- #BeginDate format:En2m -->29-Sep-2009  13:34<!-- #EndDate -->
+			<!-- #BeginDate format:En2m -->16-Oct-2009  15:14<!-- #EndDate -->
 UTC</p>
 <br clear="left">
 
@@ -59,7 +59,11 @@ UTC</p>
 
 <p>While the algorithms for symmetric key cryptography are included in the NTPv4 software distribution, Autokey cryptography requires the OpenSSL software library to be installed before building the NTP distribution. This library is available from <a href="http://www.openssl.org">http://www.openssl.org</a> and can be installed using the procedures outlined in the <a href="build.html">Building and Installing the Distribution</a> page. Once installed, the configure and build process automatically detects the library and links the library routines required.</p>
 
-<p>Note that according to US law, NTP binaries including OpenSSL library components, nothwithstanding the OpenSSL library itself, cannot be exported outside the US without license from the US Department of Commmerce. Builders outside the US are advised to obtain the OpenSSL library directly from OpenSSL, which is outside the US, and build outside the US.</p>
+<p>Note that according to US law, NTP binaries including OpenSSL library components,
+	notwithstanding the OpenSSL library itself, cannot be exported outside the
+	US without license from the US Department of Commerce. Builders outside the
+	US are advised to obtain the OpenSSL library directly from OpenSSL, which is
+	outside the US, and build outside the US.</p>
 
 <p>Authentication is configured separately for each association using the <tt>key</tt> or <tt>autokey</tt> option of the <tt>server</tt> configuration command, as described in the <a href="confopt.html">Server Options</a> page, and the options described on this page. The <a href="keygen.html">ntp-keygen</a> page describes the files required for the various authentication schemes. Further details are in the briefings, papers and reports at the NTP project page linked from <a href="http://www.ntp.org">www.ntp.org</a>.</p>
 
@@ -90,7 +94,14 @@ UTC</p>
 
 <h4 id="group">NTP Secure Groups</h4>
 
-<p>NTP secure groups are used to define cryptographic compartments and security hierarchies. All hosts belonging to a secure group have the same group name but different host names. The string specified in the <tt>host</tt> option of the <tt>crypto</tt> command is the name of the host and the name used in the host key, sign key and certificate files. The string specified in the <tt>ident</tt> option of the <tt>crypto</tt> comand is the group name of all group hosts and the name used in the identity files. The file naming conventions are described on the <a href="keygen.html">ntp-keygen</a> page.</p>
+<p>NTP secure groups are used to define cryptographic compartments and security
+	hierarchies. All hosts belonging to a secure group have the same group name
+	but different host names. The string specified in the <tt>host</tt> option of
+	the <tt>crypto</tt> command is the name of the host and the name used in the
+	host key, sign key and certificate files. The string specified in the <tt>ident</tt> option
+	of the <tt>crypto</tt> command is the group name of all group hosts and the
+	name used in the identity files. The file naming conventions are described on
+	the <a href="keygen.html">ntp-keygen</a> page.</p>
 
 <p>Each group includes one or more trusted hosts (THs) operating at the root, or lowest stratum in the group. The group name is used in the subject and issuer fields of the TH self-signed trusted certificate for these hosts. The host name is used in the subject and issuer fields of the self-signed certificates for all other hosts.</p>
 
@@ -102,7 +113,12 @@ UTC</p>
 
 <p>All configurations include a public/private host key pair and matching certificate. Absent an identity scheme, this is a Trusted Certificate (TC) scheme. There are three identity schemes, IFF, GQ and MV described on the <a href="http://www.eecis.udel.edu/%7emills/ident.html">Identity Schemes</a> page. With these schemes all servers in the group have encrypted server identity keys, while clients have nonencrypted client identity parameters. The client parameters can be obtained from a trusted agent (TA), usually one of the THs of the lower stratum group. Further information on identity schemes is on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page.</p>
 
-<p>A specific combination of authentication and identity schemes is called a cryptotype, which applies to clients and servers separately. A group can be configured using more than one cryptotype combination, although not all combinations are interoperable. Note however that some cryptotype combinations may successfully interoperate with each other, but may not represent good security practice. The server and client cryptotypes are defined by the the following codes.</p>
+<p>A specific combination of authentication and identity schemes is called a
+	cryptotype, which applies to clients and servers separately. A group can be
+	configured using more than one cryptotype combination, although not all combinations
+	are interoperable. Note however that some cryptotype combinations may successfully
+	intemperate with each other, but may not represent good security practice. The
+	server and client cryptotypes are defined by the the following codes.</p>
 
 <dl>
 <dt>NONE</dt>
@@ -192,9 +208,19 @@ UTC</p>
 	
 <p>Autokey has an intimidating number of configuration options, most of which are not necessary in typical scenarios. The simplest scenario consists of a TH where the host name of the TH is also the name of the group. For the simplest identity scheme TC, the TH generates host key and trusted certificate files using the <tt>ntp-keygen -T</tt> command, while the remaining group hosts use the same command with no options to generate the host key and public certificate files. All hosts use the <tt>crypto</tt> configuration command with no options. Configuration with passwords is described in the <a href="keygen.html">ntp-keygen</a> page. All group hosts are configured as an acyclic tree with root the TH.</p>
 
-<p>When an identity scheme is included, for example IFF, the TH generates host key, trusted certificate and private server identity ley files using the <tt>ntp-keygen -T -I -i <i>group</i></tt> command, where <tt><i>group</i></tt> is the group name. The remaining group hosts use the same command as above. All hosts use the <tt>crypto ident<i>group</i></tt> configuration command.</p>
+<p>When an identity scheme is included, for example IFF, the TH generates host
+	key, trusted certificate and private server identity key files using the <tt>ntp-keygen
+	-T -I -i <i>group</i></tt> command, where <tt><i>group</i></tt> is the group
+	name. The remaining group hosts use the same command as above. All hosts
+	use the <tt>crypto ident group<i></i></tt> configuration command.</p>
 
-<p>Hosts with no dependent clients can retrieve client parameter files from an archive or web page. The <tt>ntp-keygen</tt> can export these data using the <tt>-e</tt> option. Hosts with dependent clients other than the TH must retrieve copies of the server ley files using secure means. The <tt>ntp-keygen</tt> can export these data using the <tt>-q</tt> option. In either case the data are installed as a file and then renamed using the name given as the first line in the file, but without the filestamp.</p>
+<p>Hosts with no dependent clients can retrieve client parameter files from an
+	archive or web page. The <tt>ntp-keygen</tt> can export these data using the <tt>-e</tt> option.
+	Hosts with dependent clients other than the TH must retrieve copies of the server
+	key files using secure means. The <tt>ntp-keygen</tt> can export these data
+	using the <tt>-q</tt> option. In either case the data are installed as a file
+	and then renamed using the name given as the first line in the file, but without
+	the filestamp.</p>
 
 <h4 id="exam">Examples</h4>
 
@@ -239,7 +265,9 @@ UTC</p>
 <tt>ntp-keygen -p yyy -e &gt;ntpkey_gqpar_green</tt><br>
 <tt>ntp-keygen -p yyy -q zzz &gt;zzz_ntpkey_gqkey_green</tt></p>
 
-<p>The first two lines serve the same purpose as the preceeding examples. The third line generats a copy of the private GREEN server file for use on another server in the same group, say YELLOWm but encrypted with the <tt>zzz</tt> pasword.</p>
+<p>The first two lines serve the same purpose as the preceding examples. The
+	third line generates a copy of the private GREEN server file for use on another
+	server in the same group, say YELLOW, but encrypted with the <tt>zzz</tt> password.</p>
 
 <p>A client of GREEN, for example YELLOW, uses the configuration commands</p>
 
@@ -265,7 +293,12 @@ UTC</p>
 <dd>Specifies the key ID to use with the <a href="ntpq.html"><tt>ntpq</tt></a> utility, which uses the standard protocol defined in RFC-1305. The <tt><i>key</i></tt> argument is the key ID for a trusted key, where the value can be in the range 1 to 65,534, inclusive.</dd>
 
 <dt id="crypto"><tt>crypto [randfile <i>file</i>] [host <i>name</i>] [ident <i>name</i>] [pw <i>password</i>]</tt></dt>
-<dd>This command requires the OpenSSL library. It activates public key cryptography and loads the required host key and public certificat. If one or more files are left unspecified, the default names are used as described below. Unless the complete path and name of the file are specified, the location of a file is relative to the keys directory specified in the <tt>keysdir</tt> configuration command or default <tt>/usr/local/etc</tt>. Following are the options.</dd>
+<dd>This command requires the OpenSSL library. It activates public key cryptography
+	and loads the required host key and public certificate. If one or more files
+	are left unspecified, the default names are used as described below. Unless
+	the complete path and name of the file are specified, the location of a file
+	is relative to the keys directory specified in the <tt>keysdir</tt> configuration
+	command or default <tt>/usr/local/etc</tt>. Following are the options.</dd>
 
 <dd><dl>
 

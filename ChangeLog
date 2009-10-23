@@ -1,3 +1,21 @@
+(4.2.5p236-RC) 2009/10/22 Released by Harlan Stenn <stenn@ntp.org>
+* Cleanup from Dave Mills.
+* [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.
+* [Bug 1353] ntpq "rv 0 settimeofday" always shows UNKNOWN on unix.
+* Do not attempt to execute built binaries from ntpd/Makefile when
+  cross-compiling (keyword-gen and ntpd --saveconfigquit).
+* sntp/main.c: Remove duplicate global adr_buf[] (also defined in
+  networking.c) which Piotr Grudzinski identified breaking his build.
+* Correct in6addr_any test in configure.ac to attempt link too.
+(4.2.5p235-RC) 2009/10/18 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1343] lib/isc build breaks on systems without IPv6 headers.
+(4.2.5p234-RC) 2009/10/16 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1339] redux, use unmodified lib/isc/win32/strerror.c and
+  move #define strerror... to a header not used by lib/isc code.
+* [Bug 1345] illegal 'grep' option prevents compilation.
+* [Bug 1346] keyword scanner broken where char defaults to unsigned.
+* [Bug 1347] ntpd/complete.conf missing multicastclient test case.
+(4.2.5p233-RC) 2009/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1337] cast setsockopt() v4 address pointer to void *.
 * [Bug 1342] ignore|drop one IPv6 address on an interface blocks all
   addresses on that interface.

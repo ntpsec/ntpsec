@@ -54,8 +54,8 @@
 #define IN6ADDR_LOOPBACK_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }}
 #endif
 
-LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_in6addr_any;
-LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_in6addr_loopback;
+LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_net_in6addrany;
+LIBISC_EXTERNAL_DATA extern const struct in6_addr isc_net_in6addrloop;
 
 /*
  * Unspecified

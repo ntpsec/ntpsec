@@ -362,7 +362,7 @@ do_nodename(
 			 sockin6->sin6_addr = in6addr_any;
 			 */
 		}
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 		ai->ai_addr->sa_len = SOCKLEN(ai->ai_addr);
 #endif
 
@@ -428,7 +428,7 @@ do_nodename(
 	sockin = (struct sockaddr_in *)ai->ai_addr;
 	memcpy(&sockin->sin_addr, hp->h_addr, hp->h_length);
 	ai->ai_addr->sa_family = hp->h_addrtype;
-#ifdef HAVE_SA_LEN_IN_STRUCT_SOCKADDR
+#ifdef ISC_PLATFORM_HAVESALEN
 	ai->ai_addr->sa_len = sizeof(struct sockaddr);
 #endif
 	if (hints != NULL && hints->ai_flags & AI_CANONNAME)

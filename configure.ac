@@ -31,6 +31,7 @@ ntp_configure_cache_version=20090503
 NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
 
 AM_INIT_AUTOMAKE
+AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile
 dnl the 'host' machine is where the resulting stuff runs.
@@ -199,7 +200,8 @@ case "$GCC" in
     #
 esac
 
-
+# Expose a cross-compilation indicator to makefiles
+AM_CONDITIONAL(NTP_CROSSCOMPILE, test $build != $host)
 
 AC_MSG_CHECKING([for bin subdirectory])
 AC_ARG_WITH(binsubdir,
@@ -750,16 +752,28 @@ fi
 #
 # Look for in_port_t.
 #
-AC_MSG_CHECKING([for in_port_t])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <netinet/in.h>],
-[in_port_t port = 25; return (0);],
-	[AC_MSG_RESULT(yes)
-	],
-        [AC_MSG_RESULT(no)
-	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Do we need our own in_port_t?])
-	])
+AC_CACHE_CHECK(
+    [for in_port_t],
+    isc_cv_have_in_port_t,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#include <sys/types.h>
+		#include <netinet/in.h>
+	    ],
+	    [
+		in_port_t port = 25; 
+		return (0);
+	    ],
+	    [isc_cv_have_in_port_t=yes],
+	    [isc_cv_have_in_port_t=no]
+	)
+    ]
+)
+case "$isc_cv_have_in_port_t" in
+ no)
+	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
+esac
 
 AC_CACHE_CHECK([for a fallback value for HZ], ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
@@ -878,19 +892,6 @@ return pce->serial;],
 ])
 if test $ac_cv_struct_ppsclockev = yes; then
     AC_DEFINE(HAVE_STRUCT_PPSCLOCKEV, 1, [Does a system header define struct ppsclockev?])
-fi
-
-AC_CACHE_CHECK([struct sockaddr for sa_len], ac_cv_struct_sockaddr_has_sa_len,
-[AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>],[
-extern struct sockaddr *ps;
-return ps->sa_len;],
-	ac_cv_struct_sockaddr_has_sa_len=yes,
-	ac_cv_struct_sockaddr_has_sa_len=no)
-])
-if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
-    AC_DEFINE(HAVE_SA_LEN_IN_STRUCT_SOCKADDR, 1, [Should be obvious...])
 fi
 
 AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_struct_sockaddr_storage,
@@ -4441,8 +4442,26 @@ AC_CHECK_FUNC(
 # ISC stuff
 #
 
-if test $ac_cv_struct_sockaddr_has_sa_len = yes; then
-    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[ISC: struct sockaddr as sa_len?])
+AC_CACHE_CHECK(
+    [struct sockaddr for sa_len],
+    isc_cv_platform_havesalen,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	    ],
+	    [
+		extern struct sockaddr *ps;
+		return ps->sa_len;
+	    ],
+	    [isc_cv_platform_havesalen=yes],
+	    [isc_cv_platform_havesalen=no]
+	)
+    ]
+)
+if test $isc_cv_platform_havesalen = yes; then
+    AC_DEFINE(ISC_PLATFORM_HAVESALEN, ,[struct sockaddr has sa_len?])
 fi
 
 AC_ARG_ENABLE(ipv6, AC_HELP_STRING([--enable-ipv6], [s use IPv6?]))
@@ -4627,9 +4646,9 @@ esac
 
 AC_CACHE_CHECK(
     [for in6addr_any],
-    ac_cv_have_in6addr_any,
+    isc_cv_have_in6addr_any,
     [
-	AC_COMPILE_IFELSE(
+	AC_LINK_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
 		    [
@@ -4645,13 +4664,13 @@ AC_CACHE_CHECK(
 		    ]
 		)
 	    ],
-	    [ac_cv_have_in6addr_any=yes],
-	    [ac_cv_have_in6addr_any=no]
+	    [isc_cv_have_in6addr_any=yes],
+	    [isc_cv_have_in6addr_any=no]
 	)
     ]
 )
 
-case "$ac_cv_have_in6addr_any" in
+case "$isc_cv_have_in6addr_any" in
  no)
     AC_DEFINE(ISC_PLATFORM_NEEDIN6ADDRANY, , [missing in6addr_any?])
 esac

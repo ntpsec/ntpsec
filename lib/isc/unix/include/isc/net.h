@@ -187,7 +187,7 @@ struct in6_pktinfo {
 };
 #endif
 
-#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRANY)
+#if defined(ISC_PLATFORM_NEEDIN6ADDRANY)
 extern const struct in6_addr isc_net_in6addrany;
 /*%
  * Cope with a missing in6addr_any and in6addr_loopback.

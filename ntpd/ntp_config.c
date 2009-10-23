@@ -303,6 +303,7 @@ do {					\
 	}				\
 } while (0)
 
+void ntpd_set_tod_using(const char *);
 static unsigned long get_pfxmatch(char **s,struct masks *m);
 static unsigned long get_match(char *s,struct masks *m);
 static unsigned long get_logmask(char *s);
@@ -912,32 +913,26 @@ dump_config_tree(
 			}
 		}
 	}
-	
+
 	list_ptr = queue_head(ptree->manycastserver);
 	if (list_ptr != NULL) {
-		addr = (struct address_node *) list_ptr;
+		addr = list_ptr;
 		fprintf(df, "manycastserver %s", addr->address);
-		for (list_ptr = next_node(list_ptr); 	
-		     list_ptr != NULL;
-		     list_ptr = next_node(list_ptr)) {
-
-			addr = (struct address_node *) list_ptr;
+		for (addr = next_node(addr);
+		     addr != NULL;
+		     addr = next_node(addr))
 			fprintf(df, " %s", addr->address);
-		}
 		fprintf(df, "\n");
 	}
 
 	list_ptr = queue_head(ptree->multicastclient);
 	if (list_ptr != NULL) {
-		addr = (struct address_node *) list_ptr;
+		addr = list_ptr;
 		fprintf(df, "multicastclient %s", addr->address);
-		for (list_ptr = next_node(list_ptr); 	
-		     list_ptr != NULL;
-		     list_ptr = next_node(list_ptr)) {
-
-			addr = (struct address_node *) list_ptr;
+		for (addr = next_node(addr);
+		     addr != NULL;
+		     addr = next_node(addr))
 			fprintf(df, " %s", addr->address);
-		}
 		fprintf(df, "\n");
 	}
 
@@ -3782,11 +3777,19 @@ getconfig(
 	set_sys_var(line, strlen(line)+1, RO);
 
 	/*
-	 * Say how we're setting the time of day
+	 * Set up for the first time step to install a variable showing
+	 * which syscall is being used to step.
 	 */
-	snprintf(line, sizeof(line), "settimeofday=\"%s\"",
-	    set_tod_using);
-	set_sys_var(line, strlen(line)+1, RO);
+	set_tod_using = &ntpd_set_tod_using;
+
+	/*
+	 * On Windows, the variable has already been set, on the rest,
+	 * initialize it to "UNKNOWN".
+	 */
+#ifndef SYS_WINNT
+	strncpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
+	set_sys_var(line, strlen(line) + 1, RO);
+#endif
 
 	/*
 	 * Initialize the loop.
@@ -3939,6 +3942,18 @@ save_and_apply_config_tree(void)
 	NTP_INSIST(punlinked == ptree);
 	free_config_tree(ptree);
 #endif
+}
+
+
+void
+ntpd_set_tod_using(
+	const char *which
+	)
+{
+	char line[128];
+
+	snprintf(line, sizeof(line), "settimeofday=\"%s\"", which);
+	set_sys_var(line, strlen(line) + 1, RO);
 }
 
 

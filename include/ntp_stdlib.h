@@ -1,6 +1,9 @@
 /*
  * ntp_stdlib.h - Prototypes for NTP lib.
  */
+#ifndef NTP_STDLIB_H
+#define NTP_STDLIB_H
+
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -140,11 +143,21 @@ extern int	ipv4_works;
 extern int	ipv6_works;
 
 /* machines.c */
-extern const char *set_tod_using;
+typedef void (*pset_tod_using)(const char *);
+extern pset_tod_using	set_tod_using;
 
-/* mexit.c */
-#if defined SYS_WINNT || defined SYS_CYGWIN32
-extern HANDLE	hServDoneEvent;
+/* lib/isc/win32/strerror.c
+ *
+ * To minimize Windows-specific changes to the rest of the NTP code,
+ * particularly reference clocks, we hijack calls to strerror() to deal
+ * with our mixture of error codes from the  C runtime (open, write)
+ * and Windows (sockets, serial ports).  This is an ugly hack because
+ * both use the lowest values differently, but particularly for ntpd,
+ * it's not a problem.
+ */
+#ifdef NTP_REDEFINE_STRERROR
+#define	strerror(e)	ntp_strerror(e)
+extern char *	ntp_strerror	(int e);
 #endif
 
 /* systime.c */
@@ -152,3 +165,5 @@ extern double	sys_tick;		/* adjtime() resolution */
 
 /* version.c */
 extern const char *Version;		/* version declaration */
+
+#endif	/* NTP_STDLIB_H */

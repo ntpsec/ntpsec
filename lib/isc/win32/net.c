@@ -51,6 +51,11 @@
 const struct in6_addr isc_net_in6addrany = IN6ADDR_ANY_INIT;
 #endif
 
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(ISC_PLATFORM_NEEDIN6ADDRLOOPBACK)
+const struct in6_addr isc_net_in6addrloop = IN6ADDR_LOOPBACK_INIT;
+#endif
+
+
 static isc_once_t 	once = ISC_ONCE_INIT;
 static isc_once_t 	once_ipv6only = ISC_ONCE_INIT;
 static isc_once_t 	once_ipv6pktinfo = ISC_ONCE_INIT;
