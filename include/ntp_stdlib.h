@@ -5,7 +5,9 @@
 #define NTP_STDLIB_H
 
 #include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 
 #include "l_stdlib.h"
 #include "ntp_rfc2553.h"

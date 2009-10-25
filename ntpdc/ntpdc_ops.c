@@ -21,7 +21,9 @@
 # include <sys/timex.h>
 #endif
 #if !defined(__bsdi__) && !defined(apollo)
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #endif
 
 #include <arpa/inet.h>
@@ -2657,6 +2659,7 @@ clockstat(
 	struct info_clock *cl;
 	/* 8 is the maximum number of clocks which will fit in a packet */
 	u_long clist[min(MAXARGS, 8)];
+	int qitemc;
 	int qitems;
 	int items;
 	int itemsize;
@@ -2664,7 +2667,9 @@ clockstat(
 	l_fp ts;
 	struct clktype *clk;
 
-	for (qitems = 0; qitems < min(pcmd->nargs, 8); qitems++)
+	qitemc = min(pcmd->nargs, COUNTOF(clist));
+
+	for (qitems = 0; qitems < qitemc; qitems++)
 		clist[qitems] = NSRCADR(&pcmd->argval[qitems].netnum);
 
 again:
@@ -2678,13 +2683,13 @@ again:
 	}
 
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
-	    return;
+		return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_clock)))
-	    return;
+		return;
 
 	while (items-- > 0) {
 		(void) fprintf(fp, "clock address:        %s\n",

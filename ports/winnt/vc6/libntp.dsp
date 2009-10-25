@@ -510,7 +510,7 @@ SOURCE=..\..\..\include\l_stdlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\lib_strbuf.h
+SOURCE=..\..\..\include\lib_strbuf.h
 # End Source File
 # Begin Source File
 

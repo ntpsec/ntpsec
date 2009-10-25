@@ -1,5 +1,6 @@
 * [Bug 610] NMEA support for using PPSAPI on a different device.
 * [Bug 1238] use only fudge time2 to offset NMEA serial timestamp.
+* [Bug 1355] ntp-dev won't compile on OpenBSD 4.6.
 (4.2.5p236-RC) 2009/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup from Dave Mills.
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.

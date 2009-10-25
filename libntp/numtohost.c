@@ -1,12 +1,10 @@
 /*
  * numtohost - convert network number to host name.
  */
-
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
-#if HAVE_NETINET_IN_H
+#include <sys/types.h>
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>		/* ntohl */
 #endif
 

@@ -17,6 +17,7 @@ noinst_HEADERS =	\
 	ieee754io.h	\
 	iosignal.h	\
 	l_stdlib.h	\
+	lib_strbuf.h	\
 	mbg_gps166.h	\
 	mx4200.h	\
 	ntif.h		\

@@ -1,10 +1,15 @@
 /*
  * decodenetnum - return a net number (this is crude, but careful)
  */
+#include <config.h>
 #include <sys/types.h>
 #include <ctype.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"

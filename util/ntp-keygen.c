@@ -87,21 +87,13 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 #include "ntp_types.h"
 #include "ntp_random.h"
 #include "l_stdlib.h"
 #include "ntp_assert.h"
 
 #include "ntp-keygen-opts.h"
-
-#ifdef SYS_WINNT
-extern	int	ntp_getopt	(int, char **, const char *);
-#define getopt ntp_getopt
-#define optarg ntp_optarg
-#endif	/* SYS_WINNT */
 
 #ifdef OPENSSL
 #include "openssl/bn.h"

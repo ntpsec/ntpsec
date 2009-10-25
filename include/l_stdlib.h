@@ -15,10 +15,7 @@
 #endif
 
 #include <stdarg.h>
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 
 /* Needed for speed_t. */
 #ifdef HAVE_TERMIOS_H

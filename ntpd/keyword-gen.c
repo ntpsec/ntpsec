@@ -10,7 +10,7 @@
 
 #include <ntp_stdlib.h>
 #include <ntp_config.h>
-#include "../libntp/lib_strbuf.h"
+#include <lib_strbuf.h>
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
 
