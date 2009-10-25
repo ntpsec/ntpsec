@@ -1927,7 +1927,7 @@
 				RelativePath="..\..\..\include\l_stdlib.h">
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\lib_strbuf.h">
+				RelativePath="..\..\..\include\lib_strbuf.h">
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\include\isc\log.h">

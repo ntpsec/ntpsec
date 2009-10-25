@@ -54,8 +54,6 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/unix/include
 ETAGS_ARGS = Makefile.am
 
-noinst_HEADERS = lib_strbuf.h 
-
 ../include/des.h:
 	touch ../include/des.h
 

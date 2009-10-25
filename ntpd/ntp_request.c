@@ -18,7 +18,9 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <signal.h>
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 
 #include "recvbuff.h"

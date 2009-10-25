@@ -32,7 +32,9 @@
 #include <signal.h>
 
 /**/
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 /**/
 #ifdef HAVE_SYS_PARAM_H

@@ -20,7 +20,9 @@
 #include <signal.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 
 /*

@@ -2072,7 +2072,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\lib_strbuf.h"
+				RelativePath="..\..\..\include\lib_strbuf.h"
 				>
 			</File>
 			<File
