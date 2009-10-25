@@ -51,8 +51,16 @@ EXTRA_DIST=	bincheck.mf	\
 		$(NULL)
 OLD_EXTRA_DIST=		\
 		autogen-version.def version.def version.m4
-BUILT_SOURCES=	check-autogen-version.def check-version.def check-version.m4 \
-		sntp-opts.c sntp-opts.h sntp.1 sntp-opts.texi sntp-opts.menu
+BUILT_SOURCES=						\
+		check-autogen-version.def		\
+		check-version.def check-version.m4	\
+		libtool					\
+		sntp-opts.c				\
+		sntp-opts.h				\
+		sntp.1					\
+		sntp-opts.texi				\
+		sntp-opts.menu				\
+		$(NULL)
 man_MANS=	sntp.1
 
 FRC:
@@ -95,5 +103,8 @@ $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
+
+libtool: $(LIBTOOL_DEPS)
+	./config.status --recheck
 
 include bincheck.mf

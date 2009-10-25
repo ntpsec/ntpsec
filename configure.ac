@@ -1,7 +1,10 @@
 dnl -*-fundamental-*-
 dnl Process this file with autoconf to produce a configure script.
 m4_include([version.m4])
+AC_PREREQ(2.53)
 AC_INIT([ntp], [VERSION_NUMBER])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([.])
 
 # Increment ntp_configure_cache_version by one for each change to
 # configure.ac or .m4 files which invalidates cached values from
@@ -38,7 +41,6 @@ dnl the 'host' machine is where the resulting stuff runs.
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) of where we should run])
 AM_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
-AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no

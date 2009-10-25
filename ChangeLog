@@ -1,3 +1,5 @@
+* [Bug 1354] libtool error building after bootstrap with Autoconf 2.64.
+* Allow NTP_VPATH_HACK configure test to handle newer gmake versions.
 (4.2.5p236-RC) 2009/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup from Dave Mills.
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.
