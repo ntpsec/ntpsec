@@ -1,3 +1,4 @@
+* PPSAPI cleanup on ntpd/refclock_wwvb.c.
 (4.2.5p237-RC) 2009/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 610] NMEA support for using PPSAPI on a different device.
 * [Bug 1238] use only fudge time2 to offset NMEA serial timestamp.
