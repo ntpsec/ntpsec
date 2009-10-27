@@ -1311,7 +1311,7 @@ refclock_pps(
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
 	 */
-	pp->lastrec.l_ui = (u_int32)ap->ts.tv_sec + JAN_1970;
+	pp->lastrec.l_ui = ap->ts.tv_sec + JAN_1970;
 	dtemp = ap->ts.tv_nsec / 1e9;
 	pp->lastrec.l_uf = (u_int32)(dtemp * FRAC);
 	if (dtemp > .5)
