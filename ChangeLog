@@ -1,3 +1,4 @@
+(4.2.5p238-RC) 2009/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * Changes from Dave Mills.
 * driver4.html updates from Dave Mills.
 * [Bug 1252] PPSAPI cleanup on ntpd/refclock_wwvb.c.
