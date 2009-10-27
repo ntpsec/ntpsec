@@ -1,3 +1,6 @@
+* Changes from Dave Mills.
+* driver4.html updates from Dave Mills.
+* [Bug 1252] PPSAPI cleanup on ntpd/refclock_wwvb.c.
 * [Bug 1354] libtool error building after bootstrap with Autoconf 2.64.
 * Allow NTP_VPATH_HACK configure test to handle newer gmake versions.
 * CIDs 94-99 make it more clearly impossible for sock_hash() to return

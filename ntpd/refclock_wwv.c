@@ -1254,7 +1254,6 @@ wwv_rf(
 
 		epomax = dtemp;
 		epopos = epoch;
-		up->timestamp = up->timestamp;
 		j = epoch - 6 * MS;
 		if (j < 0)
 			j += SECOND;
