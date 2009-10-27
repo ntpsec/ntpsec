@@ -245,7 +245,7 @@ extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);
 #endif
-extern  int	sock_hash (sockaddr_u *);
+extern  u_short	sock_hash (sockaddr_u *);
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 extern	double	old_drift;
 extern	int	drift_file_sw;

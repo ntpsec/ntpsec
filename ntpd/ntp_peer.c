@@ -220,7 +220,7 @@ findpeer(
 	)
 {
 	register struct peer *peer;
-	int hash;
+	u_int hash;
 
 	findpeer_calls++;
 	hash = NTP_HASH_ADDR(srcadr);
@@ -270,7 +270,7 @@ findpeerbyassoc(
 	)
 {
 	register struct peer *peer;
-	int hash;
+	u_int hash;
 
 	assocpeer_calls++;
 
@@ -717,7 +717,7 @@ newpeer(
 	)
 {
 	struct peer *peer;
-	int	i;
+	u_int	hash;
 	char	tbuf[80];
 
 #ifdef OPENSSL
@@ -889,12 +889,12 @@ newpeer(
 	/*
 	 * Put the new peer in the hash tables.
 	 */
-	i = NTP_HASH_ADDR(&peer->srcadr);
-	LINK_SLIST(peer_hash[i], peer, next);
-	peer_hash_count[i]++;
-	i = peer->associd & NTP_HASH_MASK;
-	LINK_SLIST(assoc_hash[i], peer, ass_next);
-	assoc_hash_count[i]++;
+	hash = NTP_HASH_ADDR(&peer->srcadr);
+	LINK_SLIST(peer_hash[hash], peer, next);
+	peer_hash_count[hash]++;
+	hash = peer->associd & NTP_HASH_MASK;
+	LINK_SLIST(assoc_hash[hash], peer, ass_next);
+	assoc_hash_count[hash]++;
 	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
 	report_event(PEVNT_MOBIL, peer, tbuf);
 	DPRINTF(1, ("newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",

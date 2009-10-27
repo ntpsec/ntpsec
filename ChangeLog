@@ -1,5 +1,10 @@
 * [Bug 1354] libtool error building after bootstrap with Autoconf 2.64.
 * Allow NTP_VPATH_HACK configure test to handle newer gmake versions.
+* CIDs 94-99 make it more clearly impossible for sock_hash() to return
+  a negative number.
+* CID 105, 106 ensure ntpdc arrays are not overrun even if callers
+  misbehave.
+* CID 113 use va_end() in refclock_true.c true_debug().
 (4.2.5p237-RC) 2009/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 610] NMEA support for using PPSAPI on a different device.
 * [Bug 1238] use only fudge time2 to offset NMEA serial timestamp.

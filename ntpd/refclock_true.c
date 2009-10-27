@@ -235,6 +235,7 @@ true_debug(struct peer *peer, const char *fmt, ...)
 		fprintf(up->debug, "true%d: ", up->unit);
 		vfprintf(up->debug, fmt, ap);
 	}
+	va_end(ap);
 }
 #endif /*STDC*/
 

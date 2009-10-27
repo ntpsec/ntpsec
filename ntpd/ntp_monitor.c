@@ -54,9 +54,9 @@
 /*
  * Hashing stuff
  */
-#define	MON_HASH_SIZE	128
-#define	MON_HASH_MASK	(MON_HASH_SIZE-1)
-#define	MON_HASH(addr)	sock_hash(addr)
+#define	MON_HASH_SIZE	NTP_HASH_SIZE
+#define	MON_HASH_MASK	NTP_HASH_MASK
+#define	MON_HASH(addr)	NTP_HASH_ADDR(addr)
 
 /*
  * Pointers to the hash table, the MRU list and the count table.  Memory
@@ -212,8 +212,8 @@ ntp_monitor(
 {
 	register struct pkt *pkt;
 	register struct mon_data *md;
-        sockaddr_u addr;
-	register int hash;
+	sockaddr_u addr;
+	register u_int hash;
 	register int mode;
 	int	interval;
 
@@ -388,7 +388,7 @@ remove_from_hash(
 	struct mon_data *md
 	)
 {
-	register int hash;
+	register u_int hash;
 	register struct mon_data *md_prev;
 
 	hash = MON_HASH(&md->rmtadr);

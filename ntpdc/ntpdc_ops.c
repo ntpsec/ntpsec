@@ -697,6 +697,7 @@ showpeer(
 	struct info_peer *pp;
 	/* 4 is the maximum number of peers which will fit in a packet */
 	struct info_peer_list *pl, plist[min(MAXARGS, 4)];
+	int qitemlim;
 	int qitems;
 	int items;
 	int itemsize;
@@ -709,7 +710,8 @@ again:
 	else
 		sendsize = v4sizeof(struct info_peer_list);
 
-	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 4); qitems++) {
+	qitemlim = min(pcmd->nargs, COUNTOF(plist));
+	for (qitems = 0, pl = plist; qitems < qitemlim; qitems++) {
 		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
 			pl->addr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
@@ -769,6 +771,7 @@ peerstats(
 	/* 4 is the maximum number of peers which will fit in a packet */
 	struct info_peer_list *pl, plist[min(MAXARGS, 4)];
 	sockaddr_u src, dst;
+	int qitemlim;
 	int qitems;
 	int items;
 	int itemsize;
@@ -781,8 +784,10 @@ again:
 	else
 		sendsize = v4sizeof(struct info_peer_list);
 
-	memset((char *)plist, 0, sizeof(struct info_peer_list) * min(MAXARGS, 4));
-	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 4); qitems++) {
+	memset(plist, 0, sizeof(plist));
+
+	qitemlim = min(pcmd->nargs, COUNTOF(plist));
+	for (qitems = 0, pl = plist; qitems < qitemlim; qitems++) {
 		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
 			pl->addr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
@@ -1498,6 +1503,7 @@ unconfig(
 {
 	/* 8 is the maximum number of peers which will fit in a packet */
 	struct conf_unpeer *pl, plist[min(MAXARGS, 8)];
+	int qitemlim;
 	int qitems;
 	int items;
 	int itemsize;
@@ -1511,7 +1517,8 @@ again:
 	else
 		sendsize = v4sizeof(struct conf_unpeer);
 
-	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
+	qitemlim = min(pcmd->nargs, COUNTOF(plist));
+	for (qitems = 0, pl = plist; qitems < qitemlim; qitems++) {
 		if (IS_IPV4(&pcmd->argval[0].netnum)) {
 			pl->peeraddr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
@@ -1579,7 +1586,6 @@ doset(
 	int req
 	)
 {
-	/* 8 is the maximum number of peers which will fit in a packet */
 	struct conf_sys_flags sys;
 	int items;
 	int itemsize;
@@ -2157,6 +2163,7 @@ preset(
 {
 	/* 8 is the maximum number of peers which will fit in a packet */
 	struct conf_unpeer *pl, plist[min(MAXARGS, 8)];
+	int qitemlim;
 	int qitems;
 	int items;
 	int itemsize;
@@ -2170,7 +2177,8 @@ again:
 	else
 		sendsize = v4sizeof(struct conf_unpeer);
 
-	for (qitems = 0, pl = plist; qitems < min(pcmd->nargs, 8); qitems++) {
+	qitemlim = min(pcmd->nargs, COUNTOF(plist));
+	for (qitems = 0, pl = plist; qitems < qitemlim; qitems++) {
 		if (IS_IPV4(&pcmd->argval[qitems].netnum)) {
 			pl->peeraddr = NSRCADR(&pcmd->argval[qitems].netnum);
 			if (impl_ver == IMPL_XNTPD)
@@ -2659,7 +2667,7 @@ clockstat(
 	struct info_clock *cl;
 	/* 8 is the maximum number of clocks which will fit in a packet */
 	u_long clist[min(MAXARGS, 8)];
-	int qitemc;
+	int qitemlim;
 	int qitems;
 	int items;
 	int itemsize;
@@ -2667,9 +2675,8 @@ clockstat(
 	l_fp ts;
 	struct clktype *clk;
 
-	qitemc = min(pcmd->nargs, COUNTOF(clist));
-
-	for (qitems = 0; qitems < qitemc; qitems++)
+	qitemlim = min(pcmd->nargs, COUNTOF(clist));
+	for (qitems = 0; qitems < qitemlim; qitems++)
 		clist[qitems] = NSRCADR(&pcmd->argval[qitems].netnum);
 
 again:
@@ -2834,6 +2841,7 @@ clkbug(
 	/* 8 is the maximum number of clocks which will fit in a packet */
 	u_long clist[min(MAXARGS, 8)];
 	u_int32 ltemp;
+	int qitemlim;
 	int qitems;
 	int items;
 	int itemsize;
@@ -2841,7 +2849,8 @@ clkbug(
 	int needsp;
 	l_fp ts;
 
-	for (qitems = 0; qitems < min(pcmd->nargs, 8); qitems++)
+	qitemlim = min(pcmd->nargs, COUNTOF(clist));
+	for (qitems = 0; qitems < qitemlim; qitems++)
 		clist[qitems] = NSRCADR(&pcmd->argval[qitems].netnum);
 
 again:
@@ -2855,13 +2864,13 @@ again:
 	}
 
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
-	    return;
+		return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_clkbug)))
-	    return;
+		return;
 
 	while (items-- > 0) {
 		(void) fprintf(fp, "clock address:        %s\n",
