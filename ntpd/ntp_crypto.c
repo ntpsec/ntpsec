@@ -3692,32 +3692,32 @@ crypto_setup(void)
 	 * it back so the sequence does not repeat when we next restart.
 	 */
 	if (!RAND_status()) {
-		if (rand_file == NULL)
-			RAND_file_name(filename, MAXFILENAME);
-		else if (*rand_file == '/')
-			strcpy(filename, rand_file);
-		else
+		if (rand_file == NULL) {
+			RAND_file_name(rand_file, MAXFILENAME);
+		} else if (*rand_file != '/') {
 			snprintf(filename, MAXFILENAME, "%s/%s",
 			    keysdir, rand_file);
-		if (filename == NULL) {
+			rand_file = filename;
+		}
+		if (rand_file == NULL) {
 			msyslog(LOG_ERR,
 			    "crypto_setup: seed file unknown name");
 			exit (-1);
 		}
-		if ((bytes = RAND_load_file(filename, -1)) == 0) {
+		if ((bytes = RAND_load_file(rand_file, -1)) == 0) {
 			msyslog(LOG_ERR,
 			    "crypto_setup: random seed file %s missing",
-			    filename);
+			    rand_file);
 			exit (-1);
 		}
 		get_systime(&seed);
 		RAND_seed(&seed, sizeof(l_fp));
-		RAND_write_file(filename);
+		RAND_write_file(rand_file);
 #ifdef DEBUG
 		if (debug)
 			printf(
 			    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
-			    SSLeay(), filename, bytes);
+			    SSLeay(), rand_file, bytes);
 #endif
 	}
 
