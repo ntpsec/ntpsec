@@ -283,12 +283,6 @@ struct interface *	inter_list;
 static struct interface *wildipv4 = NULL;
 static struct interface *wildipv6 = NULL;
 
-/*
- * allocate/free in libisc form, using emalloc/free.
- */
-void *			ntp_memalloc		(void *, size_t);
-void			ntp_memfree		(void *, void *);
-
 static void		add_fd_to_list		(SOCKET, 
 						 enum desc_type);
 static struct interface *find_addr_in_list	(sockaddr_u *);
@@ -319,30 +313,6 @@ static struct interface *findlocalcastinterface	(sockaddr_u *);
 static inline int     read_network_packet	(SOCKET, struct interface *, l_fp);
 static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
-
-
-void *
-ntp_memalloc(
-	void *	ntpcontext,
-	size_t	octets
-	)
-{
-	UNUSED_ARG(ntpcontext);
-
-	return emalloc(octets);
-}
-
-
-void
-ntp_memfree(
-	void *	ntpcontext,
-	void *	p
-	)
-{
-	UNUSED_ARG(ntpcontext);
-
-	free(p);
-}
 
 
 #ifdef SYS_WINNT
@@ -1546,7 +1516,7 @@ update_interfaces(
 	void *			data
 	)
 {
-	static isc_mem_t *	mctx;
+	isc_mem_t *		mctx = (void *)-1;
 	interface_info_t	ifi;
 	isc_interfaceiter_t *	iter;
 	isc_result_t		result;
@@ -1558,12 +1528,6 @@ update_interfaces(
 	struct interface *	next;
 
 	DPRINTF(3, ("update_interfaces(%d)\n", port));
-
-	if (NULL == mctx) {
-		result = isc_mem_createx(0, 0, &ntp_memalloc,
-		    &ntp_memfree, NULL, &mctx);
-		NTP_INSIST(ISC_R_SUCCESS == result);
-	}
 
 	/*
 	 * phase one - scan interfaces

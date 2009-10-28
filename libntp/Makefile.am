@@ -30,7 +30,6 @@ libntp_a_SRCS = a_md5encrypt.c adjtime.c atoint.c atolfp.c atouint.c \
 	$(srcdir)/../lib/isc/lib.c			\
 	$(srcdir)/../lib/isc/log.c			\
 	$(srcdir)/../lib/isc/md5.c			\
-	$(srcdir)/../lib/isc/mem.c			\
 	$(srcdir)/../lib/isc/nls/msgcat.c		\
 	$(srcdir)/../lib/isc/unix/net.c			\
 	$(srcdir)/../lib/isc/netaddr.c			\

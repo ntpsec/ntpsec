@@ -951,9 +951,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\mem.c">
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\memmove.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1936,7 +1933,7 @@
 				RelativePath="..\..\..\include\md5.h">
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\include\isc\mem.h">
+				RelativePath="..\..\..\include\isc\mem.h">
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\include\isc\net.h">

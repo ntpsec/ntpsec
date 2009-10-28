@@ -356,10 +356,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\mem.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\memmove.c"
 				>
 			</File>
@@ -637,7 +633,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\include\isc\mem.h"
+				RelativePath="..\..\..\..\include\isc\mem.h"
 				>
 			</File>
 			<File
