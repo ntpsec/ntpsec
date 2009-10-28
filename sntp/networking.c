@@ -333,7 +333,7 @@ recv_bcst_data (
 
 	if (IS_IPV4(sas)) 
 		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue, sizeof(btrue));
-#ifdef ISC_PLATFORM_HAVEIPV6
+#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
 	else if (IS_IPV6(sas))
 		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue, sizeof(btrue));
 #endif
