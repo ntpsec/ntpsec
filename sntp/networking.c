@@ -214,7 +214,7 @@ recv_bcst_data (
 		}
 
 
-		if(setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &btrue, sizeof(btrue)) < 0) {
+		if (setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &btrue, sizeof(btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
 		}
@@ -245,6 +245,9 @@ recv_bcst_data (
 	}
 #ifdef ISC_PLATFORM_HAVEIPV6
 	else if (IS_IPV6(sas)) {
+#ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
+		return BROADCAST_FAILED;
+#else
 		struct ipv6_mreq mdevadr;
 
 		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
@@ -252,7 +255,7 @@ recv_bcst_data (
 				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
 		}
 
-		if(setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
+		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
 		}
@@ -283,6 +286,7 @@ recv_bcst_data (
 				return BROADCAST_FAILED;
 			}
 		}
+#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
 	}
 #endif	/* ISC_PLATFORM_HAVEIPV6 */
 	
@@ -306,7 +310,8 @@ recv_bcst_data (
 
 		case 0:
 			if(ENABLED_OPT(NORMALVERBOSE))
-				printf("sntp recv_bcst_data: select() reached timeout (%li sec), aborting.\n", timeout_tv.tv_sec);
+				printf("sntp recv_bcst_data: select() reached timeout (%u sec), aborting.\n", 
+				       (unsigned)timeout_tv.tv_sec);
 
 			return BROADCAST_FAILED;
 			break;
