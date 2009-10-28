@@ -177,6 +177,8 @@ nmea_start(
 	int baudrate;
 	char *baudtext;
 
+	pp = peer->procptr;
+
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
@@ -269,6 +271,7 @@ nmea_start(
 			return (0);
 		}
 #else
+		pp->io.fd = -1;
 		return (0);
 #endif
 	}
@@ -281,12 +284,12 @@ nmea_start(
 	 */
 	up = emalloc(sizeof(*up));
 	memset(up, 0, sizeof(*up));
-	pp = peer->procptr;
 	pp->io.clock_recv = nmea_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
+		pp->io.fd = -1;
 		close(fd);
 		free(up);
 		return (0);
@@ -308,6 +311,9 @@ nmea_start(
 
 /*
  * nmea_shutdown - shut down a GPS clock
+ * 
+ * NOTE this routine is called after nmea_start() returns failure,
+ * as well as during a normal shutdown due to ntpq :config unpeer.
  */
 static void
 nmea_shutdown(
@@ -322,15 +328,18 @@ nmea_shutdown(
 
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
+	if (up != NULL) {
 #ifdef HAVE_PPSAPI
-	if (up->ppsapi_lit) {
-		time_pps_destroy(up->atom.handle);
-		if (up->ppsapi_fd != pp->io.fd)
-			close(up->ppsapi_fd);
-	}
+		if (up->ppsapi_lit) {
+			time_pps_destroy(up->atom.handle);
+			if (up->ppsapi_fd != pp->io.fd)
+				close(up->ppsapi_fd);
+		}
 #endif
-	io_closeclock(&pp->io);
-	free(up);
+		free(up);
+	}
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
 }
 
 /*
