@@ -1,4 +1,5 @@
 * [Bug 1356] core dump from refclock_nmea when can't open /dev/gpsU.
+* [Bug 1358] AIX 4.3 sntp/networking.c IPV6_JOIN_GROUP undeclared.
 (4.2.5p238-RC) 2009/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * Changes from Dave Mills.
 * driver4.html updates from Dave Mills.
