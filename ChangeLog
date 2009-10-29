@@ -1,4 +1,6 @@
-* [Bug 1357] bogus assert from refclock_shm
+* [Bug 1357] bogus assert from refclock_shm.
+* [Bug 1359] Debug message cleanup.
+* CID 101: more pointer/array cleanup.
 * [Bug 1356] core dump from refclock_nmea when can't open /dev/gpsU.
 * [Bug 1358] AIX 4.3 sntp/networking.c IPV6_JOIN_GROUP undeclared.
 * CID 101: pointer/array cleanup.
