@@ -854,7 +854,8 @@ loop_config(
 	int i;
 
 #ifdef DEBUG
-	printf("loop_config: item %d freq %f\n", item, freq);
+	if (debug > 1)
+		printf("loop_config: item %d freq %f\n", item, freq);
 #endif
 	switch (item) {
 

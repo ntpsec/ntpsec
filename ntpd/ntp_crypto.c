@@ -3693,7 +3693,8 @@ crypto_setup(void)
 	 */
 	if (!RAND_status()) {
 		if (rand_file == NULL) {
-			RAND_file_name(rand_file, MAXFILENAME);
+			RAND_file_name(filename, MAXFILENAME);
+			rand_file = filename;
 		} else if (*rand_file != '/') {
 			snprintf(filename, MAXFILENAME, "%s/%s",
 			    keysdir, rand_file);
