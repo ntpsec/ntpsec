@@ -1,3 +1,4 @@
+* [Bug 1364] clock_gettime() not detected, need -lrt on Debian 5.0.3.
 (4.2.5p239-RC) 2009/10/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1357] bogus assert from refclock_shm.
 * [Bug 1359] Debug message cleanup.

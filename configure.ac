@@ -26,7 +26,7 @@ AC_CONFIG_AUX_DIR([.])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-ntp_configure_cache_version=20090503
+ntp_configure_cache_version=20091102
 
 # When the cache version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -1198,7 +1198,9 @@ case "$host" in
 	# this conditional will need to change.  Maybe use AC_TRY_RUN
 	# instead to try to set the time to itself and check errno.
     ;;
- *) AC_CHECK_FUNCS(clock_gettime clock_settime)
+ *)
+    AC_SEARCH_LIBS([clock_gettime], [rt])
+    AC_CHECK_FUNCS([clock_gettime clock_settime])
     ;;
 esac
 AC_CHECK_FUNCS(daemon)
