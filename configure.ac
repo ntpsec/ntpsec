@@ -4466,9 +4466,6 @@ case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
     ntp_have_linuxcaps=no
 esac
 
-AC_MSG_RESULT([$ntp_have_linuxcaps])
-
-
 AC_ARG_ENABLE(
     [linuxcaps],
     AS_HELP_STRING(
@@ -4478,13 +4475,13 @@ AC_ARG_ENABLE(
     [ntp_have_linuxcaps=$enableval]
 )
 
+AC_MSG_RESULT([$ntp_have_linuxcaps])
 
 case "$ntp_have_linuxcaps" in
  yes)
     AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
     LIBS="$LIBS -lcap"
 esac
-
 
 case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
  *yes*)
