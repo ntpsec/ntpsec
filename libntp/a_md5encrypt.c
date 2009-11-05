@@ -30,7 +30,7 @@ MD5authencrypt(
 	int	length		/* packet length */
 	)
 {
-	u_char		digest[20];
+	u_char		digest[64];	/* for SHA-512 */
 	unsigned	len;
 #ifdef OPENSSL
 	const EVP_MD *	digest_type;
@@ -75,7 +75,7 @@ MD5authdecrypt(
 	int	size		/* MAC size */
 	)
 {
-	u_char		digest[20];
+	u_char		digest[64];	/* for SHA-512 */
 	unsigned	len;
 #ifdef OPENSSL
 	EVP_MD_CTX	ctx;
