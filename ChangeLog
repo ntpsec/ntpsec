@@ -1,3 +1,4 @@
+(4.2.5p240-RC) 2009/11/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1364] clock_gettime() not detected, need -lrt on Debian 5.0.3.
 * Provide all of OpenSSL's signature methods for ntp.keys (FIPS 140-2).
 (4.2.5p239-RC) 2009/10/30 Released by Harlan Stenn <stenn@ntp.org>
