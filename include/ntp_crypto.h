@@ -17,6 +17,7 @@
 #define	CRYPTO_CONF_MVPAR 7	/* MV parameters file name */
 #define CRYPTO_CONF_PW	  8	/* private key password */
 #define	CRYPTO_CONF_IDENT 9	/* specify identity scheme */
+#define	CRYPTO_CONF_NID   10	/* specify digest name */
 
 #ifdef OPENSSL
 #include "openssl/evp.h"
@@ -174,6 +175,7 @@ struct pkey_info {
  * Cryptographic values
  */
 extern	u_int	crypto_flags;	/* status word */
+extern	int	crypto_nid;	/* digest nid */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */

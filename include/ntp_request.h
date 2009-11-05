@@ -135,7 +135,7 @@ struct req_pkt {
 					/* struct conf_peer must fit */
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
+	char mac[MAX_MD5_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
 };
 
 /*
@@ -145,7 +145,7 @@ struct req_pkt {
 struct req_pkt_tail {
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
+	char mac[MAX_MD5_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
 };
 
 /*

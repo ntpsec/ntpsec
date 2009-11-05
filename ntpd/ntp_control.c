@@ -129,11 +129,12 @@ static struct ctl_var sys_var[] = {
 	{ CS_HOST,	RO, "host" },		/* 25 */
 	{ CS_PUBLIC,	RO, "update" },		/* 26 */
 	{ CS_CERTIF,	RO, "cert" },		/* 27 */
-	{ CS_DIGEST,	RO, "signature" },	/* 28 */
+	{ CS_SIGNATURE,	RO, "signature" },	/* 28 */
 	{ CS_REVTIME,	RO, "until" },		/* 29 */
 	{ CS_GROUP,	RO, "group" },		/* 30 */
+	{ CS_DIGEST,	RO, "digest" },		/* 31 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 24/31 */
+	{ 0,		EOV, "" }		/* 24/3 2*/
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -170,6 +171,7 @@ static	u_char def_sys_var[] = {
 	CS_GROUP,
 	CS_FLAGS,
 	CS_DIGEST,
+	CS_SIGNATURE,
 	CS_PUBLIC,
 	CS_CERTIF,
 #endif /* OPENSSL */
@@ -230,7 +232,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITSEQ,	RO, "initsequence" },   /* 45 */
 	{ CP_INITKEY,	RO, "initkey" },	/* 46 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 47 */
-	{ CP_DIGEST,	RO, "signature" },	/* 48 */
+	{ CP_SIGNATURE,	RO, "signature" },	/* 48 */
 #endif /* OPENSSL */
 	{ 0,		EOV, "" }		/* 42/49 */
 };
@@ -276,7 +278,7 @@ static u_char def_peer_var[] = {
 #ifdef OPENSSL
 	CP_HOST,
 	CP_FLAGS,
-	CP_DIGEST,
+	CP_SIGNATURE,
 	CP_VALID,
 	CP_INITSEQ,
 #endif /* OPENSSL */
@@ -1515,11 +1517,19 @@ ctl_putsys(
 
 	    case CS_DIGEST:
 		if (crypto_flags) {
+			strcpy(str, OBJ_nid2ln(crypto_nid));
+			ctl_putstr(sys_var[CS_DIGEST].text, str,
+			    strlen(str));
+		}
+		break;
+
+	    case CS_SIGNATURE:
+		if (crypto_flags) {
 			const EVP_MD *dp;
 
 			dp = EVP_get_digestbynid(crypto_flags >> 16);
 			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
-			ctl_putstr(sys_var[CS_DIGEST].text, str,
+			ctl_putstr(sys_var[CS_SIGNATURE].text, str,
 			    strlen(str));
 		}
 		break;
@@ -1826,13 +1836,13 @@ ctl_putpeer(
 			ctl_puthex(peer_var[CP_FLAGS].text, peer->crypto);
 		break;
 
-	    case CP_DIGEST:
+	    case CP_SIGNATURE:
 		if (peer->crypto) {
 			const EVP_MD *dp;
 
 			dp = EVP_get_digestbynid(peer->crypto >> 16);
 			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
-			ctl_putstr(peer_var[CP_DIGEST].text, str,
+			ctl_putstr(peer_var[CP_SIGNATURE].text, str,
 			    strlen(str));
 		}
 		break;

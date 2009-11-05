@@ -14,7 +14,7 @@
 		<img src="pic/bustardfly.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>A typical NTP monitoring packet</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->16-Oct-2009  19:51<!-- #EndDate -->
+			<!-- #BeginDate format:En2m -->04-Nov-2009  0:12<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 		<h4>More Help</h4>
@@ -352,6 +352,10 @@
 				<td>host flags  (see Autokey specification)</td>
 			</tr>
 			<tr>
+				<td><tt>digest</tt></td>
+				<td>OpenSSL message digest algorithm</td>
+			</tr>
+			<tr>
 				<td><tt>signature</tt></td>
 				<td>OpenSSL digest/signature scheme</td>
 			</tr>
@@ -368,7 +372,7 @@
 				<td>NTP seconds when the certificate expires</td>
 			</tr>
 		</table>
-		<h4 id="peer">Peer Variables</h4>
+	<h4 id="peer">Peer Variables</h4>
 		<p>The following system variables apear in the <tt>rv</tt> billboard for each association. Not all variables are displayed in some configurations.</p>
 		<table width="100%" border="1" cellspacing="2" cellpadding="2">
 			<tr>
@@ -499,8 +503,12 @@
 				<td>Autokey server name</td>
 			</tr>
 			<tr>
+				<td><tt>flags</tt></td>
+				<td>peer flags (see Autokey specification)</td>
+			</tr>
+			<tr>
 				<td><tt>signature</tt></td>
-				<td>initial session key ID</td>
+				<td>OpenSSL digest/signature shceme</td>
 			</tr>
 			<tr>
 				<td><tt>initsequence</tt></td>
@@ -515,7 +523,7 @@
 				<td>Autokey signature timestamp</td>
 			</tr>
 		</table>
-		<h4 id="clock">Clock Variables</h4>
+	<h4 id="clock">Clock Variables</h4>
 		<p>The following clock variables apear in the <tt>cv</tt> billboard for each association with a reference clock. Not all variables are displayed in some configurations.</p>
 		<table width="100%" border="1" cellspacing="2" cellpadding="2">
 			<tr>

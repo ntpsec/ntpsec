@@ -421,39 +421,35 @@ receive(
 	 * the number of words following the packet header is 0, no MAC
 	 * is present and the packet is not authenticated. If 1, the
 	 * packet is a crypto-NAK; if 3, the packet is authenticated
-	 * with DES; if 5, the packet is authenticated with MD5. If 2 or
-	 * 4, the packet is a runt and discarded forthwith. If greater
-	 * than 5, an extension field is present, so we subtract the
-	 * length of the field and go around again.
+	 * with DES; if 5, the packet is authenticated with MD5; if 6,
+	 * the packet is authenticated with SHA. If 2 or * 4, the packet
+	 * is a runt and discarded forthwith. If greater than 6, an
+	 * extension field is present, so we subtract the length of the
+	 * field and go around again.
 	 */
 	authlen = LEN_PKT_NOMAC;
 	has_mac = rbufp->recv_length - authlen;
 	while (has_mac != 0) {
 		u_int32	len;
 
-		if (has_mac % 4 != 0 || has_mac < 0) {
+		if (has_mac % 4 != 0 || has_mac < MIN_MAC_LEN) {
 			sys_badlength++;
 			return;			/* bad length */
 		}
-		if (has_mac == 1 * 4 || has_mac == 3 * 4 || has_mac ==
-		    MAX_MAC_LEN) {
+		if (has_mac <= MAX_MAC_LEN) {
 			skeyid = ntohl(((u_int32 *)pkt)[authlen / 4]);
 			break;
 
-		} else if (has_mac > MAX_MAC_LEN) {
+		} else {
 			opcode = ntohl(((u_int32 *)pkt)[authlen / 4]);
  			len = opcode & 0xffff;
-			if (len < 4 || len % 4 != 0 || len +
-			    authlen + MAX_MAC_LEN >
+			if (len % 4 != 0 || len < 4 || len + authlen >
 			    rbufp->recv_length) {
 				sys_badlength++;
 				return;		/* bad length */
 			}
 			authlen += len;
 			has_mac -= len;
-		} else {
-			sys_badlength++;
-			return;			/* bad length */
 		}
 	}
 
@@ -569,9 +565,9 @@ receive(
 		 * This is described in Microsoft's WSPP docs, in MS-SNTP:
 		 * http://msdn.microsoft.com/en-us/library/cc212930.aspx
 		 */
-	} else if (has_mac == MAX_MAC_LEN && (restrict_mask & RES_MSSNTP) &&
+	} else if (has_mac == MAX_MD5_LEN && (restrict_mask & RES_MSSNTP) &&
 	   (retcode == AM_FXMIT || retcode == AM_NEWPASS) &&
-	   (memcmp(zero_key, (char *)pkt + authlen + 4, MAX_MAC_LEN - 4) ==
+	   (memcmp(zero_key, (char *)pkt + authlen + 4, MAX_MD5_LEN - 4) ==
 	   0)) {
 		is_authentic = AUTH_NONE;
 #endif /* HAVE_NTP_SIGND */
@@ -611,7 +607,7 @@ receive(
 			 * # if unsync, 0
 			 * % can't happen
 			 */
-			if (has_mac < MAX_MAC_LEN) {
+			if (has_mac < MAX_MD5_LEN) {
 				sys_badauth++;
 				return;
 			}
@@ -3323,8 +3319,7 @@ fast_xmit(
 		 */
 		cookie = session_key(&rbufp->recv_srcadr,
 		    &rbufp->dstadr->sin, 0, sys_private, 0);
-		if (rbufp->recv_length >= sendlen + MAX_MAC_LEN + 2 *
-		    sizeof(u_int32)) {
+		if (rbufp->recv_length > sendlen + MAX_MAC_LEN) {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
 			temp32 = CRYPTO_RESP;

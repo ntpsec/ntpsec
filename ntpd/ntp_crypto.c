@@ -115,6 +115,7 @@
  * Global cryptodata in host byte order
  */
 u_int32	crypto_flags = 0x0;	/* status word */
+int	crypto_nid = KEY_TYPE_MD5; /* digest nid */
 char	*sys_hostname = NULL;	/* host name */
 char	*sys_groupname = NULL;	/* group name */
 
@@ -228,13 +229,13 @@ session_key(
 		hdlen = 10 * sizeof(u_int32);
 		break;
 	}
-	EVP_DigestInit(&ctx, EVP_md5());
+	EVP_DigestInit(&ctx, EVP_get_digestbynid(crypto_nid));
 	EVP_DigestUpdate(&ctx, (u_char *)header, hdlen);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	memcpy(&keyid, dgst, 4);
 	keyid = ntohl(keyid);
 	if (lifetime != 0) {
-		MD5auth_setkey(keyno, dgst, len);
+		MD5auth_setkey(keyno, crypto_nid, dgst, len);
 		authtrust(keyno, lifetime);
 	}
 	DPRINTF(2, ("session_key: %s > %s %08x %08x hash %08x life %lu\n",
@@ -1725,7 +1726,7 @@ crypto_send(
 	len += ((vallen + 3) / 4 + 1) * 4; 
 	siglen = ntohl(vp->siglen);
 	len += ((siglen + 3) / 4 + 1) * 4; 
-	if (start + len >= sizeof(struct pkt) - MAX_MAC_LEN)
+	if (start + len > sizeof(struct pkt) - MAX_MAC_LEN)
 		return (0);
 
 	/*
@@ -3877,6 +3878,7 @@ crypto_config(
 	char	*cp		/* item name */
 	)
 {
+	int	nid;
 
 #ifdef DEBUG
 	if (debug > 1)
@@ -3914,6 +3916,18 @@ crypto_config(
 	case CRYPTO_CONF_RAND:
 		rand_file = emalloc(strlen(cp) + 1);
 		strcpy(rand_file, cp);
+		break;
+
+	/*
+	 * Set message digest NID.
+	 */
+	case CRYPTO_CONF_NID:
+		nid = OBJ_sn2nid(cp);
+		if (nid == 0)
+			msyslog(LOG_ERR,
+			    "crypto_config: invalid digest name %s", cp);
+		else
+			crypto_nid = nid;
 		break;
 	}
 }
