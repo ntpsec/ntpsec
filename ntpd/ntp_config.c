@@ -111,8 +111,6 @@ static struct masks logcfg_item[] = {
 #define ISSPACE(c)	((c) == ' ' || (c) == '\t')
 #define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
-#define KEY_TYPE_MD5	4
-
 /*
  * File descriptor used by the resolver save routines, and temporary file
  * name.
@@ -1714,8 +1712,6 @@ config_auth(
 	int item;
 #endif
 	int *key_val;
-	int i;
-	u_char rankey[9];
 
 	/* Crypto Command */
 #ifdef OPENSSL
@@ -1746,6 +1742,10 @@ config_auth(
 
 		case T_Sign:
 			item = CRYPTO_CONF_SIGN;
+			break;
+
+		case T_Digest:
+			item = CRYPTO_CONF_NID;
 			break;
 		}
 		crypto_config(item, my_val->value.s);
@@ -1812,22 +1812,12 @@ config_auth(
 
 	/* if doesn't exist, make up one at random */
 	if (!authhavekey(req_keyid)) {
+		int	rankey;
 
-		for (i = 0; i < (COUNTOF(rankey) - 1); i++)
-			do
-				rankey[i] = 
-					(u_char)(ntp_random() & 0xff);
-			while (!rankey[i]);
-
-		rankey[COUNTOF(rankey) - 1] = 0;
-
-		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
+		rankey = ntp_random();
+		MD5auth_setkey(req_keyid, KEY_TYPE_MD5, (u_char *)&rankey,
+		    sizeof(rankey));
 		authtrust(req_keyid, 1);
-		if (!authhavekey(req_keyid)) {
-			msyslog(LOG_ERR, "getconfig: Couldn't generate"
-					 " a valid random key!");
-			exit(1);
-		}
 	}
 
 	/* save keyid so we will accept config requests with it */

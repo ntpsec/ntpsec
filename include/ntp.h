@@ -139,7 +139,7 @@ typedef char s_char;
  * Miscellaneous stuff
  */
 #define NTP_MAXKEY	65535	/* max authentication key number */
-
+#define	KEY_TYPE_MD5	4	/* MD5 digest NID */
 /*
  * Limits of things
  */
@@ -541,9 +541,9 @@ struct pkt {
 	l_fp	xmt;		/* transmit time stamp */
 
 #define	LEN_PKT_NOMAC	12 * sizeof(u_int32) /* min header length */
-#define	LEN_PKT_MAC	LEN_PKT_NOMAC +  sizeof(u_int32)
-#define MIN_MAC_LEN	3 * sizeof(u_int32)	/* DES */
-#define MAX_MAC_LEN	5 * sizeof(u_int32)	/* MD5 */
+#define MIN_MAC_LEN	1 * sizeof(u_int32)	/* crypto_NAK */
+#define MAX_MD5_LEN	5 * sizeof(u_int32)	/* MD5 */
+#define	MAX_MAC_LEN	6 * sizeof(u_int32)	/* SHA */
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64

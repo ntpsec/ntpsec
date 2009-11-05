@@ -26,13 +26,13 @@ struct savekey {
 		u_char MD5_key[32];	/* MD5 key */
 	} k;
 	keyid_t keyid;		/* key identifier */
+	int	type;		/* key type */
 	u_short flags;		/* flags that wave */
 	u_long lifetime;	/* remaining lifetime */
 	int keylen;		/* key length */
 };
 
 #define	KEY_TRUSTED	0x001	/* this key is trusted */
-#define	KEY_MD5		0x200	/* this is a MD5 type key */
 
 /*
  * The hash table. This is indexed by the low order bits of the
@@ -68,6 +68,7 @@ int authnumfreekeys;
 keyid_t	cache_keyid;		/* key identifier */
 u_char	*cache_key;		/* key pointer */
 u_int	cache_keylen;		/* key length */
+int	cache_type;		/* key type */
 u_short cache_flags;		/* flags that wave */
 
 
@@ -158,13 +159,11 @@ authhavekey(
 		return (0);
 	}
 	cache_keyid = sk->keyid;
+	cache_type = sk->type;
 	cache_flags = sk->flags;
-	if (sk->flags & KEY_MD5) {
-		cache_key = sk->k.MD5_key;
-		cache_keylen = sk->keylen;
-		return (1);
-	}
-	return (0);
+	cache_key = sk->k.MD5_key;
+	cache_keylen = sk->keylen;
+	return (1);
 }
 
 
@@ -301,6 +300,7 @@ authistrusted(
 void
 MD5auth_setkey(
 	keyid_t keyno,
+	int	keytype,
 	const u_char *key,
 	const int len
 	)
@@ -314,7 +314,7 @@ MD5auth_setkey(
 	sk = key_hash[KEYHASH(keyno)];
 	while (sk != NULL) {
 		if (keyno == sk->keyid) {
-			sk->flags |= KEY_MD5;
+			sk->type = keytype;;
 			sk->keylen = min(len, sizeof(sk->k.MD5_key));
 #ifndef DISABLE_BUG1243_FIX
 			memcpy(sk->k.MD5_key, key, sk->keylen);
@@ -342,7 +342,8 @@ MD5auth_setkey(
 	authnumfreekeys--;
 
 	sk->keyid = keyno;
-	sk->flags = KEY_MD5;
+	sk->type = keytype;
+	sk->flags = 0;
 	sk->lifetime = 0;
 	sk->keylen = min(len, sizeof(sk->k.MD5_key));
 #ifndef DISABLE_BUG1243_FIX
@@ -451,10 +452,7 @@ authencrypt(
 	if (!authhavekey(keyno))
 		return (0);
 
-	if (cache_flags & KEY_MD5)
-		return (MD5authencrypt(cache_key, pkt, length));
-
-	return (0);
+	return (MD5authencrypt(cache_type, cache_key, pkt, length));
 }
 
 /*
@@ -483,8 +481,6 @@ authdecrypt(
 	if (!authhavekey(keyno) || size < 4)
 		return (0);
 
-	if (cache_flags & KEY_MD5)
-		return (MD5authdecrypt(cache_key, pkt, length, size));
-
-	return (0);
+	return (MD5authdecrypt(cache_type, cache_key, pkt, length,
+	   size));
 }

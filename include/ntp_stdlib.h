@@ -68,9 +68,9 @@ extern	int	auth_moremem	(void);
 extern	int	ymd2yd		(int, int, int);
 
 /* a_md5encrypt.c */
-extern	int	MD5authdecrypt	(u_char *, u_int32 *, int, int);
-extern	int	MD5authencrypt	(u_char *, u_int32 *, int);
-extern	void	MD5auth_setkey	(keyid_t, const u_char *, const int);
+extern	int	MD5authdecrypt	(int, u_char *, u_int32 *, int, int);
+extern	int	MD5authencrypt	(int, u_char *, u_int32 *, int);
+extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, const int);
 extern	u_int32	addr2refid	(sockaddr_u *);
 
 

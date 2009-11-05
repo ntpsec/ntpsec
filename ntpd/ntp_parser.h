@@ -63,143 +63,144 @@
      T_Cryptostats = 279,
      T_Day = 280,
      T_Default = 281,
-     T_Disable = 282,
-     T_Discard = 283,
-     T_Dispersion = 284,
-     T_Double = 285,
-     T_Driftfile = 286,
-     T_Drop = 287,
-     T_Enable = 288,
-     T_End = 289,
-     T_False = 290,
-     T_File = 291,
-     T_Filegen = 292,
-     T_Flag1 = 293,
-     T_Flag2 = 294,
-     T_Flag3 = 295,
-     T_Flag4 = 296,
-     T_Flake = 297,
-     T_Floor = 298,
-     T_Freq = 299,
-     T_Fudge = 300,
-     T_Host = 301,
-     T_Huffpuff = 302,
-     T_Iburst = 303,
-     T_Ident = 304,
-     T_Ignore = 305,
-     T_Includefile = 306,
-     T_Integer = 307,
-     T_Interface = 308,
-     T_Ipv4 = 309,
-     T_Ipv4_flag = 310,
-     T_Ipv6 = 311,
-     T_Ipv6_flag = 312,
-     T_Kernel = 313,
-     T_Key = 314,
-     T_Keys = 315,
-     T_Keysdir = 316,
-     T_Kod = 317,
-     T_Mssntp = 318,
-     T_Leapfile = 319,
-     T_Limited = 320,
-     T_Link = 321,
-     T_Listen = 322,
-     T_Logconfig = 323,
-     T_Logfile = 324,
-     T_Loopstats = 325,
-     T_Lowpriotrap = 326,
-     T_Manycastclient = 327,
-     T_Manycastserver = 328,
-     T_Mask = 329,
-     T_Maxclock = 330,
-     T_Maxdist = 331,
-     T_Maxpoll = 332,
-     T_Minclock = 333,
-     T_Mindist = 334,
-     T_Minimum = 335,
-     T_Minpoll = 336,
-     T_Minsane = 337,
-     T_Mode = 338,
-     T_Monitor = 339,
-     T_Month = 340,
-     T_Multicastclient = 341,
-     T_Nic = 342,
-     T_Nolink = 343,
-     T_Nomodify = 344,
-     T_None = 345,
-     T_Nopeer = 346,
-     T_Noquery = 347,
-     T_Noselect = 348,
-     T_Noserve = 349,
-     T_Notrap = 350,
-     T_Notrust = 351,
-     T_Ntp = 352,
-     T_Ntpport = 353,
-     T_NtpSignDsocket = 354,
-     T_Orphan = 355,
-     T_Panic = 356,
-     T_Peer = 357,
-     T_Peerstats = 358,
-     T_Phone = 359,
-     T_Pid = 360,
-     T_Pidfile = 361,
-     T_Pool = 362,
-     T_Port = 363,
-     T_Preempt = 364,
-     T_Prefer = 365,
-     T_Protostats = 366,
-     T_Pw = 367,
-     T_Qos = 368,
-     T_Randfile = 369,
-     T_Rawstats = 370,
-     T_Refid = 371,
-     T_Requestkey = 372,
-     T_Restrict = 373,
-     T_Revoke = 374,
-     T_Saveconfigdir = 375,
-     T_Server = 376,
-     T_Setvar = 377,
-     T_Sign = 378,
-     T_Statistics = 379,
-     T_Stats = 380,
-     T_Statsdir = 381,
-     T_Step = 382,
-     T_Stepout = 383,
-     T_Stratum = 384,
-     T_String = 385,
-     T_Sysstats = 386,
-     T_Tick = 387,
-     T_Time1 = 388,
-     T_Time2 = 389,
-     T_Timingstats = 390,
-     T_Tinker = 391,
-     T_Tos = 392,
-     T_Trap = 393,
-     T_True = 394,
-     T_Trustedkey = 395,
-     T_Ttl = 396,
-     T_Type = 397,
-     T_Unconfig = 398,
-     T_Unpeer = 399,
-     T_Version = 400,
-     T_WanderThreshold = 401,
-     T_Week = 402,
-     T_Wildcard = 403,
-     T_Xleave = 404,
-     T_Year = 405,
-     T_Flag = 406,
-     T_Void = 407,
-     T_EOC = 408,
-     T_Simulate = 409,
-     T_Beep_Delay = 410,
-     T_Sim_Duration = 411,
-     T_Server_Offset = 412,
-     T_Duration = 413,
-     T_Freq_Offset = 414,
-     T_Wander = 415,
-     T_Jitter = 416,
-     T_Prop_Delay = 417,
-     T_Proc_Delay = 418
+     T_Digest = 282,
+     T_Disable = 283,
+     T_Discard = 284,
+     T_Dispersion = 285,
+     T_Double = 286,
+     T_Driftfile = 287,
+     T_Drop = 288,
+     T_Enable = 289,
+     T_End = 290,
+     T_False = 291,
+     T_File = 292,
+     T_Filegen = 293,
+     T_Flag1 = 294,
+     T_Flag2 = 295,
+     T_Flag3 = 296,
+     T_Flag4 = 297,
+     T_Flake = 298,
+     T_Floor = 299,
+     T_Freq = 300,
+     T_Fudge = 301,
+     T_Host = 302,
+     T_Huffpuff = 303,
+     T_Iburst = 304,
+     T_Ident = 305,
+     T_Ignore = 306,
+     T_Includefile = 307,
+     T_Integer = 308,
+     T_Interface = 309,
+     T_Ipv4 = 310,
+     T_Ipv4_flag = 311,
+     T_Ipv6 = 312,
+     T_Ipv6_flag = 313,
+     T_Kernel = 314,
+     T_Key = 315,
+     T_Keys = 316,
+     T_Keysdir = 317,
+     T_Kod = 318,
+     T_Mssntp = 319,
+     T_Leapfile = 320,
+     T_Limited = 321,
+     T_Link = 322,
+     T_Listen = 323,
+     T_Logconfig = 324,
+     T_Logfile = 325,
+     T_Loopstats = 326,
+     T_Lowpriotrap = 327,
+     T_Manycastclient = 328,
+     T_Manycastserver = 329,
+     T_Mask = 330,
+     T_Maxclock = 331,
+     T_Maxdist = 332,
+     T_Maxpoll = 333,
+     T_Minclock = 334,
+     T_Mindist = 335,
+     T_Minimum = 336,
+     T_Minpoll = 337,
+     T_Minsane = 338,
+     T_Mode = 339,
+     T_Monitor = 340,
+     T_Month = 341,
+     T_Multicastclient = 342,
+     T_Nic = 343,
+     T_Nolink = 344,
+     T_Nomodify = 345,
+     T_None = 346,
+     T_Nopeer = 347,
+     T_Noquery = 348,
+     T_Noselect = 349,
+     T_Noserve = 350,
+     T_Notrap = 351,
+     T_Notrust = 352,
+     T_Ntp = 353,
+     T_Ntpport = 354,
+     T_NtpSignDsocket = 355,
+     T_Orphan = 356,
+     T_Panic = 357,
+     T_Peer = 358,
+     T_Peerstats = 359,
+     T_Phone = 360,
+     T_Pid = 361,
+     T_Pidfile = 362,
+     T_Pool = 363,
+     T_Port = 364,
+     T_Preempt = 365,
+     T_Prefer = 366,
+     T_Protostats = 367,
+     T_Pw = 368,
+     T_Qos = 369,
+     T_Randfile = 370,
+     T_Rawstats = 371,
+     T_Refid = 372,
+     T_Requestkey = 373,
+     T_Restrict = 374,
+     T_Revoke = 375,
+     T_Saveconfigdir = 376,
+     T_Server = 377,
+     T_Setvar = 378,
+     T_Sign = 379,
+     T_Statistics = 380,
+     T_Stats = 381,
+     T_Statsdir = 382,
+     T_Step = 383,
+     T_Stepout = 384,
+     T_Stratum = 385,
+     T_String = 386,
+     T_Sysstats = 387,
+     T_Tick = 388,
+     T_Time1 = 389,
+     T_Time2 = 390,
+     T_Timingstats = 391,
+     T_Tinker = 392,
+     T_Tos = 393,
+     T_Trap = 394,
+     T_True = 395,
+     T_Trustedkey = 396,
+     T_Ttl = 397,
+     T_Type = 398,
+     T_Unconfig = 399,
+     T_Unpeer = 400,
+     T_Version = 401,
+     T_WanderThreshold = 402,
+     T_Week = 403,
+     T_Wildcard = 404,
+     T_Xleave = 405,
+     T_Year = 406,
+     T_Flag = 407,
+     T_Void = 408,
+     T_EOC = 409,
+     T_Simulate = 410,
+     T_Beep_Delay = 411,
+     T_Sim_Duration = 412,
+     T_Server_Offset = 413,
+     T_Duration = 414,
+     T_Freq_Offset = 415,
+     T_Wander = 416,
+     T_Jitter = 417,
+     T_Prop_Delay = 418,
+     T_Proc_Delay = 419
    };
 #endif
 /* Tokens.  */
@@ -227,143 +228,144 @@
 #define T_Cryptostats 279
 #define T_Day 280
 #define T_Default 281
-#define T_Disable 282
-#define T_Discard 283
-#define T_Dispersion 284
-#define T_Double 285
-#define T_Driftfile 286
-#define T_Drop 287
-#define T_Enable 288
-#define T_End 289
-#define T_False 290
-#define T_File 291
-#define T_Filegen 292
-#define T_Flag1 293
-#define T_Flag2 294
-#define T_Flag3 295
-#define T_Flag4 296
-#define T_Flake 297
-#define T_Floor 298
-#define T_Freq 299
-#define T_Fudge 300
-#define T_Host 301
-#define T_Huffpuff 302
-#define T_Iburst 303
-#define T_Ident 304
-#define T_Ignore 305
-#define T_Includefile 306
-#define T_Integer 307
-#define T_Interface 308
-#define T_Ipv4 309
-#define T_Ipv4_flag 310
-#define T_Ipv6 311
-#define T_Ipv6_flag 312
-#define T_Kernel 313
-#define T_Key 314
-#define T_Keys 315
-#define T_Keysdir 316
-#define T_Kod 317
-#define T_Mssntp 318
-#define T_Leapfile 319
-#define T_Limited 320
-#define T_Link 321
-#define T_Listen 322
-#define T_Logconfig 323
-#define T_Logfile 324
-#define T_Loopstats 325
-#define T_Lowpriotrap 326
-#define T_Manycastclient 327
-#define T_Manycastserver 328
-#define T_Mask 329
-#define T_Maxclock 330
-#define T_Maxdist 331
-#define T_Maxpoll 332
-#define T_Minclock 333
-#define T_Mindist 334
-#define T_Minimum 335
-#define T_Minpoll 336
-#define T_Minsane 337
-#define T_Mode 338
-#define T_Monitor 339
-#define T_Month 340
-#define T_Multicastclient 341
-#define T_Nic 342
-#define T_Nolink 343
-#define T_Nomodify 344
-#define T_None 345
-#define T_Nopeer 346
-#define T_Noquery 347
-#define T_Noselect 348
-#define T_Noserve 349
-#define T_Notrap 350
-#define T_Notrust 351
-#define T_Ntp 352
-#define T_Ntpport 353
-#define T_NtpSignDsocket 354
-#define T_Orphan 355
-#define T_Panic 356
-#define T_Peer 357
-#define T_Peerstats 358
-#define T_Phone 359
-#define T_Pid 360
-#define T_Pidfile 361
-#define T_Pool 362
-#define T_Port 363
-#define T_Preempt 364
-#define T_Prefer 365
-#define T_Protostats 366
-#define T_Pw 367
-#define T_Qos 368
-#define T_Randfile 369
-#define T_Rawstats 370
-#define T_Refid 371
-#define T_Requestkey 372
-#define T_Restrict 373
-#define T_Revoke 374
-#define T_Saveconfigdir 375
-#define T_Server 376
-#define T_Setvar 377
-#define T_Sign 378
-#define T_Statistics 379
-#define T_Stats 380
-#define T_Statsdir 381
-#define T_Step 382
-#define T_Stepout 383
-#define T_Stratum 384
-#define T_String 385
-#define T_Sysstats 386
-#define T_Tick 387
-#define T_Time1 388
-#define T_Time2 389
-#define T_Timingstats 390
-#define T_Tinker 391
-#define T_Tos 392
-#define T_Trap 393
-#define T_True 394
-#define T_Trustedkey 395
-#define T_Ttl 396
-#define T_Type 397
-#define T_Unconfig 398
-#define T_Unpeer 399
-#define T_Version 400
-#define T_WanderThreshold 401
-#define T_Week 402
-#define T_Wildcard 403
-#define T_Xleave 404
-#define T_Year 405
-#define T_Flag 406
-#define T_Void 407
-#define T_EOC 408
-#define T_Simulate 409
-#define T_Beep_Delay 410
-#define T_Sim_Duration 411
-#define T_Server_Offset 412
-#define T_Duration 413
-#define T_Freq_Offset 414
-#define T_Wander 415
-#define T_Jitter 416
-#define T_Prop_Delay 417
-#define T_Proc_Delay 418
+#define T_Digest 282
+#define T_Disable 283
+#define T_Discard 284
+#define T_Dispersion 285
+#define T_Double 286
+#define T_Driftfile 287
+#define T_Drop 288
+#define T_Enable 289
+#define T_End 290
+#define T_False 291
+#define T_File 292
+#define T_Filegen 293
+#define T_Flag1 294
+#define T_Flag2 295
+#define T_Flag3 296
+#define T_Flag4 297
+#define T_Flake 298
+#define T_Floor 299
+#define T_Freq 300
+#define T_Fudge 301
+#define T_Host 302
+#define T_Huffpuff 303
+#define T_Iburst 304
+#define T_Ident 305
+#define T_Ignore 306
+#define T_Includefile 307
+#define T_Integer 308
+#define T_Interface 309
+#define T_Ipv4 310
+#define T_Ipv4_flag 311
+#define T_Ipv6 312
+#define T_Ipv6_flag 313
+#define T_Kernel 314
+#define T_Key 315
+#define T_Keys 316
+#define T_Keysdir 317
+#define T_Kod 318
+#define T_Mssntp 319
+#define T_Leapfile 320
+#define T_Limited 321
+#define T_Link 322
+#define T_Listen 323
+#define T_Logconfig 324
+#define T_Logfile 325
+#define T_Loopstats 326
+#define T_Lowpriotrap 327
+#define T_Manycastclient 328
+#define T_Manycastserver 329
+#define T_Mask 330
+#define T_Maxclock 331
+#define T_Maxdist 332
+#define T_Maxpoll 333
+#define T_Minclock 334
+#define T_Mindist 335
+#define T_Minimum 336
+#define T_Minpoll 337
+#define T_Minsane 338
+#define T_Mode 339
+#define T_Monitor 340
+#define T_Month 341
+#define T_Multicastclient 342
+#define T_Nic 343
+#define T_Nolink 344
+#define T_Nomodify 345
+#define T_None 346
+#define T_Nopeer 347
+#define T_Noquery 348
+#define T_Noselect 349
+#define T_Noserve 350
+#define T_Notrap 351
+#define T_Notrust 352
+#define T_Ntp 353
+#define T_Ntpport 354
+#define T_NtpSignDsocket 355
+#define T_Orphan 356
+#define T_Panic 357
+#define T_Peer 358
+#define T_Peerstats 359
+#define T_Phone 360
+#define T_Pid 361
+#define T_Pidfile 362
+#define T_Pool 363
+#define T_Port 364
+#define T_Preempt 365
+#define T_Prefer 366
+#define T_Protostats 367
+#define T_Pw 368
+#define T_Qos 369
+#define T_Randfile 370
+#define T_Rawstats 371
+#define T_Refid 372
+#define T_Requestkey 373
+#define T_Restrict 374
+#define T_Revoke 375
+#define T_Saveconfigdir 376
+#define T_Server 377
+#define T_Setvar 378
+#define T_Sign 379
+#define T_Statistics 380
+#define T_Stats 381
+#define T_Statsdir 382
+#define T_Step 383
+#define T_Stepout 384
+#define T_Stratum 385
+#define T_String 386
+#define T_Sysstats 387
+#define T_Tick 388
+#define T_Time1 389
+#define T_Time2 390
+#define T_Timingstats 391
+#define T_Tinker 392
+#define T_Tos 393
+#define T_Trap 394
+#define T_True 395
+#define T_Trustedkey 396
+#define T_Ttl 397
+#define T_Type 398
+#define T_Unconfig 399
+#define T_Unpeer 400
+#define T_Version 401
+#define T_WanderThreshold 402
+#define T_Week 403
+#define T_Wildcard 404
+#define T_Xleave 405
+#define T_Year 406
+#define T_Flag 407
+#define T_Void 408
+#define T_EOC 409
+#define T_Simulate 410
+#define T_Beep_Delay 411
+#define T_Sim_Duration 412
+#define T_Server_Offset 413
+#define T_Duration 414
+#define T_Freq_Offset 415
+#define T_Wander 416
+#define T_Jitter 417
+#define T_Prop_Delay 418
+#define T_Proc_Delay 419
 
 
 
@@ -391,7 +393,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 395 "ntp_parser.h"
+#line 397 "../../ntpd/ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
