@@ -22,8 +22,7 @@
 struct savekey {
 	struct savekey *next;
 	union {
-		long bogon;		/* Make sure nonempty */
-		u_char MD5_key[32];	/* MD5 key */
+		u_char MD5_key[64];	/* for keys up to to 512 bits */
 	} k;
 	keyid_t keyid;		/* key identifier */
 	int	type;		/* key type */

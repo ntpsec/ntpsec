@@ -1,4 +1,4 @@
-* Provide all of OpenSSL's signature methods for ntp.keys (FIPS xxx).
+* Provide all of OpenSSL's signature methods for ntp.keys (FIPS 140-2).
 (4.2.5p239-RC) 2009/10/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1357] bogus assert from refclock_shm.
 * [Bug 1359] Debug message cleanup.
