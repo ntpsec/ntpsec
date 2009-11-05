@@ -70,7 +70,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="bin/Debug/ntpdc.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -162,7 +162,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="bin/Release/ntpdc.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"

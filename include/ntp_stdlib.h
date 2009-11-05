@@ -36,6 +36,14 @@
 extern	void	msyslog		(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
 
+/*
+ * When building without OpenSSL, use one constant #define, NID_md5,
+ * for the keytype.  MD5 is the only digest supported without OpenSSL.
+ */
+#ifndef OPENSSL
+#define NID_md5	4	/* from openssl/objects.h */
+#endif
+
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
 extern	int	authdecrypt	(keyid_t, u_int32 *, int, int);

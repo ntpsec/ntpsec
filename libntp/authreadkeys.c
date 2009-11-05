@@ -1,6 +1,7 @@
 /*
  * authreadkeys.c - routines to support the reading of the key file
  */
+#include <config.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -8,8 +9,6 @@
 #include "ntp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
-
-#undef OPENSSL	/* disable  OpenSSL for text */
 
 #ifdef OPENSSL
 #include "openssl/objects.h"
@@ -101,13 +100,13 @@ authreadkeys(
 	while ((line = fgets(buf, sizeof buf, fp)) != NULL) {
 		token = nexttok(&line);
 		if (token == NULL)
-		    continue;
+			continue;
 		
 		/*
 		 * First is key number.  See if it is okay.
 		 */
 		keyno = atoi(token);
-		if (keyno == NULL) {
+		if (keyno == 0) {
 			msyslog(LOG_ERR,
 			    "cannot change key %s", token);
 			continue;
@@ -145,7 +144,7 @@ authreadkeys(
 			    "invalid key type for key %ld", keyno);
 			continue;
 		}
-#else
+#else	/* !OPENSSL */
 
 		/*
 		 * The key type is unused, but is required to be 'M' or
@@ -156,7 +155,8 @@ authreadkeys(
 			    "invalid key type for key %ld", keyno);
 			continue;
 		}
-#endif /* OPENSSL */
+		keytype = NID_md5;
+#endif /* !OPENSSL */
 
 		/*
 		 * Finally, get key and insert it
