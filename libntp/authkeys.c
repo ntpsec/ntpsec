@@ -1,7 +1,6 @@
 /*
  * authkeys.c - routines to manage the storage of authentication keys
  */
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -143,20 +142,42 @@ authhavekey(
 	if (keyno == 0 || keyno == cache_keyid)
 		return (1);
 
+	/*
+	 * Seach the bin for the key. If found and the key type
+	 * is zero, somebody marked it trusted without specifying
+	 * a key or key type. In this case consider the key missing.
+	 */
 	authkeyuncached++;
 	sk = key_hash[KEYHASH(keyno)];
 	while (sk != 0) {
-		if (keyno == sk->keyid)
-		    break;
+		if (keyno == sk->keyid) {
+			if (sk->type == 0) {
+				authkeynotfound++;
+				return (0);
+			}
+		}
+		break;
+
 		sk = sk->next;
 	}
+
+	/*
+	 * If the key is not found, or if it is found but not trusted,
+	 * the key is not considered found.
+	 */
 	if (sk == 0) {
 		authkeynotfound++;
 		return (0);
-	} else if (!(sk->flags & KEY_TRUSTED)) {
+
+	}
+	if (!(sk->flags & KEY_TRUSTED)) {
 		authnokey++;
 		return (0);
 	}
+
+	/*
+	 * The key is found and trusted. Initialize the key cache.
+	 */
 	cache_keyid = sk->keyid;
 	cache_type = sk->type;
 	cache_flags = sk->flags;
@@ -199,26 +220,36 @@ authtrust(
 {
 	struct savekey *sk;
 
-#ifdef DEBUG
-	if (debug > 2)
-		printf("authtrust: keyid %08x life %lu\n", keyno, trust);
-#endif
+	/*
+	 * Search bin for key; if it does not exist and is untrusted,
+	 * forget it.
+	 */
 	sk = key_hash[KEYHASH(keyno)];
 	while (sk != 0) {
 		if (keyno == sk->keyid)
 		    break;
+
 		sk = sk->next;
 	}
-
 	if (sk == 0 && !trust)
 		return;
-	
+
+	/*
+	 * There are two conditions remaining. Either it does not
+	 * exist and is to be trusted or it does exist and is or is
+	 * not to be trusted.
+	 */	
 	if (sk != 0) {
 		if (cache_keyid == keyno) {
 			cache_flags = 0;
 			cache_keyid = 0;
 		}
 
+		/*
+		 * Key exists. If it is to be trusted, say so and
+		 * update its lifetime. If not, return it to the
+		 * free list.
+		 */
 		if (trust > 0) {
 			sk->flags |= KEY_TRUSTED;
 			if (trust > 1)
@@ -227,7 +258,6 @@ authtrust(
 				sk->lifetime = 0;
 			return;
 		}
-
 		sk->flags &= ~KEY_TRUSTED; {
 			struct savekey *skp;
 
@@ -248,6 +278,11 @@ authtrust(
 		return;
 	}
 
+	/*
+	 * Here there is not key, but the key is to be trusted. There
+	 * seems to be a disconnect here. Here we allocate a new key,
+	 * but do not specify a key type, key or key length.
+	 */ 
 	if (authnumfreekeys == 0)
 	    if (auth_moremem() == 0)
 		return;
@@ -255,8 +290,9 @@ authtrust(
 	sk = authfreekeys;
 	authfreekeys = sk->next;
 	authnumfreekeys--;
-
 	sk->keyid = keyno;
+	sk->type = 0;
+	sk->keylen = 0;
 	sk->flags = KEY_TRUSTED;
 	sk->next = key_hash[KEYHASH(keyno)];
 	key_hash[KEYHASH(keyno)] = sk;
@@ -288,6 +324,7 @@ authistrusted(
 	if (sk == 0) {
 		authkeynotfound++;
 		return (0);
+
 	} else if (!(sk->flags & KEY_TRUSTED)) {
 		authkeynotfound++;
 		return (0);
@@ -313,7 +350,7 @@ MD5auth_setkey(
 	sk = key_hash[KEYHASH(keyno)];
 	while (sk != NULL) {
 		if (keyno == sk->keyid) {
-			sk->type = keytype;;
+			sk->type = keytype;
 			sk->keylen = min(len, sizeof(sk->k.MD5_key));
 #ifndef DISABLE_BUG1243_FIX
 			memcpy(sk->k.MD5_key, key, sk->keylen);
@@ -353,6 +390,10 @@ MD5auth_setkey(
 #endif
 	sk->next = key_hash[KEYHASH(keyno)];
 	key_hash[KEYHASH(keyno)] = sk;
+#ifdef DEBUG
+	if (debug)
+		printf("auth_setkey: key %d type %d\n", sk->keyid, sk->type);
+#endif
 	authnumkeys++;
 }
 

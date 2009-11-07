@@ -33,7 +33,6 @@ sntp_SOURCES =		\
 	log.c		\
 	log.h		\
 	main.c		\
-	netutils.h	\
 	networking.c	\
 	networking.h	\
 	sntp-opts.c	\

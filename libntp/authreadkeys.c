@@ -12,7 +12,7 @@
 
 #ifdef OPENSSL
 #include "openssl/objects.h"
-#endif /* OPENSSL *.
+#endif /* OPENSSL */
 
 /* Forwards */
 static char *nexttok (char **);
@@ -71,8 +71,8 @@ authreadkeys(
 {
 	FILE *fp;
 	char *line;
-	char *token;
-	u_long keyno;
+	char *token, *keystr;
+	keyid_t keyno;
 	int keytype;
 	char buf[512];		/* lots of room for line */
 
@@ -81,7 +81,8 @@ authreadkeys(
 	 */
 	fp = fopen(file, "r");
 	if (fp == NULL) {
-		msyslog(LOG_ERR, "can't open key file %s: %m", file);
+		msyslog(LOG_ERR, "authreadkeys: file %s: %m",
+		    file);
 		return (0);
 	}
 #ifdef OPENSSL
@@ -108,24 +109,24 @@ authreadkeys(
 		keyno = atoi(token);
 		if (keyno == 0) {
 			msyslog(LOG_ERR,
-			    "cannot change key %s", token);
+			    "authreadkeys: cannot change key %s", token);
 			continue;
 		}
 
 		if (keyno > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
-			    "key %s > %d reserved for autokeyd", token,
-			    NTP_MAXKEY);
+			    "authreadkeys: key %s > %d reserved for Autokey",
+			    token, NTP_MAXKEY);
 			continue;
 		}
 
 		/*
-		 * Next is keytype.  See if that is all right.
+		 * Next is keytype. See if that is all right.
 		 */
 		token = nexttok(&line);
 		if (token == NULL) {
 			msyslog(LOG_ERR,
-			    "no key type for key %ld", keyno);
+			    "authreadkeys: no key type for key %d", keyno);
 			continue;
 		}
 #ifdef OPENSSL
@@ -134,17 +135,24 @@ authreadkeys(
 		 * If the key type is 'M' or 'm', it is replaced by 'MD5".
 		 * In any case, it must be one of the algorithms supported
 		 * by OpenSSL. The key type is the NID used by the message
-		 * digest algorithm.
+		 * digest algorithm. Ther are a number of inconsistencies in
+		 * the OpenSSL database. We attempt to discover them here
+		 * and prevent use of inconsistent data.
 		 */
-		if (*token == 'M' || *token == 'm')
+		if (strcmp(token, "M") == 0 || strcmp(token, "m") == 0)
 			token  = "MD5";
 		keytype = OBJ_sn2nid(token);
-		if (keytype == 0) {
+		if (keytype == 0 || keytype > 255) {
 			msyslog(LOG_ERR,
-			    "invalid key type for key %ld", keyno);
+			    "authreadkeys: invalid type for key %d", keyno);
 			continue;
 		}
-#else	/* !OPENSSL */
+		if (EVP_get_digestbynid(keytype) == NULL) {
+			msyslog(LOG_ERR,
+			    "authreadkeys: no algorithm for key %d", keyno);
+			continue;
+		}
+#else /* OPENSSL */
 
 		/*
 		 * The key type is unused, but is required to be 'M' or
@@ -152,22 +160,23 @@ authreadkeys(
 		 */
 		if (!(*token == 'M' || *token == 'm')) {
 			msyslog(LOG_ERR,
-			    "invalid key type for key %ld", keyno);
+			    "authreadkeys: invalid type for key %d", keyno);
 			continue;
 		}
-		keytype = NID_md5;
-#endif /* !OPENSSL */
+		keytype = KEY_TYPE_MD5
+#endif /* OPENSSL */
+		keystr = token;
 
 		/*
 		 * Finally, get key and insert it
 		 */
 		token = nexttok(&line);
-		if (token == NULL)
+		if (token == NULL) {
 			msyslog(LOG_ERR,
-			    "no key for key %ld", keyno);
-		else
-			MD5auth_setkey(keyno, keytype, token,
-			    strlen(token));
+			    "authreadkeys: no key for key %d", keyno);
+			continue;
+		}
+		MD5auth_setkey(keyno, keytype, token, strlen(token));
 	}
 	fclose(fp);
 	return (1);
