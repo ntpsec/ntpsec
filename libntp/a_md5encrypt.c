@@ -77,6 +77,7 @@ MD5authdecrypt(
 #ifdef OPENSSL
 	EVP_MD_CTX ctx;
 #else
+	MD5_CTX	md5;
 #endif /* OPENSSL */
 
 	/*
