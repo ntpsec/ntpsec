@@ -1,3 +1,4 @@
+* html/authopt.html update from Dave Mills.
 * Remove unused file from sntp/Makefile.am's distribution list.
 * new crypto signature cleanup.
 (4.2.5p240-RC) 2009/11/05 Released by Harlan Stenn <stenn@ntp.org>
