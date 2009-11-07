@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  November  5, 2009 at 03:57:50 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  November  7, 2009 at 05:35:29 AM by AutoGen 5.9.9pre5
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -47,7 +47,7 @@ This is the automatically generated usage text for ntpq:
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.5p239-RC
+ntpq - standard NTP query program - Ver. 4.2.5p240-RC
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
