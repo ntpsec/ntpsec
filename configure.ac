@@ -1736,32 +1736,50 @@ case "$ac_cv_arg_setpgrp_negpid" in
  yes) AC_DEFINE(UDP_BACKWARDS_SETOWN, 1, [Do we set process groups with -pid?]) ;;
 esac
 
-AC_CACHE_CHECK([if we need a ctty for F_SETOWN], ac_cv_func_ctty_for_f_setown,
-[[case "$host" in
- *-*-bsdi[23]*)
-    ans=yes
-    ;;
- *-*-freebsd*)
-    ans=yes
-    ;;
- *-*-netbsd*3.[0-8]*|*-*-netbsd*[0-2].*|*-*-netbsd*3.99.[0-7])
-    ans=yes
-    ;;
- *-*-openbsd*)
-    ans=yes
-    ;;
- *-*-osf*)
-    ans=yes
-    ;;
- *-*-darwin*)
-    ans=yes
-    ;;
- *) ans=no
-    ;;
-esac
-ac_cv_func_ctty_for_f_setown=$ans]])
-case "$ac_cv_func_ctty_for_f_setown" in
- yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
+AC_CACHE_CHECK(
+    [if we need a ctty for F_SETOWN],
+    ntp_cv_func_ctty_for_f_setown,
+    [
+	case "$host" in
+	 *-*-bsdi[23]*)
+	    ans=yes
+	    ;;
+	 *-*-freebsd*)
+	    ans=yes
+	    ;;
+	# NetBSD versions prior to 3.99.8 require a CTTY for F_SETOWN,
+	# while later versions will fail the ioctl(TIOCSCTTY, 0) call
+	# and so must not have USE_FSETOWNCTTY.
+	 *-*-netbsdaout3.[0-8]*|*-*-netbsdaout[0-2].*|*-*-netbsdaout3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-netbsdecoff3.[0-8]*|*-*-netbsdecoff[0-2].*|*-*-netbsdecoff3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-netbsdelf3.[0-8]*|*-*-netbsdelf[0-2].*|*-*-netbsdelf3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-netbsd3.[0-8]*|*-*-netbsd[0-2].*|*-*-netbsd3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-openbsd*)
+	    ans=yes
+	    ;;
+	 *-*-osf*)
+	    ans=yes
+	    ;;
+	 *-*-darwin*)
+	    ans=yes
+	    ;;
+	 *) 
+	    ans=no
+	esac
+	ntp_cv_func_ctty_for_f_setown=$ans
+    ]
+)
+case "$ntp_cv_func_ctty_for_f_setown" in
+ yes)
+    AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?])
 esac
 
 AC_CACHE_CHECK([if the OS fails to clear cached routes when more specific routes become available], ac_cv_os_routeupdates,

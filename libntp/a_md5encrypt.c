@@ -31,7 +31,7 @@ MD5authencrypt(
 	)
 {
 	u_char		digest[64];	/* for SHA-512 */
-	unsigned	len;
+	u_int		len;
 #ifdef OPENSSL
 	const EVP_MD *	digest_type;
 	EVP_MD_CTX	ctx;
@@ -43,6 +43,7 @@ MD5authencrypt(
 	 * MD5 with key identifier concatenated with packet.
 	 */
 #ifdef OPENSSL
+	INIT_SSL(NULL);
 	digest_type = EVP_get_digestbynid(type);
 	NTP_INSIST(digest_type != NULL);
 	EVP_DigestInit(&ctx, digest_type);
@@ -76,8 +77,9 @@ MD5authdecrypt(
 	)
 {
 	u_char		digest[64];	/* for SHA-512 */
-	unsigned	len;
+	u_int		len;
 #ifdef OPENSSL
+	const EVP_MD *	digest_type;
 	EVP_MD_CTX	ctx;
 #else
 	MD5_CTX		md5;
@@ -87,7 +89,10 @@ MD5authdecrypt(
 	 * MD5 with key identifier concatenated with packet.
 	 */
 #ifdef OPENSSL
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
+	INIT_SSL(NULL);
+	digest_type = EVP_get_digestbynid(type);
+	NTP_INSIST(digest_type != NULL);
+	EVP_DigestInit(&ctx, digest_type);
 	EVP_DigestUpdate(&ctx, key, (u_int)cache_keylen);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
@@ -98,7 +103,7 @@ MD5authdecrypt(
 	MD5Final(digest, &md5);
 	len = 16;
 #endif /* OPENSSL */
-	if ((unsigned)size != len + 4)
+	if ((u_int)size != len + 4)
 		return (0);
 
 	return (!memcmp(digest, (char *)pkt + length + 4, len));
@@ -115,8 +120,9 @@ addr2refid(sockaddr_u *addr)
 	u_char		digest[20];
 	u_int32		addr_refid;
 #ifdef OPENSSL
+	const EVP_MD *	digest_type;
 	EVP_MD_CTX	ctx;
-	unsigned	len;
+	u_int		len;
 #else
 	MD5_CTX	md5;
 #endif /* OPENSSL */
@@ -125,7 +131,10 @@ addr2refid(sockaddr_u *addr)
 		return (NSRCADR(addr));
 
 #ifdef OPENSSL
-	EVP_DigestInit(&ctx, EVP_md5());
+	INIT_SSL(NULL);
+	digest_type = EVP_md5();
+	NTP_INSIST(digest_type != NULL);
+	EVP_DigestInit(&ctx, digest_type);
 	EVP_DigestUpdate(&ctx, (u_char *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
 	EVP_DigestFinal(&ctx, digest, &len);

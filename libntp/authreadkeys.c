@@ -84,10 +84,7 @@ authreadkeys(
 		msyslog(LOG_ERR, "can't open key file %s: %m", file);
 		return (0);
 	}
-#ifdef OPENSSL
-	OpenSSL_add_all_algorithms();
-#endif /* OPENSSL */
-
+	INIT_SSL();
 
 	/*
 	 * Remove all existing keys
@@ -163,10 +160,9 @@ authreadkeys(
 		 */
 		token = nexttok(&line);
 		if (token == NULL)
-			msyslog(LOG_ERR,
-			    "no key for key %ld", keyno);
+			msyslog(LOG_ERR, "no key for key %ld", keyno);
 		else
-			MD5auth_setkey(keyno, keytype, token,
+			MD5auth_setkey(keyno, keytype, (u_char *)token,
 			    strlen(token));
 	}
 	fclose(fp);

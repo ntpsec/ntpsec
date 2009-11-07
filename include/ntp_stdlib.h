@@ -156,6 +156,19 @@ extern int	ipv6_works;
 typedef void (*pset_tod_using)(const char *);
 extern pset_tod_using	set_tod_using;
 
+/* ssl_init.c */
+#ifdef OPENSSL
+extern	void	ssl_init	(void);
+extern	int	ssl_init_done;
+#define	INIT_SSL()				\
+	do {					\
+		if (!ssl_init_done)		\
+			ssl_init();		\
+	} while (0)
+#else	/* !OPENSSL follows */
+#define	INIT_SSL()	do {} while (0)
+#endif
+
 /* lib/isc/win32/strerror.c
  *
  * To minimize Windows-specific changes to the rest of the NTP code,

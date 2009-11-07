@@ -1,3 +1,5 @@
+* [Bug 1366] ioctl(TIOCSCTTY, 0) fails on NetBSD *[0-2].* > 3.99.7.
+* CID 87 dead code in ntpq.c atoascii().
 (4.2.5p240-RC) 2009/11/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1364] clock_gettime() not detected, need -lrt on Debian 5.0.3.
 * Provide all of OpenSSL's signature methods for ntp.keys (FIPS 140-2).
