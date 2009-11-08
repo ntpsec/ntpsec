@@ -1748,15 +1748,10 @@ AC_CACHE_CHECK(
 	    ans=yes
 	    ;;
 	# NetBSD versions prior to 3.99.8 require a CTTY for F_SETOWN,
-	# while later versions will fail the ioctl(TIOCSCTTY, 0) call
-	# and so must not have USE_FSETOWNCTTY.
-	 *-*-netbsdaout3.[0-8]*|*-*-netbsdaout[0-2].*|*-*-netbsdaout3.99.[0-7])
-	    ans=yes
-	    ;;
-	 *-*-netbsdecoff3.[0-8]*|*-*-netbsdecoff[0-2].*|*-*-netbsdecoff3.99.[0-7])
-	    ans=yes
-	    ;;
-	 *-*-netbsdelf3.[0-8]*|*-*-netbsdelf[0-2].*|*-*-netbsdelf3.99.[0-7])
+	# while later versions will fail a ioctl(TIOCSCTTY, 0) call in
+	# some cases and so should not have USE_FSETOWNCTTY.  "netbsd"
+	# in $host may be followed by "aout", "ecoff", or "elf".
+	 *-*-netbsd*[a-z]3.[0-8]*|*-*-netbsd*[a-z][0-2].*|*-*-netbsd*[a-z]3.99.[0-7])
 	    ans=yes
 	    ;;
 	 *-*-netbsd3.[0-8]*|*-*-netbsd[0-2].*|*-*-netbsd3.99.[0-7])
