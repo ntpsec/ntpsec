@@ -1693,6 +1693,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\ssl_init.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\statestr.c"
 				>
 				<FileConfiguration

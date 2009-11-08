@@ -8,6 +8,7 @@
 
 #include <ntp_fp.h>
 #include <ntp_types.h>
+#include <ntp_stdlib.h>
 #ifdef OPENSSL
 #include <ntp_crypto.h>
 #endif /* OPENSSL */
@@ -139,7 +140,7 @@ typedef char s_char;
  * Miscellaneous stuff
  */
 #define NTP_MAXKEY	65535	/* max authentication key number */
-#define	KEY_TYPE_MD5	4	/* MD5 digest NID */
+#define	KEY_TYPE_MD5	NID_md5	/* MD5 digest NID */
 /*
  * Limits of things
  */
@@ -540,10 +541,10 @@ struct pkt {
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */
 
-#define	LEN_PKT_NOMAC	12 * sizeof(u_int32) /* min header length */
-#define MIN_MAC_LEN	1 * sizeof(u_int32)	/* crypto_NAK */
-#define MAX_MD5_LEN	5 * sizeof(u_int32)	/* MD5 */
-#define	MAX_MAC_LEN	6 * sizeof(u_int32)	/* SHA */
+#define	LEN_PKT_NOMAC	(12 * sizeof(u_int32)) /* min header length */
+#define MIN_MAC_LEN	(1 * sizeof(u_int32))	/* crypto_NAK */
+#define MAX_MD5_LEN	(5 * sizeof(u_int32))	/* MD5 */
+#define	MAX_MAC_LEN	(6 * sizeof(u_int32))	/* SHA */
 
 	/*
 	 * The length of the packet less MAC must be a multiple of 64

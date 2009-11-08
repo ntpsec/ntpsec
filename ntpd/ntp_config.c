@@ -1815,7 +1815,7 @@ config_auth(
 		int	rankey;
 
 		rankey = ntp_random();
-		MD5auth_setkey(req_keyid, KEY_TYPE_MD5, (u_char *)&rankey,
+		MD5auth_setkey(req_keyid, NID_md5, (u_char *)&rankey,
 		    sizeof(rankey));
 		authtrust(req_keyid, 1);
 	}

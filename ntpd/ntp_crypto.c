@@ -3661,6 +3661,7 @@ crypto_setup(void)
 {
 	struct pkey_info *pinfo; /* private/public key */
 	char	filename[MAXFILENAME]; /* file name buffer */
+	char *	randfile;
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	l_fp	seed;		/* crypto PRNG seed as NTP timestamp */
 	u_int	len;
@@ -3676,14 +3677,7 @@ crypto_setup(void)
 		    "crypto_setup: spurious crypto command");
 		return;
 	}
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: OpenSSL version mismatch. Built against %lx, you have %lx",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-                exit (-1);
-        }
-	ERR_load_crypto_strings();
-	OpenSSL_add_all_algorithms();
+	ssl_check_version();
 
 	/*
 	 * Load required random seed file and seed the random number
@@ -3694,32 +3688,29 @@ crypto_setup(void)
 	 */
 	if (!RAND_status()) {
 		if (rand_file == NULL) {
-			RAND_file_name(filename, MAXFILENAME);
-			rand_file = filename;
+			RAND_file_name(filename, sizeof(filename));
+			randfile = filename;
 		} else if (*rand_file != '/') {
-			snprintf(filename, MAXFILENAME, "%s/%s",
+			snprintf(filename, sizeof(filename), "%s/%s",
 			    keysdir, rand_file);
-			rand_file = filename;
-		}
-		if (rand_file == NULL) {
-			msyslog(LOG_ERR,
-			    "crypto_setup: seed file unknown name");
-			exit (-1);
-		}
-		if ((bytes = RAND_load_file(rand_file, -1)) == 0) {
+			randfile = filename;
+		} else
+			randfile = rand_file;
+
+		if ((bytes = RAND_load_file(randfile, -1)) == 0) {
 			msyslog(LOG_ERR,
 			    "crypto_setup: random seed file %s missing",
-			    rand_file);
+			    randfile);
 			exit (-1);
 		}
 		get_systime(&seed);
 		RAND_seed(&seed, sizeof(l_fp));
-		RAND_write_file(rand_file);
+		RAND_write_file(randfile);
 #ifdef DEBUG
 		if (debug)
 			printf(
 			    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
-			    SSLeay(), rand_file, bytes);
+			    SSLeay(), randfile, bytes);
 #endif
 	}
 

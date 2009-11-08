@@ -42,6 +42,9 @@ $(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.def $(std
 
 $(PROGRAMS): $(LDADD)
 
+../libntp/libntp.a:
+	cd ../libntp && $(MAKE)
+
 $(top_srcdir)/version :
 	cd $(top_srcdir) && $(MAKE) version
 

@@ -738,7 +738,7 @@ process_control(
 	res_authenticate = 0;
 	res_keyid = 0;
 	res_authokay = 0;
-	req_count = (int)htons(pkt->count);
+	req_count = (int)ntohs(pkt->count);
 	datanotbinflag = 0;
 	datalinelen = 0;
 	datapt = rpkt.data;

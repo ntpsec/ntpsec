@@ -14,10 +14,9 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
-/* Don't include ISC's version of IPv6 variables and structures */
-#define ISC_IPV6_H 1
 #include "isc/net.h"
 #include "isc/result.h"
+#include <ssl_applink.c>
 
 #include "ntpdc-opts.h"
 
@@ -51,12 +50,7 @@ static	const char *	prompt = "ntpdc> ";	/* prompt to ask him about */
 static	u_long	info_auth_keyid;
 static int keyid_entered = 0;
 
-/*
- * Type of key md5
- */
-#define	KEY_TYPE_MD5	4
-
-static	int info_auth_keytype = KEY_TYPE_MD5;	/* MD5 */
+static	int info_auth_keytype = NID_md5;	/* MD5 */
 u_long	current_time;		/* needed by authkeys; not used */
 
 /*
@@ -298,6 +292,7 @@ ntpdcmain(
 #endif
 
 	init_lib();	/* sets up ipv4_works, ipv6_works */
+	ssl_applink();
 
 	/* Check to see if we have IPv6. Otherwise default to IPv4 */
 	if (!ipv6_works)
@@ -928,25 +923,23 @@ sendrequest(
 		qpkt.auth_seq = AUTH_SEQ(0, 0);
 		return sendpkt((char *)&qpkt, req_pkt_size);
 	} else {
-		l_fp ts;
-		int maclen = 0;
-		char *pass = "\0";
-		struct req_pkt_tail *qpktail;
-
-		qpktail = (struct req_pkt_tail *)((char *)&qpkt + req_pkt_size
-		    + MAX_MAC_LEN - sizeof(struct req_pkt_tail));
+		u_long	key_id;
+		l_fp	ts;
+		l_fp *	ptstamp;
+		int	maclen;
+		char *	pass;
 
 		if (info_auth_keyid == 0) {
 			if (((struct conf_peer *)qpkt.data)->keyid > 0)
 				info_auth_keyid = ((struct conf_peer *)qpkt.data)->keyid;
 			else {
-				maclen = getkeyid("Keyid: ");
-				if (maclen == 0) {
+				key_id = getkeyid("Keyid: ");
+				if (key_id == 0) {
 					(void) fprintf(stderr,
 					    "Invalid key identifier\n");
 					return 1;
 				}
-				info_auth_keyid = maclen;
+				info_auth_keyid = key_id;
 			}
 		}
 		if (!authistrusted(info_auth_keyid)) {
@@ -957,13 +950,15 @@ sendrequest(
 				return (1);
 			}
 			authusekey(info_auth_keyid, info_auth_keytype,
-				   (const u_char *)pass);
+				   (u_char *)pass);
 			authtrust(info_auth_keyid, 1);
 		}
 		qpkt.auth_seq = AUTH_SEQ(1, 0);
 		get_systime(&ts);
 		L_ADD(&ts, &delay_time);
-		HTONL_FP(&ts, &qpktail->tstamp);
+		ptstamp = (void *)((char *)&qpkt + req_pkt_size 
+		    - sizeof(qpkt.tstamp));
+		HTONL_FP(&ts, ptstamp);
 		maclen = authencrypt(info_auth_keyid, (u_int32 *)&qpkt,
 		    req_pkt_size);
 		if (maclen == 0) {  
@@ -1776,12 +1771,12 @@ keytype(
 {
 	if (pcmd->nargs == 0)
 	    fprintf(fp, "keytype is %s\n",
-		    (info_auth_keytype == KEY_TYPE_MD5) ? "MD5" : "???");
+		    (info_auth_keytype == NID_md5) ? "MD5" : "???");
 	else
 	    switch (*(pcmd->argval[0].string)) {
 		case 'm':
 		case 'M':
-		    info_auth_keytype = KEY_TYPE_MD5;
+		    info_auth_keytype = NID_md5;
 		    break;
 
 		default:

@@ -134,8 +134,8 @@ struct req_pkt {
 	char data[MAXFILENAME + 48];	/* data area [32 prev](176 byte max) */
 					/* struct conf_peer must fit */
 	l_fp tstamp;			/* time stamp, for authentication */
-	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MD5_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
+	keyid_t keyid;			/* (optional) encryption key */
+	char mac[MAX_MD5_LEN-sizeof(u_int32)]; /* (optional) auth code */
 };
 
 /*
@@ -144,8 +144,8 @@ struct req_pkt {
  */
 struct req_pkt_tail {
 	l_fp tstamp;			/* time stamp, for authentication */
-	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MD5_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
+	keyid_t keyid;			/* (optional) encryption key */
+	char mac[MAX_MD5_LEN-sizeof(u_int32)]; /* (optional) auth code */
 };
 
 /*
@@ -153,7 +153,7 @@ struct req_pkt_tail {
  */
 #define	REQ_LEN_HDR	8	/* 4 * u_char + 2 * u_short */
 #define	REQ_LEN_MAC	(sizeof(struct req_pkt))
-#define	REQ_LEN_NOMAC	(sizeof(struct req_pkt) - MAX_MAC_LEN)
+#define	REQ_LEN_NOMAC	(sizeof(struct req_pkt) - MAX_MD5_LEN)
 
 /*
  * A response packet.  The length here is variable, this is a

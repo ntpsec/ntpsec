@@ -149,15 +149,14 @@ authhavekey(
 	 */
 	authkeyuncached++;
 	sk = key_hash[KEYHASH(keyno)];
-	while (sk != 0) {
+	while (sk != NULL) {
 		if (keyno == sk->keyid) {
 			if (sk->type == 0) {
 				authkeynotfound++;
 				return (0);
 			}
+			break;
 		}
-		break;
-
 		sk = sk->next;
 	}
 
@@ -165,7 +164,7 @@ authhavekey(
 	 * If the key is not found, or if it is found but not trusted,
 	 * the key is not considered found.
 	 */
-	if (sk == 0) {
+	if (sk == NULL) {
 		authkeynotfound++;
 		return (0);
 

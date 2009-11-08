@@ -1,4 +1,7 @@
+* [Bug 1366] ioctl(TIOCSCTTY, 0) fails on NetBSD *[0-2].* > 3.99.7.
 * [Bug 1368] typos in libntp --without-crypto case
+* CID 87 dead code in ntpq.c atoascii().
+* Fix authenticated ntpdc, broken in p240.
 (4.2.5p241-RC) 2009/11/07 Released by Harlan Stenn <stenn@ntp.org>
 * html/authopt.html update from Dave Mills.
 * Remove unused file from sntp/Makefile.am's distribution list.

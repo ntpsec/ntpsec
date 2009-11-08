@@ -90,7 +90,7 @@
 #include <sys/types.h>
 #include "ntp_types.h"
 #include "ntp_random.h"
-#include "l_stdlib.h"
+#include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
 #include "ntp-keygen-opts.h"
@@ -103,13 +103,8 @@
 #include "openssl/pem.h"
 #include "openssl/x509v3.h"
 #include <openssl/objects.h>
-#ifdef SYS_WINNT
-# pragma warning(push)
-# pragma warning(disable: 4152)
-# include <openssl/applink.c>
-# pragma warning(pop)
-#endif /* SYS_WINNT */
 #endif /* OPENSSL */
+#include <ssl_applink.c>
 
 /*
  * Cryptodefines
@@ -159,7 +154,7 @@ u_long	asn2ntp		(ASN1_TIME *);
  */
 extern char *optarg;		/* command line argument */
 char	*progname;
-int	debug = 0;		/* debug, not de bug */
+volatile int	debug = 0;		/* debug, not de bug */
 #ifdef OPENSSL
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
@@ -255,25 +250,14 @@ main(
 #ifdef SYS_WINNT
 	/* Initialize before OpenSSL checks */
 	InitWin32Sockets();
-	if(!init_randfile())
+	if (!init_randfile())
 		fprintf(stderr, "Unable to initialize .rnd file\n");
+	ssl_applink();
 #endif
 
 #ifdef OPENSSL
-	/*
-	 * OpenSSL version numbers: MNNFFPPS: major minor fix patch
-	 * status We match major, minor, fix and status (not patch)
-	 */
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		fprintf(stderr,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-		exit (-1);
-
-	} else {
-		fprintf(stderr,
-		    "Using OpenSSL version %lx\n", SSLeay());
-	}
+	ssl_check_version();
+	fprintf(stderr, "Using OpenSSL version %lx\n", SSLeay());
 #endif /* OPENSSL */
 
 	/*
