@@ -3677,6 +3677,7 @@ crypto_setup(void)
 		    "crypto_setup: spurious crypto command");
 		return;
 	}
+	ssl_check_version();
 
 	/*
 	 * Load required random seed file and seed the random number
@@ -3685,7 +3686,6 @@ crypto_setup(void)
 	 * depending on the system. Wiggle the contents a bit and write
 	 * it back so the sequence does not repeat when we next restart.
 	 */
-	INIT_SSL();
 	if (!RAND_status()) {
 		if (rand_file == NULL) {
 			RAND_file_name(filename, sizeof(filename));
@@ -3699,7 +3699,8 @@ crypto_setup(void)
 
 		if ((bytes = RAND_load_file(randfile, -1)) == 0) {
 			msyslog(LOG_ERR,
-			    "cypto_setup: random seed file %s missing", randfile);
+			    "crypto_setup: random seed file %s missing",
+			    randfile);
 			exit (-1);
 		}
 		get_systime(&seed);

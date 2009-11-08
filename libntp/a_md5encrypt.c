@@ -78,6 +78,7 @@ MD5authdecrypt(
 #ifdef OPENSSL
 	EVP_MD_CTX ctx;
 #else
+	MD5_CTX	md5;
 #endif /* OPENSSL */
 
 	/*
@@ -86,7 +87,7 @@ MD5authdecrypt(
 	 * was created.
 	 */
 #ifdef OPENSSL
-	INIT_SSL(NULL);
+	INIT_SSL();
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
 	EVP_DigestUpdate(&ctx, key, (u_int)cache_keylen);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
@@ -117,7 +118,6 @@ addr2refid(sockaddr_u *addr)
 	u_char		digest[20];
 	u_int32		addr_refid;
 #ifdef OPENSSL
-	const EVP_MD *	digest_type;
 	EVP_MD_CTX	ctx;
 	u_int		len;
 #else

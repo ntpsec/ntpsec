@@ -25,6 +25,16 @@ ssl_init(void)
 	if (ssl_init_done)
 		return;
 
+	ERR_load_crypto_strings();
+	OpenSSL_add_all_algorithms();
+
+	ssl_init_done = 1;
+}
+
+
+void
+ssl_check_version(void)
+{
 	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
 		msyslog(LOG_ERR,
 		    "OpenSSL version mismatch. Built against %lx, you have %lx",
@@ -34,9 +44,7 @@ ssl_init(void)
 		    OPENSSL_VERSION_NUMBER, SSLeay());
 		exit (-1);
 	}
-	ERR_load_crypto_strings();
-	OpenSSL_add_all_algorithms();
 
-	ssl_init_done = 1;
+	INIT_SSL();
 }
 #endif	/* OPENSSL */

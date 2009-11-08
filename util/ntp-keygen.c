@@ -256,7 +256,7 @@ main(
 #endif
 
 #ifdef OPENSSL
-	INIT_SSL();
+	ssl_check_version();
 	fprintf(stderr, "Using OpenSSL version %lx\n", SSLeay());
 #endif /* OPENSSL */
 

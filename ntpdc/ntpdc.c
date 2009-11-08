@@ -923,25 +923,23 @@ sendrequest(
 		qpkt.auth_seq = AUTH_SEQ(0, 0);
 		return sendpkt((char *)&qpkt, req_pkt_size);
 	} else {
-		l_fp ts;
-		int maclen = 0;
-		char *pass = "\0";
-		struct req_pkt_tail *qpktail;
-
-		qpktail = (struct req_pkt_tail *)((char *)&qpkt + req_pkt_size
-		    + MAX_MAC_LEN - sizeof(struct req_pkt_tail));
+		u_long	key_id;
+		l_fp	ts;
+		l_fp *	ptstamp;
+		int	maclen;
+		char *	pass;
 
 		if (info_auth_keyid == 0) {
 			if (((struct conf_peer *)qpkt.data)->keyid > 0)
 				info_auth_keyid = ((struct conf_peer *)qpkt.data)->keyid;
 			else {
-				maclen = getkeyid("Keyid: ");
-				if (maclen == 0) {
+				key_id = getkeyid("Keyid: ");
+				if (key_id == 0) {
 					(void) fprintf(stderr,
 					    "Invalid key identifier\n");
 					return 1;
 				}
-				info_auth_keyid = maclen;
+				info_auth_keyid = key_id;
 			}
 		}
 		if (!authistrusted(info_auth_keyid)) {
@@ -958,7 +956,9 @@ sendrequest(
 		qpkt.auth_seq = AUTH_SEQ(1, 0);
 		get_systime(&ts);
 		L_ADD(&ts, &delay_time);
-		HTONL_FP(&ts, &qpktail->tstamp);
+		ptstamp = (void *)((char *)&qpkt + req_pkt_size 
+		    - sizeof(qpkt.tstamp));
+		HTONL_FP(&ts, ptstamp);
 		maclen = authencrypt(info_auth_keyid, (u_int32 *)&qpkt,
 		    req_pkt_size);
 		if (maclen == 0) {  

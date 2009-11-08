@@ -160,7 +160,7 @@ authreadkeys(
 			    "authreadkeys: invalid type for key %d", keyno);
 			continue;
 		}
-		keytype = KEY_TYPE_MD5
+		keytype = KEY_TYPE_MD5;
 #endif /* OPENSSL */
 		keystr = token;
 
