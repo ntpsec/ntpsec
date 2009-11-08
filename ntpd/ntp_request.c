@@ -615,14 +615,12 @@ process_private(
 		NTOHL_FP(&tailinpkt->tstamp, &ftmp);
 		L_SUB(&ftmp, &rbufp->recv_time);
 		LFPTOD(&ftmp, dtemp);
-		if (fabs(dtemp) >= INFO_TS_MAXSKEW) {
+		if (fabs(dtemp) > INFO_TS_MAXSKEW) {
 			/*
 			 * He's a loser.  Tell him.
 			 */
-#ifdef DEBUG
-			if (debug > 4)
-			    printf("xmit/rcv timestamp delta > INFO_TS_MAXSKEW\n");
-#endif
+			DPRINTF(5, ("xmit/rcv timestamp delta %g > INFO_TS_MAXSKEW %g\n",
+				    dtemp, INFO_TS_MAXSKEW));
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}

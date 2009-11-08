@@ -153,7 +153,7 @@ struct req_pkt_tail {
  */
 #define	REQ_LEN_HDR	8	/* 4 * u_char + 2 * u_short */
 #define	REQ_LEN_MAC	(sizeof(struct req_pkt))
-#define	REQ_LEN_NOMAC	(sizeof(struct req_pkt) - MAX_MAC_LEN)
+#define	REQ_LEN_NOMAC	(sizeof(struct req_pkt) - MAX_MD5_LEN)
 
 /*
  * A response packet.  The length here is variable, this is a

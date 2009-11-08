@@ -85,10 +85,7 @@ authreadkeys(
 		    file);
 		return (0);
 	}
-#ifdef OPENSSL
-	OpenSSL_add_all_algorithms();
-#endif /* OPENSSL */
-
+	INIT_SSL();
 
 	/*
 	 * Remove all existing keys
@@ -176,7 +173,8 @@ authreadkeys(
 			    "authreadkeys: no key for key %d", keyno);
 			continue;
 		}
-		MD5auth_setkey(keyno, keytype, token, strlen(token));
+		MD5auth_setkey(keyno, keytype, (u_char *)token,
+		    strlen(token));
 	}
 	fclose(fp);
 	return (1);

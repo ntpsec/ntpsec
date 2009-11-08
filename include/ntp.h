@@ -8,6 +8,7 @@
 
 #include <ntp_fp.h>
 #include <ntp_types.h>
+#include <ntp_stdlib.h>
 #ifdef OPENSSL
 #include <ntp_crypto.h>
 #endif /* OPENSSL */
@@ -139,7 +140,7 @@ typedef char s_char;
  * Miscellaneous stuff
  */
 #define NTP_MAXKEY	65535	/* max authentication key number */
-#define	KEY_TYPE_MD5	4	/* MD5 digest NID */
+#define	KEY_TYPE_MD5	NID_md5	/* MD5 digest NID */
 /*
  * Limits of things
  */

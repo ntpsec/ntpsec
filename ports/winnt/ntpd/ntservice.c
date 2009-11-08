@@ -30,17 +30,8 @@
 #include "clockstuff.h"
 #include "ntp_iocompletionport.h"
 #include "isc/win32os.h"
+#include <ssl_applink.c>
 
-#ifdef OPENSSL
-# pragma warning(push)
-# pragma warning(disable: 4152)
-# include <openssl/applink.c>
-# pragma warning(pop)
-#endif
-
-#if defined(OPENSSL) && defined(_MSC_VER) && defined(_DEBUG)
-#define WRAP_DBG_MALLOC
-#endif
 
 /*
  * Globals
@@ -95,13 +86,8 @@ int main( int argc, char *argv[] )
 	int i = 1;
 
 
-#ifdef OPENSSL
-#ifdef WRAP_DBG_MALLOC
-	CRYPTO_set_mem_ex_functions(wrap_dbg_malloc, wrap_dbg_realloc, wrap_dbg_free);
-#else
-	CRYPTO_malloc_init();
-#endif
-#endif
+	ssl_applink();
+
 	/* Save the command line parameters */
 	glb_argc = argc;
 	glb_argv = argv;
@@ -345,25 +331,3 @@ OnConsoleEvent(
 	return TRUE;
 }
 
-
-#if defined(OPENSSL) && defined(_MSC_VER) && defined(_DEBUG)
-/*
- * OpenSSL malloc overriding uses different parameters
- * for DEBUG malloc/realloc/free (lacking block type).
- * Simple wrappers convert.
- */
-void *wrap_dbg_malloc(size_t s, const char *f, int l)
-{
-	return _malloc_dbg(s, _NORMAL_BLOCK, f, l);
-}
-
-void *wrap_dbg_realloc(void *p, size_t s, const char *f, int l)
-{
-	return _realloc_dbg(p, s, _NORMAL_BLOCK, f, l);
-}
-
-void wrap_dbg_free(void *p)
-{
-	_free_dbg(p, _NORMAL_BLOCK);
-}
-#endif	/* defined(OPENSSL) && defined(_MSC_VER) && defined(_DEBUG) */

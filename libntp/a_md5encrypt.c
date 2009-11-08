@@ -42,6 +42,7 @@ MD5authencrypt(
 	 * was creaded.
 	 */
 #ifdef OPENSSL
+	INIT_SSL();
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
 	EVP_DigestUpdate(&ctx, key, (u_int)cache_keylen);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
@@ -85,6 +86,7 @@ MD5authdecrypt(
 	 * was created.
 	 */
 #ifdef OPENSSL
+	INIT_SSL(NULL);
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
 	EVP_DigestUpdate(&ctx, key, (u_int)cache_keylen);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
@@ -96,7 +98,7 @@ MD5authdecrypt(
 	MD5Final(digest, &md5);
 	len = 16;
 #endif /* OPENSSL */
-	if ((unsigned)size != len + 4) {
+	if ((u_int)size != len + 4) {
 		msyslog(LOG_ERR,
 		    "MAC decrypt: MAC length error");
 		return (0);
@@ -115,8 +117,9 @@ addr2refid(sockaddr_u *addr)
 	u_char		digest[20];
 	u_int32		addr_refid;
 #ifdef OPENSSL
+	const EVP_MD *	digest_type;
 	EVP_MD_CTX	ctx;
-	unsigned	len;
+	u_int		len;
 #else
 	MD5_CTX	md5;
 #endif /* OPENSSL */
@@ -125,7 +128,8 @@ addr2refid(sockaddr_u *addr)
 		return (NSRCADR(addr));
 
 #ifdef OPENSSL
-	EVP_DigestInit(&ctx, EVP_md5());
+	INIT_SSL();
+	EVP_DigestInit(&ctx, EVP_get_digestbynid(NID_md5));
 	EVP_DigestUpdate(&ctx, (u_char *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
 	EVP_DigestFinal(&ctx, digest, &len);
