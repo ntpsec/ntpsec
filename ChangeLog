@@ -1,3 +1,4 @@
+* Stub out isc/mem.h, shaving 47k from a MIPS ntpd binary.
 (4.2.5p238-RC) 2009/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * Changes from Dave Mills.
 * driver4.html updates from Dave Mills.
