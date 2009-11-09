@@ -1,3 +1,4 @@
+* authkeys.c cleanup from Dave Mills.
 (4.2.5p241-RC) 2009/11/07 Released by Harlan Stenn <stenn@ntp.org>
 * html/authopt.html update from Dave Mills.
 * Remove unused file from sntp/Makefile.am's distribution list.
