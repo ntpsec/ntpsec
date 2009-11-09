@@ -23,7 +23,7 @@
 <p>Our resident cryptographer; now you see him, now you don't.</p>
 
 <p>Last update: 
-			<!-- #BeginDate format:En2m -->05-Nov-2009  20:12<!-- #EndDate -->
+			<!-- #BeginDate format:En2m -->07-Nov-2009  20:25<!-- #EndDate -->
 UTC</p>
 <br clear="left">
 
@@ -361,8 +361,10 @@ UTC</p>
 	by the library  not exceeding 160 bits in length. However, all Autokey
 	participants in an Autokey subnet must use the same algorithm. Note that
 	the Autokey message digest algorithm is separate and distinct form the symmetric
-	key message digest algorithms. Note: If compliance with FIPS 140-2 is required, the algorithm  must
-	be ether <tt>SHA</tt> or <tt>SHA1</tt>.</dd>
+	key message digest algorithms. Note: If compliance with FIPS 140-2 is required,
+	the algorithm must be ether <tt>SHA</tt> or <tt>SHA1</tt>. [Note that, while
+	<tt>MD4</tt> is included in the OpenSSL documentation, it is not available in the
+	current library.]</dd>
 
 <dt><tt>host <i>name</i></tt></dt>
 <dd>Specifies the string used when constructing the names for the host, sign
