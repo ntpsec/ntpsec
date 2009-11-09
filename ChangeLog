@@ -1,6 +1,7 @@
 * [Bug 1363] CID 92 clarify fallthrough case in clk_trimtsip.c
 * [Bug 1366] ioctl(TIOCSCTTY, 0) fails on NetBSD *[0-2].* > 3.99.7.
 * [Bug 1368] typos in libntp --without-crypto case
+* [Bug 1371] deferred DNS lookup failing with INFO_ERR_AUTH.
 * CID 87 dead code in ntpq.c atoascii().
 * Fix authenticated ntpdc, broken in p240.
 * Stub out isc/mem.h, shaving 47k from a MIPS ntpd binary.
