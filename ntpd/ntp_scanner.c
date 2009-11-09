@@ -44,7 +44,6 @@ extern int input_from_file;
 /* CONSTANTS 
  * ---------
  */
-#define NON_ACCEPTING 0		/* A constant that depicts a non-accepting state */
 
 
 /* SCANNER GLOBAL VARIABLES 
@@ -233,27 +232,32 @@ is_keyword(
 	follby *pfollowedby
 	)
 {
-	int curr_state;
+	follby fb;
+	int curr_s;		/* current state index */
 	int token;
 	int i;
 
-	curr_state = SCANNER_INIT_S;
-	token = NON_ACCEPTING;
+	curr_s = SCANNER_INIT_S;
+	token = 0;
 
-	for (i = 0; lexeme[i]; ++i) {
-		while (curr_state && (lexeme[i] != sst[curr_state].ch))
-			curr_state = sst[curr_state].other_next_s;
+	for (i = 0; lexeme[i]; i++) {
+		while (curr_s && (lexeme[i] != SS_CH(sst[curr_s])))
+			curr_s = SS_OTHER_N(sst[curr_s]);
 
-		if (curr_state && (lexeme[i] == sst[curr_state].ch)) {
-			*pfollowedby = sst[curr_state].followedby;
-			token = sst[curr_state].finishes_token;
-			curr_state = sst[curr_state].match_next_s;
-		} else {
-			*pfollowedby = FOLLBY_TOKEN;
-			token = NON_ACCEPTING;
+		if (curr_s && (lexeme[i] == SS_CH(sst[curr_s]))) {
+			if ('\0' == lexeme[i + 1]
+			    && FOLLBY_NON_ACCEPTING 
+			       != SS_FB(sst[curr_s])) {
+				fb = SS_FB(sst[curr_s]);
+				*pfollowedby = fb;
+				token = curr_s;
+				break;
+			}
+			curr_s = SS_MATCH_N(sst[curr_s]);
+		} else
 			break;
-		}
 	}
+
 	return token;
 }
 

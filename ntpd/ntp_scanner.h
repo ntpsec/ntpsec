@@ -28,11 +28,16 @@
  * Note that some tokens use FOLLBY_TOKEN even though they sometimes
  * are followed by strings.  FOLLBY_STRING is used only when needed to
  * avoid the keyword scanner matching a token where a string is needed.
+ *
+ * FOLLBY_NON_ACCEPT is an overloading of this field to distinguish
+ * non-accepting states (where the state number does not match a T_
+ * value).
  */
 typedef enum {
 	FOLLBY_TOKEN = 0,
 	FOLLBY_STRING,
-	FOLLBY_STRINGS_TO_EOC
+	FOLLBY_STRINGS_TO_EOC,
+	FOLLBY_NON_ACCEPTING
 } follby;
 
 #define MAXLINE		1024	/* maximum length of line */
@@ -42,17 +47,39 @@ typedef enum {
  * ----------
  */
 
-/* Define a structure to hold the FSA for the keywords.
- * The structure is actually a trie
+/* 
+ * Define a structure to hold the FSA for the keywords.
+ * The structure is actually a trie.
+ *
+ * To save space, a single u_int32 encodes four fields, and a fifth
+ * (the token completed for terminal states) is implied by the index of
+ * the rule within the scan state array, taking advantage of the fact
+ * there are more scan states than the highest T_ token number.
+ *
+ * The lowest 8 bits hold the character the state matches on.
+ * Bits 8 and 9 hold the followedby value (0 - 3).  For non-accepting
+ *   states (which do not match a completed token) the followedby
+ *   value 3 (FOLLBY_NONACCEPTING) denotes that fact.  For accepting
+ *   states, values 0 - 2 control whether the scanner forces the
+ *   following token(s) to strings.
+ * Bits 10 through 20 hold the next state to check not matching
+ * this state's character.
+ * Bits 21 through 31 hold the next state to check matching the char.
  */
 
-typedef struct scan_state_tag {
-	char	ch;		/* Character this state matches on */
-	char	followedby;	/* Forces next token(s) to T_String */
-	u_short	finishes_token;	/* nonzero ID if last keyword char */
-	u_short	match_next_s;	/* next state to check matching ch */
-	u_short	other_next_s;	/* next state to check if not ch */
-} scan_state;
+#define S_ST(ch, fb, match_n, other_n) (			\
+	(u_char)((ch) & 0xff) |					\
+	((u_int32)(fb) << 8) |					\
+	((u_int32)(match_n) << 10) |				\
+	((u_int32)(other_n) << 21)				\
+)
+
+#define SS_CH(ss)	((char)(u_char)((ss) & 0xff))
+#define SS_FB(ss)	(((u_int)(ss) >>  8) & 0x3)
+#define SS_MATCH_N(ss)	(((u_int)(ss) >> 10) & 0x7ff)
+#define SS_OTHER_N(ss)	(((u_int)(ss) >> 21) & 0x7ff)
+
+typedef u_int32 scan_state;
 
 
 /* Structure to hold a filename, file pointer and positional info */
