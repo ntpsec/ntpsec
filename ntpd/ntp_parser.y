@@ -87,6 +87,7 @@
 %token	<Integer>	T_Cryptostats
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
+%token	<Integer>	T_Digest
 %token	<Integer>	T_Disable
 %token	<Integer>	T_Discard
 %token	<Integer>	T_Dispersion
@@ -483,6 +484,8 @@ crypto_command
 	|	T_Randfile T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Sign	T_String
+			{ $$ = create_attr_sval($1, $2); }
+	|	T_Digest T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Revoke T_Integer
 		{

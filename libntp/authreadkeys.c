@@ -1,6 +1,7 @@
 /*
  * authreadkeys.c - routines to support the reading of the key file
  */
+#include <config.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -9,10 +10,9 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
-/*
- *  Arbitrary long string of ASCII characters.
- */
-#define	KEY_TYPE_MD5	4
+#ifdef OPENSSL
+#include "openssl/objects.h"
+#endif /* OPENSSL */
 
 /* Forwards */
 static char *nexttok (char **);
@@ -49,7 +49,7 @@ nexttok(
 	 * token to zero and return start.
 	 */
 	if (starttok == cp)
-	    return 0;
+	    return (NULL);
 	
 	if (*cp == ' ' || *cp == '\t')
 	    *cp++ = '\0';
@@ -71,8 +71,8 @@ authreadkeys(
 {
 	FILE *fp;
 	char *line;
-	char *token;
-	u_long keyno;
+	char *token, *keystr;
+	keyid_t keyno;
 	int keytype;
 	char buf[512];		/* lots of room for line */
 
@@ -81,9 +81,11 @@ authreadkeys(
 	 */
 	fp = fopen(file, "r");
 	if (fp == NULL) {
-		msyslog(LOG_ERR, "can't open key file %s: %m", file);
-		return 0;
+		msyslog(LOG_ERR, "authreadkeys: file %s: %m",
+		    file);
+		return (0);
 	}
+	INIT_SSL();
 
 	/*
 	 * Remove all existing keys
@@ -95,8 +97,8 @@ authreadkeys(
 	 */
 	while ((line = fgets(buf, sizeof buf, fp)) != NULL) {
 		token = nexttok(&line);
-		if (token == 0)
-		    continue;
+		if (token == NULL)
+			continue;
 		
 		/*
 		 * First is key number.  See if it is okay.
@@ -104,59 +106,76 @@ authreadkeys(
 		keyno = atoi(token);
 		if (keyno == 0) {
 			msyslog(LOG_ERR,
-				"cannot change keyid 0, key entry `%s' ignored",
-				token);
+			    "authreadkeys: cannot change key %s", token);
 			continue;
 		}
 
 		if (keyno > NTP_MAXKEY) {
 			msyslog(LOG_ERR,
-				"keyid's > %d reserved for autokey, key entry `%s' ignored",
-				NTP_MAXKEY, token);
+			    "authreadkeys: key %s > %d reserved for Autokey",
+			    token, NTP_MAXKEY);
 			continue;
 		}
 
 		/*
-		 * Next is keytype.  See if that is all right.
+		 * Next is keytype. See if that is all right.
 		 */
 		token = nexttok(&line);
-		if (token == 0) {
+		if (token == NULL) {
 			msyslog(LOG_ERR,
-				"no key type for key number %ld, entry ignored",
-				keyno);
+			    "authreadkeys: no key type for key %d", keyno);
 			continue;
 		}
-		switch (*token) {
-		    case 'M':
-		    case 'm':
-			keytype = KEY_TYPE_MD5; break;
-		    default:
+#ifdef OPENSSL
+
+		/*
+		 * If the key type is 'M' or 'm', it is replaced by 'MD5".
+		 * In any case, it must be one of the algorithms supported
+		 * by OpenSSL. The key type is the NID used by the message
+		 * digest algorithm. Ther are a number of inconsistencies in
+		 * the OpenSSL database. We attempt to discover them here
+		 * and prevent use of inconsistent data.
+		 */
+		if (strcmp(token, "M") == 0 || strcmp(token, "m") == 0)
+			token  = "MD5";
+		keytype = OBJ_sn2nid(token);
+		if (keytype == 0 || keytype > 255) {
 			msyslog(LOG_ERR,
-				"invalid key type for key number %ld, entry ignored",
-				keyno);
+			    "authreadkeys: invalid type for key %d", keyno);
 			continue;
 		}
+		if (EVP_get_digestbynid(keytype) == NULL) {
+			msyslog(LOG_ERR,
+			    "authreadkeys: no algorithm for key %d", keyno);
+			continue;
+		}
+#else /* OPENSSL */
+
+		/*
+		 * The key type is unused, but is required to be 'M' or
+		 * 'm' for compatibility.
+		 */
+		if (!(*token == 'M' || *token == 'm')) {
+			msyslog(LOG_ERR,
+			    "authreadkeys: invalid type for key %d", keyno);
+			continue;
+		}
+		keytype = KEY_TYPE_MD5;
+#endif /* OPENSSL */
+		keystr = token;
 
 		/*
 		 * Finally, get key and insert it
 		 */
 		token = nexttok(&line);
-		if (token == 0) {
+		if (token == NULL) {
 			msyslog(LOG_ERR,
-				"no key for number %ld entry, entry ignored",
-				keyno);
-		} else {
-			switch(keytype) {
-			    case KEY_TYPE_MD5:
-				if (!authusekey(keyno, keytype,
-						(u_char *)token))
-				    msyslog(LOG_ERR,
-					    "format/parity error for MD5 key %ld, not used",
-					    keyno);
-				break;
-			}
+			    "authreadkeys: no key for key %d", keyno);
+			continue;
 		}
+		MD5auth_setkey(keyno, keytype, (u_char *)token,
+		    strlen(token));
 	}
-	(void) fclose(fp);
-	return 1;
+	fclose(fp);
+	return (1);
 }

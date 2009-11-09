@@ -134,7 +134,7 @@ struct sockaddr_storage {
 /*
  * Flag values for getaddrinfo()
  */
-#ifndef AI_NUMERICHOST
+#ifndef AI_PASSIVE
 #define	AI_PASSIVE	0x00000001 /* get address to use bind() */
 #define	AI_CANONNAME	0x00000002 /* fill ai_canonname */
 #define	AI_NUMERICHOST	0x00000004 /* prevent name resolution */
@@ -143,6 +143,10 @@ struct sockaddr_storage {
     (AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST | AI_ADDRCONFIG)
 
 #define	AI_ADDRCONFIG	0x00000400 /* only if any address is assigned */
+#endif	/* !AI_PASSIVE */
+
+#ifndef AI_NUMERICHOST		/* such as AIX 4.3 */
+#define AI_NUMERICHOST	0
 #endif
 
 #ifndef ISC_PLATFORM_HAVEIPV6
@@ -208,6 +212,17 @@ char	*gai_strerror (int);
 #define NI_WITHSCOPEID	0x00000020
 #endif
 
-#endif /* ISC_PLATFORM_HAVEIPV6 */
+#endif /* !ISC_PLATFORM_HAVEIPV6 */
+
+/* 
+ * Set up some macros to look for IPv6 and IPv6 multicast
+ */
+
+#if defined(ISC_PLATFORM_HAVEIPV6) && defined(WANT_IPV6)
+# define INCLUDE_IPV6_SUPPORT
+# if defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
+#  define INCLUDE_IPV6_MULTICAST_SUPPORT
+# endif	/* IPV6 Multicast Support */
+#endif  /* IPv6 Support */
 
 #endif /* !NTP_RFC2553_H */

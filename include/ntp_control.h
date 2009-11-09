@@ -174,10 +174,11 @@ struct ntp_control {
 #define CS_HOST		25
 #define CS_PUBLIC	26
 #define	CS_CERTIF	27
-#define	CS_DIGEST	28
+#define	CS_SIGNATURE	28
 #define	CS_REVTIME	29
 #define	CS_GROUP	30
-#define	CS_MAXCODE	CS_GROUP
+#define CS_DIGEST	31
+#define	CS_MAXCODE	CS_DIGEST
 #else
 #define	CS_MAXCODE	CS_RATE
 #endif /* OPENSSL */
@@ -233,8 +234,8 @@ struct ntp_control {
 #define	CP_INITSEQ	45
 #define	CP_INITKEY	46
 #define	CP_INITTSP	47
-#define	CP_DIGEST	48
-#define	CP_MAXCODE	CP_DIGEST
+#define	CP_SIGNATURE	48
+#define	CP_MAXCODE	CP_SIGNATURE
 #else
 #define	CP_MAXCODE	CP_BIAS
 #endif /* OPENSSL */

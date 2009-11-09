@@ -33,7 +33,6 @@ sntp_SOURCES =		\
 	log.c		\
 	log.h		\
 	main.c		\
-	netutils.h	\
 	networking.c	\
 	networking.h	\
 	sntp-opts.c	\
@@ -94,6 +93,12 @@ foo3:
 		echo "Installing new sntp/version.m4 file";	\
 	   fi )
 
+$(srcdir)/../COPYRIGHT:
+	cd .. && $(MAKE) COPYRIGHT
+
+$(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
+	cat $(srcdir)/../COPYRIGHT > $@
+
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) sntp-opts.def
@@ -103,6 +108,9 @@ $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
+
+../libntp/libntp.a:
+	cd ../libntp && $(MAKE)
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck

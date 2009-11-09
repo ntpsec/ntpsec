@@ -36,6 +36,14 @@
 extern	void	msyslog		(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
 
+/*
+ * When building without OpenSSL, use one constant #define, NID_md5,
+ * for the keytype.  MD5 is the only digest supported without OpenSSL.
+ */
+#ifndef OPENSSL
+#define NID_md5	4	/* from openssl/objects.h */
+#endif
+
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
 extern	int	authdecrypt	(keyid_t, u_int32 *, int, int);
@@ -68,9 +76,9 @@ extern	int	auth_moremem	(void);
 extern	int	ymd2yd		(int, int, int);
 
 /* a_md5encrypt.c */
-extern	int	MD5authdecrypt	(u_char *, u_int32 *, int, int);
-extern	int	MD5authencrypt	(u_char *, u_int32 *, int);
-extern	void	MD5auth_setkey	(keyid_t, const u_char *, const int);
+extern	int	MD5authdecrypt	(int, u_char *, u_int32 *, int, int);
+extern	int	MD5authencrypt	(int, u_char *, u_int32 *, int);
+extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, const int);
 extern	u_int32	addr2refid	(sockaddr_u *);
 
 
@@ -147,6 +155,20 @@ extern int	ipv6_works;
 /* machines.c */
 typedef void (*pset_tod_using)(const char *);
 extern pset_tod_using	set_tod_using;
+
+/* ssl_init.c */
+#ifdef OPENSSL
+extern	void	ssl_init		(void);
+extern	void	ssl_check_version	(void);
+extern	int	ssl_init_done;
+#define	INIT_SSL()				\
+	do {					\
+		if (!ssl_init_done)		\
+			ssl_init();		\
+	} while (0)
+#else	/* !OPENSSL follows */
+#define	INIT_SSL()		do {} while (0)
+#endif
 
 /* lib/isc/win32/strerror.c
  *

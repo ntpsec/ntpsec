@@ -14,6 +14,7 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 
 # LDADD might need RESLIB and ADJLIB
 LDADD=		version.o ../libntp/libntp.a
+ntpdate_LDADD= $(LDADD) @LCRYPTO@
 DISTCLEANFILES=	.version version.c stamp-v
 noinst_HEADERS=	ntpdate.h
 ETAGS_ARGS=	Makefile.am

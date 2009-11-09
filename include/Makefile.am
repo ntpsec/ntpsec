@@ -11,7 +11,6 @@ noinst_HEADERS =	\
 	ascii.h		\
 	audio.h		\
 	binio.h		\
-	global.h	\
 	gps.h		\
 	hopf6039.h	\
 	icom.h		\
@@ -62,6 +61,7 @@ noinst_HEADERS =	\
 	parse_conf.h	\
 	recvbuff.h	\
 	refclock_atom.h	\
+	ssl_applink.c	\
 	timepps-SCO.h	\
 	timepps-Solaris.h	\
 	timepps-SunOS.h	\

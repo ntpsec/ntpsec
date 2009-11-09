@@ -73,7 +73,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\vc\libeay32MD.lib"
 				OutputFile="..\bin\Release\ntpq.exe"
 				Version="0x0400"
 				LinkIncremental="1"
@@ -171,7 +171,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\vc\libeay32MDd.lib"
 				OutputFile="..\bin\Debug\ntpq.exe"
 				Version="0x0400"
 				LinkIncremental="1"

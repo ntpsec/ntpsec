@@ -830,7 +830,7 @@ request(
 		}
 
 #ifndef SYS_WINNT
-		n = recv(sockfd, (char *)&reqpkt, REQ_LEN_MAC, 0);
+		n = recv(sockfd, (char *)&reqpkt, sizeof(reqpkt), 0);
 		if (n <= 0) {
 			if (n < 0) {
 				msyslog(LOG_ERR, "recv() fails: %m");
@@ -839,7 +839,7 @@ request(
 			continue;
 		}
 #else /* Overlapped I/O used on non-blocking sockets on Windows NT */
-		ret = ReadFile((HANDLE)sockfd, (char *)&reqpkt, (DWORD)REQ_LEN_MAC,
+		ret = ReadFile((HANDLE)sockfd, (char *)&reqpkt, sizeof(reqpkt),
 			       NULL, (LPOVERLAPPED)&overlap);
 		if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
 			msyslog(LOG_ERR, "ReadFile() fails: %m");

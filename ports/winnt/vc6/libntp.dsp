@@ -382,6 +382,10 @@ SOURCE=..\..\..\libntp\socktohost.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\ssl_init.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File

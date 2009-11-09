@@ -26,7 +26,7 @@ AC_CONFIG_AUX_DIR([.])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-ntp_configure_cache_version=20090503
+ntp_configure_cache_version=20091102
 
 # When the cache version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -1198,7 +1198,9 @@ case "$host" in
 	# this conditional will need to change.  Maybe use AC_TRY_RUN
 	# instead to try to set the time to itself and check errno.
     ;;
- *) AC_CHECK_FUNCS(clock_gettime clock_settime)
+ *)
+    AC_SEARCH_LIBS([clock_gettime], [rt])
+    AC_CHECK_FUNCS([clock_gettime clock_settime])
     ;;
 esac
 AC_CHECK_FUNCS(daemon)
@@ -1734,32 +1736,45 @@ case "$ac_cv_arg_setpgrp_negpid" in
  yes) AC_DEFINE(UDP_BACKWARDS_SETOWN, 1, [Do we set process groups with -pid?]) ;;
 esac
 
-AC_CACHE_CHECK([if we need a ctty for F_SETOWN], ac_cv_func_ctty_for_f_setown,
-[[case "$host" in
- *-*-bsdi[23]*)
-    ans=yes
-    ;;
- *-*-freebsd*)
-    ans=yes
-    ;;
- *-*-netbsd*3.[0-8]*|*-*-netbsd*[0-2].*|*-*-netbsd*3.99.[0-7])
-    ans=yes
-    ;;
- *-*-openbsd*)
-    ans=yes
-    ;;
- *-*-osf*)
-    ans=yes
-    ;;
- *-*-darwin*)
-    ans=yes
-    ;;
- *) ans=no
-    ;;
-esac
-ac_cv_func_ctty_for_f_setown=$ans]])
-case "$ac_cv_func_ctty_for_f_setown" in
- yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
+AC_CACHE_CHECK(
+    [if we need a ctty for F_SETOWN],
+    ntp_cv_func_ctty_for_f_setown,
+    [
+	case "$host" in
+	 *-*-bsdi[23]*)
+	    ans=yes
+	    ;;
+	 *-*-freebsd*)
+	    ans=yes
+	    ;;
+	# NetBSD versions prior to 3.99.8 require a CTTY for F_SETOWN,
+	# while later versions will fail a ioctl(TIOCSCTTY, 0) call in
+	# some cases and so should not have USE_FSETOWNCTTY.  "netbsd"
+	# in $host may be followed by "aout", "ecoff", or "elf".
+	 *-*-netbsd*[a-z]3.[0-8]*|*-*-netbsd*[a-z][0-2].*|*-*-netbsd*[a-z]3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-netbsd3.[0-8]*|*-*-netbsd[0-2].*|*-*-netbsd3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-openbsd*)
+	    ans=yes
+	    ;;
+	 *-*-osf*)
+	    ans=yes
+	    ;;
+	 *-*-darwin*)
+	    ans=yes
+	    ;;
+	 *) 
+	    ans=no
+	esac
+	ntp_cv_func_ctty_for_f_setown=$ans
+    ]
+)
+case "$ntp_cv_func_ctty_for_f_setown" in
+ yes)
+    AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?])
 esac
 
 AC_CACHE_CHECK([if the OS fails to clear cached routes when more specific routes become available], ac_cv_os_routeupdates,
@@ -4464,9 +4479,6 @@ case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
     ntp_have_linuxcaps=no
 esac
 
-AC_MSG_RESULT([$ntp_have_linuxcaps])
-
-
 AC_ARG_ENABLE(
     [linuxcaps],
     AS_HELP_STRING(
@@ -4476,13 +4488,13 @@ AC_ARG_ENABLE(
     [ntp_have_linuxcaps=$enableval]
 )
 
+AC_MSG_RESULT([$ntp_have_linuxcaps])
 
 case "$ntp_have_linuxcaps" in
  yes)
     AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
     LIBS="$LIBS -lcap"
 esac
-
 
 case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
  *yes*)

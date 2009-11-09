@@ -113,7 +113,10 @@ struct shmTime *getShmTime (int unit) {
 #ifndef SYS_WINNT
 	int shmid=0;
 
-	assert (unit<10); /* MAXUNIT is 4, so should never happen */
+	/* 0x4e545030 is NTP0.
+	 * Big units will give non-ascii but that's OK
+	 * as long as everybody does it the same way. 
+	 */
 	shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), 
 		      IPC_CREAT|(unit<2?0700:0777));
 	if (shmid==-1) { /*error */

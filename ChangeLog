@@ -1,5 +1,24 @@
+* [Bug 1363] CID 92 clarify fallthrough case in clk_trimtsip.c
+* [Bug 1366] ioctl(TIOCSCTTY, 0) fails on NetBSD *[0-2].* > 3.99.7.
+* [Bug 1368] typos in libntp --without-crypto case
+* CID 87 dead code in ntpq.c atoascii().
+* Fix authenticated ntpdc, broken in p240.
 * Stub out isc/mem.h, shaving 47k from a MIPS ntpd binary.
 * Shrink keyword scanner FSM entries from 64 to 32 bits apiece.
+(4.2.5p241-RC) 2009/11/07 Released by Harlan Stenn <stenn@ntp.org>
+* html/authopt.html update from Dave Mills.
+* Remove unused file from sntp/Makefile.am's distribution list.
+* new crypto signature cleanup.
+(4.2.5p240-RC) 2009/11/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1364] clock_gettime() not detected, need -lrt on Debian 5.0.3.
+* Provide all of OpenSSL's signature methods for ntp.keys (FIPS 140-2).
+(4.2.5p239-RC) 2009/10/30 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1357] bogus assert from refclock_shm.
+* [Bug 1359] Debug message cleanup.
+* CID 101: more pointer/array cleanup.
+* [Bug 1356] core dump from refclock_nmea when can't open /dev/gpsU.
+* [Bug 1358] AIX 4.3 sntp/networking.c IPV6_JOIN_GROUP undeclared.
+* CID 101: pointer/array cleanup.
 (4.2.5p238-RC) 2009/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * Changes from Dave Mills.
 * driver4.html updates from Dave Mills.

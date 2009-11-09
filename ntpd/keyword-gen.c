@@ -98,6 +98,7 @@ struct key_tok ntp_keywords[] = {
 { "pw",			T_Pw,			FOLLBY_STRING },
 { "randfile",		T_Randfile,		FOLLBY_STRING },
 { "sign",		T_Sign,			FOLLBY_STRING },
+{ "digest",		T_Digest,		FOLLBY_STRING },
 /*** MONITORING COMMANDS ***/
 /* stat */
 { "clockstats",		T_Clockstats,		FOLLBY_TOKEN },

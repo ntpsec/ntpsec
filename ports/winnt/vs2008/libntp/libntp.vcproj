@@ -476,6 +476,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\ssl_init.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\libntp\statestr.c"
 				>
 			</File>
@@ -813,11 +817,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File

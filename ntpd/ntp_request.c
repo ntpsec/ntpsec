@@ -554,15 +554,16 @@ process_private(
 	if (proc->needs_auth && sys_authenticate) {
 		l_fp ftmp;
 		double dtemp;
-	
-		if (rbufp->recv_length < (int)((REQ_LEN_HDR +
+
+		if (rbufp->recv_length < (REQ_LEN_HDR +
 		    (INFO_ITEMSIZE(inpkt->mbz_itemsize) *
-		    INFO_NITEMS(inpkt->err_nitems))
-		    + sizeof(struct req_pkt_tail)))) {
+		    INFO_NITEMS(inpkt->err_nitems)) +
+		    sizeof(*tailinpkt))) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
-		}
-		tailinpkt = (struct req_pkt_tail *)((char *)&rbufp->recv_pkt +
-		    rbufp->recv_length - sizeof(struct req_pkt_tail));
+			return;
+		} 
+		tailinpkt = (void *)((char *)&rbufp->recv_pkt +
+		    rbufp->recv_length - sizeof(*tailinpkt));
 
 		/*
 		 * If this guy is restricted from doing this, don't let him
@@ -615,14 +616,12 @@ process_private(
 		NTOHL_FP(&tailinpkt->tstamp, &ftmp);
 		L_SUB(&ftmp, &rbufp->recv_time);
 		LFPTOD(&ftmp, dtemp);
-		if (fabs(dtemp) >= INFO_TS_MAXSKEW) {
+		if (fabs(dtemp) > INFO_TS_MAXSKEW) {
 			/*
 			 * He's a loser.  Tell him.
 			 */
-#ifdef DEBUG
-			if (debug > 4)
-			    printf("xmit/rcv timestamp delta > INFO_TS_MAXSKEW\n");
-#endif
+			DPRINTF(5, ("xmit/rcv timestamp delta %g > INFO_TS_MAXSKEW %g\n",
+				    dtemp, INFO_TS_MAXSKEW));
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}

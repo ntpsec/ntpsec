@@ -64,20 +64,6 @@
 #define SETSOCKOPT_ARG_CAST
 #endif
 
-/* 
- * Set up some macros to look for IPv6 and IPv6 multicast
- */
-
-#if defined(ISC_PLATFORM_HAVEIPV6) && defined(WANT_IPV6)
-
-#define INCLUDE_IPV6_SUPPORT
-
-#if defined(INCLUDE_IPV6_SUPPORT) && defined(IPV6_JOIN_GROUP) && defined(IPV6_LEAVE_GROUP)
-#define INCLUDE_IPV6_MULTICAST_SUPPORT
-
-#endif	/* IPV6 Multicast Support */
-#endif  /* IPv6 Support */
-
 extern int listen_to_virtual_ips;
 
 /*
