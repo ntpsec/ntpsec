@@ -41,6 +41,10 @@
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
 #endif
 
+#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
+#include <resolv.h>
+#endif
+
 #include <isc/net.h>
 #include <isc/result.h>
 
@@ -492,6 +496,7 @@ findhostaddr(
 	}
 
 	if (entry->ce_name) {
+		if (0) msyslog(LOG_INFO, "findhostaddr: Trying %s", entry->ce_name);
 		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
 			entry->ce_name));
 
@@ -502,7 +507,6 @@ findhostaddr(
 		 */
 		if (!ipv6_works)
 			hints.ai_family = AF_INET;
-
 		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
 		if (error == 0) {
 			entry->peer_store = *((sockaddr_u *)(addr->ai_addr));
@@ -945,32 +949,32 @@ request(
 		
 		    case INFO_ERR_IMPL:
 			msyslog(LOG_ERR,
-				"ntpd reports implementation mismatch!");
+				"ntp_intres.request: implementation mismatch");
 			return 0;
 		
 		    case INFO_ERR_REQ:
 			msyslog(LOG_ERR,
-				"ntpd says configuration request is unknown!");
+				"ntp_intres.request: request unknown");
 			return 0;
 		
 		    case INFO_ERR_FMT:
 			msyslog(LOG_ERR,
-				"ntpd indicates a format error occurred!");
+				"ntp_intres.request: format error");
 			return 0;
 
 		    case INFO_ERR_NODATA:
 			msyslog(LOG_ERR,
-				"ntpd indicates no data available!");
+				"ntp_intres.request: no data available");
 			return 0;
 		
 		    case INFO_ERR_AUTH:
 			msyslog(LOG_ERR,
-				"ntpd returns a permission denied error!");
+				"ntp_intres.request: permission denied");
 			return 0;
 
 		    default:
 			msyslog(LOG_ERR,
-				"ntpd returns unknown error code %d!", n);
+				"ntp_intres.request: unknown error code %d", n);
 			return 0;
 		}
 	}
@@ -1146,6 +1150,9 @@ doconfigure(
 			    dores ? "with" : "without" );
 #endif
 
+#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
+	if (dores) res_init();  /* Reload /etc/resolv.conf - bug 1226 */
+#endif
 	ce = confentries;
 	while (ce != NULL) {
 #ifdef DEBUG
@@ -1175,6 +1182,7 @@ doconfigure(
 				removeentry(ceremove);
 				continue;
 			}
+			// Failed case.  Should bump counter and give up.
 #ifdef DEBUG
 			if (debug > 1) {
 				msyslog(LOG_INFO,

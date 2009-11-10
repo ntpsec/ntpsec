@@ -3362,6 +3362,21 @@ config_peers(
 		status = get_multiple_netnums(curr_peer->addr->address,
 		    &peeraddr, &res, 0, t_UNK);
 
+#if 0 /* Hack for debugging Deferred DNS */
+		if (status == 1) {
+			/* Deferring everything breaks refclocks. */
+			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+			if (!ISREFCLOCKADR(&peeraddr)) {
+				status = 0;  /* force deferred DNS path */
+				msyslog(LOG_INFO, "Forcing Deferred DNS for %s, %s",
+					curr_peer->addr->address, stoa(&peeraddr));
+			} else {
+				msyslog(LOG_INFO, "NOT Deferred DNS for %s, %s",
+					curr_peer->addr->address, stoa(&peeraddr));
+			}
+		}
+#endif
+
 		/* I don't know why getnetnum would return -1.
 		 * The old code had this test, so I guess it must be
 		 * useful
@@ -3375,6 +3390,7 @@ config_peers(
 		 * resolution later
 		 */
 		else if (status != 1) {
+			msyslog(LOG_INFO, "Deferring DNS for %s", curr_peer->addr->address);
 			save_resolve(curr_peer->addr->address,
 				     hmode,
 				     curr_peer->peerversion,

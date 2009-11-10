@@ -456,6 +456,10 @@ esac
 AC_CHECK_FUNC(setsockopt, ,
 	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
 
+AC_SEARCH_LIBS([setsockopt], [socket xnet])
+AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+AC_CHECK_FUNCS(res_init __res_init)
+
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
 AC_CHECK_HEADER(dns_sd.h,
