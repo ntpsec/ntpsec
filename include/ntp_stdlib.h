@@ -37,11 +37,13 @@ extern	void	msyslog		(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
 
 /*
- * When building without OpenSSL, use one constant #define, NID_md5,
- * for the keytype.  MD5 is the only digest supported without OpenSSL.
+ * When building without OpenSSL, use a few macros of theirs to
+ * minimize source differences in NTP.
  */
 #ifndef OPENSSL
 #define NID_md5	4	/* from openssl/objects.h */
+/* from openssl/evp.h */
+#define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
 #endif
 
 extern	void	auth_delkeys	(void);
@@ -169,6 +171,9 @@ extern	int	ssl_init_done;
 #else	/* !OPENSSL follows */
 #define	INIT_SSL()		do {} while (0)
 #endif
+extern	int	keytype_from_text	(const char *,	size_t *);
+extern	const char *keytype_name	(int);
+
 
 /* lib/isc/win32/strerror.c
  *

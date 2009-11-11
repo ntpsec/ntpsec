@@ -1332,7 +1332,7 @@ doconfig(
 	struct parse *pcmd,
 	FILE *fp,
 	int mode,
-        int refc
+	int refc
 	)
 {
 	struct conf_peer cpeer;
@@ -1359,7 +1359,7 @@ again:
 	maxpoll = NTP_MAXDPOLL;
 	numtyp = 1;
 	if (refc)
-	     numtyp = 5;
+		numtyp = 5;
 
 	if (impl_ver == IMPL_XNTPD)
 		sendsize = sizeof(struct conf_peer);

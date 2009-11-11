@@ -1,3 +1,8 @@
+* [Bug 1003] ntpdc unconfig command doesn't prompt for keyid.
+* [Bug 1376] Enable authenticated ntpq and ntpdc using newly-available
+  digest types.
+* ntp-keygen, Autokey OpenSSL build vs. run version mismatch is now a
+  non-fatal warning.
 (4.2.5p243-RC) 2009/11/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1226] Fix deferred DNS lookups.
 * new crypto signature cleanup.

@@ -3,7 +3,7 @@
  */
 
 #include <stdio.h>
-
+#include <stddef.h>
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
@@ -50,7 +50,8 @@ static	const char *	prompt = "ntpdc> ";	/* prompt to ask him about */
 static	u_long	info_auth_keyid;
 static int keyid_entered = 0;
 
-static	int info_auth_keytype = NID_md5;	/* MD5 */
+static	int	info_auth_keytype = NID_md5;	/* MD5 */
+static	size_t	info_auth_hashlen = 16;		/* MD5 */
 u_long	current_time;		/* needed by authkeys; not used */
 
 /*
@@ -71,10 +72,10 @@ int		ntpdcmain	(int,	char **);
  * Built in command handler declarations
  */
 static	int	openhost	(const char *);
-static	int	sendpkt		(char *, int);
+static	int	sendpkt		(void *, size_t);
 static	void	growpktdata	(void);
 static	int	getresponse	(int, int, int *, int *, char **, int);
-static	int	sendrequest	(int, int, int, int, int, char *);
+static	int	sendrequest	(int, int, int, u_int, size_t, char *);
 static	void	getcmds		(void);
 static	RETSIGTYPE abortcmd	(int);
 static	void	docmd		(const char *);
@@ -619,11 +620,11 @@ openhost(
  */
 static int
 sendpkt(
-	char *xdata,
-	int xdatalen
+	void *	xdata,
+	size_t	xdatalen
 	)
 {
-	if (send(sockfd, xdata, (size_t)xdatalen, 0) == -1) {
+	if (send(sockfd, xdata, xdatalen, 0) == -1) {
 		warning("write to %s failed", currenthost, "");
 		return -1;
 	}
@@ -639,11 +640,7 @@ static void
 growpktdata(void)
 {
 	pktdatasize += INCDATASIZE;
-	pktdata = (char *)realloc(pktdata, (unsigned)pktdatasize);
-	if (pktdata == 0) {
-		(void) fprintf(stderr, "%s: realloc() failed!\n", progname);
-		exit(1);
-	}
+	pktdata = erealloc(pktdata, (size_t)pktdatasize);
 }
 
 
@@ -695,9 +692,9 @@ getresponse(
 
     again:
 	if (firstpkt)
-	    tvo = tvout;
+		tvo = tvout;
 	else
-	    tvo = tvsout;
+		tvo = tvsout;
 	
 	FD_SET(sockfd, &fds);
 	n = select(sockfd+1, &fds, (fd_set *)0, (fd_set *)0, &tvo);
@@ -808,7 +805,8 @@ getresponse(
 		pad = esize - size;
 	else 
 		pad = 0;
-	if ((datasize = items*size) > (n-RESP_HEADER_SIZE)) {
+	datasize = items * size;
+	if ((size_t)datasize > (n-RESP_HEADER_SIZE)) {
 		if (debug)
 		    printf(
 			    "Received items %d, size %d (total %d), data in packet is %d\n",
@@ -854,7 +852,7 @@ getresponse(
 	if ((datap + datasize + (pad * items)) > (pktdata + pktdatasize)) {
 		int offset = datap - pktdata;
 		growpktdata();
-	        *rdata = pktdata; /* might have been realloced ! */
+		*rdata = pktdata; /* might have been realloced ! */
 		datap = pktdata + offset;
 	}
 	/* 
@@ -862,9 +860,9 @@ getresponse(
 	 * items.  This is so we can play nice with older implementations
 	 */
 
-	tmp_data = (char *)rpkt.data;
-	for(i = 0; i <items; i++){
-		memmove(datap, tmp_data, (unsigned)size);
+	tmp_data = rpkt.data;
+	for (i = 0; i < items; i++) {
+		memcpy(datap, tmp_data, (unsigned)size);
 		tmp_data += size;
 		memset(datap + size, 0, pad);
 		datap += size + pad;
@@ -882,36 +880,63 @@ getresponse(
 	 */
 	++numrecv;
 	if (numrecv <= lastseq)
-	    goto again;
+		goto again;
 	return INFO_OKAY;
 }
 
 
 /*
  * sendrequest - format and send a request packet
+ *
+ * Historically, ntpdc has used a fixed-size request packet regardless
+ * of the actual payload size.  When authenticating, the timestamp, key
+ * ID, and digest have been placed just before the end of the packet.
+ * With the introduction in late 2009 of support for authenticated
+ * ntpdc requests using larger 20-octet digests (vs. 16 for MD5), we
+ * come up four bytes short.
+ *
+ * To maintain interop while allowing for larger digests, the behavior
+ * is unchanged when using 16-octet digests.  For larger digests, the
+ * timestamp, key ID, and digest are placed immediately following the
+ * request payload, with the overall packet size variable.  ntpd can
+ * distinguish 16-octet digests by the overall request size being
+ * REQ_LEN_NOMAC + 4 + 16 with the auth bit enabled.  When using a
+ * longer digest, that request size should be avoided.
+ *
+ * With the form used with 20-octet and larger digests, the timestamp,
+ * key ID, and digest are located by ntpd relative to the start of the
+ * packet, and the size of the digest is then implied by the packet
+ * size.
  */
 static int
 sendrequest(
 	int implcode,
 	int reqcode,
 	int auth,
-	int qitems,
-	int qsize,
+	u_int qitems,
+	size_t qsize,
 	char *qdata
 	)
 {
 	struct req_pkt qpkt;
-	int datasize;
+	size_t	datasize;
+	size_t	reqsize;
+	u_long	key_id;
+	l_fp	ts;
+	l_fp *	ptstamp;
+	int	maclen;
+	char	pass_prompt[32];
+	char *	pass;
 
-	memset((char *)&qpkt, 0, sizeof qpkt);
+	memset(&qpkt, 0, sizeof(qpkt));
 
 	qpkt.rm_vn_mode = RM_VN_MODE(0, 0, 0);
 	qpkt.implementation = (u_char)implcode;
 	qpkt.request = (u_char)reqcode;
 
 	datasize = qitems * qsize;
-	if (datasize != 0 && qdata != NULL) {
-		memmove((char *)qpkt.data, qdata, (unsigned)datasize);
+	if (datasize && qdata != NULL) {
+		memcpy(qpkt.data, qdata, datasize);
 		qpkt.err_nitems = ERR_NITEMS(0, qitems);
 		qpkt.mbz_itemsize = MBZ_ITEMSIZE(qsize);
 	} else {
@@ -921,53 +946,64 @@ sendrequest(
 
 	if (!auth || (keyid_entered && info_auth_keyid == 0)) {
 		qpkt.auth_seq = AUTH_SEQ(0, 0);
-		return sendpkt((char *)&qpkt, req_pkt_size);
-	} else {
-		u_long	key_id;
-		l_fp	ts;
-		l_fp *	ptstamp;
-		int	maclen;
-		char *	pass;
-
-		if (info_auth_keyid == 0) {
-			if (((struct conf_peer *)qpkt.data)->keyid > 0)
-				info_auth_keyid = ((struct conf_peer *)qpkt.data)->keyid;
-			else {
-				key_id = getkeyid("Keyid: ");
-				if (key_id == 0) {
-					(void) fprintf(stderr,
-					    "Invalid key identifier\n");
-					return 1;
-				}
-				info_auth_keyid = key_id;
-			}
-		}
-		if (!authistrusted(info_auth_keyid)) {
-			pass = getpass("MD5 Password: ");
-			if (*pass == '\0') {
-				(void) fprintf(stderr,
-				    "Invalid password\n");
-				return (1);
-			}
-			authusekey(info_auth_keyid, info_auth_keytype,
-				   (u_char *)pass);
-			authtrust(info_auth_keyid, 1);
-		}
-		qpkt.auth_seq = AUTH_SEQ(1, 0);
-		get_systime(&ts);
-		L_ADD(&ts, &delay_time);
-		ptstamp = (void *)((char *)&qpkt + req_pkt_size 
-		    - sizeof(qpkt.tstamp));
-		HTONL_FP(&ts, ptstamp);
-		maclen = authencrypt(info_auth_keyid, (u_int32 *)&qpkt,
-		    req_pkt_size);
-		if (maclen == 0) {  
-			(void) fprintf(stderr, "Key not found\n");
-			return (1);
-		}
-		return sendpkt((char *)&qpkt, (int)(req_pkt_size + maclen));
+		return sendpkt(&qpkt, req_pkt_size);
 	}
-	/*NOTREACHED*/
+
+	if (info_auth_keyid == 0) {
+		key_id = getkeyid("Keyid: ");
+		if (!key_id) {
+			fprintf(stderr, "Invalid key identifier\n");
+			return 1;
+		}
+		info_auth_keyid = key_id;
+	}
+	if (!authistrusted(info_auth_keyid)) {
+		snprintf(pass_prompt, sizeof(pass_prompt),
+			 "%s Password: ",
+			 keytype_name(info_auth_keytype));
+		pass = getpass(pass_prompt);
+		if ('\0' == pass[0]) {
+			fprintf(stderr, "Invalid password\n");
+			return 1;
+		}
+		authusekey(info_auth_keyid, info_auth_keytype,
+			   (u_char *)pass);
+		authtrust(info_auth_keyid, 1);
+	}
+	qpkt.auth_seq = AUTH_SEQ(1, 0);
+	if (info_auth_hashlen > 16) {
+		/*
+		 * Only ntpd which expects REQ_LEN_NOMAC plus maclen
+		 * octets in an authenticated request using a 16 octet
+		 * digest (that is, a newer ntpd) will handle digests
+		 * larger than 16 octets, so for longer digests, do
+		 * not attempt to shorten the requests for downlevel
+		 * ntpd compatibility.
+		 */
+		if (REQ_LEN_NOMAC != req_pkt_size)
+			return 1;
+		reqsize = REQ_LEN_HDR + datasize + sizeof(*ptstamp);
+		/* align to 32 bits */
+		reqsize = (reqsize + 3) & ~3;
+	} else
+		reqsize = req_pkt_size;
+	ptstamp = (void *)((char *)&qpkt + reqsize);
+	ptstamp--;
+	get_systime(&ts);
+	L_ADD(&ts, &delay_time);
+	HTONL_FP(&ts, ptstamp);
+	maclen = authencrypt(info_auth_keyid, (void *)&qpkt, reqsize);
+	if (!maclen) {  
+		fprintf(stderr, "Key not found\n");
+		return 1;
+	} else if (maclen != (info_auth_hashlen + sizeof(keyid_t))) {
+		fprintf(stderr,
+			"%d octet MAC, %u expected with %u octet digest\n",
+			maclen, (info_auth_hashlen + sizeof(keyid_t)),
+			info_auth_hashlen);
+		return 1;
+	}
+	return sendpkt(&qpkt, reqsize + maclen);
 }
 
 
@@ -1026,7 +1062,7 @@ again:
 	 */
 	res = sendrequest(implcode, reqcode, auth, qitems, qsize, qdata);
 	if (res != 0)
-	    return res;
+		return res;
 	
 	/*
 	 * Get the response.  If we got a standard error, print a message
@@ -1064,36 +1100,36 @@ again:
  	/* log error message if not told to be quiet */
  	if ((res > 0) && (((1 << res) & quiet_mask) == 0)) {
 		switch(res) {
-		    case INFO_ERR_IMPL:
+		case INFO_ERR_IMPL:
 			/* Give us a chance to try the older implementation. */
 			if (implcode == IMPL_XNTPD)
 				break;
 			(void) fprintf(stderr,
 				       "***Server implementation incompatable with our own\n");
 			break;
-		    case INFO_ERR_REQ:
+		case INFO_ERR_REQ:
 			(void) fprintf(stderr,
 				       "***Server doesn't implement this request\n");
 			break;
-		    case INFO_ERR_FMT:
+		case INFO_ERR_FMT:
 			(void) fprintf(stderr,
 				       "***Server reports a format error in the received packet (shouldn't happen)\n");
 			break;
-		    case INFO_ERR_NODATA:
+		case INFO_ERR_NODATA:
 			(void) fprintf(stderr,
 				       "***Server reports data not found\n");
 			break;
-		    case INFO_ERR_AUTH:
+		case INFO_ERR_AUTH:
 			(void) fprintf(stderr, "***Permission denied\n");
 			break;
-		    case ERR_TIMEOUT:
+		case ERR_TIMEOUT:
 			(void) fprintf(stderr, "***Request timed out\n");
 			break;
-		    case ERR_INCOMPLETE:
+		case ERR_INCOMPLETE:
 			(void) fprintf(stderr,
 				       "***Response from server was incomplete\n");
 			break;
-		    default:
+		default:
 			(void) fprintf(stderr,
 				       "***Server returns unknown error code %d\n", res);
 			break;
@@ -1769,21 +1805,34 @@ keytype(
 	FILE *fp
 	)
 {
-	if (pcmd->nargs == 0)
-	    fprintf(fp, "keytype is %s\n",
-		    (info_auth_keytype == NID_md5) ? "MD5" : "???");
-	else
-	    switch (*(pcmd->argval[0].string)) {
-		case 'm':
-		case 'M':
-		    info_auth_keytype = NID_md5;
-		    break;
+	const char *	digest_name;
+	size_t		digest_len;
+	int		keytype;
 
-		default:
-		    fprintf(fp, "keytype must be 'md5'\n");
-	    }
+	if (!pcmd->nargs) {
+		fprintf(fp, "keytype is %s with %u octet digests\n",
+			keytype_name(info_auth_keytype),
+			info_auth_hashlen);
+		return;
+	}
+
+	digest_name = pcmd->argval[0].string;
+	digest_len = 0;
+	keytype = keytype_from_text(digest_name, &digest_len);
+
+	if (!keytype) {
+		fprintf(fp, "keytype must be 'md5'%s\n",
+#ifdef OPENSSL
+			" or a digest type provided by OpenSSL");
+#else
+			"");
+#endif
+		return;
+	}
+
+	info_auth_keytype = keytype;
+	info_auth_hashlen = digest_len;
 }
-
 
 
 /*

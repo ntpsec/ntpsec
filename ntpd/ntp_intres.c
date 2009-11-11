@@ -727,7 +727,7 @@ request(
 	FD_SET(sockfd, &fdset);
 	while (select(sockfd + 1, &fdset, (fd_set *)0, (fd_set *)0, &tvout) >
 	       0) {
-		recv(sockfd, (char *)&reqpkt, REQ_LEN_MAC, 0);
+		recv(sockfd, (char *)&reqpkt, sizeof(reqpkt), 0);
 		FD_ZERO(&fdset);
 		FD_SET(sockfd, &fdset);
 	}

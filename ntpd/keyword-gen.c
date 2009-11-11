@@ -450,10 +450,10 @@ create_scan_states(
 			exit(2);
 		}
 	} else {
-		my_state = sst_highwater++;
-		while (my_state < COUNTOF(sst)
-		       && sst[my_state].finishes_token)
+		do
 			my_state = sst_highwater++;
+		while (my_state < COUNTOF(sst)
+		       && sst[my_state].finishes_token);
 		if (my_state >= COUNTOF(sst)) {
 			fprintf(stderr,
 				"fatal, keyword scanner state array "
@@ -493,9 +493,9 @@ create_scan_states(
 			sst[token] = sst[my_state];
 			memset(&sst[my_state], 0,
 			       sizeof(sst[my_state]));
-			sst_highwater--;
-			while (sst[sst_highwater].finishes_token)
+			do
 				sst_highwater--;
+			while (sst[sst_highwater].finishes_token);
 			my_state = token;
 			if (prev_char_s)
 				sst[prev_char_s].other_next_s = my_state;

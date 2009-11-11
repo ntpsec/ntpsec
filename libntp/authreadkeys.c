@@ -130,18 +130,13 @@ authreadkeys(
 			continue;
 		}
 #ifdef OPENSSL
-
 		/*
-		 * If the key type is 'M' or 'm', it is replaced by 'MD5".
-		 * In any case, it must be one of the algorithms supported
-		 * by OpenSSL. The key type is the NID used by the message
-		 * digest algorithm. Ther are a number of inconsistencies in
-		 * the OpenSSL database. We attempt to discover them here
-		 * and prevent use of inconsistent data later.
+		 * The key type is the NID used by the message digest 
+		 * algorithm. There are a number of inconsistencies in
+		 * the OpenSSL database. We attempt to discover them
+		 * here and prevent use of inconsistent data later.
 		 */
-		if (strcmp(token, "M") == 0 || strcmp(token, "m") == 0)
-			token  = "MD5";
-		keytype = OBJ_sn2nid(token);
+		keytype = keytype_from_text(token, NULL);
 		if (keytype == 0 || keytype > 255) {
 			msyslog(LOG_ERR,
 			    "authreadkeys: invalid type for key %d", keyno);

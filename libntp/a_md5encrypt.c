@@ -28,7 +28,7 @@ MD5authencrypt(
 	int	length		/* packet length */
 	)
 {
-	u_char	digest[32];
+	u_char	digest[EVP_MAX_MD_SIZE];
 	u_int	len;
 #ifdef OPENSSL
 	EVP_MD_CTX ctx;
@@ -73,7 +73,7 @@ MD5authdecrypt(
 	int	size		/* MAC size */
 	)
 {
-	u_char	digest[32];
+	u_char	digest[EVP_MAX_MD_SIZE];
 	u_int	len;
 #ifdef OPENSSL
 	EVP_MD_CTX ctx;
