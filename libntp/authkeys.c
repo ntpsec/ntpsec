@@ -390,8 +390,17 @@ MD5auth_setkey(
 	sk->next = key_hash[KEYHASH(keyno)];
 	key_hash[KEYHASH(keyno)] = sk;
 #ifdef DEBUG
-	if (debug)
-		printf("auth_setkey: key %d type %d\n", sk->keyid, sk->type);
+	if (debug > 1) {
+		char	hex[] = "0123456789abcdef";
+		int	j;
+
+		printf("auth_setkey: key %d type %d len %d ", sk->keyid,
+		    sk->type, sk->keylen);
+		for (j = 0; j < sk->keylen; j++)
+				printf("%c%c", hex[key[j] >> 4],
+				    hex[key[j] & 0xf]);
+		printf("\n");
+	}	
 #endif
 	authnumkeys++;
 }
