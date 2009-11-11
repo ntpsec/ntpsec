@@ -62,7 +62,8 @@ static	struct req_proc univ_codes[] = {
 };
 
 static	void	req_ack	(sockaddr_u *, struct interface *, struct req_pkt *, int);
-static	char *	prepare_pkt	(sockaddr_u *, struct interface *, struct req_pkt *, u_int);
+static	char *	prepare_pkt	(sockaddr_u *, struct interface *,
+				 struct req_pkt *, size_t);
 static	char *	more_pkt	(void);
 static	void	flush_pkt	(void);
 static	void	peer_list	(sockaddr_u *, struct interface *, struct req_pkt *);
@@ -278,13 +279,10 @@ prepare_pkt(
 	sockaddr_u *srcadr,
 	struct interface *inter,
 	struct req_pkt *pkt,
-	u_int structsize
+	size_t structsize
 	)
 {
-#ifdef DEBUG
-	if (debug > 3)
-	    printf("request: preparing pkt\n");
-#endif
+	DPRINTF(4, ("request: preparing pkt\n"));
 
 	/*
 	 * Fill in the implementation, request and itemsize fields
@@ -322,21 +320,18 @@ more_pkt(void)
 	 * If we were using the extra buffer, send the packet.
 	 */
 	if (usingexbuf) {
-#ifdef DEBUG
-		if (debug > 2)
-		    printf("request: sending pkt\n");
-#endif
+		DPRINTF(3, ("request: sending pkt\n"));
 		rpkt.rm_vn_mode = RM_VN_MODE(RESP_BIT, MORE_BIT, reqver);
 		rpkt.auth_seq = AUTH_SEQ(0, seqno);
 		rpkt.err_nitems = htons((u_short)nitems);
 		sendpkt(toaddr, frominter, -1, (struct pkt *)&rpkt,
-			RESP_HEADER_SIZE+databytes);
+			RESP_HEADER_SIZE + databytes);
 		numresppkts++;
 
 		/*
 		 * Copy data out of exbuf into the packet.
 		 */
-		memmove(&rpkt.data[0], exbuf, (unsigned)itemsize);
+		memcpy(&rpkt.data[0], exbuf, (unsigned)itemsize);
 		seqno++;
 		databytes = 0;
 		nitems = 0;
@@ -346,10 +341,7 @@ more_pkt(void)
 	databytes += itemsize;
 	nitems++;
 	if (databytes + itemsize <= RESP_DATA_SIZE) {
-#ifdef DEBUG
-		if (debug > 3)
-		    printf("request: giving him more data\n");
-#endif
+		DPRINTF(4, ("request: giving him more data\n"));
 		/*
 		 * More room in packet.  Give him the
 		 * next address.
@@ -360,12 +352,9 @@ more_pkt(void)
 		 * No room in packet.  Give him the extra
 		 * buffer unless this was the last in the sequence.
 		 */
-#ifdef DEBUG
-		if (debug > 3)
-		    printf("request: into extra buffer\n");
-#endif
+		DPRINTF(4, ("request: into extra buffer\n"));
 		if (seqno == MAXSEQ)
-		    return (char *)0;
+			return NULL;
 		else {
 			usingexbuf = 1;
 			return exbuf;
@@ -380,17 +369,14 @@ more_pkt(void)
 static void
 flush_pkt(void)
 {
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("request: flushing packet, %d items\n", nitems);
-#endif
+	DPRINTF(3, ("request: flushing packet, %d items\n", nitems));
 	/*
 	 * Must send the last packet.  If nothing in here and nothing
 	 * has been sent, send an error saying no data to be found.
 	 */
 	if (seqno == 0 && nitems == 0)
-	    req_ack(toaddr, frominter, (struct req_pkt *)&rpkt,
-		    INFO_ERR_NODATA);
+		req_ack(toaddr, frominter, (struct req_pkt *)&rpkt,
+			INFO_ERR_NODATA);
 	else {
 		rpkt.rm_vn_mode = RM_VN_MODE(RESP_BIT, 0, reqver);
 		rpkt.auth_seq = AUTH_SEQ(0, seqno);
@@ -412,6 +398,8 @@ get_packet_mode(struct recvbuf *rbufp)
 	struct req_pkt *inpkt = (struct req_pkt *)&rbufp->recv_pkt;
 	return (INFO_MODE(inpkt->rm_vn_mode));
 }
+
+
 /*
  * process_private - process private mode (7) packets
  */
@@ -428,19 +416,22 @@ process_private(
 	struct req_proc *proc;
 	int ec;
 	short temp_size;
+	l_fp ftmp;
+	double dtemp;
+	size_t recv_len;
+	size_t noslop_len;
+	size_t mac_len;
 
 	/*
 	 * Initialize pointers, for convenience
 	 */
+	recv_len = rbufp->recv_length;
 	inpkt = (struct req_pkt *)&rbufp->recv_pkt;
 	srcadr = &rbufp->recv_srcadr;
 	inter = rbufp->dstadr;
 
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("process_private: impl %d req %d\n",
-		   inpkt->implementation, inpkt->request);
-#endif
+	DPRINTF(3, ("process_private: impl %d req %d\n",
+		    inpkt->implementation, inpkt->request));
 
 	/*
 	 * Do some sanity checks on the packet.  Return a format
@@ -467,10 +458,10 @@ process_private(
 	 * Get the appropriate procedure list to search.
 	 */
 	if (inpkt->implementation == IMPL_UNIV)
-	    proc = univ_codes;
+		proc = univ_codes;
 	else if ((inpkt->implementation == IMPL_XNTPD) ||
 		 (inpkt->implementation == IMPL_XNTPD_OLD))
-	    proc = ntp_codes;
+		proc = ntp_codes;
 	else {
 		req_ack(srcadr, inter, inpkt, INFO_ERR_IMPL);
 		return;
@@ -482,7 +473,7 @@ process_private(
 	 */
 	while (proc->request_code != NO_REQUEST) {
 		if (proc->request_code == (short) inpkt->request)
-		    break;
+			break;
 		proc++;
 	}
 	if (proc->request_code == NO_REQUEST) {
@@ -490,10 +481,7 @@ process_private(
 		return;
 	}
 
-#ifdef DEBUG
-	if (debug > 3)
-	    printf("found request in tables\n");
-#endif
+	DPRINTF(4, ("found request in tables\n"));
 
 	/*
 	 * If we need data, check to see if we have some.  If we
@@ -512,21 +500,15 @@ process_private(
 	    !(inpkt->implementation == IMPL_XNTPD &&
 	      inpkt->request == REQ_CONFIG &&
 	      temp_size == sizeof(struct old_conf_peer))) {
-#ifdef DEBUG
-		if (debug > 2)
-			printf("process_private: wrong item size, received %d, should be %d or %d\n",
-			    temp_size, proc->sizeofitem, proc->v6_sizeofitem);
-#endif
+		DPRINTF(3, ("process_private: wrong item size, received %d, should be %d or %d\n",
+			    temp_size, proc->sizeofitem, proc->v6_sizeofitem));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
 	if ((proc->sizeofitem != 0) &&
-	    ((temp_size * INFO_NITEMS(inpkt->err_nitems)) >
-	    (rbufp->recv_length - REQ_LEN_HDR))) {
-#ifdef DEBUG
-		if (debug > 2)
-			printf("process_private: not enough data\n");
-#endif
+	    ((size_t)(temp_size * INFO_NITEMS(inpkt->err_nitems)) >
+	     (recv_len - REQ_LEN_HDR))) {
+		DPRINTF(3, ("process_private: not enough data\n"));
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 		return;
 	}
@@ -552,55 +534,73 @@ process_private(
 	 * time stamp.
 	 */
 	if (proc->needs_auth && sys_authenticate) {
-		l_fp ftmp;
-		double dtemp;
 
-		if (rbufp->recv_length < (REQ_LEN_HDR +
+		if (recv_len < (REQ_LEN_HDR +
 		    (INFO_ITEMSIZE(inpkt->mbz_itemsize) *
 		    INFO_NITEMS(inpkt->err_nitems)) +
 		    sizeof(*tailinpkt))) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 			return;
-		} 
-		tailinpkt = (void *)((char *)&rbufp->recv_pkt +
-		    rbufp->recv_length - sizeof(*tailinpkt));
+		}
 
 		/*
-		 * If this guy is restricted from doing this, don't let him
-		 * If wrong key was used, or packet doesn't have mac, return.
+		 * For 16-octet digests, regardless of itemsize and
+		 * nitems, authenticated requests are a fixed size
+		 * with the timestamp, key ID, and digest located
+		 * at the end of the packet.  Because the key ID
+		 * determining the digest size precedes the digest,
+		 * for larger digests the fixed size request scheme
+		 * is abandoned and the timestamp, key ID, and digest
+		 * are located relative to the start of the packet,
+		 * with the digest size determined by the packet size.
 		 */
-		if (!INFO_IS_AUTH(inpkt->auth_seq) || info_auth_keyid == 0
+		noslop_len = REQ_LEN_HDR
+			     + INFO_ITEMSIZE(inpkt->mbz_itemsize) *
+			       INFO_NITEMS(inpkt->err_nitems)
+			     + sizeof(inpkt->tstamp);
+		/* 32-bit alignment */
+		noslop_len = (noslop_len + 3) & ~3;
+		if (recv_len > (noslop_len + MAX_MAC_LEN))
+			mac_len = 20;
+		else
+			mac_len = recv_len - noslop_len;
+
+		tailinpkt = (void *)((char *)inpkt + recv_len -
+			    (mac_len + sizeof(inpkt->tstamp)));
+
+		/*
+		 * If this guy is restricted from doing this, don't let
+		 * him.  If the wrong key was used, or packet doesn't
+		 * have mac, return.
+		 */
+		if (!INFO_IS_AUTH(inpkt->auth_seq) || !info_auth_keyid
 		    || ntohl(tailinpkt->keyid) != info_auth_keyid) {
+			DPRINTF(5, ("failed auth %d info_auth_keyid %u pkt keyid %lu maclen %u\n",
+				    INFO_IS_AUTH(inpkt->auth_seq),
+				    info_auth_keyid,
+				    ntohl(tailinpkt->keyid), mac_len));
 #ifdef DEBUG
-			if (debug > 4)
-			    printf("failed auth %d info_auth_keyid %lu pkt keyid %lu\n",
-				   INFO_IS_AUTH(inpkt->auth_seq),
-				   (u_long)info_auth_keyid,
-				   (u_long)ntohl(tailinpkt->keyid));
 			msyslog(LOG_DEBUG,
-				"process_private: failed auth %d info_auth_keyid %lu pkt keyid %lu\n",
+				"process_private: failed auth %d info_auth_keyid %u pkt keyid %lu maclen %u\n",
 				INFO_IS_AUTH(inpkt->auth_seq),
-				(u_long)info_auth_keyid,
-				(u_long)ntohl(tailinpkt->keyid));
+				info_auth_keyid,
+				ntohl(tailinpkt->keyid), mac_len);
 #endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
-		if (rbufp->recv_length > REQ_LEN_MAC) {
-#ifdef DEBUG
-			if (debug > 4)
-			    printf("bad pkt length %d\n",
-				   rbufp->recv_length);
-#endif
-			msyslog(LOG_ERR, "process_private: bad pkt length %d",
-				rbufp->recv_length);
+		if (recv_len > REQ_LEN_NOMAC + MAX_MAC_LEN) {
+			DPRINTF(5, ("bad pkt length %d\n", recv_len));
+			msyslog(LOG_ERR,
+				"process_private: bad pkt length %d",
+				recv_len);
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 			return;
 		}
 		if (!mod_okay || !authhavekey(info_auth_keyid)) {
+			DPRINTF(5, ("failed auth mod_okay %d\n",
+				    mod_okay));
 #ifdef DEBUG
-			if (debug > 4)
-			    printf("failed auth mod_okay %d\n", mod_okay);
 			msyslog(LOG_DEBUG,
 				"process_private: failed auth mod_okay %d\n",
 				mod_okay);
@@ -630,22 +630,14 @@ process_private(
 		 * So far so good.  See if decryption works out okay.
 		 */
 		if (!authdecrypt(info_auth_keyid, (u_int32 *)inpkt,
-		    rbufp->recv_length - sizeof(struct req_pkt_tail) +
-		    REQ_LEN_HDR, sizeof(struct req_pkt_tail) - REQ_LEN_HDR)) {
-#ifdef DEBUG
-			if (debug > 4)
-			    printf("authdecrypt failed\n");
-#endif
+				 recv_len - mac_len, mac_len)) {
+			DPRINTF(5, ("authdecrypt failed\n"));
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
 	}
 
-#ifdef DEBUG
-	if (debug > 3)
-	    printf("process_private: all okay, into handler\n");
-#endif
-
+	DPRINTF(3, ("process_private: all okay, into handler\n"));
 	/*
 	 * Packet is okay.  Call the handler to send him data.
 	 */

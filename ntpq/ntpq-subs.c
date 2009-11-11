@@ -1067,7 +1067,7 @@ printassoc(
 			break;
 
 		case PEVNT_RATE:
-			last_event = "raate_exceeded";
+			last_event = "rate_exceeded";
 			break;
 
 		case PEVNT_DENY:

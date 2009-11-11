@@ -1,3 +1,8 @@
+* [Bug 1003] ntpdc unconfig command doesn't prompt for keyid.
+* [Bug 1376] Enable authenticated ntpq and ntpdc using newly-available
+  digest types.
+* ntp-keygen, Autokey OpenSSL build vs. run version mismatch is now a
+  non-fatal warning.
 (4.2.5p242-RC) 2009/11/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1363] CID 92 clarify fallthrough case in clk_trimtsip.c
 * [Bug 1366] ioctl(TIOCSCTTY, 0) fails on NetBSD *[0-2].* > 3.99.7.
