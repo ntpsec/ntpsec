@@ -1,3 +1,4 @@
+(4.2.5p243-RC) 2009/11/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1226] Fix deferred DNS lookups.
 * new crypto signature cleanup.
 (4.2.5p242-RC) 2009/11/10 Released by Harlan Stenn <stenn@ntp.org>
