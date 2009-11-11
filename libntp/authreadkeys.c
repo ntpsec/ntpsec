@@ -22,7 +22,7 @@ static char *nexttok (char **);
  */
 static char *
 nexttok(
-	char **str
+	char	**str
 	)
 {
 	register char *cp;
@@ -69,12 +69,15 @@ authreadkeys(
 	const char *file
 	)
 {
-	FILE *fp;
-	char *line;
-	char *token, *keystr;
-	keyid_t keyno;
-	int keytype;
-	char buf[512];		/* lots of room for line */
+	FILE	*fp;
+	char	*line;
+	char	*token;
+	keyid_t	keyno;
+	int	keytype;
+	char	buf[512];		/* lots of room for line */
+	u_char	keystr[20];
+	int	len;
+	int	j;
 
 	/*
 	 * Open file.  Complain and return if it can't be opened.
@@ -134,7 +137,7 @@ authreadkeys(
 		 * by OpenSSL. The key type is the NID used by the message
 		 * digest algorithm. Ther are a number of inconsistencies in
 		 * the OpenSSL database. We attempt to discover them here
-		 * and prevent use of inconsistent data.
+		 * and prevent use of inconsistent data later.
 		 */
 		if (strcmp(token, "M") == 0 || strcmp(token, "m") == 0)
 			token  = "MD5";
@@ -162,10 +165,12 @@ authreadkeys(
 		}
 		keytype = KEY_TYPE_MD5;
 #endif /* OPENSSL */
-		keystr = token;
 
 		/*
-		 * Finally, get key and insert it
+		 * Finally, get key and insert it. If it is longer than 20
+		 * characters, it is a binary string encoded in hex;
+		 * otherwise, it is a text string of printable ASCII
+		 * characters.
 		 */
 		token = nexttok(&line);
 		if (token == NULL) {
@@ -173,8 +178,29 @@ authreadkeys(
 			    "authreadkeys: no key for key %d", keyno);
 			continue;
 		}
-		MD5auth_setkey(keyno, keytype, (u_char *)token,
-		    strlen(token));
+		len = strlen(token);
+		if (len <= 20) {
+			MD5auth_setkey(keyno, keytype, (u_char *)token, len);
+		} else {
+			char	hex[] = "0123456789abcdef";
+			int	temp;
+			char	*ptr;
+
+			for (j = 0; j < len; j++) {
+				ptr = strchr(hex, tolower(token[j]));
+				if (ptr == NULL) {
+					msyslog(LOG_ERR,
+					    "authreadkeys: invalid hex digit for key %d", keyno);
+					continue;
+				}
+				temp = ptr - hex;
+				if (j & 1)
+					keystr[j / 2] |= temp;
+				else
+					keystr[j / 2] = temp << 4;
+			}
+			MD5auth_setkey(keyno, keytype, keystr, len / 2);
+		}
 	}
 	fclose(fp);
 	return (1);

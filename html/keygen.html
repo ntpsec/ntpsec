@@ -17,7 +17,7 @@
 <p>Alice holds the key.</p>
 
 <p>Last update: 
-	<!-- #BeginDate format:En2m -->04-Nov-2009  21:40<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->11-Nov-2009  6:01<!-- #EndDate -->
 </p>
 <br clear="left">
 
@@ -51,10 +51,19 @@
 
 <h4 id="descrip">Description</h4>
 
-<p>This program generates cryptographic data files used by the NTPv4 authentication and identity schemes. It generates MD5 keys used in symmetric key cryptography and, if the OpenSSL software library has been installed, it generates host keys, sign keys, certificates and identity keys used in the Autokey public key cryptography. The symmetric keys file is generated in a format compatible with NTPv3. All other files are in PEM-encoded printable ASCII format so they can be embedded as MIME attachments in mail to other sites.</p>
+<p>This program generates cryptographic data files used by the NTPv4 authentication
+	and identity schemes. It generates MD5 message digest keys used in symmetric
+	key cryptography and, if the OpenSSL software library has been installed,
+	it generates message digest keys for other algorithms, as well as host keys,
+	sign keys, certificates and identity keys used in the Autokey public key
+	cryptography. The symmetric keys file is generated in a format compatible
+	with NTPv3. All other files are in PEM-encoded printable ASCII format so
+	they can be embedded as MIME attachments in mail to other sites.</p>
 
 <p>When used to generate symmetric keys, the program produces a file containing
-	16 pseudo-random keys of 128 bits in length. If this is the only need, run <tt>ntp-keygen</tt> with
+	ten pseudo-random printable ASCII strings, as well as ten random hex strings,
+	both of `60 bits in length. 
+	If this is the only need, run <tt>ntp-keygen</tt> with
 	the <tt>-M</tt> option
 	and disregard the remainder of this page. The file can be edited later with
 	purpose-chosen passwords for the <tt>ntpq</tt> and <tt>ntpdc</tt> programs.
