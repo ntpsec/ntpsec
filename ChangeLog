@@ -1,3 +1,4 @@
+* keygen.html updates from Dave Mills.
 * [Bug 1003] ntpdc unconfig command doesn't prompt for keyid.
 * [Bug 1376] Enable authenticated ntpq and ntpdc using newly-available
   digest types.
