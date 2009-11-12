@@ -3249,7 +3249,7 @@ esac])
 case "$ans" in
  no) ;;
  yes) # Look in:
-    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib"
+    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib /lib"
     ;;
  *) # Look where they said
     ;;
@@ -3346,7 +3346,6 @@ case "$ntp_openssl" in
     esac
     AC_SUBST(LCRYPTO, [-lcrypto])
     AC_DEFINE(OPENSSL, , [Use OpenSSL?])
-    AC_CHECK_FUNCS([EVP_md2 EVP_mdc2])
 esac
 
 #

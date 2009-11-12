@@ -538,7 +538,7 @@ process_private(
 		if (recv_len < (REQ_LEN_HDR +
 		    (INFO_ITEMSIZE(inpkt->mbz_itemsize) *
 		    INFO_NITEMS(inpkt->err_nitems)) +
-		    sizeof(*tailinpkt))) {
+		    REQ_TAIL_MIN)) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 			return;
 		}
@@ -575,13 +575,13 @@ process_private(
 		 */
 		if (!INFO_IS_AUTH(inpkt->auth_seq) || !info_auth_keyid
 		    || ntohl(tailinpkt->keyid) != info_auth_keyid) {
-			DPRINTF(5, ("failed auth %d info_auth_keyid %u pkt keyid %lu maclen %u\n",
+			DPRINTF(5, ("failed auth %d info_auth_keyid %u pkt keyid %u maclen %u\n",
 				    INFO_IS_AUTH(inpkt->auth_seq),
 				    info_auth_keyid,
 				    ntohl(tailinpkt->keyid), mac_len));
 #ifdef DEBUG
 			msyslog(LOG_DEBUG,
-				"process_private: failed auth %d info_auth_keyid %u pkt keyid %lu maclen %u\n",
+				"process_private: failed auth %d info_auth_keyid %u pkt keyid %u maclen %u\n",
 				INFO_IS_AUTH(inpkt->auth_seq),
 				info_auth_keyid,
 				ntohl(tailinpkt->keyid), mac_len);

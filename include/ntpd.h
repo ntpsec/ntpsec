@@ -302,6 +302,8 @@ extern u_long	numasyncmsgs;		/* number of async messages we've sent */
 
 /* ntp_intres.c */
 extern keyid_t	req_keyid;		/* request keyid */
+extern int	req_keytype;		/* OpenSSL NID such as NID_md5 */
+extern size_t	req_hashlen;		/* digest size for req_keytype */
 extern char *	req_file;		/* name of the file with configuration info */
 #ifdef SYS_WINNT
 extern HANDLE ResolverEventHandle;

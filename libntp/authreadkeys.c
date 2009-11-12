@@ -178,23 +178,25 @@ authreadkeys(
 			MD5auth_setkey(keyno, keytype, (u_char *)token, len);
 		} else {
 			char	hex[] = "0123456789abcdef";
-			int	temp;
+			u_char	temp;
 			char	*ptr;
+			int	jlim;
 
-			for (j = 0; j < len; j++) {
+			jlim = min(len, 2 * sizeof(keystr));
+			for (j = 0; j < jlim; j++) {
 				ptr = strchr(hex, tolower(token[j]));
 				if (ptr == NULL) {
 					msyslog(LOG_ERR,
 					    "authreadkeys: invalid hex digit for key %d", keyno);
 					continue;
 				}
-				temp = ptr - hex;
+				temp = (u_char)(ptr - hex);
 				if (j & 1)
 					keystr[j / 2] |= temp;
 				else
 					keystr[j / 2] = temp << 4;
 			}
-			MD5auth_setkey(keyno, keytype, keystr, len / 2);
+			MD5auth_setkey(keyno, keytype, keystr, jlim / 2);
 		}
 	}
 	fclose(fp);

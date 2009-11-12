@@ -1707,11 +1707,15 @@ config_auth(
 	struct config_tree *ptree
 	)
 {
+	extern int	cache_type;	/* authkeys.c */
 #ifdef OPENSSL
+	u_char		digest[EVP_MAX_MD_SIZE];
+	u_int		digest_len;
+	EVP_MD_CTX	ctx;
 	struct attr_val *my_val;
-	int item;
+	int		item;
 #endif
-	int *key_val;
+	int *		key_val;
 
 	/* Crypto Command */
 #ifdef OPENSSL
@@ -1811,12 +1815,23 @@ config_auth(
 		req_keyid = info_auth_keyid;
 
 	/* if doesn't exist, make up one at random */
-	if (!authhavekey(req_keyid)) {
+	if (authhavekey(req_keyid)) {
+		req_keytype = cache_type;
+#ifndef OPENSSL
+		req_hashlen = 16;
+#else	/* OPENSSL follows */
+		EVP_DigestInit(&ctx, EVP_get_digestbynid(req_keytype));
+		EVP_DigestFinal(&ctx, digest, &digest_len);
+		req_hashlen = digest_len;
+#endif
+	} else {
 		int	rankey;
 
 		rankey = ntp_random();
-		MD5auth_setkey(req_keyid, NID_md5, (u_char *)&rankey,
-		    sizeof(rankey));
+		req_keytype = NID_md5;
+		req_hashlen = 16;
+		MD5auth_setkey(req_keyid, req_keytype,
+		    (u_char *)&rankey, sizeof(rankey));
 		authtrust(req_keyid, 1);
 	}
 
@@ -3362,7 +3377,7 @@ config_peers(
 		status = get_multiple_netnums(curr_peer->addr->address,
 		    &peeraddr, &res, 0, t_UNK);
 
-#if 0 /* Hack for debugging Deferred DNS */
+#ifdef FORCE_DEFER_DNS /* Hack for debugging Deferred DNS */
 		if (status == 1) {
 			/* Deferring everything breaks refclocks. */
 			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);

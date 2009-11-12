@@ -7,6 +7,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <ctype.h>
 #include <ntp.h>
 #include <ntp_debug.h>
 #include <lib_strbuf.h>
@@ -56,14 +57,14 @@ ssl_check_version(void)
  */
 int
 keytype_from_text(
-	const char *keytype_name,
+	const char *text,
 	size_t *pdigest_len
 	)
 {
 	int		key_type;
 	u_int		digest_len;
 #ifdef OPENSSL
-	char		digest[EVP_MAX_MD_SIZE];
+	u_char		digest[EVP_MAX_MD_SIZE];
 	char *		upcased;
 	char *		pch;
 	EVP_MD_CTX	ctx;
@@ -76,7 +77,7 @@ keytype_from_text(
 	 */
 	INIT_SSL();
 	LIB_GETBUF(upcased);
-	strncpy(upcased, keytype_name, LIB_BUFLENGTH);
+	strncpy(upcased, text, LIB_BUFLENGTH);
 	for (pch = upcased; '\0' != *pch; pch++)
 		*pch = (char)toupper(*pch);
 	key_type = OBJ_sn2nid(upcased);
@@ -84,7 +85,7 @@ keytype_from_text(
 	key_type = 0;
 #endif
 
-	if (!key_type && 'm' == tolower(keytype_name[0]))
+	if (!key_type && 'm' == tolower(text[0]))
 		key_type = NID_md5;
 
 	if (!key_type)
@@ -94,6 +95,17 @@ keytype_from_text(
 #ifdef OPENSSL
 		EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
 		EVP_DigestFinal(&ctx, digest, &digest_len);
+		if (digest_len + sizeof(keyid_t) > MAX_MAC_LEN) {
+			fprintf(stderr,
+				"key type %s %u octet digests are too big, max %u\n",
+				keytype_name(key_type), digest_len,
+				MAX_MAC_LEN - sizeof(keyid_t));
+			msyslog(LOG_ERR,
+				"key type %s %u octet digests are too big, max %u",
+				keytype_name(key_type), digest_len,
+				MAX_MAC_LEN - sizeof(keyid_t));
+			return 0;
+		}
 #else
 		digest_len = 16;
 #endif
@@ -123,7 +135,7 @@ keytype_name(
 	if (NULL == name)
 		name = unknown_type;
 #else	/* !OPENSSL follows */
-	if (nid_MD5 == nid)
+	if (NID_md5 == nid)
 		name = "MD5";
 	else
 		name = unknown_type;

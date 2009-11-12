@@ -136,7 +136,7 @@ struct req_pkt {
 					/* struct conf_peer must fit */
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* (optional) encryption key */
-	char mac[MAX_MD5_LEN-sizeof(keyid_t)]; /* (optional) auth code */
+	char mac[MAX_MAC_LEN-sizeof(keyid_t)]; /* (optional) auth code */
 };
 
 /*
@@ -146,13 +146,16 @@ struct req_pkt {
 struct req_pkt_tail {
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* (optional) encryption key */
-	char mac[MAX_MD5_LEN-sizeof(keyid_t)]; /* (optional) auth code */
+	char mac[MAX_MAC_LEN-sizeof(keyid_t)]; /* (optional) auth code */
 };
 
 /* MODE_PRIVATE request packet header length before optional items. */
 #define	REQ_LEN_HDR	(offsetof(struct req_pkt, data))
 /* MODE_PRIVATE request packet fixed length without MAC. */
 #define	REQ_LEN_NOMAC	(offsetof(struct req_pkt, keyid))
+/* MODE_PRIVATE req_pkt_tail minimum size (16 octet digest) */
+#define REQ_TAIL_MIN	\
+	(sizeof(struct req_pkt_tail) - (MAX_MAC_LEN - MAX_MD5_LEN))
 
 /*
  * A MODE_PRIVATE response packet.  The length here is variable, this

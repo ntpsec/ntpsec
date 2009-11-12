@@ -1807,7 +1807,7 @@ keytype(
 {
 	const char *	digest_name;
 	size_t		digest_len;
-	int		keytype;
+	int		key_type;
 
 	if (!pcmd->nargs) {
 		fprintf(fp, "keytype is %s with %u octet digests\n",
@@ -1818,9 +1818,9 @@ keytype(
 
 	digest_name = pcmd->argval[0].string;
 	digest_len = 0;
-	keytype = keytype_from_text(digest_name, &digest_len);
+	key_type = keytype_from_text(digest_name, &digest_len);
 
-	if (!keytype) {
+	if (!key_type) {
 		fprintf(fp, "keytype must be 'md5'%s\n",
 #ifdef OPENSSL
 			" or a digest type provided by OpenSSL");
@@ -1830,7 +1830,7 @@ keytype(
 		return;
 	}
 
-	info_auth_keytype = keytype;
+	info_auth_keytype = key_type;
 	info_auth_hashlen = digest_len;
 }
 
