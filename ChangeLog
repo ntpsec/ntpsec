@@ -1,3 +1,4 @@
+(4.2.5p244-RC) 2009/11/12 Released by Harlan Stenn <stenn@ntp.org>
 * keygen.html updates from Dave Mills.
 * [Bug 1003] ntpdc unconfig command doesn't prompt for keyid.
 * [Bug 1376] Enable authenticated ntpq and ntpdc using newly-available
