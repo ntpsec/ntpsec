@@ -50,21 +50,21 @@ void debug_msg(char *message) {
 	}
 }
 
-void init_log(const char *logfile) {
-	log_file = fopen(logfile, "a");
-	
-	if(log_file == NULL) {
+void init_log(
+	const char *logfile
+	)
+{
+	char error_msg[80];
+
+	log_file = fopen(logfile, "a");	
+	if (log_file == NULL) {
 		filelog = 0;
 
-		char error_msg[80];
-
 		snprintf(error_msg, 80, "init_log(): Cannot open logfile %s", logfile);
-
 		debug_msg(error_msg);
 
 		return;
-	}
-	else {
+	} else {
 		filelog = 1;
 		init = 1;
 		atexit(cleanup_log);
