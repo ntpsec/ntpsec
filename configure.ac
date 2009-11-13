@@ -1322,7 +1322,6 @@ esac
 
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
-AC_CHECK_FUNC(inet_aton, [], [AC_DEFINE(ISC_PLATFORM_NEEDATON, 1, [ISC: provide inet_aton()])])
 AC_CHECK_FUNCS(K_open kvm_open memcpy memmove memset)
 case "$host" in
  *-*-sco3.2v5.0.*)
