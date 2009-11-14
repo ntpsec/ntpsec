@@ -1,6 +1,7 @@
 NULL=
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
+BUILT_SOURCES =
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
 EXTRA_PROGRAMS = testdcf dcfd
 
@@ -16,3 +17,5 @@ check-local: @DCFD@
 	case "$(noinst_PROGRAMS)" in	\
 	 *dcfd*) ./dcfd -Y ;;		\
 	esac
+
+include $(top_srcdir)/depsver.mf

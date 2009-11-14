@@ -1,6 +1,7 @@
 NULL=
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
+BUILT_SOURCES =
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
 EXTRA_LIBRARIES = libntpsim.a
 libntp_a_SRCS =						\
@@ -105,8 +106,6 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/unix/include
 ETAGS_ARGS = Makefile.am
 
-../include/des.h:
-	touch ../include/des.h
-
 EXTRA_DIST = README
 
+include $(top_srcdir)/depsver.mf

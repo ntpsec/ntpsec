@@ -114,24 +114,8 @@ touch ntpd/ntp_parser.[ch]
 
 touch ntpd/ntp_keyword.h
 
-## HMS: Danger, Will Robinson.
-# If we remove files that used to be there, the old .Po files will bite us.
-# If we remove the .deps file, we *must* run config.status to generate new
-# dummy .Po files.  The problem with this is that we then lose the
-# dependency chain and for an exisint build tree that means we may not
-# rebuild things that need to be rebuilt.
-#
-# regenerate dummy .Po files, which are included
-# in Makefiles
-
-#for i in `find . -name '*.Po' | grep /.deps/`
-#do
-#    echo '# dummy' > $i
-#done
-
-##
-
 cp bincheck.mf sntp/
+cp depsver.mf sntp/
 
 ${AUTORECONF} -i -v
 

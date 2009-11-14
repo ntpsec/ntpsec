@@ -48,3 +48,6 @@ jitter_LDADD=
 
 kern.o: kern.c
 	$(COMPILE) -DHAVE_TIMEX_H -c kern.c
+
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

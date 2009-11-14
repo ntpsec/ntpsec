@@ -45,6 +45,8 @@ sntp_SOURCES =		\
 #dist_man_MANS=	sntp.1
 
 EXTRA_DIST=	bincheck.mf	\
+		depsver.mf	\
+		deps-ver	\
 		COPYRIGHT	\
 		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu	\
 		$(NULL)
@@ -115,4 +117,5 @@ $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(src
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
 
-include bincheck.mf
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

@@ -5,10 +5,10 @@ ACLOCAL_AMFLAGS= -I m4 -I libopts/m4
 NULL=
 
 SUBDIRS=
-SUBDIRS+= 				\
-	scripts 			\
-	include 			\
-	ElectricFence			\
+SUBDIRS+= 		\
+	scripts 	\
+	include 	\
+	ElectricFence	\
 	$(NULL)
 if NEED_LIBOPTS
 SUBDIRS+= libopts
@@ -53,47 +53,48 @@ DIST_SUBDIRS=		\
 
 DISTCHECK_CONFIGURE_FLAGS=	-C --with-arlib --enable-local-libopts
 
-EXTRA_DIST =		\
-	COPYRIGHT	\
-	ChangeLog	\
-	CommitLog	\
-	CommitLog-4.1.0 \
-	NEWS		\
-	NOTES.y2kfixes	\
-	README.bk	\
-	README.hackers	\
-	README.patches	\
-	README.refclocks \
-	README.versions	\
-	TODO		\
-	WHERE-TO-START	\
-	bootstrap	\
-	build		\
-	config.guess	\
-	config.h.in	\
-	config.sub	\
-	dot.emacs	\
-	excludes	\
-	flock-build	\
-	install-sh	\
-	packageinfo.sh	\
-	readme.y2kfixes	\
+EXTRA_DIST =			\
+	COPYRIGHT		\
+	ChangeLog		\
+	CommitLog		\
+	CommitLog-4.1.0		\
+	NEWS			\
+	NOTES.y2kfixes		\
+	README.bk		\
+	README.hackers		\
+	README.patches		\
+	README.refclocks	\
+	README.versions		\
+	TODO			\
+	WHERE-TO-START		\
+	bootstrap		\
+	build			\
+	config.guess		\
+	config.h.in		\
+	config.sub		\
+	dot.emacs		\
+	excludes		\
+	flock-build		\
+	install-sh		\
+	packageinfo.sh		\
+	readme.y2kfixes		\
 	results.y2kfixes	\
 	\
-	conf		\
-	html		\
-	lib/isc		\
-	ports		\
+	conf			\
+	html			\
+	lib/isc			\
+	ports			\
 	\
-	bincheck.mf	\
-	version		\
-	version.m4	\
+	bincheck.mf		\
+	depsver.mf		\
+	deps-ver		\
+	version			\
+	version.m4		\
 	\
 	$(NULL)
 
 DISTCLEANFILES = .gcc-warning
 
-#ETAGS_ARGS = $(srcdir)/Makefile.am $(srcdir)/configure.ac
 ETAGS_ARGS = Makefile.am configure.ac
 
 # HMS: make ports be the last directory...
@@ -120,7 +121,7 @@ $(srcdir)/COPYRIGHT: $(srcdir)/html/copyright.html
 $(srcdir)/version: FRC.version
 	-(bk version) >/dev/null 2>&1 && \
 	    cd $(srcdir) && \
-            x=`bk -R prs -hr+ -nd:I: ChangeSet` && \
+	    x=`bk -R prs -hr+ -nd:I: ChangeSet` && \
 	    y=`cat version 2>/dev/null` || true && \
 	    case "$$x" in ''|$$y) ;; *) echo $$x > version ;; esac
 
@@ -136,7 +137,6 @@ libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
 
 dist-hook:
-	@find $(distdir) -type d -name CVS -print | xargs rm -rf
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
 	@chmod u+w $(distdir)/ports/winnt
 

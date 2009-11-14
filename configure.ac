@@ -453,9 +453,6 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNC(setsockopt, ,
-	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
-
 AC_SEARCH_LIBS([setsockopt], [socket xnet])
 AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
 AC_CHECK_FUNCS(res_init __res_init)
