@@ -139,8 +139,7 @@ AC_CHECK_FUNC([openlog], ,
 	[AC_SEARCH_LIBS([openlog], [gen], , 
 		[AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])])])
 
-AC_CHECK_FUNC([setsockopt], ,
-	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
+AC_SEARCH_LIBS([setsockopt], [socket xnet])
 
 # Checks for header files.
 AC_HEADER_STDC

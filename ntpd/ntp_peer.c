@@ -571,7 +571,6 @@ peer_refresh_interface(
 			    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, ",
 			    niface->fd,  niface->bfd, niface->name,
 			    niface->flags, niface->scopeid);
-			/* Leave these as three printf calls. */
 			printf(", sin=%s", stoa((&niface->sin)));
 			if (niface->flags & INT_BROADCAST)
 				printf(", bcast=%s,",

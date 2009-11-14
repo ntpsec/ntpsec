@@ -234,4 +234,5 @@ version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/
 	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntpd
 	$(COMPILE) -c version.c
 
-include ../bincheck.mf
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

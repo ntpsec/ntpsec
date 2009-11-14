@@ -9,9 +9,12 @@ AC_PROG_CC
 AC_PROG_RANLIB
 
 # Checks for libraries.
-AC_CHECK_FUNC(gethostent, , AC_CHECK_LIB(nsl, gethostent, , , -lsocket))
-AC_CHECK_FUNC(setsockopt, , AC_CHECK_LIB(socket, setsockopt))
-AC_CHECK_FUNC(res_init, , AC_CHECK_LIB(resolv, res_init))
+AC_CHECK_FUNC([gethostent], ,
+	[AC_SEARCH_LIBS([gethostent], [nsl], , , [-lsocket])])
+AC_SEARCH_LIBS([setsockopt], [socket xnet])
+AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+AC_CHECK_FUNCS(res_init __res_init)
+
 
 # Checks for header files.
 dnl AC_CHECK_HEADERS([errno.h fcntl.h netdb.h netinet/in.h strings.h sys/socket.h sys/time.h])

@@ -1,6 +1,7 @@
 NULL=
-AUTOMAKE_OPTIONS=	
+AUTOMAKE_OPTIONS=
 
+BUILT_SOURCES=
 bindir=		${exec_prefix}/${BINSUBDIR}
 #bin_PROGRAMS=	ntpdate ntptimeset
 bin_PROGRAMS=	ntpdate
@@ -31,4 +32,5 @@ version.o: $(ntpdate_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntpdate
 	$(COMPILE) -c version.c
 
-include ../bincheck.mf
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

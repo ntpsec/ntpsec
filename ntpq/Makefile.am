@@ -51,3 +51,6 @@ $(top_srcdir)/version :
 version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntpq
 	$(COMPILE) -c version.c
+
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf
