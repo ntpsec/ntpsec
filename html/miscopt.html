@@ -13,7 +13,7 @@
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->14-Oct-2009  20:53<!-- #EndDate --> 
+			<!-- #BeginDate format:En2m -->13-Nov-2009  19:08<!-- #EndDate --> 
 			UTC</p>
 		<br clear="left">
 	<h4>Related Links</h4>
@@ -84,9 +84,15 @@
 					<dt><tt>panic <i>panic</i></tt></dt>
 					<dd>Spedifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.</dd>
 					<dt><tt>step <i>step</i></tt></dt>
-					<dd>Spedifies the step threshold in seconds with default 0.128 s. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than the default.</dd>
+					<dd>Spedifies the step threshold in seconds. The default without this command
+						is 0.128 s. If set to zero, step adjustments will never
+						occur. Note: The kernel time discipline is disabled if
+						the step threshold is set to zero or greater than 0.5
+						s.</dd>
 					<dt><tt>stepout <i>stepout</i></tt></dt>
-					<dd>Specifies the stepout threshold in seconds with default 900 s. It If set to zero, popcorn spikes will not be suppressed.</dd>
+					<dd>Specifies the stepout threshold in seconds. The default without this
+						command is 900 s.  If set to zero, popcorn spikes will
+						not be suppressed.</dd>
 			</dl></dd>
 			<dt id="tos"><tt>tos [ beacon <i>beacon</i> | ceiling <i>ceiling</i> | cohort {0 | 1} | floor <i>floor</i> | maxclock <i>maxclock </i>| maxdist <i>maxdist</i> | minclock <i>minclock</i> | mindist <i>mindist </i>| minsane <i>minsane</i> | orphan <i>stratum</i> ]</tt></dt>
 			<dd>This command alters certain system variables used by the the clock selection and clustering algorithms. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. It can be used to select the quality and quantity of peers used to synchronize the system clock and is most useful in dynamic server discovery schemes. The options are as follows:</dd>

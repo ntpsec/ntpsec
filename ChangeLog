@@ -1,3 +1,4 @@
+* Cleanup from Dave Mills.
 * [Bug 1343] sntp illegal C does not compile on Solaris 7.
 * [Bug 1381] Version .deps generated include file dependencies to allow
   known dependency-breaking changes to force .deps to be cleaned,

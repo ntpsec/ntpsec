@@ -17,7 +17,7 @@
 <p>Alice holds the key.</p>
 
 <p>Last update: 
-	<!-- #BeginDate format:En2m -->11-Nov-2009  20:03<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->13-Nov-2009  0:44<!-- #EndDate -->
 </p>
 <br clear="left">
 
@@ -62,11 +62,11 @@
 
 <p>When used to generate message digest keys, the program produces a file containing
 	ten pseudo-random printable ASCII strings suitable for the MD5 message digest
-	algorithm. If the OpenSSL library is installed, it produces an additional
-	 ten hex-encoded random bit strings suitable for the SHA1 and other message
-	digest algorithms.  All keys are 160
-	bits in length, but are truncated as necessary for the various message digest
-	algorithms.</p>
+	algorithm included in the distribution. If the OpenSSL library is installed,
+	it produces an additional ten hex-encoded random bit strings suitable for
+	the SHA1 and other message digest algorithms. Printable ASCII keys can have
+	length from one to 20 characters, inclusive. Bit string keys have length
+	20 octets (40 hex characters). All keys are 160 bits in length.</p>
 <p> The file can be edited later with
 	purpose-chosen passwords for the <tt>ntpq</tt> and <tt>ntpdc</tt> programs.
 	Each line of the file contains three fields, first an integer between 1 and

@@ -137,7 +137,7 @@ authreadkeys(
 		 * here and prevent use of inconsistent data later.
 		 */
 		keytype = keytype_from_text(token, NULL);
-		if (keytype == 0 || keytype > 255) {
+		if (keytype == 0) {
 			msyslog(LOG_ERR,
 			    "authreadkeys: invalid type for key %d", keyno);
 			continue;
