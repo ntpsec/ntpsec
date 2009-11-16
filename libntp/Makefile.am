@@ -2,6 +2,7 @@ NULL=
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
 BUILT_SOURCES =
+CLEANFILES =
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
 EXTRA_LIBRARIES = libntpsim.a
 libntp_a_SRCS =						\

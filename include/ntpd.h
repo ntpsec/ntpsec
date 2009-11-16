@@ -482,7 +482,7 @@ extern int 	initializing;		/* initializing flag */
 extern int droproot;			/* flag: try to drop root privileges after startup */
 extern char *user;			/* user to switch to */
 extern char *group;			/* group to switch to */
-extern char *chrootdir;			/* directory to chroot to */
+extern const char *chrootdir;		/* directory to chroot to */
 #endif
 
 /* refclock_conf.c */

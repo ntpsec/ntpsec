@@ -2,6 +2,7 @@ NULL=
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
 BUILT_SOURCES =
+CLEANFILES =
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
 EXTRA_PROGRAMS = testdcf dcfd
 

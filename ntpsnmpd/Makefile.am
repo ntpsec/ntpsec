@@ -20,6 +20,7 @@ EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\
 		ntpsnmpd-opts.menu ntpv4-mib.mib
 BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h ntpsnmpd.1 ntpsnmpd-opts.texi \
 		ntpsnmpd-opts.menu
+CLEANFILES=
 man_MANS=	ntpsnmpd.1
 run_ag=		cd $(srcdir) && autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\

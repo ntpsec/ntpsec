@@ -15,6 +15,7 @@ noinst_LIBRARIES=	libntpq.a
 # HMS: I don't think we need libntpq_a_LIBADD...
 #libntpq_a_LIBADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 libntpq_a_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB
+CLEANFILES=
 DISTCLEANFILES=	.version version.c
 ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu

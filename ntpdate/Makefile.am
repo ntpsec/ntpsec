@@ -2,6 +2,7 @@ NULL=
 AUTOMAKE_OPTIONS=
 
 BUILT_SOURCES=
+CLEANFILES=
 bindir=		${exec_prefix}/${BINSUBDIR}
 #bin_PROGRAMS=	ntpdate ntptimeset
 bin_PROGRAMS=	ntpdate

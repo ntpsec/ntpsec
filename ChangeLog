@@ -1,3 +1,4 @@
+* [Bug 1382] p245 configure --disable-dependency-tracking won't build.
 (4.2.5p245-RC) 2009/11/14 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup from Dave Mills.
 * [Bug 1343] sntp illegal C does not compile on Solaris 7.

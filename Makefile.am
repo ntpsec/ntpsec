@@ -93,6 +93,7 @@ EXTRA_DIST =			\
 	\
 	$(NULL)
 
+CLEANFILES =
 DISTCLEANFILES = .gcc-warning
 
 ETAGS_ARGS = Makefile.am configure.ac

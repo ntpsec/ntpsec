@@ -16,6 +16,7 @@ run_ag=         cd $(srcdir) && autogen -L ../include --writable
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
+CLEANFILES=
 
 SUBDIRS=
 if NEED_LIBOPTS

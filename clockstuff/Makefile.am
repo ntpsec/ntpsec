@@ -11,6 +11,7 @@ clktest_LDADD = ../libntp/libntp.a
 ETAGS_ARGS = Makefile.am
 #EXTRA_DIST = TAGS
 BUILT_SOURCES =
+CLEANFILES =
 
 # clktest-opts.def wants ../include/copyright.def ../include/homerc.def
 

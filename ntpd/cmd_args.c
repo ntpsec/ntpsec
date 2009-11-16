@@ -141,11 +141,8 @@ getCmdOpts(
 
 	if (HAVE_OPT( USER )) {
 #ifdef HAVE_DROPROOT
-		char *ntp_optarg = OPT_ARG( USER );
-
 		droproot = 1;
-		user = emalloc(strlen(ntp_optarg) + 1);
-		(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
+		user = estrdup(OPT_ARG( USER ));
 		group = rindex(user, ':');
 		if (group)
 			*group++ = '\0'; /* get rid of the ':' */
