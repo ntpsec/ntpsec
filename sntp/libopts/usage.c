@@ -1,7 +1,7 @@
 
 /*
- *  usage.c  $Id: usage.c,v 4.31 2009/08/01 17:44:37 bkorb Exp $
- * Time-stamp:      "2009-01-17 13:18:23 bkorb"
+ *  usage.c  $Id: f611ee45aa9aa8dc102b8acf6b4bc568c60fa99f $
+ * Time-stamp:      "2009-10-02 23:18:50 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -61,6 +61,12 @@ printInitList(
     tCC*        pzPN );
 
 static void
+printOptPreamble(
+    tOptions*     pOptions,
+    tOptDesc*     pOD,
+    arg_types_t*  pAT );
+
+static void
 printOneUsage(
     tOptions*     pOptions,
     tOptDesc*     pOD,
@@ -68,9 +74,9 @@ printOneUsage(
 
 static void
 printOptionUsage(
-    tOptions* pOpts,
-    int       ex_code,
-    tCC*      pOptTitle );
+    tOptions *  pOpts,
+    int         ex_code,
+    tCC *       pOptTitle );
 
 static void
 printProgramDetails( tOptions* pOptions );
@@ -462,11 +468,8 @@ printInitList(
 }
 
 
-/*
- *  Print the usage information for a single option.
- */
 static void
-printOneUsage(
+printOptPreamble(
     tOptions*     pOptions,
     tOptDesc*     pOD,
     arg_types_t*  pAT )
@@ -479,17 +482,31 @@ printOneUsage(
      */
     if ((pOptions->fOptSet & OPTPROC_SHORTOPT) == 0)
         fputs( pAT->pzSpc, option_usage_fp );
+
     else if (! IS_GRAPHIC_CHAR(pOD->optValue)) {
         if (  (pOptions->fOptSet & (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
            == (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
             fputc( ' ', option_usage_fp );
         fputs( pAT->pzNoF, option_usage_fp );
+
     } else {
         fprintf( option_usage_fp, "   -%c", pOD->optValue );
         if (  (pOptions->fOptSet & (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
            == (OPTPROC_GNUUSAGE|OPTPROC_LONGOPT))
             fputs( ", ", option_usage_fp );
     }
+}
+
+/*
+ *  Print the usage information for a single option.
+ */
+static void
+printOneUsage(
+    tOptions*     pOptions,
+    tOptDesc*     pOD,
+    arg_types_t*  pAT )
+{
+    printOptPreamble(pOptions, pOD, pAT);
 
     {
         char  z[ 80 ];
@@ -539,18 +556,36 @@ printOneUsage(
  */
 static void
 printOptionUsage(
-    tOptions* pOpts,
-    int       ex_code,
-    tCC*      pOptTitle )
+    tOptions *  pOpts,
+    int         ex_code,
+    tCC *       pOptTitle )
 {
-    int        ct     = pOpts->optCt;
-    int        optNo  = 0;
-    tOptDesc*  pOD    = pOpts->pOptDesc;
-    int        docCt  = 0;
+    int         ct     = pOpts->optCt;
+    int         optNo  = 0;
+    tOptDesc *  pOD    = pOpts->pOptDesc;
+    int         docCt  = 0;
 
     do  {
-        if ((pOD->fOptState & OPTST_NO_USAGE_MASK) != 0)
+        if ((pOD->fOptState & OPTST_NO_USAGE_MASK) != 0) {
+
+            /*
+             * IF      this is a compiled-out option
+             *   *AND* usage was requested with "omitted-usage"
+             *   *AND* this is NOT abbreviated usage
+             * THEN display this option.
+             */
+            if (  (pOD->fOptState == (OPTST_OMITTED | OPTST_NO_INIT))
+               && (pOD->pz_Name != NULL)
+               && (ex_code == EXIT_SUCCESS))  {
+
+                char const * why_pz =
+                    (pOD->pzText == NULL) ? zDisabledWhy : pOD->pzText;
+                printOptPreamble(pOpts, pOD, &argTypes);
+                fprintf(option_usage_fp, zDisabledOpt, pOD->pz_Name, why_pz);
+            }
+
             continue;
+        }
 
         if ((pOD->fOptState & OPTST_DOCUMENT) != 0) {
             if (ex_code == EXIT_SUCCESS) {
@@ -575,7 +610,7 @@ printOptionUsage(
            && ((pOD[-1].fOptState & OPTST_DOCUMENT) == 0) )
             fprintf( option_usage_fp, argTypes.pzBrk, zAuto, pOptTitle );
 
-        printOneUsage( pOpts, pOD, &argTypes );
+        printOneUsage(pOpts, pOD, &argTypes);
 
         /*
          *  IF we were invoked because of the --help option,

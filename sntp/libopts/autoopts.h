@@ -2,7 +2,7 @@
 /*
  *  Time-stamp:      "2008-11-01 20:08:06 bkorb"
  *
- *  autoopts.h  $Id: autoopts.h,v 4.31 2009/08/01 17:44:36 bkorb Exp $
+ *  autoopts.h  $Id: d5e30331d37ca10ec88c592d24d8615dd6c1f0ee $
  *
  *  This file defines all the global structures and special values
  *  used in the automated option processing library.

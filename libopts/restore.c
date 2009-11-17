@@ -1,6 +1,6 @@
 
 /*
- *  restore.c  $Id: restore.c,v 4.15 2009/08/01 17:44:36 bkorb Exp $
+ *  restore.c  $Id: 6f5237ba2586755d8ca354f325fc00e7fa1395ec $
  * Time-stamp:      "2007-07-04 11:34:40 bkorb"
  *
  *  This module's routines will save the current option state to memory

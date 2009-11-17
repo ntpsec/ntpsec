@@ -1,3 +1,4 @@
+* Upgrade to autogen-5.10
 * [Bug 1378] Unnecessary resetting of peers during interface update.
 * [Bug 1382] p245 configure --disable-dependency-tracking won't build.
 * [Bug 1384] ntpq :config core dumped with a blank password.

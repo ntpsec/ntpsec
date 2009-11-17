@@ -1,7 +1,7 @@
 
 /*
- *  $Id: pgusage.c,v 4.18 2009/08/01 17:44:36 bkorb Exp $
- * Time-stamp:      "2008-07-27 21:08:42 bkorb"
+ *  $Id: da09fc943da953195b243b7697fdbf5127f5b6c2 $
+ * Time-stamp:      "2009-11-01 11:52:51 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -41,11 +41,12 @@ tePagerState pagerState = PAGER_STATE_INITIAL;
  * doc:
  *  Run the usage output through a pager.
  *  This is very handy if it is very long.
+ *  This is disabled on platforms without a working fork() function.
 =*/
 void
 optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
 {
-#if defined(__windows__) && !defined(__CYGWIN__)
+#if ! defined(HAVE_WORKING_FORK)
     if ((pOD->fOptState & OPTST_RESET) != 0)
         return;
 
@@ -93,7 +94,7 @@ optionPagedUsage( tOptions* pOptions, tOptDesc* pOD )
          */
         (*pOptions->pUsageProc)( pOptions, EXIT_SUCCESS );
 
-        /*NOTREACHED*/
+        /* NOTREACHED */
         _exit( EXIT_FAILURE );
     }
 

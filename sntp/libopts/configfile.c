@@ -1,5 +1,5 @@
 /*
- *  $Id: configfile.c,v 1.36 2009/08/01 17:44:36 bkorb Exp $
+ *  $Id: f1650b45a91ec95af830ff76041cc4f0048e60f0 $
  *  Time-stamp:      "2009-01-18 10:21:58 bkorb"
  *
  *  configuration/rc/ini file handling.

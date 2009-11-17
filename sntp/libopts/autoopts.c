@@ -1,7 +1,7 @@
 
 /*
- *  $Id: autoopts.c,v 4.40 2009/08/01 17:44:36 bkorb Exp $
- *  Time-stamp:      "2009-01-12 02:49:49 bkorb"
+ *  $Id: 56abb301f50605ec5bae137ded730e330d8d7735 $
+ *  Time-stamp:      "2009-11-01 10:50:34 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -240,7 +240,7 @@ handleOption( tOptions* pOpts, tOptState* pOptState )
     /*
      *  If provided a procedure to call, call it
      */
-    if (pOP != (tpOptProc)NULL)
+    if (pOP != NULL)
         (*pOP)( pOpts, pOD );
 
     return SUCCESS;
@@ -288,8 +288,12 @@ longOptionFind( tOptions* pOpts, char* pzOptName, tOptState* pOptState )
     } else nameLen = strlen( pzOptName );
 
     do  {
-        if (SKIP_OPT(pOD))
-            continue;
+        if (SKIP_OPT(pOD)) {
+            if (  (pOD->fOptState != (OPTST_OMITTED | OPTST_NO_INIT))
+               || (pOD->pz_Name == NULL))
+                continue;
+        }
+        else assert(pOD->pz_Name != NULL);
 
         if (strneqvcmp( pzOptName, pOD->pz_Name, nameLen ) == 0) {
             /*
@@ -344,6 +348,17 @@ longOptionFind( tOptions* pOpts, char* pzOptName, tOptState* pOptState )
      *  Make sure we either found an exact match or found only one partial
      */
     if (matchCt == 1) {
+        pOD = pOpts->pOptDesc + matchIdx;
+
+        if (SKIP_OPT(pOD)) {
+            fprintf(stderr, zDisabledErr, pOpts->pzProgName, pOD->pz_Name);
+            if (pOD->pzText != NULL)
+                fprintf(stderr, " -- %s", pOD->pzText);
+            fputc('\n', stderr);
+            (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
+            /* NOTREACHED */
+        }
+
         /*
          *  IF we found a disablement name,
          *  THEN set the bit in the callers' flag word
@@ -351,7 +366,7 @@ longOptionFind( tOptions* pOpts, char* pzOptName, tOptState* pOptState )
         if (disable)
             pOptState->flags |= OPTST_DISABLED;
 
-        pOptState->pOD      = pOpts->pOptDesc + matchIdx;
+        pOptState->pOD      = pOD;
         pOptState->pzOptArg = pzEq;
         pOptState->optType  = TOPT_LONG;
         return SUCCESS;
@@ -380,7 +395,7 @@ longOptionFind( tOptions* pOpts, char* pzOptName, tOptState* pOptState )
     if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0) {
         fprintf(stderr, (matchCt == 0) ? zIllOptStr : zAmbigOptStr,
                 pOpts->pzProgPath, pzOptName);
-        (*pOpts->pUsageProc)( pOpts, EXIT_FAILURE );
+        (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
     }
 
     return FAILURE;
@@ -401,28 +416,28 @@ shortOptionFind( tOptions* pOpts, uint_t optValue, tOptState* pOptState )
     /*
      *  Search the option list
      */
-    for (;;) {
-        /*
-         *  IF the values match,
-         *  THEN we stop here
-         */
-        if ((! SKIP_OPT(pRes)) && (optValue == pRes->optValue)) {
-            pOptState->pOD     = pRes;
-            pOptState->optType = TOPT_SHORT;
-            return SUCCESS;
+    do  {
+        if (optValue != pRes->optValue)
+            continue;
+
+        if (SKIP_OPT(pRes)) {
+            if (  (pRes->fOptState == (OPTST_OMITTED | OPTST_NO_INIT))
+               && (pRes->pz_Name != NULL)) {
+                fprintf(stderr, zDisabledErr, pOpts->pzProgPath, pRes->pz_Name);
+                if (pRes->pzText != NULL)
+                    fprintf(stderr, " -- %s", pRes->pzText);
+                fputc('\n', stderr);
+                (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
+                /* NOTREACHED */
+            }
+            goto short_opt_error;
         }
 
-        /*
-         *  Advance to next option description
-         */
-        pRes++;
+        pOptState->pOD     = pRes;
+        pOptState->optType = TOPT_SHORT;
+        return SUCCESS;
 
-        /*
-         *  IF we have searched everything, ...
-         */
-        if (--ct <= 0)
-            break;
-    }
+    } while (pRes++, --ct > 0);
 
     /*
      *  IF    the character value is a digit
@@ -438,6 +453,8 @@ shortOptionFind( tOptions* pOpts, uint_t optValue, tOptState* pOptState )
         pOptState->optType = TOPT_SHORT;
         return SUCCESS;
     }
+
+ short_opt_error:
 
     /*
      *  IF we are to stop on errors (the default, actually)

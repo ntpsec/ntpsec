@@ -1,6 +1,6 @@
 
 /*
- *  $Id: file.c,v 1.9 2009/08/01 17:44:36 bkorb Exp $
+ *  $Id: 1410aaa5f08a562e0cd6c28ffae5a49dc7a3164f $
  *  Time-stamp:      "2009-07-23 17:23:46 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
