@@ -26,7 +26,7 @@ AC_CONFIG_AUX_DIR([.])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-ntp_configure_cache_version=20091102
+ntp_configure_cache_version=20091117
 
 # When the cache version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -1317,6 +1317,7 @@ case $ac_cv_have_if_nametoindex in
 	;;
 esac
 
+AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 AC_CHECK_FUNCS(K_open kvm_open memcpy memmove memset)
