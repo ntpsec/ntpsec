@@ -1,3 +1,4 @@
+(4.2.5p246-RC) 2009/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.10
 * [Bug 1378] Unnecessary resetting of peers during interface update.
 * [Bug 1382] p245 configure --disable-dependency-tracking won't build.

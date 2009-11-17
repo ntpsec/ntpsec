@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  November 14, 2009 at 08:28:03 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  November 17, 2009 at 07:33:15 AM by AutoGen 5.10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 32:1:7 templates.
+ * Generated from AutoOpts 33:0:8 templates.
  */
 
 /*
@@ -67,6 +67,7 @@ extern tUsageProc optionUsage;
 #ifndef EXIT_FAILURE
 #  define  EXIT_FAILURE 1
 #endif
+
 /*
  *  Certificate option description:
  */
@@ -79,10 +80,9 @@ tSCC    zCertificate_Name[]        = "certificate";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Certificate */
-#define VALUE_OPT_CERTIFICATE NO_EQUIVALENT
 #define CERTIFICATE_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zCertificateText       NULL
 #define zCertificate_NAME      NULL
+#define zCertificateText       NULL
 #define zCertificate_Name      NULL
 #endif  /* OPENSSL */
 
@@ -116,10 +116,9 @@ tSCC    zId_Key_Name[]             = "id-key";
 #define ID_KEY_FLAGS       (OPTST_DISABLED)
 
 #else   /* disable Id_Key */
-#define VALUE_OPT_ID_KEY NO_EQUIVALENT
 #define ID_KEY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zId_KeyText       NULL
 #define zId_Key_NAME      NULL
+#define zId_KeyText       NULL
 #define zId_Key_Name      NULL
 #endif  /* OPENSSL */
 
@@ -134,10 +133,9 @@ tSCC    zGq_Params_Name[]          = "gq-params";
 #define GQ_PARAMS_FLAGS       (OPTST_DISABLED)
 
 #else   /* disable Gq_Params */
-#define VALUE_OPT_GQ_PARAMS NO_EQUIVALENT
 #define GQ_PARAMS_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zGq_ParamsText       NULL
 #define zGq_Params_NAME      NULL
+#define zGq_ParamsText       NULL
 #define zGq_Params_Name      NULL
 #endif  /* OPENSSL */
 
@@ -152,10 +150,9 @@ tSCC    zHost_Key_Name[]           = "host-key";
 #define HOST_KEY_FLAGS       (OPTST_DISABLED)
 
 #else   /* disable Host_Key */
-#define VALUE_OPT_HOST_KEY NO_EQUIVALENT
 #define HOST_KEY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zHost_KeyText       NULL
 #define zHost_Key_NAME      NULL
+#define zHost_KeyText       NULL
 #define zHost_Key_Name      NULL
 #endif  /* OPENSSL */
 
@@ -170,10 +167,9 @@ tSCC    zIffkey_Name[]             = "iffkey";
 #define IFFKEY_FLAGS       (OPTST_DISABLED)
 
 #else   /* disable Iffkey */
-#define VALUE_OPT_IFFKEY NO_EQUIVALENT
 #define IFFKEY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zIffkeyText       NULL
 #define zIffkey_NAME      NULL
+#define zIffkeyText       NULL
 #define zIffkey_Name      NULL
 #endif  /* OPENSSL */
 
@@ -189,10 +185,9 @@ tSCC    zIssuer_Name_Name[]        = "issuer-name";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Issuer_Name */
-#define VALUE_OPT_ISSUER_NAME NO_EQUIVALENT
 #define ISSUER_NAME_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zIssuer_NameText       NULL
 #define zIssuer_Name_NAME      NULL
+#define zIssuer_NameText       NULL
 #define zIssuer_Name_Name      NULL
 #endif  /* OPENSSL */
 
@@ -217,10 +212,9 @@ tSCC    zModulus_Name[]            = "modulus";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 #else   /* disable Modulus */
-#define VALUE_OPT_MODULUS NO_EQUIVALENT
 #define MODULUS_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zModulusText       NULL
 #define zModulus_NAME      NULL
+#define zModulusText       NULL
 #define zModulus_Name      NULL
 #endif  /* OPENSSL */
 
@@ -235,10 +229,9 @@ tSCC    zPvt_Cert_Name[]           = "pvt-cert";
 #define PVT_CERT_FLAGS       (OPTST_DISABLED)
 
 #else   /* disable Pvt_Cert */
-#define VALUE_OPT_PVT_CERT NO_EQUIVALENT
 #define PVT_CERT_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zPvt_CertText       NULL
 #define zPvt_Cert_NAME      NULL
+#define zPvt_CertText       NULL
 #define zPvt_Cert_Name      NULL
 #endif  /* OPENSSL */
 
@@ -254,10 +247,9 @@ tSCC    zPvt_Passwd_Name[]         = "pvt-passwd";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Pvt_Passwd */
-#define VALUE_OPT_PVT_PASSWD NO_EQUIVALENT
 #define PVT_PASSWD_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zPvt_PasswdText       NULL
 #define zPvt_Passwd_NAME      NULL
+#define zPvt_PasswdText       NULL
 #define zPvt_Passwd_Name      NULL
 #endif  /* OPENSSL */
 
@@ -273,10 +265,9 @@ tSCC    zGet_Pvt_Passwd_Name[]     = "get-pvt-passwd";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Get_Pvt_Passwd */
-#define VALUE_OPT_GET_PVT_PASSWD NO_EQUIVALENT
 #define GET_PVT_PASSWD_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zGet_Pvt_PasswdText       NULL
 #define zGet_Pvt_Passwd_NAME      NULL
+#define zGet_Pvt_PasswdText       NULL
 #define zGet_Pvt_Passwd_Name      NULL
 #endif  /* OPENSSL */
 
@@ -292,10 +283,9 @@ tSCC    zSign_Key_Name[]           = "sign-key";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Sign_Key */
-#define VALUE_OPT_SIGN_KEY NO_EQUIVALENT
 #define SIGN_KEY_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zSign_KeyText       NULL
 #define zSign_Key_NAME      NULL
+#define zSign_KeyText       NULL
 #define zSign_Key_Name      NULL
 #endif  /* OPENSSL */
 
@@ -311,10 +301,9 @@ tSCC    zSubject_Name_Name[]       = "subject-name";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Subject_Name */
-#define VALUE_OPT_SUBJECT_NAME NO_EQUIVALENT
 #define SUBJECT_NAME_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zSubject_NameText       NULL
 #define zSubject_Name_NAME      NULL
+#define zSubject_NameText       NULL
 #define zSubject_Name_Name      NULL
 #endif  /* OPENSSL */
 
@@ -329,10 +318,9 @@ tSCC    zTrusted_Cert_Name[]       = "trusted-cert";
 #define TRUSTED_CERT_FLAGS       (OPTST_DISABLED)
 
 #else   /* disable Trusted_Cert */
-#define VALUE_OPT_TRUSTED_CERT NO_EQUIVALENT
 #define TRUSTED_CERT_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zTrusted_CertText       NULL
 #define zTrusted_Cert_NAME      NULL
+#define zTrusted_CertText       NULL
 #define zTrusted_Cert_Name      NULL
 #endif  /* OPENSSL */
 
@@ -348,10 +336,9 @@ tSCC    zMv_Params_Name[]          = "mv-params";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 #else   /* disable Mv_Params */
-#define VALUE_OPT_MV_PARAMS NO_EQUIVALENT
 #define MV_PARAMS_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zMv_ParamsText       NULL
 #define zMv_Params_NAME      NULL
+#define zMv_ParamsText       NULL
 #define zMv_Params_Name      NULL
 #endif  /* OPENSSL */
 
@@ -367,20 +354,33 @@ tSCC    zMv_Keys_Name[]            = "mv-keys";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 #else   /* disable Mv_Keys */
-#define VALUE_OPT_MV_KEYS NO_EQUIVALENT
 #define MV_KEYS_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zMv_KeysText       NULL
 #define zMv_Keys_NAME      NULL
+#define zMv_KeysText       NULL
 #define zMv_Keys_Name      NULL
 #endif  /* OPENSSL */
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]          = "Display usage information and exit";
+tSCC zHelpText[]          = "Display extended usage information and exit";
 tSCC zHelp_Name[]         = "help";
-tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+#ifdef HAVE_WORKING_FORK
+#define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
 tSCC zMore_Help_Name[]    = "more-help";
+tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+#else
+#define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
+#define zMore_Help_Name   NULL
+#define zMore_HelpText    NULL
+#endif
+#ifdef NO_OPTIONAL_OPT_ARGS
+#  define OPTST_VERSION_FLAGS   OPTST_IMM | OPTST_NO_INIT
+#else
+#  define OPTST_VERSION_FLAGS   OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
+                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
+#endif
+
 tSCC zVersionText[]       = "Output version information and exit";
 tSCC zVersion_Name[]      = "version";
 tSCC zSave_OptsText[]     = "Save the option state to a config file";
@@ -667,18 +667,11 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zMv_KeysText, zMv_Keys_NAME, zMv_Keys_Name,
      /* disablement strs */ NULL, NULL },
 
-#ifdef NO_OPTIONAL_OPT_ARGS
-#  define VERSION_OPT_FLAGS     OPTST_IMM | OPTST_NO_INIT
-#else
-#  define VERSION_OPT_FLAGS     OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
-                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
-#endif
-
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ VERSION_OPT_FLAGS, 0,
+     /* opt state flags  */ OPTST_VERSION_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
@@ -686,7 +679,6 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zVersionText, NULL, zVersion_Name,
      /* disablement strs */ NULL, NULL },
 
-#undef VERSION_OPT_FLAGS
 
 
   {  /* entry idx, value */ INDEX_OPT_HELP, VALUE_OPT_HELP,
@@ -705,7 +697,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, 0,
+     /* opt state flags  */ OPTST_MORE_HELP_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
@@ -746,7 +738,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTP_KEYGEN";
 tSCC   zUsageTitle[] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p245-RC\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p246-RC\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -760,7 +752,7 @@ tSCC    zDetail[]     = "\n\
 If there is no new host key, look for an existing one.\n\
 If one is not found, create it.\n";
 tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 501 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -897,7 +889,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 633 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>
