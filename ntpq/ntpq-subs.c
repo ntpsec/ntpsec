@@ -19,7 +19,7 @@ int 	maxhostlen;
 /*
  * Declarations for command handlers in here
  */
-static	int checkassocid	(u_int32);
+static	int	checkassocid	(u_int32);
 static	struct varlist *findlistvar (struct varlist *, char *);
 static	void	doaddvlist	(struct varlist *, char *);
 static	void	dormvlist	(struct varlist *, char *);
@@ -1869,6 +1869,9 @@ config (
 	res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(cfgcmd), cfgcmd,
 		      &rstatus, &rsize, &rdata);
 
+	if (res != 0)
+		return;
+
 	if (rsize > 0 && '\n' == rdata[rsize - 1])
 		rsize--;
 	rdata[rsize] = '\0';
@@ -1908,44 +1911,60 @@ config_from_file (
 	FILE *fp
 	)
 {
-    u_short rstatus;
-    int rsize;
-    char *rdata;
-    int res;
-    FILE *config_fd;
-    char config_cmd[MAXLINE];
-    size_t config_len;
+	u_short rstatus;
+	int rsize;
+	char *rdata;
+	int res;
+	FILE *config_fd;
+	char config_cmd[MAXLINE];
+	size_t config_len;
+	int i;
+	int retry_limit;
 
-    if (debug > 2) {
-        printf("In Config\n");
-        printf("Keyword = %s\n", pcmd->keyword);
-        printf("Filename = %s\n", pcmd->argval[0].string);
-    }
+	if (debug > 2) {
+		printf("In Config\n");
+		printf("Keyword = %s\n", pcmd->keyword);
+		printf("Filename = %s\n", pcmd->argval[0].string);
+	}
 
-    if ((config_fd = fopen(pcmd->argval[0].string, "r")) == NULL) {
-        printf("ERROR!! Couldn't open file: %s\n", pcmd->argval[0].string);
-    } 
-    else {
-        int i = 0;
-        printf("Sending configuration file, one line at a time.\n");
-        while (fgets(config_cmd, MAXLINE, config_fd) != NULL) {
-	    config_len = strlen(config_cmd);
-	    /* ensure even the last line has newline, if possible */
-	    if (config_len > 0 && config_len + 2 < sizeof(config_cmd)
-		&& '\n' != config_cmd[config_len - 1])
-		    config_cmd[config_len++] = '\n';
-            ++i;
-            res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(config_cmd),
-                          config_cmd, &rstatus,
-                          &rsize, &rdata);
-	    if (rsize > 0 && '\n' == rdata[rsize - 1])
-		    rsize--;
-	    if (rsize > 0 && '\r' == rdata[rsize - 1])
-		    rsize--;
-            rdata[rsize] = '\0';
-	    printf("Line No: %d %s: %s", i, rdata, config_cmd);
-        }
-        printf("Done sending file\n");
-        fclose(config_fd);
-    }
+	config_fd = fopen(pcmd->argval[0].string, "r");
+	if (NULL == config_fd) {
+		printf("ERROR!! Couldn't open file: %s\n",
+		       pcmd->argval[0].string);
+		return;
+	}
+
+	printf("Sending configuration file, one line at a time.\n");
+	i = 0;
+	while (fgets(config_cmd, MAXLINE, config_fd) != NULL) {
+		config_len = strlen(config_cmd);
+		/* ensure even the last line has newline, if possible */
+		if (config_len > 0 && 
+		    config_len + 2 < sizeof(config_cmd) &&
+		    '\n' != config_cmd[config_len - 1])
+			config_cmd[config_len++] = '\n';
+		++i;
+		retry_limit = 2;
+		do 
+			res = doquery(CTL_OP_CONFIGURE, 0, 1,
+				      strlen(config_cmd), config_cmd,
+				      &rstatus, &rsize, &rdata);
+		while (res != 0 && retry_limit--);
+		if (res != 0) {
+			printf("Line No: %d query failed: %s", i,
+			       config_cmd);
+			printf("Subsequent lines not sent.\n");
+			fclose(config_fd);
+			return;
+		}
+
+		if (rsize > 0 && '\n' == rdata[rsize - 1])
+			rsize--;
+		if (rsize > 0 && '\r' == rdata[rsize - 1])
+			rsize--;
+		rdata[rsize] = '\0';
+		printf("Line No: %d %s: %s", i, rdata, config_cmd);
+	}
+	printf("Done sending file\n");
+	fclose(config_fd);
 }
