@@ -1,6 +1,7 @@
 * [Bug 1142] nodebug builds shed no light on -d, -D option failure.
 * [Bug 1179] point out the problem with -i/--jaildir and -u/--user when
   they are disabled by configure.
+* [Bug 1308] support systems that lack fork().
 * [Bug 1343] sntp doesn't link on Solaris 7, needs -lresolv.
 (4.2.5p246-RC) 2009/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.10

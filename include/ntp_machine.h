@@ -2,8 +2,8 @@
  * Collect all machine dependent idiosyncrasies in one place.
  */
 
-#ifndef __ntp_machine
-#define __ntp_machine
+#ifndef NTP_MACHINE_H
+#define NTP_MACHINE_H
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -532,4 +532,4 @@ extern time_t	timegm		(struct tm *);
 	BYTE_ORDER_NOT_DEFINED_FOR_AUTHENTICATION
 #endif
 
-#endif /* __ntp_machine */
+#endif	/* NTP_MACHINE_H */

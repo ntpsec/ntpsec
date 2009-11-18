@@ -26,6 +26,9 @@
 #include "ntp_request.h"
 #include "ntp_stdlib.h"
 #include "ntp_syslog.h"
+#include "ntp_config.h"
+
+#ifndef NO_INTRES		/* from ntp_config.h */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -1233,3 +1236,7 @@ doconfigure(
 		ce = ce->ce_next;
 	}
 }
+
+#else	/* NO_INTRES follows */
+int ntp_intres_nonempty_compilation_unit;
+#endif

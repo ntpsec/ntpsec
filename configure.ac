@@ -138,6 +138,8 @@ case "${enable_libopts_install+set}" in
 esac
 LIBOPTS_CHECK(libopts)
 
+AC_FUNC_FORK
+
 AC_CACHE_CHECK(
     [if $CC can handle @%:@warning],
     ac_cv_cpp_warning,

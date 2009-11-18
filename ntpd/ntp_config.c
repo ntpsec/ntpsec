@@ -1709,9 +1709,11 @@ config_auth(
 {
 	extern int	cache_type;	/* authkeys.c */
 #ifdef OPENSSL
+#ifndef NO_INTRES
 	u_char		digest[EVP_MAX_MD_SIZE];
 	u_int		digest_len;
 	EVP_MD_CTX	ctx;
+#endif
 	struct attr_val *my_val;
 	int		item;
 #endif
@@ -1807,7 +1809,7 @@ config_auth(
 		sys_revoke = ptree->auth.revoke;
 #endif /* OPENSSL */
 
-#if !defined(VMS) && !defined(SYS_VXWORKS)
+#ifndef NO_INTRES
 	/* find a keyid */
 	if (info_auth_keyid == 0)
 		req_keyid = 65535;
@@ -1837,7 +1839,7 @@ config_auth(
 
 	/* save keyid so we will accept config requests with it */
 	info_auth_keyid = req_keyid;
-#endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
+#endif /* !NO_INTRES */
 
 }
 
@@ -4486,9 +4488,9 @@ abort_resolve(void)
 
 /*
  * do_resolve_internal - start up the resolver function (not program)
- */
-/*
- * On VMS, this routine will simply refuse to resolve anything.
+ *
+ * On VMS, VxWorks, and Unix-like systems lacking fork(), this routine
+ * will simply refuse to resolve anything.
  *
  * Possible implementation: keep `res_file' in memory, do async
  * name resolution via QIO, update from within completion AST.
@@ -4512,12 +4514,11 @@ do_resolve_internal(void)
 	(void) fclose(res_fp);
 	res_fp = NULL;
 
-#if !defined(VMS) && !defined (SYS_VXWORKS)
+#ifndef NO_INTRES
 	req_file = res_file;	/* set up pointer to res file */
 #ifndef SYS_WINNT
 	(void) signal_no_reset(SIGCHLD, catchchild);
 
-#ifndef SYS_VXWORKS
 	/* the parent process will write to the pipe
 	 * in order to wake up to child process
 	 * which may be waiting in a select() call
@@ -4576,11 +4577,6 @@ do_resolve_internal(void)
 
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 
-#ifdef DEBUG
-		if (0)
-			debug = 2;
-#endif
-
 		init_logging("ntpd_intres", 0);
 		setup_logfile();
 		/*
@@ -4597,21 +4593,14 @@ do_resolve_internal(void)
 		abort_resolve();
 		exit(1);
 	}
-#else
-	/* vxWorks spawns a thread... -casey */
-	i = sp (ntp_intres);
-	/*i = taskSpawn("ntp_intres",100,VX_FP_TASK,20000,ntp_intres);*/
-#endif
 	if (i == -1) {
 		msyslog(LOG_ERR, "fork() failed, can't start ntp_intres: %m");
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 		abort_resolve();
-	}
-	else {
+	} else
 		/* This is the parent process who will write to the pipe,
 		 * so we close the read fd */
 		close(resolver_pipe_fd[0]);
-	}
 #else /* SYS_WINNT */
 	{
 		/* NT's equivalent of fork() is _spawn(), but the start point
@@ -4642,9 +4631,9 @@ do_resolve_internal(void)
 		}
 	}
 #endif /* SYS_WINNT */
-#else /* VMS  VX_WORKS */
+#else /* NO_INTRES follows */
 	msyslog(LOG_ERR,
-		"Name resolution not implemented for VMS - use numeric addresses");
+		"Deferred DNS not implemented - use numeric addresses");
 	abort_resolve();
-#endif /* VMS VX_WORKS */
+#endif
 }
