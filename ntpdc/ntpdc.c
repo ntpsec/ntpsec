@@ -307,17 +307,12 @@ ntpdcmain(
 		argv += optct;
 	}
 
-	switch (WHICH_IDX_IPV4) {
-	    case INDEX_OPT_IPV4:
+	if (HAVE_OPT(IPV4))
 		ai_fam_templ = AF_INET;
-		break;
-	    case INDEX_OPT_IPV6:
+	else if (HAVE_OPT(IPV6))
 		ai_fam_templ = AF_INET6;
-		break;
-	    default:
+	else
 		ai_fam_templ = ai_fam_default;
-		break;
-	}
 
 	if (HAVE_OPT(COMMAND)) {
 		int		cmdct = STACKCT_OPT( COMMAND );

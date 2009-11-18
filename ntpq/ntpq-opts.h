@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 07:28:03 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 17, 2009 at 05:37:43 PM by AutoGen 5.10
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -177,7 +177,7 @@ typedef enum {
                 ntpqOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpqOptions.pUsageProc)( &ntpqOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *

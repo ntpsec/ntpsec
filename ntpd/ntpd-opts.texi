@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  November 17, 2009 at 07:26:41 AM by AutoGen 5.10
+# It has been AutoGen-ed  November 17, 2009 at 05:35:45 PM by AutoGen 5.10
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -63,7 +63,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p242-RC
+ntpd - NTP daemon program - Ver. 4.2.5p238-RC
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -130,7 +130,8 @@ This is the ``force ipv4 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv6.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -145,7 +146,8 @@ This is the ``force ipv6 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv4.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -288,10 +290,17 @@ must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
 Chroot the server to the directory
 jaildir
 .
-This option also implies that the server attempts to drop root privileges at startup (otherwise, chroot gives very little additional security), and it is only available if the OS supports to run the server without full root privileges.
+This option also implies that the server attempts to drop root privileges at startup.
 You may need to also specify a
 -u
 option.
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
+--enable-clockctl
+) and Linux (configure with
+--enable-linuxcaps
+).
 
 @node ntpd interface
 @subsection interface option (-I)
@@ -475,8 +484,9 @@ must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
 @end itemize
 
 Specify a user, and optionally a group, to switch to.
-This option is only available if the OS supports to run the server without full root privileges.
-Currently, this option is supported under NetBSD (configure with
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
 --enable-clockctl
 ) and Linux (configure with
 --enable-linuxcaps

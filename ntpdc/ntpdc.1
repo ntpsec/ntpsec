@@ -1,7 +1,7 @@
 .TH NTPDC 1 2009-11-17 "( 4.2.5p246-RC)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc.1)
 .\"  
-.\"  It has been AutoGen-ed  November 17, 2009 at 07:27:39 AM by AutoGen 5.10
+.\"  It has been AutoGen-ed  November 17, 2009 at 07:34:34 PM by AutoGen 5.10
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -38,14 +38,16 @@ ntpd's configuration file may also be specified at run time using
 .TP
 .BR \-4 ", " \--ipv4
 Force IPv4 DNS name resolution.
-This option is a member of the ipv4 class of options.
+This option must not appear in combination with any of the following options:
+ipv6.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
 .TP
 .BR \-6 ", " \--ipv6
 Force IPv6 DNS name resolution.
-This option is a member of the ipv4 class of options.
+This option must not appear in combination with any of the following options:
+ipv4.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.

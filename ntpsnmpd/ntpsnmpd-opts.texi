@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.texi)
 # 
-# It has been AutoGen-ed  November 17, 2009 at 07:28:29 AM by AutoGen 5.10
+# It has been AutoGen-ed  November 17, 2009 at 05:37:59 PM by AutoGen 5.10
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -33,7 +33,28 @@ This is the automatically generated usage text for ntpsnmpd:
 
 @exampleindent 0
 @example
-ntpsnmpd is unavailable - no --help
+ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.5p238-RC
+USAGE:  ntpsnmpd [ -<flag> | --<name> ]...
+  Flg Arg Option-Name    Description
+   -n no  nofork         Do not fork
+   -p no  syslog         Log to syslog()
+      opt version        Output version information and exit
+   -? no  help           Display usage information and exit
+   -! no  more-help      Extended usage information passed thru pager
+   -> opt save-opts      Save the option state to a config file
+   -< Str load-opts      Load options from a config file
+                                - disabled as --no-load-opts
+                                - may appear multiple times
+
+Options are specified by doubled hyphens and their name
+or by a single hyphen and the flag character.
+
+The following option preset mechanisms are supported:
+ - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/.ntprc
+ - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/ntp-dev-1142/ntpsnmpd/.ntprc
+ - examining environment variables named NTPSNMPD_*
+
+please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
 @exampleindent 4
 

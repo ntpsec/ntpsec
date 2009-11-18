@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 07:26:38 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 17, 2009 at 05:35:44 PM by AutoGen 5.10
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -286,9 +286,6 @@ typedef enum {
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_IPV4           '4'
-
-#define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
-#define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_AUTHREQ        'a'
 #define VALUE_OPT_AUTHNOREQ      'A'
@@ -337,7 +334,7 @@ typedef enum {
                 ntpdOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdOptions.pUsageProc)( &ntpdOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *

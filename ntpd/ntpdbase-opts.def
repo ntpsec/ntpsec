@@ -13,7 +13,7 @@ test-main;
 flag = {
     name      = ipv4;
     value     = 4;
-    equivalence = ipv4;
+    flags-cant = ipv6;
     descrip   = "Force IPv4 DNS name resolution";
     doc = <<-  _EndOfDoc_
 	Force DNS resolution of following host names on the command line
@@ -24,7 +24,7 @@ flag = {
 flag = {
     name      = ipv6;
     value     = 6;
-    equivalence = ipv4;
+    flags-cant = ipv4;
     descrip   = "Force IPv6 DNS name resolution";
     doc = <<-  _EndOfDoc_
 	Force DNS resolution of following host names on the command line
@@ -83,6 +83,7 @@ flag = {
     ifdef     = DEBUG;
     nopreset;
     descrip   = "Increase output debug message level";
+    omitted-usage = "this package was built using 'configure --disable--debug'";
     doc = <<-  _EndOfDoc_
 	Increase the debugging message output level.
 	_EndOfDoc_;
@@ -91,10 +92,11 @@ flag = {
 flag = {
     name      = set-debug-level;
     value     = D;
+    arg-type  = string;
     max       = NOLIMIT;
     ifdef     = DEBUG;
     descrip   = "Set the output debug message level";
-    arg-type  = string;
+    omitted-usage = "this package was built using 'configure --disable--debug'";
     flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
     doc = <<-  _EndOfDoc_
 	Set the output debugging level.  Can be supplied multiple times,
@@ -146,14 +148,22 @@ flag = {
     value     = i;
     arg-type  = string;
     descrip   = "Jail directory";
+    omitted-usage = "built without --enable-clockctl or --enable-linuxcaps";
     doc = <<-  _EndOfDoc_
 	Chroot the server to the directory
 	jaildir
 	.
-	This option also implies that the server attempts to drop root privileges at startup (otherwise, chroot gives very little additional security), and it is only available if the OS supports to run the server without full root privileges.
+	This option also implies that the server attempts to drop root privileges at startup.
 	You may need to also specify a
 	-u
 	option.
+	This option is only available if the OS supports adjusting the clock
+	without full root privileges.
+	This option is supported under NetBSD (configure with
+	--enable-clockctl
+	) and Linux (configure with
+	--enable-linuxcaps
+	).
 	_EndOfDoc_;
 };
 
@@ -347,10 +357,12 @@ flag = {
     value     = u;
     arg-type  = string;
     descrip   = "Run as userid (or userid:groupid)";
+    omitted-usage = "built without --enable-clockctl or --enable-linuxcaps";
     doc = <<-  _EndOfDoc_
 	Specify a user, and optionally a group, to switch to.
-	This option is only available if the OS supports to run the server without full root privileges.
-	Currently, this option is supported under NetBSD (configure with
+	This option is only available if the OS supports adjusting the clock
+	without full root privileges.
+	This option is supported under NetBSD (configure with
 	--enable-clockctl
 	) and Linux (configure with
 	--enable-linuxcaps

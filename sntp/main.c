@@ -17,7 +17,7 @@
 
 char *progname = "sntp";	/* for msyslog */
 
-int ai_fam_pref;
+int ai_fam_pref = AF_UNSPEC;
 volatile int debug;
 
 struct key *keys = NULL;
@@ -66,12 +66,10 @@ sntp_main (
 	}
 	else {
 		/* Check for options -4 and -6 */
-		if(ENABLED_OPT(IPV4))
+		if (HAVE_OPT(IPV4))
 			ai_fam_pref = AF_INET;
-		else if(ENABLED_OPT(IPV6))
+		else if (HAVE_OPT(IPV6))
 			ai_fam_pref = AF_INET6;
-		else 
-			ai_fam_pref = 0;
 	}
 
 	log_msg("Started sntp", 0);

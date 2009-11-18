@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 07:27:38 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 17, 2009 at 07:34:34 PM by AutoGen 5.10
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -67,21 +67,29 @@ extern tUsageProc optionUsage;
 #endif
 
 /*
- *  Ipv4 option description:
+ *  Ipv4 option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zIpv4Text[] =
         "Force IPv4 DNS name resolution";
 tSCC    zIpv4_NAME[]               = "IPV4";
 tSCC    zIpv4_Name[]               = "ipv4";
+static const int
+    aIpv4CantList[] = {
+    INDEX_OPT_IPV6, NO_EQUIVALENT };
 #define IPV4_FLAGS       (OPTST_DISABLED)
 
 /*
- *  Ipv6 option description:
+ *  Ipv6 option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zIpv6Text[] =
         "Force IPv6 DNS name resolution";
 tSCC    zIpv6_NAME[]               = "IPV6";
 tSCC    zIpv6_Name[]               = "ipv6";
+static const int
+    aIpv6CantList[] = {
+    INDEX_OPT_IPV4, NO_EQUIVALENT };
 #define IPV6_FLAGS       (OPTST_DISABLED)
 
 /*
@@ -254,25 +262,25 @@ static tOptProc
  */
 static tOptDesc optDesc[ OPTION_CT ] = {
   {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
-     /* equiv idx, value */ NO_EQUIVALENT, 0,
+     /* equiv idx, value */ 0, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aIpv4CantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
-     /* equiv idx, value */ NOLIMIT, NOLIMIT,
-     /* equivalenced to  */ INDEX_OPT_IPV4,
+     /* equiv idx, value */ 1, VALUE_OPT_IPV6,
+     /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aIpv6CantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
      /* disablement strs */ NULL, NULL },
@@ -472,7 +480,7 @@ configuration options which can be specified at startup using\n\
 ntpd's configuration file may also be specified at run time using\n\
 [= prog-name =] .\n";
 tSCC    zFullVersion[] = NTPDC_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -541,7 +549,7 @@ doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPDC_OPTS) */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_NTPDC_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -556,7 +564,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPDC_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>
