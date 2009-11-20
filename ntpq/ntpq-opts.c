@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 05:37:44 PM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 20, 2009 at 05:30:41 AM by AutoGen 5.10
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -427,7 +427,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPQ";
 tSCC   zUsageTitle[] =
-"ntpq - standard NTP query program - Ver. 4.2.5p246-RC\n\
+"ntpq - standard NTP query program - Ver. 4.2.5p247-RC\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -447,7 +447,7 @@ information about current state and/or changes in that state.\n\
 The same formats are used in NTPv4, although some of the\n\
 variables have changed and new ones added.\n";
 tSCC    zFullVersion[] = NTPQ_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -516,7 +516,7 @@ doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPQ_OPTS) */
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -531,7 +531,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>

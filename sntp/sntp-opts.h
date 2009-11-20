@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 07:35:07 PM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 20, 2009 at 05:35:47 AM by AutoGen 5.10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -72,8 +72,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    17
-#define SNTP_VERSION       "4.2.5p246-RC"
-#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p246-RC"
+#define SNTP_VERSION       "4.2.5p247-RC"
+#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p247-RC"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -202,7 +202,7 @@ typedef enum {
                 sntpOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*sntpOptions.pUsageProc)( &sntpOptions, c )
-/* extracted from /usr/local/share/autogen/opthead.tpl near line 409 */
+/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *

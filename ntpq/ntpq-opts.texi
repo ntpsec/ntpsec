@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  November 17, 2009 at 05:37:44 PM by AutoGen 5.10
+# It has been AutoGen-ed  November 20, 2009 at 05:30:43 AM by AutoGen 5.10
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -47,7 +47,7 @@ This is the automatically generated usage text for ntpq:
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.5p238-RC
+ntpq - standard NTP query program - Ver. 4.2.5p242-RC
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -83,8 +83,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/.ntprc
- - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/ntp-dev-1142/ntpq/.ntprc
+ - reading file /users/stenn/.ntprc
+ - reading file /deacon/backroom/snaps/ntp-dev/ntpq/.ntprc
  - examining environment variables named NTPQ_*
 
 The

@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  November 17, 2009 at 07:34:34 PM by AutoGen 5.10
+# It has been AutoGen-ed  November 20, 2009 at 05:30:18 AM by AutoGen 5.10
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -58,7 +58,7 @@ This is the automatically generated usage text for ntpdc:
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTP query program - Ver. 4.2.5p238-RC
+ntpdc - vendor-specific NTP query program - Ver. 4.2.5p242-RC
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -98,8 +98,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/.ntprc
- - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/ntp-dev-1142-79-1343/ntpdc/.ntprc
+ - reading file /users/stenn/.ntprc
+ - reading file /deacon/backroom/snaps/ntp-dev/ntpdc/.ntprc
  - examining environment variables named NTPDC_*
 
 The

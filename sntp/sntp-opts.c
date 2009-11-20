@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 07:35:07 PM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 20, 2009 at 05:35:47 AM by AutoGen 5.10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -473,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.5p246-RC\n\
+"sntp - standard SNTP program - Ver. 4.2.5p247-RC\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -493,7 +493,7 @@ job.\n\
 NTP is the Network Time Protocol (RFC 1305) and SNTP is the\n\
 Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -549,7 +549,7 @@ doUsageOpt(
     (void)pOptions;
     USAGE( EXIT_SUCCESS );
 }
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -564,7 +564,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>
