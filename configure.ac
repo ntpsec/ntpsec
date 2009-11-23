@@ -399,10 +399,8 @@ case "$ans" in
  *)
     ;;
 esac
-AC_MSG_CHECKING(for net-snmp-config)
-AC_MSG_RESULT($ans)
 PROG_NET_SNMP_CONFIG=$ans
-
+AC_MSG_CHECKING([for net-snmp-config path])
 case "$PROG_NET_SNMP_CONFIG" in
  no) ;;
  /*)
@@ -411,6 +409,7 @@ case "$PROG_NET_SNMP_CONFIG" in
  *) AC_PATH_PROG([PATH_NET_SNMP_CONFIG], [$PROG_NET_SNMP_CONFIG])
     ;;
 esac
+AC_MSG_RESULT([$PATH_NET_SNMP_CONFIG])
 
 case "$host" in
  *-*-vxworks*)
@@ -4087,7 +4086,7 @@ esac
 
 AC_MSG_CHECKING([if we want to build ntpsnmpd])
 AC_ARG_WITH(ntpsnmpd,
-	AC_HELP_STRING([--with-ntpsnmpd], [s Build the ntpsnmpd code?]),
+	AC_HELP_STRING([--with-ntpsnmpd], [s Build ntpsnmpd MIB agent?]),
 	[ans=$withval],
 	[case "$PATH_NET_SNMP_CONFIG" in
 	 /*)	ans=yes ;;

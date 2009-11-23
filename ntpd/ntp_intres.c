@@ -523,6 +523,7 @@ findhostaddr(
 				    SOCK_ADDR6(&entry->peer_store);
 				entry->ce_config.v6_flag = 1;
 			}
+			freeaddrinfo(addr);
 		}
 	} else {
 		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",

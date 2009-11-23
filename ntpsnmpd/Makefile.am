@@ -22,21 +22,26 @@ BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h ntpsnmpd.1 ntpsnmpd-opts.texi \
 		ntpsnmpd-opts.menu
 CLEANFILES=
 man_MANS=	ntpsnmpd.1
-run_ag=		cd $(srcdir) && autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&					\
+		env PATH="$(abs_builddir):$(PATH)"		\
+		autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/homerc.def 		\
 		$(top_srcdir)/include/version.def
 
-$(srcdir)/ntpsnmpd-opts.h: $(srcdir)/ntpsnmpd-opts.c
-$(srcdir)/ntpsnmpd-opts.c: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+$(srcdir)/ntpsnmpd-opts.c $(srcdir)/ntpsnmpd-opts.h: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) ntpsnmpd-opts.def
 
 $(srcdir)/ntpsnmpd.1: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpsnmpd ntpsnmpd-opts.def
 
 $(srcdir)/ntpsnmpd-opts.texi $(srcdir)/ntpsnmpd-opts.menu: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+	$(MAKE) @MAKE_NTPSNMPD@ not-all-target	# aginfo.tpl runs the binary to extract --help usage text
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpsnmpd-opts.def
+
+not-all-target:
+	touch $@	# used to avoid "all" default target when not building ntpsnmpd
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf

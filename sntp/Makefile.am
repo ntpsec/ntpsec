@@ -12,7 +12,9 @@ AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 
-run_ag=         cd $(srcdir) && autogen -L ../include --writable
+run_ag=	cd $(srcdir) &&				\
+	env PATH="$(abs_builddir):$(PATH)"	\
+	autogen -L ../include --writable
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
@@ -102,14 +104,14 @@ $(srcdir)/../COPYRIGHT:
 $(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
 	cat $(srcdir)/../COPYRIGHT > $@
 
-$(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
-$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp-opts.c $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) sntp-opts.def
 
 $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+	$(MAKE) sntp	# aginfo.tpl runs the binary to extract --help usage text
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 
 ../libntp/libntp.a:
