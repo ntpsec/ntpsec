@@ -17,7 +17,7 @@
 
 char *progname = "sntp";	/* for msyslog */
 
-int ai_fam_pref;
+int ai_fam_pref = AF_UNSPEC;
 volatile int debug;
 
 struct key *keys = NULL;
@@ -66,12 +66,10 @@ sntp_main (
 	}
 	else {
 		/* Check for options -4 and -6 */
-		if(ENABLED_OPT(IPV4))
+		if (HAVE_OPT(IPV4))
 			ai_fam_pref = AF_INET;
-		else if(ENABLED_OPT(IPV6))
+		else if (HAVE_OPT(IPV6))
 			ai_fam_pref = AF_INET6;
-		else 
-			ai_fam_pref = 0;
 	}
 
 	log_msg("Started sntp", 0);
@@ -161,6 +159,7 @@ on_wire (
 		struct addrinfo *host
 					)
 {
+	char logmsg[32 + INET6_ADDRSTRLEN];
 	char addr_buf[INET6_ADDRSTRLEN];
 	register int try;
 	SOCKET sock;
@@ -173,6 +172,7 @@ on_wire (
 		double t21, t34, delta, offset;
 		int error, rpktl, sw_case;
 		char *hostname = NULL, *ts_str = NULL;
+		char *log_str;
 		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
 
 		memset(&r_pkt, 0, sizeof(r_pkt));
@@ -224,19 +224,17 @@ on_wire (
 				ref = (char *)&r_pkt.refid;
 				add_entry(hostname, ref);
 
-				if(ENABLED_OPT(NORMALVERBOSE))
+				if (ENABLED_OPT(NORMALVERBOSE))
 					printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n", 
 					       ref[0], ref[1], ref[2], ref[3],
 					       hostname);
 
-				char *log_str = (char *) emalloc(sizeof(char) * (INET6_ADDRSTRLEN + 72));
+				log_str = emalloc(INET6_ADDRSTRLEN + 72);
 				snprintf(log_str, INET6_ADDRSTRLEN + 72, 
 					 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
 					 ref[0], ref[1], ref[2], ref[3],
 					 hostname);
-
 				log_msg(log_str, 2);
-
 				free(log_str);
 				break;
 
@@ -317,16 +315,13 @@ on_wire (
 		}
 	}
 
-	char logmsg[32 + INET6_ADDRSTRLEN];
 	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 
 	snprintf(logmsg, sizeof(logmsg), "Received no useable packet from %s!", addr_buf);
+	log_msg(logmsg, 1);
 
 	if (ENABLED_OPT(NORMALVERBOSE))
 		printf("sntp on_wire: Received no useable packet from %s!\n", addr_buf);
-
-
-	log_msg(logmsg, 1);
 
 	return -1;
 }

@@ -1,22 +1,23 @@
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
+NULL =
 AUTOMAKE_OPTIONS = 
 ETAGS_ARGS = $(srcdir)/Makefile.am
 EXTRA_DIST = autogen-version.def copyright.def debug-opt.def homerc.def version.def version.texi
 
-NULL=
+SUBDIRS = isc
+
 noinst_HEADERS =	\
 	adjtime.h	\
 	audio.h		\
 	ascii.h		\
 	audio.h		\
 	binio.h		\
-	global.h	\
 	gps.h		\
 	hopf6039.h	\
 	icom.h		\
 	ieee754io.h	\
 	iosignal.h	\
 	l_stdlib.h	\
+	lib_strbuf.h	\
 	mbg_gps166.h	\
 	mx4200.h	\
 	ntif.h		\
@@ -60,6 +61,7 @@ noinst_HEADERS =	\
 	parse_conf.h	\
 	recvbuff.h	\
 	refclock_atom.h	\
+	ssl_applink.c	\
 	timepps-SCO.h	\
 	timepps-Solaris.h	\
 	timepps-SunOS.h	\

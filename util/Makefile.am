@@ -21,6 +21,7 @@ ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntp-keygen-opts.def ntp-keygen.1 ntp-keygen-opts.texi ntp-keygen-opts.menu
 BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h ntp-keygen.1	\
 		ntp-keygen-opts.texi ntp-keygen-opts.menu
+CLEANFILES=
 man_MANS=	ntp-keygen.1
 run_ag=		cd $(srcdir) && autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
@@ -48,3 +49,6 @@ jitter_LDADD=
 
 kern.o: kern.c
 	$(COMPILE) -DHAVE_TIMEX_H -c kern.c
+
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

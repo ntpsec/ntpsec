@@ -356,10 +356,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\mem.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\memmove.c"
 				>
 			</File>
@@ -477,6 +473,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\libntp\socktohost.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libntp\ssl_init.c"
 				>
 			</File>
 			<File
@@ -625,7 +625,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\lib_strbuf.h"
+				RelativePath="..\..\..\..\include\lib_strbuf.h"
 				>
 			</File>
 			<File
@@ -637,7 +637,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\include\isc\mem.h"
+				RelativePath="..\..\..\..\include\isc\mem.h"
 				>
 			</File>
 			<File
@@ -817,11 +817,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File

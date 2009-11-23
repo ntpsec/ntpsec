@@ -20,9 +20,8 @@
 #include "ntp_syslog.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+#include <ssl_applink.c>
 
-/* Don't include ISC's version of IPv6 variables and structures */
-#define ISC_IPV6_H 1
 #include "isc/net.h"
 #include "isc/result.h"
 #include "isc/sockaddr.h"
@@ -37,19 +36,15 @@
 #ifdef HAVE_POLL_H
 # include <poll.h>
 #endif
-#ifndef SYS_WINNT
-# ifdef HAVE_SYS_SIGNAL_H
-#  include <sys/signal.h>
-# else
-#  include <signal.h>
-# endif
-# ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
-# endif
-#endif /* SYS_WINNT */
+#ifdef HAVE_SYS_SIGNAL_H
+# include <sys/signal.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif
 #ifdef HAVE_SYS_RESOURCE_H
 # include <sys/resource.h>
-#endif /* HAVE_SYS_RESOURCE_H */
+#endif
 
 #include <arpa/inet.h>
 
@@ -77,9 +72,6 @@ struct timeval timeout = {60,0};
 #include "recvbuff.h"
 
 #ifdef SYS_WINNT
-#define EPROTONOSUPPORT WSAEPROTONOSUPPORT
-#define EAFNOSUPPORT	WSAEAFNOSUPPORT
-#define EPFNOSUPPORT	WSAEPFNOSUPPORT
 #define TARGET_RESOLUTION 1  /* Try for 1-millisecond accuracy
 				on Windows NT timers. */
 #pragma comment(lib, "winmm")
@@ -338,6 +330,8 @@ ntpdatemain (
 
 	if (!ExpandEnvironmentStrings(KEYFILE, key_file, MAX_PATH))
 		msyslog(LOG_ERR, "ExpandEnvironmentStrings(KEYFILE) failed: %m\n");
+
+	ssl_applink();
 #endif /* SYS_WINNT */
 
 #ifdef NO_MAIN_ALLOWED

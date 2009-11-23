@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  October 22, 2009 at 06:39:36 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  November 20, 2009 at 05:30:18 AM by AutoGen 5.10
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -58,7 +58,7 @@ This is the automatically generated usage text for ntpdc:
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTP query program - Ver. 4.2.5p228
+ntpdc - vendor-specific NTP query program - Ver. 4.2.5p242-RC
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -132,7 +132,8 @@ This is the ``force ipv4 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv6.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -147,7 +148,8 @@ This is the ``force ipv6 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv4.
 @end itemize
 
 Force DNS resolution of following host names on the command line

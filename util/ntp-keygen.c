@@ -87,21 +87,13 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 #include "ntp_types.h"
 #include "ntp_random.h"
-#include "l_stdlib.h"
+#include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
 #include "ntp-keygen-opts.h"
-
-#ifdef SYS_WINNT
-extern	int	ntp_getopt	(int, char **, const char *);
-#define getopt ntp_getopt
-#define optarg ntp_optarg
-#endif	/* SYS_WINNT */
 
 #ifdef OPENSSL
 #include "openssl/bn.h"
@@ -111,18 +103,14 @@ extern	int	ntp_getopt	(int, char **, const char *);
 #include "openssl/pem.h"
 #include "openssl/x509v3.h"
 #include <openssl/objects.h>
-#ifdef SYS_WINNT
-# pragma warning(push)
-# pragma warning(disable: 4152)
-# include <openssl/applink.c>
-# pragma warning(pop)
-#endif /* SYS_WINNT */
 #endif /* OPENSSL */
+#include <ssl_applink.c>
 
 /*
  * Cryptodefines
  */
-#define	MD5KEYS		16	/* number of MD5 keys generated */
+#define	MD5KEYS		10	/* number of keys generated of each type */
+#define	MD5SIZE		20	/* maximum key size */
 #define	JAN_1970	2208988800UL /* NTP seconds */
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
 #define MAXFILENAME	256	/* max file name length */
@@ -167,7 +155,7 @@ u_long	asn2ntp		(ASN1_TIME *);
  */
 extern char *optarg;		/* command line argument */
 char	*progname;
-int	debug = 0;		/* debug, not de bug */
+volatile int	debug = 0;		/* debug, not de bug */
 #ifdef OPENSSL
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
@@ -263,25 +251,14 @@ main(
 #ifdef SYS_WINNT
 	/* Initialize before OpenSSL checks */
 	InitWin32Sockets();
-	if(!init_randfile())
+	if (!init_randfile())
 		fprintf(stderr, "Unable to initialize .rnd file\n");
+	ssl_applink();
 #endif
 
 #ifdef OPENSSL
-	/*
-	 * OpenSSL version numbers: MNNFFPPS: major minor fix patch
-	 * status We match major, minor, fix and status (not patch)
-	 */
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		fprintf(stderr,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-		exit (-1);
-
-	} else {
-		fprintf(stderr,
-		    "Using OpenSSL version %lx\n", SSLeay());
-	}
+	ssl_check_version();
+	fprintf(stderr, "Using OpenSSL version %lx\n", SSLeay());
 #endif /* OPENSSL */
 
 	/*
@@ -714,21 +691,28 @@ main(
 
 
 /*
- * Generate semi-random MD5 keys compatible with NTPv3 and NTPv4
+ * Generate semi-random MD5 keys compatible with NTPv3 and NTPv4. Also,
+ * if OpenSSL is around, generate random SHA1 keys compatible with
+ * symmetric key cryptography.
  */
 int
 gen_md5(
 	char	*id		/* file name id */
 	)
 {
-	u_char	md5key[16+1];	/* MD5 key */
+	u_char	md5key[MD5SIZE + 1];	/* MD5 key */
 	FILE	*str;
 	int	i, j;
+#ifdef OPENSSL
+	u_char	keystr[MD5SIZE];
+	u_char	hexstr[2 * MD5SIZE + 1];
+	u_char	hex[] = "0123456789abcdef";
+#endif /* OPENSSL */
 
 	str = fheader("MD5key", id, groupname);
 	ntp_srandom((u_long)epoch);
 	for (i = 1; i <= MD5KEYS; i++) {
-		for (j = 0; j < 16; j++) {
+		for (j = 0; j < MD5SIZE; j++) {
 			int temp;
 
 			while (1) {
@@ -742,9 +726,21 @@ gen_md5(
 			md5key[j] = (u_char)temp;
 		}
 		md5key[j] = '\0';
-		fprintf(str, "%2d MD5 %16s	# MD5 key\n", i,
+		fprintf(str, "%2d MD5 %s  # MD5 key\n", i,
 		    md5key);
 	}
+#ifdef OPENSSL
+	for (i = 1; i <= MD5KEYS; i++) {
+		RAND_bytes(keystr, 20);
+		for (j = 0; j < MD5SIZE; j++) {
+			hexstr[2 * j] = hex[keystr[j] >> 4];
+			hexstr[2 * j + 1] = hex[keystr[j] & 0xf];
+		}
+		hexstr[2 * MD5SIZE] = '\0';
+		fprintf(str, "%2d SHA1 %s  # SHA1 key\n", i + MD5KEYS,
+		    hexstr);
+	}
+#endif /* OPENSSL */
 	fclose(str);
 	return (1);
 }

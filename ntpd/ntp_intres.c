@@ -26,17 +26,26 @@
 #include "ntp_request.h"
 #include "ntp_stdlib.h"
 #include "ntp_syslog.h"
+#include "ntp_config.h"
+
+#ifndef NO_INTRES		/* from ntp_config.h */
 
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
 
 /**/
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <arpa/inet.h>
 /**/
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
+#endif
+
+#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
+#include <resolv.h>
 #endif
 
 #include <isc/net.h>
@@ -131,6 +140,8 @@ static	SOCKET sockfd = INVALID_SOCKET;	/* NT uses SOCKET */
 /* stuff to be filled in by caller */
 
 keyid_t req_keyid;	/* request keyid */
+int	req_keytype;	/* OpenSSL NID such as NID_md5 */
+size_t	req_hashlen;	/* digest size for req_keytype */
 char *req_file;		/* name of the file with configuration info */
 
 /* end stuff to be filled in */
@@ -500,7 +511,6 @@ findhostaddr(
 		 */
 		if (!ipv6_works)
 			hints.ai_family = AF_INET;
-
 		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
 		if (error == 0) {
 			entry->peer_store = *((sockaddr_u *)(addr->ai_addr));
@@ -690,15 +700,21 @@ request(
 	struct conf_peer *conf
 	)
 {
-	fd_set fdset;
 	struct sock_timeval tvout;
 	struct req_pkt reqpkt;
-	l_fp ts;
+	size_t	req_len;
+	size_t	total_len;	/* req_len plus keyid & digest */
+	fd_set	fdset;
+	l_fp	ts;
+	char *	pch;
+	char *	pchEnd;
+	l_fp *	pts;
+	keyid_t *pkeyid;
 	int n;
 #ifdef SYS_WINNT
-	HANDLE hReadWriteEvent = NULL;
-	BOOL ret;
-	DWORD NumberOfBytesWritten, NumberOfBytesRead, dwWait;
+	HANDLE	hReadWriteEvent = NULL;
+	BOOL	ret;
+	DWORD	NumberOfBytesWritten, NumberOfBytesRead, dwWait;
 	OVERLAPPED overlap;
 #endif /* SYS_WINNT */
 
@@ -721,7 +737,7 @@ request(
 	FD_SET(sockfd, &fdset);
 	while (select(sockfd + 1, &fdset, (fd_set *)0, (fd_set *)0, &tvout) >
 	       0) {
-		recv(sockfd, (char *)&reqpkt, REQ_LEN_MAC, 0);
+		recv(sockfd, (char *)&reqpkt, sizeof(reqpkt), 0);
 		FD_ZERO(&fdset);
 		FD_SET(sockfd, &fdset);
 	}
@@ -729,34 +745,66 @@ request(
 	/*
 	 * Make up a request packet with the configuration info
 	 */
-	memset((char *)&reqpkt, 0, sizeof(reqpkt));
+	memset(&reqpkt, 0, sizeof(reqpkt));
 
 	reqpkt.rm_vn_mode = RM_VN_MODE(0, 0, 0);
 	reqpkt.auth_seq = AUTH_SEQ(1, 0);	/* authenticated, no seq */
 	reqpkt.implementation = IMPL_XNTPD;	/* local implementation */
 	reqpkt.request = REQ_CONFIG;		/* configure a new peer */
 	reqpkt.err_nitems = ERR_NITEMS(0, 1);	/* one item */
-	reqpkt.mbz_itemsize = MBZ_ITEMSIZE(sizeof(struct conf_peer));
+	reqpkt.mbz_itemsize = MBZ_ITEMSIZE(sizeof(*conf));
 	/* Make sure mbz_itemsize <= sizeof reqpkt.data */
-	if (sizeof(struct conf_peer) > sizeof (reqpkt.data)) {
-		msyslog(LOG_ERR, "Bletch: conf_peer is too big for reqpkt.data!");
+	if (sizeof(*conf) > sizeof(reqpkt.data)) {
+		msyslog(LOG_ERR,
+			"Bletch: conf_peer is too big for reqpkt.data!");
 		resolver_exit(1);
 	}
-	memmove(reqpkt.data, (char *)conf, sizeof(struct conf_peer));
-	reqpkt.keyid = htonl(req_keyid);
+	memcpy(reqpkt.data, conf, sizeof(*conf));
 
+	if (sys_authenticate && req_hashlen > 16) {
+		pch = reqpkt.data; 
+		/* 32-bit alignment */
+		pch += (sizeof(*conf) + 3) & ~3;
+		pts = (void *)pch;
+		pkeyid = (void *)(pts + 1);
+		pchEnd = (void *)pkeyid;
+		req_len = pchEnd - (char *)&reqpkt;
+		pchEnd = (void *)(pkeyid + 1);
+		pchEnd += req_hashlen;
+		total_len = pchEnd - (char *)&reqpkt;
+		if (total_len > sizeof(reqpkt)) {
+			msyslog(LOG_ERR,
+				"intres total_len %u limit is %u (%u octet digest)\n",
+				total_len, sizeof(reqpkt),
+				req_hashlen);
+			resolver_exit(1);
+		}
+	} else {
+		pts = &reqpkt.tstamp;
+		pkeyid = &reqpkt.keyid;
+		req_len = REQ_LEN_NOMAC;
+	}
+
+	*pkeyid = htonl(req_keyid);
 	get_systime(&ts);
 	L_ADDUF(&ts, SKEWTIME);
-	HTONL_FP(&ts, &reqpkt.tstamp);
-	n = 0;
-	if (sys_authenticate)
-		n = authencrypt(req_keyid, (u_int32 *)&reqpkt, REQ_LEN_NOMAC);
+	HTONL_FP(&ts, pts);
+	if (sys_authenticate) {
+		n = authencrypt(req_keyid, (void *)&reqpkt, req_len);
+		if ((size_t)n != req_hashlen + sizeof(reqpkt.keyid)) {
+			msyslog(LOG_ERR,
+				"intres maclen %d expected %u\n",
+				n, req_hashlen + sizeof(reqpkt.keyid));
+			resolver_exit(1);
+		}
+		req_len += n;
+	}
 
 	/*
 	 * Done.  Send it.
 	 */
 #ifndef SYS_WINNT
-	n = send(sockfd, (char *)&reqpkt, (unsigned)(REQ_LEN_NOMAC + n), 0);
+	n = send(sockfd, (char *)&reqpkt, req_len, 0);
 	if (n < 0) {
 		msyslog(LOG_ERR, "send to NTP server failed: %m");
 		return 0;	/* maybe should exit */
@@ -774,7 +822,7 @@ request(
 	 */
 	overlap.Offset = overlap.OffsetHigh = (DWORD)0;
 	overlap.hEvent = hReadWriteEvent;
-	ret = WriteFile((HANDLE)sockfd, (char *)&reqpkt, REQ_LEN_NOMAC + n,
+	ret = WriteFile((HANDLE)sockfd, (char *)&reqpkt, req_len,
 			NULL, (LPOVERLAPPED)&overlap);
 	if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
 		msyslog(LOG_ERR, "send to NTP server failed: %m");
@@ -812,23 +860,20 @@ request(
 		n = select(sockfd + 1, &fdset, (fd_set *)0,
 			   (fd_set *)0, &tvout);
 
-		if (n < 0)
-		{
+		if (n < 0) {
 			if (errno != EINTR)
-			    msyslog(LOG_ERR, "select() fails: %m");
+				msyslog(LOG_ERR, "select() fails: %m");
 			return 0;
-		}
-		else if (n == 0)
-		{
+		} else if (n == 0) {
 #ifdef DEBUG
 			if (debug)
-			    msyslog(LOG_INFO, "select() returned 0.");
+				msyslog(LOG_INFO, "ntp_intres select() returned 0.");
 #endif
 			return 0;
 		}
 
 #ifndef SYS_WINNT
-		n = recv(sockfd, (char *)&reqpkt, REQ_LEN_MAC, 0);
+		n = recv(sockfd, (char *)&reqpkt, sizeof(reqpkt), 0);
 		if (n <= 0) {
 			if (n < 0) {
 				msyslog(LOG_ERR, "recv() fails: %m");
@@ -837,7 +882,7 @@ request(
 			continue;
 		}
 #else /* Overlapped I/O used on non-blocking sockets on Windows NT */
-		ret = ReadFile((HANDLE)sockfd, (char *)&reqpkt, (DWORD)REQ_LEN_MAC,
+		ret = ReadFile((HANDLE)sockfd, (char *)&reqpkt, sizeof(reqpkt),
 			       NULL, (LPOVERLAPPED)&overlap);
 		if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
 			msyslog(LOG_ERR, "ReadFile() fails: %m");
@@ -943,32 +988,32 @@ request(
 		
 		    case INFO_ERR_IMPL:
 			msyslog(LOG_ERR,
-				"ntpd reports implementation mismatch!");
+				"ntp_intres.request: implementation mismatch");
 			return 0;
 		
 		    case INFO_ERR_REQ:
 			msyslog(LOG_ERR,
-				"ntpd says configuration request is unknown!");
+				"ntp_intres.request: request unknown");
 			return 0;
 		
 		    case INFO_ERR_FMT:
 			msyslog(LOG_ERR,
-				"ntpd indicates a format error occurred!");
+				"ntp_intres.request: format error");
 			return 0;
 
 		    case INFO_ERR_NODATA:
 			msyslog(LOG_ERR,
-				"ntpd indicates no data available!");
+				"ntp_intres.request: no data available");
 			return 0;
 		
 		    case INFO_ERR_AUTH:
 			msyslog(LOG_ERR,
-				"ntpd returns a permission denied error!");
+				"ntp_intres.request: permission denied");
 			return 0;
 
 		    default:
 			msyslog(LOG_ERR,
-				"ntpd returns unknown error code %d!", n);
+				"ntp_intres.request: unknown error code %d", n);
 			return 0;
 		}
 	}
@@ -1144,6 +1189,10 @@ doconfigure(
 			    dores ? "with" : "without" );
 #endif
 
+#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
+	if (dores)	   /* Reload /etc/resolv.conf - bug 1226 */
+		res_init();
+#endif
 	ce = confentries;
 	while (ce != NULL) {
 #ifdef DEBUG
@@ -1173,6 +1222,10 @@ doconfigure(
 				removeentry(ceremove);
 				continue;
 			}
+			/* 
+			 * Failed case.  Should bump counter and give 
+			 * up.
+			 */
 #ifdef DEBUG
 			if (debug > 1) {
 				msyslog(LOG_INFO,
@@ -1183,3 +1236,7 @@ doconfigure(
 		ce = ce->ce_next;
 	}
 }
+
+#else	/* NO_INTRES follows */
+int ntp_intres_nonempty_compilation_unit;
+#endif

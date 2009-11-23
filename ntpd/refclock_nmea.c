@@ -21,6 +21,7 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_NMEA)
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <ctype.h>
 
@@ -89,7 +90,8 @@ extern int async_write(int, const void *, unsigned int);
 /*
  * Definitions
  */
-#define DEVICE	   "/dev/gps%d"	/* name of radio device */
+#define	DEVICE		"/dev/gps%d"	/* GPS serial device */
+#define	PPSDEV		"/dev/gpspps%d"	/* PPSAPI device override */
 #define	SPEED232	B4800	/* uart speed (4800 bps) */
 #define	PRECISION	(-9)	/* precision assumed (about 2 ms) */
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
@@ -97,6 +99,17 @@ extern int async_write(int, const void *, unsigned int);
 #define	DESCRIPTION	"NMEA GPS Clock" /* who we are */
 #define NANOSECOND	1000000000 /* one second (ns) */
 #define RANGEGATE	500000	/* range gate (ns) */
+#ifndef O_NOCTTY
+#define M_NOCTTY	0
+#else
+#define M_NOCTTY	O_NOCTTY
+#endif
+#ifndef O_NONBLOCK
+#define M_NONBLOCK	0
+#else
+#define M_NONBLOCK	O_NONBLOCK
+#endif
+#define PPSOPENMODE	(O_RDWR | M_NOCTTY | M_NONBLOCK)
 
 /*
  * Unit control structure
@@ -106,6 +119,7 @@ struct nmeaunit {
 	struct refclock_atom atom; /* PPSAPI structure */
 	int	ppsapi_tried;	/* attempt PPSAPI once */
 	int	ppsapi_lit;	/* time_pps_create() worked */
+	int	ppsapi_fd;	/* fd used with PPSAPI */
 	int	tcount;		/* timecode sample counter */
 	int	pcount;		/* PPS sample counter */
 #endif /* HAVE_PPSAPI */
@@ -163,10 +177,12 @@ nmea_start(
 	int baudrate;
 	char *baudtext;
 
+	pp = peer->procptr;
+
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	
 	/*
 	 * Opening the serial port with appropriate baudrate
@@ -255,6 +271,7 @@ nmea_start(
 			return (0);
 		}
 #else
+		pp->io.fd = -1;
 		return (0);
 #endif
 	}
@@ -266,17 +283,13 @@ nmea_start(
 	 * Allocate and initialize unit structure
 	 */
 	up = emalloc(sizeof(*up));
-	if (NULL == up) {
-		close(fd);
-		return (0);
-	}
 	memset(up, 0, sizeof(*up));
-	pp = peer->procptr;
 	pp->io.clock_recv = nmea_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
+		pp->io.fd = -1;
 		close(fd);
 		free(up);
 		return (0);
@@ -288,7 +301,7 @@ nmea_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, 4);
 
 	gps_send(fd,"$PMOTG,RMC,0000*1D\r\n", peer);
 
@@ -298,6 +311,9 @@ nmea_start(
 
 /*
  * nmea_shutdown - shut down a GPS clock
+ * 
+ * NOTE this routine is called after nmea_start() returns failure,
+ * as well as during a normal shutdown due to ntpq :config unpeer.
  */
 static void
 nmea_shutdown(
@@ -312,8 +328,18 @@ nmea_shutdown(
 
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (up != NULL) {
+#ifdef HAVE_PPSAPI
+		if (up->ppsapi_lit) {
+			time_pps_destroy(up->atom.handle);
+			if (up->ppsapi_fd != pp->io.fd)
+				close(up->ppsapi_fd);
+		}
+#endif
+		free(up);
+	}
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
 }
 
 /*
@@ -328,10 +354,11 @@ nmea_control(
 	struct peer *peer
 	)
 {
+	char device[32];
 	register struct nmeaunit *up;
 	struct refclockproc *pp;
+	int pps_fd;
 	
-	UNUSED_ARG(unit);
 	UNUSED_ARG(in_st);
 	UNUSED_ARG(out_st);
 
@@ -347,8 +374,11 @@ nmea_control(
 		peer->flags &= ~FLAG_PPS;
 		peer->precision = PRECISION;
 		time_pps_destroy(up->atom.handle);
+		if (up->ppsapi_fd != pp->io.fd)
+			close(up->ppsapi_fd);
 		up->atom.handle = 0;
 		up->ppsapi_lit = 0;
+		up->ppsapi_fd = -1;
 		return;
 	}
 
@@ -358,8 +388,22 @@ nmea_control(
 	 * Light up the PPSAPI interface.
 	 */
 	up->ppsapi_tried = 1;
-	if (refclock_ppsapi(pp->io.fd, &up->atom)) {
+
+	/*
+	 * if /dev/gpspps$UNIT can be opened that will be used for
+	 * PPSAPI.  Otherwise, the GPS serial device /dev/gps$UNIT
+	 * already opened is used for PPSAPI as well.
+	 */
+	snprintf(device, sizeof(device), PPSDEV, unit);
+
+	pps_fd = open(device, PPSOPENMODE, S_IRUSR | S_IWUSR);
+
+	if (-1 == pps_fd)
+		pps_fd = pp->io.fd;
+	
+	if (refclock_ppsapi(pps_fd, &up->atom)) {
 		up->ppsapi_lit = 1;
+		up->ppsapi_fd = pps_fd;
 		return;
 	}
 
@@ -414,7 +458,6 @@ nmea_receive(
 	char *cp, *dp, *msg;
 	int cmdtype;
 	int cmdtypezdg = 0;
-	l_fp lfp_fudgetime2;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_timestamp;
@@ -524,8 +567,6 @@ nmea_receive(
 	memcpy(pp->a_lastcode, rd_lastcode, pp->lencode + 1);
 	cp = pp->a_lastcode;
 
-	DTOLFP(pp->fudgetime2, &lfp_fudgetime2);
-	L_ADD(&rd_timestamp, &lfp_fudgetime2);
 	up->tstamp = rd_timestamp;
 	pp->lastrec = up->tstamp;
 
@@ -798,7 +839,7 @@ nmea_receive(
 	if (peer->flags & FLAG_PPS)
 		return;
 #endif /* HAVE_PPSAPI */
-	if (!refclock_process(pp))
+	if (!refclock_process_f(pp, pp->fudgetime2))
 		refclock_report(peer, CEVNT_BADTIME);
 }
 

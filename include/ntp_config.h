@@ -1,6 +1,7 @@
 #ifndef NTP_CONFIG_H
 #define NTP_CONFIG_H
 
+#include "ntp_machine.h"
 #include "ntp_data_structures.h"
 #include "ntpsim.h"
 
@@ -24,7 +25,7 @@
  */
 #define	CONF_QOS_LOWDELAY		1
 #define CONF_QOS_THROUGHPUT		2
-#define CONF_QOS_RELIABILITY	3
+#define CONF_QOS_RELIABILITY		3
 #define CONF_QOS_MINCOST		4
 
 #ifdef 		IPTOS_PREC_INTERNETCONTROL
@@ -50,6 +51,16 @@
  */
 #if !defined(FREE_CFG_T) && (!defined(SAVECONFIG) || defined(DEBUG))
 #define FREE_CFG_T
+#endif
+
+/*
+ * Some systems do not support fork() and don't have an alternate
+ * threads implementation of ntp_intres.  Such systems are limited
+ * to using numeric IP addresses.
+ */
+#if defined(VMS) || defined (SYS_VXWORKS) || \
+    (!defined(HAVE_FORK) && !defined(SYS_WINNT))
+#define NO_INTRES
 #endif
 
 /* Limits */

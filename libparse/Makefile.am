@@ -1,6 +1,7 @@
 NULL=
 #AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
+BUILT_SOURCES =
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris
@@ -172,3 +173,5 @@ parsesolaris.o: sys/systm.h
 sys/systm.h:
 	mkdir sys && \
 	sed -e '/ffs(.*)/d' < /usr/include/sys/systm.h > sys/systm.h
+
+include $(top_srcdir)/depsver.mf

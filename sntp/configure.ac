@@ -2,6 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 m4_include([../version.m4])
 AC_INIT([sntp], [VERSION_NUMBER])
+AC_CONFIG_MACRO_DIR([../m4])
+AC_CONFIG_AUX_DIR([.])
 
 # Increment sntp_configure_cache_version by one for each change to
 # configure.ac or .m4 files which invalidates cached values from
@@ -23,7 +25,7 @@ AC_INIT([sntp], [VERSION_NUMBER])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-sntp_configure_cache_version=20090503
+sntp_configure_cache_version=20091117
 
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -137,8 +139,7 @@ AC_CHECK_FUNC([openlog], ,
 	[AC_SEARCH_LIBS([openlog], [gen], , 
 		[AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])])])
 
-AC_CHECK_FUNC([setsockopt], ,
-	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
+AC_SEARCH_LIBS([setsockopt], [socket xnet])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -216,77 +217,172 @@ AC_DEFINE_UNQUOTED([GETSOCKNAME_SOCKLEN_TYPE],
 		   $ac_cv_func_getsockname_socklen_type,
 		   [What is getsockname()'s socklen type?])
 
-AC_CACHE_CHECK(for struct sockaddr_storage, ac_cv_struct_sockaddr_storage,
-[AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-],[
-struct sockaddr_storage n;],
-	ac_cv_struct_sockaddr_storage=yes,
-	ac_cv_struct_sockaddr_storage=no)
-])
-if test $ac_cv_struct_sockaddr_storage = yes; then
-    AC_DEFINE([HAVE_STRUCT_SOCKADDR_STORAGE], 1, [Does a system header define struct sockaddr_storage?])
-fi
-
 AC_CACHE_CHECK(
-    [for ss_family field in struct sockaddr_storage],
-    ac_cv_have_ss_family_in_struct_ss,
+    [for struct sockaddr_storage],
+    ntp_cv_sockaddr_storage,
     [
 	AC_TRY_COMPILE(
 	    [
-		#include <sys/types.h>
-		#include <sys/socket.h>
+		#ifdef HAVE_SYS_TYPES_H
+		# include <sys/types.h>
+		#endif
+		#ifdef HAVE_SYS_SOCKET_H
+		# include <sys/socket.h>
+		#endif
+		#ifdef HAVE_NETINET_IN_H
+		# include <netinet/in.h>
+		#endif
+	    ],
+	    [
+		struct sockaddr_storage n;
+	    ],
+	    [ntp_cv_sockaddr_storage="yes"],
+	    [ntp_cv_sockaddr_storage="no"]
+	)
+    ]
+)
+case "$ntp_cv_sockaddr_storage" in
+ yes)
+    AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1, [Does a system header define struct sockaddr_storage?])
+esac
+
+AC_CACHE_CHECK(
+    [for sockaddr_storage.ss_family],
+    ntp_cv_have_ss_family,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#ifdef HAVE_SYS_TYPES_H
+		# include <sys/types.h>
+		#endif
+		#ifdef HAVE_SYS_SOCKET_H
+		# include <sys/socket.h>
+		#endif
+		#ifdef HAVE_NETINET_IN_H
+		# include <netinet/in.h>
+		#endif
 	    ],
 	    [
 		struct sockaddr_storage s;
 		s.ss_family = 1;
 	    ],
-	    [ac_cv_have_ss_family_in_struct_ss=yes],
-	    [ac_cv_have_ss_family_in_struct_ss=no]
+	    [ntp_cv_have_ss_family="yes"],
+	    [ntp_cv_have_ss_family="no"]
 	)
     ]
 )
-if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
-	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
-else
-    # Hack around a problem...
-    # HMS: This is $host because we need the -D if we are building *for* it.
-    # HMS: 061029: Now that we separate the ss_* checks this is causing
-    # a problem - disable it until we get to the bottom of it.
-    case "$host" in
-     XXX*-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
-	;;
+
+case "$ntp_cv_have_ss_family" in
+ no)
+    AC_CACHE_CHECK(
+	[for sockaddr_storage.__ss_family],
+	ntp_cv_have___ss_family,
+	[
+	    AC_TRY_COMPILE(
+		[
+		    #ifdef HAVE_SYS_TYPES_H
+		    # include <sys/types.h>
+		    #endif
+		    #ifdef HAVE_SYS_SOCKET_H
+		    # include <sys/socket.h>
+		    #endif
+		    #ifdef HAVE_NETINET_IN_H
+		    # include <netinet/in.h>
+		    #endif
+		],
+		[
+		    struct sockaddr_storage s;
+		    s.__ss_family = 1;
+		],
+		[ntp_cv_have___ss_family="yes"],
+		[ntp_cv_have___ss_family="no"]
+	    )
+	]
+    )
+    case "$ntp_cv_have___ss_family" in
+     yes)
+	AC_DEFINE(HAVE___SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have __ss_family?])
     esac
-fi
+esac
+
+AH_VERBATIM(
+    [HAVE___SS_FAMILY_IN_SS_VERBATIM],
+    [
+	/* Handle sockaddr_storage.__ss_family */
+	#ifdef HAVE___SS_FAMILY_IN_SS
+	# define ss_family __ss_family
+	#endif /* HAVE___SS_FAMILY_IN_SS */
+    ]
+)
 
 AC_CACHE_CHECK(
-    [for __ss_family field in struct sockaddr_storage],
-    ac_cv_have___ss_family_in_struct_ss,
+    [for sockaddr_storage.ss_len],
+    ntp_cv_have_ss_len,
     [
 	AC_TRY_COMPILE(
 	    [
-		#include <sys/types.h>
-		#include <sys/socket.h>
+		#ifdef HAVE_SYS_TYPES_H
+		# include <sys/types.h>
+		#endif
+		#ifdef HAVE_SYS_SOCKET_H
+		# include <sys/socket.h>
+		#endif
+		#ifdef HAVE_NETINET_IN_H
+		# include <netinet/in.h>
+		#endif
 	    ],
 	    [
 		struct sockaddr_storage s;
-		s.__ss_family = 1;
+		s.ss_len = 1;
 	    ],
-	    [ac_cv_have___ss_family_in_struct_ss=yes],
-	    [ac_cv_have___ss_family_in_struct_ss=no]
+	    [ntp_cv_have_ss_len="yes"],
+	    [ntp_cv_have_ss_len="no"]
 	)
-])
-if test "x$ac_cv_have___ss_family_in_struct_ss" = "xyes" ; then
-	AC_DEFINE(HAVE___SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have __ss_family?])
-fi
+    ]
+)
 
-AH_VERBATIM([X_HAVE_SS_FAMILY_IN_SS],
-[/* Handle ss_family */
-#if !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE___SS_FAMILY_IN_SS)
-# define ss_family __ss_family
-#endif /* !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE_SA_FAMILY_IN_SS) */])
+case "$ntp_cv_have_ss_len" in
+ no)
+    AC_CACHE_CHECK(
+	[for sockaddr_storage.__ss_len],
+	ntp_cv_have___ss_len,
+	[
+	    AC_TRY_COMPILE(
+		[
+		    #ifdef HAVE_SYS_TYPES_H
+		    # include <sys/types.h>
+		    #endif
+		    #ifdef HAVE_SYS_SOCKET_H
+		    # include <sys/socket.h>
+		    #endif
+		    #ifdef HAVE_NETINET_IN_H
+		    # include <netinet/in.h>
+		    #endif
+		],
+		[
+		    struct sockaddr_storage s;
+		    s.__ss_len = 1;
+		],
+		[ntp_cv_have___ss_len="yes"],
+		[ntp_cv_have___ss_len="no"]
+	    )
+	]
+    )
+    case "$ntp_cv_have___ss_len" in
+     yes)
+	AC_DEFINE(HAVE___SS_LEN_IN_SS, 1, [Does struct sockaddr_storage have __ss_len?])
+    esac
+esac
+
+AH_VERBATIM(
+    [HAVE___SS_LEN_IN_SS_VERBATIM],
+    [
+	/* Handle sockaddr_storage.__ss_len */
+	#ifdef HAVE___SS_LEN_IN_SS
+	# define ss_len __ss_len
+	#endif /* HAVE___SS_LEN_IN_SS */
+    ]
+)
 
 #
 # Look for in_port_t.
@@ -313,6 +409,10 @@ case "$isc_cv_have_in_port_t" in
  no)
 	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
 esac
+
+AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
+AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
+AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 
 AC_ARG_ENABLE([ipv6], [AC_HELP_STRING([--enable-ipv6], [s use IPv6?])])
 

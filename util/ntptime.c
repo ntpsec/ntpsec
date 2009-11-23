@@ -67,6 +67,7 @@ static volatile int pll_control; /* (0) daemon, (1) kernel loop */
 static volatile int status;	/* most recent status bits */
 static volatile int flash;	/* most recent ntp_adjtime() bits */
 char* progname;
+volatile int debug;		/* for libntp */
 static char optargs[] = "MNT:cde:f:hm:o:rs:t:";
 
 int

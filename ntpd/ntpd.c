@@ -174,7 +174,7 @@ int mdnstries = 5;
 int droproot = 0;
 char *user = NULL;		/* User to switch to */
 char *group = NULL;		/* group to switch to */
-char *chrootdir = NULL;		/* directory to chroot to */
+const char *chrootdir = NULL;	/* directory to chroot to */
 int sw_uid;
 int sw_gid;
 char *endp;

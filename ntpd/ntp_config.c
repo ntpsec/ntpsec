@@ -111,8 +111,6 @@ static struct masks logcfg_item[] = {
 #define ISSPACE(c)	((c) == ' ' || (c) == '\t')
 #define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
-#define KEY_TYPE_MD5	4
-
 /*
  * File descriptor used by the resolver save routines, and temporary file
  * name.
@@ -1709,13 +1707,17 @@ config_auth(
 	struct config_tree *ptree
 	)
 {
+	extern int	cache_type;	/* authkeys.c */
 #ifdef OPENSSL
-	struct attr_val *my_val;
-	int item;
+#ifndef NO_INTRES
+	u_char		digest[EVP_MAX_MD_SIZE];
+	u_int		digest_len;
+	EVP_MD_CTX	ctx;
 #endif
-	int *key_val;
-	int i;
-	u_char rankey[9];
+	struct attr_val *my_val;
+	int		item;
+#endif
+	int *		key_val;
 
 	/* Crypto Command */
 #ifdef OPENSSL
@@ -1746,6 +1748,10 @@ config_auth(
 
 		case T_Sign:
 			item = CRYPTO_CONF_SIGN;
+			break;
+
+		case T_Digest:
+			item = CRYPTO_CONF_NID;
 			break;
 		}
 		crypto_config(item, my_val->value.s);
@@ -1803,7 +1809,7 @@ config_auth(
 		sys_revoke = ptree->auth.revoke;
 #endif /* OPENSSL */
 
-#if !defined(VMS) && !defined(SYS_VXWORKS)
+#ifndef NO_INTRES
 	/* find a keyid */
 	if (info_auth_keyid == 0)
 		req_keyid = 65535;
@@ -1811,28 +1817,29 @@ config_auth(
 		req_keyid = info_auth_keyid;
 
 	/* if doesn't exist, make up one at random */
-	if (!authhavekey(req_keyid)) {
+	if (authhavekey(req_keyid)) {
+		req_keytype = cache_type;
+#ifndef OPENSSL
+		req_hashlen = 16;
+#else	/* OPENSSL follows */
+		EVP_DigestInit(&ctx, EVP_get_digestbynid(req_keytype));
+		EVP_DigestFinal(&ctx, digest, &digest_len);
+		req_hashlen = digest_len;
+#endif
+	} else {
+		int	rankey;
 
-		for (i = 0; i < (COUNTOF(rankey) - 1); i++)
-			do
-				rankey[i] = 
-					(u_char)(ntp_random() & 0xff);
-			while (!rankey[i]);
-
-		rankey[COUNTOF(rankey) - 1] = 0;
-
-		authusekey(req_keyid, KEY_TYPE_MD5, (u_char *)rankey);
+		rankey = ntp_random();
+		req_keytype = NID_md5;
+		req_hashlen = 16;
+		MD5auth_setkey(req_keyid, req_keytype,
+		    (u_char *)&rankey, sizeof(rankey));
 		authtrust(req_keyid, 1);
-		if (!authhavekey(req_keyid)) {
-			msyslog(LOG_ERR, "getconfig: Couldn't generate"
-					 " a valid random key!");
-			exit(1);
-		}
 	}
 
 	/* save keyid so we will accept config requests with it */
 	info_auth_keyid = req_keyid;
-#endif /* !defined(VMS) && !defined(SYS_VXWORKS) */
+#endif /* !NO_INTRES */
 
 }
 
@@ -3372,6 +3379,21 @@ config_peers(
 		status = get_multiple_netnums(curr_peer->addr->address,
 		    &peeraddr, &res, 0, t_UNK);
 
+#ifdef FORCE_DEFER_DNS /* Hack for debugging Deferred DNS */
+		if (status == 1) {
+			/* Deferring everything breaks refclocks. */
+			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+			if (!ISREFCLOCKADR(&peeraddr)) {
+				status = 0;  /* force deferred DNS path */
+				msyslog(LOG_INFO, "Forcing Deferred DNS for %s, %s",
+					curr_peer->addr->address, stoa(&peeraddr));
+			} else {
+				msyslog(LOG_INFO, "NOT Deferred DNS for %s, %s",
+					curr_peer->addr->address, stoa(&peeraddr));
+			}
+		}
+#endif
+
 		/* I don't know why getnetnum would return -1.
 		 * The old code had this test, so I guess it must be
 		 * useful
@@ -3385,6 +3407,7 @@ config_peers(
 		 * resolution later
 		 */
 		else if (status != 1) {
+			msyslog(LOG_INFO, "Deferring DNS for %s", curr_peer->addr->address);
 			save_resolve(curr_peer->addr->address,
 				     hmode,
 				     curr_peer->peerversion,
@@ -4465,9 +4488,9 @@ abort_resolve(void)
 
 /*
  * do_resolve_internal - start up the resolver function (not program)
- */
-/*
- * On VMS, this routine will simply refuse to resolve anything.
+ *
+ * On VMS, VxWorks, and Unix-like systems lacking fork(), this routine
+ * will simply refuse to resolve anything.
  *
  * Possible implementation: keep `res_file' in memory, do async
  * name resolution via QIO, update from within completion AST.
@@ -4491,12 +4514,11 @@ do_resolve_internal(void)
 	(void) fclose(res_fp);
 	res_fp = NULL;
 
-#if !defined(VMS) && !defined (SYS_VXWORKS)
+#ifndef NO_INTRES
 	req_file = res_file;	/* set up pointer to res file */
 #ifndef SYS_WINNT
 	(void) signal_no_reset(SIGCHLD, catchchild);
 
-#ifndef SYS_VXWORKS
 	/* the parent process will write to the pipe
 	 * in order to wake up to child process
 	 * which may be waiting in a select() call
@@ -4555,11 +4577,6 @@ do_resolve_internal(void)
 
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 
-#ifdef DEBUG
-		if (0)
-			debug = 2;
-#endif
-
 		init_logging("ntpd_intres", 0);
 		setup_logfile();
 		/*
@@ -4576,21 +4593,14 @@ do_resolve_internal(void)
 		abort_resolve();
 		exit(1);
 	}
-#else
-	/* vxWorks spawns a thread... -casey */
-	i = sp (ntp_intres);
-	/*i = taskSpawn("ntp_intres",100,VX_FP_TASK,20000,ntp_intres);*/
-#endif
 	if (i == -1) {
 		msyslog(LOG_ERR, "fork() failed, can't start ntp_intres: %m");
 		(void) signal_no_reset(SIGCHLD, SIG_DFL);
 		abort_resolve();
-	}
-	else {
+	} else
 		/* This is the parent process who will write to the pipe,
 		 * so we close the read fd */
 		close(resolver_pipe_fd[0]);
-	}
 #else /* SYS_WINNT */
 	{
 		/* NT's equivalent of fork() is _spawn(), but the start point
@@ -4621,9 +4631,9 @@ do_resolve_internal(void)
 		}
 	}
 #endif /* SYS_WINNT */
-#else /* VMS  VX_WORKS */
+#else /* NO_INTRES follows */
 	msyslog(LOG_ERR,
-		"Name resolution not implemented for VMS - use numeric addresses");
+		"Deferred DNS not implemented - use numeric addresses");
 	abort_resolve();
-#endif /* VMS VX_WORKS */
+#endif
 }

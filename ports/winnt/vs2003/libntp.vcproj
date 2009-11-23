@@ -951,9 +951,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\mem.c">
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\memmove.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1566,6 +1563,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\ssl_init.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\statestr.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1927,7 +1928,7 @@
 				RelativePath="..\..\..\include\l_stdlib.h">
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\lib_strbuf.h">
+				RelativePath="..\..\..\include\lib_strbuf.h">
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\include\isc\log.h">
@@ -1936,7 +1937,7 @@
 				RelativePath="..\..\..\include\md5.h">
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\include\isc\mem.h">
+				RelativePath="..\..\..\include\isc\mem.h">
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\include\isc\net.h">

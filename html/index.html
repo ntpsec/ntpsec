@@ -14,7 +14,7 @@
 		<img src="pic/barnstable.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html"><i>P.T. Bridgeport Bear</i>; from <i>Pogo</i>, Walt Kelly</a>
 		<p>Pleased to meet you.</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->11-Jul-2009  20:00<!-- #EndDate --> 
+			<!-- #BeginDate format:En2m -->07-Nov-2009  20:43<!-- #EndDate --> 
 		UTC</p>
 <br clear="left">
 		<h4>Related Links</h4>
@@ -36,9 +36,30 @@
 		<dl>
 		<dd>It is very important that readers understand that the NTP document collection began 25 years ago and remains today a work in progress. It has evolved as new features were invented and old features retired. It has been widely copied, cached and morphed to other formats, including man pages, with varying loss of fidelity. However, these HTML pages are the ONLY authoritative and definitive reference. Readers should always use the collection that comes with the distribution they use. A copy of the online collection at <a href="http://www.ntp.org">www.ntp.org</a> is normally included in the most recent snapshot, but might not agree with an earlier snapshot or release version.</dd>
 		</dl>
-		<p>The Network Time Protocol (NTP) is widely used to synchronize a computer to Internet time servers or other sources, such as a radio or satellite receiver or telephone modem service. It provides accuracies typically less than a millisecond on LANs and up to a few milliseconds on WANs. Typical NTP configurations utilize multiple redundant servers and diverse network paths in order to achieve high accuracy and reliability.</p>
-		<p>NTP time synchronization services are widely available in the public Internet. The public NTP subnet in early 2008 includes several thousand  servers in most countries and on every continent of the globe, including Antarctica. These servers support a total population estimated at over 25 million computers in the global Internet.</p>
-		<p>The NTP subnet operates with a hierarchy of levels, where each level is assigned a number called the stratum. Stratum 1 (primary) servers at the lowest level are directly synchronized to national time services. Stratum 2 (secondary) servers at the next higher level are synchronize to stratum 1 servers and so on. Normally, NTP clients and servers with a relatively small number of clients do not synchronize to public primary servers. There are several hundred public secondary servers operating at higher strata and are the preferred choice. </p>
+		<p>The Network Time Protocol (NTP) is widely used to synchronize a computer
+			to Internet time servers or other sources, such as a radio or satellite
+			receiver or telephone modem service. It can also be used as a server
+			for dependent clients. It provides accuracies typically less than
+			a millisecond on LANs and up to a few milliseconds on WANs. Typical
+			NTP configurations utilize multiple redundant servers and diverse
+			network paths in order to achieve high accuracy and reliability.
+			Authentication is provided  using symmetric key cryptography and
+			the MD5 message digest algorithm included in the distribution. If
+			the OpenSSL cryptographic library is installed, the SHA or SHA1 message
+			digest algorithms can be used. If the OpenSSL library is installed,
+			additional options based on public key cryptography are available.</p>
+	<p>NTP time synchronization services are widely available in the public Internet.
+		The public NTP subnet in early 2008 includes several thousand servers
+		in most countries and on every continent of the globe, including Antarctica.
+		These servers support a total population estimated at over 25 million computers
+		in the global Internet. The NTP subnet operates with a hierarchy of levels,
+		where each level is assigned a number called the stratum. Stratum 1 (primary)
+		servers at the lowest level are directly synchronized to national time services.
+		Stratum 2 (secondary) servers at the next higher level are synchronize to stratum
+		1 servers and so on. Normally, NTP clients and servers with a relatively small
+		number of clients do not synchronize to public primary servers. There
+		are several hundred public secondary servers operating at higher strata and
+		are the preferred choice. </p>
 		<p>Background information on computer network time synchronization is on the <a href="http://www.eecis.udel.edu/%7emills/exec.html">Executive Summary - Computer Network Time Synchronization</a> page. Discussion on new features and interoperability with previous NTP versions is on the <a href="release.html">NTP Version 4 Release Notes</a> page. Background information, bibliography and briefing slides suitable for presentations are on the <a href="http://www.eecis.udel.edu/%7emills/ntp.html">Network Time Synchronization Research Project</a> page. Additional information is at the NTP web site <a href="http://www.ntp.org">www.ntp.org</a>.</p>
 		<h4 id="build">Building and Installing NTP</h4>
 		<p>NTP supports Unix, VMS and Windows (Vista, XP, NT4 and 2000) systems. The <a href="build.html">Building and Installing the Distribution</a> page details the procedures for building and installing on a typical system. This distribution includes drivers for 44 radio and satellite receivers and telephone modem services in the US, Canada and Europe. A list of supported drivers is on the <a href="refclock.html">Reference Clock Drivers</a> page. The default build includes the debugging options and all drivers that run on the target machine; however, options and drivers can be included or excluded using options on the <a href="config.html">Configuration Options</a> page.</p>

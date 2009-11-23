@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  October 22, 2009 at 06:45:50 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  November 20, 2009 at 05:35:49 AM by AutoGen 5.10
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -50,7 +50,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard SNTP program - Ver. 4.2.5p228
+sntp - standard SNTP program - Ver. 4.2.5p242-RC
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... ...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -112,7 +112,8 @@ This is the ``force ipv4 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv6.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -127,7 +128,8 @@ This is the ``force ipv6 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv4.
 @end itemize
 
 Force DNS resolution of following host names on the command line

@@ -18,10 +18,10 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
-/* Don't include ISC's version of IPv6 variables and structures */
-#define ISC_IPV6_H 1
+#include "ntp_debug.h"
 #include "isc/net.h"
 #include "isc/result.h"
+#include <ssl_applink.c>
 
 #include "ntpq-opts.h"
 
@@ -68,12 +68,8 @@ s_char	sys_precision;		/* local clock precision (log2 s) */
  */
 u_long info_auth_keyid = 0;
 
-/*
- * Type of key md5
- */
-#define	KEY_TYPE_MD5	4
-
-static	int info_auth_keytype = KEY_TYPE_MD5;	/* MD5 */
+static	int	info_auth_keytype = NID_md5;	/* MD5 */
+static	size_t	info_auth_hashlen = 16;		/* MD5 */
 u_long	current_time;		/* needed by authkeys; not used */
 
 /*
@@ -255,7 +251,7 @@ int		ntpqmain	(int,	char **);
  */
 static	int	openhost	(const char *);
 
-static	int	sendpkt		(char *, int);
+static	int	sendpkt		(void *, size_t);
 static	int	getresponse	(int, int, u_short *, int *, char **, int);
 static	int	sendrequest	(int, int, int, int, char *);
 static	char *	tstflags	(u_long);
@@ -296,7 +292,7 @@ static	void	ntpversion	(struct parse *, FILE *);
 static	void	warning		(const char *, const char *, const char *);
 static	void	error		(const char *, const char *, const char *);
 static	u_long	getkeyid	(const char *);
-static	void	atoascii	(int, char *, char *);
+static	void	atoascii	(const char *, size_t, char *, size_t);
 static	void	makeascii	(int, char *, FILE *);
 static	void	cookedprint	(int, int, char *, int, int, FILE *);
 static	void	rawprint	(int, int, char *, int, int, FILE *);
@@ -527,6 +523,7 @@ ntpqmain(
 	delay_time.l_uf = DEFDELAY;
 
 	init_lib();	/* sets up ipv4_works, ipv6_works */
+	ssl_applink();
 
 	/* Check to see if we have IPv6. Otherwise default to IPv4 */
 	if (!ipv6_works)
@@ -793,13 +790,12 @@ openhost(
  */
 static int
 sendpkt(
-	char *xdata,
-	int xdatalen
+	void *	xdata,
+	size_t	xdatalen
 	)
 {
 	if (debug >= 3)
-	    printf("Sending %d octets\n", xdatalen);
-
+		printf("Sending %u octets\n", xdatalen);
 
 	if (send(sockfd, xdata, (size_t)xdatalen, 0) == -1) {
 		warning("write to %s failed", currenthost, "");
@@ -808,13 +804,15 @@ sendpkt(
 
 	if (debug >= 4) {
 		int first = 8;
+		char *cdata = xdata;
+
 		printf("Packet data:\n");
 		while (xdatalen-- > 0) {
 			if (first-- == 0) {
 				printf("\n");
 				first = 7;
 			}
-			printf(" %02x", *xdata++ & 0xff);
+			printf(" %02x", *cdata++ & 0xff);
 		}
 		printf("\n");
 	}
@@ -1221,15 +1219,19 @@ sendrequest(
 	)
 {
 	struct ntp_control qpkt;
-	int pktsize;
+	int	pktsize;
+	u_long	key_id;
+	char	pass_prompt[32];
+	char *	pass;
+	int	maclen;
 
 	/*
 	 * Check to make sure the data will fit in one packet
 	 */
 	if (qsize > CTL_MAX_DATA_LEN) {
-		(void) fprintf(stderr,
-			       "***Internal error!  qsize (%d) too large\n",
-			       qsize);
+		fprintf(stderr,
+			"***Internal error!  qsize (%d) too large\n",
+			qsize);
 		return 1;
 	}
 
@@ -1250,7 +1252,7 @@ sendrequest(
 	 * If we have data, copy and pad it out to a 32-bit boundary.
 	 */
 	if (qsize > 0) {
-		memcpy(qpkt.data, qdata, (unsigned)qsize);
+		memcpy(qpkt.data, qdata, (size_t)qsize);
 		pktsize += qsize;
 		while (pktsize & (sizeof(u_int32) - 1)) {
 			qpkt.data[qsize++] = 0;
@@ -1263,55 +1265,60 @@ sendrequest(
 	 * we're going to have to think about it a little.
 	 */
 	if (!auth && !always_auth) {
-		return sendpkt((char *)&qpkt, pktsize);
-	} else {
-		char *	pass = "\0";
-		int	maclen = 0;
+		return sendpkt(&qpkt, pktsize);
+	} 
 
-		/*
-		 * Pad out packet to a multiple of 8 octets to be sure
-		 * receiver can handle it.
-		 */
-		while (pktsize & 7) {
-			qpkt.data[qsize++] = 0;
-			pktsize++;
-		}
-
-		/*
-		 * Get the keyid and the password if we don't have one.
-		 */
-		if (info_auth_keyid == 0) {
-			int u_keyid = getkeyid("Keyid: ");
-			if (u_keyid == 0 || u_keyid > NTP_MAXKEY) {
-				(void) fprintf(stderr,
-				   "Invalid key identifier\n");
-				return 1;
-			}
-			info_auth_keyid = u_keyid;
-		}
-		if (!authistrusted(info_auth_keyid)) {
-			pass = getpass("MD5 Password: ");
-			if (*pass == '\0') {
-				(void) fprintf(stderr,
-				  "Invalid password\n");
-				return (1);
-			}
-			authusekey(info_auth_keyid, info_auth_keytype, (const u_char *)pass);
-			authtrust(info_auth_keyid, 1);
-		}
-
-		/*
-		 * Do the encryption.
-		 */
-		maclen = authencrypt(info_auth_keyid, (u_int32 *)&qpkt,
-		    pktsize);
-		if (maclen == 0) {
-			(void) fprintf(stderr, "Key not found\n");
-			return (1);
-		}
-		return sendpkt((char *)&qpkt, pktsize + maclen);
+	/*
+	 * Pad out packet to a multiple of 8 octets to be sure
+	 * receiver can handle it.
+	 */
+	while (pktsize & 7) {
+		qpkt.data[qsize++] = 0;
+		pktsize++;
 	}
-	/*NOTREACHED*/
+
+	/*
+	 * Get the keyid and the password if we don't have one.
+	 */
+	if (info_auth_keyid == 0) {
+		key_id = getkeyid("Keyid: ");
+		if (key_id == 0 || key_id > NTP_MAXKEY) {
+			fprintf(stderr, 
+				"Invalid key identifier\n");
+			return 1;
+		}
+		info_auth_keyid = key_id;
+	}
+	if (!authistrusted(info_auth_keyid)) {
+		snprintf(pass_prompt, sizeof(pass_prompt),
+			 "%s Password: ",
+			 keytype_name(info_auth_keytype));
+		pass = getpass(pass_prompt);
+		if ('\0' == pass[0]) {
+			fprintf(stderr, "Invalid password\n");
+			return 1;
+		}
+		authusekey(info_auth_keyid, info_auth_keytype,
+			   (u_char *)pass);
+		authtrust(info_auth_keyid, 1);
+	}
+
+	/*
+	 * Do the encryption.
+	 */
+	maclen = authencrypt(info_auth_keyid, (void *)&qpkt, pktsize);
+	if (!maclen) {  
+		fprintf(stderr, "Key not found\n");
+		return 1;
+	} else if ((size_t)maclen != (info_auth_hashlen + sizeof(keyid_t))) {
+		fprintf(stderr,
+			"%d octet MAC, %u expected with %u octet digest\n",
+			maclen, (info_auth_hashlen + sizeof(keyid_t)),
+			info_auth_hashlen);
+		return 1;
+	}
+	
+	return sendpkt((char *)&qpkt, pktsize + maclen);
 }
 
 
@@ -2381,21 +2388,34 @@ keytype(
 	FILE *fp
 	)
 {
-	if (pcmd->nargs == 0)
-	    fprintf(fp, "keytype is %s\n",
-		    (info_auth_keytype == KEY_TYPE_MD5) ? "MD5" : "???");
-	else
-	    switch (*(pcmd->argval[0].string)) {
-		case 'm':
-		case 'M':
-		    info_auth_keytype = KEY_TYPE_MD5;
-		    break;
+	const char *	digest_name;
+	size_t		digest_len;
+	int		key_type;
 
-		default:
-		    fprintf(fp, "keytype must be 'md5'\n");
-	    }
+	if (!pcmd->nargs) {
+		fprintf(fp, "keytype is %s with %u octet digests\n",
+			keytype_name(info_auth_keytype),
+			info_auth_hashlen);
+		return;
+	}
+
+	digest_name = pcmd->argval[0].string;
+	digest_len = 0;
+	key_type = keytype_from_text(digest_name, &digest_len);
+
+	if (!key_type) {
+		fprintf(fp, "keytype must be 'md5'%s\n",
+#ifdef OPENSSL
+			" or a digest type provided by OpenSSL");
+#else
+			"");
+#endif
+		return;
+	}
+
+	info_auth_keytype = key_type;
+	info_auth_hashlen = digest_len;
 }
-
 
 
 /*
@@ -2667,49 +2687,58 @@ getkeyid(
  */
 static void
 atoascii(
-	int length,
-	char *data,
-	char *outdata
+	const char *in,
+	size_t in_octets,
+	char *out,
+	size_t out_octets
 	)
 {
-	register u_char *cp;
-	register u_char *ocp;
-	register u_char c;
+	register const u_char *	pchIn;
+		 const u_char *	pchInLimit;
+	register u_char *	pchOut;
+	register u_char		c;
 
-	if (!data)
-	{
-		*outdata = '\0';
+	pchIn = (const u_char *)in;
+	pchInLimit = pchIn + in_octets;
+	pchOut = (u_char *)out;
+
+	if (NULL == pchIn) {
+		if (0 < out_octets)
+			*pchOut = '\0';
 		return;
 	}
 
-	ocp = (u_char *)outdata;
-	for (cp = (u_char *)data; cp < (u_char *)data + length; cp++) {
-		c = *cp;
-		if (c == '\0')
-		    break;
-		if (c == '\0')
-		    break;
-		if (c > 0177) {
-			*ocp++ = 'M';
-			*ocp++ = '-';
-			c &= 0177;
-		}
+#define	ONEOUT(c)					\
+do {							\
+	if (0 == --out_octets) {			\
+		*pchOut = '\0';				\
+		return;					\
+	}						\
+	*pchOut++ = (c);				\
+} while (0)
 
+	for (	; pchIn < pchInLimit; pchIn++) {
+		c = *pchIn;
+		if ('\0' == c)
+			break;
+		if (c & 0x80) {
+			ONEOUT('M');
+			ONEOUT('-');
+			c &= 0x7f;
+		}
 		if (c < ' ') {
-			*ocp++ = '^';
-			*ocp++ = (u_char)(c + '@');
-		} else if (c == 0177) {
-			*ocp++ = '^';
-			*ocp++ = '?';
-		} else {
-			*ocp++ = c;
-		}
-		if (ocp >= ((u_char *)outdata + length - 4))
-		    break;
+			ONEOUT('^');
+			ONEOUT((u_char)(c + '@'));
+		} else if (0x7f == c) {
+			ONEOUT('^');
+			ONEOUT('?');
+		} else
+			ONEOUT(c);
 	}
-	*ocp++ = '\0';
-}
+	ONEOUT('\0');
 
+#undef ONEOUT
+}
 
 
 /*
@@ -2728,21 +2757,20 @@ makeascii(
 
 	for (cp = (u_char *)data; cp < (u_char *)data + length; cp++) {
 		c = (int)*cp;
-		if (c > 0177) {
+		if (c & 0x80) {
 			putc('M', fp);
 			putc('-', fp);
-			c &= 0177;
+			c &= 0x7f;
 		}
 
 		if (c < ' ') {
 			putc('^', fp);
-			putc(c+'@', fp);
-		} else if (c == 0177) {
+			putc(c + '@', fp);
+		} else if (0x7f == c) {
 			putc('^', fp);
 			putc('?', fp);
-		} else {
+		} else
 			putc(c, fp);
-		}
 	}
 }
 
@@ -2993,32 +3021,27 @@ output(
 	char *value
 	)
 {
-	int lenname;
-	int lenvalue;
+	size_t len;
 
-	lenname = strlen(name);
-	lenvalue = strlen(value);
+	/* strlen of "name=value" */
+	len = strlen(name) + 1 + strlen(value);
 
 	if (out_chars != 0) {
-		putc(',', fp);
-		out_chars++;
-		out_linecount++;
-		if ((out_linecount + lenname + lenvalue + 3) > MAXOUTLINE) {
-			putc('\n', fp);
-			out_chars++;
+		out_chars += 2;
+		if ((out_linecount + len + 2) > MAXOUTLINE) {
+			fputs(",\n", fp);
 			out_linecount = 0;
 		} else {
-			putc(' ', fp);
-			out_chars++;
-			out_linecount++;
+			fputs(", ", fp);
+			out_linecount += 2;
 		}
 	}
 
 	fputs(name, fp);
 	putc('=', fp);
 	fputs(value, fp);
-	out_chars += lenname + 1 + lenvalue;
-	out_linecount += lenname + 1 + lenvalue;
+	out_chars += len;
+	out_linecount += len;
 }
 
 
@@ -3031,7 +3054,7 @@ endoutput(
 	)
 {
 	if (out_chars != 0)
-	    putc('\n', fp);
+		putc('\n', fp);
 }
 
 
@@ -3142,23 +3165,24 @@ cookedprint(
 	int narr;
 
 	switch (datatype) {
-	    case TYPE_PEER:
+	case TYPE_PEER:
 		varlist = peer_var;
 		break;
-	    case TYPE_SYS:
+	case TYPE_SYS:
 		varlist = sys_var;
 		break;
-	    case TYPE_CLOCK:
+	case TYPE_CLOCK:
 		varlist = clock_var;
 		break;
-	    default:
-		(void) fprintf(stderr, "Unknown datatype(0x%x) in cookedprint\n", datatype);
+	default:
+		fprintf(stderr, "Unknown datatype(0x%x) in cookedprint\n",
+			datatype);
 		return;
 	}
 
 	if (!quiet)
-		(void) fprintf(fp, "status=%04x %s,\n", status,
-			       statustoa(datatype, status));
+		fprintf(fp, "status=%04x %s,\n", status,
+			statustoa(datatype, status));
 
 	startoutput();
 	while (nextvar(&length, &data, &name, &value)) {
@@ -3300,8 +3324,8 @@ cookedprint(
 			char bv[401];
 			int len;
 
-			atoascii(400, name, bn);
-			atoascii(400, value, bv);
+			atoascii(name, MAXVARLEN, bn, sizeof(bn));
+			atoascii(value, MAXVARLEN, bv, sizeof(bv));
 			if (output_raw != '*') {
 				len = strlen(bv);
 				bv[len] = output_raw;

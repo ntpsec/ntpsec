@@ -74,7 +74,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="..\bin\Debug\ntpdate.exe"
 				Version="0x0400"
 				LinkIncremental="1"
@@ -172,7 +172,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="..\bin\Release\ntpdate.exe"
 				Version="0x0400"
 				LinkIncremental="1"

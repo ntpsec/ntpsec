@@ -4,11 +4,11 @@
  *  as int and u_int.
  *  For 32 bit systems, define them as long and u_long
  */
+#ifndef NTP_TYPES_H
+#define NTP_TYPES_H
+
 #include <sys/types.h>
 #include "ntp_machine.h"
-
-#ifndef _NTP_TYPES_
-#define _NTP_TYPES_
 
 /*
  * This is another naming conflict.
@@ -102,5 +102,4 @@ typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
 #endif
 
 
-#endif /* _NTP_TYPES_ */
-
+#endif	/* NTP_TYPES_H */

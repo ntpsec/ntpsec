@@ -854,7 +854,8 @@ loop_config(
 	int i;
 
 #ifdef DEBUG
-	printf("loop_config: item %d freq %f\n", item, freq);
+	if (debug > 1)
+		printf("loop_config: item %d freq %f\n", item, freq);
 #endif
 	switch (item) {
 
@@ -995,7 +996,7 @@ loop_config(
 	case LOOP_MAX:		/* step threshold (step) */
 		clock_max = freq;
 		if (clock_max == 0 || clock_max > 0.5)
-		kern_enable = 0;
+			kern_enable = 0;
 		break;
 
 	case LOOP_MINSTEP:	/* stepout threshold (stepout) */

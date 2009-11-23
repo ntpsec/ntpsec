@@ -245,7 +245,7 @@ extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);
 #endif
-extern  int	sock_hash (sockaddr_u *);
+extern  u_short	sock_hash (sockaddr_u *);
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 extern	double	old_drift;
 extern	int	drift_file_sw;
@@ -302,6 +302,8 @@ extern u_long	numasyncmsgs;		/* number of async messages we've sent */
 
 /* ntp_intres.c */
 extern keyid_t	req_keyid;		/* request keyid */
+extern int	req_keytype;		/* OpenSSL NID such as NID_md5 */
+extern size_t	req_hashlen;		/* digest size for req_keytype */
 extern char *	req_file;		/* name of the file with configuration info */
 #ifdef SYS_WINNT
 extern HANDLE ResolverEventHandle;
@@ -480,7 +482,7 @@ extern int 	initializing;		/* initializing flag */
 extern int droproot;			/* flag: try to drop root privileges after startup */
 extern char *user;			/* user to switch to */
 extern char *group;			/* group to switch to */
-extern char *chrootdir;			/* directory to chroot to */
+extern const char *chrootdir;		/* directory to chroot to */
 #endif
 
 /* refclock_conf.c */

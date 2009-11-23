@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  October 22, 2009 at 06:45:48 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  November 20, 2009 at 05:35:47 AM by AutoGen 5.10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 32:1:7 templates.
+ * Generated from AutoOpts 33:0:8 templates.
  */
 
 /*
@@ -56,22 +56,31 @@ extern tUsageProc optionUsage;
 #ifndef EXIT_FAILURE
 #  define  EXIT_FAILURE 1
 #endif
+
 /*
- *  Ipv4 option description:
+ *  Ipv4 option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zIpv4Text[] =
         "Force IPv4 DNS name resolution";
 tSCC    zIpv4_NAME[]               = "IPV4";
 tSCC    zIpv4_Name[]               = "ipv4";
+static const int
+    aIpv4CantList[] = {
+    INDEX_OPT_IPV6, NO_EQUIVALENT };
 #define IPV4_FLAGS       (OPTST_DISABLED)
 
 /*
- *  Ipv6 option description:
+ *  Ipv6 option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zIpv6Text[] =
         "Force IPv6 DNS name resolution";
 tSCC    zIpv6_NAME[]               = "IPV6";
 tSCC    zIpv6_Name[]               = "ipv6";
+static const int
+    aIpv6CantList[] = {
+    INDEX_OPT_IPV4, NO_EQUIVALENT };
 #define IPV6_FLAGS       (OPTST_DISABLED)
 
 /*
@@ -189,10 +198,24 @@ tSCC    zKeyfile_Name[]            = "keyfile";
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]          = "Display usage information and exit";
+tSCC zHelpText[]          = "Display extended usage information and exit";
 tSCC zHelp_Name[]         = "help";
-tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+#ifdef HAVE_WORKING_FORK
+#define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
 tSCC zMore_Help_Name[]    = "more-help";
+tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+#else
+#define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
+#define zMore_Help_Name   NULL
+#define zMore_HelpText    NULL
+#endif
+#ifdef NO_OPTIONAL_OPT_ARGS
+#  define OPTST_VERSION_FLAGS   OPTST_IMM | OPTST_NO_INIT
+#else
+#  define OPTST_VERSION_FLAGS   OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
+                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
+#endif
+
 tSCC zVersionText[]       = "Output version information and exit";
 tSCC zVersion_Name[]      = "version";
 tSCC zSave_OptsText[]     = "Save the option state to a config file";
@@ -236,25 +259,25 @@ static tOptProc
  */
 static tOptDesc optDesc[ OPTION_CT ] = {
   {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
-     /* equiv idx, value */ NO_EQUIVALENT, 0,
+     /* equiv idx, value */ 0, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aIpv4CantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
-     /* equiv idx, value */ NOLIMIT, NOLIMIT,
-     /* equivalenced to  */ INDEX_OPT_IPV4,
+     /* equiv idx, value */ 1, VALUE_OPT_IPV6,
+     /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aIpv6CantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
      /* disablement strs */ NULL, NULL },
@@ -379,18 +402,11 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
      /* disablement strs */ NULL, NULL },
 
-#ifdef NO_OPTIONAL_OPT_ARGS
-#  define VERSION_OPT_FLAGS     OPTST_IMM | OPTST_NO_INIT
-#else
-#  define VERSION_OPT_FLAGS     OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
-                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
-#endif
-
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ VERSION_OPT_FLAGS, 0,
+     /* opt state flags  */ OPTST_VERSION_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
@@ -398,7 +414,6 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zVersionText, NULL, zVersion_Name,
      /* disablement strs */ NULL, NULL },
 
-#undef VERSION_OPT_FLAGS
 
 
   {  /* entry idx, value */ INDEX_OPT_HELP, VALUE_OPT_HELP,
@@ -417,7 +432,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, 0,
+     /* opt state flags  */ OPTST_MORE_HELP_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
@@ -458,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.5p236-RC\n\
+"sntp - standard SNTP program - Ver. 4.2.5p247-RC\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -478,7 +493,7 @@ job.\n\
 NTP is the Network Time Protocol (RFC 1305) and SNTP is the\n\
 Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 501 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -549,7 +564,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 633 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>

@@ -5,7 +5,9 @@
 #define NTP_STDLIB_H
 
 #include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 
 #include "l_stdlib.h"
 #include "ntp_rfc2553.h"
@@ -33,6 +35,16 @@
 
 extern	void	msyslog		(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
+
+/*
+ * When building without OpenSSL, use a few macros of theirs to
+ * minimize source differences in NTP.
+ */
+#ifndef OPENSSL
+#define NID_md5	4	/* from openssl/objects.h */
+/* from openssl/evp.h */
+#define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
+#endif
 
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
@@ -66,9 +78,9 @@ extern	int	auth_moremem	(void);
 extern	int	ymd2yd		(int, int, int);
 
 /* a_md5encrypt.c */
-extern	int	MD5authdecrypt	(u_char *, u_int32 *, int, int);
-extern	int	MD5authencrypt	(u_char *, u_int32 *, int);
-extern	void	MD5auth_setkey	(keyid_t, const u_char *, const int);
+extern	int	MD5authdecrypt	(int, u_char *, u_int32 *, int, int);
+extern	int	MD5authencrypt	(int, u_char *, u_int32 *, int);
+extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, const int);
 extern	u_int32	addr2refid	(sockaddr_u *);
 
 
@@ -145,6 +157,23 @@ extern int	ipv6_works;
 /* machines.c */
 typedef void (*pset_tod_using)(const char *);
 extern pset_tod_using	set_tod_using;
+
+/* ssl_init.c */
+#ifdef OPENSSL
+extern	void	ssl_init		(void);
+extern	void	ssl_check_version	(void);
+extern	int	ssl_init_done;
+#define	INIT_SSL()				\
+	do {					\
+		if (!ssl_init_done)		\
+			ssl_init();		\
+	} while (0)
+#else	/* !OPENSSL follows */
+#define	INIT_SSL()		do {} while (0)
+#endif
+extern	int	keytype_from_text	(const char *,	size_t *);
+extern	const char *keytype_name	(int);
+
 
 /* lib/isc/win32/strerror.c
  *

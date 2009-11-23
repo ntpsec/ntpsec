@@ -1,7 +1,10 @@
 dnl -*-fundamental-*-
 dnl Process this file with autoconf to produce a configure script.
 m4_include([version.m4])
+AC_PREREQ(2.53)
 AC_INIT([ntp], [VERSION_NUMBER])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([.])
 
 # Increment ntp_configure_cache_version by one for each change to
 # configure.ac or .m4 files which invalidates cached values from
@@ -23,7 +26,7 @@ AC_INIT([ntp], [VERSION_NUMBER])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-ntp_configure_cache_version=20090503
+ntp_configure_cache_version=20091117
 
 # When the cache version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -38,7 +41,6 @@ dnl the 'host' machine is where the resulting stuff runs.
 AC_DEFINE_UNQUOTED(STR_SYSTEM, "$host", [canonical system (cpu-vendor-os) of where we should run])
 AM_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
-AC_PREREQ(2.53)
 
 ac_cv_var_atom_ok=no
 ac_cv_var_oncore_ok=no
@@ -135,6 +137,8 @@ case "${enable_libopts_install+set}" in
  *) enable_libopts_install=no ;;
 esac
 LIBOPTS_CHECK(libopts)
+
+AC_FUNC_FORK
 
 AC_CACHE_CHECK(
     [if $CC can handle @%:@warning],
@@ -451,8 +455,9 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNC(setsockopt, ,
-	[AC_SEARCH_LIBS([setsockopt], [socket xnet])])
+AC_SEARCH_LIBS([setsockopt], [socket xnet])
+AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+AC_CHECK_FUNCS(res_init __res_init)
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
@@ -749,32 +754,6 @@ if test $ac_cv_type_u_int64_t = yes; then
 	AC_DEFINE(HAVE_TYPE_U_INT64_T, 1, [Does u_int64_t exist?])
 fi
 
-#
-# Look for in_port_t.
-#
-AC_CACHE_CHECK(
-    [for in_port_t],
-    isc_cv_have_in_port_t,
-    [
-	AC_TRY_COMPILE(
-	    [
-		#include <sys/types.h>
-		#include <netinet/in.h>
-	    ],
-	    [
-		in_port_t port = 25; 
-		return (0);
-	    ],
-	    [isc_cv_have_in_port_t=yes],
-	    [isc_cv_have_in_port_t=no]
-	)
-    ]
-)
-case "$isc_cv_have_in_port_t" in
- no)
-	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
-esac
-
 AC_CACHE_CHECK([for a fallback value for HZ], ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
 case "$host" in
@@ -894,104 +873,198 @@ if test $ac_cv_struct_ppsclockev = yes; then
     AC_DEFINE(HAVE_STRUCT_PPSCLOCKEV, 1, [Does a system header define struct ppsclockev?])
 fi
 
-AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_struct_sockaddr_storage,
-[AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-],[
-struct sockaddr_storage n;],
-	ac_cv_struct_sockaddr_storage=yes,
-	ac_cv_struct_sockaddr_storage=no)
-])
-if test $ac_cv_struct_sockaddr_storage = yes; then
+AC_CACHE_CHECK(
+    [for struct sockaddr_storage],
+    ntp_cv_sockaddr_storage,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#ifdef HAVE_SYS_TYPES_H
+		# include <sys/types.h>
+		#endif
+		#ifdef HAVE_SYS_SOCKET_H
+		# include <sys/socket.h>
+		#endif
+		#ifdef HAVE_NETINET_IN_H
+		# include <netinet/in.h>
+		#endif
+	    ],
+	    [
+		struct sockaddr_storage n;
+	    ],
+	    [ntp_cv_sockaddr_storage="yes"],
+	    [ntp_cv_sockaddr_storage="no"]
+	)
+    ]
+)
+case "$ntp_cv_sockaddr_storage" in
+ yes)
     AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1, [Does a system header define struct sockaddr_storage?])
-fi
+esac
 
-AC_CACHE_CHECK([for ss_family field in struct sockaddr_storage],
-		ac_cv_have_ss_family_in_struct_ss, [
+AC_CACHE_CHECK(
+    [for sockaddr_storage.ss_family],
+    ntp_cv_have_ss_family,
+    [
 	AC_TRY_COMPILE(
-		[
-#include <sys/types.h>
-#include <sys/socket.h>
-		],
-		[ struct sockaddr_storage s; s.ss_family = 1; ],
-		[ ac_cv_have_ss_family_in_struct_ss="yes" ],
-		[ ac_cv_have_ss_family_in_struct_ss="no" ],
+	    [
+		#ifdef HAVE_SYS_TYPES_H
+		# include <sys/types.h>
+		#endif
+		#ifdef HAVE_SYS_SOCKET_H
+		# include <sys/socket.h>
+		#endif
+		#ifdef HAVE_NETINET_IN_H
+		# include <netinet/in.h>
+		#endif
+	    ],
+	    [
+		struct sockaddr_storage s;
+		s.ss_family = 1;
+	    ],
+	    [ntp_cv_have_ss_family="yes"],
+	    [ntp_cv_have_ss_family="no"]
 	)
-])
-if test "x$ac_cv_have_ss_family_in_struct_ss" = "xyes" ; then
-	AC_DEFINE(HAVE_SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have ss_family?])
-else
-    # Hack around a problem...
-    # HMS: This is $host because we need the -D if we are building *for* it.
-    # HMS: 061029: Now that we separate the ss_* checks this is causing
-    # a problem - disable it until we get to the bottom of it.
-    case "$host" in
-     XXX*-*-hpux11.11) CPPFLAGS="$CPPFLAGS -D_NETINET_IN6_H"
-	;;
-    esac
-fi
+    ]
+)
 
-AC_CACHE_CHECK([for __ss_family field in struct sockaddr_storage],
-		ac_cv_have___ss_family_in_struct_ss, [
-	AC_TRY_COMPILE(
+case "$ntp_cv_have_ss_family" in
+ no)
+    AC_CACHE_CHECK(
+	[for sockaddr_storage.__ss_family],
+	ntp_cv_have___ss_family,
+	[
+	    AC_TRY_COMPILE(
 		[
-#include <sys/types.h>
-#include <sys/socket.h>
+		    #ifdef HAVE_SYS_TYPES_H
+		    # include <sys/types.h>
+		    #endif
+		    #ifdef HAVE_SYS_SOCKET_H
+		    # include <sys/socket.h>
+		    #endif
+		    #ifdef HAVE_NETINET_IN_H
+		    # include <netinet/in.h>
+		    #endif
 		],
-		[ struct sockaddr_storage s; s.__ss_family = 1; ],
-		[ ac_cv_have___ss_family_in_struct_ss="yes" ],
-		[ ac_cv_have___ss_family_in_struct_ss="no" ]
-	)
-])
-if test "x$ac_cv_have___ss_family_in_struct_ss" = "xyes" ; then
+		[
+		    struct sockaddr_storage s;
+		    s.__ss_family = 1;
+		],
+		[ntp_cv_have___ss_family="yes"],
+		[ntp_cv_have___ss_family="no"]
+	    )
+	]
+    )
+    case "$ntp_cv_have___ss_family" in
+     yes)
 	AC_DEFINE(HAVE___SS_FAMILY_IN_SS, 1, [Does struct sockaddr_storage have __ss_family?])
-fi
+    esac
+esac
 
-AH_VERBATIM([X_HAVE_SS_FAMILY_IN_SS],
-[/* Handle ss_family */
-#if !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE___SS_FAMILY_IN_SS)
-# define ss_family __ss_family
-#endif /* !defined(HAVE_SS_FAMILY_IN_SS) && defined(HAVE_SA_FAMILY_IN_SS) */])
+AH_VERBATIM(
+    [HAVE___SS_FAMILY_IN_SS_VERBATIM],
+    [
+	/* Handle sockaddr_storage.__ss_family */
+	#ifdef HAVE___SS_FAMILY_IN_SS
+	# define ss_family __ss_family
+	#endif /* HAVE___SS_FAMILY_IN_SS */
+    ]
+)
 
-AC_CACHE_CHECK([for ss_len field in struct sockaddr_storage],
-		ac_cv_have_ss_len_in_struct_ss, [
+AC_CACHE_CHECK(
+    [for sockaddr_storage.ss_len],
+    ntp_cv_have_ss_len,
+    [
 	AC_TRY_COMPILE(
-		[
-#include <sys/types.h>
-#include <sys/socket.h>
-		],
-		[ struct sockaddr_storage s; s.ss_len = 1; ],
-		[ ac_cv_have_ss_len_in_struct_ss="yes" ],
-		[ ac_cv_have_ss_len_in_struct_ss="no" ],
+	    [
+		#ifdef HAVE_SYS_TYPES_H
+		# include <sys/types.h>
+		#endif
+		#ifdef HAVE_SYS_SOCKET_H
+		# include <sys/socket.h>
+		#endif
+		#ifdef HAVE_NETINET_IN_H
+		# include <netinet/in.h>
+		#endif
+	    ],
+	    [
+		struct sockaddr_storage s;
+		s.ss_len = 1;
+	    ],
+	    [ntp_cv_have_ss_len="yes"],
+	    [ntp_cv_have_ss_len="no"]
 	)
-])
-if test "x$ac_cv_have_ss_len_in_struct_ss" = "xyes" ; then
-	AC_DEFINE(HAVE_SS_LEN_IN_SS, 1, [Does struct sockaddr_storage have ss_len?])
-fi
+    ]
+)
 
-AC_CACHE_CHECK([for __ss_len field in struct sockaddr_storage],
-		ac_cv_have___ss_len_in_struct_ss, [
-	AC_TRY_COMPILE(
+case "$ntp_cv_have_ss_len" in
+ no)
+    AC_CACHE_CHECK(
+	[for sockaddr_storage.__ss_len],
+	ntp_cv_have___ss_len,
+	[
+	    AC_TRY_COMPILE(
 		[
-#include <sys/types.h>
-#include <sys/socket.h>
+		    #ifdef HAVE_SYS_TYPES_H
+		    # include <sys/types.h>
+		    #endif
+		    #ifdef HAVE_SYS_SOCKET_H
+		    # include <sys/socket.h>
+		    #endif
+		    #ifdef HAVE_NETINET_IN_H
+		    # include <netinet/in.h>
+		    #endif
 		],
-		[ struct sockaddr_storage s; s.__ss_len = 1; ],
-		[ ac_cv_have___ss_len_in_struct_ss="yes" ],
-		[ ac_cv_have___ss_len_in_struct_ss="no" ]
-	)
-])
-if test "x$ac_cv_have___ss_len_in_struct_ss" = "xyes" ; then
+		[
+		    struct sockaddr_storage s;
+		    s.__ss_len = 1;
+		],
+		[ntp_cv_have___ss_len="yes"],
+		[ntp_cv_have___ss_len="no"]
+	    )
+	]
+    )
+    case "$ntp_cv_have___ss_len" in
+     yes)
 	AC_DEFINE(HAVE___SS_LEN_IN_SS, 1, [Does struct sockaddr_storage have __ss_len?])
-fi
+    esac
+esac
 
-AH_VERBATIM([X_HAVE_SS_LEN_IN_SS],
-[/* Handle ss_len */
-#if !defined(HAVE_SS_LEN_IN_SS) && defined(HAVE___SS_LEN_IN_SS)
-# define ss_len __ss_len
-#endif /* !defined(HAVE_SS_LEN_IN_SS) && defined(HAVE_SA_LEN_IN_SS) */])
+AH_VERBATIM(
+    [HAVE___SS_LEN_IN_SS_VERBATIM],
+    [
+	/* Handle sockaddr_storage.__ss_len */
+	#ifdef HAVE___SS_LEN_IN_SS
+	# define ss_len __ss_len
+	#endif /* HAVE___SS_LEN_IN_SS */
+    ]
+)
+
+#
+# Look for in_port_t.
+#
+AC_CACHE_CHECK(
+    [for in_port_t],
+    isc_cv_have_in_port_t,
+    [
+	AC_TRY_COMPILE(
+	    [
+		#include <sys/types.h>
+		#include <netinet/in.h>
+	    ],
+	    [
+		in_port_t port = 25; 
+		return (0);
+	    ],
+	    [isc_cv_have_in_port_t=yes],
+	    [isc_cv_have_in_port_t=no]
+	)
+    ]
+)
+case "$isc_cv_have_in_port_t" in
+ no)
+	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
+esac
 
 case "$ac_cv_header_machine_soundcard_h$ac_cv_header_sys_soundcard_h" in
   *yes*)
@@ -1128,7 +1201,9 @@ case "$host" in
 	# this conditional will need to change.  Maybe use AC_TRY_RUN
 	# instead to try to set the time to itself and check errno.
     ;;
- *) AC_CHECK_FUNCS(clock_gettime clock_settime)
+ *)
+    AC_SEARCH_LIBS([clock_gettime], [rt])
+    AC_CHECK_FUNCS([clock_gettime clock_settime])
     ;;
 esac
 AC_CHECK_FUNCS(daemon)
@@ -1244,9 +1319,9 @@ case $ac_cv_have_if_nametoindex in
 	;;
 esac
 
+AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
-AC_CHECK_FUNC(inet_aton, [], [AC_DEFINE(ISC_PLATFORM_NEEDATON, 1, [ISC: provide inet_aton()])])
 case "$ac_cv_header_kvm_h" in
  yes)
     AC_CHECK_FUNCS(kvm_open)
@@ -1669,32 +1744,45 @@ case "$ac_cv_arg_setpgrp_negpid" in
  yes) AC_DEFINE(UDP_BACKWARDS_SETOWN, 1, [Do we set process groups with -pid?]) ;;
 esac
 
-AC_CACHE_CHECK([if we need a ctty for F_SETOWN], ac_cv_func_ctty_for_f_setown,
-[[case "$host" in
- *-*-bsdi[23]*)
-    ans=yes
-    ;;
- *-*-freebsd*)
-    ans=yes
-    ;;
- *-*-netbsd*3.[0-8]*|*-*-netbsd*[0-2].*|*-*-netbsd*3.99.[0-7])
-    ans=yes
-    ;;
- *-*-openbsd*)
-    ans=yes
-    ;;
- *-*-osf*)
-    ans=yes
-    ;;
- *-*-darwin*)
-    ans=yes
-    ;;
- *) ans=no
-    ;;
-esac
-ac_cv_func_ctty_for_f_setown=$ans]])
-case "$ac_cv_func_ctty_for_f_setown" in
- yes) AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?]) ;;
+AC_CACHE_CHECK(
+    [if we need a ctty for F_SETOWN],
+    ntp_cv_func_ctty_for_f_setown,
+    [
+	case "$host" in
+	 *-*-bsdi[23]*)
+	    ans=yes
+	    ;;
+	 *-*-freebsd*)
+	    ans=yes
+	    ;;
+	# NetBSD versions prior to 3.99.8 require a CTTY for F_SETOWN,
+	# while later versions will fail a ioctl(TIOCSCTTY, 0) call in
+	# some cases and so should not have USE_FSETOWNCTTY.  "netbsd"
+	# in $host may be followed by "aout", "ecoff", or "elf".
+	 *-*-netbsd*[a-z]3.[0-8]*|*-*-netbsd*[a-z][0-2].*|*-*-netbsd*[a-z]3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-netbsd3.[0-8]*|*-*-netbsd[0-2].*|*-*-netbsd3.99.[0-7])
+	    ans=yes
+	    ;;
+	 *-*-openbsd*)
+	    ans=yes
+	    ;;
+	 *-*-osf*)
+	    ans=yes
+	    ;;
+	 *-*-darwin*)
+	    ans=yes
+	    ;;
+	 *) 
+	    ans=no
+	esac
+	ntp_cv_func_ctty_for_f_setown=$ans
+    ]
+)
+case "$ntp_cv_func_ctty_for_f_setown" in
+ yes)
+    AC_DEFINE(USE_FSETOWNCTTY, 1, [Must we have a CTTY for fsetown?])
 esac
 
 AC_CACHE_CHECK([if the OS fails to clear cached routes when more specific routes become available], ac_cv_os_routeupdates,
@@ -3165,7 +3253,7 @@ esac])
 case "$ans" in
  no) ;;
  yes) # Look in:
-    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib"
+    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib /lib"
     ;;
  *) # Look where they said
     ;;
@@ -3262,7 +3350,6 @@ case "$ntp_openssl" in
     esac
     AC_SUBST(LCRYPTO, [-lcrypto])
     AC_DEFINE(OPENSSL, , [Use OpenSSL?])
-    AC_CHECK_FUNCS([EVP_md2 EVP_mdc2])
 esac
 
 #
@@ -4399,9 +4486,6 @@ case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
     ntp_have_linuxcaps=no
 esac
 
-AC_MSG_RESULT([$ntp_have_linuxcaps])
-
-
 AC_ARG_ENABLE(
     [linuxcaps],
     AS_HELP_STRING(
@@ -4411,13 +4495,13 @@ AC_ARG_ENABLE(
     [ntp_have_linuxcaps=$enableval]
 )
 
+AC_MSG_RESULT([$ntp_have_linuxcaps])
 
 case "$ntp_have_linuxcaps" in
  yes)
     AC_DEFINE(HAVE_LINUX_CAPABILITIES, ,[Do we have Linux capabilities?])
     LIBS="$LIBS -lcap"
 esac
-
 
 case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
  *yes*)
@@ -4779,6 +4863,7 @@ AC_CONFIG_FILES(ElectricFence/Makefile)
 AC_CONFIG_FILES(adjtimed/Makefile)
 AC_CONFIG_FILES(clockstuff/Makefile)
 AC_CONFIG_FILES(include/Makefile)
+AC_CONFIG_FILES(include/isc/Makefile)
 AC_CONFIG_FILES(kernel/Makefile)
 AC_CONFIG_FILES(kernel/sys/Makefile)
 AC_CONFIG_FILES(libntp/Makefile)

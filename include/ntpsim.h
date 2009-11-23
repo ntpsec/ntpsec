@@ -2,18 +2,20 @@
  *
  * The header file for the ntp discrete event simulator. 
  *
- * Written By: Sachin Kamboj
- *             University of Delaware
- *             Newark, DE 19711
+ * Written By:	Sachin Kamboj
+ *		University of Delaware
+ *		Newark, DE 19711
  * Copyright (c) 2006
  */
 
-#ifndef __NTPSIM_H__
-#define __NTPSIM_H__
+#ifndef NTPSIM_H
+#define NTPSIM_H
 
 #include <stdio.h>
 #include <math.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #include <arpa/inet.h>
 #include "ntp_syslog.h"
 #include "ntp_fp.h"
@@ -25,7 +27,6 @@
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
 
-/* #include "config.tab.h"*/         /* Bison generated header file for flex */
 #include "ntp_data_structures.h"
 
 /* CONSTANTS */
@@ -140,4 +141,4 @@ double	 poisson		 (double, double);
 int      yyparse                 (void);
 void     create_server_associations (void);
 
-#endif
+#endif	/* NTPSIM_H */

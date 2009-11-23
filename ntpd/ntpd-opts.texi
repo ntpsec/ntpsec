@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  October 22, 2009 at 06:37:07 AM by AutoGen 5.9.9pre5
+# It has been AutoGen-ed  November 20, 2009 at 05:29:01 AM by AutoGen 5.10
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -63,7 +63,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p228
+ntpd - NTP daemon program - Ver. 4.2.5p242-RC
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -84,11 +84,11 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
                                 - may appear multiple times
-   -I Str interface      Listen on the specified interface or IP
+   -I Str interface      Listen on an interface name or address
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
    -l Str logfile        path to the log file
-   -L no  novirtualips   Do not listen to virtual IPs
+   -L no  novirtualips   Do not listen to virtual interfaces
    -n no  nofork         Do not fork
    -N no  nice           Run at high priority
    -p Str pidfile        path to the PID file
@@ -130,7 +130,8 @@ This is the ``force ipv4 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv6.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -145,7 +146,8 @@ This is the ``force ipv6 dns name resolution'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-is a member of the ipv4 class of options.
+must not appear in combination with any of the following options:
+ipv4.
 @end itemize
 
 Force DNS resolution of following host names on the command line
@@ -288,10 +290,17 @@ must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
 Chroot the server to the directory
 jaildir
 .
-This option also implies that the server attempts to drop root privileges at startup (otherwise, chroot gives very little additional security), and it is only available if the OS supports to run the server without full root privileges.
+This option also implies that the server attempts to drop root privileges at startup.
 You may need to also specify a
 -u
 option.
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
+--enable-clockctl
+) and Linux (configure with
+--enable-linuxcaps
+).
 
 @node ntpd interface
 @subsection interface option (-I)
@@ -475,8 +484,9 @@ must be compiled in by defining @code{HAVE_DROPROOT} during the compilation.
 @end itemize
 
 Specify a user, and optionally a group, to switch to.
-This option is only available if the OS supports to run the server without full root privileges.
-Currently, this option is supported under NetBSD (configure with
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
 --enable-clockctl
 ) and Linux (configure with
 --enable-linuxcaps

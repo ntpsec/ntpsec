@@ -41,22 +41,14 @@ getCmdOpts(
 	 */
 	errflg = 0;
 
-	switch (WHICH_IDX_IPV4) {
-	    case INDEX_OPT_IPV4:
+	if (HAVE_OPT( IPV4 ))
 		default_ai_family = AF_INET;
-		break;
-	    case INDEX_OPT_IPV6:
+	else if (HAVE_OPT( IPV6 ))
 		default_ai_family = AF_INET6;
-		break;
-	    default:
-		/* ai_fam_templ = ai_fam_default;	*/
-		break;
-	}
 
 	if (HAVE_OPT( AUTHREQ ))
 		proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);
-
-	if (HAVE_OPT( AUTHNOREQ ))
+	else if (HAVE_OPT( AUTHNOREQ ))
 		proto_config(PROTO_AUTHENTICATE, 0, 0., NULL);
 
 	if (HAVE_OPT( BCASTSYNC ))
@@ -75,24 +67,12 @@ getCmdOpts(
 	if (HAVE_OPT( PANICGATE ))
 		allow_panic = TRUE;
 
-	if (HAVE_OPT( JAILDIR )) {
 #ifdef HAVE_DROPROOT
-			droproot = 1;
-			chrootdir = OPT_ARG( JAILDIR );
-#else
-			fprintf(stderr, 
-				"command line -i option (jaildir) is not supported by this binary"
-# ifndef SYS_WINNT
-				",\n" "can not drop root privileges.  See configure options\n"
-				"--enable-clockctl and --enable-linuxcaps.\n");
-# else
-				".\n");
-# endif
-			msyslog(LOG_ERR, 
-				"command line -i option (jaildir) is not supported by this binary.");
-			errflg++;
-#endif
+	if (HAVE_OPT( JAILDIR )) {
+		droproot = 1;
+		chrootdir = OPT_ARG( JAILDIR );
 	}
+#endif
 
 	if (HAVE_OPT( KEYFILE ))
 		getauthkeys(OPT_ARG( KEYFILE ));
@@ -139,30 +119,15 @@ getCmdOpts(
 		} while (--ct > 0);
 	}
 
-	if (HAVE_OPT( USER )) {
 #ifdef HAVE_DROPROOT
-		char *ntp_optarg = OPT_ARG( USER );
-
+	if (HAVE_OPT( USER )) {
 		droproot = 1;
-		user = emalloc(strlen(ntp_optarg) + 1);
-		(void)strncpy(user, ntp_optarg, strlen(ntp_optarg) + 1);
+		user = estrdup(OPT_ARG( USER ));
 		group = rindex(user, ':');
 		if (group)
 			*group++ = '\0'; /* get rid of the ':' */
-#else
-		fprintf(stderr, 
-			"command line -u/--user option is not supported by this binary"
-# ifndef SYS_WINNT
-			",\n" "can not drop root privileges.  See configure options\n"
-			"--enable-clockctl and --enable-linuxcaps.\n");
-# else
-			".\n");
-# endif
-		msyslog(LOG_ERR, 
-			"command line -u/--user option is not supported by this binary.");
-		errflg++;
-#endif
 	}
+#endif
 
 	if (HAVE_OPT( VAR )) {
 		int		ct = STACKCT_OPT(  VAR );

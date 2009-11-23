@@ -83,15 +83,6 @@ extern u_long current_time;
  */
 extern s_char sys_precision;
 
-#ifdef KERNEL_PLL
-/*
- * Imported from ntp_loopfilter
- */
-extern int pll_control; 	/* kernel pll control */
-extern int kern_enable;		/* kernel pll enabled */
-extern int ext_enable;		/* external clock enable */
-#endif /* KERNEL_PLL */
-
 /*
  * Function prototypes
  */

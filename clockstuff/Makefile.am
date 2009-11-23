@@ -10,9 +10,13 @@ chutest_LDADD = ../libntp/libntp.a
 clktest_LDADD = ../libntp/libntp.a
 ETAGS_ARGS = Makefile.am
 #EXTRA_DIST = TAGS
+BUILT_SOURCES =
+CLEANFILES =
 
 # clktest-opts.def wants ../include/copyright.def ../include/homerc.def
 
 chutest$(EXEEXT): ../libntp/libntp.a
 
 clktest$(EXEEXT): ../libntp/libntp.a
+
+include $(top_srcdir)/depsver.mf

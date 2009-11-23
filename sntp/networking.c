@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2008  Johannes Maximilian Kühn
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM
- * DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
- * INTERNET SOFTWARE CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT,
- * INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
- * FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
- * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
- * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
 #include "networking.h"
 
 char adr_buf[INET6_ADDRSTRLEN];
@@ -123,18 +106,20 @@ sendpkt (
 	int len
 	)
 {
+	int cc;
+
 #ifdef DEBUG
 	printf("sntp sendpkt: Packet data:\n");
 	pkt_output(pkt, len, stdout);
 #endif
 
-	if(ENABLED_OPT(NORMALVERBOSE)) {
+	if (ENABLED_OPT(NORMALVERBOSE)) {
 		getnameinfo(&dest->sa, SOCKLEN(dest), adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 
 		printf("sntp sendpkt: Sending packet to %s... ", adr_buf);
 	}
 
-	int cc = sendto(rsock, (char *)pkt, len, 0, &dest->sa, SOCKLEN(dest));
+	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, SOCKLEN(dest));
 
 	if (cc == SOCKET_ERROR) {
 #ifdef DEBUG
@@ -144,11 +129,8 @@ sendpkt (
 		if (errno != EWOULDBLOCK && errno != ENOBUFS) {
 
 		}
-	}
-	else {
-		if(ENABLED_OPT(NORMALVERBOSE))
-			printf("Packet sent.\n");
-	}
+	} else if (ENABLED_OPT(NORMALVERBOSE))
+		printf("Packet sent.\n");
 }
 
 /* Receive raw data */
@@ -214,7 +196,7 @@ recv_bcst_data (
 		}
 
 
-		if(setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &btrue, sizeof(btrue)) < 0) {
+		if (setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &btrue, sizeof(btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
 		}
@@ -245,6 +227,9 @@ recv_bcst_data (
 	}
 #ifdef ISC_PLATFORM_HAVEIPV6
 	else if (IS_IPV6(sas)) {
+#ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
+		return BROADCAST_FAILED;
+#else
 		struct ipv6_mreq mdevadr;
 
 		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
@@ -252,7 +237,7 @@ recv_bcst_data (
 				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
 		}
 
-		if(setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
+		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
 		}
@@ -283,6 +268,7 @@ recv_bcst_data (
 				return BROADCAST_FAILED;
 			}
 		}
+#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
 	}
 #endif	/* ISC_PLATFORM_HAVEIPV6 */
 	
@@ -306,7 +292,8 @@ recv_bcst_data (
 
 		case 0:
 			if(ENABLED_OPT(NORMALVERBOSE))
-				printf("sntp recv_bcst_data: select() reached timeout (%li sec), aborting.\n", timeout_tv.tv_sec);
+				printf("sntp recv_bcst_data: select() reached timeout (%u sec), aborting.\n", 
+				       (unsigned)timeout_tv.tv_sec);
 
 			return BROADCAST_FAILED;
 			break;
@@ -328,7 +315,7 @@ recv_bcst_data (
 
 	if (IS_IPV4(sas)) 
 		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue, sizeof(btrue));
-#ifdef ISC_PLATFORM_HAVEIPV6
+#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
 	else if (IS_IPV6(sas))
 		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue, sizeof(btrue));
 #endif
@@ -477,10 +464,12 @@ recv_bcst_pkt (
 	}
 
 	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
+		char *ref_char;
+
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_pkt: Stratum unspecified, going to check for KOD (stratum: %i)\n", rpkt->stratum);
 
-		char *ref_char = (char *) &rpkt->refid;
+		ref_char = (char *) &rpkt->refid;
 		
 		/* If it's a KOD packet we'll just use the KOD information */
 		if (ref_char[0] != 'X') {
@@ -524,13 +513,13 @@ recvpkt (
 	char *rdata /* , done */;
 
 	register int a;
-	int has_mac, is_authentic, orig_pkt_len;
+	int has_mac, is_authentic, pkt_len, orig_pkt_len;
 
 
 	/* Much space, just to be sure */
 	rdata = emalloc(sizeof(char) * 256);
 
-	int pkt_len = recvdata(rsock, &sender, rdata, 256);
+	pkt_len = recvdata(rsock, &sender, rdata, 256);
 
 #if 0	/* done uninitialized */
 	if (!done) {
@@ -669,11 +658,13 @@ recvpkt (
 
 	/* Stratum is unspecified (0) check what's going on */
 	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
+		char *ref_char;
+
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: Stratum unspecified, going to check for KOD (stratum: %i)\n", rpkt->stratum);
 
 
-		char *ref_char = (char *) &rpkt->refid;
+		ref_char = (char *) &rpkt->refid;
 
 		if (ENABLED_OPT(NORMALVERBOSE)) 
 			printf("sntp recvpkt: Packet refid: %c%c%c%c\n", ref_char[0], ref_char[1], ref_char[2], ref_char[3]);

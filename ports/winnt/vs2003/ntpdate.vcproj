@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="bin/Debug/ntpdate.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -101,7 +101,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
 				OutputFile="bin/Release/ntpdate.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

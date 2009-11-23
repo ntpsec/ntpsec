@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  October 22, 2009 at 06:37:03 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  November 20, 2009 at 05:28:58 AM by AutoGen 5.10
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 32:1:7 templates.
+ * Generated from AutoOpts 33:0:8 templates.
  */
 
 /*
@@ -41,7 +41,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 131073
+#define AO_TEMPLATE_VERSION 135168
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -90,8 +90,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    35
-#define NTPD_VERSION       "4.2.5p236-RC"
-#define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.5p236-RC"
+#define NTPD_VERSION       "4.2.5p247-RC"
+#define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.5p247-RC"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -286,57 +286,41 @@ typedef enum {
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_IPV4           '4'
-#define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
-#define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_AUTHREQ        'a'
 #define VALUE_OPT_AUTHNOREQ      'A'
 #define VALUE_OPT_BCASTSYNC      'b'
 #define VALUE_OPT_CONFIGFILE     'c'
-#ifdef DEBUG
 #define VALUE_OPT_DEBUG_LEVEL    'd'
-#endif /* DEBUG */
-#ifdef DEBUG
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
-#endif /* DEBUG */
 #define VALUE_OPT_DRIFTFILE      'f'
 #define VALUE_OPT_PANICGATE      'g'
-#ifdef HAVE_DROPROOT
 #define VALUE_OPT_JAILDIR        'i'
-#endif /* HAVE_DROPROOT */
 #define VALUE_OPT_INTERFACE      'I'
 #define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_LOGFILE        'l'
 #define VALUE_OPT_NOVIRTUALIPS   'L'
-#ifdef SYS_WINNT
 #define VALUE_OPT_MODIFYMMTIMER  'M'
-#endif /* SYS_WINNT */
 #define VALUE_OPT_NOFORK         'n'
 #define VALUE_OPT_NICE           'N'
 #define VALUE_OPT_PIDFILE        'p'
 #define VALUE_OPT_PRIORITY       'P'
+
 #define OPT_VALUE_PRIORITY       (DESC(PRIORITY).optArg.argInt)
 #define VALUE_OPT_QUIT           'q'
 #define VALUE_OPT_PROPAGATIONDELAY 'r'
-#ifdef SAVECONFIG
 #define VALUE_OPT_SAVECONFIGQUIT 22
-#endif /* SAVECONFIG */
 #define VALUE_OPT_STATSDIR       's'
 #define VALUE_OPT_TRUSTEDKEY     't'
-#ifdef HAVE_DROPROOT
 #define VALUE_OPT_USER           'u'
-#endif /* HAVE_DROPROOT */
 #define VALUE_OPT_UPDATEINTERVAL 'U'
+
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
 #define VALUE_OPT_VAR            27
 #define VALUE_OPT_DVAR           28
 #define VALUE_OPT_SLEW           'x'
-#ifdef SYS_WINNT
 #define VALUE_OPT_USEPCC         30
-#endif /* SYS_WINNT */
-#ifdef SYS_WINNT
 #define VALUE_OPT_PCCFREQ        31
-#endif /* SYS_WINNT */
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION

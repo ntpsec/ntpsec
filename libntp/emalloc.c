@@ -19,7 +19,7 @@ erealloc(
 {
 	void *	mem;
 
-	mem = realloc(prev, size);
+	mem = realloc(prev, size ? size : 1);
 
 	if (NULL == mem) {
 		msyslog(LOG_ERR,
@@ -86,7 +86,8 @@ debug_erealloc(
 {
 	void *	mem;
 
-	mem = _realloc_dbg(prev, size, _NORMAL_BLOCK, file, line);
+	mem = _realloc_dbg(prev, size ? size : 1,
+			   _NORMAL_BLOCK, file, line);
 
 	if (NULL == mem) {
 		msyslog(LOG_ERR,

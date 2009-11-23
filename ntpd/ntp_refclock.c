@@ -415,6 +415,7 @@ refclock_process_offset(
 
 /*
  * refclock_process - process a sample from the clock
+ * refclock_process_f - refclock_process with other than time1 fudge
  *
  * This routine converts the timecode in the form days, hours, minutes,
  * seconds and milliseconds/microseconds to internal timestamp format,
@@ -429,8 +430,9 @@ refclock_process_offset(
  * zero and the fraction for pp->lastrec is set to the PPS offset.
  */
 int
-refclock_process(
-	struct refclockproc *pp		/* refclock structure pointer */
+refclock_process_f(
+	struct refclockproc *pp,	/* refclock structure pointer */
+	double fudge
 	)
 {
 	l_fp offset, ltemp;
@@ -450,9 +452,17 @@ refclock_process(
 	offset.l_uf = 0;
 	DTOLFP(pp->nsec / 1e9, &ltemp);
 	L_ADD(&offset, &ltemp);
-	refclock_process_offset(pp, offset, pp->lastrec,
-	    pp->fudgetime1);
+	refclock_process_offset(pp, offset, pp->lastrec, fudge);
 	return (1);
+}
+
+
+int
+refclock_process(
+	struct refclockproc *pp		/* refclock structure pointer */
+)
+{
+	return refclock_process_f(pp, pp->fudgetime1);
 }
 
 

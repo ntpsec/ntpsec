@@ -266,10 +266,6 @@ SOURCE=..\..\..\lib\isc\md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\isc\mem.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\memmove.c
 # End Source File
 # Begin Source File
@@ -383,6 +379,10 @@ SOURCE=..\..\..\libntp\socktoa.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\socktohost.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libntp\ssl_init.c
 # End Source File
 # Begin Source File
 
@@ -510,7 +510,7 @@ SOURCE=..\..\..\include\l_stdlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\lib_strbuf.h
+SOURCE=..\..\..\include\lib_strbuf.h
 # End Source File
 # Begin Source File
 

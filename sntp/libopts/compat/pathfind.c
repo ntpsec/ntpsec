@@ -5,10 +5,9 @@
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
  * Time-stamp:       "2006-09-23 19:46:16 bkorb"
- * Last Modified:    $Date: 2007/07/04 20:51:18 $
  *            by: bkorb
  *
- * $Id: pathfind.c,v 4.11 2007/07/04 20:51:18 bkorb Exp $
+ * $Id: 8ce7ddfe2378f0b75c91c0ab348a6ad81634fb01 $
  */
 
 /* Code: */

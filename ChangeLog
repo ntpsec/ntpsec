@@ -1,3 +1,72 @@
+(4.2.5p247-RC) 2009/11/20 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1142] nodebug builds shed no light on -d, -D option failure.
+* [Bug 1179] point out the problem with -i/--jaildir and -u/--user when
+  they are disabled by configure.
+* [Bug 1308] support systems that lack fork().
+* [Bug 1343] sntp doesn't link on Solaris 7, needs -lresolv.
+(4.2.5p246-RC) 2009/11/17 Released by Harlan Stenn <stenn@ntp.org>
+* Upgrade to autogen-5.10
+* [Bug 1378] Unnecessary resetting of peers during interface update.
+* [Bug 1382] p245 configure --disable-dependency-tracking won't build.
+* [Bug 1384] ntpq :config core dumped with a blank password.
+(4.2.5p245-RC) 2009/11/14 Released by Harlan Stenn <stenn@ntp.org>
+* Cleanup from Dave Mills.
+* [Bug 1343] sntp illegal C does not compile on Solaris 7.
+* [Bug 1381] Version .deps generated include file dependencies to allow
+  known dependency-breaking changes to force .deps to be cleaned,
+  triggered by changing the contents of deps-ver and/or sntp/deps-ver.
+(4.2.5p244-RC) 2009/11/12 Released by Harlan Stenn <stenn@ntp.org>
+* keygen.html updates from Dave Mills.
+* [Bug 1003] ntpdc unconfig command doesn't prompt for keyid.
+* [Bug 1376] Enable authenticated ntpq and ntpdc using newly-available
+  digest types.
+* ntp-keygen, Autokey OpenSSL build vs. run version mismatch is now a
+  non-fatal warning.
+(4.2.5p243-RC) 2009/11/11 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1226] Fix deferred DNS lookups.
+* new crypto signature cleanup.
+(4.2.5p242-RC) 2009/11/10 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1363] CID 92 clarify fallthrough case in clk_trimtsip.c
+* [Bug 1366] ioctl(TIOCSCTTY, 0) fails on NetBSD *[0-2].* > 3.99.7.
+* [Bug 1368] typos in libntp --without-crypto case
+* [Bug 1371] deferred DNS lookup failing with INFO_ERR_AUTH.
+* CID 87 dead code in ntpq.c atoascii().
+* Fix authenticated ntpdc, broken in p240.
+* Stub out isc/mem.h, shaving 47k from a MIPS ntpd binary.
+* Shrink keyword scanner FSM entries from 64 to 32 bits apiece.
+* Documention updates from Dave Mills.
+* authkeys.c cleanup from Dave Mills.
+(4.2.5p241-RC) 2009/11/07 Released by Harlan Stenn <stenn@ntp.org>
+* html/authopt.html update from Dave Mills.
+* Remove unused file from sntp/Makefile.am's distribution list.
+* new crypto signature cleanup.
+(4.2.5p240-RC) 2009/11/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1364] clock_gettime() not detected, need -lrt on Debian 5.0.3.
+* Provide all of OpenSSL's signature methods for ntp.keys (FIPS 140-2).
+(4.2.5p239-RC) 2009/10/30 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1357] bogus assert from refclock_shm.
+* [Bug 1359] Debug message cleanup.
+* CID 101: more pointer/array cleanup.
+* [Bug 1356] core dump from refclock_nmea when can't open /dev/gpsU.
+* [Bug 1358] AIX 4.3 sntp/networking.c IPV6_JOIN_GROUP undeclared.
+* CID 101: pointer/array cleanup.
+(4.2.5p238-RC) 2009/10/27 Released by Harlan Stenn <stenn@ntp.org>
+* Changes from Dave Mills.
+* driver4.html updates from Dave Mills.
+* [Bug 1252] PPSAPI cleanup on ntpd/refclock_wwvb.c.
+* [Bug 1354] libtool error building after bootstrap with Autoconf 2.64.
+* Allow NTP_VPATH_HACK configure test to handle newer gmake versions.
+* CIDs 94-99 make it more clearly impossible for sock_hash() to return
+  a negative number.
+* CID 105, 106 ensure ntpdc arrays are not overrun even if callers
+  misbehave.
+* CID 113 use va_end() in refclock_true.c true_debug().
+* Get rid of configure tests for __ss_family and __ss_len when the more
+  common ss_family and ss_len are present.
+(4.2.5p237-RC) 2009/10/26 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 610] NMEA support for using PPSAPI on a different device.
+* [Bug 1238] use only fudge time2 to offset NMEA serial timestamp.
+* [Bug 1355] ntp-dev won't compile on OpenBSD 4.6.
 (4.2.5p236-RC) 2009/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup from Dave Mills.
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.

@@ -115,6 +115,7 @@
  * Global cryptodata in host byte order
  */
 u_int32	crypto_flags = 0x0;	/* status word */
+int	crypto_nid = KEY_TYPE_MD5; /* digest nid */
 char	*sys_hostname = NULL;	/* host name */
 char	*sys_groupname = NULL;	/* group name */
 
@@ -228,13 +229,13 @@ session_key(
 		hdlen = 10 * sizeof(u_int32);
 		break;
 	}
-	EVP_DigestInit(&ctx, EVP_md5());
+	EVP_DigestInit(&ctx, EVP_get_digestbynid(crypto_nid));
 	EVP_DigestUpdate(&ctx, (u_char *)header, hdlen);
 	EVP_DigestFinal(&ctx, dgst, &len);
 	memcpy(&keyid, dgst, 4);
 	keyid = ntohl(keyid);
 	if (lifetime != 0) {
-		MD5auth_setkey(keyno, dgst, len);
+		MD5auth_setkey(keyno, crypto_nid, dgst, len);
 		authtrust(keyno, lifetime);
 	}
 	DPRINTF(2, ("session_key: %s > %s %08x %08x hash %08x life %lu\n",
@@ -1725,7 +1726,7 @@ crypto_send(
 	len += ((vallen + 3) / 4 + 1) * 4; 
 	siglen = ntohl(vp->siglen);
 	len += ((siglen + 3) / 4 + 1) * 4; 
-	if (start + len >= sizeof(struct pkt) - MAX_MAC_LEN)
+	if (start + len > sizeof(struct pkt) - MAX_MAC_LEN)
 		return (0);
 
 	/*
@@ -3660,6 +3661,7 @@ crypto_setup(void)
 {
 	struct pkey_info *pinfo; /* private/public key */
 	char	filename[MAXFILENAME]; /* file name buffer */
+	char *	randfile;
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	l_fp	seed;		/* crypto PRNG seed as NTP timestamp */
 	u_int	len;
@@ -3675,14 +3677,7 @@ crypto_setup(void)
 		    "crypto_setup: spurious crypto command");
 		return;
 	}
-	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
-		msyslog(LOG_ERR,
-		    "crypto_setup: OpenSSL version mismatch. Built against %lx, you have %lx",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
-                exit (-1);
-        }
-	ERR_load_crypto_strings();
-	OpenSSL_add_all_algorithms();
+	ssl_check_version();
 
 	/*
 	 * Load required random seed file and seed the random number
@@ -3692,32 +3687,30 @@ crypto_setup(void)
 	 * it back so the sequence does not repeat when we next restart.
 	 */
 	if (!RAND_status()) {
-		if (rand_file == NULL)
-			RAND_file_name(filename, MAXFILENAME);
-		else if (*rand_file == '/')
-			strcpy(filename, rand_file);
-		else
-			snprintf(filename, MAXFILENAME, "%s/%s",
+		if (rand_file == NULL) {
+			RAND_file_name(filename, sizeof(filename));
+			randfile = filename;
+		} else if (*rand_file != '/') {
+			snprintf(filename, sizeof(filename), "%s/%s",
 			    keysdir, rand_file);
-		if (filename == NULL) {
-			msyslog(LOG_ERR,
-			    "crypto_setup: seed file unknown name");
-			exit (-1);
-		}
-		if ((bytes = RAND_load_file(filename, -1)) == 0) {
+			randfile = filename;
+		} else
+			randfile = rand_file;
+
+		if ((bytes = RAND_load_file(randfile, -1)) == 0) {
 			msyslog(LOG_ERR,
 			    "crypto_setup: random seed file %s missing",
-			    filename);
+			    randfile);
 			exit (-1);
 		}
 		get_systime(&seed);
 		RAND_seed(&seed, sizeof(l_fp));
-		RAND_write_file(filename);
+		RAND_write_file(randfile);
 #ifdef DEBUG
 		if (debug)
 			printf(
 			    "crypto_setup: OpenSSL version %lx random seed file %s bytes read %d\n",
-			    SSLeay(), filename, bytes);
+			    SSLeay(), randfile, bytes);
 #endif
 	}
 
@@ -3876,6 +3869,7 @@ crypto_config(
 	char	*cp		/* item name */
 	)
 {
+	int	nid;
 
 #ifdef DEBUG
 	if (debug > 1)
@@ -3913,6 +3907,18 @@ crypto_config(
 	case CRYPTO_CONF_RAND:
 		rand_file = emalloc(strlen(cp) + 1);
 		strcpy(rand_file, cp);
+		break;
+
+	/*
+	 * Set message digest NID.
+	 */
+	case CRYPTO_CONF_NID:
+		nid = OBJ_sn2nid(cp);
+		if (nid == 0)
+			msyslog(LOG_ERR,
+			    "crypto_config: invalid digest name %s", cp);
+		else
+			crypto_nid = nid;
 		break;
 	}
 }

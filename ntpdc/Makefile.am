@@ -10,7 +10,8 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
 	-I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) ../libntp/libntp.a
+ntpdc_LDADD=	version.o @LCRYPTO@ @EDITLINE_LIBS@ $(LIBOPTS_LDADD) \
+		../libntp/libntp.a
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 DISTCLEANFILES=	.version version.c
@@ -66,4 +67,5 @@ version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 nl.c: nl_in.c nl.pl Makefile.am ../config.h ../include/ntp_request.h ntpdc.h
 	$(CC) -E $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(srcdir)/nl_in.c | ./nl.pl > nl.c
 
-include ../bincheck.mf
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

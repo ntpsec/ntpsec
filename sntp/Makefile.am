@@ -16,6 +16,7 @@ run_ag=         cd $(srcdir) && autogen -L ../include --writable
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
+CLEANFILES=
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -33,7 +34,6 @@ sntp_SOURCES =		\
 	log.c		\
 	log.h		\
 	main.c		\
-	netutils.h	\
 	networking.c	\
 	networking.h	\
 	sntp-opts.c	\
@@ -47,15 +47,31 @@ sntp_SOURCES =		\
 
 EXTRA_DIST=	bincheck.mf	\
 		COPYRIGHT	\
-		sntp-opts.def sntp.1 sntp-opts.texi sntp-opts.menu	\
+		deps-ver	\
+		depsver.mf	\
+		sntp-opts.def	\
+		sntp-opts.menu	\
+		sntp-opts.texi	\
+		sntp.1		\
+		sntp.html	\
 		sntp.texi	\
 		$(NULL)
 OLD_EXTRA_DIST=		\
 		autogen-version.def version.def version.m4
-BUILT_SOURCES=	check-autogen-version.def check-version.def		\
-		check-version.m4 check-version.texi			\
-		sntp-opts.c sntp-opts.h sntp-opts.texi sntp-opts.menu	\
-		sntp.1 sntp.html
+
+BUILT_SOURCES=						\
+		check-autogen-version.def		\
+		check-version.def check-version.m4	\
+		check-version.texi			\
+		libtool					\
+		sntp-opts.c				\
+		sntp-opts.h				\
+		sntp-opts.menu				\
+		sntp-opts.texi				\
+		sntp.1					\
+		sntp.html				\
+		$(NULL)
+
 man_MANS=	sntp.1
 
 FRC:
@@ -99,6 +115,12 @@ foo4:
 		echo "Installing new sntp/version.texi file";	\
 	   fi )
 
+$(srcdir)/../COPYRIGHT:
+	cd .. && $(MAKE) COPYRIGHT
+
+$(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
+	cat $(srcdir)/../COPYRIGHT > $@
+
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) sntp-opts.def
@@ -112,4 +134,11 @@ $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(src
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi
 	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
 
-include bincheck.mf
+../libntp/libntp.a:
+	cd ../libntp && $(MAKE)
+
+libtool: $(LIBTOOL_DEPS)
+	./config.status --recheck
+
+include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/depsver.mf

@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  October 22, 2009 at 06:45:47 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  November 20, 2009 at 05:35:47 AM by AutoGen 5.10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 32:1:7 templates.
+ * Generated from AutoOpts 33:0:8 templates.
  */
 
 /*
@@ -41,7 +41,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 131073
+#define AO_TEMPLATE_VERSION 135168
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -72,8 +72,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    17
-#define SNTP_VERSION       "4.2.5p236-RC"
-#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p236-RC"
+#define SNTP_VERSION       "4.2.5p247-RC"
+#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.5p247-RC"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -168,8 +168,6 @@ typedef enum {
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_IPV4           '4'
-#define WHICH_OPT_IPV4           (DESC(IPV4).optActualValue)
-#define WHICH_IDX_IPV4           (DESC(IPV4).optActualIndex)
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_NORMALVERBOSE  'd'
 #define VALUE_OPT_KOD            'K'
@@ -179,8 +177,10 @@ typedef enum {
 #define VALUE_OPT_ADJTIME        'j'
 #define VALUE_OPT_BROADCAST      'b'
 #define VALUE_OPT_TIMEOUT        't'
+
 #define OPT_VALUE_TIMEOUT        (DESC(TIMEOUT).optArg.argInt)
 #define VALUE_OPT_AUTHENTICATION 'a'
+
 #define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
 #define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_HELP          '?'

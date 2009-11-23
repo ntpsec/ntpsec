@@ -5,6 +5,7 @@
 #ifndef NTP_REQUEST_H
 #define NTP_REQUEST_H
 
+#include "stddef.h"
 #include "ntp_types.h"
 #include "recvbuff.h"
 
@@ -134,8 +135,8 @@ struct req_pkt {
 	char data[MAXFILENAME + 48];	/* data area [32 prev](176 byte max) */
 					/* struct conf_peer must fit */
 	l_fp tstamp;			/* time stamp, for authentication */
-	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
+	keyid_t keyid;			/* (optional) encryption key */
+	char mac[MAX_MAC_LEN-sizeof(keyid_t)]; /* (optional) auth code */
 };
 
 /*
@@ -144,23 +145,24 @@ struct req_pkt {
  */
 struct req_pkt_tail {
 	l_fp tstamp;			/* time stamp, for authentication */
-	keyid_t keyid;			/* encryption key */
-	char mac[MAX_MAC_LEN-sizeof(u_int32)]; /* (optional) 8 byte auth code */
+	keyid_t keyid;			/* (optional) encryption key */
+	char mac[MAX_MAC_LEN-sizeof(keyid_t)]; /* (optional) auth code */
 };
 
-/*
- * Input packet lengths.  One with the mac, one without.
- */
-#define	REQ_LEN_HDR	8	/* 4 * u_char + 2 * u_short */
-#define	REQ_LEN_MAC	(sizeof(struct req_pkt))
-#define	REQ_LEN_NOMAC	(sizeof(struct req_pkt) - MAX_MAC_LEN)
+/* MODE_PRIVATE request packet header length before optional items. */
+#define	REQ_LEN_HDR	(offsetof(struct req_pkt, data))
+/* MODE_PRIVATE request packet fixed length without MAC. */
+#define	REQ_LEN_NOMAC	(offsetof(struct req_pkt, keyid))
+/* MODE_PRIVATE req_pkt_tail minimum size (16 octet digest) */
+#define REQ_TAIL_MIN	\
+	(sizeof(struct req_pkt_tail) - (MAX_MAC_LEN - MAX_MD5_LEN))
 
 /*
- * A response packet.  The length here is variable, this is a
- * maximally sized one.  Note that this implementation doesn't
+ * A MODE_PRIVATE response packet.  The length here is variable, this
+ * is a maximally sized one.  Note that this implementation doesn't
  * authenticate responses.
  */
-#define	RESP_HEADER_SIZE	(8)
+#define	RESP_HEADER_SIZE	(offsetof(struct resp_pkt, data))
 #define	RESP_DATA_SIZE		(500)
 
 struct resp_pkt {

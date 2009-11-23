@@ -10,7 +10,7 @@
 
 #include <ntp_stdlib.h>
 #include <ntp_config.h>
-#include "../libntp/lib_strbuf.h"
+#include <lib_strbuf.h>
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
 
@@ -98,6 +98,7 @@ struct key_tok ntp_keywords[] = {
 { "pw",			T_Pw,			FOLLBY_STRING },
 { "randfile",		T_Randfile,		FOLLBY_STRING },
 { "sign",		T_Sign,			FOLLBY_STRING },
+{ "digest",		T_Digest,		FOLLBY_STRING },
 /*** MONITORING COMMANDS ***/
 /* stat */
 { "clockstats",		T_Clockstats,		FOLLBY_TOKEN },
@@ -203,9 +204,28 @@ struct key_tok ntp_keywords[] = {
 { "proc_delay",		T_Proc_Delay,		FOLLBY_TOKEN },
 };
 
+
+typedef struct big_scan_state_tag {
+	char	ch;		/* Character this state matches on */
+	char	followedby;	/* Forces next token(s) to T_String */
+	u_short	finishes_token;	/* nonzero ID if last keyword char */
+	u_short	match_next_s;	/* next state to check matching ch */
+	u_short	other_next_s;	/* next state to check if not ch */
+} big_scan_state;
+
+/*
+ * Note: to increase MAXSTATES beyond 2048, be aware it is currently
+ * crammed into 11 bits in scan_state form.  Raising to 4096 would be
+ * relatively easy by storing the followedby value in a separate
+ * array with one entry per token, and shrinking the char value to
+ * 7 bits to free a bit for accepting/non-accepting.  More than 4096
+ * states will require expanding scan_state beyond 32 bits each.
+ */
+#define MAXSTATES 2048
+
 const char *	current_keyword;/* for error reporting */
-int		sst_free;	/* next unused entry index */
-scan_state	sst[2048];	/* scanner FSM state entries */
+big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
+int		sst_highwater;	/* next entry index to consider */
 char *		symb[1024];	/* map token ID to symbolic name */
 
 /* for libntp */
@@ -269,8 +289,10 @@ generate_preamble(void)
 static void
 generate_fsm(void)
 {
+	char token_id_comment[128];
 	int initial_state;
 	int i;
+	int token;
 
 	/* 
 	 * Sort ntp_keywords in alphabetical keyword order.  This is
@@ -280,35 +302,104 @@ generate_fsm(void)
 	qsort(ntp_keywords, COUNTOF(ntp_keywords),
 	      sizeof(ntp_keywords[0]), compare_key_tok_text);
 
+	/*
+	 * To save space, reserve the state array entry matching each 
+	 * token number for its terminal state, so the token identifier
+	 * does not need to be stored in each state, but can be
+	 * recovered trivially.  To mark the entry reserved,
+	 * finishes_token is nonzero.
+	 */
+
+	for (i = 0; i < COUNTOF(ntp_keywords); i++) {
+		token = ntp_keywords[i].token;
+		if (1 > token || token >= COUNTOF(sst)) {
+			fprintf(stderr,
+				"keyword-gen sst[%u] too small "
+				"for keyword '%s' id %d\n",
+				COUNTOF(sst),
+				ntp_keywords[i].key,
+				token);
+			exit(4);
+		}
+		sst[token].finishes_token = token;
+	}
+
 	initial_state = create_keyword_scanner();
 
 	fprintf(stderr,
 		"%d keywords consumed %d states of %d max.\n",
 		(int)COUNTOF(ntp_keywords),
-		sst_free - 1,
+		sst_highwater - 1,
 		(int)COUNTOF(sst) - 1);
 
 	printf("#define SCANNER_INIT_S %d\n\n", initial_state);
 
 	printf("const scan_state sst[%d] = {\n"
-	       "/*\t\t{ ch,\tf-by,\t\t token,\tmatch,\tother\t}\t*/\n"
-	       "/* %-5d */\t{ 0 },", 
-	       sst_free,
-	       0);
+	       "/*SS_T( ch,\tf-by, match, other ),\t\t\t\t */\n"
+	       "  0,\t\t\t\t      /* %5d %-17s */\n",
+	       sst_highwater,
+	       0, "");
 
-	for (i = 1; i < sst_free; i++) {
-		printf("\n/* %-5d */\t{ '%c',\t%d,%20s,\t%5u,\t%5u\t}",
-		       i,
+	for (i = 1; i < sst_highwater; i++) {
+
+		/* verify fields will fit */
+		if (sst[i].followedby & ~0x3) {
+			fprintf(stderr,
+				"keyword-gen internal error "
+				"sst[%d].followedby %d too big\n",
+				i, sst[i].followedby);
+			exit(7);
+		}
+
+		if (sst_highwater <= sst[i].match_next_s
+		    || sst[i].match_next_s & ~0x7ff) {
+			fprintf(stderr,
+				"keyword-gen internal error "
+				"sst[%d].match_next_s %d too big\n",
+				i, sst[i].match_next_s);
+			exit(8);
+		}
+
+		if (sst_highwater <= sst[i].other_next_s
+		    || sst[i].other_next_s & ~0x7ff) {
+			fprintf(stderr,
+				"keyword-gen internal error "
+				"sst[%d].other_next_s %d too big\n",
+				i, sst[i].other_next_s);
+			exit(9);
+		}
+
+		if (!sst[i].finishes_token)
+			snprintf(token_id_comment,
+				 sizeof(token_id_comment), "%5d %-17s",
+				 i, (initial_state == i) 
+					? "initial state" 
+					: "");
+		else {
+			snprintf(token_id_comment, 
+				 sizeof(token_id_comment), "%5d %-17s",
+				 i, symbname(sst[i].finishes_token));
+			if (i != sst[i].finishes_token) {
+				fprintf(stderr,
+					"keyword-gen internal error "
+					"entry %d finishes token %d\n",
+					i, sst[i].finishes_token);
+				exit(5);
+			}
+		}
+
+		printf("  S_ST( '%c',\t%d,    %5u, %5u )%s /* %s */\n",
 		       sst[i].ch,
 		       sst[i].followedby,
-		       symbname(sst[i].finishes_token),
 		       sst[i].match_next_s,
-		       sst[i].other_next_s);
-		if (i + 1 < sst_free)
-			printf(",");
+		       sst[i].other_next_s,
+		       (i + 1 < sst_highwater)
+			   ? ","
+			   : " ",
+		       token_id_comment);
 	}
 
-	printf("\n};\n\n");
+	printf("};\n\n");
 }
 
 
@@ -359,7 +450,10 @@ create_scan_states(
 			exit(2);
 		}
 	} else {
-		my_state = sst_free++;
+		do
+			my_state = sst_highwater++;
+		while (my_state < COUNTOF(sst)
+		       && sst[my_state].finishes_token);
 		if (my_state >= COUNTOF(sst)) {
 			fprintf(stderr,
 				"fatal, keyword scanner state array "
@@ -371,6 +465,7 @@ create_scan_states(
 		/* Store the next character of the keyword */
 		sst[my_state].ch = text[0]; 
 		sst[my_state].other_next_s = curr_char_s;
+		sst[my_state].followedby = FOLLBY_NON_ACCEPTING;
 
 		if (prev_char_s)
 			sst[prev_char_s].other_next_s = my_state;
@@ -386,6 +481,27 @@ create_scan_states(
 	if ('\0' == text[1]) {
 		sst[my_state].finishes_token = (u_short)token;
 		sst[my_state].followedby = (char)followedby;
+
+		if (sst[token].finishes_token != (u_short)token) {
+			fprintf(stderr,
+				"fatal, sst[%d] not reserved for %s.\n",
+				token, symbname(token));
+			exit(6);
+		}
+		/* relocate so token id is sst[] index */
+		if (my_state != token) {
+			sst[token] = sst[my_state];
+			memset(&sst[my_state], 0,
+			       sizeof(sst[my_state]));
+			do
+				sst_highwater--;
+			while (sst[sst_highwater].finishes_token);
+			my_state = token;
+			if (prev_char_s)
+				sst[prev_char_s].other_next_s = my_state;
+			else
+				return_state = my_state;
+		}
 	} else
 		sst[my_state].match_next_s = 
 		    create_scan_states(
@@ -408,7 +524,7 @@ create_keyword_scanner(void)
 	int scanner;
 	int i;
 
-	sst_free = 1;	/* index 0 invalid, unused */
+	sst_highwater = 1;	/* index 0 invalid, unused */
 	scanner = 0;
 
 	for (i = 0; i < COUNTOF(ntp_keywords); i++) {

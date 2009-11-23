@@ -130,7 +130,7 @@ struct refclockio {
 				of refclock input data */
 	caddr_t	srcclock;	/* pointer to clock structure */
 	int	datalen;	/* lenth of data */
-	SOCKET	fd;		/* file descriptor */
+	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
 };
 
@@ -264,6 +264,7 @@ extern	void	refclock_timer	(struct peer *);
 extern	void	refclock_transmit (struct peer *);
 extern	int	refclock_ioctl	(int, u_int);
 extern 	int	refclock_process (struct refclockproc *);
+extern 	int	refclock_process_f (struct refclockproc *, double);
 extern 	void	refclock_process_offset (struct refclockproc *, l_fp, l_fp, double);
 extern	void	refclock_report	(struct peer *, int);
 extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);

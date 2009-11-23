@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  October 22, 2009 at 06:46:17 AM by AutoGen 5.9.9pre5
+ *  It has been AutoGen-ed  November 20, 2009 at 05:36:04 AM by AutoGen 5.10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 32:1:7 templates.
+ * Generated from AutoOpts 33:0:8 templates.
  */
 
 /*
@@ -41,7 +41,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 131073
+#define AO_TEMPLATE_VERSION 135168
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -78,8 +78,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    23
-#define NTP_KEYGEN_VERSION       "4.2.5p236-RC"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p236-RC"
+#define NTP_KEYGEN_VERSION       "4.2.5p247-RC"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.5p247-RC"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -203,55 +203,34 @@ typedef enum {
  *
  *  Interface defines for specific options.
  */
-#ifdef OPENSSL
 #define VALUE_OPT_CERTIFICATE    'c'
-#endif /* OPENSSL */
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
-#ifdef OPENSSL
 #define VALUE_OPT_ID_KEY         'e'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_GQ_PARAMS      'G'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_HOST_KEY       'H'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_IFFKEY         'I'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_ISSUER_NAME    'i'
-#endif /* OPENSSL */
 #define VALUE_OPT_MD5KEY         'M'
-#ifdef OPENSSL
 #define VALUE_OPT_MODULUS        'm'
+#ifdef OPENSSL
+
 #define OPT_VALUE_MODULUS        (DESC(MODULUS).optArg.argInt)
 #endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_PVT_CERT       'P'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_PVT_PASSWD     'p'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_GET_PVT_PASSWD 'q'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_SIGN_KEY       'S'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_SUBJECT_NAME   's'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_TRUSTED_CERT   'T'
-#endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_MV_PARAMS      'V'
+#ifdef OPENSSL
+
 #define OPT_VALUE_MV_PARAMS      (DESC(MV_PARAMS).optArg.argInt)
 #endif /* OPENSSL */
-#ifdef OPENSSL
 #define VALUE_OPT_MV_KEYS        'v'
+#ifdef OPENSSL
+
 #define OPT_VALUE_MV_KEYS        (DESC(MV_KEYS).optArg.argInt)
 #endif /* OPENSSL */
 #define VALUE_OPT_HELP          '?'

@@ -1047,10 +1047,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\mem.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\memmove.c"
 				>
 				<FileConfiguration
@@ -1693,6 +1689,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\ssl_init.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\statestr.c"
 				>
 				<FileConfiguration
@@ -2072,7 +2072,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\lib_strbuf.h"
+				RelativePath="..\..\..\include\lib_strbuf.h"
 				>
 			</File>
 			<File
@@ -2084,7 +2084,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\include\isc\mem.h"
+				RelativePath="..\..\..\include\isc\mem.h"
 				>
 			</File>
 			<File

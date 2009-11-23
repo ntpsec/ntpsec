@@ -1051,15 +1051,15 @@ rereadkeys(void)
 /*
  * sock_hash - hash a sockaddr_u structure
  */
-int
+u_short
 sock_hash(
 	sockaddr_u *addr
 	)
 {
-	int hashVal;
-	int i;
-	int len;
-	char *ch;
+	u_int hashVal;
+	u_int j;
+	size_t len;
+	u_char *pch;
 	hashVal = 0;
 	len = 0;
 
@@ -1068,33 +1068,30 @@ sock_hash(
 	 * fields in sockaddr_in6 that might be filled in by recvfrom(),
 	 * so just use the family, port and address.
 	 */
-	ch = (char *)&AF(addr);
-	hashVal = 37 * hashVal + (int)*ch;
+	pch = (u_char *)&AF(addr);
+	hashVal = 37 * hashVal + *pch;
 	if (sizeof(AF(addr)) > 1) {
-		ch++;
-		hashVal = 37 * hashVal + (int)*ch;
+		pch++;
+		hashVal = 37 * hashVal + *pch;
 	}
 	switch(AF(addr)) {
 	case AF_INET:
-		ch = (char *)&SOCK_ADDR4(addr);
+		pch = (u_char *)&SOCK_ADDR4(addr);
 		len = sizeof(SOCK_ADDR4(addr));
 		break;
 
 	case AF_INET6:
-		ch = (char *)&SOCK_ADDR6(addr);
+		pch = (u_char *)&SOCK_ADDR6(addr);
 		len = sizeof(SOCK_ADDR6(addr));
 		break;
 	}
 
-	for (i = 0; i < len ; i++)
-		hashVal = 37 * hashVal + (int)*(ch + i);
+	for (j = 0; j < len ; j++)
+		hashVal = 37 * hashVal + pch[j];
 
-#define	MON_HASH_SIZE	128	/* duplicated from ntp_monitor.c */
+	hashVal = hashVal & NTP_HASH_MASK;
 
-	hashVal = hashVal % MON_HASH_SIZE;
-	if (hashVal < 0)
-		hashVal += MON_HASH_SIZE;
-	return hashVal;
+	return (u_short)hashVal;
 }
 
 

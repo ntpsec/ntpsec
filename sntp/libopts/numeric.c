@@ -1,6 +1,6 @@
 
 /*
- *  $Id: numeric.c,v 4.23 2009/08/01 17:44:36 bkorb Exp $
+ *  $Id: 52d772d69bed7f2911d88ff17b9a44308d6ca0b1 $
  *  Time-stamp:      "2009-07-23 17:25:39 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.

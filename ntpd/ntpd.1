@@ -1,7 +1,7 @@
-.TH NTPD 1 2009-10-22 "( 4.2.5p236-RC)" "Programmer's Manual"
+.TH NTPD 1 2009-11-20 "( 4.2.5p247-RC)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd.1)
 .\"  
-.\"  It has been AutoGen-ed  October 22, 2009 at 06:37:05 AM by AutoGen 5.9.9pre5
+.\"  It has been AutoGen-ed  November 20, 2009 at 05:29:00 AM by AutoGen 5.10
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -20,14 +20,16 @@ This manual page briefly documents the \fBntpd\fP command.
 .TP
 .BR \-4 ", " \--ipv4
 Force IPv4 DNS name resolution.
-This option is a member of the ipv4 class of options.
+This option must not appear in combination with any of the following options:
+ipv6.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
 .TP
 .BR \-6 ", " \--ipv6
 Force IPv6 DNS name resolution.
-This option is a member of the ipv4 class of options.
+This option must not appear in combination with any of the following options:
+ipv4.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
@@ -110,10 +112,17 @@ Jail directory.
 Chroot the server to the directory
 jaildir
 .
-This option also implies that the server attempts to drop root privileges at startup (otherwise, chroot gives very little additional security), and it is only available if the OS supports to run the server without full root privileges.
+This option also implies that the server attempts to drop root privileges at startup.
 You may need to also specify a
 -u
 option.
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
+--enable-clockctl
+) and Linux (configure with
+--enable-linuxcaps
+).
 .TP
 .BR \-I " \fIiface\fP, " \--interface "=" \fIiface\fP
 Listen on an interface name or address.
@@ -235,8 +244,9 @@ Add a key number to the trusted key list.
 Run as userid (or userid:groupid).
 .sp
 Specify a user, and optionally a group, to switch to.
-This option is only available if the OS supports to run the server without full root privileges.
-Currently, this option is supported under NetBSD (configure with
+This option is only available if the OS supports adjusting the clock
+without full root privileges.
+This option is supported under NetBSD (configure with
 --enable-clockctl
 ) and Linux (configure with
 --enable-linuxcaps
@@ -296,7 +306,7 @@ The CPU counter (RDTSC on x86) is used unconditionally with the
 given frequency (in Hz).
 .TP
 .BR \-? , " \--help"
-Display usage information and exit.
+Display extended usage information and exit.
 .TP
 .BR \-! , " \--more-help"
 Extended usage information passed thru pager.
