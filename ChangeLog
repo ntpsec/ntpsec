@@ -1,6 +1,7 @@
 * [Bug 1387] Storage leak in ntp_intres (minor).
 * [Bug 1389] buffer overflow in refclock_oncore.c
 * [Bug 1391] .texi usage text from installed, not built binaries.
+* [Bug 1392] intres retries duplicate assocations endlessly.
 * Correct *-opts.h dependency so default 'get' action isn't used.
 (4.2.5p247-RC) 2009/11/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1142] nodebug builds shed no light on -d, -D option failure.
