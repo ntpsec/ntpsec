@@ -411,6 +411,8 @@ removeentry(
 		}
 
 	next_ce = entry->ce_next;
+	if (entry->ce_name != NULL)
+		free(entry->ce_name);
 	free(entry);
 
 	return next_ce;
