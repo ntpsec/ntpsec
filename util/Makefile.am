@@ -23,21 +23,23 @@ BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h ntp-keygen.1	\
 		ntp-keygen-opts.texi ntp-keygen-opts.menu
 CLEANFILES=
 man_MANS=	ntp-keygen.1
-run_ag=		cd $(srcdir) && autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&					\
+		env PATH="$(abs_builddir):$(PATH)"		\
+		autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/homerc.def 		\
 		$(top_srcdir)/include/version.def
 
-$(srcdir)/ntp-keygen-opts.h: $(srcdir)/ntp-keygen-opts.c
-$(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
+$(srcdir)/ntp-keygen-opts.c $(srcdir)/ntp-keygen-opts.h: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) ntp-keygen-opts.def
 
 $(srcdir)/ntp-keygen.1: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntp-keygen ntp-keygen-opts.def
 
 $(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
+	$(MAKE) ntp-keygen	# aginfo.tpl runs the binary to extract --help usage text
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
 
 

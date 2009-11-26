@@ -148,7 +148,8 @@ char *req_file;		/* name of the file with configuration info */
 
 
 static	void	checkparent	(void);
-static	void	removeentry	(struct conf_entry *);
+static	struct conf_entry *
+		removeentry	(struct conf_entry *);
 static	void	addentry	(char *, int, int, int, int, u_int,
 				   int, keyid_t, char *);
 static	int	findhostaddr	(struct conf_entry *);
@@ -389,26 +390,32 @@ checkparent(void)
 /*
  * removeentry - we are done with an entry, remove it from the list
  */
-static void
+static struct conf_entry *
 removeentry(
 	struct conf_entry *entry
 	)
 {
 	register struct conf_entry *ce;
+	struct conf_entry *next_ce;
 
 	ce = confentries;
-	if (ce == entry) {
+	if (ce == entry)
 		confentries = ce->ce_next;
-		return;
-	}
-
-	while (ce != NULL) {
-		if (ce->ce_next == entry) {
-			ce->ce_next = entry->ce_next;
-			return;
+	else
+		while (ce != NULL) {
+			if (ce->ce_next == entry) {
+				ce->ce_next = entry->ce_next;
+				break;
+			}
+			ce = ce->ce_next;
 		}
-		ce = ce->ce_next;
-	}
+
+	next_ce = entry->ce_next;
+	if (entry->ce_name != NULL)
+		free(entry->ce_name);
+	free(entry);
+
+	return next_ce;
 }
 
 
@@ -523,6 +530,7 @@ findhostaddr(
 				    SOCK_ADDR6(&entry->peer_store);
 				entry->ce_config.v6_flag = 1;
 			}
+			freeaddrinfo(addr);
 		}
 	} else {
 		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
@@ -840,7 +848,7 @@ request(
 		return 0;
 	}
 #endif /* SYS_WINNT */
-    
+
 
 	/*
 	 * Wait for a response.  A weakness of the mode 7 protocol used
@@ -986,6 +994,13 @@ request(
 			/* success */
 			return 1;
 		
+		    case INFO_ERR_NODATA:
+			/*
+			 * newpeer() refused duplicate association, no
+			 * point in retrying so call it success.
+			 */
+			return 1;
+		
 		    case INFO_ERR_IMPL:
 			msyslog(LOG_ERR,
 				"ntp_intres.request: implementation mismatch");
@@ -1001,11 +1016,6 @@ request(
 				"ntp_intres.request: format error");
 			return 0;
 
-		    case INFO_ERR_NODATA:
-			msyslog(LOG_ERR,
-				"ntp_intres.request: no data available");
-			return 0;
-		
 		    case INFO_ERR_AUTH:
 			msyslog(LOG_ERR,
 				"ntp_intres.request: permission denied");
@@ -1181,7 +1191,6 @@ doconfigure(
 	)
 {
 	register struct conf_entry *ce;
-	register struct conf_entry *ceremove;
 
 #ifdef DEBUG
 		if (debug > 1)
@@ -1207,19 +1216,18 @@ doconfigure(
 				msyslog(LOG_ERR,
 					"couldn't resolve `%s', giving up on it",
 					ce->ce_name);
-				ceremove = ce;
-				ce = ceremove->ce_next;
-				removeentry(ceremove);
+				ce = removeentry(ce);
 				continue;
 #endif
-			}
+			} else if (!SOCK_UNSPEC(&ce->peer_store))
+				msyslog(LOG_INFO,
+					"DNS %s -> %s", ce->ce_name,
+					stoa(&ce->peer_store));
 		}
 
 		if (!SOCK_UNSPEC(&ce->peer_store)) {
 			if (request(&ce->ce_config)) {
-				ceremove = ce;
-				ce = ceremove->ce_next;
-				removeentry(ceremove);
+				ce = removeentry(ce);
 				continue;
 			}
 			/* 

@@ -103,7 +103,9 @@ ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
-run_ag=		cd $(srcdir) && autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&					\
+		env PATH="$(abs_builddir):$(PATH)"		\
+		autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/version.def
@@ -203,14 +205,14 @@ ntp_keyword.dummy:
 $(srcdir)/ntp_keyword.h: $(NTP_KEYWORD_OUT)
 	echo $(srcdir)/ntp_keyword.h is unchanged > /dev/null
 
-$(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
-$(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpd-opts.c $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpd-opts.def
 
 $(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
 
 $(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
+	$(MAKE) ntpd	# aginfo.tpl runs the binary to extract --help usage text
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
 $(PROGRAMS): $(LDADD)

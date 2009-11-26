@@ -21,7 +21,9 @@ ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
 BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h ntpq.1 ntpq-opts.texi ntpq-opts.menu
 man_MANS=	ntpq.1
-run_ag=		cd $(srcdir) && autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&					\
+		env PATH="$(abs_builddir):$(PATH)"		\
+		autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
@@ -31,14 +33,14 @@ ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
 libntpq_a_SOURCES =	libntpq.c libntpq.h libntpq_subs.c 
 
-$(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.c
-$(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
+$(srcdir)/ntpq-opts.c $(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) ntpq-opts.def
 
 $(srcdir)/ntpq.1: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
 
 $(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.def $(std_def_list)
+	$(MAKE) ntpq	# aginfo.tpl runs the binary to extract --help usage text
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)

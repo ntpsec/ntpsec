@@ -811,17 +811,12 @@ newpeer(
 		peer->maxpoll = (u_char)max(maxpoll, NTP_MINPOLL);
 	if (peer->minpoll > peer->maxpoll)
 		peer->minpoll = peer->maxpoll;
-#ifdef DEBUG
-	if (debug > 2) {
-		if (peer->dstadr)
-			printf("newpeer: using fd %d and our addr %s\n",
-			       peer->dstadr->fd,
-				    stoa(&peer->dstadr->sin));
-		else
-			printf("newpeer: local interface currently not bound\n");
-	}
-#endif
-	
+
+	if (peer->dstadr)
+		DPRINTF(3, ("newpeer: using fd %d and our addr %s\n",
+			    peer->dstadr->fd, stoa(&peer->dstadr->sin)));
+	else
+		DPRINTF(3, ("newpeer: local interface currently not bound\n"));	
 
 	/*
 	 * Broadcast needs the socket enabled for broadcast
