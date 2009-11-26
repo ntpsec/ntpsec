@@ -1,7 +1,7 @@
-.TH SNTP 1 2009-11-20 "( 4.2.5p247-RC)" "Programmer's Manual"
+.TH SNTP 1 2009-11-26 "( 4.2.5p248-RC)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp.1)
 .\"  
-.\"  It has been AutoGen-ed  November 20, 2009 at 05:35:48 AM by AutoGen 5.10
+.\"  It has been AutoGen-ed  November 26, 2009 at 05:38:30 AM by AutoGen 5.10
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -13,7 +13,7 @@ sntp \- standard SNTP program
 .RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \--\fIopt-name\fP " [[=| ]\fIvalue\fP]]..."
 .br
 .in +8
-...
+hostname-or-IP ...
 .SH "DESCRIPTION"
 This manual page briefly documents the \fBsntp\fP command.
 .I sntp
@@ -116,42 +116,11 @@ and
 commands.  For example:
 .IP
 .B sntp \-a ntpserver.somewhere
-.PP
-More information on how to use this utility is given in the
-.I README
-file in the distribution.  In particular, this
-.I man
-page does not describe how to set it up as a server, which needs special care
-to avoid propagating misinformation.
 .SH RETURN VALUE
-When used as a client in non-daemon mode, the program returns a zero exit
-status for success, and a non-zero one otherwise. When used as a daemon
-(either client or server), it does not return except after a serious error.
+The program returns a zero exit
+status for success, and a non-zero one otherwise.
 .SH BUGS
-The program implements the SNTP protocol, and does not provide all NTP 
-facilities.  In particular, it contains no checks against any form of spoofing.
-If this is a serious concern, some network security mechanism (like a firewall
-or even just
-.IR tcpwrappers )
-should be installed.
-.PP
-There are some errors, ambiguities and inconsistencies in the RFCs, and this
-code may not interwork with all other NTP implementations.  Any unreasonable
-restrictions should be reported as bugs to whoever is responsible.  It may
-be difficult to find out who that is.
-.PP
-The program will stop as soon as it feels that things have got out of control.
-In client daemon mode, it will usually fail during an extended period of
-network or server inaccessibility or excessively slow performance, or when the
-local clock is reset by another process.  It will then need restarting
-manually.  Experienced system administrators can write a shell script, a
-.I cron
-job or put it in
-.IR inittab ,
-to do this automatically.
-.PP
-.SH AUTHOR
-.I sntp
+Please report bugs to http://bugs.ntp.org .
 .SH OPTIONS
 .TP
 .BR \-4 ", " \--ipv4
@@ -251,7 +220,7 @@ N  Key in 64 Bit hexadecimal number as specified in the NTP standard.
 A  Key in a 1-to-8 character ASCII string.
 M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
-See more information see ntp.keys(5).
+For more information see ntp.keys(5).
 .TP
 .BR \-? , " \--help"
 Display extended usage information and exit.

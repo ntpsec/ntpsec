@@ -1,3 +1,4 @@
+(4.2.5p248-RC) 2009/11/26 Released by Harlan Stenn <stenn@ntp.org>
 * Prepare for the generation of sntp.html.
 * Documentation changes from Dave Mills.
 * [Bug 1387] Storage leak in ntp_intres (minor).
