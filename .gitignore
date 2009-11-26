@@ -130,3 +130,4 @@ util/Makefile.in
 version
 version.m4
 ylwrap
+ltmain.sh
