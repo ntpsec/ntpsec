@@ -1,3 +1,4 @@
+* Documentation changes from Dave Mills.
 * [Bug 1387] Storage leak in ntp_intres (minor).
 * [Bug 1389] buffer overflow in refclock_oncore.c
 * [Bug 1391] .texi usage text from installed, not built binaries.
