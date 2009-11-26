@@ -76,7 +76,6 @@ man_MANS=	sntp.1
 
 FRC:
 check-autogen-version.def: FRC
-foo1:
 	@cd $(srcdir)							\
 	&& test -r ../include/autogen-version.def			\
 	&& ( if cmp -s ../include/autogen-version.def autogen-version.def; \
@@ -86,7 +85,6 @@ foo1:
 	   fi )
 
 check-version.def: FRC
-foo2:
 	@cd $(srcdir)					\
 	&& test -r ../include/version.def		\
 	&& ( if cmp -s ../include/version.def version.def;	\
@@ -96,7 +94,6 @@ foo2:
 	   fi )
 
 check-version.m4: FRC
-foo3:
 	@cd $(srcdir)					\
 	&& test -r ../version.m4			\
 	&& ( if cmp -s ../version.m4 version.m4;	\
@@ -106,7 +103,6 @@ foo3:
 	   fi )
 
 check-version.texi: FRC
-foo4:
 	@cd $(srcdir)					\
 	&& test -r ../include/version.texi			\
 	&& ( if cmp -s ../include/version.texi version.texi;	\
@@ -131,7 +127,7 @@ $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 
-$(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi
+$(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
 	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
 
 ../libntp/libntp.a:
