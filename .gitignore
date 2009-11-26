@@ -131,3 +131,4 @@ version
 version.m4
 ylwrap
 ltmain.sh
+sntp/depsver.mf
