@@ -20,6 +20,7 @@ sntp/sntp-opts.c
 sntp/sntp-opts.h
 sntp/sntp-opts.texi
 sntp/sntp.1
+sntp/sntp.html
 util/ntp-keygen-opts.c
 util/ntp-keygen-opts.h
 util/ntp-keygen-opts.texi
