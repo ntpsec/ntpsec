@@ -118,7 +118,7 @@ struct shmTime *getShmTime (int unit) {
 	 * as long as everybody does it the same way. 
 	 */
 	shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), 
-		      IPC_CREAT|(unit<2?0700:0777));
+		      IPC_CREAT|(unit<2?0600:0666));
 	if (shmid==-1) { /*error */
 		msyslog(LOG_ERR,"SHM shmget (unit %d): %s",unit,strerror(errno));
 		return 0;
