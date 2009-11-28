@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  November 26, 2009 at 05:38:25 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 28, 2009 at 05:27:55 AM by AutoGen 5.10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -172,6 +172,7 @@ tSCC    zTimeoutText[] =
         "Specify the number of seconds to wait for broadcasts";
 tSCC    zTimeout_NAME[]            = "TIMEOUT";
 tSCC    zTimeout_Name[]            = "timeout";
+#define zTimeoutDefaultArg           ((char const*)68)
 #define TIMEOUT_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
@@ -371,7 +372,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ TIMEOUT_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { zTimeoutDefaultArg },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionNumericVal,
@@ -473,7 +474,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.5p248-RC\n\
+"sntp - standard SNTP program - Ver. 4.2.5p249-RC\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -489,12 +490,12 @@ implements the Simple Network Time Protocol, and is used\n\
 to query an NTP or SNTP server and either\n\
 display the time\n\
 or\n\
-set the local system's time (given suitable privilege).\n\
+set the local system's time (given suitable privilege).\n\n\
 It can be\n\
 run interactively from the command line or as a\n\
 .I cron\n\
 job.\n\n\
-NTP and SNTP are defined by draft-ietf-ntp-ntpv4-proto-11, which\n\
+NTP and SNTP are defined by draft-ietf-ntp-ntpv4-proto-13, which\n\
 obsoletes RFC 4330 and RFC 1305.\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */

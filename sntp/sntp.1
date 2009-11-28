@@ -1,7 +1,7 @@
-.TH SNTP 1 2009-11-26 "( 4.2.5p248-RC)" "Programmer's Manual"
+.TH SNTP 1 2009-11-28 "( 4.2.5p249-RC)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp.1)
 .\"  
-.\"  It has been AutoGen-ed  November 26, 2009 at 05:38:30 AM by AutoGen 5.10
+.\"  It has been AutoGen-ed  November 28, 2009 at 05:28:06 AM by AutoGen 5.10
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -22,85 +22,25 @@ the time or set the local system's time (given suitable privilege).  It can be
 run as an interactive command or in a
 .I cron
 job.
-NTP is the Network Time Protocol (RFC 1305) and SNTP is the
-Simple Network Time Protocol (RFC 2030, which supersedes RFC 1769).
-.SS Options
-.PP
-.I sntp
-recognizes the following options:
-.TP
-.B \-v
-indicates that diagnostic messages for non-fatal errors and a limited amount of
-tracing should be written to standard error.  Fatal ones always produce a
-diagnostic.  This option should be set when there is a suspected problem with
-the server, network or the source.
-.TP
-.B \-V
-requests more and less comprehensible output, mainly for investigating problems
-with apparently inconsistent timestamps.  This option should be set when the
-program fails with a message indicating that is the trouble.
-.TP
-.B \-W
-requests very verbose debugging output, and will interfere with the timing
-when writing to the terminal (because of line buffered output from C).  Note
-that the times produced by this are the corrections needed, and not the error
-in the local clock.  This option should be set only when debugging the source.
-.TP
-.B \-r
-indicates that the system clock should be reset by
-.IR settod .
-Naturally, this will work only if the user has enough privilege.
-.TP
-.B \-a
-indicates that the system clock should be reset by
-.IR adjtime .
-Naturally, this will work only if the user has enough privilege.
+
+NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
+are defined and described by
+draft-ietf-ntp-ntpv4-proto-13,
+which should become a full RFC any month now.
+
 .PP
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
 .BR "'1996 Oct 15 20:17:25.123 + 4.567 +/- 0.089 secs'" ,
 where the
 .B "'+ 4.567 +/- 0.089 secs'"
-indicates the estimated error in the time on the local system.
-.TP
-.BI \-l " lockfile"
-sets the name of the lock file to ensure that there is only
-one copy of
-.I sntp
-running at once.  The default is installation-dependent, but will usually be
-.IR /etc/sntp.pid .
-.TP
-.BI \-c " count"
-sets the maximum number of NTP packets required to
-.IR count .
-Acceptable values are from 1 to 25 if a NTP host is specified and from 5 to 25
-otherwise, and the default is 5.  If the maximum isn't enough, the system needs
-a better consistency algorithm than this program uses.
-.TP
-.B \-4
-force IPv4 DNS resolution.
-.TP
-.B \-6
-force IPv6 DNS resolution.
-.PP
-.B address(es)
-are the DNS names or IP numbers of hosts to use for the challenge and response
-protocol; if no names are given, the program waits for broadcasts.  Polling a
-server is vastly more reliable than listening to broadcasts.  Note that a
-single component numeric address is not allowed, to avoid ambiguities.  If
-more than one name is give, they will be used in a round-robin fashion.
-.PP
-Constraints:
-.IP
-.BR delay / count "),"
-and
-.B count
-must be less than half of
-.BR delay .
-.IP
-In update mode,
-.B maxerr
-must be less than
+indicates the local clock is 4.567 seconds behind the correct time
+(so 4.567 seconds must be added to the local clock to get it to be correct),
+and the time of
+'1996 Oct 15 20:17:25.123'
+is believed to be correct to within
++/- 0.089
+seconds.
 .SH USAGE
 The simplest use of this program is as an unprivileged command to check the
 current time and error in the local clock.  For example:
@@ -193,6 +133,9 @@ specified broadcast address.  The default maximum wait time,
 .BR \-t " \fInumber\fP, " \--timeout "=" \fInumber\fP
 Specify the number of seconds to wait for broadcasts.
 This option takes an integer number as its argument.
+The default \fInumber\fP for this option is:
+.ti +4
+ 68
 .sp
 When waiting for a broadcast packet SNTP will wait the number 
 of seconds specified before giving up.  Default 68 seconds.

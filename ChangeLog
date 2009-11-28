@@ -1,3 +1,4 @@
+(4.2.5p249-RC) 2009/11/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1400] An empty KOD DB file causes sntp to coredump.
 * sntp: documentation cleanup.
 * sntp: clean up some error messages.
