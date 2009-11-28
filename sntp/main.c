@@ -116,7 +116,7 @@ sntp_main (
 	 * everything is initialized properly 
 	 */
 	resc = resolve_hosts(argv, argc, &resh, ai_fam_pref);
-	
+
 	if (resc < 1) {
 		printf("Unable to resolve hostname(s)\n");
 		return -1;
@@ -166,13 +166,14 @@ on_wire (
 	struct pkt x_pkt;
 	struct pkt r_pkt;
 	char *ref;
-	
+
 	for(try=0; try<5; try++) {
 		struct timeval tv_xmt, tv_dst;
-		double t21, t34, delta, offset;
-		int error, rpktl, sw_case;
+		double t21, t34, delta, offset, precision, root_dispersion;
+		int digits, error, rpktl, sw_case;
 		char *hostname = NULL, *ts_str = NULL;
 		char *log_str;
+		u_fp p_rdly, p_rdsp;
 		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
 
 		memset(&r_pkt, 0, sizeof(r_pkt));
@@ -245,6 +246,8 @@ on_wire (
 			case 1:
 
 			/* Convert timestamps from network to host byte order */
+			p_rdly = NTOHS_FP(r_pkt.rootdelay);
+			p_rdsp = NTOHS_FP(r_pkt.rootdisp);
 			NTOHL_FP(&r_pkt.reftime, &p_ref);
 			NTOHL_FP(&r_pkt.org, &p_org);
 			NTOHL_FP(&r_pkt.rec, &p_rec);
@@ -257,9 +260,22 @@ on_wire (
 				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, addr_buf);
 			}
 
+			precision = LOGTOD(r_pkt.precision);
 #ifdef DEBUG
+			printf("sntp precision: %f\n", precision);
+#endif /* DEBUG */
+			for (digits = 0; (precision *= 10.) < 1.; ++digits) ;
+			if (digits > 6)
+				digits = 6;
+
+			root_dispersion = FPTOD(p_rdsp);
+
+#ifdef DEBUG
+			printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
+			printf("sntp rootdisp: %f\n", root_dispersion);
+
 			pkt_output(&r_pkt, rpktl, stdout);
-	
+
 			printf("sntp on_wire: r_pkt.reftime:\n");
 			l_fp_output(&(r_pkt.reftime), stdout);
 			printf("sntp on_wire: r_pkt.org:\n");
@@ -304,8 +320,14 @@ on_wire (
 
 			if(offset > 0)
 				printf("+");
-			
-			printf("%.3f\n", offset);
+
+			printf("%.*f", digits, offset);
+
+			if (root_dispersion > 0.)
+				printf(" +/- %f secs", root_dispersion);
+
+			printf("\n");
+
 			free(ts_str);
 
 			if(ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
@@ -368,12 +390,8 @@ set_time (
 		tp.tv_usec += offset - (double)((int)offset);
 
 		if(SETTIMEOFDAY(&tp, (struct timezone *)NULL) < 0) {
-			if(errno == EPERM)
-				printf("set_time: You don't have enough priviledges to call settimeofday(), cannot set time!\n");
-
-			else 
-				printf("set_time: settimeofday() returned with an error, couldn't set time!\n");
-
+			printf("set_time: settimeofday(): Time not set: %s\n",
+				strerror(errno));
 			return -1;
 		}
 		else {
@@ -385,11 +403,8 @@ set_time (
 		tp.tv_usec = offset - (double)((int)offset);
 
 		if(ADJTIMEOFDAY(&tp, NULL) < 0) {
-			if(errno == EPERM)
-				printf("set_time: You don't have enough priviledges to call adjtime(), cannot set time!\n");
-			else 
-				printf("set_time: adjtime() returned with an error, couldn't set time!\n");
-			
+			printf("set_time: adjtime(): Time not set: %s\n",
+				strerror(errno));
 			return -1;
 		}
 		else {

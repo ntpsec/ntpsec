@@ -66,7 +66,7 @@ struct speer {
 	u_char pmode;
 	u_char stratum;
 	u_char ppoll;
-	u_char precision;
+	u_char precision;	/* should be s_char */
 	u_int32 refid;
 	l_fp reftime;
 	keyid_t keyid;
