@@ -1,3 +1,4 @@
+* [Bug 1400] An empty KOD DB file causes sntp to coredump.
 * sntp: documentation cleanup.
 * sntp: clean up some error messages.
 * sntp: Use the precision to control how many offset digits are shown.
