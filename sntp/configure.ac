@@ -1,6 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 m4_include([../version.m4])
+AC_PREREQ(2.61)
 AC_INIT([sntp], [VERSION_NUMBER])
 AC_CONFIG_MACRO_DIR([../m4])
 AC_CONFIG_AUX_DIR([.])

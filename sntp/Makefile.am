@@ -2,7 +2,7 @@
 
 NULL=
 
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign 1.10
 ACLOCAL_AMFLAGS= -I ../m4 -I libopts/m4
 
 AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
@@ -47,19 +47,25 @@ sntp_SOURCES =		\
 # it's in EXTRA_DIST
 #dist_man_MANS=	sntp.1
 
-EXTRA_DIST=	bincheck.mf	\
-		COPYRIGHT	\
-		deps-ver	\
-		depsver.mf	\
-		sntp-opts.def	\
-		sntp-opts.menu	\
-		sntp-opts.texi	\
-		sntp.1		\
-		sntp.html	\
-		sntp.texi	\
+EXTRA_DIST=				\
+		autogen-version.def	\
+		bincheck.mf		\
+		COPYRIGHT		\
+		deps-ver		\
+		depsver.mf		\
+		sntp-opts.def		\
+		sntp-opts.menu		\
+		sntp-opts.texi		\
+		sntp.1			\
+		sntp.html		\
+		sntp.texi		\
+		version.def		\
+		version.m4		\
+		version.texi		\
 		$(NULL)
+
 OLD_EXTRA_DIST=		\
-		autogen-version.def version.def version.m4
+		autogen-version.def version.def version.m4 version.texi
 
 BUILT_SOURCES=						\
 		check-autogen-version.def		\
