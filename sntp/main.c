@@ -264,7 +264,8 @@ on_wire (
 #ifdef DEBUG
 			printf("sntp precision: %f\n", precision);
 #endif /* DEBUG */
-			for (digits = 0; (precision *= 10.) < 1.; ++digits) ;
+			for (digits = 0; (precision *= 10.) < 1.; ++digits)
+				/* empty */ ;
 			if (digits > 6)
 				digits = 6;
 
