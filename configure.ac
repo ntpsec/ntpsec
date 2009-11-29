@@ -2142,6 +2142,22 @@ case "$ans" in
 esac
 AC_MSG_RESULT([$ans])
 
+AC_MSG_CHECKING([if ntpd will use the deferred DNS lookup path])
+AC_ARG_ENABLE(
+    [force-defer-DNS],
+    AS_HELP_STRING(
+	[--enable-force-defer-DNS],
+	[- force all DNS lookups to take the deferred path]
+    ),
+    [ans=$enableval],
+    [ans=no]
+)
+case "$ans" in
+ yes)
+    AC_DEFINE(FORCE_DEFER_DNS, 1, [Force deferred DNS lookups?])
+esac
+AC_MSG_RESULT([$ans])
+
 AC_CACHE_CHECK([if we have the tty_clk line discipline/streams module],
  ac_cv_var_tty_clk,
  [case "$ac_cv_header_sys_clkdefs_h$ac_cv_hdr_def_tiocdcdtimestamp" in
