@@ -203,9 +203,13 @@ ntp_keyword.dummy:
 	echo stamp > $@
 
 $(srcdir)/ntp_keyword.h: $(NTP_KEYWORD_OUT)
-	echo $(srcdir)/ntp_keyword.h is unchanged > /dev/null
+	@: do-nothing action to avoid default SCCS get
+	@: .h updated if needed by ntp_keyword.out rule
 
-$(srcdir)/ntpd-opts.c $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
+$(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
+	@: do-nothing action to avoid default SCCS get, .h built with .c
+	
+$(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpd-opts.def
 
 $(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)

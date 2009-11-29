@@ -32,7 +32,10 @@ std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/homerc.def 		\
 		$(top_srcdir)/include/version.def
 
-$(srcdir)/ntp-keygen-opts.c $(srcdir)/ntp-keygen-opts.h: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
+$(srcdir)/ntp-keygen-opts.h: $(srcdir)/ntp-keygen-opts.c
+	@: do-nothing action to avoid default SCCS get, .h built with .c
+	
+$(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) ntp-keygen-opts.def
 
 $(srcdir)/ntp-keygen.1: $(srcdir)/ntp-keygen-opts.def $(std_def_list)

@@ -33,7 +33,10 @@ ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h
 
 libntpq_a_SOURCES =	libntpq.c libntpq.h libntpq_subs.c 
 
-$(srcdir)/ntpq-opts.c $(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.def $(std_def_list)
+$(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.c
+	@: do-nothing action to avoid default SCCS get, .h built with .c
+	
+$(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) ntpq-opts.def
 
 $(srcdir)/ntpq.1: $(srcdir)/ntpq-opts.def $(std_def_list)

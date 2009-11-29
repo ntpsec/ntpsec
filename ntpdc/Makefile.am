@@ -32,7 +32,10 @@ std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/homerc.def 		\
 		$(top_srcdir)/include/version.def
 
-$(srcdir)/ntpdc-opts.c $(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.def $(std_def_list)
+$(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.c
+	@: do-nothing action to avoid default SCCS get, .h built with .c
+	
+$(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
 $(srcdir)/ntpdc.1: $(srcdir)/ntpdc-opts.def $(std_def_list)

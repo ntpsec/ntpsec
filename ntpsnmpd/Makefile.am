@@ -30,7 +30,10 @@ std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/homerc.def 		\
 		$(top_srcdir)/include/version.def
 
-$(srcdir)/ntpsnmpd-opts.c $(srcdir)/ntpsnmpd-opts.h: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+$(srcdir)/ntpsnmpd-opts.h: $(srcdir)/ntpsnmpd-opts.c
+	@: do-nothing action to avoid default SCCS get, .h built with .c
+	
+$(srcdir)/ntpsnmpd-opts.c: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) ntpsnmpd-opts.def
 
 $(srcdir)/ntpsnmpd.1: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)

@@ -18,7 +18,7 @@ run_ag=	cd $(srcdir) &&				\
 
 bindir=	${exec_prefix}/${BINSUBDIR}
 bin_PROGRAMS=	sntp
-CLEANFILES=
+CLEANFILES=	libopts-subdir
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -125,15 +125,24 @@ $(srcdir)/../COPYRIGHT:
 $(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
 	cat $(srcdir)/../COPYRIGHT > $@
 
-$(srcdir)/sntp-opts.c $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
+	@: do-nothing action to avoid default SCCS get, .h built with .c
+	
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) sntp-opts.def
 
 $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
 $(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
-	$(MAKE) sntp	# aginfo.tpl runs the binary to extract --help usage text
+	$(MAKE) libopts-subdir sntp	# aginfo.tpl runs binary to extract --help usage text
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
+
+libopts-subdir: $(LIBOPTS_LDADD)
+	touch $@	# LIBOPTS_LDADD is ./libopts/libopts.la if NEED_LIBOPTS
+
+libopts/libopts.la:
+	( cd libopts && $(MAKE) libopts.la )
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
 	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
