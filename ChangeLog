@@ -1,5 +1,9 @@
+* [Bug 761] internal resolver does not seem to honor -4/-6 qualifiers
+* [Bug 1386] Deferred DNS doesn't work on NetBSD
 * [Bug 1391] avoid invoking autogen twice for .c and .h files.
 * [Bug 1397] shmget() refclock_shm failing because of file mode.
+* Pass no_needed to ntp_intres as first part of fixing [Bug 975].
+* Add ./configure --enable-force-defer-DNS to help debugging.
 (4.2.5p249-RC) 2009/11/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1400] An empty KOD DB file causes sntp to coredump.
 * sntp: documentation cleanup.

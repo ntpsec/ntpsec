@@ -61,6 +61,9 @@ struct conf_entry {
 	struct conf_entry *ce_next;
 	char *ce_name;			/* name to resolve */
 	struct conf_peer ce_config;	/* config info for peer */
+	int no_needed;			/* number of addresses needed (pool) */
+	/*  no_needed isn't used yet: It's needed to fix bug-975 */
+	int type;			/* -4 and -6 flags */
 	sockaddr_u peer_store;		/* address info for both fams */
 };
 #define	ce_peeraddr	ce_config.peeraddr
@@ -119,15 +122,17 @@ static	int resolve_value;	/* next value of resolve timer */
  * is supposed to consist of entries in the following order
  */
 #define	TOK_HOSTNAME	0
-#define	TOK_HMODE	1
-#define	TOK_VERSION	2
-#define TOK_MINPOLL	3
-#define TOK_MAXPOLL	4
-#define	TOK_FLAGS	5
-#define TOK_TTL		6
-#define	TOK_KEYID	7
-#define TOK_KEYSTR	8
-#define	NUMTOK		9
+#define	TOK_NEEDED	1
+#define	TOK_TYPE	2
+#define	TOK_HMODE	3
+#define	TOK_VERSION	4
+#define	TOK_MINPOLL	5
+#define	TOK_MAXPOLL	6
+#define	TOK_FLAGS	7
+#define	TOK_TTL		8
+#define	TOK_KEYID	9
+#define	TOK_KEYSTR	10
+#define	NUMTOK		11
 
 #define	MAXLINESIZE	512
 
@@ -150,7 +155,7 @@ char *req_file;		/* name of the file with configuration info */
 static	void	checkparent	(void);
 static	struct conf_entry *
 		removeentry	(struct conf_entry *);
-static	void	addentry	(char *, int, int, int, int, u_int,
+static	void	addentry	(char *, int, int, int, int, int, int, u_int,
 				   int, keyid_t, char *);
 static	int	findhostaddr	(struct conf_entry *);
 static	void	openntp		(void);
@@ -225,9 +230,10 @@ ntp_intres(void)
 #ifdef SYS_WINNT
 	DWORD rc;
 #else
-	int rc;
-	struct timeval tv;
-	fd_set fdset;
+	int	rc;
+	struct	timeval tv;
+	fd_set	fdset;
+	int	time_left;
 #endif
 
 #ifdef DEBUG
@@ -318,20 +324,35 @@ ntp_intres(void)
 			resolver_exit(1);
 
 #else  /* not SYS_WINNT */
-		tv.tv_sec = ALARM_TIME;
-		tv.tv_usec = 0;
-		FD_ZERO(&fdset);
-		FD_SET(resolver_pipe_fd[0], &fdset);
-		rc = select(resolver_pipe_fd[0] + 1, &fdset, (fd_set *)0, (fd_set *)0, &tv);
+		/* Bug 1386: fork() in NetBSD leaves timers running. */
+		/* So we need to retry select on EINTR */
+		time_left = ALARM_TIME;
+		while (time_left > 0) {
+		    tv.tv_sec = time_left;
+		    tv.tv_usec = 0;
+		    FD_ZERO(&fdset);
+		    FD_SET(resolver_pipe_fd[0], &fdset);
+		    rc = select(resolver_pipe_fd[0] + 1, &fdset, (fd_set *)0, (fd_set *)0, &tv);
 
-		if (rc > 0) {  /* parent process has written to the pipe */
+		    if (rc == 0)		/* normal timeout */
+			break;
+
+		    if (rc > 0) {  /* parent process has written to the pipe */
 			read(resolver_pipe_fd[0], (char *)&rc, sizeof(rc));  /* make pipe empty */
 			resolve_timer = 0;   /* retry resolving immediately */
-			continue;
-		}
+			break;
+		    }
 
-		if ( rc < 0 )  /* select() returned error */
+		    if ( rc < 0 ) {		/* select() returned error */
+			if (errno == EINTR) {	/* Timer went off */
+			    time_left -= (1<<EVENT_TIMEOUT);
+			    continue;		/* try again */
+			}
+			msyslog(LOG_ERR, "ntp_intres: Error from select: %s",
+			    strerror(errno));
 			resolver_exit(1);
+		    }
+		}
 #endif
 
 		/* normal timeout, keep on waiting */
@@ -425,6 +446,8 @@ removeentry(
 static void
 addentry(
 	char *name,
+	int no_needed,
+	int type,
 	int mode,
 	int version,
 	int minpoll,
@@ -440,9 +463,9 @@ addentry(
 #ifdef DEBUG
 	if (debug > 1)
 		msyslog(LOG_INFO, 
-		    "intres: <%s> %d %d %d %d %x %d %x %s", name, mode,
-		    version, minpoll, maxpoll, flags, ttl, keyid,
-		    keystr);
+		    "intres: <%s> %d %d %d %d %d %d %x %d %x %s",
+		    name, no_needed, type, mode, version,
+		    minpoll, maxpoll, flags, ttl, keyid, keystr);
 #endif
 	ce = emalloc(sizeof(*ce));
 	ce->ce_name = estrdup(name);
@@ -455,6 +478,9 @@ addentry(
 	ce->ce_version = (u_char)version;
 	ce->ce_minpoll = (u_char)minpoll;
 	ce->ce_maxpoll = (u_char)maxpoll;
+	ce->no_needed = no_needed;	/* Not used after here. */
+					/* Start of fixing bug-975 */
+	ce->type = type;
 	ce->ce_flags = (u_char)flags;
 	ce->ce_ttl = (u_char)ttl;
 	ce->ce_keyid = keyid;
@@ -512,7 +538,9 @@ findhostaddr(
 			entry->ce_name));
 
 		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = AF_UNSPEC;
+		hints.ai_family = entry->type;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
 		/*
 		 * If IPv6 is not available look only for v4 addresses
 		 */
@@ -1174,9 +1202,11 @@ readconf(
 		/*
 		 * This is as good as we can check it.  Add it in.
 		 */
-		addentry(token[TOK_HOSTNAME], (int)intval[TOK_HMODE],
-			 (int)intval[TOK_VERSION], (int)intval[TOK_MINPOLL],
-			 (int)intval[TOK_MAXPOLL], flags, (int)intval[TOK_TTL],
+		addentry(token[TOK_HOSTNAME],
+			 (int)intval[TOK_NEEDED], (int)intval[TOK_TYPE],
+			 (int)intval[TOK_HMODE], (int)intval[TOK_VERSION],
+			 (int)intval[TOK_MINPOLL], (int)intval[TOK_MAXPOLL],
+			 flags, (int)intval[TOK_TTL],
 			 intval[TOK_KEYID], token[TOK_KEYSTR]);
 	}
 }

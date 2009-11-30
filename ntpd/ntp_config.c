@@ -310,9 +310,9 @@ static int getnetnum(const char *num,sockaddr_u *addr, int complain,
 static int get_multiple_netnums(const char *num, sockaddr_u *addr,
 				struct addrinfo **res, int complain,
 				enum gnn_type a_type);
-static void save_resolve(char *name, int mode, int version,
-			 int minpoll, int maxpoll, u_int flags,int ttl,
-			 keyid_t keyid,u_char *keystr);
+static void save_resolve(char *name, int no_needed, int type,
+			 int mode, int version, int minpoll, int maxpoll,
+			 u_int flags, int ttl, keyid_t keyid, u_char *keystr);
 static void abort_resolve(void);
 static void do_resolve_internal(void);
 
@@ -3379,7 +3379,10 @@ config_peers(
 		status = get_multiple_netnums(curr_peer->addr->address,
 		    &peeraddr, &res, 0, t_UNK);
 
-#ifdef FORCE_DEFER_DNS /* Hack for debugging Deferred DNS */
+#ifdef FORCE_DEFER_DNS
+		/* Hack for debugging Deferred DNS
+		 * Pretend working names didn't work.
+		 */
 		if (status == 1) {
 			/* Deferring everything breaks refclocks. */
 			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
@@ -3388,7 +3391,7 @@ config_peers(
 				msyslog(LOG_INFO, "Forcing Deferred DNS for %s, %s",
 					curr_peer->addr->address, stoa(&peeraddr));
 			} else {
-				msyslog(LOG_INFO, "NOT Deferred DNS for %s, %s",
+				msyslog(LOG_INFO, "NOT Deferring DNS for %s, %s",
 					curr_peer->addr->address, stoa(&peeraddr));
 			}
 		}
@@ -3407,8 +3410,10 @@ config_peers(
 		 * resolution later
 		 */
 		else if (status != 1) {
-			msyslog(LOG_INFO, "Deferring DNS for %s", curr_peer->addr->address);
+			msyslog(LOG_INFO, "Deferring DNS for %s %d", curr_peer->addr->address, no_needed);
 			save_resolve(curr_peer->addr->address,
+				     no_needed,
+				     curr_peer->addr->type,
 				     hmode,
 				     curr_peer->peerversion,
 				     curr_peer->minpoll,
@@ -4386,6 +4391,8 @@ catchchild(
 static void
 save_resolve(
 	char *name,
+	int no_needed,
+	int type,
 	int mode,
 	int version,
 	int minpoll,
@@ -4443,12 +4450,15 @@ save_resolve(
 	}
 #endif
 
-	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %u %s\n", name,
-		      mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
+	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %d %d %u %s\n",
+		name, no_needed, type,
+		mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
 #ifdef DEBUG
 	if (debug > 1)
-		printf("config: %s %d %d %d %d %x %d %u %s\n", name, mode,
-		       version, minpoll, maxpoll, flags, ttl, keyid, keystr);
+		printf("config: %s %d %d %d %d %d %d %x %d %u %s\n",
+			name, no_needed, type,
+			mode, version, minpoll, maxpoll, flags,
+			ttl, keyid, keystr);
 #endif
 
 #else  /* SYS_VXWORKS */
