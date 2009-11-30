@@ -54,10 +54,10 @@ By default, @code{sntp} writes the local data and time (i.e., not UTC) to the
 standard output in the format:
 
 @example
-1996 Oct 15 20:17:25.123 + 4.567 +/- 0.089 secs
+1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
 @end example
 
-where the + 4.567 +/- 0.089 secs indicates the time offset and
+where the +4.567 +/- 0.089 secs indicates the time offset and
 error bound of the system clock relative to the server clock.
 
 @c @include sntp-opts.texi
