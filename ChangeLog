@@ -1,3 +1,4 @@
+(4.2.5p250-RC) 2009/11/30 Released by Harlan Stenn <stenn@ntp.org>
 * sntp documentation updates.
 * [Bug 761] internal resolver does not seem to honor -4/-6 qualifiers
 * [Bug 1386] Deferred DNS doesn't work on NetBSD

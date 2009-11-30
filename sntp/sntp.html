@@ -32,13 +32,13 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 
 <h2 class="unnumbered">Simple Network Time Protocol User Manual</h2>
 
-<p>This document describes the use of the NTP Project's sntp, a program
+<p>This document describes the use of the NTP Project's <code>sntp</code> program,
 that can be used to query a Network Time Protocol (NTP) server and
 display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.5p249-RC of sntp.
+  <p>This document applies to version 4.2.5p250-RC of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by the draft NTPv4
 IETF specification.
@@ -68,12 +68,12 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <!-- node-name,  next,  previous,  up -->
 <h3 class="section">Description</h3>
 
-<p>By default, sntp writes the local data and time (i.e., not UTC) to the
+<p>By default, <code>sntp</code> writes the local data and time (i.e., not UTC) to the
 standard output in the format:
 
-<pre class="example">     1996 Oct 15 20:17:25.123 + 4.567 +/- 0.089 secs
+<pre class="example">     1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
 </pre>
-  <p>where the + 4.567 +/- 0.089 secs indicates the time offset and
+  <p>where the +4.567 +/- 0.089 secs indicates the time offset and
 error bound of the system clock relative to the server clock.
 
 <!-- @include sntp-opts.texi -->

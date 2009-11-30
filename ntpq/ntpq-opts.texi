@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  November 28, 2009 at 05:23:46 AM by AutoGen 5.10
+# It has been AutoGen-ed  November 30, 2009 at 05:24:23 AM by AutoGen 5.10
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
