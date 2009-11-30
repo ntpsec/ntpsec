@@ -65,6 +65,7 @@ flag = {
     name      = kod;
     value     = K;
     arg-type  = string;
+    arg-name  = "file-name";
     descrip   = "KoD history filename";
     doc = <<-  _EndOfDoc_
 	Modifies the filename to be used to persist the history of KoD
@@ -85,11 +86,12 @@ flag = {
 }; 
 
 flag = {
-	name 	= filelog;
-	value	= l;
-	arg-type  = string;
+	name	   = filelog;
+	value	   = l;
+	arg-type   = string;
+	arg-name   = "file-name";
 	flags-cant = syslog;
-	descrip = "Logging to specified logfile";
+	descrip = "Log to specified logfile";
 	doc = <<-  _EndOfDoc_
 	This option causes the client to write log messages to the specified
 	logfile. 
@@ -119,9 +121,10 @@ flag = {
 	value 	= b;
 	descrip	= "Use broadcasts to the address specified for synchronisation";
 	arg-type = string;
+	arg-name = "broadcast-address";
 	doc 	= <<-  _EndOfDoc_
-	If specified SNTP will listen for NTP broadcasts to the
-	specified broadcast address.  The default maximum wait time,
+	If specified SNTP will listen to the specified broadcast address
+	for NTP broadcasts.  The default maximum wait time,
 	68 seconds, can be modified with -t.
 	_EndOfDoc_;
 };
@@ -131,6 +134,7 @@ flag = {
 	value 	= t;
 	descrip	= "Specify the number of seconds to wait for broadcasts";
 	arg-type = number;
+	arg-name = "seconds";
 	arg-default = 68;
 	doc	= <<-  _EndOfDoc_
 	When waiting for a broadcast packet SNTP will wait the number 
@@ -141,12 +145,13 @@ flag = {
 flag = {
 	name 	= authentication;
 	value	= a;
-	descrip	= "Enable authentication with the key keyno. This option is used as -a keyno";
+	descrip	= "Enable authentication with the key auth-keynumber";
 	arg-type = number;
+	arg-name = "auth-keynumber";
 	doc	= <<- _EndOfDoc_
-	This option enables authentication using the key specified in this option\'s argument.
+	This option enables authentication using the key specified in this option's argument.
 	The argument of this option is the keyid, a number specified in the keyfile as this
-	key\'s identifier. See the keyfile option -k for more details.
+	key's identifier. See the keyfile option (-k) for more details.
 	_EndOfDoc_;
 };
 
@@ -155,6 +160,7 @@ flag = {
 	value	= k;
 	descrip	= "Specify a keyfile. SNTP will look in this file for the key specified with -a";
 	arg-type = string;
+	arg-name = "file-name";
 	doc	= <<-  _EndOfDoc_
 	This option specifies the keyfile. SNTP will search for the key specified with -a keyno in this 
 	file. Key files follow the following format:
@@ -208,9 +214,9 @@ which should become a full RFC any month now.
 .PP
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
-.BR "'1996 Oct 15 20:17:25.123 + 4.567 +/- 0.089 secs'" ,
+.BR "'1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs'" ,
 where the
-.B "'+ 4.567 +/- 0.089 secs'"
+.B "'+4.567 +/- 0.089 secs'"
 indicates the local clock is 4.567 seconds behind the correct time
 (so 4.567 seconds must be added to the local clock to get it to be correct),
 and the time of
@@ -218,6 +224,9 @@ and the time of
 is believed to be correct to within
 +/- 0.089
 seconds.
+	_END_PROG_MAN_DESCRIP;
+
+man-doc = <<-  _END_MAN_DOC
 .SH USAGE
 The simplest use of this program is as an unprivileged command to check the
 current time and error in the local clock.  For example:
@@ -238,4 +247,4 @@ The program returns a zero exit
 status for success, and a non-zero one otherwise.
 .SH BUGS
 Please report bugs to http://bugs.ntp.org .
-	_END_PROG_MAN_DESCRIP;
+	_END_MAN_DOC;
