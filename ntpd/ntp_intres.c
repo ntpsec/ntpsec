@@ -230,9 +230,10 @@ ntp_intres(void)
 #ifdef SYS_WINNT
 	DWORD rc;
 #else
-	int rc;
-	struct timeval tv;
-	fd_set fdset;
+	int	rc;
+	struct	timeval tv;
+	fd_set	fdset;
+	int	time_left;
 #endif
 
 #ifdef DEBUG
@@ -323,20 +324,35 @@ ntp_intres(void)
 			resolver_exit(1);
 
 #else  /* not SYS_WINNT */
-		tv.tv_sec = ALARM_TIME;
-		tv.tv_usec = 0;
-		FD_ZERO(&fdset);
-		FD_SET(resolver_pipe_fd[0], &fdset);
-		rc = select(resolver_pipe_fd[0] + 1, &fdset, (fd_set *)0, (fd_set *)0, &tv);
+		/* Bug 1386: fork() in NetBSD leaves timers running. */
+		/* So we need to retry select on EINTR */
+		time_left = ALARM_TIME;
+		while (time_left > 0) {
+		    tv.tv_sec = time_left;
+		    tv.tv_usec = 0;
+		    FD_ZERO(&fdset);
+		    FD_SET(resolver_pipe_fd[0], &fdset);
+		    rc = select(resolver_pipe_fd[0] + 1, &fdset, (fd_set *)0, (fd_set *)0, &tv);
 
-		if (rc > 0) {  /* parent process has written to the pipe */
+		    if (rc == 0)		/* normal timeout */
+			break;
+
+		    if (rc > 0) {  /* parent process has written to the pipe */
 			read(resolver_pipe_fd[0], (char *)&rc, sizeof(rc));  /* make pipe empty */
 			resolve_timer = 0;   /* retry resolving immediately */
-			continue;
-		}
+			break;
+		    }
 
-		if ( rc < 0 )  /* select() returned error */
+		    if ( rc < 0 ) {		/* select() returned error */
+			if (errno == EINTR) {	/* Timer went off */
+			    time_left -= (1<<EVENT_TIMEOUT);
+			    continue;		/* try again */
+			}
+			msyslog(LOG_ERR, "ntp_intres: Error from select: %s",
+			    strerror(errno));
 			resolver_exit(1);
+		    }
+		}
 #endif
 
 		/* normal timeout, keep on waiting */

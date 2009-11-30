@@ -1,3 +1,4 @@
+* [Bug 1386] Deferred DNS doesn't work on NetBSD
 * [Bug 761] internal resolver does not seem to honor -4/-6 qualifiers
 *  Pass no_needed to ntp_intres as first part of fixing Bug 975.
 *  Add --enable-force-defer-DNS to help debugging.
