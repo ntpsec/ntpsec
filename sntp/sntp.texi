@@ -16,7 +16,7 @@ querying and setting the time.
 @end direntry
 
 @titlepage
-@title Simple Network Time Protocol User Manual
+@title Simple Network Time Protocol User's Manual
 @subtitle sntp, version @value{VERSION}, @value{UPDATED}
 @c @author Max @email{foo@ntp.org}
 @end titlepage
@@ -27,13 +27,13 @@ querying and setting the time.
 @node Top, sntp Description, (dir), (dir)
 @top Simple Network Time Protocol User Manual
 
-This document describes the use of the NTP Project's sntp, a program
+This document describes the use of the NTP Project's @code{sntp} program,
 that can be used to query a Network Time Protocol (NTP) server and
 display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-This document applies to version @value{VERSION} of sntp.
+This document applies to version @value{VERSION} of @code{sntp}.
 
 The program implements the SNTP protocol as defined by the draft NTPv4
 IETF specification.
@@ -50,7 +50,7 @@ IETF specification.
 @comment  node-name,  next,  previous,  up
 @section Description
 
-By default, sntp writes the local data and time (i.e., not UTC) to the
+By default, @code{sntp} writes the local data and time (i.e., not UTC) to the
 standard output in the format:
 
 @example
