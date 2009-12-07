@@ -419,7 +419,7 @@ adj_systime(
 	 * If a leap second is pending then determine the UTC time stamp 
 	 * of when the insertion must take place 
 	 */
-	if (leap_sec > 0)
+	if (leapsec > 0)
 	{
 		if ( ls_ft.ull == 0 )  /* time stamp has not yet been computed */
 		{
@@ -458,8 +458,23 @@ adj_systime(
 			}
 		}
 	}
+	else
+	{
+		if ( ls_ft.ull )  /* Leap second has been armed before */
+		{
+			/*
+			 * Disarm leap second only if the leap second
+			 * is not already in progress.
+			 */
+			if ( !ls_time_adjustment )
+			{
+				ls_ft.ull = 0;
+				msyslog( LOG_NOTICE, "Leap second announcement disarmed" );
+			}
+		}
+	}
 
- 
+
 	/*
 	 * If the time stamp for the next leap second has been set
 	 * then check if the leap second must be handled
