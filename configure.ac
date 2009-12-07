@@ -360,13 +360,10 @@ esac
 case "$ac_busted_vpath_in_make$srcdir" in
  no*) ;;
  yes.) ;;
- *) case "`${MAKE-make} -v -f /dev/null 2>/dev/null | sed -e 's/GNU Make version \(1-9.]*\).*/\1/' -e q`" in
+ *) case "`${MAKE-make} -v -f /dev/null 2>/dev/null | grep 'GNU Make'`" in
      '')
 	AC_MSG_ERROR([building outside of the main directory requires GNU make])
-	;;
-     *) ;;
     esac
-    ;;
 esac
 
 AC_SUBST(CFLAGS)dnl
