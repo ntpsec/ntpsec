@@ -1,4 +1,5 @@
 ---
+(4.2.4p9-RC1) 2009/12/08 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Sec 1331] DoS with mode 7 packets - CVE-2009-3563.
 
