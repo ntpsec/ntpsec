@@ -719,6 +719,7 @@
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
 ---
+(4.2.4p8) 2009/12/08 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Sec 1331] DoS with mode 7 packets - CVE-2009-3563.
 
