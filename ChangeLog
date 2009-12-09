@@ -1,4 +1,9 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+
+---
+(4.2.6) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
+* Include (4.2.4p8) - [Sec 1331] DoS with mode 7 packets - CVE-2009-3563.
+* [Bug 508] Fixed leap second handling for Windows.
 (4.2.5p250-RC) 2009/11/30 Released by Harlan Stenn <stenn@ntp.org>
 * sntp documentation updates.
 * [Bug 761] internal resolver does not seem to honor -4/-6 qualifiers
@@ -718,6 +723,10 @@
 * [Bug 995] Remove spurious ; from ntp-keygen.c.
 * More cleanup and changes from Dave Mills.
 * [Bug 980] Direct help to stdout.
+---
+(4.2.4p8) 2009/12/08 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Sec 1331] DoS with mode 7 packets - CVE-2009-3563.
 
 ---
 (4.2.4p7) 2009/05/18 Released by Harlan Stenn <stenn@ntp.org>

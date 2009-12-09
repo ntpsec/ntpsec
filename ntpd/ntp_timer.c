@@ -341,7 +341,9 @@ timer(void)
 			if (!(pll_control && kern_enable))
 				step_systime(-1.0);
 #else /* KERNEL_PLL */
+#ifndef SYS_WINNT /* WinNT port has its own leap second handling */
 			step_systime(-1.0);
+#endif /* SYS_WINNT */
 #endif /* KERNEL_PLL */
 			report_event(EVNT_LEAP, NULL, NULL);
 		} else {
