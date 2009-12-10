@@ -1598,7 +1598,7 @@ doprintpeers(
 		if (ISREFCLOCKADR(&srcadr))
 			type = 'l';	/* local refclock*/
 		else if (IS_MCAST(&srcadr))
-			type = 'y';	/* manycast server */
+			type = 'A';	/* manycast server */
 		else
 			type = 'u';	/* manycastclient, unicast */
 		break;
