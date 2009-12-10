@@ -1604,7 +1604,7 @@ doprintpeers(
 		break;
 
 	case MODE_ACTIVE:
-		type = 'p';		/* symmetric */
+		type = 's';		/* symmetric */
 		break;
 	}
 
