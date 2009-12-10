@@ -1,3 +1,4 @@
+* [Bug 1338] ntpq displays incorrect association type codes.
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 
 ---
