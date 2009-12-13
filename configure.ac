@@ -83,17 +83,6 @@ esac
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
 case "$host" in
- *-*-amigaos)
-    CFLAGS="$CFLAGS -Dfork=vfork -DSYS_AMIGA"
-    ;;
- *-*-hpux10.*)	# at least for hppa2.0-hp-hpux10.20
-    case "$GCC" in
-     yes)
-	;;
-     *) CFLAGS="$CFLAGS -Wp,-H18816"
-	;;
-    esac
-    ;;
  *-pc-cygwin*)
     CFLAGS="$CFLAGS -DSYS_CYGWIN32"
     ;;
@@ -119,7 +108,7 @@ case "$host" in
     ;;
 esac
 
-AMU_OS_CFLAGS
+NTP_OS_CFLAGS
 NTP_DIR_SEP
 NTP_VPATH_HACK
 
@@ -274,22 +263,6 @@ case "$host" in
     ;;
 esac
 
-case "$build" in
- $host)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-	# Quick and dirty sanity check
-	case "$VX_KERNEL" in
-	 '') AC_MSG_ERROR(Please follow the directions in html/build/hints/vxworks.html!)
-	    ;;
-	esac
-        CFLAGS="$CFLAGS -DSYS_VXWORKS"
-        ;;
-    esac
-    ;;
-esac
-
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_AWK
 AC_PROG_MAKE_SET
@@ -319,25 +292,6 @@ case "$GCC" in
 	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
     # if building with OpenSSL, -Wno-strict-prototypes is added later
-esac
-
-case "$host" in
- *-next-nextstep3)
-    CFLAGS="$CFLAGS -posix"
-    ;;
-dnl This is currently commented out by bor. 
-dnl The new versions of ReliantUNIX round adjtime() interval down
-dnl to 1/100s (system tick). This makes tickadj actually useless.
-dnl So, I'd better not use additional flags.
-dnl I leave it here just in case anybody has better idea
-dnl  mips-sni-sysv4* )
-dnl     #
-dnl     # Add flags for 64 bit file access to enable tickadj to access /dev/kmem
-dnl     #
-dnl     if getconf _LFS_CFLAGS > /dev/null 2>&1 ; then
-dnl       CFLAGS="$CFLAGS `getconf _LFS_CFLAGS`"
-dnl     fi
-dnl     ;;
 esac
 
 ac_busted_vpath_in_make=no
