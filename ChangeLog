@@ -1,3 +1,4 @@
+* add util/tg2, a clone of tg that works on Linux, NetBSD, and FreeBSD
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 

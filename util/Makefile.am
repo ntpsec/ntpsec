@@ -5,7 +5,7 @@ AUTOMAKE_OPTIONS=
 bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
 		ntp-keygen
 EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
-	ntptime pps-api precision sht testrs6000 tg tickadj timetrim
+	ntptime pps-api precision sht testrs6000 tg tg2 tickadj timetrim
 
 AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
@@ -13,6 +13,7 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 
 # LDADD might need RESLIB and ADJLIB
 LDADD=		../libntp/libntp.a
+tg2_LDADD=	-lm
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
 ntp_keygen_LDADD=	@LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 
