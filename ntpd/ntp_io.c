@@ -100,7 +100,6 @@ nic_rule *nic_rule_list;
 #endif
 
 #if defined(SYS_WINNT)
-#include <transmitbuff.h>
 #include <isc/win32os.h>
 /*
  * Windows C runtime ioctl() can't deal properly with sockets, 

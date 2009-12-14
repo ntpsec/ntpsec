@@ -16,7 +16,6 @@
 #include "ntpd.h"
 #include "ntp_refclock.h"
 #include "ntp_iocompletionport.h"
-#include "transmitbuff.h"
 #include "ntp_request.h"
 #include "ntp_assert.h"
 #include "clockstuff.h"
