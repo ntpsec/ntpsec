@@ -318,7 +318,7 @@ case "$GCC" in
      yes)
 	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
-    # if building with OpenSSL, -Wno-strict-prototypes is added later
+    # -W[no-]strict-prototypes is added later depending on OpenSSL
 esac
 
 case "$host" in
@@ -3368,23 +3368,65 @@ case "$ntp_openssl" in
 esac
 
 #
-# OpenSSL has a number of callback prototypes inside other function
-# prototypes which trigger copious warnings with -Wstrict-prototypes,
-# (which is included in -Wall).
+# Older OpenSSL headers have a number of callback prototypes inside
+# other function prototypes which trigger copious warnings with gcc's
+# -Wstrict-prototypes, which is included in -Wall.
 #
 # An example:
 #
 # int i2d_RSA_NET(const RSA *a, unsigned char **pp, 
-#                 int (*cb)(), int sgckey);
-#                 ^^^^^^^^^^^
+#		  int (*cb)(), int sgckey);
+#		  ^^^^^^^^^^^
 #
-# The OpenSSL headers probably haven't been fixed in this regard
-# due to the hoops you have to jump through to stay compatible with
-# K&R C compilers.
+# 
 #
+openssl_triggers_warnings=unknown
+SAVED_CFLAGS="$CFLAGS"
+
 case "$GCC$ntp_openssl" in
  yesyes)
-    CFLAGS="$CFLAGS -Wno-strict-prototypes"
+    CFLAGS="$CFLAGS -Werror"
+    AC_COMPILE_IFELSE(
+	AC_LANG_SOURCE([[ /* see if -Werror breaks gcc */ ]]),
+	[gcc_handles_Werror=yes],
+	[gcc_handles_Werror=no]
+    )
+    case "$gcc_handles_Werror" in
+     no)
+	# if this gcc doesn't do -Werror go ahead and use
+	# -Wstrict-prototypes.
+	openssl_triggers_warnings=yes
+	;;
+     yes)
+	CFLAGS="$CFLAGS -Wstrict-prototypes"
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM(
+		[[
+		    #include "openssl/asn1_mac.h"
+		    #include "openssl/bn.h"
+		    #include "openssl/err.h"
+		    #include "openssl/evp.h"
+		    #include "openssl/pem.h"
+		    #include "openssl/rand.h"
+		    #include "openssl/x509v3.h"
+		]],
+		[[ /* empty body */ ]]
+	    ),
+	    [openssl_triggers_warnings=no],
+	    [openssl_triggers_warnings=yes]
+	)
+    esac
+    case "$openssl_triggers_warnings" in
+     yes)
+	CFLAGS="$SAVED_CFLAGS -Wno-strict-prototypes"
+	;;
+     *)
+	CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
+    esac
+    ;;
+ yesno)
+    # gcc without OpenSSL
+    CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
 esac
 
 AC_MSG_CHECKING([if we want to compile with ElectricFence])
