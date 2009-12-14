@@ -998,10 +998,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\transmitbuff.h"
-				>
-			</File>
-			<File
 				RelativePath="..\include\sys\wait.h"
 				>
 			</File>

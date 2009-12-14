@@ -893,9 +893,6 @@
 				RelativePath="..\include\termios.h">
 			</File>
 			<File
-				RelativePath="..\include\transmitbuff.h">
-			</File>
-			<File
 				RelativePath="..\include\sys\wait.h">
 			</File>
 			<File

@@ -516,10 +516,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libntp\transmitbuff.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\tsftomsu.c"
 				>
 			</File>
@@ -817,15 +813,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\transmitbuff.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

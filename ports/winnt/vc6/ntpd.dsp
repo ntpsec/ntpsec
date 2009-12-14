@@ -448,10 +448,6 @@ SOURCE=..\include\termios.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\transmitbuff.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\include\sys\wait.h
 # End Source File
 # Begin Source File
