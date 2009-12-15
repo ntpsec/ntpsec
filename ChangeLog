@@ -1,3 +1,4 @@
+(4.2.7p1) 2009/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1348] ntpd Windows port should wait for sendto() completion.
 * [Bug 1413] test OpenSSL headers regarding -Wno-strict-prototypes.
 * [Bug 1418] building ntpd/ntpdc/ntpq statically with ssl fails.
