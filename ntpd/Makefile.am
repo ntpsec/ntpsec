@@ -97,8 +97,8 @@ man_MANS=	ntpd.1
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
 keyword_gen_LDADD = ../libntp/libntp.a
-ntpd_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntp.a
-ntpdsim_LDADD = $(LDADD) -lm @LCRYPTO@ @LSCF@ $(LIBOPTS_LDADD) ../libntp/libntpsim.a
+ntpd_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntp.a -lm @LCRYPTO@ @LSCF@
+ntpdsim_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ @LSCF@
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = keyword-gen .version version.c
