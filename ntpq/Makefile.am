@@ -1,7 +1,11 @@
 NULL=
 AUTOMAKE_OPTIONS=	
 
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpq
+else
+sbin_PROGRAMS=	ntpq
+endif
 
 AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \

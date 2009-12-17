@@ -1,8 +1,12 @@
 NULL=
 AUTOMAKE_OPTIONS=	
 
-bindir=		${exec_prefix}/${BINSUBDIR}
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpdc
+else
+sbin_PROGRAMS=	ntpdc
+endif
+
 EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
 BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@

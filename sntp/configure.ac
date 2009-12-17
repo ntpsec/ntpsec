@@ -706,8 +706,10 @@ case "$use_binsubdir" in
     ;;
 esac
 AC_MSG_RESULT($use_binsubdir)
+
 BINSUBDIR=$use_binsubdir
 AC_SUBST(BINSUBDIR)
+AM_CONDITIONAL(NTP_BINSUBDIR_IS_BIN, test "bin" = "$BINSUBDIR")
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
