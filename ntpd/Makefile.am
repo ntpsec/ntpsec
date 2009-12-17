@@ -67,9 +67,23 @@ vphack_after:
 		ln -s $(srcdir)/ntp_parser.h . \
 		)
 
-BUILT_SOURCES=	$(VPHACK) ntp_parser.c ntp_parser.h $(VPHACK_AFTER) \
-	ntp_keyword.h ntpd-opts.c ntpd-opts.h ntpd.1 ntpd-opts.texi \
-	ntpd-opts.menu
+# BUILT_SOURCES which should also be in EXTRA_DIST
+B_S_DIST=		\
+	ntp_keyword.h 	\
+	ntpd-opts.c 	\
+	ntpd-opts.h 	\
+	ntpd.1 		\
+	ntpd-opts.texi 	\
+	ntpd-opts.menu	\
+	$(NULL)
+
+BUILT_SOURCES=		\
+	$(VPHACK) 	\
+	ntp_parser.c 	\
+	ntp_parser.h 	\
+	$(VPHACK_AFTER) \
+	$(B_S_DIST)	\
+	$(NULL)
 
 man_MANS=	ntpd.1
 
@@ -97,7 +111,7 @@ EXTRA_DIST = \
 	ntp_keyword.h		\
 	refclock_msfees.c	\
 	refclock_trak.c		\
-	$(BUILT_SOURCES)	\
+	$(B_S_DIST)		\
 	$(NULL)
 ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes

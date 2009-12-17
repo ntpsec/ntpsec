@@ -50,7 +50,7 @@ sntp_SOURCES =		\
 EXTRA_DIST=				\
 		autogen-version.def	\
 		bincheck.mf		\
-		COPYRIGHT		\
+		$(srcdir)/COPYRIGHT	\
 		deps-ver		\
 		depsver.mf		\
 		sntp-opts.def		\
