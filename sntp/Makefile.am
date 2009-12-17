@@ -16,8 +16,12 @@ run_ag=	cd $(srcdir) &&				\
 	env PATH="$(abs_builddir):$(PATH)"	\
 	autogen -L ../include --writable
 
-bindir=	${exec_prefix}/${BINSUBDIR}
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	sntp
+else
+sbin_PROGRAMS=	sntp
+endif
+
 CLEANFILES=	libopts-subdir
 
 SUBDIRS=

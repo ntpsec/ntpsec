@@ -1,9 +1,11 @@
 NULL=
 AUTOMAKE_OPTIONS= 
 
-bindir=	${exec_prefix}/${BINSUBDIR}
-
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
+else
+sbin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
+endif
 
 noinst_LIBRARIES=	libntpd.a
 
