@@ -538,7 +538,7 @@ esac
 AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
 # HMS: Checked sys/socket.h earlier
 case "$host" in
- *-*-netbsd*) ;;
+ *-*-netbsd*) ;;	# Bug 254
  *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
     ;;
 esac
