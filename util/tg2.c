@@ -585,13 +585,15 @@ main(
 	int	DayOfYear;
 
 	int	BitNumber;
+#ifdef HAVE_SYS_SOUNDCARD_H
 	int	AudioFormat;
-	int MonoStereo;     /* 0=mono, 1=stereo */
+	int	MonoStereo;     /* 0=mono, 1=stereo */
 #define	MONO	(0)
 #define	STEREO	(1)
-	int	SetSampleRate;
 	int	SampleRate;
 	int	SampleRateDifference;
+#endif
+	int	SetSampleRate;
 	char FormatCharacter = '3';		/* Default is IRIG-B with IEEE 1344 extensions */
 	char AsciiValue;
 	int	HexValue;
