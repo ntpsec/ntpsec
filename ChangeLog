@@ -1,3 +1,4 @@
+* [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
 (4.2.7p1) 2009/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1348] ntpd Windows port should wait for sendto() completion.
 * [Bug 1413] test OpenSSL headers regarding -Wno-strict-prototypes.
@@ -7,9 +8,6 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
----
-
-* [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
 
 ---
 (4.2.6) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
