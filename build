@@ -18,8 +18,8 @@ case "$1" in
 	echo "This is <`pwd`>"
 	echo "SIG is <$SIG>"
 	echo "KEY is <$KEY>"
-        exit 1
-        ;;
+	exit 1
+	;;
     esac
     ;;
  *)
@@ -88,7 +88,7 @@ CCSUF=""
 
 case "$CC" in
  '') ;;
- *) CCSUF="-$CC"
+ *) CCSUF="-`echo $CC | sed -e 's: :_:g' -e's:/:+:g`"
     ;;
 esac
 
