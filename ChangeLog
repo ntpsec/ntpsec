@@ -1,4 +1,4 @@
-* add util/tg2, a clone of tg that works on Linux, NetBSD, and FreeBSD
+* [Bug 1421] add util/tg2, a clone of tg that works on Linux, NetBSD, and FreeBSD
 (4.2.7p1) 2009/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1348] ntpd Windows port should wait for sendto() completion.
 * [Bug 1413] test OpenSSL headers regarding -Wno-strict-prototypes.
