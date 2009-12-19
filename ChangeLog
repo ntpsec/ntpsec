@@ -1,3 +1,5 @@
+* [Bug 1395] ease ntpdate elimination with ntpd -w/--wait-sync
+* [Bug 1396] allow servers on ntpd command line like ntpdate
 * [Bug 1387] Storage leak in ntp_intres (minor).
 * [Bug 1389] buffer overflow in refclock_oncore.c
 * [Bug 1391] .texi usage text from installed, not built binaries.

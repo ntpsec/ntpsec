@@ -1,7 +1,7 @@
-.TH NTPD 1 2009-11-20 "( 4.2.5p247-RC)" "Programmer's Manual"
+.TH NTPD 1 2009-12-19 "( 4.2.5p247-RC)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd.1)
 .\"  
-.\"  It has been AutoGen-ed  November 20, 2009 at 05:29:00 AM by AutoGen 5.10
+.\"  It has been AutoGen-ed  December 19, 2009 at 03:08:03 AM by AutoGen 5.10
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -11,8 +11,9 @@ ntpd \- NTP daemon program
 .B ntpd
 .\" Mixture of short (flag) options and long options
 .RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \--\fIopt-name\fP " [[=| ]\fIvalue\fP]]..."
-.PP
-All arguments must be options.
+.br
+.in +8
+[ <server1> ... <serverN> ]
 .SH "DESCRIPTION"
 This manual page briefly documents the \fBntpd\fP command.
 
@@ -170,6 +171,8 @@ avoiding timekeeping glitches associated with changes.
 .TP
 .BR \-n ", " \--nofork
 Do not fork.
+This option must not appear in combination with any of the following options:
+wait-sync.
 .sp
 
 .TP
@@ -202,11 +205,14 @@ priority.
 .TP
 .BR \-q ", " \--quit
 Set the time and quit.
+This option must not appear in combination with any of the following options:
+saveconfigquit, wait-sync.
 .sp
 ntpd
-will exit just after the first time the clock is set. This behavior mimics that of the
+will not daemonize and will exit after the clock is first
+synchronized.  This behavior mimics that of the
 ntpdate
-program, which is to be retired.
+program, which will soon be replaced with a shell script.
 The
 -g
 and
@@ -221,6 +227,8 @@ Specify the default propagation delay from the broadcast/multicast server to thi
 .TP
 .BR \--saveconfigquit "=\fIstring\fP"
 Save parsed configuration and quit.
+This option must not appear in combination with any of the following options:
+quit, wait-sync.
 .sp
 Cause ntpd to parse its startup configuration file and save an
 equivalent to the given filename and exit.  This option was
@@ -272,6 +280,20 @@ make ARG an ntp variable (RW|DEF).
 This option may appear an unlimited number of times.
 .sp
 
+.TP
+.BR \-w " \fIstring\fP, " \--wait-sync "=" \fIstring\fP
+Seconds to wait for first clock sync.
+This option must not appear in combination with any of the following options:
+nofork, quit, saveconfigquit.
+.sp
+If greater than zero, alters ntpd behavior when forking to
+daemonize.  Instead of exiting with status 0 immediately after
+the fork, the parent waits up to the specified number of
+seconds for the child to first synchronize the clock.  The exit
+status is zero (success) if the clock was synchronized,
+otherwise it is ETIMEDOUT.
+This provides the option for a script starting ntpd to easily
+wait for the first set of the clock before proceeding.
 .TP
 .BR \-x ", " \--slew
 Slew up to 600 seconds.

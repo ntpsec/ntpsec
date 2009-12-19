@@ -39,7 +39,6 @@
 #define NET_DLY .001            /* network delay */
 #define PROC_DLY .001		/* processing delay */
 #define BEEP_DLY 3600           /* beep interval (s) */
-#define	SLEW	500e-6		/* correction rate (PPM) */
 
 
 /* Discrete Event Queue

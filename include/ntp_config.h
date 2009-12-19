@@ -59,7 +59,7 @@
  * to using numeric IP addresses.
  */
 #if defined(VMS) || defined (SYS_VXWORKS) || \
-    (!defined(HAVE_FORK) && !defined(SYS_WINNT))
+    (!defined(HAVE_WORKING_FORK) && !defined(SYS_WINNT))
 #define NO_INTRES
 #endif
 
@@ -70,6 +70,10 @@
 
 #define CONF_SOURCE_FILE		0
 #define CONF_SOURCE_NTPQ		1
+
+/* list of servers from command line for config_peers() */
+extern	int	cmdline_server_count;
+extern	char **	cmdline_servers;
 
 
 /* Structure for storing an attribute-value pair  */

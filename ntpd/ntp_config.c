@@ -66,6 +66,10 @@ int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent p
 #include "ntp_data_structures.h"
 
 
+/* list of servers from command line for config_peers() */
+int	cmdline_server_count;
+char **	cmdline_servers;
+
 /*
  * "logconfig" building blocks
  */
@@ -305,14 +309,11 @@ void ntpd_set_tod_using(const char *);
 static unsigned long get_pfxmatch(char **s,struct masks *m);
 static unsigned long get_match(char *s,struct masks *m);
 static unsigned long get_logmask(char *s);
-static int getnetnum(const char *num,sockaddr_u *addr, int complain,
-		     enum gnn_type a_type);
-static int get_multiple_netnums(const char *num, sockaddr_u *addr,
-				struct addrinfo **res, int complain,
-				enum gnn_type a_type);
-static void save_resolve(char *name, int mode, int version,
-			 int minpoll, int maxpoll, u_int flags,int ttl,
-			 keyid_t keyid,u_char *keystr);
+static int getnetnum(const char *, sockaddr_u *, int, enum gnn_type);
+static int get_multiple_netnums(const char *, sockaddr_u *, struct
+				addrinfo **, int, enum gnn_type);
+static void save_resolve(char *, int, int, int, int, u_int, int ttl,
+			 keyid_t, u_char *);
 static void abort_resolve(void);
 static void do_resolve_internal(void);
 
@@ -3305,15 +3306,59 @@ config_peers(
 	struct config_tree *ptree
 	)
 {
-	struct addrinfo *res, *res_bak;
+	struct addrinfo *res;
+	struct addrinfo *one;
 	sockaddr_u peeraddr;
 	struct peer_node *curr_peer;
 	struct attr_val *option;
 	int hmode;
 	int peerflags;
-	int status;
+	int rc;
 	int no_needed;
 	int i;
+
+	/* add servers named on the command line with iburst implied */
+	for (;
+	     cmdline_server_count > 0;
+	     cmdline_server_count--, cmdline_servers++) {
+
+		ZERO_SOCK(&peeraddr);
+		AF(&peeraddr) = default_ai_family;
+		rc = get_multiple_netnums(*cmdline_servers, &peeraddr,
+					  &res, 0, t_UNK);
+		if (1 != rc) {
+			msyslog(LOG_INFO, "Deferring DNS for %s",
+				*cmdline_servers);
+			save_resolve(*cmdline_servers,
+				     MODE_CLIENT,
+				     NTP_VERSION,
+				     0,
+				     0,
+				     FLAG_IBURST,
+				     0,
+				     0,
+				     (u_char *)"*");
+			continue;
+		}
+		for (one = res; one != NULL; one = one->ai_next) {
+			ZERO_SOCK(&peeraddr);
+			memcpy(&peeraddr, one->ai_addr,
+			       one->ai_addrlen);
+			if ((ipv6_works || !IS_IPV6(&peeraddr)) &&
+			    !IS_MCAST(&peeraddr))
+				peer_config(&peeraddr,
+					    NULL,
+					    MODE_CLIENT,
+					    NTP_VERSION,
+					    0,
+					    0,
+					    FLAG_IBURST,
+					    0,
+					    0,
+					    (u_char *)"*");
+		}
+		freeaddrinfo(res);
+	}
 
 	curr_peer = queue_head(ptree->peers);
 	while (curr_peer != NULL) {
@@ -3376,11 +3421,11 @@ config_peers(
 		ZERO_SOCK(&peeraddr);
 		AF(&peeraddr) = (u_short)curr_peer->addr->type;
 
-		status = get_multiple_netnums(curr_peer->addr->address,
+		rc = get_multiple_netnums(curr_peer->addr->address,
 		    &peeraddr, &res, 0, t_UNK);
 
 #ifdef FORCE_DEFER_DNS /* Hack for debugging Deferred DNS */
-		if (status == 1) {
+		if (rc == 1) {
 			/* Deferring everything breaks refclocks. */
 			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
 			if (!ISREFCLOCKADR(&peeraddr)) {
@@ -3398,7 +3443,7 @@ config_peers(
 		 * The old code had this test, so I guess it must be
 		 * useful
 		 */
-		if (status == -1) {
+		if (rc == -1) {
 			/* Do nothing, apparently we found an IPv6
 			 * address and can't do anything about it */
 		}
@@ -3406,7 +3451,7 @@ config_peers(
 		 * peer information in a file for asynchronous
 		 * resolution later
 		 */
-		else if (status != 1) {
+		else if (rc != 1) {
 			msyslog(LOG_INFO, "Deferring DNS for %s", curr_peer->addr->address);
 			save_resolve(curr_peer->addr->address,
 				     hmode,
@@ -3424,17 +3469,15 @@ config_peers(
 		 * the peer
 		 */
 		else {
-			res_bak = res;
-
 			/*
 			 * Loop to configure the desired number of
 			 * associations
 			 */
-			for (i = 0; (i < no_needed) && res; res =
-			    res->ai_next) {
-				++i;
-				memcpy(&peeraddr, res->ai_addr,
-				    res->ai_addrlen);
+			for (i = 0, one = res; 
+			     i < no_needed && one != NULL;
+			     i++, one = one->ai_next) {
+				memcpy(&peeraddr, one->ai_addr,
+				       one->ai_addrlen);
 				if (is_sane_resolved_address(
 					&peeraddr,
 					curr_peer->host_mode))
@@ -3450,7 +3493,7 @@ config_peers(
 					    curr_peer->peerkey,
 					    (u_char *)"*");
 			}
-			freeaddrinfo(res_bak);
+			freeaddrinfo(res);
 		}
 		curr_peer = next_node(curr_peer);
 	}

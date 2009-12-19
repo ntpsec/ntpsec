@@ -114,7 +114,6 @@ check-local: @MAKE_CHECK_Y2K@ $(CHECK_SAVECONFIG)
 	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
 
 ntpd_SOURCES =			\
-	cmd_args.c		\
 	ntp_config.c		\
 	ntp_data_structures.c	\
 	ntp_io.c		\
@@ -134,6 +133,7 @@ ntpdsim_SOURCES =		\
 # libntpd_a_SOURCES do not use #ifdef SIM
 
 libntpd_a_SOURCES =		\
+	cmd_args.c		\
 	jupiter.h		\
 	ntp_control.c		\
 	ntp_crypto.c		\

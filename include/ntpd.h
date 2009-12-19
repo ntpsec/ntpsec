@@ -11,8 +11,8 @@
 #include "ntp_refclock.h"
 #include "recvbuff.h"
 
-/* ntp_config.c */
 
+/* ntp_config.c */
 #define	TAI_1972	10	/* initial TAI offset (s) */
 extern	char	*keysdir;	/* crypto keys and leaptable directory */
 extern	char *	saveconfigdir;	/* ntpq saveconfig output directory */
@@ -484,6 +484,10 @@ extern char *user;			/* user to switch to */
 extern char *group;			/* group to switch to */
 extern const char *chrootdir;		/* directory to chroot to */
 #endif
+#ifdef HAVE_WORKING_FORK
+extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
+#endif
+
 
 /* refclock_conf.c */
 #ifdef REFCLOCK

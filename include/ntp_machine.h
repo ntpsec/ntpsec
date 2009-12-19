@@ -261,8 +261,6 @@ int ntp_set_tod (struct timeval *tvp, void *tzp);
 #define HAVE_RANDOM		1	/* configure does not set this ...  */
 #define HAVE_SRANDOM		1	/* configure does not set this ... */
 
-#define NODETACH		1
-
 /* vxWorks specific additions to take care of its
  * unix (non)complicance
  */

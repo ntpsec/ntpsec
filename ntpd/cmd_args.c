@@ -7,6 +7,7 @@
 
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include "ntp_config.h"
 #include "ntp_cmdargs.h"
 
 #include "ntpd-opts.h"
@@ -34,7 +35,6 @@ getCmdOpts(
 {
 	extern const char *config_file;
 	int errflg;
-	tOptions *myOptions = &ntpdOptions;
 
 	/*
 	 * Initialize, initialize
@@ -130,14 +130,16 @@ getCmdOpts(
 #endif
 
 	if (HAVE_OPT( VAR )) {
-		int		ct = STACKCT_OPT(  VAR );
-		const char**	pp = STACKLST_OPT( VAR );
+		int		ct;
+		const char **	pp;
+		const char *	v_assign;
+
+		ct = STACKCT_OPT(  VAR );
+		pp = STACKLST_OPT( VAR );
 
 		do  {
-			const char* my_ntp_optarg = *pp++;
-
-			set_sys_var(my_ntp_optarg, strlen(my_ntp_optarg)+1,
-			    (u_short) (RW));
+			v_assign = *pp++;
+			set_sys_var(v_assign, strlen(v_assign) + 1, RW);
 		} while (--ct > 0);
 	}
 
@@ -157,6 +159,7 @@ getCmdOpts(
 		clock_max = 600;
 		kern_enable = 0;
 	}
+
 	if (HAVE_OPT( UPDATEINTERVAL )) {
 		long val = OPT_VALUE_UPDATEINTERVAL;
 			  
@@ -172,19 +175,15 @@ getCmdOpts(
 			errflg++;
 		}
 	}
-#ifdef SIM
 
-	/* SK:
-	 * The simulator no longer takes any command line arguments. Hence,
-	 * all the code that was here has been removed.
-	 */
 
-#endif /* SIM */
-
-	if (errflg || argc) {
-		if (argc)
-			fprintf(stderr, "argc after processing is <%d>\n", argc);
-		optionUsage(myOptions, 2);
+	/* save list of servers from cmd line for config_peers() use */
+	if (argc > 0) {
+		cmdline_server_count = argc;
+		cmdline_servers = argv;
 	}
-	return;
+
+	/* display usage & exit with any option processing errors */
+	if (errflg)
+		optionUsage(&ntpdOptions, 2);	/* does not return */
 }

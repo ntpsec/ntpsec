@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  November 20, 2009 at 05:29:01 AM by AutoGen 5.10
+# It has been AutoGen-ed  December 19, 2009 at 03:09:15 AM by AutoGen 5.10
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -53,6 +53,7 @@ This software is released under a specialized copyright license.
 * ntpd usepcc::                 usepcc option
 * ntpd user::                   user option (-u)
 * ntpd var::                    var option
+* ntpd wait-sync::              wait-sync option (-w)
 @end menu
 
 @node ntpd usage
@@ -63,12 +64,16 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.5p242-RC
-USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
+ntpd - NTP daemon program - Ver. 4.2.5p247-RC
+USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
+                [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
+                                - prohibits these options:
+                                ipv6
    -6 no  ipv6           Force IPv6 DNS name resolution
-                                - an alternate for ipv4
+                                - prohibits these options:
+                                ipv4
    -a no  authreq        Require crypto authentication
                                 - prohibits these options:
                                 authnoreq
@@ -84,29 +89,44 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
                                 - may appear multiple times
+   -i --- jaildir        built without --enable-clockctl or --enable-linuxcaps
    -I Str interface      Listen on an interface name or address
                                 - may appear multiple times
    -k Str keyfile        path to symmetric keys
    -l Str logfile        path to the log file
    -L no  novirtualips   Do not listen to virtual interfaces
    -n no  nofork         Do not fork
+                                - prohibits these options:
+                                wait-sync
    -N no  nice           Run at high priority
    -p Str pidfile        path to the PID file
    -P Num priority       Process priority
    -q no  quit           Set the time and quit
+                                - prohibits these options:
+                                saveconfigquit
+                                wait-sync
    -r Str propagationdelay Broadcast/propagation delay
       Str saveconfigquit Save parsed configuration and quit
+                                - prohibits these options:
+                                quit
+                                wait-sync
    -s Str statsdir       Statistics file location
    -t Str trustedkey     Trusted key number
                                 - may appear multiple times
+   -u --- user           built without --enable-clockctl or --enable-linuxcaps
    -U Num updateinterval interval in seconds between scans for new or dropped interfaces
       Str var            make ARG an ntp variable (RW)
                                 - may appear multiple times
       Str dvar           make ARG an ntp variable (RW|DEF)
                                 - may appear multiple times
+   -w Str wait-sync      Seconds to wait for first clock sync
+                                - prohibits these options:
+                                nofork
+                                quit
+                                saveconfigquit
    -x no  slew           Slew up to 600 seconds
-      opt version        Output version information and exit
-   -? no  help           Display usage information and exit
+   -! opt version        Output version information and exit
+   -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
 
 Options are specified by doubled hyphens and their name
@@ -375,6 +395,14 @@ avoiding timekeeping glitches associated with changes.
 
 This is the ``do not fork'' option.
 
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must not appear in combination with any of the following options:
+wait-sync.
+@end itemize
+
+
 
 @node ntpd nice
 @subsection nice option (-N)
@@ -413,10 +441,19 @@ priority.
 @cindex ntpd-quit
 
 This is the ``set the time and quit'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must not appear in combination with any of the following options:
+saveconfigquit, wait-sync.
+@end itemize
+
 ntpd
-will exit just after the first time the clock is set. This behavior mimics that of the
+will not daemonize and will exit after the clock is first
+synchronized.  This behavior mimics that of the
 ntpdate
-program, which is to be retired.
+program, which will soon be replaced with a shell script.
 The
 -g
 and
@@ -441,6 +478,9 @@ This option has some usage constraints.  It:
 @itemize @bullet
 @item
 must be compiled in by defining @code{SAVECONFIG} during the compilation.
+@item
+must not appear in combination with any of the following options:
+quit, wait-sync.
 @end itemize
 
 Cause ntpd to parse its startup configuration file and save an
@@ -529,6 +569,30 @@ may appear an unlimited number of times.
 @end itemize
 
 
+
+@node ntpd wait-sync
+@subsection wait-sync option (-w)
+@cindex ntpd-wait-sync
+
+This is the ``seconds to wait for first clock sync'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{HAVE_WORKING_FORK} during the compilation.
+@item
+must not appear in combination with any of the following options:
+nofork, quit, saveconfigquit.
+@end itemize
+
+If greater than zero, alters ntpd behavior when forking to
+daemonize.  Instead of exiting with status 0 immediately after
+the fork, the parent waits up to the specified number of
+seconds for the child to first synchronize the clock.  The exit
+status is zero (success) if the clock was synchronized,
+otherwise it is ETIMEDOUT.
+This provides the option for a script starting ntpd to easily
+wait for the first set of the clock before proceeding.
 
 @node ntpd slew
 @subsection slew option (-x)
