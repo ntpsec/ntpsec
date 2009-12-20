@@ -1,4 +1,5 @@
 ---
+(4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1409] Put refclock_neoclock4x.c under the NTP COPYRIGHT notice.
   This should allow debian and other distros to add this refclock driver
