@@ -1,5 +1,9 @@
 ---
 
+* [Bug 1409] Put refclock_neoclock4x.c under the NTP COPYRIGHT notice.
+  This should allow debian and other distros to add this refclock driver
+  in further distro releases.
+  Detect R2 hardware releases.
 * [Bug 1412] m4/os_cflags.m4 caches results that depend on $CC.
 * [Bug 1413] test OpenSSL headers regarding -Wno-strict-prototypes.
 * [Bug 1414] Enable "make distcheck" success with BSD make.
