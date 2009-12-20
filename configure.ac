@@ -409,6 +409,11 @@ esac
 
 AC_SEARCH_LIBS([setsockopt], [socket xnet])
 AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+case "$host" in
+ *-*-darwin*)
+    AC_CHECK_LIB([resolv],[res_9_init])
+    ;;
+esac
 AC_CHECK_FUNCS(res_init __res_init)
 
 AC_HEADER_STDC

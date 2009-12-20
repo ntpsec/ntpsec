@@ -12,7 +12,7 @@ ntpsnmpd_SOURCES= netsnmp_daemonize.c ntpsnmpd.c ntpSnmpSubagentObject.c \
 			ntpsnmpd-opts.c ntpsnmpd-opts.h
 noinst_HEADERS=	ntpSnmpSubagentObject.h
 # HMS: we probably want a version.o file here, too.
-LDADD=		../ntpq/libntpq.a ../libntp/libntp.a @SNMP_LIBS@ 	\
+LDADD=		../ntpq/libntpq.a ../libntp/libntp.a @LCRYPTO@ @SNMP_LIBS@ \
 		$(LIBOPTS_LDADD)
 AM_CPPFLAGS= -I$(top_srcdir)/ntpq -I$(top_srcdir)/include \
 	-I$(top_srcdir)/lib/isc/include \
