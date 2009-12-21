@@ -1,11 +1,11 @@
 #! /bin/sh
  
-packageinfo=packageinfo.sh
+packageinfo='./packageinfo.sh'
 case "$#" in
  2)
     case "$1" in
      -p|--packageinfo)
-	packageinfo=$2
+	packageinfo="$2"
     esac
     ;;
  0)
@@ -16,7 +16,7 @@ case "$#" in
 esac
 
 # This script must be executed from the TLD of the source tree...
-. $packageinfo
+. "$packageinfo"
 
 NAME="$version"
 case $point in

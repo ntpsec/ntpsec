@@ -45,7 +45,7 @@ esac
 
 set -e
  
-. packageinfo.sh
+. ./packageinfo.sh
 
 case "$repotype" in
  $repo)
@@ -317,7 +317,7 @@ case "$test" in
     ;;
  *)
     printf "Next version would be: "
-    scripts/VersionName -p packageinfo.sh+
+    scripts/VersionName -p ./packageinfo.sh+
     rm packageinfo.sh+
     ;;
 esac
