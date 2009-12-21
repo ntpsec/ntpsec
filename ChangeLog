@@ -1,4 +1,5 @@
 * [Bug 1426] scripts/VersionName needs . on the search path.
+* [Bug 1427] quote missing in ./build - shows up on NetBSD.
 (4.2.7p2) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
 (4.2.7p1) 2009/12/15 Released by Harlan Stenn <stenn@ntp.org>
