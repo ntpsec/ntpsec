@@ -1,6 +1,7 @@
 ---
 
 * [Bug 1426] scripts/VersionName needs . on the search path.
+* [Bug 1427] quote missing in ./build - shows up on NetBSD.
 
 ---
 (4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
