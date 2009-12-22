@@ -92,7 +92,7 @@ do
     for i in `ls -1 $f*`
     do
 	case "$i" in
-	 *.c|*.h|*.1|*.texi|*.menu)
+	 *.c|*.h|*.1|*.html|*.texi|*.menu)
 	    l="$l $i"
 	    ;;
 	esac
