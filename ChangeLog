@@ -1,5 +1,6 @@
 * [Bug 1426] scripts/VersionName needs . on the search path.
 * [Bug 1427] quote missing in ./build - shows up on NetBSD.
+* [Bug 1428] Use AC_HEADER_RESOLV to fix breaks from resolv.h
 (4.2.7p2) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
 (4.2.7p1) 2009/12/15 Released by Harlan Stenn <stenn@ntp.org>
@@ -11,6 +12,13 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
+* [Bug 1426] scripts/VersionName needs . on the search path.
+* [Bug 1427] quote missing in ./build - shows up on NetBSD.
+* [Bug 1428] Use AC_HEADER_RESOLV to fix breaks from resolv.h
+
 ---
 (4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
 

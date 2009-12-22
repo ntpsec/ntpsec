@@ -1,9 +1,9 @@
 NULL=
 
 if NTP_BINSUBDIR_IS_BIN
-bin_SCRIPTS=	ntp-wait ntptrace
+bin_SCRIPTS =	ntp-wait ntptrace
 else
-sbin_SCRIPTS=	ntp-wait ntptrace
+sbin_SCRIPTS =	ntp-wait ntptrace
 endif
 
 noinst_SCRIPTS =		\
