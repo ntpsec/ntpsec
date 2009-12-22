@@ -14,7 +14,10 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1411] Fix status messages in refclock_oncore.c.
+* [Bug 1416] MAXDNAME undefined on Solaris 2.6.
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
+* [Bug 1424] Fix check for rtattr (rtnetlink.h).
 * [Bug 1426] scripts/VersionName needs . on the search path.
 * [Bug 1427] quote missing in ./build - shows up on NetBSD.
 * [Bug 1428] Use AC_HEADER_RESOLV to fix breaks from resolv.h
