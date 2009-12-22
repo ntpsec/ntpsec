@@ -417,6 +417,7 @@ case "$host" in
     AC_CHECK_LIB([resolv],[res_9_init])
     ;;
 esac
+AC_HEADER_RESOLV
 AC_CHECK_FUNCS(res_init __res_init)
 
 AC_HEADER_STDC

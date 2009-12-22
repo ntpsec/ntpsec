@@ -44,8 +44,21 @@
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
 #endif
 
-#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
-#include <resolv.h>
+#if !defined(HAVE_RES_INIT) && defined(HAVE___RES_INIT)
+# define HAVE_RES_INIT
+#endif
+
+#if defined(HAVE_RESOLV_H) && defined(HAVE_RES_INIT)
+# ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+# ifdef HAVE_ARPA_NAMESER_H
+#  include <arpa/nameser.h> /* DNS HEADER struct */
+# endif
+# ifdef HAVE_NETDB_H
+#  include <netdb.h>
+# endif
+# include <resolv.h>
 #endif
 
 #include <isc/net.h>
@@ -1228,7 +1241,7 @@ doconfigure(
 			    dores ? "with" : "without" );
 #endif
 
-#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
+#if defined(HAVE_RES_INIT)
 	if (dores)	   /* Reload /etc/resolv.conf - bug 1226 */
 		res_init();
 #endif

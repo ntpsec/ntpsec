@@ -3,6 +3,7 @@
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
 * [Bug 1426] scripts/VersionName needs . on the search path.
 * [Bug 1427] quote missing in ./build - shows up on NetBSD.
+* [Bug 1428] Use AC_HEADER_RESOLV to fix breaks from resolv.h
 
 ---
 (4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
