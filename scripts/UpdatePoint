@@ -156,14 +156,18 @@ case "$repo" in
 	esac
 	;;
      beta)
-	case "$betapoint" in
-	 0) echo "betapoint is 0 and prerelease is beta, you probably intended"
-	    echo "prerelease=  (that is, empty).  It will then be changed to"
-	    echo "beta by this script, starting the first beta for the next"
-	    echo "point release."
+	case "$betapoint::$rcpoint" in
+	 [1-9]*::*)
+	    bp=0
+	    bbp=1
+	    ;;
+	 0::) echo "betapoint is 0, rcpoint emtpy, and prerelease is beta."
+	    echo "You probably intended prerelease=  (that is, empty).  It"
+	    echo "will then be changed to beta by this script, starting the"
+	    echo "first beta for the next point release."
 	    exit 1
 	    ;;
-	 [1-9]*)
+	 *)
 	    bp=0
 	    bbp=1
 	    ;;
@@ -178,13 +182,17 @@ case "$repo" in
 	;;
      rc|RC)
 	case "$rcpoint" in
-	 ''|[1-9]*)
+	 '')
 	    case "$betapoint" in
 	     0) # bp=1
 		;;
 	     *) bp=0
 		;;
 	    esac
+	    crcp=i
+	    ;;
+	 [1-9]*)
+	    bp=0
 	    crcp=i
 	    ;;
 	 [Gg][Oo])
