@@ -1,7 +1,12 @@
 NULL=
 AUTOMAKE_OPTIONS= 
 
+if NTP_BINSUBDIR_IS_BIN
+bin_PROGRAMS=	@MAKE_NTPSNMPD@
+else
 sbin_PROGRAMS=	@MAKE_NTPSNMPD@
+endif
+
 EXTRA_PROGRAMS=	ntpsnmpd
 ntpsnmpd_SOURCES= netsnmp_daemonize.c ntpsnmpd.c ntpSnmpSubagentObject.c \
 			ntpsnmpd-opts.c ntpsnmpd-opts.h
