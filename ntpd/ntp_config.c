@@ -132,11 +132,6 @@ struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
 struct config_tree cfgt;		/* Parser output stored here */
 struct config_tree *cfg_tree_history = NULL;	/* History of configs */
-#if 0
-short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
-#else
-short default_ai_family = AF_INET;	/* [Bug 891]: FIX ME */
-#endif
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	default_keysdir[] = NTP_KEYSDIR;
 char	*keysdir = default_keysdir;	/* crypto keys directory */
@@ -2945,10 +2940,9 @@ config_trap(
 			/* port is at same location for v4 and v6 */
 			SET_PORT(&peeraddr, port_no ? port_no : TRAPPORT);
 
-			if (NULL == localaddr) {
-				AF(&peeraddr) = default_ai_family;
+			if (NULL == localaddr)
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-			} else
+			else
 				AF(&peeraddr) = AF(&addr_sock);
 
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
