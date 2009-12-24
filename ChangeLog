@@ -1,3 +1,4 @@
+(4.2.7p4) 2009/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1429] ntpd -4 option does not reliably force IPv4 resolution.
 * [Bug 1431] System headers must come before ntp headers in ntp_intres.c .
 (4.2.7p3) 2009/12/22 Released by Harlan Stenn <stenn@ntp.org>
