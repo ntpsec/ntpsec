@@ -28,6 +28,7 @@
 #include "ntpsim.h"
 #include "ntpd-opts.h"
 #include <ntp_random.h>
+#include "ntp_intres.h"
 #include <isc/net.h>
 #include <isc/result.h>
 
