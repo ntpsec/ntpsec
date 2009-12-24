@@ -20,15 +20,9 @@
 # include <config.h>
 #endif
 
-#include "ntp_machine.h"
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_request.h"
-#include "ntp_stdlib.h"
-#include "ntp_syslog.h"
-#include "ntp_config.h"
+#include "ntp_intres.h"
 
-#ifndef NO_INTRES		/* from ntp_config.h */
+#ifndef NO_INTRES
 
 #include <stdio.h>
 #include <ctype.h>
@@ -60,6 +54,14 @@
 # endif
 # include <resolv.h>
 #endif
+
+#include "ntp_machine.h"
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_request.h"
+#include "ntp_stdlib.h"
+#include "ntp_syslog.h"
+#include "ntp_config.h"
 
 #include <isc/net.h>
 #include <isc/result.h>
