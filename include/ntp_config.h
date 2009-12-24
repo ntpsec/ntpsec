@@ -53,16 +53,6 @@
 #define FREE_CFG_T
 #endif
 
-/*
- * Some systems do not support fork() and don't have an alternate
- * threads implementation of ntp_intres.  Such systems are limited
- * to using numeric IP addresses.
- */
-#if defined(VMS) || defined (SYS_VXWORKS) || \
-    (!defined(HAVE_FORK) && !defined(SYS_WINNT))
-#define NO_INTRES
-#endif
-
 /* Limits */
 #define MAXLINE 1024
 

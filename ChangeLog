@@ -23,6 +23,7 @@
 * [Bug 1427] quote missing in ./build - shows up on NetBSD.
 * [Bug 1428] Use AC_HEADER_RESOLV to fix breaks from resolv.h
 * [Bug 1429] ntpd -4 option does not reliably force IPv4 resolution.
+* [Bug 1431] System headers must come before ntp headers in ntp_intres.c .
 
 ---
 (4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
