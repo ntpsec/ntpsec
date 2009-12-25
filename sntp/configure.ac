@@ -464,6 +464,9 @@ case "$ntp_cv_multicast" in
     )
 esac
 
+# HMS: We don't need res_init, but since we may be using cached 
+# values from ntpd we need to test the same way 
+AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl]) 
 AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
