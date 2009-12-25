@@ -3501,8 +3501,6 @@ config_unpeers(
 				unpeer(peer);
 			}	
 
-			/* Ok, everything done. Free up peer node memory */
-			free_node(curr_unpeer);
 			continue;
 		}
 
