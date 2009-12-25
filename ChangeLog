@@ -22,11 +22,14 @@
 * [Bug 1416] MAXDNAME undefined on Solaris 2.6.
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
 * [Bug 1424] Fix check for rtattr (rtnetlink.h).
+* [Bug 1425] unpeer by association ID sets up for duplicate free().
 * [Bug 1426] scripts/VersionName needs . on the search path.
 * [Bug 1427] quote missing in ./build - shows up on NetBSD.
 * [Bug 1428] Use AC_HEADER_RESOLV to fix breaks from resolv.h
 * [Bug 1429] ntpd -4 option does not reliably force IPv4 resolution.
 * [Bug 1431] System headers must come before ntp headers in ntp_intres.c .
+* [Bug 1434] HP-UX 11 ip_mreq undeclared, _HPUX_SOURCE helps some.
+* [Bug 1435] sntp: Test for -lresolv using the same tests as in ntp.
 
 ---
 (4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
