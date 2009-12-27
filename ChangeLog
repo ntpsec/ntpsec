@@ -1,7 +1,11 @@
 ---
+
+* [Bug 1440] Update configure.ac to support kfreebsd.
+* [Bug 1127] Properly check the return of X590_verify() - missed one.
+
+---
 (4.2.6p1-RC2) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
 
-* [Bug 1127] Properly check the return of X590_verify() - missed one.
 * [Bug 1411] Fix status messages in refclock_oncore.c.
 * [Bug 1416] MAXDNAME undefined on Solaris 2.6.
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
@@ -14,7 +18,6 @@
 * [Bug 1431] System headers must come before ntp headers in ntp_intres.c .
 * [Bug 1434] HP-UX 11 ip_mreq undeclared, _HPUX_SOURCE helps some.
 * [Bug 1435] sntp: Test for -lresolv using the same tests as in ntp.
-* [Bug 1440] Update configure.ac to support kfreebsd.
 
 ---
 (4.2.6p1-RC1) 2009/12/20 Released by Harlan Stenn <stenn@ntp.org>
