@@ -1,4 +1,6 @@
+* Include (4.2.6p1-RC3) - [Bug 1127] Check the return of X590_verify().
 (4.2.7p5) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
+* Include (4.2.6p1-RC2)
 (4.2.7p4) 2009/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1429] ntpd -4 option does not reliably force IPv4 resolution.
 * [Bug 1431] System headers must come before ntp headers in ntp_intres.c .
@@ -18,7 +20,9 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p1-RC2) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
 
+* [Bug 1127] Properly check the return of X590_verify() - missed one.
 * [Bug 1411] Fix status messages in refclock_oncore.c.
 * [Bug 1416] MAXDNAME undefined on Solaris 2.6.
 * [Bug 1419] ntpdate, ntpdc, sntp, ntpd ignore configure --bindir.
