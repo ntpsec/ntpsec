@@ -23,13 +23,17 @@ AM_CPPFLAGS= -I$(top_srcdir)/ntpq -I$(top_srcdir)/include \
 AM_CFLAGS=	@SNMP_CFLAGS@
 EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\
 		ntpsnmpd-opts.menu ntpv4-mib.mib
-BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h ntpsnmpd.1 ntpsnmpd-opts.texi \
-		ntpsnmpd-opts.menu
+BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h
 CLEANFILES=
-man_MANS=	ntpsnmpd.1
-run_ag=		cd $(srcdir) &&					\
-		env PATH="$(abs_builddir):$(PATH)"		\
+noinst_DATA=	$(srcdir)/ntpsnmpd-opts.texi $(srcdir)/ntpsnmpd-opts.menu
+man_MANS=	$(srcdir)/ntpsnmpd.1
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
+run_ro=		( { test -w $(srcdir) && exit 0 ;} || { touch ro_srcdir	\
+		&& chmod u+w $(top_srcdir) $(srcdir) ;} ) &&
+if_ro_src=	{ test ! -f ro_srcdir && exit 0 ;} ||
+post_run_ro=	$(if_ro_src) { rm ro_srcdir && chmod u-w $(srcdir)	\
+		$(top_srcdir) ;}
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/homerc.def 		\
@@ -42,14 +46,15 @@ $(srcdir)/ntpsnmpd-opts.c: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) ntpsnmpd-opts.def
 
 $(srcdir)/ntpsnmpd.1: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
-	$(run_ag) -Tagman1.tpl -bntpsnmpd ntpsnmpd-opts.def
+	$(run_ro) $(run_ag) -Tagman1.tpl -bntpsnmpd ntpsnmpd-opts.def
+	$(post_run_ro)
 
-$(srcdir)/ntpsnmpd-opts.texi $(srcdir)/ntpsnmpd-opts.menu: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
-	$(MAKE) @MAKE_NTPSNMPD@ not-all-target	# aginfo.tpl runs the binary to extract --help usage text
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpsnmpd-opts.def
-
-not-all-target:
-	touch $@	# used to avoid "all" default target when not building ntpsnmpd
+$(srcdir)/ntpsnmpd-opts.menu: $(srcdir)/ntpsnmpd-opts.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+	
+$(srcdir)/ntpsnmpd-opts.texi: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+	$(run_ro) $(run_ag) -Taginfo.tpl -DLEVEL=section ntpsnmpd-opts.def
+	$(post_run_ro)
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf

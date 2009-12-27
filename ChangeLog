@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1439] .texi generation must wait until after binary is linked.
+
+---
 (4.2.6p1-RC2) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1411] Fix status messages in refclock_oncore.c.

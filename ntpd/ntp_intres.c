@@ -29,6 +29,9 @@
 #include <signal.h>
 
 /**/
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -43,9 +46,6 @@
 #endif
 
 #if defined(HAVE_RESOLV_H) && defined(HAVE_RES_INIT)
-# ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-# endif
 # ifdef HAVE_ARPA_NAMESER_H
 #  include <arpa/nameser.h> /* DNS HEADER struct */
 # endif
@@ -53,6 +53,10 @@
 #  include <netdb.h>
 # endif
 # include <resolv.h>
+#endif
+
+#ifdef RES_TIMEOUT
+#undef RES_TIMEOUT	/* resolv.h has one, we want ours */
 #endif
 
 #include "ntp_machine.h"
