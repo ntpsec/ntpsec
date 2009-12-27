@@ -1,4 +1,5 @@
 * Include (4.2.6p1-RC3) - [Bug 1127] Check the return of X590_verify().
+* Include (4.2.6p1-RC3) - [Bug 1440] Update configure.ac to support kfreebsd.
 (4.2.7p5) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC2)
 (4.2.7p4) 2009/12/24 Released by Harlan Stenn <stenn@ntp.org>
