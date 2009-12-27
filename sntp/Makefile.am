@@ -12,9 +12,12 @@ AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 
-run_ag=	cd $(srcdir) &&				\
-	env PATH="$(abs_builddir):$(PATH)"	\
-	autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+		autogen -L ../include --writable
+run_ro=		( { test -w $(srcdir) && exit 0 ;} || { touch ro_srcdir	\
+		&& chmod u+w $(srcdir) ;} ) &&
+if_ro_src=	{ test ! -f ro_srcdir && exit 0 ;} ||
+post_run_ro=	$(if_ro_src) { rm ro_srcdir && chmod u-w $(srcdir) ;}
 
 if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	sntp
@@ -22,7 +25,7 @@ else
 sbin_PROGRAMS=	sntp
 endif
 
-CLEANFILES=	libopts-subdir
+CLEANFILES=
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -47,9 +50,6 @@ sntp_SOURCES =		\
 	utilities.c	\
 	utilities.h	\
 	$(NULL)
-
-# it's in EXTRA_DIST
-#dist_man_MANS=	sntp.1
 
 EXTRA_DIST=				\
 		autogen-version.def	\
@@ -78,13 +78,15 @@ BUILT_SOURCES=						\
 		libtool					\
 		sntp-opts.c				\
 		sntp-opts.h				\
-		sntp-opts.menu				\
-		sntp-opts.texi				\
-		sntp.1					\
-		sntp.html				\
 		$(NULL)
 
-man_MANS=	sntp.1
+man_MANS=	$(srcdir)/sntp.1
+
+noinst_DATA=				\
+	$(srcdir)/sntp.html		\
+	$(srcdir)/sntp-opts.texi	\
+	$(srcdir)/sntp-opts.menu	\
+	$(NULL)
 
 FRC:
 check-autogen-version.def: FRC
@@ -136,20 +138,21 @@ $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
 	$(run_ag) sntp-opts.def
 
 $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
-	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
+	$(run_ro) $(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
+	$(post_run_ro)
 
-$(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
-	$(MAKE) libopts-subdir sntp	# aginfo.tpl runs binary to extract --help usage text
-	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
-
-libopts-subdir: $(LIBOPTS_LDADD)
-	touch $@	# LIBOPTS_LDADD is ./libopts/libopts.la if NEED_LIBOPTS
-
-libopts/libopts.la:
-	( cd libopts && $(MAKE) libopts.la )
+$(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+	
+$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+	$(run_ro) $(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
+	$(post_run_ro)
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
-	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
+	$(run_ro) cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html+ sntp.texi
+	$(if_ro_src) { chmod a-w $(srcdir)/sntp.html+ && chmod u+w $(srcdir)/sntp.html ;}
+	$(post_run_ro)
+	mv $(srcdir)/sntp.html+ $(srcdir)/sntp.html
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

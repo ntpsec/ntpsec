@@ -22,6 +22,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1439] .texi generation must wait until after binary is linked.
 * [Bug 1440] Update configure.ac to support kfreebsd.
 * [Bug 1127] Properly check the return of X590_verify() - missed one.
 
