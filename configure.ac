@@ -742,6 +742,9 @@ case "$host" in
  *-*-sunos4*)
     ac_cv_var_override_hz=yes
     ;;
+ *-*-kfreebsd*)
+    ac_cv_var_override_hz=yes
+    ;;
 esac])
 case "$ac_cv_var_override_hz" in
  yes)
@@ -1860,6 +1863,9 @@ case "$ac_cv_hdr_def_sigio" in
      *-*-unicosmp*)
 	ans=no
 	;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
     esac
     ;;
 esac
@@ -1928,6 +1934,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-unicosmp*)
         ans=no
         ;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
      *) ans=yes
         ;;
     esac
@@ -1979,6 +1988,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-unicosmp*)
         ans=no
         ;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
      *) ans=yes
         ;;
     esac
