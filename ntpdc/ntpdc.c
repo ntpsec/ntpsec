@@ -10,7 +10,6 @@
 
 #include "ntpdc.h"
 #include "ntp_select.h"
-#include "ntp_io.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
