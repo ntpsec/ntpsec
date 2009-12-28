@@ -422,7 +422,7 @@ SOURCE=..\..\..\libntp\tsftomsu.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\termios.c
+SOURCE=..\libntp\termios.c
 # End Source File
 # Begin Source File
 
@@ -446,7 +446,7 @@ SOURCE=..\libntp\util_clockstuff.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\win32_io.c
+SOURCE=..\libntp\win32_io.c
 # End Source File
 # Begin Source File
 
