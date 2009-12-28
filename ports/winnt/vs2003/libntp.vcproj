@@ -1684,7 +1684,7 @@
 				RelativePath="..\..\..\lib\isc\win32\time.c">
 			</File>
 			<File
-				RelativePath="..\libntp\libntp\termios.c">
+				RelativePath="..\libntp\termios.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
