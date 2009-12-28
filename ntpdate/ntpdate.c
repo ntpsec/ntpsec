@@ -13,7 +13,6 @@
 #include "ntp_machine.h"
 #include "ntp_fp.h"
 #include "ntp.h"
-#include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntpdate.h"
 #include "ntp_string.h"

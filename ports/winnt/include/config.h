@@ -173,19 +173,6 @@ typedef int socklen_t;
 #define SO_EXCLUSIVEADDRUSE ((int)(~SO_REUSEADDR))
 #endif
 
-/*
- * Define this macro to control the behavior of connection
- * resets on UDP sockets.  See Microsoft KnowledgeBase Article Q263823
- * for details.
- * Based on that article, it is surprising that a much newer winsock2.h
- * does not define SIO_UDP_CONNRESET (the one that comes with VS 2008).
- * NOTE: This requires that Windows 2000 systems install Service Pack 2
- * or later.
- */
-#ifndef SIO_UDP_CONNRESET 
-#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR,12) 
-#endif
-
 #if defined _MSC_VER && _MSC_VER < 1400
 /*
  * Use 32-bit time definitions for versions prior to VS 2005

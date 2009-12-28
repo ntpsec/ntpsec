@@ -6,7 +6,6 @@
 #endif
 
 #include "ntpd.h"
-#include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntp_filegen.h"
 #include "ntp_if.h"

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ntpd"
-	ProjectGUID="{DDAB6ECD-E9DF-46B2-8737-6DEF96ADA59A}"
+	ProjectGUID="{F6F7E7C0-AE5E-4D7C-A17E-A3043FE68664}"
 	>
 	<Platforms>
 		<Platform
@@ -734,28 +734,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath="..\ntpd\win32_io.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1006,7 +984,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\isc\win32os.h"
+				RelativePath="..\..\..\lib\isc\win32\include\isc\win32os.h"
 				>
 			</File>
 		</Filter>

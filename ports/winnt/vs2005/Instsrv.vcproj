@@ -70,7 +70,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../bin/Debug/Instsrv.exe"
+				OutputFile="bin/Debug/Instsrv.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
@@ -161,7 +161,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../bin/Release/Instsrv.exe"
+				OutputFile="bin/Release/Instsrv.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\instsrv\Release/Instsrv.pdb"
