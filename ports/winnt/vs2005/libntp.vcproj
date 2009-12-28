@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="libntp"
-	ProjectGUID="{D696D740-D243-47C4-AFF8-151FB54D33CA}"
+	ProjectGUID="{ECDDC7EE-5805-4603-B38D-804C09BDC910}"
 	>
 	<Platforms>
 		<Platform
@@ -1793,6 +1793,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\libntp\termios.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\lib\isc\win32\thread.c"
 				>
 			</File>
@@ -1931,6 +1935,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\libntp\win32_io.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\win32\win32os.c"
@@ -2222,11 +2230,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\include\sys\time.h"
+				RelativePath="..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\include\sys\time.h"
 				>
 			</File>
 			<File
@@ -2234,7 +2242,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\lib\isc\include\isc\win32os.h"
+				RelativePath="..\..\..\lib\isc\win32\include\isc\win32os.h"
 				>
 			</File>
 		</Filter>

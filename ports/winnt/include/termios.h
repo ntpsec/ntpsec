@@ -1,5 +1,5 @@
-#ifndef WIN32_IO_H
-#define WIN32_IO_H
+#ifndef _TERMIOS_H
+#define _TERMIOS_H
 
 /*  Flag definitions for compatibility
  *  ==================================
@@ -213,4 +213,4 @@ extern	int	ioctl		(int, int, int *);
 extern	int	tcsetattr	(int, int, const struct termios *);
 extern	int	tcgetattr	(int, struct termios *);
 
-#endif /* defined WIN32_IO_H */
+#endif
