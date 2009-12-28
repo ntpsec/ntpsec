@@ -540,7 +540,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\win32\win32_io.c"
+				RelativePath="..\..\..\..\libntp\win32_io.c"
 				>
 			</File>
 			<File
