@@ -4533,7 +4533,13 @@ AC_MSG_CHECKING([[if we have linux capabilities (libcap)]])
 
 case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
  yesyes)
-    ntp_have_linuxcaps=yes
+    case "$host" in
+     mips-sgi-irix*)
+	ntp_have_linuxcaps=no
+	;;
+     *) ntp_have_linuxcaps=yes
+	;;
+    esac
     ;;
  *)
     ntp_have_linuxcaps=no
