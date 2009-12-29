@@ -1,3 +1,4 @@
+* [Bug 620] ntpdc getresponse() esize != *rsize s/b size != *rsize.
 (4.2.7p6) 2009/12/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1443] Remove unnecessary dependencies on ntp_io.h
 * [Bug 1442] Move Windows functions into libntp files

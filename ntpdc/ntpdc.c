@@ -812,7 +812,7 @@ getresponse(
 	 * If this isn't our first packet, make sure the size matches
 	 * the other ones.
 	 */
-	if (!firstpkt && esize != *rsize) {
+	if (!firstpkt && size != *rsize) {
 		if (debug)
 		    printf("Received itemsize %d, previous %d\n",
 			   size, *rsize);
