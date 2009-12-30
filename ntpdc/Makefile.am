@@ -28,11 +28,6 @@ man_MANS=	$(srcdir)/ntpdc.1
 noinst_DATA=	$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
-run_ro=		( { test -w $(srcdir) && exit 0 ;} || { touch ro_srcdir	\
-		&& chmod u+w $(top_srcdir) $(srcdir) ;} ) &&
-if_ro_src=	{ test ! -f ro_srcdir && exit 0 ;} ||
-post_run_ro=	$(if_ro_src) { rm ro_srcdir && chmod u-w $(srcdir)	\
-		$(top_srcdir) ;}
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
@@ -46,15 +41,13 @@ $(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
 $(srcdir)/ntpdc.1: $(srcdir)/ntpdc-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Tagman1.tpl -bntpdc ntpdc-opts.def
-	$(post_run_ro)
+	$(run_ag) -Tagman1.tpl -bntpdc ntpdc-opts.def
 
 $(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
 $(srcdir)/ntpdc-opts.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
-	$(post_run_ro)
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
 
