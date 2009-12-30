@@ -122,11 +122,6 @@ EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
 noinst_DATA =	$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
-run_ro=		( { test -w $(srcdir) && exit 0 ;} || { touch ro_srcdir	\
-		&& chmod u+w $(top_srcdir) $(srcdir) ;} ) &&
-if_ro_src=	{ test ! -f ro_srcdir && exit 0 ;} ||
-post_run_ro=	$(if_ro_src) { rm ro_srcdir && chmod u-w $(srcdir)	\
-		$(top_srcdir) ;}
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
 		$(top_srcdir)/include/version.def
@@ -234,15 +229,13 @@ $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std
 	$(run_ag) ntpd-opts.def
 
 $(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
-	$(post_run_ro)
+	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
 
 $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
 $(srcdir)/ntpd-opts.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
-	$(post_run_ro)
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
 $(PROGRAMS): $(LDADD)
 

@@ -26,11 +26,6 @@ man_MANS=	$(srcdir)/ntpq.1
 noinst_DATA=	$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
-run_ro=		( { test -w $(srcdir) && exit 0 ;} || { touch ro_srcdir	\
-		&& chmod u+w $(top_srcdir) $(srcdir) ;} ) &&
-if_ro_src=	{ test ! -f ro_srcdir && exit 0 ;} ||
-post_run_ro=	$(if_ro_src) { rm ro_srcdir && chmod u-w $(srcdir)	\
-		$(top_srcdir) ;}
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
@@ -47,15 +42,13 @@ $(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) ntpq-opts.def
 
 $(srcdir)/ntpq.1: $(srcdir)/ntpq-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
-	$(post_run_ro)
+	$(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
 
 $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
 $(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
-	$(post_run_ro)
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 
 $(PROGRAMS): $(LDADD)
 

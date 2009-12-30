@@ -31,11 +31,6 @@ noinst_DATA=	$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu
 man_MANS=	$(srcdir)/ntp-keygen.1
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
-run_ro=		( { test -w $(srcdir) && exit 0 ;} || { touch ro_srcdir	\
-		&& chmod u+w $(top_srcdir) $(srcdir) ;} ) &&
-if_ro_src=	{ test ! -f ro_srcdir && exit 0 ;} ||
-post_run_ro=	$(if_ro_src) { rm ro_srcdir && chmod u-w $(srcdir)	\
-		$(top_srcdir) ;}
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
@@ -49,15 +44,13 @@ $(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) ntp-keygen-opts.def
 
 $(srcdir)/ntp-keygen.1: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Tagman1.tpl -bntp-keygen ntp-keygen-opts.def
-	$(post_run_ro)
+	$(run_ag) -Tagman1.tpl -bntp-keygen ntp-keygen-opts.def
 
 $(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
 $(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
-	$(run_ro) $(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
-	$(post_run_ro)
+	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
 
 
 jitter_SOURCES=	jitter.c jitter.h
