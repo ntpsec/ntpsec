@@ -103,9 +103,12 @@ check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = keyword-gen .version version.c
 CLEANFILES = check-saveconfig compsave.conf ntp_keyword.out \
 	ntp_keyword.dummy
-EXTRA_DIST = \
+EXTRA_DIST =			\
 	complete.conf		\
+	ntpd.1			\
 	ntpd-opts.def		\
+	ntpd-opts.menu		\
+	ntpd-opts.texi		\
 	ntpdbase-opts.def	\
 	ntp_keyword.h		\
 	refclock_msfees.c	\
