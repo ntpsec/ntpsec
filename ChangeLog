@@ -1,3 +1,4 @@
+* [Bug 1446] 4.2.7p6 requires autogen, missing ntpd.1, *.texi, *.menu.
 (4.2.7p6) 2009/12/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1443] Remove unnecessary dependencies on ntp_io.h
 * [Bug 1442] Move Windows functions into libntp files
