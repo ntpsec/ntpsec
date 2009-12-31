@@ -252,7 +252,7 @@ void destroy_restrict_node(struct restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
 static void save_and_apply_config_tree(void);
-void getconfig(int argc,char *argv[]);
+void getconfig(int, char **);
 #if !defined(SIM)
 static sockaddr_u *get_next_address(struct address_node *addr);
 #endif
@@ -3761,8 +3761,8 @@ config_remotely(
  */
 void
 getconfig(
-	int argc,
-	char *argv[]
+	int	argc,
+	char **	argv
 	)
 {
 	char line[MAXLINE];

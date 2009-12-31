@@ -23,12 +23,15 @@ extern int	check_netinfo;
 
 
 /*
- * getCmdOpts - get command line options
+ * getCmdOpts - apply most command line options
+ *
+ * A few options are examined earlier in ntpd.c ntpdmain() and
+ * ports/winnt/ntpd/ntservice.c main().
  */
 void
 getCmdOpts(
-	int argc,
-	char *argv[]
+	int	argc,
+	char **	argv
 	)
 {
 	extern const char *config_file;

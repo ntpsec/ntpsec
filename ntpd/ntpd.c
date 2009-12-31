@@ -222,7 +222,6 @@ int		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
 void		init_logging		(char const *, int);
 void		setup_logfile		(void);
-static void	process_commandline_opts(int *, char ***);
 
 static void	assertion_failed	(const char *file, int line,
 	isc_assertiontype_t type, const char *cond);
@@ -316,15 +315,20 @@ setup_logfile(
 }
 
 
-static void
-process_commandline_opts(
-	int *pargc,
+void
+parse_cmdline_opts(
+	int *	pargc,
 	char ***pargv
 	)
 {
-	int optct;
+	static int	parsed;
+	static int	optct;
+
+	if (!parsed)
+		optct = optionProcess(&ntpdOptions, *pargc, *pargv);
+
+	parsed = 1;
 	
-	optct = optionProcess(&ntpdOptions, *pargc, *pargv);
 	*pargc -= optct;
 	*pargv += optct;
 }
@@ -337,7 +341,7 @@ main(
 	char *argv[]
 	)
 {
-	process_commandline_opts(&argc, &argv);
+	parse_cmdline_opts(&argc, &argv);
 
 	return ntpsim(argc, argv);
 }
@@ -496,7 +500,7 @@ ntpdmain(
 
 	progname = argv[0];
 	initializing = 1;		/* mark that we are initializing */
-	process_commandline_opts(&argc, &argv);
+	parse_cmdline_opts(&argc, &argv);
 	init_logging(progname, 1);	/* Open the log file */
 
 #ifdef HAVE_UMASK
@@ -523,8 +527,6 @@ ntpdmain(
 		}
 	}
 #endif
-
-	/* getstartup(argc, argv); / * startup configuration, may set debug */
 
 #ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;

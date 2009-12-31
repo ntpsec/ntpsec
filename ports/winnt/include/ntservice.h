@@ -15,22 +15,17 @@
  * WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* $Id: ntservice.h,v 1.2 2002/08/03 01:31:48 mayer Exp $ */
-
 #ifndef NTSERVICE_H
 #define NTSERVICE_H
-
-#include <winsvc.h>
 
 #define NTP_DISPLAY_NAME "NetworkTimeProtocol"
 #define NTP_SERVICE_NAME "ntpd"
 
-void ntservice_init();
+void ntservice_init(void);
 void UpdateSCM(DWORD);
 void WINAPI ServiceControl(DWORD dwCtrlCode);
-void ntservice_shutdown();
-BOOL ntservice_isservice();
-BOOL ntservice_systemisshuttingdown();
+void ntservice_shutdown(void);
+BOOL ntservice_systemisshuttingdown(void);
 BOOL WINAPI OnConsoleEvent(DWORD dwCtrlType);
 
-#endif
+#endif	/* NTSERVICE_H */
