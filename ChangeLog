@@ -1,3 +1,7 @@
+* [Bug 1448] Some macros not correctly conditionally or absolutely defined
+  on Windows
+* [Bug 1449] ntpsim.h should be conditionally in ntp_config.c
+* [Bug 1450] Option to exclude warnings not unconditionally defined on Windows
 (4.2.7p7) 2009/12/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 620] ntpdc getresponse() esize != *rsize s/b size != *rsize.
 * [Bug 1446] 4.2.7p6 requires autogen, missing ntpd.1, *.texi, *.menu.
