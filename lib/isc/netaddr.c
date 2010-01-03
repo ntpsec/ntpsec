@@ -371,7 +371,7 @@ void
 isc_netaddr_any6(isc_netaddr_t *netaddr) {
 	memset(netaddr, 0, sizeof(*netaddr));
 	netaddr->family = AF_INET6;
-	netaddr->type.in6 = in6addr_any;
+/*	netaddr->type.in6 = in6addr_any; Not strictly necessary */
 }
 
 isc_boolean_t

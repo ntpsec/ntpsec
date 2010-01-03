@@ -390,10 +390,6 @@ SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\isc\win32\stdime.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\libntp\syslog.c
 # End Source File
 # Begin Source File

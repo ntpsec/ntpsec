@@ -140,10 +140,10 @@ extern int tty_open(char *, int, int);
 #define ISC_PLATFORM_HAVEIPV6
 #define ISC_PLATFORM_HAVESCOPEID
 #define HAVE_STRUCT_SOCKADDR_STORAGE
-#define NO_OPTION_NAME_WARNINGS
+#define ISC_PLATFORM_HAVEIN6PKTINFO
 #endif	/* in_addr6 / RFC2553-compliant IPv6 headers */
 
-#define ISC_PLATFORM_HAVEIN6PKTINFO
+#define NO_OPTION_NAME_WARNINGS
 
 #if !defined( _W64 )
   /*

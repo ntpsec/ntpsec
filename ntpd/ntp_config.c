@@ -25,8 +25,10 @@
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
-#include "ntpsim.h"
 #include "ntpd-opts.h"
+#ifdef SIM
+#include "ntpsim.h"
+#endif
 #include <ntp_random.h>
 #include "ntp_intres.h"
 #include <isc/net.h>
