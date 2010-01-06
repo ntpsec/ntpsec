@@ -1,9 +1,10 @@
 ---
 
-* [Bug 1445] IRIX does not have -lcap or support linux capabilities.
-* [Bug 1440] Update configure.ac to support kfreebsd.
-* [Bug 1439] .texi generation must wait until after binary is linked.
 * [Bug 1127] Properly check the return of X590_verify() - missed one.
+* [Bug 1439] .texi generation must wait until after binary is linked.
+* [Bug 1440] Update configure.ac to support kfreebsd.
+* [Bug 1445] IRIX does not have -lcap or support linux capabilities.
+* [Bug 1453] Use $CC in config.cache filename in ./build script.
 
 ---
 (4.2.6p1-RC2) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
