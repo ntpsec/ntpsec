@@ -1,3 +1,4 @@
+* Include (4.2.6p1-RC3) - [Bug 1453] Use $CC in config.cache filename.
 (4.2.7p7) 2009/12/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 620] ntpdc getresponse() esize != *rsize s/b size != *rsize.
 * [Bug 1446] 4.2.7p6 requires autogen, missing ntpd.1, *.texi, *.menu.
