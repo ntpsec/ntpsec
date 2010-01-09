@@ -50,7 +50,7 @@ sntp_SOURCES =		\
 EXTRA_DIST=				\
 		autogen-version.def	\
 		bincheck.mf		\
-		$(srcdir)/COPYRIGHT	\
+		COPYRIGHT		\
 		deps-ver		\
 		depsver.mf		\
 		sntp-opts.def		\
@@ -71,6 +71,7 @@ BUILT_SOURCES=						\
 		check-autogen-version.def		\
 		check-version.def check-version.m4	\
 		check-version.texi			\
+		$(srcdir)/COPYRIGHT			\
 		libtool					\
 		sntp-opts.c				\
 		sntp-opts.h				\
@@ -130,16 +131,16 @@ $(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
 	
-$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) sntp-opts.def
 
-$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
 $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
-$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
