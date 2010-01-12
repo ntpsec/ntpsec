@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  December 30, 2009 at 10:22:22 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  January 12, 2010 at 10:28:39 AM by AutoGen 5.10
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpq copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntpq copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -39,7 +39,7 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "ntpq copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved"
+       "ntpq copyright (c) 1970-2010 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
@@ -427,7 +427,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPQ";
 tSCC   zUsageTitle[] =
-"ntpq - standard NTP query program - Ver. 4.2.7p7\n\
+"ntpq - standard NTP query program - Ver. 4.2.7p8\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
