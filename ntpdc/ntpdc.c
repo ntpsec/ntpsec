@@ -10,7 +10,6 @@
 
 #include "ntpdc.h"
 #include "ntp_select.h"
-#include "ntp_io.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
@@ -813,7 +812,7 @@ getresponse(
 	 * If this isn't our first packet, make sure the size matches
 	 * the other ones.
 	 */
-	if (!firstpkt && esize != *rsize) {
+	if (!firstpkt && size != *rsize) {
 		if (debug)
 		    printf("Received itemsize %d, previous %d\n",
 			   size, *rsize);

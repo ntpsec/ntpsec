@@ -211,8 +211,10 @@ case "$use_binsubdir" in
     ;;
 esac
 AC_MSG_RESULT($use_binsubdir)
+
 BINSUBDIR=$use_binsubdir
 AC_SUBST(BINSUBDIR)
+AM_CONDITIONAL(NTP_BINSUBDIR_IS_BIN, test "bin" = "$BINSUBDIR")
 
 AC_MSG_CHECKING([if we want to use arlib])
 AC_ARG_WITH(arlib,
@@ -407,6 +409,12 @@ esac
 
 AC_SEARCH_LIBS([setsockopt], [socket xnet])
 AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+case "$host" in
+ *-*-darwin*)
+    AC_CHECK_LIB([resolv],[res_9_init])
+    ;;
+esac
+AC_HEADER_RESOLV
 AC_CHECK_FUNCS(res_init __res_init)
 
 AC_HEADER_STDC
@@ -731,6 +739,9 @@ case "$host" in
  *-*-sunos4*)
     ac_cv_var_override_hz=yes
     ;;
+ *-*-kfreebsd*)
+    ac_cv_var_override_hz=yes
+    ;;
 esac])
 case "$ac_cv_var_override_hz" in
  yes)
@@ -773,6 +784,7 @@ AC_CACHE_CHECK([for struct rt_msghdr], ac_cv_struct_rt_msghdr,
 
 AC_CACHE_CHECK([for struct rtattr], ac_cv_struct_rtattr,
 [AC_TRY_COMPILE([
+#include <stddef.h>
 #include <linux/rtnetlink.h>],
 [struct rtattr p;],
 	ac_cv_struct_rtattr=yes,
@@ -1848,6 +1860,9 @@ case "$ac_cv_hdr_def_sigio" in
      *-*-unicosmp*)
 	ans=no
 	;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
     esac
     ;;
 esac
@@ -1916,6 +1931,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-unicosmp*)
         ans=no
         ;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
      *) ans=yes
         ;;
     esac
@@ -1967,6 +1985,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-unicosmp*)
         ans=no
         ;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
      *) ans=yes
         ;;
     esac
@@ -2126,36 +2147,57 @@ case "$ac_cv_var_ppsclock" in
  yes) AC_DEFINE(PPS, 1, [Do we have the ppsclock streams module?]) ;;
 esac
 
-AC_CACHE_CHECK([for kernel multicast support], ac_cv_var_mcast,
-  [ac_cv_var_mcast=no
-  case "$host" in
-   i386-sequent-sysv4) ;;
-   *) AC_EGREP_CPP(yes,
-  [#include <netinet/in.h>
-#ifdef IP_ADD_MEMBERSHIP
-   yes
-#endif
-  ], ac_cv_var_mcast=yes) ;;
-  esac])
-case "$ac_cv_var_mcast" in
+AC_CACHE_CHECK(
+    [for multicast IP support],
+    ntp_cv_multicast,
+    [
+	ntp_cv_multicast=no
+	case "$host" in
+	 i386-sequent-sysv4)
+	    ;;
+	 *)
+	    AC_COMPILE_IFELSE(
+		AC_LANG_PROGRAM(
+		    [
+			#ifdef HAVE_NETINET_IN_H
+			#include <netinet/in.h>
+			#endif
+		    ],
+		    [
+			struct ip_mreq ipmr;
+			ipmr.imr_interface.s_addr = 0;
+		    ]
+		),
+		[ntp_cv_multicast=yes],
+		[]
+	    )
+	esac
+    ]
+)
+
+case "$ntp_cv_multicast" in
  yes)
-    AC_DEFINE(MCAST, 1, [Does the kernel support multicasting IP?])
-    AC_CACHE_CHECK([[arg type needed for IP*_MULTICAST_LOOP for setsockopt()]],
-	ac_cv_var_typeof_ip_multicast_loop,
-	[case "$host" in
-	 *-*-netbsd*|*-*-*linux*)
-	    ac_cv_var_typeof_ip_multicast_loop=u_int
-	    ;;
-	 *-*-winnt*)
-	    ac_cv_var_typeof_ip_multicast_loop=BOOL
-	    ;;
-	 *) ac_cv_var_typeof_ip_multicast_loop=u_char
-	    ;;
-	esac])
-    AC_DEFINE_UNQUOTED(TYPEOF_IP_MULTICAST_LOOP,
-		   $ac_cv_var_typeof_ip_multicast_loop,
-		   [What type to use for setsockopt])
-    ;;
+    AC_DEFINE(MCAST, 1, [Does the target support multicast IP?])
+    AC_CACHE_CHECK(
+	[[arg type needed for setsockopt() IP*_MULTICAST_LOOP]],
+	ntp_cv_typeof_ip_multicast_loop,
+	[
+	    case "$host" in
+	     *-*-netbsd*|*-*-*linux*)
+		ntp_cv_typeof_ip_multicast_loop=u_int
+		;;
+	     *-*-winnt*)
+		ntp_cv_typeof_ip_multicast_loop=BOOL
+		;;
+	     *)
+		ntp_cv_typeof_ip_multicast_loop=u_char
+	    esac
+	]
+    )
+    AC_DEFINE_UNQUOTED([TYPEOF_IP_MULTICAST_LOOP],
+	$ntp_cv_typeof_ip_multicast_loop,
+	[What type to use for setsockopt]
+    )
 esac
 
 AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,
@@ -4488,7 +4530,13 @@ AC_MSG_CHECKING([[if we have linux capabilities (libcap)]])
 
 case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
  yesyes)
-    ntp_have_linuxcaps=yes
+    case "$host" in
+     mips-sgi-irix*)
+	ntp_have_linuxcaps=no
+	;;
+     *) ntp_have_linuxcaps=yes
+	;;
+    esac
     ;;
  *)
     ntp_have_linuxcaps=no

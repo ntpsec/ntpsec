@@ -12,13 +12,16 @@ AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 
-run_ag=	cd $(srcdir) &&				\
-	env PATH="$(abs_builddir):$(PATH)"	\
-	autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+		autogen -L ../include --writable
 
-bindir=	${exec_prefix}/${BINSUBDIR}
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	sntp
-CLEANFILES=	libopts-subdir
+else
+sbin_PROGRAMS=	sntp
+endif
+
+CLEANFILES=
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -44,13 +47,10 @@ sntp_SOURCES =		\
 	utilities.h	\
 	$(NULL)
 
-# it's in EXTRA_DIST
-#dist_man_MANS=	sntp.1
-
 EXTRA_DIST=				\
 		autogen-version.def	\
 		bincheck.mf		\
-		$(srcdir)/COPYRIGHT	\
+		COPYRIGHT		\
 		deps-ver		\
 		depsver.mf		\
 		sntp-opts.def		\
@@ -71,16 +71,19 @@ BUILT_SOURCES=						\
 		check-autogen-version.def		\
 		check-version.def check-version.m4	\
 		check-version.texi			\
+		$(srcdir)/COPYRIGHT			\
 		libtool					\
 		sntp-opts.c				\
 		sntp-opts.h				\
-		sntp-opts.menu				\
-		sntp-opts.texi				\
-		sntp.1					\
-		sntp.html				\
 		$(NULL)
 
-man_MANS=	sntp.1
+man_MANS=	$(srcdir)/sntp.1
+
+noinst_DATA=				\
+	$(srcdir)/sntp.html		\
+	$(srcdir)/sntp-opts.texi	\
+	$(srcdir)/sntp-opts.menu	\
+	$(NULL)
 
 FRC:
 check-autogen-version.def: FRC
@@ -128,21 +131,17 @@ $(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
 	
-$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) sntp-opts.def
 
-$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
-$(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
-	$(MAKE) libopts-subdir sntp	# aginfo.tpl runs binary to extract --help usage text
+$(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+	
+$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
-
-libopts-subdir: $(LIBOPTS_LDADD)
-	touch $@	# LIBOPTS_LDADD is ./libopts/libopts.la if NEED_LIBOPTS
-
-libopts/libopts.la:
-	( cd libopts && $(MAKE) libopts.la )
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
 	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi

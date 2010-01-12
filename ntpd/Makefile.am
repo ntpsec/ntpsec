@@ -1,9 +1,11 @@
 NULL=
 AUTOMAKE_OPTIONS= 
 
-bindir=	${exec_prefix}/${BINSUBDIR}
-
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
+else
+sbin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
+endif
 
 noinst_LIBRARIES=	libntpd.a
 
@@ -72,9 +74,6 @@ B_S_DIST=		\
 	ntp_keyword.h 	\
 	ntpd-opts.c 	\
 	ntpd-opts.h 	\
-	ntpd.1 		\
-	ntpd-opts.texi 	\
-	ntpd-opts.menu	\
 	$(NULL)
 
 BUILT_SOURCES=		\
@@ -85,7 +84,7 @@ BUILT_SOURCES=		\
 	$(B_S_DIST)	\
 	$(NULL)
 
-man_MANS=	ntpd.1
+man_MANS=	$(srcdir)/ntpd.1
 
 # ntpdsim.1 is a remnant along with all the ntpdsim-opts.* files, the
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
@@ -104,9 +103,12 @@ check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 DISTCLEANFILES = keyword-gen .version version.c
 CLEANFILES = check-saveconfig compsave.conf ntp_keyword.out \
 	ntp_keyword.dummy
-EXTRA_DIST = \
+EXTRA_DIST =			\
 	complete.conf		\
+	ntpd.1			\
 	ntpd-opts.def		\
+	ntpd-opts.menu		\
+	ntpd-opts.texi		\
 	ntpdbase-opts.def	\
 	ntp_keyword.h		\
 	refclock_msfees.c	\
@@ -117,8 +119,8 @@ ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
-run_ag=		cd $(srcdir) &&					\
-		env PATH="$(abs_builddir):$(PATH)"		\
+noinst_DATA =	$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
 		$(top_srcdir)/include/copyright.def 		\
@@ -229,8 +231,10 @@ $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std
 $(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
 
-$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(MAKE) ntpd	# aginfo.tpl runs the binary to extract --help usage text
+$(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+	
+$(srcdir)/ntpd-opts.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
 
 $(PROGRAMS): $(LDADD)

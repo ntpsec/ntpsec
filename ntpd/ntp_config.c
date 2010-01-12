@@ -28,6 +28,7 @@
 #include "ntpsim.h"
 #include "ntpd-opts.h"
 #include <ntp_random.h>
+#include "ntp_intres.h"
 #include <isc/net.h>
 #include <isc/result.h>
 
@@ -132,11 +133,6 @@ struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 FILE *res_fp;
 struct config_tree cfgt;		/* Parser output stored here */
 struct config_tree *cfg_tree_history = NULL;	/* History of configs */
-#if 0
-short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
-#else
-short default_ai_family = AF_INET;	/* [Bug 891]: FIX ME */
-#endif
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	default_keysdir[] = NTP_KEYSDIR;
 char	*keysdir = default_keysdir;	/* crypto keys directory */
@@ -256,7 +252,7 @@ void destroy_restrict_node(struct restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
 static void save_and_apply_config_tree(void);
-void getconfig(int argc,char *argv[]);
+void getconfig(int, char **);
 #if !defined(SIM)
 static sockaddr_u *get_next_address(struct address_node *addr);
 #endif
@@ -2945,10 +2941,9 @@ config_trap(
 			/* port is at same location for v4 and v6 */
 			SET_PORT(&peeraddr, port_no ? port_no : TRAPPORT);
 
-			if (NULL == localaddr) {
-				AF(&peeraddr) = default_ai_family;
+			if (NULL == localaddr)
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-			} else
+			else
 				AF(&peeraddr) = AF(&addr_sock);
 
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
@@ -3506,8 +3501,6 @@ config_unpeers(
 				unpeer(peer);
 			}	
 
-			/* Ok, everything done. Free up peer node memory */
-			free_node(curr_unpeer);
 			continue;
 		}
 
@@ -3768,8 +3761,8 @@ config_remotely(
  */
 void
 getconfig(
-	int argc,
-	char *argv[]
+	int	argc,
+	char **	argv
 	)
 {
 	char line[MAXLINE];

@@ -16,7 +16,6 @@
  */
 extern char const *progname;
 extern const char *specific_interface;
-extern short default_ai_family;
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -24,12 +23,15 @@ extern int	check_netinfo;
 
 
 /*
- * getCmdOpts - get command line options
+ * getCmdOpts - apply most command line options
+ *
+ * A few options are examined earlier in ntpd.c ntpdmain() and
+ * ports/winnt/ntpd/ntservice.c main().
  */
 void
 getCmdOpts(
-	int argc,
-	char *argv[]
+	int	argc,
+	char **	argv
 	)
 {
 	extern const char *config_file;
@@ -41,10 +43,18 @@ getCmdOpts(
 	 */
 	errflg = 0;
 
-	if (HAVE_OPT( IPV4 ))
-		default_ai_family = AF_INET;
-	else if (HAVE_OPT( IPV6 ))
-		default_ai_family = AF_INET6;
+	if (ipv4_works && ipv6_works) {
+		if (HAVE_OPT( IPV4 ))
+			ipv6_works = 0;
+		else if (HAVE_OPT( IPV6 ))
+			ipv4_works = 0;
+	} else if (!ipv4_works && !ipv6_works) {
+		msyslog(LOG_ERR, "Neither IPv4 nor IPv6 networking detected, fatal.");
+		exit(1);
+	} else if (HAVE_OPT( IPV4 ) && !ipv4_works)
+		msyslog(LOG_WARNING, "-4/--ipv4 ignored, IPv4 networking not found.");
+	else if (HAVE_OPT( IPV6 ) && !ipv6_works)
+		msyslog(LOG_WARNING, "-6/--ipv6 ignored, IPv6 networking not found.");
 
 	if (HAVE_OPT( AUTHREQ ))
 		proto_config(PROTO_AUTHENTICATE, 1, 0., NULL);

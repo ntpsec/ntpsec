@@ -411,6 +411,62 @@ case "$isc_cv_have_in_port_t" in
 	AC_DEFINE(ISC_PLATFORM_NEEDPORTT, 1, [Declare in_port_t?])
 esac
 
+AC_CACHE_CHECK(
+    [for multicast IP support],
+    ntp_cv_multicast,
+    [
+	ntp_cv_multicast=no
+	case "$host" in
+	 i386-sequent-sysv4)
+	    ;;
+	 *)
+	    AC_COMPILE_IFELSE(
+		AC_LANG_PROGRAM(
+		    [
+			#ifdef HAVE_NETINET_IN_H
+			#include <netinet/in.h>
+			#endif
+		    ],
+		    [
+			struct ip_mreq ipmr;
+			ipmr.imr_interface.s_addr = 0;
+		    ]
+		),
+		[ntp_cv_multicast=yes],
+		[]
+	    )
+	esac
+    ]
+)
+
+case "$ntp_cv_multicast" in
+ yes)
+    AC_DEFINE(MCAST, 1, [Does the target support multicast IP?])
+    AC_CACHE_CHECK(
+	[[arg type needed for setsockopt() IP*_MULTICAST_LOOP]],
+	ntp_cv_typeof_ip_multicast_loop,
+	[
+	    case "$host" in
+	     *-*-netbsd*|*-*-*linux*)
+		ntp_cv_typeof_ip_multicast_loop=u_int
+		;;
+	     *-*-winnt*)
+		ntp_cv_typeof_ip_multicast_loop=BOOL
+		;;
+	     *)
+		ntp_cv_typeof_ip_multicast_loop=u_char
+	    esac
+	]
+    )
+    AC_DEFINE_UNQUOTED([TYPEOF_IP_MULTICAST_LOOP],
+	$ntp_cv_typeof_ip_multicast_loop,
+	[What type to use for setsockopt]
+    )
+esac
+
+# HMS: We don't need res_init, but since we may be using cached 
+# values from ntpd we need to test the same way 
+AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl]) 
 AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
@@ -706,8 +762,10 @@ case "$use_binsubdir" in
     ;;
 esac
 AC_MSG_RESULT($use_binsubdir)
+
 BINSUBDIR=$use_binsubdir
 AC_SUBST(BINSUBDIR)
+AM_CONDITIONAL(NTP_BINSUBDIR_IS_BIN, test "bin" = "$BINSUBDIR")
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

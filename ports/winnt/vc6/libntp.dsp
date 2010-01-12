@@ -422,6 +422,10 @@ SOURCE=..\..\..\libntp\tsftomsu.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\libntp\termios.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\tstotv.c
 # End Source File
 # Begin Source File
@@ -439,6 +443,10 @@ SOURCE=..\..\..\libntp\uinttoa.c
 # Begin Source File
 
 SOURCE=..\libntp\util_clockstuff.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\libntp\win32_io.c
 # End Source File
 # Begin Source File
 
@@ -643,6 +651,10 @@ SOURCE=..\include\termios.h
 # Begin Source File
 
 SOURCE=..\include\sys\time.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\termios.h
 # End Source File
 # Begin Source File
 

@@ -20,6 +20,9 @@ see notes/remarks directly below this header:
 #
 #
 # Changes:
+# 12/21/2009	Dave Hart
+#				- packageinfo.sh uses prerelease= now not
+#				  releasecandidate=
 # 08/28/2009	Dave Hart	
 #				- support for building using per-compiler subdirs of winnt
 # 08/08/2006	Heiko Gerstung
@@ -192,7 +195,7 @@ REM ****************************************************************************
 :VER_FROM_PACKAGE_INFO
 	REM Get version from packageinfo.sh file, which contains lines reading e.g.
 	
-	TYPE %F_PACKAGEINFO_SH% | FIND /V "rcpoint=" | FIND "point=" > point.txt
+	TYPE %F_PACKAGEINFO_SH% | FIND /V "rcpoint=" | FIND /V "betapoint=" | FIND "point=" > point.txt
 	SET F_POINT_SH=point.txt
 	
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "proto=" %%F_PACKAGEINFO_SH%%') DO SET PROTO=%%a
@@ -200,28 +203,28 @@ REM ****************************************************************************
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "minor=" %%F_PACKAGEINFO_SH%%') DO SET MINOR=%%a
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "point=" %%F_POINT_SH%%') DO SET POINT=%%a
-	IF NOT "%POINT%"=="" set POINT=p%POINT%
 	IF "%POINT%"=="NEW" set POINT=
+	IF NOT "%POINT%"=="" set POINT=p%POINT%
 
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "betapoint=" %%F_PACKAGEINFO_SH%%') DO SET BETAPOINT=%%a
+	
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "rcpoint=" %%F_PACKAGEINFO_SH%%') DO SET RCPOINT=%%a
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "special=" %%F_PACKAGEINFO_SH%%') DO SET SPECIAL=%%a
 	IF NOT "%SPECIAL%"=="" set SPECIAL=-%SPECIAL%
 
-	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "releasecandidate=" %%F_PACKAGEINFO_SH%%') DO SET REL_CAND_STR=%%a
-	IF /I "%REL_CAND_STR%"=="yes" set REL_CAND=-RC
-	IF /I "%REL_CAND_STR%"=="Yes" set REL_CAND=-RC
-	IF /I "%REL_CAND_STR%"=="YES" set REL_CAND=-RC
-	IF /I "%REL_CAND_STR%"=="Y" set REL_CAND=-RC
-	IF /I "%REL_CAND_STR%"=="y" set REL_CAND=-RC
+	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "prerelease=" %%F_PACKAGEINFO_SH%%') DO SET PRERELEASE=%%a
+	IF /I "%PRERELEASE%"=="beta" set PR_SUF=-beta
+	IF /I "%PRERELEASE%"=="rc" set PR_SUF=-RC
 
 	FOR /F "eol=# TOKENS=2 DELIMS==" %%a IN ('findstr  "repotype=" %%F_PACKAGEINFO_SH%%') DO SET REPOTYPE=%%a
-	IF "%REPOTYPE%"=="stable" set REPOTYPE=STABLE
-	IF "%REPOTYPE%"=="Stable" set REPOTYPE=STABLE
+	IF /I "%REPOTYPE%"=="stable" set REPOTYPE=STABLE
 	
 	IF NOT "%REPOTYPE%"=="STABLE" SET RCPOINT=
+	IF "%PR_SUF%"=="-RC" set PR_POINT=%RCPOINT%
+	IF "%PR_SUF%"=="-beta" set PR_POINT=%BETAPOINT%
 
-	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%REL_CAND%%RCPOINT%
+	SET VER=%PROTO%.%MAJOR%.%MINOR%%POINT%%SPECIAL%%PR_SUF%%PR_POINT%
 	
 	REM Now we have the version info, try to add a BK ChangeSet version number
 	

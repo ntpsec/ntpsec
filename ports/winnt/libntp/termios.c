@@ -1,4 +1,5 @@
 /* This file implements system calls that are not compatible with UNIX */
+/* Moved to libntp/termios.c */
 
 #include <config.h>
 #include <io.h>

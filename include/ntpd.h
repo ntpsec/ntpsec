@@ -475,6 +475,7 @@ extern int	stats_write_period;	/* # of seconds between writes. */
 extern double	stats_write_tolerance;
 
 /* ntpd.c */
+extern void	parse_cmdline_opts(int *, char ***);
 extern volatile int debug;		/* debugging flag */
 extern int	nofork;			/* no-fork flag */
 extern int 	initializing;		/* initializing flag */

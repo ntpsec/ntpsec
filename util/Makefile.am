@@ -2,8 +2,14 @@ NULL=
 #AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS=	
 
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
 		ntp-keygen
+else
+sbin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
+		ntp-keygen
+endif
+
 EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
 	ntptime pps-api precision sht testrs6000 tg tg2 tickadj timetrim
 
@@ -20,12 +26,11 @@ ntp_keygen_LDADD=	@LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
 ETAGS_ARGS=	Makefile.am
 #EXTRA_DIST=	README TAGS
 EXTRA_DIST=	ntp-keygen-opts.def ntp-keygen.1 ntp-keygen-opts.texi ntp-keygen-opts.menu
-BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h ntp-keygen.1	\
-		ntp-keygen-opts.texi ntp-keygen-opts.menu
+BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
-man_MANS=	ntp-keygen.1
-run_ag=		cd $(srcdir) &&					\
-		env PATH="$(abs_builddir):$(PATH)"		\
+noinst_DATA=	$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu
+man_MANS=	$(srcdir)/ntp-keygen.1
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
 std_def_list=	$(top_srcdir)/include/debug-opt.def		\
 		$(top_srcdir)/include/autogen-version.def 	\
@@ -42,8 +47,10 @@ $(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 $(srcdir)/ntp-keygen.1: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -Tagman1.tpl -bntp-keygen ntp-keygen-opts.def
 
-$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
-	$(MAKE) ntp-keygen	# aginfo.tpl runs the binary to extract --help usage text
+$(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+	
+$(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
 
 
