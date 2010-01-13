@@ -1,3 +1,4 @@
+(4.2.7p9) 2010/01/13 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p8) 2010/01/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 702] ntpd service logic should use libopts to examine cmdline.
 * Include (4.2.6p1-RC3) - [Bug 1451] sntp leaks KoD entry updating.
