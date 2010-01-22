@@ -238,10 +238,6 @@ SOURCE=..\..\..\libntp\iosignal.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\isc\win32\ipv6.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\lib\isc\lib.c
 # End Source File
 # Begin Source File
