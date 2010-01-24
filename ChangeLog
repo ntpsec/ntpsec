@@ -1,9 +1,9 @@
+---
+
 * [Bug 1448] Some macros not correctly conditionally or absolutely defined
   on Windows
 * [Bug 1449] ntpsim.h should be conditionally in ntp_config.c
 * [Bug 1450] Option to exclude warnings not unconditionally defined on Windows
----
-
 * [Bug 1127] Properly check the return of X590_verify() - missed one.
 * [Bug 1439] .texi generation must wait until after binary is linked.
 * [Bug 1440] Update configure.ac to support kfreebsd.
