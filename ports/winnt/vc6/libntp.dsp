@@ -86,6 +86,14 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\libntp\getclock.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\libntp\setpriority.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\a_md5encrypt.c
 # End Source File
 # Begin Source File
@@ -122,11 +130,11 @@ SOURCE=..\..\..\libntp\authusekey.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\isc\buffer.c
+SOURCE=..\..\..\libntp\buftvtots.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\buftvtots.c
+SOURCE=..\..\..\lib\isc\buffer.c
 # End Source File
 # Begin Source File
 
@@ -194,10 +202,6 @@ SOURCE=..\..\..\libntp\fptoms.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\getclock.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\getopt.c
 # End Source File
 # Begin Source File
@@ -235,6 +239,10 @@ SOURCE=..\..\..\libntp\inttoa.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\iosignal.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\isc\win32\strerror.c
 # End Source File
 # Begin Source File
 
@@ -362,10 +370,6 @@ SOURCE=..\..\..\libntp\refnumtoa.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\setpriority.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\libntp\SetSystemTime.c
 # End Source File
 # Begin Source File
@@ -387,10 +391,6 @@ SOURCE=..\..\..\libntp\ssl_init.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\statestr.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\lib\isc\win32\strerror.c
 # End Source File
 # Begin Source File
 
@@ -490,11 +490,11 @@ SOURCE=..\include\arpa\inet.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\include\isc\interfaceiter.h
+SOURCE=..\include\inttypes.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\inttypes.h
+SOURCE=..\..\..\include\isc\interfaceiter.h
 # End Source File
 # Begin Source File
 
@@ -705,7 +705,7 @@ BuildCmds= \
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Message Compiler
-InputDir=\ntp-4.2.6p1-RC2\ports\winnt\libntp
+InputDir=.
 InputPath=..\libntp\messages.mc
 InputName=messages
 
