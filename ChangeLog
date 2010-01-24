@@ -1,3 +1,7 @@
+* [Bug 1448] Some macros not correctly conditionally or absolutely defined
+  on Windows
+* [Bug 1449] ntpsim.h should be conditionally in ntp_config.c
+* [Bug 1450] Option to exclude warnings not unconditionally defined on Windows
 (4.2.7p9) 2010/01/13 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p8) 2010/01/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 702] ntpd service logic should use libopts to examine cmdline.
