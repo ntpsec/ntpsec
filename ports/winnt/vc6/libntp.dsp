@@ -680,7 +680,7 @@ SOURCE=..\libntp\messages.mc
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Message Compiler
-InputDir=\ntp-4.2.6p1-RC2\ports\winnt\libntp
+InputDir=.
 InputPath=..\libntp\messages.mc
 InputName=messages
 
