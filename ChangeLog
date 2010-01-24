@@ -1,3 +1,4 @@
+* [Bug 1140] Clean up debug.html, decode.html, and ntpq.html.
 * Include (4.2.6p1-RC3) - Use TZ=UTC instead of TZ= when calling date in
   scripts/mkver.in .
 * Include (4.2.6p1-RC3) - [Bug 1448] Some macros not correctly conditionally
