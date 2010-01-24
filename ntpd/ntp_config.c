@@ -25,8 +25,13 @@
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
-#include "ntpsim.h"
 #include "ntpd-opts.h"
+/*
+ * Sim header. Currently unconditionally included
+ * PDMXXX This needs to be a conditional include
+ */
+#include "ntpsim.h"
+
 #include <ntp_random.h>
 #include "ntp_intres.h"
 #include <isc/net.h>
