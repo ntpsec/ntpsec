@@ -26,9 +26,12 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntpd-opts.h"
-#ifdef SIM
+/*
+ * Sim header. Currently unconditionally included
+ * PDMXXX This needs to be a conditional include
+ */
 #include "ntpsim.h"
-#endif
+
 #include <ntp_random.h>
 #include "ntp_intres.h"
 #include <isc/net.h>
