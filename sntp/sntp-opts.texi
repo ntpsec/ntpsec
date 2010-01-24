@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  December 25, 2009 at 09:30:56 AM by AutoGen 5.10
+# It has been AutoGen-ed  January 24, 2010 at 10:30:37 AM by AutoGen 5.10
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -56,7 +56,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard SNTP program - Ver. 4.2.6p1-RC2
+sntp - standard SNTP program - Ver. 4.2.6p1-RC3
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... hostname-or-IP ...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -95,7 +95,7 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /users/stenn/.ntprc
+ - reading file /deacon/users/stenn/.ntprc
  - reading file /deacon/backroom/snaps/ntp-stable/sntp/.ntprc
  - examining environment variables named SNTP_*
 

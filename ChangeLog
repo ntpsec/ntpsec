@@ -1,4 +1,5 @@
 ---
+(4.2.6p1-RC3) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
 * Use TZ=UTC instead of TZ= when calling date in scripts/mkver.in .
 * [Bug 1448] Some macros not correctly conditionally or absolutely defined
