@@ -2,6 +2,7 @@
  * clocktime - compute the NTP date from a day of year, hour, minute
  *	       and second.
  */
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"

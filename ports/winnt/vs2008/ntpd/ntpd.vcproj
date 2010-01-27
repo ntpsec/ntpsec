@@ -628,6 +628,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\ntp_worker.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\ntpd\ntpd-opts.c"
 				>
 				<FileConfiguration
@@ -672,6 +676,26 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\ntpsim.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\ntpd\ntservice.c"
 				>
 				<FileConfiguration
@@ -692,6 +716,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ntpd\work_fork.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ntpd\work_thread.c"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -807,6 +839,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\include\ntp_data_structures.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\include\ntp_debug.h"
 				>
 			</File>
@@ -908,6 +944,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\ntp_unixtime.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\ntp_worker.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\ntp_workimpl.h"
 				>
 			</File>
 			<File
@@ -1717,6 +1761,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_ripencc.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\ntpd\refclock_shm.c"
 				>
 				<FileConfiguration
@@ -1862,6 +1910,18 @@
 		<Filter
 			Name="Parse Lib"
 			>
+			<File
+				RelativePath="..\..\..\..\libparse\binio.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
 			<File
 				RelativePath="..\..\..\..\libparse\clk_computime.c"
 				>
@@ -2115,6 +2175,86 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libparse\gpstolfp.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libparse\ieee754io.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libparse\info_trimble.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libparse\mfp_mul.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\..\libparse\parse.c"
 				>
 				<FileConfiguration
@@ -2159,6 +2299,66 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libparse\parsesolaris.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libparse\parsestreams.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libparse\trim_info.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
 			</File>

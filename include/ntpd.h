@@ -9,6 +9,7 @@
 #include "ntp_select.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
+#include "ntp_workimpl.h"
 #include "recvbuff.h"
 
 /* ntp_config.c */
@@ -24,8 +25,9 @@ extern	u_short ctlpeerstatus	(struct peer *);
 extern	int	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
-extern	void	init_logging	(char const *, int);
-extern	void	setup_logfile	(void);
+extern	void	init_logging	(const char *, int);
+extern	int	change_logfile	(const char *, int);
+extern	void	setup_logfile	(int);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);
 
@@ -53,18 +55,33 @@ struct ctl_var {
 #define	WO	(CAN_WRITE)
 #define	RW	(CAN_READ|CAN_WRITE)
 
-extern  char *  add_var (struct ctl_var **, u_long, u_short);
-extern  void    free_varlist (struct ctl_var *);
-extern  void    set_var (struct ctl_var **, const char *, u_long, u_short);
-extern  void    set_sys_var (const char *, u_long, u_short);
+extern	char *	add_var (struct ctl_var **, u_long, u_short);
+extern	void	free_varlist (struct ctl_var *);
+extern	void	set_var (struct ctl_var **, const char *, u_long, u_short);
+extern	void	set_sys_var (const char *, u_long, u_short);
 
 /* ntp_intres.c */
-extern	void	ntp_res_name	(sockaddr_u, u_short);
-extern	void	ntp_res_recv	(void);
-extern	void	ntp_intres	(void);
-#ifdef SYS_WINNT
-extern	unsigned WINAPI	ntp_intres_thread	(void *);
-#endif
+#ifdef WORKER
+typedef void	(*gai_sometime_callback)
+		    (int, int, void *, const char *, const char *,
+		     const struct addrinfo *, const struct addrinfo *);
+/*
+ * you call getaddrinfo_sometime(name, service, &hints, callback_func, context);
+ * later (*callback_func)(rescode, gai_errno, context, name, service, hints, ai_result) is called.
+ */
+extern int	getaddrinfo_sometime(const char *, const char *,
+				     const struct addrinfo *,
+				     gai_sometime_callback, void *);
+typedef void	(*gni_sometime_callback)
+		    (int, int, sockaddr_u *, int, const char *,
+		     const char *, void *);
+/*
+ * you call getnameinfo_sometime(sockaddr, namelen, servlen, flags, callback_func, context);
+ * later (*callback_func)(rescode, gni_errno, sockaddr, flags, name, service, context) is called.
+ */
+extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
+				gni_sometime_callback, void *);
+#endif	/* WORKER */
 
 /* ntp_io.c */
 typedef struct interface_info {
@@ -221,14 +238,15 @@ extern	void	init_timer	(void);
 extern	void	reinit_timer	(void);
 extern	void	timer		(void);
 extern	void	timer_clr_stats (void);
-extern  void    timer_interfacetimeout (u_long);
-extern  volatile int interface_interval;
+extern	void	timer_interfacetimeout (u_long);
+extern	volatile int interface_interval;
+extern	u_long	worker_idle_timer;	/* next check current_time */
 #ifdef OPENSSL
 extern	char	*sys_hostname;	/* host name */
 extern	char	*sys_groupname;	/* group name */
 extern	char	*group_name;	/* group name */
-extern u_long	sys_revoke;	/* keys revoke timeout */
-extern u_long	sys_automax;	/* session key timeout */
+extern	u_long	sys_revoke;	/* keys revoke timeout */
+extern	u_long	sys_automax;	/* session key timeout */
 #endif /* OPENSSL */
 
 /* ntp_util.c */
@@ -247,10 +265,22 @@ extern	void	record_timing_stats (const char *);
 #endif
 extern  u_short	sock_hash (sockaddr_u *);
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
-extern	double	old_drift;
-extern	int	drift_file_sw;
-extern	double	wander_threshold;
-extern	double	wander_resid;
+
+/* ntp_worker.c */
+#ifdef WORKER
+extern void	process_blocking_response(void);
+extern void	worker_idle_timer_fired(void);
+extern void	interrupt_worker_sleep(void);
+#endif	/* WORKER */
+#if defined(HAVE_DROPROOT) && defined(WORK_FORK)
+extern void	fork_deferred_worker(void);
+#else
+# define	fork_deferred_worker()	do {} while (0)
+#endif
+
+/* ntpd.c */
+extern	void	parse_cmdline_opts(int *, char ***);
+
 
 /*
  * Variable declarations for ntpd.
@@ -299,17 +329,6 @@ extern u_long	numctlbadversion;	/* number of input pkts with unknown version */
 extern u_long	numctldatatooshort;	/* data too short for count */
 extern u_long	numctlbadop; 		/* bad op code found in packet */
 extern u_long	numasyncmsgs;		/* number of async messages we've sent */
-
-/* ntp_intres.c */
-extern keyid_t	req_keyid;		/* request keyid */
-extern int	req_keytype;		/* OpenSSL NID such as NID_md5 */
-extern size_t	req_hashlen;		/* digest size for req_keytype */
-extern char *	req_file;		/* name of the file with configuration info */
-#ifdef SYS_WINNT
-extern HANDLE ResolverEventHandle;
-#else
-extern int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent process */
-#endif /* SYS_WINNT */
 
 /*
  * Other statistics of possible interest
@@ -470,20 +489,31 @@ extern u_long	timer_overflows;
 extern u_long	timer_xmtcalls;
 
 /* ntp_util.c */
-extern int	stats_control;		/* write stats to fileset? */
-extern int	stats_write_period;	/* # of seconds between writes. */
-extern double	stats_write_tolerance;
+extern	int	stats_control;		/* write stats to fileset? */
+extern	int	stats_write_period;	/* # of seconds between writes. */
+extern	double	stats_write_tolerance;
+extern	double	old_drift;
+extern	int	drift_file_sw;
+extern	double	wander_threshold;
+extern	double	wander_resid;
+
+/* ntp_worker.c */
+#if defined(WORK_FORK)
+extern	int	parent_resp_read_pipe;
+#elif defined (WORK_THREAD)
+extern	HANDLE	blocking_response_ready;
+#endif
 
 /* ntpd.c */
-extern void	parse_cmdline_opts(int *, char ***);
-extern volatile int debug;		/* debugging flag */
-extern int	nofork;			/* no-fork flag */
-extern int 	initializing;		/* initializing flag */
+extern volatile int debug;	/* debugging flag */
+extern	int	nofork;		/* no-fork flag */
+extern	int	initializing;	/* initializing flag */
 #ifdef HAVE_DROPROOT
-extern int droproot;			/* flag: try to drop root privileges after startup */
-extern char *user;			/* user to switch to */
-extern char *group;			/* group to switch to */
-extern const char *chrootdir;		/* directory to chroot to */
+extern	int	droproot;	/* flag: try to drop root privileges after startup */
+extern	int	root_dropped;	/* root has been dropped */
+extern char *user;		/* user to switch to */
+extern char *group;		/* group to switch to */
+extern const char *chrootdir;	/* directory to chroot() to */
 #endif
 
 /* refclock_conf.c */

@@ -52,7 +52,7 @@
 # include "ppsapi_timepps.h"
 #endif
 
-#ifdef XNTP_BIG_ENDIAN
+#ifdef WORDS_BIGENDIAN
 #define getshort(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 #define putshort(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 #else

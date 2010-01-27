@@ -1,3 +1,4 @@
+#include <config.h>
 #include "log.h"
 #include "sntp-opts.h"
 

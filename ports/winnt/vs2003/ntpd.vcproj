@@ -622,6 +622,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\ntpd\ntp_worker.c">
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\ntpd-opts.c">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -687,6 +690,12 @@
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\work_fork.c">
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\work_thread.c">
 			</File>
 		</Filter>
 		<Filter
@@ -832,6 +841,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_unixtime.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_worker.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_workimpl.h">
 			</File>
 			<File
 				RelativePath="..\..\..\ntpd\ntpd-opts.h">

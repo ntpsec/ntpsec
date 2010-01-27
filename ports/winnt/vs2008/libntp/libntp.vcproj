@@ -308,6 +308,26 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\icom.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\inet_aton.c"
 				>
 			</File>
@@ -488,7 +508,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\strdup.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\win32\strerror.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libntp\strstr.c"
 				>
 			</File>
 			<File

@@ -1,6 +1,7 @@
 /*
  * fptoa - return an asciized representation of an s_fp number
  */
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 

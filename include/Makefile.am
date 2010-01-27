@@ -56,6 +56,8 @@ noinst_HEADERS =	\
 	ntp_tty.h	\
 	ntp_types.h	\
 	ntp_unixtime.h	\
+	ntp_worker.h	\
+	ntp_workimpl.h	\
 	ntpd.h		\
 	ntpsim.h	\
 	parse.h		\

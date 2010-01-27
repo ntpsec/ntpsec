@@ -2,6 +2,7 @@
  * Automatically generated - do not modify
  */
 
+#include <config.h>
 #include "ntp_types.h"
 #include "ntpd.h"
 #include "trimble.h"
@@ -91,4 +92,3 @@ cmd_info_t trimble_rcmds[] = {
 	{ CMD_RSUPER, "CMD_RSUPER", "super paket (0x8F)", "", 0 },
 	{ 0xFF, "", "" }
 };
-

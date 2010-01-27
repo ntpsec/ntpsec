@@ -28,15 +28,12 @@
 
 int syslogit = 1;
 
-FILE *syslog_file = NULL;
+FILE *	syslog_file;
+char *	syslog_fname;
+char *	syslog_abs_fname;
 
-u_long ntp_syslogmask =  ~ (u_long) 0;
+u_long ntp_syslogmask =  ~(u_long)0;	/* libntp default is all lit */
 
-#ifdef SYS_WINNT
-static char separator = '\\';
-#else
-static char separator = '/';
-#endif /* SYS_WINNT */
 extern	char *progname;
 
 /* Declare the local functions */
@@ -50,32 +47,45 @@ void	format_errmsg   (char *, int, const char *, int);
 void
 addto_syslog(int level, char * buf)
 {
-	char *prog;
-	FILE *out_file = syslog_file;
+	static const char *	last_progname;
+	static const char *	prog;
+	FILE *			out_file;
 
 #if !defined(VMS) && !defined (SYS_VXWORKS)
-	if (syslogit)
-	    syslog(level, "%s", buf);
-	else
+	if (syslogit) {
+		syslog(level, "%s", buf);
+		out_file = NULL;
+	} else
 #endif /* VMS  && SYS_VXWORKS*/
 	{
-		out_file = syslog_file ? syslog_file: level <= LOG_ERR ? stderr : stdout;
-		/* syslog() provides the timestamp, so if we're not using
-		   syslog, we must provide it. */
-		prog = strrchr(progname, separator);
-		if (prog == NULL)
-		    prog = progname;
-		else
-		    prog++;
-		(void) fprintf(out_file, "%s ", humanlogtime ());
-		(void) fprintf(out_file, "%s[%d]: %s", prog, (int)getpid(), buf);
+		out_file = (syslog_file) 
+			       ? syslog_file
+			       : (level <= LOG_ERR)
+				     ? stderr 
+				     : stdout;
+		if (last_progname != progname) {
+			last_progname = progname;
+			prog = strrchr(progname, DIR_SEP);
+			if (NULL == prog)
+				prog = progname;
+			else
+				prog++;
+		}
+		/* 
+		 * syslog() provides the timestamp, so if we're not
+		 * using syslog, we must provide it.
+		 */
+		fprintf(out_file, "%s %s[%d]: %s", humanlogtime(),
+				  prog, (int)getpid(), buf);
 		fflush (out_file);
 	}
 #if DEBUG
 	if (debug && out_file != stdout && out_file != stderr)
-		printf("addto_syslog: %s\n", buf);
+		printf("addto_syslog: %s", buf);
 #endif
 }
+
+
 void
 format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 {
@@ -106,26 +116,18 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 			n += len;
 		}
 	}
-#if !defined(VMS)
-	if (!syslogit)
-#endif /* VMS */
-	    *n++ = '\n';
+	/*
+	 * syslog adds a trailing \n if not present, do the same so we
+	 * have the same behavior with syslog and a log file.
+	 */
+	if (n > nfmt && '\n' != n[-1])
+		*n++ = '\n';
 	*n = '\0';
 }
 
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
+
 void msyslog(int level, const char *fmt, ...)
-#else /* defined(__STDC__) || defined(HAVE_STDARG_H) */
-     /*VARARGS*/
-     void msyslog(va_alist)
-     va_dcl
-#endif /* defined(__STDC__) || defined(HAVE_STDARG_H) */
 {
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-#else
-	int level;
-	const char *fmt;
-#endif
 	va_list ap;
 	char buf[1025], nfmt[256];
 	int errval;

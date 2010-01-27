@@ -669,6 +669,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\ntpd\ntp_worker.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\ntpd-opts.c"
 				>
 				<FileConfiguration
@@ -733,6 +737,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\work_fork.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\work_thread.c"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -925,6 +937,14 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_unixtime.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_worker.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_workimpl.h"
 				>
 			</File>
 			<File

@@ -49,23 +49,23 @@ typedef unsigned int u_int;
 
 #if (SIZEOF_INT == 4)
 # ifndef int32
-#  define int32 int
+   typedef	int		int32;
 # endif
 # ifndef u_int32
-#  define u_int32 unsigned int
+   typedef	unsigned	u_int32;
 # endif
-#else /* not sizeof(int) == 4 */
+#else	/* SIZEOF_INT != 4 */
 # if (SIZEOF_LONG == 4)
 #  ifndef int32
-#   define int32 long
+    typedef	long		int32;
 #  endif
 #  ifndef u_int32
-#   define u_int32 unsigned long
+    typedef	unsigned long	u_int32;
 #  endif
-# else /* not sizeof(long) == 4 */
+# else	/* SIZEOF_LONG != 4 */
 #  include "Bletch: what's 32 bits on this machine?"
-# endif /* not sizeof(long) == 4 */
-#endif /* not sizeof(int) == 4 */
+# endif
+#endif	/* SIZEOF_INT != 4 */
 
 typedef u_char		ntp_u_int8_t;
 typedef u_short		ntp_u_int16_t;

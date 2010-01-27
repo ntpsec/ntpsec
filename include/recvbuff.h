@@ -1,10 +1,6 @@
 #ifndef RECVBUFF_H
 #define RECVBUFF_H
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
 #include "ntp.h"
 #include "ntp_fp.h"
 #include "ntp_lists.h"
@@ -21,7 +17,7 @@
 
 #if defined HAVE_IO_COMPLETION_PORT
 # include "ntp_iocompletionport.h"
-#include "ntp_timer.h"
+# include "ntp_timer.h"
 
 # define RECV_BLOCK_IO()	EnterCriticalSection(&RecvCritSection)
 # define RECV_UNBLOCK_IO()	LeaveCriticalSection(&RecvCritSection)

@@ -2,6 +2,7 @@
  * msutotsf - tables for converting from a subsecond millisecond value
  *	      to a time stamp fraction.
  */
+#include <config.h>
 #include <sys/types.h>
 
 #include "ntp_types.h"

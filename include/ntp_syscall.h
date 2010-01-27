@@ -6,10 +6,6 @@
 #ifndef NTP_SYSCALL_H
 #define NTP_SYSCALL_H
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #ifdef HAVE_SYS_TIMEX_H
 # include <sys/timex.h>
 #endif

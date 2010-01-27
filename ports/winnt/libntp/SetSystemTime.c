@@ -1,4 +1,5 @@
 
+#include <config.h>
 #include "clockstuff.h"
 #include "ntp_stdlib.h"
 

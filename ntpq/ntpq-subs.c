@@ -1,7 +1,7 @@
 /*
- * ntpq_ops.c - subroutines which are called to perform operations by ntpq
+ * ntpq-subs.c - subroutines which are called to perform operations by ntpq
  */
-
+#include <config.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -907,10 +907,14 @@ dogetassoc(
 		datap += sizeof(u_short);
 		assoc_cache[numassoc].status = ntohs(*((u_short *)datap));
 		datap += sizeof(u_short);
+		if (debug)
+			fprintf(stderr, "[%u] ", assoc_cache[numassoc].assid);
 		if (++numassoc >= MAXASSOC)
 			break;
 		dsize -= sizeof(u_short) + sizeof(u_short);
 	}
+	if (debug)
+		fprintf(stderr, "\n%d associations total\n", numassoc);
 	sortassoc();
 	return 1;
 }
@@ -1451,17 +1455,17 @@ doprintpeers(
 	char whenbuf[8], pollbuf[8];
 	char clock_name[LENHOSTNAME];
 
-	memset((char *)havevar, 0, sizeof(havevar));
 	get_systime(&ts);
 	
+	memset(havevar, 0, sizeof(havevar));
 	ZERO_SOCK(&srcadr);
 	ZERO_SOCK(&dstadr);
 
 	/* Initialize by zeroing out estimate variables */
-	memset((char *)&estoffset, 0, sizeof(l_fp));
-	memset((char *)&estdelay, 0, sizeof(l_fp));
-	memset((char *)&estjitter, 0, sizeof(l_fp));
-	memset((char *)&estdisp, 0, sizeof(l_fp));
+	memset(&estoffset, 0, sizeof(estoffset));
+	memset(&estdelay, 0, sizeof(estdelay));
+	memset(&estjitter, 0, sizeof(estjitter));
+	memset(&estdisp, 0, sizeof(estdisp));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
 		sockaddr_u dum_store;
@@ -1470,12 +1474,12 @@ doprintpeers(
 		if (i == 0)
 			continue;	/* don't know this one */
 		switch (i) {
-			case CP_SRCADR:
+		case CP_SRCADR:
 			if (decodenetnum(value, &srcadr)) {
 				havevar[HAVE_SRCADR] = 1;
 			}
 			break;
-			case CP_DSTADR:
+		case CP_DSTADR:
 			if (decodenetnum(value, &dum_store)) {
 				type = decodeaddrtype(&dum_store);
 				if (pvl == opeervarlist) {
@@ -1485,7 +1489,7 @@ doprintpeers(
 				}
 			}
 			break;
-			case CP_REFID:
+		case CP_REFID:
 			if (pvl == peervarlist) {
 				havevar[HAVE_REFID] = 1;
 				if (*value == '\0') {
@@ -1511,69 +1515,62 @@ doprintpeers(
 				}
 			}
 			break;
-			case CP_STRATUM:
+		case CP_STRATUM:
 			if (decodeuint(value, &stratum))
 				havevar[HAVE_STRATUM] = 1;
 			break;
-			case CP_HPOLL:
+		case CP_HPOLL:
 			if (decodeint(value, &hpoll)) {
 				havevar[HAVE_HPOLL] = 1;
 				if (hpoll < 0)
 					hpoll = NTP_MINPOLL;
 			}
 			break;
-			case CP_PPOLL:
+		case CP_PPOLL:
 			if (decodeint(value, &ppoll)) {
 				havevar[HAVE_PPOLL] = 1;
 				if (ppoll < 0)
 					ppoll = NTP_MINPOLL;
 			}
 			break;
-			case CP_REACH:
+		case CP_REACH:
 			if (decodeuint(value, &reach))
 				havevar[HAVE_REACH] = 1;
 			break;
-			case CP_DELAY:
+		case CP_DELAY:
 			if (decodetime(value, &estdelay))
 				havevar[HAVE_DELAY] = 1;
 			break;
-			case CP_OFFSET:
+		case CP_OFFSET:
 			if (decodetime(value, &estoffset))
 				havevar[HAVE_OFFSET] = 1;
 			break;
-			case CP_JITTER:
+		case CP_JITTER:
 			if (pvl == peervarlist)
 				if (decodetime(value, &estjitter))
 					havevar[HAVE_JITTER] = 1;
 			break;
-			case CP_DISPERSION:
+		case CP_DISPERSION:
 			if (decodetime(value, &estdisp))
 				havevar[HAVE_DISPERSION] = 1;
 			break;
-			case CP_REC:
+		case CP_REC:
 			if (decodets(value, &rec))
 				havevar[HAVE_REC] = 1;
 			break;
-			case CP_SRCPORT:
+		case CP_SRCPORT:
 			if (decodeuint(value, &srcport))
 				havevar[HAVE_SRCPORT] = 1;
 			break;
-			case CP_REFTIME:
+		case CP_REFTIME:
 			havevar[HAVE_REFTIME] = 1;
 			if (!decodets(value, &reftime))
 				L_CLR(&reftime);
 			break;
-			default:
+		default:
 			break;
 		}
 	}
-
-	/*
-	 * Check to see if the srcport is NTP's port.  If not this probably
-	 * isn't a valid peer association.
-	 */
-	if (havevar[HAVE_SRCPORT] && srcport != NTP_PORT)
-		return (1);
 
 	/*
 	 * Got everything, format the line
@@ -1584,11 +1581,11 @@ doprintpeers(
 	else
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*s ", maxhostlen, currenthost);
+		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (af == 0 || AF(&srcadr) == af) {
-		strcpy(clock_name, nntohost(&srcadr));
+		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));
 		
-		(void) fprintf(fp,
+		fprintf(fp,
 			"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
 			c, clock_name, dstadr_refid, stratum, type,
 			prettyinterval(whenbuf, when(&ts, &rec, &reftime)),
@@ -1686,20 +1683,23 @@ dopeers(
 				maxhostlen = strlen(fullname);
 	}
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
-	(void) fprintf(fp,
-			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
+		fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
+	fprintf(fp,
+		"     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
 		for (i = 0; i <= maxhostlen; ++i)
-		(void) fprintf(fp, "=");
-	(void) fprintf(fp,
-			   "==============================================================================\n");
+			fprintf(fp, "=");
+	fprintf(fp,
+		"==============================================================================\n");
 
 	for (i = 0; i < numassoc; i++) {
 		if (!showall &&
-			!(CTL_PEER_STATVAL(assoc_cache[i].status)
-			  & (CTL_PST_CONFIG|CTL_PST_REACH)))
+		    !(CTL_PEER_STATVAL(assoc_cache[i].status)
+		      & (CTL_PST_CONFIG|CTL_PST_REACH))) {
+			if (debug)
+				fprintf(stderr, "eliding [%d]\n", assoc_cache[i].assid);
 			continue;
+		}
 		if (!dogetpeers(peervarlist, (int)assoc_cache[i].assid, fp, af)) {
 			return;
 		}

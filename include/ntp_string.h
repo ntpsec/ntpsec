@@ -2,12 +2,8 @@
  * Define string ops: strchr strrchr memcmp memmove memset 
  */
 
-#ifndef  _ntp_string_h
-#define  _ntp_string_h
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#ifndef NTP_STRING_H
+#define NTP_STRING_H
 
 #ifdef HAVE_MEMORY_H
 # include <memory.h>
@@ -52,4 +48,4 @@ void	ntp_memset	(char *, int, int);
 					ntp_memset((char *)(a), x, c)
 #endif /*  NTP_NEED_BOPS */
 
-#endif /* _ntp_string_h */
+#endif	/* NTP_STRING_H */

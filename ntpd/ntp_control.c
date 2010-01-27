@@ -770,7 +770,6 @@ process_control(
 		res_authenticate = 1;
 		res_keyid = ntohl(*(u_int32 *)((u_char *)pkt +
 					       properlen));
-
 		DPRINTF(3, ("recv_len %d, properlen %d, wants auth with keyid %08x, MAC length=%d\n",
 			    rbufp->recv_length, properlen, res_keyid,
 			    maclen));
@@ -780,11 +779,11 @@ process_control(
 		else if (authdecrypt(res_keyid, (u_int32 *)pkt,
 				     rbufp->recv_length - maclen,
 				     maclen)) {
-			DPRINTF(3, ("authenticated okay\n"));
 			res_authokay = 1;
+			DPRINTF(3, ("authenticated okay\n"));
 		} else {
-			DPRINTF(3, ("authentication failed\n"));
 			res_keyid = 0;
+			DPRINTF(3, ("authentication failed\n"));
 		}
 	}
 

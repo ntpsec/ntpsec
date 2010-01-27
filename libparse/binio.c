@@ -33,6 +33,7 @@
  *
  */
 
+#include <config.h>
 #include "binio.h"
 
 long

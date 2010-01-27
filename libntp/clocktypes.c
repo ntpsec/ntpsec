@@ -1,6 +1,7 @@
 /*
  * Data for pretty printing clock types
  */
+#include <config.h>
 #include <stdio.h>
 
 #include "ntp_fp.h"

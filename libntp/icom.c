@@ -5,6 +5,7 @@
  * distribution. The only function provided is to load the radio
  * frequency. All other parameters must be manually set before use.
  */
+#include <config.h>
 #include "icom.h"
 #include <unistd.h>
 #include <stdio.h>

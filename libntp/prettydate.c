@@ -1,6 +1,7 @@
 /*
  * prettydate - convert a time stamp to something readable
  */
+#include <config.h>
 #include <stdio.h>
 
 #include "ntp_fp.h"

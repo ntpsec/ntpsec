@@ -1,7 +1,7 @@
 /*
  * ntpq - query an NTP server using mode 6 commands
  */
-
+#include <config.h>
 #include <stdio.h>
 
 #include <ctype.h>

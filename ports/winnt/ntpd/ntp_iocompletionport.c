@@ -91,8 +91,8 @@ static HANDLE WaitableExitEventHandle = NULL;
 #define WAITABLEIOEVENTHANDLE NULL
 #endif
 
-#define MAXHANDLES 3
-HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
+#define MAXHANDLES 4
+HANDLE WaitHandles[MAXHANDLES];
 
 IoCompletionInfo *
 GetHeapAlloc(char *fromfunc)
@@ -294,12 +294,15 @@ init_io_completion_port(
 		exit(1);
 	}
 
+	blocking_response_ready = CreateEvent(NULL, FALSE, FALSE, NULL);
+
 	/*
 	 * Initialize the Wait Handles
 	 */
 	WaitHandles[0] = WaitableIoEventHandle;
 	WaitHandles[1] = WaitableExitEventHandle; /* exit request */
 	WaitHandles[2] = get_timer_handle();
+	WaitHandles[3] = blocking_response_ready;
 
 	/* Have one thread servicing I/O - there were 4, but this would 
 	 * somehow cause NTP to stop replying to ntpq requests; TODO
@@ -888,26 +891,28 @@ int GetReceivedBuffers()
 	while (!have_packet) {
 		DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
 		switch (Index) {
-		case WAIT_OBJECT_0 + 0 : /* Io event */
-# ifdef DEBUG
-			if ( debug > 3 )
-			{
-				printf( "IoEvent occurred\n" );
-			}
-# endif
+		case WAIT_OBJECT_0 + 0: /* Io event */
+			DPRINTF(4, ("IoEvent occurred\n"));
 			have_packet = ISC_TRUE;
 			break;
-		case WAIT_OBJECT_0 + 1 : /* exit request */
+		case WAIT_OBJECT_0 + 1: /* exit request */
 			exit(0);
 			break;
-		case WAIT_OBJECT_0 + 2 : /* timer */
+		case WAIT_OBJECT_0 + 2: /* timer */
 			timer();
 			break;
-		case WAIT_IO_COMPLETION : /* loop */
-		case WAIT_TIMEOUT :
+		case WAIT_OBJECT_0 + 3: /* blocking response */
+			process_blocking_response();
+			break;
+		case WAIT_IO_COMPLETION: /* loop */
+			break;
+		case WAIT_TIMEOUT:
+			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects INFINITE timed out.");
+			exit(1);
 			break;
 		case WAIT_FAILED:
 			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects Failed: Error: %m");
+			exit(1);
 			break;
 
 			/* For now do nothing if not expected */

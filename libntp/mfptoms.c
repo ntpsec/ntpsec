@@ -1,6 +1,7 @@
 /*
  * mfptoms - Return an asciized signed long fp number in milliseconds
  */
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 

@@ -1,14 +1,23 @@
 #ifndef NTP_INTRES_H
 #define NTP_INTRES_H
 
-/*
- * Some systems do not support fork() and don't have an alternate
- * threads implementation of ntp_intres.  Such systems are limited
- * to using numeric IP addresses.
- */
-#if defined(VMS) || defined (SYS_VXWORKS) || \
-    (!defined(HAVE_WORKING_FORK) && !defined(SYS_WINNT))
-#define NO_INTRES
-#endif
+#include "ntp_worker.h"
 
-#endif	/* !defined(NTP_INTRES_H) */
+#ifdef WORKER
+
+extern int blocking_getaddrinfo(blocking_pipe_header *);
+extern int blocking_getnameinfo(blocking_pipe_header *);
+
+#ifdef TEST_BLOCKING_WORKER
+extern void gai_test_callback(int rescode, int gai_errno,
+			      void *context, const char *name,
+			      const char *service,
+			      const struct addrinfo *hints,
+			      const struct addrinfo *ai_res);
+extern void gni_test_callback(int rescode, int gni_errno,
+			      sockaddr_u *psau, int flags,
+			      const char *host,
+			      const char *service, void *context);
+#endif	/* TEST_BLOCKING_WORKER */
+#endif	/* WORKER */
+#endif	/* !NTP_INTRES_H */

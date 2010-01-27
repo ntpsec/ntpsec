@@ -1,6 +1,7 @@
 /*
  * uinttoa - return an asciized unsigned integer
  */
+#include <config.h>
 #include <stdio.h>
 
 #include "lib_strbuf.h"
@@ -14,7 +15,7 @@ uinttoa(
 	register char *buf;
 
 	LIB_GETBUF(buf);
+	snprintf(buf, LIB_BUFLENGTH, "%lu", uval);
 
-	(void) sprintf(buf, "%lu", (u_long)uval);
 	return buf;
 }

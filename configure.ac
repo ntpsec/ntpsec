@@ -128,6 +128,7 @@ esac
 LIBOPTS_CHECK(libopts)
 
 AC_FUNC_FORK
+AC_FUNC_ALLOCA
 
 AC_CACHE_CHECK(
     [if $CC can handle @%:@warning],
@@ -1168,7 +1169,7 @@ case "$host" in
     AC_CHECK_FUNCS([clock_gettime clock_settime])
     ;;
 esac
-AC_CHECK_FUNCS(daemon)
+AC_CHECK_FUNCS(closefrom daemon)
 AC_CHECK_FUNCS(finite, ,
   [AC_CHECK_FUNCS(isfinite, ,
     [AC_MSG_CHECKING([for isfinite with <math.h>])
@@ -1366,9 +1367,24 @@ case "$host" in
  *-*-openbsd*)
     # Just stubs.  Idiots.
     ;;
- *) AC_CHECK_FUNCS(timer_create timer_settime)
+ *) AC_CHECK_FUNCS(timer_create)
     ;;
 esac
+
+# some OSes prefer _exit() in forked children to exit()
+AC_CHECK_FUNCS(_exit)
+ntp_worker_child_exit=exit
+case "$ac_cv_func__exit::$host_os" in
+ yes::netbsd*)
+    ntp_worker_child_exit=_exit
+    ;;
+ yes::openbsd*)
+    ntp_worker_child_exit=_exit
+    ;;
+esac
+AC_DEFINE_UNQUOTED([WORKER_CHILD_EXIT], [$ntp_worker_child_exit],
+		   [routine worker child proc uses to exit.])
+
 case "$host" in
  *-pc-cygwin*)
     # I have no idea...
@@ -2111,22 +2127,6 @@ AC_ARG_ENABLE(
 case "$ans" in
  yes)
     AC_DEFINE(IGNORE_DNS_ERRORS, 1, [[Retry queries on _any_ DNS error?]])
-esac
-AC_MSG_RESULT([$ans])
-
-AC_MSG_CHECKING([if ntpd will use the deferred DNS lookup path])
-AC_ARG_ENABLE(
-    [force-defer-DNS],
-    AS_HELP_STRING(
-	[--enable-force-defer-DNS],
-	[- force all DNS lookups to take the deferred path]
-    ),
-    [ans=$enableval],
-    [ans=no]
-)
-case "$ans" in
- yes)
-    AC_DEFINE(FORCE_DEFER_DNS, 1, [Force deferred DNS lookups?])
 esac
 AC_MSG_RESULT([$ans])
 

@@ -1,3 +1,4 @@
+#include <config.h>
 #include "networking.h"
 
 char adr_buf[INET6_ADDRSTRLEN];

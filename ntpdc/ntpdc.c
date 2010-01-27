@@ -2,6 +2,7 @@
  * ntpdc - control and monitor your ntpd daemon
  */
 
+#include <config.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <ctype.h>

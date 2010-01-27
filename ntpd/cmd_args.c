@@ -15,7 +15,6 @@
  * Definitions of things either imported from or exported to outside
  */
 extern char const *progname;
-extern const char *specific_interface;
 
 #ifdef HAVE_NETINFO
 extern int	check_netinfo;
@@ -133,8 +132,8 @@ getCmdOpts(
 	if (HAVE_OPT( USER )) {
 		droproot = 1;
 		user = estrdup(OPT_ARG( USER ));
-		group = rindex(user, ':');
-		if (group)
+		group = strrchr(user, ':');
+		if (group != NULL)
 			*group++ = '\0'; /* get rid of the ':' */
 	}
 #endif

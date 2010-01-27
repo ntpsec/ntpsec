@@ -35,7 +35,7 @@
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntpd.h"
-#include "../../../ntpd/ntpd-opts.h"
+#include "ntpd-opts.h"
 
 extern double sys_residual;	/* residual from previous adjustment */
 

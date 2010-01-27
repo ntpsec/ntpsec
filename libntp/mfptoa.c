@@ -1,6 +1,7 @@
 /*
  * mfptoa - Return an asciized representation of a signed long fp number
  */
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 

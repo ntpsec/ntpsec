@@ -1,13 +1,14 @@
 /*
+ * ntp_machine.h
+ *
  * Collect all machine dependent idiosyncrasies in one place.
+ *
+ * The functionality formerly in this file is mostly handled by
+ * Autoconf these days.
  */
 
 #ifndef NTP_MACHINE_H
 #define NTP_MACHINE_H
-
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
 
 #ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
@@ -25,9 +26,6 @@
 /*
 
 			 HEY!  CHECK THIS OUT!
-
-  The first half of this file is obsolete, and is only there to help
-  reconcile "what went before" with "current behavior".
 
   The per-system SYS_* #defins ARE NO LONGER USED, with the temporary
   exception of SYS_WINNT.
@@ -83,141 +81,6 @@ MISC
 #if !defined(HAVE_NTP_ADJTIME) && defined(HAVE___ADJTIMEX)
 # define ntp_adjtime __adjtimex
 #endif
-
-#if 0
-
-/*
- * IRIX 4.X and IRIX 5.x
- */
-#if defined(SYS_IRIX4)||defined(SYS_IRIX5)
-# define ADJTIME_IS_ACCURATE
-# define LOCK_PROCESS
-#endif
-
-/*
- * Ultrix
- * Note: posix version has NTP_POSIX_SOURCE and HAVE_SIGNALED_IO
- */
-#if defined(SYS_ULTRIX)
-# define S_CHAR_DEFINED
-# define NTP_SYSCALLS_STD
-# define HAVE_MODEM_CONTROL
-#endif
-
-/*
- * AUX
- */
-#if defined(SYS_AUX2) || defined(SYS_AUX3)
-# define NO_SIGNED_CHAR_DECL
-# define LOCK_PROCESS
-# define NTP_POSIX_SOURCE
-/*
- * This requires that _POSIX_SOURCE be forced on the
- * compiler command flag. We can't do it here since this
- * file is included _after_ the system header files and we
- * need to let _them_ know we're POSIX. We do this in
- * compilers/aux3.gcc...
- */
-# define LOG_NTP LOG_LOCAL1
-#endif
-
-/*
- * HPUX
- */
-#if defined(SYS_HPUX)
-# define getdtablesize() sysconf(_SC_OPEN_MAX)
-# define setlinebuf(f) setvbuf(f, NULL, _IOLBF, 0)
-# define NO_SIGNED_CHAR_DECL
-# define LOCK_PROCESS
-#endif
-
-/*
- * BSD/OS 2.0 and above
- */
-#if defined(SYS_BSDI)
-# define USE_FSETOWNCTTY	/* this funny system demands a CTTY for FSETOWN */
-#endif
-
-/*
- * FreeBSD 2.0 and above
- */
-#ifdef SYS_FREEBSD
-# define KERNEL_PLL
-#endif
-
-/*
- * Linux
- */
-#if defined(SYS_LINUX)
-# define ntp_adjtime __adjtimex
-#endif
-
-/*
- * PTX
- */
-#if defined(SYS_PTX)
-# define LOCK_PROCESS
-struct timezone { int __0; };	/* unused placebo */
-/*
- * no comment !@!
- */
-typedef unsigned int u_int;
-# ifndef	_NETINET_IN_SYSTM_INCLUDED	/* i am about to comment... */
-typedef unsigned char u_char;
-typedef unsigned short u_short;
-typedef unsigned long u_long;
-# endif
-#endif
-
-/*
- * UNIX V.4 on and NCR 3000
- */
-#if defined(SYS_SVR4)
-# define STREAM
-# define LOCK_PROCESS
-# define SIZE_RETURNED_IN_BUFFER
-#endif
-
-/*
- * (Univel/Novell) Unixware1 SVR4 on intel x86 processor
- */
-#if defined(SYS_UNIXWARE1)
-/* #define _POSIX_SOURCE */
-# define STREAM
-# define STREAMS
-# undef STEP_SLEW		/* TWO step */
-# define LOCK_PROCESS
-# define SIZE_RETURNED_IN_BUFFER
-# include <sys/sockio.h>
-# include <sys/types.h>
-# include <netinet/in_systm.h>
-#endif
-
-/*
- * DomainOS
- */
-#if defined(SYS_DOMAINOS)
-# define NTP_SYSCALLS_STD
-/* older versions of domain/os don't have class D */
-# ifndef IN_CLASSD
-#  define IN_CLASSD(i)		(((long)(i) & 0xf0000000) == 0xe0000000)
-#  define IN_CLASSD_NET 	0xf0000000
-#  define IN_CLASSD_NSHIFT	28
-#  define IN_CLASSD_HOST	0xfffffff
-#  define IN_MULTICAST(i)	IN_CLASSD(i)
-# endif
-#endif
-
-/*
- * Fujitsu UXP/V
- */
-#if defined(SYS_UXPV)
-# define LOCK_PROCESS
-# define SIZE_RETURNED_IN_BUFFER
-#endif
-
-
-#endif /* 0 */
 
 /*
  * Define these here for non-Windows NT systems
@@ -502,34 +365,7 @@ extern time_t	timegm		(struct tm *);
 	&& !defined(HAVE_TERMIOS)
 #include "ERROR: no tty type defined!"
 # endif
-#endif /* SYS_WINNT || VMS	|| SYS_VXWORKS*/
+#endif /* !SYS_WINNT && !VMS && !SYS_VXWORKS*/
 
-#ifdef	WORDS_BIGENDIAN
-# define	XNTP_BIG_ENDIAN 1
-#else
-# define	XNTP_LITTLE_ENDIAN	1
-#endif
-
-/*
- * Byte order woes.
- * This used to be resolved by calling ntohl() and htonl() to swap things
- * around, but this turned out to be quite costly on Vaxes where those
- * things are actual functions.  The code now straightens out byte
- * order troubles on its own, with no performance penalty for little
- * end first machines, but at great expense to cleanliness.
- */
-#if !defined(XNTP_BIG_ENDIAN) && !defined(XNTP_LITTLE_ENDIAN)
-	/*
-	 * Pick one or the other.
-	 */
-	BYTE_ORDER_NOT_DEFINED_FOR_AUTHENTICATION
-#endif
-
-#if defined(XNTP_BIG_ENDIAN) && defined(XNTP_LITTLE_ENDIAN)
-	/*
-	 * Pick one or the other.
-	 */
-	BYTE_ORDER_NOT_DEFINED_FOR_AUTHENTICATION
-#endif
 
 #endif	/* NTP_MACHINE_H */

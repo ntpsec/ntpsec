@@ -190,6 +190,11 @@ SOURCE=..\..\..\ntpd\ntp_util.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\ntpd\ntp_worker.c
+# SUBTRACT CPP /YX
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\..\ntpd\ntpd-opts.c"
 # End Source File
 # Begin Source File
@@ -200,8 +205,18 @@ SOURCE=..\..\..\ntpd\ntpd.c
 # Begin Source File
 
 SOURCE=..\ntpd\ntservice.c
+# SUBTRACT CPP /YX
 # End Source File
 # Begin Source File
+
+SOURCE=..\..\..\ntpd\work_fork.c
+# SUBTRACT CPP /YX
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\ntpd\work_thread.c
+# SUBTRACT CPP /YX
+# End Source File
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
@@ -391,6 +406,14 @@ SOURCE=..\..\..\include\ntp_types.h
 # Begin Source File
 
 SOURCE=..\..\..\include\ntp_unixtime.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_worker.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_workimpl.h
 # End Source File
 # Begin Source File
 

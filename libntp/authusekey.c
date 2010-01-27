@@ -1,6 +1,7 @@
 /*
  * authusekey - decode a key from ascii and use it
  */
+#include <config.h>
 #include <stdio.h>
 #include <ctype.h>
 

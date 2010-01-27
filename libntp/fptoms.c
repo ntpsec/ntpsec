@@ -1,6 +1,7 @@
 /*
  * fptoms - return an asciized s_fp number in milliseconds
  */
+#include <config.h>
 #include "ntp_fp.h"
 
 char *

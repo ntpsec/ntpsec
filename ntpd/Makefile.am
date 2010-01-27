@@ -36,7 +36,7 @@ endif
 #
 # VPHACK and VPHACK_AFTER are enabled on non-GNU makes (such as 
 # BSD make) to work around issues specific to compiling
-# ntp_parser.y into ntp_parser.h and ntp_parser.c in a vPATH
+# ntp_parser.y into ntp_parser.h and ntp_parser.c in a VPATH
 # configuration where we would like (for a change) the output
 # files ntp_parser.[ch] to be placed in the source directory,
 # as opposed to the build directory.  This allows a single
@@ -165,6 +165,7 @@ libntpd_a_SOURCES =		\
 	ntp_signd.c		\
 	ntp_timer.c		\
 	ntp_util.c		\
+	ntp_worker.c		\
 	ppsapi_timepps.h	\
 	refclock_acts.c		\
 	refclock_arbiter.c	\
@@ -206,6 +207,8 @@ libntpd_a_SOURCES =		\
 	refclock_wwv.c		\
 	refclock_wwvb.c		\
 	refclock_zyfer.c	\
+	work_fork.c		\
+	work_thread.c		\
 	$(NULL)
 
 ntp_keyword.out: keyword-gen

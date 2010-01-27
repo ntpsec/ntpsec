@@ -1,6 +1,7 @@
 /*
  * socktoa - return a numeric host name from a sockaddr_storage structure
  */
+#include <config.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>

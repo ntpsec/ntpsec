@@ -174,6 +174,13 @@ static	struct refclockio *refio;
  */
 fd_set activefds;
 int maxactivefd;
+
+#ifndef HAVE_IO_COMPLETION_PORT
+static void	maintain_activefds(int fd, int closing);
+#else
+#define		maintain_activefds(fd, closing)	do {} while (0)
+#endif
+
 /*
  * bit alternating value to detect verified interfaces during an update cycle
  */
@@ -185,7 +192,6 @@ static int		update_interfaces(u_short, interface_receiver_t, void *);
 static void		remove_interface(struct interface *);
 static struct interface *create_interface(u_short, struct interface *);
 
-static int	move_fd			(SOCKET);
 static int	is_wildcard_addr	(sockaddr_u *);
 static int	is_wildcard_netaddr	(const isc_netaddr_t *);
 
@@ -301,6 +307,53 @@ static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
 
 
+
+#ifndef HAVE_IO_COMPLETION_PORT
+static void
+maintain_activefds(
+	int fd,
+	int closing
+	)
+{
+	int i;
+
+	if (fd < 0 || fd >= FD_SETSIZE) {
+		msyslog(LOG_ERR,
+			"Too many sockets in use, FD_SETSIZE %d exceeded by fd %d",
+			FD_SETSIZE, fd);
+		exit(1);
+	}
+
+	if (!closing) {
+		FD_SET(fd, &activefds);
+		maxactivefd = max(fd, maxactivefd);
+	} else {
+		FD_CLR(fd, &activefds);
+		if (maxactivefd && fd == maxactivefd) {
+			for (i = maxactivefd - 1; i >= 0; i--)
+				if (FD_ISSET(i, &activefds)) {
+					maxactivefd = i;
+					break;
+				}
+			NTP_INSIST(fd != maxactivefd);
+		}
+	}
+}
+#endif	/* !HAVE_IO_COMPLETION_PORT */
+
+
+#ifdef WORK_FORK
+void
+update_resp_pipe_fd(
+	int resp_pipe_fd,
+	int closing
+	)
+{
+	maintain_activefds(resp_pipe_fd, closing);
+}
+#endif
+
+
 /*
  * on Unix systems the stdio library typically
  * makes use of file descriptors in the lower
@@ -314,7 +367,7 @@ static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
  * and may exceed to current file decriptor limits.
  * We are using following strategy:
  * - keep a current socket fd boundary initialized with
- *   max(0, min(getdtablesize() - FD_CHUNK, FOPEN_MAX))
+ *   max(0, min(GETDTABLESIZE() - FD_CHUNK, FOPEN_MAX))
  * - attempt to move the descriptor to the boundary or
  *   above.
  *   - if that fails and boundary > 0 set boundary
@@ -330,7 +383,7 @@ static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
  *     allocation is possible or 0 is reached - at this
  *     point the algrithm will be disabled
  */
-static int
+SOCKET
 move_fd(
 	SOCKET fd
 	)
@@ -338,6 +391,9 @@ move_fd(
 #if !defined(SYS_WINNT) && defined(F_DUPFD)
 #ifndef FD_CHUNK
 #define FD_CHUNK	10
+#endif
+#ifndef FOPEN_MAX
+#define FOPEN_MAX	20
 #endif
 /*
  * number of fds we would like to have for
@@ -352,17 +408,16 @@ move_fd(
 #define FD_PREFERRED_SOCKBOUNDARY 48
 #endif
 
-#ifndef HAVE_GETDTABLESIZE
+#if defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
+#define GETDTABLESIZE()	((int)sysconf(_SC_OPEN_MAX))
+#elif !defined(HAVE_GETDTABLESIZE)
 /*
  * if we have no idea about the max fd value set up things
  * so we will start at FOPEN_MAX
  */
-#define getdtablesize() (FOPEN_MAX+FD_CHUNK)
+#define GETDTABLESIZE()	(FOPEN_MAX + FD_CHUNK)
 #endif
 
-#ifndef FOPEN_MAX
-#define FOPEN_MAX	20	/* assume that for the lack of anything better */
-#endif
 	static SOCKET socket_boundary = -1;
 	SOCKET newfd;
 
@@ -373,12 +428,12 @@ move_fd(
 	 * already
 	 */
 	if (socket_boundary == -1) {
-		socket_boundary = max(0, min(getdtablesize() - FD_CHUNK, 
+		socket_boundary = max(0, min(GETDTABLESIZE() - FD_CHUNK, 
 					     min(FOPEN_MAX, FD_PREFERRED_SOCKBOUNDARY)));
 #ifdef DEBUG
 		msyslog(LOG_DEBUG,
 			"ntp_io: estimated max descriptors: %d, initial socket boundary: %d",
-			getdtablesize(), socket_boundary);
+			GETDTABLESIZE(), socket_boundary);
 #endif
 	}
 
@@ -413,10 +468,45 @@ move_fd(
 	return fd;
 }
 
+
+#ifndef HAVE_IO_COMPLETION_PORT
+/*
+ * close_all_beyond()
+ *
+ * Close all file descriptors after the given keep_fd, which is the
+ * highest fd to keep open.
+ */
+void
+close_all_beyond(
+	int keep_fd
+	)
+{
+# ifdef HAVE_CLOSEFROM
+	closefrom(keep_fd + 1);
+# elif defined(F_CLOSEM)
+	/*
+	 * From 'Writing Reliable AIX Daemons,' SG24-4946-00,
+	 * by Eric Agar (saves us from doing 32767 system
+	 * calls)
+	 */
+	if (fcntl(keep_fd + 1, F_CLOSEM, 0) == -1)
+		msyslog(LOG_ERR, "F_CLOSEM(%d): %m", keep_fd + 1);
+# else	/* !HAVE_CLOSEFROM && !F_CLOSEM follows */
+	int fd;
+	int max_fd;
+
+	max_fd = GETDTABLESIZE();
+	for (fd = keep_fd + 1; fd < max_fd; fd++)
+		close(fd);
+# endif	/* !HAVE_CLOSEFROM && !F_CLOSEM */
+}
+#endif	/* HAVE_IO_COMPLETION_PORT */
+
+
 #ifdef DEBUG_TIMING
 /*
  * collect timing information for various processing
- * paths. currently we only pass then on to the file
+ * paths. currently we only pass them on to the file
  * for later processing. this could also do histogram
  * based analysis in other to reduce the load (and skew)
  * dur to the file output
@@ -487,7 +577,7 @@ init_io(void)
 
 #ifdef SYS_WINNT
 	init_io_completion_port();
-#endif /* SYS_WINNT */
+#endif
 
 #if defined(HAVE_SIGNALED_IO)
 	(void) set_signal();
@@ -691,26 +781,30 @@ is_ip_address(
 	 * addresses (up to 46 bytes), the delimiter character and the
 	 * terminating NULL character.
 	 */
-	if (inet_pton(AF_INET, host, &in4) == 1) {
-		isc_netaddr_fromin(addr, &in4);
-		return (ISC_TRUE);
-	} else if (sizeof(tmpbuf) > strlen(host)) {
-		if ('[' == host[0]) {
-			strncpy(tmpbuf, &host[1], sizeof(tmpbuf));
-			pch = strchr(tmpbuf, ']');
-			if (pch != NULL)
-				*pch = '\0';
-		} else
-			strncpy(tmpbuf, host, sizeof(tmpbuf));
-		pch = strchr(tmpbuf, '%');
-		if (pch != NULL)
-			*pch = '\0';
-
-		if (inet_pton(AF_INET6, tmpbuf, &in6) == 1) {
-			isc_netaddr_fromin6(addr, &in6);
+	if (AF_UNSPEC == addr->family || AF_INET == addr->family)
+		if (inet_pton(AF_INET, host, &in4) == 1) {
+			isc_netaddr_fromin(addr, &in4);
 			return (ISC_TRUE);
 		}
-	}
+
+	if (AF_UNSPEC == addr->family || AF_INET6 == addr->family)
+		if (sizeof(tmpbuf) > strlen(host)) {
+			if ('[' == host[0]) {
+				strncpy(tmpbuf, &host[1], sizeof(tmpbuf));
+				pch = strchr(tmpbuf, ']');
+				if (pch != NULL)
+					*pch = '\0';
+			} else
+				strncpy(tmpbuf, host, sizeof(tmpbuf));
+			pch = strchr(tmpbuf, '%');
+			if (pch != NULL)
+				*pch = '\0';
+
+			if (inet_pton(AF_INET6, tmpbuf, &in6) == 1) {
+				isc_netaddr_fromin6(addr, &in6);
+				return (ISC_TRUE);
+			}
+		}
 	/*
 	 * If we got here it was not an IP address
 	 */
@@ -1334,14 +1428,7 @@ interface_update(
 #ifdef DEBUG
 	msyslog(LOG_DEBUG, "new interface(s) found: waking up resolver");
 #endif
-#ifdef SYS_WINNT
-	/* wake up the resolver thread */
-	if (ResolverEventHandle != NULL)
-		SetEvent(ResolverEventHandle);
-#else
-	/* write any single byte to the pipe to wake up the resolver process */
-	write( resolver_pipe_fd[1], &new_interface_found, 1 );
-#endif
+	interrupt_worker_sleep();
 }
 
 
@@ -3324,6 +3411,15 @@ input_handler(
 #endif /* HAS_ROUTING_SOCKET */
 	
 	/*
+	 * Check for a response from the blocking child
+	 */
+	if (parent_resp_read_pipe &&
+	    FD_ISSET(parent_resp_read_pipe, &fds)) {
+		select_count++;
+		process_blocking_response();
+	}
+
+	/*
 	 * Done everything from that select.
 	 */
 
@@ -3831,23 +3927,7 @@ add_fd_to_list(
 	lsock->type = type;
 
 	LINK_SLIST(fd_list, lsock, link);
-	/*
-	 * I/O Completion Ports don't care about the select and FD_SET
-	 */
-#ifndef HAVE_IO_COMPLETION_PORT
-	if (fd < 0 || fd >= FD_SETSIZE) {
-		msyslog(LOG_ERR,
-			"Too many sockets in use, FD_SETSIZE %d exceeded",
-			FD_SETSIZE);
-		exit(1);
-	}
-	/*
-	 * keep activefds in sync
-	 */
-	maxactivefd = max(fd, maxactivefd);
-
-	FD_SET(fd, &activefds);
-#endif
+	maintain_activefds(fd, 0);
 }
 
 static void
@@ -3879,25 +3959,9 @@ close_and_delete_fd_from_list(
 
 		free(lsock);
 		/*
-		 * I/O Completion Ports don't care about select and fd_set
-		 */
-#ifndef HAVE_IO_COMPLETION_PORT
-		/*
 		 * remove from activefds
 		 */
-		FD_CLR(fd, &activefds);
-		
-		if (fd == maxactivefd && maxactivefd) {
-			int i;
-			NTP_INSIST(maxactivefd - 1 < FD_SETSIZE);
-			for (i = maxactivefd - 1; i >= 0; i--)
-				if (FD_ISSET(i, &activefds)) {
-					maxactivefd = i;
-					break;
-				}
-			NTP_INSIST(fd != maxactivefd);
-		}
-#endif
+		maintain_activefds(fd, 1);
 	}
 }
 
