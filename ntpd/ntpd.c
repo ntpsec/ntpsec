@@ -363,7 +363,7 @@ change_logfile(
 		} else
 #endif
 			abs_fname = estrdup(log_fname);
-		msyslog(LOG_INFO, "attempting to open log %s", abs_fname);
+		DPRINTF(1, ("attempting to open log %s", abs_fname));
 		new_file = fopen(abs_fname, "a");
 	}
 
