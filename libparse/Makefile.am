@@ -85,7 +85,7 @@ ETAGS_ARGS = Makefile.am
 EXTRA_DIST = parsesolaris.c parsestreams.c mkinfo_scmd.sed mkinfo_rcmd.sed info_trimble.c
 
 info_trimble.c: Makefile $(top_srcdir)/include/trimble.h $(srcdir)/Makefile.am $(srcdir)/mkinfo_scmd.sed $(srcdir)/mkinfo_rcmd.sed
-	[ "$(srcdir)" != "." ] && rm -f info_trimble.c	# rid ourselves of leftover from old way
+	-[ "$(srcdir)" != "." ] && rm -f info_trimble.c	# rid ourselves of leftover from old way
 	sed -n -f $(srcdir)/mkinfo_scmd.sed $(top_srcdir)/include/trimble.h  > info_trimble.new
 	sed -n -f $(srcdir)/mkinfo_rcmd.sed $(top_srcdir)/include/trimble.h >> info_trimble.new
 	cmp info_trimble.new $(srcdir)/info_trimble.c || mv -f info_trimble.new $(srcdir)/info_trimble.c
