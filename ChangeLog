@@ -1,3 +1,4 @@
+(4.2.7p11) 2010/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 47] Debugging and logging do not work after a fork.
 * [Bug 1010] getaddrinfo() could block and thus should not be called by
   the main thread/process.
