@@ -680,9 +680,7 @@ AC_C_BIGENDIAN
 AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
-AC_CHECK_TYPE(time_t, long)
-AC_CHECK_SIZEOF(time_t)
-AC_CHECK_TYPES(uintptr_t)
+AC_CHECK_TYPES([time_t, uintptr_t])
  
 AH_VERBATIM([TYPEDEF_UINTPTR_T],
 [/* Provide a typedef for uintptr_t? */
@@ -691,27 +689,62 @@ typedef unsigned int	uintptr_t;
 #define HAVE_UINTPTR_T	1
 #endif])
 
+case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
+ no::yes)
+    AC_CACHE_CHECK(
+	[if DNS headers provide int32 type],
+	[ntp_cv_type_int32_with_dns],
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM(
+		[
+		    #ifdef HAVE_ARPA_NAMESER_H
+		    # include <arpa/nameser.h>
+		    #endif
+		    #include <resolv.h>
+		],
+		[
+		    size_t cb = sizeof(int32);
+		]
+	    ),
+	    [ntp_cv_type_int32_with_dns=yes],
+	    [ntp_cv_type_int32_with_dns=no]
+	)
+    )
+    case "$ntp_cv_type_int32_with_dns" in
+     yes)
+	AC_DEFINE([HAVE_INT32_ONLY_WITH_DNS], , [int32 type in DNS headers, not others.])
+    esac
+esac
+
+case "$ac_cv_type_u_int32::$ac_cv_header_resolv_h" in
+ no::yes)
+    AC_CACHE_CHECK(
+	[if DNS headers provide u_int32 type],
+	[ntp_cv_type_u_int32_with_dns],
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM(
+		[
+		    #ifdef HAVE_ARPA_NAMESER_H
+		    # include <arpa/nameser.h>
+		    #endif
+		    #include <resolv.h>
+		],
+		[
+		    size_t cb = sizeof(u_int32);
+		]
+	    ),
+	    [ntp_cv_type_u_int32_with_dns=yes],
+	    [ntp_cv_type_u_int32_with_dns=no]
+	)
+    )
+    case "$ntp_cv_type_u_int32_with_dns" in
+     yes)
+	AC_DEFINE([HAVE_U_INT32_ONLY_WITH_DNS], , [u_int32 type in DNS headers, not others.])
+    esac
+esac
+
+AC_CHECK_SIZEOF([time_t])
 AC_STRUCT_TM
-
-AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
-[AC_TRY_COMPILE([#include <sys/types.h>],
-	[u_int8_t len = 42; return 0;],
-	ac_cv_type_u_int8_t=yes,
-	ac_cv_type_u_int8_t=no)
-])
-if test $ac_cv_type_u_int8_t = yes; then
-	AC_DEFINE(HAVE_TYPE_U_INT8_T, 1, [Does u_int8_t exist?])
-fi
-
-AC_CACHE_CHECK([for u_int64_t], ac_cv_type_u_int64_t,
-[AC_TRY_COMPILE([#include <sys/types.h>],
-	[u_int64_t len = 42; return 0;],
-	ac_cv_type_u_int64_t=yes,
-	ac_cv_type_u_int64_t=no)
-])
-if test $ac_cv_type_u_int64_t = yes; then
-	AC_DEFINE(HAVE_TYPE_U_INT64_T, 1, [Does u_int64_t exist?])
-fi
 
 AC_CACHE_CHECK([for a fallback value for HZ], ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
@@ -1131,6 +1164,7 @@ AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
 AC_CHECK_SIZEOF(signed char)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
+AC_CHECK_TYPES([int32, u_int32])
 
 AC_CHECK_TYPES([s_char])
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in

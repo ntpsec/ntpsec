@@ -1,6 +1,6 @@
+* [Bug 1469] u_int32, int32 changes broke HP-UX 10.20 build.
 (4.2.7p12) 2010/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1468] 'make install' broken for root on default NFS mount.
-* [Bug 1469] u_int32, int32 changes broke HP-UX 10.20 build.
 (4.2.7p11) 2010/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 47] Debugging and logging do not work after a fork.
 * [Bug 1010] getaddrinfo() could block and thus should not be called by

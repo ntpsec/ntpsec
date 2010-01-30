@@ -84,6 +84,12 @@
 # ifdef RES_TIMEOUT
 #  undef RES_TIMEOUT	/* resolv.h has one, we want ours */
 # endif
+# ifdef HAVE_INT32_ONLY_WITH_DNS
+#  define HAVE_INT32
+# endif
+# ifdef HAVE_U_INT32_ONLY_WITH_DNS
+#  define HAVE_U_INT32
+# endif
 #endif
 
 #include "ntp_stdlib.h"

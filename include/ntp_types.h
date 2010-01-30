@@ -47,27 +47,31 @@ typedef unsigned int u_int;
 #endif /* VMS */
 
 #ifdef HAVE_UINT32_T
-  typedef	int32_t		int32;
-  typedef	uint32_t	u_int32;
+# ifndef HAVE_INT32
+   typedef	int32_t		int32;
+# endif
+# ifndef HAVE_U_INT32
+   typedef	uint32_t	u_int32;
+# endif
 #elif (SIZEOF_INT == 4)
-# ifndef int32
+# if !defined(HAVE_INT32) && !defined(int32)
    typedef	int		int32;
 # endif
-# ifndef u_int32
+# if !defined(HAVE_U_INT32) && !defined(u_int32)
    typedef	unsigned	u_int32;
 # endif
 #else	/* SIZEOF_INT != 4 */
 # if (SIZEOF_LONG == 4)
-#  ifndef int32
+# if !defined(HAVE_INT32) && !defined(int32)
     typedef	long		int32;
 #  endif
-#  ifndef u_int32
+# if !defined(HAVE_U_INT32) && !defined(u_int32)
     typedef	unsigned long	u_int32;
 #  endif
 # else	/* SIZEOF_LONG != 4 */
 #  include "Bletch: what's 32 bits on this machine?"
 # endif
-#endif	/* !HAVE_UINT32_t && SIZEOF_INT != 4 */
+#endif	/* !HAVE_UINT32_T && SIZEOF_INT != 4 */
 
 typedef u_char		ntp_u_int8_t;
 typedef u_short		ntp_u_int16_t;
