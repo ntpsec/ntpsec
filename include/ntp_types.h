@@ -7,6 +7,9 @@
 #ifndef NTP_TYPES_H
 #define NTP_TYPES_H
 
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
 #include <sys/types.h>
 #include "ntp_machine.h"
 
@@ -41,13 +44,12 @@
 #if defined(VMS)
 #include <socket.h>
 typedef unsigned int u_int;
-/*
- * Note: VMS DECC has  long == int  (even on __alpha),
- *	 so the distinction below doesn't matter
- */
 #endif /* VMS */
 
-#if (SIZEOF_INT == 4)
+#ifdef HAVE_UINT32_T
+  typedef	int32_t		int32;
+  typedef	uint32_t	u_int32;
+#elif (SIZEOF_INT == 4)
 # ifndef int32
    typedef	int		int32;
 # endif
@@ -65,7 +67,7 @@ typedef unsigned int u_int;
 # else	/* SIZEOF_LONG != 4 */
 #  include "Bletch: what's 32 bits on this machine?"
 # endif
-#endif	/* SIZEOF_INT != 4 */
+#endif	/* !HAVE_UINT32_t && SIZEOF_INT != 4 */
 
 typedef u_char		ntp_u_int8_t;
 typedef u_short		ntp_u_int16_t;
