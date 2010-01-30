@@ -1,36 +1,28 @@
 NULL=
 AUTOMAKE_OPTIONS =
-BUILT_SOURCES = info_trimble.c
+BUILT_SOURCES = stale_itc_gone
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris
 noinst_PROGRAMS = @MAKE_PARSEKMODULE@
-CLEANFILES = 
+CLEANFILES = stale_itc_gone
 
 K_CFLAGS = -DPARSESTREAM -DNTP_NEED_BOPS
 
 # info_trimble.c was mistakenly created in the build directory
-# previously.  Without special steps, building an updated tree from
-# outside the source directory (a VPATH build) would break trying to
-# update info_trimble.c in the build dir using the default SCCS get
-# action.
-# As a transitional measure, info_trimble.c is listed in
-# libparse_a_SOURCES prefixed by "$(srcdir)/".
-# This prevents attempting to update or use an old leftover
-# info_trimble.c in the build directory, when building outside
-# the source directory.  At the same time, the rule to generate
-# info_trimble.c (now in the source directory) has been updated
-# to delete any leftover info_trimble.c in the build directory.  To
-# ensure that fires in all build trees sharing a common source tree,
-# $(srcdir)/info_trimble.c now depends on Makefile, and has been added
-# temporarily to BUILT_SOURCES.  This causes builds of updated trees to
-# get rid of the troublesome leftover info_trimble.c files in the build
-# directories.
-# After a month or so, this comment block should be removed, the
-# reference to info_trimble.c in libparse_a_SOURCES simplified to
-# filename only again, info_trimble.c be removed from BUILT_SOURCES,
-# and the commented-out $(srcdir)/info_trimble.c rule should replace
-# the info_trimble.c rule.
+# previously.  It is located in $(srcdir) and any updates must
+# end up there.
+# As a transitional measure, a new target stale_itc_gone has been added
+# which removes the stale $(builddir)/info_trimble.c which will be in
+# the build directory of those tracking the source changes over time
+# while re-using the existing build directory which is not the source
+# directory.  To ensure that rule fires in each of the commonly several
+# build trees sharing a single source tree, stale_itc_gone has been
+# added temporarily to BUILT_SOURCES.  After a month or so, this
+# comment block can be removed, and stale_itc_gone with it.  It should
+# come out of CLEANFILES (which still needs to be explicitly set, don't
+# simply remove the line) and BUILT_SOURCES at the same time the rule
+# is removed.
 
 libparse_a_SOURCES = parse.c \
 		     parse_conf.c \
@@ -46,7 +38,7 @@ libparse_a_SOURCES = parse.c \
 		     clk_wharton.c \
 		     clk_varitext.c \
 		     data_mbg.c \
-		     $(srcdir)/info_trimble.c \
+		     info_trimble.c \
 		     trim_info.c \
 		     binio.c \
 		     ieee754io.c \
@@ -84,22 +76,14 @@ ETAGS_ARGS = Makefile.am
 
 EXTRA_DIST = parsesolaris.c parsestreams.c mkinfo_scmd.sed mkinfo_rcmd.sed info_trimble.c
 
-info_trimble.c: Makefile $(top_srcdir)/include/trimble.h $(srcdir)/Makefile.am $(srcdir)/mkinfo_scmd.sed $(srcdir)/mkinfo_rcmd.sed
+stale_itc_gone:
 	-[ "$(srcdir)" != "." ] && rm -f info_trimble.c	# rid ourselves of leftover from old way
+	@echo "at most one info_trimble.c in source and build dirs" > $@
+
+$(srcdir)/info_trimble.c: $(top_srcdir)/include/trimble.h $(srcdir)/Makefile.am $(srcdir)/mkinfo_scmd.sed $(srcdir)/mkinfo_rcmd.sed
 	sed -n -f $(srcdir)/mkinfo_scmd.sed $(top_srcdir)/include/trimble.h  > info_trimble.new
 	sed -n -f $(srcdir)/mkinfo_rcmd.sed $(top_srcdir)/include/trimble.h >> info_trimble.new
-	cmp info_trimble.new $(srcdir)/info_trimble.c || mv -f info_trimble.new $(srcdir)/info_trimble.c
-	rm -f info_trimble.new
-	
-# the workaround form above fires too much, such as during
-# "make install", due to the incorrect info_trimble.c target
-# rather than $(srcdir)/info_trimble.c.  That's why it verifies
-# the file contents have changed before modifying it.
-# post-workaround version:
-# $(srcdir)/info_trimble.c: $(top_srcdir)/include/trimble.h $(srcdir)/Makefile.am $(srcdir)/mkinfo_scmd.sed $(srcdir)/mkinfo_rcmd.sed
-#	sed -n -f $(srcdir)/mkinfo_scmd.sed $(top_srcdir)/include/trimble.h  > info_trimble.new
-#	sed -n -f $(srcdir)/mkinfo_rcmd.sed $(top_srcdir)/include/trimble.h >> info_trimble.new
-#	mv -f info_trimble.new $@
+	mv -f info_trimble.new $@
 
 kieee754io.o: $(srcdir)/ieee754io.c
 	 $(COMPILE) $(K_CFLAGS) -c $(srcdir)/ieee754io.c -o $@

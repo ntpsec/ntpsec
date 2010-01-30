@@ -1,7 +1,10 @@
+* [Bug 1468] 'make install' broken for root on default NFS mount.
 (4.2.7p11) 2010/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 47] Debugging and logging do not work after a fork.
 * [Bug 1010] getaddrinfo() could block and thus should not be called by
   the main thread/process.
+* New async DNS resolver in ntpd allows nonblocking queries anytime,
+  instead of only once at startup.
 (4.2.7p10) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1140] Clean up debug.html, decode.html, and ntpq.html.
 * Include (4.2.6p1-RC3) - Use TZ=UTC instead of TZ= when calling date in
