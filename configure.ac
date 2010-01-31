@@ -135,7 +135,7 @@ AC_CACHE_CHECK(
     ac_cv_cpp_warning,
     [
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM([], [#warning foo]),
+	    AC_LANG_PROGRAM([[]], [[#warning foo]]),
 	    [ac_cv_cpp_warning=yes],
 	    [ac_cv_cpp_warning=no],
 	)
@@ -156,7 +156,7 @@ case "$GCC" in
 	ac_cv_gcc_Wstrict_overflow, 
 	[
 	    AC_COMPILE_IFELSE(
-		[AC_LANG_PROGRAM([], [])],
+		[AC_LANG_PROGRAM()],
 		[ac_cv_gcc_Wstrict_overflow=yes],
 		[ac_cv_gcc_Wstrict_overflow=no]
 	    )
@@ -180,7 +180,7 @@ case "$GCC" in
 	ac_cv_gcc_Winit_self, 
 	[
 	    AC_COMPILE_IFELSE(
-		[AC_LANG_PROGRAM([], [])],
+		[AC_LANG_PROGRAM()],
 		[ac_cv_gcc_Winit_self=yes],
 		[ac_cv_gcc_Winit_self=no]
 	    )
@@ -698,15 +698,15 @@ case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
 	[ntp_cv_type_int32_with_dns],
 	AC_COMPILE_IFELSE(
 	    AC_LANG_PROGRAM(
-		[
+		[[
 		    #ifdef HAVE_ARPA_NAMESER_H
 		    # include <arpa/nameser.h>
 		    #endif
 		    #include <resolv.h>
-		],
-		[
+		]],
+		[[
 		    size_t cb = sizeof(int32);
-		]
+		]]
 	    ),
 	    [ntp_cv_type_int32_with_dns=yes],
 	    [ntp_cv_type_int32_with_dns=no]
@@ -725,15 +725,15 @@ case "$ac_cv_type_u_int32::$ac_cv_header_resolv_h" in
 	[ntp_cv_type_u_int32_with_dns],
 	AC_COMPILE_IFELSE(
 	    AC_LANG_PROGRAM(
-		[
+		[[
 		    #ifdef HAVE_ARPA_NAMESER_H
 		    # include <arpa/nameser.h>
 		    #endif
 		    #include <resolv.h>
-		],
-		[
+		]],
+		[[
 		    size_t cb = sizeof(u_int32);
-		]
+		]]
 	    ),
 	    [ntp_cv_type_u_int32_with_dns=yes],
 	    [ntp_cv_type_u_int32_with_dns=no]
@@ -2194,15 +2194,15 @@ AC_CACHE_CHECK(
 	 *)
 	    AC_COMPILE_IFELSE(
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#ifdef HAVE_NETINET_IN_H
 			#include <netinet/in.h>
 			#endif
-		    ],
-		    [
+		    ]],
+		    [[
 			struct ip_mreq ipmr;
 			ipmr.imr_interface.s_addr = 0;
-		    ]
+		    ]]
 		),
 		[ntp_cv_multicast=yes],
 		[]
@@ -4663,14 +4663,14 @@ AC_CACHE_CHECK(
 	AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <sys/socket.h>
 			#include <netinet/in.h>
-		    ],
-		    [
+		    ]],
+		    [[
 			struct sockaddr_in6 sin6;
-		    ]
+		    ]]
 		)
 	    ],
 	    [ac_cv_isc_found_ipv6=yes],
@@ -4760,16 +4760,16 @@ case "$ac_cv_isc_found_ipv6" in
 	    AC_COMPILE_IFELSE(
 		[
 		    AC_LANG_PROGRAM(
-			[
+			[[
 			    #include <sys/types.h>
 			    #include <sys/socket.h>
 			    #include <netinet/in.h>
 			    $isc_netinetin6_hack
 			    $isc_netinet6in6_hack
-			],
-			[
+			]],
+			[[
 			    struct in6_pktinfo xyzzy;
-			]
+			]]
 		    )
 		],
 		[ac_cv_have_in6_pktinfo=yes],
@@ -4792,17 +4792,17 @@ case "$ac_cv_isc_found_ipv6" in
 	    AC_COMPILE_IFELSE(
 		[
 		    AC_LANG_PROGRAM(
-			[
+			[[
 			    #include <sys/types.h>
 			    #include <sys/socket.h>
 			    #include <netinet/in.h>
 			    $isc_netinetin6_hack
 			    $isc_netinet6in6_hack
-			],
-			[
+			]],
+			[[
 			    struct sockaddr_in6 xyzzy;
 			    xyzzy.sin6_scope_id = 0;
-			]
+			]]
 		    )
 		],
 		[ac_cv_have_sin6_scope_id=yes],
@@ -4827,17 +4827,17 @@ AC_CACHE_CHECK(
 	AC_LINK_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <sys/socket.h>
 			#include <netinet/in.h>
 			$isc_netinetin6_hack
 			$isc_netinet6in6_hack
-		    ],
-		    [
+		    ]],
+		    [[
 			struct in6_addr in6; 
 			in6 = in6addr_any;
-		    ]
+		    ]]
 		)
 	    ],
 	    [isc_cv_have_in6addr_any=yes],
@@ -4859,13 +4859,13 @@ AC_CACHE_CHECK(
         AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <net/if6.h>
-		    ],
-		    [
+		    ]],
+		    [[
 			struct if_laddrconf a;
-		    ]
+		    ]]
 		)
 	    ],
 	    [ac_cv_isc_struct_if_laddrconf=yes],
@@ -4886,13 +4886,13 @@ AC_CACHE_CHECK(
         AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <net/if6.h>
-		    ],
-		    [
+		    ]],
+		    [[
 			struct if_laddrreq a;
-		    ]
+		    ]]
 		)
 	    ],
 	    [ac_cv_isc_struct_if_laddrreq=yes],
