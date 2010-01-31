@@ -680,7 +680,7 @@ AC_C_BIGENDIAN
 AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
-AC_CHECK_TYPES([time_t, uintptr_t])
+AC_CHECK_TYPES([uintptr_t])
  
 AH_VERBATIM([TYPEDEF_UINTPTR_T],
 [/* Provide a typedef for uintptr_t? */
@@ -688,6 +688,8 @@ AH_VERBATIM([TYPEDEF_UINTPTR_T],
 typedef unsigned int	uintptr_t;
 #define HAVE_UINTPTR_T	1
 #endif])
+
+AC_CHECK_TYPES([time_t, int32, u_int32])
 
 case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
  no::yes)
