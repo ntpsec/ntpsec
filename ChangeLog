@@ -1,4 +1,4 @@
-* [Bug 1467] Fix bogus rebuild of sntp/sntp.html.
+* Include (4.2.6p1) - [Bug 1467] Fix bogus rebuild of sntp/sntp.html.
 (4.2.7p12) 2010/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1468] 'make install' broken for root on default NFS mount.
 (4.2.7p11) 2010/01/28 Released by Harlan Stenn <stenn@ntp.org>
