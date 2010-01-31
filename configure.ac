@@ -694,7 +694,7 @@ AC_CHECK_TYPES([time_t, int32, u_int32])
 case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
  no::yes)
     AC_CACHE_CHECK(
-	[if DNS headers provide int32 type],
+	[for int32 with DNS headers included],
 	[ntp_cv_type_int32_with_dns],
 	AC_COMPILE_IFELSE(
 	    AC_LANG_PROGRAM(
@@ -721,7 +721,7 @@ esac
 case "$ac_cv_type_u_int32::$ac_cv_header_resolv_h" in
  no::yes)
     AC_CACHE_CHECK(
-	[if DNS headers provide u_int32 type],
+	[for u_int32 with DNS headers included],
 	[ntp_cv_type_u_int32_with_dns],
 	AC_COMPILE_IFELSE(
 	    AC_LANG_PROGRAM(
