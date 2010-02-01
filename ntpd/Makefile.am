@@ -27,12 +27,6 @@ else !SAVECONFIG_ENABLED
 CHECK_SAVECONFIG=
 endif
 
-if NTP_CROSSCOMPILE
-NTP_KEYWORD_OUT=ntp_keyword.dummy
-else
-NTP_KEYWORD_OUT=ntp_keyword.out
-endif
-
 #
 # VPHACK and VPHACK_AFTER are enabled on non-GNU makes (such as 
 # BSD make) to work around issues specific to compiling
@@ -71,7 +65,6 @@ vphack_after:
 
 # BUILT_SOURCES which should also be in EXTRA_DIST
 B_S_DIST=		\
-	ntp_keyword.h 	\
 	ntpd-opts.c 	\
 	ntpd-opts.h 	\
 	$(NULL)
@@ -80,7 +73,7 @@ BUILT_SOURCES=		\
 	$(VPHACK) 	\
 	ntp_parser.c 	\
 	ntp_parser.h 	\
-	$(VPHACK_AFTER) \
+	$(VPHACK_AFTER)	\
 	$(B_S_DIST)	\
 	$(NULL)
 
@@ -95,26 +88,37 @@ man_MANS=	$(srcdir)/ntpd.1
 # sqrt                                ntp_control.o
 # floor                               refclock_wwv.o
 # which are (usually) provided by -lm.
-keyword_gen_LDADD = ../libntp/libntp.a
 ntpd_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntp.a -lm @LCRYPTO@ @LSCF@
 ntpdsim_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ @LSCF@
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
-DISTCLEANFILES = keyword-gen .version version.c
-CLEANFILES = check-saveconfig compsave.conf ntp_keyword.out \
-	ntp_keyword.dummy
+keyword_gen_LDADD = ../libntp/libntp.a	# we don't want $(LDADD) here
+
+DISTCLEANFILES =		\
+	keyword-gen		\
+	.version		\
+	version.c		\
+	$(NULL)
+
+CLEANFILES =			\
+	check-saveconfig	\
+	compsave.conf		\
+	k-g-u-submake		\
+	$(NULL)
+
 EXTRA_DIST =			\
 	complete.conf		\
+	keyword-gen-utd		\
 	ntpd.1			\
 	ntpd-opts.def		\
 	ntpd-opts.menu		\
 	ntpd-opts.texi		\
 	ntpdbase-opts.def	\
-	ntp_keyword.h		\
 	refclock_msfees.c	\
 	refclock_trak.c		\
 	$(B_S_DIST)		\
 	$(NULL)
+
 ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
@@ -133,6 +137,7 @@ ntpd_SOURCES =			\
 	cmd_args.c		\
 	ntp_config.c		\
 	ntp_data_structures.c	\
+	ntp_keyword.h		\
 	ntp_io.c		\
 	ntp_parser.y		\
 	ntp_scanner.c		\
@@ -211,19 +216,26 @@ libntpd_a_SOURCES =		\
 	work_thread.c		\
 	$(NULL)
 
-ntp_keyword.out: keyword-gen
-	./keyword-gen $(srcdir)/ntp_parser.h > $@
-	grep -v diff_ignore_line < $(srcdir)/ntp_keyword.h > cmp1
-	grep -v diff_ignore_line < $@ > cmp2
-	cmp cmp1 cmp2 > /dev/null || cp $@ $(srcdir)/ntp_keyword.h
-	rm cmp1 cmp2
-	
-ntp_keyword.dummy:
-	echo stamp > $@
+k-g-u-submake: keyword-gen
+	./keyword-gen $(srcdir)/ntp_parser.h > k-g.out
+	@grep -v diff_ignore_line < k-g.out > cmp1
+	@grep -v diff_ignore_line < $(srcdir)/ntp_keyword.h > cmp2
+	@cmp cmp1 cmp2 > /dev/null || \
+		{ mv -f k-g.out $(srcdir)/ntp_keyword.h && \
+		  echo 'Generated changed ntp_keyword.h.' ;}
+	@[ ! -f k-g.out ] || \
+		{ rm k-g.out && echo 'ntp_keyword.h is up to date.' ;}
+	@rm cmp1 cmp2
+	@echo 'keyword-gen and ntp_keyword.h are up to date.' > $@
 
-$(srcdir)/ntp_keyword.h: $(NTP_KEYWORD_OUT)
+$(srcdir)/keyword-gen-utd: $(srcdir)/keyword-gen.c $(srcdir)/ntp_parser.h
+	$(MAKE) k-g-u-submake	# avoid explicit dependency
+	grep -v diff_ignore_line $(srcdir)/ntp_keyword.h > k-g-u
+	mv -f k-g-u $@
+	
+$(srcdir)/ntp_keyword.h: $(srcdir)/keyword-gen-utd
 	@: do-nothing action to avoid default SCCS get
-	@: .h updated if needed by ntp_keyword.out rule
+	@: .h updated if needed by k-g-u-submake rule
 
 $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
@@ -248,13 +260,16 @@ compsave.conf: ntpd $(srcdir)/complete.conf
 check-saveconfig: $(srcdir)/complete.conf compsave.conf
 	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
 
+../libopts/libopts.la:
+	cd ../libopts && $(MAKE) libopts.la
+
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE) libntp.a
 
 ../libparse/libparse.a:
-	cd ../libparse && $(MAKE)
+	cd ../libparse && $(MAKE) libparse.a
 
-$(top_srcdir)/version :
+$(top_srcdir)/version:
 	cd $(top_srcdir) && $(MAKE) version
 
 version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/version
