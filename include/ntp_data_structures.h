@@ -13,6 +13,7 @@
 #ifndef NTP_DATA_STRUCTURES_H
 #define NTP_DATA_STRUCTURES_H
 
+#include <stddef.h>		/* size_t */
 
 /* Structures for storing a priority queue 
  * ---------------------------------------
