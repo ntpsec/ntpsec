@@ -367,8 +367,10 @@ change_logfile(
 		new_file = fopen(abs_fname, "a");
 	}
 
-	if (NULL == new_file)
+	if (NULL == new_file) {
+		free(abs_fname);
 		return -1;
+	}
 
 	/* leave a pointer in the old log */
 	if (log_fname != syslog_abs_fname)
@@ -687,9 +689,10 @@ ntpdmain(
 
 		while (ifacect-- > 0) {
 			add_nic_rule(
-				is_ip_address(*ifaces, &netaddr)
-					? MATCH_IFADDR
-					: MATCH_IFNAME,
+				is_ip_address(*ifaces, AF_UNSPEC,
+					      &netaddr)
+				    ? MATCH_IFADDR
+				    : MATCH_IFNAME,
 				*ifaces, -1, ACTION_LISTEN);
 			ifaces++;
 		}

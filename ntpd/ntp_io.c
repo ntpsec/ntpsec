@@ -761,6 +761,7 @@ remove_asyncio_reader(
 isc_boolean_t
 is_ip_address(
 	const char *	host,
+	u_short		af,
 	isc_netaddr_t *	addr
 	)
 {
@@ -781,13 +782,13 @@ is_ip_address(
 	 * addresses (up to 46 bytes), the delimiter character and the
 	 * terminating NULL character.
 	 */
-	if (AF_UNSPEC == addr->family || AF_INET == addr->family)
+	if (AF_UNSPEC == af || AF_INET == af)
 		if (inet_pton(AF_INET, host, &in4) == 1) {
 			isc_netaddr_fromin(addr, &in4);
 			return (ISC_TRUE);
 		}
 
-	if (AF_UNSPEC == addr->family || AF_INET6 == addr->family)
+	if (AF_UNSPEC == af || AF_INET6 == af)
 		if (sizeof(tmpbuf) > strlen(host)) {
 			if ('[' == host[0]) {
 				strncpy(tmpbuf, &host[1], sizeof(tmpbuf));
@@ -1125,7 +1126,8 @@ add_nic_rule(
 	} else if (MATCH_IFADDR == match_type) {
 		NTP_REQUIRE(NULL != if_name);
 		/* set rule->netaddr */
-		is_ip = is_ip_address(if_name, &rule->netaddr);
+		is_ip = is_ip_address(if_name, AF_UNSPEC,
+				      &rule->netaddr);
 		NTP_REQUIRE(is_ip);
 	} else
 		NTP_REQUIRE(NULL == if_name);

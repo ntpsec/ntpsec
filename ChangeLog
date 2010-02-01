@@ -1,3 +1,5 @@
+* [Bug 1471] CID 120 CID 121 CID 122 is_ip_address() uninit family.
+* [Bug 1472] CID 116 CID 117 minor warnings in new DNS code.
 (4.2.7p13) 2010/01/31 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1) - [Bug 1467] Fix bogus rebuild of sntp/sntp.html.
 (4.2.7p12) 2010/01/30 Released by Harlan Stenn <stenn@ntp.org>
