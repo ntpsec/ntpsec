@@ -80,7 +80,7 @@ typedef enum {
 
 SOCKET		move_fd(SOCKET fd);
 isc_boolean_t	get_broadcastclient_flag(void);
-isc_boolean_t	is_ip_address(const char *, isc_netaddr_t *);
+isc_boolean_t	is_ip_address(const char *, u_short, isc_netaddr_t *);
 extern void	sau_from_netaddr(sockaddr_u *, const isc_netaddr_t *);
 extern void	add_nic_rule(nic_rule_match match_type,
 			     const char *if_name, int prefixlen,

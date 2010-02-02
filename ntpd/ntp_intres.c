@@ -223,7 +223,10 @@ getaddrinfo_sometime(
 	next_dns_timeslot = max(now, next_dns_timeslot);
 	gai_req->scheduled = now;
 	gai_req->earliest = next_dns_timeslot;
-	gai_req->hints = *hints;
+	if (NULL == hints)
+		memset(&gai_req->hints, 0, sizeof(gai_req->hints));
+	else
+		gai_req->hints = *hints;
 	gai_req->retry = INITIAL_DNS_RETRY;
 	gai_req->callback = callback;
 	gai_req->context = context;

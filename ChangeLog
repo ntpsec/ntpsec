@@ -1,4 +1,8 @@
 * [Bug 1469] u_int32, int32 changes broke HP-UX 10.20 build.
+* Include (4.2.6p1) - [Bug 1470] "make distdir" compiles keyword-gen.
+* [Bug 1471] CID 120 CID 121 CID 122 is_ip_address() uninit family.
+* [Bug 1472] CID 116 CID 117 minor warnings in new DNS code.
+* Include (4.2.6p1) - [Bug 1473] "make distcheck" version.m4 error.
 (4.2.7p13) 2010/01/31 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1) - [Bug 1467] Fix bogus rebuild of sntp/sntp.html.
 (4.2.7p12) 2010/01/30 Released by Harlan Stenn <stenn@ntp.org>
@@ -58,6 +62,13 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+
+* [Bug 1467] Fix bogus rebuild of sntp/sntp.html
+* [Bug 1470] "make distdir" in $srcdir builds keyword-gen, libntp.a.
+* [Bug 1473] "make distcheck" before build can't make sntp/version.m4.
+
+---
+(4.2.6p1-RC3) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
 
 * Use TZ=UTC instead of TZ= when calling date in scripts/mkver.in .
 * [Bug 1448] Some macros not correctly conditionally or absolutely defined

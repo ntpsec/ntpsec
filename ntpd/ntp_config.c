@@ -2387,7 +2387,8 @@ config_nic_rules(
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
 				*pchSlash = '\0';
-			if (is_ip_address(if_name, &netaddr)) {
+			if (is_ip_address(if_name, AF_UNSPEC,
+					  &netaddr)) {
 				match_type = MATCH_IFADDR;
 				if (pchSlash != NULL) {
 					sscanf(pchSlash + 1, "%d",
@@ -3321,11 +3322,9 @@ config_peers(
 		 * getaddrinfo in the mainline with it.  Otherwise
 		 * hand it off to the blocking child.
 		 */
-		memset(&i_netaddr, 0, sizeof(i_netaddr));
-		i_netaddr.family = (u_short)curr_peer->addr->type;
-
 		if (1 == num_needed
 		    && is_ip_address(curr_peer->addr->address,
+				     (u_short)curr_peer->addr->type,
 				     &i_netaddr)) {
 
 			AF(&peeraddr) = (u_short)i_netaddr.family;
@@ -3505,10 +3504,9 @@ config_unpeers(
 		 * getaddrinfo in the mainline with it.  Otherwise
 		 * hand it off to the blocking child.
 		 */
-		memset(&i_netaddr, 0, sizeof(i_netaddr));
-		i_netaddr.family = (u_short)curr_unpeer->addr->type;
-
-		if (is_ip_address(curr_unpeer->addr->address, &i_netaddr)) {
+		if (is_ip_address(curr_unpeer->addr->address,
+				  (u_short)curr_unpeer->addr->type,
+				  &i_netaddr)) {
 
 			AF(&peeraddr) = (u_short)i_netaddr.family;
 			if (AF_INET6 == i_netaddr.family)
@@ -4346,7 +4344,7 @@ get_multiple_netnums(
 	}
 
 	lookup = nameornum;
-	if (is_ip_address(nameornum, &ipaddr)) {
+	if (is_ip_address(nameornum, AF_UNSPEC, &ipaddr)) {
 		hints.ai_flags = AI_NUMERICHOST;
 		hints.ai_family = ipaddr.family;
 		if ('[' == nameornum[0]) {
