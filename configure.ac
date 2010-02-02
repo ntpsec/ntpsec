@@ -428,7 +428,7 @@ AC_CHECK_HEADER(dns_sd.h,
 case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
  yes) LIBS="-ldns_sd $LIBS" ;;
 esac
-AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h kvm.h math.h)
+AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h inttypes.h kvm.h math.h)
 
 AC_CHECK_HEADERS(md5.h, [], [],
 [#if HAVE_SYS_TYPES_H

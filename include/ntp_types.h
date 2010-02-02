@@ -7,10 +7,11 @@
 #ifndef NTP_TYPES_H
 #define NTP_TYPES_H
 
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
 #include <sys/types.h>
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+
 #include "ntp_machine.h"
 
 /*
