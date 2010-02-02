@@ -166,6 +166,10 @@ SOURCE=..\..\..\libntp\decodenetnum.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\libntp\dnslookup.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\dofptoa.c
 # End Source File
 # Begin Source File
@@ -390,10 +394,6 @@ SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\isc\win32\stdime.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\libntp\syslog.c
 # End Source File
 # Begin Source File
@@ -418,11 +418,11 @@ SOURCE=..\..\..\lib\isc\win32\time.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\transmitbuff.c
+SOURCE=..\..\..\libntp\tsftomsu.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\tsftomsu.c
+SOURCE=..\libntp\termios.c
 # End Source File
 # Begin Source File
 
@@ -443,6 +443,10 @@ SOURCE=..\..\..\libntp\uinttoa.c
 # Begin Source File
 
 SOURCE=..\libntp\util_clockstuff.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\libntp\win32_io.c
 # End Source File
 # Begin Source File
 
@@ -650,7 +654,7 @@ SOURCE=..\include\sys\time.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\transmitbuff.h
+SOURCE=..\include\termios.h
 # End Source File
 # Begin Source File
 

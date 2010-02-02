@@ -4,6 +4,7 @@
  * ATTENTION: Get approval from Dave Mills on all changes to this file!
  *
  */
+#include <config.h>
 #include "ntp_machine.h"
 #include "ntp_fp.h"
 #include "ntp_syslog.h"

@@ -308,6 +308,26 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\icom.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\inet_aton.c"
 				>
 			</File>
@@ -488,7 +508,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\strdup.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\win32\strerror.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libntp\strstr.c"
 				>
 			</File>
 			<File
@@ -516,10 +544,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libntp\transmitbuff.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\tsftomsu.c"
 				>
 			</File>
@@ -544,7 +568,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libntp\win32_io.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\win32\win32os.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libntp\termios.c"
 				>
 			</File>
 			<File
@@ -817,15 +849,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\transmitbuff.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

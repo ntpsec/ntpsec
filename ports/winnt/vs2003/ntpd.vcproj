@@ -22,7 +22,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,..\..\..\lib\isc\win32\include,..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\..\..\ntpd,..\include,..\..\..\include,..\..\..\lib\isc\win32\include,..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -84,7 +84,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..\include,..\..\..\include,..\..\..\lib\isc\win32\include,..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\libopts"
+				AdditionalIncludeDirectories=".,..\..\..\ntpd,..\include,..\..\..\include,..\..\..\lib\isc\win32\include,..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;__STDC__;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -622,6 +622,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\ntpd\ntp_worker.c">
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\ntpd-opts.c">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -689,27 +692,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\ntpd\win32_io.c">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						UsePrecompiledHeader="0"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
+				RelativePath="..\..\..\ntpd\work_fork.c">
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\work_thread.c">
 			</File>
 		</Filter>
 		<Filter
@@ -857,6 +843,12 @@
 				RelativePath="..\..\..\include\ntp_unixtime.h">
 			</File>
 			<File
+				RelativePath="..\..\..\include\ntp_worker.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_workimpl.h">
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\ntpd-opts.h">
 			</File>
 			<File
@@ -891,9 +883,6 @@
 			</File>
 			<File
 				RelativePath="..\include\termios.h">
-			</File>
-			<File
-				RelativePath="..\include\transmitbuff.h">
 			</File>
 			<File
 				RelativePath="..\include\sys\wait.h">

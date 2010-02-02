@@ -83,17 +83,6 @@ esac
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
 case "$host" in
- *-*-amigaos)
-    CFLAGS="$CFLAGS -Dfork=vfork -DSYS_AMIGA"
-    ;;
- *-*-hpux10.*)	# at least for hppa2.0-hp-hpux10.20
-    case "$GCC" in
-     yes)
-	;;
-     *) CFLAGS="$CFLAGS -Wp,-H18816"
-	;;
-    esac
-    ;;
  *-pc-cygwin*)
     CFLAGS="$CFLAGS -DSYS_CYGWIN32"
     ;;
@@ -119,7 +108,7 @@ case "$host" in
     ;;
 esac
 
-AMU_OS_CFLAGS
+NTP_OS_CFLAGS
 NTP_DIR_SEP
 NTP_VPATH_HACK
 
@@ -139,13 +128,14 @@ esac
 LIBOPTS_CHECK(libopts)
 
 AC_FUNC_FORK
+AC_FUNC_ALLOCA
 
 AC_CACHE_CHECK(
     [if $CC can handle @%:@warning],
     ac_cv_cpp_warning,
     [
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM([], [#warning foo]),
+	    AC_LANG_PROGRAM([[]], [[#warning foo]]),
 	    [ac_cv_cpp_warning=yes],
 	    [ac_cv_cpp_warning=no],
 	)
@@ -166,7 +156,7 @@ case "$GCC" in
 	ac_cv_gcc_Wstrict_overflow, 
 	[
 	    AC_COMPILE_IFELSE(
-		[AC_LANG_PROGRAM([], [])],
+		[AC_LANG_PROGRAM()],
 		[ac_cv_gcc_Wstrict_overflow=yes],
 		[ac_cv_gcc_Wstrict_overflow=no]
 	    )
@@ -190,7 +180,7 @@ case "$GCC" in
 	ac_cv_gcc_Winit_self, 
 	[
 	    AC_COMPILE_IFELSE(
-		[AC_LANG_PROGRAM([], [])],
+		[AC_LANG_PROGRAM()],
 		[ac_cv_gcc_Winit_self=yes],
 		[ac_cv_gcc_Winit_self=no]
 	    )
@@ -222,8 +212,10 @@ case "$use_binsubdir" in
     ;;
 esac
 AC_MSG_RESULT($use_binsubdir)
+
 BINSUBDIR=$use_binsubdir
 AC_SUBST(BINSUBDIR)
+AM_CONDITIONAL(NTP_BINSUBDIR_IS_BIN, test "bin" = "$BINSUBDIR")
 
 AC_MSG_CHECKING([if we want to use arlib])
 AC_ARG_WITH(arlib,
@@ -274,22 +266,6 @@ case "$host" in
     ;;
 esac
 
-case "$build" in
- $host)
-    ;;
- *) case "$host" in
-     *-*-vxworks*)
-	# Quick and dirty sanity check
-	case "$VX_KERNEL" in
-	 '') AC_MSG_ERROR(Please follow the directions in html/build/hints/vxworks.html!)
-	    ;;
-	esac
-        CFLAGS="$CFLAGS -DSYS_VXWORKS"
-        ;;
-    esac
-    ;;
-esac
-
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_AWK
 AC_PROG_MAKE_SET
@@ -318,26 +294,7 @@ case "$GCC" in
      yes)
 	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
-    # if building with OpenSSL, -Wno-strict-prototypes is added later
-esac
-
-case "$host" in
- *-next-nextstep3)
-    CFLAGS="$CFLAGS -posix"
-    ;;
-dnl This is currently commented out by bor. 
-dnl The new versions of ReliantUNIX round adjtime() interval down
-dnl to 1/100s (system tick). This makes tickadj actually useless.
-dnl So, I'd better not use additional flags.
-dnl I leave it here just in case anybody has better idea
-dnl  mips-sni-sysv4* )
-dnl     #
-dnl     # Add flags for 64 bit file access to enable tickadj to access /dev/kmem
-dnl     #
-dnl     if getconf _LFS_CFLAGS > /dev/null 2>&1 ; then
-dnl       CFLAGS="$CFLAGS `getconf _LFS_CFLAGS`"
-dnl     fi
-dnl     ;;
+    # -W[no-]strict-prototypes is added later depending on OpenSSL
 esac
 
 ac_busted_vpath_in_make=no
@@ -453,6 +410,12 @@ esac
 
 AC_SEARCH_LIBS([setsockopt], [socket xnet])
 AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+case "$host" in
+ *-*-darwin*)
+    AC_CHECK_LIB([resolv],[res_9_init])
+    ;;
+esac
+AC_HEADER_RESOLV
 AC_CHECK_FUNCS(res_init __res_init)
 
 AC_HEADER_STDC
@@ -465,7 +428,7 @@ AC_CHECK_HEADER(dns_sd.h,
 case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
  yes) LIBS="-ldns_sd $LIBS" ;;
 esac
-AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h kvm.h math.h)
+AC_CHECK_HEADERS(errno.h fcntl.h ieeefp.h inttypes.h kvm.h math.h)
 
 AC_CHECK_HEADERS(md5.h, [], [],
 [#if HAVE_SYS_TYPES_H
@@ -584,7 +547,7 @@ esac
 AC_CHECK_HEADERS(sys/select.h sys/signal.h sys/sockio.h)
 # HMS: Checked sys/socket.h earlier
 case "$host" in
- *-*-netbsd*) ;;
+ *-*-netbsd*) ;;	# Bug 254
  *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
     ;;
 esac
@@ -717,9 +680,7 @@ AC_C_BIGENDIAN
 AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
-AC_CHECK_TYPE(time_t, long)
-AC_CHECK_SIZEOF(time_t)
-AC_CHECK_TYPES(uintptr_t)
+AC_CHECK_TYPES([uintptr_t])
  
 AH_VERBATIM([TYPEDEF_UINTPTR_T],
 [/* Provide a typedef for uintptr_t? */
@@ -728,27 +689,64 @@ typedef unsigned int	uintptr_t;
 #define HAVE_UINTPTR_T	1
 #endif])
 
+AC_CHECK_TYPES([time_t, int32, u_int32])
+
+case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
+ no::yes)
+    AC_CACHE_CHECK(
+	[for int32 with DNS headers included],
+	[ntp_cv_type_int32_with_dns],
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM(
+		[[
+		    #ifdef HAVE_ARPA_NAMESER_H
+		    # include <arpa/nameser.h>
+		    #endif
+		    #include <resolv.h>
+		]],
+		[[
+		    size_t cb = sizeof(int32);
+		]]
+	    ),
+	    [ntp_cv_type_int32_with_dns=yes],
+	    [ntp_cv_type_int32_with_dns=no]
+	)
+    )
+    case "$ntp_cv_type_int32_with_dns" in
+     yes)
+	AC_DEFINE([HAVE_INT32_ONLY_WITH_DNS], , [int32 type in DNS headers, not others.])
+    esac
+esac
+
+case "$ac_cv_type_u_int32::$ac_cv_header_resolv_h" in
+ no::yes)
+    AC_CACHE_CHECK(
+	[for u_int32 with DNS headers included],
+	[ntp_cv_type_u_int32_with_dns],
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM(
+		[[
+		    #ifdef HAVE_ARPA_NAMESER_H
+		    # include <arpa/nameser.h>
+		    #endif
+		    #include <resolv.h>
+		]],
+		[[
+		    size_t cb = sizeof(u_int32);
+		]]
+	    ),
+	    [ntp_cv_type_u_int32_with_dns=yes],
+	    [ntp_cv_type_u_int32_with_dns=no]
+	)
+    )
+    case "$ntp_cv_type_u_int32_with_dns" in
+     yes)
+	AC_DEFINE([HAVE_U_INT32_ONLY_WITH_DNS], , [u_int32 type in DNS headers, not others.])
+    esac
+esac
+
+AC_CHECK_SIZEOF([time_t])
 AC_STRUCT_TM
-
-AC_CACHE_CHECK([for u_int8_t], ac_cv_type_u_int8_t,
-[AC_TRY_COMPILE([#include <sys/types.h>],
-	[u_int8_t len = 42; return 0;],
-	ac_cv_type_u_int8_t=yes,
-	ac_cv_type_u_int8_t=no)
-])
-if test $ac_cv_type_u_int8_t = yes; then
-	AC_DEFINE(HAVE_TYPE_U_INT8_T, 1, [Does u_int8_t exist?])
-fi
-
-AC_CACHE_CHECK([for u_int64_t], ac_cv_type_u_int64_t,
-[AC_TRY_COMPILE([#include <sys/types.h>],
-	[u_int64_t len = 42; return 0;],
-	ac_cv_type_u_int64_t=yes,
-	ac_cv_type_u_int64_t=no)
-])
-if test $ac_cv_type_u_int64_t = yes; then
-	AC_DEFINE(HAVE_TYPE_U_INT64_T, 1, [Does u_int64_t exist?])
-fi
 
 AC_CACHE_CHECK([for a fallback value for HZ], ac_cv_var_default_hz,
 [ac_cv_var_default_hz=100
@@ -775,6 +773,9 @@ case "$host" in
     ac_cv_var_override_hz=yes
     ;;
  *-*-sunos4*)
+    ac_cv_var_override_hz=yes
+    ;;
+ *-*-kfreebsd*)
     ac_cv_var_override_hz=yes
     ;;
 esac])
@@ -819,6 +820,7 @@ AC_CACHE_CHECK([for struct rt_msghdr], ac_cv_struct_rt_msghdr,
 
 AC_CACHE_CHECK([for struct rtattr], ac_cv_struct_rtattr,
 [AC_TRY_COMPILE([
+#include <stddef.h>
 #include <linux/rtnetlink.h>],
 [struct rtattr p;],
 	ac_cv_struct_rtattr=yes,
@@ -1202,7 +1204,7 @@ case "$host" in
     AC_CHECK_FUNCS([clock_gettime clock_settime])
     ;;
 esac
-AC_CHECK_FUNCS(daemon)
+AC_CHECK_FUNCS(closefrom daemon)
 AC_CHECK_FUNCS(finite, ,
   [AC_CHECK_FUNCS(isfinite, ,
     [AC_MSG_CHECKING([for isfinite with <math.h>])
@@ -1400,9 +1402,24 @@ case "$host" in
  *-*-openbsd*)
     # Just stubs.  Idiots.
     ;;
- *) AC_CHECK_FUNCS(timer_create timer_settime)
+ *) AC_CHECK_FUNCS(timer_create)
     ;;
 esac
+
+# some OSes prefer _exit() in forked children to exit()
+AC_CHECK_FUNCS(_exit)
+ntp_worker_child_exit=exit
+case "$ac_cv_func__exit::$host_os" in
+ yes::netbsd*)
+    ntp_worker_child_exit=_exit
+    ;;
+ yes::openbsd*)
+    ntp_worker_child_exit=_exit
+    ;;
+esac
+AC_DEFINE_UNQUOTED([WORKER_CHILD_EXIT], [$ntp_worker_child_exit],
+		   [routine worker child proc uses to exit.])
+
 case "$host" in
  *-pc-cygwin*)
     # I have no idea...
@@ -1894,6 +1911,9 @@ case "$ac_cv_hdr_def_sigio" in
      *-*-unicosmp*)
 	ans=no
 	;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
     esac
     ;;
 esac
@@ -1962,6 +1982,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-unicosmp*)
         ans=no
         ;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
      *) ans=yes
         ;;
     esac
@@ -2013,6 +2036,9 @@ case "$ac_cv_hdr_def_sigpoll" in
      *-*-unicosmp*)
         ans=no
         ;;
+     *-*-kfreebsd*)
+	ans=no
+	;;
      *) ans=yes
         ;;
     esac
@@ -2139,22 +2165,6 @@ case "$ans" in
 esac
 AC_MSG_RESULT([$ans])
 
-AC_MSG_CHECKING([if ntpd will use the deferred DNS lookup path])
-AC_ARG_ENABLE(
-    [force-defer-DNS],
-    AS_HELP_STRING(
-	[--enable-force-defer-DNS],
-	[- force all DNS lookups to take the deferred path]
-    ),
-    [ans=$enableval],
-    [ans=no]
-)
-case "$ans" in
- yes)
-    AC_DEFINE(FORCE_DEFER_DNS, 1, [Force deferred DNS lookups?])
-esac
-AC_MSG_RESULT([$ans])
-
 AC_CACHE_CHECK([if we have the tty_clk line discipline/streams module],
  ac_cv_var_tty_clk,
  [case "$ac_cv_header_sys_clkdefs_h$ac_cv_hdr_def_tiocdcdtimestamp" in
@@ -2172,36 +2182,57 @@ case "$ac_cv_var_ppsclock" in
  yes) AC_DEFINE(PPS, 1, [Do we have the ppsclock streams module?]) ;;
 esac
 
-AC_CACHE_CHECK([for kernel multicast support], ac_cv_var_mcast,
-  [ac_cv_var_mcast=no
-  case "$host" in
-   i386-sequent-sysv4) ;;
-   *) AC_EGREP_CPP(yes,
-  [#include <netinet/in.h>
-#ifdef IP_ADD_MEMBERSHIP
-   yes
-#endif
-  ], ac_cv_var_mcast=yes) ;;
-  esac])
-case "$ac_cv_var_mcast" in
+AC_CACHE_CHECK(
+    [for multicast IP support],
+    ntp_cv_multicast,
+    [
+	ntp_cv_multicast=no
+	case "$host" in
+	 i386-sequent-sysv4)
+	    ;;
+	 *)
+	    AC_COMPILE_IFELSE(
+		AC_LANG_PROGRAM(
+		    [[
+			#ifdef HAVE_NETINET_IN_H
+			#include <netinet/in.h>
+			#endif
+		    ]],
+		    [[
+			struct ip_mreq ipmr;
+			ipmr.imr_interface.s_addr = 0;
+		    ]]
+		),
+		[ntp_cv_multicast=yes],
+		[]
+	    )
+	esac
+    ]
+)
+
+case "$ntp_cv_multicast" in
  yes)
-    AC_DEFINE(MCAST, 1, [Does the kernel support multicasting IP?])
-    AC_CACHE_CHECK([[arg type needed for IP*_MULTICAST_LOOP for setsockopt()]],
-	ac_cv_var_typeof_ip_multicast_loop,
-	[case "$host" in
-	 *-*-netbsd*|*-*-*linux*)
-	    ac_cv_var_typeof_ip_multicast_loop=u_int
-	    ;;
-	 *-*-winnt*)
-	    ac_cv_var_typeof_ip_multicast_loop=BOOL
-	    ;;
-	 *) ac_cv_var_typeof_ip_multicast_loop=u_char
-	    ;;
-	esac])
-    AC_DEFINE_UNQUOTED(TYPEOF_IP_MULTICAST_LOOP,
-		   $ac_cv_var_typeof_ip_multicast_loop,
-		   [What type to use for setsockopt])
-    ;;
+    AC_DEFINE(MCAST, 1, [Does the target support multicast IP?])
+    AC_CACHE_CHECK(
+	[[arg type needed for setsockopt() IP*_MULTICAST_LOOP]],
+	ntp_cv_typeof_ip_multicast_loop,
+	[
+	    case "$host" in
+	     *-*-netbsd*|*-*-*linux*)
+		ntp_cv_typeof_ip_multicast_loop=u_int
+		;;
+	     *-*-winnt*)
+		ntp_cv_typeof_ip_multicast_loop=BOOL
+		;;
+	     *)
+		ntp_cv_typeof_ip_multicast_loop=u_char
+	    esac
+	]
+    )
+    AC_DEFINE_UNQUOTED([TYPEOF_IP_MULTICAST_LOOP],
+	$ntp_cv_typeof_ip_multicast_loop,
+	[What type to use for setsockopt]
+    )
 esac
 
 AC_CACHE_CHECK([[availability of ntp_{adj,get}time()]], ac_cv_var_ntp_syscalls,
@@ -3365,23 +3396,65 @@ case "$ntp_openssl" in
 esac
 
 #
-# OpenSSL has a number of callback prototypes inside other function
-# prototypes which trigger copious warnings with -Wstrict-prototypes,
-# (which is included in -Wall).
+# Older OpenSSL headers have a number of callback prototypes inside
+# other function prototypes which trigger copious warnings with gcc's
+# -Wstrict-prototypes, which is included in -Wall.
 #
 # An example:
 #
 # int i2d_RSA_NET(const RSA *a, unsigned char **pp, 
-#                 int (*cb)(), int sgckey);
-#                 ^^^^^^^^^^^
+#		  int (*cb)(), int sgckey);
+#		  ^^^^^^^^^^^
 #
-# The OpenSSL headers probably haven't been fixed in this regard
-# due to the hoops you have to jump through to stay compatible with
-# K&R C compilers.
+# 
 #
+openssl_triggers_warnings=unknown
+SAVED_CFLAGS="$CFLAGS"
+
 case "$GCC$ntp_openssl" in
  yesyes)
-    CFLAGS="$CFLAGS -Wno-strict-prototypes"
+    CFLAGS="$CFLAGS -Werror"
+    AC_COMPILE_IFELSE(
+	AC_LANG_SOURCE([[ /* see if -Werror breaks gcc */ ]]),
+	[gcc_handles_Werror=yes],
+	[gcc_handles_Werror=no]
+    )
+    case "$gcc_handles_Werror" in
+     no)
+	# if this gcc doesn't do -Werror go ahead and use
+	# -Wstrict-prototypes.
+	openssl_triggers_warnings=yes
+	;;
+     yes)
+	CFLAGS="$CFLAGS -Wstrict-prototypes"
+	AC_COMPILE_IFELSE(
+	    AC_LANG_PROGRAM(
+		[[
+		    #include "openssl/asn1_mac.h"
+		    #include "openssl/bn.h"
+		    #include "openssl/err.h"
+		    #include "openssl/evp.h"
+		    #include "openssl/pem.h"
+		    #include "openssl/rand.h"
+		    #include "openssl/x509v3.h"
+		]],
+		[[ /* empty body */ ]]
+	    ),
+	    [openssl_triggers_warnings=no],
+	    [openssl_triggers_warnings=yes]
+	)
+    esac
+    case "$openssl_triggers_warnings" in
+     yes)
+	CFLAGS="$SAVED_CFLAGS -Wno-strict-prototypes"
+	;;
+     *)
+	CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
+    esac
+    ;;
+ yesno)
+    # gcc without OpenSSL
+    CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
 esac
 
 AC_MSG_CHECKING([if we want to compile with ElectricFence])
@@ -4492,7 +4565,13 @@ AC_MSG_CHECKING([[if we have linux capabilities (libcap)]])
 
 case "$ac_cv_header_sys_capability_h$ac_cv_header_sys_prctl_h" in
  yesyes)
-    ntp_have_linuxcaps=yes
+    case "$host" in
+     mips-sgi-irix*)
+	ntp_have_linuxcaps=no
+	;;
+     *) ntp_have_linuxcaps=yes
+	;;
+    esac
     ;;
  *)
     ntp_have_linuxcaps=no
@@ -4583,14 +4662,14 @@ AC_CACHE_CHECK(
 	AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <sys/socket.h>
 			#include <netinet/in.h>
-		    ],
-		    [
+		    ]],
+		    [[
 			struct sockaddr_in6 sin6;
-		    ]
+		    ]]
 		)
 	    ],
 	    [ac_cv_isc_found_ipv6=yes],
@@ -4680,16 +4759,16 @@ case "$ac_cv_isc_found_ipv6" in
 	    AC_COMPILE_IFELSE(
 		[
 		    AC_LANG_PROGRAM(
-			[
+			[[
 			    #include <sys/types.h>
 			    #include <sys/socket.h>
 			    #include <netinet/in.h>
 			    $isc_netinetin6_hack
 			    $isc_netinet6in6_hack
-			],
-			[
+			]],
+			[[
 			    struct in6_pktinfo xyzzy;
-			]
+			]]
 		    )
 		],
 		[ac_cv_have_in6_pktinfo=yes],
@@ -4712,17 +4791,17 @@ case "$ac_cv_isc_found_ipv6" in
 	    AC_COMPILE_IFELSE(
 		[
 		    AC_LANG_PROGRAM(
-			[
+			[[
 			    #include <sys/types.h>
 			    #include <sys/socket.h>
 			    #include <netinet/in.h>
 			    $isc_netinetin6_hack
 			    $isc_netinet6in6_hack
-			],
-			[
+			]],
+			[[
 			    struct sockaddr_in6 xyzzy;
 			    xyzzy.sin6_scope_id = 0;
-			]
+			]]
 		    )
 		],
 		[ac_cv_have_sin6_scope_id=yes],
@@ -4747,17 +4826,17 @@ AC_CACHE_CHECK(
 	AC_LINK_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <sys/socket.h>
 			#include <netinet/in.h>
 			$isc_netinetin6_hack
 			$isc_netinet6in6_hack
-		    ],
-		    [
+		    ]],
+		    [[
 			struct in6_addr in6; 
 			in6 = in6addr_any;
-		    ]
+		    ]]
 		)
 	    ],
 	    [isc_cv_have_in6addr_any=yes],
@@ -4779,13 +4858,13 @@ AC_CACHE_CHECK(
         AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <net/if6.h>
-		    ],
-		    [
+		    ]],
+		    [[
 			struct if_laddrconf a;
-		    ]
+		    ]]
 		)
 	    ],
 	    [ac_cv_isc_struct_if_laddrconf=yes],
@@ -4806,13 +4885,13 @@ AC_CACHE_CHECK(
         AC_COMPILE_IFELSE(
 	    [
 		AC_LANG_PROGRAM(
-		    [
+		    [[
 			#include <sys/types.h>
 			#include <net/if6.h>
-		    ],
-		    [
+		    ]],
+		    [[
 			struct if_laddrreq a;
-		    ]
+		    ]]
 		)
 	    ],
 	    [ac_cv_isc_struct_if_laddrreq=yes],

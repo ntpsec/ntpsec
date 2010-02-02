@@ -9,6 +9,7 @@
  * (Some code shamelessly based on the original NTP discrete event simulator)
  */
 
+#include <config.h>
 #ifdef SIM
 #include "ntpd.h"
 #include "ntpsim.h"

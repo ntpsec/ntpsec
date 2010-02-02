@@ -31,15 +31,23 @@
 #include <openssl/rand.h>
 #endif /* OPENSSL */
 
+
+/* TC_ERR represents the timer_create() error return value. */
+#ifdef SYS_VXWORKS
+#define	TC_ERR	ERROR
+#else
+#define	TC_ERR	(-1)
+#endif
+
 /*
- * These routines provide support for the event timer.	The timer is
+ * These routines provide support for the event timer.  The timer is
  * implemented by an interrupt routine which sets a flag once every
- * 2**EVENT_TIMEOUT seconds (currently 4), and a timer routine which
- * is called when the mainline code gets around to seeing the flag.
- * The timer routine dispatches the clock adjustment code if its time
- * has come, then searches the timer queue for expiries which are
- * dispatched to the transmit procedure.  Finally, we call the hourly
- * procedure to do cleanup and print a message.
+ * second, and a timer routine which is called when the mainline code
+ * gets around to seeing the flag.  The timer routine dispatches the
+ * clock adjustment code if its time has come, then searches the timer
+ * queue for expiries which are dispatched to the transmit procedure.
+ * Finally, we call the hourly procedure to do cleanup and print a
+ * message.
  */
 volatile int interface_interval = 300;     /* update interface every 5 minutes as default */
 	  
@@ -56,7 +64,7 @@ static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 u_long	leapsec;		/* leapseconds countdown */
-l_fp	sys_time;		/* current system time */
+u_long	worker_idle_timer;	/* next check for idle intres */
 #ifdef OPENSSL
 static	u_long revoke_timer;	/* keys revoke timer */
 static	u_long keys_timer;	/* session key timer */
@@ -95,24 +103,24 @@ static	RETSIGTYPE alarming (int);
 
 #if !defined(VMS)
 # if !defined SYS_WINNT || defined(SYS_CYGWIN32)
-#  ifndef HAVE_TIMER_SETTIME
-	struct itimerval itimer;
-#  else 
-	static timer_t ntpd_timerid;
+#  ifdef HAVE_TIMER_CREATE
+	static timer_t timer_id;
 	struct itimerspec itimer;
-#  endif /* HAVE_TIMER_SETTIME */
-# endif /* SYS_WINNT */
-#endif /* VMS */
+#  else 
+	struct itimerval itimer;
+#  endif
+# endif
+#endif
 
 /*
- * reinit_timer - reinitialize interval timer.
+ * reinit_timer - reinitialize interval timer after a clock step.
  */
 void 
 reinit_timer(void)
 {
 #if !defined(SYS_WINNT) && !defined(VMS)
-#  if defined(HAVE_TIMER_CREATE) && defined(HAVE_TIMER_SETTIME)
-	timer_gettime(ntpd_timerid, &itimer);
+#  ifdef HAVE_TIMER_CREATE
+	timer_gettime(timer_id, &itimer);
 	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
 		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 	}
@@ -125,7 +133,7 @@ reinit_timer(void)
 	}
 	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
 	itimer.it_interval.tv_nsec = 0;
-	timer_settime(ntpd_timerid, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
+	timer_settime(timer_id, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
 #  else
 	getitimer(ITIMER_REAL, &itimer);
 	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
@@ -165,36 +173,29 @@ init_timer(void)
 	timer_xmtcalls = 0;
 	timer_timereset = 0;
 
-#if !defined(SYS_WINNT)
+#ifndef SYS_WINNT
 	/*
 	 * Set up the alarm interrupt.	The first comes 2**EVENT_TIMEOUT
 	 * seconds from now and they continue on every 2**EVENT_TIMEOUT
 	 * seconds.
 	 */
-# if !defined(VMS)
-#  if defined(HAVE_TIMER_CREATE) && defined(HAVE_TIMER_SETTIME)
-	if (timer_create (CLOCK_REALTIME, NULL, &ntpd_timerid) ==
-#	ifdef SYS_VXWORKS
-		ERROR
-#	else
-		-1
-#	endif
-	   )
-	{
+# ifndef VMS
+#  ifdef HAVE_TIMER_CREATE
+	if (timer_create(CLOCK_REALTIME, NULL, &timer_id) == TC_ERR) {
 		fprintf (stderr, "timer create FAILED\n");
 		exit (0);
 	}
 	(void) signal_no_reset(SIGALRM, alarming);
 	itimer.it_interval.tv_sec = itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 	itimer.it_interval.tv_nsec = itimer.it_value.tv_nsec = 0;
-	timer_settime(ntpd_timerid, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
+	timer_settime(timer_id, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
 #  else
 	(void) signal_no_reset(SIGALRM, alarming);
 	itimer.it_interval.tv_sec = itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 	itimer.it_interval.tv_usec = itimer.it_value.tv_usec = 0;
 	setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
 #  endif
-# else /* VMS */
+# else	/* VMS follows */
 	vmsinc[0] = 10000000;		/* 1 sec */
 	vmsinc[1] = 0;
 	lib$emul(&(1<<EVENT_TIMEOUT), &vmsinc, &0, &vmsinc);
@@ -203,8 +204,8 @@ init_timer(void)
 
 	lib$addx(&vmsinc, &vmstimer, &vmstimer);
 	sys$setimr(0, &vmstimer, alarming, alarming, 0);
-# endif /* VMS */
-#else /* SYS_WINNT */
+# endif	/* VMS */
+#else	/* SYS_WINNT follows */
 	/*
 	 * Set up timer interrupts for every 2**EVENT_TIMEOUT seconds
 	 * Under Windows/NT, 
@@ -225,8 +226,9 @@ init_timer(void)
 		}
 	}
 
-#endif /* SYS_WINNT */
+#endif	/* SYS_WINNT */
 }
+
 
 #if defined(SYS_WINNT)
 extern HANDLE 
@@ -236,6 +238,7 @@ get_timer_handle(void)
 }
 #endif
 
+
 /*
  * timer - event timer
  */
@@ -244,15 +247,14 @@ timer(void)
 {
 	register struct peer *peer, *next_peer;
 	u_int	n;
+	l_fp	now;
 
 	/*
-	 * The basic timerevent is one second. This is used to adjust
-	 * the system clock in time and frequency, implement the
-	 * kiss-o'-deatch function and implement the association
-	 * polling function..
+	 * The basic timerevent is one second.  This is used to adjust the
+	 * system clock in time and frequency, implement the kiss-o'-death
+	 * function and the association polling function.
 	 */
 	current_time++;
-	get_systime(&sys_time);
 	if (adjust_timer <= current_time) {
 		adjust_timer += 1;
 		adj_host_clock();
@@ -372,9 +374,8 @@ timer(void)
 	}
 
 	/*
-	 * Garbage collect key list and generate new private value. The
-	 * timer runs only after initial synchronization and fires about
-	 * once per day.
+	 * Generate new private value. The timer runs only after
+	 * initial synchronization and fires about once per day.
 	 */
 	if (revoke_timer <= current_time && sys_leap !=
 	    LEAP_NOTINSYNC) {
@@ -393,15 +394,21 @@ timer(void)
 		DPRINTF(2, ("timer: interface update\n"));
 		interface_update(NULL, NULL);
 	}
-	
+
+	if (worker_idle_timer && worker_idle_timer <= current_time)
+		worker_idle_timer_fired();
+
 	/*
 	 * Finally, write hourly stats.
 	 */
 	if (stats_timer <= current_time) {
 		stats_timer += HOUR;
 		write_stats();
-		if (sys_tai != 0 && sys_time.l_ui > leap_expire)
-			report_event(EVNT_LEAPVAL, NULL, NULL);
+		if (sys_tai != 0) {
+			get_systime(&now);
+			if (now.l_ui > leap_expire)
+				report_event(EVNT_LEAPVAL, NULL, NULL);
+		}
 	}
 }
 

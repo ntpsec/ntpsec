@@ -68,11 +68,6 @@
 #ifndef NTP_RFC2553_H
 #define NTP_RFC2553_H
 
-/*
- * Ensure that we include the configuration file before we check
- * for IPV6
- */
-#include <config.h>
 #include <netdb.h>
 #include <isc/net.h>
 

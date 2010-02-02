@@ -1,40 +1,65 @@
 /*
- * ripped off from ../ntpres/ntpres.c by Greg Troxel 4/2/92
- * routine callable from ntpd, rather than separate program
- * also, key info passed in via a global, so no key file needed.
- */
-
-/*
- * ntpres - process configuration entries which require use of the resolver
+ * ntp_intres.c - Implements a generic blocking worker child or thread,
+ *		  initially to provide a nonblocking solution for DNS
+ *		  name to address lookups available with getaddrinfo().
  *
- * This is meant to be run by ntpd on the fly.  It is not guaranteed
- * to work properly if run by hand.  This is actually a quick hack to
- * stave off violence from people who hate using numbers in the
- * configuration file (at least I hope the rest of the daemon is
- * better than this).  Also might provide some ideas about how one
- * might go about autoconfiguring an NTP distribution network.
+ * This is a new implementation as of 2009 sharing the filename and
+ * very little else with the prior implementation, which used a
+ * temporary file to receive a single set of requests from the parent,
+ * and a NTP mode 7 authenticated request to push back responses.
+ *
+ * A primary goal in rewriting this code was the need to support the
+ * pool configuration directive's requirement to retrieve multiple
+ * addresses resolving a single name, which has previously been
+ * satisfied with blocking resolver calls from the ntpd mainline code.
+ *
+ * A secondary goal is to provide a generic mechanism for other
+ * blocking operations to be delegated to a worker using a common
+ * model for both Unix and Windows ntpd.  ntp_worker.c, work_fork.c,
+ * and work_thread.c implement the generic mechanism.  This file
+ * implements the two current consumers, getaddrinfo_sometime() and the
+ * presently unused getnameinfo_sometime().
+ *
+ * Both routines deliver results to a callback and manage memory
+ * allocation, meaning there is no freeaddrinfo_sometime().
+ *
+ * The initial implementation for Unix uses a pair of unidirectional
+ * pipes, one each for requests and responses, connecting the forked
+ * blocking child worker with the ntpd mainline.  The threaded code
+ * uses arrays of pointers to queue requests and responses.
+ *
+ * Memory is managed differently for a child process, which mallocs
+ * request buffers to read from the pipe into, whereas the threaded
+ * code mallocs a copy of the request to hand off to the worker via
+ * the queueing array.  The resulting request buffer is free()d by
+ * platform-independent code.  A wrinkle is the request needs to be
+ * available to the requestor during response processing.
+ *
+ * Response memory allocation is also platform-dependent.  With a
+ * separate process and pipes, the response is free()d after being
+ * written to the pipe.  With threads, the same memory is handed
+ * over and the requestor frees it after processing is completed.
+ *
+ * The code should be generalized to support threads on Unix using
+ * much of the same code used for Windows initially.
  *
  */
-
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
-#include "ntp_machine.h"
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_request.h"
-#include "ntp_stdlib.h"
-#include "ntp_syslog.h"
-#include "ntp_config.h"
+#include "ntp_workimpl.h"
 
-#ifndef NO_INTRES		/* from ntp_config.h */
+#ifdef WORKER
 
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
 
 /**/
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -44,1237 +69,886 @@
 # include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
 #endif
 
-#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
-#include <resolv.h>
+#if !defined(HAVE_RES_INIT) && defined(HAVE___RES_INIT)
+# define HAVE_RES_INIT
 #endif
 
-#include <isc/net.h>
-#include <isc/result.h>
+#if defined(HAVE_RESOLV_H) && defined(HAVE_RES_INIT)
+# ifdef HAVE_ARPA_NAMESER_H
+#  include <arpa/nameser.h> /* DNS HEADER struct */
+# endif
+# ifdef HAVE_NETDB_H
+#  include <netdb.h>
+# endif
+# include <resolv.h>
+# ifdef RES_TIMEOUT
+#  undef RES_TIMEOUT	/* resolv.h has one, we want ours */
+# endif
+# ifdef HAVE_INT32_ONLY_WITH_DNS
+#  define HAVE_INT32
+# endif
+# ifdef HAVE_U_INT32_ONLY_WITH_DNS
+#  define HAVE_U_INT32
+# endif
+#endif
 
-#define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
+#include "ntp_stdlib.h"
+#include "ntp_malloc.h"
+#include "ntp_syslog.h"
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_assert.h"
+#include "ntp_unixtime.h"
+#include "ntp_intres.h"
 
-/*
- * Each item we are to resolve and configure gets one of these
- * structures defined for it.
- */
-struct conf_entry {
-	struct conf_entry *ce_next;
-	char *ce_name;			/* name to resolve */
-	struct conf_peer ce_config;	/* config info for peer */
-	int no_needed;			/* number of addresses needed (pool) */
-	/*  no_needed isn't used yet: It's needed to fix bug-975 */
-	int type;			/* -4 and -6 flags */
-	sockaddr_u peer_store;		/* address info for both fams */
-};
-#define	ce_peeraddr	ce_config.peeraddr
-#define	ce_peeraddr6	ce_config.peeraddr6
-#define	ce_hmode	ce_config.hmode
-#define	ce_version	ce_config.version
-#define ce_minpoll	ce_config.minpoll
-#define ce_maxpoll	ce_config.maxpoll
-#define	ce_flags	ce_config.flags
-#define ce_ttl		ce_config.ttl
-#define	ce_keyid	ce_config.keyid
-#define ce_keystr	ce_config.keystr
-
-/*
- * confentries is a pointer to the list of configuration entries
- * we have left to do.
- */
-static struct conf_entry *confentries = NULL;
 
 /*
- * We take an interrupt every thirty seconds, at which time we decrement
- * config_timer and resolve_timer.  The former is set to 2, so we retry
- * unsucessful reconfigurations every minute.  The latter is set to
- * an exponentially increasing value which starts at 2 and increases to
- * 32.  When this expires we retry failed name resolutions.
+ * Following are implementations of getaddrinfo_sometime() and
+ * getnameinfo_sometime().  Each is implemented in three routines:
  *
- * We sleep SLEEPTIME seconds before doing anything, to give the server
- * time to arrange itself.
- */
-#define	MINRESOLVE	2
-#define	MAXRESOLVE	32
-#define	CONFIG_TIME	2
-#define	ALARM_TIME	30
-#define	SLEEPTIME	2
-
-static	volatile int config_timer = 0;
-static	volatile int resolve_timer = 0;
-
-static	int resolve_value;	/* next value of resolve timer */
-
-/*
- * Big hack attack
- */
-#define	SKEWTIME	0x08000000	/* 0.03125 seconds as a l_fp fraction */
-
-/*
- * Select time out.  Set to 2 seconds.  The server is on the local machine,
- * after all.
- */
-#define	TIMEOUT_SEC	2
-#define	TIMEOUT_USEC	0
-
-
-/*
- * Input processing.  The data on each line in the configuration file
- * is supposed to consist of entries in the following order
- */
-#define	TOK_HOSTNAME	0
-#define	TOK_NEEDED	1
-#define	TOK_TYPE	2
-#define	TOK_HMODE	3
-#define	TOK_VERSION	4
-#define	TOK_MINPOLL	5
-#define	TOK_MAXPOLL	6
-#define	TOK_FLAGS	7
-#define	TOK_TTL		8
-#define	TOK_KEYID	9
-#define	TOK_KEYSTR	10
-#define	NUMTOK		11
-
-#define	MAXLINESIZE	512
-
-
-/*
- * File descriptor for ntp request code.
- */
-static	SOCKET sockfd = INVALID_SOCKET;	/* NT uses SOCKET */
-
-/* stuff to be filled in by caller */
-
-keyid_t req_keyid;	/* request keyid */
-int	req_keytype;	/* OpenSSL NID such as NID_md5 */
-size_t	req_hashlen;	/* digest size for req_keytype */
-char *req_file;		/* name of the file with configuration info */
-
-/* end stuff to be filled in */
-
-
-static	void	checkparent	(void);
-static	struct conf_entry *
-		removeentry	(struct conf_entry *);
-static	void	addentry	(char *, int, int, int, int, int, int, u_int,
-				   int, keyid_t, char *);
-static	int	findhostaddr	(struct conf_entry *);
-static	void	openntp		(void);
-static	int	request		(struct conf_peer *);
-static	char *	nexttoken	(char **);
-static	void	readconf	(FILE *, char *);
-static	void	doconfigure	(int);
-
-struct ntp_res_t_pkt {		/* Tagged packet: */
-	void *tag;		/* For the caller */
-	u_int32 paddr;		/* IP to look up, or 0 */
-	char name[MAXHOSTNAMELEN]; /* Name to look up (if 1st byte is not 0) */
-};
-
-struct ntp_res_c_pkt {		/* Control packet: */
-	char name[MAXHOSTNAMELEN];
-	u_int32 paddr;
-	int mode;
-	int version;
-	int minpoll;
-	int maxpoll;
-	u_int flags;
-	int ttl;
-	keyid_t keyid;
-	u_char keystr[MAXFILENAME];
-};
-
-
-static void	resolver_exit (int);
-
-/*
- * Call here instead of just exiting
- */
-
-static void resolver_exit (int code)
-{
-#ifdef SYS_WINNT
-	CloseHandle(ResolverEventHandle);
-	ResolverEventHandle = NULL;
-	_endthreadex(code);	/* Just to kill the thread not the process */
-#else
-	exit(code);		/* kill the forked process */
-#endif
-}
-
-/*
- * ntp_res_recv: Process an answer from the resolver
- */
-
-void
-ntp_res_recv(void)
-{
-	/*
-	  We have data ready on our descriptor.
-	  It may be an EOF, meaning the resolver process went away.
-	  Otherwise, it will be an "answer".
-	*/
-}
-
-
-/*
- * ntp_intres needs;
+ * getaddrinfo_sometime()		getnameinfo_sometime()
+ * blocking_getaddrinfo()		blocking_getnameinfo()
+ * getaddrinfo_sometime_complete()	getnameinfo_sometime_complete()
  *
- *	req_key(???), req_keyid, req_file valid
- *	syslog still open
+ * The first runs in the parent and marshalls (or serializes) request
+ * parameters into a request blob which is processed in the child by
+ * the second routine, blocking_*(), which serializes the results into
+ * a response blob unpacked by the third routine, *_complete(), which
+ * calls the callback routine provided with the request and frees
+ * _request_ memory allocated by the first routine.  Response memory
+ * is managed by the code which calls the *_complete routines.
  */
 
-void
-ntp_intres(void)
-{
-	FILE *in;
-#ifdef SYS_WINNT
-	DWORD rc;
-#else
-	int	rc;
-	struct	timeval tv;
-	fd_set	fdset;
-	int	time_left;
-#endif
+#define	INITIAL_DNS_RETRY	2	/* seconds between queries */
 
-#ifdef DEBUG
-	if (debug > 1) {
-		msyslog(LOG_INFO, "NTP_INTRES running");
-	}
-#endif
+typedef struct blocking_gai_req_tag {
+	size_t			octets;
+	time_t			scheduled;
+	time_t			earliest;
+	struct addrinfo		hints;
+	int			retry;
+	gai_sometime_callback	callback;
+	void *			context;
+	size_t			nodesize;
+	size_t			servsize;
+} blocking_gai_req;
 
-	/* check out auth stuff */
-	if (sys_authenticate) {
-		if (!authistrusted(req_keyid)) {
-			msyslog(LOG_ERR, "invalid request keyid %08x",
-			    req_keyid );
-			resolver_exit(1);
-		}
-	}
-
+typedef struct blocking_gai_resp_tag {
+	size_t			octets;
+	int			retcode;
+	int			gai_errno; /* for EAI_SYSTEM case */
+	int			ai_count;
 	/*
-	 * Read the configuration info
-	 * {this is bogus, since we are forked, but it is easier
-	 * to keep this code - gdt}
+	 * Followed by ai_count struct addrinfo and then ai_count
+	 * sockaddr_u and finally the canonical name strings.
 	 */
-	if ((in = fopen(req_file, "r")) == NULL) {
-		msyslog(LOG_ERR, "can't open configuration file %s: %m",
-			req_file);
-		resolver_exit(1);
-	}
-	readconf(in, req_file);
-	(void) fclose(in);
+} blocking_gai_resp;
 
-#ifdef DEBUG
-	if (!debug)
-#endif
-		if (unlink(req_file))
-			msyslog(LOG_WARNING,
-				"unable to remove intres request file %s, %m",
-				req_file);
+typedef struct blocking_gni_req_tag {
+	size_t			octets;
+	time_t			scheduled;
+	time_t			earliest;
+	int			retry;
+	size_t			hostoctets;
+	size_t			servoctets;
+	int			flags;
+	gni_sometime_callback	callback;
+	void *			context;
+	sockaddr_u		socku;
+} blocking_gni_req;
 
+typedef struct blocking_gni_resp_tag {
+	size_t			octets;
+	int			retcode;
+	int			gni_errno; /* for EAI_SYSTEM case */
+	size_t			hostoctets;
+	size_t			servoctets;
 	/*
-	 * Set up the timers to do first shot immediately.
+	 * Followed by hostoctets bytes of null-terminated host,
+	 * then servoctets bytes of null-terminated service.
 	 */
-	resolve_timer = 0;
-	resolve_value = MINRESOLVE;
-	config_timer = CONFIG_TIME;
+} blocking_gni_resp;
 
-	for (;;) {
-		checkparent();
-
-		if (resolve_timer == 0) {
-			/*
-			 * Sleep a little to make sure the network is completely up
-			 */
-			sleep(SLEEPTIME);
-			doconfigure(1);
-
-			/* prepare retry, in case there's more work to do */
-			resolve_timer = resolve_value;
-#ifdef DEBUG
-			if (debug > 2)
-				msyslog(LOG_INFO, "resolve_timer: 0->%d", resolve_timer);
-#endif
-			if (resolve_value < MAXRESOLVE)
-				resolve_value <<= 1;
-
-			config_timer = CONFIG_TIME;
-		} else if (config_timer == 0) {  /* MB: in which case would this be required ? */
-			doconfigure(0);
-			/* MB: should we check now if we could exit, similar to the code above? */
-			config_timer = CONFIG_TIME;
-#ifdef DEBUG
-			if (debug > 2)
-				msyslog(LOG_INFO, "config_timer: 0->%d", config_timer);
-#endif
-		}
-
-		if (confentries == NULL)
-			resolver_exit(0);   /* done */
-
-#ifdef SYS_WINNT
-		rc = WaitForSingleObject(ResolverEventHandle, 1000 * ALARM_TIME);  /* in milliseconds */
-
-		if ( rc == WAIT_OBJECT_0 ) { /* signaled by the main thread */
-			resolve_timer = 0;         /* retry resolving immediately */
-			continue;
-		}
-
-		if ( rc != WAIT_TIMEOUT ) /* not timeout: error */
-			resolver_exit(1);
-
-#else  /* not SYS_WINNT */
-		/* Bug 1386: fork() in NetBSD leaves timers running. */
-		/* So we need to retry select on EINTR */
-		time_left = ALARM_TIME;
-		while (time_left > 0) {
-		    tv.tv_sec = time_left;
-		    tv.tv_usec = 0;
-		    FD_ZERO(&fdset);
-		    FD_SET(resolver_pipe_fd[0], &fdset);
-		    rc = select(resolver_pipe_fd[0] + 1, &fdset, (fd_set *)0, (fd_set *)0, &tv);
-
-		    if (rc == 0)		/* normal timeout */
-			break;
-
-		    if (rc > 0) {  /* parent process has written to the pipe */
-			read(resolver_pipe_fd[0], (char *)&rc, sizeof(rc));  /* make pipe empty */
-			resolve_timer = 0;   /* retry resolving immediately */
-			break;
-		    }
-
-		    if ( rc < 0 ) {		/* select() returned error */
-			if (errno == EINTR) {	/* Timer went off */
-			    time_left -= (1<<EVENT_TIMEOUT);
-			    continue;		/* try again */
-			}
-			msyslog(LOG_ERR, "ntp_intres: Error from select: %s",
-			    strerror(errno));
-			resolver_exit(1);
-		    }
-		}
+static	time_t	next_dns_timeslot;
+static	time_t	ignore_scheduled_before;
+#ifdef HAVE_RES_INIT
+static	time_t	next_res_init;
 #endif
 
-		/* normal timeout, keep on waiting */
-		if (config_timer > 0)
-			config_timer--;
-		if (resolve_timer > 0)
-			resolve_timer--;
-	}
-}
+static	void	scheduled_sleep(time_t, time_t);
+static	void	manage_dns_retry_interval(time_t *, time_t *, int *);
+static	int	should_retry_dns(int, int);
+static	void	getaddrinfo_sometime_complete(blocking_work_req, void *,
+					      size_t, void *);
+static	void	getnameinfo_sometime_complete(blocking_work_req, void *,
+					      size_t, void *);
 
 
-#ifdef SYS_WINNT
+
 /*
- * ntp_intres_thread wraps the slightly different interface of Windows
- * thread functions and ntp_intres
+ * getaddrinfo_sometime - uses blocking child to call getaddrinfo then
+ *			  invokes provided callback completion function.
  */
-unsigned WINAPI
-ntp_intres_thread(void *UnusedThreadArg)
+int
+getaddrinfo_sometime(
+	const char *		node,
+	const char *		service,
+	const struct addrinfo *	hints,
+	gai_sometime_callback	callback,
+	void *			context
+	)
 {
-	UNUSED_ARG(UnusedThreadArg);
+	blocking_gai_req *	gai_req;
+	size_t			req_size;
+	size_t			nodesize;
+	size_t			servsize;
+	time_t			now;
+	
+	NTP_REQUIRE(NULL != node);
+	if (NULL != hints) {
+		NTP_REQUIRE(0 == hints->ai_addrlen);
+		NTP_REQUIRE(NULL == hints->ai_addr);
+		NTP_REQUIRE(NULL == hints->ai_canonname);
+		NTP_REQUIRE(NULL == hints->ai_next);
+	}
 
-	ntp_intres();
+	nodesize = strlen(node) + 1;
+	servsize = strlen(service) + 1;
+	req_size = sizeof(*gai_req) + nodesize + servsize;
+
+	gai_req = emalloc(req_size);
+
+	gai_req->octets = req_size;
+	now = time(NULL);
+	next_dns_timeslot = max(now, next_dns_timeslot);
+	gai_req->scheduled = now;
+	gai_req->earliest = next_dns_timeslot;
+	if (NULL == hints)
+		memset(&gai_req->hints, 0, sizeof(gai_req->hints));
+	else
+		gai_req->hints = *hints;
+	gai_req->retry = INITIAL_DNS_RETRY;
+	gai_req->callback = callback;
+	gai_req->context = context;
+	gai_req->nodesize = nodesize;
+	gai_req->servsize = servsize;
+
+	memcpy((char *)gai_req + sizeof(*gai_req), node, nodesize);
+	memcpy((char *)gai_req + sizeof(*gai_req) + nodesize, service,
+	       servsize);
+
+	if (queue_blocking_request(
+		BLOCKING_GETADDRINFO,
+		gai_req,
+		req_size, 
+		&getaddrinfo_sometime_complete, 
+		gai_req)) {
+
+		msyslog(LOG_ERR, "unable to queue getaddrinfo request");
+		errno = EFAULT;
+		return -1;
+	}
+
 	return 0;
 }
-#endif /* SYS_WINNT */
 
-
-/*
- * checkparent - see if our parent process is still running
- *
- * No need to worry in the Windows NT environment whether the
- * main thread is still running, because if it goes
- * down it takes the whole process down with it (in
- * which case we won't be running this thread either)
- * Turn function into NOP;
- */
-
-static void
-checkparent(void)
+int
+blocking_getaddrinfo(
+	blocking_pipe_header *	req
+	)
 {
-#if !defined (SYS_WINNT) && !defined (SYS_VXWORKS)
+	blocking_gai_req *	gai_req;
+	blocking_pipe_header *	resp;
+	blocking_gai_resp *	gai_resp;
+	char *			node;
+	char *			service;
+	struct addrinfo *	ai_res;
+	struct addrinfo *	ai;
+	struct addrinfo *	serialized_ai;
+	size_t			canons_octets;
+	size_t			this_octets;
+	size_t			resp_octets;
+	char *			cp;
+	time_t			time_now;
+
+	gai_req = (void *)((char *)req + sizeof(*req));
+	node = (char *)gai_req + sizeof(*gai_req);
+	service = node + gai_req->nodesize;
+
+	scheduled_sleep(gai_req->scheduled, gai_req->earliest);
+
+#ifdef HAVE_RES_INIT
+	/*
+	 * This is ad-hoc.  Reload /etc/resolv.conf once per minute
+	 * to pick up on changes from the DHCP client.  [Bug 1226]
+	 */
+	time_now = time(NULL);
+	if (next_res_init <= time_now) {
+		if (next_res_init)
+			res_init();
+		next_res_init = time_now + 60;
+	}
+#endif
 
 	/*
-	 * If our parent (the server) has died we will have been
-	 * inherited by init.  If so, exit.
+	 * Take a shot at the final size, better to overestimate
+	 * at first and then realloc to a smaller size.
 	 */
-	if (getppid() == 1) {
-		msyslog(LOG_INFO, "parent died before we finished, exiting");
-		resolver_exit(0);
+
+	resp = emalloc(sizeof(*resp) + sizeof(*gai_resp) 
+			   + 16 * (sizeof(struct addrinfo)
+				   + sizeof(sockaddr_u))
+			   + 256);
+	gai_resp = (void *)(resp + 1);
+
+	DPRINTF(2, ("blocking_getaddrinfo given node %s serv %s fam %d flags %x\n", 
+		    node, service, gai_req->hints.ai_family,
+		    gai_req->hints.ai_flags));
+	
+	ai_res = NULL;
+	gai_resp->retcode = getaddrinfo(node, service, &gai_req->hints, &ai_res);
+
+	switch (gai_resp->retcode) {
+#ifdef EAI_SYSTEM
+	case EAI_SYSTEM:
+		gai_resp->gai_errno = errno;
+		break;
+#endif
+	default:
+		gai_resp->gai_errno = 0;
 	}
-#endif /* SYS_WINNT && SYS_VXWORKS*/
-}
 
+	gai_resp->ai_count = canons_octets = 0;
 
+	if (!gai_resp->retcode) {
+		ai = ai_res;
+		while (NULL != ai) {
+			gai_resp->ai_count++;
+			if (ai->ai_canonname)
+				canons_octets += strlen(ai->ai_canonname) + 1;
+			ai = ai->ai_next;
+		}
+		/*
+		 * If this query succeeded only after retrying, DNS may have
+		 * just become responsive.  Ignore previously-scheduled
+		 * retry sleeps once for each pending request, similar to
+		 * the way scheduled_sleep() does when its worker_sleep()
+		 * is interrupted.
+		 */
+		if (gai_req->retry > INITIAL_DNS_RETRY) {
+			time_now = time(NULL);
+			ignore_scheduled_before = time_now;
+			next_dns_timeslot = time_now;
+			DPRINTF(1, ("DNS success after retry, ignoring sleeps scheduled before now (%s)",
+				humantime(time_now)));
+		}
+	}
 
-/*
- * removeentry - we are done with an entry, remove it from the list
- */
-static struct conf_entry *
-removeentry(
-	struct conf_entry *entry
-	)
-{
-	register struct conf_entry *ce;
-	struct conf_entry *next_ce;
+	/*
+	 * Our response consists of a header, followed by ai_count 
+	 * addrinfo structs followed by ai_count sockaddr_storage 
+	 * structs followed by the canonical names.
+	 */
+	gai_resp->octets = sizeof(*gai_resp)
+			    + gai_resp->ai_count
+				* (sizeof(gai_req->hints)
+				   + sizeof(sockaddr_u))
+			    + canons_octets;
 
-	ce = confentries;
-	if (ce == entry)
-		confentries = ce->ce_next;
-	else
-		while (ce != NULL) {
-			if (ce->ce_next == entry) {
-				ce->ce_next = entry->ce_next;
-				break;
+	resp_octets = sizeof(*resp) + gai_resp->octets;
+	resp =  erealloc(resp, resp_octets);
+	gai_resp = (void *)(resp + 1);
+
+	/* cp serves as our current pointer while serializing */
+	cp = (void *)(gai_resp + 1);
+	canons_octets = 0;
+
+	if (!gai_resp->retcode) {
+		
+		ai = ai_res;
+		while (NULL != ai) {
+			memcpy(cp, ai, sizeof(*ai));
+			serialized_ai = (void *)cp;
+			cp += sizeof(*ai);
+
+			/* transform ai_canonname into offset */
+			if (NULL != serialized_ai->ai_canonname) {
+				serialized_ai->ai_canonname = (char *)canons_octets;
+				canons_octets += strlen(ai->ai_canonname) + 1;
 			}
-			ce = ce->ce_next;
+			
+			/* leave fixup of ai_addr pointer for receiver */
+
+			ai = ai->ai_next;
 		}
 
-	next_ce = entry->ce_next;
-	if (entry->ce_name != NULL)
-		free(entry->ce_name);
-	free(entry);
+		ai = ai_res;
+		while (NULL != ai) {
+			NTP_INSIST(ai->ai_addrlen <= sizeof(sockaddr_u));
+			memcpy(cp, ai->ai_addr, ai->ai_addrlen);
+			cp += sizeof(sockaddr_u);
 
-	return next_ce;
+			ai = ai->ai_next;
+		}
+
+		ai = ai_res;
+		while (NULL != ai) {
+			if (NULL != ai->ai_canonname) {
+				this_octets = strlen(ai->ai_canonname) + 1;
+				memcpy(cp, ai->ai_canonname, this_octets);
+				cp += this_octets;
+			}
+
+			ai = ai->ai_next;
+		}
+	}
+
+	/*
+	 * make sure our walk and earlier calc match
+	 */
+	NTP_INSIST((size_t)(cp - (char *)resp) == resp_octets);
+
+	if (queue_blocking_response(resp, resp_octets, req)) {
+		DPRINTF(1, ("blocking_getaddrinfo unable to queue response"));
+		return -1;
+	}
+
+	return 0;
+}
+
+
+static void
+getaddrinfo_sometime_complete(
+	blocking_work_req	rtype,
+	void *			context,
+	size_t			respsize,
+	void *			resp
+	)
+{
+	blocking_gai_req *		gai_req;
+	blocking_gai_resp *		gai_resp;
+	struct addrinfo *		ai;
+	struct addrinfo *		next_ai;
+	sockaddr_u *			psau;
+	char *				node;
+	char *				service;
+	char *				canon_start;
+	int				again;
+	int				af;
+	const char *			fam_spec;
+	int				i;
+
+	gai_req = context;
+	gai_resp = resp;
+
+	NTP_REQUIRE(BLOCKING_GETADDRINFO == rtype);
+	NTP_REQUIRE(respsize == gai_resp->octets);
+
+	node = (char *)gai_req + sizeof(*gai_req);
+	service = node + gai_req->nodesize;
+
+	if (gai_resp->retcode) {
+		again = should_retry_dns(gai_resp->retcode, gai_resp->gai_errno);
+		/*
+		 * exponential backoff of DNS retries to 64s
+		 */
+		if (gai_req->retry && again) {
+			/* log the first retry only */
+			if (INITIAL_DNS_RETRY == gai_req->retry)
+				NLOG(NLOG_SYSINFO) {
+					af = gai_req->hints.ai_family;
+					fam_spec = (AF_INET6 == af)
+						       ? " (AAAA)"
+						       : (AF_INET == af)
+							     ? " (A)"
+							     : "";
+#ifdef EAI_SYSTEM
+					if (EAI_SYSTEM == gai_resp->retcode)
+						msyslog(LOG_INFO,
+							"retrying DNS %s%s: EAI_SYSTEM %s (%d)",
+							node, fam_spec,
+							strerror(gai_resp->gai_errno),
+							gai_resp->gai_errno);
+					else
+#endif
+						msyslog(LOG_INFO,
+							"retrying DNS %s%s: %s (%d)",
+							node, fam_spec,
+							gai_strerror(gai_resp->retcode),
+							gai_resp->retcode);
+				}
+			manage_dns_retry_interval(&gai_req->scheduled,
+			    &gai_req->earliest, &gai_req->retry);
+			if (!queue_blocking_request(
+					BLOCKING_GETADDRINFO,
+					gai_req,
+					gai_req->octets,
+					&getaddrinfo_sometime_complete,
+					gai_req))
+				return;
+			else
+				msyslog(LOG_ERR, "unable to retry hostname %s", node);
+		}
+	}
+
+	/*
+	 * fixup pointers in returned addrinfo array
+	 */
+	ai = (void *)((char *)gai_resp + sizeof(*gai_resp));
+	next_ai = NULL;
+	for (i = gai_resp->ai_count - 1; i >= 0; i--) {
+		ai[i].ai_next = next_ai;
+		next_ai = &ai[i];
+	}
+
+	psau = (void *)((char *)ai + gai_resp->ai_count * sizeof(*ai));
+	canon_start = (char *)psau + gai_resp->ai_count * sizeof(*psau);
+
+	for (i = 0; i < gai_resp->ai_count; i++) {
+		if (NULL != ai[i].ai_addr)
+			ai[i].ai_addr = &psau->sa;
+		psau++;
+		if (NULL != ai[i].ai_canonname)
+			ai[i].ai_canonname += (size_t)canon_start;
+	}
+
+	NTP_ENSURE((char *)psau == canon_start);
+
+	if (!gai_resp->ai_count)
+		ai = NULL;
+	
+	(*gai_req->callback)(gai_resp->retcode, gai_resp->gai_errno,
+			     gai_req->context, node, service, 
+			     &gai_req->hints, ai);
+
+	free(gai_req);
+	/* gai_resp is part of block freed by process_blocking_response() */
+}
+
+
+#ifdef TEST_BLOCKING_WORKER
+void gai_test_callback(int rescode, int gai_errno, void *context, const char *name, const char *service, const struct addrinfo *hints, const struct addrinfo *ai_res)
+{
+	sockaddr_u addr;
+
+	if (rescode) {
+		DPRINTF(1, ("gai_test_callback context %p error rescode %d %s serv %s\n",
+			    context, rescode, name, service));
+		return;
+	}
+	while (!rescode && NULL != ai_res) {
+		ZERO_SOCK(&addr);
+		memcpy(&addr, ai_res->ai_addr, ai_res->ai_addrlen);
+		DPRINTF(1, ("ctx %p fam %d addr %s canon '%s' type %s at %p ai_addr %p ai_next %p\n", 
+			    context,
+			    AF(&addr),
+			    stoa(&addr), 
+			    (ai_res->ai_canonname)
+				? ai_res->ai_canonname
+				: "",
+			    (SOCK_DGRAM == ai_res->ai_socktype) 
+				? "DGRAM" 
+				: (SOCK_STREAM == ai_res->ai_socktype) 
+					? "STREAM" 
+					: "(other)",
+			    ai_res,
+			    ai_res->ai_addr,
+			    ai_res->ai_next));
+
+		getnameinfo_sometime((sockaddr_u *)ai_res->ai_addr, 128, 32, 0, gni_test_callback, context);
+
+		ai_res = ai_res->ai_next;
+	}
+}
+#endif	/* TEST_BLOCKING_WORKER */
+
+
+int
+getnameinfo_sometime(
+	sockaddr_u *		psau,
+	size_t			hostoctets,
+	size_t			servoctets,
+	int			flags,
+	gni_sometime_callback	callback,
+	void *			context
+	)
+{
+	blocking_gni_req *	gni_req;
+	time_t			time_now;
+	
+	NTP_REQUIRE(hostoctets);
+	NTP_REQUIRE(hostoctets + servoctets < 1024);
+
+	gni_req = emalloc(sizeof(*gni_req));
+	memset(gni_req, 0, sizeof(*gni_req));
+
+	gni_req->octets = sizeof(*gni_req);
+	time_now = time(NULL);
+	next_dns_timeslot = max(time_now, next_dns_timeslot);
+	gni_req->scheduled = time_now;
+	gni_req->earliest = next_dns_timeslot;
+	memcpy(&gni_req->socku, psau, SOCKLEN(psau));
+	gni_req->hostoctets = hostoctets;
+	gni_req->servoctets = servoctets;
+	gni_req->flags = flags;
+	gni_req->retry = INITIAL_DNS_RETRY;
+	gni_req->callback = callback;
+	gni_req->context = context;
+
+	if (queue_blocking_request(
+		BLOCKING_GETNAMEINFO,
+		gni_req,
+		sizeof(*gni_req), 
+		&getnameinfo_sometime_complete, 
+		gni_req)) {
+
+		msyslog(LOG_ERR, "unable to queue getnameinfo request");
+		errno = EFAULT;
+		return -1;
+	}
+
+	return 0;
+}
+
+
+int
+blocking_getnameinfo(
+	blocking_pipe_header *	req
+	)
+{
+	blocking_gni_req *	gni_req;
+	blocking_pipe_header *	resp;
+	blocking_gni_resp *	gni_resp;
+	size_t			octets;
+	size_t			resp_octets;
+	char *			host;
+	char *			service;
+	char *			cp;
+	int			rc;
+	time_t			time_now;
+
+	gni_req = (void *)((char *)req + sizeof(*req));
+
+	octets = gni_req->hostoctets + gni_req->servoctets;
+
+	/*
+	 * Some alloca() implementations are fragile regarding
+	 * large allocations.  We only need room for the host
+	 * and service names.
+	 */
+	NTP_REQUIRE(octets < 1024);
+
+#ifndef HAVE_ALLOCA
+	host = emalloc(octets);
+#else
+	host = alloca(octets);
+	if (NULL == host) {
+		msyslog(LOG_ERR,
+			"blocking_getnameinfo unable to allocate %d octets on stack",
+			octets);
+		exit(1);
+	}
+#endif
+	service = host + gni_req->hostoctets;
+
+	scheduled_sleep(gni_req->scheduled, gni_req->earliest);
+
+#ifdef HAVE_RES_INIT
+	/*
+	 * This is ad-hoc.  Reload /etc/resolv.conf once per minute
+	 * to pick up on changes from the DHCP client.  [Bug 1226]
+	 */
+	time_now = time(NULL);
+	if (next_res_init <= time_now) {
+		if (next_res_init)
+			res_init();
+		next_res_init = time_now + 60;
+	}
+#endif
+
+	/*
+	 * Take a shot at the final size, better to overestimate
+	 * then realloc to a smaller size.
+	 */
+
+	resp_octets = sizeof(*resp) + sizeof(*gni_resp) + octets;
+	resp = emalloc(resp_octets);
+	gni_resp = (void *)((char *)resp + sizeof(*resp));
+
+	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %d servlen %d\n",
+		    stoa(&gni_req->socku), gni_req->flags,
+		    gni_req->hostoctets, gni_req->servoctets));
+	
+	gni_resp->retcode = getnameinfo(&gni_req->socku.sa,
+					SOCKLEN(&gni_req->socku),
+					host,
+					gni_req->hostoctets,
+					service,
+					gni_req->servoctets,
+					gni_req->flags);
+
+	switch (gni_resp->retcode) {
+#ifdef EAI_SYSTEM
+	case EAI_SYSTEM:
+		gni_resp->gni_errno = errno;
+		break;
+#endif
+	default:
+		gni_resp->gni_errno = 0;
+	}
+
+	if (gni_resp->retcode) {
+		gni_resp->hostoctets = 0;
+		gni_resp->servoctets = 0;
+	} else {
+		gni_resp->hostoctets = strlen(host) + 1;
+		gni_resp->servoctets = strlen(service) + 1;
+		/*
+		 * If this query succeeded only after retrying, DNS may have
+		 * just become responsive.  Ignore previously-scheduled
+		 * retry sleeps once for each pending request, similar to
+		 * the way scheduled_sleep() does when its worker_sleep()
+		 * is interrupted.
+		 */
+		if (gni_req->retry > INITIAL_DNS_RETRY) {
+			time_now = time(NULL);
+			ignore_scheduled_before = time_now;
+			next_dns_timeslot = time_now;
+			DPRINTF(1, ("DNS success after retrying, ignoring sleeps scheduled before now (%s)",
+				humantime(time_now)));
+		}
+	}
+	octets = gni_resp->hostoctets + gni_resp->servoctets;
+	/*
+	 * Our response consists of a header, followed by the host and
+	 * service strings, each null-terminated.
+	 */
+	resp_octets = sizeof(*resp) + sizeof(*gni_resp) + octets;
+
+	resp = erealloc(resp, resp_octets);
+	gni_resp = (void *)(resp + 1);
+
+	gni_resp->octets = sizeof(*gni_resp) + octets;
+
+	/* cp serves as our current pointer while serializing */
+	cp = (void *)(gni_resp + 1);
+
+	if (!gni_resp->retcode) {
+		memcpy(cp, host, gni_resp->hostoctets);
+		cp += gni_resp->hostoctets;
+		memcpy(cp, service, gni_resp->servoctets);
+		cp += gni_resp->servoctets;
+	}
+
+	NTP_INSIST((size_t)(cp - (char *)resp) == resp_octets);
+	NTP_INSIST(resp_octets - sizeof(*resp) == gni_resp->octets);
+
+	rc = queue_blocking_response(resp, resp_octets, req);
+	if (rc)
+		msyslog(LOG_ERR, "blocking_getnameinfo unable to queue response");
+#ifndef HAVE_ALLOCA
+	free(host);
+#endif
+	return rc;
+}
+
+
+static void
+getnameinfo_sometime_complete(
+	blocking_work_req	rtype,
+	void *			context,
+	size_t			respsize,
+	void *			resp
+	)
+{
+	blocking_gni_req *	gni_req;
+	blocking_gni_resp *	gni_resp;
+	char *			host;
+	char *			service;
+	int			again;
+
+	gni_req = context;
+	gni_resp = resp;
+
+	NTP_REQUIRE(BLOCKING_GETNAMEINFO == rtype);
+	NTP_REQUIRE(respsize == gni_resp->octets);
+
+	if (gni_resp->retcode) {
+		again = should_retry_dns(gni_resp->retcode, gni_resp->gni_errno);
+		/*
+		 * exponential backoff of DNS retries to 64s
+		 */
+		if (gni_req->retry)
+			manage_dns_retry_interval(&gni_req->scheduled,
+			    &gni_req->earliest, &gni_req->retry);
+
+		if (gni_req->retry && again) {
+			if (!queue_blocking_request(
+				BLOCKING_GETNAMEINFO,
+				gni_req,
+				gni_req->octets, 
+				&getnameinfo_sometime_complete, 
+				gni_req))
+				return;
+
+			msyslog(LOG_ERR, "unable to retry reverse lookup of %s", stoa(&gni_req->socku));
+		}
+	}
+
+	if (!gni_resp->hostoctets) {
+		host = NULL;
+		service = NULL;
+	} else {
+		host = (char *)gni_resp + sizeof(*gni_resp);
+		service = (gni_resp->servoctets) 
+			      ? host + gni_resp->hostoctets
+			      : NULL;
+	}
+
+	(*gni_req->callback)(gni_resp->retcode, gni_resp->gni_errno,
+			     &gni_req->socku, gni_req->flags, host,
+			     service, gni_req->context);
+
+	free(gni_req);
+	/* gni_resp is part of block freed by process_blocking_response() */
+}
+
+
+#ifdef TEST_BLOCKING_WORKER
+void gni_test_callback(int rescode, int gni_errno, sockaddr_u *psau, int flags, const char *host, const char *service, void *context)
+{
+	if (!rescode)
+		DPRINTF(1, ("gni_test_callback got host '%s' serv '%s' for addr %s context %p\n", 
+			    host, service, stoa(psau), context));
+	else
+		DPRINTF(1, ("gni_test_callback context %p rescode %d gni_errno %d flags 0x%x addr %s\n",
+			    context, rescode, gni_errno, flags, stoa(psau)));
+}
+#endif	/* TEST_BLOCKING_WORKER */
+
+
+static void
+scheduled_sleep(
+	time_t scheduled,
+	time_t earliest
+	)
+{
+	time_t now;
+
+	if (scheduled < ignore_scheduled_before) {
+		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)",
+			humantime(earliest), humantime(scheduled),
+			humantime(ignore_scheduled_before)));
+		return;
+	}
+
+	now = time(NULL);
+
+	if (now < earliest) {
+		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)",
+			humantime(earliest), humantime(scheduled),
+			humantime(ignore_scheduled_before)));
+		if (-1 == worker_sleep(earliest - now)) {
+			/* our sleep was interrupted */
+			now = time(NULL);
+			ignore_scheduled_before = now;
+			next_dns_timeslot = now;
+#ifdef HAVE_RES_INIT
+			next_res_init = now + 60;
+			res_init();
+#endif
+			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)",
+				humantime(ignore_scheduled_before)));
+		}
+	}
 }
 
 
 /*
- * addentry - add an entry to the configuration list
+ * manage_dns_retry_interval is a helper used by
+ * getaddrinfo_sometime_complete and getnameinfo_sometime_complete
+ * to calculate the new retry interval and schedule the next query.
  */
 static void
-addentry(
-	char *name,
-	int no_needed,
-	int type,
-	int mode,
-	int version,
-	int minpoll,
-	int maxpoll,
-	u_int flags,
-	int ttl,
-	keyid_t keyid,
-	char *keystr
+manage_dns_retry_interval(
+	time_t *	pscheduled,
+	time_t *	pwhen,
+	int *		pretry
 	)
 {
-	register struct conf_entry *ce;
+	time_t	now;
+	time_t	when;
+	int	retry;
+		
+	now = time(NULL);
+	retry = *pretry;
+	when = max(now + retry, next_dns_timeslot);
+	next_dns_timeslot = when;
+	retry = min(64, retry << 1);
 
-#ifdef DEBUG
-	if (debug > 1)
-		msyslog(LOG_INFO, 
-		    "intres: <%s> %d %d %d %d %d %d %x %d %x %s",
-		    name, no_needed, type, mode, version,
-		    minpoll, maxpoll, flags, ttl, keyid, keystr);
-#endif
-	ce = emalloc(sizeof(*ce));
-	ce->ce_name = estrdup(name);
-	ce->ce_peeraddr = 0;
-#ifdef ISC_PLATFORM_HAVEIPV6
-	ce->ce_peeraddr6 = in6addr_any;
-#endif
-	ZERO_SOCK(&ce->peer_store);
-	ce->ce_hmode = (u_char)mode;
-	ce->ce_version = (u_char)version;
-	ce->ce_minpoll = (u_char)minpoll;
-	ce->ce_maxpoll = (u_char)maxpoll;
-	ce->no_needed = no_needed;	/* Not used after here. */
-					/* Start of fixing bug-975 */
-	ce->type = type;
-	ce->ce_flags = (u_char)flags;
-	ce->ce_ttl = (u_char)ttl;
-	ce->ce_keyid = keyid;
-	strncpy(ce->ce_keystr, keystr, sizeof(ce->ce_keystr) - 1);
-	ce->ce_keystr[sizeof(ce->ce_keystr) - 1] = 0;
-	ce->ce_next = NULL;
-
-	if (confentries == NULL) {
-		confentries = ce;
-	} else {
-		register struct conf_entry *cep;
-
-		for (cep = confentries; cep->ce_next != NULL;
-		     cep = cep->ce_next)
-		    /* nothing */;
-		cep->ce_next = ce;
-	}
+	*pscheduled = now;
+	*pwhen = when;
+	*pretry = retry;
 }
 
-
 /*
- * findhostaddr - resolve a host name into an address (Or vice-versa)
- *
- * Given one of {ce_peeraddr,ce_name}, find the other one.
- * It returns 1 for "success" and 0 for an uncorrectable failure.
- * Note that "success" includes try again errors.  You can tell that you
- *  got a "try again" since {ce_peeraddr,ce_name} will still be zero.
+ * should_retry_dns is a helper used by getaddrinfo_sometime_complete
+ * and getnameinfo_sometime_complete which implements ntpd's DNS retry
+ * policy.
  */
 static int
-findhostaddr(
-	struct conf_entry *entry
+should_retry_dns(
+	int	rescode,
+	int	res_errno
 	)
 {
-	static int eai_again_seen = 0;
-	struct addrinfo *addr;
-	struct addrinfo hints;
-	int again;
-	int error;
+	static int	eai_again_seen;
+	int		again;
 
-	checkparent();		/* make sure our guy is still running */
+	/*
+	 * If the resolver failed, see if the failure is
+	 * temporary. If so, return success.
+	 */
+	again = 0;
 
-	if (entry->ce_name != NULL && !SOCK_UNSPEC(&entry->peer_store)) {
-		/* HMS: Squawk? */
-		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are defined...");
-		return 1;
-	}
+	switch (rescode) {
 
-	if (entry->ce_name == NULL && SOCK_UNSPEC(&entry->peer_store)) {
-		msyslog(LOG_ERR, "findhostaddr: both ce_name and ce_peeraddr are undefined!");
-		return 0;
-	}
-
-	if (entry->ce_name) {
-		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
-			entry->ce_name));
-
-		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = entry->type;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_protocol = IPPROTO_UDP;
-		/*
-		 * If IPv6 is not available look only for v4 addresses
-		 */
-		if (!ipv6_works)
-			hints.ai_family = AF_INET;
-		error = getaddrinfo(entry->ce_name, NULL, &hints, &addr);
-		if (error == 0) {
-			entry->peer_store = *((sockaddr_u *)(addr->ai_addr));
-			if (IS_IPV4(&entry->peer_store)) {
-				entry->ce_peeraddr =
-				    NSRCADR(&entry->peer_store);
-				entry->ce_config.v6_flag = 0;
-			} else {
-				entry->ce_peeraddr6 =
-				    SOCK_ADDR6(&entry->peer_store);
-				entry->ce_config.v6_flag = 1;
-			}
-			freeaddrinfo(addr);
-		}
-	} else {
-		DPRINTF(2, ("findhostaddr: Resolving <%s>\n",
-			stoa(&entry->peer_store)));
-
-		entry->ce_name = emalloc(MAXHOSTNAMELEN);
-		error = getnameinfo((const struct sockaddr *)&entry->peer_store,
-				   SOCKLEN(&entry->peer_store),
-				   (char *)&entry->ce_name, MAXHOSTNAMELEN,
-				   NULL, 0, 0);
-	}
-
-	if (0 == error) {
-
-		/* again is our return value, for success it is 1 */
+	case EAI_FAIL:
 		again = 1;
+		break;
 
-		DPRINTF(2, ("findhostaddr: %s resolved.\n", 
-			(entry->ce_name) ? "name" : "address"));
-	} else {
-		/*
-		 * If the resolver failed, see if the failure is
-		 * temporary. If so, return success.
-		 */
-		again = 0;
+	case EAI_AGAIN:
+		again = 1;
+		eai_again_seen = 1;		/* [Bug 1178] */
+		break;
 
-		switch (error) {
-
-		case EAI_FAIL:
-			again = 1;
-			break;
-
-		case EAI_AGAIN:
-			again = 1;
-			eai_again_seen = 1;
-			break;
-
-		case EAI_NONAME:
+	case EAI_NONAME:
 #if defined(EAI_NODATA) && (EAI_NODATA != EAI_NONAME)
-		case EAI_NODATA:
+	case EAI_NODATA:
 #endif
-			msyslog(LOG_ERR, "host name not found%s%s: %s",
-				(EAI_NONAME == error) ? "" : " EAI_NODATA",
-				(eai_again_seen) ? " (permanent)" : "",
-				entry->ce_name);
-			again = !eai_again_seen;
-			break;
+		again = !eai_again_seen;	/* [Bug 1178] */
+		break;
 
 #ifdef EAI_SYSTEM
-		case EAI_SYSTEM:
-			/* 
-			 * EAI_SYSTEM means the real error is in errno.  We should be more
-			 * discriminating about which errno values require retrying, but
-			 * this matches existing behavior.
-			 */
-			again = 1;
-			DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",
-				errno, strerror(errno)));
-			break;
+	case EAI_SYSTEM:
+		/* 
+		 * EAI_SYSTEM means the real error is in errno.  We should be more
+		 * discriminating about which errno values require retrying, but
+		 * this matches existing behavior.
+		 */
+		again = 1;
+		DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",
+			    res_errno, strerror(res_errno)));
+		break;
 #endif
-		}
-
-		/* do this here to avoid perturbing errno earlier */
-		DPRINTF(2, ("intres: got error status of: %d\n", error));
 	}
+
+	DPRINTF(2, ("intres: resolver returned: %s (%d), %sretrying\n",
+		gai_strerror(rescode), rescode, again ? "" : "not "));
 
 	return again;
 }
 
-
-/*
- * openntp - open a socket to the ntp server
- */
-static void
-openntp(void)
-{
-	const char	*localhost = "127.0.0.1";	/* Use IPv4 loopback */
-	struct addrinfo	hints;
-	struct addrinfo	*addr;
-	u_long		on;
-	int		err;
-
-	if (sockfd != INVALID_SOCKET)
-		return;
-
-	memset(&hints, 0, sizeof(hints));
-
-	/*
-	 * For now only bother with IPv4
-	 */
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_DGRAM;
-
-	err = getaddrinfo(localhost, "ntp", &hints, &addr);
-
-	if (err) {
-#ifdef EAI_SYSTEM
-		if (EAI_SYSTEM == err)
-			msyslog(LOG_ERR, "getaddrinfo(%s) failed: %m",
-				localhost);
-		else
-#endif
-			msyslog(LOG_ERR, "getaddrinfo(%s) failed: %s",
-				localhost, gai_strerror(err));
-		resolver_exit(1);
-	}
-
-	sockfd = socket(addr->ai_family, addr->ai_socktype, 0);
-
-	if (INVALID_SOCKET == sockfd) {
-		msyslog(LOG_ERR, "socket() failed: %m");
-		resolver_exit(1);
-	}
-
-#ifndef SYS_WINNT
-	/*
-	 * On Windows only the count of sockets must be less than
-	 * FD_SETSIZE. On Unix each descriptor's value must be less
-	 * than FD_SETSIZE, as fd_set is a bit array.
-	 */
-	if (sockfd >= FD_SETSIZE) {
-		msyslog(LOG_ERR, "socket fd %d too large, FD_SETSIZE %d",
-			(int)sockfd, FD_SETSIZE);
-		resolver_exit(1);
-	}
-
-	/*
-	 * Make the socket non-blocking.  We'll wait with select()
-	 * Unix: fcntl(O_NONBLOCK) or fcntl(FNDELAY)
-	 */
-# ifdef O_NONBLOCK
-	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1) {
-		msyslog(LOG_ERR, "fcntl(O_NONBLOCK) failed: %m");
-		resolver_exit(1);
-	}
-# else
-#  ifdef FNDELAY
-	if (fcntl(sockfd, F_SETFL, FNDELAY) == -1) {
-		msyslog(LOG_ERR, "fcntl(FNDELAY) failed: %m");
-		resolver_exit(1);
-	}
-#  else
-#   include "Bletch: NEED NON BLOCKING IO"
-#  endif	/* FNDDELAY */
-# endif	/* O_NONBLOCK */
-	(void)on;	/* quiet unused warning */
-#else	/* !SYS_WINNT above */
-	/*
-	 * Make the socket non-blocking.  We'll wait with select()
-	 * Windows: ioctlsocket(FIONBIO)
-	 */
-	on = 1;
-	err = ioctlsocket(sockfd, FIONBIO, &on);
-	if (SOCKET_ERROR == err) {
-		msyslog(LOG_ERR, "ioctlsocket(FIONBIO) fails: %m");
-		resolver_exit(1);
-	}
-#endif /* SYS_WINNT */
-
-	err = connect(sockfd, addr->ai_addr, addr->ai_addrlen);
-	if (SOCKET_ERROR == err) {
-		msyslog(LOG_ERR, "openntp: connect() failed: %m");
-		resolver_exit(1);
-	}
-
-	freeaddrinfo(addr);
-}
-
-
-/*
- * request - send a configuration request to the server, wait for a response
- */
-static int
-request(
-	struct conf_peer *conf
-	)
-{
-	struct sock_timeval tvout;
-	struct req_pkt reqpkt;
-	size_t	req_len;
-	size_t	total_len;	/* req_len plus keyid & digest */
-	fd_set	fdset;
-	l_fp	ts;
-	char *	pch;
-	char *	pchEnd;
-	l_fp *	pts;
-	keyid_t *pkeyid;
-	int n;
-#ifdef SYS_WINNT
-	HANDLE	hReadWriteEvent = NULL;
-	BOOL	ret;
-	DWORD	NumberOfBytesWritten, NumberOfBytesRead, dwWait;
-	OVERLAPPED overlap;
-#endif /* SYS_WINNT */
-
-	checkparent();		/* make sure our guy is still running */
-
-	if (sockfd == INVALID_SOCKET)
-		openntp();
-	
-#ifdef SYS_WINNT
-	hReadWriteEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-#endif /* SYS_WINNT */
-
-	/*
-	 * Try to clear out any previously received traffic so it
-	 * doesn't fool us.  Note the socket is nonblocking.
-	 */
-	tvout.tv_sec =  0;
-	tvout.tv_usec = 0;
-	FD_ZERO(&fdset);
-	FD_SET(sockfd, &fdset);
-	while (select(sockfd + 1, &fdset, (fd_set *)0, (fd_set *)0, &tvout) >
-	       0) {
-		recv(sockfd, (char *)&reqpkt, sizeof(reqpkt), 0);
-		FD_ZERO(&fdset);
-		FD_SET(sockfd, &fdset);
-	}
-
-	/*
-	 * Make up a request packet with the configuration info
-	 */
-	memset(&reqpkt, 0, sizeof(reqpkt));
-
-	reqpkt.rm_vn_mode = RM_VN_MODE(0, 0, 0);
-	reqpkt.auth_seq = AUTH_SEQ(1, 0);	/* authenticated, no seq */
-	reqpkt.implementation = IMPL_XNTPD;	/* local implementation */
-	reqpkt.request = REQ_CONFIG;		/* configure a new peer */
-	reqpkt.err_nitems = ERR_NITEMS(0, 1);	/* one item */
-	reqpkt.mbz_itemsize = MBZ_ITEMSIZE(sizeof(*conf));
-	/* Make sure mbz_itemsize <= sizeof reqpkt.data */
-	if (sizeof(*conf) > sizeof(reqpkt.data)) {
-		msyslog(LOG_ERR,
-			"Bletch: conf_peer is too big for reqpkt.data!");
-		resolver_exit(1);
-	}
-	memcpy(reqpkt.data, conf, sizeof(*conf));
-
-	if (sys_authenticate && req_hashlen > 16) {
-		pch = reqpkt.data; 
-		/* 32-bit alignment */
-		pch += (sizeof(*conf) + 3) & ~3;
-		pts = (void *)pch;
-		pkeyid = (void *)(pts + 1);
-		pchEnd = (void *)pkeyid;
-		req_len = pchEnd - (char *)&reqpkt;
-		pchEnd = (void *)(pkeyid + 1);
-		pchEnd += req_hashlen;
-		total_len = pchEnd - (char *)&reqpkt;
-		if (total_len > sizeof(reqpkt)) {
-			msyslog(LOG_ERR,
-				"intres total_len %u limit is %u (%u octet digest)\n",
-				total_len, sizeof(reqpkt),
-				req_hashlen);
-			resolver_exit(1);
-		}
-	} else {
-		pts = &reqpkt.tstamp;
-		pkeyid = &reqpkt.keyid;
-		req_len = REQ_LEN_NOMAC;
-	}
-
-	*pkeyid = htonl(req_keyid);
-	get_systime(&ts);
-	L_ADDUF(&ts, SKEWTIME);
-	HTONL_FP(&ts, pts);
-	if (sys_authenticate) {
-		n = authencrypt(req_keyid, (void *)&reqpkt, req_len);
-		if ((size_t)n != req_hashlen + sizeof(reqpkt.keyid)) {
-			msyslog(LOG_ERR,
-				"intres maclen %d expected %u\n",
-				n, req_hashlen + sizeof(reqpkt.keyid));
-			resolver_exit(1);
-		}
-		req_len += n;
-	}
-
-	/*
-	 * Done.  Send it.
-	 */
-#ifndef SYS_WINNT
-	n = send(sockfd, (char *)&reqpkt, req_len, 0);
-	if (n < 0) {
-		msyslog(LOG_ERR, "send to NTP server failed: %m");
-		return 0;	/* maybe should exit */
-	}
-#else
-	/* In the NT world, documentation seems to indicate that there
-	 * exist _write and _read routines that can be used to do blocking
-	 * I/O on sockets. Problem is these routines require a socket
-	 * handle obtained through the _open_osf_handle C run-time API
-	 * of which there is no explanation in the documentation. We need
-	 * nonblocking write's and read's anyway for our purpose here.
-	 * We're therefore forced to deviate a little bit from the Unix
-	 * model here and use the ReadFile and WriteFile Win32 I/O API's
-	 * on the socket
-	 */
-	overlap.Offset = overlap.OffsetHigh = (DWORD)0;
-	overlap.hEvent = hReadWriteEvent;
-	ret = WriteFile((HANDLE)sockfd, (char *)&reqpkt, req_len,
-			NULL, (LPOVERLAPPED)&overlap);
-	if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
-		msyslog(LOG_ERR, "send to NTP server failed: %m");
-		return 0;
-	}
-	dwWait = WaitForSingleObject(hReadWriteEvent, (DWORD) TIMEOUT_SEC * 1000);
-	if ((dwWait == WAIT_FAILED) || (dwWait == WAIT_TIMEOUT)) {
-		if (dwWait == WAIT_FAILED)
-		    msyslog(LOG_ERR, "WaitForSingleObject failed: %m");
-		return 0;
-	}
-	if (!GetOverlappedResult((HANDLE)sockfd, (LPOVERLAPPED)&overlap,
-				(LPDWORD)&NumberOfBytesWritten, FALSE)) {
-		msyslog(LOG_ERR, "GetOverlappedResult for WriteFile fails: %m");
-		return 0;
-	}
-#endif /* SYS_WINNT */
-
-
-	/*
-	 * Wait for a response.  A weakness of the mode 7 protocol used
-	 * is that there is no way to associate a response with a
-	 * particular request, i.e. the response to this configuration
-	 * request is indistinguishable from that to any other.  I should
-	 * fix this some day.  In any event, the time out is fairly
-	 * pessimistic to make sure that if an answer is coming back
-	 * at all, we get it.
-	 */
-	for (;;) {
-		FD_ZERO(&fdset);
-		FD_SET(sockfd, &fdset);
-		tvout.tv_sec = TIMEOUT_SEC;
-		tvout.tv_usec = TIMEOUT_USEC;
-
-		n = select(sockfd + 1, &fdset, (fd_set *)0,
-			   (fd_set *)0, &tvout);
-
-		if (n < 0) {
-			if (errno != EINTR)
-				msyslog(LOG_ERR, "select() fails: %m");
-			return 0;
-		} else if (n == 0) {
-#ifdef DEBUG
-			if (debug)
-				msyslog(LOG_INFO, "ntp_intres select() returned 0.");
-#endif
-			return 0;
-		}
-
-#ifndef SYS_WINNT
-		n = recv(sockfd, (char *)&reqpkt, sizeof(reqpkt), 0);
-		if (n <= 0) {
-			if (n < 0) {
-				msyslog(LOG_ERR, "recv() fails: %m");
-				return 0;
-			}
-			continue;
-		}
-#else /* Overlapped I/O used on non-blocking sockets on Windows NT */
-		ret = ReadFile((HANDLE)sockfd, (char *)&reqpkt, sizeof(reqpkt),
-			       NULL, (LPOVERLAPPED)&overlap);
-		if ((ret == FALSE) && (GetLastError() != ERROR_IO_PENDING)) {
-			msyslog(LOG_ERR, "ReadFile() fails: %m");
-			return 0;
-		}
-		dwWait = WaitForSingleObject(hReadWriteEvent, (DWORD) TIMEOUT_SEC * 1000);
-		if ((dwWait == WAIT_FAILED) || (dwWait == WAIT_TIMEOUT)) {
-			if (dwWait == WAIT_FAILED) {
-				msyslog(LOG_ERR, "WaitForSingleObject for ReadFile fails: %m");
-				return 0;
-			}
-			continue;
-		}
-		if (!GetOverlappedResult((HANDLE)sockfd, (LPOVERLAPPED)&overlap,
-					(LPDWORD)&NumberOfBytesRead, FALSE)) {
-			msyslog(LOG_ERR, "GetOverlappedResult fails: %m");
-			return 0;
-		}
-		n = NumberOfBytesRead;
-#endif /* SYS_WINNT */
-
-		/*
-		 * Got one.  Check through to make sure it is what
-		 * we expect.
-		 */
-		if (n < RESP_HEADER_SIZE) {
-			msyslog(LOG_ERR, "received runt response (%d octets)",
-				n);
-			continue;
-		}
-
-		if (!ISRESPONSE(reqpkt.rm_vn_mode)) {
-#ifdef DEBUG
-			if (debug > 1)
-			    msyslog(LOG_INFO, "received non-response packet");
-#endif
-			continue;
-		}
-
-		if (ISMORE(reqpkt.rm_vn_mode)) {
-#ifdef DEBUG
-			if (debug > 1)
-			    msyslog(LOG_INFO, "received fragmented packet");
-#endif
-			continue;
-		}
-
-		if ( ( (INFO_VERSION(reqpkt.rm_vn_mode) < 2)
-		       || (INFO_VERSION(reqpkt.rm_vn_mode) > NTP_VERSION))
-		     || INFO_MODE(reqpkt.rm_vn_mode) != MODE_PRIVATE) {
-#ifdef DEBUG
-			if (debug > 1)
-			    msyslog(LOG_INFO,
-				    "version (%d/%d) or mode (%d/%d) incorrect",
-				    INFO_VERSION(reqpkt.rm_vn_mode),
-				    NTP_VERSION,
-				    INFO_MODE(reqpkt.rm_vn_mode),
-				    MODE_PRIVATE);
-#endif
-			continue;
-		}
-
-		if (INFO_SEQ(reqpkt.auth_seq) != 0) {
-#ifdef DEBUG
-			if (debug > 1)
-			    msyslog(LOG_INFO,
-				    "nonzero sequence number (%d)",
-				    INFO_SEQ(reqpkt.auth_seq));
-#endif
-			continue;
-		}
-
-		if (reqpkt.implementation != IMPL_XNTPD ||
-		    reqpkt.request != REQ_CONFIG) {
-#ifdef DEBUG
-			if (debug > 1)
-			    msyslog(LOG_INFO,
-				    "implementation (%d) or request (%d) incorrect",
-				    reqpkt.implementation, reqpkt.request);
-#endif
-			continue;
-		}
-
-		if (INFO_NITEMS(reqpkt.err_nitems) != 0 ||
-		    INFO_MBZ(reqpkt.mbz_itemsize) != 0 ||
-		    INFO_ITEMSIZE(reqpkt.mbz_itemsize) != 0) {
-#ifdef DEBUG
-			if (debug > 1)
-			    msyslog(LOG_INFO,
-				    "nitems (%d) mbz (%d) or itemsize (%d) nonzero",
-				    INFO_NITEMS(reqpkt.err_nitems),
-				    INFO_MBZ(reqpkt.mbz_itemsize),
-				    INFO_ITEMSIZE(reqpkt.mbz_itemsize));
-#endif
-			continue;
-		}
-
-		n = INFO_ERR(reqpkt.err_nitems);
-		switch (n) {
-		    case INFO_OKAY:
-			/* success */
-			return 1;
-		
-		    case INFO_ERR_NODATA:
-			/*
-			 * newpeer() refused duplicate association, no
-			 * point in retrying so call it success.
-			 */
-			return 1;
-		
-		    case INFO_ERR_IMPL:
-			msyslog(LOG_ERR,
-				"ntp_intres.request: implementation mismatch");
-			return 0;
-		
-		    case INFO_ERR_REQ:
-			msyslog(LOG_ERR,
-				"ntp_intres.request: request unknown");
-			return 0;
-		
-		    case INFO_ERR_FMT:
-			msyslog(LOG_ERR,
-				"ntp_intres.request: format error");
-			return 0;
-
-		    case INFO_ERR_AUTH:
-			msyslog(LOG_ERR,
-				"ntp_intres.request: permission denied");
-			return 0;
-
-		    default:
-			msyslog(LOG_ERR,
-				"ntp_intres.request: unknown error code %d", n);
-			return 0;
-		}
-	}
-}
-
-
-/*
- * nexttoken - return the next token from a line
- */
-static char *
-nexttoken(
-	char **lptr
-	)
-{
-	register char *cp;
-	register char *tstart;
-
-	cp = *lptr;
-
-	/*
-	 * Skip leading white space
-	 */
-	while (*cp == ' ' || *cp == '\t')
-	    cp++;
-	
-	/*
-	 * If this is the end of the line, return nothing.
-	 */
-	if (*cp == '\n' || *cp == '\0') {
-		*lptr = cp;
-		return NULL;
-	}
-	
-	/*
-	 * Must be the start of a token.  Record the pointer and look
-	 * for the end.
-	 */
-	tstart = cp++;
-	while (*cp != ' ' && *cp != '\t' && *cp != '\n' && *cp != '\0')
-	    cp++;
-	
-	/*
-	 * Terminate the token with a \0.  If this isn't the end of the
-	 * line, space to the next character.
-	 */
-	if (*cp == '\n' || *cp == '\0')
-	    *cp = '\0';
-	else
-	    *cp++ = '\0';
-
-	*lptr = cp;
-	return tstart;
-}
-
-
-/*
- * readconf - read the configuration information out of the file we
- *	      were passed.  Note that since the file is supposed to be
- *	      machine generated, we bail out at the first sign of trouble.
- */
-static void
-readconf(
-	FILE *fp,
-	char *name
-	)
-{
-	register int i;
-	char *token[NUMTOK];
-	u_long intval[NUMTOK];
-	u_int flags;
-	char buf[MAXLINESIZE];
-	char *bp;
-
-	while (fgets(buf, MAXLINESIZE, fp) != NULL) {
-
-		bp = buf;
-		for (i = 0; i < NUMTOK; i++) {
-			if ((token[i] = nexttoken(&bp)) == NULL) {
-				msyslog(LOG_ERR,
-					"tokenizing error in file `%s', quitting",
-					name);
-				resolver_exit(1);
-			}
-		}
-
-		for (i = 1; i < NUMTOK - 1; i++) {
-			if (!atouint(token[i], &intval[i])) {
-				msyslog(LOG_ERR,
-					"format error for integer token `%s', file `%s', quitting",
-					token[i], name);
-				resolver_exit(1);
-			}
-		}
-
-#if 0 /* paranoid checking - these are done in newpeer() */
-		if (intval[TOK_HMODE] != MODE_ACTIVE &&
-		    intval[TOK_HMODE] != MODE_CLIENT &&
-		    intval[TOK_HMODE] != MODE_BROADCAST) {
-			msyslog(LOG_ERR, "invalid mode (%ld) in file %s",
-				intval[TOK_HMODE], name);
-			resolver_exit(1);
-		}
-
-		if (intval[TOK_VERSION] > NTP_VERSION ||
-		    intval[TOK_VERSION] < NTP_OLDVERSION) {
-			msyslog(LOG_ERR, "invalid version (%ld) in file %s",
-				intval[TOK_VERSION], name);
-			resolver_exit(1);
-		}
-		if (intval[TOK_MINPOLL] < ntp_minpoll ||
-		    intval[TOK_MINPOLL] > NTP_MAXPOLL) {
-
-			msyslog(LOG_ERR, "invalid MINPOLL value (%ld) in file %s",
-				intval[TOK_MINPOLL], name);
-			resolver_exit(1);
-		}
-
-		if (intval[TOK_MAXPOLL] < ntp_minpoll ||
-		    intval[TOK_MAXPOLL] > NTP_MAXPOLL) {
-			msyslog(LOG_ERR, "invalid MAXPOLL value (%ld) in file %s",
-				intval[TOK_MAXPOLL], name);
-			resolver_exit(1);
-		}
-
-		if ((intval[TOK_FLAGS] & ~(FLAG_PREFER | FLAG_NOSELECT |
-		    FLAG_BURST | FLAG_IBURST | FLAG_SKEY)) != 0) {
-			msyslog(LOG_ERR, "invalid flags (%ld) in file %s",
-				intval[TOK_FLAGS], name);
-			resolver_exit(1);
-		}
-#endif /* end paranoid checking */
-
-		flags = 0;
-		if (intval[TOK_FLAGS] & FLAG_PREFER)
-		    flags |= CONF_FLAG_PREFER;
-		if (intval[TOK_FLAGS] & FLAG_NOSELECT)
-		    flags |= CONF_FLAG_NOSELECT;
-		if (intval[TOK_FLAGS] & FLAG_BURST)
-		    flags |= CONF_FLAG_BURST;
-		if (intval[TOK_FLAGS] & FLAG_IBURST)
-		    flags |= CONF_FLAG_IBURST;
-
-#ifdef OPENSSL
-		if (intval[TOK_FLAGS] & FLAG_SKEY)
-		    flags |= CONF_FLAG_SKEY;
-#endif /* OPENSSL */
-
-		/*
-		 * This is as good as we can check it.  Add it in.
-		 */
-		addentry(token[TOK_HOSTNAME],
-			 (int)intval[TOK_NEEDED], (int)intval[TOK_TYPE],
-			 (int)intval[TOK_HMODE], (int)intval[TOK_VERSION],
-			 (int)intval[TOK_MINPOLL], (int)intval[TOK_MAXPOLL],
-			 flags, (int)intval[TOK_TTL],
-			 intval[TOK_KEYID], token[TOK_KEYSTR]);
-	}
-}
-
-
-/*
- * doconfigure - attempt to resolve names and configure the server
- */
-static void
-doconfigure(
-	int dores
-	)
-{
-	register struct conf_entry *ce;
-
-#ifdef DEBUG
-		if (debug > 1)
-			msyslog(LOG_INFO, "Running doconfigure %s DNS",
-			    dores ? "with" : "without" );
-#endif
-
-#if defined(HAVE_RES_INIT) || defined(HAVE___RES_INIT)
-	if (dores)	   /* Reload /etc/resolv.conf - bug 1226 */
-		res_init();
-#endif
-	ce = confentries;
-	while (ce != NULL) {
-#ifdef DEBUG
-		if (debug > 1)
-			msyslog(LOG_INFO,
-			    "doconfigure: <%s> has peeraddr %s",
-			    ce->ce_name, stoa(&ce->peer_store));
-#endif
-		if (dores && SOCK_UNSPEC(&ce->peer_store)) {
-			if (!findhostaddr(ce)) {
-#ifndef IGNORE_DNS_ERRORS
-				msyslog(LOG_ERR,
-					"couldn't resolve `%s', giving up on it",
-					ce->ce_name);
-				ce = removeentry(ce);
-				continue;
-#endif
-			} else if (!SOCK_UNSPEC(&ce->peer_store))
-				msyslog(LOG_INFO,
-					"DNS %s -> %s", ce->ce_name,
-					stoa(&ce->peer_store));
-		}
-
-		if (!SOCK_UNSPEC(&ce->peer_store)) {
-			if (request(&ce->ce_config)) {
-				ce = removeentry(ce);
-				continue;
-			}
-			/* 
-			 * Failed case.  Should bump counter and give 
-			 * up.
-			 */
-#ifdef DEBUG
-			if (debug > 1) {
-				msyslog(LOG_INFO,
-				    "doconfigure: request() FAILED, maybe next time.");
-			}
-#endif
-		}
-		ce = ce->ce_next;
-	}
-}
-
-#else	/* NO_INTRES follows */
+#else	/* !WORKER follows */
 int ntp_intres_nonempty_compilation_unit;
 #endif

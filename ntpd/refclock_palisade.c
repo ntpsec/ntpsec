@@ -786,9 +786,9 @@ TSIP_decode (
 	}
 	else if ((up->rpt_buf[0] == PACKET_41A) & (up->type == CLK_ACUTIME)) {
 #ifdef DEBUG
-		printf("GPS TOW: %ld\n", getlong((u_char *) &mb(0)));
+		printf("GPS TOW: %ld\n", (long)getlong((u_char *) &mb(0)));
 		printf("GPS WN: %d\n", getint((u_char *) &mb(4)));
-		printf("GPS UTC-GPS Offser: %ld\n", getlong((u_char *) &mb(6)));
+		printf("GPS UTC-GPS Offser: %ld\n", (long)getlong((u_char *) &mb(6)));
 #endif
 		return 0;
 	}
@@ -1185,85 +1185,60 @@ HW_poll (
 	return 0;
 }
 
-#if 0 /* unused */
 /*
- * this 'casts' a character array into a float
+ * copy/swap a big-endian palisade double into a host double
  */
-float
-getfloat (
-	u_char *bp
-	)
-{
-	float sval;
-#ifdef WORDS_BIGENDIAN 
-	((char *) &sval)[0] = *bp++;
-	((char *) &sval)[1] = *bp++;
-	((char *) &sval)[2] = *bp++;
-	((char *) &sval)[3] = *bp++;
-#else
-	((char *) &sval)[3] = *bp++;
-	((char *) &sval)[2] = *bp++;
-	((char *) &sval)[1] = *bp++;
-	((char *) &sval)[0] = *bp;
-#endif  /* ! XNTP_BIG_ENDIAN */ 
-	return sval;
-}
-#endif
-
-/*
- * this 'casts' a character array into a double
- */
-double
+static double
 getdbl (
 	u_char *bp
 	)
 {
-	double dval;
-#ifdef WORDS_BIGENDIAN 
-	((char *) &dval)[0] = *bp++;
-	((char *) &dval)[1] = *bp++;
-	((char *) &dval)[2] = *bp++;
-	((char *) &dval)[3] = *bp++;
-	((char *) &dval)[4] = *bp++;
-	((char *) &dval)[5] = *bp++;
-	((char *) &dval)[6] = *bp++;
-	((char *) &dval)[7] = *bp;
+#ifdef WORDS_BIGENDIAN
+	double out;
+
+	memcpy(&out, bp, sizeof(out));
+	return out;
 #else
-	((char *) &dval)[7] = *bp++;
-	((char *) &dval)[6] = *bp++;
-	((char *) &dval)[5] = *bp++;
-	((char *) &dval)[4] = *bp++;
-	((char *) &dval)[3] = *bp++;
-	((char *) &dval)[2] = *bp++;
-	((char *) &dval)[1] = *bp++;
-	((char *) &dval)[0] = *bp;
-#endif  /* ! XNTP_BIG_ENDIAN */ 
-	return dval;
+	union {
+		u_char ch[8];
+		u_int32 u32[2];
+	} ui;
+		
+	union {
+		double out;
+		u_int32 u32[2];
+	} uo;
+
+	memcpy(ui.ch, bp, sizeof(ui.ch));
+	/* least-significant 32 bits of double from swapped bp[4] to bp[7] */
+	uo.u32[0] = ntohl(ui.u32[1]);
+	/* most-significant 32 bits from swapped bp[0] to bp[3] */
+	uo.u32[1] = ntohl(ui.u32[0]);
+
+	return uo.out;
+#endif
 }
 
 /*
- * cast a 16 bit character array into a short (16 bit) int
+ * copy/swap a big-endian palisade short into a host short
  */
-short
+static short
 getint (
 	u_char *bp
 	)
 {
-	return (short) (bp[1] + (bp[0] << 8));
+	return (short)ntohs(*(u_short *)bp);
 }
 
 /*
- * cast a 32 bit character array into a long (32 bit) int
+ * copy/swap a big-endian palisade 32-bit int into a host 32-bit int
  */
-long
+static int32
 getlong(
 	u_char *bp
 	)
 {
-	return (long) (bp[0] << 24) | 
-	    (bp[1] << 16) |
-	    (bp[2] << 8) |
-	    bp[3];
+	return (int32)(u_int32)ntohl(*(u_int32 *)bp);
 }
 
 int refclock_palisade_bs;

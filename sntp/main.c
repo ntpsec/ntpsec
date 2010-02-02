@@ -1,3 +1,4 @@
+#include <config.h>
 #include <l_stdlib.h>
 #include <ntp_fp.h>
 #include <ntp.h>

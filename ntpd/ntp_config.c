@@ -17,20 +17,6 @@
 # include <netinfo/ni.h>
 #endif
 
-#include "ntp.h"
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_unixtime.h"
-#include "ntp_refclock.h"
-#include "ntp_filegen.h"
-#include "ntp_stdlib.h"
-#include "ntp_assert.h"
-#include "ntpsim.h"
-#include "ntpd-opts.h"
-#include <ntp_random.h>
-#include <isc/net.h>
-#include <isc/result.h>
-
 #include <stdio.h>
 #include <ctype.h>
 #ifdef HAVE_SYS_PARAM_H
@@ -40,18 +26,24 @@
 #ifndef SIGCHLD
 # define SIGCHLD SIGCLD
 #endif
-#if !defined(VMS)
-# ifdef HAVE_SYS_WAIT_H
-#  include <sys/wait.h>
-# endif
-#endif /* VMS */
+#ifdef HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
 
-#ifdef SYS_WINNT
-# include <io.h>
-HANDLE ResolverEventHandle;
-#else
-int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent process */
-#endif /* SYS_WINNT */
+#include "ntp.h"
+#include "ntpd.h"
+#include "ntp_io.h"
+#include "ntp_unixtime.h"
+#include "ntp_refclock.h"
+#include "ntp_filegen.h"
+#include "ntp_stdlib.h"
+#include "ntp_assert.h"
+#include "ntpd-opts.h"
+#include "ntp_random.h"
+#include "ntp_workimpl.h"
+#include <isc/net.h>
+#include <isc/result.h>
+
 
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
@@ -70,16 +62,16 @@ int resolver_pipe_fd[2];  /* used to let the resolver process alert the parent p
  * "logconfig" building blocks
  */
 struct masks {
-	const char	  *name;
-	unsigned long mask;
+	const char *	name;
+	unsigned long	mask;
 };
 
 static struct masks logcfg_class[] = {
-	{ "clock",		NLOG_OCLOCK },
-	{ "peer",		NLOG_OPEER },
-	{ "sync",		NLOG_OSYNC },
-	{ "sys",		NLOG_OSYS },
-	{ (char *)0,	0 }
+	{ "clock",	NLOG_OCLOCK },
+	{ "peer",	NLOG_OPEER },
+	{ "sync",	NLOG_OSYNC },
+	{ "sys",	NLOG_OSYS },
+	{ NULL,		0 }
 };
 
 static struct masks logcfg_item[] = {
@@ -96,7 +88,7 @@ static struct masks logcfg_item[] = {
 	{ "allsys",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYS },
 	{ "allsync",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYNC },
 	{ "all",		NLOG_SYSMASK|NLOG_PEERMASK|NLOG_CLOCKMASK|NLOG_SYNCMASK },
-	{ (char *)0,	0 }
+	{ NULL,			0 }
 };
 
 /* Limits */
@@ -112,31 +104,13 @@ static struct masks logcfg_item[] = {
 #define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
- * File descriptor used by the resolver save routines, and temporary file
- * name.
- */
-int call_resolver = 1;		/* ntp-genkeys sets this to 0, for example */
-#ifndef SYS_WINNT
-static char res_file[20];	/* enough for /tmp/ntpXXXXXX\0 */
-#define RES_TEMPFILE	"/tmp/ntpXXXXXX"
-#else
-static char res_file[MAX_PATH];
-#endif /* SYS_WINNT */
-
-/*
  * Definitions of things either imported from or exported to outside
  */
 extern int yydebug;			/* ntp_parser.c (.y) */
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
-FILE *res_fp;
 struct config_tree cfgt;		/* Parser output stored here */
-struct config_tree *cfg_tree_history = NULL;	/* History of configs */
-#if 0
-short default_ai_family = AF_UNSPEC;	/* Default either IPv4 or IPv6 */
-#else
-short default_ai_family = AF_INET;	/* [Bug 891]: FIX ME */
-#endif
+struct config_tree *cfg_tree_history;	/* History of configs */
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	default_keysdir[] = NTP_KEYSDIR;
 char	*keysdir = default_keysdir;	/* crypto keys directory */
@@ -255,8 +229,9 @@ double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
 static int get_correct_host_mode(int hmode);
+static int peerflag_bits(struct peer_node *);
 static void save_and_apply_config_tree(void);
-void getconfig(int argc,char *argv[]);
+void getconfig(int, char **);
 #if !defined(SIM)
 static sockaddr_u *get_next_address(struct address_node *addr);
 #endif
@@ -287,6 +262,15 @@ static void config_ntpdsim(struct config_tree *);
 static void config_ntpd(struct config_tree *);
 #endif
 
+#ifdef WORKER
+void peer_name_resolved(int, int, void *, const char *, const char *,
+			const struct addrinfo *,
+			const struct addrinfo *);
+void unpeer_name_resolved(int, int, void *, const char *, const char *,
+			  const struct addrinfo *,
+			  const struct addrinfo *);
+#endif
+
 enum gnn_type {
 	t_UNK,		/* Unknown */
 	t_REF,		/* Refclock */
@@ -310,11 +294,6 @@ static int getnetnum(const char *num,sockaddr_u *addr, int complain,
 static int get_multiple_netnums(const char *num, sockaddr_u *addr,
 				struct addrinfo **res, int complain,
 				enum gnn_type a_type);
-static void save_resolve(char *name, int no_needed, int type,
-			 int mode, int version, int minpoll, int maxpoll,
-			 u_int flags, int ttl, keyid_t keyid, u_char *keystr);
-static void abort_resolve(void);
-static void do_resolve_internal(void);
 
 
 
@@ -1707,13 +1686,7 @@ config_auth(
 	struct config_tree *ptree
 	)
 {
-	extern int	cache_type;	/* authkeys.c */
 #ifdef OPENSSL
-#ifndef NO_INTRES
-	u_char		digest[EVP_MAX_MD_SIZE];
-	u_int		digest_len;
-	EVP_MD_CTX	ctx;
-#endif
 	struct attr_val *my_val;
 	int		item;
 #endif
@@ -1808,39 +1781,6 @@ config_auth(
 	if (ptree->auth.revoke)
 		sys_revoke = ptree->auth.revoke;
 #endif /* OPENSSL */
-
-#ifndef NO_INTRES
-	/* find a keyid */
-	if (info_auth_keyid == 0)
-		req_keyid = 65535;
-	else
-		req_keyid = info_auth_keyid;
-
-	/* if doesn't exist, make up one at random */
-	if (authhavekey(req_keyid)) {
-		req_keytype = cache_type;
-#ifndef OPENSSL
-		req_hashlen = 16;
-#else	/* OPENSSL follows */
-		EVP_DigestInit(&ctx, EVP_get_digestbynid(req_keytype));
-		EVP_DigestFinal(&ctx, digest, &digest_len);
-		req_hashlen = digest_len;
-#endif
-	} else {
-		int	rankey;
-
-		rankey = ntp_random();
-		req_keytype = NID_md5;
-		req_hashlen = 16;
-		MD5auth_setkey(req_keyid, req_keytype,
-		    (u_char *)&rankey, sizeof(rankey));
-		authtrust(req_keyid, 1);
-	}
-
-	/* save keyid so we will accept config requests with it */
-	info_auth_keyid = req_keyid;
-#endif /* !NO_INTRES */
-
 }
 
 
@@ -2447,7 +2387,8 @@ config_nic_rules(
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
 				*pchSlash = '\0';
-			if (is_ip_address(if_name, &netaddr)) {
+			if (is_ip_address(if_name, AF_UNSPEC,
+					  &netaddr)) {
 				match_type = MATCH_IFADDR;
 				if (pchSlash != NULL) {
 					sscanf(pchSlash + 1, "%d",
@@ -2945,10 +2886,9 @@ config_trap(
 			/* port is at same location for v4 and v6 */
 			SET_PORT(&peeraddr, port_no ? port_no : TRAPPORT);
 
-			if (NULL == localaddr) {
-				AF(&peeraddr) = default_ai_family;
+			if (NULL == localaddr)
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
-			} else
+			else
 				AF(&peeraddr) = AF(&addr_sock);
 
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
@@ -3126,7 +3066,6 @@ config_vars(
 	)
 {
 	struct attr_val *curr_var;
-	FILE *new_file;
 	int len;
 
 	curr_var = queue_head(ptree->vars);
@@ -3159,20 +3098,9 @@ config_vars(
 			stats_config(STATS_PID_FILE, curr_var->value.s);
 			break;
 		case T_Logfile:
-			new_file = fopen(curr_var->value.s, "a");
-			if (new_file != NULL) {
-				NLOG(NLOG_SYSINFO) /* conditional if clause for conditional syslog */
-				    msyslog(LOG_NOTICE, "logging to file %s", curr_var->value.s);
-				if (syslog_file != NULL &&
-				    fileno(syslog_file) != fileno(new_file))
-					(void)fclose(syslog_file);
-
-				syslog_file = new_file;
-				syslogit = 0;
-			}
-			else
+			if (-1 == change_logfile(curr_var->value.s, 0))
 				msyslog(LOG_ERR,
-					"Cannot open log file %s",
+					"Cannot open logfile %s: %m",
 					curr_var->value.s);
 			break;
 
@@ -3278,12 +3206,13 @@ is_sane_resolved_address(
 	return 1;
 }
 
+
 static int
 get_correct_host_mode(
-	int hmode
+	int token
 	)
 {
-	switch (hmode) {
+	switch (token) {
 	    case T_Server:
 	    case T_Pool:
 	    case T_Manycastclient:
@@ -3300,166 +3229,227 @@ get_correct_host_mode(
 	}
 }
 
+
+/*
+ * peerflag_bits()	get config_peers() peerflags value from a
+ *			peer_node's queue of flag attr_val entries.
+ */
+static int
+peerflag_bits(
+	struct peer_node *pn
+	)
+{
+	int peerflags;
+	struct attr_val *option;
+
+	/* translate peerflags options to bits */
+	peerflags = 0;
+	option = queue_head(pn->peerflags);
+	for (;	option != NULL; option = next_node(option))
+		switch (option->value.i) {
+
+		default:
+			NTP_INSIST(0);
+			break;
+
+		case T_Autokey:
+			peerflags |= FLAG_SKEY;
+			break;
+
+		case T_Burst:
+			peerflags |= FLAG_BURST;
+			break;
+
+		case T_Iburst:
+			peerflags |= FLAG_IBURST;
+			break;
+
+		case T_Noselect:
+			peerflags |= FLAG_NOSELECT;
+			break;
+
+		case T_Preempt:
+			peerflags |= FLAG_PREEMPT;
+			break;
+
+		case T_Prefer:
+			peerflags |= FLAG_PREFER;
+			break;
+
+		case T_True:
+			peerflags |= FLAG_TRUE;
+			break;
+
+		case T_Xleave:
+			peerflags |= FLAG_XLEAVE;
+			break;
+		}
+
+	return peerflags;
+}
+
+
 static void
 config_peers(
 	struct config_tree *ptree
 	)
 {
-	struct addrinfo *res, *res_bak;
 	sockaddr_u peeraddr;
+	isc_netaddr_t	i_netaddr;
+	struct addrinfo	hints;
 	struct peer_node *curr_peer;
-	struct attr_val *option;
 	int hmode;
-	int peerflags;
-	int status;
-	int no_needed;
-	int i;
+	int num_needed;
 
-	curr_peer = queue_head(ptree->peers);
-	while (curr_peer != NULL) {
-		/* Find the number of associations needed.
-		 * If a pool coomand is specified, then sys_maxclock needed
-		 * else, only one is needed
-		 */
-		no_needed = (T_Pool == curr_peer->host_mode)
-				? sys_maxclock
-				: 1;
+	for (curr_peer = queue_head(ptree->peers);
+	     curr_peer != NULL;
+	     curr_peer = next_node(curr_peer)) {
 
 		/* Find the correct host-mode */
 		hmode = get_correct_host_mode(curr_peer->host_mode);
 		NTP_INSIST(hmode != -1);
 
-		/* translate peerflags options to bits */
-		peerflags = 0;
-		option = queue_head(curr_peer->peerflags);
-		for (;	option != NULL; option = next_node(option))
-			switch (option->value.i) {
-
-			default:
-				NTP_INSIST(0);
-				break;
-
-			case T_Autokey:
-				peerflags |= FLAG_SKEY;
-				break;
-
-			case T_Burst:
-				peerflags |= FLAG_BURST;
-				break;
-
-			case T_Iburst:
-				peerflags |= FLAG_IBURST;
-				break;
-
-			case T_Noselect:
-				peerflags |= FLAG_NOSELECT;
-				break;
-
-			case T_Preempt:
-				peerflags |= FLAG_PREEMPT;
-				break;
-
-			case T_Prefer:
-				peerflags |= FLAG_PREFER;
-				break;
-
-			case T_True:
-				peerflags |= FLAG_TRUE;
-				break;
-
-			case T_Xleave:
-				peerflags |= FLAG_XLEAVE;
-				break;
-			}
-
-		/* Attempt to resolve the address */
-		ZERO_SOCK(&peeraddr);
-		AF(&peeraddr) = (u_short)curr_peer->addr->type;
-
-		status = get_multiple_netnums(curr_peer->addr->address,
-		    &peeraddr, &res, 0, t_UNK);
-
-#ifdef FORCE_DEFER_DNS
-		/* Hack for debugging Deferred DNS
-		 * Pretend working names didn't work.
+		/* Find the number of associations needed.
+		 * If a pool coomand is specified, then sys_maxclock needed
+		 * else, only one is needed
 		 */
-		if (status == 1) {
-			/* Deferring everything breaks refclocks. */
-			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-			if (!ISREFCLOCKADR(&peeraddr)) {
-				status = 0;  /* force deferred DNS path */
-				msyslog(LOG_INFO, "Forcing Deferred DNS for %s, %s",
-					curr_peer->addr->address, stoa(&peeraddr));
-			} else {
-				msyslog(LOG_INFO, "NOT Deferring DNS for %s, %s",
-					curr_peer->addr->address, stoa(&peeraddr));
-			}
-		}
+		num_needed = (T_Pool == curr_peer->host_mode)
+				? sys_maxclock
+				: 1;
+
+		/*
+		 * If we have a numeric address, we can safely use
+		 * getaddrinfo in the mainline with it.  Otherwise
+		 * hand it off to the blocking child.
+		 */
+		if (1 == num_needed
+		    && is_ip_address(curr_peer->addr->address,
+				     (u_short)curr_peer->addr->type,
+				     &i_netaddr)) {
+
+			AF(&peeraddr) = (u_short)i_netaddr.family;
+			SET_PORT(&peeraddr, NTP_PORT);
+			if (AF_INET6 == i_netaddr.family)
+				SET_ADDR6N(&peeraddr,
+					   i_netaddr.type.in6);
+			else
+				SET_ADDR4N(&peeraddr,
+					   i_netaddr.type.in.s_addr);
+
+			if (is_sane_resolved_address(&peeraddr,
+			    curr_peer->host_mode))
+				peer_config(&peeraddr,
+				    NULL,
+				    hmode,
+				    curr_peer->peerversion,
+				    curr_peer->minpoll,
+				    curr_peer->maxpoll,
+				    peerflag_bits(curr_peer),
+				    curr_peer->ttl,
+				    curr_peer->peerkey,
+				    (u_char *)"*");
+		} else {
+			/* we have a hostname to resolve */
+#ifdef WORKER
+			memset(&hints, 0, sizeof(hints));
+			hints.ai_family = (u_short)curr_peer->addr->type;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_protocol = IPPROTO_UDP;
+			getaddrinfo_sometime(curr_peer->addr->address, "ntp",
+					     &hints, &peer_name_resolved, 
+					     (void *)curr_peer);
+#else	/* !WORKER follows */
+			msyslog(LOG_ERR,
+				"hostname %s can not be used, please use address\n",
+				curr_peer->addr->address);
 #endif
-
-		/* I don't know why getnetnum would return -1.
-		 * The old code had this test, so I guess it must be
-		 * useful
-		 */
-		if (status == -1) {
-			/* Do nothing, apparently we found an IPv6
-			 * address and can't do anything about it */
 		}
-		/* Check if name resolution failed. If yes, store the
-		 * peer information in a file for asynchronous
-		 * resolution later
-		 */
-		else if (status != 1) {
-			msyslog(LOG_INFO, "Deferring DNS for %s %d", curr_peer->addr->address, no_needed);
-			save_resolve(curr_peer->addr->address,
-				     no_needed,
-				     curr_peer->addr->type,
-				     hmode,
-				     curr_peer->peerversion,
-				     curr_peer->minpoll,
-				     curr_peer->maxpoll,
-				     peerflags,
-				     curr_peer->ttl,
-				     curr_peer->peerkey,
-				     (u_char *)"*");
-		}
-		/* Yippie!! Name resolution has succeeded!!!
-		 * Now we can proceed to some more sanity checks on
-		 * the resolved address before we start to configure
-		 * the peer
-		 */
-		else {
-			res_bak = res;
-
-			/*
-			 * Loop to configure the desired number of
-			 * associations
-			 */
-			for (i = 0; (i < no_needed) && res; res =
-			    res->ai_next) {
-				++i;
-				memcpy(&peeraddr, res->ai_addr,
-				    res->ai_addrlen);
-				if (is_sane_resolved_address(
-					&peeraddr,
-					curr_peer->host_mode))
-
-					peer_config(&peeraddr,
-					    NULL,
-					    hmode,
-					    curr_peer->peerversion,
-					    curr_peer->minpoll,
-					    curr_peer->maxpoll,
-					    peerflags,
-					    curr_peer->ttl,
-					    curr_peer->peerkey,
-					    (u_char *)"*");
-			}
-			freeaddrinfo(res_bak);
-		}
-		curr_peer = next_node(curr_peer);
 	}
 }
+
+
+/*
+ * peer_name_resolved()
+ *
+ * Callback invoked when config_peers()'s DNS lookup completes.
+ */
+#ifdef WORKER
+void
+peer_name_resolved(
+	int			rescode,
+	int			gai_errno,
+	void *			context,
+	const char *		name,
+	const char *		service,
+	const struct addrinfo *	hints,
+	const struct addrinfo *	res
+	)
+{
+	sockaddr_u		peeraddr;
+	struct peer_node *	curr_peer;
+	int			num_needed;
+	int			hmode;
+	int			i;
+	int			af;
+	const char *		fam_spec;
+
+	curr_peer = context;
+
+	DPRINTF(1, ("peer_name_resolved(%s) rescode %d\n", name, rescode));
+
+	if (rescode) {
+#ifndef IGNORE_DNS_ERRORS
+		msyslog(LOG_ERR,
+			"giving up resolving host %s: %s (%d)",
+			name, gai_strerror(rescode), rescode);
+#else	/* IGNORE_DNS_ERRORS follows */
+		getaddrinfo_sometime(name, service, hints,
+				     &peer_name_resolved, context);
+#endif
+		return;
+	}
+
+	hmode = get_correct_host_mode(curr_peer->host_mode);
+	NTP_INSIST(hmode != -1);
+	num_needed = (T_Pool == curr_peer->host_mode) 
+			? sys_maxclock 
+			: 1;
+
+	/* Loop to configure the desired number of associations */
+	for (i = 0; 
+	     res != NULL && i < num_needed; 
+	     res = res->ai_next) {
+
+		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+
+		if (is_sane_resolved_address(&peeraddr,
+					     curr_peer->host_mode)) {
+			i++;
+			NLOG(NLOG_SYSINFO) {
+				af = curr_peer->addr->type;
+				fam_spec = (AF_INET6 == af)
+					       ? "(AAAA) "
+					       : (AF_INET == af)
+						     ? "(A) "
+						     : "";
+				msyslog(LOG_INFO, "DNS %s %s-> %s",
+					name, fam_spec,
+					stoa(&peeraddr));
+			}
+			peer_config(&peeraddr,
+				NULL,
+				hmode,
+				curr_peer->peerversion,
+				curr_peer->minpoll,
+				curr_peer->maxpoll,
+				peerflag_bits(curr_peer),
+				curr_peer->ttl,
+				curr_peer->peerkey,
+				(u_char *)"*");
+		}
+	}
+}
+#endif	/* WORKER */
 
 
 #ifdef FREE_CFG_T
@@ -3484,11 +3474,11 @@ config_unpeers(
 	struct config_tree *ptree
 	)
 {
-	struct addrinfo *res, *res_bak;
 	sockaddr_u peeraddr;
+	struct addrinfo		hints;
+	isc_netaddr_t		i_netaddr;
 	struct unpeer_node *curr_unpeer;
 	struct peer *peer;
-	int status;
 	int found;
 
 	for (curr_unpeer = queue_head(ptree->unpeers);
@@ -3506,68 +3496,130 @@ config_unpeers(
 				unpeer(peer);
 			}	
 
-			/* Ok, everything done. Free up peer node memory */
-			free_node(curr_unpeer);
 			continue;
 		}
 
-		/* Attempt to resolve the name or address */
-		ZERO_SOCK(&peeraddr);
-		AF(&peeraddr) = (u_short)curr_unpeer->addr->type;
-
-		status = get_multiple_netnums(
-			curr_unpeer->addr->address, &peeraddr, &res, 0,
-			t_UNK);
-
-		/* I don't know why getnetnum would return -1.
-		 * The old code had this test, so I guess it must be
-		 * useful
+		/*
+		 * If we have a numeric address, we can safely use
+		 * getaddrinfo in the mainline with it.  Otherwise
+		 * hand it off to the blocking child.
 		 */
-		if (status == -1) {
-			/* Do nothing, apparently we found an IPv6
-			 * address and can't do anything about it */
-		}
-		/* Check if name resolution failed. If yes, throw
-		 * up our hands.
-		 */
-		else if (status != 1) {
-			/* Do nothing */
-		}
-		/* Yippie!! Name resolution has succeeded!!!
-		 */
-		else {
-			res_bak = res;
+		if (is_ip_address(curr_unpeer->addr->address,
+				  (u_short)curr_unpeer->addr->type,
+				  &i_netaddr)) {
 
-			/*
-			 * Loop through the addresses found
-			 */
-			while (res) {
-				memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+			AF(&peeraddr) = (u_short)i_netaddr.family;
+			if (AF_INET6 == i_netaddr.family)
+				SET_ADDR6N(&peeraddr,
+					   i_netaddr.type.in6);
+			else
+				SET_ADDR4N(&peeraddr,
+					   i_netaddr.type.in.s_addr);
 
-				found = 0;
-				peer = NULL;
+			found = 0;
+			peer = NULL;
 
-				DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
+			DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
 
-				while (!found) {
-					peer = findexistingpeer(&peeraddr, peer, -1);
-					if (!peer)
-						break;
-					if (peer->flags & FLAG_CONFIG)
-						found = 1;
-				}
+			do {
+				peer = findexistingpeer(&peeraddr, peer, -1);
+				if (NULL != peer && (FLAG_CONFIG & peer->flags))
+					found = 1;
+			} while (!found && NULL != peer);
 
-				if (found) {
-					peer_clear(peer, "GONE");
-					unpeer(peer);
-				}
-
-				res = res->ai_next;
+			if (found) {
+				msyslog(LOG_INFO, "unpeered %s",
+					stoa(&peeraddr));
+				peer_clear(peer, "GONE");
+				unpeer(peer);
 			}
-			freeaddrinfo(res_bak);
+		} else {
+			/* we have a hostname to resolve */
+#ifdef WORKER
+			memset(&hints, 0, sizeof(hints));
+			hints.ai_family = (u_short)curr_unpeer->addr->type;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_protocol = IPPROTO_UDP;
+			getaddrinfo_sometime(curr_unpeer->addr->address, "ntp",
+					     &hints, &unpeer_name_resolved, 
+					     (void *)curr_unpeer);
+#else	/* !WORKER follows */
+			msyslog(LOG_ERR,
+				"hostname %s can not be used, please use address\n",
+				curr_unpeer->addr->address);
+#endif
 		}
 	}
 }
+
+
+/*
+ * unpeer_name_resolved()
+ *
+ * Callback invoked when config_unpeers()'s DNS lookup completes.
+ */
+#ifdef WORKER
+void
+unpeer_name_resolved(
+	int			rescode,
+	int			gai_errno,
+	void *			context,
+	const char *		name,
+	const char *		service,
+	const struct addrinfo *	hints,
+	const struct addrinfo *	res
+	)
+{
+	sockaddr_u		peeraddr;
+	struct unpeer_node *	curr_unpeer;
+	struct peer *		peer;
+	int			found;
+	int			af;
+	const char *		fam_spec;
+
+	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
+
+	curr_unpeer = context;
+
+	if (rescode)
+		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)", 
+			name, gai_strerror(rescode), rescode);
+	else {
+		/*
+		 * Loop through the addresses found
+		 */
+		while (res) {
+			found = 0;
+			peer = NULL;
+
+			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+			DPRINTF(1, ("searching for peer %s\n", stoa(&peeraddr)));
+
+			do {
+				peer = findexistingpeer(&peeraddr, peer, -1);
+				if (NULL != peer && (FLAG_CONFIG & peer->flags))
+					found = 1;
+			} while (!found && NULL != peer);
+
+			if (found) {
+				af = curr_unpeer->addr->type;
+				fam_spec = (AF_INET6 == af)
+					       ? "(AAAA) "
+					       : (AF_INET == af)
+						     ? "(A) "
+						     : "";
+				msyslog(LOG_INFO, "unpeered %s %s-> %s",
+					name, fam_spec,
+					stoa(&peeraddr));
+				peer_clear(peer, "GONE");
+				unpeer(peer);
+			}
+
+			res = res->ai_next;
+		}
+	}
+}
+#endif	/* WORKER */
 
 
 #ifdef FREE_CFG_T
@@ -3705,6 +3757,19 @@ config_ntpd(
 	config_unpeers(ptree);
 	config_fudge(ptree);
 	config_qos(ptree);
+
+#ifdef TEST_BLOCKING_WORKER
+	{
+		struct addrinfo hints;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		getaddrinfo_sometime("www.cnn.com", "ntp", &hints, gai_test_callback, (void *)1);
+		hints.ai_family = AF_INET6;
+		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints, gai_test_callback, (void *)0x600);
+	}
+#endif
 }
 #endif	/* !SIM */
 
@@ -3768,8 +3833,8 @@ config_remotely(
  */
 void
 getconfig(
-	int argc,
-	char *argv[]
+	int	argc,
+	char **	argv
 	)
 {
 	char line[MAXLINE];
@@ -3793,10 +3858,7 @@ getconfig(
 		exit(1);
 	}
 	alt_config_file = alt_config_file_storage;
-
 #endif /* SYS_WINNT */
-	res_fp = NULL;
-	ntp_syslogmask = NLOG_SYNCMASK; /* set more via logconfig */
 
 	/*
 	 * install a non default variable with this daemon version
@@ -3882,19 +3944,6 @@ getconfig(
 	if (config_netinfo)
 		free_netinfo_config(config_netinfo);
 #endif /* HAVE_NETINFO */
-
-	/*
-	printf("getconfig: res_fp <%p> call_resolver: %d", res_fp, call_resolver);
-	*/
-
-	if (res_fp != NULL) {
-		if (call_resolver) {
-			/*
-			 * Need name resolution
-			 */
-			do_resolve_internal();
-		}
-	}
 }
 
 
@@ -4295,7 +4344,7 @@ get_multiple_netnums(
 	}
 
 	lookup = nameornum;
-	if (is_ip_address(nameornum, &ipaddr)) {
+	if (is_ip_address(nameornum, AF_UNSPEC, &ipaddr)) {
 		hints.ai_flags = AI_NUMERICHOST;
 		hints.ai_family = ipaddr.family;
 		if ('[' == nameornum[0]) {
@@ -4364,286 +4413,3 @@ get_multiple_netnums(
 }
 
 
-#if !defined(VMS) && !defined(SYS_WINNT)
-/*
- * catchchild - receive the resolver's exit status
- */
-static RETSIGTYPE
-catchchild(
-	int sig
-	)
-{
-	/*
-	 * We only start up one child, and if we're here
-	 * it should have already exited.  Hence the following
-	 * shouldn't hang.  If it does, please tell me.
-	 */
-#if !defined (SYS_WINNT) && !defined(SYS_VXWORKS)
-	(void) wait(0);
-#endif /* SYS_WINNT  && VXWORKS*/
-}
-#endif /* VMS */
-
-
-/*
- * save_resolve - save configuration info into a file for later name resolution
- */
-static void
-save_resolve(
-	char *name,
-	int no_needed,
-	int type,
-	int mode,
-	int version,
-	int minpoll,
-	int maxpoll,
-	u_int flags,
-	int ttl,
-	keyid_t keyid,
-	u_char *keystr
-	)
-{
-#ifndef SYS_VXWORKS
-	if (res_fp == NULL) {
-#ifndef SYS_WINNT
-		strcpy(res_file, RES_TEMPFILE);
-#else
-		int len;
-
-		/* no /tmp directory under NT */
-		if (!GetTempPath(sizeof res_file, res_file)) {
-			msyslog(LOG_ERR, "can not get temp dir: %m");
-			exit(1);
-		}
-		
-		len = strlen(res_file);
-		if (sizeof res_file < len + sizeof "ntpdXXXXXX") {
-			msyslog(LOG_ERR,
-				"temporary directory path %s too long",
-				res_file);
-			exit(1);
-		}
-
-		memmove(res_file + len, "ntpdXXXXXX",
-			sizeof "ntpdXXXXXX");
-#endif /* SYS_WINNT */
-#ifdef HAVE_MKSTEMP
-		{
-			int fd;
-
-			res_fp = NULL;
-			if ((fd = mkstemp(res_file)) != -1)
-				res_fp = fdopen(fd, "r+");
-		}
-#else
-		mktemp(res_file);
-		res_fp = fopen(res_file, "w");
-#endif
-		if (res_fp == NULL) {
-			msyslog(LOG_ERR, "open failed for %s: %m", res_file);
-			return;
-		}
-	}
-#ifdef DEBUG
-	if (debug) {
-		printf("resolving %s\n", name);
-	}
-#endif
-
-	(void)fprintf(res_fp, "%s %d %d %d %d %d %d %d %d %u %s\n",
-		name, no_needed, type,
-		mode, version, minpoll, maxpoll, flags, ttl, keyid, keystr);
-#ifdef DEBUG
-	if (debug > 1)
-		printf("config: %s %d %d %d %d %d %d %x %d %u %s\n",
-			name, no_needed, type,
-			mode, version, minpoll, maxpoll, flags,
-			ttl, keyid, keystr);
-#endif
-
-#else  /* SYS_VXWORKS */
-	/* save resolve info to a struct */
-#endif /* SYS_VXWORKS */
-}
-
-
-/*
- * abort_resolve - terminate the resolver stuff and delete the file
- */
-static void
-abort_resolve(void)
-{
-	/*
-	 * In an ideal world we would might reread the file and
-	 * log the hosts which aren't getting configured.  Since
-	 * this is too much work, however, just close and delete
-	 * the temp file.
-	 */
-	if (res_fp != NULL)
-		(void) fclose(res_fp);
-	res_fp = NULL;
-
-#ifndef SYS_VXWORKS		/* we don't open the file to begin with */
-#if !defined(VMS)
-	if (unlink(res_file))
-		msyslog(LOG_WARNING, 
-			"Unable to remove temporary resolver file %s, %m",
-			res_file);
-#else
-	(void) delete(res_file);
-#endif /* VMS */
-#endif /* SYS_VXWORKS */
-}
-
-
-/*
- * do_resolve_internal - start up the resolver function (not program)
- *
- * On VMS, VxWorks, and Unix-like systems lacking fork(), this routine
- * will simply refuse to resolve anything.
- *
- * Possible implementation: keep `res_file' in memory, do async
- * name resolution via QIO, update from within completion AST.
- * I'm unlikely to find the time for doing this, though. -wjm
- */
-static void
-do_resolve_internal(void)
-{
-#ifndef SYS_WINNT
-	int i;
-#endif
-
-	if (res_fp == NULL) {
-		/* belch */
-		msyslog(LOG_ERR,
-			"do_resolve_internal: Fatal: res_fp == NULL");
-		exit(1);
-	}
-
-	/* we are done with this now */
-	(void) fclose(res_fp);
-	res_fp = NULL;
-
-#ifndef NO_INTRES
-	req_file = res_file;	/* set up pointer to res file */
-#ifndef SYS_WINNT
-	(void) signal_no_reset(SIGCHLD, catchchild);
-
-	/* the parent process will write to the pipe
-	 * in order to wake up to child process
-	 * which may be waiting in a select() call
-	 * on the read fd */
-	if (pipe(resolver_pipe_fd) < 0) {
-		msyslog(LOG_ERR,
-			"unable to open resolver pipe");
-		exit(1);
-	}
-
-	i = fork();
-	/* Shouldn't the code below be re-ordered?
-	 * I.e. first check if the fork() returned an error, then
-	 * check whether we're parent or child.
-	 *     Martin Burnicki
-	 */
-	if (i == 0) {
-		/*
-		 * this used to close everything
-		 * I don't think this is necessary
-		 */
-		/*
-		 * To the unknown commenter above:
-		 * Well, I think it's better to clean up
-		 * after oneself. I have had problems with
-		 * refclock-io when intres was running - things
-		 * where fine again when ntpintres was gone.
-		 * So some systems react erratic at least.
-		 *
-		 *			Frank Kardel
-		 *
-		 * 94-11-16:
-		 * Further debugging has proven that the above is
-		 * absolutely harmful. The internal resolver
-		 * is still in the SIGIO process group and the lingering
-		 * async io information causes it to process requests from
-		 * all file decriptor causing a race between the NTP daemon
-		 * and the resolver. which then eats data when it wins 8-(.
-		 * It is absolutly necessary to kill any IO associations
-		 * shared with the NTP daemon.
-		 *
-		 * We also block SIGIO (currently no ports means to
-		 * disable the signal handle for IO).
-		 *
-		 * Thanks to wgstuken@informatik.uni-erlangen.de to notice
-		 * that it is the ntp-resolver child running into trouble.
-		 *
-		 * THUS:
-		 */
-
-		/*
-		msyslog(LOG_INFO, "do_resolve_internal: pre-closelog");
-		*/
-		closelog();
-		kill_asyncio(0);
-
-		(void) signal_no_reset(SIGCHLD, SIG_DFL);
-
-		init_logging("ntpd_intres", 0);
-		setup_logfile();
-		/*
-		msyslog(LOG_INFO, "do_resolve_internal: post-closelog");
-		*/
-
-		ntp_intres();
-
-		/*
-		 * If we got here, the intres code screwed up.
-		 * Print something so we don't die without complaint
-		 */
-		msyslog(LOG_ERR, "call to ntp_intres lost");
-		abort_resolve();
-		exit(1);
-	}
-	if (i == -1) {
-		msyslog(LOG_ERR, "fork() failed, can't start ntp_intres: %m");
-		(void) signal_no_reset(SIGCHLD, SIG_DFL);
-		abort_resolve();
-	} else
-		/* This is the parent process who will write to the pipe,
-		 * so we close the read fd */
-		close(resolver_pipe_fd[0]);
-#else /* SYS_WINNT */
-	{
-		/* NT's equivalent of fork() is _spawn(), but the start point
-		 * of the new process is an executable filename rather than
-		 * a function name as desired here.
-		 */
-		unsigned thread_id;
-		uintptr_t res_thd_handle;
-
-		fflush(stdout);
-		ResolverEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
-		if (ResolverEventHandle == NULL) {
-			msyslog(LOG_ERR, "Unable to create resolver event object, can't start ntp_intres");
-			abort_resolve();
-		}
-		res_thd_handle = _beginthreadex(
-			NULL,			/* no security attributes	*/
-			0,			/* use default stack size	*/
-			ntp_intres_thread,	/* thread function		*/
-			NULL,			/* argument to thread function	*/
-			0,			/* use default creation flags	*/
-			&thread_id);		/* receives thread identifier	*/
-		if (!res_thd_handle) {
-			msyslog(LOG_ERR, "_beginthreadex ntp_intres_thread failed %m");
-			CloseHandle(ResolverEventHandle);
-			ResolverEventHandle = NULL;
-			abort_resolve();
-		}
-	}
-#endif /* SYS_WINNT */
-#else /* NO_INTRES follows */
-	msyslog(LOG_ERR,
-		"Deferred DNS not implemented - use numeric addresses");
-	abort_resolve();
-#endif
-}

@@ -8,6 +8,10 @@
 #define NTP_TYPES_H
 
 #include <sys/types.h>
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+
 #include "ntp_machine.h"
 
 /*
@@ -41,31 +45,34 @@
 #if defined(VMS)
 #include <socket.h>
 typedef unsigned int u_int;
-/*
- * Note: VMS DECC has  long == int  (even on __alpha),
- *	 so the distinction below doesn't matter
- */
 #endif /* VMS */
 
-#if (SIZEOF_INT == 4)
-# ifndef int32
-#  define int32 int
+#ifdef HAVE_UINT32_T
+# ifndef HAVE_INT32
+   typedef	int32_t		int32;
 # endif
-# ifndef u_int32
-#  define u_int32 unsigned int
+# ifndef HAVE_U_INT32
+   typedef	uint32_t	u_int32;
 # endif
-#else /* not sizeof(int) == 4 */
+#elif (SIZEOF_INT == 4)
+# if !defined(HAVE_INT32) && !defined(int32)
+   typedef	int		int32;
+# endif
+# if !defined(HAVE_U_INT32) && !defined(u_int32)
+   typedef	unsigned	u_int32;
+# endif
+#else	/* SIZEOF_INT != 4 */
 # if (SIZEOF_LONG == 4)
-#  ifndef int32
-#   define int32 long
+# if !defined(HAVE_INT32) && !defined(int32)
+    typedef	long		int32;
 #  endif
-#  ifndef u_int32
-#   define u_int32 unsigned long
+# if !defined(HAVE_U_INT32) && !defined(u_int32)
+    typedef	unsigned long	u_int32;
 #  endif
-# else /* not sizeof(long) == 4 */
+# else	/* SIZEOF_LONG != 4 */
 #  include "Bletch: what's 32 bits on this machine?"
-# endif /* not sizeof(long) == 4 */
-#endif /* not sizeof(int) == 4 */
+# endif
+#endif	/* !HAVE_UINT32_T && SIZEOF_INT != 4 */
 
 typedef u_char		ntp_u_int8_t;
 typedef u_short		ntp_u_int16_t;

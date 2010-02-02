@@ -16,7 +16,6 @@
 #include "ntpd.h"
 #include "ntp_refclock.h"
 #include "ntp_iocompletionport.h"
-#include "transmitbuff.h"
 #include "ntp_request.h"
 #include "ntp_assert.h"
 #include "clockstuff.h"
@@ -45,7 +44,7 @@ typedef struct IoCompletionInfo {
 	int			request_type;
 	union {
 		recvbuf_t *	recv_buf;
-		transmitbuf_t *	trans_buf;
+		void *		trans_buf;
 	};
 #ifdef DEBUG
 	struct IoCompletionInfo *link;
@@ -92,8 +91,8 @@ static HANDLE WaitableExitEventHandle = NULL;
 #define WAITABLEIOEVENTHANDLE NULL
 #endif
 
-#define MAXHANDLES 3
-HANDLE WaitHandles[MAXHANDLES] = { NULL, NULL, NULL };
+#define MAXHANDLES 4
+HANDLE WaitHandles[MAXHANDLES];
 
 IoCompletionInfo *
 GetHeapAlloc(char *fromfunc)
@@ -140,26 +139,14 @@ FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
 #endif
 }
 
-transmitbuf_t *
-get_trans_buf()
-{
-	transmitbuf_t *tb  = emalloc(sizeof(*tb));
-	return (tb);
-}
-
-void
-free_trans_buf(transmitbuf_t *tb)
-{
-	free(tb);
-}
-
 HANDLE
-get_io_event()
+get_io_event(void)
 {
 	return( WaitableIoEventHandle );
 }
+
 HANDLE
-get_exit_event()
+get_exit_event(void)
 {
 	return( WaitableExitEventHandle );
 }
@@ -184,7 +171,6 @@ iocompletionthread(void *NotUsed)
 	DWORD BytesTransferred = 0;
 	ULONG_PTR Key = 0;
 	IoCompletionInfo * lpo = NULL;
-	u_long time_next_ifscan_after_error = 0;
 
 	UNUSED_ARG(NotUsed);
 
@@ -212,8 +198,7 @@ iocompletionthread(void *NotUsed)
 					&Key, 
 					(LPOVERLAPPED *) &lpo, 
 					INFINITE);
-		if (lpo == NULL)
-		{
+		if (lpo == NULL) {
 			DPRINTF(2, ("Overlapped IO Thread Exiting\n"));
 			break; /* fail */
 		}
@@ -224,32 +209,7 @@ iocompletionthread(void *NotUsed)
 		if (bSuccess)
 			errstatus = 0;
 		else
-		{
 			errstatus = GetLastError();
-			if (BytesTransferred == 0)
-			{
-				if (WSA_OPERATION_ABORTED == errstatus) {
-					DPRINTF(4, ("Transfer Operation aborted\n"));
-				} else if (ERROR_UNEXP_NET_ERR == errstatus) {
-					/*
-					 * We get this error when trying to send an the network
-					 * interface is gone or has lost link.  Rescan interfaces
-					 * to catch on sooner, but no more than once per minute.
-					 * Once ntp is able to detect changes without polling
-					 * this should be unneccessary
-					 */
-					if (time_next_ifscan_after_error < current_time) {
-						time_next_ifscan_after_error = current_time + 60;
-						timer_interfacetimeout(current_time);
-					}
-					DPRINTF(4, ("sendto unexpected network error, interface may be down\n"));
-				}
-			}
-			else
-			{
-				msyslog(LOG_ERR, "sendto error after %d bytes: %m", BytesTransferred);
-			}
-		}
 
 		/*
 		 * Invoke the appropriate function based on
@@ -267,6 +227,8 @@ iocompletionthread(void *NotUsed)
 			OnSocketRecv(Key, lpo, BytesTransferred, errstatus);
 			break;
 		case SOCK_SEND:
+			NTP_INSIST(0);
+			break;
 		case SERIAL_WRITE:
 			OnWriteComplete(Key, lpo, BytesTransferred, errstatus);
 			break;
@@ -307,10 +269,6 @@ init_io_completion_port(
 	}
 #endif
 
-#if 0	/* transmitbuff.c unused, no need to initialize it */
-	init_transmitbuff();
-#endif
-
 	/* Create the event used to signal an IO event
 	 */
 	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, WAITABLEIOEVENTHANDLE);
@@ -336,12 +294,15 @@ init_io_completion_port(
 		exit(1);
 	}
 
+	blocking_response_ready = CreateEvent(NULL, FALSE, FALSE, NULL);
+
 	/*
 	 * Initialize the Wait Handles
 	 */
 	WaitHandles[0] = WaitableIoEventHandle;
 	WaitHandles[1] = WaitableExitEventHandle; /* exit request */
 	WaitHandles[2] = get_timer_handle();
+	WaitHandles[3] = blocking_response_ready;
 
 	/* Have one thread servicing I/O - there were 4, but this would 
 	 * somehow cause NTP to stop replying to ntpq requests; TODO
@@ -794,45 +755,30 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 	return 0;
 }
 
+
 static int 
 OnWriteComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 {
-	transmitbuf_t *buff;
-	struct interface *inter;
+	void *buff;
 
 	UNUSED_ARG(Bytes);
+	UNUSED_ARG(errstatus);
 
 	buff = lpo->trans_buf;
-
-	free_trans_buf(buff);
+	free(buff);
 	lpo->trans_buf = NULL;
+	FreeHeap(lpo, "OnWriteComplete");
 
-	if (SOCK_SEND == lpo->request_type) {
-		switch (errstatus) {
-		case WSA_OPERATION_ABORTED:
-		case NO_ERROR:
-			break;
-
-		default:
-			inter = (struct interface *)i;
-			packets_notsent++;
-			inter->notsent++;
-			break;
-		}
-	}
-
-	if (errstatus == WSA_OPERATION_ABORTED)
-		FreeHeap(lpo, "OnWriteComplete: Socket Closed");
-	else
-		FreeHeap(lpo, "OnWriteComplete");
 	return 1;
 }
 
 
 /*
- * Return value is really GetLastError-style error code
- * which is a DWORD but using int, which is large enough,
- * decreases #ifdef forest in ntp_io.c harmlessly.
+ * io_completion_port_sendto() -- sendto() replacement for Windows
+ *
+ * Returns 0 after successful send.
+ * Returns -1 for any error, with the error code available via
+ *	msyslog() %m, or GetLastError().
  */
 int	
 io_completion_port_sendto(
@@ -842,77 +788,54 @@ io_completion_port_sendto(
 	sockaddr_u* dest
 	)
 {
+	static u_long time_next_ifscan_after_error;
 	WSABUF wsabuf;
-	transmitbuf_t *buff;
-	DWORD Result = ERROR_SUCCESS;
+	DWORD octets_sent;
+	DWORD Result;
 	int errval;
 	int AddrLen;
-	IoCompletionInfo *lpo;
-	DWORD Flags;
 
-	lpo = (IoCompletionInfo *) GetHeapAlloc("io_completion_port_sendto");
+	wsabuf.buf = (void *)pkt;
+	wsabuf.len = len;
+	AddrLen = SOCKLEN(dest);
+	octets_sent = 0;
 
-	if (lpo == NULL)
-		return ERROR_OUTOFMEMORY;
+	Result = WSASendTo(inter->fd, &wsabuf, 1, &octets_sent, 0,
+			   &dest->sa, AddrLen, NULL, NULL);
 
-	if (len <= sizeof(buff->pkt)) {
-		buff = get_trans_buf();
-
-		if (buff == NULL) {
-			msyslog(LOG_ERR, "No more transmit buffers left - data discarded");
-			FreeHeap(lpo, "io_completion_port_sendto");
-			return ERROR_OUTOFMEMORY;
-		}
-
-
-		memcpy(&buff->pkt, pkt, len);
-		wsabuf.buf = buff->pkt;
-		wsabuf.len = len;
-
-		AddrLen = SOCKLEN(dest);
-		lpo->request_type = SOCK_SEND;
-		lpo->trans_buf = buff;
-		Flags = 0;
-
-		Result = WSASendTo(inter->fd, &wsabuf, 1, NULL, Flags,
-				   &dest->sa, AddrLen, 
-				   (LPOVERLAPPED)lpo, NULL);
-
-		if(Result == SOCKET_ERROR)
-		{
-			errval = WSAGetLastError();
-			switch (errval) {
-
-			case NO_ERROR :
-			case WSA_IO_PENDING :
-				Result = ERROR_SUCCESS;
-				break ;
-
+	if (SOCKET_ERROR == Result) {
+		errval = GetLastError();
+		if (ERROR_UNEXP_NET_ERR == errval) {
 			/*
-			 * Something bad happened
+			 * We get this error when trying to send if the
+			 * network interface is gone or has lost link.
+			 * Rescan interfaces to catch on sooner, but no
+			 * more often than once per minute.  Once ntpd
+			 * is able to detect changes without polling
+			 * this should be unneccessary
 			 */
-			default :
-				msyslog(LOG_ERR,
-					"WSASendTo(%s) error %d: %s",
-					stoa(dest), errval, strerror(errval));
-				free_trans_buf(buff);
-				lpo->trans_buf = NULL;
-				FreeHeap(lpo, "io_completion_port_sendto");
-				break;
+			if (time_next_ifscan_after_error < current_time) {
+				time_next_ifscan_after_error = current_time + 60;
+				timer_interfacetimeout(current_time);
 			}
-		}
-#ifdef DEBUG
-		if (debug > 3)
-			printf("WSASendTo - %d bytes to %s : %d\n", len, stoa(dest), Result);
-#endif
-		return (Result);
+			DPRINTF(4, ("sendto unexpected network error, interface may be down\n"));
+		} else
+			msyslog(LOG_ERR, "WSASendTo(%s) error %m",
+				stoa(dest));
+		SetLastError(errval);
+		return -1;
 	}
-	else {
-#ifdef DEBUG
-		if (debug) printf("Packet too large: %d Bytes\n", len);
-#endif
-		return ERROR_INSUFFICIENT_BUFFER;
+
+	if (len != (int)octets_sent) {
+		msyslog(LOG_ERR, "WSASendTo(%s) sent %u of %d octets",
+			stoa(dest), octets_sent, len);
+		SetLastError(ERROR_BAD_LENGTH);
+		return -1;
 	}
+
+	DPRINTF(4, ("sendto %s %d octets\n", stoa(dest), len));
+
+	return 0;
 }
 
 
@@ -925,47 +848,29 @@ async_write(
 	const void *data,
 	unsigned int count)
 {
-	transmitbuf_t *buff;
+	void *buff;
 	IoCompletionInfo *lpo;
 	DWORD BytesWritten;
 
-	if (count > sizeof buff->pkt) {
-#ifdef DEBUG
-		if (debug) {
-			printf("async_write: %d bytes too large, limit is %d\n",
-				count, sizeof buff->pkt);
-			exit(-1);
-		}
-#endif
-		errno = ENOMEM;
-		return -1;
-	}
-
-	buff = get_trans_buf();
-	lpo = (IoCompletionInfo *) GetHeapAlloc("async_write");
-
-	if (! buff || ! lpo) {
-		if (buff) {
-			free_trans_buf(buff);
-			DPRINTF(1, ("async_write: out of memory\n"));
-		} else
-			msyslog(LOG_ERR, "No more transmit buffers left - data discarded");
-
+	buff = emalloc(count);
+	lpo = GetHeapAlloc("async_write");
+	if (lpo == NULL) {
+		free(buff);
+		DPRINTF(1, ("async_write: out of memory\n"));
 		errno = ENOMEM;
 		return -1;
 	}
 
 	lpo->request_type = SERIAL_WRITE;
 	lpo->trans_buf = buff;
-	memcpy(&buff->pkt, data, count);
+	memcpy(buff, data, count);
 
-	if (!WriteFile((HANDLE)_get_osfhandle(fd), buff->pkt, count,
+	if (!WriteFile((HANDLE)_get_osfhandle(fd), buff, count,
 		&BytesWritten, (LPOVERLAPPED)lpo)
 		&& ERROR_IO_PENDING != GetLastError()) {
 
 		msyslog(LOG_ERR, "async_write - error %m");
-		free_trans_buf(buff);
-		lpo->trans_buf = NULL;
+		free(buff);
 		FreeHeap(lpo, "async_write");
 		errno = EBADF;
 		return -1;
@@ -986,26 +891,28 @@ int GetReceivedBuffers()
 	while (!have_packet) {
 		DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
 		switch (Index) {
-		case WAIT_OBJECT_0 + 0 : /* Io event */
-# ifdef DEBUG
-			if ( debug > 3 )
-			{
-				printf( "IoEvent occurred\n" );
-			}
-# endif
+		case WAIT_OBJECT_0 + 0: /* Io event */
+			DPRINTF(4, ("IoEvent occurred\n"));
 			have_packet = ISC_TRUE;
 			break;
-		case WAIT_OBJECT_0 + 1 : /* exit request */
+		case WAIT_OBJECT_0 + 1: /* exit request */
 			exit(0);
 			break;
-		case WAIT_OBJECT_0 + 2 : /* timer */
+		case WAIT_OBJECT_0 + 2: /* timer */
 			timer();
 			break;
-		case WAIT_IO_COMPLETION : /* loop */
-		case WAIT_TIMEOUT :
+		case WAIT_OBJECT_0 + 3: /* blocking response */
+			process_blocking_response();
+			break;
+		case WAIT_IO_COMPLETION: /* loop */
+			break;
+		case WAIT_TIMEOUT:
+			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects INFINITE timed out.");
+			exit(1);
 			break;
 		case WAIT_FAILED:
 			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects Failed: Error: %m");
+			exit(1);
 			break;
 
 			/* For now do nothing if not expected */

@@ -1,6 +1,7 @@
 /*
  * tsftomsu - convert from a time stamp fraction to milliseconds
  */
+#include <config.h>
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 

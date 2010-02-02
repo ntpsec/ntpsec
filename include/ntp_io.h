@@ -1,13 +1,12 @@
 #ifndef NTP_IO_H
 #define NTP_IO_H
+
+#include "ntp_workimpl.h"
+
 /*
  * POSIX says use <fnct.h> to get O_* symbols and 
  * SEEK_SET symbol form <unistd.h>.
  */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
 #include <sys/types.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -69,7 +68,6 @@ typedef enum {
 	MATCH_IFADDR
 } nic_rule_match;
 
-
 /*
  * NIC rule actions
  */
@@ -80,10 +78,18 @@ typedef enum {
 } nic_rule_action;
 
 
+SOCKET		move_fd(SOCKET fd);
 isc_boolean_t	get_broadcastclient_flag(void);
-isc_boolean_t	is_ip_address(const char *, isc_netaddr_t *);
+isc_boolean_t	is_ip_address(const char *, u_short, isc_netaddr_t *);
 extern void	sau_from_netaddr(sockaddr_u *, const isc_netaddr_t *);
-extern void add_nic_rule(nic_rule_match match_type, const char *if_name,
-			 int prefixlen, nic_rule_action action);
+extern void	add_nic_rule(nic_rule_match match_type,
+			     const char *if_name, int prefixlen,
+			     nic_rule_action action);
+#ifndef HAVE_IO_COMPLETION_PORT
+extern void	close_all_beyond(int);
+#endif
+#ifdef WORK_FORK
+extern void	update_resp_pipe_fd(int, int);
+#endif
 
 #endif	/* NTP_IO_H */

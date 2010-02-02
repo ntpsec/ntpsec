@@ -5,17 +5,19 @@
 #ifndef NTP_SYSLOG_H
 #define NTP_SYSLOG_H
 
-# ifdef VMS
+#ifdef VMS
 extern void msyslog();
-# else
-#   ifndef SYS_VXWORKS
-#   include <syslog.h>
-#   endif
-# endif /* VMS */
-# include <stdio.h>
+#else
+# ifndef SYS_VXWORKS
+#  include <syslog.h>
+# endif
+#endif /* VMS */
+#include <stdio.h>
 
-extern int syslogit;
-extern FILE *syslog_file;
+extern int	syslogit;
+extern FILE *	syslog_file;
+extern char *	syslog_fname;
+extern char *	syslog_abs_fname;
 
 #if defined(VMS) || defined (SYS_VXWORKS)
 #define	LOG_EMERG	0	/* system is unusable */

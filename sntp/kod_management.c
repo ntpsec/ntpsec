@@ -1,3 +1,4 @@
+#include <config.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -73,6 +74,7 @@ add_entry(
 	if (n < kod_db_cnt &&
 	    0 == strcmp(kod_db[n]->hostname, pke->hostname)) {
 		kod_db[n]->timestamp = pke->timestamp;
+		free(pke);
 		return;
 	}
 

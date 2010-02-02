@@ -2,6 +2,7 @@
  * tstotv - tables for converting from NTP time stamps to struct timeval
  */
 
+#include <config.h>
 #include "ntp_types.h"
 
 /*

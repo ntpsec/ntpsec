@@ -1684,7 +1684,7 @@
 				RelativePath="..\..\..\lib\isc\win32\time.c">
 			</File>
 			<File
-				RelativePath="..\libntp\transmitbuff.c">
+				RelativePath="..\libntp\termios.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -1811,6 +1811,27 @@
 			</File>
 			<File
 				RelativePath="..\libntp\util_clockstuff.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\libntp\win32_io.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2061,9 +2082,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\win32\include\isc\time.h">
-			</File>
-			<File
-				RelativePath="..\include\transmitbuff.h">
 			</File>
 			<File
 				RelativePath="..\include\win32_io.h">

@@ -2,6 +2,7 @@
  * tvtots - tables for converting from Unix struct timeval's to
  *	    NTP time stamp format.
  */
+#include <config.h>
 #include <sys/types.h>
 
 #include "ntp_types.h"

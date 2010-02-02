@@ -1,6 +1,7 @@
 /*
  * dolfptoa - do the grunge work of converting an l_fp number to decimal
  */
+#include <config.h>
 #include <stdio.h>
 
 #include "ntp_fp.h"

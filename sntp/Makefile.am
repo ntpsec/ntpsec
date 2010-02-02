@@ -12,13 +12,16 @@ AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 
 LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
 
-run_ag=	cd $(srcdir) &&				\
-	env PATH="$(abs_builddir):$(PATH)"	\
-	autogen -L ../include --writable
+run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+		autogen -L ../include --writable
 
-bindir=	${exec_prefix}/${BINSUBDIR}
+if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	sntp
-CLEANFILES=	libopts-subdir
+else
+sbin_PROGRAMS=	sntp
+endif
+
+CLEANFILES = check-COPYRIGHT-submake
 
 SUBDIRS=
 if NEED_LIBOPTS
@@ -44,9 +47,6 @@ sntp_SOURCES =		\
 	utilities.h	\
 	$(NULL)
 
-# it's in EXTRA_DIST
-#dist_man_MANS=	sntp.1
-
 EXTRA_DIST=				\
 		autogen-version.def	\
 		bincheck.mf		\
@@ -71,18 +71,27 @@ BUILT_SOURCES=						\
 		check-autogen-version.def		\
 		check-version.def check-version.m4	\
 		check-version.texi			\
+		$(srcdir)/COPYRIGHT			\
 		libtool					\
 		sntp-opts.c				\
 		sntp-opts.h				\
-		sntp-opts.menu				\
-		sntp-opts.texi				\
-		sntp.1					\
-		sntp.html				\
 		$(NULL)
 
-man_MANS=	sntp.1
+man_MANS=	$(srcdir)/sntp.1
+
+noinst_DATA=				\
+	$(srcdir)/sntp.html		\
+	$(srcdir)/sntp-opts.texi	\
+	$(srcdir)/sntp-opts.menu	\
+	$(NULL)
 
 FRC:
+	@: do-nothing action to prevent default SCCS get
+	@: FRC "force" depends on nothing and is not a file, so is
+	@: always out-of-date causing targets which depend on it to
+	@: similarly always be outdated causing their rules to fire
+	@: each time they or a dependent is built.
+
 check-autogen-version.def: FRC
 	@cd $(srcdir)							\
 	&& test -r ../include/autogen-version.def			\
@@ -91,6 +100,9 @@ check-autogen-version.def: FRC
 	   else cp ../include/autogen-version.def autogen-version.def;	 \
 		echo "Installing new sntp/autogen-version.def file";	\
 	   fi )
+
+$(srcdir)/autogen-version.def:
+	$(MAKE) check-autogen-version.def
 
 check-version.def: FRC
 	@cd $(srcdir)					\
@@ -101,6 +113,9 @@ check-version.def: FRC
 		echo "Installing new sntp/version.def file";	\
 	   fi )
 
+$(srcdir)/version.def:
+	$(MAKE) check-version.def
+
 check-version.m4: FRC
 	@cd $(srcdir)					\
 	&& test -r ../version.m4			\
@@ -109,6 +124,9 @@ check-version.m4: FRC
 	   else cp ../version.m4 version.m4;		\
 		echo "Installing new sntp/version.m4 file";	\
 	   fi )
+
+$(srcdir)/version.m4:
+	$(MAKE) check-version.m4
 
 check-version.texi: FRC
 	@cd $(srcdir)					\
@@ -119,36 +137,46 @@ check-version.texi: FRC
 		echo "Installing new sntp/version.texi file";	\
 	   fi )
 
-$(srcdir)/../COPYRIGHT:
-	cd .. && $(MAKE) COPYRIGHT
+$(srcdir)/version.texi:
+	$(MAKE) check-version.texi
 
-$(srcdir)/COPYRIGHT: $(srcdir)/../COPYRIGHT
-	cat $(srcdir)/../COPYRIGHT > $@
+$(srcdir)/../COPYRIGHT:
+	cd .. && $(MAKE) COPYRIGHT-please
+
+check-COPYRIGHT-submake: $(srcdir)/../COPYRIGHT
+	@cmp -s $(srcdir)/../COPYRIGHT $(srcdir)/COPYRIGHT	\
+	 || { cp $(srcdir)/../COPYRIGHT $(srcdir)/COPYRIGHT	\
+	      && echo 'updated sntp/COPYRIGHT installed' ;}
+	@echo 'submake avoided if this file is newer than parent COPYRIGHT' > $@
+
+check-COPYRIGHT: FRC
+	[ ! -r $(srcdir)/../COPYRIGHT ]					\
+	|| [ check-COPYRIGHT-submake -nt $(srcdir)/../COPYRIGHT ]	\
+	|| $(MAKE) check-COPYRIGHT-submake
+
+$(srcdir)/COPYRIGHT: check-COPYRIGHT
+	@: do-nothing action to prevent any default
 
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
 	
-$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) sntp-opts.def
 
-$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
+$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
-$(srcdir)/sntp-opts.texi $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.def $(srcdir)/../include/version.def
-	$(MAKE) libopts-subdir sntp	# aginfo.tpl runs binary to extract --help usage text
+$(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+	
+$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
-
-libopts-subdir: $(LIBOPTS_LDADD)
-	touch $@	# LIBOPTS_LDADD is ./libopts/libopts.la if NEED_LIBOPTS
-
-libopts/libopts.la:
-	( cd libopts && $(MAKE) libopts.la )
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
 	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
 
 ../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
+	cd ../libntp && $(MAKE) libntp.a
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck

@@ -1,3 +1,4 @@
+#include <config.h>
 #include "crypto.h"
 
 struct key *key_ptr;

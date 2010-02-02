@@ -59,6 +59,7 @@
  * by hand.  Sorry about that.
  */
 
+#include <config.h>
 #include "ntp_machine.h"
 
 #if !defined(HAVE_MKTIME) || !defined(HAVE_TIMEGM)

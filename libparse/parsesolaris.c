@@ -40,6 +40,7 @@
 static char rcsid[] = "parsesolaris.c,v 4.11 2005/04/16 17:32:10 kardel RELEASE_20050508_A";
 #endif
 
+#include <config.h>
 #include <sys/types.h>
 #include <sys/conf.h>
 #include <sys/errno.h>

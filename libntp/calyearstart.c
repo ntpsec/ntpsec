@@ -2,6 +2,7 @@
  * calyearstart - determine the NTP time at midnight of January 1 in
  *		  the year of the given date.
  */
+#include <config.h>
 #include <sys/types.h>
 
 #include "ntp_types.h"

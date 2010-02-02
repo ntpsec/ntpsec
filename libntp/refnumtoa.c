@@ -1,6 +1,7 @@
 /*
  * refnumtoa - return asciized refclock addresses stored in local array space
  */
+#include <config.h>
 #include <stdio.h>
 
 #include "ntp_net.h"

@@ -1,7 +1,7 @@
 /*
- * ntpq_ops.c - subroutines which are called to perform operations by ntpq
+ * ntpq-subs.c - subroutines which are called to perform operations by ntpq
  */
-
+#include <config.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -907,10 +907,14 @@ dogetassoc(
 		datap += sizeof(u_short);
 		assoc_cache[numassoc].status = ntohs(*((u_short *)datap));
 		datap += sizeof(u_short);
+		if (debug)
+			fprintf(stderr, "[%u] ", assoc_cache[numassoc].assid);
 		if (++numassoc >= MAXASSOC)
 			break;
 		dsize -= sizeof(u_short) + sizeof(u_short);
 	}
+	if (debug)
+		fprintf(stderr, "\n%d associations total\n", numassoc);
 	sortassoc();
 	return 1;
 }
@@ -1455,17 +1459,17 @@ doprintpeers(
 	char whenbuf[8], pollbuf[8];
 	char clock_name[LENHOSTNAME];
 
-	memset((char *)havevar, 0, sizeof(havevar));
 	get_systime(&ts);
 	
+	memset(havevar, 0, sizeof(havevar));
 	ZERO_SOCK(&srcadr);
 	ZERO_SOCK(&dstadr);
 
 	/* Initialize by zeroing out estimate variables */
-	memset((char *)&estoffset, 0, sizeof(l_fp));
-	memset((char *)&estdelay, 0, sizeof(l_fp));
-	memset((char *)&estjitter, 0, sizeof(l_fp));
-	memset((char *)&estdisp, 0, sizeof(l_fp));
+	memset(&estoffset, 0, sizeof(estoffset));
+	memset(&estdelay, 0, sizeof(estdelay));
+	memset(&estjitter, 0, sizeof(estjitter));
+	memset(&estdisp, 0, sizeof(estdisp));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
 		sockaddr_u dum_store;
@@ -1474,7 +1478,6 @@ doprintpeers(
 		if (i == 0)
 			continue;	/* don't know this one */
 		switch (i) {
-
 		case CP_SRCADR:
 			if (decodenetnum(value, &srcadr)) {
 				havevar[HAVE_SRCADR] = 1;
@@ -1572,6 +1575,8 @@ doprintpeers(
 			if (!decodets(value, &reftime))
 				L_CLR(&reftime);
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -1617,11 +1622,11 @@ doprintpeers(
 	else
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*s ", maxhostlen, currenthost);
+		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (af == 0 || AF(&srcadr) == af) {
-		strcpy(clock_name, nntohost(&srcadr));
+		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));
 		
-		(void) fprintf(fp,
+		fprintf(fp,
 			"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
 			c, clock_name, dstadr_refid, stratum, type,
 			prettyinterval(whenbuf, when(&ts, &rec, &reftime)),
@@ -1719,20 +1724,23 @@ dopeers(
 				maxhostlen = strlen(fullname);
 	}
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
-	(void) fprintf(fp,
-			   "     remote           refid      st t when poll reach   delay   offset  jitter\n");
+		fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
+	fprintf(fp,
+		"     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
 		for (i = 0; i <= maxhostlen; ++i)
-		(void) fprintf(fp, "=");
-	(void) fprintf(fp,
-			   "==============================================================================\n");
+			fprintf(fp, "=");
+	fprintf(fp,
+		"==============================================================================\n");
 
 	for (i = 0; i < numassoc; i++) {
 		if (!showall &&
-			!(CTL_PEER_STATVAL(assoc_cache[i].status)
-			  & (CTL_PST_CONFIG|CTL_PST_REACH)))
+		    !(CTL_PEER_STATVAL(assoc_cache[i].status)
+		      & (CTL_PST_CONFIG|CTL_PST_REACH))) {
+			if (debug)
+				fprintf(stderr, "eliding [%d]\n", assoc_cache[i].assid);
 			continue;
+		}
 		if (!dogetpeers(peervarlist, (int)assoc_cache[i].assid, fp, af)) {
 			return;
 		}

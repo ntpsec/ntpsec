@@ -1,3 +1,4 @@
+#include <config.h>
 #include "utilities.h"
 
 /* Display a NTP packet in hex with leading address offset 

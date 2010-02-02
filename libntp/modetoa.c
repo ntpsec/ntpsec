@@ -1,6 +1,7 @@
 /*
  * modetoa - return an asciized mode
  */
+#include <config.h>
 #include <stdio.h>
 
 #include "lib_strbuf.h"

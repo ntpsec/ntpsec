@@ -1926,7 +1926,7 @@ x509	(
 	 * Sign and verify.
 	 */
 	X509_sign(cert, pkey, md);
-	if (!X509_verify(cert, pkey)) {
+	if (X509_verify(cert, pkey) <= 0) {
 		fprintf(stderr, "Verify %s certificate fails\n%s\n", id,
 		    ERR_error_string(ERR_get_error(), NULL));
 		X509_free(cert);

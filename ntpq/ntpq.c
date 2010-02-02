@@ -1,7 +1,7 @@
 /*
  * ntpq - query an NTP server using mode 6 commands
  */
-
+#include <config.h>
 #include <stdio.h>
 
 #include <ctype.h>
@@ -13,7 +13,6 @@
 #include "ntpq.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
-#include "ntp_io.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"

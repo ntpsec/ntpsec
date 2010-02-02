@@ -1,6 +1,7 @@
 /*
  * caltontp - convert a date to an NTP time
  */
+#include <config.h>
 #include <sys/types.h>
 
 #include "ntp_types.h"

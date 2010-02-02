@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  December  9, 2009 at 03:44:46 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  January 31, 2010 at 10:31:23 AM by AutoGen 5.10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -19,7 +19,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntp-keygen copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * ntp-keygen copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -40,7 +40,7 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "ntp-keygen copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved"
+       "ntp-keygen copyright (c) 1970-2010 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
@@ -738,7 +738,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTP_KEYGEN";
 tSCC   zUsageTitle[] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p13\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {

@@ -1,3 +1,4 @@
+#include <config.h>
 #include "ntp_malloc.h"
 
 #if !HAVE_STRDUP

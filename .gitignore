@@ -14,8 +14,10 @@
 # Simulated bk default ignores end here
 */autom4te.cache -prune
 *~
-./A.*
-.buildkey
+*.vcproj.*.user
+./A.* -prune
+./.buildkey-*
+./.flockbuild-*
 COPYRIGHT
 CommitLog
 ElectricFence/Makefile.in

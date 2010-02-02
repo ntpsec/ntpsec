@@ -38,10 +38,6 @@
 #ifndef NTP_LISTS_H
 #define NTP_LISTS_H
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
 #include <isc/list.h>
 
 

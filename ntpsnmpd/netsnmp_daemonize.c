@@ -192,7 +192,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
 {
     int i = 0;
     DEBUGMSGT(("daemonize","deamonizing...\n"));
-#if HAVE_FORK
+#if HAVE_WORKING_FORK
     /*
      * Fork to return control to the invoking process and to
      * guarantee that we aren't a process group leader.
@@ -257,7 +257,7 @@ netsnmp_daemonize(int quit_immediately, int stderr_log)
         }
 #endif /* !WIN32 */
     }
-#endif /* HAVE_FORK */
+#endif /* HAVE_WORKING_FORK */
     return i;
 }
 

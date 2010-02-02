@@ -1,6 +1,7 @@
 /*
  * atouint - convert an ascii string to an unsigned long, with error checking
  */
+#include <config.h>
 #include <sys/types.h>
 #include <ctype.h>
 
