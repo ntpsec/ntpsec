@@ -1,4 +1,5 @@
 * Include (4.2.6p1) - [Bug 1470] "make distdir" compiles keyword-gen.
+* Include (4.2.6p1) - [Bug 1473] "make distcheck" version.m4 error.
 * [Bug 1471] CID 120 CID 121 CID 122 is_ip_address() uninit family.
 * [Bug 1472] CID 116 CID 117 minor warnings in new DNS code.
 (4.2.7p13) 2010/01/31 Released by Harlan Stenn <stenn@ntp.org>
@@ -63,6 +64,7 @@
 
 * [Bug 1467] Fix bogus rebuild of sntp/sntp.html
 * [Bug 1470] "make distdir" in $srcdir builds keyword-gen, libntp.a.
+* [Bug 1473] "make distcheck" before build can't make sntp/version.m4.
 
 ---
 (4.2.6p1-RC3) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
