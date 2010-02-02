@@ -1166,7 +1166,6 @@ AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
 AC_CHECK_SIZEOF(signed char)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
-AC_CHECK_TYPES([int32, u_int32])
 
 AC_CHECK_TYPES([s_char])
 case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
