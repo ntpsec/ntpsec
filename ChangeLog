@@ -1,3 +1,4 @@
+(4.2.7p14) 2010/02/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1338] ntpq displays incorrect association type codes.
 * [Bug 1469] u_int32, int32 changes broke HP-UX 10.20 build.
 * Include (4.2.6p1) - [Bug 1470] "make distdir" compiles keyword-gen.
