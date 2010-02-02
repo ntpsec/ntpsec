@@ -230,7 +230,7 @@ k-g-u-submake: keyword-gen
 
 $(srcdir)/keyword-gen-utd: $(srcdir)/keyword-gen.c $(srcdir)/ntp_parser.h
 	$(MAKE) k-g-u-submake	# avoid explicit dependency
-	grep -v diff_ignore_line $(srcdir)/ntp_keyword.h > k-g-u
+	grep diff_ignore_line $(srcdir)/ntp_keyword.h > k-g-u
 	mv -f k-g-u $@
 	
 $(srcdir)/ntp_keyword.h: $(srcdir)/keyword-gen-utd
