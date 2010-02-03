@@ -208,6 +208,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\audio.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\libntp\authkeys.c"
 				>
 			</File>
@@ -817,11 +821,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

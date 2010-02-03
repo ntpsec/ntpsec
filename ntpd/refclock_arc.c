@@ -646,7 +646,7 @@ arc_start(
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	if (!(fd = refclock_open(device, SPEED, LDISC_CLK)))
 		return(0);
 #ifdef DEBUG
@@ -690,16 +690,20 @@ arc_start(
 
 #endif
 
-	up = (struct arcunit *) emalloc(sizeof(struct arcunit));
-	if(!up) { (void) close(fd); return(0); }
+	up = emalloc(sizeof(*up));
 	/* Set structure to all zeros... */
-	memset((char *)up, 0, sizeof(struct arcunit));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = arc_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
-	if(!io_addclock(&pp->io)) { (void) close(fd); free(up); return(0); }
+	if (!io_addclock(&pp->io)) {
+		close(fd);
+		pp->io.fd = -1;
+		free(up); 
+		return(0); 
+	}
 	pp->unitptr = (caddr_t)up;
 
 	/*
@@ -772,8 +776,10 @@ arc_shutdown(
 
 	pp = peer->procptr;
 	up = (struct arcunit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
+	if (NULL != up)
+		free(up);
 }
 
 /*

@@ -15,19 +15,20 @@ extern const char *months[];	/* prettydate.c */
 char *
 humanlogtime(void)
 {
-	char *bp;
-	time_t cursec = time((time_t *) 0);
-	struct tm *tm;
+	char *		bp;
+	time_t		cursec;
+	struct tm *	tm;
 	
+	cursec = time(NULL);
 	tm = localtime(&cursec);
 	if (!tm)
 		return "-- --- --:--:--";
 
 	LIB_GETBUF(bp);
 	
-	(void) sprintf(bp, "%2d %s %02d:%02d:%02d",
-		       tm->tm_mday, months[tm->tm_mon],
-		       tm->tm_hour, tm->tm_min, tm->tm_sec);
+	snprintf(bp, LIB_BUFLENGTH, "%2d %s %02d:%02d:%02d",
+		 tm->tm_mday, months[tm->tm_mon],
+		 tm->tm_hour, tm->tm_min, tm->tm_sec);
 		
 	return bp;
 }

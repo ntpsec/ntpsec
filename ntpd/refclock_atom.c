@@ -140,11 +140,11 @@ atom_start(
 	 * Open PPS device. This can be any serial or parallel port and
 	 * not necessarily the port used for the associated radio.
 	 */
-	sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	up->fddev = tty_open(device, O_RDWR, 0777);
 	if (up->fddev <= 0) {
 		msyslog(LOG_ERR,
-		    "refclock_atom: %s: %m", device);
+			"refclock_atom: %s: %m", device);
 		return (0);
 	}
 
@@ -199,7 +199,8 @@ atom_timer(
 	 * That's so we can make awesome Allan deviation plots.
 	 */
 	if (pp->sloppyclockflag & CLK_FLAG4) {
-		sprintf(tbuf, "%.9f", pp->filter[pp->coderecv]);
+		snprintf(tbuf, sizeof(tbuf), "%.9f",
+			 pp->filter[pp->coderecv]);
 		record_clock_stats(&peer->srcadr, tbuf);
 	}
 }

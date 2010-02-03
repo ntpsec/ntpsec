@@ -1474,10 +1474,10 @@ mkreadable(
 	)
 {
 	char *b    = buffer;
-	char *endb = (char *)0;
+	char *endb = NULL;
 
 	if (blen < 4)
-		return (char *)0;		/* don't bother with mini buffers */
+		return NULL;		/* don't bother with mini buffers */
 
 	endb = buffer + blen - 4;
 
@@ -1515,7 +1515,7 @@ mkreadable(
 				}
 				else
 				{
-					sprintf(buffer, "\\x%02x", *src++);
+					snprintf(buffer, blen, "\\x%02x", *src++);
 					blen   -= 4;
 					buffer += 4;
 				}

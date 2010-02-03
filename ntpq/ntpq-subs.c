@@ -56,7 +56,7 @@ static	void	radiostatus (struct parse *, FILE *);
 
 static	void	pstatus 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
-static	char *	prettyinterval	(char *, long);
+static	char *	prettyinterval	(char *, size_t, long);
 static	int	doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
 static	int	dogetpeers	(struct varlist *, int, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
@@ -1091,14 +1091,16 @@ printassoc(
 			break;
 		}
 		cnt = uinttoa(event_count);
-		sprintf(buf,
-		    "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2s",
-		    i + 1, assoc_cache[i].assid, assoc_cache[i].status,
-		    conf, reach, auth, condition, last_event, cnt);
-		bp = &buf[strlen(buf)];
-		while (bp > buf && *(bp-1) == ' ')
-			*(--bp) = '\0';
-		(void) fprintf(fp, "%s\n", buf);
+		snprintf(buf, sizeof(buf),
+			 "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2s",
+			 i + 1, assoc_cache[i].assid,
+			 assoc_cache[i].status, conf, reach, auth,
+			 condition, last_event, cnt);
+		bp = buf + strlen(buf);
+		while (bp > buf && ' ' == bp[-1])
+			--bp;
+		bp[0] = '\0';
+		fprintf(fp, "%s\n", buf);
 	}
 }
 
@@ -1296,6 +1298,7 @@ when(
 static char *
 prettyinterval(
 	char *buf,
+	size_t cb,
 	long diff
 	)
 {
@@ -1306,24 +1309,24 @@ prettyinterval(
 	}
 
 	if (diff <= 2048) {
-		(void) sprintf(buf, "%ld", (long int)diff);
+		snprintf(buf, cb, "%ld", diff);
 		return buf;
 	}
 
 	diff = (diff + 29) / 60;
 	if (diff <= 300) {
-		(void) sprintf(buf, "%ldm", (long int)diff);
+		snprintf(buf, cb, "%ldm", diff);
 		return buf;
 	}
 
 	diff = (diff + 29) / 60;
 	if (diff <= 96) {
-		(void) sprintf(buf, "%ldh", (long int)diff);
+		snprintf(buf, cb, "%ldh", diff);
 		return buf;
 	}
 
 	diff = (diff + 11) / 24;
-	(void) sprintf(buf, "%ldd", (long int)diff);
+	snprintf(buf, cb, "%ldd", diff);
 	return buf;
 }
 
@@ -1584,18 +1587,21 @@ doprintpeers(
 	else
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*s ", maxhostlen, currenthost);
+		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (af == 0 || AF(&srcadr) == af) {
-		strcpy(clock_name, nntohost(&srcadr));
-		
-		(void) fprintf(fp,
+		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));		
+		fprintf(fp,
 			"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
 			c, clock_name, dstadr_refid, stratum, type,
-			prettyinterval(whenbuf, when(&ts, &rec, &reftime)),
-			prettyinterval(pollbuf, (int)poll_sec), reach,
-			lfptoms(&estdelay, 3), lfptoms(&estoffset, 3),
-			havevar[HAVE_JITTER] ? lfptoms(&estjitter, 3) :
-			lfptoms(&estdisp, 3));
+			prettyinterval(whenbuf, sizeof(whenbuf),
+				       when(&ts, &rec, &reftime)),
+			prettyinterval(pollbuf, sizeof(pollbuf), 
+				       (int)poll_sec),
+			reach, lfptoms(&estdelay, 3),
+			lfptoms(&estoffset, 3),
+			(havevar[HAVE_JITTER])
+			    ? lfptoms(&estjitter, 3)
+			    : lfptoms(&estdisp, 3));
 		return (1);
 	}
 	else

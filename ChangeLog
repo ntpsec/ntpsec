@@ -1,8 +1,12 @@
 ---
 
+* [Bug 1455] ntpd does not try /etc/ntp.audio as documented.
 * [Bug 1467] Fix bogus rebuild of sntp/sntp.html
 * [Bug 1470] "make distdir" in $srcdir builds keyword-gen, libntp.a.
 * [Bug 1473] "make distcheck" before build can't make sntp/version.m4.
+* Convert many sprintf() calls to snprintf(), also strcpy(), strcat().
+* Fix widely cut-n-pasted bug in refclock shutdown after failed start.
+* Remove some dead code checking for emalloc() returning NULL.
 
 ---
 (4.2.6p1-RC3) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>

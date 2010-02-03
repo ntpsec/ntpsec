@@ -72,10 +72,10 @@ pcf_start(
 	/*
 	 * Open device file for reading.
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = open(device, O_RDONLY);
 	if (fd == -1) {
-		(void)sprintf(device, OLDDEVICE, unit);
+		snprintf(device, sizeof(device), OLDDEVICE, unit);
 		fd = open(device, O_RDONLY);
 	}
 #ifdef DEBUG

@@ -373,14 +373,15 @@ internal_current(isc_interfaceiter_t *iter) {
 
 	if ((flags & IFF_POINTTOPOINT) != 0) {
 		iter->current.flags |= INTERFACE_F_POINTTOPOINT;
-		sprintf(iter->current.name, "PPP %d", iter->numIF);
+		snprintf(iter->current.name, sizeof(iter->current.name),
+			 "PPP %d", iter->numIF);
 		ifNamed = TRUE;
 	}
 
 	if ((flags & IFF_LOOPBACK) != 0) {
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
-		sprintf(iter->current.name, "v4loop %d", 
-			iter->numIF);
+		snprintf(iter->current.name, sizeof(iter->current.name),
+			"v4loop %d", iter->numIF);
 		ifNamed = TRUE;
 	}
 
@@ -408,7 +409,7 @@ internal_current(isc_interfaceiter_t *iter) {
 				  &iter->current.netmask);
 
 	if (ifNamed == FALSE)
-		sprintf(iter->current.name,
+		snprintf(iter->current.name, sizeof(iter->current.name),
 			"IPv4 %d", iter->numIF);
 
 	return (ISC_R_SUCCESS);
@@ -468,14 +469,16 @@ internal_current6(isc_interfaceiter_t *iter) {
 	            sizeof(iter->current.address.type.in6))) {
 
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
-		sprintf(iter->current.name, "v6loop %d", 
-			iter->buf6->iAddressCount - iter->pos6);
+		snprintf(iter->current.name, sizeof(iter->current.name),
+			 "v6loop %d",
+			 iter->buf6->iAddressCount - iter->pos6);
 		ifNamed = TRUE;
 	}
 
 	if (ifNamed == FALSE)
-		sprintf(iter->current.name, "IPv6 %d",
-			iter->buf6->iAddressCount - iter->pos6);
+		snprintf(iter->current.name, sizeof(iter->current.name),
+			 "IPv6 %d",
+			 iter->buf6->iAddressCount - iter->pos6);
 
 	memset(iter->current.netmask.type.in6.s6_addr, 0xff,
 	       sizeof(iter->current.netmask.type.in6.s6_addr));

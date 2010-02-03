@@ -489,7 +489,7 @@ chu_start(
 	if (fd_audio > 0) {
 		fd = fd_audio;
 	} else {
-		sprintf(device, DEVICE, unit);
+		snprintf(device, sizeof(device), DEVICE, unit);
 		fd = refclock_open(device, SPEED232, LDISC_RAW);
 	}
 #else /* HAVE_AUDIO */
@@ -497,7 +497,7 @@ chu_start(
 	/*
 	 * Open serial port in raw mode.
 	 */
-	sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* HAVE_AUDIO */
 	if (fd < 0)
@@ -506,12 +506,8 @@ chu_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct chuunit *)
-	      emalloc(sizeof(struct chuunit)))) {
-		close(fd);
-		return (0);
-	}
-	memset((char *)up, 0, sizeof(struct chuunit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = chu_receive;
@@ -520,7 +516,9 @@ chu_start(
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 		close(fd);
+		pp->io.fd = -1;
 		free(up);
+		pp->unitptr = NULL;
 		return (0);
 	}
 
@@ -1103,6 +1101,9 @@ chu_b(
 
 	u_char	code[11];	/* decoded timecode */
 	char	tbuf[80];	/* trace buffer */
+	char *	p;
+	size_t	chars;
+	size_t	cb;
 	int	i;
 
 	pp = peer->procptr;
@@ -1115,10 +1116,20 @@ chu_b(
 	 * only if the distance is 40. Note that once a valid frame has
 	 * been found errors are ignored.
 	 */
-	sprintf(tbuf, "chuB %04x %4.0f %2d %2d ", up->status,
-	    up->maxsignal, nchar, -up->burdist);
-	for (i = 0; i < nchar; i++)
-		sprintf(&tbuf[strlen(tbuf)], "%02x", up->cbuf[i]);
+	snprintf(tbuf, sizeof(tbuf), "chuB %04x %4.0f %2d %2d ",
+		 up->status, up->maxsignal, nchar, -up->burdist);
+	cb = sizeof(tbuf);
+	p = tbuf;
+	for (i = 0; i < nchar; i++) {
+		chars = strlen(p);
+		if (cb < chars + 1) {
+			msyslog(LOG_ERR, "chu_b() fatal out buffer");
+			exit(1);
+		}
+		cb -= chars;
+		p += chars;
+		snprintf(p, cb, "%02x", up->cbuf[i]);
+	}
 	if (pp->sloppyclockflag & CLK_FLAG4)
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
@@ -1163,6 +1174,9 @@ chu_a(
 	struct chuunit *up;
 
 	char	tbuf[80];	/* trace buffer */
+	char *	p;
+	size_t	chars;
+	size_t	cb;
 	l_fp	offset;		/* timestamp offset */
 	int	val;		/* distance */
 	int	temp;
@@ -1205,12 +1219,22 @@ chu_a(
 	if (temp < 2 || temp > 9 || k + 9 >= nchar || temp !=
 	    ((up->cbuf[k + 9] >> 4) & 0xf))
 		temp = 0;
-	sprintf(tbuf, "chuA %04x %4.0f %2d %2d %2d %2d %1d ",
-	    up->status, up->maxsignal, nchar, up->burdist, k,
-	    up->syndist, temp);
-	for (i = 0; i < nchar; i++)
-		sprintf(&tbuf[strlen(tbuf)], "%02x",
-		    up->cbuf[i]);
+	snprintf(tbuf, sizeof(tbuf),
+		 "chuA %04x %4.0f %2d %2d %2d %2d %1d ", up->status,
+		 up->maxsignal, nchar, up->burdist, k, up->syndist,
+		 temp);
+	cb = sizeof(tbuf);
+	p = tbuf;
+	for (i = 0; i < nchar; i++) {
+		chars = strlen(p);
+		if (cb < chars + 1) {
+			msyslog(LOG_ERR, "chu_a() fatal out buffer");
+			exit(1);
+		}
+		cb -= chars;
+		p += chars;
+		snprintf(p, cb, "%02x", up->cbuf[i]);
+	}
 	if (pp->sloppyclockflag & CLK_FLAG4)
 		record_clock_stats(&peer->srcadr, tbuf);
 #ifdef DEBUG
@@ -1354,7 +1378,7 @@ chu_second(
 	} else {
 		pp->leap = LEAP_NOWARNING;
 	}
-	sprintf(pp->a_lastcode,
+	snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
 	    "%c%1X %04d %03d %02d:%02d:%02d %c%x %+d %d %d %s %.0f %d",
 	    synchar, qual, pp->year, pp->day, pp->hour, pp->minute,
 	    pp->second, leapchar, up->dst, up->dut, minset, up->gain,
@@ -1565,7 +1589,7 @@ chu_newchan(
 	 */
 	rval = icom_freq(up->fd_icom, peer->ttl & 0x7f, qsy[up->chan] +
 	    TUNE);
-	sprintf(up->ident, "CHU%d", up->chan);
+	snprintf(up->ident, sizeof(up->ident), "CHU%d", up->chan);
 	memcpy(&pp->refid, up->ident, 4); 
 	memcpy(&peer->refid, up->ident, 4);
 	if (metric == 0 && up->status & METRIC) {

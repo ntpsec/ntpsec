@@ -3108,33 +3108,44 @@ tstflags(
 	u_long val
 	)
 {
-	register char *cb, *s;
+	register char *cp, *s;
+	size_t cb;
 	register int i;
 	register const char *sep;
 
 	sep = "";
 	i = 0;
-	s = cb = &circ_buf[nextcb][0];
+	s = cp = circ_buf[nextcb];
 	if (++nextcb >= NUMCB)
-	    nextcb = 0;
+		nextcb = 0;
+	cb = sizeof(circ_buf[0]);
 
-	sprintf(cb, "%02lx", val);
-	cb += strlen(cb);
+	snprintf(cp, cb, "%02lx", val);
+	cp += strlen(cp);
+	cb -= strlen(cp);
 	if (!val) {
-		strcat(cb, " ok");
-		cb += strlen(cb);
+		strncat(cp, " ok", cb);
+		cp += strlen(cp);
+		cb -= strlen(cp);
 	} else {
-		*cb++ = ' ';
-		for (i = 0; i < 13; i++) {
+		if (cb) {
+			*cp++ = ' ';
+			cb--;
+		}
+		for (i = 0; i < COUNTOF(tstflagnames); i++) {
 			if (val & 0x1) {
-				sprintf(cb, "%s%s", sep, tstflagnames[i]);
+				snprintf(cp, cb, "%s%s", sep,
+					 tstflagnames[i]);
 				sep = ", ";
-				cb += strlen(cb);
+				cp += strlen(cp);
+				cb -= strlen(cp);
 			}
 			val >>= 1;
 		}
 	}
-	*cb = '\0';
+	if (cb)
+		*cp = '\0';
+
 	return s;
 }
 
