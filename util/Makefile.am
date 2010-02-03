@@ -20,7 +20,7 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 # LDADD might need RESLIB and ADJLIB
 LDADD=		../libntp/libntp.a
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
-ntp_keygen_LDADD=	@LCRYPTO@ $(LIBOPTS_LDADD) ../libntp/libntp.a
+ntp_keygen_LDADD=	$(LIBOPTS_LDADD) ../libntp/libntp.a @LCRYPTO@
 
 ETAGS_ARGS=	Makefile.am
 #EXTRA_DIST=	README TAGS
