@@ -1,3 +1,4 @@
+(4.2.7p15) 2010/02/03 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1) - [Bug 1455] ntpd does not try /etc/ntp.audio.
 * Include (4.2.6p1) - Convert many sprintf() calls to snprintf(), also
   strcpy(), strcat().
