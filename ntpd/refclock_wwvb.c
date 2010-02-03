@@ -188,15 +188,15 @@ wwvb_start(
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
-	sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	if (-1 == (fd = refclock_open(device, SPEED232, LDISC_CLK)))
 		return (0);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct wwvbunit *)emalloc(sizeof(struct wwvbunit));
-	memset((char *)up, 0, sizeof(struct wwvbunit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = wwvb_receive;
@@ -205,7 +205,9 @@ wwvb_start(
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 		close(fd);
+		pp->io.fd = -1;
 		free(up);
+		pp->unitptr = NULL;
 		return (0);
 	}
 
@@ -214,7 +216,7 @@ wwvb_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, 4);
 	return (1);
 }
 
@@ -233,8 +235,10 @@ wwvb_shutdown(
 
 	pp = peer->procptr;
 	up = (struct wwvbunit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
+	if (NULL != up)
+		free(up);
 }
 
 

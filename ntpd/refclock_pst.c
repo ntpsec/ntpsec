@@ -127,25 +127,23 @@ pst_start(
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
 		return (0);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct pstunit *)emalloc(sizeof(struct pstunit)))) {
-		(void) close(fd);
-		return (0);
-	}
-	memset((char *)up, 0, sizeof(struct pstunit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = pst_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		(void) close(fd);
+		close(fd);
+		pp->io.fd = -1;
 		free(up);
 		return (0);
 	}
@@ -176,8 +174,10 @@ pst_shutdown(
 
 	pp = peer->procptr;
 	up = (struct pstunit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
+	if (NULL != up)
+		free(up);
 }
 
 

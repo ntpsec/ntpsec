@@ -121,15 +121,18 @@ audio_config_read(
 	FILE *fd;
 	char device[20], line[100], ab[100];
 
-	sprintf(device, "%s%d", INIT_FILE, unit);
+	snprintf(device, sizeof(device), "%s%d", INIT_FILE, unit);
 	if ((fd = fopen(device, "r")) == NULL) {
 		printf("audio_config_read: <%s> NO\n", device);
-		sprintf(device, "%s.%d", INIT_FILE, unit);
+		snprintf(device, sizeof(device), "%s.%d", INIT_FILE,
+			 unit);
 		if ((fd = fopen(device, "r")) == NULL) {
 			printf("audio_config_read: <%s> NO\n", device);
-			sprintf(device, "%s.%d", INIT_FILE, unit);
+			snprintf(device, sizeof(device), "%s",
+				 INIT_FILE);
 			if ((fd = fopen(device, "r")) == NULL) {
-				printf("audio_config_read: <%s> NO\n", device);
+				printf("audio_config_read: <%s> NO\n",
+				       device);
 				return;
 			}
 		}
@@ -233,7 +236,7 @@ audio_init(
 		;
 
 #ifdef PCM_STYLE_SOUND
-	(void)sprintf(actl_dev, ACTL_DEV, unit);
+	snprintf(actl_dev, sizeof(actl_dev), ACTL_DEV, unit);
 
 	audio_config_read(unit, &actl, &dname);
 	/* If we have values for cf_c_dev or cf_i_dev, use them. */

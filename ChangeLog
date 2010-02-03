@@ -1,3 +1,10 @@
+* Include (4.2.6p1) - [Bug 1455] ntpd does not try /etc/ntp.audio.
+* Include (4.2.6p1) - Convert many sprintf() calls to snprintf(), also
+  strcpy(), strcat().
+* Include (4.2.6p1) - Fix widely cut-n-pasted bug in refclock shutdown
+  after failed start.
+* Include (4.2.6p1) - Remove some dead code checking for emalloc()
+  returning NULL.
 (4.2.7p14) 2010/02/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1338] ntpq displays incorrect association type codes.
 * [Bug 1469] u_int32, int32 changes broke HP-UX 10.20 build.
@@ -65,9 +72,13 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1455] ntpd does not try /etc/ntp.audio as documented.
 * [Bug 1467] Fix bogus rebuild of sntp/sntp.html
 * [Bug 1470] "make distdir" in $srcdir builds keyword-gen, libntp.a.
 * [Bug 1473] "make distcheck" before build can't make sntp/version.m4.
+* Convert many sprintf() calls to snprintf(), also strcpy(), strcat().
+* Fix widely cut-n-pasted bug in refclock shutdown after failed start.
+* Remove some dead code checking for emalloc() returning NULL.
 
 ---
 (4.2.6p1-RC3) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>

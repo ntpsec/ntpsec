@@ -150,9 +150,17 @@ leitch_shutdown(
 	struct peer *peer
 	)
 {
+	struct leitchunit *leitch;
+
+	if (unit >= MAXUNITS) {
+		return;
+	}
+	leitch = &leitchunits[unit];
+	if (-1 != leitch->leitchio.fd)
+		io_closeclock(&leitch->leitchio);
 #ifdef DEBUG
 	if (debug)
-	    fprintf(stderr, "leitch_shutdown()\n");
+		fprintf(stderr, "leitch_shutdown()\n");
 #endif
 }
 
@@ -258,7 +266,7 @@ leitch_start(
 	/*
 	 * Open serial port.
 	 */
-	(void) sprintf(leitchdev, LEITCH232, unit);
+	snprintf(leitchdev, sizeof(leitchdev), LEITCH232, unit);
 	fd232 = open(leitchdev, O_RDWR, 0777);
 	if (fd232 == -1) {
 		msyslog(LOG_ERR,
@@ -267,7 +275,7 @@ leitch_start(
 	}
 
 	leitch = &leitchunits[unit];
-	memset((char*)leitch, 0, sizeof(*leitch));
+	memset(leitch, 0, sizeof(*leitch));
 
 #if defined(HAVE_SYSV_TTYS)
 	/*
@@ -387,6 +395,7 @@ leitch_start(
 	leitch->leitchio.datalen = 0;
 	leitch->leitchio.fd = fd232;
 	if (!io_addclock(&leitch->leitchio)) {
+		leitch->leitchio.fd = -1;
 		goto screwed;
 	}
 

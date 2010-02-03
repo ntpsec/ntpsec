@@ -115,7 +115,7 @@ dumbclock_start(
 	 * Open serial port. Don't bother with CLK line discipline, since
 	 * it's not available.
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 #ifdef DEBUG
 	if (debug)
 		printf ("starting Dumbclock with device %s\n",device);
@@ -127,8 +127,8 @@ dumbclock_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct dumbclock_unit *)emalloc(sizeof(struct dumbclock_unit));
-	memset((char *)up, 0, sizeof(struct dumbclock_unit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
 	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = dumbclock_receive;
@@ -136,8 +136,10 @@ dumbclock_start(
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		(void) close(fd);
+		close(fd);
+		pp->io.fd = -1;
 		free(up);
+		pp->unitptr = NULL;
 		return (0);
 	}
 
@@ -177,8 +179,10 @@ dumbclock_shutdown(
 
 	pp = peer->procptr;
 	up = (struct dumbclock_unit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
+	if (NULL != up)
+		free(up);
 }
 
 

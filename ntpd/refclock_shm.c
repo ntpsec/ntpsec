@@ -137,8 +137,8 @@ struct shmTime *getShmTime (int unit) {
 	HANDLE shmid=0;
 	SECURITY_DESCRIPTOR sd;
 	SECURITY_ATTRIBUTES sa;
-	sprintf (buf,"NTP%d",unit);
-	if (unit>=2) { /* world access */
+	snprintf(buf, sizeof(buf), "NTP%d", unit);
+	if (unit >= 2) { /* world access */
 		if (!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION)) {
 			msyslog(LOG_ERR,"SHM InitializeSecurityDescriptor (unit %d): %m",unit);
 			return 0;
@@ -193,10 +193,8 @@ shm_start(
 	pp->io.datalen = 0;
 	pp->io.fd = -1;
 
-	up = (struct shmunit *) emalloc(sizeof(*up));
-	if (up == NULL)
-		return (FALSE);
-	memset((char *)up, 0, sizeof(*up));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 	pp->unitptr = (caddr_t)up;
 
 	up->shm = getShmTime(unit);
@@ -233,12 +231,16 @@ shm_shutdown(
 
 	pp = peer->procptr;
 	up = (struct shmunit *)pp->unitptr;
+
+	if (NULL == up)
+		return;
 #ifndef SYS_WINNT
 	/* HMS: shmdt()wants char* or const void * */
 	(void) shmdt ((char *)up->shm);
 #else
 	UnmapViewOfFile (up->shm);
 #endif
+	free(up);
 }
 
 

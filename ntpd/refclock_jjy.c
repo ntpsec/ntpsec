@@ -250,10 +250,8 @@ jjy_start ( int unit, struct peer *peer )
 	/*
 	 * Open serial port
 	 */
-	if ( ! ( pDeviceName = (char*) emalloc ( strlen(DEVICE) + 10 ) ) ) {
-		return RC_START_ERROR ;
-	}
-	sprintf ( pDeviceName, DEVICE, unit ) ;
+	pDeviceName = emalloc ( strlen(DEVICE) + 10 );
+	snprintf ( pDeviceName, strlen(DEVICE) + 10, DEVICE, unit ) ;
 
 	/*
 	 * peer->ttl is a mode number specified by "127.127.40.X mode N" in the ntp.conf
@@ -292,12 +290,8 @@ jjy_start ( int unit, struct peer *peer )
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if ( ! ( up = (struct jjyunit *) emalloc (sizeof(struct jjyunit)) ) ) {
-		close ( fd ) ;
-		return RC_START_ERROR ;
-	}
-
-	memset ( (char*)up, 0, sizeof(struct jjyunit) ) ;
+	up = emalloc (sizeof(*up));
+	memset ( up, 0, sizeof(*up) ) ;
 	up->linediscipline = iDiscipline ;
 
 	/*
@@ -325,8 +319,8 @@ jjy_start ( int unit, struct peer *peer )
 		up->unittype = UNITTYPE_ECHOKEISOKUKI_LT2000 ;
 		up->operationmode = 2 ;  /* Mode 2 : Continuous mode */
 		up->lineexpect = 1 ;
-        switch ( up->operationmode ) {
-        case 1 :
+		switch ( up->operationmode ) {
+		case 1 :
 			up->charexpect[0] = 15 ; /* YYMMDDWHHMMSS<BCC1><BCC2><CR> */
 			break ;
 		case 2 :
@@ -334,11 +328,11 @@ jjy_start ( int unit, struct peer *peer )
 			break ;
 		}
 		break ;
-    case 4 :
-        up->unittype = UNITTYPE_CITIZENTIC_JJY200 ;
-        up->lineexpect = 1 ;
-        up->charexpect[0] = 23 ; /* 'XX YY/MM/DD W HH:MM:SS<CR> */
-        break ;
+	case 4 :
+		up->unittype = UNITTYPE_CITIZENTIC_JJY200 ;
+		up->lineexpect = 1 ;
+		up->charexpect[0] = 23 ; /* 'XX YY/MM/DD W HH:MM:SS<CR> */
+		break ;
 	default :
 		msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Unsupported mode",
 		          ntoa(&peer->srcadr), peer->ttl ) ;
@@ -355,7 +349,9 @@ jjy_start ( int unit, struct peer *peer )
 	pp->io.fd         = fd ;
 	if ( ! io_addclock(&pp->io) ) {
 		close ( fd ) ;
-		free ( (void*) up ) ;
+		pp->io.fd = -1 ;
+		free ( up ) ;
+		pp->unitptr = NULL ;
 		return RC_START_ERROR ;
 	}
 
@@ -384,8 +380,10 @@ jjy_shutdown ( int unit, struct peer *peer )
 
 	pp = peer->procptr ;
 	up = (struct jjyunit *) pp->unitptr ;
-	io_closeclock ( &pp->io ) ;
-	free ( (void*) up ) ;
+	if ( -1 != pp->io.fd )
+		io_closeclock ( &pp->io ) ;
+	if ( NULL != up )
+		free ( up ) ;
 
 }
 
@@ -546,8 +544,10 @@ jjy_receive ( struct recvbuf *rbufp )
 	 * timecode timestamp.
 	 */
 
-	sprintf ( sLogText, "%04d/%02d/%02d %02d:%02d:%02d.%1d JST",
-	          up->year, up->month, up->day, up->hour, up->minute, up->second, up->msecond/100 ) ;
+	snprintf ( sLogText, sizeof(sLogText),
+		   "%04d/%02d/%02d %02d:%02d:%02d.%1d JST",
+	           up->year, up->month, up->day,
+		   up->hour, up->minute, up->second, up->msecond/100 ) ;
 	record_clock_stats ( &peer->srcadr, sLogText ) ;
 
 	if ( ! refclock_process ( pp ) ) {

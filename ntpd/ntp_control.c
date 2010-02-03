@@ -1079,9 +1079,9 @@ ctl_putdbl(
 	while (*cq != '\0')
 		*cp++ = *cq++;
 	*cp++ = '=';
-	(void)sprintf(cp, "%.3f", ts);
-	while (*cp != '\0')
-		cp++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "%.3f", ts);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
@@ -1104,9 +1104,9 @@ ctl_putuint(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	(void) sprintf(cp, "%lu", uval);
-	while (*cp != '\0')
-		cp++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "%lu", uval);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
@@ -1133,13 +1133,13 @@ ctl_putfs(
 	*cp++ = '=';
 	fstamp = uval - JAN_1970;
 	tm = gmtime(&fstamp);
-	if (tm == NULL)
+	if (NULL ==  tm)
 		return;
-
-	sprintf(cp, "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
-		tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
-	while (*cp != '\0')
-		cp++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer),
+		 "%04d%02d%02d%02d%02d", tm->tm_year + 1900,
+		 tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
@@ -1164,9 +1164,9 @@ ctl_puthex(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	(void) sprintf(cp, "0x%lx", uval);
-	while (*cp != '\0')
-		cp++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%lx", uval);
+	cp += strlen(cp);
 	ctl_putdata(buffer,(unsigned)( cp - buffer ), 0);
 }
 
@@ -1190,9 +1190,9 @@ ctl_putint(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	(void) sprintf(cp, "%ld", ival);
-	while (*cp != '\0')
-		cp++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "%ld", ival);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
@@ -1216,10 +1216,10 @@ ctl_putts(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	(void) sprintf(cp, "0x%08lx.%08lx", ts->l_ui & 0xffffffffUL,
-		       ts->l_uf & 0xffffffffUL);
-	while (*cp != '\0')
-		cp++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%08lx.%08lx",
+		 ts->l_ui & 0xffffffffUL, ts->l_uf & 0xffffffffUL);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
@@ -1244,12 +1244,13 @@ ctl_putadr(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	if (addr == NULL)
+	if (NULL == addr)
 		cq = numtoa(addr32);
 	else
 		cq = stoa(addr);
-	while (*cq != '\0')
-		*cp++ = *cq++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "%s", cq);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
@@ -1272,9 +1273,9 @@ ctl_putid(
 		*cp++ = *cq++;
 
 	*cp++ = '=';
-	cq = id;
-	while (*cq != '\0' && (cq - id) < 4)
-		*cp++ = *cq++;
+	NTP_INSIST((cp - buffer) < sizeof(buffer));
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "%s", id);
+	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
 
@@ -1302,9 +1303,10 @@ ctl_putarray(
 		if (i == 0)
 			i = NTP_SHIFT;
 		i--;
-		(void)sprintf(cp, " %.2f", arr[i] * 1e3);
-		while (*cp != '\0')
-			cp++;
+		NTP_INSIST((cp - buffer) < sizeof(buffer));
+		snprintf(cp, sizeof(buffer) - (cp - buffer),
+			 " %.2f", arr[i] * 1e3);
+		cp += strlen(cp);
 	} while(i != start);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
@@ -1409,7 +1411,8 @@ ctl_putsys(
 		ctl_putstr(sys_var[CS_SYSTEM].text, str_system,
 			   sizeof(str_system) - 1);
 #else
-		sprintf(str, "%s/%s", utsnamebuf.sysname, utsnamebuf.release);
+		snprintf(str, sizeof(str), "%s/%s", utsnamebuf.sysname,
+			 utsnamebuf.release);
 		ctl_putstr(sys_var[CS_SYSTEM].text, str, strlen(str));
 #endif /* HAVE_UNAME */
 		break;

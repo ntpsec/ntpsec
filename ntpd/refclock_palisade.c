@@ -273,7 +273,7 @@ palisade_start (
 	char gpsdev[20];
 	struct termios tio;
 
-	(void) sprintf(gpsdev, DEVICE, unit);
+	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
 
 	/*
 	 * Open serial port. 
@@ -350,7 +350,8 @@ palisade_start (
 #ifdef DEBUG
 		printf("Palisade(%d) io_addclock\n",unit);
 #endif
-		(void) close(fd);
+		close(fd);
+		pp->io.fd = -1;
 		free(up);
 		return (0);
 	}
@@ -394,8 +395,10 @@ palisade_shutdown (
 	struct refclockproc *pp;
 	pp = peer->procptr;
 	up = (struct palisade_unit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
+	if (NULL != up)
+		free(up);
 }
 
 
@@ -920,8 +923,10 @@ palisade_receive (
 	 * report and process 
 	 */
 
-	(void) sprintf(pp->a_lastcode,"%4d %03d %02d:%02d:%02d.%06ld",
-		       pp->year,pp->day,pp->hour,pp->minute, pp->second,pp->nsec); 
+	snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
+		 "%4d %03d %02d:%02d:%02d.%06ld",
+		 pp->year, pp->day,
+		 pp->hour,pp->minute, pp->second, pp->nsec); 
 	pp->lencode = 24;
 
 	if (!refclock_process(pp)) {
