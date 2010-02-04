@@ -1,3 +1,4 @@
+* Include (4.2.6p1-RC4) - [Bug 1474] ntp_keygen needs LCRYPTO after libntp.a.
 (4.2.7p15) 2010/02/03 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1) - [Bug 1455] ntpd does not try /etc/ntp.audio.
 * Include (4.2.6p1) - Convert many sprintf() calls to snprintf(), also
@@ -77,6 +78,7 @@
 * [Bug 1467] Fix bogus rebuild of sntp/sntp.html
 * [Bug 1470] "make distdir" in $srcdir builds keyword-gen, libntp.a.
 * [Bug 1473] "make distcheck" before build can't make sntp/version.m4.
+* [Bug 1474] ntp_keygen needs LCRYPTO after libntp.a.
 * Convert many sprintf() calls to snprintf(), also strcpy(), strcat().
 * Fix widely cut-n-pasted bug in refclock shutdown after failed start.
 * Remove some dead code checking for emalloc() returning NULL.
