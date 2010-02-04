@@ -1,4 +1,3 @@
-#AUTOMAKE_OPTIONS = util/ansi2knr foreign dist-tarZ no-dependencies
 AUTOMAKE_OPTIONS = foreign 1.10
 ACLOCAL_AMFLAGS= -I m4 -I libopts/m4
 
@@ -14,7 +13,6 @@ if NEED_LIBOPTS
 SUBDIRS+= libopts
 endif
 SUBDIRS+= 		\
-	@ARLIB_DIR@ 	\
 	libntp		\
 	libparse	\
 	ntpd		\
@@ -34,7 +32,6 @@ DIST_SUBDIRS=		\
 	scripts		\
 	include		\
 	ElectricFence	\
-	arlib		\
 	libntp		\
 	libopts		\
 	libparse	\
@@ -51,7 +48,7 @@ DIST_SUBDIRS=		\
 	util		\
 	$(NULL)
 
-DISTCHECK_CONFIGURE_FLAGS=	-C --with-arlib --enable-local-libopts
+DISTCHECK_CONFIGURE_FLAGS = -C
 
 EXTRA_DIST =			\
 	COPYRIGHT		\

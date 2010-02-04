@@ -216,22 +216,16 @@ BINSUBDIR=$use_binsubdir
 AC_SUBST(BINSUBDIR)
 AM_CONDITIONAL(NTP_BINSUBDIR_IS_BIN, test "bin" = "$BINSUBDIR")
 
-AC_MSG_CHECKING([if we want to use arlib])
-AC_ARG_WITH(arlib,
-	AC_HELP_STRING([--with-arlib], [- Compile the async resolver library?]),
+AC_MSG_CHECKING([for deprecated --with-arlib])
+AC_ARG_WITH([arlib],
+	AC_HELP_STRING([--with-arlib], [- deprecated, arlib not distributed]),
 	[ans=$withval], [ans=no])
 AC_MSG_RESULT([$ans])
 
-if test -d $srcdir/arlib
-then
-    case "$ans" in
-     yes)
-	ARLIB_DIR=arlib
-	AC_CONFIG_SUBDIRS(arlib)
-	;;
-    esac
-fi
-AC_SUBST(ARLIB_DIR)
+case "$ans" in
+ yes)
+    AC_MSG_WARN([Please do not use --with-arlib, arlib is no longer included.  In the future, --with-arlib will not be recognized.])
+esac
 
 AC_ARG_WITH(rpath,
 	AC_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),

@@ -8,6 +8,7 @@
 * Convert many sprintf() calls to snprintf(), also strcpy(), strcat().
 * Fix widely cut-n-pasted bug in refclock shutdown after failed start.
 * Remove some dead code checking for emalloc() returning NULL.
+* Remove arlib.
 
 ---
 (4.2.6p1-RC3) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
