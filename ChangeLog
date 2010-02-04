@@ -1,3 +1,4 @@
+(4.2.7p16) 2010/02/04 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC4) - [Bug 1474] ntp_keygen LCRYPTO after libntp.a.
 * Include (4.2.6p1-RC4) - Remove arlib.
 (4.2.7p15) 2010/02/03 Released by Harlan Stenn <stenn@ntp.org>
