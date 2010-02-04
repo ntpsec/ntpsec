@@ -51,7 +51,7 @@ DIST_SUBDIRS=		\
 DISTCHECK_CONFIGURE_FLAGS = -C
 
 EXTRA_DIST =			\
-	COPYRIGHT		\
+	$(srcdir)/COPYRIGHT	\
 	ChangeLog		\
 	CommitLog		\
 	CommitLog-4.1.0		\
@@ -85,7 +85,7 @@ EXTRA_DIST =			\
 	bincheck.mf		\
 	depsver.mf		\
 	deps-ver		\
-	version			\
+	$(srcdir)/version	\
 	version.m4		\
 	\
 	$(NULL)
@@ -102,9 +102,9 @@ ETAGS_ARGS = Makefile.am configure.ac
 BUILT_SOURCES =				\
 	.gcc-warning			\
 	libtool				\
-	$(srcdir)/COPYRIGHT		\
-	$(srcdir)/version		\
-	$(srcdir)/version.m4		\
+	COPYRIGHT			\
+	version				\
+	version.m4			\
 	$(srcdir)/include/version.def	\
 	$(srcdir)/include/version.texi	\
 	$(NULL)
