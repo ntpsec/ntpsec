@@ -48,34 +48,35 @@ sntp_SOURCES =		\
 	$(NULL)
 
 EXTRA_DIST=				\
-		autogen-version.def	\
-		bincheck.mf		\
-		COPYRIGHT		\
-		deps-ver		\
-		depsver.mf		\
-		sntp-opts.def		\
-		sntp-opts.menu		\
-		sntp-opts.texi		\
-		sntp.1			\
-		sntp.html		\
-		sntp.texi		\
-		version.def		\
-		version.m4		\
-		version.texi		\
-		$(NULL)
+	$(srcdir)/autogen-version.def	\
+	bincheck.mf			\
+	$(srcdir)/COPYRIGHT		\
+	deps-ver			\
+	depsver.mf			\
+	sntp-opts.def			\
+	sntp-opts.menu			\
+	sntp-opts.texi			\
+	sntp.1				\
+	sntp.html			\
+	sntp.texi			\
+	$(srcdir)/version.def		\
+	$(srcdir)/version.m4		\
+	$(srcdir)/version.texi		\
+	$(NULL)
 
 OLD_EXTRA_DIST=		\
 		autogen-version.def version.def version.m4 version.texi
 
-BUILT_SOURCES=						\
-		check-autogen-version.def		\
-		check-version.def check-version.m4	\
-		check-version.texi			\
-		$(srcdir)/COPYRIGHT			\
-		libtool					\
-		sntp-opts.c				\
-		sntp-opts.h				\
-		$(NULL)
+BUILT_SOURCES=				\
+	check-autogen-version.def	\
+	check-version.def		\
+	check-version.m4		\
+	check-version.texi		\
+	COPYRIGHT			\
+	libtool				\
+	sntp-opts.c			\
+	sntp-opts.h			\
+	$(NULL)
 
 man_MANS=	$(srcdir)/sntp.1
 
@@ -145,7 +146,7 @@ $(srcdir)/../COPYRIGHT:
 
 check-COPYRIGHT-submake: $(srcdir)/../COPYRIGHT
 	@cmp -s $(srcdir)/../COPYRIGHT $(srcdir)/COPYRIGHT	\
-	 || { cp $(srcdir)/../COPYRIGHT $(srcdir)/COPYRIGHT	\
+	 || { cp $(srcdir)/../COPYRIGHT $(srcdir)		\
 	      && echo 'updated sntp/COPYRIGHT installed' ;}
 	@echo 'submake avoided if this file is newer than parent COPYRIGHT' > $@
 
