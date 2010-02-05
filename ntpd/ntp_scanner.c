@@ -120,14 +120,21 @@ FGETC(
 	struct FILE_INFO *stream
 	)
 {
-	int ch = fgetc(stream->fd);
+	int ch;
+	
+	ch = fgetc(stream->fd);
 
-	++stream->col_no;
-	if (ch == '\n') {
-		stream->prev_line_col_no = stream->col_no;
-		++stream->line_no;
-		stream->col_no = 1;
+	if (EOF != ch) {
+		NTP_INSIST(CHAR_MIN <= ch && ch <= CHAR_MAX);
+
+		++stream->col_no;
+		if (ch == '\n') {
+			stream->prev_line_col_no = stream->col_no;
+			++stream->line_no;
+			stream->col_no = 1;
+		}
 	}
+
 	return ch;
 }
 

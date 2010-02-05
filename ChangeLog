@@ -1,5 +1,7 @@
 * Include (4.2.6p1-RC5) - [Bug 1477] First non-gmake make in clone
   w/VPATH can't make COPYRIGHT.
+* Attempts to cure CID 108 CID 118 CID 119 TAINTED_SCALAR warnings.
+* Broaden ylwrap workaround VPATH_HACK to all non-GNU make.
 (4.2.7p16) 2010/02/04 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC4) - [Bug 1474] ntp_keygen LCRYPTO after libntp.a.
 * Include (4.2.6p1-RC4) - Remove arlib.

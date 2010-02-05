@@ -8,6 +8,8 @@
 #ifndef NTP_DEBUG_H
 #define NTP_DEBUG_H
 
+#include "ntp_assert.h"
+
 /*
  * macros for debugging output - cut down on #ifdef pollution in the code
  */
