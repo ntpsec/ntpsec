@@ -64,9 +64,9 @@ vphack_after:
 		)
 
 # BUILT_SOURCES which should also be in EXTRA_DIST
-B_S_DIST=		\
-	ntpd-opts.c 	\
-	ntpd-opts.h 	\
+B_S_DIST=			\
+	$(srcdir)/ntpd-opts.c 	\
+	$(srcdir)/ntpd-opts.h 	\
 	$(NULL)
 
 BUILT_SOURCES=		\

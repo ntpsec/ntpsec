@@ -172,9 +172,15 @@ receive_blocking_req_internal(
 	req = NULL;
 
 	trycount = 3;
-	do
+	do {
+		NLOG(NLOG_SYSEVENT) {
+			if (trycount < 3)
+				msyslog(LOG_NOTICE,
+					"receive_blocking_req_internal read try #%d",
+					4 - trycount);
+		}
 		rc = read(child_req_read_pipe, &hdr, sizeof(hdr));
-	while (--trycount && !rc);
+	} while (--trycount && !rc);
 
 	if (rc < 0)
 		msyslog(LOG_ERR,
@@ -186,6 +192,7 @@ receive_blocking_req_internal(
 			"receive_blocking_req_internal: short header read %d of %d\n",
 			rc, sizeof(hdr));
 	else {
+		NTP_INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 4 * 1024);
 		req = emalloc(hdr.octets);
 		memcpy(req, &hdr, sizeof(*req));
 
@@ -265,6 +272,7 @@ receive_blocking_resp_internal(
 		DPRINTF(1, ("receive_blocking_resp_internal: header mismatch (0x%x)\n",
 			    hdr.magic_sig));
 	else {
+		NTP_INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 16 * 1024);
 		resp = emalloc(hdr.octets);
 		memcpy(resp, &hdr, sizeof(*resp));
 
