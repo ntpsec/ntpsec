@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1477] 1st non-gmake make in clone w/VPATH can't make COPYRIGHT.
+
+---
 (4.2.6p1-RC4) 2010/02/04 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1455] ntpd does not try /etc/ntp.audio as documented.
