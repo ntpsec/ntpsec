@@ -72,10 +72,10 @@ BUILT_SOURCES=				\
 	check-version.def		\
 	check-version.m4		\
 	check-version.texi		\
-	COPYRIGHT			\
+	$(srcdir)/COPYRIGHT		\
 	libtool				\
-	sntp-opts.c			\
-	sntp-opts.h			\
+	$(srcdir)/sntp-opts.c		\
+	$(srcdir)/sntp-opts.h		\
 	$(NULL)
 
 man_MANS=	$(srcdir)/sntp.1

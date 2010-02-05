@@ -102,9 +102,9 @@ ETAGS_ARGS = Makefile.am configure.ac
 BUILT_SOURCES =				\
 	.gcc-warning			\
 	libtool				\
-	COPYRIGHT			\
-	version				\
-	version.m4			\
+	$(srcdir)/COPYRIGHT		\
+	$(srcdir)/version		\
+	$(srcdir)/version.m4		\
 	$(srcdir)/include/version.def	\
 	$(srcdir)/include/version.texi	\
 	$(NULL)
