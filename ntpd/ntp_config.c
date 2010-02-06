@@ -286,14 +286,11 @@ do {					\
 } while (0)
 
 void ntpd_set_tod_using(const char *);
-static unsigned long get_pfxmatch(char **s,struct masks *m);
-static unsigned long get_match(char *s,struct masks *m);
+static unsigned long get_pfxmatch(char **s, struct masks *m);
+static unsigned long get_match(char *s, struct masks *m);
 static unsigned long get_logmask(char *s);
-static int getnetnum(const char *num,sockaddr_u *addr, int complain,
+static int getnetnum(const char *num, sockaddr_u *addr, int complain,
 		     enum gnn_type a_type);
-static int get_multiple_netnums(const char *num, sockaddr_u *addr,
-				struct addrinfo **res, int complain,
-				enum gnn_type a_type);
 
 
 
@@ -4294,122 +4291,27 @@ getnetnum(
 	enum gnn_type a_type
 	)
 {
-	int retval;
-	struct addrinfo *res;
+	isc_netaddr_t ipaddr;
 
-	/* Get all the addresses that resolve to this name */
-	retval = get_multiple_netnums(num, addr, &res, complain, a_type);
+	if (!is_ip_address(num, AF_UNSPEC, &ipaddr))
+		return 0;
 
-	if (retval != 1) {
-		/* Name resolution failed */
-		return retval;
-	}
+	if (AF_INET6 == ipaddr.family && !ipv6_works)
+		return -1;
 
-	memcpy(addr, res->ai_addr, res->ai_addrlen);
+	memset(addr, 0, sizeof(*addr));
+	AF(addr) = (u_short)ipaddr.family;
+#ifdef ISC_PLATFORM_HAVESALEN
+	addr->sas.ss_len = SIZEOF_SOCKADDR(AF(addr));
+#endif
+	if (IS_IPV4(addr))
+		memcpy(&addr->sa4.sin_addr, &ipaddr.type.in,
+		       sizeof(addr->sa4.sin_addr));
+	else
+		memcpy(&addr->sa6.sin6_addr, &ipaddr.type.in6,
+		       sizeof(addr->sa6.sin6_addr));
 
 	DPRINTF(2, ("getnetnum given %s, got %s\n", num, stoa(addr)));
 
-	freeaddrinfo(res);
 	return 1;
 }
-
-
-/*
- * get_multiple_netnums
- *
- * returns 1 for success, and mysteriously, 0 or -1 for failure
- */
-static int
-get_multiple_netnums(
-	const char *nameornum,
-	sockaddr_u *addr,
-	struct addrinfo **res,
-	int complain,
-	enum gnn_type a_type
-	)
-{
-	char lookbuf[1024];
-	const char *lookup;
-	char *pch;
-	struct addrinfo hints;
-	struct addrinfo *ptr;
-	int retval;
-	isc_netaddr_t ipaddr;
-
-	memset(&hints, 0, sizeof(hints));
-
-	if (strlen(nameornum) >= sizeof(lookbuf)) {
-		NTP_INSIST(strlen(nameornum) < sizeof(lookbuf));
-		return 0;
-	}
-
-	lookup = nameornum;
-	if (is_ip_address(nameornum, AF_UNSPEC, &ipaddr)) {
-		hints.ai_flags = AI_NUMERICHOST;
-		hints.ai_family = ipaddr.family;
-		if ('[' == nameornum[0]) {
-			lookup = lookbuf;
-			strncpy(lookbuf, &nameornum[1],
-				sizeof(lookbuf));
-			pch = strchr(lookbuf, ']');
-			if (pch != NULL)
-				*pch = '\0';
-		}
-		pch = strchr(lookup, '%');
-		if (pch != NULL) {
-			if (lookup != lookbuf) {
-				lookup = lookbuf;
-				strncpy(lookbuf, nameornum,
-					sizeof(lookbuf));
-				pch = strchr(lookup, '%');
-			}
-			*pch = '\0';
-		}
-	}
-
-	if (AF_INET6 == hints.ai_family && !ipv6_works)
-		return 0;
-
-	if (AF_UNSPEC == hints.ai_family) {
-		if (!ipv6_works)
-			hints.ai_family = AF_INET;
-		else if (!ipv4_works)
-			hints.ai_family = AF_INET6;
-		else if (IS_IPV4(addr) || IS_IPV6(addr))
-			hints.ai_family = AF(addr);
-	}
-
-	/* Get host address. Looking for UDP datagram connection */
-	hints.ai_socktype = SOCK_DGRAM;
-
-	DPRINTF(4, ("getaddrinfo %s%s\n", 
-		    (AF_UNSPEC == hints.ai_family)
-			? ""
-			: (AF_INET == hints.ai_family)
-				? "v4 "
-				: "v6 ",
-		    lookup));
-
-	retval = getaddrinfo(lookup, "ntp", &hints, &ptr);
-
-	if (retval || (AF_INET6 == ptr->ai_family && !ipv6_works)) {
-		if (complain)
-			msyslog(LOG_ERR,
-				"getaddrinfo: \"%s\" invalid host address, ignored",
-				lookup);
-		else
-			DPRINTF(1, ("getaddrinfo: \"%s\" invalid host address.\n",
-				    lookup));
-
-		if (!retval) {
-			freeaddrinfo(ptr);
-			return -1;
-		} else 
-			return 0;
-	}
-	*res = ptr;
-
-	return 1;
-}
-
-

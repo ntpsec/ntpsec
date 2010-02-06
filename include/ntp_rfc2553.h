@@ -74,7 +74,16 @@
 #include "ntp_types.h"
 
 
- /*
+#if !defined(_MSC_VER) || !defined(_DEBUG)
+struct addrinfo *copy_addrinfo_list(const struct addrinfo *);
+#else
+#define copy_addrinfo_list(ai)	\
+	debug_copy_addrinfo_list((ai), __FILE__, __LINE__)
+struct addrinfo *debug_copy_addrinfo_list(const struct addrinfo *,
+					  const char *, int);
+#endif
+
+/*
  * If various macros are not defined we need to define them
  */
 

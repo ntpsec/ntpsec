@@ -62,23 +62,32 @@ extern	void	set_sys_var (const char *, u_long, u_short);
 
 /* ntp_intres.c */
 #ifdef WORKER
-typedef void	(*gai_sometime_callback)
-		    (int, int, void *, const char *, const char *,
-		     const struct addrinfo *, const struct addrinfo *);
 /*
  * you call getaddrinfo_sometime(name, service, &hints, callback_func, context);
  * later (*callback_func)(rescode, gai_errno, context, name, service, hints, ai_result) is called.
  */
+typedef void	(*gai_sometime_callback)
+		    (int, int, void *, const char *, const char *,
+		     const struct addrinfo *, const struct addrinfo *);
 extern int	getaddrinfo_sometime(const char *, const char *,
 				     const struct addrinfo *,
 				     gai_sometime_callback, void *);
-typedef void	(*gni_sometime_callback)
-		    (int, int, sockaddr_u *, int, const char *,
-		     const char *, void *);
+/*
+ * In gai_sometime_callback routines, the resulting addrinfo list is
+ * only available until the callback returns.  To hold on to the list
+ * of addresses after the callback returns, use copy_addrinfo_list():
+ *
+ * struct addrinfo *copy_addrinfo_list(const struct addrinfo *);
+ */
+
+
 /*
  * you call getnameinfo_sometime(sockaddr, namelen, servlen, flags, callback_func, context);
  * later (*callback_func)(rescode, gni_errno, sockaddr, flags, name, service, context) is called.
  */
+typedef void	(*gni_sometime_callback)
+		    (int, int, sockaddr_u *, int, const char *,
+		     const char *, void *);
 extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
 				gni_sometime_callback, void *);
 #endif	/* WORKER */

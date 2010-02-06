@@ -82,6 +82,98 @@
 #include "ntp_malloc.h"
 #include "ntp_stdlib.h"
 #include "ntp_string.h"
+#include "ntp_debug.h"
+
+
+/*
+ * copy_addrinfo_list - copy an addrinfo list
+ *
+ * Copies an addrinfo list and its associated data to a contiguous block
+ * of storage from emalloc().  Callback routines invoked via
+ * getaddrinfo_sometime() have access to the resulting addrinfo list
+ * only until they return.  This routine provides an easy way to make a
+ * persistent copy.  Although the list provided to gai_sometime_callback
+ * routines is similarly contiguous, to keep this code usable in any
+ * context where we might want to duplicate an addrinfo list, it does
+ * not require the input list be contiguous.
+ *
+ * The returned list head pointer is passed to free() to release the
+ * entire list.
+ *
+ * In keeping with the rest of the NTP distribution, sockaddr_u is used
+ * in preference to struct sockaddr_storage, which is a member of the
+ * former union and so compatible.
+ *
+ * The rest of ntp_rfc2553.c is conditioned on ISC_PLATFORM_HAVEIPV6
+ * not being defined, copy_addrinfo_list() is an exception.
+ */
+#if !defined(_MSC_VER) || !defined(_DEBUG)
+struct addrinfo *
+copy_addrinfo_list(
+	const struct addrinfo *src
+	)
+#else
+struct addrinfo *
+debug_copy_addrinfo_list(
+	const struct addrinfo *	src,
+	const char *		caller_file,
+	int			caller_line
+	)
+#endif
+{
+	const struct addrinfo *	ai_src;
+	struct addrinfo *	ai_cpy;
+	struct addrinfo *	dst;
+	sockaddr_u *		psau;
+	char *			pcanon;
+	u_int			elements;
+	size_t			octets;
+	size_t			canons_octets;
+	size_t			str_octets;
+
+	elements = 0;
+	canons_octets = 0;
+
+	for (ai_src = src; NULL != ai_src; ai_src = ai_src->ai_next) {
+		++elements;
+		if (NULL != ai_src->ai_canonname)
+			canons_octets += 1 + strlen(ai_src->ai_canonname);
+	}
+
+	octets = elements * (sizeof(*ai_cpy) + sizeof(*psau));
+	octets += canons_octets;
+
+#if !defined(_MSC_VER) || !defined(_DEBUG)
+	dst = emalloc(octets);
+#else
+	dst = debug_erealloc(NULL, octets, caller_file, caller_line);
+#endif
+	memset(dst, 0, octets);
+	ai_cpy = dst;
+	psau = (void *)(ai_cpy + elements);
+	pcanon = (void *)(psau + elements);
+
+	for (ai_src = src; NULL != ai_src; ai_src = ai_src->ai_next) {
+		*ai_cpy = *ai_src;
+		NTP_REQUIRE(ai_src->ai_addrlen <= sizeof(sockaddr_u));
+		memcpy(psau, ai_src->ai_addr, ai_src->ai_addrlen);
+		ai_cpy->ai_addr = &psau->sa;
+		++psau;
+		if (NULL != ai_cpy->ai_canonname) {
+			ai_cpy->ai_canonname = pcanon;
+			str_octets = 1 + strlen(ai_src->ai_canonname);
+			memcpy(pcanon, ai_src->ai_canonname, str_octets);
+			pcanon += str_octets;
+		}
+		if (NULL != ai_cpy->ai_next)
+			ai_cpy->ai_next = ai_cpy + 1;
+		++ai_cpy;
+	}
+	NTP_ENSURE(pcanon == ((char *)dst + octets));
+
+	return dst;
+}
+
 
 #ifndef ISC_PLATFORM_HAVEIPV6
 

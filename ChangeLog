@@ -1,5 +1,7 @@
 * Include (4.2.6p1-RC5) - [Bug 1480] snprintf() cleanup caused 
   unterminated refclock IDs.
+* Stop using getaddrinfo() to convert numeric address strings to on-wire
+  addresses in favor of is_ip_address() alone.
 (4.2.7p17) 2010/02/05 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC5) - [Bug 1477] First non-gmake make in clone
   w/VPATH can't make COPYRIGHT.
