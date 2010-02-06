@@ -1274,7 +1274,7 @@ ctl_putid(
 
 	*cp++ = '=';
 	NTP_INSIST((cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "%s", id);
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "%.4s", id);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }

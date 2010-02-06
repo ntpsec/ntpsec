@@ -1,3 +1,5 @@
+* Include (4.2.6p1-RC5) - [Bug 1480] snprintf() cleanup caused 
+  unterminated refclock IDs.
 (4.2.7p17) 2010/02/05 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC5) - [Bug 1477] First non-gmake make in clone
   w/VPATH can't make COPYRIGHT.
@@ -82,6 +84,7 @@
 ---
 
 * [Bug 1477] 1st non-gmake make in clone w/VPATH can't make COPYRIGHT.
+* [Bug 1480] snprintf() cleanup caused unterminated refclock IDs.
 
 ---
 (4.2.6p1-RC4) 2010/02/04 Released by Harlan Stenn <stenn@ntp.org>
