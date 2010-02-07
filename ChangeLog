@@ -1,3 +1,4 @@
+(4.2.7p18) 2010/02/07 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC5) - [Bug 1480] snprintf() cleanup caused 
   unterminated refclock IDs.
 * Stop using getaddrinfo() to convert numeric address strings to on-wire
