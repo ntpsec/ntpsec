@@ -10,13 +10,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#if defined(HAVE_READLINE_HISTORY) &&		\
+    (!defined(HAVE_READLINE_HISTORY_H) ||	\
+     !defined(HAVE_READLINE_READLINE_H))
+# undef HAVE_READLINE_HISTORY
+#endif
 #if defined(HAVE_READLINE_HISTORY)
 # include <readline/readline.h>
 # include <readline/history.h>
-#else 
-# if defined(HAVE_HISTEDIT_H)
-#  include <histedit.h>
-# endif
+# define LE_READLINE
+#elif defined(HAVE_HISTEDIT_H)
+# include <histedit.h>
+# define LE_EDITLINE
+#else
+# define LE_NONE
 #endif
 
 #include "ntp.h"
@@ -39,15 +46,13 @@ static int	ntp_readline_initted;
 static char *	lineedit_prompt;
 
 
-#if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
-
+#ifdef LE_EDITLINE
 	static EditLine *	ntp_el;
 	static History *	ntp_hist;
 	static HistEvent	hev;
 
 	char *	ntp_prompt_callback(EditLine *);
-
-#endif /* !HAVE_READLINE_HISTORY_H && HAVE_HISTEDIT_H */
+#endif	/* LE_EDITLINE */
 
 
 /*
@@ -68,8 +73,7 @@ ntp_readline_init(
 		lineedit_prompt = estrdup(prompt);
 	}
 
-#if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
-
+#ifdef LE_EDITLINE
 	if (NULL == ntp_el) {
 
 		ntp_el = el_init(progname, stdin, stdout, stderr);
@@ -104,8 +108,7 @@ ntp_readline_init(
 		} else
 			success = 0;
 	}
-
-#endif	/* !HAVE_READLINE_HISTORY && HAVE_HISTEDIT_H */
+#endif	/* LE_EDITLINE */
 
 	ntp_readline_initted = success;
 
@@ -121,8 +124,7 @@ ntp_readline_uninit(
 	void
 	)
 {
-#if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
-
+#ifdef LE_EDITLINE
 	if (ntp_el) {
 		el_end(ntp_el);
 		ntp_el = NULL;
@@ -130,8 +132,7 @@ ntp_readline_uninit(
 		history_end(ntp_hist);
 		ntp_hist = NULL;
 	}
-
-#endif /* !HAVE_READLINE_HISTORY && HAVE_HISTEDIT_H */
+#endif	/* LE_EDITLINE */
 
 	if (lineedit_prompt) {
 		free(lineedit_prompt);
@@ -153,21 +154,20 @@ ntp_readline(
 	int *	pcount
 	)
 {
-#if !defined(HAVE_READLINE_HISTORY) && !defined(HAVE_HISTEDIT_H)
-	char line_buf[MAXEDITLINE];
+	char *		line;
+#ifdef LE_NONE
+	char		line_buf[MAXEDITLINE];
 #endif
-#if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
+#ifdef LE_EDITLINE
 	const char *	cline;
 #endif
-	char *		line;
 
 	if (!ntp_readline_initted)
 		return NULL;
 
 	*pcount = 0;
 
-#if defined(HAVE_READLINE_HISTORY)
-
+#ifdef LE_READLINE
 	line = readline(lineedit_prompt ? lineedit_prompt : "");
 	if (NULL != line) {
 		if (*line) {
@@ -178,11 +178,9 @@ ntp_readline(
 			line = NULL;
 		}
 	}
+#endif	/* LE_READLINE */
 
-#endif	/* HAVE_READLINE_HISTORY */
-
-#if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
-
+#ifdef LE_EDITLINE
 	cline = el_gets(ntp_el, pcount);
 
 	if (NULL != cline && *cline) {
@@ -191,10 +189,9 @@ ntp_readline(
 		line = estrdup(cline);
 	} else
 		line = NULL;
+#endif	/* LE_EDITLINE */
 
-#endif	/* !HAVE_READLINE_HISTORY && HAVE_HISTEDIT_H */
-
-#if !defined(HAVE_READLINE_HISTORY) && !defined(HAVE_HISTEDIT_H)
+#ifdef LE_NONE
 					/* stone hammers */
 	if (lineedit_prompt) {
 # ifdef VMS
@@ -216,7 +213,7 @@ ntp_readline(
 	} else
 		line = NULL;
 
-#endif	/* !HAVE_READLINE_HISTORY && !HAVE_HISTEDIT_H */
+#endif	/* LE_NONE */
 
 
 	if (!line)			/* EOF */
@@ -226,7 +223,7 @@ ntp_readline(
 }
 
 
-#if !defined(HAVE_READLINE_HISTORY) && defined(HAVE_HISTEDIT_H)
+#ifdef LE_EDITLINE
 /*
  * ntp_prompt_callback - return prompt string to el_gets()
  */
@@ -239,5 +236,5 @@ ntp_prompt_callback(
 
 	return lineedit_prompt;
 }
-#endif /* !HAVE_READLINE_HISTORY_H && HAVE_HISTEDIT_H */
+#endif /* LE_EDITLINE */
 

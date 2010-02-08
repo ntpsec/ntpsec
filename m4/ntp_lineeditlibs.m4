@@ -75,8 +75,6 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
      no)
 	;;
      *)
-	dnl AC_DEFINE(HAVE_LIBREADLINE, 1,
-        dnl           [Define if you have a readline compatible library])
 	AC_CHECK_HEADERS([readline.h readline/readline.h histedit.h])
 	AC_CHECK_HEADERS([history.h readline/history.h])
 	
