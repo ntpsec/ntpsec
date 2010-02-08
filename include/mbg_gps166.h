@@ -391,7 +391,7 @@ typedef struct {
   l_fp A0;         /*  ± Clock Correction Coefficient 0             [sec] */
   l_fp A1;         /*  ± Clock Correction Coefficient 1         [sec/sec] */
 
-  ushort WNlsf;    /*  week number of nearest leap second                 */
+  u_short WNlsf;   /*  week number of nearest leap second                 */
   short DNt;       /*  the day number at the end of which LS is inserted  */
   char delta_tls;  /*                                                     */
   char delta_tlsf; /*                                                     */

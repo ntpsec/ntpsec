@@ -13,6 +13,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_config.h"
+#include "ntp_crypto.h"
 #include "ntp_assert.h"
 
 #include <stdio.h>

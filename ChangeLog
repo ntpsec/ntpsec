@@ -1,3 +1,6 @@
+* Include (4.2.6p1-RC5) - [Bug 1478] linking fails: EVP_MD_pkey_type.
+* Include (4.2.6p1-RC5) - [Bug 1479] not finding readline headers.
+* Include (4.2.6p1-RC5) - [Bug 1484] ushort is not defined in QNX6.
 (4.2.7p18) 2010/02/07 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC5) - [Bug 1480] snprintf() cleanup caused 
   unterminated refclock IDs.
@@ -87,7 +90,10 @@
 ---
 
 * [Bug 1477] 1st non-gmake make in clone w/VPATH can't make COPYRIGHT.
+* [Bug 1478] linking fails with undefined reference EVP_MD_pkey_type.
+* [Bug 1479] Compilation fails because of not finding readline headers.
 * [Bug 1480] snprintf() cleanup caused unterminated refclock IDs.
+* [Bug 1484] ushort is not defined in QNX6.
 
 ---
 (4.2.6p1-RC4) 2010/02/04 Released by Harlan Stenn <stenn@ntp.org>
