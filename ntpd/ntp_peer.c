@@ -561,8 +561,7 @@ peer_refresh_interface(
 	{
 		printf(
 		    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
-		    peer->dstadr == NULL ? "<null>" :
-		    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
+		    latoa(peer->dstadr), stoa(&peer->srcadr),
 		    peer->hmode, peer->version, peer->minpoll,
 		    peer->maxpoll, peer->flags, peer->cast_flags,
 		    peer->ttl, peer->keyid);
@@ -892,10 +891,9 @@ newpeer(
 	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
 	report_event(PEVNT_MOBIL, peer, tbuf);
 	DPRINTF(1, ("newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",
-	    peer->dstadr == NULL ? "<null>" : stoa(&peer->dstadr->sin),
-	    stoa(&peer->srcadr), peer->hmode, peer->version,
-	    peer->minpoll, peer->maxpoll, peer->flags, peer->cast_flags,
-	    peer->ttl, peer->keyid));
+	    latoa(peer->dstadr), stoa(&peer->srcadr), peer->hmode,
+	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,
+	    peer->cast_flags, peer->ttl, peer->keyid));
 	return (peer);
 }
 

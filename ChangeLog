@@ -1,3 +1,6 @@
+* [Bug 1483] hostname in ntp.conf "restrict" parameter rejected.
+* Use all addresses for each restrict by hostname.
+* Use async DNS to resolve trap directive hostnames.
 (4.2.7p18) 2010/02/07 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC5) - [Bug 1480] snprintf() cleanup caused 
   unterminated refclock IDs.
