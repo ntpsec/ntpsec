@@ -1,3 +1,4 @@
+* [Bug 1338] Update the association type codes in ntpq.html.
 * Include (4.2.6p1-RC5) - [Bug 1478] linking fails: EVP_MD_pkey_type.
 * Include (4.2.6p1-RC5) - [Bug 1479] not finding readline headers.
 * Include (4.2.6p1-RC5) - [Bug 1484] ushort is not defined in QNX6.
