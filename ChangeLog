@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1140] Clean up debug.html, decode.html, and ntpq.html.
 * [Bug 1477] 1st non-gmake make in clone w/VPATH can't make COPYRIGHT.
 * [Bug 1480] snprintf() cleanup caused unterminated refclock IDs.
 
