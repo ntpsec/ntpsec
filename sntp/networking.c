@@ -287,7 +287,6 @@ recv_bcst_data (
 		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
 	
 	switch(select(rsock + 1, &bcst_fd, 0, 0, &timeout_tv)) {
-		FD_CLR(rsock, &bcst_fd);
 		
 		case -1: 
 			if(ENABLED_OPT(NORMALVERBOSE)) 
