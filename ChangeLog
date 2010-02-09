@@ -1,3 +1,6 @@
+* [Bug 1483] hostname in ntp.conf "restrict" parameter rejected.
+* Use all addresses for each restrict by hostname.
+* Use async DNS to resolve trap directive hostnames.
 (4.2.7p19) 2010/02/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1338] Update the association type codes in ntpq.html.
 * Include (4.2.6p1-RC5) - [Bug 1478] linking fails: EVP_MD_pkey_type.

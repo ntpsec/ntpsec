@@ -76,8 +76,8 @@ struct attr_val {
 
 /* Structure for nodes on the syntax tree */
 struct address_node {
-    char *address;
-    int type;
+	char *address;
+	short type;	/* family, AF_UNSPEC (0), AF_INET, AF_INET6 */
 };
 
 struct restrict_node {
@@ -197,6 +197,17 @@ struct REMOTE_CONFIG_INFO {
 	int err_pos;
 	int no_errors;
 };
+
+
+/*
+ * context for trap_name_resolved() to call ctlsettrap() once the 
+ * name->address resolution completes.
+ */
+typedef struct settrap_parms_tag {
+	sockaddr_u	ifaddr;
+	int		ifaddr_nonnull;
+} settrap_parms;
+
 
 /* get text from T_ tokens */
 const char * token_name(int token);

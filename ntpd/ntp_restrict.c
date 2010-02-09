@@ -272,14 +272,14 @@ hack_restrict(
 	register struct restrictlist6 *rl6 = NULL;
 	register struct restrictlist6 *rlprev6 = NULL;
 	int i, addr_cmp, mask_cmp;
-	memset(&addr6, 0, sizeof(struct in6_addr)); 
-	memset(&mask6, 0, sizeof(struct in6_addr)); 
+
+	DPRINTF(1, ("restrict: addr %s mask %s mflags %08x flags %08x\n",
+		    stoa(resaddr), stoa(resmask), mflags, flags));
+
+	memset(&addr6, 0, sizeof(addr6)); 
+	memset(&mask6, 0, sizeof(mask6)); 
 
 	if (IS_IPV4(resaddr)) {
-
-		DPRINTF(1, ("restrict: addr %08x mask %08x mflags %08x flags %08x\n",
-			    SRCADR(resaddr), SRCADR(resmask), mflags, flags));
-
 		/*
 		 * Get address and mask in host byte order
 		 */

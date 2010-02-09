@@ -269,6 +269,9 @@ void peer_name_resolved(int, int, void *, const char *, const char *,
 void unpeer_name_resolved(int, int, void *, const char *, const char *,
 			  const struct addrinfo *,
 			  const struct addrinfo *);
+void trap_name_resolved(int, int, void *, const char *, const char *,
+			const struct addrinfo *,
+			const struct addrinfo *);
 #endif
 
 enum gnn_type {
@@ -1195,11 +1198,13 @@ create_address_node(
 	struct address_node *my_node;
 
 	NTP_REQUIRE(NULL != addr);
+	NTP_REQUIRE(AF_INET == type || 
+		    AF_INET6 == type || AF_UNSPEC == type);
 	
 	my_node = get_node(sizeof *my_node);
 
 	my_node->address = addr;
-	my_node->type = type;
+	my_node->type = (short)type;
 
 	return my_node;
 }
@@ -2062,6 +2067,10 @@ config_access(
 	int *			curr_flag;
 	sockaddr_u		addr_sock;
 	sockaddr_u		addr_mask;
+	struct addrinfo		hints;
+	struct addrinfo *	ai_list;
+	struct addrinfo *	pai;
+	int			rc;
 	int			flags;
 	int			mflags;
 	int			restrict_default;
@@ -2105,6 +2114,8 @@ config_access(
 	     my_node = next_node(my_node)) {
 
 		ZERO_SOCK(&addr_sock);
+		ai_list = NULL;
+		pai = NULL;
 
 		if (NULL == my_node->addr) {
 			/*
@@ -2120,11 +2131,41 @@ config_access(
 
 			if (getnetnum(my_node->addr->address,
 				      &addr_sock, 1, t_UNK) != 1) {
-
-				msyslog(LOG_ERR,
-					"restrict: error in address '%s' on line %d. Ignoring...",
-					my_node->addr->address, my_node->line_no);
-				continue;
+				/*
+				 * Attempt a blocking lookup.  This
+				 * is in violation of the nonblocking
+				 * design of ntpd's mainline code.  The
+				 * alternative of running without the
+				 * restriction until the name resolved
+				 * seems worse.
+				 * Ideally some scheme could be used for
+				 * restrict directives in the startup
+				 * ntp.conf to delay starting up the
+				 * protocol machinery until after all
+				 * restrict hosts have been resolved.
+				 */
+				ai_list = NULL;
+				memset(&hints, 0, sizeof(hints));
+				hints.ai_protocol = IPPROTO_UDP;
+				hints.ai_socktype = SOCK_DGRAM;
+				hints.ai_family = my_node->addr->type;
+				rc = getaddrinfo(my_node->addr->address,
+						 "ntp", &hints,
+						 &ai_list);
+				if (rc) {
+					msyslog(LOG_ERR,
+						"restrict: ignoring line %d, address/host '%s' unusable.",
+						my_node->line_no,
+						my_node->addr->address);
+					continue;
+				}
+				NTP_INSIST(ai_list != NULL);
+				pai = ai_list;
+				NTP_INSIST(pai->ai_addr != NULL);
+				NTP_INSIST(sizeof(addr_sock) >= pai->ai_addrlen);
+				memcpy(&addr_sock, pai->ai_addr, pai->ai_addrlen);
+				NTP_INSIST(AF_INET == AF(&addr_sock) ||
+					   AF_INET6 == AF(&addr_sock));
 			}
 
 			SET_HOSTMASK(&addr_mask, AF(&addr_sock));
@@ -2133,11 +2174,12 @@ config_access(
 			if (my_node->mask) {
 				ZERO_SOCK(&addr_mask);
 				AF(&addr_mask) = (u_short)my_node->mask->type;
-				if (getnetnum(my_node->mask->address, &addr_mask, 1, t_MSK) != 1) {
-
+				if (getnetnum(my_node->mask->address,
+					      &addr_mask, 1, t_MSK) != 1) {
 					msyslog(LOG_ERR,
-						"restrict: error in mask '%s' on line %d. Ignoring...",
-						my_node->mask->address, my_node->line_no);
+						"restrict: ignoring line %d, mask '%s' unusable.",
+						my_node->line_no,
+						my_node->mask->address);
 					continue;
 				}
 			}
@@ -2217,14 +2259,30 @@ config_access(
 		/* Set the flags */
 		if (restrict_default) {
 			AF(&addr_sock) = AF_INET;
-			hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
-				      mflags, flags);
-
+			AF(&addr_mask) = AF_INET;
+			hack_restrict(RESTRICT_FLAGS, &addr_sock,
+				      &addr_mask, mflags, flags);
 			AF(&addr_sock) = AF_INET6;
+			AF(&addr_mask) = AF_INET6;
 		}
 
-		hack_restrict(RESTRICT_FLAGS, &addr_sock, &addr_mask,
-			      mflags, flags);
+		do {
+			hack_restrict(RESTRICT_FLAGS, &addr_sock,
+				      &addr_mask, mflags, flags);
+			if (pai != NULL &&
+			    NULL != (pai = pai->ai_next)) {
+				NTP_INSIST(pai->ai_addr != NULL);
+				NTP_INSIST(sizeof(addr_sock) >= pai->ai_addrlen);
+				ZERO_SOCK(&addr_sock);
+				memcpy(&addr_sock, pai->ai_addr, pai->ai_addrlen);
+				NTP_INSIST(AF_INET == AF(&addr_sock) ||
+					   AF_INET6 == AF(&addr_sock));
+				SET_HOSTMASK(&addr_mask, AF(&addr_sock));
+			}
+		} while (pai != NULL);
+
+		if (ai_list != NULL)
+			freeaddrinfo(ai_list);
 
 		if ((RES_MSSNTP & flags) && !warned_signd) {
 			warned_signd = 1;
@@ -2819,8 +2877,12 @@ config_trap(
 	sockaddr_u peeraddr;
 	struct address_node *addr_node;
 	struct interface *localaddr;
-	u_short port_no;
+	struct addrinfo hints;
+	char port_text[8];
+	settrap_parms *pstp;
+	u_short port;
 	int err_flag;
+	int rc;
 
 	/* silence warning about addr_sock potentially uninitialized */
 	AF(&addr_sock) = AF_UNSPEC;
@@ -2830,7 +2892,7 @@ config_trap(
 	     curr_trap = next_node(curr_trap)) {
 
 		err_flag = 0;
-		port_no = 0;
+		port = 0;
 		localaddr = NULL;
 
 		curr_opt = queue_head(curr_trap->options);
@@ -2844,7 +2906,7 @@ config_trap(
 						curr_opt->value.i);
 					err_flag = 1;
 				}
-				port_no = (u_short)curr_opt->value.i;
+				port = (u_short)curr_opt->value.i;
 			}
 			else if (T_Interface == curr_opt->attr) {
 				addr_node = curr_opt->value.p;
@@ -2875,13 +2937,52 @@ config_trap(
 		 * and port number
 		 */
 		if (!err_flag) {
+			if (!port)
+				port = TRAPPORT;
 			ZERO_SOCK(&peeraddr);
-			if (1 != getnetnum(curr_trap->addr->address,
-					   &peeraddr, 1, t_UNK))
+			rc = getnetnum(curr_trap->addr->address,
+				       &peeraddr, 1, t_UNK);
+			if (1 != rc) {
+#ifndef WORKER
+				msyslog(LOG_ERR,
+					"trap: unable to use IP address %s.",
+					curr_trap->addr->address);
+#else	/* WORKER follows */
+				/*
+				 * save context and hand it off
+				 * for name resolution.
+				 */
+				memset(&hints, 0, sizeof(hints));
+				hints.ai_protocol = IPPROTO_UDP;
+				hints.ai_socktype = SOCK_DGRAM;
+				snprintf(port_text, sizeof(port_text),
+					 "%u", port);
+				hints.ai_flags = AI_NUMERICSERV;
+				pstp = emalloc(sizeof(*pstp));
+				memset(pstp, 0, sizeof(*pstp));
+				if (localaddr != NULL) {
+					hints.ai_family = localaddr->family;
+					pstp->ifaddr_nonnull = 1;
+					memcpy(&pstp->ifaddr,
+					       &localaddr->sin,
+					       sizeof(pstp->ifaddr));
+				}
+				rc = getaddrinfo_sometime(
+					curr_trap->addr->address,
+					port_text,
+					&hints,
+					&trap_name_resolved,
+					pstp);
+				if (!rc)
+					msyslog(LOG_ERR,
+						"config_trap: getaddrinfo_sometime(%s,%s): %m",
+						curr_trap->addr->address,
+						port_text);
+#endif	/* WORKER */
 				continue;
-
+			}
 			/* port is at same location for v4 and v6 */
-			SET_PORT(&peeraddr, port_no ? port_no : TRAPPORT);
+			SET_PORT(&peeraddr, port);
 
 			if (NULL == localaddr)
 				localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
@@ -2891,11 +2992,57 @@ config_trap(
 			if (!ctlsettrap(&peeraddr, localaddr, 0,
 					NTP_VERSION))
 				msyslog(LOG_ERR,
-					"can't set trap for %s",
+					"set trap %s -> %s failed.",
+					latoa(localaddr),
 					stoa(&peeraddr));
 		}
 	}
 }
+
+
+/*
+ * trap_name_resolved()
+ *
+ * Callback invoked when config_trap()'s DNS lookup completes.
+ */
+#ifdef WORKER
+void
+trap_name_resolved(
+	int			rescode,
+	int			gai_errno,
+	void *			context,
+	const char *		name,
+	const char *		service,
+	const struct addrinfo *	hints,
+	const struct addrinfo *	res
+	)
+{
+	settrap_parms *pstp;
+	struct interface *localaddr;
+	sockaddr_u peeraddr;
+
+	pstp = context;
+	if (rescode) {
+		msyslog(LOG_ERR,
+			"giving up resolving trap host %s: %s (%d)",
+			name, gai_strerror(rescode), rescode);
+		free(pstp);
+		return;
+	}
+	NTP_INSIST(sizeof(peeraddr) >= res->ai_addrlen);
+	memset(&peeraddr, 0, sizeof(peeraddr));
+	memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+	localaddr = NULL;
+	if (pstp->ifaddr_nonnull)
+		localaddr = findinterface(&pstp->ifaddr);
+	if (NULL == localaddr)
+		localaddr = ANY_INTERFACE_CHOOSE(&peeraddr);
+	if (!ctlsettrap(&peeraddr, localaddr, 0, NTP_VERSION))
+		msyslog(LOG_ERR, "set trap %s -> %s failed.",
+			latoa(localaddr), stoa(&peeraddr));
+	free(pstp);
+}
+#endif	/* WORKER */
 
 
 #ifdef FREE_CFG_T
@@ -4281,7 +4428,8 @@ gettokens_netinfo (
 /*
  * getnetnum - return a net number (this is crude, but careful)
  *
- * returns 1 for success, and mysteriously, 0 or -1 for failure
+ * returns 1 for success, and mysteriously, 0 for most failures, and
+ * -1 if the address found is IPv6 and we believe IPv6 isn't working.
  */
 static int
 getnetnum(
@@ -4293,7 +4441,11 @@ getnetnum(
 {
 	isc_netaddr_t ipaddr;
 
-	if (!is_ip_address(num, AF_UNSPEC, &ipaddr))
+	NTP_REQUIRE(AF_UNSPEC == AF(addr) ||
+		    AF_INET == AF(addr) ||
+		    AF_INET6 == AF(addr));
+
+	if (!is_ip_address(num, AF(addr), &ipaddr))
 		return 0;
 
 	if (AF_INET6 == ipaddr.family && !ipv6_works)
