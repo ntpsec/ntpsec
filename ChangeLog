@@ -37,7 +37,8 @@
 * New async DNS resolver in ntpd allows nonblocking queries anytime,
   instead of only once at startup.
 (4.2.7p10) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 1140] Clean up debug.html, decode.html, and ntpq.html.
+* Include (4.2.6p1-RC5) - [Bug 1140] Clean up debug.html, decode.html,
+  and ntpq.html.
 * Include (4.2.6p1-RC3) - Use TZ=UTC instead of TZ= when calling date in
   scripts/mkver.in .
 * Include (4.2.6p1-RC3) - [Bug 1448] Some macros not correctly conditionally
