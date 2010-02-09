@@ -1,4 +1,5 @@
 ---
+(4.2.6p1-RC5) 2010/02/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1140] Clean up debug.html, decode.html, and ntpq.html.
 * [Bug 1438] Remove dead code from sntp/networking.c.
