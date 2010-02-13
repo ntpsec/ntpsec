@@ -1,3 +1,4 @@
+(4.2.7p20) 2010/02/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1483] hostname in ntp.conf "restrict" parameter rejected.
 * Use all addresses for each restrict by hostname.
 * Use async DNS to resolve trap directive hostnames.
