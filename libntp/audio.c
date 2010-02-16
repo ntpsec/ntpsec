@@ -176,19 +176,19 @@ audio_config_read(
 
 		if (!strncmp(cc, "IDEV", (size_t) 4)) {
 			sscanf(ca, "%s", ab);
-			strcpy(cf_i_dev, ab);
+			strncpy(cf_i_dev, ab, sizeof(cf_i_dev));
 			printf("idev <%s>\n", ab);
 		} else if (!strncmp(cc, "CDEV", (size_t) 4)) {
 			sscanf(ca, "%s", ab);
-			strcpy(cf_c_dev, ab);
+			strncpy(cf_c_dev, ab, sizeof(cf_c_dev));
 			printf("cdev <%s>\n", ab);
 		} else if (!strncmp(cc, "AGC", (size_t) 3)) {
 			sscanf(ca, "%s", ab);
-			strcpy(cf_agc, ab);
+			strncpy(cf_agc, ab, sizeof(cf_agc));
 			printf("agc <%s> %d\n", ab, i);
 		} else if (!strncmp(cc, "MONITOR", (size_t) 7)) {
 			sscanf(ca, "%s", ab);
-			strcpy(cf_monitor, ab);
+			strncpy(cf_monitor, ab, sizeof(cf_monitor));
 			printf("monitor <%s> %d\n", ab, mixer_name(ab, -1));
 		}
 	}
@@ -316,7 +316,7 @@ audio_init(
 	    printf("SOUND_MIXER_READ_RECMASK: %s\n", strerror(errno));
 
 	/* validate and set any specified config file stuff */
-	if (*cf_agc) {
+	if (cf_agc[0] != '\0') {
 		int i;
 
 		i = mixer_name(cf_agc, devmask);
@@ -327,7 +327,7 @@ audio_init(
 			       cf_agc, recmask);
 	}
 
-	if (*cf_monitor) {
+	if (cf_monitor[0] != '\0') {
 		int i;
 
 		/* devmask */
@@ -388,17 +388,16 @@ audio_gain(
 	r = 0 ; /* setting to zero nicely mutes the channel */
 #endif
 	l |= r << 8;
-        if ( cf_agc )
-          rval = ioctl(ctl_fd, agc, &l);
-        else
-	  if (port == 2) {
-	    rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_LINE, &l);
-	  } else {
-	    rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_MIC, &l);
-	  }
-	if (rval == -1) {
+	if (cf_agc[0] != '\0')
+		rval = ioctl(ctl_fd, agc, &l);
+	else
+		if (2 == port)
+			rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_LINE, &l);
+		else
+			rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_MIC, &l);
+	if (-1 == rval) {
 		printf("audio_gain: agc write: %s\n", strerror(errno));
-		return (rval);
+		return rval;
 	}
 
 	if (o_mongain != mongain) {
@@ -408,11 +407,12 @@ audio_gain(
 			printf("audio_gain: mongain %d/%d\n", mongain, l);
 # endif
 		l |= r << 8;
-                if ( cf_monitor )
-                  rval = ioctl(ctl_fd, monitor, &l );
-                else 
-		  rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_VOLUME, &l);
-		if (rval == -1) {
+		if (cf_monitor[0] != '\0')
+			rval = ioctl(ctl_fd, monitor, &l );
+		else 
+			rval = ioctl(ctl_fd, SOUND_MIXER_WRITE_VOLUME,
+				     &l);
+		if (-1 == rval) {
 			printf("audio_gain: mongain write: %s\n",
 			       strerror(errno));
 			return (rval);

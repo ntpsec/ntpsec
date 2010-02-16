@@ -1,3 +1,4 @@
+* [Bug 1306] constant conditionals in audio_gain().
 * Include (4.2.6p1) - [Bug 1464] synchronization source wrong for
   refclocks ARCRON_MSF (27) and SHM (28).
 * Include (4.2.6p1) - Correct Windows port's refclock_open() to return 0
