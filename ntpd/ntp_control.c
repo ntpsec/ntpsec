@@ -401,8 +401,8 @@ static u_char clocktypes[] = {
 	CTL_SST_TS_NTP,		/* not used (24) */
 	CTL_SST_TS_NTP, 	/* not used (25) */
 	CTL_SST_TS_UHF, 	/* REFCLK_GPS_HP (26) */
-	CTL_SST_TS_TELEPHONE,	/* REFCLK_ARCRON_MSF (27) */
-	CTL_SST_TS_TELEPHONE,	/* REFCLK_SHM (28) */
+	CTL_SST_TS_LF,		/* REFCLK_ARCRON_MSF (27) */
+	CTL_SST_TS_UHF,		/* REFCLK_SHM (28) */
 	CTL_SST_TS_UHF, 	/* REFCLK_PALISADE (29) */
 	CTL_SST_TS_UHF, 	/* REFCLK_ONCORE (30) */
 	CTL_SST_TS_UHF,		/* REFCLK_JUPITER (31) */

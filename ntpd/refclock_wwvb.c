@@ -189,7 +189,7 @@ wwvb_start(
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	if (-1 == (fd = refclock_open(device, SPEED232, LDISC_CLK)))
+	if (0 == (fd = refclock_open(device, SPEED232, LDISC_CLK)))
 		return (0);
 
 	/*
