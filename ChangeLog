@@ -1,4 +1,13 @@
 ---
+
+* [Bug 1464] synchronization source wrong for refclocks ARCRON_MSF (27)
+  and SHM (28).
+* Correct Windows port's refclock_open() to return 0 on failure not -1.
+* Correct CHU, dumbclock, and WWVB drivers to check for 0 returned from
+  refclock_open() on failure.
+* Correct "SIMUL=4 ./flock-build -1" to prioritize -1/--one.
+
+---
 (4.2.6p1-RC5) 2010/02/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1140] Clean up debug.html, decode.html, and ntpq.html.
