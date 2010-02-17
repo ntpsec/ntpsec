@@ -845,7 +845,7 @@ scheduled_sleep(
 	time_t now;
 
 	if (scheduled < ignore_scheduled_before) {
-		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)",
+		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)\n",
 			humantime(earliest), humantime(scheduled),
 			humantime(ignore_scheduled_before)));
 		return;
@@ -854,7 +854,7 @@ scheduled_sleep(
 	now = time(NULL);
 
 	if (now < earliest) {
-		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)",
+		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)\n",
 			humantime(earliest), humantime(scheduled),
 			humantime(ignore_scheduled_before)));
 		if (-1 == worker_sleep(earliest - now)) {
@@ -866,7 +866,7 @@ scheduled_sleep(
 			next_res_init = now + 60;
 			res_init();
 #endif
-			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)",
+			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)\n",
 				humantime(ignore_scheduled_before)));
 		}
 	}

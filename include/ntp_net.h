@@ -110,7 +110,7 @@ typedef union {
 
 /* blast a byte value across sockaddr_u v6 address */
 #define	MEMSET_ADDR6(psau, v)					\
-	memset((void *)(psau)->sa6.sin6_addr.s6_addr, (v),	\
+	memset((psau)->sa6.sin6_addr.s6_addr, (v),		\
 		sizeof((psau)->sa6.sin6_addr.s6_addr))
 
 #define SET_ONESMASK(psau)					\
@@ -129,17 +129,28 @@ typedef union {
 		SET_ONESMASK(psau);				\
 	} while (0)
 
-/* compare a in6_addr with socket address */
+/* 
+ * compare two in6_addr returning negative, 0, or positive.
+ * ADDR6_CMP is negative if *pin6A is lower than *pin6B, zero if they
+ * are equal, positive if *pin6A is higher than *pin6B.  IN6ADDR_ANY
+ * is the lowest address (128 zero bits).
+ */
+#define	ADDR6_CMP(pin6A, pin6B)					\
+	memcmp((pin6A)->s6_addr, (pin6B)->s6_addr,		\
+	       sizeof(pin6A)->s6_addr)
+
+/* compare two in6_addr for equality only */
 #if !defined(SYS_WINNT) || !defined(in_addr6)
-#define S_ADDR6_EQ(psau, my_in6_addr)				\
-	(!memcmp(&(psau)->sa6.sin6_addr,			\
-		 (my_in6_addr),					\
-		 sizeof((psau)->sa6.sin6_addr)))
+#define ADDR6_EQ(pin6A, pin6B)					\
+	(!ADDR6_CMP(pin6A, pin6B))
 #else
-#define S_ADDR6_EQ(psau, my_in6_addr)				\
-	IN6_ADDR_EQUAL(&(psau)->sa6.sin6_addr,			\
-		       (my_in6_addr))
+#define ADDR6_EQ(pin6A, pin6B)					\
+	IN6_ADDR_EQUAL(pin6A, pin6B)
 #endif
+
+/* compare a in6_addr with socket address */
+#define	S_ADDR6_EQ(psau, pin6)					\
+	ADDR6_EQ(&(psau)->sa6.sin6_addr, pin6)
 
 /* are two sockaddr_u's addresses equal? */
 #define SOCK_EQ(psau1, psau2)					\

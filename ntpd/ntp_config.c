@@ -91,6 +91,19 @@ static struct masks logcfg_item[] = {
 	{ NULL,			0 }
 };
 
+typedef struct peer_resolved_ctx_tag {
+	int	num_needed;
+	int	flags;
+	int	host_mode;	/* T_* token identifier */
+	short	family;
+	keyid_t	keyid;
+	u_char	hmode;		/* MODE_* */
+	u_char	version;
+	u_char	minpoll;
+	u_char	maxpoll;
+	u_char	ttl;
+} peer_resolved_ctx;
+
 /* Limits */
 #define MAXPHONE	10	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
@@ -228,7 +241,7 @@ static void free_config_tree(struct config_tree *ptree);
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
-static int get_correct_host_mode(int hmode);
+static u_char get_correct_host_mode(int token);
 static int peerflag_bits(struct peer_node *);
 static void save_and_apply_config_tree(void);
 void getconfig(int, char **);
@@ -794,7 +807,7 @@ dump_config_tree(
 		fprintf(df, " %s", addr->address);
 		
 		if (peer->minpoll != 0)
-			fprintf(df, " minpoll %d", peer->minpoll);
+			fprintf(df, " minpoll %u", peer->minpoll);
 
 		if (peer->maxpoll != 0)
 			fprintf(df, " maxpoll %d", peer->maxpoll);
@@ -802,16 +815,16 @@ dump_config_tree(
 		if (peer->ttl != 0) {
 			if (strlen(addr->address) > 8
 			    && !memcmp(addr->address, "127.127.", 8))
-				fprintf(df, " mode %d", peer->ttl);
+				fprintf(df, " mode %u", peer->ttl);
 			else
-				fprintf(df, " ttl %d", peer->ttl);
+				fprintf(df, " ttl %u", peer->ttl);
 		}
 
 		if (peer->peerversion != NTP_VERSION)
-			fprintf(df, " version %d", peer->peerversion);
+			fprintf(df, " version %u", peer->peerversion);
 
 		if (peer->peerkey != 0)
-			fprintf(df, " key %d", peer->peerkey);
+			fprintf(df, " key %u", peer->peerkey);
 
 		if (peer->bias != 0.)
 			fprintf(df, " bias %g", peer->bias);
@@ -1270,46 +1283,57 @@ create_peer_node(
 			break;
 
 		case T_Minpoll:
-			if (option->value.i < NTP_MINPOLL) {
+			if (option->value.i < NTP_MINPOLL ||
+			    option->value.i > UCHAR_MAX) {
 				msyslog(LOG_INFO,
-					"minpoll: provided value (%d) is below minimum (%d)",
-					option->value.i, NTP_MINPOLL);
+					"minpoll: provided value (%d) is out of range [%d-%d])",
+					option->value.i, NTP_MINPOLL, UCHAR_MAX);
 				my_node->minpoll = NTP_MINPOLL;
-			}
-			else
-				my_node->minpoll = option->value.i;
+			} else
+				my_node->minpoll = (u_char)option->value.u;
 			break;
 
 		case T_Maxpoll:
-			if (option->value.i > NTP_MAXPOLL) {
+			if (option->value.i < 0 ||
+			    option->value.i > NTP_MAXPOLL) {
 				msyslog(LOG_INFO,
-					"maxpoll: provided value (%d) is above maximum (%d)",
+					"maxpoll: provided value (%d) is out of range [0-%d])",
 					option->value.i, NTP_MAXPOLL);
 				my_node->maxpoll = NTP_MAXPOLL;
-			}
-			else
-				my_node->maxpoll = option->value.i;
+			} else
+				my_node->maxpoll = (u_char)option->value.u;
 			break;
 
 		case T_Ttl:
-			if (my_node->ttl >= MAX_TTL) {
+			if (option->value.u >= MAX_TTL) {
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = 1;
-			}
-			else
-				my_node->ttl = option->value.i;
+			} else
+				my_node->ttl = (u_char)option->value.u;
 			break;
 
 		case T_Mode:
-			my_node->ttl = option->value.i;
+			if (option->value.u >= UCHAR_MAX) {
+				msyslog(LOG_ERR, "mode: invalid argument");
+				errflag = 1;
+			} else
+				my_node->ttl = (u_char)option->value.u;
 			break;
 
 		case T_Key:
-			my_node->peerkey = option->value.i;
+			if (option->value.u >= KEYID_T_MAX) {
+				msyslog(LOG_ERR, "key: invalid argument");
+				errflag = 1;
+			} else
+				my_node->peerkey = (keyid_t)option->value.u;
 			break;
 
 		case T_Version:
-			my_node->peerversion = option->value.i;
+			if (option->value.u >= UCHAR_MAX) {
+				msyslog(LOG_ERR, "version: invalid argument");
+				errflag = 1;
+			} else
+			my_node->peerversion = (u_char)option->value.u;
 			break;
 
 		case T_Bias:
@@ -1342,6 +1366,7 @@ create_unpeer_node(
 	)
 {
 	struct unpeer_node *	my_node;
+	u_int			u;
 	char *			pch;
 
 	my_node = get_node(sizeof(*my_node));
@@ -1356,9 +1381,9 @@ create_unpeer_node(
 		pch++;
 
 	if (!*pch 
-	    && 1 == sscanf(addr->address, "%u", &my_node->assocID)
-	    && my_node->assocID <= USHRT_MAX) {
-		
+	    && 1 == sscanf(addr->address, "%u", &u)
+	    && u <= ASSOCID_MAX) {
+		my_node->assocID = (associd_t)u;
 		destroy_address_node(addr);
 		my_node->addr = NULL;
 	} else {
@@ -2071,9 +2096,9 @@ config_access(
 	struct addrinfo *	ai_list;
 	struct addrinfo *	pai;
 	int			rc;
-	int			flags;
-	int			mflags;
 	int			restrict_default;
+	u_short			flags;
+	u_short			mflags;
 	const char *		signd_warning =
 #ifdef HAVE_NTP_SIGND
 	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
@@ -2088,7 +2113,13 @@ config_access(
 		switch(my_opt->attr) {
 
 		case T_Average:
-			ntp_minpoll = my_opt->value.i;
+			if (0 <= my_opt->value.i &&
+			    my_opt->value.i <= UCHAR_MAX)
+				ntp_minpoll = (u_char)my_opt->value.u;
+			else
+				msyslog(LOG_ERR,
+					"discard average %d out of range, ignored.",
+					my_opt->value.i);
 			break;
 
 		case T_Minimum:
@@ -2957,7 +2988,7 @@ config_trap(
 				hints.ai_socktype = SOCK_DGRAM;
 				snprintf(port_text, sizeof(port_text),
 					 "%u", port);
-				hints.ai_flags = AI_NUMERICSERV;
+				hints.ai_flags = Z_AI_NUMERICSERV;
 				pstp = emalloc(sizeof(*pstp));
 				memset(pstp, 0, sizeof(*pstp));
 				if (localaddr != NULL) {
@@ -3351,25 +3382,26 @@ is_sane_resolved_address(
 }
 
 
-static int
+static u_char
 get_correct_host_mode(
 	int token
 	)
 {
 	switch (token) {
-	    case T_Server:
-	    case T_Pool:
-	    case T_Manycastclient:
+
+	case T_Server:
+	case T_Pool:
+	case T_Manycastclient:
 		return MODE_CLIENT;
-		break;
-	    case T_Peer:
+
+	case T_Peer:
 		return MODE_ACTIVE;
-		break;
-	    case T_Broadcast:
+
+	case T_Broadcast:
 		return MODE_BROADCAST;
-		break;
-	    default:
-		return -1;
+
+	default:
+		return 0;
 	}
 }
 
@@ -3442,7 +3474,8 @@ config_peers(
 	isc_netaddr_t	i_netaddr;
 	struct addrinfo	hints;
 	struct peer_node *curr_peer;
-	int hmode;
+	peer_resolved_ctx *ctx;
+	u_char hmode;
 	int num_needed;
 
 	for (curr_peer = queue_head(ptree->peers);
@@ -3451,7 +3484,7 @@ config_peers(
 
 		/* Find the correct host-mode */
 		hmode = get_correct_host_mode(curr_peer->host_mode);
-		NTP_INSIST(hmode != -1);
+		NTP_INSIST(hmode != 0);
 
 		/* Find the number of associations needed.
 		 * If a pool coomand is specified, then sys_maxclock needed
@@ -3495,13 +3528,26 @@ config_peers(
 		} else {
 			/* we have a hostname to resolve */
 #ifdef WORKER
+			ctx = emalloc(sizeof(*ctx));
+			ctx->family = curr_peer->addr->type;
+			ctx->num_needed = num_needed;
+			ctx->host_mode = curr_peer->host_mode;
+			ctx->hmode = hmode;
+			ctx->version = curr_peer->peerversion;
+			ctx->minpoll = curr_peer->minpoll;
+			ctx->maxpoll = curr_peer->maxpoll;
+			ctx->flags = peerflag_bits(curr_peer);
+			ctx->ttl = curr_peer->ttl;
+			ctx->keyid = curr_peer->peerkey;
+
 			memset(&hints, 0, sizeof(hints));
-			hints.ai_family = (u_short)curr_peer->addr->type;
+			hints.ai_family = (u_short)ctx->family;
 			hints.ai_socktype = SOCK_DGRAM;
 			hints.ai_protocol = IPPROTO_UDP;
+
 			getaddrinfo_sometime(curr_peer->addr->address, "ntp",
 					     &hints, &peer_name_resolved, 
-					     (void *)curr_peer);
+					     (void *)ctx);
 #else	/* !WORKER follows */
 			msyslog(LOG_ERR,
 				"hostname %s can not be used, please use address\n",
@@ -3530,19 +3576,18 @@ peer_name_resolved(
 	)
 {
 	sockaddr_u		peeraddr;
-	struct peer_node *	curr_peer;
-	int			num_needed;
-	int			hmode;
+	peer_resolved_ctx *	ctx;
 	int			i;
 	int			af;
 	const char *		fam_spec;
 
-	curr_peer = context;
+	ctx = context;
 
 	DPRINTF(1, ("peer_name_resolved(%s) rescode %d\n", name, rescode));
 
 	if (rescode) {
 #ifndef IGNORE_DNS_ERRORS
+		free(ctx);
 		msyslog(LOG_ERR,
 			"giving up resolving host %s: %s (%d)",
 			name, gai_strerror(rescode), rescode);
@@ -3553,24 +3598,18 @@ peer_name_resolved(
 		return;
 	}
 
-	hmode = get_correct_host_mode(curr_peer->host_mode);
-	NTP_INSIST(hmode != -1);
-	num_needed = (T_Pool == curr_peer->host_mode) 
-			? sys_maxclock 
-			: 1;
-
 	/* Loop to configure the desired number of associations */
 	for (i = 0; 
-	     res != NULL && i < num_needed; 
+	     res != NULL && i < ctx->num_needed; 
 	     res = res->ai_next) {
 
 		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
 
 		if (is_sane_resolved_address(&peeraddr,
-					     curr_peer->host_mode)) {
+					     ctx->host_mode)) {
 			i++;
 			NLOG(NLOG_SYSINFO) {
-				af = curr_peer->addr->type;
+				af = ctx->family;
 				fam_spec = (AF_INET6 == af)
 					       ? "(AAAA) "
 					       : (AF_INET == af)
@@ -3582,16 +3621,17 @@ peer_name_resolved(
 			}
 			peer_config(&peeraddr,
 				NULL,
-				hmode,
-				curr_peer->peerversion,
-				curr_peer->minpoll,
-				curr_peer->maxpoll,
-				peerflag_bits(curr_peer),
-				curr_peer->ttl,
-				curr_peer->peerkey,
+				ctx->hmode,
+				ctx->version,
+				ctx->minpoll,
+				ctx->maxpoll,
+				ctx->flags,
+				ctx->ttl,
+				ctx->keyid,
 				(u_char *)"*");
 		}
 	}
+	free(ctx);
 }
 #endif	/* WORKER */
 
@@ -3618,12 +3658,11 @@ config_unpeers(
 	struct config_tree *ptree
 	)
 {
-	sockaddr_u peeraddr;
+	sockaddr_u		peeraddr;
 	struct addrinfo		hints;
 	isc_netaddr_t		i_netaddr;
-	struct unpeer_node *curr_unpeer;
-	struct peer *peer;
-	int found;
+	struct unpeer_node *	curr_unpeer;
+	struct peer *		peer;
 
 	for (curr_unpeer = queue_head(ptree->unpeers);
 	     curr_unpeer != NULL;
@@ -3634,7 +3673,7 @@ config_unpeers(
 		 * address addr, or it is nonzero and addr NULL.
 		 */
 		if (curr_unpeer->assocID) {
-			peer = findpeerbyassoc((u_int)curr_unpeer->assocID);
+			peer = findpeerbyassoc(curr_unpeer->assocID);
 			if (peer != NULL) {
 				peer_clear(peer, "GONE");
 				unpeer(peer);
@@ -3660,18 +3699,15 @@ config_unpeers(
 				SET_ADDR4N(&peeraddr,
 					   i_netaddr.type.in.s_addr);
 
-			found = 0;
-			peer = NULL;
-
 			DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
-
+			peer = NULL;
 			do {
 				peer = findexistingpeer(&peeraddr, peer, -1);
-				if (NULL != peer && (FLAG_CONFIG & peer->flags))
-					found = 1;
-			} while (!found && NULL != peer);
+				if (peer != NULL && (FLAG_CONFIG & peer->flags))
+					break;
+			} while (peer != NULL);
 
-			if (found) {
+			if (peer != NULL) {
 				msyslog(LOG_INFO, "unpeered %s",
 					stoa(&peeraddr));
 				peer_clear(peer, "GONE");
@@ -3684,9 +3720,10 @@ config_unpeers(
 			hints.ai_family = (u_short)curr_unpeer->addr->type;
 			hints.ai_socktype = SOCK_DGRAM;
 			hints.ai_protocol = IPPROTO_UDP;
-			getaddrinfo_sometime(curr_unpeer->addr->address, "ntp",
-					     &hints, &unpeer_name_resolved, 
-					     (void *)curr_unpeer);
+			getaddrinfo_sometime(curr_unpeer->addr->address,
+					     "ntp", &hints,
+					     &unpeer_name_resolved, 
+					     (void *)hints.ai_family);
 #else	/* !WORKER follows */
 			msyslog(LOG_ERR,
 				"hostname %s can not be used, please use address\n",
@@ -3714,16 +3751,14 @@ unpeer_name_resolved(
 	const struct addrinfo *	res
 	)
 {
-	sockaddr_u		peeraddr;
-	struct unpeer_node *	curr_unpeer;
-	struct peer *		peer;
-	int			found;
-	int			af;
-	const char *		fam_spec;
+	sockaddr_u	peeraddr;
+	struct peer *	peer;
+	int		af;
+	const char *	fam_spec;
 
 	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
 
-	curr_unpeer = context;
+	af = (int)context;
 
 	if (rescode)
 		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)", 
@@ -3733,20 +3768,16 @@ unpeer_name_resolved(
 		 * Loop through the addresses found
 		 */
 		while (res) {
-			found = 0;
-			peer = NULL;
-
 			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
 			DPRINTF(1, ("searching for peer %s\n", stoa(&peeraddr)));
-
+			peer = NULL;
 			do {
 				peer = findexistingpeer(&peeraddr, peer, -1);
-				if (NULL != peer && (FLAG_CONFIG & peer->flags))
-					found = 1;
-			} while (!found && NULL != peer);
+				if (peer != NULL && (FLAG_CONFIG & peer->flags))
+					break;
+			} while (peer != NULL);
 
-			if (found) {
-				af = curr_unpeer->addr->type;
+			if (peer != NULL) {
 				fam_spec = (AF_INET6 == af)
 					       ? "(AAAA) "
 					       : (AF_INET == af)

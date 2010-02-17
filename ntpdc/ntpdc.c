@@ -1,29 +1,32 @@
 /*
  * ntpdc - control and monitor your ntpd daemon
  */
-
 #include <config.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
+#ifdef SYS_WINNT
+# include <mswsock.h>
+#endif
+#include <isc/net.h>
+#include <isc/result.h>
 
 #include "ntpdc.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
-#include "isc/net.h"
-#include "isc/result.h"
 #include <ssl_applink.c>
 
 #include "ntpdc-opts.h"
-
-#ifdef SYS_WINNT
-# include <Mswsock.h>
-# include <io.h>
-#endif /* SYS_WINNT */
 
 #ifdef SYS_VXWORKS
 				/* vxWorks needs mode flag -casey*/
@@ -492,7 +495,7 @@ openhost(
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_NUMERICHOST;
+	hints.ai_flags = Z_AI_NUMERICHOST;
 
 	a_info = getaddrinfo(hname, service, &hints, &ai);
 	if (a_info == EAI_NONAME

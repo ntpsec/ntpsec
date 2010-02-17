@@ -380,10 +380,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\memmove.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\mfptoa.c"
 				>
 			</File>
@@ -520,10 +516,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\strstr.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libntp\syslog.c"
 				>
 			</File>
@@ -537,6 +529,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\isc\task.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libntp\termios.c"
 				>
 			</File>
 			<File
@@ -577,10 +573,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\isc\win32\win32os.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libntp\termios.c"
 				>
 			</File>
 			<File
@@ -853,15 +845,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\sys\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

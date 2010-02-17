@@ -159,7 +159,7 @@ int tty_open(
  * refclock_open - open serial port for reference clock
  *
  * This routine opens a serial port for I/O and sets default options. It
- * returns the file descriptor or -1 indicating failure.
+ * returns the file descriptor or 0 indicating failure.
  */
 int refclock_open(
 	char *	dev,		/* device name pointer */
@@ -171,6 +171,7 @@ int refclock_open(
 	HANDLE		h;
 	COMMTIMEOUTS	timeouts;
 	DCB		dcb;
+	int		fd;
 
 	/*
 	 * open communication port handle
@@ -181,13 +182,13 @@ int refclock_open(
 
 	if (INVALID_HANDLE_VALUE == h) {  
 		msyslog(LOG_ERR, "Device %s CreateFile error: %m", windev);
-		return -1;
+		return 0;
 	}
 
 	/* Change the input/output buffers to be large. */
 	if (!SetupComm(h, 1024, 1024)) {
 		msyslog(LOG_ERR, "Device %s SetupComm error: %m", windev);
-		return -1;
+		return 0;
 	}
 
 	dcb.DCBlength = sizeof(dcb);
@@ -195,7 +196,7 @@ int refclock_open(
 	if (!GetCommState(h, &dcb)) {
 		msyslog(LOG_ERR, "Device %s GetCommState error: %m",
 				 windev);
-		return -1;
+		return 0;
 	}
 
 	switch (speed) {
@@ -239,7 +240,7 @@ int refclock_open(
 	default:
 		msyslog(LOG_ERR, "Device %s unsupported baud rate "
 				 "code %u", windev, speed);
-		return -1;
+		return 0;
 	}
 
 
@@ -265,13 +266,13 @@ int refclock_open(
 
 	if (!SetCommState(h, &dcb)) {
 		msyslog(LOG_ERR, "Device %s SetCommState error: %m", windev);
-		return -1;
+		return 0;
 	}
 
 	/* watch out for CR (dcb.EvtChar) as well as the CD line */
 	if (!SetCommMask(h, EV_RXFLAG | EV_RLSD)) {
 		msyslog(LOG_ERR, "Device %s SetCommMask error: %m", windev);
-		return -1;
+		return 0;
 	}
 
 	/* configure the handle to never block */
@@ -283,10 +284,14 @@ int refclock_open(
 
 	if (!SetCommTimeouts(h, &timeouts)) {
 		msyslog(LOG_ERR, "Device %s SetCommTimeouts error: %m", windev);
-		return -1;
+		return 0;
 	}
 
-	return (int)_open_osfhandle((int)h, _O_TEXT);
+	fd = _open_osfhandle((int)h, _O_TEXT);
+	if (fd < 0)
+		return 0;
+	NTP_INSIST(fd != 0);
+	return fd;
 }
 
 

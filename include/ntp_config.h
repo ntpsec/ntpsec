@@ -64,14 +64,15 @@
 
 /* Structure for storing an attribute-value pair  */
 struct attr_val {
-    int attr;
-    union val{
-        double d;
-        int i;
-        char *s;
-        void *p;
-    } value;
-    int type;
+	int attr;
+	union val{
+		double d;
+		int i;
+		u_int u;
+		char *s;
+		void *p;
+	} value;
+	int type;
 };
 
 /* Structure for nodes on the syntax tree */
@@ -88,19 +89,19 @@ struct restrict_node {
 };
 
 struct peer_node {
-    int host_mode;
-    struct address_node *addr;
-    queue *peerflags;
-    int minpoll;
-    int maxpoll;
-    int ttl;
-    int peerversion;
-    int peerkey;
-    double bias;
+	int host_mode;
+	struct address_node *addr;
+	queue *peerflags;
+	u_char minpoll;
+	u_char maxpoll;
+	u_char ttl;
+	u_char peerversion;
+	keyid_t peerkey;
+	double bias;
 };
 
 struct unpeer_node {
-	u_int			assocID;
+	associd_t		assocID;
 	struct address_node *	addr;
 };
 

@@ -124,7 +124,7 @@ struct value {			/* network byte order */
 	tstamp_t tstamp;	/* timestamp */
 	tstamp_t fstamp;	/* filestamp */
 	u_int32	vallen;		/* value length */
-	u_char	*ptr;		/* data pointer (various) */
+	void	*ptr;		/* data pointer (various) */
 	u_int32	siglen;		/* signature length */
 	u_char	*sig;		/* signature */
 };

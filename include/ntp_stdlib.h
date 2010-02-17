@@ -102,10 +102,6 @@ extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(u_int32);
 extern	char *	numtohost	(u_int32);
 extern	char *	socktoa		(sockaddr_u *);
-#define	localaddrtoa(pif)	((NULL == (pif))		\
-				     ? "<null>"			\
-				     : socktoa(&((pif)->sin)))
-#define		latoa(pif)	localaddrtoa(pif)
 extern	char *	socktohost	(sockaddr_u *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);

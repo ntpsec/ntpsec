@@ -1319,7 +1319,6 @@ case "$ac_cv_header_kvm_h" in
     AC_CHECK_FUNCS(kvm_open)
     ;;
 esac
-AC_CHECK_FUNCS(memcpy memmove memset)
 case "$host" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.
@@ -1381,7 +1380,7 @@ case "$host" in
 esac])
 AC_CHECK_FUNCS(setvbuf sigaction)
 AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
-AC_CHECK_FUNCS(snprintf strdup strerror strstr)
+AC_CHECK_FUNCS(snprintf strdup strerror)
 AC_CHECK_FUNCS(timegm)
 case "$host" in
  *-*-aix[[456]]*)

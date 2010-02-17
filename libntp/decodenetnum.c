@@ -40,7 +40,7 @@ decodenetnum(
 		cp = name; 
 	}
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_flags = AI_NUMERICHOST;
+	hints.ai_flags = Z_AI_NUMERICHOST;
 	err = getaddrinfo(cp, NULL, &hints, &ai);
 	if (err != 0)
 		return 0;

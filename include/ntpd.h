@@ -1,5 +1,11 @@
 /*
- * ntpd.h - Prototypes for ntpd.
+ * ntpd.h - Prototypes and external variables for ntpd.
+ *
+ * Note the first half is primarily function prototypes, type
+ * declarations, and preprocessor macros, with variables declared
+ * primarily in the second half.
+ *
+ * Each half is further divided into sections for each source file.
  */
 
 #include "ntp_syslog.h"
@@ -11,6 +17,12 @@
 #include "ntp_refclock.h"
 #include "ntp_workimpl.h"
 #include "recvbuff.h"
+
+/*
+ * First half: ntpd types, functions, macros
+ * -----------------------------------------
+ */
+
 
 /* ntp_config.c */
 
@@ -100,8 +112,6 @@ typedef struct interface_info {
 
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
-extern  int	disable_dynamic_updates;
-
 extern	void	interface_enumerate	(interface_receiver_t, void *);
 extern	struct interface *findinterface	(sockaddr_u *);
 extern	struct interface *findbcastinter(sockaddr_u *);
@@ -128,12 +138,14 @@ extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 extern	void	wait_for_signal		(void);
 extern	void	unblock_io_and_alarm	(void);
 extern	void	block_io_and_alarm	(void);
-#define UNBLOCK_IO_AND_ALARM()		unblock_io_and_alarm()
-#define BLOCK_IO_AND_ALARM()		block_io_and_alarm()
+# define	UNBLOCK_IO_AND_ALARM()	unblock_io_and_alarm()
+# define	BLOCK_IO_AND_ALARM()	block_io_and_alarm()
 #else
-#define UNBLOCK_IO_AND_ALARM()
-#define BLOCK_IO_AND_ALARM()
+# define	UNBLOCK_IO_AND_ALARM()	do {} while (0)
+# define	BLOCK_IO_AND_ALARM()	do {} while (0)
 #endif
+extern	char *	localaddrtoa(struct interface *);
+#define		latoa(pif)	localaddrtoa(pif)
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);
@@ -148,25 +160,31 @@ extern	u_int	sys_tai;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	int	ntp_monitor     (struct recvbuf *, int);
-extern  void    ntp_monclearinterface (struct interface *interface);
+extern	int	ntp_monitor	(struct recvbuf *, int);
+extern	void	mon_clearinterface(struct interface *interface);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
-extern	struct peer *findexistingpeer (sockaddr_u *, struct peer *, int);
-extern	struct peer *findpeer	(sockaddr_u *, struct interface *, int, int *);
-extern	struct peer *findpeerbyassoc (u_int);
-extern  void	set_peerdstadr	(struct peer *peer, struct interface *interface);
-extern	struct peer *newpeer	(sockaddr_u *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t);
+extern	struct peer *findexistingpeer(sockaddr_u *, struct peer *, int);
+extern	struct peer *findpeer	(sockaddr_u *, struct interface *, int,
+				 int *);
+extern	struct peer *findpeerbyassoc(associd_t);
+extern  void	set_peerdstadr	(struct peer *peer,
+				 struct interface *interface);
+extern	struct peer *newpeer	(sockaddr_u *, struct interface *,
+				 u_char, u_char, u_char, u_char, u_int,
+				 u_char, u_char, keyid_t);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
-extern	struct peer *peer_config (sockaddr_u *, struct interface *, int, int, int, int, u_int, int, keyid_t, u_char *);
+extern	struct peer *peer_config(sockaddr_u *, struct interface *,
+				 u_char, u_char, u_char, u_char, u_int,
+				 u_char, keyid_t, u_char *);
 extern	void	peer_reset	(struct peer *);
-extern	void	refresh_all_peerinterfaces (void);
+extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);
 extern	void	clear_all	(void);
 extern	int	score_all	(struct peer *);
-extern	struct	peer *findmanycastpeer	(struct recvbuf *);
+extern	struct peer *findmanycastpeer(struct recvbuf *);
 
 /* ntp_crypto.c */
 #ifdef OPENSSL
@@ -210,13 +228,7 @@ extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;
 
-/*
- * there seems to be a bug in the IRIX 4 compiler which prevents
- * u_char from beeing used in prototyped functions.
- * This is also true AIX compiler.
- * So give up and define it to be int. WLJ
- */
-extern	void	poll_update (struct peer *, int);
+extern	void	poll_update	(struct peer *, u_char);
 
 extern	void	clear		(struct peer *);
 extern	void	clock_filter	(struct peer *, double, double, double);
@@ -224,8 +236,8 @@ extern	void	init_proto	(void);
 extern	void	proto_config	(int, u_long, double, sockaddr_u *);
 extern	void	proto_clr_stats (void);
 
-#ifdef	REFCLOCK
 /* ntp_refclock.c */
+#ifdef	REFCLOCK
 extern	int	refclock_newpeer (struct peer *);
 extern	void	refclock_unpeer (struct peer *);
 extern	void	refclock_receive (struct peer *);
@@ -240,7 +252,8 @@ extern	void	process_private (struct recvbuf *, int);
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
 extern	int 	restrictions	(sockaddr_u *);
-extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *, int, int);
+extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
+				 u_short, u_short);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);
@@ -292,8 +305,10 @@ extern	void	parse_cmdline_opts(int *, char ***);
 
 
 /*
- * Variable declarations for ntpd.
+ * Last half: ntpd variables
+ * -------------------------
  */
+
 /* ntp_config.c */
 extern char const *	progname;
 extern char	*sys_phone[];		/* ACTS phone numbers */
@@ -352,18 +367,13 @@ extern volatile u_long handler_calls;	/* number of calls to interrupt handler */
 extern volatile u_long handler_pkts;	/* number of pkts received by handler */
 extern u_long	io_timereset;		/* time counters were reset */
 
-/*
- * Interface stuff
- */
+/* ntp_io.c */
+extern  int	disable_dynamic_updates;
+extern fd_set	activefds;
+extern int	maxactivefd;
 extern struct interface *any_interface;	/* default ipv4 interface */
 extern struct interface *any6_interface;/* default ipv6 interface */
 extern struct interface *loopback_interface; /* loopback interface */
-
-/*
- * File descriptor masks etc. for call to select
- */
-extern fd_set	activefds;
-extern int	maxactivefd;
 
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */
@@ -404,16 +414,18 @@ extern double	sys_offset;		/* system offset (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
-extern struct mon_data mon_mru_list;
-extern struct mon_data mon_fifo_list;
+extern mon_entry mon_mru_list;
+extern mon_entry mon_fifo_list;
 extern int	mon_enabled;
 
 /* ntp_peer.c */
-extern struct peer *peer_hash[];	/* peer hash table */
-extern int	peer_hash_count[];	/* count of peers in each bucket */
-extern struct peer *assoc_hash[];	/* association ID hash table */
-extern int	assoc_hash_count[];
-extern int	peer_free_count;
+extern struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
+extern int	peer_hash_count[NTP_HASH_SIZE];	/* count of in each bucket */
+extern struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
+extern int	assoc_hash_count[NTP_HASH_SIZE];/* count of in each bucket */
+extern struct peer *peer_list;		/* peer structures list */
+extern int	peer_count;		/* count in peer_list */
+extern int	peer_free_count;	/* count in peer_free */
 
 /*
  * Miscellaneous statistic counters which may be queried.
@@ -426,6 +438,7 @@ extern u_long	peer_demobilizations;	/* number of structs freed to free list */
 extern int	total_peer_structs;	/* number of peer structs in circulation */
 extern int	peer_associations;	/* mobilized associations */
 extern int	peer_preempt;		/* preemptable associations */
+
 /* ntp_proto.c */
 /*
  * System variables are declared here.	See Section 3.2 of the
@@ -447,6 +460,7 @@ extern int	sys_bclient;		/* we set our time to broadcasts */
 extern double	sys_bdelay; 		/* broadcast client default delay */
 extern int	sys_authenticate;	/* requre authentication for config */
 extern l_fp	sys_authdelay;		/* authentication delay */
+extern u_long 	sys_epoch;		/* last clock update time */
 extern keyid_t	sys_private;		/* private value for session seed */
 extern int	sys_manycastserver;	/* respond to manycast client pkts */
 extern int	sys_minclock;		/* minimum survivors */
@@ -483,11 +497,17 @@ extern int	fdpps;			/* pps file descriptor */
 extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 
 /* ntp_restrict.c */
-extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
-extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
-extern int	ntp_minpkt;
-extern int	ntp_minpoll;
-extern int	mon_age;		/* monitor preempt age */
+extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
+extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
+extern int		ntp_minpkt;
+extern u_char		ntp_minpoll;
+extern int		mon_age;	/* monitor preempt age */
+
+/* ntp_signd.c */
+#ifdef HAVE_NTP_SIGND
+extern void send_via_ntp_signd(struct recvbuf, int, keyid_t, int, 
+			       struct pkt *);
+#endif
 
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */
@@ -525,20 +545,14 @@ extern char *group;		/* group to switch to */
 extern const char *chrootdir;	/* directory to chroot() to */
 #endif
 
+/* ntservice.c */
+#ifdef SYS_WINNT
+extern int accept_wildcard_if_for_winnt;
+#endif
+
 /* refclock_conf.c */
 #ifdef REFCLOCK
 extern struct refclock *refclock_conf[]; /* refclock configuration table */
 extern u_char	num_refclock_conf;
 #endif
 
-/* ntp_signd.c */
-#ifdef HAVE_NTP_SIGND
-extern void 
-send_via_ntp_signd(
-	struct recvbuf *rbufp,	/* receive packet pointer */
-	int	xmode,
-	keyid_t	xkeyid, 
-	int flags,
-	struct pkt  *xpkt
-	);
-#endif

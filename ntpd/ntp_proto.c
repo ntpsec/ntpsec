@@ -21,10 +21,6 @@
 #endif /* HAVE_LIBSCF_H */
 
 
-#if defined(VMS) && defined(VMS_LOCALUNIT)	/*wjm*/
-#include "ntp_refclock.h"
-#endif
-
 /*
  * This macro defines the authentication state. If x is 1 authentication
  * is required; othewise it is optional.
@@ -136,7 +132,7 @@ transmit(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	int	hpoll;
+	u_char	hpoll;
 
 	/*
 	 * The polling state machine. There are two kinds of machines,
@@ -296,10 +292,10 @@ receive(
 {
 	register struct peer *peer;	/* peer structure pointer */
 	register struct pkt *pkt;	/* receive packet pointer */
-	int	hisversion;		/* packet version */
-	int	hisleap;		/* packet leap indicator */
-	int	hismode;		/* packet mode */
-	int	hisstratum;		/* packet stratum */
+	u_char	hisversion;		/* packet version */
+	u_char	hisleap;		/* packet leap indicator */
+	u_char	hismode;		/* packet mode */
+	u_char	hisstratum;		/* packet stratum */
 	int	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
@@ -443,8 +439,8 @@ receive(
 		} else {
 			opcode = ntohl(((u_int32 *)pkt)[authlen / 4]);
  			len = opcode & 0xffff;
-			if (len % 4 != 0 || len < 4 || len + authlen >
-			    rbufp->recv_length) {
+			if (len % 4 != 0 || len < 4 || (int)len +
+			    authlen > rbufp->recv_length) {
 				sys_badlength++;
 				return;		/* bad length */
 			}
@@ -1289,7 +1285,7 @@ receive(
 	if (peer->flip != 0) {
 		peer->rec = p_rec;
 		peer->dst = rbufp->recv_time;
-		if (peer->nextdate - current_time < (1 << min(peer->ppoll,
+		if (peer->nextdate - current_time < (1U << min(peer->ppoll,
 		    peer->hpoll)) / 2)
 			peer->nextdate++;
 		else
@@ -1777,11 +1773,12 @@ clock_update(
 void
 poll_update(
 	struct peer *peer,	/* peer structure pointer */
-	int	mpoll
+	u_char	mpoll
 	)
 {
-	int	hpoll, minpkt;
+	int	minpkt;
 	u_long	next, utemp;
+	u_char	hpoll;
 
 	/*
 	 * This routine figures out when the next poll should be sent.
@@ -1886,8 +1883,7 @@ poll_update(
 			peer->nextdate = next;
 		else
 			peer->nextdate = utemp;
-		hpoll = peer->throttle - (1 << peer->minpoll);
-		if (hpoll > 0)
+		if (peer->throttle > (1 << peer->minpoll))
 			peer->nextdate += minpkt;
 	}
 #ifdef DEBUG
@@ -1911,7 +1907,7 @@ peer_clear(
 	char	*ident			/* tally lights */
 	)
 {
-	int	i;
+	u_char	u;
 
 #ifdef OPENSSL
 	/*
@@ -1953,9 +1949,9 @@ peer_clear(
 	 */
 	if (peer->flags & FLAG_XLEAVE)
 		peer->flip = 1;
-	for (i = 0; i < NTP_SHIFT; i++) {
-		peer->filter_order[i] = i;
-		peer->filter_disp[i] = MAXDISPERSE;
+	for (u = 0; u < NTP_SHIFT; u++) {
+		peer->filter_order[u] = u;
+		peer->filter_disp[u] = MAXDISPERSE;
 	}
 #ifdef REFCLOCK
 	if (!(peer->flags & FLAG_REFCLOCK)) {
@@ -2051,7 +2047,7 @@ clock_filter(
 			peer->filter_disp[j] = MAXDISPERSE;
 			dst[i] = MAXDISPERSE;
 		} else if (peer->update - peer->filter_epoch[j] >
-		    ULOGTOD(allan_xpt)) {
+		    (u_long)ULOGTOD(allan_xpt)) {
 			dst[i] = peer->filter_delay[j] +
 			    peer->filter_disp[j];
 		} else {
@@ -2217,10 +2213,11 @@ clock_select(void)
 	static int list_alloc = 0;
 	static struct endpoint *endpoint = NULL;
 	static int *indx = NULL;
-	static struct peer **peer_list = NULL;
+	static struct peer **peers = NULL;
 	static u_int endpoint_size = 0;
 	static u_int indx_size = 0;
-	static u_int peer_list_size = 0;
+	static u_int peers_size = 0;
+	size_t octets;
 
 	/*
 	 * Initialize and create endpoint, index and peer lists big
@@ -2234,24 +2231,18 @@ clock_select(void)
 	sys_stratum = STRATUM_UNSPEC;
 	memcpy(&sys_refid, "DOWN", 4);
 #endif /* LOCKCLOCK */
-	nlist = 0;
-	for (n = 0; n < NTP_HASH_SIZE; n++)
-		nlist += peer_hash_count[n];
+	nlist = peer_count;
 	if (nlist > list_alloc) {
-		if (list_alloc > 0) {
-			free(endpoint);
-			free(indx);
-			free(peer_list);
-		}
 		while (list_alloc < nlist) {
 			list_alloc += 5;
 			endpoint_size += 5 * 3 * sizeof(*endpoint);
 			indx_size += 5 * 3 * sizeof(*indx);
-			peer_list_size += 5 * sizeof(*peer_list);
+			peers_size += 5 * sizeof(*peers);
 		}
-		endpoint = (struct endpoint *)emalloc(endpoint_size);
-		indx = (int *)emalloc(indx_size);
-		peer_list = (struct peer **)emalloc(peer_list_size);
+		octets = endpoint_size + indx_size + peers_size;
+		endpoint = erealloc(endpoint, octets);
+		indx = (int *)((char *)endpoint + endpoint_size);
+		peers = (struct peer **)((char *)indx + indx_size);
 	}
 
 	/*
@@ -2265,101 +2256,98 @@ clock_select(void)
 	 * bucks and collectively crank the chimes.
 	 */
 	nlist = nl3 = 0;	/* none yet */
-	for (n = 0; n < NTP_HASH_SIZE; n++) {
-		for (peer = peer_hash[n]; peer != NULL; peer =
-		    peer->next) {
-			peer->flags &= ~FLAG_SYSPEER;
-			peer->status = CTL_PST_SEL_REJECT;
+	for (peer = peer_list; peer != NULL; peer = peer->p_link) {
+		peer->flags &= ~FLAG_SYSPEER;
+		peer->status = CTL_PST_SEL_REJECT;
 
-			/*
-			 * Leave the island immediately if the peer is
-			 * unfit to synchronize.
-			 */
-			if (peer_unfit(peer))
-				continue;
+		/*
+		 * Leave the island immediately if the peer is
+		 * unfit to synchronize.
+		 */
+		if (peer_unfit(peer))
+			continue;
 
-			/*
-			 * If this is an orphan, choose the one with
-			 * the lowest metric defined as the IPv4 address
-			 * or the first 64 bits of the hashed IPv6 address.
-			 */
-			if (peer->stratum == sys_orphan) {
-				double	ftemp;
+		/*
+		 * If this is an orphan, choose the one with
+		 * the lowest metric defined as the IPv4 address
+		 * or the first 64 bits of the hashed IPv6 address.
+		 */
+		if (peer->stratum == sys_orphan) {
+			double	ftemp;
 
-				ftemp = addr2refid(&peer->srcadr);
-				if (ftemp < orphdist) {
-					typeorphan = peer;
-					orphdist = ftemp;
-				}
-				continue;
+			ftemp = addr2refid(&peer->srcadr);
+			if (ftemp < orphdist) {
+				typeorphan = peer;
+				orphdist = ftemp;
 			}
+			continue;
+		}
 #ifdef REFCLOCK
-			/*
-			 * The following are special cases. We deal
-			 * with them later.
-			 */
-			switch (peer->refclktype) { 
-			case REFCLK_LOCALCLOCK:
-				if (typelocal == NULL &&
-				    !(peer->flags & FLAG_PREFER))
-					typelocal = peer;
-				continue;
+		/*
+		 * The following are special cases. We deal
+		 * with them later.
+		 */
+		switch (peer->refclktype) { 
+		case REFCLK_LOCALCLOCK:
+			if (typelocal == NULL &&
+			    !(peer->flags & FLAG_PREFER))
+				typelocal = peer;
+			continue;
 
-			case REFCLK_ACTS:
-				if (typeacts == NULL &&
-				    !(peer->flags & FLAG_PREFER))
-					typeacts = peer;
-				continue;
-			}
+		case REFCLK_ACTS:
+			if (typeacts == NULL &&
+			    !(peer->flags & FLAG_PREFER))
+				typeacts = peer;
+			continue;
+		}
 #endif /* REFCLOCK */
 
-			/*
-			 * If we get this far, the peer can stay on the
-			 * island, but does not yet have the immunity
-			 * idol.
-			 */
-			peer->status = CTL_PST_SEL_SANE;
-			peer_list[nlist++] = peer;
+		/*
+		 * If we get this far, the peer can stay on the
+		 * island, but does not yet have the immunity
+		 * idol.
+		 */
+		peer->status = CTL_PST_SEL_SANE;
+		peers[nlist++] = peer;
 
-			/*
-			 * Insert each interval endpoint on the sorted
-			 * list.
-			 */
-			e = peer->offset;	 /* Upper end */
-			f = root_distance(peer);
-			e = e + f;
-			for (i = nl3 - 1; i >= 0; i--) {
-				if (e >= endpoint[indx[i]].val)
-					break;
+		/*
+		 * Insert each interval endpoint on the sorted
+		 * list.
+		 */
+		e = peer->offset;	 /* Upper end */
+		f = root_distance(peer);
+		e = e + f;
+		for (i = nl3 - 1; i >= 0; i--) {
+			if (e >= endpoint[indx[i]].val)
+				break;
 
-				indx[i + 3] = indx[i];
-			}
-			indx[i + 3] = nl3;
-			endpoint[nl3].type = 1;
-			endpoint[nl3++].val = e;
-
-			e = e - f;		/* Center point */
-			for (; i >= 0; i--) {
-				if (e >= endpoint[indx[i]].val)
-					break;
-
-				indx[i + 2] = indx[i];
-			}
-			indx[i + 2] = nl3;
-			endpoint[nl3].type = 0;
-			endpoint[nl3++].val = e;
-
-			e = e - f;		/* Lower end */
-			for (; i >= 0; i--) {
-				if (e >= endpoint[indx[i]].val)
-					break;
-
-				indx[i + 1] = indx[i];
-			}
-			indx[i + 1] = nl3;
-			endpoint[nl3].type = -1;
-			endpoint[nl3++].val = e;
+			indx[i + 3] = indx[i];
 		}
+		indx[i + 3] = nl3;
+		endpoint[nl3].type = 1;
+		endpoint[nl3++].val = e;
+
+		e = e - f;		/* Center point */
+		for (; i >= 0; i--) {
+			if (e >= endpoint[indx[i]].val)
+				break;
+
+			indx[i + 2] = indx[i];
+		}
+		indx[i + 2] = nl3;
+		endpoint[nl3].type = 0;
+		endpoint[nl3++].val = e;
+
+		e = e - f;		/* Lower end */
+		for (; i >= 0; i--) {
+			if (e >= endpoint[indx[i]].val)
+				break;
+
+			indx[i + 1] = indx[i];
+		}
+		indx[i + 1] = nl3;
+		endpoint[nl3].type = -1;
+		endpoint[nl3++].val = e;
 	}
 #ifdef DEBUG
 	if (debug > 2)
@@ -2448,7 +2436,7 @@ clock_select(void)
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
-		peer = peer_list[i];
+		peer = peers[i];
 		if (nlist > 1 && (peer->offset <= low || peer->offset >=
 		    high) && !(peer->flags & FLAG_TRUE))
 			continue;
@@ -2482,11 +2470,11 @@ clock_select(void)
 			if (d >= synch[k - 1])
 				break;
 
-			peer_list[k] = peer_list[k - 1];
+			peers[k] = peers[k - 1];
 			error[k] = error[k - 1];
 			synch[k] = synch[k - 1];
 		}
-		peer_list[k] = peer;
+		peers[k] = peer;
 		error[k] = peer->jitter;
 		synch[k] = d;
 		j++;
@@ -2504,15 +2492,15 @@ clock_select(void)
 		synch[0] = 0;
 #ifdef REFCLOCK
 		if (typeacts != NULL) {
-			peer_list[0] = typeacts;
+			peers[0] = typeacts;
 			nlist = 1;
 		} else if (typelocal != NULL) {
-			peer_list[0] = typelocal;
+			peers[0] = typelocal;
 			nlist = 1;
 		}
 #endif /* REFCLOCK */
 		if (typeorphan != NULL) {
-			peer_list[0] = typeorphan;
+			peers[0] = typeorphan;
 			nlist = 1;
 		}
 	}
@@ -2521,11 +2509,11 @@ clock_select(void)
 	 * Mark the candidates at this point as truechimers.
 	 */
 	for (i = 0; i < nlist; i++) {
-		peer_list[i]->status = CTL_PST_SEL_SELCAND;
+		peers[i]->status = CTL_PST_SEL_SELCAND;
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: survivor %s %f\n",
-			    stoa(&peer_list[i]->srcadr), synch[i]);
+			    stoa(&peers[i]->srcadr), synch[i]);
 #endif
 	}
 
@@ -2549,8 +2537,8 @@ clock_select(void)
 			f = 0;
 			if (nlist > 1) {
 				for (j = 0; j < nlist; j++)
-					f += DIFF(peer_list[j]->offset,
-					    peer_list[i]->offset);
+					f += DIFF(peers[j]->offset,
+					    peers[i]->offset);
 				f = SQRT(f / (nlist - 1));
 			}
 			if (f * synch[i] > e) {
@@ -2563,7 +2551,7 @@ clock_select(void)
 		if (nlist <= sys_minsane || nlist <= sys_minclock) {
 			break;
 
-		} else if (f <= d || peer_list[k]->flags &
+		} else if (f <= d || peers[k]->flags &
 		    (FLAG_TRUE | FLAG_PREFER)) {
 			seljitter = f;
 			break;
@@ -2572,12 +2560,12 @@ clock_select(void)
 		if (debug > 2)
 			printf(
 			    "select: drop %s seljit %.6f jit %.6f\n",
-			    ntoa(&peer_list[k]->srcadr), g, d);
+			    ntoa(&peers[k]->srcadr), g, d);
 #endif
 		if (nlist > sys_maxclock)
-			peer_list[k]->status = CTL_PST_SEL_EXCESS;
+			peers[k]->status = CTL_PST_SEL_EXCESS;
 		for (j = k + 1; j < nlist; j++) {
-			peer_list[j - 1] = peer_list[j];
+			peers[j - 1] = peers[j];
 			synch[j - 1] = synch[j];
 			error[j - 1] = error[j];
 		}
@@ -2597,7 +2585,7 @@ clock_select(void)
 	 */
 	leap_vote = 0;
 	for (i = 0; i < nlist; i++) {
-		peer = peer_list[i];
+		peer = peers[i];
 		peer->unreach = 0;
 		peer->status = CTL_PST_SEL_SYNCCAND;
 		sys_survivors++;
@@ -2621,7 +2609,7 @@ clock_select(void)
 	if (nlist > 0 && nlist >= sys_minsane) {
 		double	x;
 
-		typesystem = peer_list[0];
+		typesystem = peers[0];
 		if (osys_peer == NULL || osys_peer == typesystem) {
 			sys_clockhop = 0; 
 		} else if ((x = fabs(typesystem->offset -
@@ -2653,7 +2641,7 @@ clock_select(void)
 	if (typesystem != NULL) {
 		if (sys_prefer == NULL) {
 			typesystem->status = CTL_PST_SEL_SYSPEER;
-			clock_combine(peer_list, sys_survivors);
+			clock_combine(peers, sys_survivors);
 			sys_jitter = SQRT(SQUARE(typesystem->jitter) +
 			    SQUARE(sys_jitter) + SQUARE(seljitter));
 		} else {
@@ -3319,7 +3307,7 @@ fast_xmit(
 		 */
 		cookie = session_key(&rbufp->recv_srcadr,
 		    &rbufp->dstadr->sin, 0, sys_private, 0);
-		if (rbufp->recv_length > sendlen + MAX_MAC_LEN) {
+		if (rbufp->recv_length > sendlen + (int)MAX_MAC_LEN) {
 			session_key(&rbufp->dstadr->sin,
 			    &rbufp->recv_srcadr, xkeyid, 0, 2);
 			temp32 = CRYPTO_RESP;

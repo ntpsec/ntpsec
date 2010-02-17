@@ -949,7 +949,7 @@ remove_interface(
 	}
 
 	ninterfaces--;
-	ntp_monclearinterface(iface);
+	mon_clearinterface(iface);
 
 	/* remove restrict interface entry */
 	SET_HOSTMASK(&resmask, AF(&iface->sin));
@@ -4180,6 +4180,17 @@ find_flagged_addr_in_list(
 
 	DPRINTF(4, ("NOT FOUND\n"));
 	return NULL;
+}
+
+
+char *
+localaddrtoa(
+	struct interface *la
+	)
+{
+	return (NULL == la)
+		   ? "<null>"
+		   : stoa(&la->sin);
 }
 
 

@@ -18,6 +18,9 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 #ifdef HAVE_IEEEFP_H
 # include <ieeefp.h>

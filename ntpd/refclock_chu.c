@@ -500,7 +500,7 @@ chu_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* HAVE_AUDIO */
-	if (fd < 0)
+	if (fd <= 0)
 		return (0);
 
 	/*

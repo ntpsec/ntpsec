@@ -374,7 +374,6 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 
 #define HAVE_LIMITS_H	1
 #define HAVE_STRDUP	1
-#define HAVE_STRCHR	1
 #define HAVE_FCNTL_H	1
 #define HAVE_SYS_RESOURCE_H
 #define HAVE_BSD_NICE			/* emulate BSD setpriority() */

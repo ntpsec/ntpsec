@@ -150,7 +150,15 @@ struct sockaddr_storage {
 #endif	/* !AI_PASSIVE */
 
 #ifndef AI_NUMERICHOST		/* such as AIX 4.3 */
-#define AI_NUMERICHOST	0
+# define Z_AI_NUMERICHOST	0
+#else
+# define Z_AI_NUMERICHOST	AI_NUMERICHOST
+#endif
+
+#ifndef AI_NUMERICSERV		/* not in RFC 2553 */
+# define Z_AI_NUMERICSERV	0
+#else
+# define Z_AI_NUMERICSERV	AI_NUMERICSERV
 #endif
 
 #ifndef ISC_PLATFORM_HAVEIPV6

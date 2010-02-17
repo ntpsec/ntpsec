@@ -8,6 +8,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_if.h"
+#include "ntp_lists.h"
 #include "ntp_stdlib.h"
 #include <ntp_random.h>
 
@@ -44,11 +45,15 @@
  *
  * ... I don't believe the above is true anymore ... jdg
  */
-#ifndef MAXMONMEM
-#define	MAXMONMEM	600	/* we allocate up to 600 structures */
+#ifdef MAXMONMEM		/* old name */
+# define	MAX_MONLIST	MAXMONMEM
+#elif !defined(MAX_MONLIST)
+# define	MAX_MONLIST	600	/* recycle LRU at this limit */
 #endif
-#ifndef MONMEMINC
-#define	MONMEMINC	40	/* allocate them 40 at a time */
+#ifdef MONMEMINC		/* old name */
+# define	INC_MONLIST	MONMEMINC
+#elif !defined(INC_MONLIST)
+# define	INC_MONLIST	15	/* allocation granularity */
 #endif
 
 /*
@@ -63,14 +68,14 @@
  * for the hash and count tables is only allocated if monitoring is
  * turned on.
  */
-static	struct mon_data *mon_hash[MON_HASH_SIZE];  /* list ptrs */
+static	mon_entry *mon_hash[MON_HASH_SIZE];  /* list ptrs */
 struct	mon_data mon_mru_list;
 
 /*
  * List of free structures structures, and counters of free and total
  * structures. The free structures are linked with the hash_next field.
  */
-static  struct mon_data *mon_free;      /* free list or null if none */
+static  mon_entry *mon_free;	/* free list or null if none */
 static	int mon_total_mem;		/* total structures allocated */
 static	int mon_mem_increments;		/* times called malloc() */
 
@@ -81,17 +86,18 @@ static	int mon_mem_increments;		/* times called malloc() */
  * is less than eight times the increment.
  */
 int	ntp_minpkt = NTP_MINPKT;	/* minimum (log 2 s) */
-int	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
+u_char	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 
 /*
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-int	mon_enabled;			/* enable switch */
-int	mon_age = 3000;			/* preemption limit */
-static	int mon_have_memory;
-static	void	mon_getmoremem	(void);
-static	void	remove_from_hash (struct mon_data *);
+	int	mon_enabled;		/* enable switch */
+	int	mon_age = 3000;		/* preemption limit */
+static	int	mon_have_memory;
+static	void	mon_getmoremem(void);
+static	void	remove_from_hash(mon_entry *);
+
 
 /*
  * init_mon - initialize monitoring global data
@@ -104,12 +110,6 @@ init_mon(void)
 	 * until someone explicitly starts us.
 	 */
 	mon_enabled = MON_OFF;
-	mon_have_memory = 0;
-	mon_total_mem = 0;
-	mon_mem_increments = 0;
-	mon_free = NULL;
-	memset(&mon_hash[0], 0, sizeof mon_hash);
-	memset(&mon_mru_list, 0, sizeof mon_mru_list);
 }
 
 
@@ -121,24 +121,16 @@ mon_start(
 	int mode
 	)
 {
-
-	if (mon_enabled != MON_OFF) {
+	if (MON_OFF == mode)		/* MON_OFF is 0 */
+		return;
+	if (mon_enabled) {
 		mon_enabled |= mode;
 		return;
 	}
-	if (mode == MON_OFF)
-	    return;
-	
-	if (!mon_have_memory) {
-		mon_total_mem = 0;
-		mon_mem_increments = 0;
-		mon_free = NULL;
+	if (!mon_have_memory)
 		mon_getmoremem();
-		mon_have_memory = 1;
-	}
 
-	mon_mru_list.mru_next = &mon_mru_list;
-	mon_mru_list.mru_prev = &mon_mru_list;
+	INIT_DLIST(mon_mru_list, mru);
 	mon_enabled = mode;
 }
 
@@ -151,10 +143,10 @@ mon_stop(
 	int mode
 	)
 {
-	register struct mon_data *md, *md_next;
-	register int i;
+	mon_entry *md;
+	int i;
 
-	if (mon_enabled == MON_OFF)
+	if (MON_OFF == mon_enabled)
 		return;
 	if ((mon_enabled & mode) == 0 || mode == MON_OFF)
 		return;
@@ -167,35 +159,36 @@ mon_stop(
 	 * Put everything back on the free list
 	 */
 	for (i = 0; i < MON_HASH_SIZE; i++) {
-		md = mon_hash[i];               /* get next list */
-		mon_hash[i] = NULL;             /* zero the list head */
-		while (md != NULL) {
-			md_next = md->hash_next;
-			md->hash_next = mon_free;
-			mon_free = md;
-			md = md_next;
+		while (mon_hash[i] != NULL) {
+			UNLINK_HEAD_SLIST(md, mon_hash[i], hash_next);
+			memset(md, 0, sizeof(*md));
+			LINK_SLIST(mon_free, md, hash_next);
 		}
 	}
-	mon_mru_list.mru_next = &mon_mru_list;
-	mon_mru_list.mru_prev = &mon_mru_list;
+	INIT_DLIST(mon_mru_list, mru);
 }
 
-void
-ntp_monclearinterface(struct interface *interface)
-{
-        struct mon_data *md;
 
-	for (md = mon_mru_list.mru_next; md != &mon_mru_list;
-	    md = md->mru_next) {
-		if (md->interface == interface) {
-		      /* dequeue from mru list and put to free list */
-		      md->mru_prev->mru_next = md->mru_next;
-		      md->mru_next->mru_prev = md->mru_prev;
-		      remove_from_hash(md);
-		      md->hash_next = mon_free;
-		      mon_free = md;
+void
+mon_clearinterface(
+	struct interface *lcladr
+	)
+{
+	mon_entry *mon;
+
+	/* iterate mon over mon_mru_list */
+	ITER_DLIST_BEGIN(mon_mru_list, mon, mru, mon_entry)
+
+		if (mon->lcladr == lcladr) {
+			/* remove from mru list and hash */
+			UNLINK_DLIST(mon, mru);
+			remove_from_hash(mon);
+			/* put on free list */
+			memset(mon, 0, sizeof(*mon));
+			LINK_SLIST(mon_free, mon, hash_next);
 		}
-	}
+
+	ITER_DLIST_END()
 }
 
 
@@ -210,21 +203,22 @@ ntp_monitor(
 	int	flags
 	)
 {
-	register struct pkt *pkt;
-	register struct mon_data *md;
-	sockaddr_u addr;
-	register u_int hash;
-	register int mode;
-	int	interval;
+	struct pkt *	pkt;
+	mon_entry *	md;
+	sockaddr_u	addr;
+	u_int		hash;
+	u_char		mode;
+	u_char		version;
+	int		interval;
 
 	if (mon_enabled == MON_OFF)
 		return (flags);
 
 	pkt = &rbufp->recv_pkt;
-	memset(&addr, 0, sizeof(addr));
-	memcpy(&addr, &(rbufp->recv_srcadr), sizeof(addr));
+	memcpy(&addr, &rbufp->recv_srcadr, sizeof(addr));
 	hash = MON_HASH(&addr);
 	mode = PKT_MODE(pkt->li_vn_mode);
+	version = PKT_VERSION(pkt->li_vn_mode);
 	md = mon_hash[hash];
 	while (md != NULL) {
 		int	head;		/* headway increment */
@@ -240,18 +234,13 @@ ntp_monitor(
 			md->count++;
 			md->flags = flags;
 			md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
-			md->mode = (u_char) mode;
-			md->version = PKT_VERSION(pkt->li_vn_mode);
+			md->vn_mode = VN_MODE(version, mode);
 
 			/*
 			 * Shuffle to the head of the MRU list.
 			 */
-			md->mru_next->mru_prev = md->mru_prev;
-			md->mru_prev->mru_next = md->mru_next;
-			md->mru_next = mon_mru_list.mru_next;
-			md->mru_prev = &mon_mru_list;
-			mon_mru_list.mru_next->mru_prev = md;
-			mon_mru_list.mru_next = md;
+			UNLINK_DLIST(md, mru);
+			LINK_DLIST(mon_mru_list, md, mru);
 
 			/*
 			 * At this point the most recent arrival is
@@ -289,12 +278,12 @@ ntp_monitor(
 			    leak < limit) {
 				md->leak = leak - 2;
 				md->flags &= ~(RES_LIMITED | RES_KOD);
-			} else if (md->leak < limit) {
+			} else if (md->leak < limit)
 				md->leak = limit + head;
-			} else {
+			else
 				md->flags &= ~RES_KOD;
-			}
-			return (md->flags);
+
+			return md->flags;
 		}
 		md = md->hash_next;
 	}
@@ -304,24 +293,22 @@ ntp_monitor(
 	 * guy.  Get him some memory, either from the free list
 	 * or from the tail of the MRU list.
 	 */
-	if (mon_free == NULL && mon_total_mem >= MAXMONMEM) {
-
+	if (NULL == mon_free && mon_total_mem >= MAX_MONLIST) {
 		/*
 		 * Preempt from the MRU list if old enough.
 		 */
-		md = mon_mru_list.mru_prev;
+		md = TAIL_DLIST(mon_mru_list, mru);
 		if (md->count == 1 || ntp_random() / (2. * FRAC) >
 		    (double)(current_time - md->lasttime) / mon_age)
-			return (flags & ~RES_LIMITED);
+			return ~RES_LIMITED & flags;
 
-		md->mru_prev->mru_next = &mon_mru_list;
-		mon_mru_list.mru_prev = md->mru_prev;
+		UNLINK_DLIST(md, mru);
 		remove_from_hash(md);
+		memset(md, 0, sizeof(*md));
 	} else {
-		if (mon_free == NULL)
+		if (NULL == mon_free)
 			mon_getmoremem();
-		md = mon_free;
-		mon_free = md->hash_next;
+		UNLINK_HEAD_SLIST(md, mon_free, hash_next);
 	}
 
 	/*
@@ -331,28 +318,23 @@ ntp_monitor(
 	md->count = 1;
 	md->flags = flags & ~RES_LIMITED;
 	md->leak = 0;
-	memset(&md->rmtadr, 0, sizeof(md->rmtadr));
-	memcpy(&md->rmtadr, &addr, sizeof(addr));
+	memcpy(&md->rmtadr, &addr, sizeof(md->rmtadr));
 	md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
-	md->mode = (u_char) mode;
-	md->version = PKT_VERSION(pkt->li_vn_mode);
-	md->interface = rbufp->dstadr;
+	md->vn_mode = VN_MODE(version, mode);
+	md->lcladr = rbufp->dstadr;
 	md->cast_flags = (u_char)(((rbufp->dstadr->flags &
-	    INT_MCASTOPEN) && rbufp->fd == md->interface->fd) ?
-	    MDF_MCAST: rbufp->fd == md->interface->bfd ? MDF_BCAST :
+	    INT_MCASTOPEN) && rbufp->fd == md->lcladr->fd) ?
+	    MDF_MCAST: rbufp->fd == md->lcladr->bfd ? MDF_BCAST :
 	    MDF_UCAST);
 
 	/*
 	 * Drop him into front of the hash table. Also put him on top of
 	 * the MRU list.
 	 */
-	md->hash_next = mon_hash[hash];
-	mon_hash[hash] = md;
-	md->mru_next = mon_mru_list.mru_next;
-	md->mru_prev = &mon_mru_list;
-	mon_mru_list.mru_next->mru_prev = md;
-	mon_mru_list.mru_next = md;
-	return (md->flags);
+	LINK_SLIST(mon_hash[hash], md, hash_next);
+	LINK_DLIST(mon_mru_list, md, mru);
+
+	return md->flags;
 }
 
 
@@ -362,47 +344,31 @@ ntp_monitor(
 static void
 mon_getmoremem(void)
 {
-	register struct mon_data *md;
-	register int i;
-	struct mon_data *freedata;      /* 'old' free list (null) */
+	mon_entry *md;
+	int i;
 
-	md = (struct mon_data *)emalloc(MONMEMINC *
-	    sizeof(struct mon_data));
-	freedata = mon_free;
-	mon_free = md;
-	for (i = 0; i < (MONMEMINC-1); i++) {
-		md->hash_next = (md + 1);
-		md++;
-	}
+	md = emalloc(INC_MONLIST * sizeof(*md));
+	memset(md, 0, INC_MONLIST * sizeof(*md));
 
-	/*
-	 * md now points at the last.  Link in the rest of the chain.
-	 */
-	md->hash_next = freedata;
-	mon_total_mem += MONMEMINC;
+	for (i = INC_MONLIST - 1; i >= 0; i--)
+		LINK_SLIST(mon_free, &md[i], hash_next);
+
+	mon_total_mem += INC_MONLIST;
 	mon_mem_increments++;
+	mon_have_memory = 1;
 }
+
 
 static void
 remove_from_hash(
-	struct mon_data *md
+	mon_entry *mon
 	)
 {
-	register u_int hash;
-	register struct mon_data *md_prev;
+	u_int hash;
+	mon_entry *punlinked;
 
-	hash = MON_HASH(&md->rmtadr);
-	if (mon_hash[hash] == md) {
-		mon_hash[hash] = md->hash_next;
-	} else {
-		md_prev = mon_hash[hash];
-		while (md_prev->hash_next != md) {
-			md_prev = md_prev->hash_next;
-			if (md_prev == NULL) {
-				/* logic error */
-				return;
-			}
-		}
-		md_prev->hash_next = md->hash_next;
-	}
+	hash = MON_HASH(&mon->rmtadr);
+	UNLINK_SLIST(punlinked, mon_hash[hash], mon, hash_next,
+		     mon_entry);
+	NTP_ENSURE(punlinked == mon);
 }

@@ -1,3 +1,26 @@
+* [Bug 1483] AI_NUMERICSERV undefined in 4.2.7p20.
+* Maintain and use linked list of associations (struct peer) in ntpd,
+  avoiding walking 128 hash table entries to iterate over peers.
+* Remove more workarounds unneeded since we require ISO C90 AKA ANSI C:
+  - remove fallback implementations for memmove(), memset, strstr().
+  - do not test for atexit() or memcpy().
+* Collapse a bunch of code duplication in ntpd/ntp_restrict.c added with
+  support for IPv6.
+* Correct some corner case failures in automatically enabling the MRU
+  list if any "restrict ... limited" is in effect, and in disabling MRU
+  maintenance. (ntp_monitor.c, ntp_restrict.c)
+* Reverse the internal sort order of the address restriction lists, but
+  preserve the same behavior.  This allows removal of special-case code
+  related to the default restrictions and more straightforward lookups
+  of restrictions for a given address (now, stop on first match).
+* Move ntp_restrict.c MRU doubly-linked list maintenance code into
+  ntp_lists.h macros, allowing more duplicated source excision.
+* Correct Windows port's refclock_open() to return 0 on failure not -1.
+* Correct CHU, dumbclock, and WWVB drivers to check for 0 returned from
+  refclock_open() on failure.
+* Repair ntpdate.c to handle no longer testing HAVE_TIMER_SETTIME.
+* Do not reference peer_node/unpeer_node after freeing when built with
+  --disable-saveconfig and using DNS.
 (4.2.7p20) 2010/02/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1483] hostname in ntp.conf "restrict" parameter rejected.
 * Use all addresses for each restrict by hostname.

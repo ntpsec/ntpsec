@@ -758,6 +758,7 @@ refclock_open(
 		msyslog(LOG_ERR, "refclock_open %s: %m", dev);
 		return (0);
 	}
+	NTP_INSIST(fd != 0);
 	if (!refclock_setup(fd, speed, lflags)) {
 		close(fd);
 		return (0);
@@ -768,6 +769,7 @@ refclock_open(
 	}
 	return (fd);
 }
+
 
 /*
  * refclock_setup - initialize terminal interface structure
@@ -1311,7 +1313,7 @@ refclock_pps(
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
 	 */
-	pp->lastrec.l_ui = ap->ts.tv_sec + JAN_1970;
+	pp->lastrec.l_ui = (u_int32)ap->ts.tv_sec + JAN_1970;
 	dtemp = ap->ts.tv_nsec / 1e9;
 	pp->lastrec.l_uf = (u_int32)(dtemp * FRAC);
 	if (dtemp > .5)
