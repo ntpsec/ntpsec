@@ -117,11 +117,16 @@ u_long	sys_kodsent;		/* KoD sent */
 static	double	root_distance	(struct peer *);
 static	void	clock_combine	(struct peer **, int);
 static	void	peer_xmit	(struct peer *);
-static	void	fast_xmit	(struct recvbuf *, int, keyid_t,
-				    int);
+static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
+static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
 static	int	peer_unfit	(struct peer *);
+#ifdef WORKER
+void	pool_name_resolved	(int, int, void *, const char *,
+				 const char *, const struct addrinfo *,
+				 const struct addrinfo *);
+#endif
 
 
 /*
@@ -159,9 +164,13 @@ transmit(
 	 * increased by one for each poll until either sys_maxclock
 	 * servers have been found or the maximum ttl is reached. When
 	 * sys_maxclock servers are found we stop polling until one or
-	 * more servers have timed out or until less than minpoll
+	 * more servers have timed out or until less than sys_minclock
 	 * associations turn up. In this case additional better servers
-	 * are dragged in and preempt the existing ones.
+	 * are dragged in and preempt the existing ones.  Once every
+	 * sys_beacon seconds we are to transmit unconditionally, but
+	 * this code is not quite right -- peer->unreach counts polls
+	 * and is being compared with sys_beacon, so the beacons happen
+	 * every sys_beacon polls.
 	 */
 	if (peer->cast_flags & MDF_ACAST) {
 		peer->outdate = current_time;
@@ -181,8 +190,30 @@ transmit(
 	}
 
 	/*
+	 * Pool associations transmit unicast solicitations when there
+	 * are less than a hard limit of 2 * sys_maxclock associations,
+	 * and either less than sys_minclock survivors or less than
+	 * sys_maxclock associations.  The hard limit prevents unbounded
+	 * growth in associations if the system clock or network quality
+	 * result in survivor count dipping below sys_minclock often.
+	 * This was observed testing with pool, where sys_maxclock == 12
+	 * resulted in 34 associations without the hard limit.  A
+	 * similar hard limit on manycastclient ephemeral associations
+	 * may be appropriate.
+	 */
+	if (peer->cast_flags & MDF_POOL) {
+		peer->outdate = current_time;
+		if (peer_associations < 2 * sys_maxclock &&
+		    (peer_associations < sys_maxclock ||
+		     sys_survivors < sys_minclock))
+			pool_xmit(peer);
+		poll_update(peer, hpoll);
+		return;
+	}
+
+	/*
 	 * In unicast modes the dance is much more intricate. It is
-	 * desigmed to back off whenever possible to minimize network
+	 * designed to back off whenever possible to minimize network
 	 * traffic.
 	 */
 	if (peer->burst == 0) {
@@ -218,7 +249,7 @@ transmit(
 			 * enabled and the peer is fit.
 			 */
 			hpoll = sys_poll;
-			if (!(peer->flags & FLAG_PREEMPT &&
+			if (!((peer->flags & FLAG_PREEMPT) &&
 			    peer->hmode == MODE_CLIENT))
 				peer->unreach = 0;
 			if ((peer->flags & FLAG_BURST) && peer->retry ==
@@ -233,20 +264,15 @@ transmit(
 		 */ 
 		if (peer->unreach >= NTP_UNREACH) {
 			hpoll++;
-			if (peer->flags & FLAG_PREEMPT) {
+			if ((peer->flags & FLAG_PREEMPT) && 
+			    (peer->hmode != MODE_CLIENT ||
+			     (peer_associations > sys_maxclock &&
+			      score_all(peer)))) {
 				report_event(PEVNT_RESTART, peer,
 				    "timeout");
-				if (peer->hmode != MODE_CLIENT) {
-					peer_clear(peer, "TIME");
-					unpeer(peer);
-					return;
-				}
-				if (peer_associations > sys_maxclock &&
-				    score_all(peer)) {
-					peer_clear(peer, "TIME");
-					unpeer(peer);
-					return;
-				}
+				peer_clear(peer, "TIME");
+				unpeer(peer);
+				return;
 			}
 		}
 	} else {
@@ -754,24 +780,31 @@ receive(
 
 	/*
 	 * This is a server mode packet returned in response to a client
-	 * mode packet sent to a multicast group address. The origin
-	 * timestamp is a good nonce to reliably associate the reply
-	 * with what was sent. If there is no match, that's curious and
-	 * could be an intruder attempting to clog, so we just ignore
-	 * it.
+	 * mode packet sent to a multicast group address (for
+	 * manycastclient) or to a unicast address (for pool). The
+	 * origin timestamp is a good nonce to reliably associate the
+	 * reply with what was sent. If there is no match, that's
+	 * curious and could be an intruder attempting to clog, so we
+	 * just ignore it.
 	 *
-	 * If the packet is authentic and the manycast association is
-	 * found, we mobilize a client association and copy pertinent
-	 * variables from the manycast association to the new client
-	 * association. If not, just ignore the packet.
+	 * If the packet is authentic and the manycastclient or pool 
+	 * association is found, we mobilize a client association and
+	 * copy pertinent variables from the manycastclient or pool
+	 * association to the new client association. If not, just
+	 * ignore the packet.
 	 *
 	 * There is an implosion hazard at the manycast client, since
 	 * the manycast servers send the server packet immediately. If
 	 * the guy is already here, don't fire up a duplicate.
 	 */
 	case AM_MANYCAST:
-		if (!AUTH(sys_authenticate | (restrict_mask &
-		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
+		if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
+			sys_restricted++;
+			return;			/* not enabled */
+		}
+		if (!AUTH((!(peer2->cast_flags & MDF_POOL) &&
+		    sys_authenticate) | (restrict_mask & (RES_NOPEER |
+		    RES_DONTTRUST)), is_authentic)) {
 			sys_restricted++;
 			return;			/* access denied */
 		}
@@ -785,25 +818,28 @@ receive(
 			sys_declined++;
 			return;			/* no help */
 		}
-		if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
-			sys_restricted++;
-			return;			/* not enabled */
-		}
-		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_CLIENT, hisversion, NTP_MINDPOLL, NTP_MAXDPOLL,
-		    FLAG_PREEMPT, MDF_UCAST | MDF_ACLNT, 0, skeyid)) ==
-		    NULL) {
+		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
+		    rbufp->dstadr, MODE_CLIENT, hisversion, NTP_MINDPOLL,
+		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST | MDF_UCLNT, 0,
+		    skeyid)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
 		}
 
+		if (peer2->flags & FLAG_IBURST)
+			peer->flags |= FLAG_IBURST;
 		/*
 		 * We don't need these, but it warms the billboards.
 		 */
-		if (peer2->flags & FLAG_IBURST)
-			peer->flags |= FLAG_IBURST;
 		peer->minpoll = peer2->minpoll;
 		peer->maxpoll = peer2->maxpoll;
+		/*
+		 * After each ephemeral pool association is spun,
+		 * accelerate the next poll for the pool solicitor so
+		 * the pool will fill promptly.
+		 */
+		if (peer2->cast_flags & MDF_POOL)
+			peer2->nextdate = current_time + 1;
 		break;
 
 	/*
@@ -864,7 +900,7 @@ receive(
 			 * Do not execute the volley. Start out in
 			 * broadcast client mode.
 			 */
-			if ((peer = newpeer(&rbufp->recv_srcadr,
+			if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 			    rbufp->dstadr, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, 0, 0, 0,
 			    skeyid)) == NULL) {
@@ -886,10 +922,10 @@ receive(
 		 * packet, normally 6 (64 s) and that the poll interval
 		 * is fixed at this value.
 		 */
-		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
-		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
-		    FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT, 0,
-		    skeyid)) == NULL) {
+		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
+		    rbufp->dstadr, MODE_CLIENT, hisversion, pkt->ppoll,
+		    pkt->ppoll, FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
+		    0, skeyid)) == NULL) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
@@ -944,13 +980,13 @@ receive(
 		}
 
 		/*
-		 * The message is correctly authenticated and
-		 * allowed. Mobiliae a symmetric passive association.
+		 * The message is correctly authenticated and allowed.
+		 * Mobilize a symmetric passive association.
 		 */
-		if ((peer = newpeer(&rbufp->recv_srcadr,
+		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST, 0,
-		    skeyid)) == NULL) {
+		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST, 0, skeyid))
+		    == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
@@ -1793,10 +1829,16 @@ poll_update(
 	 * works for any association. Otherwise, clamp the poll interval
 	 * between minpoll and maxpoll.
 	 */
-	if (peer->cast_flags & MDF_BCLNT)
-		hpoll = peer->minpoll;
-	else
-		hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
+	if (peer->cast_flags & MDF_BCLNT) {
+		/* verify special casing of MDF_BCLNT here is not needed */
+		if (peer->minpoll != peer->maxpoll) {
+			msyslog(LOG_ERR, "FATAL poll_update MDF_BCLNT unexpected minpoll %u maxpoll %u",
+				(u_int)peer->minpoll, (u_int)peer->maxpoll);
+			exit(1);
+		}
+	} 
+
+	hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
 
 #ifdef OPENSSL
 	/*
@@ -2057,7 +2099,7 @@ clock_filter(
 		j = (j + 1) % NTP_SHIFT;
 	}
 
-        /*
+	/*
 	 * If the clock discipline has stabilized, sort the samples by
 	 * distance.  
 	 */
@@ -3169,9 +3211,8 @@ peer_xmit(
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %d index %d\n",
-		    current_time, peer->dstadr ?
-		    ntoa(&peer->dstadr->sin) : "-",
-	 	    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
+		    current_time, latoa(peer->dstadr),
+		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
 		    peer->keynumber);
 #endif
 #else /* OPENSSL */
@@ -3339,6 +3380,122 @@ fast_xmit(
 		    ntoa(&rbufp->recv_srcadr), xmode, xkeyid, sendlen);
 #endif
 }
+
+
+/*
+ * pool_xmit - resolve hostname or send unicast solicitation for pool.
+ */
+static void
+pool_xmit(
+	struct peer *pool	/* pool solicitor association */
+	)
+{
+#ifdef WORKER
+	struct pkt		xpkt;	/* transmit packet structure */
+	struct addrinfo		hints;
+	int			rc;
+	struct interface *	lcladr;
+	sockaddr_u *		rmtadr;
+	struct peer *		p;
+	l_fp			xmt_tx;
+
+	if (NULL == pool->ai) {
+		if (pool->addrs != NULL) {
+			/* free() is used with copy_addrinfo_list() */
+			free(pool->addrs);
+			pool->addrs = NULL;
+		}
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF(&pool->srcadr);
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		/* ignore getaddrinfo_sometime() errors, we will retry */
+		rc = getaddrinfo_sometime(
+			pool->hostname,
+			"ntp",
+			&hints,
+			&pool_name_resolved,
+			(void *)(u_int)pool->associd);
+		if (!rc)
+			msyslog(LOG_INFO, "pool DNS lookup %s started", pool->hostname);
+		else
+			msyslog(LOG_ERR, "unable to start pool DNS %s %m", pool->hostname);
+		return;
+	}
+
+	do {
+		rmtadr = (sockaddr_u *)pool->ai->ai_addr;
+		pool->ai = pool->ai->ai_next;
+		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
+	} while (p != NULL && pool->ai != NULL);
+	if (p != NULL)
+		return;	/* out of addresses, re-query DNS next poll */
+	lcladr = findinterface(rmtadr);
+	memset(&xpkt, 0, sizeof(xpkt));
+	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, pool->version,
+					 MODE_CLIENT);
+	xpkt.stratum = STRATUM_TO_PKT(sys_stratum);
+	xpkt.ppoll = pool->hpoll;
+	xpkt.precision = sys_precision;
+	xpkt.refid = sys_refid;
+	xpkt.rootdelay = HTONS_FP(DTOFP(sys_rootdelay));
+	xpkt.rootdisp = HTONS_FP(DTOUFP(sys_rootdisp));
+	HTONL_FP(&sys_reftime, &xpkt.reftime);
+	get_systime(&xmt_tx);
+	pool->aorg = xmt_tx;
+	HTONL_FP(&xmt_tx, &xpkt.xmt);
+	sendpkt(rmtadr, lcladr,	sys_ttl[pool->ttl], &xpkt,
+		LEN_PKT_NOMAC);
+	pool->sent++;
+	pool->throttle += (1 << pool->minpoll) - 2;
+#ifdef DEBUG
+	msyslog(LOG_INFO, "transmit: at %ld %s->%s pool\n", /* !!!!! */
+		    current_time, latoa(lcladr), stoa(rmtadr));
+	if (debug)
+		printf("transmit: at %ld %s->%s pool\n",
+		    current_time, latoa(lcladr), stoa(rmtadr));
+#endif
+#endif	/* WORKER */
+}
+
+
+#ifdef WORKER
+void
+pool_name_resolved(
+	int			rescode,
+	int			gai_errno,
+	void *			context,
+	const char *		name,
+	const char *		service,
+	const struct addrinfo *	hints,
+	const struct addrinfo *	res
+	)
+{
+	struct peer *	pool;	/* pool solicitor association */
+	associd_t	assoc;
+
+	if (rescode) {
+		msyslog(LOG_ERR,
+			"error resolving pool %s: %s (%d)",
+			name, gai_strerror(rescode), rescode);
+		return;
+	}
+
+	assoc = (associd_t)(u_int)context;
+	pool = findpeerbyassoc(assoc);
+	if (NULL == pool) {
+		msyslog(LOG_ERR,
+			"Could not find assoc %u for pool DNS %s\n",
+			assoc, name);
+		return;
+	}
+	msyslog(LOG_INFO, "pool DNS %s completed", name);
+	pool->addrs = copy_addrinfo_list(res);
+	pool->ai = pool->addrs;
+	pool_xmit(pool);
+
+}
+#endif	/* WORKER */
 
 
 #ifdef OPENSSL

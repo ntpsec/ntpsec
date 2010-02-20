@@ -1804,35 +1804,41 @@ getnetnum(
 	int af
 	)
 {
-	int sockaddr_len;
 	struct addrinfo hints, *ai = NULL;
 
-	sockaddr_len = SIZEOF_SOCKADDR(af);
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
 	hints.ai_flags |= AI_ADDRCONFIG;
 #endif
 	
-	/* decodenetnum works with addresses only */
+	/*
+	 * decodenetnum only works with addresses, but handles syntax
+	 * that getaddrinfo doesn't:  [2001::1]:1234
+	 */
 	if (decodenetnum(hname, num)) {
-		if (fullhost != 0) {
-			getnameinfo((struct sockaddr *)num, sockaddr_len,
-					fullhost, sizeof(fullhost), NULL, 0,
-					NI_NUMERICHOST);
-		}
+		if (fullhost != NULL)
+			getnameinfo(&num->sa, SOCKLEN(num), fullhost,
+				    LENHOSTNAME, NULL, 0, 0); 
 		return 1;
 	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
-		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
-		if (ai->ai_canonname != 0)
-		    (void) strcpy(fullhost, ai->ai_canonname);
+		NTP_INSIST(sizeof(*num) >= ai->ai_addrlen);
+		memcpy(num, ai->ai_addr, ai->ai_addrlen);
+		if (fullhost != NULL) {
+			if (ai->ai_canonname != NULL)
+				strncpy(fullhost, ai->ai_canonname,
+					LENHOSTNAME);
+			else
+				getnameinfo(&num->sa, SOCKLEN(num),
+					    fullhost, LENHOSTNAME, NULL,
+					    0, 0);
+		}
 		return 1;
-	} else {
-		(void) fprintf(stderr, "***Can't find host %s\n", hname);
-		return 0;
 	}
-	/*NOTREACHED*/
+	fprintf(stderr, "***Can't find host %s\n", hname);
+	return 0;
 }
+
 
 /*
  * nntohost - convert network number to host name.  This routine enforces
@@ -1843,7 +1849,7 @@ nntohost(
 	sockaddr_u *netnum
 	)
 {
-	if (!showhostnames)
+	if (!showhostnames || SOCK_UNSPEC(netnum))
 		return stoa(netnum);
 	else if (ISREFCLOCKADR(netnum))
 		return refnumtoa(netnum);

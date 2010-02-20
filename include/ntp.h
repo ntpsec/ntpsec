@@ -253,6 +253,9 @@ struct peer {
 	struct peer *aid_link;	/* link pointer in associd hash */
 	struct peer *ilink;	/* list of peers for interface */
 	sockaddr_u srcadr;	/* address of remote host */
+	char *	hostname;	/* if non-NULL, remote name */
+	struct addrinfo *addrs;	/* hostname query result */
+	struct addrinfo *ai;	/* position within addrs */
 	struct interface *dstadr; /* local address (interface) */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
@@ -467,11 +470,6 @@ struct peer {
 #define END_CRYPTO_TO_ZERO(p)	((char *)&((p)->end_clear_to_zero))
 #define LEN_CRYPTO_TO_ZERO	(END_CRYPTO_TO_ZERO((struct peer *)0) \
 				    - CRYPTO_TO_ZERO((struct peer *)0))
-
-/*
- * Reference clock identifiers (for pps signal)
- */
-#define PPSREFID (u_int32)"PPS "	/* used when pps controls stratum>1 */
 
 /*
  * Reference clock types.  Added as necessary.
@@ -756,17 +754,29 @@ struct mon_data {
 };
 
 /*
- * Values for cast_flags
+ * Values for cast_flags in mon_entry and struct peer.  mon_entry uses
+ * only the first three, MDF_UCAST, MDF_MCAST, and MDF_BCAST.
  */
-#define	MDF_UCAST	0x01		/* unicast */
-#define	MDF_MCAST	0x02		/* multicast */
-#define	MDF_BCAST	0x04		/* broadcast */
-#define	MDF_LCAST	0x08		/* localcast (unused) */
-#define MDF_ACAST	0x10		/* manycast */
-#define	MDF_BCLNT	0x20		/* broadcast client */
-#define MDF_ACLNT	0x40		/* manycast client */
-/* server *cast mode bits */
-#define MDF_SRVCASTMASK	(MDF_MCAST | MDF_BCAST | MDF_ACAST)
+#define	MDF_UCAST	0x01	/* unicast client */
+#define	MDF_MCAST	0x02	/* multicast server */
+#define	MDF_BCAST	0x04	/* broadcast server */
+#define	MDF_POOL	0x08	/* pool client solicitor */
+#define MDF_ACAST	0x10	/* manycast client solicitor */
+#define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client */
+#define MDF_UCLNT	0x40	/* eph. manycast or pool client */
+/*
+ * In the context of struct peer in ntpd, three of the cast_flags bits
+ * represent configured associations which never receive packets, and
+ * whose reach is always 0: MDF_BCAST, MDF_MCAST, and MDF_ACAST.  The
+ * last can be argued as responses are received, but those responses do
+ * not affect the MDF_ACAST association's reach register, rather they
+ * (may) result in mobilizing ephemeral MDF_ACLNT associations.
+ */
+#define MDF_TXONLY_MASK	(MDF_BCAST | MDF_MCAST | MDF_ACAST | MDF_POOL)
+/*
+ * manycastclient-like solicitor association cast_flags bits
+ */
+#define MDF_SOLICIT_MASK	(MDF_ACAST | MDF_POOL)
 /*
  * Values used with mon_enabled to indicate reason for enabling monitoring
  */
@@ -859,7 +869,7 @@ struct endpoint {
 #define AM_PROCPKT	1		/* server/symmetric packet */	
 #define AM_BCST		2		/* broadcast packet */	
 #define AM_FXMIT	3		/* client packet */
-#define AM_MANYCAST	4		/* manycast packet */
+#define AM_MANYCAST	4		/* manycast or pool */
 #define AM_NEWPASS	5		/* new passive */
 #define AM_NEWBCL	6		/* new broadcast */
 #define	AM_POSSBCL	7		/* discard broadcast */

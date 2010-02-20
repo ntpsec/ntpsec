@@ -92,7 +92,6 @@ static struct masks logcfg_item[] = {
 };
 
 typedef struct peer_resolved_ctx_tag {
-	int	num_needed;
 	int	flags;
 	int	host_mode;	/* T_* token identifier */
 	short	family;
@@ -1228,7 +1227,8 @@ destroy_address_node(
 	struct address_node *my_node
 	)
 {
-	NTP_REQUIRE(NULL != my_node);
+	if (NULL == my_node)
+		return;
 	NTP_REQUIRE(NULL != my_node->address);
 
 	free(my_node->address);
@@ -1430,6 +1430,7 @@ create_restrict_node(
 	return my_node;
 }
 
+
 void
 destroy_restrict_node(
 	struct restrict_node *my_node
@@ -1438,10 +1439,8 @@ destroy_restrict_node(
 	/* With great care, free all the memory occupied by
 	 * the restrict node
 	 */
-	if (my_node->addr)
-		destroy_address_node(my_node->addr);
-	if (my_node->mask)
-		destroy_address_node(my_node->mask);
+	destroy_address_node(my_node->addr);
+	destroy_address_node(my_node->mask);
 	DESTROY_QUEUE(my_node->flags);
 	free_node(my_node);
 }
@@ -3470,39 +3469,43 @@ config_peers(
 	struct config_tree *ptree
 	)
 {
-	sockaddr_u peeraddr;
-	isc_netaddr_t	i_netaddr;
-	struct addrinfo	hints;
-	struct peer_node *curr_peer;
-	peer_resolved_ctx *ctx;
-	u_char hmode;
-	int num_needed;
+	sockaddr_u		peeraddr;
+	isc_netaddr_t		i_netaddr;
+	struct addrinfo		hints;
+	struct peer_node *	curr_peer;
+	peer_resolved_ctx *	ctx;
+	u_char			hmode;
 
 	for (curr_peer = queue_head(ptree->peers);
 	     curr_peer != NULL;
 	     curr_peer = next_node(curr_peer)) {
 
+		ZERO_SOCK(&peeraddr);
 		/* Find the correct host-mode */
 		hmode = get_correct_host_mode(curr_peer->host_mode);
 		NTP_INSIST(hmode != 0);
 
-		/* Find the number of associations needed.
-		 * If a pool coomand is specified, then sys_maxclock needed
-		 * else, only one is needed
-		 */
-		num_needed = (T_Pool == curr_peer->host_mode)
-				? sys_maxclock
-				: 1;
-
+		if (T_Pool == curr_peer->host_mode) {
+			AF(&peeraddr) = curr_peer->addr->type;
+			peer_config(
+				&peeraddr,
+				curr_peer->addr->address,
+				NULL,
+				hmode,
+				curr_peer->peerversion,
+				curr_peer->minpoll,
+				curr_peer->maxpoll,
+				peerflag_bits(curr_peer),
+				curr_peer->ttl,
+				curr_peer->peerkey,
+				(u_char *)"*");
 		/*
-		 * If we have a numeric address, we can safely use
-		 * getaddrinfo in the mainline with it.  Otherwise
-		 * hand it off to the blocking child.
+		 * If we have a numeric address, we can safely
+		 * proceed in the mainline with it.  Otherwise, hand
+		 * the hostname off to the blocking child.
 		 */
-		if (1 == num_needed
-		    && is_ip_address(curr_peer->addr->address,
-				     (u_short)curr_peer->addr->type,
-				     &i_netaddr)) {
+		} else if (is_ip_address(curr_peer->addr->address,
+				  curr_peer->addr->type, &i_netaddr)) {
 
 			AF(&peeraddr) = (u_short)i_netaddr.family;
 			SET_PORT(&peeraddr, NTP_PORT);
@@ -3515,22 +3518,23 @@ config_peers(
 
 			if (is_sane_resolved_address(&peeraddr,
 			    curr_peer->host_mode))
-				peer_config(&peeraddr,
-				    NULL,
-				    hmode,
-				    curr_peer->peerversion,
-				    curr_peer->minpoll,
-				    curr_peer->maxpoll,
-				    peerflag_bits(curr_peer),
-				    curr_peer->ttl,
-				    curr_peer->peerkey,
-				    (u_char *)"*");
+				peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					hmode,
+					curr_peer->peerversion,
+					curr_peer->minpoll,
+					curr_peer->maxpoll,
+					peerflag_bits(curr_peer),
+					curr_peer->ttl,
+					curr_peer->peerkey,
+					(u_char *)"*");
 		} else {
 			/* we have a hostname to resolve */
 #ifdef WORKER
 			ctx = emalloc(sizeof(*ctx));
 			ctx->family = curr_peer->addr->type;
-			ctx->num_needed = num_needed;
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
 			ctx->version = curr_peer->peerversion;
@@ -3577,7 +3581,6 @@ peer_name_resolved(
 {
 	sockaddr_u		peeraddr;
 	peer_resolved_ctx *	ctx;
-	int			i;
 	int			af;
 	const char *		fam_spec;
 
@@ -3598,16 +3601,11 @@ peer_name_resolved(
 		return;
 	}
 
-	/* Loop to configure the desired number of associations */
-	for (i = 0; 
-	     res != NULL && i < ctx->num_needed; 
-	     res = res->ai_next) {
-
+	/* Loop to configure a single association */
+	for (; res != NULL; res = res->ai_next) {
 		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-
 		if (is_sane_resolved_address(&peeraddr,
 					     ctx->host_mode)) {
-			i++;
 			NLOG(NLOG_SYSINFO) {
 				af = ctx->family;
 				fam_spec = (AF_INET6 == af)
@@ -3619,7 +3617,9 @@ peer_name_resolved(
 					name, fam_spec,
 					stoa(&peeraddr));
 			}
-			peer_config(&peeraddr,
+			peer_config(
+				&peeraddr,
+				NULL,
 				NULL,
 				ctx->hmode,
 				ctx->version,
@@ -3629,6 +3629,7 @@ peer_name_resolved(
 				ctx->ttl,
 				ctx->keyid,
 				(u_char *)"*");
+			break;
 		}
 	}
 	free(ctx);
@@ -3683,9 +3684,9 @@ config_unpeers(
 		}
 
 		/*
-		 * If we have a numeric address, we can safely use
-		 * getaddrinfo in the mainline with it.  Otherwise
-		 * hand it off to the blocking child.
+		 * If we have a numeric address, we can finish in the
+		 * mainline.  Otherwise hand the name off to the
+		 * blocking child to resolve.
 		 */
 		if (is_ip_address(curr_unpeer->addr->address,
 				  (u_short)curr_unpeer->addr->type,
@@ -3702,7 +3703,7 @@ config_unpeers(
 			DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
 			peer = NULL;
 			do {
-				peer = findexistingpeer(&peeraddr, peer, -1);
+				peer = findexistingpeer(&peeraddr, NULL, peer, -1);
 				if (peer != NULL && (FLAG_CONFIG & peer->flags))
 					break;
 			} while (peer != NULL);
@@ -3772,7 +3773,7 @@ unpeer_name_resolved(
 			DPRINTF(1, ("searching for peer %s\n", stoa(&peeraddr)));
 			peer = NULL;
 			do {
-				peer = findexistingpeer(&peeraddr, peer, -1);
+				peer = findexistingpeer(&peeraddr, NULL, peer, -1);
 				if (peer != NULL && (FLAG_CONFIG & peer->flags))
 					break;
 			} while (peer != NULL);

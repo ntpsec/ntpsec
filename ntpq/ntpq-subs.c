@@ -1605,10 +1605,12 @@ doprintpeers(
 	case MODE_CLIENT:
 		if (ISREFCLOCKADR(&srcadr))
 			type = 'l';	/* local refclock*/
+		else if (SOCK_UNSPEC(&srcadr))
+			type = 'p';	/* pool */
 		else if (IS_MCAST(&srcadr))
-			type = 'A';	/* manycast server */
+			type = 'a';	/* manycastclient */
 		else
-			type = 'u';	/* manycastclient, unicast */
+			type = 'u';	/* unicast */
 		break;
 
 	case MODE_ACTIVE:

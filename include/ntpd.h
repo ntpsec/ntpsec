@@ -165,20 +165,23 @@ extern	void	mon_clearinterface(struct interface *interface);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
-extern	struct peer *findexistingpeer(sockaddr_u *, struct peer *, int);
+extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
+				      struct peer *, int);
 extern	struct peer *findpeer	(sockaddr_u *, struct interface *, int,
 				 int *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *peer,
 				 struct interface *interface);
-extern	struct peer *newpeer	(sockaddr_u *, struct interface *,
-				 u_char, u_char, u_char, u_char, u_int,
-				 u_char, u_char, keyid_t);
+extern	struct peer *newpeer	(sockaddr_u *, const char *,
+				 struct interface *, u_char, u_char,
+				 u_char, u_char, u_int, u_char, u_char,
+				 keyid_t);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
-extern	struct peer *peer_config(sockaddr_u *, struct interface *,
-				 u_char, u_char, u_char, u_char, u_int,
-				 u_char, keyid_t, u_char *);
+extern	struct peer *peer_config(sockaddr_u *, const char *,
+				 struct interface *, u_char, u_char,
+				 u_char, u_char, u_int, u_char, keyid_t,
+				 u_char *);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);

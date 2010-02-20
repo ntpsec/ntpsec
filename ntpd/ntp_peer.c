@@ -43,8 +43,9 @@
 #define NO_PEER		0	/* action when no peer is found */
 
 int AM[AM_MODES][AM_MODES] = {
-/*	{ UNSPEC,   ACTIVE,     PASSIVE,    CLIENT,     SERVER,     BCAST } */
-
+/*			packet->mode					    */
+/* peer { UNSPEC,   ACTIVE,     PASSIVE,    CLIENT,     SERVER,     BCAST } */
+/* mode */
 /*NONE*/{ AM_ERR, AM_NEWPASS, AM_NOMATCH, AM_FXMIT,   AM_MANYCAST, AM_NEWBCL},
 
 /*A*/	{ AM_ERR, AM_PROCPKT, AM_PROCPKT, AM_NOMATCH, AM_NOMATCH,  AM_NOMATCH},
@@ -115,11 +116,17 @@ int	peer_associations;		/* mobilized associations */
 int	peer_preempt;			/* preemptable associations */
 static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 
-static void			getmorepeermem(void);
-static int			score(struct peer *);
-static struct interface *	select_peerinterface(struct peer *,
-				    sockaddr_u *, struct interface *,
-				    u_char);
+static struct peer *	findexistingpeer_name(const char *, u_short,
+					      struct peer *, int);
+static struct peer *	findexistingpeer_addr(sockaddr_u *,
+					      struct peer *, int);
+static void		free_peer(struct peer *, int);
+static void		getmorepeermem(void);
+static int		score(struct peer *);
+static struct interface *select_peerinterface(struct peer *,
+					      sockaddr_u *,
+					      struct interface *);
+
 
 /*
  * init_peer - initialize peer data structures and counters
@@ -169,14 +176,37 @@ getmorepeermem(void)
 }
 
 
-/*
- * findexistingpeer - search by address and return a pointer to a peer.
- */
-struct peer *
-findexistingpeer(
-	sockaddr_u *addr,
-	struct peer *start_peer,
-	int mode
+static struct peer *
+findexistingpeer_name(
+	const char *	hostname,
+	u_short		hname_fam,
+	struct peer *	start_peer,
+	int		mode
+	)
+{
+	struct peer *p;
+
+	if (NULL == start_peer)
+		p = peer_list;
+	else
+		p = start_peer->p_link;
+	for (; p != NULL; p = p->p_link)
+		if (p->hostname != NULL
+		    && (-1 == mode || p->hmode == mode)
+		    && (AF_UNSPEC == hname_fam
+			|| AF_UNSPEC == AF(&p->srcadr)
+			|| hname_fam == AF(&p->srcadr))
+		    && !strcasecmp(p->hostname, hostname))
+			break;
+	return p;
+}
+
+
+static struct peer *		
+findexistingpeer_addr(
+	sockaddr_u *	addr,
+	struct peer *	start_peer,
+	int		mode
 	)
 {
 	struct peer *peer;
@@ -191,13 +221,32 @@ findexistingpeer(
 		peer = start_peer->adr_link;
 	
 	while (peer != NULL) {
-		if (SOCK_EQ(addr, &peer->srcadr)
-		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)
-		    && (-1 == mode || peer->hmode == mode))
+		if ((-1 == mode || peer->hmode == mode)
+		    && SOCK_EQ(addr, &peer->srcadr)
+		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr))
 			break;
 		peer = peer->adr_link;
 	}
 	return peer;
+}
+
+
+/*
+ * findexistingpeer - search by address and return a pointer to a peer.
+ */
+struct peer *
+findexistingpeer(
+	sockaddr_u *	addr,
+	const char *	hostname,
+	struct peer *	start_peer,
+	int		mode
+	)
+{
+	if (hostname != NULL)
+		return findexistingpeer_name(hostname, AF(addr),
+					     start_peer, mode);
+	else
+		return findexistingpeer_addr(addr, start_peer, mode);
 }
 
 
@@ -287,7 +336,7 @@ clear_all(void)
 	 * previously saved time values are untrusted.
 	 */
 	for (p = peer_list; p != NULL; p = p->p_link)
-		if (!(MDF_SRVCASTMASK & p->cast_flags))
+		if (!(MDF_TXONLY_MASK & p->cast_flags))
 			peer_clear(p, "STEP");
 
 	DPRINTF(1, ("clear_all: at %lu\n", current_time));
@@ -360,6 +409,71 @@ score(
 
 
 /*
+ * free_peer - internal routine to free memory referred to by a struct
+ *	       peer and return it to the peer free list.  If unlink is
+ *	       nonzero, unlink from the various lists and decrement
+ *	       peer_count.
+ */
+static void
+free_peer(
+	struct peer *	p,
+	int		unlink
+	)
+{
+	struct peer *	unlinked;
+	int		hash;
+
+	if (unlink) {
+		hash = NTP_HASH_ADDR(&p->srcadr);
+		peer_hash_count[hash]--;
+
+		UNLINK_SLIST(unlinked, peer_hash[hash], p, adr_link,
+			     struct peer);
+		if (NULL == unlinked) {
+			peer_hash_count[hash]++;
+			msyslog(LOG_ERR, "peer %s not in address table!",
+				stoa(&p->srcadr));
+		}
+
+		/*
+		 * Remove him from the association hash as well.
+		 */
+		hash = p->associd & NTP_HASH_MASK;
+		assoc_hash_count[hash]--;
+
+		UNLINK_SLIST(unlinked, assoc_hash[hash], p, aid_link,
+			     struct peer);
+		if (NULL == unlinked) {
+			assoc_hash_count[hash]++;
+			msyslog(LOG_ERR,
+				"peer %s not in association ID table!",
+				stoa(&p->srcadr));
+		}
+
+		/* Remove him from the overall list. */
+		UNLINK_SLIST(unlinked, peer_list, p, p_link,
+			     struct peer);
+		if (NULL == unlinked)
+			msyslog(LOG_ERR, "%s not in peer list!",
+				stoa(&p->srcadr));
+		else
+			peer_count--;
+	}
+
+	if (p->hostname != NULL)
+		free(p->hostname);
+
+	if (p->addrs != NULL)
+		free(p->addrs);		/* from copy_addrinfo_list() */
+
+	/* Add his corporeal form to peer free list */
+	memset(p, 0, sizeof(*p));
+	LINK_SLIST(peer_free, p, p_link);
+	peer_free_count++;
+}
+
+
+/*
  * unpeer - remove peer structure from hash table and free structure
  */
 void
@@ -367,15 +481,11 @@ unpeer(
 	struct peer *peer
 	)
 {
-	struct peer *unlinked;
-	int	hash;
-	char	tbuf[80];
+	char tbuf[80];
 
 	snprintf(tbuf, sizeof(tbuf), "assoc %u", peer->associd);
 	report_event(PEVNT_DEMOBIL, peer, tbuf);
 	set_peerdstadr(peer, NULL);
-	hash = NTP_HASH_ADDR(&peer->srcadr);
-	peer_hash_count[hash]--;
 	peer_demobilizations++;
 	peer_associations--;
 	if (FLAG_PREEMPT & peer->flags)
@@ -389,41 +499,7 @@ unpeer(
 #endif
 	peer->action = NULL;	/* disable timeout actions */
 
-	UNLINK_SLIST(unlinked, peer_hash[hash], peer, adr_link,
-		     struct peer);
-	if (NULL == unlinked) {
-		peer_hash_count[hash]++;
-		msyslog(LOG_ERR, "peer %s not in address table!",
-			stoa(&peer->srcadr));
-	}
-
-	/*
-	 * Remove him from the association hash as well.
-	 */
-	hash = peer->associd & NTP_HASH_MASK;
-	assoc_hash_count[hash]--;
-
-	UNLINK_SLIST(unlinked, assoc_hash[hash], peer, aid_link,
-		     struct peer);
-	if (NULL == unlinked) {
-		assoc_hash_count[hash]++;
-		msyslog(LOG_ERR,
-			"peer %s not in association ID table!",
-			stoa(&peer->srcadr));
-	}
-
-	/* Remove him from the overall list. */
-	UNLINK_SLIST(unlinked, peer_list, peer, p_link, struct peer);
-	if (NULL == unlinked)
-		msyslog(LOG_ERR, "%s not in peer list!",
-			stoa(&peer->srcadr));
-	else
-		peer_count--;
-
-	/* Add his corporeal form to peer free list */
-	memset(peer, 0, sizeof(*peer));
-	LINK_SLIST(peer_free, peer, p_link);
-	peer_free_count++;
+	free_peer(peer, 1);
 }
 
 
@@ -433,6 +509,7 @@ unpeer(
 struct peer *
 peer_config(
 	sockaddr_u *srcadr,
+	const char *hostname,
 	struct interface *dstadr,
 	u_char	hmode,
 	u_char	version,
@@ -460,7 +537,9 @@ peer_config(
 		break;
 
 	case MODE_CLIENT:
-		if (IS_MCAST(srcadr))
+		if (hostname != NULL && SOCK_UNSPEC(srcadr))
+			cast_flags = MDF_POOL;
+		else if (IS_MCAST(srcadr))
 			cast_flags = MDF_ACAST;
 		else
 			cast_flags = MDF_UCAST;
@@ -476,8 +555,9 @@ peer_config(
 	 */
 	if (mode_ntpdate)
 		flags |= FLAG_IBURST;
-	return(newpeer(srcadr, dstadr, hmode, version, minpoll, maxpoll,
-	    flags | FLAG_CONFIG, cast_flags, ttl, key));
+	return newpeer(srcadr, hostname, dstadr, hmode, version,
+		       minpoll, maxpoll, flags | FLAG_CONFIG,
+		       cast_flags, ttl, key);
 }
 
 /*
@@ -493,8 +573,9 @@ set_peerdstadr(
 	struct peer *unlinked;
 
 	if (peer->dstadr != interface) {
-		if (interface != NULL && (peer->cast_flags &
-		    MDF_BCLNT) && (interface->flags & INT_MCASTIF) &&
+		if (interface != NULL &&
+		    (MDF_BCLNT & peer->cast_flags) &&
+		    (INT_MCASTIF & interface->flags) &&
 		    peer->burst) {
 
 			/*
@@ -532,8 +613,7 @@ peer_refresh_interface(
 {
 	struct interface *niface, *piface;
 
-	niface = select_peerinterface(p, &p->srcadr, NULL,
-				      p->cast_flags);
+	niface = select_peerinterface(p, &p->srcadr, NULL);
 
 	DPRINTF(4, (
 	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
@@ -578,6 +658,7 @@ peer_refresh_interface(
 	}
 }
 
+
 /*
  * refresh_all_peerinterfaces - see that all interface bindings are up
  * to date
@@ -603,8 +684,7 @@ static struct interface *
 select_peerinterface(
 	struct peer *		peer,
 	sockaddr_u *		srcadr,
-	struct interface *	dstadr,
-	u_char			cast_flags
+	struct interface *	dstadr
 	)
 {
 	struct interface *interface;
@@ -619,32 +699,28 @@ select_peerinterface(
 	 */
 	if (ISREFCLOCKADR(srcadr))
 		interface = loopback_interface;
-	else
-		if (cast_flags & (MDF_BCLNT | MDF_SRVCASTMASK)) {
-			interface = findbcastinter(srcadr);
-#ifdef DEBUG
-			if (debug > 3) {
-				if (interface != NULL)
-					printf("Found *-cast interface address %s, for address %s\n",
-					    stoa(&(interface)->sin), stoa(srcadr));
-				else
-					printf("No *-cast local address found for address %s\n",
-					       stoa(srcadr));
-			}
-#endif
-			/*
-			 * If it was a multicast packet,
-			 * findbcastinter() may not find it, so try a
-			 * little harder.
-			 */
-			if (interface == ANY_INTERFACE_CHOOSE(srcadr))
-				interface = findinterface(srcadr);
-		}
-		else if (dstadr != NULL && dstadr !=
-		    ANY_INTERFACE_CHOOSE(srcadr))
-			interface = dstadr;
+	else if ((MDF_BCLNT | MDF_MCAST | MDF_BCAST | MDF_ACAST) &
+		 peer->cast_flags) {
+		interface = findbcastinter(srcadr);
+		if (interface != NULL)
+			DPRINTF(4, ("Found *-cast interface %s for %s\n",
+				stoa(&(interface)->sin), stoa(srcadr)));
 		else
+			DPRINTF(4, ("No *-cast interface found for %s\n",
+			       stoa(srcadr)));
+		/*
+		 * If it was a multicast packet,
+		 * findbcastinter() may not find it, so try a
+		 * little harder.
+		 */
+		if (interface == ANY_INTERFACE_CHOOSE(srcadr))
 			interface = findinterface(srcadr);
+	}
+	else if (dstadr != NULL && dstadr !=
+	    ANY_INTERFACE_CHOOSE(srcadr))
+		interface = dstadr;
+	else
+		interface = findinterface(srcadr);
 
 	/*
 	 * we do not bind to the wildcard interfaces for output 
@@ -661,12 +737,14 @@ select_peerinterface(
 	return interface;
 }
 
+
 /*
  * newpeer - initialize a new peer association
  */
 struct peer *
 newpeer(
 	sockaddr_u *srcadr,
+	const char *hostname,
 	struct interface *dstadr,
 	u_char	hmode,
 	u_char	version,
@@ -698,6 +776,11 @@ newpeer(
 #endif /* OPENSSL */
 
 	/*
+	 * For now only pool associations have a hostname.
+	 */
+	NTP_INSIST(NULL == hostname || (MDF_POOL & cast_flags));
+
+	/*
 	 * First search from the beginning for an association with given
 	 * remote address and mode. If an interface is given, search
 	 * from there to find the association which matches that
@@ -705,7 +788,7 @@ newpeer(
 	 * actual interface, because that's what gets put into the peer
 	 * structure.
 	 */
-	peer = findexistingpeer(srcadr, NULL, hmode);
+	peer = findexistingpeer(srcadr, hostname, NULL, hmode);
 	if (dstadr != NULL) {
 		while (peer != NULL) {
 			if (peer->dstadr == dstadr)
@@ -715,7 +798,7 @@ newpeer(
 			    peer->dstadr == findinterface(srcadr))
 				break;
 
-			peer = findexistingpeer(srcadr, peer, hmode);
+			peer = findexistingpeer(srcadr, hostname, peer, hmode);
 		}
 	}
 
@@ -751,11 +834,13 @@ newpeer(
 		    cast_flags, stoa(srcadr)));
 
 	peer->srcadr = *srcadr;
-	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr,
-	    cast_flags));
+	if (hostname != NULL)
+		peer->hostname = estrdup(hostname);
 	peer->hmode = hmode;
 	peer->version = version;
 	peer->flags = flags;
+	peer->cast_flags = cast_flags;
+	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr));
 
 	/*
 	 * It is an error to set minpoll less than NTP_MINPOLL or to
@@ -784,26 +869,27 @@ newpeer(
 	/*
 	 * Broadcast needs the socket enabled for broadcast
 	 */
-	if ((cast_flags & MDF_BCAST) && peer->dstadr)
+	if ((MDF_BCAST & cast_flags) && peer->dstadr != NULL)
 		enable_broadcast(peer->dstadr, srcadr);
 
 	/*
 	 * Multicast needs the socket interface enabled for multicast
 	 */
-	if ((cast_flags & MDF_MCAST) && peer->dstadr)
+	if ((MDF_MCAST & cast_flags) && peer->dstadr != NULL)
 		enable_multicast_if(peer->dstadr, srcadr);
 
 #ifdef OPENSSL
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
 #endif /* OPENSSL */
-	peer->cast_flags = cast_flags;
 	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;
 	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_ACAST)
 		peer_clear(peer, "ACST");
+	else if (cast_flags & MDF_POOL)
+		peer_clear(peer, "POOL");
 	else if (cast_flags & MDF_MCAST)
 		peer_clear(peer, "MCST");
 	else if (cast_flags & MDF_BCAST)
@@ -836,9 +922,8 @@ newpeer(
 			 * Dump it, something screwed up
 			 */
 			set_peerdstadr(peer, NULL);
-			LINK_SLIST(peer_free, peer, p_link);
-			peer_free_count++;
-			return (NULL);
+			free_peer(peer, 0);
+			return NULL;
 		}
 	}
 #endif
@@ -917,7 +1002,8 @@ peer_all_reset(void)
 
 
 /*
- * findmanycastpeer - find and return a manycast peer
+ * findmanycastpeer - find and return a manycastclient or pool
+ *		      association matching a received response.
  */
 struct peer *
 findmanycastpeer(
@@ -929,15 +1015,18 @@ findmanycastpeer(
 	l_fp p_org;
 
  	/*
- 	 * This routine is called upon arrival of a server-mode message
-	 * from a manycast client. Search the peer list for a manycast
-	 * client association where the last transmit timestamp matches
-	 * the originate timestamp. This assumes the transmit timestamps
-	 * for possibly more than one manycast association are unique.
+ 	 * This routine is called upon arrival of a server-mode response
+	 * to a manycastclient multicast solicitation, or to a pool
+	 * server unicast solicitation.  Search the peer list for a
+	 * manycastclient association where the last transmit timestamp
+	 * matches the response packet's originate timestamp.  There can
+	 * be multiple manycastclient associations, or multiple pool
+	 * solicitation assocations, so this assumes the transmit
+	 * timestamps are unique for such.
 	 */
 	pkt = &rbufp->recv_pkt;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
-		if (MDF_ACAST & peer->cast_flags) {
+		if (MDF_SOLICIT_MASK & peer->cast_flags) {
 			NTOHL_FP(&pkt->org, &p_org);
 			if (L_ISEQU(&p_org, &peer->aorg))
 				break;

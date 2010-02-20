@@ -77,8 +77,8 @@ struct attr_val {
 
 /* Structure for nodes on the syntax tree */
 struct address_node {
-	char *address;
-	short type;	/* family, AF_UNSPEC (0), AF_INET, AF_INET6 */
+	char *	address;
+	u_short	type;	/* family, AF_UNSPEC (0), AF_INET, AF_INET6 */
 };
 
 struct restrict_node {
