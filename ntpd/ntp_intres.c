@@ -516,20 +516,11 @@ getaddrinfo_sometime_complete(
 
 	if (!gai_resp->ai_count)
 		ai = NULL;
-#ifdef DEBUG
-	else	/* exercise copy_addrinfo_list() */
-		ai = copy_addrinfo_list(ai);
-#endif
 	
 	(*gai_req->callback)(gai_resp->retcode, gai_resp->gai_errno,
 			     gai_req->context, node, service, 
 			     &gai_req->hints, ai);
 
-#ifdef DEBUG
-	/* exercise copy_addrinfo_list() */
-	if (NULL != ai)
-		free(ai);
-#endif
 	free(gai_req);
 	/* gai_resp is part of block freed by process_blocking_response() */
 }

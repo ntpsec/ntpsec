@@ -234,8 +234,8 @@ struct refclock {
 	int (*clock_start)	(int, struct peer *);
 	void (*clock_shutdown)	(int, struct peer *);
 	void (*clock_poll)	(int, struct peer *);
-	void (*clock_control)	(int, struct refclockstat *,
-				    struct refclockstat *, struct peer *);
+	void (*clock_control)	(int, const struct refclockstat *,
+				 struct refclockstat *, struct peer *);
 	void (*clock_init)	(void);
 	void (*clock_buginfo)	(int, struct refclockbug *, struct peer *);
 	void (*clock_timer)	(int, struct peer *);
@@ -244,28 +244,23 @@ struct refclock {
 /*
  * Function prototypes
  */
-/*
- * auxiliary PPS interface (implemented by refclock_atom())
- */
-extern	int	pps_sample (l_fp *);
-extern	int	io_addclock_simple (struct refclockio *);
 extern	int	io_addclock	(struct refclockio *);
 extern	void	io_closeclock	(struct refclockio *);
 
 #ifdef REFCLOCK
-extern	void	refclock_buginfo (sockaddr_u *,
-				    struct refclockbug *);
-extern	void	refclock_control (sockaddr_u *,
-				    struct refclockstat *,
-				    struct refclockstat *);
+extern	void	refclock_buginfo(sockaddr_u *,
+				 struct refclockbug *);
+extern	void	refclock_control(sockaddr_u *,
+				 const struct refclockstat *,
+				 struct refclockstat *);
 extern	int	refclock_open	(char *, u_int, u_int);
 extern	int	refclock_setup	(int, u_int, u_int);
 extern	void	refclock_timer	(struct peer *);
-extern	void	refclock_transmit (struct peer *);
+extern	void	refclock_transmit(struct peer *);
 extern	int	refclock_ioctl	(int, u_int);
-extern 	int	refclock_process (struct refclockproc *);
-extern 	int	refclock_process_f (struct refclockproc *, double);
-extern 	void	refclock_process_offset (struct refclockproc *, l_fp, l_fp, double);
+extern 	int	refclock_process(struct refclockproc *);
+extern 	int	refclock_process_f(struct refclockproc *, double);
+extern 	void	refclock_process_offset(struct refclockproc *, l_fp, l_fp, double);
 extern	void	refclock_report	(struct peer *, int);
 extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);
 extern	int	refclock_gtraw  (struct recvbuf *, char *, int, l_fp *);

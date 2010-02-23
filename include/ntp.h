@@ -802,6 +802,7 @@ struct restrict_u_tag {
 	u_int32			count;	/* number of packets matched */
 	u_short			flags;	/* accesslist flags */
 	u_short			mflags;	/* match flags */
+	u_long			expire;	/* valid until time */
 	union {				/* variant starting here */
 		res_addr4 v4;
 		res_addr6 v6;
@@ -844,6 +845,7 @@ struct restrict_u_tag {
  */
 #define	RESM_INTERFACE		0x1000	/* this is an interface */
 #define	RESM_NTPONLY		0x2000	/* match ntp port only */
+#define RESM_SOURCE		0x4000	/* from "restrict source" */
 
 /*
  * Restriction configuration ops

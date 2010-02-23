@@ -185,6 +185,7 @@
 %token	<Integer>	T_Server
 %token	<Integer>	T_Setvar
 %token	<Integer>	T_Sign
+%token	<Integer>	T_Source
 %token	<Integer>	T_Statistics
 %token	<Integer>	T_Stats
 %token	<Integer>	T_Statsdir
@@ -660,6 +661,11 @@ access_control_command
 			enqueue(cfgt.restrict_opts,
 				create_restrict_node($2, NULL, $3, ip_file->line_no));
 		}
+	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
+		{
+			enqueue(cfgt.restrict_opts,
+				create_restrict_node($2, $4, $5, ip_file->line_no));
+		}
 	|	T_Restrict T_Default ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
@@ -691,10 +697,13 @@ access_control_command
 					$4, 
 					ip_file->line_no));
 		}
-	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
+	|	T_Restrict T_Source ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
-				create_restrict_node($2, $4, $5, ip_file->line_no));
+				create_restrict_node(
+					NULL, NULL,
+					enqueue($3, create_ival($2)),
+					ip_file->line_no));
 		}
 	;
 

@@ -1,7 +1,20 @@
 /*
  * keyword-gen.c -- generate keyword scanner finite state machine and
  *		    keyword_text array.
- *		    This program is run to generate ntp_keyword.h
+ *
+ * This program is run to generate ntp_keyword.h
+ * After making a change here, two output files should be committed at
+ * the same time as keyword-gen.c:
+ *	ntp_keyword.h
+ *	keyword-gen-utd
+ *
+ * keyword-gen-utd is a sentinel used by Makefile.am to avoid compiling
+ * keyword_gen.c and generating ntp_keyword.h if the input keyword-gen.c
+ * has not changed.  This is not solely an optimization, it also breaks
+ * a dependency chain that otherwise would cause programs to be compiled
+ * when running "make dist" or "make distdir".  We want these to package
+ * the existing source without building anything but a tarball.  See
+ * [Bug 1470].
  */
 #include <config.h>
 #include <stdio.h>
@@ -136,6 +149,7 @@ struct key_tok ntp_keywords[] = {
 { "orphan",		T_Orphan,		FOLLBY_TOKEN },
 /* access_control_flag */
 { "default",		T_Default,		FOLLBY_TOKEN },
+{ "source",		T_Source,		FOLLBY_TOKEN },
 { "flake",		T_Flake,		FOLLBY_TOKEN },
 { "ignore",		T_Ignore,		FOLLBY_TOKEN },
 { "limited",		T_Limited,		FOLLBY_TOKEN },

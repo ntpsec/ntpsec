@@ -1865,7 +1865,7 @@ do_restrict(
 			NSRCADR(&matchmask) = cr->mask;
 		}
 		hack_restrict(op, &matchaddr, &matchmask, cr->mflags,
-			 cr->flags);
+			      cr->flags, 0);
 		cr++;
 	}
 

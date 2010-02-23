@@ -78,9 +78,8 @@ static u_long res_found;
 static u_long res_not_found;
 
 /*
- * Count number of restriction entries referring to RES_LIMITED controls
- * activation/deactivation of monitoring (with respect to RES_LIMITED
- * control)
+ * Count number of restriction entries referring to RES_LIMITED, to
+ * control implicit activation/deactivation of the MRU monlist.
  */
 static	u_long res_limited_refcnt;
 
@@ -91,10 +90,18 @@ static	restrict_u	restrict_def4;
 static	restrict_u	restrict_def6;
 
 /*
+ * "restrict source ..." enabled knob and restriction bits.
+ */
+static	int		restrict_source_enabled;
+static	u_short		restrict_source_flags;
+static	u_short		restrict_source_mflags;
+
+/*
  * private functions
  */
 static restrict_u *	alloc_res4(void);
 static restrict_u *	alloc_res6(void);
+static void		free_res(restrict_u *, int);
 static void		inc_res_limited(void);
 static void		dec_res_limited(void);
 static restrict_u *	match_restrict4_addr(u_int32, u_short);
@@ -190,12 +197,43 @@ alloc_res6(void)
 	/* link all but the first onto free list */
 	res = (void *)((char *)rl + (count - 1) * cb);
 	for (i = count - 1; i > 0; i--) {
-		LINK_SLIST(resfree4, res, link);
+		LINK_SLIST(resfree6, res, link);
 		res = (void *)((char *)res - cb);
 	}
 	NTP_INSIST(rl == res);
 	/* allocate the first */
 	return res;
+}
+
+
+static void
+free_res(
+	restrict_u *	res,
+	int		v6
+	)
+{
+	restrict_u **	plisthead;
+	restrict_u *	unlinked;
+
+	restrictcount--;
+	if (RES_LIMITED && res->flags)
+		dec_res_limited();
+
+	if (v6)
+		plisthead = &restrictlist6;
+	else
+		plisthead = &restrictlist4;
+	UNLINK_SLIST(unlinked, *plisthead, res, link, restrict_u);
+	NTP_INSIST(unlinked == res);
+
+	if (v6) {
+		memset(res, 0, V6_SIZEOF_RESTRICT_U);
+		plisthead = &resfree6;
+	} else {
+		memset(res, 0, V4_SIZEOF_RESTRICT_U);
+		plisthead = &resfree4;
+	}
+	LINK_SLIST(*plisthead, res, link);
 }
 
 
@@ -223,13 +261,20 @@ match_restrict4_addr(
 	u_short	port
 	)
 {
-	restrict_u *res;
+	const int	v6 = 0;
+	restrict_u *	res;
+	restrict_u *	next;
 
-	for (res = restrictlist4; res != NULL; res = res->link)
+	for (res = restrictlist4; res != NULL; res = next) {
+		next = res->link;
+		if (res->expire &&
+		    res->expire <= current_time)
+			free_res(res, v6);
 		if (res->u.v4.addr == (addr & res->u.v4.mask)
 		    && (!(RESM_NTPONLY & res->mflags)
 			|| NTP_PORT == port))
 			break;
+	}
 	return res;
 }
 
@@ -240,10 +285,17 @@ match_restrict6_addr(
 	u_short			port
 	)
 {
+	const int	v6 = 1;
 	restrict_u *	res;
+	restrict_u *	next;
 	struct in6_addr	masked;
 
-	for (res = restrictlist6; res != NULL; res = res->link) {
+	for (res = restrictlist6; res != NULL; res = next) {
+		next = res->link;
+		NTP_INSIST(next != res);
+		if (res->expire &&
+		    res->expire <= current_time)
+			free_res(res, v6);
 		MASK_IPV6_ADDR(&masked, addr, &res->u.v6.mask);
 		if (ADDR6_EQ(&masked, &res->u.v6.addr)
 		    && (!(RESM_NTPONLY & res->mflags)
@@ -425,20 +477,30 @@ restrictions(
  */
 void
 hack_restrict(
-	int op,
-	sockaddr_u *resaddr,
-	sockaddr_u *resmask,
-	u_short mflags,
-	u_short flags
+	int		op,
+	sockaddr_u *	resaddr,
+	sockaddr_u *	resmask,
+	u_short		mflags,
+	u_short		flags,
+	u_long		expire
 	)
 {
-	int			v6;
-	restrict_u		match;
-	restrict_u *		res;
-	restrict_u **		plisthead;
+	int		v6;
+	restrict_u	match;
+	restrict_u *	res;
+	restrict_u **	plisthead;
 
 	DPRINTF(1, ("restrict: op %d addr %s mask %s mflags %08x flags %08x\n",
 		    op, stoa(resaddr), stoa(resmask), mflags, flags));
+
+	if (NULL == resaddr) {
+		NTP_REQUIRE(NULL == resmask);
+		NTP_REQUIRE(RESTRICT_FLAGS == op);
+		restrict_source_flags = flags;
+		restrict_source_mflags = mflags;
+		restrict_source_enabled = 1;
+		return;
+	}
 
 	memset(&match, 0, sizeof(match));
 	/* silence VC9 potentially uninit warnings */
@@ -470,6 +532,7 @@ hack_restrict(
 
 	match.flags = flags;
 	match.mflags = mflags;
+	match.expire = expire;
 	res = match_restrict_entry(&match, v6);
 
 	switch (op) {
@@ -529,23 +592,11 @@ hack_restrict(
 		 * don't remove an interface entry.
 		 */
 		if (res != NULL
-		    && res != &restrict_def4
-		    && res != &restrict_def6
 		    && (RESTRICT_REMOVEIF == op
-			|| !(RESM_INTERFACE & res->mflags))) {
-
-			restrictcount--;
-			if (RES_LIMITED && res->flags)
-				dec_res_limited();
-			if (v6) {
-				memset(res, 0, V6_SIZEOF_RESTRICT_U);
-				plisthead = &resfree6;
-			} else {
-				memset(res, 0, V4_SIZEOF_RESTRICT_U);
-				plisthead = &resfree4;
-			}
-			LINK_SLIST(*plisthead, res, link);
-		}
+			|| !(RESM_INTERFACE & res->mflags))
+		    && res != &restrict_def4
+		    && res != &restrict_def6)
+			free_res(res, v6);
 		break;
 
 	default:	/* unknown op */
@@ -553,4 +604,65 @@ hack_restrict(
 		break;
 	}
 
+}
+
+
+/*
+ * restrict_source - maintains dynamic "restrict source ..." entries as
+ *		     peers come and go.
+ */
+void
+restrict_source(
+	sockaddr_u *	addr,
+	int		farewell,	/* 0 to add, 1 to remove */
+	u_long		expire		/* 0 is infinite, valid until */
+	)
+{
+	sockaddr_u	onesmask;
+	restrict_u *	res;
+	int		found_specific;
+
+	if (!restrict_source_enabled || SOCK_UNSPEC(addr) ||
+	    IS_MCAST(addr) || ISREFCLOCKADR(addr))
+		return;
+
+	NTP_REQUIRE(AF_INET == AF(addr) || AF_INET6 == AF(addr));
+
+	SET_HOSTMASK(&onesmask, AF(addr));
+	if (farewell) {
+		hack_restrict(RESTRICT_REMOVE, addr, &onesmask,
+			      0, 0, 0);
+		DPRINTF(1, ("restrict_source: %s removed", stoa(addr)));
+		return;
+	}
+
+	/*
+	 * If there is a specific entry for this address, hands
+	 * off, as it is condidered more specific than "restrict
+	 * server ...".
+	 * However, if the specific entry found is a fleeting one
+	 * added by pool_xmit() before soliciting, replace it
+	 * immediately regardless of the expire value to make way
+	 * for the more persistent entry.
+	 */
+	if (IS_IPV4(addr)) {
+		res = match_restrict4_addr(SRCADR(addr), SRCPORT(addr));
+		found_specific = (SRCADR(&onesmask) == res->u.v4.mask);
+	} else {
+		res = match_restrict6_addr(&SOCK_ADDR6(addr),
+					   SRCPORT(addr));
+		found_specific = ADDR6_EQ(&res->u.v6.mask,
+					  &SOCK_ADDR6(&onesmask));
+	}
+	if (!expire && found_specific && res->expire) {
+		found_specific = 0;
+		free_res(res, IS_IPV6(addr));
+	}
+	if (found_specific)
+		return;
+
+	hack_restrict(RESTRICT_FLAGS, addr, &onesmask,
+		      restrict_source_mflags, restrict_source_flags,
+		      expire);
+	DPRINTF(1, ("restrict_source: %s host restriction added", stoa(addr)));
 }

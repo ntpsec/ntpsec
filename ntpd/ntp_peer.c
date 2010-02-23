@@ -202,7 +202,8 @@ findexistingpeer_name(
 }
 
 
-static struct peer *		
+static
+struct peer *		
 findexistingpeer_addr(
 	sockaddr_u *	addr,
 	struct peer *	start_peer,
@@ -227,6 +228,7 @@ findexistingpeer_addr(
 			break;
 		peer = peer->adr_link;
 	}
+
 	return peer;
 }
 
@@ -417,13 +419,13 @@ score(
 static void
 free_peer(
 	struct peer *	p,
-	int		unlink
+	int		unlink_peer
 	)
 {
 	struct peer *	unlinked;
 	int		hash;
 
-	if (unlink) {
+	if (unlink_peer) {
 		hash = NTP_HASH_ADDR(&p->srcadr);
 		peer_hash_count[hash]--;
 
@@ -485,6 +487,7 @@ unpeer(
 
 	snprintf(tbuf, sizeof(tbuf), "assoc %u", peer->associd);
 	report_event(PEVNT_DEMOBIL, peer, tbuf);
+	restrict_source(&peer->srcadr, 1, 0);
 	set_peerdstadr(peer, NULL);
 	peer_demobilizations++;
 	peer_associations--;
@@ -798,7 +801,8 @@ newpeer(
 			    peer->dstadr == findinterface(srcadr))
 				break;
 
-			peer = findexistingpeer(srcadr, hostname, peer, hmode);
+			peer = findexistingpeer(srcadr, hostname, peer,
+						hmode);
 		}
 	}
 
@@ -819,9 +823,8 @@ newpeer(
 	UNLINK_HEAD_SLIST(peer, peer_free, p_link);
 	peer_free_count--;
 	peer_associations++;
-	if (flags & FLAG_PREEMPT)
+	if (FLAG_PREEMPT & flags)
 		peer_preempt++;
-	memset(peer, 0, sizeof(*peer));
 
 	/*
 	 * Assign an association ID and increment the system variable.
@@ -829,9 +832,6 @@ newpeer(
 	peer->associd = current_association_ID;
 	if (++current_association_ID == 0)
 		++current_association_ID;
-
-	DPRINTF(3, ("newpeer: cast flags: 0x%x for address: %s\n",
-		    cast_flags, stoa(srcadr)));
 
 	peer->srcadr = *srcadr;
 	if (hostname != NULL)
@@ -861,10 +861,12 @@ newpeer(
 		peer->minpoll = peer->maxpoll;
 
 	if (peer->dstadr)
-		DPRINTF(3, ("newpeer: using fd %d and our addr %s\n",
-			    peer->dstadr->fd, stoa(&peer->dstadr->sin)));
+		DPRINTF(3, ("newpeer(%s): using fd %d and our addr %s\n",
+			stoa(srcadr), peer->dstadr->fd,
+			stoa(&peer->dstadr->sin)));
 	else
-		DPRINTF(3, ("newpeer: local interface currently not bound\n"));	
+		DPRINTF(3, ("newpeer(%s): local interface currently not bound\n",
+			stoa(srcadr)));	
 
 	/*
 	 * Broadcast needs the socket enabled for broadcast
@@ -940,10 +942,12 @@ newpeer(
 	LINK_SLIST(peer_list, peer, p_link);
 	peer_count++;
 
+	restrict_source(&peer->srcadr, 0, 0);
+
 	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
 	report_event(PEVNT_MOBIL, peer, tbuf);
 
-	DPRINTF(1, ("newpeer: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x\n",
+	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
 	    latoa(peer->dstadr), stoa(&peer->srcadr), peer->hmode,
 	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,
 	    peer->cast_flags, peer->ttl, peer->keyid));

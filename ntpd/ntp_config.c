@@ -499,6 +499,7 @@ dump_config_tree(
 	nic_rule_node *rule_node;
 
 	char **pstr = NULL;
+	const char *s;
 	char *s1;
 	char *s2;
 	int *intp = NULL;
@@ -954,12 +955,18 @@ dump_config_tree(
 		list_ptr = next_node(list_ptr)) {
 
 		rest_node = list_ptr;
-		if (NULL == rest_node->addr)
-			s1 = "default";
-		else
-			s1 = rest_node->addr->address;
+		if (NULL == rest_node->addr) {
+			s = "default";			
+			flags = queue_head(rest_node->flags);
+			for (; 	flags != NULL; flags = next_node(flags))
+				if (T_Source == *flags) {
+					s = keyword(*flags);
+					break;
+				}
+		} else
+			s = rest_node->addr->address;
 
-		fprintf(df, "restrict %s", s1);
+		fprintf(df, "restrict %s", s);
 
 		if (rest_node->mask != NULL)
 			fprintf(df, " mask %s",
@@ -967,7 +974,8 @@ dump_config_tree(
 
 		flags = queue_head(rest_node->flags);
 		for (; 	flags != NULL; flags = next_node(flags))
-			fprintf(df, " %s", keyword(*flags));
+			if (T_Source != *flags)
+				fprintf(df, " %s", keyword(*flags));
 
 		fprintf(df, "\n");
 	}
@@ -2089,8 +2097,8 @@ config_access(
 	struct attr_val *	my_opt;
 	struct restrict_node *	my_node;
 	int *			curr_flag;
-	sockaddr_u		addr_sock;
-	sockaddr_u		addr_mask;
+	sockaddr_u		addr;
+	sockaddr_u		mask;
 	struct addrinfo		hints;
 	struct addrinfo *	ai_list;
 	struct addrinfo *	pai;
@@ -2143,78 +2151,6 @@ config_access(
 	     my_node != NULL;
 	     my_node = next_node(my_node)) {
 
-		ZERO_SOCK(&addr_sock);
-		ai_list = NULL;
-		pai = NULL;
-
-		if (NULL == my_node->addr) {
-			/*
-			 * The user specified a default rule without a
-			 * -4 / -6 qualifier, add to both lists
-			 */
-			restrict_default = 1;
-			ZERO_SOCK(&addr_mask);
-		} else {
-			restrict_default = 0;
-			/* Resolve the specified address */
-			AF(&addr_sock) = (u_short)my_node->addr->type;
-
-			if (getnetnum(my_node->addr->address,
-				      &addr_sock, 1, t_UNK) != 1) {
-				/*
-				 * Attempt a blocking lookup.  This
-				 * is in violation of the nonblocking
-				 * design of ntpd's mainline code.  The
-				 * alternative of running without the
-				 * restriction until the name resolved
-				 * seems worse.
-				 * Ideally some scheme could be used for
-				 * restrict directives in the startup
-				 * ntp.conf to delay starting up the
-				 * protocol machinery until after all
-				 * restrict hosts have been resolved.
-				 */
-				ai_list = NULL;
-				memset(&hints, 0, sizeof(hints));
-				hints.ai_protocol = IPPROTO_UDP;
-				hints.ai_socktype = SOCK_DGRAM;
-				hints.ai_family = my_node->addr->type;
-				rc = getaddrinfo(my_node->addr->address,
-						 "ntp", &hints,
-						 &ai_list);
-				if (rc) {
-					msyslog(LOG_ERR,
-						"restrict: ignoring line %d, address/host '%s' unusable.",
-						my_node->line_no,
-						my_node->addr->address);
-					continue;
-				}
-				NTP_INSIST(ai_list != NULL);
-				pai = ai_list;
-				NTP_INSIST(pai->ai_addr != NULL);
-				NTP_INSIST(sizeof(addr_sock) >= pai->ai_addrlen);
-				memcpy(&addr_sock, pai->ai_addr, pai->ai_addrlen);
-				NTP_INSIST(AF_INET == AF(&addr_sock) ||
-					   AF_INET6 == AF(&addr_sock));
-			}
-
-			SET_HOSTMASK(&addr_mask, AF(&addr_sock));
-
-			/* Resolve the mask */
-			if (my_node->mask) {
-				ZERO_SOCK(&addr_mask);
-				AF(&addr_mask) = (u_short)my_node->mask->type;
-				if (getnetnum(my_node->mask->address,
-					      &addr_mask, 1, t_MSK) != 1) {
-					msyslog(LOG_ERR,
-						"restrict: ignoring line %d, mask '%s' unusable.",
-						my_node->line_no,
-						my_node->mask->address);
-					continue;
-				}
-			}
-		}
-
 		/* Parse the flags */
 		flags = 0;
 		mflags = 0;
@@ -2229,6 +2165,10 @@ config_access(
 
 			case T_Ntpport:
 				mflags |= RESM_NTPONLY;
+				break;
+
+			case T_Source:
+				mflags |= RESM_SOURCE;
 				break;
 
 			case T_Flake:
@@ -2286,39 +2226,125 @@ config_access(
 			curr_flag = next_node(curr_flag);
 		}
 
-		/* Set the flags */
-		if (restrict_default) {
-			AF(&addr_sock) = AF_INET;
-			AF(&addr_mask) = AF_INET;
-			hack_restrict(RESTRICT_FLAGS, &addr_sock,
-				      &addr_mask, mflags, flags);
-			AF(&addr_sock) = AF_INET6;
-			AF(&addr_mask) = AF_INET6;
-		}
-
-		do {
-			hack_restrict(RESTRICT_FLAGS, &addr_sock,
-				      &addr_mask, mflags, flags);
-			if (pai != NULL &&
-			    NULL != (pai = pai->ai_next)) {
-				NTP_INSIST(pai->ai_addr != NULL);
-				NTP_INSIST(sizeof(addr_sock) >= pai->ai_addrlen);
-				ZERO_SOCK(&addr_sock);
-				memcpy(&addr_sock, pai->ai_addr, pai->ai_addrlen);
-				NTP_INSIST(AF_INET == AF(&addr_sock) ||
-					   AF_INET6 == AF(&addr_sock));
-				SET_HOSTMASK(&addr_mask, AF(&addr_sock));
-			}
-		} while (pai != NULL);
-
-		if (ai_list != NULL)
-			freeaddrinfo(ai_list);
-
 		if ((RES_MSSNTP & flags) && !warned_signd) {
 			warned_signd = 1;
 			fprintf(stderr, "%s\n", signd_warning);
 			msyslog(LOG_WARNING, signd_warning);
 		}
+
+		ZERO_SOCK(&addr);
+		ai_list = NULL;
+		pai = NULL;
+		restrict_default = 0;
+
+		if (NULL == my_node->addr) {
+			ZERO_SOCK(&mask);
+			if (!(RESM_SOURCE & mflags)) {
+				/*
+				 * The user specified a default rule
+				 * without a -4 / -6 qualifier, add to
+				 * both lists
+				 */
+				restrict_default = 1;
+			} else {
+				/* apply "restrict source ..." */
+				DPRINTF(1, ("restrict source template mflags %x flags %x\n",
+					mflags, flags));
+				hack_restrict(RESTRICT_FLAGS, NULL,
+					      NULL, mflags, flags, 0);
+				continue;
+			}
+		} else {
+			/* Resolve the specified address */
+			AF(&addr) = (u_short)my_node->addr->type;
+
+			if (getnetnum(my_node->addr->address,
+				      &addr, 1, t_UNK) != 1) {
+				/*
+				 * Attempt a blocking lookup.  This
+				 * is in violation of the nonblocking
+				 * design of ntpd's mainline code.  The
+				 * alternative of running without the
+				 * restriction until the name resolved
+				 * seems worse.
+				 * Ideally some scheme could be used for
+				 * restrict directives in the startup
+				 * ntp.conf to delay starting up the
+				 * protocol machinery until after all
+				 * restrict hosts have been resolved.
+				 */
+				ai_list = NULL;
+				memset(&hints, 0, sizeof(hints));
+				hints.ai_protocol = IPPROTO_UDP;
+				hints.ai_socktype = SOCK_DGRAM;
+				hints.ai_family = my_node->addr->type;
+				rc = getaddrinfo(my_node->addr->address,
+						 "ntp", &hints,
+						 &ai_list);
+				if (rc) {
+					msyslog(LOG_ERR,
+						"restrict: ignoring line %d, address/host '%s' unusable.",
+						my_node->line_no,
+						my_node->addr->address);
+					continue;
+				}
+				NTP_INSIST(ai_list != NULL);
+				pai = ai_list;
+				NTP_INSIST(pai->ai_addr != NULL);
+				NTP_INSIST(sizeof(addr) >=
+					   pai->ai_addrlen);
+				memcpy(&addr, pai->ai_addr,
+				       pai->ai_addrlen);
+				NTP_INSIST(AF_INET == AF(&addr) ||
+					   AF_INET6 == AF(&addr));
+			}
+
+			SET_HOSTMASK(&mask, AF(&addr));
+
+			/* Resolve the mask */
+			if (my_node->mask) {
+				ZERO_SOCK(&mask);
+				AF(&mask) = my_node->mask->type;
+				if (getnetnum(my_node->mask->address,
+					      &mask, 1, t_MSK) != 1) {
+					msyslog(LOG_ERR,
+						"restrict: ignoring line %d, mask '%s' unusable.",
+						my_node->line_no,
+						my_node->mask->address);
+					continue;
+				}
+			}
+		}
+
+		/* Set the flags */
+		if (restrict_default) {
+			AF(&addr) = AF_INET;
+			AF(&mask) = AF_INET;
+			hack_restrict(RESTRICT_FLAGS, &addr,
+				      &mask, mflags, flags, 0);
+			AF(&addr) = AF_INET6;
+			AF(&mask) = AF_INET6;
+		}
+
+		do {
+			hack_restrict(RESTRICT_FLAGS, &addr,
+				      &mask, mflags, flags, 0);
+			if (pai != NULL &&
+			    NULL != (pai = pai->ai_next)) {
+				NTP_INSIST(pai->ai_addr != NULL);
+				NTP_INSIST(sizeof(addr) >=
+					   pai->ai_addrlen);
+				ZERO_SOCK(&addr);
+				memcpy(&addr, pai->ai_addr,
+				       pai->ai_addrlen);
+				NTP_INSIST(AF_INET == AF(&addr) ||
+					   AF_INET6 == AF(&addr));
+				SET_HOSTMASK(&mask, AF(&addr));
+			}
+		} while (pai != NULL);
+
+		if (ai_list != NULL)
+			freeaddrinfo(ai_list);
 	}
 }
 
@@ -3124,14 +3150,18 @@ config_fudge(
 		addr_node = curr_fudge->addr;
 		ZERO_SOCK(&addr_sock);
 		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF)
-		    != 1)
+		    != 1) {
 			err_flag = 1;
+			msyslog(LOG_ERR,
+				"unrecognized fudge reference clock address %s, line ignored",
+				stoa(&addr_sock));
+		}
 
 		if (!ISREFCLOCKADR(&addr_sock)) {
+			err_flag = 1;
 			msyslog(LOG_ERR,
 				"inappropriate address %s for the fudge command, line ignored",
 				stoa(&addr_sock));
-			err_flag = 1;
 		}
 
 		/* Parse all the options to the fudge command */
@@ -3188,7 +3218,8 @@ config_fudge(
 				break;
 			default:
 				msyslog(LOG_ERR,
-					"Unexpected fudge internal flag 0x%x for %s\n",
+					"Unexpected fudge flag %s (%d) for %s\n",
+					token_name(curr_opt->attr),
 					curr_opt->attr, stoa(&addr_sock));
 				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
@@ -3198,8 +3229,7 @@ config_fudge(
 
 #ifdef REFCLOCK
 		if (!err_flag)
-			refclock_control(&addr_sock, &clock_stat,
-					 (struct refclockstat *)0);
+			refclock_control(&addr_sock, &clock_stat, NULL);
 #endif
 
 		curr_fudge = next_node(curr_fudge);
@@ -4494,6 +4524,7 @@ getnetnum(
 	else
 		memcpy(&addr->sa6.sin6_addr, &ipaddr.type.in6,
 		       sizeof(addr->sa6.sin6_addr));
+	SET_PORT(addr, NTP_PORT);
 
 	DPRINTF(2, ("getnetnum given %s, got %s\n", num, stoa(addr)));
 

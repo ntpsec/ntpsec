@@ -40,6 +40,11 @@
 #define	RESP_DELAY	1	/* refclock burst delay (s) */
 
 /*
+ * pool soliciting restriction duration (s)
+ */
+#define	POOL_SOLICIT_WINDOW	8
+
+/*
  * System variables are declared here. Unless specified otherwise, all
  * times are in seconds.
  */
@@ -3396,6 +3401,7 @@ pool_xmit(
 	int			rc;
 	struct interface *	lcladr;
 	sockaddr_u *		rmtadr;
+	int			restrict_mask;
 	struct peer *		p;
 	l_fp			xmt_tx;
 
@@ -3430,6 +3436,10 @@ pool_xmit(
 	} while (p != NULL && pool->ai != NULL);
 	if (p != NULL)
 		return;	/* out of addresses, re-query DNS next poll */
+	restrict_mask = restrictions(rmtadr);
+	if (RES_FLAGS & restrict_mask)
+		restrict_source(rmtadr, 0, 
+				current_time + POOL_SOLICIT_WINDOW + 1);
 	lcladr = findinterface(rmtadr);
 	memset(&xpkt, 0, sizeof(xpkt));
 	xpkt.li_vn_mode = PKT_LI_VN_MODE(sys_leap, pool->version,

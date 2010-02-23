@@ -954,7 +954,7 @@ remove_interface(
 	/* remove restrict interface entry */
 	SET_HOSTMASK(&resmask, AF(&iface->sin));
 	hack_restrict(RESTRICT_REMOVEIF, &iface->sin, &resmask,
-		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE);
+		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE, 0);
 }
 
 
@@ -1889,7 +1889,7 @@ create_interface(
 	 */
 	SET_HOSTMASK(&resmask, AF(&iface->sin));
 	hack_restrict(RESTRICT_FLAGS, &iface->sin, &resmask,
-		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE);
+		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE, 0);
 	  
 	/*
 	 * set globals with the first found

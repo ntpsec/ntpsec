@@ -161,46 +161,47 @@
      T_Server = 377,
      T_Setvar = 378,
      T_Sign = 379,
-     T_Statistics = 380,
-     T_Stats = 381,
-     T_Statsdir = 382,
-     T_Step = 383,
-     T_Stepout = 384,
-     T_Stratum = 385,
-     T_String = 386,
-     T_Sysstats = 387,
-     T_Tick = 388,
-     T_Time1 = 389,
-     T_Time2 = 390,
-     T_Timingstats = 391,
-     T_Tinker = 392,
-     T_Tos = 393,
-     T_Trap = 394,
-     T_True = 395,
-     T_Trustedkey = 396,
-     T_Ttl = 397,
-     T_Type = 398,
-     T_Unconfig = 399,
-     T_Unpeer = 400,
-     T_Version = 401,
-     T_WanderThreshold = 402,
-     T_Week = 403,
-     T_Wildcard = 404,
-     T_Xleave = 405,
-     T_Year = 406,
-     T_Flag = 407,
-     T_Void = 408,
-     T_EOC = 409,
-     T_Simulate = 410,
-     T_Beep_Delay = 411,
-     T_Sim_Duration = 412,
-     T_Server_Offset = 413,
-     T_Duration = 414,
-     T_Freq_Offset = 415,
-     T_Wander = 416,
-     T_Jitter = 417,
-     T_Prop_Delay = 418,
-     T_Proc_Delay = 419
+     T_Source = 380,
+     T_Statistics = 381,
+     T_Stats = 382,
+     T_Statsdir = 383,
+     T_Step = 384,
+     T_Stepout = 385,
+     T_Stratum = 386,
+     T_String = 387,
+     T_Sysstats = 388,
+     T_Tick = 389,
+     T_Time1 = 390,
+     T_Time2 = 391,
+     T_Timingstats = 392,
+     T_Tinker = 393,
+     T_Tos = 394,
+     T_Trap = 395,
+     T_True = 396,
+     T_Trustedkey = 397,
+     T_Ttl = 398,
+     T_Type = 399,
+     T_Unconfig = 400,
+     T_Unpeer = 401,
+     T_Version = 402,
+     T_WanderThreshold = 403,
+     T_Week = 404,
+     T_Wildcard = 405,
+     T_Xleave = 406,
+     T_Year = 407,
+     T_Flag = 408,
+     T_Void = 409,
+     T_EOC = 410,
+     T_Simulate = 411,
+     T_Beep_Delay = 412,
+     T_Sim_Duration = 413,
+     T_Server_Offset = 414,
+     T_Duration = 415,
+     T_Freq_Offset = 416,
+     T_Wander = 417,
+     T_Jitter = 418,
+     T_Prop_Delay = 419,
+     T_Proc_Delay = 420
    };
 #endif
 /* Tokens.  */
@@ -326,46 +327,47 @@
 #define T_Server 377
 #define T_Setvar 378
 #define T_Sign 379
-#define T_Statistics 380
-#define T_Stats 381
-#define T_Statsdir 382
-#define T_Step 383
-#define T_Stepout 384
-#define T_Stratum 385
-#define T_String 386
-#define T_Sysstats 387
-#define T_Tick 388
-#define T_Time1 389
-#define T_Time2 390
-#define T_Timingstats 391
-#define T_Tinker 392
-#define T_Tos 393
-#define T_Trap 394
-#define T_True 395
-#define T_Trustedkey 396
-#define T_Ttl 397
-#define T_Type 398
-#define T_Unconfig 399
-#define T_Unpeer 400
-#define T_Version 401
-#define T_WanderThreshold 402
-#define T_Week 403
-#define T_Wildcard 404
-#define T_Xleave 405
-#define T_Year 406
-#define T_Flag 407
-#define T_Void 408
-#define T_EOC 409
-#define T_Simulate 410
-#define T_Beep_Delay 411
-#define T_Sim_Duration 412
-#define T_Server_Offset 413
-#define T_Duration 414
-#define T_Freq_Offset 415
-#define T_Wander 416
-#define T_Jitter 417
-#define T_Prop_Delay 418
-#define T_Proc_Delay 419
+#define T_Source 380
+#define T_Statistics 381
+#define T_Stats 382
+#define T_Statsdir 383
+#define T_Step 384
+#define T_Stepout 385
+#define T_Stratum 386
+#define T_String 387
+#define T_Sysstats 388
+#define T_Tick 389
+#define T_Time1 390
+#define T_Time2 391
+#define T_Timingstats 392
+#define T_Tinker 393
+#define T_Tos 394
+#define T_Trap 395
+#define T_True 396
+#define T_Trustedkey 397
+#define T_Ttl 398
+#define T_Type 399
+#define T_Unconfig 400
+#define T_Unpeer 401
+#define T_Version 402
+#define T_WanderThreshold 403
+#define T_Week 404
+#define T_Wildcard 405
+#define T_Xleave 406
+#define T_Year 407
+#define T_Flag 408
+#define T_Void 409
+#define T_EOC 410
+#define T_Simulate 411
+#define T_Beep_Delay 412
+#define T_Sim_Duration 413
+#define T_Server_Offset 414
+#define T_Duration 415
+#define T_Freq_Offset 416
+#define T_Wander 417
+#define T_Jitter 418
+#define T_Prop_Delay 419
+#define T_Proc_Delay 420
 
 
 
@@ -393,7 +395,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 397 "../../ntpd/ntp_parser.h"
+#line 399 "ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

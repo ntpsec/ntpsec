@@ -1027,7 +1027,7 @@ refclock_ioctl(
 void
 refclock_control(
 	sockaddr_u *srcadr,
-	struct refclockstat *in,
+	const struct refclockstat *in,
 	struct refclockstat *out
 	)
 {
@@ -1047,9 +1047,10 @@ refclock_control(
 
 	peer = findexistingpeer(srcadr, NULL, NULL, -1);
 
-	if (NULL == peer || NULL == peer->procptr)
+	if (NULL == peer)
 		return;
 
+	NTP_INSIST(peer->procptr != NULL);
 	pp = peer->procptr;
 
 	/*

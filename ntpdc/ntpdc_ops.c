@@ -1680,6 +1680,7 @@ static struct resflags resflagsV3[] = {
 static struct resflags resmflags[] = {
 	{ "ntpport",	RESM_NTPONLY },
 	{ "interface",	RESM_INTERFACE },
+	{ "source",	RESM_SOURCE },
 	{ "",		0 }
 };
 

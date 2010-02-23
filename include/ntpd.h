@@ -256,7 +256,8 @@ extern	void	process_private (struct recvbuf *, int);
 extern	void	init_restrict	(void);
 extern	int 	restrictions	(sockaddr_u *);
 extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
-				 u_short, u_short);
+				 u_short, u_short, u_long);
+extern	void	restrict_source	(sockaddr_u *, int, u_long);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);
@@ -515,7 +516,7 @@ extern void send_via_ntp_signd(struct recvbuf, int, keyid_t, int,
 /* ntp_timer.c */
 extern volatile int alarm_flag;		/* alarm flag */
 extern volatile u_long alarm_overflow;
-extern u_long	current_time;		/* current time (s) */
+extern u_long	current_time;		/* seconds since startup */
 extern u_long	timer_timereset;
 extern u_long	timer_overflows;
 extern u_long	timer_xmtcalls;

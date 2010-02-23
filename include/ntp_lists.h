@@ -146,6 +146,18 @@ do {								\
 	UNLINK_EXPR_SLIST(punlinked, listhead, (ptounlink) ==	\
 	    U_E_S_CUR(), nextlink, entrytype)
 
+#define CHECK_SLIST(listhead, nextlink, entrytype)		\
+do {								\
+	entrytype *pentry;					\
+								\
+	for (pentry = (listhead);				\
+	     pentry != NULL;					\
+	     pentry = pentry->nextlink){			\
+		NTP_INSIST(pentry != pentry->nextlink);		\
+		NTP_INSIST((listhead) != pentry->nextlink);	\
+	}							\
+} while (0)
+
 /*
  * DLIST
  */
