@@ -1400,6 +1400,7 @@ struct varlist peervarlist[] = {
 	{ "reftime",	0 },	/* 11 */
 	{ "srcport",	0 },	/* 12 */
 	{ "hmode",	0 },	/* 13 */
+	{ "srchost",	0 },	/* 14 */
 	{ 0,		0 }
 };
 
@@ -1418,7 +1419,8 @@ struct varlist peervarlist[] = {
 #define HAVE_REFTIME	11
 #define HAVE_SRCPORT	12
 #define HAVE_HMODE	13
-#define MAX_HAVE 	13
+#define HAVE_SRCHOST	14
+#define MAX_HAVE 	14
 
 /*
  * Decode an incoming data buffer and print a line in the peer list
@@ -1438,7 +1440,7 @@ doprintpeers(
 	char *value = NULL;
 	int i;
 	int c;
-
+	int len;
 	sockaddr_u srcadr;
 	sockaddr_u dstadr;
 	long hmode = 0;
@@ -1467,6 +1469,7 @@ doprintpeers(
 	memset(havevar, 0, sizeof(havevar));
 	ZERO_SOCK(&srcadr);
 	ZERO_SOCK(&dstadr);
+	clock_name[0] = '\0';
 
 	/* Initialize by zeroing out estimate variables */
 	memset(&estoffset, 0, sizeof(estoffset));
@@ -1482,8 +1485,21 @@ doprintpeers(
 			continue;	/* don't know this one */
 		switch (i) {
 		case CP_SRCADR:
-			if (decodenetnum(value, &srcadr)) {
+			if (decodenetnum(value, &srcadr))
 				havevar[HAVE_SRCADR] = 1;
+			break;
+		case CP_SRCHOST:
+			if (pvl == peervarlist) {
+				len = strlen(value);
+				if (2 < len &&
+				    (size_t)len < sizeof(clock_name)) {
+					/* strip quotes */
+					value++;
+					len -= 2;
+					memcpy(clock_name, value, len);
+					clock_name[len] = '\0';
+					havevar[HAVE_SRCHOST] = 1;
+				}
 			}
 			break;
 		case CP_DSTADR:
@@ -1504,18 +1520,16 @@ doprintpeers(
 			if (pvl == peervarlist) {
 				havevar[HAVE_REFID] = 1;
 				if (*value == '\0') {
-					dstadr_refid = "0.0.0.0";
-				} else if ((int)strlen(value) <= 4) {
+					dstadr_refid = "";
+				} else if (strlen(value) <= 4) {
 					refid_string[0] = '.';
-					(void) strcpy(&refid_string[1], value);
+					strncpy(&refid_string[1], value, sizeof(refid_string) - 1);
 					i = strlen(refid_string);
 					refid_string[i] = '.';
 					refid_string[i+1] = '\0';
 					dstadr_refid = refid_string;
 				} else if (decodenetnum(value, &dstadr)) {
-					if (SOCK_UNSPEC(&dstadr))
-						dstadr_refid = "0.0.0.0";
-					else if (ISREFCLOCKADR(&dstadr))
+					if (ISREFCLOCKADR(&dstadr))
 						dstadr_refid =
 						    refnumtoa(&dstadr);
 					else
@@ -1621,7 +1635,8 @@ doprintpeers(
 	/*
 	 * Got everything, format the line
 	 */
-	poll_sec = 1<<max(min3(ppoll, hpoll, NTP_MAXPOLL), NTP_MINPOLL);
+	poll_sec = 1 << max(min3(ppoll, hpoll, NTP_MAXPOLL),
+			    NTP_MINPOLL);
 	if (pktversion > NTP_OLDVERSION)
 		c = flash3[CTL_PEER_STATVAL(rstatus) & 0x7];
 	else
@@ -1629,7 +1644,9 @@ doprintpeers(
 	if (numhosts > 1)
 		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
-		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));
+		if (!havevar[HAVE_SRCHOST] || !SOCK_UNSPEC(&srcadr))
+			strncpy(clock_name, nntohost(&srcadr),
+				sizeof(clock_name));
 		
 		fprintf(fp,
 			"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",

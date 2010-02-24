@@ -554,13 +554,18 @@ peer_config(
 
 	/*
 	 * Mobilize the association and initialize its variables. If
-	 * emulating ntpdate, force iburst.
+	 * emulating ntpdate, force iburst.  For pool and manycastclient
+	 * strip FLAG_PREEMPT as the prototype associations are not
+	 * themselves preemptible, though the resulting associations
+	 * are.
 	 */
+	flags |= FLAG_CONFIG;
 	if (mode_ntpdate)
 		flags |= FLAG_IBURST;
+	if ((MDF_ACAST | MDF_POOL) & cast_flags)
+		flags &= ~FLAG_PREEMPT;
 	return newpeer(srcadr, hostname, dstadr, hmode, version,
-		       minpoll, maxpoll, flags | FLAG_CONFIG,
-		       cast_flags, ttl, key);
+		       minpoll, maxpoll, flags, cast_flags, ttl, key);
 }
 
 /*

@@ -183,17 +183,18 @@ struct ctl_var peer_var[] = {
 	{ CP_RECEIVED,	UI,	"received" },	/* 32 */
 	{ CP_SENT,	UI,	"sent" },	/* 33 */
 	{ CP_FILTERROR,	AR,	"filtdisp" },	/* 34 */
-	{ CP_FLASH,     FX,	"flash" },	/* 35 */ 
+	{ CP_FLASH,	FX,	"flash" },	/* 35 */ 
 	{ CP_TTL,	UI,	"ttl" },	/* 36 */
+	{ CP_SRCHOST,	ST,	"srchost" },	/* 37 */
 	/*
-	 * These are duplicate entries so that we can
-	 * process deviant version of the ntp protocol.
+	 * These are duplicate entries using different on-wire variable
+	 * names so that we can interoperate with another flavor.
 	 */
-	{ CP_SRCADR,	HA,	"peeraddr" },	/* 4 */
-	{ CP_SRCPORT,	UI,	"peerport" },	/* 5 */
-	{ CP_PPOLL,	UI,	"peerpoll" },	/* 11 */
-	{ CP_HPOLL,	UI,	"hostpoll" },	/* 12 */
-	{ CP_FILTERROR,	AR,	"filterror" },	/* 34 */
+	{ CP_SRCADR,	HA,	"peeraddr" },	/* 38 */
+	{ CP_SRCPORT,	UI,	"peerport" },	/* 39 */
+	{ CP_PPOLL,	UI,	"peerpoll" },	/* 40 */
+	{ CP_HPOLL,	UI,	"hostpoll" },	/* 41 */
+	{ CP_FILTERROR,	AR,	"filterror" },	/* 42 */
 	{ 0,		EOV,	""	}
 };
 

@@ -227,16 +227,17 @@ static struct ctl_var peer_var[] = {
 	{ CP_OUT,	RO, "out" },		/* 39 */
 	{ CP_RATE,	RO, "headway" },	/* 40 */
 	{ CP_BIAS,	RO, "bias" },		/* 41 */
+	{ CP_SRCHOST,	RO, "srchost" },	/* 42 */
 #ifdef OPENSSL
-	{ CP_FLAGS,	RO, "flags" },		/* 42 */
-	{ CP_HOST,	RO, "host" },		/* 43 */
-	{ CP_VALID,	RO, "valid" },		/* 44 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 45 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 46 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 47 */
-	{ CP_SIGNATURE,	RO, "signature" },	/* 48 */
+	{ CP_FLAGS,	RO, "flags" },		/* 43 */
+	{ CP_HOST,	RO, "host" },		/* 44 */
+	{ CP_VALID,	RO, "valid" },		/* 45 */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 46 */
+	{ CP_INITKEY,	RO, "initkey" },	/* 47 */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 48 */
+	{ CP_SIGNATURE,	RO, "signature" },	/* 49 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 42/49 */
+	{ 0,		EOV, "" }		/* 43/50 */
 };
 
 
@@ -246,6 +247,7 @@ static struct ctl_var peer_var[] = {
 static u_char def_peer_var[] = {
 	CP_SRCADR,
 	CP_SRCPORT,
+	CP_SRCHOST,
 	CP_DSTADR,
 	CP_DSTPORT,
 	CP_OUT,
@@ -1616,6 +1618,12 @@ ctl_putpeer(
 
 	case CP_SRCPORT:
 		ctl_putuint(peer_var[id].text, SRCPORT(&p->srcadr));
+		break;
+
+	case CP_SRCHOST:
+		if (p->hostname != NULL)
+			ctl_putstr(peer_var[id].text, p->hostname,
+				   strlen(p->hostname));
 		break;
 
 	case CP_DSTADR:
