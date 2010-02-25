@@ -77,7 +77,6 @@ static LONGLONG ls_elapsed;
 
 static BOOL winnt_time_initialized = FALSE;
 static BOOL winnt_use_interpolation = FALSE;
-static ULONGLONG last_interp_time;
 static unsigned clock_thread_id;
 
 
@@ -118,8 +117,9 @@ static volatile int	newest_baseline_gen = 0;
 static ULONGLONG	baseline_counts[BASELINES_TOT] = {0};
 static LONGLONG		baseline_times[BASELINES_TOT] = {0};
 
+#define CLOCK_BACK_THRESHOLD	100	/* < 10us unremarkable */
+static ULONGLONG	clock_backward_max = CLOCK_BACK_THRESHOLD;
 static int		clock_backward_count;
-static ULONGLONG	clock_backward_max;
 
 
 /*
@@ -805,26 +805,31 @@ GetInterpTimeAsFileTime(
 	LPFILETIME pft
 	)
 {
+	static ULONGLONG last_interp_time;
 	FT_ULL now_time;
 	FT_ULL now_count;
+	ULONGLONG clock_backward;
 
-	/*  Mark a mark ASAP. The latency to here should
-	 *  be reasonably deterministic
-	*/
+	/*
+	 * Mark a mark ASAP.  The latency to here should be reasonably
+	 * deterministic
+	 */
 
 	now_count.ull = perf_ctr();
 	now_time.ull = interp_time(now_count.ull, TRUE);
 
-	if (last_interp_time > now_time.ull) {
-
-		clock_backward_count++;
-		if (last_interp_time - now_time.ull > clock_backward_max)
-			clock_backward_max = last_interp_time - now_time.ull;
-		now_time.ull = last_interp_time;
-	} else
+	if (last_interp_time <= now_time.ull)
 		last_interp_time = now_time.ull;
-
+	else {
+		clock_backward = last_interp_time - now_time.ull;
+		if (clock_backward > clock_backward_max) {
+			clock_backward_max = clock_backward;
+			clock_backward_count++;
+		}
+		now_time.ull = last_interp_time;
+	}
 	*pft = now_time.ft;
+
 	return;
 }
 
@@ -1234,11 +1239,9 @@ time_stepped(void)
 	 */
 	newest_baseline_gen++;
 
-	last_interp_time = 
-		clock_backward_max = 
-		clock_backward_count = 
-		newest_baseline = 0;
-
+	clock_backward_max = CLOCK_BACK_THRESHOLD;
+	clock_backward_count = 0;
+	newest_baseline = 0;
 	memset(baseline_counts, 0, sizeof(baseline_counts));
 	memset(baseline_times, 0, sizeof(baseline_times));
 
@@ -1354,7 +1357,8 @@ ctr_freq_timer_fired(
 				clock_backward_count, 
 				(LONGLONG)clock_backward_max / 10.);
 
-			clock_backward_max = clock_backward_count = 0;
+			clock_backward_max = CLOCK_BACK_THRESHOLD;
+			clock_backward_count = 0;
 		}
 	}
 

@@ -124,6 +124,7 @@ static	void	clock_combine	(struct peer **, int);
 static	void	peer_xmit	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
+static	int	preempt_unlucky	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
 static	int	peer_unfit	(struct peer *);
@@ -208,7 +209,7 @@ transmit(
 	 */
 	if (peer->cast_flags & MDF_POOL) {
 		peer->outdate = current_time;
-		if (peer_associations < 2 * sys_maxclock &&
+		if (/* peer_associations < 2 * sys_maxclock && */
 		    (peer_associations < sys_maxclock ||
 		     sys_survivors < sys_minclock))
 			pool_xmit(peer);
@@ -270,7 +271,7 @@ transmit(
 		if (peer->unreach >= NTP_UNREACH)
 			hpoll++;
 		if ((peer->flags & FLAG_PREEMPT) && ((peer->unreach >= 
-		    NTP_UNREACH) || (ntp_random() * 2. / FRAC < 0.01)) &&
+		    NTP_UNREACH) || preempt_unlucky(peer)) &&
 		    (peer->hmode != MODE_CLIENT || (peer_associations >
 		    sys_maxclock && score_all(peer)))) {
 			if (peer->unreach >= NTP_UNREACH) {
@@ -3512,6 +3513,29 @@ pool_name_resolved(
 
 }
 #endif	/* WORKER */
+
+
+/*
+ * preempt_unlucky - play russian roulette with preemptible peers.
+ *
+ * Called once per hpoll by the transmit() procedure for preemptible
+ * associations, this function returns nonzero occasionally to cull
+ * the lowest-scoring preemptible association.
+ */
+static int
+preempt_unlucky(
+	struct peer *peer
+	)
+{
+	/* attempt to average 50% turnover in preemptibles each day */
+	const double daily = 0.50;
+	double	draw;
+	int	polls_daily;
+
+	draw = ntp_random() * 2. / FRAC;	/* [0..1] */
+	polls_daily = (24 * 60 * 60) / (1 << peer->hpoll);
+	return (int)(draw < (daily / polls_daily));
+}
 
 
 #ifdef OPENSSL
