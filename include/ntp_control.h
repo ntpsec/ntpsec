@@ -165,9 +165,9 @@ struct ntp_control {
 #define CS_VERSION	17
 #define	CS_STABIL	18
 #define CS_VARLIST	19
-#define CS_TAI          20
-#define CS_LEAPTAB      21
-#define CS_LEAPEND      22
+#define CS_TAI		20
+#define CS_LEAPTAB	21
+#define CS_LEAPEND	22
 #define	CS_RATE		23
 #ifdef OPENSSL
 #define CS_FLAGS	24

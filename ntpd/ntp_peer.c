@@ -358,22 +358,26 @@ score_all(
 	int	x;
 
 	/*
-	 * This routine finds the minimum score for all ephemeral
-	 * assocations and returns > 0 if the association can be
+	 * This routine finds the minimum score for all preemptible
+	 * associations and returns > 0 if the association can be
 	 * demobilized.
 	 */
 	tamp = score(peer);
 	temp = 100;
-	for (speer = peer_list; speer != NULL; speer = speer->p_link) {
-		x = score(speer);
-		if (x < temp && (FLAG_PREEMPT & peer->flags))
-			temp = x;
-	}
+	for (speer = peer_list; speer != NULL; speer = speer->p_link)
+		if (speer->flags & FLAG_PREEMPT) {
+			x = score(speer);
+			if (x < temp)
+				temp = x;
+		}
 	DPRINTF(1, ("score_all: at %lu score %d min %d\n",
 		    current_time, tamp, temp));
 
 	if (tamp != temp)
 		temp = 0;
+	else // !!!!!
+		msyslog(LOG_INFO, "score_all(%s) min %d bye",
+			stoa(&peer->srcadr), temp);
 
 	return temp;
 }

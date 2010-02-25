@@ -74,15 +74,17 @@ extern	void	set_sys_var (const char *, u_long, u_short);
 
 /* ntp_intres.c */
 #ifdef WORKER
+#define	INITIAL_DNS_RETRY	2	/* seconds between queries */
+
 /*
- * you call getaddrinfo_sometime(name, service, &hints, callback_func, context);
+ * you call getaddrinfo_sometime(name, service, &hints, retry, callback_func, context);
  * later (*callback_func)(rescode, gai_errno, context, name, service, hints, ai_result) is called.
  */
 typedef void	(*gai_sometime_callback)
 		    (int, int, void *, const char *, const char *,
 		     const struct addrinfo *, const struct addrinfo *);
 extern int	getaddrinfo_sometime(const char *, const char *,
-				     const struct addrinfo *,
+				     const struct addrinfo *, int,
 				     gai_sometime_callback, void *);
 /*
  * In gai_sometime_callback routines, the resulting addrinfo list is

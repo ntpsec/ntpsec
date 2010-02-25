@@ -119,8 +119,6 @@
  * is managed by the code which calls the *_complete routines.
  */
 
-#define	INITIAL_DNS_RETRY	2	/* seconds between queries */
-
 typedef struct blocking_gai_req_tag {
 	size_t			octets;
 	time_t			scheduled;
@@ -194,6 +192,7 @@ getaddrinfo_sometime(
 	const char *		node,
 	const char *		service,
 	const struct addrinfo *	hints,
+	int			retry,
 	gai_sometime_callback	callback,
 	void *			context
 	)
@@ -227,7 +226,7 @@ getaddrinfo_sometime(
 		memset(&gai_req->hints, 0, sizeof(gai_req->hints));
 	else
 		gai_req->hints = *hints;
-	gai_req->retry = INITIAL_DNS_RETRY;
+	gai_req->retry = retry;
 	gai_req->callback = callback;
 	gai_req->context = context;
 	gai_req->nodesize = nodesize;

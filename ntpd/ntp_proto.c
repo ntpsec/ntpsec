@@ -263,22 +263,25 @@ transmit(
 		}
 
 		/*
-		 * Watch for timeout. If preemptable, toss the rascal;
+		 * Watch for timeout. If preemptible, toss the rascal;
 		 * otherwise, bump the poll interval. Note the
 		 * poll_update() routine will clamp it to maxpoll.
 		 */ 
-		if (peer->unreach >= NTP_UNREACH) {
+		if (peer->unreach >= NTP_UNREACH)
 			hpoll++;
-			if ((peer->flags & FLAG_PREEMPT) && 
-			    (peer->hmode != MODE_CLIENT ||
-			     (peer_associations > sys_maxclock &&
-			      score_all(peer)))) {
-				report_event(PEVNT_RESTART, peer,
-				    "timeout");
+		if ((peer->flags & FLAG_PREEMPT) && ((peer->unreach >= 
+		    NTP_UNREACH) || (ntp_random() * 2. / FRAC < 0.01)) &&
+		    (peer->hmode != MODE_CLIENT || (peer_associations >
+		    sys_maxclock && score_all(peer)))) {
+			if (peer->unreach >= NTP_UNREACH) {
+				report_event(PEVNT_RESTART, peer, "timeout");
 				peer_clear(peer, "TIME");
-				unpeer(peer);
-				return;
+			} else {
+				report_event(PEVNT_RESTART, peer, "unlucky");
+				peer_clear(peer, "LUCK");
 			}
+			unpeer(peer);
+			return;
 		}
 	} else {
 		peer->burst--;
@@ -3420,12 +3423,15 @@ pool_xmit(
 			pool->hostname,
 			"ntp",
 			&hints,
+			0,			/* no retry */
 			&pool_name_resolved,
 			(void *)(u_int)pool->associd);
 		if (!rc)
 			msyslog(LOG_INFO, "pool DNS lookup %s started", pool->hostname);
 		else
-			msyslog(LOG_ERR, "unable to start pool DNS %s %m", pool->hostname);
+			msyslog(LOG_ERR,
+				"unable to start pool DNS %s %m",
+				pool->hostname);
 		return;
 	}
 

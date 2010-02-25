@@ -3025,8 +3025,8 @@ config_trap(
 				}
 				rc = getaddrinfo_sometime(
 					curr_trap->addr->address,
-					port_text,
-					&hints,
+					port_text, &hints,
+					INITIAL_DNS_RETRY,
 					&trap_name_resolved,
 					pstp);
 				if (!rc)
@@ -3579,8 +3579,10 @@ config_peers(
 			hints.ai_socktype = SOCK_DGRAM;
 			hints.ai_protocol = IPPROTO_UDP;
 
-			getaddrinfo_sometime(curr_peer->addr->address, "ntp",
-					     &hints, &peer_name_resolved, 
+			getaddrinfo_sometime(curr_peer->addr->address,
+					     "ntp", &hints,
+					     INITIAL_DNS_RETRY,
+					     &peer_name_resolved,
 					     (void *)ctx);
 #else	/* !WORKER follows */
 			msyslog(LOG_ERR,
@@ -3626,6 +3628,7 @@ peer_name_resolved(
 			name, gai_strerror(rescode), rescode);
 #else	/* IGNORE_DNS_ERRORS follows */
 		getaddrinfo_sometime(name, service, hints,
+				     INITIAL_DNS_RETRY,
 				     &peer_name_resolved, context);
 #endif
 		return;
@@ -3753,6 +3756,7 @@ config_unpeers(
 			hints.ai_protocol = IPPROTO_UDP;
 			getaddrinfo_sometime(curr_unpeer->addr->address,
 					     "ntp", &hints,
+					     INITIAL_DNS_RETRY,
 					     &unpeer_name_resolved, 
 					     (void *)hints.ai_family);
 #else	/* !WORKER follows */
@@ -3971,9 +3975,13 @@ config_ntpd(
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
-		getaddrinfo_sometime("www.cnn.com", "ntp", &hints, gai_test_callback, (void *)1);
+		getaddrinfo_sometime("www.cnn.com", "ntp", &hints,
+				     INITIAL_DNS_RETRY,
+				     gai_test_callback, (void *)1);
 		hints.ai_family = AF_INET6;
-		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints, gai_test_callback, (void *)0x600);
+		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints, 
+				     INITIAL_DNS_RETRY,
+				     gai_test_callback, (void *)0x600);
 	}
 #endif
 }

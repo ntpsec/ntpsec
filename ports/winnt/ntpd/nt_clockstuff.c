@@ -1431,10 +1431,11 @@ tune_ctr_freq(
 	static LONGLONG diffs[TUNE_CTR_DEPTH] = {0};
 	static LONGLONG sum = 0;
 
+	char ctr_freq_eq[64];
 	LONGLONG delta;
 	LONGLONG deltadiff;
 	ULONGLONG ObsPerfCtrFreq;
-	double obs_freq;
+	double freq;
 	double this_freq;
 	int isneg;
 
@@ -1490,12 +1491,21 @@ tune_ctr_freq(
 	/* get rid of ObsPerfCtrFreq when removing the #ifdef */
 	PerfCtrFreq = ObsPerfCtrFreq;
 #endif
-	obs_freq = (LONGLONG)ObsPerfCtrFreq / 1e6;
+	freq = (LONGLONG)PerfCtrFreq / 1e6;
+
+	/*
+	 * make the performance counter's frequency error from its
+	 * nominal rate, expressed in PPM, available via ntpq as
+	 * system variable "ctr_frequency".  This is consistent with
+	 * "frequency" which is the system clock drift in PPM.
+	 */
+	snprintf(ctr_freq_eq, sizeof(ctr_freq_eq), "ctr_frequency=%.2f", 
+		 1e6 * (freq - nom_freq) / nom_freq);
+	set_sys_var(ctr_freq_eq, strlen(ctr_freq_eq) + 1, RO | DEF);
 
 	/* 
 	 * report observed ctr freq each time the estimate used during
-	 * startup moves toward the observed freq from the nominal, 
-	 * and once a day afterward.
+	 * startup moves toward the observed freq from the nominal.
 	 */
 
 	if (count > COUNTOF(diffs) &&
@@ -1507,23 +1517,21 @@ tune_ctr_freq(
 		if (count <= COUNTOF(diffs))
 			/* moving to observed freq. from nominal (startup) */
 			msyslog(LOG_INFO,
-				(obs_freq > 100)
-				 ? "ctr %.3f MHz %+6.2f PPM using "
-				       "%.3f MHz %+6.2f PPM"
-				 : "ctr %.6f MHz %+6.2f PPM using "
-				       "%.6f MHz %+6.2f PPM",
+				(freq > 100)
+				   ? "ctr %.3f MHz %+6.2f PPM using %.3f MHz %+6.2f PPM"
+				   : "ctr %.6f MHz %+6.2f PPM using %.6f MHz %+6.2f PPM",
 				this_freq,
 				1e6 * (this_freq - nom_freq) / nom_freq,
-				obs_freq, 
-				1e6 * (obs_freq - nom_freq) / nom_freq);
+				freq, 
+				1e6 * (freq - nom_freq) / nom_freq);
 		else
 			/* steady state */
 			msyslog(LOG_INFO,
-				(obs_freq > 100)
-				 ? "ctr %.3f MHz %+.2f PPM"
-				 : "ctr %.6f MHz %+.2f PPM",
-				obs_freq, 
-				1e6 * (obs_freq - nom_freq) / nom_freq);
+				(freq > 100)
+				   ? "ctr %.3f MHz %+.2f PPM"
+				   : "ctr %.6f MHz %+.2f PPM",
+				freq, 
+				1e6 * (freq - nom_freq) / nom_freq);
 
 	if (disbelieved) {
 		msyslog(LOG_ERR, 
