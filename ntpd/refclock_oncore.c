@@ -11,7 +11,7 @@
  * Driver for some of the various the Motorola Oncore GPS receivers.
  *   should work with Basic, PVT6, VP, UT, UT+, GT, GT+, SL, M12, M12+T
  *	The receivers with TRAIM (VP, UT, UT+, M12+T), will be more accurate
- *	than the others.
+ *	   than the others.
  *	The receivers without position hold (GT, GT+) will be less accurate.
  *
  * Tested with:
@@ -353,6 +353,8 @@ struct instance {
 	u_char	once;		/* one pass code at top of BaEaHa */
 	s_char	assert;
 	u_char	hardpps;
+	s_char	pps_control;	/* PPS control, M12 only */
+	s_char	pps_control_msg_seen;
 };
 
 #define rcvbuf	instance->Rcvbuf
@@ -407,6 +409,7 @@ static	void	oncore_msg_Cj_id   (struct instance *, u_char *, size_t);
 static	void	oncore_msg_Cj_init (struct instance *, u_char *, size_t);
 static	void	oncore_msg_Ga	   (struct instance *, u_char *, size_t);
 static	void	oncore_msg_Gb	   (struct instance *, u_char *, size_t);
+static	void	oncore_msg_Gc	   (struct instance *, u_char *, size_t);
 static	void	oncore_msg_Gj	   (struct instance *, u_char *, size_t);
 static	void	oncore_msg_Sz	   (struct instance *, u_char *, size_t);
 
@@ -467,7 +470,7 @@ static struct msg_desc {
 	{ "Fa",   9,    oncore_msg_CaFaIa, "" },
 	{ "Ga",  20,    oncore_msg_Ga,     "" },
 	{ "Gb",  17,    oncore_msg_Gb,     "" },
-	{ "Gc",   8,    0,                 "" },
+	{ "Gc",   8,    oncore_msg_Gc,     "" },
 	{ "Gd",   8,    0,                 "" },
 	{ "Ge",   8,    0,                 "" },
 	{ "Gj",  21,    oncore_msg_Gj,     "" },
@@ -528,7 +531,7 @@ static u_char oncore_cmd_Gax[] = { 'G', 'a', 0xff, 0xff, 0xff, 0xff,		    /* 12	
 					     0xff, 0xff, 0xff, 0xff,		    /*							*/
 					     0xff, 0xff, 0xff, 0xff, 0xff };	    /*							*/
 static u_char oncore_cmd_Gb[]  = { 'G', 'b', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };	    /* 12	set Date/Time				*/
-static u_char oncore_cmd_Gc[]  = { 'G', 'c', 1 };				    /* 12	PPS Control: On Cont			*/
+static u_char oncore_cmd_Gc[]  = { 'G', 'c', 0 };				    /* 12	PPS Control: Off, On, 1+satellite,TRAIM */
 static u_char oncore_cmd_Gd0[] = { 'G', 'd', 0 };				    /* 12	Position Control: 3D (no hold)		*/
 static u_char oncore_cmd_Gd1[] = { 'G', 'd', 1 };				    /* 12	Position Control: 0D (3D hold)		*/
 static u_char oncore_cmd_Gd2[] = { 'G', 'd', 2 };				    /* 12	Position Control: 2D (Alt Hold) 	*/
@@ -617,6 +620,8 @@ oncore_start(
 	instance->traim = -1;
 	instance->traim_in = -1;
 	instance->chan_in = -1;
+	instance->pps_control = -1;	/* PPS control, M12 only */
+	instance->pps_control_msg_seen = -1;	/* Have seen response to Gc msg */
 	instance->model = ONCORE_UNKNOWN;
 	instance->mode = MODE_UNKNOWN;
 	instance->site_survey = ONCORE_SS_UNKNOWN;
@@ -1165,7 +1170,7 @@ oncore_read_config(
  *	   For Flag2, ASSERT=0, and hence is default.
  *
  *	There is an optional line, with HARDPPS on it.	Including this line causes
- *	   the PPS signal to control the kernel PLL.
+ *	     the PPS signal to control the kernel PLL.
  *	   HARDPPS can also be set with FLAG3 of the ntp.conf input.
  *	   For Flag3, 0 is disabled, and the default.
  *
@@ -1190,6 +1195,17 @@ oncore_read_config(
  *	   range 0 to 89. This sets the satellite mask angle and will determine the minimum
  *	   elevation angle for satellites to be tracked by the receiver. The default value
  *	   is 10 deg for the VP and 0 deg for all other receivers.
+ *
+ *	There is an optional line with PPSCONTROL on it (only valid for M12 or M12+T
+ *	   receivers, the option is read, but ignored for all others)
+ *	   and it is followed by:
+ *		ON	   Turn PPS on.  This is the default and the default for other
+ *			       oncore receivers.  The PPS is on even if not tracking
+ *			       any satellites.
+ *		SATELLITE  Turns PPS on if tracking at least 1 satellite, else off.
+ *		TRAIM	   Turns PPS on or off controlled by TRAIM.
+ *	  The OFF option is NOT implemented, since the Oncore driver will not work
+ *	     without the PPS signal.
  *
  * So acceptable input would be
  *	# these are my coordinates (RWC)
@@ -1315,7 +1331,7 @@ oncore_read_config(
 			if (f1 < 0 || f1 > 1.e9)
 				f1 = 0;
 			if (f1 < 0 || f1 > 999999) {
-				snprintf(Msg, sizeof(Msg), 
+				snprintf(Msg, sizeof(Msg),
 					 "PPS Cable delay of %fns out of Range, ignored",
 					 f1);
 				oncore_log(instance, LOG_WARNING, Msg);
@@ -1368,6 +1384,18 @@ oncore_read_config(
 			sscanf(ca, "%d", &mask);
 			if (mask > -1 && mask < 90)
 				instance->Ag = mask;			/* Satellite mask angle */
+		} else if (!strncmp(cc,"PPSCONTROL",10)) {              /* pps control M12 only */
+			if (!strcmp(ca,"ON") || !strcmp(ca, "CONTINUOUS")) {
+				instance->pps_control = 1;		/* PPS always on */
+			} else if (!strcmp(ca,"SATELLITE")) {
+				instance->pps_control = 2;		/* PPS on when satellite is available */
+			} else if (!strcmp(ca,"TRAIM")) {
+				instance->pps_control = 3;		/* PPS on when TRAIM status is OK */
+			} else {
+				snprintf(Msg, sizeof(Msg),
+				    "Unknown value \"%s\" for PPSCONTROL, ignored", cc);
+				oncore_log(instance, LOG_WARNING, Msg);
+			}
 		}
 	}
 	fclose(fd);
@@ -1588,6 +1616,8 @@ oncore_get_timestamp(
 	char	Msg[140];
 
 	peer = instance->peer;
+	peer->flags &= ~FLAG_PPS;	/* default to off, set to on if we make
+					     it to the end of the routine. */
 
 #if 1
 	/* If we are in SiteSurvey mode, then we are in 3D mode, and we fall thru.
@@ -1602,16 +1632,13 @@ oncore_get_timestamp(
 
 	if ((instance->site_survey != ONCORE_SS_DONE) || (instance->mode != MODE_0D)) {
 #endif
-		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
 	/* Don't do anything without an almanac to define the GPS->UTC delta */
 
-	if (instance->rsm.bad_almanac) {
-		peer->flags &= ~FLAG_PPS;
+	if (instance->rsm.bad_almanac)
 		return;
-	}
 
 	/* Once the Almanac is valid, the M12+T does not produce valid UTC
 	 * immediately.
@@ -1621,7 +1648,6 @@ oncore_get_timestamp(
 
 	if (instance->count5) {
 		instance->count5--;
-		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
@@ -1631,7 +1657,6 @@ oncore_get_timestamp(
 	if (time_pps_fetch(instance->pps_h, PPS_TSFMT_TSPEC, &pps_i,
 	    &timeout) < 0) {
 		oncore_log(instance, LOG_ERR, "time_pps_fetch failed");
-		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
@@ -1648,7 +1673,7 @@ oncore_get_timestamp(
 				 "serial/j (%lu, %lu) %ld.%09ld", i, j,
 				 (long)tsp->tv_sec, (long)tsp->tv_nsec);
 # else
-			snprintf(Msg, sizeof(Msg), 
+			snprintf(Msg, sizeof(Msg),
 				 "serial/j (%lu, %lu) %ld.%06ld", i, j,
 				 (long)tsp->tv_sec, (long)tsp->tv_usec);
 # endif
@@ -1658,7 +1683,6 @@ oncore_get_timestamp(
 
 		if (pps_i.assert_sequence == j) {
 			oncore_log(instance, LOG_NOTICE, "ONCORE: oncore_get_timestamp, error serial pps");
-			peer->flags &= ~FLAG_PPS;
 			return;
 		}
 
@@ -1686,7 +1710,6 @@ oncore_get_timestamp(
 
 		if (pps_i.clear_sequence == j) {
 			oncore_log(instance, LOG_ERR, "oncore_get_timestamp, error serial pps");
-			peer->flags &= ~FLAG_PPS;
 			return;
 		}
 		instance->ev_serial = pps_i.clear_sequence;
@@ -1747,14 +1770,12 @@ oncore_get_timestamp(
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
 		snprintf(Msg, sizeof(Msg), "time_pps_getcap failed: %m");
 		oncore_log(instance, LOG_ERR, Msg);
-		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
 		snprintf(Msg, sizeof(Msg), "time_pps_getparams failed: %m");
 		oncore_log(instance, LOG_ERR, Msg);
-		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
@@ -1864,7 +1885,6 @@ oncore_get_timestamp(
 
 	if (!refclock_process(instance->pp)) {
 		refclock_report(instance->peer, CEVNT_BADTIME);
-		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
@@ -1984,7 +2004,7 @@ oncore_msg_Ag(
 
 		instance->Ag = buf[4];
 		snprintf(Msg, sizeof(Msg),
-			 "Satellite mask angle %s %d degrees", cp, 
+			 "Satellite mask angle %s %d degrees", cp,
 			 (int)instance->Ag);
 		oncore_log(instance, LOG_INFO, Msg);
 }
@@ -2168,6 +2188,15 @@ oncore_msg_BaEaHa(
 
 	memcpy(instance->BEHa, buf, (size_t) (len+3));	/* Ba, Ea or Ha */
 
+	/* check if we saw a response to Gc (M12 or M12+T */
+
+	if (instance->pps_control_msg_seen != -2) {
+		if ((instance->pps_control_msg_seen == -1) && (instance->pps_control != -1)) {
+			oncore_log(instance, LOG_INFO, "PPSCONTROL set, but not implemented (not M12)");
+		}
+		instance->pps_control_msg_seen = -2;
+	}
+
 	/* check the antenna (did it get unplugged) and almanac (is it ready) for changes. */
 
 	oncore_check_almanac(instance);
@@ -2282,7 +2311,7 @@ oncore_msg_BaEaHa(
 					 *	   We will have to do it ourselves (done above)
 					 */
 
-					snprintf(Msg, sizeof(Msg), 
+					snprintf(Msg, sizeof(Msg),
 						 "Initiating software 3D site survey (%d samples)",
 						 POS_HOLD_AVERAGE);
 					oncore_log(instance, LOG_INFO, Msg);
@@ -2513,7 +2542,7 @@ oncore_msg_Bl(
 	} warn;
 
 	day_now = day_lsf = 0;
-	cp = NULL;      /* keep gcc happy */
+	cp = NULL;	/* keep gcc happy */
 
 	chan = buf[4] & 0377;
 	id   = buf[5] & 0377;
@@ -2603,14 +2632,14 @@ oncore_msg_Bl(
 			oncore_log(instance, LOG_NOTICE, Msg);
 		}
 	}
-	snprintf(Msg, sizeof(Msg), 
+	snprintf(Msg, sizeof(Msg),
 		"dt_ls = %d  dt_lsf = %d  WN = %d  DN = %d  WN_lsf = %d  DNlsf = %d  wn_flg = %d  lsf_flg = %d  Bl_day = %d",
 		instance->Bl.dt_ls, instance->Bl.dt_lsf,
-		instance->Bl.WN, instance->Bl.DN, 
+		instance->Bl.WN, instance->Bl.DN,
 		instance->Bl.WN_lsf, instance->Bl.DN_lsf,
 		instance->Bl.wn_flg, instance->Bl.lsf_flg,
 		instance->Bl.Bl_day);
-	oncore_log(instance, LOG_INFO, Msg);
+	oncore_log(instance, LOG_DEBUG, Msg);
 }
 
 
@@ -2716,7 +2745,7 @@ oncore_msg_CaFaIa(
 		if (buf[2] == 'I') i = i || buf[6];
 		if (i) {
 			if (buf[2] == 'I')
-				snprintf(Msg, sizeof(Msg), 
+				snprintf(Msg, sizeof(Msg),
 					 "self test failed: result %02x %02x %02x",
 					 buf[4], buf[5], buf[6]);
 			else
@@ -2725,7 +2754,7 @@ oncore_msg_CaFaIa(
 					 buf[4], buf[5]);
 			oncore_log(instance, LOG_ERR, Msg);
 
-			oncore_log(instance, LOG_ERR, 
+			oncore_log(instance, LOG_ERR,
 				   "ONCORE: self test failed, shutting down driver");
 
 			refclock_report(instance->peer, CEVNT_FAULT);
@@ -2988,7 +3017,7 @@ oncore_msg_Cj_id(
 		 ((instance->traim_id < 0)
 		      ? "UNKNOWN"
 		      : (instance->traim_id > 0)
-		            ? "ON"
+			    ? "ON"
 			    : "OFF"));
 	oncore_log(instance, LOG_INFO, Msg);
 }
@@ -3096,6 +3125,8 @@ oncore_msg_Cj_init(
 		oncore_sendmsg(instance, oncore_cmd_Ea0, sizeof(oncore_cmd_Ea0));
 		oncore_sendmsg(instance, oncore_cmd_En0, sizeof(oncore_cmd_En0));
 		oncore_sendmsg(instance, oncore_cmd_Ha, sizeof(oncore_cmd_Ha ));
+		oncore_cmd_Gc[2] = (instance->pps_control < 0) ? 1 : instance->pps_control;
+		oncore_sendmsg(instance, oncore_cmd_Gc, sizeof(oncore_cmd_Gc)); /* PPS off/continuous/Tracking 1+sat/TRAIM */
 	}
 
 	instance->count = 1;
@@ -3178,6 +3209,24 @@ oncore_msg_Gb(
 
 
 
+/* Response to PPS Control message (M12 and M12+T only ) */
+
+static void
+oncore_msg_Gc(
+	struct instance *instance,
+	u_char *buf,
+	size_t len
+	)
+{
+	char Msg[160], *tbl[] = {"OFF", "ON", "SATELLITE", "TRAIM" };
+
+	instance->pps_control_msg_seen = 1;
+	snprintf(Msg, sizeof(Msg), "PPS Control set to %s", tbl[buf[4]]);
+	oncore_log(instance, LOG_INFO, Msg);
+}
+
+
+
 /* Leap Second for M12, gives all info from satellite message */
 /* also in UT v3.0 */
 
@@ -3208,7 +3257,7 @@ oncore_msg_Gj(
 	if (dt) {
 		snprintf(Msg, sizeof(Msg),
 			 "Leap second (%d) scheduled for %d%s%d at %d:%d:%d",
-			 dt, buf[9], Month[buf[8] - 1], 
+			 dt, buf[9], Month[buf[8] - 1],
 			 256 * buf[6] + buf[7], buf[15], buf[16],
 			 buf[17]);
 		oncore_log(instance, LOG_NOTICE, Msg);
@@ -3339,7 +3388,7 @@ oncore_check_almanac(
 				 instance->BEHa[129],
 				 instance->BEHa[130], bits1, bits2,
 				 bits3, instance->mode == MODE_0D,
-				 instance->mode == MODE_2D, 
+				 instance->mode == MODE_2D,
 				 instance->mode == MODE_3D,
 				 instance->rsm.bad_almanac,
 				 instance->rsm.bad_fix);
