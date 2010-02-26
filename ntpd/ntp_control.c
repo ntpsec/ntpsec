@@ -836,7 +836,7 @@ ctlpeerstatus(
 	u_short status;
 
 	status = p->status;
-	if (!(FLAG_PREEMPT & p->flags))
+	if (FLAG_CONFIG & p->flags)
 		status |= CTL_PST_CONFIG;
 	if (p->keyid)
 		status |= CTL_PST_AUTHENABLE;

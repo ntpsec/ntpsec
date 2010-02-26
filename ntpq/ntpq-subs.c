@@ -1635,8 +1635,7 @@ doprintpeers(
 	/*
 	 * Got everything, format the line
 	 */
-	poll_sec = 1 << max(min3(ppoll, hpoll, NTP_MAXPOLL),
-			    NTP_MINPOLL);
+	poll_sec = 1 << min(ppoll, hpoll);
 	if (pktversion > NTP_OLDVERSION)
 		c = flash3[CTL_PEER_STATVAL(rstatus) & 0x7];
 	else

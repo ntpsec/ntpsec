@@ -124,7 +124,6 @@ static	void	clock_combine	(struct peer **, int);
 static	void	peer_xmit	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
-static	int	preempt_unlucky	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
 static	int	peer_unfit	(struct peer *);
@@ -252,11 +251,13 @@ transmit(
 
 			/*
 			 * Here the peer is reachable. Send a burst if
-			 * enabled and the peer is fit.
+			 * enabled and the peer is fit.  Reset unreach
+			 * for configured associations.  Preemptible and
+			 * ephemeral associations have unreach reset if
+			 * they are survivors in clock_select().
 			 */
 			hpoll = sys_poll;
-			if (!((peer->flags & FLAG_PREEMPT) &&
-			    peer->hmode == MODE_CLIENT))
+			if (peer->flags & FLAG_CONFIG)
 				peer->unreach = 0;
 			if ((peer->flags & FLAG_BURST) && peer->retry ==
 			    0 && !peer_unfit(peer))
@@ -268,21 +269,17 @@ transmit(
 		 * otherwise, bump the poll interval. Note the
 		 * poll_update() routine will clamp it to maxpoll.
 		 */ 
-		if (peer->unreach >= NTP_UNREACH)
+		if (peer->unreach >= NTP_UNREACH) {
 			hpoll++;
-		if ((peer->flags & FLAG_PREEMPT) && ((peer->unreach >= 
-		    NTP_UNREACH) || preempt_unlucky(peer)) &&
-		    (peer->hmode != MODE_CLIENT || (peer_associations >
-		    sys_maxclock && score_all(peer)))) {
-			if (peer->unreach >= NTP_UNREACH) {
+			if (!(peer->flags & FLAG_CONFIG) &&
+			    (!(peer->flags & FLAG_PREEMPT) ||
+			    (peer_associations > sys_maxclock &&
+			    score_all(peer)))) {
 				report_event(PEVNT_RESTART, peer, "timeout");
 				peer_clear(peer, "TIME");
-			} else {
-				report_event(PEVNT_RESTART, peer, "unlucky");
-				peer_clear(peer, "LUCK");
+				unpeer(peer);
+				return;
 			}
-			unpeer(peer);
-			return;
 		}
 	} else {
 		peer->burst--;
@@ -933,8 +930,8 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_CLIENT, hisversion, pkt->ppoll,
-		    pkt->ppoll, FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
-		    0, skeyid)) == NULL) {
+		    pkt->ppoll, FLAG_IBURST, MDF_BCLNT, 0, skeyid)) ==
+		    NULL) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
@@ -994,8 +991,7 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST, 0, skeyid))
-		    == NULL) {
+		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
@@ -3513,29 +3509,6 @@ pool_name_resolved(
 
 }
 #endif	/* WORKER */
-
-
-/*
- * preempt_unlucky - play russian roulette with preemptible peers.
- *
- * Called once per hpoll by the transmit() procedure for preemptible
- * associations, this function returns nonzero occasionally to cull
- * the lowest-scoring preemptible association.
- */
-static int
-preempt_unlucky(
-	struct peer *peer
-	)
-{
-	/* attempt to average 50% turnover in preemptibles each day */
-	const double daily = 0.50;
-	double	draw;
-	int	polls_daily;
-
-	draw = ntp_random() * 2. / FRAC;	/* [0..1] */
-	polls_daily = (24 * 60 * 60) / (1 << peer->hpoll);
-	return (int)(draw < (daily / polls_daily));
-}
 
 
 #ifdef OPENSSL
