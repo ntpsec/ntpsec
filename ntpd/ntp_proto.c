@@ -202,13 +202,13 @@ transmit(
 	 * growth in associations if the system clock or network quality
 	 * result in survivor count dipping below sys_minclock often.
 	 * This was observed testing with pool, where sys_maxclock == 12
-	 * resulted in 34 associations without the hard limit.  A
+	 * resulted in 60 associations without the hard limit.  A
 	 * similar hard limit on manycastclient ephemeral associations
 	 * may be appropriate.
 	 */
 	if (peer->cast_flags & MDF_POOL) {
 		peer->outdate = current_time;
-		if (/* peer_associations < 2 * sys_maxclock && */
+		if ((peer_associations <= 2 * sys_maxclock) &&
 		    (peer_associations < sys_maxclock ||
 		     sys_survivors < sys_minclock))
 			pool_xmit(peer);
@@ -252,12 +252,12 @@ transmit(
 			/*
 			 * Here the peer is reachable. Send a burst if
 			 * enabled and the peer is fit.  Reset unreach
-			 * for configured associations.  Preemptible and
-			 * ephemeral associations have unreach reset if
-			 * they are survivors in clock_select().
+			 * for persistent associations.  Unreach is also
+			 * reset for survivors in clock_select().
 			 */
 			hpoll = sys_poll;
-			if (peer->flags & FLAG_CONFIG)
+			if ((peer->flags & FLAG_CONFIG) && !(peer->flags
+			    & FLAG_PREEMPT))
 				peer->unreach = 0;
 			if ((peer->flags & FLAG_BURST) && peer->retry ==
 			    0 && !peer_unfit(peer))
@@ -265,16 +265,25 @@ transmit(
 		}
 
 		/*
-		 * Watch for timeout. If preemptible, toss the rascal;
+		 * Watch for timeout.  If ephemeral, toss the rascal;
 		 * otherwise, bump the poll interval. Note the
 		 * poll_update() routine will clamp it to maxpoll.
+		 * If preemptible and we have more peers than maxclock,
+		 * and this peer has the minimum score of preemptibles,
+		 * demobilize.
 		 */ 
 		if (peer->unreach >= NTP_UNREACH) {
 			hpoll++;
-			if (!(peer->flags & FLAG_CONFIG) &&
-			    (!(peer->flags & FLAG_PREEMPT) ||
-			    (peer_associations > sys_maxclock &&
-			    score_all(peer)))) {
+			/* ephemeral: no FLAG_CONFIG nor FLAG_PREEMPT */
+			if (!(peer->flags & (FLAG_CONFIG | FLAG_PREEMPT))) {
+				report_event(PEVNT_RESTART, peer, "timeout");
+				peer_clear(peer, "TIME");
+				unpeer(peer);
+				return;
+			}
+			if ((peer->flags & FLAG_PREEMPT) &&
+			    (peer_associations > sys_maxclock) &&
+			    score_all(peer)) {
 				report_event(PEVNT_RESTART, peer, "timeout");
 				peer_clear(peer, "TIME");
 				unpeer(peer);
@@ -3462,7 +3471,7 @@ pool_xmit(
 	pool->sent++;
 	pool->throttle += (1 << pool->minpoll) - 2;
 #ifdef DEBUG
-	msyslog(LOG_INFO, "transmit: at %ld %s->%s pool\n", /* !!!!! */
+	msyslog(LOG_NOTICE, "transmit: at %ld %s->%s pool\n", /* !!!!! */
 		    current_time, latoa(lcladr), stoa(rmtadr));
 	if (debug)
 		printf("transmit: at %ld %s->%s pool\n",

@@ -3735,11 +3735,13 @@ config_unpeers(
 
 			DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
 			peer = NULL;
-			do {
+			while (TRUE) {
 				peer = findexistingpeer(&peeraddr, NULL, peer, -1);
-				if (peer != NULL && (FLAG_CONFIG & peer->flags))
+				if (NULL == peer)
 					break;
-			} while (peer != NULL);
+				if (FLAG_CONFIG & peer->flags)
+					break;
+			}
 
 			if (peer != NULL) {
 				msyslog(LOG_INFO, "unpeered %s",
@@ -3806,11 +3808,13 @@ unpeer_name_resolved(
 			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
 			DPRINTF(1, ("searching for peer %s\n", stoa(&peeraddr)));
 			peer = NULL;
-			do {
+			while (TRUE) {
 				peer = findexistingpeer(&peeraddr, NULL, peer, -1);
-				if (peer != NULL && (FLAG_CONFIG & peer->flags))
+				if (NULL == peer)
 					break;
-			} while (peer != NULL);
+				if (FLAG_CONFIG & peer->flags)
+					break;
+			}
 
 			if (peer != NULL) {
 				fam_spec = (AF_INET6 == af)
