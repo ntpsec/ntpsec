@@ -507,7 +507,10 @@ extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
 extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
 extern int		ntp_minpkt;
 extern u_char		ntp_minpoll;
-extern int		mon_age;	/* monitor preempt age */
+extern u_int	mon_mindepth;		/* preempt above this */
+extern int	mon_maxage;		/* for entries older than */
+extern u_int	mon_maxdepth;		/* MRU size hard limit */
+extern int	mon_age;		/* monitor preempt age */
 
 /* ntp_signd.c */
 #ifdef HAVE_NTP_SIGND

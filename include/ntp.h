@@ -748,7 +748,6 @@ struct mon_data {
 	int		count;		/* total packet count */
 	u_long		firsttime;	/* first time found */
 	u_long		lasttime;	/* last time found */
-	u_short		rmtport;	/* remote port last came from */
 	u_char		vn_mode;	/* packet mode & version */
 	u_char		cast_flags;	/* flags MDF_?CAST */
 };

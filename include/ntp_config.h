@@ -169,6 +169,7 @@ struct config_tree {
 
     /* Access Control Configuration */
     queue *discard_opts;
+    queue *mru_opts;
     queue *restrict_opts;
 
     queue *fudge;

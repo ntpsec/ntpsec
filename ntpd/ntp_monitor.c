@@ -37,23 +37,11 @@
  * tail for the MRU list, unlinking from the hash table, and
  * reinitializing.
  */
-/*
- * Limits on the number of structures allocated.  This limit is picked
- * with the illicit knowlege that we can only return somewhat less than
- * 8K bytes in a mode 7 response packet, and that each structure will
- * require about 20 bytes of space in the response.
- *
- * ... I don't believe the above is true anymore ... jdg
- */
-#ifdef MAXMONMEM		/* old name */
-# define	MAX_MONLIST	MAXMONMEM
-#elif !defined(MAX_MONLIST)
-# define	MAX_MONLIST	600	/* recycle LRU at this limit */
-#endif
+/* INC_MONLIST is the allocation granularity in entries */
 #ifdef MONMEMINC		/* old name */
 # define	INC_MONLIST	MONMEMINC
 #elif !defined(INC_MONLIST)
-# define	INC_MONLIST	15	/* allocation granularity */
+# define	INC_MONLIST	(4096 / sizeof(mon_entry))
 #endif
 
 /*
@@ -75,9 +63,9 @@ struct	mon_data mon_mru_list;
  * List of free structures structures, and counters of free and total
  * structures. The free structures are linked with the hash_next field.
  */
-static  mon_entry *mon_free;	/* free list or null if none */
-static	int mon_total_mem;		/* total structures allocated */
-static	int mon_mem_increments;		/* times called malloc() */
+static  mon_entry *mon_free;		/* free list or null if none */
+static	u_int mon_mru_entries;		/* total structures allocated */
+static	u_int mon_mem_increments;	/* times called malloc() */
 
 /*
  * Parameters of the RES_LIMITED restriction option. We define headway
@@ -93,10 +81,16 @@ u_char	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
  * we aren't, we may not even have allocated any memory yet.
  */
 	int	mon_enabled;		/* enable switch */
+	u_int	mon_mindepth = 600;	/* preempt above this */
+	int	mon_maxage = 64;	/* for entries older than */
+	u_int	mon_maxdepth = 		/* MRU size hard limit */
+		4 * 1024 * 1024 / sizeof(mon_entry);
 	int	mon_age = 3000;		/* preemption limit */
 static	int	mon_have_memory;
+
 static	void	mon_getmoremem(void);
 static	void	remove_from_hash(mon_entry *);
+static	void	mon_reclaim_entry(mon_entry *);
 
 
 /*
@@ -192,6 +186,17 @@ mon_clearinterface(
 }
 
 
+static void
+mon_reclaim_entry(
+	mon_entry *m
+	)
+{
+	UNLINK_DLIST(m, mru);
+	remove_from_hash(m);
+	memset(m, 0, sizeof(*m));
+}
+
+
 /*
  * ntp_monitor - record stats about this packet
  *
@@ -205,6 +210,7 @@ ntp_monitor(
 {
 	struct pkt *	pkt;
 	mon_entry *	md;
+	mon_entry *	tail;
 	sockaddr_u	addr;
 	u_int		hash;
 	u_char		mode;
@@ -233,7 +239,6 @@ ntp_monitor(
 			md->lasttime = current_time;
 			md->count++;
 			md->flags = flags;
-			md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
 			md->vn_mode = VN_MODE(version, mode);
 
 			/*
@@ -292,23 +297,48 @@ ntp_monitor(
 	 * If we got here, this is the first we've heard of this
 	 * guy.  Get him some memory, either from the free list
 	 * or from the tail of the MRU list.
+	 * Four ntp.conf "mru" knobs come into play determining the
+	 * depth (or count) of the MRU list:
+	 * - mon_mindepth ("mru mindepth") is a floor beneath which
+	 *   entries are kept without regard to their age.  The
+	 *   default is 600 which matches the longtime implementation
+	 *   limit on the total number of entries.
+	 * - mon_maxage ("mru maxage") is a ceiling on the age in
+	 *   seconds of entries.  Entries older than this are
+	 *   reclaimed once mon_mindepth is exceeded.  64s default.
+	 * - mon_maxdepth ("mru maxdepth") is a hard limit on the
+	 *   number of entries.
+	 * - "mru maxmem" sets mon_maxdepth to the number of entries
+	 *   which fit in the given number of kilobytes.  4096 default.
+	 * Whichever of "mru maxmem" or "mru maxdepth" occurs last in
+	 * ntp.conf controls.
 	 */
-	if (NULL == mon_free && mon_total_mem >= MAX_MONLIST) {
+	if (NULL == mon_free && mon_mru_entries < mon_mindepth) {
+		mon_getmoremem();
+		UNLINK_HEAD_SLIST(md, mon_free, hash_next);
+	} else {
+		tail = TAIL_DLIST(mon_mru_list, mru);
+		/* note -1 is legal for mon_maxage (disables) */
+		if (tail != NULL && mon_maxage < (int)(current_time -
+		    tail->lasttime)) {
+			mon_reclaim_entry(tail);
+			md = tail;
+		} else if (mon_free != NULL || mon_mru_entries <
+			   mon_maxdepth) {
+			if (NULL == mon_free)
+				mon_getmoremem();
+			UNLINK_HEAD_SLIST(md, mon_free, hash_next);
 		/*
 		 * Preempt from the MRU list if old enough.
 		 */
-		md = TAIL_DLIST(mon_mru_list, mru);
-		if (md->count == 1 || ntp_random() / (2. * FRAC) >
-		    (double)(current_time - md->lasttime) / mon_age)
+		} else if (tail->count == 1 || ntp_random() / (2. *
+			   FRAC) > (double)(current_time -
+			   tail->lasttime) / mon_age)
 			return ~RES_LIMITED & flags;
-
-		UNLINK_DLIST(md, mru);
-		remove_from_hash(md);
-		memset(md, 0, sizeof(*md));
-	} else {
-		if (NULL == mon_free)
-			mon_getmoremem();
-		UNLINK_HEAD_SLIST(md, mon_free, hash_next);
+		else {
+			mon_reclaim_entry(tail);
+			md = tail;
+		}
 	}
 
 	/*
@@ -319,7 +349,6 @@ ntp_monitor(
 	md->flags = flags & ~RES_LIMITED;
 	md->leak = 0;
 	memcpy(&md->rmtadr, &addr, sizeof(md->rmtadr));
-	md->rmtport = NSRCPORT(&rbufp->recv_srcadr);
 	md->vn_mode = VN_MODE(version, mode);
 	md->lcladr = rbufp->dstadr;
 	md->cast_flags = (u_char)(((rbufp->dstadr->flags &
@@ -353,7 +382,7 @@ mon_getmoremem(void)
 	for (i = INC_MONLIST - 1; i >= 0; i--)
 		LINK_SLIST(mon_free, &md[i], hash_next);
 
-	mon_total_mem += INC_MONLIST;
+	mon_mru_entries += INC_MONLIST;
 	mon_mem_increments++;
 	mon_have_memory = 1;
 }

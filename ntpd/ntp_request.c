@@ -1913,7 +1913,7 @@ mon_getlist_0(
 			if (client_v6_capable)
 				im->v6_flag = 0;
 		}
-		im->port = md->rmtport;
+		im->port = NSRCPORT(&md->rmtadr);
 		im->mode = PKT_MODE(md->vn_mode);
 		im->version = PKT_VERSION(md->vn_mode);
 		im = (struct info_monitor *)more_pkt();
@@ -1970,7 +1970,7 @@ mon_getlist_1(
 				im->daddr = 4;
 		}
 		im->flags = htonl(md->cast_flags);
-		im->port = md->rmtport;
+		im->port = NSRCPORT(&md->rmtadr);
 		im->mode = PKT_MODE(md->vn_mode);
 		im->version = PKT_VERSION(md->vn_mode);
 		im = (struct info_monitor_1 *)more_pkt();

@@ -168,6 +168,12 @@ struct key_tok ntp_keywords[] = {
 { "average",		T_Average,		FOLLBY_TOKEN },
 { "minimum",		T_Minimum,		FOLLBY_TOKEN },
 { "monitor",		T_Monitor,		FOLLBY_TOKEN },
+/* mru_option */
+{ "mru",		T_Mru,			FOLLBY_TOKEN },
+{ "mindepth",		T_Mindepth,		FOLLBY_TOKEN },
+{ "maxage",		T_Maxage,		FOLLBY_TOKEN },
+{ "maxdepth",		T_Maxdepth,		FOLLBY_TOKEN },
+{ "maxmem",		T_Maxmem,		FOLLBY_TOKEN },
 /* fudge_factor */
 { "flag1",		T_Flag1,		FOLLBY_TOKEN },
 { "flag2",		T_Flag2,		FOLLBY_TOKEN },

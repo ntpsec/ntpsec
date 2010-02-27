@@ -136,10 +136,14 @@
 %token	<Integer>	T_Manycastclient
 %token	<Integer>	T_Manycastserver
 %token	<Integer>	T_Mask
+%token	<Integer>	T_Maxage
 %token	<Integer>	T_Maxclock
+%token	<Integer>	T_Maxdepth
 %token	<Integer>	T_Maxdist
+%token	<Integer>	T_Maxmem
 %token	<Integer>	T_Maxpoll
 %token	<Integer>	T_Minclock
+%token	<Integer>	T_Mindepth
 %token	<Integer>	T_Mindist
 %token	<Integer>	T_Minimum
 %token	<Integer>	T_Minpoll
@@ -147,6 +151,7 @@
 %token	<Integer>	T_Mode
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
+%token	<Integer>	T_Mru
 %token	<Integer>	T_Multicastclient
 %token	<Integer>	T_Nic
 %token	<Integer>	T_Nolink
@@ -256,6 +261,8 @@
 %type	<Address_node>	ip_address
 %type	<Attr_val>	log_config_command
 %type	<Queue>		log_config_list
+%type	<Attr_val>	mru_option
+%type	<Queue>		mru_option_list
 %type	<Integer>	nic_rule_class
 %type	<Double>	number
 %type	<Attr_val>	option
@@ -656,6 +663,10 @@ access_control_command
 		{
 			append_queue(cfgt.discard_opts, $2);
 		}
+	|	T_Mru mru_option_list
+		{
+			append_queue(cfgt.mru_opts, $2);
+		}
 	|	T_Restrict address ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
@@ -742,6 +753,20 @@ discard_option
 	:	T_Average T_Integer { $$ = create_attr_ival($1, $2); }
 	|	T_Minimum T_Integer { $$ = create_attr_ival($1, $2); }
 	|	T_Monitor T_Integer { $$ = create_attr_ival($1, $2); }
+	;
+
+mru_option_list
+	:	mru_option_list mru_option
+			{ $$ = enqueue($1, $2); }
+	|	mru_option 
+			{ $$ = enqueue_in_new_queue($1); }
+	;
+
+mru_option
+	:	T_Mindepth T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxage   T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxdepth T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxmem   T_Integer { $$ = create_attr_ival($1, $2); }
 	;
 
 /* Fudge Commands
