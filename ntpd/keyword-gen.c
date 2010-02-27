@@ -241,7 +241,8 @@ typedef struct big_scan_state_tag {
  * 7 bits to free a bit for accepting/non-accepting.  More than 4096
  * states will require expanding scan_state beyond 32 bits each.
  */
-#define MAXSTATES 2048
+#define MAXSTATES	2048
+#define MAX_TOK_LEN	63
 
 const char *	current_keyword;/* for error reporting */
 big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
@@ -309,8 +310,16 @@ generate_preamble(void)
 static void
 generate_fsm(void)
 {
-	char token_id_comment[128];
+	char rprefix[MAX_TOK_LEN + 1];
+	char prefix[MAX_TOK_LEN + 1];
+	char token_id_comment[16 + MAX_TOK_LEN + 1];
+	size_t prefix_len;
+	char *p;
+	char *r;
 	int initial_state;
+	int this_state;
+	int prev_state;
+	int state;
 	int i;
 	int token;
 
@@ -389,13 +398,7 @@ generate_fsm(void)
 			exit(9);
 		}
 
-		if (!sst[i].finishes_token)
-			snprintf(token_id_comment,
-				 sizeof(token_id_comment), "%5d %-17s",
-				 i, (initial_state == i) 
-					? "initial state" 
-					: "");
-		else {
+		if (sst[i].finishes_token) {
 			snprintf(token_id_comment, 
 				 sizeof(token_id_comment), "%5d %-17s",
 				 i, symbname(sst[i].finishes_token));
@@ -406,6 +409,53 @@ generate_fsm(void)
 					i, sst[i].finishes_token);
 				exit(5);
 			}
+		} else {
+		/*
+		 * Determine the keyword prefix that leads to this
+		 * state.  This is expensive but keyword-gen is run
+		 * only when it changes.  Distributing keyword-gen-utd
+		 * achieves that, which is why it must be committed
+		 * at the same time as keyword-gen.c and ntp_keyword.h.
+		 *
+		 * Scan the state array iteratively looking for a state
+		 * which leads to the current one, collecting matching
+		 * characters along the way.  There is only one such
+		 * path back to the starting state given the way our
+		 * scanner state machine is built and the practice of
+		 * using the spelling of the keyword as its T_* token
+		 * identifier, which results in never having two
+		 * spellings result in the same T_* value.
+		 */
+			prefix_len = 0;
+			prev_state = 0;
+			this_state = i;
+			do {
+				for (state = 1; state < sst_highwater; state++)
+					if (sst[state].other_next_s == this_state) {
+						this_state = state;
+						break;
+					} else if (sst[state].match_next_s == this_state) {
+						this_state = state;
+						rprefix[prefix_len] = sst[state].ch;
+						prefix_len++;
+						break;
+					}
+			} while (this_state != initial_state);
+
+			if (prefix_len) {
+				/* reverse rprefix into prefix */
+				p = prefix + prefix_len;
+				r = rprefix;
+				while (r < rprefix + prefix_len)
+					*--p = *r++;
+			}
+			prefix[prefix_len] = '\0';
+
+			snprintf(token_id_comment,
+				 sizeof(token_id_comment), "%5d %-17s",
+				 i, (initial_state == i) 
+					? "[initial state]" 
+					: prefix);
 		}
 
 		printf("  S_ST( '%c',\t%d,    %5u, %5u )%s /* %s */\n",
@@ -645,8 +695,8 @@ populate_symb(
 	)
 {
 	FILE *	yh;
-	char	line[128];
-	char	name[128];
+	char	line[2 * MAX_TOK_LEN];
+	char	name[2 * MAX_TOK_LEN];
 	int	token;
 
 	yh = fopen(header_file, "r");
@@ -658,10 +708,17 @@ populate_symb(
 	while (NULL != fgets(line, sizeof(line), yh))
 		if (2 == sscanf(line, "#define %s %d", name, &token)
 		    && 'T' == name[0] && '_' == name[1] && token >= 0
-		    && token < COUNTOF(symb))
+		    && token < COUNTOF(symb)) {
 
 			symb[token] = estrdup(name);
-
+			if (strlen(name) > MAX_TOK_LEN) {
+				fprintf(stderr,
+					"MAX_TOK_LEN %d too small for '%s'\n"
+					"Edit keyword-gen.c to raise.\n",
+					MAX_TOK_LEN, name);
+				exit(10);
+			}
+		}
 	fclose(yh);
 }
 
