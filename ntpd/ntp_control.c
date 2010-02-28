@@ -126,17 +126,25 @@ static struct ctl_var sys_var[] = {
 	{ CS_LEAPTAB,	RO, "leapsec" },	/* 21 */
 	{ CS_LEAPEND,	RO, "expire" },		/* 22 */
 	{ CS_RATE,	RO, "mintc" },		/* 23 */
+	{ CS_MRU_ENABLED,  RO, "mru_enabled" },	/* 24 */
+	{ CS_MRU_DEPTH,	   RO, "mru_depth" },	/* 25 */
+	{ CS_MRU_DEEPEST,  RO, "mru_deepest" },	/* 26 */
+	{ CS_MRU_MINDEPTH, RO, "mru_mindepth" },/* 27 */
+	{ CS_MRU_MAXAGE,   RO, "mru_maxage" },	/* 28 */
+	{ CS_MRU_MAXDEPTH, RO, "mru_maxdepth" },/* 29 */
+	{ CS_MRU_MEM,	   RO, "mru_mem" },	/* 30 */
+	{ CS_MRU_MAXMEM,   RO, "mru_maxmem" },	/* 31 */
 #ifdef OPENSSL
-	{ CS_FLAGS,	RO, "flags" },		/* 24 */
-	{ CS_HOST,	RO, "host" },		/* 25 */
-	{ CS_PUBLIC,	RO, "update" },		/* 26 */
-	{ CS_CERTIF,	RO, "cert" },		/* 27 */
-	{ CS_SIGNATURE,	RO, "signature" },	/* 28 */
-	{ CS_REVTIME,	RO, "until" },		/* 29 */
-	{ CS_GROUP,	RO, "group" },		/* 30 */
-	{ CS_DIGEST,	RO, "digest" },		/* 31 */
+	{ CS_FLAGS,	RO, "flags" },		/* 32 */
+	{ CS_HOST,	RO, "host" },		/* 33 */
+	{ CS_PUBLIC,	RO, "update" },		/* 34 */
+	{ CS_CERTIF,	RO, "cert" },		/* 35 */
+	{ CS_SIGNATURE,	RO, "signature" },	/* 36 */
+	{ CS_REVTIME,	RO, "until" },		/* 37 */
+	{ CS_GROUP,	RO, "group" },		/* 38 */
+	{ CS_DIGEST,	RO, "digest" },		/* 39 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 24/32 */
+	{ 0,		EOV, "" }		/* 32/40 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -1329,6 +1337,8 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
+	u_int u;
+	double kb;
 #ifdef OPENSSL
 	struct cert_info *cp;
 	char cbuf[256];
@@ -1515,6 +1525,46 @@ ctl_putsys(
 
 	    case CS_RATE:
 		ctl_putuint(sys_var[CS_RATE].text, ntp_minpoll);
+		break;
+
+	    case CS_MRU_ENABLED:
+		ctl_puthex(sys_var[varid].text, mon_enabled);
+		break;
+
+	    case CS_MRU_DEPTH:
+		ctl_putuint(sys_var[varid].text, mru_entries);
+		break;
+
+	    case CS_MRU_MEM:
+		kb = mru_entries * (sizeof(mon_entry) / 1024.);
+		u = (u_int)kb;
+		if (kb - u >= 0.5)
+			u++;
+		ctl_putuint(sys_var[varid].text, u);
+		break;
+
+	    case CS_MRU_DEEPEST:
+		ctl_putuint(sys_var[varid].text, mru_peakentries);
+		break;
+
+	    case CS_MRU_MINDEPTH:
+		ctl_putuint(sys_var[varid].text, mru_mindepth);
+		break;
+
+	    case CS_MRU_MAXAGE:
+		ctl_putint(sys_var[varid].text, mru_maxage);
+		break;
+
+	    case CS_MRU_MAXDEPTH:
+		ctl_putuint(sys_var[varid].text, mru_maxdepth);
+		break;
+
+	    case CS_MRU_MAXMEM:
+		kb = mru_maxdepth * (sizeof(mon_entry) / 1024.);
+		u = (u_int)kb;
+		if (kb - u >= 0.5)
+			u++;
+		ctl_putuint(sys_var[varid].text, u);
 		break;
 
 #ifdef OPENSSL

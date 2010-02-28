@@ -112,6 +112,10 @@
 %token	<Integer>	T_Iburst
 %token	<Integer>	T_Ident
 %token	<Integer>	T_Ignore
+%token	<Integer>	T_Incalloc
+%token	<Integer>	T_Incmem
+%token	<Integer>	T_Initalloc
+%token	<Integer>	T_Initmem
 %token	<Integer>	T_Includefile
 %token	<Integer>	T_Integer
 %token	<Integer>	T_Interface
@@ -763,10 +767,14 @@ mru_option_list
 	;
 
 mru_option
-	:	T_Mindepth T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxage   T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxdepth T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxmem   T_Integer { $$ = create_attr_ival($1, $2); }
+	:	T_Incalloc  T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Incmem    T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Initalloc T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Initmem   T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxage    T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxdepth  T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxmem    T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Mindepth  T_Integer { $$ = create_attr_ival($1, $2); }
 	;
 
 /* Fudge Commands

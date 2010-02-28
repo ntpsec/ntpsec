@@ -169,18 +169,26 @@ struct ntp_control {
 #define CS_LEAPTAB	21
 #define CS_LEAPEND	22
 #define	CS_RATE		23
+#define CS_MRU_ENABLED	24
+#define CS_MRU_DEPTH	25
+#define CS_MRU_DEEPEST	26
+#define CS_MRU_MINDEPTH	27
+#define CS_MRU_MAXAGE	28
+#define CS_MRU_MAXDEPTH	29
+#define CS_MRU_MEM	30
+#define CS_MRU_MAXMEM	31
 #ifdef OPENSSL
-#define CS_FLAGS	24
-#define CS_HOST		25
-#define CS_PUBLIC	26
-#define	CS_CERTIF	27
-#define	CS_SIGNATURE	28
-#define	CS_REVTIME	29
-#define	CS_GROUP	30
-#define CS_DIGEST	31
+#define CS_FLAGS	32
+#define CS_HOST		33
+#define CS_PUBLIC	34
+#define	CS_CERTIF	35
+#define	CS_SIGNATURE	36
+#define	CS_REVTIME	37
+#define	CS_GROUP	38
+#define CS_DIGEST	39
 #define	CS_MAXCODE	CS_DIGEST
 #else
-#define	CS_MAXCODE	CS_RATE
+#define	CS_MAXCODE	CS_MRU_MAXMEM
 #endif /* OPENSSL */
 
 /*

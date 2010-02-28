@@ -110,10 +110,8 @@ typedef struct peer_resolved_ctx_tag {
 /*
  * Miscellaneous macros
  */
-#define STRSAME(s1, s2)	(*(s1) == *(s2) && strcmp((s1), (s2)) == 0)
 #define ISEOL(c)	((c) == '#' || (c) == '\n' || (c) == '\0')
 #define ISSPACE(c)	((c) == ' ' || (c) == '\t')
-#define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
  * Definitions of things either imported from or exported to outside
@@ -2120,6 +2118,7 @@ config_access(
 	int			restrict_default;
 	u_short			flags;
 	u_short			mflags;
+	int			range_err;
 	const char *		signd_warning =
 #ifdef HAVE_NTP_SIGND
 	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
@@ -2131,42 +2130,76 @@ config_access(
 	my_opt = queue_head(ptree->mru_opts);
 	while (my_opt != NULL) {
 
-		switch(my_opt->attr) {
+		range_err = FALSE;
+
+		switch (my_opt->attr) {
+
+		case T_Incalloc:
+			if (0 <= my_opt->value.i)
+				mru_incalloc = my_opt->value.u;
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Incmem:
+			if (0 <= my_opt->value.i)
+				mru_incalloc = (my_opt->value.u * 1024)
+						/ sizeof(mon_entry);
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Initalloc:
+			if (0 <= my_opt->value.i)
+				mru_initalloc = my_opt->value.u;
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Initmem:
+			if (0 <= my_opt->value.i)
+				mru_initalloc = (my_opt->value.u * 1024)
+						 / sizeof(mon_entry);
+			else
+				range_err = TRUE;
+			break;
 
 		case T_Mindepth:
 			if (0 <= my_opt->value.i)
-				mon_mindepth = my_opt->value.u;
+				mru_mindepth = my_opt->value.u;
 			else
-				msyslog(LOG_ERR,
-					"mon mindepth %d out of range, ignored.",
-					my_opt->value.i);
+				range_err = TRUE;
 			break;
 
 		case T_Maxage:
-			mon_maxage = my_opt->value.i;
+			mru_maxage = my_opt->value.i;
 			break;
 
 		case T_Maxdepth:
 			if (0 <= my_opt->value.i)
-				mon_maxdepth = my_opt->value.u;
+				mru_maxdepth = my_opt->value.u;
 			else
-				mon_maxdepth = UINT_MAX;
+				mru_maxdepth = UINT_MAX;
 			break;
 
 		case T_Maxmem:
 			if (0 <= my_opt->value.i)
-				mon_maxdepth = my_opt->value.u * 1024 /
+				mru_maxdepth = my_opt->value.u * 1024 /
 					       sizeof(mon_entry);
 			else
-				mon_maxdepth = UINT_MAX;
+				mru_maxdepth = UINT_MAX;
 			break;
 
 		default:
 			msyslog(LOG_ERR,
-				"Unknown mru option token %s (%d)",
+				"Unknown mru option %s (%d)",
 				keyword(my_opt->attr), my_opt->attr);
 			exit(1);
 		}
+		if (range_err)
+			msyslog(LOG_ERR,
+				"mru %s %d out of range, ignored.",
+				keyword(my_opt->attr), my_opt->value.i);
 		my_opt = next_node(my_opt);
 	}
 
@@ -2174,7 +2207,7 @@ config_access(
 	my_opt = queue_head(ptree->discard_opts);
 	while (my_opt != NULL) {
 
-		switch(my_opt->attr) {
+		switch (my_opt->attr) {
 
 		case T_Average:
 			if (0 <= my_opt->value.i &&
@@ -2196,7 +2229,7 @@ config_access(
 
 		default:
 			msyslog(LOG_ERR,
-				"Unknown discard option token %s (%d)",
+				"Unknown discard option %s (%d)",
 				keyword(my_opt->attr), my_opt->attr);
 			exit(1);
 		}

@@ -36,12 +36,17 @@
  * the memory limit. Then we free memory by grabbing entries off the
  * tail for the MRU list, unlinking from the hash table, and
  * reinitializing.
+ *
+ * INC_MONLIST is the default allocation granularity in entries.
+ * INIT_MONLIST is the default initial allocation in entries.
  */
-/* INC_MONLIST is the allocation granularity in entries */
 #ifdef MONMEMINC		/* old name */
 # define	INC_MONLIST	MONMEMINC
 #elif !defined(INC_MONLIST)
-# define	INC_MONLIST	(4096 / sizeof(mon_entry))
+# define	INC_MONLIST	(4 * 1024 / sizeof(mon_entry))
+#endif
+#ifndef INIT_MONLIST
+# define	INIT_MONLIST	(16 * 1024 / sizeof(mon_entry))
 #endif
 
 /*
@@ -52,19 +57,22 @@
 #define	MON_HASH(addr)	NTP_HASH_ADDR(addr)
 
 /*
- * Pointers to the hash table, the MRU list and the count table.  Memory
- * for the hash and count tables is only allocated if monitoring is
- * turned on.
+ * Pointers to the hash table and the MRU list.  Memory for the hash
+ * table is allocated only if monitoring is enabled.
  */
-static	mon_entry *mon_hash[MON_HASH_SIZE];  /* list ptrs */
-struct	mon_data mon_mru_list;
+static	mon_entry *	mon_hash[MON_HASH_SIZE];
+	mon_entry	mon_mru_list;	/* mru listhead */
 
 /*
- * List of free structures structures, and counters of free and total
+ * List of free structures structures, and counters of in-use and total
  * structures. The free structures are linked with the hash_next field.
  */
 static  mon_entry *mon_free;		/* free list or null if none */
-static	u_int mon_mru_entries;		/* total structures allocated */
+	u_int mru_alloc;		/* mru list + free list count */
+	u_int mru_entries;		/* mru list count */
+	u_int mru_peakentries;		/* highest mru_entries seen */
+	u_int mru_initalloc = INIT_MONLIST;/* entries to preallocate */
+	u_int mru_incalloc = INC_MONLIST;/* allocation batch factor */
 static	u_int mon_mem_increments;	/* times called malloc() */
 
 /*
@@ -80,17 +88,17 @@ u_char	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
  * Initialization state.  We may be monitoring, we may not.  If
  * we aren't, we may not even have allocated any memory yet.
  */
-	int	mon_enabled;		/* enable switch */
-	u_int	mon_mindepth = 600;	/* preempt above this */
-	int	mon_maxage = 64;	/* for entries older than */
-	u_int	mon_maxdepth = 		/* MRU size hard limit */
+	u_int	mon_enabled;		/* enable switch */
+	u_int	mru_mindepth = 600;	/* preempt above this */
+	int	mru_maxage = 64;	/* for entries older than */
+	u_int	mru_maxdepth = 		/* MRU size hard limit */
 		4 * 1024 * 1024 / sizeof(mon_entry);
 	int	mon_age = 3000;		/* preemption limit */
-static	int	mon_have_memory;
 
-static	void	mon_getmoremem(void);
-static	void	remove_from_hash(mon_entry *);
-static	void	mon_reclaim_entry(mon_entry *);
+static	void		mon_getmoremem(void);
+static	void		remove_from_hash(mon_entry *);
+static	inline void	mon_free_entry(mon_entry *);
+static	inline void	mon_reclaim_entry(mon_entry *);
 
 
 /*
@@ -104,6 +112,80 @@ init_mon(void)
 	 * until someone explicitly starts us.
 	 */
 	mon_enabled = MON_OFF;
+	INIT_DLIST(mon_mru_list, mru);
+}
+
+
+/*
+ * remove_from_hash - removes an entry from the address hash table and
+ *		      decrements mru_entries.
+ */
+static void
+remove_from_hash(
+	mon_entry *mon
+	)
+{
+	u_int hash;
+	mon_entry *punlinked;
+
+	mru_entries--;
+	hash = MON_HASH(&mon->rmtadr);
+	UNLINK_SLIST(punlinked, mon_hash[hash], mon, hash_next,
+		     mon_entry);
+	NTP_ENSURE(punlinked == mon);
+}
+
+
+static inline void
+mon_free_entry(
+	mon_entry *m
+	)
+{
+	memset(m, 0, sizeof(*m));
+	LINK_SLIST(mon_free, m, hash_next);
+}
+
+
+/*
+ * mon_reclaim_entry - Remove an entry from the MRU list and from the
+ *		       hash array, then zero-initialize it.  Indirectly
+ *		       decrements mru_entries.
+
+ * The entry is prepared to be reused.  Before return, in
+ * remove_from_hash(), mru_entries is decremented.  It is the caller's
+ * responsibility to increment it again.
+ */
+static inline void
+mon_reclaim_entry(
+	mon_entry *m
+	)
+{
+	UNLINK_DLIST(m, mru);
+	remove_from_hash(m);
+	memset(m, 0, sizeof(*m));
+}
+
+
+/*
+ * mon_getmoremem - get more memory and put it on the free list
+ */
+static void
+mon_getmoremem(void)
+{
+	mon_entry *chunk;
+	mon_entry *mon;
+	u_int entries;
+
+	entries = (0 == mon_mem_increments)
+		      ? mru_initalloc
+		      : mru_incalloc;
+
+	chunk = emalloc(entries * sizeof(*chunk));
+	for (mon = chunk + entries - 1; mon >= chunk; mon--)
+		mon_free_entry(mon);
+
+	mru_alloc += entries;
+	mon_mem_increments++;
 }
 
 
@@ -121,10 +203,9 @@ mon_start(
 		mon_enabled |= mode;
 		return;
 	}
-	if (!mon_have_memory)
+	if (0 == mon_mem_increments)
 		mon_getmoremem();
 
-	INIT_DLIST(mon_mru_list, mru);
 	mon_enabled = mode;
 }
 
@@ -137,8 +218,7 @@ mon_stop(
 	int mode
 	)
 {
-	mon_entry *md;
-	int i;
+	mon_entry *mon;
 
 	if (MON_OFF == mon_enabled)
 		return;
@@ -150,19 +230,24 @@ mon_stop(
 		return;
 	
 	/*
-	 * Put everything back on the free list
+	 * Move everything on the MRU list to the free list quickly,
+	 * without bothering to remove each from either the MRU list or
+	 * the hash table.
 	 */
-	for (i = 0; i < MON_HASH_SIZE; i++) {
-		while (mon_hash[i] != NULL) {
-			UNLINK_HEAD_SLIST(md, mon_hash[i], hash_next);
-			memset(md, 0, sizeof(*md));
-			LINK_SLIST(mon_free, md, hash_next);
-		}
-	}
+	ITER_DLIST_BEGIN(mon_mru_list, mon, mru, mon_entry)
+		mon_free_entry(mon);
+	ITER_DLIST_END()
+
+	/* empty the MRU list and hash table. */
+	mru_entries = 0;
 	INIT_DLIST(mon_mru_list, mru);
+	memset(&mon_hash, 0, sizeof(mon_hash));
 }
 
-
+/*
+ * mon_clearinterface -- remove mru entries referring to a local address
+ *			 which is going away.
+ */
 void
 mon_clearinterface(
 	struct interface *lcladr
@@ -172,28 +257,15 @@ mon_clearinterface(
 
 	/* iterate mon over mon_mru_list */
 	ITER_DLIST_BEGIN(mon_mru_list, mon, mru, mon_entry)
-
 		if (mon->lcladr == lcladr) {
-			/* remove from mru list and hash */
+			/* remove from mru list */
 			UNLINK_DLIST(mon, mru);
+			/* remove from hash list, adjust mru_entries */
 			remove_from_hash(mon);
 			/* put on free list */
-			memset(mon, 0, sizeof(*mon));
-			LINK_SLIST(mon_free, mon, hash_next);
+			mon_free_entry(mon);
 		}
-
 	ITER_DLIST_END()
-}
-
-
-static void
-mon_reclaim_entry(
-	mon_entry *m
-	)
-{
-	UNLINK_DLIST(m, mru);
-	remove_from_hash(m);
-	memset(m, 0, sizeof(*m));
 }
 
 
@@ -231,9 +303,6 @@ ntp_monitor(
 		int	leak;		/* new headway */
 		int	limit;		/* average threshold */
 
-		/*
-		 * Match address only to conserve MRU size.
-		 */
 		if (SOCK_EQ(&md->rmtadr, &addr)) {
 			interval = current_time - md->lasttime;
 			md->lasttime = current_time;
@@ -297,34 +366,45 @@ ntp_monitor(
 	 * If we got here, this is the first we've heard of this
 	 * guy.  Get him some memory, either from the free list
 	 * or from the tail of the MRU list.
-	 * Four ntp.conf "mru" knobs come into play determining the
-	 * depth (or count) of the MRU list:
-	 * - mon_mindepth ("mru mindepth") is a floor beneath which
+	 * The following ntp.conf "mru" knobs come into play determining
+	 * the depth (or count) of the MRU list:
+	 * - mru_mindepth ("mru mindepth") is a floor beneath which
 	 *   entries are kept without regard to their age.  The
 	 *   default is 600 which matches the longtime implementation
 	 *   limit on the total number of entries.
-	 * - mon_maxage ("mru maxage") is a ceiling on the age in
+	 * - mru_maxage ("mru maxage") is a ceiling on the age in
 	 *   seconds of entries.  Entries older than this are
 	 *   reclaimed once mon_mindepth is exceeded.  64s default.
-	 * - mon_maxdepth ("mru maxdepth") is a hard limit on the
+	 *   Note that entries older than this can easily survive
+	 *   as they are reclaimed only as needed.
+	 * - mru_maxdepth ("mru maxdepth") is a hard limit on the
 	 *   number of entries.
-	 * - "mru maxmem" sets mon_maxdepth to the number of entries
+	 * - "mru maxmem" sets mru_maxdepth to the number of entries
 	 *   which fit in the given number of kilobytes.  4096 default.
+	 * - mru_initalloc ("mru initalloc" sets the count of the
+	 *   initial allocation of MRU entries.
+	 * - "mru initmem" sets mru_initalloc in units of kilobytes.
+	 *   The default is 16.
+	 * - mru_incalloc ("mru incalloc" sets the number of entries to
+	 *   allocate on-demand each time the free list is empty.
+	 * - "mru incmem" sets mru_incalloc in units of kilobytes.
+	 *   The default is 4.
 	 * Whichever of "mru maxmem" or "mru maxdepth" occurs last in
-	 * ntp.conf controls.
+	 * ntp.conf controls.  Similarly for "mru initalloc" and "mru
+	 * initmem", and for "mru incalloc" and "mru incmem".
 	 */
-	if (NULL == mon_free && mon_mru_entries < mon_mindepth) {
+	if (NULL == mon_free && mru_alloc < mru_mindepth) {
 		mon_getmoremem();
 		UNLINK_HEAD_SLIST(md, mon_free, hash_next);
 	} else {
 		tail = TAIL_DLIST(mon_mru_list, mru);
-		/* note -1 is legal for mon_maxage (disables) */
-		if (tail != NULL && mon_maxage < (int)(current_time -
+		/* note -1 is legal for mru_maxage (disables) */
+		if (tail != NULL && mru_maxage < (int)(current_time -
 		    tail->lasttime)) {
 			mon_reclaim_entry(tail);
 			md = tail;
-		} else if (mon_free != NULL || mon_mru_entries <
-			   mon_maxdepth) {
+		} else if (mon_free != NULL || mru_alloc <
+			   mru_maxdepth) {
 			if (NULL == mon_free)
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(md, mon_free, hash_next);
@@ -344,7 +424,10 @@ ntp_monitor(
 	/*
 	 * Got one, initialize it
 	 */
-	md->lasttime = md->firsttime = current_time;
+	mru_entries++;
+	mru_peakentries = max(mru_peakentries, mru_entries);
+	md->lasttime = current_time;
+	md->firsttime = current_time;
 	md->count = 1;
 	md->flags = flags & ~RES_LIMITED;
 	md->leak = 0;
@@ -367,37 +450,3 @@ ntp_monitor(
 }
 
 
-/*
- * mon_getmoremem - get more memory and put it on the free list
- */
-static void
-mon_getmoremem(void)
-{
-	mon_entry *md;
-	int i;
-
-	md = emalloc(INC_MONLIST * sizeof(*md));
-	memset(md, 0, INC_MONLIST * sizeof(*md));
-
-	for (i = INC_MONLIST - 1; i >= 0; i--)
-		LINK_SLIST(mon_free, &md[i], hash_next);
-
-	mon_mru_entries += INC_MONLIST;
-	mon_mem_increments++;
-	mon_have_memory = 1;
-}
-
-
-static void
-remove_from_hash(
-	mon_entry *mon
-	)
-{
-	u_int hash;
-	mon_entry *punlinked;
-
-	hash = MON_HASH(&mon->rmtadr);
-	UNLINK_SLIST(punlinked, mon_hash[hash], mon, hash_next,
-		     mon_entry);
-	NTP_ENSURE(punlinked == mon);
-}

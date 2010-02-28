@@ -110,11 +110,11 @@ struct xcmd opcmds[] = {
 	{ "writelist",  writelist,  { OPT|NTP_UINT, NO, NO, NO },
 	  { "assocID", "", "", "" },
 	  "write the system or peer variables included in the variable list" },
-	{ "readvar",    readvar,    { OPT|NTP_UINT, OPT|NTP_STR, NO, NO },
-	  { "assocID", "name=value[,...]", "", "" },
+	{ "rv",     readvar,    { OPT|NTP_UINT, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR, },
+	  { "assocID", "varname1", "varname2", "varname3" },
 	  "read system or peer variables" },
-	{ "rv",     readvar,    { OPT|NTP_UINT, OPT|NTP_STR, NO, NO },
-	  { "assocID", "name=value[,...]", "", "" },
+	{ "rv",     readvar,    { OPT|NTP_UINT, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR, },
+	  { "assocID", "varname1", "varname2", "varname3" },
 	  "read system or peer variables" },
 	{ "writevar",   writevar,   { NTP_UINT, NTP_STR, NO, NO },
 	  { "assocID", "name=value,[...]", "", "" },
@@ -623,6 +623,8 @@ readvar(
 {
 	int associd;
 	struct varlist tmplist[MAXLIST];
+	int tmpcount;
+	int i;
 
 	/* HMS: uval? */
 	if (pcmd->nargs == 0 || pcmd->argval[0].uval == 0)
@@ -630,9 +632,12 @@ readvar(
 	else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	memset((char *)tmplist, 0, sizeof(tmplist));
-	if (pcmd->nargs >= 2)
-		doaddvlist(tmplist, pcmd->argval[1].string);
+	memset(tmplist, 0, sizeof(tmplist));
+	if (pcmd->nargs > 1) {
+		tmpcount = pcmd->nargs - 1;
+		for (i = 0; i < tmpcount; i++)
+			doaddvlist(tmplist, pcmd->argval[1 + i].string);
+	}
 
 	(void) dolist(tmplist, associd, CTL_OP_READVAR,
 			  (associd == 0) ? TYPE_SYS : TYPE_PEER, fp);

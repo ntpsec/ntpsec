@@ -420,9 +420,17 @@ extern double	sys_offset;		/* system offset (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
-extern mon_entry mon_mru_list;
-extern mon_entry mon_fifo_list;
-extern int	mon_enabled;
+extern mon_entry mon_mru_list;		/* mru listhead */
+extern u_int	mon_enabled;
+extern u_int	mru_alloc;		/* mru list + free list count */
+extern u_int	mru_entries;		/* mru list count */
+extern u_int	mru_peakentries;	/* highest mru_entries */
+extern u_int	mru_initalloc;		/* entries to preallocate */
+extern u_int	mru_incalloc;		/* allocation batch factor */
+extern u_int	mru_mindepth;		/* preempt above this */
+extern int	mru_maxage;		/* for entries older than */
+extern u_int	mru_maxdepth; 		/* MRU size hard limit */
+extern int	mon_age;		/* preemption limit */
 
 /* ntp_peer.c */
 extern struct peer *peer_hash[NTP_HASH_SIZE];	/* peer hash table */
@@ -507,10 +515,6 @@ extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
 extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
 extern int		ntp_minpkt;
 extern u_char		ntp_minpoll;
-extern u_int	mon_mindepth;		/* preempt above this */
-extern int	mon_maxage;		/* for entries older than */
-extern u_int	mon_maxdepth;		/* MRU size hard limit */
-extern int	mon_age;		/* monitor preempt age */
 
 /* ntp_signd.c */
 #ifdef HAVE_NTP_SIGND

@@ -1885,6 +1885,7 @@ mon_getlist_0(
 {
 	register struct info_monitor *im;
 	register mon_entry *md;
+	size_t count;
 
 #ifdef DEBUG
 	if (debug > 2)
@@ -1896,6 +1897,7 @@ mon_getlist_0(
 	}
 	im = (struct info_monitor *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_monitor));
+	count = 0;
 
 	ITER_DLIST_BEGIN(mon_mru_list, md, mru, mon_entry)
 		im->lasttime = htonl((u_int32)((current_time -
@@ -1917,7 +1919,8 @@ mon_getlist_0(
 		im->mode = PKT_MODE(md->vn_mode);
 		im->version = PKT_VERSION(md->vn_mode);
 		im = (struct info_monitor *)more_pkt();
-		if (NULL == im)
+		count++;
+		if (NULL == im || count >= 600)
 			break;
 	ITER_DLIST_END()
 
@@ -1936,6 +1939,7 @@ mon_getlist_1(
 {
 	register struct info_monitor_1 *im;
 	register mon_entry *md;
+	size_t count;
 
 	if (!mon_enabled) {
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
@@ -1943,6 +1947,7 @@ mon_getlist_1(
 	}
 	im = (struct info_monitor_1 *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_monitor_1));
+	count = 0;
 
 	ITER_DLIST_BEGIN(mon_mru_list, md, mru, mon_entry)
 		im->lasttime = htonl((u_int32)((current_time -
@@ -1974,7 +1979,8 @@ mon_getlist_1(
 		im->mode = PKT_MODE(md->vn_mode);
 		im->version = PKT_VERSION(md->vn_mode);
 		im = (struct info_monitor_1 *)more_pkt();
-		if (NULL == im)
+		count++;
+		if (NULL == im || count >= 600)
 			break;
 	ITER_DLIST_END()
 
