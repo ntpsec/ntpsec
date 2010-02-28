@@ -252,12 +252,12 @@ transmit(
 			/*
 			 * Here the peer is reachable. Send a burst if
 			 * enabled and the peer is fit.  Reset unreach
-			 * for persistent associations.  Unreach is also
-			 * reset for survivors in clock_select().
+			 * for persistent and ephemeral associations.
+			 * Unreach is also reset for survivors in
+			 * clock_select().
 			 */
 			hpoll = sys_poll;
-			if ((peer->flags & FLAG_CONFIG) && !(peer->flags
-			    & FLAG_PREEMPT))
+			if (!(peer->flags & FLAG_PREEMPT))
 				peer->unreach = 0;
 			if ((peer->flags & FLAG_BURST) && peer->retry ==
 			    0 && !peer_unfit(peer))
