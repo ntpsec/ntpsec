@@ -1062,6 +1062,7 @@ sock_hash(
 	u_int j;
 	size_t len;
 	u_char *pch;
+
 	hashVal = 0;
 	len = 0;
 
@@ -1091,9 +1092,7 @@ sock_hash(
 	for (j = 0; j < len ; j++)
 		hashVal = 37 * hashVal + pch[j];
 
-	hashVal = hashVal & NTP_HASH_MASK;
-
-	return (u_short)hashVal;
+	return (u_short)(hashVal & USHRT_MAX);
 }
 
 

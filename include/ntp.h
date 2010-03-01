@@ -661,7 +661,7 @@ struct pkt {
  */
 #define	NTP_HASH_SIZE	128
 #define	NTP_HASH_MASK	(NTP_HASH_SIZE-1)
-#define	NTP_HASH_ADDR(src)	sock_hash(src)
+#define	NTP_HASH_ADDR(src)	(sock_hash(src) & NTP_HASH_MASK)
 
 /*
  * min, min3 and max.  Makes it easier to transliterate the spec without

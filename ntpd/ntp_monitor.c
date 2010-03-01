@@ -46,21 +46,25 @@
 # define	INC_MONLIST	(4 * 1024 / sizeof(mon_entry))
 #endif
 #ifndef INIT_MONLIST
-# define	INIT_MONLIST	(16 * 1024 / sizeof(mon_entry))
+# define	INIT_MONLIST	(4 * 1024 / sizeof(mon_entry))
+#endif
+#ifndef MRU_MAXDEPTH_DEF
+# define MRU_MAXDEPTH_DEF	(1024 * 1024 / sizeof(mon_entry))
 #endif
 
 /*
  * Hashing stuff
  */
-#define	MON_HASH_SIZE	NTP_HASH_SIZE
-#define	MON_HASH_MASK	NTP_HASH_MASK
-#define	MON_HASH(addr)	NTP_HASH_ADDR(addr)
+u_char	mon_hash_bits;
+#define MON_HASH_SIZE	(1U << mon_hash_bits)
+#define MON_HASH_MASK	(MON_HASH_SIZE - 1)
+#define	MON_HASH(addr)	(sock_hash(addr) & MON_HASH_MASK)
 
 /*
  * Pointers to the hash table and the MRU list.  Memory for the hash
  * table is allocated only if monitoring is enabled.
  */
-static	mon_entry *	mon_hash[MON_HASH_SIZE];
+static	mon_entry **	mon_hash;
 	mon_entry	mon_mru_list;	/* mru listhead */
 
 /*
@@ -91,8 +95,8 @@ u_char	ntp_minpoll = NTP_MINPOLL;	/* increment (log 2 s) */
 	u_int	mon_enabled;		/* enable switch */
 	u_int	mru_mindepth = 600;	/* preempt above this */
 	int	mru_maxage = 64;	/* for entries older than */
-	u_int	mru_maxdepth = 		/* MRU size hard limit */
-		4 * 1024 * 1024 / sizeof(mon_entry);
+	u_int	mru_maxdepth = 		/* MRU count hard limit */
+			MRU_MAXDEPTH_DEF;
 	int	mon_age = 3000;		/* preemption limit */
 
 static	void		mon_getmoremem(void);
@@ -197,6 +201,9 @@ mon_start(
 	int mode
 	)
 {
+	size_t octets;
+	u_int min_hash_slots;
+
 	if (MON_OFF == mode)		/* MON_OFF is 0 */
 		return;
 	if (mon_enabled) {
@@ -205,6 +212,20 @@ mon_start(
 	}
 	if (0 == mon_mem_increments)
 		mon_getmoremem();
+	/*
+	 * Select the MRU hash table size to limit the average count
+	 * per bucket at capacity (mru_maxdepth) to 8, if possible
+	 * given our hash is limited to 16 bits.
+	 */
+	min_hash_slots = (mru_maxdepth / 8) + 1;
+	mon_hash_bits = 0;
+	while (min_hash_slots >>= 1)
+		mon_hash_bits++;
+	mon_hash_bits = max(4, mon_hash_bits);
+	mon_hash_bits = min(16, mon_hash_bits);
+	octets = sizeof(*mon_hash) * MON_HASH_SIZE;
+	mon_hash = erealloc(mon_hash, octets);
+	memset(mon_hash, 0, octets);
 
 	mon_enabled = mode;
 }
@@ -241,7 +262,7 @@ mon_stop(
 	/* empty the MRU list and hash table. */
 	mru_entries = 0;
 	INIT_DLIST(mon_mru_list, mru);
-	memset(&mon_hash, 0, sizeof(mon_hash));
+	memset(mon_hash, 0, sizeof(*mon_hash) * MON_HASH_SIZE);
 }
 
 /*
@@ -380,11 +401,12 @@ ntp_monitor(
 	 * - mru_maxdepth ("mru maxdepth") is a hard limit on the
 	 *   number of entries.
 	 * - "mru maxmem" sets mru_maxdepth to the number of entries
-	 *   which fit in the given number of kilobytes.  4096 default.
+	 *   which fit in the given number of kilobytes.  The default is
+	 *   1024, or 1 megabyte.
 	 * - mru_initalloc ("mru initalloc" sets the count of the
 	 *   initial allocation of MRU entries.
 	 * - "mru initmem" sets mru_initalloc in units of kilobytes.
-	 *   The default is 16.
+	 *   The default is 4.
 	 * - mru_incalloc ("mru incalloc" sets the number of entries to
 	 *   allocate on-demand each time the free list is empty.
 	 * - "mru incmem" sets mru_incalloc in units of kilobytes.
