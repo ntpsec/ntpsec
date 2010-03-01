@@ -647,12 +647,12 @@ interface_dump(struct interface *itf)
 static void
 sockaddr_dump(sockaddr_u *psau)
 {
-	/* Limit the size of the sockaddr_storage hex dump */
-	const int maxsize = min(32, sizeof(psau->sas));
+	/* Limit the size of the sockaddr_in6 hex dump */
+	const int maxsize = min(32, sizeof(psau->sa6));
 	u_char *	cp;
 	int		i;
 
-	cp = (u_char *)&psau->sas;
+	cp = (u_char *)psau;
 
 	for(i = 0; i < maxsize; i++)
 	{

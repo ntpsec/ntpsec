@@ -97,8 +97,6 @@ extern int async_write(int, const void *, unsigned int);
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"	/* reference id */
 #define	DESCRIPTION	"NMEA GPS Clock" /* who we are */
-#define NANOSECOND	1000000000 /* one second (ns) */
-#define RANGEGATE	500000	/* range gate (ns) */
 #ifndef O_NOCTTY
 #define M_NOCTTY	0
 #else

@@ -410,6 +410,11 @@ ntp_monitor(
 			UNLINK_HEAD_SLIST(md, mon_free, hash_next);
 		/*
 		 * Preempt from the MRU list if old enough.
+		 * What is the intention of the tail->count == 1 test
+		 * and is it still useful?  It seems to be avoiding
+		 * mon_age controlled preemption of entries representing
+		 * a single packet, and I don't understand how that helps.
+		 *   -- Dave Hart
 		 */
 		} else if (tail->count == 1 || ntp_random() / (2. *
 			   FRAC) > (double)(current_time -

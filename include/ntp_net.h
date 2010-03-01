@@ -17,7 +17,6 @@
 
 typedef union {
 	struct sockaddr		sa;
-	struct sockaddr_storage	sas;
 	struct sockaddr_in	sa4;
 	struct sockaddr_in6	sa6;
 } sockaddr_u;
@@ -31,7 +30,7 @@ typedef union {
 #define PSOCK_ADDR4(psau)	(&SOCK_ADDR4(psau))
 #define PSOCK_ADDR6(psau)	(&SOCK_ADDR6(psau))
 
-#define AF(psau)		((psau)->sas.ss_family)
+#define AF(psau)		((psau)->sa.sa_family)
 
 #define IS_IPV4(psau)		(AF_INET == AF(psau))
 #define IS_IPV6(psau)		(AF_INET6 == AF(psau))
@@ -106,7 +105,7 @@ typedef union {
 	    : sizeof((psau)->sa6))
 
 #define ZERO_SOCK(psau)						\
-	memset(&(psau)->sas, 0, sizeof((psau)->sas))
+	memset((psau), 0, sizeof(*(psau)))
 
 /* blast a byte value across sockaddr_u v6 address */
 #define	MEMSET_ADDR6(psau, v)					\

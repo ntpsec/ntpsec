@@ -4624,7 +4624,7 @@ getnetnum(
 	memset(addr, 0, sizeof(*addr));
 	AF(addr) = (u_short)ipaddr.family;
 #ifdef ISC_PLATFORM_HAVESALEN
-	addr->sas.ss_len = SIZEOF_SOCKADDR(AF(addr));
+	addr->sa.sa_len = SIZEOF_SOCKADDR(AF(addr));
 #endif
 	if (IS_IPV4(addr))
 		memcpy(&addr->sa4.sin_addr, &ipaddr.type.in,
