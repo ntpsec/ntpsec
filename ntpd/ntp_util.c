@@ -107,10 +107,11 @@ double	old_drift = 1e9;		/* current frequency */
 static double prev_drift_comp;		/* last frequency update */
 
 /*
- * Static prototypes
+ * Function prototypes
  */
-static int leap_file(FILE *);
-static void record_sys_stats(void);
+static	int	leap_file(FILE *);
+static	void	record_sys_stats(void);
+	void	ntpd_time_stepped(void);
 
 /* 
  * Prototypes
@@ -161,14 +162,11 @@ uninit_util(void)
 
 
 /*
- * init_util - initialize the utilities (ntpd included)
+ * init_util - initialize the util module of ntpd
  */
 void
 init_util(void)
 {
-	stats_drift_file = NULL;
-	stats_temp_file = NULL;
-	key_file_name = NULL;
 	filegen_register(statsdir, "peerstats",   &peerstats);
 	filegen_register(statsdir, "loopstats",   &loopstats);
 	filegen_register(statsdir, "clockstats",  &clockstats);
@@ -181,8 +179,13 @@ init_util(void)
 #ifdef DEBUG_TIMING
 	filegen_register(statsdir, "timingstats", &timingstats);
 #endif /* DEBUG_TIMING */
+	/*
+	 * register with libntp ntp_set_tod() to call us back
+	 * when time is stepped.
+	 */
+	step_callback = &ntpd_time_stepped;
 #ifdef DEBUG
-	atexit(uninit_util);
+	atexit(&uninit_util);
 #endif /* DEBUG */
 }
 
@@ -1130,4 +1133,30 @@ char * fstostr(
 		strcpy(str, "gmtime() error");
 
 	return str;
+}
+
+
+/*
+ * ntpd_time_stepped is called back by step_systime(), allowing ntpd
+ * to do any one-time processing necessitated by the step.
+ */
+void
+ntpd_time_stepped(void)
+{
+	u_int saved_mon_enabled;
+
+	/*
+	 * flush the monitor MRU list which contains l_fp timestamps
+	 * which should not be compared across the step.
+	 */
+	if (MON_OFF != mon_enabled) {
+		saved_mon_enabled = mon_enabled;
+		mon_stop(MON_OFF);
+		mon_start(saved_mon_enabled);
+	}
+
+	/* inform interpolating Windows code to allow time to go back */
+#ifdef SYS_WINNT
+	win_time_stepped();
+#endif
 }

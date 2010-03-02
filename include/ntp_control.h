@@ -37,10 +37,10 @@ struct ntp_control {
 #define	CTL_MORE	0x20
 #define	CTL_OP_MASK	0x1f
 
-#define	CTL_ISRESPONSE(r_m_e_op)	(((r_m_e_op) & 0x80) != 0)
-#define	CTL_ISMORE(r_m_e_op)	(((r_m_e_op) & 0x20) != 0)
-#define	CTL_ISERROR(r_m_e_op)	(((r_m_e_op) & 0x40) != 0)
-#define	CTL_OP(r_m_e_op)	((r_m_e_op) & CTL_OP_MASK)
+#define	CTL_ISRESPONSE(r_m_e_op) ((CTL_RESPONSE	& (r_m_e_op)) != 0)
+#define	CTL_ISMORE(r_m_e_op)	 ((CTL_MORE	& (r_m_e_op)) != 0)
+#define	CTL_ISERROR(r_m_e_op)	 ((CTL_ERROR	& (r_m_e_op)) != 0)
+#define	CTL_OP(r_m_e_op)	 (CTL_OP_MASK	& (r_m_e_op))
 
 /*
  * Opcodes
@@ -55,6 +55,7 @@ struct ntp_control {
 #define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
 #define CTL_OP_SAVECONFIG	9	/* save config to file */
+#define CTL_OP_READ_MRU		10	/* retrieve MRU (monlist) */
 #define	CTL_OP_UNSETTRAP	31	/* unset trap */
 
 /*

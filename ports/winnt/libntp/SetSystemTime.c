@@ -5,8 +5,6 @@
 
 pset_tod_using		set_tod_using = NULL;
 
-time_stepped_callback	step_callback = NULL;
-
 int
 ntp_set_tod(
 	struct timeval *tv,
@@ -29,9 +27,6 @@ ntp_set_tod(
 		msyslog(LOG_ERR, "SetSystemTime failed: %m\n");
 		return -1;
 	}
-
-	if (step_callback)
-		(*step_callback)();
 
 	return 0;
 }

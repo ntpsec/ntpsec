@@ -151,7 +151,7 @@ typedef union {
 #define	S_ADDR6_EQ(psau, pin6)					\
 	ADDR6_EQ(&(psau)->sa6.sin6_addr, pin6)
 
-/* are two sockaddr_u's addresses equal? */
+/* are two sockaddr_u's addresses equal? (port excluded) */
 #define SOCK_EQ(psau1, psau2)					\
 	((AF(psau1) != AF(psau2))				\
 	     ? 0						\
@@ -159,6 +159,12 @@ typedef union {
 		   ? (NSRCADR(psau1) == NSRCADR(psau2))		\
 		   : (S_ADDR6_EQ((psau1), PSOCK_ADDR6(psau2))	\
 		      && SCOPE_EQ((psau1), (psau2))))
+
+/* are two sockaddr_u's addresses and ports equal? */
+#define ADDR_PORT_EQ(psau1, psau2)				\
+	((NSRCPORT(psau1) != NSRCPORT(psau2)			\
+	     ? 0						\
+	     : SOCK_EQ((psau1), (psau2))))
 
 /* is sockaddr_u address unspecified? */
 #define SOCK_UNSPEC(psau)					\

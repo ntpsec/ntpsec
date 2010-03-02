@@ -413,7 +413,7 @@ res_sorts_before6(
 /*
  * restrictions - return restrictions for this host
  */
-int
+u_short
 restrictions(
 	sockaddr_u *srcadr
 	)
@@ -664,5 +664,6 @@ restrict_source(
 	hack_restrict(RESTRICT_FLAGS, addr, &onesmask,
 		      restrict_source_mflags, restrict_source_flags,
 		      expire);
-	DPRINTF(1, ("restrict_source: %s host restriction added", stoa(addr)));
+	DPRINTF(1, ("restrict_source: %s host restriction added\n", 
+		    stoa(addr)));
 }

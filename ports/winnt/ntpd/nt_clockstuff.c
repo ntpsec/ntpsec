@@ -85,7 +85,7 @@ static void StartClockThread(void);
 static void tune_ctr_freq(LONGLONG, LONGLONG);
 void StopClockThread(void);
 void atexit_revert_mm_timer(void);
-void time_stepped(void);
+void win_time_stepped(void);
 
 static HANDLE clock_thread = NULL;
 static HANDLE TimerThreadExitRequest = NULL;
@@ -650,12 +650,6 @@ init_winnt_time(void)
 	if (-1 == setpriority(PRIO_PROCESS, 0, NTP_PRIO))
 		exit(-1);
 
-	/*
-	 * register with libntp ntp_set_tod() to call us back
-	 * when time is stepped.
-	 */
-	step_callback = time_stepped;
-
 	/* 
 	 * before we start looking at clock period, do any multimedia
 	 * timer manipulation requested via -M option.
@@ -1212,8 +1206,8 @@ ntp_timestamp_from_counter(
 #endif  /* HAVE_PPSAPI */
 
 
-void 
-time_stepped(void)
+void
+win_time_stepped(void)
 {
 	/*
 	 * called back by ntp_set_tod after the system

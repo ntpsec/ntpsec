@@ -1885,25 +1885,29 @@ mon_getlist_0(
 {
 	register struct info_monitor *im;
 	register mon_entry *md;
-	size_t count;
+	l_fp	now;
+	l_fp	diff;
+	size_t	count;
 
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("wants monitor 0 list\n");
-#endif
+	DPRINTF(3, ("wants monitor 0 list\n"));
+
 	if (!mon_enabled) {
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 		return;
 	}
+	get_systime(&now);
 	im = (struct info_monitor *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_monitor));
 	count = 0;
 
 	ITER_DLIST_BEGIN(mon_mru_list, md, mru, mon_entry)
-		im->lasttime = htonl((u_int32)((current_time -
-		    md->firsttime) / md->count));
-		im->firsttime = htonl((u_int32)(current_time - md->lasttime));
-		im->restr = htonl((u_int32)md->flags);
+		diff = now;
+		L_SUB(&diff, &md->first);
+		im->avg_int = htonl((u_int32)(diff.l_ui / md->count));
+		diff = now;
+		L_SUB(&diff, &md->last);
+		im->last_int = htonl(diff.l_ui);
+		im->restr = htonl(md->flags);
 		im->count = htonl((u_int32)(md->count));
 		if (IS_IPV6(&md->rmtadr)) {
 			if (!client_v6_capable)
@@ -1939,20 +1943,26 @@ mon_getlist_1(
 {
 	register struct info_monitor_1 *im;
 	register mon_entry *md;
-	size_t count;
+	l_fp	now;
+	l_fp	diff;
+	size_t	count;
 
 	if (!mon_enabled) {
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 		return;
 	}
+	get_systime(&now);
 	im = (struct info_monitor_1 *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_monitor_1));
 	count = 0;
 
 	ITER_DLIST_BEGIN(mon_mru_list, md, mru, mon_entry)
-		im->lasttime = htonl((u_int32)((current_time -
-		    md->firsttime) / md->count));
-		im->firsttime = htonl((u_int32)(current_time - md->lasttime));
+		diff = now;
+		L_SUB(&diff, &md->first);
+		im->avg_int = htonl((u_int32)(diff.l_ui / md->count));
+		diff = now;
+		L_SUB(&diff, &md->last);
+		im->last_int = htonl(diff.l_ui);
 		im->restr = htonl((u_int32)md->flags);
 		im->count = htonl((u_int32)md->count);
 		if (IS_IPV6(&md->rmtadr)) {

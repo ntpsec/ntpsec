@@ -256,7 +256,7 @@ static	int	openhost	(const char *);
 
 static	int	sendpkt		(void *, size_t);
 static	int	getresponse	(int, int, u_short *, int *, char **, int);
-static	int	sendrequest	(int, int, int, int, char *);
+static	int	sendrequest	(int, associd_t, int, int, char *);
 static	char *	tstflags	(u_long);
 #ifndef BUILD_AS_LIB
 static	void	getcmds		(void);
@@ -1215,7 +1215,7 @@ getresponse(
 static int
 sendrequest(
 	int opcode,
-	int associd,
+	associd_t associd,
 	int auth,
 	int qsize,
 	char *qdata
@@ -1331,7 +1331,7 @@ sendrequest(
 int
 doquery(
 	int opcode,
-	int associd,
+	associd_t associd,
 	int auth,
 	int qsize,
 	char *qdata,
@@ -1360,7 +1360,7 @@ doquery(
 	 */
 	res = sendrequest(opcode, associd, auth, qsize, qdata);
 	if (res != 0)
-	    return res;
+		return res;
 	
 	/*
 	 * Get the response.  If we got a standard error, print a message

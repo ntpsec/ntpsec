@@ -2024,8 +2024,8 @@ again:
 				    ml->mode,
 				    ml->version,
 				    (u_long)ntohl(ml->restr),
-				    (u_long)ntohl(ml->lasttime),
-				    (u_long)ntohl(ml->firsttime));
+				    (u_long)ntohl(ml->avg_int),
+				    (u_long)ntohl(ml->last_int));
 			ml++;
 			items--;
 		}
@@ -2050,8 +2050,8 @@ again:
 				    ml->mode,
 				    ml->version,
 				    (u_long)ntohl(ml->restr),
-				    (u_long)ntohl(ml->lasttime),
-				    (u_long)ntohl(ml->firsttime));
+				    (u_long)ntohl(ml->avg_int),
+				    (u_long)ntohl(ml->last_int));
 			ml++;
 			items--;
 		}

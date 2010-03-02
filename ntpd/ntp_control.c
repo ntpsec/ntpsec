@@ -77,9 +77,10 @@ static	void	write_variables (struct recvbuf *, int);
 static	void	read_clockstatus(struct recvbuf *, int);
 static	void	write_clockstatus(struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
-static	void	unset_trap	(struct recvbuf *, int);
-static	void	configure	(struct recvbuf *, int);
 static	void	save_config	(struct recvbuf *, int);
+static	void	configure	(struct recvbuf *, int);
+static	void	read_mru_list	(struct recvbuf *, int);
+static	void	unset_trap	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
 				     struct interface *);
 
@@ -91,9 +92,10 @@ static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_READCLOCK,	NOAUTH, read_clockstatus },
 	{ CTL_OP_WRITECLOCK,	NOAUTH, write_clockstatus },
 	{ CTL_OP_SETTRAP,	NOAUTH, set_trap },
-	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
 	{ CTL_OP_SAVECONFIG,	AUTH,	save_config },
 	{ CTL_OP_CONFIGURE,	AUTH,	configure },
+	{ CTL_OP_READ_MRU,	NOAUTH, read_mru_list },
+	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
 	{ NO_REQUEST,		0 }
 };
 
@@ -2564,6 +2566,94 @@ static void configure(
 		msyslog(LOG_NOTICE, "%d error in %s config",
 			remote_config.no_errors,
 			stoa(&rbufp->recv_srcadr));
+}
+
+
+/*
+ * read_mru_list - supports ntpq's mrulist command.
+ *
+ * The challenge here is to match ntpdc's monlist functionality without
+ * being limited to hundreds of entries returned total, and without
+ * requiring state on the server.  If state were required, ntpq's
+ * mrulist command would require authentication.
+ *
+ * The approach was suggested by Ry Jones.  A finite and variable number
+ * of entries are retrieved per request, to avoid having responses with
+ * such large numbers of packets that socket buffers are overflowed and
+ * packets lost.  The entries are retrieved oldest-first, taking into
+ * account that the MRU list will be changing between each request.  We
+ * can expect to see duplicate entries for addresses updated in the MRU
+ * list during the fetch operation.  In the end, the client can assemble
+ * a close approximation of the MRU list at the point in time the last
+ * response was sent by ntpd.  The only difference is it may be longer,
+ * containing some number of oldest entries which have since been
+ * reclaimed.  If necessary, the protocol could be extended to zap those
+ * from the client snapshot at the end, but so far that doesn't seem
+ * useful.
+ *
+ * To accomodate the changing MRU list, the starting point for requests
+ * after the first of a given fetch is supplied as a series of last
+ * seen timestamps and associated addresses, the newest ones the client
+ * has received.  As long as at least one of those entries hasn't been
+ * bumped to the head of the MRU list, ntpd can pick up at that point.
+ * Otherwise, the request is failed and it is up to ntpq to back up and
+ * provide the next newest entry's timestamps and addresses, conceivably
+ * backing up all the way to the starting point.
+ *
+ * input parameters:
+ *	maxentries=	Limit on MRU entries returned.  This is the sole
+ *			required input parameter.
+ *	0.last=		hex l_fp timestamp of newest entry which
+ *			client previously received.
+ *	0.addr=		text of newest entry's IP address and port,
+ *			IPv6 addresses in bracketed form: [::]:123
+ *	1.last=		timestamp of 2nd oldest entry client has.
+ *	1.addr=		address of 2nd oldest entry.
+ *	[...]
+ *
+ * ntpq provides as many last/addr pairs as will fit in a single request
+ * packet, except for the first request in a MRU fetch operation.
+ *
+ * The response begins with the next newer entry than referred to by
+ * 0.last and 0.addr, if the "0" entry has not been bumped to the front.
+ * Otherwise, it will begin with the next entry newer than referred to
+ * by 1.last and 1.addr, and so on.  If none of the referenced entries
+ * remain unchanged, the request fails and ntpq backs up to the next
+ * earlier set of entries to resync.
+ *
+ * Except for the first response, the response begins with confirmation
+ * of the entry that precedes the first additional entry provided:
+ *
+ *	older.last=	hex l_fp timestamp matching one of the input
+ *			.last timestamps, which entry now precedes the
+ *			response 0. entry in the MRU list.
+ *	older.addr=	text of address corresponding to older.last.
+ *
+ * And in any case, a successful response contains sets of values
+ * comprising entries, with the oldest numbered 0 and incrementing from
+ * there:
+ *
+ *	#.addr		text of IPv4 or IPv6 address and port
+ *	#.last		hex l_fp timestamp of last receipt
+ *	#.first		hex l_fp timestamp of first receipt
+ *	#.count		packets received
+ *	#.v_m		version and mode
+ *	#.rstr		restriction mask (RES_* bits)
+ *
+ * The client should accept the values in any order, and ignore #.
+ * values which it does not understand, to allow a smooth path to
+ * future changes without requiring a new opcode.  Clients can rely
+ * on all 0.* values preceding any 1.* values, that is all values for
+ * a given index number are together in the response.
+ */
+static void read_mru_list(
+	struct recvbuf *rbufp,
+	int restrict_mask
+	)
+{
+	size_t data_count;
+
+	data_count = reqend - reqpt;
 }
 
 

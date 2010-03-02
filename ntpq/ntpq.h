@@ -85,7 +85,7 @@ extern int	old_rv;		/* use old rv behavior? --old-rv */
 extern	void	asciize		(int, char *, FILE *);
 extern	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 extern	void	sortassoc	(void);
-extern	int	doquery		(int, int, int, int, char *, u_short *, int *, char **);
+extern	int	doquery		(int, associd_t, int, int, char *, u_short *, int *, char **);
 extern	char *	nntohost	(sockaddr_u *);
 extern	int	decodets	(char *, l_fp *);
 extern	int	decodeuint	(char *, u_long *);

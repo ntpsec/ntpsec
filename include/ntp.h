@@ -659,8 +659,8 @@ struct pkt {
  * To speed lookups, peers are hashed by the low order bits of the
  * remote IP address. These definitions relate to that.
  */
-#define	NTP_HASH_SIZE	128
-#define	NTP_HASH_MASK	(NTP_HASH_SIZE-1)
+#define	NTP_HASH_SIZE		128
+#define	NTP_HASH_MASK		(NTP_HASH_SIZE-1)
 #define	NTP_HASH_ADDR(src)	(sock_hash(src) & NTP_HASH_MASK)
 
 /*
@@ -742,14 +742,14 @@ struct mon_data {
 	mon_entry *	hash_next;	/* next structure in hash list */
 	DECL_DLIST_LINK(mon_entry, mru);/* MRU list link pointers */
 	struct interface * lcladr;	/* address on which this arrived */
-	sockaddr_u	rmtadr;		/* address of remote host */
-	int		flags;		/* restrict flags */
+	l_fp		first;		/* first time seen */
+	l_fp		last;		/* last time seen */
 	int		leak;		/* leaky bucket accumulator */
 	int		count;		/* total packet count */
-	u_long		firsttime;	/* first time found */
-	u_long		lasttime;	/* last time found */
+	u_short		flags;		/* restrict flags */
 	u_char		vn_mode;	/* packet mode & version */
 	u_char		cast_flags;	/* flags MDF_?CAST */
+	sockaddr_u	rmtadr;		/* address of remote host */
 };
 
 /*
@@ -843,7 +843,7 @@ struct restrict_u_tag {
  * Match flags
  */
 #define	RESM_INTERFACE		0x1000	/* this is an interface */
-#define	RESM_NTPONLY		0x2000	/* match ntp port only */
+#define	RESM_NTPONLY		0x2000	/* match source port 123 */
 #define RESM_SOURCE		0x4000	/* from "restrict source" */
 
 /*

@@ -337,7 +337,7 @@ receive(
 	u_char	hisleap;		/* packet leap indicator */
 	u_char	hismode;		/* packet mode */
 	u_char	hisstratum;		/* packet stratum */
-	int	restrict_mask;		/* restrict bits */
+	u_short	restrict_mask;		/* restrict bits */
 	int	has_mac;		/* length of MAC field */
 	int	authlen;		/* offset of MAC field */
 	int	is_authentic = 0;	/* cryptosum ok */
@@ -501,6 +501,8 @@ receive(
 	/*
 	 * Update the MRU list and finger the cloggers. It can be a
 	 * little expensive, so turn it off for production use.
+	 * RES_LIMITED and RES_KOD will be cleared in the returned
+	 * restrict_mask unless one or both actions are warranted.
 	 */
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {

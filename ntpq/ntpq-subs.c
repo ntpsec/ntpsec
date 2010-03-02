@@ -19,20 +19,20 @@ int 	maxhostlen;
 /*
  * Declarations for command handlers in here
  */
-static	int	checkassocid	(u_int32);
+static associd_t checkassocid	(u_int32);
 static	struct varlist *findlistvar (struct varlist *, char *);
 static	void	doaddvlist	(struct varlist *, char *);
 static	void	dormvlist	(struct varlist *, char *);
 static	void	doclearvlist	(struct varlist *);
 static	void	makequerydata	(struct varlist *, int *, char *);
-static	int	doquerylist	(struct varlist *, int, int, int, 
+static	int	doquerylist	(struct varlist *, int, associd_t, int, 
 				 u_short *, int *, char **);
 static	void	doprintvlist	(struct varlist *, FILE *);
 static	void	addvars 	(struct parse *, FILE *);
 static	void	rmvars		(struct parse *, FILE *);
 static	void	clearvars	(struct parse *, FILE *);
 static	void	showvars	(struct parse *, FILE *);
-static	int	dolist		(struct varlist *, int, int, int,
+static	int	dolist		(struct varlist *, associd_t, int, int,
 				 FILE *);
 static	void	readlist	(struct parse *, FILE *);
 static	void	writelist	(struct parse *, FILE *);
@@ -58,7 +58,7 @@ static	void	pstatus 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
 static	int	doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
-static	int	dogetpeers	(struct varlist *, int, FILE *, int);
+static	int	dogetpeers	(struct varlist *, associd_t, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
 static	void	peers		(struct parse *, FILE *);
 static	void	lpeers		(struct parse *, FILE *);
@@ -218,16 +218,16 @@ extern struct ctl_var peer_var[];
 /*
  * checkassocid - return the association ID, checking to see if it is valid
  */
-static int
+static associd_t
 checkassocid(
 	u_int32 value
 	)
 {
-	if (value == 0 || value >= 65536) {
-		(void) fprintf(stderr, "***Invalid association ID specified\n");
+	if (value == 0 || value > ASSOCID_MAX) {
+		fprintf(stderr, "***Invalid association ID specified\n");
 		return 0;
 	}
-	return (int)value;
+	return (associd_t)value;
 }
 
 
@@ -391,7 +391,7 @@ static int
 doquerylist(
 	struct varlist *vlist,
 	int op,
-	int associd,
+	associd_t associd,
 	int auth,
 	u_short *rstatus,
 	int *dsize,
@@ -496,7 +496,7 @@ showvars(
 static int
 dolist(
 	struct varlist *vlist,
-	int associd,
+	associd_t associd,
 	int op,
 	int type,
 	FILE *fp
@@ -551,7 +551,7 @@ readlist(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t associd;
 
 	if (pcmd->nargs == 0) {
 		associd = 0;
@@ -579,7 +579,7 @@ writelist(
 {
 	char *datap;
 	int res;
-	int associd;
+	associd_t associd;
 	int dsize;
 	u_short rstatus;
 
@@ -621,7 +621,7 @@ readvar(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t associd;
 	struct varlist tmplist[MAXLIST];
 	int tmpcount;
 	int i;
@@ -639,8 +639,11 @@ readvar(
 			doaddvlist(tmplist, pcmd->argval[1 + i].string);
 	}
 
-	(void) dolist(tmplist, associd, CTL_OP_READVAR,
-			  (associd == 0) ? TYPE_SYS : TYPE_PEER, fp);
+	dolist(tmplist, associd, CTL_OP_READVAR,
+	       (associd == 0) 
+		   ? TYPE_SYS
+		   : TYPE_PEER,
+	       fp);
 
 	doclearvlist(tmplist);
 }
@@ -657,7 +660,7 @@ writevar(
 {
 	char *datap;
 	int res;
-	int associd;
+	associd_t associd;
 	int dsize;
 	u_short rstatus;
 	struct varlist tmplist[MAXLIST];
@@ -704,7 +707,7 @@ clocklist(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t associd;
 
 	/* HMS: uval? */
 	if (pcmd->nargs == 0) {
@@ -716,7 +719,7 @@ clocklist(
 			return;
 	}
 
-	(void) dolist(g_varlist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
+	dolist(g_varlist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
 }
 
 
@@ -729,7 +732,7 @@ clockvar(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t associd;
 	struct varlist tmplist[MAXLIST];
 
 	/* HMS: uval? */
@@ -742,7 +745,7 @@ clockvar(
 	if (pcmd->nargs >= 2)
 		doaddvlist(tmplist, pcmd->argval[1].string);
 
-	(void) dolist(tmplist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
+	dolist(tmplist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
 
 	doclearvlist(tmplist);
 }
@@ -1250,7 +1253,7 @@ pstatus(
 {
 	char *datap;
 	int res;
-	int associd;
+	associd_t associd;
 	int dsize;
 	u_short rstatus;
 
@@ -1694,7 +1697,7 @@ doprintpeers(
 static int
 dogetpeers(
 	struct varlist *pvl,
-	int associd,
+	associd_t associd,
 	FILE *fp,
 	int af
 	)

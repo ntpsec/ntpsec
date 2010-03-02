@@ -113,7 +113,7 @@ init_mon(void)
 {
 	/*
 	 * Don't do much of anything here.  We don't allocate memory
-	 * until someone explicitly starts us.
+	 * until mon_start().
 	 */
 	mon_enabled = MON_OFF;
 	INIT_DLIST(mon_mru_list, mru);
@@ -265,6 +265,7 @@ mon_stop(
 	memset(mon_hash, 0, sizeof(*mon_hash) * MON_HASH_SIZE);
 }
 
+
 /*
  * mon_clearinterface -- remove mru entries referring to a local address
  *			 which is going away.
@@ -293,100 +294,110 @@ mon_clearinterface(
 /*
  * ntp_monitor - record stats about this packet
  *
- * Returns flags
+ * Returns supplied restriction flags, with RES_LIMITED and RES_KOD
+ * cleared unless the packet should not be responded to normally
+ * (RES_LIMITED) and possibly should trigger a KoD response (RES_KOD).
+ * The returned flags are saved in the MRU entry, so that it reflects
+ * whether the last packet from that source triggered rate limiting,
+ * and if so, possible KoD response.  This implies you can not tell
+ * whether a given address is eligible for rate limiting/KoD from the
+ * monlist restrict bits, only whether or not the last packet triggered
+ * such responses.  ntpdc -c reslist lets you see whether RES_LIMITED
+ * or RES_KOD is lit for a particular address before ntp_monitor()'s
+ * typical dousing.
  */
-int
+u_short
 ntp_monitor(
 	struct recvbuf *rbufp,
-	int	flags
+	u_short	flags
 	)
 {
 	struct pkt *	pkt;
-	mon_entry *	md;
-	mon_entry *	tail;
-	sockaddr_u	addr;
+	mon_entry *	mon;
+	mon_entry *	oldest;
+	int		oldest_age;
 	u_int		hash;
+	u_short		restrict_mask;
 	u_char		mode;
 	u_char		version;
+	l_fp		interval_fp;
 	int		interval;
+	int		head;		/* headway increment */
+	int		leak;		/* new headway */
+	int		limit;		/* average threshold */
 
 	if (mon_enabled == MON_OFF)
-		return (flags);
+		return ~(RES_LIMITED | RES_KOD) & flags;
 
 	pkt = &rbufp->recv_pkt;
-	memcpy(&addr, &rbufp->recv_srcadr, sizeof(addr));
-	hash = MON_HASH(&addr);
+	hash = MON_HASH(&rbufp->recv_srcadr);
 	mode = PKT_MODE(pkt->li_vn_mode);
 	version = PKT_VERSION(pkt->li_vn_mode);
-	md = mon_hash[hash];
-	while (md != NULL) {
-		int	head;		/* headway increment */
-		int	leak;		/* new headway */
-		int	limit;		/* average threshold */
+	mon = mon_hash[hash];
 
-		if (SOCK_EQ(&md->rmtadr, &addr)) {
-			interval = current_time - md->lasttime;
-			md->lasttime = current_time;
-			md->count++;
-			md->flags = flags;
-			md->vn_mode = VN_MODE(version, mode);
+	for (; mon != NULL; mon = mon->hash_next)
+		if (ADDR_PORT_EQ(&mon->rmtadr, &rbufp->recv_srcadr))
+			break;
 
-			/*
-			 * Shuffle to the head of the MRU list.
-			 */
-			UNLINK_DLIST(md, mru);
-			LINK_DLIST(mon_mru_list, md, mru);
+	if (mon != NULL) {
+		interval_fp = rbufp->recv_time;
+		L_SUB(&interval_fp, &mon->last);
+		interval = interval_fp.l_i;
+		mon->last = rbufp->recv_time;
+		mon->count++;
+		restrict_mask = flags;
+		mon->vn_mode = VN_MODE(version, mode);
 
-			/*
-			 * At this point the most recent arrival is
-			 * first in the MRU list. Decrease the counter
-			 * by the headway, but not less than zero.
-			 */
-			md->leak -= interval;
-			if (md->leak < 0)
-				md->leak = 0;
-			head = 1 << ntp_minpoll;
-			leak = md->leak + head;
-			limit = NTP_SHIFT * head;
-#ifdef DEBUG
-			if (debug > 1)
-				printf("restrict: interval %d headway %d limit %d\n",
-				    interval, leak, limit);
-#endif
+		/* Shuffle to the head of the MRU list. */
+		UNLINK_DLIST(mon, mru);
+		LINK_DLIST(mon_mru_list, mon, mru);
 
-			/*
-			 * If the minimum and average thresholds are not
-			 * exceeded, douse the RES_LIMITED and RES_KOD
-			 * bits and increase the counter by the headway
-			 * increment. Note that we give a 1-s grace for
-			 * the minimum threshold and a 2-s grace for the
-			 * headway increment. If one or both thresholds
-			 * are exceeded and the old counter is less than
-			 * the average threshold, set the counter to the
-			 * average threshold plus the inrcrment and
-			 * leave the RES_KOD bit lit. Othewise, leave
-			 * the counter alone and douse the RES_KOD bit.
-			 * This rate-limits the KoDs to no less than the
-			 * average headway.
-			 */
-			if (interval + 1 >= (1 << ntp_minpkt) &&
-			    leak < limit) {
-				md->leak = leak - 2;
-				md->flags &= ~(RES_LIMITED | RES_KOD);
-			} else if (md->leak < limit)
-				md->leak = limit + head;
-			else
-				md->flags &= ~RES_KOD;
+		/*
+		 * At this point the most recent arrival is first in the
+		 * MRU list.  Decrease the counter by the headway, but
+		 * not less than zero.
+		 */
+		mon->leak -= interval;
+		mon->leak = max(0, mon->leak);
+		head = 1 << ntp_minpoll;
+		leak = mon->leak + head;
+		limit = NTP_SHIFT * head;
 
-			return md->flags;
-		}
-		md = md->hash_next;
+		DPRINTF(2, ("MRU: interval %d headway %d limit %d\n",
+			    interval, leak, limit));
+
+		/*
+		 * If the minimum and average thresholds are not
+		 * exceeded, douse the RES_LIMITED and RES_KOD bits and
+		 * increase the counter by the headway increment.  Note
+		 * that we give a 1-s grace for the minimum threshold
+		 * and a 2-s grace for the headway increment.  If one or
+		 * both thresholds are exceeded and the old counter is
+		 * less than the average threshold, set the counter to
+		 * the average threshold plus the increment and leave
+		 * the RES_LIMITED and RES_KOD bits lit. Otherwise,
+		 * leave the counter alone and douse the RES_KOD bit.
+		 * This rate-limits the KoDs to no less than the average
+		 * headway.
+		 */
+		if (interval + 1 >= (1 << ntp_minpkt) && leak < limit) {
+			mon->leak = leak - 2;
+			restrict_mask &= ~(RES_LIMITED | RES_KOD);
+		} else if (mon->leak < limit)
+			mon->leak = limit + head;
+		else
+			restrict_mask &= ~RES_KOD;
+
+		mon->flags = restrict_mask;
+
+		return mon->flags;
 	}
 
 	/*
 	 * If we got here, this is the first we've heard of this
 	 * guy.  Get him some memory, either from the free list
 	 * or from the tail of the MRU list.
+	 *
 	 * The following ntp.conf "mru" knobs come into play determining
 	 * the depth (or count) of the MRU list:
 	 * - mru_mindepth ("mru mindepth") is a floor beneath which
@@ -417,34 +428,39 @@ ntp_monitor(
 	 */
 	if (NULL == mon_free && mru_alloc < mru_mindepth) {
 		mon_getmoremem();
-		UNLINK_HEAD_SLIST(md, mon_free, hash_next);
+		UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 	} else {
-		tail = TAIL_DLIST(mon_mru_list, mru);
+		oldest = TAIL_DLIST(mon_mru_list, mru);
+		oldest_age = 0;		/* silence uninit warning */
+		if (oldest != NULL) {
+			interval_fp = rbufp->recv_time;
+			L_SUB(&interval_fp, &oldest->last);
+			oldest_age = interval_fp.l_i;
+		}
 		/* note -1 is legal for mru_maxage (disables) */
-		if (tail != NULL && mru_maxage < (int)(current_time -
-		    tail->lasttime)) {
-			mon_reclaim_entry(tail);
-			md = tail;
+		if (oldest != NULL && mru_maxage < oldest_age) {
+			mon_reclaim_entry(oldest);
+			mon = oldest;
 		} else if (mon_free != NULL || mru_alloc <
 			   mru_maxdepth) {
 			if (NULL == mon_free)
 				mon_getmoremem();
-			UNLINK_HEAD_SLIST(md, mon_free, hash_next);
+			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 		/*
 		 * Preempt from the MRU list if old enough.
-		 * What is the intention of the tail->count == 1 test
+		 * What is the intention of the oldest->count == 1 test
 		 * and is it still useful?  It seems to be avoiding
 		 * mon_age controlled preemption of entries representing
-		 * a single packet, and I don't understand how that helps.
+		 * a single packet, and I don't understand how that
+		 * helps.
 		 *   -- Dave Hart
 		 */
-		} else if (tail->count == 1 || ntp_random() / (2. *
-			   FRAC) > (double)(current_time -
-			   tail->lasttime) / mon_age)
-			return ~RES_LIMITED & flags;
+		} else if (oldest->count == 1 || ntp_random() / (2. *
+			   FRAC) > (double)oldest_age / mon_age)
+			return ~(RES_LIMITED | RES_KOD) & flags;
 		else {
-			mon_reclaim_entry(tail);
-			md = tail;
+			mon_reclaim_entry(oldest);
+			mon = oldest;
 		}
 	}
 
@@ -453,27 +469,26 @@ ntp_monitor(
 	 */
 	mru_entries++;
 	mru_peakentries = max(mru_peakentries, mru_entries);
-	md->lasttime = current_time;
-	md->firsttime = current_time;
-	md->count = 1;
-	md->flags = flags & ~RES_LIMITED;
-	md->leak = 0;
-	memcpy(&md->rmtadr, &addr, sizeof(md->rmtadr));
-	md->vn_mode = VN_MODE(version, mode);
-	md->lcladr = rbufp->dstadr;
-	md->cast_flags = (u_char)(((rbufp->dstadr->flags &
-	    INT_MCASTOPEN) && rbufp->fd == md->lcladr->fd) ?
-	    MDF_MCAST: rbufp->fd == md->lcladr->bfd ? MDF_BCAST :
-	    MDF_UCAST);
+	mon->last = rbufp->recv_time;
+	mon->first = mon->last;
+	mon->count = 1;
+	mon->flags = ~(RES_LIMITED | RES_KOD) & flags;
+	mon->leak = 0;
+	memcpy(&mon->rmtadr, &rbufp->recv_srcadr, sizeof(mon->rmtadr));
+	mon->vn_mode = VN_MODE(version, mode);
+	mon->lcladr = rbufp->dstadr;
+	mon->cast_flags = (u_char)(((rbufp->dstadr->flags &
+	    INT_MCASTOPEN) && rbufp->fd == mon->lcladr->fd) ? MDF_MCAST
+	    : rbufp->fd == mon->lcladr->bfd ? MDF_BCAST : MDF_UCAST);
 
 	/*
 	 * Drop him into front of the hash table. Also put him on top of
 	 * the MRU list.
 	 */
-	LINK_SLIST(mon_hash[hash], md, hash_next);
-	LINK_DLIST(mon_mru_list, md, mru);
+	LINK_SLIST(mon_hash[hash], mon, hash_next);
+	LINK_DLIST(mon_mru_list, mon, mru);
 
-	return md->flags;
+	return mon->flags;
 }
 
 

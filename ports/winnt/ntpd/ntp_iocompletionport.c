@@ -688,17 +688,21 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 	 * If we keep it add some info to the structure
 	 */
 	if (Bytes && !inter->ignore_packets) {
-		memcpy(&buff->recv_time, &arrival_time, sizeof buff->recv_time);	
+		NTP_INSIST(buff->recv_srcadr_len <=
+			   sizeof(buff->recv_srcadr));
+		memcpy(&buff->recv_time, &arrival_time,
+		       sizeof(buff->recv_time));	
 		buff->recv_length = (int) Bytes;
 		buff->receiver = receive; 
 		buff->dstadr = inter;
-
-		DPRINTF(2, ("Received %d bytes fd %d in buffer %p from %s\n", 
-			    Bytes, (int)buff->fd, buff, stoa(&buff->recv_srcadr)));
-
 		packets_received++;
 		inter->received++;
 		add_full_recv_buffer(buff);
+
+		DPRINTF(2, ("Received %d bytes fd %d in buffer %p from %s\n", 
+			    buff->recv_length, (int)buff->fd, buff,
+			    stoa(&buff->recv_srcadr)));
+
 		/*
 		 * Now signal we have something to process
 		 */

@@ -24,8 +24,12 @@
  */
 
 
-/* ntp_config.c */
+/* nt_clockstuff.c */
+#ifdef SYS_WINNT
+extern	void	win_time_stepped(void);
+#endif
 
+/* ntp_config.c */
 #define	TAI_1972	10	/* initial TAI offset (s) */
 extern	char	*keysdir;	/* crypto keys and leaptable directory */
 extern	char *	saveconfigdir;	/* ntpq saveconfig output directory */
@@ -162,7 +166,7 @@ extern	u_int	sys_tai;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	int	ntp_monitor	(struct recvbuf *, int);
+extern	u_short	ntp_monitor	(struct recvbuf *, u_short);
 extern	void	mon_clearinterface(struct interface *interface);
 
 /* ntp_peer.c */
@@ -256,7 +260,7 @@ extern	void	process_private (struct recvbuf *, int);
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
-extern	int 	restrictions	(sockaddr_u *);
+extern	u_short	restrictions	(sockaddr_u *);
 extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *,
 				 u_short, u_short, u_long);
 extern	void	restrict_source	(sockaddr_u *, int, u_long);
