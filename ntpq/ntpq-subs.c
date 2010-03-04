@@ -1,5 +1,5 @@
 /*
- * ntpq-subs.c - subroutines which are called to perform operations by ntpq
+ * ntpq-subs.c - subroutines which are called to perform ntpq commands.
  */
 #include <config.h>
 #include <stdio.h>
@@ -7,14 +7,13 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
-#include "ntp_stdlib.h"
 #include "ntpq.h"
 #include "ntpq-opts.h"
 
 extern char *	chosts[];
-extern char currenthost[];
+extern char	currenthost[];
 extern int	numhosts;
-int 	maxhostlen;
+int 		maxhostlen;
 
 /*
  * Declarations for command handlers in here
@@ -68,6 +67,7 @@ static	void	lopeers 	(struct parse *, FILE *);
 static  void	config		(struct parse *, FILE *);
 static 	void 	saveconfig	(struct parse *, FILE *);
 static  void	config_from_file(struct parse *, FILE *);
+static  void	mrulist		(struct parse *, FILE *);
 
 
 /*
@@ -164,6 +164,9 @@ struct xcmd opcmds[] = {
 	{ "config-from-file", config_from_file, { NTP_STR, NO, NO, NO },
 	  { "<configuration filename>", "", "", "" },
 	  "configure ntpd using the configuration filename" },
+	{ "mrulist", mrulist, { OPT|NTP_STR, NO, NO, NO },
+	  { "<IP address>", "", "", "" },
+	  "display the list of most recently seen source addresses" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -172,9 +175,18 @@ struct xcmd opcmds[] = {
 /*
  * Variable list data space
  */
-#define MAXLINE     512  /* maximum length of a line */
-#define MAXLIST 	64	/* maximum number of variables in list */
-#define LENHOSTNAME 256 /* host name is 256 characters long */
+#define MAXLINE		512	/* maximum length of a line */
+#define MAXLIST		64	/* maximum variables in list */
+#define LENHOSTNAME	256	/* host name limit */
+
+#define MRU_GOT_COUNT	0x1
+#define MRU_GOT_LAST	0x2
+#define MRU_GOT_FIRST	0x4
+#define MRU_GOT_MV	0x8
+#define MRU_GOT_RS	0x10
+#define MRU_GOT_ADDR	0x20
+#define MRU_GOT_ALL	(MRU_GOT_COUNT | MRU_GOT_LAST | MRU_GOT_FIRST \
+			 | MRU_GOT_MV | MRU_GOT_RS | MRU_GOT_ADDR)
 /*
  * Old CTL_PST defines for version 2.
  */
@@ -209,10 +221,21 @@ extern int numassoc;
 extern u_char pktversion;
 extern struct ctl_var peer_var[];
 
-/*
- * For quick string comparisons
- */
-#define STREQ(a, b) (*(a) == *(b) && strcmp((a), (b)) == 0)
+typedef struct mru_tag mru;
+struct mru_tag {
+	mru *		hlink;	/* next in hash table bucket */
+	DECL_DLIST_LINK(mru, mlink);
+	int		count;
+	l_fp		last;
+	l_fp		first;
+	u_char		mode;
+	u_char		ver;
+	u_short		rs;
+	sockaddr_u	addr;
+};
+static mru mru_list;		/* listhead */
+static mru **hash_table;
+static mru *	add_mru	(mru *);
 
 
 /*
@@ -240,14 +263,15 @@ findlistvar(
 	char *name
 	)
 {
-	register struct varlist *vl;
+	struct varlist *vl;
 
-	for (vl = list; vl < list + MAXLIST && vl->name != 0; vl++)
-		if (STREQ(name, vl->name))
-		return vl;
+	for (vl = list; vl < list + MAXLIST && vl->name != NULL; vl++)
+		if (!strcmp(name, vl->name))
+			return vl;
 	if (vl < list + MAXLIST)
 		return vl;
-	return (struct varlist *)0;
+
+	return NULL;
 }
 
 
@@ -372,11 +396,11 @@ makequerydata(
 
 		if (cp != data)
 			*cp++ = ',';
-		memmove(cp, vl->name, (unsigned)namelen);
+		memcpy(cp, vl->name, (size_t)namelen);
 		cp += namelen;
 		if (valuelen != 0) {
 			*cp++ = '=';
-			memmove(cp, vl->value, (unsigned)valuelen);
+			memcpy(cp, vl->value, (size_t)valuelen);
 			cp += valuelen;
 		}
 	}
@@ -1934,11 +1958,11 @@ config (
 
 	cfgcmd = pcmd->argval[0].string;
 
-	if (debug > 2) {
-		printf("In Config\n");
-		printf("Keyword = %s\n", pcmd->keyword);
-		printf("Command = %s\n", cfgcmd);
-	}
+	if (debug > 2)
+		fprintf(stderr, 
+			"In Config\n"
+			"Keyword = %s\n"
+			"Command = %s\n", pcmd->keyword, cfgcmd);
 
 	res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(cfgcmd), cfgcmd,
 		      &rstatus, &rsize, &rdata);
@@ -1995,11 +2019,12 @@ config_from_file (
 	int i;
 	int retry_limit;
 
-	if (debug > 2) {
-		printf("In Config\n");
-		printf("Keyword = %s\n", pcmd->keyword);
-		printf("Filename = %s\n", pcmd->argval[0].string);
-	}
+	if (debug > 2)
+		fprintf(stderr,
+			"In Config\n"
+			"Keyword = %s\n"
+			"Filename = %s\n", pcmd->keyword,
+			pcmd->argval[0].string);
 
 	config_fd = fopen(pcmd->argval[0].string, "r");
 	if (NULL == config_fd) {
@@ -2041,4 +2066,381 @@ config_from_file (
 	}
 	printf("Done sending file\n");
 	fclose(config_fd);
+}
+
+
+/*
+ * add_mru	add and entry to mru list, hash table, and allocate
+ *		and return a replacement.
+ */
+static mru *
+add_mru(
+	mru *add
+	)
+{
+	u_short hash;
+	mru *mon;
+	mru *unlinked;
+	int first_ts_matches;
+
+	hash = NTP_HASH_ADDR(&add->addr);
+	/* see if we have it among previously received entries */
+	for (mon = hash_table[hash]; mon != NULL; mon = mon->hlink)
+		if (SOCK_EQ(&mon->addr, &add->addr))
+			break;
+	if (mon != NULL) {
+		first_ts_matches = L_ISEQU(&add->first, &mon->first);
+		NTP_INSIST(first_ts_matches);
+		UNLINK_DLIST(mon, mlink);
+		UNLINK_SLIST(unlinked, hash_table[hash], mon, hlink, mru);
+		NTP_INSIST(unlinked == mon);
+		if (debug)
+			fprintf(stderr,
+				"add_mru duplicate removed %s %08x.%08x -> %08x.%08x\n",
+				sptoa(&mon->addr), mon->last.l_ui,
+				mon->last.l_uf, add->last.l_ui,
+				add->last.l_uf);
+	}
+	LINK_DLIST(mru_list, add, mlink);
+	LINK_SLIST(hash_table[hash], add, hlink);
+	if (debug)
+		fprintf(stderr,
+			"add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
+			add->last.l_ui, add->last.l_uf, add->count,
+			(int)add->mode, (int)add->ver, (u_int)add->rs,
+			add->first.l_ui, add->first.l_uf,
+			sptoa(&add->addr));
+	if (NULL == mon)
+		mon = emalloc(sizeof(*mon));
+	memset(mon, 0, sizeof(*mon));
+	return mon;
+}
+
+
+static void 
+mrulist(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	u_char got;		/* MRU_GOT_* bits */
+#define MGOT(bit)				\
+	do {					\
+		got |= (bit);			\
+		if (MRU_GOT_ALL == got) {	\
+			got = 0;		\
+			mon = add_mru(mon);	\
+			ci++;			\
+		}				\
+	} while (0)
+	const char ts_fmt[] = "0x%08x.%08x";
+	size_t cb;
+	mru *mon;
+	mru *head;
+	mru *recent;
+	int list_complete;
+	char buf[128];
+	char req_buf[CTL_MAX_DATA_LEN];
+	char *req;
+	char *req_end;
+	int chars;
+	int qres;
+	u_short rstatus;
+	int rsize;
+	char *rdata;
+	int limit;
+	char *tag;
+	char *val;
+	int si;		/* server index in response */
+	int ci;		/* client (our) index for validation */
+	int ri;		/* request index (.# suffix) */
+	int mv;
+	l_fp now;
+	l_fp newest;
+	l_fp last_older;
+	l_fp interval;
+	sockaddr_u addr_older;
+	double favgint;
+	double flstint;
+	int avgint;
+	int lstint;
+	int have_now;
+	int have_addr_older;
+	int have_last_older;
+	u_short hash;
+	mru *unlinked;
+
+	list_complete = FALSE;
+	INIT_DLIST(mru_list, mlink);
+	cb = NTP_HASH_SIZE * sizeof(*hash_table);
+	hash_table = emalloc(cb);
+	memset(hash_table, 0, cb);
+	cb = sizeof(*mon);
+	mon = emalloc(cb);
+	memset(mon, 0, cb);
+	memset(&now, 0, sizeof(now));
+	memset(&last_older, 0, sizeof(last_older));
+	have_now = FALSE;
+	got = 0;
+	ri = 0;
+
+	limit = 2;
+	snprintf(req_buf, sizeof(req_buf), "limit=%d", limit);
+
+	while (TRUE) {
+		if (debug)
+			fprintf(stderr, "READ_MRU: %s\n", req_buf);
+		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
+			         req_buf, &rstatus, &rsize, &rdata, TRUE);
+
+		if (CERR_UNKNOWNVAR == qres && ri > 0) {
+			/*
+			 * None of the supplied prior entries match, so
+			 * toss them from our list and try again.
+			 */
+			if (debug)
+				printf("no overlap between %d prior entries and server MRU list\n",
+				       ri);
+			while (ri--) {
+				recent = HEAD_DLIST(mru_list, mlink);
+				NTP_INSIST(recent != NULL);
+				if (debug)
+					printf("tossing prior entry %s to resync\n",
+					       sptoa(&recent->addr));
+				UNLINK_DLIST(recent, mlink);
+				hash = NTP_HASH_ADDR(&recent->addr);
+				UNLINK_SLIST(unlinked, hash_table[hash],
+					     recent, hlink, mru);
+				NTP_INSIST(unlinked == recent);
+				free(recent);
+			}
+		} else if (qres) {
+			show_error_msg(qres, 0);
+			return;
+		}
+		if (!qres && rawmode)
+			printvars(rsize, rdata, rstatus, TYPE_SYS, 1, stdout);
+		ci = 0;
+		have_addr_older = FALSE;
+		have_last_older = FALSE;
+		while (!qres && nextvar(&rsize, &rdata, &tag, &val)) {
+			if (debug > 1)
+				fprintf(stderr, "nextvar gave: %s = %s\n", tag, val);
+			switch(tag[0]) {
+
+			case 'a':
+				if (!strcmp(tag, "addr.older")) {
+					if (!have_last_older) {
+						fprintf(stderr,
+							"addr.older %s before last.older\n",
+							val);
+						goto cleanup_return;
+					}
+					if (!decodenetnum(val, &addr_older)) {
+						fprintf(stderr,
+							"addr.older %s garbled\n",
+							val);
+						goto cleanup_return;
+					}
+					hash = NTP_HASH_ADDR(&addr_older);
+					for (recent = hash_table[hash];
+					     recent != NULL;
+					     recent = recent->hlink)
+						if (ADDR_PORT_EQ(
+						      &addr_older,
+						      &recent->addr))
+							break;
+					if (NULL == recent) {
+						fprintf(stderr,
+							"addr.older %s not in hash table\n",
+							val);
+						goto cleanup_return;
+					}
+					if (!L_ISEQU(&last_older,
+						     &recent->last)) {
+						fprintf(stderr,
+							"last.older %08x.%08x mismatches %08x.%08x expected.\n",
+							last_older.l_ui,
+							last_older.l_uf,
+							recent->last.l_ui,
+							recent->last.l_uf);
+						goto cleanup_return;
+					}
+					have_addr_older = TRUE;
+				} else if (1 != sscanf(tag, "addr.%d", &si)
+					   || si != ci)
+					goto nomatch;
+				else if (decodenetnum(val, &mon->addr))
+					MGOT(MRU_GOT_ADDR);
+				break;
+
+			case 'l':
+				if (!strcmp(tag, "last.older")) {
+					if (2 != sscanf(val, ts_fmt,
+						        &last_older.l_ui,
+							&last_older.l_uf)) {
+						fprintf(stderr,
+							"last.older %s garbled\n",
+							val);
+						goto cleanup_return;
+					}
+					have_last_older = TRUE;
+				} else if (!strcmp(tag, "last.newest")) {
+					if (0 != got) {
+						fprintf(stderr,
+							"last.newest %s before complete row, got = 0x%x\n",
+							val, (u_int)got);
+						goto cleanup_return;
+					}
+					if (!have_now) {
+						fprintf(stderr,
+							"last.newest %s before now=\n",
+							val);
+						goto cleanup_return;
+					}
+					head = HEAD_DLIST(mru_list, mlink);
+					if (NULL != head) {
+						if (2 != sscanf(val, ts_fmt,
+								&newest.l_ui,
+								&newest.l_uf) ||
+						    !L_ISEQU(&newest, &head->last)) {
+							fprintf(stderr,
+								"last.newest %s mismatches %08x.%08x",
+								val, head->last.l_ui, head->last.l_uf);
+							goto cleanup_return;
+						}
+					}
+					list_complete = TRUE;
+				} else if (1 != sscanf(tag, "last.%d", &si)
+					   || si != ci ||
+					   2 != sscanf(val, ts_fmt,
+						       &mon->last.l_ui,
+						       &mon->last.l_uf))
+					goto nomatch;
+				else
+					MGOT(MRU_GOT_LAST);
+				break;
+
+			case 'f':
+				if (1 != sscanf(tag, "first.%d", &si) ||
+				    si != ci ||
+				    2 != sscanf(val, ts_fmt,
+					        &mon->first.l_ui,
+					        &mon->first.l_uf))
+					goto nomatch;
+				MGOT(MRU_GOT_FIRST);
+				break;
+
+			case 'n':
+				if (strcmp(tag, "now") ||
+				    2 != sscanf(val, ts_fmt, &now.l_ui,
+					        &now.l_uf))
+					goto nomatch;
+				have_now = TRUE;
+				break;
+
+			case 'c':
+				if (1 != sscanf(tag, "ct.%d", &si) ||
+				    si != ci ||
+				    1 != sscanf(val, "%d", &mon->count)
+				    || mon->count < 1)
+					goto nomatch;
+				MGOT(MRU_GOT_COUNT);
+				break;
+
+			case 'm':
+				if (1 != sscanf(tag, "mv.%d", &si) ||
+				    si != ci ||
+				    1 != sscanf(val, "%d", &mv))
+					goto nomatch;
+				mon->mode = PKT_MODE(mv);
+				mon->ver = PKT_VERSION(mv);
+				MGOT(MRU_GOT_MV);
+				break;
+
+			case 'r':
+				if (1 != sscanf(tag, "rs.%d", &si) ||
+				    si != ci ||
+				    1 != sscanf(val, "0x%hx", &mon->rs))
+					goto nomatch;
+				MGOT(MRU_GOT_RS);
+				break;
+
+			default:
+			nomatch:	
+				/* empty stmt */ ;
+				/* ignore unknown tags */
+			}
+		}
+		
+		if (list_complete) {
+			NTP_INSIST(0 == ri || have_addr_older);
+			break;
+		}
+		/*
+		 * Snooze for a second between queries to let ntpd catch
+		 * up with other duties.
+		 */
+		sleep(1);
+		/*
+		 * prepare next query with as many address and last-seen
+		 * timestamps as will fit in a single packet.
+		 */
+		req = req_buf;
+		req_end = req_buf + sizeof(req_buf);
+#define REQ_ROOM	(req_end - req)
+		snprintf(req, REQ_ROOM, "limit=%d", limit);
+		req += strlen(req);
+
+		for (ri = 0, recent = HEAD_DLIST(mru_list, mlink);
+		     recent != NULL;
+		     ri++, recent = NEXT_DLIST(mru_list, recent, mlink)) {
+
+			snprintf(buf, sizeof(buf),
+					 ", addr.%d=%s, last.%d=0x%08x.%08x",
+					 ri, sptoa(&recent->addr), ri,
+					 recent->last.l_ui,
+					 recent->last.l_uf);
+			chars = strlen(buf);
+			if (REQ_ROOM - chars < 1)
+				break;
+			memcpy(req, buf, chars + 1);
+			req += chars;
+		}
+		NTP_INSIST(ri > 0 || NULL == recent);
+	}
+
+	/* display the results */
+	if (rawmode)
+		goto cleanup_return;
+
+
+	printf(	"lstint avgint rstr m v  count rport remote address\n"
+		"------------------------------------------------------------------------------\n");
+		/* '-' x 78 */
+	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
+		interval = now;
+		L_SUB(&interval, &recent->last);
+		LFPTOD(&interval, flstint);
+		lstint = (int)(flstint + 0.5);
+		interval = recent->last;
+		L_SUB(&interval, &recent->first);
+		LFPTOD(&interval, favgint);
+		favgint /= recent->count;
+		avgint = (int)(favgint + 0.5);
+		printf("%6d %6d %4hx %d %d %6d %5hu %s\n",
+		       lstint, avgint, recent->rs, (int)recent->mode,
+		       (int)recent->ver, recent->count,
+		       SRCPORT(&recent->addr), nntohost(&recent->addr));
+	ITER_DLIST_END()
+
+cleanup_return:
+	if (mon != NULL)
+		free(mon);
+	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
+		free(recent);
+	ITER_DLIST_END()
+	free(hash_table);
+	hash_table = NULL;
+	INIT_DLIST(mru_list, mlink);
 }

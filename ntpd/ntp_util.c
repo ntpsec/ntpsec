@@ -415,9 +415,9 @@ stats_config(
 		stats_temp_file = erealloc(stats_temp_file, 
 					   len + sizeof(".TEMP"));
 
-		memmove(stats_drift_file, value, (unsigned)(len+1));
-		memmove(stats_temp_file, value, (unsigned)len);
-		memmove(stats_temp_file + len,
+		memcpy(stats_drift_file, value, (size_t)(len + 1));
+		memcpy(stats_temp_file, value, (size_t)len);
+		memcpy(stats_temp_file + len,
 #if !defined(VMS)
 			".TEMP", sizeof(".TEMP"));
 #else
@@ -1025,7 +1025,7 @@ getauthkeys(
 	
 #ifndef SYS_WINNT
 	key_file_name = erealloc(key_file_name, len + 1);
-	memmove(key_file_name, keyfile, len + 1);
+	memcpy(key_file_name, keyfile, len + 1);
 #else
 	key_file_name = erealloc(key_file_name, _MAX_PATH);
 	if (len + 1 > _MAX_PATH)
@@ -1050,52 +1050,6 @@ rereadkeys(void)
 {
 	if (NULL != key_file_name)
 		authreadkeys(key_file_name);
-}
-
-
-/*
- * sock_hash - hash a sockaddr_u structure
- */
-u_short
-sock_hash(
-	sockaddr_u *addr
-	)
-{
-	u_int hashVal;
-	u_int j;
-	size_t len;
-	u_char *pch;
-
-	hashVal = 0;
-	len = 0;
-
-	/*
-	 * We can't just hash the whole thing because there are hidden
-	 * fields in sockaddr_in6 that might be filled in by recvfrom(),
-	 * so just use the family, port and address.
-	 */
-	pch = (u_char *)&AF(addr);
-	hashVal = 37 * hashVal + *pch;
-	if (sizeof(AF(addr)) > 1) {
-		pch++;
-		hashVal = 37 * hashVal + *pch;
-	}
-	switch(AF(addr)) {
-	case AF_INET:
-		pch = (u_char *)&SOCK_ADDR4(addr);
-		len = sizeof(SOCK_ADDR4(addr));
-		break;
-
-	case AF_INET6:
-		pch = (u_char *)&SOCK_ADDR6(addr);
-		len = sizeof(SOCK_ADDR6(addr));
-		break;
-	}
-
-	for (j = 0; j < len ; j++)
-		hashVal = 37 * hashVal + pch[j];
-
-	return (u_short)(hashVal & USHRT_MAX);
 }
 
 

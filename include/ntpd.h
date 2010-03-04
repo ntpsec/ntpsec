@@ -163,6 +163,9 @@ extern	u_long	sys_clocktime;
 extern	u_int	sys_tai;
 
 /* ntp_monitor.c */
+#define MON_HASH_SIZE		(1U << mon_hash_bits)
+#define MON_HASH_MASK		(MON_HASH_SIZE - 1)
+#define	MON_HASH(addr)		(sock_hash(addr) & MON_HASH_MASK)
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
@@ -295,7 +298,6 @@ extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);
 #endif
-extern  u_short	sock_hash (sockaddr_u *);
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 
 /* ntp_worker.c */
@@ -424,8 +426,10 @@ extern double	sys_offset;		/* system offset (s) */
 extern double	sys_jitter;		/* system jitter (s) */
 
 /* ntp_monitor.c */
+extern u_char	mon_hash_bits;		/* log2 size of hash table */
+extern mon_entry ** mon_hash;		/* MRU hash table */
 extern mon_entry mon_mru_list;		/* mru listhead */
-extern u_int	mon_enabled;
+extern u_int	mon_enabled;		/* MON_OFF (0) or other MON_* */
 extern u_int	mru_alloc;		/* mru list + free list count */
 extern u_int	mru_entries;		/* mru list count */
 extern u_int	mru_peakentries;	/* highest mru_entries */

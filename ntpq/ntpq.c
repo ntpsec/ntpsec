@@ -419,7 +419,7 @@ u_short sequence;
  * Holds data returned from queries.  Declare buffer long to be sure of
  * alignment.
  */
-#define	MAXFRAGS	24		/* maximum number of fragments */
+#define	MAXFRAGS	64		/* maximum number of fragments */
 #define	DATASIZE	(MAXFRAGS*480)	/* maximum amount of data */
 long pktdata[DATASIZE/sizeof(long)];
 
@@ -1189,7 +1189,7 @@ getresponse(
 		/*
 		 * Copy the data into the data buffer.
 		 */
-		memmove((char *)pktdata + offset, (char *)rpkt.data, count);
+		memcpy((char *)pktdata + offset, rpkt.data, count);
 
 		/*
 		 * If we've seen the last fragment, look for holes in the sequence.
@@ -1324,9 +1324,80 @@ sendrequest(
 	return sendpkt((char *)&qpkt, pktsize + maclen);
 }
 
+/*
+ * show_error_msg - display the error text for a mode 6 error response.
+ */
+void
+show_error_msg(
+	int		m6resp,
+	associd_t	associd
+	)
+{
+	if (numhosts > 1)
+		fprintf(stderr, "server=%s ", currenthost);
+
+	switch(m6resp) {
+
+	case CERR_BADFMT:
+		fprintf(stderr,
+		    "***Server reports a bad format request packet\n");
+		break;
+
+	case CERR_PERMISSION:
+		fprintf(stderr,
+		    "***Server disallowed request (authentication?)\n");
+		break;
+
+	case CERR_BADOP:
+		fprintf(stderr,
+		    "***Server reports a bad opcode in request\n");
+		break;
+
+	case CERR_BADASSOC:
+		fprintf(stderr,
+		    "***Association ID %d unknown to server\n",
+		    associd);
+		break;
+
+	case CERR_UNKNOWNVAR:
+		fprintf(stderr,
+		    "***A request variable unknown to the server\n");
+		break;
+
+	case CERR_BADVALUE:
+		fprintf(stderr,
+		    "***Server indicates a request variable was bad\n");
+		break;
+
+	case ERR_UNSPEC:
+		fprintf(stderr,
+		    "***Server returned an unspecified error\n");
+		break;
+
+	case ERR_TIMEOUT:
+		fprintf(stderr, "***Request timed out\n");
+		break;
+
+	case ERR_INCOMPLETE:
+		fprintf(stderr,
+		    "***Response from server was incomplete\n");
+		break;
+
+	case ERR_TOOMUCH:
+		fprintf(stderr,
+		    "***Buffer size exceeded for returned data\n");
+		break;
+
+	default:
+		fprintf(stderr,
+		    "***Server returns unknown error code %d\n",
+		    m6resp);
+	}
+}
 
 /*
- * doquery - send a request and process the response
+ * doquery - send a request and process the response, displaying
+ *	     error messages for any error responses.
  */
 int
 doquery(
@@ -1340,6 +1411,28 @@ doquery(
 	char **rdata
 	)
 {
+	return doqueryex(opcode, associd, auth, qsize, qdata, rstatus,
+			 rsize, rdata, FALSE);
+}
+
+
+/*
+ * doqueryex - send a request and process the response, optionally
+ *	       displaying error messages for any error responses.
+ */
+int
+doqueryex(
+	int opcode,
+	associd_t associd,
+	int auth,
+	int qsize,
+	char *qdata,
+	u_short *rstatus,
+	int *rsize,
+	char **rdata,
+	int quiet
+	)
+{
 	int res;
 	int done;
 
@@ -1347,7 +1440,7 @@ doquery(
 	 * Check to make sure host is open
 	 */
 	if (!havehost) {
-		(void) fprintf(stderr, "***No host open, use `host' command\n");
+		fprintf(stderr, "***No host open, use `host' command\n");
 		return -1;
 	}
 
@@ -1379,53 +1472,9 @@ doquery(
 			done = 1;
 			goto again;
 		}
-		if (numhosts > 1)
-			(void) fprintf(stderr, "server=%s ", currenthost);
-		switch(res) {
-		    case CERR_BADFMT:
-			(void) fprintf(stderr,
-			    "***Server reports a bad format request packet\n");
-			break;
-		    case CERR_PERMISSION:
-			(void) fprintf(stderr,
-			    "***Server disallowed request (authentication?)\n");
-			break;
-		    case CERR_BADOP:
-			(void) fprintf(stderr,
-			    "***Server reports a bad opcode in request\n");
-			break;
-		    case CERR_BADASSOC:
-			(void) fprintf(stderr,
-			    "***Association ID %d unknown to server\n",associd);
-			break;
-		    case CERR_UNKNOWNVAR:
-			(void) fprintf(stderr,
-			    "***A request variable unknown to the server\n");
-			break;
-		    case CERR_BADVALUE:
-			(void) fprintf(stderr,
-			    "***Server indicates a request variable was bad\n");
-			break;
-		    case ERR_UNSPEC:
-			(void) fprintf(stderr,
-			    "***Server returned an unspecified error\n");
-			break;
-		    case ERR_TIMEOUT:
-			(void) fprintf(stderr, "***Request timed out\n");
-			break;
-		    case ERR_INCOMPLETE:
-			(void) fprintf(stderr,
-			    "***Response from server was incomplete\n");
-			break;
-		    case ERR_TOOMUCH:
-			(void) fprintf(stderr,
-			    "***Buffer size exceeded for returned data\n");
-			break;
-		    default:
-			(void) fprintf(stderr,
-			    "***Server returns unknown error code %d\n", res);
-			break;
-		}
+		if (!quiet)
+			show_error_msg(res, associd);
+
 	}
 	return res;
 }

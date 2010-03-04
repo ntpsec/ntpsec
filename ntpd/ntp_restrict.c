@@ -420,9 +420,10 @@ restrictions(
 {
 	restrict_u *match;
 	struct in6_addr *pin6;
-	int	flags = 0;
+	u_short flags;
 
 	res_calls++;
+	flags = 0;
 	/* IPv4 source address */
 	if (IS_IPV4(srcadr)) {
 		/*

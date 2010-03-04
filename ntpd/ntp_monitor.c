@@ -56,16 +56,13 @@
  * Hashing stuff
  */
 u_char	mon_hash_bits;
-#define MON_HASH_SIZE	(1U << mon_hash_bits)
-#define MON_HASH_MASK	(MON_HASH_SIZE - 1)
-#define	MON_HASH(addr)	(sock_hash(addr) & MON_HASH_MASK)
 
 /*
  * Pointers to the hash table and the MRU list.  Memory for the hash
  * table is allocated only if monitoring is enabled.
  */
-static	mon_entry **	mon_hash;
-	mon_entry	mon_mru_list;	/* mru listhead */
+mon_entry **	mon_hash;	/* MRU hash table */
+mon_entry	mon_mru_list;	/* mru listhead */
 
 /*
  * List of free structures structures, and counters of in-use and total

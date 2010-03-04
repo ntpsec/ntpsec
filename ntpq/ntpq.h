@@ -1,11 +1,16 @@
 /*
  * ntpq.h - definitions of interest to ntpq
  */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include "ntp_fp.h"
 #include "ntp.h"
-#include "ntp_control.h"
+#include "ntp_stdlib.h"
 #include "ntp_string.h"
 #include "ntp_malloc.h"
+#include "ntp_assert.h"
+#include "ntp_control.h"
 
 /*
  * Maximum number of arguments
@@ -85,7 +90,11 @@ extern int	old_rv;		/* use old rv behavior? --old-rv */
 extern	void	asciize		(int, char *, FILE *);
 extern	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 extern	void	sortassoc	(void);
-extern	int	doquery		(int, associd_t, int, int, char *, u_short *, int *, char **);
+extern	void	show_error_msg	(int, associd_t);
+extern	int	doquery		(int, associd_t, int, int, char *,
+				 u_short *, int *, char **);
+extern	int	doqueryex	(int, associd_t, int, int, char *,
+				 u_short *, int *, char **, int);
 extern	char *	nntohost	(sockaddr_u *);
 extern	int	decodets	(char *, l_fp *);
 extern	int	decodeuint	(char *, u_long *);

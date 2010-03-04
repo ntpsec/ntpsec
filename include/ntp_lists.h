@@ -187,6 +187,20 @@ do {								\
 		    : NULL					\
 	)
 
+#define NEXT_DLIST(listhead, entry, link)			\
+	(							\
+		(&(listhead) != (entry)->link.f)		\
+		    ? (entry)->link.f				\
+		    : NULL					\
+	)
+
+#define PREV_DLIST(listhead, entry, link)			\
+	(							\
+		(&(listhead) != (entry)->link.b)		\
+		    ? (entry)->link.b				\
+		    : NULL					\
+	)
+
 #define LINK_DLIST(listhead, pentry, link)			\
 do {								\
 	(pentry)->link.f = (listhead).link.f;			\
@@ -195,12 +209,20 @@ do {								\
 	(listhead).link.f = (pentry);				\
 } while (0)
 
-#define UNLINK_DLIST(punlink, link)				\
+#define LINK_TAIL_DLIST(listhead, pentry, link)			\
 do {								\
-	(punlink)->link.b->link.f = (punlink)->link.f;		\
-	(punlink)->link.f->link.b = (punlink)->link.b;		\
-	(punlink)->link.b = NULL;				\
-	(punlink)->link.f = NULL;				\
+	(pentry)->link.b = (listhead).link.b;			\
+	(pentry)->link.f = &(listhead);				\
+	(listhead).link.b->link.f = (pentry);			\
+	(listhead).link.b = (pentry);				\
+} while (0)
+
+#define UNLINK_DLIST(ptounlink, link)				\
+do {								\
+	(ptounlink)->link.b->link.f = (ptounlink)->link.f;	\
+	(ptounlink)->link.f->link.b = (ptounlink)->link.b;	\
+	(ptounlink)->link.b = NULL;				\
+	(ptounlink)->link.f = NULL;				\
 } while (0)
 
 #define ITER_DLIST_BEGIN(listhead, iter, link, entrytype)	\

@@ -360,6 +360,7 @@ extern	struct tm * ntp2unix_tm (u_long ntp, int local);
 
 #define stoa(addr)		socktoa(addr)
 #define	ntoa(addr)		stoa(addr)
+#define sptoa(addr)		sockporttoa(addr)
 #define stohost(addr)		socktohost(addr)
 
 #define	ufptoa(fpv, ndec)	dofptoa((fpv), 0, (ndec), 0)

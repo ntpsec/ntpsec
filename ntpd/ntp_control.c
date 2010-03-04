@@ -1057,24 +1057,61 @@ ctl_putstr(
 	size_t		len
 	)
 {
-	register char *cp;
-	register const char *cq;
-	char buffer[400];
+	char *cp;
+	char *cpend;
+	const char *cq;
+	char buffer[512];
 
 	cp = buffer;
+	cpend = buffer + sizeof(buffer);
 	cq = tag;
-	while (*cq != '\0')
+	while (cp < cpend && *cq != '\0')
 		*cp++ = *cq++;
 	if (len > 0) {
+		NTP_INSIST(cp + 3 + len <= cpend);
 		*cp++ = '=';
 		*cp++ = '"';
-		if (len > (sizeof(buffer) - (cp - buffer) - 1))
-			len = sizeof(buffer) - (cp - buffer) - 1;
 		memcpy(cp, data, len);
 		cp += len;
 		*cp++ = '"';
 	}
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+}
+
+
+/*
+ * ctl_putunqstr - write a tagged string into the response packet
+ *		   in the form:
+ *
+ *		   tag=data
+ *
+ *	len is the data length excluding the NUL terminator.
+ *	data must not contain a comma or whitespace.
+ */
+static void
+ctl_putunqstr(
+	const char *	tag,
+	const char *	data,
+	size_t		len
+	)
+{
+	char *cp;
+	char *cpend;
+	const char *cq;
+	char buffer[512];
+
+	cp = buffer;
+	cpend = buffer + sizeof(buffer);
+	cq = tag;
+	while (cp < cpend && *cq != '\0')
+		*cp++ = *cq++;
+	if (len > 0) {
+		NTP_INSIST(cp + 1 + len <= cpend);
+		*cp++ = '=';
+		memcpy(cp, data, len);
+		cp += len;
+	}
+	ctl_putdata(buffer, (u_int)(cp - buffer), 0);
 }
 
 
@@ -2074,7 +2111,7 @@ ctl_getitem(
 	char **data
 	)
 {
-	static struct ctl_var eol = { 0, EOV, };
+	static struct ctl_var eol = { 0, EOV, NULL };
 	static char buf[128];
 	static u_long quiet_until;
 	register struct ctl_var *v;
@@ -2601,14 +2638,20 @@ static void configure(
  * backing up all the way to the starting point.
  *
  * input parameters:
- *	maxentries=	Limit on MRU entries returned.  This is the sole
+ *	limit=		Limit on MRU entries returned.  This is the sole
  *			required input parameter.
- *	0.last=		hex l_fp timestamp of newest entry which
- *			client previously received.
+ *			limit=1 is a special case:  Instead of fetching
+ *			beginning with the supplied starting point's
+ *			newer neighbor, fetch the supplied entry, and
+ *			in that case the #.last timestamp can be zero.
+ *			This enables fetching a single entry by IP
+			address.
+ *	0.last=		0x-prefixed hex l_fp timestamp of newest entry
+ *			which client previously received.
  *	0.addr=		text of newest entry's IP address and port,
  *			IPv6 addresses in bracketed form: [::]:123
- *	1.last=		timestamp of 2nd oldest entry client has.
- *	1.addr=		address of 2nd oldest entry.
+ *	1.last=		timestamp of 2nd newest entry client has.
+ *	1.addr=		address of 2nd newest entry.
  *	[...]
  *
  * ntpq provides as many last/addr pairs as will fit in a single request
@@ -2633,27 +2676,184 @@ static void configure(
  * comprising entries, with the oldest numbered 0 and incrementing from
  * there:
  *
- *	#.addr		text of IPv4 or IPv6 address and port
- *	#.last		hex l_fp timestamp of last receipt
- *	#.first		hex l_fp timestamp of first receipt
- *	#.count		packets received
- *	#.v_m		version and mode
- *	#.rstr		restriction mask (RES_* bits)
+ *	addr.#		text of IPv4 or IPv6 address and port
+ *	last.#		hex l_fp timestamp of last receipt
+ *	first.#		hex l_fp timestamp of first receipt
+ *	ct.#		count of packets received
+ *	mv.#		mode and version
+ *	rs.#		restriction mask (RES_* bits)
  *
- * The client should accept the values in any order, and ignore #.
+ * The client should accept the values in any order, and ignore .#
  * values which it does not understand, to allow a smooth path to
  * future changes without requiring a new opcode.  Clients can rely
  * on all 0.* values preceding any 1.* values, that is all values for
  * a given index number are together in the response.
+ *
+ * A response which includes the most recent entry on the list (the
+ * final response in the overall operation) is terminated with:
+ *
+ *	last.newest=	hex l_fp identical to last.# of the prior
+ *			entry.
  */
 static void read_mru_list(
 	struct recvbuf *rbufp,
 	int restrict_mask
 	)
 {
-	size_t data_count;
+	const char		limit_text[] =	"limit";
+	const char		addr_fmt[] =	"addr.%d";
+	const char		last_fmt[] =	"last.%d";
+	const char		first_fmt[] =	"first.%d";
+	const char		ct_fmt[] =	"ct.%d";
+	const char		mv_fmt[] =	"mv.%d";
+	const char		rs_fmt[] =	"rs.%d";
+	const char		l_fp_hexfmt[] =	"0x%08x.%08x";
+	u_int			limit;
+	u_int			count;
+	u_int			ui;
+	u_int			uf;
+	l_fp			last[16];
+	sockaddr_u		addr[COUNTOF(last)];
+	char			tag[32];
+	char			buf[128];
+	struct ctl_var *	in_parms;
+	struct ctl_var *	v;
+	char *			val;
+	char *			pch;
+	int			i;
+	int			priors;
+	u_short			hash;
+	mon_entry *		mon;
+	l_fp			now;
 
-	data_count = reqend - reqpt;
+	/*
+	 * fill in_parms var list with all possible input parameters.
+	 */
+	in_parms = NULL;
+	set_var(&in_parms, limit_text, sizeof(limit_text), 0);
+	for (i = 0; i < COUNTOF(last); i++) {
+		snprintf(buf, sizeof(buf), last_fmt, i);
+		set_var(&in_parms, buf, strlen(buf) + 1, 0);
+		snprintf(buf, sizeof(buf), addr_fmt, i);
+		set_var(&in_parms, buf, strlen(buf) + 1, 0);
+	}
+
+	/* decode input parms */
+	limit = 0;
+	priors = 0;
+	memset(last, 0, sizeof(last));
+	memset(addr, 0, sizeof(addr));
+
+	while (NULL != (v = ctl_getitem(in_parms, &val)) &&
+	       !(EOV & v->flags)) {
+
+		if (!strcmp(limit_text, v->text)) {
+			if (1 != sscanf(val, "%u", &limit))
+				limit = 0;
+		} else if (1 == sscanf(v->text, last_fmt, &i) &&
+			   i < COUNTOF(last)) {
+			if (2 == sscanf(val, l_fp_hexfmt, &ui, &uf)) {
+				last[i].l_ui = ui;
+				last[i].l_uf = uf;
+				if (!SOCK_UNSPEC(&addr[i]) &&
+				    i == priors)
+					priors++;
+			}
+		} else if (1 == sscanf(v->text, addr_fmt, &i) &&
+			   i < COUNTOF(addr)) {
+			if (decodenetnum(val, &addr[i])
+			    && last[i].l_ui && last[i].l_uf &&
+			    i == priors)
+				priors++;
+		}
+	}
+	free_varlist(in_parms);
+	in_parms = NULL;
+	if (!(0 < limit && limit < 1024)) {
+		ctl_error(CERR_BADFMT);
+		return;
+	}
+	mon = NULL;
+	for (i = 0; i < priors; i++) {
+		hash = MON_HASH(&addr[i]);
+		for (mon = mon_hash[hash];
+		     mon != NULL;
+		     mon = mon->hash_next)
+			if (ADDR_PORT_EQ(&mon->rmtadr, &addr[i]))
+				break;
+		if (mon != NULL && L_ISEQU(&mon->last, &last[i]))
+			break;
+	}
+
+	/* If a starting point was provided... */
+	if (priors) {
+		/* and could not be found... */
+		if (NULL == mon) {
+			/* tell ntpq to try again with older entries */
+			ctl_error(CERR_UNKNOWNVAR);
+			return;
+		}
+		/* confirm the prior entry used as starting point */
+		snprintf(buf, sizeof(buf), l_fp_hexfmt, mon->last.l_ui,
+			 mon->last.l_uf);
+		ctl_putunqstr("last.older", buf, strlen(buf));
+		pch = sptoa(&mon->rmtadr);
+		ctl_putunqstr("addr.older", pch, strlen(pch));
+
+		/* 
+		 * Move on to the first client doesn't have, except
+		 * in the special case of a limit of one.  In that
+		 * case return the given entry.
+		 */
+		if (limit > 1)
+			mon = PREV_DLIST(mon_mru_list, mon, mru);
+	} else		/* start with the oldest */
+		mon = TAIL_DLIST(mon_mru_list, mru);
+		
+	for (count = 0;
+	     count < limit && mon != NULL;
+	     count++, mon = PREV_DLIST(mon_mru_list, mon, mru)) {
+
+		snprintf(tag, sizeof(tag), addr_fmt, count);
+		pch = sptoa(&mon->rmtadr);
+		ctl_putunqstr(tag, pch, strlen(pch));
+
+		snprintf(tag, sizeof(tag), last_fmt, count);
+		snprintf(buf, sizeof(buf), l_fp_hexfmt, mon->last.l_ui,
+			 mon->last.l_uf);
+		ctl_putunqstr(tag, buf, strlen(buf));
+
+		snprintf(tag, sizeof(tag), first_fmt, count);
+		snprintf(buf, sizeof(buf), l_fp_hexfmt, mon->first.l_ui,
+			 mon->first.l_uf);
+		ctl_putunqstr(tag, buf, strlen(buf));
+
+		snprintf(tag, sizeof(tag), ct_fmt, count);
+		ctl_putint(tag, mon->count);
+
+		snprintf(tag, sizeof(tag), mv_fmt, count);
+		ctl_putint(tag, mon->vn_mode);
+
+		snprintf(tag, sizeof(tag), rs_fmt, count);
+		ctl_puthex(tag, mon->flags);
+	}
+	/*
+	 * If this batch completes the MRU list (has the most recent),
+	 * say so explicitly.
+	 */
+	if (NULL == mon) {
+		mon = HEAD_DLIST(mon_mru_list, mru);
+		if (mon != NULL) {
+			get_systime(&now);
+			snprintf(buf, sizeof(buf), l_fp_hexfmt,
+				 now.l_ui, now.l_uf);
+			ctl_putunqstr("now", buf, strlen(buf));
+			snprintf(buf, sizeof(buf), l_fp_hexfmt,
+				 mon->last.l_ui, mon->last.l_uf);
+			ctl_putunqstr("last.newest", buf, strlen(buf));
+		}
+	}
+	ctl_flushpkt(0);
 }
 
 
