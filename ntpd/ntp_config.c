@@ -3682,7 +3682,7 @@ config_peers(
 					     (void *)ctx);
 #else	/* !WORKER follows */
 			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use address\n",
+				"hostname %s can not be used, please use IP address instead.\n",
 				curr_peer->addr->address);
 #endif
 		}
@@ -3792,7 +3792,9 @@ config_unpeers(
 	struct addrinfo		hints;
 	isc_netaddr_t		i_netaddr;
 	struct unpeer_node *	curr_unpeer;
-	struct peer *		peer;
+	struct peer *		p;
+	const char *		name;
+	u_short			af;
 
 	for (curr_unpeer = queue_head(ptree->unpeers);
 	     curr_unpeer != NULL;
@@ -3803,24 +3805,21 @@ config_unpeers(
 		 * address addr, or it is nonzero and addr NULL.
 		 */
 		if (curr_unpeer->assocID) {
-			peer = findpeerbyassoc(curr_unpeer->assocID);
-			if (peer != NULL) {
-				peer_clear(peer, "GONE");
-				unpeer(peer);
+			p = findpeerbyassoc(curr_unpeer->assocID);
+			if (p != NULL) {
+				msyslog(LOG_NOTICE, "unpeered %s",
+					stoa(&p->srcadr));
+				peer_clear(p, "GONE");
+				unpeer(p);
 			}	
 
 			continue;
 		}
 
-		/*
-		 * If we have a numeric address, we can finish in the
-		 * mainline.  Otherwise hand the name off to the
-		 * blocking child to resolve.
-		 */
-		if (is_ip_address(curr_unpeer->addr->address,
-				  (u_short)curr_unpeer->addr->type,
-				  &i_netaddr)) {
-
+		name = curr_unpeer->addr->address;
+		af = curr_unpeer->addr->type;
+		/* Do we have a numeric address? */
+		if (is_ip_address(name, af, &i_netaddr)) {
 			AF(&peeraddr) = (u_short)i_netaddr.family;
 			if (AF_INET6 == i_netaddr.family)
 				SET_ADDR6N(&peeraddr,
@@ -3829,40 +3828,45 @@ config_unpeers(
 				SET_ADDR4N(&peeraddr,
 					   i_netaddr.type.in.s_addr);
 
-			DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
-			peer = NULL;
-			while (TRUE) {
-				peer = findexistingpeer(&peeraddr, NULL, peer, -1);
-				if (NULL == peer)
-					break;
-				if (FLAG_CONFIG & peer->flags)
-					break;
+			DPRINTF(1, ("unpeer: searching for %s\n",
+				    stoa(&peeraddr)));
+			p = findexistingpeer(&peeraddr, NULL, NULL, -1);
+			if (p != NULL) {
+				msyslog(LOG_NOTICE, "unpeered %s",
+					stoa(&peeraddr));
+				peer_clear(p, "GONE");
+				unpeer(p);
 			}
 
-			if (peer != NULL) {
-				msyslog(LOG_INFO, "unpeered %s",
-					stoa(&peeraddr));
-				peer_clear(peer, "GONE");
-				unpeer(peer);
-			}
-		} else {
-			/* we have a hostname to resolve */
-#ifdef WORKER
-			memset(&hints, 0, sizeof(hints));
-			hints.ai_family = (u_short)curr_unpeer->addr->type;
-			hints.ai_socktype = SOCK_DGRAM;
-			hints.ai_protocol = IPPROTO_UDP;
-			getaddrinfo_sometime(curr_unpeer->addr->address,
-					     "ntp", &hints,
-					     INITIAL_DNS_RETRY,
-					     &unpeer_name_resolved, 
-					     (void *)hints.ai_family);
-#else	/* !WORKER follows */
-			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use address\n",
-				curr_unpeer->addr->address);
-#endif
+			continue;
 		}
+		/* 
+		 * It's not a numeric IP address, it's a hostname.
+		 * Check for associations with a matching hostname.
+		 */
+		for (p = peer_list; p != NULL; p = p->p_link)
+			if (p->hostname != NULL)
+				if (!strcasecmp(p->hostname, name))
+					break;
+		if (p != NULL) {
+			msyslog(LOG_NOTICE, "unpeered %s", name);
+			peer_clear(p, "GONE");
+			unpeer(p);
+		}
+		/* Resolve the hostname to address(es). */
+#ifdef WORKER
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = af;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		getaddrinfo_sometime(name, "ntp", &hints,
+				     INITIAL_DNS_RETRY,
+				     &unpeer_name_resolved, NULL);
+#else	/* !WORKER follows */
+		msyslog(LOG_ERR,
+			"hostname %s can not be used, please use IP address instead.\n",
+			name);
+#endif
 	}
 }
 
@@ -3886,46 +3890,36 @@ unpeer_name_resolved(
 {
 	sockaddr_u	peeraddr;
 	struct peer *	peer;
-	int		af;
+	u_short		af;
 	const char *	fam_spec;
 
 	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
 
-	af = (int)context;
-
-	if (rescode)
+	if (rescode) {
 		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)", 
 			name, gai_strerror(rescode), rescode);
-	else {
-		/*
-		 * Loop through the addresses found
-		 */
-		while (res) {
-			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-			DPRINTF(1, ("searching for peer %s\n", stoa(&peeraddr)));
-			peer = NULL;
-			while (TRUE) {
-				peer = findexistingpeer(&peeraddr, NULL, peer, -1);
-				if (NULL == peer)
-					break;
-				if (FLAG_CONFIG & peer->flags)
-					break;
-			}
-
-			if (peer != NULL) {
-				fam_spec = (AF_INET6 == af)
-					       ? "(AAAA) "
-					       : (AF_INET == af)
-						     ? "(A) "
-						     : "";
-				msyslog(LOG_INFO, "unpeered %s %s-> %s",
-					name, fam_spec,
-					stoa(&peeraddr));
-				peer_clear(peer, "GONE");
-				unpeer(peer);
-			}
-
-			res = res->ai_next;
+		return;
+	}
+	/*
+	 * Loop through the addresses found
+	 */
+	for (; res != NULL; res = res->ai_next) {
+		NTP_INSIST(res->ai_addrlen <= sizeof(peeraddr));
+		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+		DPRINTF(1, ("unpeer: searching for peer %s\n",
+			    stoa(&peeraddr)));
+		peer = findexistingpeer(&peeraddr, NULL, NULL, -1);
+		if (peer != NULL) {
+			af = AF(&peeraddr);
+			fam_spec = (AF_INET6 == af)
+				       ? "(AAAA) "
+				       : (AF_INET == af)
+					     ? "(A) "
+					     : "";
+			msyslog(LOG_NOTICE, "unpeered %s %s-> %s", name,
+				fam_spec, stoa(&peeraddr));
+			peer_clear(peer, "GONE");
+			unpeer(peer);
 		}
 	}
 }

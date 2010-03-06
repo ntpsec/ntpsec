@@ -2416,7 +2416,7 @@ mrulist(
 
 
 	printf(	"lstint avgint rstr m v  count rport remote address\n"
-		"------------------------------------------------------------------------------\n");
+		"==============================================================================\n");
 		/* '-' x 78 */
 	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
 		interval = now;
