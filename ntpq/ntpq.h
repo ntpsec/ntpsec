@@ -18,8 +18,18 @@
 #define	MAXARGS	4
 
 /*
- * Flags for forming descriptors.
+ * Limit on packets in a single response
  */
+#define	MAXFRAGS	64
+
+/*
+ * Error codes for internal use
+ */
+#define	ERR_UNSPEC		256
+#define	ERR_INCOMPLETE		257
+#define	ERR_TIMEOUT		258
+#define	ERR_TOOMUCH		259
+
 /*
  * Flags for forming descriptors.
  */

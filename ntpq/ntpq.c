@@ -419,7 +419,6 @@ u_short sequence;
  * Holds data returned from queries.  Declare buffer long to be sure of
  * alignment.
  */
-#define	MAXFRAGS	64		/* maximum number of fragments */
 #define	DATASIZE	(MAXFRAGS*480)	/* maximum amount of data */
 long pktdata[DATASIZE/sizeof(long)];
 
@@ -442,14 +441,6 @@ const char *ccmds[MAXCMDS];
 int numhosts = 0;
 const char *chosts[MAXHOSTS];
 #define	ADDHOST(cp)	if (numhosts < MAXHOSTS) chosts[numhosts++] = (cp)
-
-/*
- * Error codes for internal use
- */
-#define	ERR_UNSPEC		256
-#define	ERR_INCOMPLETE	257
-#define	ERR_TIMEOUT		258
-#define	ERR_TOOMUCH		259
 
 /*
  * Macro definitions we use
@@ -1202,6 +1193,10 @@ getresponse(
 			}
 			if (n == numfrags) {
 				*rsize = offsets[numfrags-1] + counts[numfrags-1];
+				if (debug)
+					fprintf(stderr,
+						"%d packets reassembled into response\n",
+						numfrags);
 				return 0;
 			}
 		}

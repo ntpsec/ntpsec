@@ -332,8 +332,13 @@ ntp_monitor(
 	version = PKT_VERSION(pkt->li_vn_mode);
 	mon = mon_hash[hash];
 
+	/*
+	 * We keep track of all traffic for a given IP in one entry,
+	 * otherwise cron'ed ntpdate or similar evades RES_LIMITED.
+	 */
+
 	for (; mon != NULL; mon = mon->hash_next)
-		if (ADDR_PORT_EQ(&mon->rmtadr, &rbufp->recv_srcadr))
+		if (SOCK_EQ(&mon->rmtadr, &rbufp->recv_srcadr))
 			break;
 
 	if (mon != NULL) {
@@ -341,6 +346,7 @@ ntp_monitor(
 		L_SUB(&interval_fp, &mon->last);
 		interval = interval_fp.l_i;
 		mon->last = rbufp->recv_time;
+		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
 		mon->count++;
 		restrict_mask = flags;
 		mon->vn_mode = VN_MODE(version, mode);
@@ -423,8 +429,9 @@ ntp_monitor(
 	 * ntp.conf controls.  Similarly for "mru initalloc" and "mru
 	 * initmem", and for "mru incalloc" and "mru incmem".
 	 */
-	if (NULL == mon_free && mru_alloc < mru_mindepth) {
-		mon_getmoremem();
+	if (mru_entries < mru_mindepth) {
+		if (NULL == mon_free)
+			mon_getmoremem();
 		UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 	} else {
 		oldest = TAIL_DLIST(mon_mru_list, mru);

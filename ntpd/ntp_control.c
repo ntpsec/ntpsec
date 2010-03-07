@@ -136,17 +136,18 @@ static struct ctl_var sys_var[] = {
 	{ CS_MRU_MAXDEPTH, RO, "mru_maxdepth" },/* 29 */
 	{ CS_MRU_MEM,	   RO, "mru_mem" },	/* 30 */
 	{ CS_MRU_MAXMEM,   RO, "mru_maxmem" },	/* 31 */
+	{ CS_KOD_SENT,	RO, "kod_sent" },	/* 32 */
 #ifdef OPENSSL
-	{ CS_FLAGS,	RO, "flags" },		/* 32 */
-	{ CS_HOST,	RO, "host" },		/* 33 */
-	{ CS_PUBLIC,	RO, "update" },		/* 34 */
-	{ CS_CERTIF,	RO, "cert" },		/* 35 */
-	{ CS_SIGNATURE,	RO, "signature" },	/* 36 */
-	{ CS_REVTIME,	RO, "until" },		/* 37 */
-	{ CS_GROUP,	RO, "group" },		/* 38 */
-	{ CS_DIGEST,	RO, "digest" },		/* 39 */
+	{ CS_FLAGS,	RO, "flags" },		/* 33 */
+	{ CS_HOST,	RO, "host" },		/* 34 */
+	{ CS_PUBLIC,	RO, "update" },		/* 35 */
+	{ CS_CERTIF,	RO, "cert" },		/* 36 */
+	{ CS_SIGNATURE,	RO, "signature" },	/* 37 */
+	{ CS_REVTIME,	RO, "until" },		/* 38 */
+	{ CS_GROUP,	RO, "group" },		/* 39 */
+	{ CS_DIGEST,	RO, "digest" },		/* 40 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 32/40 */
+	{ 0,		EOV, "" }		/* 33/41 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -1606,6 +1607,11 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 
+	    case CS_KOD_SENT:
+		ctl_putint(sys_var[varid].text, sys_kodsent);
+		break;
+
+
 #ifdef OPENSSL
 	    case CS_FLAGS:
 		if (crypto_flags)
@@ -2645,7 +2651,14 @@ static void configure(
  *			newer neighbor, fetch the supplied entry, and
  *			in that case the #.last timestamp can be zero.
  *			This enables fetching a single entry by IP
-			address.
+ *			address.
+ *	mincount=	(decimal) return entries with count >= mincount.
+ *	resall=		0x-prefixed hex restrict bits which must all be
+ *			lit for an MRU entry to be included.
+ *			Has precedence over any resany=.
+ *	resany=		0x-prefixed hex restrict bits, at least one of
+ *			which must be list for an MRU entry to be
+ *			included.
  *	0.last=		0x-prefixed hex l_fp timestamp of newest entry
  *			which client previously received.
  *	0.addr=		text of newest entry's IP address and port,
@@ -2701,6 +2714,10 @@ static void read_mru_list(
 	)
 {
 	const char		limit_text[] =	"limit";
+	const char		mincount_text[] = "mincount";
+	const char		resall_text[] = "resall";
+	const char		resany_text[] = "resany";
+	const char		resaxx_fmt[] =	"0x%hx";
 	const char		addr_fmt[] =	"addr.%d";
 	const char		last_fmt[] =	"last.%d";
 	const char		first_fmt[] =	"first.%d";
@@ -2709,6 +2726,9 @@ static void read_mru_list(
 	const char		rs_fmt[] =	"rs.%d";
 	const char		l_fp_hexfmt[] =	"0x%08x.%08x";
 	u_int			limit;
+	u_short			resall;
+	u_short			resany;
+	int			mincount;
 	u_int			count;
 	u_int			ui;
 	u_int			uf;
@@ -2724,6 +2744,7 @@ static void read_mru_list(
 	int			priors;
 	u_short			hash;
 	mon_entry *		mon;
+	mon_entry *		prior_mon;
 	l_fp			now;
 
 	/*
@@ -2731,6 +2752,9 @@ static void read_mru_list(
 	 */
 	in_parms = NULL;
 	set_var(&in_parms, limit_text, sizeof(limit_text), 0);
+	set_var(&in_parms, mincount_text, sizeof(mincount_text), 0);
+	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
+	set_var(&in_parms, resany_text, sizeof(resany_text), 0);
 	for (i = 0; i < COUNTOF(last); i++) {
 		snprintf(buf, sizeof(buf), last_fmt, i);
 		set_var(&in_parms, buf, strlen(buf) + 1, 0);
@@ -2740,6 +2764,9 @@ static void read_mru_list(
 
 	/* decode input parms */
 	limit = 0;
+	mincount = 0;
+	resall = 0;
+	resany = 0;
 	priors = 0;
 	memset(last, 0, sizeof(last));
 	memset(addr, 0, sizeof(addr));
@@ -2748,8 +2775,15 @@ static void read_mru_list(
 	       !(EOV & v->flags)) {
 
 		if (!strcmp(limit_text, v->text)) {
-			if (1 != sscanf(val, "%u", &limit))
-				limit = 0;
+			sscanf(val, "%u", &limit);
+		} else if (!strcmp(mincount_text, v->text)) {
+			if (1 != sscanf(val, "%d", &mincount) ||
+			    mincount < 0)
+				mincount = 0;
+		} else if (!strcmp(resall_text, v->text)) {
+			sscanf(val, resaxx_fmt, &resall);
+		} else if (!strcmp(resany_text, v->text)) {
+			sscanf(val, resaxx_fmt, &resany);
 		} else if (1 == sscanf(v->text, last_fmt, &i) &&
 			   i < COUNTOF(last)) {
 			if (2 == sscanf(val, l_fp_hexfmt, &ui, &uf)) {
@@ -2809,10 +2843,18 @@ static void read_mru_list(
 			mon = PREV_DLIST(mon_mru_list, mon, mru);
 	} else		/* start with the oldest */
 		mon = TAIL_DLIST(mon_mru_list, mru);
-		
+	
+	prior_mon = NULL;
 	for (count = 0;
 	     count < limit && mon != NULL;
-	     count++, mon = PREV_DLIST(mon_mru_list, mon, mru)) {
+	     mon = PREV_DLIST(mon_mru_list, mon, mru)) {
+
+		if (mon->count < mincount)
+			continue;
+		if (resall && (resall != (resall & mon->flags)))
+			continue;
+		if (resany && !(resany & mon->flags))
+			continue;
 
 		snprintf(tag, sizeof(tag), addr_fmt, count);
 		pch = sptoa(&mon->rmtadr);
@@ -2836,20 +2878,23 @@ static void read_mru_list(
 
 		snprintf(tag, sizeof(tag), rs_fmt, count);
 		ctl_puthex(tag, mon->flags);
+
+		count++;
+		prior_mon = mon;
 	}
 	/*
 	 * If this batch completes the MRU list (has the most recent),
 	 * say so explicitly.
 	 */
 	if (NULL == mon) {
-		mon = HEAD_DLIST(mon_mru_list, mru);
-		if (mon != NULL) {
-			get_systime(&now);
+		get_systime(&now);
+		snprintf(buf, sizeof(buf), l_fp_hexfmt,
+			 now.l_ui, now.l_uf);
+		ctl_putunqstr("now", buf, strlen(buf));
+		if (prior_mon != NULL) {
 			snprintf(buf, sizeof(buf), l_fp_hexfmt,
-				 now.l_ui, now.l_uf);
-			ctl_putunqstr("now", buf, strlen(buf));
-			snprintf(buf, sizeof(buf), l_fp_hexfmt,
-				 mon->last.l_ui, mon->last.l_uf);
+				 prior_mon->last.l_ui,
+				 prior_mon->last.l_uf);
 			ctl_putunqstr("last.newest", buf, strlen(buf));
 		}
 	}

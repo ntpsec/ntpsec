@@ -766,7 +766,7 @@ record_sys_stats(void)
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (sysstats.fp != NULL) {
-                fprintf(sysstats.fp,
+		fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    day, ulfptoa(&now, 3), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,

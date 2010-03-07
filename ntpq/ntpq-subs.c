@@ -69,7 +69,6 @@ static 	void 	saveconfig	(struct parse *, FILE *);
 static  void	config_from_file(struct parse *, FILE *);
 static  void	mrulist		(struct parse *, FILE *);
 
-
 /*
  * Commands we understand.	Ntpdc imports this.
  */
@@ -164,9 +163,9 @@ struct xcmd opcmds[] = {
 	{ "config-from-file", config_from_file, { NTP_STR, NO, NO, NO },
 	  { "<configuration filename>", "", "", "" },
 	  "configure ntpd using the configuration filename" },
-	{ "mrulist", mrulist, { OPT|NTP_STR, NO, NO, NO },
-	  { "<IP address>", "", "", "" },
-	  "display the list of most recently seen source addresses" },
+	{ "mrulist", mrulist, { OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
+	  { "tag=value", "", "", "" },
+	  "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..." },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -235,7 +234,12 @@ struct mru_tag {
 };
 static mru mru_list;		/* listhead */
 static mru **hash_table;
-static mru *	add_mru	(mru *);
+
+/*
+ * other static function prototypes
+ */
+static mru *	add_mru(mru *);
+static int	collect_mru_list(const char *, l_fp *);
 
 
 /*
@@ -2070,8 +2074,9 @@ config_from_file (
 
 
 /*
- * add_mru	add and entry to mru list, hash table, and allocate
+ * add_mru	Add and entry to mru list, hash table, and allocate
  *		and return a replacement.
+ *		This is a helper for collect_mru_list().
  */
 static mru *
 add_mru(
@@ -2083,6 +2088,14 @@ add_mru(
 	mru *unlinked;
 	int first_ts_matches;
 
+	if (debug)
+		fprintf(stderr,
+			"add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
+			add->last.l_ui, add->last.l_uf, add->count,
+			(int)add->mode, (int)add->ver, (u_int)add->rs,
+			add->first.l_ui, add->first.l_uf,
+			sptoa(&add->addr));
+
 	hash = NTP_HASH_ADDR(&add->addr);
 	/* see if we have it among previously received entries */
 	for (mon = hash_table[hash]; mon != NULL; mon = mon->hlink)
@@ -2090,7 +2103,15 @@ add_mru(
 			break;
 	if (mon != NULL) {
 		first_ts_matches = L_ISEQU(&add->first, &mon->first);
-		NTP_INSIST(first_ts_matches);
+		if (!first_ts_matches) {
+			fprintf(stderr,
+				"add_mru duplicate %s first ts mismatch %08x.%08x expected %08x.%08x\n",
+				sptoa(&add->addr), add->last.l_ui,
+				add->last.l_uf, mon->last.l_ui,
+				mon->last.l_uf);
+			exit(1);
+
+		}
 		UNLINK_DLIST(mon, mlink);
 		UNLINK_SLIST(unlinked, hash_table[hash], mon, hlink, mru);
 		NTP_INSIST(unlinked == mon);
@@ -2103,13 +2124,6 @@ add_mru(
 	}
 	LINK_DLIST(mru_list, add, mlink);
 	LINK_SLIST(hash_table[hash], add, hlink);
-	if (debug)
-		fprintf(stderr,
-			"add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
-			add->last.l_ui, add->last.l_uf, add->count,
-			(int)add->mode, (int)add->ver, (u_int)add->rs,
-			add->first.l_ui, add->first.l_uf,
-			sptoa(&add->addr));
 	if (NULL == mon)
 		mon = emalloc(sizeof(*mon));
 	memset(mon, 0, sizeof(*mon));
@@ -2117,13 +2131,7 @@ add_mru(
 }
 
 
-static void 
-mrulist(
-	struct parse *pcmd,
-	FILE *fp
-	)
-{
-	u_char got;		/* MRU_GOT_* bits */
+/* MGOT macro is specific to collect_mru_list() */
 #define MGOT(bit)				\
 	do {					\
 		got |= (bit);			\
@@ -2133,6 +2141,16 @@ mrulist(
 			ci++;			\
 		}				\
 	} while (0)
+
+
+static int
+collect_mru_list(
+	const char *parms,
+	l_fp *	pnow
+	)
+{
+	int c_mru_l_rc;		/* this function's return code */
+	u_char got;		/* MRU_GOT_* bits */
 	const char ts_fmt[] = "0x%08x.%08x";
 	size_t cb;
 	mru *mon;
@@ -2155,41 +2173,35 @@ mrulist(
 	int ci;		/* client (our) index for validation */
 	int ri;		/* request index (.# suffix) */
 	int mv;
-	l_fp now;
 	l_fp newest;
 	l_fp last_older;
-	l_fp interval;
 	sockaddr_u addr_older;
-	double favgint;
-	double flstint;
-	int avgint;
-	int lstint;
 	int have_now;
 	int have_addr_older;
 	int have_last_older;
 	u_short hash;
 	mru *unlinked;
 
+	c_mru_l_rc = FALSE;
 	list_complete = FALSE;
-	INIT_DLIST(mru_list, mlink);
-	cb = NTP_HASH_SIZE * sizeof(*hash_table);
-	hash_table = emalloc(cb);
-	memset(hash_table, 0, cb);
-	cb = sizeof(*mon);
-	mon = emalloc(cb);
-	memset(mon, 0, cb);
-	memset(&now, 0, sizeof(now));
-	memset(&last_older, 0, sizeof(last_older));
 	have_now = FALSE;
 	got = 0;
 	ri = 0;
+	cb = sizeof(*mon);
+	mon = emalloc(cb);
+	memset(mon, 0, cb);
+	memset(pnow, 0, sizeof(*pnow));
+	memset(&last_older, 0, sizeof(last_older));
 
 	limit = 2;
-	snprintf(req_buf, sizeof(req_buf), "limit=%d", limit);
+	snprintf(req_buf, sizeof(req_buf), "limit=%d%s", limit, parms);
 
 	while (TRUE) {
 		if (debug)
 			fprintf(stderr, "READ_MRU: %s\n", req_buf);
+		// if (debug) !!!!!
+			fprintf(stderr, "attempting next %d\n", limit);
+				
 		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
 			         req_buf, &rstatus, &rsize, &rdata, TRUE);
 
@@ -2214,10 +2226,25 @@ mrulist(
 				NTP_INSIST(unlinked == recent);
 				free(recent);
 			}
+		} else if (ERR_INCOMPLETE == qres) {
+			/*
+			 * Reduce the number of rows to minimize effect
+			 * of single lost packets.
+			 */
+			limit = max(2, limit * 2 / 3);
 		} else if (qres) {
 			show_error_msg(qres, 0);
-			return;
+			goto cleanup_return;
 		}
+		/*
+		 * This is a cheap cop-out implementation of rawmode
+		 * output for mrulist.  A better approach would be to
+		 * dump similar output after the list is collected by
+		 * ntpq with a continuous sequence of indexes.  This
+		 * cheap approach has indexes resetting to zero for
+		 * each query/response, and duplicates are not 
+		 * coalesced.
+		 */
 		if (!qres && rawmode)
 			printvars(rsize, rdata, rstatus, TYPE_SYS, 1, stdout);
 		ci = 0;
@@ -2325,16 +2352,17 @@ mrulist(
 				if (1 != sscanf(tag, "first.%d", &si) ||
 				    si != ci ||
 				    2 != sscanf(val, ts_fmt,
-					        &mon->first.l_ui,
-					        &mon->first.l_uf))
+						&mon->first.l_ui,
+						&mon->first.l_uf))
 					goto nomatch;
 				MGOT(MRU_GOT_FIRST);
 				break;
 
 			case 'n':
 				if (strcmp(tag, "now") ||
-				    2 != sscanf(val, ts_fmt, &now.l_ui,
-					        &now.l_uf))
+				    2 != sscanf(val, ts_fmt,
+						&pnow->l_ui,
+						&pnow->l_uf))
 					goto nomatch;
 				have_now = TRUE;
 				break;
@@ -2372,7 +2400,8 @@ mrulist(
 				/* ignore unknown tags */
 			}
 		}
-		
+		if (have_now)
+			list_complete = TRUE;
 		if (list_complete) {
 			NTP_INSIST(0 == ri || have_addr_older);
 			break;
@@ -2383,13 +2412,21 @@ mrulist(
 		 */
 		sleep(1);
 		/*
+		 * If there were no errors, increase the number of rows
+		 * to a maximum of 3 * MAXFRAGS (the most packets ntpq
+		 * can handle in one response), on the assumption that
+		 * no less than 3 rows fit in each packet.
+		 */
+		if (!qres)
+			limit = min(3 * MAXFRAGS, limit * 2);
+		/*
 		 * prepare next query with as many address and last-seen
 		 * timestamps as will fit in a single packet.
 		 */
 		req = req_buf;
 		req_end = req_buf + sizeof(req_buf);
 #define REQ_ROOM	(req_end - req)
-		snprintf(req, REQ_ROOM, "limit=%d", limit);
+		snprintf(req, REQ_ROOM, "limit=%d%s", limit, parms);
 		req += strlen(req);
 
 		for (ri = 0, recent = HEAD_DLIST(mru_list, mlink);
@@ -2410,10 +2447,84 @@ mrulist(
 		NTP_INSIST(ri > 0 || NULL == recent);
 	}
 
+	c_mru_l_rc = TRUE;
+
+cleanup_return:
+	if (mon != NULL)
+		free(mon);
+
+	return c_mru_l_rc;
+}
+
+
+/*
+ * mrulist - ntpq's mrulist command to fetch an arbitrarily large Most
+ *	     Recently Used (seen) remote address list from ntpd.
+ *
+ * Similar to ntpdc's monlist command, but not limited to a single
+ * request/response, and thereby not limited to a few hundred remote
+ * addresses.
+ *
+ * See ntpd/ntp_control.c read_mru_list() for comments on the way
+ * CTL_OP_READ_MRU is designed to be used.
+ */
+static void 
+mrulist(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+	const char mincount_eq[] = "mincount=";
+	const char resall_eq[] = "resall=";
+	const char resany_eq[] = "resany=";
+	char parms_buf[128];
+	char *parms;
+	char *arg;
+	size_t cb;
+	mru *recent;
+	l_fp now;
+	l_fp interval;
+	double favgint;
+	double flstint;
+	int avgint;
+	int lstint;
+	int i;
+
+	parms_buf[0] = '\0';
+	parms = parms_buf;
+	for (i = 0; i < pcmd->nargs; i++) {
+		arg = pcmd->argval[i].string;
+		if (arg != NULL) {
+			cb = strlen(arg) + 1;
+			if ((!strncmp(resall_eq, arg, sizeof(resall_eq)
+			    - 1) || !strncmp(resany_eq, arg,
+			    sizeof(resany_eq) - 1) || !strncmp(
+			    mincount_eq, arg, sizeof(mincount_eq) - 1))
+			    && parms + cb + 2 <= parms_buf +
+			    sizeof(parms_buf)) {
+				memcpy(parms, ", ", 2);
+				parms += 2;
+				memcpy(parms, arg, cb);
+				parms += cb - 1;
+			} else
+				fprintf(stderr,
+					"ignoring unrecognized mrulist parameter: %s\n",
+					arg);
+		}
+	}
+	parms = parms_buf;
+
+	INIT_DLIST(mru_list, mlink);
+	cb = NTP_HASH_SIZE * sizeof(*hash_table);
+	hash_table = emalloc(cb);
+	memset(hash_table, 0, cb);
+
+	if (!collect_mru_list(parms, &now))
+		return;
+
 	/* display the results */
 	if (rawmode)
 		goto cleanup_return;
-
 
 	printf(	"lstint avgint rstr m v  count rport remote address\n"
 		"==============================================================================\n");
@@ -2435,8 +2546,6 @@ mrulist(
 	ITER_DLIST_END()
 
 cleanup_return:
-	if (mon != NULL)
-		free(mon);
 	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
 		free(recent);
 	ITER_DLIST_END()

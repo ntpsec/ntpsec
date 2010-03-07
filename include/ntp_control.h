@@ -178,18 +178,20 @@ struct ntp_control {
 #define CS_MRU_MAXDEPTH	29
 #define CS_MRU_MEM	30
 #define CS_MRU_MAXMEM	31
+#define CS_KOD_SENT	32
+#define CS_MAX_NOSSL	CS_KOD_SENT
 #ifdef OPENSSL
-#define CS_FLAGS	32
-#define CS_HOST		33
-#define CS_PUBLIC	34
-#define	CS_CERTIF	35
-#define	CS_SIGNATURE	36
-#define	CS_REVTIME	37
-#define	CS_GROUP	38
-#define CS_DIGEST	39
+#define CS_FLAGS	(1 + CS_MAX_NOSSL)
+#define CS_HOST		(2 + CS_MAX_NOSSL)
+#define CS_PUBLIC	(3 + CS_MAX_NOSSL)
+#define	CS_CERTIF	(4 + CS_MAX_NOSSL)
+#define	CS_SIGNATURE	(5 + CS_MAX_NOSSL)
+#define	CS_REVTIME	(6 + CS_MAX_NOSSL)
+#define	CS_GROUP	(7 + CS_MAX_NOSSL)
+#define CS_DIGEST	(8 + CS_MAX_NOSSL)
 #define	CS_MAXCODE	CS_DIGEST
 #else
-#define	CS_MAXCODE	CS_MRU_MAXMEM
+#define	CS_MAXCODE	CS_MAX_NOSSL
 #endif /* OPENSSL */
 
 /*

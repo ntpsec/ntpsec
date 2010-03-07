@@ -457,6 +457,8 @@ typedef unsigned long uintptr_t;
 
 #endif /* !defined(STR_PROCESSOR) */
 
+#undef STRINGIZE
+
 #define  SIOCGIFFLAGS SIO_GET_INTERFACE_LIST /* used in ntp_io.c */
 /*
  * Below this line are includes which must happen after the bulk of
