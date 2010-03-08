@@ -58,7 +58,7 @@ struct timeval timeout = {0,0};
 #elif defined(SYS_WINNT)
 /*
  * Windows does not abort a select select call if SIGALRM goes off
- * so a 200 ms timeout is needed
+ * so a 200 ms timeout is needed (TIMER_HZ is 5).
  */
 struct sock_timeval timeout = {0,1000000/TIMER_HZ};
 #else
@@ -419,8 +419,18 @@ ntpdatemain (
 			} else {
 				sys_timeout = ((LFPTOFP(&tmp) * TIMER_HZ)
 					   + 0x8000) >> 16;
-				if (sys_timeout == 0)
-				sys_timeout = 1;
+				/*
+				 * No less than 1s between requests to
+				 * a server to stay within ntpd's
+				 * default "discard minimum 1" (and 1s
+				 * enforcement slop).  That is enforced
+				 * only if the nondefault limited
+				 * restriction is in place, such as with
+				 * "restrict ... limited" and "restrict
+				 * ... kod limited".
+				 */
+				if (MINTIMEOUT < sys_timeout)
+					sys_timeout = MINTIMEOUT;
 			}
 			break;
 		case 'v':
@@ -829,6 +839,19 @@ receive(
 		server->trust |= 1;
 
 	/*
+	 * Check for a KoD (rate limiting) response, cease and decist.
+	 */
+	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode) &&
+	    STRATUM_PKT_UNSPEC == rpkt->stratum &&
+	    !memcmp("RATE", &rpkt->refid, 4)) {
+		msyslog(LOG_ERR, "%s rate limit response from server.\n",
+			stoa(&rbufp->recv_srcadr));
+		server->event_time = 0;
+		complete_servers++;
+		return;
+	}
+
+	/*
 	 * Looks good.	Record info from the packet.
 	 */
 	server->leap = PKT_LEAP(rpkt->li_vn_mode);
@@ -845,8 +868,9 @@ receive(
 	 * Make sure the server is at least somewhat sane.	If not, try
 	 * again.
 	 */
-	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)) {
-		transmit(server);
+	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)
+	    || L_ISEQU(&rec, &server->org)) {
+		server->event_time = current_time + sys_timeout;
 		return;
 	}
 
@@ -895,10 +919,10 @@ receive(
 	}
 
 	/*
-	 * Shift this data in, then transmit again.
+	 * Shift this data in, then schedule another transmit.
 	 */
 	server_data(server, (s_fp) di, &ci, 0);
-	transmit(server);
+	server->event_time = current_time + sys_timeout;
 }
 
 
@@ -1346,12 +1370,16 @@ addserver(
 			/* Name server is unusable. Exit after failing on the
 			   first server, in order to shorten the timeout caused
 			   by waiting for resolution of several servers */
-			fprintf(stderr, "Name server cannot be used, exiting");
-			msyslog(LOG_ERR, "name server cannot be used, reason: %s\n", gai_strerror(error));
+			fprintf(stderr, "Exiting, name server cannot be used: %s (%d)",
+				gai_strerror(error), error);
+			msyslog(LOG_ERR, "name server cannot be used: %s (%d)\n",
+				gai_strerror(error), error);
 			exit(1);
 		}
-		fprintf(stderr, "Error : %s\n", gai_strerror(error));
-		msyslog(LOG_ERR, "can't find host %s\n", serv);
+		fprintf(stderr, "Error resolving %s: %s (%d)\n", serv,
+			gai_strerror(error), error);
+		msyslog(LOG_ERR, "Can't find host %s: %s (%d)\n", serv,
+			gai_strerror(error), error);
 		return;
 	}
 #ifdef DEBUG
