@@ -1018,7 +1018,7 @@ receive(
 	/*
 	 * A passive packet matches a passive association. This is
 	 * usually the result of reconfiguring a client on the fly. As
-	 * this association might be legitamate and this packet an
+	 * this association might be legitimate and this packet an
 	 * attempt to deny service, just ignore it.
 	 */
 	case AM_ERR:
@@ -3861,4 +3861,5 @@ proto_clr_stats(void)
 	sys_badlength = 0;
 	sys_badauth = 0;
 	sys_limitrejected = 0;
+	sys_kodsent = 0;
 }

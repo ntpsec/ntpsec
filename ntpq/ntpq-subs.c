@@ -20,12 +20,12 @@ int 		maxhostlen;
  */
 static associd_t checkassocid	(u_int32);
 static	struct varlist *findlistvar (struct varlist *, char *);
-static	void	doaddvlist	(struct varlist *, char *);
-static	void	dormvlist	(struct varlist *, char *);
+static	void	doaddvlist	(struct varlist *, const char *);
+static	void	dormvlist	(struct varlist *, const char *);
 static	void	doclearvlist	(struct varlist *);
 static	void	makequerydata	(struct varlist *, int *, char *);
 static	int	doquerylist	(struct varlist *, int, associd_t, int, 
-				 u_short *, int *, char **);
+				 u_short *, int *, const char **);
 static	void	doprintvlist	(struct varlist *, FILE *);
 static	void	addvars 	(struct parse *, FILE *);
 static	void	rmvars		(struct parse *, FILE *);
@@ -56,7 +56,7 @@ static	void	radiostatus (struct parse *, FILE *);
 static	void	pstatus 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
-static	int	doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
+static	int	doprintpeers	(struct varlist *, int, int, int, const char *, FILE *, int);
 static	int	dogetpeers	(struct varlist *, associd_t, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
 static	void	peers		(struct parse *, FILE *);
@@ -64,10 +64,11 @@ static	void	lpeers		(struct parse *, FILE *);
 static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
-static  void	config		(struct parse *, FILE *);
-static 	void 	saveconfig	(struct parse *, FILE *);
-static  void	config_from_file(struct parse *, FILE *);
-static  void	mrulist		(struct parse *, FILE *);
+static	void	config		(struct parse *, FILE *);
+static	void 	saveconfig	(struct parse *, FILE *);
+static	void	config_from_file(struct parse *, FILE *);
+static	void	mrulist		(struct parse *, FILE *);
+static	void	sysstats	(struct parse *, FILE *);
 
 /*
  * Commands we understand.	Ntpdc imports this.
@@ -164,8 +165,11 @@ struct xcmd opcmds[] = {
 	  { "<configuration filename>", "", "", "" },
 	  "configure ntpd using the configuration filename" },
 	{ "mrulist", mrulist, { OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
-	  { "tag=value", "", "", "" },
+	  { "tag=value", "tag=value", "tag=value", "tag=value" },
 	  "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..." },
+	{ "sysstats", sysstats, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "display system uptime and packet counts" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -259,7 +263,10 @@ checkassocid(
 
 
 /*
- * findlistvar - look for the named variable in a list and return if found
+ * findlistvar - Look for the named variable in a varlist.  If found,
+ *		 return a pointer to it.  Otherwise, if the list has
+ *		 slots available, return the pointer to the first free
+ *		 slot, or NULL if it's full.
  */
 static struct varlist *
 findlistvar(
@@ -285,7 +292,7 @@ findlistvar(
 static void
 doaddvlist(
 	struct varlist *vlist,
-	char *vars
+	const char *vars
 	)
 {
 	register struct varlist *vl;
@@ -301,14 +308,14 @@ doaddvlist(
 			return;
 		}
 
-		if (vl->name == 0) {
+		if (vl->name == NULL) {
 			vl->name = estrdup(name);
-		} else if (vl->value != 0) {
+		} else if (vl->value != NULL) {
 			free(vl->value);
-			vl->value = 0;
+			vl->value = NULL;
 		}
 
-		if (value != 0)
+		if (value != NULL)
 			vl->value = estrdup(value);
 	}
 }
@@ -320,7 +327,7 @@ doaddvlist(
 static void
 dormvlist(
 	struct varlist *vlist,
-	char *vars
+	const char *vars
 	)
 {
 	register struct varlist *vl;
@@ -423,7 +430,7 @@ doquerylist(
 	int auth,
 	u_short *rstatus,
 	int *dsize,
-	char **datap
+	const char **datap
 	)
 {
 	char data[CTL_MAX_DATA_LEN];
@@ -432,8 +439,8 @@ doquerylist(
 	datalen = sizeof(data);
 	makequerydata(vlist, &datalen, data);
 
-	return doquery(op, associd, auth, datalen, data, rstatus,
-			   dsize, datap);
+	return doquery(op, associd, auth, datalen, data, rstatus, dsize,
+		       datap);
 }
 
 
@@ -530,7 +537,7 @@ dolist(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -605,7 +612,7 @@ writelist(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	associd_t associd;
 	int dsize;
@@ -686,7 +693,7 @@ writevar(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	associd_t associd;
 	int dsize;
@@ -910,7 +917,8 @@ dogetassoc(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
+	const u_short *pus;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -930,21 +938,24 @@ dogetassoc(
 
 	if (dsize & 0x3) {
 		if (numhosts > 1)
-			(void) fprintf(stderr, "server=%s ", currenthost);
-		(void) fprintf(stderr,
-				   "***Server returned %d octets, should be multiple of 4\n",
-				   dsize);
+			fprintf(stderr, "server=%s ", currenthost);
+		fprintf(stderr,
+			"***Server returned %d octets, should be multiple of 4\n",
+			dsize);
 		return 0;
 	}
 
 	numassoc = 0;
 	while (dsize > 0) {
-		assoc_cache[numassoc].assid = ntohs(*((u_short *)datap));
+		pus = (const void *)datap;
+		assoc_cache[numassoc].assid = ntohs(*pus);
 		datap += sizeof(u_short);
-		assoc_cache[numassoc].status = ntohs(*((u_short *)datap));
+		pus = (const void *)datap;
+		assoc_cache[numassoc].status = ntohs(*pus);
 		datap += sizeof(u_short);
 		if (debug)
-			fprintf(stderr, "[%u] ", assoc_cache[numassoc].assid);
+			fprintf(stderr, "[%u] ",
+				assoc_cache[numassoc].assid);
 		if (++numassoc >= MAXASSOC)
 			break;
 		dsize -= sizeof(u_short) + sizeof(u_short);
@@ -1212,7 +1223,7 @@ saveconfig(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -1230,10 +1241,8 @@ saveconfig(
 
 	if (0 == dsize)
 		fprintf(fp, "(no response message, curiously)");
-	else {
-		datap[dsize] = '\0';
-		fprintf(fp, "%s", datap);
-	}
+	else
+		fprintf(fp, "%.*s", dsize, datap);
 }
 
 
@@ -1279,7 +1288,7 @@ pstatus(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	associd_t associd;
 	int dsize;
@@ -1467,7 +1476,7 @@ doprintpeers(
 	int associd,
 	int rstatus,
 	int datalen,
-	char *data,
+	const char *data,
 	FILE *fp,
 	int af
 	)
@@ -1479,6 +1488,7 @@ doprintpeers(
 	int len;
 	sockaddr_u srcadr;
 	sockaddr_u dstadr;
+	sockaddr_u dum_store;
 	long hmode = 0;
 	u_long srcport = 0;
 	char *dstadr_refid = "0.0.0.0";
@@ -1514,8 +1524,6 @@ doprintpeers(
 	memset(&estdisp, 0, sizeof(estdisp));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
-		sockaddr_u dum_store;
-
 		i = findvar(name, peer_var, 1);
 		if (i == 0)
 			continue;	/* don't know this one */
@@ -1730,7 +1738,7 @@ dogetpeers(
 	int af
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -1955,7 +1963,8 @@ config (
 	char *cfgcmd;
 	u_short rstatus;
 	int rsize;
-	char *rdata;
+	const char *rdata;
+	char *resp;
 	int res;
 	int col;
 	int i;
@@ -1976,10 +1985,13 @@ config (
 
 	if (rsize > 0 && '\n' == rdata[rsize - 1])
 		rsize--;
-	rdata[rsize] = '\0';
+
+	resp = emalloc(rsize + 1);
+	memcpy(resp, rdata, rsize);
+	resp[rsize] = '\0';
 
 	col = -1;
-	if (1 == sscanf(rdata, "column %d syntax error", &col)
+	if (1 == sscanf(resp, "column %d syntax error", &col)
 	    && col >= 0 && (size_t)col <= strlen(cfgcmd) + 1) {
 		if (interactive) {
 			printf("______");	/* "ntpq> " */
@@ -1990,7 +2002,8 @@ config (
 			putchar('_');
 		printf("^\n");
 	}
-	printf("%s\n", rdata);
+	printf("%s\n", resp);
+	free(resp);
 }
 
 
@@ -2015,7 +2028,7 @@ config_from_file (
 {
 	u_short rstatus;
 	int rsize;
-	char *rdata;
+	const char *rdata;
 	int res;
 	FILE *config_fd;
 	char config_cmd[MAXLINE];
@@ -2065,8 +2078,8 @@ config_from_file (
 			rsize--;
 		if (rsize > 0 && '\r' == rdata[rsize - 1])
 			rsize--;
-		rdata[rsize] = '\0';
-		printf("Line No: %d %s: %s", i, rdata, config_cmd);
+		printf("Line No: %d %.*s: %s", i, rsize, rdata,
+		       config_cmd);
 	}
 	printf("Done sending file\n");
 	fclose(config_fd);
@@ -2165,7 +2178,7 @@ collect_mru_list(
 	int qres;
 	u_short rstatus;
 	int rsize;
-	char *rdata;
+	const char *rdata;
 	int limit;
 	char *tag;
 	char *val;
@@ -2552,4 +2565,86 @@ cleanup_return:
 	free(hash_table);
 	hash_table = NULL;
 	INIT_DLIST(mru_list, mlink);
+}
+
+
+typedef struct var_display_collection_tag {
+	const char *tag;	/* system variable */
+	const char *display;	/* descriptive text */
+	u_char type;		/* NTP_STR, etc */
+	union {			/* retrieved value */
+		char *str;
+	} v;
+} vdc;
+
+
+
+/*
+ * sysstats - implements ntpq -c sysstats modeled on ntpdc -c sysstats
+ */
+static void 
+sysstats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    vdc sysstats_vdc[] = {
+	{ "ss_uptime",		"uptime:               ", NTP_STR },
+	{ "ss_reset",		"sysstats reset:       ", NTP_STR },
+	{ "ss_received",	"packets received:     ", NTP_STR },
+	{ "ss_thisver",		"current version:      ", NTP_STR },
+	{ "ss_oldver",		"older version:        ", NTP_STR },
+	{ "ss_badformat",	"bad length or format: ", NTP_STR },
+	{ "ss_badauth",		"authentication failed:", NTP_STR },
+	{ "ss_declined",	"declined:             ", NTP_STR },
+	{ "ss_restricted",	"restricted:           ", NTP_STR },
+	{ "ss_limited",		"rate limited:         ", NTP_STR },
+	{ "ss_kodsent",		"KOD responses:        ", NTP_STR },
+	{ "ss_processed",	"processed for time:   ", NTP_STR },
+	{ NULL,			NULL,			  0	  }
+    };
+	struct varlist vl[MAXLIST];
+	vdc *vdc_table;
+	vdc *pvdc;
+	u_short rstatus;
+	int rsize;
+	const char *rdata;
+	int qres;
+	char *tag;
+	char *val;
+
+	vdc_table = sysstats_vdc;
+
+	memset(vl, 0, sizeof(vl));
+	for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++) {
+		memset(&pvdc->v, 0, sizeof(pvdc->v));
+		doaddvlist(vl, pvdc->tag);
+	}
+	qres = doquerylist(vl, CTL_OP_READVAR, 0, 0, &rstatus, &rsize,
+			  &rdata);
+	doclearvlist(vl);
+	if (qres)
+		return;		/* error msg already displayed */
+
+	/*
+	 * iterate over the response variables filling vdc_table with
+	 * the retrieved values.
+	 */
+	while (nextvar(&rsize, &rdata, &tag, &val)) {
+		for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++)
+			if (!strcmp(tag, pvdc->tag))
+				break;
+		if (pvdc->tag != NULL) {
+			NTP_INSIST(NTP_STR == pvdc->type);
+			pvdc->v.str = estrdup(val);
+		}
+	}
+
+	/* and display */
+	for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++) {
+		if (pvdc->v.str != NULL) {
+			printf("%s  %s\n", pvdc->display, pvdc->v.str);
+			free(pvdc->v.str);
+		}
+	}
 }

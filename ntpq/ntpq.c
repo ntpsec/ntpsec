@@ -255,7 +255,7 @@ int		ntpqmain	(int,	char **);
 static	int	openhost	(const char *);
 
 static	int	sendpkt		(void *, size_t);
-static	int	getresponse	(int, int, u_short *, int *, char **, int);
+static	int	getresponse	(int, int, u_short *, int *, const char **, int);
 static	int	sendrequest	(int, associd_t, int, int, char *);
 static	char *	tstflags	(u_long);
 #ifndef BUILD_AS_LIB
@@ -296,9 +296,9 @@ static	void	warning		(const char *, const char *, const char *);
 static	void	error		(const char *, const char *, const char *);
 static	u_long	getkeyid	(const char *);
 static	void	atoascii	(const char *, size_t, char *, size_t);
-static	void	makeascii	(int, char *, FILE *);
-static	void	cookedprint	(int, int, char *, int, int, FILE *);
-static	void	rawprint	(int, int, char *, int, int, FILE *);
+static	void	makeascii	(int, const char *, FILE *);
+static	void	cookedprint	(int, int, const char *, int, int, FILE *);
+static	void	rawprint	(int, int, const char *, int, int, FILE *);
 static	void	startoutput	(void);
 static	void	output		(FILE *, char *, char *);
 static	void	endoutput	(FILE *);
@@ -824,7 +824,7 @@ getresponse(
 	int associd,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata,
+	const char **rdata,
 	int timeo
 	)
 {
@@ -1403,7 +1403,7 @@ doquery(
 	char *qdata,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata
+	const char **rdata
 	)
 {
 	return doqueryex(opcode, associd, auth, qsize, qdata, rstatus,
@@ -1424,7 +1424,7 @@ doqueryex(
 	char *qdata,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata,
+	const char **rdata,
 	int quiet
 	)
 {
@@ -2801,14 +2801,17 @@ do {							\
 static void
 makeascii(
 	int length,
-	char *data,
+	const char *data,
 	FILE *fp
 	)
 {
-	register u_char *cp;
-	register int c;
+	const u_char *udata;
+	const u_char *cp;
+	int c;
 
-	for (cp = (u_char *)data; cp < (u_char *)data + length; cp++) {
+	udata = (const u_char *)data;
+
+	for (cp = udata; cp < udata + length; cp++) {
 		c = (int)*cp;
 		if (c & 0x80) {
 			putc('M', fp);
@@ -2858,15 +2861,15 @@ int nextcb = 0;
 int
 nextvar(
 	int *datalen,
-	char **datap,
+	const char **datap,
 	char **vname,
 	char **vvalue
 	)
 {
-	register char *cp;
-	register char *np;
-	register char *cpend;
-	register char *npend;	/* character after last */
+	const char *cp;
+	char *np;
+	const char *cpend;
+	char *npend;	/* character after last */
 	int quoted = 0;
 	static char name[MAXVARLEN];
 	static char value[MAXVALLEN];
@@ -2878,9 +2881,9 @@ nextvar(
 	 * Space past commas and white space
 	 */
 	while (cp < cpend && (*cp == ',' || isspace((int)*cp)))
-	    cp++;
+		cp++;
 	if (cp == cpend)
-	    return 0;
+		return 0;
 	
 	/*
 	 * Copy name until we hit a ',', an '=', a '\r' or a '\n'.  Backspace
@@ -2989,7 +2992,7 @@ findvar(
 void
 printvars(
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int sttype,
 	int quiet,
@@ -3010,14 +3013,14 @@ static void
 rawprint(
 	int datatype,
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int quiet,
 	FILE *fp
 	)
 {
-	register char *cp;
-	register char *cpend;
+	const char *cp;
+	const char *cpend;
 
 	/*
 	 * Essentially print the data as is.  We reformat unprintables, though.
@@ -3209,7 +3212,7 @@ static void
 cookedprint(
 	int datatype,
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int quiet,
 	FILE *fp

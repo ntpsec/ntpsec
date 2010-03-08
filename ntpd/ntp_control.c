@@ -128,26 +128,37 @@ static struct ctl_var sys_var[] = {
 	{ CS_LEAPTAB,	RO, "leapsec" },	/* 21 */
 	{ CS_LEAPEND,	RO, "expire" },		/* 22 */
 	{ CS_RATE,	RO, "mintc" },		/* 23 */
-	{ CS_MRU_ENABLED,  RO, "mru_enabled" },	/* 24 */
-	{ CS_MRU_DEPTH,	   RO, "mru_depth" },	/* 25 */
-	{ CS_MRU_DEEPEST,  RO, "mru_deepest" },	/* 26 */
-	{ CS_MRU_MINDEPTH, RO, "mru_mindepth" },/* 27 */
-	{ CS_MRU_MAXAGE,   RO, "mru_maxage" },	/* 28 */
-	{ CS_MRU_MAXDEPTH, RO, "mru_maxdepth" },/* 29 */
-	{ CS_MRU_MEM,	   RO, "mru_mem" },	/* 30 */
-	{ CS_MRU_MAXMEM,   RO, "mru_maxmem" },	/* 31 */
-	{ CS_KOD_SENT,	RO, "kod_sent" },	/* 32 */
+	{ CS_MRU_ENABLED,	RO, "mru_enabled" },	/* 24 */
+	{ CS_MRU_DEPTH,		RO, "mru_depth" },	/* 25 */
+	{ CS_MRU_DEEPEST,	RO, "mru_deepest" },	/* 26 */
+	{ CS_MRU_MINDEPTH,	RO, "mru_mindepth" },	/* 27 */
+	{ CS_MRU_MAXAGE,	RO, "mru_maxage" },	/* 28 */
+	{ CS_MRU_MAXDEPTH,	RO, "mru_maxdepth" },	/* 29 */
+	{ CS_MRU_MEM,		RO, "mru_mem" },	/* 30 */
+	{ CS_MRU_MAXMEM,	RO, "mru_maxmem" },	/* 31 */
+	{ CS_SS_UPTIME,		RO, "ss_uptime" },	/* 32 */
+	{ CS_SS_RESET,		RO, "ss_reset" },	/* 33 */
+	{ CS_SS_RECEIVED,	RO, "ss_received" },	/* 34 */
+	{ CS_SS_THISVER,	RO, "ss_thisver" },	/* 35 */
+	{ CS_SS_OLDVER,		RO, "ss_oldver" },	/* 36 */
+	{ CS_SS_BADFORMAT,	RO, "ss_badformat" },	/* 37 */
+	{ CS_SS_BADAUTH,	RO, "ss_badauth" },	/* 38 */
+	{ CS_SS_DECLINED,	RO, "ss_declined" },	/* 39 */
+	{ CS_SS_RESTRICTED,	RO, "ss_restricted" },	/* 40 */
+	{ CS_SS_LIMITED,	RO, "ss_limited" },	/* 41 */
+	{ CS_SS_KODSENT,	RO, "ss_kodsent" },	/* 42 */
+	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 43 */
 #ifdef OPENSSL
-	{ CS_FLAGS,	RO, "flags" },		/* 33 */
-	{ CS_HOST,	RO, "host" },		/* 34 */
-	{ CS_PUBLIC,	RO, "update" },		/* 35 */
-	{ CS_CERTIF,	RO, "cert" },		/* 36 */
-	{ CS_SIGNATURE,	RO, "signature" },	/* 37 */
-	{ CS_REVTIME,	RO, "until" },		/* 38 */
-	{ CS_GROUP,	RO, "group" },		/* 39 */
-	{ CS_DIGEST,	RO, "digest" },		/* 40 */
+	{ CS_FLAGS,	RO, "flags" },		/* 44 */
+	{ CS_HOST,	RO, "host" },		/* 45 */
+	{ CS_PUBLIC,	RO, "update" },		/* 46 */
+	{ CS_CERTIF,	RO, "cert" },		/* 47 */
+	{ CS_SIGNATURE,	RO, "signature" },	/* 48 */
+	{ CS_REVTIME,	RO, "until" },		/* 49 */
+	{ CS_GROUP,	RO, "group" },		/* 50 */
+	{ CS_DIGEST,	RO, "digest" },		/* 51 */
 #endif /* OPENSSL */
-	{ 0,		EOV, "" }		/* 33/41 */
+	{ 0,		EOV, "" }		/* 44/52 */
 };
 
 static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
@@ -1607,11 +1618,54 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 
-	    case CS_KOD_SENT:
-		ctl_putint(sys_var[varid].text, sys_kodsent);
+	    case CS_SS_UPTIME:
+		ctl_putuint(sys_var[varid].text, current_time);
 		break;
 
+	    case CS_SS_RESET:
+		ctl_putuint(sys_var[varid].text,
+			    current_time - sys_stattime);
+		break;
 
+	    case CS_SS_RECEIVED:
+		ctl_putuint(sys_var[varid].text, sys_received);
+		break;
+
+	    case CS_SS_THISVER:
+		ctl_putuint(sys_var[varid].text, sys_newversion);
+		break;
+
+	    case CS_SS_OLDVER:
+		ctl_putuint(sys_var[varid].text, sys_oldversion);
+		break;
+
+	    case CS_SS_BADFORMAT:
+		ctl_putuint(sys_var[varid].text, sys_badlength);
+		break;
+
+	    case CS_SS_BADAUTH:
+		ctl_putuint(sys_var[varid].text, sys_badauth);
+		break;
+
+	    case CS_SS_DECLINED:
+		ctl_putuint(sys_var[varid].text, sys_declined);
+		break;
+
+	    case CS_SS_RESTRICTED:
+		ctl_putuint(sys_var[varid].text, sys_restricted);
+		break;
+
+	    case CS_SS_LIMITED:
+		ctl_putuint(sys_var[varid].text, sys_limitrejected);
+		break;
+
+	    case CS_SS_KODSENT:
+		ctl_putuint(sys_var[varid].text, sys_kodsent);
+		break;
+
+	    case CS_SS_PROCESSED:
+		ctl_putuint(sys_var[varid].text, sys_processed);
+		break;
 #ifdef OPENSSL
 	    case CS_FLAGS:
 		if (crypto_flags)

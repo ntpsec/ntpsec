@@ -1131,9 +1131,6 @@ sys_stats(
 {
 	register struct info_sys_stats *ss;
 
-	/*
-	 * Importations from the protocol module
-	 */
 	ss = (struct info_sys_stats *)prepare_pkt(srcadr, inter, inpkt,
 		sizeof(struct info_sys_stats));
 	ss->timeup = htonl((u_int32)current_time);
