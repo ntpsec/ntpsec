@@ -205,8 +205,8 @@ typedef enum mru_sort_order_tag {
 } mru_sort_order;
 
 const char * const mru_sort_keywords[MRUSORT_MAX] = {
-	"default",		/* MRUSORT_DEF */
-	"reverse",		/* MRUSORT_R_DEF */
+	"lstint",		/* MRUSORT_DEF */
+	"-lstint",		/* MRUSORT_R_DEF */
 	"avgint",		/* MRUSORT_AVGINT */
 	"-avgint",		/* MRUSORT_R_AVGINT */
 	"addr",			/* MRUSORT_ADDR */

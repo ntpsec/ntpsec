@@ -2739,7 +2739,7 @@ send_mru_entry(
 
 		case 4:
 			snprintf(tag, sizeof(tag), mv_fmt, count);
-			ctl_putint(tag, mon->vn_mode);
+			ctl_putuint(tag, mon->vn_mode);
 			break;
 
 		case 5:
@@ -2776,9 +2776,9 @@ send_mru_entry(
  * useful.
  *
  * To accomodate the changing MRU list, the starting point for requests
- * after the first of a given fetch is supplied as a series of last
- * seen timestamps and associated addresses, the newest ones the client
- * has received.  As long as at least one of those entries hasn't been
+ * after the first request is supplied as a series of last seen
+ * timestamps and associated addresses, the newest ones the client has
+ * received.  As long as at least one of those entries hasn't been
  * bumped to the head of the MRU list, ntpd can pick up at that point.
  * Otherwise, the request is failed and it is up to ntpq to back up and
  * provide the next newest entry's timestamps and addresses, conceivably
@@ -2803,21 +2803,21 @@ send_mru_entry(
  *	resany=		0x-prefixed hex restrict bits, at least one of
  *			which must be list for an MRU entry to be
  *			included.
- *	0.last=		0x-prefixed hex l_fp timestamp of newest entry
+ *	last.0=		0x-prefixed hex l_fp timestamp of newest entry
  *			which client previously received.
- *	0.addr=		text of newest entry's IP address and port,
+ *	addr.0=		text of newest entry's IP address and port,
  *			IPv6 addresses in bracketed form: [::]:123
- *	1.last=		timestamp of 2nd newest entry client has.
- *	1.addr=		address of 2nd newest entry.
+ *	last.1=		timestamp of 2nd newest entry client has.
+ *	addr.1=		address of 2nd newest entry.
  *	[...]
  *
  * ntpq provides as many last/addr pairs as will fit in a single request
  * packet, except for the first request in a MRU fetch operation.
  *
  * The response begins with the next newer entry than referred to by
- * 0.last and 0.addr, if the "0" entry has not been bumped to the front.
+ * last.0 and addr.0, if the "0" entry has not been bumped to the front.
  * Otherwise, it will begin with the next entry newer than referred to
- * by 1.last and 1.addr, and so on.  If none of the referenced entries
+ * by last.1 and addr.1, and so on.  If none of the referenced entries
  * remain unchanged, the request fails and ntpq backs up to the next
  * earlier set of entries to resync.
  *
@@ -2839,6 +2839,9 @@ send_mru_entry(
  *	ct.#		count of packets received
  *	mv.#		mode and version
  *	rs.#		restriction mask (RES_* bits)
+ *
+ * Note the code currently assumes there are no valid three letter
+ * tags sent with each row, and needs to be adjusted if that changes.
  *
  * The client should accept the values in any order, and ignore .#
  * values which it does not understand, to allow a smooth path to
@@ -2890,6 +2893,7 @@ static void read_mru_list(
 	mon_entry *		mon;
 	mon_entry *		prior_mon;
 	l_fp			now;
+	u_long			noise;
 
 	/*
 	 * fill in_parms var list with all possible input parameters.
@@ -3024,6 +3028,28 @@ static void read_mru_list(
 	 * a now= l_fp timestamp.
 	 */
 	if (NULL == mon) {
+		/*
+		 * If any entries were returned toss in a garbage tag
+		 * to try to force clients to ignore unrecognized tags.
+		 * The tag will have the .# form with the index from the
+		 * last entry.
+		 * Make it three characters knowing that none of the
+		 * currently-used tags have that length, avoiding any
+		 * need to test for collision.
+		 */
+		if (count) {
+			noise = ntp_random();
+			buf[0] = 'a' + noise % 26;
+			noise >>= 5;
+			buf[1] = 'a' + noise % 26;
+			noise >>= 5;
+			buf[2] = 'a' + noise % 26;
+			noise >>= 5;
+			buf[3] = '.';
+			snprintf(&buf[4], sizeof(buf) - 4, "%d",
+				 count - 1);
+			ctl_putuint(buf, noise);
+		}
 		get_systime(&now);
 		snprintf(buf, sizeof(buf), l_fp_hexfmt,
 			 now.l_ui, now.l_uf);
