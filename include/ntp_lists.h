@@ -227,14 +227,25 @@ do {								\
 
 #define ITER_DLIST_BEGIN(listhead, iter, link, entrytype)	\
 {								\
-	entrytype *i_dl_next;					\
+	entrytype *i_dl_nextiter;				\
 								\
 	for ((iter) = (listhead).link.f;			\
 	     (iter) != &(listhead)				\
-	     && ((i_dl_next = (iter)->link.f), TRUE);	\
-	     (iter) = i_dl_next) {
-
+	     && ((i_dl_nextiter = (iter)->link.f), TRUE);	\
+	     (iter) = i_dl_nextiter) {
 #define ITER_DLIST_END()					\
+	}							\
+}
+
+#define REV_ITER_DLIST_BEGIN(listhead, iter, link, entrytype)	\
+{								\
+	entrytype *i_dl_nextiter;				\
+								\
+	for ((iter) = (listhead).link.b;			\
+	     (iter) != &(listhead)				\
+	     && ((i_dl_nextiter = (iter)->link.b), TRUE);	\
+	     (iter) = i_dl_nextiter) {
+#define REV_ITER_DLIST_END()					\
 	}							\
 }
 

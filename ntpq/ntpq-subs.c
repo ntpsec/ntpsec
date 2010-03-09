@@ -190,6 +190,31 @@ struct xcmd opcmds[] = {
 #define MRU_GOT_ADDR	0x20
 #define MRU_GOT_ALL	(MRU_GOT_COUNT | MRU_GOT_LAST | MRU_GOT_FIRST \
 			 | MRU_GOT_MV | MRU_GOT_RS | MRU_GOT_ADDR)
+
+/*
+ * mrulist() depends on MRUSORT_DEF and MRUSORT_RDEF being the first two
+ */
+typedef enum mru_sort_order_tag {
+	MRUSORT_DEF = 0,	/* lstint ascending */
+	MRUSORT_R_DEF,		/* lstint descending */
+	MRUSORT_AVGINT,		/* avgint ascending */
+	MRUSORT_R_AVGINT,	/* avgint descending */
+	MRUSORT_ADDR,		/* IPv4 asc. then IPv6 asc. */
+	MRUSORT_R_ADDR,		/* IPv6 desc. then IPv4 desc. */
+	MRUSORT_MAX,		/* special: count of this enum */
+} mru_sort_order;
+
+const char * const mru_sort_keywords[MRUSORT_MAX] = {
+	"default",		/* MRUSORT_DEF */
+	"reverse",		/* MRUSORT_R_DEF */
+	"avgint",		/* MRUSORT_AVGINT */
+	"-avgint",		/* MRUSORT_R_AVGINT */
+	"addr",			/* MRUSORT_ADDR */
+	"-addr",		/* MRUSORT_R_ADDR */
+};
+
+typedef int (*qsort_cmp)(const void *, const void *);
+
 /*
  * Old CTL_PST defines for version 2.
  */
@@ -236,9 +261,6 @@ struct mru_tag {
 	u_short		rs;
 	sockaddr_u	addr;
 };
-static u_int	mru_count;
-static mru	mru_list;		/* listhead */
-static mru **	hash_table;
 
 /*
  * other static function prototypes
@@ -246,8 +268,29 @@ static mru **	hash_table;
 static mru *	add_mru(mru *);
 static int	collect_mru_list(const char *, l_fp *);
 static int	qcmp_mru_avgint(const void *, const void *);
+static int	qcmp_mru_r_avgint(const void *, const void *);
 static int	qcmp_mru_addr(const void *, const void *);
+static int	qcmp_mru_r_addr(const void *, const void *);
 
+/*
+ * static globals
+ */
+static u_int	mru_count;
+static mru	mru_list;		/* listhead */
+static mru **	hash_table;
+
+/*
+ * qsort comparison function table for mrulist().  The first two
+ * entries are NULL because they are handled without qsort().
+ */
+const static qsort_cmp mru_qcmp_table[MRUSORT_MAX] = {
+	NULL,			/* MRUSORT_DEF unused */
+	NULL,			/* MRUSORT_R_DEF unused */
+	&qcmp_mru_avgint,	/* MRUSORT_AVGINT */
+	&qcmp_mru_r_avgint,	/* MRUSORT_R_AVGINT */
+	&qcmp_mru_addr,		/* MRUSORT_ADDR */
+	&qcmp_mru_r_addr,	/* MRUSORT_R_ADDR */
+};
 
 /*
  * checkassocid - return the association ID, checking to see if it is valid
@@ -2529,6 +2572,16 @@ qcmp_mru_addr(
 }
 
 
+static int
+qcmp_mru_r_addr(
+	const void *v1,
+	const void *v2
+	)
+{
+	return -qcmp_mru_addr(v1, v2);
+}
+
+
 /*
  * qcmp_mru_avgint - sort MRU entries by average interval.
  */
@@ -2574,6 +2627,16 @@ qcmp_mru_avgint(
 }
 
 
+static int
+qcmp_mru_r_avgint(
+	const void *v1,
+	const void *v2
+	)
+{
+	return -qcmp_mru_avgint(v1, v2);
+}
+
+
 /*
  * mrulist - ntpq's mrulist command to fetch an arbitrarily large Most
  *	     Recently Used (seen) remote address list from ntpd.
@@ -2606,14 +2669,8 @@ mrulist(
 	const char resany_eq[] =	"resany=";
 	const char laddr_eq[] =		"laddr=";
 	const char sort_eq[] =		"sort=";
-	const char avgint_text[] =	"avgint";
-	const char addr_text[] =	"addr";
-	typedef enum sort_order_tag {
-		MRUSORT_DEF,	/* lstint ascending essentially */
-		MRUSORT_AVGINT,	/* avgint ascending */
-		MRUSORT_ADDR,	/* IPv4 asc. then IPv6 asc. */
-	} sort_order;
-	sort_order order;
+	mru_sort_order order;
+	const char * const *ppkeyword;
 	char parms_buf[128];
 	char *parms;
 	char *arg;
@@ -2651,10 +2708,16 @@ mrulist(
 			} else if (!strncmp(sort_eq, arg,
 					    sizeof(sort_eq) - 1)) {
 				arg += sizeof(sort_eq) - 1;
-				if (!strcmp(avgint_text, arg))
-					order = MRUSORT_AVGINT;
-				if (!strcmp(addr_text, arg))
-					order = MRUSORT_ADDR;
+				for (ppkeyword = mru_sort_keywords;
+				     ppkeyword < mru_sort_keywords +
+					 COUNTOF(mru_sort_keywords);
+				     ppkeyword++)
+					if (!strcmp(*ppkeyword, arg))
+						break;
+				if (ppkeyword < mru_sort_keywords +
+				    COUNTOF(mru_sort_keywords))
+					order = ppkeyword -
+						mru_sort_keywords;
 			} else
 				fprintf(stderr,
 					"ignoring unrecognized mrulist parameter: %s\n",
@@ -2673,18 +2736,24 @@ mrulist(
 	/* construct an array of entry pointers in default order */
 	sorted = emalloc(mru_count * sizeof(*sorted));
 	ppentry = sorted;
-	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
-		NTP_INSIST(ppentry < sorted + mru_count);
-		*ppentry = recent;
-		ppentry++;
-	ITER_DLIST_END()
+	if (MRUSORT_R_DEF != order) {
+		ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
+			NTP_INSIST(ppentry < sorted + mru_count);
+			*ppentry = recent;
+			ppentry++;
+		ITER_DLIST_END()
+	} else {
+		REV_ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
+			NTP_INSIST(ppentry < sorted + mru_count);
+			*ppentry = recent;
+			ppentry++;
+		REV_ITER_DLIST_END()
+	}
 
-	/* re-sort sorted[] if non-default */
-	if (MRUSORT_DEF != order)
+	/* re-sort sorted[] if not default or reverse default */
+	if (MRUSORT_R_DEF < order)
 		qsort(sorted, mru_count, sizeof(sorted[0]),
-		      (MRUSORT_ADDR == order)
-			  ? &qcmp_mru_addr
-			  : &qcmp_mru_avgint);
+		      mru_qcmp_table[order]);
 
 	printf(	"lstint avgint rstr m v  count rport remote address\n"
 		"==============================================================================\n");
