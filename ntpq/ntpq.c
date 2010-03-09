@@ -271,11 +271,7 @@ static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
 static	int	rtdatetolfp	(char *, l_fp *);
 static	int	decodearr	(char *, int *, l_fp *);
 static	void	help		(struct parse *, FILE *);
-#ifdef QSORT_USES_VOID_P
 static	int	helpsort	(const void *, const void *);
-#else
-static	int	helpsort	(char **, char **);
-#endif
 static	void	printusage	(struct xcmd *, FILE *);
 static	void	timeout		(struct parse *, FILE *);
 static	void	auth_delay	(struct parse *, FILE *);
@@ -303,11 +299,7 @@ static	void	startoutput	(void);
 static	void	output		(FILE *, char *, char *);
 static	void	endoutput	(FILE *);
 static	void	outputarr	(FILE *, char *, int, l_fp *);
-#ifdef QSORT_USES_VOID_P
 static	int	assoccmp	(const void *, const void *);
-#else
-static	int	assoccmp	(struct association *, struct association *);
-#endif /* sgi || bsdi */
 void	ntpq_custom_opt_handler	(tOptions *, tOptDesc *);
 
 
@@ -2184,26 +2176,23 @@ help(
 	int word, words;
 	int row, rows;
 	int col, cols;
+	int length;
 
 	if (pcmd->nargs == 0) {
 		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
-			if (*(xcp->keyword) != '?')
+			if (*(xcp->keyword) != '?' &&
+			    words < COUNTOF(list))
 				list[words++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-			list[words++] = xcp->keyword;
+			if (words < COUNTOF(list))
+				list[words++] = xcp->keyword;
 
-		qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-			(list), (size_t)(words), sizeof(char *), helpsort);
+		qsort((void *)&list, (size_t)words, sizeof(list[0]), &helpsort);
 		col = 0;
 		for (word = 0; word < words; word++) {
-		 	int length = strlen(list[word]);
+		 	length = strlen(list[word]);
 			if (col < length) {
 				col = length;
 			}
@@ -2212,7 +2201,7 @@ help(
 		cols = SCREENWIDTH / ++col;
 		rows = (words + cols - 1) / cols;
 
-		(void) fprintf(fp, "ntpq commands:\n");
+		fprintf(fp, "ntpq commands:\n");
 
 		for (row = 0; row < rows; row++) {
 			for (word = row; word < words; word += rows) {
@@ -2242,7 +2231,6 @@ help(
 /*
  * helpsort - do hostname qsort comparisons
  */
-#ifdef QSORT_USES_VOID_P
 static int
 helpsort(
 	const void *t1,
@@ -2255,16 +2243,6 @@ helpsort(
 	return strcmp(*name1, *name2);
 }
 
-#else
-static int
-helpsort(
-	char **name1,
-	char **name2
-	)
-{
-	return strcmp(*name1, *name2);
-}
-#endif
 
 /*
  * printusage - print usage information for a command
@@ -3412,21 +3390,14 @@ void
 sortassoc(void)
 {
 	if (numassoc > 1)
-	    qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-		    assoc_cache, (size_t)numassoc,
-		    sizeof(struct association), assoccmp);
+		qsort(assoc_cache, (size_t)numassoc,
+		      sizeof(assoc_cache[0]), &assoccmp);
 }
 
 
 /*
  * assoccmp - compare two associations
  */
-#ifdef QSORT_USES_VOID_P
 static int
 assoccmp(
 	const void *t1,
@@ -3442,20 +3413,7 @@ assoccmp(
 		return 1;
 	return 0;
 }
-#else
-static int
-assoccmp(
-	struct association *ass1,
-	struct association *ass2
-	)
-{
-	if (ass1->assid < ass2->assid)
-	    return -1;
-	if (ass1->assid > ass2->assid)
-	    return 1;
-	return 0;
-}
-#endif /* not QSORT_USES_VOID_P */
+
 
 /*
  * ntpq_custom_opt_handler - autoopts handler for -c and -p

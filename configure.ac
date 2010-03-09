@@ -1498,32 +1498,6 @@ if test $ac_cv_func_setpgrp_nargs = 0; then
         AC_DEFINE(HAVE_SETPGRP_0, 1, [define if setpgrp takes 0 arguments])
 fi
 
-save_CFLAGS=$CFLAGS
-CFLAGS="$CFLAGS -I$srcdir/include"
-
-AC_CACHE_CHECK([argument pointer type of qsort()'s compare function and base],
-ac_cv_func_qsort_argtype,
-[AC_TRY_COMPILE([
-#include "l_stdlib.h"
-
-extern void *base;
-extern sortfunc (const void *, const void *);
-int sortfunc(a, b)
-  const void *a;
-  const void *b; { return 0; }
-],[
-qsort(base, 2, sizeof(char *), sortfunc);
-],
-	ac_cv_func_qsort_argtype=void, ac_cv_func_qsort_argtype=char)
-])
-case "$ac_cv_func_qsort_argtype" in
- void)
-    AC_DEFINE(QSORT_USES_VOID_P, 1, [Does qsort expect to work on "void *" stuff?])
-    ;;
-esac
-
-CFLAGS=$save_CFLAGS
-
 AC_CACHE_CHECK([if we need to declare 'errno'], ac_cv_decl_errno,
 [AC_TRY_COMPILE([#ifdef HAVE_ERRNO_H
 #include <errno.h>

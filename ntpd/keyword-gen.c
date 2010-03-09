@@ -28,12 +28,6 @@
 #include "ntp_parser.h"
 
 
-#ifdef QSORT_USES_VOID_P
-typedef const void *	QSORTP;
-#else
-typedef char *		QSORTP;
-#endif
-
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
 	char *	key;		/* Keyword */
@@ -263,8 +257,8 @@ static void	generate_fsm		(void);
 static void	generate_token_text	(void);
 static int	create_keyword_scanner	(void);
 static int	create_scan_states	(char *, int, follby, int);
-int		compare_key_tok_id	(QSORTP, QSORTP);
-int		compare_key_tok_text	(QSORTP, QSORTP);
+int		compare_key_tok_id	(const void *, const void *);
+int		compare_key_tok_text	(const void *, const void *);
 void		populate_symb		(char *);
 const char *	symbname		(int);
 
@@ -659,12 +653,12 @@ generate_token_text(void)
 	
 int
 compare_key_tok_id(
-	QSORTP a1,
-	QSORTP a2
+	const void *a1,
+	const void *a2
 	)
 {
-	const struct key_tok *p1 = (const void *)a1;
-	const struct key_tok *p2 = (const void *)a2;
+	const struct key_tok *p1 = a1;
+	const struct key_tok *p2 = a2;
 
 	if (p1->token == p2->token)
 		return 0;
@@ -678,12 +672,12 @@ compare_key_tok_id(
 
 int
 compare_key_tok_text(
-	QSORTP a1,
-	QSORTP a2
+	const void *a1,
+	const void *a2
 	)
 {
-	const struct key_tok *p1 = (const void *)a1;
-	const struct key_tok *p2 = (const void *)a2;
+	const struct key_tok *p1 = a1;
+	const struct key_tok *p2 = a2;
 
 	return strcmp(p1->key, p2->key);
 }

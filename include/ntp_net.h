@@ -94,6 +94,11 @@ typedef union {
 	    ? IN_CLASSD(SRCADR(psau))				\
 	    : IN6_IS_ADDR_MULTICAST(PSOCK_ADDR6(psau)))
 
+#define SIZEOF_INADDR(fam)					\
+	((AF_INET == (fam))					\
+	    ? sizeof(struct in_addr)				\
+	    : sizeof(struct in6_addr))
+
 #define SIZEOF_SOCKADDR(fam)					\
 	((AF_INET == (fam))					\
 	    ? sizeof(struct sockaddr_in)			\

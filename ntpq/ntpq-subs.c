@@ -236,14 +236,17 @@ struct mru_tag {
 	u_short		rs;
 	sockaddr_u	addr;
 };
-static mru mru_list;		/* listhead */
-static mru **hash_table;
+static u_int	mru_count;
+static mru	mru_list;		/* listhead */
+static mru **	hash_table;
 
 /*
  * other static function prototypes
  */
 static mru *	add_mru(mru *);
 static int	collect_mru_list(const char *, l_fp *);
+static int	qcmp_mru_avgint(const void *, const void *);
+static int	qcmp_mru_addr(const void *, const void *);
 
 
 /*
@@ -2137,8 +2140,10 @@ add_mru(
 	}
 	LINK_DLIST(mru_list, add, mlink);
 	LINK_SLIST(hash_table[hash], add, hlink);
-	if (NULL == mon)
+	if (NULL == mon) {
 		mon = emalloc(sizeof(*mon));
+		mru_count++;
+	}
 	memset(mon, 0, sizeof(*mon));
 	return mon;
 }
@@ -2195,6 +2200,12 @@ collect_mru_list(
 	u_short hash;
 	mru *unlinked;
 
+	mru_count = 0;
+	INIT_DLIST(mru_list, mlink);
+	cb = NTP_HASH_SIZE * sizeof(*hash_table);
+	hash_table = emalloc(cb);
+	memset(hash_table, 0, cb);
+
 	c_mru_l_rc = FALSE;
 	list_complete = FALSE;
 	have_now = FALSE;
@@ -2213,7 +2224,7 @@ collect_mru_list(
 		if (debug)
 			fprintf(stderr, "READ_MRU: %s\n", req_buf);
 		// if (debug) !!!!!
-			fprintf(stderr, "attempting next %d\n", limit);
+			fprintf(stderr, "%d ", limit);
 				
 		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
 			         req_buf, &rstatus, &rsize, &rdata, TRUE);
@@ -2343,10 +2354,13 @@ collect_mru_list(
 						if (2 != sscanf(val, ts_fmt,
 								&newest.l_ui,
 								&newest.l_uf) ||
-						    !L_ISEQU(&newest, &head->last)) {
+						    !L_ISEQU(&newest,
+							     &head->last)) {
 							fprintf(stderr,
 								"last.newest %s mismatches %08x.%08x",
-								val, head->last.l_ui, head->last.l_uf);
+								val,
+								head->last.l_ui,
+								head->last.l_uf);
 							goto cleanup_return;
 						}
 					}
@@ -2447,10 +2461,9 @@ collect_mru_list(
 		     ri++, recent = NEXT_DLIST(mru_list, recent, mlink)) {
 
 			snprintf(buf, sizeof(buf),
-					 ", addr.%d=%s, last.%d=0x%08x.%08x",
-					 ri, sptoa(&recent->addr), ri,
-					 recent->last.l_ui,
-					 recent->last.l_uf);
+				 ", addr.%d=%s, last.%d=0x%08x.%08x",
+				 ri, sptoa(&recent->addr), ri,
+				 recent->last.l_ui, recent->last.l_uf);
 			chars = strlen(buf);
 			if (REQ_ROOM - chars < 1)
 				break;
@@ -2460,6 +2473,9 @@ collect_mru_list(
 		NTP_INSIST(ri > 0 || NULL == recent);
 	}
 
+	// if (debug)   !!!!!
+		fprintf(stderr, "\n");
+
 	c_mru_l_rc = TRUE;
 
 cleanup_return:
@@ -2467,6 +2483,94 @@ cleanup_return:
 		free(mon);
 
 	return c_mru_l_rc;
+}
+
+
+/*
+ * qcmp_mru_addr - sort MRU entries by remote address.
+ *
+ * All IPv4 addresses sort before any IPv6, addresses are sorted by
+ * value within address family.
+ */
+static int
+qcmp_mru_addr(
+	const void *v1,
+	const void *v2
+	)
+{
+	const mru * const *	ppm1 = v1;
+	const mru * const *	ppm2 = v2;
+	const mru *		pm1;
+	const mru *		pm2;
+	u_short			af1;
+	u_short			af2;
+	size_t			cmplen;
+	size_t			addr_off;
+
+	pm1 = *ppm1;
+	pm2 = *ppm2;
+
+	af1 = AF(&pm1->addr);
+	af2 = AF(&pm2->addr);
+
+	if (af1 != af2)
+		return (AF_INET == af1)
+			   ? -1
+			   : 1;
+
+	cmplen = SIZEOF_INADDR(af1);
+	addr_off = (AF_INET == af1)
+		      ? offsetof(struct sockaddr_in, sin_addr)
+		      : offsetof(struct sockaddr_in6, sin6_addr);
+
+	return memcmp((const char *)&pm1->addr + addr_off,
+		      (const char *)&pm2->addr + addr_off,
+		      cmplen);
+}
+
+
+/*
+ * qcmp_mru_avgint - sort MRU entries by average interval.
+ */
+static int
+qcmp_mru_avgint(
+	const void *v1,
+	const void *v2
+	)
+{
+	const mru * const *	ppm1 = v1;
+	const mru * const *	ppm2 = v2;
+	const mru *		pm1;
+	const mru *		pm2;
+	l_fp			interval;
+	double			avg1;
+	double			avg2;
+
+	pm1 = *ppm1;
+	pm2 = *ppm2;
+
+	interval = pm1->last;
+	L_SUB(&interval, &pm1->first);
+	LFPTOD(&interval, avg1);
+	avg1 /= pm1->count;
+
+	interval = pm2->last;
+	L_SUB(&interval, &pm2->first);
+	LFPTOD(&interval, avg2);
+	avg2 /= pm2->count;
+
+	if (avg1 < avg2)
+		return -1;
+	else if (avg1 > avg2)
+		return 1;
+
+	/* secondary sort on lstint - rarely tested */
+	if (L_ISEQU(&pm1->last, &pm2->last))
+		return 0;
+	else if (L_ISGEQ(&pm1->last, &pm2->last))
+		return -1;
+	else
+		return 1;
 }
 
 
@@ -2480,6 +2584,16 @@ cleanup_return:
  *
  * See ntpd/ntp_control.c read_mru_list() for comments on the way
  * CTL_OP_READ_MRU is designed to be used.
+ *
+ * mrulist intentionally differs from monlist in the way the avgint
+ * column is calculated.  monlist includes the time after the last
+ * packet from the client until the monlist query time in the average,
+ * while mrulist excludes it.  That is, monlist's average interval grows
+ * over time for remote addresses not heard from in some time, while it
+ * remains unchanged in mrulist.  This also affects the avgint value for
+ * entries representing a single packet, with identical first and last
+ * timestamps.  mrulist shows 0 avgint, monlist shows a value identical
+ * to lstint.
  */
 static void 
 mrulist(
@@ -2491,10 +2605,21 @@ mrulist(
 	const char resall_eq[] =	"resall=";
 	const char resany_eq[] =	"resany=";
 	const char laddr_eq[] =		"laddr=";
+	const char sort_eq[] =		"sort=";
+	const char avgint_text[] =	"avgint";
+	const char addr_text[] =	"addr";
+	typedef enum sort_order_tag {
+		MRUSORT_DEF,	/* lstint ascending essentially */
+		MRUSORT_AVGINT,	/* avgint ascending */
+		MRUSORT_ADDR,	/* IPv4 asc. then IPv6 asc. */
+	} sort_order;
+	sort_order order;
 	char parms_buf[128];
 	char *parms;
 	char *arg;
 	size_t cb;
+	mru **sorted;
+	mru **ppentry;
 	mru *recent;
 	l_fp now;
 	l_fp interval;
@@ -2504,6 +2629,7 @@ mrulist(
 	int lstint;
 	int i;
 
+	order = MRUSORT_DEF;
 	parms_buf[0] = '\0';
 	parms = parms_buf;
 	for (i = 0; i < pcmd->nargs; i++) {
@@ -2517,10 +2643,18 @@ mrulist(
 			    || !strncmp(laddr_eq, arg, sizeof(laddr_eq)
 			    - 1)) && parms + cb + 2 <= parms_buf +
 			    sizeof(parms_buf)) {
+				/* these are passed intact to ntpd */
 				memcpy(parms, ", ", 2);
 				parms += 2;
 				memcpy(parms, arg, cb);
 				parms += cb - 1;
+			} else if (!strncmp(sort_eq, arg,
+					    sizeof(sort_eq) - 1)) {
+				arg += sizeof(sort_eq) - 1;
+				if (!strcmp(avgint_text, arg))
+					order = MRUSORT_AVGINT;
+				if (!strcmp(addr_text, arg))
+					order = MRUSORT_ADDR;
 			} else
 				fprintf(stderr,
 					"ignoring unrecognized mrulist parameter: %s\n",
@@ -2529,11 +2663,6 @@ mrulist(
 	}
 	parms = parms_buf;
 
-	INIT_DLIST(mru_list, mlink);
-	cb = NTP_HASH_SIZE * sizeof(*hash_table);
-	hash_table = emalloc(cb);
-	memset(hash_table, 0, cb);
-
 	if (!collect_mru_list(parms, &now))
 		return;
 
@@ -2541,10 +2670,27 @@ mrulist(
 	if (rawmode)
 		goto cleanup_return;
 
+	/* construct an array of entry pointers in default order */
+	sorted = emalloc(mru_count * sizeof(*sorted));
+	ppentry = sorted;
+	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
+		NTP_INSIST(ppentry < sorted + mru_count);
+		*ppentry = recent;
+		ppentry++;
+	ITER_DLIST_END()
+
+	/* re-sort sorted[] if non-default */
+	if (MRUSORT_DEF != order)
+		qsort(sorted, mru_count, sizeof(sorted[0]),
+		      (MRUSORT_ADDR == order)
+			  ? &qcmp_mru_addr
+			  : &qcmp_mru_avgint);
+
 	printf(	"lstint avgint rstr m v  count rport remote address\n"
 		"==============================================================================\n");
 		/* '-' x 78 */
-	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
+	for (ppentry = sorted; ppentry < sorted + mru_count; ppentry++) {
+		recent = *ppentry;
 		interval = now;
 		L_SUB(&interval, &recent->last);
 		LFPTOD(&interval, flstint);
@@ -2558,7 +2704,8 @@ mrulist(
 		       lstint, avgint, recent->rs, (int)recent->mode,
 		       (int)recent->ver, recent->count,
 		       SRCPORT(&recent->addr), nntohost(&recent->addr));
-	ITER_DLIST_END()
+	}
+	free(sorted);
 
 cleanup_return:
 	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)

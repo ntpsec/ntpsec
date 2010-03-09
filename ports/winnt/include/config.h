@@ -353,7 +353,6 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define SIZEOF_SIGNED_CHAR	1
 # define SIZEOF_INT		4	/* for ntp_types.h */
 
-# define QSORT_USES_VOID_P
 # define HAVE_SETVBUF
 # define HAVE_VSPRINTF
 # define HAVE_SNPRINTF
@@ -373,7 +372,8 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define HAVE_VPRINTF
 
 #define HAVE_LIMITS_H	1
-#define HAVE_STRDUP	1
+#define HAVE_STRDUP
+#define HAVE_STRCHR
 #define HAVE_FCNTL_H	1
 #define HAVE_SYS_RESOURCE_H
 #define HAVE_BSD_NICE			/* emulate BSD setpriority() */
