@@ -201,6 +201,8 @@ typedef enum mru_sort_order_tag {
 	MRUSORT_R_AVGINT,	/* avgint descending */
 	MRUSORT_ADDR,		/* IPv4 asc. then IPv6 asc. */
 	MRUSORT_R_ADDR,		/* IPv6 desc. then IPv4 desc. */
+	MRUSORT_COUNT,		/* hit count ascending */
+	MRUSORT_R_COUNT,	/* hit count descending */
 	MRUSORT_MAX,		/* special: count of this enum */
 } mru_sort_order;
 
@@ -211,6 +213,8 @@ const char * const mru_sort_keywords[MRUSORT_MAX] = {
 	"-avgint",		/* MRUSORT_R_AVGINT */
 	"addr",			/* MRUSORT_ADDR */
 	"-addr",		/* MRUSORT_R_ADDR */
+	"count",		/* MRUSORT_COUNT */
+	"-count",		/* MRUSORT_R_COUNT */
 };
 
 typedef int (*qsort_cmp)(const void *, const void *);
@@ -271,6 +275,8 @@ static int	qcmp_mru_avgint(const void *, const void *);
 static int	qcmp_mru_r_avgint(const void *, const void *);
 static int	qcmp_mru_addr(const void *, const void *);
 static int	qcmp_mru_r_addr(const void *, const void *);
+static int	qcmp_mru_count(const void *, const void *);
+static int	qcmp_mru_r_count(const void *, const void *);
 
 /*
  * static globals
@@ -290,6 +296,8 @@ const static qsort_cmp mru_qcmp_table[MRUSORT_MAX] = {
 	&qcmp_mru_r_avgint,	/* MRUSORT_R_AVGINT */
 	&qcmp_mru_addr,		/* MRUSORT_ADDR */
 	&qcmp_mru_r_addr,	/* MRUSORT_R_ADDR */
+	&qcmp_mru_count,	/* MRUSORT_COUNT */
+	&qcmp_mru_r_count,	/* MRUSORT_R_COUNT */
 };
 
 /*
@@ -2579,6 +2587,41 @@ qcmp_mru_r_addr(
 	)
 {
 	return -qcmp_mru_addr(v1, v2);
+}
+
+
+/*
+ * qcmp_mru_count - sort MRU entries by times seen (hit count).
+ */
+static int
+qcmp_mru_count(
+	const void *v1,
+	const void *v2
+	)
+{
+	const mru * const *	ppm1 = v1;
+	const mru * const *	ppm2 = v2;
+	const mru *		pm1;
+	const mru *		pm2;
+
+	pm1 = *ppm1;
+	pm2 = *ppm2;
+	
+	return (pm1->count < pm2->count)
+		   ? -1
+		   : ((pm1->count == pm2->count)
+			  ? 0
+			  : 1);
+}
+
+
+static int
+qcmp_mru_r_count(
+	const void *v1,
+	const void *v2
+	)
+{
+	return -qcmp_mru_count(v1, v2);
 }
 
 
