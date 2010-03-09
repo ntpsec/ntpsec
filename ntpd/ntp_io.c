@@ -293,7 +293,6 @@ static nic_rule_action	interface_action(char *, isc_netaddr_t *,
 					 isc_uint32_t);
 static void		convert_isc_if	(isc_interface_t *,
 					 struct interface *, u_short);
-static struct interface *getinterface	(sockaddr_u *, int);
 static struct interface *getsamenetinterface	(sockaddr_u *, int);
 static struct interface *findlocalinterface	(sockaddr_u *, int, int);
 static struct interface *findlocalcastinterface	(sockaddr_u *);
@@ -3567,7 +3566,7 @@ findlocalinterface(
  * fetch an interface structure the matches the
  * address and has the given flags NOT set
  */
-static struct interface *
+struct interface *
 getinterface(
 	sockaddr_u *	addr, 
 	int		flags

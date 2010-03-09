@@ -79,6 +79,7 @@ static	void	write_clockstatus(struct recvbuf *, int);
 static	void	set_trap	(struct recvbuf *, int);
 static	void	save_config	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
+static	void	send_mru_entry	(mon_entry *, int);
 static	void	read_mru_list	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
@@ -2667,6 +2668,92 @@ static void configure(
 
 
 /*
+ * MRU string constants shared by send_mru_entry() and read_mru_list().
+ */
+static const char addr_fmt[] =		"addr.%d";
+static const char last_fmt[] =		"last.%d";
+static const char l_fp_hexfmt[] =	"0x%08x.%08x";
+
+
+/*
+ * Send a MRU list entry in response to a "ntpq -c mrulist" operation.
+ *
+ * To keep clients honest about not depending on the order of values,
+ * and thereby avoid being locked into ugly workarounds to maintain
+ * backward compatibility later as new fields are added to the response,
+ * the order is random.
+ */
+static void
+send_mru_entry(
+	mon_entry *	mon,
+	int		count
+	)
+{
+	const char first_fmt[] =	"first.%d";
+	const char ct_fmt[] =		"ct.%d";
+	const char mv_fmt[] =		"mv.%d";
+	const char rs_fmt[] =		"rs.%d";
+	char	tag[32];
+	char	buf[128];
+	u_char	sent[6]; /* 6 tag=value pairs */
+	u_int32 noise;
+	u_int	which;
+	u_int	remaining;
+	char *	pch;
+
+	remaining = COUNTOF(sent);
+	memset(sent, 0, sizeof(sent));
+	noise = (u_int32)ntp_random();
+	while (remaining > 0) {
+		which = (noise & 7) % COUNTOF(sent);
+		noise >>= 3;
+		while (sent[which])
+			which = (which + 1) % COUNTOF(sent);
+
+		switch (which) {
+
+		case 0:
+			snprintf(tag, sizeof(tag), addr_fmt, count);
+			pch = sptoa(&mon->rmtadr);
+			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+
+		case 1:
+			snprintf(tag, sizeof(tag), last_fmt, count);
+			snprintf(buf, sizeof(buf), l_fp_hexfmt,
+				 mon->last.l_ui, mon->last.l_uf);
+			ctl_putunqstr(tag, buf, strlen(buf));
+			break;
+
+		case 2:
+			snprintf(tag, sizeof(tag), first_fmt, count);
+			snprintf(buf, sizeof(buf), l_fp_hexfmt,
+				 mon->first.l_ui, mon->first.l_uf);
+			ctl_putunqstr(tag, buf, strlen(buf));
+			break;
+
+		case 3:
+			snprintf(tag, sizeof(tag), ct_fmt, count);
+			ctl_putint(tag, mon->count);
+			break;
+
+		case 4:
+			snprintf(tag, sizeof(tag), mv_fmt, count);
+			ctl_putint(tag, mon->vn_mode);
+			break;
+
+		case 5:
+			snprintf(tag, sizeof(tag), rs_fmt, count);
+			ctl_puthex(tag, mon->flags);
+			break;
+		}
+		sent[which] = TRUE;
+		remaining--;
+	}
+}
+
+
+/*
  * read_mru_list - supports ntpq's mrulist command.
  *
  * The challenge here is to match ntpdc's monlist functionality without
@@ -2706,7 +2793,10 @@ static void configure(
  *			in that case the #.last timestamp can be zero.
  *			This enables fetching a single entry by IP
  *			address.
- *	mincount=	(decimal) return entries with count >= mincount.
+ *	mincount=	(decimal) Return entries with count >= mincount.
+ *	laddr=		Return entries associated with the server's IP
+ *			address given.  No port specification is needed,
+ *			and any supplied is ignored.
  *	resall=		0x-prefixed hex restrict bits which must all be
  *			lit for an MRU entry to be included.
  *			Has precedence over any resany=.
@@ -2734,10 +2824,10 @@ static void configure(
  * Except for the first response, the response begins with confirmation
  * of the entry that precedes the first additional entry provided:
  *
- *	older.last=	hex l_fp timestamp matching one of the input
+ *	last.older=	hex l_fp timestamp matching one of the input
  *			.last timestamps, which entry now precedes the
  *			response 0. entry in the MRU list.
- *	older.addr=	text of address corresponding to older.last.
+ *	addr.older=	text of address corresponding to older.last.
  *
  * And in any case, a successful response contains sets of values
  * comprising entries, with the oldest numbered 0 and incrementing from
@@ -2753,11 +2843,16 @@ static void configure(
  * The client should accept the values in any order, and ignore .#
  * values which it does not understand, to allow a smooth path to
  * future changes without requiring a new opcode.  Clients can rely
- * on all 0.* values preceding any 1.* values, that is all values for
+ * on all *.0 values preceding any *.1 values, that is all values for
  * a given index number are together in the response.
  *
- * A response which includes the most recent entry on the list (the
- * final response in the overall operation) is terminated with:
+ * The end of the response list is noted with one or two tag=value
+ * pairs.  Unconditionally:
+ *
+ *	now=		0x-prefixed l_fp timestamp at the server marking
+ *			the end of the operation.
+ *
+ * If any entries were returned, now= is followed by:
  *
  *	last.newest=	hex l_fp identical to last.# of the prior
  *			entry.
@@ -2767,28 +2862,23 @@ static void read_mru_list(
 	int restrict_mask
 	)
 {
-	const char		limit_text[] =	"limit";
-	const char		mincount_text[] = "mincount";
-	const char		resall_text[] = "resall";
-	const char		resany_text[] = "resany";
-	const char		resaxx_fmt[] =	"0x%hx";
-	const char		addr_fmt[] =	"addr.%d";
-	const char		last_fmt[] =	"last.%d";
-	const char		first_fmt[] =	"first.%d";
-	const char		ct_fmt[] =	"ct.%d";
-	const char		mv_fmt[] =	"mv.%d";
-	const char		rs_fmt[] =	"rs.%d";
-	const char		l_fp_hexfmt[] =	"0x%08x.%08x";
+	const char		limit_text[] =		"limit";
+	const char		mincount_text[] =	"mincount";
+	const char		resall_text[] =		"resall";
+	const char		resany_text[] =		"resany";
+	const char		laddr_text[] =		"laddr";
+	const char		resaxx_fmt[] =		"0x%hx";
 	u_int			limit;
 	u_short			resall;
 	u_short			resany;
 	int			mincount;
+	sockaddr_u		laddr;
+	struct interface *	lcladr;
 	u_int			count;
 	u_int			ui;
 	u_int			uf;
 	l_fp			last[16];
 	sockaddr_u		addr[COUNTOF(last)];
-	char			tag[32];
 	char			buf[128];
 	struct ctl_var *	in_parms;
 	struct ctl_var *	v;
@@ -2809,6 +2899,7 @@ static void read_mru_list(
 	set_var(&in_parms, mincount_text, sizeof(mincount_text), 0);
 	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
 	set_var(&in_parms, resany_text, sizeof(resany_text), 0);
+	set_var(&in_parms, laddr_text, sizeof(laddr_text), 0);
 	for (i = 0; i < COUNTOF(last); i++) {
 		snprintf(buf, sizeof(buf), last_fmt, i);
 		set_var(&in_parms, buf, strlen(buf) + 1, 0);
@@ -2821,6 +2912,7 @@ static void read_mru_list(
 	mincount = 0;
 	resall = 0;
 	resany = 0;
+	lcladr = NULL;
 	priors = 0;
 	memset(last, 0, sizeof(last));
 	memset(addr, 0, sizeof(addr));
@@ -2838,6 +2930,9 @@ static void read_mru_list(
 			sscanf(val, resaxx_fmt, &resall);
 		} else if (!strcmp(resany_text, v->text)) {
 			sscanf(val, resaxx_fmt, &resany);
+		} else if (!strcmp(laddr_text, v->text)) {
+			if (decodenetnum(val, &laddr))
+				lcladr = getinterface(&laddr, 0);
 		} else if (1 == sscanf(v->text, last_fmt, &i) &&
 			   i < COUNTOF(last)) {
 			if (2 == sscanf(val, l_fp_hexfmt, &ui, &uf)) {
@@ -2861,6 +2956,10 @@ static void read_mru_list(
 		ctl_error(CERR_BADFMT);
 		return;
 	}
+
+	/*
+	 * Find the starting point if one was provided.
+	 */
 	mon = NULL;
 	for (i = 0; i < priors; i++) {
 		hash = MON_HASH(&addr[i]);
@@ -2875,7 +2974,7 @@ static void read_mru_list(
 
 	/* If a starting point was provided... */
 	if (priors) {
-		/* and could not be found... */
+		/* and none could be found unmodified... */
 		if (NULL == mon) {
 			/* tell ntpq to try again with older entries */
 			ctl_error(CERR_UNKNOWNVAR);
@@ -2889,15 +2988,18 @@ static void read_mru_list(
 		ctl_putunqstr("addr.older", pch, strlen(pch));
 
 		/* 
-		 * Move on to the first client doesn't have, except
-		 * in the special case of a limit of one.  In that
-		 * case return the given entry.
+		 * Move on to the first entry the client doesn't have,
+		 * except in the special case of a limit of one.  In
+		 * that case return the starting point entry.
 		 */
 		if (limit > 1)
 			mon = PREV_DLIST(mon_mru_list, mon, mru);
 	} else		/* start with the oldest */
 		mon = TAIL_DLIST(mon_mru_list, mru);
 	
+	/*
+	 * send up to limit= entries
+	 */
 	prior_mon = NULL;
 	for (count = 0;
 	     count < limit && mon != NULL;
@@ -2909,42 +3011,24 @@ static void read_mru_list(
 			continue;
 		if (resany && !(resany & mon->flags))
 			continue;
+		if (lcladr != NULL && (mon->lcladr != lcladr))
+			continue;
 
-		snprintf(tag, sizeof(tag), addr_fmt, count);
-		pch = sptoa(&mon->rmtadr);
-		ctl_putunqstr(tag, pch, strlen(pch));
-
-		snprintf(tag, sizeof(tag), last_fmt, count);
-		snprintf(buf, sizeof(buf), l_fp_hexfmt, mon->last.l_ui,
-			 mon->last.l_uf);
-		ctl_putunqstr(tag, buf, strlen(buf));
-
-		snprintf(tag, sizeof(tag), first_fmt, count);
-		snprintf(buf, sizeof(buf), l_fp_hexfmt, mon->first.l_ui,
-			 mon->first.l_uf);
-		ctl_putunqstr(tag, buf, strlen(buf));
-
-		snprintf(tag, sizeof(tag), ct_fmt, count);
-		ctl_putint(tag, mon->count);
-
-		snprintf(tag, sizeof(tag), mv_fmt, count);
-		ctl_putint(tag, mon->vn_mode);
-
-		snprintf(tag, sizeof(tag), rs_fmt, count);
-		ctl_puthex(tag, mon->flags);
-
+		send_mru_entry(mon, count);
 		count++;
 		prior_mon = mon;
 	}
+
 	/*
-	 * If this batch completes the MRU list (has the most recent),
-	 * say so explicitly.
+	 * If this batch completes the MRU list, say so explicitly with
+	 * a now= l_fp timestamp.
 	 */
 	if (NULL == mon) {
 		get_systime(&now);
 		snprintf(buf, sizeof(buf), l_fp_hexfmt,
 			 now.l_ui, now.l_uf);
 		ctl_putunqstr("now", buf, strlen(buf));
+		/* if any entries were returned confirm the last */
 		if (prior_mon != NULL) {
 			snprintf(buf, sizeof(buf), l_fp_hexfmt,
 				 prior_mon->last.l_ui,
@@ -3306,8 +3390,7 @@ ctlfindtrap(
 
 	for (tp = ctl_trap; tp < &ctl_trap[CTL_MAXTRAPS]; tp++) {
 		if ((tp->tr_flags & TRAP_INUSE)
-		    && (NSRCPORT(raddr) == NSRCPORT(&tp->tr_addr))
-		    && SOCK_EQ(raddr, &tp->tr_addr)
+		    && ADDR_PORT_EQ(raddr, &tp->tr_addr)
 	 	    && (linter == tp->tr_localaddr) )
 			return (tp);
 	}

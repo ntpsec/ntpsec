@@ -2487,9 +2487,10 @@ mrulist(
 	FILE *fp
 	)
 {
-	const char mincount_eq[] = "mincount=";
-	const char resall_eq[] = "resall=";
-	const char resany_eq[] = "resany=";
+	const char mincount_eq[] =	"mincount=";
+	const char resall_eq[] =	"resall=";
+	const char resany_eq[] =	"resany=";
+	const char laddr_eq[] =		"laddr=";
 	char parms_buf[128];
 	char *parms;
 	char *arg;
@@ -2512,8 +2513,9 @@ mrulist(
 			if ((!strncmp(resall_eq, arg, sizeof(resall_eq)
 			    - 1) || !strncmp(resany_eq, arg,
 			    sizeof(resany_eq) - 1) || !strncmp(
-			    mincount_eq, arg, sizeof(mincount_eq) - 1))
-			    && parms + cb + 2 <= parms_buf +
+			    mincount_eq, arg, sizeof(mincount_eq) - 1) 
+			    || !strncmp(laddr_eq, arg, sizeof(laddr_eq)
+			    - 1)) && parms + cb + 2 <= parms_buf +
 			    sizeof(parms_buf)) {
 				memcpy(parms, ", ", 2);
 				parms += 2;

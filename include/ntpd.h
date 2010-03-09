@@ -119,8 +119,9 @@ typedef struct interface_info {
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
 extern	void	interface_enumerate	(interface_receiver_t, void *);
-extern	struct interface *findinterface	(sockaddr_u *);
-extern	struct interface *findbcastinter(sockaddr_u *);
+extern struct interface *getinterface	(sockaddr_u *, int);
+extern struct interface *findinterface	(sockaddr_u *);
+extern struct interface *findbcastinter	(sockaddr_u *);
 extern	void	enable_broadcast	(struct interface *, sockaddr_u *);
 extern	void	enable_multicast_if	(struct interface *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
