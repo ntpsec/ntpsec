@@ -2268,7 +2268,7 @@ collect_mru_list(
 	memset(pnow, 0, sizeof(*pnow));
 	memset(&last_older, 0, sizeof(last_older));
 
-	limit = 2;
+	limit = 32;
 	snprintf(req_buf, sizeof(req_buf), "limit=%d%s", limit, parms);
 
 	while (TRUE) {
@@ -2306,7 +2306,7 @@ collect_mru_list(
 			 * Reduce the number of rows to minimize effect
 			 * of single lost packets.
 			 */
-			limit = max(2, limit * 2 / 3);
+			limit = max(2, limit / 2);
 		} else if (qres) {
 			show_error_msg(qres, 0);
 			goto cleanup_return;
@@ -2485,10 +2485,19 @@ collect_mru_list(
 			break;
 		}
 		/*
-		 * Snooze for a second between queries to let ntpd catch
+		 * Snooze for a bit between queries to let ntpd catch
 		 * up with other duties.
 		 */
+#ifdef SYS_WINNT
+		Sleep(300);	/* msec */
+#elif !defined(HAVE_NANOSLEEP)
 		sleep(1);
+#else
+		{
+			struct timespec interv = { 0, 300 * 1000 };
+			nanosleep(&interv, NULL);
+		}
+#endif
 		/*
 		 * If there were no errors, increase the number of rows
 		 * to a maximum of 3 * MAXFRAGS (the most packets ntpq
@@ -2496,7 +2505,7 @@ collect_mru_list(
 		 * no less than 3 rows fit in each packet.
 		 */
 		if (!qres)
-			limit = min(3 * MAXFRAGS, limit * 2);
+			limit = min(3 * MAXFRAGS, limit * 3 / 2);
 		/*
 		 * prepare next query with as many address and last-seen
 		 * timestamps as will fit in a single packet.
@@ -2860,7 +2869,7 @@ sysstats(
 	{ "ss_declined",	"declined:             ", NTP_STR },
 	{ "ss_restricted",	"restricted:           ", NTP_STR },
 	{ "ss_limited",		"rate limited:         ", NTP_STR },
-	{ "ss_kodsent",		"KOD responses:        ", NTP_STR },
+	{ "ss_kodsent",		"KoD responses:        ", NTP_STR },
 	{ "ss_processed",	"processed for time:   ", NTP_STR },
 	{ NULL,			NULL,			  0	  }
     };

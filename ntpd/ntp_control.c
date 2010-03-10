@@ -2786,7 +2786,7 @@ send_mru_entry(
  *
  * input parameters:
  *	limit=		Limit on MRU entries returned.  This is the sole
- *			required input parameter.
+ *			required input parameter.  [1...256]
  *			limit=1 is a special case:  Instead of fetching
  *			beginning with the supplied starting point's
  *			newer neighbor, fetch the supplied entry, and
@@ -2956,7 +2956,7 @@ static void read_mru_list(
 	}
 	free_varlist(in_parms);
 	in_parms = NULL;
-	if (!(0 < limit && limit < 1024)) {
+	if (!(0 < limit && limit <= 256)) {
 		ctl_error(CERR_BADFMT);
 		return;
 	}

@@ -379,7 +379,7 @@ AC_CHECK_FUNC([openlog], ,
   AC_SEARCH_LIBS([openlog], [gen], , 
   AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])))
 AC_SEARCH_LIBS([MD5Init], [md5 md])
-AC_CHECK_FUNCS(MD5Init)
+AC_CHECK_FUNCS([MD5Init])
 
 NTP_LINEEDITLIBS
 
@@ -410,7 +410,7 @@ case "$host" in
     ;;
 esac
 AC_HEADER_RESOLV
-AC_CHECK_FUNCS(res_init __res_init)
+AC_CHECK_FUNCS([res_init __res_init])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
@@ -455,7 +455,7 @@ esac
 
 case "$host" in
  *-*-sunos*|*-*-solaris*)
-    AC_CHECK_FUNCS(getpassphrase)
+    AC_CHECK_FUNCS([getpassphrase])
 esac
 
 AC_CHECK_HEADERS(arpa/nameser.h)
@@ -581,7 +581,7 @@ esac
 
 case "$host" in
  *-*-*linux*)
-    AC_CHECK_FUNCS(__adjtimex __ntp_gettime)
+    AC_CHECK_FUNCS([__adjtimex __ntp_gettime])
     ;;
 esac
 case "$ac_cv_func___adjtimex" in
@@ -1198,9 +1198,9 @@ case "$host" in
     AC_CHECK_FUNCS([clock_gettime clock_settime])
     ;;
 esac
-AC_CHECK_FUNCS(closefrom daemon)
-AC_CHECK_FUNCS(finite, ,
-  [AC_CHECK_FUNCS(isfinite, ,
+
+AC_CHECK_FUNCS([finite], ,
+  [AC_CHECK_FUNCS([isfinite], ,
     [AC_MSG_CHECKING([for isfinite with <math.h>])
     _libs=$LIBS
     LIBS="$LIBS -lm"
@@ -1209,7 +1209,8 @@ AC_CHECK_FUNCS(finite, ,
       AC_DEFINE(HAVE_ISFINITE)],
       AC_MSG_RESULT(no))
     LIBS=$_libs])])
-AC_CHECK_FUNCS(getbootfile getclock getdtablesize)
+
+AC_CHECK_FUNCS([closefrom daemon getbootfile getclock getdtablesize nanosleep])
 
 AC_ARG_ENABLE(getifaddrs,
     AC_HELP_STRING([--enable-getifaddrs],
@@ -1231,7 +1232,7 @@ case $host in
 	# --enable-getifaddrs=glibc.
 	if test $want_getifaddrs = glibc
 	then
-		AC_CHECK_FUNCS(getifaddrs)
+		AC_CHECK_FUNCS([getifaddrs])
 	else
 		save_LIBS="$LIBS"
 		LIBS="-L/usr/local/v6/lib $LIBS"
@@ -1242,7 +1243,7 @@ case $host in
 	fi
 	;;
 *)
-	AC_CHECK_FUNCS(getifaddrs)
+	AC_CHECK_FUNCS([getifaddrs])
 	;;
 esac
 ;;
@@ -1276,8 +1277,8 @@ AC_DEFINE_UNQUOTED([GETSOCKNAME_SOCKLEN_TYPE],
 		   $ac_cv_func_getsockname_socklen_type,
 		   [What is getsockname()'s socklen type?])
 
-AC_CHECK_FUNCS(getrusage)
-AC_CHECK_FUNC(gettimeofday, ,[
+AC_CHECK_FUNCS([getrusage])
+AC_CHECK_FUNC([gettimeofday], ,[
 case "$host" in
   *-*-mpeix*) ac_cv_func_gettimeofday=yes
     ;;
@@ -1285,15 +1286,15 @@ esac])
 case "$host" in
  *-pc-cygwin*)
     ;;
- *) AC_CHECK_FUNCS(getuid)
+ *) AC_CHECK_FUNCS([getuid])
     ;;
 esac
-AC_CHECK_FUNCS(hstrerror)
+AC_CHECK_FUNCS([hstrerror])
 
 #
 # Check for if_nametoindex() for IPv6 scoped addresses support
 #
-AC_CHECK_FUNC(if_nametoindex, ac_cv_have_if_nametoindex=yes,
+AC_CHECK_FUNC([if_nametoindex], ac_cv_have_if_nametoindex=yes,
 		ac_cv_have_if_nametoindex=no)
 case $ac_cv_have_if_nametoindex in
  no)
@@ -1316,17 +1317,17 @@ AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide 
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 case "$ac_cv_header_kvm_h" in
  yes)
-    AC_CHECK_FUNCS(kvm_open)
+    AC_CHECK_FUNCS([kvm_open])
     ;;
 esac
 case "$host" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.
     ;;
- *) AC_CHECK_FUNCS(mkstemp)
+ *) AC_CHECK_FUNCS([mkstemp])
     ;;
 esac
-AC_CHECK_FUNCS(mktime)
+AC_CHECK_FUNCS([mktime])
 case "$host" in
  *-*-aix[[456]]*)
     # Just a stub.  Idiots.
@@ -1346,21 +1347,21 @@ case "$host" in
  alpha*-dec-osf4*|alpha*-dec-osf5*)
     # mlockall is there, as a #define calling memlk via <sys/mman.h>
     # Not easy to test for - cheat.
-    AC_CHECK_FUNCS(memlk, [ac_cv_func_mlockall='yes'])
-    AC_CHECK_FUNCS(mlockall)
+    AC_CHECK_FUNCS([memlk], [ac_cv_func_mlockall='yes'])
+    AC_CHECK_FUNCS([mlockall])
     ;;
- *) AC_CHECK_FUNCS(mlockall)
+ *) AC_CHECK_FUNCS([mlockall])
     ;;
 esac
-AC_CHECK_FUNCS(nice nlist)
+AC_CHECK_FUNCS([nice nlist])
 case "$host" in
  *-*-solaris2.6)
     # Broken...
     ;;
- *) AC_CHECK_FUNCS(ntp_adjtime ntp_gettime)
+ *) AC_CHECK_FUNCS([ntp_adjtime ntp_gettime])
     ;;
 esac
-AC_CHECK_FUNCS(plock pututline pututxline readlink recvmsg rtprio)
+AC_CHECK_FUNCS([plock pututline pututxline readlink recvmsg rtprio])
 case "$host" in
  *-*-aix[[456]]*)
     # Just a stub in AIX 4.  Idiots.
@@ -1368,20 +1369,17 @@ case "$host" in
  *-*-solaris2.5*)
     # Just stubs in solaris2.5.  Idiots.
     ;;
- *) AC_CHECK_FUNCS(sched_setscheduler)
+ *) AC_CHECK_FUNCS([sched_setscheduler])
     ;;
 esac
-AC_CHECK_FUNCS(setlinebuf setpgid setpriority setsid)
-AC_CHECK_FUNCS(setrlimit)
-AC_CHECK_FUNCS(settimeofday, ,[
+AC_CHECK_FUNCS([setlinebuf setpgid setpriority setsid])
+AC_CHECK_FUNCS([settimeofday], ,[
 case "$host" in
   *-*-mpeix*) ac_cv_func_settimeofday=yes
     ;;
 esac])
-AC_CHECK_FUNCS(setvbuf sigaction)
-AC_CHECK_FUNCS(sigvec sigset sigsuspend stime strchr sysconf sysctl)
-AC_CHECK_FUNCS(snprintf strdup strerror)
-AC_CHECK_FUNCS(timegm)
+AC_CHECK_FUNCS([setvbuf sigaction snprintf stime strdup strerror timegm])
+AC_CHECK_FUNCS([setrlimit sigvec sigset sigsuspend strchr sysconf sysctl])
 case "$host" in
  *-*-aix[[456]]*)
     # Just stubs.  Idiots.
@@ -1395,12 +1393,12 @@ case "$host" in
  *-*-openbsd*)
     # Just stubs.  Idiots.
     ;;
- *) AC_CHECK_FUNCS(timer_create)
+ *) AC_CHECK_FUNCS([timer_create])
     ;;
 esac
 
 # some OSes prefer _exit() in forked children to exit()
-AC_CHECK_FUNCS(_exit)
+AC_CHECK_FUNCS([_exit])
 ntp_worker_child_exit=exit
 case "$ac_cv_func__exit::$host_os" in
  yes::netbsd*)
@@ -1417,10 +1415,10 @@ case "$host" in
  *-pc-cygwin*)
     # I have no idea...
     ;;
- *) AC_CHECK_FUNCS(umask)
+ *) AC_CHECK_FUNCS([umask])
     ;;
 esac
-AC_CHECK_FUNCS(uname updwtmp updwtmpx vsnprintf vsprintf)
+AC_CHECK_FUNCS([uname updwtmp updwtmpx vsnprintf vsprintf])
 
 ###
 
