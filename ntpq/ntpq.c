@@ -325,7 +325,7 @@ struct xcmd builtins[] = {
 	{ "poll",	ntp_poll,	{ OPT|NTP_UINT, OPT|NTP_STR, NO, NO },
 	  { "n", "verbose", "", "" },
 	  "poll an NTP server in client mode `n' times" },
-	{ "passwd",	passwd,		{ NO, NO, NO, NO },
+	{ "passwd",	passwd,		{ OPT|NTP_STR, NO, NO, NO },
 	  { "", "", "", "" },
 	  "specify a password to use for authenticated requests"},
 	{ "hostnames",	hostnames,	{ OPT|NTP_STR, NO, NO, NO },
@@ -2462,20 +2462,23 @@ passwd(
 	char *pass;
 
 	if (info_auth_keyid == 0) {
-		int u_keyid = getkeyid("Keyid: ");
-		if (u_keyid == 0 || u_keyid > NTP_MAXKEY) {
-			(void)fprintf(fp, "Invalid key identifier\n");
+		info_auth_keyid = getkeyid("Keyid: ");
+		if (info_auth_keyid == 0) {
+			(void)fprintf(fp, "Keyid must be defined\n");
 			return;
 		}
-		info_auth_keyid = u_keyid;
 	}
-	pass = getpass("MD5 Password: ");
-	if (*pass == '\0')
-		(void) fprintf(fp, "Password unchanged\n");
+	if (pcmd->nargs >= 1)
+		pass = pcmd->argval[0].string;
 	else {
-		authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
-		authtrust(info_auth_keyid, 1);
+		pass = getpass("MD5 Password: ");
+		if ('\0' == *pass) {
+			fprintf(fp, "Password unchanged\n");
+			return;
+		}
 	}
+	authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+	authtrust(info_auth_keyid, 1);
 }
 
 

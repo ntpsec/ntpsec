@@ -147,6 +147,7 @@ struct interface *any6_interface;	/* default ipv6 interface */
 struct interface *loopback_interface;	/* loopback ipv4 interface */
 
 isc_boolean_t broadcast_client_enabled;	/* is broadcast client enabled */
+u_int sys_ifnum;			/* next .ifnum to assign */
 int ninterfaces;			/* Total number of interfaces */
 
 int disable_dynamic_updates;		/* scan interfaces once only */
@@ -856,7 +857,6 @@ new_interface(
 	struct interface *interface
 	)
 {
-	static u_int		sys_ifnum = 0;
 	struct interface *	iface;
 
 	iface = emalloc(sizeof(*iface));
@@ -891,15 +891,13 @@ delete_interface(
  */
 static void
 add_interface(
-	struct interface *interface
+	struct interface *iface
 	)
 {
-	/*
-	 * Calculate the address hash
-	 */
-	interface->addr_refid = addr2refid(&interface->sin);
-
-	LINK_SLIST(inter_list, interface, link);
+	/* Calculate the refid */
+	iface->addr_refid = addr2refid(&iface->sin);
+	/* link at tail so ntpdc -c ifstats index increases each row */
+	LINK_TAIL_SLIST(inter_list, iface, link, struct interface);
 	ninterfaces++;
 }
 
@@ -2363,6 +2361,7 @@ io_setbclient(void)
 	int			nif;
 	isc_boolean_t		jstatus; 
 	SOCKET			fd;
+	u_int32			prev_refid;
 
 	nif = 0;
 	set_reuseaddr(1);
@@ -2377,7 +2376,6 @@ io_setbclient(void)
 		/* use only allowed addresses */
 		if (interf->ignore_packets)
 			continue;
-
 
 		/* Need a broadcast-capable interface */
 		if (!(interf->flags & INT_BROADCAST))
@@ -2421,7 +2419,14 @@ io_setbclient(void)
 			msyslog(LOG_INFO,
 				"io_setbclient: Opened broadcast client on interface #%d %s",
 				interf->ifnum, interf->name);
+			/* hart suspects this is unneeded, verify */
+			prev_refid = interf->addr_refid;
 			interf->addr_refid = addr2refid(&interf->sin);
+			if (prev_refid != interf->addr_refid)
+				msyslog(LOG_NOTICE,	// !!!!!
+					"io_setbclient: addr_refid for %s updated %8.8x -> %8.8x",
+					stoa(&interf->sin), prev_refid,
+					interf->addr_refid);
 		}
 	}
 	set_reuseaddr(0);

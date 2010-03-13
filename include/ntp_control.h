@@ -55,7 +55,8 @@ struct ntp_control {
 #define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
 #define CTL_OP_SAVECONFIG	9	/* save config to file */
-#define CTL_OP_READ_MRU		10	/* retrieve MRU (monlist) */
+#define CTL_OP_READ_MRU		10	/* retrieve MRU (mrulist) */
+#define CTL_OP_READ_IFSTATS	11	/* interface stats (ifstats) */
 #define	CTL_OP_UNSETTRAP	31	/* unset trap */
 
 /*

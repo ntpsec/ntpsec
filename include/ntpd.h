@@ -384,9 +384,11 @@ extern u_long	io_timereset;		/* time counters were reset */
 extern  int	disable_dynamic_updates;
 extern fd_set	activefds;
 extern int	maxactivefd;
+extern u_int	sys_ifnum;		/* next .ifnum to assign */
 extern struct interface *any_interface;	/* default ipv4 interface */
 extern struct interface *any6_interface;/* default ipv6 interface */
 extern struct interface *loopback_interface; /* loopback interface */
+extern struct interface *inter_list;	/* linked list */
 
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */

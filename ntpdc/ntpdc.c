@@ -1841,20 +1841,17 @@ passwd(
 			return;
 		}
 	}
-	if (!interactive) {
-		authusekey(info_auth_keyid, info_auth_keytype,
-			   (u_char *)pcmd->argval[0].string);
-		authtrust(info_auth_keyid, 1);
-	} else {
+	if (pcmd->nargs >= 1)
+		pass = pcmd->argval[0].string;
+	else {
 		pass = getpass("MD5 Password: ");
-		if (*pass == '\0')
-		    (void) fprintf(fp, "Password unchanged\n");
-		else {
-		    authusekey(info_auth_keyid, info_auth_keytype,
-			       (u_char *)pass);
-		    authtrust(info_auth_keyid, 1);
+		if ('\0' == *pass) {
+			fprintf(fp, "Password unchanged\n");
+			return;
 		}
 	}
+	authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+	authtrust(info_auth_keyid, 1);
 }
 
 

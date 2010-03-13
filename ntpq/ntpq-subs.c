@@ -65,10 +65,12 @@ static	void	doopeers	(int, FILE *, int);
 static	void	opeers		(struct parse *, FILE *);
 static	void	lopeers 	(struct parse *, FILE *);
 static	void	config		(struct parse *, FILE *);
-static	void 	saveconfig	(struct parse *, FILE *);
+static	void	saveconfig	(struct parse *, FILE *);
 static	void	config_from_file(struct parse *, FILE *);
 static	void	mrulist		(struct parse *, FILE *);
+static	void	ifstats		(struct parse *, FILE *);
 static	void	sysstats	(struct parse *, FILE *);
+static	void	monstats	(struct parse *, FILE *);
 
 /*
  * Commands we understand.	Ntpdc imports this.
@@ -167,9 +169,15 @@ struct xcmd opcmds[] = {
 	{ "mrulist", mrulist, { OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
 	  { "tag=value", "tag=value", "tag=value", "tag=value" },
 	  "display the list of most recently seen source addresses, tags mincount=... resall=0x... resany=0x..." },
+	{ "ifstats", ifstats, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "show statistics for each local address ntpd is using" },
 	{ "sysstats", sysstats, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display system uptime and packet counts" },
+	{ "monstats", monstats, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "display monitor (mrulist) counters and limits" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -266,6 +274,31 @@ struct mru_tag {
 	sockaddr_u	addr;
 };
 
+typedef struct ifstats_row_tag {
+	u_int		ifnum;
+	sockaddr_u	addr;
+	sockaddr_u	bcast;
+	int		enabled;
+	u_int		flags;
+	int		mcast_count;
+	char		name[32];
+	int		peer_count;
+	int		received;
+	int		sent;
+	int		send_errors;
+	u_int		ttl;
+	u_int		uptime;
+} ifstats_row;
+
+typedef struct var_display_collection_tag {
+	const char * const tag;		/* system variable */
+	const char * const display;	/* descriptive text */
+	u_char type;			/* NTP_STR, etc */
+	union {
+		char *str;
+	} v;				/* retrieved value */
+} vdc;
+
 /*
  * other static function prototypes
  */
@@ -277,6 +310,9 @@ static int	qcmp_mru_addr(const void *, const void *);
 static int	qcmp_mru_r_addr(const void *, const void *);
 static int	qcmp_mru_count(const void *, const void *);
 static int	qcmp_mru_r_count(const void *, const void *);
+static void	validate_ifnum(u_int, int, ifstats_row *);
+static void	another_ifstats_field(int *, ifstats_row *, FILE *);
+static void	collect_display_vdc(vdc *vdc_table, FILE *fp);
 
 /*
  * static globals
@@ -2153,7 +2189,6 @@ add_mru(
 	u_short hash;
 	mru *mon;
 	mru *unlinked;
-	int first_ts_matches;
 
 	if (debug)
 		fprintf(stderr,
@@ -2169,10 +2204,9 @@ add_mru(
 		if (SOCK_EQ(&mon->addr, &add->addr))
 			break;
 	if (mon != NULL) {
-		first_ts_matches = L_ISEQU(&add->first, &mon->first);
-		if (!first_ts_matches) {
+		if (!L_ISGEQ(&add->first, &mon->first)) {
 			fprintf(stderr,
-				"add_mru duplicate %s first ts mismatch %08x.%08x expected %08x.%08x\n",
+				"add_mru duplicate %s new first ts %08x.%08x precedes prior %08x.%08x\n",
 				sptoa(&add->addr), add->last.l_ui,
 				add->last.l_uf, mon->last.l_ui,
 				mon->last.l_uf);
@@ -2712,13 +2746,14 @@ qcmp_mru_r_avgint(
  */
 static void 
 mrulist(
-	struct parse *pcmd,
-	FILE *fp
+	struct parse *	pcmd,
+	FILE *		fp
 	)
 {
 	const char mincount_eq[] =	"mincount=";
 	const char resall_eq[] =	"resall=";
 	const char resany_eq[] =	"resany=";
+	const char maxlstint_eq[] =	"maxlstint=";
 	const char laddr_eq[] =		"laddr=";
 	const char sort_eq[] =		"sort=";
 	mru_sort_order order;
@@ -2750,8 +2785,9 @@ mrulist(
 			    sizeof(resany_eq) - 1) || !strncmp(
 			    mincount_eq, arg, sizeof(mincount_eq) - 1) 
 			    || !strncmp(laddr_eq, arg, sizeof(laddr_eq)
-			    - 1)) && parms + cb + 2 <= parms_buf +
-			    sizeof(parms_buf)) {
+			    - 1) || !strncmp(maxlstint_eq, arg,
+			    sizeof(laddr_eq) - 1)) && parms + cb + 2 <=
+			    parms_buf + sizeof(parms_buf)) {
 				/* these are passed intact to ntpd */
 				memcpy(parms, ", ", 2);
 				parms += 2;
@@ -2809,7 +2845,7 @@ mrulist(
 
 	printf(	"lstint avgint rstr m v  count rport remote address\n"
 		"==============================================================================\n");
-		/* '-' x 78 */
+		/* '=' x 78 */
 	for (ppentry = sorted; ppentry < sorted + mru_count; ppentry++) {
 		recent = *ppentry;
 		interval = now;
@@ -2821,60 +2857,247 @@ mrulist(
 		LFPTOD(&interval, favgint);
 		favgint /= recent->count;
 		avgint = (int)(favgint + 0.5);
-		printf("%6d %6d %4hx %d %d %6d %5hu %s\n",
-		       lstint, avgint, recent->rs, (int)recent->mode,
-		       (int)recent->ver, recent->count,
-		       SRCPORT(&recent->addr), nntohost(&recent->addr));
+		fprintf(fp, "%6d %6d %4hx %d %d %6d %5hu %s\n",
+			lstint, avgint, recent->rs, (int)recent->mode,
+			(int)recent->ver, recent->count,
+			SRCPORT(&recent->addr),
+			nntohost(&recent->addr));
+		if (showhostnames)
+			fflush(fp);
 	}
+	fflush(fp);
+	// if (debug) !!!!!
+	fprintf(stderr, "--- completed, freeing sorted[] pointers\n");
+	fflush(stderr);
 	free(sorted);
 
 cleanup_return:
+	// if (debug) !!!!!
+	fprintf(stderr, "... freeing MRU entries\n");
+	fflush(stderr);
 	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
 		free(recent);
 	ITER_DLIST_END()
+	// if (debug) !!!!!
+	fprintf(stderr, "... freeing hash_table[]\n");
+	fflush(stderr);
 	free(hash_table);
 	hash_table = NULL;
 	INIT_DLIST(mru_list, mlink);
 }
 
 
-typedef struct var_display_collection_tag {
-	const char *tag;	/* system variable */
-	const char *display;	/* descriptive text */
-	u_char type;		/* NTP_STR, etc */
-	union {			/* retrieved value */
-		char *str;
-	} v;
-} vdc;
-
+/*
+ * validate_ifnum - helper for ifstats()
+ */
+static void
+validate_ifnum(
+	u_int		ifnum,
+	int		fields,
+	ifstats_row *	prow
+	)
+{
+	if (0 == fields)
+		prow->ifnum = ifnum;
+	else if (prow->ifnum != ifnum) {
+		fprintf(stderr,
+			"received interface index %u, expecting %u, aborting.\n",
+			ifnum, prow->ifnum);
+		exit(1);
+	}
+}
 
 
 /*
- * sysstats - implements ntpq -c sysstats modeled on ntpdc -c sysstats
+ * another_ifstats_field - helper for ifstats()
+ */
+static void
+another_ifstats_field(
+	int *		pfields,
+	ifstats_row *	prow,
+	FILE *		fp
+	)
+{
+	(*pfields)++;
+	/* we understand 12 tags */
+	if (12 > *pfields)
+		return;
+	/*
+	"    interface name                                        send\n"
+	" #  address/broadcast     drop flag ttl mc received sent failed peers   uptime\n"
+	"==============================================================================\n");
+	 */
+	fprintf(fp,
+		"%3u %-24.24s %c %4x %3d %2d %6d %6d %6d %5d %8d\n"
+		"    %s\n",
+		prow->ifnum, prow->name,
+		(prow->enabled)
+		    ? '.'
+		    : 'D',
+		prow->flags, prow->ttl, prow->mcast_count,
+		prow->received, prow->sent, prow->send_errors,
+		prow->peer_count, prow->uptime, sptoa(&prow->addr));
+	if (!SOCK_UNSPEC(&prow->bcast))
+		fprintf(fp, "    %s\n", sptoa(&prow->bcast));
+
+	*pfields = 0;
+	memset(prow, 0, sizeof(*prow));
+}
+
+
+/*
+ * ifstats - ntpq -c ifstats modeled on ntpdc -c ifstats.
  */
 static void 
-sysstats(
-	struct parse *pcmd,
+ifstats(
+	struct parse *	pcmd,
+	FILE *		fp
+	)
+{
+	const char	addr_fmt[] =	"addr.%u";
+	const char	bcast_fmt[] =	"bcast.%u";
+	const char	en_fmt[] =	"en.%u";	/* enabled */
+	const char	flags_fmt[] =	"flags.%u";
+	const char	mc_fmt[] =	"mc.%u";	/* mcast count */
+	const char	name_fmt[] =	"name.%u";
+	const char	pc_fmt[] =	"pc.%u";	/* peer count */
+	const char	rx_fmt[] =	"rx.%u";
+	const char	tl_fmt[] =	"tl.%u";	/* ttl */
+	const char	tx_fmt[] =	"tx.%u";
+	const char	txerr_fmt[] =	"txerr.%u";
+	const char	up_fmt[] =	"up.%u";	/* uptime */
+	const char *	datap;
+	int		qres;
+	int		dsize;
+	u_short		rstatus;
+	char *		tag;
+	char *		val;
+	int		fields;
+	u_int		ifnum;
+	u_int		ui;
+	ifstats_row	row;
+	int		comprende;
+	size_t		len;
+
+	qres = doquery(CTL_OP_READ_IFSTATS, 0, TRUE, 0, NULL, &rstatus,
+		       &dsize, &datap);
+	if (qres)	/* message already displayed */
+		return;
+
+	fprintf(fp,
+		"    interface name                                        send\n"
+		" #  address/broadcast     drop flag ttl mc received sent failed peers   uptime\n"
+		"==============================================================================\n");
+		/* '=' x 78 */
+
+	memset(&row, 0, sizeof(row));
+	fields = 0;
+	ifnum = 0;
+	ui = 0;
+	while (nextvar(&dsize, &datap, &tag, &val)) {
+		if (debug > 1)
+			fprintf(stderr, "nextvar gave: %s = %s\n", tag,
+				(NULL == val)
+				    ? ""
+				    : val);
+		comprende = FALSE;
+		switch(tag[0]) {
+
+		case 'a':
+			if (1 == sscanf(tag, addr_fmt, &ui) &&
+			    decodenetnum(val, &row.addr))
+				comprende = TRUE;
+			break;
+
+		case 'b':
+			if (1 == sscanf(tag, bcast_fmt, &ui) &&
+			    (NULL == val ||
+			     decodenetnum(val, &row.bcast)))
+				comprende = TRUE;
+			break;
+
+		case 'e':
+			if (1 == sscanf(tag, en_fmt, &ui) &&
+			    1 == sscanf(val, "%d", &row.enabled))
+				comprende = TRUE;
+			break;
+
+		case 'f':
+			if (1 == sscanf(tag, flags_fmt, &ui) &&
+			    1 == sscanf(val, "0x%x", &row.flags))
+				comprende = TRUE;
+			break;
+
+		case 'm':
+			if (1 == sscanf(tag, mc_fmt, &ui) &&
+			    1 == sscanf(val, "%d", &row.mcast_count))
+				comprende = TRUE;
+			break;
+
+		case 'n':
+			if (1 == sscanf(tag, name_fmt, &ui)) {
+				/* strip quotes */
+				len = strlen(val);
+				if (len >= 2 &&
+				    len - 2 < sizeof(row.name)) {
+					len -= 2;
+					memcpy(row.name, val + 1, len);
+					row.name[len] = '\0';
+					comprende = TRUE;
+				}
+			}
+			break;
+
+		case 'p':
+			if (1 == sscanf(tag, pc_fmt, &ui) &&
+			    1 == sscanf(val, "%d", &row.peer_count))
+				comprende = TRUE;
+			break;
+
+		case 'r':
+			if (1 == sscanf(tag, rx_fmt, &ui) &&
+			    1 == sscanf(val, "%d", &row.received))
+				comprende = TRUE;
+			break;
+
+		case 't':
+			if (1 == sscanf(tag, tl_fmt, &ui) &&
+			    1 == sscanf(val, "%d", &row.ttl))
+				comprende = TRUE;
+			else if (1 == sscanf(tag, tx_fmt, &ui) &&
+				 1 == sscanf(val, "%d", &row.sent))
+				comprende = TRUE;
+			else if (1 == sscanf(tag, txerr_fmt, &ui) &&
+				 1 == sscanf(val, "%d", &row.send_errors))
+				comprende = TRUE;
+			break;
+
+		case 'u':
+			if (1 == sscanf(tag, up_fmt, &ui) &&
+			    1 == sscanf(val, "%d", &row.uptime))
+				comprende = TRUE;
+			break;
+		}
+
+		if (comprende) {
+			validate_ifnum(ui, fields, &row);
+			another_ifstats_field(&fields, &row, fp);
+		}
+	}
+	fflush(fp);
+}
+
+
+/*
+ * collect_display_vdc
+ */
+static void 
+collect_display_vdc(
+	vdc *vdc_table,
 	FILE *fp
 	)
 {
-    vdc sysstats_vdc[] = {
-	{ "ss_uptime",		"uptime:               ", NTP_STR },
-	{ "ss_reset",		"sysstats reset:       ", NTP_STR },
-	{ "ss_received",	"packets received:     ", NTP_STR },
-	{ "ss_thisver",		"current version:      ", NTP_STR },
-	{ "ss_oldver",		"older version:        ", NTP_STR },
-	{ "ss_badformat",	"bad length or format: ", NTP_STR },
-	{ "ss_badauth",		"authentication failed:", NTP_STR },
-	{ "ss_declined",	"declined:             ", NTP_STR },
-	{ "ss_restricted",	"restricted:           ", NTP_STR },
-	{ "ss_limited",		"rate limited:         ", NTP_STR },
-	{ "ss_kodsent",		"KoD responses:        ", NTP_STR },
-	{ "ss_processed",	"processed for time:   ", NTP_STR },
-	{ NULL,			NULL,			  0	  }
-    };
 	struct varlist vl[MAXLIST];
-	vdc *vdc_table;
 	vdc *pvdc;
 	u_short rstatus;
 	int rsize;
@@ -2882,8 +3105,6 @@ sysstats(
 	int qres;
 	char *tag;
 	char *val;
-
-	vdc_table = sysstats_vdc;
 
 	memset(vl, 0, sizeof(vl));
 	for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++) {
@@ -2913,8 +3134,63 @@ sysstats(
 	/* and display */
 	for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++) {
 		if (pvdc->v.str != NULL) {
-			printf("%s  %s\n", pvdc->display, pvdc->v.str);
+			fprintf(fp, "%s  %s\n", pvdc->display,
+				pvdc->v.str);
 			free(pvdc->v.str);
 		}
 	}
+}
+
+
+/*
+ * sysstats - implements ntpq -c sysstats modeled on ntpdc -c sysstats
+ */
+static void
+sysstats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc sysstats_vdc[] = {
+	{ "ss_uptime",		"uptime:               ", NTP_STR },
+	{ "ss_reset",		"sysstats reset:       ", NTP_STR },
+	{ "ss_received",	"packets received:     ", NTP_STR },
+	{ "ss_thisver",		"current version:      ", NTP_STR },
+	{ "ss_oldver",		"older version:        ", NTP_STR },
+	{ "ss_badformat",	"bad length or format: ", NTP_STR },
+	{ "ss_badauth",		"authentication failed:", NTP_STR },
+	{ "ss_declined",	"declined:             ", NTP_STR },
+	{ "ss_restricted",	"restricted:           ", NTP_STR },
+	{ "ss_limited",		"rate limited:         ", NTP_STR },
+	{ "ss_kodsent",		"KoD responses:        ", NTP_STR },
+	{ "ss_processed",	"processed for time:   ", NTP_STR },
+	{ NULL,			NULL,			  0	  }
+    };
+
+	collect_display_vdc(sysstats_vdc, fp);
+}
+
+	
+/*
+ * monstats - implements ntpq -c monstats
+ */
+static void
+monstats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc monstats_vdc[] = {
+	{ "mru_enabled",	"enabled:            ", NTP_STR },
+	{ "mru_depth",		"addresses:          ", NTP_STR },
+	{ "mru_deepest",	"peak addresses:     ", NTP_STR },
+	{ "mru_maxdepth",	"maximum addresses:  ", NTP_STR },
+	{ "mru_mindepth",	"reclaim above count:", NTP_STR },
+	{ "mru_maxage",		"reclaim older than: ", NTP_STR },
+	{ "mru_mem",		"kilobytes:          ", NTP_STR },
+	{ "mru_maxmem",		"maximum kilobytes:  ", NTP_STR },
+	{ NULL,			NULL,			 0	 }
+    };
+
+	collect_display_vdc(monstats_vdc, fp);
 }

@@ -80,23 +80,27 @@ static	void	set_trap	(struct recvbuf *, int);
 static	void	save_config	(struct recvbuf *, int);
 static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
+static	void	send_random_tag_value(int);
 static	void	read_mru_list	(struct recvbuf *, int);
+static void	send_ifstats_entry(struct interface *, u_int);
+static	void	read_ifstats	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
 				     struct interface *);
 
 static	struct ctl_proc control_codes[] = {
-	{ CTL_OP_UNSPEC,	NOAUTH, control_unspec },
-	{ CTL_OP_READSTAT,	NOAUTH, read_status },
-	{ CTL_OP_READVAR,	NOAUTH, read_variables },
+	{ CTL_OP_UNSPEC,	NOAUTH,	control_unspec },
+	{ CTL_OP_READSTAT,	NOAUTH,	read_status },
+	{ CTL_OP_READVAR,	NOAUTH,	read_variables },
 	{ CTL_OP_WRITEVAR,	AUTH,	write_variables },
-	{ CTL_OP_READCLOCK,	NOAUTH, read_clockstatus },
-	{ CTL_OP_WRITECLOCK,	NOAUTH, write_clockstatus },
-	{ CTL_OP_SETTRAP,	NOAUTH, set_trap },
+	{ CTL_OP_READCLOCK,	NOAUTH,	read_clockstatus },
+	{ CTL_OP_WRITECLOCK,	NOAUTH,	write_clockstatus },
+	{ CTL_OP_SETTRAP,	NOAUTH,	set_trap },
 	{ CTL_OP_SAVECONFIG,	AUTH,	save_config },
 	{ CTL_OP_CONFIGURE,	AUTH,	configure },
-	{ CTL_OP_READ_MRU,	NOAUTH, read_mru_list },
-	{ CTL_OP_UNSETTRAP,	NOAUTH, unset_trap },
+	{ CTL_OP_READ_MRU,	NOAUTH,	read_mru_list },
+	{ CTL_OP_READ_IFSTATS,	AUTH,	read_ifstats },
+	{ CTL_OP_UNSETTRAP,	NOAUTH,	unset_trap },
 	{ NO_REQUEST,		0 }
 };
 
@@ -356,6 +360,12 @@ static u_char def_clock_var[] = {
 };
 #endif
 
+/*
+ * MRU string constants shared by send_mru_entry() and read_mru_list().
+ */
+static const char addr_fmt[] =		"addr.%d";
+static const char last_fmt[] =		"last.%d";
+static const char l_fp_hexfmt[] =	"0x%08x.%08x";
 
 /*
  * System and processor definitions.
@@ -2668,14 +2678,6 @@ static void configure(
 
 
 /*
- * MRU string constants shared by send_mru_entry() and read_mru_list().
- */
-static const char addr_fmt[] =		"addr.%d";
-static const char last_fmt[] =		"last.%d";
-static const char l_fp_hexfmt[] =	"0x%08x.%08x";
-
-
-/*
  * Send a MRU list entry in response to a "ntpq -c mrulist" operation.
  *
  * To keep clients honest about not depending on the order of values,
@@ -2750,6 +2752,38 @@ send_mru_entry(
 		sent[which] = TRUE;
 		remaining--;
 	}
+}
+
+
+/*
+ * send_random_tag_value - send a randomly-generated three character
+ *			   tag prefix, a '.', an index, a '=' and a
+ *			   random integer value.
+ *
+ * To try to force clients to ignore unrecognized tags in mrulist
+ * and iflist responses, the first and last rows are spiced with
+ * randomly-generated tag names with correct .# index.
+ * Make it three characters knowing that none of the currently-used
+ * tags have that length, avoiding the need to test for tag collision.
+ */
+static void
+send_random_tag_value(
+	int	index
+	)
+{
+	u_long	noise;
+	char	buf[32];
+
+	noise = ntp_random();
+	buf[0] = 'a' + noise % 26;
+	noise >>= 5;
+	buf[1] = 'a' + noise % 26;
+	noise >>= 5;
+	buf[2] = 'a' + noise % 26;
+	noise >>= 5;
+	buf[3] = '.';
+	snprintf(&buf[4], sizeof(buf) - 4, "%d", index);
+	ctl_putuint(buf, noise);
 }
 
 
@@ -2869,12 +2903,14 @@ static void read_mru_list(
 	const char		mincount_text[] =	"mincount";
 	const char		resall_text[] =		"resall";
 	const char		resany_text[] =		"resany";
+	const char		maxlstint_text[] =	"maxlstint";
 	const char		laddr_text[] =		"laddr";
 	const char		resaxx_fmt[] =		"0x%hx";
 	u_int			limit;
 	u_short			resall;
 	u_short			resany;
 	int			mincount;
+	u_int			maxlstint;
 	sockaddr_u		laddr;
 	struct interface *	lcladr;
 	u_int			count;
@@ -2893,7 +2929,6 @@ static void read_mru_list(
 	mon_entry *		mon;
 	mon_entry *		prior_mon;
 	l_fp			now;
-	u_long			noise;
 
 	/*
 	 * fill in_parms var list with all possible input parameters.
@@ -2903,6 +2938,7 @@ static void read_mru_list(
 	set_var(&in_parms, mincount_text, sizeof(mincount_text), 0);
 	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
 	set_var(&in_parms, resany_text, sizeof(resany_text), 0);
+	set_var(&in_parms, maxlstint_text, sizeof(maxlstint_text), 0);
 	set_var(&in_parms, laddr_text, sizeof(laddr_text), 0);
 	for (i = 0; i < COUNTOF(last); i++) {
 		snprintf(buf, sizeof(buf), last_fmt, i);
@@ -2916,6 +2952,7 @@ static void read_mru_list(
 	mincount = 0;
 	resall = 0;
 	resany = 0;
+	maxlstint = 0;
 	lcladr = NULL;
 	priors = 0;
 	memset(last, 0, sizeof(last));
@@ -2924,17 +2961,19 @@ static void read_mru_list(
 	while (NULL != (v = ctl_getitem(in_parms, &val)) &&
 	       !(EOV & v->flags)) {
 
-		if (!strcmp(limit_text, v->text)) {
+		if (!strcmp(limit_text, v->text))
 			sscanf(val, "%u", &limit);
-		} else if (!strcmp(mincount_text, v->text)) {
+		else if (!strcmp(mincount_text, v->text)) {
 			if (1 != sscanf(val, "%d", &mincount) ||
 			    mincount < 0)
 				mincount = 0;
-		} else if (!strcmp(resall_text, v->text)) {
+		} else if (!strcmp(resall_text, v->text))
 			sscanf(val, resaxx_fmt, &resall);
-		} else if (!strcmp(resany_text, v->text)) {
+		else if (!strcmp(resany_text, v->text))
 			sscanf(val, resaxx_fmt, &resany);
-		} else if (!strcmp(laddr_text, v->text)) {
+		else if (!strcmp(maxlstint_text, v->text))
+			sscanf(val, "%u", &maxlstint);
+		else if (!strcmp(laddr_text, v->text)) {
 			if (decodenetnum(val, &laddr))
 				lcladr = getinterface(&laddr, 0);
 		} else if (1 == sscanf(v->text, last_fmt, &i) &&
@@ -3004,6 +3043,7 @@ static void read_mru_list(
 	/*
 	 * send up to limit= entries
 	 */
+	get_systime(&now);
 	prior_mon = NULL;
 	for (count = 0;
 	     count < limit && mon != NULL;
@@ -3011,14 +3051,19 @@ static void read_mru_list(
 
 		if (mon->count < mincount)
 			continue;
-		if (resall && (resall != (resall & mon->flags)))
+		if (resall && resall != (resall & mon->flags))
 			continue;
 		if (resany && !(resany & mon->flags))
 			continue;
-		if (lcladr != NULL && (mon->lcladr != lcladr))
+		if (maxlstint > 0 && now.l_ui - mon->last.l_ui >
+		    maxlstint)
+			continue;
+		if (lcladr != NULL && mon->lcladr != lcladr)
 			continue;
 
 		send_mru_entry(mon, count);
+		if (!count)
+			send_random_tag_value(0);
 		count++;
 		prior_mon = mon;
 	}
@@ -3028,29 +3073,8 @@ static void read_mru_list(
 	 * a now= l_fp timestamp.
 	 */
 	if (NULL == mon) {
-		/*
-		 * If any entries were returned toss in a garbage tag
-		 * to try to force clients to ignore unrecognized tags.
-		 * The tag will have the .# form with the index from the
-		 * last entry.
-		 * Make it three characters knowing that none of the
-		 * currently-used tags have that length, avoiding any
-		 * need to test for collision.
-		 */
-		if (count) {
-			noise = ntp_random();
-			buf[0] = 'a' + noise % 26;
-			noise >>= 5;
-			buf[1] = 'a' + noise % 26;
-			noise >>= 5;
-			buf[2] = 'a' + noise % 26;
-			noise >>= 5;
-			buf[3] = '.';
-			snprintf(&buf[4], sizeof(buf) - 4, "%d",
-				 count - 1);
-			ctl_putuint(buf, noise);
-		}
-		get_systime(&now);
+		if (count > 1)
+			send_random_tag_value(count - 1);
 		snprintf(buf, sizeof(buf), l_fp_hexfmt,
 			 now.l_ui, now.l_uf);
 		ctl_putunqstr("now", buf, strlen(buf));
@@ -3061,6 +3085,159 @@ static void read_mru_list(
 				 prior_mon->last.l_uf);
 			ctl_putunqstr("last.newest", buf, strlen(buf));
 		}
+	}
+	ctl_flushpkt(0);
+}
+
+
+/*
+ * Send a ifstats entry in response to a "ntpq -c ifstats" request.
+ *
+ * To keep clients honest about not depending on the order of values,
+ * and thereby avoid being locked into ugly workarounds to maintain
+ * backward compatibility later as new fields are added to the response,
+ * the order is random.
+ */
+static void
+send_ifstats_entry(
+	struct interface *	la,
+	u_int			ifnum
+	)
+{
+	const char addr_fmtu[] =	"addr.%u";
+	const char bcast_fmt[] =	"bcast.%u";
+	const char en_fmt[] =		"en.%u";	/* enabled */
+	const char name_fmt[] =		"name.%u";
+	const char flags_fmt[] =	"flags.%u";
+	const char tl_fmt[] =		"tl.%u";	/* ttl */
+	const char mc_fmt[] =		"mc.%u";	/* mcast count */
+	const char rx_fmt[] =		"rx.%u";
+	const char tx_fmt[] =		"tx.%u";
+	const char txerr_fmt[] =	"txerr.%u";
+	const char pc_fmt[] =		"pc.%u";	/* peer count */
+	const char up_fmt[] =		"up.%u";	/* uptime */
+	char	tag[32];
+	u_char	sent[12]; /* 12 tag=value pairs */
+	int	noisebits;
+	u_int32 noise;
+	u_int	which;
+	u_int	remaining;
+	char *	pch;
+
+	remaining = COUNTOF(sent);
+	memset(sent, 0, sizeof(sent));
+	noise = 0;
+	noisebits = 0;
+	while (remaining > 0) {
+		if (noisebits < 4) {
+			noise = ntp_random();
+			noisebits = 31;
+		}
+		which = (noise & 0xf) % COUNTOF(sent);
+		noise >>= 4;
+		noisebits -= 4;
+
+		while (sent[which])
+			which = (which + 1) % COUNTOF(sent);
+
+		switch (which) {
+
+		case 0:
+			snprintf(tag, sizeof(tag), addr_fmtu, ifnum);
+			pch = sptoa(&la->sin);
+			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+
+		case 1:
+			snprintf(tag, sizeof(tag), bcast_fmt, ifnum);
+			if (INT_BCASTOPEN & la->flags)
+				pch = sptoa(&la->bcast);
+			else
+				pch = "";
+			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+
+		case 2:
+			snprintf(tag, sizeof(tag), en_fmt, ifnum);
+			ctl_putint(tag, !la->ignore_packets);
+			break;
+
+		case 3:
+			snprintf(tag, sizeof(tag), name_fmt, ifnum);
+			ctl_putstr(tag, la->name, strlen(la->name));
+			break;
+
+		case 4:
+			snprintf(tag, sizeof(tag), flags_fmt, ifnum);
+			ctl_puthex(tag, (u_int)la->flags);
+			break;
+
+		case 5:
+			snprintf(tag, sizeof(tag), tl_fmt, ifnum);
+			ctl_putint(tag, la->last_ttl);
+			break;
+
+		case 6:
+			snprintf(tag, sizeof(tag), mc_fmt, ifnum);
+			ctl_putint(tag, la->num_mcast);
+			break;
+
+		case 7:
+			snprintf(tag, sizeof(tag), rx_fmt, ifnum);
+			ctl_putint(tag, la->received);
+			break;
+
+		case 8:
+			snprintf(tag, sizeof(tag), tx_fmt, ifnum);
+			ctl_putint(tag, la->sent);
+			break;
+
+		case 9:
+			snprintf(tag, sizeof(tag), txerr_fmt, ifnum);
+			ctl_putint(tag, la->notsent);
+			break;
+
+		case 10:
+			snprintf(tag, sizeof(tag), pc_fmt, ifnum);
+			ctl_putuint(tag, la->peercnt);
+			break;
+
+		case 11:
+			snprintf(tag, sizeof(tag), up_fmt, ifnum);
+			ctl_putuint(tag, current_time - la->starttime);
+			break;
+		}
+		sent[which] = TRUE;
+		remaining--;
+	}
+	send_random_tag_value((int)ifnum);
+}
+
+	
+/*
+ * read_ifstats - CTL_OP_READ_IFSTATS for ntpq -c ifstats, modeled on
+ *		  ntpdc -c ifstats.
+ */
+static void read_ifstats(
+	struct recvbuf *	rbufp,
+	int			restrict_mask
+	)
+{
+	u_int			ifidx;
+	struct interface *	la;
+
+	/*
+	 * loop over [0..sys_ifnum] searching inter_list for each
+	 * ifnum in turn.
+	 */
+	for (ifidx = 0; ifidx < sys_ifnum; ifidx++) {
+		for (la = inter_list; la != NULL; la = la->link)
+			if (ifidx == la->ifnum)
+				break;
+		if (NULL == la)
+			continue;
+		/* return stats for one local address */
+		send_ifstats_entry(la, ifidx);
 	}
 	ctl_flushpkt(0);
 }
