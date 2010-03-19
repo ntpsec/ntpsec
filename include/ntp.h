@@ -880,4 +880,6 @@ struct endpoint {
 #define NETINFO_CONFIG_DIR "/config/ntp"
 #endif
 
+/* ntpq -c mrulist rows per request limit in ntpd */
+#define MRU_ROW_LIMIT	256
 #endif /* NTP_H */

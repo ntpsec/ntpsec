@@ -2995,8 +2995,8 @@ static void read_mru_list(
 	}
 	free_varlist(in_parms);
 	in_parms = NULL;
-	if (!(0 < limit && limit <= 256)) {
-		ctl_error(CERR_BADFMT);
+	if (!(0 < limit && limit <= MRU_ROW_LIMIT)) {
+		ctl_error(CERR_BADVALUE);
 		return;
 	}
 

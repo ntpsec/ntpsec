@@ -370,8 +370,18 @@ struct xcmd builtins[] = {
  * Default values we use.
  */
 #define	DEFHOST		"localhost"	/* default host name */
-#define	DEFTIMEOUT	(5)		/* 5 second time out */
-#define	DEFSTIMEOUT	(2)		/* 2 second time out after first */
+#define	DEFTIMEOUT	5		/* wait 5 seconds for 1st pkt */
+#define	DEFSTIMEOUT	3		/* and 3 more for each additional */
+/*
+ * Requests are automatically retried once, so total timeout with no
+ * response is a bit over 2 * DEFTIMEOUT, or 10 seconds.  At the other
+ * extreme, a request eliciting 32 packets of responses each for some
+ * reason nearly DEFSTIMEOUT seconds after the prior in that series,
+ * with a single packet dropped, would take around 32 * DEFSTIMEOUT, or
+ * 93 seconds to fail each of two times, or 186 seconds.
+ * Some commands involve a series of requests, such as "peers" and
+ * "mrulist", so the cumulative timeouts are even longer for those.
+ */
 #define	DEFDELAY	0x51EB852	/* 20 milliseconds, l_fp fraction */
 #define	LENHOSTNAME	256		/* host name is 256 characters long */
 #define	MAXCMDS		100		/* maximum commands on cmd line */
@@ -851,17 +861,17 @@ getresponse(
 
 	/*
 	 * Loop until we have an error or a complete response.  Nearly all
-	 * aths to loop again use continue.
+	 * code paths to loop again use continue.
 	 */
 	for (;;) {
 
 		if (numfrags == 0)
-		    tvo = tvout;
+			tvo = tvout;
 		else
-		    tvo = tvsout;
+			tvo = tvsout;
 		
 		FD_SET(sockfd, &fds);
-		n = select(sockfd+1, &fds, (fd_set *)0, (fd_set *)0, &tvo);
+		n = select(sockfd + 1, &fds, NULL, NULL, &tvo);
 
 		if (n == -1) {
 			warning("select fails", "", "");
@@ -873,24 +883,30 @@ getresponse(
 			 */
 			if (numfrags == 0) {
 				if (timeo)
-				    (void) fprintf(stderr,
-						   "%s: timed out, nothing received\n",
-						   currenthost);
+					fprintf(stderr,
+						"%s: timed out, nothing received\n",
+						currenthost);
 				return ERR_TIMEOUT;
 			} else {
 				if (timeo)
-				    (void) fprintf(stderr,
+					fprintf(stderr,
 						   "%s: timed out with incomplete data\n",
 						   currenthost);
 				if (debug) {
-					printf("Received fragments:\n");
+					fprintf(stderr,
+						"ERR_INCOMPLETE: Received fragments:\n");
 					for (n = 0; n < numfrags; n++)
-					    printf("%4d %d\n", offsets[n],
-						   counts[n]);
-					if (seenlastfrag)
-					    printf("last fragment received\n");
-					else
-					    printf("last fragment not received\n");
+						fprintf(stderr,
+							"%2d: %5d %5d\t%3d octets\n",
+							n, offsets[n],
+							offsets[n] +
+							counts[n],
+							counts[n]);
+					fprintf(stderr,
+						"last fragment %sreceived\n",
+						(seenlastfrag)
+						    ? ""
+						    : "not ");
 				}
 				return ERR_INCOMPLETE;
 			}

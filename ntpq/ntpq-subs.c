@@ -2252,6 +2252,7 @@ collect_mru_list(
 	l_fp *	pnow
 	)
 {
+	static int ntpd_row_limit = MRU_ROW_LIMIT;
 	int c_mru_l_rc;		/* this function's return code */
 	u_char got;		/* MRU_GOT_* bits */
 	const char ts_fmt[] = "0x%08x.%08x";
@@ -2280,7 +2281,7 @@ collect_mru_list(
 	l_fp last_older;
 	sockaddr_u addr_older;
 	int have_now;
-	int have_addr_older;
+	int have_addr_older; 
 	int have_last_older;
 	u_short hash;
 	mru *unlinked;
@@ -2302,7 +2303,7 @@ collect_mru_list(
 	memset(pnow, 0, sizeof(*pnow));
 	memset(&last_older, 0, sizeof(last_older));
 
-	limit = 32;
+	limit = min(3 * MAXFRAGS, ntpd_row_limit);
 	snprintf(req_buf, sizeof(req_buf), "limit=%d%s", limit, parms);
 
 	while (TRUE) {
@@ -2335,6 +2336,10 @@ collect_mru_list(
 				NTP_INSIST(unlinked == recent);
 				free(recent);
 			}
+		} else if (CERR_BADVALUE == qres /* temp -> */ || CERR_BADFMT == qres /* <- temp */) {
+			/* ntpd has lower cap on row limit */
+			ntpd_row_limit--;
+			limit = min(limit, ntpd_row_limit);
 		} else if (ERR_INCOMPLETE == qres) {
 			/*
 			 * Reduce the number of rows to minimize effect
@@ -2536,10 +2541,12 @@ collect_mru_list(
 		 * If there were no errors, increase the number of rows
 		 * to a maximum of 3 * MAXFRAGS (the most packets ntpq
 		 * can handle in one response), on the assumption that
-		 * no less than 3 rows fit in each packet.
+		 * no less than 3 rows fit in each packet, capped at 
+		 * our best guess at the server's row limit.
 		 */
 		if (!qres)
-			limit = min(3 * MAXFRAGS, limit * 3 / 2);
+			limit = min3(3 * MAXFRAGS, ntpd_row_limit,
+				     max(limit + 1, limit * 33 / 32));
 		/*
 		 * prepare next query with as many address and last-seen
 		 * timestamps as will fit in a single packet.

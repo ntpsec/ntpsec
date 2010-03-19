@@ -18,9 +18,25 @@
 #define	MAXARGS	4
 
 /*
- * Limit on packets in a single response
+ * Limit on packets in a single response.  Increasing this value to
+ * 96 will marginally speed "mrulist" operation on lossless networks
+ * but it has been observed to cause loss on WiFi networks and with
+ * an IPv6 go6.net tunnel over UDP.  That loss causes the request
+ * row limit to be cut in half, and it grows back very slowly to
+ * ensure forward progress is made and loss isn't triggered too quickly
+ * afterward.  While the lossless case gains only marginally with
+ * MAXFRAGS == 96, the lossy case is a lot slower due to the repeated
+ * timeouts.  Empirally, MAXFRAGS == 32 avoids most of the routine loss
+ * on both the WiFi and UDP v6 tunnel tests and seems a good compromise.
+ * This suggests some device in the path has a limit of 32 ~512 byte UDP
+ * packets in queue.
+ * Lowering MAXFRAGS may help with particularly lossy networks, but some
+ * ntpq commands may rely on the longtime value of 24 implicitly,
+ * assuming a single multipacket response will be large enough for any
+ * needs.  In contrast, the "mrulist" command is implemented as a series
+ * of requests and multipacket responses to each.
  */
-#define	MAXFRAGS	64
+#define	MAXFRAGS	32
 
 /*
  * Error codes for internal use
