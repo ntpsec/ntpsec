@@ -635,7 +635,6 @@ struct pkt {
 #define	PEVNT_POPCORN	(13 | PEER_EVENT) /* popcorn */
 #define	PEVNT_XLEAVE	(14 | PEER_EVENT) /* interleave mode */
 #define	PEVNT_XERR	(15 | PEER_EVENT) /* interleave error */
-#define	PEVNT_TAI	(16 | PEER_EVENT) /* TAI */
 
 /*
  * Clock event codes
