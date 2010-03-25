@@ -3473,12 +3473,11 @@ pool_xmit(
 	pool->sent++;
 	pool->throttle += (1 << pool->minpoll) - 2;
 #ifdef DEBUG
-	msyslog(LOG_NOTICE, "transmit: at %ld %s->%s pool\n", /* !!!!! */
-		    current_time, latoa(lcladr), stoa(rmtadr));
 	if (debug)
 		printf("transmit: at %ld %s->%s pool\n",
 		    current_time, latoa(lcladr), stoa(rmtadr));
 #endif
+	msyslog(LOG_INFO, "Soliciting pool server %s\n", stoa(rmtadr));
 #endif	/* WORKER */
 }
 

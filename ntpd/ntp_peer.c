@@ -375,9 +375,6 @@ score_all(
 
 	if (tamp != temp)
 		temp = 0;
-	else // !!!!!
-		msyslog(LOG_INFO, "score_all(%s) min %d bye",
-			stoa(&peer->srcadr), temp);
 
 	return temp;
 }

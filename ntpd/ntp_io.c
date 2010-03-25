@@ -2423,8 +2423,8 @@ io_setbclient(void)
 			prev_refid = interf->addr_refid;
 			interf->addr_refid = addr2refid(&interf->sin);
 			if (prev_refid != interf->addr_refid)
-				msyslog(LOG_NOTICE,	// !!!!!
-					"io_setbclient: addr_refid for %s updated %8.8x -> %8.8x",
+				msyslog(LOG_NOTICE,
+					"io_setbclient: code is not dead, addr_refid for %s updated %8.8x -> %8.8x, please email hart@ntp.org to remove this message",
 					stoa(&interf->sin), prev_refid,
 					interf->addr_refid);
 		}

@@ -2309,8 +2309,6 @@ collect_mru_list(
 	while (TRUE) {
 		if (debug)
 			fprintf(stderr, "READ_MRU: %s\n", req_buf);
-		// if (debug) !!!!!
-			fprintf(stderr, "%d ", limit);
 				
 		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
 			         req_buf, &rstatus, &rsize, &rdata, TRUE);
@@ -2573,9 +2571,6 @@ collect_mru_list(
 		}
 		NTP_INSIST(ri > 0 || NULL == recent);
 	}
-
-	// if (debug)   !!!!!
-		fprintf(stderr, "\n");
 
 	c_mru_l_rc = TRUE;
 
@@ -2873,21 +2868,25 @@ mrulist(
 			fflush(fp);
 	}
 	fflush(fp);
-	// if (debug) !!!!!
-	fprintf(stderr, "--- completed, freeing sorted[] pointers\n");
-	fflush(stderr);
+	if (debug) {
+		fprintf(stderr,
+			"--- completed, freeing sorted[] pointers\n");
+		fflush(stderr);
+	}
 	free(sorted);
 
 cleanup_return:
-	// if (debug) !!!!!
-	fprintf(stderr, "... freeing MRU entries\n");
-	fflush(stderr);
+	if (debug) {
+		fprintf(stderr, "... freeing MRU entries\n");
+		fflush(stderr);
+	}
 	ITER_DLIST_BEGIN(mru_list, recent, mlink, mru)
 		free(recent);
 	ITER_DLIST_END()
-	// if (debug) !!!!!
-	fprintf(stderr, "... freeing hash_table[]\n");
-	fflush(stderr);
+	if (debug) {
+		fprintf(stderr, "... freeing hash_table[]\n");
+		fflush(stderr);
+	}
 	free(hash_table);
 	hash_table = NULL;
 	INIT_DLIST(mru_list, mlink);

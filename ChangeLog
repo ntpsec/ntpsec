@@ -1,4 +1,67 @@
 * [Bug 1483] AI_NUMERICSERV undefined in 4.2.7p20.
+* [Bug 1497] fudge is broken by getnetnum() change.
+* [Bug 1503] Auto-enabling of monitor for "restrict ... limited" wrong.
+* [Bug 1504] ntpdate tickles ntpd "discard minimum 1" rate limit if
+  "restrict ... limited" is used.
+* ntpdate: stop querying source after KoD packet response, log it.
+* ntpdate: rate limit each server to 2s between packets.
+* Broadcast client (ephemeral) associations should be demobilized only
+  if they are not heard from for 10 consecutive polls, regardless of
+  surviving the clock selection.  Fix from David Mills.
+* Add "ntpq -c ifstats" similar to "ntpdc -c ifstats".
+* Add "ntpq -c sysstats" similar to "ntpdc -c sysstats".
+* Add "ntpq -c monstats" to show monlist knobs and stats.
+* Add "ntpq -c mrulist" similar to "ntpdc -c monlist" but not
+  limited to 600 rows, and with filtering and sorting options:
+  ntpq -c "mrulist mincount=2 laddr=192.168.1.2 sort=-avgint"
+  ntpq -c "mrulist sort=addr"
+  ntpq -c "mrulist mincount=2 sort=count"
+  ntpq -c "mrulist sort=-lstint"
+* Modify internal representation of MRU list to use l_fp fixed-point
+  NTP timestamps instead of seconds since startup.  This increases the
+  resolution and substantially improves accuracy of sorts involving
+  timestamps, at the cost of flushing all MRU entries when the clock is
+  stepped, to ensure the timestamps can be compared with the current
+  get_systime() results.
+* Add ntp.conf "mru" directive to configure MRU parameters, such as
+  "mru mindepth 600 maxage 64 maxdepth 5000 maxmem 1024" or
+  "mru initalloc 0 initmem 16 incalloc 99 incmem 4".  Several pairs are
+  equivalent with one in units of MRU entries and its twin in units of
+  kilobytes of memory, so the last one used in ntp.conf controls:
+  maxdepth/maxmem, initalloc/initmem, incalloc/incmem.  With the above
+  values, ntpd will preallocate 16kB worth of MRU entries, allocating
+  4kB worth each time more are needed, with a hard limit of 1MB of MRU
+  entries.  Until there are more than 600 entries none would be reused.
+  Then only entries for addresses last seen 64 seconds or longer ago are
+  reused.
+* Limit "ntpdc -c monlist" response in ntpd to 600 entries, the previous
+  overall limit on the MRU list depth which was driven by the monlist
+  implementation limit of one request with a single multipacket
+  response.
+* New "pool" directive implementation modeled on manycastclient.
+* Do not abort on non-ASCII characters in ntp.conf, ignore them.
+* ntpq: increase response reassembly limit from 24 to 32 packets, add
+  discussion in comment regarding results with even larger MAXFRAGS.
+* ntpq: handle "passwd MYPASSWORD" (without prompting) as with ntpdc.
+* ntpdc: do not examine argument to "passwd" if not supplied.
+* configure: remove check for pointer type used with qsort(), we
+  require ANSI C which mandates void *.
+* Reset sys_kodsent to 0 in proto_clr_stats().
+* Add sptoa()/sockporttoa() similar to stoa()/socktoa() adding :port.
+* Use memcpy() instead of memmove() when buffers can not overlap.
+* Remove sockaddr_storage from our sockaddr_u union of sockaddr,
+  sockaddr_in, and sockaddr_in6, shaving about 100 bytes from its size
+  and substantially decreasing MRU entry memory consumption.
+* Extend ntpq readvar (alias rv) to allow fetching up to three named
+  variables in one operation:  ntpq -c "rv 0 version offset frequency".
+* ntpq: use srchost variable to show .POOL. prototype associations'
+  hostname instead of address 0.0.0.0.
+* "restrict source ..." configures override restrictions for time
+  sources, allows tight default restrictions to be used with the pool
+  directive (where server addresses are not known in advance).
+* Ignore "preempt" modifier on manycastclient and pool prototype
+  associations.  The resulting associations are preemptible, but the
+  prototype must not be.
 * Maintain and use linked list of associations (struct peer) in ntpd,
   avoiding walking 128 hash table entries to iterate over peers.
 * Remove more workarounds unneeded since we require ISO C90 AKA ANSI C:
@@ -18,7 +81,7 @@
 * Correct Windows port's refclock_open() to return 0 on failure not -1.
 * Correct CHU, dumbclock, and WWVB drivers to check for 0 returned from
   refclock_open() on failure.
-* Repair ntpdate.c to handle no longer testing HAVE_TIMER_SETTIME.
+* Repair ntpdate.c to no longer test HAVE_TIMER_SETTIME.
 * Do not reference peer_node/unpeer_node after freeing when built with
   --disable-saveconfig and using DNS.
 (4.2.7p20) 2010/02/13 Released by Harlan Stenn <stenn@ntp.org>
