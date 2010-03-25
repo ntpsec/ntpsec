@@ -365,7 +365,6 @@ static u_char def_clock_var[] = {
  */
 static const char addr_fmt[] =		"addr.%d";
 static const char last_fmt[] =		"last.%d";
-static const char l_fp_hexfmt[] =	"0x%08x.%08x";
 
 /*
  * System and processor definitions.
@@ -1294,8 +1293,8 @@ ctl_putts(
 
 	*cp++ = '=';
 	NTP_INSIST((cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%08lx.%08lx",
-		 ts->l_ui & 0xffffffffUL, ts->l_uf & 0xffffffffUL);
+	snprintf(cp, sizeof(buffer) - (cp - buffer), "0x%08x.%08x",
+		 (u_int)ts->l_ui, (u_int)ts->l_uf);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
 }
@@ -2696,7 +2695,6 @@ send_mru_entry(
 	const char mv_fmt[] =		"mv.%d";
 	const char rs_fmt[] =		"rs.%d";
 	char	tag[32];
-	char	buf[128];
 	u_char	sent[6]; /* 6 tag=value pairs */
 	u_int32 noise;
 	u_int	which;
@@ -2722,16 +2720,12 @@ send_mru_entry(
 
 		case 1:
 			snprintf(tag, sizeof(tag), last_fmt, count);
-			snprintf(buf, sizeof(buf), l_fp_hexfmt,
-				 mon->last.l_ui, mon->last.l_uf);
-			ctl_putunqstr(tag, buf, strlen(buf));
+			ctl_putts(tag, &mon->last);
 			break;
 
 		case 2:
 			snprintf(tag, sizeof(tag), first_fmt, count);
-			snprintf(buf, sizeof(buf), l_fp_hexfmt,
-				 mon->first.l_ui, mon->first.l_uf);
-			ctl_putunqstr(tag, buf, strlen(buf));
+			ctl_putts(tag, &mon->first);
 			break;
 
 		case 3:
@@ -2978,7 +2972,7 @@ static void read_mru_list(
 				lcladr = getinterface(&laddr, 0);
 		} else if (1 == sscanf(v->text, last_fmt, &i) &&
 			   i < COUNTOF(last)) {
-			if (2 == sscanf(val, l_fp_hexfmt, &ui, &uf)) {
+			if (2 == sscanf(val, "0x%08x.%08x", &ui, &uf)) {
 				last[i].l_ui = ui;
 				last[i].l_uf = uf;
 				if (!SOCK_UNSPEC(&addr[i]) &&
@@ -3024,9 +3018,7 @@ static void read_mru_list(
 			return;
 		}
 		/* confirm the prior entry used as starting point */
-		snprintf(buf, sizeof(buf), l_fp_hexfmt, mon->last.l_ui,
-			 mon->last.l_uf);
-		ctl_putunqstr("last.older", buf, strlen(buf));
+		ctl_putts("last.older", &mon->last);
 		pch = sptoa(&mon->rmtadr);
 		ctl_putunqstr("addr.older", pch, strlen(pch));
 
@@ -3075,16 +3067,10 @@ static void read_mru_list(
 	if (NULL == mon) {
 		if (count > 1)
 			send_random_tag_value(count - 1);
-		snprintf(buf, sizeof(buf), l_fp_hexfmt,
-			 now.l_ui, now.l_uf);
-		ctl_putunqstr("now", buf, strlen(buf));
+		ctl_putts("now", &now);
 		/* if any entries were returned confirm the last */
-		if (prior_mon != NULL) {
-			snprintf(buf, sizeof(buf), l_fp_hexfmt,
-				 prior_mon->last.l_ui,
-				 prior_mon->last.l_uf);
-			ctl_putunqstr("last.newest", buf, strlen(buf));
-		}
+		if (prior_mon != NULL)
+			ctl_putts("last.newest", &prior_mon->last);
 	}
 	ctl_flushpkt(0);
 }
