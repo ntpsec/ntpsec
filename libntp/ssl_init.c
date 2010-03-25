@@ -37,7 +37,7 @@ ssl_check_version(void)
 {
 	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
 		msyslog(LOG_WARNING,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx",
+		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
 		    OPENSSL_VERSION_NUMBER, SSLeay());
 		fprintf(stderr,
 		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
@@ -61,6 +61,7 @@ keytype_from_text(
 	size_t *pdigest_len
 	)
 {
+	const u_long	max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
 	int		key_type;
 	u_int		digest_len;
 #ifdef OPENSSL
@@ -93,19 +94,17 @@ keytype_from_text(
 
 	if (NULL != pdigest_len) {
 #ifdef OPENSSL
-		u_long max_digest_len = 0;
-		if (MAX_MAC_LEN > sizeof(keyid_t))
-			max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
-
 		EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
 		EVP_DigestFinal(&ctx, digest, &digest_len);
 		if (digest_len > max_digest_len) {
 			fprintf(stderr,
 				"key type %s %u octet digests are too big, max %lu\n",
-				keytype_name(key_type), digest_len, max_digest_len);
+				keytype_name(key_type), digest_len,
+				max_digest_len);
 			msyslog(LOG_ERR,
-				"key type %s %u octet digests are too big, max %lu",
-				keytype_name(key_type), digest_len, max_digest_len);
+				"key type %s %u octet digests are too big, max %lu\n",
+				keytype_name(key_type), digest_len,
+				max_digest_len);
 			return 0;
 		}
 #else
