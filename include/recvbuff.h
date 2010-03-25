@@ -65,7 +65,7 @@ struct recvbuf {
 	SOCKET	fd;			/* fd on which it was received */
 	int msg_flags;			/* Flags received about the packet */
 	l_fp recv_time;			/* time of arrival */
-	void (*receiver) (struct recvbuf *); /* routine to receive buffer */
+	void (*receiver)(struct recvbuf *); /* routine to receive buffer */
 	int recv_length;		/* number of octets received */
 	union {
 		struct pkt X_recv_pkt;

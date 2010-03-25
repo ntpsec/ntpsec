@@ -38,7 +38,6 @@ libntp_a_SRCS =						\
 	iosignal.c					\
 	lib_strbuf.c					\
 	machines.c					\
-	memmove.c					\
 	mfptoa.c					\
 	ntp_lineedit.c					\
 	mfptoms.c					\
@@ -62,7 +61,6 @@ libntp_a_SRCS =						\
 	ssl_init.c					\
 	statestr.c					\
 	strdup.c					\
-	strstr.c					\
 	syssignal.c					\
 	tsftomsu.c					\
 	tstotv.c					\

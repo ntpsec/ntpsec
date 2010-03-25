@@ -18,6 +18,9 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 #ifdef HAVE_IEEEFP_H
 # include <ieeefp.h>
@@ -104,10 +107,11 @@ double	old_drift = 1e9;		/* current frequency */
 static double prev_drift_comp;		/* last frequency update */
 
 /*
- * Static prototypes
+ * Function prototypes
  */
-static int leap_file(FILE *);
-static void record_sys_stats(void);
+static	int	leap_file(FILE *);
+static	void	record_sys_stats(void);
+	void	ntpd_time_stepped(void);
 
 /* 
  * Prototypes
@@ -158,14 +162,11 @@ uninit_util(void)
 
 
 /*
- * init_util - initialize the utilities (ntpd included)
+ * init_util - initialize the util module of ntpd
  */
 void
 init_util(void)
 {
-	stats_drift_file = NULL;
-	stats_temp_file = NULL;
-	key_file_name = NULL;
 	filegen_register(statsdir, "peerstats",   &peerstats);
 	filegen_register(statsdir, "loopstats",   &loopstats);
 	filegen_register(statsdir, "clockstats",  &clockstats);
@@ -178,8 +179,13 @@ init_util(void)
 #ifdef DEBUG_TIMING
 	filegen_register(statsdir, "timingstats", &timingstats);
 #endif /* DEBUG_TIMING */
+	/*
+	 * register with libntp ntp_set_tod() to call us back
+	 * when time is stepped.
+	 */
+	step_callback = &ntpd_time_stepped;
 #ifdef DEBUG
-	atexit(uninit_util);
+	atexit(&uninit_util);
 #endif /* DEBUG */
 }
 
@@ -409,9 +415,9 @@ stats_config(
 		stats_temp_file = erealloc(stats_temp_file, 
 					   len + sizeof(".TEMP"));
 
-		memmove(stats_drift_file, value, (unsigned)(len+1));
-		memmove(stats_temp_file, value, (unsigned)len);
-		memmove(stats_temp_file + len,
+		memcpy(stats_drift_file, value, (size_t)(len + 1));
+		memcpy(stats_temp_file, value, (size_t)len);
+		memcpy(stats_temp_file + len,
 #if !defined(VMS)
 			".TEMP", sizeof(".TEMP"));
 #else
@@ -760,7 +766,7 @@ record_sys_stats(void)
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (sysstats.fp != NULL) {
-                fprintf(sysstats.fp,
+		fprintf(sysstats.fp,
 		    "%lu %s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
 		    day, ulfptoa(&now, 3), current_time - sys_stattime,
 		    sys_received, sys_processed, sys_newversion,
@@ -1019,7 +1025,7 @@ getauthkeys(
 	
 #ifndef SYS_WINNT
 	key_file_name = erealloc(key_file_name, len + 1);
-	memmove(key_file_name, keyfile, len + 1);
+	memcpy(key_file_name, keyfile, len + 1);
 #else
 	key_file_name = erealloc(key_file_name, _MAX_PATH);
 	if (len + 1 > _MAX_PATH)
@@ -1044,53 +1050,6 @@ rereadkeys(void)
 {
 	if (NULL != key_file_name)
 		authreadkeys(key_file_name);
-}
-
-
-/*
- * sock_hash - hash a sockaddr_u structure
- */
-u_short
-sock_hash(
-	sockaddr_u *addr
-	)
-{
-	u_int hashVal;
-	u_int j;
-	size_t len;
-	u_char *pch;
-	hashVal = 0;
-	len = 0;
-
-	/*
-	 * We can't just hash the whole thing because there are hidden
-	 * fields in sockaddr_in6 that might be filled in by recvfrom(),
-	 * so just use the family, port and address.
-	 */
-	pch = (u_char *)&AF(addr);
-	hashVal = 37 * hashVal + *pch;
-	if (sizeof(AF(addr)) > 1) {
-		pch++;
-		hashVal = 37 * hashVal + *pch;
-	}
-	switch(AF(addr)) {
-	case AF_INET:
-		pch = (u_char *)&SOCK_ADDR4(addr);
-		len = sizeof(SOCK_ADDR4(addr));
-		break;
-
-	case AF_INET6:
-		pch = (u_char *)&SOCK_ADDR6(addr);
-		len = sizeof(SOCK_ADDR6(addr));
-		break;
-	}
-
-	for (j = 0; j < len ; j++)
-		hashVal = 37 * hashVal + pch[j];
-
-	hashVal = hashVal & NTP_HASH_MASK;
-
-	return (u_short)hashVal;
 }
 
 
@@ -1128,4 +1087,30 @@ char * fstostr(
 		strcpy(str, "gmtime() error");
 
 	return str;
+}
+
+
+/*
+ * ntpd_time_stepped is called back by step_systime(), allowing ntpd
+ * to do any one-time processing necessitated by the step.
+ */
+void
+ntpd_time_stepped(void)
+{
+	u_int saved_mon_enabled;
+
+	/*
+	 * flush the monitor MRU list which contains l_fp timestamps
+	 * which should not be compared across the step.
+	 */
+	if (MON_OFF != mon_enabled) {
+		saved_mon_enabled = mon_enabled;
+		mon_stop(MON_OFF);
+		mon_start(saved_mon_enabled);
+	}
+
+	/* inform interpolating Windows code to allow time to go back */
+#ifdef SYS_WINNT
+	win_time_stepped();
+#endif
 }

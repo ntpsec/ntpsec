@@ -176,8 +176,8 @@ static struct datum_pts_unit
 static	int	datum_pts_start		(int, struct peer *);
 static	void	datum_pts_shutdown	(int, struct peer *);
 static	void	datum_pts_poll		(int, struct peer *);
-static	void	datum_pts_control	(int, struct refclockstat *,
-					   struct refclockstat *, struct peer *);
+static	void	datum_pts_control	(int, const struct refclockstat *,
+					 struct refclockstat *, struct peer *);
 static	void	datum_pts_init		(void);
 static	void	datum_pts_buginfo	(int, struct refclockbug *, struct peer *);
 
@@ -493,7 +493,7 @@ datum_pts_poll(
 static void
 datum_pts_control(
 	int unit,
-	struct refclockstat *in,
+	const struct refclockstat *in,
 	struct refclockstat *out,
 	struct peer *peer
 	)

@@ -122,11 +122,11 @@ FGETC(
 {
 	int ch;
 	
-	ch = fgetc(stream->fd);
+	do 
+		ch = fgetc(stream->fd);
+	while (EOF != ch && (CHAR_MIN > ch || ch > CHAR_MAX));
 
 	if (EOF != ch) {
-		NTP_INSIST(CHAR_MIN <= ch && ch <= CHAR_MAX);
-
 		++stream->col_no;
 		if (ch == '\n') {
 			stream->prev_line_col_no = stream->col_no;

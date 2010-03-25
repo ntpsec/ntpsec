@@ -101,7 +101,7 @@ static	void	leitch_init	(void);
 static	int	leitch_start	(int, struct peer *);
 static	void	leitch_shutdown	(int, struct peer *);
 static	void	leitch_poll	(int, struct peer *);
-static	void	leitch_control	(int, struct refclockstat *, struct refclockstat *, struct peer *);
+static	void	leitch_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
 #define	leitch_buginfo	noentry
 static	void	leitch_receive	(struct recvbuf *);
 static	void	leitch_process	(struct leitchunit *);
@@ -201,7 +201,7 @@ leitch_poll(
 static void
 leitch_control(
 	int unit,
-	struct refclockstat *in,
+	const struct refclockstat *in,
 	struct refclockstat *out,
 	struct peer *passed_peer
 	)

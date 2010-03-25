@@ -242,7 +242,7 @@ struct resp_pkt {
  */
 
 /*
- * NTPD request codes go here.
+ * ntpdc -> ntpd request codes go here.
  */
 #define	REQ_PEER_LIST		0	/* return list of peers */
 #define	REQ_PEER_LIST_SUM	1	/* return summary info for all peers */
@@ -668,8 +668,8 @@ struct conf_restrict {
  * Structure used for returning monitor data
  */
 struct info_monitor_1 {	
-	u_int32 lasttime;	/* last packet from this host */
-	u_int32 firsttime;	/* first time we received a packet */
+	u_int32 avg_int;	/* avg s between packets from this host */
+	u_int32 last_int;	/* s since we last received a packet */
 	u_int32 restr;		/* restrict bits (was named lastdrop) */
 	u_int32 count;		/* count of packets received */
 	u_int32 addr;		/* host address V4 style */
@@ -689,8 +689,8 @@ struct info_monitor_1 {
  * Structure used for returning monitor data
  */
 struct info_monitor {	
-	u_int32 lasttime;	/* last packet from this host */
-	u_int32 firsttime;	/* first time we received a packet */
+	u_int32 avg_int;	/* avg s between packets from this host */
+	u_int32 last_int;	/* s since we last received a packet */
 	u_int32 restr;		/* restrict bits (was named lastdrop) */
 	u_int32 count;		/* count of packets received */
 	u_int32 addr;		/* host address */

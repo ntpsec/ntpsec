@@ -56,8 +56,8 @@
 #define getshort(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 #define putshort(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
 #else
-#define getshort(s) (s)
-#define putshort(s) (s)
+#define getshort(s) ((u_short)(s))
+#define putshort(s) ((u_short)(s))
 #endif
 
 /* XXX */
@@ -144,8 +144,8 @@ static	char *	jupiter_parse_t	(struct instance *, u_short *);
 static	char *	jupiter_parse_gpos	(struct instance *, u_short *);
 static	void	jupiter_platform	(struct instance *, u_int);
 static	void	jupiter_poll	(int, struct peer *);
-static	void	jupiter_control	(int, struct refclockstat *, struct
-				    refclockstat *, struct peer *);
+static	void	jupiter_control	(int, const struct refclockstat *,
+				 struct refclockstat *, struct peer *);
 #ifdef HAVE_PPSAPI
 static	int	jupiter_ppsapi	(struct instance *);
 static	int	jupiter_pps	(struct instance *);
@@ -153,9 +153,9 @@ static	int	jupiter_pps	(struct instance *);
 static	int	jupiter_recv	(struct instance *);
 static	void	jupiter_receive (struct recvbuf *rbufp);
 static	void	jupiter_reqmsg	(struct instance *, u_int, u_int);
-static	void	jupiter_reqonemsg	(struct instance *, u_int);
+static	void	jupiter_reqonemsg(struct instance *, u_int);
 static	char *	jupiter_send	(struct instance *, struct jheader *);
-static	void	jupiter_shutdown	(int, struct peer *);
+static	void	jupiter_shutdown(int, struct peer *);
 static	int	jupiter_start	(int, struct peer *);
 
 /*
@@ -422,7 +422,7 @@ jupiter_pps(struct instance *instance)
 		return 1;
 	instance->ts = ts;
 
-	tstmp.l_ui = ts.tv_sec + JAN_1970;
+	tstmp.l_ui = (u_int32)ts.tv_sec + JAN_1970;
 	dtemp = ts.tv_nsec * FRAC / 1e9;
 	tstmp.l_uf = (u_int32)dtemp;
 	instance->peer->procptr->lastrec = tstmp;
@@ -475,7 +475,7 @@ jupiter_poll(int unit, struct peer *peer)
 static void
 jupiter_control(
 	int unit,		/* unit (not used) */
-	struct refclockstat *in, /* input parameters (not used) */
+	const struct refclockstat *in, /* input parameters (not used) */
 	struct refclockstat *out, /* output parameters (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)
@@ -538,7 +538,7 @@ jupiter_receive(struct recvbuf *rbufp)
 	bpcnt = rbufp->recv_length;
 
 	/* This shouldn't happen */
-	if (bpcnt > sizeof(instance->sbuf) - instance->ssize)
+	if (bpcnt > (int)sizeof(instance->sbuf) - instance->ssize)
 		bpcnt = sizeof(instance->sbuf) - instance->ssize;
 
 	/* Append to input buffer */
@@ -612,7 +612,7 @@ jupiter_receive(struct recvbuf *rbufp)
 				break;
 
 			/* Add the new sample to a median filter */
-			tstamp.l_ui = JAN_1970 + last_timecode;
+			tstamp.l_ui = JAN_1970 + (u_int32)last_timecode;
 			tstamp.l_uf = 0;
 
 			refclock_process_offset(pp, tstamp, pp->lastrec, pp->fudgetime1);
@@ -932,8 +932,8 @@ jupiter_send(struct instance *instance, struct jheader *hp)
 	if ((cc = write(instance->peer->procptr->io.fd, (char *)hp, size)) < 0) {
 		snprintf(errstr, sizeof(errstr), "write: %s", strerror(errno));
 		return (errstr);
-	} else if (cc != size) {
-		snprintf(errstr, sizeof(errstr), "short write (%d != %d)", cc, size);
+	} else if (cc != (int)size) {
+		snprintf(errstr, sizeof(errstr), "short write (%d != %u)", cc, size);
 		return (errstr);
 	}
 	return (NULL);

@@ -51,6 +51,7 @@
  */
 double	sys_tick = 0;		/* precision (time to read the clock) */
 double	sys_residual = 0;	/* adjustment residue (s) */
+time_stepped_callback	step_callback;
 
 #ifndef SIM
 
@@ -239,6 +240,8 @@ step_systime(
 		return (0);
 	}
 	sys_residual = 0;
+	if (step_callback)
+		(*step_callback)();
 
 #ifdef NEED_HPUX_ADJTIME
 	/*

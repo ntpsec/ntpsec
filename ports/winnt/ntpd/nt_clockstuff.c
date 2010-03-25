@@ -77,7 +77,6 @@ static LONGLONG ls_elapsed;
 
 static BOOL winnt_time_initialized = FALSE;
 static BOOL winnt_use_interpolation = FALSE;
-static ULONGLONG last_interp_time;
 static unsigned clock_thread_id;
 
 
@@ -86,7 +85,7 @@ static void StartClockThread(void);
 static void tune_ctr_freq(LONGLONG, LONGLONG);
 void StopClockThread(void);
 void atexit_revert_mm_timer(void);
-void time_stepped(void);
+void win_time_stepped(void);
 
 static HANDLE clock_thread = NULL;
 static HANDLE TimerThreadExitRequest = NULL;
@@ -118,8 +117,9 @@ static volatile int	newest_baseline_gen = 0;
 static ULONGLONG	baseline_counts[BASELINES_TOT] = {0};
 static LONGLONG		baseline_times[BASELINES_TOT] = {0};
 
+#define CLOCK_BACK_THRESHOLD	100	/* < 10us unremarkable */
+static ULONGLONG	clock_backward_max = CLOCK_BACK_THRESHOLD;
 static int		clock_backward_count;
-static ULONGLONG	clock_backward_max;
 
 
 /*
@@ -650,12 +650,6 @@ init_winnt_time(void)
 	if (-1 == setpriority(PRIO_PROCESS, 0, NTP_PRIO))
 		exit(-1);
 
-	/*
-	 * register with libntp ntp_set_tod() to call us back
-	 * when time is stepped.
-	 */
-	step_callback = time_stepped;
-
 	/* 
 	 * before we start looking at clock period, do any multimedia
 	 * timer manipulation requested via -M option.
@@ -805,26 +799,31 @@ GetInterpTimeAsFileTime(
 	LPFILETIME pft
 	)
 {
+	static ULONGLONG last_interp_time;
 	FT_ULL now_time;
 	FT_ULL now_count;
+	ULONGLONG clock_backward;
 
-	/*  Mark a mark ASAP. The latency to here should
-	 *  be reasonably deterministic
-	*/
+	/*
+	 * Mark a mark ASAP.  The latency to here should be reasonably
+	 * deterministic
+	 */
 
 	now_count.ull = perf_ctr();
 	now_time.ull = interp_time(now_count.ull, TRUE);
 
-	if (last_interp_time > now_time.ull) {
-
-		clock_backward_count++;
-		if (last_interp_time - now_time.ull > clock_backward_max)
-			clock_backward_max = last_interp_time - now_time.ull;
-		now_time.ull = last_interp_time;
-	} else
+	if (last_interp_time <= now_time.ull)
 		last_interp_time = now_time.ull;
-
+	else {
+		clock_backward = last_interp_time - now_time.ull;
+		if (clock_backward > clock_backward_max) {
+			clock_backward_max = clock_backward;
+			clock_backward_count++;
+		}
+		now_time.ull = last_interp_time;
+	}
 	*pft = now_time.ft;
+
 	return;
 }
 
@@ -1207,8 +1206,8 @@ ntp_timestamp_from_counter(
 #endif  /* HAVE_PPSAPI */
 
 
-void 
-time_stepped(void)
+void
+win_time_stepped(void)
 {
 	/*
 	 * called back by ntp_set_tod after the system
@@ -1234,11 +1233,9 @@ time_stepped(void)
 	 */
 	newest_baseline_gen++;
 
-	last_interp_time = 
-		clock_backward_max = 
-		clock_backward_count = 
-		newest_baseline = 0;
-
+	clock_backward_max = CLOCK_BACK_THRESHOLD;
+	clock_backward_count = 0;
+	newest_baseline = 0;
 	memset(baseline_counts, 0, sizeof(baseline_counts));
 	memset(baseline_times, 0, sizeof(baseline_times));
 
@@ -1354,7 +1351,8 @@ ctr_freq_timer_fired(
 				clock_backward_count, 
 				(LONGLONG)clock_backward_max / 10.);
 
-			clock_backward_max = clock_backward_count = 0;
+			clock_backward_max = CLOCK_BACK_THRESHOLD;
+			clock_backward_count = 0;
 		}
 	}
 
@@ -1431,10 +1429,11 @@ tune_ctr_freq(
 	static LONGLONG diffs[TUNE_CTR_DEPTH] = {0};
 	static LONGLONG sum = 0;
 
+	char ctr_freq_eq[64];
 	LONGLONG delta;
 	LONGLONG deltadiff;
 	ULONGLONG ObsPerfCtrFreq;
-	double obs_freq;
+	double freq;
 	double this_freq;
 	int isneg;
 
@@ -1490,12 +1489,21 @@ tune_ctr_freq(
 	/* get rid of ObsPerfCtrFreq when removing the #ifdef */
 	PerfCtrFreq = ObsPerfCtrFreq;
 #endif
-	obs_freq = (LONGLONG)ObsPerfCtrFreq / 1e6;
+	freq = (LONGLONG)PerfCtrFreq / 1e6;
+
+	/*
+	 * make the performance counter's frequency error from its
+	 * nominal rate, expressed in PPM, available via ntpq as
+	 * system variable "ctr_frequency".  This is consistent with
+	 * "frequency" which is the system clock drift in PPM.
+	 */
+	snprintf(ctr_freq_eq, sizeof(ctr_freq_eq), "ctr_frequency=%.2f", 
+		 1e6 * (freq - nom_freq) / nom_freq);
+	set_sys_var(ctr_freq_eq, strlen(ctr_freq_eq) + 1, RO | DEF);
 
 	/* 
 	 * report observed ctr freq each time the estimate used during
-	 * startup moves toward the observed freq from the nominal, 
-	 * and once a day afterward.
+	 * startup moves toward the observed freq from the nominal.
 	 */
 
 	if (count > COUNTOF(diffs) &&
@@ -1507,23 +1515,21 @@ tune_ctr_freq(
 		if (count <= COUNTOF(diffs))
 			/* moving to observed freq. from nominal (startup) */
 			msyslog(LOG_INFO,
-				(obs_freq > 100)
-				 ? "ctr %.3f MHz %+6.2f PPM using "
-				       "%.3f MHz %+6.2f PPM"
-				 : "ctr %.6f MHz %+6.2f PPM using "
-				       "%.6f MHz %+6.2f PPM",
+				(freq > 100)
+				   ? "ctr %.3f MHz %+6.2f PPM using %.3f MHz %+6.2f PPM"
+				   : "ctr %.6f MHz %+6.2f PPM using %.6f MHz %+6.2f PPM",
 				this_freq,
 				1e6 * (this_freq - nom_freq) / nom_freq,
-				obs_freq, 
-				1e6 * (obs_freq - nom_freq) / nom_freq);
+				freq, 
+				1e6 * (freq - nom_freq) / nom_freq);
 		else
 			/* steady state */
 			msyslog(LOG_INFO,
-				(obs_freq > 100)
-				 ? "ctr %.3f MHz %+.2f PPM"
-				 : "ctr %.6f MHz %+.2f PPM",
-				obs_freq, 
-				1e6 * (obs_freq - nom_freq) / nom_freq);
+				(freq > 100)
+				   ? "ctr %.3f MHz %+.2f PPM"
+				   : "ctr %.6f MHz %+.2f PPM",
+				freq, 
+				1e6 * (freq - nom_freq) / nom_freq);
 
 	if (disbelieved) {
 		msyslog(LOG_ERR, 

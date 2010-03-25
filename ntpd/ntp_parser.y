@@ -112,6 +112,10 @@
 %token	<Integer>	T_Iburst
 %token	<Integer>	T_Ident
 %token	<Integer>	T_Ignore
+%token	<Integer>	T_Incalloc
+%token	<Integer>	T_Incmem
+%token	<Integer>	T_Initalloc
+%token	<Integer>	T_Initmem
 %token	<Integer>	T_Includefile
 %token	<Integer>	T_Integer
 %token	<Integer>	T_Interface
@@ -136,10 +140,14 @@
 %token	<Integer>	T_Manycastclient
 %token	<Integer>	T_Manycastserver
 %token	<Integer>	T_Mask
+%token	<Integer>	T_Maxage
 %token	<Integer>	T_Maxclock
+%token	<Integer>	T_Maxdepth
 %token	<Integer>	T_Maxdist
+%token	<Integer>	T_Maxmem
 %token	<Integer>	T_Maxpoll
 %token	<Integer>	T_Minclock
+%token	<Integer>	T_Mindepth
 %token	<Integer>	T_Mindist
 %token	<Integer>	T_Minimum
 %token	<Integer>	T_Minpoll
@@ -147,6 +155,7 @@
 %token	<Integer>	T_Mode
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
+%token	<Integer>	T_Mru
 %token	<Integer>	T_Multicastclient
 %token	<Integer>	T_Nic
 %token	<Integer>	T_Nolink
@@ -185,6 +194,7 @@
 %token	<Integer>	T_Server
 %token	<Integer>	T_Setvar
 %token	<Integer>	T_Sign
+%token	<Integer>	T_Source
 %token	<Integer>	T_Statistics
 %token	<Integer>	T_Stats
 %token	<Integer>	T_Statsdir
@@ -255,6 +265,8 @@
 %type	<Address_node>	ip_address
 %type	<Attr_val>	log_config_command
 %type	<Queue>		log_config_list
+%type	<Attr_val>	mru_option
+%type	<Queue>		mru_option_list
 %type	<Integer>	nic_rule_class
 %type	<Double>	number
 %type	<Attr_val>	option
@@ -655,10 +667,19 @@ access_control_command
 		{
 			append_queue(cfgt.discard_opts, $2);
 		}
+	|	T_Mru mru_option_list
+		{
+			append_queue(cfgt.mru_opts, $2);
+		}
 	|	T_Restrict address ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
 				create_restrict_node($2, NULL, $3, ip_file->line_no));
+		}
+	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
+		{
+			enqueue(cfgt.restrict_opts,
+				create_restrict_node($2, $4, $5, ip_file->line_no));
 		}
 	|	T_Restrict T_Default ac_flag_list
 		{
@@ -691,10 +712,13 @@ access_control_command
 					$4, 
 					ip_file->line_no));
 		}
-	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
+	|	T_Restrict T_Source ac_flag_list
 		{
 			enqueue(cfgt.restrict_opts,
-				create_restrict_node($2, $4, $5, ip_file->line_no));
+				create_restrict_node(
+					NULL, NULL,
+					enqueue($3, create_ival($2)),
+					ip_file->line_no));
 		}
 	;
 
@@ -733,6 +757,24 @@ discard_option
 	:	T_Average T_Integer { $$ = create_attr_ival($1, $2); }
 	|	T_Minimum T_Integer { $$ = create_attr_ival($1, $2); }
 	|	T_Monitor T_Integer { $$ = create_attr_ival($1, $2); }
+	;
+
+mru_option_list
+	:	mru_option_list mru_option
+			{ $$ = enqueue($1, $2); }
+	|	mru_option 
+			{ $$ = enqueue_in_new_queue($1); }
+	;
+
+mru_option
+	:	T_Incalloc  T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Incmem    T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Initalloc T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Initmem   T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxage    T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxdepth  T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Maxmem    T_Integer { $$ = create_attr_ival($1, $2); }
+	|	T_Mindepth  T_Integer { $$ = create_attr_ival($1, $2); }
 	;
 
 /* Fudge Commands

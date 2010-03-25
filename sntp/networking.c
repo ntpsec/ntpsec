@@ -149,7 +149,7 @@ recvdata (
 #ifdef DEBUG
 	printf("sntp recvdata: Trying to receive data from...\n");
 #endif
-	slen = sizeof(sender->sas);
+	slen = sizeof(*sender);
 	recvc = recvfrom(rsock, rdata, rdata_length, 0, 
 			 &sender->sa, &slen);
 #ifdef DEBUG
@@ -306,7 +306,7 @@ recv_bcst_data (
 
 		default:
 		{
-			GETSOCKNAME_SOCKLEN_TYPE ss_len = sizeof(ras->sas);
+			GETSOCKNAME_SOCKLEN_TYPE ss_len = sizeof(*ras);
 
 			recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, &ras->sa, &ss_len);
 		}

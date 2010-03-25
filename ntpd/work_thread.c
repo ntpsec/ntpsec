@@ -20,7 +20,7 @@
 
 #define CHILD_EXIT_REQ	((blocking_pipe_header *)(intptr_t)-1)
 
-blocking_pipe_header *blocking_workitems[24];
+blocking_pipe_header *blocking_workitems[128];
 blocking_pipe_header *blocking_responses[8];
 HANDLE blocking_child_thread;
 HANDLE child_is_blocking;

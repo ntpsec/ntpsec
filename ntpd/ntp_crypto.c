@@ -161,7 +161,7 @@ static	int	crypto_mv	(struct exten *, struct peer *);
 static	int	crypto_send	(struct exten *, struct value *, int);
 static	tstamp_t crypto_time	(void);
 static	u_long	asn2ntp		(ASN1_TIME *);
-static	struct cert_info *cert_parse (u_char *, long, tstamp_t);
+static	struct cert_info *cert_parse (const u_char *, long, tstamp_t);
 static	int	cert_sign	(struct exten *, struct value *);
 static	struct cert_info *cert_install (struct exten *, struct peer *);
 static	int	cert_hike	(struct peer *, struct cert_info *);
@@ -308,7 +308,7 @@ make_keylist(
 	 * cookie if client mode or the host cookie if symmetric modes.
 	 */
 	mpoll = 1 << min(peer->ppoll, peer->hpoll);
-	lifetime = min(1 << sys_automax, NTP_MAXSESSION * mpoll);
+	lifetime = min(1U << sys_automax, NTP_MAXSESSION * mpoll);
 	if (peer->hmode == MODE_BROADCAST)
 		cookie = 0;
 	else
@@ -401,7 +401,7 @@ crypto_recv(
 	keyid_t	cookie;		/* crumbles */
 	int	hismode;	/* packet mode */
 	int	rval = XEVNT_OK;
-	u_char	*ptr;
+	const u_char *puch;
 	u_int32 temp32;
 
 	/*
@@ -626,8 +626,8 @@ crypto_recv(
 			 * signature/digest NID.
 			 */
 			if (peer->pkey == NULL) {
-				ptr = (u_char *)xinfo->cert.ptr;
-				cert = d2i_X509(NULL, &ptr,
+				puch = xinfo->cert.ptr;
+				cert = d2i_X509(NULL, &puch,
 				    ntohl(xinfo->cert.vallen));
 				peer->pkey = X509_get_pubkey(cert);
 				X509_free(cert);
@@ -1551,13 +1551,14 @@ crypto_encrypt(
 	tstamp_t tstamp;	/* NTP timestamp */
 	u_int32	temp32;
 	u_int	len;
-	u_char	*ptr;
+	const u_char *ptr;
+	u_char *puch;
 
 	/*
 	 * Extract the public key from the request.
 	 */
 	len = ntohl(ep->vallen);
-	ptr = (u_char *)ep->pkt;
+	ptr = (void *)ep->pkt;
 	pkey = d2i_PublicKey(EVP_PKEY_RSA, NULL, &ptr, len);
 	if (pkey == NULL) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
@@ -1575,9 +1576,9 @@ crypto_encrypt(
 	len = EVP_PKEY_size(pkey);
 	vp->vallen = htonl(len);
 	vp->ptr = emalloc(len);
-	ptr = vp->ptr;
+	puch = vp->ptr;
 	temp32 = htonl(*cookie);
-	if (RSA_public_encrypt(4, (u_char *)&temp32, ptr,
+	if (RSA_public_encrypt(4, (u_char *)&temp32, puch,
 	    pkey->pkey.rsa, RSA_PKCS1_OAEP_PADDING) <= 0) {
 		msyslog(LOG_ERR, "crypto_encrypt: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -1743,7 +1744,7 @@ crypto_send(
 	i = 0;
 	if (vallen > 0 && vp->ptr != NULL) {
 		j = vallen / 4;
-		if (j * 4 < vallen)
+		if (j * 4 < (int)vallen)
 			ep->pkt[i + j++] = 0;
 		memcpy(&ep->pkt[i], vp->ptr, vallen);
 		i += j;
@@ -1756,7 +1757,7 @@ crypto_send(
 	ep->pkt[i++] = vp->siglen;
 	if (siglen > 0 && vp->sig != NULL) {
 		j = vallen / 4;
-		if (j * 4 < siglen)
+		if (j * 4 < (int)siglen)
 			ep->pkt[i + j++] = 0;
 		memcpy(&ep->pkt[i], vp->sig, siglen);
 		i += j;
@@ -2944,7 +2945,8 @@ cert_sign(
 	EVP_MD_CTX ctx;		/* message digest context */
 	tstamp_t tstamp;	/* NTP timestamp */
 	u_int	len;
-	u_char	*ptr;
+	const u_char *cptr;
+	u_char *ptr;
 	int	i, temp;
 
 	/*
@@ -2956,8 +2958,8 @@ cert_sign(
 	if (tstamp == 0)
 		return (XEVNT_TSP);
 
-	ptr = (u_char *)ep->pkt;
-	if ((req = d2i_X509(NULL, &ptr, ntohl(ep->vallen))) == NULL) {
+	cptr = (void *)ep->pkt;
+	if ((req = d2i_X509(NULL, &cptr, ntohl(ep->vallen))) == NULL) {
 		msyslog(LOG_ERR, "cert_sign: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (XEVNT_CRT);
@@ -3130,7 +3132,7 @@ cert_hike(
 {
 	struct cert_info *xp;	/* subject certificate */
 	X509	*cert;		/* X509 certificate */
-	u_char	*ptr;
+	const u_char *ptr;
 
 	/*
 	 * Save the issuer on the new certificate, but remember the old
@@ -3219,7 +3221,7 @@ cert_hike(
  */
 struct cert_info *		/* certificate information structure */
 cert_parse(
-	u_char	*asn1cert,	/* X509 certificate */
+	const u_char *asn1cert,	/* X509 certificate */
 	long	len,		/* certificate length */
 	tstamp_t fstamp		/* filestamp */
 	)
@@ -3229,7 +3231,8 @@ cert_parse(
 	struct cert_info *ret;	/* certificate info/value */
 	BIO	*bp;
 	char	pathbuf[MAXFILENAME];
-	u_char	*ptr;
+	const u_char *ptr;
+	char	*pch;
 	int	temp, cnt, i;
 
 	/*
@@ -3249,8 +3252,8 @@ cert_parse(
 	/*
 	 * Extract version, subject name and public key.
 	 */
-	ret = emalloc(sizeof(struct cert_info));
-	memset(ret, 0, sizeof(struct cert_info));
+	ret = emalloc(sizeof(*ret));
+	memset(ret, 0, sizeof(*ret));
 	if ((ret->pkey = X509_get_pubkey(cert)) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
@@ -3261,15 +3264,15 @@ cert_parse(
 	ret->version = X509_get_version(cert);
 	X509_NAME_oneline(X509_get_subject_name(cert), pathbuf,
 	    MAXFILENAME);
-	ptr = strstr(pathbuf, "CN=");
-	if (ptr == NULL) {
+	pch = strstr(pathbuf, "CN=");
+	if (NULL == pch) {
 		msyslog(LOG_NOTICE, "cert_parse: invalid subject %s",
 		    pathbuf);
 		cert_free(ret);
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->subject = estrdup(ptr + 3);
+	ret->subject = estrdup(pch + 3);
 
 	/*
 	 * Extract remaining objects. Note that the NTP serial number is
@@ -3284,14 +3287,14 @@ cert_parse(
 	    (u_long)ASN1_INTEGER_get(X509_get_serialNumber(cert));
 	X509_NAME_oneline(X509_get_issuer_name(cert), pathbuf,
 	    MAXFILENAME);
-	if ((ptr = strstr(pathbuf, "CN=")) == NULL) {
+	if ((pch = strstr(pathbuf, "CN=")) == NULL) {
 		msyslog(LOG_NOTICE, "cert_parse: invalid issuer %s",
 		    pathbuf);
 		cert_free(ret);
 		X509_free(cert);
 		return (NULL);
 	}
-	ret->issuer = estrdup(ptr + 3);
+	ret->issuer = estrdup(pch + 3);
 	ret->first = asn2ntp(X509_get_notBefore(cert));
 	ret->last = asn2ntp(X509_get_notAfter(cert));
 
@@ -3808,7 +3811,7 @@ crypto_setup(void)
 		} else if (strcmp(hostval.ptr, sys_groupname) != 0) {
 			msyslog(LOG_ERR,
 			    "crypto_setup: trusted certificate name %s does not match group name %s",
-			    hostval.ptr, sys_groupname);
+			    (char *)hostval.ptr, sys_groupname);
 			exit (-1);
 		}
 	}

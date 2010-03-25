@@ -297,7 +297,7 @@ chronolog_receive(
 	pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-	up->lasthour = pp->hour;
+	up->lasthour = (u_char)pp->hour;
 }
 
 

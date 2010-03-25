@@ -152,7 +152,6 @@ struct codestring peer_codes[] = {
 	{ PEVNT_POPCORN & ~PEER_EVENT,	"popcorn" },
 	{ PEVNT_XLEAVE & ~PEER_EVENT,	"interleave_mode" },
 	{ PEVNT_XERR & ~PEER_EVENT,	"interleave_error" },
-	{ PEVNT_TAI & ~PEER_EVENT,	"TAI" },
 	{ -1,				"" }
 };
 

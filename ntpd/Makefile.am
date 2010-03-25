@@ -136,7 +136,6 @@ check-local: @MAKE_CHECK_Y2K@ $(CHECK_SAVECONFIG)
 ntpd_SOURCES =			\
 	cmd_args.c		\
 	ntp_config.c		\
-	ntp_data_structures.c	\
 	ntp_keyword.h		\
 	ntp_io.c		\
 	ntp_parser.y		\
@@ -158,6 +157,7 @@ libntpd_a_SOURCES =		\
 	jupiter.h		\
 	ntp_control.c		\
 	ntp_crypto.c		\
+	ntp_data_structures.c	\
 	ntp_filegen.c		\
 	ntp_intres.c		\
 	ntp_loopfilter.c	\

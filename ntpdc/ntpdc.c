@@ -1,29 +1,32 @@
 /*
  * ntpdc - control and monitor your ntpd daemon
  */
-
 #include <config.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
+#ifdef SYS_WINNT
+# include <mswsock.h>
+#endif
+#include <isc/net.h>
+#include <isc/result.h>
 
 #include "ntpdc.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
-#include "isc/net.h"
-#include "isc/result.h"
 #include <ssl_applink.c>
 
 #include "ntpdc-opts.h"
-
-#ifdef SYS_WINNT
-# include <Mswsock.h>
-# include <io.h>
-#endif /* SYS_WINNT */
 
 #ifdef SYS_VXWORKS
 				/* vxWorks needs mode flag -casey*/
@@ -84,11 +87,7 @@ static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
 static	int	getarg		(char *, int, arg_v *);
 static	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 static	void	help		(struct parse *, FILE *);
-#ifdef QSORT_USES_VOID_P
 static	int	helpsort	(const void *, const void *);
-#else
-static	int	helpsort	(char **, char **);
-#endif
 static	void	printusage	(struct xcmd *, FILE *);
 static	void	timeout		(struct parse *, FILE *);
 static	void	my_delay	(struct parse *, FILE *);
@@ -492,7 +491,7 @@ openhost(
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_NUMERICHOST;
+	hints.ai_flags = Z_AI_NUMERICHOST;
 
 	a_info = getaddrinfo(hname, service, &hints, &ai);
 	if (a_info == EAI_NONAME
@@ -1500,18 +1499,27 @@ getnetnum(
 	hints.ai_flags |= AI_ADDRCONFIG;
 #endif
 	
-	/* decodenetnum only works with addresses */
+	/*
+	 * decodenetnum only works with addresses, but handles syntax
+	 * that getaddrinfo doesn't:  [2001::1]:1234
+	 */
 	if (decodenetnum(hname, num)) {
-		if (fullhost != 0) {
-			getnameinfo(&num->sa, sockaddr_len, 
-				    fullhost, sizeof(fullhost), NULL, 0, 
-				    NI_NUMERICHOST); 
-		}
+		if (fullhost != NULL)
+			getnameinfo(&num->sa, SOCKLEN(num), fullhost,
+				    LENHOSTNAME, NULL, 0, 0);
 		return 1;
 	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
-		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
-		if (fullhost != 0)
-			(void) strcpy(fullhost, ai->ai_canonname);
+		NTP_INSIST(sizeof(*num) >= ai->ai_addrlen);
+		memcpy(num, ai->ai_addr, ai->ai_addrlen);
+		if (fullhost != NULL) {
+			if (ai->ai_canonname != NULL)
+				strncpy(fullhost, ai->ai_canonname,
+					LENHOSTNAME);
+			else
+				getnameinfo(&num->sa, SOCKLEN(num),
+					    fullhost, LENHOSTNAME, NULL,
+					    0, 0);
+		}
 		return 1;
 	} else {
 		(void) fprintf(stderr, "***Can't find host %s\n", hname);
@@ -1519,6 +1527,7 @@ getnetnum(
 	}
 	/*NOTREACHED*/
 }
+
 
 /*
  * nntohost - convert network number to host name.  This routine enforces
@@ -1529,12 +1538,12 @@ nntohost(
 	sockaddr_u *netnum
 	)
 {
-	if (!showhostnames)
+	if (!showhostnames || SOCK_UNSPEC(netnum))
 		return stoa(netnum);
-
-	if (ISREFCLOCKADR(netnum))
+	else if (ISREFCLOCKADR(netnum))
 		return refnumtoa(netnum);
-	return socktohost(netnum);
+	else
+		return socktohost(netnum);
 }
 
 
@@ -1554,58 +1563,52 @@ help(
 	struct xcmd *xcp;
 	char *cmd;
 	const char *list[100];
-	int word, words;     
-        int row, rows;
+	int word, words;
+	int row, rows;
 	int col, cols;
 
 	if (pcmd->nargs == 0) {
 		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
-			if (*(xcp->keyword) != '?')
-			    list[words++] = xcp->keyword;
+			if (*(xcp->keyword) != '?' &&
+			    words < COUNTOF(list))
+				list[words++] = xcp->keyword;
 		}
-                for (xcp = opcmds; xcp->keyword != 0; xcp++)
-		    list[words++] = xcp->keyword;
+		for (xcp = opcmds; xcp->keyword != 0; xcp++)
+			if (words < COUNTOF(list))
+				list[words++] = xcp->keyword;
 
-		qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-			(list), (size_t)(words), sizeof(char *), helpsort);
+		qsort((void *)&list, (size_t)words, sizeof(list[0]), helpsort);
 		col = 0;
 		for (word = 0; word < words; word++) {
 			int length = strlen(list[word]);
-			if (col < length) {
-			    col = length;
-                        }
+			if (col < length)
+				col = length;
 		}
 
 		cols = SCREENWIDTH / ++col;
-                rows = (words + cols - 1) / cols;
+		rows = (words + cols - 1) / cols;
 
-		(void) fprintf(fp, "ntpdc commands:\n");
+		fprintf(fp, "ntpdc commands:\n");
 
 		for (row = 0; row < rows; row++) {
-                        for (word = row; word < words; word += rows) {
-				(void) fprintf(fp, "%-*.*s", col, col-1, list[word]);
-                        }
-			(void) fprintf(fp, "\n");
+			for (word = row; word < words; word += rows)
+				fprintf(fp, "%-*.*s", col, col-1, list[word]);
+			fprintf(fp, "\n");
 		}
 	} else {
 		cmd = pcmd->argval[0].string;
 		words = findcmd(cmd, builtins, opcmds, &xcp);
 		if (words == 0) {
-			(void) fprintf(stderr,
-				       "Command `%s' is unknown\n", cmd);
+			fprintf(stderr,
+				"Command `%s' is unknown\n", cmd);
 			return;
 		} else if (words >= 2) {
-			(void) fprintf(stderr,
-				       "Command `%s' is ambiguous\n", cmd);
+			fprintf(stderr,
+				"Command `%s' is ambiguous\n", cmd);
 			return;
 		}
-		(void) fprintf(fp, "function: %s\n", xcp->comment);
+		fprintf(fp, "function: %s\n", xcp->comment);
 		printusage(xcp, fp);
 	}
 }
@@ -1614,7 +1617,6 @@ help(
 /*
  * helpsort - do hostname qsort comparisons
  */
-#ifdef QSORT_USES_VOID_P
 static int
 helpsort(
 	const void *t1,
@@ -1626,16 +1628,6 @@ helpsort(
 
 	return strcmp(*name1, *name2);
 }
-#else
-static int
-helpsort(
-	char **name1,
-	char **name2
-	)
-{
-	return strcmp(*name1, *name2);
-}
-#endif
 
 
 /*
@@ -1849,20 +1841,17 @@ passwd(
 			return;
 		}
 	}
-	if (!interactive) {
-		authusekey(info_auth_keyid, info_auth_keytype,
-			   (u_char *)pcmd->argval[0].string);
-		authtrust(info_auth_keyid, 1);
-	} else {
+	if (pcmd->nargs >= 1)
+		pass = pcmd->argval[0].string;
+	else {
 		pass = getpass("MD5 Password: ");
-		if (*pass == '\0')
-		    (void) fprintf(fp, "Password unchanged\n");
-		else {
-		    authusekey(info_auth_keyid, info_auth_keytype,
-			       (u_char *)pass);
-		    authtrust(info_auth_keyid, 1);
+		if ('\0' == *pass) {
+			fprintf(fp, "Password unchanged\n");
+			return;
 		}
 	}
+	authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+	authtrust(info_auth_keyid, 1);
 }
 
 

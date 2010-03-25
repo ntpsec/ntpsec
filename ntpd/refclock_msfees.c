@@ -349,11 +349,7 @@ static	void	dump_buf	P((l_fp *coffs, int from, int to, char *text));
 static	void	ees_report_event P((struct eesunit *ees, int code));
 static	void	ees_receive	P((struct recvbuf *rbufp));
 static	void	ees_process	P((struct eesunit *ees));
-#ifdef QSORT_USES_VOID_P
 static	int	offcompare	P((const void *va, const void *vb));
-#else
-static	int	offcompare	P((const l_fp *a, const l_fp *b));
-#endif /* QSORT_USES_VOID_P */
 
 
 /*
@@ -1227,7 +1223,6 @@ ees_receive(
 
 /* offcompare - auxiliary comparison routine for offset sort */
 
-#ifdef QSORT_USES_VOID_P
 static int
 offcompare(
 	const void *va,
@@ -1238,16 +1233,6 @@ offcompare(
 	const l_fp *b = (const l_fp *)vb;
 	return(L_ISGEQ(a, b) ? (L_ISEQU(a, b) ? 0 : 1) : -1);
 }
-#else
-static int
-offcompare(
-	const l_fp *a,
-	const l_fp *b
-	)
-{
-	return(L_ISGEQ(a, b) ? (L_ISEQU(a, b) ? 0 : 1) : -1);
-}
-#endif /* QSORT_USES_VOID_P */
 
 
 /* ees_process - process a pile of samples from the clock */
@@ -1289,16 +1274,11 @@ ees_process(
 	if (samples < 1) return;
 
 	/* If requested, dump the raw data we have in the buffer */
-	if (ees->dump_vals) dump_buf(coffs, 0, samples, "Raw  data  is:");
+	if (ees->dump_vals)
+		dump_buf(coffs, 0, samples, "Raw  data  is:");
 
 	/* Sort the offsets, trim off the extremes, then choose one. */
-	qsort(
-#ifdef QSORT_USES_VOID_P
-	    (void *)
-#else
-	    (char *)
-#endif
-	    coffs, (size_t)samples, sizeof(l_fp), offcompare);
+	qsort(coffs, (size_t)samples, sizeof(coffs[0]), offcompare);
 
 	noff = samples;
 	i = 0;

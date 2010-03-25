@@ -4,10 +4,12 @@
 #ifndef NTP_H
 #define NTP_H
 
+#include <stddef.h>
 #include <math.h>
 
 #include <ntp_fp.h>
 #include <ntp_types.h>
+#include <ntp_lists.h>
 #include <ntp_stdlib.h>
 #ifdef OPENSSL
 #include <ntp_crypto.h>
@@ -246,10 +248,14 @@ struct interface {
  * spec.
  */
 struct peer {
-	struct peer *next;	/* link pointer in peer hash */
-	struct peer *ass_next;	/* link pointer in associd hash */
+	struct peer *p_link;	/* link pointer in free & peer lists */
+	struct peer *adr_link;	/* link pointer in address hash */
+	struct peer *aid_link;	/* link pointer in associd hash */
 	struct peer *ilink;	/* list of peers for interface */
 	sockaddr_u srcadr;	/* address of remote host */
+	char *	hostname;	/* if non-NULL, remote name */
+	struct addrinfo *addrs;	/* hostname query result */
+	struct addrinfo *ai;	/* position within addrs */
 	struct interface *dstadr; /* local address (interface) */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
@@ -466,11 +472,6 @@ struct peer {
 				    - CRYPTO_TO_ZERO((struct peer *)0))
 
 /*
- * Reference clock identifiers (for pps signal)
- */
-#define PPSREFID (u_int32)"PPS "	/* used when pps controls stratum>1 */
-
-/*
  * Reference clock types.  Added as necessary.
  */
 #define	REFCLK_NONE		0	/* unknown or missing */
@@ -572,10 +573,11 @@ struct pkt {
 #define	PKT_LEAP(li_vn_mode)	((u_char)(((li_vn_mode) >> 6) & 0x3))
 
 /*
- * Stuff for putting things back into li_vn_mode
+ * Stuff for putting things back into li_vn_mode in packets and vn_mode
+ * in ntp_monitor.c's mon_entry.
  */
-#define	PKT_LI_VN_MODE(li, vn, md) \
-	((u_char)((((li) << 6) & 0xc0) | (((vn) << 3) & 0x38) | ((md) & 0x7)))
+#define VN_MODE(v, m)		((((v) & 7) << 3) | ((m) & 0x7))
+#define	PKT_LI_VN_MODE(l, v, m) ((((l) & 3) << 6) | VN_MODE((v), (m)))
 
 
 /*
@@ -633,7 +635,6 @@ struct pkt {
 #define	PEVNT_POPCORN	(13 | PEER_EVENT) /* popcorn */
 #define	PEVNT_XLEAVE	(14 | PEER_EVENT) /* interleave mode */
 #define	PEVNT_XERR	(15 | PEER_EVENT) /* interleave error */
-#define	PEVNT_TAI	(16 | PEER_EVENT) /* TAI */
 
 /*
  * Clock event codes
@@ -657,9 +658,9 @@ struct pkt {
  * To speed lookups, peers are hashed by the low order bits of the
  * remote IP address. These definitions relate to that.
  */
-#define	NTP_HASH_SIZE	128
-#define	NTP_HASH_MASK	(NTP_HASH_SIZE-1)
-#define	NTP_HASH_ADDR(src)	sock_hash(src)
+#define	NTP_HASH_SIZE		128
+#define	NTP_HASH_MASK		(NTP_HASH_SIZE-1)
+#define	NTP_HASH_ADDR(src)	(sock_hash(src) & NTP_HASH_MASK)
 
 /*
  * min, min3 and max.  Makes it easier to transliterate the spec without
@@ -735,61 +736,80 @@ struct pkt {
 /*
  * Structure used optionally for monitoring when this is turned on.
  */
+typedef struct mon_data	mon_entry;
 struct mon_data {
-	struct mon_data *hash_next;	/* next structure in hash list */
-	struct mon_data *mru_next;	/* next structure in MRU list */
-	struct mon_data *mru_prev;	/* previous structure in MRU list */
-	int	flags;			/* restrict flags */
-	int	leak;			/* leaky bucket accumulator */
-	int	count;			/* total packet count */
-	u_long	firsttime;		/* first time found */
-	u_long	lasttime;		/* last time found */
-	sockaddr_u rmtadr;		/* address of remote host */
-	struct interface *interface;	/* interface on which this arrived */
-	u_short	rmtport;		/* remote port last came from */
-	u_char	mode;			/* packet mode */
-	u_char	version;		/* packet version */
-	u_char	cast_flags;		/* flags MDF_?CAST */
+	mon_entry *	hash_next;	/* next structure in hash list */
+	DECL_DLIST_LINK(mon_entry, mru);/* MRU list link pointers */
+	struct interface * lcladr;	/* address on which this arrived */
+	l_fp		first;		/* first time seen */
+	l_fp		last;		/* last time seen */
+	int		leak;		/* leaky bucket accumulator */
+	int		count;		/* total packet count */
+	u_short		flags;		/* restrict flags */
+	u_char		vn_mode;	/* packet mode & version */
+	u_char		cast_flags;	/* flags MDF_?CAST */
+	sockaddr_u	rmtadr;		/* address of remote host */
 };
 
 /*
- * Values for cast_flags
+ * Values for cast_flags in mon_entry and struct peer.  mon_entry uses
+ * only the first three, MDF_UCAST, MDF_MCAST, and MDF_BCAST.
  */
-#define	MDF_UCAST	0x01		/* unicast */
-#define	MDF_MCAST	0x02		/* multicast */
-#define	MDF_BCAST	0x04		/* broadcast */
-#define	MDF_LCAST	0x08		/* localcast */
-#define MDF_ACAST	0x10		/* manycast */
-#define	MDF_BCLNT	0x20		/* broadcast client */
-#define MDF_ACLNT	0x40		/* manycast client */
-
+#define	MDF_UCAST	0x01	/* unicast client */
+#define	MDF_MCAST	0x02	/* multicast server */
+#define	MDF_BCAST	0x04	/* broadcast server */
+#define	MDF_POOL	0x08	/* pool client solicitor */
+#define MDF_ACAST	0x10	/* manycast client solicitor */
+#define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client */
+#define MDF_UCLNT	0x40	/* eph. manycast or pool client */
+/*
+ * In the context of struct peer in ntpd, three of the cast_flags bits
+ * represent configured associations which never receive packets, and
+ * whose reach is always 0: MDF_BCAST, MDF_MCAST, and MDF_ACAST.  The
+ * last can be argued as responses are received, but those responses do
+ * not affect the MDF_ACAST association's reach register, rather they
+ * (may) result in mobilizing ephemeral MDF_ACLNT associations.
+ */
+#define MDF_TXONLY_MASK	(MDF_BCAST | MDF_MCAST | MDF_ACAST | MDF_POOL)
+/*
+ * manycastclient-like solicitor association cast_flags bits
+ */
+#define MDF_SOLICIT_MASK	(MDF_ACAST | MDF_POOL)
 /*
  * Values used with mon_enabled to indicate reason for enabling monitoring
  */
-#define MON_OFF    0x00			/* no monitoring */
-#define MON_ON     0x01			/* monitoring explicitly enabled */
-#define MON_RES    0x02			/* implicit monitoring for RES_LIMITED */
+#define MON_OFF		0x00		/* no monitoring */
+#define MON_ON		0x01		/* monitoring explicitly enabled */
+#define MON_RES		0x02		/* implicit monitoring for RES_LIMITED */
 /*
  * Structure used for restrictlist entries
  */
-struct restrictlist {
-	struct restrictlist *next;	/* link to next entry */
-	u_int32 addr;			/* Ipv4 host address (host byte order) */
-	u_int32 mask;			/* Ipv4 mask for address (host byte order) */
-	u_long count;			/* number of packets matched */
-	u_short flags;			/* accesslist flags */
-	u_short mflags;			/* match flags */
-};
+typedef struct res_addr4_tag {
+	u_int32		addr;		/* IPv4 addr (host order) */
+	u_int32		mask;		/* IPv4 mask (host order) */
+} res_addr4;
 
-struct restrictlist6 {
-	struct restrictlist6 *next;	/* link to next entry */
-	struct in6_addr addr6;		/* Ipv6 host address */
-	struct in6_addr mask6;		/* Ipv6 mask address */
-	u_long count;			/* number of packets matched */
-	u_short flags;			/* accesslist flags */
-	u_short mflags;			/* match flags */
-};
+typedef struct res_addr6_tag {
+	struct in6_addr addr;		/* IPv6 addr (net order) */
+	struct in6_addr mask;		/* IPv6 mask (net order) */
+} res_addr6;
 
+typedef struct restrict_u_tag	restrict_u;
+struct restrict_u_tag {
+	restrict_u *		link;	/* link to next entry */
+	u_int32			count;	/* number of packets matched */
+	u_short			flags;	/* accesslist flags */
+	u_short			mflags;	/* match flags */
+	u_long			expire;	/* valid until time */
+	union {				/* variant starting here */
+		res_addr4 v4;
+		res_addr6 v6;
+	} u;
+};
+#define	V4_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
+				 + sizeof(res_addr4))
+#define	V6_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
+				 + sizeof(res_addr6))
 
 /*
  * Access flags
@@ -813,16 +833,17 @@ struct restrictlist6 {
 #define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */
 #define RES_TIMEOUT		0x1000	/* timeout this entry */
 
-#define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |\
-				    RES_NOMODIFY | RES_NOTRAP |\
-				    RES_LPTRAP | RES_KOD |\
-				    RES_MSSNTP | RES_TIMEOUT)
+#define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |	\
+				 RES_NOMODIFY | RES_NOTRAP |	\
+				 RES_LPTRAP | RES_KOD |		\
+				 RES_MSSNTP | RES_TIMEOUT)
 
 /*
  * Match flags
  */
 #define	RESM_INTERFACE		0x1000	/* this is an interface */
-#define	RESM_NTPONLY		0x2000	/* match ntp port only */
+#define	RESM_NTPONLY		0x2000	/* match source port 123 */
+#define RESM_SOURCE		0x4000	/* from "restrict source" */
 
 /*
  * Restriction configuration ops
@@ -830,7 +851,7 @@ struct restrictlist6 {
 #define	RESTRICT_FLAGS		1	/* add flags to restrict entry */
 #define	RESTRICT_UNFLAG		2	/* remove flags from restrict entry */
 #define	RESTRICT_REMOVE		3	/* remove a restrict entry */
-#define	RESTRICT_REMOVEIF       4	/* remove an interface restrict entry */
+#define	RESTRICT_REMOVEIF	4	/* remove an interface restrict entry */
 
 /*
  * Endpoint structure for the select algorithm
@@ -848,7 +869,7 @@ struct endpoint {
 #define AM_PROCPKT	1		/* server/symmetric packet */	
 #define AM_BCST		2		/* broadcast packet */	
 #define AM_FXMIT	3		/* client packet */
-#define AM_MANYCAST	4		/* manycast packet */
+#define AM_MANYCAST	4		/* manycast or pool */
 #define AM_NEWPASS	5		/* new passive */
 #define AM_NEWBCL	6		/* new broadcast */
 #define	AM_POSSBCL	7		/* discard broadcast */
@@ -858,4 +879,6 @@ struct endpoint {
 #define NETINFO_CONFIG_DIR "/config/ntp"
 #endif
 
+/* ntpq -c mrulist rows per request limit in ntpd */
+#define MRU_ROW_LIMIT	256
 #endif /* NTP_H */

@@ -31,20 +31,10 @@ enum {
 };
 
 /*
- * Optional callback from libntp ntp_set_tod() to Windows ntpd code
- * in nt_clockstuff that needs to know.  Optional because other
- * libntp clients like ntpdate don't use it.
- */
-
-typedef void (*time_stepped_callback)(void);
-extern time_stepped_callback	step_callback;
-
-/*
  * get_sys_time_as_filetime is a function pointer to
  * either GetSystemTimeAsFileTime provided by Windows
  * or ntpd's interpolating replacement.
  */
-
 typedef void (WINAPI *PGSTAFT)(LPFILETIME pft);
 extern PGSTAFT get_sys_time_as_filetime;
 
@@ -56,7 +46,6 @@ void lock_thread_to_processor(HANDLE);
  * serialpps.sys counterstamps to be converted to 
  * interpolated timestamps.
  */
-
 extern void ntp_timestamp_from_counter(l_fp *, ULONGLONG, ULONGLONG);
 #endif
 

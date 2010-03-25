@@ -80,11 +80,7 @@ int	cal_enable;		/* enable refclock calibrate */
 /*
  * Forward declarations
  */
-#ifdef QSORT_USES_VOID_P
 static int refclock_cmpl_fp (const void *, const void *);
-#else
-static int refclock_cmpl_fp (const double *, const double *);
-#endif /* QSORT_USES_VOID_P */
 static int refclock_sample (struct refclockproc *);
 
 
@@ -351,7 +347,6 @@ refclock_transmit(
 /*
  * Compare two doubles - used with qsort()
  */
-#ifdef QSORT_USES_VOID_P
 static int
 refclock_cmpl_fp(
 	const void *p1,
@@ -369,23 +364,6 @@ refclock_cmpl_fp(
 
 	return (0);
 }
-
-#else
-static int
-refclock_cmpl_fp(
-	const double *dp1,
-	const double *dp2
-	)
-{
-	if (*dp1 < *dp2)
-		return (-1);
-
-	if (*dp1 > *dp2)
-		return (1);
-
-	return (0);
-}
-#endif /* QSORT_USES_VOID_P */
 
 
 /*
@@ -500,13 +478,7 @@ refclock_sample(
 		return (0);
 
 	if (n > 1)
-		qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-		    off, (size_t)n, sizeof(double), refclock_cmpl_fp);
+		qsort(off, (size_t)n, sizeof(off[0]), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until
@@ -1028,7 +1000,7 @@ refclock_ioctl(
 void
 refclock_control(
 	sockaddr_u *srcadr,
-	struct refclockstat *in,
+	const struct refclockstat *in,
 	struct refclockstat *out
 	)
 {
@@ -1046,11 +1018,12 @@ refclock_control(
 	clktype = (u_char)REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
 
-	peer = findexistingpeer(srcadr, NULL, -1);
+	peer = findexistingpeer(srcadr, NULL, NULL, -1);
 
-	if (NULL == peer || NULL == peer->procptr)
+	if (NULL == peer)
 		return;
 
+	NTP_INSIST(peer->procptr != NULL);
 	pp = peer->procptr;
 
 	/*
@@ -1145,7 +1118,7 @@ refclock_buginfo(
 	clktype = (u_char) REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
 
-	peer = findexistingpeer(srcadr, NULL, -1);
+	peer = findexistingpeer(srcadr, NULL, NULL, -1);
 
 	if (NULL == peer || NULL == peer->procptr)
 		return;

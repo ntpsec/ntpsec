@@ -548,16 +548,3 @@ getpass(const char * prompt)
 	return password;
 }
 #endif /* SYS_WINNT */
-
-#if !defined(HAVE_MEMSET)
-void
-ntp_memset(
-	char *a,
-	int x,
-	int c
-	)
-{
-	while (c-- > 0)
-		*a++ = (char) x;
-}
-#endif /*POSIX*/

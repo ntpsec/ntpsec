@@ -1,7 +1,20 @@
 /*
  * keyword-gen.c -- generate keyword scanner finite state machine and
  *		    keyword_text array.
- *		    This program is run to generate ntp_keyword.h
+ *
+ * This program is run to generate ntp_keyword.h
+ * After making a change here, two output files should be committed at
+ * the same time as keyword-gen.c:
+ *	ntp_keyword.h
+ *	keyword-gen-utd
+ *
+ * keyword-gen-utd is a sentinel used by Makefile.am to avoid compiling
+ * keyword_gen.c and generating ntp_keyword.h if the input keyword-gen.c
+ * has not changed.  This is not solely an optimization, it also breaks
+ * a dependency chain that otherwise would cause programs to be compiled
+ * when running "make dist" or "make distdir".  We want these to package
+ * the existing source without building anything but a tarball.  See
+ * [Bug 1470].
  */
 #include <config.h>
 #include <stdio.h>
@@ -14,12 +27,6 @@
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
 
-
-#ifdef QSORT_USES_VOID_P
-typedef const void *	QSORTP;
-#else
-typedef char *		QSORTP;
-#endif
 
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
@@ -136,6 +143,7 @@ struct key_tok ntp_keywords[] = {
 { "orphan",		T_Orphan,		FOLLBY_TOKEN },
 /* access_control_flag */
 { "default",		T_Default,		FOLLBY_TOKEN },
+{ "source",		T_Source,		FOLLBY_TOKEN },
 { "flake",		T_Flake,		FOLLBY_TOKEN },
 { "ignore",		T_Ignore,		FOLLBY_TOKEN },
 { "limited",		T_Limited,		FOLLBY_TOKEN },
@@ -154,6 +162,16 @@ struct key_tok ntp_keywords[] = {
 { "average",		T_Average,		FOLLBY_TOKEN },
 { "minimum",		T_Minimum,		FOLLBY_TOKEN },
 { "monitor",		T_Monitor,		FOLLBY_TOKEN },
+/* mru_option */
+{ "incalloc",		T_Incalloc,		FOLLBY_TOKEN },
+{ "incmem",		T_Incmem,		FOLLBY_TOKEN },
+{ "initalloc",		T_Initalloc,		FOLLBY_TOKEN },
+{ "initmem",		T_Initmem,		FOLLBY_TOKEN },
+{ "mindepth",		T_Mindepth,		FOLLBY_TOKEN },
+{ "maxage",		T_Maxage,		FOLLBY_TOKEN },
+{ "maxdepth",		T_Maxdepth,		FOLLBY_TOKEN },
+{ "maxmem",		T_Maxmem,		FOLLBY_TOKEN },
+{ "mru",		T_Mru,			FOLLBY_TOKEN },
 /* fudge_factor */
 { "flag1",		T_Flag1,		FOLLBY_TOKEN },
 { "flag2",		T_Flag2,		FOLLBY_TOKEN },
@@ -221,7 +239,8 @@ typedef struct big_scan_state_tag {
  * 7 bits to free a bit for accepting/non-accepting.  More than 4096
  * states will require expanding scan_state beyond 32 bits each.
  */
-#define MAXSTATES 2048
+#define MAXSTATES	2048
+#define MAX_TOK_LEN	63
 
 const char *	current_keyword;/* for error reporting */
 big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
@@ -238,8 +257,8 @@ static void	generate_fsm		(void);
 static void	generate_token_text	(void);
 static int	create_keyword_scanner	(void);
 static int	create_scan_states	(char *, int, follby, int);
-int		compare_key_tok_id	(QSORTP, QSORTP);
-int		compare_key_tok_text	(QSORTP, QSORTP);
+int		compare_key_tok_id	(const void *, const void *);
+int		compare_key_tok_text	(const void *, const void *);
 void		populate_symb		(char *);
 const char *	symbname		(int);
 
@@ -289,8 +308,16 @@ generate_preamble(void)
 static void
 generate_fsm(void)
 {
-	char token_id_comment[128];
+	char rprefix[MAX_TOK_LEN + 1];
+	char prefix[MAX_TOK_LEN + 1];
+	char token_id_comment[16 + MAX_TOK_LEN + 1];
+	size_t prefix_len;
+	char *p;
+	char *r;
 	int initial_state;
+	int this_state;
+	int prev_state;
+	int state;
 	int i;
 	int token;
 
@@ -369,13 +396,7 @@ generate_fsm(void)
 			exit(9);
 		}
 
-		if (!sst[i].finishes_token)
-			snprintf(token_id_comment,
-				 sizeof(token_id_comment), "%5d %-17s",
-				 i, (initial_state == i) 
-					? "initial state" 
-					: "");
-		else {
+		if (sst[i].finishes_token) {
 			snprintf(token_id_comment, 
 				 sizeof(token_id_comment), "%5d %-17s",
 				 i, symbname(sst[i].finishes_token));
@@ -386,6 +407,53 @@ generate_fsm(void)
 					i, sst[i].finishes_token);
 				exit(5);
 			}
+		} else {
+		/*
+		 * Determine the keyword prefix that leads to this
+		 * state.  This is expensive but keyword-gen is run
+		 * only when it changes.  Distributing keyword-gen-utd
+		 * achieves that, which is why it must be committed
+		 * at the same time as keyword-gen.c and ntp_keyword.h.
+		 *
+		 * Scan the state array iteratively looking for a state
+		 * which leads to the current one, collecting matching
+		 * characters along the way.  There is only one such
+		 * path back to the starting state given the way our
+		 * scanner state machine is built and the practice of
+		 * using the spelling of the keyword as its T_* token
+		 * identifier, which results in never having two
+		 * spellings result in the same T_* value.
+		 */
+			prefix_len = 0;
+			prev_state = 0;
+			this_state = i;
+			do {
+				for (state = 1; state < sst_highwater; state++)
+					if (sst[state].other_next_s == this_state) {
+						this_state = state;
+						break;
+					} else if (sst[state].match_next_s == this_state) {
+						this_state = state;
+						rprefix[prefix_len] = sst[state].ch;
+						prefix_len++;
+						break;
+					}
+			} while (this_state != initial_state);
+
+			if (prefix_len) {
+				/* reverse rprefix into prefix */
+				p = prefix + prefix_len;
+				r = rprefix;
+				while (r < rprefix + prefix_len)
+					*--p = *r++;
+			}
+			prefix[prefix_len] = '\0';
+
+			snprintf(token_id_comment,
+				 sizeof(token_id_comment), "%5d %-17s",
+				 i, (initial_state == i) 
+					? "[initial state]" 
+					: prefix);
 		}
 
 		printf("  S_ST( '%c',\t%d,    %5u, %5u )%s /* %s */\n",
@@ -585,12 +653,12 @@ generate_token_text(void)
 	
 int
 compare_key_tok_id(
-	QSORTP a1,
-	QSORTP a2
+	const void *a1,
+	const void *a2
 	)
 {
-	const struct key_tok *p1 = (const void *)a1;
-	const struct key_tok *p2 = (const void *)a2;
+	const struct key_tok *p1 = a1;
+	const struct key_tok *p2 = a2;
 
 	if (p1->token == p2->token)
 		return 0;
@@ -604,12 +672,12 @@ compare_key_tok_id(
 
 int
 compare_key_tok_text(
-	QSORTP a1,
-	QSORTP a2
+	const void *a1,
+	const void *a2
 	)
 {
-	const struct key_tok *p1 = (const void *)a1;
-	const struct key_tok *p2 = (const void *)a2;
+	const struct key_tok *p1 = a1;
+	const struct key_tok *p2 = a2;
 
 	return strcmp(p1->key, p2->key);
 }
@@ -625,8 +693,8 @@ populate_symb(
 	)
 {
 	FILE *	yh;
-	char	line[128];
-	char	name[128];
+	char	line[2 * MAX_TOK_LEN];
+	char	name[2 * MAX_TOK_LEN];
 	int	token;
 
 	yh = fopen(header_file, "r");
@@ -638,10 +706,17 @@ populate_symb(
 	while (NULL != fgets(line, sizeof(line), yh))
 		if (2 == sscanf(line, "#define %s %d", name, &token)
 		    && 'T' == name[0] && '_' == name[1] && token >= 0
-		    && token < COUNTOF(symb))
+		    && token < COUNTOF(symb)) {
 
 			symb[token] = estrdup(name);
-
+			if (strlen(name) > MAX_TOK_LEN) {
+				fprintf(stderr,
+					"MAX_TOK_LEN %d too small for '%s'\n"
+					"Edit keyword-gen.c to raise.\n",
+					MAX_TOK_LEN, name);
+				exit(10);
+			}
+		}
 	fclose(yh);
 }
 

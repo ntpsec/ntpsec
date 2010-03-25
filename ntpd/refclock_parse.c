@@ -198,7 +198,7 @@ static char rcsid[] = "refclock_parse.c,v 4.81 2009/05/01 10:15:29 kardel RELEAS
 static	int	parse_start	(int, struct peer *);
 static	void	parse_shutdown	(int, struct peer *);
 static	void	parse_poll	(int, struct peer *);
-static	void	parse_control	(int, struct refclockstat *, struct refclockstat *, struct peer *);
+static	void	parse_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
 
 struct	refclock refclock_parse = {
 	parse_start,
@@ -3307,12 +3307,12 @@ parse_poll(
 static void
 parse_control(
 	int unit,
-	struct refclockstat *in,
+	const struct refclockstat *in,
 	struct refclockstat *out,
 	struct peer *peer
 	)
 {
-        struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
 	parsectl_t tmpctl;
 
 	static char outstatus[400];	/* status output buffer */

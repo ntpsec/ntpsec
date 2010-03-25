@@ -21,7 +21,7 @@
 #include "ntp_intres.h"
 
 
-#define CHILD_MAX_IDLE	15	/* seconds, idle worker limit */
+#define CHILD_MAX_IDLE	(3 * 60)	/* seconds, idle worker limit */
 
 int	intres_req_pending;
 
