@@ -93,7 +93,7 @@ keytype_from_text(
 
 	if (NULL != pdigest_len) {
 #ifdef OPENSSL
-		u_int max_digest_len = 0;
+		u_long max_digest_len = 0;
 		if (MAX_MAC_LEN > sizeof(keyid_t))
 			max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
 
@@ -101,10 +101,10 @@ keytype_from_text(
 		EVP_DigestFinal(&ctx, digest, &digest_len);
 		if (digest_len > max_digest_len) {
 			fprintf(stderr,
-				"key type %s %u octet digests are too big, max %u\n",
+				"key type %s %u octet digests are too big, max %lu\n",
 				keytype_name(key_type), digest_len, max_digest_len);
 			msyslog(LOG_ERR,
-				"key type %s %u octet digests are too big, max %u",
+				"key type %s %u octet digests are too big, max %lu",
 				keytype_name(key_type), digest_len, max_digest_len);
 			return 0;
 		}
