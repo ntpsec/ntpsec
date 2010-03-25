@@ -794,7 +794,7 @@ sendpkt(
 	)
 {
 	if (debug >= 3)
-		printf("Sending %u octets\n", xdatalen);
+	    printf("Sending %lu octets\n", (u_long)xdatalen);
 
 	if (send(sockfd, xdata, (size_t)xdatalen, 0) == -1) {
 		warning("write to %s failed", currenthost, "");
@@ -1311,9 +1311,9 @@ sendrequest(
 		return 1;
 	} else if ((size_t)maclen != (info_auth_hashlen + sizeof(keyid_t))) {
 		fprintf(stderr,
-			"%d octet MAC, %u expected with %u octet digest\n",
-			maclen, (info_auth_hashlen + sizeof(keyid_t)),
-			info_auth_hashlen);
+			"%d octet MAC, %lu expected with %lu octet digest\n",
+			maclen, (u_long)(info_auth_hashlen + sizeof(keyid_t)),
+			(u_long)info_auth_hashlen);
 		return 1;
 	}
 	
@@ -2392,9 +2392,9 @@ keytype(
 	int		key_type;
 
 	if (!pcmd->nargs) {
-		fprintf(fp, "keytype is %s with %u octet digests\n",
+		fprintf(fp, "keytype is %s with %lu octet digests\n",
 			keytype_name(info_auth_keytype),
-			info_auth_hashlen);
+			(u_long)info_auth_hashlen);
 		return;
 	}
 
