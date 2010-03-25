@@ -2761,6 +2761,7 @@ mrulist(
 	mru_sort_order order;
 	const char * const *ppkeyword;
 	char parms_buf[128];
+	char buf[24];
 	char *parms;
 	char *arg;
 	size_t cb;
@@ -2808,6 +2809,20 @@ mrulist(
 				    COUNTOF(mru_sort_keywords))
 					order = ppkeyword -
 						mru_sort_keywords;
+			} else if (!strcmp("limited", arg) ||
+				   !strcmp("kod", arg)) {
+				/* transform to resany=... */
+				snprintf(buf, sizeof(buf),
+					 ", resany=0x%x",
+					 ('k' == arg[0])
+					     ? RES_KOD
+					     : RES_LIMITED);
+				cb = 1 + strlen(buf);
+				if (parms + cb <
+					parms_buf + sizeof(parms_buf)) {
+					memcpy(parms, buf, cb);
+					parms += cb - 1;
+				}
 			} else
 				fprintf(stderr,
 					"ignoring unrecognized mrulist parameter: %s\n",
@@ -2845,7 +2860,7 @@ mrulist(
 		qsort(sorted, mru_count, sizeof(sorted[0]),
 		      mru_qcmp_table[order]);
 
-	printf(	"lstint avgint rstr m v  count rport remote address\n"
+	printf(	"lstint avgint rstr r m v  count rport remote address\n"
 		"==============================================================================\n");
 		/* '=' x 78 */
 	for (ppentry = sorted; ppentry < sorted + mru_count; ppentry++) {
@@ -2859,10 +2874,15 @@ mrulist(
 		LFPTOD(&interval, favgint);
 		favgint /= recent->count;
 		avgint = (int)(favgint + 0.5);
-		fprintf(fp, "%6d %6d %4hx %d %d %6d %5hu %s\n",
-			lstint, avgint, recent->rs, (int)recent->mode,
-			(int)recent->ver, recent->count,
-			SRCPORT(&recent->addr),
+		fprintf(fp, "%6d %6d %4hx %c %d %d %6d %5hu %s\n",
+			lstint, avgint, recent->rs,
+			(RES_KOD & recent->rs)
+			    ? 'K'
+			    : (RES_LIMITED & recent->rs)
+				  ? 'L'
+				  : '.',
+			(int)recent->mode, (int)recent->ver,
+			recent->count, SRCPORT(&recent->addr),
 			nntohost(&recent->addr));
 		if (showhostnames)
 			fflush(fp);

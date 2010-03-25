@@ -416,7 +416,7 @@ receive(
 	 * This is for testing. If restricted drop ten percent of
 	 * surviving packets.
 	 */
-	if (restrict_mask & RES_TIMEOUT) {
+	if (restrict_mask & RES_FLAKE) {
 		if ((double)ntp_random() / 0x7fffffff < .1) {
 			sys_restricted++;
 			return;			/* no flakeway */

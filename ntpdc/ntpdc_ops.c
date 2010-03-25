@@ -1672,7 +1672,7 @@ static struct resflags resflagsV3[] = {
 	{ "limited",	RES_LIMITED },
 	{ "version",	RES_VERSION },
 	{ "kod",	RES_KOD },
-	{ "timeout",	RES_TIMEOUT },
+	{ "flake",	RES_FLAKE },
 
 	{ "",		0 }
 };

@@ -831,12 +831,12 @@ struct restrict_u_tag {
 
 #define RES_KOD			0x0400	/* send kiss of death packet */
 #define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */
-#define RES_TIMEOUT		0x1000	/* timeout this entry */
+#define RES_FLAKE		0x1000	/* flakeway - drop 10% */
 
 #define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |	\
 				 RES_NOMODIFY | RES_NOTRAP |	\
 				 RES_LPTRAP | RES_KOD |		\
-				 RES_MSSNTP | RES_TIMEOUT)
+				 RES_MSSNTP | RES_FLAKE)
 
 /*
  * Match flags

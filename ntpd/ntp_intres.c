@@ -81,9 +81,6 @@
 #  include <netdb.h>
 # endif
 # include <resolv.h>
-# ifdef RES_TIMEOUT
-#  undef RES_TIMEOUT	/* resolv.h has one, we want ours */
-# endif
 # ifdef HAVE_INT32_ONLY_WITH_DNS
 #  define HAVE_INT32
 # endif

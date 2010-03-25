@@ -2262,7 +2262,7 @@ config_access(
 				break;
 
 			case T_Flake:
-				flags |= RES_TIMEOUT;
+				flags |= RES_FLAKE;
 				break;
 
 			case T_Ignore:
