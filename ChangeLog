@@ -1,4 +1,5 @@
 ---
+(4.2.6p1-RC6) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4) should be fabs(foo) < .4.
 * [Bug 1464] synchronization source wrong for refclocks ARCRON_MSF (27)
