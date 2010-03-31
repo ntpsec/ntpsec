@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4) should be fabs(foo) < .4.
 * [Bug 1464] synchronization source wrong for refclocks ARCRON_MSF (27)
   and SHM (28).
 * Correct Windows port's refclock_open() to return 0 on failure not -1.
