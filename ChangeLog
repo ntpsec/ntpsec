@@ -1,16 +1,8 @@
-* [Bug 1306] constant conditionals in audio_gain().
 * [Bug 1483] AI_NUMERICSERV undefined in 4.2.7p20.
 * [Bug 1497] fudge is broken by getnetnum() change.
 * [Bug 1503] Auto-enabling of monitor for "restrict ... limited" wrong.
 * [Bug 1504] ntpdate tickles ntpd "discard minimum 1" rate limit if
   "restrict ... limited" is used.
-* Include (4.2.6p1) - [Bug 1464] synchronization source wrong for
-  refclocks ARCRON_MSF (27) and SHM (28).
-* Include (4.2.6p1) - Correct Windows port's refclock_open() to return 0
-  on failure not -1.
-* Include (4.2.6p1) - Correct CHU, dumbclock, and WWVB drivers to check
-  for 0 returned from refclock_open() on failure.
-* Correct "SIMUL=4 ./flock-build -1" to prioritize -1/--one.
 * ntpdate: stop querying source after KoD packet response, log it.
 * ntpdate: rate limit each server to 2s between packets.
 * From J. N. Perlinger: avoid pointer wraparound warnings in dolfptoa(),
@@ -91,6 +83,18 @@
 * Repair ntpdate.c to no longer test HAVE_TIMER_SETTIME.
 * Do not reference peer_node/unpeer_node after freeing when built with
   --disable-saveconfig and using DNS.
+(4.2.7p21) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
+* Include (4.2.6p1-RC6) - [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4)
+  should be fabs(foo) < .4.
+* Include (4.2.6p1-RC6) - [Bug 1464] synchronization source wrong for
+  refclocks ARCRON_MSF (27) and SHM (28).
+* Include (4.2.6p1-RC6) - Correct Windows port's refclock_open() to
+  return 0 on failure not -1.
+* Include (4.2.6p1-RC6) - Correct CHU, dumbclock, and WWVB drivers to
+  check for 0 returned from refclock_open() on failure.
+* Include (4.2.6p1-RC6) - Correct "SIMUL=4 ./flock-build -1" to
+  prioritize -1/--one.
+* [Bug 1306] constant conditionals in audio_gain().
 (4.2.7p20) 2010/02/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1483] hostname in ntp.conf "restrict" parameter rejected.
 * Use all addresses for each restrict by hostname.
@@ -188,7 +192,9 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p1-RC6) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
 
+* [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4) should be fabs(foo) < .4.
 * [Bug 1464] synchronization source wrong for refclocks ARCRON_MSF (27)
   and SHM (28).
 * Correct Windows port's refclock_open() to return 0 on failure not -1.
