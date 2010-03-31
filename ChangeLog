@@ -1,3 +1,4 @@
+(4.2.7p21) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p1-RC6) - [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4)
   should be fabs(foo) < .4.
 * Include (4.2.6p1-RC6) - [Bug 1464] synchronization source wrong for
