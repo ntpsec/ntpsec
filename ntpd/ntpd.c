@@ -1090,8 +1090,8 @@ getgroup:
 			char *captext;
 			
 			captext = (interface_interval)
-				      ? "cap_sys_time,cap_net_bind_service=ipe"
-				      : "cap_sys_time=ipe";
+				      ? "cap_sys_time,cap_net_bind_service=pe"
+				      : "cap_sys_time=pe";
 			caps = cap_from_text(captext);
 			if (!caps) {
 				msyslog(LOG_ERR,

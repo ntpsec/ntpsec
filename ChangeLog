@@ -1,3 +1,4 @@
+* [Bug 1432] Don't set inheritable flag for linux capabilities.
 * [Bug 1483] AI_NUMERICSERV undefined in 4.2.7p20.
 * [Bug 1497] fudge is broken by getnetnum() change.
 * [Bug 1503] Auto-enabling of monitor for "restrict ... limited" wrong.
