@@ -57,7 +57,7 @@ CLTAG=NTP_4_2_0
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=21
+point=22
 
 ### betapoint is normally modified by script.
 # ntp-stable Beta number (betapoint)
