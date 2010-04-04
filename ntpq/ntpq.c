@@ -636,12 +636,12 @@ openhost(
 	const char *hname
 	)
 {
+	const char svc[] = "ntp";
 	char temphost[LENHOSTNAME];
 	int a_info, i;
-	struct addrinfo hints, *ai = NULL;
+	struct addrinfo hints, *ai;
 	register const char *cp;
 	char name[LENHOSTNAME];
-	char service[5];
 
 	/*
 	 * We need to get by the [] if they were entered
@@ -668,14 +668,14 @@ openhost(
 	 * will return an "IPv4-mapped IPv6 address" address if you
 	 * give it an IPv4 address to lookup.
 	 */
-	strcpy(service, "ntp");
-	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = Z_AI_NUMERICHOST;
+	ai = NULL;
 
-	a_info = getaddrinfo(hname, service, &hints, &ai);
+	a_info = getaddrinfo(hname, svc, &hints, &ai);
 	if (a_info == EAI_NONAME
 #ifdef EAI_NODATA
 	    || a_info == EAI_NODATA
@@ -685,13 +685,13 @@ openhost(
 #ifdef AI_ADDRCONFIG
 		hints.ai_flags |= AI_ADDRCONFIG;
 #endif
-		a_info = getaddrinfo(hname, service, &hints, &ai);	
+		a_info = getaddrinfo(hname, svc, &hints, &ai);	
 	}
 #ifdef AI_ADDRCONFIG
 	/* Some older implementations don't like AI_ADDRCONFIG. */
 	if (a_info == EAI_BADFLAGS) {
 		hints.ai_flags &= ~AI_ADDRCONFIG;
-		a_info = getaddrinfo(hname, service, &hints, &ai);	
+		a_info = getaddrinfo(hname, svc, &hints, &ai);	
 	}
 #endif
 	if (a_info != 0) {

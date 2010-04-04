@@ -3790,11 +3790,10 @@ config_unpeers(
 {
 	sockaddr_u		peeraddr;
 	struct addrinfo		hints;
-	isc_netaddr_t		i_netaddr;
 	struct unpeer_node *	curr_unpeer;
 	struct peer *		p;
 	const char *		name;
-	u_short			af;
+	int			rc;
 
 	for (curr_unpeer = queue_head(ptree->unpeers);
 	     curr_unpeer != NULL;
@@ -3816,18 +3815,12 @@ config_unpeers(
 			continue;
 		}
 
+		memset(&peeraddr, 0, sizeof(peeraddr));
+		AF(&peeraddr) = curr_unpeer->addr->type;
 		name = curr_unpeer->addr->address;
-		af = curr_unpeer->addr->type;
+		rc = getnetnum(name, &peeraddr, 0, t_UNK);
 		/* Do we have a numeric address? */
-		if (is_ip_address(name, af, &i_netaddr)) {
-			AF(&peeraddr) = (u_short)i_netaddr.family;
-			if (AF_INET6 == i_netaddr.family)
-				SET_ADDR6N(&peeraddr,
-					   i_netaddr.type.in6);
-			else
-				SET_ADDR4N(&peeraddr,
-					   i_netaddr.type.in.s_addr);
-
+		if (rc > 0) {
 			DPRINTF(1, ("unpeer: searching for %s\n",
 				    stoa(&peeraddr)));
 			p = findexistingpeer(&peeraddr, NULL, NULL, -1);
@@ -3856,7 +3849,7 @@ config_unpeers(
 		/* Resolve the hostname to address(es). */
 #ifdef WORKER
 		memset(&hints, 0, sizeof(hints));
-		hints.ai_family = af;
+		hints.ai_family = curr_unpeer->addr->type;
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_protocol = IPPROTO_UDP;
 		getaddrinfo_sometime(name, "ntp", &hints,
@@ -4600,7 +4593,7 @@ getnetnum(
 	const char *num,
 	sockaddr_u *addr,
 	int complain,
-	enum gnn_type a_type
+	enum gnn_type a_type	/* ignored */
 	)
 {
 	isc_netaddr_t ipaddr;

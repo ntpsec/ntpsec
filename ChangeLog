@@ -1,3 +1,9 @@
+* [Bug 1516] unpeer by IP address fails, DNS name works.
+* [Bug 1517] ntpq and ntpdc should verify reverse DNS before use.
+  ntpq and ntpdc now use the following format for showing purported
+  DNS names from IP address "reverse" DNS lookups when the DNS name
+  does not exist or does not include the original IP address among
+  the results: "192.168.1.2 (fake.dns.local)".
 (4.2.7p22) 2010/04/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1432] Don't set inheritable flag for linux capabilities.
 * [Bug 1465] Make sure time from TS2100 is not invalid.
