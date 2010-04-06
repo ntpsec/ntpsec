@@ -358,7 +358,7 @@ change_logfile(
 			octets += 1;	/* NUL terminator */
 			abs_fname = emalloc(octets);
 			snprintf(abs_fname, octets, "%.*s%c%s",
-				 cd_octets, curdir, DIR_SEP,
+				 (u_int)cd_octets, curdir, DIR_SEP,
 				 syslog_fname);
 		} else
 #endif
@@ -1368,7 +1368,7 @@ library_fatal_error(const char *file, int line, const char *format,
 
 	msyslog(LOG_ERR, "%s:%d: fatal error:", file, line);
 	vsnprintf(errbuf, sizeof(errbuf), format, args);
-	msyslog(LOG_ERR, errbuf);
+	msyslog(LOG_ERR, "%s", errbuf);
 	msyslog(LOG_ERR, "exiting (due to fatal error in library)");
 
 #if defined(DEBUG) && defined(SYS_WINNT)
@@ -1395,7 +1395,7 @@ library_unexpected_error(const char *file, int line, const char *format,
 
 	msyslog(LOG_ERR, "%s:%d: unexpected error:", file, line);
 	vsnprintf(errbuf, sizeof(errbuf), format, args);
-	msyslog(LOG_ERR, errbuf);
+	msyslog(LOG_ERR, "%s", errbuf);
 
 	if (++unexpected_error_cnt == MAX_UNEXPECTED_ERRORS)
 	{

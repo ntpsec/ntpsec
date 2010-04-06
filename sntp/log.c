@@ -31,7 +31,7 @@ void log_msg(char *message, char type) {
 				break;
 		}
 
-		syslog(type, message);
+		syslog(type, "%s", message);
 	}
 }
 
@@ -47,7 +47,7 @@ void debug_msg(char *message) {
 #ifdef LOG_PERROR
 			| LOG_PERROR
 #endif
-			| LOG_CONS, message);
+		       | LOG_CONS, "%s", message);
 	}
 }
 
