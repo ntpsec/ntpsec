@@ -357,8 +357,11 @@ change_logfile(
 			octets += strlen(syslog_fname);
 			octets += 1;	/* NUL terminator */
 			abs_fname = emalloc(octets);
+			/* It's strictly assumed that cd_octets fits into
+			 * an 'int' without overflow or sign change!
+			 */
 			snprintf(abs_fname, octets, "%.*s%c%s",
-				 (u_int)cd_octets, curdir, DIR_SEP,
+				 (int)cd_octets, curdir, DIR_SEP,
 				 syslog_fname);
 		} else
 #endif
