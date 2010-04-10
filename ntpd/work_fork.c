@@ -189,8 +189,8 @@ receive_blocking_req_internal(
 		DPRINTF(1, ("parent closed request pipe\n"));
 	else if (rc != sizeof(hdr))
 		msyslog(LOG_ERR,
-			"receive_blocking_req_internal: short header read %d of %d\n",
-			rc, sizeof(hdr));
+			"receive_blocking_req_internal: short header read %d of %lu\n",
+			rc, (u_long)sizeof(hdr));
 	else {
 		NTP_INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 4 * 1024);
 		req = emalloc(hdr.octets);
@@ -205,8 +205,8 @@ receive_blocking_req_internal(
 				"receive_blocking_req_internal: pipe data read %m\n");
 		else if (rc != hdr.octets - sizeof(hdr))
 			msyslog(LOG_ERR,
-				"receive_blocking_req_internal: short read %d of %d\n",
-				rc, hdr.octets - sizeof(hdr));
+				"receive_blocking_req_internal: short read %d of %lu\n",
+				rc, (u_long)(hdr.octets - sizeof(hdr)));
 		else if (BLOCKING_REQ_MAGIC != req->magic_sig)
 			msyslog(LOG_ERR,
 				"receive_blocking_req_internal: packet header mismatch (0x%x)",
@@ -266,8 +266,8 @@ receive_blocking_resp_internal(
 	if (rc < 0)
 		DPRINTF(1, ("receive_blocking_resp_internal: pipe read %m\n"));
 	else if (rc != sizeof(hdr))
-		DPRINTF(1, ("receive_blocking_resp_internal: short header read %d of %d\n",
-			    rc, sizeof(hdr)));
+		DPRINTF(1, ("receive_blocking_resp_internal: short header read %d of %lu\n",
+			    rc, (u_long)sizeof(hdr)));
 	else if (BLOCKING_RESP_MAGIC != hdr.magic_sig)
 		DPRINTF(1, ("receive_blocking_resp_internal: header mismatch (0x%x)\n",
 			    hdr.magic_sig));
@@ -283,8 +283,8 @@ receive_blocking_resp_internal(
 		if (rc < 0)
 			DPRINTF(1, ("receive_blocking_resp_internal: pipe data read %m\n"));
 		else if (rc < hdr.octets - sizeof(hdr))
-			DPRINTF(1, ("receive_blocking_resp_internal: short read %d of %d\n",
-				    rc, hdr.octets - sizeof(hdr)));
+			DPRINTF(1, ("receive_blocking_resp_internal: short read %d of %lu\n",
+				    rc, (u_long)(hdr.octets - sizeof(hdr))));
 		else
 			return resp;
 	}

@@ -640,8 +640,8 @@ blocking_getnameinfo(
 	host = alloca(octets);
 	if (NULL == host) {
 		msyslog(LOG_ERR,
-			"blocking_getnameinfo unable to allocate %d octets on stack",
-			octets);
+			"blocking_getnameinfo unable to allocate %lu octets on stack",
+			(u_long)octets);
 		exit(1);
 	}
 #endif
@@ -671,9 +671,9 @@ blocking_getnameinfo(
 	resp = emalloc(resp_octets);
 	gni_resp = (void *)((char *)resp + sizeof(*resp));
 
-	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %d servlen %d\n",
+	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
 		    stoa(&gni_req->socku), gni_req->flags,
-		    gni_req->hostoctets, gni_req->servoctets));
+		    (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
 	
 	gni_resp->retcode = getnameinfo(&gni_req->socku.sa,
 					SOCKLEN(&gni_req->socku),
