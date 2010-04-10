@@ -1,3 +1,6 @@
+* [Bug 1518] Windows ntpd should lock to one processor more
+  conservatively.
+* [Bug 1522] Enable range syntax "trustedkey (301 ... 399)".
 (4.2.7p23) 2010/04/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1516] unpeer by IP address fails, DNS name works.
 * [Bug 1517] ntpq and ntpdc should verify reverse DNS before use.
