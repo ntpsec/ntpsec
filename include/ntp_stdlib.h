@@ -45,6 +45,7 @@ extern	void	msyslog		(int, const char *, ...)
 #define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
 #endif
 
+/* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
 extern	int	authdecrypt	(keyid_t, u_int32 *, int, int);
@@ -146,6 +147,7 @@ extern int	authnumfreekeys;
  */
 extern keyid_t	cache_keyid;		/* key identifier */
 extern u_char *	cache_key;		/* key pointer */
+extern int	cache_type;		/* key type */
 extern u_int	cache_keylen;		/* key length */
 
 /* getopt.c */

@@ -94,6 +94,7 @@
 %token	<Double>	T_Double
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
+%token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
 %token	<Integer>	T_Enable
 %token	<Integer>	T_End
 %token	<Integer>	T_False
@@ -259,6 +260,9 @@
 %type	<Attr_val>	fudge_factor
 %type	<Queue>		fudge_factor_list
 %type	<Queue>		integer_list
+%type	<Queue>		integer_list_range
+%type	<Attr_val>	integer_list_range_elt
+%type	<Attr_val>	integer_range
 %type	<Integer>	nic_rule_action
 %type	<Queue>		interface_command
 %type	<Integer>	interface_nic
@@ -457,7 +461,7 @@ authentication_command
 			{ cfgt.auth.request_key = $2; }
 	|	T_Revoke T_Integer
 			{ cfgt.auth.revoke = $2; }
-	|	T_Trustedkey integer_list
+	|	T_Trustedkey integer_list_range
 			{ cfgt.auth.trusted_key_list = $2; }
 	|	T_NtpSignDsocket T_String
 			{ cfgt.auth.ntp_signd_socket = $2; }
@@ -1040,6 +1044,24 @@ nic_rule_action
 integer_list
 	:	integer_list T_Integer { $$ = enqueue($1, create_ival($2)); }
 	|	T_Integer { $$ = enqueue_in_new_queue(create_ival($1)); }
+	;
+
+integer_list_range
+	:	integer_list_range integer_list_range_elt
+			{ $$ = enqueue($1, $2); }
+	|	integer_list_range_elt
+			{ $$ = enqueue_in_new_queue($1); }
+	;
+
+integer_list_range_elt
+	:	T_Integer
+			{ $$ = create_attr_ival('i', $1); }
+	|	integer_range		/* default of $$ = $1 is good */
+	;
+
+integer_range		/* limited to unsigned shorts */
+	:	'(' T_Integer T_Ellipsis T_Integer ')'
+			{ $$ = create_attr_shorts('-', $2, $4); }
 	;
 
 string_list
