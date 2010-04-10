@@ -37,6 +37,7 @@ struct key_tok {
 };
 
 struct key_tok ntp_keywords[] = {
+{ "...",		T_Ellipsis,		FOLLBY_TOKEN },
 { "automax",		T_Automax,		FOLLBY_TOKEN },
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "broadcastclient",	T_Broadcastclient,	FOLLBY_TOKEN },
