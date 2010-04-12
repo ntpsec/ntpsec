@@ -2,6 +2,11 @@
   conservatively.
 * [Bug 1520] '%u' formats for size_t gives warnings with 64-bit builds.
 * [Bug 1522] Enable range syntax "trustedkey (301 ... 399)".
+* Documentation updates for 4.2.7p22 changes and additions, updating
+  ntpdc.html, ntpq.html, accopt.html, confopt.html, manyopt.html,
+  miscopt.html, and miscopt.txt.
+* Modify full MRU list preemption when full to match "discard monitor"
+  documentation, by removing exception for count == 1.
 (4.2.7p23) 2010/04/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1516] unpeer by IP address fails, DNS name works.
 * [Bug 1517] ntpq and ntpdc should verify reverse DNS before use.
