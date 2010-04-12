@@ -12,7 +12,7 @@
 Walt Kelly</a>
 <p>The chicken is getting configuration advice.</p>
 <p>Last update:
-	<!-- #BeginDate format:En2m -->25-Nov-2009  4:46<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->11-Apr-2010  23:07<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -78,11 +78,12 @@ Walt Kelly</a>
 				the address must match the address specified on the <tt>manycastserver</tt> command
 				of one or more designated manycast servers.</dd>
 			<dt><tt>pool</tt></dt>
-			<dd>For type s messages (only) this command mobilizes a client mode association
-				for servers implementing the pool automatic server discovery scheme described
-				on the <a href="assoc.html">Association Management</a> page. The address
-				is a DNS name in the form <tt><i>area</i>.pool.ntp.org</tt>, where <tt><i>area</i></tt> is
-				a qualifier designating the server geographic area such as <tt>us</tt> or <tt>europe</tt>.</dd>
+			<dd>For type s addresses (only) this command mobilizes a pool client mode association
+				for the DNS name specified. The DNS name must resolve to one or more IPv4 or
+				IPv6 addresses. The pool automatic server discovery scheme is described on the
+				<a href="manyopt.html#pool">Automatic Server Discovery</a> page.
+				<a href="http://www.pool.ntp.org/">www.pool.ntp.org</a>	describes a compatible pool
+				of public NTP servers.</dd>
 			<dt><tt>unpeer</tt></dt>
 			<dd>This command removes a previously configured association. An address or association ID can
 				be used to identify the association.  Either an IP address or DNS name can be used.  This

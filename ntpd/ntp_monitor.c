@@ -450,17 +450,9 @@ ntp_monitor(
 			if (NULL == mon_free)
 				mon_getmoremem();
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
-		/*
-		 * Preempt from the MRU list if old enough.
-		 * What is the intention of the oldest->count == 1 test
-		 * and is it still useful?  It seems to be avoiding
-		 * mon_age controlled preemption of entries representing
-		 * a single packet, and I don't understand how that
-		 * helps.
-		 *   -- Dave Hart
-		 */
-		} else if (oldest->count == 1 || ntp_random() / (2. *
-			   FRAC) > (double)oldest_age / mon_age)
+		/* Preempt from the MRU list if old enough. */
+		} else if (ntp_random() / (2. * FRAC) >
+			   (double)oldest_age / mon_age)
 			return ~(RES_LIMITED | RES_KOD) & flags;
 		else {
 			mon_reclaim_entry(oldest);

@@ -13,7 +13,7 @@
 		<img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>We have three, now looking for more.</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->13-Nov-2009  19:08<!-- #EndDate --> 
+			<!-- #BeginDate format:En2m -->11-Apr-2010  22:56<!-- #EndDate --> 
 			UTC</p>
 		<br clear="left">
 	<h4>Related Links</h4>
@@ -27,9 +27,9 @@
 			<dd>This command specifies the complete path and name of the file used to record the frequency of the local clock oscillator. This is the same operation as the <tt>-f</tt> command linke option. If the file exists, it is read at startup in order to set the initial frequency and then updated once per hour or more with the current frequency computed by the daemon. If the file name is specified, but the file itself does not exist, the starts with an initial frequency of zero and creates the file when writing it for the first time. If this command is not given, the daemon will always start with an initial frequency of zero.</dd>
 				<dd>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version. This implies that <tt>ntpd</tt> must have write permission for the directory the drift file is located in, and that file system links, symbolic or otherwise, should be avoided.</dd>
 				<dd>The parameter <tt>tolerance</tt> is the wander threshold to skip writing the new value. If the value of wander computed from recent frequency changes is greater than this threshold the file will be updated once per hour. If below the threshold, the file will not be written.</dd>
-			<dt id="enable"><tt>enable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
-			<tt>disable [ auth | bclient | calibrate | kernel | monitor | ntp | pps | stats ]</tt></dt>
-			<dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using the <a href="ntpdc.html"><tt>ntpdc</tt></a> utility program.
+			<dt id="enable"><tt>enable [auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
+			<tt>disable [auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt></dt>
+			<dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using <a href="ntpq.html"><tt>ntpq</tt></a> and <a href="ntpdc.html"><tt>ntpdc</tt></a> utility programs.
 				<dl>
 					<dt><tt>auth</tt></dt>
 					<dd>Enables the server to synchronize with unconfigured peers only if the peer has been correctly authenticated using either public key or private key cryptography. The default for this flag is enable.</dd>
@@ -40,7 +40,10 @@
 					<dt><tt>kernel</tt></dt>
 					<dd>Enables the kernel time discipline, if available. The default for this flag is enable if support is available, otherwise disable.</dd>
 					<dt><tt>monitor</tt></dt>
-					<dd>Enables the monitoring facility. See the <tt>ntpdc</tt> program and the <tt>monlist</tt> command or further information. The default for this flag is enable.</dd>
+					<dd>Enables the monitoring facility. See the <a href="ntpq.html"><tt>ntpq</tt> program</a> and the <tt>monstats</tt> and
+						<tt>mrulist</tt> commands, as well as the <a href="accopt.html#discard">Access Control Options</a> for details.
+						The monitoring facility is also enabled by the presence of <a href="accopt.html#limited"><tt>limited</tt></a>
+						in any <tt>restrict</tt> commands. The default for this flag is enable.</dd>
 					<dt><tt>ntp</tt></dt>
 					<dd>Enables time and frequency discipline. In effect, this switch opens and closes the feedback loop, which is useful for testing. The default for this flag is enable.</dd>
 					<dt><tt>stats</tt></dt>
@@ -60,10 +63,38 @@
 				<dd>Thus, a minimal log configuration could look like this:</dd>
 				<dd><tt>logconfig=syncstatus +sysevents</tt></dd>
 						<dd>This would just list the synchronizations state of <tt>ntpd</tt> and the major system events. For a simple reference server, the following minimum message configuration could be useful:</dd>
-				<dd><tt>logconfig allsync +allclock</tt></dd>
+				<dd><tt>logconfig=syncall +clockall</tt></dd>
 				<dd>This configuration will list all clock information and synchronization information. All other events and messages about peers, system events and so on is suppressed.</dd>
 			<dt id="logfile"><tt>logfile <i>logfile</i></tt></dt>
 			<dd>This command specifies the location of an alternate log file to be used instead of the default system <tt>syslog</tt> facility. This is the same operation as the <tt>-l </tt>command line option.</dd>
+			<dt id="mru"><tt>mru [maxdepth <i>count</i> | maxmem <i>kilobytes</i>  | mindepth <i>count</i> | maxage <i>seconds</i> | initalloc <i>count</i> | initmem <i>kilobytes</i> | incalloc <i>count</i> | incmem <i>kilobytes</i>]</tt></dt>
+			<dd>Controls size limits of the monitoring facility Most Recently Used <a href="ntpq.html#mrulist">(MRU) list</a> of client addresses, which is also used by the <a href="accopt.html#discard">rate control facility</a>.
+				<dl>
+					<dt><tt>maxdepth <i>count</i><br>
+					maxmem <i>kilobytes</i></tt></dt>
+					<dd>Equivalent upper limits on the size of the MRU list, in terms of entries or kilobytes. The actual
+						limit will be up to <tt>incalloc</tt> entries or <tt>incmem</tt> kilobytes larger. As with all
+						of the <tt>mru</tt> options offered in units of entries or kilobytes, if both <tt>maxdepth</tt>
+						and <tt>maxmem</tt> are used, the last one used controls. The default is 1024 kilobytes.</dd>
+					<dt><tt>mindepth <i>count</i></tt></dt>
+					<dd>Lower limit on the MRU list size. When the MRU list has fewer than <tt>mindepth</tt> entries,
+						existing entries are never removed to make room for newer ones, regardless of their age.
+						The default is 600 entries.</dd>
+					<dt><tt>maxage <i>seconds</i></tt></dt>
+					<dd>Once the MRU list has <tt>mindepth</tt> entries and an additional client address is to be added
+						to the list, if the oldest entry was updated more than <tt>maxage</tt> seconds ago, that entry
+						is removed and its storage reused. If the oldest entry was updated more recently, the MRU list
+						is grown, subject to <tt>maxdepth</tt>/<tt>maxmem</tt>. The default is 64 seconds.</dd>
+					<dt><tt>initalloc <i>count</i><br>
+					initmem <i>kilobytes</i></tt></dt>
+					<dd>Initial memory allocation at the time the monitoring facility is first enabled, in terms of
+						entries or kilobytes.  The default is 4 kilobytes.</dd>
+					<dt><tt>incalloc <i>count</i><br>
+					incmem <i>kilobytes</i></tt></dt>
+					<dd>Size of additional memory allocations when growing the MRU list, in entries or kilobytes.
+						The default is 4 kilobytes.</dd>
+				</dl>
+				</dd>
 			<dt id="phone"><tt>phone <i>dial</i>1 <i>dial</i>2 ...</tt></dt>
 			<dd>This command is used in conjunction with the ACTS modem driver (type 18). The arguments consist of a maximum of 10 telephone numbers used to dial USNO, NIST or European time services. The Hayes command ATDT&nbsp;is normally prepended to the number, which can contain other modem control codes as well.</dd>
 			<dt id="saveconfigdir"><tt>saveconfigdir <i>directory_path</i></tt></dt>
