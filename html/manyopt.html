@@ -14,7 +14,7 @@
 		<img src="pic/alice51.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 		<p>Make sure who your friends are.</p>
 		<p>Last update: 
-			<!-- #BeginDate format:En2 -->11-Apr-2010  23:09<!-- #EndDate -->
+			<!-- #BeginDate format:En2 -->12-Apr-2010  06:16<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 		<h4>Related Links</h4>
@@ -50,18 +50,17 @@
 		<p>A manycast server is configured using the <tt>manycastserver</tt> command, which listens on the specified broadcast address for manycast client messages. If a manycast server is in scope of the current TTL and is itself synchronized to a valid source and operating at a stratum level equal to or lower than the manycast client, it replies with an ordinary unicast server message.</p>
 		<p>The manycast client receiving this message mobilizes a preemptable client association according to the matching manycast client template, but only if cryptographically authenticated and the server stratum is less than or equal to the client stratum. </p>
 		<p>It is possible and frequently useful to configure a host as both manycast client and manycast server. A number of hosts configured this way and sharing a common multicast group address will automatically organize themselves in an optimum configuration based on stratum and synchronization distance.</p>
-		<p>The use of cryptograpic authentication is always a good idea in any server descovery scheme. Both symmetric key and public key cryptography can be used in the same scenarios as described above for the broadast/multicast scheme.</p>
+		<p>The use of cryptograpic authentication is always a good idea in any server discovery scheme. Both symmetric key and public key cryptography can be used in the same scenarios as described above for the broadast/multicast scheme.</p>
 		<h4 id="pool">Server Pool Scheme</h4>
 		<p>The idea of targeting servers on a random basis to distribute and balance the load is not a new one; however, the NTP pool scheme puts this on steroids. At present, several thousand operators around the globe have volunteered their servers for public access. In general, NTP&nbsp;is a lightweight service and servers used for other purposes don't mind an additional small load. The trick is to randomize over the population and minimize the load on any one server while retaining the advantages of multiple servers using the NTP&nbsp;mitigation algorithms.</p>
-		<p>To support this service the DNS&nbsp;for some volunteer servers as been
-			modified to collect a number of other volunteer&nbsp;servers and return a
-			randomized list in response to a DNS query. The client receiving this list
-			mobilizes some or all of them, similar to the manycast discovery scheme, and casts
-			off the excess.  Unlike <tt>manycastclient</tt>, cryptographic authentication is
-			not required. The pool scheme solicits a single server at a time, compared to
-			<tt>manycastclient</tt> which solicits all servers with a multicast TTL limit
-			simultaneously. Otherwise, the pool server discovery scheme operates as manycast
-			does.</p>
+		<p>To support this service custom DNS software used for pool.ntp.org and its subdomains
+			returns a random selection of participating servers in response to a DNS query.
+			The client receiving this list mobilizes some or all of them, similar to the
+			manycast discovery scheme, and casts off the excess.  Unlike <tt>manycastclient</tt>,
+			cryptographic authentication is	not required. The pool scheme solicits a single
+			server at a time, compared to <tt>manycastclient</tt> which solicits all servers
+			within a multicast TTL range simultaneously. Otherwise, the pool server discovery
+			scheme operates as manycast does.</p>
 		<p>The pool scheme is configured using one or <tt>pool</tt> commands with DNS names
 			indicating the pool from which to draw. The <tt>pool</tt> command can be used more
 			than once; duplicate servers are detected and discarded. In principle, it is
