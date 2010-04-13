@@ -24,8 +24,8 @@
 
 <p>The skunk watches for intruders and sprays.</p>
 <p>Last update: 
-<!-- #BeginDate format:En2m -->11-Apr-2010  22:57<!-- #EndDate -->
-		UTC</p>
+	<!-- #BeginDate format:En2m -->13-Apr-2010  04:38<!-- #EndDate -->
+	UTC</p>
 <br clear="left">
 
 <h4>Related Links</h4>
@@ -183,12 +183,11 @@ time) in log<sub>2</sub> s with default 3.</dd>
 	range. </dd>
 
 		<dt><tt>ntpport</tt></dt>
-			<dt><tt>non-ntpport</tt></dt>
-			<dd>This is actually a match algorithm modifier, rather than a restriction
-				flag. Its presence causes the restriction entry to be matched only if the
-				source port in the packet is the standard NTP UDP port (123). Both <tt>ntpport</tt> and <tt>non-ntpport</tt> may
-				be specified. The <tt>ntpport</tt> is considered more specific and is sorted
-				later in the list.</dd>
+<dd>This is actually a match algorithm modifier, rather than a restriction
+flag. Its presence causes the restriction entry to be matched only if the
+source port in the packet is the standard NTP UDP port (123). A restrict line
+containing <tt>ntpport</tt> is considered more specific than one with the
+same address and mask, but lacking <tt>ntpport</tt>.</dd>
 			<dt><tt>version</tt></dt>
 			<dd>Deny packets that do not match the current NTP version.</dd>
 		</dl>

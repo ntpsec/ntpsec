@@ -5,6 +5,7 @@
 * Documentation updates for 4.2.7p22 changes and additions, updating
   ntpdc.html, ntpq.html, accopt.html, confopt.html, manyopt.html,
   miscopt.html, and miscopt.txt.
+* accopt.html: non-ntpport doc changes from Dave Mills.
 * Modify full MRU list preemption when full to match "discard monitor"
   documentation, by removing exception for count == 1.
 (4.2.7p23) 2010/04/04 Released by Harlan Stenn <stenn@ntp.org>
