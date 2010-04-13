@@ -1,3 +1,4 @@
+* [Bug 1390] Control PPS on the Oncore M12.
 * [Bug 1518] Windows ntpd should lock to one processor more
   conservatively.
 * [Bug 1520] '%u' formats for size_t gives warnings with 64-bit builds.
