@@ -131,20 +131,20 @@ struct neoclock4x_unit {
   int   utc_msec;
 };
 
-static	int	neoclock4x_start        (int, struct peer *);
+static	int	neoclock4x_start	(int, struct peer *);
 static	void	neoclock4x_shutdown	(int, struct peer *);
 static	void	neoclock4x_receive	(struct recvbuf *);
 static	void	neoclock4x_poll		(int, struct peer *);
-static	void	neoclock4x_control      (int, struct refclockstat *, struct refclockstat *, struct peer *);
+static	void	neoclock4x_control	(int, const struct refclockstat *, struct refclockstat *, struct peer *);
 
-static int      neol_atoi_len           (const char str[], int *, int);
-static int      neol_hexatoi_len        (const char str[], int *, int);
-static void     neol_jdn_to_ymd         (unsigned long, int *, int *, int *);
-static void     neol_localtime          (unsigned long, int* , int*, int*, int*, int*, int*);
-static unsigned long neol_mktime        (int, int, int, int, int, int);
+static int	neol_atoi_len		(const char str[], int *, int);
+static int	neol_hexatoi_len	(const char str[], int *, int);
+static void	neol_jdn_to_ymd		(unsigned long, int *, int *, int *);
+static void	neol_localtime		(unsigned long, int* , int*, int*, int*, int*, int*);
+static unsigned long neol_mktime	(int, int, int, int, int, int);
 #if !defined(NEOCLOCK4X_FIRMWARE)
-static int      neol_query_firmware     (int, int, char *, int);
-static int      neol_check_firmware     (int, const char*, char *);
+static int	neol_query_firmware	(int, int, char *, int);
+static int	neol_check_firmware	(int, const char*, char *);
 #endif
 
 struct refclock refclock_neoclock4x = {
@@ -671,7 +671,7 @@ neoclock4x_poll(int unit,
 
 static void
 neoclock4x_control(int unit,
-		   struct refclockstat *in,
+		   const struct refclockstat *in,
 		   struct refclockstat *out,
 		   struct peer *peer)
 {

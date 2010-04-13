@@ -80,8 +80,10 @@ typedef u_int32		ntp_u_int32_t;
 
 typedef struct ntp_uint64_t { u_int32 val[2]; } ntp_uint64_t;
 
-typedef unsigned short associd_t; /* association ID */
+typedef u_short		associd_t; /* association ID */
+#define ASSOCID_MAX	USHRT_MAX
 typedef u_int32 keyid_t;	/* cryptographic key ID */
+#define KEYID_T_MAX	(0xffffffff)
 typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
 
 /*

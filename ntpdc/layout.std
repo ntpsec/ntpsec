@@ -269,8 +269,8 @@ offsetof(addr6) = 16
 offsetof(mask6) = 32
 
 sizeof(struct info_monitor_1) = 72
-offsetof(lasttime) = 0
-offsetof(firsttime) = 4
+offsetof(avg_int) = 0
+offsetof(last_int) = 4
 offsetof(restr) = 8
 offsetof(count) = 12
 offsetof(addr) = 16
@@ -285,8 +285,8 @@ offsetof(addr6) = 40
 offsetof(daddr6) = 56
 
 sizeof(struct info_monitor) = 48
-offsetof(lasttime) = 0
-offsetof(firsttime) = 4
+offsetof(avg_int) = 0
+offsetof(last_int) = 4
 offsetof(restr) = 8
 offsetof(count) = 12
 offsetof(addr) = 16

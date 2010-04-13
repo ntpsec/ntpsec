@@ -3,34 +3,37 @@
  */
 #include <config.h>
 #include <stdio.h>
-
 #include <ctype.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
+#ifdef SYS_WINNT
+# include <mswsock.h>
+#endif
+#include <isc/net.h>
+#include <isc/result.h>
 
 #include "ntpq.h"
+#include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_calendar.h"
 #include "ntp_select.h"
-#include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
 #include "ntp_debug.h"
-#include "isc/net.h"
-#include "isc/result.h"
 #include <ssl_applink.c>
 
 #include "ntpq-opts.h"
 
-#ifdef SYS_WINNT
-# include <Mswsock.h>
-# include <io.h>
-#endif /* SYS_WINNT */
 
-#ifdef SYS_VXWORKS
-				/* vxWorks needs mode flag -casey*/
+#ifdef SYS_VXWORKS		/* vxWorks needs mode flag -casey*/
 # define open(name, flags)   open(name, flags, 0777)
 # define SERVER_PORT_NUM     123
 #endif
@@ -180,17 +183,18 @@ struct ctl_var peer_var[] = {
 	{ CP_RECEIVED,	UI,	"received" },	/* 32 */
 	{ CP_SENT,	UI,	"sent" },	/* 33 */
 	{ CP_FILTERROR,	AR,	"filtdisp" },	/* 34 */
-	{ CP_FLASH,     FX,	"flash" },	/* 35 */ 
+	{ CP_FLASH,	FX,	"flash" },	/* 35 */ 
 	{ CP_TTL,	UI,	"ttl" },	/* 36 */
+	{ CP_SRCHOST,	ST,	"srchost" },	/* 37 */
 	/*
-	 * These are duplicate entries so that we can
-	 * process deviant version of the ntp protocol.
+	 * These are duplicate entries using different on-wire variable
+	 * names so that we can interoperate with another flavor.
 	 */
-	{ CP_SRCADR,	HA,	"peeraddr" },	/* 4 */
-	{ CP_SRCPORT,	UI,	"peerport" },	/* 5 */
-	{ CP_PPOLL,	UI,	"peerpoll" },	/* 11 */
-	{ CP_HPOLL,	UI,	"hostpoll" },	/* 12 */
-	{ CP_FILTERROR,	AR,	"filterror" },	/* 34 */
+	{ CP_SRCADR,	HA,	"peeraddr" },	/* 38 */
+	{ CP_SRCPORT,	UI,	"peerport" },	/* 39 */
+	{ CP_PPOLL,	UI,	"peerpoll" },	/* 40 */
+	{ CP_HPOLL,	UI,	"hostpoll" },	/* 41 */
+	{ CP_FILTERROR,	AR,	"filterror" },	/* 42 */
 	{ 0,		EOV,	""	}
 };
 
@@ -251,8 +255,8 @@ int		ntpqmain	(int,	char **);
 static	int	openhost	(const char *);
 
 static	int	sendpkt		(void *, size_t);
-static	int	getresponse	(int, int, u_short *, int *, char **, int);
-static	int	sendrequest	(int, int, int, int, char *);
+static	int	getresponse	(int, int, u_short *, int *, const char **, int);
+static	int	sendrequest	(int, associd_t, int, int, char *);
 static	char *	tstflags	(u_long);
 #ifndef BUILD_AS_LIB
 static	void	getcmds		(void);
@@ -267,11 +271,7 @@ static	int	findcmd		(char *, struct xcmd *, struct xcmd *, struct xcmd **);
 static	int	rtdatetolfp	(char *, l_fp *);
 static	int	decodearr	(char *, int *, l_fp *);
 static	void	help		(struct parse *, FILE *);
-#ifdef QSORT_USES_VOID_P
 static	int	helpsort	(const void *, const void *);
-#else
-static	int	helpsort	(char **, char **);
-#endif
 static	void	printusage	(struct xcmd *, FILE *);
 static	void	timeout		(struct parse *, FILE *);
 static	void	auth_delay	(struct parse *, FILE *);
@@ -292,18 +292,14 @@ static	void	warning		(const char *, const char *, const char *);
 static	void	error		(const char *, const char *, const char *);
 static	u_long	getkeyid	(const char *);
 static	void	atoascii	(const char *, size_t, char *, size_t);
-static	void	makeascii	(int, char *, FILE *);
-static	void	cookedprint	(int, int, char *, int, int, FILE *);
-static	void	rawprint	(int, int, char *, int, int, FILE *);
+static	void	makeascii	(int, const char *, FILE *);
+static	void	cookedprint	(int, int, const char *, int, int, FILE *);
+static	void	rawprint	(int, int, const char *, int, int, FILE *);
 static	void	startoutput	(void);
 static	void	output		(FILE *, char *, char *);
 static	void	endoutput	(FILE *);
 static	void	outputarr	(FILE *, char *, int, l_fp *);
-#ifdef QSORT_USES_VOID_P
 static	int	assoccmp	(const void *, const void *);
-#else
-static	int	assoccmp	(struct association *, struct association *);
-#endif /* sgi || bsdi */
 void	ntpq_custom_opt_handler	(tOptions *, tOptDesc *);
 
 
@@ -329,7 +325,7 @@ struct xcmd builtins[] = {
 	{ "poll",	ntp_poll,	{ OPT|NTP_UINT, OPT|NTP_STR, NO, NO },
 	  { "n", "verbose", "", "" },
 	  "poll an NTP server in client mode `n' times" },
-	{ "passwd",	passwd,		{ NO, NO, NO, NO },
+	{ "passwd",	passwd,		{ OPT|NTP_STR, NO, NO, NO },
 	  { "", "", "", "" },
 	  "specify a password to use for authenticated requests"},
 	{ "hostnames",	hostnames,	{ OPT|NTP_STR, NO, NO, NO },
@@ -374,8 +370,18 @@ struct xcmd builtins[] = {
  * Default values we use.
  */
 #define	DEFHOST		"localhost"	/* default host name */
-#define	DEFTIMEOUT	(5)		/* 5 second time out */
-#define	DEFSTIMEOUT	(2)		/* 2 second time out after first */
+#define	DEFTIMEOUT	5		/* wait 5 seconds for 1st pkt */
+#define	DEFSTIMEOUT	3		/* and 3 more for each additional */
+/*
+ * Requests are automatically retried once, so total timeout with no
+ * response is a bit over 2 * DEFTIMEOUT, or 10 seconds.  At the other
+ * extreme, a request eliciting 32 packets of responses each for some
+ * reason nearly DEFSTIMEOUT seconds after the prior in that series,
+ * with a single packet dropped, would take around 32 * DEFSTIMEOUT, or
+ * 93 seconds to fail each of two times, or 186 seconds.
+ * Some commands involve a series of requests, such as "peers" and
+ * "mrulist", so the cumulative timeouts are even longer for those.
+ */
 #define	DEFDELAY	0x51EB852	/* 20 milliseconds, l_fp fraction */
 #define	LENHOSTNAME	256		/* host name is 256 characters long */
 #define	MAXCMDS		100		/* maximum commands on cmd line */
@@ -415,7 +421,6 @@ u_short sequence;
  * Holds data returned from queries.  Declare buffer long to be sure of
  * alignment.
  */
-#define	MAXFRAGS	24		/* maximum number of fragments */
 #define	DATASIZE	(MAXFRAGS*480)	/* maximum amount of data */
 long pktdata[DATASIZE/sizeof(long)];
 
@@ -438,14 +443,6 @@ const char *ccmds[MAXCMDS];
 int numhosts = 0;
 const char *chosts[MAXHOSTS];
 #define	ADDHOST(cp)	if (numhosts < MAXHOSTS) chosts[numhosts++] = (cp)
-
-/*
- * Error codes for internal use
- */
-#define	ERR_UNSPEC		256
-#define	ERR_INCOMPLETE	257
-#define	ERR_TIMEOUT		258
-#define	ERR_TOOMUCH		259
 
 /*
  * Macro definitions we use
@@ -639,12 +636,12 @@ openhost(
 	const char *hname
 	)
 {
+	const char svc[] = "ntp";
 	char temphost[LENHOSTNAME];
 	int a_info, i;
-	struct addrinfo hints, *ai = NULL;
+	struct addrinfo hints, *ai;
 	register const char *cp;
 	char name[LENHOSTNAME];
-	char service[5];
 
 	/*
 	 * We need to get by the [] if they were entered
@@ -671,14 +668,14 @@ openhost(
 	 * will return an "IPv4-mapped IPv6 address" address if you
 	 * give it an IPv4 address to lookup.
 	 */
-	strcpy(service, "ntp");
-	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_flags = AI_NUMERICHOST;
+	hints.ai_flags = Z_AI_NUMERICHOST;
+	ai = NULL;
 
-	a_info = getaddrinfo(hname, service, &hints, &ai);
+	a_info = getaddrinfo(hname, svc, &hints, &ai);
 	if (a_info == EAI_NONAME
 #ifdef EAI_NODATA
 	    || a_info == EAI_NODATA
@@ -688,13 +685,13 @@ openhost(
 #ifdef AI_ADDRCONFIG
 		hints.ai_flags |= AI_ADDRCONFIG;
 #endif
-		a_info = getaddrinfo(hname, service, &hints, &ai);	
+		a_info = getaddrinfo(hname, svc, &hints, &ai);	
 	}
 #ifdef AI_ADDRCONFIG
 	/* Some older implementations don't like AI_ADDRCONFIG. */
 	if (a_info == EAI_BADFLAGS) {
-		hints.ai_flags = AI_CANONNAME;
-		a_info = getaddrinfo(hname, service, &hints, &ai);	
+		hints.ai_flags &= ~AI_ADDRCONFIG;
+		a_info = getaddrinfo(hname, svc, &hints, &ai);	
 	}
 #endif
 	if (a_info != 0) {
@@ -794,7 +791,7 @@ sendpkt(
 	)
 {
 	if (debug >= 3)
-		printf("Sending %u octets\n", xdatalen);
+	    printf("Sending %lu octets\n", (u_long)xdatalen);
 
 	if (send(sockfd, xdata, (size_t)xdatalen, 0) == -1) {
 		warning("write to %s failed", currenthost, "");
@@ -829,7 +826,7 @@ getresponse(
 	int associd,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata,
+	const char **rdata,
 	int timeo
 	)
 {
@@ -864,17 +861,17 @@ getresponse(
 
 	/*
 	 * Loop until we have an error or a complete response.  Nearly all
-	 * aths to loop again use continue.
+	 * code paths to loop again use continue.
 	 */
 	for (;;) {
 
 		if (numfrags == 0)
-		    tvo = tvout;
+			tvo = tvout;
 		else
-		    tvo = tvsout;
+			tvo = tvsout;
 		
 		FD_SET(sockfd, &fds);
-		n = select(sockfd+1, &fds, (fd_set *)0, (fd_set *)0, &tvo);
+		n = select(sockfd + 1, &fds, NULL, NULL, &tvo);
 
 		if (n == -1) {
 			warning("select fails", "", "");
@@ -886,24 +883,30 @@ getresponse(
 			 */
 			if (numfrags == 0) {
 				if (timeo)
-				    (void) fprintf(stderr,
-						   "%s: timed out, nothing received\n",
-						   currenthost);
+					fprintf(stderr,
+						"%s: timed out, nothing received\n",
+						currenthost);
 				return ERR_TIMEOUT;
 			} else {
 				if (timeo)
-				    (void) fprintf(stderr,
+					fprintf(stderr,
 						   "%s: timed out with incomplete data\n",
 						   currenthost);
 				if (debug) {
-					printf("Received fragments:\n");
+					fprintf(stderr,
+						"ERR_INCOMPLETE: Received fragments:\n");
 					for (n = 0; n < numfrags; n++)
-					    printf("%4d %d\n", offsets[n],
-						   counts[n]);
-					if (seenlastfrag)
-					    printf("last fragment received\n");
-					else
-					    printf("last fragment not received\n");
+						fprintf(stderr,
+							"%2d: %5d %5d\t%3d octets\n",
+							n, offsets[n],
+							offsets[n] +
+							counts[n],
+							counts[n]);
+					fprintf(stderr,
+						"last fragment %sreceived\n",
+						(seenlastfrag)
+						    ? ""
+						    : "not ");
 				}
 				return ERR_INCOMPLETE;
 			}
@@ -1185,7 +1188,7 @@ getresponse(
 		/*
 		 * Copy the data into the data buffer.
 		 */
-		memmove((char *)pktdata + offset, (char *)rpkt.data, count);
+		memcpy((char *)pktdata + offset, rpkt.data, count);
 
 		/*
 		 * If we've seen the last fragment, look for holes in the sequence.
@@ -1198,6 +1201,10 @@ getresponse(
 			}
 			if (n == numfrags) {
 				*rsize = offsets[numfrags-1] + counts[numfrags-1];
+				if (debug)
+					fprintf(stderr,
+						"%d packets reassembled into response\n",
+						numfrags);
 				return 0;
 			}
 		}
@@ -1211,7 +1218,7 @@ getresponse(
 static int
 sendrequest(
 	int opcode,
-	int associd,
+	associd_t associd,
 	int auth,
 	int qsize,
 	char *qdata
@@ -1311,29 +1318,122 @@ sendrequest(
 		return 1;
 	} else if ((size_t)maclen != (info_auth_hashlen + sizeof(keyid_t))) {
 		fprintf(stderr,
-			"%d octet MAC, %u expected with %u octet digest\n",
-			maclen, (info_auth_hashlen + sizeof(keyid_t)),
-			info_auth_hashlen);
+			"%d octet MAC, %lu expected with %lu octet digest\n",
+			maclen, (u_long)(info_auth_hashlen + sizeof(keyid_t)),
+			(u_long)info_auth_hashlen);
 		return 1;
 	}
 	
 	return sendpkt((char *)&qpkt, pktsize + maclen);
 }
 
+/*
+ * show_error_msg - display the error text for a mode 6 error response.
+ */
+void
+show_error_msg(
+	int		m6resp,
+	associd_t	associd
+	)
+{
+	if (numhosts > 1)
+		fprintf(stderr, "server=%s ", currenthost);
+
+	switch(m6resp) {
+
+	case CERR_BADFMT:
+		fprintf(stderr,
+		    "***Server reports a bad format request packet\n");
+		break;
+
+	case CERR_PERMISSION:
+		fprintf(stderr,
+		    "***Server disallowed request (authentication?)\n");
+		break;
+
+	case CERR_BADOP:
+		fprintf(stderr,
+		    "***Server reports a bad opcode in request\n");
+		break;
+
+	case CERR_BADASSOC:
+		fprintf(stderr,
+		    "***Association ID %d unknown to server\n",
+		    associd);
+		break;
+
+	case CERR_UNKNOWNVAR:
+		fprintf(stderr,
+		    "***A request variable unknown to the server\n");
+		break;
+
+	case CERR_BADVALUE:
+		fprintf(stderr,
+		    "***Server indicates a request variable was bad\n");
+		break;
+
+	case ERR_UNSPEC:
+		fprintf(stderr,
+		    "***Server returned an unspecified error\n");
+		break;
+
+	case ERR_TIMEOUT:
+		fprintf(stderr, "***Request timed out\n");
+		break;
+
+	case ERR_INCOMPLETE:
+		fprintf(stderr,
+		    "***Response from server was incomplete\n");
+		break;
+
+	case ERR_TOOMUCH:
+		fprintf(stderr,
+		    "***Buffer size exceeded for returned data\n");
+		break;
+
+	default:
+		fprintf(stderr,
+		    "***Server returns unknown error code %d\n",
+		    m6resp);
+	}
+}
 
 /*
- * doquery - send a request and process the response
+ * doquery - send a request and process the response, displaying
+ *	     error messages for any error responses.
  */
 int
 doquery(
 	int opcode,
-	int associd,
+	associd_t associd,
 	int auth,
 	int qsize,
 	char *qdata,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata
+	const char **rdata
+	)
+{
+	return doqueryex(opcode, associd, auth, qsize, qdata, rstatus,
+			 rsize, rdata, FALSE);
+}
+
+
+/*
+ * doqueryex - send a request and process the response, optionally
+ *	       displaying error messages for any error responses.
+ */
+int
+doqueryex(
+	int opcode,
+	associd_t associd,
+	int auth,
+	int qsize,
+	char *qdata,
+	u_short *rstatus,
+	int *rsize,
+	const char **rdata,
+	int quiet
 	)
 {
 	int res;
@@ -1343,7 +1443,7 @@ doquery(
 	 * Check to make sure host is open
 	 */
 	if (!havehost) {
-		(void) fprintf(stderr, "***No host open, use `host' command\n");
+		fprintf(stderr, "***No host open, use `host' command\n");
 		return -1;
 	}
 
@@ -1356,7 +1456,7 @@ doquery(
 	 */
 	res = sendrequest(opcode, associd, auth, qsize, qdata);
 	if (res != 0)
-	    return res;
+		return res;
 	
 	/*
 	 * Get the response.  If we got a standard error, print a message
@@ -1375,53 +1475,9 @@ doquery(
 			done = 1;
 			goto again;
 		}
-		if (numhosts > 1)
-			(void) fprintf(stderr, "server=%s ", currenthost);
-		switch(res) {
-		    case CERR_BADFMT:
-			(void) fprintf(stderr,
-			    "***Server reports a bad format request packet\n");
-			break;
-		    case CERR_PERMISSION:
-			(void) fprintf(stderr,
-			    "***Server disallowed request (authentication?)\n");
-			break;
-		    case CERR_BADOP:
-			(void) fprintf(stderr,
-			    "***Server reports a bad opcode in request\n");
-			break;
-		    case CERR_BADASSOC:
-			(void) fprintf(stderr,
-			    "***Association ID %d unknown to server\n",associd);
-			break;
-		    case CERR_UNKNOWNVAR:
-			(void) fprintf(stderr,
-			    "***A request variable unknown to the server\n");
-			break;
-		    case CERR_BADVALUE:
-			(void) fprintf(stderr,
-			    "***Server indicates a request variable was bad\n");
-			break;
-		    case ERR_UNSPEC:
-			(void) fprintf(stderr,
-			    "***Server returned an unspecified error\n");
-			break;
-		    case ERR_TIMEOUT:
-			(void) fprintf(stderr, "***Request timed out\n");
-			break;
-		    case ERR_INCOMPLETE:
-			(void) fprintf(stderr,
-			    "***Response from server was incomplete\n");
-			break;
-		    case ERR_TOOMUCH:
-			(void) fprintf(stderr,
-			    "***Buffer size exceeded for returned data\n");
-			break;
-		    default:
-			(void) fprintf(stderr,
-			    "***Server returns unknown error code %d\n", res);
-			break;
-		}
+		if (!quiet)
+			show_error_msg(res, associd);
+
 	}
 	return res;
 }
@@ -1801,35 +1857,41 @@ getnetnum(
 	int af
 	)
 {
-	int sockaddr_len;
 	struct addrinfo hints, *ai = NULL;
 
-	sockaddr_len = SIZEOF_SOCKADDR(af);
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
 	hints.ai_flags |= AI_ADDRCONFIG;
 #endif
 	
-	/* decodenetnum works with addresses only */
+	/*
+	 * decodenetnum only works with addresses, but handles syntax
+	 * that getaddrinfo doesn't:  [2001::1]:1234
+	 */
 	if (decodenetnum(hname, num)) {
-		if (fullhost != 0) {
-			getnameinfo((struct sockaddr *)num, sockaddr_len,
-					fullhost, sizeof(fullhost), NULL, 0,
-					NI_NUMERICHOST);
-		}
+		if (fullhost != NULL)
+			getnameinfo(&num->sa, SOCKLEN(num), fullhost,
+				    LENHOSTNAME, NULL, 0, 0); 
 		return 1;
 	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
-		memmove((char *)num, ai->ai_addr, ai->ai_addrlen);
-		if (ai->ai_canonname != 0)
-		    (void) strcpy(fullhost, ai->ai_canonname);
+		NTP_INSIST(sizeof(*num) >= ai->ai_addrlen);
+		memcpy(num, ai->ai_addr, ai->ai_addrlen);
+		if (fullhost != NULL) {
+			if (ai->ai_canonname != NULL)
+				strncpy(fullhost, ai->ai_canonname,
+					LENHOSTNAME);
+			else
+				getnameinfo(&num->sa, SOCKLEN(num),
+					    fullhost, LENHOSTNAME, NULL,
+					    0, 0);
+		}
 		return 1;
-	} else {
-		(void) fprintf(stderr, "***Can't find host %s\n", hname);
-		return 0;
 	}
-	/*NOTREACHED*/
+	fprintf(stderr, "***Can't find host %s\n", hname);
+	return 0;
 }
+
 
 /*
  * nntohost - convert network number to host name.  This routine enforces
@@ -1840,7 +1902,7 @@ nntohost(
 	sockaddr_u *netnum
 	)
 {
-	if (!showhostnames)
+	if (!showhostnames || SOCK_UNSPEC(netnum))
 		return stoa(netnum);
 	else if (ISREFCLOCKADR(netnum))
 		return refnumtoa(netnum);
@@ -2130,26 +2192,23 @@ help(
 	int word, words;
 	int row, rows;
 	int col, cols;
+	int length;
 
 	if (pcmd->nargs == 0) {
 		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
-			if (*(xcp->keyword) != '?')
+			if (*(xcp->keyword) != '?' &&
+			    words < COUNTOF(list))
 				list[words++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-			list[words++] = xcp->keyword;
+			if (words < COUNTOF(list))
+				list[words++] = xcp->keyword;
 
-		qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-			(list), (size_t)(words), sizeof(char *), helpsort);
+		qsort((void *)&list, (size_t)words, sizeof(list[0]), &helpsort);
 		col = 0;
 		for (word = 0; word < words; word++) {
-		 	int length = strlen(list[word]);
+		 	length = strlen(list[word]);
 			if (col < length) {
 				col = length;
 			}
@@ -2158,7 +2217,7 @@ help(
 		cols = SCREENWIDTH / ++col;
 		rows = (words + cols - 1) / cols;
 
-		(void) fprintf(fp, "ntpq commands:\n");
+		fprintf(fp, "ntpq commands:\n");
 
 		for (row = 0; row < rows; row++) {
 			for (word = row; word < words; word += rows) {
@@ -2188,7 +2247,6 @@ help(
 /*
  * helpsort - do hostname qsort comparisons
  */
-#ifdef QSORT_USES_VOID_P
 static int
 helpsort(
 	const void *t1,
@@ -2201,16 +2259,6 @@ helpsort(
 	return strcmp(*name1, *name2);
 }
 
-#else
-static int
-helpsort(
-	char **name1,
-	char **name2
-	)
-{
-	return strcmp(*name1, *name2);
-}
-#endif
 
 /*
  * printusage - print usage information for a command
@@ -2392,9 +2440,9 @@ keytype(
 	int		key_type;
 
 	if (!pcmd->nargs) {
-		fprintf(fp, "keytype is %s with %u octet digests\n",
+		fprintf(fp, "keytype is %s with %lu octet digests\n",
 			keytype_name(info_auth_keytype),
-			info_auth_hashlen);
+			(u_long)info_auth_hashlen);
 		return;
 	}
 
@@ -2430,20 +2478,23 @@ passwd(
 	char *pass;
 
 	if (info_auth_keyid == 0) {
-		int u_keyid = getkeyid("Keyid: ");
-		if (u_keyid == 0 || u_keyid > NTP_MAXKEY) {
-			(void)fprintf(fp, "Invalid key identifier\n");
+		info_auth_keyid = getkeyid("Keyid: ");
+		if (info_auth_keyid == 0) {
+			(void)fprintf(fp, "Keyid must be defined\n");
 			return;
 		}
-		info_auth_keyid = u_keyid;
 	}
-	pass = getpass("MD5 Password: ");
-	if (*pass == '\0')
-		(void) fprintf(fp, "Password unchanged\n");
+	if (pcmd->nargs >= 1)
+		pass = pcmd->argval[0].string;
 	else {
-		authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
-		authtrust(info_auth_keyid, 1);
+		pass = getpass("MD5 Password: ");
+		if ('\0' == *pass) {
+			fprintf(fp, "Password unchanged\n");
+			return;
+		}
 	}
+	authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+	authtrust(info_auth_keyid, 1);
 }
 
 
@@ -2747,14 +2798,17 @@ do {							\
 static void
 makeascii(
 	int length,
-	char *data,
+	const char *data,
 	FILE *fp
 	)
 {
-	register u_char *cp;
-	register int c;
+	const u_char *udata;
+	const u_char *cp;
+	int c;
 
-	for (cp = (u_char *)data; cp < (u_char *)data + length; cp++) {
+	udata = (const u_char *)data;
+
+	for (cp = udata; cp < udata + length; cp++) {
 		c = (int)*cp;
 		if (c & 0x80) {
 			putc('M', fp);
@@ -2804,15 +2858,15 @@ int nextcb = 0;
 int
 nextvar(
 	int *datalen,
-	char **datap,
+	const char **datap,
 	char **vname,
 	char **vvalue
 	)
 {
-	register char *cp;
-	register char *np;
-	register char *cpend;
-	register char *npend;	/* character after last */
+	const char *cp;
+	char *np;
+	const char *cpend;
+	char *npend;	/* character after last */
 	int quoted = 0;
 	static char name[MAXVARLEN];
 	static char value[MAXVALLEN];
@@ -2824,9 +2878,9 @@ nextvar(
 	 * Space past commas and white space
 	 */
 	while (cp < cpend && (*cp == ',' || isspace((int)*cp)))
-	    cp++;
+		cp++;
 	if (cp == cpend)
-	    return 0;
+		return 0;
 	
 	/*
 	 * Copy name until we hit a ',', an '=', a '\r' or a '\n'.  Backspace
@@ -2935,7 +2989,7 @@ findvar(
 void
 printvars(
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int sttype,
 	int quiet,
@@ -2956,14 +3010,14 @@ static void
 rawprint(
 	int datatype,
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int quiet,
 	FILE *fp
 	)
 {
-	register char *cp;
-	register char *cpend;
+	const char *cp;
+	const char *cpend;
 
 	/*
 	 * Essentially print the data as is.  We reformat unprintables, though.
@@ -3155,7 +3209,7 @@ static void
 cookedprint(
 	int datatype,
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int quiet,
 	FILE *fp
@@ -3355,21 +3409,14 @@ void
 sortassoc(void)
 {
 	if (numassoc > 1)
-	    qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-		    assoc_cache, (size_t)numassoc,
-		    sizeof(struct association), assoccmp);
+		qsort(assoc_cache, (size_t)numassoc,
+		      sizeof(assoc_cache[0]), &assoccmp);
 }
 
 
 /*
  * assoccmp - compare two associations
  */
-#ifdef QSORT_USES_VOID_P
 static int
 assoccmp(
 	const void *t1,
@@ -3385,20 +3432,7 @@ assoccmp(
 		return 1;
 	return 0;
 }
-#else
-static int
-assoccmp(
-	struct association *ass1,
-	struct association *ass2
-	)
-{
-	if (ass1->assid < ass2->assid)
-	    return -1;
-	if (ass1->assid > ass2->assid)
-	    return 1;
-	return 0;
-}
-#endif /* not QSORT_USES_VOID_P */
+
 
 /*
  * ntpq_custom_opt_handler - autoopts handler for -c and -p

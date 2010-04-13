@@ -122,11 +122,11 @@ FGETC(
 {
 	int ch;
 	
-	ch = fgetc(stream->fd);
+	do 
+		ch = fgetc(stream->fd);
+	while (EOF != ch && (CHAR_MIN > ch || ch > CHAR_MAX));
 
 	if (EOF != ch) {
-		NTP_INSIST(CHAR_MIN <= ch && ch <= CHAR_MAX);
-
 		++stream->col_no;
 		if (ch == '\n') {
 			stream->prev_line_col_no = stream->col_no;
@@ -358,7 +358,7 @@ is_special(
 	int ch
 	)
 {
-	return (int)strchr(special_chars, ch);
+	return strchr(special_chars, ch) != NULL;
 }
 
 
@@ -643,8 +643,8 @@ normal_return:
 lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
 	msyslog(LOG_ERR, 
-		"configuration item on line %d longer than limit of %d, began with '%s'",
-		ip_file->line_no, sizeof(yytext) - 1, yytext);
+		"configuration item on line %d longer than limit of %lu, began with '%s'",
+		ip_file->line_no, (u_long)(sizeof(yytext) - 1), yytext);
 
 	/*
 	 * If we hit the length limit reading the startup configuration

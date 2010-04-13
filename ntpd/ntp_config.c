@@ -91,6 +91,18 @@ static struct masks logcfg_item[] = {
 	{ NULL,			0 }
 };
 
+typedef struct peer_resolved_ctx_tag {
+	int	flags;
+	int	host_mode;	/* T_* token identifier */
+	short	family;
+	keyid_t	keyid;
+	u_char	hmode;		/* MODE_* */
+	u_char	version;
+	u_char	minpoll;
+	u_char	maxpoll;
+	u_char	ttl;
+} peer_resolved_ctx;
+
 /* Limits */
 #define MAXPHONE	10	/* maximum number of phone strings */
 #define MAXPPS		20	/* maximum length of PPS device string */
@@ -98,10 +110,8 @@ static struct masks logcfg_item[] = {
 /*
  * Miscellaneous macros
  */
-#define STRSAME(s1, s2)	(*(s1) == *(s2) && strcmp((s1), (s2)) == 0)
 #define ISEOL(c)	((c) == '#' || (c) == '\n' || (c) == '\0')
 #define ISSPACE(c)	((c) == ' ' || (c) == '\t')
-#define STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
  * Definitions of things either imported from or exported to outside
@@ -228,7 +238,7 @@ static void free_config_tree(struct config_tree *ptree);
 double *create_dval(double val);
 void destroy_restrict_node(struct restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
-static int get_correct_host_mode(int hmode);
+static u_char get_correct_host_mode(int token);
 static int peerflag_bits(struct peer_node *);
 static void save_and_apply_config_tree(void);
 void getconfig(int, char **);
@@ -339,6 +349,7 @@ init_syntax_tree(
 	ptree->multicastclient = create_queue();
 	ptree->stats_list = create_queue();
 	ptree->filegen_opts = create_queue();
+	ptree->mru_opts = create_queue();
 	ptree->discard_opts = create_queue();
 	ptree->restrict_opts = create_queue();
 	ptree->enable_opts = create_queue();
@@ -421,8 +432,6 @@ free_config_tree(
 	DESTROY_QUEUE(ptree->multicastclient);
 	DESTROY_QUEUE(ptree->stats_list);
 	DESTROY_QUEUE(ptree->filegen_opts);
-	DESTROY_QUEUE(ptree->discard_opts);
-	DESTROY_QUEUE(ptree->restrict_opts);
 	DESTROY_QUEUE(ptree->enable_opts);
 	DESTROY_QUEUE(ptree->disable_opts);
 	DESTROY_QUEUE(ptree->tinker);
@@ -487,10 +496,10 @@ dump_config_tree(
 	nic_rule_node *rule_node;
 
 	char **pstr = NULL;
+	const char *s;
 	char *s1;
 	char *s2;
 	int *intp = NULL;
-	int *key_val;
 	void *fudge_ptr;
 	void *list_ptr = NULL;
 	void *options = NULL;
@@ -665,12 +674,21 @@ dump_config_tree(
 	if (NULL != ptree->auth.keys)
 		fprintf(df, "keys \"%s\"\n", ptree->auth.keys);
 
-	key_val = queue_head(ptree->auth.trusted_key_list);
-	if (key_val != NULL) {
-		fprintf(df, "trustedkey %d", *key_val);
-
-		while (NULL != (key_val = next_node(key_val)))
-			fprintf(df, " %d", *key_val);
+	atrv = queue_head(ptree->auth.trusted_key_list);
+	if (atrv != NULL) {
+		fprintf(df, "trustedkey");
+		do {
+			if ('i' == atrv->attr)
+				fprintf(df, " %d", atrv->value.i);
+			else if ('-' == atrv->attr)
+				fprintf(df, " (%u ... %u)",
+					atrv->value.u >> 16,
+					atrv->value.u & 0xffff);
+			else
+				fprintf(df, "\n# dump error:\n"
+					"# unknown trustedkey attr %d\n"
+					"trustedkey", atrv->attr);
+		} while (NULL != (atrv = next_node(atrv)));
 		fprintf(df, "\n");
 	}
 
@@ -794,7 +812,7 @@ dump_config_tree(
 		fprintf(df, " %s", addr->address);
 		
 		if (peer->minpoll != 0)
-			fprintf(df, " minpoll %d", peer->minpoll);
+			fprintf(df, " minpoll %u", peer->minpoll);
 
 		if (peer->maxpoll != 0)
 			fprintf(df, " maxpoll %d", peer->maxpoll);
@@ -802,16 +820,16 @@ dump_config_tree(
 		if (peer->ttl != 0) {
 			if (strlen(addr->address) > 8
 			    && !memcmp(addr->address, "127.127.", 8))
-				fprintf(df, " mode %d", peer->ttl);
+				fprintf(df, " mode %u", peer->ttl);
 			else
-				fprintf(df, " ttl %d", peer->ttl);
+				fprintf(df, " ttl %u", peer->ttl);
 		}
 
 		if (peer->peerversion != NTP_VERSION)
-			fprintf(df, " version %d", peer->peerversion);
+			fprintf(df, " version %u", peer->peerversion);
 
 		if (peer->peerkey != 0)
-			fprintf(df, " key %d", peer->peerkey);
+			fprintf(df, " key %u", peer->peerkey);
 
 		if (peer->bias != 0.)
 			fprintf(df, " bias %g", peer->bias);
@@ -922,6 +940,21 @@ dump_config_tree(
 		fprintf(df, "unpeer %s\n", (unpeers->addr)->address);
 	}
 
+	list_ptr = queue_head(ptree->mru_opts);
+	if (list_ptr != NULL) {
+
+		fprintf(df, "mru");
+
+		for(;	list_ptr != NULL;
+			list_ptr = next_node(list_ptr)) {
+
+			atrv = list_ptr;
+			fprintf(df, " %s %d", keyword(atrv->attr),
+				atrv->value.i);
+		}
+		fprintf(df, "\n");
+	}
+
 	list_ptr = queue_head(ptree->discard_opts);
 	if (list_ptr != NULL) {
 
@@ -942,12 +975,18 @@ dump_config_tree(
 		list_ptr = next_node(list_ptr)) {
 
 		rest_node = list_ptr;
-		if (NULL == rest_node->addr)
-			s1 = "default";
-		else
-			s1 = rest_node->addr->address;
+		if (NULL == rest_node->addr) {
+			s = "default";			
+			flags = queue_head(rest_node->flags);
+			for (; 	flags != NULL; flags = next_node(flags))
+				if (T_Source == *flags) {
+					s = keyword(*flags);
+					break;
+				}
+		} else
+			s = rest_node->addr->address;
 
-		fprintf(df, "restrict %s", s1);
+		fprintf(df, "restrict %s", s);
 
 		if (rest_node->mask != NULL)
 			fprintf(df, " mask %s",
@@ -955,7 +994,8 @@ dump_config_tree(
 
 		flags = queue_head(rest_node->flags);
 		for (; 	flags != NULL; flags = next_node(flags))
-			fprintf(df, " %s", keyword(*flags));
+			if (T_Source != *flags)
+				fprintf(df, " %s", keyword(*flags));
 
 		fprintf(df, "\n");
 	}
@@ -1125,6 +1165,22 @@ create_attr_ival(
 }
 
 struct attr_val *
+create_attr_shorts(
+	int		attr,
+	ntp_u_int16_t	val1,
+	ntp_u_int16_t	val2
+	)
+{
+	struct attr_val *my_val;
+
+	my_val = get_node(sizeof *my_val);
+	my_val->attr = attr;
+	my_val->value.u = (val1 << 16) | val2;
+	my_val->type = T_Integer;
+	return my_val;
+}
+
+struct attr_val *
 create_attr_sval(
 	int attr,
 	char *s
@@ -1215,7 +1271,8 @@ destroy_address_node(
 	struct address_node *my_node
 	)
 {
-	NTP_REQUIRE(NULL != my_node);
+	if (NULL == my_node)
+		return;
 	NTP_REQUIRE(NULL != my_node->address);
 
 	free(my_node->address);
@@ -1270,46 +1327,57 @@ create_peer_node(
 			break;
 
 		case T_Minpoll:
-			if (option->value.i < NTP_MINPOLL) {
+			if (option->value.i < NTP_MINPOLL ||
+			    option->value.i > UCHAR_MAX) {
 				msyslog(LOG_INFO,
-					"minpoll: provided value (%d) is below minimum (%d)",
-					option->value.i, NTP_MINPOLL);
+					"minpoll: provided value (%d) is out of range [%d-%d])",
+					option->value.i, NTP_MINPOLL, UCHAR_MAX);
 				my_node->minpoll = NTP_MINPOLL;
-			}
-			else
-				my_node->minpoll = option->value.i;
+			} else
+				my_node->minpoll = (u_char)option->value.u;
 			break;
 
 		case T_Maxpoll:
-			if (option->value.i > NTP_MAXPOLL) {
+			if (option->value.i < 0 ||
+			    option->value.i > NTP_MAXPOLL) {
 				msyslog(LOG_INFO,
-					"maxpoll: provided value (%d) is above maximum (%d)",
+					"maxpoll: provided value (%d) is out of range [0-%d])",
 					option->value.i, NTP_MAXPOLL);
 				my_node->maxpoll = NTP_MAXPOLL;
-			}
-			else
-				my_node->maxpoll = option->value.i;
+			} else
+				my_node->maxpoll = (u_char)option->value.u;
 			break;
 
 		case T_Ttl:
-			if (my_node->ttl >= MAX_TTL) {
+			if (option->value.u >= MAX_TTL) {
 				msyslog(LOG_ERR, "ttl: invalid argument");
 				errflag = 1;
-			}
-			else
-				my_node->ttl = option->value.i;
+			} else
+				my_node->ttl = (u_char)option->value.u;
 			break;
 
 		case T_Mode:
-			my_node->ttl = option->value.i;
+			if (option->value.u >= UCHAR_MAX) {
+				msyslog(LOG_ERR, "mode: invalid argument");
+				errflag = 1;
+			} else
+				my_node->ttl = (u_char)option->value.u;
 			break;
 
 		case T_Key:
-			my_node->peerkey = option->value.i;
+			if (option->value.u >= KEYID_T_MAX) {
+				msyslog(LOG_ERR, "key: invalid argument");
+				errflag = 1;
+			} else
+				my_node->peerkey = (keyid_t)option->value.u;
 			break;
 
 		case T_Version:
-			my_node->peerversion = option->value.i;
+			if (option->value.u >= UCHAR_MAX) {
+				msyslog(LOG_ERR, "version: invalid argument");
+				errflag = 1;
+			} else
+			my_node->peerversion = (u_char)option->value.u;
 			break;
 
 		case T_Bias:
@@ -1342,6 +1410,7 @@ create_unpeer_node(
 	)
 {
 	struct unpeer_node *	my_node;
+	u_int			u;
 	char *			pch;
 
 	my_node = get_node(sizeof(*my_node));
@@ -1356,9 +1425,9 @@ create_unpeer_node(
 		pch++;
 
 	if (!*pch 
-	    && 1 == sscanf(addr->address, "%u", &my_node->assocID)
-	    && my_node->assocID <= USHRT_MAX) {
-		
+	    && 1 == sscanf(addr->address, "%u", &u)
+	    && u <= ASSOCID_MAX) {
+		my_node->assocID = (associd_t)u;
 		destroy_address_node(addr);
 		my_node->addr = NULL;
 	} else {
@@ -1405,6 +1474,7 @@ create_restrict_node(
 	return my_node;
 }
 
+
 void
 destroy_restrict_node(
 	struct restrict_node *my_node
@@ -1413,10 +1483,8 @@ destroy_restrict_node(
 	/* With great care, free all the memory occupied by
 	 * the restrict node
 	 */
-	if (my_node->addr)
-		destroy_address_node(my_node->addr);
-	if (my_node->mask)
-		destroy_address_node(my_node->mask);
+	destroy_address_node(my_node->addr);
+	destroy_address_node(my_node->mask);
 	DESTROY_QUEUE(my_node->flags);
 	free_node(my_node);
 }
@@ -1688,11 +1756,13 @@ config_auth(
 	struct config_tree *ptree
 	)
 {
-#ifdef OPENSSL
+	ntp_u_int16_t	ufirst;
+	ntp_u_int16_t	ulast;
+	ntp_u_int16_t	u;
 	struct attr_val *my_val;
+#ifdef OPENSSL
 	int		item;
 #endif
-	int *		key_val;
 
 	/* Crypto Command */
 #ifdef OPENSSL
@@ -1772,10 +1842,16 @@ config_auth(
 	}
 
 	/* Trusted Key Command */
-	key_val = queue_head(ptree->auth.trusted_key_list);
-	while (key_val != NULL) {
-		authtrust(*key_val, 1);
-		key_val = next_node(key_val);
+	my_val = queue_head(ptree->auth.trusted_key_list);
+	for (; my_val != NULL; my_val = next_node(my_val)) {
+		if ('i' == my_val->attr)
+			authtrust(my_val->value.i, 1);
+		else if ('-' == my_val->attr) {
+			ufirst = my_val->value.u >> 16;
+			ulast = my_val->value.u & 0xffff;
+			for (u = ufirst; u <= ulast; u++)
+				authtrust(u, 1);
+		}
 	}
 
 #ifdef OPENSSL
@@ -2065,15 +2141,16 @@ config_access(
 	struct attr_val *	my_opt;
 	struct restrict_node *	my_node;
 	int *			curr_flag;
-	sockaddr_u		addr_sock;
-	sockaddr_u		addr_mask;
+	sockaddr_u		addr;
+	sockaddr_u		mask;
 	struct addrinfo		hints;
 	struct addrinfo *	ai_list;
 	struct addrinfo *	pai;
 	int			rc;
-	int			flags;
-	int			mflags;
 	int			restrict_default;
+	u_short			flags;
+	u_short			mflags;
+	int			range_err;
 	const char *		signd_warning =
 #ifdef HAVE_NTP_SIGND
 	    "MS-SNTP signd operations currently block ntpd degrading service to all clients.";
@@ -2081,14 +2158,97 @@ config_access(
 	    "mssntp restrict bit ignored, this ntpd was configured without --enable-ntp-signd.";
 #endif
 
+	/* Configure the mru options */
+	my_opt = queue_head(ptree->mru_opts);
+	while (my_opt != NULL) {
+
+		range_err = FALSE;
+
+		switch (my_opt->attr) {
+
+		case T_Incalloc:
+			if (0 <= my_opt->value.i)
+				mru_incalloc = my_opt->value.u;
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Incmem:
+			if (0 <= my_opt->value.i)
+				mru_incalloc = (my_opt->value.u * 1024)
+						/ sizeof(mon_entry);
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Initalloc:
+			if (0 <= my_opt->value.i)
+				mru_initalloc = my_opt->value.u;
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Initmem:
+			if (0 <= my_opt->value.i)
+				mru_initalloc = (my_opt->value.u * 1024)
+						 / sizeof(mon_entry);
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Mindepth:
+			if (0 <= my_opt->value.i)
+				mru_mindepth = my_opt->value.u;
+			else
+				range_err = TRUE;
+			break;
+
+		case T_Maxage:
+			mru_maxage = my_opt->value.i;
+			break;
+
+		case T_Maxdepth:
+			if (0 <= my_opt->value.i)
+				mru_maxdepth = my_opt->value.u;
+			else
+				mru_maxdepth = UINT_MAX;
+			break;
+
+		case T_Maxmem:
+			if (0 <= my_opt->value.i)
+				mru_maxdepth = my_opt->value.u * 1024 /
+					       sizeof(mon_entry);
+			else
+				mru_maxdepth = UINT_MAX;
+			break;
+
+		default:
+			msyslog(LOG_ERR,
+				"Unknown mru option %s (%d)",
+				keyword(my_opt->attr), my_opt->attr);
+			exit(1);
+		}
+		if (range_err)
+			msyslog(LOG_ERR,
+				"mru %s %d out of range, ignored.",
+				keyword(my_opt->attr), my_opt->value.i);
+		my_opt = next_node(my_opt);
+	}
+
 	/* Configure the discard options */
 	my_opt = queue_head(ptree->discard_opts);
 	while (my_opt != NULL) {
 
-		switch(my_opt->attr) {
+		switch (my_opt->attr) {
 
 		case T_Average:
-			ntp_minpoll = my_opt->value.i;
+			if (0 <= my_opt->value.i &&
+			    my_opt->value.i <= UCHAR_MAX)
+				ntp_minpoll = (u_char)my_opt->value.u;
+			else
+				msyslog(LOG_ERR,
+					"discard average %d out of range, ignored.",
+					my_opt->value.i);
 			break;
 
 		case T_Minimum:
@@ -2101,8 +2261,8 @@ config_access(
 
 		default:
 			msyslog(LOG_ERR,
-				"Unknown discard option token %d",
-				my_opt->attr);
+				"Unknown discard option %s (%d)",
+				keyword(my_opt->attr), my_opt->attr);
 			exit(1);
 		}
 		my_opt = next_node(my_opt);
@@ -2112,78 +2272,6 @@ config_access(
 	for (my_node = queue_head(ptree->restrict_opts);
 	     my_node != NULL;
 	     my_node = next_node(my_node)) {
-
-		ZERO_SOCK(&addr_sock);
-		ai_list = NULL;
-		pai = NULL;
-
-		if (NULL == my_node->addr) {
-			/*
-			 * The user specified a default rule without a
-			 * -4 / -6 qualifier, add to both lists
-			 */
-			restrict_default = 1;
-			ZERO_SOCK(&addr_mask);
-		} else {
-			restrict_default = 0;
-			/* Resolve the specified address */
-			AF(&addr_sock) = (u_short)my_node->addr->type;
-
-			if (getnetnum(my_node->addr->address,
-				      &addr_sock, 1, t_UNK) != 1) {
-				/*
-				 * Attempt a blocking lookup.  This
-				 * is in violation of the nonblocking
-				 * design of ntpd's mainline code.  The
-				 * alternative of running without the
-				 * restriction until the name resolved
-				 * seems worse.
-				 * Ideally some scheme could be used for
-				 * restrict directives in the startup
-				 * ntp.conf to delay starting up the
-				 * protocol machinery until after all
-				 * restrict hosts have been resolved.
-				 */
-				ai_list = NULL;
-				memset(&hints, 0, sizeof(hints));
-				hints.ai_protocol = IPPROTO_UDP;
-				hints.ai_socktype = SOCK_DGRAM;
-				hints.ai_family = my_node->addr->type;
-				rc = getaddrinfo(my_node->addr->address,
-						 "ntp", &hints,
-						 &ai_list);
-				if (rc) {
-					msyslog(LOG_ERR,
-						"restrict: ignoring line %d, address/host '%s' unusable.",
-						my_node->line_no,
-						my_node->addr->address);
-					continue;
-				}
-				NTP_INSIST(ai_list != NULL);
-				pai = ai_list;
-				NTP_INSIST(pai->ai_addr != NULL);
-				NTP_INSIST(sizeof(addr_sock) >= pai->ai_addrlen);
-				memcpy(&addr_sock, pai->ai_addr, pai->ai_addrlen);
-				NTP_INSIST(AF_INET == AF(&addr_sock) ||
-					   AF_INET6 == AF(&addr_sock));
-			}
-
-			SET_HOSTMASK(&addr_mask, AF(&addr_sock));
-
-			/* Resolve the mask */
-			if (my_node->mask) {
-				ZERO_SOCK(&addr_mask);
-				AF(&addr_mask) = (u_short)my_node->mask->type;
-				if (getnetnum(my_node->mask->address,
-					      &addr_mask, 1, t_MSK) != 1) {
-					msyslog(LOG_ERR,
-						"restrict: ignoring line %d, mask '%s' unusable.",
-						my_node->line_no,
-						my_node->mask->address);
-					continue;
-				}
-			}
-		}
 
 		/* Parse the flags */
 		flags = 0;
@@ -2201,8 +2289,12 @@ config_access(
 				mflags |= RESM_NTPONLY;
 				break;
 
+			case T_Source:
+				mflags |= RESM_SOURCE;
+				break;
+
 			case T_Flake:
-				flags |= RES_TIMEOUT;
+				flags |= RES_FLAKE;
 				break;
 
 			case T_Ignore:
@@ -2256,39 +2348,125 @@ config_access(
 			curr_flag = next_node(curr_flag);
 		}
 
-		/* Set the flags */
-		if (restrict_default) {
-			AF(&addr_sock) = AF_INET;
-			AF(&addr_mask) = AF_INET;
-			hack_restrict(RESTRICT_FLAGS, &addr_sock,
-				      &addr_mask, mflags, flags);
-			AF(&addr_sock) = AF_INET6;
-			AF(&addr_mask) = AF_INET6;
-		}
-
-		do {
-			hack_restrict(RESTRICT_FLAGS, &addr_sock,
-				      &addr_mask, mflags, flags);
-			if (pai != NULL &&
-			    NULL != (pai = pai->ai_next)) {
-				NTP_INSIST(pai->ai_addr != NULL);
-				NTP_INSIST(sizeof(addr_sock) >= pai->ai_addrlen);
-				ZERO_SOCK(&addr_sock);
-				memcpy(&addr_sock, pai->ai_addr, pai->ai_addrlen);
-				NTP_INSIST(AF_INET == AF(&addr_sock) ||
-					   AF_INET6 == AF(&addr_sock));
-				SET_HOSTMASK(&addr_mask, AF(&addr_sock));
-			}
-		} while (pai != NULL);
-
-		if (ai_list != NULL)
-			freeaddrinfo(ai_list);
-
 		if ((RES_MSSNTP & flags) && !warned_signd) {
 			warned_signd = 1;
 			fprintf(stderr, "%s\n", signd_warning);
 			msyslog(LOG_WARNING, signd_warning);
 		}
+
+		ZERO_SOCK(&addr);
+		ai_list = NULL;
+		pai = NULL;
+		restrict_default = 0;
+
+		if (NULL == my_node->addr) {
+			ZERO_SOCK(&mask);
+			if (!(RESM_SOURCE & mflags)) {
+				/*
+				 * The user specified a default rule
+				 * without a -4 / -6 qualifier, add to
+				 * both lists
+				 */
+				restrict_default = 1;
+			} else {
+				/* apply "restrict source ..." */
+				DPRINTF(1, ("restrict source template mflags %x flags %x\n",
+					mflags, flags));
+				hack_restrict(RESTRICT_FLAGS, NULL,
+					      NULL, mflags, flags, 0);
+				continue;
+			}
+		} else {
+			/* Resolve the specified address */
+			AF(&addr) = (u_short)my_node->addr->type;
+
+			if (getnetnum(my_node->addr->address,
+				      &addr, 1, t_UNK) != 1) {
+				/*
+				 * Attempt a blocking lookup.  This
+				 * is in violation of the nonblocking
+				 * design of ntpd's mainline code.  The
+				 * alternative of running without the
+				 * restriction until the name resolved
+				 * seems worse.
+				 * Ideally some scheme could be used for
+				 * restrict directives in the startup
+				 * ntp.conf to delay starting up the
+				 * protocol machinery until after all
+				 * restrict hosts have been resolved.
+				 */
+				ai_list = NULL;
+				memset(&hints, 0, sizeof(hints));
+				hints.ai_protocol = IPPROTO_UDP;
+				hints.ai_socktype = SOCK_DGRAM;
+				hints.ai_family = my_node->addr->type;
+				rc = getaddrinfo(my_node->addr->address,
+						 "ntp", &hints,
+						 &ai_list);
+				if (rc) {
+					msyslog(LOG_ERR,
+						"restrict: ignoring line %d, address/host '%s' unusable.",
+						my_node->line_no,
+						my_node->addr->address);
+					continue;
+				}
+				NTP_INSIST(ai_list != NULL);
+				pai = ai_list;
+				NTP_INSIST(pai->ai_addr != NULL);
+				NTP_INSIST(sizeof(addr) >=
+					   pai->ai_addrlen);
+				memcpy(&addr, pai->ai_addr,
+				       pai->ai_addrlen);
+				NTP_INSIST(AF_INET == AF(&addr) ||
+					   AF_INET6 == AF(&addr));
+			}
+
+			SET_HOSTMASK(&mask, AF(&addr));
+
+			/* Resolve the mask */
+			if (my_node->mask) {
+				ZERO_SOCK(&mask);
+				AF(&mask) = my_node->mask->type;
+				if (getnetnum(my_node->mask->address,
+					      &mask, 1, t_MSK) != 1) {
+					msyslog(LOG_ERR,
+						"restrict: ignoring line %d, mask '%s' unusable.",
+						my_node->line_no,
+						my_node->mask->address);
+					continue;
+				}
+			}
+		}
+
+		/* Set the flags */
+		if (restrict_default) {
+			AF(&addr) = AF_INET;
+			AF(&mask) = AF_INET;
+			hack_restrict(RESTRICT_FLAGS, &addr,
+				      &mask, mflags, flags, 0);
+			AF(&addr) = AF_INET6;
+			AF(&mask) = AF_INET6;
+		}
+
+		do {
+			hack_restrict(RESTRICT_FLAGS, &addr,
+				      &mask, mflags, flags, 0);
+			if (pai != NULL &&
+			    NULL != (pai = pai->ai_next)) {
+				NTP_INSIST(pai->ai_addr != NULL);
+				NTP_INSIST(sizeof(addr) >=
+					   pai->ai_addrlen);
+				ZERO_SOCK(&addr);
+				memcpy(&addr, pai->ai_addr,
+				       pai->ai_addrlen);
+				NTP_INSIST(AF_INET == AF(&addr) ||
+					   AF_INET6 == AF(&addr));
+				SET_HOSTMASK(&mask, AF(&addr));
+			}
+		} while (pai != NULL);
+
+		if (ai_list != NULL)
+			freeaddrinfo(ai_list);
 	}
 }
 
@@ -2303,8 +2481,13 @@ free_config_access(
 	struct restrict_node *	my_node;
 	int *			curr_flag;
 
+	while (NULL != (my_opt = dequeue(ptree->mru_opts)))
+		free_node(my_opt);
+	DESTROY_QUEUE(ptree->mru_opts);
+
 	while (NULL != (my_opt = dequeue(ptree->discard_opts)))
 		free_node(my_opt);
+	DESTROY_QUEUE(ptree->discard_opts);
 
 	while (NULL != (my_node = dequeue(ptree->restrict_opts))) {
 		while (NULL != (curr_flag = dequeue(my_node->flags)))
@@ -2312,6 +2495,7 @@ free_config_access(
 
 		destroy_restrict_node(my_node);
 	}
+	DESTROY_QUEUE(ptree->restrict_opts);
 }
 #endif	/* FREE_CFG_T */
 
@@ -2688,8 +2872,8 @@ config_phone(
 			sys_phone[i++] = estrdup(*s);
 		else
 			msyslog(LOG_INFO,
-				"phone: Number of phone entries exceeds %d. Ignoring phone %s...",
-				COUNTOF(sys_phone) - 1, *s);
+				"phone: Number of phone entries exceeds %lu. Ignoring phone %s...",
+				(u_long)(COUNTOF(sys_phone) - 1), *s);
 		s = next_node(s);
 	}
 
@@ -2846,8 +3030,8 @@ config_ttl(
 			sys_ttl[i++] = (u_char)*curr_ttl;
 		else
 			msyslog(LOG_INFO,
-				"ttl: Number of TTL entries exceeds %d. Ignoring TTL %d...",
-				COUNTOF(sys_ttl), *curr_ttl);
+				"ttl: Number of TTL entries exceeds %lu. Ignoring TTL %d...",
+				(u_long)COUNTOF(sys_ttl), *curr_ttl);
 
 		curr_ttl = next_node(curr_ttl);
 	}
@@ -2957,7 +3141,7 @@ config_trap(
 				hints.ai_socktype = SOCK_DGRAM;
 				snprintf(port_text, sizeof(port_text),
 					 "%u", port);
-				hints.ai_flags = AI_NUMERICSERV;
+				hints.ai_flags = Z_AI_NUMERICSERV;
 				pstp = emalloc(sizeof(*pstp));
 				memset(pstp, 0, sizeof(*pstp));
 				if (localaddr != NULL) {
@@ -2969,8 +3153,8 @@ config_trap(
 				}
 				rc = getaddrinfo_sometime(
 					curr_trap->addr->address,
-					port_text,
-					&hints,
+					port_text, &hints,
+					INITIAL_DNS_RETRY,
 					&trap_name_resolved,
 					pstp);
 				if (!rc)
@@ -3094,14 +3278,18 @@ config_fudge(
 		addr_node = curr_fudge->addr;
 		ZERO_SOCK(&addr_sock);
 		if (getnetnum(addr_node->address, &addr_sock, 1, t_REF)
-		    != 1)
+		    != 1) {
 			err_flag = 1;
+			msyslog(LOG_ERR,
+				"unrecognized fudge reference clock address %s, line ignored",
+				stoa(&addr_sock));
+		}
 
 		if (!ISREFCLOCKADR(&addr_sock)) {
+			err_flag = 1;
 			msyslog(LOG_ERR,
 				"inappropriate address %s for the fudge command, line ignored",
 				stoa(&addr_sock));
-			err_flag = 1;
 		}
 
 		/* Parse all the options to the fudge command */
@@ -3158,7 +3346,8 @@ config_fudge(
 				break;
 			default:
 				msyslog(LOG_ERR,
-					"Unexpected fudge internal flag 0x%x for %s\n",
+					"Unexpected fudge flag %s (%d) for %s\n",
+					token_name(curr_opt->attr),
 					curr_opt->attr, stoa(&addr_sock));
 				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
@@ -3168,8 +3357,7 @@ config_fudge(
 
 #ifdef REFCLOCK
 		if (!err_flag)
-			refclock_control(&addr_sock, &clock_stat,
-					 (struct refclockstat *)0);
+			refclock_control(&addr_sock, &clock_stat, NULL);
 #endif
 
 		curr_fudge = next_node(curr_fudge);
@@ -3351,25 +3539,26 @@ is_sane_resolved_address(
 }
 
 
-static int
+static u_char
 get_correct_host_mode(
 	int token
 	)
 {
 	switch (token) {
-	    case T_Server:
-	    case T_Pool:
-	    case T_Manycastclient:
+
+	case T_Server:
+	case T_Pool:
+	case T_Manycastclient:
 		return MODE_CLIENT;
-		break;
-	    case T_Peer:
+
+	case T_Peer:
 		return MODE_ACTIVE;
-		break;
-	    case T_Broadcast:
+
+	case T_Broadcast:
 		return MODE_BROADCAST;
-		break;
-	    default:
-		return -1;
+
+	default:
+		return 0;
 	}
 }
 
@@ -3438,38 +3627,43 @@ config_peers(
 	struct config_tree *ptree
 	)
 {
-	sockaddr_u peeraddr;
-	isc_netaddr_t	i_netaddr;
-	struct addrinfo	hints;
-	struct peer_node *curr_peer;
-	int hmode;
-	int num_needed;
+	sockaddr_u		peeraddr;
+	isc_netaddr_t		i_netaddr;
+	struct addrinfo		hints;
+	struct peer_node *	curr_peer;
+	peer_resolved_ctx *	ctx;
+	u_char			hmode;
 
 	for (curr_peer = queue_head(ptree->peers);
 	     curr_peer != NULL;
 	     curr_peer = next_node(curr_peer)) {
 
+		ZERO_SOCK(&peeraddr);
 		/* Find the correct host-mode */
 		hmode = get_correct_host_mode(curr_peer->host_mode);
-		NTP_INSIST(hmode != -1);
+		NTP_INSIST(hmode != 0);
 
-		/* Find the number of associations needed.
-		 * If a pool coomand is specified, then sys_maxclock needed
-		 * else, only one is needed
-		 */
-		num_needed = (T_Pool == curr_peer->host_mode)
-				? sys_maxclock
-				: 1;
-
+		if (T_Pool == curr_peer->host_mode) {
+			AF(&peeraddr) = curr_peer->addr->type;
+			peer_config(
+				&peeraddr,
+				curr_peer->addr->address,
+				NULL,
+				hmode,
+				curr_peer->peerversion,
+				curr_peer->minpoll,
+				curr_peer->maxpoll,
+				peerflag_bits(curr_peer),
+				curr_peer->ttl,
+				curr_peer->peerkey,
+				(u_char *)"*");
 		/*
-		 * If we have a numeric address, we can safely use
-		 * getaddrinfo in the mainline with it.  Otherwise
-		 * hand it off to the blocking child.
+		 * If we have a numeric address, we can safely
+		 * proceed in the mainline with it.  Otherwise, hand
+		 * the hostname off to the blocking child.
 		 */
-		if (1 == num_needed
-		    && is_ip_address(curr_peer->addr->address,
-				     (u_short)curr_peer->addr->type,
-				     &i_netaddr)) {
+		} else if (is_ip_address(curr_peer->addr->address,
+				  curr_peer->addr->type, &i_netaddr)) {
 
 			AF(&peeraddr) = (u_short)i_netaddr.family;
 			SET_PORT(&peeraddr, NTP_PORT);
@@ -3482,29 +3676,45 @@ config_peers(
 
 			if (is_sane_resolved_address(&peeraddr,
 			    curr_peer->host_mode))
-				peer_config(&peeraddr,
-				    NULL,
-				    hmode,
-				    curr_peer->peerversion,
-				    curr_peer->minpoll,
-				    curr_peer->maxpoll,
-				    peerflag_bits(curr_peer),
-				    curr_peer->ttl,
-				    curr_peer->peerkey,
-				    (u_char *)"*");
+				peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					hmode,
+					curr_peer->peerversion,
+					curr_peer->minpoll,
+					curr_peer->maxpoll,
+					peerflag_bits(curr_peer),
+					curr_peer->ttl,
+					curr_peer->peerkey,
+					(u_char *)"*");
 		} else {
 			/* we have a hostname to resolve */
 #ifdef WORKER
+			ctx = emalloc(sizeof(*ctx));
+			ctx->family = curr_peer->addr->type;
+			ctx->host_mode = curr_peer->host_mode;
+			ctx->hmode = hmode;
+			ctx->version = curr_peer->peerversion;
+			ctx->minpoll = curr_peer->minpoll;
+			ctx->maxpoll = curr_peer->maxpoll;
+			ctx->flags = peerflag_bits(curr_peer);
+			ctx->ttl = curr_peer->ttl;
+			ctx->keyid = curr_peer->peerkey;
+
 			memset(&hints, 0, sizeof(hints));
-			hints.ai_family = (u_short)curr_peer->addr->type;
+			hints.ai_family = (u_short)ctx->family;
 			hints.ai_socktype = SOCK_DGRAM;
 			hints.ai_protocol = IPPROTO_UDP;
-			getaddrinfo_sometime(curr_peer->addr->address, "ntp",
-					     &hints, &peer_name_resolved, 
-					     (void *)curr_peer);
+
+			getaddrinfo_sometime(curr_peer->addr->address,
+					     "ntp", &hints,
+					     INITIAL_DNS_RETRY,
+					     &peer_name_resolved,
+					     (void *)ctx);
 #else	/* !WORKER follows */
 			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use address\n",
+				"hostname %s can not be used, please use IP address instead.\n",
 				curr_peer->addr->address);
 #endif
 		}
@@ -3530,47 +3740,35 @@ peer_name_resolved(
 	)
 {
 	sockaddr_u		peeraddr;
-	struct peer_node *	curr_peer;
-	int			num_needed;
-	int			hmode;
-	int			i;
+	peer_resolved_ctx *	ctx;
 	int			af;
 	const char *		fam_spec;
 
-	curr_peer = context;
+	ctx = context;
 
 	DPRINTF(1, ("peer_name_resolved(%s) rescode %d\n", name, rescode));
 
 	if (rescode) {
 #ifndef IGNORE_DNS_ERRORS
+		free(ctx);
 		msyslog(LOG_ERR,
 			"giving up resolving host %s: %s (%d)",
 			name, gai_strerror(rescode), rescode);
 #else	/* IGNORE_DNS_ERRORS follows */
 		getaddrinfo_sometime(name, service, hints,
+				     INITIAL_DNS_RETRY,
 				     &peer_name_resolved, context);
 #endif
 		return;
 	}
 
-	hmode = get_correct_host_mode(curr_peer->host_mode);
-	NTP_INSIST(hmode != -1);
-	num_needed = (T_Pool == curr_peer->host_mode) 
-			? sys_maxclock 
-			: 1;
-
-	/* Loop to configure the desired number of associations */
-	for (i = 0; 
-	     res != NULL && i < num_needed; 
-	     res = res->ai_next) {
-
+	/* Loop to configure a single association */
+	for (; res != NULL; res = res->ai_next) {
 		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-
 		if (is_sane_resolved_address(&peeraddr,
-					     curr_peer->host_mode)) {
-			i++;
+					     ctx->host_mode)) {
 			NLOG(NLOG_SYSINFO) {
-				af = curr_peer->addr->type;
+				af = ctx->family;
 				fam_spec = (AF_INET6 == af)
 					       ? "(AAAA) "
 					       : (AF_INET == af)
@@ -3580,18 +3778,22 @@ peer_name_resolved(
 					name, fam_spec,
 					stoa(&peeraddr));
 			}
-			peer_config(&peeraddr,
+			peer_config(
+				&peeraddr,
 				NULL,
-				hmode,
-				curr_peer->peerversion,
-				curr_peer->minpoll,
-				curr_peer->maxpoll,
-				peerflag_bits(curr_peer),
-				curr_peer->ttl,
-				curr_peer->peerkey,
+				NULL,
+				ctx->hmode,
+				ctx->version,
+				ctx->minpoll,
+				ctx->maxpoll,
+				ctx->flags,
+				ctx->ttl,
+				ctx->keyid,
 				(u_char *)"*");
+			break;
 		}
 	}
+	free(ctx);
 }
 #endif	/* WORKER */
 
@@ -3618,12 +3820,12 @@ config_unpeers(
 	struct config_tree *ptree
 	)
 {
-	sockaddr_u peeraddr;
+	sockaddr_u		peeraddr;
 	struct addrinfo		hints;
-	isc_netaddr_t		i_netaddr;
-	struct unpeer_node *curr_unpeer;
-	struct peer *peer;
-	int found;
+	struct unpeer_node *	curr_unpeer;
+	struct peer *		p;
+	const char *		name;
+	int			rc;
 
 	for (curr_unpeer = queue_head(ptree->unpeers);
 	     curr_unpeer != NULL;
@@ -3634,65 +3836,62 @@ config_unpeers(
 		 * address addr, or it is nonzero and addr NULL.
 		 */
 		if (curr_unpeer->assocID) {
-			peer = findpeerbyassoc((u_int)curr_unpeer->assocID);
-			if (peer != NULL) {
-				peer_clear(peer, "GONE");
-				unpeer(peer);
+			p = findpeerbyassoc(curr_unpeer->assocID);
+			if (p != NULL) {
+				msyslog(LOG_NOTICE, "unpeered %s",
+					stoa(&p->srcadr));
+				peer_clear(p, "GONE");
+				unpeer(p);
 			}	
 
 			continue;
 		}
 
-		/*
-		 * If we have a numeric address, we can safely use
-		 * getaddrinfo in the mainline with it.  Otherwise
-		 * hand it off to the blocking child.
-		 */
-		if (is_ip_address(curr_unpeer->addr->address,
-				  (u_short)curr_unpeer->addr->type,
-				  &i_netaddr)) {
-
-			AF(&peeraddr) = (u_short)i_netaddr.family;
-			if (AF_INET6 == i_netaddr.family)
-				SET_ADDR6N(&peeraddr,
-					   i_netaddr.type.in6);
-			else
-				SET_ADDR4N(&peeraddr,
-					   i_netaddr.type.in.s_addr);
-
-			found = 0;
-			peer = NULL;
-
-			DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
-
-			do {
-				peer = findexistingpeer(&peeraddr, peer, -1);
-				if (NULL != peer && (FLAG_CONFIG & peer->flags))
-					found = 1;
-			} while (!found && NULL != peer);
-
-			if (found) {
-				msyslog(LOG_INFO, "unpeered %s",
+		memset(&peeraddr, 0, sizeof(peeraddr));
+		AF(&peeraddr) = curr_unpeer->addr->type;
+		name = curr_unpeer->addr->address;
+		rc = getnetnum(name, &peeraddr, 0, t_UNK);
+		/* Do we have a numeric address? */
+		if (rc > 0) {
+			DPRINTF(1, ("unpeer: searching for %s\n",
+				    stoa(&peeraddr)));
+			p = findexistingpeer(&peeraddr, NULL, NULL, -1);
+			if (p != NULL) {
+				msyslog(LOG_NOTICE, "unpeered %s",
 					stoa(&peeraddr));
-				peer_clear(peer, "GONE");
-				unpeer(peer);
+				peer_clear(p, "GONE");
+				unpeer(p);
 			}
-		} else {
-			/* we have a hostname to resolve */
-#ifdef WORKER
-			memset(&hints, 0, sizeof(hints));
-			hints.ai_family = (u_short)curr_unpeer->addr->type;
-			hints.ai_socktype = SOCK_DGRAM;
-			hints.ai_protocol = IPPROTO_UDP;
-			getaddrinfo_sometime(curr_unpeer->addr->address, "ntp",
-					     &hints, &unpeer_name_resolved, 
-					     (void *)curr_unpeer);
-#else	/* !WORKER follows */
-			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use address\n",
-				curr_unpeer->addr->address);
-#endif
+
+			continue;
 		}
+		/* 
+		 * It's not a numeric IP address, it's a hostname.
+		 * Check for associations with a matching hostname.
+		 */
+		for (p = peer_list; p != NULL; p = p->p_link)
+			if (p->hostname != NULL)
+				if (!strcasecmp(p->hostname, name))
+					break;
+		if (p != NULL) {
+			msyslog(LOG_NOTICE, "unpeered %s", name);
+			peer_clear(p, "GONE");
+			unpeer(p);
+		}
+		/* Resolve the hostname to address(es). */
+#ifdef WORKER
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = curr_unpeer->addr->type;
+		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_protocol = IPPROTO_UDP;
+		getaddrinfo_sometime(name, "ntp", &hints,
+				     INITIAL_DNS_RETRY,
+				     &unpeer_name_resolved, NULL);
+#else	/* !WORKER follows */
+		msyslog(LOG_ERR,
+			"hostname %s can not be used, please use IP address instead.\n",
+			name);
+#endif
 	}
 }
 
@@ -3714,52 +3913,38 @@ unpeer_name_resolved(
 	const struct addrinfo *	res
 	)
 {
-	sockaddr_u		peeraddr;
-	struct unpeer_node *	curr_unpeer;
-	struct peer *		peer;
-	int			found;
-	int			af;
-	const char *		fam_spec;
+	sockaddr_u	peeraddr;
+	struct peer *	peer;
+	u_short		af;
+	const char *	fam_spec;
 
 	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
 
-	curr_unpeer = context;
-
-	if (rescode)
+	if (rescode) {
 		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)", 
 			name, gai_strerror(rescode), rescode);
-	else {
-		/*
-		 * Loop through the addresses found
-		 */
-		while (res) {
-			found = 0;
-			peer = NULL;
-
-			memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
-			DPRINTF(1, ("searching for peer %s\n", stoa(&peeraddr)));
-
-			do {
-				peer = findexistingpeer(&peeraddr, peer, -1);
-				if (NULL != peer && (FLAG_CONFIG & peer->flags))
-					found = 1;
-			} while (!found && NULL != peer);
-
-			if (found) {
-				af = curr_unpeer->addr->type;
-				fam_spec = (AF_INET6 == af)
-					       ? "(AAAA) "
-					       : (AF_INET == af)
-						     ? "(A) "
-						     : "";
-				msyslog(LOG_INFO, "unpeered %s %s-> %s",
-					name, fam_spec,
-					stoa(&peeraddr));
-				peer_clear(peer, "GONE");
-				unpeer(peer);
-			}
-
-			res = res->ai_next;
+		return;
+	}
+	/*
+	 * Loop through the addresses found
+	 */
+	for (; res != NULL; res = res->ai_next) {
+		NTP_INSIST(res->ai_addrlen <= sizeof(peeraddr));
+		memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
+		DPRINTF(1, ("unpeer: searching for peer %s\n",
+			    stoa(&peeraddr)));
+		peer = findexistingpeer(&peeraddr, NULL, NULL, -1);
+		if (peer != NULL) {
+			af = AF(&peeraddr);
+			fam_spec = (AF_INET6 == af)
+				       ? "(AAAA) "
+				       : (AF_INET == af)
+					     ? "(A) "
+					     : "";
+			msyslog(LOG_NOTICE, "unpeered %s %s-> %s", name,
+				fam_spec, stoa(&peeraddr));
+			peer_clear(peer, "GONE");
+			unpeer(peer);
 		}
 	}
 }
@@ -3909,9 +4094,13 @@ config_ntpd(
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
-		getaddrinfo_sometime("www.cnn.com", "ntp", &hints, gai_test_callback, (void *)1);
+		getaddrinfo_sometime("www.cnn.com", "ntp", &hints,
+				     INITIAL_DNS_RETRY,
+				     gai_test_callback, (void *)1);
 		hints.ai_family = AF_INET6;
-		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints, gai_test_callback, (void *)0x600);
+		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints, 
+				     INITIAL_DNS_RETRY,
+				     gai_test_callback, (void *)0x600);
 	}
 #endif
 }
@@ -4436,7 +4625,7 @@ getnetnum(
 	const char *num,
 	sockaddr_u *addr,
 	int complain,
-	enum gnn_type a_type
+	enum gnn_type a_type	/* ignored */
 	)
 {
 	isc_netaddr_t ipaddr;
@@ -4454,7 +4643,7 @@ getnetnum(
 	memset(addr, 0, sizeof(*addr));
 	AF(addr) = (u_short)ipaddr.family;
 #ifdef ISC_PLATFORM_HAVESALEN
-	addr->sas.ss_len = SIZEOF_SOCKADDR(AF(addr));
+	addr->sa.sa_len = SIZEOF_SOCKADDR(AF(addr));
 #endif
 	if (IS_IPV4(addr))
 		memcpy(&addr->sa4.sin_addr, &ipaddr.type.in,
@@ -4462,6 +4651,7 @@ getnetnum(
 	else
 		memcpy(&addr->sa6.sin6_addr, &ipaddr.type.in6,
 		       sizeof(addr->sa6.sin6_addr));
+	SET_PORT(addr, NTP_PORT);
 
 	DPRINTF(2, ("getnetnum given %s, got %s\n", num, stoa(addr)));
 

@@ -175,11 +175,7 @@ static	void	mx4200_poll	(int, struct peer *);
 static	char *	mx4200_parse_t	(struct peer *);
 static	char *	mx4200_parse_p	(struct peer *);
 static	char *	mx4200_parse_s	(struct peer *);
-#ifdef QSORT_USES_VOID_P
 int	mx4200_cmpl_fp	(const void *, const void *);
-#else
-int	mx4200_cmpl_fp	(const l_fp *, const l_fp *);
-#endif /* not QSORT_USES_VOID_P */
 static	int	mx4200_config	(struct peer *);
 static	void	mx4200_ref	(struct peer *);
 static	void	mx4200_send	(struct peer *, char *, ...)

@@ -246,7 +246,6 @@ void
 timer(void)
 {
 	register struct peer *peer, *next_peer;
-	u_int	n;
 	l_fp	now;
 
 	/*
@@ -259,12 +258,10 @@ timer(void)
 		adjust_timer += 1;
 		adj_host_clock();
 #ifdef REFCLOCK
-		for (n = 0; n < NTP_HASH_SIZE; n++) {
-			for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
-				next_peer = peer->next;
-				if (peer->flags & FLAG_REFCLOCK)
-					refclock_timer(peer);
-			}
+		for (peer = peer_list; peer != NULL; peer = next_peer) {
+			next_peer = peer->p_link;
+			if (peer->flags & FLAG_REFCLOCK)
+				refclock_timer(peer);
 		}
 #endif /* REFCLOCK */
 	}
@@ -274,31 +271,29 @@ timer(void)
 	 * careful here, since the peer structure might go away as the
 	 * result of the call.
 	 */
-	for (n = 0; n < NTP_HASH_SIZE; n++) {
-		for (peer = peer_hash[n]; peer != 0; peer = next_peer) {
-			next_peer = peer->next;
-			if (peer->action && peer->nextaction <=
-			    current_time)
-				peer->action(peer);
+	for (peer = peer_list; peer != NULL; peer = next_peer) {
+		next_peer = peer->p_link;
+		if (peer->action != NULL && peer->nextaction <=
+		    current_time)
+			(*peer->action)(peer);
 
-			/*
-			 * Restrain the non-burst packet rate not more
-			 * than one packet every 16 seconds. This is
-			 * usually tripped using iburst and minpoll of
-			 * 128 s or less.
-			 */
-			if (peer->throttle > 0)
-				peer->throttle--;
-			if (peer->nextdate <= current_time) {
+		/*
+		 * Restrain the non-burst packet rate not more
+		 * than one packet every 16 seconds. This is
+		 * usually tripped using iburst and minpoll of
+		 * 128 s or less.
+		 */
+		if (peer->throttle > 0)
+			peer->throttle--;
+		if (peer->nextdate <= current_time) {
 #ifdef REFCLOCK
-				if (peer->flags & FLAG_REFCLOCK)
-					refclock_transmit(peer);
-				else
-					transmit(peer);
-#else /* REFCLOCK */
+			if (peer->flags & FLAG_REFCLOCK)
+				refclock_transmit(peer);
+			else
 				transmit(peer);
+#else /* REFCLOCK */
+			transmit(peer);
 #endif /* REFCLOCK */
-			}
 		}
 	}
 

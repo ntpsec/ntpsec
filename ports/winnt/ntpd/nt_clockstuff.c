@@ -32,6 +32,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
 #include "ntp_timer.h"
+#include "ntp_assert.h"
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntpd.h"
@@ -77,7 +78,6 @@ static LONGLONG ls_elapsed;
 
 static BOOL winnt_time_initialized = FALSE;
 static BOOL winnt_use_interpolation = FALSE;
-static ULONGLONG last_interp_time;
 static unsigned clock_thread_id;
 
 
@@ -86,7 +86,7 @@ static void StartClockThread(void);
 static void tune_ctr_freq(LONGLONG, LONGLONG);
 void StopClockThread(void);
 void atexit_revert_mm_timer(void);
-void time_stepped(void);
+void win_time_stepped(void);
 
 static HANDLE clock_thread = NULL;
 static HANDLE TimerThreadExitRequest = NULL;
@@ -118,8 +118,9 @@ static volatile int	newest_baseline_gen = 0;
 static ULONGLONG	baseline_counts[BASELINES_TOT] = {0};
 static LONGLONG		baseline_times[BASELINES_TOT] = {0};
 
+#define CLOCK_BACK_THRESHOLD	100	/* < 10us unremarkable */
+static ULONGLONG	clock_backward_max = CLOCK_BACK_THRESHOLD;
 static int		clock_backward_count;
-static ULONGLONG	clock_backward_max;
 
 
 /*
@@ -168,10 +169,17 @@ volatile ULONGLONG PerfCtrFreq = 0;
 static LONGLONG QPC_offset = 0;
 
 /*
- * use_pcc could be a local static in perf_ctr but
- * lock_thread_to_processor cares about it.
+ * Substitute RDTSC for QueryPerformanceCounter()?
  */
 static int use_pcc = -1;
+
+/*
+ * Restrict threads that call QPC/RDTSC to one CPU?
+ */
+static int lock_interp_threads = -1;
+
+static void	choose_interp_counter(void);
+static int	is_qpc_built_on_pcc(void);
 
 /*
  * ppm_per_adjust_unit is parts per million effect on the OS
@@ -239,124 +247,150 @@ get_pcc(void)
 }
 #endif
 
+
 /*
  * perf_ctr() returns the current performance counter value, 
  * from QueryPerformanceCounter or RDTSC.
  */
-
 ULONGLONG WINAPI 
 perf_ctr(void)
 {
-	FT_ULL ft1;
+	FT_ULL ft;
 
-	if (1 == use_pcc) {
+	if (use_pcc)
 		return get_pcc();
-	} else if (0 == use_pcc) {
-		QueryPerformanceCounter(&ft1.li);
-		return ft1.ull;
-	} else {
-		FT_ULL ft2;
-		FT_ULL ft3;
-		FT_ULL ft4;
-		FT_ULL ft5;
-		LONGLONG offset;
-		const char *ntpd_pcc_freq_text;
-
-		/* one-time initialization */
-
-		/*
-		 * It's time to make some more permanent knobs,
-		 * but for right now the RDTSC aka PCC dance on x86 is:
-		 *
-		 * 1.  With none of these variables defined, only QPC
-		 *     is used because there is no reliable way to
-		 *     detect counter frequency variation after ntpd
-		 *     startup implemented.
-		 * 2.  We need a better knob, but for now if you know
-		 *     your RDTSC / CPU frequency is invariant, set
-		 *     NTPD_PCC and assuming your QPC is based on the
-		 *     PCC as well, RDTSC will be substituted.
-		 * 3.  More forcefully, you can jam in a desired exact
-		 *     processor frequency, expressed in cycles per
-		 *     second by setting NTPD_PCC_FREQ=398125000, for
-		 *     example, if yor actual known CPU frequency is
-		 *     398.125 MHz, and NTPD_PCC doesn't work because
-		 *     QueryPerformanceCounter is implemented using
-		 *     another counter.  It is very easy to make ntpd
-		 *     fall down if the NTPD_PCC_FREQ value isn't very
-		 *     close to the observed RDTSC units per second.
-		 *
-		 * Items 2 and 3 could probably best be combined into one
-		 * new windows-specific command line switch such as
-		 *   ntpd --pcc
-		 * or
-		 *   ntpd --pcc=398125000
-		 *
-		 * They are currently tied to Windows because that is
-		 * the only ntpd port with its own interpolation, and
-		 * to x86/x64 because no one has ported the Windows
-		 * ntpd port to the sole remaining alternative, Intel
-		 * Itanium.
-		 */
-		if (HAVE_OPT(PCCFREQ))
-			ntpd_pcc_freq_text = OPT_ARG(PCCFREQ);
-		else
-			ntpd_pcc_freq_text = getenv("NTPD_PCC_FREQ");
-
-		if (!HAVE_OPT(USEPCC)
-		    && NULL == ntpd_pcc_freq_text
-		    && NULL == getenv("NTPD_PCC")) {
-			use_pcc = 0;
-			QueryPerformanceCounter(&ft1.li);
-			return ft1.ull;
-		}
-
-#ifdef DEBUG
-		if (!NomPerfCtrFreq) {
-			msyslog(LOG_ERR, "NomPerfCtrFreq not initialized before first perf_ctr() call");
-			exit(-1);
-		}
-#endif
-
-		QueryPerformanceCounter(&ft1.li);
-		ft2.ull = get_pcc();
-		Sleep(1);
-		QueryPerformanceCounter(&ft3.li);
-		Sleep(1);
-		ft4.ull = get_pcc();
-		Sleep(1);
-		QueryPerformanceCounter(&ft5.li);
-
-		offset = ft2.ull - ft1.ull;
-		ft3.ull += offset;
-		ft5.ull += offset;
-
-		if (ntpd_pcc_freq_text  ||
-			(ft2.ull <= ft3.ull &&
-			 ft3.ull <= ft4.ull &&
-			 ft4.ull <= ft5.ull)) {
-
-			use_pcc = 1;
-			ft1.ull = ft2.ull;
-			QPC_offset = offset;
-
-			if (ntpd_pcc_freq_text)
-				sscanf(ntpd_pcc_freq_text, 
-				       "%I64u", 
-				       &NomPerfCtrFreq);
-
-			NLOG(NLOG_CLOCKINFO)
-				msyslog(LOG_INFO, 
-					"using processor cycle counter "
-					"%.3f MHz", 
-					(LONGLONG)NomPerfCtrFreq / 1e6);
-		} else {
-			use_pcc = 0;
-		}
-
-		return ft1.ull;
+	else {
+		QueryPerformanceCounter(&ft.li);
+		return ft.ull;
 	}
 }
+
+
+/*
+ * choose_interp_counter - select between QueryPerformanceCounter and
+ *			   the x86 processor cycle counter (TSC).
+ */
+static void
+choose_interp_counter(void)
+{
+	const char *	ntpd_pcc_freq_text;
+	int		qpc_built_on_pcc;
+
+	/*
+	 * Regardless of whether we actually use RDTSC, first determine
+	 * if QueryPerformanceCounter is built on it, so that we can
+	 * decide whether it's prudent to lock QPC-consuming threads to
+	 * a particular CPU.
+	 */
+	qpc_built_on_pcc = is_qpc_built_on_pcc();
+	lock_interp_threads = qpc_built_on_pcc;
+
+	/*
+	 * It's time to make some more permanent knobs,
+	 * but for right now the RDTSC aka PCC dance on x86 is:
+	 *
+	 * 1.  With none of these variables defined, only QPC
+	 *     is used because there is no reliable way to
+	 *     detect counter frequency variation after ntpd
+	 *     startup implemented.
+	 * 2.  We need a better knob, but for now if you know
+	 *     your RDTSC / CPU frequency is invariant, set
+	 *     NTPD_PCC and assuming your QPC is based on the
+	 *     PCC as well, RDTSC will be substituted.
+	 * 3.  More forcefully, you can jam in a desired exact
+	 *     processor frequency, expressed in cycles per
+	 *     second by setting NTPD_PCC_FREQ=398125000, for
+	 *     example, if yor actual known CPU frequency is
+	 *     398.125 MHz, and NTPD_PCC doesn't work because
+	 *     QueryPerformanceCounter is implemented using
+	 *     another counter.  It is very easy to make ntpd
+	 *     fall down if the NTPD_PCC_FREQ value isn't very
+	 *     close to the observed RDTSC units per second.
+	 *
+	 * Items 2 and 3 could probably best be combined into one
+	 * new windows-specific command line switch such as
+	 *   ntpd --pcc
+	 * or
+	 *   ntpd --pcc=398125000
+	 *
+	 * They are currently tied to Windows because that is
+	 * the only ntpd port with its own interpolation, and
+	 * to x86/x64 because no one has ported the Windows
+	 * ntpd port to the sole remaining alternative, Intel
+	 * Itanium.
+	 */
+	if (HAVE_OPT(PCCFREQ))
+		ntpd_pcc_freq_text = OPT_ARG(PCCFREQ);
+	else
+		ntpd_pcc_freq_text = getenv("NTPD_PCC_FREQ");
+
+	if (!HAVE_OPT(USEPCC)
+	    && NULL == ntpd_pcc_freq_text
+	    && NULL == getenv("NTPD_PCC")) {
+		use_pcc = 0;
+		return;
+	}
+
+	if (!qpc_built_on_pcc && NULL == ntpd_pcc_freq_text) {
+		use_pcc = 0;
+		return;
+	}
+
+	use_pcc = 1;
+	if (ntpd_pcc_freq_text != NULL)
+		sscanf(ntpd_pcc_freq_text, 
+		       "%I64u", 
+		       &NomPerfCtrFreq);
+
+	NLOG(NLOG_CLOCKINFO)
+		msyslog(LOG_INFO, 
+			"using processor cycle counter "
+			"%.3f MHz", 
+			(LONGLONG)NomPerfCtrFreq / 1e6);
+	return;
+}
+
+
+/*
+ * is_qpc_built_on_pcc - test if QueryPerformanceCounter runs at the
+ *			 same rate as the processor cycle counter (TSC).
+ */
+static int
+is_qpc_built_on_pcc(void)
+{
+	LONGLONG	offset;
+	FT_ULL		ft1;
+	FT_ULL		ft2;
+	FT_ULL		ft3;
+	FT_ULL		ft4;
+	FT_ULL		ft5;
+
+	NTP_REQUIRE(NomPerfCtrFreq != 0);
+
+	QueryPerformanceCounter(&ft1.li);
+	ft2.ull = get_pcc();
+	Sleep(1);
+	QueryPerformanceCounter(&ft3.li);
+	Sleep(1);
+	ft4.ull = get_pcc();
+	Sleep(1);
+	QueryPerformanceCounter(&ft5.li);
+
+	offset = ft2.ull - ft1.ull;
+	ft3.ull += offset;
+	ft5.ull += offset;
+
+	if (ft2.ull <= ft3.ull &&
+	    ft3.ull <= ft4.ull &&
+	    ft4.ull <= ft5.ull) {
+
+		QPC_offset = offset;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 
 /*
  * Request Multimedia Timer
@@ -650,12 +684,6 @@ init_winnt_time(void)
 	if (-1 == setpriority(PRIO_PROCESS, 0, NTP_PRIO))
 		exit(-1);
 
-	/*
-	 * register with libntp ntp_set_tod() to call us back
-	 * when time is stepped.
-	 */
-	step_callback = time_stepped;
-
 	/* 
 	 * before we start looking at clock period, do any multimedia
 	 * timer manipulation requested via -M option.
@@ -743,6 +771,8 @@ init_winnt_time(void)
 
 	winnt_time_initialized = TRUE;
 
+	choose_interp_counter();
+
 	if (os_clock_precision < 4 * 10000 && !getenv("NTPD_USE_INTERP_DANGEROUS")) {
 		msyslog(LOG_INFO, "using Windows clock directly");
 	} else {
@@ -805,26 +835,31 @@ GetInterpTimeAsFileTime(
 	LPFILETIME pft
 	)
 {
+	static ULONGLONG last_interp_time;
 	FT_ULL now_time;
 	FT_ULL now_count;
+	ULONGLONG clock_backward;
 
-	/*  Mark a mark ASAP. The latency to here should
-	 *  be reasonably deterministic
-	*/
+	/*
+	 * Mark a mark ASAP.  The latency to here should be reasonably
+	 * deterministic
+	 */
 
 	now_count.ull = perf_ctr();
 	now_time.ull = interp_time(now_count.ull, TRUE);
 
-	if (last_interp_time > now_time.ull) {
-
-		clock_backward_count++;
-		if (last_interp_time - now_time.ull > clock_backward_max)
-			clock_backward_max = last_interp_time - now_time.ull;
-		now_time.ull = last_interp_time;
-	} else
+	if (last_interp_time <= now_time.ull)
 		last_interp_time = now_time.ull;
-
+	else {
+		clock_backward = last_interp_time - now_time.ull;
+		if (clock_backward > clock_backward_max) {
+			clock_backward_max = clock_backward;
+			clock_backward_count++;
+		}
+		now_time.ull = last_interp_time;
+	}
 	*pft = now_time.ft;
+
 	return;
 }
 
@@ -1052,11 +1087,11 @@ lock_thread_to_processor(HANDLE thread)
 	if ( ! winnt_use_interpolation)
 		return;
 	
-	if (-1 == use_pcc) {
-		DPRINTF(1, ("perf_ctr is not called before affinity, "
-			    "change lock_thread_to_processor to call it\n"));
+	if (-1 == lock_interp_threads) {
+		DPRINTF(1, ("choose_interp_counter() is not called "
+			    "before lock_thread_to_processor()\n"));
 		exit(-1);
-	} else if (0 == use_pcc)
+	} else if (!lock_interp_threads)
 		return;
 
 	/*
@@ -1207,8 +1242,8 @@ ntp_timestamp_from_counter(
 #endif  /* HAVE_PPSAPI */
 
 
-void 
-time_stepped(void)
+void
+win_time_stepped(void)
 {
 	/*
 	 * called back by ntp_set_tod after the system
@@ -1234,11 +1269,9 @@ time_stepped(void)
 	 */
 	newest_baseline_gen++;
 
-	last_interp_time = 
-		clock_backward_max = 
-		clock_backward_count = 
-		newest_baseline = 0;
-
+	clock_backward_max = CLOCK_BACK_THRESHOLD;
+	clock_backward_count = 0;
+	newest_baseline = 0;
 	memset(baseline_counts, 0, sizeof(baseline_counts));
 	memset(baseline_times, 0, sizeof(baseline_times));
 
@@ -1354,7 +1387,8 @@ ctr_freq_timer_fired(
 				clock_backward_count, 
 				(LONGLONG)clock_backward_max / 10.);
 
-			clock_backward_max = clock_backward_count = 0;
+			clock_backward_max = CLOCK_BACK_THRESHOLD;
+			clock_backward_count = 0;
 		}
 	}
 
@@ -1431,10 +1465,11 @@ tune_ctr_freq(
 	static LONGLONG diffs[TUNE_CTR_DEPTH] = {0};
 	static LONGLONG sum = 0;
 
+	char ctr_freq_eq[64];
 	LONGLONG delta;
 	LONGLONG deltadiff;
 	ULONGLONG ObsPerfCtrFreq;
-	double obs_freq;
+	double freq;
 	double this_freq;
 	int isneg;
 
@@ -1490,12 +1525,21 @@ tune_ctr_freq(
 	/* get rid of ObsPerfCtrFreq when removing the #ifdef */
 	PerfCtrFreq = ObsPerfCtrFreq;
 #endif
-	obs_freq = (LONGLONG)ObsPerfCtrFreq / 1e6;
+	freq = (LONGLONG)PerfCtrFreq / 1e6;
+
+	/*
+	 * make the performance counter's frequency error from its
+	 * nominal rate, expressed in PPM, available via ntpq as
+	 * system variable "ctr_frequency".  This is consistent with
+	 * "frequency" which is the system clock drift in PPM.
+	 */
+	snprintf(ctr_freq_eq, sizeof(ctr_freq_eq), "ctr_frequency=%.2f", 
+		 1e6 * (freq - nom_freq) / nom_freq);
+	set_sys_var(ctr_freq_eq, strlen(ctr_freq_eq) + 1, RO | DEF);
 
 	/* 
 	 * report observed ctr freq each time the estimate used during
-	 * startup moves toward the observed freq from the nominal, 
-	 * and once a day afterward.
+	 * startup moves toward the observed freq from the nominal.
 	 */
 
 	if (count > COUNTOF(diffs) &&
@@ -1507,23 +1551,21 @@ tune_ctr_freq(
 		if (count <= COUNTOF(diffs))
 			/* moving to observed freq. from nominal (startup) */
 			msyslog(LOG_INFO,
-				(obs_freq > 100)
-				 ? "ctr %.3f MHz %+6.2f PPM using "
-				       "%.3f MHz %+6.2f PPM"
-				 : "ctr %.6f MHz %+6.2f PPM using "
-				       "%.6f MHz %+6.2f PPM",
+				(freq > 100)
+				   ? "ctr %.3f MHz %+6.2f PPM using %.3f MHz %+6.2f PPM"
+				   : "ctr %.6f MHz %+6.2f PPM using %.6f MHz %+6.2f PPM",
 				this_freq,
 				1e6 * (this_freq - nom_freq) / nom_freq,
-				obs_freq, 
-				1e6 * (obs_freq - nom_freq) / nom_freq);
+				freq, 
+				1e6 * (freq - nom_freq) / nom_freq);
 		else
 			/* steady state */
 			msyslog(LOG_INFO,
-				(obs_freq > 100)
-				 ? "ctr %.3f MHz %+.2f PPM"
-				 : "ctr %.6f MHz %+.2f PPM",
-				obs_freq, 
-				1e6 * (obs_freq - nom_freq) / nom_freq);
+				(freq > 100)
+				   ? "ctr %.3f MHz %+.2f PPM"
+				   : "ctr %.6f MHz %+.2f PPM",
+				freq, 
+				1e6 * (freq - nom_freq) / nom_freq);
 
 	if (disbelieved) {
 		msyslog(LOG_ERR, 

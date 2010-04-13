@@ -236,7 +236,7 @@ struct xcmd opcmds[] = {
 #ifdef ISC_PLATFORM_HAVESALEN
 #define SET_SS_LEN_IF_PRESENT(psau)				\
 	do {							\
-		(psau)->sas.ss_len = SOCKLEN(psau);		\
+		(psau)->sa.sa_len = SOCKLEN(psau);		\
 	} while (0)
 #else
 #define SET_SS_LEN_IF_PRESENT(psau)	do { } while (0)
@@ -841,8 +841,8 @@ again:
 			NSRCADR(&src) = pp->srcadr;
 		}
 #ifdef ISC_PLATFORM_HAVESALEN
-		src.sas.ss_len = SOCKLEN(&src);
-		dst.sas.ss_len = SOCKLEN(&dst);
+		src.sa.sa_len = SOCKLEN(&src);
+		dst.sa.sa_len = SOCKLEN(&dst);
 #endif
 		(void) fprintf(fp, "remote host:          %s\n",
 			       nntohost(&src));
@@ -1672,7 +1672,7 @@ static struct resflags resflagsV3[] = {
 	{ "limited",	RES_LIMITED },
 	{ "version",	RES_VERSION },
 	{ "kod",	RES_KOD },
-	{ "timeout",	RES_TIMEOUT },
+	{ "flake",	RES_FLAKE },
 
 	{ "",		0 }
 };
@@ -1680,6 +1680,7 @@ static struct resflags resflagsV3[] = {
 static struct resflags resmflags[] = {
 	{ "ntpport",	RESM_NTPONLY },
 	{ "interface",	RESM_INTERFACE },
+	{ "source",	RESM_SOURCE },
 	{ "",		0 }
 };
 
@@ -2023,8 +2024,8 @@ again:
 				    ml->mode,
 				    ml->version,
 				    (u_long)ntohl(ml->restr),
-				    (u_long)ntohl(ml->lasttime),
-				    (u_long)ntohl(ml->firsttime));
+				    (u_long)ntohl(ml->avg_int),
+				    (u_long)ntohl(ml->last_int));
 			ml++;
 			items--;
 		}
@@ -2049,8 +2050,8 @@ again:
 				    ml->mode,
 				    ml->version,
 				    (u_long)ntohl(ml->restr),
-				    (u_long)ntohl(ml->lasttime),
-				    (u_long)ntohl(ml->firsttime));
+				    (u_long)ntohl(ml->avg_int),
+				    (u_long)ntohl(ml->last_int));
 			ml++;
 			items--;
 		}

@@ -1607,6 +1607,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_neoclock4x.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\ntpd\refclock_nmea.c"
 				>
 				<FileConfiguration

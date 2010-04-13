@@ -22,7 +22,7 @@ int ntpq_closehost(void);
 int ntpq_queryhost(unsigned short VARSET, unsigned short association, char *resultbuf, int maxlen);
 int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen );
 int ntpq_queryhost_peervars(unsigned short association, char *resultbuf, int maxlen);
-int ntpq_getvar( char *resultbuf, int datalen, const char *varname, char *varvalue, int maxlen);
+int ntpq_getvar(const char *resultbuf, int datalen, const char *varname, char *varvalue, int maxlen);
 int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen);
 int ntpq_read_associations ( unsigned short resultbuf[], int max_entries );
 int ntpq_read_sysvars( char *resultbuf, int maxsize );
@@ -141,20 +141,26 @@ int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen )
  *			varvalue
  ****************************************************************************/
 
-int ntpq_getvar( char *resultbuf, int datalen, const char *varname, char *varvalue, int maxlen)
+int
+ntpq_getvar(
+	const char *resultbuf,
+	int datalen,
+	const char *varname,
+	char *varvalue,
+	int maxlen)
 {
-    char *name;
-    char *value = NULL;
+	char *name;
+	char *value = NULL;
 
-            while (nextvar(&datalen, &resultbuf, &name, &value)) {
-
-                if ( strcmp(varname, name) == 0 ) {
+	while (nextvar(&datalen, &resultbuf, &name, &value)) {
+		if (strcmp(varname, name) == 0) {
 			ntpq_stripquotes(varvalue,value,strlen(value),maxlen);
-			return strlen(varvalue);
-                }
-            }
 
-            return 0;
+			return strlen(varvalue);
+		}
+	}
+
+	return 0;
 }
 
 
@@ -188,7 +194,7 @@ int ntpq_getvar( char *resultbuf, int datalen, const char *varname, char *varval
 
 int ntpq_queryhost(unsigned short VARSET, unsigned short association, char *resultbuf, int maxlen)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -412,53 +418,55 @@ int ntpq_get_assoc_number ( int associd )
  *			0 (zero) if an error occured
  ****************************************************************************/
 
-  int ntpq_read_assoc_peervars( int associd, char *resultbuf, int maxsize )
+int
+ntpq_read_assoc_peervars(
+	int associd,
+	char *resultbuf,
+	int maxsize
+	)
 {
+	const char *datap;
+	int res;
+	int dsize;
+	u_short rstatus;
+	l_fp rec;
+	l_fp ts;
+	char value[NTPQ_BUFLEN];
 
-    char *datap;
-    int res;
-    int dsize;
-    u_short rstatus;
-   	l_fp rec;
-	  l_fp ts;
-    char value[NTPQ_BUFLEN];
 
+	res = doquery(CTL_OP_READVAR, associd, 0, 0, NULL, &rstatus,
+		      &dsize, &datap);
 
-    res = doquery(CTL_OP_READVAR, associd, 0, 0, (char *)0, &rstatus,
-              &dsize, &datap);
-    
-    if (res != 0)
-        return 0;
+	if (res != 0)
+		return 0;
 
-   	get_systime(&ts);
+	get_systime(&ts);
 
-    if (dsize == 0) {
-        if (numhosts > 1)
-            (void) fprintf(stderr, "server=%s ", currenthost);
-        (void) fprintf(stderr,
-                   "***No information returned for association %d\n",
-                   associd);
-        return 0;
-    } else {
-        if ( dsize > maxsize ) 
-            dsize = maxsize;
+	if (dsize == 0) {
+		if (numhosts > 1)
+			fprintf(stderr, "server=%s ", currenthost);
+		fprintf(stderr,
+			"***No information returned for association %d\n",
+			associd);
+		return 0;
+	} else {
+		if ( dsize > maxsize ) 
+			dsize = maxsize;
+		memcpy(resultbuf, datap, dsize);
+		resultbuf[dsize] = '\0';
+ 
+		ntpq_getvar(resultbuf, dsize, "rec", value,
+			    sizeof(value));
 
-        memcpy(resultbuf,datap,dsize);        
-        resultbuf[dsize]=0x0;
-        
-        ntpq_getvar(resultbuf, dsize, "rec", value, sizeof (value) );
+		if (!decodets(value, &rec))
+			L_CLR(&rec);
 
-        if (!decodets(value, &rec))
-				  L_CLR(&rec);
+		memcpy(resultbuf, value, maxsize);
+		resultbuf[dsize] = '\0';
+		dsize = strlen(resultbuf);
+	}
 
-        memcpy(resultbuf,value,maxsize);        
-        resultbuf[dsize]=0x0;
-        dsize=strlen(resultbuf);
-        
-
-    }
-    return dsize;
-
+	return dsize;
 }
 
 
@@ -487,35 +495,35 @@ int ntpq_get_assoc_number ( int associd )
  *			- OR - 
  *			0 (zero) if an error occured
  ****************************************************************************/
-int ntpq_read_sysvars( char *resultbuf, int maxsize )
+int
+ntpq_read_sysvars(
+	char *resultbuf, 
+	int maxsize
+	)
 {
+	const char *datap;
+	int res;
+	int dsize;
+	u_short rstatus;
 
-    char *datap;
-    int res;
-    int dsize;
-    u_short rstatus;
+	res = doquery(CTL_OP_READVAR, 0, 0, 0, NULL, &rstatus, &dsize, &datap);
 
-    res = doquery(CTL_OP_READVAR, 0, 0, 0, (char *)0, &rstatus,
-              &dsize, &datap);
-    
-    if (res != 0)
-        return 0;
+	if (res != 0)
+		return 0;
 
-    if (dsize == 0) {
-        if (numhosts > 1)
-            (void) fprintf(stderr, "server=%s ", currenthost);
-        (void) fprintf(stderr,
-                   "***No sysvar information returned \n");
-        return 0;
-    } else {
-        if ( dsize > maxsize ) 
-            dsize = maxsize;
+	if (dsize == 0) {
+		if (numhosts > 1)
+			fprintf(stderr, "server=%s ", currenthost);
+		fprintf(stderr,
+			"***No sysvar information returned \n");
 
-        memcpy(resultbuf,datap,dsize);
-    }
+		return 0;
+	}
+	if (dsize > maxsize) 
+		dsize = maxsize;
+	memcpy(resultbuf, datap, dsize);
 
-    return dsize;
-
+	return dsize;
 }
 
 
@@ -665,30 +673,33 @@ int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen)
  *			0 (zero) if an error occured
  ****************************************************************************/
 
-int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize )
+int
+ntpq_read_assoc_clockvars(
+	int	associd,
+	char *	resultbuf,
+	int	maxsize
+	)
 {
+	const char *datap;
+	int res;
+	int dsize;
+	u_short rstatus;
 
-    char *datap;
-    int res;
-    int dsize;
-    u_short rstatus;
-    
-    res = ntpq_doquerylist(ntpq_varlist, CTL_OP_READCLOCK, associd, 0, &rstatus, &dsize, &datap);
-    
-    if (res != 0)
-        return 0;
+	res = ntpq_doquerylist(ntpq_varlist, CTL_OP_READCLOCK, associd,
+			       0, &rstatus, &dsize, &datap);
+	if (res != 0)
+		return 0;
 
-    if (dsize == 0) {
-        if (numhosts > 1) /* no information returned from server */
-	return 0;
-    } else {
-        if ( dsize > maxsize ) 
-            dsize = maxsize;
+	if (dsize == 0) {
+		if (numhosts > 1) /* no information returned from server */
+			return 0;
+	} else {
+		if (dsize > maxsize) 
+			dsize = maxsize;
+		memcpy(resultbuf, datap, dsize);
+	}
 
-        memcpy(resultbuf,datap,dsize);
-    }
-
-    return dsize;
+	return dsize;
 }
 
 

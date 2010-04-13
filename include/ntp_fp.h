@@ -335,19 +335,19 @@ typedef u_int32 u_fp;
  * Prototypes
  */
 extern	char *	dofptoa		(u_fp, int, short, int);
-extern	char *	dolfptoa	(u_long, u_long, int, short, int);
+extern	char *	dolfptoa	(u_int32, u_int32, int, short, int);
 
 extern	int	atolfp		(const char *, l_fp *);
 extern	int	buftvtots	(const char *, l_fp *);
 extern	char *	fptoa		(s_fp, short);
 extern	char *	fptoms		(s_fp, short);
 extern	int	hextolfp	(const char *, l_fp *);
-extern  void    gpstolfp	(int, int, unsigned long, l_fp *);
+extern  void	gpstolfp	(int, int, unsigned long, l_fp *);
 extern	int	mstolfp		(const char *, l_fp *);
 extern	char *	prettydate	(l_fp *);
 extern	char *	gmprettydate	(l_fp *);
 extern	char *	uglydate	(l_fp *);
-extern  void    mfp_mul		(int32 *, u_int32 *, int32, u_int32, int32, u_int32);
+extern  void	mfp_mul		(int32 *, u_int32 *, int32, u_int32, int32, u_int32);
 
 extern	void	get_systime	(l_fp *);
 extern	int	step_systime	(double);
@@ -360,6 +360,7 @@ extern	struct tm * ntp2unix_tm (u_long ntp, int local);
 
 #define stoa(addr)		socktoa(addr)
 #define	ntoa(addr)		stoa(addr)
+#define sptoa(addr)		sockporttoa(addr)
 #define stohost(addr)		socktohost(addr)
 
 #define	ufptoa(fpv, ndec)	dofptoa((fpv), 0, (ndec), 0)
@@ -368,4 +369,10 @@ extern	struct tm * ntp2unix_tm (u_long ntp, int local);
 #define	ulfptoms(fpv, ndec)	dolfptoa((fpv)->l_ui, (fpv)->l_uf, 0, (ndec), 1)
 #define	umfptoa(fpi, fpf, ndec) dolfptoa((fpi), (fpf), 0, (ndec), 0)
 
+/*
+ * Optional callback from libntp step_systime() to ntpd.  Optional
+*  because other libntp clients like ntpdate don't use it.
+ */
+typedef void (*time_stepped_callback)(void);
+extern time_stepped_callback	step_callback;
 #endif /* NTP_FP_H */

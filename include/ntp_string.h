@@ -1,5 +1,5 @@
 /*
- * Define string ops: strchr strrchr memcmp memmove memset 
+ * Define string ops: strchr strrchr memcmp memmove memset
  */
 
 #ifndef NTP_STRING_H
@@ -16,20 +16,6 @@
 #ifdef HAVE_BSTRING_H
 # include <bstring.h>
 #endif
-
-#ifndef STDC_HEADERS
-# ifndef HAVE_STRCHR
-#  include <strings.h>
-#  define strchr index
-#  define strrchr rindex
-# endif
-# ifndef __GNUC__
-char *strchr(), *strrchr();
-# endif
-# ifndef HAVE_MEMCPY
-#  define NTP_NEED_BOPS
-# endif
-#endif /* STDC_HEADERS */
 
 #ifdef NTP_NEED_BOPS
 

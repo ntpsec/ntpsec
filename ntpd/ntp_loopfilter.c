@@ -19,10 +19,6 @@
 #include <signal.h>
 #include <setjmp.h>
 
-#if defined(VMS) && defined(VMS_LOCALUNIT)	/*wjm*/
-#include "ntp_refclock.h"
-#endif /* VMS */
-
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */

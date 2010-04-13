@@ -270,10 +270,6 @@ SOURCE=..\..\..\lib\isc\md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\memmove.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\libntp\mfptoa.c
 # End Source File
 # Begin Source File

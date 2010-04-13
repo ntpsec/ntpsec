@@ -81,9 +81,6 @@
 #  include <netdb.h>
 # endif
 # include <resolv.h>
-# ifdef RES_TIMEOUT
-#  undef RES_TIMEOUT	/* resolv.h has one, we want ours */
-# endif
 # ifdef HAVE_INT32_ONLY_WITH_DNS
 #  define HAVE_INT32
 # endif
@@ -118,8 +115,6 @@
  * _request_ memory allocated by the first routine.  Response memory
  * is managed by the code which calls the *_complete routines.
  */
-
-#define	INITIAL_DNS_RETRY	2	/* seconds between queries */
 
 typedef struct blocking_gai_req_tag {
 	size_t			octets;
@@ -194,6 +189,7 @@ getaddrinfo_sometime(
 	const char *		node,
 	const char *		service,
 	const struct addrinfo *	hints,
+	int			retry,
 	gai_sometime_callback	callback,
 	void *			context
 	)
@@ -227,7 +223,7 @@ getaddrinfo_sometime(
 		memset(&gai_req->hints, 0, sizeof(gai_req->hints));
 	else
 		gai_req->hints = *hints;
-	gai_req->retry = INITIAL_DNS_RETRY;
+	gai_req->retry = retry;
 	gai_req->callback = callback;
 	gai_req->context = context;
 	gai_req->nodesize = nodesize;
@@ -516,20 +512,11 @@ getaddrinfo_sometime_complete(
 
 	if (!gai_resp->ai_count)
 		ai = NULL;
-#ifdef DEBUG
-	else	/* exercise copy_addrinfo_list() */
-		ai = copy_addrinfo_list(ai);
-#endif
 	
 	(*gai_req->callback)(gai_resp->retcode, gai_resp->gai_errno,
 			     gai_req->context, node, service, 
 			     &gai_req->hints, ai);
 
-#ifdef DEBUG
-	/* exercise copy_addrinfo_list() */
-	if (NULL != ai)
-		free(ai);
-#endif
 	free(gai_req);
 	/* gai_resp is part of block freed by process_blocking_response() */
 }
@@ -653,8 +640,8 @@ blocking_getnameinfo(
 	host = alloca(octets);
 	if (NULL == host) {
 		msyslog(LOG_ERR,
-			"blocking_getnameinfo unable to allocate %d octets on stack",
-			octets);
+			"blocking_getnameinfo unable to allocate %lu octets on stack",
+			(u_long)octets);
 		exit(1);
 	}
 #endif
@@ -684,9 +671,9 @@ blocking_getnameinfo(
 	resp = emalloc(resp_octets);
 	gni_resp = (void *)((char *)resp + sizeof(*resp));
 
-	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %d servlen %d\n",
+	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
 		    stoa(&gni_req->socku), gni_req->flags,
-		    gni_req->hostoctets, gni_req->servoctets));
+		    (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
 	
 	gni_resp->retcode = getnameinfo(&gni_req->socku.sa,
 					SOCKLEN(&gni_req->socku),
@@ -845,7 +832,7 @@ scheduled_sleep(
 	time_t now;
 
 	if (scheduled < ignore_scheduled_before) {
-		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)",
+		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)\n",
 			humantime(earliest), humantime(scheduled),
 			humantime(ignore_scheduled_before)));
 		return;
@@ -854,7 +841,7 @@ scheduled_sleep(
 	now = time(NULL);
 
 	if (now < earliest) {
-		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)",
+		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)\n",
 			humantime(earliest), humantime(scheduled),
 			humantime(ignore_scheduled_before)));
 		if (-1 == worker_sleep(earliest - now)) {
@@ -866,7 +853,7 @@ scheduled_sleep(
 			next_res_init = now + 60;
 			res_init();
 #endif
-			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)",
+			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)\n",
 				humantime(ignore_scheduled_before)));
 		}
 	}

@@ -45,6 +45,7 @@ extern	void	msyslog		(int, const char *, ...)
 #define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
 #endif
 
+/* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
 extern	int	authdecrypt	(keyid_t, u_int32 *, int, int);
@@ -101,11 +102,9 @@ extern  const char * clockstatstr (int);
 extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(u_int32);
 extern	char *	numtohost	(u_int32);
-extern	char *	socktoa		(sockaddr_u *);
-#define	localaddrtoa(pif)	((NULL == (pif))		\
-				     ? "<null>"			\
-				     : socktoa(&((pif)->sin)))
-#define		latoa(pif)	localaddrtoa(pif)
+extern	char *	socktoa		(const sockaddr_u *);
+extern	char *	sockporttoa	(const sockaddr_u *);
+extern	u_short	sock_hash	(const sockaddr_u *);
 extern	char *	socktohost	(sockaddr_u *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
@@ -148,6 +147,7 @@ extern int	authnumfreekeys;
  */
 extern keyid_t	cache_keyid;		/* key identifier */
 extern u_char *	cache_key;		/* key pointer */
+extern int	cache_type;		/* key type */
 extern u_int	cache_keylen;		/* key length */
 
 /* getopt.c */

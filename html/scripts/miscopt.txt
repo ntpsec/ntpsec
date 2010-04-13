@@ -8,6 +8,7 @@ document.write("<h4>Miscellaneous Commands</h4><p><ul>\
 <li class='inline'><a href='miscopt.html#leapfile'>leapfile - specify leapseconds file</a><br>\
 <li class='inline'><a href='miscopt.html#logconfig'>logconfig - configure log file</a><br>\
 <li class='inline'><a href='miscopt.html#interface'>nic - alias for interface</a><br>\
+<li class='inline'><a href='miscopt.html#mru'>mru - control monitor MRU list limits</a><br>\
 <li class='inline'><a href='miscopt.html#phone'>phone - specify modem phone numbers</a><br>\
 <li class='inline'><a href='miscopt.html#saveconfigdir'>saveconfigdir - specify saveconfig directory</a><br>\
 <li class='inline'><a href='miscopt.html#setvar'>setvar - set system variables</a><br>\

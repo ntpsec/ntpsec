@@ -14,7 +14,7 @@
 		<img src="pic/alice51.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 		<p>Make sure who your friends are.</p>
 		<p>Last update: 
-			<!-- #BeginDate format:En2 -->25-Nov-2009<!-- #EndDate -->
+			<!-- #BeginDate format:En2 -->12-Apr-2010  06:16<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 		<h4>Related Links</h4>
@@ -46,19 +46,31 @@
 		<h4 id="mcst">Manycast Scheme</h4>
 		<p>Manycast is a automatic server discovery and configuration paradigm new to NTPv4. It is intended as a means for a client to troll the nearby network neighborhood to find cooperating servers, validate them using cryptographic means and evaluate their time values with respect to other servers that might be lurking in the vicinity. It uses the grab-n'-drop paradigm with the additional feature that active means are used to grab additional servers should the number of survivors fall below the <tt>minclock</tt> option of the <tt>tos</tt> command.</p>
 		<p>The manycast paradigm is not the anycast paradigm described in RFC-1546, which is designed to find a single server from a clique of servers providing the same service. The manycast paradigm is designed to find a plurality of redundant servers satisfying defined optimality criteria.</p>
-		<p>A manycast clients is configured using the <tt>manycastclient</tt> configuration command, which is similar to the <tt>server</tt> configuration command. It sends ordinary client mode messages, but with a broadcast address rather than a unicast address and sends only if less than <tt>minclock</tt> associateons remain and then only at the minimum feasible rate and minimum feasible time-to-live (TTL) hops. The polling strategy is designed to reduce as much as possible the volume of broadcast messages and the effects of implosion due to near-simultaneous arrival of manycast server messages. There can be as many manycast client associations as different addresses, each one serving as a template for a future unicast client/server association.</p>
+		<p>A manycast clients is configured using the <tt>manycastclient</tt> configuration command, which is similar to the <tt>server</tt> configuration command. It sends ordinary client mode messages, but with a broadcast address rather than a unicast address and sends only if less than <tt>minclock</tt> associations remain and then only at the minimum feasible rate and minimum feasible time-to-live (TTL) hops. The polling strategy is designed to reduce as much as possible the volume of broadcast messages and the effects of implosion due to near-simultaneous arrival of manycast server messages. There can be as many manycast client associations as different addresses, each one serving as a template for future unicast client/server associations.</p>
 		<p>A manycast server is configured using the <tt>manycastserver</tt> command, which listens on the specified broadcast address for manycast client messages. If a manycast server is in scope of the current TTL and is itself synchronized to a valid source and operating at a stratum level equal to or lower than the manycast client, it replies with an ordinary unicast server message.</p>
 		<p>The manycast client receiving this message mobilizes a preemptable client association according to the matching manycast client template, but only if cryptographically authenticated and the server stratum is less than or equal to the client stratum. </p>
 		<p>It is possible and frequently useful to configure a host as both manycast client and manycast server. A number of hosts configured this way and sharing a common multicast group address will automatically organize themselves in an optimum configuration based on stratum and synchronization distance.</p>
-		<p>The use of cryptograpic authentication is always a good idea in any server descovery scheme. Both symmetric key and public key cryptography can be used in the same scenarios as described above for the broadast/multicast scheme.</p>
+		<p>The use of cryptograpic authentication is always a good idea in any server discovery scheme. Both symmetric key and public key cryptography can be used in the same scenarios as described above for the broadast/multicast scheme.</p>
 		<h4 id="pool">Server Pool Scheme</h4>
-		<p>The idea of targeting servers on a random basis to distribute and balance the load is not a new one; however, the NTP pool scheme puts this on steroids. At present, several hundred operators around the globe have volunteered their servers for public access. In general, NTP&nbsp;is a lightweight service and servers used for other purposes don't mind an additional small load. The trick is to randomize over the population and minimize the load on any one server while retaining the advantages of multiple servers using the NTP&nbsp;mitigation algorithms.</p>
-		<p>To support this service the DNS&nbsp;for some volunteer servers as been
-			modified to collect a number of other volunteer&nbsp;servers and return a
-			randomized list in response to a DNS query. The client receiving this list
-			mobilizes some or all of them just as in the other discovery schemes and casts
-			off the excess.</p>
-		<p>The pool scheme is configured using one or <tt>pool</tt> commands with the DNS name <tt><i>region</i>.pool.ntp.org</tt>, where <tt><i>region</i></tt> is a region of the world, country of the region or state of the country or even the whole world if absent. The <tt>pool</tt> command can be used more than once; duplicate servers are detected and discarded. In principle, it is possible to use a configuration file containing a single line <tt>pool pool.ntp.org</tt>.</p>
+		<p>The idea of targeting servers on a random basis to distribute and balance the load is not a new one; however, the NTP pool scheme puts this on steroids. At present, several thousand operators around the globe have volunteered their servers for public access. In general, NTP&nbsp;is a lightweight service and servers used for other purposes don't mind an additional small load. The trick is to randomize over the population and minimize the load on any one server while retaining the advantages of multiple servers using the NTP&nbsp;mitigation algorithms.</p>
+		<p>To support this service custom DNS software used for pool.ntp.org and its subdomains
+			returns a random selection of participating servers in response to a DNS query.
+			The client receiving this list mobilizes some or all of them, similar to the
+			manycast discovery scheme, and casts off the excess.  Unlike <tt>manycastclient</tt>,
+			cryptographic authentication is	not required. The pool scheme solicits a single
+			server at a time, compared to <tt>manycastclient</tt> which solicits all servers
+			within a multicast TTL range simultaneously. Otherwise, the pool server discovery
+			scheme operates as manycast does.</p>
+		<p>The pool scheme is configured using one or more <tt>pool</tt> commands with DNS names
+			indicating the pool from which to draw. The <tt>pool</tt> command can be used more
+			than once; duplicate servers are detected and discarded. In principle, it is
+			possible to use a configuration file containing a single line <tt>pool
+			pool.ntp.org</tt>. The <a href="http://www.pool.ntp.org/en/use.html">NTP Pool
+			Project</a> offers instructions on using the pool with the <tt>server</tt>
+			command, which is suboptimal but works with older versions of <tt>ntpd</tt>
+			predating the <tt>pool</tt> command. With recent ntpd, consider replacing the
+			multiple <tt>server</tt> commands in their example with a single <tt>pool</tt>
+			command.</p>
 		<hr>
 		<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
 	</body>

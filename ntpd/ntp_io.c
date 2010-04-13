@@ -147,6 +147,7 @@ struct interface *any6_interface;	/* default ipv6 interface */
 struct interface *loopback_interface;	/* loopback ipv4 interface */
 
 isc_boolean_t broadcast_client_enabled;	/* is broadcast client enabled */
+u_int sys_ifnum;			/* next .ifnum to assign */
 int ninterfaces;			/* Total number of interfaces */
 
 int disable_dynamic_updates;		/* scan interfaces once only */
@@ -293,7 +294,6 @@ static nic_rule_action	interface_action(char *, isc_netaddr_t *,
 					 isc_uint32_t);
 static void		convert_isc_if	(isc_interface_t *,
 					 struct interface *, u_short);
-static struct interface *getinterface	(sockaddr_u *, int);
 static struct interface *getsamenetinterface	(sockaddr_u *, int);
 static struct interface *findlocalinterface	(sockaddr_u *, int, int);
 static struct interface *findlocalcastinterface	(sockaddr_u *);
@@ -647,12 +647,12 @@ interface_dump(struct interface *itf)
 static void
 sockaddr_dump(sockaddr_u *psau)
 {
-	/* Limit the size of the sockaddr_storage hex dump */
-	const int maxsize = min(32, sizeof(psau->sas));
+	/* Limit the size of the sockaddr_in6 hex dump */
+	const int maxsize = min(32, sizeof(psau->sa6));
 	u_char *	cp;
 	int		i;
 
-	cp = (u_char *)&psau->sas;
+	cp = (u_char *)psau;
 
 	for(i = 0; i < maxsize; i++)
 	{
@@ -857,7 +857,6 @@ new_interface(
 	struct interface *interface
 	)
 {
-	static u_int		sys_ifnum = 0;
 	struct interface *	iface;
 
 	iface = emalloc(sizeof(*iface));
@@ -892,15 +891,13 @@ delete_interface(
  */
 static void
 add_interface(
-	struct interface *interface
+	struct interface *iface
 	)
 {
-	/*
-	 * Calculate the address hash
-	 */
-	interface->addr_refid = addr2refid(&interface->sin);
-
-	LINK_SLIST(inter_list, interface, link);
+	/* Calculate the refid */
+	iface->addr_refid = addr2refid(&iface->sin);
+	/* link at tail so ntpdc -c ifstats index increases each row */
+	LINK_TAIL_SLIST(inter_list, iface, link, struct interface);
 	ninterfaces++;
 }
 
@@ -949,12 +946,12 @@ remove_interface(
 	}
 
 	ninterfaces--;
-	ntp_monclearinterface(iface);
+	mon_clearinterface(iface);
 
 	/* remove restrict interface entry */
 	SET_HOSTMASK(&resmask, AF(&iface->sin));
 	hack_restrict(RESTRICT_REMOVEIF, &iface->sin, &resmask,
-		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE);
+		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE, 0);
 }
 
 
@@ -1889,7 +1886,7 @@ create_interface(
 	 */
 	SET_HOSTMASK(&resmask, AF(&iface->sin));
 	hack_restrict(RESTRICT_FLAGS, &iface->sin, &resmask,
-		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE);
+		      RESM_NTPONLY | RESM_INTERFACE, RES_IGNORE, 0);
 	  
 	/*
 	 * set globals with the first found
@@ -2364,6 +2361,7 @@ io_setbclient(void)
 	int			nif;
 	isc_boolean_t		jstatus; 
 	SOCKET			fd;
+	u_int32			prev_refid;
 
 	nif = 0;
 	set_reuseaddr(1);
@@ -2378,7 +2376,6 @@ io_setbclient(void)
 		/* use only allowed addresses */
 		if (interf->ignore_packets)
 			continue;
-
 
 		/* Need a broadcast-capable interface */
 		if (!(interf->flags & INT_BROADCAST))
@@ -2422,7 +2419,14 @@ io_setbclient(void)
 			msyslog(LOG_INFO,
 				"io_setbclient: Opened broadcast client on interface #%d %s",
 				interf->ifnum, interf->name);
+			/* hart suspects this is unneeded, verify */
+			prev_refid = interf->addr_refid;
 			interf->addr_refid = addr2refid(&interf->sin);
+			if (prev_refid != interf->addr_refid)
+				msyslog(LOG_NOTICE,
+					"io_setbclient: code is not dead, addr_refid for %s updated %8.8x -> %8.8x, please email hart@ntp.org to remove this message",
+					stoa(&interf->sin), prev_refid,
+					interf->addr_refid);
 		}
 	}
 	set_reuseaddr(0);
@@ -3567,7 +3571,7 @@ findlocalinterface(
  * fetch an interface structure the matches the
  * address and has the given flags NOT set
  */
-static struct interface *
+struct interface *
 getinterface(
 	sockaddr_u *	addr, 
 	int		flags
@@ -4180,6 +4184,17 @@ find_flagged_addr_in_list(
 
 	DPRINTF(4, ("NOT FOUND\n"));
 	return NULL;
+}
+
+
+char *
+localaddrtoa(
+	struct interface *la
+	)
+{
+	return (NULL == la)
+		   ? "<null>"
+		   : stoa(&la->sin);
 }
 
 

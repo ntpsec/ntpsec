@@ -429,8 +429,8 @@ static	int	print_msg_table_header	(int rptcode, char *HdrStr, int force);
 static	char *	show_time	(float time_of_week);
 
 /* RIPE NCC functions */
-static	void	ripencc_control	(int, struct refclockstat *, struct
-				refclockstat *, struct peer *);
+static	void	ripencc_control	(int, const struct refclockstat *,
+				 struct refclockstat *, struct peer *);
 static	int	ripencc_ppsapi	(struct peer *, int, int);
 static	int	ripencc_get_pps_ts	(struct ripencc_unit *, l_fp *);
 static	int	ripencc_start	(int, struct peer *);
@@ -615,7 +615,7 @@ ripencc_start(int unit, struct peer *peer)
 static void
 ripencc_control(
 	int unit,		/* unit (not used) */
-	struct refclockstat *in, /* input parameters (not used) */
+	const struct refclockstat *in, /* input parameters (not used) */
 	struct refclockstat *out, /* output parameters (not used) */
 	struct peer *peer	/* peer structure pointer */
 	)

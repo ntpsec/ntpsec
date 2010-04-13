@@ -14,7 +14,7 @@
 		<img src="pic/bustardfly.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 		<p>A typical NTP monitoring packet</p>
 		<p>Last update:
-			<!-- #BeginDate format:En2m -->05-Feb-2010  17:13<!-- #EndDate -->
+			<!-- #BeginDate format:En2m -->11-Apr-2010  20:18<!-- #EndDate -->
 		UTC</p>
 <br clear="left">
 		<h4>More Help</h4>
@@ -145,6 +145,67 @@
 			<dd>Specify the key ID to use for write requests.</dd>
 			<dt><tt>lassociations</tt></dt>
 			<dd>Perform the same function as the associations command, execept display mobilized and unmobilized associations.</dd>
+			<dt id="monstats"><tt>monstats</tt></dt>
+			<dd>Display monitor facility statistics.</dd>
+			<dt id="mrulist"><tt>mrulist [limited | kod | mincount=<i>count</i> | laddr=<i>localaddr</i> | sort=<i>sortorder</i> | resany=<i>hexmask</i> | resall=<i>hexmask</i>]</tt></dt>
+			<dd>Obtain and print traffic counts collected and maintained by the monitor facility. With the exception of
+				<tt>sort=<i>sortorder</i></tt>, the options filter the list returned by <tt>ntpd</tt>. The <tt>limited</tt>
+				and <tt>kod</tt> options return only entries representing client addresses from which the last packet
+				received triggered either discarding or a KoD response. The <tt>mincount=<i>count</i></tt> option filters entries
+				representing less than <tt><i>count</i></tt> packets. The <tt>laddr=<i>localaddr</i></tt> option filters entries
+				for packets received on any local address other than <tt><i>localaddr</i></tt>. <tt>resany=<i>hexmask</i></tt> and
+				<tt>resall=<i>hexmask</i></tt> filter entries containing none or less than all, respectively, of the bits in
+				<tt><i>hexmask</i></tt>, which must begin with <tt>0x</tt>.</dd> The <tt><i>sortorder</i></tt> defaults to
+				<tt>lstint</tt> and may be any of <tt>addr</tt>, <tt>count</tt>, <tt>avgint</tt>, <tt>lstint</tt>, or any of
+				those preceded by a minus sign (hyphen) to reverse the sort order. The output columns are:
+				<table width="100%" border="1" cellspacing="2" cellpadding="2">
+					<tr>
+						<td>Column</td>
+						<td>Description</td>
+					</tr>
+					<tr>
+						<td><tt>lstint</tt></td>
+						<td>Interval in s between the receipt of the most recent packet from this address and the completion of the
+							retrieval of the MRU list by <tt>ntpq</tt>.</td>
+					</tr>
+					<tr>
+						<td><tt>avgint</tt></td>
+						<td>Average interval in s between packets from this address.</td>
+					</tr>
+					<tr>
+						<td><tt>rstr</tt></td>
+						<td>Restriction flags associated with this address.  Most are copied unchanged from the matching <tt>restrict</tt>
+							command, however 0x400 (kod) and 0x20 (limited) flags are cleared unless the last packet from this
+							address triggered a rate control response.</td>
+					</tr>
+					<tr>
+						<td><tt>r</tt></td>
+						<td>Rate control indicator, either a period, <tt>L</tt> or <tt>K</tt> for no rate control response,
+							rate limiting by discarding, or rate limiting with a KoD response, respectively.</td>
+					</tr>
+					<tr>
+						<td><tt>m</tt></td>
+						<td>Packet mode.</dt>
+					</tr>
+					<tr>
+						<td><tt>v</tt></td>
+						<td>Packet version number.</td>
+					</tr>
+					<tr>
+						<td><tt>count</tt></td>
+						<td>Packets received from this address.</td>
+					</tr>
+					<tr>
+						<td><tt>rport</tt></td>
+						<td>Source port of last packet from this address.</td>
+					</tr>
+					<tr>
+						<td><tt>remote address</tt></td>
+						<td>DNS name, numeric address, or address followed by claimed DNS name which
+							could not be verified in parentheses.</dt>
+					</tr>
+				</table>
+			</dd>
 			<dt><tt>mreadvar <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt><br>
 				<tt>mrv <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt></dt>
 			<dd>Perform the same function as the <tt>readvar</tt> command, except for a range of association IDs. This range is determined from the association list cached by the most recent <tt>associations</tt> command.</dd>
@@ -229,6 +290,8 @@ broadcast server, <tt>M</tt>: multicast server</td>
 			<dd>Write the specified variables. If the <tt><i>assocID</i></tt> is  zero, the variables
 			are from the <a href="#system">system variables</a> name space, otherwise they are from the <a href="#peer">peer variables</a> name	space. The <tt><i>assocID</i></tt> is required, as the same name can occur
 			in both spaces.</dd>
+			<dt id="sysstats"><tt>sysstats</tt>
+			<dd>Print statistics counters maintained in the protocol module.</dd>
 	</dl>
 	<h4 id="status">Status Words and Kiss Codes</h4>
 		<p>The current state of the operating program is shown in a set of status words maintained by the system and each association separately. These words are displayed in the <tt>rv</tt> and <tt>as</tt> commands both in hexadecimal and decoded short tip strings. The codes, tips and short explanations are on the <a href="decode.html">Event Messages and Status Words</a> page. The page also includes a list of system and peer messages, the code for the latest of which is included in the status word.</p>

@@ -37,10 +37,10 @@ struct ntp_control {
 #define	CTL_MORE	0x20
 #define	CTL_OP_MASK	0x1f
 
-#define	CTL_ISRESPONSE(r_m_e_op)	(((r_m_e_op) & 0x80) != 0)
-#define	CTL_ISMORE(r_m_e_op)	(((r_m_e_op) & 0x20) != 0)
-#define	CTL_ISERROR(r_m_e_op)	(((r_m_e_op) & 0x40) != 0)
-#define	CTL_OP(r_m_e_op)	((r_m_e_op) & CTL_OP_MASK)
+#define	CTL_ISRESPONSE(r_m_e_op) ((CTL_RESPONSE	& (r_m_e_op)) != 0)
+#define	CTL_ISMORE(r_m_e_op)	 ((CTL_MORE	& (r_m_e_op)) != 0)
+#define	CTL_ISERROR(r_m_e_op)	 ((CTL_ERROR	& (r_m_e_op)) != 0)
+#define	CTL_OP(r_m_e_op)	 (CTL_OP_MASK	& (r_m_e_op))
 
 /*
  * Opcodes
@@ -55,6 +55,8 @@ struct ntp_control {
 #define	CTL_OP_ASYNCMSG		7	/* asynchronous message */
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
 #define CTL_OP_SAVECONFIG	9	/* save config to file */
+#define CTL_OP_READ_MRU		10	/* retrieve MRU (mrulist) */
+#define CTL_OP_READ_IFSTATS	11	/* interface stats (ifstats) */
 #define	CTL_OP_UNSETTRAP	31	/* unset trap */
 
 /*
@@ -165,22 +167,43 @@ struct ntp_control {
 #define CS_VERSION	17
 #define	CS_STABIL	18
 #define CS_VARLIST	19
-#define CS_TAI          20
-#define CS_LEAPTAB      21
-#define CS_LEAPEND      22
+#define CS_TAI		20
+#define CS_LEAPTAB	21
+#define CS_LEAPEND	22
 #define	CS_RATE		23
+#define CS_MRU_ENABLED	24
+#define CS_MRU_DEPTH	25
+#define CS_MRU_DEEPEST	26
+#define CS_MRU_MINDEPTH	27
+#define CS_MRU_MAXAGE	28
+#define CS_MRU_MAXDEPTH	29
+#define CS_MRU_MEM	30
+#define CS_MRU_MAXMEM	31
+#define CS_SS_UPTIME	32
+#define CS_SS_RESET	33
+#define	CS_SS_RECEIVED	34
+#define CS_SS_THISVER	35
+#define CS_SS_OLDVER	36
+#define CS_SS_BADFORMAT	37
+#define CS_SS_BADAUTH	38
+#define CS_SS_DECLINED	39
+#define CS_SS_RESTRICTED 40
+#define CS_SS_LIMITED	41
+#define CS_SS_KODSENT	42
+#define CS_SS_PROCESSED	43
+#define CS_MAX_NOSSL	CS_SS_PROCESSED
 #ifdef OPENSSL
-#define CS_FLAGS	24
-#define CS_HOST		25
-#define CS_PUBLIC	26
-#define	CS_CERTIF	27
-#define	CS_SIGNATURE	28
-#define	CS_REVTIME	29
-#define	CS_GROUP	30
-#define CS_DIGEST	31
+#define CS_FLAGS	(1 + CS_MAX_NOSSL)
+#define CS_HOST		(2 + CS_MAX_NOSSL)
+#define CS_PUBLIC	(3 + CS_MAX_NOSSL)
+#define	CS_CERTIF	(4 + CS_MAX_NOSSL)
+#define	CS_SIGNATURE	(5 + CS_MAX_NOSSL)
+#define	CS_REVTIME	(6 + CS_MAX_NOSSL)
+#define	CS_GROUP	(7 + CS_MAX_NOSSL)
+#define CS_DIGEST	(8 + CS_MAX_NOSSL)
 #define	CS_MAXCODE	CS_DIGEST
 #else
-#define	CS_MAXCODE	CS_RATE
+#define	CS_MAXCODE	CS_MAX_NOSSL
 #endif /* OPENSSL */
 
 /*
@@ -227,17 +250,18 @@ struct ntp_control {
 #define	CP_OUT		39
 #define	CP_RATE		40
 #define	CP_BIAS		41
+#define	CP_SRCHOST	42
 #ifdef OPENSSL
-#define CP_FLAGS	42
-#define CP_HOST		43
-#define CP_VALID	44
-#define	CP_INITSEQ	45
-#define	CP_INITKEY	46
-#define	CP_INITTSP	47
-#define	CP_SIGNATURE	48
+#define CP_FLAGS	43
+#define CP_HOST		44
+#define CP_VALID	45
+#define	CP_INITSEQ	46
+#define	CP_INITKEY	47
+#define	CP_INITTSP	48
+#define	CP_SIGNATURE	49
 #define	CP_MAXCODE	CP_SIGNATURE
 #else
-#define	CP_MAXCODE	CP_BIAS
+#define	CP_MAXCODE	CP_SRCHOST
 #endif /* OPENSSL */
 
 /*
