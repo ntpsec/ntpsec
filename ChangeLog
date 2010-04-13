@@ -1,3 +1,4 @@
+* accopt.html: non-ntpport doc changes from Dave Mills.
 (4.2.7p23) 2010/04/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1516] unpeer by IP address fails, DNS name works.
 * [Bug 1517] ntpq and ntpdc should verify reverse DNS before use.
