@@ -848,7 +848,7 @@ peer_info (
 			NSRCADR(&addr) = ipl->addr;
 		}
 #ifdef ISC_PLATFORM_HAVESALEN
-		addr.sas.ss_len = SOCKLEN(&addr);
+		addr.sa.sa_len = SOCKLEN(&addr);
 #endif
 		ipl++;
 		if ((pp = findexistingpeer(&addr, (struct peer *)0, -1)) == 0)
@@ -981,7 +981,7 @@ peer_stats (
 			NSRCADR(&addr) = ipl->addr;
 		}	
 #ifdef ISC_PLATFORM_HAVESALEN
-		addr.sas.ss_len = SOCKLEN(&addr);
+		addr.sa.sa_len = SOCKLEN(&addr);
 #endif
 		DPRINTF(1, ("peer_stats: looking for %s, %d, %d\n",
 			    stoa(&addr), ipl->port, NSRCPORT(&addr)));
@@ -1407,7 +1407,7 @@ do_conf(
 		}
 		NSRCPORT(&peeraddr) = htons(NTP_PORT);
 #ifdef ISC_PLATFORM_HAVESALEN
-		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
+		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
 
 		/* XXX W2DO? minpoll/maxpoll arguments ??? */
@@ -1571,7 +1571,7 @@ do_unconf(
 		}
 		SET_PORT(&peeraddr, NTP_PORT);
 #ifdef ISC_PLATFORM_HAVESALEN
-		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
+		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
 		found = 0;
 		peer = NULL;
@@ -1616,7 +1616,7 @@ do_unconf(
 		}
 		SET_PORT(&peeraddr, NTP_PORT);
 #ifdef ISC_PLATFORM_HAVESALEN
-		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
+		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
 		found = 0;
 		peer = NULL;
@@ -1731,6 +1731,58 @@ setclr_flags(
 	     	loop_config(LOOP_DRIFTCOMP, drift_comp);
 }
 
+/*
+ * list_restrict4 - recursive helper for list_restrict dumps IPv4
+ *		    restriction list in reverse order.
+ */
+static void
+list_restrict4(
+	restrict_u *		res,
+	struct info_restrict **	ppir
+	)
+{
+	struct info_restrict *	pir;
+
+	if (res->link != NULL)
+		list_restrict4(res->link, ppir);
+
+	pir = *ppir;
+	pir->addr = htonl(res->u.v4.addr);
+	if (client_v6_capable) 
+		pir->v6_flag = 0;
+	pir->mask = htonl(res->u.v4.mask);
+	pir->count = htonl(res->count);
+	pir->flags = htons(res->flags);
+	pir->mflags = htons(res->mflags);
+	*ppir = (struct info_restrict *)more_pkt();
+}
+
+
+/*
+ * list_restrict6 - recursive helper for list_restrict dumps IPv6
+ *		    restriction list in reverse order.
+ */
+static void
+list_restrict6(
+	restrict_u *		res,
+	struct info_restrict **	ppir
+	)
+{
+	struct info_restrict *	pir;
+
+	if (res->link != NULL)
+		list_restrict6(res->link, ppir);
+
+	pir = *ppir;
+	pir->addr6 = res->u.v6.addr; 
+	pir->mask6 = res->u.v6.mask;
+	pir->v6_flag = 1;
+	pir->count = htonl(res->count);
+	pir->flags = htons(res->flags);
+	pir->mflags = htons(res->mflags);
+	*ppir = (struct info_restrict *)more_pkt();
+}
+
 
 /*
  * list_restrict - return the restrict list
@@ -1742,41 +1794,24 @@ list_restrict(
 	struct req_pkt *inpkt
 	)
 {
-	register struct info_restrict *ir;
-	register struct restrictlist *rl;
-	register struct restrictlist6 *rl6;
+	struct info_restrict *ir;
 
-#ifdef DEBUG
-	if (debug > 2)
-	    printf("wants restrict list summary\n");
-#endif
+	DPRINTF(3, ("wants restrict list summary\n"));
 
 	ir = (struct info_restrict *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_restrict));
 	
-	for (rl = restrictlist; rl != 0 && ir != 0; rl = rl->next) {
-		ir->addr = htonl(rl->addr);
-		if (client_v6_capable) 
-			ir->v6_flag = 0;
-		ir->mask = htonl(rl->mask);
-		ir->count = htonl((u_int32)rl->count);
-		ir->flags = htons(rl->flags);
-		ir->mflags = htons(rl->mflags);
-		ir = (struct info_restrict *)more_pkt();
-	}
+	/*
+	 * The restriction lists are kept sorted in the reverse order
+	 * than they were originally.  To preserve the output semantics,
+	 * dump each list in reverse order.  A recursive helper function
+	 * achieves that.
+	 */
+	list_restrict4(restrictlist4, &ir);
 	if (client_v6_capable)
-		for (rl6 = restrictlist6; rl6 != 0 && ir != 0; rl6 = rl6->next) {
-			ir->addr6 = rl6->addr6;
-			ir->mask6 = rl6->mask6;
-			ir->v6_flag = 1;
-			ir->count = htonl((u_int32)rl6->count);
-			ir->flags = htons(rl6->flags);
-			ir->mflags = htons(rl6->mflags);
-			ir = (struct info_restrict *)more_pkt();
-		}
+		list_restrict6(restrictlist6, &ir);
 	flush_pkt();
 }
-
 
 
 /*
@@ -2100,7 +2135,7 @@ reset_peer(
 		}
 
 #ifdef ISC_PLATFORM_HAVESALEN
-		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
+		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
 		peer = findexistingpeer(&peeraddr, NULL, -1);
 		if (NULL == peer)
@@ -2131,7 +2166,7 @@ reset_peer(
 		}
 		SET_PORT(&peeraddr, 123);
 #ifdef ISC_PLATFORM_HAVESALEN
-		peeraddr.sas.ss_len = SOCKLEN(&peeraddr);
+		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
 		peer = findexistingpeer(&peeraddr, NULL, -1);
 		while (peer != NULL) {
@@ -2637,7 +2672,7 @@ get_clock_info(
 	ZERO_SOCK(&addr);
 	AF(&addr) = AF_INET;
 #ifdef ISC_PLATFORM_HAVESALEN
-	addr.sas.ss_len = SOCKLEN(&addr);
+	addr.sa.sa_len = SOCKLEN(&addr);
 #endif
 	SET_PORT(&addr, NTP_PORT);
 	items = INFO_NITEMS(inpkt->err_nitems);
@@ -2709,7 +2744,7 @@ set_clock_fudge(
 		AF(&addr) = AF_INET;
 		NSRCADR(&addr) = cf->clockadr;
 #ifdef ISC_PLATFORM_HAVESALEN
-		addr.sas.ss_len = SOCKLEN(&addr);
+		addr.sa.sa_len = SOCKLEN(&addr);
 #endif
 		SET_PORT(&addr, NTP_PORT);
 		if (!ISREFCLOCKADR(&addr) ||
@@ -2776,7 +2811,7 @@ get_clkbug_info(
 	ZERO_SOCK(&addr);
 	AF(&addr) = AF_INET;
 #ifdef ISC_PLATFORM_HAVESALEN
-	addr.sas.ss_len = SOCKLEN(&addr);
+	addr.sa.sa_len = SOCKLEN(&addr);
 #endif
 	SET_PORT(&addr, NTP_PORT);
 	items = INFO_NITEMS(inpkt->err_nitems);
