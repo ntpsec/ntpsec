@@ -1,3 +1,4 @@
+(4.2.7p24) 2010/04/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1390] Control PPS on the Oncore M12.
 * [Bug 1518] Windows ntpd should lock to one processor more
   conservatively.
