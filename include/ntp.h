@@ -4,6 +4,7 @@
 #ifndef NTP_H
 #define NTP_H
 
+#include <stddef.h>
 #include <math.h>
 
 #include <ntp_fp.h>
@@ -772,23 +773,31 @@ struct mon_data {
 /*
  * Structure used for restrictlist entries
  */
-struct restrictlist {
-	struct restrictlist *next;	/* link to next entry */
-	u_int32 addr;			/* Ipv4 host address (host byte order) */
-	u_int32 mask;			/* Ipv4 mask for address (host byte order) */
-	u_long count;			/* number of packets matched */
-	u_short flags;			/* accesslist flags */
-	u_short mflags;			/* match flags */
-};
+typedef struct res_addr4_tag {
+	u_int32		addr;		/* IPv4 addr (host order) */
+	u_int32		mask;		/* IPv4 mask (host order) */
+} res_addr4;
 
-struct restrictlist6 {
-	struct restrictlist6 *next;	/* link to next entry */
-	struct in6_addr addr6;		/* Ipv6 host address */
-	struct in6_addr mask6;		/* Ipv6 mask address */
-	u_long count;			/* number of packets matched */
-	u_short flags;			/* accesslist flags */
-	u_short mflags;			/* match flags */
+typedef struct res_addr6_tag {
+	struct in6_addr addr;		/* IPv6 addr (net order) */
+	struct in6_addr mask;		/* IPv6 mask (net order) */
+} res_addr6;
+
+typedef struct restrict_u_tag	restrict_u;
+struct restrict_u_tag {
+	restrict_u *		link;	/* link to next entry */
+	u_int32			count;	/* number of packets matched */
+	u_short			flags;	/* accesslist flags */
+	u_short			mflags;	/* match flags */
+	union {				/* variant starting here */
+		res_addr4 v4;
+		res_addr6 v6;
+	} u;
 };
+#define	V4_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
+				 + sizeof(res_addr4))
+#define	V6_SIZEOF_RESTRICT_U	(offsetof(restrict_u, u)	\
+				 + sizeof(res_addr6))
 
 
 /*

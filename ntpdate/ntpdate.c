@@ -58,7 +58,7 @@ struct timeval timeout = {0,0};
 #elif defined(SYS_WINNT)
 /*
  * Windows does not abort a select select call if SIGALRM goes off
- * so a 200 ms timeout is needed
+ * so a 200 ms timeout is needed (TIMER_HZ is 5).
  */
 struct sock_timeval timeout = {0,1000000/TIMER_HZ};
 #else
@@ -88,7 +88,7 @@ UINT wTimerRes;
 # define	NTPDATE_PRIO	(100)
 #endif
 
-#if defined(HAVE_TIMER_SETTIME) || defined (HAVE_TIMER_CREATE)
+#ifdef HAVE_TIMER_CREATE
 /* POSIX TIMERS - vxWorks doesn't have itimer - casey */
 static timer_t ntpdate_timerid;
 #endif
@@ -419,8 +419,18 @@ ntpdatemain (
 			} else {
 				sys_timeout = ((LFPTOFP(&tmp) * TIMER_HZ)
 					   + 0x8000) >> 16;
-				if (sys_timeout == 0)
-				sys_timeout = 1;
+				/*
+				 * No less than 1s between requests to
+				 * a server to stay within ntpd's
+				 * default "discard minimum 1" (and 1s
+				 * enforcement slop).  That is enforced
+				 * only if the nondefault limited
+				 * restriction is in place, such as with
+				 * "restrict ... limited" and "restrict
+				 * ... kod limited".
+				 */
+				if (MINTIMEOUT < sys_timeout)
+					sys_timeout = MINTIMEOUT;
 			}
 			break;
 		case 'v':
@@ -829,6 +839,19 @@ receive(
 		server->trust |= 1;
 
 	/*
+	 * Check for a KoD (rate limiting) response, cease and decist.
+	 */
+	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode) &&
+	    STRATUM_PKT_UNSPEC == rpkt->stratum &&
+	    !memcmp("RATE", &rpkt->refid, 4)) {
+		msyslog(LOG_ERR, "%s rate limit response from server.\n",
+			stoa(&rbufp->recv_srcadr));
+		server->event_time = 0;
+		complete_servers++;
+		return;
+	}
+
+	/*
 	 * Looks good.	Record info from the packet.
 	 */
 	server->leap = PKT_LEAP(rpkt->li_vn_mode);
@@ -845,8 +868,9 @@ receive(
 	 * Make sure the server is at least somewhat sane.	If not, try
 	 * again.
 	 */
-	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)) {
-		transmit(server);
+	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)
+	    || L_ISEQU(&rec, &server->org)) {
+		server->event_time = current_time + sys_timeout;
 		return;
 	}
 
@@ -895,10 +919,10 @@ receive(
 	}
 
 	/*
-	 * Shift this data in, then transmit again.
+	 * Shift this data in, then schedule another transmit.
 	 */
 	server_data(server, (s_fp) di, &ci, 0);
-	transmit(server);
+	server->event_time = current_time + sys_timeout;
 }
 
 
@@ -1260,7 +1284,7 @@ clock_adjust(void)
 				lfptoa(&server->offset, 6));
 		}
 	} else {
-#if !defined SYS_WINNT && !defined SYS_CYGWIN32
+#ifndef SYS_WINNT
 		if (simple_query || l_adj_systime(&server->offset)) {
 			msyslog(LOG_NOTICE, "adjust time server %s offset %s sec",
 				stoa(&server->srcadr),
@@ -1346,12 +1370,16 @@ addserver(
 			/* Name server is unusable. Exit after failing on the
 			   first server, in order to shorten the timeout caused
 			   by waiting for resolution of several servers */
-			fprintf(stderr, "Name server cannot be used, exiting");
-			msyslog(LOG_ERR, "name server cannot be used, reason: %s\n", gai_strerror(error));
+			fprintf(stderr, "Exiting, name server cannot be used: %s (%d)",
+				gai_strerror(error), error);
+			msyslog(LOG_ERR, "name server cannot be used: %s (%d)\n",
+				gai_strerror(error), error);
 			exit(1);
 		}
-		fprintf(stderr, "Error : %s\n", gai_strerror(error));
-		msyslog(LOG_ERR, "can't find host %s\n", serv);
+		fprintf(stderr, "Error resolving %s: %s (%d)\n", serv,
+			gai_strerror(error), error);
+		msyslog(LOG_ERR, "Can't find host %s: %s (%d)\n", serv,
+			gai_strerror(error), error);
 		return;
 	}
 #ifdef DEBUG
@@ -1479,7 +1507,7 @@ alarming(
 {
 	alarm_flag++;
 }
-#else
+#else	/* SYS_WINNT follows */
 void CALLBACK 
 alarming(UINT uTimerID, UINT uMsg, DWORD dwUser, DWORD dw1, DWORD dw2)
 {
@@ -1505,16 +1533,14 @@ static void
 init_alarm(void)
 {
 #ifndef SYS_WINNT
-# ifndef HAVE_TIMER_SETTIME
-	struct itimerval itimer;
+# ifdef HAVE_TIMER_CREATE
+	struct itimerspec its;
 # else
-	struct itimerspec ntpdate_itimer;
+	struct itimerval itv;
 # endif
-#else
+#else	/* SYS_WINNT follows */
 	TIMECAPS tc;
 	UINT wTimerID;
-# endif /* SYS_WINNT */
-#if defined SYS_CYGWIN32 || defined SYS_WINNT
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tkp;
 	DWORD dwUser = 0;
@@ -1523,7 +1549,7 @@ init_alarm(void)
 	alarm_flag = 0;
 
 #ifndef SYS_WINNT
-# if defined(HAVE_TIMER_CREATE) && defined(HAVE_TIMER_SETTIME)
+# ifdef HAVE_TIMER_CREATE
 	alarm_flag = 0;
 	/* this code was put in as setitimer() is non existant this us the
 	 * POSIX "equivalents" setup - casey
@@ -1545,44 +1571,26 @@ init_alarm(void)
 	 * Set up the alarm interrupt.	The first comes 1/(2*TIMER_HZ)
 	 * seconds from now and they continue on every 1/TIMER_HZ seconds.
 	 */
-	(void) signal_no_reset(SIGALRM, alarming);
-	ntpdate_itimer.it_interval.tv_sec = ntpdate_itimer.it_value.tv_sec = 0;
-	ntpdate_itimer.it_interval.tv_nsec = 1000000000/TIMER_HZ;
-	ntpdate_itimer.it_value.tv_nsec = 1000000000/(TIMER_HZ<<1);
-	timer_settime(ntpdate_timerid, 0 /* !TIMER_ABSTIME */, &ntpdate_itimer, NULL);
-# else
+	signal_no_reset(SIGALRM, alarming);
+	its.it_interval.tv_sec = 0;
+	its.it_value.tv_sec = 0;
+	its.it_interval.tv_nsec = 1000000000/TIMER_HZ;
+	its.it_value.tv_nsec = 1000000000/(TIMER_HZ<<1);
+	timer_settime(ntpdate_timerid, 0 /* !TIMER_ABSTIME */, &its, NULL);
+# else	/* !HAVE_TIMER_CREATE follows */
 	/*
 	 * Set up the alarm interrupt.	The first comes 1/(2*TIMER_HZ)
 	 * seconds from now and they continue on every 1/TIMER_HZ seconds.
 	 */
-	(void) signal_no_reset(SIGALRM, alarming);
-	itimer.it_interval.tv_sec = itimer.it_value.tv_sec = 0;
-	itimer.it_interval.tv_usec = 1000000/TIMER_HZ;
-	itimer.it_value.tv_usec = 1000000/(TIMER_HZ<<1);
+	signal_no_reset(SIGALRM, alarming);
+	itv.it_interval.tv_sec = 0;
+	itv.it_value.tv_sec = 0;
+	itv.it_interval.tv_usec = 1000000/TIMER_HZ;
+	itv.it_value.tv_usec = 1000000/(TIMER_HZ<<1);
 
-	setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
-# endif
-#if defined SYS_CYGWIN32
-	/*
-	 * Get privileges needed for fiddling with the clock
-	 */
-
-	/* get the current process token handle */
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-		msyslog(LOG_ERR, "OpenProcessToken failed: %m");
-		exit(1);
-	}
-	/* get the LUID for system-time privilege. */
-	LookupPrivilegeValue(NULL, SE_SYSTEMTIME_NAME, &tkp.Privileges[0].Luid);
-	tkp.PrivilegeCount = 1;		/* one privilege to set */
-	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	/* get set-time privilege for this process. */
-	AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,(PTOKEN_PRIVILEGES) NULL, 0);
-	/* cannot test return value of AdjustTokenPrivileges. */
-	if (GetLastError() != ERROR_SUCCESS)
-		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
-#endif
-#else	/* SYS_WINNT */
+	setitimer(ITIMER_REAL, &itv, NULL);
+# endif	/* !HAVE_TIMER_CREATE */
+#else	/* SYS_WINNT follows */
 	_tzset();
 
 	/*

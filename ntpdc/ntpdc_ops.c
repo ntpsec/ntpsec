@@ -236,7 +236,7 @@ struct xcmd opcmds[] = {
 #ifdef ISC_PLATFORM_HAVESALEN
 #define SET_SS_LEN_IF_PRESENT(psau)				\
 	do {							\
-		(psau)->sas.ss_len = SOCKLEN(psau);		\
+		(psau)->sa.sa_len = SOCKLEN(psau);		\
 	} while (0)
 #else
 #define SET_SS_LEN_IF_PRESENT(psau)	do { } while (0)
@@ -841,8 +841,8 @@ again:
 			NSRCADR(&src) = pp->srcadr;
 		}
 #ifdef ISC_PLATFORM_HAVESALEN
-		src.sas.ss_len = SOCKLEN(&src);
-		dst.sas.ss_len = SOCKLEN(&dst);
+		src.sa.sa_len = SOCKLEN(&src);
+		dst.sa.sa_len = SOCKLEN(&dst);
 #endif
 		(void) fprintf(fp, "remote host:          %s\n",
 			       nntohost(&src));

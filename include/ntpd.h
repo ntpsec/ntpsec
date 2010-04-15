@@ -213,8 +213,8 @@ extern	void	process_private (struct recvbuf *, int);
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);
-extern	int 	restrictions	(sockaddr_u *);
-extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *, int, int);
+extern	u_short	restrictions	(sockaddr_u *);
+extern	void	hack_restrict	(int, sockaddr_u *, sockaddr_u *, u_short, u_short);
 
 /* ntp_timer.c */
 extern	void	init_timer	(void);
@@ -455,8 +455,8 @@ extern int	fdpps;			/* pps file descriptor */
 extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 
 /* ntp_restrict.c */
-extern struct restrictlist *restrictlist; /* the ipv4 restriction list */
-extern struct restrictlist6 *restrictlist6; /* the ipv6 restriction list */
+extern restrict_u *	restrictlist4;	/* IPv4 restriction list */
+extern restrict_u *	restrictlist6;	/* IPv6 restriction list */
 extern int	ntp_minpkt;
 extern int	ntp_minpoll;
 extern int	mon_age;		/* monitor preempt age */
