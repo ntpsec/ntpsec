@@ -1,4 +1,9 @@
 ---
+
+* [Bug 1518] Windows ntpd should lock to one processor more
+  conservatively.
+
+---
 (4.2.6p1-RC6) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4) should be fabs(foo) < .4.
