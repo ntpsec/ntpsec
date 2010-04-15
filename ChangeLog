@@ -5,6 +5,8 @@
   "restrict ... limited" is used.
 * [Bug 1518] Windows ntpd should lock to one processor more
   conservatively.
+* [Bug 1522] Enable range syntax "trustedkey (301 ... 399)".
+* Update html/authopt.html controlkey, requestkey, and trustedkey docs.
 
 ---
 (4.2.6p1) 2010/04/09 Released by Harlan Stenn <stenn@ntp.org>

@@ -65,11 +65,12 @@
 /* Structure for storing an attribute-value pair  */
 struct attr_val {
     int attr;
-    union val{
-        double d;
-        int i;
-        char *s;
-        void *p;
+    union val {
+ 	double	d;
+ 	int	i;
+	u_int	u;
+ 	char *	s;
+	void *	p;
     } value;
     int type;
 };
@@ -210,6 +211,7 @@ void destroy_address_node(struct address_node *my_node);
 queue *enqueue_in_new_queue(void *my_node);
 struct attr_val *create_attr_dval(int attr, double value);
 struct attr_val *create_attr_ival(int attr, int value);
+struct attr_val *create_attr_shorts(int, ntp_u_int16_t, ntp_u_int16_t);
 struct attr_val *create_attr_sval(int attr, char *s);
 struct attr_val *create_attr_pval(int attr, void *s);
 struct filegen_node *create_filegen_node(int filegen_token, queue *options);

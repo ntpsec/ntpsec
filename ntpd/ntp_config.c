@@ -512,7 +512,6 @@ dump_config_tree(
 	char *s1;
 	char *s2;
 	int *intp = NULL;
-	int *key_val;
 	void *fudge_ptr;
 	void *list_ptr = NULL;
 	void *options = NULL;
@@ -687,12 +686,21 @@ dump_config_tree(
 	if (NULL != ptree->auth.keys)
 		fprintf(df, "keys \"%s\"\n", ptree->auth.keys);
 
-	key_val = queue_head(ptree->auth.trusted_key_list);
-	if (key_val != NULL) {
-		fprintf(df, "trustedkey %d", *key_val);
-
-		while (NULL != (key_val = next_node(key_val)))
-			fprintf(df, " %d", *key_val);
+	atrv = queue_head(ptree->auth.trusted_key_list);
+	if (atrv != NULL) {
+		fprintf(df, "trustedkey");
+		do {
+			if ('i' == atrv->attr)
+				fprintf(df, " %d", atrv->value.i);
+			else if ('-' == atrv->attr)
+				fprintf(df, " (%u ... %u)",
+					atrv->value.u >> 16,
+					atrv->value.u & 0xffff);
+			else
+				fprintf(df, "\n# dump error:\n"
+					"# unknown trustedkey attr %d\n"
+					"trustedkey", atrv->attr);
+		} while (NULL != (atrv = next_node(atrv)));
 		fprintf(df, "\n");
 	}
 
@@ -1142,6 +1150,22 @@ create_attr_ival(
 	my_val = get_node(sizeof *my_val);
 	my_val->attr = attr;
 	my_val->value.i = value;
+	my_val->type = T_Integer;
+	return my_val;
+}
+
+struct attr_val *
+create_attr_shorts(
+	int		attr,
+	ntp_u_int16_t	val1,
+	ntp_u_int16_t	val2
+	)
+{
+	struct attr_val *my_val;
+
+	my_val = get_node(sizeof *my_val);
+	my_val->attr = attr;
+	my_val->value.u = (val1 << 16) | val2;
 	my_val->type = T_Integer;
 	return my_val;
 }
@@ -1708,17 +1732,18 @@ config_auth(
 	struct config_tree *ptree
 	)
 {
-	extern int	cache_type;	/* authkeys.c */
+	ntp_u_int16_t	ufirst;
+	ntp_u_int16_t	ulast;
+	ntp_u_int16_t	u;
+	struct attr_val *my_val;
 #ifdef OPENSSL
 #ifndef NO_INTRES
 	u_char		digest[EVP_MAX_MD_SIZE];
 	u_int		digest_len;
 	EVP_MD_CTX	ctx;
 #endif
-	struct attr_val *my_val;
 	int		item;
 #endif
-	int *		key_val;
 
 	/* Crypto Command */
 #ifdef OPENSSL
@@ -1798,10 +1823,16 @@ config_auth(
 	}
 
 	/* Trusted Key Command */
-	key_val = queue_head(ptree->auth.trusted_key_list);
-	while (key_val != NULL) {
-		authtrust(*key_val, 1);
-		key_val = next_node(key_val);
+	my_val = queue_head(ptree->auth.trusted_key_list);
+	for (; my_val != NULL; my_val = next_node(my_val)) {
+		if ('i' == my_val->attr)
+			authtrust(my_val->value.i, 1);
+		else if ('-' == my_val->attr) {
+			ufirst = my_val->value.u >> 16;
+			ulast = my_val->value.u & 0xffff;
+			for (u = ufirst; u <= ulast; u++)
+				authtrust(u, 1);
+		}
 	}
 
 #ifdef OPENSSL
