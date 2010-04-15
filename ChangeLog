@@ -1,4 +1,9 @@
 ---
+
+* [Bug 1522] Enable range syntax "trustedkey (301 ... 399)".
+* Update html/authopt.html controlkey, requestkey, and trustedkey docs.
+
+---
 (4.2.6p1-RC6) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4) should be fabs(foo) < .4.
