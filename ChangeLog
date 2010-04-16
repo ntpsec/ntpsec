@@ -1,3 +1,5 @@
+* Include (4.2.6p2-RC1) - [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522],
+  all of which were fixed in 4.2.7 previously. 
 (4.2.7p24) 2010/04/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1390] Control PPS on the Oncore M12.
 * [Bug 1518] Windows ntpd should lock to one processor more
@@ -213,6 +215,16 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1503] Auto-enabling of monitor for "restrict ... limited" wrong.
+* [Bug 1504] ntpdate tickles ntpd "discard minimum 1" rate limit if
+  "restrict ... limited" is used.
+* [Bug 1518] Windows ntpd should lock to one processor more
+  conservatively.
+* [Bug 1522] Enable range syntax "trustedkey (301 ... 399)".
+* Update html/authopt.html controlkey, requestkey, and trustedkey docs.
+
 ---
 (4.2.6p1) 2010/04/09 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.6p1-RC6) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>

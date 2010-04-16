@@ -12,6 +12,7 @@
 #include "ntp_if.h"
 #include "ntp_lists.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 
 /*
  * This code keeps a simple address-and-mask list of hosts we want
