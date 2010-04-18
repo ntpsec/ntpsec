@@ -216,6 +216,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p2-RC1) 2010/04/18 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1503] Auto-enabling of monitor for "restrict ... limited" wrong.
 * [Bug 1504] ntpdate tickles ntpd "discard minimum 1" rate limit if
