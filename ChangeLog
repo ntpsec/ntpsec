@@ -1,3 +1,4 @@
+* Include (4.2.6p2-RC2) [Bug 1528], Remove --with-arlib from br-flock.
 * Include (4.2.6p2-RC1) - [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522],
   all of which were fixed in 4.2.7 previously. 
 (4.2.7p24) 2010/04/13 Released by Harlan Stenn <stenn@ntp.org>
@@ -215,6 +216,12 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
+* [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
+* Remove --with-arlib from br-flock.
+
 ---
 (4.2.6p2-RC1) 2010/04/18 Released by Harlan Stenn <stenn@ntp.org>
 

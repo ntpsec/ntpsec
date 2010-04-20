@@ -14,8 +14,8 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
 	-I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) \
-		../libntp/libntp.a @LCRYPTO@
+ntpdc_LDADD=	version.o $(LIBOPTS_LDADD) ../libntp/libntp.a \
+		@EDITLINE_LIBS@ @LCRYPTO@
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 DISTCLEANFILES=	.version version.c
