@@ -12,8 +12,8 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
 
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD=	version.o @EDITLINE_LIBS@ $(LIBOPTS_LDADD) \
-		../libntp/libntp.a @LCRYPTO@
+ntpq_LDADD=	version.o $(LIBOPTS_LDADD) ../libntp/libntp.a \
+		@EDITLINE_LIBS@ @LCRYPTO@
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a
 libntpq_a_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB
