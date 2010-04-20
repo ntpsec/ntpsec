@@ -481,7 +481,8 @@ true_receive(
 		 * Adjust the synchronize indicator according to timecode
 		 * say were OK, and then say not if we really are not OK
 		 */
-		if (synced == '>' || synced == '#' || synced == '?')
+		if (synced == '>' || synced == '#' || synced == '?'
+		    || synced == 'X')
 		    pp->leap = LEAP_NOTINSYNC;
 		else
                     pp->leap = LEAP_NOWARNING;

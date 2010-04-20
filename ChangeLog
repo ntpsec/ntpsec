@@ -1,3 +1,4 @@
+* [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
 * [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
 * Remove --with-arlib from br-flock.
 
