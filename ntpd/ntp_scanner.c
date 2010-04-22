@@ -36,6 +36,7 @@
 
 #define MAX_LEXEME (1024 + 1)	/* The maximum size of a lexeme */
 char yytext[MAX_LEXEME];	/* Buffer for storing the input text/lexeme */
+u_int32 conf_file_sum;		/* Simple sum of characters read */
 extern int input_from_file;
 
 
@@ -127,6 +128,8 @@ FGETC(
 	while (EOF != ch && (CHAR_MIN > ch || ch > CHAR_MAX));
 
 	if (EOF != ch) {
+		if (input_from_file)
+			conf_file_sum += (u_char)ch;
 		++stream->col_no;
 		if (ch == '\n') {
 			stream->prev_line_col_no = stream->col_no;
@@ -148,6 +151,8 @@ UNGETC(
 	struct FILE_INFO *stream
 	)
 {
+	if (input_from_file)
+		conf_file_sum -= (u_char)ch;
 	if (ch == '\n') {
 		stream->col_no = stream->prev_line_col_no;
 		stream->prev_line_col_no = -1;

@@ -88,8 +88,7 @@ static	void	do_resaddflags	(sockaddr_u *, struct interface *, struct req_pkt *);
 static	void	do_ressubflags	(sockaddr_u *, struct interface *, struct req_pkt *);
 static	void	do_unrestrict	(sockaddr_u *, struct interface *, struct req_pkt *);
 static	void	do_restrict	(sockaddr_u *, struct interface *, struct req_pkt *, int);
-static	void	mon_getlist_0	(sockaddr_u *, struct interface *, struct req_pkt *);
-static	void	mon_getlist_1	(sockaddr_u *, struct interface *, struct req_pkt *);
+static	void	mon_getlist	(sockaddr_u *, struct interface *, struct req_pkt *);
 static	void	reset_stats	(sockaddr_u *, struct interface *, struct req_pkt *);
 static	void	reset_peer	(sockaddr_u *, struct interface *, struct req_pkt *);
 static	void	do_key_reread	(sockaddr_u *, struct interface *, struct req_pkt *);
@@ -149,8 +148,8 @@ static	struct req_proc ntp_codes[] = {
 				sizeof(struct conf_restrict), do_ressubflags },
 	{ REQ_UNRESTRICT, AUTH, v4sizeof(struct conf_restrict),
 				sizeof(struct conf_restrict), do_unrestrict },
-	{ REQ_MON_GETLIST,	NOAUTH,	0, 0,	mon_getlist_0 },
-	{ REQ_MON_GETLIST_1,	NOAUTH,	0, 0,	mon_getlist_1 },
+	{ REQ_MON_GETLIST,	NOAUTH,	0, 0,	mon_getlist },
+	{ REQ_MON_GETLIST_1,	NOAUTH,	0, 0,	mon_getlist },
 	{ REQ_RESET_STATS, AUTH, sizeof(struct reset_flags), 0, reset_stats },
 	{ REQ_RESET_PEER,  AUTH, v4sizeof(struct conf_unpeer),
 				sizeof(struct conf_unpeer), reset_peer },
@@ -1874,125 +1873,15 @@ do_restrict(
  * mon_getlist - return monitor data
  */
 static void
-mon_getlist_0(
+mon_getlist(
 	sockaddr_u *srcadr,
 	struct interface *inter,
 	struct req_pkt *inpkt
 	)
 {
-	register struct info_monitor *im;
-	register mon_entry *md;
-	l_fp	now;
-	l_fp	diff;
-	size_t	count;
-
-	DPRINTF(3, ("wants monitor 0 list\n"));
-
-	if (!mon_enabled) {
-		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
-		return;
-	}
-	get_systime(&now);
-	im = (struct info_monitor *)prepare_pkt(srcadr, inter, inpkt,
-	    v6sizeof(struct info_monitor));
-	count = 0;
-
-	ITER_DLIST_BEGIN(mon_mru_list, md, mru, mon_entry)
-		diff = now;
-		L_SUB(&diff, &md->first);
-		im->avg_int = htonl((u_int32)(diff.l_ui / md->count));
-		diff = now;
-		L_SUB(&diff, &md->last);
-		im->last_int = htonl(diff.l_ui);
-		im->restr = htonl(md->flags);
-		im->count = htonl((u_int32)(md->count));
-		if (IS_IPV6(&md->rmtadr)) {
-			if (!client_v6_capable)
-				continue;
-			im->addr6 = SOCK_ADDR6(&md->rmtadr);
-			im->v6_flag = 1;
-		} else {
-			im->addr = NSRCADR(&md->rmtadr);
-			if (client_v6_capable)
-				im->v6_flag = 0;
-		}
-		im->port = NSRCPORT(&md->rmtadr);
-		im->mode = PKT_MODE(md->vn_mode);
-		im->version = PKT_VERSION(md->vn_mode);
-		im = (struct info_monitor *)more_pkt();
-		count++;
-		if (NULL == im || count >= 600)
-			break;
-	ITER_DLIST_END()
-
-	flush_pkt();
+	req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 }
 
-/*
- * mon_getlist - return monitor data
- */
-static void
-mon_getlist_1(
-	sockaddr_u *srcadr,
-	struct interface *inter,
-	struct req_pkt *inpkt
-	)
-{
-	register struct info_monitor_1 *im;
-	register mon_entry *md;
-	l_fp	now;
-	l_fp	diff;
-	size_t	count;
-
-	if (!mon_enabled) {
-		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
-		return;
-	}
-	get_systime(&now);
-	im = (struct info_monitor_1 *)prepare_pkt(srcadr, inter, inpkt,
-	    v6sizeof(struct info_monitor_1));
-	count = 0;
-
-	ITER_DLIST_BEGIN(mon_mru_list, md, mru, mon_entry)
-		diff = now;
-		L_SUB(&diff, &md->first);
-		im->avg_int = htonl((u_int32)(diff.l_ui / md->count));
-		diff = now;
-		L_SUB(&diff, &md->last);
-		im->last_int = htonl(diff.l_ui);
-		im->restr = htonl((u_int32)md->flags);
-		im->count = htonl((u_int32)md->count);
-		if (IS_IPV6(&md->rmtadr)) {
-			if (!client_v6_capable)
-				continue;
-			im->addr6 = SOCK_ADDR6(&md->rmtadr);
-			im->v6_flag = 1;
-			im->daddr6 = SOCK_ADDR6(&md->lcladr->sin);
-		} else {
-			im->addr = NSRCADR(&md->rmtadr);
-			if (client_v6_capable)
-				im->v6_flag = 0;
-			if (MDF_BCAST == md->cast_flags)
-				im->daddr = NSRCADR(&md->lcladr->bcast);
-			else if (md->cast_flags) {
-				im->daddr = NSRCADR(&md->lcladr->sin);
-				if (!im->daddr)
-					im->daddr = NSRCADR(&md->lcladr->bcast);
-			} else
-				im->daddr = 4;
-		}
-		im->flags = htonl(md->cast_flags);
-		im->port = NSRCPORT(&md->rmtadr);
-		im->mode = PKT_MODE(md->vn_mode);
-		im->version = PKT_VERSION(md->vn_mode);
-		im = (struct info_monitor_1 *)more_pkt();
-		count++;
-		if (NULL == im || count >= 600)
-			break;
-	ITER_DLIST_END()
-
-	flush_pkt();
-}
 
 /*
  * Module entry points and the flags they correspond with
