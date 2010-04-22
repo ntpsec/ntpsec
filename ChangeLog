@@ -1,3 +1,6 @@
+* [Bug 1531] Require nonce with mrulist requests.
+* [Bug 1532] Remove ntpd support for ntpdc's monlist in favor of ntpq's
+  mrulist.
 * Include (4.2.6p2-RC1) - [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522],
   all of which were fixed in 4.2.7 previously. 
 (4.2.7p24) 2010/04/13 Released by Harlan Stenn <stenn@ntp.org>

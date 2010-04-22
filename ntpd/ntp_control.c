@@ -26,6 +26,13 @@
 #endif
 #include <arpa/inet.h>
 
+#ifdef OPENSSL
+# include "openssl/evp.h"
+#else
+# include "ntp_md5.h"	/* provides clone of OpenSSL MD5 API */
+#endif
+
+
 /*
  * Structure to hold request procedure information
  */
@@ -82,8 +89,12 @@ static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
 static	void	send_random_tag_value(int);
 static	void	read_mru_list	(struct recvbuf *, int);
-static void	send_ifstats_entry(struct interface *, u_int);
+static	void	send_ifstats_entry(struct interface *, u_int);
 static	void	read_ifstats	(struct recvbuf *, int);
+static	u_int32	derive_nonce	(sockaddr_u *, u_int32, u_int32);
+static	void	generate_nonce	(struct recvbuf *, char *, size_t);
+static	int	validate_nonce	(const char *, struct recvbuf *);
+static	void	req_nonce	(struct recvbuf *, int);
 static	void	unset_trap	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
 				     struct interface *);
@@ -100,6 +111,7 @@ static	struct ctl_proc control_codes[] = {
 	{ CTL_OP_CONFIGURE,	AUTH,	configure },
 	{ CTL_OP_READ_MRU,	NOAUTH,	read_mru_list },
 	{ CTL_OP_READ_IFSTATS,	AUTH,	read_ifstats },
+	{ CTL_OP_REQ_NONCE,	NOAUTH,	req_nonce },
 	{ CTL_OP_UNSETTRAP,	NOAUTH,	unset_trap },
 	{ NO_REQUEST,		0 }
 };
@@ -2677,6 +2689,96 @@ static void configure(
 
 
 /*
+ * derive_nonce - generate client-address-specific nonce value
+ *		  associated with a given timestamp.
+ */
+static u_int32 derive_nonce(
+	sockaddr_u *	addr,
+	u_int32		ts_i,
+	u_int32		ts_f
+	)
+{
+	static u_int32	salt[2];
+	union d_tag {
+		u_char	digest[EVP_MAX_MD_SIZE];
+		u_int32 extract;
+	}		d;
+	EVP_MD_CTX	ctx;
+	u_int		len;
+
+	while (!salt[0])
+		salt[0] = ntp_random();
+	salt[1] = conf_file_sum;
+
+	EVP_DigestInit(&ctx, EVP_get_digestbynid(NID_md5));
+	EVP_DigestUpdate(&ctx, salt, sizeof(salt));
+	EVP_DigestUpdate(&ctx, &ts_i, sizeof(ts_i));
+	EVP_DigestUpdate(&ctx, &ts_f, sizeof(ts_f));
+	if (IS_IPV4(addr))
+		EVP_DigestUpdate(&ctx, &SOCK_ADDR4(addr),
+			         sizeof(SOCK_ADDR4(addr)));
+	else
+		EVP_DigestUpdate(&ctx, &SOCK_ADDR6(addr),
+			         sizeof(SOCK_ADDR6(addr)));
+	EVP_DigestUpdate(&ctx, &NSRCPORT(addr), sizeof(NSRCPORT(addr)));
+	EVP_DigestUpdate(&ctx, salt, sizeof(salt));
+	EVP_DigestFinal(&ctx, d.digest, &len);
+
+	return d.extract;
+}
+
+
+/*
+ * generate_nonce - generate client-address-specific nonce string.
+ */
+static void generate_nonce(
+	struct recvbuf *	rbufp,
+	char *			nonce,
+	size_t			nonce_octets
+	)
+{
+	u_int32 derived;
+
+	derived = derive_nonce(&rbufp->recv_srcadr,
+			       rbufp->recv_time.l_ui,
+			       rbufp->recv_time.l_uf);
+	snprintf(nonce, nonce_octets, "%08x%08x%08x",
+		 rbufp->recv_time.l_ui, rbufp->recv_time.l_uf, derived);
+}
+
+
+/*
+ * validate_nonce - validate client-address-specific nonce string.
+ *
+ * Returns TRUE if the local calculation of the nonce matches the
+ * client-provided value and the timestamp is recent enough.
+ */
+static int validate_nonce(
+	const char *		pnonce,
+	struct recvbuf *	rbufp
+	)
+{
+	u_int	ts_i;
+	u_int	ts_f;
+	l_fp	ts;
+	l_fp	now_delta;
+	u_int	supposed;
+	u_int	derived;
+
+	if (3 != sscanf(pnonce, "%08x%08x%08x", &ts_i, &ts_f, &supposed))
+		return FALSE;
+
+	ts.l_ui = (u_int32)ts_i;
+	ts.l_uf = (u_int32)ts_f;
+	derived = derive_nonce(&rbufp->recv_srcadr, ts.l_ui, ts.l_uf);
+	get_systime(&now_delta);
+	L_SUB(&now_delta, &ts);
+
+	return (supposed == derived && now_delta.l_ui < 16);
+}
+
+
+/*
  * Send a MRU list entry in response to a "ntpq -c mrulist" operation.
  *
  * To keep clients honest about not depending on the order of values,
@@ -2755,7 +2857,7 @@ send_mru_entry(
  *			   random integer value.
  *
  * To try to force clients to ignore unrecognized tags in mrulist
- * and iflist responses, the first and last rows are spiced with
+ * and ifstats responses, the first and last rows are spiced with
  * randomly-generated tag names with correct .# index.
  * Make it three characters knowing that none of the currently-used
  * tags have that length, avoiding the need to test for tag collision.
@@ -2813,6 +2915,9 @@ send_random_tag_value(
  * backing up all the way to the starting point.
  *
  * input parameters:
+ *	nonce=		Regurgitated nonce retrieved by the client
+ *			previously using CTL_OP_REQ_NONCE, demonstrating
+ *			ability to receive traffic sent to its address.
  *	limit=		Limit on MRU entries returned.  This is the sole
  *			required input parameter.  [1...256]
  *			limit=1 is a special case:  Instead of fetching
@@ -2842,12 +2947,13 @@ send_random_tag_value(
  * ntpq provides as many last/addr pairs as will fit in a single request
  * packet, except for the first request in a MRU fetch operation.
  *
- * The response begins with the next newer entry than referred to by
- * last.0 and addr.0, if the "0" entry has not been bumped to the front.
- * Otherwise, it will begin with the next entry newer than referred to
- * by last.1 and addr.1, and so on.  If none of the referenced entries
- * remain unchanged, the request fails and ntpq backs up to the next
- * earlier set of entries to resync.
+ * The response begins with a new nonce value to be used for any
+ * followup request.  Following the nonce is the next newer entry than
+ * referred to by last.0 and addr.0, if the "0" entry has not been
+ * bumped to the front.  If it has, the first entry returned will be the
+ * next entry newer than referred to by last.1 and addr.1, and so on.
+ * If none of the referenced entries remain unchanged, the request fails
+ * and ntpq backs up to the next earlier set of entries to resync.
  *
  * Except for the first response, the response begins with confirmation
  * of the entry that precedes the first additional entry provided:
@@ -2893,6 +2999,7 @@ static void read_mru_list(
 	int restrict_mask
 	)
 {
+	const char		nonce_text[] =		"nonce";
 	const char		limit_text[] =		"limit";
 	const char		mincount_text[] =	"mincount";
 	const char		resall_text[] =		"resall";
@@ -2917,6 +3024,8 @@ static void read_mru_list(
 	struct ctl_var *	v;
 	char *			val;
 	char *			pch;
+	char *			pnonce;
+	int			nonce_valid;
 	int			i;
 	int			priors;
 	u_short			hash;
@@ -2928,6 +3037,7 @@ static void read_mru_list(
 	 * fill in_parms var list with all possible input parameters.
 	 */
 	in_parms = NULL;
+	set_var(&in_parms, nonce_text, sizeof(nonce_text), 0);
 	set_var(&in_parms, limit_text, sizeof(limit_text), 0);
 	set_var(&in_parms, mincount_text, sizeof(mincount_text), 0);
 	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
@@ -2942,6 +3052,7 @@ static void read_mru_list(
 	}
 
 	/* decode input parms */
+	pnonce = NULL;
 	limit = 0;
 	mincount = 0;
 	resall = 0;
@@ -2955,7 +3066,9 @@ static void read_mru_list(
 	while (NULL != (v = ctl_getitem(in_parms, &val)) &&
 	       !(EOV & v->flags)) {
 
-		if (!strcmp(limit_text, v->text))
+		if (!strcmp(nonce_text, v->text))
+			pnonce = estrdup(val);
+		else if (!strcmp(limit_text, v->text))
 			sscanf(val, "%u", &limit);
 		else if (!strcmp(mincount_text, v->text)) {
 			if (1 != sscanf(val, "%d", &mincount) ||
@@ -2989,6 +3102,16 @@ static void read_mru_list(
 	}
 	free_varlist(in_parms);
 	in_parms = NULL;
+
+	/* return no responses until the nonce is validated */
+	if (NULL == pnonce)
+		return;
+
+	nonce_valid = validate_nonce(pnonce, rbufp);
+	free(pnonce);
+	if (!nonce_valid)
+		return;
+
 	if (!(0 < limit && limit <= MRU_ROW_LIMIT)) {
 		ctl_error(CERR_BADVALUE);
 		return;
@@ -3036,6 +3159,8 @@ static void read_mru_list(
 	 * send up to limit= entries
 	 */
 	get_systime(&now);
+	generate_nonce(rbufp, buf, sizeof(buf));
+	ctl_putunqstr("nonce", buf, strlen(buf));
 	prior_mon = NULL;
 	for (count = 0;
 	     count < limit && mon != NULL;
@@ -3225,6 +3350,22 @@ static void read_ifstats(
 		/* return stats for one local address */
 		send_ifstats_entry(la, ifidx);
 	}
+	ctl_flushpkt(0);
+}
+
+
+/*
+ * req_nonce - CTL_OP_REQ_NONCE for ntpq -c mrulist prerequisite.
+ */
+static void req_nonce(
+	struct recvbuf *	rbufp,
+	int			restrict_mask
+	)
+{
+	char	buf[64];
+
+	generate_nonce(rbufp, buf, sizeof(buf));
+	ctl_putunqstr("nonce", buf, strlen(buf));
 	ctl_flushpkt(0);
 }
 

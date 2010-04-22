@@ -2256,11 +2256,13 @@ collect_mru_list(
 	int c_mru_l_rc;		/* this function's return code */
 	u_char got;		/* MRU_GOT_* bits */
 	const char ts_fmt[] = "0x%08x.%08x";
+	const char nonce_eq[] = "nonce=";
 	size_t cb;
 	mru *mon;
 	mru *head;
 	mru *recent;
 	int list_complete;
+	char nonce[128];
 	char buf[128];
 	char req_buf[CTL_MAX_DATA_LEN];
 	char *req;
@@ -2286,6 +2288,31 @@ collect_mru_list(
 	u_short hash;
 	mru *unlinked;
 
+	/*
+	 * Retrieve a nonce specific to this client to demonstrate to
+	 * ntpd that we're capable of receiving responses to our source
+	 * IP address, and thereby unlikely to be forging the source.
+	 */
+	qres = doquery(CTL_OP_REQ_NONCE, 0, 0, 0, NULL, &rstatus,
+		       &rsize, &rdata);
+	if (qres) {
+		fprintf(stderr, "nonce request failed\n");
+		return FALSE;
+	}
+
+	if (strncmp(rdata, nonce_eq, sizeof(nonce_eq) - 1)) {
+		fprintf(stderr, "unexpected nonce response format: %.*s\n",
+			rsize, rdata);
+		return FALSE;
+	}
+	strncpy(nonce, rdata + sizeof(nonce_eq) - 1, sizeof(nonce));
+	chars = strlen(nonce);
+	while (chars > 0 &&
+	       ('\r' == nonce[chars - 1] || '\n' == nonce[chars - 1])) {
+		chars--;
+		nonce[chars] = '\0';
+	}
+
 	mru_count = 0;
 	INIT_DLIST(mru_list, mlink);
 	cb = NTP_HASH_SIZE * sizeof(*hash_table);
@@ -2304,11 +2331,12 @@ collect_mru_list(
 	memset(&last_older, 0, sizeof(last_older));
 
 	limit = min(3 * MAXFRAGS, ntpd_row_limit);
-	snprintf(req_buf, sizeof(req_buf), "limit=%d%s", limit, parms);
+	snprintf(req_buf, sizeof(req_buf), "nonce=%s, limit=%d%s",
+		 nonce, limit, parms);
 
 	while (TRUE) {
 		if (debug)
-			fprintf(stderr, "READ_MRU: %s\n", req_buf);
+			fprintf(stderr, "READ_MRU parms: %s\n", req_buf);
 				
 		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
 			         req_buf, &rstatus, &rsize, &rdata, TRUE);
@@ -2334,7 +2362,7 @@ collect_mru_list(
 				NTP_INSIST(unlinked == recent);
 				free(recent);
 			}
-		} else if (CERR_BADVALUE == qres /* temp -> */ || CERR_BADFMT == qres /* <- temp */) {
+		} else if (CERR_BADVALUE == qres) {
 			/* ntpd has lower cap on row limit */
 			ntpd_row_limit--;
 			limit = min(limit, ntpd_row_limit);
@@ -2474,7 +2502,11 @@ collect_mru_list(
 				break;
 
 			case 'n':
-				if (strcmp(tag, "now") ||
+				if (!strcmp(tag, "nonce")) {
+					strncpy(nonce, val,
+						sizeof(nonce));
+					break; /* case */
+				} else if (strcmp(tag, "now") ||
 				    2 != sscanf(val, ts_fmt,
 						&pnow->l_ui,
 						&pnow->l_uf))
@@ -2552,7 +2584,8 @@ collect_mru_list(
 		req = req_buf;
 		req_end = req_buf + sizeof(req_buf);
 #define REQ_ROOM	(req_end - req)
-		snprintf(req, REQ_ROOM, "limit=%d%s", limit, parms);
+		snprintf(req, REQ_ROOM, "nonce=%s, limit=%d%s", nonce,
+			 limit, parms);
 		req += strlen(req);
 
 		for (ri = 0, recent = HEAD_DLIST(mru_list, mlink);
