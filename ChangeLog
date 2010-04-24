@@ -1,5 +1,8 @@
-* [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
+* [Bug 1465] Make sure time from TS2100 is not invalid (backport from
+  ntp-dev).
 * [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
+* [Bug 1534] win32/include/isc/net.h conflicts with VC++ 2010 errno.h.
+* [Bug 1535] "restrict -4 default" and "restrict -6 default" ignored.
 * Remove --with-arlib from br-flock.
 
 ---

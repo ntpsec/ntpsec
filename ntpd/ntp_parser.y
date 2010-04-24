@@ -677,7 +677,7 @@ access_control_command
 						estrdup("0.0.0.0"), 
 						AF_INET),
 					create_address_node(
-						estrdup("255.255.255.255"), 
+						estrdup("0.0.0.0"), 
 						AF_INET),
 					$4, 
 					ip_file->line_no));
@@ -690,7 +690,7 @@ access_control_command
 						estrdup("::"), 
 						AF_INET6),
 					create_address_node(
-						estrdup("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"),
+						estrdup("::"), 
 						AF_INET6),
 					$4, 
 					ip_file->line_no));
