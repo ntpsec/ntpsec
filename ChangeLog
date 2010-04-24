@@ -1,6 +1,11 @@
+* [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
+* [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
 * [Bug 1531] Require nonce with mrulist requests.
 * [Bug 1532] Remove ntpd support for ntpdc's monlist in favor of ntpq's
-  mrulist.
+mrulist.
+* Include (4.2.6p2-RC2) [Bug 1534] conflicts with VC++ 2010 errno.h.
+* Include (4.2.6p2-RC2) [Bug 1535] "restrict -4 default" and "restrict
+  -6 default" ignored.
 (4.2.7p25) 2010/04/20 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p2-RC2) [Bug 1528], Remove --with-arlib from br-flock.
 * Include (4.2.6p2-RC1) - [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522],
@@ -222,8 +227,11 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
+* [Bug 1465] Make sure time from TS2100 is not invalid (backport from
+  ntp-dev).
 * [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
+* [Bug 1534] win32/include/isc/net.h conflicts with VC++ 2010 errno.h.
+* [Bug 1535] "restrict -4 default" and "restrict -6 default" ignored.
 * Remove --with-arlib from br-flock.
 
 ---
