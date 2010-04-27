@@ -1,3 +1,4 @@
+(4.2.7p27) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p26) 2010/04/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
 * [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
