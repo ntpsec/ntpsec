@@ -1,7 +1,7 @@
-.TH NTPSNMPD 1 2010-04-27 "( 4.2.6p2-RC2)" "Programmer's Manual"
+.TH NTPSNMPD 1 2010-04-29 "( 4.2.6p2-RC2)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd.1)
 .\"  
-.\"  It has been AutoGen-ed  April 27, 2010 at 02:52:14 AM by AutoGen 5.10
+.\"  It has been AutoGen-ed  April 29, 2010 at 07:33:08 AM by AutoGen 5.10
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -27,6 +27,15 @@ Do not fork.
 Log to syslog().
 .sp
 
+.TP
+.BR \--agentxsocket "=\fIstring\fP"
+The socket address ntpsnmpd uses to connect to net-snmpd.
+The default \fIstring\fP for this option is:
+.ti +4
+ unix:/var/agentx/master
+.sp
+[<transport-specifier>:]<transport-address>
+The default is the Unix Domain socket "unix:/var/agentx/master". Another common alternative is tcp:localhost:705.
 .TP
 .BR \-? , " \--help"
 Display extended usage information and exit.

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *  
- *  It has been AutoGen-ed  April 27, 2010 at 02:52:13 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  April 29, 2010 at 07:33:02 AM by AutoGen 5.10
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -52,16 +52,17 @@
  *  Enumeration of each option:
  */
 typedef enum {
-    INDEX_OPT_NOFORK      =  0,
-    INDEX_OPT_SYSLOG      =  1,
-    INDEX_OPT_VERSION     =  2,
-    INDEX_OPT_HELP        =  3,
-    INDEX_OPT_MORE_HELP   =  4,
-    INDEX_OPT_SAVE_OPTS   =  5,
-    INDEX_OPT_LOAD_OPTS   =  6
+    INDEX_OPT_NOFORK        =  0,
+    INDEX_OPT_SYSLOG        =  1,
+    INDEX_OPT_AGENTXSOCKET  =  2,
+    INDEX_OPT_VERSION       =  3,
+    INDEX_OPT_HELP          =  4,
+    INDEX_OPT_MORE_HELP     =  5,
+    INDEX_OPT_SAVE_OPTS     =  6,
+    INDEX_OPT_LOAD_OPTS     =  7
 } teOptIndex;
 
-#define OPTION_CT    7
+#define OPTION_CT    8
 #define NTPSNMPD_VERSION       "4.2.6p2-RC2"
 #define NTPSNMPD_FULL_VERSION  "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p2-RC2"
 
@@ -98,9 +99,14 @@ typedef enum {
 #  warning undefining SYSLOG due to option name conflict
 #  undef   SYSLOG
 # endif
+# ifdef    AGENTXSOCKET
+#  warning undefining AGENTXSOCKET due to option name conflict
+#  undef   AGENTXSOCKET
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef NOFORK
 # undef SYSLOG
+# undef AGENTXSOCKET
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -109,6 +115,7 @@ typedef enum {
  */
 #define VALUE_OPT_NOFORK         'n'
 #define VALUE_OPT_SYSLOG         'p'
+#define VALUE_OPT_AGENTXSOCKET   2
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
@@ -128,7 +135,7 @@ typedef enum {
                 ntpsnmpdOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpsnmpdOptions.pUsageProc)( &ntpsnmpdOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *
