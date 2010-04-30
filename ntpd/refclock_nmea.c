@@ -257,7 +257,7 @@ nmea_start(
 
 		if ((he = gethostbyname(nmea_host)) == NULL)
 			return(0);
-		if ((p = getprotobyname("ip")) == NULL)
+		if ((p = getprotobyname("tcp")) == NULL)
 			return(0);
 		memset(&so_addr, 0, sizeof(so_addr));
 		so_addr.sin_family = AF_INET;

@@ -1,4 +1,10 @@
+---
+
+* [Bug 1538] update refclock_nmea.c's call to getprotobyname().
+
+---
 (4.2.6p2-RC2) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
+
 * [Bug 1465] Make sure time from TS2100 is not invalid (backport from
   ntp-dev).
 * [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
