@@ -1,7 +1,13 @@
+* [Bug 1542] ntpd mrulist response may have incorrect last.older.
+* [Bug 1543] ntpq mrulist must refresh nonce when retrying.
+* [Bug 1544] ntpq mrulist sscanf timestamp format mismatch on 64-bit.
+* Windows compiling hints/winnt.html update from Sunil Tej S.
 (4.2.7p27) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p26) 2010/04/24 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
-* [Bug 1528] Fix EDITLINE_LIBS link order for ntpq and ntpdc.
+* Include (4.2.6p2-RC2) [Bug 1465] Make sure time from TS2100 is not
+  invalid (backport from -dev).
+* Include (4.2.6p2-RC2) [Bug 1528] Fix EDITLINE_LIBS link order for ntpq
+  and ntpdc.
 * [Bug 1531] Require nonce with mrulist requests.
 * [Bug 1532] Remove ntpd support for ntpdc's monlist in favor of ntpq's
 mrulist.

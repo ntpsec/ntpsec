@@ -3128,8 +3128,11 @@ static void read_mru_list(
 		     mon = mon->hash_next)
 			if (ADDR_PORT_EQ(&mon->rmtadr, &addr[i]))
 				break;
-		if (mon != NULL && L_ISEQU(&mon->last, &last[i]))
-			break;
+		if (mon != NULL) {
+			if (L_ISEQU(&mon->last, &last[i]))
+				break;
+			mon = NULL;
+		}
 	}
 
 	/* If a starting point was provided... */

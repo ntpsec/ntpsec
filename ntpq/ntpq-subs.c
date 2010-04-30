@@ -304,6 +304,7 @@ typedef struct var_display_collection_tag {
  */
 static mru *	add_mru(mru *);
 static int	collect_mru_list(const char *, l_fp *);
+static int	fetch_nonce(char *, size_t);
 static int	qcmp_mru_avgint(const void *, const void *);
 static int	qcmp_mru_r_avgint(const void *, const void *);
 static int	qcmp_mru_addr(const void *, const void *);
@@ -2176,6 +2177,52 @@ config_from_file (
 }
 
 
+static int
+fetch_nonce(
+	char *	nonce,
+	size_t	cb_nonce
+	)
+{
+	const char	nonce_eq[] = "nonce=";
+	int		qres;
+	u_short		rstatus;
+	int		rsize;
+	const char *	rdata;
+	int		chars;
+
+	/*
+	 * Retrieve a nonce specific to this client to demonstrate to
+	 * ntpd that we're capable of receiving responses to our source
+	 * IP address, and thereby unlikely to be forging the source.
+	 */
+	qres = doquery(CTL_OP_REQ_NONCE, 0, 0, 0, NULL, &rstatus,
+		       &rsize, &rdata);
+	if (qres) {
+		fprintf(stderr, "nonce request failed\n");
+		return FALSE;
+	}
+
+	if (rsize <= sizeof(nonce_eq) - 1 ||
+	    strncmp(rdata, nonce_eq, sizeof(nonce_eq) - 1)) {
+		fprintf(stderr, "unexpected nonce response format: %.*s\n",
+			rsize, rdata);
+		return FALSE;
+	}
+	chars = rsize - (sizeof(nonce_eq) - 1);
+	if (chars >= (int)cb_nonce)
+		return FALSE;
+	memcpy(nonce, rdata + sizeof(nonce_eq) - 1, chars);
+	nonce[chars] = '\0';
+	while (chars > 0 &&
+	       ('\r' == nonce[chars - 1] || '\n' == nonce[chars - 1])) {
+		chars--;
+		nonce[chars] = '\0';
+	}
+	
+	return TRUE;
+}
+
+
 /*
  * add_mru	Add and entry to mru list, hash table, and allocate
  *		and return a replacement.
@@ -2190,13 +2237,6 @@ add_mru(
 	mru *mon;
 	mru *unlinked;
 
-	if (debug)
-		fprintf(stderr,
-			"add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
-			add->last.l_ui, add->last.l_uf, add->count,
-			(int)add->mode, (int)add->ver, (u_int)add->rs,
-			add->first.l_ui, add->first.l_uf,
-			sptoa(&add->addr));
 
 	hash = NTP_HASH_ADDR(&add->addr);
 	/* see if we have it among previously received entries */
@@ -2217,19 +2257,25 @@ add_mru(
 		UNLINK_SLIST(unlinked, hash_table[hash], mon, hlink, mru);
 		NTP_INSIST(unlinked == mon);
 		if (debug)
-			fprintf(stderr,
-				"add_mru duplicate removed %s %08x.%08x -> %08x.%08x\n",
-				sptoa(&mon->addr), mon->last.l_ui,
-				mon->last.l_uf, add->last.l_ui,
-				add->last.l_uf);
+			fprintf(stderr, "(updated from %08x.%08x) ",
+				mon->last.l_ui,	mon->last.l_uf);
 	}
 	LINK_DLIST(mru_list, add, mlink);
 	LINK_SLIST(hash_table[hash], add, hlink);
+	if (debug)
+		fprintf(stderr,
+			"add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
+			add->last.l_ui, add->last.l_uf, add->count,
+			(int)add->mode, (int)add->ver, (u_int)add->rs,
+			add->first.l_ui, add->first.l_uf,
+			sptoa(&add->addr));
+	/* if we didn't update an existing entry, alloc replacement */
 	if (NULL == mon) {
 		mon = emalloc(sizeof(*mon));
 		mru_count++;
 	}
 	memset(mon, 0, sizeof(*mon));
+
 	return mon;
 }
 
@@ -2252,11 +2298,10 @@ collect_mru_list(
 	l_fp *	pnow
 	)
 {
+	const u_int sleep_msecs = 30;
 	static int ntpd_row_limit = MRU_ROW_LIMIT;
 	int c_mru_l_rc;		/* this function's return code */
 	u_char got;		/* MRU_GOT_* bits */
-	const char ts_fmt[] = "0x%08x.%08x";
-	const char nonce_eq[] = "nonce=";
 	size_t cb;
 	mru *mon;
 	mru *head;
@@ -2285,37 +2330,20 @@ collect_mru_list(
 	int have_now;
 	int have_addr_older; 
 	int have_last_older;
+	u_int restarted_count;
+	u_int nonce_uses;
 	u_short hash;
 	mru *unlinked;
 
-	/*
-	 * Retrieve a nonce specific to this client to demonstrate to
-	 * ntpd that we're capable of receiving responses to our source
-	 * IP address, and thereby unlikely to be forging the source.
-	 */
-	qres = doquery(CTL_OP_REQ_NONCE, 0, 0, 0, NULL, &rstatus,
-		       &rsize, &rdata);
-	if (qres) {
-		fprintf(stderr, "nonce request failed\n");
+	if (!fetch_nonce(nonce, sizeof(nonce)))
 		return FALSE;
-	}
 
-	if (strncmp(rdata, nonce_eq, sizeof(nonce_eq) - 1)) {
-		fprintf(stderr, "unexpected nonce response format: %.*s\n",
-			rsize, rdata);
-		return FALSE;
-	}
-	strncpy(nonce, rdata + sizeof(nonce_eq) - 1, sizeof(nonce));
-	chars = strlen(nonce);
-	while (chars > 0 &&
-	       ('\r' == nonce[chars - 1] || '\n' == nonce[chars - 1])) {
-		chars--;
-		nonce[chars] = '\0';
-	}
-
+	nonce_uses = 0;
+	restarted_count = 0;
 	mru_count = 0;
 	INIT_DLIST(mru_list, mlink);
 	cb = NTP_HASH_SIZE * sizeof(*hash_table);
+	NTP_INSIST(NULL == hash_table);
 	hash_table = emalloc(cb);
 	memset(hash_table, 0, cb);
 
@@ -2333,11 +2361,12 @@ collect_mru_list(
 	limit = min(3 * MAXFRAGS, ntpd_row_limit);
 	snprintf(req_buf, sizeof(req_buf), "nonce=%s, limit=%d%s",
 		 nonce, limit, parms);
+	nonce_uses++;
 
 	while (TRUE) {
 		if (debug)
 			fprintf(stderr, "READ_MRU parms: %s\n", req_buf);
-				
+
 		qres = doqueryex(CTL_OP_READ_MRU, 0, 0, strlen(req_buf),
 			         req_buf, &rstatus, &rsize, &rdata, TRUE);
 
@@ -2347,31 +2376,61 @@ collect_mru_list(
 			 * toss them from our list and try again.
 			 */
 			if (debug)
-				printf("no overlap between %d prior entries and server MRU list\n",
-				       ri);
+				fprintf(stderr,
+					"no overlap between %d prior entries and server MRU list\n",
+					ri);
 			while (ri--) {
 				recent = HEAD_DLIST(mru_list, mlink);
 				NTP_INSIST(recent != NULL);
 				if (debug)
-					printf("tossing prior entry %s to resync\n",
-					       sptoa(&recent->addr));
+					fprintf(stderr,
+						"tossing prior entry %s to resync\n",
+						sptoa(&recent->addr));
 				UNLINK_DLIST(recent, mlink);
 				hash = NTP_HASH_ADDR(&recent->addr);
 				UNLINK_SLIST(unlinked, hash_table[hash],
 					     recent, hlink, mru);
 				NTP_INSIST(unlinked == recent);
 				free(recent);
+				mru_count--;
 			}
+			if (NULL == HEAD_DLIST(mru_list, mlink)) {
+				restarted_count++;
+				if (restarted_count > 8) {
+					fprintf(stderr,
+						"Giving up after 8 restarts from the beginning.\n"
+						"With high-traffic NTP servers, this can occur if the\n"
+						"MRU list is limited to less than about 16 seconds' of\n"
+						"entries.  See the 'mru' ntp.conf directive to adjust.\n");
+					goto cleanup_return;
+				}
+				if (debug)
+					fprintf(stderr,
+						"--->   Restarting from the beginning, retry #%u\n", 
+						restarted_count);
+			}
+		} else if (CERR_UNKNOWNVAR == qres) {
+			fprintf(stderr,
+				"CERR_UNKNOWNVAR from ntpd but no priors given.\n");
+			goto cleanup_return;
 		} else if (CERR_BADVALUE == qres) {
 			/* ntpd has lower cap on row limit */
 			ntpd_row_limit--;
 			limit = min(limit, ntpd_row_limit);
+			if (debug)
+				fprintf(stderr,
+					"Row limit reduced to %d following CERR_BADVALUE.\n",
+				        limit);
 		} else if (ERR_INCOMPLETE == qres) {
 			/*
 			 * Reduce the number of rows to minimize effect
 			 * of single lost packets.
 			 */
 			limit = max(2, limit / 2);
+			if (debug)
+				fprintf(stderr,
+					"Row limit reduced to %d following incomplete response.\n",
+					limit);
 		} else if (qres) {
 			show_error_msg(qres, 0);
 			goto cleanup_return;
@@ -2392,7 +2451,8 @@ collect_mru_list(
 		have_last_older = FALSE;
 		while (!qres && nextvar(&rsize, &rdata, &tag, &val)) {
 			if (debug > 1)
-				fprintf(stderr, "nextvar gave: %s = %s\n", tag, val);
+				fprintf(stderr, "nextvar gave: %s = %s\n",
+					tag, val);
 			switch(tag[0]) {
 
 			case 'a':
@@ -2443,9 +2503,9 @@ collect_mru_list(
 
 			case 'l':
 				if (!strcmp(tag, "last.older")) {
-					if (2 != sscanf(val, ts_fmt,
-						        &last_older.l_ui,
-							&last_older.l_uf)) {
+					if ('0' != val[0] ||
+					    'x' != val[1] ||
+					    !hextolfp(val + 2, &last_older)) {
 						fprintf(stderr,
 							"last.older %s garbled\n",
 							val);
@@ -2467,9 +2527,9 @@ collect_mru_list(
 					}
 					head = HEAD_DLIST(mru_list, mlink);
 					if (NULL != head) {
-						if (2 != sscanf(val, ts_fmt,
-								&newest.l_ui,
-								&newest.l_uf) ||
+						if ('0' != val[0] ||
+						    'x' != val[1] ||
+						    !hextolfp(val + 2, &newest) ||
 						    !L_ISEQU(&newest,
 							     &head->last)) {
 							fprintf(stderr,
@@ -2481,11 +2541,10 @@ collect_mru_list(
 						}
 					}
 					list_complete = TRUE;
-				} else if (1 != sscanf(tag, "last.%d", &si)
-					   || si != ci ||
-					   2 != sscanf(val, ts_fmt,
-						       &mon->last.l_ui,
-						       &mon->last.l_uf))
+				} else if (1 != sscanf(tag, "last.%d", &si) ||
+					   si != ci || '0' != val[0] ||
+					   'x' != val[1] ||
+					   !hextolfp(val + 2, &mon->last))
 					goto nomatch;
 				else
 					MGOT(MRU_GOT_LAST);
@@ -2493,23 +2552,22 @@ collect_mru_list(
 
 			case 'f':
 				if (1 != sscanf(tag, "first.%d", &si) ||
-				    si != ci ||
-				    2 != sscanf(val, ts_fmt,
-						&mon->first.l_ui,
-						&mon->first.l_uf))
+				    si != ci || '0' != val[0] ||
+				    'x' != val[1] ||
+				    !hextolfp(val + 2, &mon->first))
 					goto nomatch;
 				MGOT(MRU_GOT_FIRST);
 				break;
 
 			case 'n':
 				if (!strcmp(tag, "nonce")) {
-					strncpy(nonce, val,
-						sizeof(nonce));
+					strncpy(nonce, val, sizeof(nonce));
+					nonce_uses = 0;
 					break; /* case */
 				} else if (strcmp(tag, "now") ||
-				    2 != sscanf(val, ts_fmt,
-						&pnow->l_ui,
-						&pnow->l_uf))
+					   '0' != val[0] ||
+					   'x' != val[1] ||
+					    !hextolfp(val + 2, pnow))
 					goto nomatch;
 				have_now = TRUE;
 				break;
@@ -2558,12 +2616,13 @@ collect_mru_list(
 		 * up with other duties.
 		 */
 #ifdef SYS_WINNT
-		Sleep(300);	/* msec */
+		Sleep(sleep_msecs);
 #elif !defined(HAVE_NANOSLEEP)
-		sleep(1);
+		sleep((sleep_msecs / 1000) + 1);
 #else
 		{
-			struct timespec interv = { 0, 300 * 1000 };
+			struct timespec interv = { 0,
+						   1000 * sleep_msecs };
 			nanosleep(&interv, NULL);
 		}
 #endif
@@ -2587,6 +2646,13 @@ collect_mru_list(
 		snprintf(req, REQ_ROOM, "nonce=%s, limit=%d%s", nonce,
 			 limit, parms);
 		req += strlen(req);
+		nonce_uses++;
+		if (nonce_uses >= 4) {
+			if (!fetch_nonce(nonce, sizeof(nonce)))
+				goto cleanup_return;
+			nonce_uses = 0;
+		}
+
 
 		for (ri = 0, recent = HEAD_DLIST(mru_list, mlink);
 		     recent != NULL;
@@ -2602,12 +2668,16 @@ collect_mru_list(
 			memcpy(req, buf, chars + 1);
 			req += chars;
 		}
-		NTP_INSIST(ri > 0 || NULL == recent);
 	}
 
 	c_mru_l_rc = TRUE;
+	goto retain_hash_table;
 
 cleanup_return:
+	free(hash_table);
+	hash_table = NULL;
+
+retain_hash_table:
 	if (mon != NULL)
 		free(mon);
 
@@ -2886,6 +2956,14 @@ mrulist(
 			*ppentry = recent;
 			ppentry++;
 		REV_ITER_DLIST_END()
+	}
+
+	if (ppentry - sorted != (int)mru_count) {
+		fprintf(stderr,
+			"mru_count %u should match MRU list depth %d.\n",
+			mru_count, ppentry - sorted);
+		free(sorted);
+		goto cleanup_return;
 	}
 
 	/* re-sort sorted[] if not default or reverse default */
