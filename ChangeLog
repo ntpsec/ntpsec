@@ -1,3 +1,8 @@
+* Include (4.2.6p2-RC3) [Bug 1512] ntpsnmpd should connect to net-snmpd
+  via a unix-domain socket by default.
+  Provide a command-line 'socket name' option.
+* Include (4.2.6p2-RC3) [Bug 1538] update refclock_nmea.c's call to
+  getprotobyname().
 (4.2.7p27) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p26) 2010/04/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1465] Make sure time from TS2100 is not invalid (backport from -dev).
