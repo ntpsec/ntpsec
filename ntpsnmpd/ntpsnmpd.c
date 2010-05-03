@@ -92,7 +92,7 @@ main (int argc, char **argv) {
 
   /* Set AgentX socket interface */
   netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-                            NETSNMP_DS_AGENT_X_SOCKET, "tcp:localhost:705");
+                            NETSNMP_DS_AGENT_X_SOCKET, OPT_ARG( AGENTXSOCKET ));
 
   init_agent("ntpsnmpd");
 
