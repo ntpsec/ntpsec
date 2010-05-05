@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  April 27, 2010 at 10:07:35 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  May  4, 2010 at 10:32:38 PM by AutoGen 5.10
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -74,6 +74,17 @@ tSCC    zSyslogText[] =
 tSCC    zSyslog_NAME[]             = "SYSLOG";
 tSCC    zSyslog_Name[]             = "syslog";
 #define SYSLOG_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Agentxsocket option description:
+ */
+tSCC    zAgentxsocketText[] =
+        "The socket address ntpsnmpd uses to connect to net-snmpd";
+tSCC    zAgentxsocket_NAME[]       = "AGENTXSOCKET";
+tSCC    zAgentxsocket_Name[]       = "agentxsocket";
+tSCC    zAgentxsocketDefaultArg[]    = "unix:/var/agentx/master";
+#define AGENTXSOCKET_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -162,6 +173,18 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSyslogText, zSyslog_NAME, zSyslog_Name,
      /* disablement strs */ NULL, NULL },
 
+  {  /* entry idx, value */ 2, VALUE_OPT_AGENTXSOCKET,
+     /* equiv idx, value */ 2, VALUE_OPT_AGENTXSOCKET,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ AGENTXSOCKET_FLAGS, 0,
+     /* last opt argumnt */ { zAgentxsocketDefaultArg },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zAgentxsocketText, zAgentxsocket_NAME, zAgentxsocket_Name,
+     /* disablement strs */ NULL, NULL },
+
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -233,8 +256,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPSNMPD";
 tSCC   zUsageTitle[] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p27\n\
-USAGE:  %s [ -<flag> | --<name> ]...\n";
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p29\n\
+USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
        "$HOME",
@@ -285,7 +308,7 @@ tOptions ntpsnmpdOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    7 /* full option count */, 2 /* user option count */,
+    8 /* full option count */, 3 /* user option count */,
     ntpsnmpd_full_usage, ntpsnmpd_short_usage,
     NULL, NULL
 };

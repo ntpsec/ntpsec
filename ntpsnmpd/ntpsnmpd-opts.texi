@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.texi)
 # 
-# It has been AutoGen-ed  April 27, 2010 at 10:07:36 AM by AutoGen 5.10
+# It has been AutoGen-ed  May  4, 2010 at 10:32:38 PM by AutoGen 5.10
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -21,6 +21,7 @@ This software is released under a specialized copyright license.
 
 @menu
 * ntpsnmpd usage::                  ntpsnmpd usage help (-?)
+* ntpsnmpd agentxsocket::           agentxsocket option
 * ntpsnmpd nofork::                 nofork option (-n)
 * ntpsnmpd syslog::                 syslog option (-p)
 @end menu
@@ -50,3 +51,11 @@ This is the ``do not fork'' option.
 
 This is the ``log to syslog()'' option.
 
+
+@node ntpsnmpd agentxsocket
+@subsection agentxsocket option
+@cindex ntpsnmpd-agentxsocket
+
+This is the ``the socket address ntpsnmpd uses to connect to net-snmpd'' option.
+[<transport-specifier>:]<transport-address>
+The default is the Unix Domain socket "unix:/var/agentx/master". Another common alternative is tcp:localhost:705.

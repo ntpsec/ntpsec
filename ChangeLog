@@ -1,7 +1,9 @@
+(4.2.7p29) 2010/05/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1542] ntpd mrulist response may have incorrect last.older.
 * [Bug 1543] ntpq mrulist must refresh nonce when retrying.
 * [Bug 1544] ntpq mrulist sscanf timestamp format mismatch on 64-bit.
 * Windows compiling hints/winnt.html update from Sunil Tej S.
+(4.2.7p28) 2010/05/03 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p2-RC3) [Bug 1512] ntpsnmpd should connect to net-snmpd
   via a unix-domain socket by default.
   Provide a command-line 'socket name' option.
