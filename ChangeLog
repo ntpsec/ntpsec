@@ -1,30 +1,31 @@
+* Update the ChangeLog entries when merging items from -stable.
 (4.2.7p29) 2010/05/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1542] ntpd mrulist response may have incorrect last.older.
 * [Bug 1543] ntpq mrulist must refresh nonce when retrying.
 * [Bug 1544] ntpq mrulist sscanf timestamp format mismatch on 64-bit.
 * Windows compiling hints/winnt.html update from Sunil Tej S.
 (4.2.7p28) 2010/05/03 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p2-RC3) [Bug 1512] ntpsnmpd should connect to net-snmpd
+* [Bug 1512] from 4.2.6p2-RC3: ntpsnmpd should connect to net-snmpd
   via a unix-domain socket by default.
   Provide a command-line 'socket name' option.
-* Include (4.2.6p2-RC3) [Bug 1538] update refclock_nmea.c's call to
+* [Bug 1538] from 4.2.6p2-RC3: update refclock_nmea.c's call to
   getprotobyname().
-* Include (4.2.6p2-RC3) [Bug 1541] Fix wrong keyword for "maxclock".
+* [Bug 1541] from 4.2.6p2-RC3: Fix wrong keyword for "maxclock".
 (4.2.7p27) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p26) 2010/04/24 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p2-RC2) [Bug 1465] Make sure time from TS2100 is not
+* [Bug 1465] from 4.2.6p2-RC2: Make sure time from TS2100 is not
   invalid (backport from -dev).
-* Include (4.2.6p2-RC2) [Bug 1528] Fix EDITLINE_LIBS link order for ntpq
+* [Bug 1528] from 4.2.6p2-RC2: Fix EDITLINE_LIBS link order for ntpq
   and ntpdc.
 * [Bug 1531] Require nonce with mrulist requests.
 * [Bug 1532] Remove ntpd support for ntpdc's monlist in favor of ntpq's
 mrulist.
-* Include (4.2.6p2-RC2) [Bug 1534] conflicts with VC++ 2010 errno.h.
-* Include (4.2.6p2-RC2) [Bug 1535] "restrict -4 default" and "restrict
+* [Bug 1534] from 4.2.6p2-RC2: conflicts with VC++ 2010 errno.h.
+* [Bug 1535] from 4.2.6p2-RC2: "restrict -4 default" and "restrict
   -6 default" ignored.
 (4.2.7p25) 2010/04/20 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p2-RC2) [Bug 1528], Remove --with-arlib from br-flock.
-* Include (4.2.6p2-RC1) - [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522],
+* [Bug 1528] from 4.2.6p2-RC2: Remove --with-arlib from br-flock.
+* [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522] from 4.2.6p2-RC2:
   all of which were fixed in 4.2.7 previously. 
 (4.2.7p24) 2010/04/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1390] Control PPS on the Oncore M12.
@@ -134,15 +135,15 @@ mrulist.
 * Do not reference peer_node/unpeer_node after freeing when built with
   --disable-saveconfig and using DNS.
 (4.2.7p21) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1-RC6) - [Bug 1514] Typo in ntp_proto.c: fabs(foo < .4)
+* [Bug 1514] from 4.2.6p1-RC6: Typo in ntp_proto.c: fabs(foo < .4)
   should be fabs(foo) < .4.
-* Include (4.2.6p1-RC6) - [Bug 1464] synchronization source wrong for
+* [Bug 1464] from 4.2.6p1-RC6: synchronization source wrong for
   refclocks ARCRON_MSF (27) and SHM (28).
-* Include (4.2.6p1-RC6) - Correct Windows port's refclock_open() to
+* From 4.2.6p1-RC6: Correct Windows port's refclock_open() to
   return 0 on failure not -1.
-* Include (4.2.6p1-RC6) - Correct CHU, dumbclock, and WWVB drivers to
+* From 4.2.6p1-RC6: Correct CHU, dumbclock, and WWVB drivers to
   check for 0 returned from refclock_open() on failure.
-* Include (4.2.6p1-RC6) - Correct "SIMUL=4 ./flock-build -1" to
+* From 4.2.6p1-RC6: Correct "SIMUL=4 ./flock-build -1" to
   prioritize -1/--one.
 * [Bug 1306] constant conditionals in audio_gain().
 (4.2.7p20) 2010/02/13 Released by Harlan Stenn <stenn@ntp.org>
@@ -151,39 +152,39 @@ mrulist.
 * Use async DNS to resolve trap directive hostnames.
 (4.2.7p19) 2010/02/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1338] Update the association type codes in ntpq.html.
-* Include (4.2.6p1-RC5) - [Bug 1478] linking fails: EVP_MD_pkey_type.
-* Include (4.2.6p1-RC5) - [Bug 1479] not finding readline headers.
-* Include (4.2.6p1-RC5) - [Bug 1484] ushort is not defined in QNX6.
+* [Bug 1478] from 4.2.6p1-RC5: linking fails: EVP_MD_pkey_type.
+* [Bug 1479] from 4.2.6p1-RC5: not finding readline headers.
+* [Bug 1484] from 4.2.6p1-RC5: ushort is not defined in QNX6.
 (4.2.7p18) 2010/02/07 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1-RC5) - [Bug 1480] snprintf() cleanup caused 
+* [Bug 1480] from 4.2.6p1-RC5: snprintf() cleanup caused 
   unterminated refclock IDs.
 * Stop using getaddrinfo() to convert numeric address strings to on-wire
   addresses in favor of is_ip_address() alone.
 (4.2.7p17) 2010/02/05 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1-RC5) - [Bug 1477] First non-gmake make in clone
+* [Bug 1477] from 4.2.6p1-RC5: First non-gmake make in clone
   w/VPATH can't make COPYRIGHT.
 * Attempts to cure CID 108 CID 118 CID 119 TAINTED_SCALAR warnings.
 * Broaden ylwrap workaround VPATH_HACK to all non-GNU make.
 (4.2.7p16) 2010/02/04 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1-RC4) - [Bug 1474] ntp_keygen LCRYPTO after libntp.a.
-* Include (4.2.6p1-RC4) - Remove arlib.
+* [Bug 1474] from 4.2.6p1-RC4: ntp_keygen LCRYPTO after libntp.a.
+* Include 4.2.6p1-RC4: Remove arlib.
 (4.2.7p15) 2010/02/03 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1) - [Bug 1455] ntpd does not try /etc/ntp.audio.
-* Include (4.2.6p1) - Convert many sprintf() calls to snprintf(), also
+* [Bug 1455] from 4.2.6p1: ntpd does not try /etc/ntp.audio.
+* Include 4.2.6p1: Convert many sprintf() calls to snprintf(), also
   strcpy(), strcat().
-* Include (4.2.6p1) - Fix widely cut-n-pasted bug in refclock shutdown
+* Include 4.2.6p1: Fix widely cut-n-pasted bug in refclock shutdown
   after failed start.
-* Include (4.2.6p1) - Remove some dead code checking for emalloc()
+* Include 4.2.6p1: Remove some dead code checking for emalloc()
   returning NULL.
 (4.2.7p14) 2010/02/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1338] ntpq displays incorrect association type codes.
 * [Bug 1469] u_int32, int32 changes broke HP-UX 10.20 build.
-* Include (4.2.6p1) - [Bug 1470] "make distdir" compiles keyword-gen.
+* [Bug 1470] from 4.2.6p1: "make distdir" compiles keyword-gen.
 * [Bug 1471] CID 120 CID 121 CID 122 is_ip_address() uninit family.
 * [Bug 1472] CID 116 CID 117 minor warnings in new DNS code.
-* Include (4.2.6p1) - [Bug 1473] "make distcheck" version.m4 error.
+* [Bug 1473] from 4.2.6p1: "make distcheck" version.m4 error.
 (4.2.7p13) 2010/01/31 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1) - [Bug 1467] Fix bogus rebuild of sntp/sntp.html.
+* [Bug 1467] from 4.2.6p1: Fix bogus rebuild of sntp/sntp.html.
 (4.2.7p12) 2010/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1468] 'make install' broken for root on default NFS mount.
 (4.2.7p11) 2010/01/28 Released by Harlan Stenn <stenn@ntp.org>
@@ -193,34 +194,34 @@ mrulist.
 * New async DNS resolver in ntpd allows nonblocking queries anytime,
   instead of only once at startup.
 (4.2.7p10) 2010/01/24 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1-RC5) - [Bug 1140] Clean up debug.html, decode.html,
+* [Bug 1140] from 4.2.6p1-RC5: Clean up debug.html, decode.html,
   and ntpq.html.
-* Include (4.2.6p1-RC3) - Use TZ=UTC instead of TZ= when calling date in
+* Include 4.2.6p1-RC3: Use TZ=UTC instead of TZ= when calling date in
   scripts/mkver.in .
-* Include (4.2.6p1-RC3) - [Bug 1448] Some macros not correctly conditionally
+* [Bug 1448] from 4.2.6p1-RC3: Some macros not correctly conditionally
   or absolutely defined on Windows.
-* Include (4.2.6p1-RC3) - [Bug 1449] ntpsim.h in ntp_config.c should be used
+* [Bug 1449] from 4.2.6p1-RC3: ntpsim.h in ntp_config.c should be used
   conditionally.
-* Include (4.2.6p1-RC3) - [Bug 1450] Option to exclude warnings not
+* [Bug 1450] from 4.2.6p1-RC3: Option to exclude warnings not
   unconditionally defined on Windows.
 (4.2.7p9) 2010/01/13 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p8) 2010/01/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 702] ntpd service logic should use libopts to examine cmdline.
-* Include (4.2.6p1-RC3) - [Bug 1451] sntp leaks KoD entry updating.
-* Include (4.2.6p1-RC3) - [Bug 1453] Use $CC in config.cache filename.
+* [Bug 1451] from 4.2.6p1-RC3: sntp leaks KoD entry updating.
+* [Bug 1453] from 4.2.6p1-RC3: Use $CC in config.cache filename.
 (4.2.7p7) 2009/12/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 620] ntpdc getresponse() esize != *rsize s/b size != *rsize.
 * [Bug 1446] 4.2.7p6 requires autogen, missing ntpd.1, *.texi, *.menu.
 (4.2.7p6) 2009/12/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1443] Remove unnecessary dependencies on ntp_io.h
 * [Bug 1442] Move Windows functions into libntp files
-* Include (4.2.6p1-RC3) - [Bug 1127] Check the return of X590_verify().
-* Include (4.2.6p1-RC3) - [Bug 1439] .texi gen after binary is linked.
-* Include (4.2.6p1-RC3) - [Bug 1440] Update configure.ac to support kfreebsd.
-* Include (4.2.6p1-RC3) - [Bug 1445] IRIX does not have -lcap or support
+* [Bug 1127] from 4.2.6p1-RC3: Check the return of X590_verify().
+* [Bug 1439] from 4.2.6p1-RC3: .texi gen after binary is linked.
+* [Bug 1440] from 4.2.6p1-RC3: Update configure.ac to support kfreebsd.
+* [Bug 1445] from 4.2.6p1-RC3: IRIX does not have -lcap or support
   linux capabilities.
 (4.2.7p5) 2009/12/25 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.6p1-RC2)
+* Include 4.2.6p1-RC2
 (4.2.7p4) 2009/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1429] ntpd -4 option does not reliably force IPv4 resolution.
 * [Bug 1431] System headers must come before ntp headers in ntp_intres.c .
@@ -352,7 +353,7 @@ mrulist.
 
 ---
 (4.2.6) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p8) - [Sec 1331] DoS with mode 7 packets - CVE-2009-3563.
+* [Sec 1331] from4.2.4p8: DoS with mode 7 packets - CVE-2009-3563.
 * [Bug 508] Fixed leap second handling for Windows.
 (4.2.5p250-RC) 2009/11/30 Released by Harlan Stenn <stenn@ntp.org>
 * sntp documentation updates.
@@ -759,7 +760,7 @@ mrulist.
 * [Bug 320] "restrict default ignore" does not affect IPv6.
 * [Bug 1192] "restrict -6 ..." reports a syntax error.
 (4.2.5p177) 2009/05/18 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p7)
+* Include 4.2.4p7
 * [Bug 1174] nmea_shutdown assumes that nmea has a unit assigned
 * [Bug 1190] NMEA refclock fudge flag4 1 obscures position in timecode
 * Update NMEA refclock documentation in html/drivers/driver20.html
@@ -767,7 +768,7 @@ mrulist.
 * [Bug 1154] mDNS registration should be done later, repeatedly and only
   if asked for. (second try for fix)
 (4.2.5p175) 2009/05/12 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p7-RC7)
+* Include 4.2.4p7-RC7
 * [Bug 1180] ntpd won't start with more than ~1000 interfaces
 * [Bug 1182] Documentation typos and missing bits.
 * [Bug 1183] COM port support should extend past COM3
@@ -777,7 +778,7 @@ mrulist.
 (4.2.5p174) 2009/05/09 Released by Harlan Stenn <stenn@ntp.org>
 * Stale leapsecond file fixes from Dave Mills.
 (4.2.5p173) 2009/05/08 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p7-RC6)
+* Include 4.2.4p7-RC6
 (4.2.5p172) 2009/05/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1175] Instability in PLL daemon mode.
 * [Bug 1176] refclock_parse.c does not compile without PPSAPI.
@@ -790,7 +791,7 @@ mrulist.
 * Do not clear config.cache when it is  empty.
 (4.2.5p170) 2009/05/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1152] adjust PARSE to new refclock_pps logic
-* Include (4.2.4p7-RC5)
+* Include 4.2.4p7-RC5
 * loopfilter FLL/PLL crossover cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
 * ntp-keygen cleanup from Dave Mills.
@@ -801,7 +802,7 @@ mrulist.
 * [Bug 1171] Note that we never look for -lreadline by default.
 * [Bug 1090] Fix bogus leap seconds in refclock_hpgps.
 (4.2.5p168) 2009/04/29 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p7-RC4)
+* Include 4.2.4p7-RC4
 * [Bug 1169] quiet compiler warnings
 * Re-enable gcc -Wstrict-prototypes when not building with OpenSSL
 * Enable gcc -Wstrict-overflow
@@ -841,7 +842,7 @@ mrulist.
 * Documentation updates from Dave Mills.
 * timepps-Solaris.h patches from Dave Hart.
 (4.2.5p164) 2009/04/22 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p7-RC3)
+* Include 4.2.4p7-RC3
 * PPS/PPSAPI cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
 * [Bug 1125] C runtime per-thread initialization on Windows
@@ -853,7 +854,7 @@ mrulist.
 (4.2.5p162) 2009/04/09 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * Mitigation and PPS cleanup from Dave Mills.
-* Include (4.2.4p7-RC2)
+* Include 4.2.4p7-RC2
 * [Bug 216] New interpolation scheme for Windows eliminates 1ms jitter
 * remove a bunch of #ifdef SYS_WINNT from portable code
 * 64-bit time_t cleanup for building on newer Windows compilers
@@ -867,7 +868,7 @@ mrulist.
 (4.2.5p160) 2009/03/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1141] refclock_report missing braces cause spurious "peer event:
   clock clk_unspec" log entries
-* Include (4.2.4p7-RC1)
+* Include 4.2.4p7-RC1
 (4.2.5p159) 2009/03/28 Released by Harlan Stenn <stenn@ntp.org>
 * "bias" changes from Dave Mills.
 (4.2.5p158) 2009/01/30 Released by Harlan Stenn <stenn@ntp.org>
@@ -893,7 +894,7 @@ mrulist.
   file name problems under Windows.
   Removed German umlaut from log msg for 4.2.5p142.
 (4.2.5p152) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
-* Include (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
+* Include 4.2.4p6: 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.5p151) 2008/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Stats file logging cleanup from Dave Mills.
 (4.2.5p150) 2008/12/15 Released by Harlan Stenn <stenn@ntp.org>
@@ -977,7 +978,7 @@ mrulist.
 * [Bug 1052] Add linuxPPS support to ONCORE driver.
 (4.2.5p124) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
-* Include (4.2.4p5) 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
+* Include 4.2.4p5: 2008/08/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 861] leap info was not being transmitted.
 * [Bug 1046] refnumtoa.c is using the wrong header file.
 * [Bug 1047] enable/disable options processing fix.
