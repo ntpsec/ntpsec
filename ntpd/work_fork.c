@@ -164,23 +164,15 @@ receive_blocking_req_internal(
 {
 	blocking_pipe_header hdr;
 	blocking_pipe_header *req;
-	int trycount;
 	int rc;
 
 	NTP_REQUIRE(child_req_read_pipe);
 
 	req = NULL;
 
-	trycount = 3;
 	do {
-		NLOG(NLOG_SYSEVENT) {
-			if (trycount < 3)
-				msyslog(LOG_NOTICE,
-					"receive_blocking_req_internal read try #%d",
-					4 - trycount);
-		}
 		rc = read(child_req_read_pipe, &hdr, sizeof(hdr));
-	} while (--trycount && !rc);
+	} while (rc < 0 && EINTR == errno);
 
 	if (rc < 0)
 		msyslog(LOG_ERR,

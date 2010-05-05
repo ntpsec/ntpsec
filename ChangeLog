@@ -1,3 +1,4 @@
+* [Bug 1526] ntpd DNS pipe read EINTR with no network at startup.
 * Update the ChangeLog entries when merging items from -stable.
 (4.2.7p29) 2010/05/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1542] ntpd mrulist response may have incorrect last.older.
