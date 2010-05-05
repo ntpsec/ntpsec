@@ -1,3 +1,4 @@
+(4.2.7p29) 2010/05/04 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p28) 2010/05/03 Released by Harlan Stenn <stenn@ntp.org>
 * Include (4.2.6p2-RC3) [Bug 1512] ntpsnmpd should connect to net-snmpd
   via a unix-domain socket by default.
