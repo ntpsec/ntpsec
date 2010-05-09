@@ -6,7 +6,7 @@
   socket by default.  Provide a command-line 'socket name' option.
 * [Bug 1538] update refclock_nmea.c's call to getprotobyname().
 * [Bug 1541] Fix wrong keyword for "maxclock".
-* Many sntp fixes from Nelson Boyard:
+* Many sntp fixes from Nelson B Bolyard <nelson@bolyard.me>:
   1. sntp properly handles hex key strings in the keyfile, instead of
   just treating the text as binary strings.
   2. sntp handles SHA1 as well as MD5.
