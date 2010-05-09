@@ -94,3 +94,4 @@ extern	int	decodetime	(char *, l_fp *);
 extern	void	printvars	(int, char *, int, int, int, FILE *);
 extern	int	decodeint	(char *, long *);
 extern	int	findvar		(char *, struct ctl_var *, int code);
+extern	void	makeascii	(int, char *, FILE *);

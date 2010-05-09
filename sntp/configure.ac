@@ -95,6 +95,7 @@ case "$GCC" in
      yes)
 	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
+    # -W[no-]strict-prototypes is added later depending on OpenSSL
 esac
 
 # HMS: These need to be moved to AM_CPPFLAGS and/or AM_CFLAGS
@@ -191,6 +192,8 @@ case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
     ;;
 esac
 AC_TYPE_UID_T
+
+NTP_OPENSSL
 
 AC_MSG_CHECKING([type of socklen arg for getsockname()])
 AC_CACHE_VAL(ac_cv_func_getsockname_arg2,dnl

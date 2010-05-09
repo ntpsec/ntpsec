@@ -24,15 +24,15 @@ struct key *keys = NULL;
 
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode); 
 int sntp_main (int argc, char **argv);
-int on_wire (struct addrinfo *host);
+int on_wire (struct addrinfo *host, struct addrinfo *bcastaddr);
 int set_time (double offset);
 
 
 int 
 main (
-		int argc,
-		char **argv
-		) 
+	int argc,
+	char **argv
+	) 
 {
 	return sntp_main(argc, argv);
 }
@@ -42,19 +42,21 @@ main (
  */
 int  
 sntp_main (
-		int argc, 
-		char **argv
-		) 
+	int argc, 
+	char **argv
+	) 
 {
 	register int c;
 	struct kod_entry *reason = NULL;
 	int optct;
 	int sync_data_suc = 0;
+	struct addrinfo **bcastaddr = NULL;
 	struct addrinfo **resh = NULL;
 	struct addrinfo *ai;
 	int resc;
 	int kodc;
 	int ow_ret;
+	int bcast = 0;
 	char *hostname;
 
 	/* IPv6 available? */
@@ -63,8 +65,7 @@ sntp_main (
 #ifdef DEBUG
 		printf("No ipv6 support available, forcing ipv4\n");
 #endif
-	}
-	else {
+	} else {
 		/* Check for options -4 and -6 */
 		if (HAVE_OPT(IPV4))
 			ai_fam_pref = AF_INET;
@@ -115,11 +116,18 @@ sntp_main (
 	/* Considering employing a variable that prevents functions of doing anything until 
 	 * everything is initialized properly 
 	 */
-	resc = resolve_hosts(argv, argc, &resh, ai_fam_pref);
-
+	resc = resolve_hosts((const char **)argv, argc, &resh, ai_fam_pref);
 	if (resc < 1) {
 		printf("Unable to resolve hostname(s)\n");
 		return -1;
+	}
+	bcast = ENABLED_OPT(BROADCAST);
+	if (bcast) {
+		const char * myargv[2];
+
+		myargv[0] = OPT_ARG(BROADCAST);
+		myargv[1] = NULL;
+		bcast = resolve_hosts(myargv, 1, &bcastaddr, ai_fam_pref);
 	}
 
 	/* Select a certain ntp server according to simple criteria? For now
@@ -129,10 +137,9 @@ sntp_main (
 		ai = resh[c];
 		do {
 			hostname = addrinfo_to_str(ai);
-
 			if ((kodc = search_entry(hostname, &reason)) == 0) {
 				if (is_reachable(ai)) {
-					ow_ret = on_wire(ai);
+					ow_ret = on_wire(ai, bcast ? bcastaddr[0] : NULL);
 					if (ow_ret < 0)
 						printf("on_wire failed for server %s!\n", hostname);
 					else
@@ -149,24 +156,36 @@ sntp_main (
 		freeaddrinfo(resh[c]);
 	}
 	free(resh);
-
 	return 0;
 }
+
+static union {
+	struct pkt pkt;
+	char   buf[1500];
+} rbuf;
+
+#define r_pkt  rbuf.pkt
 
 /* The heart of (S)NTP, exchange NTP packets and compute values to correct the local clock */
 int
 on_wire (
-		struct addrinfo *host
-					)
+	struct addrinfo *host,
+	struct addrinfo *bcast
+	)
 {
 	char logmsg[32 + INET6_ADDRSTRLEN];
 	char addr_buf[INET6_ADDRSTRLEN];
 	register int try;
 	SOCKET sock;
 	struct pkt x_pkt;
-	struct pkt r_pkt;
 	char *ref;
+	struct key *pkt_key = NULL;
+	int key_id = 0;
 
+	if (ENABLED_OPT(AUTHENTICATION)) {
+		key_id = (int) OPT_ARG(AUTHENTICATION);
+		get_key(key_id, &pkt_key);
+	}
 	for(try=0; try<5; try++) {
 		struct timeval tv_xmt, tv_dst;
 		double t21, t34, delta, offset, precision, root_dispersion;
@@ -176,11 +195,10 @@ on_wire (
 		u_fp p_rdly, p_rdsp;
 		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
 
-		memset(&r_pkt, 0, sizeof(r_pkt));
+		memset(&r_pkt, 0, sizeof rbuf);
 		memset(&x_pkt, 0, sizeof(x_pkt));
 
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
-
 		tv_xmt.tv_sec += JAN_1970;
 
 #ifdef DEBUG
@@ -188,20 +206,30 @@ on_wire (
 				(unsigned int) tv_xmt.tv_usec);
 #endif
 
-		TVTOTS(&tv_xmt, &xmt);
-		HTONL_FP(&xmt, &(x_pkt.xmt));
-
-		x_pkt.stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
-		x_pkt.ppoll = 8;
-		/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
-		set_li_vn_mode(&x_pkt, LEAP_NOTINSYNC, 4, 3);
-
-		create_socket(&sock, (sockaddr_u *)host->ai_addr);
-
-		sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt, LEN_PKT_NOMAC);
-		rpktl = recvpkt(sock, &r_pkt, &x_pkt);
-
-		closesocket(sock);
+		if (bcast) {
+			create_socket(&sock, (sockaddr_u *)bcast->ai_addr);
+			rpktl = recv_bcst_pkt(sock, &r_pkt, sizeof rbuf, (sockaddr_u *)bcast->ai_addr);
+			closesocket(sock);
+		} else {
+			int pkt_len = LEN_PKT_NOMAC;
+			TVTOTS(&tv_xmt, &xmt);
+			HTONL_FP(&xmt, &(x_pkt.xmt));
+			x_pkt.stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
+			x_pkt.ppoll = 8;
+			/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
+			set_li_vn_mode(&x_pkt, LEAP_NOTINSYNC, 4, 3);
+			if (pkt_key != NULL) {
+				int mac_size = 20; /* max room for MAC */
+				x_pkt.exten[0] = htonl(key_id);
+				mac_size = make_mac((char *)&x_pkt, pkt_len, mac_size, pkt_key, (char *)&x_pkt.exten[1]);
+				if (mac_size)
+					pkt_len += mac_size + 4;
+			}
+			create_socket(&sock, (sockaddr_u *)host->ai_addr);
+			sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt, pkt_len);
+			rpktl = recvpkt(sock, &r_pkt, sizeof rbuf, &x_pkt);
+			closesocket(sock);
+		}
 
 		if(rpktl > 0)
 			sw_case = 1;
@@ -209,42 +237,41 @@ on_wire (
 			sw_case = rpktl;
 
 		switch(sw_case) {
-			case SERVER_UNUSEABLE:
-				return -1;
-				break;
+		case SERVER_UNUSEABLE:
+			return -1;
+			break;
 
-			case PACKET_UNUSEABLE:
-				break;
+		case PACKET_UNUSEABLE:
+			break;
 
-			case SERVER_AUTH_FAIL:
-				break;
+		case SERVER_AUTH_FAIL:
+			break;
 
-			case KOD_DEMOBILIZE:
-				/* Received a DENY or RESTR KOD packet */
-				hostname = addrinfo_to_str(host);
-				ref = (char *)&r_pkt.refid;
-				add_entry(hostname, ref);
+		case KOD_DEMOBILIZE:
+			/* Received a DENY or RESTR KOD packet */
+			hostname = addrinfo_to_str(host);
+			ref = (char *)&r_pkt.refid;
+			add_entry(hostname, ref);
 
-				if (ENABLED_OPT(NORMALVERBOSE))
-					printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n", 
-					       ref[0], ref[1], ref[2], ref[3],
-					       hostname);
+			if (ENABLED_OPT(NORMALVERBOSE))
+				printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
+				       ref[0], ref[1], ref[2], ref[3],
+				       hostname);
 
-				log_str = emalloc(INET6_ADDRSTRLEN + 72);
-				snprintf(log_str, INET6_ADDRSTRLEN + 72, 
-					 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
-					 ref[0], ref[1], ref[2], ref[3],
-					 hostname);
-				log_msg(log_str, 2);
-				free(log_str);
-				break;
+			log_str = emalloc(INET6_ADDRSTRLEN + 72);
+			snprintf(log_str, INET6_ADDRSTRLEN + 72, 
+				 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
+				 ref[0], ref[1], ref[2], ref[3],
+				 hostname);
+			log_msg(log_str, 2);
+			free(log_str);
+			break;
 
-			case KOD_RATE:
-				/* Hmm... probably we should sleep a bit here */
-				break;
+		case KOD_RATE:
+			/* Hmm... probably we should sleep a bit here */
+			break;
 
-			case 1:
-
+		case 1:
 			/* Convert timestamps from network to host byte order */
 			p_rdly = NTOHS_FP(r_pkt.rootdelay);
 			p_rdsp = NTOHS_FP(r_pkt.rootdisp);
@@ -256,7 +283,6 @@ on_wire (
 			if (ENABLED_OPT(NORMALVERBOSE)) {
 				getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
 						sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
-
 				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, addr_buf);
 			}
 
@@ -293,21 +319,14 @@ on_wire (
 
 			/* Compute offset etc. */
 			GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
-
 			tv_dst.tv_sec += JAN_1970;
-
 			tmp = p_rec;
 			L_SUB(&tmp, &p_org);
-
 			LFPTOD(&tmp, t21);
-
 			TVTOTS(&tv_dst, &dst);
-
 			tmp = dst;
 			L_SUB(&tmp, &p_xmt);
-
 			LFPTOD(&tmp, t34);
-
 			offset = (t21 + t34) / 2.;
 			delta = t21 - t34;
 
@@ -316,19 +335,13 @@ on_wire (
 					t21, t34, delta, offset);
 
 			ts_str = tv_to_str(&tv_dst);
-
 			printf("%s ", ts_str);
-
 			if(offset > 0)
 				printf("+");
-
 			printf("%.*f", digits, offset);
-
 			if (root_dispersion > 0.)
 				printf(" +/- %f secs", root_dispersion);
-
 			printf("\n");
-
 			free(ts_str);
 
 			if(ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
@@ -352,11 +365,11 @@ on_wire (
 /* Compute the 8 bits for li_vn_mode */
 void
 set_li_vn_mode (
-		struct pkt *spkt,
-		char leap,
-		char version,
-		char mode
-	       ) 
+	struct pkt *spkt,
+	char leap,
+	char version,
+	char mode
+	) 
 {
 
 	if(leap > 3) {
@@ -378,9 +391,9 @@ set_li_vn_mode (
  * with adjtime()/adjusttimeofday().
  */
 int
-set_time (
-		double offset
-	 )
+set_time(
+	double offset
+	)
 {
 	struct timeval tp;
 
@@ -395,21 +408,15 @@ set_time (
 				strerror(errno));
 			return -1;
 		}
-		else {
-			return 0;
-		}
+		return 0;
 	}
-	else {
-		tp.tv_sec = (int) offset;
-		tp.tv_usec = offset - (double)((int)offset);
+	tp.tv_sec = (int) offset;
+	tp.tv_usec = offset - (double)((int)offset);
 
-		if(ADJTIMEOFDAY(&tp, NULL) < 0) {
-			printf("set_time: adjtime(): Time not set: %s\n",
-				strerror(errno));
-			return -1;
-		}
-		else {
-			return 0;
-		}
+	if(ADJTIMEOFDAY(&tp, NULL) < 0) {
+		printf("set_time: adjtime(): Time not set: %s\n",
+			strerror(errno));
+		return -1;
 	}
+	return 0;
 }

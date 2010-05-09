@@ -1,9 +1,41 @@
 ---
 
+* [Bug 1325] unreachable code in sntp recv_bcst_data().
+* [Bug 1459] sntp MD5 authentication does not work with ntpd.
 * [Bug 1512] ntpsnmpd should connect to net-snmpd via a unix-domain
   socket by default.  Provide a command-line 'socket name' option.
 * [Bug 1538] update refclock_nmea.c's call to getprotobyname().
 * [Bug 1541] Fix wrong keyword for "maxclock".
+* Many sntp fixes from Nelson Boyard:
+  1. sntp properly handles hex key strings in the keyfile, instead of
+  just treating the text as binary strings.
+  2. sntp handles SHA1 as well as MD5.
+  3. If the key file contains more than one key, sntp can use keys
+  other than the first one in the file.
+  4. sntp computes the MAC using the key, then the data (was other way).
+  5. sntp handles responses with extensions now.
+  6. sntp implements the -b (broadcast/multicast) option.  Tested.
+  The -b option takes an argument which is the broadcast/multicast
+  address on which to listen for packets.  The command still requires a
+  host address at the end of the command line.  This is the address
+  expected to do the broadcasting/multicasting.
+  7. sntp correctly handles network-order key IDs on little-endian.
+  8. Eliminated a huge amount of code duplication between the sntp
+  unicast and multicast code paths, creating a single process_pkt()
+  function that is used for both paths after the packet is received.
+  9. The -t timeout option now works with both unicast and multicast.
+  Previously it worked with neither.  It wasn't coded for unicast, and
+  was incorrectly coded for multicast.
+  10. In unicast mode, the requests are sent MACed using the key
+  specified with the -a command line option.
+  11. Cleaned up indentation consistent with the predominant style in
+  the files changed, namely, using tab stop characters and not spaces
+  for indentation.  This way, you can set your tab stop spacing as you
+  like it and the indentation looks correct.  This was not a big change.
+  The files were mostly consistent before.
+  12. Eliminated LOTS of blank lines.
+* sntp/configure.ac OpenSSL support now that sntp optionally uses it.
+* Escape unprintable characters in a refid in ntpq -p billboard.
 
 ---
 (4.2.6p2-RC2) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
