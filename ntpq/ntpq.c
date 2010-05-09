@@ -2747,7 +2747,7 @@ do {							\
 void
 makeascii(
 	int length,
-	char *data,
+	const char *data,
 	FILE *fp
 	)
 {

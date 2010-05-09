@@ -1429,7 +1429,6 @@ doprintpeers(
 {
 	char *name;
 	char *value = NULL;
-	size_t len;
 	int i;
 	int c;
 
@@ -1437,6 +1436,7 @@ doprintpeers(
 	sockaddr_u dstadr;
 	u_long srcport = 0;
 	char *dstadr_refid = "0.0.0.0";
+	size_t drlen;
 	u_long stratum = 0;
 	long ppoll = 0;
 	long hpoll = 0;
@@ -1493,8 +1493,8 @@ doprintpeers(
 			if (pvl == peervarlist) {
 				havevar[HAVE_REFID] = 1;
 				if (*value == '\0') {
-					dstadr_refid = "0.0.0.0";
-				} else if ((i = (int)strlen(value)) <= 4) {
+					dstadr_refid = "";
+				} else if (strlen(value) <= 4) {
 					refid_string[0] = '.';
 					(void) strcpy(&refid_string[1], value);
 					i = strlen(refid_string);
@@ -1589,12 +1589,12 @@ doprintpeers(
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
 		fprintf(fp, "%-*s ", maxhostlen, currenthost);
-	if (af == 0 || AF(&srcadr) == af) {
+	if (AF_UNSPEC == af || AF(&srcadr) == af) {
 		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));		
 		fprintf(fp, "%c%-15.15s ", c, clock_name);
-		len = strlen(dstadr_refid);
-		makeascii(len, dstadr_refid, fp);
-		while (len++ < 15)
+		drlen = strlen(dstadr_refid);
+		makeascii(drlen, dstadr_refid, fp);
+		while (drlen++ < 15)
 			fputc(' ', fp);
 		fprintf(fp,
 			" %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
