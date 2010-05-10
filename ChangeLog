@@ -36,6 +36,9 @@
   12. Eliminated LOTS of blank lines.
 * sntp/configure.ac OpenSSL support now that sntp optionally uses it.
 * Escape unprintable characters in a refid in ntpq -p billboard.
+* Simplify hash client code by providing OpenSSL EVP_*() API when built
+  without OpenSSL.  (from ntp-dev)
+* Do not depend on ASCII values for ('A' - '0'), ('a' - '0') in sntp.
 
 ---
 (4.2.6p2-RC2) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>

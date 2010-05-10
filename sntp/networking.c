@@ -220,8 +220,8 @@ recv_bcst_data (
 		}
 		memset(&mdevadr, 0, sizeof(mdevadr));
 		mdevadr.ipv6mr_multiaddr = SOCK_ADDR6(sas);
-		if(!IN6_IS_ADDR_MULTICAST(&mdevadr.ipv6mr_multiaddr)) {
-			if(ENABLED_OPT(NORMALVERBOSE)) {
+		if (!IN6_IS_ADDR_MULTICAST(&mdevadr.ipv6mr_multiaddr)) {
+			if (ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n", buf);
 				free(buf);
@@ -229,7 +229,7 @@ recv_bcst_data (
 			return BROADCAST_FAILED;
 		}
 		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mdevadr, sizeof(mdevadr)) < 0) {
-			if(ENABLED_OPT(NORMALVERBOSE)) {
+			if (ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: Couldn't join group for %s\n", buf);
 				free(buf);
@@ -240,20 +240,20 @@ recv_bcst_data (
 #endif	/* ISC_PLATFORM_HAVEIPV6 */
 	FD_ZERO(&bcst_fd);
 	FD_SET(rsock, &bcst_fd);
-	if(ENABLED_OPT(TIMEOUT)) 
+	if (ENABLED_OPT(TIMEOUT)) 
 		timeout_tv.tv_sec = (int) OPT_ARG(TIMEOUT);
 	else 
 		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
 	timeout_tv.tv_usec = 0;
 	rdy_socks = select(rsock + 1, &bcst_fd, 0, 0, &timeout_tv);
-	switch(rdy_socks) {
+	switch (rdy_socks) {
 	case -1: 
-		if(ENABLED_OPT(NORMALVERBOSE)) 
+		if (ENABLED_OPT(NORMALVERBOSE)) 
 			perror("sntp recv_bcst_data: select()");
 		return BROADCAST_FAILED;
 		break;
 	case 0:
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_data: select() reached timeout (%u sec), aborting.\n", 
 			       (unsigned)timeout_tv.tv_sec);
 		return BROADCAST_FAILED;
@@ -264,7 +264,7 @@ recv_bcst_data (
 		break;
 	}
 	if (recv_bytes == -1) {
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			perror("sntp recv_bcst_data: recvfrom:");
 		recv_bytes = BROADCAST_FAILED;
 	}
@@ -307,7 +307,7 @@ process_pkt (
 	 */
 	if (pkt_len < LEN_PKT_NOMAC || (pkt_len & 3) != 0) {
 unusable:
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp %s: Funny packet length: %i. Discarding package.\n", func_name, pkt_len);
 		return PACKET_UNUSEABLE;
 	}
@@ -462,20 +462,20 @@ recvpkt (
 
 	FD_ZERO(&recv_fd);
 	FD_SET(rsock, &recv_fd);
-	if(ENABLED_OPT(TIMEOUT)) 
+	if (ENABLED_OPT(TIMEOUT)) 
 		timeout_tv.tv_sec = (int) OPT_ARG(TIMEOUT);
 	else 
 		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
 	timeout_tv.tv_usec = 0;
 	rdy_socks = select(rsock + 1, &recv_fd, 0, 0, &timeout_tv);
-	switch(rdy_socks) {
+	switch (rdy_socks) {
 	case -1: 
-		if(ENABLED_OPT(NORMALVERBOSE)) 
+		if (ENABLED_OPT(NORMALVERBOSE)) 
 			perror("sntp recvpkt: select()");
 		return PACKET_UNUSEABLE;
 		break;
 	case 0:
-		if(ENABLED_OPT(NORMALVERBOSE))
+		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: select() reached timeout (%u sec), aborting.\n", 
 			       (unsigned)timeout_tv.tv_sec);
 		return PACKET_UNUSEABLE;
@@ -484,9 +484,8 @@ recvpkt (
 		break;
 	}
 	pkt_len = recvdata(rsock, &sender, (char *)rpkt, rsize);
-	if (pkt_len > 0) {
-	    pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, "recvpkt");
-	}
+	if (pkt_len > 0)
+		pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, "recvpkt");
 	if (pkt_len < 0)
 		return pkt_len;
 	/*

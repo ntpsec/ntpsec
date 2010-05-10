@@ -4,35 +4,6 @@
 struct key *key_ptr;
 int key_cnt = 0;
 
-static int
-s_keytype_from_text(
-	const char *text
-	)
-{
-	int		key_type;
-#ifdef OPENSSL
-	char		upcased[EVP_MAX_MD_SIZE];
-	char *		pch;
-
-	/*
-	 * OpenSSL digest short names are capitalized, so uppercase the
-	 * digest name before passing to OBJ_sn2nid().  If it is not
-	 * recognized but begins with 'M' use NID_md5 to be consistent
-	 * with past behavior.
-	 */
-	strncpy(upcased, text, sizeof upcased);
-	for (pch = upcased; '\0' != *pch; pch++)
-		*pch = (char)toupper(*pch);
-	key_type = OBJ_sn2nid(upcased);
-#else
-	key_type = 0;
-#endif
-
-	if (!key_type && 'm' == tolower(text[0]))
-		key_type = NID_md5;
-	return key_type;
-}
-
 int
 make_mac(
 	char *pkt_data,
@@ -42,36 +13,21 @@ make_mac(
 	char * digest
 	)
 {
-	unsigned int len = mac_size;
-#ifdef OPENSSL
-	int key_type;
-	EVP_MD_CTX ctx;
-#else
-	MD5_CTX ctx;
-#endif /* OPENSSL */
+	u_int		len = mac_size;
+	int		key_type;
+	EVP_MD_CTX	ctx;
 	
 	if (cmp_key->key_len > 64)
 		return 0;
 	if (pkt_size % 4 != 0)
 		return 0;
-#ifdef OPENSSL
+
 	INIT_SSL();
-	key_type = s_keytype_from_text(cmp_key->type);
+	key_type = keytype_from_text(cmp_key->type, NULL);
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(key_type));
 	EVP_DigestUpdate(&ctx, (u_char *)cmp_key->key_seq, (u_int)cmp_key->key_len);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt_data, (u_int)pkt_size);
 	EVP_DigestFinal(&ctx, (u_char *)digest, &len);
-#else /* OPENSSL */
-	if ((cmp_key->type[0] | 0x20) != 'm')
-		return 0;
-	if (mac_size < 16)
-		return 0;
-	MD5Init(&ctx);
-	MD5Update(&ctx, (u_char *)cmp_key->key_seq, (u_int)cmp_key->key_len); 
-	MD5Update(&ctx, (u_char *)pkt_data, (u_int)pkt_size);
-	MD5Final((u_char *)digest, &ctx);
-	len = 16;
-#endif /* OPENSSL */
 
 	return (int)len;
 }
@@ -90,25 +46,39 @@ auth_md5(
 	struct key *cmp_key
 	)
 {
-	int rv;
+	int  hash_len;
+	int  authentic;
 	char digest[20];
 
-	if (mac_size > sizeof digest)
+	if (mac_size > sizeof(digest))
 		return 0;
-	rv = make_mac(pkt_data, pkt_size, sizeof digest, cmp_key, digest);
-	return rv ? !memcmp(digest, pkt_data + pkt_size + 4, rv) : rv;
+	hash_len = make_mac(pkt_data, pkt_size, sizeof(digest), cmp_key,
+			    digest);
+	if (!hash_len)
+		authentic = FALSE;
+	else
+		authentic = !memcmp(digest, pkt_data + pkt_size + 4,
+				    hash_len);
+	return authentic;
 }
 
 static int
-hex_val( unsigned char x)
+hex_val(
+	unsigned char x
+	)
 {
-	static const short vals [] = 
-	{  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
-	  -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-	  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-	  -1, 10, 11, 12, 13, 14, 15 };
+	int val;
 
-	return (x < '0' || x > 'f') ? -1 : vals[x - '0'];
+	if ('0' <= x && x <= '9')
+		val = x - '0';
+	else if ('a' <= x && x <= 'f')
+		val = x - 'a' + 0xa;
+	else if ('A' <= x && x <= 'F')
+		val = x - 'A' + 0xA;
+	else
+		val = -1;
+
+	return val;
 }
 
 /* Load keys from the specified keyfile into the key structures.
@@ -145,24 +115,24 @@ auth_init(
 		int goodline = 0;
 
 		fgets(kbuf, sizeof(kbuf), keyf);
-		kbuf[199] = '\0';
+		kbuf[sizeof(kbuf) - 1] = '\0';
 		octothorpe = strchr(kbuf, '#');
 		if (octothorpe)
 			*octothorpe = '\0';
 #ifdef DEBUG
 		printf("sntp auth_init: fgets: %s", kbuf);
 #endif
-		scan_cnt = sscanf(kbuf, "%i %10s %128s", &act->key_id, act->type, keystring);
+		scan_cnt = sscanf(kbuf, "%d %9s %128s", &act->key_id, act->type, keystring);
 		if (scan_cnt == 3) {
 			int len = strlen(keystring);
 			if (len <= 20) {
 				act->key_len = len;
-				memcpy(act->key_seq, keystring, len+1);
+				memcpy(act->key_seq, keystring, len + 1);
 				goodline = 1;
 			} else if ((len & 1) != 0) {
 				goodline = 0; /* it's bad */
 			} else {
-                                int j;
+				int j;
 				goodline = 1;
 				act->key_len = len >> 1;
 				for (j = 0; j < len; j+=2) {
