@@ -1,4 +1,5 @@
 ---
+(4.2.6p2-RC3) 2010/05/11 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1325] unreachable code in sntp recv_bcst_data().
 * [Bug 1459] sntp MD5 authentication does not work with ntpd.
