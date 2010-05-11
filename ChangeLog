@@ -4,6 +4,7 @@
   socket by default.  Provide a command-line 'socket name' option.
 * [Bug 1538] update refclock_nmea.c's call to getprotobyname().
 * [Bug 1541] Fix wrong keyword for "maxclock".
+* Windows compiling hints/winnt.html update from G. Sunil Tej.
 
 ---
 (4.2.6p2-RC2) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
