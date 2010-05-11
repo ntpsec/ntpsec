@@ -5,7 +5,7 @@
 * [Bug 1542] ntpd mrulist response may have incorrect last.older.
 * [Bug 1543] ntpq mrulist must refresh nonce when retrying.
 * [Bug 1544] ntpq mrulist sscanf timestamp format mismatch on 64-bit.
-* Windows compiling hints/winnt.html update from Sunil Tej S.
+* Windows compiling hints/winnt.html update from G. Sunil Tej.
 (4.2.7p28) 2010/05/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1512] from 4.2.6p2-RC3: ntpsnmpd should connect to net-snmpd
   via a unix-domain socket by default.
@@ -250,6 +250,7 @@ mrulist.
   socket by default.  Provide a command-line 'socket name' option.
 * [Bug 1538] update refclock_nmea.c's call to getprotobyname().
 * [Bug 1541] Fix wrong keyword for "maxclock".
+* Windows compiling hints/winnt.html update from G. Sunil Tej.
 
 ---
 (4.2.6p2-RC2) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>
