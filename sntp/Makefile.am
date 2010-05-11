@@ -10,7 +10,7 @@ AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 	-I$(top_srcdir)/../lib/isc/nothreads/include \
 	-I$(top_srcdir)/../lib/isc/unix/include
 
-LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a
+LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a @LCRYPTO@
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable

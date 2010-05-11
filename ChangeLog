@@ -1,3 +1,15 @@
+* [Bug 1325] from 4.2.6p2-RC3: unreachable code sntp recv_bcst_data().
+* [Bug 1459] from 4.2.6p2-RC3: sntp MD5 authentication does not work
+  with ntpd.
+* [Bug 1541] from 4.2.6p2-RC3: Fix wrong keyword for "maxclock".
+* [Bug 1552] from 4.2.6p2-RC3: update and complete broadcast and crypto
+  features in sntp.
+* [Bug 1553] from 4.2.6p2-RC3: sntp/configure.ac OpenSSL support.
+* from 4.2.6p2-RC3: Escape unprintable characters in a refid in ntpq -p
+  billboard.
+* from 4.2.6p2-RC3: Simplify hash client code by providing OpenSSL
+  EVP_*() API when built without OpenSSL.  (already in 4.2.7)
+* from 4.2.6p2-RC3: Do not depend on ASCII in sntp.
 (4.2.7p30) 2010/05/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1526] ntpd DNS pipe read EINTR with no network at startup.
 * Update the ChangeLog entries when merging items from -stable.
@@ -246,10 +258,18 @@ mrulist.
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1325] unreachable code in sntp recv_bcst_data().
+* [Bug 1459] sntp MD5 authentication does not work with ntpd.
 * [Bug 1512] ntpsnmpd should connect to net-snmpd via a unix-domain
   socket by default.  Provide a command-line 'socket name' option.
 * [Bug 1538] update refclock_nmea.c's call to getprotobyname().
 * [Bug 1541] Fix wrong keyword for "maxclock".
+* [Bug 1552] update and complete broadcast and crypto features in sntp.
+* [Bug 1553] sntp/configure.ac OpenSSL support.
+* Escape unprintable characters in a refid in ntpq -p billboard.
+* Simplify hash client code by providing OpenSSL EVP_*() API when built
+  without OpenSSL.  (from ntp-dev)
+* Do not depend on ASCII values for ('A' - '0'), ('a' - '0') in sntp.
 
 ---
 (4.2.6p2-RC2) 2010/04/27 Released by Harlan Stenn <stenn@ntp.org>

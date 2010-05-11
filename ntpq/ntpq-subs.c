@@ -1583,6 +1583,7 @@ doprintpeers(
 	long hmode = 0;
 	u_long srcport = 0;
 	char *dstadr_refid = "0.0.0.0";
+	size_t drlen;
 	u_long stratum = 0;
 	long ppoll = 0;
 	long hpoll = 0;
@@ -1778,13 +1779,15 @@ doprintpeers(
 	if (numhosts > 1)
 		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
-		if (!havevar[HAVE_SRCHOST] || !SOCK_UNSPEC(&srcadr))
-			strncpy(clock_name, nntohost(&srcadr),
-				sizeof(clock_name));
-		
+		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));		
+		fprintf(fp, "%c%-15.15s ", c, clock_name);
+		drlen = strlen(dstadr_refid);
+		makeascii(drlen, dstadr_refid, fp);
+		while (drlen++ < 15)
+			fputc(' ', fp);
 		fprintf(fp,
-			"%c%-15.15s %-15.15s %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
-			c, clock_name, dstadr_refid, stratum, type,
+			" %2ld %c %4.4s %4.4s  %3lo  %7.7s %8.7s %7.7s\n",
+			stratum, type,
 			prettyinterval(whenbuf, sizeof(whenbuf),
 				       when(&ts, &rec, &reftime)),
 			prettyinterval(pollbuf, sizeof(pollbuf), 

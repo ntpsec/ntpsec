@@ -36,7 +36,7 @@
 /* From ntpdate.c */
 int is_reachable (struct addrinfo *dst);
 
-int resolve_hosts (char **hosts, int hostc, struct addrinfo ***res, int pref_family);
+int resolve_hosts (const char **hosts, int hostc, struct addrinfo ***res, int pref_family);
 
 void create_socket (SOCKET *rsock, sockaddr_u *dest);
 
@@ -44,11 +44,11 @@ void sendpkt (SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
 
 int recvdata (SOCKET rsock, sockaddr_u *sender, char *rdata, int rdata_len);
 
-int recvpkt (SOCKET rsock, struct pkt *rpkt, struct pkt *spkt);
+int recvpkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, struct pkt *spkt);
 
 int recv_bcst_data (SOCKET rsock, char *rdata, int rdata_len, sockaddr_u *sas, sockaddr_u *ras);
 
-int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, sockaddr_u *sas);
+int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, sockaddr_u *sas);
 
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {

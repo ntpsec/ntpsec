@@ -292,7 +292,6 @@ static	void	warning		(const char *, const char *, const char *);
 static	void	error		(const char *, const char *, const char *);
 static	u_long	getkeyid	(const char *);
 static	void	atoascii	(const char *, size_t, char *, size_t);
-static	void	makeascii	(int, const char *, FILE *);
 static	void	cookedprint	(int, int, const char *, int, int, FILE *);
 static	void	rawprint	(int, int, const char *, int, int, FILE *);
 static	void	startoutput	(void);
@@ -2795,7 +2794,7 @@ do {							\
  * makeascii - print possibly ascii data using the character
  *	       transformations that cat -v uses.
  */
-static void
+void
 makeascii(
 	int length,
 	const char *data,
