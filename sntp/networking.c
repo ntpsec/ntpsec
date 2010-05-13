@@ -1,3 +1,4 @@
+#include <config.h>
 #include "networking.h"
 
 char adr_buf[INET6_ADDRSTRLEN];
@@ -171,6 +172,10 @@ recv_bcst_data (
 	GETSOCKNAME_SOCKLEN_TYPE ss_len;
 	struct timeval timeout_tv;
 	fd_set bcst_fd;
+#ifdef MCAST
+	struct ip_mreq mdevadr;
+	TYPEOF_IP_MULTICAST_LOOP mtrue = 1;
+#endif
 
 	setsockopt(rsock, SOL_SOCKET, SO_REUSEADDR, &btrue, sizeof(btrue));
 	if (IS_IPV4(sas)) {
@@ -181,9 +186,6 @@ recv_bcst_data (
 		}
 
 #ifdef MCAST
-		struct ip_mreq mdevadr;
-		TYPEOF_IP_MULTICAST_LOOP mtrue = 1;
-
 		if (setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &mtrue, sizeof(mtrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;

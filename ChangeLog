@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1555] 4.2.6p2-RC3 sntp illegal C (mixed code and declarations).
+
+---
 (4.2.6p2-RC3) 2010/05/11 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1325] unreachable code in sntp recv_bcst_data().
