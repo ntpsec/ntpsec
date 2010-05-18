@@ -1204,14 +1204,17 @@ ntp_timestamp_from_counter(
 		/* sanity check timestamp is within 1 minute of now */
 		GetSystemTimeAsFileTime(&Now.ft);
 		Now.ll -= InterpTimestamp;
-		if (Now.ll > 60 * HECTONANOSECONDS || 
+		if (debug &&
+		    Now.ll > 60 * HECTONANOSECONDS || 
 		    Now.ll < -60 * (LONGLONG) HECTONANOSECONDS) {
-			DPRINTF(1, ("ntp_timestamp_from_counter interpolated "
-				    "time %.6fs from current\n",
+			DPRINTF(1, ("ntp_timestamp_from_counter interpolated time %.6fs from current\n",
 					Now.ll / (double)LL_HNS));
 			DPRINTF(1, ("interpol time %llx from  %llx\n",
 					InterpTimestamp,
 					Counterstamp));
+			msyslog(LOG_ERR,
+				"ntp_timestamp_from_counter interpolated time %.6fs from current\n",
+				Now.ll / (double)LL_HNS);
 			exit(-1);
 		}
 #endif
