@@ -1,8 +1,9 @@
+* [Bug 1555] from 4.2.6p2-RC4: sntp illegal C (mixed code and
+  declarations).
 (4.2.7p31) 2010/05/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1325] from 4.2.6p2-RC3: unreachable code sntp recv_bcst_data().
 * [Bug 1459] from 4.2.6p2-RC3: sntp MD5 authentication does not work
   with ntpd.
-* [Bug 1541] from 4.2.6p2-RC3: Fix wrong keyword for "maxclock".
 * [Bug 1552] from 4.2.6p2-RC3: update and complete broadcast and crypto
   features in sntp.
 * [Bug 1553] from 4.2.6p2-RC3: sntp/configure.ac OpenSSL support.
@@ -34,7 +35,7 @@
   and ntpdc.
 * [Bug 1531] Require nonce with mrulist requests.
 * [Bug 1532] Remove ntpd support for ntpdc's monlist in favor of ntpq's
-mrulist.
+  mrulist.
 * [Bug 1534] from 4.2.6p2-RC2: conflicts with VC++ 2010 errno.h.
 * [Bug 1535] from 4.2.6p2-RC2: "restrict -4 default" and "restrict
   -6 default" ignored.
@@ -257,6 +258,11 @@ mrulist.
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+* [Bug 1555] 4.2.6p2-RC3 sntp illegal C (mixed code and declarations).
+---
+
+* [Bug 1555] 4.2.6p2-RC3 sntp illegal C (mixed code and declarations).
+
 ---
 (4.2.6p2-RC3) 2010/05/11 Released by Harlan Stenn <stenn@ntp.org>
 
