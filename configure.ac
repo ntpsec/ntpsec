@@ -2101,7 +2101,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_ok)
 
-AC_MSG_CHECKING([[for a the number of minutes in a DST adjustment]])
+AC_MSG_CHECKING([for a the number of minutes in a DST adjustment])
 AC_ARG_ENABLE(
     [dst_minutes],
     AS_HELP_STRING(
@@ -3238,15 +3238,33 @@ case "$ntp_libparse" in
 esac
 AC_MSG_RESULT([$ans])
 
-
-# AC_SUBST(RSAOBJS)
-# AC_SUBST(RSASRCS)
-# AC_SUBST(RSADIR)
-# AC_SUBST(RSAREF)
-# AC_SUBST(LIBRSAREF)
-# AC_SUBST(MAKE_LIBRSAREF)
-
 NTP_OPENSSL
+
+# if we are using OpenSSL (--with-crypto), by default Autokey is enabled
+AC_MSG_CHECKING([if we want to include NTP Autokey protocol support])
+AC_ARG_ENABLE(
+    [autokey],
+    AS_HELP_STRING(
+	[--enable-autokey],
+	[+ Experimental disabling of NTP Autokey protocol]
+	),
+    [ntp_autokey=$enableval],
+    [ntp_autokey=$ntp_openssl]
+)
+case "$ntp_autokey" in
+ no)
+    ;;
+ *)
+    case "$ntp_openssl" in
+     no)
+	AC_MSG_WARN([Disabling Autokey, --enable-autokey requires --with-crypto.])
+	;;
+     *)
+	AC_DEFINE(AUTOKEY, , [Support NTP Autokey protocol?])
+	ntp_autokey=yes
+    esac
+esac
+AC_MSG_RESULT([$ntp_autokey])
 
 AC_MSG_CHECKING([if we want to compile with ElectricFence])
 AC_ARG_WITH(electricfence,

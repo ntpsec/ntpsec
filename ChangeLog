@@ -1,5 +1,10 @@
 * [Bug 1555] from 4.2.6p2-RC4: sntp illegal C (mixed code and
   declarations).
+* configure.ac: add --disable-autokey, #define AUTOKEY to enable future
+  support for building without Autokey, but with OpenSSL for its digest
+  algorithms (hash functions).  Code must be modified to use #ifdef
+  AUTOKEY instead of #ifdef OPENSSL where appropriate to complete this.
+* include/ntp_crypto.h: make assumption AUTOKEY implies OPENSSL explicit.
 (4.2.7p31) 2010/05/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1325] from 4.2.6p2-RC3: unreachable code sntp recv_bcst_data().
 * [Bug 1459] from 4.2.6p2-RC3: sntp MD5 authentication does not work

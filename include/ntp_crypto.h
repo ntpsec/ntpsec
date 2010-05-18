@@ -179,5 +179,10 @@ extern	int	crypto_nid;	/* digest nid */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */
+#else	/* ! OPENSSL follows */
+#ifdef AUTOKEY
+#error AUTOKEY should be defined only if OPENSSL is.
+invalidsyntax: AUTOKEY should be defined only if OPENSSL is.
+#endif
 #endif /* OPENSSL */
 #endif /* NTP_CRYPTO_H */
