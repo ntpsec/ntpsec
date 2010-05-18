@@ -1,5 +1,6 @@
 * [Bug 1555] from 4.2.6p2-RC4: sntp illegal C (mixed code and
   declarations).
+* [Bug 1558] pool prototype associations have 0.0.0.0 for remote addr.
 * configure.ac: add --disable-autokey, #define AUTOKEY to enable future
   support for building without Autokey, but with OpenSSL for its digest
   algorithms (hash functions).  Code must be modified to use #ifdef

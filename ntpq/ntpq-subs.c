@@ -1779,7 +1779,9 @@ doprintpeers(
 	if (numhosts > 1)
 		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
-		strncpy(clock_name, nntohost(&srcadr), sizeof(clock_name));		
+		if (!havevar[HAVE_SRCHOST])
+			strncpy(clock_name, nntohost(&srcadr),
+				sizeof(clock_name));
 		fprintf(fp, "%c%-15.15s ", c, clock_name);
 		drlen = strlen(dstadr_refid);
 		makeascii(drlen, dstadr_refid, fp);
