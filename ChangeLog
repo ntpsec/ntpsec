@@ -1,4 +1,5 @@
 ---
+(4.2.6p2-RC4) 2010/05/19 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1555] 4.2.6p2-RC3 sntp illegal C (mixed code and declarations).
 
