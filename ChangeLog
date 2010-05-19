@@ -1,3 +1,4 @@
+(4.2.7p32) 2010/05/19 Released by Harlan Stenn <stenn@ntp.org>
 * Copyright file cleanup from Dave Mills.
 * [Bug 1555] from 4.2.6p2-RC4: sntp illegal C (mixed code and
   declarations).
