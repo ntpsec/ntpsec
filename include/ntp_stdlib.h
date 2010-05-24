@@ -177,6 +177,7 @@ extern	int	ssl_init_done;
 #endif
 extern	int	keytype_from_text	(const char *,	size_t *);
 extern	const char *keytype_name	(int);
+extern	char *	getpass_keytype		(int);
 
 
 /* lib/isc/win32/strerror.c
