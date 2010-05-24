@@ -59,14 +59,6 @@ u_long	current_time;		/* needed by authkeys; not used */
  */
 s_char	sys_precision;		/* local clock precision (log2 s) */
 
-/*
- * Use getpassphrase() if configure.ac detected it, as Suns that
- * have it truncate the password in getpass() to 8 characters.
- */
-#ifdef HAVE_GETPASSPHRASE
-# define	getpass(str)	getpassphrase(str)
-#endif
-
 int		ntpdcmain	(int,	char **);
 /*
  * Built in command handler declarations
@@ -920,7 +912,6 @@ sendrequest(
 	l_fp	ts;
 	l_fp *	ptstamp;
 	int	maclen;
-	char	pass_prompt[32];
 	char *	pass;
 
 	memset(&qpkt, 0, sizeof(qpkt));
@@ -953,10 +944,7 @@ sendrequest(
 		info_auth_keyid = key_id;
 	}
 	if (!authistrusted(info_auth_keyid)) {
-		snprintf(pass_prompt, sizeof(pass_prompt),
-			 "%s Password: ",
-			 keytype_name(info_auth_keytype));
-		pass = getpass(pass_prompt);
+		pass = getpass_keytype(info_auth_keytype);
 		if ('\0' == pass[0]) {
 			fprintf(stderr, "Invalid password\n");
 			return 1;
@@ -1854,7 +1842,7 @@ passwd(
 			   (u_char *)pcmd->argval[0].string);
 		authtrust(info_auth_keyid, 1);
 	} else {
-		pass = getpass("MD5 Password: ");
+		pass = getpass_keytype(info_auth_keytype);
 		if (*pass == '\0')
 		    (void) fprintf(fp, "Password unchanged\n");
 		else {

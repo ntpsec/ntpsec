@@ -143,3 +143,28 @@ keytype_name(
 	return name;
 }
 
+
+/*
+ * Use getpassphrase() if configure.ac detected it, as Suns that
+ * have it truncate the password in getpass() to 8 characters.
+ */
+#ifdef HAVE_GETPASSPHRASE
+# define	getpass(str)	getpassphrase(str)
+#endif
+
+/*
+ * getpass_keytype() -- shared between ntpq and ntpdc, only vaguely
+ *			related to the rest of ssl_init.c.
+ */
+char *
+getpass_keytype(
+	int	keytype
+	)
+{
+	char	pass_prompt[64 + 11 + 1]; /* 11 for " Password: " */
+
+	snprintf(pass_prompt, sizeof(pass_prompt),
+		 "%.64s Password: ", keytype_name(keytype));
+
+	return getpass(pass_prompt);
+}

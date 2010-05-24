@@ -237,14 +237,6 @@ static const char *tstflagnames[] = {
 };
 
 
-/*
- * Use getpassphrase() if configure.ac detected it, as Suns that
- * have it truncate the password in getpass() to 8 characters.
- */
-#ifdef HAVE_GETPASSPHRASE
-# define	getpass(str)	getpassphrase(str)
-#endif
-
 int		ntpqmain	(int,	char **);
 /*
  * Built in command handler declarations
@@ -1220,7 +1212,6 @@ sendrequest(
 	struct ntp_control qpkt;
 	int	pktsize;
 	u_long	key_id;
-	char	pass_prompt[32];
 	char *	pass;
 	int	maclen;
 
@@ -1289,10 +1280,7 @@ sendrequest(
 		info_auth_keyid = key_id;
 	}
 	if (!authistrusted(info_auth_keyid)) {
-		snprintf(pass_prompt, sizeof(pass_prompt),
-			 "%s Password: ",
-			 keytype_name(info_auth_keytype));
-		pass = getpass(pass_prompt);
+		pass = getpass_keytype(info_auth_keytype);
 		if ('\0' == pass[0]) {
 			fprintf(stderr, "Invalid password\n");
 			return 1;
@@ -2437,13 +2425,17 @@ passwd(
 		}
 		info_auth_keyid = u_keyid;
 	}
-	pass = getpass("MD5 Password: ");
-	if (*pass == '\0')
-		(void) fprintf(fp, "Password unchanged\n");
+	if (pcmd->nargs >= 1)
+		pass = pcmd->argval[0].string;
 	else {
-		authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
-		authtrust(info_auth_keyid, 1);
+		pass = getpass_keytype(info_auth_keytype);
+		if ('\0' == pass[0]) {
+			fprintf(fp, "Password unchanged\n");
+			return;
+		}
 	}
+	authusekey(info_auth_keyid, info_auth_keytype, (u_char *)pass);
+	authtrust(info_auth_keyid, 1);
 }
 
 
@@ -2751,10 +2743,13 @@ makeascii(
 	FILE *fp
 	)
 {
-	register u_char *cp;
-	register int c;
+	const u_char *data_u_char;
+	const u_char *cp;
+	int c;
 
-	for (cp = (u_char *)data; cp < (u_char *)data + length; cp++) {
+	data_u_char = (const u_char *)data;
+
+	for (cp = data_u_char; cp < data_u_char + length; cp++) {
 		c = (int)*cp;
 		if (c & 0x80) {
 			putc('M', fp);
