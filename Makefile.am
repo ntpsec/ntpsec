@@ -28,6 +28,10 @@ SUBDIRS+= 		\
 	util		\
 	$(NULL)
 
+SUBDIRS+=		\
+	tests		\
+	$(NULL)
+
 DIST_SUBDIRS=		\
 	scripts		\
 	include		\
