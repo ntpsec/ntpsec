@@ -1,6 +1,7 @@
 ---
 
 * [Bug 1561] ntpq, ntpdc "passwd" prompts for MD5 password w/SHA1.
+* [Bug 1565] sntp/crypto.c compile fails on MacOS over vsnprintf().
 * Windows port: do not exit in ntp_timestamp_from_counter() without
   first logging the reason.
 * Support "passwd blah" syntax in ntpq.
