@@ -7,6 +7,8 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/unix/include \
 	-I$(top_srcdir)/tests
 
+TESTS = 
+
 if !NTP_CROSSCOMPILE
-TESTS = tests
+TESTS += tests
 endif
