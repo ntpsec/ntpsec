@@ -1,4 +1,5 @@
 ---
+(4.2.6p2-RC5) 2010/06/03 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1561] ntpq, ntpdc "passwd" prompts for MD5 password w/SHA1.
 * [Bug 1565] sntp/crypto.c compile fails on MacOS over vsnprintf().
