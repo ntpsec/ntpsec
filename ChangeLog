@@ -1,5 +1,5 @@
-* [Bug 1580] serial clock drivers get outdated input from kernel
-  tty line buffer after startup
+* [Bug 1570] serial clock drivers get outdated input from kernel tty
+  line buffer after startup
 (4.2.7p33) 2010/06/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1561] from 4.2.6p2-RC5: ntpq, ntpdc "passwd" prompts for MD5
   password w/SHA1.
