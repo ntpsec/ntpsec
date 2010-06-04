@@ -1,3 +1,5 @@
+* [Bug 1580] serial clock drivers get outdated input from kernel
+  tty line buffer after startup
 * [Bug 1561] from 4.2.6p2-RC5: ntpq, ntpdc "passwd" prompts for MD5
   password w/SHA1.
 * [Bug 1565] from 4.2.6p2-RC5: sntp/crypto.c compile fails on MacOS over
