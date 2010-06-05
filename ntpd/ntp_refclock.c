@@ -746,7 +746,7 @@ refclock_open(
 #ifdef O_NONBLOCK
 	/*
 	 * We want to make sure there is no pending trash in the input
-	 * buffer. Since we have none-blocking IO available, this is a
+	 * buffer. Since we have non-blocking IO available, this is a
 	 * good moment to read and dump all available outdated stuff
 	 * that might have become toxic for the driver.
 	 */
