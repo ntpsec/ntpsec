@@ -1,3 +1,4 @@
+(4.2.7p34) 2010/06/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] serial clock drivers get outdated input from kernel tty
   line buffer after startup
 (4.2.7p33) 2010/06/04 Released by Harlan Stenn <stenn@ntp.org>
