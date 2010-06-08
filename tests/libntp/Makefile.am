@@ -2,6 +2,8 @@ check_PROGRAMS = tests
 LDADD = @top_builddir@/libntp/libntp.a @LCRYPTO@ -lgtest_main -lpthread
 tests_SOURCES = libntptest.cpp		\
 		a_md5encrypt.cpp	\
+		atoint.cpp		\
+		atolfp.cpp		\
 		authkeys.cpp		\
 		hextoint.cpp
 
