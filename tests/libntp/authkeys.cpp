@@ -9,6 +9,12 @@ class authkeysTest : public libntptest {
 protected:
 	virtual void SetUp() {
 		init_auth();
+
+		/*
+		 * init_auth() does not initialize global variables like authnumkeys,
+		 * so let's reset them to zero here.
+		 */
+		authnumkeys = 0;
 	}
 
 	void AddTrustedKey(keyid_t keyno) {
@@ -26,12 +32,15 @@ protected:
 	}
 };
 
-TEST_F(authkeysTest, AddTrustedKey) {
-	const keyid_t KEYNO = 5;
+TEST_F(authkeysTest, AddTrustedKeys) {
+	const keyid_t KEYNO1 = 5;
+	const keyid_t KEYNO2 = 8;
 
-	AddTrustedKey(KEYNO);
+	AddTrustedKey(KEYNO1);
+	AddTrustedKey(KEYNO2);
 
-	EXPECT_TRUE(authistrusted(KEYNO));
+	EXPECT_TRUE(authistrusted(KEYNO1));
+	EXPECT_TRUE(authistrusted(KEYNO2));
 }
 
 TEST_F(authkeysTest, AddUntrustedKey) {
@@ -71,3 +80,21 @@ TEST_F(authkeysTest, HaveKeyIncorrect) {
 	EXPECT_FALSE(auth_havekey(KEYNO));
 	EXPECT_FALSE(authhavekey(KEYNO));
 }
+
+/*TEST_F(authkeysTest, DeleteKeys) {
+	const keyid_t KEYNO1 = 2;
+	const keyid_t KEYNO2 = 5;
+	const keyid_t KEYNO3 = 66;
+
+	AddTrustedKey(KEYNO1);
+	AddTrustedKey(KEYNO2);
+	AddTrustedKey(KEYNO3);
+
+	EXPECT_EQ(3, authnumkeys);
+
+	auth_delkeys();
+
+	EXPECT_FALSE(auth_havekey(KEYNO1));
+	EXPECT_FALSE(auth_havekey(KEYNO2));
+	EXPECT_FALSE(auth_havekey(KEYNO3));
+}*/
