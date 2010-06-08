@@ -1,3 +1,5 @@
+* Rewrite of multiprecision macros in 'ntp_fp.h' from J. Perlinger
+  <perlinger@ntp.org>
 (4.2.7p34) 2010/06/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] serial clock drivers get outdated input from kernel tty
   line buffer after startup
