@@ -1,4 +1,8 @@
 ---
+
+* [Bug 715] libisc Linux IPv6 interface iteration drops multicast flags.
+
+---
 (4.2.6p2-RC5) 2010/06/03 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1561] ntpq, ntpdc "passwd" prompts for MD5 password w/SHA1.
