@@ -4,7 +4,9 @@ tests_SOURCES = libntptest.cpp		\
 		a_md5encrypt.cpp	\
 		atoint.cpp		\
 		atolfp.cpp		\
+		atouint.cpp		\
 		authkeys.cpp		\
+		caljulian.cpp		\
 		hextoint.cpp
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \

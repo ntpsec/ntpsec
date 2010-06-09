@@ -16,21 +16,22 @@ const int keytype = KEY_TYPE_MD5;
 const char *key = "abcdefgh";
 const int keylength = 8;
 const char *packet = "ijklmnopqrstuvwx";
-const int packetlength = 16;
-const char *expectedPacket = "ijklmnopqrstuvwx0000\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
+const int packetLength = 16;
+const int keyIdLength = 4;
+const int digestLength = 16;
+const int totalLength = packetLength + keyIdLength + digestLength;
+const char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x53";
 
 TEST_F(a_md5encryptTest, Encrypt) {
-	char *packetPtr = new char[16+4+16]; // Data + keyid + digest
-	memcpy(packetPtr, packet, 16);
-	memcpy(packetPtr+16, "0000", 4);
+	char *packetPtr = new char[totalLength];
+	memcpy(packetPtr, packet, packetLength);
 
-	cache_keylen = keylength;
+	cache_keylen = keyIdLength;
 
-	int length =  MD5authencrypt(KEY_TYPE_MD5, (u_char*)key, (u_int32*)packetPtr, packetlength);
+	int length =  MD5authencrypt(KEY_TYPE_MD5, (u_char*)key, (u_int32*)packetPtr, packetLength);
 	
 	EXPECT_EQ(20, length);
-
-	EXPECT_STREQ(expectedPacket, packetPtr);
+	EXPECT_TRUE(memcmp(expectedPacket, packetPtr, totalLength));
 
 	delete[] packetPtr;
 }
@@ -38,13 +39,13 @@ TEST_F(a_md5encryptTest, Encrypt) {
 TEST_F(a_md5encryptTest, DecryptValid) {
 	cache_keylen = keylength;
 
-	EXPECT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)expectedPacket, packetlength, 20));
+	EXPECT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)expectedPacket, packetLength, 20));
 }
 
 TEST_F(a_md5encryptTest, DecryptInvalid) {
-	const char *invalidPacket = "ijklmnopqrstuvwx0000\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
+	const char *invalidPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 	
-	EXPECT_FALSE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)invalidPacket, packetlength, 20));
+	EXPECT_FALSE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)invalidPacket, packetLength, 20));
 }
 
 TEST_F(a_md5encryptTest, IPv4AddressToRefId) {

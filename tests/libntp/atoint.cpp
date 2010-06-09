@@ -1,9 +1,5 @@
 #include "libntptest.h"
 
-extern "C" {
-#include "ntp_stdlib.h"
-};
-
 class atointTest : public libntptest {
 };
 
@@ -11,7 +7,7 @@ TEST_F(atointTest, RegularPositive) {
 	const char *str = "17";
 	long val;
 
-	EXPECT_TRUE(atoint(str, &val));
+	ASSERT_TRUE(atoint(str, &val));
 	EXPECT_EQ(17, val);
 }
 
@@ -19,7 +15,7 @@ TEST_F(atointTest, RegularNegative) {
 	const char *str = "-20";
 	long val;
 
-	EXPECT_TRUE(atoint(str, &val));
+	ASSERT_TRUE(atoint(str, &val));
 	EXPECT_EQ(-20, val);
 }
 
