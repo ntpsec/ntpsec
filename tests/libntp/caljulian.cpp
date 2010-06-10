@@ -16,20 +16,53 @@ protected:
 		   << (u_int)cal.minute << ":" << (u_int)cal.second;
 		return ss.str();
 	}
+
+	::testing::AssertionResult IsEqual(const calendar &expected, const calendar &actual) {
+		if (expected.year == actual.year &&
+			(expected.yearday == actual.yearday ||
+			 (expected.month == actual.month &&
+			  expected.monthday == actual.monthday)) &&
+			expected.hour == actual.hour &&
+			expected.minute == actual.minute &&
+			expected.second == actual.second) {
+			return ::testing::AssertionSuccess();
+		} else {
+			return ::testing::AssertionFailure()
+				<< "expected: " << CalendarToString(expected) << " but was "
+				<< CalendarToString(actual);
+		}
+	}
 };
 
-TEST_F(caljulianTest, RegularDate) {
-	u_long date1 = 1;
-	u_long date2 = 10;
-	u_long date0 =  0;
+TEST_F(caljulianTest, RegularTime) {
+	u_long testDate = 3485080800; // 2010-06-09 14:00:00
+	calendar expected = {2010,160,6,9,14,0,0};
 
-	calendar cal1, cal2, cal0;
+	calendar actual;
 
-	caljulian(date1, &cal1);
-	caljulian(date2, &cal2);
-	caljulian(date0, &cal0);
+	caljulian(testDate, &actual);
 
-	ADD_FAILURE() << CalendarToString(cal1).c_str();
-	ADD_FAILURE() << CalendarToString(cal2).c_str();
-	ADD_FAILURE() << CalendarToString(cal0).c_str();
+	EXPECT_TRUE(IsEqual(expected, actual));
+}
+
+TEST_F(caljulianTest, uLongBoundary) {
+	u_long time = 4294967295; // 2036-02-07 6:28:15
+	calendar expected = {2036,0,2,7,6,28,15};
+
+	calendar actual;
+
+	caljulian(time, &actual);
+
+	EXPECT_TRUE(IsEqual(expected, actual));
+}
+
+TEST_F(caljulianTest, uLongWrapped) {
+	u_long time = 0;
+	calendar expected = {2036,0,2,7,6,28,16};
+
+	calendar actual;
+
+	caljulian(time, &actual);
+
+	EXPECT_TRUE(IsEqual(expected, actual));
 }
