@@ -7,7 +7,10 @@ tests_SOURCES = libntptest.cpp		\
 		atouint.cpp		\
 		authkeys.cpp		\
 		caljulian.cpp		\
-		hextoint.cpp
+		decodenetnum.cpp	\
+		hextoint.cpp		\
+		hextolfp.cpp		\
+		sfptostr.cpp
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \

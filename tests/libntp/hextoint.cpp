@@ -1,29 +1,42 @@
 #include "libntptest.h"
 
-extern "C" {
-#include "ntp_stdlib.h"
-}
-
 class hextointTest : public libntptest {
-	
 };
 
-TEST_F(hextointTest, Test1) {
-	char dec8[] = "8";
-	char dec31[] = "1F";
-	char decmaxsigned[] = "80000000";
-	char invalid1[] = "5gb";
-	
-	u_long res;
+TEST_F(hextointTest, SingleDigit) {
+	const char *str = "a"; // 10 decimal
+	u_long actual;
 
-	ASSERT_TRUE(hextoint(dec8, &res));
-	ASSERT_EQ(8, res);
+	ASSERT_TRUE(hextoint(str, &actual));
+	EXPECT_EQ(10, actual);
+}
 
-	ASSERT_TRUE(hextoint(dec31, &res));
-	ASSERT_EQ(31, res);
+TEST_F(hextointTest, MultipleDigits) {
+	const char *str = "8F3"; // 2291 decimal
+	u_long actual;
 
-	ASSERT_TRUE(hextoint(decmaxsigned, &res));
-	ASSERT_EQ(2147483648, res);
+	ASSERT_TRUE(hextoint(str, &actual));
+	EXPECT_EQ(2291, actual);
+}
 
-	ASSERT_FALSE(hextoint(invalid1, &res));
+TEST_F(hextointTest, MaxUnsigned) {
+	const char *str = "ffffffff"; // 4294967295 decimal
+	u_long actual;
+
+	ASSERT_TRUE(hextoint(str, &actual));
+	EXPECT_EQ(4294967295, actual);
+}
+
+TEST_F(hextointTest, Overflow) {
+	const char *str = "100000000"; // Overflow by 1
+	u_long actual;
+
+	ASSERT_FALSE(hextoint(str, &actual));
+}
+
+TEST_F(hextointTest, IllegalChar) {
+	const char *str = "5gb"; // Illegal character g
+	u_long actual;
+
+	ASSERT_FALSE(hextoint(str, &actual));
 }

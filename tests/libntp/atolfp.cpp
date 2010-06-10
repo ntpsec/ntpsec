@@ -1,20 +1,6 @@
-#include "libntptest.h"
+#include "lfptest.h"
 
-extern "C" {
-#include "ntp_fp.h"
-};
-
-class atolfpTest : public libntptest {
-protected:
-	::testing::AssertionResult IsEqual(const l_fp &expected, const l_fp &actual) {
-		if (L_ISEQU(&expected, &actual)) {
-			return ::testing::AssertionSuccess();
-		} else {
-			return ::testing::AssertionFailure()
-				<< " expected: " << lfptoa(&expected, FRACTION_PREC)
-				<< " but was: " << lfptoa(&actual, FRACTION_PREC);
-		}
-	}
+class atolfpTest : public lfptest {
 };
 
 TEST_F(atolfpTest, PositiveInteger) {
