@@ -279,6 +279,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p2-RC6) 2010/06/12 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 715] libisc Linux IPv6 interface iteration drops multicast flags.
 
