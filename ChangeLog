@@ -1,3 +1,4 @@
+(4.2.7p35) 2010/06/12 Released by Harlan Stenn <stenn@ntp.org>
 * Rewrite of multiprecision macros in 'ntp_fp.h' from J. Perlinger
   <perlinger@ntp.org>
 * [Bug 715] from 4.2.6p2-RC6: libisc Linux IPv6 interface iteration
