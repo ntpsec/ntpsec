@@ -1,11 +1,7 @@
-<<<<<<< gca ChangeLog 1.589
-<<<<<<< local ChangeLog 1.590
 * Rewrite of multiprecision macros in 'ntp_fp.h' from J. Perlinger
   <perlinger@ntp.org>
-<<<<<<< remote ChangeLog 1.589.1.2
 * [Bug 715] from 4.2.6p2-RC6: libisc Linux IPv6 interface iteration
   drops multicast flags.
->>>>>>>
 (4.2.7p34) 2010/06/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] serial clock drivers get outdated input from kernel tty
   line buffer after startup
