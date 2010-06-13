@@ -14,7 +14,7 @@ protected:
  */
 const int keytype = KEY_TYPE_MD5;
 const char *key = "abcdefgh";
-const int keylength = 8;
+const int keyLength = 8;
 const char *packet = "ijklmnopqrstuvwx";
 const int packetLength = 16;
 const int keyIdLength = 4;
@@ -24,25 +24,30 @@ const char *expectedPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\x
 
 TEST_F(a_md5encryptTest, Encrypt) {
 	char *packetPtr = new char[totalLength];
+	memset(packetPtr+packetLength, 0, keyIdLength);
 	memcpy(packetPtr, packet, packetLength);
 
-	cache_keylen = keyIdLength;
+	cache_keylen = keyLength;
 
-	int length =  MD5authencrypt(KEY_TYPE_MD5, (u_char*)key, (u_int32*)packetPtr, packetLength);
+	int length =  MD5authencrypt(keytype, (u_char*)key, (u_int32*)packetPtr, packetLength);
+
+	EXPECT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)packetPtr, packetLength, length));
 	
 	EXPECT_EQ(20, length);
-	EXPECT_TRUE(memcmp(expectedPacket, packetPtr, totalLength));
+	EXPECT_TRUE(memcmp(expectedPacket, packetPtr, totalLength) == 0);
 
 	delete[] packetPtr;
 }
 
 TEST_F(a_md5encryptTest, DecryptValid) {
-	cache_keylen = keylength;
+	cache_keylen = keyLength;
 
 	EXPECT_TRUE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)expectedPacket, packetLength, 20));
 }
 
 TEST_F(a_md5encryptTest, DecryptInvalid) {
+	cache_keylen = keyLength;
+
 	const char *invalidPacket = "ijklmnopqrstuvwx\0\0\0\0\x0c\x0e\x84\xcf\x0b\xb7\xa8\x68\x8e\x52\x38\xdb\xbc\x1c\x39\x54";
 	
 	EXPECT_FALSE(MD5authdecrypt(keytype, (u_char*)key, (u_int32*)invalidPacket, packetLength, 20));
