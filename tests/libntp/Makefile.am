@@ -13,6 +13,7 @@ tests_SOURCES = ../main.cpp		\
 		decodenetnum.cpp	\
 		hextoint.cpp		\
 		hextolfp.cpp		\
+		lfptostr.cpp		\
 		sfptostr.cpp
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
