@@ -13,6 +13,7 @@ tests_SOURCES = ../main.cpp		\
 		decodenetnum.cpp	\
 		hextoint.cpp		\
 		hextolfp.cpp		\
+		inttoa.cpp		\
 		lfptostr.cpp		\
 		sfptostr.cpp
 
