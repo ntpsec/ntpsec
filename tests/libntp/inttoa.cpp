@@ -11,8 +11,9 @@ TEST_F(inttoaTest, NegativeNumber) {
 	EXPECT_STREQ("-3", inttoa(-3));
 }
 
+/* Bug 1575 start */
 TEST_F(inttoaTest, BigPositiveNumber) {
-	EXPECT_STREQ("2147483647", inttoa(2147483647));
+	EXPECT_STREQ("2147483647", inttoa(2147483647L));
 }
 
 TEST_F(inttoaTest, BigNegativeNumber) {
@@ -22,3 +23,4 @@ TEST_F(inttoaTest, BigNegativeNumber) {
 TEST_F(inttoaTest, MediumNumber) {
 	EXPECT_STREQ("20000001", inttoa(20000001));
 }
+/* Bug 1575 end */
