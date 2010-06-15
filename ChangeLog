@@ -1,3 +1,5 @@
+* [Bug 1560] Initial support for orphanwait, from Dave Mills.
+* clock_filter()/reachability fixes from Dave Mills.
 (4.2.7p35) 2010/06/12 Released by Harlan Stenn <stenn@ntp.org>
 * Rewrite of multiprecision macros in 'ntp_fp.h' from J. Perlinger
   <perlinger@ntp.org>

@@ -277,6 +277,7 @@ extern	void	timer_clr_stats (void);
 extern	void	timer_interfacetimeout (u_long);
 extern	volatile int interface_interval;
 extern	u_long	worker_idle_timer;	/* next check current_time */
+extern	u_long	orphwait;		/* orphan wait time */
 #ifdef OPENSSL
 extern	char	*sys_hostname;	/* host name */
 extern	char	*sys_groupname;	/* group name */

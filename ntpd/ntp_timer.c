@@ -65,6 +65,7 @@ static	u_long stats_timer;	/* stats timer */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 u_long	leapsec;		/* leapseconds countdown */
 u_long	worker_idle_timer;	/* next check for idle intres */
+u_long	orphwait; 		/* orphan wait time */
 #ifdef OPENSSL
 static	u_long revoke_timer;	/* keys revoke timer */
 static	u_long keys_timer;	/* session key timer */
@@ -303,7 +304,8 @@ timer(void)
 	 * synchronization source is an orphan It shows offset zero and
 	 * reference ID the loopback address.
 	 */
-	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL) {
+	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL &&
+	    current_time > orphwait) {
 		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
 #ifdef OPENSSL

@@ -137,6 +137,7 @@ typedef char s_char;
 #define MAX_TTL		8	/* max ttl mapping vector size */
 #define	BEACON		7200	/* manycast beacon interval */
 #define NTP_MAXEXTEN	2048	/* max extension field size */
+#define	NTP_ORPHWAIT	300	/* orphan wair (s) */
 
 /*
  * Miscellaneous stuff
@@ -700,6 +701,7 @@ struct pkt {
 #define	PROTO_MAXHOP		24
 #define	PROTO_BEACON		25
 #define	PROTO_ORPHAN		26
+#define	PROTO_ORPHWAIT		27
 
 /*
  * Configuration items for the loop filter
