@@ -100,6 +100,7 @@ int	sys_minclock = NTP_MINCLOCK; /* minimum candidates */
 int	sys_maxclock = NTP_MAXCLOCK; /* maximum candidates */
 int	sys_cohort = 0;		/* cohort switch */
 int	sys_orphan = STRATUM_UNSPEC + 1; /* orphan stratum */
+int	sys_orphwait = NTP_ORPHWAIT; /* orphan wait */
 int	sys_beacon = BEACON;	/* manycast beacon interval */
 int	sys_ttlmax;		/* max ttl mapping vector index */
 u_char	sys_ttl[MAX_TTL];	/* ttl mapping vector */
@@ -233,8 +234,6 @@ transmit(
 		peer->outdate = current_time;
 		peer->unreach++;
 		peer->reach <<= 1;
-		if (!(peer->reach & 0x0f))
-			clock_filter(peer, 0., 0., MAXDISPERSE);
 		if (!peer->reach) {
 
 			/*
@@ -242,8 +241,11 @@ transmit(
 			 * previously reachable raise a trap. Send a
 			 * burst if enabled.
 			 */
-			if (oreach)
+			clock_filter(peer, 0., 0., MAXDISPERSE);
+			if (oreach) {
+				peer_unfit(peer);
 				report_event(PEVNT_UNREACH, peer, NULL);
+			}
 			if ((peer->flags & FLAG_IBURST) &&
 			    peer->retry == 0)
 				peer->retry = NTP_RETRY;
@@ -2116,8 +2118,7 @@ clock_filter(
 	}
 
 	/*
-	 * If the clock discipline has stabilized, sort the samples by
-	 * distance.  
+	 * If and the clock is synchronized,sort the samples by distance.  
 	 */
 	if (sys_leap != LEAP_NOTINSYNC) {
 		for (i = 1; i < NTP_SHIFT; i++) {
@@ -2746,8 +2747,10 @@ clock_select(void)
 	 * current statistics, but do not update the clock.
 	 */
 	if (typesystem == NULL) {
-		if (osys_peer != NULL)
+		if (osys_peer != NULL) {
+			orphwait = current_time + sys_orphwait;
 			report_event(EVNT_NOPEER, NULL, NULL);
+		}
 		sys_peer = NULL;			
 		return;
 	}
@@ -3696,6 +3699,7 @@ init_proto(void)
 	sys_bdelay = 0;
 	sys_authenticate = 1;
 	sys_stattime = current_time;
+	orphwait = current_time + sys_orphwait;
 	proto_clr_stats();
 	for (i = 0; i < MAX_TTL; i++) {
 		sys_ttl[i] = (u_char)((i * 256) / MAX_TTL);
@@ -3817,6 +3821,10 @@ proto_config(
 
 	case PROTO_ORPHAN:	/* orphan stratum (orphan) */
 		sys_orphan = (int)dvalue;
+		break;
+
+	case PROTO_ORPHWAIT:	/* orphan wait (orphwait) */
+		sys_orphwait = (int)dvalue;
 		break;
 
 	case PROTO_ADJ:		/* tick increment (tick) */
