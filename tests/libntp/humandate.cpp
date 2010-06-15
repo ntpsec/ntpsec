@@ -14,9 +14,10 @@ TEST_F(humandateTest, RegularTime) {
 	time = localtime(&sample);
 	ASSERT_TRUE(time != NULL);
 
-	expected << time->tm_hour << ":"
-			 << time->tm_min << ":"
-			 << time->tm_sec;
+	expected << std::setfill('0')
+			 << std::setw(2) << time->tm_hour << ":"
+			 << std::setw(2) << time->tm_min << ":"
+			 << std::setw(2) << time->tm_sec;
 
 	EXPECT_STREQ(expected.str().c_str(), humantime(sample));
 }
