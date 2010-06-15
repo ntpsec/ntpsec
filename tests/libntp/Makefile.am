@@ -6,16 +6,22 @@ tests_SOURCES = ../main.cpp		\
 		libntptest.cpp		\
 		a_md5encrypt.cpp	\
 		atoint.cpp		\
-		atolfp.cpp		\
 		atouint.cpp		\
 		authkeys.cpp		\
 		caljulian.cpp		\
 		decodenetnum.cpp	\
 		hextoint.cpp		\
 		hextolfp.cpp		\
+		humandate.cpp		\
 		inttoa.cpp		\
 		lfptostr.cpp		\
-		sfptostr.cpp
+		netof.cpp		\
+		numtoa.cpp		\
+		numtohost.cpp		\
+		octtoint.cpp		\
+		sfptostr.cpp		\
+		socktoa.cpp		\
+		strtolfp.cpp
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
