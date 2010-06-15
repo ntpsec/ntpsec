@@ -20,7 +20,7 @@ utvtoa(
 
 	LIB_GETBUF(buf);
 	
-	(void) sprintf(buf, "%lu.%06lu", (u_long)tv->tv_sec,
+	(void) snprintf(buf, LIB_BUFLENGTH, "%lu.%06lu", (u_long)tv->tv_sec,
 		       (u_long)tv->tv_usec);
 	return buf;
 }
