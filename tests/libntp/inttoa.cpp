@@ -17,7 +17,7 @@ TEST_F(inttoaTest, BigPositiveNumber) {
 }
 
 TEST_F(inttoaTest, BigNegativeNumber) {
-	EXPECT_STREQ("-2147483648", inttoa(-2147483648L));
+	EXPECT_STREQ("-2147483648", inttoa(-2147483647L - 1L));
 }
 
 TEST_F(inttoaTest, MediumNumber) {

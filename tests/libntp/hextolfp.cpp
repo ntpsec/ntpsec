@@ -2,7 +2,7 @@
 
 class hextolfpTest : public lfptest {
 protected:
-	static const int32 HALF = -2147483648L;
+	static const int32 HALF = -2147483647L - 1L;
 	static const int32 QUARTER = 1073741824L;
 };
 

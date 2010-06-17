@@ -4,7 +4,7 @@
 
 class strtolfpTest : public lfptest {
 protected:
-	static const int32 HALF = -2147483648L;
+	static const int32 HALF = -2147483647L - 1L;
 	static const int32 QUARTER = 1073741824L;
 	static const int32 QUARTER_PROMILLE_APPRX = 1073742L;
 };
