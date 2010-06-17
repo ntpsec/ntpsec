@@ -21,7 +21,9 @@ tests_SOURCES = ../main.cpp		\
 		octtoint.cpp		\
 		sfptostr.cpp		\
 		socktoa.cpp		\
-		strtolfp.cpp
+		ssl_init.cpp		\
+		strtolfp.cpp		\
+		uinttoa.cpp
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
