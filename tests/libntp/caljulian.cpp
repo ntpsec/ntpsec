@@ -35,7 +35,7 @@ protected:
 };
 
 TEST_F(caljulianTest, RegularTime) {
-	u_long testDate = 3485080800; // 2010-06-09 14:00:00
+	u_long testDate = 3485080800UL; // 2010-06-09 14:00:00
 	calendar expected = {2010,160,6,9,14,0,0};
 
 	calendar actual;
@@ -46,7 +46,7 @@ TEST_F(caljulianTest, RegularTime) {
 }
 
 TEST_F(caljulianTest, uLongBoundary) {
-	u_long time = 4294967295; // 2036-02-07 6:28:15
+	u_long time = 4294967295UL; // 2036-02-07 6:28:15
 	calendar expected = {2036,0,2,7,6,28,15};
 
 	calendar actual;

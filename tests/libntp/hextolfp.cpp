@@ -1,6 +1,9 @@
 #include "lfptest.h"
 
 class hextolfpTest : public lfptest {
+protected:
+	static const int32 HALF = -2147483648L;
+	static const int32 QUARTER = 1073741824L;
 };
 
 TEST_F(hextolfpTest, PositiveInteger) {
@@ -27,7 +30,7 @@ TEST_F(hextolfpTest, PositiveFraction) {
 	const char *str = "00002000.80000000"; // 8196.5 decimal
 	l_fp actual;
 
-	l_fp expected = {8192, -2147483648};
+	l_fp expected = {8192, HALF};
 
 	ASSERT_TRUE(hextolfp(str, &actual));
 	EXPECT_TRUE(IsEqual(expected, actual));
@@ -37,7 +40,7 @@ TEST_F(hextolfpTest, NegativeFraction) {
 	const char *str = "ffffffff.40000000"; // -1 + 0.25 decimal
 	l_fp actual;
 
-	l_fp expected = {-1, 1073741824}; //-1 + 0.25
+	l_fp expected = {-1, QUARTER}; //-1 + 0.25
 
 	ASSERT_TRUE(hextolfp(str, &actual));
 	EXPECT_TRUE(IsEqual(expected, actual));

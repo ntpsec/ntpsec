@@ -24,7 +24,7 @@ TEST_F(hextointTest, MaxUnsigned) {
 	u_long actual;
 
 	ASSERT_TRUE(hextoint(str, &actual));
-	EXPECT_EQ(4294967295, actual);
+	EXPECT_EQ(4294967295UL, actual);
 }
 
 TEST_F(hextointTest, Overflow) {

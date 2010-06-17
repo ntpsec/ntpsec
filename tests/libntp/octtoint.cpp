@@ -32,7 +32,7 @@ TEST_F(octtointTest, MaximumUnsigned32bit) {
 	u_long actual;
 
 	ASSERT_TRUE(octtoint(str, &actual));
-	EXPECT_EQ(4294967295, actual);
+	EXPECT_EQ(4294967295UL, actual);
 }
 
 TEST_F(octtointTest, Overflow) {
