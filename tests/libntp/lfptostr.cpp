@@ -1,6 +1,7 @@
 /* 
  * This file contains test for both mfptoa and mfptoms (which uses dolfptoa),
- * since all these functions are very similar.
+ * since all these functions are very similar. It also tests ulfptoa, which is
+ * a macro.
  */
 
 #include "libntptest.h"
@@ -93,4 +94,10 @@ TEST_F(lfptostrTest, MillisecondsRoundingDown) {
 
 	EXPECT_STREQ("1000.5", lfptoms(&test, 1));
 	EXPECT_STREQ("1000", lfptoms(&test, 0));
+}
+
+TEST_F(lfptostrTest, UnsignedInteger) {
+	l_fp test = {3000000000UL, 0};
+
+	EXPECT_STREQ("3000000000.0", ulfptoa(&test, 1));
 }
