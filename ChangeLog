@@ -1,3 +1,4 @@
+(4.2.7p37) 2010/06/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1576] sys/sysctl.h depends on sys/param.h on OpenBSD.
 (4.2.7p36) 2010/06/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1560] Initial support for orphanwait, from Dave Mills.
