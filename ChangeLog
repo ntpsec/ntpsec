@@ -1,5 +1,7 @@
 ---
 
+* [Bug 1570] serial clock drivers get outdated input from kernel tty
+  line buffer after startup
 * [Bug 1575] use 'snprintf' with LIB_BUFLENGTH in inttoa.c, tvtoa.c and
   utvtoa.c
 * [Bug 1576] sys/sysctl.h depends on sys/param.h on OpenBSD.
