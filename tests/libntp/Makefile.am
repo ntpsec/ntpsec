@@ -19,11 +19,16 @@ tests_SOURCES = ../main.cpp		\
 		numtoa.cpp		\
 		numtohost.cpp		\
 		octtoint.cpp		\
+		prettydate.cpp		\
+		refnumtoa.cpp		\
 		sfptostr.cpp		\
 		socktoa.cpp		\
 		ssl_init.cpp		\
 		strtolfp.cpp		\
-		uinttoa.cpp
+		uglydate.cpp		\
+		uinttoa.cpp		\
+		ymd2yd.cpp
+
 
 INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
