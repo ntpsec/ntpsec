@@ -545,8 +545,13 @@ case "$host" in
  *) AC_CHECK_HEADERS(machine/soundcard.h sys/soundcard.h)
     ;;
 esac
-AC_CHECK_HEADERS(sys/stat.h sys/stream.h)
-AC_CHECK_HEADERS(sys/stropts.h sys/sysctl.h sys/syssgi.h sys/systune.h)
+AC_CHECK_HEADERS(sys/stat.h sys/stream.h sys/stropts.h)
+# sys/sysctl.h depends on sys/param.h on OpenBSD - Bug 1576
+AC_CHECK_HEADERS(sys/sysctl.h, [], [],
+[#if defined HAVE_SYS_PARAM_H
+# include <sys/param.h>
+#endif])
+AC_CHECK_HEADERS(sys/syssgi.h sys/systune.h)
 AC_CHECK_HEADERS(sys/termios.h sys/time.h sys/signal.h)
 AC_EGREP_CPP(yes,
 [#if HAVE_SYS_TIME_H
