@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1576] sys/sysctl.h depends on sys/param.h on OpenBSD.
+
+---
 (4.2.6p2-RC6) 2010/06/12 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 715] libisc Linux IPv6 interface iteration drops multicast flags.
