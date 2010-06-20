@@ -1,3 +1,4 @@
+(4.2.7p38) 2010/06/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] backported to 4.2.6p2-RC7.
 * [Bug 1575] from 4.2.6p2-RC7: use 'snprintf' with LIB_BUFLENGTH in
   inttoa.c, tvtoa.c and utvtoa.c
