@@ -2,6 +2,7 @@
 * [Bug 1575] from 4.2.6p2-RC7: use 'snprintf' with LIB_BUFLENGTH in
   inttoa.c, tvtoa.c and utvtoa.c
 * [Bug 1576] backported to 4.2.6p2-RC7.
+* Typo fix in a comment in ntp_proto.c.
 (4.2.7p37) 2010/06/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1576] sys/sysctl.h depends on sys/param.h on OpenBSD.
 (4.2.7p36) 2010/06/15 Released by Harlan Stenn <stenn@ntp.org>
