@@ -15,7 +15,7 @@ inttoa(
 	register char *buf;
 
 	LIB_GETBUF(buf);
-	snprintf(buf, sizeof(buf), "%ld", val);
+	snprintf(buf, LIB_BUFLENGTH, "%ld", val);
 
 	return buf;
 }

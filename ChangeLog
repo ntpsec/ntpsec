@@ -1,3 +1,10 @@
+(4.2.7p38) 2010/06/20 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1570] backported to 4.2.6p2-RC7.
+* [Bug 1575] from 4.2.6p2-RC7: use 'snprintf' with LIB_BUFLENGTH in
+  inttoa.c, tvtoa.c and utvtoa.c
+* [Bug 1576] backported to 4.2.6p2-RC7.
+* Typo fix in a comment in ntp_proto.c.
+(4.2.7p37) 2010/06/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1576] sys/sysctl.h depends on sys/param.h on OpenBSD.
 (4.2.7p36) 2010/06/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1560] Initial support for orphanwait, from Dave Mills.
@@ -285,6 +292,15 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+(4.2.6p2-RC7) 2010/06/19 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1570] serial clock drivers get outdated input from kernel tty
+  line buffer after startup
+* [Bug 1575] use 'snprintf' with LIB_BUFLENGTH in inttoa.c, tvtoa.c and
+  utvtoa.c
+* [Bug 1576] sys/sysctl.h depends on sys/param.h on OpenBSD.
+
 ---
 (4.2.6p2-RC6) 2010/06/12 Released by Harlan Stenn <stenn@ntp.org>
 

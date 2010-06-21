@@ -34,6 +34,6 @@ tvtoa(
 
 	LIB_GETBUF(buf);
 
-	(void) sprintf(buf, "%s%lu.%06lu", (isneg?"-":""), sec, usec);
+	(void) snprintf(buf, LIB_BUFLENGTH, "%s%lu.%06lu", (isneg?"-":""), sec, usec);
 	return buf;
 }

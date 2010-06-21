@@ -2118,7 +2118,7 @@ clock_filter(
 	}
 
 	/*
-	 * If and the clock is synchronized,sort the samples by distance.  
+	 * If the clock is synchronized,sort the samples by distance.  
 	 */
 	if (sys_leap != LEAP_NOTINSYNC) {
 		for (i = 1; i < NTP_SHIFT; i++) {
