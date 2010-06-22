@@ -1,3 +1,5 @@
+/* This file contains test for both libntp/authkeys.c and libntp/authusekey.c */
+
 #include "libntptest.h"
 
 extern "C" {
@@ -7,6 +9,8 @@ extern "C" {
 
 class authkeysTest : public libntptest {
 protected:
+	static const int KEYTYPE = KEY_TYPE_MD5;
+
 	virtual void SetUp() {
 		init_auth();
 
@@ -22,7 +26,7 @@ protected:
 		 * We need to add a MD5-key in addition to setting the
 		 * trust, because authhavekey() requires type != 0.
 		 */
-		MD5auth_setkey(keyno, KEY_TYPE_MD5, NULL, 0);
+		MD5auth_setkey(keyno, KEYTYPE, NULL, 0);
 
 		authtrust(keyno, 1);
 	}
@@ -51,17 +55,29 @@ TEST_F(authkeysTest, AddUntrustedKey) {
 	EXPECT_FALSE(authistrusted(KEYNO));
 }
 
-/*
+/* // Would require definition of struct savekey.
 TEST_F(authkeysTest, FindKey) {
 	const keyid_t KEYNO1 = 2;
 	const keyid_t KEYNO2 = 66;
 
-	authtrust(KEYNO1, 1);
-	authtrust(KEYNO2, 1);
+	AddTrustedKey(KEYNO1);
+	AddTrustedKey(KEYNO2);
 
 	savekey* key1 = auth_findkey(KEYNO1);
 	EXPECT_TRUE(key1 != NULL);
 	EXPECT_EQ(KEYNO1, key1->keyid);
+}
+
+TEST_F(authkeysTest, FindKeyIncorrect) {
+	const keyid_t KEYNO1 = 4;
+	const keyid_t KEYNO2 = 10;
+	const keyid_t KEYNOTADDED = 14;
+
+	AddTrustedKey(KEYNO1);
+	AddTrustedKey(KEYNO2);
+
+	savekey* key = auth_findkey(KEYNOTADDED);
+	EXPECT_TRUE(key == NULL);
 }
 */
 
@@ -81,20 +97,17 @@ TEST_F(authkeysTest, HaveKeyIncorrect) {
 	EXPECT_FALSE(authhavekey(KEYNO));
 }
 
-/*TEST_F(authkeysTest, DeleteKeys) {
-	const keyid_t KEYNO1 = 2;
-	const keyid_t KEYNO2 = 5;
-	const keyid_t KEYNO3 = 66;
+TEST_F(authkeysTest, AddWithAuthUseKey) {
+	const keyid_t KEYNO = 5;
+	const char* KEY = "52a";
 
-	AddTrustedKey(KEYNO1);
-	AddTrustedKey(KEYNO2);
-	AddTrustedKey(KEYNO3);
+	EXPECT_TRUE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));	
+}
 
-	EXPECT_EQ(3, authnumkeys);
+TEST_F(authkeysTest, EmptyKey) {
+	const keyid_t KEYNO = 3;
+	const char* KEY = "";
 
-	auth_delkeys();
 
-	EXPECT_FALSE(auth_havekey(KEYNO1));
-	EXPECT_FALSE(auth_havekey(KEYNO2));
-	EXPECT_FALSE(auth_havekey(KEYNO3));
-}*/
+	EXPECT_FALSE(authusekey(KEYNO, KEYTYPE, (u_char*)KEY));
+}

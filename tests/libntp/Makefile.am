@@ -15,6 +15,7 @@ tests_SOURCES = ../main.cpp		\
 		humandate.cpp		\
 		inttoa.cpp		\
 		lfptostr.cpp		\
+		modetoa.cpp		\
 		netof.cpp		\
 		numtoa.cpp		\
 		numtohost.cpp		\
@@ -25,6 +26,7 @@ tests_SOURCES = ../main.cpp		\
 		socktoa.cpp		\
 		ssl_init.cpp		\
 		strtolfp.cpp		\
+		tsftomsu.cpp		\
 		uglydate.cpp		\
 		uinttoa.cpp		\
 		ymd2yd.cpp
