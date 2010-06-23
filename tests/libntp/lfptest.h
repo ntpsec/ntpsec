@@ -15,7 +15,9 @@ protected:
 		} else {
 			return ::testing::AssertionFailure()
 				<< " expected: " << lfptoa(&expected, FRACTION_PREC)
-				<< " but was: " << lfptoa(&actual, FRACTION_PREC);
+				<< " (" << expected.l_ui << "." << expected.l_uf << ")"
+				<< " but was: " << lfptoa(&actual, FRACTION_PREC)
+				<< " (" << actual.l_ui << "." << actual.l_uf << ")";
 		}
 	}
 };

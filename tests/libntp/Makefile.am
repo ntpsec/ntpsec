@@ -25,8 +25,11 @@ tests_SOURCES = ../main.cpp		\
 		sfptostr.cpp		\
 		socktoa.cpp		\
 		ssl_init.cpp		\
+		statestr.cpp		\
 		strtolfp.cpp		\
 		tsftomsu.cpp		\
+		tstotv.cpp		\
+		tvtots.cpp		\
 		uglydate.cpp		\
 		uinttoa.cpp		\
 		ymd2yd.cpp
