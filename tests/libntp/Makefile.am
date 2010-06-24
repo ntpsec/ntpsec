@@ -9,6 +9,7 @@ tests_SOURCES = ../main.cpp		\
 		atouint.cpp		\
 		authkeys.cpp		\
 		caljulian.cpp		\
+		caltontp.cpp		\
 		decodenetnum.cpp	\
 		hextoint.cpp		\
 		hextolfp.cpp		\
