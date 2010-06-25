@@ -10,6 +10,8 @@ tests_SOURCES = ../main.cpp		\
 		authkeys.cpp		\
 		caljulian.cpp		\
 		caltontp.cpp		\
+		calyearstart.cpp	\
+		clocktime.cpp		\
 		decodenetnum.cpp	\
 		hextoint.cpp		\
 		hextolfp.cpp		\
