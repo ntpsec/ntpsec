@@ -5,10 +5,6 @@ extern "C" {
 };
 
 class tvtotsTest : public lfptest {
-protected:
-	static const u_long HALF = 2147483648UL;
-	static const u_long HALF_PROMILLE_UP = 2147484; // slightly more than 0.0005
-	static const u_long HALF_PROMILLE_DOWN = 2147483; // slightly less than 0.0005
 };
 
 TEST_F(tvtotsTest, Seconds) {

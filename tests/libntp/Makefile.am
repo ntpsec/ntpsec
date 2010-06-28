@@ -8,6 +8,7 @@ tests_SOURCES = ../main.cpp		\
 		atoint.cpp		\
 		atouint.cpp		\
 		authkeys.cpp		\
+		buftvtots.cpp		\
 		caljulian.cpp		\
 		caltontp.cpp		\
 		calyearstart.cpp	\
@@ -24,6 +25,7 @@ tests_SOURCES = ../main.cpp		\
 		numtohost.cpp		\
 		octtoint.cpp		\
 		prettydate.cpp		\
+		recvbuff.cpp		\
 		refnumtoa.cpp		\
 		sfptostr.cpp		\
 		socktoa.cpp		\
