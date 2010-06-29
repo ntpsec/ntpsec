@@ -45,6 +45,17 @@ TEST_F(caljulianTest, RegularTime) {
 	EXPECT_TRUE(IsEqual(expected, actual));
 }
 
+TEST_F(caljulianTest, LeapYear) {
+	u_long input = 3549902400UL; // 2012-06-28 20:00:00Z
+	calendar expected = {2012, 179, 6, 28, 20, 0, 0};
+
+	calendar actual;
+
+	caljulian(input, &actual);
+
+	EXPECT_TRUE(IsEqual(expected, actual));
+}
+
 TEST_F(caljulianTest, uLongBoundary) {
 	u_long time = 4294967295UL; // 2036-02-07 6:28:15
 	calendar expected = {2036,0,2,7,6,28,15};

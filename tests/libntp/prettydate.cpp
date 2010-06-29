@@ -14,7 +14,3 @@ TEST_F(prettydateTest, ConstantDate) {
 
 	ASSERT_STREQ("cfba1ce0.80000000  Wed, Jun  9 2010 14:00:00.500", gmprettydate(&time));
 }
-
-TEST_F(prettydateTest, ) {
-
-}
