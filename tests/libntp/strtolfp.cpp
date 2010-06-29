@@ -23,7 +23,10 @@ TEST_F(strtolfpTest, NegativeInteger) {
 	const char *str = "-300";
 	const char *str_ms = "-300000";
 
-	l_fp expected = {-300,0};
+	l_fp expected;
+	expected.l_i = -300;
+	expected.l_f = 0;
+
 	l_fp actual, actual_ms;
 
 	ASSERT_TRUE(atolfp(str, &actual));
@@ -51,7 +54,10 @@ TEST_F(strtolfpTest, NegativeFraction) {
 	const char *str = "-300.75";
 	const char *str_ms = "-300750";
 
-	l_fp expected = {-301, QUARTER}; // Fraction is 2^32 * 1/4
+	l_fp expected;
+	expected.l_i = -301;
+	expected.l_uf = QUARTER;
+
 	l_fp actual, actual_ms;
 
 	ASSERT_TRUE(atolfp(str, &actual));
@@ -79,7 +85,10 @@ TEST_F(strtolfpTest, NegativeMsFraction) {
 	const char *str = "-199.99975";
 	const char *str_ms = "-199999.75";
 
-	l_fp expected = {-200, QUARTER_PROMILLE_APPRX};
+	l_fp expected;
+	expected.l_i = -200;
+	expected.l_uf = QUARTER_PROMILLE_APPRX;
+
 	l_fp actual, actual_ms;
 
 	ASSERT_TRUE(atolfp(str, &actual));
