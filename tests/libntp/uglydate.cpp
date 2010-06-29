@@ -6,7 +6,7 @@ extern "C" {
 
 class uglydateTest : public libntptest {
 protected:
-	static const int HALF = -2147483648L;
+	static const u_int32 HALF = 2147483648UL;
 };
 
 TEST_F(uglydateTest, ConstantDateTime) {
