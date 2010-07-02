@@ -782,7 +782,7 @@ sendpkt(
 	)
 {
 	if (debug >= 3)
-	    printf("Sending %lu octets\n", (u_long)xdatalen);
+		printf("Sending %lu octets\n", (u_long)xdatalen);
 
 	if (send(sockfd, xdata, (size_t)xdatalen, 0) == -1) {
 		warning("write to %s failed", currenthost, "");

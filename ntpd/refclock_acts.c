@@ -364,7 +364,7 @@ acts_message(
 	ioctl(pp->io.fd, TIOCMGET, (char *)&modem);
 	snprintf(tbuf, sizeof(tbuf), "acts: %04x (%d %d) %lu %s", modem,
 		 up->state, up->timer, (u_long)strlen(pp->a_lastcode),
-	    pp->a_lastcode);
+		 pp->a_lastcode);
 	if (debug)
 		printf("%s\n", tbuf);
 #endif
