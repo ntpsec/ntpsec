@@ -636,8 +636,8 @@ normal_return:
 lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
 	msyslog(LOG_ERR, 
-		"configuration item on line %d longer than limit of %d, began with '%s'",
-		ip_file->line_no, sizeof(yytext) - 1, yytext);
+		"configuration item on line %d longer than limit of %lu, began with '%s'",
+		ip_file->line_no, (u_long)(sizeof(yytext) - 1), yytext);
 
 	/*
 	 * If we hit the length limit reading the startup configuration

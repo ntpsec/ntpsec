@@ -582,25 +582,26 @@ process_private(
 		 */
 		if (!INFO_IS_AUTH(inpkt->auth_seq) || !info_auth_keyid
 		    || ntohl(tailinpkt->keyid) != info_auth_keyid) {
-			DPRINTF(5, ("failed auth %d info_auth_keyid %u pkt keyid %u maclen %u\n",
+			DPRINTF(5, ("failed auth %d info_auth_keyid %u pkt keyid %u maclen %lu\n",
 				    INFO_IS_AUTH(inpkt->auth_seq),
 				    info_auth_keyid,
-				    ntohl(tailinpkt->keyid), mac_len));
+				    ntohl(tailinpkt->keyid), (u_long)mac_len));
 #ifdef DEBUG
 			msyslog(LOG_DEBUG,
-				"process_private: failed auth %d info_auth_keyid %u pkt keyid %u maclen %u\n",
+				"process_private: failed auth %d info_auth_keyid %u pkt keyid %u maclen %lu\n",
 				INFO_IS_AUTH(inpkt->auth_seq),
 				info_auth_keyid,
-				ntohl(tailinpkt->keyid), mac_len);
+				ntohl(tailinpkt->keyid), (u_long)mac_len);
 #endif
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}
 		if (recv_len > REQ_LEN_NOMAC + MAX_MAC_LEN) {
-			DPRINTF(5, ("bad pkt length %d\n", recv_len));
+			DPRINTF(5, ("bad pkt length %lu\n", 
+				    (u_long)recv_len));
 			msyslog(LOG_ERR,
-				"process_private: bad pkt length %d",
-				recv_len);
+				"process_private: bad pkt length %lu",
+				(u_long)recv_len);
 			req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
 			return;
 		}

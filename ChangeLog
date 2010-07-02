@@ -1,4 +1,10 @@
 ---
+
+* [Bug 1581] size_t printf format string mismatches, IRIG string buffers
+  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
+  Perlinger.
+
+---
 (4.2.6p2-RC7) 2010/06/19 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1570] serial clock drivers get outdated input from kernel tty

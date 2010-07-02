@@ -796,8 +796,8 @@ getresponse(
 	if ((size_t)datasize > (n-RESP_HEADER_SIZE)) {
 		if (debug)
 		    printf(
-			    "Received items %d, size %d (total %d), data in packet is %d\n",
-			    items, size, datasize, n-RESP_HEADER_SIZE);
+			    "Received items %d, size %d (total %d), data in packet is %lu\n",
+			    items, size, datasize, (u_long)(n-RESP_HEADER_SIZE));
 		goto again;
 	}
 
@@ -981,9 +981,9 @@ sendrequest(
 		return 1;
 	} else if (maclen != (info_auth_hashlen + sizeof(keyid_t))) {
 		fprintf(stderr,
-			"%d octet MAC, %u expected with %u octet digest\n",
-			maclen, (info_auth_hashlen + sizeof(keyid_t)),
-			info_auth_hashlen);
+			"%d octet MAC, %lu expected with %lu octet digest\n",
+			maclen, (u_long)(info_auth_hashlen + sizeof(keyid_t)),
+			(u_long)info_auth_hashlen);
 		return 1;
 	}
 	return sendpkt(&qpkt, reqsize + maclen);
@@ -1793,9 +1793,9 @@ keytype(
 	int		key_type;
 
 	if (!pcmd->nargs) {
-		fprintf(fp, "keytype is %s with %u octet digests\n",
+		fprintf(fp, "keytype is %s with %lu octet digests\n",
 			keytype_name(info_auth_keytype),
-			info_auth_hashlen);
+			(u_long)info_auth_hashlen);
 		return;
 	}
 

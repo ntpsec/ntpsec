@@ -829,9 +829,10 @@ request(
 		total_len = pchEnd - (char *)&reqpkt;
 		if (total_len > sizeof(reqpkt)) {
 			msyslog(LOG_ERR,
-				"intres total_len %u limit is %u (%u octet digest)\n",
-				total_len, sizeof(reqpkt),
-				req_hashlen);
+				"intres total_len %lu limit is %lu (%lu octet digest)\n",
+				(u_long)total_len,
+				(u_long)sizeof(reqpkt),
+				(u_long)req_hashlen);
 			resolver_exit(1);
 		}
 	} else {
@@ -849,7 +850,8 @@ request(
 		if ((size_t)n != req_hashlen + sizeof(reqpkt.keyid)) {
 			msyslog(LOG_ERR,
 				"intres maclen %d expected %u\n",
-				n, req_hashlen + sizeof(reqpkt.keyid));
+				n, (u_long)(req_hashlen +
+				sizeof(reqpkt.keyid)));
 			resolver_exit(1);
 		}
 		req_len += n;

@@ -844,11 +844,11 @@ irig_decode(
 	 * Local variables
 	 */
 	int	syncdig;	/* sync digit (Spectracom) */
-	char	sbs[6];		/* binary seconds since 0h */
-	char	spare[2];	/* mulligan digits */
+	char	sbs[6 + 1];	/* binary seconds since 0h */
+	char	spare[2 + 1];	/* mulligan digits */
 	int	temp;
 
-        pp = peer->procptr;
+	pp = peer->procptr;
 	up = (struct irigunit *)pp->unitptr;
 
 	/*
