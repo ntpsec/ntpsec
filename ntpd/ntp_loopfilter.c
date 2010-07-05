@@ -256,7 +256,7 @@ local_clock(
 		if (fabs(fp_offset) > clock_max && clock_max > 0) {
 			step_systime(fp_offset);
 			msyslog(LOG_NOTICE, "ntpd: time set %+.6f s",
-	   		    fp_offset);
+			    fp_offset);
 			printf("ntpd: time set %+.6fs\n", fp_offset);
 		} else {
 			adj_systime(fp_offset);
@@ -340,7 +340,7 @@ local_clock(
 
 			clock_frequency = direct_freq(fp_offset);
 
-			/* fall through to S_SPIK */
+			/* fall through to EVNT_SPIK */
 
 		/*
 		 * In SPIK state we ignore succeeding outlyers until
@@ -400,7 +400,7 @@ local_clock(
 		 * The offset is less than the step threshold. Calculate
 		 * the jitter as the exponentially weighted offset
 		 * differences.
- 	      	 */
+		 */
 		etemp = SQUARE(clock_jitter);
 		dtemp = SQUARE(max(fabs(fp_offset - last_offset),
 		    LOGTOD(sys_precision)));
@@ -625,7 +625,7 @@ local_clock(
 	drift_file_sw = TRUE;
 
 	/*
-	 * Here we adjust the timeconstan by comparing the current
+	 * Here we adjust the time constant by comparing the current
 	 * offset with the clock jitter. If the offset is less than the
 	 * clock jitter times a constant, then the averaging interval is
 	 * increased, otherwise it is decreased. A bit of hysteresis
@@ -709,7 +709,7 @@ adj_host_clock(
 	 * Implement the phase and frequency adjustments. The gain
 	 * factor (denominator) increases with poll interval, so is
 	 * dominated by the FLL above the Allan intercept.
- 	 */
+	 */
 	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
@@ -948,8 +948,8 @@ loop_config(
 			ntv.status = STA_UNSYNC;
 			ntp_adjtime(&ntv);
 			report_event(EVNT_KERN, NULL,
- 		  	    "kernel time sync disabledx");
-		   }
+			    "kernel time sync disabled");
+		}
 #endif /* KERNEL_PLL */
 #endif /* LOCKCLOCK */
 		break;
