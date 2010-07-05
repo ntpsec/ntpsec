@@ -3649,7 +3649,7 @@ config_peers(
 		 * proceed in the mainline with it.  Otherwise, hand
 		 * the hostname off to the blocking child.
 		 */
-		if (is_ip_address(*cmdline_servers, default_ai_family,
+		if (is_ip_address(*cmdline_servers, AF_UNSPEC,
 				  &i_netaddr)) {
 
 			AF(&peeraddr) = (u_short)i_netaddr.family;
@@ -3679,7 +3679,7 @@ config_peers(
 			/* we have a hostname to resolve */
 #ifdef WORKER
 			ctx = emalloc(sizeof(*ctx));
-			ctx->family = default_ai_family;
+			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
 			ctx->version = NTP_VERSION;
