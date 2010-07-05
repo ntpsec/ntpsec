@@ -7,6 +7,9 @@ extern "C" {
 #include "ntp_stdlib.h"
 };
 
+// This declaration does not exist in ntp_stdlib.h
+extern u_short cache_flags;
+
 class authkeysTest : public libntptest {
 protected:
 	static const int KEYTYPE = KEY_TYPE_MD5;
@@ -19,6 +22,15 @@ protected:
 		 * so let's reset them to zero here.
 		 */
 		authnumkeys = 0;
+
+		/*
+		 * Especially, empty the key cache!
+		 */
+		cache_keyid = 0;
+		cache_type = 0;
+		cache_flags = 0;
+		cache_key = NULL;
+		cache_keylen = 0;
 	}
 
 	void AddTrustedKey(keyid_t keyno) {
@@ -54,32 +66,6 @@ TEST_F(authkeysTest, AddUntrustedKey) {
 
 	EXPECT_FALSE(authistrusted(KEYNO));
 }
-
-/* // Would require definition of struct savekey.
-TEST_F(authkeysTest, FindKey) {
-	const keyid_t KEYNO1 = 2;
-	const keyid_t KEYNO2 = 66;
-
-	AddTrustedKey(KEYNO1);
-	AddTrustedKey(KEYNO2);
-
-	savekey* key1 = auth_findkey(KEYNO1);
-	EXPECT_TRUE(key1 != NULL);
-	EXPECT_EQ(KEYNO1, key1->keyid);
-}
-
-TEST_F(authkeysTest, FindKeyIncorrect) {
-	const keyid_t KEYNO1 = 4;
-	const keyid_t KEYNO2 = 10;
-	const keyid_t KEYNOTADDED = 14;
-
-	AddTrustedKey(KEYNO1);
-	AddTrustedKey(KEYNO2);
-
-	savekey* key = auth_findkey(KEYNOTADDED);
-	EXPECT_TRUE(key == NULL);
-}
-*/
 
 TEST_F(authkeysTest, HaveKeyCorrect) {
 	const keyid_t KEYNO = 3;
