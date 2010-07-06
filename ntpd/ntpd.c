@@ -641,16 +641,9 @@ ntpdmain(
 # endif
 # if defined(HAVE_WORKING_FORK)
 	long	wait_sync = 0;
-	int	s;
 	int	pipe_fds[2];
 	int	rc;
 	int	exit_code;
-#  ifdef F_CLOSEM
-	int	f_closem_errno;
-	int	first_to_close;
-#  else		/* !F_CLOSEM follows */
-	int	max_fd;
-#  endif	/* !F_CLOSEM */
 #  ifdef _AIX
 	struct sigaction sa;
 #  endif

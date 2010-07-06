@@ -172,6 +172,7 @@
 %token	<Integer>	T_Ntpport
 %token	<Integer>	T_NtpSignDsocket
 %token	<Integer>	T_Orphan
+%token	<Integer>	T_Orphanwait
 %token	<Integer>	T_Panic
 %token	<Integer>	T_Peer
 %token	<Integer>	T_Peerstats
@@ -537,6 +538,8 @@ tos_option
 	|	T_Cohort boolean
 			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Orphan T_Integer
+			{ $$ = create_attr_dval($1, (double)$2); }
+	|	T_Orphanwait T_Integer
 			{ $$ = create_attr_dval($1, (double)$2); }
 	|	T_Mindist number
 			{ $$ = create_attr_dval($1, $2); }

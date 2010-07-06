@@ -1678,8 +1678,6 @@ clock_update(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	struct peer *o_sys_peer;
-	u_char	o_sys_stratum;
 	double	dtemp;
 	l_fp	now;
 #ifdef HAVE_LIBSCF_H
@@ -1690,7 +1688,6 @@ clock_update(
 	 * Update the system state variables. We do this very carefully,
 	 * as the poll interval might need to be clamped differently.
 	 */
-	o_sys_peer = sys_peer;
 	sys_peer = peer;
 	sys_epoch = peer->epoch;
 	if (sys_poll < peer->minpoll)
@@ -1698,7 +1695,6 @@ clock_update(
 	if (sys_poll > peer->maxpoll)
 		sys_poll = peer->maxpoll;
 	poll_update(peer, sys_poll);
-	o_sys_stratum = sys_stratum;
 	sys_stratum = min(peer->stratum + 1, STRATUM_UNSPEC);
 	if (peer->stratum == STRATUM_REFCLOCK ||
 	    peer->stratum == STRATUM_UNSPEC)
@@ -1773,8 +1769,7 @@ clock_update(
 		 * leap bits. If crypto, the timer will goose the setup
 		 * process.
 		 */
-		if (sys_leap == LEAP_NOTINSYNC || (o_sys_peer == NULL &&
-		    o_sys_stratum == (u_char)sys_orphan)) {
+		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
 #ifdef OPENSSL
 			if (crypto_flags)

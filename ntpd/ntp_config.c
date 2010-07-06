@@ -748,6 +748,7 @@ dump_config_tree(
 		case T_Floor:
 		case T_Cohort:
 		case T_Orphan:
+		case T_Orphanwait:
 		case T_Minclock:
 		case T_Maxclock:
 		case T_Minsane:
@@ -1918,6 +1919,10 @@ config_tos(
 
 		case T_Orphan:
 			item = PROTO_ORPHAN;
+			break;
+
+		case T_Orphanwait:
+			item = PROTO_ORPHWAIT;
 			break;
 
 		case T_Mindist:
