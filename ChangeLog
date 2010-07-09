@@ -1,6 +1,6 @@
-* [Bug 1581] from 4.2.6p2-RC8: size_t printf format string mismatches,
-  IRIG string buffers undersized.  Mostly backported from earlier
-  ntp-dev fixes by Jürgen Perlinger.
+* [Bug 1581] from 4.2.6p2: size_t printf format string mismatches, IRIG
+  string buffers undersized.  Mostly backported from earlier ntp-dev
+  fixes by Jürgen Perlinger.
 (4.2.7p38) 2010/06/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] backported to 4.2.6p2-RC7.
 * [Bug 1575] from 4.2.6p2-RC7: use 'snprintf' with LIB_BUFLENGTH in
