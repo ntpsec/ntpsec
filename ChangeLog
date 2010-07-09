@@ -1,4 +1,5 @@
 ---
+(4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
   undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
