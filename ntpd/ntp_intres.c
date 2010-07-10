@@ -849,7 +849,7 @@ request(
 		n = authencrypt(req_keyid, (void *)&reqpkt, req_len);
 		if ((size_t)n != req_hashlen + sizeof(reqpkt.keyid)) {
 			msyslog(LOG_ERR,
-				"intres maclen %d expected %u\n",
+				"intres maclen %d expected %lu\n",
 				n, (u_long)(req_hashlen +
 				sizeof(reqpkt.keyid)));
 			resolver_exit(1);
