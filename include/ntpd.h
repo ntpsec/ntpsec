@@ -572,6 +572,9 @@ extern char *user;		/* user to switch to */
 extern char *group;		/* group to switch to */
 extern const char *chrootdir;	/* directory to chroot() to */
 #endif
+#ifdef HAVE_WORKING_FORK
+extern	int	waitsync_fd_to_close;	/* -w/--wait-sync */
+#endif
 
 /* ntservice.c */
 #ifdef SYS_WINNT

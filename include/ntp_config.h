@@ -61,6 +61,10 @@
 #define CONF_SOURCE_FILE		0
 #define CONF_SOURCE_NTPQ		1
 
+/* list of servers from command line for config_peers() */
+extern	int	cmdline_server_count;
+extern	char **	cmdline_servers;
+
 
 /* Structure for storing an attribute-value pair  */
 struct attr_val {

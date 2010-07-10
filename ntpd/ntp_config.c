@@ -58,6 +58,10 @@
 #include "ntp_data_structures.h"
 
 
+/* list of servers from command line for config_peers() */
+int	cmdline_server_count;
+char **	cmdline_servers;
+
 /*
  * "logconfig" building blocks
  */
@@ -744,6 +748,7 @@ dump_config_tree(
 		case T_Floor:
 		case T_Cohort:
 		case T_Orphan:
+		case T_Orphanwait:
 		case T_Minclock:
 		case T_Maxclock:
 		case T_Minsane:
@@ -1914,6 +1919,10 @@ config_tos(
 
 		case T_Orphan:
 			item = PROTO_ORPHAN;
+			break;
+
+		case T_Orphanwait:
+			item = PROTO_ORPHWAIT;
 			break;
 
 		case T_Mindist:
@@ -3634,6 +3643,76 @@ config_peers(
 	peer_resolved_ctx *	ctx;
 	u_char			hmode;
 
+	/* add servers named on the command line with iburst implied */
+	for (;
+	     cmdline_server_count > 0;
+	     cmdline_server_count--, cmdline_servers++) {
+
+		ZERO_SOCK(&peeraddr);
+		/*
+		 * If we have a numeric address, we can safely
+		 * proceed in the mainline with it.  Otherwise, hand
+		 * the hostname off to the blocking child.
+		 */
+		if (is_ip_address(*cmdline_servers, AF_UNSPEC,
+				  &i_netaddr)) {
+
+			AF(&peeraddr) = (u_short)i_netaddr.family;
+			SET_PORT(&peeraddr, NTP_PORT);
+			if (AF_INET6 == i_netaddr.family)
+				SET_ADDR6N(&peeraddr,
+					   i_netaddr.type.in6);
+			else
+				SET_ADDR4N(&peeraddr,
+					   i_netaddr.type.in.s_addr);
+
+			if (is_sane_resolved_address(&peeraddr,
+						     T_Server))
+				peer_config(
+					&peeraddr,
+					NULL,
+					NULL,
+					MODE_CLIENT,
+					NTP_VERSION,
+					0,
+					0,
+					FLAG_IBURST,
+					0,
+					0,
+					(u_char *)"*");
+		} else {
+			/* we have a hostname to resolve */
+#ifdef WORKER
+			ctx = emalloc(sizeof(*ctx));
+			ctx->family = AF_UNSPEC;
+			ctx->host_mode = T_Server;
+			ctx->hmode = MODE_CLIENT;
+			ctx->version = NTP_VERSION;
+			ctx->minpoll = 0;
+			ctx->maxpoll = 0;
+			ctx->flags = FLAG_IBURST;
+			ctx->ttl = 0;
+			ctx->keyid = 0;
+
+			memset(&hints, 0, sizeof(hints));
+			hints.ai_family = (u_short)ctx->family;
+			hints.ai_socktype = SOCK_DGRAM;
+			hints.ai_protocol = IPPROTO_UDP;
+
+			getaddrinfo_sometime(*cmdline_servers,
+					     "ntp", &hints,
+					     INITIAL_DNS_RETRY,
+					     &peer_name_resolved,
+					     (void *)ctx);
+#else	/* !WORKER follows */
+			msyslog(LOG_ERR,
+				"hostname %s can not be used, please use IP address instead.\n",
+				curr_peer->addr->address);
+#endif
+		}
+	}
+
+	/* add associations from the configuration file */
 	for (curr_peer = queue_head(ptree->peers);
 	     curr_peer != NULL;
 	     curr_peer = next_node(curr_peer)) {

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  July  9, 2010 at 10:06:49 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  July  5, 2010 at 01:48:12 PM by AutoGen 5.10
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -81,17 +81,18 @@ typedef enum {
     INDEX_OPT_UPDATEINTERVAL    = 26,
     INDEX_OPT_VAR               = 27,
     INDEX_OPT_DVAR              = 28,
-    INDEX_OPT_SLEW              = 29,
-    INDEX_OPT_USEPCC            = 30,
-    INDEX_OPT_PCCFREQ           = 31,
-    INDEX_OPT_VERSION           = 32,
-    INDEX_OPT_HELP              = 33,
-    INDEX_OPT_MORE_HELP         = 34
+    INDEX_OPT_WAIT_SYNC         = 29,
+    INDEX_OPT_SLEW              = 30,
+    INDEX_OPT_USEPCC            = 31,
+    INDEX_OPT_PCCFREQ           = 32,
+    INDEX_OPT_VERSION           = 33,
+    INDEX_OPT_HELP              = 34,
+    INDEX_OPT_MORE_HELP         = 35
 } teOptIndex;
 
-#define OPTION_CT    35
-#define NTPD_VERSION       "4.2.7p39"
-#define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.7p39"
+#define OPTION_CT    36
+#define NTPD_VERSION       "4.2.7p38"
+#define NTPD_FULL_VERSION  "ntpd - NTP daemon program - Ver. 4.2.7p38"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -234,6 +235,10 @@ typedef enum {
 #  warning undefining DVAR due to option name conflict
 #  undef   DVAR
 # endif
+# ifdef    WAIT_SYNC
+#  warning undefining WAIT_SYNC due to option name conflict
+#  undef   WAIT_SYNC
+# endif
 # ifdef    SLEW
 #  warning undefining SLEW due to option name conflict
 #  undef   SLEW
@@ -276,6 +281,7 @@ typedef enum {
 # undef UPDATEINTERVAL
 # undef VAR
 # undef DVAR
+# undef WAIT_SYNC
 # undef SLEW
 # undef USEPCC
 # undef PCCFREQ
@@ -318,9 +324,10 @@ typedef enum {
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
 #define VALUE_OPT_VAR            27
 #define VALUE_OPT_DVAR           28
+#define VALUE_OPT_WAIT_SYNC      'w'
 #define VALUE_OPT_SLEW           'x'
-#define VALUE_OPT_USEPCC         30
-#define VALUE_OPT_PCCFREQ        31
+#define VALUE_OPT_USEPCC         31
+#define VALUE_OPT_PCCFREQ        32
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
@@ -334,7 +341,7 @@ typedef enum {
                 ntpdOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdOptions.pUsageProc)( &ntpdOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *

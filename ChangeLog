@@ -1,8 +1,10 @@
+* [Bug 1395] ease ntpdate elimination with ntpd -w/--wait-sync
+* [Bug 1396] allow servers on ntpd command line like ntpdate
 (4.2.7p39) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 * Fix typo in driver28.html.
 * [Bug 1581] from 4.2.6p2: size_t printf format string mismatches, IRIG
   string buffers undersized.  Mostly backported from earlier ntp-dev
-  fixes by Jürgen Perlinger.
+  fixes by JÃ¼rgen Perlinger.
 (4.2.7p38) 2010/06/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] backported to 4.2.6p2-RC7.
 * [Bug 1575] from 4.2.6p2-RC7: use 'snprintf' with LIB_BUFLENGTH in
@@ -301,7 +303,7 @@
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by JÃ¼rgen
   Perlinger.
 
 ---

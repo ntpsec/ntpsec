@@ -240,6 +240,7 @@ flag = {
 flag = {
     name      = nofork;
     value     = n;
+    flags-cant = wait-sync;
     descrip   = "Do not fork";
     doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
@@ -288,12 +289,15 @@ flag = {
 flag = {
     name      = quit;
     value     = q;
+    flags-cant = saveconfigquit;
+    flags-cant = wait-sync;
     descrip   = "Set the time and quit";
     doc = <<-  _EndOfDoc_
 	ntpd
-	will exit just after the first time the clock is set. This behavior mimics that of the
+	will not daemonize and will exit after the clock is first
+	synchronized.  This behavior mimics that of the
 	ntpdate
-	program, which is to be retired.
+	program, which will soon be replaced with a shell script.
 	The
 	-g
 	and
@@ -317,6 +321,8 @@ flag = {
     ifdef     = SAVECONFIG;
     name      = saveconfigquit;
     arg-type  = string;
+    flags-cant = quit;
+    flags-cant = wait-sync;
     descrip   = "Save parsed configuration and quit";
     doc = <<-  _EndOfDoc_
 	Cause ntpd to parse its startup configuration file and save an
@@ -404,6 +410,32 @@ flag = {
     arg-name  = ndvar;
     stack-arg;
     doc = <<-  _EndOfDoc_
+	_EndOfDoc_;
+};
+
+flag = {
+    ifdef     = HAVE_WORKING_FORK;
+    name      = wait-sync;
+    value     = w;
+    /* arg-type  = number; */ /* doesn't compile on Windows with Autogen 5.10 output, instead: */
+    arg-type  = string;
+    flag-code = <<- _EOF_
+	extern tOptProc optionNumericVal;
+	optionNumericVal(pOptions, pOptDesc);
+	_EOF_;
+    flags-cant = nofork;
+    flags-cant = quit;
+    flags-cant = saveconfigquit;
+    descrip   = "Seconds to wait for first clock sync";
+    doc = <<-  _EndOfDoc_
+	If greater than zero, alters ntpd behavior when forking to
+	daemonize.  Instead of exiting with status 0 immediately after
+	the fork, the parent waits up to the specified number of
+	seconds for the child to first synchronize the clock.  The exit
+	status is zero (success) if the clock was synchronized,
+	otherwise it is ETIMEDOUT.
+	This provides the option for a script starting ntpd to easily
+	wait for the first set of the clock before proceeding.
 	_EndOfDoc_;
 };
 
