@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  July  9, 2010 at 11:31:56 PM by AutoGen 5.10
+ *  It has been AutoGen-ed  July 12, 2010 at 10:07:16 AM by AutoGen 5.10
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -1016,7 +1016,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPD";
 tSCC   zUsageTitle[] =
-"ntpd - NTP daemon program - Ver. 4.2.7p39\n\
+"ntpd - NTP daemon program - Ver. 4.2.7p40\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n";
 #define zRcName     NULL
@@ -1026,7 +1026,7 @@ tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 tSCC    zDetail[]     = "\n\n";
 tSCC    zFullVersion[] = NTPD_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -1114,7 +1114,7 @@ optionNumericVal(pOptions, pOptDesc);
 }
 #endif /* defined HAVE_WORKING_FORK */
 #endif /* defined(TEST_NTPD_OPTS) */
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_NTPD_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -1129,7 +1129,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPD_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>
