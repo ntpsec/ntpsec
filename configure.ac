@@ -3251,7 +3251,7 @@ AC_ARG_ENABLE(
     [autokey],
     AS_HELP_STRING(
 	[--enable-autokey],
-	[+ Experimental disabling of NTP Autokey protocol]
+	[+ support NTP Autokey protocol]
 	),
     [ntp_autokey=$enableval],
     [ntp_autokey=$ntp_openssl]

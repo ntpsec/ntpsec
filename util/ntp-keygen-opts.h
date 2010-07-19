@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  July 12, 2010 at 10:09:37 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  July 19, 2010 at 07:43:25 AM by AutoGen 5.10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -213,10 +213,10 @@ typedef enum {
 #define VALUE_OPT_ISSUER_NAME    'i'
 #define VALUE_OPT_MD5KEY         'M'
 #define VALUE_OPT_MODULUS        'm'
-#ifdef OPENSSL
+#ifdef AUTOKEY
 
 #define OPT_VALUE_MODULUS        (DESC(MODULUS).optArg.argInt)
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #define VALUE_OPT_PVT_CERT       'P'
 #define VALUE_OPT_PVT_PASSWD     'p'
 #define VALUE_OPT_GET_PVT_PASSWD 'q'
@@ -224,15 +224,15 @@ typedef enum {
 #define VALUE_OPT_SUBJECT_NAME   's'
 #define VALUE_OPT_TRUSTED_CERT   'T'
 #define VALUE_OPT_MV_PARAMS      'V'
-#ifdef OPENSSL
+#ifdef AUTOKEY
 
 #define OPT_VALUE_MV_PARAMS      (DESC(MV_PARAMS).optArg.argInt)
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #define VALUE_OPT_MV_KEYS        'v'
-#ifdef OPENSSL
+#ifdef AUTOKEY
 
 #define OPT_VALUE_MV_KEYS        (DESC(MV_KEYS).optArg.argInt)
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
@@ -252,7 +252,7 @@ typedef enum {
                 ntp_keygenOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntp_keygenOptions.pUsageProc)( &ntp_keygenOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 409 */
 
 /* * * * * *
  *

@@ -28,6 +28,10 @@
 #include "ntp_assert.h"
 #include "ntp_lineedit.h"
 #include "ntp_debug.h"
+#ifdef OPENSSL
+#include "openssl/evp.h"
+#include "openssl/objects.h"
+#endif
 #include <ssl_applink.c>
 
 #include "ntpq-opts.h"

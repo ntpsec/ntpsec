@@ -71,7 +71,7 @@ struct speer {
 	l_fp reftime;
 	keyid_t keyid;
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #define clear_to_zero opcode
 	u_int32	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
@@ -99,9 +99,9 @@ struct speer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
-#else /* OPENSSL */
+#else	/* !AUTOKEY follows */
 #define clear_to_zero status
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 	
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */

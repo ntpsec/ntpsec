@@ -13,9 +13,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_control.h"
 #include <ntp_random.h>
-#ifdef OPENSSL
-#include "openssl/rand.h"
-#endif /* OPENSSL */
 
 /*
  *                  Table of valid association combinations
@@ -769,7 +766,7 @@ newpeer(
 	u_int	hash;
 	char	tbuf[80];
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * If Autokey is requested but not configured, complain loudly.
 	 */
@@ -782,7 +779,7 @@ newpeer(
 			return (NULL);
 		} 
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/*
 	 * For now only pool associations have a hostname.
@@ -886,10 +883,10 @@ newpeer(
 	if ((MDF_MCAST & cast_flags) && peer->dstadr != NULL)
 		enable_multicast_if(peer->dstadr, srcadr);
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
 	peer->precision = sys_precision;

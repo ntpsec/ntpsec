@@ -9,6 +9,11 @@
 #include "ntpd.h"
 #include "ntp_stdlib.h"
 
+#if defined(HAVE_IO_COMPLETION_PORT)
+# include "ntp_iocompletionport.h"
+# include "ntp_timer.h"
+#endif
+
 #include <stdio.h>
 #include <signal.h>
 #ifdef HAVE_SYS_SIGNAL_H
@@ -18,18 +23,13 @@
 # include <unistd.h>
 #endif
 
-#if defined(HAVE_IO_COMPLETION_PORT)
-# include "ntp_iocompletionport.h"
-# include "ntp_timer.h"
-#endif
-
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #include <openssl/rand.h>
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 
 /* TC_ERR represents the timer_create() error return value. */
@@ -66,12 +66,12 @@ static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 u_long	leapsec;		/* leapseconds countdown */
 u_long	worker_idle_timer;	/* next check for idle intres */
 u_long	orphwait; 		/* orphan wait time */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 static	u_long revoke_timer;	/* keys revoke timer */
 static	u_long keys_timer;	/* session key timer */
 u_long	sys_revoke = KEY_REVOKE; /* keys revoke timeout (log2 s) */
 u_long	sys_automax = NTP_AUTOMAX; /* key list timeout (log2 s) */
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 /*
  * Statistics counter for the interested.
@@ -308,10 +308,10 @@ timer(void)
 	    current_time > orphwait) {
 		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 			if (crypto_flags)	
 				crypto_update();
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 		}
 		sys_stratum = (u_char)sys_orphan;
 		if (sys_stratum > 1)
@@ -361,7 +361,7 @@ timer(void)
 		huffpuff();
 	}
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * Garbage collect expired keys.
 	 */
@@ -379,7 +379,7 @@ timer(void)
 		revoke_timer += 1 << sys_revoke;
 		RAND_bytes((u_char *)&sys_private, 4);
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/*
 	 * Interface update timer

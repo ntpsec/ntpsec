@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  July 12, 2010 at 10:09:37 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  July 19, 2010 at 07:43:26 AM by AutoGen 5.10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -71,7 +71,7 @@ extern tUsageProc optionUsage;
 /*
  *  Certificate option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zCertificateText[] =
         "certificate scheme";
 tSCC    zCertificate_NAME[]        = "CERTIFICATE";
@@ -84,7 +84,7 @@ tSCC    zCertificate_Name[]        = "certificate";
 #define zCertificate_NAME      NULL
 #define zCertificateText       NULL
 #define zCertificate_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Debug_Level option description:
@@ -108,7 +108,7 @@ tSCC    zSet_Debug_Level_Name[]    = "set-debug-level";
 /*
  *  Id_Key option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zId_KeyText[] =
         "Write IFF or GQ identity keys";
 tSCC    zId_Key_NAME[]             = "ID_KEY";
@@ -120,12 +120,12 @@ tSCC    zId_Key_Name[]             = "id-key";
 #define zId_Key_NAME      NULL
 #define zId_KeyText       NULL
 #define zId_Key_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Gq_Params option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zGq_ParamsText[] =
         "Generate GQ parameters and keys";
 tSCC    zGq_Params_NAME[]          = "GQ_PARAMS";
@@ -137,12 +137,12 @@ tSCC    zGq_Params_Name[]          = "gq-params";
 #define zGq_Params_NAME      NULL
 #define zGq_ParamsText       NULL
 #define zGq_Params_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Host_Key option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zHost_KeyText[] =
         "generate RSA host key";
 tSCC    zHost_Key_NAME[]           = "HOST_KEY";
@@ -154,12 +154,12 @@ tSCC    zHost_Key_Name[]           = "host-key";
 #define zHost_Key_NAME      NULL
 #define zHost_KeyText       NULL
 #define zHost_Key_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Iffkey option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zIffkeyText[] =
         "generate IFF parameters";
 tSCC    zIffkey_NAME[]             = "IFFKEY";
@@ -171,12 +171,12 @@ tSCC    zIffkey_Name[]             = "iffkey";
 #define zIffkey_NAME      NULL
 #define zIffkeyText       NULL
 #define zIffkey_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Issuer_Name option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zIssuer_NameText[] =
         "set issuer name";
 tSCC    zIssuer_Name_NAME[]        = "ISSUER_NAME";
@@ -189,7 +189,7 @@ tSCC    zIssuer_Name_Name[]        = "issuer-name";
 #define zIssuer_Name_NAME      NULL
 #define zIssuer_NameText       NULL
 #define zIssuer_Name_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Md5key option description:
@@ -203,7 +203,7 @@ tSCC    zMd5key_Name[]             = "md5key";
 /*
  *  Modulus option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zModulusText[] =
         "modulus";
 tSCC    zModulus_NAME[]            = "MODULUS";
@@ -216,12 +216,12 @@ tSCC    zModulus_Name[]            = "modulus";
 #define zModulus_NAME      NULL
 #define zModulusText       NULL
 #define zModulus_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Pvt_Cert option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zPvt_CertText[] =
         "generate PC private certificate";
 tSCC    zPvt_Cert_NAME[]           = "PVT_CERT";
@@ -233,12 +233,12 @@ tSCC    zPvt_Cert_Name[]           = "pvt-cert";
 #define zPvt_Cert_NAME      NULL
 #define zPvt_CertText       NULL
 #define zPvt_Cert_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Pvt_Passwd option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zPvt_PasswdText[] =
         "output private password";
 tSCC    zPvt_Passwd_NAME[]         = "PVT_PASSWD";
@@ -251,12 +251,12 @@ tSCC    zPvt_Passwd_Name[]         = "pvt-passwd";
 #define zPvt_Passwd_NAME      NULL
 #define zPvt_PasswdText       NULL
 #define zPvt_Passwd_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Get_Pvt_Passwd option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zGet_Pvt_PasswdText[] =
         "input private password";
 tSCC    zGet_Pvt_Passwd_NAME[]     = "GET_PVT_PASSWD";
@@ -269,12 +269,12 @@ tSCC    zGet_Pvt_Passwd_Name[]     = "get-pvt-passwd";
 #define zGet_Pvt_Passwd_NAME      NULL
 #define zGet_Pvt_PasswdText       NULL
 #define zGet_Pvt_Passwd_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Sign_Key option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zSign_KeyText[] =
         "generate sign key (RSA or DSA)";
 tSCC    zSign_Key_NAME[]           = "SIGN_KEY";
@@ -287,12 +287,12 @@ tSCC    zSign_Key_Name[]           = "sign-key";
 #define zSign_Key_NAME      NULL
 #define zSign_KeyText       NULL
 #define zSign_Key_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Subject_Name option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zSubject_NameText[] =
         "set subject name";
 tSCC    zSubject_Name_NAME[]       = "SUBJECT_NAME";
@@ -305,12 +305,12 @@ tSCC    zSubject_Name_Name[]       = "subject-name";
 #define zSubject_Name_NAME      NULL
 #define zSubject_NameText       NULL
 #define zSubject_Name_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Trusted_Cert option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zTrusted_CertText[] =
         "trusted certificate (TC scheme)";
 tSCC    zTrusted_Cert_NAME[]       = "TRUSTED_CERT";
@@ -322,12 +322,12 @@ tSCC    zTrusted_Cert_Name[]       = "trusted-cert";
 #define zTrusted_Cert_NAME      NULL
 #define zTrusted_CertText       NULL
 #define zTrusted_Cert_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Mv_Params option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zMv_ParamsText[] =
         "generate <num> MV parameters";
 tSCC    zMv_Params_NAME[]          = "MV_PARAMS";
@@ -340,12 +340,12 @@ tSCC    zMv_Params_Name[]          = "mv-params";
 #define zMv_Params_NAME      NULL
 #define zMv_ParamsText       NULL
 #define zMv_Params_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Mv_Keys option description:
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 tSCC    zMv_KeysText[] =
         "update <num> MV keys";
 tSCC    zMv_Keys_NAME[]            = "MV_KEYS";
@@ -358,7 +358,7 @@ tSCC    zMv_Keys_Name[]            = "mv-keys";
 #define zMv_Keys_NAME      NULL
 #define zMv_KeysText       NULL
 #define zMv_Keys_Name      NULL
-#endif  /* OPENSSL */
+#endif  /* AUTOKEY */
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -393,21 +393,21 @@ tSCC zNotLoad_Opts_Pfx[]  = "no";
 /*
  *  Declare option callback procedures
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
   static tOptProc doOptModulus;
-#else /* not OPENSSL */
+#else /* not AUTOKEY */
 # define doOptModulus NULL
-#endif /* def/not OPENSSL */
-#ifdef OPENSSL
+#endif /* def/not AUTOKEY */
+#ifdef AUTOKEY
   extern tOptProc optionNumericVal;
-#else /* not OPENSSL */
+#else /* not AUTOKEY */
 # define optionNumericVal NULL
-#endif /* def/not OPENSSL */
-#ifdef OPENSSL
+#endif /* def/not AUTOKEY */
+#ifdef AUTOKEY
   extern tOptProc optionNumericVal;
-#else /* not OPENSSL */
+#else /* not AUTOKEY */
 # define optionNumericVal NULL
-#endif /* def/not OPENSSL */
+#endif /* def/not AUTOKEY */
 #if defined(TEST_NTP_KEYGEN_OPTS)
 /*
  *  Under test, omit argument processing, or call optionStackArg,
@@ -752,7 +752,7 @@ tSCC    zDetail[]     = "\n\
 If there is no new host key, look for an existing one.\n\
 If one is not found, create it.\n";
 tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 495 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -825,9 +825,9 @@ DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   For the modulus option, when OPENSSL is #define-d.
+ *   For the modulus option, when AUTOKEY is #define-d.
  */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 static void
 doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
 {
@@ -873,8 +873,8 @@ doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
     }
     pOptDesc->optArg.argInt = val;
 }
-#endif /* defined OPENSSL */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
+#endif /* defined AUTOKEY */
+/* extracted from /usr/local/share/autogen/optmain.tpl near line 109 */
 
 #if defined(TEST_NTP_KEYGEN_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -889,7 +889,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 627 */
 
 #if ENABLE_NLS
 #include <stdio.h>

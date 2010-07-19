@@ -12,7 +12,8 @@
 
 #ifdef OPENSSL
 #include "openssl/objects.h"
-#endif /* OPENSSL */
+#include "openssl/evp.h"
+#endif	/* OPENSSL */
 
 /* Forwards */
 static char *nexttok (char **);
@@ -34,7 +35,7 @@ nexttok(
 	 * Space past white space
 	 */
 	while (*cp == ' ' || *cp == '\t')
-	    cp++;
+		cp++;
 	
 	/*
 	 * Save this and space to end of token
@@ -42,19 +43,19 @@ nexttok(
 	starttok = cp;
 	while (*cp != '\0' && *cp != '\n' && *cp != ' '
 	       && *cp != '\t' && *cp != '#')
-	    cp++;
+		cp++;
 	
 	/*
 	 * If token length is zero return an error, else set end of
 	 * token to zero and return start.
 	 */
 	if (starttok == cp)
-	    return (NULL);
+		return NULL;
 	
 	if (*cp == ' ' || *cp == '\t')
-	    *cp++ = '\0';
+		*cp++ = '\0';
 	else
-	    *cp = '\0';
+		*cp = '\0';
 	
 	*str = cp;
 	return starttok;
@@ -147,7 +148,7 @@ authreadkeys(
 			    "authreadkeys: no algorithm for key %d", keyno);
 			continue;
 		}
-#else /* OPENSSL */
+#else	/* !OPENSSL follows */
 
 		/*
 		 * The key type is unused, but is required to be 'M' or
@@ -159,7 +160,7 @@ authreadkeys(
 			continue;
 		}
 		keytype = KEY_TYPE_MD5;
-#endif /* OPENSSL */
+#endif	/* !OPENSSL */
 
 		/*
 		 * Finally, get key and insert it. If it is longer than 20

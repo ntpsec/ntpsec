@@ -20,7 +20,7 @@ flag = {
     name      = certificate;
     arg-type  = string;
     arg-name  = scheme;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "certificate scheme";
     doc = <<-  _EndOfDoc_
 	scheme is one of
@@ -39,7 +39,7 @@ flag = {
 flag = {
     value     = e;
     name      = id-key;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "Write IFF or GQ identity keys";
     doc = <<-  _EndOfDoc_
 	Write the IFF or GQ client keys to the standard output.  This is
@@ -50,7 +50,7 @@ flag = {
 flag = {
     value     = G;
     name      = gq-params;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "Generate GQ parameters and keys";
     doc = <<-  _EndOfDoc_
 	Generate parameters and keys for the GQ identification scheme,
@@ -61,7 +61,7 @@ flag = {
 flag = {
     value     = H;
     name      = host-key;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "generate RSA host key";
     doc = <<-  _EndOfDoc_
 	Generate new host keys, obsoleting any that may exist.
@@ -71,7 +71,7 @@ flag = {
 flag = {
     value     = I;
     name      = iffkey;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "generate IFF parameters";
     doc = <<-  _EndOfDoc_
 	Generate parameters for the IFF identification scheme, obsoleting
@@ -82,7 +82,7 @@ flag = {
 flag = {
     value     = i;
     name      = issuer-name;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     arg-type  = string;
     arg-name  = issuer-name;
     descrip   = "set issuer name";
@@ -107,7 +107,7 @@ flag = {
     arg-type  = number;
     arg-name  = modulus;
     arg-range = '256->2048';
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "modulus";
     doc = <<-  _EndOfDoc_
 	The number of bits in the prime modulus.  The default is 512.
@@ -117,7 +117,7 @@ flag = {
 flag = {
     value     = P;
     name      = pvt-cert;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "generate PC private certificate";
     doc = <<-  _EndOfDoc_
 	Generate a private certificate.  By default, the program generates
@@ -128,7 +128,7 @@ flag = {
 flag = {
     value     = p;
     name      = pvt-passwd;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     arg-type  = string;
     arg-name  = passwd;
     descrip   = "output private password";
@@ -141,7 +141,7 @@ flag = {
 flag = {
     value     = q;
     name      = get-pvt-passwd;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     arg-type  = string;
     arg-name  = passwd;
     descrip   = "input private password";
@@ -155,7 +155,7 @@ flag = {
     name      = sign-key;
     arg-type  = string;
     arg-name  = sign;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "generate sign key (RSA or DSA)";
     doc = <<-  _EndOfDoc_
 	Generate a new sign key of the designated type, obsoleting any
@@ -169,7 +169,7 @@ flag = {
     name      = subject-name;
     arg-type  = string;
     arg-name  = host;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "set subject name";
     doc = <<-  _EndOfDoc_
 	Set the issuer name to name.  This is used for the issuer field
@@ -180,7 +180,7 @@ flag = {
 flag = {
     value     = T;
     name      = trusted-cert;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "trusted certificate (TC scheme)";
     doc = <<-  _EndOfDoc_
 	Generate a trusted certificate.  By default, the program generates
@@ -193,7 +193,7 @@ flag = {
     name      = mv-params;
     arg-type  = number;
     arg-name  = num;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "generate <num> MV parameters";
     doc = <<-  _EndOfDoc_
 	Generate parameters and keys for the Mu-Varadharajan (MV)
@@ -206,7 +206,7 @@ flag = {
     name      = mv-keys;
     arg-type  = number;
     arg-name  = num;
-    ifdef     = OPENSSL;
+    ifdef     = AUTOKEY;
     descrip   = "update <num> MV keys";
 };
 

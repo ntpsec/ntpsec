@@ -82,9 +82,9 @@ int	drift_file_sw;			/* clock update switch */
 #ifdef DEBUG_TIMING
 static FILEGEN timingstats;
 #endif
-#ifdef OPENSSL
+#ifdef AUTOKEY
 static FILEGEN cryptostats;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 static	char statsdir[MAXPATHLEN] = NTP_VAR;
 static FILEGEN peerstats;
@@ -147,12 +147,12 @@ uninit_util(void)
 	filegen_unregister("rawstats");
 	filegen_unregister("sysstats");
 	filegen_unregister("protostats");
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	filegen_unregister("cryptostats");
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 #ifdef DEBUG_TIMING
 	filegen_unregister("timingstats");
-#endif /* DEBUG_TIMING */
+#endif	/* DEBUG_TIMING */
 
 #if defined(_MSC_VER) && defined (_DEBUG)
 	_CrtCheckMemory();
@@ -173,12 +173,12 @@ init_util(void)
 	filegen_register(statsdir, "rawstats",    &rawstats);
 	filegen_register(statsdir, "sysstats",    &sysstats);
 	filegen_register(statsdir, "protostats",  &protostats);
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	filegen_register(statsdir, "cryptostats", &cryptostats);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 #ifdef DEBUG_TIMING
 	filegen_register(statsdir, "timingstats", &timingstats);
-#endif /* DEBUG_TIMING */
+#endif	/* DEBUG_TIMING */
 	/*
 	 * register with libntp ntp_set_tod() to call us back
 	 * when time is stepped.
@@ -471,65 +471,65 @@ stats_config(
 				    value[value_l - 1]);
 
 			if (add_dir_sep)
-			    snprintf(statsdir, sizeof(statsdir),
-				"%s%c", value, DIR_SEP);
+				snprintf(statsdir, sizeof(statsdir),
+					 "%s%c", value, DIR_SEP);
 			else
-			    snprintf(statsdir, sizeof(statsdir),
-				"%s", value);
+				snprintf(statsdir, sizeof(statsdir),
+					 "%s", value);
 
 			get_systime(&now);
-			if(peerstats.prefix == &statsdir[0] &&
+			if (peerstats.prefix == &statsdir[0] &&
 			    peerstats.fp != NULL) {
 				fclose(peerstats.fp);
 				peerstats.fp = NULL;
 				filegen_setup(&peerstats, now.l_ui);
 			}
-			if(loopstats.prefix == &statsdir[0] &&
+			if (loopstats.prefix == &statsdir[0] &&
 			    loopstats.fp != NULL) {
 				fclose(loopstats.fp);
 				loopstats.fp = NULL;
 				filegen_setup(&loopstats, now.l_ui);
 			}
-			if(clockstats.prefix == &statsdir[0] &&
+			if (clockstats.prefix == &statsdir[0] &&
 			    clockstats.fp != NULL) {
 				fclose(clockstats.fp);
 				clockstats.fp = NULL;
 				filegen_setup(&clockstats, now.l_ui);
 			}
-			if(rawstats.prefix == &statsdir[0] &&
+			if (rawstats.prefix == &statsdir[0] &&
 			    rawstats.fp != NULL) {
 				fclose(rawstats.fp);
 				rawstats.fp = NULL;
 				filegen_setup(&rawstats, now.l_ui);
 			}
-			if(sysstats.prefix == &statsdir[0] &&
+			if (sysstats.prefix == &statsdir[0] &&
 			    sysstats.fp != NULL) {
 				fclose(sysstats.fp);
 				sysstats.fp = NULL;
 				filegen_setup(&sysstats, now.l_ui);
 			}
-			if(protostats.prefix == &statsdir[0] &&
+			if (protostats.prefix == &statsdir[0] &&
 			    protostats.fp != NULL) {
 				fclose(protostats.fp);
 				protostats.fp = NULL;
 				filegen_setup(&protostats, now.l_ui);
 			}
-#ifdef OPENSSL
-			if(cryptostats.prefix == &statsdir[0] &&
+#ifdef AUTOKEY
+			if (cryptostats.prefix == &statsdir[0] &&
 			    cryptostats.fp != NULL) {
 				fclose(cryptostats.fp);
 				cryptostats.fp = NULL;
 				filegen_setup(&cryptostats, now.l_ui);
 			}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 #ifdef DEBUG_TIMING
-			if(timingstats.prefix == &statsdir[0] &&
+			if (timingstats.prefix == &statsdir[0] &&
 			    timingstats.fp != NULL) {
 				fclose(timingstats.fp);
 				timingstats.fp = NULL;
 				filegen_setup(&timingstats, now.l_ui);
 			}
-#endif /* DEBUG_TIMING */
+#endif	/* DEBUG_TIMING */
 		}
 		break;
 
@@ -810,7 +810,7 @@ record_proto_stats(
 }
 
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 /*
  * record_crypto_stats - write crypto statistics to file
  *
@@ -846,7 +846,7 @@ record_crypto_stats(
 		fflush(cryptostats.fp);
 	}
 }
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 
 #ifdef DEBUG_TIMING

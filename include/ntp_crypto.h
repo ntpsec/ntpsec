@@ -5,7 +5,7 @@
 #define NTP_CRYPTO_H
 
 /*
- * Configuration codes (also needed for parser without OPENSSL)
+ * Configuration codes (also needed for parser without AUTOKEY)
  */
 #define CRYPTO_CONF_NONE  0	/* nothing doing */
 #define CRYPTO_CONF_PRIV  1	/* host keys file name */
@@ -19,8 +19,14 @@
 #define	CRYPTO_CONF_IDENT 9	/* specify identity scheme */
 #define	CRYPTO_CONF_NID   10	/* specify digest name */
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
+#ifndef OPENSSL
+#error AUTOKEY should be defined only if OPENSSL is.
+invalidsyntax: AUTOKEY should be defined only if OPENSSL is.
+#endif
+
 #include "openssl/evp.h"
+
 
 /*
  * The following bits are set by the CRYPTO_ASSOC message from
@@ -179,10 +185,5 @@ extern	int	crypto_nid;	/* digest nid */
 extern	struct value hostval;	/* host name/value */
 extern	struct cert_info *cinfo; /* host certificate information */
 extern	struct value tai_leap;	/* leapseconds table */
-#else	/* ! OPENSSL follows */
-#ifdef AUTOKEY
-#error AUTOKEY should be defined only if OPENSSL is.
-invalidsyntax: AUTOKEY should be defined only if OPENSSL is.
-#endif
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #endif /* NTP_CRYPTO_H */
