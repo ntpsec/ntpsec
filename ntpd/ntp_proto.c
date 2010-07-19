@@ -17,9 +17,10 @@
 #include <stdio.h>
 #ifdef HAVE_LIBSCF_H
 #include <libscf.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* HAVE_LIBSCF_H */
-
+#endif
 
 /*
  * This macro defines the authentication state. If x is 1 authentication
@@ -1774,6 +1775,18 @@ clock_update(
 			if (crypto_flags)
 				crypto_update();
 #endif /* OPENSSL */
+			/*
+			 * If our parent process is waiting for the
+			 * first clock sync, send them home satisfied.
+			 */
+#ifdef HAVE_WORKING_FORK
+			if (waitsync_fd_to_close != -1) {
+				close(waitsync_fd_to_close);
+				waitsync_fd_to_close = -1;
+				DPRINTF(1, ("notified parent --wait-sync is done\n"));
+			}
+#endif /* HAVE_WORKING_FORK */
+
 		}
 
 		/*

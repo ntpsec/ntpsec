@@ -598,7 +598,8 @@ process_private(
 			return;
 		}
 		if (recv_len > REQ_LEN_NOMAC + MAX_MAC_LEN) {
-		    DPRINTF(5, ("bad pkt length %lu\n", (u_long)recv_len));
+			DPRINTF(5, ("bad pkt length %lu\n", 
+				    (u_long)recv_len));
 			msyslog(LOG_ERR,
 				"process_private: bad pkt length %lu",
 				(u_long)recv_len);

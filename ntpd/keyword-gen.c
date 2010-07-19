@@ -142,6 +142,7 @@ struct key_tok ntp_keywords[] = {
 { "maxdist",		T_Maxdist,		FOLLBY_TOKEN },
 { "beacon",		T_Beacon,		FOLLBY_TOKEN },
 { "orphan",		T_Orphan,		FOLLBY_TOKEN },
+{ "orphanwait",		T_Orphanwait,		FOLLBY_TOKEN },
 /* access_control_flag */
 { "default",		T_Default,		FOLLBY_TOKEN },
 { "source",		T_Source,		FOLLBY_TOKEN },

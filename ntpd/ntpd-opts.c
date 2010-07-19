@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  June 20, 2010 at 10:08:00 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  July 12, 2010 at 10:07:16 AM by AutoGen 5.10
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -266,12 +266,16 @@ tSCC    zModifymmtimer_Name[]      = "modifymmtimer";
 #endif  /* SYS_WINNT */
 
 /*
- *  Nofork option description:
+ *  Nofork option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zNoforkText[] =
         "Do not fork";
 tSCC    zNofork_NAME[]             = "NOFORK";
 tSCC    zNofork_Name[]             = "nofork";
+static const int
+    aNoforkCantList[] = {
+    INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
 #define NOFORK_FLAGS       (OPTST_DISABLED)
 
 /*
@@ -304,12 +308,17 @@ tSCC    zPriority_Name[]           = "priority";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
- *  Quit option description:
+ *  Quit option description with
+ *  "Must also have options" and "Incompatible options":
  */
 tSCC    zQuitText[] =
         "Set the time and quit";
 tSCC    zQuit_NAME[]               = "QUIT";
 tSCC    zQuit_Name[]               = "quit";
+static const int
+    aQuitCantList[] = {
+    INDEX_OPT_SAVECONFIGQUIT,
+    INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
 #define QUIT_FLAGS       (OPTST_DISABLED)
 
 /*
@@ -323,18 +332,24 @@ tSCC    zPropagationdelay_Name[]   = "propagationdelay";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Saveconfigquit option description:
+ *  Saveconfigquit option description with
+ *  "Must also have options" and "Incompatible options":
  */
 #ifdef SAVECONFIG
 tSCC    zSaveconfigquitText[] =
         "Save parsed configuration and quit";
 tSCC    zSaveconfigquit_NAME[]     = "SAVECONFIGQUIT";
 tSCC    zSaveconfigquit_Name[]     = "saveconfigquit";
+static const int
+    aSaveconfigquitCantList[] = {
+    INDEX_OPT_QUIT,
+    INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
 #define SAVECONFIGQUIT_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable Saveconfigquit */
 #define SAVECONFIGQUIT_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define aSaveconfigquitCantList   NULL
 #define zSaveconfigquit_NAME      NULL
 #define zSaveconfigquitText       NULL
 #define zSaveconfigquit_Name      NULL
@@ -407,6 +422,31 @@ tSCC    zDvar_NAME[]               = "DVAR";
 tSCC    zDvar_Name[]               = "dvar";
 #define DVAR_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+/*
+ *  Wait_Sync option description with
+ *  "Must also have options" and "Incompatible options":
+ */
+#ifdef HAVE_WORKING_FORK
+tSCC    zWait_SyncText[] =
+        "Seconds to wait for first clock sync";
+tSCC    zWait_Sync_NAME[]          = "WAIT_SYNC";
+tSCC    zWait_Sync_Name[]          = "wait-sync";
+static const int
+    aWait_SyncCantList[] = {
+    INDEX_OPT_NOFORK,
+    INDEX_OPT_QUIT,
+    INDEX_OPT_SAVECONFIGQUIT, NO_EQUIVALENT };
+#define WAIT_SYNC_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+#else   /* disable Wait_Sync */
+#define WAIT_SYNC_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define aWait_SyncCantList   NULL
+#define zWait_Sync_NAME      NULL
+#define zWait_SyncText       NULL
+#define zWait_Sync_Name      NULL
+#endif  /* HAVE_WORKING_FORK */
 
 /*
  *  Slew option description:
@@ -483,6 +523,11 @@ tSCC zVersion_Name[]      = "version";
 #else /* not DEBUG */
 # define doOptSet_Debug_Level NULL
 #endif /* def/not DEBUG */
+#ifdef HAVE_WORKING_FORK
+  static tOptProc doOptWait_Sync;
+#else /* not HAVE_WORKING_FORK */
+# define doOptWait_Sync NULL
+#endif /* def/not HAVE_WORKING_FORK */
 #if defined(TEST_NTPD_OPTS)
 /*
  *  Under test, omit argument processing, or call optionStackArg,
@@ -498,6 +543,7 @@ static tOptProc
  *  #define map the "normal" callout procs to the test ones...
  */
 #define SET_DEBUG_LEVEL_OPT_PROC optionStackArg
+#define WAIT_SYNC_OPT_PROC optionStackArg
 
 
 #else /* NOT defined TEST_NTPD_OPTS */
@@ -513,8 +559,10 @@ static tOptProc
  *  #define map the "normal" callout procs
  */
 #define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+#define WAIT_SYNC_OPT_PROC doOptWait_Sync
 
 #define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+#define WAIT_SYNC_OPT_PROC doOptWait_Sync
 #endif /* defined(TEST_NTPD_OPTS) */
 #ifdef TEST_NTPD_OPTS
 # define DOVERPROC optionVersionStderr
@@ -726,7 +774,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* opt state flags  */ NOFORK_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aNoforkCantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zNoforkText, zNofork_NAME, zNofork_Name,
      /* disablement strs */ NULL, NULL },
@@ -774,7 +822,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* opt state flags  */ QUIT_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aQuitCantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zQuitText, zQuit_NAME, zQuit_Name,
      /* disablement strs */ NULL, NULL },
@@ -798,7 +846,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* opt state flags  */ SAVECONFIGQUIT_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
+     /* must/cannot opts */ NULL, aSaveconfigquitCantList,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zSaveconfigquitText, zSaveconfigquit_NAME, zSaveconfigquit_Name,
      /* disablement strs */ NULL, NULL },
@@ -875,8 +923,20 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zDvarText, zDvar_NAME, zDvar_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 29, VALUE_OPT_SLEW,
-     /* equiv idx, value */ 29, VALUE_OPT_SLEW,
+  {  /* entry idx, value */ 29, VALUE_OPT_WAIT_SYNC,
+     /* equiv idx, value */ 29, VALUE_OPT_WAIT_SYNC,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ WAIT_SYNC_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, aWait_SyncCantList,
+     /* option proc      */ WAIT_SYNC_OPT_PROC,
+     /* desc, NAME, name */ zWait_SyncText, zWait_Sync_NAME, zWait_Sync_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 30, VALUE_OPT_SLEW,
+     /* equiv idx, value */ 30, VALUE_OPT_SLEW,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SLEW_FLAGS, 0,
@@ -887,8 +947,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSlewText, zSlew_NAME, zSlew_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 30, VALUE_OPT_USEPCC,
-     /* equiv idx, value */ 30, VALUE_OPT_USEPCC,
+  {  /* entry idx, value */ 31, VALUE_OPT_USEPCC,
+     /* equiv idx, value */ 31, VALUE_OPT_USEPCC,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USEPCC_FLAGS, 0,
@@ -899,8 +959,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zUsepccText, zUsepcc_NAME, zUsepcc_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 31, VALUE_OPT_PCCFREQ,
-     /* equiv idx, value */ 31, VALUE_OPT_PCCFREQ,
+  {  /* entry idx, value */ 32, VALUE_OPT_PCCFREQ,
+     /* equiv idx, value */ 32, VALUE_OPT_PCCFREQ,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PCCFREQ_FLAGS, 0,
@@ -956,8 +1016,9 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPD";
 tSCC   zUsageTitle[] =
-"ntpd - NTP daemon program - Ver. 4.2.7p38\n\
-USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
+"ntpd - NTP daemon program - Ver. 4.2.7p40\n\
+USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
+\t\t[ <server1> ... <serverN> ]\n";
 #define zRcName     NULL
 #define apzHomeList NULL
 
@@ -986,8 +1047,7 @@ tOptions ntpdOptions = {
     + OPTPROC_SHORTOPT
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
-    + OPTPROC_ENVIRON
-    + OPTPROC_NO_ARGS ),
+    + OPTPROC_ENVIRON ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -1005,7 +1065,7 @@ tOptions ntpdOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    35 /* full option count */, 32 /* user option count */,
+    36 /* full option count */, 33 /* user option count */,
     ntpd_full_usage, ntpd_short_usage,
     NULL, NULL
 };
@@ -1036,6 +1096,23 @@ doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined DEBUG */
+#endif /* defined(TEST_NTPD_OPTS) */
+
+#if ! defined(TEST_NTPD_OPTS)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   For the wait-sync option, when HAVE_WORKING_FORK is #define-d.
+ */
+#ifdef HAVE_WORKING_FORK
+static void
+doOptWait_Sync(tOptions* pOptions, tOptDesc* pOptDesc)
+{
+    /* extracted from ntpdbase-opts.def, line 423 */
+extern tOptProc optionNumericVal;
+optionNumericVal(pOptions, pOptDesc);
+}
+#endif /* defined HAVE_WORKING_FORK */
 #endif /* defined(TEST_NTPD_OPTS) */
 /* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
 

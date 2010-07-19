@@ -4,8 +4,9 @@ autogen definitions options;
 
 #include copyright.def
 
-prog-name      = "ntpd";
-prog-title     = "NTP daemon program";
+prog-name	= "ntpd";
+prog-title	= "NTP daemon program";
+argument	= "[ <server1> ... <serverN> ]";
 
 #include ntpdbase-opts.def
 
