@@ -135,15 +135,15 @@ $(srcdir)/version: FRC.version
 	    case "$$x" in ''|$$y) ;; *) echo $$x > version ;; esac
 
 $(srcdir)/version.m4: $(srcdir)/packageinfo.sh
-	cd $(srcdir) && \
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver version.m4
 
 $(srcdir)/include/version.def: $(srcdir)/packageinfo.sh
-	cd $(srcdir) && \
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver include/version.def
 
 $(srcdir)/include/version.texi: $(srcdir)/packageinfo.sh
-	cd $(srcdir) && \
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver include/version.texi
 
 libtool: $(LIBTOOL_DEPS)
