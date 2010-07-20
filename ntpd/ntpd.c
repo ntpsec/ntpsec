@@ -808,15 +808,16 @@ ntpdmain(
 		/*
 		 * child/daemon 
 		 * close all open files excepting waitsync_fd_to_close.
+		 * msyslog() unreliable until after init_logging().
 		 */
+		closelog();
 		if (syslog_file != NULL) {
 			fclose(syslog_file);
 			syslog_file = NULL;
 			syslogit = 1;
-			/* no msyslog() until after init_logging() */
 		}
-		close_all_beyond(waitsync_fd_to_close);
-		open("/", 0);
+		close_all_except(waitsync_fd_to_close);
+		open("/dev/null", 0);
 		dup2(0, 1);
 		dup2(0, 2);
 
