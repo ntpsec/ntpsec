@@ -3,10 +3,11 @@
 #include "config.h"
 
 #include <string>
+#include <vector>
 
 class ntptest : public ::testing::Test {
 public:
-	static void SetExtraParam(const char* param);
+	static void SetExtraParams(int start, int count, char** argv);
 protected:
-	static std::string m_param;
+	static std::vector<std::string> m_params;
 };

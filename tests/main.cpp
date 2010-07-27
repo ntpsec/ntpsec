@@ -3,18 +3,20 @@
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 
-	// Some tests makes use of an extra parameter passed to the tests
-	// executable. Save this param as a static member of the base class.
+	// Some tests makes use of extra parameters passed to the tests
+	// executable. Save these params as static members of the base class.
 	if (argc > 1) {
-		ntptest::SetExtraParam(argv[1]);
+		ntptest::SetExtraParams(1, argc-1, argv);
 	}
 	
 	return RUN_ALL_TESTS();
 }
 
-std::string ntptest::m_param = "";
+std::vector<std::string> ntptest::m_params;
 
-void ntptest::SetExtraParam(const char* param)
+void ntptest::SetExtraParams(int start, int count, char** argv)
 {
-	m_param = param;
+	for (int i=0; i<count; i++) {
+		m_params.push_back(argv[i+start]);
+	}
 }

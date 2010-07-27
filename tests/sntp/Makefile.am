@@ -25,7 +25,7 @@ INCLUDES = $(LIBOPTS_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/inc
 
 TESTS = 
 
-TESTS_ENVIRONMENT = $(top_srcdir)/tests/sntp/test-driver $(abs_srcdir)/data
+TESTS_ENVIRONMENT = $(top_srcdir)/tests/sntp/test-driver $(abs_srcdir)/data $(abs_builddir)/data
 
 if !NTP_CROSSCOMPILE
 TESTS += $(check_PROGRAMS)

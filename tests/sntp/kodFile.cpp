@@ -16,8 +16,12 @@ extern char* kod_db_file;
 
 class kodFileTest : public sntptest {
 protected:
-	std::string CreatePath(const char* filename) {
-		std::string path = m_param;
+	std::string CreatePath(const char* filename, int argument) {
+		std::string path;
+
+		if (m_params.size() >= argument + 1) {
+			path = m_params[argument];
+		}
 
 		if (path[path.size()-1] != DIR_SEP && !path.empty()) {
 			path.append(1, DIR_SEP);
@@ -45,13 +49,13 @@ protected:
 };
 
 TEST_F(kodFileTest, ReadEmptyFile) {
-	kod_init_kod_db(CreatePath("kod-test-empty").c_str());
+	kod_init_kod_db(CreatePath("kod-test-empty", 0).c_str());
 
 	EXPECT_EQ(0, kod_db_cnt);
 }
 
 TEST_F(kodFileTest, ReadCorrectFile) {
-	kod_init_kod_db(CreatePath("kod-test-correct").c_str());
+	kod_init_kod_db(CreatePath("kod-test-correct", 0).c_str());
 	
 	EXPECT_EQ(2, kod_db_cnt);
 
@@ -69,7 +73,7 @@ TEST_F(kodFileTest, ReadCorrectFile) {
 }
 
 TEST_F(kodFileTest, ReadFileWithBlankLines) {
-	kod_init_kod_db(CreatePath("kod-test-blanks").c_str());
+	kod_init_kod_db(CreatePath("kod-test-blanks", 0).c_str());
 
 	EXPECT_EQ(3, kod_db_cnt);
 
