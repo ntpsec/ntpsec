@@ -96,7 +96,7 @@ TEST_F(kodFileTest, ReadCorrectFile) {
 	ASSERT_EQ(1, search_entry("192.0.2.5", &res));
 	EXPECT_STREQ("DENY", res->type);
 	EXPECT_STREQ("192.0.2.5", res->hostname);
-	EXPECT_EQ(0x1234567890, res->timestamp);
+	EXPECT_EQ(0x12345678, res->timestamp);
 
 	ASSERT_EQ(1, search_entry("192.0.2.100", &res));
 	EXPECT_STREQ("RSTR", res->type);
@@ -114,7 +114,7 @@ TEST_F(kodFileTest, ReadFileWithBlankLines) {
 	ASSERT_EQ(1, search_entry("192.0.2.5", &res));
 	EXPECT_STREQ("DENY", res->type);
 	EXPECT_STREQ("192.0.2.5", res->hostname);
-	EXPECT_EQ(0x1234567890, res->timestamp);
+	EXPECT_EQ(0x12345678, res->timestamp);
 
 	ASSERT_EQ(1, search_entry("192.0.2.100", &res));
 	EXPECT_STREQ("RSTR", res->type);
