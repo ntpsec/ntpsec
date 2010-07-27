@@ -2,6 +2,11 @@
 
 #include "config.h"
 
-class ntptest : public ::testing::Test {
+#include <string>
 
+class ntptest : public ::testing::Test {
+public:
+	static void SetExtraParam(const char* param);
+protected:
+	static std::string m_param;
 };

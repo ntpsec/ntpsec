@@ -9,11 +9,13 @@ sntp_SOURCES_USED =	$(sntp_src)/kod_management.c	\
 			$(sntp_src)/log.c		\
 			$(sntp_src)/sntp-opts.c
 
-tests_SOURCES = ../main.cpp		\
-		sntptest.cpp		\
-		kodDatabase.cpp		\
-		$(sntp_SOURCES_USED)
+base_SOURCES =		../main.cpp	\
+			sntptest.cpp
 
+tests_SOURCES = $(base_SOURCES)		\
+		kodDatabase.cpp		\
+		kodFile.cpp		\
+		$(sntp_SOURCES_USED)
 
 INCLUDES = $(LIBOPTS_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/nothreads/include \
@@ -23,6 +25,8 @@ INCLUDES = $(LIBOPTS_CFLAGS) -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/inc
 
 TESTS = 
 
+TESTS_ENVIRONMENT = $(top_srcdir)/tests/sntp/test-driver $(abs_srcdir)/data
+
 if !NTP_CROSSCOMPILE
-TESTS += tests
+TESTS += $(check_PROGRAMS)
 endif
