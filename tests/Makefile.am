@@ -1,6 +1,6 @@
 SUBDIRS = 
 
 if GTEST_AVAILABLE
-SUBDIRS += libntp
+SUBDIRS += libntp sntp
 endif
 
