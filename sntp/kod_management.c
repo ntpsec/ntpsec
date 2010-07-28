@@ -7,7 +7,7 @@
 #include "log.h"
 #include "sntp-opts.h"
 #include "ntp_stdlib.h"
-#define DEBUG
+//#define DEBUG
 
 int kod_init = 0, kod_db_cnt = 0;
 const char *kod_db_file;
