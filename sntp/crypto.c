@@ -115,7 +115,9 @@ auth_init(
 		struct key *act = emalloc(sizeof(struct key));
 		int goodline = 0;
 
-		fgets(kbuf, sizeof(kbuf), keyf);
+		if (NULL == fgets(kbuf, sizeof(kbuf), keyf))
+			continue;
+
 		kbuf[sizeof(kbuf) - 1] = '\0';
 		octothorpe = strchr(kbuf, '#');
 		if (octothorpe)
