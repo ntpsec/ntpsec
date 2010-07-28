@@ -1,3 +1,5 @@
+* [Bug 1581] from 4.2.6p3-beta1: ntp_intres.c size_t printf format
+  string mismatch.
 * [Bug 1586] ntpd 4.2.7p40 doesn't write to syslog after fork on QNX.
 * Avoid race with parallel builds using same source directory in
   scripts/genver by using build directory for temporary files.
