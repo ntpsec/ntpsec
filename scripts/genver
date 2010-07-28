@@ -9,7 +9,9 @@ outputs=
 for i in $*
 do
     case "$i" in
-     -f) force=1 ;;
+     -f) 
+	force=1 
+	;;
      version.m4)
 	outputs="version.m4 $outputs"
 	;;
@@ -37,17 +39,23 @@ dversion=`scripts/VersionName`
 
 set +e
 
+# Create intermediate files in $TEMPDIR defaulting it to /tmp
+# if not set.  This avoids races when multiple builds run in
+# parallel on shared source.
+
+TEMPDIR=${TEMPDIR=/tmp}
+
 case "$outputs" in
  *version.m4*)
-    echo "m4_define([VERSION_NUMBER],[${dversion}])" > /tmp/version.m4+
-    cmp -s /tmp/version.m4+ version.m4
+    echo "m4_define([VERSION_NUMBER],[${dversion}])" > "${TEMPDIR}/version.m4+"
+    cmp -s "${TEMPDIR}/version.m4+" version.m4
     rc=$?
     case "$force$rc" in
      00)
-	rm -f /tmp/version.m4+
+	rm -f "${TEMPDIR}/version.m4+"
 	;;
      *)
-	mv /tmp/version.m4+ version.m4
+	mv "${TEMPDIR}/version.m4+" version.m4
 	;;
     esac
     ;;
@@ -55,15 +63,15 @@ esac
 
 case "$outputs" in
  *version.def*)
-    echo "version = '${dversion}';" > /tmp/version.def+
-    cmp -s /tmp/version.def+ include/version.def
+    echo "version = '${dversion}';" > "${TEMPDIR}/version.def+"
+    cmp -s "${TEMPDIR}/version.def+" include/version.def
     rc=$?
     case "$force$rc" in
      00)
-	rm -f /tmp/version.def+
+	rm -f "${TEMPDIR}/version.def+"
 	;;
      *)
-	mv /tmp/version.def+ include/version.def
+	mv "${TEMPDIR}/version.def+" include/version.def
 	;;
     esac
     ;;
@@ -71,17 +79,17 @@ esac
 
 case "$outputs" in
  *version.texi*)
-    echo "@set UPDATED `date +'%d %B %Y'`"	>  /tmp/version.texi+
-    echo "@set EDITION $dversion"		>> /tmp/version.texi+
-    echo "@set VERSION $dversion"		>> /tmp/version.texi+
-    cmp -s /tmp/version.texi+ include/version.texi
+    echo "@set UPDATED `date +'%d %B %Y'`"	>  "${TEMPDIR}/version.texi+"
+    echo "@set EDITION $dversion"		>> "${TEMPDIR}/version.texi+"
+    echo "@set VERSION $dversion"		>> "${TEMPDIR}/version.texi+"
+    cmp -s "${TEMPDIR}/version.texi+" include/version.texi
     rc=$?
     case "$force$rc" in
      00)
-	rm -f /tmp/version.texi+
+	rm -f "${TEMPDIR}/version.texi+"
 	;;
      *)
-	mv /tmp/version.texi+ include/version.texi
+	mv "${TEMPDIR}/version.texi+" include/version.texi
 	;;
     esac
     ;;

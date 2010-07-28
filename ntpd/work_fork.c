@@ -391,6 +391,7 @@ fork_blocking_child(
 	child_resp_write_pipe = blocking_pipes[3];
 
 	kill_asyncio(0);
+	closelog();
 	if (syslog_file != NULL) {
 		fclose(syslog_file);
 		syslog_file = NULL;
@@ -400,7 +401,7 @@ fork_blocking_child(
 	for (fd = 3; fd < keep_fd; fd++)
 		if (fd != child_req_read_pipe && 
 		    fd != child_resp_write_pipe)
-		    close(fd);
+			close(fd);
 	close_all_beyond(keep_fd);
 	/*
 	 * We get signals from refclock serial I/O on NetBSD in the

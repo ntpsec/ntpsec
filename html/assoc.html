@@ -7,7 +7,7 @@
 		<meta name="generator" content="HTML Tidy, see www.w3.org">
 		<title>Association Management</title>
 		<link href="scripts/style.css" type="text/css" rel="stylesheet">
-	</head>
+</head>
 
 	<body>
 		<h3>Association Management</h3>
@@ -30,7 +30,7 @@
 		<hr>
 		<h4 id="modes">Association Modes</h4>
 		<p>This page describes the various modes of operation provided in NTPv4. Details about the configuration commands and options are given on the <a href="confopt.html">Configuration Options</a> page. Details about the cryptographic authentication schemes are given on the <a href="authopt.html">Authentication Options</a> page. Details about the automatic server discovery schemes are described on the <a href="manyopt.html">Automatic Server Discovery Schemes</a> page. Additional information is available in the papers, reports, memoranda and briefings on the <a href="http://www.eecis.udel.edu/~mills/ntp.html"> NTP Project</a> page.</p>
-		<p>There are three types of associations in NTP: persistent, preemptable and ephemeral. Persistent associations are mobilized by a configuration command and never demobilized. Preemptable associations, which are new to NTPv4, are mobilized by a configuration command which includes the <tt>prempt</tt> option and are demobilized by a &quot;better&quot; server or by timeout, but only if the number of survivors exceeds the threshold set by the <tt>tos maxclock</tt> configuration command. Ephemeral associations are mobilized upon arrival of designated messages and demobilized by timeout.</p>
+		<p>There are three types of associations in NTP: persistent, preemptable and ephemeral. Persistent associations are mobilized by a configuration command and never demobilized. Preemptable associations, which are new to NTPv4, are mobilized by a configuration command which includes the <tt>preempt</tt> option and are demobilized by a &quot;better&quot; server or by timeout, but only if the number of survivors exceeds the threshold set by the <tt>tos maxclock</tt> configuration command. Ephemeral associations are mobilized upon arrival of designated messages and demobilized by timeout.</p>
 		<p>Ordinarily, successful mobilization of ephemeral associations requires the server to be cryptographically authenticated to the client. This can be done using either symmetric key or Autokey public key cryptography, as described in the <a href="authopt.html">Authentication Options</a> page.</p>
 		<p>There are three principal modes of operation in NTP: client/server, symmetric active/passive and broadcast/multicast. There are three automatic server discovery schemes in NTP: broadcast/multicast, manycast and pool described on the <a href="manyopt.html">Automatic Server Discovery Schemes</a> page. In addition, the orphan mode and burst options described on this page can be used in appropriate cases.</p>
 		<p>Following is a summary of the operations in each mode. Note that reference to option applies to the commands described on the <a href="confopt.html">Configuration Options</a> page. See that page for applicability and defaults.</p>
@@ -62,7 +62,8 @@
 		<p>A common configuration for private networks includes one or more core servers operating at the lowest stratum. Good practice is to configure each of these servers as backup for the others using symmetric or broadcast modes. As long as at least one core server can reach a UTC source, the entire subnet can synchronize to it.</p>
 		<p>If no UTC sources are available to any core server, one of them can provide a simulated UTC source for all other hosts in the subnet. However, only one core server can simulate the UTC source and all direct dependents, called orphan children, must select the same one, called the orphan parent.</p>
 		<p>A host is enabled for orphan mode using the <tt>tos orphan <i>stratum</i></tt> command, where <tt><i>stratum</i></tt> is some stratum less than 16 and greater than any anticipated stratum that might occur with configured Internet time servers. However, sufficient headroom should remain so every subnet host dependent on the orphan children has stratum less than 16. Where no associations for other servers or reference clocks are configured, the orphan stratum can be set to 1. These are the same considerations that guide the local clock driver stratum selection.</p>
-		<p>A orphan parent with no sources shows reference ID <font face="Courier New, Courier, Monaco, monospace">LOOP</font>&nbsp;if
+		<p>In order to avoid premature enabling orphan mode, a holdoff delay occurs when the daemon is first started and when all sources have been lost after that. The delay is intended to allow time for other sources to become reachable and selected. Only when the delay has expired with no sources will orphan mode be enabled. By default the delay is 600 s (five minutes), but this can be changed using the <tt>tos orphanwait <em>delay</em></tt> command.</p>
+	<p>A orphan parent with no sources shows reference ID <font face="Courier New, Courier, Monaco, monospace">LOOP</font>&nbsp;if
 			operating at stratum 1 and 127.0.0.1 (Unix loopback address) otherwise.
 			While ordinary NTP clients use a selection metric based on delay
 			and dispersion, orphan children use a metric computed from the IP
