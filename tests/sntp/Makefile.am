@@ -2,7 +2,8 @@ check_PROGRAMS = tests
 
 sntp_src = $(top_builddir)/sntp
 
-sntp_SOURCES_USED =	$(sntp_src)/kod_management.o	\
+sntp_SOURCES_USED =	$(sntp_src)/crypto.o		\
+			$(sntp_src)/kod_management.o	\
 			$(sntp_src)/log.o		\
 			$(sntp_src)/sntp-opts.o
 
@@ -10,6 +11,7 @@ base_SOURCES =		../main.cpp	\
 			sntptest.cpp
 
 tests_SOURCES = $(base_SOURCES)		\
+		keyFile.cpp		\
 		kodDatabase.cpp		\
 		kodFile.cpp
 
@@ -17,6 +19,7 @@ LDADD = 	@GTEST_LDFLAGS@			\
 		@GTEST_LIBS@			\
 		$(LIBOPTS_LDADD)		\
 		@top_builddir@/libntp/libntp.a	\
+		@LCRYPTO@			\
 		$(sntp_SOURCES_USED)
 
 AM_CXXFLAGS = @GTEST_CXXFLAGS@

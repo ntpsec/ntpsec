@@ -1,4 +1,4 @@
-#include "sntptest.h"
+#include "fileHandlingTest.h"
 
 extern "C" {
 #include "kod_management.h"
@@ -19,28 +19,8 @@ extern int kod_db_cnt;
 extern kod_entry** kod_db;
 extern char* kod_db_file;
 
-class kodFileTest : public sntptest {
+class kodFileTest : public fileHandlingTest {
 protected:
-	enum DirectoryType {
-		INPUT_DIR = 0,
-		OUTPUT_DIR = 1
-	};
-
-	std::string CreatePath(const char* filename, DirectoryType argument) {
-		std::string path;
-
-		if (m_params.size() >= argument + 1) {
-			path = m_params[argument];
-		}
-
-		if (path[path.size()-1] != DIR_SEP && !path.empty()) {
-			path.append(1, DIR_SEP);
-		}
-		path.append(filename);
-
-		return path;
-	}
-
 	virtual void SetUp() {
 		kod_db_cnt = 0;
 		kod_db = NULL;
