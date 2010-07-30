@@ -281,7 +281,7 @@ recv_bcst_data (
 	return recv_bytes;
 }
 
-static int
+int
 process_pkt (
 	struct pkt *rpkt,
 	sockaddr_u *sas,
