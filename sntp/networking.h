@@ -50,6 +50,8 @@ int recv_bcst_data (SOCKET rsock, char *rdata, int rdata_len, sockaddr_u *sas, s
 
 int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, sockaddr_u *sas);
 
+int process_pkt (struct pkt *rpkt, sockaddr_u *sas,	int pkt_len, int mode, char * func_name);
+
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {
 	struct speer *next;
