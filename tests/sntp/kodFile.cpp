@@ -6,11 +6,6 @@ extern "C" {
 #include "ntp_stdlib.h" // For estrdup()
 };
 
-#include <fstream>
-using std::ifstream;
-using std::ios;
-using std::string;
-
 /*
  * We access some parts of the kod database directly, without
  * going through the public interface
@@ -35,28 +30,6 @@ protected:
 		 */
 
 		kod_db_file = estrdup("/dev/null");
-	}
-
-	int GetFileSize(ifstream& file) {
-		int initial = file.tellg();
-
-		file.seekg(0, std::ios::end);
-		int length = file.tellg();
-		file.seekg(initial);
-
-		return length;
-	}
-
-	void CompareFileContent(ifstream& expected, ifstream& actual) {
-		int currentLine = 1;
-		while (actual.good() && expected.good()) {
-			string actualLine, expectedLine;
-			getline(actual, actualLine);
-			getline(expected, expectedLine);
-			
-			EXPECT_EQ(expectedLine, actualLine) << "Comparision failed on line " << currentLine;
-			currentLine++;
-		}
 	}
 };
 

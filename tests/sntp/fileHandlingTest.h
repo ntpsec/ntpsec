@@ -1,5 +1,12 @@
 #include "sntptest.h"
 
+#include <fstream>
+#include <string>
+
+using std::ifstream;
+using std::string;
+using std::ios;
+
 class fileHandlingTest : public sntptest {
 protected:
 	enum DirectoryType {
@@ -20,5 +27,27 @@ protected:
 		path.append(filename);
 
 		return path;
+	}
+
+	int GetFileSize(ifstream& file) {
+		int initial = file.tellg();
+
+		file.seekg(0, ios::end);
+		int length = file.tellg();
+		file.seekg(initial);
+
+		return length;
+	}
+
+	void CompareFileContent(ifstream& expected, ifstream& actual) {
+		int currentLine = 1;
+		while (actual.good() && expected.good()) {
+			string actualLine, expectedLine;
+			getline(actual, actualLine);
+			getline(expected, expectedLine);
+			
+			EXPECT_EQ(expectedLine, actualLine) << "Comparision failed on line " << currentLine;
+			currentLine++;
+		}
 	}
 };
