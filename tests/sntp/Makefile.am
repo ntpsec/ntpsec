@@ -5,6 +5,7 @@ sntp_src = $(top_builddir)/sntp
 sntp_SOURCES_USED =	$(sntp_src)/crypto.o		\
 			$(sntp_src)/kod_management.o	\
 			$(sntp_src)/log.o		\
+			$(sntp_src)/networking.o	\
 			$(sntp_src)/sntp-opts.o		\
 			$(sntp_src)/utilities.o
 
@@ -15,6 +16,7 @@ tests_SOURCES = $(base_SOURCES)		\
 		keyFile.cpp		\
 		kodDatabase.cpp		\
 		kodFile.cpp		\
+		networking.cpp		\
 		utilities.cpp
 
 LDADD = 	@GTEST_LDFLAGS@			\
