@@ -1,4 +1,9 @@
 ---
+
+* [Bug 1597] packet processing ignores RATE KoD packets, because of
+  a bug in string comparison.
+
+---
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
