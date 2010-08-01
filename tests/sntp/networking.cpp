@@ -37,7 +37,7 @@ protected:
 
 	void PrepareAuthenticationTest(int key_id,
 								  int key_len,
-								  void* key_seq) {
+								  const void* key_seq) {
 		std::stringstream ss;
 		ss << key_id;
 
@@ -49,10 +49,12 @@ protected:
 		key_ptr->key_id = key_id;
 		key_ptr->key_len = key_len;
 		memcpy(key_ptr->type, "MD5", 3);
+
+		ASSERT_TRUE(key_len < sizeof(key_ptr->key_seq));
+
 		memcpy(key_ptr->key_seq, key_seq, key_ptr->key_len);
 		restoreKeyDb = true;
 	}
-								  
 
 	virtual void SetUp() {
 		optionSaveState(&sntpOptions);
@@ -138,21 +140,9 @@ TEST_F(packetProcessingTest, CryptoNAKPacketReject) {
 
 TEST_F(packetProcessingTest, AuthenticatedPacketInvalid) {
 	// Activate authentication option
-	ActivateOption("-a", "50");
+	PrepareAuthenticationTest(50, 9, "123456789");
 	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 	
-	// Hack into the key database.
-	extern key* key_ptr;
-	extern int key_cnt;
-
-	key_cnt = 1;
-	key_ptr = new key;
-	key_ptr->next = NULL;
-	key_ptr->key_id = 50;
-	key_ptr->key_len = 9;
-	memcpy(key_ptr->type, "MD5", 3);
-	memcpy(key_ptr->key_seq, "123456789", key_ptr->key_len);
-
 	// Prepare the packet.
 	int pkt_len = LEN_PKT_NOMAC;
 
@@ -169,29 +159,13 @@ TEST_F(packetProcessingTest, AuthenticatedPacketInvalid) {
 	EXPECT_EQ(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, "UnitTest"));
-
-	key_cnt = 0;
-	delete key_ptr;
-	key_ptr = NULL;
 }
 
 TEST_F(packetProcessingTest, AuthenticatedPacketUnknownKey) {
 	// Activate authentication option
-	ActivateOption("-a", "30");
+	PrepareAuthenticationTest(30, 9, "123456789");
 	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 	
-	// Hack into the key database.
-	extern key* key_ptr;
-	extern int key_cnt;
-
-	key_cnt = 1;
-	key_ptr = new key;
-	key_ptr->next = NULL;
-	key_ptr->key_id = 30;
-	key_ptr->key_len = 9;
-	memcpy(key_ptr->type, "MD5", 3);
-	memcpy(key_ptr->key_seq, "123456789", key_ptr->key_len);
-
 	// Prepare the packet. Observe that the Key-ID expected is 30,
 	// but the packet has a key id of 50.
 	int pkt_len = LEN_PKT_NOMAC;
@@ -201,8 +175,6 @@ TEST_F(packetProcessingTest, AuthenticatedPacketUnknownKey) {
 						   MAX_MD5_LEN, key_ptr,
 						   (char*)&testpkt.exten[1]);
 	pkt_len += 4 + mac_len;
-
-	printf("lens: %d %d\n", pkt_len, mac_len);
 
 	EXPECT_EQ(SERVER_AUTH_FAIL,
 			  process_pkt(&testpkt, &testsock, pkt_len,
@@ -297,12 +269,21 @@ TEST_F(packetProcessingTest, CorrectUnauthenticatedPacket) {
 }
 
 TEST_F(packetProcessingTest, CorrectAuthenticatedPacket) {
-	ActivateOption("-a", "50");
+	PrepareAuthenticationTest(10, 15, "123456789abcdef");
 	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 
+	int pkt_len = LEN_PKT_NOMAC;
 
+	// Prepare the packet.
+	testpkt.exten[0] = htonl(10);
+	int mac_len = make_mac((char*)&testpkt, pkt_len,
+						   MAX_MD5_LEN, key_ptr,
+						   (char*)&testpkt.exten[1]);
 
-	EXPECT_EQ(LEN_PKT_NOMAC,
-			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
+	pkt_len += 4 + mac_len;
+
+	EXPECT_EQ(pkt_len,
+			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, "UnitTest"));
+
 }
