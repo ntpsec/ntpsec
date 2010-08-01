@@ -410,11 +410,11 @@ unusable:
 			       ref_char[0], ref_char[1], ref_char[2], ref_char[3]);
 		/* If it's a KOD packet we'll just use the KOD information */
 		if (ref_char[0] != 'X') {
-			if (strncmp(ref_char, "DENY", 4))
+			if (strncmp(ref_char, "DENY", 4) == 0)
 				return KOD_DEMOBILIZE;
-			if (strncmp(ref_char, "RSTR", 4))
+			if (strncmp(ref_char, "RSTR", 4) == 0)
 				return KOD_DEMOBILIZE;
-			if (strncmp(ref_char, "RATE", 4))
+			if (strncmp(ref_char, "RATE", 4) == 0)
 				return KOD_RATE;
 			/* There are other interesting kiss codes which might be interesting for authentication */
 		}
