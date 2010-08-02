@@ -1,6 +1,5 @@
 #include "main.h"
 
-#include "crypto.h"
 #include "kod_management.h"
 #include "networking.h"
 #include "utilities.h"
@@ -142,6 +141,33 @@ static union {
 
 #define r_pkt  rbuf.pkt
 
+int
+generate_pkt (
+	struct pkt *x_pkt,
+	const struct timeval *tv_xmt,
+	int key_id,
+	struct key *pkt_key
+	)
+{
+	l_fp xmt;
+	int pkt_len = LEN_PKT_NOMAC;
+	memset(x_pkt, 0, sizeof(struct pkt));
+	TVTOTS(tv_xmt, &xmt);
+	HTONL_FP(&xmt, &(x_pkt->xmt));
+	x_pkt->stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
+	x_pkt->ppoll = 8;
+	/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
+	set_li_vn_mode(x_pkt, LEAP_NOTINSYNC, 4, 3);
+	if (pkt_key != NULL) {
+		int mac_size = 20; /* max room for MAC */
+		x_pkt->exten[0] = htonl(key_id);
+		mac_size = make_mac((char *)x_pkt, pkt_len, mac_size, pkt_key, (char *)&x_pkt->exten[1]);
+		if (mac_size)
+			pkt_len += mac_size + 4;
+	}
+	return pkt_len;
+}
+
 /* The heart of (S)NTP, exchange NTP packets and compute values to correct the local clock */
 int
 on_wire (
@@ -153,7 +179,6 @@ on_wire (
 	char addr_buf[INET6_ADDRSTRLEN];
 	register int try;
 	SOCKET sock;
-	struct pkt x_pkt;
 	char *ref;
 	struct key *pkt_key = NULL;
 	int key_id = 0;
@@ -164,16 +189,16 @@ on_wire (
 	}
 	for(try=0; try<5; try++) {
 		struct timeval tv_xmt, tv_dst;
+		struct pkt x_pkt;
 		double t21, t34, delta, offset, precision, root_dispersion;
 		int digits, error, rpktl, sw_case;
 		char *hostname = NULL, *ts_str = NULL;
 		char *log_str;
 		u_fp p_rdly, p_rdsp;
-		l_fp p_rec, p_xmt, p_ref, p_org, xmt, tmp, dst;
+		l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
 
 		memset(&r_pkt, 0, sizeof rbuf);
-		memset(&x_pkt, 0, sizeof(x_pkt));
-
+		
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
 		tv_xmt.tv_sec += JAN_1970;
 
@@ -187,20 +212,8 @@ on_wire (
 			rpktl = recv_bcst_pkt(sock, &r_pkt, sizeof rbuf, (sockaddr_u *)bcast->ai_addr);
 			closesocket(sock);
 		} else {
-			int pkt_len = LEN_PKT_NOMAC;
-			TVTOTS(&tv_xmt, &xmt);
-			HTONL_FP(&xmt, &(x_pkt.xmt));
-			x_pkt.stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
-			x_pkt.ppoll = 8;
-			/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
-			set_li_vn_mode(&x_pkt, LEAP_NOTINSYNC, 4, 3);
-			if (pkt_key != NULL) {
-				int mac_size = 20; /* max room for MAC */
-				x_pkt.exten[0] = htonl(key_id);
-				mac_size = make_mac((char *)&x_pkt, pkt_len, mac_size, pkt_key, (char *)&x_pkt.exten[1]);
-				if (mac_size)
-					pkt_len += mac_size + 4;
-			}
+			int pkt_len = generate_pkt(&x_pkt, &tv_xmt, key_id, pkt_key);
+
 			create_socket(&sock, (sockaddr_u *)host->ai_addr);
 			sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt, pkt_len);
 			rpktl = recvpkt(sock, &r_pkt, sizeof rbuf, &x_pkt);
