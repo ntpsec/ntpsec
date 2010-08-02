@@ -168,6 +168,143 @@ generate_pkt (
 	return pkt_len;
 }
 
+int
+handle_pkt (
+	int rpktl,
+	struct pkt *rpkt,
+	struct addrinfo *host
+	)
+{
+	struct timeval tv_dst;
+	int sw_case, digits;
+	char *hostname = NULL, *log_str, *ref, *ts_str = NULL;
+	double t21, t34, delta, offset, precision, root_dispersion;
+	l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
+	u_fp p_rdly, p_rdsp;
+	char addr_buf[INET6_ADDRSTRLEN];
+
+	if(rpktl > 0)
+		sw_case = 1;
+	else
+		sw_case = rpktl;
+
+	switch(sw_case) {
+	case SERVER_UNUSEABLE:
+		return -1;
+		break;
+
+	case PACKET_UNUSEABLE:
+		break;
+ 
+	case SERVER_AUTH_FAIL:
+		break;
+
+	case KOD_DEMOBILIZE:
+		/* Received a DENY or RESTR KOD packet */
+		hostname = addrinfo_to_str(host);
+		ref = (char *)&rpkt->refid;
+		add_entry(hostname, ref);
+
+		if (ENABLED_OPT(NORMALVERBOSE))
+			printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
+				   ref[0], ref[1], ref[2], ref[3],
+				   hostname);
+
+		log_str = emalloc(INET6_ADDRSTRLEN + 72);
+		snprintf(log_str, INET6_ADDRSTRLEN + 72, 
+			 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
+			 ref[0], ref[1], ref[2], ref[3],
+			 hostname);
+		log_msg(log_str, 2);
+		free(log_str);
+		break;
+
+	case KOD_RATE:
+		/* Hmm... probably we should sleep a bit here */
+		break;
+
+	case 1:
+		/* Convert timestamps from network to host byte order */
+		p_rdly = NTOHS_FP(rpkt->rootdelay);
+		p_rdsp = NTOHS_FP(rpkt->rootdisp);
+		NTOHL_FP(&rpkt->reftime, &p_ref);
+		NTOHL_FP(&rpkt->org, &p_org);
+		NTOHL_FP(&rpkt->rec, &p_rec);
+		NTOHL_FP(&rpkt->xmt, &p_xmt);
+
+		if (ENABLED_OPT(NORMALVERBOSE)) {
+			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
+				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
+			printf("sntp on_wire: Received %i bytes from %s\n", rpktl, addr_buf);
+		}
+
+		precision = LOGTOD(rpkt->precision);
+#ifdef DEBUG
+		printf("sntp precision: %f\n", precision);
+#endif /* DEBUG */
+		for (digits = 0; (precision *= 10.) < 1.; ++digits)
+			/* empty */ ;
+		if (digits > 6)
+			digits = 6;
+
+		root_dispersion = FPTOD(p_rdsp);
+
+#ifdef DEBUG
+		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
+		printf("sntp rootdisp: %f\n", root_dispersion);
+
+		pkt_output(rpkt, rpktl, stdout);
+
+		printf("sntp on_wire: rpkt->reftime:\n");
+		l_fp_output(&(rpkt->reftime), stdout);
+		printf("sntp on_wire: rpkt->org:\n");
+		l_fp_output(&(rpkt->org), stdout);
+		printf("sntp on_wire: rpkt->rec:\n");
+		l_fp_output(&(rpkt->rec), stdout);
+		printf("sntp on_wire: rpkt->rec:\n");
+		l_fp_output_bin(&(rpkt->rec), stdout);
+		printf("sntp on_wire: rpkt->rec:\n");
+		l_fp_output_dec(&(rpkt->rec), stdout);
+		printf("sntp on_wire: rpkt->xmt:\n");
+		l_fp_output(&(rpkt->xmt), stdout);
+#endif
+
+		/* Compute offset etc. */
+		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
+		tv_dst.tv_sec += JAN_1970;
+		tmp = p_rec;
+		L_SUB(&tmp, &p_org);
+		LFPTOD(&tmp, t21);
+		TVTOTS(&tv_dst, &dst);
+		tmp = dst;
+		L_SUB(&tmp, &p_xmt);
+		LFPTOD(&tmp, t34);
+		offset = (t21 + t34) / 2.;
+		delta = t21 - t34;
+
+		if(ENABLED_OPT(NORMALVERBOSE))
+			printf("sntp on_wire:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
+				   t21, t34, delta, offset);
+
+		ts_str = tv_to_str(&tv_dst);
+		printf("%s ", ts_str);
+		if(offset > 0)
+			printf("+");
+		printf("%.*f", digits, offset);
+		if (root_dispersion > 0.)
+			printf(" +/- %f secs", root_dispersion);
+		printf("\n");
+		free(ts_str);
+
+		if(ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
+			return set_time(offset); 
+
+		return 0;
+	}
+
+	return 1;
+}
+
 /* The heart of (S)NTP, exchange NTP packets and compute values to correct the local clock */
 int
 on_wire (
@@ -179,7 +316,6 @@ on_wire (
 	char addr_buf[INET6_ADDRSTRLEN];
 	register int try;
 	SOCKET sock;
-	char *ref;
 	struct key *pkt_key = NULL;
 	int key_id = 0;
 
@@ -188,14 +324,9 @@ on_wire (
 		get_key(key_id, &pkt_key);
 	}
 	for(try=0; try<5; try++) {
-		struct timeval tv_xmt, tv_dst;
+		struct timeval tv_xmt;
 		struct pkt x_pkt;
-		double t21, t34, delta, offset, precision, root_dispersion;
-		int digits, error, rpktl, sw_case;
-		char *hostname = NULL, *ts_str = NULL;
-		char *log_str;
-		u_fp p_rdly, p_rdsp;
-		l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
+		int error, rpktl, handle_pkt_res;
 
 		memset(&r_pkt, 0, sizeof rbuf);
 		
@@ -220,124 +351,9 @@ on_wire (
 			closesocket(sock);
 		}
 
-		if(rpktl > 0)
-			sw_case = 1;
-		else
-			sw_case = rpktl;
-
-		switch(sw_case) {
-		case SERVER_UNUSEABLE:
-			return -1;
-			break;
-
-		case PACKET_UNUSEABLE:
-			break;
-
-		case SERVER_AUTH_FAIL:
-			break;
-
-		case KOD_DEMOBILIZE:
-			/* Received a DENY or RESTR KOD packet */
-			hostname = addrinfo_to_str(host);
-			ref = (char *)&r_pkt.refid;
-			add_entry(hostname, ref);
-
-			if (ENABLED_OPT(NORMALVERBOSE))
-				printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
-				       ref[0], ref[1], ref[2], ref[3],
-				       hostname);
-
-			log_str = emalloc(INET6_ADDRSTRLEN + 72);
-			snprintf(log_str, INET6_ADDRSTRLEN + 72, 
-				 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
-				 ref[0], ref[1], ref[2], ref[3],
-				 hostname);
-			log_msg(log_str, 2);
-			free(log_str);
-			break;
-
-		case KOD_RATE:
-			/* Hmm... probably we should sleep a bit here */
-			break;
-
-		case 1:
-			/* Convert timestamps from network to host byte order */
-			p_rdly = NTOHS_FP(r_pkt.rootdelay);
-			p_rdsp = NTOHS_FP(r_pkt.rootdisp);
-			NTOHL_FP(&r_pkt.reftime, &p_ref);
-			NTOHL_FP(&r_pkt.org, &p_org);
-			NTOHL_FP(&r_pkt.rec, &p_rec);
-			NTOHL_FP(&r_pkt.xmt, &p_xmt);
-
-			if (ENABLED_OPT(NORMALVERBOSE)) {
-				getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
-						sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
-				printf("sntp on_wire: Received %i bytes from %s\n", rpktl, addr_buf);
-			}
-
-			precision = LOGTOD(r_pkt.precision);
-#ifdef DEBUG
-			printf("sntp precision: %f\n", precision);
-#endif /* DEBUG */
-			for (digits = 0; (precision *= 10.) < 1.; ++digits)
-				/* empty */ ;
-			if (digits > 6)
-				digits = 6;
-
-			root_dispersion = FPTOD(p_rdsp);
-
-#ifdef DEBUG
-			printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
-			printf("sntp rootdisp: %f\n", root_dispersion);
-
-			pkt_output(&r_pkt, rpktl, stdout);
-
-			printf("sntp on_wire: r_pkt.reftime:\n");
-			l_fp_output(&(r_pkt.reftime), stdout);
-			printf("sntp on_wire: r_pkt.org:\n");
-			l_fp_output(&(r_pkt.org), stdout);
-			printf("sntp on_wire: r_pkt.rec:\n");
-			l_fp_output(&(r_pkt.rec), stdout);
-			printf("sntp on_wire: r_pkt.rec:\n");
-			l_fp_output_bin(&(r_pkt.rec), stdout);
-			printf("sntp on_wire: r_pkt.rec:\n");
-			l_fp_output_dec(&(r_pkt.rec), stdout);
-			printf("sntp on_wire: r_pkt.xmt:\n");
-			l_fp_output(&(r_pkt.xmt), stdout);
-#endif
-
-			/* Compute offset etc. */
-			GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
-			tv_dst.tv_sec += JAN_1970;
-			tmp = p_rec;
-			L_SUB(&tmp, &p_org);
-			LFPTOD(&tmp, t21);
-			TVTOTS(&tv_dst, &dst);
-			tmp = dst;
-			L_SUB(&tmp, &p_xmt);
-			LFPTOD(&tmp, t34);
-			offset = (t21 + t34) / 2.;
-			delta = t21 - t34;
-
-			if(ENABLED_OPT(NORMALVERBOSE))
-				printf("sntp on_wire:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
-					t21, t34, delta, offset);
-
-			ts_str = tv_to_str(&tv_dst);
-			printf("%s ", ts_str);
-			if(offset > 0)
-				printf("+");
-			printf("%.*f", digits, offset);
-			if (root_dispersion > 0.)
-				printf(" +/- %f secs", root_dispersion);
-			printf("\n");
-			free(ts_str);
-
-			if(ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
-				return set_time(offset); 
-
-			return 0;
-		}
+		handle_pkt_res = handle_pkt(rpktl, &r_pkt, host);
+		if (handle_pkt_res < 1)
+			return handle_pkt_res;
 	}
 
 	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
