@@ -5,10 +5,7 @@
 #include "utilities.h"
 #include "log.h"
 
-char *progname = "sntp";	/* for msyslog */
-
 int ai_fam_pref = AF_UNSPEC;
-volatile int debug;
 
 struct key *keys = NULL;
 
