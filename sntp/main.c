@@ -178,9 +178,7 @@ handle_pkt (
 	struct timeval tv_dst;
 	int sw_case, digits;
 	char *hostname = NULL, *log_str, *ref, *ts_str = NULL;
-	double t21, t34, delta, offset, precision, root_dispersion;
-	l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
-	u_fp p_rdly, p_rdsp;
+	double offset, precision, root_dispersion;
 	char addr_buf[INET6_ADDRSTRLEN];
 
 	if(rpktl > 0)
@@ -206,7 +204,7 @@ handle_pkt (
 		add_entry(hostname, ref);
 
 		if (ENABLED_OPT(NORMALVERBOSE))
-			printf("sntp on_wire: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
+			printf("sntp handle_pkt: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
 				   ref[0], ref[1], ref[2], ref[3],
 				   hostname);
 
@@ -224,67 +222,18 @@ handle_pkt (
 		break;
 
 	case 1:
-		/* Convert timestamps from network to host byte order */
-		p_rdly = NTOHS_FP(rpkt->rootdelay);
-		p_rdsp = NTOHS_FP(rpkt->rootdisp);
-		NTOHL_FP(&rpkt->reftime, &p_ref);
-		NTOHL_FP(&rpkt->org, &p_org);
-		NTOHL_FP(&rpkt->rec, &p_rec);
-		NTOHL_FP(&rpkt->xmt, &p_xmt);
-
 		if (ENABLED_OPT(NORMALVERBOSE)) {
 			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
 				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
-			printf("sntp on_wire: Received %i bytes from %s\n", rpktl, addr_buf);
+			printf("sntp handle_pkt: Received %i bytes from %s\n", rpktl, addr_buf);
 		}
 
-		precision = LOGTOD(rpkt->precision);
-#ifdef DEBUG
-		printf("sntp precision: %f\n", precision);
-#endif /* DEBUG */
+		offset_calculation(rpkt, rpktl, &tv_dst, &offset, &precision, &root_dispersion);
+
 		for (digits = 0; (precision *= 10.) < 1.; ++digits)
 			/* empty */ ;
 		if (digits > 6)
 			digits = 6;
-
-		root_dispersion = FPTOD(p_rdsp);
-
-#ifdef DEBUG
-		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
-		printf("sntp rootdisp: %f\n", root_dispersion);
-
-		pkt_output(rpkt, rpktl, stdout);
-
-		printf("sntp on_wire: rpkt->reftime:\n");
-		l_fp_output(&(rpkt->reftime), stdout);
-		printf("sntp on_wire: rpkt->org:\n");
-		l_fp_output(&(rpkt->org), stdout);
-		printf("sntp on_wire: rpkt->rec:\n");
-		l_fp_output(&(rpkt->rec), stdout);
-		printf("sntp on_wire: rpkt->rec:\n");
-		l_fp_output_bin(&(rpkt->rec), stdout);
-		printf("sntp on_wire: rpkt->rec:\n");
-		l_fp_output_dec(&(rpkt->rec), stdout);
-		printf("sntp on_wire: rpkt->xmt:\n");
-		l_fp_output(&(rpkt->xmt), stdout);
-#endif
-
-		/* Compute offset etc. */
-		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
-		tv_dst.tv_sec += JAN_1970;
-		tmp = p_rec;
-		L_SUB(&tmp, &p_org);
-		LFPTOD(&tmp, t21);
-		TVTOTS(&tv_dst, &dst);
-		tmp = dst;
-		L_SUB(&tmp, &p_xmt);
-		LFPTOD(&tmp, t34);
-		offset = (t21 + t34) / 2.;
-		delta = t21 - t34;
-
-		if(ENABLED_OPT(NORMALVERBOSE))
-			printf("sntp on_wire:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
-				   t21, t34, delta, offset);
 
 		ts_str = tv_to_str(&tv_dst);
 		printf("%s ", ts_str);
@@ -303,6 +252,73 @@ handle_pkt (
 	}
 
 	return 1;
+}
+
+void
+offset_calculation (
+	struct pkt *rpkt,
+	int rpktl,
+	struct timeval *tv_dst,
+	double *offset,
+	double *precision,
+	double *root_dispersion
+	)
+{
+	l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
+	u_fp p_rdly, p_rdsp;
+	double t21, t34, delta;
+
+	/* Convert timestamps from network to host byte order */
+	p_rdly = NTOHS_FP(rpkt->rootdelay);
+	p_rdsp = NTOHS_FP(rpkt->rootdisp);
+	NTOHL_FP(&rpkt->reftime, &p_ref);
+	NTOHL_FP(&rpkt->org, &p_org);
+	NTOHL_FP(&rpkt->rec, &p_rec);
+	NTOHL_FP(&rpkt->xmt, &p_xmt);
+
+	*precision = LOGTOD(rpkt->precision);
+#ifdef DEBUG
+	printf("sntp precision: %f\n", *precision);
+#endif /* DEBUG */
+
+	*root_dispersion = FPTOD(p_rdsp);
+
+#ifdef DEBUG
+	printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
+	printf("sntp rootdisp: %f\n", *root_dispersion);
+
+	pkt_output(rpkt, rpktl, stdout);
+
+	printf("sntp offset_calculation: rpkt->reftime:\n");
+	l_fp_output(&(rpkt->reftime), stdout);
+	printf("sntp offset_calculation: rpkt->org:\n");
+	l_fp_output(&(rpkt->org), stdout);
+	printf("sntp offset_calculation: rpkt->rec:\n");
+	l_fp_output(&(rpkt->rec), stdout);
+	printf("sntp offset_calculation: rpkt->rec:\n");
+	l_fp_output_bin(&(rpkt->rec), stdout);
+	printf("sntp offset_calculation: rpkt->rec:\n");
+	l_fp_output_dec(&(rpkt->rec), stdout);
+	printf("sntp offset_calculation: rpkt->xmt:\n");
+	l_fp_output(&(rpkt->xmt), stdout);
+#endif
+
+	/* Compute offset etc. */
+	GETTIMEOFDAY(tv_dst, (struct timezone *)NULL);
+	tv_dst->tv_sec += JAN_1970;
+	tmp = p_rec;
+	L_SUB(&tmp, &p_org);
+	LFPTOD(&tmp, t21);
+	TVTOTS(tv_dst, &dst);
+	tmp = dst;
+	L_SUB(&tmp, &p_xmt);
+	LFPTOD(&tmp, t34);
+	*offset = (t21 + t34) / 2.;
+	delta = t21 - t34;
+
+	if(ENABLED_OPT(NORMALVERBOSE))
+		printf("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
+			   t21, t34, delta, *offset);
 }
 
 /* The heart of (S)NTP, exchange NTP packets and compute values to correct the local clock */
