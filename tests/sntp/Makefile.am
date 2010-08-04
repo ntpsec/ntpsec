@@ -5,11 +5,12 @@ sntp_src = $(top_builddir)/sntp
 sntp_SOURCES_USED =	$(sntp_src)/crypto.o		\
 			$(sntp_src)/kod_management.o	\
 			$(sntp_src)/log.o		\
+			$(sntp_src)/main.o		\
 			$(sntp_src)/networking.o	\
 			$(sntp_src)/sntp-opts.o		\
 			$(sntp_src)/utilities.o
 
-base_SOURCES =		../main.cpp	\
+base_SOURCES =		../tests_main.cpp	\
 			sntptest.cpp
 
 tests_SOURCES = $(base_SOURCES)		\
@@ -17,6 +18,7 @@ tests_SOURCES = $(base_SOURCES)		\
 		kodDatabase.cpp		\
 		kodFile.cpp		\
 		networking.cpp		\
+		packetHandling.cpp	\
 		utilities.cpp
 
 LDADD = 	@GTEST_LDFLAGS@			\

@@ -2,7 +2,7 @@ check_PROGRAMS = tests
 LDADD = @LCRYPTO@ @GTEST_LDFLAGS@ @GTEST_LIBS@ @top_builddir@/libntp/libntp.a
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
 AM_CPPFLAGS = @GTEST_CPPFLAGS@
-tests_SOURCES = ../main.cpp		\
+tests_SOURCES = ../tests_main.cpp	\
 		libntptest.cpp		\
 		a_md5encrypt.cpp	\
 		atoint.cpp		\

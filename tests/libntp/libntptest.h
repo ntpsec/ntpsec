@@ -1,4 +1,4 @@
-#include "main.h"
+#include "tests_main.h"
 
 extern "C" {
 #include "ntp_stdlib.h"
