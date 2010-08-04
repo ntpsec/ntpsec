@@ -225,6 +225,9 @@ handle_pkt (
 			printf("sntp handle_pkt: Received %i bytes from %s\n", rpktl, addr_buf);
 		}
 
+		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
+		tv_dst.tv_sec += JAN_1970;
+
 		offset_calculation(rpkt, rpktl, &tv_dst, &offset, &precision, &root_dispersion);
 
 		for (digits = 0; (precision *= 10.) < 1.; ++digits)
@@ -301,8 +304,6 @@ offset_calculation (
 #endif
 
 	/* Compute offset etc. */
-	GETTIMEOFDAY(tv_dst, (struct timezone *)NULL);
-	tv_dst->tv_sec += JAN_1970;
 	tmp = p_rec;
 	L_SUB(&tmp, &p_org);
 	LFPTOD(&tmp, t21);
