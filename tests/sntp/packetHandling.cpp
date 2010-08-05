@@ -94,18 +94,22 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 
 	l_fp tmp;
 
+	// T1 - Originate timestamp
 	tmp.l_ui = 1000000000UL;
 	tmp.l_uf = 0UL;
 	HTONL_FP(&tmp, &rpkt.org);
 
+	// T2 - Receive timestamp
 	tmp.l_ui = 1000000001UL;
 	tmp.l_uf = 2147483648UL;
 	HTONL_FP(&tmp, &rpkt.rec);
 
+	// T3 - Transmit timestamp
 	tmp.l_ui = 1000000002UL;
 	tmp.l_uf = 0UL;
 	HTONL_FP(&tmp, &rpkt.xmt);
 
+	// T4 - Destination timestamp
 	tmp.l_ui = 1000000001UL;
 	tmp.l_uf = 0UL;
 	timeval dst;
@@ -120,5 +124,42 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 }
 
 TEST_F(mainTest, OffsetCalculationNegativeOffset) {
+	pkt rpkt;
 
+	rpkt.precision = -1;
+	rpkt.rootdelay = HTONS_FP(DTOUFP(0.5));
+	rpkt.rootdisp = HTONS_FP(DTOUFP(0.5));
+	l_fp reftime;
+	get_systime(&reftime);
+	HTONL_FP(&reftime, &rpkt.reftime);
+
+	l_fp tmp;
+
+	// T1 - Originate timestamp
+	tmp.l_ui = 1000000001UL;
+	tmp.l_uf = 0UL;
+	HTONL_FP(&tmp, &rpkt.org);
+
+	// T2 - Receive timestamp
+	tmp.l_ui = 1000000000UL;
+	tmp.l_uf = 2147483648UL;
+	HTONL_FP(&tmp, &rpkt.rec);
+
+	// T3 - Transmit timestamp
+	tmp.l_ui = 1000000001UL;
+	tmp.l_uf = 2147483648UL;
+	HTONL_FP(&tmp, &rpkt.xmt);
+
+	// T4 - Destination timestamp
+	tmp.l_ui = 1000000003UL;
+	tmp.l_uf = 0UL;
+	timeval dst;
+	TSTOTV(&tmp, &dst);
+
+	double offset, precision, root_disp;
+	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &root_disp);
+
+	EXPECT_DOUBLE_EQ(-1, offset);
+	EXPECT_DOUBLE_EQ(LOGTOD(-1), precision);
+	EXPECT_DOUBLE_EQ(0.5, root_disp);
 }
