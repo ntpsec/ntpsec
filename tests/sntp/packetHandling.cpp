@@ -1,7 +1,9 @@
 #include "sntptest.h"
 
 extern "C" {
+#include "kod_management.h"
 #include "main.h"
+#include "networking.h"
 #include "ntp.h"
 };
 
@@ -163,3 +165,83 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 	EXPECT_DOUBLE_EQ(LOGTOD(-1), precision);
 	EXPECT_DOUBLE_EQ(0.5, root_disp);
 }
+
+TEST_F(mainTest, HandleUnusableServer) {
+	pkt rpkt;
+	addrinfo host;
+	int rpktl = SERVER_UNUSEABLE;
+
+	EXPECT_EQ(-1, handle_pkt(rpktl, &rpkt, &host));
+}
+
+TEST_F(mainTest, HandleUnusablePacket) {
+	pkt rpkt;
+	addrinfo host;
+	int rpktl = PACKET_UNUSEABLE;
+
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+}
+
+TEST_F(mainTest, HandleServerAuthenticationFailure) {
+	pkt rpkt;
+	addrinfo host;
+	int rpktl = SERVER_AUTH_FAIL;
+
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+}
+
+TEST_F(mainTest, HandleKodDemobilize) {
+	const char* HOSTNAME = "192.0.2.1";
+	const char* REASON = "DENY";
+
+	pkt rpkt;
+	addrinfo host;
+	int rpktl = KOD_DEMOBILIZE;
+
+	host.ai_family = AF_INET;
+	host.ai_addrlen = sizeof(sockaddr_in);
+
+	sockaddr_u s;
+	s.sa4.sin_family = AF_INET;
+	s.sa4.sin_addr.s_addr = inet_addr(HOSTNAME);
+	host.ai_addr = &s.sa;
+
+	memcpy(&rpkt.refid, REASON, 4);
+
+	// Test that the KOD-entry is added to the database.
+	kod_init_kod_db("/dev/null");
+
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+
+	kod_entry *entry;
+	ASSERT_EQ(1, search_entry((char*)HOSTNAME, &entry));
+	EXPECT_TRUE(memcmp(REASON, entry->type, 4) == 0);
+}
+
+TEST_F(mainTest, HandleKodRate) {
+	pkt rpkt;
+	addrinfo host;
+	int rpktl = KOD_RATE;
+
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+}
+
+TEST_F(mainTest, HandleCorrectPacket) {
+	// We don't want our testing code to actually change the system clock.
+	ASSERT_FALSE(ENABLED_OPT(SETTOD));
+	ASSERT_FALSE(ENABLED_OPT(ADJTIME));
+
+	pkt rpkt;
+	addrinfo host;
+	int rpktl = LEN_PKT_NOMAC;
+
+	l_fp now;
+	get_systime(&now);
+	HTONL_FP(&now, &rpkt.reftime);
+	HTONL_FP(&now, &rpkt.org);
+	HTONL_FP(&now, &rpkt.rec);
+	HTONL_FP(&now, &rpkt.xmt);
+
+	EXPECT_EQ(0, handle_pkt(rpktl, &rpkt, &host));
+}
+
