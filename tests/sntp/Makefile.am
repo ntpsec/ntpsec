@@ -14,6 +14,7 @@ base_SOURCES =		../tests_main.cpp	\
 			sntptest.cpp
 
 tests_SOURCES = $(base_SOURCES)		\
+		crypto.cpp		\
 		keyFile.cpp		\
 		kodDatabase.cpp		\
 		kodFile.cpp		\
