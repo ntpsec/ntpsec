@@ -18,6 +18,7 @@ tests_SOURCES = $(base_SOURCES)		\
 		keyFile.cpp		\
 		kodDatabase.cpp		\
 		kodFile.cpp		\
+		logFile.cpp		\
 		networking.cpp		\
 		packetHandling.cpp	\
 		utilities.cpp

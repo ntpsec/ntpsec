@@ -36,8 +36,9 @@ protected:
 	}
 
 	void PrepareAuthenticationTest(int key_id,
-								  int key_len,
-								  const void* key_seq) {
+								   int key_len,
+								   const char* type,
+								   const void* key_seq) {
 		std::stringstream ss;
 		ss << key_id;
 
@@ -54,6 +55,12 @@ protected:
 
 		memcpy(key_ptr->key_seq, key_seq, key_ptr->key_len);
 		restoreKeyDb = true;
+	}
+
+	void PrepareAuthenticationTest(int key_id,
+								   int key_len,
+								   const void* key_seq) {
+		PrepareAuthenticationTest(key_id, key_len, "MD5", key_seq);
 	}
 
 	virtual void SetUp() {
@@ -268,7 +275,7 @@ TEST_F(packetProcessingTest, CorrectUnauthenticatedPacket) {
 						  MODE_SERVER, "UnitTest"));
 }
 
-TEST_F(packetProcessingTest, CorrectAuthenticatedPacket) {
+TEST_F(packetProcessingTest, CorrectAuthenticatedPacketMD5) {
 	PrepareAuthenticationTest(10, 15, "123456789abcdef");
 	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
 
@@ -286,4 +293,23 @@ TEST_F(packetProcessingTest, CorrectAuthenticatedPacket) {
 			  process_pkt(&testpkt, &testsock, pkt_len,
 						  MODE_SERVER, "UnitTest"));
 
+}
+
+TEST_F(packetProcessingTest, CorrectAuthenticatedPacketSHA1) {
+	PrepareAuthenticationTest(20, 15, "SHA1", "abcdefghijklmno");
+	ASSERT_TRUE(ENABLED_OPT(AUTHENTICATION));
+
+	int pkt_len = LEN_PKT_NOMAC;
+
+	// Prepare the packet.
+	testpkt.exten[0] = htonl(20);
+	int mac_len = make_mac((char*)&testpkt, pkt_len,
+						   MAX_MAC_LEN, key_ptr,
+						   (char*)&testpkt.exten[1]);
+
+	pkt_len += 4 + mac_len;
+
+	EXPECT_EQ(pkt_len,
+			  process_pkt(&testpkt, &testsock, pkt_len,
+						  MODE_SERVER, "UnitTest"));
 }
