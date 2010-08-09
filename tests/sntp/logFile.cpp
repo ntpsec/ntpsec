@@ -23,8 +23,6 @@ TEST_F(logFileTest, WriteLogFile) {
 	log_msg("Test log message", 0);
 	log_msg("Test message 2", 0);
 
-	cleanup_log();
-
 	/*
 	 * Compare the file size, since the contents differs in the
 	 * timestamp.

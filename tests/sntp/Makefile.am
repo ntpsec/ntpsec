@@ -21,6 +21,7 @@ tests_SOURCES = $(base_SOURCES)		\
 		logFile.cpp		\
 		networking.cpp		\
 		packetHandling.cpp	\
+		packetProcessing.cpp	\
 		utilities.cpp
 
 LDADD = 	@GTEST_LDFLAGS@			\
