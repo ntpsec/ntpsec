@@ -437,7 +437,7 @@ unusable:
 	printf("spkt->xmt:\n");
 	l_fp_output(&spkt->xmt, stdout);
 #endif
-	if (!L_ISEQU(&rpkt->org, &spkt->xmt) && mode != MODE_BROADCAST) {
+	if (mode != MODE_BROADCAST && !L_ISEQU(&rpkt->org, &spkt->xmt)) {
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp process_pkt: pkt.org and peer.xmt differ\n");
 		return PACKET_UNUSEABLE;
