@@ -1,3 +1,6 @@
 #!/bin/sh
 
+# Create the output directory.
+mkdir -p "$2"
+
 exec "$3" "$1" "$2"
