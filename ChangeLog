@@ -1,4 +1,4 @@
-* [Bug 1597] from 4.2.6-RC1: packet processing ignores RATE KoD packets,
+* [Bug 1597] from 4.2.6p3-RC1: packet processing ignores RATE KoD packets,
   Because of a bug in string comparison.
 (4.2.7p41) 2010/07/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1581] from 4.2.6p3-beta1: ntp_intres.c size_t printf format
