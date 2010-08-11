@@ -1,5 +1,5 @@
-* [Bug 1597] packet processing ignores RATE KoD packets, because of
-  a bug in string comparison.
+* [Bug 1597] from 4.2.6-RC1: packet processing ignores RATE KoD packets,
+  Because of a bug in string comparison.
 (4.2.7p41) 2010/07/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1581] from 4.2.6p3-beta1: ntp_intres.c size_t printf format
   string mismatch.
@@ -309,6 +309,11 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1597] packet processing ignores RATE KoD packets, because of
+  a bug in string comparison.
+
 ---
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
