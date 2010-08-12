@@ -110,3 +110,21 @@ TEST_F(keyFileTest, ReadKeyFileWithComments) {
 	ASSERT_TRUE(result != NULL);
 	EXPECT_TRUE(CompareKeys(34, 3, "MD5", "xyz", *result));
 }
+
+TEST_F(keyFileTest, ReadKeyFileWithInvalidHex) {
+	key* keys = NULL;
+
+	ASSERT_EQ(1, auth_init(CreatePath("key-test-invalid-hex", INPUT_DIR).c_str(), &keys));
+
+	ASSERT_TRUE(keys != NULL);
+
+	key* result = NULL;
+	get_key(10, &result);
+	ASSERT_TRUE(result != NULL);
+	char data[15]; memset(data, 0x01, 15);
+	EXPECT_TRUE(CompareKeys(10, 15, "MD5", data, *result));
+
+	result = NULL;
+	get_key(30, &result); // Should not exist, and result should remain NULL.
+	ASSERT_TRUE(result == NULL);
+}

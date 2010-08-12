@@ -139,3 +139,33 @@ TEST_F(networkingTest, ResolveMixedAddressValidity) {
 
 	EXPECT_TRUE(CompareAddrinfo(HOSTS[1], AF_INET, 0, **actual));
 }
+
+TEST_F(networkingTest, ResolveIgnoringIPv6) {
+	const char* HOSTS[4] = {"2001:0db8:ac10:fe01::", "192.0.2.10",
+							"192.0.2.30", "2001:ab0:1000::"};
+	const int FAMILIES[4] = {AF_INET6, AF_INET, AF_INET, AF_INET6};
+	const int HOSTCOUNT = COUNTOF(HOSTS);
+
+	addrinfo** actual = NULL;
+
+	ASSERT_EQ(2, resolve_hosts(HOSTS, HOSTCOUNT, &actual, AF_INET));
+	ASSERT_TRUE(actual != NULL);
+
+	EXPECT_TRUE(CompareAddrinfo(HOSTS[1], FAMILIES[1], 0, *actual[0]));
+	EXPECT_TRUE(CompareAddrinfo(HOSTS[2], FAMILIES[2], 0, *actual[1]));
+}
+
+TEST_F(networkingTest, ResolveIgnoringIPv4) {
+	const char* HOSTS[4] = {"2001:0db8:ac10:fe01::", "192.0.2.10",
+							"192.0.2.30", "2001:ab0:1000::"};
+	const int FAMILIES[4] = {AF_INET6, AF_INET, AF_INET, AF_INET6};
+	const int HOSTCOUNT = COUNTOF(HOSTS);
+
+	addrinfo** actual = NULL;
+
+	ASSERT_EQ(2, resolve_hosts(HOSTS, HOSTCOUNT, &actual, AF_INET6));
+	ASSERT_TRUE(actual != NULL);
+
+	EXPECT_TRUE(CompareAddrinfo(HOSTS[0], FAMILIES[0], 0, *actual[0]));
+	EXPECT_TRUE(CompareAddrinfo(HOSTS[3], FAMILIES[3], 0, *actual[1]));
+}

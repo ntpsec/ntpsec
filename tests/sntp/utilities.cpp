@@ -1,6 +1,7 @@
 #include "sntptest.h"
 
 extern "C" {
+#include "main.h"
 #include "utilities.h"
 };
 
@@ -63,4 +64,30 @@ TEST_F(utilitiesTest, IPv6Address) {
 
 	EXPECT_STREQ(expected, ss_to_str(&input));
 	EXPECT_STREQ(expected, addrinfo_to_str(&inputA));
+}
+
+TEST_F(utilitiesTest, SetLiVnMode1) {
+	pkt expected;
+	expected.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+										 NTP_VERSION,
+										 MODE_SERVER);
+
+	pkt actual;
+	set_li_vn_mode(&actual, LEAP_NOWARNING, NTP_VERSION,
+				   MODE_SERVER);
+
+	EXPECT_EQ(expected.li_vn_mode, actual.li_vn_mode);
+}
+
+TEST_F(utilitiesTest, SetLiVnMode2) {
+	pkt expected;
+	expected.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOTINSYNC,
+										 NTP_OLDVERSION,
+										 MODE_BROADCAST);
+
+	pkt actual;
+	set_li_vn_mode(&actual, LEAP_NOTINSYNC, NTP_OLDVERSION,
+				   MODE_BROADCAST);
+
+	EXPECT_EQ(expected.li_vn_mode, actual.li_vn_mode);
 }
