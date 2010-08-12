@@ -1,9 +1,12 @@
 #include "sntptest.h"
+#include "fileHandlingTest.h"
 
 extern "C" {
 #include "main.h"
 #include "utilities.h"
 };
+
+using std::string;
 
 class utilitiesTest : public sntptest {
 protected:
@@ -26,6 +29,36 @@ protected:
 		}
 		a.ai_addr = &sock->sa;
 		return a;
+	}
+};
+
+class debugUtilitiesTest : public fileHandlingTest {
+protected:
+	bool outputFileOpened;
+	FILE* outputFile;
+
+	debugUtilitiesTest() : outputFileOpened(false) {}
+
+	void InitDebugTest(const string& filename) {
+		// Clear the contents of the current file.
+		// Open the output file
+		outputFile = fopen(filename.c_str(), "w+");
+		ASSERT_TRUE(outputFile != NULL);
+		outputFileOpened = true;
+	}
+
+	// Closes outputFile, and compare contents.
+	void FinishDebugTest(const string& expected,
+						 const string& actual) {
+		if (outputFileOpened)
+			fclose(outputFile);
+
+		ifstream e(expected.c_str());
+		ifstream a(actual.c_str());
+		ASSERT_TRUE(e.good());
+		ASSERT_TRUE(a.good());
+
+		CompareFileContent(e, a);
 	}
 };
 
@@ -90,4 +123,74 @@ TEST_F(utilitiesTest, SetLiVnMode2) {
 				   MODE_BROADCAST);
 
 	EXPECT_EQ(expected.li_vn_mode, actual.li_vn_mode);
+}
+
+/* Debug utilities tests */
+
+TEST_F(debugUtilitiesTest, PktOutput) {
+	string filename = CreatePath("debug-output-pkt", OUTPUT_DIR);
+	InitDebugTest(filename);
+
+	pkt testpkt;
+	memset(&testpkt, 0, sizeof(pkt));
+	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
+										NTP_VERSION,
+										MODE_SERVER);
+
+	l_fp test;
+	test.l_ui = 8;
+	test.l_uf = 2147483647; // Lots of ones.
+	HTONL_FP(&test, &testpkt.xmt);
+
+	pkt_output(&testpkt, LEN_PKT_NOMAC, outputFile);
+
+	FinishDebugTest(CreatePath("debug-input-pkt", INPUT_DIR), filename);
+}
+
+TEST_F(debugUtilitiesTest, LfpOutputHexFormat) {
+	string filename = CreatePath("debug-output-lfp-hex", OUTPUT_DIR);
+	InitDebugTest(filename);
+
+	l_fp test;
+	test.l_ui = 127; // 0x7f
+	test.l_uf = 2147483647; // 0x7fffffff
+
+	l_fp network;
+	HTONL_FP(&test, &network);
+
+	l_fp_output(&network, outputFile);
+
+	FinishDebugTest(CreatePath("debug-input-lfp-hex", INPUT_DIR), filename);
+}
+
+TEST_F(debugUtilitiesTest, LfpOutputBinaryFormat) {
+	string filename = CreatePath("debug-output-lfp-bin", OUTPUT_DIR);
+	InitDebugTest(filename);
+
+	l_fp test;
+	test.l_ui = 63;  // 00000000 00000000 00000000 00111111
+	test.l_uf = 127; // 00000000 00000000 00000000 01111111
+
+	l_fp network;
+	HTONL_FP(&test, &network);
+
+	l_fp_output_bin(&network, outputFile);
+
+	FinishDebugTest(CreatePath("debug-input-lfp-bin", INPUT_DIR), filename);
+}
+
+TEST_F(debugUtilitiesTest, LfpOutputDecimalFormat) {
+	string filename = CreatePath("debug-output-lfp-dec", OUTPUT_DIR);
+	InitDebugTest(filename);
+
+	l_fp test;
+	test.l_ui = 6310; // 0x000018A6
+	test.l_uf = 308502; // 0x00004B516
+
+	l_fp network;
+	HTONL_FP(&test, &network);
+
+	l_fp_output_dec(&network, outputFile);
+
+	FinishDebugTest(CreatePath("debug-input-lfp-dec", INPUT_DIR), filename);
 }

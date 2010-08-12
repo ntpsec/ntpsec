@@ -1,3 +1,6 @@
+#ifndef TESTS_MAIN_H
+#define TESTS_MAIN_H
+
 #include <gtest/gtest.h>
 
 #include "config.h"
@@ -11,3 +14,5 @@ public:
 protected:
 	static std::vector<std::string> m_params;
 };
+
+#endif // TESTS_MAIN_H

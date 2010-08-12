@@ -1,3 +1,6 @@
+#ifndef FILE_HANDLING_TEST_H
+#define FILE_HANDLING_TEST_H
+
 #include "sntptest.h"
 
 #include <fstream>
@@ -50,4 +53,12 @@ protected:
 			currentLine++;
 		}
 	}
+
+	void ClearFile(const std::string& filename) {
+		std::ofstream clear(filename.c_str(), ios::trunc);
+		ASSERT_TRUE(clear.good());
+		clear.close();
+	}
 };
+
+#endif // FILE_HANDLING_TEST_H
