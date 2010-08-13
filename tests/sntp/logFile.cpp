@@ -5,12 +5,6 @@ extern "C" {
 };
 
 class logFileTest : public fileHandlingTest {
-protected:
-	void ClearFile(const std::string& filename) {
-		std::ofstream clear(filename.c_str(), ios::trunc);
-		ASSERT_TRUE(clear.good());
-		clear.close();
-	}
 };
 
 TEST_F(logFileTest, WriteLogFile) {
@@ -35,3 +29,28 @@ TEST_F(logFileTest, WriteLogFile) {
 	EXPECT_EQ(GetFileSize(expected), GetFileSize(actual));
 }
 
+TEST_F(logFileTest, WriteDebugMessage) {
+	ActivateOption("-l", "/dev/null");
+
+	std::string filename = CreatePath("log-output-debug", OUTPUT_DIR);
+
+	extern FILE** debug_log_file;
+	FILE* debugFile = fopen(filename.c_str(), "w");
+	debug_log_file = &debugFile;
+
+	debug_msg("This is a debug message");
+	debug_msg("Another debug message");
+
+	fclose(debugFile);
+
+	/*
+	 * Compare the file size, since the contents differs in the
+	 * timestamp.
+	 */
+	ifstream expected(CreatePath("log-expected-debug", INPUT_DIR).c_str());
+	ifstream actual(filename.c_str());
+	ASSERT_TRUE(expected.good());
+	ASSERT_TRUE(actual.good());
+
+	EXPECT_EQ(GetFileSize(expected), GetFileSize(actual));
+}
