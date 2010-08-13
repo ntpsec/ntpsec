@@ -6,6 +6,7 @@ int init = 0;
 int filelog = 0;
 
 FILE *log_file;
+FILE **debug_log_file = &stderr;
 
 
 void log_msg(char *message, char type) {
@@ -40,7 +41,7 @@ void debug_msg(char *message) {
 		time_t cur_time = time(NULL);
 		char *timestamp = ctime(&cur_time);
 
-		fprintf(stderr, "%s: %s\n", timestamp, message);
+		fprintf(*debug_log_file, "%s: %s\n", timestamp, message);
 	}
 	else {
 		syslog(LOG_DEBUG
