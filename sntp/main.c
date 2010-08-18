@@ -325,8 +325,8 @@ on_wire (
 			L_SUB(&tmp, &p_org);
 			LFPTOD(&tmp, t21);
 			TVTOTS(&tv_dst, &dst);
-			tmp = dst;
-			L_SUB(&tmp, &p_xmt);
+			tmp = p_xmt;
+			L_SUB(&tmp, &dst);
 			LFPTOD(&tmp, t34);
 			offset = (t21 + t34) / 2.;
 			delta = t21 - t34;

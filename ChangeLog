@@ -1,3 +1,4 @@
+* [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
 * [Bug 1593] ntpd abort in free() with logconfig syntax error.
 * [Bug 1595] from 4.2.6p3-RC1: empty last line in key file causes
   duplicate key to be added
@@ -314,6 +315,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1573] Miscalculation of offset in sntp.
 * [Bug 1595] empty last line in key file causes duplicate key to be added
 * [Bug 1597] packet processing ignores RATE KoD packets, because of
   a bug in string comparison.
