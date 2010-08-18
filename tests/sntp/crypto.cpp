@@ -23,7 +23,7 @@ TEST_F(cryptoTest, MakeMd5Mac) {
 	md5.key_id = 10;
 	md5.key_len = 6;
 	memcpy(&md5.key_seq, "md5seq", md5.key_len);
-	memcpy(&md5.type, "MD5", 3);
+	memcpy(&md5.type, "MD5", 4);
 
 	EXPECT_EQ(MD5_LENGTH,
 			  make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
@@ -44,7 +44,7 @@ TEST_F(cryptoTest, MakeSHA1Mac) {
 	sha1.key_id = 20;
 	sha1.key_len = 7;
 	memcpy(&sha1.key_seq, "sha1seq", sha1.key_len);
-	memcpy(&sha1.type, "SHA1", 4);
+	memcpy(&sha1.type, "SHA1", 5);
 
 	EXPECT_EQ(SHA1_LENGTH,
 			  make_mac((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1, actual));
@@ -65,7 +65,7 @@ TEST_F(cryptoTest, VerifyCorrectMD5) {
 	md5.key_id = 0;
 	md5.key_len = 6;
 	memcpy(&md5.key_seq, "md5key", md5.key_len);
-	memcpy(&md5.type, "MD5", 3);
+	memcpy(&md5.type, "MD5", 4);
 
 	EXPECT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
 }
@@ -83,7 +83,7 @@ TEST_F(cryptoTest, VerifySHA1) {
 	sha1.key_id = 0;
 	sha1.key_len = 7;
 	memcpy(&sha1.key_seq, "sha1key", sha1.key_len);
-	memcpy(&sha1.type, "SHA1", 4);
+	memcpy(&sha1.type, "SHA1", 5);
 
 	EXPECT_TRUE(auth_md5((char*)PKT_DATA, PKT_LEN, SHA1_LENGTH, &sha1));
 }
@@ -103,7 +103,7 @@ TEST_F(cryptoTest, VerifyFailure) {
 	md5.key_id = 0;
 	md5.key_len = 6;
 	memcpy(&md5.key_seq, "md5key", md5.key_len);
-	memcpy(&md5.type, "MD5", 3);
+	memcpy(&md5.type, "MD5", 4);
 
 	EXPECT_FALSE(auth_md5((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5));
 }
@@ -118,7 +118,7 @@ TEST_F(cryptoTest, PacketSizeNotMultipleOfFourBytes) {
 	md5.key_id = 10;
 	md5.key_len = 6;
 	memcpy(&md5.key_seq, "md5seq", md5.key_len);
-	memcpy(&md5.type, "MD5", 3);
+	memcpy(&md5.type, "MD5", 4);
 
 	EXPECT_EQ(0, make_mac((char*)PKT_DATA, PKT_LEN, MD5_LENGTH, &md5, actual));
 }
