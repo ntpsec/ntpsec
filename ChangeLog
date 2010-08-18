@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1573] Miscalculation of offset in sntp.
 * [Bug 1595] empty last line in key file causes duplicate key to be added
 * [Bug 1597] packet processing ignores RATE KoD packets, because of
   a bug in string comparison.
