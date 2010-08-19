@@ -1,3 +1,4 @@
+(4.2.7p42) 2010/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1593] ntpd abort in free() with logconfig syntax error.
 * [Bug 1595] from 4.2.6p3-RC1: empty last line in key file causes
   duplicate key to be added
