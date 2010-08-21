@@ -2,6 +2,7 @@
 
 extern "C" {
 #include "log.h"
+#include <fcntl.h>
 };
 
 class logFileTest : public fileHandlingTest {
@@ -34,14 +35,26 @@ TEST_F(logFileTest, WriteDebugMessage) {
 
 	std::string filename = CreatePath("log-output-debug", OUTPUT_DIR);
 
-	extern FILE** debug_log_file;
+	// Create and/or truncate the file.
 	FILE* debugFile = fopen(filename.c_str(), "w");
-	debug_log_file = &debugFile;
+
+	fflush(stderr);
+
+	/* 
+	 * Copy stderr's original file handle, so we can restore
+	 * it later on. Then redirect stderr to our debugFile.
+	 */
+	int orig = dup(fileno(stderr));
+	dup2(fileno(debugFile), fileno(stderr));
+	fclose(debugFile);
 
 	debug_msg("This is a debug message");
 	debug_msg("Another debug message");
 
-	fclose(debugFile);
+	// Restore the original stderr handle.
+	fflush(stderr);
+	dup2(orig, fileno(stderr));
+	close(orig);
 
 	/*
 	 * Compare the file size, since the contents differs in the
