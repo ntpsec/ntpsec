@@ -1,3 +1,4 @@
+* [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
 (4.2.7p43) 2010/08/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1602] Refactor some of the sntp/ directory to facililtate testing.
 (4.2.7p42) 2010/08/18 Released by Harlan Stenn <stenn@ntp.org>
@@ -317,6 +318,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1573] Miscalculation of offset in sntp.
 * [Bug 1595] empty last line in key file causes duplicate key to be added
 * [Bug 1597] packet processing ignores RATE KoD packets, because of
   a bug in string comparison.
