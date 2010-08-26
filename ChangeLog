@@ -1,4 +1,5 @@
 * [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
+(4.2.7p43) 2010/08/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1602] Refactor some of the sntp/ directory to facililtate testing.
 (4.2.7p42) 2010/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1593] ntpd abort in free() with logconfig syntax error.
