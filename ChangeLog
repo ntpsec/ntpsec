@@ -1,3 +1,4 @@
+(4.2.7p44) 2010/08/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
 (4.2.7p43) 2010/08/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1602] Refactor some of the sntp/ directory to facililtate testing.
