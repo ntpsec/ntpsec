@@ -382,6 +382,7 @@ AC_SEARCH_LIBS([MD5Init], [md5 md])
 AC_CHECK_FUNCS([MD5Init])
 
 NTP_LINEEDITLIBS
+NTP_LIB_M
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
