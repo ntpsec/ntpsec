@@ -1,3 +1,4 @@
+* Use AC_SEARCH_LIBS instead of AC_CHECK_LIB for NTP_LIB_M.
 (4.2.7p45) 2010/09/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1578] Consistently use -lm when needed.
 (4.2.7p44) 2010/08/27 Released by Harlan Stenn <stenn@ntp.org>

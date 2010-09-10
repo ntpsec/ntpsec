@@ -6,7 +6,7 @@ case "$host" in
  *-*-darwin*)
     ;;
  *)
-    AC_CHECK_LIB(m, cos, LIBM="-lm")
+    AC_SEARCH_LIBS(cos, m, LIBM="-lm")
     ;;
 esac
 AC_SUBST([LIBM])
