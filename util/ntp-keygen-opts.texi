@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  September 10, 2010 at 10:11:50 AM by AutoGen 5.10
+# It has been AutoGen-ed  September 11, 2010 at 10:16:48 AM by AutoGen 5.10
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -51,7 +51,7 @@ This is the automatically generated usage text for ntp-keygen:
 @exampleindent 0
 @example
 Using OpenSSL version 90704f
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p46
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p47
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
@@ -107,7 +107,7 @@ This is the ``certificate scheme'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 scheme is one of
@@ -157,7 +157,7 @@ This is the ``write iff or gq identity keys'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Write the IFF or GQ client keys to the standard output.  This is
@@ -172,7 +172,7 @@ This is the ``generate gq parameters and keys'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate parameters and keys for the GQ identification scheme,
@@ -187,7 +187,7 @@ This is the ``generate rsa host key'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate new host keys, obsoleting any that may exist.
@@ -201,7 +201,7 @@ This is the ``generate iff parameters'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate parameters for the IFF identification scheme, obsoleting
@@ -216,7 +216,7 @@ This is the ``set issuer name'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Set the suject name to name.  This is used as the subject field
@@ -238,7 +238,7 @@ This is the ``modulus'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 The number of bits in the prime modulus.  The default is 512.
@@ -252,7 +252,7 @@ This is the ``generate pc private certificate'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate a private certificate.  By default, the program generates
@@ -267,7 +267,7 @@ This is the ``output private password'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Encrypt generated files containing private data with the specified
@@ -282,7 +282,7 @@ This is the ``input private password'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Set the password for reading files to the specified password.
@@ -296,7 +296,7 @@ This is the ``generate sign key (rsa or dsa)'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate a new sign key of the designated type, obsoleting any
@@ -312,7 +312,7 @@ This is the ``set subject name'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Set the issuer name to name.  This is used for the issuer field
@@ -327,7 +327,7 @@ This is the ``trusted certificate (tc scheme)'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate a trusted certificate.  By default, the program generates
@@ -342,7 +342,7 @@ This is the ``generate <num> mv parameters'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Generate parameters and keys for the Mu-Varadharajan (MV)
@@ -357,7 +357,7 @@ This is the ``update <num> mv keys'' option.
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{OPENSSL} during the compilation.
+must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 This option has no @samp{doc} documentation.
