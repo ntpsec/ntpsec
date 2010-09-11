@@ -112,7 +112,7 @@ typedef char s_char;
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
 #define	NTP_RETRY	3	/* max packet retries */
-#define	NTP_MINPKT	1	/* log2 min interburst interval (2 s) */
+#define	NTP_MINPKT	2	/* guard time (s) */
 
 /*
  * Clock filter algorithm tuning parameters

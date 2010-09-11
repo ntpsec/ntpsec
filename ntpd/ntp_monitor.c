@@ -383,7 +383,7 @@ ntp_monitor(
 		 * This rate-limits the KoDs to no less than the average
 		 * headway.
 		 */
-		if (interval + 1 >= (1 << ntp_minpkt) && leak < limit) {
+		if (interval + 1 >= ntp_minpkt && leak < limit) {
 			mon->leak = leak - 2;
 			restrict_mask &= ~(RES_LIMITED | RES_KOD);
 		} else if (mon->leak < limit)

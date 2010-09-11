@@ -1843,7 +1843,6 @@ poll_update(
 	u_char	mpoll
 	)
 {
-	int	minpkt;
 	u_long	next, utemp;
 	u_char	hpoll;
 
@@ -1899,9 +1898,8 @@ poll_update(
 	 * slink away. If called from the poll process, delay 1 s for a
 	 * reference clock, otherwise 2 s.
 	 */
-	minpkt = 1 << ntp_minpkt;
 	utemp = current_time + max(peer->throttle - (NTP_SHIFT - 1) *
-	    (1 << peer->minpoll), minpkt);
+	    (1 << peer->minpoll), ntp_minpkt);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
 			return;
@@ -1919,7 +1917,7 @@ poll_update(
 	 */
 	} else if (peer->cmmd != NULL) {
 		if (peer->nextdate > current_time) {
-			if (peer->nextdate + minpkt != utemp)
+			if (peer->nextdate + ntp_minpkt != utemp)
 				peer->nextdate = utemp;
 		} else {
 			peer->nextdate = utemp;
@@ -1957,7 +1955,7 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 		if (peer->throttle > (1 << peer->minpoll))
-			peer->nextdate += minpkt;
+			peer->nextdate += ntp_minpkt;
 	}
 #ifdef DEBUG
 	if (debug > 1)
@@ -2048,7 +2046,7 @@ peer_clear(
 	if (initializing) {
 		peer->nextdate += peer_associations;
 	} else if (peer->hmode == MODE_PASSIVE) {
-		peer->nextdate += 1 << ntp_minpkt;
+		peer->nextdate += ntp_minpkt;
 	} else {
 		peer->nextdate += ntp_random() % peer_associations;
 	}
