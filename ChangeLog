@@ -1,4 +1,5 @@
 * [Bug 1588] finish configure --disable-autokey implementation.
+* [Bug 1616] refclock_acts.c: if (pp->leap == 2) is always false.
 * [Bug 1620] [Backward Incompatible] "discard minimum" value should be in
   seconds, not log2 seconds.
 (4.2.7p46) 2010/09/10 Released by Harlan Stenn <stenn@ntp.org>

@@ -499,7 +499,7 @@ acts_timecode(
 		pp->leap = LEAP_NOWARNING;
 		if (leap == 1)
 	    		pp->leap = LEAP_ADDSECOND;
-		else if (pp->leap == 2)
+		else if (leap == 2)
 	    		pp->leap = LEAP_DELSECOND;
 		memcpy(&pp->refid, REFACTS, 4);
 		if (up->msgcnt == 0)
