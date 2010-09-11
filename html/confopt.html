@@ -3,50 +3,29 @@
 <head>
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
 <meta name="generator" content="HTML Tidy, see www.w3.org">
-<title>Server Options</title>
+<title>Server Commands and Options</title>
 <link href="scripts/style.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-<h3>Server Options</h3>
+<h3>Server Commands and Options</h3>
 <img src="pic/boom3a.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>,
 Walt Kelly</a>
 <p>The chicken is getting configuration advice.</p>
 <p>Last update:
-	<!-- #BeginDate format:En2m -->11-Apr-2010  23:07<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->10-Sep-2010  0:29<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
 <script type="text/javascript" language="javascript" src="scripts/command.txt"></script>
 <script type="text/javascript" language="javascript" src="scripts/confopt.txt"></script>
-<h4>Table of Contents</h4>
-<ul>
-	<li class="inline"><a href="#cfg">Configuration Commands</a></li>
-	<li class="inline"><a href="#opt">Command Options</a></li>
-	<li class="inline"><a href="#aux">Auxilliary Commands</a></li>
-	<li class="inline"><a href="#bug">Bugs</a></li>
-</ul>
 <hr>
-<p>Following is a description of the configuration commands in NTPv4. There are
-	two classes of commands, configuration commands that configure an association
-	with a remote server, peer or reference clock, and auxilliary commands that
-	specify environmental variables that control various related operations. </p>
-<p>The various modes described on the <a href="assoc.html">Association Management</a> page
-	are determined by the command keyword and the DNS name or IP address. Addresses
-	are classed by type as (s) a remote server or peer (IPv4 class A, B and C),
-	(b) the IP broadcast address of a local interface, (m) a multicast address (IPv4
-	class D), or (r) a reference clock address (127.127.x.x). For type m addresses
-	the IANA has assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101
-	(site local) exclusively to NTP, but other nonconflicting addresses can be used. </p>
+<h4>Server and Peer Addresses</h4>
+<p>Following is a description of the configuration commands in NTPv4. There are two classes of commands, configuration commands that configure an association with a remote server, peer or reference clock, and auxilliary commands that specify environmental variables that control various related operations. </p>
+<p>The various modes described on the <a href="assoc.html">Association Management</a> page are determined by the command keyword and the DNS name or IP address. Addresses are classed by type as (s) a remote server or peer (IPv4 class A, B and C), (b) the IP broadcast address of a local interface, (m) a multicast address (IPv4 class D), or (r) a reference clock address (127.127.x.x). For type m addresses the IANA has assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101 (site local) exclusively to NTP, but other nonconflicting addresses can be used. </p>
 <p>If the Basic Socket Interface Extensions for IPv6 (RFC-2553) is detected,
-	support for the IPv6 address family is generated in addition to the default
-	IPv4 address family. IPv6 addresses can be identified by the presence of colons &quot;:&quot; in
-	the address field. IPv6 addresses can be used almost everywhere where IPv4 addresses
-	can be used, with the exception of reference clock addresses, which are always
-	IPv4. Note that in contexts where a host name is expected, a <tt>-4</tt> qualifier
-	preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier
-	forces DNS resolution to the IPv6 namespace.</p>
-<h4 id="cfg">Configuration Commands</h4>
-<dl>
+	support for the IPv6 address family is generated in addition to the default IPv4 address family. IPv6 addresses can be identified by the presence of colons &quot;:&quot; in the address field. IPv6 addresses can be used almost everywhere where IPv4 addresses can be used, with the exception of reference clock addresses, which are always IPv4. Note that in contexts where a host name is expected, a <tt>-4</tt> qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the IPv6 namespace.</p>
+<h4 id="cfg">Commands and Options</h4>
+<p>Unless noted otherwise, further information about these ccommands is on the <a href="assoc.html">Association Management</a> page.</p><dl>
 	<dt id="server"><tt>server <i>address</i> [options ...]</tt><br>
 		<tt>peer <i>address</i> [options ...]</tt><br>
 		<tt>broadcast <i>address</i> [options ...]</tt><br>
@@ -95,7 +74,7 @@ Walt Kelly</a>
 <dl>
 	<dt><tt>autokey</tt></dt>
 	<dd>Send and receive packets authenticated by the Autokey scheme described
-		in the <a href="authopt.html">Authentication Options</a> page. This option
+		in the <a href="autokey.html">Autokey Public Key Authentication</a> page. This option
 		is mutually exclusive with the <tt>key</tt> option.</dd>
 	<dt><tt>burst</tt></dt>
 	<dd>When the server is reachable, send a burst of eight packets instead of the
@@ -114,7 +93,7 @@ Walt Kelly</a>
 		a recommended option with this command.</dd>
 	<dt><tt>key</tt> <i><tt>key</tt></i></dt>
 	<dd>Send and receive packets authenticated by the symmetric key scheme described
-		in the <a href="authopt.html">Authentication Options</a> page. 
+		in the <a href="authentic.html">Authentication Support</a> page. 
 		The <i><tt>key</tt></i> specifies the key identifier with values from 1 to
 		65534, inclusive. This option is mutually exclusive with the <tt>autokey</tt> option.</dd>
 	<dt><tt>minpoll <i>minpoll<br>
@@ -156,8 +135,8 @@ Walt Kelly</a>
 or outgoing NTP packets. Versions
 		1-4 are the choices, with version 4 the default.</dd>
 	<dt><tt>xleave</tt></dt>
-	<dd>Operate in interleaved mode (symmetric and broadcast modes only). (see <a href="xleave.html">NTP
-			Interleaved Modes</a>)</dd>
+	<dd>Operate in interleaved mode (symmetric and broadcast modes only). Further information is on the <a href="xleave.html">NTP
+			Interleaved Modes</a> page.</dd>
 </dl>
 <h4 id="aux">Auxilliary Commands</h4>
 <dl>
@@ -190,9 +169,6 @@ or outgoing NTP packets. Versions
 		should operate using symmetric key or public key authentication as described
 		in the <a href="authopt.html">Authentication Options</a> page.</dd>
 </dl>
-<h4 id="bug">Bugs</h4>
-<p>The syntax checking is not picky; some combinations of ridiculous and even
-	hilarious options and modes may not be detected.</p>
 <hr>
 <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
 </body>

@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<title>Clock State Machine</title>
+<link href="scripts/style.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<h3>Clock State Machine</h3>
+<p>Last update:
+  <!-- #BeginDate format:En2m -->08-Sep-2010  21:38<!-- #EndDate -->
+  UTC</p>
+<hr>
+<h4>Introduction</h4>
+<p>In the NTPv4 specification and reference implementation a state machine is used to manage the system clock under exceptional conditions, as when the daemon is first started or when encountering  severe network congesiton, for example. The state machine uses three thresolds: panic, step and stepout, and a watchdog timer. The thresholds default to 1000 s, 128 ms and 900 s, respectively, but can be changed by command options.</p>
+<h4>The Panic Threhold</h4>
+<p>Most compters today incorporate a time-of-year (TOY) chip to maintain the time  when the power is off. When the machine is restarted, the chip is used to initialize the operating system time. In case there is no TOY chip or the TOY&nbsp;time is different from  NTP  time by more than the  panic threshold, the daemon <tt></tt> assumes something must be terribly wrong, so exits with a message to the system operator to set the time  manually. With the <tt>-g</tt> option, the daemon will set the clock  to NTP time the first time, but exit if the offset exceed the any time after that.</p>
+<h4>The Step and Stepout Thresholds</h4>
+<p>Under ordinary conditions, the clock discipline slews the clock so that the time is effectively continuous and never runs backwards. If due to extreme network congestion, or an offset spike exceeds the  step threshold, by default 128 ms, the spike is discarded. However, if   offsets greater than the step threshold persist for more than the <i>stepout threshold</i>, by default 900 s, the system clock is stepped to the correct value. In practice the need for a step has been extremely rare and almost always the result of a hardware failure.  Both the step threshold and stepout threshold can be set as options to the tinker command.</p>
+<p>Historically, the most important appliccation of the step function was when a leap second was inserted in the Coordinated Univesal Time (UTC) timescale and kernel precision time support was not available. Further details are on the <a href="leap">Leap Second Processing</a> page.</p>
+<p>In some applications the clock can never be set backward, even  it  accidentlly set forward a week by some other means. There are several ways to alter the daemon behavior to insure time is always monotone-increasing. If the step threhold is set to zero, there will never be a step.  With the <tt>-x</tt> command line option the daemon will set will set the step threshold  to 600 s, which is about the limit of eyeball and wristwatch. However, in any of these cases, the precision time kernel support is disabled, as it cannot handle offsets greater than &plusmn;0.5 s.</p>
+<p>The issues should be carefully considered before using these options. The  slew rate   is fixed at  500 parts-per-million (PPM) by the Unix kernel. As a result, the clock can take 33 minutes to amortize  each second the clock is outside the acceptable range. During this interval the clock will not be consistent with any other network clock and the system cannot be used for distributed applications that require correctly synchronized network time.</p>
+<h4>Frequency Training</h4>
+<p>The frequency file, usually called <tt>ntp.drift</tt>, contains the latest estimate  of clock frequency. If this file does not exist when the daemon is started, the clock state machine enters a special mode designed to measure the particular frequency directly. The measurement takes an interval equal to the stepout threshold, after which the frequency is set and the daemon esumes normal mode where the time and frequency are continuously adjusted. The frequency file is updated at intervals of an hour or more depending on the measured clock stability.</p>
+<hr>
+<p>
+  <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+</p>
+</body>
+</html>
