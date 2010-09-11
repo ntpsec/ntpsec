@@ -87,6 +87,7 @@ extern void	add_nic_rule(nic_rule_match match_type,
 			     nic_rule_action action);
 #ifndef HAVE_IO_COMPLETION_PORT
 extern void	close_all_beyond(int);
+extern void	close_all_except(int);
 #endif
 #ifdef WORK_FORK
 extern void	update_resp_pipe_fd(int, int);

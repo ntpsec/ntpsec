@@ -134,7 +134,7 @@ AC_PROG_LIBTOOL
 NTP_DIR_SEP
 
 # Checks for libraries.
-
+NTP_LIB_M
 AC_CHECK_FUNC([gethostent], ,
 	[AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket])])
 AC_CHECK_FUNC([openlog], , 

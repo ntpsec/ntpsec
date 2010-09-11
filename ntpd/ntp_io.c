@@ -471,6 +471,25 @@ move_fd(
 
 #ifndef HAVE_IO_COMPLETION_PORT
 /*
+ * close_all_except()
+ *
+ * Close all file descriptors except the given keep_fd.
+ */
+void
+close_all_except(
+	int keep_fd
+	)
+{
+	int fd;
+
+	for (fd = 0; fd < keep_fd; fd++)
+		close(fd);
+
+	close_all_beyond(keep_fd);
+}
+
+
+/*
  * close_all_beyond()
  *
  * Close all file descriptors after the given keep_fd, which is the

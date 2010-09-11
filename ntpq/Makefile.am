@@ -12,7 +12,7 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 	-I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
 
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD=	version.o $(LIBOPTS_LDADD) ../libntp/libntp.a \
+ntpq_LDADD=	version.o $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a \
 		@EDITLINE_LIBS@ @LCRYPTO@
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a

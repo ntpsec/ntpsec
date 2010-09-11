@@ -995,14 +995,24 @@ log_config_list
 log_config_command
 	:	T_String
 		{
-			char prefix = $1[0];
-			char *type = $1 + 1;
+			char	prefix;
+			char *	type;
 			
-			if (prefix != '+' && prefix != '-' && prefix != '=') {
-				yyerror("Logconfig prefix is not '+', '-' or '='\n");
-			}
-			else
-				$$ = create_attr_sval(prefix, estrdup(type));
+			switch ($1[0]) {
+			
+			case '+':
+			case '-':
+			case '=':
+				prefix = $1[0];
+				type = $1 + 1;
+				break;
+				
+			default:
+				prefix = '=';
+				type = $1;
+			}	
+			
+			$$ = create_attr_sval(prefix, estrdup(type));
 			YYFREE($1);
 		}
 	;

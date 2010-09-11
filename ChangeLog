@@ -1,4 +1,24 @@
 * [Bug 1588] finish configure --disable-autokey implementation.
+* Use AC_SEARCH_LIBS instead of AC_CHECK_LIB for NTP_LIB_M.
+(4.2.7p45) 2010/09/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1578] Consistently use -lm when needed.
+(4.2.7p44) 2010/08/27 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
+(4.2.7p43) 2010/08/26 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1602] Refactor some of the sntp/ directory to facililtate testing.
+(4.2.7p42) 2010/08/18 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1593] ntpd abort in free() with logconfig syntax error.
+* [Bug 1595] from 4.2.6p3-RC1: empty last line in key file causes
+  duplicate key to be added
+* [Bug 1597] from 4.2.6p3-RC1: packet processing ignores RATE KoD packets,
+  Because of a bug in string comparison.
+(4.2.7p41) 2010/07/28 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1581] from 4.2.6p3-beta1: ntp_intres.c size_t printf format
+  string mismatch.
+* [Bug 1586] ntpd 4.2.7p40 doesn't write to syslog after fork on QNX.
+* Avoid race with parallel builds using same source directory in
+  scripts/genver by using build directory for temporary files.
+* orphanwait documentation updates.
 (4.2.7p40) 2010/07/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1395] ease ntpdate elimination with ntpd -w/--wait-sync
 * [Bug 1396] allow servers on ntpd command line like ntpdate
@@ -301,6 +321,13 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1573] Miscalculation of offset in sntp.
+* [Bug 1595] empty last line in key file causes duplicate key to be added
+* [Bug 1597] packet processing ignores RATE KoD packets, because of
+  a bug in string comparison.
+
 ---
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 

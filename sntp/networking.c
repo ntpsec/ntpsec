@@ -281,12 +281,13 @@ recv_bcst_data (
 	return recv_bytes;
 }
 
-static int
+int
 process_pkt (
 	struct pkt *rpkt,
 	sockaddr_u *sas,
 	int pkt_len,
 	int mode,
+	struct pkt *spkt,
 	char * func_name
 	)
 {
@@ -410,11 +411,11 @@ unusable:
 			       ref_char[0], ref_char[1], ref_char[2], ref_char[3]);
 		/* If it's a KOD packet we'll just use the KOD information */
 		if (ref_char[0] != 'X') {
-			if (strncmp(ref_char, "DENY", 4))
+			if (strncmp(ref_char, "DENY", 4) == 0)
 				return KOD_DEMOBILIZE;
-			if (strncmp(ref_char, "RSTR", 4))
+			if (strncmp(ref_char, "RSTR", 4) == 0)
 				return KOD_DEMOBILIZE;
-			if (strncmp(ref_char, "RATE", 4))
+			if (strncmp(ref_char, "RATE", 4) == 0)
 				return KOD_RATE;
 			/* There are other interesting kiss codes which might be interesting for authentication */
 		}
@@ -425,6 +426,23 @@ unusable:
 			printf("sntp %s: Server not in sync, skipping this server\n", func_name);
 		return SERVER_UNUSEABLE;
 	}
+
+	/*
+	 * Decode the org timestamp and make sure we're getting a response
+	 * to our last request, but only if we're not in broadcast mode.
+	 */
+#ifdef DEBUG
+	printf("rpkt->org:\n");
+	l_fp_output(&rpkt->org, stdout);
+	printf("spkt->xmt:\n");
+	l_fp_output(&spkt->xmt, stdout);
+#endif
+	if (mode != MODE_BROADCAST && !L_ISEQU(&rpkt->org, &spkt->xmt)) {
+		if (ENABLED_OPT(NORMALVERBOSE))
+			printf("sntp process_pkt: pkt.org and peer.xmt differ\n");
+		return PACKET_UNUSEABLE;
+	}
+
 	return pkt_len;
 }
 
@@ -441,7 +459,7 @@ recv_bcst_pkt (
 	if (pkt_len < 0) {
 		return BROADCAST_FAILED;
 	}
-	pkt_len = process_pkt(rpkt, sas, pkt_len, MODE_BROADCAST, "recv_bcst_pkt");
+	pkt_len = process_pkt(rpkt, sas, pkt_len, MODE_BROADCAST, NULL, "recv_bcst_pkt");
 	return pkt_len;
 }
 
@@ -487,24 +505,8 @@ recvpkt (
 	}
 	pkt_len = recvdata(rsock, &sender, (char *)rpkt, rsize);
 	if (pkt_len > 0)
-		pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, "recvpkt");
-	if (pkt_len < 0)
-		return pkt_len;
-	/*
-	 * Decode the org timestamp and make sure we're getting a response
-	 * to our last request. 
-	 */
-#ifdef DEBUG
-	printf("rpkt->org:\n");
-	l_fp_output(&rpkt->org, stdout);
-	printf("spkt->xmt:\n");
-	l_fp_output(&spkt->xmt, stdout);
-#endif
-	if (!L_ISEQU(&rpkt->org, &spkt->xmt)) {
-		if (ENABLED_OPT(NORMALVERBOSE))
-			printf("sntp recvpkt: pkt.org and peer.xmt differ\n");
-		return PACKET_UNUSEABLE;
-	}
+		pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, spkt, "recvpkt");
+
 	return pkt_len;
 }
 
