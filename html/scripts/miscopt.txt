@@ -1,6 +1,5 @@
 document.write("<p>Miscellaneous Commands and Options</p><ul>\
 <li class='inline'><a href='miscopt.html#broadcastdelay'>broadcastdelay - specify broadcast delay</a></li>\
-<li class='inline'><a href='miscopt.html#discard'>discard - specify minimum guard time and average headway</a></li>\
 <li class='inline'><a href='miscopt.html#driftfile'>driftfile - specify frequency file</a></li>\
 <li class='inline'><a href='miscopt.html#enable'>enable - enable options</a></li>\
 <li class='inline'><a href='miscopt.html#enable'>disable - disable options</a></li>\

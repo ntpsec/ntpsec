@@ -5,13 +5,21 @@
 <meta name="generator" content="HTML Tidy, see www.w3.org">
 <title>Rate Management and the Kiss-o'-Death</title>
 <link href="scripts/style.css" type="text/css" rel="stylesheet">
+<style type="text/css">
+<!--
+<style1 {
+color: #FF0000;
+ font-weight: bold;
+}
+-->
+</style>
 </head>
 <body>
 <h3>Rate Management and the Kiss-o'-Death Packet</h3>
 <img src="pic/boom4.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>Our junior managers and the administrators.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->09-Sep-2010  20:49<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->11-Sep-2010  16:52<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -40,7 +48,7 @@
 <h4 id="guard">Guard Time</h4>
 <p>Guard time is the minimum time between successive packets. By default this is 2 s, but can be changed using the <tt>minimum</tt> option of the <tt>discard</tt> command. By design, this is also the interval between packets sent using the <tt>burst</tt> and <tt>iburst</tt> options.</p>
 <p>A review of past client abuse incidence shows the most frequent scenario is a broken client that attempts to send a number of packets at rates of one per second or more. On one occasion due to a defective client design, over 750,000 clients fell into this mode. There have been occasions where this abuse has persisted for days at a time. These scenarios are the most damaging, as they can threaten not only the victim server but the network infrastructure as well.</p>
-<p>In the <tt>ntpd</tt> design the minimum headway between the last packet received and the current packet is called the guard time. If the headway is less than the guard time, the packet is discarded. The guard time defaults to 2 s, but this can be changed using the <tt>minimum</tt> option of the <a href="acccopt.html#discard"><tt>discard</tt></a> command.</p>
+<p>In the <tt>ntpd</tt> design the minimum headway between the last packet received and the current packet is called the guard time. If the headway is less than the guard time, the packet is discarded. The guard time defaults to 2 s, but this can be changed using the <tt>minimum</tt> option of the <a href="accopt.html#discard"><tt>discard</tt></a> command.</p>
 <h4 id="mah">Average Headway Time</h4>
 <p>There are two features in <tt>ntpd</tt> to manage the interval between one packet and the next. These features make use of a set of counters: a client output counter for each association and a server input counter for each distinct client address. Each counter increments by a value called the headway when a packet is processed and decrements by one each second. The default minimum average headway in <tt>ntpd</tt> is 8 s, but this can be changed using the <tt>average</tt> option of the <a href="accopt.html#discard"><tt>discard</tt></a> command, but not less than 3 (8 s).</p>
 <p>If the <tt>iburst</tt> or <tt>burst</tt> options are present, the poll algorithm sends a burst of packets instead of a single packet at each poll opportunity. The NTPv4 specification requires that bursts contain no more than eight packets; so, starting from an output counter value of zero, the maximum counter value or output ceiling can be no more than eight times the minimum poll interval set by the <tt>minpoll</tt> option of the <a href="confopt.html#server"><tt>server</tt></a> command. However, if the burst starts with a counter value other than zero, there is a potential to exceed the ceiling. The poll algorithm avoids this by computing an additional headway time so that the next packet sent will not exceed the ceiling. Additional headway time can result from Autokey protocol operations. Designs such as this are often called leaky buckets. The current headway is displayed as the headway peer variable by the <tt>ntpq</tt> <a href="ntpq.html#pe"><tt>rv</tt></a> command.</p>

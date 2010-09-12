@@ -8,9 +8,10 @@
 <style type="text/css">
 <!--
 <style1 {
- color: #FF0000;
+color: #FF0000;
  font-weight: bold;
 }
+-->
 </style>
 </head>
 <body>
@@ -18,7 +19,7 @@
 <img src="pic/pogo6.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>The skunk watches for intruders and sprays.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->09-Sep-2010  23:54<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->11-Sep-2010  16:55<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -29,14 +30,13 @@
 <p>Unless noted otherwise, further information about these ccommands is on the <a href="accopt.html">Access Control Support</a> page.</p>
 <dl>
   <dt id="discard"><tt>discard [ average <i>avg</i> ][ minimum <i>min</i> ] [ monitor <i>prob</i> ]</tt></dt>
-  <dd>Set the parameters of the rate control facility which protects the server from client abuse. If the <tt>limited</tt> flag is present in the ACL, packets that violate these limits are discarded. If, in addition, the <tt>kod</tt> flag is present, a kiss-o'-death packet is returned. See the <a href="rate.html">Rate Management</a> page for further information. 
-    The options are:
+  <dd>Set the parameters of the rate control facility which protects the server from client abuse. If the <tt>limited</tt> flag is present in the ACL, packets that violate these limits are discarded. If, in addition, the <tt>kod</tt> flag is present, a kiss-o'-death packet is returned. See the <a href="rate.html">Rate Management</a> page for further information. The options are:
     <dl>
       <dt><tt>average <i>avg</i></tt></dt>
       <dd>Specify the minimum average interpacket spacing (minimum average headway
         time) in log<sub>2</sub> s with default 3.</dd>
       <dt><tt>minimum <i>min</i></tt></dt>
-      <dd>Specify the minimum interpacket spacing (guard time) in seconds with default 1.</dd>
+      <dd>Specify the minimum interpacket spacing (guard time) in seconds with default 2.</dd>
       <dt><tt>monitor</tt></dt>
       <dd>Specify the probability of being recorded for packets that overflow the MRU list size limit set by <tt>mru maxmem</tt> or <tt>mru maxdepth</tt>. This is a performance optimization for servers with aggregate arrivals of 1000 packets per second or more.</dd>
     </dl>
