@@ -335,10 +335,18 @@
   a bug in string comparison.
 
 ---
+(4.2.6p3-beta1) 2010/09/11 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1573] Miscalculation of offset in sntp.
+* [Bug 1595] empty last line in key file causes duplicate key to be added
+* [Bug 1597] packet processing ignores RATE KoD packets, because of
+  a bug in string comparison.
+
+---
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by JÃ¼rgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
   Perlinger.
 
 ---
