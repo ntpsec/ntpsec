@@ -10,7 +10,7 @@
 <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>We have three, now looking for more.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->06-Sep-2010  18:31<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->13-Sep-2010  3:59<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -107,19 +107,14 @@
       <dt><tt>freq <i>freq</i></tt></dt>
       <dd>Specifies the frequency offset in parts-per-million (PPM) with default the value in the frequency file.</dd>
       <dt><tt>huffpuff <i>huffpuff</i></tt></dt>
-      <dd>Sp edifies the huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 m), but a more reasonable value is 7200 (2 hours).</dd>
+      <dd>Sp edifies the huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 min), but a more reasonable value is 7200 (2 hours).See the <a href=="huffpuff.html">Huff-n'-Puff Filter</a> page for further information.</dd>
       <dt><tt>panic <i>panic</i></tt></dt>
       <dd>Sp edifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.</dd>
       <dt><tt>step <i>step</i></tt></dt>
-      <dd>Sp edifies the step threshold in seconds. The default without this command
-        is 0.128 s. If set to zero, step adjustments will never
-        occur. Note: The kernel time discipline is disabled if
-        the step threshold is set to zero or greater than 0.5
+      <dd>Sp edifies the step threshold in seconds. The default without this command is 0.128 s. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than 0.5
         s.</dd>
       <dt><tt>stepout <i>stepout</i></tt></dt>
-      <dd>Specifies the stepout threshold in seconds. The default without this
-        command is 900 s.  If set to zero, popcorn spikes will
-        not be suppressed.</dd>
+      <dd>Specifies the stepout threshold in seconds. The default without this command is 900 s. If set to zero, popcorn spikes will not be suppressed.</dd>
     </dl>
   </dd>
   <dt id="tos"><tt>tos [ beacon <i>beacon</i> | ceiling <i>ceiling</i> | cohort {0 | 1} | floor <i>floor</i> | maxclock <i>maxclock </i>| maxdist <i>maxdist</i> | minclock <i>minclock</i> | mindist <i>mindist </i>| minsane <i>minsane</i> | orphan <i>stratum</i> | orphanwait <em>delay</em> ]</tt></dt>
@@ -127,15 +122,15 @@
   <dd>
     <dl>
       <dt><tt>beacon <i>beacon</i></tt></dt>
-      <dd>The manycast server sends packets at intervals of 64 s if less than <tt>maxclock</tt> servers are available. Otherwise, it sends packets at the <i><tt>beacon</tt></i> interval in seconds. The default is 3600 s. See the <a href="manyopt.html">Automatic Server Discovery</a> page for further details.</dd>
+      <dd>The manycast server sends packets at intervals of 64 s if less than <tt>maxclock</tt> servers are available. Otherwise, it sends packets at the <i><tt>beacon</tt></i> interval in seconds. The default is 3600 s. See the <a href="discover.html">Automatic Server Discovery</a> page for further details.</dd>
       <dt><tt>ceiling <i>ceiling</i></tt></dt>
-      <dd>Specify the maximum stratum (exclusive) for acceptable server packets. The default is 16. See the <a href="manyopt.html">Automatic Server Discovery</a> page for further details.</dd>
+      <dd>Specify the maximum stratum (exclusive) for acceptable server packets. The default is 16. See the <a href="discover.html">Automatic Server Discovery</a> page for further details.</dd>
       <dt><tt>cohort { 0 | 1 }</tt></dt>
-      <dd>Specify whether (1) or whether not (0) a server packet will be accepted for the same stratum as the client. The default is 0. See the <a href="manyopt.html">Automatic Server Discovery</a> page for further details.</dd>
+      <dd>Specify whether (1) or whether not (0) a server packet will be accepted for the same stratum as the client. The default is 0. See the <a href="discover.html">Automatic Server Discovery</a> page for further details.</dd>
       <dt><tt>floor <i>floor</i></tt></dt>
-      <dd>Specify the minimum stratum (inclusive) for acceptable server packets. The default is 1. See the <a href="manyopt.html">Automatic Server Discovery</a> page for further details.</dd>
+      <dd>Specify the minimum stratum (inclusive) for acceptable server packets. The default is 1. See the <a href="discover.html">Automatic Server Discovery</a> page for further details.</dd>
       <dt><tt>maxclock <i>maxclock</i></tt></dt>
-      <dd>Specify the maximum number of servers retained by the server discovery schemes. The default is 10. See the <a href="manyopt.html">Automatic Server Discovery</a> page for further details.</dd>
+      <dd>Specify the maximum number of servers retained by the server discovery schemes. The default is 10. See the <a href="discover.html">Automatic Server Discovery</a> page for further details.</dd>
       <dt><tt>maxdist <i>maxdistance</i></tt></dt>
       <dd>Specify the synchronization distance threshold used by the clock selection algorithm. The default is 1.5 s. This determines both the minimum number of packets to set the system clock and the maximum roundtrip delay. It can be decreased to improve reliability or increased to synchronize clocks on the Moon or planets.</dd>
       <dt><tt>minclock <i>minclock</i></tt></dt>

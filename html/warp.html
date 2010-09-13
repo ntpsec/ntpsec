@@ -9,7 +9,7 @@
 <body>
 <h3>How NTP Works</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->11-Sep-2010  17:51<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->12-Sep-2010  21:04<!-- #EndDate -->
   UTC</p>
 <h4>Table of Contents</h4>
 <ul>
@@ -17,6 +17,7 @@
   <li class="inline"><a href="#ntp">NTP Daemon Architecture and Basic Operation</a></li>
   <li class="inline"><a href="#stats">How Statistics are Determined</a></li>
   <li class="inline"><a href="#clock">Clock Discipline Algorithm</a></li>
+  <li class="inline"><a href="#state">Clock State Machine</a></li>
 </ul>
 <hr>
 <h4 id="intro">Introduction</h4>
@@ -51,7 +52,14 @@
 <p> The optimum time constant, and thus the poll interval, depends on the network time jitter and the clock oscillator frequency wander. Errors due to jitter decrease as the time constant increases, while errors due to wander decrease as the time constant decreases. The two error characteristics intersect at a point called the Allan intercept, which represents the ideal time constant. With a compromise Allan intercept of 2000 s, the optimum poll interval is about 64 s, which corresponds to a poll exponent of 6.</p>
 <p> The poll interval is managed by a heuristic algorithm developed over several years of experimentation. It depends on an exponentially weighted  average of clock offset differences, called the clock jitter, and a jiggle counter, which is initially set to zero.  When a clock update is received and the offset exceeds the clock jitter by a factor of 4,   the jiggle counter is increased by the poll exponent; otherwise, it is decreased by twice the poll exponent. If  the jiggle counter is greater than an arbitrary threshold of 30,  the poll exponent. if jiggle counter exceed an arbitrary threshold of 30, it is reset to zero and the poll exponent increased by 1.  If the jiggle counter is less than -30, it is set to zero and the  poll exponent  decreased by 1. In effect, the algorithm has a relatively slow reaction to good news, but a relatively fast reaction to bad news.</p>
 <p>The optimum time constant, and thus the poll exponent, depends on the network time jitter and the clock oscillator frequency wander. Errors due to jitter decrease as the time constant increases, while errors due to wander decrease as the time constant decreases. The two error characteristics intersect at a point called the Allan intercept, which represents the ideal time constant. With a compromise Allan intercept of 2000 s, the optimum poll interval is about 64 s, which corresponds to a poll exponent of 6.</p>
-<p>Additional information about the clock discipline behavior is on the <a href="clock.html">Clock State Machine</a> page. </p>
+<h4 id="state">Clock State Machine</h4>
+<p>In the NTPv4 specification and reference implementation a state machine is used to manage the system clock under exceptional conditions, as when the daemon is first started or when encountering  severe network congesiton, for example. The state machine uses three thresolds: panic, step and stepout, and a watchdog timer. The thresholds default to 1000 s, 128 ms and 900 s, respectively, but can be changed by command options.</p>
+<p>Most compters today incorporate a time-of-year (TOY) chip to maintain the time  when the power is off. When the machine is restarted, the chip is used to initialize the operating system time. In case there is no TOY chip or the TOY&nbsp;time is different from  NTP  time by more than the  panic threshold, the daemon <tt></tt> assumes something must be terribly wrong, so exits with a message to the system operator to set the time  manually. With the <tt>-g</tt> option, the daemon will set the clock  to NTP time the first time, but exit if the offset exceed the any time after that.</p>
+<p>Under ordinary conditions, the clock discipline slews the clock so that the time is effectively continuous and never runs backwards. If due to extreme network congestion, or an offset spike exceeds the  step threshold, by default 128 ms, the spike is discarded. However, if   offsets greater than the step threshold persist for more than the <i>stepout threshold</i>, by default 900 s, the system clock is stepped to the correct value. In practice the need for a step has been extremely rare and almost always the result of a hardware failure.  Both the step threshold and stepout threshold can be set as options to the tinker command.</p>
+<p>Historically, the most important appliccation of the step function was when a leap second was inserted in the Coordinated Univesal Time (UTC) timescale and kernel precision time support was not available. Further details are on the <a href="leap.html">Leap Second Processing</a> page.</p>
+<p>In some applications the clock can never be set backward, even  it  accidentlly set forward a week by some other means. There are several ways to alter the daemon behavior to insure time is always monotone-increasing. If the step threhold is set to zero, there will never be a step.  With the <tt>-x</tt> command line option the daemon will set will set the step threshold  to 600 s, which is about the limit of eyeball and wristwatch. However, in any of these cases, the precision time kernel support is disabled, as it cannot handle offsets greater than &plusmn;0.5 s.</p>
+<p>The issues should be carefully considered before using these options. The  slew rate   is fixed at  500 parts-per-million (PPM) by the Unix kernel. As a result, the clock can take 33 minutes to amortize  each second the clock is outside the acceptable range. During this interval the clock will not be consistent with any other network clock and the system cannot be used for distributed applications that require correctly synchronized network time.</p>
+<p>The frequency file, usually called <tt>ntp.drift</tt>, contains the latest estimate  of clock frequency. If this file does not exist when the daemon is started, the clock state machine enters a special mode designed to measure the particular frequency directly. The measurement takes an interval equal to the stepout threshold, after which the frequency is set and the daemon esumes normal mode where the time and frequency are continuously adjusted. The frequency file is updated at intervals of an hour or more depending on the measured clock stability.</p>
 <hr>
 <p>
   <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
