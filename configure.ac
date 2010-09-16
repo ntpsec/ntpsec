@@ -403,15 +403,18 @@ case "$host" in
     ;;
 esac
 
-AC_SEARCH_LIBS([setsockopt], [socket xnet])
-AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl])
+_libs=$LIBS
+LIBS="$LIBS $libxnet"
+AC_SEARCH_LIBS([setsockopt], [socket])
+LIBS=$_libs
+AC_SEARCH_LIBS([res_init], [resolv], , , [$libxnet -lsocket -lnsl])
 case "$host" in
  *-*-darwin*)
     AC_CHECK_LIB([resolv],[res_9_init])
     ;;
 esac
 AC_HEADER_RESOLV
-AC_CHECK_FUNCS([res_init __res_init])
+AC_CHECK_FUNCS([res_init], , AC_CHECK_FUNCS([__res_init]))
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(bstring.h)
@@ -1318,7 +1321,7 @@ case $ac_cv_have_if_nametoindex in
 	;;
 esac
 
-AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
+AC_SEARCH_LIBS([inet_ntop], [resolv], , , [$libxnet -lsocket -lnsl])
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 case "$ac_cv_header_kvm_h" in
