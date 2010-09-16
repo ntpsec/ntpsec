@@ -403,11 +403,19 @@ case "$host" in
     ;;
 esac
 
-_libs=$LIBS
-LIBS="$LIBS $libxnet"
+# On Solaris, we need -lxnet before -lsocket:
 AC_SEARCH_LIBS([setsockopt], [socket])
-LIBS=$_libs
-AC_SEARCH_LIBS([res_init], [resolv], , , [$libxnet -lsocket -lnsl])
+case "$LIBS" in
+ -lsocket*)
+    _libs=$LIBS
+    LIBS=
+    AC_SEARCH_LIBS([getsockopt], [xnet])
+    LIBS="$LIBS $_libs"
+    ;;
+esac
+
+# res_init needs -lsocket, but we have that already.
+AC_SEARCH_LIBS([res_init], [resolv], , , [-lnsl])
 case "$host" in
  *-*-darwin*)
     AC_CHECK_LIB([resolv],[res_9_init])
@@ -1321,7 +1329,8 @@ case $ac_cv_have_if_nametoindex in
 	;;
 esac
 
-AC_SEARCH_LIBS([inet_ntop], [resolv], , , [$libxnet -lsocket -lnsl])
+# We also need -lsocket, but we have tested for that already.
+AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lnsl])
 AC_CHECK_FUNC(inet_ntop, [], [AC_DEFINE(ISC_PLATFORM_NEEDNTOP, 1, [ISC: provide inet_ntop()])])
 AC_CHECK_FUNC(inet_pton, [], [AC_DEFINE(ISC_PLATFORM_NEEDPTON, 1, [ISC: provide inet_pton()])])
 case "$ac_cv_header_kvm_h" in
