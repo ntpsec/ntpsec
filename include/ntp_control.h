@@ -149,121 +149,122 @@ struct ntp_control {
 /*
  * System variables we understand
  */
-#define	CS_LEAP		1
-#define	CS_STRATUM	2
-#define	CS_PRECISION	3
-#define	CS_ROOTDELAY	4
+#define	CS_LEAP			1
+#define	CS_STRATUM		2
+#define	CS_PRECISION		3
+#define	CS_ROOTDELAY		4
 #define	CS_ROOTDISPERSION	5
-#define	CS_REFID	6
-#define	CS_REFTIME	7
-#define	CS_POLL		8
-#define	CS_PEERID	9
-#define	CS_OFFSET	10
-#define	CS_DRIFT	11
-#define CS_JITTER	12
-#define CS_ERROR	13
-#define	CS_CLOCK	14
-#define	CS_PROCESSOR	15
-#define	CS_SYSTEM	16
-#define CS_VERSION	17
-#define	CS_STABIL	18
-#define CS_VARLIST	19
-#define CS_TAI		20
-#define CS_LEAPTAB	21
-#define CS_LEAPEND	22
-#define	CS_RATE		23
-#define CS_MRU_ENABLED	24
-#define CS_MRU_DEPTH	25
-#define CS_MRU_DEEPEST	26
-#define CS_MRU_MINDEPTH	27
-#define CS_MRU_MAXAGE	28
-#define CS_MRU_MAXDEPTH	29
-#define CS_MRU_MEM	30
-#define CS_MRU_MAXMEM	31
-#define CS_SS_UPTIME	32
-#define CS_SS_RESET	33
-#define	CS_SS_RECEIVED	34
-#define CS_SS_THISVER	35
-#define CS_SS_OLDVER	36
-#define CS_SS_BADFORMAT	37
-#define CS_SS_BADAUTH	38
-#define CS_SS_DECLINED	39
-#define CS_SS_RESTRICTED 40
-#define CS_SS_LIMITED	41
-#define CS_SS_KODSENT	42
-#define CS_SS_PROCESSED	43
-#define CS_MAX_NOSSL	CS_SS_PROCESSED
-#ifdef OPENSSL
-#define CS_FLAGS	(1 + CS_MAX_NOSSL)
-#define CS_HOST		(2 + CS_MAX_NOSSL)
-#define CS_PUBLIC	(3 + CS_MAX_NOSSL)
-#define	CS_CERTIF	(4 + CS_MAX_NOSSL)
-#define	CS_SIGNATURE	(5 + CS_MAX_NOSSL)
-#define	CS_REVTIME	(6 + CS_MAX_NOSSL)
-#define	CS_GROUP	(7 + CS_MAX_NOSSL)
-#define CS_DIGEST	(8 + CS_MAX_NOSSL)
-#define	CS_MAXCODE	CS_DIGEST
-#else
-#define	CS_MAXCODE	CS_MAX_NOSSL
-#endif /* OPENSSL */
+#define	CS_REFID		6
+#define	CS_REFTIME		7
+#define	CS_POLL			8
+#define	CS_PEERID		9
+#define	CS_OFFSET		10
+#define	CS_DRIFT		11
+#define	CS_JITTER		12
+#define	CS_ERROR		13
+#define	CS_CLOCK		14
+#define	CS_PROCESSOR		15
+#define	CS_SYSTEM		16
+#define	CS_VERSION		17
+#define	CS_STABIL		18
+#define	CS_VARLIST		19
+#define	CS_TAI			20
+#define	CS_LEAPTAB		21
+#define	CS_LEAPEND		22
+#define	CS_RATE			23
+#define	CS_MRU_ENABLED		24
+#define	CS_MRU_DEPTH		25
+#define	CS_MRU_DEEPEST		26
+#define	CS_MRU_MINDEPTH		27
+#define	CS_MRU_MAXAGE		28
+#define	CS_MRU_MAXDEPTH		29
+#define	CS_MRU_MEM		30
+#define	CS_MRU_MAXMEM		31
+#define	CS_SS_UPTIME		32
+#define	CS_SS_RESET		33
+#define	CS_SS_RECEIVED		34
+#define	CS_SS_THISVER		35
+#define	CS_SS_OLDVER		36
+#define	CS_SS_BADFORMAT		37
+#define	CS_SS_BADAUTH		38
+#define	CS_SS_DECLINED		39
+#define	CS_SS_RESTRICTED	40
+#define	CS_SS_LIMITED		41
+#define	CS_SS_KODSENT		42
+#define	CS_SS_PROCESSED		43
+#define	CS_MAX_NOAUTOKEY	CS_SS_PROCESSED
+#ifdef AUTOKEY
+#define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
+#define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
+#define	CS_PUBLIC		(3 + CS_MAX_NOAUTOKEY)
+#define	CS_CERTIF		(4 + CS_MAX_NOAUTOKEY)
+#define	CS_SIGNATURE		(5 + CS_MAX_NOAUTOKEY)
+#define	CS_REVTIME		(6 + CS_MAX_NOAUTOKEY)
+#define	CS_GROUP		(7 + CS_MAX_NOAUTOKEY)
+#define	CS_DIGEST		(8 + CS_MAX_NOAUTOKEY)
+#define	CS_MAXCODE		CS_DIGEST
+#else	/* !AUTOKEY follows */
+#define	CS_MAXCODE		CS_MAX_NOAUTOKEY
+#endif	/* !AUTOKEY */
 
 /*
  * Peer variables we understand
  */
-#define	CP_CONFIG	1
-#define	CP_AUTHENABLE	2
-#define	CP_AUTHENTIC	3
-#define	CP_SRCADR	4
-#define	CP_SRCPORT	5
-#define	CP_DSTADR	6
-#define	CP_DSTPORT	7
-#define	CP_LEAP		8
-#define	CP_HMODE	9
-#define	CP_STRATUM	10
-#define	CP_PPOLL	11
-#define	CP_HPOLL	12
-#define	CP_PRECISION	13
-#define	CP_ROOTDELAY	14
+#define	CP_CONFIG		1
+#define	CP_AUTHENABLE		2
+#define	CP_AUTHENTIC		3
+#define	CP_SRCADR		4
+#define	CP_SRCPORT		5
+#define	CP_DSTADR		6
+#define	CP_DSTPORT		7
+#define	CP_LEAP			8
+#define	CP_HMODE		9
+#define	CP_STRATUM		10
+#define	CP_PPOLL		11
+#define	CP_HPOLL		12
+#define	CP_PRECISION		13
+#define	CP_ROOTDELAY		14
 #define	CP_ROOTDISPERSION	15
-#define	CP_REFID	16
-#define	CP_REFTIME	17
-#define	CP_ORG		18
-#define	CP_REC		19
-#define	CP_XMT		20
-#define	CP_REACH	21
-#define	CP_UNREACH	22
-#define	CP_TIMER	23
-#define	CP_DELAY	24
-#define	CP_OFFSET	25
-#define CP_JITTER	26
-#define	CP_DISPERSION	27
-#define	CP_KEYID	28
-#define	CP_FILTDELAY	29
-#define	CP_FILTOFFSET	30
-#define	CP_PMODE	31
-#define	CP_RECEIVED	32
-#define	CP_SENT		33
-#define	CP_FILTERROR	34
-#define	CP_FLASH	35
-#define CP_TTL		36
-#define CP_VARLIST	37
-#define	CP_IN		38
-#define	CP_OUT		39
-#define	CP_RATE		40
-#define	CP_BIAS		41
-#define	CP_SRCHOST	42
-#ifdef OPENSSL
-#define CP_FLAGS	43
-#define CP_HOST		44
-#define CP_VALID	45
-#define	CP_INITSEQ	46
-#define	CP_INITKEY	47
-#define	CP_INITTSP	48
-#define	CP_SIGNATURE	49
-#define	CP_MAXCODE	CP_SIGNATURE
-#else
-#define	CP_MAXCODE	CP_SRCHOST
-#endif /* OPENSSL */
+#define	CP_REFID		16
+#define	CP_REFTIME		17
+#define	CP_ORG			18
+#define	CP_REC			19
+#define	CP_XMT			20
+#define	CP_REACH		21
+#define	CP_UNREACH		22
+#define	CP_TIMER		23
+#define	CP_DELAY		24
+#define	CP_OFFSET		25
+#define	CP_JITTER		26
+#define	CP_DISPERSION		27
+#define	CP_KEYID		28
+#define	CP_FILTDELAY		29
+#define	CP_FILTOFFSET		30
+#define	CP_PMODE		31
+#define	CP_RECEIVED		32
+#define	CP_SENT			33
+#define	CP_FILTERROR		34
+#define	CP_FLASH		35
+#define	CP_TTL			36
+#define	CP_VARLIST		37
+#define	CP_IN			38
+#define	CP_OUT			39
+#define	CP_RATE			40
+#define	CP_BIAS			41
+#define	CP_SRCHOST		42
+#define	CP_MAX_NOAUTOKEY	CP_SRCHOST
+#ifdef AUTOKEY
+#define	CP_FLAGS		(1 + CP_MAX_NOAUTOKEY)
+#define	CP_HOST			(2 + CP_MAX_NOAUTOKEY)
+#define	CP_VALID		(3 + CP_MAX_NOAUTOKEY)
+#define	CP_INITSEQ		(4 + CP_MAX_NOAUTOKEY)
+#define	CP_INITKEY		(5 + CP_MAX_NOAUTOKEY)
+#define	CP_INITTSP		(6 + CP_MAX_NOAUTOKEY)
+#define	CP_SIGNATURE		(7 + CP_MAX_NOAUTOKEY)
+#define	CP_MAXCODE		CP_SIGNATURE
+#else	/* !AUTOKEY follows */
+#define	CP_MAXCODE		CP_MAX_NOAUTOKEY
+#endif	/* !AUTOKEY */
 
 /*
  * Clock variables we understand

@@ -155,7 +155,7 @@ struct codestring peer_codes[] = {
 	{ -1,				"" }
 };
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 /*
  * Crypto events (cryp)
  */
@@ -179,7 +179,7 @@ struct codestring crypto_codes[] = {
 	{ XEVNT_ERR & ~CRPT_EVENT,	"protocol_error" },
 	{ -1,				"" }
 };
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 /* Forwards */
 static const char *getcode (int, struct codestring *);
@@ -313,10 +313,10 @@ eventstr(
 {
 	if (num & PEER_EVENT)
 		return (getcode(num & ~PEER_EVENT, peer_codes));
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	else if (num & CRPT_EVENT)
 		return (getcode(num & ~CRPT_EVENT, crypto_codes));
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	else
 		return (getcode(num, sys_codes));
 }

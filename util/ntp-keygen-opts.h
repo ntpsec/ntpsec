@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  August 26, 2010 at 09:33:51 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  September 16, 2010 at 06:21:13 AM by AutoGen 5.10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -78,8 +78,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    23
-#define NTP_KEYGEN_VERSION       "4.2.7p43"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p43"
+#define NTP_KEYGEN_VERSION       "4.2.7p50"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p50"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -213,10 +213,10 @@ typedef enum {
 #define VALUE_OPT_ISSUER_NAME    'i'
 #define VALUE_OPT_MD5KEY         'M'
 #define VALUE_OPT_MODULUS        'm'
-#ifdef OPENSSL
+#ifdef AUTOKEY
 
 #define OPT_VALUE_MODULUS        (DESC(MODULUS).optArg.argInt)
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #define VALUE_OPT_PVT_CERT       'P'
 #define VALUE_OPT_PVT_PASSWD     'p'
 #define VALUE_OPT_GET_PVT_PASSWD 'q'
@@ -224,15 +224,15 @@ typedef enum {
 #define VALUE_OPT_SUBJECT_NAME   's'
 #define VALUE_OPT_TRUSTED_CERT   'T'
 #define VALUE_OPT_MV_PARAMS      'V'
-#ifdef OPENSSL
+#ifdef AUTOKEY
 
 #define OPT_VALUE_MV_PARAMS      (DESC(MV_PARAMS).optArg.argInt)
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #define VALUE_OPT_MV_KEYS        'v'
-#ifdef OPENSSL
+#ifdef AUTOKEY
 
 #define OPT_VALUE_MV_KEYS        (DESC(MV_KEYS).optArg.argInt)
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION

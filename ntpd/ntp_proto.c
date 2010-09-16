@@ -352,11 +352,11 @@ receive(
 	l_fp	p_org;			/* origin timestamp */
 	l_fp	p_rec;			/* receive timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	struct autokey *ap;		/* autokey structure pointer */
 	int	rval;			/* cookie snatcher */
 	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 #ifdef HAVE_NTP_SIGND
 	static unsigned char zero_key[16];
 #endif /* HAVE_NTP_SIGND */
@@ -616,7 +616,7 @@ receive(
 
 	} else {
 		restrict_mask &= ~RES_MSSNTP;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		/*
 		 * For autokey modes, generate the session key
 		 * and install in the key cache. Use the socket
@@ -700,7 +700,7 @@ receive(
 			}
 
 		}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 		/*
 		 * Compute the cryptosum. Note a clogging attack may
@@ -714,10 +714,10 @@ receive(
 			is_authentic = AUTH_ERROR;
 		else
 			is_authentic = AUTH_OK;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		if (crypto_flags && skeyid > NTP_MAXKEY)
 			authtrust(skeyid, 0);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 #ifdef DEBUG
 		if (debug)
 			printf(
@@ -889,23 +889,23 @@ receive(
 			return;			/* no help */
 		}
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		/*
 		 * Do not respond if Autokey and the opcode is not a
-		 * CRYPTO_ASSOC response with associationn ID.
+		 * CRYPTO_ASSOC response with association ID.
 		 */
 		if (crypto_flags && skeyid > NTP_MAXKEY && (opcode &
 		    0xffff0000) != (CRYPTO_ASSOC | CRYPTO_RESP)) {
 			sys_declined++;
 			return;			/* protocol error */
 		}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 		/*
 		 * Determine whether to execute the initial volley.
 		 */
 		if (sys_bdelay != 0) {
-#ifdef OPENSSL
+#ifdef AUTOKEY
 			/*
 			 * If a two-way exchange is not possible,
 			 * neither is Autokey.
@@ -914,7 +914,7 @@ receive(
 				sys_restricted++;
 				return;		/* no autokey */
 			}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 			/*
 			 * Do not execute the volley. Start out in
@@ -949,10 +949,10 @@ receive(
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		if (skeyid > NTP_MAXKEY)
 			crypto_recv(peer, rbufp);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 		return;				/* hooray */
 
@@ -1036,7 +1036,7 @@ receive(
 		return;
 	}
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * If the association is configured for Autokey, the packet must
 	 * have a public key ID; if not, the packet must have a
@@ -1048,7 +1048,7 @@ receive(
 		sys_badauth++;
 		return;
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	peer->received++;
 	peer->flash &= ~PKT_TEST_MASK;
 	if (peer->flags & FLAG_XBOGUS) {
@@ -1149,10 +1149,10 @@ receive(
 			unpeer(peer);
 			return;
 		}
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		if (peer->crypto)
 			peer_clear(peer, "AUTH");
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 		return;
 
 	/* 
@@ -1173,10 +1173,10 @@ receive(
 			unpeer(peer);
 			return;
 		}
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		if (peer->crypto)
 			peer_clear(peer, "AUTH");
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 		return;
 	}
 
@@ -1210,7 +1210,7 @@ receive(
 	else
 		peer->flags &= ~FLAG_AUTHENTIC;
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * More autokey dance. The rules of the cha-cha are as follows:
 	 *
@@ -1324,7 +1324,7 @@ receive(
 			return;
 		}
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/*
 	 * The dance is complete and the flash bits have been lit. Toss
@@ -1656,16 +1656,16 @@ process_packet(
 	 */
 	if ((peer->cast_flags & MDF_BCLNT) && !(peer_unfit(peer) &
 	    TEST11)) {
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		if (peer->flags & FLAG_SKEY) {
 			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
 				peer->hmode = MODE_BCLIENT;
 		} else {
 			peer->hmode = MODE_BCLIENT;
 		}
-#else /* OPENSSL */
+#else	/* !AUTOKEY follows */
 		peer->hmode = MODE_BCLIENT;
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 	}
 }
 
@@ -1771,10 +1771,10 @@ clock_update(
 		 */
 		if (sys_leap == LEAP_NOTINSYNC) {
 			sys_leap = LEAP_NOWARNING;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 			if (crypto_flags)
 				crypto_update();
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 			/*
 			 * If our parent process is waiting for the
 			 * first clock sync, send them home satisfied.
@@ -1843,7 +1843,6 @@ poll_update(
 	u_char	mpoll
 	)
 {
-	int	minpkt;
 	u_long	next, utemp;
 	u_char	hpoll;
 
@@ -1871,7 +1870,7 @@ poll_update(
 
 	hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * If during the crypto protocol the poll interval has changed,
 	 * the lifetimes in the key list are probably bogus. Purge the
@@ -1879,7 +1878,7 @@ poll_update(
 	 */
 	if ((peer->flags & FLAG_SKEY) && hpoll != peer->hpoll)
 		key_expire(peer);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	peer->hpoll = hpoll;
 
 	/*
@@ -1899,9 +1898,8 @@ poll_update(
 	 * slink away. If called from the poll process, delay 1 s for a
 	 * reference clock, otherwise 2 s.
 	 */
-	minpkt = 1 << ntp_minpkt;
 	utemp = current_time + max(peer->throttle - (NTP_SHIFT - 1) *
-	    (1 << peer->minpoll), minpkt);
+	    (1 << peer->minpoll), ntp_minpkt);
 	if (peer->burst > 0) {
 		if (peer->nextdate > current_time)
 			return;
@@ -1912,19 +1910,19 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * If a burst is not in progress and a crypto response message
 	 * is pending, delay 2 s, but only if this is a new interval.
 	 */
 	} else if (peer->cmmd != NULL) {
 		if (peer->nextdate > current_time) {
-			if (peer->nextdate + minpkt != utemp)
+			if (peer->nextdate + ntp_minpkt != utemp)
 				peer->nextdate = utemp;
 		} else {
 			peer->nextdate = utemp;
 		}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/*
 	 * The ordinary case. If a retry, use minpoll; if unreachable,
@@ -1957,7 +1955,7 @@ poll_update(
 		else
 			peer->nextdate = utemp;
 		if (peer->throttle > (1 << peer->minpoll))
-			peer->nextdate += minpkt;
+			peer->nextdate += ntp_minpkt;
 	}
 #ifdef DEBUG
 	if (debug > 1)
@@ -1982,7 +1980,7 @@ peer_clear(
 {
 	u_char	u;
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * If cryptographic credentials have been acquired, toss them to
 	 * Valhalla. Note that autokeys are ephemeral, in that they are
@@ -2005,7 +2003,7 @@ peer_clear(
 		free(peer->subject);
 	if (peer->issuer != NULL)
 		free(peer->issuer);
-#endif /* OPENSSL */
+#endif /* AUTOKEY */
 
 	/*
 	 * Clear all values, including the optional crypto values above.
@@ -2048,13 +2046,13 @@ peer_clear(
 	if (initializing) {
 		peer->nextdate += peer_associations;
 	} else if (peer->hmode == MODE_PASSIVE) {
-		peer->nextdate += 1 << ntp_minpkt;
+		peer->nextdate += ntp_minpkt;
 	} else {
 		peer->nextdate += ntp_random() % peer_associations;
 	}
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	peer->refresh = current_time + (1 << NTP_REFRESH);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 #ifdef DEBUG
 	if (debug)
 		printf(
@@ -2876,11 +2874,11 @@ peer_xmit(
 	 * might not be usable.
 	 */
 	sendlen = LEN_PKT_NOMAC;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (!(peer->flags & FLAG_SKEY) && peer->keyid == 0) {
-#else
+#else	/* !AUTOKEY follows */
 	if (peer->keyid == 0) {
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 
 		/*
 		 * Transmit a-priori timestamps
@@ -2941,7 +2939,7 @@ peer_xmit(
 	 * authenticated. If autokey is enabled, fuss with the various
 	 * modes; otherwise, symmetric key cryptography is used.
 	 */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (peer->flags & FLAG_SKEY) {
 		struct exten *exten;	/* extension field */
 
@@ -3180,7 +3178,7 @@ peer_xmit(
 			    xkeyid, 0, 2);
 		}
 	} 
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/*
 	 * Transmit a-priori timestamps
@@ -3212,10 +3210,10 @@ peer_xmit(
 		return;
 	}
 	sendlen += authlen;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	if (sendlen > sizeof(xpkt)) {
 		msyslog(LOG_ERR, "proto: buffer overflow %u", sendlen);
 		exit (-1);
@@ -3239,7 +3237,7 @@ peer_xmit(
 	}
 	L_SUB(&xmt_ty, &xmt_tx);
 	LFPTOD(&xmt_ty, peer->xleave);
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %d index %d\n",
@@ -3247,7 +3245,7 @@ peer_xmit(
 		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen,
 		    peer->keynumber);
 #endif
-#else /* OPENSSL */
+#else	/* !AUTOKEY follows */
 #ifdef DEBUG
 	if (debug)
 		printf("transmit: at %ld %s->%s mode %d keyid %08x len %d\n",
@@ -3255,7 +3253,7 @@ peer_xmit(
 		    ntoa(&peer->dstadr->sin) : "-",
 		    ntoa(&peer->srcadr), peer->hmode, xkeyid, sendlen);
 #endif
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 }
 
 
@@ -3275,7 +3273,7 @@ fast_xmit(
 	struct pkt *rpkt;	/* receive packet structure */
 	l_fp	xmt_tx, xmt_ty;
 	int	sendlen;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	u_int32	temp32;
 #endif
 
@@ -3365,7 +3363,7 @@ fast_xmit(
 	 * value to generate the cookie, which is unique for every
 	 * source-destination-key ID combination.
 	 */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY) {
 		keyid_t cookie;
 
@@ -3393,13 +3391,13 @@ fast_xmit(
 			    &rbufp->recv_srcadr, xkeyid, cookie, 2);
 		}
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	get_systime(&xmt_tx);
 	sendlen += authencrypt(xkeyid, (u_int32 *)&xpkt, sendlen);
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (xkeyid > NTP_MAXKEY)
 		authtrust(xkeyid, 0);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	sendpkt(&rbufp->recv_srcadr, rbufp->dstadr, 0, &xpkt, sendlen);
 	get_systime(&xmt_ty);
 	L_SUB(&xmt_ty, &xmt_tx);
@@ -3537,7 +3535,7 @@ pool_name_resolved(
 #endif	/* WORKER */
 
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 /*
  * key_expire - purge the key list
  */
@@ -3563,7 +3561,7 @@ key_expire(
 		    peer->associd);
 #endif
 }
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 
 /*

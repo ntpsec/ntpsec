@@ -5,7 +5,7 @@
 #include <config.h>
 #endif
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/param.h>
@@ -3925,6 +3925,6 @@ crypto_config(
 		break;
 	}
 }
-# else
+# else	/* !AUTOKEY follows */
 int ntp_crypto_bs_pubkey;
-# endif /* OPENSSL */
+# endif	/* !AUTOKEY */

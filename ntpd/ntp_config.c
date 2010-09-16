@@ -555,7 +555,7 @@ dump_config_tree(
 			
 		/* ints */
 		case T_Calldelay:
-#ifdef OPENSSL
+#ifdef AUTOKEY
 		case T_Automax:
 #endif
 			fprintf(df, "%s %d\n",
@@ -1765,12 +1765,12 @@ config_auth(
 	ntp_u_int16_t	ulast;
 	ntp_u_int16_t	u;
 	struct attr_val *my_val;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	int		item;
 #endif
 
 	/* Crypto Command */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	item = -1;	/* quiet warning */
 	my_val = queue_head(ptree->auth.crypto_cmd_list);
 	while (my_val != NULL) {
@@ -1807,7 +1807,7 @@ config_auth(
 		crypto_config(item, my_val->value.s);
 		my_val = next_node(my_val);
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/* Keysdir Command */
 	if (ptree->auth.keysdir) {
@@ -1824,12 +1824,12 @@ config_auth(
 		ntp_signd_socket = estrdup(ptree->auth.ntp_signd_socket);
 	}
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	if (ptree->auth.cryptosw && !cryptosw) {
 		crypto_setup();
 		cryptosw = 1;
 	}
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/* Keys Command */
 	if (ptree->auth.keys)
@@ -1859,11 +1859,11 @@ config_auth(
 		}
 	}
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/* crypto revoke command */
 	if (ptree->auth.revoke)
 		sys_revoke = ptree->auth.revoke;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 }
 
 
@@ -3468,7 +3468,7 @@ config_vars(
 			break;
 
 		case T_Automax:
-#ifdef OPENSSL
+#ifdef AUTOKEY
 			sys_automax = curr_var->value.i;
 #endif
 			break;

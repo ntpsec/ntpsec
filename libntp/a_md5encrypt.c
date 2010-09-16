@@ -9,11 +9,7 @@
 #include "ntp_string.h"
 #include "ntp_stdlib.h"
 #include "ntp.h"
-#ifdef OPENSSL
-# include "openssl/evp.h"
-#else
-# include "ntp_md5.h"	/* provides clone of OpenSSL MD5 API */
-#endif
+#include "ntp_md5.h"	/* provides OpenSSL digest API */
 
 /*
  * MD5authencrypt - generate message digest

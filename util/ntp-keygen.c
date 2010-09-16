@@ -103,7 +103,7 @@
 #include "openssl/pem.h"
 #include "openssl/x509v3.h"
 #include <openssl/objects.h>
-#endif /* OPENSSL */
+#endif	/* OPENSSL */
 #include <ssl_applink.c>
 
 /*
@@ -115,7 +115,7 @@
 #define YEAR		((long)60*60*24*365) /* one year in seconds */
 #define MAXFILENAME	256	/* max file name length */
 #define MAXHOSTNAME	256	/* max host name length */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	ILEN		256	/* default identity modulus size (bits) */
 #define	MVMAX		100	/* max MV parameters */
@@ -127,14 +127,14 @@
 #define BASIC_CONSTRAINTS	"critical,CA:TRUE"
 #define EXT_KEY_PRIVATE		"private"
 #define EXT_KEY_TRUST		"trustRoot"
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 /*
  * Prototypes
  */
 FILE	*fheader	(const char *, const char *, const char *);
 int	gen_md5		(char *);
-#ifdef OPENSSL
+#ifdef AUTOKEY
 EVP_PKEY *gen_rsa	(char *);
 EVP_PKEY *gen_dsa	(char *);
 EVP_PKEY *gen_iffkey	(char *);
@@ -148,7 +148,7 @@ EVP_PKEY *genkey	(char *, char *);
 EVP_PKEY *readkey	(char *, char *, u_int *, EVP_PKEY **);
 void	writekey	(char *, char *, u_int *, EVP_PKEY **);
 u_long	asn2ntp		(ASN1_TIME *);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 /*
  * Program variables
@@ -156,7 +156,7 @@ u_long	asn2ntp		(ASN1_TIME *);
 extern char *optarg;		/* command line argument */
 char	*progname;
 volatile int	debug = 0;		/* debug, not de bug */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
 #endif
@@ -168,9 +168,9 @@ char	*groupname = NULL;	/* trusted host name (issuer name) */
 char	filename[MAXFILENAME + 1]; /* file name */
 char	*passwd1 = NULL;	/* input private key password */
 char	*passwd2 = NULL;	/* output private key password */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 long	d0, d1, d2, d3;		/* callback counters */
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 #ifdef SYS_WINNT
 BOOL init_randfile();
@@ -218,7 +218,7 @@ main(
 {
 	struct timeval tv;	/* initialization vector */
 	int	md5key = 0;	/* generate MD5 keys */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	X509	*cert = NULL;	/* X509 certificate */
 	X509_EXTENSION *ext;	/* X509v3 extension */
 	EVP_PKEY *pkey_host = NULL; /* host key */
@@ -242,7 +242,7 @@ main(
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
 #define iffsw   HAVE_OPT(ID_KEY)
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	char	hostbuf[MAXHOSTNAME + 1];
 	char	groupbuf[MAXHOSTNAME + 1];
 
@@ -259,7 +259,7 @@ main(
 #ifdef OPENSSL
 	ssl_check_version();
 	fprintf(stderr, "Using OpenSSL version %lx\n", SSLeay());
-#endif /* OPENSSL */
+#endif	/* OPENSSL */
 
 	/*
 	 * Process options, initialize host name and timestamp.
@@ -279,7 +279,7 @@ main(
 	if (HAVE_OPT( MD5KEY ))
 		md5key++;
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	passwd1 = hostbuf;
 	if (HAVE_OPT( PVT_PASSWD ))
 		passwd1 = strdup(OPT_ARG( PVT_PASSWD ));
@@ -416,7 +416,7 @@ main(
 	if ((iffkey || gqkey || mvkey) && exten == NULL)
 		fprintf(stderr,
 		    "Warning: identity files may not be useful with a nontrusted certificate.\n");
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	/*
 	 * Create new unencrypted MD5 keys file if requested. If this
@@ -427,7 +427,7 @@ main(
 		exit (0);
 	}
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	/*
 	 * Create a new encrypted RSA host key file if requested;
 	 * otherwise, look for an existing host key file. If not found,
@@ -685,7 +685,7 @@ main(
 		x509(pkey_sign, ectx, grpkey, exten, hostname);
 	else
 		x509(pkey_sign, ectx, grpkey, exten, groupname);
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	exit (0);
 }
 
@@ -707,7 +707,7 @@ gen_md5(
 	u_char	keystr[MD5SIZE];
 	u_char	hexstr[2 * MD5SIZE + 1];
 	u_char	hex[] = "0123456789abcdef";
-#endif /* OPENSSL */
+#endif	/* OPENSSL */
 
 	str = fheader("MD5key", id, groupname);
 	ntp_srandom((u_long)epoch);
@@ -740,13 +740,13 @@ gen_md5(
 		fprintf(str, "%2d SHA1 %s  # SHA1 key\n", i + MD5KEYS,
 		    hexstr);
 	}
-#endif /* OPENSSL */
+#endif	/* OPENSSL */
 	fclose(str);
 	return (1);
 }
 
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 /*
  * readkey - load cryptographic parameters and keys
  *
@@ -2038,7 +2038,7 @@ genkey(
 	fprintf(stderr, "Invalid %s key type %s\n", id, type);
 	return (NULL);
 }
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 
 /*

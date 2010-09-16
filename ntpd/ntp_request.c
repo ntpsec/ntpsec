@@ -1331,13 +1331,13 @@ do_conf(
 		if (temp_cp.flags & CONF_FLAG_PREFER)
 			fl |= FLAG_PREFER;
 		if (temp_cp.flags & CONF_FLAG_BURST)
-		    fl |= FLAG_BURST;
+			fl |= FLAG_BURST;
 		if (temp_cp.flags & CONF_FLAG_IBURST)
-		    fl |= FLAG_IBURST;
-#ifdef OPENSSL
+			fl |= FLAG_IBURST;
+#ifdef AUTOKEY
 		if (temp_cp.flags & CONF_FLAG_SKEY)
 			fl |= FLAG_SKEY;
-#endif /* OPENSSL */		
+#endif	/* AUTOKEY */
 		if (client_v6_capable && temp_cp.v6_flag != 0) {
 			AF(&peeraddr) = AF_INET6;
 			SOCK_ADDR6(&peeraddr) = temp_cp.peeraddr6; 

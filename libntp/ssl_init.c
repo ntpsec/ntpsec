@@ -15,6 +15,7 @@
 #ifdef OPENSSL
 #include "openssl/err.h"
 #include "openssl/rand.h"
+#include "openssl/evp.h"
 
 
 int ssl_init_done;

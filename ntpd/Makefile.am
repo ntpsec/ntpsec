@@ -83,13 +83,8 @@ man_MANS=	$(srcdir)/ntpd.1
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
 # longer a reason to have ntpdbase-opts.def split off of ntpd-opts.def.
 
-# ntpd may need:
-# log10                               refclock_wwv.o
-# sqrt                                ntp_control.o
-# floor                               refclock_wwv.o
-# which are (usually) provided by -lm.
-ntpd_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntp.a -lm @LCRYPTO@ @LSCF@
-ntpdsim_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntpsim.a -lm @LCRYPTO@ @LSCF@
+ntpd_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntp.a $(LIBM) @LCRYPTO@ @LSCF@
+ntpdsim_LDADD = $(LDADD) $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntpsim.a @LCRYPTO@ @LSCF@
 ntpdsim_CFLAGS = $(CFLAGS) -DSIM
 check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
 keyword_gen_LDADD = ../libntp/libntp.a	# we don't want $(LDADD) here

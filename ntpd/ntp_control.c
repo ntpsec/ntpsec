@@ -15,6 +15,7 @@
 #include "ntp_config.h"
 #include "ntp_crypto.h"
 #include "ntp_assert.h"
+#include "ntp_md5.h"	/* provides OpenSSL digest API */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -25,12 +26,6 @@
 #include <netinet/in.h>
 #endif
 #include <arpa/inet.h>
-
-#ifdef OPENSSL
-# include "openssl/evp.h"
-#else
-# include "ntp_md5.h"	/* provides clone of OpenSSL MD5 API */
-#endif
 
 
 /*
@@ -165,7 +160,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_SS_LIMITED,	RO, "ss_limited" },	/* 41 */
 	{ CS_SS_KODSENT,	RO, "ss_kodsent" },	/* 42 */
 	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 43 */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 44 */
 	{ CS_HOST,	RO, "host" },		/* 45 */
 	{ CS_PUBLIC,	RO, "update" },		/* 46 */
@@ -174,11 +169,11 @@ static struct ctl_var sys_var[] = {
 	{ CS_REVTIME,	RO, "until" },		/* 49 */
 	{ CS_GROUP,	RO, "group" },		/* 50 */
 	{ CS_DIGEST,	RO, "digest" },		/* 51 */
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	{ 0,		EOV, "" }		/* 44/52 */
 };
 
-static struct ctl_var *ext_sys_var = (struct ctl_var *)0;
+static struct ctl_var *ext_sys_var = NULL;
 
 /*
  * System variables we print by default (in fuzzball order,
@@ -207,7 +202,7 @@ static	u_char def_sys_var[] = {
 	CS_TAI,
 	CS_LEAPTAB,
 	CS_LEAPEND,
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	CS_HOST,
 	CS_GROUP,
 	CS_FLAGS,
@@ -215,7 +210,7 @@ static	u_char def_sys_var[] = {
 	CS_SIGNATURE,
 	CS_PUBLIC,
 	CS_CERTIF,
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	0
 };
 
@@ -267,7 +262,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_RATE,	RO, "headway" },	/* 40 */
 	{ CP_BIAS,	RO, "bias" },		/* 41 */
 	{ CP_SRCHOST,	RO, "srchost" },	/* 42 */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	{ CP_FLAGS,	RO, "flags" },		/* 43 */
 	{ CP_HOST,	RO, "host" },		/* 44 */
 	{ CP_VALID,	RO, "valid" },		/* 45 */
@@ -275,7 +270,7 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITKEY,	RO, "initkey" },	/* 47 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 48 */
 	{ CP_SIGNATURE,	RO, "signature" },	/* 49 */
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	{ 0,		EOV, "" }		/* 43/50 */
 };
 
@@ -318,13 +313,13 @@ static u_char def_peer_var[] = {
 	CP_FILTDELAY,
 	CP_FILTOFFSET,
 	CP_FILTERROR,
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	CP_HOST,
 	CP_FLAGS,
 	CP_SIGNATURE,
 	CP_VALID,
 	CP_INITSEQ,
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	0
 };
 
@@ -1410,38 +1405,43 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
+	char buf[CTL_MAX_DATA_LEN];
 	u_int u;
 	double kb;
-#ifdef OPENSSL
+	char *s, *t, *be;
+	const char *ss;
+	int i;
+	struct ctl_var *k;
+#ifdef AUTOKEY
 	struct cert_info *cp;
 	char cbuf[256];
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	switch (varid) {
 
-	    case CS_LEAP:
+	case CS_LEAP:
 		ctl_putuint(sys_var[CS_LEAP].text, sys_leap);
 		break;
 
-	    case CS_STRATUM:
+	case CS_STRATUM:
 		ctl_putuint(sys_var[CS_STRATUM].text, sys_stratum);
 		break;
 
-	    case CS_PRECISION:
+	case CS_PRECISION:
 		ctl_putint(sys_var[CS_PRECISION].text, sys_precision);
 		break;
 
-	    case CS_ROOTDELAY:
+	case CS_ROOTDELAY:
 		ctl_putdbl(sys_var[CS_ROOTDELAY].text, sys_rootdelay *
 			   1e3);
 		break;
 
-	    case CS_ROOTDISPERSION:
+	case CS_ROOTDISPERSION:
 		ctl_putdbl(sys_var[CS_ROOTDISPERSION].text,
 			   sys_rootdisp * 1e3);
 		break;
 
-	    case CS_REFID:
+	case CS_REFID:
 		if (sys_stratum > 1 && sys_stratum < STRATUM_UNSPEC)
 			ctl_putadr(sys_var[CS_REFID].text, sys_refid, NULL);
 		else
@@ -1449,15 +1449,15 @@ ctl_putsys(
 				  (char *)&sys_refid);
 		break;
 
-	    case CS_REFTIME:
+	case CS_REFTIME:
 		ctl_putts(sys_var[CS_REFTIME].text, &sys_reftime);
 		break;
 
-	    case CS_POLL:
+	case CS_POLL:
 		ctl_putuint(sys_var[CS_POLL].text, sys_poll);
 		break;
 
-	    case CS_PEERID:
+	case CS_PEERID:
 		if (sys_peer == NULL)
 			ctl_putuint(sys_var[CS_PEERID].text, 0);
 		else
@@ -1465,28 +1465,28 @@ ctl_putsys(
 				    sys_peer->associd);
 		break;
 
-	    case CS_OFFSET:
+	case CS_OFFSET:
 		ctl_putdbl(sys_var[CS_OFFSET].text, last_offset * 1e3);
 		break;
 
-	    case CS_DRIFT:
+	case CS_DRIFT:
 		ctl_putdbl(sys_var[CS_DRIFT].text, drift_comp * 1e6);
 		break;
 
-	    case CS_JITTER:
+	case CS_JITTER:
 		ctl_putdbl(sys_var[CS_JITTER].text, sys_jitter * 1e3);
 		break;
 
-	    case CS_ERROR:
+	case CS_ERROR:
 		ctl_putdbl(sys_var[CS_ERROR].text, clock_jitter * 1e3);
 		break;
 
-	    case CS_CLOCK:
+	case CS_CLOCK:
 		get_systime(&tmp);
 		ctl_putts(sys_var[CS_CLOCK].text, &tmp);
 		break;
 
-	    case CS_PROCESSOR:
+	case CS_PROCESSOR:
 #ifndef HAVE_UNAME
 		ctl_putstr(sys_var[CS_PROCESSOR].text, str_processor,
 			   sizeof(str_processor) - 1);
@@ -1496,7 +1496,7 @@ ctl_putsys(
 #endif /* HAVE_UNAME */
 		break;
 
-	    case CS_SYSTEM:
+	case CS_SYSTEM:
 #ifndef HAVE_UNAME
 		ctl_putstr(sys_var[CS_SYSTEM].text, str_system,
 			   sizeof(str_system) - 1);
@@ -1507,108 +1507,97 @@ ctl_putsys(
 #endif /* HAVE_UNAME */
 		break;
 
-	    case CS_VERSION:
+	case CS_VERSION:
 		ctl_putstr(sys_var[CS_VERSION].text, Version,
 			   strlen(Version));
 		break;
 
-	    case CS_STABIL:
+	case CS_STABIL:
 		ctl_putdbl(sys_var[CS_STABIL].text, clock_stability *
 			   1e6);
 		break;
 
-	    case CS_VARLIST:
-	    {
-		    char buf[CTL_MAX_DATA_LEN];
-		    register char *s, *t, *be;
-		    register const char *ss;
-		    register int i;
-		    register struct ctl_var *k;
+	case CS_VARLIST:
+		s = buf;
+		be = buf + sizeof(buf);
+		if (s + strlen(sys_var[CS_VARLIST].text) + 4 > be)
+			break;	/* really long var name */
 
-		    s = buf;
-		    be = buf + sizeof(buf);
-		    if (s + strlen(sys_var[CS_VARLIST].text) + 4 > be)
-			    break;	/* really long var name */
+		snprintf(s, sizeof(buf), "%s=\"",
+			 sys_var[CS_VARLIST].text);
+		s += strlen(s);
+		t = s;
+		for (k = sys_var; !(EOV & k->flags); k++) {
+			if (PADDING & k->flags)
+				continue;
+			i = strlen(k->text);
+			if (s + i + 1 >= be)
+				break;
 
-		    snprintf(s, sizeof(buf), "%s=\"",
-			sys_var[CS_VARLIST].text);
-		    s += strlen(s);
-		    t = s;
-		    for (k = sys_var; !(EOV & k->flags); k++) {
-			    if (PADDING & k->flags)
-				    continue;
-			    i = strlen(k->text);
-			    if (s + i + 1 >= be)
-				    break;
+			if (s != t)
+				*s++ = ',';
+			memcpy(s, k->text, i);
+			s += i;
+		}
 
-			    if (s != t)
-				    *s++ = ',';
-			    memcpy(s, k->text, i);
-			    s += i;
-		    }
+		for (k = ext_sys_var; k && !(EOV & k->flags); k++) {
+			if (PADDING & k->flags)
+				continue;
 
-		    for (k = ext_sys_var; k && !(EOV & k->flags);
-			 k++) {
-			    if (PADDING & k->flags)
-				    continue;
+			ss = k->text;
+			if (NULL == ss)
+				continue;
 
-			    ss = k->text;
-			    if (!ss)
-				    continue;
+			while (*ss != '\0' && *ss != '=')
+				ss++;
+			i = ss - k->text;
+			if (s + i + 1 >= be)
+				break;
 
-			    while (*ss && *ss != '=')
-				    ss++;
-			    i = ss - k->text;
-			    if (s + i + 1 >= be)
-				    break;
+			if (s != t)
+				*s++ = ',';
+			memcpy(s, k->text, (unsigned)i);
+			s += i;
+		}
+		if (s + 2 >= be)
+			break;
 
-			    if (s != t)
-				    *s++ = ',';
-			    memcpy(s, k->text,
-				    (unsigned)i);
-			    s += i;
-		    }
-		    if (s+2 >= be)
-			    break;
+		*s++ = '"';
+		*s = '\0';
 
-		    *s++ = '"';
-		    *s = '\0';
+		ctl_putdata(buf, (unsigned)(s - buf), 0);
+		break;
 
-		    ctl_putdata(buf, (unsigned)( s - buf ),
-			0);
-	    }
-	    break;
-
-	    case CS_TAI:
+	case CS_TAI:
 		if (sys_tai > 0)
 			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
 
-	    case CS_LEAPTAB:
+	case CS_LEAPTAB:
 		if (leap_sec > 0)
 			ctl_putfs(sys_var[CS_LEAPTAB].text,
 			    leap_sec);
 		break;
 
-	    case CS_LEAPEND:
+	case CS_LEAPEND:
 		if (leap_expire > 0)
 			ctl_putfs(sys_var[CS_LEAPEND].text,
 			    leap_expire);
 		break;
 
-	    case CS_RATE:
+	case CS_RATE:
 		ctl_putuint(sys_var[CS_RATE].text, ntp_minpoll);
 		break;
 
-	    case CS_MRU_ENABLED:
+	case CS_MRU_ENABLED:
 		ctl_puthex(sys_var[varid].text, mon_enabled);
 		break;
 
-	    case CS_MRU_DEPTH:
+	case CS_MRU_DEPTH:
 		ctl_putuint(sys_var[varid].text, mru_entries);
 		break;
 
-	    case CS_MRU_MEM:
+	case CS_MRU_MEM:
 		kb = mru_entries * (sizeof(mon_entry) / 1024.);
 		u = (u_int)kb;
 		if (kb - u >= 0.5)
@@ -1616,23 +1605,23 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 
-	    case CS_MRU_DEEPEST:
+	case CS_MRU_DEEPEST:
 		ctl_putuint(sys_var[varid].text, mru_peakentries);
 		break;
 
-	    case CS_MRU_MINDEPTH:
+	case CS_MRU_MINDEPTH:
 		ctl_putuint(sys_var[varid].text, mru_mindepth);
 		break;
 
-	    case CS_MRU_MAXAGE:
+	case CS_MRU_MAXAGE:
 		ctl_putint(sys_var[varid].text, mru_maxage);
 		break;
 
-	    case CS_MRU_MAXDEPTH:
+	case CS_MRU_MAXDEPTH:
 		ctl_putuint(sys_var[varid].text, mru_maxdepth);
 		break;
 
-	    case CS_MRU_MAXMEM:
+	case CS_MRU_MAXMEM:
 		kb = mru_maxdepth * (sizeof(mon_entry) / 1024.);
 		u = (u_int)kb;
 		if (kb - u >= 0.5)
@@ -1640,93 +1629,97 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, u);
 		break;
 
-	    case CS_SS_UPTIME:
+	case CS_SS_UPTIME:
 		ctl_putuint(sys_var[varid].text, current_time);
 		break;
 
-	    case CS_SS_RESET:
+	case CS_SS_RESET:
 		ctl_putuint(sys_var[varid].text,
 			    current_time - sys_stattime);
 		break;
 
-	    case CS_SS_RECEIVED:
+	case CS_SS_RECEIVED:
 		ctl_putuint(sys_var[varid].text, sys_received);
 		break;
 
-	    case CS_SS_THISVER:
+	case CS_SS_THISVER:
 		ctl_putuint(sys_var[varid].text, sys_newversion);
 		break;
 
-	    case CS_SS_OLDVER:
+	case CS_SS_OLDVER:
 		ctl_putuint(sys_var[varid].text, sys_oldversion);
 		break;
 
-	    case CS_SS_BADFORMAT:
+	case CS_SS_BADFORMAT:
 		ctl_putuint(sys_var[varid].text, sys_badlength);
 		break;
 
-	    case CS_SS_BADAUTH:
+	case CS_SS_BADAUTH:
 		ctl_putuint(sys_var[varid].text, sys_badauth);
 		break;
 
-	    case CS_SS_DECLINED:
+	case CS_SS_DECLINED:
 		ctl_putuint(sys_var[varid].text, sys_declined);
 		break;
 
-	    case CS_SS_RESTRICTED:
+	case CS_SS_RESTRICTED:
 		ctl_putuint(sys_var[varid].text, sys_restricted);
 		break;
 
-	    case CS_SS_LIMITED:
+	case CS_SS_LIMITED:
 		ctl_putuint(sys_var[varid].text, sys_limitrejected);
 		break;
 
-	    case CS_SS_KODSENT:
+	case CS_SS_KODSENT:
 		ctl_putuint(sys_var[varid].text, sys_kodsent);
 		break;
 
-	    case CS_SS_PROCESSED:
+	case CS_SS_PROCESSED:
 		ctl_putuint(sys_var[varid].text, sys_processed);
 		break;
-#ifdef OPENSSL
-	    case CS_FLAGS:
+#ifdef AUTOKEY
+	case CS_FLAGS:
 		if (crypto_flags)
 			ctl_puthex(sys_var[CS_FLAGS].text,
 			    crypto_flags);
 		break;
 
-	    case CS_DIGEST:
+	case CS_DIGEST:
 		if (crypto_flags) {
-			strcpy(str, OBJ_nid2ln(crypto_nid));
+			strncpy(str, OBJ_nid2ln(crypto_nid),
+			    COUNTOF(str));
+			str[COUNTOF(str) - 1] = '\0';
 			ctl_putstr(sys_var[CS_DIGEST].text, str,
 			    strlen(str));
 		}
 		break;
 
-	    case CS_SIGNATURE:
+	case CS_SIGNATURE:
 		if (crypto_flags) {
 			const EVP_MD *dp;
 
 			dp = EVP_get_digestbynid(crypto_flags >> 16);
-			strcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)));
+			strncpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)),
+			    COUNTOF(str));
+			str[COUNTOF(str) - 1] = '\0';
 			ctl_putstr(sys_var[CS_SIGNATURE].text, str,
 			    strlen(str));
 		}
 		break;
 
-	    case CS_HOST:
+	case CS_HOST:
 		if (sys_hostname != NULL)
 			ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
 			    strlen(sys_hostname));
 		break;
 
-	    case CS_GROUP:
+	case CS_GROUP:
 		if (sys_groupname != NULL)
 			ctl_putstr(sys_var[CS_GROUP].text, sys_groupname,
 			    strlen(sys_groupname));
 		break;
 
-	    case CS_CERTIF:
+	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
 			snprintf(cbuf, sizeof(cbuf), "%s %s 0x%x",
 			    cp->subject, cp->issuer, cp->flags);
@@ -1736,12 +1729,12 @@ ctl_putsys(
 		}
 		break;
 
-	    case CS_PUBLIC:
+	case CS_PUBLIC:
 		if (hostval.tstamp != 0)
 			ctl_putfs(sys_var[CS_PUBLIC].text,
 			    ntohl(hostval.tstamp));
 		break;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	}
 }
 
@@ -1761,11 +1754,11 @@ ctl_putpeer(
 	char *be;
 	int i;
 	struct ctl_var *k;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	struct autokey *ap;
 	const EVP_MD *dp;
 	const char *str;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 
 	switch (id) {
 
@@ -1987,7 +1980,7 @@ ctl_putpeer(
 			ctl_putdata(buf, (u_int)(s - buf), 0);
 		}
 		break;
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	case CP_FLAGS:
 		if (p->crypto)
 			ctl_puthex(peer_var[id].text, p->crypto);
@@ -2019,7 +2012,7 @@ ctl_putpeer(
 		ctl_putfs(peer_var[CP_INITTSP].text,
 			  ntohl(p->recval.tstamp));
 		break;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 	}
 }
 
@@ -3835,10 +3828,10 @@ report_event(
 		 * variables. Don't send crypto strings.
 		 */
 		for (i = 1; i <= CS_MAXCODE; i++) {
-#ifdef OPENSSL
+#ifdef AUTOKEY
 			if (i > CS_VARLIST)
 				continue;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 			ctl_putsys(i);
 		}
 	} else {
@@ -3850,10 +3843,10 @@ report_event(
 		 * Dump it all. Later, maybe less.
 		 */
 		for (i = 1; i <= CP_MAXCODE; i++) {
-#ifdef OPENSSL
+#ifdef AUTOKEY
 			if (i > CP_VARLIST)
 				continue;
-#endif /* OPENSSL */
+#endif	/* AUTOKEY */
 			ctl_putpeer(i, peer);
 		}
 #ifdef REFCLOCK

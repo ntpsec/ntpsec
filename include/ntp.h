@@ -11,9 +11,7 @@
 #include <ntp_types.h>
 #include <ntp_lists.h>
 #include <ntp_stdlib.h>
-#ifdef OPENSSL
 #include <ntp_crypto.h>
-#endif /* OPENSSL */
 #include <ntp_random.h>
 #include <ntp_net.h>
 
@@ -114,7 +112,7 @@ typedef char s_char;
 #define NTP_MAXDPOLL	10	/* log2 default max poll (~17 m) */
 #define	NTP_MAXPOLL	17	/* log2 max poll interval (~36 h) */
 #define	NTP_RETRY	3	/* max packet retries */
-#define	NTP_MINPKT	1	/* log2 min interburst interval (2 s) */
+#define	NTP_MINPKT	2	/* guard time (s) */
 
 /*
  * Clock filter algorithm tuning parameters
@@ -297,7 +295,7 @@ struct peer {
 	 * Variables used by authenticated client
 	 */
 	keyid_t keyid;		/* current key ID */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #define clear_to_zero opcode
 	u_int32	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
@@ -325,9 +323,9 @@ struct peer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
-#else /* OPENSSL */
+#else	/* !AUTOKEY follows */
 #define clear_to_zero status
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 
 	/*
 	 * Ephemeral state variables
@@ -558,11 +556,11 @@ struct pkt {
 	 * octets. But, to handle humungus certificates, the bank must
 	 * be broke.
 	 */
-#ifdef OPENSSL
+#ifdef AUTOKEY
 	u_int32	exten[NTP_MAXEXTEN / 4]; /* max extension field */
-#else /* OPENSSL */
+#else	/* !AUTOKEY follows */
 	u_int32	exten[1];	/* misused */
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 	u_char	mac[MAX_MAC_LEN]; /* mac */
 };
 

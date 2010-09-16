@@ -1,3 +1,21 @@
+(4.2.7p50) 2010/09/16 Released by Harlan Stenn <stenn@ntp.org>
+* Cleanup NTP_LIB_M.
+* [Bug 1628] Clean up -lxnet/-lsocket usage for (open)solaris.
+(4.2.7p49) 2010/09/13 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p48) 2010/09/12 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p47) 2010/09/11 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+* [Bug 1588] finish configure --disable-autokey implementation.
+* [Bug 1616] refclock_acts.c: if (pp->leap == 2) is always false.
+* [Bug 1620] [Backward Incompatible] "discard minimum" value should be in
+  seconds, not log2 seconds.
+(4.2.7p46) 2010/09/10 Released by Harlan Stenn <stenn@ntp.org>
+* Use AC_SEARCH_LIBS instead of AC_CHECK_LIB for NTP_LIB_M.
+(4.2.7p45) 2010/09/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1578] Consistently use -lm when needed.
+(4.2.7p44) 2010/08/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
 (4.2.7p43) 2010/08/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1602] Refactor some of the sntp/ directory to facililtate testing.
@@ -324,10 +342,18 @@
   a bug in string comparison.
 
 ---
+(4.2.6p3-beta1) 2010/09/11 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1573] Miscalculation of offset in sntp.
+* [Bug 1595] empty last line in key file causes duplicate key to be added
+* [Bug 1597] packet processing ignores RATE KoD packets, because of
+  a bug in string comparison.
+
+---
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by JÃ¼rgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
   Perlinger.
 
 ---
