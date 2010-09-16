@@ -1,3 +1,4 @@
+(4.2.7p50) 2010/09/16 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup NTP_LIB_M.
 * [Bug 1628] Clean up -lxnet/-lsocket usage for (open)solaris.
 (4.2.7p49) 2010/09/13 Released by Harlan Stenn <stenn@ntp.org>
