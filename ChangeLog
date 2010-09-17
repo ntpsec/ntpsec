@@ -1,3 +1,5 @@
+* [Bug 1344] from 4.2.6p3-RC1: ntpd on Windows exits without logging
+  cause.
 (4.2.7p50) 2010/09/16 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup NTP_LIB_M.
 * [Bug 1628] Clean up -lxnet/-lsocket usage for (open)solaris.
@@ -16,14 +18,14 @@
 (4.2.7p45) 2010/09/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1578] Consistently use -lm when needed.
 (4.2.7p44) 2010/08/27 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 1573] from 4.2.6p3-RC1: Miscalculation of offset in sntp.
+* [Bug 1573] from 4.2.6p3-beta1: Miscalculation of offset in sntp.
 (4.2.7p43) 2010/08/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1602] Refactor some of the sntp/ directory to facililtate testing.
 (4.2.7p42) 2010/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1593] ntpd abort in free() with logconfig syntax error.
-* [Bug 1595] from 4.2.6p3-RC1: empty last line in key file causes
+* [Bug 1595] from 4.2.6p3-beta1: empty last line in key file causes
   duplicate key to be added
-* [Bug 1597] from 4.2.6p3-RC1: packet processing ignores RATE KoD packets,
+* [Bug 1597] from 4.2.6p3-beta1: packet processing ignores RATE KoD packets,
   Because of a bug in string comparison.
 (4.2.7p41) 2010/07/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1581] from 4.2.6p3-beta1: ntp_intres.c size_t printf format
@@ -39,7 +41,7 @@
 * Fix typo in driver28.html.
 * [Bug 1581] from 4.2.6p2: size_t printf format string mismatches, IRIG
   string buffers undersized.  Mostly backported from earlier ntp-dev
-  fixes by Jürgen Perlinger.
+  fixes by Juergen Perlinger.
 (4.2.7p38) 2010/06/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1570] backported to 4.2.6p2-RC7.
 * [Bug 1575] from 4.2.6p2-RC7: use 'snprintf' with LIB_BUFLENGTH in
@@ -336,10 +338,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 1573] Miscalculation of offset in sntp.
-* [Bug 1595] empty last line in key file causes duplicate key to be added
-* [Bug 1597] packet processing ignores RATE KoD packets, because of
-  a bug in string comparison.
+* [Bug 1344] ntpd on Windows exits without logging cause.
 
 ---
 (4.2.6p3-beta1) 2010/09/11 Released by Harlan Stenn <stenn@ntp.org>

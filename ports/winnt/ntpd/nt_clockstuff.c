@@ -1227,9 +1227,11 @@ ntp_timestamp_from_counter(
 		Now.ll -= InterpTimestamp;
 		if (Now.ll > 60 * HECTONANOSECONDS || 
 		    Now.ll < -60 * (LONGLONG) HECTONANOSECONDS) {
-			DPRINTF(1, ("ntp_timestamp_from_counter serial driver system "
-				    "time %.6fs from current\n",
+			DPRINTF(1, ("ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
 				    Now.ll / (double)LL_HNS));
+			msyslog(LOG_ERR,
+				"ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
+				Now.ll / (double)LL_HNS);
 			exit(-1);
 		}
 #endif
