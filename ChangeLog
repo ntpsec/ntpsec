@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1344] ntpd on Windows exits without logging cause.
+
+---
 (4.2.6p3-beta1) 2010/09/11 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1573] Miscalculation of offset in sntp.
