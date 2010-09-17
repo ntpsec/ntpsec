@@ -1,3 +1,5 @@
+* [Bug 1629] 4.2.7p50 configure.ac changes invalidate config.cache.
+* [Bug 1630] 4.2.7p50 cannot bootstrap on Autoconf 2.61.
 (4.2.7p50) 2010/09/16 Released by Harlan Stenn <stenn@ntp.org>
 * Cleanup NTP_LIB_M.
 * [Bug 1628] Clean up -lxnet/-lsocket usage for (open)solaris.
