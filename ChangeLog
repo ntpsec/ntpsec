@@ -339,6 +339,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1344] ntpd on Windows exits without logging cause.
 
@@ -354,7 +355,8 @@
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by JÃ¼rgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
+>>>>>>>
   Perlinger.
 
 ---
