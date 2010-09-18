@@ -1,3 +1,4 @@
+(4.2.7p51) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1344] from 4.2.6p3-RC1: ntpd on Windows exits without logging
   cause.
 * [Bug 1629] 4.2.7p50 configure.ac changes invalidate config.cache.
