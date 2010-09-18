@@ -1,4 +1,5 @@
 ---
+(4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1344] ntpd on Windows exits without logging cause.
 
