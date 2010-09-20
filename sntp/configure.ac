@@ -6,9 +6,9 @@ AC_INIT([sntp], [VERSION_NUMBER])
 AC_CONFIG_MACRO_DIR([../m4])
 AC_CONFIG_AUX_DIR([.])
 
-# Increment sntp_configure_cache_version by one for each change to
-# configure.ac or .m4 files which invalidates cached values from
-# previous versions.
+# Bump sntp_configure_cache_version for each change to configure.ac or
+# .m4 files which invalidates cached values from previous configure 
+# runs.
 #
 # If the change affects cache variables used only by the main NTP
 # configure.ac, then only its version number should be bumped, while
@@ -18,15 +18,15 @@ AC_CONFIG_AUX_DIR([.])
 # bumping.
 #
 # If a change affects variables shared by all NTP configure scripts,
-# please bump the version numbers of all three.  If you are not sure,
-# the safe choice is to bump all three on any cache-invalidating change.
+# please bump the version numbers of each.  If you are not sure, the
+# safe choice is to bump all on any cache-invalidating change.
 #
 # In order to avoid the risk of version stamp collision between -stable
 # and -dev branches, do not simply increment the version, instead use
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-sntp_configure_cache_version=20091117
+sntp_configure_cache_version=20100916
 
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -106,7 +106,6 @@ case "$host" in
     # -D_XOPEN_SOURCE=600 seems OK for c99
     #CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
     CPPFLAGS="$CPPFLAGS -D__EXTENSIONS__"
-    libxnet=-lxnet
     ;;
 esac
 
@@ -135,13 +134,28 @@ NTP_DIR_SEP
 
 # Checks for libraries.
 NTP_LIB_M
-AC_CHECK_FUNC([gethostent], ,
-	[AC_SEARCH_LIBS([gethostent], [nsl], , , [$libxnet -lsocket])])
-AC_CHECK_FUNC([openlog], , 
-	[AC_SEARCH_LIBS([openlog], [gen], , 
-		[AC_SEARCH_LIBS([openlog], [syslog], , , [$libxnet -lsocket])])])
 
-AC_SEARCH_LIBS([setsockopt], [socket xnet])
+# [Bug 1628] On Solaris, we need -lxnet -lsocket.  Generalize this to
+# avoid keying on the OS name:  If we find socket functions in
+# libsocket, next try for them in libxnet without libsocket, if found,
+# list both.  If we simply tested libxnet first, we would find the
+# functions there and never add libsocket.  See also [Bug 660]
+# http://bugs.ntp.org/show_bug.cgi?id=660#c9
+saved_LIBS=$LIBS
+AC_SEARCH_LIBS([setsockopt], [socket])
+case "$ac_cv_search_setsockopt" in
+ -lsocket)
+    LIBS="$saved_LIBS"
+    AC_SEARCH_LIBS([getsockopt], [xnet])
+    case "$ac_cv_search_getsockopt" in
+     -lxnet)
+	LIBS="-lxnet -lsocket $saved_LIBS"
+    esac
+esac
+$as_unset saved_LIBS
+
+AC_SEARCH_LIBS([inet_pton], [nsl])
+AC_SEARCH_LIBS([openlog], [gen syslog])
 
 # Checks for header files.
 AC_HEADER_STDC

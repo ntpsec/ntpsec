@@ -31,12 +31,13 @@
  * All units are in s and s/s, unless noted otherwise.
  */
 #define CLOCK_MAX	.128	/* default step threshold (s) */
-#define CLOCK_MINSTEP	900.	/* default stepout threshold (s) */
+#define CLOCK_MINSTEP	300.	/* default stepout threshold (s) */
 #define CLOCK_PANIC	1000.	/* default panic threshold (s) */
 #define	CLOCK_PHI	15e-6	/* max frequency error (s/s) */
 #define CLOCK_PLL	16.	/* PLL loop gain (log2) */
 #define CLOCK_AVG	8.	/* parameter averaging constant */
 #define CLOCK_FLL	.25	/* FLL loop gain */
+#define	CLOCK_FLOOR	.0005	/* startup offset floor (s) */
 #define	CLOCK_ALLAN	11	/* Allan intercept (log2 s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_JUNE	(CLOCK_DAY * 30) /* June in seconds (s) */
@@ -142,6 +143,7 @@ int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	allow_panic = FALSE;	/* allow panic correction */
 int	mode_ntpdate = FALSE;	/* exit on first clock set */
+int	freq_cnt;		/* initial frequency clamp */
 
 /*
  * Clock state machine variables
@@ -415,65 +417,70 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case EVNT_NSET:
+			freq_cnt = clock_minstep;
 			rstclock(EVNT_FREQ, fp_offset);
 			break;
 
 		/*
 		 * In FSET state this is the first update received and
 		 * the frequency has been initialized. Adjust the phase,
-		 * but do not adjust the frequency until the next
-		 * update.
+		 * but do not adjust the frequency until the holdoff
+		 * counter decrements to zero.
 		 */
 		case EVNT_FSET:
+			freq_cnt = clock_minstep;
 			rstclock(EVNT_SYNC, fp_offset);
 			break;
 
 		/*
 		 * In FREQ state ignore updates until the stepout
 		 * threshold. After that, compute the new frequency, but
-		 * do not adjust the phase or frequency until the next
-		 * update.
+		 * do not adjust the frequency until the holdoff counter
+		 * decrements to zero.
 		 */
 		case EVNT_FREQ:
 			if (mu < clock_minstep)
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
+			freq_cnt = clock_minstep;
 			rstclock(EVNT_SYNC, 0);
-			break;
-
+			/* fall through to default */
 
 		/*
 		 * We get here by default in SYNC and SPIK states. Here
 		 * we compute the frequency update due to PLL and FLL
-		 * contributions.
+		 * contributions. Note, we avoid frequency discipline at
+		 * startup until the initial transient has subsided.
 		 */
 		default:
 			allow_panic = FALSE;
+			if (freq_cnt == 0) {
 
-			/*
-			 * The FLL and PLL frequency gain constants
-			 * depend on the time constant and Allan
-			 * intercept. The PLL is always used, but
-			 * becomes ineffective above the Allan intercept
-			 * where the FLL becomes effective.
-			 */
-			if (sys_poll >= allan_xpt)
-				clock_frequency += (fp_offset -
-				    clock_offset) /
-				    max(ULOGTOD(sys_poll), mu) *
-				    CLOCK_FLL;
+				/*
+				 * The FLL and PLL frequency gain constants
+				 * depend on the time constant and Allan
+				 * intercept. The PLL is always used, but
+				 * becomes ineffective above the Allan intercept
+				 * where the FLL becomes effective.
+				 */
+				if (sys_poll >= allan_xpt)
+					clock_frequency += (fp_offset -
+					    clock_offset) /
+					    max(ULOGTOD(sys_poll), mu) *
+					    CLOCK_FLL;
 
-			/*
-			 * The PLL frequency gain (numerator) depends on
-			 * the minimum of the update interval and Allan
-			 * intercept. This reduces the PLL gain when the 
-			 * FLL becomes effective.
-			 */ 
-			etemp = min(ULOGTOD(allan_xpt), mu);
-			dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
-			clock_frequency += fp_offset * etemp / (dtemp *
-			    dtemp);
+				/*
+				 * The PLL frequency gain (numerator) depends on
+				 * the minimum of the update interval and Allan
+				 * intercept. This reduces the PLL gain when the 
+				 * FLL becomes effective.
+				 */ 
+				etemp = min(ULOGTOD(allan_xpt), mu);
+				dtemp = 4 * CLOCK_PLL * ULOGTOD(sys_poll);
+				clock_frequency += fp_offset * etemp / (dtemp *
+				    dtemp);
+			}
 			rstclock(EVNT_SYNC, fp_offset);
 			break;
 		}
@@ -495,7 +502,7 @@ local_clock(
 	 * lead to overflow problems. This might occur if some misguided
 	 * lad set the step threshold to something ridiculous.
 	 */
-	if (pll_control && kern_enable) {
+	if (pll_control && kern_enable && freq_cnt == 0) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
@@ -629,9 +636,12 @@ local_clock(
 	 * offset with the clock jitter. If the offset is less than the
 	 * clock jitter times a constant, then the averaging interval is
 	 * increased, otherwise it is decreased. A bit of hysteresis
-	 * helps calm the dance. Works best using burst mode.
+	 * helps calm the dance. Works best using burst mode. Don't
+	 * fiddle with the poll during the startup clamp period.
 	 */
-	if (fabs(clock_offset) < CLOCK_PGATE * clock_jitter) {
+	if (freq_cnt > 0) {
+		tc_counter = 0;
+	} else if (fabs(clock_offset) < CLOCK_PGATE * clock_jitter) {
 		tc_counter += sys_poll;
 		if (tc_counter > CLOCK_LIMIT) {
 			tc_counter = CLOCK_LIMIT;
@@ -692,9 +702,14 @@ adj_host_clock(
 	 * NTPv3, NTPv4 does not declare unsynchronized after one day,
 	 * since the dispersion check serves this function. Also,
 	 * since the poll interval can exceed one day, the old test
-	 * would be counterproductive.
+	 * would be counterproductive. During the startup clamp period, the
+	 * time constant is clamkped at 2.
 	 */
 	sys_rootdisp += clock_phi;
+	if (fabs(clock_offset) < CLOCK_FLOOR)
+		freq_cnt = 0;
+	else if (freq_cnt > 0)
+		freq_cnt--;
 
 #ifndef LOCKCLOCK
 	/*
@@ -702,15 +717,19 @@ adj_host_clock(
 	 * get out of Dodge quick.
 	 */
 	if (!ntp_enable || mode_ntpdate || (pll_control &&
-	    kern_enable))
+	    kern_enable && freq_cnt == 0))
 		return;
 
 	/*
 	 * Implement the phase and frequency adjustments. The gain
 	 * factor (denominator) increases with poll interval, so is
-	 * dominated by the FLL above the Allan intercept.
+	 * dominated by the FLL above the Allan intercept. Note the
+	 * reduced time constant at startup.
 	 */
-	adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
+	if (freq_cnt > 0)
+		adjustment = clock_offset / (CLOCK_PLL * 4);
+	else
+		adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	clock_offset -= adjustment;
 	adj_systime(adjustment + drift_comp);
 #endif /* LOCKCLOCK */
@@ -755,23 +774,6 @@ direct_freq(
 	double	fp_offset
 	)
 {
-
-#ifdef KERNEL_PLL
-	/*
-	 * If the kernel is enabled, we need the residual offset to
-	 * calculate the frequency correction.
-	 */
-	if (pll_control && kern_enable) {
-		memset(&ntv,  0, sizeof(ntv));
-		ntp_adjtime(&ntv);
-#ifdef STA_NANO
-		clock_offset = ntv.offset / 1e9;
-#else /* STA_NANO */
-		clock_offset = ntv.offset / 1e6;
-#endif /* STA_NANO */
-		drift_comp = FREQTOD(ntv.freq);
-	}
-#endif /* KERNEL_PLL */
 	set_freq((fp_offset - clock_offset) / (current_time -
 	    clock_epoch) + drift_comp);
 	wander_resid = 0;
