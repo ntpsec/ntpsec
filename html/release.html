@@ -11,7 +11,7 @@
 <img src="pic/hornraba.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>The rabbit toots to make sure you read this.</p>
 <p>Last update:
-  <!-- #BeginDate format:En1m -->12-sep-10  4:14<!-- #EndDate -->
+  <!-- #BeginDate format:En1m -->18-sep-10  3:29<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -26,6 +26,7 @@
 <p>NTP has been under development for almost 30 years, but the paint ain't dry even now. This release of the NTP Version 4 (NTPv4) distribution for Unix, VMS and Windows incorporates new features and refinements, but retaining backwards compatibility with older versions, including NTPv3 and NTPv2, but not NTPv1. Support for NTPv1 has been discontinued because of certain security vulnerabilities.</p>
 <h4 id="new">New Features</h4>
 <ul>
+  <li>The behavior of the daemon at startup has been considerably improved. The time to measure the frequency and correct an initial offset error when started fro the first time is now no more than ten minutes. Upon restart, it takes no more than five minutes to reduce the initial offset to less than one millisecond without adversely affecting the frequency. This avoids a subsequent frequency correction which could take up to several hours.</li>
   <li>A new  feature called interleaved mode can be used  in NTP
     symmetric and broadcast modes. It is designed to improve accuracy
     by minimizing errors due to queueing and transmission delays. It is described on the <a href="xleave.html">NTP

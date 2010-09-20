@@ -9,7 +9,7 @@
 <body>
 <h3>How NTP Works</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->12-Sep-2010  21:04<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->16-Sep-2010  19:12<!-- #EndDate -->
   UTC</p>
 <h4>Table of Contents</h4>
 <ul>
@@ -37,7 +37,71 @@
 <p>Those sources that have passed a number of sanity checks are declared <em>selectable</em>. From the selectable population the statistics are used by the select algorithm to determine a number of <em>truechimers</em> according to correctness principles. From the truechimer population a number of <em>survivors</em> are determined on the basis of statistical principles. One of the survivors is declared the <em>system peer</em> and the system statistics  inherited from it. The combine algorithm computes a weighted average of the peer offset and jitter to produce the final values used by the clock discipline algorithm to adjust the system clock time and frequency.</p>
 <p> When started, the program requires several measurements sufficient data fro these a algorithms to work properly before setting the clock. As the default poll interval is 64 s, it can take several minutes to set the clock. The time can be reduced using the <tt>iburst</tt> option on the <a href="confopt.html">Server Options</a> page. For additional details about the clock filter, select, cluster and combine algorithms see the Architecture Briefing on the NTP Project Page.</p>
 <h4 id="stats">How Statistics are Determined</h4>
-<p>Each source is characterized by the  offset and  delay measured by the on-wire protocol and the  dispersion and jitter calculated by the clock filter algorithm of the peer process. Each time an NTP packet is received from a source, the dispersion is initialized by the sum of the precisions of the server and client. The offset, delay and dispersion  values are inserted as the youngest stage of  an 8-stage shift register, thus discarding the oldest stage. Subsequently, the dispersion in each stage is increased at a fixed rate of 15 <font face="symbol">m</font>s/s, representing the worst case error due to skew between the server and client clocks.  The clock filter algorithm in each peer process selects the stage with the lowest delay, which generally represents the most accurate values, and the associated offset and delay   values become the peer variables of the same name. The peer dispersion continues to grow at the same  rate as the register dispersion. The peer dispersion  is determined as a weighted average of the dispersion samples in the shift register. Finally, the peer jitter is determined as the root-mean-square (RMS) average of all the offset samples in the shift register relative to the selected sample. </p>
+<p>Each source is characterized by the  offset and  delay measured by the on-wire protocol and the  dispersion and jitter calculated by the clock filter algorithm of the peer process. Each time an NTP packet is received from a source, the dispersion is initialized by the sum of the precisions of the server and client.</p>
+<div align="center"><p><table width="714" border="1" cellpadding="5 p">
+  <tr>
+    <th width="229" scope="col">Name</th>
+    <th width="158" scope="col">Hardware</th>
+    <th width="163" scope="col">System</th>
+    <th width="104" scope="col">Precision</th>
+  </tr>
+  <tr>
+    <td>deacon.udel.edu</td>
+    <td>Sun Blade 1500</td>
+    <td>SunOS/5.10</td>
+    <td>-20</td>
+  </tr>
+  <tr>
+    <td>howland.udel.edu</td>
+    <td>i386 2.8 GHZ dual core</td>
+    <td>SunOS/5.11</td>
+    <td>-21</td>
+  </tr>
+  <tr>
+    <td>beauregard.udel.edu</td>
+    <td>i386 2.8 GHZ dual core</td>
+    <td>FreeBSD/8.0</td>
+    <td>-19</td>
+  </tr>
+  <tr>
+    <td>pogo.udel.edu</td>
+    <td>UltraSPARC 5</td>
+    <td>SunOS/5.10</td>
+    <td>-20</td>
+  </tr>
+  <tr>
+    <td>huey.usel.edu</td>
+    <td>i386</td>
+    <td>SunOS/5.11</td>
+    <td>-22</td>
+  </tr>
+  <tr>
+    <td>rackety.udel.edu</td>
+    <td>i386/Pentium II</td>
+    <td>FreeBSD/6.1</td>
+    <td>-18</td>
+  </tr>
+  <tr>
+    <td>tick.usno.navy.mil</td>
+    <td>HP ia64</td>
+    <td>HP-UX/11.31</td>
+    <td>-20</td>
+  </tr>
+  <tr>
+    <td>Meinberg LANtime M600 GPS</td>
+    <td>i586</td>
+    <td>Linux/2.6.15</td>
+    <td>-19</td>
+  </tr>
+  <tr>
+    <td>time1.chu.nrc.ca</td>
+    <td>i686</td>
+    <td>Linux/2.6.27</td>
+    <td>-20</td>
+  </tr>
+</table></p>
+<p>Table 1. Typical Precision for Various Machines</p></div>
+<p> The offset, delay and dispersion  values are inserted as the youngest stage of  an 8-stage shift register, thus discarding the oldest stage. Subsequently, the dispersion in each stage is increased at a fixed rate of 15 <font face="symbol">m</font>s/s, representing the worst case error due to skew between the server and client clocks.  The clock filter algorithm in each peer process selects the stage with the lowest delay, which generally represents the most accurate values, and the associated offset and delay   values become the peer variables of the same name. The peer dispersion continues to grow at the same  rate as the register dispersion. The peer dispersion  is determined as a weighted average of the dispersion samples in the shift register. Finally, the peer jitter is determined as the root-mean-square (RMS) average of all the offset samples in the shift register relative to the selected sample. </p>
 <p> The clock filter algorithm continues to process packets in this way until the source is no longer reachable. In this case the algorithm inserts dummy samples with  &quot;infinite&quot; dispersion are inserted in the shift register, thus displacing old samples.</p>
 <p>The composition of  the survivor population and the system peer selection is redetermined as each update from each server is received. The system variables are copied from the  peer variables of the same name and the system stratum set one greater than the system peer stratum. Like  peer dispersion, the system dispersion increases at the same rate so, even if all sources have become unreachable, the daemon appears to upstratum clients at ever increasing dispersion.</p>
 <h4>Reachability and Selection Criteria</h4>
