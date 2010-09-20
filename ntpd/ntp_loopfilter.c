@@ -37,6 +37,7 @@
 #define CLOCK_PLL	16.	/* PLL loop gain (log2) */
 #define CLOCK_AVG	8.	/* parameter averaging constant */
 #define CLOCK_FLL	.25	/* FLL loop gain */
+#define	CLOCK_FLOOR	.0005	/* startup offset floor (s) */
 #define	CLOCK_ALLAN	11	/* Allan intercept (log2 s) */
 #define CLOCK_DAY	86400.	/* one day in seconds (s) */
 #define CLOCK_JUNE	(CLOCK_DAY * 30) /* June in seconds (s) */
@@ -142,7 +143,7 @@ int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
 int	allow_panic = FALSE;	/* allow panic correction */
 int	mode_ntpdate = FALSE;	/* exit on first clock set */
-int	freqcnt;		/* initial frequency clamp */
+int	freq_cnt;		/* initial frequency clamp */
 
 /*
  * Clock state machine variables
@@ -416,6 +417,7 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case EVNT_NSET:
+			freq_cnt = clock_minstep;
 			rstclock(EVNT_FREQ, fp_offset);
 			break;
 
@@ -426,7 +428,7 @@ local_clock(
 		 * counter decrements to zero.
 		 */
 		case EVNT_FSET:
-			freqcnt = clock_minstep;
+			freq_cnt = clock_minstep;
 			rstclock(EVNT_SYNC, fp_offset);
 			break;
 
@@ -441,10 +443,9 @@ local_clock(
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
-			freqcnt = clock_minstep;
+			freq_cnt = clock_minstep;
 			rstclock(EVNT_SYNC, 0);
-			break;
-
+			/* fall through to default */
 
 		/*
 		 * We get here by default in SYNC and SPIK states. Here
@@ -454,7 +455,7 @@ local_clock(
 		 */
 		default:
 			allow_panic = FALSE;
-			if (freqcnt == 0) {
+			if (freq_cnt == 0) {
 
 				/*
 				 * The FLL and PLL frequency gain constants
@@ -501,7 +502,7 @@ local_clock(
 	 * lead to overflow problems. This might occur if some misguided
 	 * lad set the step threshold to something ridiculous.
 	 */
-	if (pll_control && kern_enable && freqcnt == 0) {
+	if (pll_control && kern_enable && freq_cnt == 0) {
 
 		/*
 		 * We initialize the structure for the ntp_adjtime()
@@ -638,7 +639,7 @@ local_clock(
 	 * helps calm the dance. Works best using burst mode. Don't
 	 * fiddle with the poll during the startup clamp period.
 	 */
-	if (freqcnt > 0) {
+	if (freq_cnt > 0) {
 		tc_counter = 0;
 	} else if (fabs(clock_offset) < CLOCK_PGATE * clock_jitter) {
 		tc_counter += sys_poll;
@@ -705,8 +706,10 @@ adj_host_clock(
 	 * time constant is clamkped at 2.
 	 */
 	sys_rootdisp += clock_phi;
-	if (freqcnt > 0)
-		freqcnt--;
+	if (fabs(clock_offset) < CLOCK_FLOOR)
+		freq_cnt = 0;
+	else if (freq_cnt > 0)
+		freq_cnt--;
 
 #ifndef LOCKCLOCK
 	/*
@@ -714,7 +717,7 @@ adj_host_clock(
 	 * get out of Dodge quick.
 	 */
 	if (!ntp_enable || mode_ntpdate || (pll_control &&
-	    kern_enable && freqcnt == 0))
+	    kern_enable && freq_cnt == 0))
 		return;
 
 	/*
@@ -723,7 +726,7 @@ adj_host_clock(
 	 * dominated by the FLL above the Allan intercept. Note the
 	 * reduced time constant at startup.
 	 */
-	if (freqcnt > 0)
+	if (freq_cnt > 0)
 		adjustment = clock_offset / (CLOCK_PLL * 4);
 	else
 		adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
