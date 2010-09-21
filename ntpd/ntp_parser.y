@@ -582,10 +582,20 @@ stat
 
 filegen_option_list
 	:	filegen_option_list filegen_option
-			{ $$ = enqueue($1, $2); }
+		{
+			if ($2 != NULL)
+				$$ = enqueue($1, $2);
+			else
+				$$ = $1;
+		}
 	|	filegen_option
-			{ $$ = enqueue_in_new_queue($1); }
-	|	/* emtpy list */
+		{
+			if ($1 != NULL)
+				$$ = enqueue_in_new_queue($1);
+			else
+				$$ = create_queue();
+		}
+	|	/* empty list */
 			{ $$ = create_queue(); }
 	;
 

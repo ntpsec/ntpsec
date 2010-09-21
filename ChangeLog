@@ -1,6 +1,7 @@
 ---
 
 * [Bug 1635] "filegen ... enable" is not default.
+* [Bug 1636] yyparse() segfault after denied filegen remote config.
 
 ---
 (4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
