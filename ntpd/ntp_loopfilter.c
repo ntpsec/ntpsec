@@ -998,7 +998,10 @@ loop_config(
 		break;
 
 	case LOOP_MINSTEP:	/* stepout threshold (stepout) */
-		clock_minstep = freq; 
+		if (freq < CLOCK_MINSTEP)
+			clock_minstep = CLOCK_MINSTEP;
+		else
+			clock_minstep = freq; 
 		break;
 
 	case LOOP_LEAP:		/* not used */
