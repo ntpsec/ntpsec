@@ -10,7 +10,7 @@
 <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>We have three, now looking for more.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->13-Sep-2010  3:59<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->21-Sep-2010  3:37<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -97,7 +97,7 @@
   <dt id="setvar"><tt>setvar <i>variable</i> [default]</tt></dt>
   <dd>This command adds an additional system variable. These variables can be used to distribute additional information such as the access policy. If the variable of the form <tt><i>name</i> = <i>value</i></tt> is followed by the <tt>default</tt> keyword, the variable will be listed as part of the default system variables (<tt>ntpq rv</tt> command). These additional variables serve informational purposes only. They are not related to the protocol other that they can be listed. The known protocol variables will always override any variables defined via the <tt>setvar</tt> mechanism. There are three special variables that contain the names of all variable of the same group. The <tt>sys_var_list</tt> holds the names of all system variables. The <tt>peer_var_list</tt> holds the names of all peer variables and the <tt>clock_var_list</tt> holds the names of the reference clock variables.</dd>
   <dt id="tinker"><tt>tinker [ allan <i>allan</i> | dispersion <i>dispersion</i> | freq <i>freq</i> | huffpuff <i>huffpuff</i> | panic <i>panic</i> | step <i>step</i> | stepout <i>stepout</i> ]</tt></dt>
-  <dd>This command alters certain system variables used by the clock discipline algorithm. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. The options are as follows:</dd>
+  <dd>This command alters certain system variables used by the clock discipline algorithm. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. Thptie oons are as follows:</dd>
   <dd>
     <dl>
       <dt><tt>allan <i>allan</i></tt></dt>
@@ -111,10 +111,10 @@
       <dt><tt>panic <i>panic</i></tt></dt>
       <dd>Sp edifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.</dd>
       <dt><tt>step <i>step</i></tt></dt>
-      <dd>Sp edifies the step threshold in seconds. The default without this command is 0.128 s. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than 0.5
-        s.</dd>
+      <dd>Specifies the step threshold in seconds. The default without this command is 0.128 s. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than 0.5
+        s. Further details are on the <a href="clock.html">Clock State Machine</a> page.</dd>
       <dt><tt>stepout <i>stepout</i></tt></dt>
-      <dd>Specifies the stepout threshold in seconds. The default without this command is 900 s. If set to zero, popcorn spikes will not be suppressed.</dd>
+      <dd>Specifies the stepout threshold in seconds. The default without this command is 300 s. Since this option also affects the training and startup intervals, it should not be set less than the default. Further details are on the <a href="clock.html">Clock State Machine</a> page.</dd>
     </dl>
   </dd>
   <dt id="tos"><tt>tos [ beacon <i>beacon</i> | ceiling <i>ceiling</i> | cohort {0 | 1} | floor <i>floor</i> | maxclock <i>maxclock </i>| maxdist <i>maxdist</i> | minclock <i>minclock</i> | mindist <i>mindist </i>| minsane <i>minsane</i> | orphan <i>stratum</i> | orphanwait <em>delay</em> ]</tt></dt>
