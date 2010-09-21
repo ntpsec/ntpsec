@@ -1,3 +1,4 @@
+* [Bug 1635] from 4.2.6p3-RC2: "filegen ... enable" is not default.
 (4.2.7p53) 2010/09/20 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * More Initial convergence improvements from Dave Mills.
@@ -344,6 +345,10 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1635] "filegen ... enable" is not default.
+
 ---
 (4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
 

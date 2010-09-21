@@ -725,7 +725,7 @@ record_raw_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
-                fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n", day,
+		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n", day,
 		    ulfptoa(&now, 3), stoa(srcadr), dstadr ? 
 		    stoa(dstadr) : "-",	ulfptoa(t1, 9), ulfptoa(t2, 9),
 		    ulfptoa(t3, 9), ulfptoa(t4, 9));
