@@ -1,3 +1,4 @@
+(4.2.7p54) 2010/09/21 Released by Harlan Stenn <stenn@ntp.org>
 * More Initial convergence improvements from Dave Mills.
 * Documentation updates from Dave Mills.
 * [Bug 1635] from 4.2.6p3-RC2: "filegen ... enable" is not default.
