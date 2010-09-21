@@ -2030,6 +2030,9 @@ config_monitor(
 		filegen_flag = filegen->flag;
 		filegen_type = filegen->type;
 
+		/* "filegen ... enabled" is the default (when filegen is used) */
+		filegen_flag |= FGEN_FLAG_ENABLED;
+
 		my_opts = queue_head(my_node->options);
 		while (my_opts != NULL) {
 
@@ -2108,10 +2111,10 @@ config_monitor(
 					my_opts->attr);
 				exit(1);
 			}
-			filegen_config(filegen, filegen_file, 
-				       filegen_type, filegen_flag);
 			my_opts = next_node(my_opts);
 		}
+		filegen_config(filegen, filegen_file, filegen_type,
+			       filegen_flag);
 		my_node = next_node(my_node);
 	}
 }
