@@ -1,3 +1,4 @@
+* [Bug 1636] from 4.2.6p3-RC2: segfault after denied remote config.
 (4.2.7p54) 2010/09/21 Released by Harlan Stenn <stenn@ntp.org>
 * More Initial convergence improvements from Dave Mills.
 * Documentation updates from Dave Mills.
@@ -351,6 +352,7 @@
 ---
 
 * [Bug 1635] "filegen ... enable" is not default.
+* [Bug 1636] yyparse() segfault after denied filegen remote config.
 
 ---
 (4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
@@ -369,8 +371,7 @@
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
->>>>>>>
+  undersized.  Mostly backported from earlier ntp-dev fixes by Juergen
   Perlinger.
 
 ---
