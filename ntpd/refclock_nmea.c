@@ -15,6 +15,17 @@
  *		Dave Hart July 1, 2009
  *		hart@ntp.org, davehart@davehart.com
  */
+
+/*
+************************************************************************
+* MODIFIED FOR ENHANCED PPS PROCESSING AND SYNC TO ABSOLUTE TIME       *
+*                                                                      *
+* THIS IS AN INOFFICAL / UNPUBLISHED WORK; USE AT OWN RISK AND DO NOT  *
+* FILE ERRORS AGAINST ANY NTPD VERSION THAT USES IT!                   *
+************************************************************************
+*/
+const char NMEA_DISCLAIMER[] = "refclock_nmea: inofficial version -- no support";
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -30,10 +41,11 @@
 #include "ntp_unixtime.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "ntp_calendar.h"
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
-#include "refclock_atom.h"
+# include "refclock_atom.h"
 #endif /* HAVE_PPSAPI */
 
 #ifdef SYS_WINNT
@@ -41,6 +53,15 @@
 extern int async_write(int, const void *, unsigned int);
 #define write(fd, data, octets)	async_write(fd, data, octets)
 #endif
+
+#ifndef TIMESPECTOTS
+#define TIMESPECTOTS(ptspec, pts)					\
+        do {								\
+                DTOLFP((ptspec)->tv_nsec * 1.0e-9, pts);		\
+                (pts)->l_ui += (u_int32)((ptspec)->tv_sec) + JAN_1970;  \
+        } while (0)
+#endif
+
 
 /*
  * This driver supports NMEA-compatible GPS receivers
@@ -97,8 +118,6 @@ extern int async_write(int, const void *, unsigned int);
 #define	PPS_PRECISION	(-20)	/* precision assumed (about 1 us) */
 #define	REFID		"GPS\0"	/* reference id */
 #define	DESCRIPTION	"NMEA GPS Clock" /* who we are */
-#define NANOSECOND	1000000000 /* one second (ns) */
-#define RANGEGATE	500000	/* range gate (ns) */
 #ifndef O_NOCTTY
 #define M_NOCTTY	0
 #else
@@ -120,6 +139,7 @@ struct nmeaunit {
 	int	ppsapi_tried;	/* attempt PPSAPI once */
 	int	ppsapi_lit;	/* time_pps_create() worked */
 	int	ppsapi_fd;	/* fd used with PPSAPI */
+	int     ppsapi_gate;	/* allow edge detection processing */
 	int	tcount;		/* timecode sample counter */
 	int	pcount;		/* PPS sample counter */
 #endif /* HAVE_PPSAPI */
@@ -147,6 +167,8 @@ static  void	nmea_timer	(int, struct peer *);
 static	void	gps_send	(int, const char *, struct peer *);
 static	char *	field_parse	(char *, int);
 static	int	nmea_checksum_ok(const char *);
+static void nmea_day_unfold(struct calendar*);
+static void nmea_century_unfold(struct calendar*);
 
 /*
  * Transfer vector
@@ -404,6 +426,8 @@ nmea_control(
 	if (refclock_ppsapi(pps_fd, &up->atom)) {
 		up->ppsapi_lit = 1;
 		up->ppsapi_fd = pps_fd;
+		/* prepare to use the PPS API for our own purposes now. */
+		refclock_params(pp->sloppyclockflag, &up->atom);
 		return;
 	}
 
@@ -433,7 +457,7 @@ nmea_timer(
 	pp = peer->procptr;
 	up = (struct nmeaunit *)pp->unitptr;
 
-	if (up->ppsapi_lit &&
+	if (up->ppsapi_lit && up->ppsapi_gate &&
 	    refclock_pps(peer, &up->atom, pp->sloppyclockflag) > 0) {
 		up->pcount++,
 		peer->flags |= FLAG_PPS;
@@ -442,6 +466,114 @@ nmea_timer(
 }
 #endif	/* HAVE_PPSAPI */
 
+#ifdef HAVE_PPSAPI
+/*
+ * This function is used to correlate a receive time stamp and a
+ * reference time with a PPS edge time stamp. It applies the necessary
+ * fudges (fudge1 for PPS, fudge2 for receive time) and then tries to
+ * move the receive time stamp to the corresponding edge. This can
+ * warp into future, if a transmission delay of more than 500ms is not
+ * compensated with a corresponding fudge time2 value, because then
+ * the next PPS edge is nearer than the last. (Similiar to what the
+ * PPS ATOM driver does, but we deal with full time stamps here, not
+ * just phase shift information.) Likewise, a negative fudge time2
+ * value must be used if the reference time stamp correlates with the
+ * *following* PPS pulse.
+ *
+ * Note that the receive time fudge value only needs to move the receive
+ * stamp near a PPS edge but that close proximity is not required;
+ * +/-100ms precision should be enough. But since the fudge value will
+ * probably also be used to compensate the transmission delay when no PPS
+ * edge can be related to the time stamp, it's best to get it as close
+ * as possible.
+ *
+ * It should also be noted that the typical use case is matching to
+ * the preceeding edge, as most units relate their sentences to the
+ * current second.
+ *
+ * The function returns PPS_RELATE_NONE (0) if no PPS edge correlation
+ * can be fixed; PPS_RELATE_EDGE (1) when a PPS edge could be fixed, but
+ * the distance to the reference time stamp is too big (exceeds +/-400ms)
+ * and the ATOM driver PLL cannot be used to fix the phase; and
+ * PPS_RELATE_PHASE (2) when the ATOM driver PLL code can be used.
+ *
+ * On output, the receive time stamp is replaced with the
+ * corresponding PPS edge time if a fix could be made; the PPS fudge
+ * is updated to reflect the proper fudge time to apply. (This implies
+ * that 'refclock_process_f()' must be used!)
+ */
+#define PPS_RELATE_NONE  0	/* no pps correlation possible    */
+#define PPS_RELATE_EDGE  1	/* recv time fixed, no phase lock */
+#define PPS_RELATE_PHASE 2	/* recv time fixed, phase lock ok */
+
+static int
+refclock_ppsrelate(
+	const struct refclockproc  *pp      ,	/* for sanity     */
+	const struct refclock_atom *ap      ,	/* for PPS io     */
+	const l_fp                 *reftime ,
+	l_fp                       *rd_stamp,	/* i/o read stamp */
+	double                      pp_fudge,	/* pps fudge      */
+	double                     *rd_fudge)	/* i/o read fudge */
+{
+	pps_info_t      pps_info;
+	struct timespec timeout;
+	l_fp            pp_stamp, pp_delta;
+	double          delta, idelta;
+
+	if (pp->leap == LEAP_NOTINSYNC)
+		return PPS_RELATE_NONE;	/* clock is insane, no chance */
+	
+	memset(&timeout, 0, sizeof(timeout));
+	memset(&pps_info, 0, sizeof(pps_info_t));
+
+	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC,
+			   &pps_info, &timeout) < 0)
+		return PPS_RELATE_NONE;
+
+	/* get last active PPS edge before receive */
+	if (ap->pps_params.mode & PPS_CAPTUREASSERT)
+		timeout = pps_info.assert_timestamp;
+	else if (ap->pps_params.mode & PPS_CAPTURECLEAR)
+		timeout = pps_info.clear_timestamp;
+	else
+		return PPS_RELATE_NONE;
+
+	/* get delta between receive time and PPS time */
+	TIMESPECTOTS(&timeout, &pp_stamp);
+	pp_delta = *rd_stamp;
+	L_SUB(&pp_delta, &pp_stamp);
+	LFPTOD(&pp_delta, delta);
+	delta += pp_fudge - *rd_fudge;
+	if (fabs(delta) > 1.5)
+		return PPS_RELATE_NONE; /* PPS timeout control */
+	
+	/* eventually warp edges, check phase */
+	idelta    = floor(delta + 0.5);
+	pp_fudge -= idelta;
+	delta    -= idelta;
+	if (fabs(delta) > 0.45)
+		return PPS_RELATE_NONE; /* dead band control */
+
+	/* we actually have a PPS edge to relate with! */
+	*rd_stamp = pp_stamp;
+	*rd_fudge = pp_fudge;
+
+	/* if whole system out-of-sync, do not try to PLL */
+	if (sys_leap == LEAP_NOTINSYNC)
+		return PPS_RELATE_EDGE;	/* cannot PLL with atom code */
+
+	/* check against reftime if ATOM PLL can be used */
+	pp_delta = *reftime;
+	L_SUB(&pp_delta, &pp_stamp);
+	LFPTOD(&pp_delta, delta);
+	delta += pp_fudge;
+	if (fabs(delta) > 0.45)
+		return PPS_RELATE_EDGE;	/* cannot PLL with atom code */
+
+	/* all checks passed, gets an AAA rating here! */
+	return PPS_RELATE_PHASE; /* can PLL with atom code */
+}
+#endif	/* HAVE_PPSAPI */
 
 /*
  * nmea_receive - receive data from the serial interface
@@ -454,14 +586,15 @@ nmea_receive(
 	register struct nmeaunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
-	int month, day;
 	char *cp, *dp, *msg;
 	int cmdtype;
 	int cmdtypezdg = 0;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
-	l_fp	rd_timestamp;
+	l_fp	rd_timestamp, reftime;
 	int	rd_lencode;
+	double  rd_fudge;
+	struct calendar date;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp
@@ -573,6 +706,7 @@ nmea_receive(
 	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
 
 	/* Grab field depending on clock string type */
+	memset(&date, 0, sizeof(date));
 	switch (cmdtype) {
 
 	case GPRMC:
@@ -657,9 +791,9 @@ nmea_receive(
 	/*
 	 * Convert time and check values.
 	 */
-	pp->hour = ((dp[0] - '0') * 10) + dp[1] - '0';
-	pp->minute = ((dp[2] - '0') * 10) + dp[3] -  '0';
-	pp->second = ((dp[4] - '0') * 10) + dp[5] - '0';
+	date.hour = ((dp[0] - '0') * 10) + dp[1] - '0';
+	date.minute = ((dp[2] - '0') * 10) + dp[3] -  '0';
+	date.second = ((dp[4] - '0') * 10) + dp[5] - '0';
 	/* 
 	 * Default to 0 milliseconds, if decimal convert milliseconds in
 	 * one, two or three digits
@@ -677,25 +811,8 @@ nmea_receive(
 		}
 	}
 
-	/*
-	 * Manipulating GPS timestamp in GPZDG as the seconds field
-	 * is valid for next PPS tick. Just rolling back the second,
-	 * minute and hour fields appopriately
-	 */
-	if (cmdtypezdg) {
-		if (pp->second == 0) {
-			pp->second = 59;
-			if (pp->minute == 0) {
-				pp->minute = 59;
-				if (pp->hour == 0)
-					pp->hour = 23;
-			}
-		} else
-			pp->second -= 1;
-	}
-
-	if (pp->hour > 23 || pp->minute > 59 || 
-	    pp->second > 59 || pp->nsec > 1000000000) {
+	if (date.hour > 23 || date.minute > 59 || 
+	    date.second > 59 || pp->nsec > 1000000000) {
 
 		DPRINTF(1, ("NMEA hour/min/sec/nsec range %02d:%02d:%02d.%09ld\n",
 			    pp->hour, pp->minute, pp->second, pp->nsec));
@@ -709,51 +826,29 @@ nmea_receive(
 	if (GPRMC == cmdtype) {
 
 		dp = field_parse(cp,9);
-		day = dp[0] - '0';
-		day = (day * 10) + dp[1] - '0';
-		month = dp[2] - '0';
-		month = (month * 10) + dp[3] - '0';
-		pp->year = dp[4] - '0';
-		pp->year = (pp->year * 10) + dp[5] - '0';
+		date.monthday = 10 * (dp[0] - '0') + (dp[1] - '0');
+		date.month    = 10 * (dp[2] - '0') + (dp[3] - '0');
+		date.year     = 10 * (dp[4] - '0') + (dp[5] - '0');
+		nmea_century_unfold(&date);
 
 	} else if (GPZDG_ZDA == cmdtype) {
 
 		dp = field_parse(cp, 2);
-		day = 10 * (dp[0] - '0') + (dp[1] - '0');
+		date.monthday = 10 * (dp[0] - '0') + (dp[1] - '0');
 		dp = field_parse(cp, 3);
-		month = 10 * (dp[0] - '0') + (dp[1] - '0');
+		date.month = 10 * (dp[0] - '0') + (dp[1] - '0');
 		dp = field_parse(cp, 4);
-		pp->year = /* 1000 * (dp[0] - '0') + 100 * (dp[1] - '0') + */ 10 * (dp[2] - '0') + (dp[3] - '0');
+		date.year = 1000 * (dp[0] - '0') + 100 * (dp[1] - '0')
+		          + 10 * (dp[2] - '0') + (dp[3] - '0');
 
-	} else {
-		/* only time */
-		time_t tt = time(NULL);
-		struct tm * t = gmtime(&tt);
-		day = t->tm_mday;
-		month = t->tm_mon + 1;
-		pp->year= t->tm_year + 1900;
-	}
+	} else
+		nmea_day_unfold(&date);
 
-	if (month < 1 || month > 12 || day < 1) {
+	if (date.month < 1 || date.month > 12 ||
+	    date.monthday < 1 || date.monthday > 31) {
 		refclock_report(peer, CEVNT_BADDATE);
 		return;
 	}
-
-	/* pp->year will be 2 or 4 digits if read from GPS, 4 from gmtime */
-	if (pp->year < 100) {
-		if (pp->year < 9)	/* year of our line of code is 2009 */
-			pp->year += 2100;
-		else
-			pp->year += 2000;
-	}
-
-	/* pp->year now 4 digits as ymd2yd requires */
-	day = ymd2yd(pp->year, month, day);
-	if (-1 == day) {
-		refclock_report(peer, CEVNT_BADDATE);
-		return;
-	}
-	pp->day = day;
 
 	/*
 	 * If "fudge 127.127.20.__ flag4 1" is configured in ntp.conf,
@@ -821,26 +916,63 @@ nmea_receive(
 	}
 
 	/*
-	 * Note if we're only using GPS timescale from now on.
+	 * Get the reference time stamp from the calendar buffer.
+	 * Process the new sample in the median filter and determine
+	 * the timecode timestamp, but only if the PPS is not in
+	 * control.
 	 */
-	if (cmdtypezdg && !up->gps_time) {
-		up->gps_time = 1;
-		NLOG(NLOG_CLOCKINFO)
+	rd_fudge = pp->fudgetime2;
+	date.yearday = 0; /* make sure it's not used */
+	DTOLFP(pp->nsec * 1.0e-9, &reftime);
+	reftime.l_ui += caltontp(&date);
+
+	/* $GPZDG postprocessing first... */
+	if (cmdtypezdg) {
+		/*
+		 * Note if we're only using GPS timescale from now on.
+		 */
+		if (!up->gps_time) {
+			up->gps_time = 1;
+			NLOG(NLOG_CLOCKINFO)
 			msyslog(LOG_INFO, "%s using only $GPZDG",
 				refnumtoa(&peer->srcadr));
+		}
+		/*
+		 * $GPZDG indicates the second after the *next* PPS
+		 * pulse. So we remove 1 second from the reference
+		 * time now.
+		 */
+		reftime.l_ui--;
 	}
 
-	/*
-	 * Process the new sample in the median filter and determine the
-	 * timecode timestamp, but only if the PPS is not in control.
-	 */
 #ifdef HAVE_PPSAPI
 	up->tcount++;
-	if (peer->flags & FLAG_PPS)
+	/*
+	 * If we have PPS running, we try to associate the sentence with the last
+	 * active edge of the PPS signal.
+	 */
+	if (up->ppsapi_lit)
+		switch(refclock_ppsrelate(pp, &up->atom, &reftime,
+					  &rd_timestamp, pp->fudgetime1,
+					  &rd_fudge))
+		{
+		    case PPS_RELATE_EDGE:
+			up->ppsapi_gate = 0;
+			break;
+		    case PPS_RELATE_PHASE:
+			up->ppsapi_gate = 1;
+			break;
+		    default:
+			break;
+		}
+	else 
+		up->ppsapi_gate = 0;
+
+	if (up->ppsapi_gate && (peer->flags & FLAG_PPS))
 		return;
 #endif /* HAVE_PPSAPI */
-	if (!refclock_process_f(pp, pp->fudgetime2))
-		refclock_report(peer, CEVNT_BADTIME);
+
+	refclock_process_offset(pp, reftime, rd_timestamp, rd_fudge);
 }
 
 
@@ -986,6 +1118,129 @@ nmea_checksum_ok(
 
 	return 1;
 }
+
+/*
+ * -------------------------------------------------------------------
+ * funny calendar-oriented stuff -- a bit hard to grok.
+ * -------------------------------------------------------------------
+ */
+/*
+ * Do a periodic unfolding of a truncated value around a given pivot
+ * value. The code will augment the given value with the pivot in such
+ * manner that the absolute difference between the pivot value and the
+ * result value will be less than or equal to half a period.
+ *
+ * This will only work for strictly positive periods; the code does
+ * *not* check against such a flagrant misuse. The result is undefined
+ * for negative periods.
+ */
+static time_t
+nmea_periodic_unfold(
+	time_t pivot,
+	time_t value,
+	time_t period)
+{
+	time_t epoch_start, epoch_limit;
+
+	/* get warp limit and warp epoch start from pivot and period */ 
+	epoch_start = pivot + period / 2;
+	epoch_limit = epoch_start % period;
+	if (epoch_limit < 0) {
+		epoch_limit += period;
+		epoch_start -= period;
+	}
+	epoch_start -= epoch_limit;
+
+	/* normalise value and unfold into epoch */
+	value %= period;
+	if (value < 0)
+		value += period;
+	if (value >= epoch_limit)
+		value -= period;
+	value += epoch_start;
+
+	/* that's all folks! */
+	return value;
+}
+
+/*
+ * Unfold a time-of-day (seconds since midnight) around the current
+ * system time in a manner that guarantees an absolute difference of
+ * less than 12hrs.
+ *
+ * This function is used for NMEA sentences that contain no date
+ * information. This requires the system clock to be in +/-12hrs
+ * around the true time, or the clock will synchronize the system 1day
+ * off if not augmented with a time sources that also provide the
+ * necessary date information.
+ *
+ * The function updates the refclockproc structure is also uses as
+ * input to fetch the time from.
+ */
+static void
+nmea_day_unfold(
+	struct calendar *jd)
+{
+	time_t value;
+	struct tm *tdate;
+
+	value = ((time_t)jd->hour * MINSPERHR
+		 + (time_t)jd->minute) * SECSPERMIN
+	          + (time_t)jd->second;	
+
+	value = nmea_periodic_unfold(time(NULL), value, SECSPERDAY);
+	tdate = gmtime(&value);
+	if (tdate) {
+		jd->year     = tdate->tm_year + 1900;
+		jd->yearday  = tdate->tm_yday + 1;
+		jd->monthday = tdate->tm_mon + 1;
+		jd->monthday = tdate->tm_mday;
+		jd->hour     = tdate->tm_hour;
+		jd->minute   = tdate->tm_min;
+		jd->second   = tdate->tm_sec;
+	} else {
+		jd->year     = 0;
+		jd->yearday  = 0;
+		jd->month    = 0;
+		jd->monthday = 0;
+	}
+}
+
+/*
+ * Unfold a 2-digit year into full year spec around the current year
+ * of the system time. This requires the system clock to be in -79/+19
+ * years around the true time, or the result will be off by
+ * 100years. The assymetric behaviour was chosen to enable inital sync
+ * for systems that do not have a battery-backup-clock and start with
+ * a date that is typically years in the past.
+ *
+ * The function updates the calendar structure that is also used as
+ * input to fetch the year from.
+ */
+static void
+nmea_century_unfold(
+	struct calendar *jd)
+{
+#if 0
+	/* assume that until AD2070 somebody has changed this... */
+	jd->year %= 100;
+	if (jd->year > 70)
+		jd->year += 1900;
+	else
+		jd->year += 2000
+#else
+	time_t     pivot_time;
+	struct tm *pivot_date;
+	time_t     pivot_year;
+
+	/* get warp limit and century start of pivot from system time */
+	pivot_time = time(NULL);
+	pivot_date = gmtime(&pivot_time);
+	pivot_year = pivot_date->tm_year + 1900 + 30;
+	jd->year = nmea_periodic_unfold(pivot_year, jd->year, 100);
+#endif
+}
+
 #else
 int refclock_nmea_bs;
 #endif /* REFCLOCK && CLOCK_NMEA */
