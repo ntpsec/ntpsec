@@ -5,6 +5,7 @@ document.write("<p>Special Topics</p><ul>\
 <li class='inline'><a href='orphan.html'>Orphan Mode</a></li>\
 <li class='inline'><a href='xleave.html'>NTP Interleaved Modes</a></li>\
 <li class='inline'><a href='huffpuff.html'>Huff-n'-Puff Filter</a></li>\
+<li class='inline'><a href='discipline.html'>Clock Discipline Algorithm</a></li>\
 <li class='inline'><a href='clock.html'>Clock State Machine</a></li>\
 <li class='inline'><a href='leap.html'>Leap Second Processing</a></li>\
 <li class='inline'><a href='sitemap.html'>Site Map</a></li>\

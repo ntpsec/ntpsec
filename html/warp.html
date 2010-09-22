@@ -9,116 +9,52 @@
 <body>
 <h3>How NTP Works</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->21-Sep-2010  5:15<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->21-Sep-2010  20:15<!-- #EndDate -->
   UTC</p>
 <h4>Table of Contents</h4>
 <ul>
-  <li class="inline"><a href="#intro">Introduction</a></li>
-  <li class="inline"><a href="#ntp">NTP Daemon Architecture and Basic Operation</a></li>
-  <li class="inline"><a href="#stats">How Statistics are Determined</a></li>
+  <li class="inline"><a href="#intro">Introduction and Overview</a></li>
+  <li class="inline"><a href="#budget">Statistics Budget</a></li>
+  <li class="inline"><a href="#quality">Quality of Service</a></li>
+  <li class="inline"><a href="#prefer">Mitigation Algorithm</a></li>
   <li class="inline"><a href="#clock">Clock Discipline Algorithm</a></li>
   <li class="inline"><a href="#state">Clock State Machine</a></li>
 </ul>
 <hr>
-<h4 id="intro">Introduction</h4>
+<h4 id="intro">Introduction and Overview</h4>
 <p>NTP time synchronization services are widely available in the public Internet. The public NTP subnet in late 2010 includes several thousand servers in most countries and on every continent of the globe, including Antarctica, and sometimes in space and on the sea floor. These servers support a total population estimated at over 25 million computers in the global Internet.</p>
-<p> The NTP subnet operates with a hierarchy of levels, where each level is assigned a number called the stratum. Stratum 1 (primary) servers at the lowest level are directly synchronized to national time servicesvia satellite, radio and telephone mdem services. Stratum 2 (secondary) servers at the next higher level are synchronize to stratum 1 servers and so on. Normally, NTP clients and servers with a relatively small number of clients do not synchronize to public primary servers. There are several hundred public secondary servers operating at higher strata and are the preferred choice.</p>
-<p>This page presents an overview of the NTP daemon included in this distribution. We refer to this as the reference implementation only because it was  used to test and validate the NTPv4 specificatioin RFC-5905. It is best read in conjunction with the briefings on the <a href="http://www.eecis.udel.edu/~mills/ntp.html">Network Time Synchronization Research Project</a> page.</p>
+<p> The NTP subnet operates with a hierarchy of levels, where each level is assigned a number called the stratum. Stratum 1 (primary) servers at the lowest level are directly synchronized to national time services via satellite, radio and telephone mdem. Stratum 2 (secondary) servers at the next higher level are synchronize to stratum 1 servers and so on. Normally, NTP clients and servers with a relatively small number of clients do not synchronize to public primary servers. There are several hundred public secondary servers operating at higher strata and are the preferred choice.</p>
+<p>This page presents an overview of the NTP daemon included in this distribution. We refer to this as the <em>reference implementation</em> only because it was  used to test and validate the NTPv4 specification RFC-5905. It is best read in conjunction with the briefings on the <a href="http://www.eecis.udel.edu/~mills/ntp.html">Network Time Synchronization Research Project</a> page.</p>
 <div align="center">
   <p><img src="pic/fig_3_1.gif" alt="gif"></p>
   <p>Figure 1. NTP Daemon Processes and Algorithms</p>
 </div>
-<h4 id="ntp">NTP Daemon Architecture and Basic Operation</h4>
-<p>The overall organization of the NTP daemon is shown in Figure 1. It is useful in this context to consider the daemon as both a client of upstream servers and as a server for downstream clients. It includes a pair of peer/poll processes for each reference clock or remote  server used as a synchronization source. The poll process sends NTP packets at intervals ranging from 8 s to 36 hr. The peer process receives NTP packets and runs the on-wire protocol that collects four timestamps: the <em>origin timestamp</em> <em>T</em><sub>1</sub> upon departure of the client request, the <em>receive timestamp</em> <em>T</em><sub>2</sub> upon arrival at the server, the <em>transmit timestamp</em> <em>T</em><sub>3</sub> upon departure of the server reply and the <em>destination timestamp</em> <em>T</em><sub>4</sub> upon arrival at the client. These timestamps are used to calculate the clock offset and roundtrip delay:</p>
+<p>The overall organization of the NTP daemon is shown in Figure 1. It is useful in this context to consider the daemon as both a client of upstream servers and as a server for downstream clients. It includes a pair of peer/poll processes for each reference clock or remote  server used as a synchronization source. The poll process sends NTP packets at intervals ranging from 8 s to 36 hr. The peer process receives NTP packets and runs the on-wire protocol that collects four timestamps: the <em>origin timestamp</em> <em>T</em><sub>1</sub> upon departure of the client request, the <em>receive timestamp</em> <em>T</em><sub>2</sub> upon arrival at the server, the <em>transmit timestamp</em> <em>T</em><sub>3</sub> upon departure of the server reply, and the <em>destination timestamp</em> <em>T</em><sub>4</sub> upon arrival at the client. These timestamps are used to calculate the clock offset and roundtrip delay:</p>
 <div align="center">
   <p>offset = [(<em>T</em><sub>2</sub> -<em> T</em><sub>1</sub>) + (<em>T</em><sub>3</sub> - <em>T</em><sub>4</sub>)] / 2<br>
     delay = (<em>T</em><sub>4</sub> - <em>T</em><sub>1</sub>) - (<em>T</em><sub>3</sub> - <em>T</em><sub>2</sub>).</p>
 </div>
-<p>Those sources that have passed a number of sanity checks are declared <em>selectable</em>. From the selectable population the statistics are used by the select algorithm to determine a number of <em>truechimers</em> according to correctness principles. From the truechimer population a number of <em>survivors</em> are determined on the basis of statistical principles. One of the survivors is declared the <em>system peer</em> and the system statistics  inherited from it. The combine algorithm computes a weighted average of the peer offset and jitter to produce the final values used by the clock discipline algorithm to adjust the system clock time and frequency.</p>
+<p>Those sources that have passed a number of sanity checks are declared <em>selectable</em>. From the selectable population the statistics are used by the select algorithm to determine a number of <em>truechimers</em> according to correctness principles. From the truechimer population a number of <em>survivors</em> are determined on the basis of statistical clustering principles. One of the survivors is declared the <em>system peer</em> and the system statistics  inherited from it. The combine algorithm computes a weighted average of the survivor offsets and jitters to produce the final offset used by the clock discipline algorithm to adjust the system clock time and frequency.</p>
 <p> When started, the program requires several measurements   for these a algorithms to work reliably before setting the clock. As the default poll interval is 64 s, it can take several minutes to set the clock. The time can be reduced using the <tt>iburst</tt> option on the <a href="confopt.html">Server Options</a> page. For additional details about the clock filter, select, cluster and combine algorithms see the Architecture Briefing on the NTP Project Page.</p>
-<h4 id="stats">How Statistics are Determined</h4>
-<p>Each source is characterized by the  offset and  delay measured by the on-wire protocol and the  dispersion and jitter calculated by the clock filter algorithm of the peer process. Each time an NTP packet is received from a source, the dispersion is initialized by the sum of the precisions of the server and client. Table 1 shows the precisions measured for typical modern systems. The values are in log<sub>2</sub> units.</p>
-<div align="center"><p><table width="714" border="1" cellpadding="5 p">
-  <tr>
-    <th width="229" scope="col">Name</th>
-    <th width="158" scope="col">Hardware</th>
-    <th width="163" scope="col">System</th>
-    <th width="104" scope="col">Precision</th>
-  </tr>
-  <tr>
-    <td>deacon.udel.edu</td>
-    <td>Sun Blade 1500</td>
-    <td>SunOS/5.10</td>
-    <td>-20</td>
-  </tr>
-  <tr>
-    <td>howland.udel.edu</td>
-    <td>i386 2.8 GHZ dual core</td>
-    <td>SunOS/5.11</td>
-    <td>-21</td>
-  </tr>
-  <tr>
-    <td>beauregard.udel.edu</td>
-    <td>i386 2.8 GHZ dual core</td>
-    <td>FreeBSD/8.0</td>
-    <td>-19</td>
-  </tr>
-  <tr>
-    <td>pogo.udel.edu</td>
-    <td>UltraSPARC 5</td>
-    <td>SunOS/5.10</td>
-    <td>-20</td>
-  </tr>
-  <tr>
-    <td>huey.usel.edu</td>
-    <td>i386</td>
-    <td>SunOS/5.11</td>
-    <td>-22</td>
-  </tr>
-  <tr>
-    <td>rackety.udel.edu</td>
-    <td>i386/Pentium II</td>
-    <td>FreeBSD/6.1</td>
-    <td>-18</td>
-  </tr>
-  <tr>
-    <td>tick.usno.navy.mil</td>
-    <td>HP ia64</td>
-    <td>HP-UX/11.31</td>
-    <td>-20</td>
-  </tr>
-  <tr>
-    <td>Meinberg LANtime M600 GPS</td>
-    <td>i586</td>
-    <td>Linux/2.6.15</td>
-    <td>-19</td>
-  </tr>
-  <tr>
-    <td>time1.chu.nrc.ca</td>
-    <td>i686</td>
-    <td>Linux/2.6.27</td>
-    <td>-20</td>
-  </tr>
-</table></p>
-<p>Table 1. Typical Precision for Various Machines</p></div>
-<p> The offset, delay and dispersion  values are inserted as the youngest stage of  an 8-stage shift register, thus discarding the oldest stage. Subsequently, the dispersion in each stage is increased at a fixed rate of 15 <font face="symbol">m</font>s/s, representing the worst case error due to skew between the server and client clocks.</p>
-<p>The clock filter algorithm in each peer process selects the stage with the lowest delay, which generally represents the most accurate values, and the associated offset and delay   values become the peer variables of the same name. The  dispersion continues to grow at the same  rate as the register dispersion. The peer dispersion  is determined as a weighted average of the dispersion samples in the shift register. Finally, the peer jitter is determined as the root-mean-square (RMS) average of all the offset samples in the shift register relative to the selected sample. </p>
-<p> The clock filter algorithm continues to process packets in this way until the source is no longer reachable. In this case the algorithm inserts dummy samples with  &quot;infinite&quot; dispersion are inserted in the shift register, thus displacing old samples.</p>
-<p>The composition of  the survivor population and the system peer selection is redetermined as each update from each server is received. The system variables are copied from the  peer variables of the same name and the system stratum set one greater than the system peer stratum. Like  peer dispersion, the system dispersion increases at the same rate so, even if all sources have become unreachable, the daemon appears to upstratum clients at ever increasing dispersion.</p>
-<h4>Reachability and Selection Criteria</h4>
-<p>Of interest in this discussion is how an NTP client determines if a server is reachable and suitable as a source of synchronization. Reachability is determined by an 8-bit shift register, which is shifted left by one bit as each poll message is sent, with zero replacing the vacated rightmost bit. Each time an update is received the rightmost bit is set. The source is considered reachable if any bit is set in the register; otherwise, it is considered unreachable. The peer dispersion is used as a filter to determine whether a source is usable or not.  If the server is unreachable or the dispersion exceeds the select threshold threshold (1.5 s by default),  it is not  selectable to synchronize the system clock.</p>
-<p>The quality of time service is determined by a quantity called the <em>synchronization distance.</em> It is  computed as one-half the <em>root delay</em> to the primary source of time; i.e., the primary reference clock, plus the <em>root dispersion</em>.   The root root delay and root dispersion are included in the NTP packet header. The client adds the current system peer delay and dispersion to the corresponding root values and saves them in its own system variables which are passed on to dependent clients.   Like peer dispersion, the  root dispersion increases at the same rate.</p>
-<p>Although it might seem counterintuitive, a cardinal rule in the selection processes is, once a sample has been selected by the clock filter algorithm, that sample and any older samples are no longer selectable. This applies also to the select algorithm. Once the peer variables for a source have been selected, older variables of the same or other sources are no longer selectable. This means that not every sample can be used to update the peer variables and up to seven samples can be ignored between selected samples. This fact has been carefully considered in the discipline algorithm design with due consideration of the feedback loop delay and minimum sampling rate. In engineering terms, even if only one sample in eight survives, the resulting sample rate is twice the Nyquist rate at any time constant and poll interval.</p>
+<h4 id="budget">Statistics Budget</h4>
+<p>Each source is characterized by the  offset and  delay measured by the on-wire protocol and the  dispersion and jitter calculated by the clock filter algorithm of the peer process. Each time an NTP packet is received from a source, the  dispersion is initialized as the sum of the precisions of the server and client. Precision is defined by the latency to read the system clock and various from 1000 ns to 100 ns in modern machines.</p>
+<div align="center"></div>
+<p> The offset, delay and dispersion  samples are inserted as the youngest stage of  an 8-stage shift register, thus discarding the oldest stage. Subsequently, the sample dispersion in each stage is increased at a fixed rate of 15 <font face="symbol">m</font>s/s, representing the worst case error due to skew between the server and client clock frequencies's.</p>
+<p>In each peer process the  clock filter algorithm  selects the stage with the lowest  delay sample, which generally represents the most accurate data, and it and the  associated offset  sample become the peer variables of the same name. The peer dispersion  is determined as a weighted average of the dispersion samples in the shift register.  It continues to grow at the same  rate as the sample dispersion. Finally, the peer jitter is determined as the root-mean-square (RMS) average of all the offset samples in the shift register relative to the selected offset sample. </p>
+<p> The clock filter algorithm continues to process packets in this way until the source is no longer reachable. Reachability is determined by an 8-bit shift register, which is shifted left by one bit as each poll packet is sent, with zero replacing the vacated rightmost bit. Each time an update is received, the rightmost bit is set. The source is considered reachable if any bit is set in the register; otherwise, it is considered unreachable.</p>
+<p> A server is considered selectable only if it is reachable and a timing loop would not be created. A timing loop occurs when the server is apparently synchronized to the client or when the server is synchronized to the same server as the client. When a source is unreachable, a  dummy sample with  &quot;infinite&quot; dispersion  is inserted in the shift register, thus displacing old samples.</p>
+<p>The composition of  the survivor population and the system peer selection is redetermined as each update from each source is received. The system variables are copied from the  peer variables of the same name and the system stratum set one greater than the system peer stratum. Like  peer dispersion, the system dispersion increases at the same rate so, even if all sources have become unreachable, the daemon appears to upstratum clients at ever increasing dispersion.</p>
+<h4 id="quality">Quality of Service</h4>
+<p>Of interest in this discussion is how the protocol determines the quality of service from a particular reference clock or remote server. It is determined from two statistics, <em>expected error</em> and <em>maximum error.</em> Expected error is determined from various jitter components; it represents the nominal error in determining the mean clock offset. However, it is not relevant to  the discussion to follow. Maximum error is determined from delay and dispersion contributions and represents the worst-case error due to all causes. In order to simplicity this presentation, certain minor contribution s to the maximum error statistic are ignored. Elsewhere in the documentation the maximum error is called <em>synchronization distance</em>.</p>
+<p>The maximum error  is  computed as one-half the <em>root delay</em> to the primary source of time; i.e., the primary reference clock, plus the <em>root dispersion</em>.   The root variables are included in the NTP packet header received from each server. When calculating  maximum error, the  root delay is the sum of the root delay in the packet and the peer  delay, while the root dispersion is the sum of the root dispersion in the packet and the peer dispersion. </p>
+<p>A source is considered selectable only if its maximum error is less than the <em>select threshold</em>, by default 1.5 s, but can be changed due to client preference. A common  consequences is when an upstream server loses all sources and its maximum error apparent to clients begins to increase. The clients are not aware of  this condition and  continues to accept synchronization as long as the maximum error is less than the select threshold.</p>
+<p>Although it might seem counter-intuitive, a cardinal rule in the selection process is, once a sample has been selected by the clock filter algorithm, that sample and any older samples are no longer selectable. This applies also to the select algorithm. Once the peer variables for a source have been selected, older variables of the same or other sources are no longer selectable. This means that not every sample can be used to update the peer variables and up to seven samples can be ignored between selected samples. This fact has been carefully considered in the discipline algorithm design with due consideration of the feedback loop delay and minimum sampling rate. In engineering terms, even if only one sample in eight survives, the resulting sample rate is twice the Nyquist rate at any time constant and poll interval.</p>
+<h4 id="prefer">Mitigation Algorithms</h4>
+<p>Some daemon configurations include a combination of  reference clocks and remote servers in order to provide redundancy and backup. For example, a modem reference clock may furnish backup for a GPS reference clock, but used only if the GPS clock fails. In addition, the local clock  might be used if all sources fail, or orphan mode might be used instead. The mitigation algorithms provide an orderly selection in such cases. Another function of these algorithms is when multiple sources of the same type are available, but for one reason or another, one or more of them are  preferred over the others. Finally, some reference clocks provide a pulse-per-second (PPS) signal to augment the serial timecode. The mitigation algorithms have to figure out when the PPS signal is valid and which reference clock is to number the seconds. These intricate algorithms are described on the <a href="prefer.html">Mitigation Algorithms and the <tt>prefer</tt> Keyword</a> page.</p>
 <h4 id="clock">Clock Discipline Algorithm</h4>
-<p>At the heart of the NTP host is the clock discipline algorithm, which is best described as a hybrid phase/frequency-lock feedback loop. In the NTP reference implementation, it is an intricately crafted algorithm that automatically  adapts  for optimum performance while  minimizing network overhead. Its response  is determined by  the <em>time constant</em>, which results in a &quot;stiffness&quot; depending on the   jitter  of the available sources and the stability of the system clock oscillator. The  time constant is also used as the poll interval  by the poll processes. However, in  NTP symmetric mode, each   peer manages its own poll interval and the two  might not be the same. In such cases either peer uses the minimum of its own poll interval and that of the other peer, which is included in the NTP  packet header.</p>
-<p>It is important to understand how the dynamics of the discipline are affected by the poll interval. At an interval of 64 s and a step change of 100 ms, the time response crosses zero in about 50 minutes and overshoots about 7 ms, as per design. However, the step correction causes a temporary frequency  change of about 5 PPM, which is slowly corrected within a few hours. The result is that the overshoot slowly subsides over the that interval. This is an intrinsic feature of a discipline loop that can minimize both time and frequency offset.</p>
-<p>Since the discipline loop is linear, the response with different step sizes and poll intervals has the characteristic, but scaled differently in amplitude and time. The response scales exactly with step amplitude, so that the response to  a 10-ms step has the same characteristic, but with amplitude one-tenth that with the 100-ms step. The response scales exactly with poll interval, so at a poll interval of 8 s the time response is the same as at 64 s, but at a time scale one-eighth that at 64 s.</p>
-<p>In the NTP specification and reference implementation, poll intervals are  expressed as exponents of 2; thus, a poll exponent of 6 represents an actual poll interval; of 64 s. The clock discipline time constant is also expressed in powers of 2 and, with proper scaling, the two have the same value. Thus, a change in one corresponds to the same change in the other.</p>
-<p> The optimum time constant, and thus the poll interval, depends on the network time jitter and the clock oscillator frequency wander. Errors due to jitter decrease as the time constant increases, while errors due to wander decrease as the time constant decreases. The two error characteristics intersect at a point called the Allan intercept, which represents the ideal time constant. With a compromise Allan intercept of 2000 s, the optimum poll interval is about 64 s, which corresponds to a poll exponent of 6.</p>
-<p> The poll interval is managed by a heuristic algorithm developed over several years of experimentation. It depends on an exponentially weighted  average of clock offset differences, called the clock jitter, and a jiggle counter, which is initially set to zero.  When a clock update is received and the offset exceeds the clock jitter by a factor of 4,   the jiggle counter is increased by the poll exponent; otherwise, it is decreased by twice the poll exponent. If  the jiggle counter is greater than an arbitrary threshold of 30,  the poll exponent. if jiggle counter exceed an arbitrary threshold of 30, it is reset to zero and the poll exponent increased by 1.  If the jiggle counter is less than -30, it is set to zero and the  poll exponent  decreased by 1. In effect, the algorithm has a relatively slow reaction to good news, but a relatively fast reaction to bad news.</p>
-<p>The optimum time constant, and thus the poll exponent, depends on the network time jitter and the clock oscillator frequency wander. Errors due to jitter decrease as the time constant increases, while errors due to wander decrease as the time constant decreases. The two error characteristics intersect at a point called the Allan intercept, which represents the ideal time constant. With a compromise Allan intercept of 2000 s, the optimum poll interval is about 64 s, which corresponds to a poll exponent of 6.</p>
+<p>At the heart of the NTP specification and reference implementation is the clock discipline algorithm, which is best described as an adaptive parameter, hybrid phase/frequency-lock feedback loop. It is an intricately crafted algorithm that automatically  adapts  for optimum performance while  minimizing network overhead. Further details are on the <a href="discipline.html">Clock Discipline</a> page.</p>
 <h4 id="state">Clock State Machine</h4>
-<p>In the NTPv4 specification and reference implementation a state machine is used to manage the system clock under exceptional conditions, as when the daemon is first started or when encountering  severe network congesiton. When the frequency file is present at  startup is that the residual offset error is less than 0.5 ms within 300 s. When the frequency file is not present, this result is achieved within 600 s. Further details are on the <a href="clock.html">Clock State Machine</a> page.</p>
+<p>In the NTPv4 specification and reference implementation a state machine is used to manage the system clock under exceptional conditions, as when the daemon is first started or when encountering  severe network congestion. When the frequency file is present at  startup is that the residual offset error is less than 0.5 ms within 300 s. When the frequency file is not present, this result is achieved within 600 s. Further details are on the <a href="clock.html">Clock State Machine</a> page.</p>
 <hr>
 <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
 </body>
