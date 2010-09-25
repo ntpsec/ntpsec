@@ -355,6 +355,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1635] "filegen ... enable" is not default.
 * [Bug 1636] yyparse() segfault after denied filegen remote config.
