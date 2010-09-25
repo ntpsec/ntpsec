@@ -2526,10 +2526,10 @@ clock_select(void)
 
 		/*
 		 * The metric is the scaled root distance at the next
-		 * poll interval plus the peer stratum.
+		 * poll interval.
 		 */
-		d = (root_distance(peer) + clock_phi * (peer->nextdate -
-		    current_time)) / sys_maxdist + peer->stratum;
+		d = root_distance(peer) + clock_phi * (peer->nextdate -
+		    current_time);
 		if (j >= NTP_MAXASSOC) {
 			if (d >= synch[j - 1])
 				continue;
@@ -2797,10 +2797,10 @@ clock_combine(
 
 	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
-		x = root_distance(peers[i]);
-		y += 1. / x;
-		z += peers[i]->offset / x;
-		w += SQUARE(peers[i]->offset - peers[0]->offset) / x;
+		x = max(sys_maxdist - root_distance(peers[i]), 0);
+		y += x;
+		z += peers[i]->offset * x;
+		w += SQUARE(peers[i]->offset - peers[0]->offset) * x;
 	}
 	sys_offset = z / y;
 	sys_jitter = SQRT(w / y);
