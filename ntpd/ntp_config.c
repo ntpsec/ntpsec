@@ -1559,9 +1559,9 @@ create_sim_script_info(
 	queue *script_queue
 	)
 {
-#ifdef SIM
+#ifndef SIM
 	return NULL;
-#else
+#else	/* SIM follows */
 	script_info *my_info;
 	struct attr_val *my_attr_val;
 
@@ -1576,8 +1576,11 @@ create_sim_script_info(
 	my_info->proc_delay = PROC_DLY;
 
 	/* Traverse the script_queue and fill out non-default values */
-	my_attr_val = queue_head(script_queue);
-	while (my_attr_val != NULL) {
+	
+	for (my_attr_val = queue_head(script_queue);
+	     my_attr_val != NULL;
+	     my_attr_val = next_node(my_attr_val)) {
+
 		/* Set the desired value */
 		switch (my_attr_val->attr) {
 
@@ -1608,14 +1611,11 @@ create_sim_script_info(
 		}
 	}
 	return (my_info);
-#endif
+#endif	/* SIM */
 }
 
 
-#if !defined(SIM)
-
-#define ADDR_LENGTH 16 + 1
-
+#ifdef SIM
 static sockaddr_u *
 get_next_address(
 	struct address_node *addr
@@ -1623,6 +1623,7 @@ get_next_address(
 {
 	const char addr_prefix[] = "192.168.0.";
 	static int curr_addr_no = 1;
+#define ADDR_LENGTH 16 + 1	/* room for 192.168.1.255 */
 	char addr_string[ADDR_LENGTH];
 	sockaddr_u *final_addr;
 	struct addrinfo *ptr;
@@ -1648,7 +1649,7 @@ get_next_address(
 	freeaddrinfo(ptr);
 	return final_addr;
 }
-#endif /* !SIM */
+#endif /* SIM */
 
 
 server_info *
@@ -1658,9 +1659,9 @@ create_sim_server(
 	queue *script
 	)
 {
-#ifdef SIM
+#ifndef SIM
 	return NULL;
-#else
+#else	/* SIM follows */
 	server_info *my_info;
 
 	my_info = get_node(sizeof *my_info);
@@ -1670,7 +1671,7 @@ create_sim_server(
 	my_info->script = script;
 	my_info->curr_script = dequeue(my_info->script);
 	return my_info;
-#endif /* SIM */
+#endif	/* SIM */
 }
 
 struct sim_node *

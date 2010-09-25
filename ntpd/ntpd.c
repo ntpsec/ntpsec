@@ -478,6 +478,10 @@ main(
 	)
 {
 	parse_cmdline_opts(&argc, &argv);
+#ifdef DEBUG
+	debug = DESC(DEBUG_LEVEL).optOccCt;
+	DPRINTF(1, ("%s\n", Version));
+#endif
 
 	return ntpsim(argc, argv);
 }
@@ -694,7 +698,7 @@ ntpdmain(
 	}
 # endif
 
-#ifdef DEBUG
+# ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 	DPRINTF(1, ("%s\n", Version));
 # endif
