@@ -1,3 +1,4 @@
+(4.2.7p56) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
 * Clock combining algorithm improvements from Dave Mills.
 * Documentation updates from Dave Mills.
 * [Bug 1642] ntpdsim can't find simulate block in config file.
