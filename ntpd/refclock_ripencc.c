@@ -3179,7 +3179,9 @@ static void rpt_rcvr_health (TSIPPKT *rpt)
 {
 	unsigned char
 		status1, status2;
-	static char
+	const char
+		*text;
+	static const char const
 		*sc_text[] = {
 			"Doing position fixes",
 			"Don't have GPS time yet",
@@ -3203,8 +3205,11 @@ static void rpt_rcvr_health (TSIPPKT *rpt)
 		return;
 	}
 
+	text = (status1 < COUNTOF(sc_text))
+		   ? sc_text[status1]
+		   : "(out of range)";
 	pbuf += sprintf(pbuf, "\nRcvr status1: %s (%02Xh); ",
-     	sc_text[rpt->buf[0]], status1);
+     		text, status1);
 
 	pbuf += sprintf(pbuf, "status2: %s, %s (%02Xh)",
 		(status2 & 0x01)?"No BBRAM":"BBRAM OK",
@@ -3382,7 +3387,7 @@ static void rpt_operating_parameters (TSIPPKT *rpt)
 	pbuf += sprintf(pbuf, "\nOperating Parameters:");
 	pbuf += sprintf(pbuf, "\n     Dynamics code = %d %s",
    	dyn_code, dyn_text[dyn_code]);
-	pbuf += sprintf(pbuf, "\n     Elevation mask = %.2fø", el_mask * R2D);
+	pbuf += sprintf(pbuf, "\n     Elevation mask = %.2f?", el_mask * R2D);
 	pbuf += sprintf(pbuf, "\n     SNR mask = %.2f", snr_mask);
 	pbuf += sprintf(pbuf, "\n     DOP mask = %.2f", dop_mask);
 	pbuf += sprintf(pbuf, "\n     DOP switch = %.2f", dop_switch);
