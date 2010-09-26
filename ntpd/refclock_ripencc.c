@@ -3387,7 +3387,7 @@ static void rpt_operating_parameters (TSIPPKT *rpt)
 	pbuf += sprintf(pbuf, "\nOperating Parameters:");
 	pbuf += sprintf(pbuf, "\n     Dynamics code = %d %s",
    	dyn_code, dyn_text[dyn_code]);
-	pbuf += sprintf(pbuf, "\n     Elevation mask = %.2f?", el_mask * R2D);
+	pbuf += sprintf(pbuf, "\n     Elevation mask = %.2f", el_mask * R2D);
 	pbuf += sprintf(pbuf, "\n     SNR mask = %.2f", snr_mask);
 	pbuf += sprintf(pbuf, "\n     DOP mask = %.2f", dop_mask);
 	pbuf += sprintf(pbuf, "\n     DOP switch = %.2f", dop_switch);
