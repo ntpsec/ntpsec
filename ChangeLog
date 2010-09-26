@@ -1,4 +1,7 @@
 ---
+* [Bug 1643]: Range-check the decoding of the RIPE-NCC status codes.
+
+---
 (4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1635] "filegen ... enable" is not default.
