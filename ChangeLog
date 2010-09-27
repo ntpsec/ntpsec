@@ -1,3 +1,4 @@
+* [Bug 1646] ntpd crashes with relative path to logfile.
 * Documentation updates from Dave Mills.
 (4.2.7p56) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
 * Clock combining algorithm improvements from Dave Mills.
