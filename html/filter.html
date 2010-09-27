@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<title>Clock Filter Algorithm</title>
+<link href="scripts/style.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<h3>Clock Filter Algorithm</h3>
+<p>Last update:
+  <!-- #BeginDate format:En2m -->26-Sep-2010  3:50<!-- #EndDate -->
+  UTC</p>
+<hr>
+<p>The clock filter algorithm processes the offset and delay samples produced by the on-wire protocol for each peer process separately. It uses a sliding window of eight samples and picks out the sample with the least expected error. This page describes the algorithm design principles along with an example of typical performance..</p>
+<div align=["center"><img src="pic/flt5.gif" alt="gif">
+  <p>Figure 1. Wedge Scattergram</p>
+</div>
+<p>Figure 1 shows  a <em>wedge scattergram</em> plotting  sample points of offset versus delay collected over a 24-hr period.  As the delay increases, the  offset variation increases, so the best samples are those at the lowest delay. There are two limb lines at slope &plusmn;0.5, representing the limits of sample variation. This turns out to be useful in the huff-n'-puff filter, but will not be pursued here. However, it is apparent that, if a way could be found to find the sample of least delay, it would have the least offset variation and would be the best candidate to synchronize the system clock.</p>
+<p>In the clock filter algorithm the offset and delay   samples from the on-wire protocol are inserted as the youngest stage of  an eight-stage shift register, thus discarding the oldest stage.  Each time an NTP packet is received from a source, a  dispersion sample is initialized as the sum of the precisions of the server and client. Precision is defined by the latency to read the system clock and various from 1000 ns to 100 ns in modern machines. The dispersion ample is inserted in the shift register along with the offset and delay samples.  Subsequently, the sample dispersion in each stage is increased at a fixed rate of 15 <font face="symbol">m</font>s/s, representing the worst case error due to skew between the server and client clock frequencies's.</p>
+<p>In each peer process the  clock filter algorithm  selects the stage with the smallest  delay, which generally represents the most accurate data, and it and the  associated offset  sample become the peer variables of the same name. The peer dispersion  is determined as a weighted average of the dispersion samples in the shift register.  It continues to grow at the same  rate as the sample dispersion. Finally, the peer jitter is determined as the root-mean-square (RMS) average of all the offset samples in the shift register relative to the selected offset sample. </p>
+<div align="center"> <img src="pic/flt1.gif" alt="gif"> <img src="pic/flt2.gif" alt="gif">
+  <p>Figure 2. Raw (left) and Filtered (right) Offsets</p>
+</div>
+<p>Figure 2 shows the  performance of the algorithm using  offsets for a typical Internet path over a 24-hr period. The graph on the left shows the raw offsets produced by the on-wired protocol, while the figure on the right shows the filtered offsets  produced by the  algorithm. If we consider the series formed as the absolute value of the offset samples, the mean error is defined as the mean of this series. Thus, the mean error of the raw samples is 0.724 ms, while the mean error of the filtered series is 0.192 ms. Radio engineers would interpret this as a  processing gain of 11.5 dB.</p>
+<p>The reader may notice the somewhat boxy characteristic of the filtered offsets. This is because only new samples are selected. Once a sample is selected, the same or older samples are never selected again. The reason for this is to preserve causality; that is, time always moves forward, never stands still or moves backward. The result can be the loss of up to seven samples in the shift register, or more to the point, the output sample rate can never be less than one in eight input samples. The clock discipline algorithm is specifically designed to operate at this rate.</p>
+<hr>
+<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+</body>
+</html>
