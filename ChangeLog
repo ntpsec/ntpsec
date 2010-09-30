@@ -1,5 +1,7 @@
 ---
+
 * [Bug 1643]: Range-check the decoding of the RIPE-NCC status codes.
+* [Bug 1644]: cvo.sh should use lsb_release to identify linux distros.
 
 ---
 (4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
