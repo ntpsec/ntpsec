@@ -1,4 +1,4 @@
-* [Bug 1644] from 4.2.6p3: cvo.sh doesn't handle some unstable/testing
+* [Bug 1644] from 4.2.6p3: cvo.sh should use lsb_release to identify
   linux distros.
 (4.2.7p57) 2010/09/27 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
