@@ -3,6 +3,7 @@
   unreachable.
 * [Bug 1644] from 4.2.6p3: cvo.sh should use lsb_release to identify
   linux distros.
+* [Bug 1646] ntpd crashes with relative path to logfile.
 (4.2.7p57) 2010/09/27 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.7p56) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
