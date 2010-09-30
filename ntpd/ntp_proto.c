@@ -2187,8 +2187,10 @@ clock_filter(
 	 * save the offset, delay and jitter. Note the jitter must not
 	 * be less than the precision.
 	 */
-	if (m == 0)
+	if (m == 0) {
+		clock_select();
 		return;
+	}
 
 	etemp = fabs(peer->offset - peer->filter_offset[k]);
 	peer->offset = peer->filter_offset[k];
@@ -2477,6 +2479,7 @@ clock_select(void)
 				found++;
 		}
 
+#if 0
 		/*
 		 * If the number of candidates found outside the
 		 * interval is greater than the number of falsetickers,
@@ -2486,6 +2489,7 @@ clock_select(void)
 		 */
 		if (found > allow)
 			continue;
+#endif
 
 		/*
 		 * If an interval containing truechimers is found, stop.
@@ -2506,9 +2510,12 @@ clock_select(void)
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
+		double	d;
+
 		peer = peers[i];
-		if (nlist > 1 && (peer->offset <= low || peer->offset >=
-		    high) && !(peer->flags & FLAG_TRUE))
+		d = root_distance(peer);
+		if (nlist > 1 && (peer->offset + d < low ||
+		    peer->offset - d > high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
 #ifdef REFCLOCK
