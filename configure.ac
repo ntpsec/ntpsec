@@ -414,10 +414,12 @@ case "$host" in
     ;;
 esac
 
-AC_SEARCH_LIBS([res_init], [resolv])
-case "$ac_search_func_res_init:$host" in
- no:*-*-darwin*)
+case "$host" in
+ *-*-darwin*)
     AC_SEARCH_LIBS([res_9_init], [resolv])
+    ;;
+ *) AC_SEARCH_LIBS([res_init], [resolv])
+    ;;
 esac
 AC_HEADER_RESOLV
 AC_CHECK_FUNCS([res_init], , [AC_CHECK_FUNCS([__res_init])])
