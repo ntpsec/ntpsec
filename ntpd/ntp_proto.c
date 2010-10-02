@@ -2510,12 +2510,12 @@ clock_select(void)
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
-		double	d;
+		double	h;
 
 		peer = peers[i];
-		d = root_distance(peer);
-		if (nlist > 1 && (peer->offset + d < low ||
-		    peer->offset - d > high) && !(peer->flags & FLAG_TRUE))
+		h = root_distance(peer);
+		if ((high <= low || peer->offset + h < low ||
+		    peer->offset - h > high) && !(peer->flags & FLAG_TRUE))
 			continue;
 
 #ifdef REFCLOCK

@@ -1,3 +1,4 @@
+* Variable name cleanup from Dave Mills.
 * [Bug 1657] darwin needs res_9_init, not res_init.
 (4.2.7p58) 2010/09/30 Released by Harlan Stenn <stenn@ntp.org>
 * Clock select bugfix from Dave Mills.
