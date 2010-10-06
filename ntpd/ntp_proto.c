@@ -2270,7 +2270,6 @@ clock_select(void)
 	double	d, e, f, g;
 	double	high, low;
 	double	seljitter;
-	double	synch[NTP_MAXASSOC], error[NTP_MAXASSOC];
 	double	orphdist = 1e10;
 	struct peer *osys_peer = NULL;
 	struct peer *sys_prefer = NULL;	/* prefer peer */
@@ -2281,14 +2280,16 @@ clock_select(void)
 	struct peer *typelocal = NULL;
 	struct peer *typepps = NULL;
 #endif /* REFCLOCK */
-
-	static int list_alloc = 0;
 	static struct endpoint *endpoint = NULL;
 	static int *indx = NULL;
 	static struct peer **peers = NULL;
+	static double *synch = NULL;
+	static double *error = NULL;
 	static u_int endpoint_size = 0;
 	static u_int indx_size = 0;
 	static u_int peers_size = 0;
+	static u_int synch_size = 0;
+	static u_int error_size = 0;
 	size_t octets;
 
 	/*
@@ -2303,19 +2304,23 @@ clock_select(void)
 	sys_stratum = STRATUM_UNSPEC;
 	memcpy(&sys_refid, "DOWN", 4);
 #endif /* LOCKCLOCK */
-	nlist = peer_count;
-	if (nlist > list_alloc) {
-		while (list_alloc < nlist) {
-			list_alloc += 5;
-			endpoint_size += 5 * 3 * sizeof(*endpoint);
-			indx_size += 5 * 3 * sizeof(*indx);
-			peers_size += 5 * sizeof(*peers);
-		}
-		octets = endpoint_size + indx_size + peers_size;
-		endpoint = erealloc(endpoint, octets);
-		indx = (int *)((char *)endpoint + endpoint_size);
-		peers = (struct peer **)((char *)indx + indx_size);
-	}
+
+	/*
+	 * Allocate dynamic space depending on the number of
+	 * associations.
+	 */
+	endpoint_size = peer_count * 3 * sizeof(struct endpoint);
+	indx_size = peer_count * 3 * sizeof(int);
+	peers_size = peer_count * sizeof(struct peer *);
+	synch_size = peer_count * sizeof(double);
+	error_size = peer_count * sizeof(double);
+	octets = endpoint_size + indx_size + peers_size + synch_size +
+	    error_size;
+	endpoint = erealloc(endpoint, octets);
+	indx = (int *)((char *)endpoint + endpoint_size);
+	peers = (struct peer **)((char *)indx + indx_size);
+	synch = (double *)((char *)peers + peers_size);
+	error = (double *)((char *)synch + synch_size);
 
 	/*
 	 * Initially, we populate the island with all the rifraff peers
@@ -2384,33 +2389,23 @@ clock_select(void)
 
 		/*
 		 * Insert each interval endpoint on the sorted
-		 * list.
+		 * list. This code relies on the endpointd being at
+		 * increasing offsets.
 		 */
-		e = peer->offset;	 /* Upper end */
+		e = peer->offset;	 /* upper end */
 		f = root_distance(peer);
 		e = e + f;
 		for (i = nl3 - 1; i >= 0; i--) {
 			if (e >= endpoint[indx[i]].val)
 				break;
 
-			indx[i + 3] = indx[i];
-		}
-		indx[i + 3] = nl3;
-		endpoint[nl3].type = 1;
-		endpoint[nl3++].val = e;
-
-		e = e - f;		/* Center point */
-		for (; i >= 0; i--) {
-			if (e >= endpoint[indx[i]].val)
-				break;
-
 			indx[i + 2] = indx[i];
 		}
 		indx[i + 2] = nl3;
-		endpoint[nl3].type = 0;
+		endpoint[nl3].type = 1;
 		endpoint[nl3++].val = e;
 
-		e = e - f;		/* Lower end */
+		e = e - f - f;		/* lower end */
 		for (; i >= 0; i--) {
 			if (e >= endpoint[indx[i]].val)
 				break;
@@ -2428,6 +2423,7 @@ clock_select(void)
 			   endpoint[indx[i]].type,
 			   endpoint[indx[i]].val);
 #endif
+
 	/*
 	 * This is the actual algorithm that cleaves the truechimers
 	 * from the falsetickers. The original algorithm was described
@@ -2453,21 +2449,17 @@ clock_select(void)
 	low = 1e9;
 	high = -1e9;
 	for (allow = 0; 2 * allow < nlist; allow++) {
-		int	found;
 
 		/*
-		 * Bound the interval (low, high) as the largest
-		 * interval containing points from presumed truechimers.
+		 * Bound the interval (low, high) as the smallest 
+		 * interval containing points from the most sources.
 		 */
-		found = 0;
 		n = 0;
 		for (i = 0; i < nl3; i++) {
 			low = endpoint[indx[i]].val;
 			n -= endpoint[indx[i]].type;
 			if (n >= nlist - allow)
 				break;
-			if (endpoint[indx[i]].type == 0)
-				found++;
 		}
 		n = 0;
 		for (j = nl3 - 1; j >= 0; j--) {
@@ -2475,21 +2467,7 @@ clock_select(void)
 			n += endpoint[indx[j]].type;
 			if (n >= nlist - allow)
 				break;
-			if (endpoint[indx[j]].type == 0)
-				found++;
 		}
-
-#if 0
-		/*
-		 * If the number of candidates found outside the
-		 * interval is greater than the number of falsetickers,
-		 * then at least one truechimer is outside the interval,
-		 * so go around again. This is what makes this algorithm
-		 * different than Marzullo's.
-		 */
-		if (found > allow)
-			continue;
-#endif
 
 		/*
 		 * If an interval containing truechimers is found, stop.
@@ -2502,11 +2480,16 @@ clock_select(void)
 
 	/*
 	 * Clustering algorithm. Construct candidate list in order first
-	 * by stratum then by root distance, but keep only the best
-	 * NTP_MAXASSOC of them. Scan the list to find falsetickers, who
-	 * leave the island immediately. The TRUE peer is always a
-	 * truechimer. We must leave at least one peer to collect the
-	 * million bucks.
+	 * by stratum then by root distance. Scan the list to find
+	 * falsetickers, who leave the island immediately. The TRUE peer
+	 * is always a truechimer. We must leave at least one peer
+	 * to collect the million bucks.
+	 *
+	 * We assert the correc time is contained in the interval, but
+	 * the best offset estimate for the interval might not be
+	 * contained in the interval. For this purpose, a truechimer is
+	 * defined as the midpoint of an interval that overlaps the 
+	 * intersection interval.
 	 */
 	j = 0;
 	for (i = 0; i < nlist; i++) {
@@ -2537,12 +2520,6 @@ clock_select(void)
 		 */
 		d = root_distance(peer) + clock_phi * (peer->nextdate -
 		    current_time);
-		if (j >= NTP_MAXASSOC) {
-			if (d >= synch[j - 1])
-				continue;
-			else
-				j--;
-		}
 		for (k = j; k > 0; k--) {
 			if (d >= synch[k - 1])
 				break;
@@ -2625,7 +2602,7 @@ clock_select(void)
 			}
 		}
 		f = max(f, LOGTOD(sys_precision));
-		if (nlist <= sys_minsane || nlist <= sys_minclock) {
+		if (nlist <= sys_minclock) {
 			break;
 
 		} else if (f <= d || peers[k]->flags &
