@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *  
- *  It has been AutoGen-ed  October  4, 2010 at 10:11:33 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  October  6, 2010 at 10:08:24 AM by AutoGen 5.10
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -63,8 +63,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    8
-#define NTPSNMPD_VERSION       "4.2.7p60"
-#define NTPSNMPD_FULL_VERSION  "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p60"
+#define NTPSNMPD_VERSION       "4.2.7p61"
+#define NTPSNMPD_FULL_VERSION  "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p61"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
