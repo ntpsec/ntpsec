@@ -515,7 +515,6 @@ SOURCE=..\..\..\ntpd\refclock_acts.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_arbiter.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -657,7 +656,6 @@ SOURCE=..\..\..\ntpd\refclock_trak.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_true.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 

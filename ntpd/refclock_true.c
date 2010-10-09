@@ -21,6 +21,12 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#ifdef SYS_WINNT
+extern int async_write(int, const void *, unsigned int);
+#undef write
+#define write(fd, data, octets)	async_write(fd, data, octets)
+#endif
+
 /* This should be an atom clock but those are very hard to build.
  *
  * The PCL720 from P C Labs has an Intel 8253 lookalike, as well as a bunch
@@ -290,7 +296,16 @@ true_start(
 	up->pollcnt = 2;
 	up->type = t_unknown;
 	up->state = s_Base;
+
+	/*
+	 * Send a CTRL-C character at the start,
+	 * just in case the clock is already
+	 * sending timecodes
+	 */
+	true_send(peer, "\03\r");
+	
 	true_doevent(peer, e_Init);
+
 	return (1);
 }
 

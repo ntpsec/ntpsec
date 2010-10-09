@@ -325,6 +325,7 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define REFCLOCK			/* from ntpd.mak */
 
 /* # define CLOCK_PARSE  */
+# define CLOCK_ARBITER
 # define CLOCK_ARCRON_MSF
 # define OWN_PPS_NTP_TIMESTAMP_FROM_COUNTER	/* timepps.h */
 # define HAVE_TIMEPPS_H
@@ -343,6 +344,7 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define CLOCK_SPECTRACOM	/* refclock_wwvb.c */
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
+# define CLOCK_TRUE
 
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define NTP_POSIX_SOURCE

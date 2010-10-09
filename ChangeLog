@@ -1,3 +1,6 @@
+* [Bug 1567] from 4.2.6p3: Support Arbiter 1093C Satellite Clock on
+  Windows.
+* [Bug 1659] from 4.2.6p3: Support Truetime Satellite Clocks on Windows.
 (4.2.7p61) 2010/10/06 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation and code cleanup from Dave Mills. No more NTP_MAXASSOC.
 (4.2.7p60) 2010/10/04 Released by Harlan Stenn <stenn@ntp.org>
@@ -8,7 +11,7 @@
 * [Bug 1657] darwin needs res_9_init, not res_init.
 (4.2.7p58) 2010/09/30 Released by Harlan Stenn <stenn@ntp.org>
 * Clock select bugfix from Dave Mills.
-* [Bug 1554]: peer may stay selected as system peer after becoming
+* [Bug 1554] peer may stay selected as system peer after becoming
   unreachable.
 * [Bug 1644] from 4.2.6p3: cvo.sh should use lsb_release to identify
   linux distros.
@@ -376,8 +379,10 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 1643]: Range-check the decoding of the RIPE-NCC status codes.
-* [Bug 1644]: cvo.sh should use lsb_release to identify linux distros.
+* [Bug 1567] Support Arbiter 1093C Satellite Clock on Windows.
+* [Bug 1643] Range-check the decoding of the RIPE-NCC status codes.
+* [Bug 1644] cvo.sh should use lsb_release to identify linux distros.
+* [Bug 1659] Support Truetime Satellite Clocks on Windows.
 
 ---
 (4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
