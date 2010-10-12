@@ -514,7 +514,7 @@ ripencc_start(int unit, struct peer *peer)
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	if (!io_addclock(&pp->io)) {
-		/* XXX HMS: Do we need to set pp->io.fd to -1 here? */
+		pp->io.fd = -1;
 		(void) close(fd);
 		free(up);
 		return (0);
