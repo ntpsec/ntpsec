@@ -462,29 +462,51 @@ case "$host" in
     AC_CHECK_FUNCS(getpassphrase)
 esac
 
-AC_CHECK_HEADERS(arpa/nameser.h)
-AC_CHECK_HEADERS(sys/socket.h)
-AC_CHECK_HEADERS(net/if.h, [], [],
-[#if HAVE_SYS_SOCKET_H
+AC_CHECK_HEADERS([arpa/nameser.h])
+AC_CHECK_HEADERS([sys/socket.h])
+AC_CHECK_HEADERS([net/if.h], [], [],
+[#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 ])
-AC_CHECK_HEADERS(net/if6.h)
-AC_CHECK_HEADERS(net/route.h, [], [], [
+AC_CHECK_HEADERS([net/if6.h])
+AC_CHECK_HEADERS([net/route.h], [], [], [
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
 ])
-AC_CHECK_HEADERS(netinet/in_system.h netinet/in_systm.h)
-AC_CHECK_HEADERS(netinet/in.h)
-AC_CHECK_HEADERS(netinet/ip.h, [], [],
+AC_CHECK_HEADERS([netinet/in_system.h netinet/in_systm.h netinet/in.h])
+AC_CHECK_HEADERS([net/if_var.h], [], [],
 [#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_NETINET_IN_SYSTM_H
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+])
+AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [],
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
 ])
