@@ -1,3 +1,34 @@
+NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2010/07/08)
+
+Focus: Bug fixes and portability improvements
+
+Severity: Medium
+
+This is a recommended upgrade.
+
+This release includes build infrastructure updates, code
+clean-ups, minor bug fixes, fixes for a number of minor
+ref-clock issues, and documentation revisions.
+
+Portability improvements in this release affect Linux and
+Microsoft Windows.
+
+New features / changes in this release:
+
+Build system
+* Use lsb_release to get information about Linux distributions
+
+ntpd
+* Log the reason for exiting under Windows
+* Make sure that the "filegen" configuration command defaults to "enable"
+* Range-check the status codes in the RIPE-NCC driver
+
+sntp
+* Pay proper attention to RATE KoD packets
+* Fix a miscalculation of the offset
+* Properly parse empty lines in the key file
+
+---
 NTP 4.2.6p2 (Harlan Stenn <stenn@ntp.org>, 2010/07/08)
 
 Focus: Bug fixes and portability improvements

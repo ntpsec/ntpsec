@@ -1,5 +1,33 @@
 ---
 
+* [Bug 750] Non-existing device causes coredump with RIPE-NCC driver.
+* [Bug 1080] ntpd on ipv6 routers very chatty.
+* [Bug 1567] Support Arbiter 1093C Satellite Clock on Windows.
+* [Bug 1581] printf format string mismatch leftover.
+* [Bug 1643] Range-check the decoding of the RIPE-NCC status codes.
+* [Bug 1644] cvo.sh should use lsb_release to identify linux distros.
+* [Bug 1659] Support Truetime Satellite Clocks on Windows.
+* [Bug 1660] On some systems, test is in /usr/bin, not /bin.
+* [Bug 1661] Re-indent refclock_ripencc.c.
+
+---
+(4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1635] "filegen ... enable" is not default.
+* [Bug 1636] yyparse() segfault after denied filegen remote config.
+
+---
+(4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1344] ntpd on Windows exits without logging cause.
+
+---
+(4.2.6p3-beta1) 2010/09/11 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1573] Miscalculation of offset in sntp.
+* [Bug 1595] empty last line in key file causes duplicate key to be added
+* [Bug 1597] packet processing ignores RATE KoD packets, because of
+  a bug in string comparison.
 * [Bug 1581] ntp_intres.c size_t printf format string mismatch.
 
 ---

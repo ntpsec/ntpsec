@@ -60,7 +60,7 @@ version=${proto}.${major}.${minor}
 special=
 
 # prerelease can be empty, 'beta', or 'rc'.
-prerelease=
+prerelease=rc
 
 # ChangeLog starting tag (see also CommitLog-4.1.0)
 CLTAG=NTP_4_2_0
@@ -70,14 +70,14 @@ CLTAG=NTP_4_2_0
 # - Numeric values increment
 # - empty 'increments' to 1
 # - NEW 'increments' to empty
-point=2
+point=3
 
 ### betapoint is normally modified by script.
 # ntp-stable Beta number (betapoint)
 # Should be zeroed at release, and left at zero until first beta.
 # The first beta is -beta1.
 # betapoint is always zero in ntp-dev.
-betapoint=0
+betapoint=1
 
 ### rcpoint is normally modified by script except for GO.
 # RC number (rcpoint)
@@ -91,4 +91,4 @@ betapoint=0
 # - - prerelease is emptied
 # else (not in RC)
 # - rcpoint is empty and unused (for now).
-rcpoint=
+rcpoint=2

@@ -595,6 +595,8 @@ filegen_option_list
 			else
 				$$ = create_queue();
 		}
+	|	/* empty list */
+			{ $$ = create_queue(); }
 	;
 
 filegen_option
