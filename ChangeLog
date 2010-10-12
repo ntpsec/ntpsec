@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1584]: ntpsnmpd OID must be mib-2.197.
 * [Bug 1643]: Range-check the decoding of the RIPE-NCC status codes.
 * [Bug 1644]: cvo.sh should use lsb_release to identify linux distros.
 
