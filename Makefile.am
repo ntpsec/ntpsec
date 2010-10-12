@@ -167,7 +167,7 @@ dist-hook:
 
 CommitLog: FRC.CommitLog
 	cd $(srcdir)					\
-	&& /bin/test -e CommitLog			\
+	&& $(PATH_TEST) -e CommitLog			\
 		-a SCCS/s.ChangeSet -ot CommitLog	\
 	|| scripts/genCommitLog
 

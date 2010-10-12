@@ -328,8 +328,10 @@ AC_PROG_LN_S
 AC_PROG_GCC_TRADITIONAL
 AC_C_VOLATILE
 AC_ISC_POSIX
-AC_PATH_PROG(PATH_SH, sh)
+
 AC_PATH_PROG(PATH_PERL, perl)
+AC_PATH_PROG(PATH_SH, sh)
+AC_PATH_PROG(PATH_TEST, test)
 
 AC_ARG_WITH(net-snmp-config,
 	AC_HELP_STRING([--with-net-snmp-config], [+ =net-snmp-config]),

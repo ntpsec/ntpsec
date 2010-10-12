@@ -1,6 +1,10 @@
-* [Bug 1567] from 4.2.6p3: Support Arbiter 1093C Satellite Clock on
+* [Bug 1567] from 4.2.6p3-RC3: Support Arbiter 1093C Satellite Clock on
   Windows.
-* [Bug 1659] from 4.2.6p3: Support Truetime Satellite Clocks on Windows.
+* [Bug 1659] from 4.2.6p3-RC3: Support Truetime Satellite Clocks on
+  Windows. 
+* [Bug 1660] from 4.2.6p3-RC3: On some systems, test is in /usr/bin, not
+  /bin. 
+* [Bug 1661] from 4.2.6p3-RC3: Re-indent refclock_ripencc.c.
 (4.2.7p61) 2010/10/06 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation and code cleanup from Dave Mills. No more NTP_MAXASSOC.
 (4.2.7p60) 2010/10/04 Released by Harlan Stenn <stenn@ntp.org>
@@ -13,7 +17,7 @@
 * Clock select bugfix from Dave Mills.
 * [Bug 1554] peer may stay selected as system peer after becoming
   unreachable.
-* [Bug 1644] from 4.2.6p3: cvo.sh should use lsb_release to identify
+* [Bug 1644] from 4.2.6p3-RC3: cvo.sh should use lsb_release to identify
   linux distros.
 * [Bug 1646] ntpd crashes with relative path to logfile.
 (4.2.7p57) 2010/09/27 Released by Harlan Stenn <stenn@ntp.org>
@@ -22,8 +26,8 @@
 * Clock combining algorithm improvements from Dave Mills.
 * Documentation updates from Dave Mills.
 * [Bug 1642] ntpdsim can't find simulate block in config file.
-* [Bug 1643] from 4.2.6p3: Range-check the decoding of the RIPE-NCC status
-  codes.
+* [Bug 1643] from 4.2.6p3-RC3: Range-check the decoding of the RIPE-NCC
+  status codes.
 (4.2.7p55) 2010/09/22 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * [Bug 1636] from 4.2.6p3-RC2: segfault after denied remote config.
@@ -383,6 +387,8 @@
 * [Bug 1643] Range-check the decoding of the RIPE-NCC status codes.
 * [Bug 1644] cvo.sh should use lsb_release to identify linux distros.
 * [Bug 1659] Support Truetime Satellite Clocks on Windows.
+* [Bug 1660]: On some systems, test is in /usr/bin, not /bin.
+* [Bug 1661]: Re-indent refclock_ripencc.c.
 
 ---
 (4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
