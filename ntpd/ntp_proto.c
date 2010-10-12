@@ -2309,11 +2309,14 @@ clock_select(void)
 	 * Allocate dynamic space depending on the number of
 	 * associations.
 	 */
-	endpoint_size = peer_count * 3 * sizeof(struct endpoint);
-	indx_size = peer_count * 3 * sizeof(int);
-	peers_size = peer_count * sizeof(struct peer *);
-	synch_size = peer_count * sizeof(double);
-	error_size = peer_count * sizeof(double);
+	nlist = 0;
+	for (peer = peer_list; peer != NULL; peer = peer->p_link)
+		nlist++;
+	endpoint_size = nlist * 2 * sizeof(struct endpoint);
+	indx_size = nlist * 2 * sizeof(int);
+	peers_size = nlist * sizeof(struct peer *);
+	synch_size = nlist * sizeof(double);
+	error_size = nlist * sizeof(double);
 	octets = endpoint_size + indx_size + peers_size + synch_size +
 	    error_size;
 	endpoint = erealloc(endpoint, octets);
@@ -2395,7 +2398,9 @@ clock_select(void)
 		e = peer->offset;	 /* upper end */
 		f = root_distance(peer);
 		e = e + f;
+		j = 0;
 		for (i = nl3 - 1; i >= 0; i--) {
+			j = nl3 - 1 + 2;
 			if (e >= endpoint[indx[i]].val)
 				break;
 
