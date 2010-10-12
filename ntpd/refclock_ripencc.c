@@ -471,12 +471,18 @@ ripencc_start(int unit, struct peer *peer)
 	struct termios tio;
 	TSIPPKT spt;
 
+	pp = peer->procptr;
+
 	/*
 	 * Open serial port
 	 */
 	(void)snprintf(device, sizeof(device), DEVICE, unit);
-	if (!(fd = refclock_open(device, SPEED232, LDISC_RAW)))
+	if (!(fd = refclock_open(device, SPEED232, LDISC_RAW))) {
+		pp->io.fd = -1;
 		return (0);
+	}
+
+	pp->io.fd = fd;
 
 	/* from refclock_palisade.c */
 	if (tcgetattr(fd, &tio) < 0) {
@@ -503,12 +509,12 @@ ripencc_start(int unit, struct peer *peer)
 		return (0);
 	}
 	memset((char *)up, 0, sizeof(struct ripencc_unit));
-	pp = peer->procptr;
+
 	pp->io.clock_recv = ripencc_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
-	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
+		/* XXX HMS: Do we need to set pp->io.fd to -1 here? */
 		(void) close(fd);
 		free(up);
 		return (0);
@@ -770,12 +776,15 @@ ripencc_shutdown(int unit, struct peer *peer)
 	pp = peer->procptr;
 	up = (struct ripencc_unit *)pp->unitptr;
 
-	if (up->handle != 0)
-		time_pps_destroy(up->handle);
+	if (up != NULL) {
+		if (up->handle != 0)
+			time_pps_destroy(up->handle);
+		free(up);
+	}
+	if (-1 != pp->io.fd)
+		io_closeclock(&pp->io);
 
-	io_closeclock(&pp->io);
-
-	free(up);
+	return;
 }
 
 /*
@@ -1097,7 +1106,7 @@ cmd_0x2F(
 
 /* set serial I/O options */
 void
-md_0x35s(
+cmd_0x35s(
 	 TSIPPKT *cmd,
 	 unsigned char pos_code,
 	 unsigned char vel_code,

@@ -1,9 +1,10 @@
 ---
 
-* [Bug 1567] Support Arbiter 1093C Satellite Clock on Windows.
+* [Bug 750]: Non-existing device causes coredump with RIPE-NCC driver.
+* [Bug 1567]: Support Arbiter 1093C Satellite Clock on Windows.
 * [Bug 1643]: Range-check the decoding of the RIPE-NCC status codes.
 * [Bug 1644]: cvo.sh should use lsb_release to identify linux distros.
-* [Bug 1659] Support Truetime Satellite Clocks on Windows.
+* [Bug 1659]: Support Truetime Satellite Clocks on Windows.
 * [Bug 1660]: On some systems, test is in /usr/bin, not /bin.
 * [Bug 1661]: Re-indent refclock_ripencc.c.
 
