@@ -3,6 +3,7 @@
 * [Bug 1643]: Range-check the decoding of the RIPE-NCC status codes.
 * [Bug 1644]: cvo.sh should use lsb_release to identify linux distros.
 * [Bug 1660]: On some systems, test is in /usr/bin, not /bin.
+* [Bug 1661]: Re-indent refclock_ripencc.c.
 
 ---
 (4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
