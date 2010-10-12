@@ -200,6 +200,9 @@ static int	is_wildcard_netaddr	(const isc_netaddr_t *);
  * Multicast functions
  */
 static	isc_boolean_t	addr_ismulticast	(sockaddr_u *);
+static	isc_boolean_t	is_anycast		(sockaddr_u *,
+						 const char *);
+
 /*
  * Not all platforms support multicast
  */
@@ -1538,6 +1541,39 @@ set_wildcard_reuse(
 }
 #endif /* OS_NEEDS_REUSEADDR_FOR_IFADDRBIND */
 
+
+static isc_boolean_t
+is_anycast(
+	sockaddr_u *psau,
+	const char *name
+	)
+{
+#if defined(INCLUDE_IPV6_SUPPORT) && defined(SIOCGIFAFLAG_IN6) && \
+    defined(IN6_IFF_ANYCAST)
+	struct in6_ifreq ifr6;
+	int fd;
+	u_int32_t flags6;
+
+	if (psau->sa.sa_family != AF_INET6)
+		return ISC_FALSE;
+	if ((fd = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
+		return ISC_FALSE;
+	memset(&ifr6, 0, sizeof(ifr6));
+	memcpy(&ifr6.ifr_addr, &psau->sa6, sizeof(ifr6.ifr_addr));
+	strncpy(ifr6.ifr_name, name, sizeof(ifr6.ifr_name));
+	if (ioctl(fd, SIOCGIFAFLAG_IN6, &ifr6) < 0) {
+		close(fd);
+		return ISC_FALSE;
+	}
+	close(fd);
+	flags6 = ifr6.ifr_ifru.ifru_flags6;
+	if ((flags6 & IN6_IFF_ANYCAST) != 0)
+		return ISC_TRUE;
+#endif	/* INCLUDE_IPV6_SUPPORT && SIOCGIFAFLAG_IN6 && IN6_IFF_ANYCAST */
+	return ISC_FALSE;
+}
+
+
 /*
  * update_interface strategy
  *
@@ -1658,6 +1694,9 @@ update_interfaces(
 		 * wild
 		 */
 		if (is_wildcard_addr(&interface.sin))
+			continue;
+
+		if (is_anycast(&interface.sin, isc_if.name))
 			continue;
 
 		/*
