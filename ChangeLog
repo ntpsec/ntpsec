@@ -6,6 +6,7 @@
   /bin. 
 * [Bug 1661] from 4.2.6p3-RC3: Re-indent refclock_ripencc.c.
 * Lose peer_count from ntp_peer.c and ntp_proto.c (Dave Mills).
+* Documentation updates from Dave Mills.
 (4.2.7p61) 2010/10/06 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation and code cleanup from Dave Mills. No more NTP_MAXASSOC.
 (4.2.7p60) 2010/10/04 Released by Harlan Stenn <stenn@ntp.org>
