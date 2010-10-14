@@ -20,23 +20,13 @@
  *
  ****************************************************************************/
 
+#include <ntp_snmp.h>
 #include <signal.h>
 #include <sys/time.h>
 
 #ifdef SOLARIS /* needed with at least Solaris 8 */
 #include <siginfo.h>
 #endif
-
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <ntpSnmpSubagentObject.h>
-
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
 
 #include <libntpq.h>
 #include <ntpsnmpd-opts.h>

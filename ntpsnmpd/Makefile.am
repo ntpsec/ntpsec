@@ -9,8 +9,8 @@ endif
 
 EXTRA_PROGRAMS=	ntpsnmpd
 ntpsnmpd_SOURCES= netsnmp_daemonize.c ntpsnmpd.c ntpSnmpSubagentObject.c \
-			ntpsnmpd-opts.c ntpsnmpd-opts.h
-noinst_HEADERS=	ntpSnmpSubagentObject.h
+		ntpsnmpd-opts.c ntpsnmpd-opts.h ntpSnmpSubagentObject.h \
+		ntp_snmp.h
 # HMS: we probably want a version.o file here, too.
 LDADD=		../ntpq/libntpq.a ../libntp/libntp.a @LCRYPTO@ @SNMP_LIBS@ \
 		$(LIBOPTS_LDADD)
