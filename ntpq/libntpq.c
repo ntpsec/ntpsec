@@ -9,7 +9,7 @@
  *  communcation is based on mode 6 packets.
  *
  ****************************************************************************/
-#define _LIBNTPQC
+#define LIBNTPQ_C
 #define NO_MAIN_ALLOWED 1
 /* #define BUILD_AS_LIB		Already provided by the Makefile */
 
@@ -17,40 +17,21 @@
 #include "libntpq.h"
 
 /* Function Prototypes */
-int ntpq_openhost(char *);
-int ntpq_closehost(void);
-int ntpq_queryhost(unsigned short VARSET, unsigned short association, char *resultbuf, int maxlen);
-int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen );
-int ntpq_queryhost_peervars(unsigned short association, char *resultbuf, int maxlen);
-int ntpq_getvar(const char *resultbuf, int datalen, const char *varname, char *varvalue, int maxlen);
-int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen);
-int ntpq_read_associations ( unsigned short resultbuf[], int max_entries );
-int ntpq_read_sysvars( char *resultbuf, int maxsize );
-int ntpq_get_assoc_allvars( int associd  );
-int ntpq_get_sysvars( void );
-int ntpq_get_assocs ( void );
-int ntpq_read_assoc_peervars( int associd, char *resultbuf, int maxsize );
-int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize );
-int ntpq_get_assoc_number ( int associd );
-int ntpq_get_assoc_peervars( int associd );
-int ntpq_get_assoc_clockvars( int associd );
-int ntpq_get_assoc_clocktype ( int assoc_number );
  
 
 const char *Version = "libntpq 0.3beta";
 
 /* global variables used for holding snapshots of data */
- char peervars[NTPQ_BUFLEN];
- int peervarlen = 0;
- int peervar_assoc = 0;
- char clockvars[NTPQ_BUFLEN];
- int clockvarlen = 0;
- int clockvar_assoc = 0;
- char sysvars[NTPQ_BUFLEN];
- int sysvarlen = 0;
- char *ntpq_resultbuffer[NTPQ_BUFLEN];
- unsigned short ntpq_associations[MAXASSOC];
-
+char peervars[NTPQ_BUFLEN];
+int peervarlen = 0;
+int peervar_assoc = 0;
+char clockvars[NTPQ_BUFLEN];
+int clockvarlen = 0;
+int clockvar_assoc = 0;
+char sysvars[NTPQ_BUFLEN];
+int sysvarlen = 0;
+char *ntpq_resultbuffer[NTPQ_BUFLEN];
+unsigned short ntpq_associations[MAXASSOC];
 struct ntpq_varlist ntpq_varlist[MAXLIST];
 
 /*****************************************************************************
@@ -129,32 +110,36 @@ int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen )
  * Parameters:
  *	resultbuf	char*	The resulting string without quoted
  *				characters
- *	datalen		int	The number of bytes stored in 
+ *	datalen		size_t	The number of bytes stored in 
  *							resultbuf
  *	varname		char*	Name of the required variable 
  *	varvalue	char*	Where the value of the variable should
  *							be stored
- *	maxlen		int	Max. number of bytes for varvalue
+ *	maxlen		size_t	Max. number of bytes for varvalue
  *
  * Returns:
- *	int		number of chars that have been copied to 
+ *	size_t		number of chars that have been copied to 
  *			varvalue
  ****************************************************************************/
 
-int
+size_t
 ntpq_getvar(
-	const char *resultbuf,
-	int datalen,
-	const char *varname,
-	char *varvalue,
-	int maxlen)
+	char *		resultbuf,
+	size_t		datalen,
+	const char *	varname,
+	char *		varvalue,
+	size_t		maxlen)
 {
-	char *name;
-	char *value = NULL;
+	char *	name;
+	char *	value;
+	int	idatalen;
 
-	while (nextvar(&datalen, &resultbuf, &name, &value)) {
+	value = NULL;
+	idatalen = (int)datalen;
+
+	while (nextvar(&idatalen, &resultbuf, &name, &value)) {
 		if (strcmp(varname, name) == 0) {
-			ntpq_stripquotes(varvalue,value,strlen(value),maxlen);
+			ntpq_stripquotes(varvalue, value, strlen(value), maxlen);
 
 			return strlen(varvalue);
 		}
@@ -495,18 +480,19 @@ ntpq_read_assoc_peervars(
  *			- OR - 
  *			0 (zero) if an error occured
  ****************************************************************************/
-int
+size_t
 ntpq_read_sysvars(
-	char *resultbuf, 
-	int maxsize
-	)
+	char *	resultbuf,
+	size_t	maxsize)
 {
-	const char *datap;
-	int res;
-	int dsize;
-	u_short rstatus;
+	char *	datap;
+	int	res;
+	int	i_dsize;
+	size_t	dsize;
+	u_short	rstatus;
 
-	res = doquery(CTL_OP_READVAR, 0, 0, 0, NULL, &rstatus, &dsize, &datap);
+	res = doquery(CTL_OP_READVAR, 0, 0, 0, NULL, &rstatus,
+		      &i_dsize, &datap);
 
 	if (res != 0)
 		return 0;
@@ -514,14 +500,14 @@ ntpq_read_sysvars(
 	if (dsize == 0) {
 		if (numhosts > 1)
 			fprintf(stderr, "server=%s ", currenthost);
-		fprintf(stderr,
-			"***No sysvar information returned \n");
+		fprintf(stderr, "***No sysvar information returned\n");
 
 		return 0;
+	} else {
+		dsize = max(0, i_dsize);
+		dsize = min(dsize, maxsize);
+		memcpy(resultbuf, datap, dsize);
 	}
-	if (dsize > maxsize) 
-		dsize = maxsize;
-	memcpy(resultbuf, datap, dsize);
 
 	return dsize;
 }

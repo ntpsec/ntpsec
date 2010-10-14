@@ -60,7 +60,7 @@ struct ntpq_varlist {
 };
 
 /* global variables used for holding snapshots of data */
-#ifndef _LIBNTPQC
+#ifndef LIBNTPQ_C
 extern char peervars[];
 extern int peervarlen;
 extern int peervar_assoc;
@@ -80,20 +80,20 @@ extern struct ntpq_varlist ntpq_varlist[MAXLIST];
  */
 
 /* from libntpq.c */
-#ifndef _LIBNTPQC
 extern int ntpq_openhost(char *);
 extern int ntpq_closehost(void);
-extern int ntpq_queryhost(u_short VARSET, u_short association,
+extern int ntpq_queryhost(unsigned short VARSET, unsigned short association,
 			  char *resultbuf, int maxlen);
-extern int ntpq_getvar(const char *resultbuf, int datalen,
-		       const char *varname, char *varvalue, int maxlen);
+extern size_t ntpq_getvar(char *resultbuf, size_t datalen,
+			  const char *varname, char *varvalue,
+			  size_t maxlen);
 extern int ntpq_stripquotes(char *resultbuf, char *srcbuf, int datalen,
 			    int maxlen);
 extern int ntpq_queryhost_peervars(u_short association, char *resultbuf,
 				   int maxlen);
 extern int ntpq_get_peervar(const char *varname, char *varvalue,
 			    int maxlen);
-extern int ntpq_read_sysvars(char *resultbuf, int maxsize );
+extern size_t ntpq_read_sysvars(char *resultbuf, size_t maxsize);
 extern int ntpq_get_sysvars(void);
 extern int ntpq_read_associations(u_short resultbuf[], int max_entries);
 extern int ntpq_get_assocs(void);
@@ -106,7 +106,6 @@ extern int ntpq_read_assoc_peervars(int associd, char *resultbuf,
 				    int maxsize);
 extern int ntpq_read_assoc_clockvars(int associd, char *resultbuf,
 				     int maxsize);
- #endif
 
 /* in libntpq_subs.c */
 #ifndef _LIBNTPQSUBSC
