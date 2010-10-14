@@ -1,11 +1,15 @@
 ---
+
+* ntpsnmpd, libntpq warning cleanup.
+
+---
 (4.2.6p3-RC3) 2010/10/14 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 750] Non-existing device causes coredump with RIPE-NCC driver.
 * [Bug 1080] ntpd on ipv6 routers very chatty.
 * [Bug 1567] Support Arbiter 1093C Satellite Clock on Windows.
 * [Bug 1581] printf format string mismatch leftover.
-* [Bug 1584]: ntpsnmpd OID must be mib-2.197.
+* [Bug 1584] ntpsnmpd OID must be mib-2.197.
 * [Bug 1643] Range-check the decoding of the RIPE-NCC status codes.
 * [Bug 1644] cvo.sh should use lsb_release to identify linux distros.
 * [Bug 1659] Support Truetime Satellite Clocks on Windows.
