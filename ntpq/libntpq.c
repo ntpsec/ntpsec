@@ -124,7 +124,7 @@ int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen )
 
 size_t
 ntpq_getvar(
-	char *		resultbuf,
+	const char *	resultbuf,
 	size_t		datalen,
 	const char *	varname,
 	char *		varvalue,
@@ -485,11 +485,11 @@ ntpq_read_sysvars(
 	char *	resultbuf,
 	size_t	maxsize)
 {
-	char *	datap;
-	int	res;
-	int	i_dsize;
-	size_t	dsize;
-	u_short	rstatus;
+	const char *	datap;
+	int		res;
+	int		i_dsize;
+	size_t		dsize;
+	u_short		rstatus;
 
 	res = doquery(CTL_OP_READVAR, 0, 0, 0, NULL, &rstatus,
 		      &i_dsize, &datap);
