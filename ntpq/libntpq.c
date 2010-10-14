@@ -497,7 +497,7 @@ ntpq_read_sysvars(
 	if (res != 0)
 		return 0;
 
-	if (dsize == 0) {
+	if (i_dsize == 0) {
 		if (numhosts > 1)
 			fprintf(stderr, "server=%s ", currenthost);
 		fprintf(stderr, "***No sysvar information returned\n");

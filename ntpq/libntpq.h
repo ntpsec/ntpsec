@@ -84,7 +84,7 @@ extern int ntpq_openhost(char *);
 extern int ntpq_closehost(void);
 extern int ntpq_queryhost(unsigned short VARSET, unsigned short association,
 			  char *resultbuf, int maxlen);
-extern size_t ntpq_getvar(char *resultbuf, size_t datalen,
+extern size_t ntpq_getvar(const char *resultbuf, size_t datalen,
 			  const char *varname, char *varvalue,
 			  size_t maxlen);
 extern int ntpq_stripquotes(char *resultbuf, char *srcbuf, int datalen,

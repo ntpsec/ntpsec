@@ -1552,7 +1552,7 @@ is_anycast(
     defined(IN6_IFF_ANYCAST)
 	struct in6_ifreq ifr6;
 	int fd;
-	u_int32_t flags6;
+	u_int32 flags6;
 
 	if (psau->sa.sa_family != AF_INET6)
 		return ISC_FALSE;
