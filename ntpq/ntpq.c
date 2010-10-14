@@ -244,7 +244,7 @@ int		ntpqmain	(int,	char **);
 static	int	openhost	(const char *);
 
 static	int	sendpkt		(void *, size_t);
-static	int	getresponse	(int, int, u_short *, int *, char **, int);
+static	int	getresponse	(int, int, u_short *, int *, const char **, int);
 static	int	sendrequest	(int, int, int, int, char *);
 static	char *	tstflags	(u_long);
 #ifndef BUILD_AS_LIB
@@ -285,8 +285,8 @@ static	void	warning		(const char *, const char *, const char *);
 static	void	error		(const char *, const char *, const char *);
 static	u_long	getkeyid	(const char *);
 static	void	atoascii	(const char *, size_t, char *, size_t);
-static	void	cookedprint	(int, int, char *, int, int, FILE *);
-static	void	rawprint	(int, int, char *, int, int, FILE *);
+static	void	cookedprint	(int, int, const char *, int, int, FILE *);
+static	void	rawprint	(int, int, const char *, int, int, FILE *);
 static	void	startoutput	(void);
 static	void	output		(FILE *, char *, char *);
 static	void	endoutput	(FILE *);
@@ -821,7 +821,7 @@ getresponse(
 	int associd,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata,
+	const char **rdata,
 	int timeo
 	)
 {
@@ -856,17 +856,17 @@ getresponse(
 
 	/*
 	 * Loop until we have an error or a complete response.  Nearly all
-	 * aths to loop again use continue.
+	 * code paths to loop again use continue.
 	 */
 	for (;;) {
 
 		if (numfrags == 0)
-		    tvo = tvout;
+			tvo = tvout;
 		else
-		    tvo = tvsout;
+			tvo = tvsout;
 		
 		FD_SET(sockfd, &fds);
-		n = select(sockfd+1, &fds, (fd_set *)0, (fd_set *)0, &tvo);
+		n = select(sockfd + 1, &fds, NULL, NULL, &tvo);
 
 		if (n == -1) {
 			warning("select fails", "", "");
@@ -878,24 +878,30 @@ getresponse(
 			 */
 			if (numfrags == 0) {
 				if (timeo)
-				    (void) fprintf(stderr,
-						   "%s: timed out, nothing received\n",
-						   currenthost);
+					fprintf(stderr,
+						"%s: timed out, nothing received\n",
+						currenthost);
 				return ERR_TIMEOUT;
 			} else {
 				if (timeo)
-				    (void) fprintf(stderr,
+					fprintf(stderr,
 						   "%s: timed out with incomplete data\n",
 						   currenthost);
 				if (debug) {
-					printf("Received fragments:\n");
+					fprintf(stderr,
+						"ERR_INCOMPLETE: Received fragments:\n");
 					for (n = 0; n < numfrags; n++)
-					    printf("%4d %d\n", offsets[n],
-						   counts[n]);
-					if (seenlastfrag)
-					    printf("last fragment received\n");
-					else
-					    printf("last fragment not received\n");
+						fprintf(stderr,
+							"%2d: %5d %5d\t%3d octets\n",
+							n, offsets[n],
+							offsets[n] +
+							counts[n],
+							counts[n]);
+					fprintf(stderr,
+						"last fragment %sreceived\n",
+						(seenlastfrag)
+						    ? ""
+						    : "not ");
 				}
 				return ERR_INCOMPLETE;
 			}
@@ -1177,7 +1183,7 @@ getresponse(
 		/*
 		 * Copy the data into the data buffer.
 		 */
-		memmove((char *)pktdata + offset, (char *)rpkt.data, count);
+		memcpy((char *)pktdata + offset, rpkt.data, count);
 
 		/*
 		 * If we've seen the last fragment, look for holes in the sequence.
@@ -1190,6 +1196,10 @@ getresponse(
 			}
 			if (n == numfrags) {
 				*rsize = offsets[numfrags-1] + counts[numfrags-1];
+				if (debug)
+					fprintf(stderr,
+						"%d packets reassembled into response\n",
+						numfrags);
 				return 0;
 			}
 		}
@@ -1310,18 +1320,112 @@ sendrequest(
 
 
 /*
- * doquery - send a request and process the response
+ * show_error_msg - display the error text for a mode 6 error response.
+ */
+void
+show_error_msg(
+	int		m6resp,
+	associd_t	associd
+	)
+{
+	if (numhosts > 1)
+		fprintf(stderr, "server=%s ", currenthost);
+
+	switch(m6resp) {
+
+	case CERR_BADFMT:
+		fprintf(stderr,
+		    "***Server reports a bad format request packet\n");
+		break;
+
+	case CERR_PERMISSION:
+		fprintf(stderr,
+		    "***Server disallowed request (authentication?)\n");
+		break;
+
+	case CERR_BADOP:
+		fprintf(stderr,
+		    "***Server reports a bad opcode in request\n");
+		break;
+
+	case CERR_BADASSOC:
+		fprintf(stderr,
+		    "***Association ID %d unknown to server\n",
+		    associd);
+		break;
+
+	case CERR_UNKNOWNVAR:
+		fprintf(stderr,
+		    "***A request variable unknown to the server\n");
+		break;
+
+	case CERR_BADVALUE:
+		fprintf(stderr,
+		    "***Server indicates a request variable was bad\n");
+		break;
+
+	case ERR_UNSPEC:
+		fprintf(stderr,
+		    "***Server returned an unspecified error\n");
+		break;
+
+	case ERR_TIMEOUT:
+		fprintf(stderr, "***Request timed out\n");
+		break;
+
+	case ERR_INCOMPLETE:
+		fprintf(stderr,
+		    "***Response from server was incomplete\n");
+		break;
+
+	case ERR_TOOMUCH:
+		fprintf(stderr,
+		    "***Buffer size exceeded for returned data\n");
+		break;
+
+	default:
+		fprintf(stderr,
+		    "***Server returns unknown error code %d\n",
+		    m6resp);
+	}
+}
+
+/*
+ * doquery - send a request and process the response, displaying
+ *	     error messages for any error responses.
  */
 int
 doquery(
 	int opcode,
-	int associd,
+	associd_t associd,
 	int auth,
 	int qsize,
 	char *qdata,
 	u_short *rstatus,
 	int *rsize,
-	char **rdata
+	const char **rdata
+	)
+{
+	return doqueryex(opcode, associd, auth, qsize, qdata, rstatus,
+			 rsize, rdata, FALSE);
+}
+
+
+/*
+ * doqueryex - send a request and process the response, optionally
+ *	       displaying error messages for any error responses.
+ */
+int
+doqueryex(
+	int opcode,
+	associd_t associd,
+	int auth,
+	int qsize,
+	char *qdata,
+	u_short *rstatus,
+	int *rsize,
+	const char **rdata,
+	int quiet
 	)
 {
 	int res;
@@ -1331,7 +1435,7 @@ doquery(
 	 * Check to make sure host is open
 	 */
 	if (!havehost) {
-		(void) fprintf(stderr, "***No host open, use `host' command\n");
+		fprintf(stderr, "***No host open, use `host' command\n");
 		return -1;
 	}
 
@@ -1344,7 +1448,7 @@ doquery(
 	 */
 	res = sendrequest(opcode, associd, auth, qsize, qdata);
 	if (res != 0)
-	    return res;
+		return res;
 	
 	/*
 	 * Get the response.  If we got a standard error, print a message
@@ -1363,53 +1467,9 @@ doquery(
 			done = 1;
 			goto again;
 		}
-		if (numhosts > 1)
-			(void) fprintf(stderr, "server=%s ", currenthost);
-		switch(res) {
-		    case CERR_BADFMT:
-			(void) fprintf(stderr,
-			    "***Server reports a bad format request packet\n");
-			break;
-		    case CERR_PERMISSION:
-			(void) fprintf(stderr,
-			    "***Server disallowed request (authentication?)\n");
-			break;
-		    case CERR_BADOP:
-			(void) fprintf(stderr,
-			    "***Server reports a bad opcode in request\n");
-			break;
-		    case CERR_BADASSOC:
-			(void) fprintf(stderr,
-			    "***Association ID %d unknown to server\n",associd);
-			break;
-		    case CERR_UNKNOWNVAR:
-			(void) fprintf(stderr,
-			    "***A request variable unknown to the server\n");
-			break;
-		    case CERR_BADVALUE:
-			(void) fprintf(stderr,
-			    "***Server indicates a request variable was bad\n");
-			break;
-		    case ERR_UNSPEC:
-			(void) fprintf(stderr,
-			    "***Server returned an unspecified error\n");
-			break;
-		    case ERR_TIMEOUT:
-			(void) fprintf(stderr, "***Request timed out\n");
-			break;
-		    case ERR_INCOMPLETE:
-			(void) fprintf(stderr,
-			    "***Response from server was incomplete\n");
-			break;
-		    case ERR_TOOMUCH:
-			(void) fprintf(stderr,
-			    "***Buffer size exceeded for returned data\n");
-			break;
-		    default:
-			(void) fprintf(stderr,
-			    "***Server returns unknown error code %d\n", res);
-			break;
-		}
+		if (!quiet)
+			show_error_msg(res, associd);
+
 	}
 	return res;
 }
@@ -2799,15 +2859,15 @@ int nextcb = 0;
 int
 nextvar(
 	int *datalen,
-	char **datap,
+	const char **datap,
 	char **vname,
 	char **vvalue
 	)
 {
-	register char *cp;
-	register char *np;
-	register char *cpend;
-	register char *npend;	/* character after last */
+	const char *cp;
+	char *np;
+	const char *cpend;
+	char *npend;	/* character after last */
 	int quoted = 0;
 	static char name[MAXVARLEN];
 	static char value[MAXVALLEN];
@@ -2819,9 +2879,9 @@ nextvar(
 	 * Space past commas and white space
 	 */
 	while (cp < cpend && (*cp == ',' || isspace((int)*cp)))
-	    cp++;
+		cp++;
 	if (cp == cpend)
-	    return 0;
+		return 0;
 	
 	/*
 	 * Copy name until we hit a ',', an '=', a '\r' or a '\n'.  Backspace
@@ -2930,7 +2990,7 @@ findvar(
 void
 printvars(
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int sttype,
 	int quiet,
@@ -2951,14 +3011,14 @@ static void
 rawprint(
 	int datatype,
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int quiet,
 	FILE *fp
 	)
 {
-	register char *cp;
-	register char *cpend;
+	const char *cp;
+	const char *cpend;
 
 	/*
 	 * Essentially print the data as is.  We reformat unprintables, though.
@@ -3150,7 +3210,7 @@ static void
 cookedprint(
 	int datatype,
 	int length,
-	char *data,
+	const char *data,
 	int status,
 	int quiet,
 	FILE *fp

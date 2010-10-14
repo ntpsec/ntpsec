@@ -20,7 +20,7 @@
 /* Function Prototypes */
 int ntpq_dogetassoc(void);
 char ntpq_decodeaddrtype(sockaddr_u *sock);
-int ntpq_doquerylist(struct varlist *, int , int , int , u_short *, int *, char **datap );
+int ntpq_doquerylist(struct varlist *, int , int , int , u_short *, int *, const char **datap);
 
 
 /* the following functions are required internally by a number of libntpq functions 
@@ -43,8 +43,18 @@ char ntpq_decodeaddrtype(sockaddr_u *sock)
 	return decodeaddrtype(sock);
 }
 
-int ntpq_doquerylist(struct varlist *vlist, int op, int associd, int auth, u_short *rstatus, int *dsize, char **datap )
+int
+ntpq_doquerylist(
+	struct varlist *vlist,
+	int op,
+	int associd,
+	int auth,
+	u_short *rstatus,
+	int *dsize,
+	const char **datap
+	)
 {
-    return doquerylist(vlist, op, associd, auth, rstatus, dsize,  &*datap );
+	return doquerylist(vlist, op, associd, auth, rstatus, dsize,
+			   datap);
 }
 

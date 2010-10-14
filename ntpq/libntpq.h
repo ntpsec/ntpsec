@@ -83,7 +83,7 @@ extern struct ntpq_varlist ntpq_varlist[MAXLIST];
 extern int ntpq_openhost(char *);
 extern int ntpq_closehost(void);
 extern int ntpq_queryhost(unsigned short VARSET, unsigned short association, char *resultbuf, int maxlen);
-extern size_t ntpq_getvar(char *resultbuf, size_t datalen,
+extern size_t ntpq_getvar(const char *resultbuf, size_t datalen,
 			  const char *varname, char *varvalue,
 			  size_t maxlen);
 extern int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen );
@@ -105,6 +105,6 @@ extern int ntpq_read_assoc_clockvars( int associd, char *resultbuf, int maxsize 
 #ifndef _LIBNTPQSUBSC
 extern int ntpq_dogetassoc(void);
 extern char ntpq_decodeaddrtype(sockaddr_u *sock);
-extern int ntpq_doquerylist(struct ntpq_varlist *, int , int , int , u_short *, int *, char **datap );
+extern int ntpq_doquerylist(struct ntpq_varlist *, int , int , int , u_short *, int *, const char **datap );
 #endif
 

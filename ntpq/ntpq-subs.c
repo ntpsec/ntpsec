@@ -21,12 +21,12 @@ int 	maxhostlen;
  */
 static	int	checkassocid	(u_int32);
 static	struct varlist *findlistvar (struct varlist *, char *);
-static	void	doaddvlist	(struct varlist *, char *);
-static	void	dormvlist	(struct varlist *, char *);
+static	void	doaddvlist	(struct varlist *, const char *);
+static	void	dormvlist	(struct varlist *, const char *);
 static	void	doclearvlist	(struct varlist *);
 static	void	makequerydata	(struct varlist *, int *, char *);
 static	int	doquerylist	(struct varlist *, int, int, int, 
-				 u_short *, int *, char **);
+				 u_short *, int *, const char **);
 static	void	doprintvlist	(struct varlist *, FILE *);
 static	void	addvars 	(struct parse *, FILE *);
 static	void	rmvars		(struct parse *, FILE *);
@@ -57,7 +57,7 @@ static	void	radiostatus (struct parse *, FILE *);
 static	void	pstatus 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
-static	int	doprintpeers	(struct varlist *, int, int, int, char *, FILE *, int);
+static	int	doprintpeers	(struct varlist *, int, int, int, const char *, FILE *, int);
 static	int	dogetpeers	(struct varlist *, int, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
 static	void	peers		(struct parse *, FILE *);
@@ -257,7 +257,7 @@ findlistvar(
 static void
 doaddvlist(
 	struct varlist *vlist,
-	char *vars
+	const char *vars
 	)
 {
 	register struct varlist *vl;
@@ -292,7 +292,7 @@ doaddvlist(
 static void
 dormvlist(
 	struct varlist *vlist,
-	char *vars
+	const char *vars
 	)
 {
 	register struct varlist *vl;
@@ -395,7 +395,7 @@ doquerylist(
 	int auth,
 	u_short *rstatus,
 	int *dsize,
-	char **datap
+	const char **datap
 	)
 {
 	char data[CTL_MAX_DATA_LEN];
@@ -502,7 +502,7 @@ dolist(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -577,7 +577,7 @@ writelist(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int associd;
 	int dsize;
@@ -650,7 +650,7 @@ writevar(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int associd;
 	int dsize;
@@ -874,7 +874,7 @@ dogetassoc(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -903,9 +903,9 @@ dogetassoc(
 
 	numassoc = 0;
 	while (dsize > 0) {
-		assoc_cache[numassoc].assid = ntohs(*((u_short *)datap));
+		assoc_cache[numassoc].assid = ntohs(*((const u_short *)datap));
 		datap += sizeof(u_short);
-		assoc_cache[numassoc].status = ntohs(*((u_short *)datap));
+		assoc_cache[numassoc].status = ntohs(*((const u_short *)datap));
 		datap += sizeof(u_short);
 		if (++numassoc >= MAXASSOC)
 			break;
@@ -1172,7 +1172,7 @@ saveconfig(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -1190,10 +1190,8 @@ saveconfig(
 
 	if (0 == dsize)
 		fprintf(fp, "(no response message, curiously)");
-	else {
-		datap[dsize] = '\0';
-		fprintf(fp, "%s", datap);
-	}
+	else
+		fprintf(fp, "%.*s", dsize, datap);
 }
 
 
@@ -1239,7 +1237,7 @@ pstatus(
 	FILE *fp
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int associd;
 	int dsize;
@@ -1422,7 +1420,7 @@ doprintpeers(
 	int associd,
 	int rstatus,
 	int datalen,
-	char *data,
+	const char *data,
 	FILE *fp,
 	int af
 	)
@@ -1643,7 +1641,7 @@ dogetpeers(
 	int af
 	)
 {
-	char *datap;
+	const char *datap;
 	int res;
 	int dsize;
 	u_short rstatus;
@@ -1865,18 +1863,19 @@ config (
 	char *cfgcmd;
 	u_short rstatus;
 	int rsize;
-	char *rdata;
+	const char *rdata;
+	char *resp;
 	int res;
 	int col;
 	int i;
 
 	cfgcmd = pcmd->argval[0].string;
 
-	if (debug > 2) {
-		printf("In Config\n");
-		printf("Keyword = %s\n", pcmd->keyword);
-		printf("Command = %s\n", cfgcmd);
-	}
+	if (debug > 2)
+		fprintf(stderr, 
+			"In Config\n"
+			"Keyword = %s\n"
+			"Command = %s\n", pcmd->keyword, cfgcmd);
 
 	res = doquery(CTL_OP_CONFIGURE, 0, 1, strlen(cfgcmd), cfgcmd,
 		      &rstatus, &rsize, &rdata);
@@ -1886,10 +1885,13 @@ config (
 
 	if (rsize > 0 && '\n' == rdata[rsize - 1])
 		rsize--;
-	rdata[rsize] = '\0';
+
+	resp = emalloc(rsize + 1);
+	memcpy(resp, rdata, rsize);
+	resp[rsize] = '\0';
 
 	col = -1;
-	if (1 == sscanf(rdata, "column %d syntax error", &col)
+	if (1 == sscanf(resp, "column %d syntax error", &col)
 	    && col >= 0 && (size_t)col <= strlen(cfgcmd) + 1) {
 		if (interactive) {
 			printf("______");	/* "ntpq> " */
@@ -1900,7 +1902,8 @@ config (
 			putchar('_');
 		printf("^\n");
 	}
-	printf("%s\n", rdata);
+	printf("%s\n", resp);
+	free(resp);
 }
 
 
@@ -1925,7 +1928,7 @@ config_from_file (
 {
 	u_short rstatus;
 	int rsize;
-	char *rdata;
+	const char *rdata;
 	int res;
 	FILE *config_fd;
 	char config_cmd[MAXLINE];
@@ -1933,11 +1936,12 @@ config_from_file (
 	int i;
 	int retry_limit;
 
-	if (debug > 2) {
-		printf("In Config\n");
-		printf("Keyword = %s\n", pcmd->keyword);
-		printf("Filename = %s\n", pcmd->argval[0].string);
-	}
+	if (debug > 2)
+		fprintf(stderr,
+			"In Config\n"
+			"Keyword = %s\n"
+			"Filename = %s\n", pcmd->keyword,
+			pcmd->argval[0].string);
 
 	config_fd = fopen(pcmd->argval[0].string, "r");
 	if (NULL == config_fd) {
@@ -1974,8 +1978,8 @@ config_from_file (
 			rsize--;
 		if (rsize > 0 && '\r' == rdata[rsize - 1])
 			rsize--;
-		rdata[rsize] = '\0';
-		printf("Line No: %d %s: %s", i, rdata, config_cmd);
+		printf("Line No: %d %.*s: %s", i, rsize, rdata,
+		       config_cmd);
 	}
 	printf("Done sending file\n");
 	fclose(config_fd);
