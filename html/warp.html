@@ -9,7 +9,7 @@
 <body>
 <h3>How NTP Works</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->14-Oct-2010  3:26<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->14-Oct-2010  16:45<!-- #EndDate -->
   UTC</p>
 <h4>Related Links</h4>
 <script type="text/javascript" language="javascript" src="scripts/special.txt"></script>
@@ -28,7 +28,8 @@
   <p><img src="pic/fig_3_1.gif" alt="gif"></p>
   <p>Figure 1. NTP Daemon Processes and Algorithms</p>
 </div>
-<p>The overall organization of the NTP daemon is shown in Figure 1. It is useful in this context to consider the daemon as both a client of upstream servers and as a server for downstream clients. It includes a pair of peer/poll processes for each reference clock or remote  server used as a synchronization source. The poll process sends NTP packets at intervals ranging from 8 s to 36 hr. The peer process receives NTP packets and  performs  the packet sanity tests    of the <a href="decode.html#flash">flash status word</a>. Packets that fail one or more of these tests are summarily discarded. Otherwise, the peer process runs the on-wire protocol that uses four raw timestamps: the <em>origin timestamp</em> <em>T</em><sub>1</sub> upon departure of the client request, the <em>receive timestamp</em> <em>T</em><sub>2</sub> upon arrival at the server, the <em>transmit timestamp</em> <em>T</em><sub>3</sub> upon departure of the server reply, and the <em>destination timestamp</em> <em>T</em><sub>4</sub> upon arrival at the client. These timestamps, which are recorded by the <tt>rawstats</tt> option of the <a href="monopt.html#filegen"><tt>filegen</tt></a> command, are used to calculate the clock offset and roundtrip delay samples:</p>
+<p>The overall organization of the NTP daemon is shown in Figure 1. It is useful in this context to consider the daemon as both a client of upstream servers and as a server for downstream clients. It includes a pair of peer/poll processes for each reference clock or remote  server used as a synchronization source. Packets are exchanged between the client and server using the <em>on-wire protocol</em> described in  the white paper <a href="http://www.eecis.udel.edu/~mills/onwire.html">Analysis and Simulation of the NTP On-Wire Protocols</a>. The protocol is resistant to lost, replayed or spoofed packets.</p>
+<p> The poll process sends NTP packets at intervals ranging from 8 s to 36 hr. The peer process receives NTP packets and  performs  the packet sanity tests    of the <a href="decode.html#flash">flash status word</a>. Packets that fail one or more of these tests are summarily discarded. Otherwise, the peer process runs the on-wire protocol that uses four raw timestamps: the <em>origin timestamp</em> <em>T</em><sub>1</sub> upon departure of the client request, the <em>receive timestamp</em> <em>T</em><sub>2</sub> upon arrival at the server, the <em>transmit timestamp</em> <em>T</em><sub>3</sub> upon departure of the server reply, and the <em>destination timestamp</em> <em>T</em><sub>4</sub> upon arrival at the client. These timestamps, which are recorded by the <tt>rawstats</tt> option of the <a href="monopt.html#filegen"><tt>filegen</tt></a> command, are used to calculate the clock offset and roundtrip delay samples:</p>
 <div align="center">
   <p>offset = [(<em>T</em><sub>2</sub> -<em> T</em><sub>1</sub>) + (<em>T</em><sub>3</sub> - <em>T</em><sub>4</sub>)] / 2<br>
     delay = (<em>T</em><sub>4</sub> - <em>T</em><sub>1</sub>) - (<em>T</em><sub>3</sub> - <em>T</em><sub>2</sub>).</p>

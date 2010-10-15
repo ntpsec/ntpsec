@@ -12,7 +12,7 @@
 Walt Kelly</a>
 <p>The chicken is getting configuration advice.</p>
 <p>Last update:
-	<!-- #BeginDate format:En2m -->12-Oct-2010  1:14<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->14-Oct-2010  21:22<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -60,17 +60,17 @@ Walt Kelly</a>
 	<dd>Send and receive packets authenticated by the Autokey scheme described
 		in the <a href="autokey.html">Autokey Public Key Authentication</a> page. This option is mutually exclusive with the <tt>key</tt> option.</dd>
 	<dt><tt>burst</tt></dt>
-	<dd>When the server is reachable, send a burst of eight packets instead of the usual one. The packet spacing is normally 2 s; however, the spacing between	the first and second packets can be changed with the <a href="miscopt.html"><tt>calldelay</tt></a> command to allow additional time for a modem or ISDN call to complete. This option is valid only with  the <tt>server</tt> command and type s addresses. It is a recommended option when the <tt>maxpoll</tt> option is greater than	10 (1024 s). Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
-	<dt><tt>iburst</tt></dt>
-	<dd>When the server is unreachable, send a burst of eight packets instead of the usual one. The packet spacing is normally 2 s; however, the spacing between	the first and second packets can be changed with the <a href="miscopt.html"><tt>calldelay</tt></a> command to allow additional time for a modem or ISDN call to complete. This option is valid only with the <tt>server</tt> command and type s addresses. It is a recommended option with this command. Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
-	<dt><tt>key</tt> <i><tt>key</tt></i></dt>
+	<dd>When the server is reachable, send a burst of  packets instead of the usual one.  This option is valid only with  the <tt>server</tt> command and type s addresses. It is a recommended option when the <tt>maxpoll</tt> option is greater than	10 (1024 s). Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
+  <dt><tt>iburst</tt></dt>
+	<dd>When the server is unreachable, send a burst of  packets instead of the usual one.  This option is valid only with the <tt>server</tt> command and type s addresses. It is a recommended option with this command. Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
+  <dt><tt>key</tt> <i><tt>key</tt></i></dt>
 	<dd>Send and receive packets authenticated by the symmetric key scheme described in the <a href="authentic.html">Authentication Support</a> page. The <i><tt>key</tt></i> specifies the key identifier with values from 1 to 65534, inclusive. This option is mutually exclusive with the <tt>autokey</tt> option.</dd>	<dt><tt>minpoll <i>minpoll<br>
 	</i></tt><tt>maxpoll <i>maxpoll</i></tt></dt>
 	<dd>These options specify the minimum and maximum poll intervals for NTP messages, in seconds as a power of two. The maximum poll interval defaults to 10 (1024 s), but can be increased by the <tt>maxpoll</tt> option to an upper limit of 17 (36 hr). The minimum poll interval defaults to 6 (64 s), but can be decreased by the <tt>minpoll</tt> option to a lower limit of 3 (8 s).  Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
 	<dt><tt>mode <i>option</i></tt></dt>
 	<dd>Pass the <tt><i>option</i></tt> to a reference clock driver, where <tt><i>option</i></tt> is an integer in the range from 0 to 255, inclusive. This option is valid	only with type r addresses.</dd>
 	<dt><tt>noselect</tt></dt>
-	<dd>Marks the server or peer to be ignored by the selection algorithm but visible to the monitoring program. This option is ignored with the <tt>broadcast</tt> command.</dd>
+	<dd>Marks the server or peer to be ignored by the selection algorithm as unreachable, but visible to the monitoring program.  This option is valid only with the <tt>server</tt> and <tt>peer</tt> commands.</dd>
 	<dt><tt>preempt</tt></dt>
 	<dd>Specifies the association as preemptable rather than the default persistent.	This option is ignored with the <tt>broadcast</tt> command and is most useful with the <tt>manycastclient</tt> and <tt>pool</tt> commands.</dd>
 	<dt><tt>prefer</tt></dt>
@@ -88,9 +88,9 @@ or outgoing NTP packets. Versions 1-4 are the choices, with version 4 the defaul
 <h4 id="aux">Auxiliary Commands</h4>
 <dl>
 	<dt id="broadcastclient"><tt>broadcastclient</tt></dt>
-	<dd>Enable reception of broadcast server messages to any local interface (type	b address). Ordinarily, upon receiving a broadcast message for the first time, the broadcast client measures the nominal server propagation delay using a brief client/server exchange, after which it continues in listen-only mode. If a nonzero value is specified in the <tt>broadcastdelay</tt> command, the value becomes the delay and the volley is not executed. Note: the <tt>novolley</tt> option has been deprecated for future enhancements. Note that, in order to avoid accidental or malicious disruption in this mode, both the server and client should operate using symmetric key or public key authentication as described in the <a href="authopt.html">Authentication Options</a> page. Note that the <tt>novolley</tt> keyword is incompatible with public key authentication.</dd>
-	<dt id="manycastserver"><tt>manycastserver <i>address</i> [...]</tt></dt>
-	<dd>Enable reception of manycast client messages (type m)to the multicasts group address(es) (type m) specified. At least one address is required. Note that, in order to avoid accidental or malicious disruption, both the server and client should operate using symmetric key or public key authentication as described in the <a href="authopt.html">Authentication Options</a> page.</dd>
+	<dd>Enable reception of broadcast server messages to any local interface (type	b address). Ordinarily, upon receiving a broadcast message for the first time, the broadcast client measures the nominal server propagation delay using a brief client/server exchange, after which it continues in listen-only mode. If a nonzero value is specified in the <tt>broadcastdelay</tt> command, the value becomes the delay and the volley is not executed. Note: the <tt>novolley</tt> option has been deprecated for future enhancements. Note that, in order to avoid accidental or malicious disruption in this mode, both the server and client should operate using symmetric key or public key authentication as described in the <a href="authopt.html">Authentication Options</a> page. Note that the volley is required with public key authentication in order to run the Autokey protocol..</dd>
+  <dt id="manycastserver"><tt>manycastserver <i>address</i> [...]</tt></dt>
+	<dd>Enable reception of manycast client messages (type m) to the multicasts group address(es) (type m) specified. At least one address is required. Note that, in order to avoid accidental or malicious disruption, both the server and client should operate using symmetric key or public key authentication as described in the <a href="authopt.html">Authentication Options</a> page.</dd>
 	<dt id="multicastclient"><tt>multicastclient <i>address</i> [...]</tt></dt>
 	<dd>Enable reception of multicast server messages to the multicast group address(es) (type m) specified. Upon receiving a message for the first time, the multicast client measures the nominal server propagation delay using a brief client/server exchange with the server, then enters the broadcast client mode, in which it synchronizes to succeeding multicast messages. Note that, in order to avoid accidental or malicious disruption in this mode, both the server and client should operate using symmetric key or public key authentication as described in the <a href="authopt.html">Authentication Options</a> page.</dd>
 </dl>
