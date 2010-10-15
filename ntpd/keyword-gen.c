@@ -42,7 +42,6 @@ struct key_tok ntp_keywords[] = {
 { "broadcast",		T_Broadcast,		FOLLBY_STRING },
 { "broadcastclient",	T_Broadcastclient,	FOLLBY_TOKEN },
 { "broadcastdelay",	T_Broadcastdelay,	FOLLBY_TOKEN },
-{ "calldelay",		T_Calldelay,		FOLLBY_TOKEN },
 { "disable",		T_Disable,		FOLLBY_TOKEN },
 { "driftfile",		T_Driftfile,		FOLLBY_STRING },
 { "enable",		T_Enable,		FOLLBY_TOKEN },
@@ -105,7 +104,6 @@ struct key_tok ntp_keywords[] = {
 { "ident",		T_Ident,		FOLLBY_STRING },
 { "pw",			T_Pw,			FOLLBY_STRING },
 { "randfile",		T_Randfile,		FOLLBY_STRING },
-{ "sign",		T_Sign,			FOLLBY_STRING },
 { "digest",		T_Digest,		FOLLBY_STRING },
 /*** MONITORING COMMANDS ***/
 /* stat */
