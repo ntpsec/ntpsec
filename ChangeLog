@@ -3,6 +3,7 @@
 * [Bug 1663] ntpdsim should not open net sockets.
 * [Bug 1665] from 4.2.6p3: is_anycast() u_int32_t should be u_int32.
 * from 4.2.6p3: ntpsnmpd, libntpq warning cleanup.
+* Remove 'calldelay' and 'sign' keywords (Dave Mills).
 * Documentation updates from Dave Mills.
 (4.2.7p63) 2010/10/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1080] from 4.2.6p3-RC3: ntpd on ipv6 routers very chatty.

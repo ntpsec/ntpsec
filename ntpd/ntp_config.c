@@ -1797,10 +1797,6 @@ config_auth(
 			item = CRYPTO_CONF_RAND;
 			break;
 
-		case T_Sign:
-			item = CRYPTO_CONF_SIGN;
-			break;
-
 		case T_Digest:
 			item = CRYPTO_CONF_NID;
 			break;
@@ -1863,7 +1859,7 @@ config_auth(
 #ifdef AUTOKEY
 	/* crypto revoke command */
 	if (ptree->auth.revoke)
-		sys_revoke = ptree->auth.revoke;
+		sys_revoke = 1 << ptree->auth.revoke;
 #endif	/* AUTOKEY */
 }
 
