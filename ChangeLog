@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1659] Need CLOCK_TRUETIME not CLOCK_TRUE.
 * [Bug 1665] is_anycast() u_int32_t should be u_int32.
 * ntpsnmpd, libntpq warning cleanup.
 
