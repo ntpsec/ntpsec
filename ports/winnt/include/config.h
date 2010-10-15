@@ -344,7 +344,7 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define CLOCK_SPECTRACOM	/* refclock_wwvb.c */
 # define CLOCK_TRIMBLEDC
 # define CLOCK_TRIMTSIP 1
-# define CLOCK_TRUE
+# define CLOCK_TRUETIME
 
 # define NTP_LITTLE_ENDIAN		/* from libntp.mak */
 # define NTP_POSIX_SOURCE
