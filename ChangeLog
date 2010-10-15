@@ -1,5 +1,6 @@
 * [Bug 1584] from 4.2.6p3-RC3: ntpsnmpd OID must be mib-2.197.
 * [Bug 1659] from 4.2.6p3: Need CLOCK_TRUETIME not CLOCK_TRUE.
+* [Bug 1663] ntpdsim should not open net sockets.
 * [Bug 1665] from 4.2.6p3: is_anycast() u_int32_t should be u_int32.
 * from 4.2.6p3: ntpsnmpd, libntpq warning cleanup.
 * Documentation updates from Dave Mills.

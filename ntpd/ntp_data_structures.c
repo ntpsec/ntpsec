@@ -21,13 +21,11 @@
  * is determined by a function 'get_order' which is supplied to the
  * priority_queue
  */
-
-
 queue *debug_create_priority_queue(
-	int (*get_order)(void *, void *) 
+	q_order_func	get_order
 #ifdef _CRTDBG_MAP_ALLOC
-	, const char *sourcefile
-	, int line_num
+	, const char *	sourcefile
+	, int		line_num
 #endif	
 	)
 {
@@ -234,7 +232,7 @@ void append_queue(
 /* C is not Lisp and does not allow anonymous lambda functions :-(. 
  * So define a get_fifo_order function here
  */
-int get_fifo_order(void *el1, void *el2)
+int get_fifo_order(const void *el1, const void *el2)
 {
 	return 1;
 }

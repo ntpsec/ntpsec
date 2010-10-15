@@ -49,8 +49,8 @@
  * Finally, we call the hourly procedure to do cleanup and print a
  * message.
  */
-volatile int interface_interval = 300;     /* update interface every 5 minutes as default */
-	  
+volatile int interface_interval;     /* init_io() sets def. 300s */
+
 /*
  * Alarm flag. The mainline code imports this.
  */

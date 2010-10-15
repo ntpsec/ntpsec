@@ -15,9 +15,13 @@
 #include "ntpsim.h"
 #include "ntp_data_structures.h"
 
+/* forward prototypes */
+int determine_event_ordering(const Event *e1, const Event *e2);
+int determine_recv_buf_ordering(const struct recvbuf *b1, 
+				const struct recvbuf *b2);
+void create_server_associations(void);
 
 /* Global Variable Definitions */
-
 sim_info simulation;		/* Simulation Control Variables */
 local_clock_info simclock;	/* Local Clock Variables */
 queue *event_queue;		/* Event Queue */
@@ -29,33 +33,43 @@ void (*event_ptr[]) (Event *) = {
 };			/* Function pointer to the events */
 
 
-/* Define a function to compare two events to determine which one occurs first
+/*
+ * Define a function to compare two events to determine which one occurs
+ * first.
  */
-
-int determine_event_ordering(Event *e1, Event *e2);
-
-int determine_event_ordering(Event *e1, Event *e2)
+int
+determine_event_ordering(
+	const Event *e1,
+	const Event *e2
+	)
 {
-    return (e1->time - e2->time);
+	return (e1->time - e2->time);
 }
 
-/* Define a function to compare two received packets to determine which one
- * is received first
+
+/*
+ * Define a function to compare two received packets to determine which
+ * one is received first.
  */
-int determine_recv_buf_ordering(struct recvbuf *b1, struct recvbuf *b2);
-
-int determine_recv_buf_ordering(struct recvbuf *b1, struct recvbuf *b2)
+int
+determine_recv_buf_ordering(
+	const struct recvbuf *b1,
+	const struct recvbuf *b2
+	)
 {
-    double recv_time1, recv_time2;
+	double recv_time1;
+	double recv_time2;
 
-    /* Simply convert the time received to double and subtract */
-    LFPTOD(&b1->recv_time, recv_time1);
-    LFPTOD(&b2->recv_time, recv_time2);
-    return ((int)(recv_time1 - recv_time2));
+	/* Simply convert the time received to double and subtract */
+	LFPTOD(&b1->recv_time, recv_time1);
+	LFPTOD(&b2->recv_time, recv_time2);
+
+	return (int)(recv_time1 - recv_time2);
 }
+
 
 /* Define a function to create the server associations */
-void create_server_associations()
+void create_server_associations(void)
 {
     int i;
     for (i = 0;i < simulation.num_of_servers;++i) {
@@ -80,80 +94,79 @@ void create_server_associations()
 
 /* Main Simulator Code */
 
-int ntpsim(int argc, char *argv[])
+int
+ntpsim(
+	int	argc,
+	char *	argv[]
+	)
 {
-    Event *curr_event;
-    struct timeval seed;
+	Event *		curr_event;
+	struct timeval	seed;
 
-    /* Initialize the local Clock 
-     */
-    simclock.local_time = 0;
-    simclock.adj = 0;
-    simclock.slew = 0;
+	/* Initialize the local Clock */
+	simclock.local_time = 0;
+	simclock.adj = 0;
+	simclock.slew = 0;
 
-    /* Initialize the simulation 
-     */
-    simulation.num_of_servers = 0;
-    simulation.beep_delay = BEEP_DLY;
-    simulation.sim_time = 0;
-    simulation.end_time = SIM_TIME;
+	/* Initialize the simulation */
+	simulation.num_of_servers = 0;
+	simulation.beep_delay = BEEP_DLY;
+	simulation.sim_time = 0;
+	simulation.end_time = SIM_TIME;
 
-    /*
-     * Initialize ntp variables
-     */
-    initializing = 1;
-    init_auth();
-    init_util();
-    init_restrict();
-    init_mon();
-    init_timer();
-    init_lib();
-    init_request();
-    init_control();
-    init_peer();
-    init_proto();
-    init_io();
-    init_loopfilter();
-    mon_start(MON_OFF);    
+	/* Initialize ntp modules */
+	initializing = 1;
+	init_auth();
+	init_util();
+	init_restrict();
+	init_mon();
+	init_timer();
+	init_lib();
+	init_request();
+	init_control();
+	init_peer();
+	init_proto();
+	init_loopfilter();
+	mon_start(MON_OFF);
 
-    /* Call getconfig to parse the configuration file */
-    getconfig(argc, argv);
-    initializing = 0;
-    loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
+	/* Call getconfig to parse the configuration file */
+	getconfig(argc, argv);
+	initializing = 0;
+	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 
-    /*
-     * Watch out here, we want the real time, not the silly stuff.
-     */
-    gettimeofday(&seed, NULL);
-    ntp_srandom(seed.tv_usec);
+	/*
+	 * Watch out here, we want the real time, not the silly stuff.
+	 */
+	gettimeofday(&seed, NULL);
+	ntp_srandom(seed.tv_usec);
 
+	/* Initialize the event queue */
+	event_queue = create_priority_queue((q_order_func)
+	    determine_event_ordering);
 
-    /* Initialize the event queue */
-    event_queue = create_priority_queue((int(*)(void *, void*)) 
-					determine_event_ordering);
+	/* Initialize the receive queue */
+	recv_queue = create_priority_queue((q_order_func)
+	    determine_recv_buf_ordering);
 
-    /* Initialize the receive queue */
-    recv_queue = create_priority_queue((int(*)(void *, void*))
-				       determine_recv_buf_ordering);
+	/* Push a beep and a timer on the event queue */
+	enqueue(event_queue, event(0, BEEP));
+	enqueue(event_queue, event(simulation.sim_time + 1.0, TIMER));
 
-    /* Push a beep and a timer on the event queue */
-    enqueue(event_queue, event(0, BEEP));
-    enqueue(event_queue, event(simulation.sim_time + 1.0, TIMER));
-    /* 
-     * Pop the queue until nothing is left or time is exceeded
-     */
-    /* maxtime = simulation.sim_time + simulation.end_time;*/
-    while (simulation.sim_time <= simulation.end_time &&
+	/* 
+	 * Pop the queue until nothing is left or time is exceeded
+	 */
+	/* maxtime = simulation.sim_time + simulation.end_time;*/
+	while (simulation.sim_time <= simulation.end_time &&
 	   (!empty(event_queue))) {
-	curr_event = dequeue(event_queue);
-	/* Update all the clocks to the time on the event */
-	sim_update_clocks(curr_event);
+		curr_event = dequeue(event_queue);
+		/* Update all the clocks to the time on the event */
+		sim_update_clocks(curr_event);
 
-	/* Execute the function associated with the event */
-	event_ptr[curr_event->function](curr_event);
-	free_node(curr_event);
-    }
-    return (0);
+		/* Execute the function associated with the event */
+		(*event_ptr[curr_event->function])(curr_event);
+		free_node(curr_event);
+	}
+	return (0);
 }
 
 

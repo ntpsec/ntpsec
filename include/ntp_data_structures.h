@@ -27,10 +27,12 @@ typedef struct node {
 } node;
 #define node_next nodeu.next
 
+typedef int (*q_order_func)(const void *, const void *);
+
 typedef struct Queue {
-	int (*get_order)(void *, void *);
-	node *front;
-	int no_of_elements;
+	q_order_func	get_order;
+	node *		front;
+	int		no_of_elements;
 } queue;
 
 
@@ -49,7 +51,7 @@ queue *enqueue(queue *my_queue, void *my_node);
 void append_queue(queue *q1, queue *q2);
 void *dequeue(queue *my_queue);
 int get_no_of_elements(queue *my_queue);
-int get_fifo_order(void *el1, void *el2);
+int get_fifo_order(const void *el1, const void *el2);
 
 /*
  * Preserve original callsite __FILE__ and __LINE__ for these 
@@ -64,16 +66,18 @@ int get_fifo_order(void *el1, void *el2);
 #endif
 
 queue *debug_create_priority_queue(
-	int (*get_order)(void *, void *)
+	q_order_func	get_order
 #ifdef _CRTDBG_MAP_ALLOC
-	, const char *, int	/* __FILE__, __LINE__ */
-#endif
+	, const char *	sourcefile
+	, int		line_num
+#endif	
 	);
 
 void *debug_get_node(
-	size_t
+	size_t		size
 #ifdef _CRTDBG_MAP_ALLOC
-	, const char *, int	/* __FILE__, __LINE__ */
+	, const char *	sourcefile
+	, int		line_num
 #endif
 	);
 

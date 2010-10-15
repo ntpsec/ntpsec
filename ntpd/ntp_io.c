@@ -587,15 +587,15 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
  */
 
 /*
- * init_io - initialize I/O data structures and call socket creation routine
+ * init_io - initialize I/O module.
  */
 void
 init_io(void)
 {
-	/*
-	 * Init buffer free list and stat counters
-	 */
+	/* Init buffer free list and stat counters */
 	init_recvbuff(RECV_INIT);
+	/* update interface every 5 minutes as default */
+	interface_interval = 300;
 
 #ifdef SYS_WINNT
 	init_io_completion_port();
