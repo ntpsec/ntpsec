@@ -171,6 +171,9 @@ ntpsnmpd_cut_string(
 	int l;
 	size_t str_cnt;
 
+	if (maxsize < 1)
+		return 0;
+
 	str_cnt = strlen(string);
 	j = 0;
 	memset(dest, 0, maxsize);
@@ -182,7 +185,7 @@ ntpsnmpd_cut_string(
 		else if (l == fieldnumber && j < maxsize)
 			dest[j++] = string[i]; 
 	}
-	j = max(j, maxsize - 1);
+	j = min(j, maxsize - 1);
 	dest[j] = '\0';
 
 	return j;
