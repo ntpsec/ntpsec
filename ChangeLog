@@ -1,5 +1,6 @@
 * [Bug 1584] from 4.2.6p3-RC4: wrong SNMP type for precision,
   resolution.
+* Remove 'calldelay' and 'sign' remnants from parser, ntp_config.c.
 (4.2.7p64) 2010/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1584] from 4.2.6p3-RC3: ntpsnmpd OID must be mib-2.197.
 * [Bug 1659] from 4.2.6p3-RC4: Need CLOCK_TRUETIME not CLOCK_TRUE.

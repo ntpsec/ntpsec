@@ -554,7 +554,6 @@ dump_config_tree(
 			break;
 			
 		/* ints */
-		case T_Calldelay:
 #ifdef AUTOKEY
 		case T_Automax:
 #endif
@@ -3415,9 +3414,6 @@ config_vars(
 		switch (curr_var->attr) {
 		case T_Broadcastdelay:
 			proto_config(PROTO_BROADDELAY, 0, curr_var->value.d, NULL);
-			break;
-		case T_Calldelay:
-			proto_config(PROTO_CALLDELAY, curr_var->value.i, 0, NULL);
 			break;
 		case T_Tick:
 			proto_config(PROTO_ADJ, 0, curr_var->value.d, NULL);

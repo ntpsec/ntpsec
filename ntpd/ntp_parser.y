@@ -78,7 +78,6 @@
 %token	<Integer>	T_Broadcastdelay
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
-%token	<Integer>	T_Calldelay
 %token	<Integer>	T_Ceiling
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
@@ -195,7 +194,6 @@
 %token	<Integer>	T_Saveconfigdir
 %token	<Integer>	T_Server
 %token	<Integer>	T_Setvar
-%token	<Integer>	T_Sign
 %token	<Integer>	T_Source
 %token	<Integer>	T_Statistics
 %token	<Integer>	T_Stats
@@ -499,8 +497,6 @@ crypto_command
 	|	T_Pw T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Randfile T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Sign	T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Digest T_String
 			{ $$ = create_attr_sval($1, $2); }
@@ -913,8 +909,6 @@ miscellaneous_command
 
 	|	T_Broadcastdelay number
 			{ enqueue(cfgt.vars, create_attr_dval($1, $2)); }
-	|	T_Calldelay T_Integer
-			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
 	|	T_Tick number
 			{ enqueue(cfgt.vars, create_attr_dval($1, $2)); }
 	|	T_Driftfile drift_parm
