@@ -1,3 +1,4 @@
+(4.2.7p65) 2010/10/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1584] from 4.2.6p3-RC4: wrong SNMP type for precision,
   resolution.
 * Remove 'calldelay' and 'sign' remnants from parser, ntp_config.c.
