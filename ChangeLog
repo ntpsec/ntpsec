@@ -403,6 +403,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3-RC4) 2010/10/16 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1584] wrong SNMP type for precision, resolution.
 * [Bug 1659] Need CLOCK_TRUETIME not CLOCK_TRUE.
