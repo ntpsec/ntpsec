@@ -1,8 +1,10 @@
+* [Bug 1584] from 4.2.6p3-RC4: wrong SNMP type for precision,
+  resolution.
 (4.2.7p64) 2010/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1584] from 4.2.6p3-RC3: ntpsnmpd OID must be mib-2.197.
-* [Bug 1659] from 4.2.6p3-RC3: Need CLOCK_TRUETIME not CLOCK_TRUE.
+* [Bug 1659] from 4.2.6p3-RC4: Need CLOCK_TRUETIME not CLOCK_TRUE.
 * [Bug 1663] ntpdsim should not open net sockets.
-* [Bug 1665] from 4.2.6p3-RC3: is_anycast() u_int32_t should be u_int32.
+* [Bug 1665] from 4.2.6p3-RC4: is_anycast() u_int32_t should be u_int32.
 * from 4.2.6p3: ntpsnmpd, libntpq warning cleanup.
 * Remove 'calldelay' and 'sign' keywords (Dave Mills).
 * Documentation updates from Dave Mills.
@@ -401,6 +403,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1584] wrong SNMP type for precision, resolution.
 * [Bug 1659] Need CLOCK_TRUETIME not CLOCK_TRUE.
 * [Bug 1665] is_anycast() u_int32_t should be u_int32.
 * ntpsnmpd, libntpq warning cleanup.
