@@ -11,12 +11,12 @@
 #define NTPSNMPSUBAGENTOBJECT_H
 
 /* Function Prototypes */
-#if 0		/* appears unused */
-int ntpsnmpd_strip_string(char *string);
-#endif		/* #if 0 -- appears unused */
-size_t ntpsnmpd_parse_string(char *src, char *field, size_t fieldsize, char *value, size_t valuesize);
-size_t ntpsnmpd_cut_string(char *src, char *dest, const char delim, int fieldnumber, size_t maxsize);
-size_t read_ntp_value(char *variable, char *rbuffer, size_t maxlength);
+size_t ntpsnmpd_parse_string(const char *string, char *field, size_t
+			     fieldsize, char *value, size_t valuesize);
+size_t ntpsnmpd_cut_string(const char *string, char *dest, char delim,
+			   int fieldnumber, size_t maxsize);
+size_t read_ntp_value(const char *variable, char *value,
+		      size_t valuesize);
 
 /* Initialization */
 void init_ntpSnmpSubagentObject(void);
