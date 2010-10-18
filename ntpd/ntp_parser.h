@@ -47,53 +47,53 @@
      T_Average = 264,
      T_Bclient = 265,
      T_Beacon = 266,
-     T_Bias = 267,
-     T_Broadcast = 268,
-     T_Broadcastclient = 269,
-     T_Broadcastdelay = 270,
-     T_Burst = 271,
-     T_Calibrate = 272,
-     T_Ceiling = 273,
-     T_Clockstats = 274,
-     T_Cohort = 275,
-     T_ControlKey = 276,
-     T_Crypto = 277,
-     T_Cryptostats = 278,
-     T_Day = 279,
-     T_Default = 280,
-     T_Digest = 281,
-     T_Disable = 282,
-     T_Discard = 283,
-     T_Dispersion = 284,
-     T_Double = 285,
-     T_Driftfile = 286,
-     T_Drop = 287,
-     T_Ellipsis = 288,
-     T_Enable = 289,
-     T_End = 290,
-     T_False = 291,
-     T_File = 292,
-     T_Filegen = 293,
-     T_Flag1 = 294,
-     T_Flag2 = 295,
-     T_Flag3 = 296,
-     T_Flag4 = 297,
-     T_Flake = 298,
-     T_Floor = 299,
-     T_Freq = 300,
-     T_Fudge = 301,
-     T_Host = 302,
-     T_Huffpuff = 303,
-     T_Iburst = 304,
-     T_Ident = 305,
-     T_Ignore = 306,
-     T_Incalloc = 307,
-     T_Incmem = 308,
-     T_Initalloc = 309,
-     T_Initmem = 310,
-     T_Includefile = 311,
-     T_Integer = 312,
-     T_Interface = 313,
+     T_Broadcast = 267,
+     T_Broadcastclient = 268,
+     T_Broadcastdelay = 269,
+     T_Burst = 270,
+     T_Calibrate = 271,
+     T_Ceiling = 272,
+     T_Clockstats = 273,
+     T_Cohort = 274,
+     T_ControlKey = 275,
+     T_Crypto = 276,
+     T_Cryptostats = 277,
+     T_Day = 278,
+     T_Default = 279,
+     T_Digest = 280,
+     T_Disable = 281,
+     T_Discard = 282,
+     T_Dispersion = 283,
+     T_Double = 284,
+     T_Driftfile = 285,
+     T_Drop = 286,
+     T_Ellipsis = 287,
+     T_Enable = 288,
+     T_End = 289,
+     T_False = 290,
+     T_File = 291,
+     T_Filegen = 292,
+     T_Flag1 = 293,
+     T_Flag2 = 294,
+     T_Flag3 = 295,
+     T_Flag4 = 296,
+     T_Flake = 297,
+     T_Floor = 298,
+     T_Freq = 299,
+     T_Fudge = 300,
+     T_Host = 301,
+     T_Huffpuff = 302,
+     T_Iburst = 303,
+     T_Ident = 304,
+     T_Ignore = 305,
+     T_Incalloc = 306,
+     T_Incmem = 307,
+     T_Initalloc = 308,
+     T_Initmem = 309,
+     T_Includefile = 310,
+     T_Integer = 311,
+     T_Interface = 312,
+     T_Intrange = 313,
      T_Ipv4 = 314,
      T_Ipv4_flag = 315,
      T_Ipv6 = 316,
@@ -198,18 +198,17 @@
      T_Xleave = 415,
      T_Year = 416,
      T_Flag = 417,
-     T_Void = 418,
-     T_EOC = 419,
-     T_Simulate = 420,
-     T_Beep_Delay = 421,
-     T_Sim_Duration = 422,
-     T_Server_Offset = 423,
-     T_Duration = 424,
-     T_Freq_Offset = 425,
-     T_Wander = 426,
-     T_Jitter = 427,
-     T_Prop_Delay = 428,
-     T_Proc_Delay = 429
+     T_EOC = 418,
+     T_Simulate = 419,
+     T_Beep_Delay = 420,
+     T_Sim_Duration = 421,
+     T_Server_Offset = 422,
+     T_Duration = 423,
+     T_Freq_Offset = 424,
+     T_Wander = 425,
+     T_Jitter = 426,
+     T_Prop_Delay = 427,
+     T_Proc_Delay = 428
    };
 #endif
 /* Tokens.  */
@@ -222,53 +221,53 @@
 #define T_Average 264
 #define T_Bclient 265
 #define T_Beacon 266
-#define T_Bias 267
-#define T_Broadcast 268
-#define T_Broadcastclient 269
-#define T_Broadcastdelay 270
-#define T_Burst 271
-#define T_Calibrate 272
-#define T_Ceiling 273
-#define T_Clockstats 274
-#define T_Cohort 275
-#define T_ControlKey 276
-#define T_Crypto 277
-#define T_Cryptostats 278
-#define T_Day 279
-#define T_Default 280
-#define T_Digest 281
-#define T_Disable 282
-#define T_Discard 283
-#define T_Dispersion 284
-#define T_Double 285
-#define T_Driftfile 286
-#define T_Drop 287
-#define T_Ellipsis 288
-#define T_Enable 289
-#define T_End 290
-#define T_False 291
-#define T_File 292
-#define T_Filegen 293
-#define T_Flag1 294
-#define T_Flag2 295
-#define T_Flag3 296
-#define T_Flag4 297
-#define T_Flake 298
-#define T_Floor 299
-#define T_Freq 300
-#define T_Fudge 301
-#define T_Host 302
-#define T_Huffpuff 303
-#define T_Iburst 304
-#define T_Ident 305
-#define T_Ignore 306
-#define T_Incalloc 307
-#define T_Incmem 308
-#define T_Initalloc 309
-#define T_Initmem 310
-#define T_Includefile 311
-#define T_Integer 312
-#define T_Interface 313
+#define T_Broadcast 267
+#define T_Broadcastclient 268
+#define T_Broadcastdelay 269
+#define T_Burst 270
+#define T_Calibrate 271
+#define T_Ceiling 272
+#define T_Clockstats 273
+#define T_Cohort 274
+#define T_ControlKey 275
+#define T_Crypto 276
+#define T_Cryptostats 277
+#define T_Day 278
+#define T_Default 279
+#define T_Digest 280
+#define T_Disable 281
+#define T_Discard 282
+#define T_Dispersion 283
+#define T_Double 284
+#define T_Driftfile 285
+#define T_Drop 286
+#define T_Ellipsis 287
+#define T_Enable 288
+#define T_End 289
+#define T_False 290
+#define T_File 291
+#define T_Filegen 292
+#define T_Flag1 293
+#define T_Flag2 294
+#define T_Flag3 295
+#define T_Flag4 296
+#define T_Flake 297
+#define T_Floor 298
+#define T_Freq 299
+#define T_Fudge 300
+#define T_Host 301
+#define T_Huffpuff 302
+#define T_Iburst 303
+#define T_Ident 304
+#define T_Ignore 305
+#define T_Incalloc 306
+#define T_Incmem 307
+#define T_Initalloc 308
+#define T_Initmem 309
+#define T_Includefile 310
+#define T_Integer 311
+#define T_Interface 312
+#define T_Intrange 313
 #define T_Ipv4 314
 #define T_Ipv4_flag 315
 #define T_Ipv6 316
@@ -373,18 +372,17 @@
 #define T_Xleave 415
 #define T_Year 416
 #define T_Flag 417
-#define T_Void 418
-#define T_EOC 419
-#define T_Simulate 420
-#define T_Beep_Delay 421
-#define T_Sim_Duration 422
-#define T_Server_Offset 423
-#define T_Duration 424
-#define T_Freq_Offset 425
-#define T_Wander 426
-#define T_Jitter 427
-#define T_Prop_Delay 428
-#define T_Proc_Delay 429
+#define T_EOC 418
+#define T_Simulate 419
+#define T_Beep_Delay 420
+#define T_Sim_Duration 421
+#define T_Server_Offset 422
+#define T_Duration 423
+#define T_Freq_Offset 424
+#define T_Wander 425
+#define T_Jitter 426
+#define T_Prop_Delay 427
+#define T_Proc_Delay 428
 
 
 
@@ -394,25 +392,28 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 50 "ntp_parser.y"
+#line 49 "ntp_parser.y"
 
-    char   *String;
-    double  Double;
-    int     Integer;
-    void   *VoidPtr;
-    queue  *Queue;
-    struct attr_val *Attr_val;
-    struct address_node *Address_node;
-    struct setvar_node *Set_var;
-
-    /* Simulation types */
-    server_info *Sim_server;
-    script_info *Sim_script;
+	char *			String;
+	double			Double;
+	int			Integer;
+	gen_fifo *		Generic_fifo;
+	attr_val *		Attr_val;
+	attr_val_fifo *		Attr_val_fifo;
+	int_fifo *		Int_fifo;
+	string_fifo *		String_fifo;
+	address_node *		Address_node;
+	address_fifo *		Address_fifo;
+	setvar_node *		Set_var;
+	server_info *		Sim_server;
+	server_info_fifo *	Sim_server_fifo;
+	script_info *		Sim_script;
+	script_info_fifo *	Sim_script_fifo;
 
 
 
 /* Line 1685 of yacc.c  */
-#line 416 "ntp_parser.h"
+#line 417 "ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

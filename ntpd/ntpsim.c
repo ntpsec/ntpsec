@@ -325,18 +325,18 @@ int simulate_server(
     enqueue(event_queue, e);
     
 
-    /* Check if the time of the script has expired. If yes, delete the script.
-     * If not, re-enqueue the script onto the server script queue 
+    /*
+     * Check if the time of the script has expired. If yes, delete it.
      */
     if (curr_script->duration > simulation.sim_time && 
-	!empty(server->script)) {
+	NULL == HEAD_PFIFO(server->script)) {
 	printf("Hello\n");
 	/* 
 	 * For some reason freeing up the curr_script memory kills the
 	 * simulation. Further debugging is needed to determine why.
-	 * free_node(curr_script);
+	 * free(curr_script);
 	 */
-	curr_script = dequeue(server->script);
+	UNLINK_FIFO(curr_script, *server->script, link);
     }
 
     return (0);

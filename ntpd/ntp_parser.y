@@ -624,7 +624,7 @@ stat
 filegen_option_list
 	:	/* empty list */
 		{
-			$$ = NULL
+			$$ = NULL;
 		}
 	|	filegen_option_list filegen_option
 		{
@@ -1286,9 +1286,12 @@ number
 simulate_command
 	:	sim_conf_start '{' sim_init_statement_list sim_server_list '}'
 		{
-			cfgt.sim_details = create_sim_node($3, $4);
+			sim_node *sn;
+			
+			sn =  create_sim_node($3, $4);
+			APPEND_G_FIFO(cfgt.sim_details, sn);
 
-			/* Reset the old_config_style variable */
+			/* Revert from ; to \n for end-of-command */
 			old_config_style = 1;
 		}
 	;
