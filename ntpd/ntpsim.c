@@ -12,7 +12,7 @@
 #include <config.h>
 #ifdef SIM
 #include "ntpd.h"
-#include "ntpsim.h"
+#include "ntp_config.h"
 
 /* forward prototypes */
 int determine_event_ordering(const Event *e1, const Event *e2);

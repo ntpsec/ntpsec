@@ -123,7 +123,7 @@ extern int yydebug;			/* ntp_parser.c (.y) */
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
 config_tree cfgt;			/* Parser output stored here */
-config_tree *cfg_tree_history;		/* History of configs */
+struct config_tree_tag *cfg_tree_history;	/* History of configs */
 char	*sys_phone[MAXPHONE] = {NULL};	/* ACTS phone numbers */
 char	default_keysdir[] = NTP_KEYSDIR;
 char	*keysdir = default_keysdir;	/* crypto keys directory */
@@ -245,8 +245,6 @@ static void free_config_tree(config_tree *ptree);
 
 static void destroy_restrict_node(restrict_node *my_node);
 static int is_sane_resolved_address(sockaddr_u *peeraddr, int hmode);
-static u_char get_correct_host_mode(int token);
-static int peerflag_bits(peer_node *);
 static void save_and_apply_config_tree(void);
 static void destroy_int_fifo(int_fifo *);
 #define FREE_INT_FIFO(pf)			\
@@ -290,35 +288,34 @@ static void destroy_addr_opts_fifo(addr_opts_fifo *);
 		destroy_addr_opts_fifo(pf);	\
 		(pf) = NULL;			\
 	} while (0)
-#if !defined(SIM)
-static sockaddr_u *get_next_address(address_node *addr);
-#endif
 
-static void config_other_modes(config_tree *);
-static void config_auth(config_tree *);
 static void config_tos(config_tree *);
 static void config_monitor(config_tree *);
-static void config_access(config_tree *);
 static void config_tinker(config_tree *);
 static void config_system_opts(config_tree *);
 static void config_logconfig(config_tree *);
+static void config_vars(config_tree *);
+#ifdef SIM
+static sockaddr_u *get_next_address(address_node *addr);
+static void config_sim(config_tree *);
+static void config_ntpdsim(config_tree *);
+#else	/* !SIM follows */
+static void config_ntpd(config_tree *);
+static void config_other_modes(config_tree *);
+static void config_auth(config_tree *);
+static void config_access(config_tree *);
 static void config_phone(config_tree *);
 static void config_qos(config_tree *);
 static void config_setvar(config_tree *);
 static void config_ttl(config_tree *);
 static void config_trap(config_tree *);
 static void config_fudge(config_tree *);
-static void config_vars(config_tree *);
 static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *);
-
-#ifdef SIM
-static void config_sim(config_tree *);
-static void config_ntpdsim(config_tree *);
-#else
-static void config_ntpd(config_tree *);
-#endif
+static u_char get_correct_host_mode(int token);
+static int peerflag_bits(peer_node *);
+#endif	/* !SIM */
 
 #ifdef WORKER
 void peer_name_resolved(int, int, void *, const char *, const char *,
@@ -342,8 +339,10 @@ void ntpd_set_tod_using(const char *);
 static unsigned long get_pfxmatch(char **s, struct masks *m);
 static unsigned long get_match(char *s, struct masks *m);
 static unsigned long get_logmask(char *s);
+#ifndef SIM
 static int getnetnum(const char *num, sockaddr_u *addr, int complain,
 		     enum gnn_type a_type);
+#endif
 
 
 /* FUNCTIONS FOR INITIALIZATION
@@ -1700,6 +1699,7 @@ create_sim_node(
  * ------------------------------------------
  */
 
+#ifndef SIM
 static void
 config_other_modes(
 	config_tree *	ptree
@@ -1741,6 +1741,7 @@ config_other_modes(
 		proto_config(PROTO_MULTICAST_ADD, 1, 0., NULL);
 	}
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -1773,6 +1774,7 @@ free_config_other_modes(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_auth(
 	config_tree *ptree
@@ -1882,6 +1884,7 @@ config_auth(
 		sys_revoke = 1 << ptree->auth.revoke;
 #endif	/* AUTOKEY */
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -2132,6 +2135,7 @@ free_config_monitor(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_access(
 	config_tree *ptree
@@ -2464,6 +2468,7 @@ config_access(
 			freeaddrinfo(ai_list);
 	}
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -2543,6 +2548,7 @@ free_config_tinker(
 /*
  * config_nic_rules - apply interface listen/ignore/drop items
  */
+#ifndef SIM
 void
 config_nic_rules(
 	config_tree *ptree
@@ -2666,6 +2672,7 @@ config_nic_rules(
 			free(if_name);
 	}
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -2827,6 +2834,7 @@ free_config_logconfig(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_phone(
 	config_tree *ptree
@@ -2850,6 +2858,7 @@ config_phone(
 	if (i)
 		sys_phone[i] = NULL;
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -2863,6 +2872,7 @@ free_config_phone(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_qos(
 	config_tree *ptree
@@ -2917,6 +2927,7 @@ config_qos(
 		 */
 	}
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -2930,6 +2941,7 @@ free_config_qos(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_setvar(
 	config_tree *ptree
@@ -2955,6 +2967,7 @@ config_setvar(
 	if (str != NULL)
 		free(str);
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -2968,6 +2981,7 @@ free_config_setvar(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_ttl(
 	config_tree *ptree
@@ -2987,6 +3001,7 @@ config_ttl(
 	}
 	sys_ttlmax = i - 1;
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -3000,6 +3015,7 @@ free_config_ttl(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_trap(
 	config_tree *ptree
@@ -3130,7 +3146,7 @@ config_trap(
  *
  * Callback invoked when config_trap()'s DNS lookup completes.
  */
-#ifdef WORKER
+# ifdef WORKER
 void
 trap_name_resolved(
 	int			rescode,
@@ -3167,7 +3183,8 @@ trap_name_resolved(
 			latoa(localaddr), stoa(&peeraddr));
 	free(pstp);
 }
-#endif	/* WORKER */
+# endif	/* WORKER */
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -3181,6 +3198,7 @@ free_config_trap(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_fudge(
 	config_tree *ptree
@@ -3286,12 +3304,13 @@ config_fudge(
 				exit(curr_opt->attr ? curr_opt->attr : 1);
 			}
 		}
-#ifdef REFCLOCK
+# ifdef REFCLOCK
 		if (!err_flag)
 			refclock_control(&addr_sock, &clock_stat, NULL);
-#endif
+# endif
 	}
 }
+#endif	/* !SIM */
 
 
 #ifdef FREE_CFG_T
@@ -3443,6 +3462,7 @@ is_sane_resolved_address(
 }
 
 
+#ifndef SIM
 static u_char
 get_correct_host_mode(
 	int token
@@ -3578,7 +3598,7 @@ config_peers(
 					(u_char *)"*");
 		} else {
 			/* we have a hostname to resolve */
-#ifdef WORKER
+# ifdef WORKER
 			ctx = emalloc(sizeof(*ctx));
 			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
@@ -3600,11 +3620,11 @@ config_peers(
 					     INITIAL_DNS_RETRY,
 					     &peer_name_resolved,
 					     (void *)ctx);
-#else	/* !WORKER follows */
+# else	/* !WORKER follows */
 			msyslog(LOG_ERR,
 				"hostname %s can not be used, please use IP address instead.\n",
 				curr_peer->addr->address);
-#endif
+# endif
 		}
 	}
 
@@ -3663,7 +3683,7 @@ config_peers(
 					(u_char *)"*");
 		} else {
 			/* we have a hostname to resolve */
-#ifdef WORKER
+# ifdef WORKER
 			ctx = emalloc(sizeof(*ctx));
 			ctx->family = curr_peer->addr->type;
 			ctx->host_mode = curr_peer->host_mode;
@@ -3684,15 +3704,15 @@ config_peers(
 					     "ntp", &hints,
 					     INITIAL_DNS_RETRY,
 					     &peer_name_resolved, ctx);
-#else	/* !WORKER follows */
+# else	/* !WORKER follows */
 			msyslog(LOG_ERR,
 				"hostname %s can not be used, please use IP address instead.\n",
 				curr_peer->addr->address);
-#endif
+# endif
 		}
 	}
 }
-
+#endif	/* !SIM */
 
 /*
  * peer_name_resolved()
@@ -3794,6 +3814,7 @@ free_config_peers(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
 static void
 config_unpeers(
 	config_tree *ptree
@@ -3856,7 +3877,7 @@ config_unpeers(
 			unpeer(p);
 		}
 		/* Resolve the hostname to address(es). */
-#ifdef WORKER
+# ifdef WORKER
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = curr_unpeer->addr->type;
 		hints.ai_socktype = SOCK_DGRAM;
@@ -3864,13 +3885,14 @@ config_unpeers(
 		getaddrinfo_sometime(name, "ntp", &hints,
 				     INITIAL_DNS_RETRY,
 				     &unpeer_name_resolved, NULL);
-#else	/* !WORKER follows */
+# else	/* !WORKER follows */
 		msyslog(LOG_ERR,
 			"hostname %s can not be used, please use IP address instead.\n",
 			name);
-#endif
+# endif
 	}
 }
+#endif	/* !SIM */
 
 
 /*
@@ -4625,6 +4647,7 @@ gettokens_netinfo (
  * returns 1 for success, and mysteriously, 0 for most failures, and
  * -1 if the address found is IPv6 and we believe IPv6 isn't working.
  */
+#ifndef SIM
 static int
 getnetnum(
 	const char *num,
@@ -4647,9 +4670,9 @@ getnetnum(
 
 	memset(addr, 0, sizeof(*addr));
 	AF(addr) = (u_short)ipaddr.family;
-#ifdef ISC_PLATFORM_HAVESALEN
+# ifdef ISC_PLATFORM_HAVESALEN
 	addr->sa.sa_len = SIZEOF_SOCKADDR(AF(addr));
-#endif
+# endif
 	if (IS_IPV4(addr))
 		memcpy(&addr->sa4.sin_addr, &ipaddr.type.in,
 		       sizeof(addr->sa4.sin_addr));
@@ -4662,3 +4685,4 @@ getnetnum(
 
 	return 1;
 }
+#endif	/* !SIM */

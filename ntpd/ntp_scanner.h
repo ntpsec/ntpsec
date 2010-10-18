@@ -11,6 +11,8 @@
 #ifndef NTP_SCANNER_H
 #define NTP_SCANNER_H
 
+#include "ntp_config.h"
+
 /*
  * ntp.conf syntax is slightly irregular in that some tokens such as
  * hostnames do not require quoting even if they might otherwise be

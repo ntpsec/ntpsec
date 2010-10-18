@@ -54,6 +54,8 @@ emalloc_zero(
 	ptr = erealloc(NULL, size);
 	if (NULL != ptr)
 		memset(ptr, 0, size);
+
+	return ptr;
 }
 
 
