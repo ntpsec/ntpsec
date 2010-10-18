@@ -62,11 +62,13 @@ extern	int	clocktime	(int, int, int, int, int, u_long, u_long *, u_int32 *);
 #if !defined(_MSC_VER) || !defined(_DEBUG)
 extern	void *	emalloc		(size_t);
 extern	void *	erealloc	(void *, size_t);
+extern	void *	emalloc_zero	(size_t);
 extern	char *	estrdup		(const char *);
 #else
-extern	void *	debug_erealloc	(void *, size_t, const char *, int);
-#define		emalloc(c)	debug_erealloc(NULL, (c), __FILE__, __LINE__)
-#define		erealloc(p, c)	debug_erealloc((p), (c), __FILE__, __LINE__)
+extern	void *	debug_ereallocz	(void *, size_t, int, const char *, int);
+#define		emalloc(c)	debug_ereallocz(NULL, (c), 0, __FILE__, __LINE__)
+#define		erealloc(p, c)	debug_ereallocz((p), (c), 0, __FILE__, __LINE__)
+#define		emalloc_zero(c)	debug_ereallocz(NULL, (c), 1, __FILE__, __LINE__)
 extern	char *	debug_estrdup	(const char *, const char *, int);
 #define		estrdup(s)	debug_estrdup((s), __FILE__, __LINE__)
 #endif

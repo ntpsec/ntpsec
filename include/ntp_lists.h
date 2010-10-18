@@ -20,7 +20,8 @@
  *	add entry at head
  *
  * LINK_TAIL_SLIST(listhead, pentry, nextlink, entrytype)
- *	add entry at tail
+ *	add entry at tail.  This is O(n), if this is a common
+ *	operation the FIFO template may be more appropriate.
  *
  * LINK_SORT_SLIST(listhead, pentry, beforecur, nextlink, entrytype)
  *	add entry in sorted order.  beforecur is an expression comparing
@@ -46,6 +47,52 @@
  *	punlinked is pointed to the removed entry or NULL if none
  *	satisfy expr.
  *
+ * FIFO: singly-linked lists plus tail pointer
+ * ===========================================
+ *
+ * This is the same as FreeBSD's sys/queue.h STAILQ -- a singly-linked
+ * list implementation with tail-pointer maintenance, so that adding
+ * at the tail for first-in, first-out access is O(1).
+ *
+ * DECL_FIFO_ANCHOR(entrytype)
+ *	provides the type specification portion of the declaration for
+ *	a variable to refer to a FIFO queue (similar to listhead).  The
+ *	anchor contains the head and indirect tail pointers.  Example:
+ *
+ *		#include "ntp_lists.h"
+ *
+ *		typedef struct myentry_tag myentry;
+ *		struct myentry_tag {
+ *			myentry *next_link;
+ *			...
+ *		};
+ *
+ *		DECL_FIFO_ANCHOR(myentry) my_fifo;
+ *
+ *		void somefunc(myentry *pentry)
+ *		{
+ *			LINK_FIFO(my_fifo, pentry, next_link);
+ *		}
+ *
+ *	If DECL_FIFO_ANCHOR is used with stack or heap storage, it
+ *	should be initialized to NULL pointers using a = { NULL };
+ *	initializer or memset.
+ *
+ * HEAD_FIFO(anchor)
+ * TAIL_FIFO(anchor)
+ *	Pointer to first/last entry, NULL if FIFO is empty.
+ *
+ * LINK_FIFO(anchor, pentry, nextlink)
+ *	add entry at tail.
+ *
+ * UNLINK_FIFO(punlinked, anchor, nextlink)
+ *	unlink head entry and point punlinked to it, or set punlinked
+ *	to NULL if the list is empty.
+ *
+ * CONCAT_FIFO(q1, q2, nextlink)
+ *	empty fifoq q2 moving its nodes to q1 following q1's existing
+ *	nodes.
+ *
  * DLIST: doubly-linked lists
  * ==========================
  *
@@ -58,6 +105,26 @@
  */
 #ifndef NTP_LISTS_H
 #define NTP_LISTS_H
+
+#include "ntp_assert.h"
+
+/*
+ * For now enable extra debugging code on all builds.  Before long, it
+ * will probably make sense to only include the debugging #ifdef DEBUG
+ */
+#define NTP_DEBUG_LISTS_H
+
+/*
+ * If list debugging is not enabled, save a little time by not clearing
+ * an entry's link pointer when it is unlinked, as the stale pointer
+ * is harmless as long as it is ignored when the entry is not in a
+ * list.
+ */
+#ifndef NTP_DEBUG_LISTS_H
+#define MAYBE_Z_LISTS(p)	do { } while (0)
+#else
+#define MAYBE_Z_LISTS(p)	(p) = NULL
+#endif
 
 #ifndef TRUE
 # define TRUE	1
@@ -155,6 +222,80 @@ do {								\
 	     pentry = pentry->nextlink){			\
 		NTP_INSIST(pentry != pentry->nextlink);		\
 		NTP_INSIST((listhead) != pentry->nextlink);	\
+	}							\
+} while (0)
+
+/*
+ * FIFO
+ */
+
+#define DECL_FIFO_ANCHOR(entrytype)				\
+struct {							\
+	entrytype *	phead;	/* NULL if list empty */	\
+	entrytype **	pptail;	/* NULL if list empty */	\
+}
+
+#define HEAD_FIFO(anchor)	((anchor).phead)
+#define TAIL_FIFO(anchor)	((NULL == (anchor).pptail)	\
+					? NULL			\
+					: *((anchor).pptail))
+
+/*
+ * For DEBUG builds only, verify both or neither of the anchor pointers
+ * are NULL with each operation.
+ */
+#if !defined(NTP_DEBUG_LISTS_H) || !defined(DEBUG)
+#define	CHECK_FIFO_CONSISTENCY(queue)	do { } while (0);
+#else
+#define	CHECK_FIFO_CONSISTENCY(anchor)				\
+	NTP_REQUIRE((NULL == (anchor).phead			\
+		     && NULL == (anchor).pptail)		\
+		    || (NULL != (anchor).phead			\
+		     && NULL != (anchor).pptail))
+#endif
+
+#define LINK_FIFO(anchor, pentry, nextlink)			\
+do {								\
+	CHECK_FIFO_CONSISTENCY(anchor);				\
+								\
+	(pentry)->nextlink = NULL;				\
+	if (NULL != (anchor).pptail) {				\
+		(*((anchor).pptail))->nextlink = (pentry);	\
+		(anchor).pptail =				\
+		    &((*((anchor).pptail))->nextlink);		\
+	} else {						\
+		(anchor).phead = (pentry);			\
+		(anchor).pptail = &((anchor).phead);		\
+	}							\
+} while (0)
+
+#define UNLINK_FIFO(punlinked, anchor, nextlink)		\
+do {								\
+	CHECK_FIFO_CONSISTENCY(anchor);				\
+								\
+	(punlinked) = (anchor).phead;				\
+	if (NULL != (punlinked)) {				\
+		(anchor).phead = (punlinked)->nextlink;		\
+		if (NULL == (anchor).phead)			\
+			(anchor).pptail = NULL;			\
+		MAYBE_Z_LISTS((punlinked)->nextlink);		\
+	}							\
+} while (0)
+
+#define CONCAT_FIFO(f1, f2, nextlink)				\
+do {								\
+	CHECK_FIFO_CONSISTENCY(f1);				\
+	CHECK_FIFO_CONSISTENCY(f2);				\
+								\
+	if ((f2).pptail != NULL) {				\
+		if ((f1).pptail != NULL) {			\
+			(*(f1).pptail)->nextlink = (f2).phead;	\
+			(f1).pptail = (f2).pptail;		\
+		} else	{					\
+			(f1) = (f2);				\
+		}						\
+		(f2).phead = NULL;				\
+		(f2).pptail = NULL;				\
 	}							\
 } while (0)
 

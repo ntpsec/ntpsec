@@ -85,7 +85,6 @@ struct key_tok ntp_keywords[] = {
 { "-6",			T_Ipv6_flag,		FOLLBY_TOKEN },
 /* option */
 { "autokey",		T_Autokey,		FOLLBY_TOKEN },
-{ "bias",		T_Bias,			FOLLBY_TOKEN },
 { "burst",		T_Burst,		FOLLBY_TOKEN },
 { "iburst",		T_Iburst,		FOLLBY_TOKEN },
 { "key",		T_Key,			FOLLBY_TOKEN },

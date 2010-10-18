@@ -1,7 +1,7 @@
-/* ntp_data_structures.c
+/* ntp_prio_q.c
  *
- * This file contains the data structures used by the ntp configuration
- * code and the discrete event simulator.
+ * This file contains the priority queue implementation used by the
+ * discrete event simulator.
  *
  * Written By:	Sachin Kamboj
  *		University of Delaware
@@ -12,8 +12,8 @@
 # include <config.h>
 #endif
 
-#include "ntp_data_structures.h"
-#include "ntp_stdlib.h"
+#include <ntp_stdlib.h>
+#include <ntp_prio_q.h>
 
 /* Priority Queue
  * --------------

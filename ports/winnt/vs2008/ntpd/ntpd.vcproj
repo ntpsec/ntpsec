@@ -237,6 +237,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\keyword-gen.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\ntpd\nt_clockstuff.c"
 				>
 				<FileConfiguration
@@ -323,10 +335,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ntpd\ntp_data_structures.c"
-				>
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\ntp_filegen.c"
@@ -463,6 +471,18 @@
 			<File
 				RelativePath="..\..\..\..\ntpd\ntp_parser.c"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ntpd\ntp_parser.y"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\ntp_peer.c"
@@ -836,10 +856,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\ntp_control.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\include\ntp_data_structures.h"
 				>
 			</File>
 			<File

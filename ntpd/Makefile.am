@@ -142,6 +142,7 @@ ntpd_SOURCES =			\
 	
 ntpdsim_SOURCES =		\
 	$(ntpd_SOURCES)		\
+	ntp_prio_q.c		\
 	ntpsim.c		\
 	$(NULL)
 
@@ -152,7 +153,6 @@ libntpd_a_SOURCES =		\
 	jupiter.h		\
 	ntp_control.c		\
 	ntp_crypto.c		\
-	ntp_data_structures.c	\
 	ntp_filegen.c		\
 	ntp_intres.c		\
 	ntp_loopfilter.c	\
