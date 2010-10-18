@@ -1,8 +1,7 @@
-/* ntp_data_structures.h
+/* ntp_prio_q.h
  *
- * This file contains the structures and function prototypes for the data 
- * structures used by the ntp configuration code and the discrete event 
- * simulator.
+ * This file contains the structures and function prototypes for the
+ * priority queue implementation used by the discrete event simulator.
  *
  * Written By:	Sachin Kamboj
  *		University of Delaware
@@ -10,8 +9,8 @@
  * Copyright (c) 2006
  */
 
-#ifndef NTP_DATA_STRUCTURES_H
-#define NTP_DATA_STRUCTURES_H
+#ifndef NTP_PRIO_Q_H
+#define NTP_PRIO_Q_H
 
 #include <stddef.h>		/* size_t */
 
@@ -77,4 +76,4 @@ void *debug_get_node(
 #endif
 	);
 
-#endif	/* NTP_DATA_STRUCTURES_H */
+#endif	/* NTP_PRIO_Q_H */

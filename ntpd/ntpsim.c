@@ -13,7 +13,6 @@
 #ifdef SIM
 #include "ntpd.h"
 #include "ntpsim.h"
-#include "ntp_data_structures.h"
 
 
 /* Global Variable Definitions */

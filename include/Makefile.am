@@ -28,7 +28,7 @@ noinst_HEADERS =	\
 	ntp_config.h	\
 	ntp_control.h	\
 	ntp_crypto.h	\
-	ntp_data_structures.h	\
+	ntp_prio_q.h	\
 	ntp_datum.h	\
 	ntp_debug.h	\
 	ntp_filegen.h	\

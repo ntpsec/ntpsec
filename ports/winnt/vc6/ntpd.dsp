@@ -113,10 +113,6 @@ SOURCE=..\..\..\ntpd\ntp_crypto.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\ntp_data_structures.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\ntpd\ntp_filegen.c
 # SUBTRACT CPP /YX
 # End Source File

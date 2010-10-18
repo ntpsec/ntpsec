@@ -107,7 +107,7 @@ filegen_open(
 	basename = emalloc(len);
 	snprintf(basename, len, "%s%s", gen->prefix, gen->basename);
   
-	switch(gen->type) {
+	switch (gen->type) {
 
 	default:
 		msyslog(LOG_ERR, 

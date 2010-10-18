@@ -103,7 +103,7 @@ struct FILE_INFO {
 /* SCANNER GLOBAL VARIABLES 
  * ------------------------
  */
-extern struct config_tree cfgt;	  /* Parser output stored here */
+extern config_tree cfgt;	  /* Parser output stored here */
 extern int curr_include_level;    /* The current include level */
 
 extern struct FILE_INFO *ip_file; /* Pointer to the configuration file stream */

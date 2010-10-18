@@ -1,10 +1,9 @@
-
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* A Bison parser, made by GNU Bison 2.4.3.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+   2009, 2010 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -48,54 +47,54 @@
      T_Average = 264,
      T_Bclient = 265,
      T_Beacon = 266,
-     T_Bias = 267,
-     T_Broadcast = 268,
-     T_Broadcastclient = 269,
-     T_Broadcastdelay = 270,
-     T_Burst = 271,
-     T_Calibrate = 272,
-     T_Calldelay = 273,
-     T_Ceiling = 274,
-     T_Clockstats = 275,
-     T_Cohort = 276,
-     T_ControlKey = 277,
-     T_Crypto = 278,
-     T_Cryptostats = 279,
-     T_Day = 280,
-     T_Default = 281,
-     T_Digest = 282,
-     T_Disable = 283,
-     T_Discard = 284,
-     T_Dispersion = 285,
-     T_Double = 286,
-     T_Driftfile = 287,
-     T_Drop = 288,
-     T_Ellipsis = 289,
-     T_Enable = 290,
-     T_End = 291,
-     T_False = 292,
-     T_File = 293,
-     T_Filegen = 294,
-     T_Flag1 = 295,
-     T_Flag2 = 296,
-     T_Flag3 = 297,
-     T_Flag4 = 298,
-     T_Flake = 299,
-     T_Floor = 300,
-     T_Freq = 301,
-     T_Fudge = 302,
-     T_Host = 303,
-     T_Huffpuff = 304,
-     T_Iburst = 305,
-     T_Ident = 306,
-     T_Ignore = 307,
-     T_Incalloc = 308,
-     T_Incmem = 309,
-     T_Initalloc = 310,
-     T_Initmem = 311,
-     T_Includefile = 312,
-     T_Integer = 313,
-     T_Interface = 314,
+     T_Broadcast = 267,
+     T_Broadcastclient = 268,
+     T_Broadcastdelay = 269,
+     T_Burst = 270,
+     T_Calibrate = 271,
+     T_Calldelay = 272,
+     T_Ceiling = 273,
+     T_Clockstats = 274,
+     T_Cohort = 275,
+     T_ControlKey = 276,
+     T_Crypto = 277,
+     T_Cryptostats = 278,
+     T_Day = 279,
+     T_Default = 280,
+     T_Digest = 281,
+     T_Disable = 282,
+     T_Discard = 283,
+     T_Dispersion = 284,
+     T_Double = 285,
+     T_Driftfile = 286,
+     T_Drop = 287,
+     T_Ellipsis = 288,
+     T_Enable = 289,
+     T_End = 290,
+     T_False = 291,
+     T_File = 292,
+     T_Filegen = 293,
+     T_Flag1 = 294,
+     T_Flag2 = 295,
+     T_Flag3 = 296,
+     T_Flag4 = 297,
+     T_Flake = 298,
+     T_Floor = 299,
+     T_Freq = 300,
+     T_Fudge = 301,
+     T_Host = 302,
+     T_Huffpuff = 303,
+     T_Iburst = 304,
+     T_Ident = 305,
+     T_Ignore = 306,
+     T_Incalloc = 307,
+     T_Incmem = 308,
+     T_Initalloc = 309,
+     T_Initmem = 310,
+     T_Includefile = 311,
+     T_Integer = 312,
+     T_Interface = 313,
+     T_Intrange = 314,
      T_Ipv4 = 315,
      T_Ipv4_flag = 316,
      T_Ipv6 = 317,
@@ -201,18 +200,17 @@
      T_Xleave = 417,
      T_Year = 418,
      T_Flag = 419,
-     T_Void = 420,
-     T_EOC = 421,
-     T_Simulate = 422,
-     T_Beep_Delay = 423,
-     T_Sim_Duration = 424,
-     T_Server_Offset = 425,
-     T_Duration = 426,
-     T_Freq_Offset = 427,
-     T_Wander = 428,
-     T_Jitter = 429,
-     T_Prop_Delay = 430,
-     T_Proc_Delay = 431
+     T_EOC = 420,
+     T_Simulate = 421,
+     T_Beep_Delay = 422,
+     T_Sim_Duration = 423,
+     T_Server_Offset = 424,
+     T_Duration = 425,
+     T_Freq_Offset = 426,
+     T_Wander = 427,
+     T_Jitter = 428,
+     T_Prop_Delay = 429,
+     T_Proc_Delay = 430
    };
 #endif
 /* Tokens.  */
@@ -225,54 +223,54 @@
 #define T_Average 264
 #define T_Bclient 265
 #define T_Beacon 266
-#define T_Bias 267
-#define T_Broadcast 268
-#define T_Broadcastclient 269
-#define T_Broadcastdelay 270
-#define T_Burst 271
-#define T_Calibrate 272
-#define T_Calldelay 273
-#define T_Ceiling 274
-#define T_Clockstats 275
-#define T_Cohort 276
-#define T_ControlKey 277
-#define T_Crypto 278
-#define T_Cryptostats 279
-#define T_Day 280
-#define T_Default 281
-#define T_Digest 282
-#define T_Disable 283
-#define T_Discard 284
-#define T_Dispersion 285
-#define T_Double 286
-#define T_Driftfile 287
-#define T_Drop 288
-#define T_Ellipsis 289
-#define T_Enable 290
-#define T_End 291
-#define T_False 292
-#define T_File 293
-#define T_Filegen 294
-#define T_Flag1 295
-#define T_Flag2 296
-#define T_Flag3 297
-#define T_Flag4 298
-#define T_Flake 299
-#define T_Floor 300
-#define T_Freq 301
-#define T_Fudge 302
-#define T_Host 303
-#define T_Huffpuff 304
-#define T_Iburst 305
-#define T_Ident 306
-#define T_Ignore 307
-#define T_Incalloc 308
-#define T_Incmem 309
-#define T_Initalloc 310
-#define T_Initmem 311
-#define T_Includefile 312
-#define T_Integer 313
-#define T_Interface 314
+#define T_Broadcast 267
+#define T_Broadcastclient 268
+#define T_Broadcastdelay 269
+#define T_Burst 270
+#define T_Calibrate 271
+#define T_Calldelay 272
+#define T_Ceiling 273
+#define T_Clockstats 274
+#define T_Cohort 275
+#define T_ControlKey 276
+#define T_Crypto 277
+#define T_Cryptostats 278
+#define T_Day 279
+#define T_Default 280
+#define T_Digest 281
+#define T_Disable 282
+#define T_Discard 283
+#define T_Dispersion 284
+#define T_Double 285
+#define T_Driftfile 286
+#define T_Drop 287
+#define T_Ellipsis 288
+#define T_Enable 289
+#define T_End 290
+#define T_False 291
+#define T_File 292
+#define T_Filegen 293
+#define T_Flag1 294
+#define T_Flag2 295
+#define T_Flag3 296
+#define T_Flag4 297
+#define T_Flake 298
+#define T_Floor 299
+#define T_Freq 300
+#define T_Fudge 301
+#define T_Host 302
+#define T_Huffpuff 303
+#define T_Iburst 304
+#define T_Ident 305
+#define T_Ignore 306
+#define T_Incalloc 307
+#define T_Incmem 308
+#define T_Initalloc 309
+#define T_Initmem 310
+#define T_Includefile 311
+#define T_Integer 312
+#define T_Interface 313
+#define T_Intrange 314
 #define T_Ipv4 315
 #define T_Ipv4_flag 316
 #define T_Ipv6 317
@@ -378,18 +376,17 @@
 #define T_Xleave 417
 #define T_Year 418
 #define T_Flag 419
-#define T_Void 420
-#define T_EOC 421
-#define T_Simulate 422
-#define T_Beep_Delay 423
-#define T_Sim_Duration 424
-#define T_Server_Offset 425
-#define T_Duration 426
-#define T_Freq_Offset 427
-#define T_Wander 428
-#define T_Jitter 429
-#define T_Prop_Delay 430
-#define T_Proc_Delay 431
+#define T_EOC 420
+#define T_Simulate 421
+#define T_Beep_Delay 422
+#define T_Sim_Duration 423
+#define T_Server_Offset 424
+#define T_Duration 425
+#define T_Freq_Offset 426
+#define T_Wander 427
+#define T_Jitter 428
+#define T_Prop_Delay 429
+#define T_Proc_Delay 430
 
 
 
@@ -398,25 +395,28 @@
 typedef union YYSTYPE
 {
 
-/* Line 1676 of yacc.c  */
-#line 50 "ntp_parser.y"
+/* Line 1685 of yacc.c  */
+#line 49 "ntp_parser.y"
 
-    char   *String;
-    double  Double;
-    int     Integer;
-    void   *VoidPtr;
-    queue  *Queue;
-    struct attr_val *Attr_val;
-    struct address_node *Address_node;
-    struct setvar_node *Set_var;
+	char *			String;
+	double			Double;
+	int			Integer;
+	gen_fifo *		Generic_fifo;
+	attr_val *		Attr_val;
+	attr_val_fifo *		Attr_val_fifo;
+	int_fifo *		Int_fifo;
+	string_fifo *		String_fifo;
+	address_node *		Address_node;
+	address_fifo *		Address_fifo;
+	setvar_node *		Set_var;
+	server_info *		Sim_server;
+	server_info_fifo *	Sim_server_fifo;
+	script_info *		Sim_script;
+	script_info_fifo *	Sim_script_fifo;
 
-    /* Simulation types */
-    server_info *Sim_server;
-    script_info *Sim_script;
 
 
-
-/* Line 1676 of yacc.c  */
+/* Line 1685 of yacc.c  */
 #line 421 "ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1

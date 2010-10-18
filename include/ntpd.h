@@ -14,6 +14,7 @@
 #include "ntp_debug.h"
 #include "ntp_select.h"
 #include "ntp_malloc.h"
+#include "ntp_config.h"
 #include "ntp_refclock.h"
 #include "ntp_workimpl.h"
 #include "recvbuff.h"
@@ -331,7 +332,7 @@ extern int	config_priority_override;
 extern int	config_priority;
 #endif
 extern char *ntp_signd_socket;
-extern struct config_tree *cfg_tree_history;
+extern config_tree *cfg_tree_history;
 
 #ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
 /*

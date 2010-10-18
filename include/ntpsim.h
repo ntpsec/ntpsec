@@ -26,8 +26,7 @@
 #include "recvbuff.h"
 #include "ntp_io.h"
 #include "ntp_stdlib.h"
-
-#include "ntp_data_structures.h"
+#include "ntp_prio_q.h"
 
 /* CONSTANTS */
 
@@ -77,26 +76,32 @@ typedef struct {
 
 
 /* Server Script Information */
+typedef struct script_info_tag script_info;
+struct script_info_tag {
+	script_info *	link;
+	double		duration;
+	double		freq_offset;
+	double		wander;
+	double		jitter; 
+	double		prop_delay;
+	double		proc_delay;
+};
 
-typedef struct {
-    double duration;
-    double freq_offset;
-    double wander;
-    double jitter; 
-    double prop_delay;
-    double proc_delay;
-} script_info;   
-
+typedef DECL_FIFO_ANCHOR(script_info) script_info_fifo;
 
 
 /* Server Structures */
 
-typedef struct {
-    double server_time;             /* Server time */
-    sockaddr_u *addr;  		    /* Server Address */
-    queue *script;                  /* Server Script */
-    script_info *curr_script;       /* Current Script */
-} server_info;
+typedef struct server_info_tag server_info;
+struct server_info_tag {
+	server_info *		link;
+	double			server_time;
+	sockaddr_u *		addr;
+	script_info_fifo *	script;
+	script_info *		curr_script;
+};
+
+typedef DECL_FIFO_ANCHOR(server_info) server_info_fifo;
 
 
 /* Simulation control information */

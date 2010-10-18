@@ -145,10 +145,10 @@ debug_copy_addrinfo_list(
 
 #if !defined(_MSC_VER) || !defined(_DEBUG)
 	dst = emalloc(octets);
-#else
-	dst = debug_erealloc(NULL, octets, caller_file, caller_line);
-#endif
 	memset(dst, 0, octets);
+#else
+	dst = debug_ereallocz(NULL, octets, 1, caller_file, caller_line);
+#endif
 	ai_cpy = dst;
 	psau = (void *)(ai_cpy + elements);
 	pcanon = (void *)(psau + elements);
