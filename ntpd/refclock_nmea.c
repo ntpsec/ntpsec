@@ -111,6 +111,42 @@ extern int async_write(int, const void *, unsigned int);
 #endif
 #define PPSOPENMODE	(O_RDWR | M_NOCTTY | M_NONBLOCK)
 
+/* NMEA sentence array indexes for those we use */
+#define NMEA_GPRMC	0	/* recommended min. nav. */
+#define NMEA_GPGGA	1	/* fix and quality */
+#define NMEA_GPGLL	2	/* geo. lat/long */
+#define NMEA_GPZDA	3	/* date/time */
+/*
+ * $GPZDG is a proprietary sentence that violates the spec, by not
+ * using $P and an assigned company identifier to prefix the sentence
+ * identifier.  When used with this driver, the system needs to be
+ * isolated from other NTP networks, as it operates in GPS time, not
+ * UTC as is much more common.  GPS time is >15 seconds different from
+ * UTC due to not respecting leap seconds since 1970 or so.  Other
+ * than the different timebase, $GPZDG is similar to $GPZDA.
+ */
+#define NMEA_GPZDG	4
+#define NMEA_ARRAY_SIZE (NMEA_GPZDG + 1)
+
+/*
+ * Sentence selection mode bits
+ */
+#define USE_ALL			0	/* any/all */
+#define USE_GPRMC		1
+#define USE_GPGGA		2
+#define USE_GPGLL		4
+#define USE_GPZDA_ZDG		8	/* affects both */
+
+/* mapping from sentence index to controlling mode bit */
+u_char sentence_mode[NMEA_ARRAY_SIZE] =
+{
+	USE_GPRMC,
+	USE_GPGGA,
+	USE_GPGLL,
+	USE_GPZDA_ZDG,
+	USE_GPZDA_ZDG
+};
+
 /*
  * Unit control structure
  */
@@ -125,6 +161,8 @@ struct nmeaunit {
 #endif /* HAVE_PPSAPI */
 	l_fp	tstamp;		/* timestamp of last poll */
 	int	gps_time;	/* 0 UTC, 1 GPS time */
+		/* per sentence checksum seen flag */
+	u_char	cksum_seen[NMEA_ARRAY_SIZE];
 };
 
 /*
@@ -456,8 +494,7 @@ nmea_receive(
 	struct peer *peer;
 	int month, day;
 	char *cp, *dp, *msg;
-	int cmdtype;
-	int cmdtypezdg = 0;
+	u_char sentence;
 	/* Use these variables to hold data until we decide its worth keeping */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_timestamp;
@@ -477,9 +514,10 @@ nmea_receive(
 			&rd_timestamp);
 
 	/*
-	 * There is a case that a <CR><LF> gives back a "blank" line
+	 * There is a case that a <CR><LF> gives back a "blank" line.
+	 * We can't have a well-formed sentence with less than 8 chars.
 	 */
-	if (rd_lencode == 0)
+	if (rd_lencode < 8)
 		return;
 
 	DPRINTF(1, ("nmea: gpsread %d %s\n", rd_lencode, rd_lastcode));
@@ -516,29 +554,24 @@ nmea_receive(
 	 *	   '1' indicates accuracy of +/-20 ms
 	 *	   '2' indicates accuracy of +/-100 ns
 	 */
-#define GPXXX		0	/* any/all */
-#define GPRMC		1
-#define GPGGA		2
-#define GPGLL		4
-#define GPZDG_ZDA	8
 
 	cp = rd_lastcode;
-	cmdtype=0;
 	if (cp[0] == '$') {
 		/* Allow for GLGGA and GPGGA etc. */
 		msg = cp + 3;
 
 		if (strncmp(msg, "RMC", 3) == 0)
-			cmdtype = GPRMC;
+			sentence = NMEA_GPRMC;
 		else if (strncmp(msg, "GGA", 3) == 0)
-			cmdtype = GPGGA;
+			sentence = NMEA_GPGGA;
 		else if (strncmp(msg, "GLL", 3) == 0)
-			cmdtype = GPGLL;
+			sentence = NMEA_GPGLL;
 		else if (strncmp(msg, "ZD", 2) == 0) {
-			cmdtype = GPZDG_ZDA;
 			if ('G' == msg[2])
-				cmdtypezdg = 1;
-			else if ('A' != msg[2])
+				sentence = NMEA_GPZDG;
+			else if ('A' == msg[2])
+				sentence = NMEA_GPZDA;
+			else
 				return;
 		} else
 			return;
@@ -546,7 +579,7 @@ nmea_receive(
 		return;
 
 	/* See if I want to process this message type */
-	if (peer->ttl && !(cmdtype & (peer->ttl & NMEA_MESSAGE_MASK)))
+	if (peer->ttl && !(peer->ttl & sentence_mode[sentence]))
 		return;
 
 	/* 
@@ -554,16 +587,29 @@ nmea_receive(
 	 * Once have processed a $GPZDG, do not process any further
 	 * UTC sentences (all but $GPZDG currently).
 	 */
-	if (up->gps_time && !cmdtypezdg)
+	if (up->gps_time && NMEA_GPZDG != sentence)
 		return;
 
-	/* make sure it came in clean */
-	if (!nmea_checksum_ok(rd_lastcode)) {
+	/*
+	 * Apparently, older NMEA specifications (which are expensive)
+	 * did not require the checksum for all sentences.  $GPMRC is
+	 * the only one so far identified which has always been required
+	 * to include a checksum.
+	 *
+	 * Today, most NMEA GPS receivers checksum every sentence.  To
+	 * preserve its error-detection capabilities with modern GPSes
+	 * while allowing operation without checksums on all but $GPMRC,
+	 * we keep track of whether we've ever seen a checksum on a
+	 * given sentence, and if so, reject future checksum failures.
+	 */
+	if (nmea_checksum_ok(rd_lastcode)) {
+		up->cksum_seen[sentence] = TRUE;
+	} else if (NMEA_GPRMC == sentence || up->cksum_seen[sentence]) {
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
 
-	pp->lencode = (u_short) rd_lencode;
+	pp->lencode = (u_short)rd_lencode;
 	memcpy(pp->a_lastcode, rd_lastcode, pp->lencode + 1);
 	cp = pp->a_lastcode;
 
@@ -573,9 +619,9 @@ nmea_receive(
 	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
 
 	/* Grab field depending on clock string type */
-	switch (cmdtype) {
+	switch (sentence) {
 
-	case GPRMC:
+	case NMEA_GPRMC:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
@@ -589,7 +635,7 @@ nmea_receive(
 		dp = field_parse(cp, 1);
 		break;
 
-	case GPGGA:
+	case NMEA_GPGGA:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
@@ -603,7 +649,7 @@ nmea_receive(
 		dp = field_parse(cp, 1);
 		break;
 
-	case GPGLL:
+	case NMEA_GPGLL:
 		/*
 		 * Test for synchronization.  Check for quality byte.
 		 */
@@ -617,17 +663,17 @@ nmea_receive(
 		dp = field_parse(cp, 5);
 		break;
 	
-	case GPZDG_ZDA:
-		/*
-		 * Test for synchronization.  For $GPZDG check for validity of GPS time.
-		 */
-		if (cmdtypezdg) {
-			dp = field_parse(cp, 6);
-			if (dp[0] == '0') 
-				pp->leap = LEAP_NOTINSYNC;
-			else 
-				pp->leap = LEAP_NOWARNING;
-		} else
+	case NMEA_GPZDG:
+		/* For $GPZDG check for validity of GPS time. */
+		dp = field_parse(cp, 6);
+		if (dp[0] == '0') 
+			pp->leap = LEAP_NOTINSYNC;
+		else 
+			pp->leap = LEAP_NOWARNING;
+		/* fall through to NMEA_GPZDA */
+
+	case NMEA_GPZDA:
+		if (NMEA_GPZDA == sentence)
 			pp->leap = LEAP_NOWARNING;
 
 		/* Now point at the time field */
@@ -677,23 +723,6 @@ nmea_receive(
 		}
 	}
 
-	/*
-	 * Manipulating GPS timestamp in GPZDG as the seconds field
-	 * is valid for next PPS tick. Just rolling back the second,
-	 * minute and hour fields appopriately
-	 */
-	if (cmdtypezdg) {
-		if (pp->second == 0) {
-			pp->second = 59;
-			if (pp->minute == 0) {
-				pp->minute = 59;
-				if (pp->hour == 0)
-					pp->hour = 23;
-			}
-		} else
-			pp->second -= 1;
-	}
-
 	if (pp->hour > 23 || pp->minute > 59 || 
 	    pp->second > 59 || pp->nsec > 1000000000) {
 
@@ -704,9 +733,27 @@ nmea_receive(
 	}
 
 	/*
+	 * Manipulating GPS timestamp in GPZDG as the seconds field
+	 * is valid for next PPS tick. Just rolling back the second,
+	 * minute and hour fields appopriately
+	 */
+	if (NMEA_GPZDG == sentence) {
+		if (pp->second == 0) {
+			pp->second = 59;
+			if (pp->minute == 0) {
+				pp->minute = 59;
+				if (pp->hour == 0)
+					pp->hour = 23;
+			}
+		} else {
+			pp->second--;
+		}
+	}
+
+	/*
 	 * Convert date and check values.
 	 */
-	if (GPRMC == cmdtype) {
+	if (NMEA_GPRMC == sentence) {
 
 		dp = field_parse(cp,9);
 		day = dp[0] - '0';
@@ -716,7 +763,7 @@ nmea_receive(
 		pp->year = dp[4] - '0';
 		pp->year = (pp->year * 10) + dp[5] - '0';
 
-	} else if (GPZDG_ZDA == cmdtype) {
+	} else if (NMEA_GPZDA == sentence || NMEA_GPZDG == sentence) {
 
 		dp = field_parse(cp, 2);
 		day = 10 * (dp[0] - '0') + (dp[1] - '0');
@@ -774,24 +821,25 @@ nmea_receive(
 		 * Start by pointing cp and dp at the fields with 
 		 * longitude and latitude in the last timecode.
 		 */
-		switch (cmdtype) {
+		switch (sentence) {
 
-		case GPGLL:
+		case NMEA_GPGLL:
 			cp = field_parse(pp->a_lastcode, 1);
 			dp = field_parse(cp, 2);
 			break;
 
-		case GPGGA:
+		case NMEA_GPGGA:
 			cp = field_parse(pp->a_lastcode, 2);
 			dp = field_parse(cp, 2);
 			break;
 
-		case GPRMC:
+		case NMEA_GPRMC:
 			cp = field_parse(pp->a_lastcode, 3);
 			dp = field_parse(cp, 2);
 			break;
 
-		case GPZDG_ZDA:
+		case NMEA_GPZDA:
+		case NMEA_GPZDG:
 		default:
 			cp = dp = NULL;
 		}
@@ -823,7 +871,7 @@ nmea_receive(
 	/*
 	 * Note if we're only using GPS timescale from now on.
 	 */
-	if (cmdtypezdg && !up->gps_time) {
+	if (!up->gps_time && NMEA_GPZDG == sentence) {
 		up->gps_time = 1;
 		NLOG(NLOG_CLOCKINFO)
 			msyslog(LOG_INFO, "%s using only $GPZDG",

@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1649] Require NMEA checksum if $GPRMC or previously seen.
+
+---
 (4.2.6p3-RC4) 2010/10/16 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1584] wrong SNMP type for precision, resolution.
