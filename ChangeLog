@@ -1,3 +1,4 @@
+(4.2.7p67) 2010/10/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1649] from 4.2.6p3-RC5: Require NMEA checksum if $GPRMC or
   previously seen.
 (4.2.7p66) 2010/10/19 Released by Harlan Stenn <stenn@ntp.org>
