@@ -414,6 +414,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3-RC5) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1649] Require NMEA checksum if $GPRMC or previously seen.
 * [Bug 1669] NTP 4.2.6p2 fails to compile on IBM AIX 5.3.
