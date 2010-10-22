@@ -1548,7 +1548,7 @@ process_packet(
 		 */
 		if (peer->cast_flags & MDF_BCLNT) {
 			peer->cast_flags &= ~MDF_BCLNT;
-			peer->delay = (peer->offset - p_offset) * 2;
+			peer->delay = fabs(peer->offset - p_offset) * 2;
 		}
 		p_del = peer->delay;
 		p_offset += p_del / 2;

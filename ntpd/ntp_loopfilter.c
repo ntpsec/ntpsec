@@ -708,7 +708,7 @@ adj_host_clock(
 	sys_rootdisp += clock_phi;
 	if (fabs(clock_offset) < CLOCK_FLOOR)
 		freq_cnt = 0;
-	else if (freq_cnt > 0)
+	else if (freq_cnt > 0 && sys_leap != LEAP_NOTINSYNC)
 		freq_cnt--;
 
 #ifndef LOCKCLOCK
