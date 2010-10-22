@@ -929,7 +929,6 @@ receive(
 
 			} else {
 				peer->delay = sys_bdelay;
-				peer->bias = -sys_bdelay / 2.;
 			}
 			break;
 		}
@@ -1570,7 +1569,6 @@ process_packet(
 		p_del = fabs(t21 - t34);
 		p_offset = (t21 + t34) / 2.;
 	}
-	p_offset += peer->bias;
 	p_disp = LOGTOD(sys_precision) + LOGTOD(peer->precision) +
 	    clock_phi * p_del;
 
@@ -1647,7 +1645,7 @@ process_packet(
 	/*
 	 * That was awesome. Now hand off to the clock filter.
 	 */
-	clock_filter(peer, p_offset, p_del, p_disp);
+	clock_filter(peer, p_offset + peer->bias, p_del, p_disp);
 
 	/*
 	 * If we are in broadcast calibrate mode, return to broadcast
@@ -2191,7 +2189,6 @@ clock_filter(
 		clock_select();
 		return;
 	}
-
 	etemp = fabs(peer->offset - peer->filter_offset[k]);
 	peer->offset = peer->filter_offset[k];
 	peer->delay = peer->filter_delay[k];
@@ -2309,7 +2306,7 @@ clock_select(void)
 	 * Allocate dynamic space depending on the number of
 	 * associations.
 	 */
-	nlist = 0;
+	nlist = 1;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
 	endpoint_size = nlist * 2 * sizeof(struct endpoint);

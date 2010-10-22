@@ -352,7 +352,7 @@ struct peer {
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	xleave;		/* interleave delay */
-	double	bias;		/* bias for NIC asymmetry */
+	double	bias;		/* programmed offset bias */
 
 	/*
 	 * Variables used to correct for packet length and asymmetry.
