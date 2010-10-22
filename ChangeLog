@@ -1,5 +1,6 @@
 * [Bug 1669] from 4.2.6p3-RC5: NTP fails to compile on IBM AIX 5.3.
 * Documentation updates from Dave Mills.
+* Documentation EOL cleanup.
 (4.2.7p67) 2010/10/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1649] from 4.2.6p3-RC5: Require NMEA checksum if $GPRMC or
   previously seen.
