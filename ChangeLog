@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1669] NTP 4.2.6p2 fails to compile on IBM AIX 5.3.
+
+---
 (4.2.6p3-RC4) 2010/10/16 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1584] wrong SNMP type for precision, resolution.
