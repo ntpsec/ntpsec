@@ -1,3 +1,4 @@
+(4.2.7p69) 2010/10/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1671] Audoomatic delay calibration is sometimes inaccurate.
 (4.2.7p68) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1669] from 4.2.6p3-RC5: NTP fails to compile on IBM AIX 5.3.
