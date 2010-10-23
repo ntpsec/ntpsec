@@ -1126,13 +1126,10 @@ nmea_checksum_ok(
  */
 /*
  * Do a periodic unfolding of a truncated value around a given pivot
- * value. The code will augment the given value with the pivot in such
- * manner that the absolute difference between the pivot value and the
- * result value will be less than or equal to half a period.
- *
- * This will only work for strictly positive periods; the code does
- * *not* check against such a flagrant misuse. The result is undefined
- * for negative periods.
+ * value.
+ * The result r will hold to pivot <= r < pivot+period (period>0) or
+ * pivot+period < r <= pivot (period < 0) and value % period == r % period,
+ * using floor division convention.
  */
 static time_t
 nmea_periodic_unfold(
@@ -1140,27 +1137,14 @@ nmea_periodic_unfold(
 	time_t value,
 	time_t period)
 {
-	time_t epoch_start, epoch_limit;
-
-	/* get warp limit and warp epoch start from pivot and period */ 
-	epoch_start = pivot + period / 2;
-	epoch_limit = epoch_start % period;
-	if (epoch_limit < 0) {
-		epoch_limit += period;
-		epoch_start -= period;
-	}
-	epoch_start -= epoch_limit;
-
-	/* normalise value and unfold into epoch */
-	value %= period;
-	if (value < 0)
+	/*
+	 * This will only work as long as 'value - pivot%period' does
+	 * not create a signed overflow condition.
+	 */
+	value = (value - (pivot % period)) % period;
+	if (value && (value ^ period) < 0)
 		value += period;
-	if (value >= epoch_limit)
-		value -= period;
-	value += epoch_start;
-
-	/* that's all folks! */
-	return value;
+	return pivot + value;
 }
 
 /*
@@ -1181,14 +1165,15 @@ static void
 nmea_day_unfold(
 	struct calendar *jd)
 {
-	time_t value;
+	time_t value, pivot;
 	struct tm *tdate;
 
 	value = ((time_t)jd->hour * MINSPERHR
 		 + (time_t)jd->minute) * SECSPERMIN
-	          + (time_t)jd->second;	
+	          + (time_t)jd->second;
+	pivot = time(NULL) - SECSPERDAY/2;
 
-	value = nmea_periodic_unfold(time(NULL), value, SECSPERDAY);
+	value = nmea_periodic_unfold(pivot, value, SECSPERDAY);
 	tdate = gmtime(&value);
 	if (tdate) {
 		jd->year     = tdate->tm_year + 1900;
@@ -1221,14 +1206,6 @@ static void
 nmea_century_unfold(
 	struct calendar *jd)
 {
-#if 0
-	/* assume that until AD2070 somebody has changed this... */
-	jd->year %= 100;
-	if (jd->year > 70)
-		jd->year += 1900;
-	else
-		jd->year += 2000
-#else
 	time_t     pivot_time;
 	struct tm *pivot_date;
 	time_t     pivot_year;
@@ -1236,9 +1213,8 @@ nmea_century_unfold(
 	/* get warp limit and century start of pivot from system time */
 	pivot_time = time(NULL);
 	pivot_date = gmtime(&pivot_time);
-	pivot_year = pivot_date->tm_year + 1900 + 30;
+	pivot_year = pivot_date->tm_year + 1900 - 20;
 	jd->year = nmea_periodic_unfold(pivot_year, jd->year, 100);
-#endif
 }
 
 #else
