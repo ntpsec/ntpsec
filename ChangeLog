@@ -1,4 +1,6 @@
 * [Bug 1671] Audoomatic delay calibration is sometimes inaccurate.
+* Enable generating ntpd/ntp_keyword.h after keyword-gen.c changes on
+  Windows as well as POSIX platforms.
 (4.2.7p68) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1669] from 4.2.6p3-RC5: NTP fails to compile on IBM AIX 5.3.
 * [Bug 1670] Fix peer->bias and broadcastdelay.

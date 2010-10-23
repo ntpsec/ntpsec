@@ -31,7 +31,7 @@
 /* Define a structure to hold a (keyword, token) pair */
 struct key_tok {
 	char *	key;		/* Keyword */
-	int	token;		/* Associated Token */
+	u_short	token;		/* Associated Token */
 	follby	followedby;	/* nonzero indicates the next token(s)
 				   forced to be string(s) */
 };
@@ -221,7 +221,6 @@ struct key_tok ntp_keywords[] = {
 { "proc_delay",		T_Proc_Delay,		FOLLBY_TOKEN },
 };
 
-
 typedef struct big_scan_state_tag {
 	char	ch;		/* Character this state matches on */
 	char	followedby;	/* Forces next token(s) to T_String */
@@ -243,7 +242,7 @@ typedef struct big_scan_state_tag {
 
 const char *	current_keyword;/* for error reporting */
 big_scan_state	sst[MAXSTATES];	/* scanner FSM state entries */
-int		sst_highwater;	/* next entry index to consider */
+u_short		sst_highwater;	/* next entry index to consider */
 char *		symb[1024];	/* map token ID to symbolic name */
 
 /* for libntp */
@@ -254,12 +253,12 @@ int		main			(int, char **);
 static void	generate_preamble	(void);
 static void	generate_fsm		(void);
 static void	generate_token_text	(void);
-static int	create_keyword_scanner	(void);
-static int	create_scan_states	(char *, int, follby, int);
+static u_short	create_keyword_scanner	(void);
+static u_short	create_scan_states	(char *, u_short, follby, u_short);
 int		compare_key_tok_id	(const void *, const void *);
 int		compare_key_tok_text	(const void *, const void *);
 void		populate_symb		(char *);
-const char *	symbname		(int);
+const char *	symbname		(u_short);
 
 
 int main(int argc, char **argv)
@@ -313,12 +312,12 @@ generate_fsm(void)
 	size_t prefix_len;
 	char *p;
 	char *r;
-	int initial_state;
-	int this_state;
-	int prev_state;
-	int state;
-	int i;
-	int token;
+	u_short initial_state;
+	u_short this_state;
+	u_short prev_state;
+	u_short state;
+	u_short i;
+	u_short token;
 
 	/* 
 	 * Sort ntp_keywords in alphabetical keyword order.  This is
@@ -477,18 +476,18 @@ generate_fsm(void)
  * recognizing the complete keyword, and any pre-existing state that exists
  * for some other keyword that has the same prefix as the current one.
  */
-static int
+static u_short
 create_scan_states(
 	char *	text, 
-	int	token, 
+	u_short	token, 
 	follby	followedby,
-	int	prev_state
+	u_short	prev_state
 	)
 {
-	int my_state;
-	int return_state;
-	int prev_char_s;
-	int curr_char_s;
+	u_short my_state;
+	u_short return_state;
+	u_short prev_char_s;
+	u_short curr_char_s;
 
 	return_state = prev_state;
 	curr_char_s = prev_state;
@@ -585,11 +584,11 @@ create_scan_states(
  * creates a keywords scanner out of it.
  */
 
-static int
+static u_short
 create_keyword_scanner(void)
 {
-	int scanner;
-	int i;
+	u_short scanner;
+	u_short i;
 
 	sst_highwater = 1;	/* index 0 invalid, unused */
 	scanner = 0;
@@ -611,11 +610,11 @@ create_keyword_scanner(void)
 static void
 generate_token_text(void)
 {
-	int lowest_id;
-	int highest_id;
-	int id_count;
-	int id;
-	int i;
+	u_short lowest_id;
+	u_short highest_id;
+	u_short id_count;
+	u_short id;
+	u_short i;
 
 	/* sort ntp_keywords in token ID order */
 	qsort(ntp_keywords, COUNTOF(ntp_keywords),
@@ -722,15 +721,17 @@ populate_symb(
 
 const char *
 symbname(
-	int token
+	u_short token
 	)
 {
 	char *name;
 
-	if (token >= 0 && token < COUNTOF(symb) && symb[token] != NULL)
-		return symb[token];
+	if (token < COUNTOF(symb) && symb[token] != NULL) {
+		name = symb[token];
+	} else {
+		LIB_GETBUF(name);
+		snprintf(name, LIB_BUFLENGTH, "%d", token);
+	}	
 
-	LIB_GETBUF(name);
-	snprintf(name, LIB_BUFLENGTH, "%d", token);
 	return name;
 }
