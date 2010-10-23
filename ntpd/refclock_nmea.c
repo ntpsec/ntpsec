@@ -4,8 +4,8 @@
  *		 based on refclock_heathn.c
  *
  * Updated to add support for Accord GPS Clock
- * 		Venu Gopal Dec 05, 2007
- * 		neo.venu@gmail.com, venugopal_d@pgad.gov.in
+ *		Venu Gopal Dec 05, 2007
+ *		neo.venu@gmail.com, venugopal_d@pgad.gov.in
  *
  * Updated to process 'time1' fudge factor
  *		Venu Gopal May 05, 2008
@@ -46,10 +46,10 @@ extern int async_write(int, const void *, unsigned int);
 
 #ifndef TIMESPECTOTS
 #define TIMESPECTOTS(ptspec, pts)					\
-        do {								\
-                DTOLFP((ptspec)->tv_nsec * 1.0e-9, pts);		\
-                (pts)->l_ui += (u_int32)((ptspec)->tv_sec) + JAN_1970;  \
-        } while (0)
+	do {								\
+		DTOLFP((ptspec)->tv_nsec * 1.0e-9, pts);		\
+		(pts)->l_ui += (u_int32)((ptspec)->tv_sec) + JAN_1970;	\
+	} while (0)
 #endif
 
 
@@ -59,7 +59,7 @@ extern int async_write(int, const void *, unsigned int);
  * Prototype was refclock_trak.c, Thanks a lot.
  *
  * The receiver used spits out the NMEA sentences for boat navigation.
- * And you thought it was an information superhighway.  Try a raging river
+ * And you thought it was an information superhighway.	Try a raging river
  * filled with rapids and whirlpools that rip away your data and warp time.
  *
  * If HAVE_PPSAPI is defined code to use the PPSAPI will be compiled in.
@@ -91,12 +91,12 @@ extern int async_write(int, const void *, unsigned int);
  *		4 for 57600 
  *		5 for 115200 
  */
-#define NMEA_MESSAGE_MASK_OLD    0x07
+#define NMEA_MESSAGE_MASK_OLD	 0x07
 #define NMEA_MESSAGE_MASK_SINGLE 0x08
-#define NMEA_MESSAGE_MASK        (NMEA_MESSAGE_MASK_OLD | NMEA_MESSAGE_MASK_SINGLE)
+#define NMEA_MESSAGE_MASK	 (NMEA_MESSAGE_MASK_OLD | NMEA_MESSAGE_MASK_SINGLE)
 
-#define NMEA_BAUDRATE_MASK       0x70
-#define NMEA_BAUDRATE_SHIFT      4
+#define NMEA_BAUDRATE_MASK	 0x70
+#define NMEA_BAUDRATE_SHIFT	 4
 
 /*
  * Definitions
@@ -128,9 +128,9 @@ extern int async_write(int, const void *, unsigned int);
 /*
  * $GPZDG is a proprietary sentence that violates the spec, by not
  * using $P and an assigned company identifier to prefix the sentence
- * identifier.  When used with this driver, the system needs to be
+ * identifier.	When used with this driver, the system needs to be
  * isolated from other NTP networks, as it operates in GPS time, not
- * UTC as is much more common.  GPS time is >15 seconds different from
+ * UTC as is much more common.	GPS time is >15 seconds different from
  * UTC due to not respecting leap seconds since 1970 or so.  Other
  * than the different timebase, $GPZDG is similar to $GPZDA.
  */
@@ -165,7 +165,7 @@ struct nmeaunit {
 	int	ppsapi_tried;	/* attempt PPSAPI once */
 	int	ppsapi_lit;	/* time_pps_create() worked */
 	int	ppsapi_fd;	/* fd used with PPSAPI */
-	int     ppsapi_gate;	/* allow edge detection processing */
+	int	ppsapi_gate;	/* allow edge detection processing */
 	int	tcount;		/* timecode sample counter */
 	int	pcount;		/* PPS sample counter */
 #endif /* HAVE_PPSAPI */
@@ -185,7 +185,7 @@ static	void	nmea_poll	(int, struct peer *);
 #ifdef HAVE_PPSAPI
 static	void	nmea_control	(int, struct refclockstat *,
 				 struct refclockstat *, struct peer *);
-static  void	nmea_timer	(int, struct peer *);
+static	void	nmea_timer	(int, struct peer *);
 #define		NMEA_CONTROL	nmea_control
 #define		NMEA_TIMER	nmea_timer
 #else
@@ -239,33 +239,33 @@ nmea_start(
 	 * based on the value of bit 4/5/6
 	 */
 	switch ((peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT) {
-	    case 0:
-	    case 6:
-	    case 7:
-	    default:
+	case 0:
+	case 6:
+	case 7:
+	default:
 		baudrate = SPEED232;
 		baudtext = "4800";
 		break;
-	    case 1:
+	case 1:
 		baudrate = B9600;
 		baudtext = "9600";
 		break;
-	    case 2:
+	case 2:
 		baudrate = B19200;
 		baudtext = "19200";
 		break;
-	    case 3:
+	case 3:
 		baudrate = B38400;
 		baudtext = "38400";
 		break;
 #ifdef B57600
-	    case 4:
+	case 4:
 		baudrate = B57600;
 		baudtext = "57600";
 		break;
 #endif
 #ifdef B115200
-	    case 5:
+	case 5:
 		baudrate = B115200;
 		baudtext = "115200";
 		break;
@@ -281,8 +281,9 @@ nmea_start(
 		 * See http://home.hiwaay.net/~taylorc/gps/nmea-server/
 		 * for information about nmead
 		 *
-		 * To use this, you need to create a link from /dev/gpsX to
-		 * the server:port where nmead is running.  Something like this:
+		 * To use this, you need to create a link from /dev/gpsX
+		 * to the server:port where nmead is running.  Something
+		 * like this:
 		 *
 		 * ln -s server:port /dev/gps1
 		 */
@@ -530,23 +531,23 @@ nmea_timer(
  * is updated to reflect the proper fudge time to apply. (This implies
  * that 'refclock_process_f()' must be used!)
  */
-#define PPS_RELATE_NONE  0	/* no pps correlation possible    */
-#define PPS_RELATE_EDGE  1	/* recv time fixed, no phase lock */
+#define PPS_RELATE_NONE	 0	/* no pps correlation possible	  */
+#define PPS_RELATE_EDGE	 1	/* recv time fixed, no phase lock */
 #define PPS_RELATE_PHASE 2	/* recv time fixed, phase lock ok */
 
 static int
 refclock_ppsrelate(
-	const struct refclockproc  *pp      ,	/* for sanity     */
-	const struct refclock_atom *ap      ,	/* for PPS io     */
-	const l_fp                 *reftime ,
-	l_fp                       *rd_stamp,	/* i/o read stamp */
-	double                      pp_fudge,	/* pps fudge      */
-	double                     *rd_fudge)	/* i/o read fudge */
+	const struct refclockproc  *pp	    ,	/* for sanity	  */
+	const struct refclock_atom *ap	    ,	/* for PPS io	  */
+	const l_fp		   *reftime ,
+	l_fp			   *rd_stamp,	/* i/o read stamp */
+	double			    pp_fudge,	/* pps fudge	  */
+	double			   *rd_fudge)	/* i/o read fudge */
 {
-	pps_info_t      pps_info;
+	pps_info_t	pps_info;
 	struct timespec timeout;
-	l_fp            pp_stamp, pp_delta;
-	double          delta, idelta;
+	l_fp		pp_stamp, pp_delta;
+	double		delta, idelta;
 
 	if (pp->leap == LEAP_NOTINSYNC)
 		return PPS_RELATE_NONE;	/* clock is insane, no chance */
@@ -576,9 +577,9 @@ refclock_ppsrelate(
 		return PPS_RELATE_NONE; /* PPS timeout control */
 	
 	/* eventually warp edges, check phase */
-	idelta    = floor(delta + 0.5);
+	idelta	  = floor(delta + 0.5);
 	pp_fudge -= idelta;
-	delta    -= idelta;
+	delta	 -= idelta;
 	if (fabs(delta) > 0.45)
 		return PPS_RELATE_NONE; /* dead band control */
 
@@ -616,11 +617,12 @@ nmea_receive(
 	struct peer *peer;
 	char *cp, *dp, *msg;
 	u_char sentence;
-	/* Use these variables to hold data until we decide its worth keeping */
+	/* Use these variables to hold data until we decide its worth
+	 * keeping */
 	char	rd_lastcode[BMAX];
 	l_fp	rd_timestamp, reftime;
 	int	rd_lencode;
-	double  rd_fudge;
+	double	rd_fudge;
 	struct calendar date;
 
 	/*
@@ -672,7 +674,7 @@ nmea_receive(
 	 *  It contains the GPS timestamp valid for next PPS pulse.
 	 *  Apart from the familiar fields, 
 	 *  'AA.BB' denotes the signal strength( should be < 05.00 ) 
-	 *  'V'     denotes the GPS sync status : 
+	 *  'V'	    denotes the GPS sync status : 
 	 *	   '0' indicates INVALID time, 
 	 *	   '1' indicates accuracy of +/-20 ms
 	 *	   '2' indicates accuracy of +/-100 ns
@@ -872,7 +874,7 @@ nmea_receive(
 		date.month = 10 * (dp[0] - '0') + (dp[1] - '0');
 		dp = field_parse(cp, 4);
 		date.year = 1000 * (dp[0] - '0') + 100 * (dp[1] - '0')
-		          + 10 * (dp[2] - '0') + (dp[3] - '0');
+			  + 10 * (dp[2] - '0') + (dp[3] - '0');
 
 	} else
 		nmea_day_unfold(&date);
@@ -982,21 +984,21 @@ nmea_receive(
 #ifdef HAVE_PPSAPI
 	up->tcount++;
 	/*
-	 * If we have PPS running, we try to associate the sentence with the last
-	 * active edge of the PPS signal.
+	 * If we have PPS running, we try to associate the sentence with
+	 * the last active edge of the PPS signal.
 	 */
 	if (up->ppsapi_lit)
-		switch(refclock_ppsrelate(pp, &up->atom, &reftime,
+		switch (refclock_ppsrelate(pp, &up->atom, &reftime,
 					  &rd_timestamp, pp->fudgetime1,
 					  &rd_fudge))
 		{
-		    case PPS_RELATE_EDGE:
+		case PPS_RELATE_EDGE:
 			up->ppsapi_gate = 0;
 			break;
-		    case PPS_RELATE_PHASE:
+		case PPS_RELATE_PHASE:
 			up->ppsapi_gate = 1;
 			break;
-		    default:
+		default:
 			break;
 		}
 	else 
@@ -1067,7 +1069,7 @@ nmea_poll(
 
 /*
  *
- *	gps_send(fd,cmd, peer)  Sends a command to the GPS receiver.
+ *	gps_send(fd,cmd, peer)	Sends a command to the GPS receiver.
  *	 as	gps_send(fd,"rqts,u\r", peer);
  *
  *	We don't currently send any data, but would like to send
@@ -1204,7 +1206,7 @@ nmea_day_unfold(
 
 	value = ((time_t)jd->hour * MINSPERHR
 		 + (time_t)jd->minute) * SECSPERMIN
-	          + (time_t)jd->second;
+		  + (time_t)jd->second;
 	pivot = time(NULL) - SECSPERDAY/2;
 
 	value = nmea_periodic_unfold(pivot, value, SECSPERDAY);
@@ -1240,9 +1242,9 @@ static void
 nmea_century_unfold(
 	struct calendar *jd)
 {
-	time_t     pivot_time;
+	time_t	   pivot_time;
 	struct tm *pivot_date;
-	time_t     pivot_year;
+	time_t	   pivot_year;
 
 	/* get warp limit and century start of pivot from system time */
 	pivot_time = time(NULL);
