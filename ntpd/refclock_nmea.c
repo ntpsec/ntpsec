@@ -16,16 +16,6 @@
  *		hart@ntp.org, davehart@davehart.com
  */
 
-/*
-************************************************************************
-* MODIFIED FOR ENHANCED PPS PROCESSING AND SYNC TO ABSOLUTE TIME       *
-*                                                                      *
-* THIS IS AN INOFFICAL / UNPUBLISHED WORK; USE AT OWN RISK AND DO NOT  *
-* FILE ERRORS AGAINST ANY NTPD VERSION THAT USES IT!                   *
-************************************************************************
-*/
-const char NMEA_DISCLAIMER[] = "refclock_nmea: inofficial version -- no support";
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif

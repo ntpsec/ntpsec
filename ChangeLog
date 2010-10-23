@@ -1,4 +1,9 @@
 ---
+
+* [Bug 1571] NMEA does not relate data to PPS edge
+* [Bug 1572] NMEA time adjustment for GPZDG buggy
+
+---
 (4.2.6p3-RC5) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1649] Require NMEA checksum if $GPRMC or previously seen.
