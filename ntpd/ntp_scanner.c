@@ -62,7 +62,10 @@ static int is_keyword(char *lexeme, follby *pfollowedby);
 
 
 /*
- * keyword() - Return the keyword associated with token T_ identifier
+ * keyword() - Return the keyword associated with token T_ identifier.
+ *	       See also token_name() for the string-ized T_ identifier.
+ *	       Example: keyword(T_Server) returns "server"
+ *			token_name(T_Server) returns "T_Server"
  */
 const char *
 keyword(

@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1675] Prohibit includefile remote config.
+
+---
 (4.2.6p3-RC5) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1649] Require NMEA checksum if $GPRMC or previously seen.
