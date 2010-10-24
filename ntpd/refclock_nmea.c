@@ -1214,7 +1214,7 @@ nmea_day_unfold(
 	if (tdate) {
 		jd->year     = tdate->tm_year + 1900;
 		jd->yearday  = tdate->tm_yday + 1;
-		jd->monthday = tdate->tm_mon + 1;
+		jd->month    = tdate->tm_mon + 1;
 		jd->monthday = tdate->tm_mday;
 		jd->hour     = tdate->tm_hour;
 		jd->minute   = tdate->tm_min;
