@@ -10,7 +10,7 @@ This release includes build infrastructure updates, code
 clean-ups, minor bug fixes, fixes for a number of minor
 ref-clock issues, and documentation revisions.
 
-Portability improvements in this release affect Linux and
+Portability improvements in this release affect AIX, Linux and
 Microsoft Windows.
 
 New features / changes in this release:
@@ -22,10 +22,12 @@ Build system
 ntpd
 * Do not bind to IN6_IFF_ANYCAST addresses
 * Log the reason for exiting under Windows
+* NMEA refclock improvements
 * Support Truetime Satellite clocks under Windows
 * Support Arbiter 1093C Satellite clocks under Windows
 * Make sure that the "filegen" configuration command defaults to "enable"
 * Range-check the status codes (plus other cleanup) in the RIPE-NCC driver
+* Prohibit 'includefile' directive in remote configuration command
 
 ntpq
 * libntpq warning cleanup
