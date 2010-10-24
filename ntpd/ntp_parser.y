@@ -36,7 +36,7 @@
   #define YYFREE	free
   #define YYERROR_VERBOSE
   #define YYMAXDEPTH	1000   /* stop the madness sooner */
-  void yyerror (char *msg);
+  void yyerror(const char *msg);
   extern int input_from_file;  /* 0=input from ntpq :config */
 %}
 
@@ -246,17 +246,23 @@
 %type	<Integer>	access_control_flag
 %type	<Int_fifo>	ac_flag_list
 %type	<Address_node>	address
+%type	<Integer>	address_fam
 %type	<Address_fifo>	address_list
 %type	<Integer>	boolean
 %type	<Integer>	client_type
 %type	<Attr_val>	crypto_command
 %type	<Attr_val_fifo>	crypto_command_list
+%type	<Integer>	crypto_str_keyword
 %type	<Attr_val>	discard_option
+%type	<Integer>	discard_option_keyword
 %type	<Attr_val_fifo>	discard_option_list
+%type	<Integer>	enable_disable
 %type	<Attr_val>	filegen_option
 %type	<Attr_val_fifo>	filegen_option_list
 %type	<Integer>	filegen_type
 %type	<Attr_val>	fudge_factor
+%type	<Integer>	fudge_factor_bool_keyword
+%type	<Integer>	fudge_factor_dbl_keyword
 %type	<Attr_val_fifo>	fudge_factor_list
 %type	<Attr_val_fifo>	integer_list
 %type	<Attr_val_fifo>	integer_list_range
@@ -266,22 +272,36 @@
 %type	<Integer>	interface_command
 %type	<Integer>	interface_nic
 %type	<Address_node>	ip_address
+%type	<Integer>	link_nolink
 %type	<Attr_val>	log_config_command
 %type	<Attr_val_fifo>	log_config_list
+%type	<Integer>	misc_cmd_dbl_keyword
+%type	<Integer>	misc_cmd_str_keyword
+%type	<Integer>	misc_cmd_str_lcl_keyword
 %type	<Attr_val>	mru_option
+%type	<Integer>	mru_option_keyword
 %type	<Attr_val_fifo>	mru_option_list
 %type	<Integer>	nic_rule_class
 %type	<Double>	number
 %type	<Attr_val>	option
+%type	<Attr_val>	option_flag
+%type	<Integer>	option_flag_keyword
 %type	<Attr_val_fifo>	option_list
+%type	<Attr_val>	option_int
+%type	<Integer>	option_int_keyword
 %type	<Integer>	stat
 %type	<Int_fifo>	stats_list
 %type	<String_fifo>	string_list
 %type	<Attr_val>	system_option
+%type	<Integer>	system_option_flag_keyword
 %type	<Attr_val_fifo>	system_option_list
+%type	<Integer>	t_default_or_zero
+%type	<Integer>	tinker_option_keyword
 %type	<Attr_val>	tinker_option
 %type	<Attr_val_fifo>	tinker_option_list
 %type	<Attr_val>	tos_option
+%type	<Integer>	tos_option_dbl_keyword
+%type	<Integer>	tos_option_int_keyword
 %type	<Attr_val_fifo>	tos_option_list
 %type	<Attr_val>	trap_option
 %type	<Attr_val_fifo>	trap_option_list
@@ -355,16 +375,14 @@ server_command
 			peer_node *my_node;
 
 			my_node = create_peer_node($1, $2, $3);
-			if (my_node)
-				APPEND_G_FIFO(cfgt.peers, my_node);
+			APPEND_G_FIFO(cfgt.peers, my_node);
 		}
 	|	client_type address
 		{
 			peer_node *my_node;
 
 			my_node = create_peer_node($1, $2, NULL);
-			if (my_node)
-				APPEND_G_FIFO(cfgt.peers, my_node);
+			APPEND_G_FIFO(cfgt.peers, my_node);
 		}
 	;
 
@@ -378,15 +396,20 @@ client_type
 
 address
 	:	ip_address
-	|	T_Ipv4_flag T_String
-			{ $$ = create_address_node($2, AF_INET); }
-	|	T_Ipv6_flag T_String
-			{ $$ = create_address_node($2, AF_INET6); }
+	|	address_fam T_String
+			{ $$ = create_address_node($2, $1); }
 	;
 
 ip_address
 	:	T_String 
 			{ $$ = create_address_node($1, AF_UNSPEC); }
+	;
+
+address_fam
+	:	T_Ipv4_flag
+			{ $$ = AF_INET; }
+	|	T_Ipv6_flag
+			{ $$ = AF_INET6; }
 	;
 
 option_list
@@ -397,22 +420,39 @@ option_list
 	;
 
 option
-	:	T_Autokey		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Burst			{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Iburst		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Key T_Integer		{ $$ = create_attr_ival($1, $2); }
-	|	T_Minpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Maxpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Noselect		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Preempt		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Prefer		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_True			{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Xleave		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Ttl T_Integer		{ $$ = create_attr_ival($1, $2); }
-	|	T_Mode T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Version T_Integer	{ $$ = create_attr_ival($1, $2); }
+	:	option_flag
+	|	option_int
 	;
 
+option_flag
+	:	option_flag_keyword
+			{ $$ = create_attr_ival(T_Flag, $1); }
+	;
+
+option_flag_keyword
+	:	T_Autokey
+	|	T_Burst
+	|	T_Iburst
+	|	T_Noselect
+	|	T_Preempt
+	|	T_Prefer
+	|	T_True
+	|	T_Xleave
+	;
+
+option_int
+	:	option_int_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+option_int_keyword
+	:	T_Key
+	|	T_Minpoll
+	|	T_Maxpoll
+	|	T_Ttl
+	|	T_Mode
+	|	T_Version
+	;
 
 /* unpeer commands
  * ---------------
@@ -502,15 +542,7 @@ crypto_command_list
 	;
 
 crypto_command
-	:	T_Host	T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Ident	T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Pw T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Randfile T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Digest T_String
+	:	crypto_str_keyword T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Revoke T_Integer
 		{
@@ -521,6 +553,14 @@ crypto_command
 				"please use 'revoke %d' instead.",
 				cfgt.auth.revoke, cfgt.auth.revoke);
 		}
+	;
+
+crypto_str_keyword
+	:	T_Host
+	|	T_Ident
+	|	T_Pw
+	|	T_Randfile
+	|	T_Digest
 	;
 
 
@@ -547,28 +587,29 @@ tos_option_list
 	;
 
 tos_option
-	:	T_Ceiling T_Integer
+	:	tos_option_int_keyword T_Integer
 			{ $$ = create_attr_ival($1, $2); }
-	|	T_Floor T_Integer
-			{ $$ = create_attr_ival($1, $2); }
+	|	tos_option_dbl_keyword number
+			{ $$ = create_attr_dval($1, $2); }
 	|	T_Cohort boolean
 			{ $$ = create_attr_ival($1, $2); }
-	|	T_Orphan T_Integer
-			{ $$ = create_attr_ival($1, $2); }
-	|	T_Orphanwait T_Integer
-			{ $$ = create_attr_ival($1, $2); }
-	|	T_Mindist number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Maxdist number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Minclock number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Maxclock number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Minsane T_Integer
-			{ $$ = create_attr_ival($1, $2); }
-	|	T_Beacon T_Integer
-			{ $$ = create_attr_ival($1, $2); }
+	;
+
+
+tos_option_int_keyword
+	:	T_Ceiling
+	|	T_Floor
+	|	T_Orphan
+	|	T_Orphanwait
+	|	T_Minsane
+	|	T_Beacon
+	;
+
+tos_option_dbl_keyword
+	:	T_Mindist
+	|	T_Maxdist
+	|	T_Minclock
+	|	T_Maxclock
 	;
 
 
@@ -636,44 +677,52 @@ filegen_option_list
 filegen_option
 	:	T_File T_String
 		{
-			if (input_from_file)
+			if (input_from_file) {
 				$$ = create_attr_sval($1, $2);
-			else {
+			} else {
 				$$ = NULL;
 				YYFREE($2);
-				yyerror("filegen file remote configuration ignored");
+				yyerror("filegen file remote config ignored");
 			}
 		}
 	|	T_Type filegen_type
 		{
-			if (input_from_file)
+			if (input_from_file) {
 				$$ = create_attr_ival($1, $2);
-			else {
+			} else {
 				$$ = NULL;
-				yyerror("filegen type remote configuration ignored");
+				yyerror("filegen type remote config ignored");
 			}
 		}
-	|	T_Link
+	|	link_nolink
 		{
-			if (input_from_file)
+			const char *err;
+			
+			if (input_from_file) {
 				$$ = create_attr_ival(T_Flag, $1);
-			else {
+			} else {
 				$$ = NULL;
-				yyerror("filegen link remote configuration ignored");
+				if (T_Link == $1)
+					err = "filegen link remote config ignored";
+				else
+					err = "filegen nolink remote config ignored";
+				yyerror(err);
 			}
 		}
-	|	T_Nolink
-		{
-			if (input_from_file)
-				$$ = create_attr_ival(T_Flag, $1);
-			else {
-				$$ = NULL;
-				yyerror("filegen nolink remote configuration ignored");
-			}
-		}
-	|	T_Enable	{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Disable	{ $$ = create_attr_ival(T_Flag, $1); }
+	|	enable_disable
+			{ $$ = create_attr_ival(T_Flag, $1); }
 	;
+
+link_nolink
+	:	T_Link
+	|	T_Nolink
+	;
+
+enable_disable
+	:	T_Enable
+	|	T_Disable
+	;
+
 
 filegen_type
 	:	T_None
@@ -807,9 +856,14 @@ discard_option_list
 	;
 
 discard_option
-	:	T_Average T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Minimum T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Monitor T_Integer { $$ = create_attr_ival($1, $2); }
+	:	discard_option_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+discard_option_keyword
+	:	T_Average
+	|	T_Minimum
+	|	T_Monitor
 	;
 
 mru_option_list
@@ -826,14 +880,19 @@ mru_option_list
 	;
 
 mru_option
-	:	T_Incalloc  T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Incmem    T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Initalloc T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Initmem   T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxage    T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxdepth  T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxmem    T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Mindepth  T_Integer { $$ = create_attr_ival($1, $2); }
+	:	mru_option_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+mru_option_keyword
+	:	T_Incalloc
+	|	T_Incmem
+	|	T_Initalloc
+	|	T_Initmem
+	|	T_Maxage
+	|	T_Maxdepth
+	|	T_Maxmem
+	|	T_Mindepth
 	;
 
 /* Fudge Commands
@@ -864,14 +923,26 @@ fudge_factor_list
 	;
 	
 fudge_factor
-	:	T_Time1 number		{ $$ = create_attr_dval($1, $2); }
-	|	T_Time2 number		{ $$ = create_attr_dval($1, $2); }
-	|	T_Stratum T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Refid T_String	{ $$ = create_attr_sval($1, $2); }
-	|	T_Flag1 boolean		{ $$ = create_attr_ival($1, $2); }
-	|	T_Flag2	boolean		{ $$ = create_attr_ival($1, $2); }
-	|	T_Flag3	boolean		{ $$ = create_attr_ival($1, $2); }
-	|	T_Flag4 boolean		{ $$ = create_attr_ival($1, $2); }
+	:	fudge_factor_dbl_keyword number
+			{ $$ = create_attr_dval($1, $2); }
+	|	fudge_factor_bool_keyword boolean
+			{ $$ = create_attr_ival($1, $2); }
+	|	T_Stratum T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	|	T_Refid T_String
+			{ $$ = create_attr_sval($1, $2); }
+	;
+
+fudge_factor_dbl_keyword
+	:	T_Time1
+	|	T_Time2
+	;
+
+fudge_factor_bool_keyword
+	:	T_Flag1
+	|	T_Flag2
+	|	T_Flag3
+	|	T_Flag4
 	;
 
 /* Command for System Options
@@ -899,12 +970,8 @@ system_option_list
 	;
 
 system_option
-	:	T_Auth		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Bclient	{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Calibrate	{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Kernel	{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Monitor	{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Ntp		{ $$ = create_attr_ival(T_Flag, $1); }
+	:	system_option_flag_keyword
+			{ $$ = create_attr_ival(T_Flag, $1); }
 	|	T_Stats
 		{ 
 			if (input_from_file) {
@@ -914,6 +981,15 @@ system_option
 				yyerror("enable/disable stats remote configuration ignored");
 			}
 		}
+	;
+
+system_option_flag_keyword
+	:	T_Auth
+	|	T_Bclient
+	|	T_Calibrate
+	|	T_Kernel
+	|	T_Monitor
+	|	T_Ntp
 	;
 
 /* Tinker Commands
@@ -939,13 +1015,18 @@ tinker_option_list
 	;
 
 tinker_option
-	:	T_Allan number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Dispersion number { $$ = create_attr_dval($1, $2); }
-	|	T_Freq number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Huffpuff number   { $$ = create_attr_dval($1, $2); }
-	|	T_Panic number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Step number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Stepout number    { $$ = create_attr_dval($1, $2); }
+	:	tinker_option_keyword number
+			{ $$ = create_attr_dval($1, $2); }
+	;
+
+tinker_option_keyword
+	:	T_Allan
+	|	T_Dispersion
+	|	T_Freq
+	|	T_Huffpuff
+	|	T_Panic
+	|	T_Step
+	|	T_Stepout
 	;
 
 
@@ -955,8 +1036,42 @@ tinker_option
 
 miscellaneous_command
 	:	interface_command
+	|	misc_cmd_dbl_keyword number
+		{
+			attr_val *av;
+			
+			av = create_attr_dval($1, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
+	|	misc_cmd_str_keyword T_String
+		{
+			attr_val *av;
+			
+			av = create_attr_sval($1, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
+	|	misc_cmd_str_lcl_keyword T_String
+		{
+			char error_text[64];
+			attr_val *av;
+
+			if (input_from_file) {
+				av = create_attr_sval($1, $2);
+				APPEND_G_FIFO(cfgt.vars, av);
+			} else {
+				YYFREE($2);
+				snprintf(error_text, sizeof(error_text),
+					 "%s remote config ignored",
+					 keyword($1));
+				yyerror(error_text);
+			}
+		}
 	|	T_Includefile T_String command
 		{
+			if (!input_from_file) {
+				yyerror("remote includefile ignored");
+				break;
+			}
 			if (curr_include_level >= MAXINCLUDELEVEL) {
 				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
 				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.\n");
@@ -975,74 +1090,14 @@ miscellaneous_command
 			while (curr_include_level != -1)
 				FCLOSE(fp[curr_include_level--]);
 		}
-
-	|	T_Broadcastdelay number
-		{
-			attr_val *av;
-			
-			av = create_attr_dval($1, $2);
-			APPEND_G_FIFO(cfgt.vars, av);
-		}
-	|	T_Tick number
-		{
-			attr_val *av;
-			
-			av = create_attr_dval($1, $2);
-			APPEND_G_FIFO(cfgt.vars, av);
-		}
 	|	T_Driftfile drift_parm
 			{ /* see drift_parm below for actions */ }
-	|	T_Leapfile T_String
-		{
-			attr_val *av;
-			
-			av = create_attr_sval($1, $2);
-			APPEND_G_FIFO(cfgt.vars, av);
-		}
-	|	T_Pidfile T_String
-		{
-			attr_val *av;
-			
-			av = create_attr_sval($1, $2);
-			APPEND_G_FIFO(cfgt.vars, av);
-		}
-	|	T_Logfile T_String
-		{
-			attr_val *av;
-
-			if (input_from_file) {
-				av = create_attr_sval($1, $2);
-				APPEND_G_FIFO(cfgt.vars, av);
-			} else {
-				YYFREE($2);
-				yyerror("logfile remote configuration ignored");
-			}
-		}
 	|	T_Logconfig log_config_list
 			{ CONCAT_G_FIFOS(cfgt.logconfig, $2); }
 	|	T_Phone string_list
 			{ CONCAT_G_FIFOS(cfgt.phone, $2); }
-	|	T_Saveconfigdir	T_String
-		{
-			attr_val *av;
-
-			if (input_from_file) {
-				av = create_attr_sval($1, $2);
-				APPEND_G_FIFO(cfgt.vars, av);
-			} else {
-				YYFREE($2);
-				yyerror("saveconfigdir remote configuration ignored");
-			}
-		}
 	|	T_Setvar variable_assign
 			{ APPEND_G_FIFO(cfgt.setvar, $2); }
-	|	T_Trap ip_address
-		{
-			addr_opts_node *aon;
-			
-			aon = create_addr_opts_node($2, NULL);
-			APPEND_G_FIFO(cfgt.trap, aon);
-		}
 	|	T_Trap ip_address trap_option_list
 		{
 			addr_opts_node *aon;
@@ -1052,15 +1107,24 @@ miscellaneous_command
 		}
 	|	T_Ttl integer_list
 			{ CONCAT_G_FIFOS(cfgt.ttl, $2); }
-	|	T_Qos T_String
-		{
-			attr_val *av;
-			
-			av = create_attr_sval($1, $2);
-			APPEND_G_FIFO(cfgt.qos, av);
-		}
 	;
-	
+
+misc_cmd_dbl_keyword
+	:	T_Broadcastdelay
+	|	T_Tick
+	;
+
+misc_cmd_str_keyword
+	:	T_Leapfile
+	|	T_Pidfile
+	|	T_Qos
+	;
+
+misc_cmd_str_lcl_keyword
+	:	T_Logfile
+	|	T_Saveconfigdir
+	;
+
 drift_parm
 	:	T_String
 		{
@@ -1088,22 +1152,25 @@ drift_parm
 	;
 
 variable_assign
-	:	T_String '=' T_String T_Default
+	:	T_String '=' T_String t_default_or_zero
 			{ $$ = create_setvar_node($1, $3, $4); }
-	|	T_String '=' T_String
-			{ $$ = create_setvar_node($1, $3, 0); }
+	;
+
+t_default_or_zero
+	:	T_Default
+	|	/* empty, no "default" modifier */
+		{ $$ = 0; }
 	;
 
 trap_option_list
-	:	trap_option_list trap_option
+	:	/* empty list */
+		{
+			$$ = NULL;
+		}
+	|	trap_option_list trap_option
 		{
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
-		}
-	|	trap_option
-		{
-			$$ = NULL;
-			APPEND_G_FIFO($$, $1);
 		}
 	;
 
@@ -1402,7 +1469,10 @@ sim_act_keyword
 
 %%
 
-void yyerror (char *msg)
+void 
+yyerror(
+	const char *msg
+	)
 {
 	int retval;
 

@@ -1,6 +1,8 @@
-* [Bug 1671] Audoomatic delay calibration is sometimes inaccurate.
+* [Bug 1675] from 4.2.6p3-RC6: Prohibit includefile remote config.
 * Enable generating ntpd/ntp_keyword.h after keyword-gen.c changes on
   Windows as well as POSIX platforms.
+(4.2.7p69) 2010/10/23 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1671] Automatic delay calibration is sometimes inaccurate.
 (4.2.7p68) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1669] from 4.2.6p3-RC5: NTP fails to compile on IBM AIX 5.3.
 * [Bug 1670] Fix peer->bias and broadcastdelay.
@@ -417,6 +419,10 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1675] Prohibit includefile remote config.
+
 ---
 (4.2.6p3-RC5) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 
