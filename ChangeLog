@@ -421,6 +421,8 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1571] NMEA does not relate data to PPS edge
+* [Bug 1572] NMEA time adjustment for GPZDG buggy
 * [Bug 1675] Prohibit includefile remote config.
 
 ---
