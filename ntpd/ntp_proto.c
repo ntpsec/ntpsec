@@ -2783,7 +2783,7 @@ clock_combine(
 
 	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
-		x = max(sys_maxdist - root_distance(peers[i]), 0);
+		x = max(sys_maxdist - root_distance(peers[i]), sys_mindisp);
 		y += x;
 		z += peers[i]->offset * x;
 		w += SQUARE(peers[i]->offset - peers[0]->offset) * x;

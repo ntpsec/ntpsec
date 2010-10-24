@@ -1,6 +1,7 @@
 * [Bug 1675] from 4.2.6p3-RC6: Prohibit includefile remote config.
 * Enable generating ntpd/ntp_keyword.h after keyword-gen.c changes on
   Windows as well as POSIX platforms.
+* Fix from Dave Mills for a rare singularity in clock_combine().
 (4.2.7p69) 2010/10/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1671] Automatic delay calibration is sometimes inaccurate.
 (4.2.7p68) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
