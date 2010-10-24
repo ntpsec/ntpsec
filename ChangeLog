@@ -417,6 +417,11 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+
+* [Bug 1571] NMEA does not relate data to PPS edge
+* [Bug 1572] NMEA time adjustment for GPZDG buggy
+
+---
 (4.2.6p3-RC5) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1649] Require NMEA checksum if $GPRMC or previously seen.
