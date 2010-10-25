@@ -426,13 +426,15 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 1676] NMEA: $GPGLL did not work after fix for Bug1571
+* [Bug 1676] NMEA: $GPGLL did not work after fix for Bug 1571.
+* Added scripts/checkChangeLog.
 
 ---
 (4.2.6p3-RC6) 2010/10/24 Released by Harlan Stenn <stenn@ntp.org>
 
-* [Bug 1571] NMEA does not relate data to PPS edge
-* [Bug 1572] NMEA time adjustment for GPZDG buggy
+* [Bug 1571] NMEA does not relate data to PPS edge.
+* [Bug 1572] NMEA time adjustment for GPZDG buggy.
+>>>>>>>
 * [Bug 1675] Prohibit includefile remote config.
 
 ---
