@@ -1,3 +1,4 @@
+(4.2.7p71) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1676] from 4.2.6p3-RC7: NMEA: $GPGLL did not work after fix
   for Bug 1571.
 * [Bug 1678] "restrict source" treated as "restrict default".
