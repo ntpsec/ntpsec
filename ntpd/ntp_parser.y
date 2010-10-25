@@ -377,13 +377,6 @@ server_command
 			my_node = create_peer_node($1, $2, $3);
 			APPEND_G_FIFO(cfgt.peers, my_node);
 		}
-	|	client_type address
-		{
-			peer_node *my_node;
-
-			my_node = create_peer_node($1, $2, NULL);
-			APPEND_G_FIFO(cfgt.peers, my_node);
-		}
 	;
 
 client_type
@@ -413,10 +406,13 @@ address_fam
 	;
 
 option_list
-	:	option_list option 
-			{ $$ = append_gen_fifo($1, $2); }
-	|	option
-			{ $$ = append_gen_fifo(NULL, $1); }
+	:	/* empty list */
+			{ $$ = NULL; }
+	|	option_list option 
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	;
 
 option
@@ -453,6 +449,7 @@ option_int_keyword
 	|	T_Mode
 	|	T_Version
 	;
+
 
 /* unpeer commands
  * ---------------
@@ -524,20 +521,12 @@ authentication_command
 	;
 
 crypto_command_list
-	:	crypto_command_list crypto_command
+	:	/* empty list */
+			{ $$ = NULL; }
+	|	crypto_command_list crypto_command
 		{
 			$$ = $1;
 			APPEND_G_FIFO($$, $2);
-		}
-	|	crypto_command
-		{
-			$$ = NULL;
-			APPEND_G_FIFO($$, $1);
-		}
-	|	/* empty list */
-		{
-			$$ = NULL;
-			APPEND_G_FIFO($$, NULL);
 		}
 	;
 
@@ -594,7 +583,6 @@ tos_option
 	|	T_Cohort boolean
 			{ $$ = create_attr_ival($1, $2); }
 	;
-
 
 tos_option_int_keyword
 	:	T_Ceiling
@@ -664,9 +652,7 @@ stat
 
 filegen_option_list
 	:	/* empty list */
-		{
-			$$ = NULL;
-		}
+			{ $$ = NULL; }
 	|	filegen_option_list filegen_option
 		{
 			$$ = $1;
@@ -722,7 +708,6 @@ enable_disable
 	:	T_Enable
 	|	T_Disable
 	;
-
 
 filegen_type
 	:	T_None
@@ -806,7 +791,7 @@ access_control_command
 		{
 			restrict_node *	rn;
 
-			append_gen_fifo($3, create_int_node($2));
+			APPEND_G_FIFO($3, create_int_node($2));
 			rn = create_restrict_node(
 				NULL, NULL, $3, ip_file->line_no);
 			APPEND_G_FIFO(cfgt.restrict_opts, rn);
@@ -815,9 +800,7 @@ access_control_command
 
 ac_flag_list
 	:	/* empty list is allowed */
-		{
-			$$ = NULL;
-		}
+			{ $$ = NULL; }
 	|	ac_flag_list access_control_flag
 		{
 			$$ = $1;
@@ -1159,14 +1142,12 @@ variable_assign
 t_default_or_zero
 	:	T_Default
 	|	/* empty, no "default" modifier */
-		{ $$ = 0; }
+			{ $$ = 0; }
 	;
 
 trap_option_list
 	:	/* empty list */
-		{
-			$$ = NULL;
-		}
+			{ $$ = NULL; }
 	|	trap_option_list trap_option
 		{
 			$$ = $1;
@@ -1256,7 +1237,6 @@ nic_rule_action
 	|	T_Ignore
 	|	T_Drop
 	;
-
 
 
 /* Miscellaneous Rules

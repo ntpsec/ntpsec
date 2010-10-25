@@ -253,6 +253,7 @@ compsave.conf: ntpd $(srcdir)/complete.conf
 	./ntpd --configfile $(srcdir)/complete.conf --saveconfigquit $@
 
 check-saveconfig: $(srcdir)/complete.conf compsave.conf
+	-diff $(srcdir)/complete.conf compsave.conf
 	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
 
 ../libopts/libopts.la:
