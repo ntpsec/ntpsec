@@ -1,6 +1,6 @@
 (4.2.7p70) 2010/10/24 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 1571] from 4.2.63-RC6: NMEA does not relate data to PPS edge.
-* [Bug 1572] from 4.2.63-RC6: NMEA time adjustment for GPZDG buggy.
+* [Bug 1571] from 4.2.6p3-RC6: NMEA does not relate data to PPS edge.
+* [Bug 1572] from 4.2.p63-RC6: NMEA time adjustment for GPZDG buggy.
 * [Bug 1675] from 4.2.6p3-RC6: Prohibit includefile remote config.
 * Enable generating ntpd/ntp_keyword.h after keyword-gen.c changes on
   Windows as well as POSIX platforms.
