@@ -1,4 +1,7 @@
+* [Bug 1676] from 4.2.6p3-RC7: NMEA: $GPGLL did not work after fix
+  for Bug 1571.
 * [Bug 1678] "restrict source" treated as "restrict default".
+* from 4.2.6p3-RC7: Added scripts/checkChangeLog.
 (4.2.7p70) 2010/10/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1571] from 4.2.6p3-RC6: NMEA does not relate data to PPS edge.
 * [Bug 1572] from 4.2.p63-RC6: NMEA time adjustment for GPZDG buggy.
