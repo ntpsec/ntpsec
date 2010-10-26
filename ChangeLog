@@ -1,3 +1,4 @@
+(4.2.7p72) 2010/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1679] Fix test for -lsocket.
 * Clean up missing ;; entries in configure.ac.
 (4.2.7p71) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
