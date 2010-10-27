@@ -2127,9 +2127,9 @@ clock_filter(
 	}
 
 	/*
-	 * If the clock is synchronized,sort the samples by distance.  
+	 * If the clock has stabilized, sort the samples by distance.  
 	 */
-	if (sys_leap != LEAP_NOTINSYNC) {
+	if (freq_cnt == 0) {
 		for (i = 1; i < NTP_SHIFT; i++) {
 			for (j = 0; j < i; j++) {
 				if (dst[j] > dst[i]) {
@@ -2221,7 +2221,7 @@ clock_filter(
 	 */
 	if (peer->filter_epoch[k] <= peer->epoch) {
 #if DEBUG
-	if (debug)
+	if (debug > 1)
 		printf("clock_filter: old sample %lu\n", current_time -
 		    peer->filter_epoch[k]);
 #endif
@@ -2278,15 +2278,15 @@ clock_select(void)
 	struct peer *typepps = NULL;
 #endif /* REFCLOCK */
 	static struct endpoint *endpoint = NULL;
-	static int *indx = NULL;
-	static struct peer **peers = NULL;
 	static double *synch = NULL;
 	static double *error = NULL;
+	static int *indx = NULL;
+	static struct peer **peers = NULL;
 	static u_int endpoint_size = 0;
-	static u_int indx_size = 0;
-	static u_int peers_size = 0;
 	static u_int synch_size = 0;
 	static u_int error_size = 0;
+	static u_int peers_size = 0;
+	static u_int indx_size = 0;
 	size_t octets;
 
 	/*
@@ -2310,17 +2310,17 @@ clock_select(void)
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
 	endpoint_size = nlist * 2 * sizeof(struct endpoint);
-	indx_size = nlist * 2 * sizeof(int);
-	peers_size = nlist * sizeof(struct peer *);
 	synch_size = nlist * sizeof(double);
 	error_size = nlist * sizeof(double);
+	peers_size = nlist * sizeof(struct peer *);
+	indx_size = nlist * 2 * sizeof(int);
 	octets = endpoint_size + indx_size + peers_size + synch_size +
 	    error_size;
 	endpoint = erealloc(endpoint, octets);
-	indx = (int *)((char *)endpoint + endpoint_size);
-	peers = (struct peer **)((char *)indx + indx_size);
-	synch = (double *)((char *)peers + peers_size);
+	synch = (double *)((char *)endpoint + endpoint_size);
 	error = (double *)((char *)synch + synch_size);
+	peers = (struct peer **)((char *)error + error_size);
+	indx = (int *)((char *)peers + peers_size);
 
 	/*
 	 * Initially, we populate the island with all the rifraff peers

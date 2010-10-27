@@ -1,3 +1,5 @@
+* [Bug 1680] Fix alignment of clock_select() arrays.
+* refinements to new startup behavior from David Mills.
 * For the bootstrap script, touch .html files last.
 (4.2.7p72) 2010/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1679] Fix test for -lsocket.

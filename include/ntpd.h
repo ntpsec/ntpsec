@@ -162,6 +162,7 @@ extern	void	loop_config(int, double);
 extern	void	huffpuff(void);
 extern	u_long	sys_clocktime;
 extern	u_int	sys_tai;
+extern 	int	freq_cnt;
 
 /* ntp_monitor.c */
 #define MON_HASH_SIZE		(1U << mon_hash_bits)

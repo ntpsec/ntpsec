@@ -185,6 +185,7 @@ init_loopfilter(void)
 	 */
 	sys_poll = ntp_minpoll;
 	clock_jitter = LOGTOD(sys_precision);
+	freq_cnt = clock_minstep;
 }
 
 /*
@@ -417,7 +418,6 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case EVNT_NSET:
-			freq_cnt = clock_minstep;
 			rstclock(EVNT_FREQ, fp_offset);
 			break;
 
@@ -428,7 +428,6 @@ local_clock(
 		 * counter decrements to zero.
 		 */
 		case EVNT_FSET:
-			freq_cnt = clock_minstep;
 			rstclock(EVNT_SYNC, fp_offset);
 			break;
 
@@ -443,7 +442,6 @@ local_clock(
 				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
-			freq_cnt = clock_minstep;
 			rstclock(EVNT_SYNC, 0);
 			/* fall through to default */
 
@@ -706,11 +704,12 @@ adj_host_clock(
 	 * time constant is clamkped at 2.
 	 */
 	sys_rootdisp += clock_phi;
-	if (fabs(clock_offset) < CLOCK_FLOOR)
-		freq_cnt = 0;
-	else if (freq_cnt > 0 && sys_leap != LEAP_NOTINSYNC)
-		freq_cnt--;
-
+	if (state == EVNT_SYNC) {
+		if (fabs(clock_offset) < CLOCK_FLOOR)
+			freq_cnt = 0;
+		else if (freq_cnt > 0)
+			freq_cnt--;
+	}
 #ifndef LOCKCLOCK
 	/*
 	 * If clock discipline is disabled or if the kernel is enabled,
@@ -727,7 +726,7 @@ adj_host_clock(
 	 * reduced time constant at startup.
 	 */
 	if (freq_cnt > 0)
-		adjustment = clock_offset / (CLOCK_PLL * 4);
+		adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(1));
 	else
 		adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
 	clock_offset -= adjustment;
