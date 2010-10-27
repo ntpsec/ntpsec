@@ -1,3 +1,4 @@
+* For the bootstrap script, touch .html files last.
 (4.2.7p72) 2010/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1679] Fix test for -lsocket.
 * Clean up missing ;; entries in configure.ac.
