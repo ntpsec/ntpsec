@@ -1,3 +1,5 @@
+* [Bug 1685] from 4.2.6p3-RC8: NMEA driver mode byte confusion.
+* from 4.2.6p3-RC8: First cut at using scripts/checkChangeLog.
 (4.2.7p73) 2010/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1680] Fix alignment of clock_select() arrays.
 * refinements to new startup behavior from David Mills.
@@ -436,6 +438,12 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+(4.2.6p3-RC8) 2010/10/29 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1685] NMEA driver mode byte confusion.
+* First cut at using scripts/checkChangeLog.
+
 ---
 (4.2.6p3-RC7) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
 
