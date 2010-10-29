@@ -149,7 +149,7 @@ $(srcdir)/include/version.texi: $(srcdir)/packageinfo.sh
 
 $(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/checkChangeLog
 	cd $(srcdir) && \
-	./scripts/checkChangeLog && touch .checkChangeLog
+	./scripts/checkChangeLog
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
