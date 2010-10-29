@@ -89,17 +89,21 @@ for f in ${prog_opt_files}
 do
     f=`echo $f | sed -e 's/-opts.def//'`
     l=
+    lh=
     for i in `ls -1 $f*`
     do
 	case "$i" in
-	 *.c|*.h|*.1|*.html|*.texi|*.menu)
+	 *.c|*.h|*.1|*.texi|*.menu)
 	    l="$l $i"
+	    ;;
+	 *.html)
+	    lh="$lh $i"
 	    ;;
 	esac
     done
-    case "$l" in
-     '') ;;
-     *) touch $l
+    case "$l:$lh" in
+     ':') ;;
+     *) touch $l $lh
 	;;
     esac
 done

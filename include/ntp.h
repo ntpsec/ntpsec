@@ -126,7 +126,6 @@ typedef char s_char;
  */
 #define	NTP_MINCLOCK	3	/* min survivors */
 #define	NTP_MAXCLOCK	10	/* max candidates */
-#define	NTP_MAXASSOC	50	/* max associations */
 #define MINDISPERSE	.001	/* min distance */
 #define MAXDISTANCE	1.5	/* max root distance (select threshold) */
 #define CLOCK_SGATE	3.	/* popcorn spike gate */
@@ -353,7 +352,7 @@ struct peer {
 	double	jitter;		/* peer jitter (squares) */
 	double	disp;		/* peer dispersion */
 	double	xleave;		/* interleave delay */
-	double	bias;		/* bias for NIC asymmetry */
+	double	bias;		/* programmed offset bias */
 
 	/*
 	 * Variables used to correct for packet length and asymmetry.

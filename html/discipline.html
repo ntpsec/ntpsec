@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<title>Clock Discipline Algorithm</title>
+<link href="scripts/style.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+^
+<h3>Clock Discipline Algorithm</h3>
+<p>Last update:
+  <!-- #BeginDate format:En2m -->10-Oct-2010  2:27<!-- #EndDate -->
+  UTC</p>
+<h4>Table of Contents</h4>
+<ul>
+  <li class="inline"><a href="#intro">Introduction</a></li>
+  <li class="inline"><a href="#pll">Phase-Lock Loop Operations</a></li>
+  <li class="inline"><a href="#loop">Loop Dynamics</a></li>
+</ul>
+<hr>
+<h4 id="intro">Introduction</h4>
+<p>At the heart of the NTP specification and reference implementation is the clock discipline algorithm, which is best described as an adaptive parameter, hybrid phase/frequency-lock feedback loop. It is an intricately crafted algorithm that automatically  adapts  for optimum performance while  minimizing network overhead. Operation is in two modes, phase-lock loop (PLL), which is most influential at poll intervals at and below 2048 s, and frequency-lock loop (FLL), which is most influential above that. Only the PLL mode is described here.</p>
+<div align="center"> <img src="pic/discipline.gif" alt="gif">
+  <p>Figure 1. Clock Discipline Algorithm</p>
+</div>
+<h4 id="pll">Phase-Lock Loop Operations</h4>
+<p>A block diagram of the PLL is shown in Figure 1. The timestamp of a reference clock or remote server is compared with the timestamp of the system clock, represented as a variable frequency oscillator (VFO), to produce a raw offset sample <em>V<sub>d</sub></em>. Offset samples are processed by the clock filter to produce a filtered update <em>V<sub>s</sub></em>. The loop filter implements a type-2 feedback loop  often called a proportional-integrator controller (PIC). The PIC can  minimize errors in both time and frequency using predictors <em>x</em> and <em>y</em>, respectively. The clock adjust process samples these predictors once each second to produce the system clock frequency correction <em>V<sub>c</sub></em>.</p>
+<p>Its response  is determined by  the <em>time constant</em>, which results in a &quot;stiffness&quot; depending on the   jitter  of the available sources and the wander of the system clock oscillator. The  scaled time constant is also used as the poll interval  by the poll processes. However, in  NTP symmetric mode, each   peer manages its own poll interval and the two  might not be the same. In such cases either peer uses the minimum of its own poll interval and that of the other peer, which is included in the NTP  packet header.</p>
+<h4 id="loop">Loop Dynamics</h4>
+<p> It is necessary to verify the PLL  is stable and satisfies the Nyquist criterion, which requires that the sampling rate be at least twice the bandwidth. In this case the bandwidth can be approximated by the reciprocal of the time constant. At a poll exponent of 6, the poll interval is 64 s and the time constant  2048 s. The Nyquist criterion requires the  sample interval to be not more than half the time constant or 1024 s. The clock filter guarantees at least one sample in eight poll intervals, so the sample interval is not more than 512 s. This would be described as oversampling by a factor of two. Finally, the PLL parameters have been chosen for a damping factor of 2, which results in a much faster risetime than with critical damping, but results in modest overshoot of  6 percent.</p>
+<p> It is important to understand how the dynamics of the PLL are affected by the poll interval. At an interval of 64 s and a offset step change of 100 ms, the time response crosses zero in about 50 min and overshoots about 6 ms, as per design. Ordinarily, a step correction would causes a temporary frequency  surge of about 5 PPM, which is slowly dissipates over a few hours. The result would be that the overshoot slowly subsides over  that interval.</p>
+<p>However, the clock state machine used with the discipline algorithm avoids this transient at startup. It does this using a previously saved frequency file, if present, or by measuring the oscillator frequency, if not. It then quickly amortizes the residual offset at startup without affecting the oscillator frequency. In this way the offset error is less than 0.5 ms within 5 min if the file is present and within 10 min if not. See the <a href="clock.html">Clock State Machine</a> page for further details.</p>
+<p>Since the PLL is linear, the response with different offset step amplitudes and poll intervals has the same characteristic shape, but scaled differently in amplitude and time. The response scales exactly with step amplitude, so that the response to  a 10-ms step has the same shape as at 64 s, but with amplitude  compressed by one-tenth. The response scales exactly with poll interval, so that response at a poll interval of 8 s  has the same shape as at 64 s, but with  time compressed by  one-eighth.</p>
+<p>In the NTP specification and reference implementation, poll intervals are  expressed as exponents of 2. The clock discipline time constant is  proportional to the poll interval by a factor of  32. Thus, a poll exponent of 6 corresponds to a poll interval of 64 s and a time constant of 2048 s. A change  in the poll interval changes the time constant by a corresponding amount.</p>
+<p> The optimum time constant, and thus the poll interval, depends on the network time jitter and the  oscillator frequency wander. Errors due to jitter decrease as the time constant increases, while errors due to wander decrease as the time constant decreases. For typical Internet paths, the two error characteristics intersect at a point called the Allan intercept, which represents the ideal time constant. With a compromise Allan intercept of 2000 s, the optimum poll interval is about 64 s, which corresponds to a compromise poll exponent of 6. For fast LANs with modern computers, the Allan intercept is somewhat lower, so a compromise poll exponent of 8 is appropriate. An intricate, heuristic algorithm is used to manage the actual poll interval within a specified range. Details are on the <a href="poll.html">Poll Program</a> page.</p>
+<p>In the NTPv4 specification and reference implementation a state machine is used to manage the system clock under exceptional conditions, as when the daemon is first started or when encountering  severe network congestion. When the frequency file is present at  startup is that the residual offset error is less than 0.5 ms within 300 s. When the frequency file is not present, this result is achieved within 600 s. Further details are on the <a href="clock.html">Clock State Machine</a> page.</p>
+<hr>
+<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+</body>
+</html>

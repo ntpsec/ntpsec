@@ -370,15 +370,12 @@ change_logfile(
 				cd_octets--;
 			octets = cd_octets;
 			octets += 1;	/* separator '/' */
-			octets += strlen(syslog_fname);
+			octets += strlen(log_fname);
 			octets += 1;	/* NUL terminator */
 			abs_fname = emalloc(octets);
-			/* It's strictly assumed that cd_octets fits into
-			 * an 'int' without overflow or sign change!
-			 */
 			snprintf(abs_fname, octets, "%.*s%c%s",
 				 (int)cd_octets, curdir, DIR_SEP,
-				 syslog_fname);
+				 log_fname);
 		} else
 #endif
 			abs_fname = estrdup(log_fname);
@@ -478,6 +475,10 @@ main(
 	)
 {
 	parse_cmdline_opts(&argc, &argv);
+#ifdef DEBUG
+	debug = DESC(DEBUG_LEVEL).optOccCt;
+	DPRINTF(1, ("%s\n", Version));
+#endif
 
 	return ntpsim(argc, argv);
 }
@@ -694,7 +695,7 @@ ntpdmain(
 	}
 # endif
 
-#ifdef DEBUG
+# ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 	DPRINTF(1, ("%s\n", Version));
 # endif

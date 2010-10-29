@@ -13,12 +13,11 @@
   # include <config.h>
   #endif
 
+  #include "ntp.h"
   #include "ntpd.h"
   #include "ntp_machine.h"
-  #include "ntp.h"
   #include "ntp_stdlib.h"
   #include "ntp_filegen.h"
-  #include "ntp_data_structures.h"
   #include "ntp_scanner.h"
   #include "ntp_config.h"
   #include "ntp_crypto.h"
@@ -37,7 +36,7 @@
   #define YYFREE	free
   #define YYERROR_VERBOSE
   #define YYMAXDEPTH	1000   /* stop the madness sooner */
-  void yyerror (char *msg);
+  void yyerror(const char *msg);
   extern int input_from_file;  /* 0=input from ntpq :config */
 %}
 
@@ -48,18 +47,21 @@
 %token-table
 
 %union {
-    char   *String;
-    double  Double;
-    int     Integer;
-    void   *VoidPtr;
-    queue  *Queue;
-    struct attr_val *Attr_val;
-    struct address_node *Address_node;
-    struct setvar_node *Set_var;
-
-    /* Simulation types */
-    server_info *Sim_server;
-    script_info *Sim_script;
+	char *			String;
+	double			Double;
+	int			Integer;
+	gen_fifo *		Generic_fifo;
+	attr_val *		Attr_val;
+	attr_val_fifo *		Attr_val_fifo;
+	int_fifo *		Int_fifo;
+	string_fifo *		String_fifo;
+	address_node *		Address_node;
+	address_fifo *		Address_fifo;
+	setvar_node *		Set_var;
+	server_info *		Sim_server;
+	server_info_fifo *	Sim_server_fifo;
+	script_info *		Sim_script;
+	script_info_fifo *	Sim_script_fifo;
 }
 
 /* TERMINALS (do not appear left of colon) */
@@ -72,13 +74,11 @@
 %token	<Integer>	T_Average
 %token	<Integer>	T_Bclient
 %token	<Integer>	T_Beacon
-%token	<Integer>	T_Bias
 %token	<Integer>	T_Broadcast
 %token	<Integer>	T_Broadcastclient
 %token	<Integer>	T_Broadcastdelay
 %token	<Integer>	T_Burst
 %token	<Integer>	T_Calibrate
-%token	<Integer>	T_Calldelay
 %token	<Integer>	T_Ceiling
 %token	<Integer>	T_Clockstats
 %token	<Integer>	T_Cohort
@@ -91,7 +91,7 @@
 %token	<Integer>	T_Disable
 %token	<Integer>	T_Discard
 %token	<Integer>	T_Dispersion
-%token	<Double>	T_Double
+%token	<Double>	T_Double		/* not a token */
 %token	<Integer>	T_Driftfile
 %token	<Integer>	T_Drop
 %token	<Integer>	T_Ellipsis	/* "..." not "ellipsis" */
@@ -118,8 +118,9 @@
 %token	<Integer>	T_Initalloc
 %token	<Integer>	T_Initmem
 %token	<Integer>	T_Includefile
-%token	<Integer>	T_Integer
+%token	<Integer>	T_Integer		/* not a token */
 %token	<Integer>	T_Interface
+%token	<Integer>	T_Intrange		/* not a token */
 %token	<Integer>	T_Ipv4
 %token	<Integer>	T_Ipv4_flag
 %token	<Integer>	T_Ipv6
@@ -195,7 +196,6 @@
 %token	<Integer>	T_Saveconfigdir
 %token	<Integer>	T_Server
 %token	<Integer>	T_Setvar
-%token	<Integer>	T_Sign
 %token	<Integer>	T_Source
 %token	<Integer>	T_Statistics
 %token	<Integer>	T_Stats
@@ -203,7 +203,7 @@
 %token	<Integer>	T_Step
 %token	<Integer>	T_Stepout
 %token	<Integer>	T_Stratum
-%token	<String>	T_String
+%token	<String>	T_String		/* not a token */
 %token	<Integer>	T_Sysstats
 %token	<Integer>	T_Tick
 %token	<Integer>	T_Time1
@@ -224,8 +224,7 @@
 %token	<Integer>	T_Wildcard
 %token	<Integer>	T_Xleave
 %token	<Integer>	T_Year
-%token	<Integer>	T_Flag		/* Not an actual token */
-%token	<Integer>	T_Void		/* Not an actual token */
+%token	<Integer>	T_Flag			/* Not a token */
 %token	<Integer>	T_EOC
 
 
@@ -245,62 +244,83 @@
 
 /*** NON-TERMINALS ***/
 %type	<Integer>	access_control_flag
-%type	<Queue>		ac_flag_list
+%type	<Int_fifo>	ac_flag_list
 %type	<Address_node>	address
-%type	<Queue>		address_list
+%type	<Integer>	address_fam
+%type	<Address_fifo>	address_list
 %type	<Integer>	boolean
 %type	<Integer>	client_type
 %type	<Attr_val>	crypto_command
-%type	<Queue>		crypto_command_line
-%type	<Queue>		crypto_command_list
+%type	<Attr_val_fifo>	crypto_command_list
+%type	<Integer>	crypto_str_keyword
 %type	<Attr_val>	discard_option
-%type	<Queue>		discard_option_list
+%type	<Integer>	discard_option_keyword
+%type	<Attr_val_fifo>	discard_option_list
+%type	<Integer>	enable_disable
 %type	<Attr_val>	filegen_option
-%type	<Queue>		filegen_option_list
+%type	<Attr_val_fifo>	filegen_option_list
 %type	<Integer>	filegen_type
 %type	<Attr_val>	fudge_factor
-%type	<Queue>		fudge_factor_list
-%type	<Queue>		integer_list
-%type	<Queue>		integer_list_range
+%type	<Integer>	fudge_factor_bool_keyword
+%type	<Integer>	fudge_factor_dbl_keyword
+%type	<Attr_val_fifo>	fudge_factor_list
+%type	<Attr_val_fifo>	integer_list
+%type	<Attr_val_fifo>	integer_list_range
 %type	<Attr_val>	integer_list_range_elt
 %type	<Attr_val>	integer_range
 %type	<Integer>	nic_rule_action
-%type	<Queue>		interface_command
+%type	<Integer>	interface_command
 %type	<Integer>	interface_nic
 %type	<Address_node>	ip_address
+%type	<Integer>	link_nolink
 %type	<Attr_val>	log_config_command
-%type	<Queue>		log_config_list
+%type	<Attr_val_fifo>	log_config_list
+%type	<Integer>	misc_cmd_dbl_keyword
+%type	<Integer>	misc_cmd_str_keyword
+%type	<Integer>	misc_cmd_str_lcl_keyword
 %type	<Attr_val>	mru_option
-%type	<Queue>		mru_option_list
+%type	<Integer>	mru_option_keyword
+%type	<Attr_val_fifo>	mru_option_list
 %type	<Integer>	nic_rule_class
 %type	<Double>	number
 %type	<Attr_val>	option
-%type	<Queue>		option_list
+%type	<Attr_val>	option_flag
+%type	<Integer>	option_flag_keyword
+%type	<Attr_val_fifo>	option_list
+%type	<Attr_val>	option_int
+%type	<Integer>	option_int_keyword
 %type	<Integer>	stat
-%type	<Queue>		stats_list
-%type	<Queue>		string_list
+%type	<Int_fifo>	stats_list
+%type	<String_fifo>	string_list
 %type	<Attr_val>	system_option
-%type	<Queue>		system_option_list
+%type	<Integer>	system_option_flag_keyword
+%type	<Attr_val_fifo>	system_option_list
+%type	<Integer>	t_default_or_zero
+%type	<Integer>	tinker_option_keyword
 %type	<Attr_val>	tinker_option
-%type	<Queue>		tinker_option_list
+%type	<Attr_val_fifo>	tinker_option_list
 %type	<Attr_val>	tos_option
-%type	<Queue>		tos_option_list
+%type	<Integer>	tos_option_dbl_keyword
+%type	<Integer>	tos_option_int_keyword
+%type	<Attr_val_fifo>	tos_option_list
 %type	<Attr_val>	trap_option
-%type	<Queue>		trap_option_list
+%type	<Attr_val_fifo>	trap_option_list
 %type	<Integer>	unpeer_keyword
 %type	<Set_var>	variable_assign
 
 /* NTP Simulator non-terminals */
-%type	<Queue>		sim_init_statement_list
-%type	<Attr_val>	sim_init_statement
-%type	<Queue>		sim_server_list
-%type	<Sim_server>	sim_server
-%type	<Double>	sim_server_offset
-%type	<Address_node>	sim_server_name
-%type	<Queue>		sim_act_list
-%type	<Sim_script>	sim_act
-%type	<Queue>		sim_act_stmt_list
-%type	<Attr_val>	sim_act_stmt
+%type	<Attr_val>		sim_init_statement
+%type	<Attr_val_fifo>		sim_init_statement_list
+%type	<Integer>		sim_init_keyword
+%type	<Sim_server_fifo>	sim_server_list
+%type	<Sim_server>		sim_server
+%type	<Double>		sim_server_offset
+%type	<Address_node>		sim_server_name
+%type	<Sim_script>		sim_act
+%type	<Sim_script_fifo>	sim_act_list
+%type	<Integer>		sim_act_keyword
+%type	<Attr_val_fifo>		sim_act_stmt_list
+%type	<Attr_val>		sim_act_stmt
 
 %%
 
@@ -352,15 +372,10 @@ command :	/* NULL STATEMENT */
 server_command
 	:	client_type address option_list
 		{
-			struct peer_node *my_node =  create_peer_node($1, $2, $3);
-			if (my_node)
-				enqueue(cfgt.peers, my_node);
-		}
-	|	client_type address
-		{
-			struct peer_node *my_node = create_peer_node($1, $2, NULL);
-			if (my_node)
-				enqueue(cfgt.peers, my_node);
+			peer_node *my_node;
+
+			my_node = create_peer_node($1, $2, $3);
+			APPEND_G_FIFO(cfgt.peers, my_node);
 		}
 	;
 
@@ -374,35 +389,65 @@ client_type
 
 address
 	:	ip_address
-	|	T_Ipv4_flag T_String	{ $$ = create_address_node($2, AF_INET); }
-	|	T_Ipv6_flag T_String	{ $$ = create_address_node($2, AF_INET6); }
+	|	address_fam T_String
+			{ $$ = create_address_node($2, $1); }
 	;
 
 ip_address
-	:	T_String { $$ = create_address_node($1, 0); }
+	:	T_String 
+			{ $$ = create_address_node($1, AF_UNSPEC); }
+	;
+
+address_fam
+	:	T_Ipv4_flag
+			{ $$ = AF_INET; }
+	|	T_Ipv6_flag
+			{ $$ = AF_INET6; }
 	;
 
 option_list
-	:	option_list option { $$ = enqueue($1, $2); }
-	|	option { $$ = enqueue_in_new_queue($1); }
+	:	/* empty list */
+			{ $$ = NULL; }
+	|	option_list option 
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	;
 
 option
-	:	T_Autokey		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Bias number		{ $$ = create_attr_dval($1, $2); }
-	|	T_Burst			{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Iburst		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Key T_Integer		{ $$ = create_attr_ival($1, $2); }
-	|	T_Minpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Maxpoll T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Noselect		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Preempt		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Prefer		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_True			{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Xleave		{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Ttl T_Integer		{ $$ = create_attr_ival($1, $2); }
-	|	T_Mode T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Version T_Integer	{ $$ = create_attr_ival($1, $2); }
+	:	option_flag
+	|	option_int
+	;
+
+option_flag
+	:	option_flag_keyword
+			{ $$ = create_attr_ival(T_Flag, $1); }
+	;
+
+option_flag_keyword
+	:	T_Autokey
+	|	T_Burst
+	|	T_Iburst
+	|	T_Noselect
+	|	T_Preempt
+	|	T_Prefer
+	|	T_True
+	|	T_Xleave
+	;
+
+option_int
+	:	option_int_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+option_int_keyword
+	:	T_Key
+	|	T_Minpoll
+	|	T_Maxpoll
+	|	T_Ttl
+	|	T_Mode
+	|	T_Version
 	;
 
 
@@ -413,9 +458,11 @@ option
 unpeer_command
 	:	unpeer_keyword address
 		{
-			struct unpeer_node *my_node = create_unpeer_node($2);
+			unpeer_node *my_node;
+			
+			my_node = create_unpeer_node($2);
 			if (my_node)
-				enqueue(cfgt.unpeers, my_node);
+				APPEND_G_FIFO(cfgt.unpeers, my_node);
 		}
 	;	
 unpeer_keyword	
@@ -433,9 +480,9 @@ other_mode_command
 	:	T_Broadcastclient
 			{ cfgt.broadcastclient = 1; }
 	|	T_Manycastserver address_list
-			{ append_queue(cfgt.manycastserver, $2); }
+			{ CONCAT_G_FIFOS(cfgt.manycastserver, $2); }
 	|	T_Multicastclient address_list
-			{ append_queue(cfgt.multicastclient, $2); }
+			{ CONCAT_G_FIFOS(cfgt.multicastclient, $2); }
 	;
 
 
@@ -446,13 +493,18 @@ other_mode_command
 
 authentication_command
 	:	T_Automax T_Integer
-			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
+		{
+			attr_val *atrv;
+			
+			atrv = create_attr_ival($1, $2);
+			APPEND_G_FIFO(cfgt.vars, atrv);
+		}
 	|	T_ControlKey T_Integer
 			{ cfgt.auth.control_key = $2; }
-	|	T_Crypto crypto_command_line
+	|	T_Crypto crypto_command_list
 		{ 
 			cfgt.auth.cryptosw++;
-			append_queue(cfgt.auth.crypto_cmd_list, $2);
+			CONCAT_G_FIFOS(cfgt.auth.crypto_cmd_list, $2);
 		}
 	|	T_Keys T_String
 			{ cfgt.auth.keys = $2; }
@@ -468,41 +520,18 @@ authentication_command
 			{ cfgt.auth.ntp_signd_socket = $2; }
 	;
 
-crypto_command_line
-	:	crypto_command_list
-	|	/* Null list */
-			{ $$ = create_queue(); }
-	;
-
 crypto_command_list
-	:	crypto_command_list crypto_command
-		{ 
-			if ($2 != NULL)
-				$$ = enqueue($1, $2);
-			else
-				$$ = $1;
-		}
-	|	crypto_command
+	:	/* empty list */
+			{ $$ = NULL; }
+	|	crypto_command_list crypto_command
 		{
-			if ($1 != NULL)
-				$$ = enqueue_in_new_queue($1);
-			else
-				$$ = create_queue();
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
 		}
 	;
 
 crypto_command
-	:	T_Host	T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Ident	T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Pw T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Randfile T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Sign	T_String
-			{ $$ = create_attr_sval($1, $2); }
-	|	T_Digest T_String
+	:	crypto_str_keyword T_String
 			{ $$ = create_attr_sval($1, $2); }
 	|	T_Revoke T_Integer
 		{
@@ -515,6 +544,14 @@ crypto_command
 		}
 	;
 
+crypto_str_keyword
+	:	T_Host
+	|	T_Ident
+	|	T_Pw
+	|	T_Randfile
+	|	T_Digest
+	;
+
 
 /* Orphan Mode Commands
  * --------------------
@@ -522,37 +559,45 @@ crypto_command
 
 orphan_mode_command
 	:	T_Tos tos_option_list
-			{ append_queue(cfgt.orphan_cmds,$2); }
+			{ CONCAT_G_FIFOS(cfgt.orphan_cmds, $2); }
 	;
 
 tos_option_list
-	:	tos_option_list tos_option { $$ = enqueue($1, $2); }
-	|	tos_option { $$ = enqueue_in_new_queue($1); }
+	:	tos_option_list tos_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	tos_option
+		{	
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 tos_option
-	:	T_Ceiling T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
-	|	T_Floor T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
+	:	tos_option_int_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	|	tos_option_dbl_keyword number
+			{ $$ = create_attr_dval($1, $2); }
 	|	T_Cohort boolean
-			{ $$ = create_attr_dval($1, (double)$2); }
-	|	T_Orphan T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
-	|	T_Orphanwait T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
-	|	T_Mindist number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Maxdist number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Minclock number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Maxclock number
-			{ $$ = create_attr_dval($1, $2); }
-	|	T_Minsane T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
-	|	T_Beacon T_Integer
-			{ $$ = create_attr_dval($1, (double)$2); }
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+tos_option_int_keyword
+	:	T_Ceiling
+	|	T_Floor
+	|	T_Orphan
+	|	T_Orphanwait
+	|	T_Minsane
+	|	T_Beacon
+	;
+
+tos_option_dbl_keyword
+	:	T_Mindist
+	|	T_Maxdist
+	|	T_Minclock
+	|	T_Maxclock
 	;
 
 
@@ -562,26 +607,36 @@ tos_option
 
 monitoring_command
 	:	T_Statistics stats_list
-			{ append_queue(cfgt.stats_list, $2); }
+			{ CONCAT_G_FIFOS(cfgt.stats_list, $2); }
 	|	T_Statsdir T_String
 		{
-			if (input_from_file)
+			if (input_from_file) {
 				cfgt.stats_dir = $2;
-			else {
-				free($2);
+			} else {
+				YYFREE($2);
 				yyerror("statsdir remote configuration ignored");
 			}
 		}
 	|	T_Filegen stat filegen_option_list
 		{
-			enqueue(cfgt.filegen_opts,
-				create_filegen_node($2, $3));
+			filegen_node *fgn;
+			
+			fgn = create_filegen_node($2, $3);
+			APPEND_G_FIFO(cfgt.filegen_opts, fgn);
 		}
 	;
 
 stats_list
-	:	stats_list stat { $$ = enqueue($1, create_ival($2)); }
-	|	stat { $$ = enqueue_in_new_queue(create_ival($1)); }
+	:	stats_list stat 
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, create_int_node($2));
+		}
+	|	stat
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, create_int_node($1));
+		}
 	;
 
 stat
@@ -596,62 +651,62 @@ stat
 	;
 
 filegen_option_list
-	:	filegen_option_list filegen_option
+	:	/* empty list */
+			{ $$ = NULL; }
+	|	filegen_option_list filegen_option
 		{
-			if ($2 != NULL)
-				$$ = enqueue($1, $2);
-			else
-				$$ = $1;
-		}
-	|	filegen_option
-		{
-			if ($1 != NULL)
-				$$ = enqueue_in_new_queue($1);
-			else
-				$$ = create_queue();
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
 		}
 	;
 
 filegen_option
 	:	T_File T_String
 		{
-			if (input_from_file)
+			if (input_from_file) {
 				$$ = create_attr_sval($1, $2);
-			else {
+			} else {
 				$$ = NULL;
-				free($2);
-				yyerror("filegen file remote configuration ignored");
+				YYFREE($2);
+				yyerror("filegen file remote config ignored");
 			}
 		}
 	|	T_Type filegen_type
 		{
-			if (input_from_file)
+			if (input_from_file) {
 				$$ = create_attr_ival($1, $2);
-			else {
+			} else {
 				$$ = NULL;
-				yyerror("filegen type remote configuration ignored");
+				yyerror("filegen type remote config ignored");
 			}
 		}
-	|	T_Link
+	|	link_nolink
 		{
-			if (input_from_file)
+			const char *err;
+			
+			if (input_from_file) {
 				$$ = create_attr_ival(T_Flag, $1);
-			else {
+			} else {
 				$$ = NULL;
-				yyerror("filegen link remote configuration ignored");
+				if (T_Link == $1)
+					err = "filegen link remote config ignored";
+				else
+					err = "filegen nolink remote config ignored";
+				yyerror(err);
 			}
 		}
+	|	enable_disable
+			{ $$ = create_attr_ival(T_Flag, $1); }
+	;
+
+link_nolink
+	:	T_Link
 	|	T_Nolink
-		{
-			if (input_from_file)
-				$$ = create_attr_ival(T_Flag, $1);
-			else {
-				$$ = NULL;
-				yyerror("filegen nolink remote configuration ignored");
-			}
-		}
-	|	T_Enable	{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Disable	{ $$ = create_attr_ival(T_Flag, $1); }
+	;
+
+enable_disable
+	:	T_Enable
+	|	T_Disable
 	;
 
 filegen_type
@@ -672,68 +727,85 @@ filegen_type
 access_control_command
 	:	T_Discard discard_option_list
 		{
-			append_queue(cfgt.discard_opts, $2);
+			CONCAT_G_FIFOS(cfgt.discard_opts, $2);
 		}
 	|	T_Mru mru_option_list
 		{
-			append_queue(cfgt.mru_opts, $2);
+			CONCAT_G_FIFOS(cfgt.mru_opts, $2);
 		}
 	|	T_Restrict address ac_flag_list
 		{
-			enqueue(cfgt.restrict_opts,
-				create_restrict_node($2, NULL, $3, ip_file->line_no));
+			restrict_node *rn;
+
+			rn = create_restrict_node($2, NULL, $3,
+						  ip_file->line_no);
+			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict ip_address T_Mask ip_address ac_flag_list
 		{
-			enqueue(cfgt.restrict_opts,
-				create_restrict_node($2, $4, $5, ip_file->line_no));
+			restrict_node *rn;
+
+			rn = create_restrict_node($2, $4, $5,
+						  ip_file->line_no);
+			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Default ac_flag_list
 		{
-			enqueue(cfgt.restrict_opts,
-				create_restrict_node(NULL, NULL, $3, ip_file->line_no));
+			restrict_node *rn;
+
+			rn = create_restrict_node(NULL, NULL, $3,
+						  ip_file->line_no);
+			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Ipv4_flag T_Default ac_flag_list
 		{
-			enqueue(cfgt.restrict_opts,
-				create_restrict_node(
-					create_address_node(
-						estrdup("0.0.0.0"), 
-						AF_INET),
-					create_address_node(
-						estrdup("0.0.0.0"), 
-						AF_INET),
-					$4, 
-					ip_file->line_no));
+			restrict_node *rn;
+
+			rn = create_restrict_node(
+				create_address_node(
+					estrdup("0.0.0.0"), 
+					AF_INET),
+				create_address_node(
+					estrdup("0.0.0.0"), 
+					AF_INET),
+				$4, 
+				ip_file->line_no);
+			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Ipv6_flag T_Default ac_flag_list
 		{
-			enqueue(cfgt.restrict_opts,
-				create_restrict_node(
-					create_address_node(
-						estrdup("::"), 
-						AF_INET6),
-					create_address_node(
-						estrdup("::"), 
-						AF_INET6),
-					$4, 
-					ip_file->line_no));
+			restrict_node *rn;
+			
+			rn = create_restrict_node(
+				create_address_node(
+					estrdup("::"), 
+					AF_INET6),
+				create_address_node(
+					estrdup("::"), 
+					AF_INET6),
+				$4, 
+				ip_file->line_no);
+			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	|	T_Restrict T_Source ac_flag_list
 		{
-			enqueue(cfgt.restrict_opts,
-				create_restrict_node(
-					NULL, NULL,
-					enqueue($3, create_ival($2)),
-					ip_file->line_no));
+			restrict_node *	rn;
+
+			APPEND_G_FIFO($3, create_int_node($2));
+			rn = create_restrict_node(
+				NULL, NULL, $3, ip_file->line_no);
+			APPEND_G_FIFO(cfgt.restrict_opts, rn);
 		}
 	;
 
 ac_flag_list
-	:	/* Null statement */
-			{ $$ = create_queue(); }
+	:	/* empty list is allowed */
+			{ $$ = NULL; }
 	|	ac_flag_list access_control_flag
-			{ $$ = enqueue($1, create_ival($2)); }
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, create_int_node($2));
+		}
 	;
 
 access_control_flag
@@ -755,33 +827,55 @@ access_control_flag
 
 discard_option_list
 	:	discard_option_list discard_option
-			{ $$ = enqueue($1, $2); }
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	|	discard_option 
-			{ $$ = enqueue_in_new_queue($1); }
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 discard_option
-	:	T_Average T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Minimum T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Monitor T_Integer { $$ = create_attr_ival($1, $2); }
+	:	discard_option_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+discard_option_keyword
+	:	T_Average
+	|	T_Minimum
+	|	T_Monitor
 	;
 
 mru_option_list
 	:	mru_option_list mru_option
-			{ $$ = enqueue($1, $2); }
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	|	mru_option 
-			{ $$ = enqueue_in_new_queue($1); }
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 mru_option
-	:	T_Incalloc  T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Incmem    T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Initalloc T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Initmem   T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxage    T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxdepth  T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Maxmem    T_Integer { $$ = create_attr_ival($1, $2); }
-	|	T_Mindepth  T_Integer { $$ = create_attr_ival($1, $2); }
+	:	mru_option_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+mru_option_keyword
+	:	T_Incalloc
+	|	T_Incmem
+	|	T_Initalloc
+	|	T_Initmem
+	|	T_Maxage
+	|	T_Maxdepth
+	|	T_Maxmem
+	|	T_Mindepth
 	;
 
 /* Fudge Commands
@@ -790,25 +884,48 @@ mru_option
 
 fudge_command
 	:	T_Fudge address fudge_factor_list
-			{ enqueue(cfgt.fudge, create_addr_opts_node($2, $3)); }
+		{
+			addr_opts_node *aon;
+			
+			aon = create_addr_opts_node($2, $3);
+			APPEND_G_FIFO(cfgt.fudge, aon);
+		}
 	;
 
 fudge_factor_list
 	:	fudge_factor_list fudge_factor
-			{ enqueue($1, $2); }
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	|	fudge_factor
-			{ $$ = enqueue_in_new_queue($1); }
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 	
 fudge_factor
-	:	T_Time1 number		{ $$ = create_attr_dval($1, $2); }
-	|	T_Time2 number		{ $$ = create_attr_dval($1, $2); }
-	|	T_Stratum T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Refid T_String	{ $$ = create_attr_sval($1, $2); }
-	|	T_Flag1 boolean		{ $$ = create_attr_ival($1, $2); }
-	|	T_Flag2	boolean		{ $$ = create_attr_ival($1, $2); }
-	|	T_Flag3	boolean		{ $$ = create_attr_ival($1, $2); }
-	|	T_Flag4 boolean		{ $$ = create_attr_ival($1, $2); }
+	:	fudge_factor_dbl_keyword number
+			{ $$ = create_attr_dval($1, $2); }
+	|	fudge_factor_bool_keyword boolean
+			{ $$ = create_attr_ival($1, $2); }
+	|	T_Stratum T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	|	T_Refid T_String
+			{ $$ = create_attr_sval($1, $2); }
+	;
+
+fudge_factor_dbl_keyword
+	:	T_Time1
+	|	T_Time2
+	;
+
+fudge_factor_bool_keyword
+	:	T_Flag1
+	|	T_Flag2
+	|	T_Flag3
+	|	T_Flag4
 	;
 
 /* Command for System Options
@@ -817,44 +934,45 @@ fudge_factor
 
 system_option_command
 	:	T_Enable system_option_list
-			{ append_queue(cfgt.enable_opts, $2);  }
+			{ CONCAT_G_FIFOS(cfgt.enable_opts, $2); }
 	|	T_Disable system_option_list
-			{ append_queue(cfgt.disable_opts, $2);  }
+			{ CONCAT_G_FIFOS(cfgt.disable_opts, $2); }
 	;
 
 system_option_list
 	:	system_option_list system_option
 		{
-			if ($2 != NULL)
-				$$ = enqueue($1, $2);
-			else
-				$$ = $1;
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
 		}
 	|	system_option
 		{
-			if ($1 != NULL)
-				$$ = enqueue_in_new_queue($1);
-			else
-				$$ = create_queue();
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
 		}
 	;
 
 system_option
-	:	T_Auth      { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Bclient   { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Calibrate { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Kernel    { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Monitor   { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Ntp       { $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Stats     
+	:	system_option_flag_keyword
+			{ $$ = create_attr_ival(T_Flag, $1); }
+	|	T_Stats
 		{ 
-			if (input_from_file)
+			if (input_from_file) {
 				$$ = create_attr_ival(T_Flag, $1);
-			else {
+			} else {
 				$$ = NULL;
 				yyerror("enable/disable stats remote configuration ignored");
 			}
 		}
+	;
+
+system_option_flag_keyword
+	:	T_Auth
+	|	T_Bclient
+	|	T_Calibrate
+	|	T_Kernel
+	|	T_Monitor
+	|	T_Ntp
 	;
 
 /* Tinker Commands
@@ -862,22 +980,36 @@ system_option
  */
 
 tinker_command
-	:	T_Tinker tinker_option_list  { append_queue(cfgt.tinker, $2); }
+	:	T_Tinker tinker_option_list
+			{ CONCAT_G_FIFOS(cfgt.tinker, $2); }
 	;
 
 tinker_option_list
-	:	tinker_option_list tinker_option  { $$ = enqueue($1, $2); }
-	|	tinker_option { $$ = enqueue_in_new_queue($1); }
+	:	tinker_option_list tinker_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	tinker_option
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 tinker_option
-	:	T_Allan number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Dispersion number { $$ = create_attr_dval($1, $2); }
-	|	T_Freq number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Huffpuff number   { $$ = create_attr_dval($1, $2); }
-	|	T_Panic number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Step number	    { $$ = create_attr_dval($1, $2); }
-	|	T_Stepout number    { $$ = create_attr_dval($1, $2); }
+	:	tinker_option_keyword number
+			{ $$ = create_attr_dval($1, $2); }
+	;
+
+tinker_option_keyword
+	:	T_Allan
+	|	T_Dispersion
+	|	T_Freq
+	|	T_Huffpuff
+	|	T_Panic
+	|	T_Step
+	|	T_Stepout
 	;
 
 
@@ -887,20 +1019,53 @@ tinker_option
 
 miscellaneous_command
 	:	interface_command
+	|	misc_cmd_dbl_keyword number
+		{
+			attr_val *av;
+			
+			av = create_attr_dval($1, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
+	|	misc_cmd_str_keyword T_String
+		{
+			attr_val *av;
+			
+			av = create_attr_sval($1, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
+	|	misc_cmd_str_lcl_keyword T_String
+		{
+			char error_text[64];
+			attr_val *av;
+
+			if (input_from_file) {
+				av = create_attr_sval($1, $2);
+				APPEND_G_FIFO(cfgt.vars, av);
+			} else {
+				YYFREE($2);
+				snprintf(error_text, sizeof(error_text),
+					 "%s remote config ignored",
+					 keyword($1));
+				yyerror(error_text);
+			}
+		}
 	|	T_Includefile T_String command
 		{
+			if (!input_from_file) {
+				yyerror("remote includefile ignored");
+				break;
+			}
 			if (curr_include_level >= MAXINCLUDELEVEL) {
 				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
-			}
-			else {
+				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.\n");
+			} else {
 				fp[curr_include_level + 1] = F_OPEN(FindConfig($2), "r");
 				if (fp[curr_include_level + 1] == NULL) {
 					fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig($2));
-					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig($2));
-				}
-				else
+					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>\n", FindConfig($2));
+				} else {
 					ip_file = fp[++curr_include_level];
+				}
 			}
 		}
 	|	T_End
@@ -908,88 +1073,109 @@ miscellaneous_command
 			while (curr_include_level != -1)
 				FCLOSE(fp[curr_include_level--]);
 		}
-
-	|	T_Broadcastdelay number
-			{ enqueue(cfgt.vars, create_attr_dval($1, $2)); }
-	|	T_Calldelay T_Integer
-			{ enqueue(cfgt.vars, create_attr_ival($1, $2)); }
-	|	T_Tick number
-			{ enqueue(cfgt.vars, create_attr_dval($1, $2)); }
 	|	T_Driftfile drift_parm
-			{ /* Null action, possibly all null parms */ }
-	|	T_Leapfile T_String
-			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
-
-	|	T_Pidfile T_String
-			{ enqueue(cfgt.vars, create_attr_sval($1, $2)); }
-	|	T_Logfile T_String
-		{
-			if (input_from_file)
-				enqueue(cfgt.vars,
-					create_attr_sval($1, $2));
-			else {
-				free($2);
-				yyerror("logfile remote configuration ignored");
-			}
-		}
-
+			{ /* see drift_parm below for actions */ }
 	|	T_Logconfig log_config_list
-			{ append_queue(cfgt.logconfig, $2); }
+			{ CONCAT_G_FIFOS(cfgt.logconfig, $2); }
 	|	T_Phone string_list
-			{ append_queue(cfgt.phone, $2); }
-	|	T_Saveconfigdir	T_String
-		{
-			if (input_from_file)
-				enqueue(cfgt.vars,
-					create_attr_sval($1, $2));
-			else {
-				free($2);
-				yyerror("saveconfigdir remote configuration ignored");
-			}
-		}
+			{ CONCAT_G_FIFOS(cfgt.phone, $2); }
 	|	T_Setvar variable_assign
-			{ enqueue(cfgt.setvar, $2); }
-	|	T_Trap ip_address
-			{ enqueue(cfgt.trap, create_addr_opts_node($2, NULL)); }
+			{ APPEND_G_FIFO(cfgt.setvar, $2); }
 	|	T_Trap ip_address trap_option_list
-			{ enqueue(cfgt.trap, create_addr_opts_node($2, $3)); }
+		{
+			addr_opts_node *aon;
+			
+			aon = create_addr_opts_node($2, $3);
+			APPEND_G_FIFO(cfgt.trap, aon);
+		}
 	|	T_Ttl integer_list
-			{ append_queue(cfgt.ttl, $2); }
-	|	T_Qos T_String
-			{ enqueue(cfgt.qos, create_attr_sval($1, $2)); }
+			{ CONCAT_G_FIFOS(cfgt.ttl, $2); }
 	;
-	
+
+misc_cmd_dbl_keyword
+	:	T_Broadcastdelay
+	|	T_Tick
+	;
+
+misc_cmd_str_keyword
+	:	T_Leapfile
+	|	T_Pidfile
+	|	T_Qos
+	;
+
+misc_cmd_str_lcl_keyword
+	:	T_Logfile
+	|	T_Saveconfigdir
+	;
+
 drift_parm
 	:	T_String
-			{ enqueue(cfgt.vars, create_attr_sval(T_Driftfile, $1)); }
+		{
+			attr_val *av;
+			
+			av = create_attr_sval(T_Driftfile, $1);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
 	|	T_String T_Double
-			{ enqueue(cfgt.vars, create_attr_dval(T_WanderThreshold, $2));
-			  enqueue(cfgt.vars, create_attr_sval(T_Driftfile, $1)); }
-	|	/* Null driftfile,  indicated by null string "\0" */
-			{ enqueue(cfgt.vars, create_attr_sval(T_Driftfile, "\0")); }
+		{
+			attr_val *av;
+			
+			av = create_attr_sval(T_Driftfile, $1);
+			APPEND_G_FIFO(cfgt.vars, av);
+			av = create_attr_dval(T_WanderThreshold, $2);
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
+	|	/* Null driftfile,  indicated by empty string "" */
+		{
+			attr_val *av;
+			
+			av = create_attr_sval(T_Driftfile, "");
+			APPEND_G_FIFO(cfgt.vars, av);
+		}
 	;
 
 variable_assign
-	:	T_String '=' T_String T_Default
+	:	T_String '=' T_String t_default_or_zero
 			{ $$ = create_setvar_node($1, $3, $4); }
-	|	T_String '=' T_String
-			{ $$ = create_setvar_node($1, $3, 0); }
+	;
+
+t_default_or_zero
+	:	T_Default
+	|	/* empty, no "default" modifier */
+			{ $$ = 0; }
 	;
 
 trap_option_list
-	:	trap_option_list trap_option
-				{ $$ = enqueue($1, $2); }
-	|	trap_option	{ $$ = enqueue_in_new_queue($1); }
+	:	/* empty list */
+			{ $$ = NULL; }
+	|	trap_option_list trap_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	;
 
 trap_option
-	:	T_Port T_Integer	{ $$ = create_attr_ival($1, $2); }
-	|	T_Interface ip_address	{ $$ = create_attr_pval($1, $2); }
+	:	T_Port T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	|	T_Interface ip_address
+		{
+			$$ = create_attr_sval($1, estrdup($2->address));
+			destroy_address_node($2);
+		}
 	;
 
 log_config_list
-	:	log_config_list log_config_command { $$ = enqueue($1, $2); }
-	|	log_config_command  { $$ = enqueue_in_new_queue($1); }
+	:	log_config_list log_config_command
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	log_config_command
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 log_config_command
@@ -1020,13 +1206,17 @@ log_config_command
 interface_command
 	:	interface_nic nic_rule_action nic_rule_class
 		{
-			enqueue(cfgt.nic_rules,
-				create_nic_rule_node($3, NULL, $2));
+			nic_rule_node *nrn;
+			
+			nrn = create_nic_rule_node($3, NULL, $2);
+			APPEND_G_FIFO(cfgt.nic_rules, nrn);
 		}
 	|	interface_nic nic_rule_action T_String
 		{
-			enqueue(cfgt.nic_rules,
-				create_nic_rule_node(0, $3, $2));
+			nic_rule_node *nrn;
+			
+			nrn = create_nic_rule_node(0, $3, $2);
+			APPEND_G_FIFO(cfgt.nic_rules, nrn);
 		}
 	;
 
@@ -1049,42 +1239,71 @@ nic_rule_action
 	;
 
 
-
 /* Miscellaneous Rules
  * -------------------
  */
 
 integer_list
-	:	integer_list T_Integer { $$ = enqueue($1, create_ival($2)); }
-	|	T_Integer { $$ = enqueue_in_new_queue(create_ival($1)); }
+	:	integer_list T_Integer
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, create_int_node($2));
+		}
+	|	T_Integer
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, create_int_node($1));
+		}
 	;
 
 integer_list_range
 	:	integer_list_range integer_list_range_elt
-			{ $$ = enqueue($1, $2); }
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
 	|	integer_list_range_elt
-			{ $$ = enqueue_in_new_queue($1); }
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 integer_list_range_elt
 	:	T_Integer
 			{ $$ = create_attr_ival('i', $1); }
-	|	integer_range		/* default of $$ = $1 is good */
+	|	integer_range
 	;
 
-integer_range		/* limited to unsigned shorts */
+integer_range
 	:	'(' T_Integer T_Ellipsis T_Integer ')'
-			{ $$ = create_attr_shorts('-', $2, $4); }
+			{ $$ = create_attr_rangeval('-', $2, $4); }
 	;
 
 string_list
-	:	string_list T_String { $$ = enqueue($1, create_pval($2)); }
-	|	T_String { $$ = enqueue_in_new_queue(create_pval($1)); }
+	:	string_list T_String
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, create_string_node($2));
+		}
+	|	T_String
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, create_string_node($1));
+		}
 	;
 
 address_list
-	:	address_list address { $$ = enqueue($1, $2); }
-	|	address { $$ = enqueue_in_new_queue($1); }
+	:	address_list address
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	address
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 boolean
@@ -1093,16 +1312,16 @@ boolean
 			if ($1 != 0 && $1 != 1) {
 				yyerror("Integer value is not boolean (0 or 1). Assuming 1");
 				$$ = 1;
-			}
-			else
+			} else {
 				$$ = $1;
+			}
 		}
-	|	T_True    { $$ = 1; }
-	|	T_False   { $$ = 0; }
+	|	T_True	{ $$ = 1; }
+	|	T_False	{ $$ = 0; }
 	;
 
 number
-	:	T_Integer { $$ = (double)$1; }
+	:	T_Integer	{ $$ = (double)$1; }
 	|	T_Double
 	;
 
@@ -1114,9 +1333,12 @@ number
 simulate_command
 	:	sim_conf_start '{' sim_init_statement_list sim_server_list '}'
 		{
-			cfgt.sim_details = create_sim_node($3, $4);
+			sim_node *sn;
+			
+			sn =  create_sim_node($3, $4);
+			APPEND_G_FIFO(cfgt.sim_details, sn);
 
-			/* Reset the old_config_style variable */
+			/* Revert from ; to \n for end-of-command */
 			old_config_style = 1;
 		}
 	;
@@ -1131,36 +1353,67 @@ sim_conf_start
 	;
 
 sim_init_statement_list
-	:	sim_init_statement_list sim_init_statement T_EOC { $$ = enqueue($1, $2); }
-	|	sim_init_statement T_EOC			 { $$ = enqueue_in_new_queue($1); }
+	:	sim_init_statement_list sim_init_statement T_EOC
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	sim_init_statement T_EOC
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 sim_init_statement
-	:	T_Beep_Delay '=' number   { $$ = create_attr_dval($1, $3); }
-	|	T_Sim_Duration '=' number { $$ = create_attr_dval($1, $3); }
+	:	sim_init_keyword '=' number
+			{ $$ = create_attr_dval($1, $3); }
+	;
+
+sim_init_keyword
+	:	T_Beep_Delay
+	|	T_Sim_Duration
 	;
 
 sim_server_list
-	:	sim_server_list sim_server { $$ = enqueue($1, $2); }
-	|	sim_server		   { $$ = enqueue_in_new_queue($1); }
+	:	sim_server_list sim_server
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	sim_server
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 sim_server
 	:	sim_server_name '{' sim_server_offset sim_act_list '}'
-		{ $$ = create_sim_server($1, $3, $4); }
+			{ $$ = create_sim_server($1, $3, $4); }
 	;
 
 sim_server_offset
-	:	T_Server_Offset '=' number T_EOC { $$ = $3; }
+	:	T_Server_Offset '=' number T_EOC
+			{ $$ = $3; }
 	;
 
 sim_server_name
-	:	T_Server '=' address { $$ = $3; }
+	:	T_Server '=' address
+			{ $$ = $3; }
 	;
 
 sim_act_list
-	:	sim_act_list sim_act { $$ = enqueue($1, $2); }
-	|	sim_act		     { $$ = enqueue_in_new_queue($1); }
+	:	sim_act_list sim_act
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	sim_act
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 sim_act
@@ -1169,27 +1422,37 @@ sim_act
 	;
 
 sim_act_stmt_list
-	:	sim_act_stmt_list sim_act_stmt T_EOC { $$ = enqueue($1, $2); }
-	|	sim_act_stmt T_EOC		     { $$ = enqueue_in_new_queue($1); }
+	:	sim_act_stmt_list sim_act_stmt T_EOC
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	sim_act_stmt T_EOC
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
 	;
 
 sim_act_stmt
-	:	T_Freq_Offset '=' number
-			{ $$ = create_attr_dval($1, $3); }
-	|	T_Wander '=' number
-			{ $$ = create_attr_dval($1, $3); }
-	|	T_Jitter '=' number
-			{ $$ = create_attr_dval($1, $3); }
-	|	T_Prop_Delay '=' number
-			{ $$ = create_attr_dval($1, $3); }
-	|	T_Proc_Delay '=' number
+	:	sim_act_keyword '=' number
 			{ $$ = create_attr_dval($1, $3); }
 	;
 
+sim_act_keyword
+	:	T_Freq_Offset
+	|	T_Wander
+	|	T_Jitter
+	|	T_Prop_Delay
+	|	T_Proc_Delay
+	;
 
 %%
 
-void yyerror (char *msg)
+void 
+yyerror(
+	const char *msg
+	)
 {
 	int retval;
 
@@ -1231,17 +1494,15 @@ token_name(
 }
 
 
-/* Initial Testing function -- ignore
+/* Initial Testing function -- ignore */
+#if 0
 int main(int argc, char *argv[])
 {
 	ip_file = FOPEN(argv[1], "r");
-	if (!ip_file) {
+	if (!ip_file)
 		fprintf(stderr, "ERROR!! Could not open file: %s\n", argv[1]);
-	}
-	key_scanner = create_keyword_scanner(keyword_list);
-	print_keyword_scanner(key_scanner, 0);
 	yyparse();
 	return 0;
 }
-*/
+#endif
 

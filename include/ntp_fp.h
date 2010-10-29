@@ -70,7 +70,7 @@ typedef int32 s_fp;
 typedef u_int32 u_fp;
 
 /*
- * A unit second in fp format.  Actually 2**(half_the_bits_in_a_long)
+ * A unit second in fp format.	Actually 2**(half_the_bits_in_a_long)
  */
 #define	FP_SECOND	(0x10000)
 
@@ -86,9 +86,9 @@ typedef u_int32 u_fp;
 #define	NTOHL_MFP(ni, nf, hi, hf) \
 	do { (hi) = ntohl(ni); (hf) = ntohl(nf); } while (0)
 #define	HTONL_MFP(hi, hf, ni, nf) \
-	do { (ni) = ntohl(hi); (nf) = ntohl(hf); } while (0)
+	do { (ni) = htonl(hi); (nf) = htonl(hf); } while (0)
 
-/* funny ones.  Converts ts fractions to net order ts */
+/* funny ones.	Converts ts fractions to net order ts */
 #define	HTONL_UF(uf, nts) \
 	do { (nts)->l_ui = 0u; (nts)->l_uf = htonl(uf); } while (0)
 #define	HTONL_F(f, nts) \
@@ -116,19 +116,19 @@ typedef u_int32 u_fp;
  * be replaced by inline assembler for particular machines someday.
  * These are the (kind of inefficient) run-anywhere versions.
  */
-#define	M_NEG(v_i, v_f) 	/* v = -v */ \
+#define	M_NEG(v_i, v_f)		/* v = -v */ \
 	do { \
 		(v_f) = ~(v_f) + 1u; \
 		(v_i) = ~(v_i) + ((v_f) == 0); \
 	} while(0)
 
-#define	M_NEGM(r_i, r_f, a_i, a_f) 	/* r = -a */ \
+#define	M_NEGM(r_i, r_f, a_i, a_f)	/* r = -a */ \
 	do { \
 		(r_f) = ~(a_f) + 1u; \
 		(r_i) = ~(a_i) + ((r_f) == 0); \
 	} while(0)
 
-#define M_ADD(r_i, r_f, a_i, a_f) 	/* r += a */ \
+#define M_ADD(r_i, r_f, a_i, a_f)	/* r += a */ \
 	do { \
 		u_int32 add_t = (r_f); \
 		(r_f) += (a_f); \
@@ -181,7 +181,7 @@ typedef u_int32 u_fp;
 		(v_f) = ((u_int32)(v_f) << 1); \
 	} while (0)
 
-#define	M_ADDUF(r_i, r_f, uf) 		/* r += uf, uf is u_int32 fraction */ \
+#define	M_ADDUF(r_i, r_f, uf)		/* r += uf, uf is u_int32 fraction */ \
 	M_ADD((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
 
 #define	M_SUBUF(r_i, r_f, uf)		/* r -= uf, uf is u_int32 fraction */ \
@@ -196,7 +196,7 @@ typedef u_int32 u_fp;
 			M_SUB((r_i), (r_f), 0, (uint32)(-add_f)); \
 	} while(0)
 
-#define	M_ISNEG(v_i, v_f) 		/* v < 0 */ \
+#define	M_ISNEG(v_i, v_f)		/* v < 0 */ \
 	(((v_i) & 0x80000000u) != 0)
 
 #define	M_ISHIS(a_i, a_f, b_i, b_f)	/* a >= b unsigned */ \

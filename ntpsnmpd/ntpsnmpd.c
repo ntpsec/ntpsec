@@ -20,7 +20,7 @@
  *
  ****************************************************************************/
 
-#include <config.h>
+#include <ntp_snmp.h>
 #include <signal.h>
 #include <sys/time.h>
 
@@ -28,21 +28,11 @@
 #include <siginfo.h>
 #endif
 
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
-#include <ntpSnmpSubagentObject.h>
-
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-
 #include <libntpq.h>
 #include <ntpsnmpd-opts.h>
 
 static int keep_running;
+RETSIGTYPE stop_server(int);
 
 RETSIGTYPE
 stop_server(int a) {
@@ -57,8 +47,6 @@ int
 main (int argc, char **argv) {
   int background = 0; /* start as background process */
   int use_syslog = 1; /* use syslog for logging */
-  char varvalue[1024];
-	
 
 	{
 		int optct = optionProcess(&ntpsnmpdOptions, argc, argv);

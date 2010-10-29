@@ -9,11 +9,16 @@
 <body>
 <h3>The Huff-n'-Puff Filter</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->04-Sep-2010  23:17<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->27-Sep-2010  17:57<!-- #EndDate -->
   UTC</p>
 <hr>
-<p>In scenarios where a considerable amount of data are to be downloaded or uploaded over telephone modems, timekeeping quality can be seriously degraded. This occurs because the differential delays on the two directions of transmission can be quite large. In many cases the apparent time errors are so large as to exceed the step threshold and a step correction can occur during and after the data transfer.</p>
-<p>The huff-n'-puff filter is designed to correct the apparent time offset in these cases. It depends on knowledge of the propagation delay when no other traffic is present, such as during other than work hours. The filter remembers the minimum delay over the most recent interval measured usually in hours. Under conditions of severe delay, the filter corrects the apparent offset using the sign of the offset and the difference between the apparent delay and minimum delay. The name of the filter reflects the negative (huff) and positive (puff) correction, which depends on the sign of the offset. The filter is activated by the <tt>tinker huffpuff</tt> command, as described in the <a href="miscopt.html">Miscellaneous Options</a> page.</p>
+<p>In scenarios where a considerable amount of data are  downloaded or uploaded using DSL or telephone modem lines, timekeeping quality can be seriously degraded. This occurs because the differential delays on the two directions of transmission can be quite large. In many cases the apparent time errors are so large as to exceed the step threshold and a step correction can occur during and after the data transfer.</p>
+<p>The huff-n'-puff filter is designed to correct the apparent time offset in these cases. It depends on knowledge of the propagation delay when no other traffic is present, such as during other than work hours. The filter remembers the minimum delay over the most recent interval measured usually in hours. Under conditions of large delay, the filter corrects the apparent offset using the sign of the offset and the difference between the apparent delay and minimum delay. The name of the filter reflects the negative (huff) and positive (puff) correction, which depends on the sign of the offset. The filter is activated by the <tt>tinker huffpuff</tt> command, as described in the <a href="miscopt.html">Miscellaneous Options</a> page.</p>
+<hr>
+<div align="center"><img src="pic/flt4.gif" alt="gif">
+<p>Figure 1. Huff-n'-Puff Wedge Scattergram</p>
+</div>
+<p>Figure 1 shows how the huff-n'-puff filter works. Recall from the <a href="filter.html">Clock Filter Algorithm</a> page that the wedge scattergram plots sample points of offset versus delay and that the limb lines are at slope &plusmn;0.5. Note in the figure that the samples are clustered close to the upper limb line. Given the apparent minimum delay close to 0.1 s and a point (<em>x</em>, <em>y</em>) on the upper limb line, the delay is <em>x</em> - 0.1 s, so the  offset <em>y</em> is corrected by subtracting  (<em>x</em> - 0.1) / 2. If the point was on the lower limb line, the correction would be added instead.</p>
 <hr>
 <p><script type="text/javascript" language="javascript" src="scripts/footer.txt"></script></p>
 </body>

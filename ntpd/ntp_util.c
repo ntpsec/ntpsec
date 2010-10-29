@@ -361,6 +361,11 @@ stats_config(
 	int	len;
 	char	tbuf[80];
 	char	str1[20], str2[20];
+#ifndef VMS
+	const char temp_ext[] = ".TEMP";
+#else
+	const char temp_ext[] = "-TEMP";
+#endif
 
 	/*
 	 * Expand environment strings under Windows NT, since the
@@ -415,14 +420,10 @@ stats_config(
 		stats_temp_file = erealloc(stats_temp_file, 
 					   len + sizeof(".TEMP"));
 
-		memcpy(stats_drift_file, value, (size_t)(len + 1));
+		memcpy(stats_drift_file, value, (size_t)(len+1));
 		memcpy(stats_temp_file, value, (size_t)len);
-		memcpy(stats_temp_file + len,
-#if !defined(VMS)
-			".TEMP", sizeof(".TEMP"));
-#else
-			"-TEMP", sizeof("-TEMP"));
-#endif /* VMS */
+		memcpy(stats_temp_file + len, temp_ext,
+		       sizeof(temp_ext));
 
 		/*
 		 * Open drift file and read frequency. If the file is
@@ -725,7 +726,7 @@ record_raw_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
-                fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n", day,
+		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n", day,
 		    ulfptoa(&now, 3), stoa(srcadr), dstadr ? 
 		    stoa(dstadr) : "-",	ulfptoa(t1, 9), ulfptoa(t2, 9),
 		    ulfptoa(t3, 9), ulfptoa(t4, 9));

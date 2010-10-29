@@ -11,10 +11,9 @@
 <img src="pic/pogo7.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>Racoon is shooting configuration bugs.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->12-Sep-2010  3:45<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->03-Oct-2010  1:48<!-- #EndDate -->
   UTC</p>
 <br clear="left">
-<hr>
 <h4>Table of Contents</h4>
 <ul>
   <li class="inline"><a href="#synopsis">Synopsis</a></li>
@@ -23,6 +22,7 @@
   <li class="inline"><a href="#detailed">Detailed Description</a></li>
   <li class="inline"><a href="#guidelines">Guidelines for Adding Configuration Commands </a></li>
 </ul>
+<hr>
 <h4 id="synopsis">Synopsis</h4>
 <p>The NTP configuration process is driven by a phrase-structure grammar which is used to specify the format of the configuration commands and the actions needed to build an abstract syntax tree (AST). The grammar is fed to a parser generator (Bison) which produces a parser for the configuration file.</p>
 <p>The generated parser is used to parse an NTP configuration file and check it for syntax and semantic errors. The result of the parse is an AST, which contains a representation of the various commands and options. This AST is then traversed to set up the NTP daemon to the correct configuration.</p>

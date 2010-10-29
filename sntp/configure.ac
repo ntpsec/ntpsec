@@ -150,7 +150,12 @@ case "$ac_cv_search_setsockopt" in
     case "$ac_cv_search_getsockopt" in
      -lxnet)
 	LIBS="-lxnet -lsocket $saved_LIBS"
+	;;
+     *)
+	LIBS="-lsocket $saved_LIBS"
+	;;
     esac
+    ;;
 esac
 $as_unset saved_LIBS
 

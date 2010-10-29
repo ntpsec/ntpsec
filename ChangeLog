@@ -1,3 +1,95 @@
+(4.2.7p73) 2010/10/27 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1680] Fix alignment of clock_select() arrays.
+* refinements to new startup behavior from David Mills.
+* For the bootstrap script, touch .html files last.
+* Add 'make check' test case that would have caught [Bug 1678].
+(4.2.7p72) 2010/10/26 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1679] Fix test for -lsocket.
+* Clean up missing ;; entries in configure.ac.
+(4.2.7p71) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1676] from 4.2.6p3-RC7: NMEA: $GPGLL did not work after fix
+  for Bug 1571.
+* [Bug 1678] "restrict source" treated as "restrict default".
+* from 4.2.6p3-RC7: Added scripts/checkChangeLog.
+(4.2.7p70) 2010/10/24 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1571] from 4.2.6p3-RC6: NMEA does not relate data to PPS edge.
+* [Bug 1572] from 4.2.p63-RC6: NMEA time adjustment for GPZDG buggy.
+* [Bug 1675] from 4.2.6p3-RC6: Prohibit includefile remote config.
+* Enable generating ntpd/ntp_keyword.h after keyword-gen.c changes on
+  Windows as well as POSIX platforms.
+* Fix from Dave Mills for a rare singularity in clock_combine().
+(4.2.7p69) 2010/10/23 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1671] Automatic delay calibration is sometimes inaccurate.
+(4.2.7p68) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1669] from 4.2.6p3-RC5: NTP fails to compile on IBM AIX 5.3.
+* [Bug 1670] Fix peer->bias and broadcastdelay.
+* Documentation updates from Dave Mills.
+* Documentation EOL cleanup.
+(4.2.7p67) 2010/10/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1649] from 4.2.6p3-RC5: Require NMEA checksum if $GPRMC or
+  previously seen.
+(4.2.7p66) 2010/10/19 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1277] Provide and use O(1) FIFOs, esp. in the config tree code.
+* Remove unused 'bias' configuration keyword.
+(4.2.7p65) 2010/10/16 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1584] from 4.2.6p3-RC4: wrong SNMP type for precision,
+  resolution.
+* Remove 'calldelay' and 'sign' remnants from parser, ntp_config.c.
+(4.2.7p64) 2010/10/15 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1584] from 4.2.6p3-RC3: ntpsnmpd OID must be mib-2.197.
+* [Bug 1659] from 4.2.6p3-RC4: Need CLOCK_TRUETIME not CLOCK_TRUE.
+* [Bug 1663] ntpdsim should not open net sockets.
+* [Bug 1665] from 4.2.6p3-RC4: is_anycast() u_int32_t should be u_int32.
+* from 4.2.6p3: ntpsnmpd, libntpq warning cleanup.
+* Remove 'calldelay' and 'sign' keywords (Dave Mills).
+* Documentation updates from Dave Mills.
+(4.2.7p63) 2010/10/13 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1080] from 4.2.6p3-RC3: ntpd on ipv6 routers very chatty.
+* Documentation nit cleanup.
+* Documentation updates from Dave Mills.
+(4.2.7p62) 2010/10/12 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 750] from 4.2.6p3-RC3: Non-existing device causes coredump with 
+  RIPE-NCC driver.
+* [Bug 1567] from 4.2.6p3-RC3: Support Arbiter 1093C Satellite Clock on
+  Windows.
+* [Bug 1581] from 4.2.6p3-RC3: printf format string mismatch leftover.
+* [Bug 1659] from 4.2.6p3-RC3: Support Truetime Satellite Clocks on
+  Windows. 
+* [Bug 1660] from 4.2.6p3-RC3: On some systems, test is in /usr/bin, not
+  /bin. 
+* [Bug 1661] from 4.2.6p3-RC3: Re-indent refclock_ripencc.c.
+* Lose peer_count from ntp_peer.c and ntp_proto.c (Dave Mills).
+* Documentation updates from Dave Mills.
+(4.2.7p61) 2010/10/06 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation and code cleanup from Dave Mills. No more NTP_MAXASSOC.
+(4.2.7p60) 2010/10/04 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p59) 2010/10/02 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+* Variable name cleanup from Dave Mills.
+* [Bug 1657] darwin needs res_9_init, not res_init.
+(4.2.7p58) 2010/09/30 Released by Harlan Stenn <stenn@ntp.org>
+* Clock select bugfix from Dave Mills.
+* [Bug 1554] peer may stay selected as system peer after becoming
+  unreachable.
+* [Bug 1644] from 4.2.6p3-RC3: cvo.sh should use lsb_release to identify
+  linux distros.
+* [Bug 1646] ntpd crashes with relative path to logfile.
+(4.2.7p57) 2010/09/27 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p56) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
+* Clock combining algorithm improvements from Dave Mills.
+* Documentation updates from Dave Mills.
+* [Bug 1642] ntpdsim can't find simulate block in config file.
+* [Bug 1643] from 4.2.6p3-RC3: Range-check the decoding of the RIPE-NCC
+  status codes.
+(4.2.7p55) 2010/09/22 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+* [Bug 1636] from 4.2.6p3-RC2: segfault after denied remote config.
+(4.2.7p54) 2010/09/21 Released by Harlan Stenn <stenn@ntp.org>
+* More Initial convergence improvements from Dave Mills.
+* Documentation updates from Dave Mills.
+* [Bug 1635] from 4.2.6p3-RC2: "filegen ... enable" is not default.
 (4.2.7p53) 2010/09/20 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * More Initial convergence improvements from Dave Mills.
@@ -345,6 +437,53 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3-RC7) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1676] NMEA: $GPGLL did not work after fix for Bug 1571.
+* Added scripts/checkChangeLog.
+
+---
+(4.2.6p3-RC6) 2010/10/24 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1571] NMEA does not relate data to PPS edge.
+* [Bug 1572] NMEA time adjustment for GPZDG buggy.
+* [Bug 1675] Prohibit includefile remote config.
+
+---
+(4.2.6p3-RC5) 2010/10/22 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1649] Require NMEA checksum if $GPRMC or previously seen.
+* [Bug 1669] NTP 4.2.6p2 fails to compile on IBM AIX 5.3.
+
+---
+(4.2.6p3-RC4) 2010/10/16 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1584] wrong SNMP type for precision, resolution.
+* [Bug 1659] Need CLOCK_TRUETIME not CLOCK_TRUE.
+* [Bug 1665] is_anycast() u_int32_t should be u_int32.
+* ntpsnmpd, libntpq warning cleanup.
+
+---
+(4.2.6p3-RC3) 2010/10/14 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 750] Non-existing device causes coredump with RIPE-NCC driver.
+* [Bug 1080] ntpd on ipv6 routers very chatty.
+* [Bug 1567] Support Arbiter 1093C Satellite Clock on Windows.
+* [Bug 1581] printf format string mismatch leftover.
+* [Bug 1584] ntpsnmpd OID must be mib-2.197.
+* [Bug 1643] Range-check the decoding of the RIPE-NCC status codes.
+* [Bug 1644] cvo.sh should use lsb_release to identify linux distros.
+* [Bug 1659] Support Truetime Satellite Clocks on Windows.
+* [Bug 1660] On some systems, test is in /usr/bin, not /bin.
+* [Bug 1661] Re-indent refclock_ripencc.c.
+
+---
+(4.2.6p3-RC2) 2010/09/25 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 1635] "filegen ... enable" is not default.
+* [Bug 1636] yyparse() segfault after denied filegen remote config.
+
+---
 (4.2.6p3-RC1) 2010/09/18 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1344] ntpd on Windows exits without logging cause.
@@ -356,13 +495,13 @@
 * [Bug 1595] empty last line in key file causes duplicate key to be added
 * [Bug 1597] packet processing ignores RATE KoD packets, because of
   a bug in string comparison.
+* [Bug 1581] ntp_intres.c size_t printf format string mismatch.
 
 ---
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
   undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
->>>>>>>
   Perlinger.
 
 ---

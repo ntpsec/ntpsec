@@ -156,6 +156,7 @@
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\ntpd,..\..\..\..\ntpd,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H"
+				StringPooling="true"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
@@ -197,7 +198,7 @@
 				OptimizeForWindows98="0"
 				LinkTimeCodeGeneration="0"
 				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
+				DataExecutionPrevention="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -235,6 +236,26 @@
 			<File
 				RelativePath="..\..\..\..\ntpd\cmd_args.c"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ntpd\keyword-gen.c"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\ntpd\nt_clockstuff.c"
@@ -323,10 +344,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ntpd\ntp_data_structures.c"
-				>
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\ntp_filegen.c"
@@ -463,6 +480,26 @@
 			<File
 				RelativePath="..\..\..\..\ntpd\ntp_parser.c"
 				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ntpd\ntp_parser.y"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\ntp_peer.c"
@@ -839,10 +876,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\ntp_data_structures.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\ntp_debug.h"
 				>
 			</File>
@@ -864,10 +897,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\ntp_iocompletionport.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\ntpd\ntp_keyword.h"
 				>
 			</File>
 			<File
@@ -1053,6 +1082,32 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\ntp_keyword.h"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h"
+						CommandLine=".\gen-ntp_keyword ..\bin\Release"
+						AdditionalDependencies="..\..\..\..\ntpd\ntp_parser.h"
+						Outputs="..\..\..\..\ntpd\ntp_keyword.h ..\..\..\..\ntpd\keyword-gen-utd"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h"
+						CommandLine=".\gen-ntp_keyword ..\bin\Debug"
+						AdditionalDependencies="..\..\..\..\ntpd\ntp_parser.h"
+						Outputs="..\..\..\..\ntpd\ntp_keyword.h ..\..\..\..\ntpd\keyword-gen-utd"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\version.c"
 				>
 				<FileConfiguration
@@ -1139,7 +1194,6 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1149,7 +1203,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1845,7 +1898,6 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1855,7 +1907,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

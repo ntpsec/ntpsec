@@ -85,7 +85,6 @@ struct peer *assoc_hash[NTP_HASH_SIZE];	/* association ID hash table */
 int	assoc_hash_count[NTP_HASH_SIZE];/* peers in each bucket */
 struct peer *peer_list;			/* peer structures list */
 static struct peer *peer_free;		/* peer structures free list */
-int	peer_count;			/* count of peer_list */
 int	peer_free_count;		/* count of free structures */
 
 /*
@@ -411,8 +410,7 @@ score(
 /*
  * free_peer - internal routine to free memory referred to by a struct
  *	       peer and return it to the peer free list.  If unlink is
- *	       nonzero, unlink from the various lists and decrement
- *	       peer_count.
+ *	       nonzero, unlink from the various lists.
  */
 static void
 free_peer(
@@ -456,8 +454,6 @@ free_peer(
 		if (NULL == unlinked)
 			msyslog(LOG_ERR, "%s not in peer list!",
 				stoa(&p->srcadr));
-		else
-			peer_count--;
 	}
 
 	if (p->hostname != NULL)
@@ -943,13 +939,10 @@ newpeer(
 	LINK_SLIST(assoc_hash[hash], peer, aid_link);
 	assoc_hash_count[hash]++;
 	LINK_SLIST(peer_list, peer, p_link);
-	peer_count++;
 
 	restrict_source(&peer->srcadr, 0, 0);
-
 	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
 	report_event(PEVNT_MOBIL, peer, tbuf);
-
 	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
 	    latoa(peer->dstadr), stoa(&peer->srcadr), peer->hmode,
 	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,

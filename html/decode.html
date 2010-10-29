@@ -11,7 +11,7 @@
 <img src="pic/alice47.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>Caterpillar knows all the error codes, which is more than most of us do.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->10-Sep-2010  0:20<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->14-Oct-2010  16:31<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -475,10 +475,10 @@
 <p>The flash status word is displayed by the <tt>ntpq</tt> program <tt>rv</tt> command. It consists of a number of bits coded in hexadecimal as follows:</p>
 <table width="100%" border="1" cellspacing="2" cellpadding="2">
   <tr>
-    <td>Code</td>
-    <td>Tag</td>
-    <td>Message</td>
-    <td>Description</td>
+    <td width="10%">Code</td>
+    <td width="15%">Tag</td>
+    <td width="20%">Message</td>
+    <td width="55%">Description</td>
   </tr>
   <tr>
     <td><tt>0001</tt></td>
@@ -496,7 +496,7 @@
     <td><tt>0004</tt></td>
     <td>TEST3</td>
     <td><tt>pkt_unsync</tt></td>
-    <td>protocol unsynchronized</td>
+    <td>server not synchronized</td>
   </tr>
   <tr>
     <td><tt>0008</tt></td>
@@ -508,55 +508,55 @@
     <td><tt>0010</tt></td>
     <td>TEST5</td>
     <td><tt>pkt_auth</tt></td>
-    <td>bad authentication</td>
+    <td> authentication failure</td>
   </tr>
   <tr>
     <td><tt>0020</tt></td>
     <td>TEST6</td>
     <td><tt>pkt_stratum</tt></td>
-    <td>bad synch or stratum</td>
+    <td>invalid  leap or stratum</td>
   </tr>
   <tr>
     <td><tt>0040</tt></td>
     <td>TEST7</td>
     <td><tt>pkt_header</tt></td>
-    <td>bad header</td>
+    <td> header distance exceeded</td>
   </tr>
   <tr>
     <td><tt>0080</tt></td>
     <td>TEST8</td>
     <td><tt>pkt_autokey</tt></td>
-    <td>bad autokey</td>
+    <td>Autokey sequence error</td>
   </tr>
   <tr>
     <td><tt>0100</tt></td>
     <td>TEST9</td>
     <td><tt>pkt_crypto</tt></td>
-    <td>bad crypto</td>
+    <td>Autokey protocol error</td>
   </tr>
   <tr>
     <td><tt>0200</tt></td>
     <td>TEST10</td>
     <td><tt>peer_stratum</tt></td>
-    <td>peer bad synch or stratum</td>
+    <td> invalid header or stratum</td>
   </tr>
   <tr>
     <td><tt>0400</tt></td>
     <td>TEST11</td>
     <td><tt>peer_dist</tt></td>
-    <td>peer distance exceeded</td>
+    <td> distance threshold exceeded</td>
   </tr>
   <tr>
     <td><tt>0800</tt></td>
     <td>TEST12</td>
     <td><tt>peer_loop</tt></td>
-    <td>peer synchronization loop</td>
+    <td> synchronization loop</td>
   </tr>
   <tr>
     <td><tt>1000</tt></td>
     <td>TEST13</td>
     <td><tt>peer_unreach</tt></td>
-    <td>peer unreachable</td>
+    <td> unreachable or nonselect</td>
   </tr>
 </table>
 <h4 id="kiss">Kiss Codes</h4>

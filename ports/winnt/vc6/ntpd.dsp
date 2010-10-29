@@ -113,10 +113,6 @@ SOURCE=..\..\..\ntpd\ntp_crypto.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\ntp_data_structures.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\ntpd\ntp_filegen.c
 # SUBTRACT CPP /YX
 # End Source File
@@ -515,7 +511,6 @@ SOURCE=..\..\..\ntpd\refclock_acts.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_arbiter.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -657,7 +652,6 @@ SOURCE=..\..\..\ntpd\refclock_trak.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_true.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 

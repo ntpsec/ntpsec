@@ -142,6 +142,7 @@ ntpd_SOURCES =			\
 	
 ntpdsim_SOURCES =		\
 	$(ntpd_SOURCES)		\
+	ntp_prio_q.c		\
 	ntpsim.c		\
 	$(NULL)
 
@@ -152,7 +153,6 @@ libntpd_a_SOURCES =		\
 	jupiter.h		\
 	ntp_control.c		\
 	ntp_crypto.c		\
-	ntp_data_structures.c	\
 	ntp_filegen.c		\
 	ntp_intres.c		\
 	ntp_loopfilter.c	\
@@ -253,6 +253,7 @@ compsave.conf: ntpd $(srcdir)/complete.conf
 	./ntpd --configfile $(srcdir)/complete.conf --saveconfigquit $@
 
 check-saveconfig: $(srcdir)/complete.conf compsave.conf
+	-diff $(srcdir)/complete.conf compsave.conf
 	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
 
 ../libopts/libopts.la:

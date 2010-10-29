@@ -8,16 +8,15 @@
  * Configuration codes (also needed for parser without AUTOKEY)
  */
 #define CRYPTO_CONF_NONE  0	/* nothing doing */
-#define CRYPTO_CONF_PRIV  1	/* host keys file name */
-#define CRYPTO_CONF_SIGN  2	/* signature keys file name */
+#define CRYPTO_CONF_PRIV  1	/* host name */
+#define CRYPTO_CONF_IDENT 2	/* group name */
 #define CRYPTO_CONF_CERT  3	/* certificate file name */
 #define CRYPTO_CONF_RAND  4	/* random seed file name */
 #define CRYPTO_CONF_IFFPAR 5	/* IFF parameters file name */
 #define CRYPTO_CONF_GQPAR 6	/* GQ parameters file name */
 #define	CRYPTO_CONF_MVPAR 7	/* MV parameters file name */
 #define CRYPTO_CONF_PW	  8	/* private key password */
-#define	CRYPTO_CONF_IDENT 9	/* specify identity scheme */
-#define	CRYPTO_CONF_NID   10	/* specify digest name */
+#define	CRYPTO_CONF_NID   9	/* specify digest name */
 
 #ifdef AUTOKEY
 #ifndef OPENSSL

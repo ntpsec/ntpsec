@@ -10,9 +10,7 @@
 <img src="pic/alice11.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html"> from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>Listen carefully to what I say; it is very complicated.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->
-  22-Apr-2009  14:04
-  <!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->25-Sep-2010  3:35<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -20,6 +18,8 @@
 <h4>Table of Contents</h4>
 <ul>
   <li class="inline"><a href="#intro">Introduction</a></li>
+  <li class="inline"><a href="#combine">Combine Algorithm</a></li>
+  <li class="inline"><a href="#clockhop">Anti-Clockhop Algorithm</a></li>
   <li class="inline"><a href="#peer">Peer Classification</a></li>
   <li class="inline"><a href="#prefer">The <tt>prefer</tt> Peer</a></li>
   <li class="inline"><a href="#miti">Mitigation Rules</a></li>
@@ -40,14 +40,21 @@
   with the <tt>true</tt> option is ipso facto a truechimer independent of this
   algorithm. Phase four uses a clustering algorithm to cast off statistical outliers
   from the truechimers until a set of survivors not less than the number specified
-  as the <tt>minclock</tt> option of the <tt>tos</tt> command, with default 3.
-  Phase five uses a set of mitigation rules to select from among the survivors
+  as the <tt>minclock</tt> option of the <tt>tos</tt> command, with default 3.</p>
+<p> Phase five uses a set of algorithms and mitigation rules to rank the survivors to prodce  combined statistics used to discipline the clock, as well as to select from among the survivors
   a system peer from which a set of system statistics can be inherited and passed
-  along to a dependent client population. The clock offset developed from these
+  along to a dependent client population. The algorithms and rules are the main toopic of this page. The clock offset developed from these
   algorithms can discipline the system clock either using the <tt>ntpd</tt> clock
   discipline algorithm or enable the kernel to discipline the system clock directly,
   as described on the <a href="kern.html">A Kernel Model for Precision Timekeeping</a> page.
   Phase five is the topic of this page.</p>
+<h4 id="combine">Combine Algorithm</h4>
+<p>The cluster algorithm  produces a list of survivors ranked by increasing synchronization distance. The combine algorithm uses this list to produce a weighted average of both offset and jitter. Absent other considerations discussed later, the combined offset is used to discipline the clock, while the combined jitter is combined with other components to produce the system jitter statistic inherited by dependent clients.</p>
+<p>The combine algorithm uses a weight factor for each survivor computed as the select threshold minus the synchronization distance. Since the select algorithm refects candidates with synchronization distance greater than the select threshold, the weight factor is always positive. The system jitter is calculated as the RMS weighted differences between the  offset of each survivor and the offset of the first candidate on the survivor list. </p>
+<h4 id="clockhop">Anti-Clockhp Algorityhm</h4>
+<p>Generally speaking, the best candidate for the system peer is the first candidate on the survivor list, as this has the smallest synchronization distance. However, it can cause some trauma in downstream clients when the system peer is changed frequectly, so some care is taken to insure that a change does not occur, unless to do so would materially improve quality. Frequently when there are two or more servers avaialbe with substantially the same synchronization distance, one or another will show up at the head of the survivor list followed closely by the others of substantially the same distance. The object of the anti-clockhop algorithm is to avoid reselecting the system peer unless it becomes stale or significally worse than the candidate at the head of the list.</p>
+<p>Previously, the algorithm has remembered the last selected system peer or whether there was none. In addition, the algorithm has initialized the anticlockhop threshold with the value of the mindisp statistic, by default 1 ms. To help compact this duscussion, we will call the last selected systm peer the <em>old peer</em>, and the peer at the head of the survivor peer the <em>candidate peer</em>. If there was no old peer or the old and candidate peers are the same,   the candidate peer becomes the system peer. If not, the algorithm measures the difference between the offset of the old peer and candidate peer. If the difference exceeds the anticlockhop threshold, the candidate peer becomes the system peer and the anticlochop threshold restored to its original value. If not, the old peer continues as the system peer. However, at each subsequent call, the algorithm reduces the anticlockhop threshold by half. Should operation continue in this way, the canddate peer will eventually become the system peer.</p>
+<p>The anti-clockhop algorithm is most effective in cases where multiple primary servers are available on fast LANs with modern computers. Typical offset differences in such cases are less than 0.5 ms and clockhops are much less frequent than if the algorithm is not used..</p>
 <h4 id="peer">Peer Classification</h4>
 <p>The behavior of the various algorithms and mitigation rules involved depends on how the various synchronization sources are classified. This depends on whether the source is local or remote and if local the type of source. The following classes are defined:</p>
 <ol>

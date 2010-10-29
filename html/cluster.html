@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<title>Clock Cluster Algorithm</title>
+<link href="scripts/style.css" type="text/css" rel="stylesheet"></head>
+<body>
+<em></em>
+<h3>Clock Cluster Algorithm</h3>
+<p>Last update:
+  <!-- #BeginDate format:En2m -->05-Oct-2010  21:29<!-- #EndDate -->
+  UTC</p>
+<hr>
+<p>The clock cluster algorithm processes the truechimers produced by the clock select algorithm to produce the survivors used by the mitigation algorithms to discipline the system clock. It operates in a series of rounds, where at each round the truechimer  furthest from the offset centroid is pruned from the population. The rounds are continued until a specified termination condition results. This page discusses the algorithm in detail.</p>
+<p>First, the truechimer candidates are saved on a list of <em>n</em> entries sorted by root distance.  For the <em>i</em>th entry on the list, a statistic called the <em>select jitter</em> is calculated as follows. Let</p>
+<div align="center">
+  <p><em>d<sub>i</sub></em>(<em>j</em>) = <font face="symbol">q</font>(<em>j</em>) - <font face="symbol"> q</font>(<em>i</em>),</p>
+</div>
+<p> where<font face="symbol"> q</font>(<em>i</em>) is the peer offset of the <em>i</em>th entry and <font face="symbol">q</font>(<em>j</em>) is the peer offset of the <em>j</em>th entry, both produced by the clock filter algorithm. Then, the select jitter <font face="symbol">j</font><sub>S</sub>(<em>i</em>) of the <em>i</em>th entry is the root distance of the <em>i</em>th entry times the  RMS sum of <em>d<sub>i</sub></em>(<em>j</em>)<em> </em>as <em>j</em> ranges from 1 to <em>n</em>. For the purpose of notation in the example to follow, let <font face="symbol">j</font><sub>R</sub>(<em>i</em>) be the peer jitter computed by the clock filter algorithm for the <em>i</em>th entry. In general, the <em>expected error</em> statistic for the <em>i</em>th entry is the RMS sum of these two components, but that is not needed by the clock cluster algorithm.</p>
+<p>The object at each round is to prune the entry with the largest select jitter until the termination condition is met. Note that the select jitter must be recomputed at each round, but the peer jitter does not change. At each round the remaining entries on the list represent the survivors of that round. While the number of entries on the list is not limited, the list is always pruned to  the <em>maxclock threshold</em>. It has   default 10, but can be set by the <tt>maxclock</tt> option of the <a href="miscopt.html#tos"><tt>tos</tt></a> command. This threshold is useful to limit the number of survivors when  automatic server discovery schemes are in use.</p>
+<p>The termination condition has two parts. First, if the number of candidates is not greater than the<em> </em><em>minclock threshold</em> set by the <tt>minclock</tt> option of the <a href="miscopt.html#tos"><tt>tos</tt></a> command, the pruning process terminates. The<tt> minclock</tt> default is 3, but can be changed  to fit special conditions, as described on the <a href="prefer.html">Mitigation Rules and the prefer Keyword</a> page.</p>
+<div align="center"><img src="pic/flt7.gif" alt="gif">
+  <p>Figure 1. Cluster Algorithm</p>
+</div>
+<p>The second termination condition is more intricate. Figure 1 shows a round where a candidate of (a) is pruned to yield the candidates of (b). Let <font face="symbol">j</font><sub><em>max</em></sub> be the maximum select jitter and <font face="symbol">j</font><sub><em>min</em></sub> be the minimum peer jitter over all entries on the list. In (a), candidate 1 has the highest select jitter, so  <font face="symbol">j</font><sub><em>max</em></sub> = <font face="symbol"> j</font><sub>S</sub>(1). Candidate 4 has the lowest peer jitter, so <font face="symbol">j</font><sub><em>min</em></sub> = <font face="symbol">j</font><sub>R</sub>(4). Since <font face="symbol">j</font><sub><em>max</em></sub> &gt; <font face="symbol">j</font><sub><em>min</em></sub>, select jitter dominates  total jitter,<em> so </em>the algorithm prunes candidate 1.&#13; In (b), <font face="symbol">j</font><sub><em>max</em></sub> = <font face="symbol">j</font><sub>S</sub>(3) and <font face="symbol">j</font><sub><em>min </em></sub>=<font face="symbol"> j</font><sub>R</sub>(4). Since <font face="symbol">j</font><sub><em>max</em></sub> &lt;  <font face="symbol">j</font><sub><em>min</em></sub>, pruning additional candidates will not significantly reduce total jitter. So, the algorithm terminates with candidates 2, 3 and 4 as  survivors.</p>
+<hr>
+<script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
+</body>
+</html>

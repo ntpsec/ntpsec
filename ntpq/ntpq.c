@@ -1318,6 +1318,7 @@ sendrequest(
 	return sendpkt((char *)&qpkt, pktsize + maclen);
 }
 
+
 /*
  * show_error_msg - display the error text for a mode 6 error response.
  */

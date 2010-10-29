@@ -44,6 +44,21 @@ emalloc(
 }
 
 
+void *
+emalloc_zero(
+	size_t	size
+	)
+{
+	void *ptr;
+
+	ptr = erealloc(NULL, size);
+	if (NULL != ptr)
+		memset(ptr, 0, size);
+
+	return ptr;
+}
+
+
 char *
 estrdup(
 	const char *	str
@@ -78,9 +93,10 @@ estrdup(
  */
 
 void *
-debug_erealloc(
+debug_ereallocz(
 	void *		prev,
 	size_t		size,
+	int		zero_init,
 	const char *	file,		/* __FILE__ */
 	int		line		/* __LINE__ */
 	)
@@ -90,7 +106,10 @@ debug_erealloc(
 	mem = _realloc_dbg(prev, size ? size : 1,
 			   _NORMAL_BLOCK, file, line);
 
-	if (NULL == mem) {
+	if (mem != NULL) {
+		if (zero_init)
+			memset(mem, 0, size);
+	} else {
 		msyslog(LOG_ERR,
 			"fatal: out of memory in %s line %d size %u", 
 			file, line, (u_int)size);
@@ -114,7 +133,7 @@ debug_estrdup(
 	size_t	bytes;
 
 	bytes = strlen(str) + 1;
-	copy = debug_erealloc(NULL, bytes, file, line);
+	copy = debug_ereallocz(NULL, bytes, 0, file, line);
 	memcpy(copy, str, bytes);
 
 	return copy;
