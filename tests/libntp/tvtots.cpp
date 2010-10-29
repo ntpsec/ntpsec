@@ -31,13 +31,21 @@ TEST_F(tvtotsTest, MicrosecondsRounded) {
 	EXPECT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(tvtotsTest, DISABLED_MicrosecondsExact) {
+TEST_F(tvtotsTest, MicrosecondsExact) {
 	// 0.5 can be represented exact in both l_fp and timeval.
-
-	timeval input = {10, 500000}; // 0.5 exact
-	l_fp expected = {10, HALF}; // 0.5 exact
+	const timeval input = {10, 500000}; // 0.5 exact
+	const l_fp expected = {10, HALF}; // 0.5 exact
 	l_fp actual;
 
 	TVTOTS(&input, &actual);
-	EXPECT_TRUE(IsEqual(expected, actual));
+
+	// Compare the fractional part with an absolute error given.
+	EXPECT_EQ(expected.l_ui, actual.l_ui);
+
+	double expectedDouble, actualDouble;
+	M_LFPTOD(0, expected.l_uf, expectedDouble);
+	M_LFPTOD(0, actual.l_uf, actualDouble);
+
+	// The error should be less than 0.5 us
+	EXPECT_NEAR(expectedDouble, actualDouble, 0.0000005);
 }

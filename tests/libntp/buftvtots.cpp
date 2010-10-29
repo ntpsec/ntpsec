@@ -18,14 +18,23 @@ TEST_F(buftvtotsTest, ZeroBuffer) {
 	EXPECT_TRUE(IsEqual(expected, actual));
 }
 
-TEST_F(buftvtotsTest, DISABLED_IntegerAndFractionalBuffer) {
+TEST_F(buftvtotsTest, IntegerAndFractionalBuffer) {
 	const timeval input = {5, 500000}; // 5.5
 	const l_fp expected = {5 + JAN_1970, HALF};
 
 	l_fp actual;
 
 	ASSERT_TRUE(buftvtots((const char*)(&input), &actual));
-	EXPECT_TRUE(IsEqual(expected, actual));
+
+	// Compare the fractional part with an absolute error given.
+	EXPECT_EQ(expected.l_ui, actual.l_ui);
+
+	double expectedDouble, actualDouble;
+	M_LFPTOD(0, expected.l_uf, expectedDouble);
+	M_LFPTOD(0, actual.l_uf, actualDouble);
+
+	// The error should be less than 0.5 us
+	EXPECT_NEAR(expectedDouble, actualDouble, 0.0000005);
 }
 
 TEST_F(buftvtotsTest, IllegalMicroseconds) {
