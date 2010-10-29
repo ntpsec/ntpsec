@@ -701,7 +701,8 @@ nmea_receive(
 		return;
 
 	/* See if I want to process this message type */
-	if (peer->ttl && !(peer->ttl & sentence_mode[sentence]))
+	if ((peer->ttl & NMEA_MESSAGE_MASK) &&
+	   !(peer->ttl & sentence_mode[sentence]))
 		return;
 
 	/* 

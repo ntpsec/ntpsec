@@ -111,6 +111,7 @@ BUILT_SOURCES =				\
 	$(srcdir)/version.m4		\
 	$(srcdir)/include/version.def	\
 	$(srcdir)/include/version.texi	\
+	$(srcdir)/.checkChangeLog	\
 	$(NULL)
 
 $(srcdir)/COPYRIGHT: $(srcdir)/html/copyright.html
@@ -149,6 +150,10 @@ $(srcdir)/include/version.def: $(srcdir)/packageinfo.sh
 $(srcdir)/include/version.texi: $(srcdir)/packageinfo.sh
 	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver include/version.texi
+
+$(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/checkChangeLog
+	cd $(srcdir) && \
+	./scripts/checkChangeLog
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
