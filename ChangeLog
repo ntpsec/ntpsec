@@ -1,5 +1,6 @@
 * [Bug 1685] from 4.2.6p3-RC8: NMEA driver mode byte confusion.
 * from 4.2.6p3-RC8: First cut at using scripts/checkChangeLog.
+* Documentation updates from Dave Mills.
 (4.2.7p73) 2010/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1680] Fix alignment of clock_select() arrays.
 * refinements to new startup behavior from David Mills.
