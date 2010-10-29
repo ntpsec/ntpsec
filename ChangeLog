@@ -1,6 +1,7 @@
 ---
 
 * [Bug 1685] NMEA driver mode byte confusion.
+* First cut at using scripts/checkChangeLog.
 
 ---
 (4.2.6p3-RC7) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
