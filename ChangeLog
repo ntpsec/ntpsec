@@ -1,6 +1,6 @@
 ---
 
-* [Bug 1685] NMEA driver mode byte confusion
+* [Bug 1685] NMEA driver mode byte confusion.
 
 ---
 (4.2.6p3-RC7) 2010/10/25 Released by Harlan Stenn <stenn@ntp.org>
