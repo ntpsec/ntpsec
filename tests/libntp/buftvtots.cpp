@@ -4,6 +4,9 @@ extern "C" {
 #include "ntp_unixtime.h"
 };
 
+// Required for Solaris.
+#include <math.h>
+
 class buftvtotsTest : public lfptest {
 };
 

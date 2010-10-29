@@ -4,6 +4,9 @@ extern "C" {
 #include "ntp_unixtime.h"
 };
 
+// Required on Solaris for ldexp.
+#include <math.h>
+
 class tvtotsTest : public lfptest {
 };
 
