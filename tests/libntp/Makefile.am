@@ -2,7 +2,7 @@ check_PROGRAMS = tests
 LDADD = @LCRYPTO@ @GTEST_LDFLAGS@ @GTEST_LIBS@ @top_builddir@/libntp/libntp.a
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
 AM_CPPFLAGS = @GTEST_CPPFLAGS@
-tests_SOURCES = ../tests_main.cpp	\
+tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		libntptest.cpp		\
 		a_md5encrypt.cpp	\
 		atoint.cpp		\
@@ -40,10 +40,12 @@ tests_SOURCES = ../tests_main.cpp	\
 		ymd2yd.cpp
 
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
-	-I$(top_srcdir)/lib/isc/nothreads/include \
-	-I$(top_srcdir)/lib/isc/unix/include \
-	-I$(top_srcdir)/tests
+INCLUDES = 						\
+	-I$(top_srcdir)/include				\
+	-I$(top_srcdir)/lib/isc/include			\
+	-I$(top_srcdir)/lib/isc/nothreads/include	\
+	-I$(top_srcdir)/lib/isc/unix/include		\
+	-I$(top_srcdir)/sntp
 
 TESTS = 
 

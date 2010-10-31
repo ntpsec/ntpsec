@@ -43,6 +43,9 @@ AC_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
 AC_PREREQ([2.53])
 
+# Expose a cross-compilation indicator to makefiles
+AM_CONDITIONAL(SNTP_CROSSCOMPILE, test $build != $host)
+
 # Checks for programs.
 AC_PROG_CC
 
@@ -790,4 +793,21 @@ AC_SUBST(BINSUBDIR)
 AM_CONDITIONAL(NTP_BINSUBDIR_IS_BIN, test "bin" = "$BINSUBDIR")
 
 AC_CONFIG_FILES([Makefile])
+
+AC_PROG_CXX
+
+AC_PATH_PROG([GTEST_CONFIG], [gtest-config])
+if test x${GTEST_CONFIG} != x ; then
+	GTEST_LDFLAGS=`$GTEST_CONFIG --ldflags`
+	GTEST_LIBS=`$GTEST_CONFIG --libs`
+	GTEST_CXXFLAGS=`$GTEST_CONFIG --cxxflags`
+	GTEST_CPPFLAGS=`$GTEST_CONFIG --cppflags`
+	AC_SUBST(GTEST_LDFLAGS)
+	AC_SUBST(GTEST_LIBS)
+	AC_SUBST(GTEST_CXXFLAGS)
+	AC_SUBST(GTEST_CPPFLAGS)
+fi
+AM_CONDITIONAL([GTEST_AVAILABLE], [test x${GTEST_CONFIG} != x])
+
+AC_CONFIG_FILES(tests/Makefile)
 AC_OUTPUT

@@ -4910,7 +4910,6 @@ AM_CONDITIONAL([GTEST_AVAILABLE], [test x${GTEST_CONFIG} != x])
 
 AC_CONFIG_FILES(tests/Makefile)
 AC_CONFIG_FILES(tests/libntp/Makefile)
-AC_CONFIG_FILES(tests/sntp/Makefile)
 
 AC_CONFIG_SUBDIRS(sntp)
 
