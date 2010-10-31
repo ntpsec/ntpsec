@@ -46,6 +46,10 @@ AC_PREREQ([2.53])
 # Expose a cross-compilation indicator to makefiles
 AM_CONDITIONAL(SNTP_CROSSCOMPILE, test $build != $host)
 
+dnl check these early to avoid autoconf warnings
+AC_AIX
+AC_MINIX
+
 # Checks for programs.
 AC_PROG_CC
 
@@ -164,6 +168,20 @@ $as_unset saved_LIBS
 
 AC_SEARCH_LIBS([inet_pton], [nsl])
 AC_SEARCH_LIBS([openlog], [gen syslog])
+
+case "$host" in
+ *-*-aix[[456]]*)
+	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
+	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
+	# IBM pulls its thumbs out long enough to implement clock_settime,
+	# this conditional will need to change.  Maybe use AC_TRY_RUN
+	# instead to try to set the time to itself and check errno.
+    ;;
+ *)
+    AC_SEARCH_LIBS([clock_gettime], [rt])
+    AC_CHECK_FUNCS([clock_gettime clock_settime])
+    ;;
+esac
 
 # Checks for header files.
 AC_HEADER_STDC
