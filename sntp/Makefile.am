@@ -28,7 +28,10 @@ if NEED_LIBOPTS
 SUBDIRS+= libopts
 endif
 SUBDIRS+= .
+
+if GTEST_AVAILABLE
 SUBDIRS+= tests
+endif
 
 sntp_SOURCES =		\
 	crypto.c	\
