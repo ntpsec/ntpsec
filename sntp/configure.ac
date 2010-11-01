@@ -169,6 +169,7 @@ $as_unset saved_LIBS
 AC_SEARCH_LIBS([inet_pton], [nsl])
 AC_SEARCH_LIBS([openlog], [gen syslog])
 
+# -lrt may only be needed by tests/
 case "$host" in
  *-*-aix[[456]]*)
 	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
