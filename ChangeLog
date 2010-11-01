@@ -2,6 +2,7 @@
 * [Bug 1691] Use first NMEA sentence each second.
 * Put the sntp tests under sntp/ .
 * ... and only build/run them if we have gtest.
+* Documentation updates from Dave Mills.
 (4.2.7p75) 2010/10/30 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 * Include Linus Karlsson's GSoC 2010 testing code.
