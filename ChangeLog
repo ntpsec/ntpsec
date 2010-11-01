@@ -1,4 +1,5 @@
-* [Bug 1690] Unit tests fails to build on some systems
+* [Bug 1690] Unit tests fails to build on some systems.
+* [Bug 1691] Use first NMEA sentence each second.
 * Put the sntp tests under sntp/ .
 * ... and only build/run them if we have gtest.
 (4.2.7p75) 2010/10/30 Released by Harlan Stenn <stenn@ntp.org>
