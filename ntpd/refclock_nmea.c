@@ -172,6 +172,7 @@ struct nmeaunit {
 	l_fp	tstamp;		/* timestamp of last poll */
 	int	gps_time;	/* 0 UTC, 1 GPS time */
 		/* per sentence checksum seen flag */
+	struct calendar used;	/* hh:mm:ss of used sentence */
 	u_char	cksum_seen[NMEA_ARRAY_SIZE];
 };
 
@@ -642,8 +643,13 @@ nmea_receive(
 	 * There is a case that a <CR><LF> gives back a "blank" line.
 	 * We can't have a well-formed sentence with less than 8 chars.
 	 */
-	if (rd_lencode < 8)
+	if (0 == rd_lencode)
 		return;
+
+	if (rd_lencode < 8) {
+		refclock_report(peer, CEVNT_BADREPLY);
+		return;
+	}
 
 	DPRINTF(1, ("nmea: gpsread %d %s\n", rd_lencode, rd_lastcode));
 
@@ -732,14 +738,7 @@ nmea_receive(
 		return;
 	}
 
-	pp->lencode = (u_short)rd_lencode;
-	memcpy(pp->a_lastcode, rd_lastcode, pp->lencode + 1);
-	cp = pp->a_lastcode;
-
-	up->tstamp = rd_timestamp;
-	pp->lastrec = up->tstamp;
-
-	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
+	cp = rd_lastcode;
 
 	/* Grab field depending on clock string type */
 	memset(&date, 0, sizeof(date));
@@ -857,6 +856,20 @@ nmea_receive(
 	}
 
 	/*
+	 * Used only the first recognized sentence each second.
+	 */
+	if (date.hour   == up->used.hour   &&
+	    date.minute == up->used.minute &&
+	    date.second == up->used.second)
+		return;
+
+	pp->lencode = (u_short)rd_lencode;
+	memcpy(pp->a_lastcode, rd_lastcode, pp->lencode + 1);
+	up->tstamp = rd_timestamp;
+	pp->lastrec = up->tstamp;
+	DPRINTF(1, ("nmea: timecode %d %s\n", pp->lencode, pp->a_lastcode));
+
+	/*
 	 * Convert date and check values.
 	 */
 	if (NMEA_GPRMC == sentence) {
@@ -885,6 +898,10 @@ nmea_receive(
 		refclock_report(peer, CEVNT_BADDATE);
 		return;
 	}
+
+	up->used.hour = date.hour;
+	up->used.minute = date.minute;
+	up->used.second = date.second;
 
 	/*
 	 * If "fudge 127.127.20.__ flag4 1" is configured in ntp.conf,
