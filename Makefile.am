@@ -26,9 +26,6 @@ SUBDIRS+= 		\
 	kernel		\
 	sntp		\
 	util		\
-	$(NULL)
-
-SUBDIRS+=		\
 	tests		\
 	$(NULL)
 
@@ -50,6 +47,7 @@ DIST_SUBDIRS=		\
 	kernel		\
 	sntp		\
 	util		\
+	tests		\
 	$(NULL)
 
 DISTCHECK_CONFIGURE_FLAGS = -C
