@@ -6,6 +6,7 @@
 
 #include "ntp_types.h"
 
+/* gregorian calendar date */
 struct calendar {
 	u_short year;		/* year (A.D.) */
 	u_short yearday;	/* day of year, 1 = January 1 */
@@ -14,10 +15,40 @@ struct calendar {
 	u_char hour;		/* hour of day, midnight = 0 */
 	u_char minute;		/* minute of hour */
 	u_char second;		/* second of minute */
+	u_char weekday;		/* 0..7, 0=Sunday */
 };
 
+/* ISO week calendar date */
+struct isodate {
+	u_short year;		/* year (A.D.) */
+	u_char	week;		/* 1..53, week in year */
+	u_char	weekday;	/* 1..7, 1=Monday */
+	u_char	hour;		/* hour of day, midnight = 0 */
+	u_char	minute;		/* minute of hour */
+	u_char	second;		/* second of minute */
+};
+
+/* general split representation */
+typedef struct {
+	int32 hi;
+	int32 lo;
+} ntpcal_split;
+
+
 /*
- * Days in each month.  30 days hath September...
+ * days-of-week
+ */
+#define CAL_SUNDAY	0
+#define CAL_MONDAY	1
+#define CAL_TUESDAY	2
+#define CAL_WEDNESDAY	3
+#define CAL_THURSDAY	4
+#define CAL_FRIDAY	5
+#define CAL_SATURDAY	6
+#define CAL_SUNDAY7	7	/* also sunday */
+
+/*
+ * Days in each month.	30 days hath September...
  */
 #define	JAN	31
 #define	FEB	28
@@ -34,7 +65,7 @@ struct calendar {
 #define	DEC	31
 
 /*
- * We deal in a 4 year cycle starting at March 1, 1900.  We assume
+ * We deal in a 4 year cycle starting at March 1, 1900.	 We assume
  * we will only want to deal with dates since then, and not to exceed
  * the rollover day in 2036.
  */
@@ -43,17 +74,14 @@ struct calendar {
 #define	HRSPERDAY	(24)			/* hours per day */
 #define	DAYSPERYEAR	(365)			/* days per year */
 
-#define	SECSPERDAY	(SECSPERMIN*MINSPERHR*HRSPERDAY)
+#define	SECSPERHR	(SECSPERMIN * MINSPERHR)
+#define	SECSPERDAY	(SECSPERHR * HRSPERDAY)
 #define	SECSPERYEAR	(365 * SECSPERDAY)	/* regular year */
 #define	SECSPERLEAPYEAR	(366 * SECSPERDAY)	/* leap year */
-
-#define	MAR1900		((JAN+FEB) * SECSPERDAY) /* no leap year in 1900 */
-#define	DAYSPERCYCLE	(365+365+365+366)	/* 3 normal years plus leap */
-#define	SECSPERCYCLE	(DAYSPERCYCLE*SECSPERDAY)
-#define	YEARSPERCYCLE	4
+#define SECSPERAVGYEAR	31556952		/* mean year length over 400yrs */
 
 /*
- * Gross hacks.  I have illicit knowlege that there won't be overflows
+ * Gross hacks.	 I have illicit knowlege that there won't be overflows
  * here, the compiler often can't tell this.
  */
 #define	TIMES60(val)	((((val)<<4) - (val))<<2)	/* *(16 - 1) * 4 */
@@ -63,23 +91,234 @@ struct calendar {
 			+ ((val)<<7) + ((val)<<5) \
 			+ ((val)<<4) + ((val)<<2) + (val))	/* *big* hack */
 
-/*
- * Another big hack.  Cycle 22 started on March 1, 1988.  This is
- * STARTCYCLE22 seconds after the start of cycle 0.
- */
-#define	CYCLE22		(22)
-#define	STARTCYCLE22	(u_long)(0xa586b500)	/* 2777068800 */
-#define	MAR1988		(u_long)(STARTCYCLE22 + (u_long)MAR1900)
+
+extern	void	caljulian	(u_int32, struct calendar *);
+extern	u_int32	caltontp	(const struct calendar *);
 
 /*
- * The length of January + February in leap and non-leap years.
+ * Convert a timestamp in NTP scale to a time_t value in the UN*X
+ * scale with proper epoch unfolding around a given pivot or the
+ * current system time.
  */
-#define	JANFEBNOLEAP	((JAN+FEB) * SECSPERDAY)
-#define	JANFEBLEAP	((JAN+FEBLEAP) * SECSPERDAY)
+extern vint64
+ntpcal_ntp_to_time(u_int32 ntp, const time_t *pivot);
+
+/*
+ * Convert a timestamp in NTP scale to a 64bit seconds value in the NTP
+ * scale with proper epoch unfolding around a given pivot or the current
+ * system time.
+ * Note: The pivot must be given in UN*X time scale!
+ */
+extern vint64
+ntpcal_ntp_to_ntp(u_int32 ntp, const time_t *pivot);
+
+/*
+ * Split a time stamp in seconds into elapsed days and elapsed seconds
+ * since midnight.
+ */
+extern ntpcal_split
+ntpcal_daysplit(const vint64*);
+
+/*
+ * Merge a number of days and a number of seconds into seconds,
+ * expressed in 64 bits to avoid overflow.
+ */
+extern vint64
+ntpcal_dayjoin(int32 days, int32 seconds);
+
+/*
+ * Convert elapsed years in Era into elapsed days in Era.
+ */
+extern int32
+ntpcal_days_in_years(int32 years);
+
+/*
+ * Convert a number of elapsed month in a year into elapsed days
+ * in year.
+ *
+ * The month will be normalized, and 'res.hi' will contain the
+ * excessive years that must be considered when converting the years,
+ * while 'res.lo' will contain the days since start of the
+ * year. (Expect the resulting days to be negative, with a positive
+ * excess! But then, we need no leap year flag, either...)
+ */
+extern ntpcal_split
+ntpcal_days_in_months(int32 months);
+
+/*
+ * Convert ELAPSED years/months/days of gregorian calendar to elapsed
+ * days in Gregorian epoch. No range checks done here!
+ */
+extern int32
+ntpcal_edate_to_eradays(int32 years, int32 months, int32 mdays);
+
+/*
+ * Convert a time spec to seconds. No range checks done here!
+ */
+extern int32
+ntpcal_etime_to_seconds(int32 hours, int32 minutes, int32 seconds);
+
+/*
+ * Convert ELAPSED years/months/days of gregorian calendar to elapsed
+ * days in year.
+ *
+ * Note: This will give the true difference to the start of the given year,
+ * even if months & days are off-scale.
+ */
+extern int32
+ntpcal_edate_to_yeardays(int32 years, int32 months, int32 mdays);
+
+/*
+ * Convert the date part of a 'struct tm' (that is, year, month,
+ * day-of-month) into the RataDie of that day.
+ */
+extern int32
+ntpcal_tm_to_rd(const struct tm *utm);
+
+/*
+ * Convert the date part of a 'struct calendar' (that is, year, month,
+ * day-of-month) into the RataDie of that day.
+ */
+extern int32
+ntpcal_date_to_rd(const struct calendar *jt);
+
+/*
+ * Given the number of elapsed days in the calendar era, split this
+ * number into the number of elapsed years in 'res.quot' and the
+ * number of elapsed days of that year in 'res.rem'.
+ *
+ * if 'isleapyear' is not NULL, it will receive an integer that is 0
+ * for regular years and a non-zero value for leap years.
+ */
+extern ntpcal_split
+ntpcal_split_eradays(int32 days, int *isleapyear);
+
+/*
+ * Given a number of elapsed days in a year and a leap year indicator,
+ * split the number of elapsed days into the number of elapsed months
+ * in 'res.quot' and the number of elapsed days of that month in
+ * 'res.rem'.
+ */
+extern ntpcal_split
+ntpcal_split_yeardays(int32 eyd, int isleapyear);
+
+/*
+ * Convert a RataDie number into the date part of a 'struct
+ * calendar'. Return 0 if the year is regular year, !0 if the year is
+ * a leap year.
+ */
+extern int
+ntpcal_rd_to_date(struct calendar *jt, int32 rd);
+
+/*
+ * Convert a RataDie number into the date part of a 'struct
+ * tm'. Return 0 if the year is regular year, !0 if the year is a leap
+ * year.
+ */
+extern int
+ntpcal_rd_to_tm(struct tm *utm, int32 rd);
+
+/*
+ * Take a value of seconds since midnight and split it into hhmmss in
+ * a 'struct calendar'. Return excessive days.
+ */
+extern int32
+ntpcal_daysec_to_date(struct calendar *jt, int32 secs);
+
+/*
+ * Take the time part of a 'struct calendar' and return the seconds
+ * since midnight.
+ */
+extern int32
+ntpcal_date_to_daysec(const struct calendar*);
+
+/*
+ * Take a value of seconds since midnight and split it into hhmmss in
+ * a 'struct tm'. Return excessive days.
+ */
+extern int32
+ntpcal_daysec_to_tm(struct tm *utm, int32 secs);
+
+extern int32
+ntpcal_tm_to_daysec(const struct tm *utm);
+
+/*
+ * convert a year number to rata die of year start
+ */
+extern int32
+ntpcal_year_to_ystart(int32 year);
+
+/*
+ * For a given RataDie, get the RataDie of the associated year start,
+ * that is, the RataDie of the last January,1st on or before that day.
+ */
+extern int32
+ntpcal_rd_to_ystart(int32 rd);
+
+/*
+ * convert a RataDie to the RataDie of start of the calendar month.
+ */
+extern int32
+ntpcal_rd_to_mstart(int32 year);
 
 
-extern	void	caljulian	(u_long, struct calendar *);
-extern	u_long	caltontp	(const struct calendar *);
+extern int
+ntpcal_daysplit_to_date(struct calendar *jt, const ntpcal_split *ds,
+			int32 dof);
+
+extern int
+ntpcal_daysplit_to_tm(struct tm *utm, const ntpcal_split *ds,
+		      int32 dof);
+
+extern int
+ntpcal_time_to_date(struct calendar *jd, const vint64 *ts);
+
+extern int32
+ntpcal_periodic_extend(int32 pivot, int32 value, int32 cycle);
+
+extern int
+ntpcal_ntp_to_date(struct calendar *jd,	u_int32 ntp, const time_t *pivot);
+
+extern u_int32
+ntpcal_date_to_ntp(const struct calendar *jd);
+
+/*
+ * ISO week-calendar conversions
+ */
+extern int32
+isocal_weeks_in_years(int32 years);
+
+extern ntpcal_split
+isocal_split_eraweeks(int32 weeks);
+
+extern int
+isocal_ntp_to_date(struct isodate *id, u_int32 ntp, const time_t *pivot);
+
+extern u_int32
+isocal_date_to_ntp(const struct isodate *id);
+
+
+/*
+ * day-of-week calculations
+ *
+ * Given a RataDie and a day-of-week, calculate a RDN that is reater-than,
+ * greater-or equal, closest, less-or-equal or less-than the given RDN
+ * and denotes the given day-of-week
+ */
+extern int32
+ntpcal_weekday_gt(int32 rdn, int32 dow);
+
+extern int32
+ntpcal_weekday_ge(int32 rdn, int32 dow);
+
+extern int32
+ntpcal_weekday_close(int32 rdn, int32 dow);
+
+extern int32
+ntpcal_weekday_le(int32 rdn, int32 dow);
+
+extern int32
+ntpcal_weekday_lt(int32 rdn, int32 dow);
 
 /*
  * Additional support stuff for Ed Rheingold's calendrical calculations
@@ -90,15 +329,31 @@ extern	u_long	caltontp	(const struct calendar *);
  * (This is the beginning of the Christian Era, or BCE.)
  */
 #define	DAY_NTP_STARTS 693596
+
 /*
- * The Gregorian calendar is based on a 400 year cycle.  This is the number
- * of days in each cycle.
+ * Start day of the UNIX epoch. This is the Rata Die of 1970-01-01.
+ */
+#define DAY_UNIX_STARTS 719163
+
+/*
+ * Difference between UN*X and NTP epoch
+ */
+#define NTP_TO_UNIX_DAYS (DAY_UNIX_STARTS - DAY_NTP_STARTS)
+   
+/*
+ * The Gregorian calendar is based on a 400 year cycle.	 This is the
+ * number of days in each cycle.
  */
 #define	GREGORIAN_CYCLE_DAYS 146097
 
 /*
- * Days in a normal 100 year leap year calendar.  We lose a leap year day
- * in years evenly divisible by 100 but not by 400.
+ * Number of weeks in 400 years
+ */
+#define	GREGORIAN_CYCLE_WEEKS (GREGORIAN_CYCLE_DAYS / 7)
+
+/*
+ * Days in a normal 100 year leap year calendar.  We lose a leap year
+ * day in years evenly divisible by 100 but not by 400.
  */
 #define	GREGORIAN_NORMAL_CENTURY_DAYS 36524
 

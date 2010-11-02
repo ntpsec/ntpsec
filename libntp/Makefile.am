@@ -47,6 +47,7 @@ libntp_a_SRCS =						\
 	msutotsf.c					\
 	msyslog.c					\
 	netof.c						\
+	ntp_calendar.c					\
 	ntp_rfc2553.c					\
 	numtoa.c					\
 	numtohost.c					\
