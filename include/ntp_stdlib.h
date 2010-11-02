@@ -56,9 +56,19 @@ extern	int	authreadkeys	(const char *);
 extern	void	authtrust	(keyid_t, u_long);
 extern	int	authusekey	(keyid_t, int, const u_char *);
 
-extern	u_long	calyearstart	(u_long);
+/*
+ * Based on the NTP timestamp, calculate the NTP timestamp of
+ * the corresponding calendar unit. Use the pivot time to unfold
+ * the NTP timestamp properly, or the current system time if the
+ * pivot pointer is NULL.
+ */
+extern	u_int32	calyearstart	(u_int32 ntptime, const time_t *pivot);
+extern	u_int32	calmonthstart	(u_int32 ntptime, const time_t *pivot);
+extern	u_int32	calweekstart	(u_int32 ntptime, const time_t *pivot);
+extern	u_int32	caldaystart	(u_int32 ntptime, const time_t *pivot);
+
 extern	const char *clockname	(int);
-extern	int	clocktime	(int, int, int, int, int, u_long, u_long *, u_int32 *);
+extern	int	clocktime	(int, int, int, int, int, u_int32, u_long *, u_int32 *);
 #if !defined(_MSC_VER) || !defined(_DEBUG)
 extern	void *	emalloc		(size_t);
 extern	void *	erealloc	(void *, size_t);

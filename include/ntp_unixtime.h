@@ -3,6 +3,9 @@
  *		    NTP time stamps (l_fp) and Unix times (struct timeval)
  */
 
+#ifndef NTP_UNIXTIME_H
+#define NTP_UNIXTIME_H
+
 #include "ntp_types.h"
 
 #ifdef SIM
@@ -136,3 +139,5 @@ extern u_long msutotsfhi[];
 
 #define	MSUTOTSF(msu, tsf) \
 	(tsf) = msutotsfhi[((msu) >> 5) & 0x1f] + msutotsflo[(msu) & 0x1f]
+
+#endif /* !defined(NTP_UNIXTIME_H) */

@@ -8,8 +8,10 @@
 #define NTP_TYPES_H
 
 #include <sys/types.h>
-#ifdef HAVE_INTTYPES_H
+#if defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+# include <stdint.h>
 #endif
 
 #include "ntp_machine.h"
@@ -73,6 +75,95 @@ typedef unsigned int u_int;
 #  include "Bletch: what's 32 bits on this machine?"
 # endif
 #endif	/* !HAVE_UINT32_T && SIZEOF_INT != 4 */
+
+/*
+ * Ugly dance to find out if we have 64bit integer type.
+ */
+#if !defined(HAVE_INT64)
+
+/* assume best for now, fix if frustrated later. */
+# define HAVE_INT64
+# define HAVE_U_INT64
+
+/* now check the cascade. Feel free to add things. */
+# ifdef INT64_MAX
+
+typedef int64_t int64;
+typedef uint64_t u_int64;
+
+# elif defined(_MSC_VER)
+
+typedef __int64 int64;
+typedef unsigned __int64 u_int64;
+
+# elif SIZEOF_LONG == 8
+
+typedef long int64;
+typedef unsigned long u_int64;
+
+# elif SIZEOF_LONGLONG == 8
+
+typedef long long int64;
+typedef unsigned long long u_int64;
+
+# else
+
+/* no 64bit scalar, give it up. */
+#  undef HAVE_INT64
+#  undef HAVE_U_INT64
+
+# endif
+
+#endif
+
+/*
+ * and here the trouble starts: We need a representation with more than
+ * 64 bits. If a scalar of that size is not available, we need a struct
+ * that holds the value in split representation.
+ *
+ * To ease the usage a bit, we alwys use a union that is in processor
+ * byte order and might or might not contain a 64bit scalar.
+ */
+
+#if SIZEOF_SHORT != 2
+# error short is not 2 bytes -- what is 16 bit integer on this target?
+#endif
+
+typedef union {
+#   ifdef WORDS_BIGENDIAN
+	struct {
+		short	hh; u_short hl; u_short lh; u_short ll;
+	} w_s;
+	struct {
+		u_short	hh; u_short hl; u_short lh; u_short ll;
+	} W_s;
+	struct {
+		  int32 hi; u_int32 lo;
+	} d_s;
+	struct {
+		u_int32	hi; u_int32 lo;
+	} D_s;
+#   else
+	struct {
+		u_short ll; u_short lh; u_short hl;   short hh;
+	} w_s;
+	struct {
+		u_short ll; u_short lh; u_short hl; u_short hh;
+	} W_s;
+	struct {
+		u_int32 lo;   int32 hi;
+	} d_s;
+	struct {
+		u_int32 lo; u_int32 hi;
+	} D_s;
+#   endif
+
+#   ifdef HAVE_INT64
+	int64	q_s;	/*   signed quad scalar */
+	u_int64 Q_s;	/* unsigned quad scalar */
+#   endif
+} vint64; /* variant int 64 */
+
 
 typedef u_char		ntp_u_int8_t;
 typedef u_short		ntp_u_int16_t;
