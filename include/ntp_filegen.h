@@ -5,7 +5,7 @@
  *
  *
  * Copyright (C) 1992, 1996 by Rainer Pruy
- * Friedrich-Alexander Universität Erlangen-Nürnberg, Germany
+ * Friedrich-Alexander Universitaet Erlangen-Nuernberg, Germany
  *
  * This code may be modified and used freely
  * provided the credits remain intact.

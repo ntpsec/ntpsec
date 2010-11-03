@@ -13,14 +13,6 @@
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"
 
-#if !(defined(ISC_CHECK_ALL) || defined(ISC_CHECK_NONE) || \
-      defined(ISC_CHECK_ENSURE) || defined(ISC_CHECK_INSIST) || \
-      defined(ISC_CHECK_INVARIANT))
-# define ISC_CHECK_ALL
-#endif
-
-#include "ntp_assert.h"
-
 /*
  *---------------------------------------------------------------------
  * basic calendar stuff
@@ -430,8 +422,6 @@ priv_timesplit(
 {
 	int32 days = 0;
 
-	NTP_INSIST(NULL != split);
-
 	/* make sure we have a positive offset into a day */
 	if (ts < 0 || ts >= SECSPERDAY) {
 		days = ts / SECSPERDAY;
@@ -441,18 +431,12 @@ priv_timesplit(
 			ts   += SECSPERDAY;
 		}
 	}
-	NTP_ENSURE(0 <= ts && ts < SECSPERDAY);
 
 	/* get secs, mins, hours */
 	split[2] = (u_char)(ts % SECSPERMIN);
 	ts /= SECSPERMIN;
 	split[1] = (u_char)(ts % MINSPERHR);
 	split[0] = (u_char)(ts / MINSPERHR);
-
-	/* check time invariants */
-	NTP_ENSURE(split[0] < HRSPERDAY );
-	NTP_ENSURE(split[1] < MINSPERHR );
-	NTP_ENSURE(split[2] < SECSPERMIN);
 
 	return days;
 }
@@ -512,9 +496,6 @@ ntpcal_split_eradays(
 	res.hi = ((4*n400 + n100)*25 + n004)*4 + n001;
 	res.lo = yday;
 	
-	NTP_ENSURE(0 <= res.lo && res.lo <= 365);
-	NTP_INVARIANT(ntpcal_days_in_years(res.hi) + res.lo == days);
-
 	return res;
 }
 
@@ -523,6 +504,9 @@ ntpcal_split_eradays(
  * Given a number of elapsed days in a year and a leap year indicator,
  * split the number of elapsed days into the number of elapsed months in
  * 'res.hi' and the number of elapsed days of that month in 'res.lo'.
+ *
+ * This function will fail and return {-1,-1} if the number of elapsed
+ * days is not in the valid range!
  *---------------------------------------------------------------------
  */
 ntpcal_split
@@ -533,19 +517,17 @@ ntpcal_split_yeardays(
 	ntpcal_split   res;
 	const u_short *lt;	/* month length table	*/
 
-	NTP_REQUIRE(0 <= eyd && eyd <= 365);
-	
 	/* check leap year flag and select proper table */
 	lt = real_month_table[(isleapyear != 0)];
-	/* get zero-based month by approximation & correction step */
-	res.hi = eyd >> 5;	   /* approx month; might be 1 too low */
-	if (lt[res.hi + 1] <= eyd) /* fixup approximative month value  */
-		res.hi += 1;
-	res.lo = eyd - lt[res.hi];
+	if (0 <= eyd && eyd < lt[12]) {
+		/* get zero-based month by approximation & correction step */
+		res.hi = eyd >> 5;	   /* approx month; might be 1 too low */
+		if (lt[res.hi + 1] <= eyd) /* fixup approximative month value  */
+			res.hi += 1;
+		res.lo = eyd - lt[res.hi];
+	} else
+		res.lo = res.hi = -1;
 
-	NTP_ENSURE(0 <= res.hi && res.hi <= 11);
-	NTP_ENSURE(0 <= res.lo && res.lo <= 30);
-	
 	return res;
 }
 
@@ -562,8 +544,6 @@ ntpcal_rd_to_date(
 	ntpcal_split split;
 	int	     leaps = 0;
 	int	     retv  = 0;
-
-	NTP_INSIST(NULL != jd);
 
 	/* get day-of-week first */
 	jd->weekday = rd % 7;
@@ -585,12 +565,6 @@ ntpcal_rd_to_date(
 	jd->month    = split.hi + 1;
 	jd->monthday = split.lo + 1;
 
-	/* invariants */
-	NTP_ENSURE(1 <= jd->yearday  && jd->yearday  <= 366);
-	NTP_ENSURE(1 <= jd->monthday && jd->monthday <=	 31);
-	NTP_ENSURE(1 <= jd->month    && jd->month    <=	 12); 
-	NTP_ENSURE(0 <= jd->weekday  && jd->weekday  <= 6  );
-	
 	return retv ? retv : leaps;
 }
 
@@ -607,8 +581,6 @@ ntpcal_rd_to_tm(
 	ntpcal_split split;
 	int	     leaps = 0;
 
-	NTP_INSIST(NULL != utm);
-
 	/* get day-of-week first */
 	utm->tm_wday = rd % 7;
 	if (utm->tm_wday < 0)
@@ -623,12 +595,6 @@ ntpcal_rd_to_tm(
 	split = ntpcal_split_yeardays(split.lo, leaps);
 	utm->tm_mon  = split.hi;	/* 0-based */
 	utm->tm_mday = split.lo + 1;	/* 1-based */
-
-	/* invariants */
-	NTP_ENSURE(0 <= utm->tm_yday && utm->tm_yday <= 365);
-	NTP_ENSURE(1 <= utm->tm_mday && utm->tm_mday <= 31 );
-	NTP_ENSURE(0 <= utm->tm_mon  && utm->tm_mon  <= 11 );
-	NTP_ENSURE(0 <= utm->tm_wday && utm->tm_wday <= 6  );
 
 	return leaps;
 }
@@ -647,8 +613,6 @@ ntpcal_daysec_to_date(
 	int32 days;
 	int   ts[3];
 	
-	NTP_INSIST(NULL != jd);
-
 	days = priv_timesplit(ts, sec);
 	jd->hour   = (u_char)ts[0];
 	jd->minute = (u_char)ts[1];
@@ -671,8 +635,6 @@ ntpcal_daysec_to_tm(
 	int32 days;
 	int   ts[3];
 	
-	NTP_INSIST(NULL != utm);
-
 	days = priv_timesplit(ts, sec);
 	utm->tm_hour = ts[0];
 	utm->tm_min  = ts[1];
@@ -697,8 +659,6 @@ ntpcal_daysplit_to_date(
 	const ntpcal_split *ds ,
 	int32		    dof)
 {
-	NTP_INSIST(NULL != jd && NULL != ds);
-	
 	dof += ntpcal_daysec_to_date(jd, ds->lo);
 	return ntpcal_rd_to_date(jd, ds->hi + dof);
 }
@@ -719,8 +679,6 @@ ntpcal_daysplit_to_tm(
 	const ntpcal_split *ds ,
 	int32		    dof)
 {
-	NTP_INSIST(NULL != utm && NULL != ds);
-
 	dof += ntpcal_daysec_to_tm(utm, ds->lo);
 	return ntpcal_rd_to_tm(utm, ds->hi + dof);
 }
@@ -736,8 +694,6 @@ ntpcal_time_to_date(
 	const vint64	*ts)
 {
 	ntpcal_split ds;
-
-	NTP_INSIST(NULL != jd);
 
 	ds = ntpcal_daysplit(ts);
 	ds.hi += ntpcal_daysec_to_date(jd, ds.lo);
@@ -985,7 +941,6 @@ int32
 ntpcal_tm_to_rd(
 	const struct tm *utm)
 {
-	NTP_INSIST(NULL != utm);
 	return ntpcal_edate_to_eradays(utm->tm_year + 1899,
 				       utm->tm_mon,
 				       utm->tm_mday - 1) + 1;
@@ -1001,7 +956,6 @@ int32
 ntpcal_date_to_rd(
 	const struct calendar *jd)
 {
-	NTP_INSIST(NULL != jd);
 	return ntpcal_edate_to_eradays((int32)jd->year - 1,
 				       (int32)jd->month - 1,
 				       (int32)jd->monthday - 1) + 1;
@@ -1063,7 +1017,6 @@ int32
 ntpcal_date_to_daysec(
 	const struct calendar *jd)
 {
-	NTP_INSIST(NULL != jd);
 	return ntpcal_etime_to_seconds(jd->hour, jd->minute, jd->second);
 }
 
@@ -1076,7 +1029,6 @@ int32
 ntpcal_tm_to_daysec(
 	const struct tm *utm)
 {
-	NTP_INSIST(NULL != utm);
 	return ntpcal_etime_to_seconds(utm->tm_hour, utm->tm_min, utm->tm_sec);
 }
 
@@ -1096,8 +1048,6 @@ ntpcal_ntp_to_date(
 	vint64	     vl;
 	ntpcal_split ds;
 	
-	NTP_INSIST(NULL != jd);
-
 	/*
 	 * Unfold ntp time around current time into NTP domain. Split
 	 * into days and seconds, shift days into CE domain and
@@ -1114,8 +1064,6 @@ u_int32
 ntpcal_date_to_ntp(
 	const struct calendar *jd)
 {
-	NTP_INSIST(jd != NULL);
-
 	/*
 	 * Convert date to NTP. Ignore yearday, use d/m/y only.
 	 */
@@ -1248,12 +1196,10 @@ isocal_weeks_in_years(
 		cycle -= 1;
 		years += 400;
 	}
-	NTP_ENSURE(0 <= years  && years < 400);
 
 	/* split off full centuries */
 	cents = years / 100;
 	years = years % 100;
-	NTP_ENSURE(0 <= cents  && cents < 4);
 
 	/*
 	 * calculate elapsed weeks, taking into account that the
@@ -1261,7 +1207,6 @@ isocal_weeks_in_years(
 	 * second century falls short by one week.
 	 */
 	weeks = (years * 53431 + bctab[cents]) / 1024;
-	NTP_ENSURE(0 <= weeks  && weeks < 5218);
 
 	return cycle * GREGORIAN_CYCLE_WEEKS
 	     + cents * 5218 - (cents > 1)
@@ -1307,14 +1252,11 @@ isocal_split_eraweeks(
 	res.lo += (res.lo >= 10435);
 	cents	= res.lo / 5218;
 	res.lo %= 5218;		/* res.lo is weeks in century now */
-	NTP_ENSURE(0 <= cents  && cents	 <    4);
-	NTP_ENSURE(0 <= res.lo && res.lo < 5218);
 	
 	/* convert elapsed weeks in century to elapsed years and weeks */
 	res.lo	= res.lo * 157 + bctab[cents];
 	res.hi += cents * 100 + res.lo / 8192;
 	res.lo	= (res.lo % 8192) / 157;	
-	NTP_ENSURE(0 <= res.lo && res.lo <= 52);
 	
 	return res;
 }
@@ -1334,8 +1276,6 @@ isocal_ntp_to_date(
 	ntpcal_split ds;
 	int	     ts[3];
 	
-	NTP_INSIST(NULL != id);
-
 	/*
 	 * Unfold ntp time around current time into NTP domain. Split
 	 * into days and seconds, shift days into CE domain and
@@ -1376,8 +1316,6 @@ isocal_date_to_ntp(
 	const struct isodate *id)
 {
 	int32 weeks, days, secs;
-
-	NTP_INSIST(NULL != id);
 
 	weeks = isocal_weeks_in_years((int32)id->year - 1)
 	      + (int32)id->week - 1;
