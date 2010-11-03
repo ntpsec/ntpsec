@@ -3,7 +3,7 @@
 set -e
 
 GCL_REMOVEWRITE=0
-. packageinfo.sh
+. ./packageinfo.sh
 if [ ! -w . ] ; then
         GCL_REMOVEWRITE=1
         chmod u+w .
