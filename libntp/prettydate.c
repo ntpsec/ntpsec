@@ -158,7 +158,7 @@ common_prettydate(
 	)
 {
 	static const char* pfmt[2] = {
-		"%08lx.%08lx %s, %s %2d %4d %2d:%02d:%02d.%03u",
+		"%08lx.%08lx  %s, %s %2d %4d %2d:%02d:%02d.%03u",
 		"%08lx.%08lx [%s, %s %2d %4d %2d:%02d:%02d.%03u UTC]"
 	};
 
@@ -182,7 +182,7 @@ common_prettydate(
 	if (!tm) {
 		/*
 		 * get a replacement, but always in UTC, using
-		 * caljulian()
+		 * ntpcal_time_to_date()
 		 */
 		struct calendar jd;
 		ntpcal_time_to_date(&jd, &sec);
