@@ -11,6 +11,7 @@
 #include "ntp_if.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
+#include "ntp_calendar.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -29,7 +30,7 @@
 # include <math.h>
 #endif
 
-#ifdef  DOSYNCTODR
+#ifdef	DOSYNCTODR
 # if !defined(VMS)
 #  include <sys/resource.h>
 # endif /* VMS */
@@ -167,11 +168,11 @@ uninit_util(void)
 void
 init_util(void)
 {
-	filegen_register(statsdir, "peerstats",   &peerstats);
-	filegen_register(statsdir, "loopstats",   &loopstats);
+	filegen_register(statsdir, "peerstats",	  &peerstats);
+	filegen_register(statsdir, "loopstats",	  &loopstats);
 	filegen_register(statsdir, "clockstats",  &clockstats);
-	filegen_register(statsdir, "rawstats",    &rawstats);
-	filegen_register(statsdir, "sysstats",    &sysstats);
+	filegen_register(statsdir, "rawstats",	  &rawstats);
+	filegen_register(statsdir, "sysstats",	  &sysstats);
 	filegen_register(statsdir, "protostats",  &protostats);
 #ifdef AUTOKEY
 	filegen_register(statsdir, "cryptostats", &cryptostats);
@@ -204,7 +205,7 @@ write_stats(void)
 	int	prio_set;
 #endif
 #ifdef HAVE_GETCLOCK
-        struct timespec ts;
+	struct timespec ts;
 #endif
 	int	o_prio;
 
@@ -226,8 +227,8 @@ write_stats(void)
 	 * thing to do.
 	 *
 	 * CAVEAT: settimeofday() steps the sun clock by about 800 us,
-	 *         so setting DOSYNCTODR seems a bad idea in the
-	 *         case of us resolution
+	 *	   so setting DOSYNCTODR seems a bad idea in the
+	 *	   case of us resolution
 	 */
 
 #if !defined(VMS)
@@ -256,9 +257,9 @@ write_stats(void)
 		prio_set = 1;	/* overdrive */
 #endif /* VMS */
 #ifdef HAVE_GETCLOCK
-        (void) getclock(TIMEOFDAY, &ts);
-        tv.tv_sec = ts.tv_sec;
-        tv.tv_usec = ts.tv_nsec / 1000;
+	(void) getclock(TIMEOFDAY, &ts);
+	tv.tv_sec = ts.tv_sec;
+	tv.tv_usec = ts.tv_nsec / 1000;
 #else /*  not HAVE_GETCLOCK */
 	GETTIMEOFDAY(&tv,(struct timezone *)NULL);
 #endif /* not HAVE_GETCLOCK */
@@ -293,7 +294,7 @@ write_stats(void)
 			    clock_stability * 1e6, wander_resid * 1e6,
 			    drift_comp * 1e6);
 #endif
- 		if (sys_leap != LEAP_NOTINSYNC && clock_stability >
+		if (sys_leap != LEAP_NOTINSYNC && clock_stability >
 		    wander_resid) {
 			wander_resid = wander_threshold;
 			if ((fp = fopen(stats_temp_file, "w")) == NULL)
@@ -375,7 +376,7 @@ stats_config(
 	char newvalue[MAX_PATH], parameter[MAX_PATH];
 
 	if (!ExpandEnvironmentStrings(invalue, newvalue, MAX_PATH)) {
- 		switch(item) {
+		switch(item) {
 		    case STATS_FREQ_FILE:
 			strcpy(parameter,"STATS_FREQ_FILE");
 			break;
@@ -403,7 +404,7 @@ stats_config(
 	} else {
 		value = newvalue;
 	}
-#else    
+#else	 
 	value = invalue;
 #endif /* SYS_WINNT */
 
@@ -909,7 +910,7 @@ leap_file(
 	 * integers followed by junk or comments. The first integer is
 	 * the NTP seconds at the leap, the second is the TAI offset
 	 * after the leap.
- 	 */
+	 */
 	offset = 0;
 	leap = 0;
 	expire = 0;
@@ -966,47 +967,25 @@ leap_month(
 	u_long	sec		/* current NTP second */
 	)
 {
-	u_long	ltemp;
-	u_long	*ptr;
-	u_long	year[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30,
-		    31}; 
-	u_long	lyear[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30,
-		    31}; 
+	int	     leap;
+	int32	     year, month;
+	u_int32	     ndays;
+	ntpcal_split tmp;
+	vint64	     tvl;
 
-	/*
-	 * Find current leap cycle.
-	 */
-	ltemp = sec;
-	while (ltemp >= L_CENT)
-		ltemp -= L_CENT;
-	while (ltemp >= L_4YEAR)
-		ltemp -= L_4YEAR;
-
-	/*
-	 * We are within four years of the target. If in leap year, use
-	 * leap year month table; otherwise, use year month table.
-	 */
-	if (ltemp < L_LYEAR) {
-		ptr = lyear;
-	} else {
-		ptr = year;
-		ltemp -= L_LYEAR;
-		while (ltemp >= L_YEAR)
-			ltemp -= L_YEAR;
-	}
-
-	/*
-	 * We are within one year of the target. Find the month of the
-	 * leap.
-	 */
-	while (ltemp >= *ptr * L_DAY)
-		ltemp -= *ptr++ * L_DAY;
-
-	/*
-	 * The result is the number of seconds until the end of the
-	 * month when the leap is to occur.
-	 */
-	return (*ptr * L_DAY - ltemp - L_DAY);
+	/* --*-- expand time and split to days */
+	tvl   = ntpcal_ntp_to_ntp(sec, NULL);
+	tmp   = ntpcal_daysplit(&tvl);
+	/* --*-- split to years and days in year */
+	tmp   = ntpcal_split_eradays(tmp.hi + DAY_NTP_STARTS - 1, &leap);
+	year  = tmp.hi;
+	/* --*-- split days of year to month */
+	tmp   = ntpcal_split_yeardays(tmp.lo, leap);
+	month = tmp.hi;
+	/* --*-- get nominal start of next month */
+	ndays = ntpcal_edate_to_eradays(year, month+1, 0) + 1 - DAY_NTP_STARTS;
+	
+	return (u_int32)(ndays*SECSPERDAY - sec);
 }
 
 

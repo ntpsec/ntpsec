@@ -9,6 +9,7 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		atouint.cpp		\
 		authkeys.cpp		\
 		buftvtots.cpp		\
+		calendar.cpp		\
 		caljulian.cpp		\
 		caltontp.cpp		\
 		calyearstart.cpp	\
