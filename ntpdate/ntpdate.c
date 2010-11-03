@@ -922,6 +922,17 @@ receive(
 	 * Shift this data in, then schedule another transmit.
 	 */
 	server_data(server, (s_fp) di, &ci, 0);
+
+	if ((int)server->filter_nextpt >= sys_samples) {
+		/*
+		 * Got all the data we need.  Mark this guy
+		 * completed and return.
+		 */
+		server->event_time = 0;
+		complete_servers++;
+		return;
+	}
+
 	server->event_time = current_time + sys_timeout;
 }
 
