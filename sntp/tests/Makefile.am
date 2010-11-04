@@ -33,9 +33,9 @@ noinst_HEADERS =	sntptest.h		\
 			fileHandlingTest.h	\
 			$(NULL)
 
-EXTRA_DIST =	data			\
-		test-driver		\
-		$(NULL)
+dist_check_SCRIPTS =	test-driver
+
+EXTRA_DIST =	data
 
 CLEANFILES =	data/log-output-debug		\
 		data/kod-output-multiple	\
