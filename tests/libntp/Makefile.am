@@ -40,6 +40,9 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		uinttoa.cpp		\
 		ymd2yd.cpp
 
+noinst_HEADERS =	lfptest.h	\
+			libntptest.h	\
+			sockaddrtest.h
 
 INCLUDES = 						\
 	-I$(top_srcdir)/include				\

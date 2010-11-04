@@ -1,3 +1,5 @@
+NULL =
+
 check_PROGRAMS = tests
 
 sntp_objs = ..
@@ -7,11 +9,13 @@ sntp_SOURCES_USED =	$(sntp_objs)/crypto.o		\
 			$(sntp_objs)/log.o		\
 			$(sntp_objs)/main.o		\
 			$(sntp_objs)/networking.o	\
-			$(sntp_objs)/sntp-opts.o		\
-			$(sntp_objs)/utilities.o
+			$(sntp_objs)/sntp-opts.o	\
+			$(sntp_objs)/utilities.o	\
+			$(NULL)
 
 base_SOURCES =		$(srcdir)/../tests_main.cpp	\
-			sntptest.cpp
+			sntptest.cpp			\
+			$(NULL)
 
 tests_SOURCES = $(base_SOURCES)		\
 		crypto.cpp		\
@@ -22,7 +26,27 @@ tests_SOURCES = $(base_SOURCES)		\
 		networking.cpp		\
 		packetHandling.cpp	\
 		packetProcessing.cpp	\
-		utilities.cpp
+		utilities.cpp		\
+		$(NULL)
+
+noinst_HEADERS =	sntptest.h		\
+			fileHandlingTest.h	\
+			$(NULL)
+
+EXTRA_DIST =	data			\
+		test-driver		\
+		$(NULL)
+
+CLEANFILES =	data/log-output-debug		\
+		data/kod-output-multiple	\
+		data/kod-output-single		\
+		data/debug-output-pkt		\
+		data/debug-output-lfp-dec	\
+		data/kod-output-blank		\
+		data/log-output-log		\
+		data/debug-output-lfp-bin	\
+		data/debug-output-lfp-hex	\
+		$(NULL)
 
 LDADD = 	@GTEST_LDFLAGS@			\
 		@GTEST_LIBS@			\
@@ -34,13 +58,13 @@ LDADD = 	@GTEST_LDFLAGS@			\
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
 AM_CPPFLAGS = @GTEST_CPPFLAGS@
 
-INCLUDES = $(LIBOPTS_CFLAGS)				\
-	-I$(top_srcdir)/../include			\
-	-I$(top_srcdir)/../lib/isc/include		\
-	-I$(top_srcdir)/../lib/isc/nothreads/include	\
-	-I$(top_srcdir)/../lib/isc/unix/include		\
-	-I$(top_srcdir)/../tests			\
-	-I$(top_srcdir)
+INCLUDES  = $(LIBOPTS_CFLAGS)
+INCLUDES += -I$(top_srcdir)/../include
+INCLUDES += -I$(top_srcdir)/../lib/isc/include
+INCLUDES += -I$(top_srcdir)/../lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/../lib/isc/unix/include
+INCLUDES += -I$(top_srcdir)/../tests
+INCLUDES += -I$(top_srcdir)
 
 TESTS = 
 

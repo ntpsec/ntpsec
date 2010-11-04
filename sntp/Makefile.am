@@ -65,6 +65,7 @@ EXTRA_DIST=				\
 	sntp.1				\
 	sntp.html			\
 	sntp.texi			\
+	tests_main.h			\
 	$(srcdir)/version.def		\
 	$(srcdir)/version.m4		\
 	$(srcdir)/version.texi		\
