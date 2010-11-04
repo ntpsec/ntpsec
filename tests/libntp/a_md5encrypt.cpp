@@ -1,6 +1,11 @@
 #include "libntptest.h"
 
 extern "C" {
+#ifdef OPENSSL
+# include "openssl/err.h"
+# include "openssl/rand.h"
+# include "openssl/evp.h"
+#endif
 #include "ntp.h"
 #include "ntp_stdlib.h"
 };

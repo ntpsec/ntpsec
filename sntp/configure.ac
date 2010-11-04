@@ -207,6 +207,7 @@ esac
 
 AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
 AC_CHECK_SIZEOF([signed char])
+AC_CHECK_SIZEOF([short])
 AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([long])
 

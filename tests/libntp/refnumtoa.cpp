@@ -11,6 +11,7 @@ protected:
 	static const int UNUSED_REFCLOCK_ID = 250;
 };
 
+#ifdef REFCLOCK		/* clockname() is useless otherwise */
 TEST_F(refnumtoaTest, LocalClock) {
 	/* We test with a refclock address of type LOCALCLOCK.
 	 * with id 8
@@ -29,7 +30,9 @@ TEST_F(refnumtoaTest, LocalClock) {
 
 	EXPECT_STREQ(expected.str().c_str(), refnumtoa(&address));
 }
+#endif	/* REFCLOCK */
 
+#ifdef REFCLOCK		/* refnumtoa() is useless otherwise */
 TEST_F(refnumtoaTest, UnknownId) {
 	/* We test with a currently unused refclock ID */
 	u_int32 addr = REFCLOCK_ADDR;
@@ -46,3 +49,4 @@ TEST_F(refnumtoaTest, UnknownId) {
 
 	EXPECT_STREQ(expected.str().c_str(), refnumtoa(&address));
 }
+#endif	/* REFCLOCK */

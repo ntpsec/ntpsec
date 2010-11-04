@@ -353,6 +353,7 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define HAVE_GETCLOCK
 
 # define SIZEOF_SIGNED_CHAR	1
+# define SIZEOF_SHORT		2
 # define SIZEOF_INT		4	/* for ntp_types.h */
 
 # define HAVE_SETVBUF
