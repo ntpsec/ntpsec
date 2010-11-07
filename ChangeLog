@@ -1,3 +1,4 @@
+* Correct frequency estimate with no drift file, from David Mills.
 (4.2.7p78) 2010/11/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1697] filegen implementation should be improved.
 * Refactor calendar functions in terms of new common code.

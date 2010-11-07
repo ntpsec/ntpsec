@@ -439,7 +439,7 @@ local_clock(
 		 */
 		case EVNT_FREQ:
 			if (mu < clock_minstep)
-				return (0);
+				break;
 
 			clock_frequency = direct_freq(fp_offset);
 			rstclock(EVNT_SYNC, 0);
