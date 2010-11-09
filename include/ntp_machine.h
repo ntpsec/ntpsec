@@ -93,7 +93,10 @@ MISC
 typedef int SOCKET;
 # define INVALID_SOCKET	-1
 # define SOCKET_ERROR	-1
+# define socket_errno()		(errno)
 # define closesocket(fd)	close(fd)
+#else	/* SYS_WINNT follows */
+# define socket_errno()		(errno = WSAGetLastError())
 #endif
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);

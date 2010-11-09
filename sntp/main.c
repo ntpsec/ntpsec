@@ -9,6 +9,33 @@ int ai_fam_pref = AF_UNSPEC;
 
 struct key *keys = NULL;
 
+void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode); 
+int sntp_main (int argc, char **argv);
+int on_wire (struct addrinfo *host, struct addrinfo *bcastaddr);
+int set_time (double offset);
+
+#define NORMALIZE_TIMEVAL(tv)				\
+do {							\
+	while ((tv).tv_usec < 0) {			\
+		(tv).tv_usec += 1000000;		\
+		(tv).tv_sec--;				\
+	}						\
+	while ((tv).tv_usec > 999999) {			\
+		(tv).tv_usec -= 1000000;		\
+		(tv).tv_sec++;				\
+	}						\
+} while (0)
+
+
+int 
+main (
+	int argc,
+	char **argv
+	) 
+{
+	return sntp_main(argc, argv);
+}
+
 /*
  * The actual main function.
  */
@@ -416,23 +443,26 @@ set_time(
 {
 	struct timeval tp;
 
-	if(ENABLED_OPT(SETTOD)) {
-		GETTIMEOFDAY(&tp, (struct timezone *)NULL);
+	if (ENABLED_OPT(SETTOD)) {
+		GETTIMEOFDAY(&tp, NULL);
 
-		tp.tv_sec += (int) offset;
-		tp.tv_usec += offset - (double)((int)offset);
+		tp.tv_sec += (long)offset;
+		tp.tv_usec += 1e6 * (offset - (long)offset);
+		NORMALIZE_TIMEVAL(tp);
 
-		if(SETTIMEOFDAY(&tp, (struct timezone *)NULL) < 0) {
+		if (SETTIMEOFDAY(&tp, NULL) < 0) {
 			printf("set_time: settimeofday(): Time not set: %s\n",
 				strerror(errno));
 			return -1;
 		}
 		return 0;
 	}
-	tp.tv_sec = (int) offset;
-	tp.tv_usec = offset - (double)((int)offset);
 
-	if(ADJTIMEOFDAY(&tp, NULL) < 0) {
+	tp.tv_sec = (long)offset;
+	tp.tv_usec = 1e6 * (offset - (long)offset);
+	NORMALIZE_TIMEVAL(tp);
+
+	if (ADJTIMEOFDAY(&tp, NULL) < 0) {
 		printf("set_time: adjtime(): Time not set: %s\n",
 			strerror(errno));
 		return -1;

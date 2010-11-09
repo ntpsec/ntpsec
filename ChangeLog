@@ -1,3 +1,8 @@
+* [Bug 1574] from 4.2.6p3-RC9: sntp doesn't set tv_usec correctly.
+* [Bug 1683] from 4.2.6p3-RC9: Interface binding does not seem to work
+  as intended.
+* [Bug 1709] from 4.2.6p3-RC9: ntpdate ignores replies with equal
+  receive and transmit timestamps.
 (4.2.7p79) 2010/11/07 Released by Harlan Stenn <stenn@ntp.org>
 * Correct frequency estimate with no drift file, from David Mills.
 (4.2.7p78) 2010/11/04 Released by Harlan Stenn <stenn@ntp.org>
@@ -458,6 +463,14 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1574] sntp:set_time doesn't set tv_usec correctly.
+* [Bug 1683] Interface binding does not seem to work as intended.
+* [Bug 1691] Use first NMEA sentence each second.
+* [Bug 1709] ntpdate ignores replies with equal receive and transmit
+  timestamps.
+
 ---
 (4.2.6p3-RC8) 2010/10/29 Released by Harlan Stenn <stenn@ntp.org>
 
