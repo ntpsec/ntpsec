@@ -159,7 +159,7 @@ tv_to_str (
 	tm_ptr = localtime(&cur_time);
 
 
-	snprintf(buf, 48, "%i %s %.2d %.2d:%.2d:%.2d.%.3d", 
+	snprintf(buf, 48, "%i %s %.2d %.2d:%.2d:%.2d.%.6d", 
 			tm_ptr->tm_year + 1900,
 			month_names[tm_ptr->tm_mon],
 			tm_ptr->tm_mday,
