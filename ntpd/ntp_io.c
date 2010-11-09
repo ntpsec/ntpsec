@@ -301,7 +301,6 @@ static void		calc_addr_distance(sockaddr_u *,
 					   const sockaddr_u *);
 static int		cmp_addr_distance(const sockaddr_u *,
 					  const sockaddr_u *);
-static struct interface *getinterface	(sockaddr_u *, int);
 static struct interface *findlocalinterface	(sockaddr_u *, int, int);
 static struct interface *findclosestinterface	(sockaddr_u *, int);
 static struct interface *findlocalcastinterface	(sockaddr_u *);
@@ -3793,7 +3792,7 @@ cmp_addr_distance(
  * fetch an interface structure the matches the
  * address and has the given flags NOT set
  */
-static struct interface *
+struct interface *
 getinterface(
 	sockaddr_u *	addr, 
 	int		flags

@@ -27,15 +27,6 @@ do {							\
 } while (0)
 
 
-int 
-main (
-	int argc,
-	char **argv
-	) 
-{
-	return sntp_main(argc, argv);
-}
-
 /*
  * The actual main function.
  */
