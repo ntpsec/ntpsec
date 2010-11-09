@@ -868,8 +868,7 @@ receive(
 	 * Make sure the server is at least somewhat sane.	If not, try
 	 * again.
 	 */
-	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)
-	    || L_ISEQU(&rec, &server->org)) {
+	if (L_ISZERO(&rec) || !L_ISHIS(&server->org, &rec)) {
 		server->event_time = current_time + sys_timeout;
 		return;
 	}
