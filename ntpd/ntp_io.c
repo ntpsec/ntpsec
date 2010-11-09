@@ -275,7 +275,6 @@ static struct interface *wildipv6 = NULL;
 static void		add_fd_to_list		(SOCKET, 
 						 enum desc_type);
 static struct interface *find_addr_in_list	(sockaddr_u *);
-static struct interface *find_samenet_addr_in_list(sockaddr_u *);
 static struct interface *find_flagged_addr_in_list(sockaddr_u *, int);
 static void		delete_addr_from_list	(sockaddr_u *);
 static void		delete_interface_from_list(struct interface *);
@@ -290,9 +289,14 @@ static nic_rule_action	interface_action(char *, isc_netaddr_t *,
 					 isc_uint32_t);
 static void		convert_isc_if	(isc_interface_t *,
 					 struct interface *, u_short);
+static void		calc_addr_distance(sockaddr_u *,
+					   const sockaddr_u *,
+					   const sockaddr_u *);
+static int		cmp_addr_distance(const sockaddr_u *,
+					  const sockaddr_u *);
 static struct interface *getinterface	(sockaddr_u *, int);
-static struct interface *getsamenetinterface	(sockaddr_u *, int);
 static struct interface *findlocalinterface	(sockaddr_u *, int, int);
+static struct interface *findclosestinterface	(sockaddr_u *, int);
 static struct interface *findlocalcastinterface	(sockaddr_u *);
 
 /*
@@ -1273,6 +1277,9 @@ convert_isc_if(
 	u_short port
 	)
 {
+	const u_char v6loop[16] = {0, 0, 0, 0, 0, 0, 0, 0,
+				   0, 0, 0, 0, 0, 0, 0, 1};
+
 	strncpy(itf->name, isc_if->name, sizeof(itf->name));
 	itf->name[sizeof(itf->name) - 1] = 0; /* strncpy may not */
 	itf->family = (u_short)isc_if->af;
@@ -1316,6 +1323,21 @@ convert_isc_if(
 		| ((INTERFACE_F_MULTICAST & isc_if->flags) 
 			 ? INT_MULTICAST : 0)
 		;
+
+	/*
+	 * Clear the loopback flag if the address is not localhost.
+	 * http://bugs.ntp.org/1691
+	 */
+	if (INT_LOOPBACK & itf->flags) {
+		if (AF_INET == itf->family) {
+			if (127 != (SRCADR(&itf->sin) >> 24))
+				itf->flags &= ~INT_LOOPBACK;
+		} else {
+			if (memcmp(v6loop, NSRCADR6(&itf->sin),
+				   sizeof(NSRCADR6(&itf->sin))))
+				itf->flags &= ~INT_LOOPBACK;
+		}
+	}
 }
 
 
@@ -2708,11 +2730,7 @@ open_socket(
 	/* create a datagram (UDP) socket */
 	fd = socket(AF(addr), SOCK_DGRAM, 0);
 	if (INVALID_SOCKET == fd) {
-#ifndef SYS_WINNT
-		errval = errno;
-#else
-		errval = WSAGetLastError();
-#endif
+		errval = socket_errno();
 		msyslog(LOG_ERR, 
 			"socket(AF_INET%s, SOCK_DGRAM, 0) failed on address %s: %m",
 			IS_IPV6(addr) ? "6" : "", stoa(addr));
@@ -3514,7 +3532,6 @@ findlocalinterface(
 	sockaddrlen = sizeof(saddr);
 	rtn = getsockname(s, &saddr.sa, &sockaddrlen);
 	closesocket(s);
-
 	if (SOCKET_ERROR == rtn)
 		return NULL;
 
@@ -3524,15 +3541,16 @@ findlocalinterface(
 	iface = getinterface(&saddr, flags);
 
 	/* 
-	 * if we didn't find an exact match on saddr check for an
-	 * interface on the same subnet as saddr.  This handles the
-	 * case of the address suggested by the kernel being
-	 * excluded by the user's -I and -L options to ntpd, when
-	 * another address is enabled on the same subnet.
-	 * See http://bugs.ntp.org/1184 for more detail.
+	 * if we didn't find an exact match on saddr, find the closest
+	 * available local address.  This handles the case of the
+	 * address suggested by the kernel being excluded by nic rules
+	 * or the user's -I and -L options to ntpd.
+	 * See http://bugs.ntp.org/1184 and http://bugs.ntp.org/1683
+	 * for more background.
 	 */
 	if (NULL == iface || iface->ignore_packets)
-		iface = getsamenetinterface(&saddr, flags);
+		iface = findclosestinterface(&saddr, 
+					     flags | INT_LOOPBACK);
 
 	/* Don't use an interface which will ignore replies */
 	if (iface != NULL && iface->ignore_packets)
@@ -3540,6 +3558,151 @@ findlocalinterface(
 
 	return iface;
 }
+
+
+/*
+ * findclosestinterface
+ *
+ * If there are -I/--interface or -L/novirtualips command-line options,
+ * or "nic" or "interface" rules in ntp.conf, findlocalinterface() may
+ * find the kernel's preferred local address for a given peer address is
+ * administratively unavailable to ntpd, and punt to this routine's more
+ * expensive search.
+ *
+ * Find the numerically closest local address to the one connect()
+ * suggested.  This matches an address on the same subnet first, as
+ * needed by Bug 1184, and provides a consistent choice if there are
+ * multiple feasible local addresses, regardless of the order ntpd
+ * enumerated them.
+ */
+static struct interface *
+findclosestinterface(
+	sockaddr_u *	addr,
+	int		flags
+	)
+{
+	struct interface *	endpt;
+	struct interface *	winner;
+	sockaddr_u		addr_dist;
+	sockaddr_u		min_dist;
+
+	winner = NULL;
+	
+	for (endpt = inter_list; endpt != NULL; endpt = endpt->link) {
+		if (endpt->ignore_packets ||
+		    AF(addr) != endpt->family || 
+		    flags & endpt->flags)
+			continue;
+		
+		calc_addr_distance(&addr_dist, addr, &endpt->sin);
+		if (NULL == winner ||
+		    -1 == cmp_addr_distance(&addr_dist, &min_dist)) {
+			min_dist = addr_dist;
+			winner = endpt;
+		}
+	}
+	if (NULL == winner)
+		DPRINTF(4, ("findclosestinterface(%s) failed\n", 
+			    stoa(addr)));
+	else
+		DPRINTF(4, ("findclosestinterface(%s) -> %s\n", 
+			    stoa(addr), stoa(&winner->sin)));
+
+	return winner;
+}
+
+
+/*
+ * calc_addr_distance - calculate the distance between two addresses,
+ *			the absolute value of the difference between
+ *			the addresses numerically, stored as an address.
+ */
+static void
+calc_addr_distance(
+	sockaddr_u *		dist,
+	const sockaddr_u *	a1,
+	const sockaddr_u *	a2
+	)
+{
+	u_int32	a1val;
+	u_int32	a2val;
+	u_int32	v4dist;
+	int	found_greater;
+	int	a1_greater;
+	int	i;
+
+	NTP_REQUIRE(AF(a1) == AF(a2));
+
+	memset(dist, 0, sizeof(*dist));
+	AF(dist) = AF(a1);
+
+	/* v4 can be done a bit simpler */
+	if (IS_IPV4(a1)) {
+		a1val = SRCADR(a1);
+		a2val = SRCADR(a2);
+		v4dist = (a1val > a2val)
+			     ? a1val - a2val
+			     : a2val - a1val;
+		SET_ADDR4(dist, v4dist);
+
+		return;
+	}
+
+	found_greater = FALSE;
+	a1_greater = FALSE;	/* suppress pot. uninit. warning */
+	for (i = 0; i < sizeof(NSRCADR6(a1)); i++) {
+		if (!found_greater &&
+		    NSRCADR6(a1)[i] != NSRCADR6(a2)[i]) {
+			found_greater = TRUE;
+			a1_greater = (NSRCADR6(a1)[i] > NSRCADR6(a2)[i]);
+		}
+		if (!found_greater) {
+			NSRCADR6(dist)[i] = 0;
+		} else {
+			if (a1_greater)
+				NSRCADR6(dist)[i] = NSRCADR6(a1)[i] -
+						    NSRCADR6(a2)[i];
+			else
+				NSRCADR6(dist)[i] = NSRCADR6(a2)[i] -
+						    NSRCADR6(a1)[i];
+		}
+	}
+}
+
+
+/*
+ * cmp_addr_distance - compare two address distances, returning -1, 0,
+ *		       1 to indicate their relationship.
+ */
+static int
+cmp_addr_distance(
+	const sockaddr_u *	d1,
+	const sockaddr_u *	d2
+	)
+{
+	int	i;
+
+	NTP_REQUIRE(AF(d1) == AF(d2));
+
+	if (IS_IPV4(d1)) {
+		if (SRCADR(d1) < SRCADR(d2))
+			return -1;
+		else if (SRCADR(d1) == SRCADR(d2))
+			return 0;
+		else
+			return 1;
+	}
+
+	for (i = 0; i < sizeof(NSRCADR6(d1)); i++) {
+		if (NSRCADR6(d1)[i] < NSRCADR6(d2)[i])
+			return -1;
+		else if (NSRCADR6(d1)[i] > NSRCADR6(d2)[i])
+			return 1;
+	}
+
+	return 0;
+}
+
 
 
 /*
@@ -3559,27 +3722,6 @@ getinterface(
 	if (iface != NULL && (iface->flags & flags))
 		iface = NULL;
 	
-	return iface;
-}
-
-
-/*
- * fetch an interface structure with a local address on the same subnet
- * as addr which has the given flags NOT set
- */
-static struct interface *
-getsamenetinterface(
-	sockaddr_u *	addr,
-	int		flags
-	)
-{
-	struct interface *iface;
-
-	iface = find_samenet_addr_in_list(addr);
-
-	if (iface != NULL && (iface->flags & flags))
-		iface = NULL;
-
 	return iface;
 }
 
@@ -4063,98 +4205,6 @@ find_addr_in_list(
 	     entry != NULL;
 	     entry = entry->link)
 		if (SOCK_EQ(&entry->addr, addr)) {
-			DPRINTF(4, ("FOUND\n"));
-			return entry->interface;
-		}
-
-	DPRINTF(4, ("NOT FOUND\n"));
-	return NULL;
-}
-
-static inline isc_boolean_t
-same_network_v4(
-	struct sockaddr_in *addr1,
-	struct sockaddr_in *mask,
-	struct sockaddr_in *addr2
-	)
-{
-	return (addr1->sin_addr.s_addr & mask->sin_addr.s_addr)
-	       == (addr2->sin_addr.s_addr & mask->sin_addr.s_addr);
-}
-
-#ifdef INCLUDE_IPV6_SUPPORT
-static inline isc_boolean_t
-same_network_v6(
-	struct sockaddr_in6 *addr1,
-	struct sockaddr_in6 *mask,
-	struct sockaddr_in6 *addr2
-	)
-{
-	int i;
-
-	for (i = 0; 
-	     i < sizeof(addr1->sin6_addr.s6_addr) / 
-	         sizeof(addr1->sin6_addr.s6_addr[0]);
-	     i++)
-
-		if ((addr1->sin6_addr.s6_addr[i] &
-		     mask->sin6_addr.s6_addr[i]) 
-		    !=
-		    (addr2->sin6_addr.s6_addr[i] &
-		     mask->sin6_addr.s6_addr[i]))
-
-			return ISC_FALSE;
-
-	return ISC_TRUE;
-}
-#endif	/* INCLUDE_IPV6_SUPPORT */
-
-
-static isc_boolean_t
-same_network(
-	sockaddr_u *a1,
-	sockaddr_u *mask,
-	sockaddr_u *a2
-	)
-{
-	isc_boolean_t sn;
-
-	if (AF(a1) != AF(a2))
-		sn = ISC_FALSE;
-	else if (IS_IPV4(a1))
-		sn = same_network_v4(&a1->sa4, &mask->sa4, &a2->sa4);
-#ifdef INCLUDE_IPV6_SUPPORT
-	else if (IS_IPV6(a1))
-		sn = same_network_v6(&a1->sa6, &mask->sa6, &a2->sa6);
-#endif
-	else
-		sn = ISC_FALSE;
-
-	return sn;
-}
-
-/*
- * Find an address in the list on the same network as addr which is not
- * addr.
- */
-static struct interface *
-find_samenet_addr_in_list(
-	sockaddr_u *addr
-	) 
-{
-	remaddr_t *entry;
-
-	DPRINTF(4, ("Searching for addr with same subnet as %s in list of addresses - ",
-		    stoa(addr)));
-
-	for (entry = remoteaddr_list;
-	     entry != NULL;
-	     entry = entry->link)
-
-		if (!SOCK_EQ(addr, &entry->addr)
-		    && same_network(&entry->addr, 
-				    &entry->interface->mask,
-				    addr)) {
 			DPRINTF(4, ("FOUND\n"));
 			return entry->interface;
 		}
