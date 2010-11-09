@@ -149,7 +149,7 @@ write_kod_db(void)
 #ifdef DEBUG
 		debug_msg(msg);
 #endif
-		log_msg(msg, 2);
+		log_msg(msg, LOG_WARNING | LOG_CONS);
 
 		return;
 	}
@@ -200,7 +200,7 @@ kod_init_kod_db(
 		debug_msg(msg);
 		printf("%s\n", msg);
 #endif
-		log_msg(msg, 2);
+		log_msg(msg, LOG_WARNING | LOG_CONS);
 
 		return;
 	}
@@ -232,7 +232,7 @@ kod_init_kod_db(
 						debug_msg(msg);
 						printf("%s\n", msg);
 	#endif
-						log_msg(msg, 1);
+						log_msg(msg, LOG_DEBUG | LOG_CONS);
 					}
 					fclose(db_s);
 					return;
@@ -298,7 +298,7 @@ kod_init_kod_db(
 #ifdef DEBUG
 		debug_msg(msg);
 #endif
-		log_msg(msg, 2);
+		log_msg(msg, LOG_WARNING | LOG_CONS);
 		fclose(db_s);
 
 		return;

@@ -63,8 +63,6 @@ sntp_main (
 			ai_fam_pref = AF_INET6;
 	}
 
-	log_msg("Started sntp", 0);
-
 	optct = optionProcess(&sntpOptions, argc, argv);
 	argc -= optct;
 	argv += optct; 
@@ -74,6 +72,8 @@ sntp_main (
 	/* Initialize logging system */
 	if (HAVE_OPT(FILELOG))
 		init_log(OPT_ARG(FILELOG));
+
+	log_msg("Started sntp", LOG_CONS);
 
 	/* 
 	 * If there's a specified KOD file init KOD system.  If not use
@@ -228,7 +228,7 @@ handle_pkt (
 			 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
 			 ref[0], ref[1], ref[2], ref[3],
 			 hostname);
-		log_msg(log_str, 2);
+		log_msg(log_str, LOG_WARNING | LOG_CONS);
 		free(log_str);
 		break;
 
@@ -391,7 +391,7 @@ on_wire (
 	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 
 	snprintf(logmsg, sizeof(logmsg), "Received no useable packet from %s!", addr_buf);
-	log_msg(logmsg, 1);
+	log_msg(logmsg, LOG_DEBUG | LOG_CONS);
 
 	if (ENABLED_OPT(NORMALVERBOSE))
 		printf("sntp on_wire: Received no useable packet from %s!\n", addr_buf);

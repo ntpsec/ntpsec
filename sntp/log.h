@@ -10,7 +10,7 @@
 #include <time.h>
 
 
-void log_msg(char *message, char type);
+void log_msg(char *message, int type);
 void debug_msg(char *message);
 
 void init_log(const char *logfile);
