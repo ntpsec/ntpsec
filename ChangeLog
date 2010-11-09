@@ -3,6 +3,8 @@
 * [Bug 1574] sntp:set_time doesn't set tv_usec correctly.
 * [Bug 1683] Interface binding does not seem to work as intended.
 * [Bug 1691] Use first NMEA sentence each second.
+* [Bug 1709] ntpdate ignores replies with equal receive and transmit
+  timestamps.
 
 ---
 (4.2.6p3-RC8) 2010/10/29 Released by Harlan Stenn <stenn@ntp.org>
