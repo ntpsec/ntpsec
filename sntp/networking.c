@@ -49,7 +49,7 @@ resolve_hosts (
 #ifdef DEBUG
 			printf("%s\n", logmsg);
 #endif
-			log_msg(logmsg, 1);
+			log_msg(logmsg, LOG_DEBUG | LOG_CONS);
 			free(logmsg);
 		} else {
 #ifdef DEBUG

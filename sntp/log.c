@@ -7,29 +7,14 @@ int filelog = 0;
 FILE *log_file;
 
 
-void log_msg(char *message, char type) {
-	if(init) {
+void log_msg(char *message, int type) {
+	if (init) {
 		time_t cur_time = time(NULL);
 		char *timestamp = ctime(&cur_time);
 
 		fprintf(log_file, "%s: %s\n", timestamp, message);
 		fflush(log_file);
-	}
-	else {
-		switch(type) {
-			case 0:
-				type = LOG_CONS;
-				break;
-			
-			case 1:
-				type = LOG_DEBUG | LOG_CONS;
-				break;
-	
-			case 2: 
-				type = LOG_WARNING | LOG_CONS;
-				break;
-		}
-
+	} else {
 		syslog(type, message);
 	}
 }
