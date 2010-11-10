@@ -7,6 +7,7 @@
 * [Bug 1692] packageinfo.sh needs to be "sourced" using ./ .
 * [Bug 1709] ntpdate ignores replies with equal receive and transmit
   timestamps.
+* Backport sntp from -dev
 
 ---
 (4.2.6p3-RC8) 2010/10/29 Released by Harlan Stenn <stenn@ntp.org>
