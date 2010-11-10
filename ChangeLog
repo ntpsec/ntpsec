@@ -1,3 +1,4 @@
+(4.2.7p80) 2010/11/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1574] from 4.2.6p3-RC9: sntp doesn't set tv_usec correctly.
 * [Bug 1681] from 4.2.6p3-RC9: sntp logging cleanup.
 * [Bug 1683] from 4.2.6p3-RC9: Interface binding does not seem to work
