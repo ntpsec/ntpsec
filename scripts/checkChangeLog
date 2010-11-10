@@ -1,6 +1,6 @@
 #! /bin/sh
 
-. packageinfo.sh
+. ./packageinfo.sh
 
 cl1=`head -1 ChangeLog`
 

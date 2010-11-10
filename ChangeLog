@@ -1,4 +1,8 @@
 ---
+
+* [Bug 1692] packageinfo.sh needs to be "sourced" using ./ .
+
+---
 (4.2.6p3-RC8) 2010/10/29 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1685] NMEA driver mode byte confusion.
