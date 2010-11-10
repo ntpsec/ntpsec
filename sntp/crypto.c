@@ -1,3 +1,4 @@
+#include <config.h>
 #include "crypto.h"
 #include <ctype.h>
 

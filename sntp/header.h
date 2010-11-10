@@ -24,7 +24,7 @@ No changes should be needed for any system that is even remotely like Unix. */
 #    define SAVENAME "/etc/sntp.state" /* Stores the recovery state */
 #endif
 
-#define DEBUG
+//#define DEBUG
 
 
 

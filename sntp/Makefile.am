@@ -10,7 +10,7 @@ AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 	-I$(top_srcdir)/../lib/isc/nothreads/include \
 	-I$(top_srcdir)/../lib/isc/unix/include
 
-LDADD=	$(LIBOPTS_LDADD) -lm ../libntp/libntp.a @LCRYPTO@
+LDADD=	$(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
@@ -39,8 +39,10 @@ sntp_SOURCES =		\
 	log.c		\
 	log.h		\
 	main.c		\
+	main.h		\
 	networking.c	\
 	networking.h	\
+	sntp.c		\
 	sntp-opts.c	\
 	sntp-opts.h	\
 	utilities.c	\

@@ -24,6 +24,14 @@
 #include "sntp-opts.h"	
 #include "utilities.h"
 
+/* 
+ * for 4.2.6 only define AUTOKEY if OPENSSL, so that backported 4.2.7
+ * references to AUTOKEY work -- in 4.2.7 AUTOKEY is independent of OPENSSL
+ */
+#ifdef OPENSSL
+#define AUTOKEY
+#endif
+
 /* FIXME To be replaced by the constants in ntp.h */
 #define SERVER_UNUSEABLE -1 /* Skip server */
 #define PACKET_UNUSEABLE -2 /* Discard packet and try to get a useable packet again if not tried too often */
@@ -50,6 +58,8 @@ int recv_bcst_data (SOCKET rsock, char *rdata, int rdata_len, sockaddr_u *sas, s
 
 int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, sockaddr_u *sas);
 
+int process_pkt (struct pkt *rpkt, sockaddr_u *sas,	int pkt_len, int mode, struct pkt *spkt, char * func_name);
+
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {
 	struct speer *next;
@@ -71,7 +81,7 @@ struct speer {
 	l_fp reftime;
 	keyid_t keyid;
 
-#ifdef OPENSSL
+#ifdef AUTOKEY
 #define clear_to_zero opcode
 	u_int32	opcode;		/* last request opcode */
 	associd_t assoc;	/* peer association ID */
@@ -99,9 +109,9 @@ struct speer {
 	int	keynumber;	/* current key number */
 	struct value encrypt;	/* send encrypt values */
 	struct value sndval;	/* send autokey values */
-#else /* OPENSSL */
+#else	/* !AUTOKEY follows */
 #define clear_to_zero status
-#endif /* OPENSSL */
+#endif	/* !AUTOKEY */
 	
 	l_fp	rec;		/* receive time stamp */
 	l_fp	xmt;		/* transmit time stamp */

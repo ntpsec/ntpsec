@@ -1,3 +1,4 @@
+#include <config.h>
 #include "log.h"
 #include "sntp-opts.h"
 
@@ -15,7 +16,7 @@ void log_msg(char *message, int type) {
 		fprintf(log_file, "%s: %s\n", timestamp, message);
 		fflush(log_file);
 	} else {
-		syslog(type, message);
+		syslog(type, "%s", message);
 	}
 }
 
@@ -31,7 +32,7 @@ void debug_msg(char *message) {
 #ifdef LOG_PERROR
 			| LOG_PERROR
 #endif
-			| LOG_CONS, message);
+		       | LOG_CONS, "%s", message);
 	}
 }
 

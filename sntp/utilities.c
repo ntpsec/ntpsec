@@ -1,3 +1,4 @@
+#include <config.h>
 #include "utilities.h"
 
 /* Display a NTP packet in hex with leading address offset 
@@ -110,15 +111,15 @@ l_fp_output_dec (
  */
 char *
 addrinfo_to_str (
-		struct addrinfo *addr
-		)
+	struct addrinfo *addr
+	)
 {
-	char *buf = (char *) emalloc(sizeof(char) * INET6_ADDRSTRLEN);
+	sockaddr_u	s;
+	
+	memset(&s, 0, sizeof(s));
+	memcpy(&s, addr->ai_addr, min(sizeof(s), addr->ai_addrlen));
 
-	getnameinfo(addr->ai_addr, addr->ai_addrlen, buf, 
-			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
-
-	return buf;
+	return ss_to_str(&s);
 }
 
 /* Convert a sockaddr_u to a string containing the address in
@@ -128,14 +129,13 @@ addrinfo_to_str (
  */
 char *
 ss_to_str (
-		sockaddr_u *saddr
-		)
+	sockaddr_u *saddr
+	)
 {
-	char *buf = (char *) emalloc(sizeof(char) * INET6_ADDRSTRLEN);
-
-	getnameinfo(&saddr->sa, SOCKLEN(saddr), buf,
-			INET6_ADDRSTRLEN, NULL, 0, NI_NUMERICHOST);
-
+	char *	buf;
+	
+	buf = emalloc(INET6_ADDRSTRLEN);
+	strncpy(buf, stoa(saddr), INET6_ADDRSTRLEN);
 
 	return buf;
 }
