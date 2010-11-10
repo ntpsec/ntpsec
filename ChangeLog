@@ -1,4 +1,5 @@
 ---
+(4.2.6p3-RC9) 2010/11/10 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1574] sntp:set_time doesn't set tv_usec correctly.
 * [Bug 1681] sntp logging cleanup.
