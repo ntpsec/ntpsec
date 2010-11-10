@@ -4896,18 +4896,44 @@ AC_CONFIG_FILES(util/Makefile)
 
 AC_PROG_CXX
 
-AC_PATH_PROG([GTEST_CONFIG], [gtest-config])
-if test x${GTEST_CONFIG} != x ; then
-	GTEST_LDFLAGS=`$GTEST_CONFIG --ldflags`
-	GTEST_LIBS=`$GTEST_CONFIG --libs`
-	GTEST_CXXFLAGS=`$GTEST_CONFIG --cxxflags`
-	GTEST_CPPFLAGS=`$GTEST_CONFIG --cppflags`
-	AC_SUBST(GTEST_LDFLAGS)
-	AC_SUBST(GTEST_LIBS)
-	AC_SUBST(GTEST_CXXFLAGS)
-	AC_SUBST(GTEST_CPPFLAGS)
-fi
-AM_CONDITIONAL([GTEST_AVAILABLE], [test x${GTEST_CONFIG} != x])
+gta=false
+AC_ARG_WITH([gtest],
+  [AS_HELP_STRING([--with-gtest],
+    [Use the gtest framework if it's available])],
+  [try_gtest=$withval], [try_gtest=yes])
+
+case "$try_gtest" in
+ yes)
+    AC_PATH_PROG([GTEST_CONFIG], [gtest-config])
+    case x${GTEST_CONFIG} in
+     x) ;;
+     *)
+	AC_MSG_CHECKING([gtest version])
+	gtest_version=`$GTEST_CONFIG --version`
+        case "$gtest_version" in
+         1.5.*)
+	    GTEST_LDFLAGS=`$GTEST_CONFIG --ldflags`
+	    GTEST_LIBS=`$GTEST_CONFIG --libs`
+	    GTEST_CXXFLAGS=`$GTEST_CONFIG --cxxflags`
+	    GTEST_CPPFLAGS=`$GTEST_CONFIG --cppflags`
+	    AC_SUBST(GTEST_LDFLAGS)
+	    AC_SUBST(GTEST_LIBS)
+	    AC_SUBST(GTEST_CXXFLAGS)
+	    AC_SUBST(GTEST_CPPFLAGS)
+	    gta=true
+	    ;;
+        esac
+	case "$gta" in
+	 true)
+	    AC_MSG_RESULT([($gtest_version) ok])
+	    ;;
+	 *) AC_MSG_RESULT([($gtest_version) not ok])
+	    ;;
+	esac
+    esac
+esac
+
+AM_CONDITIONAL([GTEST_AVAILABLE], [$gta])
 
 AC_CONFIG_FILES(tests/Makefile)
 AC_CONFIG_FILES(tests/libntp/Makefile)
