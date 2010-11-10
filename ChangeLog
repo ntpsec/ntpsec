@@ -468,6 +468,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3-RC9) 2010/11/10 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1574] sntp:set_time doesn't set tv_usec correctly.
 * [Bug 1681] sntp logging cleanup.
@@ -476,6 +477,7 @@
 * [Bug 1692] packageinfo.sh needs to be "sourced" using ./ .
 * [Bug 1709] ntpdate ignores replies with equal receive and transmit
   timestamps.
+* Backport sntp from -dev
 
 ---
 (4.2.6p3-RC8) 2010/10/29 Released by Harlan Stenn <stenn@ntp.org>
