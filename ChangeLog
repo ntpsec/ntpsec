@@ -4,6 +4,7 @@
   as intended.
 * [Bug 1709] from 4.2.6p3-RC9: ntpdate ignores replies with equal
   receive and transmit timestamps.
+* [Bug 1715] sntp utilitiesTest.IPv6Address failed.
 (4.2.7p79) 2010/11/07 Released by Harlan Stenn <stenn@ntp.org>
 * Correct frequency estimate with no drift file, from David Mills.
 (4.2.7p78) 2010/11/04 Released by Harlan Stenn <stenn@ntp.org>
