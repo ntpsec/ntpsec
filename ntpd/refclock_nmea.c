@@ -1132,9 +1132,11 @@ field_init(
 
 	/* syntax check follows here. check allowed character
 	 * sequences, updating the local computed checksum as we go.
+	 *
+	 * regex equiv: '^\$[A-Z][A-Z0-9]{4,}[^*]*(\*[0-9A-F]{2})?$'
 	 */
 
-	/* -*- start character: [$] */
+	/* -*- start character: '^\$' */
 	if (*cptr == '\0')
 		return CHECK_EMPTY;
 	if (*cptr++ != '$')
@@ -1145,7 +1147,7 @@ field_init(
 	data->cptr++;
 	data->blen--;
 	
-	/* -*- field name: [A-Z][A-Z0-9]{4+}[,] */
+	/* -*- field name: '[A-Z][A-Z0-9]{4,},' */
 	if (*cptr < 'A' || *cptr > 'Z')
 		return CHECK_INVALID;
 	cs_l ^= *cptr++;
@@ -1156,16 +1158,17 @@ field_init(
 		return CHECK_INVALID;
 	cs_l ^= *cptr++;
 
-	/* -*- data: [^*]* */
+	/* -*- data: '[^*]*' */
 	while (*cptr && *cptr != '*')
 		cs_l ^= *cptr++;
+	
+	/* -*- checksum field: (\*[0-9A-F]{2})?$ */
 	if (*cptr == '\0')
 		return CHECK_VALID;
 	if (*cptr != '*' || cptr != eptr - 3 ||
 	    (cptr - data->base) >= NMEA_PROTO_MAXLEN)
 		return CHECK_INVALID;
 
-	/* -*- checksum field: [*][0-9A-F]{2}$ */
 	for (cptr++; (tmp = *cptr) != '\0'; cptr++)
 		if (tmp >= '0' && tmp <= '9')
 			cs_r = (cs_r << 4) + (tmp - '0');
