@@ -184,7 +184,7 @@ struct interface {
 	char name[32];		/* name of interface */
 	u_short family;		/* Address family */
 	u_short phase;		/* phase in update cycle */
-	int flags;		/* interface flags */
+	u_int32 flags;		/* interface flags */
 	int last_ttl;		/* last TTL specified */
 	u_int32 addr_refid;	/* IPv4 addr or IPv6 hash */
 	int num_mcast;		/* No. of IP addresses in multicast socket */

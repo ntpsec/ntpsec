@@ -2555,12 +2555,13 @@ config_nic_rules(
 	)
 {
 	nic_rule_node *	curr_node;
-	isc_netaddr_t	netaddr;
+	sockaddr_u	addr;
 	nic_rule_match	match_type;
 	nic_rule_action	action;
 	char *		if_name;
 	char *		pchSlash;
 	int		prefixlen;
+	int		addrbits;
 
 	curr_node = HEAD_PFIFO(ptree->nic_rules);
 
@@ -2604,17 +2605,16 @@ config_nic_rules(
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
 				*pchSlash = '\0';
-			if (is_ip_address(if_name, AF_UNSPEC,
-					  &netaddr)) {
+			if (is_ip_address(if_name, AF_UNSPEC, &addr)) {
 				match_type = MATCH_IFADDR;
 				if (pchSlash != NULL) {
 					sscanf(pchSlash + 1, "%d",
 					    &prefixlen);
+					addrbits = 8 *
+					    SIZEOF_INADDR(AF(&addr));
 					prefixlen = max(-1, prefixlen);
-					prefixlen = min(prefixlen, 
-					    (AF_INET6 == netaddr.family)
-						? 128
-						: 32);
+					prefixlen = min(prefixlen,
+							addrbits);
 				}
 			} else {
 				match_type = MATCH_IFNAME;
@@ -4656,29 +4656,19 @@ getnetnum(
 	enum gnn_type a_type	/* ignored */
 	)
 {
-	isc_netaddr_t ipaddr;
-
 	NTP_REQUIRE(AF_UNSPEC == AF(addr) ||
 		    AF_INET == AF(addr) ||
 		    AF_INET6 == AF(addr));
 
-	if (!is_ip_address(num, AF(addr), &ipaddr))
+	if (!is_ip_address(num, AF(addr), addr))
 		return 0;
 
-	if (AF_INET6 == ipaddr.family && !ipv6_works)
+	if (IS_IPV6(addr) && !ipv6_works)
 		return -1;
 
-	memset(addr, 0, sizeof(*addr));
-	AF(addr) = (u_short)ipaddr.family;
 # ifdef ISC_PLATFORM_HAVESALEN
 	addr->sa.sa_len = SIZEOF_SOCKADDR(AF(addr));
 # endif
-	if (IS_IPV4(addr))
-		memcpy(&addr->sa4.sin_addr, &ipaddr.type.in,
-		       sizeof(addr->sa4.sin_addr));
-	else
-		memcpy(&addr->sa6.sin6_addr, &ipaddr.type.in6,
-		       sizeof(addr->sa6.sin6_addr));
 	SET_PORT(addr, NTP_PORT);
 
 	DPRINTF(2, ("getnetnum given %s, got %s\n", num, stoa(addr)));
