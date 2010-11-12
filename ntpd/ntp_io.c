@@ -1235,7 +1235,7 @@ interface_action(
 		    (if_name != NULL) ? if_name : "wildcard"));
 
 	iswildcard = is_wildcard_addr(if_addr);
-	is_loopback = !!(INT_LOOPBACK & if_flags);
+	isloopback = !!(INT_LOOPBACK & if_flags);
 
 	/*
 	 * Find any matching NIC rule from --interface / -I or ntp.conf

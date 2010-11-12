@@ -3553,7 +3553,6 @@ config_peers(
 	)
 {
 	sockaddr_u		peeraddr;
-	isc_netaddr_t		i_netaddr;
 	struct addrinfo		hints;
 	peer_node *		curr_peer;
 	peer_resolved_ctx *	ctx;
@@ -3571,17 +3570,9 @@ config_peers(
 		 * the hostname off to the blocking child.
 		 */
 		if (is_ip_address(*cmdline_servers, AF_UNSPEC,
-				  &i_netaddr)) {
+				  &peeraddr)) {
 
-			AF(&peeraddr) = (u_short)i_netaddr.family;
 			SET_PORT(&peeraddr, NTP_PORT);
-			if (AF_INET6 == i_netaddr.family)
-				SET_ADDR6N(&peeraddr,
-					   i_netaddr.type.in6);
-			else
-				SET_ADDR4N(&peeraddr,
-					   i_netaddr.type.in.s_addr);
-
 			if (is_sane_resolved_address(&peeraddr,
 						     T_Server))
 				peer_config(
@@ -3656,17 +3647,9 @@ config_peers(
 		 * the hostname off to the blocking child.
 		 */
 		} else if (is_ip_address(curr_peer->addr->address,
-				  curr_peer->addr->type, &i_netaddr)) {
+				  curr_peer->addr->type, &peeraddr)) {
 
-			AF(&peeraddr) = (u_short)i_netaddr.family;
 			SET_PORT(&peeraddr, NTP_PORT);
-			if (AF_INET6 == i_netaddr.family)
-				SET_ADDR6N(&peeraddr,
-					   i_netaddr.type.in6);
-			else
-				SET_ADDR4N(&peeraddr,
-					   i_netaddr.type.in.s_addr);
-
 			if (is_sane_resolved_address(&peeraddr,
 			    curr_peer->host_mode))
 				peer_config(
