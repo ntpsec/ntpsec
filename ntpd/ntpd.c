@@ -556,13 +556,13 @@ ntpdmain(
 	 * --interface, listen on specified interfaces
 	 */
 	if (HAVE_OPT( INTERFACE )) {
-		int	ifacect = STACKCT_OPT( INTERFACE );
+		int		ifacect = STACKCT_OPT( INTERFACE );
 		const char**	ifaces  = STACKLST_OPT( INTERFACE );
-		isc_netaddr_t	netaddr;
+		sockaddr_u	addr;
 
 		while (ifacect-- > 0) {
 			add_nic_rule(
-				is_ip_address(*ifaces, &netaddr)
+				is_ip_address(*ifaces, &addr)
 					? MATCH_IFADDR
 					: MATCH_IFNAME,
 				*ifaces, -1, ACTION_LISTEN);

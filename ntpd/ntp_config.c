@@ -2160,8 +2160,8 @@ config_access(
 	int *			curr_flag;
 	sockaddr_u		addr_sock;
 	sockaddr_u		addr_mask;
-	int			flags;
-	int			mflags;
+	u_short			flags;
+	u_short			mflags;
 	int			restrict_default;
 	const char *		signd_warning =
 #ifdef HAVE_NTP_SIGND
@@ -2430,12 +2430,13 @@ config_nic_rules(
 	)
 {
 	nic_rule_node *	curr_node;
-	isc_netaddr_t	netaddr;
+	sockaddr_u	addr;
 	nic_rule_match	match_type;
 	nic_rule_action	action;
 	char *		if_name;
 	char *		pchSlash;
 	int		prefixlen;
+	int		addrbits;
 
 	curr_node = queue_head(ptree->nic_rules);
 
@@ -2482,16 +2483,16 @@ config_nic_rules(
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
 				*pchSlash = '\0';
-			if (is_ip_address(if_name, &netaddr)) {
+			if (is_ip_address(if_name, &addr)) {
 				match_type = MATCH_IFADDR;
 				if (pchSlash != NULL) {
 					sscanf(pchSlash + 1, "%d",
 					    &prefixlen);
+					addrbits = 8 *
+					    SIZEOF_INADDR(AF(&addr));
 					prefixlen = max(-1, prefixlen);
-					prefixlen = min(prefixlen, 
-					    (AF_INET6 == netaddr.family)
-						? 128
-						: 32);
+					prefixlen = min(prefixlen,
+							addrbits);
 				}
 			} else {
 				match_type = MATCH_IFNAME;
@@ -4317,7 +4318,7 @@ get_multiple_netnums(
 	struct addrinfo hints;
 	struct addrinfo *ptr;
 	int retval;
-	isc_netaddr_t ipaddr;
+	sockaddr_u ipaddr;
 
 	memset(&hints, 0, sizeof(hints));
 
@@ -4329,7 +4330,7 @@ get_multiple_netnums(
 	lookup = nameornum;
 	if (is_ip_address(nameornum, &ipaddr)) {
 		hints.ai_flags = AI_NUMERICHOST;
-		hints.ai_family = ipaddr.family;
+		hints.ai_family = AF(&ipaddr);
 		if ('[' == nameornum[0]) {
 			lookup = lookbuf;
 			strncpy(lookbuf, &nameornum[1],
@@ -4387,8 +4388,9 @@ get_multiple_netnums(
 		if (!retval) {
 			freeaddrinfo(ptr);
 			return -1;
-		} else 
+		} else {
 			return 0;
+		}
 	}
 	*res = ptr;
 
