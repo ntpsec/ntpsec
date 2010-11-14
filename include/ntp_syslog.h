@@ -15,7 +15,9 @@ extern void msyslog();
 #include <stdio.h>
 
 extern int	syslogit;
-extern FILE *	syslog_file;
+extern int	msyslog_term;	/* duplicate to stdout/err */
+extern FILE *	syslog_file;	/* if syslogit is FALSE, log to 
+				   this file and not syslog */
 extern char *	syslog_fname;
 extern char *	syslog_abs_fname;
 

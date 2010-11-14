@@ -42,15 +42,13 @@ resolve_hosts (
 		hints.ai_socktype = SOCK_DGRAM;
 		error = getaddrinfo(hosts[a], "123", &hints, &tres[resc]);
 		if (error) {
-			size_t msg_length = strlen(hosts[a]) + 21;
-			char *logmsg = (char *) emalloc(sizeof(char) * msg_length);
-
-			snprintf(logmsg, msg_length, "Error looking up %s", hosts[a]);
-#ifdef DEBUG
-			printf("%s\n", logmsg);
-#endif
-			log_msg(logmsg, LOG_DEBUG | LOG_CONS);
-			free(logmsg);
+			msyslog(LOG_DEBUG, "Error looking up %s%s: %s",
+				(AF_UNSPEC == hints.ai_family)
+				    ? ""
+				    : (AF_INET == hints.ai_family)
+					  ? "(A) "
+					  : "(AAAA) ",
+				hosts[a], gai_strerror(error));
 		} else {
 #ifdef DEBUG
 			for (dres = tres[resc]; dres; dres = dres->ai_next) {
@@ -176,6 +174,9 @@ recv_bcst_data (
 	struct ip_mreq mdevadr;
 	TYPEOF_IP_MULTICAST_LOOP mtrue = 1;
 #endif
+#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+	struct ipv6_mreq mdevadr6;
+#endif
 
 	setsockopt(rsock, SOL_SOCKET, SO_REUSEADDR, &btrue, sizeof(btrue));
 	if (IS_IPV4(sas)) {
@@ -215,14 +216,13 @@ recv_bcst_data (
 				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
 		}
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-		struct ipv6_mreq mdevadr;
 		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
 			/* some error message regarding setting up multicast loop */
 			return BROADCAST_FAILED;
 		}
-		memset(&mdevadr, 0, sizeof(mdevadr));
-		mdevadr.ipv6mr_multiaddr = SOCK_ADDR6(sas);
-		if (!IN6_IS_ADDR_MULTICAST(&mdevadr.ipv6mr_multiaddr)) {
+		memset(&mdevadr6, 0, sizeof(mdevadr6));
+		mdevadr6.ipv6mr_multiaddr = SOCK_ADDR6(sas);
+		if (!IN6_IS_ADDR_MULTICAST(&mdevadr6.ipv6mr_multiaddr)) {
 			if (ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n", buf);
@@ -230,7 +230,7 @@ recv_bcst_data (
 			}
 			return BROADCAST_FAILED;
 		}
-		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mdevadr, sizeof(mdevadr)) < 0) {
+		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mdevadr6, sizeof(mdevadr)) < 0) {
 			if (ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: Couldn't join group for %s\n", buf);

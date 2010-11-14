@@ -1,5 +1,6 @@
-#include "main.h"
+#include <config.h>
 
+#include "main.h"
 #include "kod_management.h"
 #include "networking.h"
 #include "utilities.h"
@@ -49,6 +50,17 @@ sntp_main (
 	int bcast = 0;
 	char *hostname;
 
+	optct = optionProcess(&sntpOptions, argc, argv);
+	argc -= optct;
+	argv += optct; 
+
+	/* Initialize logging system */
+	init_logging();
+	if (HAVE_OPT(FILELOG))
+		open_logfile(OPT_ARG(FILELOG));
+
+	log_msg("Started sntp", LOG_INFO);
+
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 		ai_fam_pref = AF_INET;
@@ -63,17 +75,7 @@ sntp_main (
 			ai_fam_pref = AF_INET6;
 	}
 
-	optct = optionProcess(&sntpOptions, argc, argv);
-	argc -= optct;
-	argv += optct; 
-
 	/* Parse config file if declared TODO */
-
-	/* Initialize logging system */
-	if (HAVE_OPT(FILELOG))
-		init_log(OPT_ARG(FILELOG));
-
-	log_msg("Started sntp", LOG_CONS);
 
 	/* 
 	 * If there's a specified KOD file init KOD system.  If not use
@@ -130,10 +132,8 @@ sntp_main (
 			if ((kodc = search_entry(hostname, &reason)) == 0) {
 				if (is_reachable(ai)) {
 					ow_ret = on_wire(ai, bcast ? bcastaddr[0] : NULL);
-					if (ow_ret < 0)
-						printf("on_wire failed for server %s!\n", hostname);
-					else
-						sync_data_suc = 1;
+					if (0 == ow_ret)
+						sync_data_suc = TRUE;
 				}
 			} else {
 				printf("%d prior KoD%s for %s, skipping.\n", 
@@ -146,7 +146,11 @@ sntp_main (
 		freeaddrinfo(resh[c]);
 	}
 	free(resh);
-	return 0;
+
+	if (sync_data_suc)
+		return 0;
+	else
+		return 1;
 }
 
 static union {
@@ -228,7 +232,7 @@ handle_pkt (
 			 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
 			 ref[0], ref[1], ref[2], ref[3],
 			 hostname);
-		log_msg(log_str, LOG_WARNING | LOG_CONS);
+		log_msg(log_str, LOG_WARNING);
 		free(log_str);
 		break;
 
@@ -255,7 +259,7 @@ handle_pkt (
 
 		ts_str = tv_to_str(&tv_dst);
 		printf("%s ", ts_str);
-		if(offset > 0)
+		if (offset > 0)
 			printf("+");
 		printf("%.*f", digits, offset);
 		if (root_dispersion > 0.)
@@ -263,7 +267,7 @@ handle_pkt (
 		printf("\n");
 		free(ts_str);
 
-		if(ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
+		if (ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
 			return set_time(offset); 
 
 		return 0;
@@ -332,7 +336,7 @@ offset_calculation (
 	*offset = (t21 + t34) / 2.;
 	delta = t21 - t34;
 
-	if(ENABLED_OPT(NORMALVERBOSE))
+	if (ENABLED_OPT(NORMALVERBOSE))
 		printf("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
 			   t21, t34, delta, *offset);
 }
@@ -344,22 +348,21 @@ on_wire (
 	struct addrinfo *bcast
 	)
 {
-	char logmsg[32 + INET6_ADDRSTRLEN];
 	char addr_buf[INET6_ADDRSTRLEN];
 	register int try;
 	SOCKET sock;
 	struct key *pkt_key = NULL;
 	int key_id = 0;
+	struct timeval tv_xmt;
+	struct pkt x_pkt;
+	int error, rpktl, handle_pkt_res;
+
 
 	if (ENABLED_OPT(AUTHENTICATION)) {
 		key_id = (int) OPT_ARG(AUTHENTICATION);
 		get_key(key_id, &pkt_key);
 	}
-	for(try=0; try<5; try++) {
-		struct timeval tv_xmt;
-		struct pkt x_pkt;
-		int error, rpktl, handle_pkt_res;
-
+	for (try=0; try<5; try++) {
 		memset(&r_pkt, 0, sizeof rbuf);
 		
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
@@ -389,12 +392,7 @@ on_wire (
 	}
 
 	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
-
-	snprintf(logmsg, sizeof(logmsg), "Received no useable packet from %s!", addr_buf);
-	log_msg(logmsg, LOG_DEBUG | LOG_CONS);
-
-	if (ENABLED_OPT(NORMALVERBOSE))
-		printf("sntp on_wire: Received no useable packet from %s!\n", addr_buf);
+	msyslog(LOG_DEBUG, "Received no useable packet from %s!", addr_buf);
 
 	return -1;
 }
@@ -408,13 +406,12 @@ set_li_vn_mode (
 	char mode
 	) 
 {
-
-	if(leap > 3) {
+	if (leap > 3) {
 		debug_msg("set_li_vn_mode: leap > 3 using max. 3");
 		leap = 3;
 	}
 
-	if(mode > 7) {
+	if (mode > 7) {
 		debug_msg("set_li_vn_mode: mode > 7, using client mode 3");
 		mode = 3;
 	}
@@ -442,8 +439,7 @@ set_time(
 		NORMALIZE_TIMEVAL(tp);
 
 		if (SETTIMEOFDAY(&tp, NULL) < 0) {
-			printf("set_time: settimeofday(): Time not set: %s\n",
-				strerror(errno));
+			msyslog(LOG_ERR, "Time not set: settimeofday(): %m");
 			return -1;
 		}
 		return 0;
@@ -454,8 +450,7 @@ set_time(
 	NORMALIZE_TIMEVAL(tp);
 
 	if (ADJTIMEOFDAY(&tp, NULL) < 0) {
-		printf("set_time: adjtime(): Time not set: %s\n",
-			strerror(errno));
+		msyslog(LOG_ERR, "Time not set: adjtime(): %m");
 		return -1;
 	}
 	return 0;

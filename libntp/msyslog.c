@@ -13,31 +13,30 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-
 #include <stdio.h>
 
-#include "ntp_types.h"
+#include "ntp.h"
 #include "ntp_string.h"
 #include "ntp_syslog.h"
-#include "ntp_stdlib.h"
 
 #ifdef SYS_WINNT
 # include <stdarg.h>
 # include "..\ports\winnt\libntp\messages.h"
 #endif
 
-int syslogit = 1;
 
+int	syslogit = 1;
+int	msyslog_term = FALSE;	/* duplicate to stdout/err */
 FILE *	syslog_file;
 char *	syslog_fname;
 char *	syslog_abs_fname;
 
 u_long ntp_syslogmask =  ~(u_long)0;	/* libntp default is all lit */
 
-extern	char *progname;
+extern	char *	progname;
 
 /* Declare the local functions */
-void	addto_syslog	(int, char *);
+void	addto_syslog	(int, const char *);
 void	format_errmsg   (char *, int, const char *, int);
 
 
@@ -45,44 +44,54 @@ void	format_errmsg   (char *, int, const char *, int);
  * This routine adds the contents of a buffer to the log
  */
 void
-addto_syslog(int level, char * buf)
+addto_syslog(
+	int		level,
+	const char *	buf
+	)
 {
-	static const char *	last_progname;
-	static const char *	prog;
-	FILE *			out_file;
+	static char *	prevcall_progname;
+	static char *	prog;
+	FILE *		term_file;
+	int		log_to_term;
+	const char *	human_time;
 
-#if !defined(VMS) && !defined (SYS_VXWORKS)
-	if (syslogit) {
+	human_time = humanlogtime();
+	log_to_term = msyslog_term;
+	/* setup program basename static var prog if needed */
+	if (progname != prevcall_progname) {
+		prevcall_progname = progname;
+		prog = strrchr(progname, DIR_SEP);
+		if (prog != NULL)
+			prog++;
+		else
+			prog = progname;
+	}
+
+#if !defined(VMS) && !defined(SYS_VXWORKS)
+	if (syslogit)
 		syslog(level, "%s", buf);
-		out_file = NULL;
-	} else
+	else
 #endif /* VMS  && SYS_VXWORKS*/
-	{
-		out_file = (syslog_file) 
-			       ? syslog_file
-			       : (level <= LOG_ERR)
-				     ? stderr 
-				     : stdout;
-		if (last_progname != progname) {
-			last_progname = progname;
-			prog = strrchr(progname, DIR_SEP);
-			if (NULL == prog)
-				prog = progname;
-			else
-				prog++;
-		}
-		/* 
-		 * syslog() provides the timestamp, so if we're not
-		 * using syslog, we must provide it.
-		 */
-		fprintf(out_file, "%s %s[%d]: %s", humanlogtime(),
-				  prog, (int)getpid(), buf);
-		fflush (out_file);
+	if (syslog_file != NULL) {
+		/* syslog() provides the timestamp, program, and pid */
+		fprintf(syslog_file, "%s %s[%d]: %s", human_time, prog,
+			(int)getpid(), buf);
+		fflush(syslog_file);
+	} else {
+		log_to_term = TRUE;
 	}
 #if DEBUG
-	if (debug && out_file != stdout && out_file != stderr)
-		printf("addto_syslog: %s", buf);
+	if (debug > 0)
+		log_to_term = TRUE;
 #endif
+	if (log_to_term) {
+		term_file = (level <= LOG_ERR)
+				? stderr
+				: stdout;
+		fprintf(term_file, "%s %s[%d]: %s", human_time, prog,
+			(int)getpid(), buf);
+		fflush(term_file);
+	}
 }
 
 
@@ -120,7 +129,7 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 	 * syslog adds a trailing \n if not present, do the same so we
 	 * have the same behavior with syslog and a log file.
 	 */
-	if (n > nfmt && '\n' != n[-1])
+	if (n > nfmt && '\n' != *(n - 1))
 		*n++ = '\n';
 	*n = '\0';
 }
@@ -154,6 +163,6 @@ void msyslog(int level, const char *fmt, ...)
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
 
 	vsnprintf(buf, sizeof(buf), nfmt, ap);
-	addto_syslog(level, buf);
 	va_end(ap);
+	addto_syslog(level, buf);
 }

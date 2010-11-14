@@ -1,64 +1,59 @@
 #include <config.h>
+
 #include "log.h"
-#include "sntp-opts.h"
 
-int init = 0;
-int filelog = 0;
+char *progname = "sntp";	/* for msyslog use too */
 
-FILE *log_file;
+static void cleanup_log(void);
 
-
-void log_msg(char *message, int type) {
-	if (init) {
-		time_t cur_time = time(NULL);
-		char *timestamp = ctime(&cur_time);
-
-		fprintf(log_file, "%s: %s\n", timestamp, message);
-		fflush(log_file);
-	} else {
-		syslog(type, "%s", message);
-	}
+void
+log_msg(
+	const char *	text, 
+	int		type
+	)
+{
+	msyslog(type, "%s", text);
 }
 
-void debug_msg(char *message) {
-	if(HAVE_OPT(FILELOG)) {
-		time_t cur_time = time(NULL);
-		char *timestamp = ctime(&cur_time);
 
-		fprintf(stderr, "%s: %s\n", timestamp, message);
-	}
-	else {
-		syslog(LOG_DEBUG
-#ifdef LOG_PERROR
-			| LOG_PERROR
-#endif
-		       | LOG_CONS, "%s", message);
-	}
+void
+debug_msg(
+	const char *text
+	)
+{
+	msyslog(LOG_DEBUG, "%s", text);
 }
 
-void init_log(
+
+void
+init_logging(void)
+{
+	openlog(progname, LOG_PID | LOG_CONS, OPENLOG_FAC);
+	msyslog_term = TRUE;
+}
+
+
+void
+open_logfile(
 	const char *logfile
 	)
 {
-	char error_msg[80];
-
-	log_file = fopen(logfile, "a");	
-	if (log_file == NULL) {
-		filelog = 0;
-
-		snprintf(error_msg, 80, "init_log(): Cannot open logfile %s", logfile);
-		debug_msg(error_msg);
-
+	syslog_file = fopen(logfile, "a");	
+	if (syslog_file == NULL) {
+		msyslog(LOG_ERR, "sntp: Cannot open logfile %s",
+			logfile);
 		return;
-	} else {
-		filelog = 1;
-		init = 1;
-		atexit(cleanup_log);
 	}
+	syslogit = FALSE;
+	atexit(cleanup_log);
 }
 
-void cleanup_log(void) {
-	init = 0;
-	fflush(log_file);
-	fclose(log_file);
+
+static void
+cleanup_log(void)
+{
+	syslogit = TRUE;
+	fflush(syslog_file);
+	fclose(syslog_file);
+	syslog_file = NULL;
 }

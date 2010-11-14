@@ -1,3 +1,4 @@
+* [Bug 1681] from 4.2.6p3-RC10: More sntp logging cleanup.
 * [Bug 1683] from 4.2.6p3-RC10: Non-localhost on loopback exempted from
   nic rules.
 (4.2.7p80) 2010/11/10 Released by Harlan Stenn <stenn@ntp.org>
@@ -472,6 +473,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1681] More sntp logging cleanup.
 * [Bug 1683] Non-localhost on loopback exempted from nic rules.
 
 ---
