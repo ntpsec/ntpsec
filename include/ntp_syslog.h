@@ -15,7 +15,9 @@ extern void msyslog();
 # include <stdio.h>
 
 extern int syslogit;
-extern FILE *syslog_file;
+extern int msyslog_term;	/* duplicate to stdout/err */
+extern FILE *syslog_file;	/* if syslogit is FALSE, log to 
+				   this file and not syslog */
 
 #if defined(VMS) || defined (SYS_VXWORKS)
 #define	LOG_EMERG	0	/* system is unusable */

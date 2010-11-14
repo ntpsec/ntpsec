@@ -194,7 +194,7 @@ run interactively from the command line or as a
 .I cron
 job.
 
-NTP and SNTP are defined by draft-ietf-ntp-ntpv4-proto-13, which
+NTP and SNTP are defined by RFC 5905, which
 obsoletes RFC 4330 and RFC 1305.
 	_END_DETAIL;
 
@@ -207,9 +207,7 @@ run as an interactive command or in a
 job.
 
 NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
-are defined and described by
-draft-ietf-ntp-ntpv4-proto-13,
-which should become a full RFC any month now.
+are defined and described by RFC 5905.
 
 .PP
 The default is to write the estimated correct local date and time (i.e. not

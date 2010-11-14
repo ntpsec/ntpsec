@@ -141,15 +141,8 @@ write_kod_db(void)
 	}
 
 	if (NULL == db_s) {
-		char msg[80];
-
-		snprintf(msg, sizeof(msg),
-			 "Can't open KOD db file %s for writing!",
-			 kod_db_file);
-#ifdef DEBUG
-		debug_msg(msg);
-#endif
-		log_msg(msg, LOG_WARNING | LOG_CONS);
+		msyslog(LOG_WARNING, "Can't open KOD db file %s for writing!",
+			kod_db_file);
 
 		return;
 	}
@@ -193,14 +186,8 @@ kod_init_kod_db(
 	db_s = fopen(db_file, "r");
 
 	if (NULL == db_s) {
-		char msg[80];
-
-		snprintf(msg, sizeof(msg), "kod_init_kod_db(): Cannot open KoD db file %s", db_file);
-#ifdef DEBUG
-		debug_msg(msg);
-		printf("%s\n", msg);
-#endif
-		log_msg(msg, LOG_WARNING | LOG_CONS);
+		msyslog(LOG_WARNING, "kod_init_kod_db(): Cannot open KoD db file %s",
+			db_file);
 
 		return;
 	}
@@ -223,17 +210,11 @@ kod_init_kod_db(
 
 			if ('\n' == fbuf[a]) {
 				if (sepc != 2) {
-					if (strcmp(db_file, "/dev/null")) {
-						char msg[80];
-						snprintf(msg, sizeof(msg),
-							 "Syntax error in KoD db file %s in line %i (missing space)",
-							 db_file, kod_db_cnt + 1);
-	#ifdef DEBUG
-						debug_msg(msg);
-						printf("%s\n", msg);
-	#endif
-						log_msg(msg, LOG_DEBUG | LOG_CONS);
-					}
+					if (strcmp(db_file, "/dev/null"))
+						msyslog(LOG_DEBUG,
+							"Syntax error in KoD db file %s in line %i (missing space)",
+							db_file,
+							kod_db_cnt + 1);
 					fclose(db_s);
 					return;
 				}
@@ -291,14 +272,9 @@ kod_init_kod_db(
 	}
 
 	if (ferror(db_s) || error) {
-		char msg[80];
-
 		kod_db_cnt = b;
-		snprintf(msg, sizeof(msg), "An error occured while parsing the KoD db file %s", db_file);
-#ifdef DEBUG
-		debug_msg(msg);
-#endif
-		log_msg(msg, LOG_WARNING | LOG_CONS);
+		msyslog(LOG_WARNING, "An error occured while parsing the KoD db file %s",
+			db_file);
 		fclose(db_s);
 
 		return;

@@ -122,9 +122,6 @@ auth_init(
 		octothorpe = strchr(kbuf, '#');
 		if (octothorpe)
 			*octothorpe = '\0';
-#ifdef DEBUG
-		printf("sntp auth_init: fgets: %s", kbuf);
-#endif
 		scan_cnt = sscanf(kbuf, "%d %9s %128s", &act->key_id, act->type, keystring);
 		if (scan_cnt == 3) {
 			int len = strlen(keystring);
@@ -158,34 +155,15 @@ auth_init(
 				prev->next = act;
 			prev = act;
 			key_cnt++;
-#ifdef DEBUG
-			printf("sntp auth_init: key_id %i type %s with key %s\n", act->key_id, act->type, act->key_seq);
-#endif
 		} else {
-#ifdef DEBUG
-			printf("sntp auth_init: scanf read %i items, doesn't look good, skipping line %i.\n", scan_cnt, line_cnt);
-#endif
+			msyslog(LOG_DEBUG, "auth_init: scanf %d items, skipping line %d.",
+				scan_cnt, line_cnt);
 			free(act);
 		}
 		line_cnt++;
 	}
 	fclose(keyf);
 	
-#ifdef DEBUG
-	STDLINE
-	printf("sntp auth_init: Read %i keys from file %s:\n", line_cnt, keyfile);
-	{
-		struct key *kptr = *keys;
-		register int a;
-
-		for (a = 0; a < key_cnt; a++) {
-			printf("key_id %i type %s with key %s (key length: %i)\n",
-			       kptr->key_id, kptr->type, kptr->key_seq, kptr->key_len);
-			kptr = kptr->next;
-		}
-	}
-	STDLINE
-#endif
 	key_ptr = *keys;
 	return key_cnt;
 }

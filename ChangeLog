@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1681] More sntp logging cleanup.
 * [Bug 1683] Non-localhost on loopback exempted from nic rules.
 
 ---
