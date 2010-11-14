@@ -8,6 +8,7 @@ extern "C" {
 class logFileTest : public fileHandlingTest {
 };
 
+#if 0	/* temporarily disable, needs rework */
 TEST_F(logFileTest, WriteLogFile) {
 	std::string filename = CreatePath("log-output-log", OUTPUT_DIR);
 
@@ -67,3 +68,4 @@ TEST_F(logFileTest, WriteDebugMessage) {
 
 	EXPECT_EQ(GetFileSize(expected), GetFileSize(actual));
 }
+#endif

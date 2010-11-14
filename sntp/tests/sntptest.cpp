@@ -6,4 +6,3 @@
  */
 
 volatile int debug = 0;
-const char *progname = "sntptest";
