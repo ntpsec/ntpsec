@@ -1,4 +1,5 @@
 ---
+(4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1681] More sntp logging cleanup.
 * [Bug 1683] Non-localhost on loopback exempted from nic rules.
