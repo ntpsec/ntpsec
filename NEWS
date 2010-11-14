@@ -1,4 +1,4 @@
-NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2010/07/08)
+NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2010/11/14, RC10)
 
 Focus: Bug fixes and portability improvements
 
@@ -16,30 +16,39 @@ Microsoft Windows.
 New features / changes in this release:
 
 Build system
-* Use lsb_release to get information about Linux distributions
-* 'test' is in /usr/bin (instead of /bin) on some systems
+* Use lsb_release to get information about Linux distributions.
+* 'test' is in /usr/bin (instead of /bin) on some systems.
+* Basic sanity checks for the ChangeLog file.
+* Source certain build files with ./filename for systems without . in PATH.
 
 ntpd
-* Do not bind to IN6_IFF_ANYCAST addresses
-* Log the reason for exiting under Windows
-* NMEA refclock improvements
-* Support Truetime Satellite clocks under Windows
-* Support Arbiter 1093C Satellite clocks under Windows
-* Make sure that the "filegen" configuration command defaults to "enable"
-* Range-check the status codes (plus other cleanup) in the RIPE-NCC driver
-* Prohibit 'includefile' directive in remote configuration command
+* Do not bind to IN6_IFF_ANYCAST addresses.
+* Log the reason for exiting under Windows.
+* NMEA refclock improvements.
+* Support Truetime Satellite clocks under Windows.
+* Support Arbiter 1093C Satellite clocks under Windows.
+* Make sure that the "filegen" configuration command defaults to "enable".
+* Range-check the status codes (plus other cleanup) in the RIPE-NCC driver.
+* Prohibit 'includefile' directive in remote configuration command.
+* Fix 'nic' interface bindings.
+* Fix 'nic' interface handling where an address is on lo1.
+
+ntpdate
+* Do not ignore replies with equal receive and transmit timestamps.
 
 ntpq
-* libntpq warning cleanup
+* libntpq warning cleanup.
 
 ntpsnmpd
 * Correct SNMP type for "precision" and "resolution".
 * Update the MIB from the draft version to RFC-5907.
 
 sntp
-* Pay proper attention to RATE KoD packets
-* Fix a miscalculation of the offset
-* Properly parse empty lines in the key file
+* Pay proper attention to RATE KoD packets.
+* Fix a miscalculation of the offset.
+* Properly parse empty lines in the key file.
+* Logging cleanup.
+* Use tv_usec correctly in set_time().
 
 ---
 NTP 4.2.6p2 (Harlan Stenn <stenn@ntp.org>, 2010/07/08)
