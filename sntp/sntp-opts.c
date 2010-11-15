@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  November 10, 2010 at 05:43:47 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 14, 2010 at 11:35:38 PM by AutoGen 5.10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -474,7 +474,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.7p80\n\
+"sntp - standard SNTP program - Ver. 4.2.7p81\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -495,7 +495,7 @@ It can be\n\
 run interactively from the command line or as a\n\
 .I cron\n\
 job.\n\n\
-NTP and SNTP are defined by draft-ietf-ntp-ntpv4-proto-13, which\n\
+NTP and SNTP are defined by RFC 5905, which\n\
 obsoletes RFC 4330 and RFC 1305.\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
