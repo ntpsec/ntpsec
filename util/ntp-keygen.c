@@ -112,7 +112,8 @@
 #define	MD5KEYS		10	/* number of keys generated of each type */
 #define	MD5SIZE		20	/* maximum key size */
 #define	JAN_1970	2208988800UL /* NTP seconds */
-#define YEAR		((long)60*60*24*365) /* one year in seconds */
+#define DAY		((long)60*60*24) /* one day in seconds */
+#define	YEAR		((long)365) /* one year in days */
 #define MAXFILENAME	256	/* max file name length */
 #define MAXHOSTNAME	256	/* max host name length */
 #ifdef AUTOKEY
@@ -155,19 +156,19 @@ u_long	asn2ntp		(ASN1_TIME *);
  */
 extern char *optarg;		/* command line argument */
 char	*progname;
-volatile int	debug = 0;		/* debug, not de bug */
-#ifdef AUTOKEY
+volatile int	debug = 0;	/* debug, not de bug */
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
-#endif
+u_int	lifetime = YEAR;	/* cetificate lifetime (days) */
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 u_int	fstamp;			/* NTP filestamp */
-char	*hostname = NULL;	/* host name (subject name) */
-char	*groupname = NULL;	/* trusted host name (issuer name) */
-char	filename[MAXFILENAME + 1]; /* file name */
+char	*hostname = NULL;	/* host name */
+char	*groupname = NULL;	/* group name */
+char	*certname = NULL;	/* certificate subjetc/issuer name */
 char	*passwd1 = NULL;	/* input private key password */
 char	*passwd2 = NULL;	/* output private key password */
+char	filename[MAXFILENAME + 1]; /* file name */
 #ifdef AUTOKEY
 long	d0, d1, d2, d3;		/* callback counters */
 #endif	/* AUTOKEY */
@@ -265,9 +266,9 @@ main(
 	 * Process options, initialize host name and timestamp.
 	 */
 	gethostname(hostbuf, MAXHOSTNAME);
-	hostname = hostbuf;
+	hostname = groupname = certname = passwd1 = hostbuf;
+	passwd2 = NULL;
 	gettimeofday(&tv, 0);
-
 	epoch = tv.tv_sec;
 
 	{
@@ -280,7 +281,6 @@ main(
 		md5key++;
 
 #ifdef AUTOKEY
-	passwd1 = hostbuf;
 	if (HAVE_OPT( PVT_PASSWD ))
 		passwd1 = strdup(OPT_ARG( PVT_PASSWD ));
 
@@ -314,7 +314,7 @@ main(
 		scheme = OPT_ARG( CERTIFICATE );
 
 	if (HAVE_OPT( SUBJECT_NAME ))
-		hostname = strdup(OPT_ARG( SUBJECT_NAME ));
+		certname = strdup(OPT_ARG( SUBJECT_NAME ));
 
 	if (HAVE_OPT( ISSUER_NAME ))
 		groupname = strdup(OPT_ARG( ISSUER_NAME ));
@@ -682,7 +682,7 @@ main(
 			exit (-1);
 	}
 	if (exten == NULL)
-		x509(pkey_sign, ectx, grpkey, exten, hostname);
+		x509(pkey_sign, ectx, grpkey, exten, certname);
 	else
 		x509(pkey_sign, ectx, grpkey, exten, groupname);
 #endif	/* AUTOKEY */
@@ -1365,8 +1365,8 @@ gen_gqkey(
  *
  * How it works
  *
- * The scheme goes like this. Bob has the server values (p, E, q, gbar,
- * ghat) and Alice has the client values (p, xbar, xhat).
+ * The scheme goes like this. Bob has the server values (p, E, q,
+ * gbar, ghat) and Alice has the client values (p, xbar, xhat).
  *
  * Alice rolls new random nonce r mod p and sends to Bob in the MV
  * request message. Bob rolls random nonce k mod q, encrypts y = r E^k
@@ -1529,7 +1529,6 @@ gen_mvkey(
 	 */
 	for (i = 0; i <= n; i++) {
 		a[i] = BN_new();
-
 		BN_one(a[i]);
 	}
 	for (j = 1; j <= n; j++) {
@@ -1549,7 +1548,6 @@ gen_mvkey(
 	 */
 	for (i = 0; i <= n; i++) {
 		g[i] = BN_new();
-
 		BN_mod_exp(g[i], dsa->g, a[i], dsa->p, ctx);
 	}
 
@@ -1628,6 +1626,7 @@ gen_mvkey(
 		for (i = 1; i <= n; i++) {
 			if (i == j)
 				continue;
+
 			BN_mod_exp(u, x[i], v, dsa->q, ctx);
 			BN_add(xbar[j], xbar[j], u);
 		}
@@ -1644,9 +1643,7 @@ gen_mvkey(
 	 * additional keys, so we sail on with only token revocations.
 	 */
 	s = BN_new();
-
 	BN_copy(s, dsa->q);
-	BN_div(s, u, s, s1[10], ctx);
 	BN_div(s, u, s, s1[n], ctx);
 
 	/*
@@ -1658,7 +1655,6 @@ gen_mvkey(
 	 * changed.
 	 */
 	bige = BN_new(); gbar = BN_new(); ghat = BN_new();
-
 	BN_mod_exp(bige, biga, s, dsa->p, ctx);
 	BN_mod_exp(gbar, dsa->g, s, dsa->p, ctx);
 	BN_mod_mul(v, s, b, dsa->q, ctx);
@@ -1746,7 +1742,6 @@ gen_mvkey(
 	fprintf(stderr, "Generating %d MV client keys\n", n);
 	for (j = 1; j <= n; j++) {
 		sdsa = DSA_new();
-
 		sdsa->p = BN_dup(dsa->p);
 		sdsa->q = BN_dup(BN_value_one()); 
 		sdsa->g = BN_dup(BN_value_one()); 
@@ -1838,7 +1833,7 @@ x509	(
 	X509_set_serialNumber(cert, serial);
 	ASN1_INTEGER_free(serial);
 	X509_time_adj(X509_get_notBefore(cert), 0L, &epoch);
-	X509_time_adj(X509_get_notAfter(cert), YEAR, &epoch);
+	X509_time_adj(X509_get_notAfter(cert), lifetime * DAY, &epoch);
 	subj = X509_get_subject_name(cert);
 	X509_NAME_add_entry_by_txt(subj, "commonName", MBSTRING_ASC,
 	    (unsigned char *) name, strlen(name), -1, 0);

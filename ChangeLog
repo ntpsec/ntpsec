@@ -1,6 +1,7 @@
 * [Bug 1681] from 4.2.6p3-RC10: More sntp logging cleanup.
 * [Bug 1683] from 4.2.6p3-RC10: Non-localhost on loopback exempted from
   nic rules.
+* [Bug 1719] Cleanup for ntp-keygen and fix -V crash, from Dave Mills.
 (4.2.7p80) 2010/11/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1574] from 4.2.6p3-RC9: sntp doesn't set tv_usec correctly.
 * [Bug 1681] from 4.2.6p3-RC9: sntp logging cleanup.
