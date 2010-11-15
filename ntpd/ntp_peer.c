@@ -18,7 +18,9 @@
 #endif /* OPENSSL */
 
 #ifdef SYS_WINNT
-extern int accept_wildcard_if_for_winnt;
+int accept_wildcard_if_for_winnt;
+#else
+const int accept_wildcard_if_for_winnt = FALSE;
 #endif
 
 /*
@@ -551,36 +553,32 @@ peer_refresh_interface(
 	struct peer *peer
 	)
 {
-	struct interface *niface, *piface;
+	endpt *	niface;
+	endpt *	piface;
 
 	niface = select_peerinterface(peer, &peer->srcadr, NULL,
-	    peer->cast_flags);
+				      peer->cast_flags);
 
-#ifdef DEBUG
-	if (debug > 3)
-	{
-		printf(
-		    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
-		    peer->dstadr == NULL ? "<null>" :
-		    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
-		    peer->hmode, peer->version, peer->minpoll,
-		    peer->maxpoll, peer->flags, peer->cast_flags,
-		    peer->ttl, peer->keyid);
-		if (niface != NULL) {
-			printf(
-			    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, ",
-			    niface->fd,  niface->bfd, niface->name,
-			    niface->flags, niface->scopeid);
-			printf(", sin=%s", stoa((&niface->sin)));
-			if (niface->flags & INT_BROADCAST)
-				printf(", bcast=%s,",
-				    stoa((&niface->bcast)));
-			printf(", mask=%s\n", stoa((&niface->mask)));
-		} else {
-			printf("<NONE>\n");
-		}
+	DPRINTF(4, (
+	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
+	    peer->dstadr == NULL ? "<null>" :
+	    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
+	    peer->hmode, peer->version, peer->minpoll,
+	    peer->maxpoll, peer->flags, peer->cast_flags,
+	    peer->ttl, peer->keyid));
+	if (niface != NULL) {
+		DPRINTF(4, (
+		    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, sin=%s",
+		    niface->fd,  niface->bfd, niface->name,
+		    niface->flags, niface->scopeid,
+		    stoa((&niface->sin))));
+		if (niface->flags & INT_BROADCAST)
+			DPRINTF(4, (", bcast=%s",
+				stoa((&niface->bcast))));
+		DPRINTF(4, (", mask=%s\n", stoa((&niface->mask))));
+	} else {
+		DPRINTF(4, ("<NONE>\n"));
 	}
-#endif
 
 	piface = peer->dstadr;
 	set_peerdstadr(peer, niface);
@@ -636,16 +634,19 @@ refresh_all_peerinterfaces(void)
 /*
  * find an interface suitable for the src address
  */
-static struct interface *
+static endpt *
 select_peerinterface(
-	struct peer *		peer,
-	sockaddr_u *		srcadr,
-	struct interface *	dstadr,
-	u_char			cast_flags
+	struct peer *	peer,
+	sockaddr_u *	srcadr,
+	endpt *		dstadr,
+	u_char		cast_flags
 	)
 {
-	struct interface *interface;
-  
+	endpt *ep;
+	endpt *wild;
+
+	wild = ANY_INTERFACE_CHOOSE(srcadr);
+
 	/*
 	 * Initialize the peer structure and dance the interface jig.
 	 * Reference clocks step the loopback waltz, the others
@@ -654,48 +655,40 @@ select_peerinterface(
 	 * This might happen in some systems and would preclude proper
 	 * operation with public key cryptography.
 	 */
-	if (ISREFCLOCKADR(srcadr))
-		interface = loopback_interface;
-	else
-		if (cast_flags & (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
-			interface = findbcastinter(srcadr);
-#ifdef DEBUG
-			if (debug > 3) {
-				if (interface != NULL)
-					printf("Found *-cast interface address %s, for address %s\n",
-					    stoa(&(interface)->sin), stoa(srcadr));
-				else
-					printf("No *-cast local address found for address %s\n",
-					       stoa(srcadr));
-			}
-#endif
-			/*
-			 * If it was a multicast packet,
-			 * findbcastinter() may not find it, so try a
-			 * little harder.
-			 */
-			if (interface == ANY_INTERFACE_CHOOSE(srcadr))
-				interface = findinterface(srcadr);
-		}
-		else if (dstadr != NULL && dstadr !=
-		    ANY_INTERFACE_CHOOSE(srcadr))
-			interface = dstadr;
+	if (ISREFCLOCKADR(srcadr)) {
+		ep = loopback_interface;
+	} else if (cast_flags & 
+		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
+		ep = findbcastinter(srcadr);
+		if (ep != NULL)
+			DPRINTF(4, ("Found *-cast interface %s for address %s\n",
+				stoa(&ep->sin), stoa(srcadr)));
 		else
-			interface = findinterface(srcadr);
-
+			DPRINTF(4, ("No *-cast local address found for address %s\n",
+				stoa(srcadr)));
+	} else {
+		ep = dstadr;
+		if (NULL == ep)
+			ep = wild;
+	} 
+	/*
+	 * If it is a multicast address, findbcastinter() may not find
+	 * it.  For unicast, we get to find the interface when dstadr is
+	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).  Either
+	 * way, try a little harder.
+	 */
+	if (wild == ep)
+		ep = findinterface(srcadr);
 	/*
 	 * we do not bind to the wildcard interfaces for output 
 	 * as our (network) source address would be undefined and
 	 * crypto will not work without knowing the own transmit address
 	 */
-	if (interface != NULL && interface->flags & INT_WILDCARD)
-#ifdef SYS_WINNT
-		if ( !accept_wildcard_if_for_winnt )  
-#endif
-			interface = NULL;
+	if (ep != NULL && INT_WILDCARD & ep->flags)
+		if (!accept_wildcard_if_for_winnt)  
+			ep = NULL;
 
-
-	return interface;
+	return ep;
 }
 
 /*

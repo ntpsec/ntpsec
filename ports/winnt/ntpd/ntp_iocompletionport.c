@@ -830,30 +830,30 @@ OnWriteComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 
 
 /*
- * Return value is really GetLastError-style error code
- * which is a DWORD but using int, which is large enough,
- * decreases #ifdef forest in ntp_io.c harmlessly.
+ * mimic sendto() interface
  */
-int	
+int
 io_completion_port_sendto(
-	struct interface *inter,	
-	struct pkt *pkt,	
-	int len, 
-	sockaddr_u* dest
+	int		fd,
+	void  *		pkt,
+	size_t		len,
+	sockaddr_u *	dest
 	)
 {
-	WSABUF wsabuf;
-	transmitbuf_t *buff;
-	DWORD Result = ERROR_SUCCESS;
-	int errval;
-	int AddrLen;
-	IoCompletionInfo *lpo;
-	DWORD Flags;
+	WSABUF			wsabuf;
+	transmitbuf_t *		buff;
+	DWORD			Result;
+	int			errval;
+	int			AddrLen;
+	IoCompletionInfo *	lpo;
+	DWORD			Flags;
 
-	lpo = (IoCompletionInfo *) GetHeapAlloc("io_completion_port_sendto");
-
-	if (lpo == NULL)
-		return ERROR_OUTOFMEMORY;
+	Result = ERROR_SUCCESS;
+	lpo = (IoCompletionInfo *)GetHeapAlloc("io_completion_port_sendto");
+	if (lpo == NULL) {
+		SetLastError(ERROR_OUTOFMEMORY);
+		return -1;
+	}
 
 	if (len <= sizeof(buff->pkt)) {
 		buff = get_trans_buf();
@@ -861,9 +861,9 @@ io_completion_port_sendto(
 		if (buff == NULL) {
 			msyslog(LOG_ERR, "No more transmit buffers left - data discarded");
 			FreeHeap(lpo, "io_completion_port_sendto");
-			return ERROR_OUTOFMEMORY;
+			SetLastError(ERROR_OUTOFMEMORY);
+			return -1;
 		}
-
 
 		memcpy(&buff->pkt, pkt, len);
 		wsabuf.buf = buff->pkt;
@@ -874,12 +874,10 @@ io_completion_port_sendto(
 		lpo->trans_buf = buff;
 		Flags = 0;
 
-		Result = WSASendTo(inter->fd, &wsabuf, 1, NULL, Flags,
-				   &dest->sa, AddrLen, 
+		Result = WSASendTo(fd, &wsabuf, 1, NULL, Flags,
+				   &dest->sa, AddrLen,
 				   (LPOVERLAPPED)lpo, NULL);
-
-		if(Result == SOCKET_ERROR)
-		{
+		if (Result == SOCKET_ERROR) {
 			errval = WSAGetLastError();
 			switch (errval) {
 
@@ -905,13 +903,16 @@ io_completion_port_sendto(
 		if (debug > 3)
 			printf("WSASendTo - %d bytes to %s : %d\n", len, stoa(dest), Result);
 #endif
-		return (Result);
-	}
-	else {
+		if (ERROR_SUCCESS == Result)
+			return len;
+		SetLastError(Result);
+		return -1;
+	} else {
 #ifdef DEBUG
 		if (debug) printf("Packet too large: %d Bytes\n", len);
 #endif
-		return ERROR_INSUFFICIENT_BUFFER;
+		SetLastError(ERROR_INSUFFICIENT_BUFFER);
+		return -1;
 	}
 }
 
@@ -923,7 +924,8 @@ int
 async_write(
 	int fd,
 	const void *data,
-	unsigned int count)
+	unsigned int count
+	)
 {
 	transmitbuf_t *buff;
 	IoCompletionInfo *lpo;

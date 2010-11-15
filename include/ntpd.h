@@ -68,8 +68,8 @@ extern	unsigned WINAPI	ntp_intres_thread	(void *);
 
 /* ntp_io.c */
 typedef struct interface_info {
-	struct interface *	interface;
-	u_char			action;
+	endpt *	ep;
+	u_char	action;
 } interface_info_t;
 
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
@@ -77,10 +77,10 @@ typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 extern  int	disable_dynamic_updates;
 
 extern	void	interface_enumerate	(interface_receiver_t, void *);
-extern	struct interface *findinterface	(sockaddr_u *);
-extern	struct interface *findbcastinter(sockaddr_u *);
-extern	void	enable_broadcast	(struct interface *, sockaddr_u *);
-extern	void	enable_multicast_if	(struct interface *, sockaddr_u *);
+extern	endpt *	findinterface		(sockaddr_u *);
+extern	endpt *	findbcastinter		(sockaddr_u *);
+extern	void	enable_broadcast	(endpt *, sockaddr_u *);
+extern	void	enable_multicast_if	(endpt *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 
 extern	void	init_io 	(void);
@@ -327,9 +327,9 @@ extern u_long	io_timereset;		/* time counters were reset */
 /*
  * Interface stuff
  */
-extern struct interface *any_interface;	/* default ipv4 interface */
-extern struct interface *any6_interface;/* default ipv6 interface */
-extern struct interface *loopback_interface; /* loopback interface */
+extern endpt *	any_interface;		/* IPv4 wildcard */
+extern endpt *	any6_interface;		/* IPv6 wildcard */
+extern endpt *	loopback_interface;	/* IPv4 loopback for refclocks */
 
 /*
  * File descriptor masks etc. for call to select

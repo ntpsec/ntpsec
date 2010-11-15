@@ -14,8 +14,7 @@ extern	int	io_completion_port_add_socket(SOCKET fd, struct interface *);
 
 struct refclockio; /* in ntp_refclock.h but inclusion here triggers problems */
 extern	int	io_completion_port_add_clock_io(struct refclockio *rio);
-
-extern	int	io_completion_port_sendto(struct interface *, struct pkt *, int, sockaddr_u *);
+extern	int	io_completion_port_sendto(int, void *, size_t, sockaddr_u *);
 
 extern	HANDLE	get_io_event(void);
 extern	HANDLE	get_exit_event(void);

@@ -42,8 +42,8 @@ static BOOL computer_shutting_down = FALSE;
 static int glb_argc;
 static char **glb_argv;
 HANDLE hServDoneEvent = NULL;
-int accept_wildcard_if_for_winnt;
 extern volatile int debug;
+extern int accept_wildcard_if_for_winnt;
 
 /*
  * Forward declarations
@@ -94,8 +94,8 @@ int main( int argc, char *argv[] )
 
 	/* Under original Windows NT we must not discard the wildcard */
 	/* socket to workaround a bug in NT's getsockname(). */
-	if ( isc_win32os_majorversion() <= 4 )
-		accept_wildcard_if_for_winnt = 1;
+	if (isc_win32os_majorversion() <= 4)
+		accept_wildcard_if_for_winnt = TRUE;
 
 	/*
 	 * This is a hack in the Windows port of ntpd.  Before the

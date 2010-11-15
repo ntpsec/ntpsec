@@ -1681,7 +1681,7 @@ config_other_modes(
 	addr_node = queue_head(ptree->manycastserver);
 	if (addr_node != NULL) {
 		do {
-			memset((char *)&addr_sock, 0, sizeof(addr_sock));
+			ZERO_SOCK(&addr_sock);
 			AF(&addr_sock) = (u_short)addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
@@ -1696,12 +1696,11 @@ config_other_modes(
 	addr_node = queue_head(ptree->multicastclient);
 	if (addr_node != NULL) {
 		do {
-			memset((char *)&addr_sock, 0, sizeof(addr_sock));
+			ZERO_SOCK(&addr_sock);
 			AF(&addr_sock) = (u_short)addr_node->type;
 
 			if (getnetnum(addr_node->address, &addr_sock, 1, t_UNK)  == 1)
 				proto_config(PROTO_MULTICAST_ADD, 0, 0., &addr_sock);
-
 
 			addr_node = next_node(addr_node);
 		} while (addr_node != NULL);
