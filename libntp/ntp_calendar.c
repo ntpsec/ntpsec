@@ -553,17 +553,17 @@ ntpcal_rd_to_date(
 	split = ntpcal_split_eradays(rd - 1, &leaps);
 	retv  = leaps;
 	/* get year and day-of-year */
-	jd->year = split.hi + 1;
+	jd->year = (u_short)split.hi + 1;
 	if (jd->year != split.hi + 1) {
 		jd->year = 0;
 		retv	 = -1;	/* bletch. overflow trouble. */
 	}
-	jd->yearday = split.lo + 1;
+	jd->yearday = (u_short)split.lo + 1;
 
 	/* convert to month and mday */
 	split = ntpcal_split_yeardays(split.lo, leaps);
-	jd->month    = split.hi + 1;
-	jd->monthday = split.lo + 1;
+	jd->month    = (u_char)split.hi + 1;
+	jd->monthday = (u_char)split.lo + 1;
 
 	return retv ? retv : leaps;
 }
@@ -1286,9 +1286,9 @@ isocal_ntp_to_date(
 
 	/* split time part */
 	ds.hi += priv_timesplit(ts, ds.lo);
-	id->hour   = ts[0];
-	id->minute = ts[1];
-	id->second = ts[2];
+	id->hour   = (u_char)ts[0];
+	id->minute = (u_char)ts[1];
+	id->second = (u_char)ts[2];
 
 	/* split date part */
 	ds.lo = ds.hi + DAY_NTP_STARTS - 1;	/* elapsed era days  */
@@ -1298,11 +1298,11 @@ isocal_ntp_to_date(
 		ds.hi -= 1;
 		ds.lo += 7;
 	}
-	id->weekday = ds.lo + 1;		/* weekday result    */
+	id->weekday = (u_char)ds.lo + 1;	/* weekday result    */
 
 	ds = isocal_split_eraweeks(ds.hi);	/* elapsed years&week*/
-	id->year = ds.hi + 1;			/* shift to current  */
-	id->week = ds.lo + 1;
+	id->year = (u_short)ds.hi + 1;		/* shift to current  */
+	id->week = (u_char)ds.lo + 1;
 
 	return (ds.hi >= 0 && ds.hi < 0xFFFFU);
 }

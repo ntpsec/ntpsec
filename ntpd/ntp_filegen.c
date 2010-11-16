@@ -349,7 +349,6 @@ filegen_setup(
 	)
 {
 	int    current = 0;
-	u_long new_gen = ~ (u_long) 0;
 	time_t pivot   = time(NULL);
 
 	if (!(gen->flag & FGEN_FLAG_ENABLED)) {
@@ -368,7 +367,7 @@ filegen_setup(
 		break;
 
 	case FILEGEN_PID:
-		current = (gen->id_lo == getpid());
+		current = ((int)gen->id_lo == getpid());
 		break;
 
 	case FILEGEN_AGE:

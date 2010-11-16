@@ -291,7 +291,6 @@ static void	delete_interface_from_list(endpt *);
 static void	close_and_delete_fd_from_list(SOCKET);
 static void	add_addr_to_list	(sockaddr_u *, endpt *);
 static void	create_wildcards	(u_short);
-static endpt *	getinterface		(sockaddr_u *, u_int32);
 static endpt *	findlocalinterface	(sockaddr_u *, int, int);
 static endpt *	findclosestinterface	(sockaddr_u *, int);
 #ifdef MULTICAST_NONEWSOCKET
@@ -1094,7 +1093,7 @@ remove_interface(
 	}
 
 	ninterfaces--;
-	ntp_monclearinterface(ep);
+	mon_clearinterface(ep);
 
 	/* remove restrict interface entry */
 	SET_HOSTMASK(&resmask, AF(&ep->sin));
@@ -2170,7 +2169,7 @@ enable_broadcast(
 #ifdef OPEN_BCAST_SOCKET 
 /*
  * Enable a broadcast address to a given socket
- * The socket is in the inter_list all we need to do is enable
+ * The socket is in the ep_list all we need to do is enable
  * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
@@ -2204,7 +2203,7 @@ socket_broadcast_enable(
 
 /*
  * Remove a broadcast address from a given socket
- * The socket is in the inter_list all we need to do is disable
+ * The socket is in the ep_list all we need to do is disable
  * broadcasting. It is not this function's job to select the socket
  */
 static isc_boolean_t
@@ -2357,7 +2356,7 @@ enable_multicast_if(
 
 /*
  * Add a multicast address to a given socket
- * The socket is in the inter_list all we need to do is enable
+ * The socket is in the ep_list all we need to do is enable
  * multicasting. It is not this function's job to select the socket
  */
 #ifdef MCAST
@@ -2441,7 +2440,7 @@ socket_multicast_enable(
 
 /*
  * Remove a multicast address from a given socket
- * The socket is in the inter_list all we need to do is disable
+ * The socket is in the ep_list all we need to do is disable
  * multicasting. It is not this function's job to select the socket
  */
 static isc_boolean_t

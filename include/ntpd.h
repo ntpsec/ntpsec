@@ -390,7 +390,7 @@ extern u_int	sys_ifnum;		/* next .ifnum to assign */
 extern endpt *	any_interface;		/* IPv4 wildcard */
 extern endpt *	any6_interface;		/* IPv6 wildcard */
 extern endpt *	loopback_interface;	/* IPv4 loopback for refclocks */
-extern struct interface *inter_list;	/* linked list */
+extern endpt *	ep_list;		/* linked list */
 
 /* ntp_loopfilter.c */
 extern double	drift_comp;		/* clock frequency (s/s) */

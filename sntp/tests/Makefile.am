@@ -22,7 +22,6 @@ tests_SOURCES = $(base_SOURCES)		\
 		keyFile.cpp		\
 		kodDatabase.cpp		\
 		kodFile.cpp		\
-		logFile.cpp		\
 		networking.cpp		\
 		packetHandling.cpp	\
 		packetProcessing.cpp	\
@@ -37,13 +36,11 @@ dist_check_SCRIPTS =	test-driver
 
 EXTRA_DIST =	data
 
-CLEANFILES =	data/log-output-debug		\
-		data/kod-output-multiple	\
+CLEANFILES =	data/kod-output-multiple	\
 		data/kod-output-single		\
 		data/debug-output-pkt		\
 		data/debug-output-lfp-dec	\
 		data/kod-output-blank		\
-		data/log-output-log		\
 		data/debug-output-lfp-bin	\
 		data/debug-output-lfp-hex	\
 		$(NULL)

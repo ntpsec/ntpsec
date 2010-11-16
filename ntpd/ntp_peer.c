@@ -622,16 +622,14 @@ peer_refresh_interface(
 	endpt *	niface;
 	endpt *	piface;
 
-	niface = select_peerinterface(peer, &peer->srcadr, NULL,
-				      peer->cast_flags);
+	niface = select_peerinterface(p, &p->srcadr, NULL);
 
 	DPRINTF(4, (
 	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
-	    peer->dstadr == NULL ? "<null>" :
-	    stoa(&peer->dstadr->sin), stoa(&peer->srcadr),
-	    peer->hmode, peer->version, peer->minpoll,
-	    peer->maxpoll, peer->flags, peer->cast_flags,
-	    peer->ttl, peer->keyid));
+	    p->dstadr == NULL ? "<null>" :
+	    stoa(&p->dstadr->sin), stoa(&p->srcadr), p->hmode,
+	    p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
+	    p->ttl, p->keyid));
 	if (niface != NULL) {
 		DPRINTF(4, (
 		    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, sin=%s",
@@ -646,9 +644,9 @@ peer_refresh_interface(
 		DPRINTF(4, ("<NONE>\n"));
 	}
 
-	piface = peer->dstadr;
-	set_peerdstadr(peer, niface);
-	if (peer->dstadr) {
+	piface = p->dstadr;
+	set_peerdstadr(p, niface);
+	if (p->dstadr) {
 		/*
 		 * clear crypto if we change the local address
 		 */

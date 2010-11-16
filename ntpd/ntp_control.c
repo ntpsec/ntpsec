@@ -3334,11 +3334,11 @@ static void read_ifstats(
 	struct interface *	la;
 
 	/*
-	 * loop over [0..sys_ifnum] searching inter_list for each
+	 * loop over [0..sys_ifnum] searching ep_list for each
 	 * ifnum in turn.
 	 */
 	for (ifidx = 0; ifidx < sys_ifnum; ifidx++) {
-		for (la = inter_list; la != NULL; la = la->link)
+		for (la = ep_list; la != NULL; la = la->elink)
 			if (ifidx == la->ifnum)
 				break;
 		if (NULL == la)
