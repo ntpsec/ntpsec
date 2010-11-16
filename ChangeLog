@@ -1,4 +1,9 @@
 ---
+
+* [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
+  to CPPFLAGS or LDFLAGS.
+
+---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1681] More sntp logging cleanup.
