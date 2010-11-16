@@ -59,7 +59,7 @@ sntp_main (
 	if (HAVE_OPT(FILELOG))
 		open_logfile(OPT_ARG(FILELOG));
 
-	log_msg("Started sntp", LOG_INFO);
+	msyslog(LOG_NOTICE, "Started sntp");
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -196,7 +196,7 @@ handle_pkt (
 {
 	struct timeval tv_dst;
 	int sw_case, digits;
-	char *hostname = NULL, *log_str, *ref, *ts_str = NULL;
+	char *hostname = NULL, *ref, *ts_str = NULL;
 	double offset, precision, root_dispersion;
 	char addr_buf[INET6_ADDRSTRLEN];
 
@@ -227,13 +227,8 @@ handle_pkt (
 				   ref[0], ref[1], ref[2], ref[3],
 				   hostname);
 
-		log_str = emalloc(INET6_ADDRSTRLEN + 72);
-		snprintf(log_str, INET6_ADDRSTRLEN + 72, 
-			 "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections", 
-			 ref[0], ref[1], ref[2], ref[3],
-			 hostname);
-		log_msg(log_str, LOG_WARNING);
-		free(log_str);
+		msyslog(LOG_WARNING, "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections",
+			ref[0], ref[1], ref[2], ref[3], hostname);
 		break;
 
 	case KOD_RATE:
@@ -407,12 +402,12 @@ set_li_vn_mode (
 	) 
 {
 	if (leap > 3) {
-		debug_msg("set_li_vn_mode: leap > 3 using max. 3");
+		msyslog(LOG_DEBUG, "set_li_vn_mode: leap > 3 using max. 3");
 		leap = 3;
 	}
 
 	if (mode > 7) {
-		debug_msg("set_li_vn_mode: mode > 7, using client mode 3");
+		msyslog(LOG_DEBUG, "set_li_vn_mode: mode > 7, using client mode 3");
 		mode = 3;
 	}
 

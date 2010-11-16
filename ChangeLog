@@ -1,6 +1,7 @@
 ---
 
 * [Bug 1725] ntpd sends multicast from only one address.
+* Remove log_msg() and debug_msg() from sntp in favor of msyslog().
 
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
