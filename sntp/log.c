@@ -7,25 +7,6 @@ char *progname = "sntp";	/* for msyslog use too */
 static void cleanup_log(void);
 
 void
-log_msg(
-	const char *	text, 
-	int		type
-	)
-{
-	msyslog(type, "%s", text);
-}
-
-
-void
-debug_msg(
-	const char *text
-	)
-{
-	msyslog(LOG_DEBUG, "%s", text);
-}
-
-
-void
 init_logging(void)
 {
 	openlog(progname, LOG_PID | LOG_CONS, OPENLOG_FAC);

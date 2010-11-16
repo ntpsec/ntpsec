@@ -19,9 +19,6 @@
 # define OPENLOG_FAC	LOG_DAEMON
 #endif
 
-void log_msg(const char *text, int type);
-void debug_msg(const char *text);
-
 void init_logging(void);
 void open_logfile(const char *logfile);
 

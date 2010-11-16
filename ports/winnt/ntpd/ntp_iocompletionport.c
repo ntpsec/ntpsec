@@ -780,16 +780,16 @@ OnWriteComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 /*
  * io_completion_port_sendto() -- sendto() replacement for Windows
  *
- * Returns 0 after successful send.
+ * Returns len after successful send.
  * Returns -1 for any error, with the error code available via
  *	msyslog() %m, or GetLastError().
  */
-int	
+int
 io_completion_port_sendto(
-	struct interface *inter,	
-	struct pkt *pkt,	
-	int len, 
-	sockaddr_u* dest
+	int		fd,
+	void  *		pkt,
+	size_t		len,
+	sockaddr_u *	dest
 	)
 {
 	static u_long time_next_ifscan_after_error;
@@ -804,7 +804,7 @@ io_completion_port_sendto(
 	AddrLen = SOCKLEN(dest);
 	octets_sent = 0;
 
-	Result = WSASendTo(inter->fd, &wsabuf, 1, &octets_sent, 0,
+	Result = WSASendTo(fd, &wsabuf, 1, &octets_sent, 0,
 			   &dest->sa, AddrLen, NULL, NULL);
 
 	if (SOCKET_ERROR == Result) {
@@ -823,9 +823,10 @@ io_completion_port_sendto(
 				timer_interfacetimeout(current_time);
 			}
 			DPRINTF(4, ("sendto unexpected network error, interface may be down\n"));
-		} else
+		} else {
 			msyslog(LOG_ERR, "WSASendTo(%s) error %m",
 				stoa(dest));
+		}
 		SetLastError(errval);
 		return -1;
 	}
@@ -839,7 +840,7 @@ io_completion_port_sendto(
 
 	DPRINTF(4, ("sendto %s %d octets\n", stoa(dest), len));
 
-	return 0;
+	return len;
 }
 
 
@@ -850,7 +851,8 @@ int
 async_write(
 	int fd,
 	const void *data,
-	unsigned int count)
+	unsigned int count
+	)
 {
 	void *buff;
 	IoCompletionInfo *lpo;

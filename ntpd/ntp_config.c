@@ -1714,7 +1714,7 @@ config_other_modes(
 
 	addr_node = HEAD_PFIFO(ptree->manycastserver);
 	while (addr_node != NULL) {
-		memset(&addr_sock, 0, sizeof(addr_sock));
+		ZERO_SOCK(&addr_sock);
 		AF(&addr_sock) = addr_node->type;
 		if (1 == getnetnum(addr_node->address, &addr_sock, 1,
 				   t_UNK)) {
@@ -1729,7 +1729,7 @@ config_other_modes(
 	addr_node = HEAD_PFIFO(ptree->multicastclient);
 	if (addr_node != NULL) {
 		do {
-			memset(&addr_sock, 0, sizeof(addr_sock));
+			ZERO_SOCK(&addr_sock);
 			AF(&addr_sock) = addr_node->type;
 			if (1 == getnetnum(addr_node->address,
 					   &addr_sock, 1, t_UNK)) {

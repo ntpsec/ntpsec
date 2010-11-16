@@ -112,18 +112,18 @@ extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
 
 /* ntp_io.c */
 typedef struct interface_info {
-	struct interface *	interface;
-	u_char			action;
+	endpt *	ep;
+	u_char	action;
 } interface_info_t;
 
 typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
 extern	void	interface_enumerate	(interface_receiver_t, void *);
-extern struct interface *getinterface	(sockaddr_u *, int);
-extern struct interface *findinterface	(sockaddr_u *);
-extern struct interface *findbcastinter	(sockaddr_u *);
-extern	void	enable_broadcast	(struct interface *, sockaddr_u *);
-extern	void	enable_multicast_if	(struct interface *, sockaddr_u *);
+extern	endpt *	getinterface		(sockaddr_u *, u_int32);
+extern	endpt *	findinterface		(sockaddr_u *);
+extern	endpt *	findbcastinter		(sockaddr_u *);
+extern	void	enable_broadcast	(endpt *, sockaddr_u *);
+extern	void	enable_multicast_if	(endpt *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
 
 extern	void	init_io 	(void);
@@ -387,9 +387,9 @@ extern  int	disable_dynamic_updates;
 extern fd_set	activefds;
 extern int	maxactivefd;
 extern u_int	sys_ifnum;		/* next .ifnum to assign */
-extern struct interface *any_interface;	/* default ipv4 interface */
-extern struct interface *any6_interface;/* default ipv6 interface */
-extern struct interface *loopback_interface; /* loopback interface */
+extern endpt *	any_interface;		/* IPv4 wildcard */
+extern endpt *	any6_interface;		/* IPv6 wildcard */
+extern endpt *	loopback_interface;	/* IPv4 loopback for refclocks */
 extern struct interface *inter_list;	/* linked list */
 
 /* ntp_loopfilter.c */
