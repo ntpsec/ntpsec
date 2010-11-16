@@ -1,3 +1,5 @@
+* [Bug 1728] from 4.2.6p3-RC11: In ntp_openssl.m4, don't add
+  -I/usr/include or -L/usr/lib to CPPFLAGS or LDFLAGS.
 (4.2.7p81) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1681] from 4.2.6p3-RC10: More sntp logging cleanup.
 * [Bug 1683] from 4.2.6p3-RC10: Non-localhost on loopback exempted from
@@ -473,6 +475,11 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
+  to CPPFLAGS or LDFLAGS.
+
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
 
