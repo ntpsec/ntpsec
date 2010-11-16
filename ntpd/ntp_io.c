@@ -879,8 +879,12 @@ add_interface(
 	)
 {
 	endpt **	pmclisthead;
+	endpt *		scan;
+	endpt *		scan_next;
+	endpt *		unlinked;
 	sockaddr_u *	addr;
-	int		is_linksitelocal;
+	int		ep_linklocal;
+	int		scan_linklocal;
 
 	/*
 	 * Calculate the address hash
@@ -889,38 +893,76 @@ add_interface(
 
 	LINK_SLIST(ep_list, ep, elink);
 	ninterfaces++;
-	if (!ep->ignore_packets && INT_MULTICAST & ep->flags) {
-		pmclisthead = (AF_INET == ep->family)
-				 ? &mc4_list
-				 : &mc6_list;
+	/* the rest is for enabled multicast-capable addresses only */
+	if (ep->ignore_packets || !(INT_MULTICAST & ep->flags))
+		return;
+	pmclisthead = (AF_INET == ep->family)
+			 ? &mc4_list
+			 : &mc6_list;
 
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-		addr = &ep->sin;
-		is_linksitelocal = (AF_INET6 == ep->family &&
-			(IN6_IS_ADDR_MC_LINKLOCAL(PSOCK_ADDR6(addr)) ||
-			 IN6_IS_ADDR_MC_SITELOCAL(PSOCK_ADDR6(addr))));
+	addr = &ep->sin;
+	ep_linklocal = (AF_INET6 == ep->family &&
+		IN6_IS_ADDR_MC_LINKLOCAL(PSOCK_ADDR6(addr)));
 #else
-		is_linksitelocal = FALSE;
+	ep_linklocal = FALSE;
 #endif
-		/*
-		 * Add link/site local at the tail of the multicast-
-		 * capable unicast interfaces list, so that ntpd will
-		 * send from global addresses before link-/site-local
-		 * ones.
-		 */
-		if (is_linksitelocal)
-			LINK_TAIL_SLIST(*pmclisthead, ep, mclink, endpt);
-		else
-			LINK_SLIST(*pmclisthead, ep, mclink);
-		DPRINTF(4, ("added %s to %s of IPv%s multicast-capable unicast local address list\n",
-			stoa(&ep->sin),
-			(is_linksitelocal)
-			    ? "tail"
-			    : "head",
-			(AF_INET == ep->family)
-			    ? "4"
-			    : "6"));
+	/*
+	 * If we have multiple local addresses on the same
+	 * network interface, and some are link-local, do not
+	 * multicast out from the link-local addresses by
+	 * default, to avoid duplicate manycastclient
+	 * associations between v6 peers using link-local and
+	 * global addresses.  link-local can still be forced
+	 * using "nic ignore myv6globalprefix::/64".
+	 */
+	for (scan = *pmclisthead;
+	     scan != NULL && (AF_INET6 == ep->family);
+	     scan = scan_next) {
+
+		scan_next = scan->mclink;
+		if (strcmp(ep->name, scan->name))
+			continue;
+		addr = &scan->sin;
+		scan_linklocal =
+			IN6_IS_ADDR_MC_LINKLOCAL(PSOCK_ADDR6(addr));
+		if (ep_linklocal && !scan_linklocal) {
+			DPRINTF(4, ("did not add %s to %s of IPv6 multicast-capable list which already has %s\n",
+				stoa(&ep->sin),
+				(ep_linklocal)
+				    ? "tail"
+				    : "head",
+				stoa(&scan->sin)));
+			return;
+		}
+		if (scan_linklocal && !ep_linklocal) {
+			UNLINK_SLIST(unlinked, *pmclisthead,
+				     scan, mclink, endpt);
+			DPRINTF(4, ("%s %s from IPv6 multicast-capable list to add %s\n",
+				(unlinked != scan)
+				    ? "Failed to remove"
+				    : "removed",
+				stoa(&scan->sin), stoa(&ep->sin)));
+		}
 	}
+	/*
+	 * Add link/site local at the tail of the multicast-
+	 * capable unicast interfaces list, so that ntpd will
+	 * send from global addresses before link-/site-local
+	 * ones.
+	 */
+	if (ep_linklocal)
+		LINK_TAIL_SLIST(*pmclisthead, ep, mclink, endpt);
+	else
+		LINK_SLIST(*pmclisthead, ep, mclink);
+	DPRINTF(4, ("added %s to %s of IPv%s multicast-capable unicast local address list\n",
+		stoa(&ep->sin),
+		(ep_linklocal)
+		    ? "tail"
+		    : "head",
+		(AF_INET == ep->family)
+		    ? "4"
+		    : "6"));
 }
 
 
@@ -943,11 +985,11 @@ remove_interface(
 				 ? &mc4_list
 				 : &mc6_list;
 		UNLINK_SLIST(unlinked, *pmclisthead, ep, mclink, endpt);
-		DPRINTF(4, ("%s %s from IPv%s multicast-capable unicast local address list\n",
-			(unlinked != NULL)
-			    ? "removed"
-			    : "failed to remove",
+		DPRINTF(4, ("%s %s IPv%s multicast-capable unicast local address list\n",
 			stoa(&ep->sin),
+			(unlinked != NULL)
+			    ? "removed from"
+			    : "not found on",
 			(AF_INET == ep->family)
 			    ? "4"
 			    : "6"));
