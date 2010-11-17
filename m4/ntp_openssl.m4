@@ -107,10 +107,18 @@ AC_MSG_RESULT([$ans])
 case "$ntp_openssl" in
  yes)
     # We have OpenSSL inc/lib - use them.
-    CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
-    LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-    case "$need_dash_r" in
-     1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
+    case "$OPENSSL_INC" in
+     /usr/include) ;;
+     *)	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
+	;;
+    esac
+    case "$OPENSSL_LIB" in
+     /usr/lib) ;;
+     *)	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+	case "$need_dash_r" in
+	 1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB" ;;
+	esac
+	;;
     esac
     AC_SUBST(LCRYPTO, [-lcrypto])
     AC_DEFINE(OPENSSL, , [Use OpenSSL?])

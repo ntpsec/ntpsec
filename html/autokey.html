@@ -9,7 +9,7 @@
 <body>
 <h3>Autokey Public-Key Authentication</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->11-Nov-2010  3:16<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->15-Nov-2010  22:56<!-- #EndDate -->
   UTC</p>
 <hr>
 <h4>Table of Contents</h4>
@@ -50,7 +50,7 @@
 <p><tt># ntp_keygen</tt></p>
 <p>The options are copied from the current certificate.</p>
 <p>&nbsp;</p>
-<p>There are three timeouts associated with the Autokey scheme. The key list timeout, which defaults to about 1.1 h, specifies the interval between generating new key lists. The revoke timeout, which defaults to about 36 hr, specifies the interval between generating new private values. The restart timeout, with default about 5 d, specifies the interval between protocol restarts to refresh public values. In general, the behavior when these timeouts expire is not affected by the issues discussed on this page.</p>
+<p>There are three timeouts associated with the Autokey scheme. The key list timeout set by the <tt>automax</tt> coomand, which defaults to about 1.1 h, specifies the interval between generating new key lists. The revoke timeout set by the <tt>revoke</tt> command, which defaults to about 36 hr, specifies the interval between generating new private values. As this causes all association to refresh the cookies, the value should be set to zero. The restart timeout, with default to about 5 d, specifies the interval between protocol restarts to refresh public values. In general, the behavior when these timeouts expire is not affected by the issues discussed on this page.</p>
 <h4 id="group">NTP Secure Groups</h4>
 <p>NTP secure groups are used to define cryptographic compartments and security
   hierarchies. All hosts belonging to a secure group have the same group name

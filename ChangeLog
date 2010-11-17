@@ -1,7 +1,13 @@
 * [Bug 1725] from 4.2.6p3-RC11: ntpd sends multicast from only one
-  address.
+address.
+* [Bug 1727] ntp-keygen PLEN, ILEN undeclared --without-crypto.
+* Remove top-level libopts, use sntp/libopts.
 * from 4.2.6p3-RC11: Remove log_msg() and debug_msg() from sntp in favor
   of msyslog().
+* Documentation updates from Dave Mills.
+(4.2.7p82) 2010/11/16 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1728] from 4.2.6p3-RC11: In ntp_openssl.m4, don't add
+  -I/usr/include or -L/usr/lib to CPPFLAGS or LDFLAGS.
 (4.2.7p81) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1681] from 4.2.6p3-RC10: More sntp logging cleanup.
 * [Bug 1683] from 4.2.6p3-RC10: Non-localhost on loopback exempted from
@@ -481,6 +487,8 @@
 
 * [Bug 1725] ntpd sends multicast from only one address.
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
+* [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
+  to CPPFLAGS or LDFLAGS.
 
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
@@ -571,7 +579,7 @@
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by JÃ¼rgen
   Perlinger.
 
 ---
