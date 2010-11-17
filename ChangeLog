@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 (4.2.7p82) 2010/11/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1728] from 4.2.6p3-RC11: In ntp_openssl.m4, don't add
   -I/usr/include or -L/usr/lib to CPPFLAGS or LDFLAGS.
