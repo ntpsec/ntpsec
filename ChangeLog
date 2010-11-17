@@ -1,3 +1,4 @@
+* [Bug 1727] ntp-keygen PLEN, ILEN undeclared --without-crypto.
 * Remove top-level libopts, use sntp/libopts.
 (4.2.7p82) 2010/11/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1728] from 4.2.6p3-RC11: In ntp_openssl.m4, don't add

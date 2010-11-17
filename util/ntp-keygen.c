@@ -157,8 +157,6 @@ u_long	asn2ntp		(ASN1_TIME *);
 extern char *optarg;		/* command line argument */
 char	*progname;
 volatile int	debug = 0;	/* debug, not de bug */
-u_int	modulus = PLEN;		/* prime modulus size (bits) */
-u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
 u_int	lifetime = YEAR;	/* cetificate lifetime (days) */
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
@@ -170,6 +168,8 @@ char	*passwd1 = NULL;	/* input private key password */
 char	*passwd2 = NULL;	/* output private key password */
 char	filename[MAXFILENAME + 1]; /* file name */
 #ifdef AUTOKEY
+u_int	modulus = PLEN;		/* prime modulus size (bits) */
+u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
 long	d0, d1, d2, d3;		/* callback counters */
 #endif	/* AUTOKEY */
 
