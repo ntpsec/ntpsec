@@ -1,3 +1,4 @@
+(4.2.7p83) 2010/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1727] ntp-keygen PLEN, ILEN undeclared --without-crypto.
 * Remove top-level libopts, use sntp/libopts.
 * Documentation updates from Dave Mills.
