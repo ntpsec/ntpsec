@@ -125,7 +125,7 @@ case "${enable_libopts_install+set}" in
  set) ;;
  *) enable_libopts_install=no ;;
 esac
-LIBOPTS_CHECK(libopts)
+LIBOPTS_CHECK([sntp/libopts])
 
 AC_FUNC_FORK
 AC_FUNC_ALLOCA

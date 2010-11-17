@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\libntp,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\libopts"
+				AdditionalIncludeDirectories="..\..\libntp,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\sntp\libopts"
 				PreprocessorDefinitions="_DEBUG;_LIB;WIN32;SYS_WINNT;HAVE_CONFIG_H"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -124,7 +124,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="..\..\libntp,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\libopts"
+				AdditionalIncludeDirectories="..\..\libntp,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\sntp\libopts"
 				PreprocessorDefinitions="NDEBUG;_LIB;WIN32;SYS_WINNT;HAVE_CONFIG_H"
 				GeneratePreprocessedFile="0"
 				StringPooling="true"
@@ -364,7 +364,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libopts\libopts.c"
+				RelativePath="..\..\..\..\sntp\libopts\libopts.c"
 				>
 			</File>
 			<File
@@ -589,7 +589,7 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="..\..\..\..\libopts\ag-char-map.h"
+				RelativePath="..\..\..\..\sntp\libopts\ag-char-map.h"
 				>
 			</File>
 			<File
