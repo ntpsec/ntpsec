@@ -1,6 +1,8 @@
 ---
 
 * [Bug 1725] ntpd sends multicast from only one address.
+* [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
+  to CPPFLAGS or LDFLAGS.
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
 
 ---
