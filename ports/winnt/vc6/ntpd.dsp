@@ -276,7 +276,7 @@ SOURCE=..\..\..\include\l_stdlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\log.h
+SOURCE=..\..\..\sntp\libntp\log.h
 # End Source File
 # Begin Source File
 
@@ -468,11 +468,11 @@ SOURCE=..\include\isc\win32os.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\libntp\messages.rc
+SOURCE=..\sntp\libntp\messages.rc
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\MSG00001.bin
+SOURCE=..\sntp\libntp\MSG00001.bin
 # End Source File
 # Begin Source File
 
@@ -484,7 +484,7 @@ SOURCE=.\version.c
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=..\libntp\messages.mc
+SOURCE=..\sntp\libntp\messages.mc
 # End Source File
 # End Group
 # Begin Group "Reference Clock"
