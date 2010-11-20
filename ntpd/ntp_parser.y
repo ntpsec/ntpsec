@@ -163,6 +163,7 @@
 %token	<Integer>	T_Nolink
 %token	<Integer>	T_Nomodify
 %token	<Integer>	T_None
+%token	<Integer>	T_Nonvolatile
 %token	<Integer>	T_Nopeer
 %token	<Integer>	T_Noquery
 %token	<Integer>	T_Noselect
@@ -598,6 +599,7 @@ tos_option_dbl_keyword
 	|	T_Maxdist
 	|	T_Minclock
 	|	T_Maxclock
+	|	T_Nonvolatile
 	;
 
 

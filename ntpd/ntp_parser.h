@@ -136,79 +136,80 @@
      T_Nolink = 353,
      T_Nomodify = 354,
      T_None = 355,
-     T_Nopeer = 356,
-     T_Noquery = 357,
-     T_Noselect = 358,
-     T_Noserve = 359,
-     T_Notrap = 360,
-     T_Notrust = 361,
-     T_Ntp = 362,
-     T_Ntpport = 363,
-     T_NtpSignDsocket = 364,
-     T_Orphan = 365,
-     T_Orphanwait = 366,
-     T_Panic = 367,
-     T_Peer = 368,
-     T_Peerstats = 369,
-     T_Phone = 370,
-     T_Pid = 371,
-     T_Pidfile = 372,
-     T_Pool = 373,
-     T_Port = 374,
-     T_Preempt = 375,
-     T_Prefer = 376,
-     T_Protostats = 377,
-     T_Pw = 378,
-     T_Qos = 379,
-     T_Randfile = 380,
-     T_Rawstats = 381,
-     T_Refid = 382,
-     T_Requestkey = 383,
-     T_Restrict = 384,
-     T_Revoke = 385,
-     T_Saveconfigdir = 386,
-     T_Server = 387,
-     T_Setvar = 388,
-     T_Source = 389,
-     T_Statistics = 390,
-     T_Stats = 391,
-     T_Statsdir = 392,
-     T_Step = 393,
-     T_Stepout = 394,
-     T_Stratum = 395,
-     T_String = 396,
-     T_Sysstats = 397,
-     T_Tick = 398,
-     T_Time1 = 399,
-     T_Time2 = 400,
-     T_Timingstats = 401,
-     T_Tinker = 402,
-     T_Tos = 403,
-     T_Trap = 404,
-     T_True = 405,
-     T_Trustedkey = 406,
-     T_Ttl = 407,
-     T_Type = 408,
-     T_Unconfig = 409,
-     T_Unpeer = 410,
-     T_Version = 411,
-     T_WanderThreshold = 412,
-     T_Week = 413,
-     T_Wildcard = 414,
-     T_Xleave = 415,
-     T_Year = 416,
-     T_Flag = 417,
-     T_EOC = 418,
-     T_Simulate = 419,
-     T_Beep_Delay = 420,
-     T_Sim_Duration = 421,
-     T_Server_Offset = 422,
-     T_Duration = 423,
-     T_Freq_Offset = 424,
-     T_Wander = 425,
-     T_Jitter = 426,
-     T_Prop_Delay = 427,
-     T_Proc_Delay = 428
+     T_Nonvolatile = 356,
+     T_Nopeer = 357,
+     T_Noquery = 358,
+     T_Noselect = 359,
+     T_Noserve = 360,
+     T_Notrap = 361,
+     T_Notrust = 362,
+     T_Ntp = 363,
+     T_Ntpport = 364,
+     T_NtpSignDsocket = 365,
+     T_Orphan = 366,
+     T_Orphanwait = 367,
+     T_Panic = 368,
+     T_Peer = 369,
+     T_Peerstats = 370,
+     T_Phone = 371,
+     T_Pid = 372,
+     T_Pidfile = 373,
+     T_Pool = 374,
+     T_Port = 375,
+     T_Preempt = 376,
+     T_Prefer = 377,
+     T_Protostats = 378,
+     T_Pw = 379,
+     T_Qos = 380,
+     T_Randfile = 381,
+     T_Rawstats = 382,
+     T_Refid = 383,
+     T_Requestkey = 384,
+     T_Restrict = 385,
+     T_Revoke = 386,
+     T_Saveconfigdir = 387,
+     T_Server = 388,
+     T_Setvar = 389,
+     T_Source = 390,
+     T_Statistics = 391,
+     T_Stats = 392,
+     T_Statsdir = 393,
+     T_Step = 394,
+     T_Stepout = 395,
+     T_Stratum = 396,
+     T_String = 397,
+     T_Sysstats = 398,
+     T_Tick = 399,
+     T_Time1 = 400,
+     T_Time2 = 401,
+     T_Timingstats = 402,
+     T_Tinker = 403,
+     T_Tos = 404,
+     T_Trap = 405,
+     T_True = 406,
+     T_Trustedkey = 407,
+     T_Ttl = 408,
+     T_Type = 409,
+     T_Unconfig = 410,
+     T_Unpeer = 411,
+     T_Version = 412,
+     T_WanderThreshold = 413,
+     T_Week = 414,
+     T_Wildcard = 415,
+     T_Xleave = 416,
+     T_Year = 417,
+     T_Flag = 418,
+     T_EOC = 419,
+     T_Simulate = 420,
+     T_Beep_Delay = 421,
+     T_Sim_Duration = 422,
+     T_Server_Offset = 423,
+     T_Duration = 424,
+     T_Freq_Offset = 425,
+     T_Wander = 426,
+     T_Jitter = 427,
+     T_Prop_Delay = 428,
+     T_Proc_Delay = 429
    };
 #endif
 /* Tokens.  */
@@ -310,79 +311,80 @@
 #define T_Nolink 353
 #define T_Nomodify 354
 #define T_None 355
-#define T_Nopeer 356
-#define T_Noquery 357
-#define T_Noselect 358
-#define T_Noserve 359
-#define T_Notrap 360
-#define T_Notrust 361
-#define T_Ntp 362
-#define T_Ntpport 363
-#define T_NtpSignDsocket 364
-#define T_Orphan 365
-#define T_Orphanwait 366
-#define T_Panic 367
-#define T_Peer 368
-#define T_Peerstats 369
-#define T_Phone 370
-#define T_Pid 371
-#define T_Pidfile 372
-#define T_Pool 373
-#define T_Port 374
-#define T_Preempt 375
-#define T_Prefer 376
-#define T_Protostats 377
-#define T_Pw 378
-#define T_Qos 379
-#define T_Randfile 380
-#define T_Rawstats 381
-#define T_Refid 382
-#define T_Requestkey 383
-#define T_Restrict 384
-#define T_Revoke 385
-#define T_Saveconfigdir 386
-#define T_Server 387
-#define T_Setvar 388
-#define T_Source 389
-#define T_Statistics 390
-#define T_Stats 391
-#define T_Statsdir 392
-#define T_Step 393
-#define T_Stepout 394
-#define T_Stratum 395
-#define T_String 396
-#define T_Sysstats 397
-#define T_Tick 398
-#define T_Time1 399
-#define T_Time2 400
-#define T_Timingstats 401
-#define T_Tinker 402
-#define T_Tos 403
-#define T_Trap 404
-#define T_True 405
-#define T_Trustedkey 406
-#define T_Ttl 407
-#define T_Type 408
-#define T_Unconfig 409
-#define T_Unpeer 410
-#define T_Version 411
-#define T_WanderThreshold 412
-#define T_Week 413
-#define T_Wildcard 414
-#define T_Xleave 415
-#define T_Year 416
-#define T_Flag 417
-#define T_EOC 418
-#define T_Simulate 419
-#define T_Beep_Delay 420
-#define T_Sim_Duration 421
-#define T_Server_Offset 422
-#define T_Duration 423
-#define T_Freq_Offset 424
-#define T_Wander 425
-#define T_Jitter 426
-#define T_Prop_Delay 427
-#define T_Proc_Delay 428
+#define T_Nonvolatile 356
+#define T_Nopeer 357
+#define T_Noquery 358
+#define T_Noselect 359
+#define T_Noserve 360
+#define T_Notrap 361
+#define T_Notrust 362
+#define T_Ntp 363
+#define T_Ntpport 364
+#define T_NtpSignDsocket 365
+#define T_Orphan 366
+#define T_Orphanwait 367
+#define T_Panic 368
+#define T_Peer 369
+#define T_Peerstats 370
+#define T_Phone 371
+#define T_Pid 372
+#define T_Pidfile 373
+#define T_Pool 374
+#define T_Port 375
+#define T_Preempt 376
+#define T_Prefer 377
+#define T_Protostats 378
+#define T_Pw 379
+#define T_Qos 380
+#define T_Randfile 381
+#define T_Rawstats 382
+#define T_Refid 383
+#define T_Requestkey 384
+#define T_Restrict 385
+#define T_Revoke 386
+#define T_Saveconfigdir 387
+#define T_Server 388
+#define T_Setvar 389
+#define T_Source 390
+#define T_Statistics 391
+#define T_Stats 392
+#define T_Statsdir 393
+#define T_Step 394
+#define T_Stepout 395
+#define T_Stratum 396
+#define T_String 397
+#define T_Sysstats 398
+#define T_Tick 399
+#define T_Time1 400
+#define T_Time2 401
+#define T_Timingstats 402
+#define T_Tinker 403
+#define T_Tos 404
+#define T_Trap 405
+#define T_True 406
+#define T_Trustedkey 407
+#define T_Ttl 408
+#define T_Type 409
+#define T_Unconfig 410
+#define T_Unpeer 411
+#define T_Version 412
+#define T_WanderThreshold 413
+#define T_Week 414
+#define T_Wildcard 415
+#define T_Xleave 416
+#define T_Year 417
+#define T_Flag 418
+#define T_EOC 419
+#define T_Simulate 420
+#define T_Beep_Delay 421
+#define T_Sim_Duration 422
+#define T_Server_Offset 423
+#define T_Duration 424
+#define T_Freq_Offset 425
+#define T_Wander 426
+#define T_Jitter 427
+#define T_Prop_Delay 428
+#define T_Proc_Delay 429
 
 
 
@@ -413,7 +415,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 417 "ntp_parser.h"
+#line 419 "ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

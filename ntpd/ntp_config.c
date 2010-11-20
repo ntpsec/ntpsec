@@ -1961,6 +1961,10 @@ config_tos(
 		case T_Beacon:
 			item = PROTO_BEACON;
 			break;
+
+		case T_Nonvolatile:
+			item = PROTO_NONVOLATILE;
+			break;
 		}
 		proto_config(item, 0, tos->value.d, NULL);
 	}
