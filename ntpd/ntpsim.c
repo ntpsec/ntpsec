@@ -130,8 +130,8 @@ ntpsim(
 
 	/* Call getconfig to parse the configuration file */
 	getconfig(argc, argv);
+	loop_config(LOOP_DRIFTINIT, 0);
 	initializing = 0;
-	loop_config(LOOP_DRIFTCOMP, old_drift / 1e6);
 
 	/*
 	 * Watch out here, we want the real time, not the silly stuff.

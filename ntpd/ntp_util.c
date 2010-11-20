@@ -61,9 +61,8 @@ static	char *key_file_name;		/* keys file name */
 char	*leapseconds_file_name;		/* leapseconds file name */
 char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
-double wander_resid;			/* wander threshold */
-double	wander_threshold = 1e-7;	/* initial wander threshold */
-int	drift_file_sw;			/* clock update switch */
+static double wander_resid;		/* last frequency update */
+double	wander_threshold = 1e-7;	/* initial frequency threshold */
 
 /*
  * Statistics file stuff
@@ -102,9 +101,8 @@ static FILEGEN protostats;
 int stats_control;
 
 /*
- * Initial frequency offset later passed to the loopfilter.
+ * Last frequency written to file.
  */
-double	old_drift = 1e9;		/* current frequency */
 static double prev_drift_comp;		/* last frequency update */
 
 /*
@@ -198,7 +196,6 @@ void
 write_stats(void)
 {
 	FILE	*fp;
-	double	ftemp;
 #ifdef DOSYNCTODR
 	struct timeval tv;
 #if !defined(VMS)
@@ -271,79 +268,71 @@ write_stats(void)
 #endif /* VMS */
 #endif /* DOSYNCTODR */
 	record_sys_stats();
-	ftemp = fabs(prev_drift_comp - drift_comp); 
-	prev_drift_comp = drift_comp;
-	if (ftemp > clock_phi)
-		return;
-
-	if (stats_drift_file != 0 && drift_file_sw) {
+	if (stats_drift_file != 0) {
 
 		/*
 		 * When the frequency file is written, initialize the
-		 * wander threshold to a configured initial value.
-		 * Thereafter reduce it by a factor of 0.5. When it
-		 * drops below the frequency wander, write the frequency
-		 * file. This adapts to the prevailing wander yet
-		 * minimizes the file writes.
+		 * prev_drift_comp and wander_resid. Thereafter,
+		 * reduce the wander_resid by half each hour. When
+		 * the difference between the prev_drift_comp and
+		 * drift_comp is less than the wander_resid, update
+		 * the frequncy file. This minimizes the file writes to
+		 * nonvolaile storage.
 		 */
-		drift_file_sw = FALSE;
-		wander_resid *= 0.5;
 #ifdef DEBUG
 		if (debug)
-			printf("write_stats: wander %.6lf thresh %.6lf, freq %.6lf\n",
-			    clock_stability * 1e6, wander_resid * 1e6,
-			    drift_comp * 1e6);
+			printf("write_stats: frequency %.6lf thresh %.6lf, freq %.6lf\n",
+			    (prev_drift_comp - drift_comp) * 1e6, wander_resid *
+			    1e6, drift_comp * 1e6);
 #endif
-		if (sys_leap != LEAP_NOTINSYNC && clock_stability >
-		    wander_resid) {
-			wander_resid = wander_threshold;
-			if ((fp = fopen(stats_temp_file, "w")) == NULL)
-			    {
-				msyslog(LOG_ERR,
-				    "frequency file %s: %m",
-				    stats_temp_file);
-				return;
-			}
-			fprintf(fp, "%.3f\n", drift_comp * 1e6);
-			(void)fclose(fp);
-			/* atomic */
+		if (fabs(prev_drift_comp - drift_comp) < wander_resid) {
+			wander_resid *= 0.5;
+			return;
+		}
+		prev_drift_comp = drift_comp;
+		wander_resid = wander_threshold;
+		if ((fp = fopen(stats_temp_file, "w")) == NULL) {
+			msyslog(LOG_ERR, "frequency file %s: %m",
+			    stats_temp_file);
+			return;
+		}
+		fprintf(fp, "%.3f\n", drift_comp * 1e6);
+		(void)fclose(fp);
+		/* atomic */
 #ifdef SYS_WINNT
-			if (_unlink(stats_drift_file)) /* rename semantics differ under NT */
-				msyslog(LOG_WARNING, 
-					"Unable to remove prior drift file %s, %m", 
-					stats_drift_file);
+		if (_unlink(stats_drift_file)) /* rename semantics differ under NT */
+			msyslog(LOG_WARNING, 
+				"Unable to remove prior drift file %s, %m", 
+				stats_drift_file);
 #endif /* SYS_WINNT */
 
 #ifndef NO_RENAME
-			if (rename(stats_temp_file, stats_drift_file))
-				msyslog(LOG_WARNING, 
-					"Unable to rename temp drift file %s to %s, %m", 
-					stats_temp_file, stats_drift_file);
+		if (rename(stats_temp_file, stats_drift_file))
+			msyslog(LOG_WARNING, 
+				"Unable to rename temp drift file %s to %s, %m", 
+				stats_temp_file, stats_drift_file);
 #else
-			/* we have no rename NFS of ftp in use */
-			if ((fp = fopen(stats_drift_file, "w")) ==
-			    NULL) {
-				msyslog(LOG_ERR,
-				    "frequency file %s: %m",
-				    stats_drift_file);
-				return;
-			}
+		/* we have no rename NFS of ftp in use */
+		if ((fp = fopen(stats_drift_file, "w")) ==
+		    NULL) {
+			msyslog(LOG_ERR,
+			    "frequency file %s: %m",
+			    stats_drift_file);
+			return;
+		}
 #endif
 
 #if defined(VMS)
-			/* PURGE */
-			{
-				$DESCRIPTOR(oldvers,";-1");
-				struct dsc$descriptor driftdsc = {
-					strlen(stats_drift_file), 0, 0,
-					    stats_drift_file };
-				while(lib$delete_file(&oldvers,
-				    &driftdsc) & 1);
-			}
-#endif
-		} else {
-			/* XXX: Log a message at INFO level */
+		/* PURGE */
+		{
+			$DESCRIPTOR(oldvers,";-1");
+			struct dsc$descriptor driftdsc = {
+				strlen(stats_drift_file), 0, 0,
+				    stats_drift_file };
+			while(lib$delete_file(&oldvers,
+			    &driftdsc) & 1);
 		}
+#endif
 	}
 }
 
@@ -362,6 +351,7 @@ stats_config(
 	int	len;
 	char	tbuf[80];
 	char	str1[20], str2[20];
+	double	old_drift;
 #ifndef VMS
 	const char temp_ext[] = ".TEMP";
 #else
@@ -419,12 +409,10 @@ stats_config(
 
 		stats_drift_file = erealloc(stats_drift_file, len + 1);
 		stats_temp_file = erealloc(stats_temp_file, 
-					   len + sizeof(".TEMP"));
-
+		    len + sizeof(".TEMP"));
 		memcpy(stats_drift_file, value, (size_t)(len+1));
 		memcpy(stats_temp_file, value, (size_t)len);
-		memcpy(stats_temp_file + len, temp_ext,
-		       sizeof(temp_ext));
+		memcpy(stats_temp_file + len, temp_ext, sizeof(temp_ext));
 
 		/*
 		 * Open drift file and read frequency. If the file is
@@ -442,8 +430,8 @@ stats_config(
 
 		}
 		fclose(fp);
-		old_drift /= 1e6;
-		prev_drift_comp = old_drift;
+		loop_config(LOOP_FREQ, old_drift);
+		prev_drift_comp = drift_comp;
 		break;
 
 	/*
@@ -474,11 +462,10 @@ stats_config(
 
 			if (add_dir_sep)
 				snprintf(statsdir, sizeof(statsdir),
-					 "%s%c", value, DIR_SEP);
+				    "%s%c", value, DIR_SEP);
 			else
 				snprintf(statsdir, sizeof(statsdir),
-					 "%s", value);
-
+				    "%s", value);
 			get_systime(&now);
 			if (peerstats.prefix == &statsdir[0] &&
 			    peerstats.fp != NULL) {

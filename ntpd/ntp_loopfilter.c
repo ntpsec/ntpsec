@@ -116,6 +116,7 @@ u_char	allan_xpt = CLOCK_ALLAN; /* Allan intercept (log2 s) */
 static double clock_offset;	/* offset */
 double	clock_jitter;		/* offset jitter */
 double	drift_comp;		/* frequency (s/s) */
+static double init_drift_comp; /* initial frequency (PPM) */
 double	clock_stability;	/* frequency stability (wander) (s/s) */
 double	clock_codec;		/* audio codec frequency (samples/s) */
 static u_long clock_epoch;	/* last update */
@@ -144,15 +145,15 @@ int	pps_stratum;		/* pps stratum */
 int	allow_panic = FALSE;	/* allow panic correction */
 int	mode_ntpdate = FALSE;	/* exit on first clock set */
 int	freq_cnt;		/* initial frequency clamp */
+int	freq_set;		/* initial set frequency switch */
 
 /*
  * Clock state machine variables
  */
-int	state;			/* clock discipline state */
+int	state = 0;		/* clock discipline state */
 u_char	sys_poll;		/* time constant/poll (log2 s) */
 int	tc_counter;		/* jiggle counter */
 double	last_offset;		/* last offset (s) */
-static u_long last_step;	/* last clock step */
 
 /*
  * Huff-n'-puff filter variables
@@ -388,12 +389,10 @@ local_clock(
 			tc_counter = 0;
 			clock_jitter = LOGTOD(sys_precision);
 			rval = 2;
-			if (state == EVNT_NSET || (current_time -
-			    last_step) < clock_minstep * 2) {
+			if (state == EVNT_NSET) {
 				rstclock(EVNT_FREQ, 0);
 				return (rval);
 			}
-			last_step = current_time;
 			break;
 		}
 		rstclock(EVNT_SYNC, 0);
@@ -418,17 +417,8 @@ local_clock(
 		 * the stepout threshold.
 		 */
 		case EVNT_NSET:
+			adj_systime(fp_offset);
 			rstclock(EVNT_FREQ, fp_offset);
-			break;
-
-		/*
-		 * In FSET state this is the first update received and
-		 * the frequency has been initialized. Adjust the phase,
-		 * but do not adjust the frequency until the holdoff
-		 * counter decrements to zero.
-		 */
-		case EVNT_FSET:
-			rstclock(EVNT_SYNC, fp_offset);
 			break;
 
 		/*
@@ -439,15 +429,14 @@ local_clock(
 		 */
 		case EVNT_FREQ:
 			if (mu < clock_minstep)
-				break;
+				return (0);
 
 			clock_frequency = direct_freq(fp_offset);
-			rstclock(EVNT_SYNC, 0);
-			/* fall through to default */
+			/* fall through */
 
 		/*
-		 * We get here by default in SYNC and SPIK states. Here
-		 * we compute the frequency update due to PLL and FLL
+		 * We get here by default in FSET, SPIK and SYNC states.
+		 * Here compute the frequency update due to PLL and FLL
 		 * contributions. Note, we avoid frequency discipline at
 		 * startup until the initial transient has subsided.
 		 */
@@ -464,9 +453,8 @@ local_clock(
 				 */
 				if (sys_poll >= allan_xpt)
 					clock_frequency += (fp_offset -
-					    clock_offset) /
-					    max(ULOGTOD(sys_poll), mu) *
-					    CLOCK_FLL;
+					    clock_offset) / max(ULOGTOD(sys_poll),
+					    mu) * CLOCK_FLL;
 
 				/*
 				 * The PLL frequency gain (numerator) depends on
@@ -480,6 +468,8 @@ local_clock(
 				    dtemp);
 			}
 			rstclock(EVNT_SYNC, fp_offset);
+			if (fabs(fp_offset) < CLOCK_FLOOR)
+				freq_cnt = 0;
 			break;
 		}
 	}
@@ -627,7 +617,6 @@ local_clock(
 	 */
 	etemp = SQUARE(clock_stability);
 	clock_stability = SQRT(etemp + (dtemp - etemp) / CLOCK_AVG);
-	drift_file_sw = TRUE;
 
 	/*
 	 * Here we adjust the time constant by comparing the current
@@ -701,16 +690,16 @@ adj_host_clock(
 	 * since the dispersion check serves this function. Also,
 	 * since the poll interval can exceed one day, the old test
 	 * would be counterproductive. During the startup clamp period, the
-	 * time constant is clamkped at 2.
+	 * time constant is clamped at 2.
 	 */
 	sys_rootdisp += clock_phi;
-	if (state == EVNT_SYNC) {
-		if (fabs(clock_offset) < CLOCK_FLOOR)
-			freq_cnt = 0;
-		else if (freq_cnt > 0)
-			freq_cnt--;
-	}
 #ifndef LOCKCLOCK
+	if (state != EVNT_SYNC)
+		return;
+	
+	if (freq_cnt > 0)
+		freq_cnt--;
+
 	/*
 	 * If clock discipline is disabled or if the kernel is enabled,
 	 * get out of Dodge quick.
@@ -773,9 +762,8 @@ direct_freq(
 	double	fp_offset
 	)
 {
-	set_freq((fp_offset - clock_offset) / (current_time -
-	    clock_epoch) + drift_comp);
-	wander_resid = 0;
+	set_freq(fp_offset / (current_time -
+	    clock_epoch));
 	return (drift_comp);
 }
 
@@ -848,7 +836,8 @@ loop_config(
 	double	freq
 	)
 {
-	int i;
+	int	i;
+	double	ftemp;
 
 #ifdef DEBUG
 	if (debug > 1)
@@ -913,24 +902,21 @@ loop_config(
  		  	    "kernel time sync enabled");
 		}
 #endif /* KERNEL_PLL */
-#endif /* LOCKCLOCK */
-		break;
 
-	/*
-	 * Initialize the frequency. If the frequency file is missing or
-	 * broken, set the initial frequency to zero and set the state
-	 * to NSET. Otherwise, set the initial frequency to the given
-	 * value and the state to FSET.
-	 */
-	case LOOP_DRIFTCOMP:
-#ifndef LOCKCLOCK
-		if (freq > NTP_MAXFREQ || freq < -NTP_MAXFREQ) {
-			set_freq(0);
-			rstclock(EVNT_NSET, 0);
-		} else {
-			set_freq(freq);
+		/*
+		 * Initialize frequency if given; otherwise, begin frequency
+		 * calibration phase.
+		 */
+		ftemp = init_drift_comp / 1e6;
+		if (ftemp > NTP_MAXFREQ)
+			ftemp = NTP_MAXFREQ;
+		else if (ftemp < -NTP_MAXFREQ)
+			ftemp = -NTP_MAXFREQ;
+		set_freq(ftemp);
+		if (freq_set)
 			rstclock(EVNT_FSET, 0);
-		}
+		else
+			rstclock(EVNT_NSET, 0);
 #endif /* LOCKCLOCK */
 		break;
 
@@ -971,8 +957,8 @@ loop_config(
 		break;
 
 	case LOOP_FREQ:		/* initial frequency (freq) */	
-		set_freq(freq / 1e6);
-		rstclock(EVNT_FSET, 0);
+		init_drift_comp = freq;
+		freq_set++;
 		break;
 
 	case LOOP_HUFFPUFF:	/* huff-n'-puff length (huffpuff) */

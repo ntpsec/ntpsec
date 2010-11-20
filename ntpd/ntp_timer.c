@@ -166,7 +166,7 @@ init_timer(void)
 	alarm_flag = 0;
 	alarm_overflow = 0;
 	adjust_timer = 1;
-	stats_timer = 0;
+	stats_timer = HOUR;
 	huffpuff_timer = 0;
 	interface_timer = 0;
 	current_time = 0;
@@ -371,11 +371,10 @@ timer(void)
 	}
 
 	/*
-	 * Generate new private value. The timer runs only after
-	 * initial synchronization and fires about once per day.
+	 * Generate new private value. This causes all associations
+	 * to regenerate cookies.
 	 */
-	if (revoke_timer <= current_time && sys_leap !=
-	    LEAP_NOTINSYNC) {
+	if (revoke_timer && revoke_timer <= current_time) {
 		revoke_timer += 1 << sys_revoke;
 		RAND_bytes((u_char *)&sys_private, 4);
 	}
@@ -385,7 +384,6 @@ timer(void)
 	 * Interface update timer
 	 */
 	if (interface_interval && interface_timer <= current_time) {
-
 		timer_interfacetimeout(current_time +
 		    interface_interval);
 		DPRINTF(2, ("timer: interface update\n"));
