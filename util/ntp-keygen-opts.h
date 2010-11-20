@@ -1,21 +1,19 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  November 17, 2010 at 10:10:17 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 20, 2010 at 07:08:53 AM by AutoGen 5.11.2
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:0:8 templates.
- */
-
-/*
- *  This file was produced by an AutoOpts template.  AutoOpts is a
- *  copyrighted work.  This header file is not encumbered by AutoOpts
- *  licensing, but is provided under the licensing terms chosen by the
- *  ntp-keygen author or copyright holder.  AutoOpts is licensed under
- *  the terms of the LGPL.  The redistributable library (``libopts'') is
- *  licensed under the terms of either the LGPL or, at the users discretion,
- *  the BSD license.  See the AutoOpts and/or libopts sources for details.
+ * Generated from AutoOpts 33:3:8 templates.
+ *
+ *  AutoOpts is a copyrighted work.  This header file is not encumbered
+ *  by AutoOpts licensing, but is provided under the licensing terms chosen
+ *  by the ntp-keygen author or copyright holder.  AutoOpts is
+ *  licensed under the terms of the LGPL.  The redistributable library
+ *  (``libopts'') is licensed under the terms of either the LGPL or, at the
+ *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
+ *  for details.
  *
  * This source file is copyrighted and licensed under the following terms:
  *
@@ -41,7 +39,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 135168
+#define AO_TEMPLATE_VERSION 135171
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -60,31 +58,32 @@ typedef enum {
     INDEX_OPT_HOST_KEY         =  5,
     INDEX_OPT_IFFKEY           =  6,
     INDEX_OPT_ISSUER_NAME      =  7,
-    INDEX_OPT_MD5KEY           =  8,
-    INDEX_OPT_MODULUS          =  9,
-    INDEX_OPT_PVT_CERT         = 10,
-    INDEX_OPT_PVT_PASSWD       = 11,
-    INDEX_OPT_GET_PVT_PASSWD   = 12,
-    INDEX_OPT_SIGN_KEY         = 13,
-    INDEX_OPT_SUBJECT_NAME     = 14,
-    INDEX_OPT_TRUSTED_CERT     = 15,
-    INDEX_OPT_MV_PARAMS        = 16,
-    INDEX_OPT_MV_KEYS          = 17,
-    INDEX_OPT_VERSION          = 18,
-    INDEX_OPT_HELP             = 19,
-    INDEX_OPT_MORE_HELP        = 20,
-    INDEX_OPT_SAVE_OPTS        = 21,
-    INDEX_OPT_LOAD_OPTS        = 22
+    INDEX_OPT_LIFETIME         =  8,
+    INDEX_OPT_MD5KEY           =  9,
+    INDEX_OPT_MODULUS          = 10,
+    INDEX_OPT_PVT_CERT         = 11,
+    INDEX_OPT_PVT_PASSWD       = 12,
+    INDEX_OPT_GET_PVT_PASSWD   = 13,
+    INDEX_OPT_SIGN_KEY         = 14,
+    INDEX_OPT_SUBJECT_NAME     = 15,
+    INDEX_OPT_TRUSTED_CERT     = 16,
+    INDEX_OPT_MV_PARAMS        = 17,
+    INDEX_OPT_MV_KEYS          = 18,
+    INDEX_OPT_VERSION          = 19,
+    INDEX_OPT_HELP             = 20,
+    INDEX_OPT_MORE_HELP        = 21,
+    INDEX_OPT_SAVE_OPTS        = 22,
+    INDEX_OPT_LOAD_OPTS        = 23
 } teOptIndex;
 
-#define OPTION_CT    23
+#define OPTION_CT    24
 #define NTP_KEYGEN_VERSION       "4.2.7p83"
 #define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p83"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT( CERTIFICATE )
+ *  e.g. HAVE_OPT(CERTIFICATE)
  */
 #define         DESC(n) (ntp_keygenOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -98,7 +97,7 @@ typedef enum {
 #define STACKLST_OPT(n) (((tArgList*)(DESC(n).optCookie))->apzArgs)
 #define    CLEAR_OPT(n) STMTS( \
                 DESC(n).fOptState &= OPTST_PERSISTENT_MASK;   \
-                if ( (DESC(n).fOptState & OPTST_INITENABLED) == 0) \
+                if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
 
@@ -137,6 +136,10 @@ typedef enum {
 # ifdef    ISSUER_NAME
 #  warning undefining ISSUER_NAME due to option name conflict
 #  undef   ISSUER_NAME
+# endif
+# ifdef    LIFETIME
+#  warning undefining LIFETIME due to option name conflict
+#  undef   LIFETIME
 # endif
 # ifdef    MD5KEY
 #  warning undefining MD5KEY due to option name conflict
@@ -187,6 +190,7 @@ typedef enum {
 # undef HOST_KEY
 # undef IFFKEY
 # undef ISSUER_NAME
+# undef LIFETIME
 # undef MD5KEY
 # undef MODULUS
 # undef PVT_CERT
@@ -211,6 +215,11 @@ typedef enum {
 #define VALUE_OPT_HOST_KEY       'H'
 #define VALUE_OPT_IFFKEY         'I'
 #define VALUE_OPT_ISSUER_NAME    'i'
+#define VALUE_OPT_LIFETIME       'l'
+#ifdef AUTOKEY
+
+#define OPT_VALUE_LIFETIME       (DESC(LIFETIME).optArg.argInt)
+#endif /* AUTOKEY */
 #define VALUE_OPT_MD5KEY         'M'
 #define VALUE_OPT_MODULUS        'm'
 #ifdef AUTOKEY
@@ -245,14 +254,14 @@ typedef enum {
 /*
  *  Interface defines not associated with particular options
  */
-#define ERRSKIP_OPTERR  STMTS( ntp_keygenOptions.fOptSet &= ~OPTPROC_ERRSTOP )
-#define ERRSTOP_OPTERR  STMTS( ntp_keygenOptions.fOptSet |= OPTPROC_ERRSTOP )
+#define ERRSKIP_OPTERR  STMTS(ntp_keygenOptions.fOptSet &= ~OPTPROC_ERRSTOP)
+#define ERRSTOP_OPTERR  STMTS(ntp_keygenOptions.fOptSet |= OPTPROC_ERRSTOP)
 #define RESTART_OPT(n)  STMTS( \
                 ntp_keygenOptions.curOptIdx = (n); \
-                ntp_keygenOptions.pzCurOpt  = NULL )
+                ntp_keygenOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
-#define USAGE(c)        (*ntp_keygenOptions.pUsageProc)( &ntp_keygenOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+#define USAGE(c)        (*ntp_keygenOptions.pUsageProc)(&ntp_keygenOptions, c)
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 408 */
 
 /* * * * * *
  *
@@ -267,9 +276,9 @@ extern tOptions   ntp_keygenOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
-    static inline char* aoGetsText( char const* pz ) {
+    static inline char* aoGetsText(char const* pz) {
         if (pz == NULL) return NULL;
-        return (char*)gettext( pz );
+        return (char*)gettext(pz);
     }
 #   define _(s)  aoGetsText(s)
 # endif /* _() */

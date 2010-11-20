@@ -157,7 +157,7 @@ u_long	asn2ntp		(ASN1_TIME *);
 extern char *optarg;		/* command line argument */
 char	*progname;
 volatile int	debug = 0;	/* debug, not de bug */
-u_int	lifetime = YEAR;	/* cetificate lifetime (days) */
+u_int	lifetime = YEAR;	/* certificate lifetime (days) */
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 u_int	fstamp;			/* NTP filestamp */
@@ -318,6 +318,9 @@ main(
 
 	if (HAVE_OPT( ISSUER_NAME ))
 		groupname = strdup(OPT_ARG( ISSUER_NAME ));
+
+	if (HAVE_OPT( LIFETIME ))
+		lifetime = OPT_VALUE_LIFETIME;
 
 	if (HAVE_OPT( PVT_CERT ))
 		exten = EXT_KEY_PRIVATE;

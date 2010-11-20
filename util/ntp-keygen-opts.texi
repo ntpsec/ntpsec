@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  November 17, 2010 at 10:10:23 AM by AutoGen 5.10
+# It has been AutoGen-ed  November 20, 2010 at 07:08:57 AM by AutoGen 5.11.2
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -22,24 +22,25 @@ This software is released under a specialized copyright license.
 
 @menu
 * ntp-keygen usage::                  ntp-keygen usage help (-?)
-* ntp-keygen certificate::            certificate option (-c)
-* ntp-keygen debug-level::            debug-level option (-d)
-* ntp-keygen get-pvt-passwd::         get-pvt-passwd option (-q)
-* ntp-keygen gq-params::              gq-params option (-G)
-* ntp-keygen host-key::               host-key option (-H)
-* ntp-keygen id-key::                 id-key option (-e)
-* ntp-keygen iffkey::                 iffkey option (-I)
-* ntp-keygen issuer-name::            issuer-name option (-i)
-* ntp-keygen md5key::                 md5key option (-M)
-* ntp-keygen modulus::                modulus option (-m)
-* ntp-keygen mv-keys::                mv-keys option (-v)
-* ntp-keygen mv-params::              mv-params option (-V)
-* ntp-keygen pvt-cert::               pvt-cert option (-P)
-* ntp-keygen pvt-passwd::             pvt-passwd option (-p)
-* ntp-keygen set-debug-level::        set-debug-level option (-D)
-* ntp-keygen sign-key::               sign-key option (-S)
-* ntp-keygen subject-name::           subject-name option (-s)
-* ntp-keygen trusted-cert::           trusted-cert option (-T)
+* ntp-keygen certificate::           certificate option (-c)
+* ntp-keygen debug-level::           debug-level option (-d)
+* ntp-keygen get-pvt-passwd::        get-pvt-passwd option (-q)
+* ntp-keygen gq-params::             gq-params option (-G)
+* ntp-keygen host-key::              host-key option (-H)
+* ntp-keygen id-key::                id-key option (-e)
+* ntp-keygen iffkey::                iffkey option (-I)
+* ntp-keygen issuer-name::           issuer-name option (-i)
+* ntp-keygen lifetime::              lifetime option (-l)
+* ntp-keygen md5key::                md5key option (-M)
+* ntp-keygen modulus::               modulus option (-m)
+* ntp-keygen mv-keys::               mv-keys option (-v)
+* ntp-keygen mv-params::             mv-params option (-V)
+* ntp-keygen pvt-cert::              pvt-cert option (-P)
+* ntp-keygen pvt-passwd::            pvt-passwd option (-p)
+* ntp-keygen set-debug-level::       set-debug-level option (-D)
+* ntp-keygen sign-key::              sign-key option (-S)
+* ntp-keygen subject-name::          subject-name option (-s)
+* ntp-keygen trusted-cert::          trusted-cert option (-T)
 @end menu
 
 @node ntp-keygen usage
@@ -50,7 +51,7 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-Using OpenSSL version 90704f
+Using OpenSSL version 90705f
 ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p83
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
@@ -64,6 +65,7 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -H no  host-key       generate RSA host key
    -I no  iffkey         generate IFF parameters
    -i Str issuer-name    set issuer name
+   -l Num lifetime       set certificate lifetime
    -M no  md5key         generate MD5 keys
    -m Num modulus        modulus
                                 - it must be:  256 to 2048
@@ -87,8 +89,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /deacon/users/stenn/.ntprc
- - reading file /deacon/backroom/snaps/ntp-dev/util/.ntprc
+ - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/.ntprc
+ - reading file /a/etc/amd.stage/thump2-g3/export/ntp/home/hart/ntp-dev-1725/util/.ntprc
  - examining environment variables named NTP_KEYGEN_*
 
 If there is no new host key, look for an existing one.
@@ -133,26 +135,11 @@ may appear an unlimited number of times.
 
 Increase the debugging message output level.
 
-@node ntp-keygen set-debug-level
-@subsection set-debug-level option (-D)
-@cindex ntp-keygen-set-debug-level
+@node ntp-keygen get-pvt-passwd
+@subsection get-pvt-passwd option (-q)
+@cindex ntp-keygen-get-pvt-passwd
 
-This is the ``set the output debug message level'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-may appear an unlimited number of times.
-@end itemize
-
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
-
-@node ntp-keygen id-key
-@subsection id-key option (-e)
-@cindex ntp-keygen-id-key
-
-This is the ``write iff or gq identity keys'' option.
+This is the ``input private password'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -160,8 +147,7 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
-Write the IFF or GQ client keys to the standard output.  This is
-intended for automatic key distribution by mail.
+Set the password for reading files to the specified password.
 
 @node ntp-keygen gq-params
 @subsection gq-params option (-G)
@@ -192,6 +178,21 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 
 Generate new host keys, obsoleting any that may exist.
 
+@node ntp-keygen id-key
+@subsection id-key option (-e)
+@cindex ntp-keygen-id-key
+
+This is the ``write iff or gq identity keys'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+Write the IFF or GQ client keys to the standard output.  This is
+intended for automatic key distribution by mail.
+
 @node ntp-keygen iffkey
 @subsection iffkey option (-I)
 @cindex ntp-keygen-iffkey
@@ -219,8 +220,22 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
-Set the suject name to name.  This is used as the subject field
+Set the subject name to name.  This is used as the subject field
 in certificates and in the file name for host and sign keys.
+
+@node ntp-keygen lifetime
+@subsection lifetime option (-l)
+@cindex ntp-keygen-lifetime
+
+This is the ``set certificate lifetime'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+Set the certificate expiration to lifetime days from now.
 
 @node ntp-keygen md5key
 @subsection md5key option (-M)
@@ -242,6 +257,35 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 The number of bits in the prime modulus.  The default is 512.
+
+@node ntp-keygen mv-keys
+@subsection mv-keys option (-v)
+@cindex ntp-keygen-mv-keys
+
+This is the ``update <num> mv keys'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+This option has no @samp{doc} documentation.
+
+@node ntp-keygen mv-params
+@subsection mv-params option (-V)
+@cindex ntp-keygen-mv-params
+
+This is the ``generate <num> mv parameters'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+Generate parameters and keys for the Mu-Varadharajan (MV)
+identification scheme.
 
 @node ntp-keygen pvt-cert
 @subsection pvt-cert option (-P)
@@ -273,19 +317,20 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 Encrypt generated files containing private data with the specified
 password and the DES-CBC algorithm.
 
-@node ntp-keygen get-pvt-passwd
-@subsection get-pvt-passwd option (-q)
-@cindex ntp-keygen-get-pvt-passwd
+@node ntp-keygen set-debug-level
+@subsection set-debug-level option (-D)
+@cindex ntp-keygen-set-debug-level
 
-This is the ``input private password'' option.
+This is the ``set the output debug message level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
+may appear an unlimited number of times.
 @end itemize
 
-Set the password for reading files to the specified password.
+Set the output debugging level.  Can be supplied multiple times,
+but each overrides the previous value(s).
 
 @node ntp-keygen sign-key
 @subsection sign-key option (-S)
@@ -332,32 +377,3 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 
 Generate a trusted certificate.  By default, the program generates
 a non-trusted certificate.
-
-@node ntp-keygen mv-params
-@subsection mv-params option (-V)
-@cindex ntp-keygen-mv-params
-
-This is the ``generate <num> mv parameters'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
-@end itemize
-
-Generate parameters and keys for the Mu-Varadharajan (MV)
-identification scheme.
-
-@node ntp-keygen mv-keys
-@subsection mv-keys option (-v)
-@cindex ntp-keygen-mv-keys
-
-This is the ``update <num> mv keys'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
-@end itemize
-
-This option has no @samp{doc} documentation.
