@@ -1,7 +1,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.menu)
 # 
-# It has been AutoGen-ed  November 18, 2010 at 03:19:58 PM by AutoGen 5.11.2
+# It has been AutoGen-ed  November 19, 2010 at 11:51:16 PM by AutoGen 5.11.3
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -45,7 +45,7 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-Using OpenSSL version 90801f
+Using OpenSSL version 90704f
 ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3-RC10
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
@@ -82,8 +82,8 @@ Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
 
 The following option preset mechanisms are supported:
- - reading file /home/hart/.ntprc
- - reading file /home/hart/ntp-stable-1725/util/.ntprc
+ - reading file /deacon/users/stenn/.ntprc
+ - reading file /deacon/backroom/ntp-stable/util/.ntprc
  - examining environment variables named NTP_KEYGEN_*
 
 If there is no new host key, look for an existing one.
