@@ -11,6 +11,7 @@ copyright = {
 long-opts;
 config-header  = config.h;
 environrc;
+no-misuse-usage;
 
 version         = `
 eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../version.m4\`
