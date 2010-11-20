@@ -550,10 +550,7 @@ extern u_long	timer_xmtcalls;
 extern	int	stats_control;		/* write stats to fileset? */
 extern	int	stats_write_period;	/* # of seconds between writes. */
 extern	double	stats_write_tolerance;
-extern	double	old_drift;
-extern	int	drift_file_sw;
 extern	double	wander_threshold;
-extern	double	wander_resid;
 
 /* ntp_worker.c */
 #if defined(WORK_FORK)

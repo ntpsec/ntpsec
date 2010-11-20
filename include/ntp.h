@@ -709,8 +709,8 @@ struct pkt {
 /*
  * Configuration items for the loop filter
  */
-#define	LOOP_DRIFTINIT		1	/* set initial frequency offset */
-#define LOOP_DRIFTCOMP		2	/* set frequency offset */
+#define	LOOP_DRIFTINIT		1	/* iniitialize frequency */
+#define	LOOP_KERN_CLEAR		2	/* set initial frequency offset */
 #define LOOP_MAX		3	/* set step offset */
 #define LOOP_PANIC		4	/* set panic offseet */
 #define LOOP_PHI		5	/* set dispersion rate */
@@ -719,9 +719,8 @@ struct pkt {
 #define LOOP_ALLAN		8	/* set minimum Allan intercept */
 #define LOOP_HUFFPUFF		9	/* set huff-n'-puff filter length */
 #define LOOP_FREQ		10	/* set initial frequency */
-#define LOOP_KERN_CLEAR		11	/* reset kernel pll parameters */
-#define LOOP_CODEC		12	/* set audio codec frequency */
-#define	LOOP_LEAP		13	/* insert leap after second 23:59 */
+#define LOOP_CODEC		11	/* set audio codec frequency */
+#define	LOOP_LEAP		12	/* insert leap after second 23:59 */
 
 /*
  * Configuration items for the stats printer

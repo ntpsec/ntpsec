@@ -4226,16 +4226,8 @@ getconfig(
 	strncpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
 	set_sys_var(line, strlen(line) + 1, RO);
 #endif
-
-	/*
-	 * Initialize the loop.
-	 */
-	loop_config(LOOP_DRIFTINIT, 0.);
-
 	getCmdOpts(argc, argv);
-
 	init_syntax_tree(&cfgt);
-
 	curr_include_level = 0;
 	if (
 		(fp[curr_include_level] = F_OPEN(FindConfig(config_file), "r")) == NULL

@@ -1119,10 +1119,10 @@ receive(
 	 * found, flip and resynchronize.
 	 */
 	} else if (!L_ISZERO(&peer->dst) && !L_ISEQU(&p_org,
-		    &peer->dst)) {
-			peer->bogusorg++;
-			peer->flags |= FLAG_XBOGUS;
-			peer->flash |= TEST2;		/* bogus */
+	    &peer->dst)) {
+		peer->bogusorg++;
+		peer->flags |= FLAG_XBOGUS;
+		peer->flash |= TEST2;		/* bogus */
 	}
 
 	/*
@@ -2253,7 +2253,7 @@ clock_filter(
  *
  * LOCKCLOCK: (1) If the local clock is the prefer peer, it will always
  * be enabled, even if declared falseticker, (2) only the prefer peer
- * caN Be selected as the system peer, (3) if the external source is
+ * can be selected as the system peer, (3) if the external source is
  * down, the system leap bits are set to 11 and the stratum set to
  * infinity.
  */

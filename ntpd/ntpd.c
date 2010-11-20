@@ -1000,8 +1000,8 @@ ntpdmain(
 	 * since this will definitely be different for the gizmo board.
 	 */
 	getconfig(argc, argv);
+	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
-	loop_config(LOOP_DRIFTCOMP, old_drift);
 	initializing = 0;
 
 # ifdef HAVE_DROPROOT

@@ -1,5 +1,10 @@
 * [Bug 1725] from 4.2.6p3-RC11: ntpd sends multicast from only one
   address.
+* An almost complete rebuild of the initial loopfilter configuration
+  process, including the code that determines the interval between
+  frequency file updates, from Dave Mills.
+* Documentation updates from Dave Mills.
+(4.2.7p83) 2010/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1727] ntp-keygen PLEN, ILEN undeclared --without-crypto.
 * Remove top-level libopts, use sntp/libopts.
 * from 4.2.6p3-RC11: Remove log_msg() and debug_msg() from sntp in favor

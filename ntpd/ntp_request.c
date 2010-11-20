@@ -1615,9 +1615,7 @@ setclr_flags(
 	)
 {
 	register u_int flags;
-	int prev_kern_enable;
 
-	prev_kern_enable = kern_enable;
 	if (INFO_NITEMS(inpkt->err_nitems) > 1) {
 		msyslog(LOG_ERR, "setclr_flags: err_nitems > 1");
 		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
@@ -1656,12 +1654,6 @@ setclr_flags(
 	if (flags & SYS_FLAG_CAL)
 		proto_config(PROTO_CAL, set, 0., NULL);
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
-
-	/* Reset the kernel ntp parameters if the kernel flag changed. */
-	if (prev_kern_enable && !kern_enable)
-	     	loop_config(LOOP_KERN_CLEAR, 0.0);
-	if (!prev_kern_enable && kern_enable)
-	     	loop_config(LOOP_DRIFTCOMP, drift_comp);
 }
 
 /*
