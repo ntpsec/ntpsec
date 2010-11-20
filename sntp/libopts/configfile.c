@@ -1,7 +1,7 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2010-11-07 14:43:09 bkorb"
+ *  Time-stamp:      "2010-11-18 08:24:46 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
@@ -647,11 +647,13 @@ aoflags_directive(tOptions * pOpts, char * pzText)
 static char *
 program_directive(tOptions * pOpts, char * pzText)
 {
-    char * ttl;
-    size_t ttl_len  = asprintf(&ttl, "<?%s", zCfgProg);
+    static char const ttlfmt[] = "<?";
+    size_t ttl_len  = sizeof(ttlfmt) + strlen(zCfgProg);
+    char * ttl      = AGALOC(ttl_len, "prog title");
     size_t name_len = strlen(pOpts->pzProgName);
 
-    (void) ttl_len;
+    memcpy(ttl, ttlfmt, sizeof(ttlfmt) - 1);
+    strcpy(ttl + sizeof(ttlfmt) - 1, zCfgProg);
 
     do  {
         while (IS_WHITESPACE_CHAR(*++pzText))  ;
@@ -665,7 +667,7 @@ program_directive(tOptions * pOpts, char * pzText)
         pzText = strstr(pzText, ttl);
     } while (pzText != NULL);
 
-    free(ttl);
+    AGFREE(ttl);
     if (pzText != NULL)
         for (;;) {
             if (*pzText == NUL) {
