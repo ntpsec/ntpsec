@@ -1,11 +1,12 @@
 
-/*
- *  $Id: 63d3312044fd7854ad0995faea41c96f5185cb93 $
- *  Time-stamp:      "2008-11-16 14:51:48 bkorb"
+/**
+ * \file time.c
+ *
+ *  Time-stamp:      "2010-07-17 10:36:19 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is copyright (c) 1992-2009 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2010 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -73,7 +74,7 @@ optionTimeVal(tOptions* pOpts, tOptDesc* pOD )
     return;
 
 bad_time:
-    fprintf( stderr, zNotNumber, pOpts->pzProgName, pOD->optArg.argString );
+    fprintf(stderr, zNotNumber, pOpts->pzProgName, pOD->optArg.argString);
     if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
         (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
 
@@ -85,4 +86,4 @@ bad_time:
  * c-file-style: "stroustrup"
  * indent-tabs-mode: nil
  * End:
- * end of autoopts/numeric.c */
+ * end of autoopts/time.c */

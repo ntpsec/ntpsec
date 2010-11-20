@@ -1,5 +1,6 @@
 * [Bug 1725] from 4.2.6p3-RC11: ntpd sends multicast from only one
   address.
+* from 4.2.6p3-RC11: Upgrade libopts to 33.3.8.
 * An almost complete rebuild of the initial loopfilter configuration
   process, including the code that determines the interval between
   frequency file updates, from Dave Mills.
@@ -494,6 +495,8 @@
 * [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
   to CPPFLAGS or LDFLAGS.
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
+* Use a single copy of libopts/, in sntp/.
+* Upgrade libopts to 33.3.8.
 
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
