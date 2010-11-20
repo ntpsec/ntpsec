@@ -7,14 +7,14 @@ noinst_LTLIBRARIES      = libopts.la
 endif
 libopts_la_SOURCES      = libopts.c
 libopts_la_CPPFLAGS     = -I$(top_srcdir)
-libopts_la_LDFLAGS      = -version-info  33:0:8
+libopts_la_LDFLAGS      = -version-info  33:3:8
 EXTRA_DIST              = \
     COPYING.gplv3           COPYING.lgplv3          COPYING.mbsd  \
     MakeDefs.inc            README                  ag-char-map.h  \
-    autoopts/options.h      autoopts/usage-txt.h    autoopts.c  \
-    autoopts.h              boolean.c               compat/windows-config.h  \
-    compat/compat.h         compat/pathfind.c       compat/snprintf.c  \
-    compat/strdup.c         compat/strchr.c         configfile.c  \
+    autoopts/usage-txt.h    autoopts/options.h      autoopts.c  \
+    autoopts.h              boolean.c               compat/strchr.c  \
+    compat/windows-config.h compat/strdup.c         compat/compat.h  \
+    compat/snprintf.c       compat/pathfind.c       configfile.c  \
     cook.c                  enumeration.c           environment.c  \
     file.c                  genshell.c              genshell.h  \
     load.c                  m4/libopts.m4           m4/liboptschk.m4  \

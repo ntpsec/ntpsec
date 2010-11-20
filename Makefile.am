@@ -1,18 +1,19 @@
 AUTOMAKE_OPTIONS = foreign 1.10
-ACLOCAL_AMFLAGS= -I m4 -I libopts/m4
+ACLOCAL_AMFLAGS = -I m4 -I sntp/libopts/m4
 
-NULL=
+NULL =
 
-SUBDIRS=
-SUBDIRS+= 		\
+SUBDIRS =
+SUBDIRS += 		\
 	scripts 	\
 	include 	\
 	ElectricFence	\
 	$(NULL)
 if NEED_LIBOPTS
-SUBDIRS+= libopts
+SUBDIRS += 		\
+	sntp/libopts
 endif
-SUBDIRS+= 		\
+SUBDIRS += 		\
 	libntp		\
 	libparse	\
 	ntpd		\
@@ -28,12 +29,11 @@ SUBDIRS+= 		\
 	util		\
 	$(NULL)
 
-DIST_SUBDIRS=		\
+DIST_SUBDIRS =		\
 	scripts		\
 	include		\
 	ElectricFence	\
 	libntp		\
-	libopts		\
 	libparse	\
 	ntpd		\
 	ntpdate		\
@@ -95,9 +95,6 @@ DISTCLEANFILES = .gcc-warning
 
 ETAGS_ARGS = Makefile.am configure.ac
 
-# HMS: make ports be the last directory...
-# DIST_HOOK_DIRS = conf html scripts ports
-
 # HMS: Keep .gcc-warning first, as that way it gets printed first.
 BUILT_SOURCES =				\
 	.gcc-warning			\
@@ -136,15 +133,15 @@ $(srcdir)/version: FRC.version
 	    case "$$x" in ''|$$y) ;; *) echo $$x > version ;; esac
 
 $(srcdir)/version.m4: $(srcdir)/packageinfo.sh
-	cd $(srcdir) && \
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver version.m4
 
 $(srcdir)/include/version.def: $(srcdir)/packageinfo.sh
-	cd $(srcdir) && \
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver include/version.def
 
 $(srcdir)/include/version.texi: $(srcdir)/packageinfo.sh
-	cd $(srcdir) && \
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
 	./scripts/genver include/version.texi
 
 $(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/checkChangeLog
@@ -156,7 +153,6 @@ libtool: $(LIBTOOL_DEPS)
 
 dist-hook:
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
-	@chmod u+w $(distdir)/ports/winnt
 
 .gcc-warning:
 	@echo "Compiling with GCC now generates lots of new warnings."
