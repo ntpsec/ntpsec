@@ -8,13 +8,8 @@ SUBDIRS += 		\
 	scripts 	\
 	include 	\
 	ElectricFence	\
-	$(NULL)
-if NEED_LIBOPTS
-SUBDIRS += 		\
-	sntp/libopts
-endif
-SUBDIRS += 		\
 	libntp		\
+	sntp		\
 	libparse	\
 	ntpd		\
 	ntpdate		\
@@ -25,7 +20,6 @@ SUBDIRS += 		\
 	adjtimed	\
 	clockstuff	\
 	kernel		\
-	sntp		\
 	util		\
 	$(NULL)
 
@@ -35,6 +29,7 @@ DIST_SUBDIRS =		\
 	ElectricFence	\
 	libntp		\
 	libparse	\
+	sntp		\
 	ntpd		\
 	ntpdate		\
 	ntpdc		\
@@ -44,7 +39,6 @@ DIST_SUBDIRS =		\
 	adjtimed	\
 	clockstuff	\
 	kernel		\
-	sntp		\
 	util		\
 	$(NULL)
 
