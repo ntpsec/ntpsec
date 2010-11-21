@@ -13,11 +13,11 @@ EXTRA_DIST              = \
     MakeDefs.inc            README                  ag-char-map.h  \
     autoopts/usage-txt.h    autoopts/options.h      autoopts.c  \
     autoopts.h              boolean.c               compat/strchr.c  \
-    compat/windows-config.h compat/strdup.c         compat/compat.h  \
-    compat/snprintf.c       compat/pathfind.c       configfile.c  \
+    compat/strdup.c         compat/compat.h         compat/windows-config.h  \
+    compat/pathfind.c       compat/snprintf.c       configfile.c  \
     cook.c                  enumeration.c           environment.c  \
     file.c                  genshell.c              genshell.h  \
-    load.c                  m4/libopts.m4           m4/liboptschk.m4  \
+    load.c                  m4/liboptschk.m4        m4/libopts.m4  \
     makeshell.c             nested.c                numeric.c  \
     parse-duration.c        parse-duration.h        pgusage.c  \
     proto.h                 putshell.c              reset.c  \

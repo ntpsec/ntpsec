@@ -438,7 +438,11 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS],[
 
 ]) # end AC_DEFUN of INVOKE_LIBOPTS_MACROS
 
-dnl @synopsis  LIBOPTS_CHECK
+dnl @synopsis  LIBOPTS_CHECK(libopts-path, options)
+dnl
+dnl libopts-path defaults to [libopts] if not provided.
+dnl Only one option is supported, [skip-makefile], which
+dnl conditionalizes away the AC_CONFIG_FILES(libopts-path/Makefile).
 dnl
 dnl Time-stamp:        "2010-02-24 08:37:21 bkorb"
 dnl
@@ -532,13 +536,14 @@ AC_DEFUN([LIBOPTS_CHECK],[
   AC_SUBST(LIBOPTS_LDADD)
   AC_SUBST(LIBOPTS_CFLAGS)
   AC_SUBST(LIBOPTS_DIR, AO_Libopts_Dir)
-  AC_CONFIG_FILES(AO_Libopts_Dir/Makefile)
+  AM_CONDITIONAL([BUILD_LIBOPTS], [test -n "${NEED_LIBOPTS_DIR}" -a -z "]$2["])
+  AM_COND_IF([BUILD_LIBOPTS],
+    [AC_CONFIG_FILES(AO_Libopts_Dir/Makefile)])
   m4_popdef([AO_Libopts_Dir])
 
-  [if test -n "${NEED_LIBOPTS_DIR}" ; then]
-    INVOKE_LIBOPTS_MACROS
-  else
-    INVOKE_LIBOPTS_MACROS_FIRST
-  [fi
+  AM_COND_IF([BUILD_LIBOPTS],
+    [INVOKE_LIBOPTS_MACROS],
+    [INVOKE_LIBOPTS_MACROS_FIRST])
+  [
 # end of AC_DEFUN of LIBOPTS_CHECK]
 ])

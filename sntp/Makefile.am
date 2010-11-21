@@ -1,36 +1,35 @@
 # Makefile.am for JMK's SNTP, by Harlan Stenn
 
-NULL=
+NULL =
 
 AUTOMAKE_OPTIONS = foreign 1.10
-ACLOCAL_AMFLAGS= -I ../m4 -I libopts/m4
+ACLOCAL_AMFLAGS = -I ../m4 -I libopts/m4
 
-AM_CPPFLAGS= $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
+AM_CPPFLAGS = $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
 	-I$(top_srcdir)/../lib/isc/include \
 	-I$(top_srcdir)/../lib/isc/nothreads/include \
 	-I$(top_srcdir)/../lib/isc/unix/include
 
-LDADD=	$(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
+LDADD =	$(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
 
-run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
+run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
 
 if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS=	sntp
+bin_PROGRAMS =	sntp
 else
-sbin_PROGRAMS=	sntp
+sbin_PROGRAMS =	sntp
 endif
 
 CLEANFILES = check-COPYRIGHT-submake
 
-SUBDIRS=
+SUBDIRS =
 if NEED_LIBOPTS
-SUBDIRS+= libopts
+SUBDIRS += libopts
 endif
-SUBDIRS+= .
 
 if GTEST_AVAILABLE
-SUBDIRS+= tests
+SUBDIRS += tests
 endif
 
 sntp_SOURCES =		\
@@ -53,7 +52,7 @@ sntp_SOURCES =		\
 	utilities.h	\
 	$(NULL)
 
-EXTRA_DIST=				\
+EXTRA_DIST =				\
 	$(srcdir)/autogen-version.def	\
 	bincheck.mf			\
 	$(srcdir)/COPYRIGHT		\
