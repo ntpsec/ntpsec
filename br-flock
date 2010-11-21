@@ -1,8 +1,21 @@
 #! /bin/sh
 
+IAM=`hostname || uname -n`
+MYNAME=`IFS=. ; set $IAM ; echo $1`
+
+case "$1" in
+ '--one'|'-1')
+     shift
+     FB_FIRSTONLY=-1
+     LIST=$MYNAME
+     ;;
+ *)
+     FB_FIRSTONLY=
+esac
+
 case "$LIST" in
  '') LIST="deacon barnstable beauregard grundoon howland mort macabre";;
 esac
 
 export LIST
-flock-build --disable-parse-clocks "$@"
+flock-build $FB_FIRSTONLY --disable-parse-clocks "$@"
