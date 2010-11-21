@@ -417,12 +417,7 @@ flag = {
     ifdef     = HAVE_WORKING_FORK;
     name      = wait-sync;
     value     = w;
-    /* arg-type  = number; */ /* doesn't compile on Windows with Autogen 5.10 output, instead: */
-    arg-type  = string;
-    flag-code = <<- _EOF_
-	extern tOptProc optionNumericVal;
-	optionNumericVal(pOptions, pOptDesc);
-	_EOF_;
+    arg-type  = number;
     flags-cant = nofork;
     flags-cant = quit;
     flags-cant = saveconfigquit;

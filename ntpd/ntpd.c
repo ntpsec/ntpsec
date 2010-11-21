@@ -754,8 +754,7 @@ ntpdmain(
 	do {					/* 'loop' once */
 		if (!HAVE_OPT( WAIT_SYNC ))
 			break;
-/* should be 	wait_sync = OPT_VALUE_WAIT_SYNC;  after Autogen 5.10 fixed */
-	 	wait_sync = DESC(WAIT_SYNC).optArg.argInt;
+		wait_sync = OPT_VALUE_WAIT_SYNC;
 		if (wait_sync <= 0) {
 			wait_sync = 0;
 			break;
