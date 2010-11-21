@@ -180,7 +180,7 @@ $(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
-	cd $(srcdir) && makeinfo --force --html --no-split -o sntp.html sntp.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE) libntp.a
