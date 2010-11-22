@@ -1,3 +1,4 @@
+* [Bug 1618] Unreachable code in jjy_start().
 * [Bug 1725] from 4.2.6p3-RC11: ntpd sends multicast from only one
   address.
 * from 4.2.6p3-RC11: Upgrade libopts to 33.3.8.
@@ -6,6 +7,8 @@
   frequency file updates, from Dave Mills.
 * Documentation updates from Dave Mills.
 * Add ntp-keygen -l/--lifetime to control certificate expiry.
+* JJY driver improvements for Tristate JJY01/02, including changes
+  to its clockstats format.
 (4.2.7p83) 2010/11/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1727] ntp-keygen PLEN, ILEN undeclared --without-crypto.
 * Remove top-level libopts, use sntp/libopts.
