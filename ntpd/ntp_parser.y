@@ -599,7 +599,6 @@ tos_option_dbl_keyword
 	|	T_Maxdist
 	|	T_Minclock
 	|	T_Maxclock
-	|	T_Nonvolatile
 	;
 
 
@@ -1096,6 +1095,7 @@ miscellaneous_command
 
 misc_cmd_dbl_keyword
 	:	T_Broadcastdelay
+	|	T_Nonvolatile
 	|	T_Tick
 	;
 

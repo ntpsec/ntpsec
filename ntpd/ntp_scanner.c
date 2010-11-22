@@ -317,15 +317,13 @@ is_double(
 	for (; lexeme[i] && isdigit(lexeme[i]); i++)
 		num_digits++;
 
-	/* Check for the required decimal point */
-	if ('.' == lexeme[i])
+	/* Check for the optional decimal point */
+	if ('.' == lexeme[i]) {
 		i++;
-	else
-		return 0;
-
-	/* Check for any digits after the decimal point */
-	for (; lexeme[i] && isdigit(lexeme[i]); i++)
-		num_digits++;
+		/* Check for any digits after the decimal point */
+		for (; lexeme[i] && isdigit(lexeme[i]); i++)
+			num_digits++;
+	}
 
 	/*
 	 * The number of digits in both the decimal part and the

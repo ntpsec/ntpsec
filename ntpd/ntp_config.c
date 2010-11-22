@@ -37,6 +37,7 @@
 #include "ntp_refclock.h"
 #include "ntp_filegen.h"
 #include "ntp_stdlib.h"
+#include "lib_strbuf.h"
 #include "ntp_assert.h"
 #include "ntpd-opts.h"
 #include "ntp_random.h"
@@ -336,6 +337,7 @@ enum gnn_type {
 };
 
 void ntpd_set_tod_using(const char *);
+static char * normal_dtoa(double);
 static unsigned long get_pfxmatch(char **s, struct masks *m);
 static unsigned long get_match(char *s, struct masks *m);
 static unsigned long get_logmask(char *s);
@@ -512,41 +514,37 @@ dump_config_tree(
 	/* For options I didn't find documentation I'll just output its name and the cor. value */
 	atrv = HEAD_PFIFO(ptree->vars);
 	for ( ; atrv != NULL; atrv = atrv->link) {
-		switch (atrv->attr) {
+		switch (atrv->type) {
 #ifdef DEBUG
 		default:
 			fprintf(df, "\n# dump error:\n"
-				"# unknown vars token %s\n",
+				"# unknown vars type %d (%s) for %s\n",
+				atrv->type, token_name(atrv->type),
 				token_name(atrv->attr));
 			break;
 #endif
-		/* doubles */
-		case T_Broadcastdelay:
-		case T_Tick:
-		case T_WanderThreshold:
-			fprintf(df, "%s %g\n",
-				keyword(atrv->attr),
-				atrv->value.d);
+		case T_Double:
+			fprintf(df, "%s %s\n", keyword(atrv->attr),
+				normal_dtoa(atrv->value.d));
 			break;
 			
-		/* ints */
-#ifdef AUTOKEY
-		case T_Automax:
-#endif
-			fprintf(df, "%s %d\n",
-				keyword(atrv->attr),
+		case T_Integer:
+			fprintf(df, "%s %d\n", keyword(atrv->attr),
 				atrv->value.i);
 			break;
 
-		/* strings */
-		case T_Driftfile:
-		case T_Leapfile:
-		case T_Logfile:
-		case T_Pidfile:
-		case T_Saveconfigdir:
-			fprintf(df, "%s \"%s\"\n",
-				keyword(atrv->attr),
+		case T_String:
+			fprintf(df, "%s \"%s\"", keyword(atrv->attr),
 				atrv->value.s);
+			if (T_Driftfile == atrv->attr &&
+			    atrv->link != NULL &&
+			    T_WanderThreshold == atrv->link->attr) {
+				atrv = atrv->link;
+				fprintf(df, " %s\n",
+					normal_dtoa(atrv->value.d));
+			} else {
+				fprintf(df, "\n");
+			}
 			break;
 		}
 	}
@@ -687,9 +685,9 @@ dump_config_tree(
 				break;
 
 			case T_Double:
-				fprintf(df, " %s %g", 
+				fprintf(df, " %s %s", 
 					keyword(atrv->attr),
-					atrv->value.d);
+					normal_dtoa(atrv->value.d));
 				break;
 			}
 		}
@@ -701,8 +699,8 @@ dump_config_tree(
 		fprintf(df, "tinker");
 		for ( ; atrv != NULL; atrv = atrv->link) {
 			NTP_INSIST(T_Double == atrv->type);
-			fprintf(df, " %s %g", keyword(atrv->attr),
-				atrv->value.d);
+			fprintf(df, " %s %s", keyword(atrv->attr),
+				normal_dtoa(atrv->value.d));
 		}
 		fprintf(df, "\n");
 	}
@@ -792,9 +790,9 @@ dump_config_tree(
 					break;
 #endif
 				case T_Double:
-					fprintf(df, " %s %g",
+					fprintf(df, " %s %s",
 						keyword(atrv->attr),
-						atrv->value.d);
+						normal_dtoa(atrv->value.d));
 					break;
 
 				case T_Integer:
@@ -1960,10 +1958,6 @@ config_tos(
 
 		case T_Beacon:
 			item = PROTO_BEACON;
-			break;
-
-		case T_Nonvolatile:
-			item = PROTO_NONVOLATILE;
 			break;
 		}
 		proto_config(item, 0, tos->value.d, NULL);
@@ -3356,7 +3350,8 @@ config_vars(
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
 			break;
 
-		case T_WanderThreshold:
+		case T_WanderThreshold:		/* FALLTHROUGH */
+		case T_Nonvolatile:
 			wander_threshold = curr_var->value.d;
 			break;
 
@@ -4372,6 +4367,40 @@ ntpd_set_tod_using(
 
 	snprintf(line, sizeof(line), "settimeofday=\"%s\"", which);
 	set_sys_var(line, strlen(line) + 1, RO);
+}
+
+
+static char *
+normal_dtoa(
+	double d
+	)
+{
+	char *	buf;
+	char *	pch_e;
+	char *	pch_nz;
+
+	LIB_GETBUF(buf);
+	snprintf(buf, LIB_BUFLENGTH, "%g", d);
+
+	/* use lowercase 'e', strip any leading zeroes in exponent */
+	pch_e = strchr(buf, 'e');
+	if (NULL == pch_e) {
+		pch_e = strchr(buf, 'E');
+		if (NULL == pch_e)
+			return buf;
+		*pch_e = 'e';
+	}
+	pch_e++;
+	if ('-' == *pch_e)
+		pch_e++;
+	pch_nz = pch_e;
+	while ('0' == *pch_nz)
+		pch_nz++;
+	if (pch_nz == pch_e)
+		return buf;
+	strncpy(pch_e, pch_nz, LIB_BUFLENGTH - (pch_e - buf));
+
+	return buf;
 }
 
 

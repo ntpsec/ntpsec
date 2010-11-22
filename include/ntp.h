@@ -705,7 +705,6 @@ struct pkt {
 #define	PROTO_BEACON		25
 #define	PROTO_ORPHAN		26
 #define	PROTO_ORPHWAIT		27
-#define	PROTO_NONVOLATILE	28
 
 /*
  * Configuration items for the loop filter
