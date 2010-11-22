@@ -1,7 +1,7 @@
-.TH NTPD 1 2010-11-17 "( 4.2.7p83)" "Programmer's Manual"
+.TH NTPD 1 2010-11-22 "( 4.2.7p84)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd.1)
 .\"  
-.\"  It has been AutoGen-ed  November 17, 2010 at 10:08:17 AM by AutoGen 5.10
+.\"  It has been AutoGen-ed  November 22, 2010 at 04:35:42 AM by AutoGen 5.11.3
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -281,10 +281,11 @@ This option may appear an unlimited number of times.
 .sp
 
 .TP
-.BR \-w " \fIstring\fP, " \--wait-sync "=" \fIstring\fP
+.BR \-w " \fInumber\fP, " \--wait-sync "=" \fInumber\fP
 Seconds to wait for first clock sync.
 This option must not appear in combination with any of the following options:
 nofork, quit, saveconfigquit.
+This option takes an integer number as its argument.
 .sp
 If greater than zero, alters ntpd behavior when forking to
 daemonize.  Instead of exiting with status 0 immediately after

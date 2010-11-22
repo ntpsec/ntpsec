@@ -1,21 +1,19 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  November 17, 2010 at 10:10:11 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 22, 2010 at 04:34:18 AM by AutoGen 5.11.3
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:0:8 templates.
- */
-
-/*
- *  This file was produced by an AutoOpts template.  AutoOpts is a
- *  copyrighted work.  This source file is not encumbered by AutoOpts
- *  licensing, but is provided under the licensing terms chosen by the
- *  sntp author or copyright holder.  AutoOpts is licensed under
- *  the terms of the LGPL.  The redistributable library (``libopts'') is
- *  licensed under the terms of either the LGPL or, at the users discretion,
- *  the BSD license.  See the AutoOpts and/or libopts sources for details.
+ * Generated from AutoOpts 33:3:8 templates.
+ *
+ *  AutoOpts is a copyrighted work.  This source file is not encumbered
+ *  by AutoOpts licensing, but is provided under the licensing terms chosen
+ *  by the sntp author or copyright holder.  AutoOpts is
+ *  licensed under the terms of the LGPL.  The redistributable library
+ *  (``libopts'') is licensed under the terms of either the LGPL or, at the
+ *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
+ *  for details.
  *
  * This source file is copyrighted and licensed under the following terms:
  *
@@ -61,10 +59,10 @@ extern tUsageProc optionUsage;
  *  Ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zIpv4Text[] =
+static char const zIpv4Text[] =
         "Force IPv4 DNS name resolution";
-tSCC    zIpv4_NAME[]               = "IPV4";
-tSCC    zIpv4_Name[]               = "ipv4";
+static char const zIpv4_NAME[]               = "IPV4";
+static char const zIpv4_Name[]               = "ipv4";
 static const int
     aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
@@ -74,10 +72,10 @@ static const int
  *  Ipv6 option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zIpv6Text[] =
+static char const zIpv6Text[] =
         "Force IPv6 DNS name resolution";
-tSCC    zIpv6_NAME[]               = "IPV6";
-tSCC    zIpv6_Name[]               = "ipv6";
+static char const zIpv6_NAME[]               = "IPV6";
+static char const zIpv6_Name[]               = "ipv6";
 static const int
     aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
@@ -86,19 +84,19 @@ static const int
 /*
  *  Normalverbose option description:
  */
-tSCC    zNormalverboseText[] =
+static char const zNormalverboseText[] =
         "Normal verbose";
-tSCC    zNormalverbose_NAME[]      = "NORMALVERBOSE";
-tSCC    zNormalverbose_Name[]      = "normalverbose";
+static char const zNormalverbose_NAME[]      = "NORMALVERBOSE";
+static char const zNormalverbose_Name[]      = "normalverbose";
 #define NORMALVERBOSE_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Kod option description:
  */
-tSCC    zKodText[] =
+static char const zKodText[] =
         "KoD history filename";
-tSCC    zKod_NAME[]                = "KOD";
-tSCC    zKod_Name[]                = "kod";
+static char const zKod_NAME[]                = "KOD";
+static char const zKod_Name[]                = "kod";
 #define KOD_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
@@ -106,10 +104,10 @@ tSCC    zKod_Name[]                = "kod";
  *  Syslog option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zSyslogText[] =
+static char const zSyslogText[] =
         "Logging with syslog";
-tSCC    zSyslog_NAME[]             = "SYSLOG";
-tSCC    zSyslog_Name[]             = "syslog";
+static char const zSyslog_NAME[]             = "SYSLOG";
+static char const zSyslog_Name[]             = "syslog";
 static const int
     aSyslogCantList[] = {
     INDEX_OPT_FILELOG, NO_EQUIVALENT };
@@ -119,10 +117,10 @@ static const int
  *  Filelog option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zFilelogText[] =
+static char const zFilelogText[] =
         "Log to specified logfile";
-tSCC    zFilelog_NAME[]            = "FILELOG";
-tSCC    zFilelog_Name[]            = "filelog";
+static char const zFilelog_NAME[]            = "FILELOG";
+static char const zFilelog_Name[]            = "filelog";
 static const int
     aFilelogCantList[] = {
     INDEX_OPT_SYSLOG, NO_EQUIVALENT };
@@ -133,10 +131,10 @@ static const int
  *  Settod option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zSettodText[] =
+static char const zSettodText[] =
         "Set (step) the time with settimeofday()";
-tSCC    zSettod_NAME[]             = "SETTOD";
-tSCC    zSettod_Name[]             = "settod";
+static char const zSettod_NAME[]             = "SETTOD";
+static char const zSettod_Name[]             = "settod";
 static const int
     aSettodCantList[] = {
     INDEX_OPT_ADJTIME, NO_EQUIVALENT };
@@ -146,10 +144,10 @@ static const int
  *  Adjtime option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zAdjtimeText[] =
+static char const zAdjtimeText[] =
         "Set (slew) the time with adjtime()";
-tSCC    zAdjtime_NAME[]            = "ADJTIME";
-tSCC    zAdjtime_Name[]            = "adjtime";
+static char const zAdjtime_NAME[]            = "ADJTIME";
+static char const zAdjtime_Name[]            = "adjtime";
 static const int
     aAdjtimeCantList[] = {
     INDEX_OPT_SETTOD, NO_EQUIVALENT };
@@ -158,20 +156,20 @@ static const int
 /*
  *  Broadcast option description:
  */
-tSCC    zBroadcastText[] =
+static char const zBroadcastText[] =
         "Use broadcasts to the address specified for synchronisation";
-tSCC    zBroadcast_NAME[]          = "BROADCAST";
-tSCC    zBroadcast_Name[]          = "broadcast";
+static char const zBroadcast_NAME[]          = "BROADCAST";
+static char const zBroadcast_Name[]          = "broadcast";
 #define BROADCAST_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Timeout option description:
  */
-tSCC    zTimeoutText[] =
+static char const zTimeoutText[] =
         "Specify the number of seconds to wait for broadcasts";
-tSCC    zTimeout_NAME[]            = "TIMEOUT";
-tSCC    zTimeout_Name[]            = "timeout";
+static char const zTimeout_NAME[]            = "TIMEOUT";
+static char const zTimeout_Name[]            = "timeout";
 #define zTimeoutDefaultArg           ((char const*)68)
 #define TIMEOUT_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
@@ -179,32 +177,32 @@ tSCC    zTimeout_Name[]            = "timeout";
 /*
  *  Authentication option description:
  */
-tSCC    zAuthenticationText[] =
+static char const zAuthenticationText[] =
         "Enable authentication with the key auth-keynumber";
-tSCC    zAuthentication_NAME[]     = "AUTHENTICATION";
-tSCC    zAuthentication_Name[]     = "authentication";
+static char const zAuthentication_NAME[]     = "AUTHENTICATION";
+static char const zAuthentication_Name[]     = "authentication";
 #define AUTHENTICATION_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
  *  Keyfile option description:
  */
-tSCC    zKeyfileText[] =
+static char const zKeyfileText[] =
         "Specify a keyfile. SNTP will look in this file for the key specified with -a";
-tSCC    zKeyfile_NAME[]            = "KEYFILE";
-tSCC    zKeyfile_Name[]            = "keyfile";
+static char const zKeyfile_NAME[]            = "KEYFILE";
+static char const zKeyfile_Name[]            = "keyfile";
 #define KEYFILE_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]          = "Display extended usage information and exit";
-tSCC zHelp_Name[]         = "help";
+static char const zHelpText[]          = "Display extended usage information and exit";
+static char const zHelp_Name[]         = "help";
 #ifdef HAVE_WORKING_FORK
 #define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
-tSCC zMore_Help_Name[]    = "more-help";
-tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+static char const zMore_Help_Name[]    = "more-help";
+static char const zMore_HelpText[]     = "Extended usage information passed thru pager";
 #else
 #define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
 #define zMore_Help_Name   NULL
@@ -217,14 +215,14 @@ tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
                                 OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
 #endif
 
-tSCC zVersionText[]       = "Output version information and exit";
-tSCC zVersion_Name[]      = "version";
-tSCC zSave_OptsText[]     = "Save the option state to a config file";
-tSCC zSave_Opts_Name[]    = "save-opts";
-tSCC zLoad_OptsText[]     = "Load options from a config file";
-tSCC zLoad_Opts_NAME[]    = "LOAD_OPTS";
-tSCC zNotLoad_Opts_Name[] = "no-load-opts";
-tSCC zNotLoad_Opts_Pfx[]  = "no";
+static char const zVersionText[]       = "Output version information and exit";
+static char const zVersion_Name[]      = "version";
+static char const zSave_OptsText[]     = "Save the option state to a config file";
+static char const zSave_Opts_Name[]    = "save-opts";
+static char const zLoad_OptsText[]     = "Load options from a config file";
+static char const zLoad_Opts_NAME[]    = "LOAD_OPTS";
+static char const zNotLoad_Opts_Name[] = "no-load-opts";
+static char const zNotLoad_Opts_Pfx[]  = "no";
 #define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
 /*
  *  Declare option callback procedures
@@ -234,8 +232,6 @@ tSCC zNotLoad_Opts_Pfx[]  = "no";
  *  Under test, omit argument processing, or call optionStackArg,
  *  if multiple copies are allowed.
  */
-extern tOptProc
-    optionNumericVal, optionPagedUsage, optionVersionStderr;
 static tOptProc
     doUsageOpt;
 
@@ -244,7 +240,10 @@ static tOptProc
  *  When not under test, there are different procs to use
  */
 extern tOptProc
-    optionNumericVal, optionPagedUsage, optionPrintVersion;
+    optionBooleanVal,    optionNestedVal,     optionNumericVal,
+    optionPagedUsage,    optionPrintVersion,  optionResetOpt,
+    optionStackArg,      optionTimeVal,       optionUnstackArg,
+    optionVersionStderr;
 static tOptProc
     doUsageOpt;
 #endif /* defined(TEST_SNTP_OPTS) */
@@ -474,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.7p83\n\
+"sntp - standard SNTP program - Ver. 4.2.7p84\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -498,7 +497,7 @@ job.\n\n\
 NTP and SNTP are defined by RFC 5905, which\n\
 obsoletes RFC 4330 and RFC 1305.\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -520,7 +519,8 @@ tOptions sntpOptions = {
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
-    + OPTPROC_ARGS_REQ ),
+    + OPTPROC_ARGS_REQ
+    + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -552,24 +552,27 @@ doUsageOpt(
     tOptDesc*   pOptDesc )
 {
     (void)pOptions;
-    USAGE( EXIT_SUCCESS );
+    USAGE(EXIT_SUCCESS);
 }
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
-extern void optionPutShell( tOptions* );
+extern void optionPutShell(tOptions*);
 
 int
 main(int argc, char** argv)
 {
     int res = EXIT_SUCCESS;
-    (void)optionProcess( &sntpOptions, argc, argv );
-    optionPutShell( &sntpOptions );
+    (void)optionProcess(&sntpOptions, argc, argv);
+    optionPutShell(&sntpOptions);
+    res = ferror(stdout);
+    if (res != 0)
+        fputs("output error writing to stdout\n", stderr);
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -578,11 +581,11 @@ main(int argc, char** argv)
 #include <unistd.h>
 #include <autoopts/usage-txt.h>
 
-static char* AO_gettext( char const* pz );
+static char* AO_gettext(char const* pz);
 static void  coerce_it(void** s);
 
 static char*
-AO_gettext( char const* pz )
+AO_gettext(char const* pz)
 {
     char* pzRes;
     if (pz == NULL)
@@ -590,10 +593,10 @@ AO_gettext( char const* pz )
     pzRes = _(pz);
     if (pzRes == pz)
         return pzRes;
-    pzRes = strdup( pzRes );
+    pzRes = strdup(pzRes);
     if (pzRes == NULL) {
-        fputs( _("No memory for duping translated strings\n"), stderr );
-        exit( EXIT_FAILURE );
+        fputs(_("No memory for duping translated strings\n"), stderr);
+        exit(EXIT_FAILURE);
     }
     return pzRes;
 }
@@ -606,7 +609,7 @@ static void coerce_it(void** s) { *s = AO_gettext(*s); }
  *  This invokes the translation code (e.g. gettext(3)).
  */
 static void
-translate_option_strings( void )
+translate_option_strings(void)
 {
     /*
      *  Guard against re-translation.  It won't work.  The strings will have

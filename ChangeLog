@@ -1,3 +1,4 @@
+(4.2.7p84) 2010/11/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1618] Unreachable code in jjy_start().
 * [Bug 1725] from 4.2.6p3-RC11: ntpd sends multicast from only one
   address.

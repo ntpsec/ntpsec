@@ -1,21 +1,19 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *  
- *  It has been AutoGen-ed  November 17, 2010 at 10:08:23 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 22, 2010 at 04:35:50 AM by AutoGen 5.11.3
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:0:8 templates.
- */
-
-/*
- *  This file was produced by an AutoOpts template.  AutoOpts is a
- *  copyrighted work.  This header file is not encumbered by AutoOpts
- *  licensing, but is provided under the licensing terms chosen by the
- *  ntpdc author or copyright holder.  AutoOpts is licensed under
- *  the terms of the LGPL.  The redistributable library (``libopts'') is
- *  licensed under the terms of either the LGPL or, at the users discretion,
- *  the BSD license.  See the AutoOpts and/or libopts sources for details.
+ * Generated from AutoOpts 33:3:8 templates.
+ *
+ *  AutoOpts is a copyrighted work.  This header file is not encumbered
+ *  by AutoOpts licensing, but is provided under the licensing terms chosen
+ *  by the ntpdc author or copyright holder.  AutoOpts is
+ *  licensed under the terms of the LGPL.  The redistributable library
+ *  (``libopts'') is licensed under the terms of either the LGPL or, at the
+ *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
+ *  for details.
  *
  * This source file is copyrighted and licensed under the following terms:
  *
@@ -41,7 +39,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 135168
+#define AO_TEMPLATE_VERSION 135171
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -70,13 +68,13 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    15
-#define NTPDC_VERSION       "4.2.7p83"
-#define NTPDC_FULL_VERSION  "ntpdc - vendor-specific NTP query program - Ver. 4.2.7p83"
+#define NTPDC_VERSION       "4.2.7p84"
+#define NTPDC_FULL_VERSION  "ntpdc - vendor-specific NTP query program - Ver. 4.2.7p84"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT( IPV4 )
+ *  e.g. HAVE_OPT(IPV4)
  */
 #define         DESC(n) (ntpdcOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -90,7 +88,7 @@ typedef enum {
 #define STACKLST_OPT(n) (((tArgList*)(DESC(n).optCookie))->apzArgs)
 #define    CLEAR_OPT(n) STMTS( \
                 DESC(n).fOptState &= OPTST_PERSISTENT_MASK;   \
-                if ( (DESC(n).fOptState & OPTST_INITENABLED) == 0) \
+                if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
 
@@ -177,14 +175,14 @@ typedef enum {
 /*
  *  Interface defines not associated with particular options
  */
-#define ERRSKIP_OPTERR  STMTS( ntpdcOptions.fOptSet &= ~OPTPROC_ERRSTOP )
-#define ERRSTOP_OPTERR  STMTS( ntpdcOptions.fOptSet |= OPTPROC_ERRSTOP )
+#define ERRSKIP_OPTERR  STMTS(ntpdcOptions.fOptSet &= ~OPTPROC_ERRSTOP)
+#define ERRSTOP_OPTERR  STMTS(ntpdcOptions.fOptSet |= OPTPROC_ERRSTOP)
 #define RESTART_OPT(n)  STMTS( \
                 ntpdcOptions.curOptIdx = (n); \
-                ntpdcOptions.pzCurOpt  = NULL )
+                ntpdcOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
-#define USAGE(c)        (*ntpdcOptions.pUsageProc)( &ntpdcOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+#define USAGE(c)        (*ntpdcOptions.pUsageProc)(&ntpdcOptions, c)
+/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 408 */
 
 /* * * * * *
  *
@@ -199,9 +197,9 @@ extern tOptions   ntpdcOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
-    static inline char* aoGetsText( char const* pz ) {
+    static inline char* aoGetsText(char const* pz) {
         if (pz == NULL) return NULL;
-        return (char*)gettext( pz );
+        return (char*)gettext(pz);
     }
 #   define _(s)  aoGetsText(s)
 # endif /* _() */

@@ -1,21 +1,19 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  November 17, 2010 at 10:08:35 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  November 22, 2010 at 04:36:02 AM by AutoGen 5.11.3
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:0:8 templates.
- */
-
-/*
- *  This file was produced by an AutoOpts template.  AutoOpts is a
- *  copyrighted work.  This source file is not encumbered by AutoOpts
- *  licensing, but is provided under the licensing terms chosen by the
- *  ntpq author or copyright holder.  AutoOpts is licensed under
- *  the terms of the LGPL.  The redistributable library (``libopts'') is
- *  licensed under the terms of either the LGPL or, at the users discretion,
- *  the BSD license.  See the AutoOpts and/or libopts sources for details.
+ * Generated from AutoOpts 33:3:8 templates.
+ *
+ *  AutoOpts is a copyrighted work.  This source file is not encumbered
+ *  by AutoOpts licensing, but is provided under the licensing terms chosen
+ *  by the ntpq author or copyright holder.  AutoOpts is
+ *  licensed under the terms of the LGPL.  The redistributable library
+ *  (``libopts'') is licensed under the terms of either the LGPL or, at the
+ *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
+ *  for details.
  *
  * This source file is copyrighted and licensed under the following terms:
  *
@@ -70,10 +68,10 @@ extern tUsageProc optionUsage;
  *  Ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zIpv4Text[] =
+static char const zIpv4Text[] =
         "Force IPv4 DNS name resolution";
-tSCC    zIpv4_NAME[]               = "IPV4";
-tSCC    zIpv4_Name[]               = "ipv4";
+static char const zIpv4_NAME[]               = "IPV4";
+static char const zIpv4_Name[]               = "ipv4";
 static const int
     aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
@@ -83,10 +81,10 @@ static const int
  *  Ipv6 option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zIpv6Text[] =
+static char const zIpv6Text[] =
         "Force IPv6 DNS name resolution";
-tSCC    zIpv6_NAME[]               = "IPV6";
-tSCC    zIpv6_Name[]               = "ipv6";
+static char const zIpv6_NAME[]               = "IPV6";
+static char const zIpv6_Name[]               = "ipv6";
 static const int
     aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
@@ -95,29 +93,29 @@ static const int
 /*
  *  Command option description:
  */
-tSCC    zCommandText[] =
+static char const zCommandText[] =
         "run a command and exit";
-tSCC    zCommand_NAME[]            = "COMMAND";
-tSCC    zCommand_Name[]            = "command";
+static char const zCommand_NAME[]            = "COMMAND";
+static char const zCommand_Name[]            = "command";
 #define COMMAND_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Debug_Level option description:
  */
-tSCC    zDebug_LevelText[] =
+static char const zDebug_LevelText[] =
         "Increase output debug message level";
-tSCC    zDebug_Level_NAME[]        = "DEBUG_LEVEL";
-tSCC    zDebug_Level_Name[]        = "debug-level";
+static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
+static char const zDebug_Level_Name[]        = "debug-level";
 #define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Set_Debug_Level option description:
  */
-tSCC    zSet_Debug_LevelText[] =
+static char const zSet_Debug_LevelText[] =
         "Set the output debug message level";
-tSCC    zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
-tSCC    zSet_Debug_Level_Name[]    = "set-debug-level";
+static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
+static char const zSet_Debug_Level_Name[]    = "set-debug-level";
 #define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
@@ -125,10 +123,10 @@ tSCC    zSet_Debug_Level_Name[]    = "set-debug-level";
  *  Peers option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zPeersText[] =
+static char const zPeersText[] =
         "Print a list of the peers";
-tSCC    zPeers_NAME[]              = "PEERS";
-tSCC    zPeers_Name[]              = "peers";
+static char const zPeers_NAME[]              = "PEERS";
+static char const zPeers_Name[]              = "peers";
 static const int
     aPeersCantList[] = {
     INDEX_OPT_INTERACTIVE, NO_EQUIVALENT };
@@ -138,10 +136,10 @@ static const int
  *  Interactive option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zInteractiveText[] =
+static char const zInteractiveText[] =
         "Force ntpq to operate in interactive mode";
-tSCC    zInteractive_NAME[]        = "INTERACTIVE";
-tSCC    zInteractive_Name[]        = "interactive";
+static char const zInteractive_NAME[]        = "INTERACTIVE";
+static char const zInteractive_Name[]        = "interactive";
 static const int
     aInteractiveCantList[] = {
     INDEX_OPT_COMMAND,
@@ -151,30 +149,30 @@ static const int
 /*
  *  Numeric option description:
  */
-tSCC    zNumericText[] =
+static char const zNumericText[] =
         "numeric host addresses";
-tSCC    zNumeric_NAME[]            = "NUMERIC";
-tSCC    zNumeric_Name[]            = "numeric";
+static char const zNumeric_NAME[]            = "NUMERIC";
+static char const zNumeric_Name[]            = "numeric";
 #define NUMERIC_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Old_Rv option description:
  */
-tSCC    zOld_RvText[] =
+static char const zOld_RvText[] =
         "Always output status line with readvar";
-tSCC    zOld_Rv_NAME[]             = "OLD_RV";
-tSCC    zOld_Rv_Name[]             = "old-rv";
+static char const zOld_Rv_NAME[]             = "OLD_RV";
+static char const zOld_Rv_Name[]             = "old-rv";
 #define OLD_RV_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]          = "Display extended usage information and exit";
-tSCC zHelp_Name[]         = "help";
+static char const zHelpText[]          = "Display extended usage information and exit";
+static char const zHelp_Name[]         = "help";
 #ifdef HAVE_WORKING_FORK
 #define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
-tSCC zMore_Help_Name[]    = "more-help";
-tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+static char const zMore_Help_Name[]    = "more-help";
+static char const zMore_HelpText[]     = "Extended usage information passed thru pager";
 #else
 #define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
 #define zMore_Help_Name   NULL
@@ -187,14 +185,14 @@ tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
                                 OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
 #endif
 
-tSCC zVersionText[]       = "Output version information and exit";
-tSCC zVersion_Name[]      = "version";
-tSCC zSave_OptsText[]     = "Save the option state to a config file";
-tSCC zSave_Opts_Name[]    = "save-opts";
-tSCC zLoad_OptsText[]     = "Load options from a config file";
-tSCC zLoad_Opts_NAME[]    = "LOAD_OPTS";
-tSCC zNotLoad_Opts_Name[] = "no-load-opts";
-tSCC zNotLoad_Opts_Pfx[]  = "no";
+static char const zVersionText[]       = "Output version information and exit";
+static char const zVersion_Name[]      = "version";
+static char const zSave_OptsText[]     = "Save the option state to a config file";
+static char const zSave_Opts_Name[]    = "save-opts";
+static char const zLoad_OptsText[]     = "Load options from a config file";
+static char const zLoad_Opts_NAME[]    = "LOAD_OPTS";
+static char const zNotLoad_Opts_Name[] = "no-load-opts";
+static char const zNotLoad_Opts_Pfx[]  = "no";
 #define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
 /*
  *  Declare option callback procedures
@@ -205,7 +203,7 @@ tSCC zNotLoad_Opts_Pfx[]  = "no";
  *  if multiple copies are allowed.
  */
 extern tOptProc
-    optionPagedUsage, optionStackArg, optionVersionStderr;
+    optionStackArg;
 static tOptProc
     doUsageOpt;
 
@@ -222,7 +220,10 @@ static tOptProc
  *  When not under test, there are different procs to use
  */
 extern tOptProc
-    ntpq_custom_opt_handler, optionPagedUsage, optionPrintVersion;
+    ntpq_custom_opt_handler, optionBooleanVal,        optionNestedVal,
+    optionNumericVal,        optionPagedUsage,        optionPrintVersion,
+    optionResetOpt,          optionStackArg,          optionTimeVal,
+    optionUnstackArg,        optionVersionStderr;
 static tOptProc
     doOptSet_Debug_Level, doUsageOpt;
 
@@ -427,7 +428,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPQ";
 tSCC   zUsageTitle[] =
-"ntpq - standard NTP query program - Ver. 4.2.7p83\n\
+"ntpq - standard NTP query program - Ver. 4.2.7p84\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -447,7 +448,7 @@ information about current state and/or changes in that state.\n\
 The same formats are used in NTPv4, although some of the\n\
 variables have changed and new ones added.\n";
 tSCC    zFullVersion[] = NTPQ_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -468,7 +469,8 @@ tOptions ntpqOptions = {
     + OPTPROC_SHORTOPT
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
-    + OPTPROC_ENVIRON ),
+    + OPTPROC_ENVIRON
+    + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -500,7 +502,7 @@ doUsageOpt(
     tOptDesc*   pOptDesc )
 {
     (void)pOptions;
-    USAGE( EXIT_SUCCESS );
+    USAGE(EXIT_SUCCESS);
 }
 
 #if ! defined(TEST_NTPQ_OPTS)
@@ -516,22 +518,25 @@ doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPQ_OPTS) */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
 
-extern void optionPutShell( tOptions* );
+extern void optionPutShell(tOptions*);
 
 int
 main(int argc, char** argv)
 {
     int res = EXIT_SUCCESS;
-    (void)optionProcess( &ntpqOptions, argc, argv );
-    optionPutShell( &ntpqOptions );
+    (void)optionProcess(&ntpqOptions, argc, argv);
+    optionPutShell(&ntpqOptions);
+    res = ferror(stdout);
+    if (res != 0)
+        fputs("output error writing to stdout\n", stderr);
     return res;
 }
 #endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -540,11 +545,11 @@ main(int argc, char** argv)
 #include <unistd.h>
 #include <autoopts/usage-txt.h>
 
-static char* AO_gettext( char const* pz );
+static char* AO_gettext(char const* pz);
 static void  coerce_it(void** s);
 
 static char*
-AO_gettext( char const* pz )
+AO_gettext(char const* pz)
 {
     char* pzRes;
     if (pz == NULL)
@@ -552,10 +557,10 @@ AO_gettext( char const* pz )
     pzRes = _(pz);
     if (pzRes == pz)
         return pzRes;
-    pzRes = strdup( pzRes );
+    pzRes = strdup(pzRes);
     if (pzRes == NULL) {
-        fputs( _("No memory for duping translated strings\n"), stderr );
-        exit( EXIT_FAILURE );
+        fputs(_("No memory for duping translated strings\n"), stderr);
+        exit(EXIT_FAILURE);
     }
     return pzRes;
 }
@@ -568,7 +573,7 @@ static void coerce_it(void** s) { *s = AO_gettext(*s); }
  *  This invokes the translation code (e.g. gettext(3)).
  */
 static void
-translate_option_strings( void )
+translate_option_strings(void)
 {
     /*
      *  Guard against re-translation.  It won't work.  The strings will have
