@@ -6,6 +6,8 @@
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
 * Use a single copy of libopts/, in sntp/.
 * Upgrade libopts to 33.3.8.
+* Bump minimum Automake version to 1.11, required for AM_COND_IF
+  use in LIBOPTS_CHECK.
 
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
@@ -96,7 +98,7 @@
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by Juergen
   Perlinger.
 
 ---
