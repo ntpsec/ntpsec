@@ -2,6 +2,8 @@
 * [Bug 1725] from 4.2.6p3-RC11: ntpd sends multicast from only one
   address.
 * from 4.2.6p3-RC11: Upgrade libopts to 33.3.8.
+* from 4.2.6p3-RC11: Bump minimum Automake version to 1.11, required for
+  AM_COND_IF use in LIBOPTS_CHECK.
 * An almost complete rebuild of the initial loopfilter configuration
   process, including the code that determines the interval between
   frequency file updates, from Dave Mills.
@@ -503,6 +505,8 @@
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
 * Use a single copy of libopts/, in sntp/.
 * Upgrade libopts to 33.3.8.
+* Bump minimum Automake version to 1.11, required for AM_COND_IF
+  use in LIBOPTS_CHECK.
 
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
