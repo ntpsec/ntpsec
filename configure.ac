@@ -131,10 +131,10 @@ AC_FUNC_FORK
 
 AC_CACHE_CHECK(
     [if $CC can handle @%:@warning],
-    ac_cv_cpp_warning,
+    [ac_cv_cpp_warning],
     [
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM([], [#warning foo]),
+	    [AC_LANG_PROGRAM([[]], [[#warning foo]])],
 	    [ac_cv_cpp_warning=yes],
 	    [ac_cv_cpp_warning=no],
 	)
@@ -1251,14 +1251,17 @@ AC_CACHE_VAL(ac_cv_func_getsockname_arg2,dnl
 [AC_CACHE_VAL(ac_cv_func_getsockname_socklen_type,dnl
  [for ac_cv_func_getsockname_arg2 in 'struct sockaddr *' 'void *'; do
   for ac_cv_func_getsockname_socklen_type in 'socklen_t' 'size_t' 'unsigned int' 'int'; do
-   AC_TRY_COMPILE(dnl
-[#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-extern getsockname (int, $ac_cv_func_getsockname_arg2, $ac_cv_func_getsockname_socklen_type *);],,dnl
+   AC_TRY_COMPILE(
+    [AC_LANG_PROGRAM([
+	#ifdef HAVE_SYS_TYPES_H
+	#include <sys/types.h>
+	#endif
+	#ifdef HAVE_SYS_SOCKET_H
+	#include <sys/socket.h>
+	#endif
+    ], [
+	extern getsockname (int, $ac_cv_func_getsockname_arg2, $ac_cv_func_getsockname_socklen_type *);
+    ])], ,
     [ac_not_found=no ; break 2], ac_not_found=yes)
    done
   done
@@ -2167,8 +2170,8 @@ case "$ac_cv_var_tty_clk" in
 esac
 
 AC_CACHE_CHECK([for the ppsclock streams module],
- ac_cv_var_ppsclock,
- ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev)
+ [ac_cv_var_ppsclock],
+ [ac_cv_var_ppsclock=$ac_cv_struct_ppsclockev])
 case "$ac_cv_var_ppsclock" in
  yes) AC_DEFINE(PPS, 1, [Do we have the ppsclock streams module?]) ;;
 esac
@@ -2182,7 +2185,7 @@ AC_CACHE_CHECK(
 	 i386-sequent-sysv4)
 	    ;;
 	 *)
-	    AC_COMPILE_IFELSE(
+	    AC_COMPILE_IFELSE([
 		AC_LANG_PROGRAM(
 		    [
 			#ifdef HAVE_NETINET_IN_H
@@ -2193,7 +2196,7 @@ AC_CACHE_CHECK(
 			struct ip_mreq ipmr;
 			ipmr.imr_interface.s_addr = 0;
 		    ]
-		),
+		)],
 		[ntp_cv_multicast=yes],
 		[]
 	    )

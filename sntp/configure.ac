@@ -201,14 +201,17 @@ AC_CACHE_VAL(ac_cv_func_getsockname_arg2,dnl
 [AC_CACHE_VAL(ac_cv_func_getsockname_socklen_type,dnl
  [for ac_cv_func_getsockname_arg2 in 'struct sockaddr *' 'void *'; do
   for ac_cv_func_getsockname_socklen_type in 'socklen_t' 'size_t' 'unsigned int' 'int'; do
-   AC_TRY_COMPILE(dnl
-[#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-extern getsockname (int, $ac_cv_func_getsockname_arg2, $ac_cv_func_getsockname_socklen_type *);],,dnl
+   AC_TRY_COMPILE(
+    [AC_LANG_PROGRAM([
+	#ifdef HAVE_SYS_TYPES_H
+	#include <sys/types.h>
+	#endif
+	#ifdef HAVE_SYS_SOCKET_H
+	#include <sys/socket.h>
+	#endif
+    ], [
+	extern getsockname (int, $ac_cv_func_getsockname_arg2, $ac_cv_func_getsockname_socklen_type *);
+    ])], ,
     [ac_not_found=no ; break 2], ac_not_found=yes)
    done
   done
