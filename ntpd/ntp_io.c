@@ -980,7 +980,7 @@ add_interface(
 		    (IN6_IS_ADDR_LINKLOCAL(PSOCK_ADDR6(addr)) ||
 		     IN6_IS_ADDR_SITELOCAL(PSOCK_ADDR6(addr))));
 #else
-	ep_linklocal = FALSE;
+	ep_local = FALSE;
 #endif
 	/*
 	 * If we have multiple local addresses on the same network
