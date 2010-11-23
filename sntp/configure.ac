@@ -476,17 +476,17 @@ AC_CACHE_CHECK(
 	    ;;
 	 *)
 	    AC_COMPILE_IFELSE(
-		AC_LANG_PROGRAM(
-		    [
+		[AC_LANG_PROGRAM(
+		    [[
 			#ifdef HAVE_NETINET_IN_H
 			#include <netinet/in.h>
 			#endif
-		    ],
-		    [
+		    ]],
+		    [[
 			struct ip_mreq ipmr;
 			ipmr.imr_interface.s_addr = 0;
-		    ]
-		),
+		    ]]
+		)],
 		[ntp_cv_multicast=yes],
 		[]
 	    )

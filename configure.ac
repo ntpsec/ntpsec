@@ -134,7 +134,7 @@ AC_CACHE_CHECK(
     ac_cv_cpp_warning,
     [
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM([], [#warning foo]),
+	    [AC_LANG_PROGRAM([[]], [[#warning foo]])],
 	    [ac_cv_cpp_warning=yes],
 	    [ac_cv_cpp_warning=no],
 	)
@@ -2221,17 +2221,17 @@ AC_CACHE_CHECK(
 	    ;;
 	 *)
 	    AC_COMPILE_IFELSE(
-		AC_LANG_PROGRAM(
-		    [
+		[AC_LANG_PROGRAM(
+		    [[
 			#ifdef HAVE_NETINET_IN_H
 			#include <netinet/in.h>
 			#endif
-		    ],
-		    [
+		    ]],
+		    [[
 			struct ip_mreq ipmr;
 			ipmr.imr_interface.s_addr = 0;
-		    ]
-		),
+		    ]]
+		)],
 		[ntp_cv_multicast=yes],
 		[]
 	    )
@@ -2243,7 +2243,7 @@ case "$ntp_cv_multicast" in
  yes)
     AC_DEFINE(MCAST, 1, [Does the target support multicast IP?])
     AC_CACHE_CHECK(
-	[[arg type needed for setsockopt() IP*_MULTICAST_LOOP]],
+	[arg type needed for setsockopt() IP*_MULTICAST_LOOP],
 	ntp_cv_typeof_ip_multicast_loop,
 	[
 	    case "$host" in
