@@ -44,7 +44,8 @@ dnl AC_ARG_PROGRAM
 AC_PREREQ([2.53])
 
 # Checks for programs.
-AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_CPP
 
 # AC_PROG_CC_STDC has two functions.  It attempts to find a compiler
 # capable of C99, or failing that, for C89.  CC is set afterward with
@@ -146,6 +147,53 @@ AC_SEARCH_LIBS([setsockopt], [socket xnet])
 
 # Checks for header files.
 AC_HEADER_STDC
+
+dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
+dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3
+dnl  compiles it without complaint.  The mpinfou union is defined later
+dnl  in the resulting preprocessed source than the spu_info array in
+dnl  /usr/include/machine/sys/getppdp.h:
+dnl	extern union mpinfou spu_info[];
+dnl  triggering the error.  Our strategy is on HP-UX only, test for
+dnl  net/netmp.h, which is the file included by net/if.h that leads to
+dnl  getppdp.h.  If it is present but can't be compiled, try adding
+dnl  a duplicate definition of mpinfou, which should then allow the
+dnl  following net/if.h and net/if6.h tests to proceed normally.
+dnl  Using net/netmp.h allows us to avoid polluting test results for
+dnl  net/if.h.
+#
+case "$host" in
+ *-hp-hpux*)
+    AC_CHECK_HEADERS(
+	[net/netmp.h],
+	[netmp_h_works=yes],
+	[netmp_h_works=no]
+    )
+    case "$netmp_h_works" in
+     no)
+	cat >>confdefs.h <<_ACEOF
+#ifndef MPINFOU_PREDECLARED
+# define MPINFOU_PREDECLARED
+typedef union mpinfou {		/* For lint */
+	struct pdk_mpinfo *pdkptr;
+	struct mpinfo *pikptr;
+} mpinfou_t;
+#endif
+_ACEOF
+	AH_BOTTOM([
+#ifndef MPINFOU_PREDECLARED
+# define MPINFOU_PREDECLARED
+typedef union mpinfou {		/* For lint */
+	struct pdk_mpinfo *pdkptr;
+	struct mpinfo *pikptr;
+} mpinfou_t;
+#endif
+])
+	;;
+    esac
+    ;;
+esac
+
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h syslog.h])
 AC_CHECK_HEADERS([sys/socket.h sys/time.h])
 AC_HEADER_TIME
