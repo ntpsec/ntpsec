@@ -135,7 +135,7 @@ AC_CACHE_CHECK(
     ac_cv_cpp_warning,
     [
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM([[]], [[#warning foo]]),
+	    [AC_LANG_PROGRAM([[]], [[#warning foo]])],
 	    [ac_cv_cpp_warning=yes],
 	    [ac_cv_cpp_warning=no],
 	)
@@ -489,6 +489,53 @@ esac
 
 AC_CHECK_HEADERS([arpa/nameser.h])
 AC_CHECK_HEADERS([sys/socket.h])
+
+dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
+dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3
+dnl  compiles it without complaint.  The mpinfou union is defined later
+dnl  in the resulting preprocessed source than the spu_info array in
+dnl  /usr/include/machine/sys/getppdp.h:
+dnl	extern union mpinfou spu_info[];
+dnl  triggering the error.  Our strategy is on HP-UX only, test for
+dnl  net/netmp.h, which is the file included by net/if.h that leads to
+dnl  getppdp.h.  If it is present but can't be compiled, try adding
+dnl  a duplicate definition of mpinfou, which should then allow the
+dnl  following net/if.h and net/if6.h tests to proceed normally.
+dnl  Using net/netmp.h allows us to avoid polluting test results for
+dnl  net/if.h.
+#
+case "$host" in
+ *-hp-hpux*)
+    AC_CHECK_HEADERS(
+	[net/netmp.h],
+	[netmp_h_works=yes],
+	[netmp_h_works=no]
+    )
+    case "$netmp_h_works" in
+     no)
+	cat >>confdefs.h <<_ACEOF
+#ifndef MPINFOU_PREDECLARED
+# define MPINFOU_PREDECLARED
+typedef union mpinfou {		/* For lint */
+	struct pdk_mpinfo *pdkptr;
+	struct mpinfo *pikptr;
+} mpinfou_t;
+#endif
+_ACEOF
+	AH_BOTTOM([
+#ifndef MPINFOU_PREDECLARED
+# define MPINFOU_PREDECLARED
+typedef union mpinfou {		/* For lint */
+	struct pdk_mpinfo *pdkptr;
+	struct mpinfo *pikptr;
+} mpinfou_t;
+#endif
+])
+	;;
+    esac
+    ;;
+esac
+
 AC_CHECK_HEADERS([net/if.h], [], [],
 [#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -661,15 +708,6 @@ case "$ac_cv_func___adjtimex" in
     ])dnl
     ;;
 esac
-
-dnl AC_CHECK_HEADERS(net/if.h, [], [],
-dnl [#if HAVE_SYS_TYPES_H
-dnl # include <sys/types.h>
-dnl #endif
-dnl #if HAVE_SYS_SOCKET_H
-dnl # include <sys/socket.h>
-dnl #endif
-dnl ])
 
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_TYPES_H
@@ -2232,7 +2270,7 @@ AC_CACHE_CHECK(
 	    ;;
 	 *)
 	    AC_COMPILE_IFELSE(
-		AC_LANG_PROGRAM(
+		[AC_LANG_PROGRAM(
 		    [[
 			#ifdef HAVE_NETINET_IN_H
 			#include <netinet/in.h>
@@ -2242,7 +2280,7 @@ AC_CACHE_CHECK(
 			struct ip_mreq ipmr;
 			ipmr.imr_interface.s_addr = 0;
 		    ]]
-		),
+		)],
 		[ntp_cv_multicast=yes],
 		[]
 	    )
@@ -2255,7 +2293,7 @@ case "$ntp_cv_multicast" in
  yes)
     AC_DEFINE(MCAST, 1, [Does the target support multicast IP?])
     AC_CACHE_CHECK(
-	[[arg type needed for setsockopt() IP*_MULTICAST_LOOP]],
+	[arg type needed for setsockopt() IP*_MULTICAST_LOOP],
 	ntp_cv_typeof_ip_multicast_loop,
 	[
 	    case "$host" in

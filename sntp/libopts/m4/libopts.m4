@@ -9,8 +9,7 @@ dnl
 dnl do always before generated macros:
 dnl
 AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
-[if test X${INVOKE_LIBOPTS_MACROS_FIRST_done} != Xyes ; then]
-  AC_HEADER_STDC
+  AC_REQUIRE([AC_HEADER_STDC])dnl
   AC_HEADER_DIRENT
   
   # =================
@@ -105,9 +104,8 @@ AC_DEFUN([INVOKE_LIBOPTS_MACROS_FIRST],[
   AC_FUNC_VPRINTF
   AC_FUNC_FORK
   AC_CHECK_FUNCS([mmap canonicalize_file_name snprintf strdup strchr \
-                 strrchr strsignal])
-[  INVOKE_LIBOPTS_MACROS_FIRST_done=yes
-fi]])
+                  strrchr strsignal])
+])
 
 dnl
 dnl @synopsis  INVOKE_LIBOPTS_MACROS
@@ -408,7 +406,7 @@ AC_DEFUN([LIBOPTS_DISABLE_OPTIONAL_ARGS],[
 
 
 AC_DEFUN([INVOKE_LIBOPTS_MACROS],[
-  INVOKE_LIBOPTS_MACROS_FIRST
+  AC_REQUIRE([INVOKE_LIBOPTS_MACROS_FIRST])dnl
   # Check to see if a reg expr header is specified.
   LIBOPTS_WITH_REGEX_HEADER
 
@@ -470,6 +468,7 @@ dnl
 dnl Default to system libopts
 dnl
 AC_DEFUN([LIBOPTS_CHECK],[
+  AC_REQUIRE([INVOKE_LIBOPTS_MACROS_FIRST])dnl
   [NEED_LIBOPTS_DIR='']
   m4_pushdef([AO_Libopts_Dir],
 	    [ifelse($1, , [libopts], [$1])])
@@ -541,9 +540,7 @@ AC_DEFUN([LIBOPTS_CHECK],[
     [AC_CONFIG_FILES(AO_Libopts_Dir/Makefile)])
   m4_popdef([AO_Libopts_Dir])
 
-  AM_COND_IF([BUILD_LIBOPTS],
-    [INVOKE_LIBOPTS_MACROS],
-    [INVOKE_LIBOPTS_MACROS_FIRST])
+  AM_COND_IF([BUILD_LIBOPTS], [INVOKE_LIBOPTS_MACROS])
   [
 # end of AC_DEFUN of LIBOPTS_CHECK]
 ])

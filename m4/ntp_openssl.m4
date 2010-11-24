@@ -7,7 +7,7 @@ AC_SUBST(OPENSSL_INC)
 AC_SUBST(OPENSSL_LIB)
 
 AC_MSG_CHECKING([for openssl library directory])
-AC_ARG_WITH(openssl-libdir,
+AC_ARG_WITH([openssl-libdir],
 	AC_HELP_STRING([--with-openssl-libdir], [+ =/something/reasonable]),
 [ans=$withval],
 [case "$build" in
@@ -51,7 +51,7 @@ esac
 AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([for openssl include directory])
-AC_ARG_WITH(openssl-incdir,
+AC_ARG_WITH([openssl-incdir],
 	AC_HELP_STRING([--with-openssl-incdir], [+ =/something/reasonable]),
 [ans=$withval],
 [case "$build" in
@@ -87,7 +87,7 @@ esac
 AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we will use crypto])
-AC_ARG_WITH(crypto,
+AC_ARG_WITH([crypto],
 	AC_HELP_STRING([--with-crypto], [+ =openssl]),
 [ans=$withval], [ans=yes])
 case "$ans" in
@@ -143,11 +143,11 @@ SAVED_CFLAGS="$CFLAGS"
 case "$GCC$ntp_openssl" in
  yesyes)
     CFLAGS="$CFLAGS -Werror"
-    AC_COMPILE_IFELSE(
+    AC_COMPILE_IFELSE([
 	AC_LANG_SOURCE([[ /* see if -Werror breaks gcc */ ]]),
 	[gcc_handles_Werror=yes],
 	[gcc_handles_Werror=no]
-    )
+    ])
     case "$gcc_handles_Werror" in
      no)
 	# if this gcc doesn't do -Werror go ahead and use
@@ -156,7 +156,7 @@ case "$GCC$ntp_openssl" in
 	;;
      yes)
 	CFLAGS="$CFLAGS -Wstrict-prototypes"
-	AC_COMPILE_IFELSE(
+	AC_COMPILE_IFELSE([
 	    AC_LANG_PROGRAM(
 		[[
 		    #include "openssl/asn1_mac.h"
@@ -171,7 +171,7 @@ case "$GCC$ntp_openssl" in
 	    ),
 	    [openssl_triggers_warnings=no],
 	    [openssl_triggers_warnings=yes]
-	)
+	])
     esac
     case "$openssl_triggers_warnings" in
      yes)
