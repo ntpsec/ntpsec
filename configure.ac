@@ -786,7 +786,7 @@ case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
 	[for int32 with DNS headers included],
 	[ntp_cv_type_int32_with_dns],
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM(
+	    [AC_LANG_PROGRAM(
 		[[
 		    #ifdef HAVE_ARPA_NAMESER_H
 		    # include <arpa/nameser.h>
@@ -796,7 +796,7 @@ case "$ac_cv_type_int32::$ac_cv_header_resolv_h" in
 		[[
 		    size_t cb = sizeof(int32);
 		]]
-	    ),
+	    )],
 	    [ntp_cv_type_int32_with_dns=yes],
 	    [ntp_cv_type_int32_with_dns=no]
 	)
@@ -815,7 +815,7 @@ case "$ac_cv_type_u_int32::$ac_cv_header_resolv_h" in
 	[for u_int32 with DNS headers included],
 	[ntp_cv_type_u_int32_with_dns],
 	AC_COMPILE_IFELSE(
-	    AC_LANG_PROGRAM(
+	    [AC_LANG_PROGRAM(
 		[[
 		    #ifdef HAVE_ARPA_NAMESER_H
 		    # include <arpa/nameser.h>
@@ -825,7 +825,7 @@ case "$ac_cv_type_u_int32::$ac_cv_header_resolv_h" in
 		[[
 		    size_t cb = sizeof(u_int32);
 		]]
-	    ),
+	    )],
 	    [ntp_cv_type_u_int32_with_dns=yes],
 	    [ntp_cv_type_u_int32_with_dns=no]
 	)
