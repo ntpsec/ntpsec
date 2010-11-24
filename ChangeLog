@@ -3,6 +3,7 @@
 * [Bug 1725] ntpd sends multicast from only one address.
 * [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
   to CPPFLAGS or LDFLAGS.
+* [Bug 1733] IRIX doesn't have 'head' (affects scripts/checkChangeLog).
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
 * Use a single copy of libopts/, in sntp/.
 * Upgrade libopts to 33.3.8.
