@@ -49,9 +49,13 @@ esac
 case "$NTP_BDIR" in
  '')
     case "$IAM" in
+     *.ntp.org)
+	NTP_BDIR=host
+	;;
      *.udel.edu)
 	NTP_BDIR=host
-	CONFIG_ARGS="$CONFIG_ARGS --enable-local-libopts"
+	# HMS: --enable-local-libopts is the default now...
+	#CONFIG_ARGS="$CONFIG_ARGS --enable-local-libopts"
 	case "$CVO" in
 	 *-*-ultrix*)
 	    CONFIG_ARGS="$CONFIG_ARGS --with-libregex=/usr/local"
