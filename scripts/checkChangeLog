@@ -2,7 +2,8 @@
 
 . ./packageinfo.sh
 
-cl1=`head -1 ChangeLog`
+# HMS: Irix doesn't have 'head'...
+cl1=`head -1 ChangeLog || sed -e 1q ChangeLog`
 
 case "$repotype" in
  dev) ;;

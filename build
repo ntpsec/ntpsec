@@ -46,18 +46,39 @@ case "$CVO" in
     ;;
 esac
 
-case "$IAM" in
- *.udel.edu)
-    BASEDIR=A.$MYNAME
-    CONFIG_ARGS="$CONFIG_ARGS --enable-local-libopts"
-    case "$CVO" in
-     *-*-ultrix*)
-	CONFIG_ARGS="$CONFIG_ARGS --with-libregex=/usr/local"
+case "$NTP_BDIR" in
+ '')
+    case "$IAM" in
+     *.ntp.org)
+	NTP_BDIR=host
 	;;
-    esac
+     *.udel.edu)
+	NTP_BDIR=host
+	# HMS: --enable-local-libopts is the default now...
+	#CONFIG_ARGS="$CONFIG_ARGS --enable-local-libopts"
+	case "$CVO" in
+	 *-*-ultrix*)
+	    CONFIG_ARGS="$CONFIG_ARGS --with-libregex=/usr/local"
+	    ;;
+	esac
+	;;
+     *)
+	NTP_BDIR=cvo
+	;;
+     esac
+     ;;
+esac
+
+case "$NTP_BDIR" in
+ host) 
+    BASEDIR=A.$MYNAME
+    ;;
+ cvo)
+    BASEDIR=A.$CVO
     ;;
  *)
-    BASEDIR=A.$CVO
+    echo "build: NTP_BDIR must be either 'cvo' or 'host'!" 1>&2
+    exit 1
     ;;
 esac
 
@@ -106,7 +127,7 @@ cd $BDIR
 # Make sure we have a nice that works.
 # To disable use of nice, setenv NO_NICE_BUILD=1
 #
-NICEB=""
+NICEB=
 [ "$NO_NICE_BUILD" != "1" ] && nice true && NICEB=nice
 [ -z "$NICEB" ] && {
 	NICEB="./.nicebuild-$MYNAME-$SIG"
@@ -118,16 +139,40 @@ HEREDOC
 	chmod +x $NICEB
 }
 
+#
+# Find a test which supports -nt, unlike Solaris /bin/sh builtin.
+#
+TEST="${TEST-}"
+if [ -z "$TEST" ] ; then
+    for try in test /bin/test /usr/bin/test ; do
+	case `$try config.status -nt ../configure 2>&1` in
+	 '')
+	    TEST="$try"
+	    # echo "Using $TEST"
+	    break
+	    ;;
+	esac		
+    done
+    if [ -z "$TEST" ] ; then
+	echo "build: need help finding test binary" 1>&2
+	exit 1
+    fi
+fi
+
 CONFIGURE="../configure --cache-file=../config.cache-$IAM$CCSUF $CONFIG_ARGS"
 
 (	# This sequence of commands is logged to make.log.
-	# Solaris /bin/sh doesn't grok -nt, csh does
-	csh -c '[ config.status -nt ../configure ] && \
-		[ sntp/config.status -nt ../sntp/configure ]' || \
-			 $NICEB -7 $CONFIGURE
-	$NICEB -5 ./config.status && 	\
-		( cd sntp && $NICEB -5 ./config.status )
-	$NICEB -14 ${MAKE-make} && $NICEB -11 ${MAKE-make} check
+	# If config.status is newer than ../configure, and the same
+	# is true for sntp, we do not need to re-run configure.
+	# Solaris /bin/sh doesn't grok -nt.
+
+	( "$TEST" config.status -nt ../configure &&
+		$TEST sntp/config.status -nt ../sntp/configure ) ||
+		"$NICEB" -7 $CONFIGURE
+	"$NICEB" -5 ./config.status &&
+		( cd sntp && "$NICEB" -5 ./config.status ) &&
+		"$NICEB" -14 ${MAKE-make} &&
+		"$NICEB" -11 ${MAKE-make} check
 ) > $LOGF 2>&1
 
 EXITCODE=$?
@@ -137,7 +182,8 @@ case "$NICEB" in
  nice)
     ;;
  *)
-    rm $NICEB
+    rm "$NICEB"
+    ;;
 esac
 
 exit $EXITCODE
