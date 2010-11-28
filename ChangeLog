@@ -1,4 +1,5 @@
 ---
+(4.2.6p3-RC11) 2010/11/28 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1725] ntpd sends multicast from only one address.
 * [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
