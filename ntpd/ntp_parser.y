@@ -290,6 +290,8 @@
 %type	<Attr_val_fifo>	option_list
 %type	<Attr_val>	option_int
 %type	<Integer>	option_int_keyword
+%type	<Attr_val>	option_str
+%type	<Integer>	option_str_keyword
 %type	<Integer>	stat
 %type	<Int_fifo>	stats_list
 %type	<String_fifo>	string_list
@@ -419,6 +421,7 @@ option_list
 option
 	:	option_flag
 	|	option_int
+	|	option_str
 	;
 
 option_flag
@@ -449,6 +452,15 @@ option_int_keyword
 	|	T_Ttl
 	|	T_Mode
 	|	T_Version
+	;
+
+option_str
+	:	option_str_keyword T_String
+			{ $$ = create_attr_sval($1, $2); }
+	;
+
+option_str_keyword
+	:	T_Ident
 	;
 
 

@@ -511,17 +511,17 @@ unpeer(
  */
 struct peer *
 peer_config(
-	sockaddr_u *srcadr,
-	const char *hostname,
-	struct interface *dstadr,
-	u_char	hmode,
-	u_char	version,
-	u_char	minpoll,
-	u_char	maxpoll,
-	u_int	flags,
-	u_char	ttl,
-	keyid_t	key,
-	u_char *keystr
+	sockaddr_u *	srcadr,
+	const char *	hostname,
+	endpt *		dstadr,
+	u_char		hmode,
+	u_char		version,
+	u_char		minpoll,
+	u_char		maxpoll,
+	u_int		flags,
+	u_char		ttl,
+	keyid_t		key,
+	const char *	group
 	)
 {
 	u_char cast_flags;

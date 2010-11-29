@@ -96,15 +96,16 @@ static struct masks logcfg_item[] = {
 };
 
 typedef struct peer_resolved_ctx_tag {
-	int	flags;
-	int	host_mode;	/* T_* token identifier */
-	u_short	family;
-	keyid_t	keyid;
-	u_char	hmode;		/* MODE_* */
-	u_char	version;
-	u_char	minpoll;
-	u_char	maxpoll;
-	u_char	ttl;
+	int		flags;
+	int		host_mode;	/* T_* token identifier */
+	u_short		family;
+	keyid_t		keyid;
+	u_char		hmode;		/* MODE_* */
+	u_char		version;
+	u_char		minpoll;
+	u_char		maxpoll;
+	u_char		ttl;
+	const char *	group;
 } peer_resolved_ctx;
 
 /* Limits */
@@ -754,6 +755,9 @@ dump_config_tree(
 		if (peern->peerkey != 0)
 			fprintf(df, " key %u", peern->peerkey);
 
+		if (peern->group != NULL)
+			fprintf(df, " ident \"%s\"", peern->group);
+
 		atrv = HEAD_PFIFO(peern->peerflags);
 		for ( ; atrv != NULL; atrv = atrv->link) {
 			NTP_INSIST(T_Flag == atrv->attr);
@@ -1246,6 +1250,10 @@ create_peer_node(
 				my_node->peerversion = 
 					(u_char)option->value.u;
 			}
+			break;
+
+		case T_Ident:
+			my_node->group = option->value.s;
 			break;
 
 		default:
@@ -3585,20 +3593,16 @@ config_peers(
 					FLAG_IBURST,
 					0,
 					0,
-					(u_char *)"*");
+					NULL);
 		} else {
 			/* we have a hostname to resolve */
 # ifdef WORKER
-			ctx = emalloc(sizeof(*ctx));
+			ctx = emalloc_zero(sizeof(*ctx));
 			ctx->family = AF_UNSPEC;
 			ctx->host_mode = T_Server;
 			ctx->hmode = MODE_CLIENT;
 			ctx->version = NTP_VERSION;
-			ctx->minpoll = 0;
-			ctx->maxpoll = 0;
 			ctx->flags = FLAG_IBURST;
-			ctx->ttl = 0;
-			ctx->keyid = 0;
 
 			memset(&hints, 0, sizeof(hints));
 			hints.ai_family = (u_short)ctx->family;
@@ -3639,7 +3643,7 @@ config_peers(
 				peerflag_bits(curr_peer),
 				curr_peer->ttl,
 				curr_peer->peerkey,
-				(u_char *)"*");
+				curr_peer->group);
 		/*
 		 * If we have a numeric address, we can safely
 		 * proceed in the mainline with it.  Otherwise, hand
@@ -3662,11 +3666,11 @@ config_peers(
 					peerflag_bits(curr_peer),
 					curr_peer->ttl,
 					curr_peer->peerkey,
-					(u_char *)"*");
+					curr_peer->group);
 		} else {
 			/* we have a hostname to resolve */
 # ifdef WORKER
-			ctx = emalloc(sizeof(*ctx));
+			ctx = emalloc_zero(sizeof(*ctx));
 			ctx->family = curr_peer->addr->type;
 			ctx->host_mode = curr_peer->host_mode;
 			ctx->hmode = hmode;
@@ -3676,6 +3680,7 @@ config_peers(
 			ctx->flags = peerflag_bits(curr_peer);
 			ctx->ttl = curr_peer->ttl;
 			ctx->keyid = curr_peer->peerkey;
+			ctx->group = curr_peer->group;
 
 			memset(&hints, 0, sizeof(hints));
 			hints.ai_family = ctx->family;
@@ -3763,7 +3768,7 @@ peer_name_resolved(
 				ctx->flags,
 				ctx->ttl,
 				ctx->keyid,
-				(u_char *)"*");
+				ctx->group);
 			break;
 		}
 	}

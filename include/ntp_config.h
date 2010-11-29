@@ -143,6 +143,7 @@ struct peer_node_tag {
 	u_char		ttl;
 	u_char		peerversion;
 	keyid_t		peerkey;
+	char *		group;
 };
 
 typedef DECL_FIFO_ANCHOR(peer_node) peer_fifo;
