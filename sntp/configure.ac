@@ -310,7 +310,8 @@ AC_CACHE_CHECK(
      no)
 	ntp_cv_getsockname_socklen_type='socklen_t'
     esac
-    AS_UNSET([getsockname_arg2 getsockname_socklen_type_found])
+    AS_UNSET([getsockname_arg2])
+    AS_UNSET([getsockname_socklen_type_found])
     ]
 )
 AC_DEFINE_UNQUOTED([GETSOCKNAME_SOCKLEN_TYPE],

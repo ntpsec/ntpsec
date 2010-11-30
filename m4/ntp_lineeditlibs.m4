@@ -103,5 +103,8 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 		[Define if your readline library has \`add_history'])
 	esac
     esac	# $ntp_lib_lineedit
-    AS_UNSET([NTP_ORIG_LIBS TRY_LIB use_lineeditlibs])
+    AS_UNSET([NTP_ORIG_LIBS])
+    AS_UNSET([ORIG_LIBS])
+    AS_UNSET([TRY_LIB])
+    AS_UNSET([use_lineeditlibs])
 ])dnl
