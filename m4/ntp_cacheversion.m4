@@ -104,7 +104,9 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	AC_MSG_NOTICE([[$cache_file saved by another version, ignored.]])
 	AC_MSG_NOTICE([[configure script cache version: ]][$2])
 	AC_MSG_NOTICE([[$cache_file version: $c_version]])
-	AS_UNSET([c_varname_list c_varname c_version])
+	AS_UNSET([c_varname])
+	AS_UNSET([c_varname_list])
+	AS_UNSET([c_version])
     esac
 
     AS_UNSET([ntp_cache_flush])
