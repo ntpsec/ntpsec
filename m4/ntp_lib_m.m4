@@ -7,10 +7,11 @@ case "$host" in
     ;;
  *)
     _libs=$LIBS
-    AC_SEARCH_LIBS(cos, m, LIBM="-lm")
+    AC_SEARCH_LIBS([cos], [m], [LIBM="-lm"])
     LIBS=$_libs
     ;;
 esac
 AC_SUBST([LIBM])
+AS_UNSET([_libs])
 ])
 dnl ======================================================================

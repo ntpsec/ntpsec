@@ -1,3 +1,5 @@
+* from 4.2.6p3-RC12: Clean up m4 quoting in configure.ac, *.m4 files,
+  resolving intermittent AC_LANG_PROGRAM possibly undefined errors.
 (4.2.7p86) 2010/11/29 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.7p85) 2010/11/24 Released by Harlan Stenn <stenn@ntp.org>
@@ -504,14 +506,9 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 1725] ntpd sends multicast from only one address.
-* [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
-  to CPPFLAGS or LDFLAGS.
-* Remove log_msg() and debug_msg() from sntp in favor of msyslog().
-* Use a single copy of libopts/, in sntp/.
-* Upgrade libopts to 33.3.8.
-* Bump minimum Automake version to 1.11, required for AM_COND_IF
-  use in LIBOPTS_CHECK.
+* Clean up m4 quoting in configure.ac, *.m4 files, resolving
+  intermittent AC_LANG_PROGRAM possibly undefined errors.
+
 ---
 (4.2.6p3-RC11) 2010/11/28 Released by Harlan Stenn <stenn@ntp.org>
 

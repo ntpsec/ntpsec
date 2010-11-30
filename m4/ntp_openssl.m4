@@ -2,20 +2,28 @@ dnl ######################################################################
 dnl OpenSSL support shared by top-level and sntp/configure.ac
 AC_DEFUN([NTP_OPENSSL], [
 	
-AC_SUBST(OPENSSL)
-AC_SUBST(OPENSSL_INC)
-AC_SUBST(OPENSSL_LIB)
+AC_SUBST([OPENSSL])
+AC_SUBST([OPENSSL_INC])
+AC_SUBST([OPENSSL_LIB])
 
 AC_MSG_CHECKING([for openssl library directory])
-AC_ARG_WITH([openssl-libdir],
-	AC_HELP_STRING([--with-openssl-libdir], [+ =/something/reasonable]),
-[ans=$withval],
-[case "$build" in
- $host) ans=yes ;;
- *)     ans=no ;;
-esac])
+AC_ARG_WITH(
+    [openssl-libdir],
+    [AS_HELP_STRING(
+	[--with-openssl-libdir], 
+	[+ =/something/reasonable]
+    )],
+    [ans=$withval],
+    [
+	case "$build" in
+	 $host) ans=yes ;;
+	 *)     ans=no ;;
+	esac
+    ]
+)
 case "$ans" in
- no) ;;
+ no) 
+    ;;
  yes) # Look in:
     ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib /lib"
     ;;
@@ -23,7 +31,8 @@ case "$ans" in
     ;;
 esac
 case "$ans" in
- no) ;;
+ no)
+    ;;
  *) # Look for libcrypto.a and libssl.a:
     for i in $ans no
     do
@@ -51,15 +60,23 @@ esac
 AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([for openssl include directory])
-AC_ARG_WITH([openssl-incdir],
-	AC_HELP_STRING([--with-openssl-incdir], [+ =/something/reasonable]),
-[ans=$withval],
-[case "$build" in
- $host) ans=yes ;;
- *)     ans=no ;;
-esac])
+AC_ARG_WITH(
+    [openssl-incdir],
+    [AS_HELP_STRING(
+	[--with-openssl-incdir],
+	[+ =/something/reasonable]
+    )],
+    [ans=$withval],
+    [
+	case "$build" in
+	 $host) ans=yes ;;
+	 *)     ans=no ;;
+	esac
+    ]
+)
 case "$ans" in
- no) ;;
+ no)
+    ;;
  yes) # look in:
     ans="/usr/include /usr/sfw/include /usr/local/include /usr/local/ssl/include"
     ;;
@@ -67,7 +84,8 @@ case "$ans" in
     ;;
 esac
 case "$ans" in
- no) ;;
+ no)
+    ;;
  *) # look for openssl/opensslconf.h:
     for i in $ans no
     do
@@ -87,9 +105,15 @@ esac
 AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we will use crypto])
-AC_ARG_WITH([crypto],
-	AC_HELP_STRING([--with-crypto], [+ =openssl]),
-[ans=$withval], [ans=yes])
+AC_ARG_WITH(
+    [crypto],
+    [AS_HELP_STRING(
+	[--with-crypto],
+	[+ =openssl]
+    )],
+    [ans=$withval],
+    [ans=yes]
+)
 case "$ans" in
  no)
     ;;
@@ -108,20 +132,25 @@ case "$ntp_openssl" in
  yes)
     # We have OpenSSL inc/lib - use them.
     case "$OPENSSL_INC" in
-     /usr/include) ;;
-     *)	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
+     /usr/include)
+	;;
+     *)	
+	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
 	;;
     esac
     case "$OPENSSL_LIB" in
-     /usr/lib) ;;
-     *)	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
+     /usr/lib)
+	;;
+     *)	
+	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
 	case "$need_dash_r" in
-	 1) LDFLAGS="$LDFLAGS -R$OPENSSL_LIB" ;;
+	 1)
+	    LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
 	esac
 	;;
     esac
-    AC_SUBST(LCRYPTO, [-lcrypto])
-    AC_DEFINE(OPENSSL, , [Use OpenSSL?])
+    AC_SUBST([LCRYPTO], [-lcrypto])
+    AC_DEFINE([OPENSSL], [1], [Use OpenSSL?])
 esac
 
 #
@@ -143,11 +172,17 @@ SAVED_CFLAGS="$CFLAGS"
 case "$GCC$ntp_openssl" in
  yesyes)
     CFLAGS="$CFLAGS -Werror"
-    AC_COMPILE_IFELSE([
-	AC_LANG_SOURCE([[ /* see if -Werror breaks gcc */ ]]),
+    AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+	    [[
+	    ]],
+	    [[
+		/* see if -Werror breaks gcc */
+	    ]]
+	)],
 	[gcc_handles_Werror=yes],
 	[gcc_handles_Werror=no]
-    ])
+    )
     case "$gcc_handles_Werror" in
      no)
 	# if this gcc doesn't do -Werror go ahead and use
@@ -156,8 +191,8 @@ case "$GCC$ntp_openssl" in
 	;;
      yes)
 	CFLAGS="$CFLAGS -Wstrict-prototypes"
-	AC_COMPILE_IFELSE([
-	    AC_LANG_PROGRAM(
+	AC_COMPILE_IFELSE(
+	    [AC_LANG_PROGRAM(
 		[[
 		    #include "openssl/asn1_mac.h"
 		    #include "openssl/bn.h"
@@ -167,11 +202,13 @@ case "$GCC$ntp_openssl" in
 		    #include "openssl/rand.h"
 		    #include "openssl/x509v3.h"
 		]],
-		[[ /* empty body */ ]]
-	    ),
+		[[
+		    /* empty body */
+		]]
+	    )],
 	    [openssl_triggers_warnings=no],
 	    [openssl_triggers_warnings=yes]
-	])
+	)
     esac
     case "$openssl_triggers_warnings" in
      yes)
