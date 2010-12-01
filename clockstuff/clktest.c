@@ -4,6 +4,9 @@
  * usage: clktest -b bps -f -t timeo -s cmd -c char1 -a char2 /dev/whatever
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include "clktest-opts.h"
 
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)

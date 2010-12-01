@@ -47,6 +47,9 @@
  * to find delays to GOES via each of the three satellites.
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 

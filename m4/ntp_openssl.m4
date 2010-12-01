@@ -222,6 +222,6 @@ case "$GCC$ntp_openssl" in
     # gcc without OpenSSL
     CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
 esac
-
+AS_UNSET([SAVED_CFLAGS])
 ])
 dnl ======================================================================

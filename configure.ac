@@ -53,16 +53,13 @@ dnl check these early to avoid autoconf warnings
 AC_AIX
 AC_MINIX
 
-# So far, the only shared library we might use is libopts.
-# It's a small library - we might as well use a static version of it.
-AC_DISABLE_SHARED
-
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_CC
 # Ralf Wildenhues: With per-target flags we need CC_C_O
 # AM_PROG_CC_C_O supersets AC_PROG_CC_C_O
 AM_PROG_CC_C_O
 AC_PROG_CPP
+AC_PROG_CXX
 AC_PROG_YACC
 
 # AC_PROG_CC_STDC has two functions.  It attempts to find a compiler
@@ -221,9 +218,15 @@ case "$ans" in
     ;;
 esac
 
-AC_ARG_WITH(rpath,
-	AS_HELP_STRING([--without-rpath], [s Disable auto-added -R linker paths]),
-[ans=$withval], [ans=x])
+AC_ARG_WITH(
+    [rpath],
+    [AS_HELP_STRING(
+	[--without-rpath],
+	[s Disable auto-added -R linker paths]
+    )],
+    [ans=$withval],
+    [ans=x]
+)
 case "$ans" in
  no)
     need_dash_r=
@@ -318,6 +321,9 @@ esac
 AC_SUBST([CFLAGS])
 AC_SUBST([LDFLAGS])
 
+# So far, the only shared library we might use is libopts.
+# It's a small library - we might as well use a static version of it.
+AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 
 AC_PROG_LN_S
@@ -498,33 +504,61 @@ esac
 AC_CHECK_HEADERS([arpa/nameser.h])
 AC_CHECK_HEADERS([sys/socket.h])
 
+
 dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
 dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3
 dnl  compiles it without complaint.  The mpinfou union is defined later
 dnl  in the resulting preprocessed source than the spu_info array in
 dnl  /usr/include/machine/sys/getppdp.h:
 dnl	extern union mpinfou spu_info[];
-dnl  triggering the error.  Our strategy is on HP-UX only, test for
-dnl  net/netmp.h, which is the file included by net/if.h that leads to
-dnl  getppdp.h.  If it is present but can't be compiled, try adding
-dnl  a duplicate definition of mpinfou, which should then allow the
-dnl  following net/if.h and net/if6.h tests to proceed normally.
-dnl  Using net/netmp.h allows us to avoid polluting test results for
-dnl  net/if.h.
+dnl  triggering the error.  Our strategy is on HP-UX only, test compile
+dnl  net/if.h.  If that fails, try adding a duplicate definition of
+dnl  mpinfou, and if that helps add it to confdefs.h (used for further
+dnl  configure tests) and config.h.
 #
+AC_CHECK_HEADERS([net/if.h], [], [], [
+    #ifdef HAVE_SYS_SOCKET_H
+    # include <sys/socket.h>
+    #endif
+])
 case "$host" in
  *-hp-hpux*)
-    AC_CHECK_HEADERS(
-	[net/netmp.h],
-	[netmp_h_works=yes],
-	[netmp_h_works=no]
+    AC_CACHE_CHECK(
+	[if net/if.h requires mpinfou predeclaration],
+	[ntp_cv_predecl_mpinfou],
+	[
+	    np_cv_predecl_mpinfou=no
+	    case "$ac_cv_header_net_if_h" in
+	     no)
+		AC_COMPILE_IFELSE(
+		    [AC_LANG_PROGRAM(
+			[[
+			    typedef union mpinfou {
+				    struct pdk_mpinfo *pdkptr;
+				    struct mpinfo *pikptr;
+			    } mpinfou_t;
+			    #ifdef HAVE_SYS_SOCKET_H
+			    # include <sys/socket.h>
+			    #endif
+			    #include <net/if.h>
+			]],
+			[[
+			]]
+		    )],
+		    [
+			ntp_cv_predecl_mpinfou=yes
+			ac_cv_header_net_if_h=yes
+		    ]
+		)
+	    esac
+	]
     )
-    case "$netmp_h_works" in
-     no)
+    case "$ntp_cv_predecl_mpinfou" in
+     yes)
 	cat >>confdefs.h <<_ACEOF
 #ifndef MPINFOU_PREDECLARED
 # define MPINFOU_PREDECLARED
-typedef union mpinfou {		/* For lint */
+typedef union mpinfou {
 	struct pdk_mpinfo *pdkptr;
 	struct mpinfo *pikptr;
 } mpinfou_t;
@@ -533,62 +567,55 @@ _ACEOF
 	AH_BOTTOM([
 #ifndef MPINFOU_PREDECLARED
 # define MPINFOU_PREDECLARED
-typedef union mpinfou {		/* For lint */
+typedef union mpinfou {
 	struct pdk_mpinfo *pdkptr;
 	struct mpinfo *pikptr;
 } mpinfou_t;
 #endif
 ])
-	;;
     esac
-    ;;
 esac
 
-AC_CHECK_HEADERS([net/if.h], [], [],
-[#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-])
 AC_CHECK_HEADERS([net/if6.h])
 AC_CHECK_HEADERS([net/route.h], [], [], [
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <net/if.h>
 ])
 AC_CHECK_HEADERS([netinet/in_system.h netinet/in_systm.h netinet/in.h])
-AC_CHECK_HEADERS([net/if_var.h], [], [],
-[#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
+AC_CHECK_HEADERS([net/if_var.h], [], [], [
+    #if HAVE_SYS_TYPES_H
+    # include <sys/types.h>
+    #endif
+    #ifdef HAVE_SYS_SOCKET_H
+    # include <sys/socket.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_H
+    # include <netinet/in.h>
+    #endif
+    #ifdef HAVE_NET_IF_H
+    # include <net/if.h>
+    #endif
 ])
-AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [],
-[#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NET_IF_VAR_H
-#include <net/if_var.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
+AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [], [
+    #ifdef HAVE_SYS_TYPES_H
+    # include <sys/types.h>
+    #endif
+    #ifdef HAVE_SYS_SOCKET_H
+    # include <sys/socket.h>
+    #endif
+    #ifdef HAVE_NET_IF_H
+    # include <net/if.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_H
+    # include <netinet/in.h>
+    #endif
+    #ifdef HAVE_NET_IF_VAR_H
+    # include <net/if_var.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_SYSTM_H
+    # include <netinet/in_systm.h>
+    #endif
 ])
 
 # Check for IPTOS_PREC
@@ -624,7 +651,7 @@ case "$ac_cv_header_netinfo_ni_h" in
     AC_DEFINE([HAVE_NETINFO], [1], [NetInfo support?])
 esac
 AC_CHECK_HEADERS([sun/audioio.h sys/audioio.h])
-dnl AC_CHECK_HEADERS([sys/chudefs.h])
+AC_CHECK_HEADERS([sys/chudefs.h])
 AC_CHECK_HEADERS([sys/clkdefs.h sys/file.h])
 case "$host" in
  *-*-sunos4*)
@@ -659,7 +686,7 @@ case "$host" in
     AC_CHECK_HEADERS([machine/soundcard.h sys/soundcard.h])
     ;;
 esac
-AC_CHECK_HEADERS([sys/stat.h sys/stream.h sys/stropts.h])
+AC_CHECK_HEADERS([sys/stat.h sys/stream.h stropts.h sys/stropts.h])
 # sys/sysctl.h depends on sys/param.h on OpenBSD - Bug 1576
 AC_CHECK_HEADERS([sys/sysctl.h], [], [],
 [#if defined HAVE_SYS_PARAM_H
@@ -750,46 +777,46 @@ case "$ac_cv_func___adjtimex" in
     ;;
 esac
 
-AC_CHECK_HEADERS([sys/proc.h], [], [],
-[#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
+AC_CHECK_HEADERS([sys/proc.h], [], [], [
+    #ifdef HAVE_SYS_TYPES_H
+    # include <sys/types.h>
+    #endif
+    #ifdef HAVE_SYS_TIME_H
+    # include <sys/time.h>
+    #endif
 ])
 
-AC_CHECK_HEADERS([sys/resource.h], [], [],
-[#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
+AC_CHECK_HEADERS([sys/resource.h], [], [], [
+    #ifdef HAVE_SYS_TIME_H
+    # include <sys/time.h>
+    #endif
 ])
 
-AC_CHECK_HEADERS([sys/shm.h], [], [],
-[#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_IPC_H
-# include <sys/ipc.h>
-#endif
+AC_CHECK_HEADERS([sys/shm.h], [], [], [
+    #ifdef HAVE_SYS_TYPES_H
+    # include <sys/types.h>
+    #endif
+    #ifdef HAVE_SYS_IPC_H
+    # include <sys/ipc.h>
+    #endif
 ])
 
-AC_CHECK_HEADERS([sys/timex.h], [], [],
-[#if HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
+AC_CHECK_HEADERS([sys/timex.h], [], [], [
+    #ifdef HAVE_SYS_TIME_H
+    # include <sys/time.h>
+    #endif
 ])
 
-AC_CHECK_HEADERS([resolv.h], [], [],
-[#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_NAMESER_H
-#include <arpa/nameser.h>
-#endif
+AC_CHECK_HEADERS([resolv.h], [], [], [
+    #ifdef HAVE_SYS_TYPES_H
+    # include <sys/types.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_H
+    # include <netinet/in.h>
+    #endif
+    #ifdef HAVE_ARPA_NAMESER_H
+    # include <arpa/nameser.h>
+    #endif
 ])
 
 AC_CACHE_CHECK(
@@ -815,7 +842,6 @@ case "$ntp_cv_c_volatile" in
     ;;
 esac
 
-AC_C_CONST
 AC_C_BIGENDIAN
 AC_TYPE_SIGNAL
 AC_TYPE_OFF_T
@@ -889,52 +915,6 @@ esac
 
 AC_CHECK_SIZEOF([time_t])
 AC_STRUCT_TM
-
-AC_CACHE_CHECK(
-    [for u_int8_t],
-    [ntp_cv_type_u_int8_t],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
-	    ]],
-	    [[
-		u_int8_t len = 42;
-	    ]]
-	)],
-	[ntp_cv_type_u_int8_t=yes],
-	[ntp_cv_type_u_int8_t=no]
-    )]
-)
-case "$ntp_cv_type_u_int8_t" in
- yes)
-    AC_DEFINE([HAVE_TYPE_U_INT8_T], [1], [Does u_int8_t exist?])
-esac
-
-AC_CACHE_CHECK(
-    [for u_int64_t],
-    [ntp_cv_type_u_int64_t],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
-	    ]],
-	    [[
-		u_int64_t len = 42;
-	    ]]
-	)],
-	[ntp_cv_type_u_int64_t=yes],
-	[ntp_cv_type_u_int64_t=no]
-    )]
-)
-case "$ntp_cv_type_u_int64_t" in
- yes)
-    AC_DEFINE([HAVE_TYPE_U_INT64_T], [1], [Does u_int64_t exist?])
-esac
 
 AC_CACHE_CHECK(
     [for a fallback value for HZ],
@@ -1887,12 +1867,6 @@ case "$ntp_cv_func_setpgrp_nargs" in
 	      [define if setpgrp takes 0 arguments])
 esac
 
-dnl we require ANSI C which mandates void * here
-dnl we should clean up all uses of QSORT_USES_VOID_P so
-dnl this can be removed.
-AC_DEFINE([QSORT_USES_VOID_P], [1],
-    [Does qsort expect to work on "void *" stuff?])
-
 AC_CACHE_CHECK(
     [if we need to declare 'errno'],
     [ntp_cv_decl_errno],
@@ -2672,7 +2646,7 @@ AC_CACHE_CHECK(
 		[AC_LANG_PROGRAM(
 		    [[
 			#ifdef HAVE_NETINET_IN_H
-			#include <netinet/in.h>
+			# include <netinet/in.h>
 			#endif
 		    ]],
 		    [[
@@ -4127,9 +4101,10 @@ case "$ntp_autokey" in
     case "$ntp_openssl" in
      no)
 	AC_MSG_WARN([Disabling Autokey, --enable-autokey requires --with-crypto.])
+	ntp_autokey=no
 	;;
      *)
-	AC_DEFINE(AUTOKEY, , [Support NTP Autokey protocol?])
+	AC_DEFINE([AUTOKEY], [1], [Support NTP Autokey protocol?])
 	ntp_autokey=yes
 	;;
     esac
@@ -4182,7 +4157,7 @@ if test "$ntp_parseutil" = "yes"; then
      *-*-sunos4*|*-*-solaris2*|*-*-*linux*|*-*-netbsd*)
 	ans="dcfd testdcf"
 	DCFD=dcfd
-        TESTDCF=testdcf
+	TESTDCF=testdcf
     esac
 fi
 AC_MSG_RESULT([$ans])
@@ -4218,10 +4193,10 @@ if test "$ntp_refclock" = "yes"; then
 fi
 AC_MSG_RESULT($ntp_refclock)
 
-dnl Things that can be made in clockstuff/
-AC_SUBST([PROPDELAY])	dnl Set to "propdelay"
-AC_SUBST([CHUTEST])	dnl Set to "chutest"
-AC_SUBST([CLKTEST])	dnl Set to "clktest"
+dnl Things that can be made in clockstuff
+AC_SUBST([PROPDELAY], [propdelay])
+AC_SUBST([CHUTEST]) dnl needs work to compile
+AC_SUBST([CLKTEST]) dnl needs work to compile
 
 AC_SUBST([MAKE_ADJTIMED])
 AC_MSG_CHECKING([if we want HP-UX adjtimed support])
@@ -4974,8 +4949,11 @@ case "$ans" in
 	esac
 	
 	CFLAGS=$save_CFLAGS
+	AS_UNSET([save_CFLAGS])
 	CPPFLAGS=$save_CPPFLAGS
+	AS_UNSET([save_CPPFLAGS])
 	LIBS=$save_LIBS
+	AS_UNSET([save_LIBS])
 	;;
      *) 
 	AC_MSG_WARN([Cannot build ntpsnmpd - net-snmp-config cannot be found])
@@ -5710,44 +5688,9 @@ fi
 AM_CONDITIONAL([SAVECONFIG_ENABLED], [test x$ntp_saveconfig_enabled = x1])
 AC_MSG_RESULT([$ntp_ok])
 
-###
-
-AC_DEFINE_DIR([NTP_KEYSDIR], [sysconfdir],
-    [Default location of crypto key info])
-
-AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([ElectricFence/Makefile])
-AC_CONFIG_FILES([adjtimed/Makefile])
-AC_CONFIG_FILES([clockstuff/Makefile])
-AC_CONFIG_FILES([include/Makefile])
-AC_CONFIG_FILES([include/isc/Makefile])
-AC_CONFIG_FILES([kernel/Makefile])
-AC_CONFIG_FILES([kernel/sys/Makefile])
-AC_CONFIG_FILES([libntp/Makefile])
-AC_CONFIG_FILES([libparse/Makefile])
-AC_CONFIG_FILES([ntpd/Makefile])
-AC_CONFIG_FILES([ntpdate/Makefile])
-AC_CONFIG_FILES([ntpdc/Makefile])
-AC_CONFIG_FILES([ntpdc/nl.pl],		[chmod +x ntpdc/nl.pl])
-AC_CONFIG_FILES([ntpq/Makefile])
-AC_CONFIG_FILES([ntpsnmpd/Makefile])
-AC_CONFIG_FILES([parseutil/Makefile])
-AC_CONFIG_FILES([scripts/Makefile])
-AC_CONFIG_FILES([scripts/calc_tickadj],	[chmod +x scripts/calc_tickadj])
-AC_CONFIG_FILES([scripts/checktime],	[chmod +x scripts/checktime])
-AC_CONFIG_FILES([scripts/freq_adj],	[chmod +x scripts/freq_adj])
-AC_CONFIG_FILES([scripts/html2man],	[chmod +x scripts/html2man])
-AC_CONFIG_FILES([scripts/mkver],	[chmod +x scripts/mkver])
-AC_CONFIG_FILES([scripts/ntp-wait],	[chmod +x scripts/ntp-wait])
-AC_CONFIG_FILES([scripts/ntpsweep],	[chmod +x scripts/ntpsweep])
-AC_CONFIG_FILES([scripts/ntptrace],	[chmod +x scripts/ntptrace])
-AC_CONFIG_FILES([scripts/ntpver],	[chmod +x scripts/ntpver])
-AC_CONFIG_FILES([scripts/plot_summary],	[chmod +x scripts/plot_summary])
-AC_CONFIG_FILES([scripts/summary],	[chmod +x scripts/summary])
-AC_CONFIG_FILES([util/Makefile])
-
-
-AC_PROG_CXX
+dnl  gtest is needed for our tests subdirs. It would be nice if we could
+dnl  require a C++ compiler only if we will use gtest, but AC_PROG_CXX
+dnl  can't be conditionalized.
 
 gta=false
 AC_ARG_WITH(
@@ -5789,11 +5732,46 @@ case "$try_gtest" in
 	esac
     esac
 esac
-
 AM_CONDITIONAL([GTEST_AVAILABLE], [$gta])
 
+
+###
+
+AC_DEFINE_DIR([NTP_KEYSDIR], [sysconfdir],
+    [Default location of crypto key info])
+
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([ElectricFence/Makefile])
+AC_CONFIG_FILES([adjtimed/Makefile])
+AC_CONFIG_FILES([clockstuff/Makefile])
+AC_CONFIG_FILES([include/Makefile])
+AC_CONFIG_FILES([include/isc/Makefile])
+AC_CONFIG_FILES([kernel/Makefile])
+AC_CONFIG_FILES([kernel/sys/Makefile])
+AC_CONFIG_FILES([libntp/Makefile])
+AC_CONFIG_FILES([libparse/Makefile])
+AC_CONFIG_FILES([ntpd/Makefile])
+AC_CONFIG_FILES([ntpdate/Makefile])
+AC_CONFIG_FILES([ntpdc/Makefile])
+AC_CONFIG_FILES([ntpdc/nl.pl],		[chmod +x ntpdc/nl.pl])
+AC_CONFIG_FILES([ntpq/Makefile])
+AC_CONFIG_FILES([ntpsnmpd/Makefile])
+AC_CONFIG_FILES([parseutil/Makefile])
+AC_CONFIG_FILES([scripts/Makefile])
+AC_CONFIG_FILES([scripts/calc_tickadj],	[chmod +x scripts/calc_tickadj])
+AC_CONFIG_FILES([scripts/checktime],	[chmod +x scripts/checktime])
+AC_CONFIG_FILES([scripts/freq_adj],	[chmod +x scripts/freq_adj])
+AC_CONFIG_FILES([scripts/html2man],	[chmod +x scripts/html2man])
+AC_CONFIG_FILES([scripts/mkver],	[chmod +x scripts/mkver])
+AC_CONFIG_FILES([scripts/ntp-wait],	[chmod +x scripts/ntp-wait])
+AC_CONFIG_FILES([scripts/ntpsweep],	[chmod +x scripts/ntpsweep])
+AC_CONFIG_FILES([scripts/ntptrace],	[chmod +x scripts/ntptrace])
+AC_CONFIG_FILES([scripts/ntpver],	[chmod +x scripts/ntpver])
+AC_CONFIG_FILES([scripts/plot_summary],	[chmod +x scripts/plot_summary])
+AC_CONFIG_FILES([scripts/summary],	[chmod +x scripts/summary])
 AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([tests/libntp/Makefile])
+AC_CONFIG_FILES([util/Makefile])
 
 AC_CONFIG_SUBDIRS([sntp])
 

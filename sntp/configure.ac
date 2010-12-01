@@ -131,6 +131,7 @@ case "$host" in
 esac
 
 AC_DISABLE_SHARED
+AC_PROG_LIBTOOL
 
 # NTP has (so far) been relying on leading-edge autogen.
 # Therefore, by default:
@@ -147,7 +148,6 @@ case "${enable_libopts_install+set}" in
 esac
 LIBOPTS_CHECK
 
-AC_PROG_LIBTOOL
 NTP_DIR_SEP
 
 # Checks for libraries.
@@ -175,7 +175,7 @@ case "$GCC" in
      yes)
 	CFLAGS="$CFLAGS -Wstrict-overflow"
     esac
-    # -W[no-]strict-prototypes is added later depending on OpenSSL
+    # -W[no-]strict-prototypes might be added by NTP_OPENSSL
 esac
 
 # [Bug 1628] On Solaris, we need -lxnet -lsocket.  Generalize this to
@@ -222,52 +222,6 @@ esac
 
 # Checks for header files.
 AC_HEADER_STDC
-
-dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
-dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3
-dnl  compiles it without complaint.  The mpinfou union is defined later
-dnl  in the resulting preprocessed source than the spu_info array in
-dnl  /usr/include/machine/sys/getppdp.h:
-dnl	extern union mpinfou spu_info[];
-dnl  triggering the error.  Our strategy is on HP-UX only, test for
-dnl  net/netmp.h, which is the file included by net/if.h that leads to
-dnl  getppdp.h.  If it is present but can't be compiled, try adding
-dnl  a duplicate definition of mpinfou, which should then allow the
-dnl  following net/if.h and net/if6.h tests to proceed normally.
-dnl  Using net/netmp.h allows us to avoid polluting test results for
-dnl  net/if.h.
-#
-case "$host" in
- *-hp-hpux*)
-    AC_CHECK_HEADERS(
-	[net/netmp.h],
-	[netmp_h_works=yes],
-	[netmp_h_works=no]
-    )
-    case "$netmp_h_works" in
-     no)
-	cat >>confdefs.h <<_ACEOF
-#ifndef MPINFOU_PREDECLARED
-# define MPINFOU_PREDECLARED
-typedef union mpinfou {		/* For lint */
-	struct pdk_mpinfo *pdkptr;
-	struct mpinfo *pikptr;
-} mpinfou_t;
-#endif
-_ACEOF
-	AH_BOTTOM([
-#ifndef MPINFOU_PREDECLARED
-# define MPINFOU_PREDECLARED
-typedef union mpinfou {		/* For lint */
-	struct pdk_mpinfo *pdkptr;
-	struct mpinfo *pikptr;
-} mpinfou_t;
-#endif
-])
-	;;
-    esac
-    ;;
-esac
 
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h syslog.h])
 AC_CHECK_HEADERS([sys/socket.h sys/time.h])
