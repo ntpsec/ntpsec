@@ -1,3 +1,4 @@
+(4.2.7p87) 2010/12/01 Released by Harlan Stenn <stenn@ntp.org>
 * from 4.2.6p3-RC12: Clean up m4 quoting in configure.ac, *.m4 files,
   resolving intermittent AC_LANG_PROGRAM possibly undefined errors.
 (4.2.7p86) 2010/11/29 Released by Harlan Stenn <stenn@ntp.org>
