@@ -23,11 +23,18 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/file.h>
-#include <sgtty.h>
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#else
+# ifdef HAVE_SGTTY_H
+#  include <sgtty.h>
+# endif
+#endif
 
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_unixtime.h"
+#include "ntp_calendar.h"
 
 #ifdef CHULDISC
 # ifdef HAVE_SYS_CHUDEFS_H
@@ -74,7 +81,7 @@ void	init_chu(void);
 int	openterm(char *dev);
 int	process_raw(int s);
 int	process_ldisc(int s);
-int	raw_filter(unsigned int c, struct timeval *tv);
+void	raw_filter(unsigned int c, struct timeval *tv);
 void	chufilter(struct chucode *chuc,	l_fp *rtime);
 
 
@@ -272,7 +279,7 @@ process_raw(
 /*
  * raw_filter - run the line discipline filter over raw data
  */
-int
+void
 raw_filter(
 	unsigned int c,
 	struct timeval *tv
@@ -638,7 +645,7 @@ chufilter(
 	 * work most of the time.
 	 */
 	date_ui = tmp + yearstart;
-#define CLOCK_WAYTOOBIG (4 * 60 * 60) /* WAG Juergen please review */
+#define CLOCK_WAYTOOBIG 1000 /* revived from ancient sources */
 	if (date_ui < (rtime->l_ui + CLOCK_WAYTOOBIG)
 	    && date_ui > (rtime->l_ui - CLOCK_WAYTOOBIG))
 	    goto codeokay;	/* looks good */
@@ -647,7 +654,7 @@ chufilter(
 	 * Trouble.  Next check is to see if the year rolled over and, if
 	 * so, try again with the new year's start.
 	 */
-	date_ui = calyearstart(rtime->l_ui);
+	date_ui = calyearstart(rtime->l_ui, NULL);
 	if (date_ui != yearstart) {
 		yearstart = date_ui;
 		date_ui += tmp;
@@ -673,7 +680,9 @@ chufilter(
 	 * than CLOCK_WAYTOOBIG seconds into the new year.
 	 */
 	if ((rtime->l_ui - yearstart) < CLOCK_WAYTOOBIG) {
-		date_ui = tmp + calyearstart(yearstart - CLOCK_WAYTOOBIG);
+		date_ui = tmp; 
+		date_ui += calyearstart(yearstart - CLOCK_WAYTOOBIG,
+					NULL);
 		if ((rtime->l_ui - date_ui) < CLOCK_WAYTOOBIG)
 		    goto codeokay;
 	}
@@ -683,7 +692,9 @@ chufilter(
 	 * following the year the system is in.  Try this one before
 	 * giving up.
 	 */
-	date_ui = tmp + calyearstart(yearstart + (400*24*60*60)); /* 400 days */
+	date_ui = tmp;
+	date_ui += calyearstart(yearstart + (400 * SECSPERDAY),
+				NULL);
 	if ((date_ui - rtime->l_ui) >= CLOCK_WAYTOOBIG) {
 		printf("Date hopelessly off\n");
 		return;		/* hopeless, let it sync to other peers */

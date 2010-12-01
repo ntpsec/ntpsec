@@ -223,6 +223,77 @@ esac
 # Checks for header files.
 AC_HEADER_STDC
 
+dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
+dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3
+dnl  compiles it without complaint.  The mpinfou union is defined later
+dnl  in the resulting preprocessed source than the spu_info array in
+dnl  /usr/include/machine/sys/getppdp.h:
+dnl	extern union mpinfou spu_info[];
+dnl  triggering the error.  Our strategy is on HP-UX only, test compile
+dnl  net/if.h.  If that fails, try adding a duplicate definition of
+dnl  mpinfou, and if that helps add it to confdefs.h (used for further
+dnl  configure tests) and config.h.
+#
+AC_CHECK_HEADERS([net/if.h], [], [], [
+    #ifdef HAVE_SYS_SOCKET_H
+    # include <sys/socket.h>
+    #endif
+])
+case "$host" in
+ *-hp-hpux*)
+    AC_CACHE_CHECK(
+	[if net/if.h requires mpinfou predeclaration],
+	[ntp_cv_predecl_mpinfou],
+	[
+	    np_cv_predecl_mpinfou=no
+	    case "$ac_cv_header_net_if_h" in
+	     no)
+		AC_COMPILE_IFELSE(
+		    [AC_LANG_PROGRAM(
+			[[
+			    typedef union mpinfou {
+				    struct pdk_mpinfo *pdkptr;
+				    struct mpinfo *pikptr;
+			    } mpinfou_t;
+			    #ifdef HAVE_SYS_SOCKET_H
+			    # include <sys/socket.h>
+			    #endif
+			    #include <net/if.h>
+			]],
+			[[
+			]]
+		    )],
+		    [
+			ntp_cv_predecl_mpinfou=yes
+			ac_cv_header_net_if_h=yes
+		    ]
+		)
+	    esac
+	]
+    )
+    case "$ntp_cv_predecl_mpinfou" in
+     yes)
+	cat >>confdefs.h <<_ACEOF
+#ifndef MPINFOU_PREDECLARED
+# define MPINFOU_PREDECLARED
+typedef union mpinfou {
+	struct pdk_mpinfo *pdkptr;
+	struct mpinfo *pikptr;
+} mpinfou_t;
+#endif
+_ACEOF
+	AH_BOTTOM([
+#ifndef MPINFOU_PREDECLARED
+# define MPINFOU_PREDECLARED
+typedef union mpinfou {
+	struct pdk_mpinfo *pdkptr;
+	struct mpinfo *pikptr;
+} mpinfou_t;
+#endif
+])
+    esac
+esac
+
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h syslog.h])
 AC_CHECK_HEADERS([sys/socket.h sys/time.h])
 AC_HEADER_TIME
