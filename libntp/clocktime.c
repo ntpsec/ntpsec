@@ -8,8 +8,6 @@
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
 
-#include "ntp_assert.h"
-
 /*
  * Hacks to avoid excercising the multiplier.  I have no pride.
  */
@@ -136,11 +134,14 @@ clocktime(
 	for (min = 1, idx = 0; idx < 3; idx++)
 		if (diff[idx] < diff[min])
 			min = idx;
-	NTP_ENSURE(diff[min] <= NEARLIMIT);
-	
-	/* -*- store results and tell if we could get into CLOSETIME*/
-	*ts_ui	   = test[min];
-	*yearstart = ystt[min];
+	if (diff[min] <= NEARLIMIT) {	
+	    /* -*- store results and update year start */
+	    *ts_ui     = test[min];
+	    *yearstart = ystt[min];
+	} else
+	    *ts_ui = rec_ui; /* emergency fallback */
+
+	/* -*- tell if we could get into CLOSETIME*/
 	return diff[min] < CLOSETIME;
 }
 
