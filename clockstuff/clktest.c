@@ -7,6 +7,40 @@
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <signal.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/file.h>
+#ifdef HAVE_SGTTY_H
+#include <sgtty.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+#ifdef CLKLDISC
+# define DEFMAGIC	'\r'
+#endif
+
+#ifdef CLKLDISC
+# ifdef STREAM
+#  include <stropts.h>
+#  ifdef HAVE_SYS_CLKDEFS_H
+#   include <sys/clkdefs.h>
+#  endif
+#  undef  DEFMAGIC
+#  define DEFMAGIC	"\r"
+# endif
+#endif
+
+#include "ntp_fp.h"
+#include "ntp.h"
+#include "ntp_unixtime.h"
 #include "clktest-opts.h"
 
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)

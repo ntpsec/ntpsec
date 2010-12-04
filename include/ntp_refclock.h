@@ -5,44 +5,14 @@
 #ifndef NTP_REFCLOCK_H
 #define NTP_REFCLOCK_H
 
-#include "ntp_types.h"
-
-#if defined(HAVE_BSD_TTYS)
-#include <sgtty.h>
-#endif /* HAVE_BSD_TTYS */
-
-#if defined(HAVE_SYSV_TTYS)
-#include <termio.h>
-#endif /* HAVE_SYSV_TTYS */
-
-#if defined(HAVE_TERMIOS)
-# ifdef TERMIOS_NEEDS__SVID3
-#  define _SVID3
-# endif
-# include <termios.h>
-# ifdef TERMIOS_NEEDS__SVID3
-#  undef _SVID3
-# endif
-#endif
-
 #if defined(HAVE_SYS_MODEM_H)
 #include <sys/modem.h>
 #endif
 
-#if 0 /* If you need that, include ntp_io.h instead */
-#if defined(STREAM)
-#include <stropts.h>
-#if defined(CLK) /* This is never defined, except perhaps by a system header file */
-#include <sys/clkdefs.h>
-#endif /* CLK */
-#endif /* STREAM */
-#endif
-
+#include "ntp_types.h"
+#include "ntp_tty.h"
 #include "recvbuff.h"
 
-#if !defined(SYSV_TTYS) && !defined(STREAM) & !defined(BSD_TTYS)
-#define BSD_TTYS
-#endif /* SYSV_TTYS STREAM BSD_TTYS */
 
 #define SAMPLE(x)	pp->coderecv = (pp->coderecv + 1) % MAXSTAGE; \
 			pp->filter[pp->coderecv] = (x); \

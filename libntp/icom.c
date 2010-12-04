@@ -87,10 +87,10 @@ doublefreq(			/* returns void */
 	)
 {
 	int i;
-	char s1[11];
+	char s1[16];
 	char *y;
 
-	sprintf(s1, " %10.0f", freq);
+	snprintf(s1, sizeof(s1), " %10.0f", freq);
 	y = s1 + 10;
 	i = 0;
 	while (*y != ' ') {
@@ -98,13 +98,13 @@ doublefreq(			/* returns void */
 		x[i] = x[i] | ((*y-- & 0x0f) << 4);
 		i++;
 	}
-	for (; i < len; i++)
+	for ( ; i < len; i++)
 		x[i] = 0;
 	x[i] = FI;
 }
 
 /*
- * icom_open() - open and initialize serial interface
+ * icom_init() - open and initialize serial interface
  *
  * This routine opens the serial interface for raw transmission; that
  * is, character-at-a-time, no stripping, checking or monkeying with the

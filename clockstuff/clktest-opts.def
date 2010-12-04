@@ -18,38 +18,6 @@ detail = <<- _EODetail_
 
 test-main;
 
-export = <<- _EOExport_
-	#include <stdio.h>
-	#include <ctype.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <signal.h>
-	#include <netinet/in.h>
-	#include <sys/ioctl.h>
-	#include <sys/time.h>
-	#include <sys/file.h>
-	#include <sgtty.h>
-
-	#include "../include/ntp_fp.h"
-	#include "../include/ntp.h"
-	#include "../include/ntp_unixtime.h"
-
-	#ifdef CLKLDISC
-	# define DEFMAGIC	'\r'
-	#endif
-
-	#ifdef CLKLDISC
-	# ifdef STREAM
-	#  include <stropts.h>
-	#  ifdef HAVE_SYS_CLKDEFS_H
-	#   include <sys/clkdefs.h>
-	#  endif
-	#  undef  DEFMAGIC
-	#  define DEFMAGIC	"\r"
-	# endif
-	#endif
-	_EOExport_;
-
 #ifdef CLKLDISC
 flag = {
     name      = magic2;

@@ -2,9 +2,9 @@ AUTOMAKE_OPTIONS =
 noinst_PROGRAMS = @PROPDELAY@ @CHUTEST@ @CLKTEST@
 EXTRA_PROGRAMS = propdelay chutest clktest
 
-BUILT_SOURCES =	clktest-opts.c clktest-opts.h
+BUILT_SOURCES =	$(srcdir)/clktest-opts.c $(srcdir)/clktest-opts.h
 
-clktest_SOURCES = clktest.c clktest-opts.c clktest-opts.h
+clktest_SOURCES = clktest.c clktest-opts.c
 
 INCLUDES =  -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include
 INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include

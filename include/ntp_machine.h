@@ -329,44 +329,9 @@ extern char *strdup(const char *);
 #include "ERROR: You must define one of the HAVE_xx_NICE defines!"
 #endif
 
-/*
- * use only one tty model - no use in initialising
- * a tty in three ways
- * HAVE_TERMIOS is preferred over HAVE_SYSV_TTYS over HAVE_BSD_TTYS
- */
-
-#ifdef HAVE_TERMIOS_H
-# define HAVE_TERMIOS
-#else
-# ifdef HAVE_TERMIO_H
-#  define HAVE_SYSV_TTYS
-# else
-#  ifdef HAVE_SGTTY_H
-#	define HAVE_BSD_TTYS
-#  endif
-# endif
-#endif
-
-#ifdef HAVE_TERMIOS
-# undef HAVE_BSD_TTYS
-# undef HAVE_SYSV_TTYS
-#endif
-
 #ifndef HAVE_TIMEGM
 extern time_t	timegm		(struct tm *);
 #endif
-
-#ifdef HAVE_SYSV_TTYS
-# undef HAVE_BSD_TTYS
-#endif
-
-#if !defined(SYS_WINNT) && !defined(VMS) && !defined(SYS_VXWORKS)
-# if	!defined(HAVE_SYSV_TTYS) \
-	&& !defined(HAVE_BSD_TTYS) \
-	&& !defined(HAVE_TERMIOS)
-#include "ERROR: no tty type defined!"
-# endif
-#endif /* !SYS_WINNT && !VMS && !SYS_VXWORKS*/
 
 
 #endif	/* NTP_MACHINE_H */
