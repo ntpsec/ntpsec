@@ -2,6 +2,7 @@
 
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
   intermittent AC_LANG_PROGRAM possibly undefined errors.
+* Clean up the SNTP documentation.
 
 ---
 (4.2.6p3-RC11) 2010/11/28 Released by Harlan Stenn <stenn@ntp.org>
