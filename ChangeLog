@@ -1,5 +1,6 @@
-* [Bug 1735] clocktime() aborts ntpd on bogus input.
 * [Bug 1736] tos int, bool options broken in 4.2.7p66.
+(4.2.7p88) 2010/12/02 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1735] 'clocktime()' aborts ntpd on bogus input
 (4.2.7p87) 2010/12/01 Released by Harlan Stenn <stenn@ntp.org>
 * from 4.2.6p3-RC12: Clean up m4 quoting in configure.ac, *.m4 files,
   resolving intermittent AC_LANG_PROGRAM possibly undefined errors.
