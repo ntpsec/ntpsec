@@ -2479,7 +2479,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 593 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
+    { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 81:
@@ -2493,7 +2493,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 597 "ntp_parser.y"
-    { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
+    { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 93:

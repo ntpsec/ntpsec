@@ -675,16 +675,11 @@ dump_config_tree(
 #ifdef DEBUG
 			default:
 				fprintf(df, "\n# dump error:\n"
-					"# unknown tos attr type %d\n"
-					"tos", atrv->type);
+					"# unknown tos attr type %d %s\n"
+					"tos", atrv->type, 
+					token_name(atrv->type));
 				break;
 #endif
-			case T_Integer:
-				fprintf(df, " %s %d", 
-					keyword(atrv->attr),
-					atrv->value.i);
-				break;
-
 			case T_Double:
 				fprintf(df, " %s %s", 
 					keyword(atrv->attr),

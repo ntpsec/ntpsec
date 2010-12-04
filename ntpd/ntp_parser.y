@@ -590,11 +590,11 @@ tos_option_list
 
 tos_option
 	:	tos_option_int_keyword T_Integer
-			{ $$ = create_attr_ival($1, $2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	|	tos_option_dbl_keyword number
 			{ $$ = create_attr_dval($1, $2); }
 	|	T_Cohort boolean
-			{ $$ = create_attr_ival($1, $2); }
+			{ $$ = create_attr_dval($1, (double)$2); }
 	;
 
 tos_option_int_keyword

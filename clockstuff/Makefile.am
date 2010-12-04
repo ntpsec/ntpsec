@@ -2,7 +2,8 @@ AUTOMAKE_OPTIONS =
 noinst_PROGRAMS = @PROPDELAY@ @CHUTEST@ @CLKTEST@
 EXTRA_PROGRAMS = propdelay chutest clktest
 
-BUILT_SOURCES =	$(srcdir)/clktest-opts.c $(srcdir)/clktest-opts.h
+BUILT_SOURCES =	clktest-opts.c clktest-opts.h
+EXTRA_DIST = clktest-opts.def
 
 clktest_SOURCES = clktest.c clktest-opts.c
 
