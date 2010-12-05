@@ -1,25 +1,23 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.c)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 06:37:09 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  December  4, 2010 at 10:59:28 AM by AutoGen 5.11.3
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:0:8 templates.
- */
-
-/*
- *  This file was produced by an AutoOpts template.  AutoOpts is a
- *  copyrighted work.  This source file is not encumbered by AutoOpts
- *  licensing, but is provided under the licensing terms chosen by the
- *  clktest author or copyright holder.  AutoOpts is licensed under
- *  the terms of the LGPL.  The redistributable library (``libopts'') is
- *  licensed under the terms of either the LGPL or, at the users discretion,
- *  the BSD license.  See the AutoOpts and/or libopts sources for details.
+ * Generated from AutoOpts 33:3:8 templates.
+ *
+ *  AutoOpts is a copyrighted work.  This source file is not encumbered
+ *  by AutoOpts licensing, but is provided under the licensing terms chosen
+ *  by the clktest author or copyright holder.  AutoOpts is
+ *  licensed under the terms of the LGPL.  The redistributable library
+ *  (``libopts'') is licensed under the terms of either the LGPL or, at the
+ *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
+ *  for details.
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * clktest copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * clktest copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -40,8 +38,8 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "clktest copyright (c) 1970-2009 David L. Mills and/or others, all rights reserved"
-/* extracted from /deacon/backroom/ntp-dev/include/copyright.def near line 8 */
+       "clktest copyright (c) 1970-2010 David L. Mills and/or others, all rights reserved"
+/* extracted from ../include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
@@ -67,39 +65,39 @@ extern int ttflags;
 /*
  *  Speed option description:
  */
-tSCC    zSpeedText[] =
+static char const zSpeedText[] =
         "Set the rate according to the speed";
-tSCC    zSpeed_NAME[]              = "SPEED";
-tSCC    zSpeed_Name[]              = "speed";
+static char const zSpeed_NAME[]              = "SPEED";
+static char const zSpeed_Name[]              = "speed";
 #define SPEED_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Debug option description:
  */
-tSCC    zDebugText[] =
+static char const zDebugText[] =
         "Turn on debugging output";
-tSCC    zDebug_NAME[]              = "DEBUG";
-tSCC    zDebug_Name[]              = "debug";
+static char const zDebug_NAME[]              = "DEBUG";
+static char const zDebug_Name[]              = "debug";
 #define DEBUG_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Crmod option description:
  */
-tSCC    zCrmodText[] =
+static char const zCrmodText[] =
         "Turn on CRMOD flag";
-tSCC    zCrmod_NAME[]              = "CRMOD";
-tSCC    zCrmod_Name[]              = "crmod";
+static char const zCrmod_NAME[]              = "CRMOD";
+static char const zCrmod_Name[]              = "crmod";
 #define CRMOD_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Command option description with
  *  "Must also have options" and "Incompatible options":
  */
-tSCC    zCommandText[] =
+static char const zCommandText[] =
         "";
-tSCC    zCommand_NAME[]            = "COMMAND";
-tSCC    zCommand_Name[]            = "command";
+static char const zCommand_NAME[]            = "COMMAND";
+static char const zCommand_Name[]            = "command";
 static const int
     aCommandMustList[] = {
     INDEX_OPT_TIMEOUT, NO_EQUIVALENT };
@@ -109,22 +107,22 @@ static const int
 /*
  *  Timeout option description:
  */
-tSCC    zTimeoutText[] =
+static char const zTimeoutText[] =
         "Limit wait for command completion";
-tSCC    zTimeout_NAME[]            = "TIMEOUT";
-tSCC    zTimeout_Name[]            = "timeout";
+static char const zTimeout_NAME[]            = "TIMEOUT";
+static char const zTimeout_Name[]            = "timeout";
 #define TIMEOUT_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-tSCC zHelpText[]          = "Display extended usage information and exit";
-tSCC zHelp_Name[]         = "help";
+static char const zHelpText[]          = "Display extended usage information and exit";
+static char const zHelp_Name[]         = "help";
 #ifdef HAVE_WORKING_FORK
 #define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
-tSCC zMore_Help_Name[]    = "more-help";
-tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
+static char const zMore_Help_Name[]    = "more-help";
+static char const zMore_HelpText[]     = "Extended usage information passed thru pager";
 #else
 #define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
 #define zMore_Help_Name   NULL
@@ -137,14 +135,14 @@ tSCC zMore_HelpText[]     = "Extended usage information passed thru pager";
                                 OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
 #endif
 
-tSCC zVersionText[]       = "Output version information and exit";
-tSCC zVersion_Name[]      = "version";
-tSCC zSave_OptsText[]     = "Save the option state to a config file";
-tSCC zSave_Opts_Name[]    = "save-opts";
-tSCC zLoad_OptsText[]     = "Load options from a config file";
-tSCC zLoad_Opts_NAME[]    = "LOAD_OPTS";
-tSCC zNotLoad_Opts_Name[] = "no-load-opts";
-tSCC zNotLoad_Opts_Pfx[]  = "no";
+static char const zVersionText[]       = "Output version information and exit";
+static char const zVersion_Name[]      = "version";
+static char const zSave_OptsText[]     = "Save the option state to a config file";
+static char const zSave_Opts_Name[]    = "save-opts";
+static char const zLoad_OptsText[]     = "Load options from a config file";
+static char const zLoad_Opts_NAME[]    = "LOAD_OPTS";
+static char const zNotLoad_Opts_Name[] = "no-load-opts";
+static char const zNotLoad_Opts_Pfx[]  = "no";
 #define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
 /*
  *  Declare option callback procedures
@@ -154,8 +152,6 @@ tSCC zNotLoad_Opts_Pfx[]  = "no";
  *  Under test, omit argument processing, or call optionStackArg,
  *  if multiple copies are allowed.
  */
-extern tOptProc
-    optionPagedUsage, optionVersionStderr;
 static tOptProc
     doOptTimeout, doUsageOpt;
 
@@ -171,7 +167,10 @@ static tOptProc
  *  When not under test, there are different procs to use
  */
 extern tOptProc
-    optionPagedUsage, optionPrintVersion;
+    optionBooleanVal,    optionNestedVal,     optionNumericVal,
+    optionPagedUsage,    optionPrintVersion,  optionResetOpt,
+    optionStackArg,      optionTimeVal,       optionUnstackArg,
+    optionVersionStderr;
 static tOptProc
     doOptCrmod, doOptSpeed, doOptTimeout, doUsageOpt;
 
@@ -326,7 +325,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "CLKTEST";
 tSCC   zUsageTitle[] =
-"clktest - test the clock line discipline - Ver. 4.2.5p245-RC\n\
+"clktest - test the clock line discipline - Ver. 4.2.7p89\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... <tty_device>\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -341,7 +340,7 @@ Clktest can be used to test the clock line discipline (CLKLDISC,\n\
 it must be available), and to take a look at radio clocks attached\n\
 to a serial port.\n";
 tSCC    zFullVersion[] = CLKTEST_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 495 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -363,7 +362,8 @@ tOptions clktestOptions = {
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
-    + OPTPROC_ARGS_REQ ),
+    + OPTPROC_ARGS_REQ
+    + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zCopyrightNotice,
@@ -395,7 +395,7 @@ doUsageOpt(
     tOptDesc*   pOptDesc )
 {
     (void)pOptions;
-    USAGE( EXIT_SUCCESS );
+    USAGE(EXIT_SUCCESS);
 }
 
 #if ! defined(TEST_CLKTEST_OPTS)
@@ -407,7 +407,7 @@ doUsageOpt(
 static void
 doOptSpeed(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from clktest-opts.def, line 130 */
+    /* extracted from clktest-opts.def, line 98 */
     /*
      * speed table
      */
@@ -456,7 +456,7 @@ doOptSpeed(tOptions* pOptions, tOptDesc* pOptDesc)
 static void
 doOptCrmod(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from clktest-opts.def, line 184 */
+    /* extracted from clktest-opts.def, line 152 */
     ttflags |= CRMOD;
 }
 #endif /* defined(TEST_CLKTEST_OPTS) */
@@ -510,22 +510,25 @@ doOptTimeout(tOptions* pOptions, tOptDesc* pOptDesc)
     }
     pOptDesc->optArg.argInt = val;
 }
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 109 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_CLKTEST_OPTS) /* TEST MAIN PROCEDURE: */
 
-extern void optionPutShell( tOptions* );
+extern void optionPutShell(tOptions*);
 
 int
 main(int argc, char** argv)
 {
     int res = EXIT_SUCCESS;
-    (void)optionProcess( &clktestOptions, argc, argv );
-    optionPutShell( &clktestOptions );
+    (void)optionProcess(&clktestOptions, argc, argv);
+    optionPutShell(&clktestOptions);
+    res = ferror(stdout);
+    if (res != 0)
+        fputs("output error writing to stdout\n", stderr);
     return res;
 }
 #endif  /* defined TEST_CLKTEST_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 627 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -534,11 +537,11 @@ main(int argc, char** argv)
 #include <unistd.h>
 #include <autoopts/usage-txt.h>
 
-static char* AO_gettext( char const* pz );
+static char* AO_gettext(char const* pz);
 static void  coerce_it(void** s);
 
 static char*
-AO_gettext( char const* pz )
+AO_gettext(char const* pz)
 {
     char* pzRes;
     if (pz == NULL)
@@ -546,10 +549,10 @@ AO_gettext( char const* pz )
     pzRes = _(pz);
     if (pzRes == pz)
         return pzRes;
-    pzRes = strdup( pzRes );
+    pzRes = strdup(pzRes);
     if (pzRes == NULL) {
-        fputs( _("No memory for duping translated strings\n"), stderr );
-        exit( EXIT_FAILURE );
+        fputs(_("No memory for duping translated strings\n"), stderr);
+        exit(EXIT_FAILURE);
     }
     return pzRes;
 }
@@ -562,7 +565,7 @@ static void coerce_it(void** s) { *s = AO_gettext(*s); }
  *  This invokes the translation code (e.g. gettext(3)).
  */
 static void
-translate_option_strings( void )
+translate_option_strings(void)
 {
     /*
      *  Guard against re-translation.  It won't work.  The strings will have

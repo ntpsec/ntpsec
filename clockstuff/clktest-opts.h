@@ -1,25 +1,23 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.h)
  *  
- *  It has been AutoGen-ed  November 17, 2009 at 06:37:09 AM by AutoGen 5.10
+ *  It has been AutoGen-ed  December  4, 2010 at 10:59:28 AM by AutoGen 5.11.3
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:0:8 templates.
- */
-
-/*
- *  This file was produced by an AutoOpts template.  AutoOpts is a
- *  copyrighted work.  This header file is not encumbered by AutoOpts
- *  licensing, but is provided under the licensing terms chosen by the
- *  clktest author or copyright holder.  AutoOpts is licensed under
- *  the terms of the LGPL.  The redistributable library (``libopts'') is
- *  licensed under the terms of either the LGPL or, at the users discretion,
- *  the BSD license.  See the AutoOpts and/or libopts sources for details.
+ * Generated from AutoOpts 33:3:8 templates.
+ *
+ *  AutoOpts is a copyrighted work.  This header file is not encumbered
+ *  by AutoOpts licensing, but is provided under the licensing terms chosen
+ *  by the clktest author or copyright holder.  AutoOpts is
+ *  licensed under the terms of the LGPL.  The redistributable library
+ *  (``libopts'') is licensed under the terms of either the LGPL or, at the
+ *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
+ *  for details.
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * clktest copyright (c) 1970-2009 David L. Mills and/or others - all rights reserved
+ * clktest copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -41,7 +39,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 135168
+#define AO_TEMPLATE_VERSION 135171
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -65,13 +63,13 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    10
-#define CLKTEST_VERSION       "4.2.5p245-RC"
-#define CLKTEST_FULL_VERSION  "clktest - test the clock line discipline - Ver. 4.2.5p245-RC"
+#define CLKTEST_VERSION       "4.2.7p89"
+#define CLKTEST_FULL_VERSION  "clktest - test the clock line discipline - Ver. 4.2.7p89"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT( SPEED )
+ *  e.g. HAVE_OPT(SPEED)
  */
 #define         DESC(n) (clktestOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -85,43 +83,9 @@ typedef enum {
 #define STACKLST_OPT(n) (((tArgList*)(DESC(n).optCookie))->apzArgs)
 #define    CLEAR_OPT(n) STMTS( \
                 DESC(n).fOptState &= OPTST_PERSISTENT_MASK;   \
-                if ( (DESC(n).fOptState & OPTST_INITENABLED) == 0) \
+                if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
-
-/* * * * * *
- *
- *  Globals exported from the test the clock line discipline option definitions
- */
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <signal.h>
-#include <netinet/in.h>
-#include <sys/ioctl.h>
-#include <sys/time.h>
-#include <sys/file.h>
-#include <sgtty.h>
-
-#include "../include/ntp_fp.h"
-#include "../include/ntp.h"
-#include "../include/ntp_unixtime.h"
-
-#ifdef CLKLDISC
-# define DEFMAGIC	'\r'
-#endif
-
-#ifdef CLKLDISC
-# ifdef STREAM
-#  include <stropts.h>
-#  ifdef HAVE_SYS_CLKDEFS_H
-#   include <sys/clkdefs.h>
-#  endif
-#  undef  DEFMAGIC
-#  define DEFMAGIC	"\r"
-# endif
-#endif
 
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -178,14 +142,14 @@ typedef enum {
 /*
  *  Interface defines not associated with particular options
  */
-#define ERRSKIP_OPTERR  STMTS( clktestOptions.fOptSet &= ~OPTPROC_ERRSTOP )
-#define ERRSTOP_OPTERR  STMTS( clktestOptions.fOptSet |= OPTPROC_ERRSTOP )
+#define ERRSKIP_OPTERR  STMTS(clktestOptions.fOptSet &= ~OPTPROC_ERRSTOP)
+#define ERRSTOP_OPTERR  STMTS(clktestOptions.fOptSet |= OPTPROC_ERRSTOP)
 #define RESTART_OPT(n)  STMTS( \
                 clktestOptions.curOptIdx = (n); \
-                clktestOptions.pzCurOpt  = NULL )
+                clktestOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
-#define USAGE(c)        (*clktestOptions.pUsageProc)( &clktestOptions, c )
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 409 */
+#define USAGE(c)        (*clktestOptions.pUsageProc)(&clktestOptions, c)
+/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 408 */
 
 /* * * * * *
  *
@@ -200,9 +164,9 @@ extern tOptions   clktestOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
-    static inline char* aoGetsText( char const* pz ) {
+    static inline char* aoGetsText(char const* pz) {
         if (pz == NULL) return NULL;
-        return (char*)gettext( pz );
+        return (char*)gettext(pz);
     }
 #   define _(s)  aoGetsText(s)
 # endif /* _() */

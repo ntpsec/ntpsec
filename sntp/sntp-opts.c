@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  December  2, 2010 at 10:08:50 AM by AutoGen 5.11.3
+ *  It has been AutoGen-ed  December  4, 2010 at 10:58:20 AM by AutoGen 5.11.3
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -473,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.7p88\n\
+"sntp - standard SNTP program - Ver. 4.2.7p89\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -484,18 +484,12 @@ tSCC*  apzHomeList[] = {
 tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 tSCC    zDetail[]     = "\n\
-.I sntp\n\
-implements the Simple Network Time Protocol, and is used\n\
-to query an NTP or SNTP server and either\n\
-display the time\n\
-or\n\
-set the local system's time (given suitable privilege).\n\n\
-It can be\n\
-run interactively from the command line or as a\n\
-.I cron\n\
-job.\n\n\
-NTP and SNTP are defined by RFC 5905, which\n\
-obsoletes RFC 4330 and RFC 1305.\n";
+sntp implements the Simple Network Time Protocol, and is used to query\n\
+an NTP or SNTP server and either display the time or set the local\n\
+system's time (given suitable privilege).\n\n\
+It can be run interactively from the command line or as a cron job.\n\n\
+NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
+1305.\n";
 tSCC    zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
 
