@@ -211,7 +211,7 @@ isc_netaddr_format(const isc_netaddr_t *na, char *array, unsigned int size) {
 
 isc_result_t
 isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen) {
-	static const unsigned char zeros[16];
+	static const unsigned char zeros[16] = { 0 };
 	unsigned int nbits, nbytes, ipbytes;
 	const unsigned char *p;
 
