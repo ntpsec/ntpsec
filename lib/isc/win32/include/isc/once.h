@@ -27,7 +27,7 @@ ISC_LANG_BEGINDECLS
 
 typedef struct {
 	int status;
-	int counter;
+	LONG counter;
 } isc_once_t;
 
 #define ISC_ONCE_INIT_NEEDED 0
