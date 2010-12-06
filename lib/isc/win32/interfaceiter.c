@@ -195,7 +195,7 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 			NULL,
 			iter->ipaa,
 			&iter->ipaasize);
-		if (NO_ERROR == err || ERROR_BUFFER_OVERFLOW == !err)
+		if (NO_ERROR == err || ERROR_BUFFER_OVERFLOW != err)
 			break;
 	}
 
@@ -437,7 +437,7 @@ GAA_find_prefix(isc_interfaceiter_t *iter) {
 			octets = sizeof(iter->current.netmask.type.in6);
 		else
 			octets = sizeof(iter->current.netmask.type.in);
-		memset(&iter->current.netmask.type.in6, 0xFF, octets);
+		memset(&iter->current.netmask.type, 0xFF, octets);
 		return (8 * (unsigned char)octets);
 	}
 	nbytes = match_len / 8;
