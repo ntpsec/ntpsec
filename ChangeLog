@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1742] Fix a typo in an error message in the "build" script.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
   intermittent AC_LANG_PROGRAM possibly undefined errors.
 * Clean up the SNTP documentation.
