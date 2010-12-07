@@ -1,3 +1,5 @@
+* [Bug 1742] form 4.2.6p3-RC12: Fix a typo in an error message in the
+  "build" script.
 (4.2.7p90) 2010/12/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1738] Windows ntpd has wrong net adapter name.
 * [Bug 1740] ntpdc -c reslist packet count wrongly treated as signed.
@@ -515,6 +517,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1742] Fix a typo in an error message in the "build" script.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
   intermittent AC_LANG_PROGRAM possibly undefined errors.
 * Clean up the SNTP documentation.
