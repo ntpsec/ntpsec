@@ -37,7 +37,7 @@ esac
 
 CVO=`env PATH="$PATH:." scripts/cvo.sh @cvo@`
 case "$CVO" in
- *-*-*-*) "echo scripts/cvo.sh returned <$CVO>, which makes no sense to me."
+ *-*-*-*) echo "scripts/cvo.sh returned <$CVO>, which makes no sense to me."
     exit 1
     ;;
  *-*-*) ;;
