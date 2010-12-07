@@ -3492,6 +3492,7 @@ input_handler(
 	 */
 	if (n < 0) {
 		int err = errno;
+		int j, b, prior;
 		/*
 		 * extended FAU debugging output
 		 */
@@ -3500,15 +3501,21 @@ input_handler(
 				"select(%d, %s, 0L, 0L, &0.0) error: %m",
 				maxactivefd + 1,
 				fdbits(maxactivefd, &activefds));
-		if (err == EBADF) {
-			int j, b;
-			fds = activefds;
-			for (j = 0; j <= maxactivefd; j++)
-				if ((FD_ISSET(j, &fds)
-				    && (read(j, &b, 0) == -1)))
-					msyslog(LOG_ERR,
-						"Bad file descriptor %d",
-						j);
+		if (err != EBADF)
+			return;
+		for (j = 0, prior = 0; j <= maxactivefd; j++) {
+			if (FD_ISSET(j, &activefds)) {
+				if (-1 != read(j, &b, 0)) {
+					prior = j;
+					continue;
+				}
+				msyslog(LOG_ERR,
+					"Removing bad file descriptor %d from select set",
+					j);
+				FD_CLR(j, &activefds);
+				if (j == maxactivefd)
+					maxactivefd = prior;
+			}
 		}
 		return;
 	}

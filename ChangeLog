@@ -1,3 +1,4 @@
+* [Bug 1732] ntpd ties up CPU on disconnected USB device.
 (4.2.7p90) 2010/12/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1738] Windows ntpd has wrong net adapter name.
 * [Bug 1740] ntpdc -c reslist packet count wrongly treated as signed.
