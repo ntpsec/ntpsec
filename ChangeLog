@@ -1,3 +1,4 @@
+(4.2.7p91) 2010/12/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1732] ntpd ties up CPU on disconnected USB device.
 * [Bug 1742] form 4.2.6p3-RC12: Fix a typo in an error message in the
   "build" script.
