@@ -42,11 +42,11 @@ IETF specification.
 
 @menu
 * sntp Description::            Description
-@include sntp-opts.menu
+* sntp Invocation::		Invoking sntp
 * Usage::                       Usage
 @end menu
 
-@node sntp Description, Usage, Top, Top
+@node sntp Description, sntp Invocation, Top, Top
 @comment  node-name,  next,  previous,  up
 @section Description
 
@@ -62,7 +62,7 @@ error bound of the system clock relative to the server clock.
 
 @include sntp-opts.texi
 
-@node Usage,  , sntp Description, Top
+@node Usage,  , sntp Invocation, Top
 @comment  node-name,  next,  previous,  up
 @section Usage
 

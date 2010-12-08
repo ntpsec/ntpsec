@@ -199,6 +199,8 @@ handle_pkt (
 	char *hostname = NULL, *ref, *ts_str = NULL;
 	double offset, precision, root_dispersion;
 	char addr_buf[INET6_ADDRSTRLEN];
+	char *p_SNTP_PRETEND_TIME;
+	time_t pretend_time;
 
 	if(rpktl > 0)
 		sw_case = 1;
@@ -243,9 +245,21 @@ handle_pkt (
 		}
 
 		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
-		tv_dst.tv_sec += JAN_1970;
 
-		offset_calculation(rpkt, rpktl, &tv_dst, &offset, &precision, &root_dispersion);
+		p_SNTP_PRETEND_TIME = getenv("SNTP_PRETEND_TIME");
+		if (p_SNTP_PRETEND_TIME) {
+#if SIZEOF_TIME_T == 4
+			sscanf(p_SNTP_PRETEND_TIME, "%ld", &pretend_time);
+#elif SIZEOF_TIME_T == 8
+			sscanf(p_SNTP_PRETEND_TIME, "%lld", &pretend_time);
+#else
+# include "GRONK: unexpected value for SIZEOF_TIME_T"
+#endif
+			tv_dst.tv_sec = pretend_time;
+		}
+
+		offset_calculation(rpkt, rpktl, &tv_dst, &offset,
+				   &precision, &root_dispersion);
 
 		for (digits = 0; (precision *= 10.) < 1.; ++digits)
 			/* empty */ ;
@@ -261,6 +275,9 @@ handle_pkt (
 			printf(" +/- %f secs", root_dispersion);
 		printf("\n");
 		free(ts_str);
+
+		if (p_SNTP_PRETEND_TIME)
+			return 0;
 
 		if (ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
 			return set_time(offset); 
@@ -325,6 +342,7 @@ offset_calculation (
 	L_SUB(&tmp, &p_org);
 	LFPTOD(&tmp, t21);
 	TVTOTS(tv_dst, &dst);
+	dst.l_ui += JAN_1970;
 	tmp = p_xmt;
 	L_SUB(&tmp, &dst);
 	LFPTOD(&tmp, t34);
