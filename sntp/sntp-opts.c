@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  December  7, 2010 at 10:09:52 AM by AutoGen 5.11.3
+ *  It has been AutoGen-ed  December  8, 2010 at 10:09:35 AM by AutoGen 5.11.3
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -473,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "SNTP";
 tSCC   zUsageTitle[] =
-"sntp - standard SNTP program - Ver. 4.2.7p91\n\
+"sntp - standard SNTP program - Ver. 4.2.7p92\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {
@@ -482,7 +482,7 @@ tSCC*  apzHomeList[] = {
        NULL };
 
 tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
-#define zExplain NULL
+tSCC   zExplain[]     = "\n\n";
 tSCC    zDetail[]     = "\n\
 sntp implements the Simple Network Time Protocol, and is used to query\n\
 an NTP or SNTP server and either display the time or set the local\n\

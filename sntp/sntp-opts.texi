@@ -6,11 +6,10 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  December  7, 2010 at 10:09:58 AM by AutoGen 5.11.3
+# It has been AutoGen-ed  December  8, 2010 at 10:09:43 AM by AutoGen 5.11.3
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
-This program has no explanation.
 
 @code{sntp}
 can be used as a SNTP client to query a NTP or SNTP server and either display
@@ -69,7 +68,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard SNTP program - Ver. 4.2.7p91
+sntp - standard SNTP program - Ver. 4.2.7p92
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... hostname-or-IP ...
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -106,6 +105,8 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... hostname-or-IP ...
 
 Options are specified by doubled hyphens and their name
 or by a single hyphen and the flag character.
+
+
 
 The following option preset mechanisms are supported:
  - reading file /deacon/users/stenn/.ntprc
