@@ -1,3 +1,5 @@
+* [Bug 1510] from 4.2.6p3-RC12: Add modes 20/21 for driver 8 to support
+  RAWDCF @ 75 baud.
 * [Bug 1741] from 4.2.6p3-RC12: Enable multicast reception on each
   address (Windows).
 * from 4.2.6p3-RC12: Other manycastclient repairs:
@@ -535,6 +537,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1510] Add modes 20/21 for driver 8 to support RAWDCF @ 75 baud.
 * [Bug 1741] Enable multicast reception on each address (Windows).
 * [Bug 1742] Fix a typo in an error message in the "build" script.
 * [Bug 1743] Display timezone offset when showing time for sntp in the
