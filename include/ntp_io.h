@@ -30,12 +30,12 @@
 #include <isc/boolean.h>
 #include <isc/netaddr.h>
 
-#if HAVE_NETINET_IN_H && HAVE_NETINET_IP_H
-#include <netinet/in.h>
-# if HAVE_NETINET_IN_SYSTM_H
+#if defined(HAVE_NETINET_IN_H) && defined(HAVE_NETINET_IP_H)
+# include <netinet/in.h>
+# ifdef HAVE_NETINET_IN_SYSTM_H
 #  include <netinet/in_systm.h>
 # endif
-#include <netinet/ip.h>
+# include <netinet/ip.h>
 #endif
 
 /*

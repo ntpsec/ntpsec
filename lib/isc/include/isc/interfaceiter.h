@@ -56,6 +56,7 @@ struct isc_interface {
 	isc_netaddr_t broadcast;	/*&< Broadcast address. */
 	isc_netaddr_t dstaddress; 	/*%< Destination address (point-to-point only). */
 	isc_uint32_t flags;		/*%< Flags; see INTERFACE flags. */
+	unsigned int ifindex;		/*%< Interface index for IP(V6)_MULTICAST_IF. */
 };
 
 /*@{*/
@@ -66,6 +67,7 @@ struct isc_interface {
 #define INTERFACE_F_LOOPBACK		0x00000004U
 #define INTERFACE_F_BROADCAST		0x00000008U
 #define INTERFACE_F_MULTICAST		0x00000010U
+#define INTERFACE_F_PRIVACY		0x00000020U	/* RFC 4941 */
 /*@}*/
 
 /***

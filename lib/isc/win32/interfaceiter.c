@@ -29,7 +29,6 @@
 
 #include <isc/interfaceiter.h>
 #include <isc/mem.h>
-//#include <isc/netaddr.h>
 #include <isc/result.h>
 #include <isc/string.h>
 #include <isc/strerror.h>
@@ -47,8 +46,6 @@ struct isc_interfaceiter {
 	unsigned int		magic;		/* Magic number. */
 	/* common fields */
 	isc_mem_t		*mctx;
-	struct in6_addr		loop__1;	/* ::1 node-scope localhost */
-	struct in6_addr		loopfe80__1;	/* fe80::1 link-scope localhost */
 	isc_interface_t		current;	/* Current interface data. */
 	isc_result_t		result;		/* Last result code. */
 	/* fields used if GetAdaptersAddresses is available at runtime */
@@ -67,6 +64,8 @@ struct isc_interfaceiter {
 	SOCKET_ADDRESS_LIST	*buf6;
 	unsigned int		buf6size;	/* Bytes allocated. */
 	unsigned int		pos6;		/* buf6 index, counts down */
+	struct in6_addr		loop__1;	/* ::1 node-scope localhost */
+	struct in6_addr		loopfe80__1;	/* fe80::1 link-scope localhost */
 };
 
 typedef ULONG (WINAPI *PGETADAPTERSADDRESSES)(
@@ -77,7 +76,7 @@ typedef ULONG (WINAPI *PGETADAPTERSADDRESSES)(
     PULONG SizePointer
 );
 
-/* static */	isc_boolean_t		use_GAA;
+static	isc_boolean_t		use_GAA;
 static	isc_boolean_t		use_GAA_determined;
 static	HMODULE			hmod_iphlpapi;
 static	PGETADAPTERSADDRESSES	pGAA;
@@ -451,32 +450,44 @@ GAA_find_prefix(isc_interfaceiter_t *iter) {
 
 static isc_result_t
 internal_current_GAA(isc_interfaceiter_t *iter) {
+	IP_ADAPTER_ADDRESSES *adap;
+	IP_ADAPTER_UNICAST_ADDRESS *addr;
 	unsigned char prefix_len;
 
+	REQUIRE(iter->ipaaCur != NULL);
 	REQUIRE(iter->ipuaCur != NULL);
+	adap = iter->ipaaCur;
+	addr = iter->ipuaCur;
+	if (IpDadStatePreferred != addr->DadState)
+		return (ISC_R_IGNORE);
 	memset(&iter->current, 0, sizeof(iter->current));
-	iter->current.af = iter->ipuaCur->Address.lpSockaddr->sa_family;
+	iter->current.af = addr->Address.lpSockaddr->sa_family;
 	isc_netaddr_fromsockaddr(&iter->current.address,
-	    (isc_sockaddr_t *)iter->ipuaCur->Address.lpSockaddr);
+	    (isc_sockaddr_t *)addr->Address.lpSockaddr);
+	if (AF_INET6 == iter->current.af)
+		iter->current.ifindex = adap->Ipv6IfIndex;
 	iter->current.name[0] = '\0';
 	WideCharToMultiByte(
 		CP_ACP, 
 		0, 
-		iter->ipaaCur->FriendlyName,
+		adap->FriendlyName,
 		-1,
 		iter->current.name,
 		sizeof(iter->current.name),
 		NULL,
 		NULL);
 	iter->current.name[sizeof(iter->current.name) - 1] = '\0';
-	if (IfOperStatusUp == iter->ipaaCur->OperStatus)
+	if (IfOperStatusUp == adap->OperStatus)
 		iter->current.flags |= INTERFACE_F_UP;
-	if ((IP_ADAPTER_NO_MULTICAST & iter->ipaaCur->Flags) == 0)
-		iter->current.flags |= INTERFACE_F_MULTICAST;
-	if (IF_TYPE_PPP == iter->ipaaCur->IfType)
+	if (IF_TYPE_PPP == adap->IfType)
 		iter->current.flags |= INTERFACE_F_POINTTOPOINT;
-	else if (IF_TYPE_SOFTWARE_LOOPBACK == iter->ipaaCur->IfType)
+	else if (IF_TYPE_SOFTWARE_LOOPBACK == adap->IfType)
 		iter->current.flags |= INTERFACE_F_LOOPBACK;
+	if ((IP_ADAPTER_NO_MULTICAST & adap->Flags) == 0)
+		iter->current.flags |= INTERFACE_F_MULTICAST;
+	if (IpSuffixOriginRandom == addr->SuffixOrigin)
+		iter->current.flags |= INTERFACE_F_PRIVACY;
+
 	prefix_len = GAA_find_prefix(iter);
 	/* I'm failing to see a broadcast flag via GAA */
 	if (AF_INET == iter->current.af && prefix_len < 32 &&
@@ -739,10 +750,12 @@ isc_interfaceiter_next(isc_interfaceiter_t *iter) {
 	REQUIRE(use_GAA_determined);
 
 	if (use_GAA) {
-		result = internal_next_GAA(iter);
-		if (ISC_R_NOMORE == result)
-			goto set_result;
-		result = internal_current_GAA(iter);
+		do {
+			result = internal_next_GAA(iter);
+			if (ISC_R_NOMORE == result)
+				goto set_result;
+			result = internal_current_GAA(iter);
+		} while (ISC_R_IGNORE == result);
 		goto set_result;
 	}
 

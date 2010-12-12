@@ -166,6 +166,7 @@ internal_current(isc_interfaceiter_t *iter) {
 
 		memset(&iter->current, 0, sizeof(iter->current));
 
+		iter->current.ifindex = sdl->sdl_index;
 		namelen = sdl->sdl_nlen;
 		if (namelen > sizeof(iter->current.name) - 1)
 			namelen = sizeof(iter->current.name) - 1;

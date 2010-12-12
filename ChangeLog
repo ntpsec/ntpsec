@@ -1,3 +1,16 @@
+* [Bug 1741] from 4.2.6p3-RC12: Enable multicast reception on each
+  address (Windows).
+* from 4.2.6p3-RC12: Other manycastclient repairs:
+  Separate handling of scope ID embedded in many in6_addr from ifindex
+  used for IPv6 multicasting ioctls.
+  Add INT_PRIVACY endpt bit flag for IPv6 RFC 4941 privacy addresses.
+  Enable outbound multicast from only one address per interface in the
+  same subnet, and in that case prefer embedded MAC address modified
+  EUI-64 IPv6 addresses first, then static, and last RFC 4941 privacy
+  addresses.
+  Use setsockopt(IP[V6]_MULTICAST_IF) before each send to multicast to
+  select the local source address, using the correct socket is not
+  enough.
 (4.2.7p92) 2010/12/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1743] from 4.2.6p3-RC12: Display timezone offset when showing
   time for sntp in the local timezone.
@@ -522,12 +535,24 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1741] Enable multicast reception on each address (Windows).
 * [Bug 1742] Fix a typo in an error message in the "build" script.
 * [Bug 1743] Display timezone offset when showing time for sntp in the
   local timezone.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
   intermittent AC_LANG_PROGRAM possibly undefined errors.
 * Clean up the SNTP documentation.
+* Other manycastclient repairs:
+  Separate handling of scope ID embedded in many in6_addr from ifindex
+  used for IPv6 multicasting ioctls.
+  Add INT_PRIVACY endpt bit flag for IPv6 RFC 4941 privacy addresses.
+  Enable outbound multicast from only one address per interface in the
+  same subnet, and in that case prefer embedded MAC address modified
+  EUI-64 IPv6 addresses first, then static, and last RFC 4941 privacy
+  addresses.
+  Use setsockopt(IP[V6]_MULTICAST_IF) before each send to multicast to
+  select the local source address, using the correct socket is not
+  enough.
 
 ---
 (4.2.6p3-RC11) 2010/11/28 Released by Harlan Stenn <stenn@ntp.org>
