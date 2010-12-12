@@ -103,6 +103,10 @@ typedef union {
 	    ? IN_CLASSD(SRCADR(psau))				\
 	    : IN6_IS_ADDR_MULTICAST(PSOCK_ADDR6(psau)))
 
+/* v6 is interface ID scope universal, as with MAC-derived addresses */
+#define IS_IID_UNIV(psau)					\
+	(!!(0x02 & NSRCADR6(psau)[8]))
+
 #define SIZEOF_INADDR(fam)					\
 	((AF_INET == (fam))					\
 	    ? sizeof(struct in_addr)				\

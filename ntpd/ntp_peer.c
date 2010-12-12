@@ -215,34 +215,34 @@ findexistingpeer(
  */
 struct peer *
 findpeer(
-	sockaddr_u *srcadr,
-	struct interface *dstadr,
-	int	pkt_mode,
-	int	*action
+	sockaddr_u *	srcadr,
+	endpt *		dstadr,
+	int		pkt_mode,
+	int *		action
 	)
 {
-	register struct peer *peer;
+	struct peer *p;
 	u_int hash;
 
 	findpeer_calls++;
 	hash = NTP_HASH_ADDR(srcadr);
-	for (peer = peer_hash[hash]; peer != NULL; peer = peer->next) {
-		if (SOCK_EQ(srcadr, &peer->srcadr) &&
-		    NSRCPORT(srcadr) == NSRCPORT(&peer->srcadr)) {
+	for (p = peer_hash[hash]; p != NULL; p = p->next) {
+		if (SOCK_EQ(srcadr, &p->srcadr) &&
+		    NSRCPORT(srcadr) == NSRCPORT(&p->srcadr)) {
 
 			/*
 			 * if the association matching rules determine
 			 * that this is not a valid combination, then
 			 * look for the next valid peer association.
 			 */
-			*action = MATCH_ASSOC(peer->hmode, pkt_mode);
+			*action = MATCH_ASSOC(p->hmode, pkt_mode);
 
 			/*
 			 * if an error was returned, exit back right
 			 * here.
 			 */
 			if (*action == AM_ERR)
-				return ((struct peer *)0);
+				return NULL;
 
 			/*
 			 * if a match is found, we stop our search.
@@ -255,12 +255,14 @@ findpeer(
 	/*
 	 * If no matching association is found
 	 */
-	if (peer == 0) {
+	if (NULL == p) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-		return ((struct peer *)0);
+	} else if (p->dstadr != dstadr) {
+		set_peerdstadr(p, dstadr);
+		DPRINTF(1, ("changed %s local address to match response",
+			    stoa(&p->srcadr)));
 	}
-	set_peerdstadr(peer, dstadr);
-	return (peer);
+	return p;
 }
 
 /*
@@ -507,41 +509,38 @@ peer_config(
  */
 void
 set_peerdstadr(
-	struct peer *peer,
-	struct interface *interface
+	struct peer *	p,
+	endpt *		dstadr
 	)
 {
-	struct peer *unlinked;
+	struct peer *	unlinked;
 
-	if (peer->dstadr != interface) {
-		if (interface != NULL && (peer->cast_flags &
-		    MDF_BCLNT) && (interface->flags & INT_MCASTIF) &&
-		    peer->burst) {
+	if (p->dstadr == dstadr)
+		return;
 
-			/*
-			 * don't accept updates to a true multicast
-			 * reception interface while a BCLNT peer is
-			 * running it's unicast protocol
-			 */
-			return;
-		}
-		if (peer->dstadr != NULL) {
-			peer->dstadr->peercnt--;
-			UNLINK_SLIST(unlinked, peer->dstadr->peers,
-			    peer, ilink, struct peer);
-			msyslog(LOG_INFO,
-				"%s interface %s -> %s",
-				stoa(&peer->srcadr),
-				stoa(&peer->dstadr->sin),
-				(interface != NULL)
-				    ? stoa(&interface->sin)
-				    : "(null)");
-		}
-		peer->dstadr = interface;
-		if (peer->dstadr != NULL) {
-			LINK_SLIST(peer->dstadr->peers, peer, ilink);
-			peer->dstadr->peercnt++;
-		}
+	if (dstadr != NULL && (MDF_BCLNT & p->cast_flags) &&
+	    (dstadr->flags & INT_MCASTIF) && p->burst) {
+		/*
+		 * don't accept updates to a true multicast
+		 * reception interface while a BCLNT peer is
+		 * running it's unicast protocol
+		 */
+		return;
+	}
+	if (p->dstadr != NULL) {
+		p->dstadr->peercnt--;
+		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
+			     struct peer);
+		msyslog(LOG_INFO, "%s interface %s -> %s",
+			stoa(&p->srcadr), stoa(&p->dstadr->sin),
+			(dstadr != NULL)
+			    ? stoa(&dstadr->sin)
+			    : "(none)");
+	}
+	p->dstadr = dstadr;
+	if (dstadr != NULL) {
+		LINK_SLIST(dstadr->peers, p, ilink);
+		dstadr->peercnt++;
 	}
 }
 
@@ -568,14 +567,14 @@ peer_refresh_interface(
 	    peer->ttl, peer->keyid));
 	if (niface != NULL) {
 		DPRINTF(4, (
-		    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, scope=%d, sin=%s",
+		    "fd=%d, bfd=%d, name=%.16s, flags=0x%x, ifindex=%u, sin=%s",
 		    niface->fd,  niface->bfd, niface->name,
-		    niface->flags, niface->scopeid,
-		    stoa((&niface->sin))));
+		    niface->flags, niface->ifindex,
+		    stoa(&niface->sin)));
 		if (niface->flags & INT_BROADCAST)
 			DPRINTF(4, (", bcast=%s",
-				stoa((&niface->bcast))));
-		DPRINTF(4, (", mask=%s\n", stoa((&niface->mask))));
+				stoa(&niface->bcast)));
+		DPRINTF(4, (", mask=%s\n", stoa(&niface->mask)));
 	} else {
 		DPRINTF(4, ("<NONE>\n"));
 	}

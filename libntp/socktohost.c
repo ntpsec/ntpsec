@@ -21,7 +21,7 @@
 
 char *
 socktohost(
-	sockaddr_u *sock
+	const sockaddr_u *sock
 	)
 {
 	register char *buffer;
