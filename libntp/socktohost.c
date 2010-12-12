@@ -23,7 +23,7 @@
 
 char *
 socktohost(
-	sockaddr_u *sock
+	const sockaddr_u *sock
 	)
 {
 	const char		svc[] = "ntp";

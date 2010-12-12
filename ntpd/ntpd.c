@@ -1316,7 +1316,7 @@ getgroup:
 # ifdef HAVE_DNSREGISTRATION
 		if (mdnsreg && (current_time - mdnsreg ) > 60 && mdnstries && sys_leap != LEAP_NOTINSYNC) {
 			mdnsreg = current_time;
-			msyslog(LOG_INFO, "Attemping to register mDNS");
+			msyslog(LOG_INFO, "Attempting to register mDNS");
 			if ( DNSServiceRegister (&mdns, 0, 0, NULL, "_ntp._udp", NULL, NULL, 
 			    htons(NTP_PORT), 0, NULL, NULL, NULL) != kDNSServiceErr_NoError ) {
 				if (!--mdnstries) {

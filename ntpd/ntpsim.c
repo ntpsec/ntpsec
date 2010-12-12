@@ -70,24 +70,26 @@ determine_recv_buf_ordering(
 /* Define a function to create the server associations */
 void create_server_associations(void)
 {
-    int i;
-    for (i = 0;i < simulation.num_of_servers;++i) {
-	printf("%s\n", stoa(simulation.servers[i].addr));
-	if (peer_config(simulation.servers[i].addr,
-			NULL,
-			ANY_INTERFACE_CHOOSE(simulation.servers[i].addr),
-			MODE_CLIENT,
-			NTP_VERSION,
-			NTP_MINDPOLL,
-			NTP_MAXDPOLL,
-			0, /* peerflags */
-			0, /* ttl */
-			0, /* peerkey */
-			(u_char *)"*" /* peerkeystr */) == 0) {
-	    fprintf(stderr, "ERROR!! Could not create association for: %s",
-		    stoa(simulation.servers[i].addr));
+	int i;
+
+	for (i = 0; i < simulation.num_of_servers; ++i) {
+		printf("%s\n", stoa(simulation.servers[i].addr));
+		if (peer_config(simulation.servers[i].addr,
+				NULL,
+				ANY_INTERFACE_CHOOSE(simulation.servers[i].addr),
+				MODE_CLIENT,
+				NTP_VERSION,
+				NTP_MINDPOLL,
+				NTP_MAXDPOLL,
+				0, /* peerflags */
+				0, /* ttl */
+				0, /* peerkey */
+				NULL /* group ident */) == 0) {
+			fprintf(stderr,
+				"ERROR!! Could not create association for: %s",
+				stoa(simulation.servers[i].addr));
+		}
 	}
-    }
 }
 
 

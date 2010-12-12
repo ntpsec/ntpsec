@@ -111,11 +111,12 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 	tmp.l_uf = 0UL;
 	HTONL_FP(&tmp, &rpkt.xmt);
 
-	// T4 - Destination timestamp
+	// T4 - Destination timestamp as standard timeval
 	tmp.l_ui = 1000000001UL;
 	tmp.l_uf = 0UL;
 	timeval dst;
 	TSTOTV(&tmp, &dst);
+	dst.tv_sec -= JAN_1970;
 
 	double offset, precision, root_disp;
 	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &root_disp);
@@ -152,11 +153,12 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 	tmp.l_uf = 2147483648UL;
 	HTONL_FP(&tmp, &rpkt.xmt);
 
-	// T4 - Destination timestamp
+	// T4 - Destination timestamp as standard timeval
 	tmp.l_ui = 1000000003UL;
 	tmp.l_uf = 0UL;
 	timeval dst;
 	TSTOTV(&tmp, &dst);
+	dst.tv_sec -= JAN_1970;
 
 	double offset, precision, root_disp;
 	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &root_disp);
