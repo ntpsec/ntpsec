@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1510] Add modes 20/21 for driver 8 to support RAWDCF @ 75 baud.
 * [Bug 1741] Enable multicast reception on each address (Windows).
 * [Bug 1742] Fix a typo in an error message in the "build" script.
 * [Bug 1743] Display timezone offset when showing time for sntp in the
