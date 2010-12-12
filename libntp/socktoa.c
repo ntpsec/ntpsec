@@ -35,33 +35,43 @@ socktoa(
 	const sockaddr_u *sock
 	)
 {
-	register char *buffer;
+	char *		res;
+	char *		addr;
+	u_long		scope;
 
-	LIB_GETBUF(buffer);
+	LIB_GETBUF(res);
 
 	if (NULL == sock)
-		strncpy(buffer, "(null)", LIB_BUFLENGTH);
+		strncpy(res, "(null)", LIB_BUFLENGTH);
 	else {
 		switch(AF(sock)) {
 
 		case AF_INET:
 		case AF_UNSPEC:
-			inet_ntop(AF_INET, PSOCK_ADDR4(sock), buffer,
+			inet_ntop(AF_INET, PSOCK_ADDR4(sock), res,
 				  LIB_BUFLENGTH);
 			break;
 
 		case AF_INET6:
-			inet_ntop(AF_INET6, PSOCK_ADDR6(sock), buffer,
+			inet_ntop(AF_INET6, PSOCK_ADDR6(sock), res,
 				  LIB_BUFLENGTH);
+			scope = SCOPE_VAR(sock);
+			if (0 != scope && !strchr(res, '%')) {
+				addr = res;
+				LIB_GETBUF(res);
+				snprintf(res, LIB_BUFLENGTH, "%s%%%lu",
+					 addr, scope);
+				res[LIB_BUFLENGTH - 1] = '\0';
+			}
 			break;
 
 		default:
-			snprintf(buffer, LIB_BUFLENGTH, 
+			snprintf(res, LIB_BUFLENGTH, 
 				 "(socktoa unknown family %d)", 
 				 AF(sock));
 		}
 	}
-	return buffer;
+	return res;
 }
 
 
@@ -70,15 +80,16 @@ sockporttoa(
 	const sockaddr_u *sock
 	)
 {
-	const char *atext;
-	char *buf;
+	const char *	atext;
+	char *		buf;
 
 	atext = socktoa(sock);
 	LIB_GETBUF(buf);
-	if (IS_IPV4(sock))
-		snprintf(buf, LIB_BUFLENGTH, "%s:%hu", atext, SRCPORT(sock));
-	else
-		snprintf(buf, LIB_BUFLENGTH, "[%s]:%hu", atext, SRCPORT(sock));
+	snprintf(buf, LIB_BUFLENGTH,
+		 (IS_IPV6(sock))
+		     ? "[%s]:%hu"
+		     : "%s:%hu",
+		 atext, SRCPORT(sock));
 
 	return buf;
 }
