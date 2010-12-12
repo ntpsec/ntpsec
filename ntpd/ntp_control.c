@@ -579,8 +579,6 @@ ctl_error(
 	 * send packet and bump counters
 	 */
 	if (res_authenticate && sys_authenticate) {
-		int maclen;
-
 		maclen = authencrypt(res_keyid, (u_int32 *)&rpkt,
 				     CTL_HEADER_LEN);
 		sendpkt(rmt_addr, lcl_inter, -2, (void *)&rpkt,

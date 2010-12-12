@@ -85,6 +85,7 @@ TEST_F(utilitiesTest, IPv6Address) {
 	sockaddr_u	input;
 	addrinfo	inputA;
 
+	memset(&input, 0, sizeof(input));
 	input.sa6.sin6_family = AF_INET6;
 	input.sa6.sin6_addr = address;
 	EXPECT_STREQ(expected, ss_to_str(&input));
@@ -96,8 +97,8 @@ TEST_F(utilitiesTest, IPv6Address) {
 TEST_F(utilitiesTest, SetLiVnMode1) {
 	pkt expected;
 	expected.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
-										 NTP_VERSION,
-										 MODE_SERVER);
+					     NTP_VERSION,
+					     MODE_SERVER);
 
 	pkt actual;
 	set_li_vn_mode(&actual, LEAP_NOWARNING, NTP_VERSION,

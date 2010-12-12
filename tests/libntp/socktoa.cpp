@@ -13,9 +13,9 @@ TEST_F(socktoaTest, IPv4AddressWithPort) {
 TEST_F(socktoaTest, IPv6AddressWithPort) {
 	const struct in6_addr address = {
 		0x20, 0x01, 0x0d, 0xb8,
-        0x85, 0xa3, 0x08, 0xd3, 
-        0x13, 0x19, 0x8a, 0x2e,
-        0x03, 0x70, 0x73, 0x34
+		0x85, 0xa3, 0x08, 0xd3, 
+		0x13, 0x19, 0x8a, 0x2e,
+		0x03, 0x70, 0x73, 0x34
 	};
 
 	const char* expected =
@@ -24,13 +24,40 @@ TEST_F(socktoaTest, IPv6AddressWithPort) {
 		"[2001:db8:85a3:8d3:1319:8a2e:370:7334]:123";
 
 	sockaddr_u input;
-	input.sa6.sin6_family = AF_INET6;
-	input.sa6.sin6_addr = address;
+	memset(&input, 0, sizeof(input));
+	AF(&input) = AF_INET6;
+	SET_ADDR6N(&input, address);
 	SET_PORT(&input, 123);
 
 	EXPECT_STREQ(expected, socktoa(&input));
 	EXPECT_STREQ(expected_port, sockporttoa(&input));
 }
+
+#ifdef ISC_PLATFORM_HAVESCOPEID
+TEST_F(socktoaTest, ScopedIPv6AddressWithPort) {
+	const struct in6_addr address = {
+		0xfe, 0x80, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00,
+		0x02, 0x12, 0x3f, 0xff, 
+		0xfe, 0x29, 0xff, 0xfa
+	};
+
+	const char* expected =
+		"fe80::212:3fff:fe29:fffa%5";
+	const char* expected_port = 
+		"[fe80::212:3fff:fe29:fffa%5]:123";
+
+	sockaddr_u input;
+	memset(&input, 0, sizeof(input));
+	AF(&input) = AF_INET6;
+	SET_ADDR6N(&input, address);
+	SET_PORT(&input, 123);
+	SCOPE_VAR(&input) = 5;
+
+	EXPECT_STREQ(expected, socktoa(&input));
+	EXPECT_STREQ(expected_port, sockporttoa(&input));
+}
+#endif	/* ISC_PLATFORM_HAVESCOPEID */
 
 TEST_F(socktoaTest, HashEqual) {
 	sockaddr_u input1 = CreateSockaddr4("192.00.2.2", 123);
