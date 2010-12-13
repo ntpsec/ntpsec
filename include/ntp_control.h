@@ -261,7 +261,8 @@ struct ntp_control {
 #define	CP_INITKEY		(5 + CP_MAX_NOAUTOKEY)
 #define	CP_INITTSP		(6 + CP_MAX_NOAUTOKEY)
 #define	CP_SIGNATURE		(7 + CP_MAX_NOAUTOKEY)
-#define	CP_MAXCODE		CP_SIGNATURE
+#define	CP_IDENT		(8 + CP_MAX_NOAUTOKEY)
+#define	CP_MAXCODE		CP_IDENT
 #else	/* !AUTOKEY follows */
 #define	CP_MAXCODE		CP_MAX_NOAUTOKEY
 #endif	/* !AUTOKEY */

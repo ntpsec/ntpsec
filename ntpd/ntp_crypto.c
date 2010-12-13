@@ -1627,7 +1627,7 @@ crypto_ident(
 	 */
 	if (peer->crypto & CRYPTO_FLAG_IFF) {
 		snprintf(filename, MAXFILENAME, "ntpkey_iffpar_%s",
-		    peer->issuer);
+		    peer->ident);
 		peer->ident_pkey = crypto_key(filename, NULL,
 		    &peer->srcadr);
 		if (peer->ident_pkey != NULL)
@@ -1635,7 +1635,7 @@ crypto_ident(
 	}
 	if (peer->crypto & CRYPTO_FLAG_GQ) {
 		snprintf(filename, MAXFILENAME, "ntpkey_gqpar_%s",
-		    peer->issuer);
+		    peer->ident);
 		peer->ident_pkey = crypto_key(filename, NULL,
 		    &peer->srcadr);
 		if (peer->ident_pkey != NULL)
@@ -1643,15 +1643,13 @@ crypto_ident(
 	}
 	if (peer->crypto & CRYPTO_FLAG_MV) {
 		snprintf(filename, MAXFILENAME, "ntpkey_mvpar_%s",
-		    peer->issuer);
+		    peer->ident);
 		peer->ident_pkey = crypto_key(filename, NULL,
 		    &peer->srcadr);
 		if (peer->ident_pkey != NULL)
 			return (CRYPTO_MV);
 	}
-	msyslog(LOG_NOTICE,
-	    "crypto_ident: no identity parameters found for group %s",
-	    peer->issuer);
+	report_event(XEVNT_ID, peer, NULL);
 	return (CRYPTO_NULL);
 }
 
@@ -3157,20 +3155,15 @@ cert_hike(
 		if (!(yp->flags & CERT_TRUST))
 			return (XEVNT_OK);
 
-		peer->grpkey = yp->grpkey;
-		peer->crypto |= CRYPTO_FLAG_CERT;
-		if (!(peer->crypto & CRYPTO_FLAG_MASK))
-			peer->crypto |= CRYPTO_FLAG_VRFY |
-			    CRYPTO_FLAG_PROV;
-
 		/*
 		 * If the server has an an identity scheme, fetch the
 		 * identity credentials. If not, the identity is
 		 * verified only by the trusted certificate. The next
 		 * signature will set the server proventic.
 		 */
-		if (!(peer->crypto & CRYPTO_FLAG_MASK) ||
-		    sys_groupname == NULL)
+		peer->crypto |= CRYPTO_FLAG_CERT;
+		peer->grpkey = yp->grpkey;
+		if (peer->ident == NULL)
 			peer->crypto |= CRYPTO_FLAG_VRFY;
 	}
 
@@ -3800,21 +3793,6 @@ crypto_setup(void)
 	}
 	hostval.vallen = htonl(strlen(cinfo->subject));
 	hostval.ptr = cinfo->subject;
-
-	/*
-	 * If trusted certificate, the subject name must match the group
-	 * name.
-	 */
-	if (cinfo->flags & CERT_TRUST) {
-		if (sys_groupname == NULL) {
-			sys_groupname = hostval.ptr;
-		} else if (strcmp(hostval.ptr, sys_groupname) != 0) {
-			msyslog(LOG_ERR,
-			    "crypto_setup: trusted certificate name %s does not match group name %s",
-			    (char *)hostval.ptr, sys_groupname);
-			exit (-1);
-		}
-	}
 	if (sys_groupname != NULL) {
 
 		/*

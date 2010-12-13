@@ -13,6 +13,8 @@
   Use setsockopt(IP[V6]_MULTICAST_IF) before each send to multicast to
   select the local source address, using the correct socket is not
   enough.
+* "server ... ident <groupname>" changes from Dave Mills.
+* Documentation updates from Dave Mills.
 (4.2.7p92) 2010/12/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1743] from 4.2.6p3-RC12: Display timezone offset when showing
   time for sntp in the local timezone.

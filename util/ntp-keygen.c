@@ -270,6 +270,7 @@ main(
 	passwd2 = NULL;
 	gettimeofday(&tv, 0);
 	epoch = tv.tv_sec;
+	fstamp = epoch + JAN_1970;
 
 	{
 		int optct = optionProcess(&ntp_keygenOptions, argc, argv);
@@ -469,7 +470,7 @@ main(
 			readlink(filename, filename, sizeof(filename));
 			fprintf(stderr, "Using sign key %s\n",
 			    filename);
-		} else if (pkey_host != NULL) {
+		} else {
 			pkey_sign = pkey_host;
 			fprintf(stderr, "Using host key as sign key\n");
 		}
@@ -502,7 +503,6 @@ main(
 	if (pkey_gqkey != NULL && HAVE_OPT(ID_KEY)) {
 		RSA	*rsa;
 
-		epoch = fstamp - JAN_1970;
 		sprintf(filename, "ntpkey_gqpar_%s.%u", groupname,
 		    fstamp);
 		fprintf(stderr, "Writing GQ parameters %s to stdout\n",
@@ -567,7 +567,6 @@ main(
 	if (pkey_iffkey != NULL && HAVE_OPT(ID_KEY)) {
 		DSA	*dsa;
 
-		epoch = fstamp - JAN_1970;
 		sprintf(filename, "ntpkey_iffpar_%s.%u", groupname,
 		    fstamp);
 		fprintf(stderr, "Writing IFF parameters %s to stdout\n",
@@ -591,7 +590,6 @@ main(
 	if (pkey_iffkey != NULL && passwd2 != NULL) {
 		DSA	*dsa;
 
-		epoch = fstamp - JAN_1970;
 		sprintf(filename, "ntpkey_iffkey_%s.%u", groupname,
 		    fstamp);
 		fprintf(stderr, "Writing IFF keys %s to stdout\n",
@@ -631,7 +629,6 @@ main(
 	 * associated with client key 1.
 	 */
 	if (pkey_mvkey != NULL && HAVE_OPT(ID_KEY)) {
-		epoch = fstamp - JAN_1970;
 		sprintf(filename, "ntpkey_mvpar_%s.%u", groupname,
 		    fstamp);
 		fprintf(stderr, "Writing MV parameters %s to stdout\n",
@@ -650,7 +647,6 @@ main(
 	 * Write the encrypted MV server keys to the stdout stream.
 	 */
 	if (pkey_mvkey != NULL && passwd2 != NULL) {
-		epoch = fstamp - JAN_1970;
 		sprintf(filename, "ntpkey_mvkey_%s.%u", groupname,
 		    fstamp);
 		fprintf(stderr, "Writing MV keys %s to stdout\n",
@@ -666,16 +662,8 @@ main(
 	}
 
 	/*
-	 * Don't generate a certificate if no host keys or extracting
-	 * encrypted or nonencrypted keys to the standard output stream.
-	 */
-	if (pkey_host == NULL || HAVE_OPT(ID_KEY) || passwd2 != NULL)
-		exit (0);
-
-	/*
-	 * Decode the digest/signature scheme. If trusted, set the
-	 * subject and issuer names to the group name; if not set both
-	 * to the host name.
+	 * Decode the digest/signature scheme and create the
+	 * certificate. Do this every time we run the program.
 	 */
 	ectx = EVP_get_digestbyname(scheme);
 	if (ectx == NULL) {
@@ -684,10 +672,7 @@ main(
 		    scheme);
 			exit (-1);
 	}
-	if (exten == NULL)
-		x509(pkey_sign, ectx, grpkey, exten, certname);
-	else
-		x509(pkey_sign, ectx, grpkey, exten, groupname);
+	x509(pkey_sign, ectx, grpkey, exten, certname);
 #endif	/* AUTOKEY */
 	exit (0);
 }
@@ -1809,7 +1794,7 @@ x509	(
 	const EVP_MD *md,	/* generic digest algorithm */
 	char	*gqpub,		/* identity extension (hex string) */
 	char	*exten,		/* private cert extension */
-	char	*name		/* subject/issuer namd */
+	char	*name		/* subject/issuer name */
 	)
 {
 	X509	*cert;		/* X509 certificate */
@@ -2053,8 +2038,7 @@ fheader	(
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
 
-	sprintf(filename, "ntpkey_%s_%s.%lu", file, owner, epoch +
-	    JAN_1970);
+	sprintf(filename, "ntpkey_%s_%s.%u", file, owner, fstamp); 
 	if ((str = fopen(filename, "w")) == NULL) {
 		perror("Write");
 		exit (-1);

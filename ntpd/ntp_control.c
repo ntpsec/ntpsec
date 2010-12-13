@@ -270,8 +270,9 @@ static struct ctl_var peer_var[] = {
 	{ CP_INITKEY,	RO, "initkey" },	/* 47 */
 	{ CP_INITTSP,	RO, "timestamp" },	/* 48 */
 	{ CP_SIGNATURE,	RO, "signature" },	/* 49 */
+	{ CP_IDENT,	RO, "ident" },		/* 44 */
 #endif	/* AUTOKEY */
-	{ 0,		EOV, "" }		/* 43/50 */
+	{ 0,		EOV, "" }		/* 44/51 */
 };
 
 
@@ -319,6 +320,7 @@ static u_char def_peer_var[] = {
 	CP_SIGNATURE,
 	CP_VALID,
 	CP_INITSEQ,
+	CP_IDENT,
 #endif	/* AUTOKEY */
 	0
 };
@@ -1995,7 +1997,7 @@ ctl_putpeer(
 	case CP_HOST:
 		if (p->subject != NULL)
 			ctl_putstr(peer_var[id].text, p->subject,
-				   strlen(p->subject));
+			    strlen(p->subject));
 		break;
 
 	case CP_VALID:		/* not used */
@@ -2010,6 +2012,14 @@ ctl_putpeer(
 		ctl_putfs(peer_var[CP_INITTSP].text,
 			  ntohl(p->recval.tstamp));
 		break;
+
+	case CP_IDENT:
+		if (p->ident != NULL)
+			ctl_putstr(peer_var[id].text, p->ident,
+			    strlen(p->ident));
+		break;
+
+		
 #endif	/* AUTOKEY */
 	}
 }
