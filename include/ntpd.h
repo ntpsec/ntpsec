@@ -186,7 +186,7 @@ extern  void	set_peerdstadr	(struct peer *peer,
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 struct interface *, u_char, u_char,
 				 u_char, u_char, u_int, u_char, u_char,
-				 keyid_t);
+				 keyid_t, const char *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
