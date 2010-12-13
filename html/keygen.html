@@ -16,7 +16,7 @@
 <p><img src="pic/alice23.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a></p>
 <p>Alice holds the key.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->12-Dec-2010  4:43<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->13-Dec-2010  5:07<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -54,6 +54,7 @@
 <p>To test and gain experience with Autokey concepts, log in as root and change to the keys directory, usually <tt>/usr/local/etc</tt>. When run for the first time, or if all files with names beginning <tt>ntpkey</tt> have been removed, use the <tt>ntp-keygen </tt>command without arguments to generate a default RSA host key and matching RSA-MD5 certificate with expiration date one year hence. If run again, the program uses the existing keys and parameters and generates only a new certificate with new expiration date one year hence.</p>
 <p>Run the command on as many hosts as necessary. Designate one of them as the trusted host (TH) using <tt>ntp-keygen</tt> with the <tt>-T</tt> option and configure it to synchronize from reliable Internet servers. Then configure the other hosts to synchronize to the TH directly or indirectly. A certificate trail is created when Autokey asks the immediately ascendant host towards the TH to sign its certificate, which is then provided to the immediately descendant host on request. All group hosts should have acyclic certificate trails ending on the TH.</p>
 <p>The host key is used to encrypt the cookie when required and so must be RSA type. By default, the host key is also the sign key used to encrypt signatures. A different sign key can be assigned using the <tt>-S</tt> option and this can be either RSA or DSA type. By default, the signature message digest type is MD5, but any combination of sign key type and message digest type supported by the OpenSSL library can be specified using the <tt>-c</tt> option.</p>
+<dd>The rules say cryptographic media should be generated with proventic filestamps, which means the host should already be synchronized before this program is run. This of course creates a fowl problem when the host is started for the first time. Accordingly, the host time should be set by some other means, such as eyeball-and-wristwatch, at lest so that the certificate lifetime is within the current year. After that and when the host is synchronized to a proventic source, the certificate should be re-generated.</dd>
 <p>Additional information on trusted groups and identity schemes is on the <a href="autokey.html">Autokey Public-Key Authentication</a> page.</p>
 <h4 id="cmd">Command Line Options</h4>
 <dl>
