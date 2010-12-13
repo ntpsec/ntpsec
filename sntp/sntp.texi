@@ -46,7 +46,7 @@ IETF specification.
 * Usage::                       Usage
 @end menu
 
-@node sntp Description, sntp Invocation, Top, Top
+@node sntp Description
 @comment  node-name,  next,  previous,  up
 @section Description
 
@@ -62,7 +62,7 @@ error bound of the system clock relative to the server clock.
 
 @include sntp-opts.texi
 
-@node Usage,  , sntp Invocation, Top
+@node Usage
 @comment  node-name,  next,  previous,  up
 @section Usage
 
