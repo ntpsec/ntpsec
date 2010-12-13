@@ -10,7 +10,7 @@
 <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>We have three, now looking for more.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->19-Nov-2010  23:15<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->09-Dec-2010  15:22<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -88,7 +88,7 @@
   </dd>
   <dt id="nonvolatile"><tt>nonvolatile <i>threshold</i></tt></dt>
   <dd>Specify the <i><tt>threshold</tt></i> in PPM to write the frequency file, with default 0.1 PPM. The frequency file is inspected each hour. If the difference between the current frequency  and the last value written exceeds the threshold, the file is written and the <tt><em>threshold</em></tt>  becomes the new threshold value. If the threshold is not exceeded, it is reduced by half. This is intended to reduce the frequency of unnecessary file writes for embedded systems with nonvolatile memory.</dd>
-  <dt id="phone"><tt>phone <i>dial</i>2 ...</tt></dt>
+  <dt id="phone"><tt>phone <i>dial</i> ...</tt></dt>
   <dd>This command is used in conjunction with the ACTS modem driver (type 18). The arguments consist of a maximum of 10 telephone numbers used to dial USNO, NIST or European time services. The Hayes command ATDT&nbsp;is normally prepended to the number, which can contain other modem control codes as well.</dd>
   <dt id="saveconfigdir"><tt>saveconfigdir <i>directory_path</i></tt></dt>
   <dd>Specify the directory in which to write configuration snapshots requested with <tt>ntpq</tt>'s <a href="ntpq.html#saveconfig">saveconfig</a> command.  If <tt>saveconfigdir</tt> does not appear in the configuration file, saveconfig requests are rejected by ntpd.</dd>
@@ -146,7 +146,7 @@
       <dd>Specify the orphan stratum with default 16. If less than 16 this is the stratum assumed by the root servers. See the <a href="assoc.html">Association Management</a> page for further details.</dd>
       <dt><tt>orphanwait <em>delay</em></tt></dt>
       <dd>&nbsp;</dd>
-      <dd>Specify the delay in seconds from the time all sources are lost until orphan mode is enabled with default 500 s (five minutes). This allows time for one or more sources to be found without enabling orphan mode and later disabling it.</dd>
+      <dd>Specify the delay in seconds from the time all sources are lost until orphan mode is enabled with default 600 s (five minutes). This allows time for one or more sources to be found without enabling orphan mode and later disabling it.</dd>
     </dl>
   </dd>
   <dt id="trap"><tt>trap <i>host_address</i> [port <i>port_number</i>] [interface <i>interfSace_address</i>]</tt></dt>
