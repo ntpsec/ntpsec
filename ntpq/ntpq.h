@@ -63,7 +63,7 @@ struct xcmd {
  * Structure to hold association data
  */
 struct association {
-	u_short assid;
+	associd_t assid;
 	u_short status;
 };
 

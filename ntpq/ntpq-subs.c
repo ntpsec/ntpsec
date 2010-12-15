@@ -19,20 +19,20 @@ int 	maxhostlen;
 /*
  * Declarations for command handlers in here
  */
-static	int	checkassocid	(u_int32);
+static	associd_t checkassocid	(u_int32);
 static	struct varlist *findlistvar (struct varlist *, char *);
 static	void	doaddvlist	(struct varlist *, const char *);
 static	void	dormvlist	(struct varlist *, const char *);
 static	void	doclearvlist	(struct varlist *);
 static	void	makequerydata	(struct varlist *, int *, char *);
-static	int	doquerylist	(struct varlist *, int, int, int, 
+static	int	doquerylist	(struct varlist *, int, associd_t, int,
 				 u_short *, int *, const char **);
 static	void	doprintvlist	(struct varlist *, FILE *);
 static	void	addvars 	(struct parse *, FILE *);
 static	void	rmvars		(struct parse *, FILE *);
 static	void	clearvars	(struct parse *, FILE *);
 static	void	showvars	(struct parse *, FILE *);
-static	int	dolist		(struct varlist *, int, int, int,
+static	int	dolist		(struct varlist *, associd_t, int, int,
 				 FILE *);
 static	void	readlist	(struct parse *, FILE *);
 static	void	writelist	(struct parse *, FILE *);
@@ -58,7 +58,7 @@ static	void	pstatus 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
 static	int	doprintpeers	(struct varlist *, int, int, int, const char *, FILE *, int);
-static	int	dogetpeers	(struct varlist *, int, FILE *, int);
+static	int	dogetpeers	(struct varlist *, associd_t, FILE *, int);
 static	void	dopeers 	(int, FILE *, int);
 static	void	peers		(struct parse *, FILE *);
 static	void	lpeers		(struct parse *, FILE *);
@@ -218,16 +218,24 @@ extern struct ctl_var peer_var[];
 /*
  * checkassocid - return the association ID, checking to see if it is valid
  */
-static int
+static associd_t
 checkassocid(
 	u_int32 value
 	)
 {
-	if (value == 0 || value >= 65536) {
-		(void) fprintf(stderr, "***Invalid association ID specified\n");
+	associd_t	associd;
+	u_long		ulvalue;
+
+	associd = (associd_t)value;
+	if (0 == associd || value != associd) {
+		ulvalue = value;
+		fprintf(stderr,
+			"***Invalid association ID %lu specified\n",
+			ulvalue);
 		return 0;
 	}
-	return (int)value;
+
+	return associd;
 }
 
 
@@ -391,7 +399,7 @@ static int
 doquerylist(
 	struct varlist *vlist,
 	int op,
-	int associd,
+	associd_t associd,
 	int auth,
 	u_short *rstatus,
 	int *dsize,
@@ -496,7 +504,7 @@ showvars(
 static int
 dolist(
 	struct varlist *vlist,
-	int associd,
+	associd_t associd,
 	int op,
 	int type,
 	FILE *fp
@@ -551,7 +559,8 @@ readlist(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t	associd;
+	int		type;
 
 	if (pcmd->nargs == 0) {
 		associd = 0;
@@ -563,8 +572,10 @@ readlist(
 			return;
 	}
 
-	(void) dolist(g_varlist, associd, CTL_OP_READVAR,
-			  (associd == 0) ? TYPE_SYS : TYPE_PEER, fp);
+	type = (0 == associd)
+		   ? TYPE_SYS
+		   : TYPE_PEER;
+	dolist(g_varlist, associd, CTL_OP_READVAR, type, fp);
 }
 
 
@@ -579,7 +590,7 @@ writelist(
 {
 	const char *datap;
 	int res;
-	int associd;
+	associd_t associd;
 	int dsize;
 	u_short rstatus;
 
@@ -621,8 +632,10 @@ readvar(
 	FILE *fp
 	)
 {
-	int associd;
-	struct varlist tmplist[MAXLIST];
+	associd_t	associd;
+	int		type;
+	struct varlist	tmplist[MAXLIST];
+
 
 	/* HMS: uval? */
 	if (pcmd->nargs == 0 || pcmd->argval[0].uval == 0)
@@ -630,12 +643,14 @@ readvar(
 	else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	memset((char *)tmplist, 0, sizeof(tmplist));
+	memset(tmplist, 0, sizeof(tmplist));
 	if (pcmd->nargs >= 2)
 		doaddvlist(tmplist, pcmd->argval[1].string);
 
-	(void) dolist(tmplist, associd, CTL_OP_READVAR,
-			  (associd == 0) ? TYPE_SYS : TYPE_PEER, fp);
+	type = (0 == associd)
+		   ? TYPE_SYS
+		   : TYPE_PEER;
+	dolist(tmplist, associd, CTL_OP_READVAR, type, fp);
 
 	doclearvlist(tmplist);
 }
@@ -652,7 +667,8 @@ writevar(
 {
 	const char *datap;
 	int res;
-	int associd;
+	associd_t associd;
+	int type;
 	int dsize;
 	u_short rstatus;
 	struct varlist tmplist[MAXLIST];
@@ -675,16 +691,15 @@ writevar(
 		return;
 
 	if (numhosts > 1)
-		(void) fprintf(fp, "server=%s ", currenthost);
+		fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0)
-		(void) fprintf(fp, "done! (no data returned)\n");
+		fprintf(fp, "done! (no data returned)\n");
 	else {
-		(void) fprintf(fp,"associd=%d ",associd);
-		printvars(dsize, datap, (int)rstatus,
-			  (associd != 0)
-			      ? TYPE_PEER 
-			      : TYPE_SYS, 
-			  0, fp);
+		fprintf(fp,"associd=%d ",associd);
+		type = (0 == associd)
+			   ? TYPE_SYS
+			   : TYPE_PEER;
+		printvars(dsize, datap, (int)rstatus, type, 0, fp);
 	}
 	return;
 }
@@ -699,7 +714,7 @@ clocklist(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t associd;
 
 	/* HMS: uval? */
 	if (pcmd->nargs == 0) {
@@ -711,7 +726,7 @@ clocklist(
 			return;
 	}
 
-	(void) dolist(g_varlist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
+	dolist(g_varlist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
 }
 
 
@@ -724,7 +739,7 @@ clockvar(
 	FILE *fp
 	)
 {
-	int associd;
+	associd_t associd;
 	struct varlist tmplist[MAXLIST];
 
 	/* HMS: uval? */
@@ -733,11 +748,11 @@ clockvar(
 	else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	memset((char *)tmplist, 0, sizeof(tmplist));
+	memset(tmplist, 0, sizeof(tmplist));
 	if (pcmd->nargs >= 2)
 		doaddvlist(tmplist, pcmd->argval[1].string);
 
-	(void) dolist(tmplist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
+	dolist(tmplist, associd, CTL_OP_READCLOCK, TYPE_CLOCK, fp);
 
 	doclearvlist(tmplist);
 }
@@ -754,48 +769,38 @@ findassidrange(
 	int *to
 	)
 {
-	register int i;
-	int f, t;
+	associd_t	assids[2];
+	int		ind[COUNTOF(assids)];
+	int		i;
+	size_t		a;
 
-	if (assid1 == 0 || assid1 > 65535) {
-		(void) fprintf(stderr,
-				   "***Invalid association ID %lu specified\n", (u_long)assid1);
+	assids[0] = checkassocid(assid1);
+	if (0 == assids[0])
 		return 0;
-	}
-
-	if (assid2 == 0 || assid2 > 65535) {
-	fprintf(stderr,
-	    "***Invalid association ID %lu specified\n", (u_long)assid2);
+	assids[1] = checkassocid(assid2);
+	if (0 == assids[1])
 		return 0;
-	}
 
-	f = t = -1;
-	for (i = 0; i < numassoc; i++) {
-		if (assoc_cache[i].assid == assid1) {
-			f = i;
-			if (t != -1)
-				break;
+	for (a = 0; a < COUNTOF(assids); a++) {
+		ind[a] = -1;
+		for (i = 0; i < numassoc; i++)
+			if (assoc_cache[i].assid == assids[a])
+				ind[a] = i;
+	}
+	for (a = 0; a < COUNTOF(assids); a++)
+		if (-1 == ind[a]) {
+			fprintf(stderr,
+				"***Association ID %u not found in list\n",
+				assids[a]);
+			return 0;
 		}
-		if (assoc_cache[i].assid == assid2) {
-			t = i;
-			if (f != -1)
-				break;
-		}
-	}
 
-	if (f == -1 || t == -1) {
-		(void) fprintf(stderr,
-				   "***Association ID %lu not found in list\n",
-				   (f == -1) ? (u_long)assid1 : (u_long)assid2);
-		return 0;
-	}
-
-	if (f < t) {
-		*from = f;
-		*to = t;
+	if (ind[0] < ind[1]) {
+		*from = ind[0];
+		*to = ind[1];
 	} else {
-		*from = t;
-		*to = f;
+		*to = ind[0];
+		*from = ind[1];
 	}
 	return 1;
 }
@@ -844,21 +849,26 @@ mreadvar(
 	int from;
 	int to;
 	struct varlist tmplist[MAXLIST];
+	struct varlist *pvars;
 
 	/* HMS: uval? */
 	if (!findassidrange(pcmd->argval[0].uval, pcmd->argval[1].uval,
 				&from, &to))
 		return;
 
-	memset((char *)tmplist, 0, sizeof(tmplist));
-	if (pcmd->nargs >= 3)
+	if (pcmd->nargs >= 3) {
+		memset(tmplist, 0, sizeof(tmplist));
 		doaddvlist(tmplist, pcmd->argval[2].string);
+		pvars = tmplist;
+	} else {
+		pvars = g_varlist;
+	}
 
 	for (i = from; i <= to; i++) {
 		if (i != from)
-			(void) fprintf(fp, "\n");
-		if (!dolist(g_varlist, (int)assoc_cache[i].assid,
-				CTL_OP_READVAR, TYPE_PEER, fp))
+			fprintf(fp, "\n");
+		if (!dolist(pvars, (int)assoc_cache[i].assid,
+			    CTL_OP_READVAR, TYPE_PEER, fp))
 			break;
 	}
 	doclearvlist(tmplist);
@@ -1239,7 +1249,7 @@ pstatus(
 {
 	const char *datap;
 	int res;
-	int associd;
+	associd_t associd;
 	int dsize;
 	u_short rstatus;
 
@@ -1247,22 +1257,22 @@ pstatus(
 	if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	res = doquery(CTL_OP_READSTAT, associd, 0, 0, (char *)0, &rstatus,
-			  &dsize, &datap);
+	res = doquery(CTL_OP_READSTAT, associd, 0, 0, NULL, &rstatus,
+		      &dsize, &datap);
 
 	if (res != 0)
 		return;
 
 	if (numhosts > 1)
-		(void) fprintf(fp, "server=%s ", currenthost);
+		fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0) {
-		(void) fprintf(fp,
-				   "No information returned for association %u\n",
-				   associd);
+		fprintf(fp,
+			"No information returned for association %u\n",
+			associd);
 		return;
 	}
 
-	(void) fprintf(fp,"associd=%d ",associd);
+	fprintf(fp, "associd=%u ", associd);
 	printvars(dsize, datap, (int)rstatus, TYPE_PEER, 0, fp);
 }
 
@@ -1636,7 +1646,7 @@ doprintpeers(
 static int
 dogetpeers(
 	struct varlist *pvl,
-	int associd,
+	associd_t associd,
 	FILE *fp,
 	int af
 	)
@@ -1653,7 +1663,7 @@ dogetpeers(
 	/*
 	 * Damn fuzzballs
 	 */
-	res = doquery(CTL_OP_READVAR, associd, 0, 0, (char *)0, &rstatus,
+	res = doquery(CTL_OP_READVAR, associd, 0, 0, NULL, &rstatus,
 			  &dsize, &datap);
 #endif
 
@@ -1662,14 +1672,15 @@ dogetpeers(
 
 	if (dsize == 0) {
 		if (numhosts > 1)
-			(void) fprintf(stderr, "server=%s ", currenthost);
-		(void) fprintf(stderr,
-				   "***No information returned for association %d\n",
-				   associd);
+			fprintf(stderr, "server=%s ", currenthost);
+		fprintf(stderr,
+			"***No information returned for association %u\n",
+			associd);
 		return 0;
 	}
 
-	return doprintpeers(pvl, associd, (int)rstatus, dsize, datap, fp, af);
+	return doprintpeers(pvl, associd, (int)rstatus, dsize, datap,
+			    fp, af);
 }
 
 

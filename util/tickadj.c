@@ -180,7 +180,9 @@ main(
 # include <sys/resource.h>
 # include <sys/file.h>
 # include <a.out.h>
-# include <sys/var.h>
+# ifdef HAVE_SYS_VAR_H
+#  include <sys/var.h>
+# endif
 #endif
 
 #include "ntp_stdlib.h"

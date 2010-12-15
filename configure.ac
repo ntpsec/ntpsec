@@ -692,7 +692,7 @@ case "$ac_cv_func___adjtimex" in
     AC_CHECK_LIB([kvm], [main])		dnl We already know about -lelf here...
     AC_CHECK_LIB([ld], [nlist])
     AC_CHECK_LIB([mld], [nlist])
-    AC_CHECK_HEADER([nlist.h])
+    AC_CHECK_HEADERS([nlist.h sys/var.h])
     case "$ac_cv_header_nlist_h" in
      yes)
 	AC_DEFINE([NLIST_STRUCT], [1], [nlist stuff])
@@ -2215,6 +2215,9 @@ AC_CACHE_CHECK(
 		ans=no
 		;;
 	     *-*-kfreebsd*)
+		ans=no
+		;;
+	     m68k-*-mint*)
 		ans=no
 		;;
 	    esac

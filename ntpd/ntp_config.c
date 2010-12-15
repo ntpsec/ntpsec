@@ -2723,17 +2723,16 @@ config_phone(
 
 	s = queue_head(ptree->phone);
 	while (s != NULL) {
-		if (i < COUNTOF(sys_phone) - 1)
+		if (i < COUNTOF(sys_phone) - 1) {
 			sys_phone[i++] = estrdup(*s);
-		else
+			sys_phone[i] = NULL;
+		} else {
 			msyslog(LOG_INFO,
 				"phone: Number of phone entries exceeds %lu. Ignoring phone %s...",
 				(u_long)(COUNTOF(sys_phone) - 1), *s);
+		}
 		s = next_node(s);
 	}
-
-	if (i)
-		sys_phone[i] = NULL;
 }
 
 
