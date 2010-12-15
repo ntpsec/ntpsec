@@ -759,6 +759,8 @@ readvar(
 	)
 {
 	associd_t	associd;
+	u_int		tmpcount;
+	u_int		u;
 	int		type;
 	struct varlist	tmplist[MAXLIST];
 
@@ -772,8 +774,8 @@ readvar(
 	memset(tmplist, 0, sizeof(tmplist));
 	if (pcmd->nargs > 1) {
 		tmpcount = pcmd->nargs - 1;
-		for (i = 0; i < tmpcount; i++)
-			doaddvlist(tmplist, pcmd->argval[1 + i].string);
+		for (u = 0; u < tmpcount; u++)
+			doaddvlist(tmplist, pcmd->argval[1 + u].string);
 	}
 
 	type = (0 == associd)
