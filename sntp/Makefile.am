@@ -2,7 +2,8 @@
 
 NULL =
 
-AUTOMAKE_OPTIONS = foreign 1.10
+## LIBOPTS_CHECK patch requires AM_COND_IF, thereby automake 1.11
+AUTOMAKE_OPTIONS = foreign 1.11
 ACLOCAL_AMFLAGS = -I ../m4 -I libopts/m4
 
 AM_CPPFLAGS = $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
@@ -80,6 +81,10 @@ BUILT_SOURCES=				\
 	$(NULL)
 
 man_MANS=	$(srcdir)/sntp.1
+
+# HMS: Real Soon Now...
+#info_TEXINFOS=	sntp.texi
+#sntp_TEXINFOS=	sntp-opts.texi
 
 noinst_DATA=				\
 	$(srcdir)/sntp.html		\

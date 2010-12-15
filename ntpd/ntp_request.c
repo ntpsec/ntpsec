@@ -1682,7 +1682,8 @@ setclr_flags(
 	u_long set
 	)
 {
-	register u_int flags;
+	struct conf_sys_flags *sf;
+	u_int32 flags;
 	int prev_kern_enable;
 
 	prev_kern_enable = kern_enable;
@@ -1692,8 +1693,8 @@ setclr_flags(
 		return;
 	}
 
-	flags = ((struct conf_sys_flags *)inpkt->data)->flags;
-	flags = ntohl(flags);
+	sf = (struct conf_sys_flags *)inpkt->data;
+	flags = ntohl(sf->flags);
 	
 	if (flags & ~(SYS_FLAG_BCLIENT | SYS_FLAG_PPS |
 		      SYS_FLAG_NTP | SYS_FLAG_KERNEL | SYS_FLAG_MONITOR |
@@ -2073,6 +2074,7 @@ reset_stats(
 	struct req_pkt *inpkt
 	)
 {
+	struct reset_flags *rflags;
 	u_long flags;
 	struct reset_entry *rent;
 
@@ -2082,9 +2084,9 @@ reset_stats(
 		return;
 	}
 
-	flags = ((struct reset_flags *)inpkt->data)->flags;
-	flags = ntohl(flags);
-     
+	rflags = (struct reset_flags *)inpkt->data;
+	flags = ntohl(rflags->flags);
+
 	if (flags & ~RESET_ALLFLAGS) {
 		msyslog(LOG_ERR, "reset_stats: reset leaves %#lx",
 			flags & ~RESET_ALLFLAGS);
@@ -2094,7 +2096,7 @@ reset_stats(
 
 	for (rent = reset_entries; rent->flag != 0; rent++) {
 		if (flags & rent->flag)
-		    (rent->handler)();
+			(*rent->handler)();
 	}
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
 }
@@ -2495,7 +2497,7 @@ set_request_keyid(
 	struct req_pkt *inpkt
 	)
 {
-	keyid_t keyid;
+	keyid_t *pkeyid;
 
 	/*
 	 * Restrict ourselves to one item only.
@@ -2506,8 +2508,8 @@ set_request_keyid(
 		return;
 	}
 
-	keyid = ntohl(*((u_int32 *)(inpkt->data)));
-	info_auth_keyid = keyid;
+	pkeyid = (keyid_t *)inpkt->data;
+	info_auth_keyid = ntohl(*pkeyid);
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
 }
 
@@ -2523,7 +2525,7 @@ set_control_keyid(
 	struct req_pkt *inpkt
 	)
 {
-	keyid_t keyid;
+	keyid_t *pkeyid;
 	extern keyid_t ctl_auth_keyid;
 
 	/*
@@ -2535,8 +2537,8 @@ set_control_keyid(
 		return;
 	}
 
-	keyid = ntohl(*((u_int32 *)(inpkt->data)));
-	ctl_auth_keyid = keyid;
+	pkeyid = (keyid_t *)inpkt->data;
+	ctl_auth_keyid = ntohl(*pkeyid);
 	req_ack(srcadr, inter, inpkt, INFO_OKAY);
 }
 
@@ -2895,9 +2897,9 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 	ifs->received = htonl(ep->received);
 	ifs->sent = htonl(ep->sent);
 	ifs->notsent = htonl(ep->notsent);
-	ifs->scopeid = htonl(ep->scopeid);
-	/* ifindex was always zero, now no longer in struct interface */
-	ifs->ifindex = 0;
+	ifs->ifindex = htonl(ep->ifindex);
+	/* scope no longer in struct interface, in in6_addr typically */
+	ifs->scopeid = ifs->ifindex;
 	ifs->ifnum = htonl(ep->ifnum);
 	ifs->uptime = htonl(current_time - ep->starttime);
 	ifs->ignore_packets = ep->ignore_packets;

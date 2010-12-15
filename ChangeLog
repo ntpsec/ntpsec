@@ -1,11 +1,39 @@
 ---
 
+* [Bug 1510] Add modes 20/21 for driver 8 to support RAWDCF @ 75 baud.
+* [Bug 1741] Enable multicast reception on each address (Windows).
+* [Bug 1742] Fix a typo in an error message in the "build" script.
+* [Bug 1743] Display timezone offset when showing time for sntp in the
+  local timezone.
+* [Bug 1751] Support for Atari FreeMiNT OS.
+* Clean up m4 quoting in configure.ac, *.m4 files, resolving
+  intermittent AC_LANG_PROGRAM possibly undefined errors.
+* Clean up the SNTP documentation.
+* Other manycastclient repairs:
+  Separate handling of scope ID embedded in many in6_addr from ifindex
+  used for IPv6 multicasting ioctls.
+  Add INT_PRIVACY endpt bit flag for IPv6 RFC 4941 privacy addresses.
+  Enable outbound multicast from only one address per interface in the
+  same subnet, and in that case prefer embedded MAC address modified
+  EUI-64 IPv6 addresses first, then static, and last RFC 4941 privacy
+  addresses.
+  Use setsockopt(IP[V6]_MULTICAST_IF) before each send to multicast to
+  select the local source address, using the correct socket is not
+  enough.
+
+---
+(4.2.6p3-RC11) 2010/11/28 Released by Harlan Stenn <stenn@ntp.org>
+
 * [Bug 1725] ntpd sends multicast from only one address.
 * [Bug 1728] In ntp_openssl.m4, don't add -I/usr/include or -L/usr/lib
   to CPPFLAGS or LDFLAGS.
+* [Bug 1733] IRIX doesn't have 'head' (affects scripts/checkChangeLog).
 * Remove log_msg() and debug_msg() from sntp in favor of msyslog().
 * Use a single copy of libopts/, in sntp/.
 * Upgrade libopts to 33.3.8.
+* Bump minimum Automake version to 1.11, required for AM_COND_IF
+  use in LIBOPTS_CHECK.
+* Improvements to the 'build' script.
 
 ---
 (4.2.6p3-RC10) 2010/11/14 Released by Harlan Stenn <stenn@ntp.org>
@@ -96,7 +124,7 @@
 (4.2.6p2) 2010/07/09 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1581] size_t printf format string mismatches, IRIG string buffers
-  undersized.  Mostly backported from earlier ntp-dev fixes by Jürgen
+  undersized.  Mostly backported from earlier ntp-dev fixes by Juergen
   Perlinger.
 
 ---

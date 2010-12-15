@@ -1,4 +1,4 @@
-NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2010/11/14, RC10)
+NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2010/11/14, RC11)
 
 Focus: Bug fixes and portability improvements
 
@@ -20,6 +20,8 @@ Build system
 * 'test' is in /usr/bin (instead of /bin) on some systems.
 * Basic sanity checks for the ChangeLog file.
 * Source certain build files with ./filename for systems without . in PATH.
+* IRIX portability fix.
+* Use a single copy of the "libopts" code.
 
 ntpd
 * Do not bind to IN6_IFF_ANYCAST addresses.
@@ -32,6 +34,9 @@ ntpd
 * Prohibit 'includefile' directive in remote configuration command.
 * Fix 'nic' interface bindings.
 * Fix 'nic' interface handling where an address is on lo1.
+* multicast fixes.
+* Fix the way we link with openssl if openssl is installed in the base
+  system.
 
 ntpdate
 * Do not ignore replies with equal receive and transmit timestamps.

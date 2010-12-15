@@ -40,7 +40,8 @@ sntp_main (
 	register int c;
 	struct kod_entry *reason = NULL;
 	int optct;
-	int sync_data_suc = 0;
+	/* boolean, u_int quiets gcc4 signed overflow warning */
+	u_int sync_data_suc;
 	struct addrinfo **bcastaddr = NULL;
 	struct addrinfo **resh = NULL;
 	struct addrinfo *ai;
@@ -125,6 +126,7 @@ sntp_main (
 	/* Select a certain ntp server according to simple criteria? For now
 	 * let's just pay attention to previous KoDs.
 	 */
+	sync_data_suc = FALSE;
 	for (c = 0; c < resc && !sync_data_suc; c++) {
 		ai = resh[c];
 		do {
@@ -147,10 +149,9 @@ sntp_main (
 	}
 	free(resh);
 
-	if (sync_data_suc)
-		return 0;
-	else
+	if (!sync_data_suc)
 		return 1;
+	return 0;
 }
 
 static union {
@@ -199,6 +200,8 @@ handle_pkt (
 	char *hostname = NULL, *ref, *ts_str = NULL;
 	double offset, precision, root_dispersion;
 	char addr_buf[INET6_ADDRSTRLEN];
+	char *p_SNTP_PRETEND_TIME;
+	time_t pretend_time;
 
 	if(rpktl > 0)
 		sw_case = 1;
@@ -243,9 +246,21 @@ handle_pkt (
 		}
 
 		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
-		tv_dst.tv_sec += JAN_1970;
 
-		offset_calculation(rpkt, rpktl, &tv_dst, &offset, &precision, &root_dispersion);
+		p_SNTP_PRETEND_TIME = getenv("SNTP_PRETEND_TIME");
+		if (p_SNTP_PRETEND_TIME) {
+#if SIZEOF_TIME_T == 4
+			sscanf(p_SNTP_PRETEND_TIME, "%ld", &pretend_time);
+#elif SIZEOF_TIME_T == 8
+			sscanf(p_SNTP_PRETEND_TIME, "%lld", &pretend_time);
+#else
+# include "GRONK: unexpected value for SIZEOF_TIME_T"
+#endif
+			tv_dst.tv_sec = pretend_time;
+		}
+
+		offset_calculation(rpkt, rpktl, &tv_dst, &offset,
+				   &precision, &root_dispersion);
 
 		for (digits = 0; (precision *= 10.) < 1.; ++digits)
 			/* empty */ ;
@@ -261,6 +276,9 @@ handle_pkt (
 			printf(" +/- %f secs", root_dispersion);
 		printf("\n");
 		free(ts_str);
+
+		if (p_SNTP_PRETEND_TIME)
+			return 0;
 
 		if (ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
 			return set_time(offset); 
@@ -325,6 +343,7 @@ offset_calculation (
 	L_SUB(&tmp, &p_org);
 	LFPTOD(&tmp, t21);
 	TVTOTS(tv_dst, &dst);
+	dst.l_ui += JAN_1970;
 	tmp = p_xmt;
 	L_SUB(&tmp, &dst);
 	LFPTOD(&tmp, t34);

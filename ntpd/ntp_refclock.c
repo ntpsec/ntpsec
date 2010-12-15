@@ -351,7 +351,6 @@ refclock_transmit(
 /*
  * Compare two doubles - used with qsort()
  */
-#ifdef QSORT_USES_VOID_P
 static int
 refclock_cmpl_fp(
 	const void *p1,
@@ -362,30 +361,11 @@ refclock_cmpl_fp(
 	const double *dp2 = (const double *)p2;
 
 	if (*dp1 < *dp2)
-		return (-1);
-
+		return -1;
 	if (*dp1 > *dp2)
-		return (1);
-
-	return (0);
+		return 1;
+	return 0;
 }
-
-#else
-static int
-refclock_cmpl_fp(
-	const double *dp1,
-	const double *dp2
-	)
-{
-	if (*dp1 < *dp2)
-		return (-1);
-
-	if (*dp1 > *dp2)
-		return (1);
-
-	return (0);
-}
-#endif /* QSORT_USES_VOID_P */
 
 
 /*
@@ -482,7 +462,7 @@ refclock_sample(
 	struct refclockproc *pp		/* refclock structure pointer */
 	)
 {
-	int	i, j, k, m, n;
+	size_t	i, j, k, m, n;
 	double	off[MAXSTAGE];
 	double	offset;
 
@@ -500,13 +480,7 @@ refclock_sample(
 		return (0);
 
 	if (n > 1)
-		qsort(
-#ifdef QSORT_USES_VOID_P
-		    (void *)
-#else
-		    (char *)
-#endif
-		    off, (size_t)n, sizeof(double), refclock_cmpl_fp);
+		qsort((void *)off, n, sizeof(off[0]), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until
@@ -540,7 +514,7 @@ refclock_sample(
 		    "refclock_sample: n %d offset %.6f disp %.6f jitter %.6f\n",
 		    n, pp->offset, pp->disp, pp->jitter);
 #endif
-	return (n);
+	return (int)n;
 }
 
 

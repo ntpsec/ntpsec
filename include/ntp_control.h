@@ -18,7 +18,7 @@ struct ntp_control {
 /*
  * Length of the control header, in octets
  */
-#define	CTL_HEADER_LEN		12
+#define	CTL_HEADER_LEN		(offsetof(struct ntp_control, data))
 #define	CTL_MAX_DATA_LEN	468
 
 

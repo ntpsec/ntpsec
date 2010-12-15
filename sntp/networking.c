@@ -230,7 +230,8 @@ recv_bcst_data (
 			}
 			return BROADCAST_FAILED;
 		}
-		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mdevadr6, sizeof(mdevadr)) < 0) {
+		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP,
+			       &mdevadr6, sizeof(mdevadr6)) < 0) {
 			if (ENABLED_OPT(NORMALVERBOSE)) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: Couldn't join group for %s\n", buf);

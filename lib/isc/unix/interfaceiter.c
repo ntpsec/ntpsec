@@ -187,7 +187,8 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 	char name[IF_NAMESIZE+1];
 	char strbuf[ISC_STRERRORSIZE];
 	struct in6_addr addr6;
-	int ifindex, prefix, scope, flags;
+	unsigned int ifindex;
+	int prefix, scope, flags;
 	struct ifreq ifreq;
 	int res;
 	unsigned int i;
@@ -253,6 +254,7 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 #endif
 
 	isc_netaddr_fromin6(&iter->current.address, &addr6);
+	iter->current.ifindex = ifindex;
 	if (isc_netaddr_islinklocal(&iter->current.address)) {
 		isc_netaddr_setzone(&iter->current.address,
 				    (isc_uint32_t)ifindex);

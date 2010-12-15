@@ -1,4 +1,5 @@
-AUTOMAKE_OPTIONS = foreign 1.10
+## LIBOPTS_CHECK patch requires AM_COND_IF, thereby automake 1.11
+AUTOMAKE_OPTIONS = foreign 1.11
 ACLOCAL_AMFLAGS = -I m4 -I sntp/libopts/m4
 
 NULL =

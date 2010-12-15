@@ -1,10 +1,14 @@
 AC_DEFUN([NTP_LINEEDITLIBS], [
     NTP_ORIG_LIBS="$LIBS"
-    AC_ARG_WITH([lineeditlibs],
-	[AC_HELP_STRING([--with-lineeditlibs], [edit,editline (readline may be specified if desired)])],
+    AC_ARG_WITH(
+	[lineeditlibs],
+	[AS_HELP_STRING(
+	    [--with-lineeditlibs],
+	    [edit,editline (readline may be specified if desired)]
+	)],
 	[use_lineeditlibs="$withval"],
-	[use_lineeditlibs="edit,editline"])
-
+	[use_lineeditlibs="edit,editline"]
+    )
     AC_MSG_CHECKING([line editing libraries])
     AC_MSG_RESULT([$use_lineeditlibs])
     case "$use_lineeditlibs" in
@@ -18,8 +22,10 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 		 '') 
 		    TRY_LIB="-l$lineedit_lib"
 		    ;;
-		 *) TRY_LIB="-l$lineedit_lib -l$term_lib"
-		esac	# $term_lib
+		 *)
+		    TRY_LIB="-l$lineedit_lib -l$term_lib"
+		    ;;
+		esac
 		LIBS="$NTP_ORIG_LIBS $TRY_LIB"
 		AC_MSG_CHECKING([for readline() with $TRY_LIB])
 		AC_TRY_LINK_FUNC([readline], [ntp_lib_lineedit="$TRY_LIB"])
@@ -31,7 +37,7 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 		    # Use readline()
 		    AC_MSG_RESULT([yes])
 		    break
-		esac		# $ntp_lib_lineedit
+		esac
 		case "$term_lib" in
 		 '')
 		    # do not try el_gets without a terminal library
@@ -51,8 +57,11 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 		esac		# $term_lib
 	    done
 	    case "$ntp_lib_lineedit" in
-	     '') ;;
-	     *)  break ;;
+	     '')
+		;;
+	     *)
+		break
+		;;
 	    esac
 	done
 	LIBS="$NTP_ORIG_LIBS"
@@ -67,7 +76,7 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 	;;
      *)
 	EDITLINE_LIBS="$ntp_lib_lineedit"
-	AC_SUBST(EDITLINE_LIBS)
+	AC_SUBST([EDITLINE_LIBS])
 	;;
     esac	# $ntp_lib_lineedit
 
@@ -90,11 +99,12 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
 
 	case "$ntp_lib_lineedit_history" in
 	 yes)
-	    AC_DEFINE(HAVE_READLINE_HISTORY, 1,
-		      [Define if your readline library has \`add_history'])
-	esac	# $ntp_lib_lineedit_history
+	    AC_DEFINE([HAVE_READLINE_HISTORY], [1],
+		[Define if your readline library has \`add_history'])
+	esac
     esac	# $ntp_lib_lineedit
-    dnl when oldest supported autoconf has AS_UNSET
-    dnl AS_UNSET([NTP_ORIG_LIBS TRY_LIB use_lineeditlibs])
-    $as_unset NTP_ORIG_LIBS TRY_LIB use_lineeditlibs
+    AS_UNSET([NTP_ORIG_LIBS])
+    AS_UNSET([ORIG_LIBS])
+    AS_UNSET([TRY_LIB])
+    AS_UNSET([use_lineeditlibs])
 ])dnl

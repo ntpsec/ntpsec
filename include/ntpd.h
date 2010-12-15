@@ -122,7 +122,7 @@ extern	u_int	sys_tai;
 extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
-extern	int	ntp_monitor     (struct recvbuf *, int);
+extern	int	ntp_monitor	(struct recvbuf *, int);
 extern  void    ntp_monclearinterface (struct interface *interface);
 
 /* ntp_peer.c */

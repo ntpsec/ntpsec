@@ -535,8 +535,6 @@ ctl_error(
 	if (res_authenticate && sys_authenticate) {
 		int maclen;
 
-		*(u_int32 *)((u_char *)&rpkt + CTL_HEADER_LEN) =
-		    htonl(res_keyid);
 		maclen = authencrypt(res_keyid, (u_int32 *)&rpkt,
 				     CTL_HEADER_LEN);
 		sendpkt(rmt_addr, lcl_inter, -2, (struct pkt *)&rpkt,
@@ -2453,7 +2451,9 @@ static void configure(
 	int restrict_mask
 	)
 {
-	int data_count, retval, replace_nl;
+	size_t data_count;
+	int retval;
+	int replace_nl;
 
 	/* I haven't yet implemented changes to an existing association.
 	 * Hence check if the association id is 0

@@ -3,6 +3,8 @@
 #  This "bootstrap" script performs various pre-autoreconf actions
 #  that are required after pulling fresh sources from the repository.
 #
+#  --force is supported and will be passed to autoreconf
+#
 #  NOTE:  THE NTP VERSION NUMBER COMES FROM packageinfo.sh
 #
 #  all other instances of it anywhere in the source base have propagated
@@ -120,11 +122,12 @@ touch ntpd/ntp_parser.[ch] ntpd/keyword-gen-utd ntpd/ntp_keyword.h
 cp bincheck.mf sntp/
 cp depsver.mf sntp/
 
-${AUTORECONF} -i -v
+${AUTORECONF} -i -v --no-recursive "$@"
 
 # DH: 20101120: We are back to a single copy of libopts, and
 # once again it seems we need to run autoreconf in sntp after
 # the top-level run to get a correct sntp/libopts/Makefile.in.
+# To reduce redundancy, the top-level autoreconf uses --no-recursive.
 #
 # HMS: 20060618: Now that we use separate copies of libopts
 # we should only need the previous line.
@@ -133,4 +136,4 @@ ${AUTORECONF} -i -v
 ## we get the correct srcdir path in sntp/libopts/Makefile.in
 #rm -rf sntp/autom4te.cache
 #
-(cd sntp && ${AUTORECONF} -i -v)
+(cd sntp && ${AUTORECONF} -i -v "$@")
