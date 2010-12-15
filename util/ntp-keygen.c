@@ -1646,7 +1646,6 @@ gen_mvkey(
 	s = BN_new();
 
 	BN_copy(s, dsa->q);
-	BN_div(s, u, s, s1[10], ctx);
 	BN_div(s, u, s, s1[n], ctx);
 
 	/*
