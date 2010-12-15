@@ -563,7 +563,6 @@ ctl_error(
 	)
 {
 	int		maclen;
-	keyid_t *	pkid;
 
 	numctlerrors++;
 	DPRINTF(3, ("sending control error %u\n", errcode));

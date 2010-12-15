@@ -122,7 +122,7 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &root_disp);
 
 	EXPECT_DOUBLE_EQ(1.25, offset);
-	EXPECT_DOUBLE_EQ(LOGTOD(-16), precision);
+	EXPECT_DOUBLE_EQ(1. / ULOGTOD(16), precision);
 	EXPECT_DOUBLE_EQ(0.25, root_disp);
 }
 
@@ -164,7 +164,7 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 	offset_calculation(&rpkt, LEN_PKT_NOMAC, &dst, &offset, &precision, &root_disp);
 
 	EXPECT_DOUBLE_EQ(-1, offset);
-	EXPECT_DOUBLE_EQ(LOGTOD(-1), precision);
+	EXPECT_DOUBLE_EQ(1. / ULOGTOD(1), precision);
 	EXPECT_DOUBLE_EQ(0.5, root_disp);
 }
 

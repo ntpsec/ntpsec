@@ -3591,13 +3591,14 @@ input_handler(
 	l_fp ts_e;		/* Timestamp at EOselect() gob */
 #endif
 	fd_set fds;
-	int select_count = 0;
+	size_t select_count;
 	endpt *ep;
 #if defined(HAS_ROUTING_SOCKET)
 	struct asyncio_reader *asyncio_reader;
 #endif
 
 	handler_calls++;
+	select_count = 0;
 
 	/*
 	 * If we have something to do, freeze a timestamp.

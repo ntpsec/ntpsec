@@ -1349,7 +1349,6 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 static void
 printableString ( char *sOutput, int iOutputLen, char *sInput, int iInputLen )
 {
-
 	char	*printableControlChar[] = {
 			"<NUL>", "<SOH>", "<STX>", "<ETX>",
 			"<EOT>", "<ENQ>", "<ACK>", "<BEL>",
@@ -1360,28 +1359,34 @@ printableString ( char *sOutput, int iOutputLen, char *sInput, int iInputLen )
 			"<CAN>", "<EM>" , "<SUB>", "<ESC>",
 			"<FS>" , "<GS>" , "<RS>" , "<US>" ,
 			" " } ;
+	size_t	InputLen;
+	size_t	OutputLen;
+	size_t	i;
+	size_t	j;
+	size_t	n;
 
-	int	i, j, n ;
-
-	for ( i = j = 0 ; i < iInputLen && j < iOutputLen ; i ++ ) {
+	InputLen = (size_t)iInputLen;
+	OutputLen = (size_t)iOutputLen;
+	for ( i = j = 0 ; i < InputLen && j < OutputLen ; i ++ ) {
 		if ( isprint( sInput[i] ) ) {
 			n = 1 ;
-			if ( j + 1 >= iOutputLen )
+			if ( j + 1 >= OutputLen )
 				break ;
 			sOutput[j] = sInput[i] ;
 		} else if ( ( sInput[i] & 0xFF ) < 
 			    COUNTOF(printableControlChar) ) {
 			n = strlen( printableControlChar[sInput[i] & 0xFF] ) ;
-			if ( j + n + 1 >= iOutputLen )
+			if ( j + n + 1 >= OutputLen )
 				break ;
 			strncpy( sOutput + j,
 				 printableControlChar[sInput[i] & 0xFF],
-				 (size_t)iOutputLen - j ) ;
+				 OutputLen - j ) ;
 		} else {
 			n = 5 ;
-			if ( j + n + 1 >= iOutputLen ) break ;
-			snprintf( sOutput + j, (size_t)iOutputLen - j,
-				  "<x%X>", sInput[i] & 0xFF ) ;
+			if ( j + n + 1 >= OutputLen )
+				break ;
+			snprintf( sOutput + j, OutputLen - j, "<x%X>",
+				  sInput[i] & 0xFF ) ;
 		}
 		j += n ;
 	}

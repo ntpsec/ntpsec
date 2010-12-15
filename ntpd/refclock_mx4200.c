@@ -840,7 +840,7 @@ mx4200_receive(
 		 * Capture the last PPS signal.
 		 * Precision timestamp is returned in pp->lastrec
 		 */
-		if (mx4200_pps(peer) != NULL) {
+		if (0 != mx4200_pps(peer)) {
 			mx4200_debug(peer, "mx4200_receive: pps failure\n");
 			refclock_report(peer, CEVNT_FAULT);
 			return;

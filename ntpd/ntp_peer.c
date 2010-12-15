@@ -467,6 +467,9 @@ free_peer(
 	if (p->hostname != NULL)
 		free(p->hostname);
 
+	if (p->ident != NULL)
+		free(p->ident);
+
 	if (p->addrs != NULL)
 		free(p->addrs);		/* from copy_addrinfo_list() */
 
@@ -894,7 +897,7 @@ newpeer(
 #endif	/* AUTOKEY */
 	peer->ttl = (u_char)ttl;
 	peer->keyid = key;
-	peer->ident = group;
+	peer->ident = estrdup(group);
 	peer->precision = sys_precision;
 	peer->hpoll = peer->minpoll;
 	if (cast_flags & MDF_ACAST)
