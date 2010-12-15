@@ -82,36 +82,28 @@ extern struct ntpq_varlist ntpq_varlist[MAXLIST];
 /* from libntpq.c */
 extern int ntpq_openhost(char *);
 extern int ntpq_closehost(void);
-extern int ntpq_queryhost(unsigned short VARSET, unsigned short association,
+extern int ntpq_queryhost(unsigned short VARSET, associd_t association,
 			  char *resultbuf, int maxlen);
 extern size_t ntpq_getvar(const char *resultbuf, size_t datalen,
 			  const char *varname, char *varvalue,
 			  size_t maxlen);
-extern int ntpq_stripquotes(char *resultbuf, char *srcbuf, int datalen,
-			    int maxlen);
-extern int ntpq_queryhost_peervars(u_short association, char *resultbuf,
-				   int maxlen);
-extern int ntpq_get_peervar(const char *varname, char *varvalue,
-			    int maxlen);
+extern int ntpq_stripquotes ( char *resultbuf, char *srcbuf, int datalen, int maxlen );
+extern int ntpq_queryhost_peervars(associd_t association, char *resultbuf, int maxlen);
+extern int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen);
 extern size_t ntpq_read_sysvars(char *resultbuf, size_t maxsize);
-extern int ntpq_get_sysvars(void);
-extern int ntpq_read_associations(u_short resultbuf[], int max_entries);
-extern int ntpq_get_assocs(void);
-extern int ntpq_get_assoc_number(int associd);
-extern int ntpq_get_assoc_peervars(int associd);
-extern int ntpq_get_assoc_clockvars(int associd);
-extern int ntpq_get_assoc_allvars(int associd);
-extern int ntpq_get_assoc_clocktype(int assoc_number);
-extern int ntpq_read_assoc_peervars(int associd, char *resultbuf,
-				    int maxsize);
-extern int ntpq_read_assoc_clockvars(int associd, char *resultbuf,
-				     int maxsize);
+extern int ntpq_get_sysvars( void );
+extern int ntpq_read_associations ( unsigned short resultbuf[], int max_entries );
+extern int ntpq_get_assocs ( void );
+extern int ntpq_get_assoc_number ( associd_t associd );
+extern int ntpq_get_assoc_peervars( associd_t associd );
+extern int ntpq_get_assoc_clockvars( associd_t associd );
+extern int ntpq_get_assoc_allvars( associd_t associd  );
+extern int ntpq_get_assoc_clocktype ( associd_t assoc_number );
+extern int ntpq_read_assoc_peervars( associd_t associd, char *resultbuf, int maxsize );
+extern int ntpq_read_assoc_clockvars( associd_t associd, char *resultbuf, int maxsize );
 
 /* in libntpq_subs.c */
-#ifndef _LIBNTPQSUBSC
 extern int ntpq_dogetassoc(void);
 extern char ntpq_decodeaddrtype(sockaddr_u *sock);
-extern int ntpq_doquerylist(struct ntpq_varlist *, int, int, int,
-			    u_short *, int *, const char **);
-#endif
-
+extern int ntpq_doquerylist(struct ntpq_varlist *, int, associd_t, int,
+			    u_short *, int *, const char **datap);

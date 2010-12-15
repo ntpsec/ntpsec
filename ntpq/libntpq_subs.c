@@ -13,15 +13,8 @@
  ****************************************************************************/
 
 
-#define _LIBNTPQSUBSC
 #include "ntpq-subs.c"
 #include "libntpq.h"
-
-/* Function Prototypes */
-int ntpq_dogetassoc(void);
-char ntpq_decodeaddrtype(sockaddr_u *sock);
-int ntpq_doquerylist(struct varlist *, int , int , int , u_short *,
-		     int *, const char **datap);
 
 
 /* the following functions are required internally by a number of libntpq functions 
@@ -46,16 +39,16 @@ char ntpq_decodeaddrtype(sockaddr_u *sock)
 
 int
 ntpq_doquerylist(
-	struct varlist *vlist, 
-	int		op,
-	int		associd,
-	int		auth,
-	u_short *	rstatus,
-	int *		dsize,
-	const char **	datap
+	struct ntpq_varlist *vlist,
+	int op,
+	associd_t associd,
+	int auth,
+	u_short *rstatus,
+	int *dsize,
+	const char **datap
 	)
 {
-	return doquerylist(vlist, op, associd, auth, rstatus, dsize,
-			   datap);
+	return doquerylist((struct varlist *)vlist, op, associd, auth,
+			   rstatus, dsize, datap);
 }
 

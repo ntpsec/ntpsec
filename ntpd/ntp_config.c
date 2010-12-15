@@ -2848,16 +2848,15 @@ config_phone(
 	sn = HEAD_PFIFO(ptree->phone);
 	for (; sn != NULL; sn = sn->link) {
 		/* need to leave array entry for NULL terminator */
-		if (i < COUNTOF(sys_phone) - 1)
+		if (i < COUNTOF(sys_phone) - 1) {
 			sys_phone[i++] = estrdup(sn->s);
-		else
+			sys_phone[i] = NULL;
+		} else {
 			msyslog(LOG_INFO,
 				"phone: Number of phone entries exceeds %lu. Ignoring phone %s...",
 				(u_long)(COUNTOF(sys_phone) - 1), sn->s);
+		}
 	}
-
-	if (i)
-		sys_phone[i] = NULL;
 }
 #endif	/* !SIM */
 

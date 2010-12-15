@@ -87,6 +87,10 @@ BUILT_SOURCES=				\
 
 man_MANS=	$(srcdir)/sntp.1
 
+# HMS: Real Soon Now...
+#info_TEXINFOS=	sntp.texi
+#sntp_TEXINFOS=	sntp-opts.texi
+
 noinst_DATA=				\
 	$(srcdir)/sntp.html		\
 	$(srcdir)/sntp-opts.texi	\

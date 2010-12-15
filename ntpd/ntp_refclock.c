@@ -357,12 +357,10 @@ refclock_cmpl_fp(
 	const double *dp2 = (const double *)p2;
 
 	if (*dp1 < *dp2)
-		return (-1);
-
+		return -1;
 	if (*dp1 > *dp2)
-		return (1);
-
-	return (0);
+		return 1;
+	return 0;
 }
 
 
@@ -460,7 +458,7 @@ refclock_sample(
 	struct refclockproc *pp		/* refclock structure pointer */
 	)
 {
-	int	i, j, k, m, n;
+	size_t	i, j, k, m, n;
 	double	off[MAXSTAGE];
 	double	offset;
 
@@ -478,7 +476,7 @@ refclock_sample(
 		return (0);
 
 	if (n > 1)
-		qsort(off, (size_t)n, sizeof(off[0]), refclock_cmpl_fp);
+		qsort(off, n, sizeof(off[0]), refclock_cmpl_fp);
 
 	/*
 	 * Reject the furthest from the median of the samples until
@@ -512,7 +510,7 @@ refclock_sample(
 		    "refclock_sample: n %d offset %.6f disp %.6f jitter %.6f\n",
 		    n, pp->offset, pp->disp, pp->jitter);
 #endif
-	return (n);
+	return (int)n;
 }
 
 

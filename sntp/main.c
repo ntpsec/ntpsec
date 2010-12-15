@@ -40,7 +40,8 @@ sntp_main (
 	register int c;
 	struct kod_entry *reason = NULL;
 	int optct;
-	int sync_data_suc = 0;
+	/* boolean, u_int quiets gcc4 signed overflow warning */
+	u_int sync_data_suc;
 	struct addrinfo **bcastaddr = NULL;
 	struct addrinfo **resh = NULL;
 	struct addrinfo *ai;
@@ -125,6 +126,7 @@ sntp_main (
 	/* Select a certain ntp server according to simple criteria? For now
 	 * let's just pay attention to previous KoDs.
 	 */
+	sync_data_suc = FALSE;
 	for (c = 0; c < resc && !sync_data_suc; c++) {
 		ai = resh[c];
 		do {
@@ -147,10 +149,9 @@ sntp_main (
 	}
 	free(resh);
 
-	if (sync_data_suc)
-		return 0;
-	else
+	if (!sync_data_suc)
 		return 1;
+	return 0;
 }
 
 static union {

@@ -71,7 +71,11 @@
 # include "config.h"
 #endif
 
-#if defined(REFCLOCK) && (defined(PALISADE) || defined(CLOCK_PALISADE))
+#if defined(REFCLOCK) && defined(CLOCK_PALISADE)
+
+#include <termios.h>
+
+# ifdef TIOCMSET
 
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);
@@ -1246,5 +1250,7 @@ getlong(
 	return (int32)(u_int32)ntohl(*(u_int32 *)bp);
 }
 
-int refclock_palisade_bs;
-#endif /* REFCLOCK */
+# endif	/* TIOCMSET */
+#else	/* REFCLOCK && CLOCK_PALISADE*/
+int refclock_palisade_c_notempty;
+#endif

@@ -1040,12 +1040,14 @@ clock_filter(
 static struct server *
 clock_select(void)
 {
-	register struct server *server;
-	register int i;
-	register int nlist;
-	register s_fp d;
-	register int j;
-	register int n;
+	struct server *server;
+	u_int nlist;
+	s_fp d;
+	u_int count;
+	u_int i;
+	u_int j;
+	u_int k;
+	int n;
 	s_fp local_threshold;
 	struct server *server_list[NTP_MAXCLOCK];
 	u_fp server_badness[NTP_MAXCLOCK];
@@ -1141,12 +1143,14 @@ clock_select(void)
 	 * Got the five-or-less best.	 Cut the list where the number of
 	 * strata exceeds two.
 	 */
-	j = 0;
+	count = 0;
 	for (i = 1; i < nlist; i++)
-		if (server_list[i]->stratum > server_list[i-1]->stratum)
-		if (++j == 2) {
-			nlist = i;
-			break;
+		if (server_list[i]->stratum > server_list[i-1]->stratum) {
+			count++;
+			if (2 == count) {
+				nlist = i;
+				break;
+			}
 		}
 
 	/*
@@ -1156,9 +1160,9 @@ clock_select(void)
 	 * detection.
 	 */
 
-	if (nlist == 0)
-		sys_server = 0;
-	else if (nlist == 1) {
+	if (0 == nlist)
+		sys_server = NULL;
+	else if (1 == nlist) {
 		sys_server = server_list[0];
 	} else {
 		/*
@@ -1167,12 +1171,13 @@ clock_select(void)
 		 */
 		for (i = 0; i < nlist-1; i++)
 			for (j = i+1; j < nlist; j++) {
-				if (server_list[i]->stratum
-				< server_list[j]->stratum)
-				break;	/* already sorted by stratum */
-				if (server_list[i]->delay
-				< server_list[j]->delay)
-				continue;
+				if (server_list[i]->stratum <
+				    server_list[j]->stratum)
+					/* already sorted by stratum */
+					break;
+				if (server_list[i]->delay <
+				    server_list[j]->delay)
+					continue;
 				server = server_list[i];
 				server_list[i] = server_list[j];
 				server_list[j] = server;
@@ -1188,14 +1193,14 @@ clock_select(void)
 		 * Now drop samples until we're down to one.
 		 */
 		while (nlist > 1) {
-			for (n = 0; n < nlist; n++) {
-				server_badness[n] = 0;
+			for (k = 0; k < nlist; k++) {
+				server_badness[k] = 0;
 				for (j = 0; j < nlist; j++) {
-					if (j == n) /* with self? */
+					if (j == k) /* with self? */
 						continue;
-					d = server_list[j]->soffset
-						- server_list[n]->soffset;
-					if (d < 0)	/* absolute value */
+					d = server_list[j]->soffset -
+					    server_list[k]->soffset;
+					if (d < 0)	/* abs value */
 						d = -d;
 					/*
 					 * XXX This code *knows* that
@@ -1203,7 +1208,7 @@ clock_select(void)
 					 */
 					for (i = 0; i < j; i++)
 						d = (d>>1) + (d>>2);
-					server_badness[n] += d;
+					server_badness[k] += d;
 				}
 			}
 

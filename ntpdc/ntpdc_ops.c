@@ -1344,12 +1344,13 @@ doconfig(
 	int res;
 	int sendsize;
 	int numtyp;
+	long val;
 
 again:
 	keyid = 0;
 	version = 3;
 	flags = 0;
-	res = 0;
+	res = FALSE;
 	cmode = 0;
 	minpoll = NTP_MINDPOLL;
 	maxpoll = NTP_MAXDPOLL;
@@ -1365,82 +1366,80 @@ again:
 	items = 1;
 	while (pcmd->nargs > items) {
 		if (STREQ(pcmd->argval[items].string, "prefer"))
-		    flags |= CONF_FLAG_PREFER;
+			flags |= CONF_FLAG_PREFER;
 		else if (STREQ(pcmd->argval[items].string, "burst"))
-		    flags |= CONF_FLAG_BURST;
+			flags |= CONF_FLAG_BURST;
 		else if (STREQ(pcmd->argval[items].string, "iburst"))
-		    flags |= CONF_FLAG_IBURST;
+			flags |= CONF_FLAG_IBURST;
 		else if (!refc && STREQ(pcmd->argval[items].string, "keyid"))
-		    numtyp = 1;
+			numtyp = 1;
 		else if (!refc && STREQ(pcmd->argval[items].string, "version"))
-		    numtyp = 2;
+			numtyp = 2;
 		else if (STREQ(pcmd->argval[items].string, "minpoll"))
-		    numtyp = 3;
+			numtyp = 3;
 		else if (STREQ(pcmd->argval[items].string, "maxpoll"))
-		    numtyp = 4;
+			numtyp = 4;
 		else {
-		        long val;
 			if (!atoint(pcmd->argval[items].string, &val))
-			     numtyp = 0;				  
+				numtyp = 0;
 			switch (numtyp) {
 			case 1:
-			     keyid = val;
-			     numtyp = 2;				  
-			     break;
-			     
+				keyid = val;
+				numtyp = 2;
+				break;
+
 			case 2:
-			     version = (u_int) val;
-			     numtyp = 0;				  
-			     break;
+				version = (u_int)val;
+				numtyp = 0;
+				break;
 
 			case 3:
-			     minpoll = (u_char)val;
-			     numtyp = 0;				  
-			     break;
+				minpoll = (u_char)val;
+				numtyp = 0;
+				break;
 
 			case 4:
-			     maxpoll = (u_char)val;
-			     numtyp = 0;				  
-			     break;
+				maxpoll = (u_char)val;
+				numtyp = 0;
+				break;
 
 			case 5:
-			     cmode = (u_char)val;
-			     numtyp = 0;				  
-			     break;
+				cmode = (u_char)val;
+				numtyp = 0;
+				break;
 
 			default:
-			     (void) fprintf(fp, "*** '%s' not understood\n",
-					    pcmd->argval[items].string);
-			     res++;
-			     numtyp = 0;				  
+				fprintf(fp, "*** '%s' not understood\n",
+					pcmd->argval[items].string);
+				res = TRUE;
+				numtyp = 0;
 			}
 			if (val < 0) {
-			     (void) fprintf(stderr,
-				     "***Value '%s' should be unsigned\n",
-				      pcmd->argval[items].string);
-			     res++;
+				fprintf(stderr,
+					"*** Value '%s' should be unsigned\n",
+					pcmd->argval[items].string);
+				res = TRUE;
 			}
-		   }
-	     items++;
+		}
+		items++;
 	}
 	if (keyid > 0)
-	     flags |= CONF_FLAG_AUTHENABLE;
-	if (version > NTP_VERSION ||
-	    version < NTP_OLDVERSION) {
-	     (void)fprintf(fp, "***invalid version number: %u\n",
-			   version);
-	     res++;
+		flags |= CONF_FLAG_AUTHENABLE;
+	if (version > NTP_VERSION || version < NTP_OLDVERSION) {
+		fprintf(fp, "***invalid version number: %u\n",
+			version);
+		res = TRUE;
 	}
 	if (minpoll < NTP_MINPOLL || minpoll > NTP_MAXPOLL || 
 	    maxpoll < NTP_MINPOLL || maxpoll > NTP_MAXPOLL || 
 	    minpoll > maxpoll) {
-	     (void) fprintf(fp, "***min/max-poll must be within %d..%d\n",
-			    NTP_MINPOLL, NTP_MAXPOLL);
-	     res++;
+		fprintf(fp, "***min/max-poll must be within %d..%d\n",
+			NTP_MINPOLL, NTP_MAXPOLL);
+		res = TRUE;
 	}					
 
 	if (res)
-	    return;
+		return;
 
 	memset(&cpeer, 0, sizeof(cpeer));
 
@@ -1873,7 +1872,7 @@ again:
 	} else {
 		if (impl_ver == IMPL_XNTPD_OLD) {
 			fprintf(stderr,
-			    "***Server doesn't understand IPv6 addresses\n");
+				"***Server doesn't understand IPv6 addresses\n");
 			return;
 		}
 		cres.addr6 = SOCK_ADDR6(&pcmd->argval[0].netnum);
@@ -1881,7 +1880,7 @@ again:
 	}
 	cres.flags = 0;
 	cres.mflags = 0;
-	err = 0;
+	err = FALSE;
 	for (res = 2; res < pcmd->nargs; res++) {
 		if (STREQ(pcmd->argval[res].string, "ntpport")) {
 			cres.mflags |= RESM_NTPONLY;
@@ -1889,20 +1888,20 @@ again:
 			for (i = 0; resflagsV3[i].bit != 0; i++) {
 				if (STREQ(pcmd->argval[res].string,
 					  resflagsV3[i].str))
-				    break;
+					break;
 			}
 			if (resflagsV3[i].bit != 0) {
 				cres.flags |= resflagsV3[i].bit;
 				if (req_code == REQ_UNRESTRICT) {
-					(void) fprintf(fp,
-						       "Flag %s inappropriate\n",
-						       resflagsV3[i].str);
-					err++;
+					fprintf(fp,
+						"Flag %s inappropriate\n",
+						resflagsV3[i].str);
+					err = TRUE;
 				}
 			} else {
-				(void) fprintf(fp, "Unknown flag %s\n",
-					       pcmd->argval[res].string);
-				err++;
+				fprintf(fp, "Unknown flag %s\n",
+					pcmd->argval[res].string);
+				err = TRUE;
 			}
 		}
 	}
@@ -1919,15 +1918,15 @@ again:
 		} else {
 			num = ntohl(cres.mask);
 			for (bit = 0x80000000; bit != 0; bit >>= 1)
-			    if ((num & bit) == 0)
-				break;
+				if ((num & bit) == 0)
+					break;
 			for ( ; bit != 0; bit >>= 1)
-			    if ((num & bit) != 0)
-				break;
+				if ((num & bit) != 0)
+					break;
 			if (bit != 0) {
-				(void) fprintf(fp, "Invalid mask %s\n",
-					       numtoa(cres.mask));
-				err++;
+				fprintf(fp, "Invalid mask %s\n",
+					numtoa(cres.mask));
+				err = TRUE;
 			}
 		}
 	} else {
@@ -1935,11 +1934,10 @@ again:
 	}
 
 	if (err)
-	    return;
+		return;
 
-	res = doquery(impl_ver, req_code, 1, 1,
-		      sendsize, (char *)&cres, &items,
-		      &itemsize, &dummy, 0, sizeof(struct conf_restrict));
+	res = doquery(impl_ver, req_code, 1, 1, sendsize, (char *)&cres,
+		      &items, &itemsize, &dummy, 0, sizeof(cres));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
 		impl_ver = IMPL_XNTPD_OLD;

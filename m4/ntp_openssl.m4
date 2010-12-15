@@ -154,6 +154,58 @@ case "$ntp_openssl" in
 esac
 
 #
+# check for linking with -lcrypto failure, and try -lz -lcrypto.
+# Helps m68k-atari-mint
+#
+case "$ntp_openssl" in
+ yes)
+    NTP_SAVED_LDFLAGS="$LDFLAGS"
+    LDFLAGS="$NTP_SAVED_LDFLAGS $LCRYPTO"
+    AC_CACHE_CHECK(
+	[if linking with $LCRYPTO alone works],
+	[ntp_cv_bare_lcrypto],
+	[AC_LINK_IFELSE(
+	    [AC_LANG_PROGRAM(
+		[[
+		    #include "openssl/err.h"
+		]],
+		[[
+		    ERR_load_crypto_strings();
+		]]
+	    )],
+	    [ntp_cv_bare_lcrypto=yes],
+	    [ntp_cv_bare_lcrypto=no]
+	)]
+    )
+    case "$ntp_cv_bare_lcrypto" in
+     no)
+	LDFLAGS="$NTP_SAVED_LDFLAGS $LCRYPTO -lz"
+	AC_CACHE_CHECK(
+	    [if linking with $LCRYPTO -lz works],
+	    [ntp_cv_lcrypto_lz],
+	    [AC_LINK_IFELSE(
+		[AC_LANG_PROGRAM(
+		    [[
+			#include "openssl/err.h"
+		    ]],
+		    [[
+			ERR_load_crypto_strings();
+		    ]]
+		)],
+		[ntp_cv_lcrypto_lz=yes],
+		[ntp_cv_lcrypto_lz=no]
+	    )]
+	)
+	case "$ntp_cv_lz_lcrypto" in
+	 yes)
+	     LCRYPTO="$LCRYPTO -lz"
+	esac
+    esac
+    LDFLAGS="$NTP_SAVED_LDFLAGS"
+    AS_UNSET([NTP_SAVED_LDFLAGS])
+esac
+
+#
 # Older OpenSSL headers have a number of callback prototypes inside
 # other function prototypes which trigger copious warnings with gcc's
 # -Wstrict-prototypes, which is included in -Wall.

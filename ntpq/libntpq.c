@@ -24,7 +24,7 @@ const char *Version = "libntpq 0.3beta";
 /* global variables used for holding snapshots of data */
 char peervars[NTPQ_BUFLEN];
 int peervarlen = 0;
-int peervar_assoc = 0;
+associd_t peervar_assoc = 0;
 char clockvars[NTPQ_BUFLEN];
 int clockvarlen = 0;
 int clockvar_assoc = 0;
@@ -363,16 +363,16 @@ int ntpq_closehost(void)
  * 			ID has been found
  ****************************************************************************/
  
-int ntpq_get_assoc_number ( int associd )
+int ntpq_get_assoc_number ( associd_t associd )
 {
-   int i = 0;
+	int i;
 
-   for (i=0;i<numassoc;i++) {
-     if (assoc_cache[i].assid == associd)
-       return i;
-    }
+	for (i=0;i<numassoc;i++) {
+		if (assoc_cache[i].assid == associd)
+			return i;
+	}
 
-   return (-1);
+	return -1;
 
 }
 
@@ -405,7 +405,7 @@ int ntpq_get_assoc_number ( int associd )
 
 int
 ntpq_read_assoc_peervars(
-	int associd,
+	associd_t associd,
 	char *resultbuf,
 	int maxsize
 	)
@@ -537,9 +537,10 @@ ntpq_read_sysvars(
  *			0 (zero) if an error occured and both variable sets
  *			could not be read
  ****************************************************************************/
- int  ntpq_get_assoc_allvars( int associd  )
+ int  ntpq_get_assoc_allvars( associd_t associd  )
 {
-    return ( ntpq_get_assoc_peervars ( associd ) & ntpq_get_assoc_clockvars( associd ) );
+	return ntpq_get_assoc_peervars ( associd ) &
+	       ntpq_get_assoc_clockvars( associd );
 }
 
 
@@ -620,16 +621,17 @@ int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen)
  *			0 (zero) if an error occured and the variable set
  *			could not be read
  ****************************************************************************/
- int  ntpq_get_assoc_peervars( int associd )
+ int  ntpq_get_assoc_peervars( associd_t associd )
 {
-        peervarlen = ( ntpq_read_assoc_peervars( associd, peervars, sizeof(peervars )) );
-        if ( peervarlen <= 0 ) {
-            peervar_assoc = 0;
-            return 0;
-        } else {
-            peervar_assoc = associd;
-            return 1;
-        }
+	peervarlen = ntpq_read_assoc_peervars( associd, peervars, 
+					       sizeof(peervars ) );
+	if ( peervarlen <= 0 ) {
+		peervar_assoc = 0;
+		return 0;
+	} else {
+		peervar_assoc = associd;
+		return 1;
+	}
 }
 
 
@@ -661,9 +663,9 @@ int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen)
 
 int
 ntpq_read_assoc_clockvars(
-	int	associd,
-	char *	resultbuf,
-	int	maxsize
+	associd_t	associd,
+	char *		resultbuf,
+	int		maxsize
 	)
 {
 	const char *datap;
@@ -704,46 +706,33 @@ ntpq_read_assoc_clockvars(
  *  NTP_CLOCKTYPE_MULTICAST Multicast server
  * 
  ****************************************************************************/
- int ntpq_get_assoc_clocktype ( int assoc_number )
+int ntpq_get_assoc_clocktype ( associd_t assoc_number )
 {
-    int type = 0;
-    int i, rc = 0;
-    sockaddr_u dum_store;
-    char value[LENHOSTNAME];
-    char resultbuf[1024];
+	int type = 0;
+	int i, rc = 0;
+	sockaddr_u dum_store;
+	char value[LENHOSTNAME];
+	char resultbuf[1024];
 
+	if ( assoc_number < 0 || assoc_number > numassoc )
+		return -1;
+	if ( peervar_assoc != assoc_cache[assoc_number].assid ) {
+		i = ntpq_read_assoc_peervars(
+		    assoc_cache[assoc_number].assid, resultbuf,
+		    sizeof(resultbuf));
+		if ( i <= 0 )
+			return -1;
+		rc = ntpq_getvar(resultbuf, i, "dstadr", value,
+				 LENHOSTNAME );
+	} else {
+		rc = ntpq_get_peervar("dstadr",value,LENHOSTNAME);
+	}
 
-    if ( assoc_number < 0 || assoc_number > numassoc ) {
-        return -1;
-    } else {
-        if ( peervar_assoc != assoc_cache[assoc_number].assid ) {
-
-            i=ntpq_read_assoc_peervars(assoc_cache[assoc_number].assid, resultbuf, sizeof(resultbuf));
-            if ( i <= 0 ) {
-                return -1;
-            }
-
-            rc = ntpq_getvar(resultbuf, i, "dstadr", value, LENHOSTNAME );
-
-
-        } else {
-            
-            rc = ntpq_get_peervar("dstadr",value,LENHOSTNAME);
-
-        }
-
-        if ( rc ) {
-            if (decodenetnum(value, &dum_store)) {
+	if (0 != rc && decodenetnum(value, &dum_store)) {
 		type = ntpq_decodeaddrtype(&dum_store);
-                return type;
-            }
-        }
-
-        return -1;
-    }
-
-    return -1;
-
+		return type;
+	}
+	return -1;
 }
 
 
@@ -768,20 +757,20 @@ ntpq_read_assoc_clockvars(
  *			0 (zero) if an error occured and the variable set
  *			could not be read
  ****************************************************************************/
- int  ntpq_get_assoc_clockvars( int associd )
+int  ntpq_get_assoc_clockvars( associd_t associd )
 {
-        
-        if ( ntpq_get_assoc_clocktype(ntpq_get_assoc_number(associd)) != NTP_CLOCKTYPE_LOCAL )
-            return 0;
-  
-        clockvarlen = ( ntpq_read_assoc_clockvars( associd, clockvars, sizeof(clockvars )) );
-        if ( clockvarlen <= 0 ) {
-            clockvar_assoc = 0;
-            return 0;
-        } else {
-            clockvar_assoc = associd;
-            return 1;
-        }
+	if (NTP_CLOCKTYPE_LOCAL != ntpq_get_assoc_clocktype(
+	    ntpq_get_assoc_number(associd)))
+		return 0;
+	clockvarlen = ntpq_read_assoc_clockvars( associd, clockvars,
+						 sizeof(clockvars) );
+	if ( clockvarlen <= 0 ) {
+		clockvar_assoc = 0;
+		return 0;
+	} else {
+		clockvar_assoc = associd;
+		return 1;
+	}
 }
 
 

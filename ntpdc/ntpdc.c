@@ -1555,27 +1555,25 @@ help(
 	struct xcmd *xcp;
 	char *cmd;
 	const char *list[100];
-	int word, words;
-	int row, rows;
-	int col, cols;
+	size_t word, words;
+	size_t row, rows;
+	size_t col, cols;
+	size_t length;
 
 	if (pcmd->nargs == 0) {
 		words = 0;
 		for (xcp = builtins; xcp->keyword != 0; xcp++) {
-			if (*(xcp->keyword) != '?' &&
-			    words < COUNTOF(list))
+			if (*(xcp->keyword) != '?')
 				list[words++] = xcp->keyword;
 		}
 		for (xcp = opcmds; xcp->keyword != 0; xcp++)
-			if (words < COUNTOF(list))
-				list[words++] = xcp->keyword;
+			list[words++] = xcp->keyword;
 
-		qsort((void *)&list, (size_t)words, sizeof(list[0]), helpsort);
+		qsort((void *)list, words, sizeof(list[0]), helpsort);
 		col = 0;
 		for (word = 0; word < words; word++) {
-			int length = strlen(list[word]);
-			if (col < length)
-				col = length;
+			length = strlen(list[word]);
+			col = max(col, length);
 		}
 
 		cols = SCREENWIDTH / ++col;
@@ -1615,8 +1613,8 @@ helpsort(
 	const void *t2
 	)
 {
-	char const * const * name1 = (char const * const *)t1;
-	char const * const * name2 = (char const * const *)t2;
+	const char * const *	name1 = t1;
+	const char * const *	name2 = t2;
 
 	return strcmp(*name1, *name2);
 }
@@ -1969,10 +1967,11 @@ getkeyid(
 	const char *keyprompt
 	)
 {
-	register char *p;
-	register int c;
+	int c;
 	FILE *fi;
 	char pbuf[20];
+	size_t i;
+	size_t ilim;
 
 #ifndef SYS_WINNT
 	if ((fi = fdopen(open("/dev/tty", 2), "r")) == NULL)
@@ -1980,15 +1979,16 @@ getkeyid(
 	if ((fi = _fdopen(open("CONIN$", _O_TEXT), "r")) == NULL)
 #endif /* SYS_WINNT */
 		fi = stdin;
-	    else
+	else
 		setbuf(fi, (char *)NULL);
 	fprintf(stderr, "%s", keyprompt); fflush(stderr);
-	for (p=pbuf; (c = getc(fi))!='\n' && c!=EOF;) {
-		if (p < &pbuf[18])
-		    *p++ = (char) c;
-	}
-	*p = '\0';
+	for (i = 0, ilim = COUNTOF(pbuf) - 1;
+	     i < ilim && (c = getc(fi)) != '\n' && c != EOF;
+	     )
+		pbuf[i++] = (char)c;
+	pbuf[i] = '\0';
 	if (fi != stdin)
-	    fclose(fi);
-	return (u_int32)atoi(pbuf);
+		fclose(fi);
+
+	return (u_long) atoi(pbuf);
 }
