@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 (4.2.7p93) 2010/12/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1510] from 4.2.6p3-RC12: Add modes 20/21 for driver 8 to support
   RAWDCF @ 75 baud.
