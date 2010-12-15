@@ -168,7 +168,7 @@ case "$ntp_openssl" in
 	    [AC_LANG_PROGRAM(
 		[[
 		    #include "openssl/err.h"
-		    #include "openssl/rand.h"
+		    #include "openssl/evp.h"
 		]],
 		[[
 		    ERR_load_crypto_strings();
@@ -189,7 +189,7 @@ case "$ntp_openssl" in
 		[AC_LANG_PROGRAM(
 		    [[
 			#include "openssl/err.h"
-			#include "openssl/rand.h"
+			#include "openssl/evp.h"
 		    ]],
 		    [[
 			ERR_load_crypto_strings();
