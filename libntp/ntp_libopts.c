@@ -4,10 +4,13 @@
  * Common code interfacing with Autogen's libopts command-line option
  * processing.
  */
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stddef.h>
 #include "ntp_libopts.h"
-#include "autoopts/options.h"
 #include "ntp_stdlib.h"
 
 extern const char *Version;	/* version.c for each program */
