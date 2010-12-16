@@ -1,7 +1,7 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2010-11-18 08:24:46 bkorb"
+ *  Time-stamp:      "2010-12-10 11:15:09 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
@@ -1241,6 +1241,9 @@ validateOptionsStruct(tOptions* pOpts, char const* pzProgram)
         else
             fputs(zAO_Sml, stderr);
 
+        fputs(ShellAsString(AO_CURRENT)  ":"
+              ShellAsString(AO_REVISION) ":"
+              ShellAsString(AO_AGE)      "\n", stderr);
         return FAILURE;
     }
 
