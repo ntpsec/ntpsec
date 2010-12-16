@@ -356,7 +356,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpkeygen&#x0D;&#x0A;"
+					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntp-keygen&#x0D;&#x0A;"
 					Outputs="$(ProjectDir)version.c"
 				/>
 			</FileConfiguration>
@@ -365,7 +365,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntpkeygen&#x0D;&#x0A;"
+					CommandLine="echo Using NT Shell Script to generate version.c&#x0D;&#x0A;..\scripts\mkver.bat -P ntp-keygen&#x0D;&#x0A;"
 					Outputs="$(ProjectDir)version.c"
 				/>
 			</FileConfiguration>

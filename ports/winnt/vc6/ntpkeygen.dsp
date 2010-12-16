@@ -131,7 +131,7 @@ InputPath=..\..\..\configure
 
 "$(ProjDir)\version.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	echo Using NT Shell Script to generate version.c 
-	..\scripts\mkver.bat -P ntpkeygen 
+	..\scripts\mkver.bat -P ntp-keygen 
 	
 # End Custom Build
 
@@ -143,7 +143,7 @@ InputPath=..\..\..\configure
 
 "$(ProjDir)\version.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	echo Using NT Shell Script to generate version.c 
-	..\scripts\mkver.bat -P ntpkeygen 
+	..\scripts\mkver.bat -P ntp-keygen 
 	
 # End Custom Build
 

@@ -23,6 +23,7 @@
 #include "isc/result.h"
 #include <ssl_applink.c>
 
+#include "ntp_libopts.h"
 #include "ntpq-opts.h"
 
 #ifdef SYS_WINNT
@@ -515,7 +516,7 @@ ntpqmain(
 	progname = argv[0];
 
 	{
-		int optct = optionProcess(&ntpqOptions, argc, argv);
+		int optct = ntpOptionProcess(&ntpqOptions, argc, argv);
 		argc -= optct;
 		argv += optct;
 	}

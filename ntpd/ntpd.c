@@ -22,6 +22,7 @@
 # include "ntpsim.h"
 #endif
 
+#include "ntp_libopts.h"
 #include "ntpd-opts.h"
 
 #ifdef HAVE_UNISTD_H
@@ -324,7 +325,7 @@ process_commandline_opts(
 {
 	int optct;
 	
-	optct = optionProcess(&ntpdOptions, *pargc, *pargv);
+	optct = ntpOptionProcess(&ntpdOptions, *pargc, *pargv);
 	*pargc -= optct;
 	*pargv += optct;
 }

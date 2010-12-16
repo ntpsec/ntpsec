@@ -1245,6 +1245,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\ntp_libopts.c">
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\ntp_random.c">
 				<FileConfiguration
 					Name="Debug|Win32">

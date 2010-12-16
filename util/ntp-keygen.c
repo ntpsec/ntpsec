@@ -93,6 +93,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 
+#include "ntp_libopts.h"
 #include "ntp-keygen-opts.h"
 
 #ifdef OPENSSL
@@ -258,7 +259,6 @@ main(
 
 #ifdef OPENSSL
 	ssl_check_version();
-	fprintf(stderr, "Using OpenSSL version %lx\n", SSLeay());
 #endif /* OPENSSL */
 
 	/*
@@ -271,10 +271,21 @@ main(
 	epoch = tv.tv_sec;
 
 	{
-		int optct = optionProcess(&ntp_keygenOptions, argc, argv);
+		int optct = ntpOptionProcess(&ntp_keygenOptions,
+					     argc, argv);
 		argc -= optct;
 		argv += optct;
 	}
+
+#ifdef OPENSSL
+	if (SSLeay() == SSLEAY_VERSION_NUMBER)
+		fprintf(stderr, "Using OpenSSL version %s\n",
+			SSLeay_version(SSLEAY_VERSION));
+	else
+		fprintf(stderr, "Built against OpenSSL %s, using version %s\n",
+			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+#endif /* OPENSSL */
+
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 	if (HAVE_OPT( MD5KEY ))
 		md5key++;

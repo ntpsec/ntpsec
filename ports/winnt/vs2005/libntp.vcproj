@@ -1333,6 +1333,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\ntp_libopts.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\ntp_lineedit.c"
 				>
 				<FileConfiguration
