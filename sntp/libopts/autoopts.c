@@ -2,7 +2,7 @@
 /**
  * \file autoopts.c
  *
- *  Time-stamp:      "2010-07-17 10:41:35 bkorb"
+ *  Time-stamp:      "2010-12-06 14:02:35 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -122,13 +122,13 @@ ao_strdup(char const *str)
 #endif
 
 /*
- *  handleOption
+ *  handle_opt
  *
  *  This routine handles equivalencing, sets the option state flags and
  *  invokes the handler procedure, if any.
  */
 LOCAL tSuccess
-handleOption(tOptions* pOpts, tOptState* pOptState)
+handle_opt(tOptions* pOpts, tOptState* pOptState)
 {
     /*
      *  Save a copy of the option procedure pointer.
@@ -821,7 +821,7 @@ doImmediateOpts(tOptions* pOpts)
         if (! DO_IMMEDIATELY(optState.flags))
             continue;
 
-        if (! SUCCESSFUL(handleOption(pOpts, &optState)))
+        if (! SUCCESSFUL(handle_opt(pOpts, &optState)))
             break;
     } optionsDone:;
 
@@ -858,7 +858,7 @@ doRegularOpts(tOptions* pOpts)
             optState.pOD->optOccCt--; /* don't count last time */
         }
 
-        if (! SUCCESSFUL(handleOption(pOpts, &optState)))
+        if (! SUCCESSFUL(handle_opt(pOpts, &optState)))
             break;
     } optionsDone:;
     if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)

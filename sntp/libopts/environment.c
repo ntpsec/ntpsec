@@ -2,7 +2,7 @@
 /**
  * \file environment.c
  *
- * Time-stamp:      "2010-07-17 10:39:52 bkorb"
+ * Time-stamp:      "2010-12-06 15:01:45 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -32,7 +32,7 @@
 
 /* = = = START-STATIC-FORWARD = = = */
 static void
-checkEnvOpt(tOptState * os, char * env_name,
+do_env_opt(tOptState * os, char * env_name,
             tOptions* pOpts, teEnvPresetType type);
 /* = = = END-STATIC-FORWARD = = = */
 
@@ -110,15 +110,15 @@ doPrognameEnv(tOptions* pOpts, teEnvPresetType type)
 }
 
 static void
-checkEnvOpt(tOptState * os, char * env_name,
+do_env_opt(tOptState * os, char * env_name,
             tOptions* pOpts, teEnvPresetType type)
 {
     os->pzOptArg = getenv(env_name);
     if (os->pzOptArg == NULL)
         return;
 
-    os->flags    = OPTST_PRESET | OPTST_ALLOC_ARG | os->pOD->fOptState;
-    os->optType  = TOPT_UNDEFINED;
+    os->flags   = OPTST_PRESET | OPTST_ALLOC_ARG | os->pOD->fOptState;
+    os->optType = TOPT_UNDEFINED;
 
     if (  (os->pOD->pz_DisablePfx != NULL)
        && (streqvcmp(os->pzOptArg, os->pOD->pz_DisablePfx) == 0)) {
@@ -153,21 +153,27 @@ checkEnvOpt(tOptState * os, char * env_name,
      *  The interpretation of the option value depends
      *  on the type of value argument the option takes
      */
-    if (os->pzOptArg != NULL) {
-        if (OPTST_GET_ARGTYPE(os->pOD->fOptState) == OPARG_TYPE_NONE) {
-            os->pzOptArg = NULL;
-        } else if (  (os->pOD->fOptState & OPTST_ARG_OPTIONAL)
-                  && (*os->pzOptArg == NUL)) {
-            os->pzOptArg = NULL;
-        } else if (*os->pzOptArg == NUL) {
-            os->pzOptArg = zNil;
-        } else {
-            AGDUPSTR(os->pzOptArg, os->pzOptArg, "option argument");
-            os->flags |= OPTST_ALLOC_ARG;
-        }
+    if (OPTST_GET_ARGTYPE(os->pOD->fOptState) == OPARG_TYPE_NONE) {
+        /*
+         *  Ignore any value.
+         */
+        os->pzOptArg = NULL;
+
+    } else if (os->pzOptArg[0] == NUL) {
+        /*
+         * If the argument is the empty string and the argument is
+         * optional, then treat it as if the option was not specified.
+         */
+        if ((os->pOD->fOptState & OPTST_ARG_OPTIONAL) == 0)
+            return;
+        os->pzOptArg = NULL;
+
+    } else {
+        AGDUPSTR(os->pzOptArg, os->pzOptArg, "option argument");
+        os->flags |= OPTST_ALLOC_ARG;
     }
 
-    handleOption(pOpts, os);
+    handle_opt(pOpts, os);
 }
 
 /*
@@ -218,7 +224,7 @@ doEnvPresets(tOptions* pOpts, teEnvPresetType type)
          *  Set up the option state
          */
         strcpy(pzFlagName, st.pOD->pz_NAME);
-        checkEnvOpt(&st, zEnvName, pOpts, type);
+        do_env_opt(&st, zEnvName, pOpts, type);
     }
 
     /*
@@ -230,7 +236,7 @@ doEnvPresets(tOptions* pOpts, teEnvPresetType type)
 
         if (st.pOD->pz_NAME != NULL) {
             strcpy(pzFlagName, st.pOD->pz_NAME);
-            checkEnvOpt(&st, zEnvName, pOpts, type);
+            do_env_opt(&st, zEnvName, pOpts, type);
         }
     }
 }

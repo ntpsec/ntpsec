@@ -1,7 +1,7 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2010-07-17 10:38:19 bkorb"
+ *  Time-stamp:      "2010-12-06 14:03:01 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -473,7 +473,7 @@ loadOptionLine(
     {
         tOptionLoadMode sv = option_load_mode;
         option_load_mode = load_mode;
-        handleOption(pOpts, pOS);
+        handle_opt(pOpts, pOS);
         option_load_mode = sv;
     }
 }
