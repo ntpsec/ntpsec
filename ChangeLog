@@ -11,7 +11,7 @@
 * [Bug 1751] Support for Atari FreeMiNT OS.
 * [Bug 1754] --version output should be more verbose.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
-  display both build and runtime OpenSLL versions when they differ.
+  display both build and runtime OpenSSL versions when they differ.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
   intermittent AC_LANG_PROGRAM possibly undefined errors.
 * Clean up the SNTP documentation.
