@@ -34,6 +34,7 @@
 #endif
 #include <ssl_applink.c>
 
+#include "ntp_libopts.h"
 #include "ntpq-opts.h"
 
 
@@ -523,7 +524,7 @@ ntpqmain(
 	progname = argv[0];
 
 	{
-		int optct = optionProcess(&ntpqOptions, argc, argv);
+		int optct = ntpOptionProcess(&ntpqOptions, argc, argv);
 		argc -= optct;
 		argv += optct;
 	}

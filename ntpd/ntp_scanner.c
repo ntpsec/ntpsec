@@ -304,8 +304,8 @@ is_double(
 	char *lexeme
 	)
 {
-	int num_digits = 0;  /* Number of digits read */
-	int i;
+	u_int num_digits = 0;  /* Number of digits read */
+	u_int i;
 
 	i = 0;
 

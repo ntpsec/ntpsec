@@ -20,13 +20,14 @@ AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 LDADD=		../libntp/libntp.a
 tg2_LDADD=	$(LIBM)
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
-ntp_keygen_LDADD=	$(LIBOPTS_LDADD) ../libntp/libntp.a @LCRYPTO@
+ntp_keygen_LDADD= version.o $(LIBOPTS_LDADD) ../libntp/libntp.a @LCRYPTO@
 
 ETAGS_ARGS=	Makefile.am
 #EXTRA_DIST=	README TAGS
 EXTRA_DIST=	ntp-keygen-opts.def ntp-keygen.1 ntp-keygen-opts.texi ntp-keygen-opts.menu
 BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
+DISTCLEANFILES=	.version version.c
 noinst_DATA=	$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu
 man_MANS=	$(srcdir)/ntp-keygen.1
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
@@ -61,6 +62,13 @@ jitter_LDADD=
 
 kern.o: kern.c
 	$(COMPILE) -DHAVE_TIMEX_H -c kern.c
+
+$(top_srcdir)/version :
+	cd $(top_srcdir) && $(MAKE) version
+
+version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
+	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntp-keygen
+	$(COMPILE) -c version.c
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf

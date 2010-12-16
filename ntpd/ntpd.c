@@ -22,6 +22,7 @@
 # include "ntpsim.h"
 #endif
 
+#include "ntp_libopts.h"
 #include "ntpd-opts.h"
 
 #ifdef HAVE_UNISTD_H
@@ -458,7 +459,7 @@ parse_cmdline_opts(
 	static int	optct;
 
 	if (!parsed)
-		optct = optionProcess(&ntpdOptions, *pargc, *pargv);
+		optct = ntpOptionProcess(&ntpdOptions, *pargc, *pargv);
 
 	parsed = 1;
 	

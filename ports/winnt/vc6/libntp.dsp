@@ -322,6 +322,10 @@ SOURCE=..\..\..\libntp\ntp_calendar.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\ntp_libopts.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\ntp_lineedit.c
 # End Source File
 # Begin Source File

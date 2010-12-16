@@ -39,7 +39,6 @@ libntp_a_SRCS =						\
 	lib_strbuf.c					\
 	machines.c					\
 	mfptoa.c					\
-	ntp_lineedit.c					\
 	mfptoms.c					\
 	mktime.c					\
 	modetoa.c					\
@@ -48,6 +47,8 @@ libntp_a_SRCS =						\
 	msyslog.c					\
 	netof.c						\
 	ntp_calendar.c					\
+	ntp_libopts.c					\
+	ntp_lineedit.c					\
 	ntp_rfc2553.c					\
 	numtoa.c					\
 	numtohost.c					\

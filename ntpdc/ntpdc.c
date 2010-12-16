@@ -30,6 +30,7 @@
 #endif
 #include <ssl_applink.c>
 
+#include "ntp_libopts.h"
 #include "ntpdc-opts.h"
 
 #ifdef SYS_VXWORKS
@@ -297,7 +298,7 @@ ntpdcmain(
 	progname = argv[0];
 
 	{
-		int optct = optionProcess(&ntpdcOptions, argc, argv);
+		int optct = ntpOptionProcess(&ntpdcOptions, argc, argv);
 		argc -= optct;
 		argv += optct;
 	}
