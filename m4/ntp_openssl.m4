@@ -159,8 +159,8 @@ esac
 #
 case "$ntp_openssl" in
  yes)
-    NTP_SAVED_LDFLAGS="$LDFLAGS"
-    LDFLAGS="$NTP_SAVED_LDFLAGS $LCRYPTO"
+    NTPO_SAVED_LIBS="$LIBS"
+    LIBS="$NTPO_SAVED_LIBS $LCRYPTO"
     AC_CACHE_CHECK(
 	[if linking with $LCRYPTO alone works],
 	[ntp_cv_bare_lcrypto],
@@ -181,7 +181,7 @@ case "$ntp_openssl" in
     )
     case "$ntp_cv_bare_lcrypto" in
      no)
-	LDFLAGS="$NTP_SAVED_LDFLAGS $LCRYPTO -lz"
+	LIBS="$NTPO_SAVED_LIBS $LCRYPTO -lz"
 	AC_CACHE_CHECK(
 	    [if linking with $LCRYPTO -lz works],
 	    [ntp_cv_lcrypto_lz],
@@ -200,13 +200,13 @@ case "$ntp_openssl" in
 		[ntp_cv_lcrypto_lz=no]
 	    )]
 	)
-	case "$ntp_cv_lz_lcrypto" in
+	case "$ntp_cv_lcrypto_lz" in
 	 yes)
 	     LCRYPTO="$LCRYPTO -lz"
 	esac
     esac
-    LDFLAGS="$NTP_SAVED_LDFLAGS"
-    AS_UNSET([NTP_SAVED_LDFLAGS])
+    LIBS="$NTPO_SAVED_LIBS"
+    AS_UNSET([NTPO_SAVED_LIBS])
 esac
 
 #
