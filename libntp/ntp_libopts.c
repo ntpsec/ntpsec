@@ -28,16 +28,16 @@ ntpOptionProcess(
 	char **		argv
 	)
 {
-	u_char		Opts[sizeof(*pOpts)];
+	char *		pchOpts;
 	char **		ppzFullVersion;
 	char *		pzNewFV;
-	const char *	pzAutogenFV;
+	char *		pzAutogenFV;
 	size_t		octets;
 	int		rc;
 
-	memcpy(Opts, pOpts, sizeof(Opts));
-	ppzFullVersion = (char **)(Opts + offsetof(struct options,
-						   pzFullVersion));
+	pchOpts = (void *)pOpts;
+	ppzFullVersion = (char **)(pchOpts + offsetof(tOptions,
+						      pzFullVersion));
 	pzAutogenFV = *ppzFullVersion;
 	octets = strlen(pzAutogenFV) +
 		 1 +	/* '\n' */
@@ -46,7 +46,8 @@ ntpOptionProcess(
 	pzNewFV = emalloc(octets);
 	snprintf(pzNewFV, octets, "%s\n%s", pzAutogenFV, Version);
 	*ppzFullVersion = pzNewFV;
-	rc = optionProcess((tOptions *)Opts, argc, argv);
+	rc = optionProcess(pOpts, argc, argv);
+	*ppzFullVersion = pzAutogenFV;
 	free(pzNewFV);
 
 	return rc;
