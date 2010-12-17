@@ -846,13 +846,13 @@ oncore_ppsapi(
 	char *cp, Msg[160];
 
 	if (time_pps_getcap(instance->pps_h, &cap) < 0) {
-		snprintf(Msg, sizeof(Msg), "time_pps_getcap failed: %m");
+		msnprintf(Msg, sizeof(Msg), "time_pps_getcap failed: %m");
 		oncore_log(instance, LOG_ERR, Msg);
 		return (0);
 	}
 
 	if (time_pps_getparams(instance->pps_h, &instance->pps_p) < 0) {
-		snprintf(Msg, sizeof(Msg), "time_pps_getparams failed: %m");
+		msnprintf(Msg, sizeof(Msg), "time_pps_getparams failed: %m");
 		oncore_log(instance, LOG_ERR, Msg);
 		return (0);
 	}
@@ -912,7 +912,7 @@ oncore_ppsapi(
 
 		if (time_pps_kcbind(instance->pps_h, PPS_KC_HARDPPS, i,
 		    PPS_TSFMT_TSPEC) < 0) {
-			snprintf(Msg, sizeof(Msg), "time_pps_kcbind failed: %m");
+			msnprintf(Msg, sizeof(Msg), "time_pps_kcbind failed: %m");
 			oncore_log(instance, LOG_ERR, Msg);
 			oncore_log(instance, LOG_ERR, "HARDPPS failed, abort...");
 			return (0);
@@ -1745,14 +1745,14 @@ oncore_get_timestamp(
 	 */
 
 	if (time_pps_getcap(instance->pps_h, &current_mode) < 0) {
-		snprintf(Msg, sizeof(Msg), "time_pps_getcap failed: %m");
+		msnprintf(Msg, sizeof(Msg), "time_pps_getcap failed: %m");
 		oncore_log(instance, LOG_ERR, Msg);
 		peer->flags &= ~FLAG_PPS;
 		return;
 	}
 
 	if (time_pps_getparams(instance->pps_h, &current_params) < 0) {
-		snprintf(Msg, sizeof(Msg), "time_pps_getparams failed: %m");
+		msnprintf(Msg, sizeof(Msg), "time_pps_getparams failed: %m");
 		oncore_log(instance, LOG_ERR, Msg);
 		peer->flags &= ~FLAG_PPS;
 		return;
