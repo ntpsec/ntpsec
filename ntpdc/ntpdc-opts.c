@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  November 27, 2010 at 11:51:15 PM by AutoGen 5.11.3
+ *  It has been AutoGen-ed  December 16, 2010 at 07:20:37 PM by AutoGen 5.11.6pre2
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:3:8 templates.
+ * Generated from AutoOpts 33:4:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -479,7 +479,7 @@ configuration options which can be specified at startup using\n\
 ntpd's configuration file may also be specified at run time using\n\
 [= prog-name =] .\n";
 tSCC    zFullVersion[] = NTPDC_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 493 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -549,7 +549,7 @@ doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPDC_OPTS) */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
+/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_NTPDC_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -567,7 +567,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPDC_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 626 */
 
 #if ENABLE_NLS
 #include <stdio.h>

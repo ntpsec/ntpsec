@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  November 27, 2010 at 11:51:47 PM by AutoGen 5.11.3
+ *  It has been AutoGen-ed  December 16, 2010 at 07:21:23 PM by AutoGen 5.11.6pre2
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:3:8 templates.
+ * Generated from AutoOpts 33:4:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -741,7 +741,7 @@ tSCC    zDetail[]     = "\n\
 If there is no new host key, look for an existing one.\n\
 If one is not found, create it.\n";
 tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 493 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -864,7 +864,7 @@ doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
     pOptDesc->optArg.argInt = val;
 }
 #endif /* defined OPENSSL */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
+/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_NTP_KEYGEN_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -882,7 +882,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 626 */
 
 #if ENABLE_NLS
 #include <stdio.h>
