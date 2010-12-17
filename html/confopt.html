@@ -12,7 +12,7 @@
 Walt Kelly</a>
 <p>The chicken is getting configuration advice.</p>
 <p>Last update:
-	<!-- #BeginDate format:En2m -->14-Oct-2010  21:22<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->16-Dec-2010  0:52<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -26,8 +26,8 @@ Walt Kelly</a>
 </ul>
 <hr>
 <h4 id="address">Server and Peer Addresses</h4>
-<p>Following is a description of the configuration commands in NTPv4. There are two classes of commands, configuration commands that configure an association with a remote server, peer or reference clock, and auxiliary commands that specify environmental variables that control various related operations. </p>
-<p>The various modes described on the <a href="assoc.html">Association Management</a> page are determined by the command keyword and the DNS name or IP address. Addresses are classed by type as (s) a remote server or peer (IPv4 class A, B and C), (b) the IP broadcast address of a local interface, (m) a multicast address (IPv4 class D), or (r) a reference clock address (127.127.x.x). For type m addresses the IANA has assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101 (site local) exclusively to NTP, but other nonconflicting addresses can be used. </p>
+<p>Following is a description of the server configuration commands in NTPv4. There are two classes of commands, configuration commands that configure an association with a remote server, peer or reference clock, and auxiliary commands that specify environment variables that control various related operations. </p>
+<p>The various modes described on the <a href="assoc.html">Association Management</a> page are determined by the command keyword and the DNS name or IP address. Addresses are classed by type as (s) a remote server or peer (IPv4 class A, B and C or IPv6), (b) the IPv4 broadcast address of a local interface, (m) a multicast address (IPv4 class D or IPv6), or (r) a reference clock address (127.127.x.x). For type m addresses the IANA has assigned the multicast group address IPv4 224.0.1.1 and IPv6 ff05::101 (site local) exclusively to NTP, but other nonconflicting addresses can be used. </p>
 <p>If the Basic Socket Interface Extensions for IPv6 (RFC-2553) is detected,
 	support for the IPv6 address family is generated in addition to the default IPv4 address family. IPv6 addresses can be identified by the presence of colons &quot;:&quot; in the address field. IPv6 addresses can be used almost everywhere where IPv4 addresses can be used, with the exception of reference clock addresses, which are always IPv4. Note that in contexts where a host name is expected, a <tt>-4</tt> qualifier preceding the host name forces DNS resolution to the IPv4 namespace, while a <tt>-6</tt> qualifier forces DNS resolution to the IPv6 namespace.</p>
 <h4 id="command">Server Commands</h4>
@@ -38,15 +38,15 @@ Walt Kelly</a>
 		<tt>manycastclient <i>address</i> [options ...]</tt><br>
 		<tt>pool <i>address</i> [options ...]</tt><br>
 		<tt>unpeer [<i>address</i> | <i>associd</i>]</tt></dt>
-	<dd>These commands specify the time server name or address to be used and the mode in which to operate. The <i>address</i> can be either a DNS name or a IPv4 or IPv6 address in standard notation. In general, multiple commands of each type can be used for different server and peer addresses or multicast groups.
+	<dd>These commands specify the remote server name or address to be used and the mode in which to operate. The <i>address</i> can be either a DNS name or a IPv4 or IPv6 address in standard notation. In general, multiple commands of each type can be used for different server and peer addresses or multicast groups.
 		<dl>
 			<dt><tt>server</tt></dt>
 			<dd>For type s and r addresses (only), this command mobilizes a persistent client mode association with the specified remote server or local reference clock. If the <tt>preempt</tt> flag is specified, a preemptable client mode association is mobilized instead.</dd>
 			<dt><tt>peer</tt></dt>
 			<dd>For type s addresses (only), this command mobilizes a persistent symmetric-active mode association with the specified remote peer.</dd>
 			<dt><tt>broadcast</tt></dt>
-			<dd>For type b and m addressees (only), this command mobilizes an ephemeral broadcast or multicast server mode association. Note that type b messages go only to the interface specified, but type m messages go to all interfaces.</dd>
-			<dt><tt>manycastclient</tt></dt>
+			<dd>For type b and m addressees (only), this command mobilizes a broadcast or multicast server mode association. Note that type b messages go only to the interface specified, but type m messages go to all interfaces.</dd>
+		  <dt><tt>manycastclient</tt></dt>
 			<dd>For type m addresses (only), this command mobilizes a preemptable manycast client mode association for the multicast group address specified. In this mode the address must match the address specified on the <tt>manycastserver</tt> command of one or more designated manycast servers. Additional information about this command is on the  <a href="discover.html#pool">Automatic Server Discovery</a> page.</dd>
 			<dt><tt>pool</tt></dt>
 			<dd>For type s addresses (only) this command mobilizes a preemptable pool client mode association for the DNS name specified. The DNS name must resolve to one or more IPv4 or IPv6 addresses. Additional information about this command is on the  <a href="discover.html#pool">Automatic Server Discovery</a> page. The <a href="http://www.pool.ntp.org/">www.pool.ntp.org</a> page describes a compatible pool of public NTP servers.</dd>
@@ -58,13 +58,15 @@ Walt Kelly</a>
 <dl>
 	<dt><tt>autokey</tt></dt>
 	<dd>Send and receive packets authenticated by the Autokey scheme described
-		in the <a href="autokey.html">Autokey Public Key Authentication</a> page. This option is mutually exclusive with the <tt>key</tt> option.</dd>
+		on the <a href="autokey.html">Autokey Public Key Authentication</a> page. This option is mutually exclusive with the <tt>key</tt> option.</dd>
 	<dt><tt>burst</tt></dt>
 	<dd>When the server is reachable, send a burst of  packets instead of the usual one.  This option is valid only with  the <tt>server</tt> command and type s addresses. It is a recommended option when the <tt>maxpoll</tt> option is greater than	10 (1024 s). Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
   <dt><tt>iburst</tt></dt>
 	<dd>When the server is unreachable, send a burst of  packets instead of the usual one.  This option is valid only with the <tt>server</tt> command and type s addresses. It is a recommended option with this command. Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
+    <dt><tt>ident</tt> <em><tt>group</tt></em></dt>
+    <dd>Specify <i><tt>group</tt></i> as the group name for the association. This is used by the identigy scheme described on the <a href="autokey.html">Autokey Public-Key Authenticationn</a> page.</dd>
   <dt><tt>key</tt> <i><tt>key</tt></i></dt>
-	<dd>Send and receive packets authenticated by the symmetric key scheme described in the <a href="authentic.html">Authentication Support</a> page. The <i><tt>key</tt></i> specifies the key identifier with values from 1 to 65534, inclusive. This option is mutually exclusive with the <tt>autokey</tt> option.</dd>	<dt><tt>minpoll <i>minpoll<br>
+  <dd>Send and receive packets authenticated by the symmetric key scheme described in the <a href="authentic.html">Authentication Support</a> page. The <i><tt>key</tt></i> specifies the key identifier with values from 1 to 65534, inclusive. This option is mutually exclusive with the <tt>autokey</tt> option.</dd>	<dt><tt>minpoll <i>minpoll<br>
 	</i></tt><tt>maxpoll <i>maxpoll</i></tt></dt>
 	<dd>These options specify the minimum and maximum poll intervals for NTP messages, in seconds as a power of two. The maximum poll interval defaults to 10 (1024 s), but can be increased by the <tt>maxpoll</tt> option to an upper limit of 17 (36 hr). The minimum poll interval defaults to 6 (64 s), but can be decreased by the <tt>minpoll</tt> option to a lower limit of 3 (8 s).  Additional information about this option is on the <a href="poll.html">Poll Program</a> page.</dd>
 	<dt><tt>mode <i>option</i></tt></dt>
