@@ -2828,7 +2828,7 @@ io_multicast_add(
 	 */
 	if (IS_IPV4(addr))
 		one_ep = wildipv4;
-	else if (IS_IPV6(addr))
+	else
 		one_ep = wildipv6;
 	for (ep = ep_list; ep != NULL; ep = ep->elink) {
 		if (ep->ignore_packets || AF(&ep->sin) != AF(addr) ||

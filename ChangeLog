@@ -1,5 +1,6 @@
 * [Bug 1753] 4.2.7p94 faults on startup in newpeer(), strdup(NULL).
 * [Bug 1754] from 4.2.6p3-RC12: --version output should be more verbose.
+* [Bug 1757] from 4.2.6p3-RC12: oncore snprintf("%m") doesn't expand %m.
 * from 4.2.6p3-RC12: Suppress ntp-keygen OpenSSL version display for
   --help, --version, display both build and runtime OpenSSL versions
   when they differ.
@@ -559,6 +560,7 @@
   local timezone.
 * [Bug 1751] Support for Atari FreeMiNT OS.
 * [Bug 1754] --version output should be more verbose.
+* [Bug 1757] oncore snprintf("%m") doesn't expand %m.
 * Upgrade to libopts 33.5.8 from AutoGen 5.11.6pre3.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
   display both build and runtime OpenSSL versions when they differ.
