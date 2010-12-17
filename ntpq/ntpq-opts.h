@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  December 15, 2010 at 10:11:50 AM by AutoGen 5.11.3
+ *  It has been AutoGen-ed  December 17, 2010 at 04:37:42 AM by AutoGen 5.11.6pre1
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:3:8 templates.
+ * Generated from AutoOpts 33:4:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -39,7 +39,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 135171
+#define AO_TEMPLATE_VERSION 135172
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -67,8 +67,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    14
-#define NTPQ_VERSION       "4.2.7p94"
-#define NTPQ_FULL_VERSION  "ntpq - standard NTP query program - Ver. 4.2.7p94"
+#define NTPQ_VERSION       "4.2.7p95"
+#define NTPQ_FULL_VERSION  "ntpq - standard NTP query program - Ver. 4.2.7p95"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -90,6 +90,15 @@ typedef enum {
                 if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
+
+/* * * * * *
+ *
+ *  Enumeration of ntpq exit codes
+ */
+typedef enum {
+    NTPQ_EXIT_SUCCESS = 0,
+    NTPQ_EXIT_FAILURE = 1
+} ntpq_exit_code_t;
 
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -175,7 +184,7 @@ typedef enum {
                 ntpqOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpqOptions.pUsageProc)(&ntpqOptions, c)
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 408 */
+/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 435 */
 
 /* * * * * *
  *

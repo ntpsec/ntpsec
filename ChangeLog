@@ -1,3 +1,4 @@
+(4.2.7p95) 2010/12/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1753] 4.2.7p94 faults on startup in newpeer(), strdup(NULL).
 * [Bug 1754] from 4.2.6p3-RC12: --version output should be more verbose.
 * [Bug 1757] from 4.2.6p3-RC12: oncore snprintf("%m") doesn't expand %m.
