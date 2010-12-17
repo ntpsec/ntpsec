@@ -3,7 +3,7 @@
 * from 4.2.6p3-RC12: Suppress ntp-keygen OpenSSL version display for
   --help, --version, display both build and runtime OpenSSL versions
   when they differ.
-* from 4.2.6p3-RC12: Upgrade to libopts 33.4.8 from AutoGen 5.11.6pre1.
+* from 4.2.6p3-RC12: Upgrade to libopts 33.5.8 from AutoGen 5.11.6pre3.
 (4.2.7p94) 2010/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1751] from 4.2.6p3-RC12: Support for Atari FreeMiNT OS.
 * Documentation updates from Dave Mills.
@@ -559,7 +559,7 @@
   local timezone.
 * [Bug 1751] Support for Atari FreeMiNT OS.
 * [Bug 1754] --version output should be more verbose.
-* Upgrade to libopts 33.4.8 from AutoGen 5.11.6pre1.
+* Upgrade to libopts 33.5.8 from AutoGen 5.11.6pre3.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
   display both build and runtime OpenSSL versions when they differ.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
