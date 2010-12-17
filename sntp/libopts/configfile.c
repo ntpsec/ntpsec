@@ -1,7 +1,7 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2010-12-10 11:15:09 bkorb"
+ *  Time-stamp:      "2010-12-16 14:03:06 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
@@ -972,7 +972,12 @@ optionFileLoad(tOptions* pOpts, char const* pzProgram)
     if (! SUCCESSFUL(validateOptionsStruct(pOpts, pzProgram)))
         return -1;
 
-    pOpts->pzProgName = pzProgram;
+    {
+        char const ** pp =
+            (char const **)(void *)&(pOpts->pzProgName);
+        *pp = pzProgram;
+    }
+
     internalFileLoad(pOpts);
     return 0;
 }
@@ -1252,13 +1257,15 @@ validateOptionsStruct(tOptions* pOpts, char const* pzProgram)
      *  and the set of equivalent characters.
      */
     if (pOpts->pzProgName == NULL) {
-        char const* pz = strrchr(pzProgram, DIRCH);
-
+        char const *  pz = strrchr(pzProgram, DIRCH);
+        char const ** pp =
+            (char const **)(void **)&(pOpts->pzProgName);
         if (pz == NULL)
-             pOpts->pzProgName = pzProgram;
-        else pOpts->pzProgName = pz+1;
+             *pp = pzProgram;
+        else *pp = pz+1;
 
-        pOpts->pzProgPath = pzProgram;
+        pp  = (char const **)(void **)&(pOpts->pzProgPath);
+        *pp = pzProgram;
 
         /*
          *  when comparing long names, these are equivalent

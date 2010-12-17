@@ -2,7 +2,7 @@
 /**
  * \file makeshell.c
  *
- * Time-stamp:      "2010-09-05 05:58:57 bkorb"
+ * Time-stamp:      "2010-12-16 14:09:32 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -612,21 +612,28 @@ emitUsage(tOptions* pOpts)
         printf(zPreamble, zStartMarker, pzOutName, zTimeBuf);
     }
 
+    printf(zEndPreamble, pOpts->pzPROGNAME);
+
     /*
-     *  Get a copy of the original program name in lower case
+     *  Get a copy of the original program name in lower case and
+     *  fill in an approximation of the program name from it.
      */
     {
-        char* pzPN = zTimeBuf;
-        tCC*  pz   = pOpts->pzPROGNAME;
+        char *       pzPN = zTimeBuf;
+        char const * pz   = pOpts->pzPROGNAME;
+        char **      pp;
+
         for (;;) {
             if ((*pzPN++ = tolower(*pz++)) == '\0')
                 break;
         }
+
+        pp = (char **)(void *)&(pOpts->pzProgPath);
+        *pp = zTimeBuf;
+        pp  = (char **)(void *)&(pOpts->pzProgName);
+        *pp = zTimeBuf;
     }
 
-    printf(zEndPreamble, pOpts->pzPROGNAME);
-
-    pOpts->pzProgPath = pOpts->pzProgName = zTimeBuf;
     textToVariable(pOpts, TT_LONGUSAGE, NULL);
     textToVariable(pOpts, TT_USAGE,     NULL);
 
@@ -1063,9 +1070,10 @@ genshelloptUsage(tOptions*  pOpts, int exitCode)
      *  gets it from the command line
      */
     {
-        char* pz;
+        char *  pz;
+        char ** pp = (char **)(void *)&(pShellParseOptions->pzProgName);
         AGDUPSTR(pz, pShellParseOptions->pzPROGNAME, "program name");
-        pShellParseOptions->pzProgName = pz;
+        *pp = pz;
         while (*pz != NUL) {
             *pz = tolower(*pz);
             pz++;
