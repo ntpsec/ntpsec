@@ -135,11 +135,16 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 }
 
 
-void msyslog(int level, const char *fmt, ...)
+size_t
+mvsnprintf(
+	char *		buf,
+	size_t		bufsiz,
+	const char *	fmt,
+	va_list		ap
+	)
 {
-	va_list ap;
-	char buf[1025], nfmt[256];
-	int errval;
+	char	nfmt[256];
+	int	errval;
 
 	/*
 	 * Save the error value as soon as possible
@@ -152,17 +157,42 @@ void msyslog(int level, const char *fmt, ...)
 		errval = errno;
 #endif /* SYS_WINNT */
 
-#if defined(__STDC__) || defined(HAVE_STDARG_H)
-	va_start(ap, fmt);
-#else
-	va_start(ap);
-
-	level = va_arg(ap, int);
-	fmt = va_arg(ap, char *);
-#endif
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
 
-	vsnprintf(buf, sizeof(buf), nfmt, ap);
+	return vsnprintf(buf, bufsiz, nfmt, ap);
+}
+
+size_t
+msnprintf(
+	char *		buf,
+	size_t		bufsiz,
+	const char *	fmt,
+	...
+	)
+{
+	va_list	ap;
+	size_t	rc;
+
+	va_start(ap, fmt);
+	rc = mvsnprintf(buf, bufsiz, fmt, ap);
+	va_end(ap);
+
+	return rc;
+}
+
+
+void
+msyslog(
+	int		level,
+	const char *	fmt,
+	...
+	)
+{
+	char	buf[1024];
+	va_list	ap;
+
+	va_start(ap, fmt);
+	mvsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 	addto_syslog(level, buf);
 }
