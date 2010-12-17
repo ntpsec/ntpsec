@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  December 16, 2010 at 07:19:38 PM by AutoGen 5.11.6pre2
+ *  It has been AutoGen-ed  December 17, 2010 at 01:50:12 AM by AutoGen 5.11.6pre3
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:4:8 templates.
+ * Generated from AutoOpts 33:5:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen

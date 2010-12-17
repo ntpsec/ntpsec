@@ -75,7 +75,7 @@ Usage Instructions for autoconf/automake/libtoolized projects:
 
      man_MANS = prog.1
      prog.1 : prog-opts.def
-         autogen -Tagman1.tpl -bprog prog-opts.def
+         autogen -Tagman-cmd.tpl -bprog prog-opts.def
 
      prog-invoke.texi : prog-opts.def
          autogen -Taginfo.tpl -bprog-invoke prog-opts.def
