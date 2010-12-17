@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *  
- *  It has been AutoGen-ed  November 27, 2010 at 11:51:38 PM by AutoGen 5.11.3
+ *  It has been AutoGen-ed  December 17, 2010 at 01:50:58 AM by AutoGen 5.11.6pre3
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:3:8 templates.
+ * Generated from AutoOpts 33:5:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -39,7 +39,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 135171
+#define AO_TEMPLATE_VERSION 135173
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -84,6 +84,15 @@ typedef enum {
                 if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
+
+/* * * * * *
+ *
+ *  Enumeration of ntpsnmpd exit codes
+ */
+typedef enum {
+    NTPSNMPD_EXIT_SUCCESS = 0,
+    NTPSNMPD_EXIT_FAILURE = 1
+} ntpsnmpd_exit_code_t;
 
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -133,7 +142,7 @@ typedef enum {
                 ntpsnmpdOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpsnmpdOptions.pUsageProc)(&ntpsnmpdOptions, c)
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 408 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 435 */
 
 /* * * * * *
  *
