@@ -1,5 +1,6 @@
 * [Bug 1758] from 4.2.6p3-RC12: setsockopt IPV6_MULTICAST_IF with wrong
   ifindex.
+* Documentation updates from Dave Mills.
 (4.2.7p95) 2010/12/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1753] 4.2.7p94 faults on startup in newpeer(), strdup(NULL).
 * [Bug 1754] from 4.2.6p3-RC12: --version output should be more verbose.
