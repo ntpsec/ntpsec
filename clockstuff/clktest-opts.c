@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.c)
  *  
- *  It has been AutoGen-ed  December 17, 2010 at 04:38:04 AM by AutoGen 5.11.6pre1
+ *  It has been AutoGen-ed  December 18, 2010 at 11:27:20 AM by AutoGen 5.11.6pre3
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:4:8 templates.
+ * Generated from AutoOpts 33:5:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -325,7 +325,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "CLKTEST";
 tSCC   zUsageTitle[] =
-"clktest - test the clock line discipline - Ver. 4.2.7p95\n\
+"clktest - test the clock line discipline - Ver. 4.2.7p96\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... <tty_device>\n";
 tSCC   zRcName[]     = ".ntprc";
 tSCC*  apzHomeList[] = {

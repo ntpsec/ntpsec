@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  December 17, 2010 at 04:36:28 AM by AutoGen 5.11.6pre1
+ *  It has been AutoGen-ed  December 18, 2010 at 11:21:19 AM by AutoGen 5.11.6pre3
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:4:8 templates.
+ * Generated from AutoOpts 33:5:8 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -1006,7 +1006,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 tSCC   zPROGNAME[]   = "NTPD";
 tSCC   zUsageTitle[] =
-"ntpd - NTP daemon program - Ver. 4.2.7p95\n\
+"ntpd - NTP daemon program - Ver. 4.2.7p96\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n";
 #define zRcName     NULL
