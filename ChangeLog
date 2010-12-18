@@ -10,6 +10,7 @@
   local timezone.
 * [Bug 1751] Support for Atari FreeMiNT OS.
 * [Bug 1754] --version output should be more verbose.
+* [Bug 1758] setsockopt IPV6_MULTICAST_IF with wrong ifindex.
 * Upgrade to libopts 33.5.8 from AutoGen 5.11.6pre3.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
   display both build and runtime OpenSSL versions when they differ.

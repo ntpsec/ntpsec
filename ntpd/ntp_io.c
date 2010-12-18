@@ -929,6 +929,7 @@ add_interface(
 	int		scan_univ_iid;	/* see RFC 4291 */
 	int		ep_privacy;	/* random local iface ID */
 	int		scan_privacy;	/* see RFC 4941 */
+	int		rc;
 
 	/*
 	 * Calculate the address hash
@@ -937,14 +938,15 @@ add_interface(
 
 	LINK_SLIST(ep_list, ep, elink);
 	ninterfaces++;
+#ifdef MCAST
 	/* the rest is for enabled multicast-capable addresses only */
 	if (ep->ignore_packets || !(INT_MULTICAST & ep->flags) ||
 	    INT_LOOPBACK & ep->flags)
 		return;
-#ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
+# ifndef INCLUDE_IPV6_MULTICAST_SUPPORT
 	if (AF_INET6 == ep->family)
 		return;
-#endif
+# endif
 	pmclisthead = (AF_INET == ep->family)
 			 ? &mc4_list
 			 : &mc6_list;
@@ -1043,6 +1045,35 @@ add_interface(
 		(AF_INET == ep->family)
 		    ? "4"
 		    : "6"));
+
+	/*
+	 * select the local address from which to send to multicast.
+	 */
+	switch (AF(&ep->sin)) {
+	case AF_INET :
+		rc = setsockopt(ep->fd, IPPROTO_IP,
+				IP_MULTICAST_IF,
+				(void *)&NSRCADR(&ep->sin),
+				sizeof(NSRCADR(&ep->sin)));
+		if (rc)
+			msyslog(LOG_ERR,
+				"setsockopt IP_MULTICAST_IF %s fails: %m",
+				stoa(&ep->sin));
+		break;
+# ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
+	case AF_INET6 :
+		rc = setsockopt(ep->fd, IPPROTO_IPV6,
+				 IPV6_MULTICAST_IF,
+				 (void *)&ep->ifindex,
+				 sizeof(ep->ifindex));
+		if (rc)
+			msyslog(LOG_ERR,
+				"setsockopt IPV6_MULTICAST_IF %u for %s fails: %m",
+				ep->ifindex, stoa(&ep->sin));
+		break;
+# endif
+	}
+#endif	/* MCAST */
 }
 
 
@@ -2130,14 +2161,14 @@ create_interface(
 			if (socket_multicast_enable(iface,
 						    &entry->addr))
 				msyslog(LOG_INFO, 
-					"Added Multicast Listener %s on %s",
-					stoa(&entry->addr),
-					stoa(&iface->sin));
+					"Joined %s socket to multicast group %s",
+					stoa(&iface->sin),
+					stoa(&entry->addr));
 			else
 				msyslog(LOG_ERR,
-					"Failed to add Multicast Listener %s on %s",
-					stoa(&entry->addr),
-					stoa(&iface->sin));
+					"Failed to join %s socket to multicast group %s",
+					stoa(&iface->sin),
+					stoa(&entry->addr));
 		}
 	}
 #endif	/* MCAST && MCAST_NONEWSOCKET */
@@ -2357,16 +2388,6 @@ enable_multicast_if(
 	switch (AF(&iface->sin)) {
 
 	case AF_INET:
-		if (setsockopt(iface->fd, IPPROTO_IP, IP_MULTICAST_IF,
-			       (void *)&NSRCADR(&iface->sin),
-			       sizeof(NSRCADR(&iface->sin)))) {
-
-			msyslog(LOG_ERR,
-				"setsockopt IP_MULTICAST_IF failed: %m on socket %d, addr %s for multicast address %s",
-				iface->fd, stoa(&iface->sin),
-				stoa(maddr));
-			return;
-		}
 #ifdef IP_MULTICAST_LOOP
 		/*
 		 * Don't send back to itself, but allow failure to set
@@ -2382,24 +2403,10 @@ enable_multicast_if(
 				stoa(maddr));
 		}
 #endif
-		DPRINTF(4, ("Added IPv4 multicast interface on socket %d, addr %s for multicast address %s\n",
-			    iface->fd, stoa(&iface->sin),
-			    stoa(maddr)));
 		break;
 
 	case AF_INET6:
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-		if (setsockopt(iface->fd, IPPROTO_IPV6,
-			       IPV6_MULTICAST_IF,
-			       (char *)&iface->ifindex,
-			       sizeof(iface->ifindex))) {
-
-			msyslog(LOG_ERR,
-				"setsockopt IPV6_MULTICAST_IF failed: %m on socket %d, addr %s, ifindex %u for multicast address %s",
-				iface->fd, stoa(&iface->sin),
-				iface->ifindex, stoa(maddr));
-			return;
-		}
 #ifdef IPV6_MULTICAST_LOOP
 		/*
 		 * Don't send back to itself, but allow failure to set
@@ -2414,9 +2421,6 @@ enable_multicast_if(
 				stoa(maddr));
 		}
 #endif
-		DPRINTF(4, ("Added IPv6 multicast interface on socket %d, addr %s, for multicast address %s\n",
-			    iface->fd,  stoa(&iface->sin),
-			    stoa(maddr)));
 		break;
 #else
 		return;
@@ -2777,12 +2781,14 @@ io_multicast_add(
 #endif	/* MULTICAST_NONEWSOCKET */
 		if (socket_multicast_enable(ep, addr))
 			msyslog(LOG_INFO, 
-				"Added Multicast Listener %s on %s",
-				stoa(addr), stoa(&ep->sin));
+				"Joined %s socket to multicast group %s",
+				stoa(&ep->sin),
+				stoa(addr));
 		else
 			msyslog(LOG_ERR,
-				"Failed to add Multicast Listener %s on %s",
-				stoa(addr), stoa(&ep->sin));
+				"Failed to join %s socket to multicast group %s",
+				stoa(&ep->sin),
+				stoa(addr));
 	}
 
 	add_addr_to_list(addr, one_ep);
@@ -3172,14 +3178,14 @@ sendpkt(
 						sizeof(cttl));
 				break;
 				
-#ifdef INCLUDE_IPV6_SUPPORT
+# ifdef INCLUDE_IPV6_SUPPORT
 			case AF_INET6 :
 				rc = setsockopt(src->fd, IPPROTO_IPV6,
 						 IPV6_MULTICAST_HOPS,
 						 (void *)&ttl,
 						 sizeof(ttl));
 				break;
-#endif /* INCLUDE_IPV6_SUPPORT */
+# endif	/* INCLUDE_IPV6_SUPPORT */
 
 			default:
 				rc = 0;
@@ -3192,37 +3198,7 @@ sendpkt(
 					"setsockopt IP_MULTICAST_TTL/IPV6_MULTICAST_HOPS fails on address %s: %m",
 					stoa(&src->sin));
 		}
-		if (ismcast) {
-			/*
-			 * select the local address from which to send to multicast.
-			 */
-			switch (AF(&src->sin)) {
-			case AF_INET :
-				cttl = (u_char)ttl;
-				rc = setsockopt(src->fd, IPPROTO_IP,
-						IP_MULTICAST_IF,
-						(void *)&NSRCADR(&src->sin),
-						sizeof(NSRCADR(&src->sin)));
-				break;
-#ifdef INCLUDE_IPV6_SUPPORT
-			case AF_INET6 :
-				rc = setsockopt(src->fd, IPPROTO_IPV6,
-						 IPV6_MULTICAST_IF,
-						 (void *)&ep->ifindex,
-						 sizeof(ep->ifindex));
-				break;
-#endif
-			default:
-				DPRINTF(1, ("sendpkt unknown AF %d",
-					    AF(&src->sin)));
-				rc = 0;
-			}
-			if (rc)
-				msyslog(LOG_ERR, 
-					"setsockopt IP[V6]_MULTICAST_IF fails on address %s: %m",
-					stoa(&src->sin));
-		}
-#endif /* MCAST */
+#endif	/* MCAST */
 
 #ifdef SIM
 		cc = simulate_server(dest, src, pkt);
