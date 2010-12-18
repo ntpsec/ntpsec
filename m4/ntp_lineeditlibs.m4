@@ -86,6 +86,32 @@ AC_DEFUN([NTP_LINEEDITLIBS], [
      *)
 	AC_CHECK_HEADERS([readline.h readline/readline.h histedit.h])
 	AC_CHECK_HEADERS([history.h readline/history.h])
+
+	case "$ac_cv_header_histedit_h" in
+	 yes)
+	    AC_CACHE_CHECK(
+		[number of arguments to el_init()],
+		[ntp_cv_el_init_args],
+		[AC_COMPILE_IFELSE(
+		    [AC_LANG_PROGRAM(
+			[[
+			    #include <stdio.h>
+			    #include <histedit.h>
+			]],
+			[[
+			    el_init("conftest", stdin, stdout, stderr);
+			]]
+		    )],
+		    [ntp_cv_el_init_args=4],
+		    [ntp_cv_el_init_args=3]
+		)]
+	    )
+	    AC_DEFINE_UNQUOTED(
+		[EL_INIT_ARGS], 
+		[$ntp_cv_el_init_args],
+		[number of args to el_init()]
+		)
+	esac
 	
 	AC_MSG_CHECKING([whether readline supports history])
 	
