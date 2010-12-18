@@ -714,7 +714,7 @@ int ntpq_get_assoc_clocktype ( associd_t assoc_number )
 	char value[LENHOSTNAME];
 	char resultbuf[1024];
 
-	if ( assoc_number < 0 || assoc_number > numassoc )
+	if ( assoc_number > numassoc )
 		return -1;
 	if ( peervar_assoc != assoc_cache[assoc_number].assid ) {
 		i = ntpq_read_assoc_peervars(
