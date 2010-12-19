@@ -14,7 +14,7 @@
 <body>
 <h3>Autokey Public-Key Authentication</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->18-Dec-2010  4:29<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->19-Dec-2010  4:26<!-- #EndDate -->
   UTC</p>
 <hr>
 <h4>Table of Contents</h4>
@@ -37,29 +37,36 @@
 <p>There are two timeouts associated with the Autokey scheme. The <em>key list timeout</em> is set by the <tt>automax</tt> command, which  specifies the interval between generating new key lists by the client. The default timeout of about 1.1 hr is appropriate for the majority of configurations and ordinarily should not be changed. The <em>revoke timeout</em> is set by the <tt>revoke</tt> command, which  specifies the interval between generating new server private values. It is intended to reduce the vulnerability to cryptanalysis; however,  new values  require the server to encrypt each client cookie separately. The default timeout of about 36 hr is appropriate for most  servers, but might be too short for national time servers.</p>
 <h4 id="cert">Autokey Subnets</h4>
 <p> An Autokey subnet consists of a collection of hosts configured as an acyclic, directed tree with roots one or more trusted hosts (THs) operating at the lowest stratum of the subnet. The THs are synchronized  directly or indirectly to national time services via trusted means, such as radio, satellite or telephone modem, or an   NTP secure group as described in the next section. Autokey hosts operate as servers, clients or both at the same time.</p>
-<p>A certificate trail is a sequence of certificates, each signed by a host  nearer the THs and terminating at the self-signed certificate of a TH. As the Autokey protocol proceeds,  each client provides its self-signed certificate to a server  nearer  the THs for signature. In order for the signature to succeed, the client certificate valid period  must begin within the valid period  of the server certificate.  If  the server period begins later than the client period, the client certificate has expired; if the client period begins later than the server period, the server certificate has expired.  While the certificate trail authenticates each host on the trail to  the THs, it does not   validate  the time values themselves. Ultimately, this is determined by the NTP on-wire protocool.</p>
+<p>A certificate trail is a sequence of certificates, each signed by a host  one step closer to the THs and terminating at the self-signed certificate of a TH. In general,   NTP servers operate as certificate  authorities (CAs) to sign certificates provided by its clients.  The CAs include the THs and those group servers with dependent clients. In order for the signature to succeed, the client certificate valid period  must begin within the valid period  of the server certificate.  If  the server period begins later than the client period, the client certificate has expired; if the client period begins later than the server period, the server certificate has expired.  While the certificate trail authenticates each host on the trail to  the THs, it does not   validate  the time values themselves. Ultimately, this is determined by the NTP on-wire protocool.</p>
 <dd class="style1">The requirement that the NTP subnet be acyclic means that, if peers are configured with each other in symmetric modes, each must be a TH.</dd>
 <p>The Autokey protocol runs for each association separately. During the protocol the client recursively obtains all the certificates on the trail to a TH, saving each in a cache ordered from most recent to oldest. If an expired certificate is found, it is invalidated and marked for later replacement. As the client certificate itself is not involved in the certificate trail, it can only be declared valid or expired when the server  signs it. </p>
 <p>The certificates derived from each association are combined in the cache with duplicates suppressed. If it happens that two different associations contribute certificates to the cache, a certificate on the trail from one association  could expire before any on another trail. In this case the remaining trails  will survive until the expired certificate is replaced. Once saved in the cache, a certificate remains valid until it expires or is replaced by a new one.</p>
 <p> It is important to note that the certificate trail is validated only at startup when an association is mobilized. Once validated in this way,  the server remains valid until it  is demobilized, even if  certificates on the trail to the THs expire.</p>
+<p>Example</p>
+<div align="center"><img src="pic/flt8.gif" alt="gif">
+    <p>Figure 1. Example Configuration</p>
+</div>
+<p>Figure 1 shows an example configuration with three NTP subnets, Alice, Helen and Carol. Hosts A and B are THs of Alice, host R is the TH of Helen and host X is the TH of Carol. Assume that all associations are client/server; so, for example, TH X has two mobilized associations, one to Alice host C and the other to Carol host S. While not shown in the figure, Alice hosts A and B could configure symmetric mode associations between them for redundancy and backup.</p>
+<p>Note that  host D cetificate trail is D&rarr;C&rarr;A or D&rarr;C&rarr;B, depending on the particular order the trails are built. Host Y certificate trail is only Y&rarr;X, since X is a TH. Host X has two cetficate trails X&rarr;C&rarr;A or X&rarr;C&rarr;B, and X&rarr;S&rarr;R.</p>
 <h4 id="group">NTP Secure Groups</h4>
 <p>NTP security groups are an extension of the NTP subnets described in the previous section. They include in addition to certificate trails one or another identity schemes described on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page. NTP secure groups are used to define cryptographic compartments and security
-hierarchies. The identity scheme insures that the server is authentic and not masqueraded by an intruder acting as a middleman.</p>
-<p> As in NTP subnet, NTP secure groups are configured as an acyclic tree rooted on the THs. The THs are at the lowest stratum of the secure group. All group hosts construct an  unbroken  certificate trail from each host, possibly via intermediate hosts, and ending at a TH. In addition, each group host verifies the server has the secret group key using an identity exchange.</p>
+hierarchies. The identity scheme insures that the server is authentic and not victim of masquerade by an intruder acting as a middleman.</p>
+<p> As in NTP subnet, NTP secure groups are configured as an acyclic tree rooted on the THs. The THs are at the lowest stratum of the secure group. All group hosts construct an  unbroken  certificate trail from each host, possibly via intermediate hosts, and ending at a TH of that group. In addition, each group host verifies its server has the secret group key using an identity exchange.</p>
 <p> For secure group servers, the string specified by the <tt>-i</tt> option of the <tt>ntp-keygen</tt> program is the name of the secure group. For secure group servers this name must match the <tt>ident</tt> option
-  of the <tt>crypto</tt> command. For secure group clients, this name must match the <tt>ident</tt> option of the <tt>server</tt> command. This name is also used in the identity keys and parameters file names. The file naming conventions are described on
+  of the <tt>crypto</tt> command for the server. For secure group clients, this name must match the <tt>ident</tt> option of the <tt>server</tt> command. This name is also used in the identity keys and parameters file names. The file naming conventions are described on
   the <a href="keygen.html">ntp-keygen</a> page.</p>
-<p><span class="style1">In the latest Autokey version, the host name and group name are independent of each other and the <tt>host</tt> option of the <tt>crypto</tt> command is deprecated. When compatibility with older versions is required, specify the same name for both the <tt>-s</tt> and <tt>-i</tt> options.</span></p>
+<dd><span class="style1">In the latest Autokey version, the host name and group name are independent of each other and the <tt>host</tt> option of the <tt>crypto</tt> command is deprecated. When compatibility with older versions is required, specify the same name for both the <tt>-s</tt> and <tt>-i</tt> options.</span></dd>
 <p>The Autokey identity schemes involve a challenge-response exchange where a client generates a nonce and sends to the server. The server performs a mathematical operation involving a second nonce and the secret group key, and sends the result along with a hash to the client. The client performs a another mathematical operation and verifies the result with the hash. Since each exchange involves two nonces, even after repeated observations of many exchanges, an intruder cannot learn the secret group key. It is this quality that allows the secure group key to persist long after the longest period of certificate validity. In the Schnorr IFF scheme considered later on this page, the secret group key is not divulged to the clients, so they cannot conspire to prove identity to other hosts.</p>
-<p>As described on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page, there are five identity schemes, three of which - IFF, GQ and MV - require identity files specific to each scheme. There are two types of files for each scheme, an encrypted keys file  and a nonencrypted parameters file, which usually contains a subset of the keys file. In general,   NTP servers operating as certificate  authorities (CAs) use the keys file and clients use the parameters file. The CAs include the THs and those group servers with dependent clients.</p>
+<p>As described on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page, there are five identity schemes, three of which - IFF, GQ and MV - require identity files specific to each scheme. There are two types of files for each scheme, an encrypted server keys file  and a nonencrypted client parameters file, which usually contains a subset of the keys file. </p>
 <p> Hosts with no dependent clients can retrieve client parameter files from an
-  archive or web page. The <tt>ntp-keygen</tt> program can export these data using the <tt>-e</tt> option.
+  archive or web page. The <tt>ntp-keygen</tt> program can export parameter files using the <tt>-e</tt> option.
   Hosts with dependent clients other than the CA must retrieve copies of the server
-  key files using secure means. The <tt>ntp-keygen</tt> program can export these data
+  key file using secure means. The <tt>ntp-keygen</tt> program can export these data
   using the <tt>-q</tt> option and chosen remote password. In either case the data are installed as a file
   and then renamed using the name given as the first line in the file, but without
 the filestamp.</p>
-<p>&nbsp;</p>
+<p>Example</p>
+<p>Returning to the example of Figure 1, Alice, Helen and Carol run TC, internally, as the environment is secure and without threat from external attack, in particular a middleman masquerade. However,  TH X of Carol is vulnerable to masquerade on the links between X and C and between X and  S. Therefor, both C and S are configured as Autokey servers with, for example, the IFF identity scheme, and X as a client of both of them. For this purpose, both C and S export their IFF parameter files to X as described above.</p>
 <h4 id="config2">Configuration - Authentication Schemes</h4>
 <p>Autokey has an intimidating number of  options, most of which are not necessary in typical scenarios. However, the  Trusted Certificate (TC) scheme is recommended for  national NTP time services, such as those operated by NIST and USNO. Configuration for TC is very simple. For each server, e.g. <tt>time.nist.gov,</tt> as root:</p>
 <p><tt># cd /usr/local/etc<br>
@@ -80,11 +87,6 @@ the filestamp.</p>
   # driftfile /etc/ntp.drift</tt></p>
 <p>It is possible to configure clients  of server <tt>grundoon.udel.edu</tt> in the same way with the server line pointing to <tt>grundoon.udel.edu</tt>. Dependent clients  authenticate to <tt>time.nistg.gov</tt> through <tt>grundoon.udel.edu</tt>.</p>
 <p>In the above configuration examples, the default Autokey host name is the string  returned by the Unix <tt>gethostname()</tt> library routine. However, this name has nothing to do with the DNS name of the host. The Autokey host name is used as the subject and issuer names on the certificate, as well as the default  password for the encrypted keys files. The  Autokey host name can be changed using the <tt>-s</tt> option of the <tt>ntp-keygen</tt> program. The default password can be changed using the <tt>-p</tt> option of the <tt>ntp-keygen</tt> program and the <tt>pw</tt> option of the <tt>crypto</tt> command.</p>
-<p>Example</p>
-<div align="center"><img src="pic/flt8.gif" alt="gif">
-    <p>Figure 1. Example Configuration</p>
-</div>
-<p>Figure 1 shows an example configuration with three NTP subnets, Alice, Helen and Carol. Hosts A and B are THs of Alice, host R is the TH of Helen and host X is the TH of Carol. For the moment, assume that all associations are client/server; so, for example, TH X has two mobilized associations, one to Alice host C, the other to Carol host S. While not shown in the figure, Alice hosts A and B could configure symmetric active mode between them for redundancy and backup.</p>
 <h4 ident="ident">Configuration - Identity Schemes</h4>
 <p> For the simplest identity scheme TC, the server generates host keys, trusted certificate and identity files using an <tt>ntp-keygen </tt> program commadn with options specified in this section, while the clients use the same command with no options. The server  uses the <tt>crypto</tt>  command in the comnfiguration file with options specified in this section, while the clients use the same command with no options. Additonia client options are specified in the <tt>server</tt> command for each association. </p>
 <p> It's best to start with a functioning TC configuation and add  commands as necessary. For example, the CA generates an encrypted server keys file using the command</p>
@@ -98,20 +100,6 @@ the filestamp.</p>
 <p>In special circumstances the Autokey message digest algorithm can be changed using the <tt>digest</tt> option of the <tt>crypto</tt> command. The  digest algorithm is separate and distinct from the symmetric
   key message digest algorithm.   If compliance with FIPS 140-2 is required,
 the algorithm must be ether <tt>SHA</tt> or <tt>SHA1</tt>. The Autokey message digest algorithm must be the same for  all participants in the NTP subnet.</p>
-<p>Example</p>
-<p>Returnign to the example of Figure 1, Alice, Helen and Carol run TC, internally, as the environment is secure and without threat from external attack, in particular a middleman masquerade. However, Carols' TH X is vulnerale to masquerade on the links between X and C and S. Therefor, X runs an identity scheme with C and S For example, C uses the command</p>
-<p>ntp-keygen -I -i YELLOW -e&gt;ntpkey_iffpar_C</p>
-<p>and includes the command</p>
-<p>crypto ident YELLOW</p>
-<p>in its configuraiton file. S runs a similar configuration</p>
-<p>ntp-keygen -G -i ORANGE -e &gt;orange</p>
-<p>crypto ident ORANGE</p>
-<p>in her configuration file. X needs only</p>
-<p>ntp-keygen </p>
-<p>to generate RSA keys and cetificate, but moblizes assoctions</p>
-<p>server C autokey ident YELLOW</p>
-<p>server S autiokey ident ORANGE</p>
-<p>X needs in install files yellow and orange under the names biven as the files like in the ifle, but without the filestamp.</p>
 <h4 id="exam">Examples</h4>
 <div align="center"> <img src="pic/group.gif" alt="gif"> </div>
 <p>Consider a scenario involving three secure groups RED, GREEN and BLUE. RED and BLUE are typical of national laboratories providing certified time to the Internet at large. As shown ion the figure, RED TH mort and BLUE TH macabre run NTP symmetric mode with each other for monitoring or backup. For the purpose of illustration, assume both THs are primary servers. GREEN is typical of a large university providing certified time to the campus community. GREEN TH howland is a broadcast client of both RED and BLUE. BLUE uses the IFF scheme, while both RED and GREEN use the GQ scheme, but with different keys. YELLOW is a client of GREEN and for purposes of illustration a TH for YELLOW.</p>

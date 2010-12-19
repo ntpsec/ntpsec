@@ -1,6 +1,7 @@
 * [Bug 1760] from 4.2.6p3-RC12: ntpd Windows interpolation cannot be
   disabled.
 * from 4.2.6p3-RC12: Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre5.
+* Documentation updates from Dave Mills.
 (4.2.7p96) 2010/12/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1758] from 4.2.6p3-RC12: setsockopt IPV6_MULTICAST_IF with wrong
   ifindex.
