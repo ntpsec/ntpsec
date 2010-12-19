@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  December 18, 2010 at 11:27:21 AM by AutoGen 5.11.6pre3
+ *  It has been AutoGen-ed  December 19, 2010 at 09:37:37 AM by AutoGen 5.11.6pre5
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:5:8 templates.
+ * Generated from AutoOpts 34:0:9 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -755,23 +755,23 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *
  *  Define the Ntp_Keygen Option Environment
  */
-tSCC   zPROGNAME[]   = "NTP_KEYGEN";
-tSCC   zUsageTitle[] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p96\n\
+static char const zPROGNAME[11] = "NTP_KEYGEN";
+static char const zUsageTitle[115] =
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p97\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
-tSCC   zRcName[]     = ".ntprc";
-tSCC*  apzHomeList[] = {
-       "$HOME",
-       ".",
-       NULL };
+static char const zRcName[7] = ".ntprc";
+static char const * const apzHomeList[3] = {
+    "$HOME",
+    ".",
+    NULL };
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
+static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-tSCC    zDetail[]     = "\n\
+static char const zDetail[98] = "\n\
 If there is no new host key, look for an existing one.\n\
 If one is not found, create it.\n";
-tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+static char const zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -784,6 +784,10 @@ tSCC    zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
 
 #define ntp_keygen_full_usage NULL
 #define ntp_keygen_short_usage NULL
+#ifndef  PKGDATADIR
+# define PKGDATADIR ""
+#endif
+
 tOptions ntp_keygenOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -814,7 +818,8 @@ tOptions ntp_keygenOptions = {
     },
     24 /* full option count */, 19 /* user option count */,
     ntp_keygen_full_usage, ntp_keygen_short_usage,
-    NULL, NULL
+    NULL, NULL,
+    PKGDATADIR
 };
 
 /*
@@ -912,7 +917,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

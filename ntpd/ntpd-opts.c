@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  December 18, 2010 at 11:21:19 AM by AutoGen 5.11.6pre3
+ *  It has been AutoGen-ed  December 19, 2010 at 09:36:18 AM by AutoGen 5.11.6pre5
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:5:8 templates.
+ * Generated from AutoOpts 34:0:9 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -1004,19 +1004,19 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *
  *  Define the Ntpd Option Environment
  */
-tSCC   zPROGNAME[]   = "NTPD";
-tSCC   zUsageTitle[] =
-"ntpd - NTP daemon program - Ver. 4.2.7p96\n\
+static char const zPROGNAME[5] = "NTPD";
+static char const zUsageTitle[132] =
+"ntpd - NTP daemon program - Ver. 4.2.7p97\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n";
 #define zRcName     NULL
 #define apzHomeList NULL
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
+static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-tSCC    zDetail[]     = "\n\n";
-tSCC    zFullVersion[] = NTPD_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+static char const zDetail[7] = "\n\n";
+static char const zFullVersion[] = NTPD_FULL_VERSION;
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -1029,6 +1029,10 @@ tSCC    zFullVersion[] = NTPD_FULL_VERSION;
 
 #define ntpd_full_usage NULL
 #define ntpd_short_usage NULL
+#ifndef  PKGDATADIR
+# define PKGDATADIR ""
+#endif
+
 tOptions ntpdOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -1058,7 +1062,8 @@ tOptions ntpdOptions = {
     },
     36 /* full option count */, 33 /* user option count */,
     ntpd_full_usage, ntpd_short_usage,
-    NULL, NULL
+    NULL, NULL,
+    PKGDATADIR
 };
 
 /*
@@ -1106,7 +1111,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPD_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

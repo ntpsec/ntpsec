@@ -1,3 +1,4 @@
+(4.2.7p97) 2010/12/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1760] from 4.2.6p3-RC12: ntpd Windows interpolation cannot be
   disabled.
 * from 4.2.6p3-RC12: Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre5.

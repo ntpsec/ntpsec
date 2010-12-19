@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.c)
  *  
- *  It has been AutoGen-ed  December 18, 2010 at 11:27:20 AM by AutoGen 5.11.6pre3
+ *  It has been AutoGen-ed  December 19, 2010 at 09:37:35 AM by AutoGen 5.11.6pre5
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:5:8 templates.
+ * Generated from AutoOpts 34:0:9 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -323,24 +323,24 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *
  *  Define the Clktest Option Environment
  */
-tSCC   zPROGNAME[]   = "CLKTEST";
-tSCC   zUsageTitle[] =
-"clktest - test the clock line discipline - Ver. 4.2.7p96\n\
+static char const zPROGNAME[8] = "CLKTEST";
+static char const zUsageTitle[128] =
+"clktest - test the clock line discipline - Ver. 4.2.7p97\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... <tty_device>\n";
-tSCC   zRcName[]     = ".ntprc";
-tSCC*  apzHomeList[] = {
-       "$HOME",
-       ".",
-       NULL };
+static char const zRcName[7] = ".ntprc";
+static char const * const apzHomeList[3] = {
+    "$HOME",
+    ".",
+    NULL };
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
+static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-tSCC    zDetail[]     = "\n\
+static char const zDetail[164] = "\n\
 Clktest can be used to test the clock line discipline (CLKLDISC,\n\
 it must be available), and to take a look at radio clocks attached\n\
 to a serial port.\n";
-tSCC    zFullVersion[] = CLKTEST_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+static char const zFullVersion[] = CLKTEST_FULL_VERSION;
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -353,6 +353,10 @@ tSCC    zFullVersion[] = CLKTEST_FULL_VERSION;
 
 #define clktest_full_usage NULL
 #define clktest_short_usage NULL
+#ifndef  PKGDATADIR
+# define PKGDATADIR ""
+#endif
+
 tOptions clktestOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -383,7 +387,8 @@ tOptions clktestOptions = {
     },
     10 /* full option count */, 5 /* user option count */,
     clktest_full_usage, clktest_short_usage,
-    NULL, NULL
+    NULL, NULL,
+    PKGDATADIR
 };
 
 /*
@@ -528,7 +533,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_CLKTEST_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

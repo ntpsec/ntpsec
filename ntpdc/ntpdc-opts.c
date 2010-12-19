@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  December 18, 2010 at 11:24:03 AM by AutoGen 5.11.6pre3
+ *  It has been AutoGen-ed  December 19, 2010 at 09:36:57 AM by AutoGen 5.11.6pre5
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:5:8 templates.
+ * Generated from AutoOpts 34:0:9 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -449,19 +449,19 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *
  *  Define the Ntpdc Option Environment
  */
-tSCC   zPROGNAME[]   = "NTPDC";
-tSCC   zUsageTitle[] =
-"ntpdc - vendor-specific NTP query program - Ver. 4.2.7p96\n\
+static char const zPROGNAME[6] = "NTPDC";
+static char const zUsageTitle[128] =
+"ntpdc - vendor-specific NTP query program - Ver. 4.2.7p97\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
-tSCC   zRcName[]     = ".ntprc";
-tSCC*  apzHomeList[] = {
-       "$HOME",
-       ".",
-       NULL };
+static char const zRcName[7] = ".ntprc";
+static char const * const apzHomeList[3] = {
+    "$HOME",
+    ".",
+    NULL };
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
+static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-tSCC    zDetail[]     = "\n\
+static char const zDetail[618] = "\n\
 The\n\
 [= prog-name =]\n\
 utility program is used to query an NTP daemon about its\n\
@@ -478,8 +478,8 @@ In addition, nearly all the\n\
 configuration options which can be specified at startup using\n\
 ntpd's configuration file may also be specified at run time using\n\
 [= prog-name =] .\n";
-tSCC    zFullVersion[] = NTPDC_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+static char const zFullVersion[] = NTPDC_FULL_VERSION;
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -492,6 +492,10 @@ tSCC    zFullVersion[] = NTPDC_FULL_VERSION;
 
 #define ntpdc_full_usage NULL
 #define ntpdc_short_usage NULL
+#ifndef  PKGDATADIR
+# define PKGDATADIR ""
+#endif
+
 tOptions ntpdcOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -521,7 +525,8 @@ tOptions ntpdcOptions = {
     },
     15 /* full option count */, 10 /* user option count */,
     ntpdc_full_usage, ntpdc_short_usage,
-    NULL, NULL
+    NULL, NULL,
+    PKGDATADIR
 };
 
 /*
@@ -567,7 +572,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPDC_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

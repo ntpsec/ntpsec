@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  December 18, 2010 at 11:26:34 AM by AutoGen 5.11.6pre3
+ *  It has been AutoGen-ed  December 19, 2010 at 09:37:11 AM by AutoGen 5.11.6pre5
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 33:5:8 templates.
+ * Generated from AutoOpts 34:0:9 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -426,19 +426,19 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *
  *  Define the Ntpq Option Environment
  */
-tSCC   zPROGNAME[]   = "NTPQ";
-tSCC   zUsageTitle[] =
-"ntpq - standard NTP query program - Ver. 4.2.7p96\n\
+static char const zPROGNAME[5] = "NTPQ";
+static char const zUsageTitle[120] =
+"ntpq - standard NTP query program - Ver. 4.2.7p97\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
-tSCC   zRcName[]     = ".ntprc";
-tSCC*  apzHomeList[] = {
-       "$HOME",
-       ".",
-       NULL };
+static char const zRcName[7] = ".ntprc";
+static char const * const apzHomeList[3] = {
+    "$HOME",
+    ".",
+    NULL };
 
-tSCC   zBugsAddr[]    = "http://bugs.ntp.org, bugs@ntp.org";
+static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-tSCC    zDetail[]     = "\n\
+static char const zDetail[389] = "\n\
 The\n\
 [= prog-name =]\n\
 utility program is used to query NTP servers which\n\
@@ -447,8 +447,8 @@ in Appendix B of the NTPv3 specification RFC1305, requesting\n\
 information about current state and/or changes in that state.\n\
 The same formats are used in NTPv4, although some of the\n\
 variables have changed and new ones added.\n";
-tSCC    zFullVersion[] = NTPQ_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 493 */
+static char const zFullVersion[] = NTPQ_FULL_VERSION;
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -461,6 +461,10 @@ tSCC    zFullVersion[] = NTPQ_FULL_VERSION;
 
 #define ntpq_full_usage NULL
 #define ntpq_short_usage NULL
+#ifndef  PKGDATADIR
+# define PKGDATADIR ""
+#endif
+
 tOptions ntpqOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -490,7 +494,8 @@ tOptions ntpqOptions = {
     },
     14 /* full option count */, 9 /* user option count */,
     ntpq_full_usage, ntpq_short_usage,
-    NULL, NULL
+    NULL, NULL,
+    PKGDATADIR
 };
 
 /*
@@ -536,7 +541,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 626 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>
