@@ -1,5 +1,5 @@
 /*
- *   Character mapping generated 12/16/10 15:59:15
+ *   Character mapping generated 12/18/10 12:13:30
  *
  *  This file contains the character classifications
  *  used by AutoGen and AutoOpts for identifying tokens.
@@ -70,7 +70,7 @@
 // 
 // %guard          autoopts_internal
 // %file           ag-char-map.h
-// %table          opt-char-cat
+// %table          option-char-category
 // 
 // %comment
 //   This file contains the character classifications
@@ -120,41 +120,41 @@
 //
 #endif /* 0 -- mapping spec. source */
 
-typedef uint32_t opt_char_cat_mask_t;
-extern opt_char_cat_mask_t const opt_char_cat[128];
+typedef uint32_t option_char_category_mask_t;
+extern option_char_category_mask_t const option_char_category[128];
 
-static inline int is_opt_char_cat_char(char ch, opt_char_cat_mask_t mask) {
+static inline int is_option_char_category_char(char ch, option_char_category_mask_t mask) {
     unsigned int ix = (unsigned char)ch;
-    return ((ix < 0x7F) && ((opt_char_cat[ix] & mask) != 0)); }
+    return ((ix < 0x7F) && ((option_char_category[ix] & mask) != 0)); }
 
-#define IS_LOWER_CASE_CHAR(_c)      is_opt_char_cat_char((_c), 0x000001)
-#define IS_UPPER_CASE_CHAR(_c)      is_opt_char_cat_char((_c), 0x000002)
-#define IS_ALPHABETIC_CHAR(_c)      is_opt_char_cat_char((_c), 0x000003)
-#define IS_OCT_DIGIT_CHAR(_c)       is_opt_char_cat_char((_c), 0x000004)
-#define IS_DEC_DIGIT_CHAR(_c)       is_opt_char_cat_char((_c), 0x00000C)
-#define IS_HEX_DIGIT_CHAR(_c)       is_opt_char_cat_char((_c), 0x00001C)
-#define IS_ALPHANUMERIC_CHAR(_c)    is_opt_char_cat_char((_c), 0x00000F)
-#define IS_VAR_FIRST_CHAR(_c)       is_opt_char_cat_char((_c), 0x000023)
-#define IS_VARIABLE_NAME_CHAR(_c)   is_opt_char_cat_char((_c), 0x00002F)
-#define IS_OPTION_NAME_CHAR(_c)     is_opt_char_cat_char((_c), 0x00006F)
-#define IS_VALUE_NAME_CHAR(_c)      is_opt_char_cat_char((_c), 0x0000EF)
-#define IS_HORIZ_WHITE_CHAR(_c)     is_opt_char_cat_char((_c), 0x000100)
-#define IS_COMPOUND_NAME_CHAR(_c)   is_opt_char_cat_char((_c), 0x0003EF)
-#define IS_WHITESPACE_CHAR(_c)      is_opt_char_cat_char((_c), 0x000500)
-#define IS_UNQUOTABLE_CHAR(_c)      is_opt_char_cat_char((_c), 0x000800)
-#define IS_END_XML_TOKEN_CHAR(_c)   is_opt_char_cat_char((_c), 0x001500)
-#define IS_GRAPHIC_CHAR(_c)         is_opt_char_cat_char((_c), 0x002000)
-#define IS_PLUS_N_SPACE_CHAR(_c)    is_opt_char_cat_char((_c), 0x004500)
-#define IS_PUNCTUATION_CHAR(_c)     is_opt_char_cat_char((_c), 0x008000)
-#define IS_SUFFIX_CHAR(_c)          is_opt_char_cat_char((_c), 0x01000F)
-#define IS_SUFFIX_FMT_CHAR(_c)      is_opt_char_cat_char((_c), 0x03000F)
-#define IS_FALSE_TYPE_CHAR(_c)      is_opt_char_cat_char((_c), 0x040000)
-#define IS_FILE_NAME_CHAR(_c)       is_opt_char_cat_char((_c), 0x09000F)
-#define IS_END_TOKEN_CHAR(_c)       is_opt_char_cat_char((_c), 0x100500)
-#define IS_END_LIST_ENTRY_CHAR(_c)  is_opt_char_cat_char((_c), 0x300500)
+#define IS_LOWER_CASE_CHAR(_c)      is_option_char_category_char((_c), 0x000001)
+#define IS_UPPER_CASE_CHAR(_c)      is_option_char_category_char((_c), 0x000002)
+#define IS_ALPHABETIC_CHAR(_c)      is_option_char_category_char((_c), 0x000003)
+#define IS_OCT_DIGIT_CHAR(_c)       is_option_char_category_char((_c), 0x000004)
+#define IS_DEC_DIGIT_CHAR(_c)       is_option_char_category_char((_c), 0x00000C)
+#define IS_HEX_DIGIT_CHAR(_c)       is_option_char_category_char((_c), 0x00001C)
+#define IS_ALPHANUMERIC_CHAR(_c)    is_option_char_category_char((_c), 0x00000F)
+#define IS_VAR_FIRST_CHAR(_c)       is_option_char_category_char((_c), 0x000023)
+#define IS_VARIABLE_NAME_CHAR(_c)   is_option_char_category_char((_c), 0x00002F)
+#define IS_OPTION_NAME_CHAR(_c)     is_option_char_category_char((_c), 0x00006F)
+#define IS_VALUE_NAME_CHAR(_c)      is_option_char_category_char((_c), 0x0000EF)
+#define IS_HORIZ_WHITE_CHAR(_c)     is_option_char_category_char((_c), 0x000100)
+#define IS_COMPOUND_NAME_CHAR(_c)   is_option_char_category_char((_c), 0x0003EF)
+#define IS_WHITESPACE_CHAR(_c)      is_option_char_category_char((_c), 0x000500)
+#define IS_UNQUOTABLE_CHAR(_c)      is_option_char_category_char((_c), 0x000800)
+#define IS_END_XML_TOKEN_CHAR(_c)   is_option_char_category_char((_c), 0x001500)
+#define IS_GRAPHIC_CHAR(_c)         is_option_char_category_char((_c), 0x002000)
+#define IS_PLUS_N_SPACE_CHAR(_c)    is_option_char_category_char((_c), 0x004500)
+#define IS_PUNCTUATION_CHAR(_c)     is_option_char_category_char((_c), 0x008000)
+#define IS_SUFFIX_CHAR(_c)          is_option_char_category_char((_c), 0x01000F)
+#define IS_SUFFIX_FMT_CHAR(_c)      is_option_char_category_char((_c), 0x03000F)
+#define IS_FALSE_TYPE_CHAR(_c)      is_option_char_category_char((_c), 0x040000)
+#define IS_FILE_NAME_CHAR(_c)       is_option_char_category_char((_c), 0x09000F)
+#define IS_END_TOKEN_CHAR(_c)       is_option_char_category_char((_c), 0x100500)
+#define IS_END_LIST_ENTRY_CHAR(_c)  is_option_char_category_char((_c), 0x300500)
 
 #ifdef AUTOOPTS_INTERNAL
-opt_char_cat_mask_t const opt_char_cat[128] = {
+option_char_category_mask_t const option_char_category[128] = {
   /*x00*/ 0x140000, /*x01*/ 0x000000, /*x02*/ 0x000000, /*x03*/ 0x000000,
   /*x04*/ 0x000000, /*x05*/ 0x000000, /*x06*/ 0x000000, /*\a */ 0x000000,
   /*\b */ 0x000400, /*\t */ 0x000100, /*\n */ 0x000400, /*\v */ 0x000400,
