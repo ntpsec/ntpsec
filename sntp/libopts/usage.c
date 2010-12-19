@@ -2,7 +2,7 @@
 /*
  * \file usage.c
  *
- * Time-stamp:      "2010-11-05 11:41:54 bkorb"
+ * Time-stamp:      "2010-12-18 11:41:41 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -37,12 +37,6 @@
 
 #define OPTPROC_L_N_S  (OPTPROC_LONGOPT | OPTPROC_SHORTOPT)
 
-static arg_types_t argTypes;
-
-FILE * option_usage_fp = NULL;
-static char    zOptFmtLine[ 16 ];
-static ag_bool displayEnum;
-
 /* = = = START-STATIC-FORWARD = = = */
 static void
 set_usage_flags(tOptions * opts, char const * flg_txt);
@@ -60,11 +54,8 @@ static void
 prt_extd_usage(tOptions * pOptions, tOptDesc * pOD, arg_types_t * pAT);
 
 static void
-prt_ini_list(
-    char const * const * papz,
-    ag_bool *    pInitIntro,
-    char const * pzRc,
-    char const * pzPN );
+prt_ini_list(char const * const * papz, ag_bool * pInitIntro,
+             char const * pzRc, char const * pzPN);
 
 static void
 prt_preamble(tOptions * pOptions, tOptDesc * pOD, arg_types_t * pAT);
@@ -532,13 +523,10 @@ prt_extd_usage(tOptions * pOptions, tOptDesc * pOD, arg_types_t * pAT)
  *   squishy, but important to tell users how to find these files.
  */
 static void
-prt_ini_list(
-    char const * const * papz,
-    ag_bool *    pInitIntro,
-    char const * pzRc,
-    char const * pzPN )
+prt_ini_list(char const * const * papz, ag_bool * pInitIntro,
+             char const * pzRc, char const * pzPN)
 {
-    char zPath[ AG_PATH_MAX+1 ];
+    char zPath[AG_PATH_MAX+1];
 
     if (papz == NULL)
         return;
@@ -547,13 +535,25 @@ prt_ini_list(
     *pInitIntro = AG_FALSE;
 
     for (;;) {
-        char const* pzPath = *(papz++);
+        char const * pzPath = *(papz++);
+        char const * pzReal = zPath;
 
         if (pzPath == NULL)
             break;
 
-        if (optionMakePath(zPath, (int)sizeof(zPath), pzPath, pzPN))
-            pzPath = zPath;
+        /*
+         * Ignore any invalid paths
+         */
+        if (! optionMakePath(zPath, (int)sizeof(zPath), pzPath, pzPN))
+            pzReal = pzPath;
+
+        /*
+         * Expand paths that are relative to the executable or installation
+         * directories.  Leave alone paths that use environment variables.
+         */
+        else if ((*pzPath == '$')
+                 && ((pzPath[1] == '$') || (pzPath[1] == '@')))
+            pzPath = pzReal;
 
         /*
          *  Print the name of the "homerc" file.  If the "rcfile" name is
@@ -567,10 +567,9 @@ prt_ini_list(
              *  IF the "homerc" file is a directory,
              *  then append the "rcfile" name.
              */
-            if (  (stat(pzPath, &sb) == 0)
-               && S_ISDIR(sb.st_mode)) {
+            if ((stat(pzReal, &sb) == 0) && S_ISDIR(sb.st_mode)) {
                 fputc(DIRCH, option_usage_fp);
-                fputs(pzRc, option_usage_fp);
+                fputs(pzRc,  option_usage_fp);
             }
         }
 

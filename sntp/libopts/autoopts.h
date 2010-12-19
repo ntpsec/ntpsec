@@ -2,7 +2,7 @@
 /*
  *  \file autoopts.h
  *
- *  Time-stamp:      "2010-07-17 10:39:18 bkorb"
+ *  Time-stamp:      "2010-12-18 11:53:11 bkorb"
  *
  *  This file defines all the global structures and special values
  *  used in the automated option processing library.
@@ -145,7 +145,7 @@ typedef enum {
     OPTION_LOAD_KEEP
 } tOptionLoadMode;
 
-extern tOptionLoadMode option_load_mode;
+static tOptionLoadMode option_load_mode;
 
 /*
  *  The pager state is used by optionPagedUsage() procedure.
@@ -197,21 +197,21 @@ typedef enum { TEXTTO_TABLE COUNT_TT } teTextTo;
 #undef _TT_
 
 typedef struct {
-    tCC*    pzStr;
-    tCC*    pzReq;
-    tCC*    pzNum;
-    tCC*    pzFile;
-    tCC*    pzKey;
-    tCC*    pzKeyL;
-    tCC*    pzBool;
-    tCC*    pzNest;
-    tCC*    pzOpt;
-    tCC*    pzNo;
-    tCC*    pzBrk;
-    tCC*    pzNoF;
-    tCC*    pzSpc;
-    tCC*    pzOptFmt;
-    tCC*    pzTime;
+    char const * pzStr;
+    char const * pzReq;
+    char const * pzNum;
+    char const * pzFile;
+    char const * pzKey;
+    char const * pzKeyL;
+    char const * pzBool;
+    char const * pzNest;
+    char const * pzOpt;
+    char const * pzNo;
+    char const * pzBrk;
+    char const * pzNoF;
+    char const * pzSpc;
+    char const * pzOptFmt;
+    char const * pzTime;
 } arg_types_t;
 
 #define AGALOC(c, w)          ao_malloc((size_t)c)
@@ -353,7 +353,8 @@ extern char* strrchr(char const *s, int c);
 /*
  *  File pointer for usage output
  */
-extern FILE* option_usage_fp;
+FILE * option_usage_fp;
+static char const * program_pkgdatadir;
 
 extern tOptProc optionPrintVersion, optionPagedUsage, optionLoadOpt;
 
