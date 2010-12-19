@@ -2,7 +2,7 @@
 /**
  * \file autoopts.c
  *
- *  Time-stamp:      "2010-12-06 14:02:35 bkorb"
+ *  Time-stamp:      "2010-12-18 12:09:04 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -30,7 +30,19 @@
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
-static char const zNil[] = "";
+#ifndef PKGDATADIR
+#  define PKGDATADIR ""
+#endif
+
+static char const   zNil[] = "";
+static arg_types_t  argTypes             = { NULL };
+static char         zOptFmtLine[16]      = { NUL };
+static ag_bool      displayEnum          = AG_FALSE;
+static char const   pkgdatadir_default[] = PKGDATADIR;
+static char const * program_pkgdatadir   = pkgdatadir_default;
+static tOptionLoadMode option_load_mode  = OPTION_LOAD_UNCOOKED;
+
+       FILE *       option_usage_fp      = NULL;
 
 /* = = = START-STATIC-FORWARD = = = */
 static tSuccess
@@ -60,7 +72,7 @@ ao_malloc(size_t sz)
 {
     void * res = malloc(sz);
     if (res == NULL) {
-        fprintf(stderr, "malloc of %d bytes failed\n", (int)sz);
+        fprintf(stderr, zAO_Alloc, (int)sz);
         exit(EXIT_FAILURE);
     }
     return res;
@@ -73,7 +85,7 @@ ao_realloc(void *p, size_t sz)
 {
     void * res = (p == NULL) ? malloc(sz) : realloc(p, sz);
     if (res == NULL) {
-        fprintf(stderr, "realloc of %d bytes at 0x%p failed\n", (int)sz, p);
+        fprintf(stderr, zAO_Realloc, (int)sz, p);
         exit(EXIT_FAILURE);
     }
     return res;
@@ -97,7 +109,7 @@ ao_strdup(char const *str)
 {
     char * res = strdup(str);
     if (res == NULL) {
-        fprintf(stderr, "strdup of %d byte string failed\n", (int)strlen(str));
+        fprintf(stderr, zAO_Strdup, (int)strlen(str));
         exit(EXIT_FAILURE);
     }
     return res;
@@ -457,7 +469,7 @@ shortOptionFind(tOptions* pOpts, uint_t optValue, tOptState* pOptState)
         return SUCCESS;
     }
 
- short_opt_error:
+short_opt_error:
 
     /*
      *  IF we are to stop on errors (the default, actually)
@@ -1091,10 +1103,7 @@ checkConsistency(tOptions* pOpts)
  *       ERRSKIP_OPTERR or ERRSTOP_OPTERR macros were invoked.
 =*/
 int
-optionProcess(
-    tOptions*  pOpts,
-    int        argCt,
-    char**     argVect )
+optionProcess(tOptions * pOpts, int argCt, char ** argVect)
 {
     if (! SUCCESSFUL(validateOptionsStruct(pOpts, argVect[0])))
         exit(EX_SOFTWARE);
@@ -1107,6 +1116,8 @@ optionProcess(
         pOpts->origArgCt   = argCt;
         pOpts->origArgVect = argVect;
         pOpts->fOptSet    |= OPTPROC_INITDONE;
+        if (HAS_pzPkgDataDir(pOpts))
+            program_pkgdatadir = pOpts->pzPkgDataDir;
 
         if (! SUCCESSFUL(doPresets(pOpts)))
             return 0;

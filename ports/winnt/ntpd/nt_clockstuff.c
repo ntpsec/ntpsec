@@ -773,7 +773,9 @@ init_winnt_time(void)
 
 	choose_interp_counter();
 
-	if (os_clock_precision < 4 * 10000 && !getenv("NTPD_USE_INTERP_DANGEROUS")) {
+	if (getenv("NTPD_USE_SYSTEM_CLOCK") ||
+	    (os_clock_precision < 4 * 10000 &&
+	     !getenv("NTPD_USE_INTERP_DANGEROUS"))) {
 		msyslog(LOG_INFO, "using Windows clock directly");
 	} else {
 		winnt_use_interpolation = TRUE;

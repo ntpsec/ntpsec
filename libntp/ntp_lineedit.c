@@ -47,11 +47,14 @@ static char *	lineedit_prompt;
 
 
 #ifdef LE_EDITLINE
-	static EditLine *	ntp_el;
-	static History *	ntp_hist;
-	static HistEvent	hev;
+# ifndef H_SETSIZE
+#  define H_SETSIZE H_EVENT
+# endif
+static EditLine *	ntp_el;
+static History *	ntp_hist;
+static HistEvent	hev;
 
-	char *	ntp_prompt_callback(EditLine *);
+char *	ntp_prompt_callback(EditLine *);
 #endif	/* LE_EDITLINE */
 
 
@@ -76,7 +79,11 @@ ntp_readline_init(
 #ifdef LE_EDITLINE
 	if (NULL == ntp_el) {
 
+# if 4 == EL_INIT_ARGS
 		ntp_el = el_init(progname, stdin, stdout, stderr);
+# else
+		ntp_el = el_init(progname, stdin, stdout);
+# endif
 		if (ntp_el) {
 
 			el_set(ntp_el, EL_PROMPT, ntp_prompt_callback);
@@ -96,12 +103,12 @@ ntp_readline_init(
 				success = 0;
 
 			} else {
-				memset(&hev, 0, sizeof hev);
-
-				history(ntp_hist, &hev,	H_SETSIZE, 128);
-
-				el_set(ntp_el, EL_HIST, history, ntp_hist);
-
+				memset(&hev, 0, sizeof(hev));
+#ifdef H_SETSIZE
+				history(ntp_hist, &hev, H_SETSIZE, 128);
+#endif
+				el_set(ntp_el, EL_HIST, history,
+				       ntp_hist);
 				/* use any .editrc */
 				el_source(ntp_el, NULL);
 			}
