@@ -61,7 +61,7 @@ struct recvbuf {
 #else
 	int recv_srcadr_len;		/* filled in on completion */
 #endif
-	struct interface *dstadr;	/* interface datagram arrived thru */
+	endpt *	dstadr;			/* address pkt arrived on */
 	SOCKET	fd;			/* fd on which it was received */
 	int msg_flags;			/* Flags received about the packet */
 	l_fp recv_time;			/* time of arrival */

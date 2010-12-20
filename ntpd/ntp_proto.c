@@ -543,8 +543,7 @@ receive(
 	 * multicaster, the broadcast address is null, so we use the
 	 * unicast address anyway. Don't ask.
 	 */
-	peer = findpeer(&rbufp->recv_srcadr, rbufp->dstadr,  hismode,
-	    &retcode);
+	peer = findpeer(rbufp,  hismode, &retcode);
 	dstadr_sin = &rbufp->dstadr->sin;
 	NTOHL_FP(&pkt->org, &p_org);
 	NTOHL_FP(&pkt->rec, &p_rec);

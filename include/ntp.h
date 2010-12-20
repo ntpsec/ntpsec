@@ -261,7 +261,7 @@ struct peer {
 	char *	hostname;	/* if non-NULL, remote name */
 	struct addrinfo *addrs;	/* hostname query result */
 	struct addrinfo *ai;	/* position within addrs */
-	struct interface *dstadr; /* local address (interface) */
+	endpt *	dstadr;		/* local address */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */

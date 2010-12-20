@@ -178,8 +178,7 @@ extern	void	mon_clearinterface(struct interface *interface);
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
 				      struct peer *, int);
-extern	struct peer *findpeer	(sockaddr_u *, struct interface *, int,
-				 int *);
+extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *peer,
 				 struct interface *interface);

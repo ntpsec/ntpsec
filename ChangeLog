@@ -1,4 +1,6 @@
+* [Bug 1762] from 4.2.6p3-RC12: manycastclient responses interfere.
 (4.2.7p97) 2010/12/19 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1458] from 4.2.6p3-RC12: Can not compile NTP on FreeBSD 4.7.
 * [Bug 1760] from 4.2.6p3-RC12: ntpd Windows interpolation cannot be
   disabled.
 * from 4.2.6p3-RC12: Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre5.
@@ -561,6 +563,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1458] Can not compile NTP on FreeBSD 4.7.
 * [Bug 1510] Add modes 20/21 for driver 8 to support RAWDCF @ 75 baud.
 * [Bug 1618] Unreachable code in jjy_start(). (backport from ntp-dev)
 * [Bug 1719] ntp-keygen -V crash. (backport)
@@ -573,6 +576,7 @@
 * [Bug 1754] --version output should be more verbose.
 * [Bug 1758] setsockopt IPV6_MULTICAST_IF with wrong ifindex.
 * [Bug 1760] ntpd Windows interpolation cannot be disabled.
+* [Bug 1762] manycastclient solicitation responses interfere.
 * Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre5.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
   display both build and runtime OpenSSL versions when they differ.
