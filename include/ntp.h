@@ -258,7 +258,7 @@ struct peer {
 	struct peer *ass_next;	/* link pointer in associd hash */
 	struct peer *ilink;	/* list of peers for interface */
 	sockaddr_u srcadr;	/* address of remote host */
-	struct interface *dstadr; /* local address (interface) */
+	endpt *	dstadr;		/* local address */
 	associd_t associd;	/* association ID */
 	u_char	version;	/* version number */
 	u_char	hmode;		/* local association mode */

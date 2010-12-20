@@ -215,16 +215,19 @@ findexistingpeer(
  */
 struct peer *
 findpeer(
-	sockaddr_u *	srcadr,
-	endpt *		dstadr,
+	struct recvbuf *rbufp,
 	int		pkt_mode,
 	int *		action
 	)
 {
-	struct peer *p;
-	u_int hash;
+	struct peer *	p;
+	sockaddr_u *	srcadr;
+	u_int		hash;
+	struct pkt *	pkt;
+	l_fp		pkt_org;
 
 	findpeer_calls++;
+	srcadr = &rbufp->recv_srcadr;
 	hash = NTP_HASH_ADDR(srcadr);
 	for (p = peer_hash[hash]; p != NULL; p = p->next) {
 		if (SOCK_EQ(srcadr, &p->srcadr) &&
@@ -236,6 +239,24 @@ findpeer(
 			 * look for the next valid peer association.
 			 */
 			*action = MATCH_ASSOC(p->hmode, pkt_mode);
+
+			/*
+			 * A response to our manycastclient solicitation
+			 * might be misassociated with an ephemeral peer
+			 * already spun for the server.  If the packet's
+			 * org timestamp doesn't match the peer's, check
+			 * if it matches the ACST prototype peer's.  If
+			 * so it is a redundant solicitation response,
+			 * return AM_ERR to discard it.  [Bug 1762]
+			 */
+			if (MODE_SERVER == pkt_mode &&
+			    AM_PROCPKT == *action) {
+				pkt = &rbufp->recv_pkt;
+				NTOHL_FP(&pkt->org, &pkt_org);
+				if (!L_ISEQU(&p->aorg, &pkt_org) &&
+				    findmanycastpeer(rbufp))
+					*action = AM_ERR;
+			}
 
 			/*
 			 * if an error was returned, exit back right
@@ -257,8 +278,8 @@ findpeer(
 	 */
 	if (NULL == p) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
-	} else if (p->dstadr != dstadr) {
-		set_peerdstadr(p, dstadr);
+	} else if (p->dstadr != rbufp->dstadr) {
+		set_peerdstadr(p, rbufp->dstadr);
 		DPRINTF(1, ("changed %s local address to match response",
 			    stoa(&p->srcadr)));
 	}
@@ -273,18 +294,17 @@ findpeerbyassoc(
 	u_int assoc
 	)
 {
-	register struct peer *peer;
+	struct peer *p;
 	u_int hash;
 
 	assocpeer_calls++;
 
 	hash = assoc & NTP_HASH_MASK;
-	for (peer = assoc_hash[hash]; peer != 0; peer =
-	    peer->ass_next) {
-		if (assoc == peer->associd)
-		    return (peer);
+	for (p = assoc_hash[hash]; p != NULL; p = p->ass_next) {
+		if (assoc == p->associd)
+			return p;
 	}
-	return (NULL);
+	return NULL;
 }
 
 
@@ -914,7 +934,7 @@ peer_reset(
 	)
 {
 	if (peer == NULL)
-	    return;
+		return;
 
 	peer->timereset = current_time;
 	peer->sent = 0;
