@@ -1,3 +1,4 @@
+(4.2.7p98) 2010/12/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1761] clockstuff/clktest-opts.h omitted from tarball.
 * [Bug 1762] from 4.2.6p3-RC12: manycastclient responses interfere.
 * Documentation updates from Dave Mills.

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  December 19, 2010 at 09:37:26 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 20, 2010 at 09:03:48 AM by AutoGen 5.11.6pre5
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -255,7 +255,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[104] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p97\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p98\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
