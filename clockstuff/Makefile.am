@@ -5,7 +5,7 @@ EXTRA_PROGRAMS = propdelay chutest clktest
 BUILT_SOURCES =	clktest-opts.c clktest-opts.h
 EXTRA_DIST = clktest-opts.def
 
-clktest_SOURCES = clktest.c clktest-opts.c
+clktest_SOURCES = clktest.c clktest-opts.c clktest-opts.h
 
 INCLUDES =  -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include
 INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include

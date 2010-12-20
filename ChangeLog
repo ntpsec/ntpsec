@@ -1,3 +1,4 @@
+* [Bug 1761] clockstuff/clktest-opts.h omitted from tarball.
 * [Bug 1762] from 4.2.6p3-RC12: manycastclient responses interfere.
 (4.2.7p97) 2010/12/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1458] from 4.2.6p3-RC12: Can not compile NTP on FreeBSD 4.7.

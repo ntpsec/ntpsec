@@ -3352,6 +3352,10 @@ config_vars(
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
 			break;
 
+		case T_Ident:
+			DPRINTF(1, ("DLM: ident %s\n", curr_var->value.s));
+			break;
+
 		case T_WanderThreshold:		/* FALLTHROUGH */
 		case T_Nonvolatile:
 			wander_threshold = curr_var->value.d;

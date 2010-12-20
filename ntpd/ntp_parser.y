@@ -1112,7 +1112,8 @@ misc_cmd_dbl_keyword
 	;
 
 misc_cmd_str_keyword
-	:	T_Leapfile
+	:	T_Ident
+	|	T_Leapfile
 	|	T_Pidfile
 	|	T_Qos
 	;
