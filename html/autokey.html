@@ -7,14 +7,16 @@
 <link href="scripts/style.css" type="text/css" rel="stylesheet">
 <style type="text/css">
 <!--
-.style1 {color: #FF0000}
+.style1 {
+	color: #FF0000
+}
 -->
 </style>
 </head>
 <body>
 <h3>Autokey Public-Key Authentication</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->19-Dec-2010  4:26<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->19-Dec-2010  22:23<!-- #EndDate -->
   UTC</p>
 <hr>
 <h4>Table of Contents</h4>
@@ -44,27 +46,31 @@
 <p> It is important to note that the certificate trail is validated only at startup when an association is mobilized. Once validated in this way,  the server remains valid until it  is demobilized, even if  certificates on the trail to the THs expire.</p>
 <p>Example</p>
 <div align="center"><img src="pic/flt8.gif" alt="gif">
-    <p>Figure 1. Example Configuration</p>
+  <p>Figure 1. Example Configuration</p>
 </div>
 <p>Figure 1 shows an example configuration with three NTP subnets, Alice, Helen and Carol. Hosts A and B are THs of Alice, host R is the TH of Helen and host X is the TH of Carol. Assume that all associations are client/server; so, for example, TH X has two mobilized associations, one to Alice host C and the other to Carol host S. While not shown in the figure, Alice hosts A and B could configure symmetric mode associations between them for redundancy and backup.</p>
 <p>Note that  host D cetificate trail is D&rarr;C&rarr;A or D&rarr;C&rarr;B, depending on the particular order the trails are built. Host Y certificate trail is only Y&rarr;X, since X is a TH. Host X has two cetficate trails X&rarr;C&rarr;A or X&rarr;C&rarr;B, and X&rarr;S&rarr;R.</p>
 <h4 id="group">NTP Secure Groups</h4>
 <p>NTP security groups are an extension of the NTP subnets described in the previous section. They include in addition to certificate trails one or another identity schemes described on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page. NTP secure groups are used to define cryptographic compartments and security
-hierarchies. The identity scheme insures that the server is authentic and not victim of masquerade by an intruder acting as a middleman.</p>
-<p> As in NTP subnet, NTP secure groups are configured as an acyclic tree rooted on the THs. The THs are at the lowest stratum of the secure group. All group hosts construct an  unbroken  certificate trail from each host, possibly via intermediate hosts, and ending at a TH of that group. In addition, each group host verifies its server has the secret group key using an identity exchange.</p>
+  hierarchies. The identity scheme insures that the server is authentic and not victim of masquerade by an intruder acting as a middleman.</p>
+<p> As in NTP subnet, NTP secure groups are configured as an acyclic tree rooted on the THs. The THs are at the lowest stratum of the secure group; they and possibly other hosts in the group run the identity exchange. All group hosts construct an  unbroken  certificate trail from each host, possibly via intermediate hosts, and ending at a TH of that group. The TH verifies authenticity as a client of a serverin another group.</p>
 <p> For secure group servers, the string specified by the <tt>-i</tt> option of the <tt>ntp-keygen</tt> program is the name of the secure group. For secure group servers this name must match the <tt>ident</tt> option
-  of the <tt>crypto</tt> command for the server. For secure group clients, this name must match the <tt>ident</tt> option of the <tt>server</tt> command. This name is also used in the identity keys and parameters file names. The file naming conventions are described on
+  of the <tt>crypto</tt> command. For secure group clients, this name must match the <tt>ident</tt> option of the <tt>server</tt> command. This name is also used in the identity keys and parameters file names. The file naming conventions are described on
   the <a href="keygen.html">ntp-keygen</a> page.</p>
 <dd><span class="style1">In the latest Autokey version, the host name and group name are independent of each other and the <tt>host</tt> option of the <tt>crypto</tt> command is deprecated. When compatibility with older versions is required, specify the same name for both the <tt>-s</tt> and <tt>-i</tt> options.</span></dd>
-<p>The Autokey identity schemes involve a challenge-response exchange where a client generates a nonce and sends to the server. The server performs a mathematical operation involving a second nonce and the secret group key, and sends the result along with a hash to the client. The client performs a another mathematical operation and verifies the result with the hash. Since each exchange involves two nonces, even after repeated observations of many exchanges, an intruder cannot learn the secret group key. It is this quality that allows the secure group key to persist long after the longest period of certificate validity. In the Schnorr IFF scheme considered later on this page, the secret group key is not divulged to the clients, so they cannot conspire to prove identity to other hosts.</p>
-<p>As described on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page, there are five identity schemes, three of which - IFF, GQ and MV - require identity files specific to each scheme. There are two types of files for each scheme, an encrypted server keys file  and a nonencrypted client parameters file, which usually contains a subset of the keys file. </p>
-<p> Hosts with no dependent clients can retrieve client parameter files from an
+<div align="center"><img src="pic/flt9.gif" alt="gif">
+  <p>Figure 2. Identify Scheme</p>
+</div>
+<p>As shown in Figure 2, an Autokey identity scheme involves a challenge-response exchange where a client generates a nonce and sends to the server. The server performs a mathematical operation involving a second nonce and the secret group key, and sends the result along with a hash to the client. The client performs a another mathematical operation and verifies the result with the hash.</p>
+<p> Since each exchange involves two nonces, even after repeated observations of many exchanges, an intruder cannot learn the secret group key. It is this quality that allows the  secret group key to persist long after the longest period of certificate validity. In the Schnorr (Identify Friend or Foe - IFF) scheme, the secret group key is not divulged to the clients, so they cannot conspire to prove identity to other hosts.</p>
+<p>As described on the <a href="http://www.eecis.udel.edu/~mills/ident.html">Autokey Identity Schemes</a> page, there are five identity schemes, three of which - IFF, GQ and MV - require identity files specific to each scheme. There are two types of files for each scheme, an encrypted server keys file  and a nonencrypted client keys file, also called the parameters file, which usually contains a subset of the keys file.</p>
+<p> Figure 2 shows how keys and parameters are distributed to servers and clients. Here, a TH constructs the encrypted keys file and the nonencrypted parameters file. Hosts with no dependent clients can retrieve client parameter files from an
   archive or web page. The <tt>ntp-keygen</tt> program can export parameter files using the <tt>-e</tt> option.
-  Hosts with dependent clients other than the CA must retrieve copies of the server
-  key file using secure means. The <tt>ntp-keygen</tt> program can export these data
-  using the <tt>-q</tt> option and chosen remote password. In either case the data are installed as a file
+  Servers with dependent clients other than THs must retrieve copies of the server
+  keys file using secure means. The <tt>ntp-keygen</tt> program can export server keys files 
+  using the <tt>-q</tt> option and chosen remote password. In either case the files are installed 
   and then renamed using the name given as the first line in the file, but without
-the filestamp.</p>
+  the filestamp.</p>
 <p>Example</p>
 <p>Returning to the example of Figure 1, Alice, Helen and Carol run TC, internally, as the environment is secure and without threat from external attack, in particular a middleman masquerade. However,  TH X of Carol is vulnerable to masquerade on the links between X and C and between X and  S. Therefor, both C and S are configured as Autokey servers with, for example, the IFF identity scheme, and X as a client of both of them. For this purpose, both C and S export their IFF parameter files to X as described above.</p>
 <h4 id="config2">Configuration - Authentication Schemes</h4>
@@ -88,18 +94,18 @@ the filestamp.</p>
 <p>It is possible to configure clients  of server <tt>grundoon.udel.edu</tt> in the same way with the server line pointing to <tt>grundoon.udel.edu</tt>. Dependent clients  authenticate to <tt>time.nistg.gov</tt> through <tt>grundoon.udel.edu</tt>.</p>
 <p>In the above configuration examples, the default Autokey host name is the string  returned by the Unix <tt>gethostname()</tt> library routine. However, this name has nothing to do with the DNS name of the host. The Autokey host name is used as the subject and issuer names on the certificate, as well as the default  password for the encrypted keys files. The  Autokey host name can be changed using the <tt>-s</tt> option of the <tt>ntp-keygen</tt> program. The default password can be changed using the <tt>-p</tt> option of the <tt>ntp-keygen</tt> program and the <tt>pw</tt> option of the <tt>crypto</tt> command.</p>
 <h4 ident="ident">Configuration - Identity Schemes</h4>
-<p> For the simplest identity scheme TC, the server generates host keys, trusted certificate and identity files using an <tt>ntp-keygen </tt> program commadn with options specified in this section, while the clients use the same command with no options. The server  uses the <tt>crypto</tt>  command in the comnfiguration file with options specified in this section, while the clients use the same command with no options. Additonia client options are specified in the <tt>server</tt> command for each association. </p>
+<p> For the simplest identity scheme TC, the server generates host keys, trusted certificate and identity files using an <tt>ntp-keygen </tt> program commadn with options specified in this section, while the clients use the same command with no options. The server  uses the <tt>crypto</tt> command in the comnfiguration file with options specified in this section, while the clients use the same command with no options. Additonia client options are specified in the <tt>server</tt> command for each association. </p>
 <p> It's best to start with a functioning TC configuation and add  commands as necessary. For example, the CA generates an encrypted server keys file using the command</p>
 <p><tt>ntp-keygen -I -i <em>group</em></tt>,</p>
-<p>  where  <em><tt>group</tt></em> is the group name used by  all hosts in the group.  This and following commands can be combined in a single command. The   nonencrypted client parameters     can be exported using the  command</p>
+<p> where <em><tt>group</tt></em> is the group name used by  all hosts in the group.  This and following commands can be combined in a single command. The   nonencrypted client parameters     can be exported using the  command</p>
 <p><tt>ntp-keygen -e &gt;<i>file</i></tt>,</p>
 <p>where the <tt>-e</tt> option redirects the  client parameters to <em><tt>file</tt></em> via the standard output stream for a mail application or stored locally for later distribution.  In a similar fashion the  encrypted keys file can be exported using the command </p>
 <p><tt>ntp-keygen -q <em>passw2</em> &gt;<i>file</i></tt>,</p>
 <p>where <em><tt>passwd2</tt></em> is the read password for another host. In either case the file is installed  under the name<tt> </tt>found in the first line of the file, but converted to lower case and without the filestamp</p>
-<p>As in the TC scheme, the server includes a <tt>crypto</tt> command in the configuration file with the <tt>ident <em>group</em></tt> option. The crypto command in the  client configuration file is unchanged, but the server command includes the  <tt>ident <em>group</em></tt> option.</p>
+<p>As in the TC scheme, the server includes a <tt>crypto</tt> command in the configuration file with the <tt>ident <em>group</em></tt> option. The crypto command in the  client configuration file is unchanged, but the server command includes the <tt>ident <em>group</em></tt> option.</p>
 <p>In special circumstances the Autokey message digest algorithm can be changed using the <tt>digest</tt> option of the <tt>crypto</tt> command. The  digest algorithm is separate and distinct from the symmetric
   key message digest algorithm.   If compliance with FIPS 140-2 is required,
-the algorithm must be ether <tt>SHA</tt> or <tt>SHA1</tt>. The Autokey message digest algorithm must be the same for  all participants in the NTP subnet.</p>
+  the algorithm must be ether <tt>SHA</tt> or <tt>SHA1</tt>. The Autokey message digest algorithm must be the same for  all participants in the NTP subnet.</p>
 <h4 id="exam">Examples</h4>
 <div align="center"> <img src="pic/group.gif" alt="gif"> </div>
 <p>Consider a scenario involving three secure groups RED, GREEN and BLUE. RED and BLUE are typical of national laboratories providing certified time to the Internet at large. As shown ion the figure, RED TH mort and BLUE TH macabre run NTP symmetric mode with each other for monitoring or backup. For the purpose of illustration, assume both THs are primary servers. GREEN is typical of a large university providing certified time to the campus community. GREEN TH howland is a broadcast client of both RED and BLUE. BLUE uses the IFF scheme, while both RED and GREEN use the GQ scheme, but with different keys. YELLOW is a client of GREEN and for purposes of illustration a TH for YELLOW.</p>
