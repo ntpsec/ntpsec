@@ -208,13 +208,17 @@ are defined and described by RFC 5905.
 .PP
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
-.BR "'1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs'" ,
+.BR "'1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs'" ,
 where the
+.B "'(+0800)'"
+means that to get to UTC from the reported local time one must
+add 8 hours and 0 minutes,
+and the
 .B "'+4.567 +/- 0.089 secs'"
 indicates the local clock is 4.567 seconds behind the correct time
 (so 4.567 seconds must be added to the local clock to get it to be correct),
 and the time of
-'1996 Oct 15 20:17:25.123'
+'1996-10-15 20:17:25.123'
 is believed to be correct to within
 +/- 0.089
 seconds.
@@ -235,7 +239,7 @@ are defined and described by RFC 5905.
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
 @example
-1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
+1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
 @end example
 where the
 @example
@@ -243,8 +247,9 @@ where the
 @end example
 indicates the local clock is 4.567 seconds behind the correct time
 (so 4.567 seconds must be added to the local clock to get it to be correct),
-and the time of
-@code{1996 Oct 15 20:17:25.123}
+and the (local) time of
+@code{1996-10-15 20:17:25.123}
+can be converted to UTC time by adding 8 hours and 0 minutes, and
 is believed to be correct to within
 @code{+/- 0.089}
 seconds.
