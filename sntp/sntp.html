@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p99 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p100 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -92,15 +92,16 @@ are defined and described by RFC 5905.
 
   <p class="indent">The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
-<pre class="example">     1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
+<pre class="example">     1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
 </pre>
   <p>where the
 <pre class="example">     +4.567 +/- 0.089 secs
 </pre>
   <p>indicates the local clock is 4.567 seconds behind the correct time
 (so 4.567 seconds must be added to the local clock to get it to be correct),
-and the time of
-<code>1996 Oct 15 20:17:25.123</code>
+and the (local) time of
+<code>1996-10-15 20:17:25.123</code>
+can be converted to UTC time by adding 8 hours and 0 minutes, and
 is believed to be correct to within
 <code>+/- 0.089</code>
 seconds.

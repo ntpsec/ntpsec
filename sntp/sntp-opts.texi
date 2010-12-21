@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  December 21, 2010 at 09:34:46 AM by AutoGen 5.11.6pre5
+# It has been AutoGen-ed  December 21, 2010 at 11:11:33 AM by AutoGen 5.11.6pre5
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -25,7 +25,7 @@ are defined and described by RFC 5905.
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
 @example
-1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
+1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
 @end example
 where the
 @example
@@ -33,8 +33,9 @@ where the
 @end example
 indicates the local clock is 4.567 seconds behind the correct time
 (so 4.567 seconds must be added to the local clock to get it to be correct),
-and the time of
-@code{1996 Oct 15 20:17:25.123}
+and the (local) time of
+@code{1996-10-15 20:17:25.123}
+can be converted to UTC time by adding 8 hours and 0 minutes, and
 is believed to be correct to within
 @code{+/- 0.089}
 seconds.
