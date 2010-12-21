@@ -577,6 +577,7 @@
   local timezone.
 * [Bug 1751] Support for Atari FreeMiNT OS.
 * [Bug 1754] --version output should be more verbose.
+* [Bug 1757] oncore snprintf("%m") doesn't expand %m.
 * [Bug 1758] setsockopt IPV6_MULTICAST_IF with wrong ifindex.
 * [Bug 1760] ntpd Windows interpolation cannot be disabled.
 * [Bug 1762] manycastclient solicitation responses interfere.
