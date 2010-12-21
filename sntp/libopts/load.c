@@ -1,7 +1,7 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2010-12-06 14:03:01 bkorb"
+ *  Time-stamp:      "2010-12-18 11:46:07 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -27,8 +27,6 @@
  *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
-
-tOptionLoadMode option_load_mode = OPTION_LOAD_UNCOOKED;
 
 /* = = = START-STATIC-FORWARD = = = */
 static ag_bool
@@ -61,8 +59,8 @@ assembleArgValue(char* pzTxt, tOptionLoadMode mode);
  *
  * doc:
  *
- *  This routine will copy the @code{pzName} input name into the @code{pzBuf}
- *  output buffer, carefully not exceeding @code{bufSize} bytes.  If the
+ *  This routine will copy the @code{pzName} input name into the
+ *  @code{pzBuf} output buffer, not exceeding @code{bufSize} bytes.  If the
  *  first character of the input name is a @code{'$'} character, then there
  *  is special handling:
  *  @*
@@ -98,17 +96,9 @@ ag_bool
 optionMakePath(char * pzBuf, int bufSize, char const * pzName,
                char const * pzProgPath)
 {
-    size_t  name_len = strlen(pzName);
+    size_t name_len = strlen(pzName);
 
-#   ifndef PKGDATADIR
-#     define PKGDATADIR ""
-#   endif
-
-    static char const pkgdatadir[] = PKGDATADIR;
-
-    ag_bool res = AG_TRUE;
-
-    if (bufSize <= name_len)
+    if ((bufSize <= name_len) || (name_len == 0))
         return AG_FALSE;
 
     /*
@@ -137,46 +127,52 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
         return AG_FALSE;
 
     case '$':
-        res = insertProgramPath(pzBuf, bufSize, pzName, pzProgPath);
+        if (! insertProgramPath(pzBuf, bufSize, pzName, pzProgPath))
+            return AG_FALSE;
         break;
 
     case '@':
-        if (pkgdatadir[0] == NUL)
+        if (program_pkgdatadir[0] == NUL)
             return AG_FALSE;
 
-        if (name_len + sizeof (pkgdatadir) > bufSize)
+        if (snprintf(pzBuf, bufSize, "%s%s", program_pkgdatadir, pzName + 2)
+            >= bufSize)
             return AG_FALSE;
-
-        strcpy(pzBuf, pkgdatadir);
-        strcpy(pzBuf + sizeof(pkgdatadir) - 1, pzName + 2);
         break;
 
     default:
-        res = insertEnvVal(pzBuf, bufSize, pzName, pzProgPath);
+        if (! insertEnvVal(pzBuf, bufSize, pzName, pzProgPath))
+            return AG_FALSE;
     }
-
-    if (! res)
-        return AG_FALSE;
 
 #if defined(HAVE_CANONICALIZE_FILE_NAME)
     {
-        char* pz = canonicalize_file_name(pzBuf);
+        char * pz = canonicalize_file_name(pzBuf);
         if (pz == NULL)
             return AG_FALSE;
-        if (strlen(pz) < bufSize)
-            strcpy(pzBuf, pz);
+
+        name_len = strlen(pz);
+        if (name_len >= bufSize) {
+            free(pz);
+            return AG_FALSE;
+        }
+
+        memcpy(pzBuf, pz, name_len + 1);
         free(pz);
     }
 
 #elif defined(HAVE_REALPATH)
     {
-        char z[ PATH_MAX+1 ];
+        char z[PATH_MAX+1];
 
         if (realpath(pzBuf, z) == NULL)
             return AG_FALSE;
 
-        if (strlen(z) < bufSize)
-            strcpy(pzBuf, z);
+        name_len = strlen(z);
+        if (name_len >= bufSize)
+            return AG_FALSE;
+
+        memcpy(pzBuf, z, name_len + 1);
     }
 #endif
 

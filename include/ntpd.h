@@ -128,7 +128,7 @@ extern  void    ntp_monclearinterface (struct interface *interface);
 /* ntp_peer.c */
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer (sockaddr_u *, struct peer *, int);
-extern	struct peer *findpeer	(sockaddr_u *, struct interface *, int, int *);
+extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc (u_int);
 extern  void	set_peerdstadr	(struct peer *peer, struct interface *interface);
 extern	struct peer *newpeer	(sockaddr_u *, struct interface *, int, int, int, int, u_int, u_char, int, keyid_t);
