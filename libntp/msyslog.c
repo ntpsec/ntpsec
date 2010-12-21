@@ -37,26 +37,29 @@ extern	char *	progname;
 
 /* Declare the local functions */
 void	addto_syslog	(int, const char *);
-void	format_errmsg   (char *, int, const char *, int);
+void	format_errmsg	(char *, size_t, const char *, int);
 
 
 /*
- * This routine adds the contents of a buffer to the log
+ * This routine adds the contents of a buffer to the syslog or an
+ * application-specific logfile.
  */
 void
 addto_syslog(
 	int		level,
-	const char *	buf
+	const char *	msg
 	)
 {
 	static char *	prevcall_progname;
 	static char *	prog;
+	const char	nl[] = "\n";
+	const char	empty[] = "";
 	FILE *		term_file;
 	int		log_to_term;
+	int		log_to_file;
+	const char *	nl_or_empty;
 	const char *	human_time;
 
-	human_time = humanlogtime();
-	log_to_term = msyslog_term;
 	/* setup program basename static var prog if needed */
 	if (progname != prevcall_progname) {
 		prevcall_progname = progname;
@@ -67,52 +70,75 @@ addto_syslog(
 			prog = progname;
 	}
 
+	log_to_term = msyslog_term;
+	log_to_file = FALSE;
 #if !defined(VMS) && !defined(SYS_VXWORKS)
 	if (syslogit)
-		syslog(level, "%s", buf);
+		syslog(level, "%s", msg);
 	else
-#endif /* VMS  && SYS_VXWORKS*/
-	if (syslog_file != NULL) {
-		/* syslog() provides the timestamp, program, and pid */
-		fprintf(syslog_file, "%s %s[%d]: %s", human_time, prog,
-			(int)getpid(), buf);
-		fflush(syslog_file);
-	} else {
-		log_to_term = TRUE;
-	}
+#endif
+		if (syslog_file != NULL)
+			log_to_file = TRUE;
+		else
+			log_to_term = TRUE;
 #if DEBUG
 	if (debug > 0)
 		log_to_term = TRUE;
 #endif
+	if (!(log_to_file || log_to_term))
+		return;
+
+	/* syslog() adds the timestamp, name, and pid */
+	human_time = humanlogtime();
+
+	/* syslog() adds trailing \n if not present */
+	if ('\n' != msg[strlen(msg) - 1])
+		nl_or_empty = nl;
+	else
+		nl_or_empty = empty;
+
 	if (log_to_term) {
 		term_file = (level <= LOG_ERR)
 				? stderr
 				: stdout;
-		fprintf(term_file, "%s %s[%d]: %s", human_time, prog,
-			(int)getpid(), buf);
+		fprintf(term_file, "%s %s[%d]: %s%s", human_time, prog,
+			(int)getpid(), msg, nl_or_empty);
 		fflush(term_file);
+	}
+
+	if (log_to_file) {
+		fprintf(syslog_file, "%s %s[%d]: %s%s", human_time,
+			prog, (int)getpid(), msg, nl_or_empty);
+		fflush(syslog_file);
 	}
 }
 
 
 void
-format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
+format_errmsg(
+	char *		nfmt,
+	size_t		lennfmt,
+	const char *	fmt,
+	int		errval
+	)
 {
-	register char c;
-	register char *n;
-	register const char *f;
+	char c;
+	char *n;
+	const char *f;
 	size_t len;
 	char *err;
 
 	n = nfmt;
 	f = fmt;
-	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 2)) {
+	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 1)) {
 		if (c != '%') {
 			*n++ = c;
 			continue;
 		}
 		if ((c = *f++) != 'm') {
 			*n++ = '%';
+			if ('\0' == c)
+				break;
 			*n++ = c;
 			continue;
 		}
@@ -120,17 +146,11 @@ format_errmsg(char *nfmt, int lennfmt, const char *fmt, int errval)
 		len = strlen(err);
 
 		/* Make sure we have enough space for the error message */
-		if ((n + len) < (nfmt + lennfmt - 2)) {
+		if ((n + len) < (nfmt + lennfmt - 1)) {
 			memcpy(n, err, len);
 			n += len;
 		}
 	}
-	/*
-	 * syslog adds a trailing \n if not present, do the same so we
-	 * have the same behavior with syslog and a log file.
-	 */
-	if (n > nfmt && '\n' != *(n - 1))
-		*n++ = '\n';
 	*n = '\0';
 }
 

@@ -21,6 +21,7 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		inttoa.cpp		\
 		lfptostr.cpp		\
 		modetoa.cpp		\
+		msyslog.cpp		\
 		netof.cpp		\
 		numtoa.cpp		\
 		numtohost.cpp		\
