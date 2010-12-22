@@ -15,7 +15,8 @@
 * [Bug 1758] setsockopt IPV6_MULTICAST_IF with wrong ifindex.
 * [Bug 1760] ntpd Windows interpolation cannot be disabled.
 * [Bug 1762] manycastclient solicitation responses interfere.
-* Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre5.
+* Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre7.
+* Relax minimum Automake version to 1.10 with updated libopts.m4.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
   display both build and runtime OpenSSL versions when they differ.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving

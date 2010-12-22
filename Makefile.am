@@ -1,5 +1,5 @@
-## LIBOPTS_CHECK patch requires AM_COND_IF, thereby automake 1.11
-AUTOMAKE_OPTIONS = foreign 1.11
+## LIBOPTS_CHECK_NOBUILD works with Automake 1.10 now
+AUTOMAKE_OPTIONS = foreign 1.10
 ACLOCAL_AMFLAGS = -I m4 -I sntp/libopts/m4
 
 NULL =

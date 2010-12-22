@@ -123,7 +123,7 @@ case "${enable_libopts_install+set}" in
  set) ;;
  *) enable_libopts_install=no ;;
 esac
-LIBOPTS_CHECK([sntp/libopts], [skip-makefile])
+LIBOPTS_CHECK_NOBUILD([sntp/libopts])
 
 AC_FUNC_FORK
 
