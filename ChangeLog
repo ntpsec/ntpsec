@@ -1,4 +1,6 @@
 (4.2.7p100) 2010/12/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1743] from 4.2.6p3-RC12: Display timezone offset when showing
+  time for sntp in the local timezone (documentation updates).
 (4.2.7p99) 2010/12/21 Released by Harlan Stenn <stenn@ntp.org>
 * Add unit tests for msnprintf().
 (4.2.7p98) 2010/12/20 Released by Harlan Stenn <stenn@ntp.org>
