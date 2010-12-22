@@ -1,3 +1,6 @@
+* from 4.2.6p3-RC12: Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre7.
+* from 4.2.6p3-RC12: Relax minimum Automake version to 1.10 with updated
+  libopts.m4.
 (4.2.7p100) 2010/12/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1743] from 4.2.6p3-RC12: Display timezone offset when showing
   time for sntp in the local timezone (documentation updates).
@@ -569,7 +572,6 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
----
 
 * [Bug 1458] Can not compile NTP on FreeBSD 4.7.
 * [Bug 1510] Add modes 20/21 for driver 8 to support RAWDCF @ 75 baud.
@@ -586,7 +588,8 @@
 * [Bug 1758] setsockopt IPV6_MULTICAST_IF with wrong ifindex.
 * [Bug 1760] ntpd Windows interpolation cannot be disabled.
 * [Bug 1762] manycastclient solicitation responses interfere.
-* Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre5.
+* Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre7.
+* Relax minimum Automake version to 1.10 with updated libopts.m4.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
   display both build and runtime OpenSSL versions when they differ.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
