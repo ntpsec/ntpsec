@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  December 21, 2010 at 11:10:39 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 22, 2010 at 12:30:15 PM by AutoGen 5.11.6pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -473,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[123] =
-"sntp - standard SNTP program - Ver. 4.2.7p100\n\
+"sntp - standard SNTP program - Ver. 4.2.7p101\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
