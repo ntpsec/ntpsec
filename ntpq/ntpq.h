@@ -62,7 +62,7 @@
  * Arguments are returned in a union
  */
 typedef union {
-	char *string;
+	const char *string;
 	long ival;
 	u_long uval;
 	sockaddr_u netnum;
@@ -112,14 +112,17 @@ struct ctl_var {
 
 extern int	interactive;	/* are we prompting? */
 extern int	old_rv;		/* use old rv behavior? --old-rv */
+extern u_int	numhosts;
+extern u_int	numassoc;
 
 extern	void	asciize		(int, char *, FILE *);
 extern	int	getnetnum	(const char *, sockaddr_u *, char *, int);
 extern	void	sortassoc	(void);
 extern	void	show_error_msg	(int, associd_t);
-extern	int	doquery		(int, associd_t, int, int, char *,
+extern	int	dogetassoc	(FILE *);
+extern	int	doquery		(int, associd_t, int, int, const char *,
 				 u_short *, int *, const char **);
-extern	int	doqueryex	(int, associd_t, int, int, char *,
+extern	int	doqueryex	(int, associd_t, int, int, const char *,
 				 u_short *, int *, const char **, int);
 extern	char *	nntohost	(sockaddr_u *);
 extern	int	decodets	(char *, l_fp *);

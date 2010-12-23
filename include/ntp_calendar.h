@@ -92,6 +92,8 @@ typedef struct {
 			+ ((val)<<4) + ((val)<<2) + (val))	/* *big* hack */
 
 
+extern	const char *months[12];
+extern	const char *daynames[7];
 extern	void	caljulian	(u_int32, struct calendar *);
 extern	u_int32	caltontp	(const struct calendar *);
 

@@ -17,12 +17,12 @@
 
 static char *common_prettydate(l_fp *, int);
 
-const char *months[] = {
+const char * months[12] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static const char *days[] = {
+const char * daynames[7] = {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
@@ -188,13 +188,13 @@ common_prettydate(
 		ntpcal_time_to_date(&jd, &sec);
 		snprintf(bp, LIB_BUFLENGTH, pfmt[local != 0],
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
-			 days[jd.weekday], months[jd.month-1],
+			 daynames[jd.weekday], months[jd.month-1],
 			 jd.monthday, jd.year, jd.hour,
 			 jd.minute, jd.second, msec);
 	} else		
 		snprintf(bp, LIB_BUFLENGTH, pfmt[0],
 			 (u_long)ts->l_ui, (u_long)ts->l_uf,
-			 days[tm->tm_wday], months[tm->tm_mon],
+			 daynames[tm->tm_wday], months[tm->tm_mon],
 			 tm->tm_mday, 1900 + tm->tm_year, tm->tm_hour,
 			 tm->tm_min, tm->tm_sec, msec);
 	return bp;

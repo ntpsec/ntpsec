@@ -12,7 +12,6 @@
 
 extern char *	chosts[];
 extern char	currenthost[];
-extern int	numhosts;
 int 		maxhostlen;
 
 /*
@@ -42,7 +41,6 @@ static	void	clockvar	(struct parse *, FILE *);
 static	int	findassidrange	(u_int32, u_int32, int *, int *);
 static	void	mreadlist	(struct parse *, FILE *);
 static	void	mreadvar	(struct parse *, FILE *);
-static	int	dogetassoc	(FILE *);
 static	void	printassoc	(int, FILE *);
 static	void	associations	(struct parse *, FILE *);
 static	void	lassociations	(struct parse *, FILE *);
@@ -257,7 +255,6 @@ extern int showhostnames;
 extern int rawmode;
 extern struct servent *server_entry;
 extern struct association assoc_cache[];
-extern int numassoc;
 extern u_char pktversion;
 extern struct ctl_var peer_var[];
 
@@ -902,7 +899,7 @@ findassidrange(
 {
 	associd_t	assids[2];
 	int		ind[COUNTOF(assids)];
-	int		i;
+	u_int		i;
 	size_t		a;
 
 	assids[0] = checkassocid(assid1);
@@ -1010,7 +1007,7 @@ mreadvar(
 /*
  * dogetassoc - query the host for its list of associations
  */
-static int
+int
 dogetassoc(
 	FILE *fp
 	)
@@ -1029,8 +1026,8 @@ dogetassoc(
 
 	if (dsize == 0) {
 		if (numhosts > 1)
-			(void) fprintf(fp, "server=%s ", currenthost);
-		(void) fprintf(fp, "No association ID's returned\n");
+			fprintf(fp, "server=%s ", currenthost);
+		fprintf(fp, "No association ID's returned\n");
 		return 0;
 	}
 
@@ -1075,7 +1072,7 @@ printassoc(
 	)
 {
 	register char *bp;
-	int i;
+	u_int i;
 	u_char statval;
 	int event;
 	u_long event_count;
@@ -1884,7 +1881,7 @@ dopeers(
 	int af
 	)
 {
-	register int i;
+	u_int i;
 	char fullname[LENHOSTNAME];
 	sockaddr_u netnum;
 
@@ -2064,7 +2061,7 @@ config (
 	FILE *fp
 	)
 {
-	char *cfgcmd;
+	const char *cfgcmd;
 	u_short rstatus;
 	int rsize;
 	const char *rdata;
@@ -2879,7 +2876,7 @@ mrulist(
 	char parms_buf[128];
 	char buf[24];
 	char *parms;
-	char *arg;
+	const char *arg;
 	size_t cb;
 	mru **sorted;
 	mru **ppentry;

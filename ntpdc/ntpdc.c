@@ -278,7 +278,6 @@ ntpdcmain(
 	char *argv[]
 	)
 {
-	extern int ntp_optind;
 
 	delay_time.l_ui = 0;
 	delay_time.l_uf = DEFDELAY;
@@ -352,62 +351,6 @@ ntpdcmain(
 	    && isatty(fileno(stdin)) && isatty(fileno(stderr))) {
 		interactive = 1;
 	}
-
-#if 0
-	ai_fam_templ = ai_fam_default;
-	while ((c = ntp_getopt(argc, argv, "46c:dilnps")) != EOF)
-	    switch (c) {
-		case '4':
-		    ai_fam_templ = AF_INET;
-		    break;
-		case '6':
-		    ai_fam_templ = AF_INET6;
-		    break;
-		case 'c':
-		    ADDCMD(ntp_optarg);
-		    break;
-		case 'd':
-		    ++debug;
-		    break;
-		case 'i':
-		    interactive = 1;
-		    break;
-		case 'l':
-		    ADDCMD("listpeers");
-		    break;
-		case 'n':
-		    showhostnames = 0;
-		    break;
-		case 'p':
-		    ADDCMD("peers");
-		    break;
-		case 's':
-		    ADDCMD("dmpeers");
-		    break;
-		default:
-		    errflg++;
-		    break;
-	    }
-
-	if (errflg) {
-		(void) fprintf(stderr,
-			       "usage: %s [-46dilnps] [-c cmd] host ...\n",
-			       progname);
-		exit(2);
-	}
-
-	if (ntp_optind == argc) {
-		ADDHOST(DEFHOST);
-	} else {
-		for (; ntp_optind < argc; ntp_optind++)
-		    ADDHOST(argv[ntp_optind]);
-	}
-
-	if (numcmds == 0 && interactive == 0
-	    && isatty(fileno(stdin)) && isatty(fileno(stderr))) {
-		interactive = 1;
-	}
-#endif
 
 #ifndef SYS_WINNT /* Under NT cannot handle SIGINT, WIN32 spawns a handler */
 	if (interactive)

@@ -863,14 +863,14 @@ ntpcal_days_in_months(
 int32
 ntpcal_edate_to_eradays(
 	int32 years  ,
-	int32 months ,
+	int32 mons ,
 	int32 mdays  )
 {
 	ntpcal_split tmp;
 	int32	     res;
 
-	if (months) {
-		tmp = ntpcal_days_in_months(months);
+	if (mons) {
+		tmp = ntpcal_days_in_months(mons);
 		res = ntpcal_days_in_years(years + tmp.hi) + tmp.lo;
 	} else
 		res = ntpcal_days_in_years(years);
@@ -891,16 +891,16 @@ ntpcal_edate_to_eradays(
 int32
 ntpcal_edate_to_yeardays(
 	int32 years ,
-	int32 months,
+	int32 mons,
 	int32 mdays )
 {
 	ntpcal_split tmp;
 
-	if (0 <= months && months < 12) {
+	if (0 <= mons && mons < 12) {
 		years += 1;
-		mdays += real_month_table[is_leapyear(years)][months];
+		mdays += real_month_table[is_leapyear(years)][mons];
 	} else {
-		tmp = ntpcal_days_in_months(months);
+		tmp = ntpcal_days_in_months(mons);
 		mdays += tmp.lo
 		       + ntpcal_days_in_years(years + tmp.hi)
 		       - ntpcal_days_in_years(years);

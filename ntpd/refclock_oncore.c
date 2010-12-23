@@ -161,6 +161,7 @@
 #include "ntp_io.h"
 #include "ntp_unixtime.h"
 #include "ntp_refclock.h"
+#include "ntp_calendar.h"
 #include "ntp_stdlib.h"
 
 #include <stdio.h>
@@ -553,9 +554,6 @@ static u_char oncore_cmd_Ia[]  = { 'I', 'a' };					    /* 12	Self Test				*/
  * Gj in UT as of 3.0, 1999 , Bj as of 1.3
  */
 
-static char *Month[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jly",
-	"Aug", "Sep", "Oct", "Nov", "Dec" };
-
 #define DEVICE1 	"/dev/oncore.serial.%d" /* name of serial device */
 #define DEVICE2 	"/dev/oncore.pps.%d"    /* name of pps device */
 
@@ -599,7 +597,9 @@ oncore_start(
 	struct refclockproc *pp;
 	int fd1, fd2;
 	char device1[STRING_LEN], device2[STRING_LEN], Msg[160];
+#ifndef SYS_WINNT
 	struct stat stat1, stat2;
+#endif
 
 	/* create instance structure for this unit */
 
@@ -3203,7 +3203,7 @@ oncore_msg_Gb(
 
 	snprintf(Msg, sizeof(Msg),
 		 "Date/Time set to: %d%s%d %2d:%02d:%02d GMT (GMT offset is %s%02d:%02d)",
-		 d, Month[mo-1], y, h, m, s, gmts, gmth, gmtm);
+		 d, months[mo-1], y, h, m, s, gmts, gmth, gmtm);
 	oncore_log(instance, LOG_NOTICE, Msg);
 }
 
@@ -3257,7 +3257,7 @@ oncore_msg_Gj(
 	if (dt) {
 		snprintf(Msg, sizeof(Msg),
 			 "Leap second (%d) scheduled for %d%s%d at %d:%d:%d",
-			 dt, buf[9], Month[buf[8] - 1],
+			 dt, buf[9], months[buf[8] - 1],
 			 256 * buf[6] + buf[7], buf[15], buf[16],
 			 buf[17]);
 		oncore_log(instance, LOG_NOTICE, Msg);
