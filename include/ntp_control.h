@@ -252,7 +252,15 @@ struct ntp_control {
 #define	CP_RATE			40
 #define	CP_BIAS			41
 #define	CP_SRCHOST		42
-#define	CP_MAX_NOAUTOKEY	CP_SRCHOST
+#define	CP_TIMEREC		43
+#define	CP_TIMEREACH		44
+#define	CP_BADAUTH		45
+#define	CP_BOGUSORG		46
+#define	CP_OLDPKT		47
+#define	CP_SELDISP		48
+#define	CP_SELBROKEN		49
+#define	CP_CANDIDATE		50
+#define	CP_MAX_NOAUTOKEY	CP_CANDIDATE
 #ifdef AUTOKEY
 #define	CP_FLAGS		(1 + CP_MAX_NOAUTOKEY)
 #define	CP_HOST			(2 + CP_MAX_NOAUTOKEY)

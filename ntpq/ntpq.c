@@ -26,6 +26,7 @@
 #include "ntp_calendar.h"
 #include "ntp_select.h"
 #include "ntp_assert.h"
+#include "lib_strbuf.h"
 #include "ntp_lineedit.h"
 #include "ntp_debug.h"
 #ifdef OPENSSL
@@ -1839,6 +1840,29 @@ nntohost(
 		return socktohost(netnum);
 }
 
+
+/*
+ * nntohostp() is the same as nntohost() plus a :port suffix
+ */
+char *
+nntohostp(
+	sockaddr_u *netnum
+	)
+{
+	const char *	hostn;
+	char *		buf;
+
+	if (!showhostnames || SOCK_UNSPEC(netnum))
+		return sptoa(netnum);
+	else if (ISREFCLOCKADR(netnum))
+		return refnumtoa(netnum);
+	
+	hostn = socktohost(netnum);
+	LIB_GETBUF(buf);
+	snprintf(buf, LIB_BUFLENGTH, "%s:%u", hostn, SRCPORT(netnum));
+
+	return buf;
+}
 
 /*
  * rtdatetolfp - decode an RT-11 date into an l_fp

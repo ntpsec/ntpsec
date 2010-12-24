@@ -51,7 +51,7 @@ static	void	lpassociations	(struct parse *, FILE *);
 static	void	radiostatus (struct parse *, FILE *);
 #endif	/* UNUSED */
 
-static	void	pstatus 	(struct parse *, FILE *);
+static	void	pstats	 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
 static	int	doprintpeers	(struct varlist *, int, int, int, const char *, FILE *, int);
@@ -143,7 +143,7 @@ struct xcmd opcmds[] = {
 	{ "cv",     clockvar,   { OPT|NTP_UINT, OPT|NTP_STR, NO, NO },
 	  { "assocID", "name=value[,...]", "", "" },
 	  "read clock variables" },
-	{ "pstatus",    pstatus,    { NTP_UINT, NO, NO, NO },
+	{ "pstats",    pstats,    { NTP_UINT, NO, NO, NO },
 	  { "assocID", "", "", "" },
 	  "print status information returned for a peer" },
 	{ "peers",  peers,      { OPT|IP_VERSION, NO, NO, NO },
@@ -292,7 +292,8 @@ typedef struct var_display_collection_tag {
 	const char * const display;	/* descriptive text */
 	u_char type;			/* NTP_STR, etc */
 	union {
-		char *str;
+		char *		str;
+		sockaddr_u	sau;	/* NTP_ADD */
 	} v;				/* retrieved value */
 } vdc;
 
@@ -310,7 +311,7 @@ static int	qcmp_mru_count(const void *, const void *);
 static int	qcmp_mru_r_count(const void *, const void *);
 static void	validate_ifnum(u_int, int, ifstats_row *);
 static void	another_ifstats_field(int *, ifstats_row *, FILE *);
-static void	collect_display_vdc(vdc *vdc_table, FILE *fp);
+static void	collect_display_vdc(associd_t as, vdc *table, FILE *fp);
 
 /*
  * static globals
@@ -667,7 +668,7 @@ dolist(
 	}
 
 	if (!quiet)
-		fprintf(fp,"associd=%d ",associd);
+		fprintf(fp, "associd=%u ", associd);
 	printvars(dsize, datap, (int)rstatus, type, quiet, fp);
 	return 1;
 }
@@ -738,7 +739,7 @@ writelist(
 	if (dsize == 0)
 		(void) fprintf(fp, "done! (no data returned)\n");
 	else {
-		(void) fprintf(fp,"associd=%d ",associd);
+		(void) fprintf(fp,"associd=%u ", associd);
 		printvars(dsize, datap, (int)rstatus,
 			  (associd != 0) ? TYPE_PEER : TYPE_SYS, 0, fp);
 	}
@@ -823,7 +824,7 @@ writevar(
 	if (dsize == 0)
 		fprintf(fp, "done! (no data returned)\n");
 	else {
-		fprintf(fp,"associd=%d ",associd);
+		fprintf(fp,"associd=%u ", associd);
 		type = (0 == associd)
 			   ? TYPE_SYS
 			   : TYPE_PEER;
@@ -1373,45 +1374,6 @@ radiostatus(
 	asciize(dsize, datap, fp);
 }
 #endif	/* UNUSED */
-
-/*
- * pstatus - print peer status returned by the server
- */
-static void
-pstatus(
-	struct parse *pcmd,
-	FILE *fp
-	)
-{
-	const char *datap;
-	int res;
-	associd_t associd;
-	int dsize;
-	u_short rstatus;
-
-	/* HMS: uval? */
-	if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
-		return;
-
-	res = doquery(CTL_OP_READSTAT, associd, 0, 0, NULL, &rstatus,
-		      &dsize, &datap);
-
-	if (res != 0)
-		return;
-
-	if (numhosts > 1)
-		fprintf(fp, "server=%s ", currenthost);
-	if (dsize == 0) {
-		fprintf(fp,
-			"No information returned for association %u\n",
-			associd);
-		return;
-	}
-
-	fprintf(fp, "associd=%u ", associd);
-	printvars(dsize, datap, (int)rstatus, TYPE_PEER, 0, fp);
-}
-
 
 /*
  * when - print how long its been since his last packet arrived
@@ -3240,11 +3202,14 @@ ifstats(
  */
 static void 
 collect_display_vdc(
-	vdc *vdc_table,
-	FILE *fp
+	associd_t	as,
+	vdc *		table,
+	FILE *		fp
 	)
 {
+	static const char * const suf[2] = { "adr", "port" };
 	struct varlist vl[MAXLIST];
+	char tagbuf[32];
 	vdc *pvdc;
 	u_short rstatus;
 	int rsize;
@@ -3252,14 +3217,26 @@ collect_display_vdc(
 	int qres;
 	char *tag;
 	char *val;
+	u_int n;
+	size_t taglen;
+	int match;
+	u_long ul;
 
 	memset(vl, 0, sizeof(vl));
-	for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++) {
+	for (pvdc = table; pvdc->tag != NULL; pvdc++) {
 		memset(&pvdc->v, 0, sizeof(pvdc->v));
-		doaddvlist(vl, pvdc->tag);
+		if (NTP_ADD != pvdc->type) {
+			doaddvlist(vl, pvdc->tag);
+		} else {
+			for (n = 0; n < COUNTOF(suf); n++) {
+				snprintf(tagbuf, sizeof(tagbuf), "%s%s",
+					 pvdc->tag, suf[n]);
+				doaddvlist(vl, tagbuf);
+			}
+		}
 	}
-	qres = doquerylist(vl, CTL_OP_READVAR, 0, 0, &rstatus, &rsize,
-			  &rdata);
+	qres = doquerylist(vl, CTL_OP_READVAR, as, 0, &rstatus, &rsize,
+			   &rdata);
 	doclearvlist(vl);
 	if (qres)
 		return;		/* error msg already displayed */
@@ -3269,21 +3246,66 @@ collect_display_vdc(
 	 * the retrieved values.
 	 */
 	while (nextvar(&rsize, &rdata, &tag, &val)) {
-		for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++)
-			if (!strcmp(tag, pvdc->tag))
+		for (pvdc = table; pvdc->tag != NULL; pvdc++) {
+			taglen = strlen(pvdc->tag);
+			if (strncmp(tag, pvdc->tag, taglen))
+				continue;
+			if (NTP_ADD != pvdc->type) {
+				if ('\0' != tag[taglen])
+					continue;
 				break;
-		if (pvdc->tag != NULL) {
-			NTP_INSIST(NTP_STR == pvdc->type);
+			}
+			match = FALSE;
+			for (n = 0; n < COUNTOF(suf); n++) {
+				if (strcmp(tag + taglen, suf[n]))
+					continue;
+				match = TRUE;
+				break;
+			}
+			if (match)
+				break;
+		}
+		if (NULL == pvdc->tag)
+			continue;
+		if (NTP_STR == pvdc->type) {
 			pvdc->v.str = estrdup(val);
+		} else if (NTP_ADD == pvdc->type) {
+			if (0 == n) {	/* adr */
+				decodenetnum(val, &pvdc->v.sau);
+			} else {	/* port */
+				if (atouint(val, &ul))
+					SET_PORT(&pvdc->v.sau, 
+						 (u_short)ul);
+			}
 		}
 	}
 
 	/* and display */
-	for (pvdc = vdc_table; pvdc->tag != NULL; pvdc++) {
-		if (pvdc->v.str != NULL) {
+	if (as != 0)
+		fprintf(fp, "associd=%u status=%04x %s,\n", as, rstatus,
+			statustoa(TYPE_PEER, rstatus));
+
+	for (pvdc = table; pvdc->tag != NULL; pvdc++) {
+		switch (pvdc->type) {
+
+		case NTP_STR:
+			if (pvdc->v.str != NULL) {
+				fprintf(fp, "%s  %s\n", pvdc->display,
+					pvdc->v.str);
+				free(pvdc->v.str);
+				pvdc->v.str = NULL;
+			}
+			break;
+
+		case NTP_ADD:
 			fprintf(fp, "%s  %s\n", pvdc->display,
-				pvdc->v.str);
-			free(pvdc->v.str);
+				nntohostp(&pvdc->v.sau));
+			break;
+
+		default:
+			fprintf(stderr, "unexpected vdc type %d for %s\n",
+				pvdc->type, pvdc->tag);
+			break;
 		}
 	}
 }
@@ -3314,7 +3336,7 @@ sysstats(
 	{ NULL,			NULL,			  0	  }
     };
 
-	collect_display_vdc(sysstats_vdc, fp);
+	collect_display_vdc(0, sysstats_vdc, fp);
 }
 
 	
@@ -3339,5 +3361,41 @@ monstats(
 	{ NULL,			NULL,			 0	 }
     };
 
-	collect_display_vdc(monstats_vdc, fp);
+	collect_display_vdc(0, monstats_vdc, fp);
 }
+
+
+/*
+ * pstats - print peer statistics returned by the server
+ */
+static void
+pstats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc pstats_vdc[] = {
+	{ "src",		"remote host:         ", NTP_ADD },
+	{ "dst",		"local address:       ", NTP_ADD },
+	{ "timerec",		"time last received:  ", NTP_STR },
+	{ "timer",		"time until next send:", NTP_STR },
+	{ "timereach",		"reachability change: ", NTP_STR },
+	{ "sent",		"packets sent:        ", NTP_STR },
+	{ "received",		"packets received:    ", NTP_STR },
+	{ "badauth",		"bad authentication:  ", NTP_STR },
+	{ "bogusorg",		"bogus origin:        ", NTP_STR },
+	{ "oldpkt",		"duplicate:           ", NTP_STR },
+	{ "seldisp",		"bad dispersion:      ", NTP_STR },
+	{ "selbroken",		"bad reference time:  ", NTP_STR },
+	{ "candidate",		"candidate order:     ", NTP_STR },
+	{ NULL,			NULL,			 0	 }
+    };
+	associd_t associd;
+
+	associd = checkassocid(pcmd->argval[0].uval);
+	if (0 == associd)
+		return;
+
+	collect_display_vdc(associd, pstats_vdc, fp);
+}
+

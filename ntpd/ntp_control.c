@@ -248,12 +248,12 @@ static struct ctl_var peer_var[] = {
 	{ CP_JITTER,	RO, "jitter" },		/* 26 */
 	{ CP_DISPERSION, RO, "dispersion" },	/* 27 */
 	{ CP_KEYID,	RO, "keyid" },		/* 28 */
-	{ CP_FILTDELAY,	RO, "filtdelay=" },	/* 29 */
-	{ CP_FILTOFFSET, RO, "filtoffset=" },	/* 30 */
+	{ CP_FILTDELAY,	RO, "filtdelay" },	/* 29 */
+	{ CP_FILTOFFSET, RO, "filtoffset" },	/* 30 */
 	{ CP_PMODE,	RO, "pmode" },		/* 31 */
 	{ CP_RECEIVED,	RO, "received"},	/* 32 */
 	{ CP_SENT,	RO, "sent" },		/* 33 */
-	{ CP_FILTERROR,	RO, "filtdisp=" },	/* 34 */
+	{ CP_FILTERROR,	RO, "filtdisp" },	/* 34 */
 	{ CP_FLASH,	RO, "flash" },		/* 35 */
 	{ CP_TTL,	RO, "ttl" },		/* 36 */
 	{ CP_VARLIST,	RO, "peer_var_list" },	/* 37 */
@@ -262,17 +262,25 @@ static struct ctl_var peer_var[] = {
 	{ CP_RATE,	RO, "headway" },	/* 40 */
 	{ CP_BIAS,	RO, "bias" },		/* 41 */
 	{ CP_SRCHOST,	RO, "srchost" },	/* 42 */
+	{ CP_TIMEREC,	RO, "timerec" },	/* 43 */
+	{ CP_TIMEREACH,	RO, "timereach" },	/* 44 */
+	{ CP_BADAUTH,	RO, "badauth" },	/* 45 */
+	{ CP_BOGUSORG,	RO, "bogusorg" },	/* 46 */
+	{ CP_OLDPKT,	RO, "oldpkt" },		/* 47 */
+	{ CP_SELDISP,	RO, "seldisp" },	/* 48 */
+	{ CP_SELBROKEN,	RO, "selbroken" },	/* 49 */
+	{ CP_CANDIDATE, RO, "candidate" },	/* 50 */
 #ifdef AUTOKEY
-	{ CP_FLAGS,	RO, "flags" },		/* 43 */
-	{ CP_HOST,	RO, "host" },		/* 44 */
-	{ CP_VALID,	RO, "valid" },		/* 45 */
-	{ CP_INITSEQ,	RO, "initsequence" },   /* 46 */
-	{ CP_INITKEY,	RO, "initkey" },	/* 47 */
-	{ CP_INITTSP,	RO, "timestamp" },	/* 48 */
-	{ CP_SIGNATURE,	RO, "signature" },	/* 49 */
-	{ CP_IDENT,	RO, "ident" },		/* 44 */
+	{ CP_FLAGS,	RO, "flags" },		/* 1 + CP_MAX_NOAUTOKEY */
+	{ CP_HOST,	RO, "host" },		/* 2 + CP_MAX_NOAUTOKEY */
+	{ CP_VALID,	RO, "valid" },		/* 3 + CP_MAX_NOAUTOKEY */
+	{ CP_INITSEQ,	RO, "initsequence" },   /* 4 + CP_MAX_NOAUTOKEY */
+	{ CP_INITKEY,	RO, "initkey" },	/* 5 + CP_MAX_NOAUTOKEY */
+	{ CP_INITTSP,	RO, "timestamp" },	/* 6 + CP_MAX_NOAUTOKEY */
+	{ CP_SIGNATURE,	RO, "signature" },	/* 7 + CP_MAX_NOAUTOKEY */
+	{ CP_IDENT,	RO, "ident" },		/* 8 + CP_MAX_NOAUTOKEY */
 #endif	/* AUTOKEY */
-	{ 0,		EOV, "" }		/* 44/51 */
+	{ 0,		EOV, "" }		/* 50/58 */
 };
 
 
@@ -1380,6 +1388,7 @@ ctl_putarray(
 	cq = tag;
 	while (*cq != '\0')
 		*cp++ = *cq++;
+	*cp++ = '=';
 	i = start;
 	do {
 		if (i == 0)
@@ -1389,7 +1398,7 @@ ctl_putarray(
 		snprintf(cp, sizeof(buffer) - (cp - buffer),
 			 " %.2f", arr[i] * 1e3);
 		cp += strlen(cp);
-	} while(i != start);
+	} while (i != start);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
@@ -1928,17 +1937,17 @@ ctl_putpeer(
 
 	case CP_FILTDELAY:
 		ctl_putarray(peer_var[id].text, p->filter_delay,
-			     (int)p->filter_nextpt);
+			     p->filter_nextpt);
 		break;
 
 	case CP_FILTOFFSET:
 		ctl_putarray(peer_var[id].text, p->filter_offset,
-			     (int)p->filter_nextpt);
+			     p->filter_nextpt);
 		break;
 
 	case CP_FILTERROR:
 		ctl_putarray(peer_var[id].text, p->filter_disp,
-			     (int)p->filter_nextpt);
+			     p->filter_nextpt);
 		break;
 
 	case CP_PMODE:
@@ -1978,6 +1987,40 @@ ctl_putpeer(
 			*s = '\0';
 			ctl_putdata(buf, (u_int)(s - buf), 0);
 		}
+		break;
+
+	case CP_TIMEREC:
+		ctl_putuint(peer_var[id].text,
+			    current_time - p->timereceived);
+		break;
+
+	case CP_TIMEREACH:
+		ctl_putuint(peer_var[id].text,
+			    current_time - p->timereachable);
+		break;
+
+	case CP_BADAUTH:
+		ctl_putuint(peer_var[id].text, p->badauth);
+		break;
+
+	case CP_BOGUSORG:
+		ctl_putuint(peer_var[id].text, p->bogusorg);
+		break;
+
+	case CP_OLDPKT:
+		ctl_putuint(peer_var[id].text, p->oldpkt);
+		break;
+
+	case CP_SELDISP:
+		ctl_putuint(peer_var[id].text, p->seldisptoolarge);
+		break;
+
+	case CP_SELBROKEN:
+		ctl_putuint(peer_var[id].text, p->selbroken);
+		break;
+
+	case CP_CANDIDATE:
+		ctl_putuint(peer_var[id].text, p->status);
 		break;
 #ifdef AUTOKEY
 	case CP_FLAGS:

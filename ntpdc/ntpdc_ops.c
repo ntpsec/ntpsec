@@ -550,49 +550,56 @@ refid_string(
 
 static void
 print_pflag(
-	    FILE *fp,
-	    u_int32 flags
-	    )
+	FILE *	fp,
+	u_int32	flags
+	)
 {
-     const char *str;
+	static const char none[] = "";
+	static const char comma[] = ",";
+	const char *dlim;
 
-     if (flags == 0) {
-		(void) fprintf(fp, " none\n");
-	} else {
-		str = "";
-		if (flags & INFO_FLAG_SYSPEER) {
-			(void) fprintf(fp, " system_peer");
-			str = ",";
-		}
-		if (flags & INFO_FLAG_CONFIG) {
-			(void) fprintf(fp, "%s config", str);
-			str = ",";
-		}
-		if (flags & INFO_FLAG_REFCLOCK) {
-			(void) fprintf(fp, "%s refclock", str);
-			str = ",";
-		}
-		if (flags & INFO_FLAG_AUTHENABLE) {
-			(void) fprintf(fp, "%s auth", str);
-			str = ",";
-		}
-		if (flags & INFO_FLAG_BCLIENT) {
-			(void) fprintf(fp, "%s bclient", str);
-			str = ",";
-		}
-		if (flags & INFO_FLAG_PREFER) {
-			(void) fprintf(fp, "%s prefer", str);
-			str = ",";
-		}
-		if (flags & INFO_FLAG_IBURST) {
-			(void) fprintf(fp, "%s iburst", str);
-			str = ",";
-		}
-		if (flags & INFO_FLAG_BURST) {
-			(void) fprintf(fp, "%s burst", str);
-		}
-		(void) fprintf(fp, "\n");
+	if (0 == flags) {
+		fprintf(fp, " none\n");
+		return;
 	}
+	dlim = none;
+	if (flags & INFO_FLAG_SYSPEER) {
+		fprintf(fp, " system_peer");
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_CONFIG) {
+		fprintf(fp, "%s config", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_REFCLOCK) {
+		fprintf(fp, "%s refclock", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_AUTHENABLE) {
+		fprintf(fp, "%s auth", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_PREFER) {
+		fprintf(fp, "%s prefer", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_IBURST) {
+		fprintf(fp, "%s iburst", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_BURST) {
+		fprintf(fp, "%s burst", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_SEL_CANDIDATE) {
+		fprintf(fp, "%s candidate", dlim);
+		dlim = comma;
+	}
+	if (flags & INFO_FLAG_PREFER) {
+		fprintf(fp, "%s shortlist", dlim);
+		dlim = comma;
+	}
+	fprintf(fp, "\n");
 }
 /*
  * printpeer - print detail information for a peer

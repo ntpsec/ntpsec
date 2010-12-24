@@ -237,7 +237,8 @@ statustoa(
 	LIB_GETBUF(cb);
 
 	switch (type) {
-	    case TYPE_SYS:
+
+	case TYPE_SYS:
 		strcpy(cb, getcode(CTL_SYS_LI(st), leap_codes));
 		strcat(cb, ", ");
 		strcat(cb, getcode(CTL_SYS_SOURCE(st), sync_codes));
@@ -247,8 +248,7 @@ statustoa(
 		strcat(cb, getcode(CTL_SYS_EVENT(st), sys_codes));
 		break;
 	
-	    case TYPE_PEER:
-
+	case TYPE_PEER:
 		/*
 		 * Handcraft the bits
 		 */
@@ -296,7 +296,7 @@ statustoa(
 		}
 		break;
 	
-	    case TYPE_CLOCK:
+	case TYPE_CLOCK:
 		strcat(cb, ", ");
 		strcat(cb, getevents(CTL_SYS_NEVNT(st)));
 		strcat(cb, ", ");

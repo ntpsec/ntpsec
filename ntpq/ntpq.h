@@ -125,6 +125,7 @@ extern	int	doquery		(int, associd_t, int, int, const char *,
 extern	int	doqueryex	(int, associd_t, int, int, const char *,
 				 u_short *, int *, const char **, int);
 extern	char *	nntohost	(sockaddr_u *);
+extern	char *	nntohostp	(sockaddr_u *);
 extern	int	decodets	(char *, l_fp *);
 extern	int	decodeuint	(char *, u_long *);
 extern	int	nextvar		(int *, const char **, char **, char **);
