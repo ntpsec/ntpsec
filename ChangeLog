@@ -1,3 +1,4 @@
+(4.2.7p103) 2010/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * Add ntpq pstats command similar to ntpdc's.
 * Remove ntpq pstatus command, rv/readvar does the same and more.
 * Documentation updates from Dave Mills.

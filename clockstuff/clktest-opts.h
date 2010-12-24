@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.h)
  *  
- *  It has been AutoGen-ed  December 23, 2010 at 11:10:24 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 24, 2010 at 09:43:56 AM by AutoGen 5.11.6pre5
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
@@ -63,8 +63,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    10
-#define CLKTEST_VERSION       "4.2.7p102"
-#define CLKTEST_FULL_VERSION  "clktest - test the clock line discipline - Ver. 4.2.7p102"
+#define CLKTEST_VERSION       "4.2.7p103"
+#define CLKTEST_FULL_VERSION  "clktest - test the clock line discipline - Ver. 4.2.7p103"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
