@@ -17,12 +17,12 @@
 
 static char *common_prettydate(l_fp *, int);
 
-const char * months[12] = {
+const char * const months[12] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-const char * daynames[7] = {
+const char * const daynames[7] = {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 

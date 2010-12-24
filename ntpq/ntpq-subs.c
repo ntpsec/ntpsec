@@ -12,7 +12,7 @@
 
 extern char *	chosts[];
 extern char	currenthost[];
-int 		maxhostlen;
+size_t		maxhostlen;
 
 /*
  * Declarations for command handlers in here
@@ -1973,7 +1973,7 @@ doopeers(
 	int af
 	)
 {
-	register int i;
+	u_int i;
 	char fullname[LENHOSTNAME];
 	sockaddr_u netnum;
 
