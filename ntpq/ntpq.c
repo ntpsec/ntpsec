@@ -425,7 +425,7 @@ long pktdata[DATASIZE/sizeof(long)];
  * Holds association data for use with the &n operator.
  */
 struct association assoc_cache[MAXASSOC];
-u_int numassoc = 0;		/* number of cached associations */
+u_int numassoc;		/* number of cached associations */
 
 /*
  * For commands typed on the command line (with the -c option)
@@ -736,6 +736,8 @@ openhost(
 	if (a_info == 0)
 		freeaddrinfo(ai);
 	havehost = 1;
+	numassoc = 0;
+
 	return 1;
 }
 
@@ -2287,27 +2289,19 @@ host(
 			ai_fam_templ = AF_INET;
 		else if (!strcmp("-6", pcmd->argval[i].string))
 			ai_fam_templ = AF_INET6;
-		else {
-			if (havehost)
-				(void) fprintf(fp,
-					       "current host remains %s\n",
-					       currenthost);
-			else
-				(void) fprintf(fp, "still no current host\n");
-			return;
-		}
+		else
+			goto no_change;
 		i = 1;
 	}
 	if (openhost(pcmd->argval[i].string)) {
-		(void) fprintf(fp, "current host set to %s\n", currenthost);
-		numassoc = 0;
+		fprintf(fp, "current host set to %s\n", currenthost);
 	} else {
+    no_change:
 		if (havehost)
-			(void) fprintf(fp,
-				       "current host remains %s\n", 
-				       currenthost);
+			fprintf(fp, "current host remains %s\n",
+				currenthost);
 		else
-			(void) fprintf(fp, "still no current host\n");
+			fprintf(fp, "still no current host\n");
 	}
 }
 

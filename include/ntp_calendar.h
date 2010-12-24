@@ -92,8 +92,9 @@ typedef struct {
 			+ ((val)<<4) + ((val)<<2) + (val))	/* *big* hack */
 
 
-extern	const char *months[12];
-extern	const char *daynames[7];
+extern	const char * const months[12];
+extern	const char * const daynames[7];
+
 extern	void	caljulian	(u_int32, struct calendar *);
 extern	u_int32	caltontp	(const struct calendar *);
 
@@ -145,14 +146,14 @@ ntpcal_days_in_years(int32 years);
  * excess! But then, we need no leap year flag, either...)
  */
 extern ntpcal_split
-ntpcal_days_in_months(int32 months);
+ntpcal_days_in_months(int32 mons);
 
 /*
  * Convert ELAPSED years/months/days of gregorian calendar to elapsed
  * days in Gregorian epoch. No range checks done here!
  */
 extern int32
-ntpcal_edate_to_eradays(int32 years, int32 months, int32 mdays);
+ntpcal_edate_to_eradays(int32 years, int32 mons, int32 mdays);
 
 /*
  * Convert a time spec to seconds. No range checks done here!
@@ -168,7 +169,7 @@ ntpcal_etime_to_seconds(int32 hours, int32 minutes, int32 seconds);
  * even if months & days are off-scale.
  */
 extern int32
-ntpcal_edate_to_yeardays(int32 years, int32 months, int32 mdays);
+ntpcal_edate_to_yeardays(int32 years, int32 mons, int32 mdays);
 
 /*
  * Convert the date part of a 'struct tm' (that is, year, month,
