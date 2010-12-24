@@ -1,5 +1,6 @@
 * Add ntpq pstats command similar to ntpdc's.
 * Remove ntpq pstatus command, rv/readvar does the same and more.
+* Documentation updates from Dave Mills.
 (4.2.7p102) 2010/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * Allow ntpq &1 associd use without preceding association-fetching.
 * Documentation updates from Dave Mills.
