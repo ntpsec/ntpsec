@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  December 19, 2010 at 01:02:01 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 25, 2010 at 10:21:14 AM by AutoGen 5.11.6pre7
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -727,7 +727,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[11] = "NTP_KEYGEN";
 static char const zUsageTitle[119] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3-RC11\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3-RC12\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -741,7 +741,7 @@ static char const zDetail[98] = "\n\
 If there is no new host key, look for an existing one.\n\
 If one is not found, create it.\n";
 static char const zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 504 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -869,7 +869,7 @@ doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
     pOptDesc->optArg.argInt = val;
 }
 #endif /* defined OPENSSL */
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_NTP_KEYGEN_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -887,7 +887,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 641 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

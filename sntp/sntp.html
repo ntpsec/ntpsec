@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.6p3-RC11 of <code>sntp</code>.
+  <p>This document applies to version 4.2.6p3-RC12 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -92,15 +92,16 @@ are defined and described by RFC 5905.
 
   <p class="indent">The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like
-<pre class="example">     1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
+<pre class="example">     1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
 </pre>
   <p>where the
 <pre class="example">     +4.567 +/- 0.089 secs
 </pre>
   <p>indicates the local clock is 4.567 seconds behind the correct time
 (so 4.567 seconds must be added to the local clock to get it to be correct),
-and the time of
-<code>1996 Oct 15 20:17:25.123</code>
+and the (local) time of
+<code>1996-10-15 20:17:25.123</code>
+can be converted to UTC time by adding 8 hours and 0 minutes, and
 is believed to be correct to within
 <code>+/- 0.089</code>
 seconds.
@@ -138,61 +139,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <p><a name="index-sntp-usage-3"></a>
 This is the automatically generated usage text for sntp:
 
-<pre class="example">sntp - standard SNTP program - Ver. 4.2.6p3-RC11
-USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... hostname-or-IP ...
-  Flg Arg Option-Name    Description
-   -4 no  ipv4           Force IPv4 DNS name resolution
-                                - prohibits these options:
-                                ipv6
-   -6 no  ipv6           Force IPv6 DNS name resolution
-                                - prohibits these options:
-                                ipv4
-   -d no  normalverbose  Normal verbose
-   -K Str kod            KoD history filename
-   -p no  syslog         Logging with syslog
-                                - prohibits these options:
-                                filelog
-   -l Str filelog        Log to specified logfile
-                                - prohibits these options:
-                                syslog
-   -s no  settod         Set (step) the time with settimeofday()
-                                - prohibits these options:
-                                adjtime
-   -j no  adjtime        Set (slew) the time with adjtime()
-                                - prohibits these options:
-                                settod
-   -b Str broadcast      Use broadcasts to the address specified for synchronisation
-   -t Num timeout        Specify the number of seconds to wait for broadcasts
-   -a Num authentication Enable authentication with the key auth-keynumber
-   -k Str keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
-      opt version        Output version information and exit
-   -? no  help           Display extended usage information and exit
-   -! no  more-help      Extended usage information passed thru pager
-   -&gt; opt save-opts      Save the option state to a config file
-   -&lt; Str load-opts      Load options from a config file
-                                - disabled as --no-load-opts
-                                - may appear multiple times
-
-Options are specified by doubled hyphens and their name
-or by a single hyphen and the flag character.
-
-
-
-The following option preset mechanisms are supported:
- - reading file $HOME/.ntprc
- - reading file ./.ntprc
- - examining environment variables named SNTP_*
-
-sntp implements the Simple Network Time Protocol, and is used to query
-an NTP or SNTP server and either display the time or set the local
-system's time (given suitable privilege).
-
-It can be run interactively from the command line or as a cron job.
-
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC
-1305.
-
-please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
+<pre class="example">sntp is unavailable - no --help
 </pre>
   <div class="node">
 <p><hr>

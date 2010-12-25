@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  December 19, 2010 at 01:01:44 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 25, 2010 at 10:18:44 AM by AutoGen 5.11.6pre7
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -451,7 +451,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[6] = "NTPDC";
 static char const zUsageTitle[132] =
-"ntpdc - vendor-specific NTP query program - Ver. 4.2.6p3-RC11\n\
+"ntpdc - vendor-specific NTP query program - Ver. 4.2.6p3-RC12\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -479,7 +479,7 @@ configuration options which can be specified at startup using\n\
 ntpd's configuration file may also be specified at run time using\n\
 [= prog-name =] .\n";
 static char const zFullVersion[] = NTPDC_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 504 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -554,7 +554,7 @@ doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPDC_OPTS) */
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_NTPDC_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -572,7 +572,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPDC_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 641 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

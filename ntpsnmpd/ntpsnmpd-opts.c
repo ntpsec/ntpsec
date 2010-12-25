@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  December 19, 2010 at 01:01:57 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 25, 2010 at 10:20:42 AM by AutoGen 5.11.6pre7
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -255,7 +255,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[108] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p3-RC11\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p3-RC12\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -267,7 +267,7 @@ static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 #define zDetail         NULL
 static char const zFullVersion[] = NTPSNMPD_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 504 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -329,7 +329,7 @@ doUsageOpt(
     (void)pOptions;
     USAGE(EXIT_SUCCESS);
 }
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_NTPSNMPD_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -347,7 +347,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPSNMPD_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 641 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

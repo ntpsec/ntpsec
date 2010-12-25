@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  December 19, 2010 at 03:41:47 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 25, 2010 at 10:03:48 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -473,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[126] =
-"sntp - standard SNTP program - Ver. 4.2.6p3-RC11\n\
+"sntp - standard SNTP program - Ver. 4.2.6p3-RC12\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -491,7 +491,7 @@ It can be run interactively from the command line or as a cron job.\n\n\
 NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
 1305.\n";
 static char const zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 504 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -553,7 +553,7 @@ doUsageOpt(
     (void)pOptions;
     USAGE(EXIT_SUCCESS);
 }
-/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -571,7 +571,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tpl near line 641 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>
