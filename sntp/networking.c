@@ -289,7 +289,7 @@ process_pkt (
 	int pkt_len,
 	int mode,
 	struct pkt *spkt,
-	char * func_name
+	const char * func_name
 	)
 {
 	unsigned int key_id = 0;

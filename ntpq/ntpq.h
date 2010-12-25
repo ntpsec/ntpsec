@@ -57,6 +57,10 @@
 #define	NTP_INT		0x3	/* signed integer */
 #define	NTP_ADD		0x4	/* IP network address */
 #define IP_VERSION	0x5	/* IP version */
+#define	NTP_ADP		0x6	/* IP address and port */
+#define NTP_LFP		0x7	/* NTP timestamp */
+#define NTP_MODE	0x8	/* peer mode */
+#define NTP_2BIT	0x9	/* leap bits */
 
 /*
  * Arguments are returned in a union

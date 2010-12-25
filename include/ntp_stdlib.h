@@ -117,13 +117,14 @@ extern  const char * clockstatstr (int);
 extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(u_int32);
 extern	char *	numtohost	(u_int32);
-extern	char *	socktoa		(const sockaddr_u *);
-extern	char *	sockporttoa	(const sockaddr_u *);
+extern	const char * socktoa	(const sockaddr_u *);
+extern	const char * sockporttoa(const sockaddr_u *);
 extern	u_short	sock_hash	(const sockaddr_u *);
 extern	char *	socktohost	(const sockaddr_u *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
-extern	char *	refnumtoa	(sockaddr_u *);
+extern	const char *refnumtoa	(sockaddr_u *);
+extern	const char *refid_str	(u_int32, int);
 extern	int	tsftomsu	(u_long, int);
 extern	char *	uinttoa		(u_long);
 

@@ -1087,7 +1087,7 @@ sys_info(
 	is->rootdelay = htonl(DTOFP(sys_rootdelay));
 	is->rootdispersion = htonl(DTOUFP(sys_rootdisp));
 	is->frequency = htonl(DTOFP(sys_jitter));
-	is->stability = htonl(DTOUFP(clock_stability));
+	is->stability = htonl(DTOUFP(clock_stability * 1e6));
 	is->refid = sys_refid;
 	HTONL_FP(&sys_reftime, &is->reftime);
 

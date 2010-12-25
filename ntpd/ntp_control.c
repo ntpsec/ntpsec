@@ -160,17 +160,21 @@ static struct ctl_var sys_var[] = {
 	{ CS_SS_LIMITED,	RO, "ss_limited" },	/* 41 */
 	{ CS_SS_KODSENT,	RO, "ss_kodsent" },	/* 42 */
 	{ CS_SS_PROCESSED,	RO, "ss_processed" },	/* 43 */
+	{ CS_PEERADR,		RO, "peeradr" },	/* 44 */
+	{ CS_PEERMODE,		RO, "peermode" },	/* 45 */
+	{ CS_BCASTDELAY,	RO, "bcastdelay" },	/* 46 */
+	{ CS_AUTHDELAY,		RO, "authdelay" },	/* 47 */
 #ifdef AUTOKEY
-	{ CS_FLAGS,	RO, "flags" },		/* 44 */
-	{ CS_HOST,	RO, "host" },		/* 45 */
-	{ CS_PUBLIC,	RO, "update" },		/* 46 */
-	{ CS_CERTIF,	RO, "cert" },		/* 47 */
-	{ CS_SIGNATURE,	RO, "signature" },	/* 48 */
-	{ CS_REVTIME,	RO, "until" },		/* 49 */
-	{ CS_GROUP,	RO, "group" },		/* 50 */
-	{ CS_DIGEST,	RO, "digest" },		/* 51 */
+	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
+	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
+	{ CS_PUBLIC,	RO, "update" },		/* 3 + CS_MAX_NOAUTOKEY */
+	{ CS_CERTIF,	RO, "cert" },		/* 4 + CS_MAX_NOAUTOKEY */
+	{ CS_SIGNATURE,	RO, "signature" },	/* 5 + CS_MAX_NOAUTOKEY */
+	{ CS_REVTIME,	RO, "until" },		/* 6 + CS_MAX_NOAUTOKEY */
+	{ CS_GROUP,	RO, "group" },		/* 7 + CS_MAX_NOAUTOKEY */
+	{ CS_DIGEST,	RO, "digest" },		/* 8 + CS_MAX_NOAUTOKEY */
 #endif	/* AUTOKEY */
-	{ 0,		EOV, "" }		/* 44/52 */
+	{ 0,		EOV, "" }		/* 48/56 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -1416,10 +1420,12 @@ ctl_putsys(
 	char buf[CTL_MAX_DATA_LEN];
 	u_int u;
 	double kb;
+	double dtemp;
 	char *s, *t, *be;
 	const char *ss;
 	int i;
 	struct ctl_var *k;
+	sockaddr_u sau;
 #ifdef AUTOKEY
 	struct cert_info *cp;
 	char cbuf[256];
@@ -1471,6 +1477,21 @@ ctl_putsys(
 		else
 			ctl_putuint(sys_var[CS_PEERID].text,
 				    sys_peer->associd);
+		break;
+
+	case CS_PEERADR:
+		if (sys_peer != NULL && sys_peer->dstadr != NULL)
+			ss = sptoa(&sys_peer->srcadr);
+		else
+			ss = "0.0.0.0:0";
+		ctl_putunqstr(sys_var[CS_PEERADR].text, ss, strlen(ss));
+		break;
+
+	case CS_PEERMODE:
+		u = (sys_peer != NULL)
+			? sys_peer->hmode
+			: MODE_UNSPEC;
+		ctl_putuint(sys_var[CS_PEERMODE].text, u);
 		break;
 
 	case CS_OFFSET:
@@ -1684,6 +1705,15 @@ ctl_putsys(
 
 	case CS_SS_PROCESSED:
 		ctl_putuint(sys_var[varid].text, sys_processed);
+		break;
+
+	case CS_BCASTDELAY:
+		ctl_putdbl(sys_var[varid].text, sys_bdelay * 1e3);
+		break;
+
+	case CS_AUTHDELAY:
+		LFPTOD(&sys_authdelay, dtemp);
+		ctl_putdbl(sys_var[varid].text, dtemp * 1e3);
 		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:
@@ -2846,7 +2876,7 @@ send_mru_entry(
 	u_int32 noise;
 	u_int	which;
 	u_int	remaining;
-	char *	pch;
+	const char * pch;
 
 	remaining = COUNTOF(sent);
 	memset(sent, 0, sizeof(sent));
@@ -3068,7 +3098,7 @@ static void read_mru_list(
 	struct ctl_var *	in_parms;
 	struct ctl_var *	v;
 	char *			val;
-	char *			pch;
+	const char *		pch;
 	char *			pnonce;
 	int			nonce_valid;
 	int			i;
@@ -3281,7 +3311,7 @@ send_ifstats_entry(
 	u_int32 noise;
 	u_int	which;
 	u_int	remaining;
-	char *	pch;
+	const char *pch;
 
 	remaining = COUNTOF(sent);
 	memset(sent, 0, sizeof(sent));
@@ -3823,8 +3853,8 @@ report_event(
 		 * Discard a peer report if the number of reports of
 		 * the same type exceeds the maximum for that peer.
 		 */
-		char	*src;
-		u_char	errlast;
+		const char *	src;
+		u_char		errlast;
 
 		errlast = (u_char)err & ~PEER_EVENT; 
 		if (peer->last_event == errlast)

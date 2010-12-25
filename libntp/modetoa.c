@@ -13,7 +13,7 @@ modetoa(
 	)
 {
 	char *bp;
-	static const char *modestrings[] = {
+	static const char * const modestrings[] = {
 		"unspec",
 		"sym_active",
 		"sym_passive",

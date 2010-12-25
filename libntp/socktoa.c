@@ -30,7 +30,7 @@
 /*
  * socktoa - return a numeric host name from a sockaddr_storage structure
  */
-char *
+const char *
 socktoa(
 	const sockaddr_u *sock
 	)
@@ -75,7 +75,7 @@ socktoa(
 }
 
 
-char *
+const char *
 sockporttoa(
 	const sockaddr_u *sock
 	)

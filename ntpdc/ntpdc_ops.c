@@ -532,7 +532,7 @@ again:
 }
 
 /* Convert a refid & stratum (in host order) to a string */
-static char*
+static char *
 refid_string(
 	u_int32 refid,
 	int stratum
@@ -541,7 +541,7 @@ refid_string(
 	if (stratum <= 1) {
 		static char junk[5];
 		junk[4] = 0;
-		memmove(junk, (char *)&refid, 4);
+		memcpy(junk, &refid, 4);
 		return junk;
 	}
 
@@ -595,7 +595,7 @@ print_pflag(
 		fprintf(fp, "%s candidate", dlim);
 		dlim = comma;
 	}
-	if (flags & INFO_FLAG_PREFER) {
+	if (flags & INFO_FLAG_SHORTLIST) {
 		fprintf(fp, "%s shortlist", dlim);
 		dlim = comma;
 	}
@@ -1704,8 +1704,8 @@ reslist(
 	int itemsize;
 	int res;
 	int skip;
-	char *addr;
-	char *mask;
+	const char *addr;
+	const char *mask;
 	struct resflags *rf;
 	u_int32 count;
 	u_short flags;

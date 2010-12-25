@@ -8,14 +8,14 @@
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 
-char *
+const char *
 refnumtoa(
 	sockaddr_u *num
 	)
 {
-	register u_int32 netnum;
-	register char *buf;
-	register const char *rclock;
+	u_int32 netnum;
+	char *buf;
+	const char *rclock;
 
 	LIB_GETBUF(buf);
 

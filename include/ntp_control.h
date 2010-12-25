@@ -192,7 +192,11 @@ struct ntp_control {
 #define	CS_SS_LIMITED		41
 #define	CS_SS_KODSENT		42
 #define	CS_SS_PROCESSED		43
-#define	CS_MAX_NOAUTOKEY	CS_SS_PROCESSED
+#define	CS_PEERADR		44
+#define	CS_PEERMODE		45
+#define	CS_BCASTDELAY		46
+#define	CS_AUTHDELAY		47
+#define	CS_MAX_NOAUTOKEY	CS_AUTHDELAY
 #ifdef AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
