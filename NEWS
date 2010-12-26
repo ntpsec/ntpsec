@@ -52,7 +52,7 @@ ntp-keygen
 * OpenSSL version display cleanup.
 
 ntpdc
-* Many counters hsould be treated as unsigned.
+* Many counters should be treated as unsigned.
 
 ntpdate
 * Do not ignore replies with equal receive and transmit timestamps.
