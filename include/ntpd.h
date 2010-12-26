@@ -521,6 +521,7 @@ extern int	fdpps;			/* pps file descriptor */
 
 /* ntp_request.c */
 extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
+extern u_long	auth_timereset;
 
 /* ntp_restrict.c */
 extern restrict_u *	restrictlist4;	/* IPv4 restriction list */

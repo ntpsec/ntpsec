@@ -164,6 +164,15 @@ static struct ctl_var sys_var[] = {
 	{ CS_PEERMODE,		RO, "peermode" },	/* 45 */
 	{ CS_BCASTDELAY,	RO, "bcastdelay" },	/* 46 */
 	{ CS_AUTHDELAY,		RO, "authdelay" },	/* 47 */
+	{ CS_AUTHKEYS,		RO, "authkeys" },	/* 48 */
+	{ CS_AUTHFREEK,		RO, "authfreek" },	/* 49 */
+	{ CS_AUTHKLOOKUPS,	RO, "authklookups" },	/* 50 */
+	{ CS_AUTHKNOTFOUND,	RO, "authknotfound" },	/* 51 */
+	{ CS_AUTHKUNCACHED,	RO, "authkuncached" },	/* 52 */
+	{ CS_AUTHKEXPIRED,	RO, "authkexpired" },	/* 53 */
+	{ CS_AUTHENCRYPTS,	RO, "authencrypts" },	/* 54 */
+	{ CS_AUTHDECRYPTS,	RO, "authdecrypts" },	/* 55 */
+	{ CS_AUTHRESET,		RO, "authreset" },	/* 56 */
 #ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
@@ -174,7 +183,7 @@ static struct ctl_var sys_var[] = {
 	{ CS_GROUP,	RO, "group" },		/* 7 + CS_MAX_NOAUTOKEY */
 	{ CS_DIGEST,	RO, "digest" },		/* 8 + CS_MAX_NOAUTOKEY */
 #endif	/* AUTOKEY */
-	{ 0,		EOV, "" }		/* 48/56 */
+	{ 0,		EOV, "" }		/* 57/65 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -1714,6 +1723,43 @@ ctl_putsys(
 	case CS_AUTHDELAY:
 		LFPTOD(&sys_authdelay, dtemp);
 		ctl_putdbl(sys_var[varid].text, dtemp * 1e3);
+		break;
+
+	case CS_AUTHKEYS:
+		ctl_putuint(sys_var[varid].text, authnumkeys);
+		break;
+
+	case CS_AUTHFREEK:
+		ctl_putuint(sys_var[varid].text, authnumfreekeys);
+		break;
+
+	case CS_AUTHKLOOKUPS:
+		ctl_putuint(sys_var[varid].text, authkeylookups);
+		break;
+
+	case CS_AUTHKNOTFOUND:
+		ctl_putuint(sys_var[varid].text, authkeynotfound);
+		break;
+
+	case CS_AUTHKUNCACHED:
+		ctl_putuint(sys_var[varid].text, authkeyuncached);
+		break;
+
+	case CS_AUTHKEXPIRED:
+		ctl_putuint(sys_var[varid].text, authkeyexpired);
+		break;
+
+	case CS_AUTHENCRYPTS:
+		ctl_putuint(sys_var[varid].text, authencryptions);
+		break;
+
+	case CS_AUTHDECRYPTS:
+		ctl_putuint(sys_var[varid].text, authdecryptions);
+		break;
+
+	case CS_AUTHRESET:
+		ctl_putuint(sys_var[varid].text, 
+			    current_time - auth_timereset);
 		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:

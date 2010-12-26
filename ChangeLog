@@ -1,3 +1,4 @@
+* Add ntpq authinfo command, similar to ntpdc's authinfo.
 * Add ntpq sysinfo command, similar to ntpdc's sysinfo.
 (4.2.7p103) 2010/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * Add ntpq pstats command similar to ntpdc's.

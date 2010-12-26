@@ -204,7 +204,7 @@ u_long errorcounter[INFO_ERR_AUTH+1];	/* lazy way to count errors, indexed */
  * A hack.  To keep the authentication module clear of ntp-ism's, we
  * include a time reset variable for its stats here.
  */
-static u_long auth_timereset;
+u_long auth_timereset;
 
 /*
  * Response packet used by these routines.  Also some state information

@@ -51,6 +51,7 @@ static	void	lpassociations	(struct parse *, FILE *);
 static	void	radiostatus (struct parse *, FILE *);
 #endif	/* UNUSED */
 
+static	void	authinfo	(struct parse *, FILE *);
 static	void	pstats	 	(struct parse *, FILE *);
 static	long	when		(l_fp *, l_fp *, l_fp *);
 static	char *	prettyinterval	(char *, size_t, long);
@@ -180,6 +181,9 @@ struct xcmd opcmds[] = {
 	{ "monstats", monstats, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display monitor (mrulist) counters and limits" },
+	{ "authinfo", authinfo, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "display symmetric authentication counters" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -3413,7 +3417,7 @@ sysinfo(
 	collect_display_vdc(0, sysinfo_vdc, TRUE, fp);
 }
 
-	
+
 /*
  * monstats - implements ntpq -c monstats
  */
@@ -3436,6 +3440,32 @@ monstats(
     };
 
 	collect_display_vdc(0, monstats_vdc, FALSE, fp);
+}
+
+
+/*
+ * monstats - implements ntpq -c monstats
+ */
+static void
+authinfo(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc authinfo_vdc[] = {
+	{ "authreset",		"time since reset:", NTP_STR },
+	{ "authkeys",		"stored keys:     ", NTP_STR },
+	{ "authfreek",		"free keys:       ", NTP_STR },
+	{ "authklookups",	"key lookups:     ", NTP_STR },
+	{ "authknotfound",	"keys not found:  ", NTP_STR },
+	{ "authkuncached",	"uncached keys:   ", NTP_STR },
+	{ "authkexpired",	"expired keys:    ", NTP_STR },
+	{ "authencrypts",	"encryptions:     ", NTP_STR },
+	{ "authdecrypts",	"decryptions:     ", NTP_STR },
+	{ NULL,			NULL,		     0	     }
+    };
+
+	collect_display_vdc(0, authinfo_vdc, FALSE, fp);
 }
 
 
