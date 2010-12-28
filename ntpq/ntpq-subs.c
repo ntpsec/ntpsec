@@ -70,6 +70,7 @@ static	void	mrulist		(struct parse *, FILE *);
 static	void	ifstats		(struct parse *, FILE *);
 static	void	sysstats	(struct parse *, FILE *);
 static	void	sysinfo		(struct parse *, FILE *);
+static	void	kerninfo	(struct parse *, FILE *);
 static	void	monstats	(struct parse *, FILE *);
 
 /*
@@ -175,6 +176,9 @@ struct xcmd opcmds[] = {
 	{ "sysinfo", sysinfo, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display system summary" },
+	{ "kerninfo", kerninfo, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "display kernel loop and PPS statistics" },
 	{ "sysstats", sysstats, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display system uptime and packet counts" },
@@ -3227,7 +3231,7 @@ collect_display_vdc(
 	char *tag;
 	char *val;
 	u_int n;
-	size_t taglen;
+	size_t len;
 	int match;
 	u_long ul;
 	int vtype;
@@ -3257,17 +3261,17 @@ collect_display_vdc(
 	 */
 	while (nextvar(&rsize, &rdata, &tag, &val)) {
 		for (pvdc = table; pvdc->tag != NULL; pvdc++) {
-			taglen = strlen(pvdc->tag);
-			if (strncmp(tag, pvdc->tag, taglen))
+			len = strlen(pvdc->tag);
+			if (strncmp(tag, pvdc->tag, len))
 				continue;
 			if (NTP_ADD != pvdc->type) {
-				if ('\0' != tag[taglen])
+				if ('\0' != tag[len])
 					continue;
 				break;
 			}
 			match = FALSE;
 			for (n = 0; n < COUNTOF(suf); n++) {
-				if (strcmp(tag + taglen, suf[n]))
+				if (strcmp(tag + len, suf[n]))
 					continue;
 				match = TRUE;
 				break;
@@ -3279,7 +3283,16 @@ collect_display_vdc(
 			continue;
 		switch (pvdc->type) {
 
-		case NTP_STR:	/* fallthru */
+		case NTP_STR:
+			/* strip surrounding double quotes */
+			if ('"' == val[0]) {
+				len = strlen(val);
+				if (len > 0 && '"' == val[len - 1]) {
+					val[len - 1] = '\0';
+					val++;
+				}
+			}
+			/* fallthru */
 		case NTP_MODE:	/* fallthru */
 		case NTP_2BIT:
 			pvdc->v.str = estrdup(val);
@@ -3386,7 +3399,7 @@ sysstats(
 	collect_display_vdc(0, sysstats_vdc, FALSE, fp);
 }
 
-	
+
 /*
  * sysinfo - modeled on ntpdc's sysinfo
  */
@@ -3415,6 +3428,39 @@ sysinfo(
     };
 
 	collect_display_vdc(0, sysinfo_vdc, TRUE, fp);
+}
+
+
+/*
+ * kerninfo - modeled on ntpdc's kerninfo
+ */
+static void
+kerninfo(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc kerninfo_vdc[] = {
+	{ "koffset",		"pll offset:          ", NTP_STR },
+	{ "kfreq",		"pll frequency:       ", NTP_STR },
+	{ "kmaxerr",		"maximum error:       ", NTP_STR },
+	{ "kesterr",		"estimated error:     ", NTP_STR },
+	{ "kstflags",		"kernel status:       ", NTP_STR },
+	{ "ktimeconst",		"pll time constant:   ", NTP_STR },
+	{ "kprecis",		"precision:           ", NTP_STR },
+	{ "kfreqtol",		"frequency tolerance: ", NTP_STR },
+	{ "kppsfreq",		"pps frequency:       ", NTP_STR },
+	{ "kppsstab",		"pps stability:       ", NTP_STR },
+	{ "kppsjitter",		"pps jitter:          ", NTP_STR },
+	{ "kppscalibdur",	"calibration interval ", NTP_STR },
+	{ "kppscalibs",		"calibration cycles:  ", NTP_STR },
+	{ "kppsjitexc",		"jitter exceeded:     ", NTP_STR },
+	{ "kppsstbexc",		"stability exceeded:  ", NTP_STR },
+	{ "kppscaliberrs",	"calibration errors:  ", NTP_STR },
+	{ NULL,			NULL,			 0	 }
+    };
+
+	collect_display_vdc(0, kerninfo_vdc, TRUE, fp);
 }
 
 

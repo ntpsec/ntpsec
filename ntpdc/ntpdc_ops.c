@@ -86,8 +86,8 @@ static	void	clockstat	(struct parse *, FILE *);
 static	void	fudge		(struct parse *, FILE *);
 static	void	clkbug		(struct parse *, FILE *);
 static	void	kerninfo	(struct parse *, FILE *);
-static  void    get_if_stats    (struct parse *, FILE *);
-static  void    do_if_reload    (struct parse *, FILE *);
+static	void	get_if_stats	(struct parse *, FILE *);
+static	void	do_if_reload	(struct parse *, FILE *);
 
 /*
  * Commands we understand.  Ntpdc imports this.
@@ -2971,9 +2971,9 @@ again:
 	(void)fprintf(fp, "pll frequency:        %s ppm\n",
 	    fptoa((s_fp)ntohl(ik->freq), 3));
 	(void)fprintf(fp, "maximum error:        %g s\n",
-	    (u_long)ntohl(ik->maxerror) * 1e-6);
+	    (u_long)ntohl(ik->maxerror) * tscale);
 	(void)fprintf(fp, "estimated error:      %g s\n",
-	    (u_long)ntohl(ik->esterror) * 1e-6);
+	    (u_long)ntohl(ik->esterror) * tscale);
 	(void)fprintf(fp, "status:               %04x ", status);
 #ifdef STA_PLL
 	if (status & STA_PLL) (void)fprintf(fp, " pll");

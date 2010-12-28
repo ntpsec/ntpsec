@@ -57,7 +57,7 @@ struct req_proc {
 /*
  * Universal request codes
  */
-static	struct req_proc univ_codes[] = {
+static const struct req_proc univ_codes[] = {
 	{ NO_REQUEST,		NOAUTH,	 0,	0 }
 };
 
@@ -120,7 +120,7 @@ static	void	get_clkbug_info (sockaddr_u *, struct interface *, struct req_pkt *)
 /*
  * ntpd request codes
  */
-static	struct req_proc ntp_codes[] = {
+static const struct req_proc ntp_codes[] = {
 	{ REQ_PEER_LIST,	NOAUTH,	0, 0,	list_peers },
 	{ REQ_PEER_LIST_SUM,	NOAUTH,	0, 0,	list_peers_sum },
 	{ REQ_PEER_INFO,    NOAUTH, v4sizeof(struct info_peer_list),
@@ -179,7 +179,7 @@ static	struct req_proc ntp_codes[] = {
 				get_clkbug_info },
 #endif
 	{ REQ_IF_STATS,		AUTH, 0, 0,	get_if_stats },
-	{ REQ_IF_RELOAD,        AUTH, 0, 0,	do_if_reload },
+	{ REQ_IF_RELOAD,	AUTH, 0, 0,	do_if_reload },
 
 	{ NO_REQUEST,		NOAUTH,	0, 0,	0 }
 };
@@ -415,7 +415,7 @@ process_private(
 	struct req_pkt_tail *tailinpkt;
 	sockaddr_u *srcadr;
 	struct interface *inter;
-	struct req_proc *proc;
+	const struct req_proc *proc;
 	int ec;
 	short temp_size;
 	l_fp ftmp;

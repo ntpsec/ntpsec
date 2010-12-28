@@ -4409,9 +4409,9 @@ find_flagged_addr_in_list(
 }
 
 
-char *
+const char *
 localaddrtoa(
-	struct interface *la
+	endpt *la
 	)
 {
 	return (NULL == la)

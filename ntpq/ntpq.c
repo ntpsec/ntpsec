@@ -294,7 +294,7 @@ static	void	atoascii	(const char *, size_t, char *, size_t);
 static	void	cookedprint	(int, int, const char *, int, int, FILE *);
 static	void	rawprint	(int, int, const char *, int, int, FILE *);
 static	void	startoutput	(void);
-static	void	output		(FILE *, char *, char *);
+static	void	output		(FILE *, const char *, const char *);
 static	void	endoutput	(FILE *);
 static	void	outputarr	(FILE *, char *, int, l_fp *);
 static	int	assoccmp	(const void *, const void *);
@@ -1827,7 +1827,7 @@ getnetnum(
  * nntohost - convert network number to host name.  This routine enforces
  *	       the showhostnames setting.
  */
-char *
+const char *
 nntohost(
 	sockaddr_u *netnum
 	)
@@ -1844,7 +1844,7 @@ nntohost(
 /*
  * nntohostp() is the same as nntohost() plus a :port suffix
  */
-char *
+const char *
 nntohostp(
 	sockaddr_u *netnum
 	)
@@ -3010,8 +3010,8 @@ startoutput(void)
 static void
 output(
 	FILE *fp,
-	char *name,
-	char *value
+	const char *name,
+	const char *value
 	)
 {
 	size_t len;

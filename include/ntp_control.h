@@ -205,7 +205,25 @@ struct ntp_control {
 #define	CS_AUTHENCRYPTS		54
 #define	CS_AUTHDECRYPTS		55
 #define	CS_AUTHRESET		56
-#define	CS_MAX_NOAUTOKEY	CS_AUTHRESET
+#define	CS_K_OFFSET		57
+#define	CS_K_FREQ		58
+#define	CS_K_MAXERR		59
+#define	CS_K_ESTERR		60
+#define	CS_K_STFLAGS		61
+#define	CS_K_TIMECONST		62
+#define	CS_K_PRECISION		63
+#define	CS_K_FREQTOL		64
+#define	CS_K_PPS_FREQ		65
+#define	CS_K_PPS_STABIL		66
+#define	CS_K_PPS_JITTER		67
+#define	CS_K_PPS_CALIBDUR	68
+#define	CS_K_PPS_CALIBS		69
+#define	CS_K_PPS_CALIBERRS	70
+#define	CS_K_PPS_JITEXC		71
+#define	CS_K_PPS_STBEXC		72
+#define	CS_KERN_FIRST		CS_K_OFFSET
+#define	CS_KERN_LAST		CS_K_PPS_STBEXC
+#define	CS_MAX_NOAUTOKEY	CS_KERN_LAST
 #ifdef AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)

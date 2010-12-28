@@ -7,7 +7,6 @@
 #include "log.h"
 #include "sntp-opts.h"
 #include "ntp_stdlib.h"
-//#define DEBUG
 
 int kod_init = 0, kod_db_cnt = 0;
 const char *kod_db_file;
@@ -19,9 +18,9 @@ struct kod_entry **kod_db;	/* array of pointers to kod_entry */
  */
 int
 search_entry (
-		char *hostname,
-		struct kod_entry **dst
-	     )
+	const char *hostname,
+	struct kod_entry **dst
+	)
 {
 	register int a, b, resc = 0;
 
@@ -49,8 +48,8 @@ search_entry (
 
 void
 add_entry(
-	char *hostname,
-	char *type	/* 4 bytes not \0 terminated */
+	const char *	hostname,
+	const char *	type	/* 4 bytes not \0 terminated */
 	)
 {
 	int n;
@@ -89,11 +88,11 @@ add_entry(
 
 void
 delete_entry(
-	char *hostname,
-	char *type
+	const char *	hostname,
+	const char *	type
 	)
 {
-	register int a;
+	int a;
 
 	for (a = 0; a < kod_db_cnt; a++)
 		if (!strcmp(kod_db[a]->hostname, hostname)

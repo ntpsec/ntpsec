@@ -2127,7 +2127,7 @@ printserver(
 {
 	register int i;
 	char junk[5];
-	char *str;
+	const char *str;
 
 	if (!debug) {
 		(void) fprintf(fp, "server %s, stratum %d, offset %s, delay %s\n",

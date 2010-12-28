@@ -151,8 +151,8 @@ extern	void	block_io_and_alarm	(void);
 # define	UNBLOCK_IO_AND_ALARM()	do {} while (0)
 # define	BLOCK_IO_AND_ALARM()	do {} while (0)
 #endif
-extern	char *	localaddrtoa(struct interface *);
 #define		latoa(pif)	localaddrtoa(pif)
+extern const char * localaddrtoa(endpt *);
 
 /* ntp_loopfilter.c */
 extern	void	init_loopfilter(void);

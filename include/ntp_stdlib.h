@@ -120,7 +120,7 @@ extern	char *	numtohost	(u_int32);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	u_short	sock_hash	(const sockaddr_u *);
-extern	char *	socktohost	(const sockaddr_u *);
+extern	const char * socktohost	(const sockaddr_u *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	const char *refnumtoa	(sockaddr_u *);

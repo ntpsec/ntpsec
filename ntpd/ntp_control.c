@@ -1,10 +1,20 @@
 /*
- * ntp_control.c - respond to control messages and send async traps
+ * ntp_control.c - respond to mode 6 control messages and send async
+ *		   traps.  Provides service to ntpq and others.
  */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
+
+#include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
+#include <sys/stat.h>
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
+#include <arpa/inet.h>
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -16,16 +26,9 @@
 #include "ntp_crypto.h"
 #include "ntp_assert.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
-
-#include <stdio.h>
-#include <ctype.h>
-#include <signal.h>
-#include <sys/stat.h>
-
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
+#ifdef KERNEL_PLL
+# include "ntp_syscall.h"
 #endif
-#include <arpa/inet.h>
 
 
 /*
@@ -53,7 +56,12 @@ static	u_short ctlclkstatus	(struct refclockstat *);
 static	void	ctl_flushpkt	(u_char);
 static	void	ctl_putdata	(const char *, unsigned int, int);
 static	void	ctl_putstr	(const char *, const char *, size_t);
-static	void	ctl_putdbl	(const char *, double);
+static	void	ctl_putdblf	(const char *, const char *, double);
+const char ctl_def_dbl_fmt[] = "%.3f";
+#define	ctl_putdbl(tag, d)	ctl_putdblf(tag, ctl_def_dbl_fmt, d)
+const char ctl_def_sfp_fmt[] = "%g";
+#define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, ctl_def_sfp_fmt, \
+					    FPTOD(sfp))
 static	void	ctl_putuint	(const char *, u_long);
 static	void	ctl_puthex	(const char *, u_long);
 static	void	ctl_putint	(const char *, long);
@@ -62,14 +70,18 @@ static	void	ctl_putadr	(const char *, u_int32,
 				 sockaddr_u *);
 static	void	ctl_putid	(const char *, char *);
 static	void	ctl_putarray	(const char *, double *, int);
+#ifdef KERNEL_PLL
+static	void	kstatus_to_text	(u_int32, char *, size_t);
+#endif
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
 static	void	ctl_putfs	(const char *, tstamp_t);
 #ifdef REFCLOCK
 static	void	ctl_putclock	(int, struct refclockstat *, int);
 #endif	/* REFCLOCK */
-static	struct ctl_var *ctl_getitem(struct ctl_var *, char **);
-static	u_short	count_var	(struct ctl_var *);
+static	const struct ctl_var *ctl_getitem(const struct ctl_var *,
+					  char **);
+static	u_short	count_var	(const struct ctl_var *);
 static	void	control_unspec	(struct recvbuf *, int);
 static	void	read_status	(struct recvbuf *, int);
 static	void	read_sysvars	(void);
@@ -94,7 +106,7 @@ static	void	unset_trap	(struct recvbuf *, int);
 static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
 				     struct interface *);
 
-static	struct ctl_proc control_codes[] = {
+static const struct ctl_proc control_codes[] = {
 	{ CTL_OP_UNSPEC,	NOAUTH,	control_unspec },
 	{ CTL_OP_READSTAT,	NOAUTH,	read_status },
 	{ CTL_OP_READVAR,	NOAUTH,	read_variables },
@@ -115,7 +127,7 @@ static	struct ctl_proc control_codes[] = {
  * System variable values. The array can be indexed by the variable
  * index to find the textual name.
  */
-static struct ctl_var sys_var[] = {
+static const struct ctl_var sys_var[] = {
 	{ 0,		PADDING, "" },		/* 0 */
 	{ CS_LEAP,	RW, "leap" },		/* 1 */
 	{ CS_STRATUM,	RO, "stratum" },	/* 2 */
@@ -173,6 +185,22 @@ static struct ctl_var sys_var[] = {
 	{ CS_AUTHENCRYPTS,	RO, "authencrypts" },	/* 54 */
 	{ CS_AUTHDECRYPTS,	RO, "authdecrypts" },	/* 55 */
 	{ CS_AUTHRESET,		RO, "authreset" },	/* 56 */
+	{ CS_K_OFFSET,		RO, "koffset" },	/* 57 */
+	{ CS_K_FREQ,		RO, "kfreq" },		/* 58 */
+	{ CS_K_MAXERR,		RO, "kmaxerr" },	/* 59 */
+	{ CS_K_ESTERR,		RO, "kesterr" },	/* 60 */
+	{ CS_K_STFLAGS,		RO, "kstflags" },	/* 61 */
+	{ CS_K_TIMECONST,	RO, "ktimeconst" },	/* 62 */
+	{ CS_K_PRECISION,	RO, "kprecis" },	/* 63 */
+	{ CS_K_FREQTOL,		RO, "kfreqtol" },	/* 64 */
+	{ CS_K_PPS_FREQ,	RO, "kppsfreq" },	/* 65 */
+	{ CS_K_PPS_STABIL,	RO, "kppsstab" },	/* 66 */
+	{ CS_K_PPS_JITTER,	RO, "kppsjitter" },	/* 67 */
+	{ CS_K_PPS_CALIBDUR,	RO, "kppscalibdur" },	/* 68 */
+	{ CS_K_PPS_CALIBS,	RO, "kppscalibs" },	/* 69 */
+	{ CS_K_PPS_CALIBERRS,	RO, "kppscaliberrs" },	/* 70 */
+	{ CS_K_PPS_JITEXC,	RO, "kppsjitexc" },	/* 71 */
+	{ CS_K_PPS_STBEXC,	RO, "kppsstbexc" },	/* 72 */
 #ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
@@ -192,7 +220,7 @@ static struct ctl_var *ext_sys_var = NULL;
  * System variables we print by default (in fuzzball order,
  * more-or-less)
  */
-static	u_char def_sys_var[] = {
+static const u_char def_sys_var[] = {
 	CS_VERSION,
 	CS_PROCESSOR,
 	CS_SYSTEM,
@@ -231,7 +259,7 @@ static	u_char def_sys_var[] = {
 /*
  * Peer variable list
  */
-static struct ctl_var peer_var[] = {
+static const struct ctl_var peer_var[] = {
 	{ 0,		PADDING, "" },		/* 0 */
 	{ CP_CONFIG,	RO, "config" },		/* 1 */
 	{ CP_AUTHENABLE, RO,	"authenable" },	/* 2 */
@@ -300,7 +328,7 @@ static struct ctl_var peer_var[] = {
 /*
  * Peer variables we print by default
  */
-static u_char def_peer_var[] = {
+static const u_char def_peer_var[] = {
 	CP_SRCADR,
 	CP_SRCPORT,
 	CP_SRCHOST,
@@ -351,7 +379,7 @@ static u_char def_peer_var[] = {
 /*
  * Clock variable list
  */
-static struct ctl_var clock_var[] = {
+static const struct ctl_var clock_var[] = {
 	{ 0,		PADDING, "" },		/* 0 */
 	{ CC_TYPE,	RO, "type" },		/* 1 */
 	{ CC_TIMECODE,	RO, "timecode" },	/* 2 */
@@ -373,7 +401,7 @@ static struct ctl_var clock_var[] = {
 /*
  * Clock variables printed by default
  */
-static u_char def_clock_var[] = {
+static const u_char def_clock_var[] = {
 	CC_DEVICE,
 	CC_TYPE,	/* won't be output if device = known */
 	CC_TIMECODE,
@@ -407,8 +435,8 @@ static const char last_fmt[] =		"last.%d";
 #  define		STR_PROCESSOR	"unknown"
 # endif
 
-static char str_system[] = STR_SYSTEM;
-static char str_processor[] = STR_PROCESSOR;
+static const char str_system[] = STR_SYSTEM;
+static const char str_processor[] = STR_PROCESSOR;
 #else
 # include <sys/utsname.h>
 static struct utsname utsnamebuf;
@@ -740,10 +768,10 @@ process_control(
 	int restrict_mask
 	)
 {
-	register struct ntp_control *pkt;
-	register int req_count;
-	register int req_data;
-	register struct ctl_proc *cc;
+	struct ntp_control *pkt;
+	int req_count;
+	int req_data;
+	const struct ctl_proc *cc;
 	keyid_t *pkid;
 	int properlen;
 	int maclen;
@@ -1165,16 +1193,17 @@ ctl_putunqstr(
 
 
 /*
- * ctl_putdbl - write a tagged, signed double into the response packet
+ * ctl_putdblf - write a tagged, signed double into the response packet
  */
 static void
-ctl_putdbl(
-	const char *tag,
-	double ts
+ctl_putdblf(
+	const char *	tag,
+	const char *	fmt,
+	double		d
 	)
 {
-	register char *cp;
-	register const char *cq;
+	char *cp;
+	const char *cq;
 	char buffer[200];
 
 	cp = buffer;
@@ -1183,7 +1212,7 @@ ctl_putdbl(
 		*cp++ = *cq++;
 	*cp++ = '=';
 	NTP_INSIST((cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "%.3f", ts);
+	snprintf(cp, sizeof(buffer) - (cp - buffer), fmt, d);
 	cp += strlen(cp);
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
@@ -1415,6 +1444,132 @@ ctl_putarray(
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
+/*
+ * kstatus_to_text - convert ntp_adjtime() status bits to text
+ */
+#ifdef KERNEL_PLL
+void
+kstatus_to_text(
+	u_int32	status,
+	char *	str,
+	size_t	str_sz
+	)
+{
+	char *	pch;
+	const char *lim;
+
+	pch = str;
+	lim = pch + str_sz;
+
+# define	XLATE_KST_BIT(bitval, text)			\
+do {								\
+	if (((bitval) & status) && pch + sizeof(text) <= lim) {	\
+		memcpy(pch, (text), sizeof(text));		\
+		pch += sizeof(text) - 1;			\
+	}							\
+} while (0)
+
+# ifdef STA_PLL
+	{
+		const char spll[] =		"pll ";
+		XLATE_KST_BIT(STA_PLL, spll);
+	}
+# endif
+# ifdef STA_PPSFREQ
+	{
+		const char sppsfreq[] =		"ppsfreq ";
+		XLATE_KST_BIT(STA_PPSFREQ, sppsfreq);
+	}
+# endif
+# ifdef STA_PPSTIME
+	{
+		const char sppstime[] =		"ppstime ";
+		XLATE_KST_BIT(STA_PPSTIME, sppstime);
+	}
+# endif
+# ifdef STA_FLL
+	{
+		const char sfll[] =		"fll ";
+		XLATE_KST_BIT(STA_FLL, sfll);
+	}
+# endif
+# ifdef STA_INS
+	{
+		const char sins[] =		"ins ";
+		XLATE_KST_BIT(STA_INS, sins);
+	}
+# endif
+# ifdef STA_DEL
+	{
+		const char sdel[] =		"del ";
+		XLATE_KST_BIT(STA_DEL, sdel);
+	}
+# endif
+# ifdef STA_UNSYNC
+	{
+		const char sunsync[] =		"unsync ";
+		XLATE_KST_BIT(STA_UNSYNC, sunsync);
+	}
+# endif
+# ifdef STA_FREQHOLD
+	{
+		const char sfreqhold[] =	"freqhold ";
+		XLATE_KST_BIT(STA_FREQHOLD, sfreqhold);
+	}
+# endif
+# ifdef STA_PPSSIGNAL
+	{
+		const char sppssignal[] =	"ppssignal ";
+		XLATE_KST_BIT(STA_PPSSIGNAL, sppssignal);
+	}
+# endif
+# ifdef STA_PPSJITTER
+	{
+		const char sppsjitter[] =	"ppsjitter ";
+		XLATE_KST_BIT(STA_PPSJITTER, sppsjitter);
+	}
+# endif
+# ifdef STA_PPSWANDER
+	{
+		const char sppswander[] =	"ppswander ";
+		XLATE_KST_BIT(STA_PPSWANDER, sppswander);
+	}
+# endif
+# ifdef STA_PPSERROR
+	{
+		const char sppserror[] =	"ppserror ";
+		XLATE_KST_BIT(STA_PPSERROR, sppserror);
+	}
+# endif
+# ifdef STA_CLOCKERR
+	{
+		const char sclockerr[] =	"clockerr ";
+		XLATE_KST_BIT(STA_CLOCKERR, sclockerr);
+	}
+# endif
+# ifdef STA_NANO
+	{
+		const char snano[] =		"nano ";
+		XLATE_KST_BIT(STA_NANO, snano);
+	}
+# endif
+# ifdef STA_MODE
+	{
+		const char smodefll[] =		"mode=fll ";
+		XLATE_KST_BIT(STA_MODE, smodefll);
+	}
+# endif
+# ifdef STA_CLK
+	{
+		const char ssrcb[] =		"src=B ";
+		XLATE_KST_BIT(STA_CLK, ssrcb);
+	}
+# endif
+	if (pch > str && ' ' == pch[-1])
+		pch[-1] = '\0';
+}
+#endif	/* KERNEL_PLL */
+
 
 /*
  * ctl_putsys - output a system variable
@@ -1433,12 +1588,34 @@ ctl_putsys(
 	char *s, *t, *be;
 	const char *ss;
 	int i;
-	struct ctl_var *k;
-	sockaddr_u sau;
+	const struct ctl_var *k;
 #ifdef AUTOKEY
 	struct cert_info *cp;
 	char cbuf[256];
 #endif	/* AUTOKEY */
+#ifdef KERNEL_PLL
+	static struct timex ntx;
+	static u_long ntp_adjtime_time;
+	const double tscale =
+# ifdef STA_NANO
+				1e-9;
+# else
+				1e-6;
+# endif
+	const double to_ms = 1e3 * tscale;
+
+	/*
+	 * CS_K_* variables depend on up-to-date output of ntp_adjtime()
+	 */
+	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
+	    current_time != ntp_adjtime_time) {
+		memset(&ntx, 0, sizeof(ntx));
+		if (ntp_adjtime(&ntx) < 0)
+			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
+		else
+			ntp_adjtime_time = current_time;
+	}
+#endif	/* KERNEL_PLL */
 
 	switch (varid) {
 
@@ -1761,6 +1938,150 @@ ctl_putsys(
 		ctl_putuint(sys_var[varid].text, 
 			    current_time - auth_timereset);
 		break;
+
+		/*
+		 * CTL_IF_KERNLOOP() puts a zero if the kernel loop is
+		 * unavailable, otherwise calls putfunc with args.
+		 */
+#ifndef KERNEL_PLL
+# define	CTL_IF_KERNLOOP(putfunc, args)	\
+		ctl_putint(sys_var[varid].text, 0)
+#else
+# define	CTL_IF_KERNLOOP(putfunc, args)	\
+		putfunc args
+#endif
+
+		/*
+		 * CTL_IF_KERNPPS() puts a zero if either the kernel
+		 * loop is unavailable, or kernel hard PPS is not
+		 * active, otherwise calls putfunc with args.
+		 */
+#ifndef KERNEL_PLL
+# define	CTL_IF_KERNPPS(putfunc, args)	\
+		ctl_putint(sys_var[varid].text, 0)
+#else
+# define	CTL_IF_KERNPPS(putfunc, args)			\
+		if (0 == ntx.shift)				\
+			ctl_putint(sys_var[varid].text, 0);	\
+		else						\
+			putfunc args	/* no trailing ; */
+#endif
+
+	case CS_K_OFFSET:
+		CTL_IF_KERNLOOP(
+			ctl_putdblf, 
+			(sys_var[varid].text, "%g", to_ms * ntx.offset)
+		);
+		break;
+
+	case CS_K_FREQ:
+		CTL_IF_KERNLOOP(
+			ctl_putsfp,
+			(sys_var[varid].text, ntx.freq)
+		);
+		break;
+
+	case CS_K_MAXERR:
+		CTL_IF_KERNLOOP(
+			ctl_putdblf,
+			(sys_var[varid].text, "%.6g",
+			 to_ms * ntx.maxerror)
+		);
+		break;
+
+	case CS_K_ESTERR:
+		CTL_IF_KERNLOOP(
+			ctl_putdblf,
+			(sys_var[varid].text, "%.6g",
+			 to_ms * ntx.esterror)
+		);
+		break;
+
+	case CS_K_STFLAGS:
+#ifndef KERNEL_PLL
+		str[0] = '\0';
+#else
+		kstatus_to_text(ntx.status, str, sizeof(str));
+#endif
+		ctl_putstr(sys_var[varid].text, str, strlen(str));
+		break;
+
+	case CS_K_TIMECONST:
+		CTL_IF_KERNLOOP(
+			ctl_putint,
+			(sys_var[varid].text, ntx.constant)
+		);
+		break;
+
+	case CS_K_PRECISION:
+		CTL_IF_KERNLOOP(
+			ctl_putdblf,
+			(sys_var[varid].text, "%.6g",
+			    to_ms * ntx.precision)
+		);
+		break;
+
+	case CS_K_FREQTOL:
+		CTL_IF_KERNLOOP(
+			ctl_putsfp,
+			(sys_var[varid].text, ntx.tolerance)
+		);
+		break;
+
+	case CS_K_PPS_FREQ:
+		CTL_IF_KERNPPS(
+			ctl_putsfp,
+			(sys_var[varid].text, ntx.ppsfreq)
+		);
+		break;
+
+	case CS_K_PPS_STABIL:
+		CTL_IF_KERNPPS(
+			ctl_putsfp,
+			(sys_var[varid].text, ntx.stabil)
+		);
+		break;
+
+	case CS_K_PPS_JITTER:
+		CTL_IF_KERNPPS(
+			ctl_putdbl,
+			(sys_var[varid].text, to_ms * ntx.jitter)
+		);
+		break;
+
+	case CS_K_PPS_CALIBDUR:
+		CTL_IF_KERNPPS(
+			ctl_putint,
+			(sys_var[varid].text, 1 << ntx.shift)
+		);
+		break;
+
+	case CS_K_PPS_CALIBS:
+		CTL_IF_KERNPPS(
+			ctl_putint,
+			(sys_var[varid].text, ntx.calcnt)
+		);
+		break;
+
+	case CS_K_PPS_CALIBERRS:
+		CTL_IF_KERNPPS(
+			ctl_putint,
+			(sys_var[varid].text, ntx.errcnt)
+		);
+
+	case CS_K_PPS_JITEXC:
+		CTL_IF_KERNPPS(
+			ctl_putint,
+			(sys_var[varid].text, ntx.jitcnt)
+		);
+		break;
+
+	case CS_K_PPS_STBEXC:
+		CTL_IF_KERNPPS(
+			ctl_putint,
+			(sys_var[varid].text, ntx.stbcnt)
+		);
+		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:
 		if (crypto_flags)
@@ -1837,7 +2158,7 @@ ctl_putpeer(
 	char *t;
 	char *be;
 	int i;
-	struct ctl_var *k;
+	const struct ctl_var *k;
 #ifdef AUTOKEY
 	struct autokey *ap;
 	const EVP_MD *dp;
@@ -2154,6 +2475,12 @@ ctl_putclock(
 	int mustput
 	)
 {
+	char buf[CTL_MAX_DATA_LEN];
+	char *s, *t, *be;
+	const char *ss;
+	int i;
+	const struct ctl_var *k;
+
 	switch (id) {
 
 	    case CC_TYPE:
@@ -2238,11 +2565,6 @@ ctl_putclock(
 
 	    case CC_VARLIST:
 	    {
-		    char buf[CTL_MAX_DATA_LEN];
-		    register char *s, *t, *be;
-		    register const char *ss;
-		    register int i;
-		    register struct ctl_var *k;
 
 		    s = buf;
 		    be = buf + sizeof(buf);
@@ -2306,18 +2628,19 @@ ctl_putclock(
 /*
  * ctl_getitem - get the next data item from the incoming packet
  */
-static struct ctl_var *
+static const struct ctl_var *
 ctl_getitem(
-	struct ctl_var *var_list,
+	const struct ctl_var *var_list,
 	char **data
 	)
 {
-	static struct ctl_var eol = { 0, EOV, NULL };
+	static const struct ctl_var eol = { 0, EOV, NULL };
 	static char buf[128];
 	static u_long quiet_until;
-	register struct ctl_var *v;
-	register char *cp;
-	register char *tp;
+	const struct ctl_var *v;
+	const char *pch;
+	char *cp;
+	char *tp;
 
 	/*
 	 * Delete leading commas and white space
@@ -2339,13 +2662,13 @@ ctl_getitem(
 	cp = reqpt;
 	for (v = var_list; !(EOV & v->flags); v++) {
 		if (!(PADDING & v->flags) && *cp == *(v->text)) {
-			tp = v->text;
-			while ('\0' != *tp && '=' != *tp && cp < reqend
-			       && *cp == *tp) {
+			pch = v->text;
+			while ('\0' != *pch && '=' != *pch && cp < reqend
+			       && *cp == *pch) {
 				cp++;
-				tp++;
+				pch++;
 			}
-			if ('\0' == *tp || '=' == *tp) {
+			if ('\0' == *pch || '=' == *pch) {
 				while (cp < reqend && isspace((u_char)*cp))
 					cp++;
 				if (cp == reqend || ',' == *cp) {
@@ -2433,9 +2756,9 @@ read_status(
 	int restrict_mask
 	)
 {
-	register struct peer *peer;
-	register u_char *cp;
-	register int n;
+	struct peer *peer;
+	const u_char *cp;
+	int n;
 	/* a_st holds association ID, status pairs alternating */
 	u_short a_st[CTL_MAX_DATA_LEN / sizeof(u_short)];
 
@@ -2490,10 +2813,10 @@ read_status(
 static void
 read_peervars(void)
 {
-	register struct ctl_var *v;
-	register struct peer *peer;
-	register u_char *cp;
-	register int i;
+	const struct ctl_var *v;
+	struct peer *peer;
+	const u_char *cp;
+	int i;
 	char *	valuep;
 	u_char	wants[CP_MAXCODE + 1];
 	u_int	gotvar;
@@ -2538,13 +2861,13 @@ read_peervars(void)
 static void
 read_sysvars(void)
 {
-	register struct ctl_var *v;
-	register struct ctl_var *kv;
+	const struct ctl_var *v;
+	struct ctl_var *kv;
 	u_int	n;
 	u_int	gotvar;
-	u_char *cs;
+	const u_char *cs;
 	char *	valuep;
-	char *	pch;
+	const char * pch;
 	u_char *wants;
 	size_t	wants_count;
 
@@ -2628,8 +2951,8 @@ write_variables(
 	int restrict_mask
 	)
 {
-	register struct ctl_var *v;
-	register int ext_var;
+	const struct ctl_var *v;
+	int ext_var;
 	char *valuep;
 	long val = 0;
 
@@ -3142,7 +3465,7 @@ static void read_mru_list(
 	sockaddr_u		addr[COUNTOF(last)];
 	char			buf[128];
 	struct ctl_var *	in_parms;
-	struct ctl_var *	v;
+	const struct ctl_var *	v;
 	char *			val;
 	const char *		pch;
 	char *			pnonce;
@@ -3510,14 +3833,14 @@ read_clockstatus(
 	 */
 	ctl_error(CERR_BADASSOC);
 #else
-	register struct ctl_var *v;
-	register int i;
-	register struct peer *peer;
+	const struct ctl_var *v;
+	int i;
+	struct peer *peer;
 	char *valuep;
 	u_char *wants;
 	unsigned int gotvar;
-	register u_char *cc;
-	register struct ctl_var *kv;
+	const u_char *cc;
+	struct ctl_var *kv;
 	struct refclockstat cs;
 
 	if (res_associd)
@@ -4037,10 +4360,10 @@ ctl_clr_stats(void)
 
 static u_short
 count_var(
-	struct ctl_var *k
+	const struct ctl_var *k
 	)
 {
-	register u_int c;
+	u_int c;
 
 	if (NULL == k)
 		return 0;
@@ -4061,20 +4384,22 @@ add_var(
 	u_short def
 	)
 {
-	register u_short c;
+	u_short		c;
 	struct ctl_var *k;
+	char *		buf;
 
 	c = count_var(*kv);
 	*kv  = erealloc(*kv, (c + 2) * sizeof(**kv));
 	k = *kv;
+	buf = emalloc(size);
 	k[c].code  = c;
-	k[c].text  = emalloc(size);
+	k[c].text  = buf;
 	k[c].flags = def;
 	k[c + 1].code  = 0;
 	k[c + 1].text  = NULL;
 	k[c + 1].flags = EOV;
 
-	return k[c].text;
+	return buf;
 }
 
 
@@ -4086,9 +4411,9 @@ set_var(
 	u_short def
 	)
 {
-	register struct ctl_var *k;
-	register const char *s;
-	register const char *t;
+	struct ctl_var *k;
+	const char *s;
+	const char *t;
 	char *td;
 
 	if (NULL == data || !size)
@@ -4098,8 +4423,9 @@ set_var(
 	if (k != NULL) {
 		while (!(EOV & k->flags)) {
 			if (NULL == k->text)	{
-				k->text = emalloc(size);
-				memcpy(k->text, data, size);
+				td = emalloc(size);
+				memcpy(td, data, size);
+				k->text = td;
 				k->flags = def;
 				return;
 			} else {
@@ -4110,9 +4436,9 @@ set_var(
 					t++;
 				}
 				if (*s == *t && ((*t == '=') || !*t)) {
-					k->text = erealloc(k->text,
-							   size);
-					memcpy(k->text, data, size);
+					td = erealloc(k->text, size);
+					memcpy(td, data, size);
+					k->text = td;
 					k->flags = def;
 					return;
 				}

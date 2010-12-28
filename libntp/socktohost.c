@@ -21,7 +21,7 @@
 #include "ntp_debug.h"
 
 
-char *
+const char *
 socktohost(
 	const sockaddr_u *sock
 	)

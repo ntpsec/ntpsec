@@ -1469,7 +1469,7 @@ getnetnum(
  * nntohost - convert network number to host name.  This routine enforces
  *	       the showhostnames setting.
  */
-char *
+const char *
 nntohost(
 	sockaddr_u *netnum
 	)
