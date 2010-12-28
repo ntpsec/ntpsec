@@ -48,6 +48,7 @@ $(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.texi
 	
 $(srcdir)/ntpdc-opts.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
+	$(top_srcdir)/scripts/check--help $@
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
 
