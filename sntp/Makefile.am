@@ -183,7 +183,7 @@ $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	
 $(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
-	$(top_srcdir)/scripts/check--help $@
+	$(top_srcdir)/../scripts/check--help $@
 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )
