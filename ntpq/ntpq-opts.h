@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  December 24, 2010 at 09:43:38 AM by AutoGen 5.11.6pre5
+ *  It has been AutoGen-ed  December 28, 2010 at 04:33:25 AM by AutoGen 5.11.6pre7
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -67,8 +67,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    14
-#define NTPQ_VERSION       "4.2.7p103"
-#define NTPQ_FULL_VERSION  "ntpq - standard NTP query program - Ver. 4.2.7p103"
+#define NTPQ_VERSION       "4.2.7p104"
+#define NTPQ_FULL_VERSION  "ntpq - standard NTP query program - Ver. 4.2.7p104"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
