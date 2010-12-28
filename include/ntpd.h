@@ -241,6 +241,7 @@ extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;
 
+extern	char	*sys_ident;	/* identity scheme */
 extern	void	poll_update	(struct peer *, u_char);
 
 extern	void	clear		(struct peer *);

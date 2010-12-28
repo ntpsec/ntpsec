@@ -1617,38 +1617,28 @@ crypto_ident(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
-	char	filename[MAXFILENAME];
 
 	/*
-	 * We come here after the group trusted host has been found; its
-	 * name defines the group name. Search the key cache for all
-	 * keys matching the same group name in order IFF, GQ and MV.
-	 * Use the first one available.
+	 * We come here after the trusted host has been found. The name
+	 * of the parameters file is in peer->ident and must be present.
+	 * Search the key cache for all keys matching this name. Use the
+	 * first one available. The identity scheme is supplied by the
+	 * server.
 	 */
-	if (peer->crypto & CRYPTO_FLAG_IFF) {
-		snprintf(filename, MAXFILENAME, "ntpkey_iffpar_%s",
-		    peer->ident);
-		peer->ident_pkey = crypto_key(filename, NULL,
-		    &peer->srcadr);
-		if (peer->ident_pkey != NULL)
-			return (CRYPTO_IFF);
+	peer->ident_pkey = crypto_key(peer->ident, NULL, &peer->srcadr);
+	if (peer->ident_pkey == NULL) {
+		report_event(XEVNT_ID, peer, NULL);
+		return (CRYPTO_NULL);
 	}
-	if (peer->crypto & CRYPTO_FLAG_GQ) {
-		snprintf(filename, MAXFILENAME, "ntpkey_gqpar_%s",
-		    peer->ident);
-		peer->ident_pkey = crypto_key(filename, NULL,
-		    &peer->srcadr);
-		if (peer->ident_pkey != NULL)
-			return (CRYPTO_GQ);
-	}
-	if (peer->crypto & CRYPTO_FLAG_MV) {
-		snprintf(filename, MAXFILENAME, "ntpkey_mvpar_%s",
-		    peer->ident);
-		peer->ident_pkey = crypto_key(filename, NULL,
-		    &peer->srcadr);
-		if (peer->ident_pkey != NULL)
-			return (CRYPTO_MV);
-	}
+	if (peer->crypto & CRYPTO_FLAG_IFF)
+		return (CRYPTO_IFF);
+
+	else if (peer->crypto & CRYPTO_FLAG_GQ)
+		return (CRYPTO_GQ);
+
+	else if (peer->crypto & CRYPTO_FLAG_MV)
+		return (CRYPTO_MV);
+
 	report_event(XEVNT_ID, peer, NULL);
 	return (CRYPTO_NULL);
 }
@@ -3793,38 +3783,38 @@ crypto_setup(void)
 	}
 	hostval.vallen = htonl(strlen(cinfo->subject));
 	hostval.ptr = cinfo->subject;
-	if (sys_groupname != NULL) {
+	if (sys_groupname == NULL)
+		sys_groupname = sys_hostname;
 
-		/*
-		 * Load optional IFF parameters from file
-		 * "ntpkey_iffkey_<groupname>".
-		 */
-		snprintf(filename, MAXFILENAME, "ntpkey_iffkey_%s",
-		    sys_groupname);
-		iffkey_info = crypto_key(filename, passwd, NULL);
-		if (iffkey_info != NULL)
-			crypto_flags |= CRYPTO_FLAG_IFF;
+	/*
+	 * Load optional IFF parameters from file
+	 * "ntpkey_iffkey_<groupname>".
+	 */
+	snprintf(filename, MAXFILENAME, "ntpkey_iffkey_%s",
+	    sys_groupname);
+	iffkey_info = crypto_key(filename, passwd, NULL);
+	if (iffkey_info != NULL)
+		crypto_flags |= CRYPTO_FLAG_IFF;
 
-		/*
-		 * Load optional GQ parameters from file
-		 * "ntpkey_gqkey_<groupname>".
-		 */
-		snprintf(filename, MAXFILENAME, "ntpkey_gqkey_%s",
-		    sys_groupname);
-		gqkey_info = crypto_key(filename, passwd, NULL);
-		if (gqkey_info != NULL)
-			crypto_flags |= CRYPTO_FLAG_GQ;
+	/*
+	 * Load optional GQ parameters from file
+	 * "ntpkey_gqkey_<groupname>".
+	 */
+	snprintf(filename, MAXFILENAME, "ntpkey_gqkey_%s",
+	    sys_groupname);
+	gqkey_info = crypto_key(filename, passwd, NULL);
+	if (gqkey_info != NULL)
+		crypto_flags |= CRYPTO_FLAG_GQ;
 
-		/*
-		 * Load optional MV parameters from file
-		 * "ntpkey_mvkey_<groupname>".
-		 */
-		snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
-		    sys_groupname);
-		mvkey_info = crypto_key(filename, passwd, NULL);
-		if (mvkey_info != NULL)
-			crypto_flags |= CRYPTO_FLAG_MV;
-	}
+	/*
+	 * Load optional MV parameters from file
+	 * "ntpkey_mvkey_<groupname>".
+	 */
+	snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
+	    sys_groupname);
+	mvkey_info = crypto_key(filename, passwd, NULL);
+	if (mvkey_info != NULL)
+		crypto_flags |= CRYPTO_FLAG_MV;
 
 	/*
 	 * We met the enemy and he is us. Now strike up the dance.

@@ -90,6 +90,7 @@ keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 int	sys_survivors;		/* truest of the truechimers */
+char	*sys_ident = NULL;	/* identity scheme */
 
 /*
  * TOS and multicast mapping stuff
@@ -840,7 +841,7 @@ receive(
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_CLIENT, hisversion, NTP_MINDPOLL,
 		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST | MDF_UCLNT, 0,
-		    skeyid, NULL)) == NULL) {
+		    skeyid, sys_ident)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
 		}
@@ -922,7 +923,7 @@ receive(
 			if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 			    rbufp->dstadr, MODE_BCLIENT, hisversion,
 			    pkt->ppoll, pkt->ppoll, 0, 0, 0,
-			    skeyid, NULL)) == NULL) {
+			    skeyid, sys_ident)) == NULL) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
 
@@ -942,7 +943,7 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_CLIENT, hisversion, pkt->ppoll,
-		    pkt->ppoll, FLAG_IBURST, MDF_BCLNT, 0, skeyid, NULL)) ==
+		    pkt->ppoll, FLAG_IBURST, MDF_BCLNT, 0, skeyid, sys_ident)) ==
 		    NULL) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
@@ -1003,7 +1004,7 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid, NULL)) == NULL) {
+		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid, sys_ident)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}

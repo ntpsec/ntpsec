@@ -231,7 +231,7 @@ struct ntp_control {
 #define	CS_CERTIF		(4 + CS_MAX_NOAUTOKEY)
 #define	CS_SIGNATURE		(5 + CS_MAX_NOAUTOKEY)
 #define	CS_REVTIME		(6 + CS_MAX_NOAUTOKEY)
-#define	CS_GROUP		(7 + CS_MAX_NOAUTOKEY)
+#define	CS_IDENT		(7 + CS_MAX_NOAUTOKEY)
 #define	CS_DIGEST		(8 + CS_MAX_NOAUTOKEY)
 #define	CS_MAXCODE		CS_DIGEST
 #else	/* !AUTOKEY follows */

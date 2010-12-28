@@ -1,3 +1,5 @@
+* Support for multiple Autokey identity groups from Dave Mills.
+* Documentation updates from Dave Mills.
 * Add ntpq kerninfo, authinfo, and sysinfo commands similar to ntpdc's.
 (4.2.7p103) 2010/12/24 Released by Harlan Stenn <stenn@ntp.org>
 * Add ntpq pstats command similar to ntpdc's.

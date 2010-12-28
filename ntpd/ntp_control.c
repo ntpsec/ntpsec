@@ -208,7 +208,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_CERTIF,	RO, "cert" },		/* 4 + CS_MAX_NOAUTOKEY */
 	{ CS_SIGNATURE,	RO, "signature" },	/* 5 + CS_MAX_NOAUTOKEY */
 	{ CS_REVTIME,	RO, "until" },		/* 6 + CS_MAX_NOAUTOKEY */
-	{ CS_GROUP,	RO, "group" },		/* 7 + CS_MAX_NOAUTOKEY */
+	{ CS_IDENT,	RO, "ident" },		/* 7 + CS_MAX_NOAUTOKEY */
 	{ CS_DIGEST,	RO, "digest" },		/* 8 + CS_MAX_NOAUTOKEY */
 #endif	/* AUTOKEY */
 	{ 0,		EOV, "" }		/* 57/65 */
@@ -245,7 +245,7 @@ static const u_char def_sys_var[] = {
 	CS_LEAPEND,
 #ifdef AUTOKEY
 	CS_HOST,
-	CS_GROUP,
+	CS_IDENT,
 	CS_FLAGS,
 	CS_DIGEST,
 	CS_SIGNATURE,
@@ -2118,10 +2118,10 @@ ctl_putsys(
 			    strlen(sys_hostname));
 		break;
 
-	case CS_GROUP:
-		if (sys_groupname != NULL)
-			ctl_putstr(sys_var[CS_GROUP].text, sys_groupname,
-			    strlen(sys_groupname));
+	case CS_IDENT:
+		if (sys_ident != NULL)
+			ctl_putstr(sys_var[CS_IDENT].text, sys_ident,
+			    strlen(sys_ident));
 		break;
 
 	case CS_CERTIF:
