@@ -48,6 +48,7 @@ $(srcdir)/ntpsnmpd-opts.menu: $(srcdir)/ntpsnmpd-opts.texi
 	
 $(srcdir)/ntpsnmpd-opts.texi: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpsnmpd-opts.def
+	$(top_srcdir)/scripts/check--help $@
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf

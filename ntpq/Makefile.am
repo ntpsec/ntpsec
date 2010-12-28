@@ -49,6 +49,7 @@ $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.texi
 	
 $(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
+	$(top_srcdir)/scripts/check--help $@
 
 $(PROGRAMS): $(LDADD)
 

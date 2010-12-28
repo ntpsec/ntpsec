@@ -8,6 +8,7 @@ endif
 
 noinst_SCRIPTS =		\
 	calc_tickadj		\
+	check--help		\
 	checktime		\
 	freq_adj		\
 	html2man		\

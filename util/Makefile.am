@@ -52,6 +52,7 @@ $(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.texi
 	
 $(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
+	$(top_srcdir)/scripts/check--help $@
 
 
 jitter_SOURCES=	jitter.c jitter.h

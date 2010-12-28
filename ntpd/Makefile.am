@@ -246,6 +246,7 @@ $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.texi
 	
 $(srcdir)/ntpd-opts.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
+	$(top_srcdir)/scripts/check--help $@
 
 $(PROGRAMS): $(LDADD)
 
