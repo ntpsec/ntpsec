@@ -8,7 +8,7 @@
 # otherwise:
 # - exit with a 0 status.
 
-if ! test -f $1
+if test ! -f $1
 then
 	echo "$0: $1 is not a regular file!" 2>&3
 	exit 1
