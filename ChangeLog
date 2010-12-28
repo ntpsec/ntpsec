@@ -583,6 +583,11 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* Update bk triggers for the bk-5 release.
+---
+(4.2.6p3-RC12) 2010/12/25 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1458] Can not compile NTP on FreeBSD 4.7.
 * [Bug 1510] Add modes 20/21 for driver 8 to support RAWDCF @ 75 baud.
