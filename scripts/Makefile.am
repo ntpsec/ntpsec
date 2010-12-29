@@ -8,7 +8,6 @@ endif
 
 noinst_SCRIPTS =		\
 	calc_tickadj		\
-	check--help		\
 	checktime		\
 	freq_adj		\
 	html2man		\
@@ -20,6 +19,7 @@ noinst_SCRIPTS =		\
 	$(NULL)
 
 EXTRA_DIST =			\
+	check--help		\
 	checkChangeLog		\
 	cvo.sh			\
 	fixautomakedepsmagic	\
