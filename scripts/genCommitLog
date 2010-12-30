@@ -9,7 +9,7 @@ if [ ! -w . ] ; then
         chmod u+w .
         [ -f CommitLog -a ! -w CommitLog ] && chmod u+w CommitLog
 fi
-bk -R prs -hr${CLTAG}.. -nd':I:' | bk changes -m -v - > CommitLog.new
+bk changes -v -m -r${CLTAG}.. > CommitLog.new
 mv CommitLog.new CommitLog
 case "$GCL_REMOVEWRITE" in
  1) chmod a-w CommitLog .

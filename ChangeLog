@@ -1,3 +1,4 @@
+* from 4.2.6p3: Update genCommitLog for the bk-5 release.
 (4.2.7p105) 2010/12/29 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p104) 2010/12/28 Released by Harlan Stenn <stenn@ntp.org>
 * from 4.2.6p3: Create and use scripts/check--help when generating
@@ -592,6 +593,7 @@
 
 * Create and use scripts/check--help when generating .texi files.
 * Update bk triggers for the bk-5 release.
+* Update genCommitLog for the bk-5 release.
 
 ---
 (4.2.6p3-RC12) 2010/12/25 Released by Harlan Stenn <stenn@ntp.org>
