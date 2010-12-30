@@ -105,14 +105,12 @@ struct association {
 #define	MAXASSOC	1024
 
 /*
- * Structure for translation tables between text format
- * variable indices and text format.
+ * var_format is used to override cooked formatting for selected vars.
  */
-struct ctl_var {
-	u_short code;
-	u_short fmt;
-	const char *text;
-};
+typedef struct var_format_tag {
+	const char *	varname;
+	u_short		fmt;
+} var_format;
 
 extern int	interactive;	/* are we prompting? */
 extern int	old_rv;		/* use old rv behavior? --old-rv */
@@ -136,5 +134,4 @@ extern	int	nextvar		(int *, const char **, char **, char **);
 extern	int	decodetime	(char *, l_fp *);
 extern	void	printvars	(int, const char *, int, int, int, FILE *);
 extern	int	decodeint	(char *, long *);
-extern	int	findvar		(char *, struct ctl_var *, int code);
 extern	void	makeascii	(int, const char *, FILE *);

@@ -74,6 +74,9 @@
 #if defined(REFCLOCK) && defined(CLOCK_PALISADE)
 
 #include <termios.h>
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>		/* TIOCMSET here in recent Linux */
+#endif
 
 # ifdef TIOCMSET
 
