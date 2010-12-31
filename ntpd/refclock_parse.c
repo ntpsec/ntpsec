@@ -3243,7 +3243,7 @@ parse_start(
 static void
 parse_ctl(
 	    struct parseunit *parse,
-	    struct refclockstat *in
+	    const struct refclockstat *in
 	    )
 {
         if (in)

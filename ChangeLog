@@ -1,4 +1,5 @@
 * [Bug 1764] Palisade driver doesn't build on Linux.
+* [Bug 1766] Oncore clock has offset/high jitter at startup.
 * Move ntp_control.h variable IDs to ntp_control.c, remove their use by
   ntpq.  They are implementation details private to ntpd.  [Bug 597] was
   caused by ntpq's reliance on these IDs it need not know about.

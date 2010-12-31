@@ -32,8 +32,8 @@
 # endif
 #endif
 
-extern	size_t	mvsnprintf(char *, size_t, const char *, va_list);
-extern	size_t	msnprintf(char *, size_t, const char *, ...)
+extern	int	mvsnprintf(char *, size_t, const char *, va_list);
+extern	int	msnprintf(char *, size_t, const char *, ...)
 				__attribute__((__format__(__printf__, 3, 4)));
 extern	void	msyslog(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));

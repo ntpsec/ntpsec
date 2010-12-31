@@ -684,6 +684,31 @@ record_clock_stats(
 
 
 /*
+ * mprintf_clock_stats - write clock statistics to file with
+ *			msnprintf-style formatting.
+ */
+int
+mprintf_clock_stats(
+	sockaddr_u *addr,
+	const char *fmt,
+	...
+	)
+{
+	va_list	ap;
+	int	rc;
+	char	msg[512];
+
+	if (!stats_control)
+		return;
+	va_start(ap, fmt);
+	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
+	va_end(ap);
+	record_clock_stats(addr, msg);
+
+	return rc;
+}
+
+/*
  * record_raw_stats - write raw timestamps to file
  *
  * file format

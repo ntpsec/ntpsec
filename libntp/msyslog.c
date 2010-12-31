@@ -155,7 +155,7 @@ format_errmsg(
 }
 
 
-size_t
+int
 mvsnprintf(
 	char *		buf,
 	size_t		bufsiz,
@@ -165,6 +165,7 @@ mvsnprintf(
 {
 	char	nfmt[256];
 	int	errval;
+	int	rc;
 
 	/*
 	 * Save the error value as soon as possible
@@ -179,10 +180,15 @@ mvsnprintf(
 
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
 
-	return vsnprintf(buf, bufsiz, nfmt, ap);
+	rc = vsnprintf(buf, bufsiz, nfmt, ap);
+	/* terminate buf, as MS vsnprintf() does not when truncating */
+	buf[bufsiz - 1] = '\0';
+
+	return rc;
 }
 
-size_t
+
+int
 msnprintf(
 	char *		buf,
 	size_t		bufsiz,
