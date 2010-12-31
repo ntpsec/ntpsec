@@ -1,3 +1,7 @@
+* [Bug 1764] Palisade driver doesn't build on Linux.
+* Move ntp_control.h variable IDs to ntp_control.c, remove their use by
+  ntpq.  They are implementation details private to ntpd.  [Bug 597] was
+  caused by ntpq's reliance on these IDs it need not know about.
 (4.2.7p106) 2010/12/30 Released by Harlan Stenn <stenn@ntp.org>
 * from 4.2.6p3: Update genCommitLog for the bk-5 release.
 (4.2.7p105) 2010/12/29 Released by Harlan Stenn <stenn@ntp.org>

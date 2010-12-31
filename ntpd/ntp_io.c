@@ -1140,7 +1140,8 @@ add_interface(
 				 IPV6_MULTICAST_IF,
 				 (void *)&ep->ifindex,
 				 sizeof(ep->ifindex));
-		if (rc)
+		/* do not complain if bound addr scope is ifindex */
+		if (rc && ep->ifindex != SCOPE(&ep->sin))
 			msyslog(LOG_ERR,
 				"setsockopt IPV6_MULTICAST_IF %u for %s fails: %m",
 				ep->ifindex, stoa(&ep->sin));

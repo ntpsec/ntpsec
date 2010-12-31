@@ -104,126 +104,40 @@ volatile int jump = 0;
  * Format values
  */
 #define	PADDING	0
-#define	TS	1	/* time stamp */
-#define	FL	2	/* l_fp type value */
-#define	FU	3	/* u_fp type value */
-#define	FS	4	/* s_fp type value */
-#define	UI	5	/* unsigned integer value */
-#define	SI	6	/* signed integer value */
-#define	HA	7	/* host address */
-#define	NA	8	/* network address */
-#define	ST	9	/* string value */
-#define	RF	10	/* refid (sometimes string, sometimes not) */
-#define	LP	11	/* leap (print in binary) */
-#define	OC	12	/* integer, print in octal */
-#define	MD	13	/* mode */
-#define	AR	14	/* array of times */
-#define FX	15	/* test flags */
+#define	HA	1	/* host address */
+#define	NA	2	/* network address */
+#define	LP	3	/* leap (print in binary) */
+#define	RF	4	/* refid (sometimes string, sometimes not) */
+#define	AR	5	/* array of times */
+#define FX	6	/* test flags */
+#define TS	7	/* l_fp timestamp in hex */
+#define	OC	8	/* integer, print in octal */
 #define	EOV	255	/* end of table */
 
-
 /*
- * System variable values.  The array can be indexed by
- * the variable index to find the textual name.
+ * For the most part ntpq simply displays what ntpd provides in the
+ * mostly plain-text mode 6 responses.  A few variable names are by
+ * default "cooked" to provide more human-friendly output.
  */
-struct ctl_var sys_var[] = {
-	{ 0,		PADDING, "" },		/* 0 */
-	{ CS_LEAP,	LP,	"leap" },	/* 1 */
-	{ CS_STRATUM,	UI,	"stratum" },	/* 2 */
-	{ CS_PRECISION,	SI,	"precision" },	/* 3 */
-	{ CS_ROOTDELAY,	FS,	"rootdelay" },	/* 4 */
-	{ CS_ROOTDISPERSION, FU, "rootdispersion" }, /* 5 */
-	{ CS_REFID,	RF,	"refid" },	/* 6 */
-	{ CS_REFTIME,	TS,	"reftime" },	/* 7 */
-	{ CS_POLL,	UI,	"poll" },	/* 8 */
-	{ CS_PEERID,	UI,	"peer" },	/* 9 */
-	{ CS_OFFSET,	FL,	"offset" },	/* 10 */
-	{ CS_DRIFT,	FS,	"frequency" },	/* 11 */
-	{ CS_JITTER,	FU,	"jitter" },	/* 12 */
-	{ CS_CLOCK,	TS,	"clock" },	/* 13 */
-	{ CS_PROCESSOR,	ST,	"processor" },	/* 14 */
-	{ CS_SYSTEM,	ST,	"system" },	/* 15 */
-	{ CS_VERSION,	ST,	"version" },	/* 16 */
-	{ CS_STABIL,	FS,	"stability" },	/* 17 */
-	{ CS_VARLIST,	ST,	"sys_var_list" }, /* 18 */
-	{ 0,		EOV,	""	}
+const var_format cookedvars[] = {
+	{ "leap",		LP },
+	{ "reach",		OC },
+	{ "refid",		RF },
+	{ "reftime",		TS },
+	{ "clock",		TS },
+	{ "org",		TS },
+	{ "rec",		TS },
+	{ "xmt",		TS },
+	{ "flash",		FX },
+	{ "srcadr",		HA },
+	{ "peeradr",		HA },	/* compat with others */
+	{ "dstadr",		NA },
+	{ "filtdelay",		AR },
+	{ "filtoffset",		AR },
+	{ "filtdisp",		AR },
+	{ "filterror",		AR },	/* compat with others */
 };
 
-
-/*
- * Peer variable list
- */
-struct ctl_var peer_var[] = {
-	{ 0,		PADDING, "" },		/* 0 */
-	{ CP_CONFIG,	UI,	"config" },	/* 1 */
-	{ CP_AUTHENABLE, UI,	"authenable" },	/* 2 */
-	{ CP_AUTHENTIC,	UI,	"authentic" },	/* 3 */
-	{ CP_SRCADR,	HA,	"srcadr" },	/* 4 */
-	{ CP_SRCPORT,	UI,	"srcport" },	/* 5 */
-	{ CP_DSTADR,	NA,	"dstadr" },	/* 6 */
-	{ CP_DSTPORT,	UI,	"dstport" },	/* 7 */
-	{ CP_LEAP,	LP,	"leap" },	/* 8 */
-	{ CP_HMODE,	MD,	"hmode" },	/* 9 */
-	{ CP_STRATUM,	UI,	"stratum" },	/* 10 */
-	{ CP_PPOLL,	UI,	"ppoll" },	/* 11 */
-	{ CP_HPOLL,	UI,	"hpoll" },	/* 12 */
-	{ CP_PRECISION,	SI,	"precision" },	/* 13 */
-	{ CP_ROOTDELAY,	FS,	"rootdelay" },	/* 14 */
-	{ CP_ROOTDISPERSION, FU, "rootdisp" },	/* 15 */
-	{ CP_REFID,	RF,	"refid" },	/* 16 */
-	{ CP_REFTIME,	TS,	"reftime" },	/* 17 */
-	{ CP_ORG,	TS,	"org" },	/* 18 */
-	{ CP_REC,	TS,	"rec" },	/* 19 */
-	{ CP_XMT,	TS,	"xmt" },	/* 20 */
-	{ CP_REACH,	OC,	"reach" },	/* 21 */
-	{ CP_UNREACH,	UI,	"unreach" },	/* 22 */
-	{ CP_TIMER,	UI,	"timer" },	/* 23 */
-	{ CP_DELAY,	FS,	"delay" },	/* 24 */
-	{ CP_OFFSET,	FL,	"offset" },	/* 25 */
-	{ CP_JITTER,	FU,	"jitter" },	/* 26 */
-	{ CP_DISPERSION, FU,	"dispersion" },	/* 27 */
-	{ CP_KEYID,	UI,	"keyid" },	/* 28 */
-	{ CP_FILTDELAY,	AR,	"filtdelay" },	/* 29 */
-	{ CP_FILTOFFSET, AR,	"filtoffset" },	/* 30 */
-	{ CP_PMODE,	ST,	"pmode" },	/* 31 */
-	{ CP_RECEIVED,	UI,	"received" },	/* 32 */
-	{ CP_SENT,	UI,	"sent" },	/* 33 */
-	{ CP_FILTERROR,	AR,	"filtdisp" },	/* 34 */
-	{ CP_FLASH,	FX,	"flash" },	/* 35 */ 
-	{ CP_TTL,	UI,	"ttl" },	/* 36 */
-	{ CP_SRCHOST,	ST,	"srchost" },	/* 37 */
-	/*
-	 * These are duplicate entries using different on-wire variable
-	 * names so that we can interoperate with another flavor.
-	 */
-	{ CP_SRCADR,	HA,	"peeraddr" },	/* 38 */
-	{ CP_SRCPORT,	UI,	"peerport" },	/* 39 */
-	{ CP_PPOLL,	UI,	"peerpoll" },	/* 40 */
-	{ CP_HPOLL,	UI,	"hostpoll" },	/* 41 */
-	{ CP_FILTERROR,	AR,	"filterror" },	/* 42 */
-	{ 0,		EOV,	""	}
-};
-
-
-/*
- * Clock variable list
- */
-struct ctl_var clock_var[] = {
-	{ 0,		PADDING, "" },		/* 0 */
-	{ CC_TYPE,	UI,	"type" },	/* 1 */
-	{ CC_TIMECODE,	ST,	"timecode" },	/* 2 */
-	{ CC_POLL,	UI,	"poll" },	/* 3 */
-	{ CC_NOREPLY,	UI,	"noreply" },	/* 4 */
-	{ CC_BADFORMAT,	UI,	"badformat" },	/* 5 */
-	{ CC_BADDATA,	UI,	"baddata" },	/* 6 */
-	{ CC_FUDGETIME1, FL,	"fudgetime1" },	/* 7 */
-	{ CC_FUDGETIME2, FL,	"fudgetime2" },	/* 8 */
-	{ CC_FUDGEVAL1,	UI,	"stratum" },	/* 9 */
-	{ CC_FUDGEVAL2,	RF,	"refid" },	/* 10 */
-	{ CC_FLAGS,	UI,	"flags" },	/* 11 */
-	{ CC_DEVICE,	ST,	"device" },	/* 12 */
-	{ 0,		EOV,	""	}
-};
 
 
 /*
@@ -298,6 +212,8 @@ static	void	output		(FILE *, const char *, const char *);
 static	void	endoutput	(FILE *);
 static	void	outputarr	(FILE *, char *, int, l_fp *);
 static	int	assoccmp	(const void *, const void *);
+	u_short	varfmt		(const char *);
+
 void	ntpq_custom_opt_handler	(tOptions *, tOptDesc *);
 
 
@@ -2893,34 +2809,17 @@ nextvar(
 }
 
 
-/*
- * findvar - see if this variable is known to us.
- * If "code" is 1, return ctl_var->code.
- * Otherwise return the ordinal position of the found variable.
- */
-int
-findvar(
-	char *varname,
-	struct ctl_var *varlist,
-	int code
-	)
+u_short
+varfmt(const char * varname)
 {
-	register char *np;
-	register struct ctl_var *vl;
+	u_int n;
 
-	vl = varlist;
-	np = varname;
-	while (vl->fmt != EOV) {
-		if (vl->fmt != PADDING && STREQ(np, vl->text))
-		    return (code)
-				? vl->code
-				: (vl - varlist)
-			    ;
-		vl++;
-	}
-	return 0;
+	for (n = 0; n < COUNTOF(cookedvars); n++)
+		if (!strcmp(varname, cookedvars[n].varname))
+			return cookedvars[n].fmt;
+
+	return PADDING;
 }
-
 
 
 /*
@@ -3155,34 +3054,21 @@ cookedprint(
 	FILE *fp
 	)
 {
-	register int varid;
 	char *name;
 	char *value;
 	char output_raw;
 	int fmt;
-	struct ctl_var *varlist;
 	l_fp lfp;
-	long ival;
 	sockaddr_u hval;
 	u_long uval;
-	l_fp lfparr[8];
 	int narr;
+	size_t len;
+	l_fp lfparr[8];
+	char b[12];
+	char bn[2 * MAXVARLEN];
+	char bv[2 * MAXVARLEN];
 
-	switch (datatype) {
-	case TYPE_PEER:
-		varlist = peer_var;
-		break;
-	case TYPE_SYS:
-		varlist = sys_var;
-		break;
-	case TYPE_CLOCK:
-		varlist = clock_var;
-		break;
-	default:
-		fprintf(stderr, "Unknown datatype(0x%x) in cookedprint\n",
-			datatype);
-		return;
-	}
+	UNUSED_ARG(datatype);
 
 	if (!quiet)
 		fprintf(fp, "status=%04x %s,\n", status,
@@ -3190,144 +3076,92 @@ cookedprint(
 
 	startoutput();
 	while (nextvar(&length, &data, &name, &value)) {
-		varid = findvar(name, varlist, 0);
-		if (varid == 0) {
+		fmt = varfmt(name);
+		output_raw = 0;
+		switch (fmt) {
+
+		case PADDING:
 			output_raw = '*';
-		} else {
-			output_raw = 0;
-			fmt = varlist[varid].fmt;
-			switch(fmt) {
-			    case TS:
-				if (!decodets(value, &lfp))
-				    output_raw = '?';
-				else
-				    output(fp, name, prettydate(&lfp));
-				break;
-			    case FL:
-			    case FU:
-			    case FS:
-				if (!decodetime(value, &lfp))
-				    output_raw = '?';
-				else {
-					switch (fmt) {
-					    case FL:
-						output(fp, name,
-						       lfptoms(&lfp, 3));
-						break;
-					    case FU:
-						output(fp, name,
-						       ulfptoms(&lfp, 3));
-						break;
-					    case FS:
-						output(fp, name,
-						       lfptoms(&lfp, 3));
-						break;
-					}
-				}
-				break;
-			
-			    case UI:
-				if (!decodeuint(value, &uval))
-				    output_raw = '?';
-				else
-				    output(fp, name, uinttoa(uval));
-				break;
-			
-			    case SI:
-				if (!decodeint(value, &ival))
-				    output_raw = '?';
-				else
-				    output(fp, name, inttoa(ival));
-				break;
+			break;
 
-			    case HA:
-			    case NA:
-				if (!decodenetnum(value, &hval))
-				    output_raw = '?';
-				else if (fmt == HA){
-				    output(fp, name, nntohost(&hval));
-				} else {
-				    output(fp, name, stoa(&hval));
-				}
-				break;
-			
-			    case ST:
-				output_raw = '*';
-				break;
-			
-			    case RF:
-				if (decodenetnum(value, &hval)) {
-					if (ISREFCLOCKADR(&hval))
-    						output(fp, name,
-						    refnumtoa(&hval));
-					else
-				    		output(fp, name, stoa(&hval));
-				} else if ((int)strlen(value) <= 4)
-				    output(fp, name, value);
-				else
-				    output_raw = '?';
-				break;
+		case TS:
+			if (!decodets(value, &lfp))
+				output_raw = '?';
+			else
+				output(fp, name, prettydate(&lfp));
+			break;
 
-			    case LP:
-				if (!decodeuint(value, &uval) || uval > 3)
-				    output_raw = '?';
-				else {
-					char b[3];
-					b[0] = b[1] = '0';
-					if (uval & 0x2)
-					    b[0] = '1';
-					if (uval & 0x1)
-					    b[1] = '1';
-					b[2] = '\0';
-					output(fp, name, b);
-				}
-				break;
-
-			    case OC:
-				if (!decodeuint(value, &uval))
-				    output_raw = '?';
-				else {
-					char b[12];
-
-					(void) snprintf(b, sizeof b, "%03lo", uval);
-					output(fp, name, b);
-				}
-				break;
-			
-			    case MD:
-				if (!decodeuint(value, &uval))
-				    output_raw = '?';
-				else
-				    output(fp, name, uinttoa(uval));
-				break;
-			
-			    case AR:
-				if (!decodearr(value, &narr, lfparr))
-				    output_raw = '?';
-				else
-				    outputarr(fp, name, narr, lfparr);
-				break;
-
-			    case FX:
-				if (!decodeuint(value, &uval))
-				    output_raw = '?';
-				else
-				    output(fp, name, tstflags(uval));
-				break;
-			
-			    default:
-				(void) fprintf(stderr,
-				    "Internal error in cookedprint, %s=%s, fmt %d\n",
-				    name, value, fmt);
-				break;
+		case HA:	/* fallthru */
+		case NA:
+			if (!decodenetnum(value, &hval)) {
+				output_raw = '?';
+			} else if (fmt == HA){
+				output(fp, name, nntohost(&hval));
+			} else {
+				output(fp, name, stoa(&hval));
 			}
+			break;
+		
+		case RF:
+			if (decodenetnum(value, &hval)) {
+				if (ISREFCLOCKADR(&hval))
+					output(fp, name,
+					       refnumtoa(&hval));
+				else
+					output(fp, name, stoa(&hval));
+			} else if (strlen(value) <= 4) {
+				output(fp, name, value);
+			} else {
+				output_raw = '?';
+			}
+			break;
 
+		case LP:
+			if (!decodeuint(value, &uval) || uval > 3) {
+				output_raw = '?';
+			} else {
+				b[0] = (0x2 & uval)
+					   ? '1'
+					   : '0';
+				b[1] = (0x1 & uval)
+					   ? '1'
+					   : '0';
+				b[2] = '\0';
+				output(fp, name, b);
+			}
+			break;
+
+		case OC:
+			if (!decodeuint(value, &uval)) {
+				output_raw = '?';
+			} else {
+				snprintf(b, sizeof(b), "%03lo", uval);
+				output(fp, name, b);
+			}
+			break;
+		
+		case AR:
+			if (!decodearr(value, &narr, lfparr))
+				output_raw = '?';
+			else
+				outputarr(fp, name, narr, lfparr);
+			break;
+
+		case FX:
+			if (!decodeuint(value, &uval))
+				output_raw = '?';
+			else
+				output(fp, name, tstflags(uval));
+			break;
+		
+		default:
+			fprintf(stderr, "Internal error in cookedprint, %s=%s, fmt %d\n",
+				name, value, fmt);
+			output_raw = '?';
+			break;
 		}
-		if (output_raw != 0) {
-			char bn[401];
-			char bv[401];
-			int len;
 
+		if (output_raw != 0) {
 			atoascii(name, MAXVARLEN, bn, sizeof(bn));
 			atoascii(value, MAXVARLEN, bv, sizeof(bv));
 			if (output_raw != '*') {

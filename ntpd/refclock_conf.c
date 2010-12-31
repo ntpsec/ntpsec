@@ -7,6 +7,12 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>		/* TIOCMSET here in recent Linux */
+#endif
 
 #include "ntpd.h"
 #include "ntp_refclock.h"

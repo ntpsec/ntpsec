@@ -268,7 +268,6 @@ extern int rawmode;
 extern struct servent *server_entry;
 extern struct association assoc_cache[];
 extern u_char pktversion;
-extern struct ctl_var peer_var[];
 
 typedef struct mru_tag mru;
 struct mru_tag {
@@ -1520,23 +1519,6 @@ struct varlist peervarlist[] = {
 	{ 0,		0 }
 };
 
-#define HAVE_SRCADR	0
-#define HAVE_DSTADR	1
-#define HAVE_REFID	1
-#define HAVE_STRATUM	2
-#define HAVE_HPOLL	3
-#define HAVE_PPOLL	4
-#define HAVE_REACH	5
-#define HAVE_DELAY	6
-#define HAVE_OFFSET	7
-#define HAVE_JITTER	8
-#define HAVE_DISPERSION 9
-#define HAVE_REC	10
-#define HAVE_REFTIME	11
-#define HAVE_SRCPORT	12
-#define HAVE_HMODE	13
-#define HAVE_SRCHOST	14
-#define MAX_HAVE 	14
 
 /*
  * Decode an incoming data buffer and print a line in the peer list
@@ -1554,9 +1536,10 @@ doprintpeers(
 {
 	char *name;
 	char *value = NULL;
-	int i;
 	int c;
 	int len;
+	int have_srchost;
+	int have_jitter;
 	sockaddr_u srcadr;
 	sockaddr_u dstadr;
 	sockaddr_u dum_store;
@@ -1576,7 +1559,6 @@ doprintpeers(
 	l_fp reftime;
 	l_fp rec;
 	l_fp ts;
-	u_char havevar[MAX_HAVE + 1];
 	u_long poll_sec;
 	char type = '?';
 	char whenbuf[8], pollbuf[8];
@@ -1584,27 +1566,21 @@ doprintpeers(
 
 	get_systime(&ts);
 	
-	memset(havevar, 0, sizeof(havevar));
+	have_srchost = FALSE;
+	have_jitter = FALSE;
 	ZERO_SOCK(&srcadr);
 	ZERO_SOCK(&dstadr);
 	clock_name[0] = '\0';
-
-	/* Initialize by zeroing out estimate variables */
 	memset(&estoffset, 0, sizeof(estoffset));
 	memset(&estdelay, 0, sizeof(estdelay));
 	memset(&estjitter, 0, sizeof(estjitter));
 	memset(&estdisp, 0, sizeof(estdisp));
 
 	while (nextvar(&datalen, &data, &name, &value)) {
-		i = findvar(name, peer_var, 1);
-		if (i == 0)
-			continue;	/* don't know this one */
-		switch (i) {
-		case CP_SRCADR:
-			if (decodenetnum(value, &srcadr))
-				havevar[HAVE_SRCADR] = 1;
-			break;
-		case CP_SRCHOST:
+		if (!strcmp("srcadr", name) ||
+		    !strcmp("peeradr", name)) {
+			decodenetnum(value, &srcadr);
+		} else if (!strcmp("srchost", name)) {
 			if (pvl == peervarlist) {
 				len = strlen(value);
 				if (2 < len &&
@@ -1614,98 +1590,61 @@ doprintpeers(
 					len -= 2;
 					memcpy(clock_name, value, len);
 					clock_name[len] = '\0';
-					havevar[HAVE_SRCHOST] = 1;
+					have_srchost = TRUE;
 				}
 			}
-			break;
-		case CP_DSTADR:
+		} else if (!strcmp("dstadr", name)) {
 			if (decodenetnum(value, &dum_store)) {
 				type = decodeaddrtype(&dum_store);
 				if (pvl == opeervarlist) {
-					havevar[HAVE_DSTADR] = 1;
 					dstadr = dum_store;
 					dstadr_refid = stoa(&dstadr);
 				}
 			}
-			break;
-		case CP_HMODE:
-			if (decodeint(value, &hmode))
-				havevar[HAVE_HMODE] = 1;
-			break;
-		case CP_REFID:
+		} else if (!strcmp("hmode", name)) {
+			decodeint(value, &hmode);
+		} else if (!strcmp("refid", name)) {
 			if (pvl == peervarlist) {
-				havevar[HAVE_REFID] = 1;
 				if (*value == '\0') {
 					dstadr_refid = "";
 				} else if (strlen(value) <= 4) {
-					strncpy((void *)&u32, value, sizeof(u32));
+					strncpy((void *)&u32, value,
+						sizeof(u32));
 					dstadr_refid = refid_str(u32, 1);
 				} else if (decodenetnum(value, &dstadr)) {
-					if (ISREFCLOCKADR(&dstadr))
-						dstadr_refid =
-						    refnumtoa(&dstadr);
-					else
-						dstadr_refid =
-						    stoa(&dstadr);
-				} else {
-					havevar[HAVE_REFID] = 0;
+					dstadr_refid =
+					    refnumtoa(&dstadr);
 				}
 			}
-			break;
-		case CP_STRATUM:
-			if (decodeuint(value, &stratum))
-				havevar[HAVE_STRATUM] = 1;
-			break;
-		case CP_HPOLL:
-			if (decodeint(value, &hpoll)) {
-				havevar[HAVE_HPOLL] = 1;
-				if (hpoll < 0)
-					hpoll = NTP_MINPOLL;
-			}
-			break;
-		case CP_PPOLL:
-			if (decodeint(value, &ppoll)) {
-				havevar[HAVE_PPOLL] = 1;
-				if (ppoll < 0)
-					ppoll = NTP_MINPOLL;
-			}
-			break;
-		case CP_REACH:
-			if (decodeuint(value, &reach))
-				havevar[HAVE_REACH] = 1;
-			break;
-		case CP_DELAY:
-			if (decodetime(value, &estdelay))
-				havevar[HAVE_DELAY] = 1;
-			break;
-		case CP_OFFSET:
-			if (decodetime(value, &estoffset))
-				havevar[HAVE_OFFSET] = 1;
-			break;
-		case CP_JITTER:
-			if (pvl == peervarlist)
-				if (decodetime(value, &estjitter))
-					havevar[HAVE_JITTER] = 1;
-			break;
-		case CP_DISPERSION:
-			if (decodetime(value, &estdisp))
-				havevar[HAVE_DISPERSION] = 1;
-			break;
-		case CP_REC:
-			if (decodets(value, &rec))
-				havevar[HAVE_REC] = 1;
-			break;
-		case CP_SRCPORT:
-			if (decodeuint(value, &srcport))
-				havevar[HAVE_SRCPORT] = 1;
-			break;
-		case CP_REFTIME:
-			havevar[HAVE_REFTIME] = 1;
+		} else if (!strcmp("stratum", name)) {
+			decodeuint(value, &stratum);
+		} else if (!strcmp("hpoll", name)) {
+			if (decodeint(value, &hpoll) && hpoll < 0)
+				hpoll = NTP_MINPOLL;
+		} else if (!strcmp("ppoll", name)) {
+			if (decodeint(value, &ppoll) && ppoll < 0)
+				ppoll = NTP_MINPOLL;
+		} else if (!strcmp("reach", name)) {
+			decodeuint(value, &reach);
+		} else if (!strcmp("delay", name)) {
+			decodetime(value, &estdelay);
+		} else if (!strcmp("offset", name)) {
+			decodetime(value, &estoffset);
+		} else if (!strcmp("jitter", name)) {
+			if (pvl == peervarlist &&
+			    decodetime(value, &estjitter))
+				have_jitter = 1;
+		} else if (!strcmp("rootdisp", name) ||
+			   !strcmp("dispersion", name)) {
+			decodetime(value, &estdisp);
+		} else if (!strcmp("rec", name)) {
+			decodets(value, &rec);
+		} else if (!strcmp("srcport", name) ||
+			   !strcmp("peerport", name)) {
+			decodeuint(value, &srcport);
+		} else if (!strcmp("reftime", name)) {
 			if (!decodets(value, &reftime))
 				L_CLR(&reftime);
-			break;
-		default:
-			break;
 		}
 	}
 
@@ -1755,7 +1694,7 @@ doprintpeers(
 	if (numhosts > 1)
 		fprintf(fp, "%-*s ", maxhostlen, currenthost);
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
-		if (!havevar[HAVE_SRCHOST])
+		if (!have_srchost)
 			strncpy(clock_name, nntohost(&srcadr),
 				sizeof(clock_name));
 		fprintf(fp, "%c%-15.15s ", c, clock_name);
@@ -1772,7 +1711,7 @@ doprintpeers(
 				       (int)poll_sec),
 			reach, lfptoms(&estdelay, 3),
 			lfptoms(&estoffset, 3),
-			(havevar[HAVE_JITTER])
+			(have_jitter)
 			    ? lfptoms(&estjitter, 3)
 			    : lfptoms(&estdisp, 3));
 		return (1);
@@ -1780,22 +1719,6 @@ doprintpeers(
 	else
 		return(1);
 }
-
-#undef	HAVE_SRCADR
-#undef	HAVE_DSTADR
-#undef	HAVE_STRATUM
-#undef	HAVE_PPOLL
-#undef	HAVE_HPOLL
-#undef	HAVE_REACH
-#undef	HAVE_ESTDELAY
-#undef	HAVE_ESTOFFSET
-#undef	HAVE_JITTER
-#undef	HAVE_ESTDISP
-#undef	HAVE_REFID
-#undef	HAVE_REC
-#undef	HAVE_SRCPORT
-#undef	HAVE_REFTIME
-#undef	MAX_HAVE
 
 
 /*

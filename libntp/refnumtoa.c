@@ -17,21 +17,20 @@ refnumtoa(
 	char *buf;
 	const char *rclock;
 
+	if (!ISREFCLOCKADR(num))
+		return socktoa(num);
+
 	LIB_GETBUF(buf);
+	netnum = SRCADR(num);
+	rclock = clockname((int)((u_long)netnum >> 8) & 0xff);
 
-	if (ISREFCLOCKADR(num)) {
-		netnum = SRCADR(num);
-		rclock = clockname((int)((u_long)netnum >> 8) & 0xff);
-
-		if (rclock != NULL)
-			snprintf(buf, LIB_BUFLENGTH, "%s(%lu)",
-				 rclock, (u_long)netnum & 0xff);
-		else
-			snprintf(buf, LIB_BUFLENGTH, "REFCLK(%lu,%lu)",
-				 ((u_long)netnum >> 8) & 0xff,
-				 (u_long)netnum & 0xff);
-
-	}
+	if (rclock != NULL)
+		snprintf(buf, LIB_BUFLENGTH, "%s(%lu)",
+			 rclock, (u_long)netnum & 0xff);
+	else
+		snprintf(buf, LIB_BUFLENGTH, "REFCLK(%lu,%lu)",
+			 ((u_long)netnum >> 8) & 0xff,
+			 (u_long)netnum & 0xff);
 
 	return buf;
 }
