@@ -13,7 +13,7 @@
 (4.2.7p104) 2010/12/28 Released by Harlan Stenn <stenn@ntp.org>
 * from 4.2.6p3: Create and use scripts/check--help when generating
   .texi files.
-* from 4.2.6p3: Update bk triggers or the bk-5 release.
+* from 4.2.6p3: Update bk triggers for the bk-5 release.
 * Support for multiple Autokey identity groups from Dave Mills.
 * Documentation updates from Dave Mills.
 * Add ntpq kerninfo, authinfo, and sysinfo commands similar to ntpdc's.
