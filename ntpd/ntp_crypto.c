@@ -3781,7 +3781,6 @@ crypto_setup(void)
 		    filename);
 		exit (-1);
 	}
-printf("xxx %s %s\n", sys_hostname, sys_groupname);
 
 	if (sys_groupname == NULL)
 		snprintf(filename, MAXFILENAME, "%s", sys_hostname);
