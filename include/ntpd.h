@@ -8,9 +8,9 @@
  * Each half is further divided into sections for each source file.
  */
 
-#include "ntp_syslog.h"
-#include "ntp_fp.h"
 #include "ntp.h"
+#include "ntp_stdlib.h"
+#include "ntp_syslog.h"
 #include "ntp_debug.h"
 #include "ntp_select.h"
 #include "ntp_malloc.h"
@@ -295,7 +295,8 @@ extern	void	record_peer_stats (sockaddr_u *, int, double, double, double, double
 extern	void	record_proto_stats (char *);
 extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (sockaddr_u *, const char *);
-extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...);
+extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...)
+			__attribute__((__format__(__printf__, 2, 3)));
 extern	void	record_raw_stats (sockaddr_u *, sockaddr_u *, l_fp *, l_fp *, l_fp *, l_fp *);
 extern	u_long	leap_month(u_long);
 extern	void	record_crypto_stats (sockaddr_u *, const char *);

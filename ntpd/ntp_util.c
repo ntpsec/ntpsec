@@ -698,12 +698,11 @@ mprintf_clock_stats(
 	int	rc;
 	char	msg[512];
 
-	if (!stats_control)
-		return;
 	va_start(ap, fmt);
 	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
-	record_clock_stats(addr, msg);
+	if (stats_control)
+		record_clock_stats(addr, msg);
 
 	return rc;
 }
