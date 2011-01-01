@@ -3049,6 +3049,42 @@ case "$ac_cv_header_sys_ipc_h$ac_cv_header_sys_shm_h" in
 esac
 AC_MSG_RESULT([$ntp_canshm])
 
+# Test for termios TIOCMBIS modem control (ACTS, Heath, Palisade)
+AC_CACHE_CHECK(
+    [for termios modem control],
+    [ntp_cv_modem_control],
+    [AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+	    [[
+		#ifdef HAVE_UNISTD_H
+		# include <unistd.h>
+		#endif
+		#ifdef HAVE_TERMIOS_H
+		# include <termios.h>
+		#endif
+		#ifdef HAVE_SYS_IOCTL_H
+		# include <sys/ioctl.h>
+		#endif
+	    ]],
+	    [[
+		int	dtr = TIOCM_DTR;
+		
+		ioctl(1, TIOCMBIS, (char *)&dtr);
+	    ]]
+	)],
+	[ntp_cv_modem_control=yes],
+	[ntp_cv_modem_control=no]
+    )]
+)
+case "$ntp_eac::$ntp_cv_modem_control" in
+ yes::yes)
+    ntp_enable_all_modem_control_clocks=yes
+    ;;
+ *)
+    ntp_enable_all_modem_control_clocks=no
+    ;;
+esac
+
 # Requires modem control
 AC_MSG_CHECKING([ACTS modem service])
 AC_ARG_ENABLE(
@@ -3058,21 +3094,7 @@ AC_ARG_ENABLE(
 	[s ACTS modem service]
     )],
     [ntp_ok=$enableval],
-    [AC_EGREP_CPP(
-	[yes],
-	[
-	    #include <termios.h>
-	    #ifdef HAVE_SYS_IOCTL_H
-	    # include <sys/ioctl.h>
-	    #endif
-
-	    #ifdef TIOCMBIS
-		yes
-	    #endif
-	],
-	[ntp_ok=$ntp_eac],
-	[ntp_ok=no]
-    )]
+    [ntp_ok=$ntp_enable_all_modem_control_clocks]
 )
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -3270,21 +3292,7 @@ AC_ARG_ENABLE(
 	[s Heath GC-1000 WWV/WWVH receiver]
     )],
     [ntp_ok=$enableval],
-    [AC_EGREP_CPP(
-	[yes],
-	[
-	    #include <termios.h>
-	    #ifdef HAVE_SYS_IOCTL_H
-	    # include <sys/ioctl.h>
-	    #endif
-
-	    #ifdef TIOCMBIS
-		yes
-	    #endif
-	],
-	[ntp_ok=$ntp_eac],
-	[ntp_ok=no]
-    )]
+    [ntp_ok=$ntp_enable_all_modem_control_clocks]
 )
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
@@ -3521,6 +3529,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT([$ntp_ok])
 
+# Requires modem control
 AC_MSG_CHECKING([for Palisade clock])
 AC_ARG_ENABLE(
     [PALISADE],
@@ -3529,15 +3538,7 @@ AC_ARG_ENABLE(
 	[s Palisade clock]
     )],
     [ntp_ok=$enableval],
-    [
-	case "$ac_cv_header_termios_h" in
-	 yes)
-	    ntp_ok=$ntp_eac
-	    ;;
-	 *) ntp_ok=no
-	    ;;
-	esac
-    ]
+    [ntp_ok=$ntp_enable_all_modem_control_clocks]
 )
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes

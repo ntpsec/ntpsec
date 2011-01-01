@@ -1,4 +1,5 @@
 * Autokey multiple identity group improvements from Dave Mills.
+* [Bug 1764] Move Palisade modem control logic to configure.ac.
 * [Bug 1768] TIOCFLUSH undefined in linux for refclock_acts.
 (4.2.7p107) 2010/12/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1764] Palisade driver doesn't build on Linux.
@@ -601,6 +602,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1764] Palisade driver doesn't build on Linux
 * Create and use scripts/check--help when generating .texi files.
 * Update bk triggers for the bk-5 release.
 * Update genCommitLog for the bk-5 release.
