@@ -3647,7 +3647,8 @@ crypto_setup(void)
 {
 	struct pkey_info *pinfo; /* private/public key */
 	char	filename[MAXFILENAME]; /* file name buffer */
-	char *	randfile;
+	char	hostname[MAXFILENAME]; /* host name buffer */
+	char	*randfile;
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	l_fp	seed;		/* crypto PRNG seed as NTP timestamp */
 	u_int	len;
@@ -3703,13 +3704,12 @@ crypto_setup(void)
 	/*
 	 * Initialize structures.
 	 */
-	if (sys_hostname == NULL) {
-		gethostname(filename, MAXFILENAME);
-		sys_hostname = emalloc(strlen(filename) + 1);
-		strcpy(sys_hostname, filename);
-	}
+	gethostname(hostname, MAXFILENAME);
+	if (sys_hostname == NULL)
+		sys_hostname = strdup(hostname);
 	if (passwd == NULL)
 		passwd = sys_hostname;
+
 	memset(&hostval, 0, sizeof(hostval));
 	memset(&pubkey, 0, sizeof(pubkey));
 	memset(&tai_leap, 0, sizeof(tai_leap));
@@ -3720,7 +3720,7 @@ crypto_setup(void)
 	 * as we know it ends. The host key also becomes the default
 	 * sign key. 
 	 */
-	snprintf(filename, MAXFILENAME, "ntpkey_host_%s", sys_hostname);
+	snprintf(filename, MAXFILENAME, "ntpkey_host_%s", hostname);
 	pinfo = crypto_key(filename, passwd, NULL);
 	if (pinfo == NULL) {
 		msyslog(LOG_ERR,
@@ -3751,14 +3751,14 @@ crypto_setup(void)
 	 * Load optional sign key from file "ntpkey_sign_<hostname>". If
 	 * available, it becomes the sign key.
 	 */
-	snprintf(filename, MAXFILENAME, "ntpkey_sign_%s", sys_hostname);
+	snprintf(filename, MAXFILENAME, "ntpkey_sign_%s", hostname);
 	pinfo = crypto_key(filename, passwd, NULL); if (pinfo != NULL)
 	 	sign_pkey = pinfo->pkey;
 
 	/*
 	 * Load required certificate from file "ntpkey_cert_<hostname>".
 	 */
-	snprintf(filename, MAXFILENAME, "ntpkey_cert_%s", sys_hostname);
+	snprintf(filename, MAXFILENAME, "ntpkey_cert_%s", hostname);
 	cinfo = crypto_cert(filename);
 	if (cinfo == NULL) {
 		msyslog(LOG_ERR,
@@ -3781,37 +3781,42 @@ crypto_setup(void)
 		    filename);
 		exit (-1);
 	}
-	hostval.vallen = htonl(strlen(cinfo->subject));
-	hostval.ptr = cinfo->subject;
+printf("xxx %s %s\n", sys_hostname, sys_groupname);
+
 	if (sys_groupname == NULL)
-		sys_groupname = sys_hostname;
+		snprintf(filename, MAXFILENAME, "%s", sys_hostname);
+	else
+		snprintf(filename, MAXFILENAME, "%s@%s", sys_hostname,
+		    sys_groupname);
+	hostval.vallen = htonl(strlen(filename));
+	hostval.ptr = strdup(filename);
 
 	/*
 	 * Load optional IFF parameters from file
-	 * "ntpkey_iffkey_<groupname>".
+	 * "ntpkey_iffkey_<hostname>".
 	 */
 	snprintf(filename, MAXFILENAME, "ntpkey_iffkey_%s",
-	    sys_groupname);
+	    hostname);
 	iffkey_info = crypto_key(filename, passwd, NULL);
 	if (iffkey_info != NULL)
 		crypto_flags |= CRYPTO_FLAG_IFF;
 
 	/*
 	 * Load optional GQ parameters from file
-	 * "ntpkey_gqkey_<groupname>".
+	 * "ntpkey_gqkey_<hostname>".
 	 */
 	snprintf(filename, MAXFILENAME, "ntpkey_gqkey_%s",
-	    sys_groupname);
+	    hostname);
 	gqkey_info = crypto_key(filename, passwd, NULL);
 	if (gqkey_info != NULL)
 		crypto_flags |= CRYPTO_FLAG_GQ;
 
 	/*
 	 * Load optional MV parameters from file
-	 * "ntpkey_mvkey_<groupname>".
+	 * "ntpkey_mvkey_<hostname>".
 	 */
 	snprintf(filename, MAXFILENAME, "ntpkey_mvkey_%s",
-	    sys_groupname);
+	    hostname);
 	mvkey_info = crypto_key(filename, passwd, NULL);
 	if (mvkey_info != NULL)
 		crypto_flags |= CRYPTO_FLAG_MV;
@@ -3821,7 +3826,7 @@ crypto_setup(void)
 	 */
 	crypto_flags |= CRYPTO_FLAG_ENAB | (cinfo->nid << 16);
 	snprintf(statstr, NTP_MAXSTRLEN,
-	    "setup 0x%x host %s %s", crypto_flags, sys_hostname,
+	    "setup 0x%x host %s %s", crypto_flags, hostname,
 	    OBJ_nid2ln(cinfo->nid));
 	record_crypto_stats(NULL, statstr);
 #ifdef DEBUG

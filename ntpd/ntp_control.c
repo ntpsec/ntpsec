@@ -2292,8 +2292,8 @@ ctl_putsys(
 
 	case CS_HOST:
 		if (sys_hostname != NULL)
-			ctl_putstr(sys_var[CS_HOST].text, sys_hostname,
-			    strlen(sys_hostname));
+			ctl_putstr(sys_var[CS_HOST].text, hostval.ptr,
+			    strlen(hostval.ptr));
 		break;
 
 	case CS_IDENT:

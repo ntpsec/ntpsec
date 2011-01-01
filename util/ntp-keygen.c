@@ -416,21 +416,16 @@ main(
 					else if (strcmp(pathbuf,
 					    "Private") == 0)
 						exten = EXT_KEY_PRIVATE;
-					if (groupname == NULL)
-						groupname = ptr + 3;
+					if (certname == NULL)
+						certname = ptr + 3;
 				}
 			}
 		}
 	}
 	if (scheme == NULL)
 		scheme = "RSA-MD5";
-	if (groupname == NULL)
-		groupname = hostname;
 	fprintf(stderr, "Using host %s group %s\n", hostname,
 	    groupname);
-	if ((iffkey || gqkey || mvkey) && exten == NULL)
-		fprintf(stderr,
-		    "Warning: identity files may not be useful with a nontrusted certificate.\n");
 #endif	/* AUTOKEY */
 
 	/*
@@ -2054,7 +2049,7 @@ fheader	(
 		perror("Write");
 		exit (-1);
 	}
-	sprintf(linkname, "ntpkey_%s_%s", ulink, owner);
+	sprintf(linkname, "ntpkey_%s_%s", ulink, hostname);
 	remove(linkname);
 	temp = symlink(filename, linkname);
 	if (temp < 0)
