@@ -1,6 +1,7 @@
-* Autokey multiple identity group improvements from Dave Mills.
 * [Bug 1764] Move Palisade modem control logic to configure.ac.
 * [Bug 1768] TIOCFLUSH undefined in linux for refclock_acts.
+* Autokey multiple identity group improvements from Dave Mills.
+* from 4.2.6p3: Update the copyright year.
 (4.2.7p107) 2010/12/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1764] Palisade driver doesn't build on Linux.
 * [Bug 1766] Oncore clock has offset/high jitter at startup.
@@ -606,6 +607,7 @@
 * Create and use scripts/check--help when generating .texi files.
 * Update bk triggers for the bk-5 release.
 * Update genCommitLog for the bk-5 release.
+* Update the copyright year.
 
 ---
 (4.2.6p3-RC12) 2010/12/25 Released by Harlan Stenn <stenn@ntp.org>
