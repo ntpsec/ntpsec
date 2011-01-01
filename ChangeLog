@@ -1,3 +1,4 @@
+* [Bug 1768] TIOCFLUSH undefined in linux for refclock_acts.
 (4.2.7p107) 2010/12/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1764] Palisade driver doesn't build on Linux.
 * [Bug 1766] Oncore clock has offset/high jitter at startup.

@@ -33,20 +33,19 @@
  * This driver requires a modem with a Hayes-compatible command set and
  * control over the modem data terminal ready (DTR) control line. The
  * modem setup string is hard-coded in the driver and may require
- * changes for nonstandard modems or special circumstances. For reasons
- * unrelated to this driver, the data set ready (DSR) control line
- * should not be set when this driver is first started.
+ * changes for nonstandard modems or special circumstances.
  *
- * The calling program is initiated by setting fudge flag1, either
- * manually or automatically. When flag1 is set, the calling program
- * dials the first number in the phone command of the configuration
- * file. If that call fails, the calling program dials the second number
- * and so on. The number is specified by the Hayes ATDT prefix followed
- * by the number itself, including the prefix and long-distance digits
- * and delay code, if necessary. The flag1 is reset and the calling
- * program terminated if (a) a valid clock update has been determined,
- * (b) no more numbers remain in the list, (c) a device fault or timeout
- * occurs or (d) fudge flag1 is reset manually.
+ * When enabled, the calling program dials the first number in the
+ * phones file. If that call fails, it dials the second number and
+ * so on. The phone number is specified by the Hayes ATDT prefix
+ * followed by the number itself, including the long-distance prefix
+ * and delay code, if necessary. The calling program is enabled
+ * when (a) fudge flag1 is set by ntpdc, (b) at each poll interval
+ * when no other synchronization sources are present, and (c) at each
+ * poll interval whether or not other synchronization sources are 
+ * present. The calling program disconnects if (a) the called party
+ * is busy or does not answer, (b) the called party disconnects
+ * before a sufficient nuimber of timecodes have been received. 
  *
  * The driver is transparent to each of the modem time services and
  * Spectracom radios. It selects the parsing algorithm depending on the
@@ -88,7 +87,9 @@
  *
  * MJD, DST, DUT1 and UTC are not used by this driver. The "*" or "#" is
  * the on-time markers echoed by the driver and used by NIST to measure
- * and correct for the propagation delay.
+ * and correct for the propagation delay. Note: the ACTS timecode has
+ * recently been changed to elminate the * on-time indicator. The reason
+ * for this and the long term implications are not clear.
  *
  * US Naval Observatory (USNO)
  *
@@ -147,7 +148,8 @@
  * Service identifiers (message length)
  */
 #define REFACTS		"NIST"	/* NIST reference ID */
-#define LENACTS		50	/* NIST format */
+#define LENACTSA	50	/* NIST format A */
+#define LENACTSB	48	/* NIST format B */
 #define REFUSNO		"USNO"	/* USNO reference ID */
 #define LENUSNO		20	/* USNO */
 #define REFPTB		"PTB\0"	/* PTB/NPL reference ID */
@@ -496,7 +498,6 @@ acts_timeout(
 			msyslog(LOG_ERR, "acts: addclock fails");
 			return;
 		}
-		tcflush(pp->io.fd, TIOCFLUSH);
 		up->msgcnt = 0;
 		up->bufptr = pp->a_lastcode;
 
@@ -579,7 +580,6 @@ acts_close(
 	if (pp->io.fd != 0) {
 		report_event(PEVNT_CLOCK, peer, "close");
 		ioctl(pp->io.fd, TIOCMBIC, &dtr);
-		tcflush(pp->io.fd, TIOCFLUSH);
 		io_closeclock(&pp->io);
 		pp->io.fd = 0;
 	}
@@ -735,10 +735,10 @@ acts_timecode(
 		return;
 	
 	/*
-	 * ACTS format: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
-	 * UTC(NIST) *"
+	 * ACTS format A: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
+	 * UTC(NIST) *".
 	 */
-	case LENACTS:
+	case LENACTSA:
 		if (sscanf(str,
 		    "%5ld %2d-%2d-%2d %2d:%2d:%2d %2d %1d %3lf %5lf %9s %c",
 		    &mjd, &pp->year, &month, &day, &pp->hour,
@@ -747,16 +747,34 @@ acts_timecode(
 			refclock_report(peer, CEVNT_BADREPLY);
 			return;
 		}
-
-		/*
-		 * Wait until ACTS has calculated the roundtrip delay.
-		 * We don't need to do anything, as ACTS adjusts the
-		 * on-time epoch.
-		 */
-/*
-if (flag != '#')
+		pp->day = ymd2yd(pp->year, month, day);
+		pp->leap = LEAP_NOWARNING;
+		if (leap == 1)
+	    		pp->leap = LEAP_ADDSECOND;
+		else if (leap == 2)
+	    		pp->leap = LEAP_DELSECOND;
+		memcpy(&pp->refid, REFACTS, 4);
+		if (up->msgcnt == 0)
+			record_clock_stats(&peer->srcadr, str);
+		up->msgcnt++;
+		if (flag != '#' && up->msgcnt < 5)
 			return;
-*/
+
+		break;
+	
+	/*
+	 * ACTS format B: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
+	 * UTC(NIST)".
+	 */
+	case LENACTSB:
+		if (sscanf(str,
+		    "%5ld %2d-%2d-%2d %2d:%2d:%2d %2d %1d %3lf %5lf %9s",
+		    &mjd, &pp->year, &month, &day, &pp->hour,
+		    &pp->minute, &pp->second, &dst, &leap, &dut1,
+		    &msADV, utc) != 12) {
+			refclock_report(peer, CEVNT_BADREPLY);
+			return;
+		}
 		pp->day = ymd2yd(pp->year, month, day);
 		pp->leap = LEAP_NOWARNING;
 		if (leap == 1)
