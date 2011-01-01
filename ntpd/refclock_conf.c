@@ -168,7 +168,7 @@ extern	struct refclock refclock_shm;
 #define refclock_shm refclock_none
 #endif
 
-#if defined(CLOCK_PALISADE) && defined(TIOCMSET)
+#ifdef CLOCK_PALISADE 
 extern  struct refclock refclock_palisade;
 #else
 #define refclock_palisade refclock_none

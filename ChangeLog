@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1764] Palisade driver doesn't build on Linux
 * Create and use scripts/check--help when generating .texi files.
 * Update bk triggers for the bk-5 release.
 * Update genCommitLog for the bk-5 release.

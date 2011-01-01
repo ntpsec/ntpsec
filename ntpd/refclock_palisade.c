@@ -73,10 +73,6 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_PALISADE)
 
-#include <termios.h>
-
-# ifdef TIOCMSET
-
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);
 #undef write
@@ -1275,7 +1271,6 @@ getlong(
 		       bp[3];
 }
 
-# endif	/* TIOCMSET */
 #else	/* REFCLOCK && CLOCK_PALISADE*/
 int refclock_palisade_c_notempty;
 #endif

@@ -3460,6 +3460,7 @@ if test "$ntp_ok" = "yes"; then
 fi
 AC_MSG_RESULT([$ntp_ok])
 
+# Requires modem control
 AC_MSG_CHECKING([for Palisade clock])
 AC_ARG_ENABLE(
     [PALISADE],
@@ -3468,15 +3469,21 @@ AC_ARG_ENABLE(
 	[s Palisade clock]
     )],
     [ntp_ok=$enableval],
-    [
-	case "$ac_cv_header_termios_h" in
-	 yes)
-	    ntp_ok=$ntp_eac
-	    ;;
-	 *) ntp_ok=no
-	    ;;
-	esac
-    ]
+    [AC_EGREP_CPP(
+	[yes],
+	[
+	    #include <termios.h>
+	    #ifdef HAVE_SYS_IOCTL_H
+	    # include <sys/ioctl.h>
+	    #endif
+
+	    #ifdef TIOCMBIS
+		yes
+	    #endif
+	],
+	[ntp_ok=$ntp_eac],
+	[ntp_ok=no]
+    )]
 )
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
