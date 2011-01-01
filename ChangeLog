@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 (4.2.7p108) 2011/01/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1764] Move Palisade modem control logic to configure.ac.
 * [Bug 1768] TIOCFLUSH undefined in linux for refclock_acts.
