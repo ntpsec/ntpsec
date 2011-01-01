@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.c)
  *  
- *  It has been AutoGen-ed  December 31, 2010 at 10:28:34 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January  1, 2011 at 10:25:01 AM by AutoGen 5.11.6pre7
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * clktest copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
+ * clktest copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -38,7 +38,7 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "clktest copyright (c) 1970-2010 David L. Mills and/or others, all rights reserved"
+       "clktest copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
@@ -325,7 +325,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[8] = "CLKTEST";
 static char const zUsageTitle[129] =
-"clktest - test the clock line discipline - Ver. 4.2.7p107\n\
+"clktest - test the clock line discipline - Ver. 4.2.7p108\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... <tty_device>\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
