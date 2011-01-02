@@ -3185,6 +3185,7 @@ collect_display_vdc(
 	while (nextvar(&rsize, &rdata, &tag, &val)) {
 		if (NULL == val)
 			continue;
+		n = 0;
 		for (pvdc = table; pvdc->tag != NULL; pvdc++) {
 			len = strlen(pvdc->tag);
 			if (strncmp(tag, pvdc->tag, len))
