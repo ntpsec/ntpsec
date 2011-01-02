@@ -16,6 +16,14 @@
 
 #include "ntp_machine.h"
 
+
+#ifndef TRUE
+# define	TRUE	1
+#endif
+#ifndef FALSE
+# define	FALSE	0
+#endif
+
 /*
  * This is another naming conflict.
  * On NetBSD for MAC the macro "mac" is defined as 1

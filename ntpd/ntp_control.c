@@ -70,9 +70,6 @@ static	void	ctl_putadr	(const char *, u_int32,
 				 sockaddr_u *);
 static	void	ctl_putid	(const char *, char *);
 static	void	ctl_putarray	(const char *, double *, int);
-#ifdef KERNEL_PLL
-static	void	kstatus_to_text	(u_int32, char *, size_t);
-#endif
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
 static	void	ctl_putfs	(const char *, tstamp_t);
@@ -1622,133 +1619,6 @@ ctl_putarray(
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
-/*
- * kstatus_to_text - convert ntp_adjtime() status bits to text
- */
-#ifdef KERNEL_PLL
-void
-kstatus_to_text(
-	u_int32	status,
-	char *	str,
-	size_t	str_sz
-	)
-{
-	char *	pch;
-	const char *lim;
-
-	pch = str;
-	lim = pch + str_sz;
-
-# define	XLATE_KST_BIT(bitval, text)			\
-do {								\
-	if (((bitval) & status) &&				\
-	    (pch + sizeof(text) <= lim)) {			\
-		memcpy(pch, (text), sizeof(text));		\
-		pch += (u_int)(sizeof(text) - 1);		\
-	}							\
-} while (0)
-
-# ifdef STA_PLL
-	{
-		const char spll[] =		"pll ";
-		XLATE_KST_BIT(STA_PLL, spll);
-	}
-# endif
-# ifdef STA_PPSFREQ
-	{
-		const char sppsfreq[] =		"ppsfreq ";
-		XLATE_KST_BIT(STA_PPSFREQ, sppsfreq);
-	}
-# endif
-# ifdef STA_PPSTIME
-	{
-		const char sppstime[] =		"ppstime ";
-		XLATE_KST_BIT(STA_PPSTIME, sppstime);
-	}
-# endif
-# ifdef STA_FLL
-	{
-		const char sfll[] =		"fll ";
-		XLATE_KST_BIT(STA_FLL, sfll);
-	}
-# endif
-# ifdef STA_INS
-	{
-		const char sins[] =		"ins ";
-		XLATE_KST_BIT(STA_INS, sins);
-	}
-# endif
-# ifdef STA_DEL
-	{
-		const char sdel[] =		"del ";
-		XLATE_KST_BIT(STA_DEL, sdel);
-	}
-# endif
-# ifdef STA_UNSYNC
-	{
-		const char sunsync[] =		"unsync ";
-		XLATE_KST_BIT(STA_UNSYNC, sunsync);
-	}
-# endif
-# ifdef STA_FREQHOLD
-	{
-		const char sfreqhold[] =	"freqhold ";
-		XLATE_KST_BIT(STA_FREQHOLD, sfreqhold);
-	}
-# endif
-# ifdef STA_PPSSIGNAL
-	{
-		const char sppssignal[] =	"ppssignal ";
-		XLATE_KST_BIT(STA_PPSSIGNAL, sppssignal);
-	}
-# endif
-# ifdef STA_PPSJITTER
-	{
-		const char sppsjitter[] =	"ppsjitter ";
-		XLATE_KST_BIT(STA_PPSJITTER, sppsjitter);
-	}
-# endif
-# ifdef STA_PPSWANDER
-	{
-		const char sppswander[] =	"ppswander ";
-		XLATE_KST_BIT(STA_PPSWANDER, sppswander);
-	}
-# endif
-# ifdef STA_PPSERROR
-	{
-		const char sppserror[] =	"ppserror ";
-		XLATE_KST_BIT(STA_PPSERROR, sppserror);
-	}
-# endif
-# ifdef STA_CLOCKERR
-	{
-		const char sclockerr[] =	"clockerr ";
-		XLATE_KST_BIT(STA_CLOCKERR, sclockerr);
-	}
-# endif
-# ifdef STA_NANO
-	{
-		const char snano[] =		"nano ";
-		XLATE_KST_BIT(STA_NANO, snano);
-	}
-# endif
-# ifdef STA_MODE
-	{
-		const char smodefll[] =		"mode=fll ";
-		XLATE_KST_BIT(STA_MODE, smodefll);
-	}
-# endif
-# ifdef STA_CLK
-	{
-		const char ssrcb[] =		"src=B ";
-		XLATE_KST_BIT(STA_CLK, ssrcb);
-	}
-# endif
-	if (pch > str && ' ' == pch[-1])
-		pch[-1] = '\0';
-}
-#endif	/* KERNEL_PLL */
-
 
 /*
  * ctl_putsys - output a system variable
@@ -2178,11 +2048,11 @@ ctl_putsys(
 
 	case CS_K_STFLAGS:
 #ifndef KERNEL_PLL
-		str[0] = '\0';
+		ss = "";
 #else
-		kstatus_to_text(ntx.status, str, sizeof(str));
+		ss = k_st_flags(ntx.status);
 #endif
-		ctl_putstr(sys_var[varid].text, str, strlen(str));
+		ctl_putstr(sys_var[varid].text, ss, strlen(ss));
 		break;
 
 	case CS_K_TIMECONST:

@@ -7,22 +7,22 @@
 /*
  * Sizes of things
  */
-#define	LIB_NUMBUFS	200
-#define	LIB_BUFLENGTH	80
+#define LIB_NUMBUF	16
+typedef char libbufstr[128];
+extern libbufstr lib_stringbuf[LIB_NUMBUF];
+extern int lib_nextbuf;
+extern int lib_inited;
+
+#define	LIB_BUFLENGTH	(sizeof(lib_stringbuf) / COUNTOF(lib_stringbuf))
 
 /*
  * Macro to get a pointer to the next buffer
  */
-#define	LIB_GETBUF(buf) \
-	do { \
-		if (!lib_inited) \
-			init_lib(); \
-		buf = &lib_stringbuf[lib_nextbuf][0]; \
-		if (++lib_nextbuf >= LIB_NUMBUFS) \
-			lib_nextbuf = 0; \
-		memset(buf, 0, LIB_BUFLENGTH); \
-	} while (0)
-
-extern char lib_stringbuf[LIB_NUMBUFS][LIB_BUFLENGTH];
-extern int lib_nextbuf;
-extern int lib_inited;
+#define	LIB_GETBUF(bufp)					\
+	do {							\
+		if (!lib_inited)				\
+			init_lib();				\
+		(bufp) = &lib_stringbuf[lib_nextbuf++][0];	\
+		lib_nextbuf %= COUNTOF(lib_stringbuf);		\
+		memset((bufp), '\0', sizeof(lib_stringbuf[0]));	\
+	} while (FALSE)

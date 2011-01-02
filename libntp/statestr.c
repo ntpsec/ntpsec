@@ -12,6 +12,10 @@
 #include "ntp_refclock.h"
 #include "ntp_control.h"
 #include "ntp_string.h"
+#ifdef KERNEL_PLL
+# include "ntp_syscall.h"
+#endif
+
 
 /*
  * Structure for turning various constants into a readable string.
@@ -148,6 +152,18 @@ static const struct codestring peer_codes[] = {
 	{ -1,				"" }
 };
 
+/*
+ * Peer status bits
+ */
+static const struct codestring peer_st_bits[] = {
+	{ CTL_PST_CONFIG,		"conf" },
+	{ CTL_PST_AUTHENABLE,		"authenb" },
+	{ CTL_PST_AUTHENTIC,		"auth" },
+	{ CTL_PST_REACH,		"reach" },
+	{ CTL_PST_BCAST,		"bcast" },
+	/* not used with getcode(), no terminating entry needed */
+};
+
 #ifdef AUTOKEY
 /*
  * Crypto events (cryp)
@@ -172,6 +188,63 @@ static const struct codestring crypto_codes[] = {
 	{ -1,				"" }
 };
 #endif	/* AUTOKEY */
+
+#ifdef KERNEL_PLL
+/*
+ * kernel discipline status bits
+ */
+static const struct codestring k_st_bits[] = {
+# ifdef STA_PLL
+	{ STA_PLL,			"pll" },
+# endif
+# ifdef STA_PPSFREQ
+	{ STA_PPSFREQ,			"ppsfreq" },
+# endif
+# ifdef STA_PPSTIME
+	{ STA_PPSTIME,			"ppstime" },
+# endif
+# ifdef STA_FLL
+	{ STA_FLL,			"fll" },
+# endif
+# ifdef STA_INS
+	{ STA_INS,			"ins" },
+# endif
+# ifdef STA_DEL
+	{ STA_DEL,			"del" },
+# endif
+# ifdef STA_UNSYNC
+	{ STA_UNSYNC,			"unsync" },
+# endif
+# ifdef STA_FREQHOLD
+	{ STA_FREQHOLD,			"freqhold" },
+# endif
+# ifdef STA_PPSSIGNAL
+	{ STA_PPSSIGNAL,		"ppssignal" },
+# endif
+# ifdef STA_PPSJITTER
+	{ STA_PPSJITTER,		"ppsjitter" },
+# endif
+# ifdef STA_PPSWANDER
+	{ STA_PPSWANDER,		"ppswander" },
+# endif
+# ifdef STA_PPSERROR
+	{ STA_PPSERROR,			"ppserror" },
+# endif
+# ifdef STA_CLOCKERR
+	{ STA_CLOCKERR,			"clockerr" },
+# endif
+# ifdef STA_NANO
+	{ STA_NANO,			"nano" },
+# endif
+# ifdef STA_MODE
+	{ STA_MODE,			"mode=fll" },
+# endif
+# ifdef STA_CLK
+	{ STA_CLK,			"src=B" },
+# endif
+	/* not used with getcode(), no terminating entry needed */
+};
+#endif	/* KERNEL_PLL */
 
 /* Forwards */
 static const char *	getcode(int, const struct codestring *);
@@ -224,43 +297,84 @@ getevents(
 }
 
 
+/*
+ * decode_bitflags()
+ *
+ * returns a human-readable string with a keyword from tab for each bit
+ * set in bits, separating multiple entries with text of sep2.
+ */
 static const char *
-peer_st_flags(u_char pst)
+decode_bitflags(
+	int				bits,
+	const char *			sep2,
+	const struct codestring *	tab,
+	size_t				tab_ct
+	)
 {
-	static const char	toosmall[] = "buffer too small!";
-	static const char	csp[] = ", ";
-	const char *		sep;
-	char *			buf;
-	char *			pch;
-	char *			lim;
-	int			rc;
+	const char *	sep;
+	char *		buf;
+	char *		pch;
+	char *		lim;
+	size_t		b;
+	int		rc;
 
 	LIB_GETBUF(buf);
 	pch = buf;
 	lim = buf + LIB_BUFLENGTH;
 	sep = "";
 
-#define EXPAND_PEERST_BIT(b, text)				\
-do {								\
-	if ((b) & pst) {					\
-		rc = snprintf(pch, (lim - pch), "%s" text, sep);\
-		if (rc < 0)					\
-			return toosmall;			\
-		pch += (u_int)rc;				\
-		if (pch >= lim)					\
-			return toosmall;			\
-		sep = csp;					\
-	}							\
-} while (0)
+	for (b = 0; b < tab_ct; b++) {
+		if (tab[b].code & bits) {
+			rc = snprintf(pch, (lim - pch), "%s%s", sep,
+				      tab[b].string);
+			if (rc < 0)
+				goto toosmall;
+			pch += (u_int)rc;
+			if (pch >= lim)
+				goto toosmall;
+			sep = sep2;
+		}
+	}
 
-	EXPAND_PEERST_BIT(CTL_PST_CONFIG,	"conf");
-	EXPAND_PEERST_BIT(CTL_PST_AUTHENABLE,	"authenb");
-	EXPAND_PEERST_BIT(CTL_PST_AUTHENTIC,	"auth");
-	EXPAND_PEERST_BIT(CTL_PST_REACH,	"reach");
-	EXPAND_PEERST_BIT(CTL_PST_BCAST,	"bcast");
+	return buf;
+
+    toosmall:
+	snprintf(buf, LIB_BUFLENGTH,
+		 "decode_bitflags(%s) can't decode 0x%x in %d bytes",
+		 (tab == peer_st_bits)
+		     ? "peer_st"
+		     : 
+#ifdef KERNEL_PLL
+		       (tab == k_st_bits)
+			   ? "kern_st"
+			   :
+#endif
+			     "",
+		 bits, (int)LIB_BUFLENGTH);
 
 	return buf;
 }
+
+
+static const char *
+peer_st_flags(
+	u_char pst
+	)
+{
+	return decode_bitflags(pst, ", ", peer_st_bits,
+			       COUNTOF(peer_st_bits));
+}
+
+
+#ifdef KERNEL_PLL
+const char *
+k_st_flags(
+	u_int32 st
+	)
+{
+	return decode_bitflags(st, " ", k_st_bits, COUNTOF(k_st_bits));
+}
+#endif	/* KERNEL_PLL */
 
 
 /*

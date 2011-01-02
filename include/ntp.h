@@ -89,12 +89,6 @@ typedef char s_char;
 #  undef SO_SNDBUF
 # endif
 #endif
-#ifndef TRUE
-# define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-# define FALSE 0
-#endif /* FALSE */
 
 /*
  * NTP protocol parameters.  See section 3.2.6 of the specification.
