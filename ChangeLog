@@ -1,3 +1,6 @@
+* Remove nearly all strcpy() and most strcat() from NTP distribution.
+  One major pocket remains in ntp_crypto.c.  libopts & libisc also have
+  (safe) uses of strcpy() and strcat() remaining.
 * Documentation updates from Dave Mills.
 (4.2.7p108) 2011/01/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1764] Move Palisade modem control logic to configure.ac.
