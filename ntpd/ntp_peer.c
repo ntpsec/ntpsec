@@ -509,10 +509,7 @@ unpeer(
 	struct peer *peer
 	)
 {
-	char tbuf[80];
-
-	snprintf(tbuf, sizeof(tbuf), "assoc %u", peer->associd);
-	report_event(PEVNT_DEMOBIL, peer, tbuf);
+	mprintf_event(PEVNT_DEMOBIL, peer, "assoc %u", peer->associd);
 	restrict_source(&peer->srcadr, 1, 0);
 	set_peerdstadr(peer, NULL);
 	peer_demobilizations++;
@@ -793,7 +790,6 @@ newpeer(
 {
 	struct peer *peer;
 	u_int	hash;
-	char	tbuf[80];
 
 #ifdef AUTOKEY
 	/*
@@ -976,8 +972,7 @@ newpeer(
 	LINK_SLIST(peer_list, peer, p_link);
 
 	restrict_source(&peer->srcadr, 0, 0);
-	snprintf(tbuf, sizeof(tbuf), "assoc %d", peer->associd);
-	report_event(PEVNT_MOBIL, peer, tbuf);
+	mprintf_event(PEVNT_MOBIL, peer, "assoc %d", peer->associd);
 	DPRINTF(1, ("newpeer: %s->%s mode %u vers %u poll %u %u flags 0x%x 0x%x ttl %u key %08x\n",
 	    latoa(peer->dstadr), stoa(&peer->srcadr), peer->hmode,
 	    peer->version, peer->minpoll, peer->maxpoll, peer->flags,

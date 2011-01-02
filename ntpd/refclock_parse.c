@@ -1522,13 +1522,14 @@ mkreadable(
 	int hex
 	)
 {
+	static const char ellipsis[] = "...";
 	char *b    = buffer;
 	char *endb = NULL;
 
 	if (blen < 4)
 		return NULL;		/* don't bother with mini buffers */
 
-	endb = buffer + blen - 4;
+	endb = buffer + blen - sizeof(ellipsis);
 
 	blen--;			/* account for '\0' */
 
@@ -1557,7 +1558,7 @@ mkreadable(
 			{
 				if (*src == '\\')
 				{
-					strcpy(buffer,"\\\\");
+					memcpy(buffer, "\\\\", 2);
 					buffer += 2;
 					blen   -= 2;
 					src++;
@@ -1571,7 +1572,7 @@ mkreadable(
 			}
 		}
 		if (srclen && !blen && endb) /* overflow - set last chars to ... */
-			strcpy(endb, "...");
+			memcpy(endb, ellipsis, sizeof(ellipsis));
 	}
 
 	*buffer = '\0';

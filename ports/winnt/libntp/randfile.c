@@ -41,8 +41,7 @@ init_randfile()
 	homedir = getenv("HOME");
 	if (homedir != NULL &&
 	    (strlen(homedir) + 5 /* \.rnd */) < sizeof(tmp)) {
-		strncpy(tmp, homedir, sizeof(tmp));
-		strcat(tmp, "\\.rnd");
+		snprintf(tmp, sizeof(tmp), "%s\\.rnd", homedir);
 		rf = fopen(tmp, "rb");
 		if (rf != NULL) {
 			fclose(rf);

@@ -46,6 +46,8 @@ extern	int	change_logfile	(const char *, int);
 extern	void	setup_logfile	(int);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);
+extern	int	mprintf_event	(int, struct peer *, const char *, ...)
+			__attribute__((__format__(__printf__, 3, 4)));
 
 /* ntp_control.c */
 /*

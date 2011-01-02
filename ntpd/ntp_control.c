@@ -1641,9 +1641,10 @@ kstatus_to_text(
 
 # define	XLATE_KST_BIT(bitval, text)			\
 do {								\
-	if (((bitval) & status) && pch + sizeof(text) <= lim) {	\
+	if (((bitval) & status) &&				\
+	    (pch + sizeof(text) <= lim)) {			\
 		memcpy(pch, (text), sizeof(text));		\
-		pch += sizeof(text) - 1;			\
+		pch += (u_int)(sizeof(text) - 1);		\
 	}							\
 } while (0)
 
@@ -3132,8 +3133,13 @@ write_variables(
 	const struct ctl_var *v;
 	int ext_var;
 	char *valuep;
-	long val = 0;
+	long val;
+	size_t octets;
+	char *vareqv;
+	const char *t;
+	char *tt;
 
+	val = 0;
 	/*
 	 * If he's trying to write into a peer tell him no way
 	 */
@@ -3180,30 +3186,19 @@ write_variables(
 		}
 
 		if (ext_var) {
-			char *s = (char *)emalloc(strlen(v->text) +
-						  strlen(valuep) + 2);
-			const char *t;
-			char *tt = s;
-
+			octets = strlen(v->text) + strlen(valuep) + 2;
+			vareqv = emalloc(octets);
+			tt = vareqv;
 			t = v->text;
 			while (*t && *t != '=')
 				*tt++ = *t++;
-
 			*tt++ = '=';
-			strcat(tt, valuep);
-			set_sys_var(s, strlen(s)+1, v->flags);
-			free(s);
+			memcpy(tt, valuep, 1 + strlen(valuep));
+			set_sys_var(vareqv, 1 + strlen(vareqv), v->flags);
+			free(vareqv);
 		} else {
-			/*
-			 * This one seems sane. Save it.
-			 */
-			switch(v->code) {
-
-			    case CS_LEAP:
-			    default:
-				ctl_error(CERR_UNSPEC); /* really */
-				return;
-			}
+			ctl_error(CERR_UNSPEC); /* really */
+			return;
 		}
 	}
 
@@ -4509,6 +4504,30 @@ report_event(
 	 * We're done, return.
 	 */
 	ctl_flushpkt(0);
+}
+
+
+/*
+ * mprintf_event - printf-style varargs variant of report_event()
+ */
+int
+mprintf_event(
+	int		evcode,		/* event code */
+	struct peer *	p,		/* may be NULL */
+	const char *	fmt,		/* msnprintf format */
+	...
+	)
+{
+	va_list	ap;
+	int	rc;
+	char	msg[512];
+
+	va_start(ap, fmt);
+	rc = mvsnprintf(msg, sizeof(msg), fmt, ap);
+	va_end(ap);
+	report_event(evcode, p, msg);
+
+	return rc;
 }
 
 

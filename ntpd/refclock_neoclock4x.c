@@ -317,10 +317,10 @@ neoclock4x_start(int unit,
 
   up->leap_status = 0;
   up->unit = unit;
-  strcpy(up->firmware, "?");
+  strncpy(up->firmware, "?", sizeof(up->firmware));
   up->firmwaretag = '?';
-  strcpy(up->serial, "?");
-  strcpy(up->radiosignal, "?");
+  strncpy(up->serial, "?", sizeof(up->serial));
+  strncpy(up->radiosignal, "?", sizeof(up->radiosignal));
   up->timesource  = '?';
   up->dststatus   = '?';
   up->quarzstatus = '?';
@@ -336,7 +336,8 @@ neoclock4x_start(int unit,
 
 #if defined(NEOCLOCK4X_FIRMWARE)
 #if NEOCLOCK4X_FIRMWARE == NEOCLOCK4X_FIRMWARE_VERSION_A
-  strcpy(up->firmware, "(c) 2002 NEOL S.A. FRANCE / L0.01 NDF:A:* (compile time)");
+  strncpy(up->firmware, "(c) 2002 NEOL S.A. FRANCE / L0.01 NDF:A:* (compile time)",
+	  sizeof(up->firmware));
   up->firmwaretag = 'A';
 #else
   msyslog(LOG_EMERG, "NeoClock4X(%d): unknown firmware defined at compile time for NeoClock4X",
@@ -931,13 +932,13 @@ neol_query_firmware(int fd,
 	  if(read_errors > 5)
 	    {
 	      msyslog(LOG_ERR, "NeoClock4X(%d): can't read firmware version (timeout)", unit);
-	      strcpy(tmpbuf, "unknown due to timeout");
+	      strncpy(tmpbuf, "unknown due to timeout", sizeof(tmpbuf));
 	      break;
 	    }
           if(chars_read > 500)
             {
 	      msyslog(LOG_ERR, "NeoClock4X(%d): can't read firmware version (garbage)", unit);
-	      strcpy(tmpbuf, "unknown due to garbage input");
+	      strncpy(tmpbuf, "unknown due to garbage input", sizeof(tmpbuf));
 	      break;
             }
 	  if(-1 == read(fd, &c, 1))
@@ -963,7 +964,7 @@ neol_query_firmware(int fd,
 	      if(0xA9 != c) /* wait for (c) char in input stream */
 		continue;
 
-	      strcpy(tmpbuf, "(c)");
+	      strncpy(tmpbuf, "(c)", sizeof(tmpbuf));
 	      len = 3;
 	      init = 0;
 	      continue;
@@ -1008,7 +1009,7 @@ neol_query_firmware(int fd,
   else
     {
       msyslog(LOG_ERR, "NeoClock4X(%d): can't query firmware version", unit);
-      strcpy(tmpbuf, "unknown error");
+      strncpy(tmpbuf, "unknown error", sizeof(tmpbuf));
     }
   strncpy(firmware, tmpbuf, maxlen);
   firmware[maxlen] = '\0';

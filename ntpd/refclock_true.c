@@ -367,7 +367,7 @@ true_receive(
         if (rd_lencode == 0)
             return;
         pp->lencode = rd_lencode;
-        strcpy(pp->a_lastcode, rd_lastcode);
+        strncpy(pp->a_lastcode, rd_lastcode, sizeof(pp->a_lastcode));
         pp->lastrec = rd_tmp;
 	true_debug(peer, "receive(%s) [%d]\n", pp->a_lastcode, pp->lencode);
 

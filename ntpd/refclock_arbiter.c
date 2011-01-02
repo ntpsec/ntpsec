@@ -289,7 +289,8 @@ arb_receive(
 			return;
 
 		} else if (!strncmp(tbuf, "SR", 2)) {
-			strcpy(up->status, tbuf + 2);
+			strncpy(up->status, tbuf + 2,
+				sizeof(up->status));
 			if (pp->sloppyclockflag & CLK_FLAG4)
 				write(pp->io.fd, "LA", 2);
 			else
@@ -297,7 +298,7 @@ arb_receive(
 			return;
 
 		} else if (!strncmp(tbuf, "LA", 2)) {
-			strcpy(up->latlon, tbuf + 2);
+			strncpy(up->latlon, tbuf + 2, sizeof(up->latlon));
 			write(pp->io.fd, "LO", 2);
 			return;
 

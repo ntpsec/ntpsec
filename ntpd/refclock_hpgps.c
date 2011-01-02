@@ -300,7 +300,7 @@ hpgps_receive(
 	if (up->linecnt-- > 0) {
 		if ((int)(pp->lencode + 2) <= (SMAX - (up->lastptr - up->statscrn))) {
 			*up->lastptr++ = '\n';
-			(void)strcpy(up->lastptr, pp->a_lastcode);
+			memcpy(up->lastptr, pp->a_lastcode, pp->lencode);
 			up->lastptr += pp->lencode;
 		}
 		if (up->linecnt == 0) 
@@ -333,7 +333,7 @@ hpgps_receive(
 	 *
 	 */
 
-	(void)strcpy(prompt,pp->a_lastcode);
+	strncpy(prompt, pp->a_lastcode, sizeof(prompt));
 	tcp = strrchr(pp->a_lastcode,'>');
 	if (tcp == NULL)
 	    tcp = pp->a_lastcode; 

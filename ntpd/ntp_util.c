@@ -12,6 +12,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
+#include "lib_strbuf.h"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -349,8 +350,6 @@ stats_config(
 	FILE	*fp;
 	const char *value;
 	int	len;
-	char	tbuf[80];
-	char	str1[20], str2[20];
 	double	old_drift;
 #ifndef VMS
 	const char temp_ext[] = ".TEMP";
@@ -366,31 +365,36 @@ stats_config(
 	char newvalue[MAX_PATH], parameter[MAX_PATH];
 
 	if (!ExpandEnvironmentStrings(invalue, newvalue, MAX_PATH)) {
-		switch(item) {
-		    case STATS_FREQ_FILE:
-			strcpy(parameter,"STATS_FREQ_FILE");
+		switch (item) {
+		case STATS_FREQ_FILE:
+			strncpy(parameter, "STATS_FREQ_FILE",
+				sizeof(parameter));
 			break;
 
-		    case STATS_LEAP_FILE:
-			strcpy(parameter,"STATS_LEAP_FILE");
+		case STATS_LEAP_FILE:
+			strncpy(parameter, "STATS_LEAP_FILE",
+				sizeof(parameter));
 			break;
 
-		    case STATS_STATSDIR:
-			strcpy(parameter,"STATS_STATSDIR");
+		case STATS_STATSDIR:
+			strncpy(parameter, "STATS_STATSDIR",
+				sizeof(parameter));
 			break;
 
-		    case STATS_PID_FILE:
-			strcpy(parameter,"STATS_PID_FILE");
+		case STATS_PID_FILE:
+			strncpy(parameter, "STATS_PID_FILE",
+				sizeof(parameter));
 			break;
 
-		    default:
-			strcpy(parameter,"UNKNOWN");
+		default:
+			strncpy(parameter, "UNKNOWN",
+				sizeof(parameter));
 			break;
 		}
 		value = invalue;
 		msyslog(LOG_ERR,
-		    "ExpandEnvironmentStrings(%s) failed: %m\n",
-		    parameter);
+			"ExpandEnvironmentStrings(%s) failed: %m\n",
+			parameter);
 	} else {
 		value = newvalue;
 	}
@@ -398,7 +402,7 @@ stats_config(
 	value = invalue;
 #endif /* SYS_WINNT */
 
-	switch(item) {
+	switch (item) {
 
 	/*
 	 * Open and read frequency file.
@@ -545,18 +549,15 @@ stats_config(
 			break;
 		}
 
-		if (leap_file(fp) < 0) {
+		if (leap_file(fp) < 0)
 			msyslog(LOG_ERR,
 			    "format error leapseconds file %s",
 			    value);
-		} else {
-			strcpy(str1, fstostr(leap_sec));
-			strcpy(str2, fstostr(leap_expire));
-			snprintf(tbuf, sizeof(tbuf),
-			    "%d leap %s expire %s", leap_tai, str1,
-			    str2);
-			report_event(EVNT_TAI, NULL, tbuf);
-		}
+		else
+			mprintf_event(EVNT_TAI, NULL,
+				      "%d leap %s expire %s", leap_tai,
+				      fstostr(leap_sec),
+				      fstostr(leap_expire));
 		fclose(fp);
 		break;
 
@@ -1063,21 +1064,25 @@ char * fstostr(
 	time_t	ntp_stamp
 	)
 {
-	static char	str[20];
+	char	*	buf;
 	struct tm *	tm;
 	time_t		unix_stamp;
 
+	LIB_GETBUF(buf);
 	unix_stamp = ntp_stamp - JAN_1970;
 	tm = gmtime(&unix_stamp);
-	if (NULL != tm)
-		snprintf(str, sizeof(str),
-			 "%04d%02d%02d%02d%02d",
-			 tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-			 tm->tm_hour, tm->tm_min);
+	if (NULL == tm)
+#ifdef WAIT_FOR_NTP_CRYPTO_C_CALLERS_ABLE_TO_HANDLE_MORE_THAN_20_CHARS
+		msnprintf(buf, LIB_BUFLENGTH, "gmtime: %m");
+#else
+		strncpy(buf, "gmtime() error", LIB_BUFLENGTH);
+#endif
 	else
-		strcpy(str, "gmtime() error");
+		snprintf(buf, LIB_BUFLENGTH, "%04d%02d%02d%02d%02d",
+			 tm->tm_year + 1900, tm->tm_mon + 1,
+			 tm->tm_mday, tm->tm_hour, tm->tm_min);
 
-	return str;
+	return buf;
 }
 
 

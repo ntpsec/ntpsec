@@ -1366,7 +1366,7 @@ addserver(
 	int error;
 	/* Service name */
 	char service[5];
-	strcpy(service, "ntp");
+	strncpy(service, "ntp", sizeof(service));
 
 	/* Get host address. Looking for UDP datagram connection. */
 	memset(&hints, 0, sizeof(hints));
@@ -1696,7 +1696,7 @@ init_io(void)
 	 * Open the socket
 	 */
 
-	strcpy(service, "ntp");
+	strncpy(service, "ntp", sizeof(service));
 
 	/*
 	 * Init hints addrinfo structure
@@ -1706,10 +1706,10 @@ init_io(void)
 	hints.ai_flags = AI_PASSIVE;
 	hints.ai_socktype = SOCK_DGRAM;
 
-	if(getaddrinfo(NULL, service, &hints, &res) != 0) {
-	       msyslog(LOG_ERR, "getaddrinfo() failed: %m");
-	       exit(1);
-	       /*NOTREACHED*/
+	if (getaddrinfo(NULL, service, &hints, &res) != 0) {
+		msyslog(LOG_ERR, "getaddrinfo() failed: %m");
+		exit(1);
+		/*NOTREACHED*/
 	}
 
 #ifdef SYS_WINNT

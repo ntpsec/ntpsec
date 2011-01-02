@@ -1786,7 +1786,7 @@ again:
 		}
 
 		if (flagstr[0] == '\0')
-			strcpy(flagstr, "none");
+			strncpy(flagstr, "none", sizeof(flagstr));
 
 		if (!skip)
 			fprintf(fp, "%-15.15s %-15.15s %9lu  %s\n",

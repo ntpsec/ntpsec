@@ -426,7 +426,7 @@ openhost(
 	 * will return an "IPv4-mapped IPv6 address" address if you
 	 * give it an IPv4 address to lookup.
 	 */
-	strcpy(service, "ntp");
+	strncpy(service, "ntp", sizeof(service));
 	memset((char *)&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
@@ -481,7 +481,7 @@ openhost(
 		(void) closesocket(sockfd);
 		havehost = 0;
 	}
-	(void) strcpy(currenthost, temphost);
+	strncpy(currenthost, temphost, sizeof(currenthost));
 	
 	/* port maps to the same in both families */
 	s_port = ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port; 

@@ -595,7 +595,7 @@ openhost(
 		(void) closesocket(sockfd);
 		havehost = 0;
 	}
-	(void) strcpy(currenthost, temphost);
+	strncpy(currenthost, temphost, sizeof(currenthost));
 
 	/* port maps to the same location in both families */
 	s_port = ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port;

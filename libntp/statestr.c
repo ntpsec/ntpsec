@@ -18,14 +18,13 @@
  */
 struct codestring {
 	int code;
-	const char *string;
+	const char * const string;
 };
 
 /*
  * Leap status (leap)
  */
-static
-struct codestring leap_codes[] = {
+static const struct codestring leap_codes[] = {
 	{ LEAP_NOWARNING,	"leap_none" },
 	{ LEAP_ADDSECOND,	"leap_add_sec" },
 	{ LEAP_DELSECOND,	"leap_del_sec" },
@@ -36,8 +35,7 @@ struct codestring leap_codes[] = {
 /*
  * Clock source status (sync)
  */
-static
-struct codestring sync_codes[] = {
+static const struct codestring sync_codes[] = {
 	{ CTL_SST_TS_UNSPEC,	"sync_unspec" },
 	{ CTL_SST_TS_ATOM,	"sync_pps" },
 	{ CTL_SST_TS_LF,	"sync_lf_radio" },
@@ -54,8 +52,7 @@ struct codestring sync_codes[] = {
 /*
  * Peer selection status (sel)
  */
-static
-struct codestring select_codes[] = {
+static const struct codestring select_codes[] = {
 	{ CTL_PST_SEL_REJECT,	"sel_reject" },
 	{ CTL_PST_SEL_SANE,	"sel_falsetick" },
 	{ CTL_PST_SEL_CORRECT,	"sel_excess" },
@@ -70,8 +67,7 @@ struct codestring select_codes[] = {
 /*
  * Clock status (clk)
  */
-static
-struct codestring clock_codes[] = {
+static const struct codestring clock_codes[] = {
 	{ CTL_CLK_OKAY,		"clk_unspec" },
 	{ CTL_CLK_NOREPLY,	"clk_no_reply" },
 	{ CTL_CLK_BADFORMAT,	"clk_bad_format" },
@@ -87,8 +83,7 @@ struct codestring clock_codes[] = {
 /*
  * Flash bits -- see ntpq.c tstflags & tstflagnames
  */
-static
-struct codestring flash_codes[] = {
+static const struct codestring flash_codes[] = {
 	{ TEST1,		"pkt_dup" },
 	{ TEST2,		"pkt_bogus" },
 	{ TEST3,		"pkt_unsync" },
@@ -110,8 +105,7 @@ struct codestring flash_codes[] = {
 /*
  * System events (sys)
  */
-static
-struct codestring sys_codes[] = {
+static const struct codestring sys_codes[] = {
 	{ EVNT_UNSPEC,		"unspecified" },
 	{ EVNT_NSET,		"freq_not_set" },
 	{ EVNT_FSET,		"freq_set" },
@@ -135,8 +129,7 @@ struct codestring sys_codes[] = {
 /*
  * Peer events (peer)
  */
-static
-struct codestring peer_codes[] = {
+static const struct codestring peer_codes[] = {
 	{ PEVNT_MOBIL & ~PEER_EVENT,	"mobilize" },
 	{ PEVNT_DEMOBIL & ~PEER_EVENT,	"demobilize" },
 	{ PEVNT_UNREACH & ~PEER_EVENT,	"unreachable" },
@@ -159,8 +152,7 @@ struct codestring peer_codes[] = {
 /*
  * Crypto events (cryp)
  */
-static
-struct codestring crypto_codes[] = {
+static const struct codestring crypto_codes[] = {
 	{ XEVNT_OK & ~CRPT_EVENT,	"success" },
 	{ XEVNT_LEN & ~CRPT_EVENT,	"bad_field_format_or_length" },
 	{ XEVNT_TSP & ~CRPT_EVENT,	"bad_timestamp" },
@@ -182,26 +174,30 @@ struct codestring crypto_codes[] = {
 #endif	/* AUTOKEY */
 
 /* Forwards */
-static const char *getcode (int, struct codestring *);
-static const char *getevents (int);
+static const char *	getcode(int, const struct codestring *);
+static const char *	getevents(int);
+static const char *	peer_st_flags(u_char pst);
 
 /*
  * getcode - return string corresponding to code
  */
 static const char *
 getcode(
-	int code,
-	struct codestring *codetab
+	int				code,
+	const struct codestring *	codetab
 	)
 {
-	static char buf[30];
+	char *	buf;
 
 	while (codetab->code != -1) {
 		if (codetab->code == code)
 			return codetab->string;
 		codetab++;
 	}
-	snprintf(buf, sizeof(buf), "%s_%d", codetab->string, code);
+
+	LIB_GETBUF(buf);
+	snprintf(buf, LIB_BUFLENGTH, "%s_%d", codetab->string, code);
+
 	return buf;
 }
 
@@ -213,14 +209,59 @@ getevents(
 	int cnt
 	)
 {
-	static char buf[20];
+	char *	buf;
 
 	if (cnt == 0)
 		return "no events";
-	snprintf(buf, sizeof(buf), "%d event%s", cnt, (cnt==1) ? "" : 
-	    "s");
+
+	LIB_GETBUF(buf);
+	snprintf(buf, LIB_BUFLENGTH, "%d event%s", cnt,
+		 (1 == cnt)
+		     ? ""
+		     : "s");
+
 	return buf;
 }
+
+
+static const char *
+peer_st_flags(u_char pst)
+{
+	static const char	toosmall[] = "buffer too small!";
+	static const char	csp[] = ", ";
+	const char *		sep;
+	char *			buf;
+	char *			pch;
+	char *			lim;
+	int			rc;
+
+	LIB_GETBUF(buf);
+	pch = buf;
+	lim = buf + LIB_BUFLENGTH;
+	sep = "";
+
+#define EXPAND_PEERST_BIT(b, text)				\
+do {								\
+	if ((b) & pst) {					\
+		rc = snprintf(pch, (lim - pch), "%s" text, sep);\
+		if (rc < 0)					\
+			return toosmall;			\
+		pch += (u_int)rc;				\
+		if (pch >= lim)					\
+			return toosmall;			\
+		sep = csp;					\
+	}							\
+} while (0)
+
+	EXPAND_PEERST_BIT(CTL_PST_CONFIG,	"conf");
+	EXPAND_PEERST_BIT(CTL_PST_AUTHENABLE,	"authenb");
+	EXPAND_PEERST_BIT(CTL_PST_AUTHENTIC,	"auth");
+	EXPAND_PEERST_BIT(CTL_PST_REACH,	"reach");
+	EXPAND_PEERST_BIT(CTL_PST_BCAST,	"bcast");
+
+	return buf;
+}
+
 
 /*
  * statustoa - return a descriptive string for a peer status
@@ -231,78 +272,43 @@ statustoa(
 	int st
 	)
 {
-	char *cb;
-	u_char pst;
+	char *	cb;
+	char *	cc;
+	u_char	pst;
 
 	LIB_GETBUF(cb);
 
 	switch (type) {
 
 	case TYPE_SYS:
-		strcpy(cb, getcode(CTL_SYS_LI(st), leap_codes));
-		strcat(cb, ", ");
-		strcat(cb, getcode(CTL_SYS_SOURCE(st), sync_codes));
-		strcat(cb, ", ");
-		strcat(cb, getevents(CTL_SYS_NEVNT(st)));
-		strcat(cb, ", ");
-		strcat(cb, getcode(CTL_SYS_EVENT(st), sys_codes));
+		snprintf(cb, LIB_BUFLENGTH, "%s, %s, %s, %s",
+			 getcode(CTL_SYS_LI(st), leap_codes),
+			 getcode(CTL_SYS_SOURCE(st), sync_codes),
+			 getevents(CTL_SYS_NEVNT(st)),
+			 getcode(CTL_SYS_EVENT(st), sys_codes));
 		break;
 	
 	case TYPE_PEER:
-		/*
-		 * Handcraft the bits
-		 */
-		pst = (u_char) CTL_PEER_STATVAL(st);
-		if (pst & CTL_PST_CONFIG)
-			strcpy(cb, "conf");
-		if (pst & CTL_PST_AUTHENABLE) {
-			if (pst & CTL_PST_CONFIG)
-				strcat(cb, ", authenb");
-			else
-				strcat(cb, "authenb");
-		}
-		if (pst & CTL_PST_AUTHENTIC) {
-			if (pst & (CTL_PST_CONFIG | CTL_PST_AUTHENABLE))
-				strcat(cb, ", auth");
-			else
-				strcat(cb, "auth");
-		}
-		if (pst & CTL_PST_REACH) {
-			if (pst & (CTL_PST_CONFIG | CTL_PST_AUTHENABLE |
-			    CTL_PST_AUTHENTIC))
-				strcat(cb, ", reach");
-			else
-				strcat(cb, "reach");
-		}
-		if (pst & CTL_PST_BCAST) {
-			if (pst & (CTL_PST_CONFIG | CTL_PST_AUTHENABLE |
-			    CTL_PST_AUTHENTIC | CTL_PST_REACH))
-				strcat(cb, ", bcst");
-			else
-				strcat(cb, "bcst");
-		}
-
-		/*
-		 * Now the codes
-		 */
-		strcat(cb, ", ");
-		strcat(cb, getcode(pst & 0x7, select_codes));
-		strcat(cb, ", ");
-		strcat(cb, getevents(CTL_PEER_NEVNT(st)));
+		pst = (u_char)CTL_PEER_STATVAL(st);
+		snprintf(cb, LIB_BUFLENGTH, "%s, %s, %s",
+			 peer_st_flags(pst),
+			 getcode(pst & 0x7, select_codes),
+			 getevents(CTL_PEER_NEVNT(st)));
 		if (CTL_PEER_EVENT(st) != EVNT_UNSPEC) {
-			strcat(cb, ", ");
-			strcat(cb, getcode(CTL_PEER_EVENT(st),
-			    peer_codes));
+			cc = cb + strlen(cb);
+			snprintf(cc, LIB_BUFLENGTH - (cc - cb), ", %s",
+				 getcode(CTL_PEER_EVENT(st),
+					 peer_codes));
 		}
 		break;
 	
 	case TYPE_CLOCK:
-		strcat(cb, ", ");
-		strcat(cb, getevents(CTL_SYS_NEVNT(st)));
-		strcat(cb, ", ");
-		strcat(cb, getcode((st) & 0xf, clock_codes));
+		snprintf(cb, LIB_BUFLENGTH, "%s, %s",
+			 getevents(CTL_SYS_NEVNT(st)),
+			 getcode((st) & 0xf, clock_codes));
 		break;
 	}
+
 	return cb;
 }
 

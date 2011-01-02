@@ -233,6 +233,7 @@ as2201_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 	l_fp trtmp;
+	size_t octets;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp.
@@ -267,7 +268,7 @@ as2201_receive(
 		if ((int)(up->lastptr - up->stats + pp->lencode) > SMAX - 2)
 		    return;
 		*up->lastptr++ = ' ';
-		(void)strcpy(up->lastptr, pp->a_lastcode);
+		memcpy(up->lastptr, pp->a_lastcode, 1 + pp->lencode);
 		up->lastptr += pp->lencode;
 		return;
 	} else {
@@ -328,13 +329,17 @@ as2201_receive(
 	 * send the next command. If not, simply write the timecode to
 	 * the clockstats file.
 	 */
+	if ((int)(up->lastptr - up->stats + pp->lencode) > SMAX - 2)
+	    return;
 	(void)strcpy(up->lastptr, pp->a_lastcode);
 	up->lastptr += pp->lencode;
 	if (pp->sloppyclockflag & CLK_FLAG4) {
+		octets = strlen(stat_command[up->index]);
+		if ((int)(up->lastptr - up->stats + octets) > SMAX - 2)
+		    return;
 		*up->lastptr++ = ' ';
-		(void)strcpy(up->lastptr, stat_command[up->index]);
-		up->lastptr += strlen(stat_command[up->index]);
-		up->lastptr--;
+		memcpy(up->lastptr, stat_command[up->index], octets);
+		up->lastptr += octets - 1;
 		*up->lastptr = '\0';
 		(void)write(pp->io.fd, stat_command[up->index],
 		    strlen(stat_command[up->index]));

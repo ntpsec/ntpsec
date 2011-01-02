@@ -381,7 +381,8 @@ static	int	oncore_checksum_ok    (u_char *, int);
 static	void	oncore_compute_dH     (struct instance *);
 static	void	oncore_load_almanac   (struct instance *);
 static	void	oncore_log	      (struct instance *, int, const char *);
-static	int	oncore_log_f	      (struct instance *, int, const char *, ...);
+static	int	oncore_log_f	      (struct instance *, int, const char *, ...)
+		__attribute__((__format__(__printf__, 3, 4)));
 static	void	oncore_print_Cb       (struct instance *, u_char *);
 /* static  void    oncore_print_array	 (u_char *, int);	*/
 static	void	oncore_print_posn     (struct instance *);
