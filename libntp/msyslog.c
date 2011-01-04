@@ -170,13 +170,11 @@ mvsnprintf(
 	/*
 	 * Save the error value as soon as possible
 	 */
-	errval = errno;
-
 #ifdef SYS_WINNT
 	errval = GetLastError();
 	if (NO_ERROR == errval)
-		errval = errno;
 #endif /* SYS_WINNT */
+		errval = errno;
 
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
 

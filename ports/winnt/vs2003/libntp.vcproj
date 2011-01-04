@@ -717,6 +717,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\icom.c">
+			</File>
+			<File
 				RelativePath="..\..\..\lib\isc\inet_aton.c">
 				<FileConfiguration
 					Name="Debug|Win32">

@@ -204,10 +204,21 @@ typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
  * instead of refclock_open(), tty_open() is equivalent to open() on
  * Unix and  implemented in the Windows port similarly to
  * refclock_open().
+ * Similarly, the termios emulation in the Windows code needs to know
+ * about serial ports being closed, while the Posix systems do not.
  */
 #ifndef SYS_WINNT
-#define tty_open(f, a, m)	open(f, a, m)
+# define tty_open(f, a, m)	open(f, a, m)
+# define closeserial(fd)	close(fd)
+# define closesocket(fd)	close(fd)
+typedef int SOCKET;
+# define INVALID_SOCKET		(-1)
+# define SOCKET_ERROR		(-1)
+# define socket_errno()		(errno)
+#else	/* SYS_WINNT follows */
+# define socket_errno()		(errno = WSAGetLastError())
 #endif
+
 
 
 #endif	/* NTP_TYPES_H */

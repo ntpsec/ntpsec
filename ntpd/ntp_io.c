@@ -4141,6 +4141,7 @@ io_addclock(
 	 * Stuff the I/O structure in the list and mark the descriptor
 	 * in use.  There is a harmless (I hope) race condition here.
 	 */
+	rio->active = TRUE;
 	rio->next = refio;
 
 # ifdef HAVE_SIGNALED_IO
@@ -4184,6 +4185,7 @@ io_closeclock(
 	/*
 	 * Remove structure from the list
 	 */
+	rio->active = FALSE;
 	if (refio == rio)
 		refio = rio->next;
 	else {
@@ -4198,6 +4200,7 @@ io_closeclock(
 			return;
 		}
 	}
+	rio->next = NULL;
 
 	/*
 	 * Close the descriptor.
@@ -4264,29 +4267,31 @@ close_and_delete_fd_from_list(
 	UNLINK_EXPR_SLIST(lsock, fd_list, fd == 
 	    UNLINK_EXPR_SLIST_CURRENT()->fd, link, vsock_t);
 
-	if (lsock != NULL) {
-		switch (lsock->type) {
-		case FD_TYPE_SOCKET:
-			closesocket(lsock->fd);
-			break;
+	if (NULL == lsock)
+		return;
 
-		case FD_TYPE_FILE:
-			close(lsock->fd);
-			break;
+	switch (lsock->type) {
 
-		default:
-			msyslog(LOG_ERR,
-				"internal error - illegal descriptor type %d - EXITING",
-				(int)lsock->type);
-			exit(1);
-		}
+	case FD_TYPE_SOCKET:
+		closesocket(lsock->fd);
+		break;
 
-		free(lsock);
-		/*
-		 * remove from activefds
-		 */
-		maintain_activefds(fd, 1);
+	case FD_TYPE_FILE:
+		closeserial(lsock->fd);
+		break;
+
+	default:
+		msyslog(LOG_ERR,
+			"internal error - illegal descriptor type %d - EXITING",
+			(int)lsock->type);
+		exit(1);
 	}
+
+	free(lsock);
+	/*
+	 * remove from activefds
+	 */
+	maintain_activefds(fd, 1);
 }
 
 static void

@@ -1098,7 +1098,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h"
-						CommandLine=".\gen-ntp_keyword ..\bin\Release"
+						CommandLine=".\gen-ntp_keyword ..\bin\Release&#x0D;&#x0A;"
 						AdditionalDependencies="..\..\..\..\ntpd\ntp_parser.h"
 						Outputs="..\..\..\..\ntpd\ntp_keyword.h ..\..\..\..\ntpd\keyword-gen-utd"
 					/>
@@ -1109,7 +1109,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="invoking keyword-gen on ntp_parser.h to produce ntp_keyword.h"
-						CommandLine=".\gen-ntp_keyword ..\bin\Debug"
+						CommandLine=".\gen-ntp_keyword ..\bin\Debug&#x0D;&#x0A;"
 						AdditionalDependencies="..\..\..\..\ntpd\ntp_parser.h"
 						Outputs="..\..\..\..\ntpd\ntp_keyword.h ..\..\..\..\ntpd\keyword-gen-utd"
 					/>
@@ -1178,7 +1178,6 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1188,7 +1187,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1320,7 +1318,6 @@
 				>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1330,7 +1327,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"

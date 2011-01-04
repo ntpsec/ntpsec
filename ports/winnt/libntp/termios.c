@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "ntp_machine.h"
 #include "ntp_stdlib.h"
+#include "lib_strbuf.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
 #include "ntp_debug.h"
@@ -16,25 +17,31 @@
 
 #define MAX_SERIAL 255	/* COM1: - COM255: */
 
+typedef struct comhandles_tag {
+	HANDLE		h;
+	size_t		opens;
+	HANDLE *	dupes;
+} comhandles;
+
+comhandles *	hnds;	/* handle/dupes array */
+size_t		c_hnds;	/* current array size */
 
 /*
  * common_serial_open ensures duplicate opens of the same port
  * work by duplicating the handle for the 2nd open, allowing
  * refclock_atom to share a GPS refclock's comm port.
  */
-
 HANDLE common_serial_open(
 	char *	dev,
 	char **	pwindev
 	)
 {
-	static HANDLE *	hnds = NULL;	/* handle array */
-	static int	c_hnd = 0;	/* current array size */
-	static char	windev[32];	/* return pointer into this */
-	HANDLE		handle;
-	int		unit;
-	int		prev_c_hnd;
-	char *		pch;
+	char *	windev;
+	HANDLE	handle;
+	size_t	unit;
+	size_t	prev_c_hnds;
+	size_t	opens;
+	char *	pch;
 
 	/*
 	 * This is odd, but we'll take any unix device path
@@ -54,11 +61,9 @@ HANDLE common_serial_open(
 	if ('/' == dev[0]) {
 		pch = dev + strlen(dev) - 1;
 
-		//DPRINTF(1, ("common_serial_open initial %s\n", pch));
 		if (isdigit(pch[0])) {
 			while (isdigit(pch[0])) {
 				pch--;
-				//DPRINTF(1, ("common_serial_open backed up to %s\n", pch));
 			}
 			pch++;
 		}
@@ -83,47 +88,103 @@ HANDLE common_serial_open(
 	}
 
 
-	if (c_hnd < unit + 1) {
-		prev_c_hnd = c_hnd;
-		c_hnd = unit + 1;
+	if (c_hnds < unit + 1) {
+		prev_c_hnds = c_hnds;
+		c_hnds = unit + 1;
 		/* round up to closest multiple of 4 to avoid churn */
-		c_hnd = (c_hnd + 3) & ~3;
-		hnds = erealloc(hnds, c_hnd * sizeof hnds[0]);
-		memset(&hnds[prev_c_hnd], 0, 
-		       (c_hnd - prev_c_hnd) * sizeof hnds[0]);
+		c_hnds = (c_hnds + 3) & ~3;
+		hnds = erealloc(hnds, c_hnds * sizeof(hnds[0]));
+		memset(&hnds[prev_c_hnds], 0, 
+		       (c_hnds - prev_c_hnds) * sizeof(hnds[0]));
 	}
 
-	if (NULL == hnds[unit]) {
-		snprintf(windev, sizeof(windev), "\\\\.\\COM%d", unit);
+	if (NULL == hnds[unit].h) {
+		NTP_ENSURE(0 == hnds[unit].opens);
+		LIB_GETBUF(windev);
+		snprintf(windev, LIB_BUFLENGTH, "\\\\.\\COM%d", unit);
 		DPRINTF(1, ("windows device %s\n", windev));
 		*pwindev = windev;
-		hnds[unit] = CreateFile(
-				windev,
-				GENERIC_READ | GENERIC_WRITE,
-				0, /* sharing prohibited */
-				NULL, /* default security */
-				OPEN_EXISTING,
-				FILE_ATTRIBUTE_NORMAL
-				    | FILE_FLAG_OVERLAPPED,
-				NULL);
+		hnds[unit].h =
+		    CreateFile(
+			windev,
+			GENERIC_READ | GENERIC_WRITE,
+			0, /* sharing prohibited */
+			NULL, /* default security */
+			OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+			NULL);
+		if (INVALID_HANDLE_VALUE == hnds[unit].h)
+			hnds[unit].h = NULL;
 	}
 
-	if (INVALID_HANDLE_VALUE == hnds[unit]) {
-		hnds[unit] = NULL;
-		handle = INVALID_HANDLE_VALUE;
-	} else
+	if (NULL != hnds[unit].h) {
+		/* think handle = dup(hnds[unit].h); */
 		DuplicateHandle(
 			GetCurrentProcess(),
-			hnds[unit],
+			hnds[unit].h,
 			GetCurrentProcess(),
 			&handle,
 			0,
 			FALSE,
 			DUPLICATE_SAME_ACCESS
 			);
+		hnds[unit].opens++;
+		opens = hnds[unit].opens;
+		hnds[unit].dupes = erealloc(hnds[unit].dupes, opens *
+					    sizeof(hnds[unit].dupes[0]));
+		hnds[unit].dupes[opens - 1] = handle;
+		return handle;
+	}
 
-	return handle;
+	return INVALID_HANDLE_VALUE;
 }
+
+
+/*
+ * closeserial() is used in place of close by ntpd refclock I/O for ttys
+ */
+int
+closeserial(int fd)
+{
+	HANDLE	h;
+	BOOL	found;
+	size_t	u;
+	size_t	d;
+
+	h = (HANDLE)_get_osfhandle(fd);
+	if (INVALID_HANDLE_VALUE == h) {
+		errno = EBADF;
+		return -1;
+	}
+
+	d = 0;		/* silence potent. uninit. warning */
+	found = FALSE;
+	for (u = 0; u < c_hnds; u++) {
+		for (d = 0; d < hnds[u].opens; d++) {
+			if (hnds[u].dupes[d] == h) {
+				found = TRUE;
+				break;
+			}
+		}
+		if (found)
+			break;
+	}
+	if (found) {
+		hnds[u].opens--;
+		if (d < hnds[u].opens)
+			memmove(&hnds[u].dupes[d],
+				&hnds[u].dupes[d + 1],
+				hnds[u].opens - d *
+				    sizeof(hnds[u].dupes[d]));
+		if (0 == hnds[u].opens) {
+			CloseHandle(hnds[u].h);
+			hnds[u].h = NULL;
+		}
+	}
+
+	return close(fd);
+}
+
 
 /*
  * tty_open - open serial port for refclock special uses
@@ -145,7 +206,9 @@ int tty_open(
 	 */
 	windev = NULL;
 	Handle = common_serial_open(dev, &windev);
-	windev = (windev) ? windev : dev;
+	windev = (windev)
+		     ? windev
+		     : dev;
 
 	if (Handle == INVALID_HANDLE_VALUE) {  
 		msyslog(LOG_ERR, "tty_open: device %s CreateFile error: %m", windev);
@@ -153,8 +216,9 @@ int tty_open(
 		return -1;
 	}
 
-	return (int) _open_osfhandle((int)Handle, _O_TEXT);
+	return (int)_open_osfhandle((int)Handle, _O_TEXT);
 }
+
 
 /*
  * refclock_open - open serial port for reference clock
@@ -172,7 +236,9 @@ int refclock_open(
 	HANDLE		h;
 	COMMTIMEOUTS	timeouts;
 	DCB		dcb;
+	DWORD		dwEvtMask;
 	int		fd;
+	int		translate;
 
 	/*
 	 * open communication port handle
@@ -249,7 +315,7 @@ int refclock_open(
 	dcb.fParity = TRUE;
 	dcb.fOutxCtsFlow = 0;
 	dcb.fOutxDsrFlow = 0;
-	dcb.fDtrControl = DTR_CONTROL_DISABLE;
+	dcb.fDtrControl = DTR_CONTROL_ENABLE;
 	dcb.fDsrSensitivity = 0;
 	dcb.fTXContinueOnXoff = TRUE;
 	dcb.fOutX = 0; 
@@ -262,8 +328,11 @@ int refclock_open(
 	dcb.StopBits = ONESTOPBIT;
 	dcb.Parity = NOPARITY;
 	dcb.ErrorChar = 0;
-	dcb.EvtChar = 13; /* CR */
 	dcb.EofChar = 0;
+	if (LDISC_RAW & flags)
+		dcb.EvtChar = 0;
+	else
+		dcb.EvtChar = '\r';
 
 	if (!SetCommState(h, &dcb)) {
 		msyslog(LOG_ERR, "Device %s SetCommState error: %m", windev);
@@ -271,7 +340,12 @@ int refclock_open(
 	}
 
 	/* watch out for CR (dcb.EvtChar) as well as the CD line */
-	if (!SetCommMask(h, EV_RXFLAG | EV_RLSD)) {
+	dwEvtMask = EV_RLSD;
+	if (LDISC_RAW & flags)
+		dwEvtMask |= EV_RXCHAR;
+	else
+		dwEvtMask |= EV_RXFLAG;
+	if (!SetCommMask(h, dwEvtMask)) {
 		msyslog(LOG_ERR, "Device %s SetCommMask error: %m", windev);
 		return 0;
 	}
@@ -288,7 +362,10 @@ int refclock_open(
 		return 0;
 	}
 
-	fd = _open_osfhandle((int)h, _O_TEXT);
+	translate = (LDISC_RAW & flags)
+			? 0
+			: _O_TEXT;
+	fd = _open_osfhandle((int)h, translate);
 	if (fd < 0)
 		return 0;
 	NTP_INSIST(fd != 0);
@@ -361,6 +438,7 @@ ioctl(
 {
 	HANDLE	h;
 	int	result;
+	int	modctl;
 	
 	h = (HANDLE)_get_osfhandle(fd);
 
@@ -377,6 +455,22 @@ ioctl(
 
 	case TIOCMSET:
 		result = ioctl_tiocmset(h, pi);
+		break;
+
+	case TIOCMBIC:
+		result = ioctl_tiocmget(h, &modctl);
+		if (result < 0)
+			return result;
+		modctl &= ~(*pi);
+		result = ioctl_tiocmset(h, &modctl);
+		break;
+
+	case TIOCMBIS:
+		result = ioctl_tiocmget(h, &modctl);
+		if (result < 0)
+			return result;
+		modctl |= *pi;
+		result = ioctl_tiocmset(h, &modctl);
 		break;
 
 	default:

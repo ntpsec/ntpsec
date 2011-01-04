@@ -6,7 +6,7 @@
 #include <config.h>
 #endif
 
-#if defined(REFCLOCK) && (defined(CLOCK_ACTS) || defined(CLOCK_PTBACTS))
+#if defined(REFCLOCK) && defined(CLOCK_ACTS)
 
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -20,6 +20,12 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
+
+#ifdef SYS_WINNT
+#undef write	/* ports/winnt/include/config.h: #define write _write */
+extern int async_write(int, const void *, unsigned int);
+#define write(fd, data, octets)	async_write(fd, data, octets)
+#endif
 
 /*
  * This driver supports the US (NIST, USNO) and European (PTB, NPL,
@@ -88,8 +94,8 @@
  * MJD, DST, DUT1 and UTC are not used by this driver. The "*" or "#" is
  * the on-time markers echoed by the driver and used by NIST to measure
  * and correct for the propagation delay. Note: the ACTS timecode has
- * recently been changed to elminate the * on-time indicator. The reason
- * for this and the long term implications are not clear.
+ * recently been changed to eliminate the * on-time indicator. The
+ * reason for this and the long term implications are not clear.
  *
  * US Naval Observatory (USNO)
  *
@@ -129,7 +135,7 @@
  * Interface definitions
  */
 #define	DEVICE		"/dev/acts%d" /* device name and unit */
-#define	SPEED232	B9600	/* uart speed (9600 baud) */
+#define	SPEED232	B19200	/* uart speed (19200 bps) */
 #define	PRECISION	(-10)	/* precision assumed (about 1 ms) */
 #define LOCKFILE	"/var/spool/lock/LCK..cua%d"
 #define DESCRIPTION	"Automated Computer Time Service" /* WRU */
@@ -173,7 +179,8 @@
  * V1	return result codes as English words
  * Y1	enable long-space disconnect
  */
-#define MODEM_SETUP	"ATB1&C0&D2E0L1M1Q0V1Y1" /* modem setup */
+const char def_modem_setup[] = "ATB1&C0&D2E0L1M1Q0V1Y1";
+const char *modem_setup = def_modem_setup; 
 
 /*
  * Timeouts (all in seconds)
@@ -202,7 +209,8 @@ struct actsunit {
 	int	retry;		/* retry index */
 	int	msgcnt;		/* count of messages received */
 	l_fp	tstamp;		/* on-time timestamp */
-	char	*bufptr;	/* buffer pointer */
+	char *	bufptr;		/* next incoming char stored here */
+	char	buf[BMAX];	/* bufptr roams within buf[] */
 };
 
 /*
@@ -211,8 +219,8 @@ struct actsunit {
 static	int	acts_start	(int, struct peer *);
 static	void	acts_shutdown	(int, struct peer *);
 static	void	acts_receive	(struct recvbuf *);
-static	void	acts_message	(struct peer *);
-static	void	acts_timecode	(struct peer *, char *);
+static	void	acts_message	(struct peer *, const char *);
+static	void	acts_timecode	(struct peer *, const char *);
 static	void	acts_poll	(int, struct peer *);
 static	void	acts_timeout	(struct peer *, int);
 static	void	acts_timer	(int, struct peer *);
@@ -242,6 +250,7 @@ acts_start (
 {
 	struct actsunit *up;
 	struct refclockproc *pp;
+	const char *setup;
 
 	/*
 	 * Allocate and initialize unit structure
@@ -254,15 +263,22 @@ acts_start (
 	pp->io.clock_recv = acts_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
+	pp->io.fd = -1;
 
 	/*
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 4);
+	memcpy(&pp->refid, REFID, 4);
 	peer->sstclktype = CTL_SST_TS_TELEPHONE;
-	up->bufptr = pp->a_lastcode;
+	up->bufptr = up->buf;
+	if (def_modem_setup == modem_setup) {
+		setup = get_ext_sys_var("modemsetup");
+		if (setup != NULL)
+			modem_setup = estrdup(setup);
+	}
+
 	return (1);
 }
 
@@ -284,6 +300,10 @@ acts_shutdown (
 	 */
 	pp = peer->procptr;
 	up = (struct actsunit *)pp->unitptr;
+	if (-1 != pp->io.fd) {
+		io_closeclock(&pp->io);
+		pp->io.fd = -1;
+	}
 	free(up);
 }
 
@@ -312,18 +332,17 @@ acts_receive (
 	peer = (struct peer *)rbufp->recv_srcclock;
 	pp = peer->procptr;
 	up = (struct actsunit *)pp->unitptr;
-	pp->lencode = refclock_gtraw(rbufp, tbuf, BMAX - (up->bufptr -
-	    pp->a_lastcode), &pp->lastrec);
+	refclock_gtraw(rbufp, tbuf, BMAX - (up->bufptr - up->buf), &pp->lastrec);
 	for (tptr = tbuf; *tptr != '\0'; tptr++) {
 		if (*tptr == LF) {
-			if (up->bufptr == pp->a_lastcode) {
+			if (up->bufptr == up->buf) {
 				up->tstamp = pp->lastrec;
 				continue;
 
 			} else {
 				*up->bufptr = '\0';
-				acts_message(peer);
-				up->bufptr = pp->a_lastcode;
+				up->bufptr = up->buf;
+				acts_message(peer, up->buf);
 			}
 		} else if (!iscntrl(*tptr)) {
 			*up->bufptr++ = *tptr;
@@ -342,13 +361,16 @@ acts_receive (
  */
 void
 acts_message(
-	struct peer *peer
+	struct peer *	peer,
+	const char *	msg
 	)
 {
 	struct actsunit *up;
 	struct refclockproc *pp;
 	char	tbuf[BMAX];
 	int		dtr = TIOCM_DTR;
+
+	DPRINTF(1, ("acts: %d %s\n", strlen(msg), msg));
 
 	/*
 	 * What to do depends on the state and the first token in the
@@ -357,18 +379,12 @@ acts_message(
 	pp = peer->procptr;
 	up = (struct actsunit *)pp->unitptr;
 
-#ifdef DEBUG
-	if (debug)
-		printf("acts: %d %s\n", strlen(pp->a_lastcode),
-		    pp->a_lastcode);
-#endif
-
 	/*
 	 * Extract the first token in the line.
 	 */
-	strncpy(tbuf, pp->a_lastcode, BMAX);
+	strncpy(tbuf, msg, sizeof(tbuf));
 	strtok(tbuf, " ");
-	switch(up->state) {
+	switch (up->state) {
 
 	/*
 	 * We are waiting for the OK response to the modem setup
@@ -377,12 +393,20 @@ acts_message(
 	 * and wait for timeoue.
 	 */
 	case S_SETUP:
-		if (strcmp(tbuf, "OK") != 0)
+		if (strcmp(tbuf, "OK") != 0) {
+			/*
+			 * We disable echo with MODEM_SETUP's E0 but
+			 * if the modem was previously E1, we will
+			 * see MODEM_SETUP echoed before the OK/ERROR.
+			 * Ignore it.
+			 */
+			if (!strcmp(tbuf, modem_setup))
+				return;
 			break;
+		}
 
-		snprintf(tbuf, sizeof(tbuf), "DIAL #%d %s", up->retry,
-		    sys_phone[up->retry]);
-		report_event(PEVNT_CLOCK, peer, tbuf);
+		mprintf_event(PEVNT_CLOCK, peer, "DIAL #%d %s",
+			      up->retry, sys_phone[up->retry]);
 		ioctl(pp->io.fd, TIOCMBIS, &dtr);
 		if (write(pp->io.fd, sys_phone[up->retry],
 		    strlen(sys_phone[up->retry])) < 0)
@@ -403,7 +427,7 @@ acts_message(
 		if (strcmp(tbuf, "CONNECT") != 0)
 			break;
 
-		report_event(PEVNT_CLOCK, peer, pp->a_lastcode);
+		report_event(PEVNT_CLOCK, peer, msg);
 		up->state = S_MSG;
 		up->timer = TIMECODE;
 		return;
@@ -415,9 +439,9 @@ acts_message(
 	 */
 	case S_MSG:
 		if (strcmp(tbuf, "NO") == 0)
-			report_event(PEVNT_CLOCK, peer, pp->a_lastcode);
+			report_event(PEVNT_CLOCK, peer, msg);
 		if (up->msgcnt < MAXCODE)
-			acts_timecode(peer, pp->a_lastcode);
+			acts_timecode(peer, msg);
 		else
 			acts_timeout(peer, S_MSG);
 		return;
@@ -426,7 +450,7 @@ acts_message(
 	/*
 	 * Other response. Tell us about it.
 	 */
-	report_event(PEVNT_CLOCK, peer, pp->a_lastcode);
+	report_event(PEVNT_CLOCK, peer, msg);
 	acts_close(peer);
 }
 
@@ -443,23 +467,25 @@ acts_timeout(
 	struct actsunit *up;
 	struct refclockproc *pp;
 	int	fd;
+	int	rc;
 	char	device[20];
 	char	lockfile[128], pidbuf[8];
-	char	tbuf[BMAX];
 
 	/*
 	 * The state machine is driven by messages from the modem,
-	 * when first stated and at timeout.
+	 * when first started and at timeout.
 	 */
 	pp = peer->procptr;
 	up = (struct actsunit *)pp->unitptr;
-	switch(dstate) {
+	switch (dstate) {
 
 	/*
 	 * System poll event. Lock the modem port, open the device
 	 * and send the setup command.
 	 */
 	case S_IDLE:
+		if (-1 != pp->io.fd)
+			return;		/* port is already open */
 
 		/*
 		 * Lock the modem port. If busy, retry later. Note: if
@@ -487,7 +513,7 @@ acts_timeout(
 		 */
 		snprintf(device, sizeof(device), DEVICE,
 		    up->unit);
-		fd = refclock_open(device, SPEED232,LDISC_ACTS |
+		fd = refclock_open(device, SPEED232, LDISC_ACTS |
 		    LDISC_RAW | LDISC_REMOTE);
 		if (fd < 0) {
 			msyslog(LOG_ERR, "acts: open fails %m");
@@ -499,7 +525,7 @@ acts_timeout(
 			return;
 		}
 		up->msgcnt = 0;
-		up->bufptr = pp->a_lastcode;
+		up->bufptr = up->buf;
 
 		/*
 		 * If the port is directly connected to the device, skip
@@ -514,12 +540,13 @@ acts_timeout(
 		}
 
 		/*
-		 * Initialize the modem. This works with Hayes comapatible
-		 * modems.
+		 * Initialize the modem. This works with Hayes-
+		 * compatible modems.
 		 */
-		snprintf(tbuf, sizeof(tbuf), "SETUP %s", MODEM_SETUP); 
-		report_event(PEVNT_CLOCK, peer, tbuf);
-		if (write(pp->io.fd, MODEM_SETUP, strlen(MODEM_SETUP)) < 0)
+		mprintf_event(PEVNT_CLOCK, peer, "SETUP %s",
+			      modem_setup);
+		rc = write(pp->io.fd, modem_setup, strlen(modem_setup));
+		if (rc < 0)
 			msyslog(LOG_ERR, "acts: write SETUP fails %m");
 		write(pp->io.fd, "\r", 1);
 		up->state = S_SETUP;
@@ -527,31 +554,31 @@ acts_timeout(
 		return;
 
 	/*
-	 * In SETUP state the modem did not respond to setup.
-	 * the call.
+	 * In SETUP state the modem did not respond OK to setup string.
 	 */
 	case S_SETUP:
 		report_event(PEVNT_CLOCK, peer, "no modem");
 		break;
 
 	/*
-	 * In CONNECT state the call did not complete. Abort
-	 * the call.
+	 * In CONNECT state the call did not complete. Abort the call.
 	 */
 	case S_CONNECT:
 		report_event(PEVNT_CLOCK, peer, "no answer");
 		break;
 
 	/*
-	 * In MSG states no further timecoees are expected. If any
+	 * In MSG states no further timecodes are expected. If any
 	 * timecodes have arrived, update the clock. In any case,
-	 * ternuabte the cakk.
+	 * terminate the call.
 	 */
 	case S_MSG:
-		if (up->msgcnt == 0)
+		if (up->msgcnt == 0) {
 			report_event(PEVNT_CLOCK, peer, "no timecodes");
-		else
+		} else {
+			pp->lastref = pp->lastrec;
 			refclock_receive(peer);
+		}
 		break;
 	}
 	acts_close(peer);
@@ -581,7 +608,7 @@ acts_close(
 		report_event(PEVNT_CLOCK, peer, "close");
 		ioctl(pp->io.fd, TIOCMBIC, &dtr);
 		io_closeclock(&pp->io);
-		pp->io.fd = 0;
+		pp->io.fd = -1;
 	}
 	if (pp->sloppyclockflag & CLK_FLAG2) {
 		snprintf(lockfile, sizeof(lockfile),
@@ -604,7 +631,7 @@ acts_close(
  * acts_poll - called by the transmit routine
  */
 static void
-acts_poll (
+acts_poll(
 	int	unit,
 	struct peer *peer
 	)
@@ -646,8 +673,11 @@ acts_poll (
 
 		break;
 	}
-	up->retry = 0;
-	acts_timeout(peer, S_IDLE);
+	pp->polls++;
+	if (S_IDLE == up->state) {
+		up->retry = 0;
+		acts_timeout(peer, S_IDLE);
+	}
 }
 
 
@@ -688,8 +718,8 @@ acts_timer(
  */
 void
 acts_timecode(
-	struct peer *peer,	/* peer structure pointer */
-	char	*str		/* timecode string */
+	struct peer *	peer,	/* peer structure pointer */
+	const char *	str	/* timecode string */
 	)
 {
 	struct actsunit *up;
@@ -711,7 +741,7 @@ acts_timecode(
 	char	dstchar;	/* WWVB daylight/savings indicator */
 	int	tz;		/* WWVB timezone */
 
-	u_int	leapmonth;	/* PTB/NPL month of leap */
+	int	leapmonth;	/* PTB/NPL month of leap */
 	char	leapdir;	/* PTB/NPL leap direction */
 
 	/*
@@ -722,7 +752,7 @@ acts_timecode(
 	pp = peer->procptr;
 	up = (struct actsunit *)pp->unitptr;
 	pp->nsec = 0;
-	switch(strlen(str)) {
+	switch (strlen(str)) {
 
 	/*
 	 * For USNO format on-time character '*', which is on a line by
@@ -750,9 +780,9 @@ acts_timecode(
 		pp->day = ymd2yd(pp->year, month, day);
 		pp->leap = LEAP_NOWARNING;
 		if (leap == 1)
-	    		pp->leap = LEAP_ADDSECOND;
+			pp->leap = LEAP_ADDSECOND;
 		else if (leap == 2)
-	    		pp->leap = LEAP_DELSECOND;
+			pp->leap = LEAP_DELSECOND;
 		memcpy(&pp->refid, REFACTS, 4);
 		if (up->msgcnt == 0)
 			record_clock_stats(&peer->srcadr, str);
@@ -778,9 +808,9 @@ acts_timecode(
 		pp->day = ymd2yd(pp->year, month, day);
 		pp->leap = LEAP_NOWARNING;
 		if (leap == 1)
-	    		pp->leap = LEAP_ADDSECOND;
+			pp->leap = LEAP_ADDSECOND;
 		else if (leap == 2)
-	    		pp->leap = LEAP_DELSECOND;
+			pp->leap = LEAP_DELSECOND;
 		memcpy(&pp->refid, REFACTS, 4);
 		if (up->msgcnt == 0)
 			record_clock_stats(&peer->srcadr, str);
@@ -825,9 +855,9 @@ acts_timecode(
 		pp->leap = LEAP_NOWARNING;
 		if (leapmonth == month) {
 			if (leapdir == '+')
-		    		pp->leap = LEAP_ADDSECOND;
+				pp->leap = LEAP_ADDSECOND;
 			else if (leapdir == '-')
-		    		pp->leap = LEAP_DELSECOND;
+				pp->leap = LEAP_DELSECOND;
 		}
 		pp->day = ymd2yd(pp->year, month, day);
 		memcpy(&pp->refid, REFPTB, 4);
@@ -897,6 +927,8 @@ acts_timecode(
 	pp->lastrec = up->tstamp;
 	if (up->msgcnt == 0)
 		return;
+	strncpy(pp->a_lastcode, str, sizeof(pp->a_lastcode));
+	pp->lencode = strlen(pp->a_lastcode);
 
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);

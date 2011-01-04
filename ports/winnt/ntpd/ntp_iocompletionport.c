@@ -23,6 +23,10 @@
 #include "ntp_lists.h"
 #include "clockstuff.h"
 
+
+#define CONTAINEROF(p, type, member) \
+	((type *)((char *)(p) - offsetof(type, member)))
+
 /*
  * Request types
  */
@@ -31,6 +35,7 @@ enum {
 	SOCK_SEND,
 	SERIAL_WAIT,
 	SERIAL_READ,
+	RAW_SERIAL_READ,
 	SERIAL_WRITE
 };
 
@@ -39,17 +44,17 @@ enum {
 # pragma warning(disable: 201)		/* nonstd extension nameless union */
 #endif
 
-typedef struct IoCompletionInfo {
-	OVERLAPPED		overlapped;	/* must be first */
+typedef struct olplus_tag {
+	OVERLAPPED		ol;
 	int			request_type;
 	union {
 		recvbuf_t *	recv_buf;
 		void *		trans_buf;
 	};
 #ifdef DEBUG
-	struct IoCompletionInfo *link;
+	struct olplus_tag *	link;
 #endif
-} IoCompletionInfo;
+} olplus;
 
 #ifdef _MSC_VER
 # pragma warning(pop)
@@ -58,17 +63,21 @@ typedef struct IoCompletionInfo {
 /*
  * local function definitions
  */
-static int QueueSerialWait(struct refclockio *, recvbuf_t *buff, IoCompletionInfo *lpo, BOOL clear_timestamp);
+static int QueueSerialWait(struct refclockio *, recvbuf_t *buff,
+			   olplus *lpo, BOOL clear_timestamp);
+static int QueueRawSerialRead(struct refclockio *, recvbuf_t *buff,
+			      olplus *lpo);
 
-static int OnSocketRecv(ULONG_PTR, IoCompletionInfo *, DWORD, int);
-static int OnSerialWaitComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
-static int OnSerialReadComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
-static int OnWriteComplete(ULONG_PTR, IoCompletionInfo *, DWORD, int);
+static int OnSocketRecv(ULONG_PTR, olplus *, DWORD, int);
+static int OnSerialWaitComplete(struct refclockio *, olplus *, DWORD, int);
+static int OnSerialReadComplete(struct refclockio *, olplus *, DWORD, int);
+static int OnRawSerialReadComplete(struct refclockio *, olplus *, DWORD, int);
+static int OnWriteComplete(ULONG_PTR, olplus *, DWORD, int);
 
 /* keep a list to traverse to free memory on debug builds */
 #ifdef DEBUG
 static void free_io_completion_port_mem(void);
-IoCompletionInfo *	compl_info_list;
+olplus *	compl_info_list;
 CRITICAL_SECTION	compl_info_lock;
 #define LOCK_COMPL()	EnterCriticalSection(&compl_info_lock);
 #define UNLOCK_COMPL()	LeaveCriticalSection(&compl_info_lock);
@@ -94,20 +103,20 @@ static HANDLE WaitableExitEventHandle = NULL;
 #define MAXHANDLES 4
 HANDLE WaitHandles[MAXHANDLES];
 
-IoCompletionInfo *
+olplus *
 GetHeapAlloc(char *fromfunc)
 {
-	IoCompletionInfo *lpo;
+	olplus *lpo;
 
 #ifdef USE_HEAP
 	lpo = HeapAlloc(hHeapHandle,
 			HEAP_ZERO_MEMORY,
-			sizeof(IoCompletionInfo));
+			sizeof(olplus));
 #else
 	lpo = emalloc(sizeof(*lpo));
 	memset(lpo, 0, sizeof(*lpo));
 #endif
-	DPRINTF(3, ("Allocation %d memory for %s, ptr %x\n", sizeof(IoCompletionInfo), fromfunc, lpo));
+	DPRINTF(3, ("Allocation %d memory for %s, ptr %x\n", sizeof(olplus), fromfunc, lpo));
 
 #ifdef DEBUG
 	LOCK_COMPL();
@@ -119,16 +128,16 @@ GetHeapAlloc(char *fromfunc)
 }
 
 void
-FreeHeap(IoCompletionInfo *lpo, char *fromfunc)
+FreeHeap(olplus *lpo, char *fromfunc)
 {
 #ifdef DEBUG
-	IoCompletionInfo *unlinked;
+	olplus *unlinked;
 
 	DPRINTF(3, ("Freeing memory for %s, ptr %x\n", fromfunc, lpo));
 
 	LOCK_COMPL();
 	UNLINK_SLIST(unlinked, compl_info_list, lpo, link,
-	    IoCompletionInfo);
+	    olplus);
 	UNLOCK_COMPL();
 #endif
 
@@ -166,11 +175,14 @@ signal_io_completion_port_exit()
 static unsigned WINAPI
 iocompletionthread(void *NotUsed)
 {
-	BOOL bSuccess = FALSE;
-	int errstatus = 0;
-	DWORD BytesTransferred = 0;
-	ULONG_PTR Key = 0;
-	IoCompletionInfo * lpo = NULL;
+	BOOL			bSuccess;
+	int			err;
+	DWORD			octets;
+	ULONG_PTR		key;
+	struct refclockio *	rio;
+	OVERLAPPED *		pol;
+	olplus *		lpo;
+
 
 	UNUSED_ARG(NotUsed);
 
@@ -187,51 +199,62 @@ iocompletionthread(void *NotUsed)
 	 *	preempt normal recv packet processing, but not
 	 * 	higher than the timer sync thread.
 	 */
-	if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL)) {
+	if (!SetThreadPriority(GetCurrentThread(),
+			       THREAD_PRIORITY_ABOVE_NORMAL))
 		msyslog(LOG_ERR, "Can't set thread priority: %m");
-	}
 
 	while (TRUE) {
 		bSuccess = GetQueuedCompletionStatus(
 					hIoCompletionPort, 
-					&BytesTransferred, 
-					&Key, 
-					(LPOVERLAPPED *) &lpo, 
+					&octets, 
+					&key, 
+					&pol, 
 					INFINITE);
-		if (lpo == NULL) {
+		if (NULL == pol) {
 			DPRINTF(2, ("Overlapped IO Thread Exiting\n"));
 			break; /* fail */
 		}
+		lpo = CONTAINEROF(pol, olplus, ol);
+		rio = (struct refclockio *)key;
 		
 		/*
 		 * Deal with errors
 		 */
 		if (bSuccess)
-			errstatus = 0;
+			err = 0;
 		else
-			errstatus = GetLastError();
+			err = GetLastError();
 
 		/*
 		 * Invoke the appropriate function based on
 		 * the value of the request_type
 		 */
-		switch(lpo->request_type)
-		{
-		case SERIAL_WAIT:
-			OnSerialWaitComplete(Key, lpo, BytesTransferred, errstatus);
-			break;
-		case SERIAL_READ:
-			OnSerialReadComplete(Key, lpo, BytesTransferred, errstatus);
-			break;
+		switch (lpo->request_type) {
+
 		case SOCK_RECV:
-			OnSocketRecv(Key, lpo, BytesTransferred, errstatus);
+			OnSocketRecv(key, lpo, octets, err);
 			break;
+
 		case SOCK_SEND:
 			NTP_INSIST(0);
 			break;
-		case SERIAL_WRITE:
-			OnWriteComplete(Key, lpo, BytesTransferred, errstatus);
+
+		case SERIAL_WAIT:
+			OnSerialWaitComplete(rio, lpo, octets, err);
 			break;
+
+		case SERIAL_READ:
+			OnSerialReadComplete(rio, lpo, octets, err);
+			break;
+
+		case RAW_SERIAL_READ:
+			OnRawSerialReadComplete(rio, lpo, octets, err);
+			break;
+
+		case SERIAL_WRITE:
+			OnWriteComplete(key, lpo, octets, err);
+			break;
+
 		default:
 			DPRINTF(1, ("Unknown request type %d found in completion port\n",
 				    lpo->request_type));
@@ -261,7 +284,7 @@ init_io_completion_port(
 	/*
 	 * Create a handle to the Heap
 	 */
-	hHeapHandle = HeapCreate(0, 20*sizeof(IoCompletionInfo), 0);
+	hHeapHandle = HeapCreate(0, 20*sizeof(olplus), 0);
 	if (hHeapHandle == NULL)
 	{
 		msyslog(LOG_ERR, "Can't initialize Heap: %m");
@@ -325,7 +348,7 @@ free_io_completion_port_mem(
 	void
 	)
 {
-	IoCompletionInfo *	pci;
+	olplus *	pci;
 
 #if defined(_MSC_VER) && defined (_DEBUG)
 	_CrtCheckMemory();
@@ -373,10 +396,12 @@ static int
 QueueSerialWait(
 	struct refclockio *	rio,
 	recvbuf_t *		buff,
-	IoCompletionInfo *	lpo,
+	olplus *		lpo,
 	BOOL			clear_timestamp
 	)
 {
+	DWORD err;
+
 	lpo->request_type = SERIAL_WAIT;
 	lpo->recv_buf = buff;
 
@@ -384,9 +409,16 @@ QueueSerialWait(
 		memset(&buff->recv_time, 0, sizeof(buff->recv_time));
 
 	buff->fd = _get_osfhandle(rio->fd);
-	if (!WaitCommEvent((HANDLE) buff->fd, (DWORD *)&buff->recv_buffer, (LPOVERLAPPED) lpo)) {
-		if (ERROR_IO_PENDING != GetLastError()) {
-			msyslog(LOG_ERR, "Can't wait on Refclock: %m");
+	if (!WaitCommEvent((HANDLE)buff->fd,
+			   (DWORD *)&buff->recv_buffer, &lpo->ol)) {
+		err = GetLastError();
+		if (ERROR_IO_PENDING != err) {
+			/*
+			 * ERROR_INVALID_PARAMETER occurs after rio->fd
+			 * is closed.
+			 */
+			if (ERROR_INVALID_PARAMETER != err)
+				msyslog(LOG_ERR, "Can't wait on Refclock: %m");
 			freerecvbuf(buff);
 			return 0;
 		}
@@ -396,10 +428,14 @@ QueueSerialWait(
 
 
 static int 
-OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
+OnSerialWaitComplete(
+	struct refclockio *	rio,
+	olplus *		lpo,
+	DWORD			Bytes,
+	int errstatus
+	)
 {
 	recvbuf_t *buff;
-	struct refclockio * rio = (struct refclockio *) i;
 	struct peer *pp;
 	l_fp arrival_time;
 	DWORD comm_mask;
@@ -409,19 +445,23 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 
 	get_systime(&arrival_time);
 
+	if (!rio->active)
+		return FALSE;
+
 	/*
 	 * Get the recvbuf pointer from the overlapped buffer.
 	 */
 	buff = lpo->recv_buf;
 	comm_mask = (*(DWORD *)&buff->recv_buffer);
 #ifdef DEBUG
-		if (errstatus || comm_mask & ~(EV_RXFLAG | EV_RLSD)) {
+		if (errstatus || comm_mask &
+		    ~(EV_RXFLAG | EV_RLSD | EV_RXCHAR)) {
 			msyslog(LOG_ERR, "WaitCommEvent returned unexpected mask %x errstatus %d",
 				comm_mask, errstatus);
 			exit(-1);
 		}
 #endif
-		if (comm_mask & EV_RLSD) { 
+		if (EV_RLSD & comm_mask) { 
 			modem_status = 0;
 			GetCommModemStatus((HANDLE)buff->fd, &modem_status);
 			if (modem_status & MS_RLSD_ON) {
@@ -432,14 +472,19 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 				buff->recv_time = arrival_time;
 			}
 
-			if (!(comm_mask & EV_RXFLAG)) {
+			if (EV_RLSD == comm_mask) {
 				/*
 				 * if we didn't see an end of line yet
 				 * issue another wait for it.
 				 */
 				QueueSerialWait(rio, buff, lpo, FALSE);
-				return 1;
+				return TRUE;
 			}
+		}
+
+		if (EV_RXCHAR & comm_mask) {		/* raw discipline */
+			QueueRawSerialRead(rio, buff, lpo);
+			return TRUE;
 		}
 
 		/*
@@ -474,7 +519,7 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 			buff->recv_buffer,
 			sizeof(buff->recv_buffer),
 			NULL,
-			(LPOVERLAPPED)lpo);
+			&lpo->ol);
 
 		if (!rc && ERROR_IO_PENDING != GetLastError()) {
 			msyslog(LOG_ERR, "Can't read from Refclock: %m");
@@ -485,15 +530,22 @@ OnSerialWaitComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 	return 1;
 }
 
+
 /* Return 1 on Successful Read */
 static int 
-OnSerialReadComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
+OnSerialReadComplete(
+	struct refclockio *	rio,
+	olplus *		lpo,
+	DWORD			Bytes,
+	int			errstatus
+	)
 {
 	recvbuf_t *		buff;
 	l_fp			cr_time;
-	struct refclockio *	rio;
 
-	rio = (struct refclockio *)i;
+	if (!rio->active)
+		return FALSE;
+
 	/*
 	 * Get the recvbuf pointer from the overlapped buffer.
 	 */
@@ -515,6 +567,7 @@ OnSerialReadComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 		 */
 		if (rio->recvcount++) {
 			cr_time = buff->recv_time;
+			buff->fd = rio->fd;		/* was handle */
 			add_full_recv_buffer(buff);
 			/*
 			 * Mimic Unix line discipline and assume CR/LF
@@ -528,7 +581,7 @@ OnSerialReadComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 			buff = get_free_recv_buffer_alloc();
 			buff->recv_time = cr_time;
 			buff->recv_length = 0;
-			buff->fd = _get_osfhandle(rio->fd);
+			buff->fd = rio->fd;
 			buff->receiver = rio->clock_recv;
 			buff->dstadr = NULL;
 			buff->recv_srcclock = rio->srcclock;
@@ -546,6 +599,75 @@ OnSerialReadComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errsta
 	return 1;
 }
 
+
+/*
+ * QueueRawSerialRead() returns TRUE if successful.
+ */
+static int
+QueueRawSerialRead(
+	struct refclockio *	rio,
+	recvbuf_t *		buff,
+	olplus *		lpo
+	)
+{
+	BOOL		rc;
+
+	buff->fd = _get_osfhandle(rio->fd);
+	lpo->request_type = RAW_SERIAL_READ;
+	lpo->recv_buf = buff;
+	rc = ReadFile((HANDLE)buff->fd, buff->recv_buffer,
+		      sizeof(buff->recv_buffer), NULL, &lpo->ol);
+	if (!rc && ERROR_IO_PENDING != GetLastError()) {
+		msyslog(LOG_ERR, "Can't raw read from Refclock: %m");
+		freerecvbuf(buff);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+
+static int 
+OnRawSerialReadComplete(
+	struct refclockio *	rio,
+	olplus *		lpo,
+	DWORD			octets,
+	int			errstatus
+	)
+{
+	recvbuf_t *		rbufp;
+	l_fp			arrival_time;
+
+	get_systime(&arrival_time);
+
+	if (!rio->active)
+		return FALSE;
+
+	rbufp = lpo->recv_buf;
+
+	/* ignore 0 bytes read. */
+	if (NO_ERROR == errstatus && octets > 0) {
+		rbufp->recv_length = (int)octets;
+		rbufp->dstadr = NULL;
+		rbufp->recv_time = arrival_time;
+		rbufp->receiver = rio->clock_recv;
+		rbufp->recv_srcclock = rio->srcclock;
+		rbufp->fd = rio->fd; /* was handle */
+		packets_received++;
+		add_full_recv_buffer(rbufp);
+		/*
+		 * Now signal we have something to process
+		 */
+		SetEvent(WaitableIoEventHandle);
+		rbufp = get_free_recv_buffer_alloc();
+	}
+
+	QueueSerialWait(rio, rbufp, lpo, TRUE);
+
+	return 1;
+}
+
+
 /*  Add a reference clock data structures I/O handles to
  *  the I/O completion port. Return 1 if any error.
  */  
@@ -554,11 +676,13 @@ io_completion_port_add_clock_io(
 	struct refclockio *rio
 	)
 {
-	IoCompletionInfo *lpo;
-	recvbuf_t *buff;
+	olplus *	lpo;
+	recvbuf_t *	buff;
+	HANDLE		h;
 
+	h = (HANDLE)_get_osfhandle(rio->fd);
 	if (NULL == CreateIoCompletionPort(
-			(HANDLE)_get_osfhandle(rio->fd), 
+			h, 
 			hIoCompletionPort, 
 			(ULONG_PTR)rio,
 			0)) {
@@ -574,6 +698,7 @@ io_completion_port_add_clock_io(
 
 	buff = get_free_recv_buffer_alloc();
 	QueueSerialWait(rio, buff, lpo, TRUE);
+
 	return 0;
 }
 
@@ -587,7 +712,7 @@ static unsigned long
 QueueSocketRecv(
 	SOCKET s,
 	recvbuf_t *buff,
-	IoCompletionInfo *lpo
+	olplus *lpo
 	)
 {
 	WSABUF wsabuf;
@@ -608,7 +733,7 @@ QueueSocketRecv(
 						NULL, &Flags, 
 						&buff->recv_srcadr.sa, 
 						&buff->recv_srcadr_len, 
-						(LPOVERLAPPED)lpo, NULL)) {
+						&lpo->ol, NULL)) {
 			Result = GetLastError();
 			switch (Result) {
 				case NO_ERROR :
@@ -642,7 +767,7 @@ QueueSocketRecv(
 
 /* Returns 0 if any Error */
 static int 
-OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
+OnSocketRecv(ULONG_PTR i, olplus *lpo, DWORD Bytes, int errstatus)
 {
 	struct recvbuf *buff = NULL;
 	recvbuf_t *newbuff;
@@ -693,7 +818,7 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 		memcpy(&buff->recv_time, &arrival_time,
 		       sizeof(buff->recv_time));	
 		buff->recv_length = (int) Bytes;
-		buff->receiver = receive; 
+		buff->receiver = &receive; 
 		buff->dstadr = inter;
 		packets_received++;
 		inter->received++;
@@ -720,7 +845,7 @@ OnSocketRecv(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
 extern int
 io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 {
-	IoCompletionInfo *lpo;
+	olplus *lpo;
 	recvbuf_t *buff;
 	int n;
 
@@ -746,7 +871,7 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 	for (n = 0; n < WINDOWS_RECVS_PER_SOCKET; n++) {
 
 		buff = get_free_recv_buffer_alloc();
-		lpo = (IoCompletionInfo *) GetHeapAlloc("io_completion_port_add_socket");
+		lpo = (olplus *) GetHeapAlloc("io_completion_port_add_socket");
 		if (lpo == NULL)
 		{
 			msyslog(LOG_ERR, "Can't allocate heap for completion port: %m");
@@ -761,10 +886,11 @@ io_completion_port_add_socket(SOCKET fd, struct interface *inter)
 
 
 static int 
-OnWriteComplete(ULONG_PTR i, IoCompletionInfo *lpo, DWORD Bytes, int errstatus)
+OnWriteComplete(ULONG_PTR i, olplus *lpo, DWORD Bytes, int errstatus)
 {
 	void *buff;
 
+	UNUSED_ARG(i);
 	UNUSED_ARG(Bytes);
 	UNUSED_ARG(errstatus);
 
@@ -855,7 +981,7 @@ async_write(
 	)
 {
 	void *buff;
-	IoCompletionInfo *lpo;
+	olplus *lpo;
 	DWORD BytesWritten;
 
 	buff = emalloc(count);
@@ -872,7 +998,7 @@ async_write(
 	memcpy(buff, data, count);
 
 	if (!WriteFile((HANDLE)_get_osfhandle(fd), buff, count,
-		&BytesWritten, (LPOVERLAPPED)lpo)
+		&BytesWritten, &lpo->ol)
 		&& ERROR_IO_PENDING != GetLastError()) {
 
 		msyslog(LOG_ERR, "async_write - error %m");

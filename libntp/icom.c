@@ -15,6 +15,12 @@
 #include "ntp_tty.h"
 #include "l_stdlib.h"
 
+#ifdef SYS_WINNT
+#undef write	/* ports/winnt/include/config.h: #define write _write */
+extern int async_write(int, const void *, unsigned int);
+#define write(fd, data, octets)	async_write(fd, data, octets)
+#endif
+
 /*
  * Packet routines
  *
@@ -65,13 +71,15 @@ icom_freq(			/* returns 0 (ok), EIO (error) */
 	u_char cmd[] = {PAD, PR, PR, 0, TX, V_SFREQ, 0, 0, 0, 0, FI,
 	    FI};
 	int temp;
-	cmd[3] = ident;
+
+	cmd[3] = (char)ident;
 	if (ident == IC735)
 		temp = 4;
 	else
 		temp = 5;
 	doublefreq(freq * 1e6, &cmd[6], temp);
 	temp = write(fd, cmd, temp + 7);
+
 	return (0);
 }
 
@@ -121,7 +129,7 @@ icom_init(
 	int fd, flags;
 
 	flags = trace;
-	fd = open(device, O_RDWR, 0777);
+	fd = tty_open(device, O_RDWR, 0777);
 	if (fd < 0)
 		return (fd);
 

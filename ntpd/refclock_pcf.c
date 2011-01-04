@@ -118,7 +118,8 @@ pcf_shutdown(
 	struct refclockproc *pp;
 	
 	pp = peer->procptr;
-	(void)close(pp->io.fd);
+	if (NULL != pp)
+		close(pp->io.fd);
 }
 
 

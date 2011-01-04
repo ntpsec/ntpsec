@@ -506,7 +506,6 @@ SOURCE=..\ntpd\hopf_PCI_io.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_acts.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -533,7 +532,6 @@ SOURCE=..\..\..\ntpd\refclock_bancomm.c
 # Begin Source File
 
 SOURCE=..\..\..\ntpd\refclock_chu.c
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 

@@ -242,7 +242,7 @@
  */
 #define CHAR		(11. / 300.) /* character time (s) */
 #define BURST		11	/* max characters per burst */
-#define MINCHAR		9	/* min characters per burst */
+#define MINCHARS		9	/* min characters per burst */
 #define MINDIST		28	/* min burst distance (of 40)  */
 #define MINSYNC		8	/* min sync distance (of 16) */
 #define MINSTAMP	20	/* min timestamps (of 60) */
@@ -1052,7 +1052,7 @@ chu_burst(
 	 * of bits that match in the two blocks for format A and that
 	 * match the inverse for format B.
 	 */
-	if (up->ndx < MINCHAR) {
+	if (up->ndx < MINCHARS) {
 		up->status |= RUNT;
 		return;
 	}

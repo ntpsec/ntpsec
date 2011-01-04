@@ -114,6 +114,7 @@
 #undef interface
 #include <process.h>
 #include <time.h>		/* time_t for timeval decl */
+#include <io.h>
 
 /* ---------------------------------------------------------------------
  * Above this line are #include lines and the few #define lines
@@ -325,12 +326,14 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define REFCLOCK			/* from ntpd.mak */
 
 /* # define CLOCK_PARSE  */
+# define CLOCK_ACTS
 # define CLOCK_ARBITER
 # define CLOCK_ARCRON_MSF
 # define OWN_PPS_NTP_TIMESTAMP_FROM_COUNTER	/* timepps.h */
 # define HAVE_TIMEPPS_H
 # define HAVE_PPSAPI
 # define CLOCK_ATOM
+# define CLOCK_CHU
 # define CLOCK_CHRONOLOG
 # define CLOCK_DUMBCLOCK
 # define CLOCK_HOPF_SERIAL	/* device 38, hopf DCF77/GPS serial line receiver  */

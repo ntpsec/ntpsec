@@ -60,7 +60,7 @@ dolfptoa(
 		dec   += 3;
 		cpdec += 3;
 	}
-	if (dec > sizeof(cbuf) - (cpend - cbuf))
+	if ((size_t)dec > sizeof(cbuf) - (cpend - cbuf))
 		dec = sizeof(cbuf) - (cpend - cbuf);
 	
 	/*
@@ -120,10 +120,10 @@ dolfptoa(
 
 	bp = buf;
 	if (neg)
-	    *bp++ = '-';
+		*bp++ = '-';
 	while (cp < cpend) {
 		if (cp == cpdec)
-		    *bp++ = '.';
+			*bp++ = '.';
 		*bp++ = (char)(*cp++) + '0';
 	}
 	*bp = '\0';

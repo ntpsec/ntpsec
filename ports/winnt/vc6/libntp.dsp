@@ -218,6 +218,10 @@ SOURCE=..\..\..\libntp\humandate.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\icom.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\isc\inet_aton.c
 # End Source File
 # Begin Source File

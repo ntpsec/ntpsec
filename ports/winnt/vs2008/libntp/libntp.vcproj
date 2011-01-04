@@ -316,7 +316,6 @@
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -324,7 +323,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -857,11 +855,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

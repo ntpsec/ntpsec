@@ -4498,7 +4498,7 @@ set_var(
 			} else {
 				s = data;
 				t = k->text;
-				while (*t != '=' && *s - *t == 0) {
+				while (*t != '=' && *s == *t) {
 					s++;
 					t++;
 				}
@@ -4517,6 +4517,7 @@ set_var(
 	memcpy(td, data, size);
 }
 
+
 void
 set_sys_var(
 	const char *data,
@@ -4526,6 +4527,34 @@ set_sys_var(
 {
 	set_var(&ext_sys_var, data, size, def);
 }
+
+
+/*
+ * get_ext_sys_var() retrieves the value of a user-defined variable or
+ * NULL if the variable has not been setvar'd.
+ */
+const char *
+get_ext_sys_var(const char *tag)
+{
+	struct ctl_var *	v;
+	size_t			c;
+	const char *		val;
+
+	val = NULL;
+	c = strlen(tag);
+	for (v = ext_sys_var; !(EOV & v->flags); v++) {
+		if (NULL != v->text && !memcmp(tag, v->text, c)) {
+			if ('=' == v->text[c])
+				val = v->text + c + 1;
+			else
+				val = "";
+			break;
+		}
+	}
+	
+	return val;
+}
+
 
 void
 free_varlist(

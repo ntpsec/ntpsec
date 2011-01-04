@@ -891,7 +891,7 @@ dump_config_tree(
 	if (str_node != NULL) {
 		fprintf(df, "phone");
 		for ( ; str_node != NULL; str_node = str_node->link)
-			fprintf(df, " %s", str_node->s);
+			fprintf(df, " \"%s\"", str_node->s);
 		fprintf(df, "\n");
 	}
 

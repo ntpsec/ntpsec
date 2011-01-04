@@ -3,20 +3,14 @@
 #endif
 
 #include <stdio.h>
-#include "ntp_machine.h"
+
 #include "ntp_assert.h"
-#include "ntp_fp.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 #include "ntp_lists.h"
 #include "recvbuff.h"
 #include "iosignal.h"
 
-
-
-#ifdef DEBUG
-static void uninit_recvbuff(void);
-#endif
 
 /*
  * Memory allocation
@@ -42,9 +36,14 @@ static CRITICAL_SECTION RecvLock;
 # define LOCK()		EnterCriticalSection(&RecvLock)
 # define UNLOCK()	LeaveCriticalSection(&RecvLock)
 #else
-# define LOCK()	
-# define UNLOCK()	
+# define LOCK()		do {} while (FALSE)
+# define UNLOCK()	do {} while (FALSE)
 #endif
+
+#ifdef DEBUG
+static void uninit_recvbuff(void);
+#endif
+
 
 u_long
 free_recvbuffs (void)
@@ -221,7 +220,8 @@ get_free_recv_buffer_alloc(void)
 recvbuf_t *
 get_full_recv_buffer(void)
 {
-	recvbuf_t *rbuf;
+	recvbuf_t *	rbuf;
+
 	LOCK();
 	
 #ifdef HAVE_SIGNALED_IO
@@ -246,15 +246,19 @@ get_full_recv_buffer(void)
 	 */
 	rbuf = ISC_LIST_HEAD(full_recv_list);
 	if (rbuf != NULL) {
-		ISC_LIST_DEQUEUE_TYPE(full_recv_list, rbuf, link, recvbuf_t);
-		--full_recvbufs;
-	} else
+		ISC_LIST_DEQUEUE_TYPE(full_recv_list, rbuf, link,
+				      recvbuf_t);
+		full_recvbufs--;
+	} else {
 		/*
 		 * Make sure we reset the full count to 0
 		 */
 		full_recvbufs = 0;
+	}
+
 	UNLOCK();
-	return (rbuf);
+
+	return rbuf;
 }
 
 /*

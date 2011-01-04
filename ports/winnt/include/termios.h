@@ -1,5 +1,5 @@
-#ifndef _TERMIOS_H
-#define _TERMIOS_H
+#ifndef NTP_WIN_TERMIOS_H
+#define NTP_WIN_TERMIOS_H
 
 /*  Flag definitions for compatibility
  *  ==================================
@@ -195,22 +195,18 @@ struct termios
 #define TIOCM_OUT2	0x4000
 
 /* ioctl */
-#define TIOCMGET	0x5415
-#define TIOCMSET	0x5418
+#define TIOCMGET	1
+#define TIOCMSET	2
+#define TIOCMBIC	3
+#define TIOCMBIS	4
 
 /* NOP cfsetospeed() and cfsetispeed() for now */
 #define cfsetospeed(dcb, spd)	(0)
 #define cfsetispeed(dcb, spd)	(0)
 
-
-
-#if 0
-extern	BOOL	TTY_GETATTR (int fd, DCB *tio);
-extern	BOOL	TTY_SETATTR (int fd, const DCB *tio);
-#endif
-
+extern	int	closeserial	(int);
 extern	int	ioctl		(int, int, int *);
 extern	int	tcsetattr	(int, int, const struct termios *);
 extern	int	tcgetattr	(int, struct termios *);
 
-#endif
+#endif	/* NTP_WIN_TERMIOS_H */

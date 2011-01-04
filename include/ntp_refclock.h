@@ -99,9 +99,10 @@ struct refclockio {
 				due to small bursts
 				of refclock input data */
 	caddr_t	srcclock;	/* pointer to clock structure */
-	int	datalen;	/* lenth of data */
+	int	datalen;	/* length of data */
 	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
+	int	active;		/* nonzero when in use */
 };
 
 /*

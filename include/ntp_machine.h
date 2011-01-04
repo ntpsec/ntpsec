@@ -82,23 +82,6 @@ MISC
 # define ntp_adjtime __adjtimex
 #endif
 
-/*
- * Define these here for non-Windows NT systems
- * SOCKET and INVALID_SOCKET are native macros
- * on Windows NT and since they have different
- * requirements we use them in the code and
- * make them macros for everyone else
- */
-#ifndef SYS_WINNT
-typedef int SOCKET;
-# define INVALID_SOCKET	-1
-# define SOCKET_ERROR	-1
-# define socket_errno()		(errno)
-# define closesocket(fd)	close(fd)
-#else	/* SYS_WINNT follows */
-# define socket_errno()		(errno = WSAGetLastError())
-#endif
-
 int ntp_set_tod (struct timeval *tvp, void *tzp);
 
 #if defined (SYS_CYGWIN32)

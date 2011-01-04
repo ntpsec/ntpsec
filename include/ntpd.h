@@ -77,6 +77,7 @@ extern	char *	add_var (struct ctl_var **, u_long, u_short);
 extern	void	free_varlist (struct ctl_var *);
 extern	void	set_var (struct ctl_var **, const char *, u_long, u_short);
 extern	void	set_sys_var (const char *, u_long, u_short);
+extern	const char *	get_ext_sys_var(const char *tag);
 
 /* ntp_intres.c */
 #ifdef WORKER
