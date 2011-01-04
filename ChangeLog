@@ -1,3 +1,5 @@
+* [Bug 1771] algorithmic error in 'clocktime()' fixed;
+  Unit test extended for fixed system time
 (4.2.7p109) 2011/01/02 Released by Harlan Stenn <stenn@ntp.org>
 * Remove nearly all strcpy() and most strcat() from NTP distribution.
   One major pocket remains in ntp_crypto.c.  libopts & libisc also have

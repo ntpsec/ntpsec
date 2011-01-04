@@ -1,18 +1,35 @@
 #include "libntptest.h"
 
-/*
- * clocktime() uses calyearstart(), which in uses caljulian().
- * caljulian() should be ideally be mocked, because it uses
- * the current system time.
- */
+// ---------------------------------------------------------------------
+// test fixture
+//
+// The clocktimeTest uses the NTP calendar feature to use a mockup
+// function for getting the current system time, so the tests are not
+// dependent on the actual system time.
 
 class clocktimeTest : public libntptest {
+	virtual void SetUp();
+	virtual void TearDown();
 };
+
+void clocktimeTest::SetUp()
+{
+    ntpcal_set_timefunc(timefunc);
+    settime(2000, 1, 1, 0, 0, 0);
+}
+
+void clocktimeTest::TearDown()
+{
+    ntpcal_set_timefunc(NULL);
+}
+
+// ---------------------------------------------------------------------
+// test cases
 
 TEST_F(clocktimeTest, CurrentYear) {
 	// Timestamp: 2010-06-24 12:50:00Z
-	const u_long timestamp = 3486372600UL;
-	const u_int32 expected = timestamp; // exactly the same.
+	const u_int32 timestamp = 3486372600UL;
+	const u_int32 expected	= timestamp; // exactly the same.
 
 	const int yday=175, hour=12, minute=50, second=0, tzoff=0;
 
@@ -33,8 +50,8 @@ TEST_F(clocktimeTest, CurrentYearFuzz) {
 	 * timestamp for the 12:00:00 time.
 	 */
 
-	const u_long timestamp = 3486372600UL; // 2010-06-24 12:50:00Z
-	const u_int32 expected = 3486369600UL; // 2010-06-24 12:00:00Z
+	const u_int32 timestamp = 3486372600UL; // 2010-06-24 12:50:00Z
+	const u_int32 expected	= 3486369600UL; // 2010-06-24 12:00:00Z
 
 	const int yday=175, hour=12, minute=0, second=0, tzoff=0;
 
@@ -53,8 +70,8 @@ TEST_F(clocktimeTest, TimeZoneOffset) {
 	 *
 	 * Time sent into function is 04:00:00 +0800
 	 */
-	const u_long timestamp = 3486369600UL;
-	const u_int32 expected = timestamp;
+	const u_int32 timestamp = 3486369600UL;
+	const u_int32 expected	= timestamp;
 
 	const int yday=175, hour=4, minute=0, second=0, tzoff=8;
 
@@ -72,8 +89,8 @@ TEST_F(clocktimeTest, WrongYearStart) {
 	 * Time sent into function is 11:00:00.
 	 * Yearstart sent into function is the yearstart of 2009!
 	 */
-	const u_long timestamp = 3471418800UL;
-	const u_int32 expected = timestamp;
+	const u_int32 timestamp = 3471418800UL;
+	const u_int32 expected	= timestamp;
 
 	const int yday=2, hour=11, minute=0, second=0, tzoff=0;
 
@@ -91,8 +108,8 @@ TEST_F(clocktimeTest, PreviousYear) {
 	 * Time sent into function is 23:00:00
 	 * (which is meant to be 2009-12-31 23:00:00Z)
 	 */
-	const u_long timestamp = 3471296400UL;
-	const u_int32 expected = 3471289200UL;
+	const u_int32 timestamp = 3471296400UL;
+	const u_int32 expected	= 3471289200UL;
 
 	const int yday=365, hour=23, minute=0, second=0, tzoff=0;
 
@@ -110,8 +127,8 @@ TEST_F(clocktimeTest, NextYear) {
 	 * Time sent into function is 01:00:00
 	 * (which is meant to be 2010-01-01 01:00:00Z)
 	 */
-	const u_long timestamp = 3471289200UL;
-	const u_int32 expected = 3471296400UL;
+	const u_int32 timestamp = 3471289200UL;
+	const u_int32 expected	= 3471296400UL;
 
 	const int yday=1, hour=1, minute=0, second=0, tzoff=0;
 	u_long yearstart = 0;
@@ -124,7 +141,7 @@ TEST_F(clocktimeTest, NextYear) {
 
 TEST_F(clocktimeTest, NoReasonableConversion) {
 	/* Timestamp is: 2010-01-02 11:00:00Z */
-	const u_long timestamp = 3471418800UL;
+	const u_int32 timestamp = 3471418800UL;
 	
 	const int yday=100, hour=12, minute=0, second=0, tzoff=0;
 	u_long yearstart = 0;
@@ -132,4 +149,27 @@ TEST_F(clocktimeTest, NoReasonableConversion) {
 
 	ASSERT_FALSE(clocktime(yday, hour, minute, second, tzoff, timestamp,
 						   &yearstart, &actual));
+}
+
+TEST_F(clocktimeTest, AlwaysInLimit) {
+	/* Timestamp is: 2010-01-02 11:00:00Z */
+	const u_int32 timestamp = 3471418800UL;
+	
+	int cyc, yday, hour, minute, second;
+	u_long yearstart = 0;
+	u_int32 actual, diff;
+
+	for (cyc = 0; cyc < 5; cyc++) {
+		settime(1900+cyc*65, 1, 1, 0, 0, 0);
+		for (yday = -26000; yday < 26000; yday += 17)
+			for (hour = -204; hour < 204; hour+=2)
+				for (minute = -60; minute < 60; minute++) {
+					clocktime(yday, hour, minute, 30, 0,
+						  timestamp, &yearstart, &actual);
+					diff = actual - timestamp;
+					if (diff >= 0x80000000UL)
+						diff = ~diff + 1;
+					ASSERT_LE(diff, (183u * SECSPERDAY));
+				}
+	}
 }

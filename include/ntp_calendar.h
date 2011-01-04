@@ -34,6 +34,15 @@ typedef struct {
 	int32 lo;
 } ntpcal_split;
 
+typedef time_t (*systime_func_ptr)(time_t*);
+
+/*
+ * set the function for getting the system time. This is mostly used for
+ * unit testing to provide a fixed / shifted time stamp. Setting the
+ * value to NULL restores the original function, that is, 'time()',
+ * which is also the automatic default.
+ */
+extern systime_func_ptr ntpcal_set_timefunc(systime_func_ptr);
 
 /*
  * days-of-week

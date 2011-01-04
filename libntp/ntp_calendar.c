@@ -15,6 +15,38 @@
 
 /*
  *---------------------------------------------------------------------
+ * replacing the 'time()' function
+ * --------------------------------------------------------------------
+ */
+
+static systime_func_ptr systime_func = time;
+
+systime_func_ptr
+ntpcal_set_timefunc(
+    systime_func_ptr nfunc)
+{
+    systime_func_ptr res = systime_func;
+
+    if (!nfunc)
+	nfunc = time;
+    systime_func = nfunc;
+
+    return res;
+}    
+
+
+
+static time_t
+now()
+{
+    if (systime_func)
+	return (*systime_func)(NULL);
+    else
+	return time(NULL);
+}
+
+/*
+ *---------------------------------------------------------------------
  * basic calendar stuff
  * --------------------------------------------------------------------
  */
@@ -212,7 +244,7 @@ ntpcal_ntp_to_time(
 
 #ifdef HAVE_INT64
 
-	res.q_s = pivot ? *pivot : time(NULL);
+	res.q_s = pivot ? *pivot : now();
 	
 	res.Q_s -= 0x80000000u;		/* unshift of half range */
 	ntp	-= (u_int32)JAN_1970;	/* warp into UN*X domain */
@@ -221,7 +253,7 @@ ntpcal_ntp_to_time(
 
 #else /* no 64bit scalars */
 	
-	time_t tmp = pivot ? *pivot : time(NULL);
+	time_t tmp = pivot ? *pivot : now();
 
 	/*
 	 * shifting negative signed quantities is compiler-dependent, so
@@ -273,7 +305,7 @@ ntpcal_ntp_to_ntp(
 
 #ifdef HAVE_INT64
 
-	res.q_s = pivot ? *pivot : time(NULL);
+	res.q_s = pivot ? *pivot : now();
 
 	res.Q_s -= 0x80000000u;		/* unshift of half range */
 	res.Q_s += (u_int32)JAN_1970;	/* warp into NTP domain	 */
@@ -282,7 +314,7 @@ ntpcal_ntp_to_ntp(
 
 #else /* no 64bit scalars */
 	
-	time_t tmp = pivot ? *pivot : time(NULL);
+	time_t tmp = pivot ? *pivot : now();
 
 	/*
 	 * shifting negative signed quantities is compiler-dependent, so

@@ -9,6 +9,9 @@ extern "C" {
 
 class caljulianTest : public libntptest {
 protected:
+	virtual void SetUp();
+	virtual void TearDown();
+
 	std::string CalendarToString(const calendar &cal) {
 		std::ostringstream ss;
 		ss << cal.year << "-" << (u_int)cal.month << "-" << (u_int)cal.monthday
@@ -33,6 +36,18 @@ protected:
 		}
 	}
 };
+
+void caljulianTest::SetUp()
+{
+    ntpcal_set_timefunc(timefunc);
+    settime(1970, 1, 1, 0, 0, 0);
+}
+
+void caljulianTest::TearDown()
+{
+    ntpcal_set_timefunc(NULL);
+}
+
 
 TEST_F(caljulianTest, RegularTime) {
 	u_long testDate = 3485080800UL; // 2010-06-09 14:00:00

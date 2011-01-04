@@ -9,13 +9,6 @@
 #include "ntp_calendar.h"
 
 /*
- * Hacks to avoid excercising the multiplier.  I have no pride.
- */
-#define	MULBY10(x)	(((x)<<3) + ((x)<<1))
-#define	MULBY60(x)	(((x)<<6) - ((x)<<2))	/* watch overflow */
-#define	MULBY24(x)	(((x)<<4) + ((x)<<3))
-
-/*
  * We check that the time be within CLOSETIME seconds of the receive
  * time stamp.	This is about 4 hours, which hopefully should be wide
  * enough to collect most data, while close enough to keep things from
@@ -31,11 +24,6 @@
  * the edge, but will make sure we always get the correct result.
  */
 #define NEARTIME	(182u * SECSPERDAY)
-
-/*
- * For a final check, we use a limit that is exactly half of a leap year
- */
-#define NEARLIMIT	(183u * SECSPERDAY)
 
 /*
  * local calendar helpers
@@ -80,21 +68,20 @@ clocktime(
 	 * Compute the offset into the year in seconds.	 Note that
 	 * this could come out to be a negative number.
 	 */
-	tmp = yday-1;
-	tmp = MULBY24(tmp) + hour + tzoff;
-	tmp = MULBY60(tmp) + (long)minute;
-	tmp = MULBY60(tmp) + (long)second;
-	
+	tmp = ((int32)second +
+	       SECSPERMIN * ((int32)minute +
+			     MINSPERHR * ((int32)hour + (int32)tzoff +
+					  HRSPERDAY * ((int32)yday - 1))));
 	/*
 	 * Based on the cached year start, do a first attempt. Be
 	 * happy and return if this gets us better than NEARTIME to
 	 * the receive time stamp. Do this only if the cached year
-	 * start is not zero, which will no happen after 1900 for the
+	 * start is not zero, which will not happen after 1900 for the
 	 * next few thousand years.
 	 */
 	if (*yearstart) {
 		/* -- get time stamp of potential solution */
-		test[0] = (u_int32)*yearstart + tmp;
+		test[0] = (u_int32)(*yearstart) + tmp;
 		/* -- calc absolute difference to receive time */
 		diff[0] = test[0] - rec_ui;
 		if (diff[0] >= 0x80000000u)
@@ -116,10 +103,7 @@ clocktime(
 	 * around the guess and select the entry with the minimum
 	 * absolute difference to the receive time stamp.
 	 */
-	y = ntp_to_year(rec_ui)
-	  + (tmp / SECSPERAVGYEAR)
-	  - (tmp < 0); /* get close */
-
+	y = ntp_to_year(rec_ui - tmp);
 	for (idx = 0; idx < 3; idx++) {
 		/* -- get year start of potential solution */
 		ystt[idx] = year_to_ntp(y + idx - 1);
@@ -134,12 +118,9 @@ clocktime(
 	for (min = 1, idx = 0; idx < 3; idx++)
 		if (diff[idx] < diff[min])
 			min = idx;
-	if (diff[min] <= NEARLIMIT) {	
-	    /* -*- store results and update year start */
-	    *ts_ui     = test[min];
-	    *yearstart = ystt[min];
-	} else
-	    *ts_ui = rec_ui; /* emergency fallback */
+	/* -*- store results and update year start */
+	*ts_ui	   = test[min];
+	*yearstart = ystt[min];
 
 	/* -*- tell if we could get into CLOSETIME*/
 	return diff[min] < CLOSETIME;
