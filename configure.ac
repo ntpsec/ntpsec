@@ -34,6 +34,11 @@ ntp_configure_cache_version=20100916
 NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
 
 AM_INIT_AUTOMAKE
+dnl AM_SILENT_RULES req. automake 1.11
+m4_ifdef(
+    [AM_SILENT_RULES],
+    [AM_SILENT_RULES]
+)
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 dnl the 'build' machine is where we run configure and compile

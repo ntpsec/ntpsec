@@ -1,5 +1,6 @@
 * [Bug 1771] algorithmic error in 'clocktime()' fixed.
 * Unit tests extended for hard-coded system time.
+* make V=0 and configure --enable-silent-rules supported.
 * setvar modemsetup = ATE0... overrides ACTS driver default.
 * Preserve last timecode in ACTS driver (ntpq -ccv).
 * Tolerate previous ATE1 state when sending ACTS setup.
