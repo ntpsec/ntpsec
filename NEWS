@@ -1,4 +1,4 @@
-NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2010/11/14, RC12)
+NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2011/01/03)
 
 Focus: Bug fixes and portability improvements
 
@@ -30,12 +30,12 @@ ntpd
 * Log the reason for exiting under Windows.
 * Multicast fixes for Windows.
 * Interpolation fixes for Windows.
-* multicast fixes.
-* IPv6 Multicast fixes.
-* Manycast solicitation fixes and  general repairs.
+* IPv4 and IPv6 Multicast fixes.
+* Manycast solicitation fixes and general repairs.
 * JJY refclock cleanup.
 * NMEA refclock improvements.
 * Oncore debug message cleanup.
+* Palisade refclock now builds under Linux.
 * Give RAWDCF more baudrates.
 * Support Truetime Satellite clocks under Windows.
 * Support Arbiter 1093C Satellite clocks under Windows.
@@ -43,7 +43,6 @@ ntpd
 * Range-check the status codes (plus other cleanup) in the RIPE-NCC driver.
 * Prohibit 'includefile' directive in remote configuration command.
 * Fix 'nic' interface bindings.
-* Fix 'nic' interface handling where an address is on lo1.
 * Fix the way we link with openssl if openssl is installed in the base
   system.
 

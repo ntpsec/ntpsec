@@ -608,6 +608,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p3) 2011/01/03 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1764] Palisade driver doesn't build on Linux
 * Create and use scripts/check--help when generating .texi files.
