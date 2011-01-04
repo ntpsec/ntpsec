@@ -1,3 +1,4 @@
+(4.2.7p110) 2011/01/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1771] algorithmic error in 'clocktime()' fixed.
 * Unit tests extended for hard-coded system time.
 * make V=0 and configure --enable-silent-rules supported.
