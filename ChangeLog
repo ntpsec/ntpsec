@@ -1,4 +1,5 @@
 ---
+(4.2.6p3) 2011/01/03 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1764] Palisade driver doesn't build on Linux
 * Create and use scripts/check--help when generating .texi files.

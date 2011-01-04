@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  December 25, 2010 at 10:21:14 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January  3, 2011 at 09:18:50 PM by AutoGen 5.11.6pre7
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntp-keygen copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
+ * ntp-keygen copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -76,8 +76,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    23
-#define NTP_KEYGEN_VERSION       "4.2.6p3-RC12"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3-RC12"
+#define NTP_KEYGEN_VERSION       "4.2.6p3"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

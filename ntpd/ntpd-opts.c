@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  December 25, 2010 at 10:04:36 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January  3, 2011 at 09:15:35 PM by AutoGen 5.11.6pre7
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpd copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
+ * ntpd copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -37,7 +37,7 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "ntpd copyright (c) 1970-2010 David L. Mills and/or others, all rights reserved"
+       "ntpd copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
@@ -953,8 +953,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *  Define the Ntpd Option Environment
  */
 static char const zPROGNAME[5] = "NTPD";
-static char const zUsageTitle[104] =
-"ntpd - NTP daemon program - Ver. 4.2.6p3-RC12\n\
+static char const zUsageTitle[99] =
+"ntpd - NTP daemon program - Ver. 4.2.6p3\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 #define zRcName     NULL
 #define apzHomeList NULL

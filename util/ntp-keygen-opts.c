@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  December 25, 2010 at 10:21:14 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January  3, 2011 at 09:18:50 PM by AutoGen 5.11.6pre7
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntp-keygen copyright (c) 1970-2010 David L. Mills and/or others - all rights reserved
+ * ntp-keygen copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
  */
@@ -38,7 +38,7 @@ extern "C" {
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 tSCC zCopyright[] =
-       "ntp-keygen copyright (c) 1970-2010 David L. Mills and/or others, all rights reserved"
+       "ntp-keygen copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
 /* extracted from ../include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
@@ -726,8 +726,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *  Define the Ntp_Keygen Option Environment
  */
 static char const zPROGNAME[11] = "NTP_KEYGEN";
-static char const zUsageTitle[119] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3-RC12\n\
+static char const zUsageTitle[114] =
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
