@@ -281,6 +281,7 @@ vme_start(
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd_vme;
+	/* shouldn't there be an io_addclock() call? */
 
 	/*
 	 * All done.  Initialize a few random peer variables, then

@@ -140,6 +140,7 @@ trak_start(
 	register struct trakunit *up;
 	struct refclockproc *pp;
 	int fd;
+	int ldisc;
 	char device[20];
 
 	/*
@@ -148,14 +149,14 @@ trak_start(
 	 * timecode.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	if (
 #ifdef PPS
-		!(fd = refclock_open(device, SPEED232, LDISC_CLK))
+	ldisc = LDISC_CLK;
 #else
-		!(fd = refclock_open(device, SPEED232, 0))
-#endif /* PPS */
-		)
-	    return (0);
+	ldisc = 0;
+#endif
+	fd = refclock_open(device, SPEED232, ldisc);
+	if (fd <= 0)
+		return 0;
 
 	/*
 	 * Allocate and initialize unit structure

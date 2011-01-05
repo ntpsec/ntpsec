@@ -189,7 +189,8 @@ wwvb_start(
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	if (0 == (fd = refclock_open(device, SPEED232, LDISC_CLK)))
+	fd = refclock_open(device, SPEED232, LDISC_CLK);
+	if (fd <= 0)
 		return (0);
 
 	/*
@@ -198,7 +199,6 @@ wwvb_start(
 	up = emalloc(sizeof(*up));
 	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = wwvb_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
@@ -207,9 +207,9 @@ wwvb_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		pp->unitptr = NULL;
 		return (0);
 	}
+	pp->unitptr = (caddr_t)up;
 
 	/*
 	 * Initialize miscellaneous variables

@@ -48,6 +48,17 @@ extern	void	msyslog(int, const char *, ...)
 #define EVP_MAX_MD_SIZE	64	/* longest known is SHA512 */
 #endif
 
+#define SAVE_ERRNO(stmt)				\
+	{						\
+		int preserved_errno;			\
+							\
+		preserved_errno = socket_errno();	\
+		{					\
+			stmt				\
+		}					\
+		errno = preserved_errno;		\
+	}
+
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);

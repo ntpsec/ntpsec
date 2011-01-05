@@ -1028,6 +1028,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_palisade.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\include\isc\result.h"
 				>
 			</File>
@@ -1404,6 +1408,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_fg.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\ntpd\refclock_gpsvme.c"
 				>
 				<FileConfiguration
@@ -1734,10 +1742,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_palisade.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\refclock_parse.c"
 				>
 				<FileConfiguration
@@ -1920,28 +1924,8 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_usno.c"
+				RelativePath="..\..\..\..\ntpd\refclock_ulink.c"
 				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\ntpd\refclock_wwvb.c"
@@ -1964,6 +1948,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\..\ntpd\refclock_zyfer.c"
+				>
 			</File>
 		</Filter>
 		<Filter

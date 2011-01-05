@@ -178,14 +178,21 @@ static int use_pcc = -1;
  */
 static int lock_interp_threads = -1;
 
-static void	choose_interp_counter(void);
-static int	is_qpc_built_on_pcc(void);
-
 /*
  * ppm_per_adjust_unit is parts per million effect on the OS
  * clock per slewing adjustment unit per second.  Per haps.
  */
 static DOUBLE ppm_per_adjust_unit = 0.0;
+
+/*
+ * wintickadj emulates the functionality provided by unix tickadj,
+ * providing a baseline clock correction if needed to get the
+ * clock within a few hundred PPM of correct frequency.
+ */
+static long wintickadj;
+
+static void	choose_interp_counter(void);
+static int	is_qpc_built_on_pcc(void);
 
 /*
  * performance counter frequency observations
@@ -557,6 +564,7 @@ adj_systime(
 
 
 	/* only adjust the clock if adjustment changes */
+	TimeAdjustment += wintickadj;
 	if (last_Adj != TimeAdjustment) {
 		last_Adj = TimeAdjustment;
 		DPRINTF(1, ("SetSystemTimeAdjustment(%+ld)\n", TimeAdjustment));
@@ -592,6 +600,9 @@ init_winnt_time(void)
 	LARGE_INTEGER Freq;
 	FT_ULL initial_hectonanosecs;
 	FT_ULL next_hectonanosecs;
+	double adjppm;
+	double rawadj;
+	char * pch;
 
 	if (winnt_time_initialized)
 		return;
@@ -768,6 +779,18 @@ init_winnt_time(void)
 		"Windows clock precision %.3f msec, min. slew %.3f ppm/s",
 		(LONGLONG)os_clock_precision / 1e4, 
 		ppm_per_adjust_unit);
+
+	pch = getenv("NTPD_TICKADJ_PPM");
+	if (pch != NULL && 1 == sscanf(pch, "%lf", &adjppm)) {
+		rawadj = adjppm / ppm_per_adjust_unit;
+		rawadj += (rawadj < 0)
+			      ? -0.5
+			      : 0.5;
+		wintickadj = (long)rawadj;
+		msyslog(LOG_INFO,
+			"Using NTPD_TICKADJ_PPM %+g ppm (%+ld)",
+			adjppm, wintickadj);
+	}
 
 	winnt_time_initialized = TRUE;
 

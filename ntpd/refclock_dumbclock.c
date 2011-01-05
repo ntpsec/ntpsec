@@ -121,7 +121,7 @@ dumbclock_start(
 		printf ("starting Dumbclock with device %s\n",device);
 #endif
 	fd = refclock_open(device, SPEED232, 0);
-	if (!fd)
+	if (fd <= 0)
 		return (0);
 
 	/*

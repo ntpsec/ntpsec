@@ -82,6 +82,7 @@ int	cal_enable;		/* enable refclock calibrate */
  */
 static int refclock_cmpl_fp (const void *, const void *);
 static int refclock_sample (struct refclockproc *);
+static int refclock_ioctl(int, u_int);
 
 
 /*
@@ -211,6 +212,7 @@ refclock_newpeer(
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
 	pp->timestarted = current_time;
+	pp->io.fd = -1;
 
 	/*
 	 * Set peer.pmode based on the hmode. For appearances only.
@@ -694,14 +696,15 @@ refclock_gtraw(
 /*
  * The following code does not apply to WINNT & VMS ...
  */
-#if !defined SYS_VXWORKS && !defined SYS_WINNT
+#if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)
 #if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
 /*
  * refclock_open - open serial port for reference clock
  *
  * This routine opens a serial port for I/O and sets default options. It
- * returns the file descriptor if success and zero if failure.
+ * returns the file descriptor if successful, or logs an error and
+ * returns -1.
  */
 int
 refclock_open(
@@ -713,7 +716,7 @@ refclock_open(
 	int	fd;
 	int	omode;
 #ifdef O_NONBLOCK
-	char    trash[128];	/* litter bin for old input data */
+	char	trash[128];	/* litter bin for old input data */
 #endif
 
 	/*
@@ -728,18 +731,26 @@ refclock_open(
 #endif
 
 	fd = open(dev, omode, 0777);
-	if (fd < 0) {
-		msyslog(LOG_ERR, "refclock_open %s: %m", dev);
-		return (0);
+	/* refclock_open() long returned 0 on failure, avoid it. */
+	if (0 == fd) {
+		fd = dup(0);
+		SAVE_ERRNO(
+			close(0);
+		)
 	}
-	NTP_INSIST(fd != 0);
+	if (fd < 0) {
+		SAVE_ERRNO(
+			msyslog(LOG_ERR, "refclock_open %s: %m", dev);
+		)
+		return -1;
+	}
 	if (!refclock_setup(fd, speed, lflags)) {
 		close(fd);
-		return (0);
+		return -1;
 	}
 	if (!refclock_ioctl(fd, lflags)) {
 		close(fd);
-		return (0);
+		return -1;
 	}
 #ifdef O_NONBLOCK
 	/*
@@ -751,7 +762,7 @@ refclock_open(
 	while (read(fd, trash, sizeof(trash)) > 0 || errno == EINTR)
 		/*NOP*/;
 #endif
-	return (fd);
+	return fd;
 }
 
 
@@ -786,9 +797,12 @@ refclock_setup(
 	 * POSIX serial line parameters (termios interface)
 	 */
 	if (tcgetattr(fd, ttyp) < 0) {
-		msyslog(LOG_ERR,
-			"refclock_setup fd %d tcgetattr: %m", fd);
-		return (0);
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"refclock_setup fd %d tcgetattr: %m",
+				fd);
+		)
+		return FALSE;
 	}
 
 	/*
@@ -842,9 +856,12 @@ refclock_setup(
 	if (lflags & LDISC_ECHO)
 		ttyp->c_lflag |= ECHO;
 	if (tcsetattr(fd, TCSANOW, ttyp) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_setup fd %d TCSANOW: %m", fd);
-		return (0);
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"refclock_setup fd %d TCSANOW: %m",
+				fd);
+		)
+		return FALSE;
 	}
 
 	/*
@@ -853,7 +870,8 @@ refclock_setup(
 	 * is logged, but we keep our fingers crossed otherwise.
 	 */
 	if (tcflush(fd, TCIOFLUSH) < 0)
-		msyslog(LOG_ERR, "refclock_setup fd %d tcflush(): %m", fd);
+		msyslog(LOG_ERR, "refclock_setup fd %d tcflush(): %m",
+			fd);
 #endif /* HAVE_TERMIOS */
 
 #ifdef HAVE_SYSV_TTYS
@@ -863,9 +881,12 @@ refclock_setup(
 	 *
 	 */
 	if (ioctl(fd, TCGETA, ttyp) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_setup fd %d TCGETA: %m", fd);
-		return (0);
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"refclock_setup fd %d TCGETA: %m",
+				fd);
+		)
+		return FALSE;
 	}
 
 	/*
@@ -911,9 +932,11 @@ refclock_setup(
 		ttyp->c_cc[VMIN] = 1;
 	}
 	if (ioctl(fd, TCSETA, ttyp) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_setup fd %d TCSETA: %m", fd);
-		return (0);
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"refclock_setup fd %d TCSETA: %m", fd);
+		)
+		return FALSE;
 	}
 #endif /* HAVE_SYSV_TTYS */
 
@@ -923,23 +946,26 @@ refclock_setup(
 	 * 4.3bsd serial line parameters (sgttyb interface)
 	 */
 	if (ioctl(fd, TIOCGETP, (char *)ttyp) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_setup fd %d TIOCGETP: %m", fd);
-		return (0);
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"refclock_setup fd %d TIOCGETP: %m",
+				fd);
+		)
+		return FALSE;
 	}
 	if (speed)
 		ttyp->sg_ispeed = ttyp->sg_ospeed = speed;
 	ttyp->sg_flags = EVENP | ODDP | CRMOD;
 	if (ioctl(fd, TIOCSETP, (char *)ttyp) < 0) {
-		msyslog(LOG_ERR,
-		    "refclock_setup TIOCSETP: %m");
-		return (0);
+		SAVE_ERRNO(
+			msyslog(LOG_ERR, "refclock_setup TIOCSETP: %m");
+		)
+		return FALSE;
 	}
 #endif /* HAVE_BSD_TTYS */
 	return(1);
 }
 #endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
-#endif /* SYS_VXWORKS SYS_WINNT */
 
 
 /*
@@ -948,8 +974,8 @@ refclock_setup(
  * This routine attempts to hide the internal, system-specific details
  * of serial ports. It can handle POSIX (termios), SYSV (termio) and BSD
  * (sgtty) interfaces with varying degrees of success. The routine sets
- * up optional features such as tty_clk. The routine returns 1 if
- * success and 0 if failure.
+ * up optional features such as tty_clk. The routine returns TRUE if
+ * successful.
  */
 int
 refclock_ioctl(
@@ -958,9 +984,8 @@ refclock_ioctl(
 	)
 {
 	/*
-	 * simply return 1 if no UNIX line discipline is supported
+	 * simply return TRUE if no UNIX line discipline is supported
 	 */
-#if !defined SYS_VXWORKS && !defined SYS_WINNT
 #if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
 
 #ifdef DEBUG
@@ -979,9 +1004,12 @@ refclock_ioctl(
 		int rval = 0;
 
 		if (ioctl(fd, I_PUSH, "clk") < 0) {
-			msyslog(LOG_NOTICE,
-			    "refclock_ioctl fd %d I_PUSH: %m", fd);
-			return (0);
+			SAVE_ERRNO(
+				msyslog(LOG_ERR,
+					"refclock_ioctl fd %d I_PUSH: %m",
+					fd);
+			)
+			return FALSE;
 #ifdef CLK_SETSTR
 		} else {
 			char *str;
@@ -993,18 +1021,21 @@ refclock_ioctl(
 			else
 				str = "\n";
 			if (ioctl(fd, CLK_SETSTR, str) < 0) {
-				msyslog(LOG_ERR,
-				    "refclock_ioctl fd %d CLK_SETSTR: %m", fd);
-				return (0);
+				SAVE_ERRNO(
+					msyslog(LOG_ERR,
+						"refclock_ioctl fd %d CLK_SETSTR: %m",
+						fd);
+				)
+				return FALSE;
 			}
 #endif /*CLK_SETSTR */
 		}
 	}
 #endif /* TTYCLK */
 #endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
-#endif /* SYS_VXWORKS SYS_WINNT */
-	return (1);
+	return TRUE;
 }
+#endif /* !defined(SYS_VXWORKS) && !defined(SYS_WINNT) */
 
 
 /*

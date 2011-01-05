@@ -1,3 +1,15 @@
+* [Bug 1772] refclock_open() return value check wrong for ACTS.
+* Default --with-openssl-libdir and --with-openssl-incdir to the values
+  from pkg-config, falling back on our usual search paths if pkg-config
+  is not available or does not have openssl.pc on PKG_CONFIG_PATH.
+* Change refclock_open() to return -1 on failure like open().
+* Update all refclock_open() callers to check for fd <= 0 indicating
+  failure, so they work with older and newer refclock_open() and can
+  easily backport.
+* Initialize refclockproc.rio.fd to -1, harmonize refclock shutdown
+  entrypoints to avoid crashing, particularly if refclock_open() fails.
+* Enable tickadj-like taming of wildly off-spec Windows clock using
+  NTPD_TICKADJ_PPM env. var. specifying baseline slew.
 (4.2.7p110) 2011/01/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1771] algorithmic error in 'clocktime()' fixed.
 * Unit tests extended for hard-coded system time.

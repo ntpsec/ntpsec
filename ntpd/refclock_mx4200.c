@@ -219,9 +219,9 @@ mx4200_start(
 	 * Open serial port
 	 */
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
-	if (!(fd = refclock_open(gpsdev, SPEED232, LDISC_PPS))) {
-	    return (0);
-	}
+	fd = refclock_open(gpsdev, SPEED232, LDISC_PPS);
+	if (fd <= 0)
+		return 0;
 
 	/*
 	 * Allocate unit structure

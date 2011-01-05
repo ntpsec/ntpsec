@@ -222,8 +222,9 @@ heath_start(
 	 * Open serial port
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	if (!(fd = refclock_open(device, speed[peer->ttl & 0x3],
-	    LDISC_REMOTE)))
+	fd = refclock_open(device, speed[peer->ttl & 0x3],
+			   LDISC_REMOTE);
+	if (fd <= 0)
 		return (0);
 	pp = peer->procptr;
 	pp->io.clock_recv = heath_receive;

@@ -228,13 +228,12 @@ extern	int	refclock_open	(char *, u_int, u_int);
 extern	int	refclock_setup	(int, u_int, u_int);
 extern	void	refclock_timer	(struct peer *);
 extern	void	refclock_transmit(struct peer *);
-extern	int	refclock_ioctl	(int, u_int);
 extern 	int	refclock_process(struct refclockproc *);
 extern 	int	refclock_process_f(struct refclockproc *, double);
 extern 	void	refclock_process_offset(struct refclockproc *, l_fp, l_fp, double);
 extern	void	refclock_report	(struct peer *, int);
 extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);
-extern	int	refclock_gtraw  (struct recvbuf *, char *, int, l_fp *);
+extern	int	refclock_gtraw	(struct recvbuf *, char *, int, l_fp *);
 #endif /* REFCLOCK */
 
 #endif /* NTP_REFCLOCK_H */

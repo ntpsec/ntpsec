@@ -305,9 +305,8 @@ palisade_start (
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = (struct palisade_unit *) emalloc(sizeof(struct palisade_unit));
-
-	memset((char *)up, 0, sizeof(struct palisade_unit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 
 	up->type = CLK_TYPE(peer);
 	switch (up->type) {

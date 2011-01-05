@@ -477,7 +477,8 @@ ripencc_start(int unit, struct peer *peer)
 	 * Open serial port
 	 */
 	(void)snprintf(device, sizeof(device), DEVICE, unit);
-	if (!(fd = refclock_open(device, SPEED232, LDISC_RAW))) {
+	fd = refclock_open(device, SPEED232, LDISC_RAW);
+	if (fd <= 0) {
 		pp->io.fd = -1;
 		return (0);
 	}
@@ -503,19 +504,15 @@ ripencc_start(int unit, struct peer *peer)
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct ripencc_unit *) 
-	      emalloc(sizeof(struct ripencc_unit)))) {
-		(void) close(fd);
-		return (0);
-	}
-	memset((char *)up, 0, sizeof(struct ripencc_unit));
+	up = emalloc(sizeof(*up));
+	memset(up, 0, sizeof(*up));
 
 	pp->io.clock_recv = ripencc_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	if (!io_addclock(&pp->io)) {
 		pp->io.fd = -1;
-		(void) close(fd);
+		close(fd);
 		free(up);
 		return (0);
 	}

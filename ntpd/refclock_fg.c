@@ -91,7 +91,7 @@ fg_init(
  */
 static int
 fg_start(
-     	int unit,
+	int unit,
 	struct peer *peer
 	)
 {
@@ -106,23 +106,18 @@ fg_start(
 	 */
 	(void)sprintf(device, DEVICE, unit);
 
-#ifdef DEBUG
-	if (debug)
-		printf ("starting FG with device %s\n",device);
-#endif
-	 if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
-                return (0);
-	
-        /*
-         * Allocate and initialize unit structure
-         */
+	DPRINTF(1, ("starting FG with device %s\n",device));
 
-	if (!(up = (struct fgunit *)
-              emalloc(sizeof(struct fgunit)))) {
-                (void) close(fd);
-                return (0);
-        }
-	memset((char *)up, 0, sizeof(struct fgunit));
+	fd = refclock_open(device, SPEED232, LDISC_CLK);
+	if (fd <= 0)
+		return (0);
+	
+	/*
+	 * Allocate and initialize unit structure
+	 */
+
+	up = emalloc(sizeof(struct fgunit));
+	memset(up, 0, sizeof(struct fgunit));
 	pp = peer->procptr;
 	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = fg_receive;
@@ -130,9 +125,10 @@ fg_start(
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
  	if (!io_addclock(&pp->io)) {
-                (void) close(fd);
-                return (0);
-        }
+		close(fd);
+		pp->io.fd = -1;
+		return 0;
+	}
 
 	
 	/*
@@ -140,13 +136,13 @@ fg_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	memcpy((char *)&pp->refid, REFID, 3);
+	memcpy(&pp->refid, REFID, 3);
 	up->pollnum = 0;
 	
 	/* 
 	 * Setup dating station to use GPS receiver.
 	 * GPS receiver should work before this operation.
-         */
+	 */
 	if(!fg_init(pp->io.fd))
 		refclock_report(peer, CEVNT_FAULT);
 
@@ -168,8 +164,10 @@ fg_shutdown(
 	
 	pp = peer->procptr;
 	up = (struct fgunit *)pp->unitptr;
-        io_closeclock(&pp->io);
-	free(up);
+	if (pp->io.fd != -1)
+		io_closeclock(&pp->io);
+	if (up != NULL)
+		free(up);
 }
 
 

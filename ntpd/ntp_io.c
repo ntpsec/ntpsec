@@ -4206,6 +4206,7 @@ io_closeclock(
 	 * Close the descriptor.
 	 */
 	close_and_delete_fd_from_list(rio->fd);
+	rio->fd = -1;
 	UNBLOCKIO();
 }
 #endif	/* REFCLOCK */

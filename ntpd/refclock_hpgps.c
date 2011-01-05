@@ -156,6 +156,7 @@ hpgps_start(
 	register struct hpgpsunit *up;
 	struct refclockproc *pp;
 	int fd;
+	int ldisc;
 	char device[20];
 
 	/*
@@ -163,15 +164,13 @@ hpgps_start(
 	 * Default is HP 58503A, mode arg selects HP Z3801A
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
+	ldisc = LDISC_CLK;
 	/* mode parameter to server config line shares ttl slot */
-	if ((peer->ttl == 1)) {
-		if (!(fd = refclock_open(device, SPEED232Z,
-				LDISC_CLK | LDISC_7O1)))
-			return (0);
-	} else {
-		if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
-			return (0);
-	}
+	if (1 == peer->ttl)
+		ldisc |= LDISC_7O1;
+	fd = refclock_open(device, SPEED232Z, ldisc);
+	if (fd <= 0)
+		return (0);
 	/*
 	 * Allocate and initialize unit structure
 	 */

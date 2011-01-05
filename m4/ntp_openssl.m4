@@ -6,6 +6,8 @@ AC_SUBST([OPENSSL])
 AC_SUBST([OPENSSL_INC])
 AC_SUBST([OPENSSL_LIB])
 
+AC_PATH_PROG([PKG_CONFIG], [pkg-config])
+
 AC_MSG_CHECKING([for openssl library directory])
 AC_ARG_WITH(
     [openssl-libdir],
@@ -24,8 +26,24 @@ AC_ARG_WITH(
 case "$ans" in
  no) 
     ;;
- yes) # Look in:
-    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib /usr/local/lib /usr/local/ssl/lib /lib"
+ yes)
+    case "$PKG_CONFIG" in
+     '')
+	;;
+     *)
+	pkgans=`$PKG_CONFIG --libs-only-L openssl | sed -e 's/^-L//'`
+	case "$pkgans" in
+	 '')
+	    # Look in:
+	    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib"
+	    ans="$ans /usr/local/lib /usr/local/ssl/lib /lib"
+	    ;;
+	 *)
+	    ans="$pkgans"
+	    ;;
+	esac
+	;;
+    esac
     ;;
  *) # Look where they said
     ;;
@@ -78,7 +96,23 @@ case "$ans" in
  no)
     ;;
  yes) # look in:
-    ans="/usr/include /usr/sfw/include /usr/local/include /usr/local/ssl/include"
+    case "$PKG_CONFIG" in
+     '')
+	;;
+     *)
+	pkgans=`$PKG_CONFIG --cflags-only-I openssl | sed -e 's/^-I//'`
+	case "$pkgans" in
+	 '')
+	    # Look in:
+	    ans="/usr/include /usr/sfw/include /usr/local/include"
+	    ans="$ans /usr/local/ssl/include"
+	    ;;
+	 *)
+	    ans="$pkgans"
+	    ;;
+	esac
+	;;
+    esac
     ;;
  *) # Look where they said
     ;;

@@ -343,7 +343,8 @@ jjy_start ( int unit, struct peer *peer )
 		return RC_START_ERROR ;
 	}
 
-	if ( ! ( fd = refclock_open ( pDeviceName, iSpeed232, iDiscipline ) ) ) {
+	fd = refclock_open ( pDeviceName, iSpeed232, iDiscipline ) ;
+	if ( fd <= 0 ) {
 		free ( (void*) pDeviceName ) ;
 		return RC_START_ERROR ;
 	}

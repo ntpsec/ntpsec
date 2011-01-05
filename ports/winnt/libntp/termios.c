@@ -224,7 +224,7 @@ int tty_open(
  * refclock_open - open serial port for reference clock
  *
  * This routine opens a serial port for I/O and sets default options. It
- * returns the file descriptor or 0 indicating failure.
+ * returns the file descriptor or -1 indicating failure.
  */
 int refclock_open(
 	char *	dev,		/* device name pointer */
@@ -247,23 +247,32 @@ int refclock_open(
 	h = common_serial_open(dev, &windev);
 	windev = (windev) ? windev : dev;
 
-	if (INVALID_HANDLE_VALUE == h) {  
-		msyslog(LOG_ERR, "Device %s CreateFile error: %m", windev);
-		return 0;
+	if (INVALID_HANDLE_VALUE == h) {
+		SAVE_ERRNO(
+			msyslog(LOG_ERR, "CreateFile(%s) error: %m",
+				windev);
+		)
+		return -1;
 	}
 
 	/* Change the input/output buffers to be large. */
 	if (!SetupComm(h, 1024, 1024)) {
-		msyslog(LOG_ERR, "Device %s SetupComm error: %m", windev);
-		return 0;
+		SAVE_ERRNO(
+			msyslog(LOG_ERR, "SetupComm(%s) error: %m",
+				windev);
+		)
+		return -1;
 	}
 
 	dcb.DCBlength = sizeof(dcb);
 
 	if (!GetCommState(h, &dcb)) {
-		msyslog(LOG_ERR, "Device %s GetCommState error: %m",
-				 windev);
-		return 0;
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"GetCommState(%s) error: %m",
+				windev);
+		)
+		return -1;
 	}
 
 	switch (speed) {
@@ -305,11 +314,11 @@ int refclock_open(
 		break;
 
 	default:
-		msyslog(LOG_ERR, "Device %s unsupported baud rate "
-				 "code %u", windev, speed);
-		return 0;
+		msyslog(LOG_ERR, "%s unsupported bps code %u", windev,
+			speed);
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return -1;
 	}
-
 
 	dcb.fBinary = TRUE;
 	dcb.fParity = TRUE;
@@ -335,8 +344,11 @@ int refclock_open(
 		dcb.EvtChar = '\r';
 
 	if (!SetCommState(h, &dcb)) {
-		msyslog(LOG_ERR, "Device %s SetCommState error: %m", windev);
-		return 0;
+		SAVE_ERRNO(
+			msyslog(LOG_ERR, "SetCommState(%s) error: %m",
+				windev);
+		)
+		return -1;
 	}
 
 	/* watch out for CR (dcb.EvtChar) as well as the CD line */
@@ -346,8 +358,11 @@ int refclock_open(
 	else
 		dwEvtMask |= EV_RXFLAG;
 	if (!SetCommMask(h, dwEvtMask)) {
-		msyslog(LOG_ERR, "Device %s SetCommMask error: %m", windev);
-		return 0;
+		SAVE_ERRNO(
+			msyslog(LOG_ERR, "SetCommMask(%s) error: %m",
+				windev);
+		)
+		return -1;
 	}
 
 	/* configure the handle to never block */
@@ -358,17 +373,24 @@ int refclock_open(
 	timeouts.WriteTotalTimeoutConstant = 0;
 
 	if (!SetCommTimeouts(h, &timeouts)) {
-		msyslog(LOG_ERR, "Device %s SetCommTimeouts error: %m", windev);
-		return 0;
+		SAVE_ERRNO(
+			msyslog(LOG_ERR,
+				"Device %s SetCommTimeouts error: %m",
+				windev);
+		)
+		return -1;
 	}
 
 	translate = (LDISC_RAW & flags)
 			? 0
 			: _O_TEXT;
 	fd = _open_osfhandle((int)h, translate);
-	if (fd < 0)
-		return 0;
-	NTP_INSIST(fd != 0);
+	/* refclock_open() long returned 0 on failure, avoid it. */
+	if (0 == fd) {
+		fd = _dup(0);
+		_close(0);
+	}
+
 	return fd;
 }
 

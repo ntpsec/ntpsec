@@ -612,7 +612,6 @@ oncore_start(
 	/* initialize miscellaneous variables */
 
 	pp = peer->procptr;
-	pp->unitptr    = (caddr_t) instance;
 	instance->pp   = pp;
 	instance->unit = unit;
 	instance->peer = peer;
@@ -686,7 +685,8 @@ oncore_start(
 	}
 #endif	/* !SYS_WINNT */
 
-	if (!(fd1 = refclock_open(device1, SPEED, LDISC_RAW))) {
+	fd1 = refclock_open(device1, SPEED, LDISC_RAW);
+	if (fd1 <= 0) {
 		oncore_log_f(instance, LOG_ERR, "Can't open fd1 (%s)",
 			     device1);
 		return(0);			/* exit, can't open file, can't start driver */
@@ -735,10 +735,12 @@ oncore_start(
 	pp->io.fd = fd1;
 	if (!io_addclock(&pp->io)) {
 		oncore_log(instance, LOG_ERR, "can't do io_addclock");
-		(void) close(fd1);
+		close(fd1);
+		pp->io.fd = -1;
 		free(instance);
 		return (0);
 	}
+	pp->unitptr = (caddr_t)instance;
 
 #ifdef ONCORE_SHMEM_STATUS
 	/*
@@ -783,19 +785,22 @@ oncore_shutdown(
 	pp = peer->procptr;
 	instance = (struct instance *) pp->unitptr;
 
-	io_closeclock(&pp->io);
+	if (pp->io.fd != -1)
+		io_closeclock(&pp->io);
 
-	time_pps_destroy (instance->pps_h);
+	if (instance != NULL) {
+		time_pps_destroy (instance->pps_h);
 
-	close(instance->ttyfd);
+		close(instance->ttyfd);
 
-	if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd))
-		close(instance->ppsfd);
+		if ((instance->ppsfd != -1) && (instance->ppsfd != instance->ttyfd))
+			close(instance->ppsfd);
 
-	if (instance->shmemfd)
-		close(instance->shmemfd);
+		if (instance->shmemfd)
+			close(instance->shmemfd);
 
-	free(instance);
+		free(instance);
+	}
 }
 
 

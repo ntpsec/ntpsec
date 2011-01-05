@@ -135,27 +135,25 @@ zyfer_start(
 	 * Something like LDISC_ACTS that looked for ! would be nice...
 	 */
 	(void)sprintf(device, DEVICE, unit);
-	if ( !(fd = refclock_open(device, SPEED232, LDISC_RAW)) )
-	    return (0);
+	fd = refclock_open(device, SPEED232, LDISC_RAW);
+	if (fd <= 0)
+		return (0);
 
 	msyslog(LOG_NOTICE, "zyfer(%d) fd: %d dev <%s>", unit, fd, device);
 
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct zyferunit *)
-	      emalloc(sizeof(struct zyferunit)))) {
-		(void) close(fd);
-		return (0);
-	}
-	memset((char *)up, 0, sizeof(struct zyferunit));
+	up = emalloc(sizeof(struct zyferunit));
+	memset(up, 0, sizeof(struct zyferunit));
 	pp = peer->procptr;
 	pp->io.clock_recv = zyfer_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		(void) close(fd);
+		close(fd);
+		pp->io.fd = -1;
 		free(up);
 		return (0);
 	}
@@ -188,8 +186,10 @@ zyfer_shutdown(
 
 	pp = peer->procptr;
 	up = (struct zyferunit *)pp->unitptr;
-	io_closeclock(&pp->io);
-	free(up);
+	if (pp->io.fd != -1)
+		io_closeclock(&pp->io);
+	if (up != NULL)
+		free(up);
 }
 
 

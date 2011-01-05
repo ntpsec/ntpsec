@@ -335,7 +335,6 @@ irig_start(
 	up = emalloc(sizeof(*up));
 	memset(up, 0, sizeof(*up));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = irig_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
@@ -344,9 +343,9 @@ irig_start(
 		close(fd);
 		pp->io.fd = -1;
 		free(up);
-		pp->unitptr = NULL;
 		return (0);
 	}
+	pp->unitptr = (caddr_t)up;
 
 	/*
 	 * Initialize miscellaneous variables

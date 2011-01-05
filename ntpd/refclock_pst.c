@@ -128,7 +128,8 @@ pst_start(
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	if (!(fd = refclock_open(device, SPEED232, LDISC_CLK)))
+	fd = refclock_open(device, SPEED232, LDISC_CLK);
+	if (fd <= 0)
 		return (0);
 
 	/*

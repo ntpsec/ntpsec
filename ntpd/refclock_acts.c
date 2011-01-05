@@ -515,13 +515,15 @@ acts_timeout(
 		    up->unit);
 		fd = refclock_open(device, SPEED232, LDISC_ACTS |
 		    LDISC_RAW | LDISC_REMOTE);
-		if (fd < 0) {
+		if (fd <= 0) {
 			msyslog(LOG_ERR, "acts: open fails %m");
 			return;
 		}
 		pp->io.fd = fd;
 		if (!io_addclock(&pp->io)) {
 			msyslog(LOG_ERR, "acts: addclock fails");
+			close(fd);
+			pp->io.fd = -1;
 			return;
 		}
 		up->msgcnt = 0;
