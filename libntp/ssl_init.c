@@ -38,10 +38,10 @@ ssl_check_version(void)
 	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
 		msyslog(LOG_WARNING,
 		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
+		    (u_long)OPENSSL_VERSION_NUMBER, SSLeay());
 		fprintf(stderr,
 		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
-		    OPENSSL_VERSION_NUMBER, SSLeay());
+		    (u_long)OPENSSL_VERSION_NUMBER, SSLeay());
 	}
 
 	INIT_SSL();

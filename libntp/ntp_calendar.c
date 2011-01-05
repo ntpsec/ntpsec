@@ -19,30 +19,30 @@
  * --------------------------------------------------------------------
  */
 
-static systime_func_ptr systime_func = time;
+static systime_func_ptr systime_func = &time;
+static inline time_t now(void);
+
 
 systime_func_ptr
 ntpcal_set_timefunc(
-    systime_func_ptr nfunc)
+	systime_func_ptr nfunc
+	)
 {
-    systime_func_ptr res = systime_func;
+	systime_func_ptr res;
+	
+	res = systime_func;
+	if (NULL == nfunc)
+		nfunc = &time;
+	systime_func = nfunc;
 
-    if (!nfunc)
-	nfunc = time;
-    systime_func = nfunc;
-
-    return res;
-}    
+	return res;
+}
 
 
-
-static time_t
-now()
+static inline time_t
+now(void)
 {
-    if (systime_func)
 	return (*systime_func)(NULL);
-    else
-	return time(NULL);
 }
 
 /*
