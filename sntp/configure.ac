@@ -147,6 +147,7 @@ case "${enable_libopts_install+set}" in
  *) enable_libopts_install=no ;;
 esac
 LIBOPTS_CHECK
+NTP_LIBEVENT_CHECK
 
 NTP_DIR_SEP
 
@@ -1000,5 +1001,12 @@ esac
 
 AM_CONDITIONAL([GTEST_AVAILABLE], [$gta])
 
+case "$NEED_LIBEVENT_DIR" in
+ true)
+    AC_CONFIG_SUBDIRS([libevent])
+    ;;
+esac
+
+AC_CONFIG_FILES(build-libevent/Makefile)
 AC_CONFIG_FILES(tests/Makefile)
 AC_OUTPUT

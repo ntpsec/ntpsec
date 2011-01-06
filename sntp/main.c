@@ -6,10 +6,40 @@
 #include "utilities.h"
 #include "log.h"
 
+#include <event2/dns.h>
+#include <event2/util.h>
+#include <event2/event.h>
+
+#if 0
+// Might need:
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#endif
+
+int n_pending_dns = 0;
+int n_pending_ntp = 0;
 int ai_fam_pref = AF_UNSPEC;
+char *progname;
+struct event_base *base = NULL;
+
+struct dns_cb_ctx {
+	char *name;
+	int flags;
+#define CTX_BCST        0x0001
+#define CTX_UCST        0x0002
+#define CTX_unused      0xfffd
+};
+
+struct ntp_cb_ctx {
+	char *name;
+	int flags;
+};
 
 struct key *keys = NULL;
 
+void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
+void ntp_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode); 
 int sntp_main (int argc, char **argv);
 int on_wire (struct addrinfo *host, struct addrinfo *bcastaddr);
@@ -37,19 +67,13 @@ sntp_main (
 	char **argv
 	) 
 {
-	register int c;
-	struct kod_entry *reason = NULL;
+	int i;
 	int optct;
 	/* boolean, u_int quiets gcc4 signed overflow warning */
-	u_int sync_data_suc;
-	struct addrinfo **bcastaddr = NULL;
-	struct addrinfo **resh = NULL;
-	struct addrinfo *ai;
-	int resc;
-	int kodc;
-	int ow_ret;
-	int bcast = 0;
-	char *hostname;
+	// struct addrinfo *ai;
+	struct evdns_base *dnsbase;
+
+	progname = argv[0];
 
 	optct = optionProcess(&sntpOptions, argc, argv);
 	argc -= optct;
@@ -78,11 +102,11 @@ sntp_main (
 
 	/* Parse config file if declared TODO */
 
-	/* 
-	 * If there's a specified KOD file init KOD system.  If not use
-	 * default file.  For embedded systems with no writable
-	 * filesystem, -K /dev/null can be used to disable KoD storage.
-	 */
+	/*
+	** If there's a specified KOD file init KOD system.  If not use
+	** default file.  For embedded systems with no writable filesystem,
+	** -K /dev/null can be used to disable KoD storage.
+	*/
 	if (HAVE_OPT(KOD))
 		kod_init_kod_db(OPT_ARG(KOD));
 	else
@@ -106,26 +130,96 @@ sntp_main (
 		free(reason);
 #endif
 
-	/* Considering employing a variable that prevents functions of doing anything until 
-	 * everything is initialized properly 
-	 */
-	resc = resolve_hosts((const char **)argv, argc, &resh, ai_fam_pref);
-	if (resc < 1) {
-		printf("Unable to resolve hostname(s)\n");
+	/*
+	** Considering employing a variable that prevents functions of doing
+	** anything until everything is initialized properly
+	**
+	** HMS: What exactly does the above mean?
+	*/
+
+	base = event_base_new();
+	if (!base) {
+		printf("%s: event_base_new() failed!\n", progname);
 		return -1;
 	}
-	bcast = ENABLED_OPT(BROADCAST);
-	if (bcast) {
-		const char * myargv[2];
 
-		myargv[0] = OPT_ARG(BROADCAST);
-		myargv[1] = NULL;
-		bcast = resolve_hosts(myargv, 1, &bcastaddr, ai_fam_pref);
+	dnsbase = evdns_base_new(base, 1);
+	if (!dnsbase) {
+		printf("%s: evdns_base_new() failed!\n", progname);
+		return -1;
 	}
 
-	/* Select a certain ntp server according to simple criteria? For now
-	 * let's just pay attention to previous KoDs.
-	 */
+	if (ENABLED_OPT(BROADCAST)) {
+		struct evutil_addrinfo hints;
+		struct dns_cb_ctx *dns_ctx;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = ai_fam_pref;
+		hints.ai_flags = EVUTIL_AI_CANONNAME;
+		/*
+		** Unless we specify a socktype, we'll get at least two
+                ** entries for each address: one for TCP and one for
+                ** UDP. That's not what we want.
+                */
+                hints.ai_socktype = SOCK_STREAM;
+                hints.ai_protocol = IPPROTO_TCP;
+
+		dns_ctx = emalloc(sizeof *dns_ctx);
+		dns_ctx->name = OPT_ARG(BROADCAST);
+		dns_ctx->flags = CTX_BCST;
+
+		printf("broadcast-before: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
+		++n_pending_dns;
+		evdns_getaddrinfo(dnsbase, OPT_ARG(BROADCAST), NULL, &hints,
+				  dns_cb, (void *)dns_ctx);
+		printf("broadcast-after: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
+	}
+
+	for (i = 0; i < argc; ++i) {
+		struct evutil_addrinfo hints; /* is 1 copy really OK? */
+		struct dns_cb_ctx *dns_ctx;
+
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = ai_fam_pref;
+		hints.ai_flags = EVUTIL_AI_CANONNAME;
+		/*
+		** Unless we specify a socktype, we'll get at least two
+                ** entries for each address: one for TCP and one for
+                ** UDP. That's not what we want.
+                */
+                hints.ai_socktype = SOCK_STREAM;
+                hints.ai_protocol = IPPROTO_TCP;
+
+		dns_ctx = emalloc(sizeof *dns_ctx);
+		dns_ctx->name = argv[i];
+		dns_ctx->flags = CTX_UCST;
+
+		printf("unicast-before: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
+		++n_pending_dns;
+		evdns_getaddrinfo(dnsbase, argv[i], NULL, &hints,
+				  dns_cb, (void *)dns_ctx);
+		printf("unicast-after: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
+	}
+
+	printf("unicast: n_pending_dns = %d\n", n_pending_dns);
+
+	event_base_dispatch(base);
+
+	evdns_base_free(dnsbase, 0);
+	event_base_free(base);
+
+	return 0;		/* Might not want 0... */
+}
+
+
+#if 0
+void
+handle_later() {
+	/*
+	** Select a certain ntp server according to simple criteria?
+	**
+	** For now let's just pay attention to previous KoDs.
+	*/
 	sync_data_suc = FALSE;
 	for (c = 0; c < resc && !sync_data_suc; c++) {
 		ai = resh[c];
@@ -133,7 +227,10 @@ sntp_main (
 			hostname = addrinfo_to_str(ai);
 			if ((kodc = search_entry(hostname, &reason)) == 0) {
 				if (is_reachable(ai)) {
-					ow_ret = on_wire(ai, bcast ? bcastaddr[0] : NULL);
+					ow_ret = on_wire(ai,
+							 (bcast)
+							 ? bcastaddr[0]
+							 : NULL);
 					if (0 == ow_ret)
 						sync_data_suc = TRUE;
 				}
@@ -153,6 +250,90 @@ sntp_main (
 		return 1;
 	return 0;
 }
+#endif
+
+
+/*
+** DNS Callback:
+** - For each IP:
+** - - open a socket
+** - - increment n_pending_ntp
+** - - send a request if this is a Unicast callback
+** - - queue wait for response
+** - decrement n_pending_dns
+*/
+void
+dns_cb(
+        int errcode,
+        struct evutil_addrinfo *addr,
+        void *ptr
+        )
+{
+        struct dns_cb_ctx *ctx = ptr;
+
+        if (errcode) {
+                printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
+        } else {
+                struct evutil_addrinfo *ai;
+
+                printf("%s [%s]\n", ctx->name,
+                       (addr->ai_canonname)
+                       ? addr->ai_canonname
+                       : "");
+                for (ai = addr; ai; ai = ai->ai_next) {
+                        char buf[128];
+                        const char *s = NULL;
+
+                        /*
+			** If we get something good, bump n_pending_ntp and
+                        ** send a packet.
+                        */
+                        if (ai->ai_family == AF_INET) {
+                                struct sockaddr_in *sin = (struct sockaddr_in *)ai->ai_addr;
+                                s = evutil_inet_ntop(AF_INET, &sin->sin_addr, buf, 128);
+                        } else if (ai->ai_family == AF_INET6) {
+                                struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)ai->ai_addr;
+                                s = evutil_inet_ntop(AF_INET6, &sin6->sin6_addr, buf, 128);
+                        }
+                        if (s)
+                                printf("    -> %s\n", s);
+                }
+                evutil_freeaddrinfo(addr);
+                free(ptr);
+        }
+	printf("n_pending_dns = %d, n_pending_ntp = %d\n",
+	       n_pending_dns, n_pending_ntp);
+	/* n_pending_dns really should be >0 here... */
+        if (--n_pending_dns == 0 && n_pending_ntp == 0)
+                event_base_loopexit(base, NULL);
+}
+
+
+/*
+** NTP Callback:
+** Unicast:
+** - close socket
+** - decrement n_pending_ntp
+** - If packet is good, set the time and "exit"
+** Broadcast:
+** - If packet is good, set the time and "exit"
+*/
+void
+ntp_cb( 
+        int errcode, 
+        struct evutil_addrinfo *addr, 
+        void *ptr 
+        ) 
+{
+        struct dns_cb_ctx *ctx = ptr;
+
+        if (errcode) {
+                printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
+        } else {
+	}
+}
+
+
 
 static union {
 	struct pkt pkt;
@@ -160,6 +341,7 @@ static union {
 } rbuf;
 
 #define r_pkt  rbuf.pkt
+
 
 int
 generate_pkt (
@@ -171,6 +353,7 @@ generate_pkt (
 {
 	l_fp xmt;
 	int pkt_len = LEN_PKT_NOMAC;
+
 	memset(x_pkt, 0, sizeof(struct pkt));
 	TVTOTS(tv_xmt, &xmt);
 	HTONL_FP(&xmt, &(x_pkt->xmt));
@@ -181,12 +364,14 @@ generate_pkt (
 	if (pkt_key != NULL) {
 		int mac_size = 20; /* max room for MAC */
 		x_pkt->exten[0] = htonl(key_id);
-		mac_size = make_mac((char *)x_pkt, pkt_len, mac_size, pkt_key, (char *)&x_pkt->exten[1]);
+		mac_size = make_mac((char *)x_pkt, pkt_len, mac_size,
+				    pkt_key, (char *)&x_pkt->exten[1]);
 		if (mac_size)
 			pkt_len += mac_size + 4;
 	}
 	return pkt_len;
 }
+
 
 int
 handle_pkt (
@@ -203,23 +388,23 @@ handle_pkt (
 	char *p_SNTP_PRETEND_TIME;
 	time_t pretend_time;
 
-	if(rpktl > 0)
+	if (rpktl > 0)
 		sw_case = 1;
 	else
 		sw_case = rpktl;
 
 	switch(sw_case) {
-	case SERVER_UNUSEABLE:
+	    case SERVER_UNUSEABLE:
 		return -1;
 		break;
 
-	case PACKET_UNUSEABLE:
+	    case PACKET_UNUSEABLE:
 		break;
  
-	case SERVER_AUTH_FAIL:
+	    case SERVER_AUTH_FAIL:
 		break;
 
-	case KOD_DEMOBILIZE:
+	    case KOD_DEMOBILIZE:
 		/* Received a DENY or RESTR KOD packet */
 		hostname = addrinfo_to_str(host);
 		ref = (char *)&rpkt->refid;
@@ -234,15 +419,16 @@ handle_pkt (
 			ref[0], ref[1], ref[2], ref[3], hostname);
 		break;
 
-	case KOD_RATE:
+	    case KOD_RATE:
 		/* Hmm... probably we should sleep a bit here */
 		break;
 
-	case 1:
+	    case 1:
 		if (ENABLED_OPT(NORMALVERBOSE)) {
 			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
 				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
-			printf("sntp handle_pkt: Received %i bytes from %s\n", rpktl, addr_buf);
+			printf("sntp handle_pkt: Received %i bytes from %s\n",
+			       rpktl, addr_buf);
 		}
 
 		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
@@ -288,6 +474,7 @@ handle_pkt (
 
 	return 1;
 }
+
 
 void
 offset_calculation (
@@ -355,7 +542,12 @@ offset_calculation (
 			   t21, t34, delta, *offset);
 }
 
-/* The heart of (S)NTP, exchange NTP packets and compute values to correct the local clock */
+
+/*
+** The heart of (S)NTP:
+**
+** Exchange NTP packets and compute values to correct the local clock.
+*/
 int
 on_wire (
 	struct addrinfo *host,
@@ -371,7 +563,6 @@ on_wire (
 	struct pkt x_pkt;
 	int error, rpktl, handle_pkt_res;
 
-
 	if (ENABLED_OPT(AUTHENTICATION)) {
 		key_id = (int) OPT_ARG(AUTHENTICATION);
 		get_key(key_id, &pkt_key);
@@ -383,19 +574,23 @@ on_wire (
 		tv_xmt.tv_sec += JAN_1970;
 
 #ifdef DEBUG
-		printf("sntp on_wire: Current time sec: %i msec: %i\n", (unsigned int) tv_xmt.tv_sec, 
-				(unsigned int) tv_xmt.tv_usec);
+		printf("sntp on_wire: Current time sec: %i msec: %i\n",
+		       (unsigned int) tv_xmt.tv_sec, 
+		       (unsigned int) tv_xmt.tv_usec);
 #endif
 
 		if (bcast) {
 			create_socket(&sock, (sockaddr_u *)bcast->ai_addr);
-			rpktl = recv_bcst_pkt(sock, &r_pkt, sizeof rbuf, (sockaddr_u *)bcast->ai_addr);
+			rpktl = recv_bcst_pkt(sock, &r_pkt, sizeof rbuf,
+					      (sockaddr_u *)bcast->ai_addr);
 			closesocket(sock);
 		} else {
-			int pkt_len = generate_pkt(&x_pkt, &tv_xmt, key_id, pkt_key);
+			int pkt_len = generate_pkt(&x_pkt, &tv_xmt, key_id,
+						   pkt_key);
 
 			create_socket(&sock, (sockaddr_u *)host->ai_addr);
-			sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt, pkt_len);
+			sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt,
+				pkt_len);
 			rpktl = recvpkt(sock, &r_pkt, sizeof rbuf, &x_pkt);
 			closesocket(sock);
 		}
@@ -405,11 +600,13 @@ on_wire (
 			return handle_pkt_res;
 	}
 
-	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
+	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf,
+		    sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 	msyslog(LOG_DEBUG, "Received no useable packet from %s!", addr_buf);
 
 	return -1;
 }
+
 
 /* Compute the 8 bits for li_vn_mode */
 void
@@ -435,9 +632,11 @@ set_li_vn_mode (
 	spkt->li_vn_mode |= mode;
 }
 
-/* set_time corrects the local clock by offset with either settimeofday() or by default 
- * with adjtime()/adjusttimeofday().
- */
+
+/*
+** set_time corrects the local clock by offset with either settimeofday() or
+** by default with adjtime()/adjusttimeofday().
+*/
 int
 set_time(
 	double offset
