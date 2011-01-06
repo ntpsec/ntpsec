@@ -4,19 +4,27 @@
 char adr_buf[INET6_ADDRSTRLEN];
 
 
-/* resolve_hosts consumes an array of hostnames/addresses and its length, stores a pointer
- * to the array with the resolved hosts in res and returns the size of the array res.
- * pref_family enforces IPv4 or IPv6 depending on commandline options and system 
- * capability. If pref_family is NULL or PF_UNSPEC any compatible family will be accepted.
- * Check here: Probably getaddrinfo() can do without ISC's IPv6 availability check? 
- */
+/*
+** resolve_hosts consumes an array of hostnames/addresses and its length,
+** stores a pointer to the array with the resolved hosts in res and returns
+** the size of the array res.
+**
+** pref_family enforces IPv4 or IPv6 depending on commandline options and
+** system capability.
+**
+** If pref_family is NULL or PF_UNSPEC any compatible family will be
+** accepted.
+**
+** Check here: Probably getaddrinfo() can do without ISC's IPv6 availability
+** check?
+*/
 int 
 resolve_hosts (
-		const char **hosts, 
-		int hostc, 
-		struct addrinfo ***res,
-		int pref_family
-		) 
+	const char **hosts, 
+	int hostc, 
+	struct addrinfo ***res,
+	int pref_family
+	) 
 {
 	register unsigned int a;
 	unsigned int resc;
@@ -74,18 +82,20 @@ resolve_hosts (
 	return resc;
 }
 
+
 /* Creates a socket and returns. */
 void 
 create_socket (
-		SOCKET *rsock,
-		sockaddr_u *dest
-		)
+	SOCKET *rsock,
+	sockaddr_u *dest
+	)
 {
 	*rsock = socket(AF(dest), SOCK_DGRAM, 0);
 
 	if (-1 == *rsock && ENABLED_OPT(NORMALVERBOSE))
 		printf("Failed to create UDP socket with family %d\n", AF(dest));
 }
+
 
 /* Send a packet */
 void
@@ -104,7 +114,8 @@ sendpkt (
 #endif
 
 	if (ENABLED_OPT(NORMALVERBOSE)) {
-		getnameinfo(&dest->sa, SOCKLEN(dest), adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
+		getnameinfo(&dest->sa, SOCKLEN(dest), adr_buf,
+			    sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 		printf("sntp sendpkt: Sending packet to %s... ", adr_buf);
 	}
 
@@ -120,6 +131,7 @@ sendpkt (
 		printf("Packet sent.\n");
 	}
 }
+
 
 /* Receive raw data */
 int
@@ -152,8 +164,15 @@ recvdata(
 	return recvc;
 }
 
-/* Receive data from broadcast. Couldn't finish that. Need to do some digging
- * here, especially for protocol independence and IPv6 multicast */
+
+/*
+** Receive data from broadcast.
+**
+** Couldn't finish that.
+**
+** Need to do some digging here, especially for protocol independence and
+** IPv6 multicast.
+*/
 int 
 recv_bcst_data (
 	SOCKET rsock,
@@ -250,18 +269,18 @@ recv_bcst_data (
 	timeout_tv.tv_usec = 0;
 	rdy_socks = select(rsock + 1, &bcst_fd, 0, 0, &timeout_tv);
 	switch (rdy_socks) {
-	case -1: 
+	    case -1: 
 		if (ENABLED_OPT(NORMALVERBOSE)) 
 			perror("sntp recv_bcst_data: select()");
 		return BROADCAST_FAILED;
 		break;
-	case 0:
+	    case 0:
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recv_bcst_data: select() reached timeout (%u sec), aborting.\n", 
 			       (unsigned)timeout_tv.tv_sec);
 		return BROADCAST_FAILED;
 		break;
-	default:
+	    default:
 		ss_len = sizeof(*ras);
 		recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, &ras->sa, &ss_len);
 		break;
@@ -273,14 +292,17 @@ recv_bcst_data (
 	}
 #ifdef MCAST
 	if (IS_IPV4(sas)) 
-		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue, sizeof(btrue));
+		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue,
+			   sizeof(btrue));
 #endif
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
 	if (IS_IPV6(sas))
-		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue, sizeof(btrue));
+		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue,
+			   sizeof(btrue));
 #endif
 	return recv_bytes;
 }
+
 
 int
 process_pkt (
@@ -297,6 +319,7 @@ process_pkt (
 	int is_authentic = 0;
 	unsigned int exten_words, exten_words_used = 0;
 	int mac_size;
+
 	/*
 	 * Parse the extension field if present. We figure out whether
 	 * an extension field is present by measuring the MAC size. If
@@ -319,6 +342,7 @@ unusable:
 	exten_words = ((unsigned)pkt_len - LEN_PKT_NOMAC) >> 2;
 	while (exten_words > 6) {
 		unsigned int exten_len;
+
 		exten_len = ntohl(rpkt->exten[exten_words_used]) & 0xffff;
 		exten_len = (exten_len + 7) >> 2; /* convert to words, add 1 */
 		if (exten_len > exten_words || exten_len < 5)
@@ -328,23 +352,31 @@ unusable:
 	}
 
 	switch (exten_words) {
-	case 1:
+	    case 0:
+		break;
+	    case 1:
 		key_id = ntohl(rpkt->exten[exten_words_used]);
 		printf("Crypto NAK = 0x%08x\n", key_id);
 		break;
-	case 5:
-	case 6:
-		/* Look for the key used by the server in the specified keyfile
-		 * and if existent, fetch it or else leave the pointer untouched */
+	    case 5:
+	    case 6:
+		/*
+		** Look for the key used by the server in the specified
+		** keyfile and if existent, fetch it or else leave the
+		** pointer untouched
+		*/
 		key_id = ntohl(rpkt->exten[exten_words_used]);
 		get_key(key_id, &pkt_key);
 		if (!pkt_key) {
 			printf("unrecognized key ID = 0x%08x\n", key_id);
 			break;
 		}
-		/* Seems like we've got a key with matching keyid */
-		/* Generate a md5sum of the packet with the key from our keyfile
-		 * and compare those md5sums */
+		/*
+		** Seems like we've got a key with matching keyid.
+		**
+		** Generate a md5sum of the packet with the key from our
+		** keyfile and compare those md5sums.
+		*/
 		mac_size = exten_words << 2;
 		if (!auth_md5((char *)rpkt, pkt_len - mac_size, mac_size - 4, pkt_key)) {
 			break;
@@ -358,9 +390,7 @@ unusable:
 		}
 		is_authentic = 1;
 		break;
-	case 0:
-		break;
-	default:
+	    default:
 		goto unusable;
 		break;
 	}
@@ -375,10 +405,13 @@ unusable:
 			}
 			return SERVER_AUTH_FAIL;
 		}
-		/* We don't know if the user wanted authentication so let's 
-		 * use it anyways */
+		/*
+		** We don't know if the user wanted authentication so let's
+		** use it anyways
+		*/
 		if (ENABLED_OPT(NORMALVERBOSE)) {
 			char *hostname = ss_to_str(sas);
+
 			printf("sntp %s: packet received from %s is not authentic. Authentication not enforced.\n",
 				func_name, hostname);
 			free(hostname);
@@ -403,6 +436,7 @@ unusable:
 	/* Stratum is unspecified (0) check what's going on */
 	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
 		char *ref_char;
+
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp %s: Stratum unspecified, going to check for KOD (stratum: %i)\n", 
 				func_name, rpkt->stratum);
@@ -418,7 +452,10 @@ unusable:
 				return KOD_DEMOBILIZE;
 			if (strncmp(ref_char, "RATE", 4) == 0)
 				return KOD_RATE;
-			/* There are other interesting kiss codes which might be interesting for authentication */
+			/*
+			** There are other interesting kiss codes which
+			** might be interesting for authentication.
+			*/
 		}
 	}
 	/* If the server is not synced it's not really useable for us */
@@ -447,6 +484,7 @@ unusable:
 	return pkt_len;
 }
 
+
 int 
 recv_bcst_pkt (
 	SOCKET rsock,
@@ -457,6 +495,7 @@ recv_bcst_pkt (
 {
 	sockaddr_u sender;
 	int pkt_len = recv_bcst_data(rsock, (char *)rpkt, rsize, sas, &sender);
+
 	if (pkt_len < 0) {
 		return BROADCAST_FAILED;
 	}
@@ -464,9 +503,13 @@ recv_bcst_pkt (
 	return pkt_len;
 }
 
-/* Fetch data, check if it's data for us and whether it's useable or not. If not, return
- * a failure code so we can delete this server from our list and continue with another one.
- */
+
+/*
+** Fetch data, check if it's data for us and whether it's useable or not.
+**
+** If not, return a failure code so we can delete this server from our list
+** and continue with another one.
+*/
 int
 recvpkt (
 	SOCKET rsock,
@@ -490,18 +533,18 @@ recvpkt (
 	timeout_tv.tv_usec = 0;
 	rdy_socks = select(rsock + 1, &recv_fd, 0, 0, &timeout_tv);
 	switch (rdy_socks) {
-	case -1: 
+	    case -1: 
 		if (ENABLED_OPT(NORMALVERBOSE)) 
 			perror("sntp recvpkt: select()");
 		return PACKET_UNUSEABLE;
 		break;
-	case 0:
+	    case 0:
 		if (ENABLED_OPT(NORMALVERBOSE))
 			printf("sntp recvpkt: select() reached timeout (%u sec), aborting.\n", 
 			       (unsigned)timeout_tv.tv_sec);
 		return PACKET_UNUSEABLE;
 		break;
-	default:
+	    default:
 		break;
 	}
 	pkt_len = recvdata(rsock, &sender, (char *)rpkt, rsize);
@@ -510,6 +553,7 @@ recvpkt (
 
 	return pkt_len;
 }
+
 
 /*
  * is_reachable - check to see if we have a route to given destination

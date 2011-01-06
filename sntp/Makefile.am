@@ -6,12 +6,16 @@ NULL =
 AUTOMAKE_OPTIONS = foreign 1.10
 ACLOCAL_AMFLAGS = -I ../m4 -I libopts/m4
 
-AM_CPPFLAGS = $(LIBOPTS_CFLAGS) -I$(top_srcdir)/../include \
-	-I$(top_srcdir)/../lib/isc/include \
-	-I$(top_srcdir)/../lib/isc/nothreads/include \
-	-I$(top_srcdir)/../lib/isc/unix/include
+AM_CPPFLAGS =					\
+	$(LIBEVENT_CPPFLAGS)			\
+	$(LIBOPTS_CFLAGS)			\
+	-I$(top_srcdir)/../include		\
+	-I$(top_srcdir)/../lib/isc/include	\
+	-I$(top_srcdir)/../lib/isc/nothreads/include	\
+	-I$(top_srcdir)/../lib/isc/unix/include	\
+	$(NULL)
 
-LDADD =	$(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
+LDADD =	$(LIBOPTS_LDADD) $(LIBEVENT_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
@@ -27,6 +31,9 @@ CLEANFILES = check-COPYRIGHT-submake
 SUBDIRS =
 if NEED_LIBOPTS
 SUBDIRS += libopts
+endif
+if NEED_LIBEVENT
+SUBDIRS += build-libevent
 endif
 
 if GTEST_AVAILABLE
@@ -171,7 +178,7 @@ $(srcdir)/COPYRIGHT: check-COPYRIGHT
 
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
-	
+
 $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) sntp-opts.def
 
@@ -180,7 +187,7 @@ $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../inc
 
 $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
-	
+
 $(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 	$(top_srcdir)/../scripts/check--help $@
