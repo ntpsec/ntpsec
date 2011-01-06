@@ -31,22 +31,19 @@ case "$ans" in
      '')
 	;;
      *)
-	pkgans=`$PKG_CONFIG --libs-only-L openssl | sed -e 's/^-L//'`
-	case "$pkgans" in
-	 '')
-	    # Look in:
-	    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib"
-	    ans="$ans /usr/local/lib /usr/local/ssl/lib /lib"
-	    ;;
-	 *)
-	    ans="$pkgans"
-	    ;;
-	esac
+	pkgans="`$PKG_CONFIG --libs-only-L openssl | sed -e 's/^-L//'`" 2>/dev/null
+	test -f "${pkgans}/pkgconfig/openssl.pc" && ans="$pkgans"
 	;;
     esac
     ;;
  *) # Look where they said
     ;;
+esac
+case "$ans" in
+ yes)
+    # Look in:
+    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib"
+    ans="$ans /usr/local/lib /usr/local/ssl/lib /lib"
 esac
 case "$ans" in
  no)
@@ -100,22 +97,19 @@ case "$ans" in
      '')
 	;;
      *)
-	pkgans=`$PKG_CONFIG --cflags-only-I openssl | sed -e 's/^-I//'`
-	case "$pkgans" in
-	 '')
-	    # Look in:
-	    ans="/usr/include /usr/sfw/include /usr/local/include"
-	    ans="$ans /usr/local/ssl/include"
-	    ;;
-	 *)
-	    ans="$pkgans"
-	    ;;
-	esac
+	pkgans="`$PKG_CONFIG --cflags-only-I openssl | sed -e 's/^-I//'`" 2>/dev/null
+	test -f "${pkgans}/pkgconfig/openssl.pc" && ans="$pkgans"
 	;;
     esac
     ;;
  *) # Look where they said
     ;;
+esac
+case "$ans" in
+ yes)
+    # Look in:
+    ans="/usr/include /usr/sfw/include /usr/local/include"
+    ans="$ans /usr/local/ssl/include"
 esac
 case "$ans" in
  no)

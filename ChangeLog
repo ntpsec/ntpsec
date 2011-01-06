@@ -1,3 +1,5 @@
+* [Bug 1773] openssl not detected during ./configure.
+* [Bug 1774] Segfaults if cryptostats enabled and built without OpenSSL.
 (4.2.7p111) 2011/01/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1772] refclock_open() return value check wrong for ACTS.
 * Default --with-openssl-libdir and --with-openssl-incdir to the values

@@ -80,12 +80,6 @@ double	wander_threshold = 1e-7;	/* initial frequency threshold */
 # define MAXPATHLEN 256
 #endif
 
-#ifdef DEBUG_TIMING
-static FILEGEN timingstats;
-#endif
-#ifdef AUTOKEY
-static FILEGEN cryptostats;
-#endif	/* AUTOKEY */
 
 static	char statsdir[MAXPATHLEN] = NTP_VAR;
 static FILEGEN peerstats;
@@ -94,6 +88,8 @@ static FILEGEN clockstats;
 static FILEGEN rawstats;
 static FILEGEN sysstats;
 static FILEGEN protostats;
+static FILEGEN cryptostats;
+static FILEGEN timingstats;
 
 /*
  * This controls whether stats are written to the fileset. Provided
@@ -173,12 +169,8 @@ init_util(void)
 	filegen_register(statsdir, "rawstats",	  &rawstats);
 	filegen_register(statsdir, "sysstats",	  &sysstats);
 	filegen_register(statsdir, "protostats",  &protostats);
-#ifdef AUTOKEY
 	filegen_register(statsdir, "cryptostats", &cryptostats);
-#endif	/* AUTOKEY */
-#ifdef DEBUG_TIMING
 	filegen_register(statsdir, "timingstats", &timingstats);
-#endif	/* DEBUG_TIMING */
 	/*
 	 * register with libntp ntp_set_tod() to call us back
 	 * when time is stepped.

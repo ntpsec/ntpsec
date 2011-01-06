@@ -2015,6 +2015,12 @@ config_monitor(
 	for (; pfilegen_token != NULL; pfilegen_token = pfilegen_token->link) {
 		filegen_string = keyword(pfilegen_token->i);
 		filegen = filegen_get(filegen_string);
+		if (NULL == filegen) {
+			msyslog(LOG_ERR,
+				"stats %s unrecognized",
+				filegen_string);
+			continue;
+		}
 		DPRINTF(4, ("enabling filegen for %s statistics '%s%s'\n",
 			    filegen_string, filegen->prefix, 
 			    filegen->basename));
@@ -2026,6 +2032,12 @@ config_monitor(
 	for (; my_node != NULL; my_node = my_node->link) {
 		filegen_file = keyword(my_node->filegen_token);
 		filegen = filegen_get(filegen_file);
+		if (NULL == filegen) {
+			msyslog(LOG_ERR,
+				"filegen category '%s' unrecognized",
+				filegen_file);
+			continue;
+		}
 
 		/* Initialize the filegen variables to their pre-configuration states */
 		filegen_flag = filegen->flag;
