@@ -45,12 +45,11 @@ noinst_HEADERS =	lfptest.h	\
 			libntptest.h	\
 			sockaddrtest.h
 
-INCLUDES = 						\
-	-I$(top_srcdir)/include				\
-	-I$(top_srcdir)/lib/isc/include			\
-	-I$(top_srcdir)/lib/isc/nothreads/include	\
-	-I$(top_srcdir)/lib/isc/unix/include		\
-	-I$(top_srcdir)/sntp
+INCLUDES  = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES += -I$(top_srcdir)/sntp
 
 TESTS = 
 
