@@ -26,9 +26,9 @@ struct event_base *base = NULL;
 struct dns_cb_ctx {
 	char *name;
 	int flags;
-#define CTX_BCST        0x0001
-#define CTX_UCST        0x0002
-#define CTX_unused      0xfffd
+#define CTX_BCST	0x0001
+#define CTX_UCST	0x0002
+#define CTX_unused	0xfffd
 };
 
 struct ntp_cb_ctx {
@@ -40,7 +40,7 @@ struct key *keys = NULL;
 
 void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
 void ntp_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
-void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode); 
+void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode);
 int sntp_main (int argc, char **argv);
 int on_wire (struct addrinfo *host, struct addrinfo *bcastaddr);
 int set_time (double offset);
@@ -61,11 +61,11 @@ do {							\
 /*
  * The actual main function.
  */
-int  
+int
 sntp_main (
-	int argc, 
+	int argc,
 	char **argv
-	) 
+	)
 {
 	int i;
 	int optct;
@@ -77,7 +77,7 @@ sntp_main (
 
 	optct = optionProcess(&sntpOptions, argc, argv);
 	argc -= optct;
-	argv += optct; 
+	argv += optct;
 
 	/* Initialize logging system */
 	init_logging();
@@ -158,11 +158,11 @@ sntp_main (
 		hints.ai_flags = EVUTIL_AI_CANONNAME;
 		/*
 		** Unless we specify a socktype, we'll get at least two
-                ** entries for each address: one for TCP and one for
-                ** UDP. That's not what we want.
-                */
-                hints.ai_socktype = SOCK_STREAM;
-                hints.ai_protocol = IPPROTO_TCP;
+		** entries for each address: one for TCP and one for
+		** UDP. That's not what we want.
+		*/
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
 
 		dns_ctx = emalloc(sizeof *dns_ctx);
 		dns_ctx->name = OPT_ARG(BROADCAST);
@@ -176,7 +176,7 @@ sntp_main (
 	}
 
 	for (i = 0; i < argc; ++i) {
-		struct evutil_addrinfo hints; /* is 1 copy really OK? */
+		struct evutil_addrinfo hints; /* local copy is OK */
 		struct dns_cb_ctx *dns_ctx;
 
 		memset(&hints, 0, sizeof(hints));
@@ -184,11 +184,11 @@ sntp_main (
 		hints.ai_flags = EVUTIL_AI_CANONNAME;
 		/*
 		** Unless we specify a socktype, we'll get at least two
-                ** entries for each address: one for TCP and one for
-                ** UDP. That's not what we want.
-                */
-                hints.ai_socktype = SOCK_STREAM;
-                hints.ai_protocol = IPPROTO_TCP;
+		** entries for each address: one for TCP and one for
+		** UDP. That's not what we want.
+		*/
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
 
 		dns_ctx = emalloc(sizeof *dns_ctx);
 		dns_ctx->name = argv[i];
@@ -235,7 +235,7 @@ handle_later() {
 						sync_data_suc = TRUE;
 				}
 			} else {
-				printf("%d prior KoD%s for %s, skipping.\n", 
+				printf("%d prior KoD%s for %s, skipping.\n",
 					kodc, (kodc > 1) ? "s" : "", hostname);
 				free(reason);
 			}
@@ -264,48 +264,68 @@ handle_later() {
 */
 void
 dns_cb(
-        int errcode,
-        struct evutil_addrinfo *addr,
-        void *ptr
-        )
+	int errcode,
+	struct evutil_addrinfo *addr,
+	void *ptr
+	)
 {
-        struct dns_cb_ctx *ctx = ptr;
+	struct dns_cb_ctx *ctx = ptr;
 
-        if (errcode) {
-                printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
-        } else {
-                struct evutil_addrinfo *ai;
+	if (errcode) {
+		printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
+	} else {
+		struct evutil_addrinfo *ai;
 
-                printf("%s [%s]\n", ctx->name,
-                       (addr->ai_canonname)
-                       ? addr->ai_canonname
-                       : "");
-                for (ai = addr; ai; ai = ai->ai_next) {
-                        char buf[128];
-                        const char *s = NULL;
+		printf("%s [%s]\n", ctx->name,
+		       (addr->ai_canonname)
+		       ? addr->ai_canonname
+		       : "");
 
-                        /*
-			** If we get something good, bump n_pending_ntp and
-                        ** send a packet.
-                        */
-                        if (ai->ai_family == AF_INET) {
-                                struct sockaddr_in *sin = (struct sockaddr_in *)ai->ai_addr;
-                                s = evutil_inet_ntop(AF_INET, &sin->sin_addr, buf, 128);
-                        } else if (ai->ai_family == AF_INET6) {
-                                struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)ai->ai_addr;
-                                s = evutil_inet_ntop(AF_INET6, &sin6->sin6_addr, buf, 128);
-                        }
-                        if (s)
-                                printf("    -> %s\n", s);
-                }
-                evutil_freeaddrinfo(addr);
-                free(ptr);
-        }
+		for (ai = addr; ai; ai = ai->ai_next) {
+			char buf[128];
+			const char *s = NULL; /* for display purposes */
+
+			/* Open a socket */
+
+			/* Make it non-blocking */
+
+			/*
+			** We're waiting for a response for either unicast
+			** or broadcast, so...
+			*/
+			++n_pending_ntp;
+
+			/* If this is for a unicast host, send a request */
+			if (ctx->flags & CTX_UCST) {
+				/*
+				** If the send fails:
+				** - decrement n_pending_ntp
+				** - restart the loop
+				*/
+			}
+
+			/* queue that we're waiting for a response */
+
+#if 0
+			if (ai->ai_family == AF_INET) {
+				struct sockaddr_in *sin = (struct sockaddr_in *)ai->ai_addr;
+				s = evutil_inet_ntop(AF_INET, &sin->sin_addr, buf, 128);
+			} else if (ai->ai_family == AF_INET6) {
+				struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)ai->ai_addr;
+				s = evutil_inet_ntop(AF_INET6, &sin6->sin6_addr, buf, 128);
+			}
+			if (s)
+				printf("    -> %s\n", s);
+#endif
+		}
+		evutil_freeaddrinfo(addr);
+		free(ptr);
+	}
 	printf("n_pending_dns = %d, n_pending_ntp = %d\n",
 	       n_pending_dns, n_pending_ntp);
 	/* n_pending_dns really should be >0 here... */
-        if (--n_pending_dns == 0 && n_pending_ntp == 0)
-                event_base_loopexit(base, NULL);
+	if (--n_pending_dns == 0 && n_pending_ntp == 0)
+		event_base_loopexit(base, NULL);
 }
 
 
@@ -319,17 +339,17 @@ dns_cb(
 ** - If packet is good, set the time and "exit"
 */
 void
-ntp_cb( 
-        int errcode, 
-        struct evutil_addrinfo *addr, 
-        void *ptr 
-        ) 
+ntp_cb(
+	int errcode,
+	struct evutil_addrinfo *addr,
+	void *ptr
+	)
 {
-        struct dns_cb_ctx *ctx = ptr;
+	struct dns_cb_ctx *ctx = ptr;
 
-        if (errcode) {
-                printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
-        } else {
+	if (errcode) {
+		printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
+	} else {
 	}
 }
 
@@ -400,7 +420,7 @@ handle_pkt (
 
 	    case PACKET_UNUSEABLE:
 		break;
- 
+
 	    case SERVER_AUTH_FAIL:
 		break;
 
@@ -425,7 +445,7 @@ handle_pkt (
 
 	    case 1:
 		if (ENABLED_OPT(NORMALVERBOSE)) {
-			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf, 
+			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf,
 				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 			printf("sntp handle_pkt: Received %i bytes from %s\n",
 			       rpktl, addr_buf);
@@ -467,7 +487,7 @@ handle_pkt (
 			return 0;
 
 		if (ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
-			return set_time(offset); 
+			return set_time(offset);
 
 		return 0;
 	}
@@ -538,7 +558,7 @@ offset_calculation (
 	delta = t21 - t34;
 
 	if (ENABLED_OPT(NORMALVERBOSE))
-		printf("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", 
+		printf("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n",
 			   t21, t34, delta, *offset);
 }
 
@@ -569,13 +589,13 @@ on_wire (
 	}
 	for (try=0; try<5; try++) {
 		memset(&r_pkt, 0, sizeof rbuf);
-		
+
 		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
 		tv_xmt.tv_sec += JAN_1970;
 
 #ifdef DEBUG
 		printf("sntp on_wire: Current time sec: %i msec: %i\n",
-		       (unsigned int) tv_xmt.tv_sec, 
+		       (unsigned int) tv_xmt.tv_sec,
 		       (unsigned int) tv_xmt.tv_usec);
 #endif
 
@@ -615,7 +635,7 @@ set_li_vn_mode (
 	char leap,
 	char version,
 	char mode
-	) 
+	)
 {
 	if (leap > 3) {
 		msyslog(LOG_DEBUG, "set_li_vn_mode: leap > 3 using max. 3");
