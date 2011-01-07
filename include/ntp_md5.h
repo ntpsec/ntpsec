@@ -18,7 +18,7 @@
 #  include "isc/md5.h"
    typedef isc_md5_t		MD5_CTX;
 #  define MD5Init(c)		isc_md5_init(c)
-#  define MD5Update(c, p, s)	isc_md5_update(c, p, s)
+#  define MD5Update(c, p, s)	isc_md5_update(c, (const void *)(p), s)
 #  define MD5Final(d, c)	isc_md5_final((c), (d))	/* swapped */
 # endif
 

@@ -34,10 +34,10 @@ sntp_configure_cache_version=20100916
 NTP_CACHEVERSION([sntp], [$sntp_configure_cache_version])
 
 AM_INIT_AUTOMAKE
-dnl AM_SILENT_RULES req. automake 1.11
+dnl AM_SILENT_RULES req. automake 1.11.  [yes] defaults V=0
 m4_ifdef(
     [AM_SILENT_RULES],
-    [AM_SILENT_RULES]
+    [AM_SILENT_RULES([yes])]
 )
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST

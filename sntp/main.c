@@ -109,7 +109,8 @@ sntp_main (
 	/* Considering employing a variable that prevents functions of doing anything until 
 	 * everything is initialized properly 
 	 */
-	resc = resolve_hosts((const char **)argv, argc, &resh, ai_fam_pref);
+	resc = resolve_hosts((const char * const *)argv, argc, &resh,
+			     ai_fam_pref);
 	if (resc < 1) {
 		printf("Unable to resolve hostname(s)\n");
 		return -1;
@@ -120,7 +121,8 @@ sntp_main (
 
 		myargv[0] = OPT_ARG(BROADCAST);
 		myargv[1] = NULL;
-		bcast = resolve_hosts(myargv, 1, &bcastaddr, ai_fam_pref);
+		bcast = resolve_hosts(myargv, 1, &bcastaddr,
+				      ai_fam_pref);
 	}
 
 	/* Select a certain ntp server according to simple criteria? For now
@@ -202,6 +204,11 @@ handle_pkt (
 	char addr_buf[INET6_ADDRSTRLEN];
 	char *p_SNTP_PRETEND_TIME;
 	time_t pretend_time;
+#if SIZEOF_TIME_T == 8
+	longlong ll;
+#else
+	long l;
+#endif
 
 	if(rpktl > 0)
 		sw_case = 1;
@@ -249,14 +256,18 @@ handle_pkt (
 
 		p_SNTP_PRETEND_TIME = getenv("SNTP_PRETEND_TIME");
 		if (p_SNTP_PRETEND_TIME) {
+			pretend_time = 0;
 #if SIZEOF_TIME_T == 4
-			sscanf(p_SNTP_PRETEND_TIME, "%ld", &pretend_time);
+			if (1 == sscanf(p_SNTP_PRETEND_TIME, "%ld", &l))
+				pretend_time = (time_t)l;
 #elif SIZEOF_TIME_T == 8
-			sscanf(p_SNTP_PRETEND_TIME, "%lld", &pretend_time);
+			if (1 == sscanf(p_SNTP_PRETEND_TIME, "%lld", &ll))
+				pretend_time = (time_t)ll;
 #else
 # include "GRONK: unexpected value for SIZEOF_TIME_T"
 #endif
-			tv_dst.tv_sec = pretend_time;
+			if (0 != pretend_time)
+				tv_dst.tv_sec = pretend_time;
 		}
 
 		offset_calculation(rpkt, rpktl, &tv_dst, &offset,
@@ -366,20 +377,22 @@ on_wire (
 	register int try;
 	SOCKET sock;
 	struct key *pkt_key = NULL;
+	long l;
 	int key_id = 0;
 	struct timeval tv_xmt;
 	struct pkt x_pkt;
 	int error, rpktl, handle_pkt_res;
 
 
-	if (ENABLED_OPT(AUTHENTICATION)) {
-		key_id = (int) OPT_ARG(AUTHENTICATION);
+	if (ENABLED_OPT(AUTHENTICATION) &&
+	    atoint(OPT_ARG(AUTHENTICATION), &l)) {
+		key_id = l;
 		get_key(key_id, &pkt_key);
 	}
-	for (try=0; try<5; try++) {
+	for (try = 0; try < 5; try++) {
 		memset(&r_pkt, 0, sizeof rbuf);
 		
-		error = GETTIMEOFDAY(&tv_xmt, (struct timezone *)NULL);
+		error = GETTIMEOFDAY(&tv_xmt, NULL);
 		tv_xmt.tv_sec += JAN_1970;
 
 #ifdef DEBUG

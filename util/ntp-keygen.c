@@ -243,10 +243,10 @@ main(
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
+	char	groupbuf[MAXHOSTNAME + 1];
 #define iffsw   HAVE_OPT(ID_KEY)
 #endif	/* AUTOKEY */
 	char	hostbuf[MAXHOSTNAME + 1];
-	char	groupbuf[MAXHOSTNAME + 1];
 
 	progname = argv[0];
 

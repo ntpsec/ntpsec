@@ -1692,7 +1692,7 @@ doprintpeers(
 	else
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
 	if (numhosts > 1)
-		fprintf(fp, "%-*s ", maxhostlen, currenthost);
+		fprintf(fp, "%-*s ", (int)maxhostlen, currenthost);
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
 		if (!have_srchost)
 			strncpy(clock_name, nntohost(&srcadr),
@@ -1789,7 +1789,8 @@ dopeers(
 				maxhostlen = strlen(fullname);
 	}
 	if (numhosts > 1)
-		fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
+		fprintf(fp, "%-*.*s ", (int)maxhostlen, (int)maxhostlen,
+			"server");
 	fprintf(fp,
 		"     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)
@@ -1877,27 +1878,27 @@ doopeers(
 
 	for (i = 0; i < numhosts; ++i) {
 		if (getnetnum(chosts[i], &netnum, fullname, af))
-			if ((int)strlen(fullname) > maxhostlen)
+			if (strlen(fullname) > maxhostlen)
 				maxhostlen = strlen(fullname);
 	}
 	if (numhosts > 1)
-		(void) fprintf(fp, "%-*.*s ", maxhostlen, maxhostlen, "server");
-	(void) fprintf(fp,
-			   "     remote           local      st t when poll reach   delay   offset    disp\n");
+		fprintf(fp, "%-*.*s ", (int)maxhostlen, (int)maxhostlen,
+			"server");
+	fprintf(fp,
+	    "     remote           local      st t when poll reach   delay   offset    disp\n");
 	if (numhosts > 1)
 		for (i = 0; i <= maxhostlen; ++i)
-		(void) fprintf(fp, "=");
-	(void) fprintf(fp,
-			   "==============================================================================\n");
+			fprintf(fp, "=");
+	fprintf(fp,
+	    "==============================================================================\n");
 
 	for (i = 0; i < numassoc; i++) {
 		if (!showall &&
-			!(CTL_PEER_STATVAL(assoc_cache[i].status)
-			  & (CTL_PST_CONFIG|CTL_PST_REACH)))
+		    !(CTL_PEER_STATVAL(assoc_cache[i].status) &
+		      (CTL_PST_CONFIG | CTL_PST_REACH)))
 			continue;
-		if (!dogetpeers(opeervarlist, (int)assoc_cache[i].assid, fp, af)) {
+		if (!dogetpeers(opeervarlist, assoc_cache[i].assid, fp, af))
 			return;
-		}
 	}
 	return;
 }
@@ -2865,8 +2866,8 @@ mrulist(
 
 	if (ppentry - sorted != (int)mru_count) {
 		fprintf(stderr,
-			"mru_count %u should match MRU list depth %d.\n",
-			mru_count, ppentry - sorted);
+			"mru_count %u should match MRU list depth %ld.\n",
+			mru_count, (long)(ppentry - sorted));
 		free(sorted);
 		goto cleanup_return;
 	}

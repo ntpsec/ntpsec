@@ -12,10 +12,10 @@ char adr_buf[INET6_ADDRSTRLEN];
  */
 int 
 resolve_hosts (
-		const char **hosts, 
-		int hostc, 
-		struct addrinfo ***res,
-		int pref_family
+		const char * const *	hosts, 
+		int			hostc, 
+		struct addrinfo ***	res,
+		int			pref_family
 		) 
 {
 	register unsigned int a;
@@ -168,6 +168,7 @@ recv_bcst_data (
 	int recv_bytes = 0;
 	int rdy_socks;
 	GETSOCKNAME_SOCKLEN_TYPE ss_len;
+	long l;
 	struct timeval timeout_tv;
 	fd_set bcst_fd;
 #ifdef MCAST
@@ -243,8 +244,8 @@ recv_bcst_data (
 #endif	/* ISC_PLATFORM_HAVEIPV6 */
 	FD_ZERO(&bcst_fd);
 	FD_SET(rsock, &bcst_fd);
-	if (ENABLED_OPT(TIMEOUT)) 
-		timeout_tv.tv_sec = (int) OPT_ARG(TIMEOUT);
+	if (ENABLED_OPT(TIMEOUT) && atoint(OPT_ARG(TIMEOUT), &l))
+		timeout_tv.tv_sec = l;
 	else 
 		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
 	timeout_tv.tv_usec = 0;
@@ -478,13 +479,14 @@ recvpkt (
 	int rdy_socks;
 	int pkt_len;
 	sockaddr_u sender;
+	long l;
 	struct timeval timeout_tv;
 	fd_set recv_fd;
 
 	FD_ZERO(&recv_fd);
 	FD_SET(rsock, &recv_fd);
-	if (ENABLED_OPT(TIMEOUT)) 
-		timeout_tv.tv_sec = (int) OPT_ARG(TIMEOUT);
+	if (ENABLED_OPT(TIMEOUT) && atoint(OPT_ARG(TIMEOUT), &l))
+		timeout_tv.tv_sec = l;
 	else 
 		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
 	timeout_tv.tv_usec = 0;

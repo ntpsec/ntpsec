@@ -782,7 +782,7 @@ getresponse(
 				for (f = 0; f < numfrags; f++)
 					fprintf(stderr,
 						"%2u: %5d %5d\t%3d octets\n",
-						f, offsets[f],
+						(u_int)f, offsets[f],
 						offsets[f] +
 						counts[f],
 						counts[f]);
@@ -906,20 +906,16 @@ getresponse(
 		 * boundary and no smaller than claimed by rpkt.count
 		 */
 		if (n & 0x3) {
-			if (debug)
-				printf("Response packet not padded, "
-					"size = %d\n", n);
+			DPRINTF(1, ("Response packet not padded, size = %d\n",
+				n));
 			continue;
 		}
 
 		shouldbesize = (CTL_HEADER_LEN + count + 3) & ~3;
 
 		if (n < shouldbesize) {
-			printf("Response packet claims %u octets "
-				"payload, above %d received\n",
-				count,
-				n - CTL_HEADER_LEN
-				);
+			printf("Response packet claims %u octets payload, above %ld received\n",
+			       count, (long)(n - CTL_HEADER_LEN));
 			return ERR_INCOMPLETE;
 		}
 
@@ -967,9 +963,9 @@ getresponse(
 			printf("Got packet, size = %d\n", n);
 		if ((int)count > (n - CTL_HEADER_LEN)) {
 			if (debug)
-				printf("Received count of %d octets, "
-					"data in packet is %d\n",
-					count, n-CTL_HEADER_LEN);
+				printf("Received count of %d octets, data in packet is %ld\n",
+					count,
+					(long)(n - CTL_HEADER_LEN));
 			continue;
 		}
 		if (count == 0 && CTL_ISMORE(rpkt.r_m_e_op)) {
@@ -1072,8 +1068,8 @@ getresponse(
 				*rsize = offsets[f-1] + counts[f-1];
 				if (debug)
 					fprintf(stderr,
-						"%u packets reassembled into response\n",
-						numfrags);
+						"%lu packets reassembled into response\n",
+						(u_long)numfrags);
 				return 0;
 			}
 		}
@@ -2086,8 +2082,8 @@ help(
 
 		for (row = 0; row < rows; row++) {
 			for (word = row; word < words; word += rows)
-				fprintf(fp, "%-*.*s", col,  col-1,
-					list[word]);
+				fprintf(fp, "%-*.*s", (int)col,
+					(int)col - 1, list[word]);
 			fprintf(fp, "\n");
 		}
 	} else {

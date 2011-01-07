@@ -1,28 +1,17 @@
 NULL=
 AUTOMAKE_OPTIONS =
-BUILT_SOURCES = stale_itc_gone
+BUILT_SOURCES =
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris
 noinst_PROGRAMS = @MAKE_PARSEKMODULE@
-CLEANFILES = stale_itc_gone
+CLEANFILES =
 
 K_CFLAGS = -DPARSESTREAM -DNTP_NEED_BOPS
 
 # info_trimble.c was mistakenly created in the build directory
 # previously.  It is located in $(srcdir) and any updates must
 # end up there.
-# As a transitional measure, a new target stale_itc_gone has been added
-# which removes the stale $(builddir)/info_trimble.c which will be in
-# the build directory of those tracking the source changes over time
-# while re-using the existing build directory which is not the source
-# directory.  To ensure that rule fires in each of the commonly several
-# build trees sharing a single source tree, stale_itc_gone has been
-# added temporarily to BUILT_SOURCES.  After a month or so, this
-# comment block can be removed, and stale_itc_gone with it.  It should
-# come out of CLEANFILES (which still needs to be explicitly set, don't
-# simply remove the line) and BUILT_SOURCES at the same time the rule
-# is removed.
 
 libparse_a_SOURCES = parse.c \
 		     parse_conf.c \
@@ -75,10 +64,6 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
 ETAGS_ARGS = Makefile.am
 
 EXTRA_DIST = parsesolaris.c parsestreams.c mkinfo_scmd.sed mkinfo_rcmd.sed info_trimble.c
-
-stale_itc_gone:
-	-[ "$(srcdir)" != "." ] && rm -f info_trimble.c	# rid ourselves of leftover from old way
-	@echo "at most one info_trimble.c in source and build dirs" > $@
 
 $(srcdir)/info_trimble.c: $(top_srcdir)/include/trimble.h $(srcdir)/Makefile.am $(srcdir)/mkinfo_scmd.sed $(srcdir)/mkinfo_rcmd.sed
 	sed -n -f $(srcdir)/mkinfo_scmd.sed $(top_srcdir)/include/trimble.h  > info_trimble.new

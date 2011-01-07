@@ -1527,7 +1527,8 @@ help(
 
 		for (row = 0; row < rows; row++) {
 			for (word = row; word < words; word += rows)
-				fprintf(fp, "%-*.*s", col, col-1, list[word]);
+				fprintf(fp, "%-*.*s", (int)col,
+					(int)col - 1, list[word]);
 			fprintf(fp, "\n");
 		}
 	} else {

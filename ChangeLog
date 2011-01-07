@@ -1,3 +1,8 @@
+* [Bug 1776] sntp mishandles -t/--timeout and -a/--authentication.
+* Default to silent make rules, override with make V=1 or ./configure
+  --disable-silent-rules.
+* Correct --with-openssl-incdir defaulting with pkg-config.
+* Correct ./build on systems without gtest available.
 (4.2.7p112) 2011/01/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1773] openssl not detected during ./configure.
 * [Bug 1774] Segfaults if cryptostats enabled and built without OpenSSL.
