@@ -5,6 +5,7 @@
 #include "networking.h"
 #include "utilities.h"
 #include "log.h"
+#include "libntp.h"
 
 #include <event2/dns.h>
 #include <event2/util.h>
@@ -20,6 +21,8 @@
 int n_pending_dns = 0;
 int n_pending_ntp = 0;
 int ai_fam_pref = AF_UNSPEC;
+SOCKET sock4 = -1;		/* Socket for IPv4 */
+SOCKET sock6 = -1;		/* Socket for IPv6 */
 char *progname;
 struct event_base *base = NULL;
 
@@ -282,12 +285,31 @@ dns_cb(
 		       : "");
 
 		for (ai = addr; ai; ai = ai->ai_next) {
-			char buf[128];
-			const char *s = NULL; /* for display purposes */
 
-			/* Open a socket */
-
-			/* Make it non-blocking */
+			/* Open a socket and make it non-blocking */
+			if (ai->ai_family == AF_INET) {
+			  if (-1 == sock4) {
+			    sock4 = socket(PF_INET, SOCK_DGRAM, 0);
+			    if (-1 == sock4) {
+			      /* error getting a socket */
+			    }
+			    /* Make it nonb-locking */
+			    make_socket_nonblocking(sock4);
+			  }
+			}
+			else if (ai->ai_family == AF_INET6) {
+			  if (-1 == sock6) {
+			    sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
+			    if (-1 == sock6) {
+			      /* error getting a socket */
+			    }
+			    /* Make it non-blocking */
+			    make_socket_nonblocking(sock6);
+			  }
+			}
+			else {
+			  /* unexpected ai_family value */
+			}
 
 			/*
 			** We're waiting for a response for either unicast
