@@ -729,4 +729,4 @@ kill_asyncio(int startfd)
 }
 #endif	/* !SYS_WINNT */
 
-#endif 0
+#endif /* 0 */
