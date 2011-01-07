@@ -314,20 +314,6 @@
 			<File
 				RelativePath="..\..\..\..\libntp\icom.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\isc\inet_aton.c"
@@ -491,6 +477,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\isc\sockaddr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libntp\socket.c"
 				>
 			</File>
 			<File
@@ -855,15 +845,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\sys\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
