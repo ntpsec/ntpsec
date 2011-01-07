@@ -2,7 +2,6 @@
 #define NTP_IO_H
 
 #include "ntp_workimpl.h"
-#include "libntp.h"
 
 /*
  * POSIX says use <fnct.h> to get O_* symbols and 
@@ -38,6 +37,8 @@
 # endif
 # include <netinet/ip.h>
 #endif
+
+#include "libntp.h"	/* This needs Something above for GETDTABLESIZE */
 
 /*
  * Define FNDELAY and FASYNC using O_NONBLOCK and O_ASYNC if we need
