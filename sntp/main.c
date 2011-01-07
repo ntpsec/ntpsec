@@ -32,11 +32,15 @@ struct dns_cb_ctx {
 #define CTX_BCST	0x0001
 #define CTX_UCST	0x0002
 #define CTX_unused	0xfffd
+	int key_id;
+	struct key *key;
 };
 
 struct ntp_cb_ctx {
 	char *name;
 	int flags;
+	int key_id;
+	struct key *key;
 };
 
 struct key *keys = NULL;
@@ -155,6 +159,7 @@ sntp_main (
 	if (ENABLED_OPT(BROADCAST)) {
 		struct evutil_addrinfo hints;
 		struct dns_cb_ctx *dns_ctx;
+		long l;
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = ai_fam_pref;
@@ -171,6 +176,15 @@ sntp_main (
 		dns_ctx->name = OPT_ARG(BROADCAST);
 		dns_ctx->flags = CTX_BCST;
 
+		if (ENABLED_OPT(AUTHENTICATION) &&
+		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
+			dns_ctx->key_id = l;
+			get_key(dns_ctx->key_id, &(dns_ctx->key));
+		} else {
+			dns_ctx->key_id = -1;
+			dns_ctx->key = NULL;
+		}
+
 		printf("broadcast-before: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 		++n_pending_dns;
 		evdns_getaddrinfo(dnsbase, OPT_ARG(BROADCAST), NULL, &hints,
@@ -181,6 +195,7 @@ sntp_main (
 	for (i = 0; i < argc; ++i) {
 		struct evutil_addrinfo hints; /* local copy is OK */
 		struct dns_cb_ctx *dns_ctx;
+		long l;
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = ai_fam_pref;
@@ -196,6 +211,15 @@ sntp_main (
 		dns_ctx = emalloc(sizeof *dns_ctx);
 		dns_ctx->name = argv[i];
 		dns_ctx->flags = CTX_UCST;
+
+		if (ENABLED_OPT(AUTHENTICATION) &&
+		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
+			dns_ctx->key_id = l;
+			get_key(dns_ctx->key_id, &(dns_ctx->key));
+		} else {
+			dns_ctx->key_id = -1;
+			dns_ctx->key = NULL;
+		}
 
 		printf("unicast-before: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
 		++n_pending_dns;
@@ -285,6 +309,21 @@ dns_cb(
 		       : "");
 
 		for (ai = addr; ai; ai = ai->ai_next) {
+			char *hostname;
+			struct kod_entry *reason;
+			SOCKET sock;
+
+			/* Is there a KoD on file for this address? */
+			hostname = addrinfo_to_str(ai);
+			if (search_entry(hostname, &reason)) {
+				printf("prior KoD for %s, skipping.\n",
+					hostname);
+				free(reason);
+				free(hostname);
+
+				continue;
+			}
+			free(hostname);
 
 			/* Open a socket and make it non-blocking */
 			if (ai->ai_family == AF_INET) {
@@ -292,23 +331,33 @@ dns_cb(
 			    sock4 = socket(PF_INET, SOCK_DGRAM, 0);
 			    if (-1 == sock4) {
 			      /* error getting a socket */
+			      msyslog(LOG_ERR, "dns_cb: socket(PF_INET) failed: %m");
+			      exit(1);
 			    }
-			    /* Make it nonb-locking */
+			    /* Make it non-blocking */
 			    make_socket_nonblocking(sock4);
 			  }
+			  sock = sock4;
 			}
 			else if (ai->ai_family == AF_INET6) {
 			  if (-1 == sock6) {
 			    sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
 			    if (-1 == sock6) {
 			      /* error getting a socket */
+			      msyslog(LOG_ERR, "dns_cb: socket(PF_INET6) failed: %m");
+			      exit(1);
 			    }
 			    /* Make it non-blocking */
 			    make_socket_nonblocking(sock6);
 			  }
+			  sock = sock6;
 			}
 			else {
 			  /* unexpected ai_family value */
+			  msyslog(LOG_ERR, "dns_cb: unexpected ai_family: %d",
+				ai->ai_family
+				);
+			  exit(1);
 			}
 
 			/*
@@ -319,6 +368,33 @@ dns_cb(
 
 			/* If this is for a unicast host, send a request */
 			if (ctx->flags & CTX_UCST) {
+				struct timeval tv_xmt;
+				struct pkt x_pkt;
+				int pkt_len;
+
+				if (0 != GETTIMEOFDAY(&tv_xmt, NULL)) {
+					msyslog(LOG_ERR,
+						"xxx: gettimeofday() failed: %m");
+					exit(1);
+				}
+				tv_xmt.tv_sec += JAN_1970;
+
+				pkt_len = generate_pkt(&x_pkt, &tv_xmt,
+						ctx->key_id, ctx->key);
+
+				/* The current sendpkt does not return status */
+				/* XXX: the 2nd arg may be wrong... */
+				/* XXX: ... or it may need a cast*/
+				sendpkt(sock, ai->ai_addr,
+					&x_pkt, pkt_len);
+
+#ifdef DEBUG
+				msyslog(LOG_DEBUG,
+					"dns_cb: UCST: Current time sec: %i msec: %i\n",
+				       (unsigned int) tv_xmt.tv_sec,
+				       (unsigned int) tv_xmt.tv_usec);
+#endif
+
 				/*
 				** If the send fails:
 				** - decrement n_pending_ntp
@@ -327,6 +403,12 @@ dns_cb(
 			}
 
 			/* queue that we're waiting for a response */
+
+			/*
+			** we should register an NTP callback,
+			** which will probably need the key ID and value
+			** copied from the DNS context
+			*/
 
 #if 0
 			if (ai->ai_family == AF_INET) {
