@@ -2,6 +2,7 @@
 #define NTP_IO_H
 
 #include "ntp_workimpl.h"
+#include "libntp.h"
 
 /*
  * POSIX says use <fnct.h> to get O_* symbols and 

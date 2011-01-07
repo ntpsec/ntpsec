@@ -58,6 +58,7 @@ libntp_a_SRCS =						\
 	recvbuff.c					\
 	refnumtoa.c					\
 	snprintf.c					\
+	socket.c					\
 	socktoa.c					\
 	socktohost.c					\
 	ssl_init.c					\

@@ -160,15 +160,6 @@ int disable_dynamic_updates;		/* scan interfaces once only */
 static	struct refclockio *refio;
 #endif /* REFCLOCK */
 
-#if defined(HAVE_IPTOS_SUPPORT)
-/* set IP_TOS to minimize packet delay */
-# if defined(IPTOS_PREC_INTERNETCONTROL)
-	unsigned int qos = IPTOS_PREC_INTERNETCONTROL;
-# else
-	 unsigned int qos = IPTOS_LOWDELAY;
-# endif
-#endif
-
 /*
  * File descriptor masks etc. for call to select
  * Not needed for I/O Completion Ports
@@ -362,6 +353,8 @@ update_resp_pipe_fd(
 #endif
 
 
+/* MOVED to libntp/socket.c for inclusion by libntp */
+#if 0
 /*
  * on Unix systems the stdio library typically
  * makes use of file descriptors in the lower
@@ -475,6 +468,7 @@ move_fd(
 #endif /* !defined(SYS_WINNT) && defined(F_DUPFD) */
 	return fd;
 }
+#endif /* 0 */
 
 
 #ifndef HAVE_IO_COMPLETION_PORT
@@ -2900,6 +2894,8 @@ io_multicast_del(
 }
 
 
+#if 0
+/* MOVED to libntp/socket.c, to become part of libntp. */
 /*
  * init_nonblocking_io() - set up descriptor to be non blocking
  */
@@ -2959,6 +2955,7 @@ static void init_nonblocking_io(
 # include "Bletch: Need non-blocking I/O!"
 #endif
 }
+#endif /* 0 */
 
 /*
  * open_socket - open a socket, returning the file descriptor
@@ -3147,7 +3144,7 @@ open_socket(
 		   fd, IS_IPV6(addr) ? "6" : "", stoa(addr),
 		   SCOPE(addr), SRCPORT(addr), interf->flags));
 
-	init_nonblocking_io(fd);
+	make_socket_nonblocking(fd);
 	
 #ifdef HAVE_SIGNALED_IO
 	init_socket_sig(fd);
@@ -4587,7 +4584,7 @@ init_async_notifications()
 		return;
 	}
 #endif
-	init_nonblocking_io(fd);
+	make_socket_nonblocking(fd);
 #if defined(HAVE_SIGNALED_IO)
 	init_socket_sig(fd);
 #endif /* HAVE_SIGNALED_IO */
