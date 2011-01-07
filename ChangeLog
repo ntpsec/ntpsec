@@ -1,3 +1,4 @@
+(4.2.7p113) 2011/01/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1776] sntp mishandles -t/--timeout and -a/--authentication.
 * Default to silent make rules, override with make V=1 or ./configure
   --disable-silent-rules.
