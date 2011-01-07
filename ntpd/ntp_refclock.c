@@ -510,7 +510,7 @@ refclock_sample(
 	if (debug)
 		printf(
 		    "refclock_sample: n %d offset %.6f disp %.6f jitter %.6f\n",
-		    n, pp->offset, pp->disp, pp->jitter);
+		    (int)n, pp->offset, pp->disp, pp->jitter);
 #endif
 	return (int)n;
 }

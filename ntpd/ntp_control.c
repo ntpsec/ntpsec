@@ -3351,7 +3351,7 @@ send_mru_entry(
  */
 static void
 send_random_tag_value(
-	int	index
+	int	indx
 	)
 {
 	u_long	noise;
@@ -3365,7 +3365,7 @@ send_random_tag_value(
 	buf[2] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[3] = '.';
-	snprintf(&buf[4], sizeof(buf) - 4, "%d", index);
+	snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
 	ctl_putuint(buf, noise);
 }
 

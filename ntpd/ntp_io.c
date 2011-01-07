@@ -3866,6 +3866,7 @@ findclosestinterface(
 	sockaddr_u	addr_dist;
 	sockaddr_u	min_dist;
 
+	ZERO_SOCK(&min_dist);
 	winner = NULL;
 	
 	for (ep = ep_list; ep != NULL; ep = ep->elink) {

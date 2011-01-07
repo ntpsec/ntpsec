@@ -34,10 +34,10 @@ ntp_configure_cache_version=20100916
 NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
 
 AM_INIT_AUTOMAKE
-dnl AM_SILENT_RULES req. automake 1.11
+dnl AM_SILENT_RULES req. automake 1.11.  [yes] defaults V=0
 m4_ifdef(
     [AM_SILENT_RULES],
-    [AM_SILENT_RULES]
+    [AM_SILENT_RULES([yes])]
 )
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
@@ -220,44 +220,6 @@ AC_MSG_RESULT([$ans])
 case "$ans" in
  yes)
     AC_MSG_WARN([Please do not use --with-arlib, arlib is no longer included.  In the future, --with-arlib will not be recognized.])
-    ;;
-esac
-
-AC_ARG_WITH(
-    [rpath],
-    [AS_HELP_STRING(
-	[--without-rpath],
-	[s Disable auto-added -R linker paths]
-    )],
-    [ans=$withval],
-    [ans=x]
-)
-case "$ans" in
- no)
-    need_dash_r=
-    ;;
- yes)
-    need_dash_r=1
-    ;;
-esac
-# HMS: Why isn't this $build?
-# Well, that depends on if we need this for the build toolchain or
-# for info in the host executable...
-# I still have no idea which way this should go, but nobody has complained.
-case "$host" in
- *-*-netbsd*)
-    case "$need_dash_r" in
-     no) ;;
-     *)  need_dash_r=1
-	 ;;
-    esac
-    ;;
- *-*-solaris*)
-    case "$need_dash_r" in
-     no) ;;
-     *)  need_dash_r=1
-	 ;;
-    esac
     ;;
 esac
 

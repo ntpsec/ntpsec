@@ -61,10 +61,10 @@ keytype_from_text(
 	size_t *pdigest_len
 	)
 {
-	const u_long	max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
 	int		key_type;
 	u_int		digest_len;
 #ifdef OPENSSL
+	const u_long	max_digest_len = MAX_MAC_LEN - sizeof(keyid_t);
 	u_char		digest[EVP_MAX_MD_SIZE];
 	char *		upcased;
 	char *		pch;

@@ -1,7 +1,45 @@
 dnl ######################################################################
 dnl OpenSSL support shared by top-level and sntp/configure.ac
 AC_DEFUN([NTP_OPENSSL], [
-	
+
+AC_ARG_WITH(
+    [rpath],
+    [AS_HELP_STRING(
+	[--without-rpath],
+	[s Disable auto-added -R linker paths]
+    )],
+    [ans=$withval],
+    [ans=x]
+)
+case "$ans" in
+ no)
+    need_dash_r=
+    ;;
+ yes)
+    need_dash_r=1
+    ;;
+esac
+# HMS: Why isn't this $build?
+# Well, that depends on if we need this for the build toolchain or
+# for info in the host executable...
+# I still have no idea which way this should go, but nobody has complained.
+case "$host" in
+ *-*-netbsd*)
+    case "$need_dash_r" in
+     no) ;;
+     *)  need_dash_r=1
+	 ;;
+    esac
+    ;;
+ *-*-solaris*)
+    case "$need_dash_r" in
+     no) ;;
+     *)  need_dash_r=1
+	 ;;
+    esac
+    ;;
+esac
+
 AC_SUBST([OPENSSL])
 AC_SUBST([OPENSSL_INC])
 AC_SUBST([OPENSSL_LIB])
@@ -31,8 +69,12 @@ case "$ans" in
      '')
 	;;
      *)
-	pkgans="`$PKG_CONFIG --libs-only-L openssl | sed -e 's/^-L//'`" 2>/dev/null
-	test -f "${pkgans}/pkgconfig/openssl.pc" && ans="$pkgans"
+	pkgans=`$PKG_CONFIG --libs-only-L openssl | sed -e 's/^-L//' 2>/dev/null`
+	# strip trailing whitespace
+	pkgans=`set $pkgans ; echo $[1]`
+	if test -f "${pkgans}/pkgconfig/openssl.pc" ; then
+	    ans="$pkgans"
+	fi
 	;;
     esac
     ;;
@@ -63,6 +105,8 @@ case "$ans" in
     done
     case "$i" in
      no)
+	echo ""
+	echo "did not find libcrypto and libssl in any of $ans"
 	ans=no
 	OPENSSL_LIB=
 	;;
@@ -97,8 +141,12 @@ case "$ans" in
      '')
 	;;
      *)
-	pkgans="`$PKG_CONFIG --cflags-only-I openssl | sed -e 's/^-I//'`" 2>/dev/null
-	test -f "${pkgans}/pkgconfig/openssl.pc" && ans="$pkgans"
+	pkgans=`$PKG_CONFIG --cflags-only-I openssl | sed -e 's/^-I//' 2>/dev/null`
+	# strip trailing whitespace
+	pkgans=`set $pkgans ; echo $[1]`
+	if test -f "${pkgans}/openssl/evp.h" ; then
+	    ans="$pkgans"
+	fi
 	;;
     esac
     ;;
@@ -114,13 +162,15 @@ esac
 case "$ans" in
  no)
     ;;
- *) # look for openssl/opensslconf.h:
+ *) # look for openssl/evp.h:
     for i in $ans no
     do
-	test -f $i/openssl/opensslconf.h && break
+	test -f $i/openssl/evp.h && break
     done
     case "$i" in
      no)
+	echo ""
+	echo "did not find openssl/evp.h in any of $ans"
 	ans=no
 	OPENSSL_INC=
 	;;
@@ -130,6 +180,7 @@ case "$ans" in
     esac
     ;;
 esac
+AS_UNSET([pkgans])
 AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we will use crypto])

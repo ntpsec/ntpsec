@@ -238,15 +238,16 @@ main(
 	EVP_PKEY *pkey = NULL;	/* temp key */
 	const EVP_MD *ectx;	/* EVP digest */
 	char	pathbuf[MAXFILENAME + 1];
+	char	str[MAXFILENAME + 1];
 	const char *scheme = NULL; /* digest/signature scheme */
 	char	*exten = NULL;	/* private extension */
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
+	char	groupbuf[MAXHOSTNAME + 1];
 #define iffsw   HAVE_OPT(ID_KEY)
 #endif	/* AUTOKEY */
 	char	hostbuf[MAXHOSTNAME + 1];
-	char	groupbuf[MAXHOSTNAME + 1];
 
 	progname = argv[0];
 
@@ -325,8 +326,15 @@ main(
 	if (HAVE_OPT( CERTIFICATE ))
 		scheme = OPT_ARG( CERTIFICATE );
 
-	if (HAVE_OPT( SUBJECT_NAME ))
-		certname = strdup(OPT_ARG( SUBJECT_NAME ));
+	if (HAVE_OPT( SUBJECT_NAME )) {
+		if (*OPT_ARG(SUBJECT_NAME) != '@') {
+			certname = strdup(OPT_ARG(SUBJECT_NAME));
+		} else {
+			strcpy(str, certname);
+			strcat(str, OPT_ARG(SUBJECT_NAME));
+			certname = strdup(str);
+		}
+	}
 
 	if (HAVE_OPT( ISSUER_NAME ))
 		groupname = strdup(OPT_ARG( ISSUER_NAME ));

@@ -36,7 +36,8 @@
 /* From ntpdate.c */
 int is_reachable (struct addrinfo *dst);
 
-int resolve_hosts (const char **hosts, int hostc, struct addrinfo ***res, int pref_family);
+int resolve_hosts (const char * const *hosts, int hostc,
+		   struct addrinfo ***res, int pref_family);
 
 void create_socket (SOCKET *rsock, sockaddr_u *dest);
 
