@@ -102,12 +102,7 @@ nic_rule *nic_rule_list;
 #if defined(SYS_WINNT)
 #include "win32_io.h"
 #include <isc/win32os.h>
-/*
- * Windows C runtime ioctl() can't deal properly with sockets, 
- * map to ioctlsocket for this source file.
- */
-#define ioctl(fd, opt, val)  ioctlsocket((fd), (opt), (u_long *)(val))
-#endif  /* SYS_WINNT */
+#endif
 
 /*
  * We do asynchronous input using the SIGIO facility.  A number of
@@ -2891,69 +2886,6 @@ io_multicast_del(
 #endif /* not MCAST */
 }
 
-
-#if 0
-/* MOVED to libntp/socket.c, to become part of libntp. */
-/*
- * init_nonblocking_io() - set up descriptor to be non blocking
- */
-static void init_nonblocking_io(
-	SOCKET fd
-	)
-{
-	/*
-	 * set non-blocking,
-	 */
-
-#ifdef USE_FIONBIO
-	/* in vxWorks we use FIONBIO, but the others are defined for old systems, so
-	 * all hell breaks loose if we leave them defined
-	 */
-#undef O_NONBLOCK
-#undef FNDELAY
-#undef O_NDELAY
-#endif
-
-#if defined(O_NONBLOCK) /* POSIX */
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
-		msyslog(LOG_ERR,
-			"fcntl(O_NONBLOCK) fails on fd #%d: %m", fd);
-		exit(1);
-	}
-#elif defined(FNDELAY)
-	if (fcntl(fd, F_SETFL, FNDELAY) < 0) {
-		msyslog(LOG_ERR, "fcntl(FNDELAY) fails on fd #%d: %m",
-			fd);
-		exit(1);
-	}
-#elif defined(O_NDELAY) /* generally the same as FNDELAY */
-	if (fcntl(fd, F_SETFL, O_NDELAY) < 0) {
-		msyslog(LOG_ERR, "fcntl(O_NDELAY) fails on fd #%d: %m",
-			fd);
-		exit(1);
-	}
-#elif defined(FIONBIO)
-	{
-		int on = 1;
-
-		if (ioctl(fd, FIONBIO, &on) < 0) {
-			msyslog(LOG_ERR,
-				"ioctl(FIONBIO) fails on fd #%d: %m",
-				fd);
-			exit(1);
-		}
-	}
-#elif defined(FIOSNBIO)
-	if (ioctl(fd, FIOSNBIO, &on) < 0) {
-		msyslog(LOG_ERR,
-			"ioctl(FIOSNBIO) fails on fd #%d: %m", fd);
-		exit(1);
-	}
-#else
-# include "Bletch: Need non-blocking I/O!"
-#endif
-}
-#endif /* 0 */
 
 /*
  * open_socket - open a socket, returning the file descriptor

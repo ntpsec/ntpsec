@@ -16,6 +16,14 @@
 
 #include <isc/util.h>
 
+/*
+ * Windows C runtime ioctl() can't deal properly with sockets, 
+ * map to ioctlsocket for this source file.
+ */
+#ifdef SYS_WINNT
+#define ioctl(fd, opt, val)  ioctlsocket(fd, opt, (u_long *)(val))
+#endif
+
 /* HMS: Is this the best place to put the qos global? */
 
 #if defined(HAVE_IPTOS_SUPPORT)
