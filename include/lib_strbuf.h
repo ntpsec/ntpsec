@@ -22,7 +22,7 @@ extern int lib_inited;
 	do {							\
 		if (!lib_inited)				\
 			init_lib();				\
+		ZERO(lib_stringbuf[lib_nextbuf]);		\
 		(bufp) = &lib_stringbuf[lib_nextbuf++][0];	\
 		lib_nextbuf %= COUNTOF(lib_stringbuf);		\
-		memset((bufp), '\0', sizeof(lib_stringbuf[0]));	\
 	} while (FALSE)

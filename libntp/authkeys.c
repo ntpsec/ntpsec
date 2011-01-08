@@ -79,7 +79,7 @@ init_auth(void)
 	/*
 	 * Initialize hash table and free list
 	 */
-	memset((char *)key_hash, 0, sizeof key_hash);
+	ZERO(key_hash);
 }
 
 
@@ -429,7 +429,7 @@ auth_delkeys(void)
 			 */
 			if (sk->flags & KEY_TRUSTED) {
 				skp = &(sk->next);
-				memset(&sk->k, 0, sizeof(sk->k));
+				ZERO(sk->k);
 				sk->lifetime = 0;
 				sk->keylen = 0;
 				sk = sk->next;

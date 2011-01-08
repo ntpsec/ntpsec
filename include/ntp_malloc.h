@@ -41,4 +41,21 @@
 void * alloca(size_t);
 #endif
 
+#ifdef EREALLOC_IMPL
+# define EREALLOC_CALLSITE	/* preserve __FILE__ and __LINE__ */
+#else
+# define EREALLOC_IMPL(ptr, newsz, filenm, loc) \
+	 realloc(ptr, (newsz))
+#endif
+
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+# define zero_mem(p, s)		bzero(p, s)
+#endif
+
+#ifndef zero_mem
+# define zero_mem(p, s)		memset(p, 0, s)
+#endif
+#define ZERO(var)		zero_mem(&(var), sizeof(var))
+
 #endif	/* NTP_MALLOC_H */

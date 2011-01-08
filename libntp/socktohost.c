@@ -48,7 +48,7 @@ socktohost(
 	 * Resolve the reversed name and make sure the reversed address
 	 * is among the results.
 	 */
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_family = AF(sock);
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;

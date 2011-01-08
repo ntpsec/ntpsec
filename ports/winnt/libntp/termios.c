@@ -93,9 +93,8 @@ HANDLE common_serial_open(
 		c_hnds = unit + 1;
 		/* round up to closest multiple of 4 to avoid churn */
 		c_hnds = (c_hnds + 3) & ~3;
-		hnds = erealloc(hnds, c_hnds * sizeof(hnds[0]));
-		memset(&hnds[prev_c_hnds], 0, 
-		       (c_hnds - prev_c_hnds) * sizeof(hnds[0]));
+		hnds = erealloc_zero(hnds, c_hnds * sizeof(hnds[0]),
+				     prev_c_hnds * sizeof(hnds[0]));
 	}
 
 	if (NULL == hnds[unit].h) {

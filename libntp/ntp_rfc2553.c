@@ -80,7 +80,6 @@
 
 #include "ntpd.h"
 #include "ntp_malloc.h"
-#include "ntp_stdlib.h"
 #include "ntp_string.h"
 #include "ntp_debug.h"
 
@@ -107,19 +106,15 @@
  * The rest of ntp_rfc2553.c is conditioned on ISC_PLATFORM_HAVEIPV6
  * not being defined, copy_addrinfo_list() is an exception.
  */
-#if !defined(_MSC_VER) || !defined(_DEBUG)
 struct addrinfo *
-copy_addrinfo_list(
-	const struct addrinfo *src
-	)
-#else
-struct addrinfo *
-debug_copy_addrinfo_list(
-	const struct addrinfo *	src,
+copy_addrinfo_list_impl(
+	const struct addrinfo *	src
+#ifdef EREALLOC_CALLSITE
+				   ,
 	const char *		caller_file,
 	int			caller_line
-	)
 #endif
+	)
 {
 	const struct addrinfo *	ai_src;
 	struct addrinfo *	ai_cpy;
@@ -143,12 +138,8 @@ debug_copy_addrinfo_list(
 	octets = elements * (sizeof(*ai_cpy) + sizeof(*psau));
 	octets += canons_octets;
 
-#if !defined(_MSC_VER) || !defined(_DEBUG)
-	dst = emalloc(octets);
-	memset(dst, 0, octets);
-#else
-	dst = debug_ereallocz(NULL, octets, 1, caller_file, caller_line);
-#endif
+	dst = erealloczsite(NULL, octets, 0, TRUE, caller_file,
+			    caller_line);
 	ai_cpy = dst;
 	psau = (void *)(ai_cpy + elements);
 	pcanon = (void *)(psau + elements);

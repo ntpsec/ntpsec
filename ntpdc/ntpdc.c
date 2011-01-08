@@ -427,7 +427,7 @@ openhost(
 	 * give it an IPv4 address to lookup.
 	 */
 	strncpy(service, "ntp", sizeof(service));
-	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
@@ -573,8 +573,11 @@ sendpkt(
 static void
 growpktdata(void)
 {
+	size_t priorsz;
+
+	priorsz = (size_t)pktdatasize;
 	pktdatasize += INCDATASIZE;
-	pktdata = erealloc(pktdata, (size_t)pktdatasize);
+	pktdata = erealloc_zero(pktdata, (size_t)pktdatasize, priorsz);
 }
 
 
@@ -621,7 +624,7 @@ getresponse(
 	numrecv = 0;
 	*rdata = datap = pktdata;
 	lastseq = 999;	/* too big to be a sequence number */
-	memset(haveseq, 0, sizeof(haveseq));
+	ZERO(haveseq);
 	FD_ZERO(&fds);
 
     again:
@@ -798,7 +801,7 @@ getresponse(
 	for (i = 0; i < items; i++) {
 		memcpy(datap, tmp_data, (unsigned)size);
 		tmp_data += size;
-		memset(datap + size, 0, pad);
+		zero_mem(datap + size, pad);
 		datap += size + pad;
 	}
 
@@ -861,8 +864,7 @@ sendrequest(
 	int	maclen;
 	char *	pass;
 
-	memset(&qpkt, 0, sizeof(qpkt));
-
+	ZERO(qpkt);
 	qpkt.rm_vn_mode = RM_VN_MODE(0, 0, 0);
 	qpkt.implementation = (u_char)implcode;
 	qpkt.request = (u_char)reqcode;
@@ -1346,8 +1348,7 @@ getarg(
 	char *cp, *np;
 	static const char *digits = "0123456789";
 
-	memset(argp, 0, sizeof(*argp));
-
+	ZERO(*argp);
 	argp->string = str;
 	argp->type   = code & ~OPT;
 
@@ -1429,7 +1430,7 @@ getnetnum(
 	struct addrinfo hints, *ai = NULL;
 
 	sockaddr_len = SIZEOF_SOCKADDR(af);
-	memset((char *)&hints, 0, sizeof(struct addrinfo));
+	ZERO(hints);
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
 	hints.ai_flags |= AI_ADDRCONFIG;

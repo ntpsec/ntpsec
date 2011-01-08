@@ -545,7 +545,7 @@ openhost(
 	 * will return an "IPv4-mapped IPv6 address" address if you
 	 * give it an IPv4 address to lookup.
 	 */
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
@@ -1701,7 +1701,7 @@ getnetnum(
 {
 	struct addrinfo hints, *ai = NULL;
 
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
 	hints.ai_flags |= AI_ADDRCONFIG;
@@ -2718,6 +2718,8 @@ nextvar(
 	const char *cp;
 	char *np;
 	const char *cpend;
+	size_t srclen;
+	size_t len;
 	char *npend;	/* character after last */
 	int quoted = 0;
 	static char name[MAXVARLEN];
@@ -2731,39 +2733,32 @@ nextvar(
 	 */
 	while (cp < cpend && (*cp == ',' || isspace((int)*cp)))
 		cp++;
-	if (cp == cpend)
+	if (cp >= cpend)
 		return 0;
 	
 	/*
 	 * Copy name until we hit a ',', an '=', a '\r' or a '\n'.  Backspace
 	 * over any white space and terminate it.
 	 */
-	np = name;
-	npend = &name[MAXVARLEN];
-	while (cp < cpend && np < npend && *cp != ',' && *cp != '='
-	       && *cp != '\r' && *cp != '\n')
-	    *np++ = *cp++;
-	/*
-	 * Check if we ran out of name space, without reaching the end or a
-	 * terminating character
-	 */
-	if (np == npend && !(cp == cpend || *cp == ',' || *cp == '=' ||
-			     *cp == '\r' || *cp == '\n'))
-	    return 0;
-	while (isspace((int)(*(np-1))))
-	    np--;
-	*np = '\0';
+	srclen = strcspn(cp, ",=\r\n");
+	len = srclen;
+	while (len > 0 && isspace(cp[len - 1]))
+		len--;
+	if (len > 0)
+		memcpy(name, cp, len);
+	name[len] = '\0';
 	*vname = name;
+	cp += srclen;
 
 	/*
 	 * Check if we hit the end of the buffer or a ','.  If so we are done.
 	 */
-	if (cp == cpend || *cp == ',' || *cp == '\r' || *cp == '\n') {
-		if (cp != cpend)
-		    cp++;
+	if (cp >= cpend || *cp == ',' || *cp == '\r' || *cp == '\n') {
+		if (cp < cpend)
+			cp++;
 		*datap = cp;
 		*datalen = cpend - cp;
-		*vvalue = (char *)0;
+		*vvalue = NULL;
 		return 1;
 	}
 
@@ -2772,7 +2767,7 @@ nextvar(
 	 */
 	cp++;	/* past '=' */
 	while (cp < cpend && (isspace((int)*cp) && *cp != '\r' && *cp != '\n'))
-	    cp++;
+		cp++;
 	np = value;
 	npend = &value[MAXVALLEN];
 	while (cp < cpend && np < npend && ((*cp != ',') || quoted))
@@ -2785,19 +2780,19 @@ nextvar(
 	 * or without finding a comma
 	 */
 	if (np == npend && (quoted || *cp != ','))
-	    return 0;
+		return 0;
 	/*
 	 * Trim off any trailing whitespace
 	 */
 	while (np > value && isspace((int)(*(np-1))))
-	    np--;
+		np--;
 	*np = '\0';
 
 	/*
 	 * Return this.  All done.
 	 */
 	if (cp != cpend)
-	    cp++;
+		cp++;
 	*datap = cp;
 	*datalen = cpend - cp;
 	*vvalue = value;

@@ -1302,8 +1302,8 @@ win_time_stepped(void)
 	clock_backward_max = CLOCK_BACK_THRESHOLD;
 	clock_backward_count = 0;
 	newest_baseline = 0;
-	memset(baseline_counts, 0, sizeof(baseline_counts));
-	memset(baseline_times, 0, sizeof(baseline_times));
+	ZERO(baseline_counts);
+	ZERO(baseline_times);
 
 	StartClockThread();
 }

@@ -1,3 +1,7 @@
+* Fix for openssl pkg-config detection eval failure.
+* Add erealloc_zero(), refactor estrdup(), emalloc(), emalloc_zero() to
+  separate tracking callsite file/line from using debug MS C runtime,
+  and to reduce code duplication.
 (4.2.7p113) 2011/01/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1776] sntp mishandles -t/--timeout and -a/--authentication.
 * Default to silent make rules, override with make V=1 or ./configure

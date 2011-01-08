@@ -722,10 +722,9 @@ new_asyncio_reader(void)
 {
 	struct asyncio_reader *reader;
 
-	reader = emalloc(sizeof(*reader));
-
-	memset(reader, 0, sizeof(*reader));
+	reader = emalloc_zero(sizeof(*reader));
 	reader->fd = INVALID_SOCKET;
+
 	return reader;
 }
 
@@ -785,12 +784,12 @@ addr_eqprefix(
 	isc_netaddr_t		isc_b;
 	isc_sockaddr_t		isc_sa;
 
-	memset(&isc_sa, 0, sizeof(isc_sa));
+	ZERO(isc_sa);
 	memcpy(&isc_sa.type.sa, &a->sa, 
 	       min(sizeof(isc_sa.type), sizeof(a)));
 	isc_netaddr_fromsockaddr(&isc_a, &isc_sa);
 
-	memset(&isc_sa, 0, sizeof(isc_sa));
+	ZERO(isc_sa);
 	memcpy(&isc_sa.type.sa, &b->sa, 
 	       min(sizeof(isc_sa.type), sizeof(b)));
 	isc_netaddr_fromsockaddr(&isc_b, &isc_sa);
@@ -863,7 +862,7 @@ is_ip_address(
 	NTP_REQUIRE(host != NULL);
 	NTP_REQUIRE(addr != NULL);
 
-	memset(addr, 0, sizeof(*addr));
+	ZERO_SOCK(addr);
 
 	/*
 	 * Try IPv4, then IPv6.  In order to handle the extended format
@@ -933,7 +932,7 @@ init_interface(
 	endpt *ep
 	)
 {
-	memset(ep, 0, sizeof(*ep));
+	ZERO(*ep);
 	ep->fd = INVALID_SOCKET;
 	ep->bfd = INVALID_SOCKET;
 	ep->phase = sys_interphase;
@@ -1240,7 +1239,7 @@ create_wildcards(
 	 * the first if (v4wild).
 	 */
 	action = ACTION_LISTEN;
-	memset(&wildaddr, 0, sizeof(wildaddr));
+	ZERO(wildaddr);
 	
 	/*
 	 * create pseudo-interface with wildcard IPv4 address
@@ -1300,7 +1299,7 @@ create_wildcards(
 	v6wild = ipv6_works;
 	if (v6wild) {
 		/* set wildaddr to the v6 wildcard address :: */
-		memset(&wildaddr, 0, sizeof(wildaddr));
+		ZERO(wildaddr);
 		AF(&wildaddr) = AF_INET6;
 		SET_ADDR6N(&wildaddr, in6addr_any);
 		SET_PORT(&wildaddr, port);
@@ -1356,8 +1355,7 @@ add_nic_rule(
 	nic_rule *	rule;
 	isc_boolean_t	is_ip;
 
-	rule = emalloc(sizeof(*rule));
-	memset(rule, 0, sizeof(*rule));
+	rule = emalloc_zero(sizeof(*rule));
 	rule->match_type = match_type;
 	rule->prefixlen = prefixlen;
 	rule->action = action;
@@ -1693,7 +1691,7 @@ sau_from_netaddr(
 	const isc_netaddr_t *pna
 	)
 {
-	memset(psau, 0, sizeof(*psau));
+	ZERO_SOCK(psau);
 	AF(psau) = (u_short)pna->family;
 	switch (pna->family) {
 
@@ -1775,7 +1773,7 @@ is_anycast(
 		return ISC_FALSE;
 	if ((fd = socket(AF_INET6, SOCK_DGRAM, 0)) < 0)
 		return ISC_FALSE;
-	memset(&ifr6, 0, sizeof(ifr6));
+	ZERO(ifr6);
 	memcpy(&ifr6.ifr_addr, &psau->sa6, sizeof(ifr6.ifr_addr));
 	strncpy(ifr6.ifr_name, name, sizeof(ifr6.ifr_name));
 	if (ioctl(fd, SIOCGIFAFLAG_IN6, &ifr6) < 0) {
@@ -2498,7 +2496,7 @@ socket_multicast_enable(
 	switch (AF(maddr)) {
 
 	case AF_INET:
-		memset(&mreq, 0, sizeof(mreq));
+		ZERO(mreq);
 		mreq.imr_multiaddr = SOCK_ADDR4(maddr);
 		mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (setsockopt(iface->fd,
@@ -2529,7 +2527,7 @@ socket_multicast_enable(
 		 * for other types of multicast addresses. For now let
 		 * the kernel figure it out.
 		 */
-		memset(&mreq6, 0, sizeof(mreq6));
+		ZERO(mreq6);
 		mreq6.ipv6mr_multiaddr = SOCK_ADDR6(maddr);
 		mreq6.ipv6mr_interface = iface->ifindex;
 
@@ -2574,7 +2572,7 @@ socket_multicast_disable(
 #endif
 	struct ip_mreq mreq;
 
-	memset(&mreq, 0, sizeof(mreq));
+	ZERO(mreq);
 
 	if (find_addr_in_list(maddr) == NULL) {
 		DPRINTF(4, ("socket_multicast_disable(%s): not found\n", 
@@ -3911,7 +3909,7 @@ calc_addr_distance(
 
 	NTP_REQUIRE(AF(a1) == AF(a2));
 
-	memset(dist, 0, sizeof(*dist));
+	ZERO_SOCK(dist);
 	AF(dist) = AF(a1);
 
 	/* v4 can be done a bit simpler */
@@ -4572,7 +4570,7 @@ init_async_notifications()
 
 	fd = move_fd(fd);
 #ifdef HAVE_RTNETLINK
-	memset(&sa, 0, sizeof(sa));
+	ZERO(sa);
 	sa.nl_family = PF_NETLINK;
 	sa.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR
 		       | RTMGRP_IPV6_IFADDR | RTMGRP_IPV4_ROUTE

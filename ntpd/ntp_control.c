@@ -624,7 +624,7 @@ static struct utsname utsnamebuf;
  * timed out.
  */
 /* ntp_request.c */
-struct ctl_trap ctl_trap[CTL_MAXTRAPS];
+struct ctl_trap ctl_traps[CTL_MAXTRAPS];
 int num_ctl_traps;
 
 /*
@@ -773,8 +773,8 @@ init_control(void)
 	ctl_sys_num_events = 0;
 
 	num_ctl_traps = 0;
-	for (i = 0; i < COUNTOF(ctl_trap); i++)
-		ctl_trap[i].tr_flags = 0;
+	for (i = 0; i < COUNTOF(ctl_traps); i++)
+		ctl_traps[i].tr_flags = 0;
 }
 
 
@@ -1195,20 +1195,20 @@ ctl_flushpkt(
 	rpkt.count = htons((u_short)dlen);
 	rpkt.offset = htons((u_short)res_offset);
 	if (res_async) {
-		for (i = 0; i < COUNTOF(ctl_trap); i++) {
-			if (TRAP_INUSE & ctl_trap[i].tr_flags) {
+		for (i = 0; i < COUNTOF(ctl_traps); i++) {
+			if (TRAP_INUSE & ctl_traps[i].tr_flags) {
 				rpkt.li_vn_mode =
 				    PKT_LI_VN_MODE(
 					sys_leap,
-					ctl_trap[i].tr_version,
+					ctl_traps[i].tr_version,
 					MODE_CONTROL);
 				rpkt.sequence =
-				    htons(ctl_trap[i].tr_sequence);
-				sendpkt(&ctl_trap[i].tr_addr,
-					ctl_trap[i].tr_localaddr, -4,
+				    htons(ctl_traps[i].tr_sequence);
+				sendpkt(&ctl_traps[i].tr_addr,
+					ctl_traps[i].tr_localaddr, -4,
 					(struct pkt *)&rpkt, sendlen);
 				if (!more)
-					ctl_trap[i].tr_sequence++;
+					ctl_traps[i].tr_sequence++;
 				numasyncmsgs++;
 			}
 		}
@@ -1309,18 +1309,15 @@ ctl_putstr(
 	size_t		len
 	)
 {
-	char *cp;
-	char *cpend;
-	const char *cq;
 	char buffer[512];
+	char *cp;
+	size_t tl;
 
-	cp = buffer;
-	cpend = buffer + sizeof(buffer);
-	cq = tag;
-	while (cp < cpend && *cq != '\0')
-		*cp++ = *cq++;
+	tl = strlen(tag);
+	memcpy(buffer, tag, tl);
+	cp = buffer + tl;
 	if (len > 0) {
-		NTP_INSIST(cp + 3 + len <= cpend);
+		NTP_INSIST(tl + 3 + len <= sizeof(buffer));
 		*cp++ = '=';
 		*cp++ = '"';
 		memcpy(cp, data, len);
@@ -1347,18 +1344,15 @@ ctl_putunqstr(
 	size_t		len
 	)
 {
-	char *cp;
-	char *cpend;
-	const char *cq;
 	char buffer[512];
+	char *cp;
+	size_t tl;
 
-	cp = buffer;
-	cpend = buffer + sizeof(buffer);
-	cq = tag;
-	while (cp < cpend && *cq != '\0')
-		*cp++ = *cq++;
+	tl = strlen(tag);
+	memcpy(buffer, tag, tl);
+	cp = buffer + tl;
 	if (len > 0) {
-		NTP_INSIST(cp + 1 + len <= cpend);
+		NTP_INSIST(tl + 1 + len <= sizeof(buffer));
 		*cp++ = '=';
 		memcpy(cp, data, len);
 		cp += len;
@@ -1658,7 +1652,7 @@ ctl_putsys(
 	 */
 	if (CS_KERN_FIRST <= varid && varid <= CS_KERN_LAST &&
 	    current_time != ntp_adjtime_time) {
-		memset(&ntx, 0, sizeof(ntx));
+		ZERO(ntx);
 		if (ntp_adjtime(&ntx) < 0)
 			msyslog(LOG_ERR, "ntp_adjtime() for mode 6 query failed: %m");
 		else
@@ -1784,7 +1778,7 @@ ctl_putsys(
 	case CS_VARLIST:
 		s = buf;
 		be = buf + sizeof(buf);
-		if (s + strlen(sys_var[CS_VARLIST].text) + 4 > be)
+		if (strlen(sys_var[CS_VARLIST].text) + 4 > sizeof(buf))
 			break;	/* really long var name */
 
 		snprintf(s, sizeof(buf), "%s=\"",
@@ -2532,56 +2526,56 @@ ctl_putclock(
 
 	switch (id) {
 
-	    case CC_TYPE:
+	case CC_TYPE:
 		if (mustput || pcs->clockdesc == NULL
 		    || *(pcs->clockdesc) == '\0') {
 			ctl_putuint(clock_var[id].text, pcs->type);
 		}
 		break;
-	    case CC_TIMECODE:
+	case CC_TIMECODE:
 		ctl_putstr(clock_var[id].text,
 			   pcs->p_lastcode,
 			   (unsigned)pcs->lencode);
 		break;
 
-	    case CC_POLL:
+	case CC_POLL:
 		ctl_putuint(clock_var[id].text, pcs->polls);
 		break;
 
-	    case CC_NOREPLY:
+	case CC_NOREPLY:
 		ctl_putuint(clock_var[id].text,
 			    pcs->noresponse);
 		break;
 
-	    case CC_BADFORMAT:
+	case CC_BADFORMAT:
 		ctl_putuint(clock_var[id].text,
 			    pcs->badformat);
 		break;
 
-	    case CC_BADDATA:
+	case CC_BADDATA:
 		ctl_putuint(clock_var[id].text,
 			    pcs->baddata);
 		break;
 
-	    case CC_FUDGETIME1:
+	case CC_FUDGETIME1:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME1))
 			ctl_putdbl(clock_var[id].text,
 				   pcs->fudgetime1 * 1e3);
 		break;
 
-	    case CC_FUDGETIME2:
+	case CC_FUDGETIME2:
 		if (mustput || (pcs->haveflags & CLK_HAVETIME2))
 			ctl_putdbl(clock_var[id].text,
 			   pcs->fudgetime2 * 1e3);
 		break;
 
-	    case CC_FUDGEVAL1:
+	case CC_FUDGEVAL1:
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL1))
 			ctl_putint(clock_var[id].text,
 				   pcs->fudgeval1);
 		break;
 
-	    case CC_FUDGEVAL2:
+	case CC_FUDGEVAL2:
 		if (mustput || (pcs->haveflags & CLK_HAVEVAL2)) {
 			if (pcs->fudgeval1 > 1)
 				ctl_putadr(clock_var[id].text,
@@ -2592,14 +2586,14 @@ ctl_putclock(
 		}
 		break;
 
-	    case CC_FLAGS:
+	case CC_FLAGS:
 		if (mustput || (pcs->haveflags &	(CLK_HAVEFLAG1 |
 							 CLK_HAVEFLAG2 | CLK_HAVEFLAG3 | CLK_HAVEFLAG4)))
 			ctl_putuint(clock_var[id].text,
 				    pcs->flags);
 		break;
 
-	    case CC_DEVICE:
+	case CC_DEVICE:
 		if (pcs->clockdesc == NULL ||
 		    *(pcs->clockdesc) == '\0') {
 			if (mustput)
@@ -2612,62 +2606,59 @@ ctl_putclock(
 		}
 		break;
 
-	    case CC_VARLIST:
-	    {
+	case CC_VARLIST:
+		s = buf;
+		be = buf + sizeof(buf);
+		if (strlen(clock_var[CC_VARLIST].text) + 4 >
+		    sizeof(buf))
+			break;	/* really long var name */
 
-		    s = buf;
-		    be = buf + sizeof(buf);
-		    if (s + strlen(clock_var[CC_VARLIST].text) + 4 >
-			be)
-			    break;	/* really long var name */
+		snprintf(s, sizeof(buf), "%s=\"", 
+			 clock_var[CC_VARLIST].text);
+		s += strlen(s);
+		t = s;
 
-		    snprintf(s, sizeof(buf), "%s=\"", 
-		        clock_var[CC_VARLIST].text);
-		    s += strlen(s);
-		    t = s;
+		for (k = clock_var; !(EOV & k->flags); k++) {
+			if (PADDING & k->flags)
+				continue;
 
-		    for (k = clock_var; !(k->flags & EOV); k++) {
-			    if (k->flags & PADDING)
-				    continue;
+			i = strlen(k->text);
+			if (s + i + 1 >= be)
+				break;
 
-			    i = strlen(k->text);
-			    if (s + i + 1 >= be)
-				    break;
+			if (s != t)
+				*s++ = ',';
+			memcpy(s, k->text, i);
+			s += i;
+		}
 
-			    if (s != t)
-				    *s++ = ',';
-			    memcpy(s, k->text, i);
-			    s += i;
-		    }
+		for (k = pcs->kv_list; k && !(EOV & k->flags); k++) {
+			if (PADDING & k->flags)
+				continue;
 
-		    for (k = pcs->kv_list; k && !(EOV & k->flags); k++) {
-			    if (PADDING & k->flags)
-				    continue;
+			ss = k->text;
+			if (NULL == ss)
+				continue;
 
-			    ss = k->text;
-			    if (!ss)
-				    continue;
+			while (*ss && *ss != '=')
+				ss++;
+			i = ss - k->text;
+			if (s + i + 1 >= be)
+				break;
 
-			    while (*ss && *ss != '=')
-				    ss++;
-			    i = ss - k->text;
-			    if (s + i + 1 >= be)
-				    break;
+			if (s != t)
+				*s++ = ',';
+			memcpy(s, k->text, (unsigned)i);
+			s += i;
+			*s = '\0';
+		}
+		if (s + 2 >= be)
+			break;
 
-			    if (s != t)
-				    *s++ = ',';
-			    memcpy(s, k->text, (unsigned)i);
-			    s += i;
-			    *s = '\0';
-		    }
-		    if (s + 2 >= be)
-			    break;
-
-		    *s++ = '"';
-		    *s = '\0';
-		    ctl_putdata(buf, (unsigned)(s - buf), 0);
-	    }
-	    break;
+		*s++ = '"';
+		*s = '\0';
+		ctl_putdata(buf, (unsigned)(s - buf), 0);
+		break;
 	}
 }
 #endif
@@ -2735,7 +2726,7 @@ ctl_getitem(
 						cp++;
 					while (cp < reqend && *cp != ',') {
 						*tp++ = *cp++;
-						if (tp >= buf + sizeof(buf)) {
+						if (tp - buf >= sizeof(buf)) {
 							ctl_error(CERR_BADFMT);
 							numctlbadpkts++;
 							NLOG(NLOG_SYSEVENT)
@@ -2882,7 +2873,7 @@ read_peervars(void)
 	rpkt.status = htons(ctlpeerstatus(peer));
 	if (res_authokay)
 		peer->num_events = 0;
-	memset(&wants, 0, sizeof(wants));
+	ZERO(wants);
 	gotvar = 0;
 	while (NULL != (v = ctl_getitem(peer_var, &valuep))) {
 		if (v->flags & EOV) {
@@ -2928,8 +2919,7 @@ read_sysvars(void)
 	if (res_authokay)
 		ctl_sys_num_events = 0;
 	wants_count = CS_MAXCODE + 1 + count_var(ext_sys_var);
-	wants = emalloc(wants_count);
-	memset(wants, 0, wants_count);
+	wants = emalloc_zero(wants_count);
 	gotvar = 0;
 	while (NULL != (v = ctl_getitem(sys_var, &valuep))) {
 		if (!(EOV & v->flags)) {
@@ -3291,7 +3281,7 @@ send_mru_entry(
 	const char * pch;
 
 	remaining = COUNTOF(sent);
-	memset(sent, 0, sizeof(sent));
+	ZERO(sent);
 	noise = (u_int32)ntp_random();
 	while (remaining > 0) {
 		which = (noise & 7) % COUNTOF(sent);
@@ -3547,8 +3537,8 @@ static void read_mru_list(
 	maxlstint = 0;
 	lcladr = NULL;
 	priors = 0;
-	memset(last, 0, sizeof(last));
-	memset(addr, 0, sizeof(addr));
+	ZERO(last);
+	ZERO(addr);
 
 	while (NULL != (v = ctl_getitem(in_parms, &val)) &&
 	       !(EOV & v->flags)) {
@@ -3726,7 +3716,7 @@ send_ifstats_entry(
 	const char *pch;
 
 	remaining = COUNTOF(sent);
-	memset(sent, 0, sizeof(sent));
+	ZERO(sent);
 	noise = 0;
 	noisebits = 0;
 	while (remaining > 0) {
@@ -3919,8 +3909,7 @@ read_clockstatus(
 	 */
 	rpkt.status = htons(ctlclkstatus(&cs));
 	gotvar = CC_MAXCODE + 1 + count_var(kv);
-	wants = emalloc(gotvar);
-	memset(wants, 0, gotvar);
+	wants = emalloc_zero(gotvar);
 	gotvar = 0;
 	while (NULL != (v = ctl_getitem(clock_var, &valuep))) {
 		if (!(EOV & v->flags)) {
@@ -4062,8 +4051,9 @@ ctlsettrap(
 	int version
 	)
 {
-	register struct ctl_trap *tp;
-	register struct ctl_trap *tptouse;
+	size_t n;
+	struct ctl_trap *tp;
+	struct ctl_trap *tptouse;
 
 	/*
 	 * See if we can find this trap.  If so, we only need update
@@ -4072,17 +4062,17 @@ ctlsettrap(
 	if ((tp = ctlfindtrap(raddr, linter)) != NULL) {
 		switch (traptype) {
 
-		    case TRAP_TYPE_CONFIG:
+		case TRAP_TYPE_CONFIG:
 			tp->tr_flags = TRAP_INUSE|TRAP_CONFIGURED;
 			break;
 
-		    case TRAP_TYPE_PRIO:
+		case TRAP_TYPE_PRIO:
 			if (tp->tr_flags & TRAP_CONFIGURED)
 				return (1); /* don't change anything */
 			tp->tr_flags = TRAP_INUSE;
 			break;
 
-		    case TRAP_TYPE_NONPRIO:
+		case TRAP_TYPE_NONPRIO:
 			if (tp->tr_flags & TRAP_CONFIGURED)
 				return (1); /* don't change anything */
 			tp->tr_flags = TRAP_INUSE|TRAP_NONPRIO;
@@ -4099,29 +4089,30 @@ ctlsettrap(
 	 * have to. Clear out anyone who's expired while we're at it.
 	 */
 	tptouse = NULL;
-	for (tp = ctl_trap; tp < &ctl_trap[CTL_MAXTRAPS]; tp++) {
-		if ((tp->tr_flags & TRAP_INUSE) &&
-		    !(tp->tr_flags & TRAP_CONFIGURED) &&
+	for (n = 0; n < COUNTOF(ctl_traps); n++) {
+		tp = &ctl_traps[n];
+		if ((TRAP_INUSE & tp->tr_flags) &&
+		    !(TRAP_CONFIGURED & tp->tr_flags) &&
 		    ((tp->tr_settime + CTL_TRAPTIME) > current_time)) {
 			tp->tr_flags = 0;
 			num_ctl_traps--;
 		}
-		if (!(tp->tr_flags & TRAP_INUSE)) {
+		if (!(TRAP_INUSE & tp->tr_flags)) {
 			tptouse = tp;
-		} else if (!(tp->tr_flags & TRAP_CONFIGURED)) {
+		} else if (!(TRAP_CONFIGURED & tp->tr_flags)) {
 			switch (traptype) {
 
-			    case TRAP_TYPE_CONFIG:
+			case TRAP_TYPE_CONFIG:
 				if (tptouse == NULL) {
 					tptouse = tp;
 					break;
 				}
-				if (tptouse->tr_flags & TRAP_NONPRIO &&
-				    !(tp->tr_flags & TRAP_NONPRIO))
+				if ((TRAP_NONPRIO & tptouse->tr_flags) &&
+				    !(TRAP_NONPRIO & tp->tr_flags))
 					break;
 
-				if (!(tptouse->tr_flags & TRAP_NONPRIO)
-				    && tp->tr_flags & TRAP_NONPRIO) {
+				if (!(TRAP_NONPRIO & tptouse->tr_flags)
+				    && (TRAP_NONPRIO & tp->tr_flags)) {
 					tptouse = tp;
 					break;
 				}
@@ -4130,18 +4121,18 @@ ctlsettrap(
 					tptouse = tp;
 				break;
 
-			    case TRAP_TYPE_PRIO:
-				if (tp->tr_flags & TRAP_NONPRIO) {
+			case TRAP_TYPE_PRIO:
+				if ( TRAP_NONPRIO & tp->tr_flags) {
 					if (tptouse == NULL ||
-					    (tptouse->tr_flags &
-					     TRAP_INUSE &&
+					    ((TRAP_INUSE &
+					      tptouse->tr_flags) &&
 					     tptouse->tr_origtime <
 					     tp->tr_origtime))
 						tptouse = tp;
 				}
 				break;
 
-			    case TRAP_TYPE_NONPRIO:
+			case TRAP_TYPE_NONPRIO:
 				break;
 			}
 		}
@@ -4206,15 +4197,15 @@ ctlfindtrap(
 	struct interface *linter
 	)
 {
-	register struct ctl_trap *tp;
+	size_t	n;
 
-	for (tp = ctl_trap; tp < &ctl_trap[CTL_MAXTRAPS]; tp++) {
-		if ((tp->tr_flags & TRAP_INUSE)
-		    && ADDR_PORT_EQ(raddr, &tp->tr_addr)
-	 	    && (linter == tp->tr_localaddr) )
-			return (tp);
-	}
-	return (struct ctl_trap *)NULL;
+	for (n = 0; n < COUNTOF(ctl_traps); n++)
+		if ((ctl_traps[n].tr_flags & TRAP_INUSE)
+		    && ADDR_PORT_EQ(raddr, &ctl_traps[n].tr_addr)
+	 	    && (linter == ctl_traps[n].tr_localaddr))
+			return &ctl_traps[n];
+
+	return NULL;
 }
 
 

@@ -558,8 +558,7 @@ create_scan_states(
 		/* relocate so token id is sst[] index */
 		if (my_state != token) {
 			sst[token] = sst[my_state];
-			memset(&sst[my_state], 0,
-			       sizeof(sst[my_state]));
+			ZERO(sst[my_state]);
 			do
 				sst_highwater--;
 			while (sst[sst_highwater].finishes_token);

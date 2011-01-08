@@ -103,7 +103,7 @@ ntp_readline_init(
 				success = 0;
 
 			} else {
-				memset(&hev, 0, sizeof(hev));
+				ZERO(hev);
 #ifdef H_SETSIZE
 				history(ntp_hist, &hev, H_SETSIZE, 128);
 #endif

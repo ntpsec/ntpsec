@@ -563,19 +563,18 @@ doprintvlist(
 	FILE *fp
 	)
 {
-	register struct varlist *vl;
+	size_t n;
 
-	if (vlist->name == 0) {
-		(void) fprintf(fp, "No variables on list\n");
-	} else {
-		for (vl = vlist; vl < vlist + MAXLIST && vl->name != 0; vl++) {
-			if (vl->value == 0) {
-				(void) fprintf(fp, "%s\n", vl->name);
-			} else {
-				(void) fprintf(fp, "%s=%s\n",
-						   vl->name, vl->value);
-			}
-		}
+	if (NULL == vlist->name) {
+		fprintf(fp, "No variables on list\n");
+		return;
+	}
+	for (n = 0; n < MAXLIST && vlist[n].name != NULL; n++) {
+		if (NULL == vlist[n].value)
+			fprintf(fp, "%s\n", vlist[n].name);
+		else
+			fprintf(fp, "%s=%s\n", vlist[n].name,
+				vlist[n].value);
 	}
 }
 
@@ -782,7 +781,7 @@ readvar(
 	else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	memset(tmplist, 0, sizeof(tmplist));
+	ZERO(tmplist);
 	if (pcmd->nargs > 1) {
 		tmpcount = pcmd->nargs - 1;
 		for (u = 0; u < tmpcount; u++)
@@ -821,7 +820,7 @@ writevar(
 	else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	memset((char *)tmplist, 0, sizeof(tmplist));
+	ZERO(tmplist);
 	doaddvlist(tmplist, pcmd->argval[1].string);
 
 	res = doquerylist(tmplist, CTL_OP_WRITEVAR, associd, 1, &rstatus,
@@ -890,7 +889,7 @@ clockvar(
 	else if ((associd = checkassocid(pcmd->argval[0].uval)) == 0)
 		return;
 
-	memset(tmplist, 0, sizeof(tmplist));
+	ZERO(tmplist);
 	if (pcmd->nargs >= 2)
 		doaddvlist(tmplist, pcmd->argval[1].string);
 
@@ -999,7 +998,7 @@ mreadvar(
 		return;
 
 	if (pcmd->nargs >= 3) {
-		memset(tmplist, 0, sizeof(tmplist));
+		ZERO(tmplist);
 		doaddvlist(tmplist, pcmd->argval[2].string);
 		pvars = tmplist;
 	} else {
@@ -1571,10 +1570,10 @@ doprintpeers(
 	ZERO_SOCK(&srcadr);
 	ZERO_SOCK(&dstadr);
 	clock_name[0] = '\0';
-	memset(&estoffset, 0, sizeof(estoffset));
-	memset(&estdelay, 0, sizeof(estdelay));
-	memset(&estjitter, 0, sizeof(estjitter));
-	memset(&estdisp, 0, sizeof(estdisp));
+	ZERO(estoffset);
+	ZERO(estdelay);
+	ZERO(estjitter);
+	ZERO(estdisp);
 
 	while (nextvar(&datalen, &data, &name, &value)) {
 		if (!strcmp("srcadr", name) ||
@@ -2180,7 +2179,7 @@ add_mru(
 		mon = emalloc(sizeof(*mon));
 		mru_count++;
 	}
-	memset(mon, 0, sizeof(*mon));
+	ZERO(*mon);
 
 	return mon;
 }
@@ -2250,8 +2249,7 @@ collect_mru_list(
 	INIT_DLIST(mru_list, mlink);
 	cb = NTP_HASH_SIZE * sizeof(*hash_table);
 	NTP_INSIST(NULL == hash_table);
-	hash_table = emalloc(cb);
-	memset(hash_table, 0, cb);
+	hash_table = emalloc_zero(cb);
 
 	c_mru_l_rc = FALSE;
 	list_complete = FALSE;
@@ -2259,10 +2257,9 @@ collect_mru_list(
 	got = 0;
 	ri = 0;
 	cb = sizeof(*mon);
-	mon = emalloc(cb);
-	memset(mon, 0, cb);
-	memset(pnow, 0, sizeof(*pnow));
-	memset(&last_older, 0, sizeof(last_older));
+	mon = emalloc_zero(cb);
+	ZERO(*pnow);
+	ZERO(last_older);
 
 	limit = min(3 * MAXFRAGS, ntpd_row_limit);
 	snprintf(req_buf, sizeof(req_buf), "nonce=%s, limit=%d%s",
@@ -2768,7 +2765,7 @@ mrulist(
 	const char laddr_eq[] =		"laddr=";
 	const char sort_eq[] =		"sort=";
 	mru_sort_order order;
-	const char * const *ppkeyword;
+	size_t n;
 	char parms_buf[128];
 	char buf[24];
 	char *parms;
@@ -2808,16 +2805,14 @@ mrulist(
 			} else if (!strncmp(sort_eq, arg,
 					    sizeof(sort_eq) - 1)) {
 				arg += sizeof(sort_eq) - 1;
-				for (ppkeyword = mru_sort_keywords;
-				     ppkeyword < mru_sort_keywords +
-					 COUNTOF(mru_sort_keywords);
-				     ppkeyword++)
-					if (!strcmp(*ppkeyword, arg))
+				for (n = 0;
+				     n < COUNTOF(mru_sort_keywords);
+				     n++)
+					if (!strcmp(mru_sort_keywords[n],
+						    arg))
 						break;
-				if (ppkeyword < mru_sort_keywords +
-				    COUNTOF(mru_sort_keywords))
-					order = ppkeyword -
-						mru_sort_keywords;
+				if (n < COUNTOF(mru_sort_keywords))
+					order = n;
 			} else if (!strcmp("limited", arg) ||
 				   !strcmp("kod", arg)) {
 				/* transform to resany=... */
@@ -2984,7 +2979,7 @@ another_ifstats_field(
 		fprintf(fp, "    %s\n", sptoa(&prow->bcast));
 
 	*pfields = 0;
-	memset(prow, 0, sizeof(*prow));
+	ZERO(*prow);
 }
 
 
@@ -3033,7 +3028,7 @@ ifstats(
 		"==============================================================================\n");
 		/* '=' x 78 */
 
-	memset(&row, 0, sizeof(row));
+	ZERO(row);
 	fields = 0;
 	ifnum = 0;
 	ui = 0;
@@ -3160,9 +3155,9 @@ collect_display_vdc(
 	u_long ul;
 	int vtype;
 
-	memset(vl, 0, sizeof(vl));
+	ZERO(vl);
 	for (pvdc = table; pvdc->tag != NULL; pvdc++) {
-		memset(&pvdc->v, 0, sizeof(pvdc->v));
+		ZERO(pvdc->v);
 		if (NTP_ADD != pvdc->type) {
 			doaddvlist(vl, pvdc->tag);
 		} else {

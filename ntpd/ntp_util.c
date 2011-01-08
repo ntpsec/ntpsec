@@ -1020,6 +1020,8 @@ getauthkeys(
 			"ExpandEnvironmentStrings(KEY_FILE) failed: %m");
 		strncpy(key_file_name, keyfile, _MAX_PATH);
 	}
+	key_file_name = erealloc(key_file_name,
+				 1 + strlen(key_file_name));
 #endif /* SYS_WINNT */
 
 	authreadkeys(key_file_name);

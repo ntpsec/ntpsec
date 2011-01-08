@@ -197,8 +197,7 @@ refclock_newpeer(
 	/*
 	 * Allocate and initialize interface structure
 	 */
-	pp = emalloc(sizeof(*pp));
-	memset(pp, 0, sizeof(*pp));
+	pp = emalloc_zero(sizeof(*pp));
 	peer->procptr = pp;
 
 	/*
@@ -1238,7 +1237,7 @@ refclock_params(
 	struct refclock_atom *ap	/* atom structure pointer */
 	)
 {
-	memset(&ap->pps_params, 0, sizeof(pps_params_t));
+	ZERO(ap->pps_params);
 	ap->pps_params.api_version = PPS_API_VERS_1;
 
 	/*
@@ -1310,7 +1309,7 @@ refclock_pps(
 	}
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = 0;
-	memset(&pps_info, 0, sizeof(pps_info_t));
+	ZERO(pps_info);
 	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC, &pps_info,
 	    &timeout) < 0) {
 		refclock_report(peer, CEVNT_FAULT);

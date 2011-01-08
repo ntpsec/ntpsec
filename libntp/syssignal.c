@@ -75,7 +75,7 @@ signal_no_reset(
 	struct sigvec sv;
 	int n;
 
-	memset(&sv, 0, sizeof(sv));
+	ZERO(sv);
 	sv.sv_handler = func;
 	n = sigvec(sig, &sv, (struct sigvec *)NULL);
 	if (-1 == n) {

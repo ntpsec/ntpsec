@@ -72,15 +72,19 @@
 #include <isc/net.h>
 
 #include "ntp_types.h"
+#include "ntp_malloc.h"
 
-
-#if !defined(_MSC_VER) || !defined(_DEBUG)
-struct addrinfo *copy_addrinfo_list(const struct addrinfo *);
+struct addrinfo *copy_addrinfo_list_impl(const struct addrinfo *
+#ifdef EREALLOC_CALLSITE	/* from ntp_malloc.h */
+								,
+					 const char *, int
+#endif
+					 );
+#ifdef EREALLOC_CALLSITE
+# define copy_addrinfo_list(l) \
+	 copy_addrinfo_list_impl((l), __FILE__, __LINE__)
 #else
-#define copy_addrinfo_list(ai)	\
-	debug_copy_addrinfo_list((ai), __FILE__, __LINE__)
-struct addrinfo *debug_copy_addrinfo_list(const struct addrinfo *,
-					  const char *, int);
+# define copy_addrinfo_list(l)	copy_addrinfo_list_impl(l)
 #endif
 
 /*

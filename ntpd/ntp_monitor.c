@@ -142,7 +142,7 @@ mon_free_entry(
 	mon_entry *m
 	)
 {
-	memset(m, 0, sizeof(*m));
+	ZERO(*m);
 	LINK_SLIST(mon_free, m, hash_next);
 }
 
@@ -163,7 +163,7 @@ mon_reclaim_entry(
 {
 	UNLINK_DLIST(m, mru);
 	remove_from_hash(m);
-	memset(m, 0, sizeof(*m));
+	ZERO(*m);
 }
 
 
@@ -221,8 +221,7 @@ mon_start(
 	mon_hash_bits = max(4, mon_hash_bits);
 	mon_hash_bits = min(16, mon_hash_bits);
 	octets = sizeof(*mon_hash) * MON_HASH_SIZE;
-	mon_hash = erealloc(mon_hash, octets);
-	memset(mon_hash, 0, octets);
+	mon_hash = erealloc_zero(mon_hash, octets, 0);
 
 	mon_enabled = mode;
 }
@@ -259,7 +258,7 @@ mon_stop(
 	/* empty the MRU list and hash table. */
 	mru_entries = 0;
 	INIT_DLIST(mon_mru_list, mru);
-	memset(mon_hash, 0, sizeof(*mon_hash) * MON_HASH_SIZE);
+	zero_mem(mon_hash, sizeof(*mon_hash) * MON_HASH_SIZE);
 }
 
 

@@ -247,7 +247,7 @@ struct xcmd opcmds[] = {
  */
 #define SET_ADDR(address, v6flag, v4addr, v6addr)		\
 do {								\
-	memset(&(address), 0, sizeof(address));			\
+	ZERO(address);						\
 	if (v6flag) {						\
 		AF(&(address)) = AF_INET6;			\
 		SOCK_ADDR6(&(address)) = (v6addr);		\
@@ -265,8 +265,8 @@ do {								\
  */
 #define SET_ADDRS(a1, a2, info, a1prefix, a2prefix)		\
 do {								\
-	memset(&(a1), 0, sizeof(a1));				\
-	memset(&(a2), 0, sizeof(a2));				\
+	ZERO(a1);						\
+	ZERO(a2);						\
 	if ((info)->v6_flag) {					\
 		AF(&(a1)) = AF_INET6;				\
 		AF(&(a2)) = AF_INET6;				\
@@ -282,31 +282,6 @@ do {								\
 	SET_SS_LEN_IF_PRESENT(&(a2));				\
 } while (0)
 
-
-/*
- * SET_ADDRS - setup source and destination addresses for 
- * v4/v6 as needed
- */
-#if 0
-#define SET_ADDR_MASK(address, addrmask, info)			\
-do {								\
-	memset(&(address), 0, sizeof(address));			\
-	memset(&(mask), 0, sizeof(mask));			\
-	if ((info)->v6_flag) {					\
-		AF(&(address)) = AF_INET6;			\
-		AF(&(addrmask)) = AF_INET6;			\
-		SOCK_ADDR6(&(address)) = (info)->addr6;		\
-		SOCK_ADDR6(&(addrmask)) = (info)->mask6;	\
-	} else {						\
-		AF(&(address)) = AF_INET;			\
-		AF(&(addrmask)) = AF_INET;			\
-		NSRCADR(&(address)) = (info)->addr;		\
-		NSRCADR(&(addrmask)) = (info)->mask;		\
-	}							\
-	SET_SS_LEN_IF_PRESENT(&(address));			\
-	SET_SS_LEN_IF_PRESENT(&(addrmask));			\
-} while (0)
-#endif
 
 /*
  * checkitems - utility to print a message if no items were returned
@@ -791,7 +766,7 @@ again:
 	else
 		sendsize = v4sizeof(struct info_peer_list);
 
-	memset(plist, 0, sizeof(plist));
+	ZERO(plist);
 
 	qitemlim = min(pcmd->nargs, COUNTOF(plist));
 	for (qitems = 0, pl = plist; qitems < qitemlim; qitems++) {
@@ -1448,7 +1423,7 @@ again:
 	if (res)
 		return;
 
-	memset(&cpeer, 0, sizeof(cpeer));
+	ZERO(cpeer);
 
 	if (IS_IPV4(&pcmd->argval[0].netnum)) {
 		cpeer.peeraddr = NSRCADR(&pcmd->argval[0].netnum);
@@ -2381,9 +2356,8 @@ traps(
 	int res;
 
 again:
-	res = doquery(impl_ver, REQ_TRAPS, 0, 0, 0, (char *)NULL,
-		      &items, &itemsize, (void *)&it, 0, 
-		      sizeof(struct info_trap));
+	res = doquery(impl_ver, REQ_TRAPS, 0, 0, 0, NULL, &items,
+		      &itemsize, (void *)&it, 0, sizeof(*it));
 	
 	if (res == INFO_ERR_IMPL && impl_ver == IMPL_XNTPD) {
 		impl_ver = IMPL_XNTPD_OLD;
@@ -2391,39 +2365,38 @@ again:
 	}
 
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
-	    return;
+		return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_trap)) &&
 	    !checkitemsize(itemsize, v4sizeof(struct info_trap)))
-	    return;
+		return;
 
 	for (i = 0; i < items; i++ ) {
-		if (i != 0)
-		    (void) fprintf(fp, "\n");
 		SET_ADDRS(trap_addr, local_addr, it, trap_address, local_address);
-		(void) fprintf(fp, "address %s, port %d\n",
-				stoa(&trap_addr), 
-				ntohs(it->trap_port));
-		(void) fprintf(fp, "interface: %s, ",
-				(it->local_address == 0)
-				? "wildcard"
-				: stoa(&local_addr));
+		fprintf(fp, "%saddress %s, port %d\n",
+			(0 == i)
+			    ? ""
+			    : "\n",
+			stoa(&trap_addr), ntohs(it->trap_port));
+		fprintf(fp, "interface: %s, ",
+			(0 == it->local_address)
+			    ? "wildcard"
+			    : stoa(&local_addr));
 		if (ntohl(it->flags) & TRAP_CONFIGURED)
-		    (void) fprintf(fp, "configured\n");
+			fprintf(fp, "configured\n");
 		else if (ntohl(it->flags) & TRAP_NONPRIO)
-		    (void) fprintf(fp, "low priority\n");
+			fprintf(fp, "low priority\n");
 		else
-		    (void) fprintf(fp, "normal priority\n");
+			fprintf(fp, "normal priority\n");
 		
-		(void) fprintf(fp, "set for %ld secs, last set %ld secs ago\n",
-			       (long)ntohl(it->origtime),
-			       (long)ntohl(it->settime));
-		(void) fprintf(fp, "sequence %d, number of resets %ld\n",
-			       ntohs(it->sequence),
-			       (long)ntohl(it->resets));
+		fprintf(fp, "set for %ld secs, last set %ld secs ago\n",
+			(long)ntohl(it->origtime),
+			(long)ntohl(it->settime));
+		fprintf(fp, "sequence %d, number of resets %ld\n",
+			ntohs(it->sequence), (long)ntohl(it->resets));
 	}
 }
 
@@ -2765,7 +2738,7 @@ fudge(
 
 
 	err = 0;
-	memset((char *)&fudgedata, 0, sizeof fudgedata);
+	ZERO(fudgedata);
 	fudgedata.clockadr = NSRCADR(&pcmd->argval[0].netnum);
 
 	if (STREQ(pcmd->argval[1].string, "time1")) {
