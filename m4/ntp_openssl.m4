@@ -69,9 +69,8 @@ case "$ans" in
      '')
 	;;
      *)
-	pkgans=`$PKG_CONFIG --libs-only-L openssl | sed -e 's/^-L//' 2>/dev/null`
-	# strip trailing whitespace
-	pkgans=`set $pkgans ; echo $[1]`
+	pkgans=`$PKG_CONFIG --libs-only-L openssl 2>/dev/null`
+	pkgans=`echo $pkgans | sed -e 's/^-L//' | tr -d '\n' | tr -d ' '`
 	if test -f "${pkgans}/pkgconfig/openssl.pc" ; then
 	    ans="$pkgans"
 	fi
@@ -141,9 +140,8 @@ case "$ans" in
      '')
 	;;
      *)
-	pkgans=`$PKG_CONFIG --cflags-only-I openssl | sed -e 's/^-I//' 2>/dev/null`
-	# strip trailing whitespace
-	pkgans=`set $pkgans ; echo $[1]`
+	pkgans=`$PKG_CONFIG --cflags-only-I openssl 2>/dev/null`
+	pkgans=`echo $pkgans | sed -e 's/^-I//' | tr -d '\n' | tr -d ' '`
 	if test -f "${pkgans}/openssl/evp.h" ; then
 	    ans="$pkgans"
 	fi
