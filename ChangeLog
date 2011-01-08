@@ -1,3 +1,4 @@
+(4.2.7p114) 2011/01/08 Released by Harlan Stenn <stenn@ntp.org>
 * Fix for openssl pkg-config detection eval failure.
 * Add erealloc_zero(), refactor estrdup(), emalloc(), emalloc_zero() to
   separate tracking callsite file/line from using debug MS C runtime,
