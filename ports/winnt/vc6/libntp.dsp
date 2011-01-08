@@ -386,6 +386,10 @@ SOURCE=..\..\..\lib\isc\sockaddr.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\socket.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\socktoa.c
 # End Source File
 # Begin Source File
