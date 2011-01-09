@@ -2716,12 +2716,10 @@ nextvar(
 	)
 {
 	const char *cp;
-	char *np;
+	const char *np;
 	const char *cpend;
 	size_t srclen;
 	size_t len;
-	char *npend;	/* character after last */
-	int quoted = 0;
 	static char name[MAXVARLEN];
 	static char value[MAXVALLEN];
 
@@ -2741,6 +2739,7 @@ nextvar(
 	 * over any white space and terminate it.
 	 */
 	srclen = strcspn(cp, ",=\r\n");
+	srclen = max(srclen, (size_t)(cpend - cp));
 	len = srclen;
 	while (len > 0 && isspace(cp[len - 1]))
 		len--;
@@ -2766,35 +2765,37 @@ nextvar(
 	 * So far, so good.  Copy out the value
 	 */
 	cp++;	/* past '=' */
-	while (cp < cpend && (isspace((int)*cp) && *cp != '\r' && *cp != '\n'))
+	while (cp < cpend && (isspace(*cp) && *cp != '\r' && *cp != '\n'))
 		cp++;
-	np = value;
-	npend = &value[MAXVALLEN];
-	while (cp < cpend && np < npend && ((*cp != ',') || quoted))
-	{
-		quoted ^= ((*np++ = *cp++) == '"');
+	np = cp;
+	if ('"' == *np) {
+		do {
+			np++;
+		} while (np < cpend && '"' != *np);
+		if (np < cpend)
+			np++;
+	} else {
+		while (np < cpend && ',' != *np)
+			np++;
 	}
-
-	/*
-	 * Check if we overran the value buffer while still in a quoted string
-	 * or without finding a comma
-	 */
-	if (np == npend && (quoted || *cp != ','))
+	len = np - cp;
+	if (np >= cpend || ',' != *np || len >= sizeof(value))
 		return 0;
+	memcpy(value, cp, len);
 	/*
 	 * Trim off any trailing whitespace
 	 */
-	while (np > value && isspace((int)(*(np-1))))
-		np--;
-	*np = '\0';
+	while (len > 0 && isspace(value[len - 1]))
+		len--;
+	value[len] = '\0';
 
 	/*
 	 * Return this.  All done.
 	 */
-	if (cp != cpend)
-		cp++;
-	*datap = cp;
-	*datalen = cpend - cp;
+	if (np < cpend)
+		np++;
+	*datap = np;
+	*datalen = cpend - np;
 	*vvalue = value;
 	return 1;
 }

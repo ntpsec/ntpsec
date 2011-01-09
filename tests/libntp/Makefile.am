@@ -1,5 +1,5 @@
 check_PROGRAMS = tests
-LDADD = @LCRYPTO@ @GTEST_LDFLAGS@ @GTEST_LIBS@ @top_builddir@/libntp/libntp.a
+LDADD = @top_builddir@/libntp/libntp.a @LCRYPTO@ @GTEST_LDFLAGS@ @GTEST_LIBS@
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
 AM_CPPFLAGS = @GTEST_CPPFLAGS@
 tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\

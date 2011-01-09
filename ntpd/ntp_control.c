@@ -2405,7 +2405,7 @@ ctl_putpeer(
 	case CP_VARLIST:
 		s = buf;
 		be = buf + sizeof(buf);
-		if (s + strlen(peer_var[id].text) + 4 > be)
+		if (strlen(peer_var[id].text) + 4 > sizeof(buf))
 			break;	/* really long var name */
 
 		snprintf(s, sizeof(buf), "%s=\"", peer_var[id].text);
