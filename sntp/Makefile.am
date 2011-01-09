@@ -15,7 +15,7 @@ AM_CPPFLAGS =					\
 	-I$(top_srcdir)/../lib/isc/unix/include	\
 	$(NULL)
 
-LDADD =	$(LIBOPTS_LDADD) $(LIBEVENT_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
+LDADD =	version.o $(LIBOPTS_LDADD) $(LIBEVENT_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../include --writable
@@ -60,6 +60,10 @@ sntp_SOURCES =		\
 	utilities.h	\
 	$(NULL)
 
+DISTCLEANFILES =			\
+	version.c			\
+	$(NULL)
+
 EXTRA_DIST =				\
 	$(srcdir)/autogen-version.def	\
 	bincheck.mf			\
@@ -73,6 +77,7 @@ EXTRA_DIST =				\
 	sntp.html			\
 	sntp.texi			\
 	tests_main.h			\
+	$(srcdir)/version		\
 	$(srcdir)/version.def		\
 	$(srcdir)/version.m4		\
 	$(srcdir)/version.texi		\
@@ -90,6 +95,7 @@ BUILT_SOURCES=				\
 	libtool				\
 	$(srcdir)/sntp-opts.c		\
 	$(srcdir)/sntp-opts.h		\
+	$(srcdir)/version		\
 	$(NULL)
 
 man_MANS=	$(srcdir)/sntp.1
@@ -110,6 +116,17 @@ FRC:
 	@: always out-of-date causing targets which depend on it to
 	@: similarly always be outdated causing their rules to fire
 	@: each time they or a dependent is built.
+
+$(srcdir)/version: FRC
+	@cd $(srcdir)				\
+	&& test -f ../version			\
+	&& ( cd .. && $(MAKE) version )		\
+	&& ( cmp -s version ../version || cp ../version version )
+
+# We probably need something about libevent, too
+version.o: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
+	env CSET=`cat $(top_srcdir)/version` ../$(top_builddir)/scripts/mkver sntp
+	$(COMPILE) -c version.c
 
 check-autogen-version.def: FRC
 	@cd $(srcdir)							\

@@ -58,7 +58,7 @@ resolve_hosts (
 					  : "(AAAA) ",
 				hosts[a], gai_strerror(error));
 		} else {
-#ifdef DEBUG
+#if 0
 			for (dres = tres[resc]; dres; dres = dres->ai_next) {
 				getnameinfo(dres->ai_addr, dres->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
 				STDLINE
@@ -109,13 +109,15 @@ sendpkt (
 	int cc;
 
 #ifdef DEBUG
-	printf("sntp sendpkt: Packet data:\n");
-	pkt_output(pkt, len, stdout);
-#endif
+	if (debug > 2) {
+		printf("sntp sendpkt: Packet data:\n");
+		pkt_output(pkt, len, stdout);
+	}
 
 	if (debug) {
 		printf("sntp sendpkt: Sending packet to %s ...\n", sptoa(dest));
 	}
+#endif
 
 	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, SOCKLEN(dest));
 	if (cc == SOCKET_ERROR) {
@@ -125,8 +127,11 @@ sendpkt (
 		if (errno != EWOULDBLOCK && errno != ENOBUFS) {
 			/* oh well */
 		}
-	} else if (debug) {
-		printf("Packet sent.\n");
+	} else {
+#ifdef DEBUG
+		if (debug)
+			printf("Packet sent.\n");
+#endif
 	}
 }
 
@@ -154,9 +159,9 @@ recvdata(
 		printf("Received %d bytes from %s:\n", recvc, sptoa(sender));
 		pkt_output((struct pkt *) rdata, recvc, stdout);
 	} else {
-		saved_errno = errno;
+		// saved_errno = errno;
 		printf("recvfrom error %d (%s)\n", errno, strerror(errno));
-		errno = saved_errno;
+		// errno = saved_errno;
 	}
 #endif
 	return recvc;
