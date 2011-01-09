@@ -35,10 +35,18 @@ struct ntp_ctx {
 	int key_id;
 	struct timeval timeout;
 	struct key *key;
+	struct pkt x_pkt;
 };
 
 struct key *keys = NULL;
 struct timeval timeout_tv;
+
+static union {
+	struct pkt pkt;
+	char   buf[1500];
+} rbuf;
+
+#define r_pkt  rbuf.pkt
 
 void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
 void ntp_cb (evutil_socket_t, short, void *);
@@ -222,6 +230,8 @@ sntp_main (
 		hints.ai_protocol = IPPROTO_TCP;
 
 		dns_ctx = emalloc(sizeof(*dns_ctx));
+		memset(dns_ctx, 0, sizeof(*dns_ctx));
+
 		dns_ctx->name = argv[i];
 		dns_ctx->flags = CTX_UCST;
 		dns_ctx->timeout = timeout_tv;
@@ -424,10 +434,10 @@ printf("dns_cb: checking <%s>\n", hostname);
 						ctx->key_id, ctx->key);
 
 				/* The current sendpkt does not return status */
-				/* XXX: the 2nd arg may be wrong... */
-				/* XXX: ... or it may need a cast*/
 				sendpkt(sock, (sockaddr_u *)ai->ai_addr,
 					&x_pkt, pkt_len);
+				/* Save the packet we sent... */
+				memcpy(&(ctx->x_pkt), &x_pkt, pkt_len);
 
 #ifdef DEBUG
 				msyslog(LOG_DEBUG,
@@ -494,6 +504,7 @@ ntp_cb(
 	)
 {
 	struct ntp_ctx *ctx = ptr;
+	int rpktl;
 
 	if (debug)
 	    printf("Got an event on socket %d:%s%s%s%s [%s%s] <%s>\n",
@@ -508,6 +519,8 @@ ntp_cb(
 		);
 
 	/* Read in the packet */
+	rpktl = recvpkt(fd, &r_pkt, sizeof rbuf,
+		(ctx->flags & CTX_UCST) ? &(ctx->x_pkt) :  0);
 
 	/* If this is a Unicast packet, we're done ... */
 	if (ctx->flags & CTX_UCST) {
@@ -518,15 +531,6 @@ ntp_cb(
 
 	/* If the packet is good, set the time and we're all done */
 }
-
-
-
-static union {
-	struct pkt pkt;
-	char   buf[1500];
-} rbuf;
-
-#define r_pkt  rbuf.pkt
 
 
 int
@@ -737,72 +741,6 @@ offset_calculation (
 			   t21, t34, delta, *offset);
 }
 
-
-/*
-** The heart of (S)NTP:
-**
-** Exchange NTP packets and compute values to correct the local clock.
-*/
-int
-on_wire (
-	struct addrinfo *host,
-	struct addrinfo *bcast
-	)
-{
-	char addr_buf[INET6_ADDRSTRLEN];
-	register int try;
-	SOCKET sock;
-	struct key *pkt_key = NULL;
-	long l;
-	int key_id = 0;
-	struct timeval tv_xmt;
-	struct pkt x_pkt;
-	int error, rpktl, handle_pkt_res;
-
-	if (ENABLED_OPT(AUTHENTICATION) &&
-	    atoint(OPT_ARG(AUTHENTICATION), &l)) {
-		key_id = l;
-		get_key(key_id, &pkt_key);
-	}
-	for (try = 0; try < 5; try++) {
-		memset(&r_pkt, 0, sizeof rbuf);
-
-		error = GETTIMEOFDAY(&tv_xmt, NULL);
-		tv_xmt.tv_sec += JAN_1970;
-
-#ifdef DEBUG
-		printf("sntp on_wire: Current time sec: %i msec: %i\n",
-		       (unsigned int) tv_xmt.tv_sec,
-		       (unsigned int) tv_xmt.tv_usec);
-#endif
-
-		if (bcast) {
-			create_socket(&sock, (sockaddr_u *)bcast->ai_addr);
-			rpktl = recv_bcst_pkt(sock, &r_pkt, sizeof rbuf,
-					      (sockaddr_u *)bcast->ai_addr);
-			closesocket(sock);
-		} else {
-			int pkt_len = generate_pkt(&x_pkt, &tv_xmt, key_id,
-						   pkt_key);
-
-			create_socket(&sock, (sockaddr_u *)host->ai_addr);
-			sendpkt(sock, (sockaddr_u *)host->ai_addr, &x_pkt,
-				pkt_len);
-			rpktl = recvpkt(sock, &r_pkt, sizeof rbuf, &x_pkt);
-			closesocket(sock);
-		}
-
-		handle_pkt_res = handle_pkt(rpktl, &r_pkt, host);
-		if (handle_pkt_res < 1)
-			return handle_pkt_res;
-	}
-
-	getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf,
-		    sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
-	msyslog(LOG_DEBUG, "Received no useable packet from %s!", addr_buf);
-
-	return -1;
-}
 
 
 /* Compute the 8 bits for li_vn_mode */
