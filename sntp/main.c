@@ -26,27 +26,22 @@ SOCKET sock6 = -1;		/* Socket for IPv6 */
 char *progname;
 struct event_base *base = NULL;
 
-struct dns_cb_ctx {
+struct ntp_ctx {
 	char *name;
 	int flags;
 #define CTX_BCST	0x0001
 #define CTX_UCST	0x0002
 #define CTX_unused	0xfffd
 	int key_id;
-	struct key *key;
-};
-
-struct ntp_cb_ctx {
-	char *name;
-	int flags;
-	int key_id;
+	struct timeval timeout;
 	struct key *key;
 };
 
 struct key *keys = NULL;
+struct timeval timeout_tv;
 
 void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
-void ntp_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
+void ntp_cb (evutil_socket_t, short, void *);
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode);
 int sntp_main (int argc, char **argv);
 int on_wire (struct addrinfo *host, struct addrinfo *bcastaddr);
@@ -79,6 +74,7 @@ sntp_main (
 	/* boolean, u_int quiets gcc4 signed overflow warning */
 	// struct addrinfo *ai;
 	struct evdns_base *dnsbase;
+	long l;
 
 	progname = argv[0];
 
@@ -92,6 +88,17 @@ sntp_main (
 		open_logfile(OPT_ARG(FILELOG));
 
 	msyslog(LOG_NOTICE, "Started sntp");
+
+	/*
+	** Eventually, we probably want:
+	** - separate bcst and ucst timeouts
+	** - multiple --timeout values in the commandline
+	*/
+	if (ENABLED_OPT(TIMEOUT) && atoint(OPT_ARG(TIMEOUT), &l))
+		timeout_tv.tv_sec = l;
+	else 
+		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
+	timeout_tv.tv_usec = 0;
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -158,8 +165,7 @@ sntp_main (
 
 	if (ENABLED_OPT(BROADCAST)) {
 		struct evutil_addrinfo hints;
-		struct dns_cb_ctx *dns_ctx;
-		long l;
+		struct ntp_ctx *dns_ctx;
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = ai_fam_pref;
@@ -175,6 +181,7 @@ sntp_main (
 		dns_ctx = emalloc(sizeof *dns_ctx);
 		dns_ctx->name = OPT_ARG(BROADCAST);
 		dns_ctx->flags = CTX_BCST;
+		dns_ctx->timeout = timeout_tv;
 
 		if (ENABLED_OPT(AUTHENTICATION) &&
 		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
@@ -194,8 +201,7 @@ sntp_main (
 
 	for (i = 0; i < argc; ++i) {
 		struct evutil_addrinfo hints; /* local copy is OK */
-		struct dns_cb_ctx *dns_ctx;
-		long l;
+		struct ntp_ctx *dns_ctx;
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = ai_fam_pref;
@@ -211,6 +217,7 @@ sntp_main (
 		dns_ctx = emalloc(sizeof *dns_ctx);
 		dns_ctx->name = argv[i];
 		dns_ctx->flags = CTX_UCST;
+		dns_ctx->timeout = timeout_tv;
 
 		if (ENABLED_OPT(AUTHENTICATION) &&
 		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
@@ -296,7 +303,8 @@ dns_cb(
 	void *ptr
 	)
 {
-	struct dns_cb_ctx *ctx = ptr;
+	struct ntp_ctx *ctx = ptr;
+	struct event *ev;
 
 	if (errcode) {
 		printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
@@ -315,6 +323,7 @@ dns_cb(
 
 			/* Is there a KoD on file for this address? */
 			hostname = addrinfo_to_str(ai);
+printf("dns_cb: checking <%s>\n", hostname);
 			if (search_entry(hostname, &reason)) {
 				printf("prior KoD for %s, skipping.\n",
 					hostname);
@@ -374,7 +383,7 @@ dns_cb(
 
 				if (0 != GETTIMEOFDAY(&tv_xmt, NULL)) {
 					msyslog(LOG_ERR,
-						"xxx: gettimeofday() failed: %m");
+						"dns_cb: gettimeofday() failed: %m");
 					exit(1);
 				}
 				tv_xmt.tv_sec += JAN_1970;
@@ -405,22 +414,24 @@ dns_cb(
 			/* queue that we're waiting for a response */
 
 			/*
-			** we should register an NTP callback,
-			** which will probably need the key ID and value
-			** copied from the DNS context
+			** register an NTP callback,
 			*/
 
-#if 0
-			if (ai->ai_family == AF_INET) {
-				struct sockaddr_in *sin = (struct sockaddr_in *)ai->ai_addr;
-				s = evutil_inet_ntop(AF_INET, &sin->sin_addr, buf, 128);
-			} else if (ai->ai_family == AF_INET6) {
-				struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)ai->ai_addr;
-				s = evutil_inet_ntop(AF_INET6, &sin6->sin6_addr, buf, 128);
+			/*
+			** HMS: Exactly why do we want a timeout?
+			** Should we use the same value for bcast and ucast?
+			*/
+			ev = event_new(base, sock,
+				EV_TIMEOUT|EV_READ|EV_PERSIST,
+				ntp_cb, ptr);
+			if (NULL == ev) {
+				msyslog(LOG_ERR,
+					"dns_cb: event_new(base, sock) failed!");
+				--n_pending_ntp;
+				/* What now? */
+			} else {
+				event_add(ev, &(ctx->timeout));
 			}
-			if (s)
-				printf("    -> %s\n", s);
-#endif
 		}
 		evutil_freeaddrinfo(addr);
 		free(ptr);
@@ -435,6 +446,7 @@ dns_cb(
 
 /*
 ** NTP Callback:
+** Read in the packet
 ** Unicast:
 ** - close socket
 ** - decrement n_pending_ntp
@@ -444,17 +456,34 @@ dns_cb(
 */
 void
 ntp_cb(
-	int errcode,
-	struct evutil_addrinfo *addr,
+	evutil_socket_t fd,
+	short what,
 	void *ptr
 	)
 {
-	struct dns_cb_ctx *ctx = ptr;
+	struct ntp_ctx *ctx = ptr;
 
-	if (errcode) {
-		printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
-	} else {
+	printf("Got an event on socket %d:%s%s%s%s [%s%s] <%s>",
+		(int) fd,
+		(what&EV_TIMEOUT) ? " timeout" : "",
+		(what&EV_READ)    ? " read" : "",
+		(what&EV_WRITE)   ? " write" : "",
+		(what&EV_SIGNAL)  ? " signal" : "",
+		(ctx->flags & CTX_BCST)	? "BCST" : "",
+		(ctx->flags & CTX_UCST)	? "UCST" : "",
+		ctx->name
+		);
+
+	/* Read in the packet */
+
+	/* If this is a Unicast packet, we're done ... */
+	if (ctx->flags & CTX_UCST) {
+		/* Only close() if we use a separate socket for each response */
+		// close(fd);
+		--n_pending_ntp;
 	}
+
+	/* If the packet is good, set the time and we're all done */
 }
 
 
