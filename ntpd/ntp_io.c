@@ -1243,7 +1243,7 @@ create_wildcards(
 	if (v4wild) {
 		/* set wildaddr to the v4 wildcard address 0.0.0.0 */
 		AF(&wildaddr) = AF_INET;
-		SET_ADDR4(&wildaddr, INADDR_ANY);
+		SET_ADDR4N(&wildaddr, INADDR_ANY);
 		SET_PORT(&wildaddr, port);
 
 		/* check for interface/nic rules affecting the wildcard */
@@ -1266,7 +1266,7 @@ create_wildcards(
 		 * enable multicast reception on the broadcast socket
 		 */
 		AF(&wildif->bcast) = AF_INET;
-		SET_ADDR4(&wildif->bcast, INADDR_ANY);
+		SET_ADDR4N(&wildif->bcast, INADDR_ANY);
 		SET_PORT(&wildif->bcast, port);
 #endif /* MCAST */
 		wildif->fd = open_socket(&wildif->sin, 0, 1, wildif);

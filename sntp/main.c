@@ -27,7 +27,7 @@ char *progname;
 struct event_base *base = NULL;
 
 struct ntp_ctx {
-	char *name;
+	const char *name;
 	int flags;
 #define CTX_BCST	0x0001
 #define CTX_UCST	0x0002
@@ -167,7 +167,7 @@ sntp_main (
 		struct evutil_addrinfo hints;
 		struct ntp_ctx *dns_ctx;
 
-		memset(&hints, 0, sizeof(hints));
+		ZERO(hints);
 		hints.ai_family = ai_fam_pref;
 		hints.ai_flags |= EVUTIL_AI_CANONNAME;
 		hints.ai_flags |= EVUTIL_AI_NUMERICSERV;
@@ -179,7 +179,7 @@ sntp_main (
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 
-		dns_ctx = emalloc(sizeof *dns_ctx);
+		dns_ctx = emalloc(sizeof(*dns_ctx));
 		dns_ctx->name = OPT_ARG(BROADCAST);
 		dns_ctx->flags = CTX_BCST;
 		dns_ctx->timeout = timeout_tv;
@@ -187,7 +187,7 @@ sntp_main (
 		if (ENABLED_OPT(AUTHENTICATION) &&
 		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
 			dns_ctx->key_id = l;
-			get_key(dns_ctx->key_id, &(dns_ctx->key));
+			get_key(dns_ctx->key_id, &dns_ctx->key);
 		} else {
 			dns_ctx->key_id = -1;
 			dns_ctx->key = NULL;
@@ -196,7 +196,7 @@ sntp_main (
 		printf("broadcast-before: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 		++n_pending_dns;
 		evdns_getaddrinfo(dnsbase, OPT_ARG(BROADCAST), "123", &hints,
-				  dns_cb, (void *)dns_ctx);
+				  dns_cb, dns_ctx);
 		printf("broadcast-after: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 	}
 
@@ -204,9 +204,10 @@ sntp_main (
 		struct evutil_addrinfo hints; /* local copy is OK */
 		struct ntp_ctx *dns_ctx;
 
-		memset(&hints, 0, sizeof(hints));
+		ZERO(hints);
 		hints.ai_family = ai_fam_pref;
-		hints.ai_flags = EVUTIL_AI_CANONNAME;
+		hints.ai_flags |= EVUTIL_AI_CANONNAME;
+		hints.ai_flags |= EVUTIL_AI_NUMERICSERV;
 		/*
 		** Unless we specify a socktype, we'll get at least two
 		** entries for each address: one for TCP and one for
@@ -215,7 +216,7 @@ sntp_main (
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 
-		dns_ctx = emalloc(sizeof *dns_ctx);
+		dns_ctx = emalloc(sizeof(*dns_ctx));
 		dns_ctx->name = argv[i];
 		dns_ctx->flags = CTX_UCST;
 		dns_ctx->timeout = timeout_tv;
@@ -223,7 +224,7 @@ sntp_main (
 		if (ENABLED_OPT(AUTHENTICATION) &&
 		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
 			dns_ctx->key_id = l;
-			get_key(dns_ctx->key_id, &(dns_ctx->key));
+			get_key(dns_ctx->key_id, &dns_ctx->key);
 		} else {
 			dns_ctx->key_id = -1;
 			dns_ctx->key = NULL;
@@ -231,8 +232,8 @@ sntp_main (
 
 		printf("unicast-before: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
 		++n_pending_dns;
-		evdns_getaddrinfo(dnsbase, argv[i], NULL, &hints,
-				  dns_cb, (void *)dns_ctx);
+		evdns_getaddrinfo(dnsbase, argv[i], "123", &hints,
+				  dns_cb, dns_ctx);
 		printf("unicast-after: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
 	}
 
@@ -306,6 +307,7 @@ dns_cb(
 {
 	struct ntp_ctx *ctx = ptr;
 	struct event *ev;
+	sockaddr_u name;
 
 	if (errcode) {
 		printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
@@ -338,7 +340,6 @@ printf("dns_cb: checking <%s>\n", hostname);
 			/* Open a socket and make it non-blocking */
 			if (ai->ai_family == AF_INET) {
 				if (-1 == sock4) {
-					struct sockaddr_in name;
 
 					sock4 = socket(PF_INET, SOCK_DGRAM, 0);
 					if (-1 == sock4) {
@@ -350,13 +351,13 @@ printf("dns_cb: checking <%s>\n", hostname);
 					make_socket_nonblocking(sock4);
 
 					/* Let's try using a wildcard... */
-					memset(&name, 0, sizeof(name));
-					name.sin_family = AF_INET;
-					name.sin_addr.s_addr = INADDR_ANY;
-					name.sin_port = 0;
-					if (-1 == bind(sock4,
-						    (struct sockaddr *)&name,
-						    sizeof(name))) {
+					ZERO(name);
+					AF(&name) = AF_INET;
+					SET_ADDR4N(&name, INADDR_ANY);
+					SET_PORT(&name, 0);
+
+					if (-1 == bind(sock4, &name.sa,
+						       SOCKLEN(&name))) {
 						msyslog(LOG_ERR, "dns_cv: bind(sock4) failed: %m");
 						exit(1);
 					}
@@ -365,8 +366,6 @@ printf("dns_cb: checking <%s>\n", hostname);
 			}
 			else if (ai->ai_family == AF_INET6) {
 				if (-1 == sock6) {
-					struct sockaddr_in6 name;
-
 					sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
 					if (-1 == sock6) {
 						/* error getting a socket */
@@ -377,13 +376,13 @@ printf("dns_cb: checking <%s>\n", hostname);
 					make_socket_nonblocking(sock6);
 
 					/* Let's try using a wildcard... */
-					memset(&name, 0, sizeof(name));
-					name.sin6_family = AF_INET6;
-					name.sin6_addr = in6addr_any;
-					name.sin6_port = 0;
-					if (-1 == bind(sock6,
-						    (struct sockaddr *)&name,
-						    sizeof(name))) {
+					ZERO(name);
+					AF(&name) = AF_INET;
+					SET_ADDR6N(&name, in6addr_any);
+					SET_PORT(&name, 0);
+
+					if (-1 == bind(sock6, &name.sa,
+						       SOCKLEN(&name))) {
 						msyslog(LOG_ERR, "dns_cv: bind(sock6) failed: %m");
 						exit(1);
 					}
@@ -391,11 +390,10 @@ printf("dns_cb: checking <%s>\n", hostname);
 				sock = sock6;
 			}
 			else {
-			  /* unexpected ai_family value */
-			  msyslog(LOG_ERR, "dns_cb: unexpected ai_family: %d",
-				ai->ai_family
-				);
-			  exit(1);
+				/* unexpected ai_family value */
+				msyslog(LOG_ERR, "dns_cb: unexpected ai_family: %d",
+					ai->ai_family);
+				exit(1);
 			}
 
 			/*
