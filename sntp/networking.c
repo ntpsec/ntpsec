@@ -114,15 +114,13 @@ sendpkt (
 #endif
 
 	if (ENABLED_OPT(NORMALVERBOSE)) {
-		getnameinfo(&dest->sa, SOCKLEN(dest), adr_buf,
-			    sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
-		printf("sntp sendpkt: Sending packet to %s... ", adr_buf);
+		printf("sntp sendpkt: Sending packet to %s ...\n", sptoa(dest));
 	}
 
 	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, SOCKLEN(dest));
 	if (cc == SOCKET_ERROR) {
 #ifdef DEBUG
-		printf("\n sntp sendpkt: Socket error: %i. Couldn't send packet!\n", cc);
+		printf("sntp sendpkt: Socket error: %i. Couldn't send packet!\n", cc);
 #endif
 		if (errno != EWOULDBLOCK && errno != ENOBUFS) {
 			/* oh well */
@@ -153,7 +151,7 @@ recvdata(
 			 &sender->sa, &slen);
 #ifdef DEBUG
 	if (recvc > 0) {
-		printf("Received %d bytes from %s:\n", recvc, stoa(sender));
+		printf("Received %d bytes from %s:\n", recvc, sptoa(sender));
 		pkt_output((struct pkt *) rdata, recvc, stdout);
 	} else {
 		saved_errno = errno;
@@ -202,8 +200,8 @@ recv_bcst_data (
 	if (IS_IPV4(sas)) {
 		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
 			if (ENABLED_OPT(NORMALVERBOSE))
-				printf("sntp recv_bcst_data: Couldn't bind() address %s:%d.\n",
-				       stoa(sas), SRCPORT(sas));
+				printf("sntp recv_bcst_data: Couldn't bind() address %s.\n",
+				       sptoa(sas));
 		}
 
 #ifdef MCAST
@@ -215,8 +213,8 @@ recv_bcst_data (
 		mdevadr.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (mdevadr.imr_multiaddr.s_addr == -1) {
 			if (ENABLED_OPT(NORMALVERBOSE)) {
-				printf("sntp recv_bcst_data: %s:%d is not a broad-/multicast address, aborting...\n",
-				       stoa(sas), SRCPORT(sas));
+				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n",
+				       sptoa(sas));
 			}
 			return BROADCAST_FAILED;
 		}
