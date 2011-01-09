@@ -113,8 +113,7 @@ GetHeapAlloc(char *fromfunc)
 			HEAP_ZERO_MEMORY,
 			sizeof(olplus));
 #else
-	lpo = emalloc(sizeof(*lpo));
-	memset(lpo, 0, sizeof(*lpo));
+	lpo = emalloc_zero(sizeof(*lpo));
 #endif
 	DPRINTF(3, ("Allocation %d memory for %s, ptr %x\n", sizeof(olplus), fromfunc, lpo));
 
@@ -406,7 +405,7 @@ QueueSerialWait(
 	lpo->recv_buf = buff;
 
 	if (clear_timestamp)
-		memset(&buff->recv_time, 0, sizeof(buff->recv_time));
+		ZERO(buff->recv_time);
 
 	buff->fd = _get_osfhandle(rio->fd);
 	if (!WaitCommEvent((HANDLE)buff->fd,

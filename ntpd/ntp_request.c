@@ -739,7 +739,7 @@ list_peers_sum(
 				if (pp->dstadr)
 					ips->dstadr6 = SOCK_ADDR6(&pp->dstadr->sin);
 				else
-					memset(&ips->dstadr6, 0, sizeof(ips->dstadr6));
+					ZERO(ips->dstadr6);
 				skip = 0;
 			} else {
 				skip = 1;
@@ -848,7 +848,7 @@ peer_info (
 					? SOCK_ADDR6(&pp->dstadr->bcast)
 					: SOCK_ADDR6(&pp->dstadr->sin);
 			else
-				memset(&ip->dstadr6, 0, sizeof(ip->dstadr6));
+				ZERO(ip->dstadr6);
 
 			ip->srcadr6 = SOCK_ADDR6(&pp->srcadr);
 			ip->v6_flag = 1;
@@ -958,7 +958,7 @@ peer_stats (
 	ip = (struct info_peer_stats *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_peer_stats));
 	while (items-- > 0 && ip != 0) {
-		memset((char *)&addr, 0, sizeof(addr));
+		ZERO(addr);
 		NSRCPORT(&addr) = ipl->port;
 		if (client_v6_capable && ipl->v6_flag) {
 			AF(&addr) = AF_INET6;
@@ -1007,7 +1007,7 @@ peer_stats (
 					? SOCK_ADDR6(&pp->dstadr->bcast)
 					: SOCK_ADDR6(&pp->dstadr->sin);
 			else
-				memset(&ip->dstadr6, 0, sizeof(ip->dstadr6));
+				ZERO(ip->dstadr6);
 
 			ip->srcadr6 = SOCK_ADDR6(&pp->srcadr);
 			ip->v6_flag = 1;
@@ -1290,31 +1290,8 @@ do_conf(
 	 */
 	items = INFO_NITEMS(inpkt->err_nitems);
 	cp = (struct conf_peer *)inpkt->data;
-	memset(&temp_cp, 0, sizeof(temp_cp));
-	memcpy(&temp_cp, (char *)cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
-
-#if 0 /* paranoid checking - these are done in newpeer() */
-	fl = 0;
-	while (items-- > 0 && !fl) {
-		if (((temp_cp.version) > NTP_VERSION)
-		    || ((temp_cp.version) < NTP_OLDVERSION))
-		    fl = 1;
-		if (temp_cp.hmode != MODE_ACTIVE
-		    && temp_cp.hmode != MODE_CLIENT
-		    && temp_cp.hmode != MODE_BROADCAST)
-		    fl = 1;
-		if (temp_cp.flags & ~(CONF_FLAG_PREFER | CONF_FLAG_BURST |
-		    CONF_FLAG_IBURST | CONF_FLAG_SKEY))
-			fl = 1;
-		cp = (struct conf_peer *)
-		    ((char *)cp + INFO_ITEMSIZE(inpkt->mbz_itemsize));
-	}
-
-	if (fl) {
-		req_ack(srcadr, inter, inpkt, INFO_ERR_FMT);
-		return;
-	}
-#endif /* end paranoid checking */
+	ZERO(temp_cp);
+	memcpy(&temp_cp, (void *)cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
 
 	/*
 	 * Looks okay, try it out
@@ -1323,7 +1300,7 @@ do_conf(
 	cp = (struct conf_peer *)inpkt->data;  
 
 	while (items-- > 0) {
-		memset(&temp_cp, 0, sizeof(struct conf_peer));
+		ZERO(temp_cp);
 		memcpy(&temp_cp, (char *)cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
 		ZERO_SOCK(&peeraddr);
 
@@ -1404,7 +1381,7 @@ dns_a(
 	 */
 	items = INFO_NITEMS(inpkt->err_nitems);
 	dp = (struct info_dns_assoc *)inpkt->data;
-	memset((char *)&peeraddr, 0, sizeof(struct sockaddr_in));
+	ZERO(peeraddr);
 	peeraddr.sin_family = AF_INET;
 	peeraddr.sin_port = htons(NTP_PORT);
 
@@ -1492,7 +1469,7 @@ do_unconf(
 
 	bad = 0;
 	while (items-- > 0 && !bad) {
-		memset(&temp_cp, 0, sizeof(temp_cp));
+		ZERO(temp_cp);
 		ZERO_SOCK(&peeraddr);
 		memcpy(&temp_cp, cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
 		if (client_v6_capable && temp_cp.v6_flag) {
@@ -1537,8 +1514,8 @@ do_unconf(
 	cp = (struct conf_unpeer *)inpkt->data;
 
 	while (items-- > 0) {
-		memset(&temp_cp, 0, sizeof(temp_cp));
-		memset(&peeraddr, 0, sizeof(peeraddr));
+		ZERO(temp_cp);
+		ZERO(peeraddr);
 		memcpy(&temp_cp, cp, INFO_ITEMSIZE(inpkt->mbz_itemsize));
 		if (client_v6_capable && temp_cp.v6_flag) {
 			AF(&peeraddr) = AF_INET6;
@@ -2141,9 +2118,9 @@ req_get_traps(
 	struct req_pkt *inpkt
 	)
 {
-	register struct info_trap *it;
-	register struct ctl_trap *tr;
-	register int i;
+	struct info_trap *it;
+	struct ctl_trap *tr;
+	int i;
 
 	if (num_ctl_traps == 0) {
 		req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
@@ -2153,7 +2130,7 @@ req_get_traps(
 	it = (struct info_trap *)prepare_pkt(srcadr, inter, inpkt,
 	    v6sizeof(struct info_trap));
 
-	for (i = 0, tr = ctl_trap; i < CTL_MAXTRAPS; i++, tr++) {
+	for (i = 0, tr = ctl_traps; i < COUNTOF(ctl_traps); i++, tr++) {
 		if (tr->tr_flags & TRAP_INUSE) {
 			if (IS_IPV4(&tr->tr_addr)) {
 				if (tr->tr_localaddr == any_interface)
@@ -2403,7 +2380,7 @@ get_kernel_info(
 		return;
 	}
 
-	memset((char *)&ntx, 0, sizeof(ntx));
+	ZERO(ntx);
 	if (ntp_adjtime(&ntx) < 0)
 		msyslog(LOG_ERR, "get_kernel_info: ntp_adjtime() failed: %m");
 	ik = (struct info_kernel *)prepare_pkt(srcadr, inter, inpkt,
@@ -2523,8 +2500,8 @@ set_clock_fudge(
 	sockaddr_u addr;
 	l_fp ltmp;
 
-	ZERO_SOCK(&addr);
-	memset((char *)&clock_stat, 0, sizeof clock_stat);
+	ZERO(addr);
+	ZERO(clock_stat);
 	items = INFO_NITEMS(inpkt->err_nitems);
 	cf = (struct conf_fudge *) inpkt->data;
 
@@ -2616,7 +2593,7 @@ get_clkbug_info(
 			return;
 		}
 
-		memset((char *)&bug, 0, sizeof bug);
+		ZERO(bug);
 		refclock_buginfo(&addr, &bug);
 		if (bug.nvalues == 0 && bug.ntimes == 0) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
@@ -2657,7 +2634,7 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 	struct info_if_stats *ifs = *ifsp;
 	endpt *ep = interface_info->ep;
 	
-	memset(ifs, 0, sizeof(*ifs));
+	ZERO(*ifs);
 	
 	if (IS_IPV6(&ep->sin)) {
 		if (!client_v6_capable) {

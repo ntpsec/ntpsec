@@ -1369,7 +1369,7 @@ addserver(
 	strncpy(service, "ntp", sizeof(service));
 
 	/* Get host address. Looking for UDP datagram connection. */
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_socktype = SOCK_DGRAM;
 
@@ -1406,8 +1406,7 @@ addserver(
 	/* We must get all returned server in case the first one fails */
 	for (ptr = addrResult; ptr != NULL; ptr = ptr->ai_next) {
 		if (is_reachable ((sockaddr_u *)ptr->ai_addr)) {
-			server = emalloc(sizeof(*server));
-			memset(server, 0, sizeof(*server));
+			server = emalloc_zero(sizeof(*server));
 
 			memcpy(&server->srcadr, ptr->ai_addr, ptr->ai_addrlen);
 			server->event_time = ++sys_numservers;
@@ -1417,7 +1416,8 @@ addserver(
 				struct server *sp;
 
 				for (sp = sys_servers; sp->next_server != NULL;
-				     sp = sp->next_server) ;
+				     sp = sp->next_server)
+					/* empty */;
 				sp->next_server = server;
 			}
 		}
@@ -1463,15 +1463,15 @@ findserver(
 			complete_servers++;
 		}
 
-		server = emalloc(sizeof(*server));
-		memset(server, 0, sizeof(*server));
+		server = emalloc_zero(sizeof(*server));
 
 		server->srcadr = *addr;
 
 		server->event_time = ++sys_numservers;
 
 		for (sp = sys_servers; sp->next_server != NULL;
-		     sp = sp->next_server) ;
+		     sp = sp->next_server)
+			/* empty */;
 		sp->next_server = server;
 		transmit(server);
 	}
@@ -1701,7 +1701,7 @@ init_io(void)
 	/*
 	 * Init hints addrinfo structure
 	 */
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_flags = AI_PASSIVE;
 	hints.ai_socktype = SOCK_DGRAM;

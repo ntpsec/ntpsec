@@ -167,8 +167,7 @@ getmorepeermem(void)
 	int i;
 	struct peer *peers;
 
-	peers = emalloc(INC_PEER_ALLOC * sizeof(*peers));
-	memset(peers, 0, INC_PEER_ALLOC * sizeof(*peers));
+	peers = emalloc_zero(INC_PEER_ALLOC * sizeof(*peers));
 
 	for (i = INC_PEER_ALLOC - 1; i >= 0; i--)
 		LINK_SLIST(peer_free, &peers[i], p_link);
@@ -495,7 +494,7 @@ free_peer(
 		free(p->addrs);		/* from copy_addrinfo_list() */
 
 	/* Add his corporeal form to peer free list */
-	memset(p, 0, sizeof(*p));
+	ZERO(*p);
 	LINK_SLIST(peer_free, p, p_link);
 	peer_free_count++;
 }

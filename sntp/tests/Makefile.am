@@ -45,11 +45,11 @@ CLEANFILES =	data/kod-output-multiple	\
 		data/debug-output-lfp-hex	\
 		$(NULL)
 
-LDADD = 	@GTEST_LDFLAGS@			\
-		@GTEST_LIBS@			\
-		$(LIBOPTS_LDADD)		\
+LDADD =		$(LIBOPTS_LDADD)			\
 		@top_builddir@/../libntp/libntp.a	\
-		@LCRYPTO@			\
+		@LCRYPTO@				\
+		@GTEST_LDFLAGS@				\
+		@GTEST_LIBS@				\
 		$(sntp_SOURCES_USED)
 
 AM_CXXFLAGS = @GTEST_CXXFLAGS@

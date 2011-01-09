@@ -72,7 +72,7 @@ lowater_additions(void)
 static inline void 
 initialise_buffer(recvbuf_t *buff)
 {
-	memset(buff, 0, sizeof(*buff));
+	ZERO(*buff);
 }
 
 static void
@@ -85,7 +85,7 @@ create_buffers(int nbufs)
 	buffer_shortfall = 0;
 
 #ifndef DEBUG
-	bufp = emalloc(abuf * sizeof(*bufp));
+	bufp = emalloc_zero(abuf * sizeof(*bufp));
 #endif
 
 	for (i = 0; i < abuf; i++) {
@@ -95,9 +95,8 @@ create_buffers(int nbufs)
 		 * free()d during ntpd shutdown on DEBUG builds to
 		 * keep them out of heap leak reports.
 		 */
-		bufp = emalloc(sizeof(*bufp));
+		bufp = emalloc_zero(sizeof(*bufp));
 #endif
-		memset(bufp, 0, sizeof(*bufp));
 		LINK_SLIST(free_recv_list, bufp, link.next);
 		bufp++;
 		free_recvbufs++;

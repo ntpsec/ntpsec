@@ -166,8 +166,7 @@ alloc_res4(void)
 	if (res != NULL)
 		return res;
 
-	rl = emalloc(count * cb);
-	memset(rl, 0, count * cb);
+	rl = emalloc_zero(count * cb);
 	/* link all but the first onto free list */
 	res = (void *)((char *)rl + (count - 1) * cb);
 	for (i = count - 1; i > 0; i--) {
@@ -193,8 +192,7 @@ alloc_res6(void)
 	if (res != NULL)
 		return res;
 
-	rl = emalloc(count * cb);
-	memset(rl, 0, count * cb);
+	rl = emalloc_zero(count * cb);
 	/* link all but the first onto free list */
 	res = (void *)((char *)rl + (count - 1) * cb);
 	for (i = count - 1; i > 0; i--) {
@@ -228,10 +226,10 @@ free_res(
 	NTP_INSIST(unlinked == res);
 
 	if (v6) {
-		memset(res, 0, V6_SIZEOF_RESTRICT_U);
+		zero_mem(res, V6_SIZEOF_RESTRICT_U);
 		plisthead = &resfree6;
 	} else {
-		memset(res, 0, V4_SIZEOF_RESTRICT_U);
+		zero_mem(res, V4_SIZEOF_RESTRICT_U);
 		plisthead = &resfree4;
 	}
 	LINK_SLIST(*plisthead, res, link);
@@ -504,7 +502,7 @@ hack_restrict(
 		return;
 	}
 
-	memset(&match, 0, sizeof(match));
+	ZERO(match);
 	/* silence VC9 potentially uninit warnings */
 	res = NULL;
 	v6 = 0;

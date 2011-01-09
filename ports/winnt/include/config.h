@@ -45,11 +45,13 @@
  * at exit time (currently only if run under a debugger).
  */
 #if defined(_MSC_VER) && defined(_DEBUG)
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <malloc.h>
-#include <crtdbg.h>
-/* #define MALLOC_LINT */	/* defers free() */
+# define _CRTDBG_MAP_ALLOC
+# include <stdlib.h>
+# include <malloc.h>
+# include <crtdbg.h>
+/* # define MALLOC_LINT */	/* defers free() */
+# define EREALLOC_IMPL(ptr, newsz, filenm, loc) \
+	 _realloc_dbg(ptr, newsz, _NORMAL_BLOCK, filenm, loc)
 #endif
 
 /*

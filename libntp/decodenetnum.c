@@ -67,7 +67,7 @@ decodenetnum(
 			port_str = &cp[2];
 		cp = name; 
 	}
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_flags = Z_AI_NUMERICHOST;
 	err = getaddrinfo(cp, "ntp", &hints, &ai);
 	if (err != 0)

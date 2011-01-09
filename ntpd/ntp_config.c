@@ -381,7 +381,7 @@ init_syntax_tree(
 	config_tree *ptree
 	)
 {
-	memset(ptree, 0, sizeof(*ptree));
+	ZERO(*ptree);
 }
 
 
@@ -2408,7 +2408,7 @@ config_access(
 				 * restrict hosts have been resolved.
 				 */
 				ai_list = NULL;
-				memset(&hints, 0, sizeof(hints));
+				ZERO(hints);
 				hints.ai_protocol = IPPROTO_UDP;
 				hints.ai_socktype = SOCK_DGRAM;
 				hints.ai_family = my_node->addr->type;
@@ -3106,7 +3106,7 @@ config_trap(
 				 * save context and hand it off
 				 * for name resolution.
 				 */
-				memset(&hints, 0, sizeof(hints));
+				ZERO(hints);
 				hints.ai_protocol = IPPROTO_UDP;
 				hints.ai_socktype = SOCK_DGRAM;
 				snprintf(port_text, sizeof(port_text),
@@ -3183,7 +3183,7 @@ trap_name_resolved(
 		return;
 	}
 	NTP_INSIST(sizeof(peeraddr) >= res->ai_addrlen);
-	memset(&peeraddr, 0, sizeof(peeraddr));
+	ZERO(peeraddr);
 	memcpy(&peeraddr, res->ai_addr, res->ai_addrlen);
 	localaddr = NULL;
 	if (pstp->ifaddr_nonnull)
@@ -3248,7 +3248,7 @@ config_fudge(
 		}
 
 		/* Parse all the options to the fudge command */
-		memset(&clock_stat, 0, sizeof(clock_stat));
+		ZERO(clock_stat);
 		curr_opt = HEAD_PFIFO(curr_fudge->options);
 		for (; curr_opt != NULL; curr_opt = curr_opt->link) {
 			switch (curr_opt->attr) {
@@ -3614,7 +3614,7 @@ config_peers(
 			ctx->version = NTP_VERSION;
 			ctx->flags = FLAG_IBURST;
 
-			memset(&hints, 0, sizeof(hints));
+			ZERO(hints);
 			hints.ai_family = (u_short)ctx->family;
 			hints.ai_socktype = SOCK_DGRAM;
 			hints.ai_protocol = IPPROTO_UDP;
@@ -3692,7 +3692,7 @@ config_peers(
 			ctx->keyid = curr_peer->peerkey;
 			ctx->group = curr_peer->group;
 
-			memset(&hints, 0, sizeof(hints));
+			ZERO(hints);
 			hints.ai_family = ctx->family;
 			hints.ai_socktype = SOCK_DGRAM;
 			hints.ai_protocol = IPPROTO_UDP;
@@ -3842,7 +3842,7 @@ config_unpeers(
 			continue;
 		}
 
-		memset(&peeraddr, 0, sizeof(peeraddr));
+		ZERO(peeraddr);
 		AF(&peeraddr) = curr_unpeer->addr->type;
 		name = curr_unpeer->addr->address;
 		rc = getnetnum(name, &peeraddr, 0, t_UNK);
@@ -3875,7 +3875,7 @@ config_unpeers(
 		}
 		/* Resolve the hostname to address(es). */
 # ifdef WORKER
-		memset(&hints, 0, sizeof(hints));
+		ZERO(hints);
 		hints.ai_family = curr_unpeer->addr->type;
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_protocol = IPPROTO_UDP;
@@ -4118,7 +4118,7 @@ config_ntpd(
 	{
 		struct addrinfo hints;
 
-		memset(&hints, 0, sizeof(hints));
+		ZERO(hints);
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 		getaddrinfo_sometime("www.cnn.com", "ntp", &hints,
@@ -4167,7 +4167,7 @@ config_remotely(
 
 	snprintf(origin, sizeof(origin), "remote config from %s",
 		 stoa(remote_addr));
-	memset(&remote_cuckoo, 0, sizeof(remote_cuckoo));
+	ZERO(remote_cuckoo);
 	remote_cuckoo.fname = origin;
 	remote_cuckoo.line_no = 1;
 	remote_cuckoo.col_no = 1;
@@ -4314,7 +4314,7 @@ save_and_apply_config_tree(void)
 	 */
 	ptree = emalloc(sizeof(*ptree));
 	memcpy(ptree, &cfgt, sizeof(*ptree));
-	memset(&cfgt, 0, sizeof(cfgt));
+	ZERO(cfgt);
 	
 	LINK_TAIL_SLIST(cfg_tree_history, ptree, link, config_tree);
 

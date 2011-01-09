@@ -264,7 +264,7 @@ void UpdateSCM(DWORD state) {
 		if (state)
 			dwState = state;
 
-		memset(&ss, 0, sizeof(SERVICE_STATUS));
+		ZERO(ss);
 		ss.dwServiceType |= SERVICE_WIN32_OWN_PROCESS;
 		ss.dwCurrentState = dwState;
 		ss.dwControlsAccepted = SERVICE_ACCEPT_STOP |

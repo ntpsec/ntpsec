@@ -212,16 +212,14 @@ getaddrinfo_sometime(
 	servsize = strlen(service) + 1;
 	req_size = sizeof(*gai_req) + nodesize + servsize;
 
-	gai_req = emalloc(req_size);
+	gai_req = emalloc_zero(req_size);
 
 	gai_req->octets = req_size;
 	now = time(NULL);
 	next_dns_timeslot = max(now, next_dns_timeslot);
 	gai_req->scheduled = now;
 	gai_req->earliest = next_dns_timeslot;
-	if (NULL == hints)
-		memset(&gai_req->hints, 0, sizeof(gai_req->hints));
-	else
+	if (hints != NULL)
 		gai_req->hints = *hints;
 	gai_req->retry = retry;
 	gai_req->callback = callback;
@@ -575,8 +573,7 @@ getnameinfo_sometime(
 	NTP_REQUIRE(hostoctets);
 	NTP_REQUIRE(hostoctets + servoctets < 1024);
 
-	gni_req = emalloc(sizeof(*gni_req));
-	memset(gni_req, 0, sizeof(*gni_req));
+	gni_req = emalloc_zero(sizeof(*gni_req));
 
 	gni_req->octets = sizeof(*gni_req);
 	time_now = time(NULL);

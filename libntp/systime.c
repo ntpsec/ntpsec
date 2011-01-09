@@ -281,10 +281,10 @@ step_systime(
 #endif
 
 #ifdef HAVE_UTMP_H
-		memset(&ut, 0, sizeof(ut));
+		ZERO(ut);
 #endif
 #ifdef HAVE_UTMPX_H
-		memset(&utx, 0, sizeof(utx));
+		ZERO(utx);
 #endif
 
 		/* UTMP */

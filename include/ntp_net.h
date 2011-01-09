@@ -23,6 +23,7 @@
 #endif
 
 #include "ntp_rfc2553.h"
+#include "ntp_malloc.h"
 
 typedef union {
 	struct sockaddr		sa;
@@ -123,7 +124,7 @@ typedef union {
 	    : sizeof((psau)->sa6))
 
 #define ZERO_SOCK(psau)						\
-	memset((psau), 0, sizeof(*(psau)))
+	ZERO(*(psau))
 
 /* blast a byte value across sockaddr_u v6 address */
 #define	MEMSET_ADDR6(psau, v)					\

@@ -10,7 +10,7 @@
 #endif
 
 #include "l_stdlib.h"
-#include "ntp_types.h"
+#include "ntp_malloc.h"
 #include "ntp_string.h"
 #include "ntp_net.h"
 #include "ntp_syslog.h"
@@ -83,19 +83,6 @@ extern	u_int32	caldaystart	(u_int32 ntptime, const time_t *pivot);
 
 extern	const char *clockname	(int);
 extern	int	clocktime	(int, int, int, int, int, u_int32, u_long *, u_int32 *);
-#if !defined(_MSC_VER) || !defined(_DEBUG)
-extern	void *	emalloc		(size_t);
-extern	void *	erealloc	(void *, size_t);
-extern	void *	emalloc_zero	(size_t);
-extern	char *	estrdup		(const char *);
-#else
-extern	void *	debug_ereallocz	(void *, size_t, int, const char *, int);
-#define		emalloc(c)	debug_ereallocz(NULL, (c), 0, __FILE__, __LINE__)
-#define		erealloc(p, c)	debug_ereallocz((p), (c), 0, __FILE__, __LINE__)
-#define		emalloc_zero(c)	debug_ereallocz(NULL, (c), 1, __FILE__, __LINE__)
-extern	char *	debug_estrdup	(const char *, const char *, int);
-#define		estrdup(s)	debug_estrdup((s), __FILE__, __LINE__)
-#endif
 extern	int	ntp_getopt	(int, char **, const char *);
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
@@ -108,6 +95,32 @@ extern	int	MD5authdecrypt	(int, u_char *, u_int32 *, int, int);
 extern	int	MD5authencrypt	(int, u_char *, u_int32 *, int);
 extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, const int);
 extern	u_int32	addr2refid	(sockaddr_u *);
+
+/* emalloc.c */
+#ifndef EREALLOC_CALLSITE	/* ntp_malloc.h defines */
+extern	void *	ereallocz	(void *, size_t, size_t, int);
+#define	erealloczsite(p, n, o, z, f, l) ereallocz(p, n, o, (z))
+extern	void *	emalloc		(size_t);
+#define	emalloc_zero(c)		ereallocz(NULL, (c), 0, TRUE)
+#define	erealloc(p, c)		ereallocz(p, (c), 0, FALSE)
+#define erealloc_zero(p, n, o)	ereallocz(p, n, (o), TRUE)
+extern	char *	estrdup_impl	(const char *);
+#define	estrdup(s)		estrdup_impl(s)
+#else
+extern	void *	ereallocz	(void *, size_t, size_t, int,
+				 const char *, int);
+#define erealloczsite		ereallocz
+#define	emalloc(c)		ereallocz(NULL, (c), 0, FALSE, \
+					  __FILE__, __LINE__)
+#define	emalloc_zero(c)		ereallocz(NULL, (c), 0, TRUE, \
+					  __FILE__, __LINE__)
+#define	erealloc(p, c)		ereallocz(p, (c), 0, FALSE, \
+					  __FILE__, __LINE__)
+#define	erealloc_zero(p, n, o)	ereallocz(p, n, (o), TRUE, \
+					  __FILE__, __LINE__)
+extern	char *	estrdup_impl	(const char *, const char *, int);
+#define	estrdup(s) estrdup_impl((s), __FILE__, __LINE__)
+#endif
 
 
 extern	int	atoint		(const char *, long *);

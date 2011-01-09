@@ -31,7 +31,7 @@ dolfptoa(
 	/*
 	 * Zero the character buffer
 	 */
-	memset((char *) cbuf, 0, sizeof(cbuf));
+	ZERO(cbuf);
 
 	/*
 	 * Work on the integral part. This should work reasonable on

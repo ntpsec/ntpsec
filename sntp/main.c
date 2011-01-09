@@ -541,7 +541,7 @@ handle_pkt (
 	char *p_SNTP_PRETEND_TIME;
 	time_t pretend_time;
 #if SIZEOF_TIME_T == 8
-	longlong ll;
+	long long ll;
 #else
 	long l;
 #endif
