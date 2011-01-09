@@ -7,6 +7,7 @@
 #include "log.h"
 #include "sntp-opts.h"
 #include "ntp_stdlib.h"
+#include "ntp_debug.h"
 
 int kod_init = 0, kod_db_cnt = 0;
 const char *kod_db_file;
@@ -175,9 +176,7 @@ kod_init_kod_db(
 
 	atexit(write_kod_db);
 
-#ifdef DEBUG
-	printf("Initializing KOD DB...\n");
-#endif
+	DPRINTF(2, ("Initializing KOD DB..."));
 
 	kod_db_file = estrdup(db_file);
 
@@ -224,16 +223,12 @@ kod_init_kod_db(
 	}
 
 	if (0 == kod_db_cnt) {
-#ifdef DEBUG
-		printf("KoD DB %s empty.\n", db_file);
-#endif
+		DPRINTF(2, ("KoD DB %s empty.", db_file));
 		fclose(db_s);
 		return;
 	}
 
-#ifdef DEBUG
-	printf("KoD DB %s contains %d entries, reading...\n", db_file, kod_db_cnt);
-#endif
+	DPRINTF(2, ("KoD DB %s contains %d entries, reading...\n", db_file, kod_db_cnt));
 
 	rewind(db_s);
 
@@ -280,11 +275,10 @@ kod_init_kod_db(
 	}
 
 	fclose(db_s);
-#ifdef DEBUG
-	for (a = 0; a < kod_db_cnt; a++)
+	if (debug > 1)
+	    for (a = 0; a < kod_db_cnt; a++)
 		printf("KoD entry %d: %s at %llx type %s\n", a,
 		       kod_db[a]->hostname,
 		       (unsigned long long)kod_db[a]->timestamp,
 		       kod_db[a]->type);
-#endif
 }

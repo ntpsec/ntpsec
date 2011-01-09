@@ -26,16 +26,21 @@ SOCKET sock6 = -1;		/* Socket for IPv6 */
 char *progname;
 struct event_base *base = NULL;
 
-struct ntp_ctx {
-	const char *name;
-	int flags;
+struct dns_ctx {
+	const char *	name;
+	int		flags;
 #define CTX_BCST	0x0001
 #define CTX_UCST	0x0002
 #define CTX_unused	0xfffd
-	int key_id;
-	struct timeval timeout;
-	struct key *key;
-	struct pkt x_pkt;
+	int		key_id;
+	struct timeval	timeout;
+	struct key *	key;
+};
+
+struct ntp_ctx {
+	struct dns_ctx *	dctx;
+	struct evutil_addrinfo *ai;
+	struct pkt		x_pkt;
 };
 
 struct key *keys = NULL;
@@ -99,8 +104,6 @@ sntp_main (
 	init_logging();
 	if (HAVE_OPT(FILELOG))
 		open_logfile(OPT_ARG(FILELOG));
-
-	msyslog(LOG_NOTICE, "Started sntp");
 
 	/*
 	** Eventually, we probably want:
@@ -178,7 +181,7 @@ sntp_main (
 
 	if (ENABLED_OPT(BROADCAST)) {
 		struct evutil_addrinfo hints;
-		struct ntp_ctx *dns_ctx;
+		struct dns_ctx *dns_ctx;
 
 		ZERO(hints);
 		hints.ai_family = ai_fam_pref;
@@ -193,6 +196,8 @@ sntp_main (
 		hints.ai_protocol = IPPROTO_TCP;
 
 		dns_ctx = emalloc(sizeof(*dns_ctx));
+		memset(dns_ctx, 0, sizeof(*dns_ctx));
+
 		dns_ctx->name = OPT_ARG(BROADCAST);
 		dns_ctx->flags = CTX_BCST;
 		dns_ctx->timeout = timeout_tv;
@@ -215,7 +220,7 @@ sntp_main (
 
 	for (i = 0; i < argc; ++i) {
 		struct evutil_addrinfo hints; /* local copy is OK */
-		struct ntp_ctx *dns_ctx;
+		struct dns_ctx *dns_ctx;
 
 		ZERO(hints);
 		hints.ai_family = ai_fam_pref;
@@ -245,14 +250,14 @@ sntp_main (
 			dns_ctx->key = NULL;
 		}
 
-		printf("unicast-before: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
+		// printf("unicast-before: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
 		++n_pending_dns;
 		evdns_getaddrinfo(dnsbase, argv[i], "123", &hints,
 				  dns_cb, dns_ctx);
-		printf("unicast-after: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
+		// printf("unicast-after: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
 	}
 
-	printf("unicast: n_pending_dns = %d\n", n_pending_dns);
+	// printf("unicast: n_pending_dns = %d\n", n_pending_dns);
 
 	event_base_dispatch(base);
 
@@ -261,47 +266,6 @@ sntp_main (
 
 	return 0;		/* Might not want 0... */
 }
-
-
-#if 0
-void
-handle_later() {
-	/*
-	** Select a certain ntp server according to simple criteria?
-	**
-	** For now let's just pay attention to previous KoDs.
-	*/
-	sync_data_suc = FALSE;
-	for (c = 0; c < resc && !sync_data_suc; c++) {
-		ai = resh[c];
-		do {
-			hostname = addrinfo_to_str(ai);
-			if ((kodc = search_entry(hostname, &reason)) == 0) {
-				if (is_reachable(ai)) {
-					ow_ret = on_wire(ai,
-							 (bcast)
-							 ? bcastaddr[0]
-							 : NULL);
-					if (0 == ow_ret)
-						sync_data_suc = TRUE;
-				}
-			} else {
-				printf("%d prior KoD%s for %s, skipping.\n",
-					kodc, (kodc > 1) ? "s" : "", hostname);
-				free(reason);
-			}
-			free(hostname);
-			ai = ai->ai_next;
-		} while (NULL != ai);
-		freeaddrinfo(resh[c]);
-	}
-	free(resh);
-
-	if (!sync_data_suc)
-		return 1;
-	return 0;
-}
-#endif
 
 
 /*
@@ -320,19 +284,21 @@ dns_cb(
 	void *ptr
 	)
 {
-	struct ntp_ctx *ctx = ptr;
+	struct dns_ctx *dctx = ptr;
+	struct ntp_ctx *nctx;
 	struct event *ev;
 	sockaddr_u name;
 
 	if (errcode) {
-		printf("%s -> %s\n", ctx->name, evutil_gai_strerror(errcode));
+		printf("%s -> %s\n", dctx->name, evutil_gai_strerror(errcode));
 	} else {
 		struct evutil_addrinfo *ai;
 
-		printf("%s [%s]\n", ctx->name,
-		       (addr->ai_canonname)
-		       ? addr->ai_canonname
-		       : "");
+		if (debug > 2)
+			printf("%s [%s]\n", dctx->name,
+			       (addr->ai_canonname)
+			       ? addr->ai_canonname
+			       : "");
 
 		for (ai = addr; ai; ai = ai->ai_next) {
 			char *hostname;
@@ -341,7 +307,7 @@ dns_cb(
 
 			/* Is there a KoD on file for this address? */
 			hostname = addrinfo_to_str(ai);
-printf("dns_cb: checking <%s>\n", hostname);
+// printf("dns_cb: checking <%s>\n", hostname);
 			if (search_entry(hostname, &reason)) {
 				printf("prior KoD for %s, skipping.\n",
 					hostname);
@@ -351,6 +317,12 @@ printf("dns_cb: checking <%s>\n", hostname);
 				continue;
 			}
 			free(hostname);
+
+			nctx = emalloc((sizeof *nctx));
+			memset(nctx, 0, sizeof *nctx);
+
+			nctx->dctx = dctx;
+			nctx->ai = ai;
 
 			/* Open a socket and make it non-blocking */
 			if (ai->ai_family == AF_INET) {
@@ -418,7 +390,7 @@ printf("dns_cb: checking <%s>\n", hostname);
 			++n_pending_ntp;
 
 			/* If this is for a unicast host, send a request */
-			if (ctx->flags & CTX_UCST) {
+			if (dctx->flags & CTX_UCST) {
 				struct timeval tv_xmt;
 				struct pkt x_pkt;
 				int pkt_len;
@@ -431,20 +403,15 @@ printf("dns_cb: checking <%s>\n", hostname);
 				tv_xmt.tv_sec += JAN_1970;
 
 				pkt_len = generate_pkt(&x_pkt, &tv_xmt,
-						ctx->key_id, ctx->key);
+						dctx->key_id, dctx->key);
 
 				/* The current sendpkt does not return status */
 				sendpkt(sock, (sockaddr_u *)ai->ai_addr,
 					&x_pkt, pkt_len);
 				/* Save the packet we sent... */
-				memcpy(&(ctx->x_pkt), &x_pkt, pkt_len);
+				memcpy(&(nctx->x_pkt), &x_pkt, pkt_len);
 
-#ifdef DEBUG
-				msyslog(LOG_DEBUG,
-					"dns_cb: UCST: Current time sec: %i msec: %i\n",
-				       (unsigned int) tv_xmt.tv_sec,
-				       (unsigned int) tv_xmt.tv_usec);
-#endif
+				DPRINTF(2, ("dns_cb: UCST: Current time sec: %i msec: %i\n", (unsigned int) tv_xmt.tv_sec, (unsigned int) tv_xmt.tv_usec));
 
 				/*
 				** If the send fails:
@@ -465,21 +432,20 @@ printf("dns_cb: checking <%s>\n", hostname);
 			*/
 			ev = event_new(base, sock,
 				EV_TIMEOUT|EV_READ|EV_PERSIST,
-				ntp_cb, ptr);
+				ntp_cb, nctx);
 			if (NULL == ev) {
 				msyslog(LOG_ERR,
 					"dns_cb: event_new(base, sock) failed!");
 				--n_pending_ntp;
 				/* What now? */
 			} else {
-				event_add(ev, &(ctx->timeout));
+				event_add(ev, &(dctx->timeout));
 			}
 		}
 		evutil_freeaddrinfo(addr);
 		free(ptr);
 	}
-	printf("n_pending_dns = %d, n_pending_ntp = %d\n",
-	       n_pending_dns, n_pending_ntp);
+
 	/* n_pending_dns really should be >0 here... */
 	if (--n_pending_dns == 0 && n_pending_ntp == 0)
 		event_base_loopexit(base, NULL);
@@ -503,8 +469,9 @@ ntp_cb(
 	void *ptr
 	)
 {
-	struct ntp_ctx *ctx = ptr;
+	struct ntp_ctx *nctx = ptr;
 	int rpktl;
+	int rc;
 
 	if (debug)
 	    printf("ntp_cb: event on socket %d:%s%s%s%s [%s%s] <%s>\n",
@@ -513,28 +480,38 @@ ntp_cb(
 		(what & EV_READ)    ? " read" : "",
 		(what & EV_WRITE)   ? " write" : "",
 		(what & EV_SIGNAL)  ? " signal" : "",
-		(ctx->flags & CTX_BCST)	? "BCST" : "",
-		(ctx->flags & CTX_UCST)	? "UCST" : "",
-		ctx->name
+		(nctx->dctx->flags & CTX_BCST)	? "BCST" : "",
+		(nctx->dctx->flags & CTX_UCST)	? "UCST" : "",
+		nctx->dctx->name
 		);
 
 	/* Read in the packet */
 	rpktl = recvpkt(fd, &r_pkt, sizeof rbuf,
-		(ctx->flags & CTX_UCST) ? &(ctx->x_pkt) :  0);
+		(nctx->dctx->flags & CTX_UCST) ? &(nctx->x_pkt) :  0);
 
-	DPRINTF(2, ("ntp_cb: recvpkt returned %x", rpktl));
+	DPRINTF(1, ("ntp_cb: recvpkt returned %x", rpktl));
 
 	/* If this is a Unicast packet, we're done ... */
-	if (ctx->flags & CTX_UCST) {
+	if (nctx->dctx->flags & CTX_UCST) {
 		/* Only close() if we use a separate socket for each response */
 		// close(fd);
 		--n_pending_ntp;
 	}
 
 	/* If the packet is good, set the time and we're all done */
+	rc = handle_pkt(rpktl, &r_pkt, nctx->ai);
 
-	if (n_pending_dns == 0 && n_pending_ntp == 0)
-		event_base_loopexit(base, NULL);
+	switch (rc) {
+	case 0:
+		// Should clean up and exit...
+		exit(0);
+		break;
+	default:
+		printf("handle_pkt() returned %d\n", rc);
+		break;
+	}
+
+	event_base_loopexit(base, NULL);
 }
 
 
@@ -703,30 +680,30 @@ offset_calculation (
 	NTOHL_FP(&rpkt->xmt, &p_xmt);
 
 	*precision = LOGTOD(rpkt->precision);
-#ifdef DEBUG
-	printf("sntp precision: %f\n", *precision);
-#endif /* DEBUG */
+	DPRINTF(1, ("offset_calculation: precision: %f", *precision));
 
 	*root_dispersion = FPTOD(p_rdsp);
 
 #ifdef DEBUG
-	printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
-	printf("sntp rootdisp: %f\n", *root_dispersion);
+	if (debug) {
+		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
+		printf("sntp rootdisp: %f\n", *root_dispersion);
 
-	pkt_output(rpkt, rpktl, stdout);
+		pkt_output(rpkt, rpktl, stdout);
 
-	printf("sntp offset_calculation: rpkt->reftime:\n");
-	l_fp_output(&(rpkt->reftime), stdout);
-	printf("sntp offset_calculation: rpkt->org:\n");
-	l_fp_output(&(rpkt->org), stdout);
-	printf("sntp offset_calculation: rpkt->rec:\n");
-	l_fp_output(&(rpkt->rec), stdout);
-	printf("sntp offset_calculation: rpkt->rec:\n");
-	l_fp_output_bin(&(rpkt->rec), stdout);
-	printf("sntp offset_calculation: rpkt->rec:\n");
-	l_fp_output_dec(&(rpkt->rec), stdout);
-	printf("sntp offset_calculation: rpkt->xmt:\n");
-	l_fp_output(&(rpkt->xmt), stdout);
+		printf("sntp offset_calculation: rpkt->reftime:\n");
+		l_fp_output(&(rpkt->reftime), stdout);
+		printf("sntp offset_calculation: rpkt->org:\n");
+		l_fp_output(&(rpkt->org), stdout);
+		printf("sntp offset_calculation: rpkt->rec:\n");
+		l_fp_output(&(rpkt->rec), stdout);
+		printf("sntp offset_calculation: rpkt->rec:\n");
+		l_fp_output_bin(&(rpkt->rec), stdout);
+		printf("sntp offset_calculation: rpkt->rec:\n");
+		l_fp_output_dec(&(rpkt->rec), stdout);
+		printf("sntp offset_calculation: rpkt->xmt:\n");
+		l_fp_output(&(rpkt->xmt), stdout);
+	}
 #endif
 
 	/* Compute offset etc. */

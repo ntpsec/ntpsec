@@ -41,7 +41,7 @@ resolve_hosts (
 
 		tres[resc] = NULL;
 #ifdef DEBUG
-		printf("sntp resolve_hosts: Starting host resolution for %s...\n", hosts[a]); 
+		DPRINTF(2, ("sntp resolve_hosts: Starting host resolution for %s...\n", hosts[a])); 
 #endif
 		memset(&hints, 0, sizeof(hints));
 		if (AF_UNSPEC == pref_family)
@@ -449,10 +449,12 @@ unusable:
 	 * to our last request, but only if we're not in broadcast mode.
 	 */
 #ifdef DEBUG
-	printf("rpkt->org:\n");
-	l_fp_output(&rpkt->org, stdout);
-	printf("spkt->xmt:\n");
-	l_fp_output(&spkt->xmt, stdout);
+	if (debug > 1) {
+		printf("rpkt->org:\n");
+		l_fp_output(&rpkt->org, stdout);
+		printf("spkt->xmt:\n");
+		l_fp_output(&spkt->xmt, stdout);
+	}
 #endif
 	if (mode != MODE_BROADCAST && !L_ISEQU(&rpkt->org, &spkt->xmt)) {
 		msyslog(LOG_ERR,
