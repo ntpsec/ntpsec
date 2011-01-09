@@ -169,7 +169,8 @@ sntp_main (
 
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = ai_fam_pref;
-		hints.ai_flags = EVUTIL_AI_CANONNAME;
+		hints.ai_flags |= EVUTIL_AI_CANONNAME;
+		hints.ai_flags |= EVUTIL_AI_NUMERICSERV;
 		/*
 		** Unless we specify a socktype, we'll get at least two
 		** entries for each address: one for TCP and one for
@@ -194,7 +195,7 @@ sntp_main (
 
 		printf("broadcast-before: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 		++n_pending_dns;
-		evdns_getaddrinfo(dnsbase, OPT_ARG(BROADCAST), NULL, &hints,
+		evdns_getaddrinfo(dnsbase, OPT_ARG(BROADCAST), "123", &hints,
 				  dns_cb, (void *)dns_ctx);
 		printf("broadcast-after: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 	}
@@ -336,30 +337,58 @@ printf("dns_cb: checking <%s>\n", hostname);
 
 			/* Open a socket and make it non-blocking */
 			if (ai->ai_family == AF_INET) {
-			  if (-1 == sock4) {
-			    sock4 = socket(PF_INET, SOCK_DGRAM, 0);
-			    if (-1 == sock4) {
-			      /* error getting a socket */
-			      msyslog(LOG_ERR, "dns_cb: socket(PF_INET) failed: %m");
-			      exit(1);
-			    }
-			    /* Make it non-blocking */
-			    make_socket_nonblocking(sock4);
-			  }
-			  sock = sock4;
+				if (-1 == sock4) {
+					struct sockaddr_in name;
+
+					sock4 = socket(PF_INET, SOCK_DGRAM, 0);
+					if (-1 == sock4) {
+						/* error getting a socket */
+						msyslog(LOG_ERR, "dns_cb: socket(PF_INET) failed: %m");
+						exit(1);
+					}
+					/* Make it non-blocking */
+					make_socket_nonblocking(sock4);
+
+					/* Let's try using a wildcard... */
+					memset(&name, 0, sizeof(name));
+					name.sin_family = AF_INET;
+					name.sin_addr.s_addr = INADDR_ANY;
+					name.sin_port = 0;
+					if (-1 == bind(sock4,
+						    (struct sockaddr *)&name,
+						    sizeof(name))) {
+						msyslog(LOG_ERR, "dns_cv: bind(sock4) failed: %m");
+						exit(1);
+					}
+				}
+				sock = sock4;
 			}
 			else if (ai->ai_family == AF_INET6) {
-			  if (-1 == sock6) {
-			    sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
-			    if (-1 == sock6) {
-			      /* error getting a socket */
-			      msyslog(LOG_ERR, "dns_cb: socket(PF_INET6) failed: %m");
-			      exit(1);
-			    }
-			    /* Make it non-blocking */
-			    make_socket_nonblocking(sock6);
-			  }
-			  sock = sock6;
+				if (-1 == sock6) {
+					struct sockaddr_in6 name;
+
+					sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
+					if (-1 == sock6) {
+						/* error getting a socket */
+						msyslog(LOG_ERR, "dns_cb: socket(PF_INET6) failed: %m");
+						exit(1);
+					}
+					/* Make it non-blocking */
+					make_socket_nonblocking(sock6);
+
+					/* Let's try using a wildcard... */
+					memset(&name, 0, sizeof(name));
+					name.sin6_family = AF_INET6;
+					name.sin6_addr = in6addr_any;
+					name.sin6_port = 0;
+					if (-1 == bind(sock6,
+						    (struct sockaddr *)&name,
+						    sizeof(name))) {
+						msyslog(LOG_ERR, "dns_cv: bind(sock6) failed: %m");
+						exit(1);
+					}
+				}
+				sock = sock6;
 			}
 			else {
 			  /* unexpected ai_family value */
@@ -394,7 +423,7 @@ printf("dns_cb: checking <%s>\n", hostname);
 				/* The current sendpkt does not return status */
 				/* XXX: the 2nd arg may be wrong... */
 				/* XXX: ... or it may need a cast*/
-				sendpkt(sock, ai->ai_addr,
+				sendpkt(sock, (sockaddr_u *)ai->ai_addr,
 					&x_pkt, pkt_len);
 
 #ifdef DEBUG
