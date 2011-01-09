@@ -669,6 +669,22 @@ case "$isc_cv_platform_havesalen" in
 	 [struct sockaddr has sa_len?])
 esac
 
+AC_MSG_CHECKING([if we're including sntp debugging code])
+AC_ARG_ENABLE(
+    [debugging],
+    [AS_HELP_STRING(
+        [--enable-debugging],
+        [+ include sntp debugging code]
+    )],
+    [ans=$enableval],
+    [ans=yes]
+)
+case "$ans" in
+ yes)
+    AC_DEFINE([DEBUG], [1], [Enable sntp debugging code?])
+esac
+AC_MSG_RESULT([$ans])
+
 AC_ARG_ENABLE(
     [ipv6],
     [AS_HELP_STRING(

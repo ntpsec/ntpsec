@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  January  8, 2011 at 09:34:22 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January  9, 2011 at 06:03:48 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -45,6 +45,15 @@ tSCC zCopyrightNotice[24] =
 
 extern tUsageProc optionUsage;
 
+/*
+ *  global included definitions
+ */
+#ifdef __windows
+  extern int atoi(const char*);
+#else
+# include <stdlib.h>
+#endif
+
 #ifndef NULL
 #  define NULL 0
 #endif
@@ -54,6 +63,25 @@ extern tUsageProc optionUsage;
 #ifndef EXIT_FAILURE
 #  define  EXIT_FAILURE 1
 #endif
+
+/*
+ *  Debug_Level option description:
+ */
+static char const zDebug_LevelText[] =
+        "Increase output debug message level";
+static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
+static char const zDebug_Level_Name[]        = "debug-level";
+#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Set_Debug_Level option description:
+ */
+static char const zSet_Debug_LevelText[] =
+        "Set the output debug message level";
+static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
+static char const zSet_Debug_Level_Name[]    = "set-debug-level";
+#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Ipv4 option description with
@@ -80,15 +108,6 @@ static const int
     aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
 #define IPV6_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Normalverbose option description:
- */
-static char const zNormalverboseText[] =
-        "Normal verbose";
-static char const zNormalverbose_NAME[]      = "NORMALVERBOSE";
-static char const zNormalverbose_Name[]      = "normalverbose";
-#define NORMALVERBOSE_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Kod option description:
@@ -235,6 +254,12 @@ static char const zNotLoad_Opts_Pfx[]  = "no";
 static tOptProc
     doUsageOpt;
 
+/*
+ *  #define map the "normal" callout procs to the test ones...
+ */
+#define SET_DEBUG_LEVEL_OPT_PROC optionStackArg
+
+
 #else /* NOT defined TEST_SNTP_OPTS */
 /*
  *  When not under test, there are different procs to use
@@ -245,7 +270,14 @@ extern tOptProc
     optionStackArg,      optionTimeVal,       optionUnstackArg,
     optionVersionStderr;
 static tOptProc
-    doUsageOpt;
+    doOptSet_Debug_Level, doUsageOpt;
+
+/*
+ *  #define map the "normal" callout procs
+ */
+#define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+
+#define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
 #endif /* defined(TEST_SNTP_OPTS) */
 #ifdef TEST_SNTP_OPTS
 # define DOVERPROC optionVersionStderr
@@ -258,8 +290,32 @@ static tOptProc
  *  Define the Sntp Option Descriptions.
  */
 static tOptDesc optDesc[ OPTION_CT ] = {
-  {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
-     /* equiv idx, value */ 0, VALUE_OPT_IPV4,
+  {  /* entry idx, value */ 0, VALUE_OPT_DEBUG_LEVEL,
+     /* equiv idx, value */ 0, VALUE_OPT_DEBUG_LEVEL,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 1, VALUE_OPT_SET_DEBUG_LEVEL,
+     /* equiv idx, value */ 1, VALUE_OPT_SET_DEBUG_LEVEL,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
+     /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 2, VALUE_OPT_IPV4,
+     /* equiv idx, value */ 2, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
@@ -270,8 +326,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
-     /* equiv idx, value */ 1, VALUE_OPT_IPV6,
+  {  /* entry idx, value */ 3, VALUE_OPT_IPV6,
+     /* equiv idx, value */ 3, VALUE_OPT_IPV6,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
@@ -282,20 +338,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 2, VALUE_OPT_NORMALVERBOSE,
-     /* equiv idx, value */ 2, VALUE_OPT_NORMALVERBOSE,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ NORMALVERBOSE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zNormalverboseText, zNormalverbose_NAME, zNormalverbose_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 3, VALUE_OPT_KOD,
-     /* equiv idx, value */ 3, VALUE_OPT_KOD,
+  {  /* entry idx, value */ 4, VALUE_OPT_KOD,
+     /* equiv idx, value */ 4, VALUE_OPT_KOD,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ KOD_FLAGS, 0,
@@ -306,8 +350,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zKodText, zKod_NAME, zKod_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 4, VALUE_OPT_SYSLOG,
-     /* equiv idx, value */ 4, VALUE_OPT_SYSLOG,
+  {  /* entry idx, value */ 5, VALUE_OPT_SYSLOG,
+     /* equiv idx, value */ 5, VALUE_OPT_SYSLOG,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SYSLOG_FLAGS, 0,
@@ -318,8 +362,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSyslogText, zSyslog_NAME, zSyslog_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 5, VALUE_OPT_FILELOG,
-     /* equiv idx, value */ 5, VALUE_OPT_FILELOG,
+  {  /* entry idx, value */ 6, VALUE_OPT_FILELOG,
+     /* equiv idx, value */ 6, VALUE_OPT_FILELOG,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ FILELOG_FLAGS, 0,
@@ -330,8 +374,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zFilelogText, zFilelog_NAME, zFilelog_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 6, VALUE_OPT_SETTOD,
-     /* equiv idx, value */ 6, VALUE_OPT_SETTOD,
+  {  /* entry idx, value */ 7, VALUE_OPT_SETTOD,
+     /* equiv idx, value */ 7, VALUE_OPT_SETTOD,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SETTOD_FLAGS, 0,
@@ -342,8 +386,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zSettodText, zSettod_NAME, zSettod_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 7, VALUE_OPT_ADJTIME,
-     /* equiv idx, value */ 7, VALUE_OPT_ADJTIME,
+  {  /* entry idx, value */ 8, VALUE_OPT_ADJTIME,
+     /* equiv idx, value */ 8, VALUE_OPT_ADJTIME,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ ADJTIME_FLAGS, 0,
@@ -354,8 +398,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zAdjtimeText, zAdjtime_NAME, zAdjtime_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 8, VALUE_OPT_BROADCAST,
-     /* equiv idx, value */ 8, VALUE_OPT_BROADCAST,
+  {  /* entry idx, value */ 9, VALUE_OPT_BROADCAST,
+     /* equiv idx, value */ 9, VALUE_OPT_BROADCAST,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ BROADCAST_FLAGS, 0,
@@ -366,8 +410,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zBroadcastText, zBroadcast_NAME, zBroadcast_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 9, VALUE_OPT_TIMEOUT,
-     /* equiv idx, value */ 9, VALUE_OPT_TIMEOUT,
+  {  /* entry idx, value */ 10, VALUE_OPT_TIMEOUT,
+     /* equiv idx, value */ 10, VALUE_OPT_TIMEOUT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ TIMEOUT_FLAGS, 0,
@@ -378,8 +422,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zTimeoutText, zTimeout_NAME, zTimeout_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 10, VALUE_OPT_AUTHENTICATION,
-     /* equiv idx, value */ 10, VALUE_OPT_AUTHENTICATION,
+  {  /* entry idx, value */ 11, VALUE_OPT_AUTHENTICATION,
+     /* equiv idx, value */ 11, VALUE_OPT_AUTHENTICATION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ AUTHENTICATION_FLAGS, 0,
@@ -390,8 +434,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zAuthenticationText, zAuthentication_NAME, zAuthentication_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 11, VALUE_OPT_KEYFILE,
-     /* equiv idx, value */ 11, VALUE_OPT_KEYFILE,
+  {  /* entry idx, value */ 12, VALUE_OPT_KEYFILE,
+     /* equiv idx, value */ 12, VALUE_OPT_KEYFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ KEYFILE_FLAGS, 0,
@@ -491,7 +535,7 @@ It can be run interactively from the command line or as a cron job.\n\n\
 NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
 1305.\n";
 static char const zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -536,7 +580,7 @@ tOptions sntpOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    17 /* full option count */, 12 /* user option count */,
+    18 /* full option count */, 13 /* user option count */,
     sntp_full_usage, sntp_short_usage,
     NULL, NULL,
     PKGDATADIR
@@ -553,7 +597,21 @@ doUsageOpt(
     (void)pOptions;
     USAGE(EXIT_SUCCESS);
 }
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
+
+#if ! defined(TEST_SNTP_OPTS)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   For the set-debug-level option.
+ */
+static void
+doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
+{
+    /* extracted from ../include/debug-opt.def, line 27 */
+DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
+}
+#endif /* defined(TEST_SNTP_OPTS) */
+/* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -571,7 +629,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
+/* extracted from /usr/local/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>

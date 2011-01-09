@@ -99,12 +99,12 @@ auth_init(
 	char keystring[129];
 
 	if (keyf == NULL) {
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp auth_init: Couldn't open key file %s for reading!\n", keyfile);
 		return -1;
 	}
 	if (feof(keyf)) {
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp auth_init: Key file %s is empty!\n", keyfile);
 		fclose(keyf);
 		return -1;

@@ -92,7 +92,7 @@ create_socket (
 {
 	*rsock = socket(AF(dest), SOCK_DGRAM, 0);
 
-	if (-1 == *rsock && ENABLED_OPT(NORMALVERBOSE))
+	if (-1 == *rsock && debug)
 		printf("Failed to create UDP socket with family %d\n", AF(dest));
 }
 
@@ -113,7 +113,7 @@ sendpkt (
 	pkt_output(pkt, len, stdout);
 #endif
 
-	if (ENABLED_OPT(NORMALVERBOSE)) {
+	if (debug) {
 		printf("sntp sendpkt: Sending packet to %s ...\n", sptoa(dest));
 	}
 
@@ -125,7 +125,7 @@ sendpkt (
 		if (errno != EWOULDBLOCK && errno != ENOBUFS) {
 			/* oh well */
 		}
-	} else if (ENABLED_OPT(NORMALVERBOSE)) {
+	} else if (debug) {
 		printf("Packet sent.\n");
 	}
 }
@@ -199,7 +199,7 @@ recv_bcst_data (
 	setsockopt(rsock, SOL_SOCKET, SO_REUSEADDR, &btrue, sizeof(btrue));
 	if (IS_IPV4(sas)) {
 		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
-			if (ENABLED_OPT(NORMALVERBOSE))
+			if (debug)
 				printf("sntp recv_bcst_data: Couldn't bind() address %s.\n",
 				       sptoa(sas));
 		}
@@ -212,14 +212,14 @@ recv_bcst_data (
 		mdevadr.imr_multiaddr.s_addr = NSRCADR(sas); 
 		mdevadr.imr_interface.s_addr = htonl(INADDR_ANY);
 		if (mdevadr.imr_multiaddr.s_addr == -1) {
-			if (ENABLED_OPT(NORMALVERBOSE)) {
+			if (debug) {
 				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n",
 				       sptoa(sas));
 			}
 			return BROADCAST_FAILED;
 		}
 		if (setsockopt(rsock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mdevadr, sizeof(mdevadr)) < 0) {
-			if (ENABLED_OPT(NORMALVERBOSE)) {
+			if (debug) {
 				buf = ss_to_str(sas);
 				printf("sntp recv_bcst_data: Couldn't add IP membership for %s\n", buf);
 				free(buf);
@@ -230,7 +230,7 @@ recv_bcst_data (
 #ifdef ISC_PLATFORM_HAVEIPV6
 	else if (IS_IPV6(sas)) {
 		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
-			if (ENABLED_OPT(NORMALVERBOSE))
+			if (debug)
 				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
 		}
 #ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
@@ -241,7 +241,7 @@ recv_bcst_data (
 		memset(&mdevadr6, 0, sizeof(mdevadr6));
 		mdevadr6.ipv6mr_multiaddr = SOCK_ADDR6(sas);
 		if (!IN6_IS_ADDR_MULTICAST(&mdevadr6.ipv6mr_multiaddr)) {
-			if (ENABLED_OPT(NORMALVERBOSE)) {
+			if (debug) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n", buf);
 				free(buf);
@@ -250,7 +250,7 @@ recv_bcst_data (
 		}
 		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 			       &mdevadr6, sizeof(mdevadr6)) < 0) {
-			if (ENABLED_OPT(NORMALVERBOSE)) {
+			if (debug) {
 				buf = ss_to_str(sas); 
 				printf("sntp recv_bcst_data: Couldn't join group for %s\n", buf);
 				free(buf);
@@ -269,12 +269,12 @@ recv_bcst_data (
 	rdy_socks = select(rsock + 1, &bcst_fd, 0, 0, &timeout_tv);
 	switch (rdy_socks) {
 	    case -1: 
-		if (ENABLED_OPT(NORMALVERBOSE)) 
+		if (debug) 
 			perror("sntp recv_bcst_data: select()");
 		return BROADCAST_FAILED;
 		break;
 	    case 0:
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp recv_bcst_data: select() reached timeout (%u sec), aborting.\n", 
 			       (unsigned)timeout_tv.tv_sec);
 		return BROADCAST_FAILED;
@@ -285,7 +285,7 @@ recv_bcst_data (
 		break;
 	}
 	if (recv_bytes == -1) {
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			perror("sntp recv_bcst_data: recvfrom:");
 		recv_bytes = BROADCAST_FAILED;
 	}
@@ -333,7 +333,7 @@ process_pkt (
 	 */
 	if (pkt_len < LEN_PKT_NOMAC || (pkt_len & 3) != 0) {
 unusable:
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp %s: Funny packet length: %i. Discarding package.\n", func_name, pkt_len);
 		return PACKET_UNUSEABLE;
 	}
@@ -381,7 +381,7 @@ unusable:
 			break;
 		}
 		/* Yay! Things worked out! */
-		if (ENABLED_OPT(NORMALVERBOSE)) {
+		if (debug) {
 			char *hostname = ss_to_str(sas);
 			printf("sntp %s: packet received from %s successfully authenticated using key id %i.\n",
 				func_name, hostname, key_id);
@@ -396,7 +396,7 @@ unusable:
 	if (!is_authentic) {
 		if (ENABLED_OPT(AUTHENTICATION)) {
 			/* We want a authenticated packet */
-			if (ENABLED_OPT(NORMALVERBOSE)) {
+			if (debug) {
 				char *hostname = ss_to_str(sas);
 				printf("sntp %s: packet received from %s is not authentic. Will discard it.\n",
 					func_name, hostname);
@@ -408,7 +408,7 @@ unusable:
 		** We don't know if the user wanted authentication so let's
 		** use it anyways
 		*/
-		if (ENABLED_OPT(NORMALVERBOSE)) {
+		if (debug) {
 			char *hostname = ss_to_str(sas);
 
 			printf("sntp %s: packet received from %s is not authentic. Authentication not enforced.\n",
@@ -419,7 +419,7 @@ unusable:
 	/* Check for server's ntp version */
 	if (PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
 		PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp %s: Packet shows wrong version (%i)\n",
 				func_name, PKT_VERSION(rpkt->li_vn_mode));
 		return SERVER_UNUSEABLE;
@@ -427,7 +427,7 @@ unusable:
 	/* We want a server to sync with */
 	if (PKT_MODE(rpkt->li_vn_mode) != mode &&
 	    PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp %s: mode %d stratum %i\n", func_name, 
 			       PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
 		return SERVER_UNUSEABLE;
@@ -436,11 +436,11 @@ unusable:
 	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
 		char *ref_char;
 
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp %s: Stratum unspecified, going to check for KOD (stratum: %i)\n", 
 				func_name, rpkt->stratum);
 		ref_char = (char *) &rpkt->refid;
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp %s: Packet refid: %c%c%c%c\n", func_name,
 			       ref_char[0], ref_char[1], ref_char[2], ref_char[3]);
 		/* If it's a KOD packet we'll just use the KOD information */
@@ -459,7 +459,7 @@ unusable:
 	}
 	/* If the server is not synced it's not really useable for us */
 	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode)) {
-		if (ENABLED_OPT(NORMALVERBOSE)) 
+		if (debug) 
 			printf("sntp %s: Server not in sync, skipping this server\n", func_name);
 		return SERVER_UNUSEABLE;
 	}
@@ -475,7 +475,7 @@ unusable:
 	l_fp_output(&spkt->xmt, stdout);
 #endif
 	if (mode != MODE_BROADCAST && !L_ISEQU(&rpkt->org, &spkt->xmt)) {
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp process_pkt: pkt.org and peer.xmt differ\n");
 		return PACKET_UNUSEABLE;
 	}
@@ -534,12 +534,12 @@ recvpkt (
 	rdy_socks = select(rsock + 1, &recv_fd, 0, 0, &timeout_tv);
 	switch (rdy_socks) {
 	    case -1: 
-		if (ENABLED_OPT(NORMALVERBOSE)) 
+		if (debug) 
 			perror("sntp recvpkt: select()");
 		return PACKET_UNUSEABLE;
 		break;
 	    case 0:
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp recvpkt: select() reached timeout (%u sec), aborting.\n", 
 			       (unsigned)timeout_tv.tv_sec);
 		return PACKET_UNUSEABLE;

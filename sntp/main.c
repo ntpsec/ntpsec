@@ -82,6 +82,11 @@ sntp_main (
 	argc -= optct;
 	argv += optct;
 
+#ifdef DEBUG
+	debug = DESC(DEBUG_LEVEL).optOccCt;
+	DPRINTF(1, ("%s\n", Version));
+#endif
+
 	/* Initialize logging system */
 	init_logging();
 	if (HAVE_OPT(FILELOG))
@@ -377,7 +382,7 @@ printf("dns_cb: checking <%s>\n", hostname);
 
 					/* Let's try using a wildcard... */
 					ZERO(name);
-					AF(&name) = AF_INET;
+					AF(&name) = AF_INET6;
 					SET_ADDR6N(&name, in6addr_any);
 					SET_PORT(&name, 0);
 
@@ -490,12 +495,13 @@ ntp_cb(
 {
 	struct ntp_ctx *ctx = ptr;
 
-	printf("Got an event on socket %d:%s%s%s%s [%s%s] <%s>",
+	if (debug)
+	    printf("Got an event on socket %d:%s%s%s%s [%s%s] <%s>\n",
 		(int) fd,
-		(what&EV_TIMEOUT) ? " timeout" : "",
-		(what&EV_READ)    ? " read" : "",
-		(what&EV_WRITE)   ? " write" : "",
-		(what&EV_SIGNAL)  ? " signal" : "",
+		(what & EV_TIMEOUT) ? " timeout" : "",
+		(what & EV_READ)    ? " read" : "",
+		(what & EV_WRITE)   ? " write" : "",
+		(what & EV_SIGNAL)  ? " signal" : "",
 		(ctx->flags & CTX_BCST)	? "BCST" : "",
 		(ctx->flags & CTX_UCST)	? "UCST" : "",
 		ctx->name
@@ -595,7 +601,7 @@ handle_pkt (
 		ref = (char *)&rpkt->refid;
 		add_entry(hostname, ref);
 
-		if (ENABLED_OPT(NORMALVERBOSE))
+		if (debug)
 			printf("sntp handle_pkt: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
 				   ref[0], ref[1], ref[2], ref[3],
 				   hostname);
@@ -609,7 +615,7 @@ handle_pkt (
 		break;
 
 	    case 1:
-		if (ENABLED_OPT(NORMALVERBOSE)) {
+		if (debug) {
 			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf,
 				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 			printf("sntp handle_pkt: Received %i bytes from %s\n",
@@ -726,7 +732,7 @@ offset_calculation (
 	*offset = (t21 + t34) / 2.;
 	delta = t21 - t34;
 
-	if (ENABLED_OPT(NORMALVERBOSE))
+	if (debug)
 		printf("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n",
 			   t21, t34, delta, *offset);
 }

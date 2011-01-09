@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  January  8, 2011 at 09:34:22 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January  9, 2011 at 06:03:48 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -50,33 +50,34 @@
  *  Enumeration of each option:
  */
 typedef enum {
-    INDEX_OPT_IPV4            =  0,
-    INDEX_OPT_IPV6            =  1,
-    INDEX_OPT_NORMALVERBOSE   =  2,
-    INDEX_OPT_KOD             =  3,
-    INDEX_OPT_SYSLOG          =  4,
-    INDEX_OPT_FILELOG         =  5,
-    INDEX_OPT_SETTOD          =  6,
-    INDEX_OPT_ADJTIME         =  7,
-    INDEX_OPT_BROADCAST       =  8,
-    INDEX_OPT_TIMEOUT         =  9,
-    INDEX_OPT_AUTHENTICATION  = 10,
-    INDEX_OPT_KEYFILE         = 11,
-    INDEX_OPT_VERSION         = 12,
-    INDEX_OPT_HELP            = 13,
-    INDEX_OPT_MORE_HELP       = 14,
-    INDEX_OPT_SAVE_OPTS       = 15,
-    INDEX_OPT_LOAD_OPTS       = 16
+    INDEX_OPT_DEBUG_LEVEL      =  0,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  1,
+    INDEX_OPT_IPV4             =  2,
+    INDEX_OPT_IPV6             =  3,
+    INDEX_OPT_KOD              =  4,
+    INDEX_OPT_SYSLOG           =  5,
+    INDEX_OPT_FILELOG          =  6,
+    INDEX_OPT_SETTOD           =  7,
+    INDEX_OPT_ADJTIME          =  8,
+    INDEX_OPT_BROADCAST        =  9,
+    INDEX_OPT_TIMEOUT          = 10,
+    INDEX_OPT_AUTHENTICATION   = 11,
+    INDEX_OPT_KEYFILE          = 12,
+    INDEX_OPT_VERSION          = 13,
+    INDEX_OPT_HELP             = 14,
+    INDEX_OPT_MORE_HELP        = 15,
+    INDEX_OPT_SAVE_OPTS        = 16,
+    INDEX_OPT_LOAD_OPTS        = 17
 } teOptIndex;
 
-#define OPTION_CT    17
+#define OPTION_CT    18
 #define SNTP_VERSION       "4.2.7p114"
 #define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.7p114"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT(IPV4)
+ *  e.g. HAVE_OPT(DEBUG_LEVEL)
  */
 #define         DESC(n) (sntpOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -107,6 +108,14 @@ typedef enum {
  *  Make sure there are no #define name conflicts with the option names
  */
 #ifndef     NO_OPTION_NAME_WARNINGS
+# ifdef    DEBUG_LEVEL
+#  warning undefining DEBUG_LEVEL due to option name conflict
+#  undef   DEBUG_LEVEL
+# endif
+# ifdef    SET_DEBUG_LEVEL
+#  warning undefining SET_DEBUG_LEVEL due to option name conflict
+#  undef   SET_DEBUG_LEVEL
+# endif
 # ifdef    IPV4
 #  warning undefining IPV4 due to option name conflict
 #  undef   IPV4
@@ -114,10 +123,6 @@ typedef enum {
 # ifdef    IPV6
 #  warning undefining IPV6 due to option name conflict
 #  undef   IPV6
-# endif
-# ifdef    NORMALVERBOSE
-#  warning undefining NORMALVERBOSE due to option name conflict
-#  undef   NORMALVERBOSE
 # endif
 # ifdef    KOD
 #  warning undefining KOD due to option name conflict
@@ -156,9 +161,10 @@ typedef enum {
 #  undef   KEYFILE
 # endif
 #else  /* NO_OPTION_NAME_WARNINGS */
+# undef DEBUG_LEVEL
+# undef SET_DEBUG_LEVEL
 # undef IPV4
 # undef IPV6
-# undef NORMALVERBOSE
 # undef KOD
 # undef SYSLOG
 # undef FILELOG
@@ -174,9 +180,10 @@ typedef enum {
  *
  *  Interface defines for specific options.
  */
+#define VALUE_OPT_DEBUG_LEVEL    'd'
+#define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
-#define VALUE_OPT_NORMALVERBOSE  'd'
 #define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_SYSLOG         'p'
 #define VALUE_OPT_FILELOG        'l'
@@ -209,7 +216,7 @@ typedef enum {
                 sntpOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*sntpOptions.pUsageProc)(&sntpOptions, c)
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 435 */
+/* extracted from /usr/local/share/autogen/opthead.tpl near line 435 */
 
 /* * * * * *
  *

@@ -191,7 +191,7 @@ kod_init_kod_db(
 		return;
 	}
 
-	if (ENABLED_OPT(NORMALVERBOSE))
+	if (debug)
 		printf("Starting to read KoD file %s...\n", db_file);
 	/* First let's see how many entries there are and check for right syntax */
 
