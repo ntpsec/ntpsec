@@ -507,7 +507,7 @@ ntp_cb(
 	int rpktl;
 
 	if (debug)
-	    printf("Got an event on socket %d:%s%s%s%s [%s%s] <%s>\n",
+	    printf("ntp_cb: event on socket %d:%s%s%s%s [%s%s] <%s>\n",
 		(int) fd,
 		(what & EV_TIMEOUT) ? " timeout" : "",
 		(what & EV_READ)    ? " read" : "",
@@ -522,6 +522,8 @@ ntp_cb(
 	rpktl = recvpkt(fd, &r_pkt, sizeof rbuf,
 		(ctx->flags & CTX_UCST) ? &(ctx->x_pkt) :  0);
 
+	DPRINTF(2, ("ntp_cb: recvpkt returned %x", rpktl));
+
 	/* If this is a Unicast packet, we're done ... */
 	if (ctx->flags & CTX_UCST) {
 		/* Only close() if we use a separate socket for each response */
@@ -530,6 +532,9 @@ ntp_cb(
 	}
 
 	/* If the packet is good, set the time and we're all done */
+
+	if (n_pending_dns == 0 && n_pending_ntp == 0)
+		event_base_loopexit(base, NULL);
 }
 
 
