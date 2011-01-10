@@ -32,7 +32,6 @@
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
 #include "ntp_calendar.h"
-#include "lib_strbuf.h"
 
 #ifdef HAVE_PPSAPI
 # include "ppsapi_timepps.h"
@@ -269,7 +268,7 @@ static int	parse_time	(const char *cp, struct calendar *jd,
 static int	parse_date	(const char *cp, struct calendar *jd,
 				 enum date_fmt fmt);
 /* calendar / date helpers */
-static int	unfold_day	(struct calendar*, u_int32 rec_ui);
+static int	unfold_day	(struct calendar *jd, u_int32 rec_ui);
 
 /*
  * -------------------------------------------------------------------
@@ -403,8 +402,7 @@ nmea_start(
 		refnumtoa(&peer->srcadr), device, baudtext);
 
 	/* Allocate and initialize unit structure */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp->io.clock_recv = nmea_receive;
 	pp->io.srcclock = (caddr_t)peer;
 	pp->io.datalen = 0;
@@ -638,9 +636,8 @@ refclock_ppsrelate(
 	if (pp->leap == LEAP_NOTINSYNC)
 		return PPS_RELATE_NONE;	/* clock is insane, no chance */
 	
-	memset(&timeout, 0, sizeof(timeout));
-	memset(&pps_info, 0, sizeof(pps_info_t));
-
+	ZERO(timeout);
+	ZERO(pps_info);
 	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC,
 			   &pps_info, &timeout) < 0)
 		return PPS_RELATE_NONE;
@@ -748,8 +745,10 @@ nmea_receive(
 				    sizeof(rd_lastcode), &rd_timestamp);
 	checkres = field_init(&rdata, rd_lastcode, rd_lencode);
 	switch (checkres) {
+
 	case CHECK_INVALID:
-		DPRINTF(1, ("nmea: invalid data: '%s'\n", rd_lastcode));
+		DPRINTF(1, ("%s invalid data: '%s'\n",
+			refnumtoa(&peer->srcadr), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
 		/* FALLTHRU */
 
@@ -757,7 +756,8 @@ nmea_receive(
 		return;
 
 	default:
-		DPRINTF(1, ("nmea: gpsread: %d '%s'\n", rd_lencode,
+		DPRINTF(1, ("%s gpsread: %d '%s'\n",
+			refnumtoa(&peer->srcadr), rd_lencode,
 			rd_lastcode));
 		break;
 	}
@@ -783,12 +783,10 @@ nmea_receive(
 
 	/* eventually output delay measurement now. */
 	if (peer->ttl & NMEA_DELAYMEAS_MASK) {
-		LIB_GETBUF(cp);
-		snprintf(cp, LIB_BUFLENGTH, "delay %0.6f %.*s",
+		mprintf_clock_stats(&peer->srcadr, "delay %0.6f %.*s",
 			 ldexp(rd_timestamp.l_uf, -32),
 			 (int)(strchr(rd_lastcode, ',') - rd_lastcode),
 			 rd_lastcode);
-		record_clock_stats(&peer->srcadr, cp);
 	}
 	
 	/* See if I want to process this message type */
@@ -816,7 +814,8 @@ nmea_receive(
 	if (up->cksum_type[sentence] <= (u_char)checkres) {
 		up->cksum_type[sentence] = (u_char)checkres;
 	} else {
-		DPRINTF(1, ("nmea: checksum missing: '%s'\n", rd_lastcode));
+		DPRINTF(1, ("%s checksum missing: '%s'\n",
+			refnumtoa(&peer->srcadr), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
 		return;
 	}
@@ -829,15 +828,15 @@ nmea_receive(
 	if (up->gps_time && NMEA_GPZDG != sentence)
 		return;
 
-	DPRINTF(1, ("nmea: processing %d bytes, timecode '%s'\n",
-		    rd_lencode, rd_lastcode));
+	DPRINTF(1, ("%s processing %d bytes, timecode '%s'\n",
+		refnumtoa(&peer->srcadr), rd_lencode, rd_lastcode));
 
 	/* Grab fields depending on clock string type and possibly wipe
 	 * sensitive data from the last timecode.
 	 */
-	memset(&date, 0, sizeof(date));	/* pristine state of stamp */
-	switch (sentence)
-	{
+	ZERO(date);		/* pristine state of stamp */
+	switch (sentence) {
+
 	case NMEA_GPRMC:
 		/*
 		 * Check quality byte, fetch data & time; need recv
@@ -915,7 +914,8 @@ nmea_receive(
 		return;
 	up->last_daytime = daytime;
 	
-	DPRINTF(1, ("nmea_receive: effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
+	DPRINTF(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
+		refnumtoa(&peer->srcadr),
 		date.year, date.month, date.monthday,
 		date.hour, date.minute, date.second));
 
@@ -1036,7 +1036,8 @@ nmea_poll(
 	/*
 	 * reset counters for next cycle.
 	 */
-	up->pcount = up->tcount = 0;
+	up->pcount = 0;
+	up->tcount = 0;
 #endif /* HAVE_PPSAPI */
 	/*
 	 * If the median filter is empty, claim a timeout and leave
@@ -1097,7 +1098,8 @@ gps_send(
 	*end = '\0';
 	dst += strlen(dst);
 	len = dst - buf;
-	DPRINTF(1, ("nmea: gps_send: '%.*s'\n", len - 2, buf));
+	DPRINTF(1, ("%s gps_send: '%.*s'\n", refnumtoa(&peer->srcadr),
+		len - 2, buf));
 
 	/* send out the whole stuff */
 	if (write(fd, buf, len) == -1)
@@ -1441,7 +1443,7 @@ parse_date(
 	/* store results */
 	jd->monthday = (u_char)d;
 	jd->month    = (u_char)m;
-	jd->year     = (u_char)y;
+	jd->year     = (u_short)y;
 
 	return 1;
 }
