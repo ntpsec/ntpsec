@@ -1,3 +1,4 @@
+(4.2.7p116) 2011/01/10 Released by Harlan Stenn <stenn@ntp.org>
 * refclock_nmea.c refactoring by Juergen Perlinger.
 (4.2.7p115) 2011/01/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1780] Windows ntpd 4.2.7p114 crashes in ioctl().
