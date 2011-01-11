@@ -230,7 +230,7 @@ open_sockets(
 		ZERO(name);
 		AF(&name) = AF_INET;
 		SET_ADDR4N(&name, INADDR_ANY);
-		SET_PORT(&name, 0);
+		SET_PORT(&name, (HAVE_OPT(UNPRIV_PORT) ? 0 : 123));
 
 		if (-1 == bind(sock4, &name.sa,
 			       SOCKLEN(&name))) {
