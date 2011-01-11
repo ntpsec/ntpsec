@@ -115,10 +115,7 @@ sendpkt (
 			/* oh well */
 		}
 	} else {
-#ifdef DEBUG
-		if (debug)
-			printf("Packet sent.\n");
-#endif
+		DPRINTF(3, ("Packet sent.\n"));
 	}
 }
 

@@ -485,7 +485,7 @@ ntp_cb(
 	int rpktl;
 	int rc;
 
-	if (debug)
+	if (debug > 1)
 	    printf("ntp_cb: event on socket %d:%s%s%s%s [%s%s] <%s>\n",
 		(int) fd,
 		(what & EV_TIMEOUT) ? " timeout" : "",
@@ -501,7 +501,7 @@ ntp_cb(
 	rpktl = recvpkt(fd, &r_pkt, sizeof rbuf,
 		(nctx->dctx->flags & CTX_UCST) ? &(nctx->x_pkt) :  0);
 
-	DPRINTF(1, ("ntp_cb: recvpkt returned %x", rpktl));
+	DPRINTF(2, ("ntp_cb: recvpkt returned %x/n", rpktl));
 
 	/* If this is a Unicast packet, we're done ... */
 	if (nctx->dctx->flags & CTX_UCST) {
@@ -730,9 +730,7 @@ offset_calculation (
 	*offset = (t21 + t34) / 2.;
 	delta = t21 - t34;
 
-	if (debug)
-		printf("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n",
-			   t21, t34, delta, *offset);
+	DPRINTF(2, ("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", t21, t34, delta, *offset));
 }
 
 
