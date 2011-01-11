@@ -176,7 +176,7 @@ kod_init_kod_db(
 
 	atexit(write_kod_db);
 
-	DPRINTF(2, ("Initializing KOD DB..."));
+	DPRINTF(2, ("Initializing KOD DB...\n"));
 
 	kod_db_file = estrdup(db_file);
 
@@ -223,7 +223,7 @@ kod_init_kod_db(
 	}
 
 	if (0 == kod_db_cnt) {
-		DPRINTF(2, ("KoD DB %s empty.", db_file));
+		DPRINTF(2, ("KoD DB %s empty.\n", db_file));
 		fclose(db_s);
 		return;
 	}

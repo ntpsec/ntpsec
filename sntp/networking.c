@@ -140,7 +140,7 @@ recvdata(
 		return recvc;
 	}
 #ifdef DEBUG
-	if (debug > 1) {
+	if (debug > 2) {
 		printf("Received %d bytes from %s:\n", recvc, sptoa(sender));
 		pkt_output((struct pkt *)rdata, recvc, stdout);
 	}
@@ -446,7 +446,7 @@ unusable:
 	 * to our last request, but only if we're not in broadcast mode.
 	 */
 #ifdef DEBUG
-	if (debug > 1) {
+	if (debug > 2) {
 		printf("rpkt->org:\n");
 		l_fp_output(&rpkt->org, stdout);
 		printf("spkt->xmt:\n");

@@ -565,7 +565,7 @@ ntp_cb(
 	rpktl = recvpkt(fd, &r_pkt, sizeof rbuf,
 		(nctx->dctx->flags & CTX_UCST) ? &(nctx->x_pkt) :  0);
 
-	DPRINTF(2, ("ntp_cb: recvpkt returned %x/n", rpktl));
+	DPRINTF(2, ("ntp_cb: recvpkt returned %x\n", rpktl));
 
 	/* If this is a Unicast packet, we're done ... */
 	if (nctx->dctx->flags & CTX_UCST) {
@@ -677,7 +677,7 @@ handle_pkt (
 		break;
 
 	    case 1:
-		if (debug) {
+		if (debug > 2) {
 			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf,
 				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 			printf("sntp handle_pkt: Received %i bytes from %s\n",
@@ -756,7 +756,7 @@ offset_calculation (
 	NTOHL_FP(&rpkt->xmt, &p_xmt);
 
 	*precision = LOGTOD(rpkt->precision);
-	DPRINTF(2, ("offset_calculation: precision: %f", *precision));
+	DPRINTF(3, ("offset_calculation: precision: %f", *precision));
 
 	*root_dispersion = FPTOD(p_rdsp);
 
@@ -794,7 +794,7 @@ offset_calculation (
 	*offset = (t21 + t34) / 2.;
 	delta = t21 - t34;
 
-	DPRINTF(2, ("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", t21, t34, delta, *offset));
+	DPRINTF(3, ("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", t21, t34, delta, *offset));
 }
 
 
