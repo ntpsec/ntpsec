@@ -14,6 +14,7 @@
 int n_pending_dns = 0;
 int n_pending_ntp = 0;
 int ai_fam_pref = AF_UNSPEC;
+int xmt_delay;
 SOCKET sock4 = -1;		/* Socket for IPv4 */
 SOCKET sock6 = -1;		/* Socket for IPv6 */
 char *progname;
@@ -30,6 +31,12 @@ struct dns_ctx {
 	int		key_id;
 	struct timeval	timeout;
 	struct key *	key;
+};
+
+struct xmt_ctx {
+	SOCKET			sock;
+	struct dns_ctx *	dctx;
+	struct ntp_ctx *	nctx;
 };
 
 struct ntp_ctx {
@@ -50,8 +57,12 @@ static union {
 
 #define r_pkt  rbuf.pkt
 
+void open_sockets( void );
 void handle_lookup( const char *name, int flags );
 void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
+void queue_xmt( SOCKET sock, struct dns_ctx *dctx, struct ntp_ctx *nctx );
+void xmt_cb( evutil_socket_t, short, void *ptr );
+int checkKoD( struct evutil_addrinfo *ai );
 void ntp_cb (evutil_socket_t, short, void *);
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode);
 int sntp_main (int argc, char **argv);
@@ -155,6 +166,8 @@ sntp_main (
 		return -1;
 	}
 
+	open_sockets();
+
 	if (HAVE_OPT(BROADCAST)) {
 		int		cn = STACKCT_OPT( BROADCAST );
 		const char **	cp = STACKLST_OPT( BROADCAST );
@@ -185,6 +198,67 @@ sntp_main (
 	event_base_free(base);
 
 	return 0;		/* Might not want 0... */
+}
+
+
+/*
+** open sockets and make them non-blocking
+*/
+void
+open_sockets(
+	void
+	)
+{
+	sockaddr_u name;
+
+	if (-1 == sock4) {
+		sock4 = socket(PF_INET, SOCK_DGRAM, 0);
+		if (-1 == sock4) {
+			/* error getting a socket */
+			msyslog(LOG_ERR, "open_sockets: socket(PF_INET) failed: %m");
+			exit(1);
+		}
+		/* Make it non-blocking */
+		make_socket_nonblocking(sock4);
+
+		/* Let's try using a wildcard... */
+		ZERO(name);
+		AF(&name) = AF_INET;
+		SET_ADDR4N(&name, INADDR_ANY);
+		SET_PORT(&name, 0);
+
+		if (-1 == bind(sock4, &name.sa,
+			       SOCKLEN(&name))) {
+			msyslog(LOG_ERR, "open_sockets: bind(sock4) failed: %m");
+			exit(1);
+		}
+	}
+
+	/* We may not always have IPv6... */
+	if (-1 == sock6) {
+		sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
+		if (-1 == sock6) {
+			/* error getting a socket */
+			msyslog(LOG_ERR, "open_sockets: socket(PF_INET6) failed: %m");
+			exit(1);
+		}
+		/* Make it non-blocking */
+		make_socket_nonblocking(sock6);
+
+		/* Let's try using a wildcard... */
+		ZERO(name);
+		AF(&name) = AF_INET6;
+		SET_ADDR6N(&name, in6addr_any);
+		SET_PORT(&name, 0);
+
+		if (-1 == bind(sock6, &name.sa,
+			       SOCKLEN(&name))) {
+			msyslog(LOG_ERR, "open_sockets: bind(sock6) failed: %m");
+			exit(1);
+		}
+	}
+	
+	return;
 }
 
 
@@ -259,12 +333,11 @@ dns_cb(
 {
 	struct dns_ctx *dctx = ptr;
 	struct ntp_ctx *nctx;
-	struct event *ev;
-	sockaddr_u name;
 
 	if (errcode) {
 		printf("%s -> %s\n", dctx->name, evutil_gai_strerror(errcode));
 	} else {
+		struct event *ev;
 		struct evutil_addrinfo *ai;
 
 		if (debug > 2)
@@ -273,23 +346,12 @@ dns_cb(
 			       ? addr->ai_canonname
 			       : "");
 
+		xmt_delay = 0;
 		for (ai = addr; ai; ai = ai->ai_next) {
-			char *hostname;
-			struct kod_entry *reason;
 			SOCKET sock;
 
-			/* Is there a KoD on file for this address? */
-			hostname = addrinfo_to_str(ai);
-// printf("dns_cb: checking <%s>\n", hostname);
-			if (search_entry(hostname, &reason)) {
-				printf("prior KoD for %s, skipping.\n",
-					hostname);
-				free(reason);
-				free(hostname);
-
+			if (checkKoD(ai))
 				continue;
-			}
-			free(hostname);
 
 			nctx = emalloc((sizeof *nctx));
 			memset(nctx, 0, sizeof *nctx);
@@ -297,63 +359,18 @@ dns_cb(
 			nctx->dctx = dctx;
 			nctx->ai = ai;
 
-			/* Open a socket and make it non-blocking */
-			if (ai->ai_family == AF_INET) {
-				if (-1 == sock4) {
-
-					sock4 = socket(PF_INET, SOCK_DGRAM, 0);
-					if (-1 == sock4) {
-						/* error getting a socket */
-						msyslog(LOG_ERR, "dns_cb: socket(PF_INET) failed: %m");
-						exit(1);
-					}
-					/* Make it non-blocking */
-					make_socket_nonblocking(sock4);
-
-					/* Let's try using a wildcard... */
-					ZERO(name);
-					AF(&name) = AF_INET;
-					SET_ADDR4N(&name, INADDR_ANY);
-					SET_PORT(&name, 0);
-
-					if (-1 == bind(sock4, &name.sa,
-						       SOCKLEN(&name))) {
-						msyslog(LOG_ERR, "dns_cv: bind(sock4) failed: %m");
-						exit(1);
-					}
-				}
+			switch (ai->ai_family) {
+			case AF_INET:
 				sock = sock4;
-			}
-			else if (ai->ai_family == AF_INET6) {
-				if (-1 == sock6) {
-					sock6 = socket(PF_INET6, SOCK_DGRAM, 0);
-					if (-1 == sock6) {
-						/* error getting a socket */
-						msyslog(LOG_ERR, "dns_cb: socket(PF_INET6) failed: %m");
-						exit(1);
-					}
-					/* Make it non-blocking */
-					make_socket_nonblocking(sock6);
-
-					/* Let's try using a wildcard... */
-					ZERO(name);
-					AF(&name) = AF_INET6;
-					SET_ADDR6N(&name, in6addr_any);
-					SET_PORT(&name, 0);
-
-					if (-1 == bind(sock6, &name.sa,
-						       SOCKLEN(&name))) {
-						msyslog(LOG_ERR, "dns_cv: bind(sock6) failed: %m");
-						exit(1);
-					}
-				}
+				break;
+			case AF_INET6:
 				sock = sock6;
-			}
-			else {
-				/* unexpected ai_family value */
+				break;
+			default:
 				msyslog(LOG_ERR, "dns_cb: unexpected ai_family: %d",
 					ai->ai_family);
 				exit(1);
+				break;
 			}
 
 			/*
@@ -362,45 +379,18 @@ dns_cb(
 			*/
 			++n_pending_ntp;
 
-			/* If this is for a unicast host, send a request */
-			if (dctx->flags & CTX_UCST) {
-				struct timeval tv_xmt;
-				struct pkt x_pkt;
-				int pkt_len;
-
-				if (0 != GETTIMEOFDAY(&tv_xmt, NULL)) {
-					msyslog(LOG_ERR,
-						"dns_cb: gettimeofday() failed: %m");
-					exit(1);
-				}
-				tv_xmt.tv_sec += JAN_1970;
-
-				pkt_len = generate_pkt(&x_pkt, &tv_xmt,
-						dctx->key_id, dctx->key);
-
-				/* The current sendpkt does not return status */
-				sendpkt(sock, (sockaddr_u *)ai->ai_addr,
-					&x_pkt, pkt_len);
-				/* Save the packet we sent... */
-				memcpy(&(nctx->x_pkt), &x_pkt, pkt_len);
-
-				DPRINTF(2, ("dns_cb: UCST: Current time sec: %i msec: %i\n", (unsigned int) tv_xmt.tv_sec, (unsigned int) tv_xmt.tv_usec));
-
-				/*
-				** If the send fails:
-				** - decrement n_pending_ntp
-				** - restart the loop
-				*/
-			}
-
-			/* queue that we're waiting for a response */
+			/* If this is for a unicast IP, queue a request */
+			if (dctx->flags & CTX_UCST)
+				queue_xmt(sock, dctx, nctx);
 
 			/*
-			** register an NTP callback,
+			** Register an NTP callback for the response
+			** or broadcast.
 			*/
 
 			/*
-			** HMS: Exactly why do we want a timeout?
+			** Do we need separate events if we are using
+			** a wildcard socket for responses?
 			*/
 			ev = event_new(base, sock,
 				EV_TIMEOUT|EV_READ|EV_PERSIST,
@@ -421,6 +411,120 @@ dns_cb(
 	/* n_pending_dns really should be >0 here... */
 	if (--n_pending_dns == 0 && n_pending_ntp == 0)
 		event_base_loopexit(base, NULL);
+}
+
+
+/*
+** queue_xmt
+*/
+void
+queue_xmt(
+	SOCKET sock,
+	struct dns_ctx *dctx,
+	struct ntp_ctx *nctx
+	)
+{
+	struct event *ev;
+	struct xmt_ctx *xctx;
+	struct timeval cb_tv = { 2 * xmt_delay, 0 };
+
+	xctx = emalloc(sizeof(*xctx));
+	memset(xctx, 0, sizeof(*xctx));
+
+	xctx->sock = sock;
+	xctx->dctx = dctx;
+	xctx->nctx = nctx;
+
+	/*
+	** xmt_delay increases, starting with 0.
+	** Queue an event for xmt_delay*2 seconds from now,
+	** and when it "fires" send off a packet to the target.
+	*/
+	ev = evtimer_new(base, &xmt_cb, xctx);
+	if (NULL == ev) {
+		msyslog(LOG_ERR, "queue_xmt: evtimer_new() failed!");
+		exit(1);
+	}
+
+	++xmt_delay;
+
+	evtimer_add(ev, &cb_tv);
+
+	return;
+}
+
+
+/*
+** xmt_cb
+*/
+void
+xmt_cb(
+	evutil_socket_t fd,
+	short what,
+	void *ptr
+	)
+{
+	struct xmt_ctx *xctx = ptr;
+	SOCKET		sock = xctx->sock;
+	struct dns_ctx *dctx = xctx->dctx;
+	struct ntp_ctx *nctx = xctx->nctx;
+	struct evutil_addrinfo *ai = nctx->ai;
+	struct timeval	tv_xmt;
+	struct pkt	x_pkt;
+	int		pkt_len;
+
+	if (0 != GETTIMEOFDAY(&tv_xmt, NULL)) {
+		msyslog(LOG_ERR,
+			"xmt_cb: gettimeofday() failed: %m");
+		exit(1);
+	}
+	tv_xmt.tv_sec += JAN_1970;
+
+	pkt_len = generate_pkt(&x_pkt, &tv_xmt,
+			dctx->key_id, dctx->key);
+
+	/* The current sendpkt does not return status */
+	sendpkt(sock, (sockaddr_u *)ai->ai_addr, &x_pkt, pkt_len);
+	/* Save the packet we sent... */
+	memcpy(&(nctx->x_pkt), &x_pkt, pkt_len);
+
+	DPRINTF(2, ("xmt_cb: UCST: Current time sec: %i msec: %i\n", (unsigned int) tv_xmt.tv_sec, (unsigned int) tv_xmt.tv_usec));
+
+	/*
+	** If the send fails:
+	** - decrement n_pending_ntp
+	** - restart the loop
+	*/
+
+	return;
+}
+
+
+/*
+** checkKoD
+*/
+int
+checkKoD(
+	struct evutil_addrinfo *ai
+	)
+{
+	char *hostname;
+	struct kod_entry *reason;
+
+	/* Is there a KoD on file for this address? */
+	hostname = addrinfo_to_str(ai);
+	DPRINTF(2, ("checkKoD: checking <%s>\n", hostname));
+	if (search_entry(hostname, &reason)) {
+		printf("prior KoD for %s, skipping.\n",
+			hostname);
+		free(reason);
+		free(hostname);
+
+		return 1;
+	}
+	free(hostname);
+
+	return 0;
 }
 
 
