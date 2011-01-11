@@ -292,7 +292,7 @@ handle_lookup(
 	dns_ctx = emalloc(sizeof(*dns_ctx));
 	memset(dns_ctx, 0, sizeof(*dns_ctx));
 
-	dns_ctx->name = OPT_ARG(BROADCAST);
+	dns_ctx->name = name;
 	dns_ctx->flags = flags;
 	dns_ctx->timeout =
 		(flags & CTX_BCST)
@@ -611,6 +611,7 @@ generate_pkt (
 	set_li_vn_mode(x_pkt, LEAP_NOTINSYNC, 4, 3);
 	if (pkt_key != NULL) {
 		int mac_size = 20; /* max room for MAC */
+
 		x_pkt->exten[0] = htonl(key_id);
 		mac_size = make_mac((char *)x_pkt, pkt_len, mac_size,
 				    pkt_key, (char *)&x_pkt->exten[1]);
