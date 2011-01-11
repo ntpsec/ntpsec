@@ -583,7 +583,7 @@ ntp_cb(
 		exit(0);
 		break;
 	default:
-		printf("handle_pkt() returned %d\n", rc);
+		printf("ntp_cb: handle_pkt() returned %d\n", rc);
 		break;
 	}
 
