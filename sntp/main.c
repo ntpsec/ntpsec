@@ -111,6 +111,11 @@ sntp_main (
 	if (HAVE_OPT(FILELOG))
 		open_logfile(OPT_ARG(FILELOG));
 
+	if (0 == argc && !HAVE_OPT(BROADCAST) && !HAVE_OPT(CONCURRENT)) {
+		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n", progname);
+		exit(EX_USAGE);
+	}
+
 	/*
 	** Eventually, we probably want:
 	** - separate bcst and ucst timeouts
