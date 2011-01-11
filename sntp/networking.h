@@ -34,22 +34,11 @@
 
 
 /* From ntpdate.c */
-int is_reachable (struct addrinfo *dst);
-
-int resolve_hosts (const char * const *hosts, int hostc,
-		   struct addrinfo ***res, int pref_family);
-
-void create_socket (SOCKET *rsock, sockaddr_u *dest);
-
 void sendpkt (SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
 
 int recvdata (SOCKET rsock, sockaddr_u *sender, char *rdata, int rdata_len);
 
 int recvpkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, struct pkt *spkt);
-
-int recv_bcst_data (SOCKET rsock, char *rdata, int rdata_len, sockaddr_u *sas, sockaddr_u *ras);
-
-int recv_bcst_pkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, sockaddr_u *sas);
 
 int process_pkt (struct pkt *rpkt, sockaddr_u *sas, int pkt_len,
 		 int mode, struct pkt *spkt, const char *func_name);
