@@ -50,7 +50,7 @@ static union {
 
 #define r_pkt  rbuf.pkt
 
-void handle_lookup( char *name, int flags );
+void handle_lookup( const char *name, int flags );
 void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
 void ntp_cb (evutil_socket_t, short, void *);
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode);
@@ -193,7 +193,7 @@ sntp_main (
 */
 void
 handle_lookup(
-	char *name,
+	const char *name,
 	int flags
 	)
 {
