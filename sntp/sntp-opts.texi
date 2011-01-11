@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  January  9, 2011 at 06:07:36 AM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  January 10, 2011 at 11:23:56 PM by AutoGen 5.11.6pre7
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -50,6 +50,7 @@ This software is released under a specialized copyright license.
 * sntp adjtime::               adjtime option (-j)
 * sntp authentication::        authentication option (-a)
 * sntp broadcast::             broadcast option (-b)
+* sntp concurrent::            concurrent option (-c)
 * sntp debug-level::           debug-level option (-d)
 * sntp filelog::               filelog option (-l)
 * sntp ipv4::                  ipv4 option (-4)
@@ -58,6 +59,7 @@ This software is released under a specialized copyright license.
 * sntp kod::                   kod option (-K)
 * sntp set-debug-level::       set-debug-level option (-D)
 * sntp settod::                settod option (-s)
+* sntp steplimit::             steplimit option (-S)
 * sntp syslog::                syslog option (-p)
 * sntp timeout::               timeout option (-t)
 @end menu
@@ -71,7 +73,8 @@ This is the automatically generated usage text for sntp:
 @exampleindent 0
 @example
 sntp - standard SNTP program - Ver. 4.2.7p114
-USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... hostname-or-IP ...
+USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
+                [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
    -d no  debug-level    Increase output debug message level
                                 - may appear multiple times
@@ -83,23 +86,31 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... hostname-or-IP ...
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits these options:
                                 ipv4
-   -K Str kod            KoD history filename
+   -K Fil kod            KoD history filename
    -p no  syslog         Logging with syslog
                                 - prohibits these options:
                                 filelog
-   -l Str filelog        Log to specified logfile
+   -l Fil filelog        Log to specified logfile
                                 - prohibits these options:
                                 syslog
+   -S Num steplimit      Adjustments less than steplimit msec will be slewed.
+                                - prohibits these options:
+                                adjtime
+                                settod
    -s no  settod         Set (step) the time with settimeofday()
                                 - prohibits these options:
                                 adjtime
+                                steplimit
    -j no  adjtime        Set (slew) the time with adjtime()
                                 - prohibits these options:
                                 settod
+                                steplimit
+   -c Str concurrent     Send concurrent queries to all IPs returned for host-name
+                                - may appear multiple times
    -b Str broadcast      Use broadcasts to the address specified for synchronisation
    -t Num timeout        Specify the number of seconds to wait for broadcasts
    -a Num authentication Enable authentication with the key auth-keynumber
-   -k Str keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
+   -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
       opt version        Output version information and exit
    -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
@@ -118,7 +129,7 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
 
-sntp implements the Simple Network Time Protocol, and is used to query
+sntp implements the Simple Network Time Protocol and is used to query
 an NTP or SNTP server and either display the time or set the local
 system's time (given suitable privilege).
 
@@ -141,7 +152,7 @@ This option has some usage constraints.  It:
 @itemize @bullet
 @item
 must not appear in combination with any of the following options:
-settod.
+settod, steplimit.
 @end itemize
 
 
@@ -163,6 +174,28 @@ This is the ``use broadcasts to the address specified for synchronisation'' opti
 If specified SNTP will listen to the specified broadcast address
 for NTP broadcasts.  The default maximum wait time,
 68 seconds, can be modified with -t.
+
+@node sntp concurrent
+@subsection concurrent option (-c)
+@cindex sntp-concurrent
+
+This is the ``send concurrent queries to all ips returned for host-name'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+may appear an unlimited number of times.
+@end itemize
+
+Requests from an NTP "client" to a "server" should never be sent
+more rapidly than one every 2 seconds.  By default, any IPs returned
+as part of a DNS lookup are assumed to be for a single instance of
+ntpd, and therefore sntp will send  queries to these IPs one after
+another, with a 2-second gap in between each query.
+
+The -c or --concurrent flag says that any IPs returned for the
+DNS lookup of the supplied host-name are on different machines,
+so we can send concurrent queries.
 
 @node sntp debug-level
 @subsection debug-level option (-d)
@@ -250,7 +283,7 @@ For more information see ntp.keys(5).
 @cindex sntp-kod
 
 This is the ``kod history filename'' option.
-Modifies the filename to be used to persist the history of KoD
+Specifies the filename to be used for the  persistent history of KoD
 responses received from servers.  The default is
 /var/db/ntp-kod.
 
@@ -279,10 +312,25 @@ This option has some usage constraints.  It:
 @itemize @bullet
 @item
 must not appear in combination with any of the following options:
-adjtime.
+adjtime, steplimit.
 @end itemize
 
 
+
+@node sntp steplimit
+@subsection steplimit option (-S)
+@cindex sntp-steplimit
+
+This is the ``adjustments less than steplimit msec will be slewed.'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must not appear in combination with any of the following options:
+adjtime, settod.
+@end itemize
+
+If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
 
 @node sntp syslog
 @subsection syslog option (-p)

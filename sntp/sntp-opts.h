@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  January  9, 2011 at 06:03:48 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 10, 2011 at 11:23:51 PM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -57,20 +57,22 @@ typedef enum {
     INDEX_OPT_KOD              =  4,
     INDEX_OPT_SYSLOG           =  5,
     INDEX_OPT_FILELOG          =  6,
-    INDEX_OPT_SETTOD           =  7,
-    INDEX_OPT_ADJTIME          =  8,
-    INDEX_OPT_BROADCAST        =  9,
-    INDEX_OPT_TIMEOUT          = 10,
-    INDEX_OPT_AUTHENTICATION   = 11,
-    INDEX_OPT_KEYFILE          = 12,
-    INDEX_OPT_VERSION          = 13,
-    INDEX_OPT_HELP             = 14,
-    INDEX_OPT_MORE_HELP        = 15,
-    INDEX_OPT_SAVE_OPTS        = 16,
-    INDEX_OPT_LOAD_OPTS        = 17
+    INDEX_OPT_STEPLIMIT        =  7,
+    INDEX_OPT_SETTOD           =  8,
+    INDEX_OPT_ADJTIME          =  9,
+    INDEX_OPT_CONCURRENT       = 10,
+    INDEX_OPT_BROADCAST        = 11,
+    INDEX_OPT_TIMEOUT          = 12,
+    INDEX_OPT_AUTHENTICATION   = 13,
+    INDEX_OPT_KEYFILE          = 14,
+    INDEX_OPT_VERSION          = 15,
+    INDEX_OPT_HELP             = 16,
+    INDEX_OPT_MORE_HELP        = 17,
+    INDEX_OPT_SAVE_OPTS        = 18,
+    INDEX_OPT_LOAD_OPTS        = 19
 } teOptIndex;
 
-#define OPTION_CT    18
+#define OPTION_CT    20
 #define SNTP_VERSION       "4.2.7p114"
 #define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.7p114"
 
@@ -136,6 +138,10 @@ typedef enum {
 #  warning undefining FILELOG due to option name conflict
 #  undef   FILELOG
 # endif
+# ifdef    STEPLIMIT
+#  warning undefining STEPLIMIT due to option name conflict
+#  undef   STEPLIMIT
+# endif
 # ifdef    SETTOD
 #  warning undefining SETTOD due to option name conflict
 #  undef   SETTOD
@@ -143,6 +149,10 @@ typedef enum {
 # ifdef    ADJTIME
 #  warning undefining ADJTIME due to option name conflict
 #  undef   ADJTIME
+# endif
+# ifdef    CONCURRENT
+#  warning undefining CONCURRENT due to option name conflict
+#  undef   CONCURRENT
 # endif
 # ifdef    BROADCAST
 #  warning undefining BROADCAST due to option name conflict
@@ -168,8 +178,10 @@ typedef enum {
 # undef KOD
 # undef SYSLOG
 # undef FILELOG
+# undef STEPLIMIT
 # undef SETTOD
 # undef ADJTIME
+# undef CONCURRENT
 # undef BROADCAST
 # undef TIMEOUT
 # undef AUTHENTICATION
@@ -187,8 +199,12 @@ typedef enum {
 #define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_SYSLOG         'p'
 #define VALUE_OPT_FILELOG        'l'
+#define VALUE_OPT_STEPLIMIT      'S'
+
+#define OPT_VALUE_STEPLIMIT      (DESC(STEPLIMIT).optArg.argInt)
 #define VALUE_OPT_SETTOD         's'
 #define VALUE_OPT_ADJTIME        'j'
+#define VALUE_OPT_CONCURRENT     'c'
 #define VALUE_OPT_BROADCAST      'b'
 #define VALUE_OPT_TIMEOUT        't'
 

@@ -9,7 +9,7 @@ autogen definitions options;
 prog-name      = "sntp";
 prog-title     = "standard SNTP program";
 homerc         =  $HOME, ".";
-argument       = 'hostname-or-IP ...';
+argument       = '[ hostname-or-IP ...]';
 
 long-opts;
 
@@ -53,11 +53,11 @@ flag = {
 flag = {
     name      = kod;
     value     = K;
-    arg-type  = string;
+    arg-type  = file;
     arg-name  = "file-name";
     descrip   = "KoD history filename";
     doc = <<-  _EndOfDoc_
-	Modifies the filename to be used to persist the history of KoD
+	Specifies the filename to be used for the  persistent history of KoD
 	responses received from servers.  The default is
 	/var/db/ntp-kod.
 	_EndOfDoc_;
@@ -77,7 +77,7 @@ flag = {
 flag = {
 	name	   = filelog;
 	value	   = l;
-	arg-type   = string;
+	arg-type   = file;
 	arg-name   = "file-name";
 	flags-cant = syslog;
 	descrip = "Log to specified logfile";
@@ -88,20 +88,52 @@ flag = {
 };
 
 flag = {
-    name      = settod;
-    value     = s;
-    flags-cant = adjtime;
-    descrip   = "Set (step) the time with settimeofday()";
-    doc = <<-  _EndOfDoc_
+	name       = steplimit;
+	value      = S;
+	arg-type   = number;
+	flags-cant = adjtime, settod;
+	descrip    = "Adjustments less than steplimit msec will be slewed.";
+	doc = <<-  _EndOfDoc_
+	If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+	_EndOfDoc_;
+	};
+
+flag = {
+	name       = settod;
+	value      = s;
+	flags-cant = adjtime, steplimit;
+	descrip    = "Set (step) the time with settimeofday()";
+	doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
 };
 
 flag = {
-    name      = adjtime;
-    value     = j;
-    flags-cant = settod;
-    descrip   = "Set (slew) the time with adjtime()";
-    doc = <<-  _EndOfDoc_
+	name       = adjtime;
+	value      = j;
+	flags-cant = settod, steplimit;
+	descrip    = "Set (slew) the time with adjtime()";
+	doc = <<-  _EndOfDoc_
+	_EndOfDoc_;
+};
+
+flag = {
+	name	 = concurrent;
+	value	 = c;
+	descrip	 = "Send concurrent queries to all IPs returned for host-name";
+	arg-type = string;
+	arg-name = "host-name";
+	max	 = NOLIMIT;
+	stack-arg;
+	doc	 = <<-  _EndOfDoc_
+	Requests from an NTP "client" to a "server" should never be sent
+	more rapidly than one every 2 seconds.  By default, any IPs returned
+	as part of a DNS lookup are assumed to be for a single instance of
+	ntpd, and therefore sntp will send  queries to these IPs one after
+	another, with a 2-second gap in between each query.
+
+	The -c or --concurrent flag says that any IPs returned for the
+	DNS lookup of the supplied host-name are on different machines,
+	so we can send concurrent queries.
 	_EndOfDoc_;
 };
 
@@ -148,7 +180,7 @@ flag = {
 	name	= keyfile;
 	value	= k;
 	descrip	= "Specify a keyfile. SNTP will look in this file for the key specified with -a";
-	arg-type = string;
+	arg-type = file;
 	arg-name = "file-name";
 	doc	= <<-  _EndOfDoc_
 	This option specifies the keyfile. SNTP will search for the key specified with -a keyno in this
@@ -173,7 +205,7 @@ explain = <<- _END_EXPLAIN
 	_END_EXPLAIN;
 
 detail = <<-  _END_DETAIL
-sntp implements the Simple Network Time Protocol, and is used to query
+sntp implements the Simple Network Time Protocol and is used to query
 an NTP or SNTP server and either display the time or set the local
 system's time (given suitable privilege).
 

@@ -31,6 +31,7 @@ struct dns_ctx {
 	int		flags;
 #define CTX_BCST	0x0001
 #define CTX_UCST	0x0002
+#define CTX_CONC	0x0004
 #define CTX_unused	0xfffd
 	int		key_id;
 	struct timeval	timeout;
@@ -45,6 +46,8 @@ struct ntp_ctx {
 
 struct key *keys = NULL;
 struct timeval timeout_tv;
+
+struct timeval ucst_timeout_tv = { 5, 0 };
 
 static union {
 	struct pkt pkt;
@@ -218,6 +221,16 @@ sntp_main (
 		printf("broadcast-after: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 	}
 
+	if (HAVE_OPT(CONCURRENT)) {
+		int		cn = STACKCT_OPT( CONCURRENT );
+		const char **	cp = STACKLST_OPT( CONCURRENT );
+
+		while (cn-- > 0) {
+			/* Do something with *cp++ */
+			printf("Concurrent: <%s>\n", *cp++);
+		}
+	}
+
 	for (i = 0; i < argc; ++i) {
 		struct evutil_addrinfo hints; /* local copy is OK */
 		struct dns_ctx *dns_ctx;
@@ -239,7 +252,7 @@ sntp_main (
 
 		dns_ctx->name = argv[i];
 		dns_ctx->flags = CTX_UCST;
-		dns_ctx->timeout = timeout_tv;
+		dns_ctx->timeout = ucst_timeout_tv;
 
 		if (ENABLED_OPT(AUTHENTICATION) &&
 		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
@@ -428,7 +441,6 @@ dns_cb(
 
 			/*
 			** HMS: Exactly why do we want a timeout?
-			** Should we use the same value for bcast and ucast?
 			*/
 			ev = event_new(base, sock,
 				EV_TIMEOUT|EV_READ|EV_PERSIST,
@@ -680,12 +692,12 @@ offset_calculation (
 	NTOHL_FP(&rpkt->xmt, &p_xmt);
 
 	*precision = LOGTOD(rpkt->precision);
-	DPRINTF(1, ("offset_calculation: precision: %f", *precision));
+	DPRINTF(2, ("offset_calculation: precision: %f", *precision));
 
 	*root_dispersion = FPTOD(p_rdsp);
 
 #ifdef DEBUG
-	if (debug) {
+	if (debug > 2) {
 		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
 		printf("sntp rootdisp: %f\n", *root_dispersion);
 
