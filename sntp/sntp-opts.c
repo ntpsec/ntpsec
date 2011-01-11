@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  January 11, 2011 at 01:30:03 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 11, 2011 at 08:16:38 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -240,6 +240,15 @@ static char const zKeyfile_NAME[]            = "KEYFILE";
 static char const zKeyfile_Name[]            = "keyfile";
 #define KEYFILE_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
+
+/*
+ *  Unpriv_Port option description:
+ */
+static char const zUnpriv_PortText[] =
+        "Use an unprivileged port for communicating";
+static char const zUnpriv_Port_NAME[]        = "UNPRIV_PORT";
+static char const zUnpriv_Port_Name[]        = "unpriv-port";
+#define UNPRIV_PORT_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -498,6 +507,18 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
      /* disablement strs */ NULL, NULL },
 
+  {  /* entry idx, value */ 15, VALUE_OPT_UNPRIV_PORT,
+     /* equiv idx, value */ 15, VALUE_OPT_UNPRIV_PORT,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ UNPRIV_PORT_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zUnpriv_PortText, zUnpriv_Port_NAME, zUnpriv_Port_Name,
+     /* disablement strs */ NULL, NULL },
+
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
      /* equiv idx value  */ NO_EQUIVALENT, 0,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -632,7 +653,7 @@ tOptions sntpOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    20 /* full option count */, 15 /* user option count */,
+    21 /* full option count */, 16 /* user option count */,
     sntp_full_usage, sntp_short_usage,
     NULL, NULL,
     PKGDATADIR

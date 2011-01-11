@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  January 11, 2011 at 01:30:08 AM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  January 11, 2011 at 08:16:46 AM by AutoGen 5.11.6pre7
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -62,6 +62,7 @@ This software is released under a specialized copyright license.
 * sntp steplimit::             steplimit option (-S)
 * sntp syslog::                syslog option (-p)
 * sntp timeout::               timeout option (-t)
+* sntp unpriv-port::           unpriv-port option (-u)
 @end menu
 
 @node sntp usage
@@ -112,6 +113,7 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -t Num timeout        Specify the number of seconds to wait for broadcasts
    -a Num authentication Enable authentication with the key auth-keynumber
    -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
+   -u no  unpriv-port    Use an unprivileged port for communicating
       opt version        Output version information and exit
    -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
@@ -362,3 +364,9 @@ When this option is set all logging will be done using syslog.
 This is the ``specify the number of seconds to wait for broadcasts'' option.
 When waiting for a broadcast packet SNTP will wait the number
 of seconds specified before giving up.  Default 68 seconds.
+
+@node sntp unpriv-port
+@subsection unpriv-port option (-u)
+@cindex sntp-unpriv-port
+
+This is the ``use an unprivileged port for communicating'' option.

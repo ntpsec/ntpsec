@@ -202,6 +202,14 @@ flag = {
 	_EndOfDoc_;
 };
 
+flag = {
+    name      = unpriv-port;
+    value     = u;
+    descrip   = "Use an unprivileged port for communicating";
+    doc = <<-  _EndOfDoc_
+	_EndOfDoc_;
+};
+
 
 /* explain: Additional information whenever the usage routine is invoked */
 explain = <<- _END_EXPLAIN

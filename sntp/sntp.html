@@ -132,6 +132,7 @@ the aginfo template and the option descriptions for the <samp><span class="comma
 <li><a href="#sntp-steplimit">sntp steplimit</a>:              steplimit option (-S)
 <li><a href="#sntp-syslog">sntp syslog</a>:                 syslog option (-p)
 <li><a href="#sntp-timeout">sntp timeout</a>:                timeout option (-t)
+<li><a href="#sntp-unpriv_002dport">sntp unpriv-port</a>:            unpriv-port option (-u)
 </ul>
 
 <div class="node">
@@ -187,6 +188,7 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -t Num timeout        Specify the number of seconds to wait for broadcasts
    -a Num authentication Enable authentication with the key auth-keynumber
    -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
+   -u no  unpriv-port    Use an unprivileged port for communicating
       opt version        Output version information and exit
    -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
@@ -530,6 +532,7 @@ filelog.
 <div class="node">
 <p><hr>
 <a name="sntp-timeout"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-unpriv_002dport">sntp unpriv-port</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-syslog">sntp syslog</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
@@ -541,6 +544,20 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 This is the &ldquo;specify the number of seconds to wait for broadcasts&rdquo; option. 
 When waiting for a broadcast packet SNTP will wait the number
 of seconds specified before giving up.  Default 68 seconds.
+
+<div class="node">
+<p><hr>
+<a name="sntp-unpriv-port"></a>
+<a name="sntp-unpriv_002dport"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-timeout">sntp timeout</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">unpriv-port option (-u)</h4>
+
+<p><a name="index-sntp_002dunpriv_002dport-19"></a>
+This is the &ldquo;use an unprivileged port for communicating&rdquo; option.
 
 <div class="node">
 <p><hr>

@@ -2,87 +2,6 @@
 #include "networking.h"
 #include "ntp_debug.h"
 
-char adr_buf[INET6_ADDRSTRLEN];
-
-
-/*
-** resolve_hosts consumes an array of hostnames/addresses and its length,
-** stores a pointer to the array with the resolved hosts in res and returns
-** the size of the array res.
-**
-** pref_family enforces IPv4 or IPv6 depending on commandline options and
-** system capability.
-**
-** If pref_family is NULL or PF_UNSPEC any compatible family will be
-** accepted.
-**
-** Check here: Probably getaddrinfo() can do without ISC's IPv6 availability
-** check?
-*/
-int 
-resolve_hosts (
-	       const char * const *	hosts,
-	       int			hostc, 
-	       struct addrinfo ***	res,
-	       int			pref_family
-	       )
-{
-	register unsigned int a;
-	unsigned int resc;
-	struct addrinfo **tres;
-
-	if (hostc < 1 || NULL == res)
-		return 0;
-	
-	tres = emalloc(sizeof(struct addrinfo *) * hostc);
-	for (a = 0, resc = 0; a < hostc; a++) {
-		struct addrinfo hints;
-		int error;
-
-		tres[resc] = NULL;
-#ifdef DEBUG
-		DPRINTF(2, ("sntp resolve_hosts: Starting host resolution for %s...\n", hosts[a])); 
-#endif
-		memset(&hints, 0, sizeof(hints));
-		if (AF_UNSPEC == pref_family)
-			hints.ai_family = PF_UNSPEC;
-		else 
-			hints.ai_family = pref_family;
-		hints.ai_socktype = SOCK_DGRAM;
-		error = getaddrinfo(hosts[a], "123", &hints, &tres[resc]);
-		if (error) {
-			msyslog(LOG_DEBUG, "Error looking up %s%s: %s",
-				(AF_UNSPEC == hints.ai_family)
-				    ? ""
-				    : (AF_INET == hints.ai_family)
-					  ? "(A) "
-					  : "(AAAA) ",
-				hosts[a], gai_strerror(error));
-		} else {
-#if 0
-			for (dres = tres[resc]; dres; dres = dres->ai_next) {
-				getnameinfo(dres->ai_addr, dres->ai_addrlen, adr_buf, sizeof(adr_buf), NULL, 0, NI_NUMERICHOST);
-				STDLINE
-				printf("Resolv No.: %i Result of getaddrinfo for %s:\n", resc, hosts[a]);
-				printf("socktype: %i ", dres->ai_socktype); 
-				printf("protocol: %i ", dres->ai_protocol);
-				printf("Prefered socktype: %i IP: %s\n", dres->ai_socktype, adr_buf);
-				STDLINE
-			}
-#endif
-			resc++;
-		}
-	}
-
-	if (resc)
-		*res = realloc(tres, sizeof(struct addrinfo *) * resc);
-	else {
-		free(tres);
-		*res = NULL;
-	}
-	return resc;
-}
-
 
 /* Send a packet */
 void
@@ -120,6 +39,31 @@ sendpkt (
 }
 
 
+/*
+** Fetch data, check if it's data for us and whether it's useable or not.
+**
+** If not, return a failure code so we can delete this server from our list
+** and continue with another one.
+*/
+int
+recvpkt (
+	SOCKET rsock,
+	struct pkt *rpkt,    /* received packet (response) */
+	unsigned int rsize,  /* size of rpkt buffer */
+	struct pkt *spkt     /* sent     packet (request) */
+	)
+{
+	int pkt_len;
+	sockaddr_u sender;
+
+	pkt_len = recvdata(rsock, &sender, (char *)rpkt, rsize);
+	if (pkt_len > 0)
+		pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, spkt, "recvpkt");
+
+	return pkt_len;
+}
+
+
 /* Receive raw data */
 int
 recvdata(
@@ -146,146 +90,6 @@ recvdata(
 	}
 #endif
 	return recvc;
-}
-
-
-/*
-** Receive data from broadcast.
-**
-** Couldn't finish that.
-**
-** Need to do some digging here, especially for protocol independence and
-** IPv6 multicast.
-*/
-int 
-recv_bcst_data (
-	SOCKET rsock,
-	char *rdata,
-	int rdata_len,
-	sockaddr_u *sas,
-	sockaddr_u *ras
-	)
-{
-	char *buf;
-	int btrue = 1;
-	int recv_bytes = 0;
-	int rdy_socks;
-	GETSOCKNAME_SOCKLEN_TYPE ss_len;
-	long l;
-	struct timeval timeout_tv;
-	fd_set bcst_fd;
-#ifdef MCAST
-	struct ip_mreq mdevadr;
-	TYPEOF_IP_MULTICAST_LOOP mtrue = 1;
-#endif
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-	struct ipv6_mreq mdevadr6;
-#endif
-
-	setsockopt(rsock, SOL_SOCKET, SO_REUSEADDR, &btrue, sizeof(btrue));
-	if (IS_IPV4(sas)) {
-		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
-			if (debug)
-				printf("sntp recv_bcst_data: Couldn't bind() address %s.\n",
-				       sptoa(sas));
-		}
-
-#ifdef MCAST
-		if (setsockopt(rsock, IPPROTO_IP, IP_MULTICAST_LOOP, &mtrue, sizeof(mtrue)) < 0) {
-			/* some error message regarding setting up multicast loop */
-			return BROADCAST_FAILED;
-		}
-		mdevadr.imr_multiaddr.s_addr = NSRCADR(sas); 
-		mdevadr.imr_interface.s_addr = htonl(INADDR_ANY);
-		if (mdevadr.imr_multiaddr.s_addr == -1) {
-			if (debug) {
-				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n",
-				       sptoa(sas));
-			}
-			return BROADCAST_FAILED;
-		}
-		if (setsockopt(rsock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mdevadr, sizeof(mdevadr)) < 0) {
-			if (debug) {
-				buf = ss_to_str(sas);
-				printf("sntp recv_bcst_data: Couldn't add IP membership for %s\n", buf);
-				free(buf);
-			}
-		}
-#endif	/* MCAST */
-	}
-#ifdef ISC_PLATFORM_HAVEIPV6
-	else if (IS_IPV6(sas)) {
-		if (bind(rsock, &sas->sa, SOCKLEN(sas)) < 0) {
-			if (debug)
-				printf("sntp recv_bcst_data: Couldn't bind() address.\n");
-		}
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &btrue, sizeof (btrue)) < 0) {
-			/* some error message regarding setting up multicast loop */
-			return BROADCAST_FAILED;
-		}
-		memset(&mdevadr6, 0, sizeof(mdevadr6));
-		mdevadr6.ipv6mr_multiaddr = SOCK_ADDR6(sas);
-		if (!IN6_IS_ADDR_MULTICAST(&mdevadr6.ipv6mr_multiaddr)) {
-			if (debug) {
-				buf = ss_to_str(sas); 
-				printf("sntp recv_bcst_data: %s is not a broad-/multicast address, aborting...\n", buf);
-				free(buf);
-			}
-			return BROADCAST_FAILED;
-		}
-		if (setsockopt(rsock, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-			       &mdevadr6, sizeof(mdevadr6)) < 0) {
-			if (debug) {
-				buf = ss_to_str(sas); 
-				printf("sntp recv_bcst_data: Couldn't join group for %s\n", buf);
-				free(buf);
-			}
-		}
-#endif	/* INCLUDE_IPV6_MULTICAST_SUPPORT */
-	}
-#endif	/* ISC_PLATFORM_HAVEIPV6 */
-	FD_ZERO(&bcst_fd);
-	FD_SET(rsock, &bcst_fd);
-	if (ENABLED_OPT(TIMEOUT) && atoint(OPT_ARG(TIMEOUT), &l))
-		timeout_tv.tv_sec = l;
-	else 
-		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
-	timeout_tv.tv_usec = 0;
-	rdy_socks = select(rsock + 1, &bcst_fd, 0, 0, &timeout_tv);
-	switch (rdy_socks) {
-	    case -1: 
-		if (debug) 
-			perror("sntp recv_bcst_data: select()");
-		return BROADCAST_FAILED;
-		break;
-	    case 0:
-		if (debug)
-			printf("sntp recv_bcst_data: select() reached timeout (%u sec), aborting.\n", 
-			       (unsigned)timeout_tv.tv_sec);
-		return BROADCAST_FAILED;
-		break;
-	    default:
-		ss_len = sizeof(*ras);
-		recv_bytes = recvfrom(rsock, rdata, rdata_len, 0, &ras->sa, &ss_len);
-		break;
-	}
-	if (recv_bytes == -1) {
-		if (debug)
-			perror("sntp recv_bcst_data: recvfrom:");
-		recv_bytes = BROADCAST_FAILED;
-	}
-#ifdef MCAST
-	if (IS_IPV4(sas)) 
-		setsockopt(rsock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &btrue,
-			   sizeof(btrue));
-#endif
-#ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
-	if (IS_IPV6(sas))
-		setsockopt(rsock, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &btrue,
-			   sizeof(btrue));
-#endif
-	return recv_bytes;
 }
 
 
@@ -460,100 +264,4 @@ unusable:
 	}
 
 	return pkt_len;
-}
-
-
-int 
-recv_bcst_pkt (
-	SOCKET rsock,
-	struct pkt *rpkt,
-	unsigned int rsize,
-	sockaddr_u *sas
-	)
-{
-	sockaddr_u sender;
-	int pkt_len = recv_bcst_data(rsock, (char *)rpkt, rsize, sas, &sender);
-
-	if (pkt_len < 0) {
-		return BROADCAST_FAILED;
-	}
-	pkt_len = process_pkt(rpkt, sas, pkt_len, MODE_BROADCAST, NULL, "recv_bcst_pkt");
-	return pkt_len;
-}
-
-
-/*
-** Fetch data, check if it's data for us and whether it's useable or not.
-**
-** If not, return a failure code so we can delete this server from our list
-** and continue with another one.
-*/
-int
-recvpkt (
-	SOCKET rsock,
-	struct pkt *rpkt,    /* received packet (response) */
-	unsigned int rsize,  /* size of rpkt buffer */
-	struct pkt *spkt     /* sent     packet (request) */
-	)
-{
-	int rdy_socks;
-	int pkt_len;
-	sockaddr_u sender;
-	long l;
-	struct timeval timeout_tv;
-	fd_set recv_fd;
-
-	FD_ZERO(&recv_fd);
-	FD_SET(rsock, &recv_fd);
-	if (ENABLED_OPT(TIMEOUT) && atoint(OPT_ARG(TIMEOUT), &l))
-		timeout_tv.tv_sec = l;
-	else 
-		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
-	timeout_tv.tv_usec = 0;
-	rdy_socks = select(rsock + 1, &recv_fd, 0, 0, &timeout_tv);
-	switch (rdy_socks) {
-	    case -1: 
-		if (debug) 
-			perror("sntp recvpkt: select()");
-		return PACKET_UNUSEABLE;
-		break;
-	    case 0:
-		if (debug)
-			printf("sntp recvpkt: select() reached timeout (%u sec), aborting.\n", 
-			       (unsigned)timeout_tv.tv_sec);
-		return PACKET_UNUSEABLE;
-		break;
-	    default:
-		break;
-	}
-	pkt_len = recvdata(rsock, &sender, (char *)rpkt, rsize);
-	if (pkt_len > 0)
-		pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, spkt, "recvpkt");
-
-	return pkt_len;
-}
-
-
-/*
- * is_reachable - check to see if we have a route to given destination
- */
-int
-is_reachable (
-	struct addrinfo *dst
-	)
-{
-	SOCKET sockfd = socket(dst->ai_family, SOCK_DGRAM, 0);
-
-	if (-1 == sockfd) {
-#ifdef DEBUG
-		printf("is_reachable: Couldn't create socket\n");
-#endif
-		return 0;
-	}
-	if (connect(sockfd, dst->ai_addr, SOCKLEN((sockaddr_u *)dst->ai_addr))) {
-		closesocket(sockfd);
-		return 0;
-	}
-	closesocket(sockfd);
-	return 1;
 }

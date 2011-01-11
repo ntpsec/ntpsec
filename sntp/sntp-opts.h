@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  January 11, 2011 at 01:30:02 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 11, 2011 at 08:16:38 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -65,14 +65,15 @@ typedef enum {
     INDEX_OPT_TIMEOUT          = 12,
     INDEX_OPT_AUTHENTICATION   = 13,
     INDEX_OPT_KEYFILE          = 14,
-    INDEX_OPT_VERSION          = 15,
-    INDEX_OPT_HELP             = 16,
-    INDEX_OPT_MORE_HELP        = 17,
-    INDEX_OPT_SAVE_OPTS        = 18,
-    INDEX_OPT_LOAD_OPTS        = 19
+    INDEX_OPT_UNPRIV_PORT      = 15,
+    INDEX_OPT_VERSION          = 16,
+    INDEX_OPT_HELP             = 17,
+    INDEX_OPT_MORE_HELP        = 18,
+    INDEX_OPT_SAVE_OPTS        = 19,
+    INDEX_OPT_LOAD_OPTS        = 20
 } teOptIndex;
 
-#define OPTION_CT    20
+#define OPTION_CT    21
 #define SNTP_VERSION       "4.2.7p114"
 #define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.7p114"
 
@@ -170,6 +171,10 @@ typedef enum {
 #  warning undefining KEYFILE due to option name conflict
 #  undef   KEYFILE
 # endif
+# ifdef    UNPRIV_PORT
+#  warning undefining UNPRIV_PORT due to option name conflict
+#  undef   UNPRIV_PORT
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
@@ -186,6 +191,7 @@ typedef enum {
 # undef TIMEOUT
 # undef AUTHENTICATION
 # undef KEYFILE
+# undef UNPRIV_PORT
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -213,6 +219,7 @@ typedef enum {
 
 #define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
 #define VALUE_OPT_KEYFILE        'k'
+#define VALUE_OPT_UNPRIV_PORT    'u'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
