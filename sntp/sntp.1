@@ -1,7 +1,7 @@
-.TH SNTP 1 2011-01-10 "( 4.2.7p114)" "Programmer's Manual"
+.TH SNTP 1 2011-01-11 "( 4.2.7p114)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp.1)
 .\"  
-.\"  It has been AutoGen-ed  January 10, 2011 at 11:23:55 PM by AutoGen 5.11.6pre7
+.\"  It has been AutoGen-ed  January 11, 2011 at 01:30:07 AM by AutoGen 5.11.6pre7
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -78,6 +78,9 @@ to the IPv6 namespace.
 .TP
 .BR \-K " \fIfile-name\fP, " \--kod "=" \fIfile-name\fP
 KoD history filename.
+The default \fIfile-name\fP for this option is:
+.ti +4
+ /var/db/ntp-kod
 .sp
 Specifies the filename to be used for the  persistent history of KoD
 responses received from servers.  The default is
@@ -136,6 +139,7 @@ so we can send concurrent queries.
 .TP
 .BR \-b " \fIbroadcast-address\fP, " \--broadcast "=" \fIbroadcast-address\fP
 Use broadcasts to the address specified for synchronisation.
+This option may appear an unlimited number of times.
 .sp
 If specified SNTP will listen to the specified broadcast address
 for NTP broadcasts.  The default maximum wait time,

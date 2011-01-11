@@ -11,13 +11,6 @@
 #include <event2/util.h>
 #include <event2/event.h>
 
-#if 0
-// Might need:
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#endif
-
 int n_pending_dns = 0;
 int n_pending_ntp = 0;
 int ai_fam_pref = AF_UNSPEC;
@@ -25,6 +18,7 @@ SOCKET sock4 = -1;		/* Socket for IPv4 */
 SOCKET sock6 = -1;		/* Socket for IPv6 */
 char *progname;
 struct event_base *base = NULL;
+struct evdns_base *dnsbase = NULL;
 
 struct dns_ctx {
 	const char *	name;
@@ -56,6 +50,7 @@ static union {
 
 #define r_pkt  rbuf.pkt
 
+void handle_lookup( char *name, int flags );
 void dns_cb (int errcode, struct evutil_addrinfo *addr, void *ptr);
 void ntp_cb (evutil_socket_t, short, void *);
 void set_li_vn_mode (struct pkt *spkt, char leap, char version, char mode);
@@ -87,9 +82,6 @@ sntp_main (
 {
 	int i;
 	int optct;
-	/* boolean, u_int quiets gcc4 signed overflow warning */
-	// struct addrinfo *ai;
-	struct evdns_base *dnsbase;
 	long l;
 
 	progname = argv[0];
@@ -122,9 +114,7 @@ sntp_main (
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 		ai_fam_pref = AF_INET;
-#ifdef DEBUG
-		printf("No ipv6 support available, forcing ipv4\n");
-#endif
+		DPRINTF(1, ("No ipv6 support available, forcing ipv4\n"));
 	} else {
 		/* Check for options -4 and -6 */
 		if (HAVE_OPT(IPV4))
@@ -133,35 +123,18 @@ sntp_main (
 			ai_fam_pref = AF_INET6;
 	}
 
-	/* Parse config file if declared TODO */
+	/* TODO: Parse config file if declared */
 
 	/*
-	** If there's a specified KOD file init KOD system.  If not use
-	** default file.  For embedded systems with no writable filesystem,
+	** Init the KOD system.
+	** For embedded systems with no writable filesystem,
 	** -K /dev/null can be used to disable KoD storage.
 	*/
-	if (HAVE_OPT(KOD))
-		kod_init_kod_db(OPT_ARG(KOD));
-	else
-		kod_init_kod_db("/var/db/ntp-kod");
+	kod_init_kod_db(OPT_ARG(KOD));
 
+	// HMS: Should we use arg-defalt for this too?
 	if (HAVE_OPT(KEYFILE))
 		auth_init(OPT_ARG(KEYFILE), &keys);
-
-#ifdef EXERCISE_KOD_DB
-	add_entry("192.168.169.170", "DENY");
-	add_entry("192.168.169.171", "DENY");
-	add_entry("192.168.169.172", "DENY");
-	add_entry("192.168.169.173", "DENY");
-	add_entry("192.168.169.174", "DENY");
-	delete_entry("192.168.169.174", "DENY");
-	delete_entry("192.168.169.172", "DENY");
-	delete_entry("192.168.169.170", "DENY");
-	if ((kodc = search_entry("192.168.169.173", &reason)) == 0)
-		printf("entry for 192.168.169.173 not found but should have been!\n");
-	else
-		free(reason);
-#endif
 
 	/*
 	** Considering employing a variable that prevents functions of doing
@@ -182,43 +155,14 @@ sntp_main (
 		return -1;
 	}
 
-	if (ENABLED_OPT(BROADCAST)) {
-		struct evutil_addrinfo hints;
-		struct dns_ctx *dns_ctx;
+	if (HAVE_OPT(BROADCAST)) {
+		int		cn = STACKCT_OPT( BROADCAST );
+		const char **	cp = STACKLST_OPT( BROADCAST );
 
-		ZERO(hints);
-		hints.ai_family = ai_fam_pref;
-		hints.ai_flags |= EVUTIL_AI_CANONNAME;
-		hints.ai_flags |= EVUTIL_AI_NUMERICSERV;
-		/*
-		** Unless we specify a socktype, we'll get at least two
-		** entries for each address: one for TCP and one for
-		** UDP. That's not what we want.
-		*/
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-
-		dns_ctx = emalloc(sizeof(*dns_ctx));
-		memset(dns_ctx, 0, sizeof(*dns_ctx));
-
-		dns_ctx->name = OPT_ARG(BROADCAST);
-		dns_ctx->flags = CTX_BCST;
-		dns_ctx->timeout = timeout_tv;
-
-		if (ENABLED_OPT(AUTHENTICATION) &&
-		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
-			dns_ctx->key_id = l;
-			get_key(dns_ctx->key_id, &dns_ctx->key);
-		} else {
-			dns_ctx->key_id = -1;
-			dns_ctx->key = NULL;
+		while (cn-- > 0) {
+			handle_lookup(*cp, CTX_BCST);
+			cp++;
 		}
-
-		printf("broadcast-before: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
-		++n_pending_dns;
-		evdns_getaddrinfo(dnsbase, OPT_ARG(BROADCAST), "123", &hints,
-				  dns_cb, dns_ctx);
-		printf("broadcast-after: <%s> n_pending_dns = %d\n", OPT_ARG(BROADCAST), n_pending_dns);
 	}
 
 	if (HAVE_OPT(CONCURRENT)) {
@@ -226,51 +170,14 @@ sntp_main (
 		const char **	cp = STACKLST_OPT( CONCURRENT );
 
 		while (cn-- > 0) {
-			/* Do something with *cp++ */
-			printf("Concurrent: <%s>\n", *cp++);
+			handle_lookup(*cp, CTX_UCST|CTX_CONC);
+			cp++;
 		}
 	}
 
 	for (i = 0; i < argc; ++i) {
-		struct evutil_addrinfo hints; /* local copy is OK */
-		struct dns_ctx *dns_ctx;
-
-		ZERO(hints);
-		hints.ai_family = ai_fam_pref;
-		hints.ai_flags |= EVUTIL_AI_CANONNAME;
-		hints.ai_flags |= EVUTIL_AI_NUMERICSERV;
-		/*
-		** Unless we specify a socktype, we'll get at least two
-		** entries for each address: one for TCP and one for
-		** UDP. That's not what we want.
-		*/
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-
-		dns_ctx = emalloc(sizeof(*dns_ctx));
-		memset(dns_ctx, 0, sizeof(*dns_ctx));
-
-		dns_ctx->name = argv[i];
-		dns_ctx->flags = CTX_UCST;
-		dns_ctx->timeout = ucst_timeout_tv;
-
-		if (ENABLED_OPT(AUTHENTICATION) &&
-		    atoint(OPT_ARG(AUTHENTICATION), &l)) {
-			dns_ctx->key_id = l;
-			get_key(dns_ctx->key_id, &dns_ctx->key);
-		} else {
-			dns_ctx->key_id = -1;
-			dns_ctx->key = NULL;
-		}
-
-		// printf("unicast-before: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
-		++n_pending_dns;
-		evdns_getaddrinfo(dnsbase, argv[i], "123", &hints,
-				  dns_cb, dns_ctx);
-		// printf("unicast-after: <%s> n_pending_dns = %d\n", argv[i], n_pending_dns);
+		handle_lookup(argv[i], CTX_UCST);
 	}
-
-	// printf("unicast: n_pending_dns = %d\n", n_pending_dns);
 
 	event_base_dispatch(base);
 
@@ -278,6 +185,59 @@ sntp_main (
 	event_base_free(base);
 
 	return 0;		/* Might not want 0... */
+}
+
+
+/*
+** handle_lookup
+*/
+void
+handle_lookup(
+	char *name,
+	int flags
+	)
+{
+	struct evutil_addrinfo hints;	/* Local copy is OK */
+	struct dns_ctx *dns_ctx;
+	long l;
+
+	DPRINTF(1, ("handle_lookup(%s,%#x)\n", name, flags));
+
+	ZERO(hints);
+	hints.ai_family = ai_fam_pref;
+	hints.ai_flags |= EVUTIL_AI_CANONNAME;
+	hints.ai_flags |= EVUTIL_AI_NUMERICSERV;
+	/*
+	** Unless we specify a socktype, we'll get at least two
+	** entries for each address: one for TCP and one for
+	** UDP. That's not what we want.
+	*/
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	dns_ctx = emalloc(sizeof(*dns_ctx));
+	memset(dns_ctx, 0, sizeof(*dns_ctx));
+
+	dns_ctx->name = OPT_ARG(BROADCAST);
+	dns_ctx->flags = flags;
+	dns_ctx->timeout =
+		(flags & CTX_BCST)
+		? timeout_tv
+		: ucst_timeout_tv
+		;
+
+	// The following should arguably be passed in...
+	if (ENABLED_OPT(AUTHENTICATION) &&
+	    atoint(OPT_ARG(AUTHENTICATION), &l)) {
+		dns_ctx->key_id = l;
+		get_key(dns_ctx->key_id, &dns_ctx->key);
+	} else {
+		dns_ctx->key_id = -1;
+		dns_ctx->key = NULL;
+	}
+
+	++n_pending_dns;
+	evdns_getaddrinfo(dnsbase, name, "123", &hints, dns_cb, dns_ctx);
 }
 
 

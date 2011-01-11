@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  January 10, 2011 at 11:23:51 PM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 11, 2011 at 01:30:03 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -116,6 +116,7 @@ static char const zKodText[] =
         "KoD history filename";
 static char const zKod_NAME[]                = "KOD";
 static char const zKod_Name[]                = "kod";
+static char const zKodDefaultArg[]             = "/var/db/ntp-kod";
 #define KOD_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
@@ -206,7 +207,7 @@ static char const zBroadcastText[] =
         "Use broadcasts to the address specified for synchronisation";
 static char const zBroadcast_NAME[]          = "BROADCAST";
 static char const zBroadcast_Name[]          = "broadcast";
-#define BROADCAST_FLAGS       (OPTST_DISABLED \
+#define BROADCAST_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
@@ -370,7 +371,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ KOD_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { zKodDefaultArg },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ doOptKod,
@@ -452,12 +453,12 @@ static tOptDesc optDesc[ OPTION_CT ] = {
   {  /* entry idx, value */ 11, VALUE_OPT_BROADCAST,
      /* equiv idx, value */ 11, VALUE_OPT_BROADCAST,
      /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ BROADCAST_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
+     /* option proc      */ optionStackArg,
      /* desc, NAME, name */ zBroadcastText, zBroadcast_NAME, zBroadcast_Name,
      /* disablement strs */ NULL, NULL },
 

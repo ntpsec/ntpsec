@@ -55,6 +55,7 @@ flag = {
     value     = K;
     arg-type  = file;
     arg-name  = "file-name";
+    arg-default = "/var/db/ntp-kod";
     descrip   = "KoD history filename";
     doc = <<-  _EndOfDoc_
 	Specifies the filename to be used for the  persistent history of KoD
@@ -143,6 +144,8 @@ flag = {
 	descrip	= "Use broadcasts to the address specified for synchronisation";
 	arg-type = string;
 	arg-name = "broadcast-address";
+	max	 = NOLIMIT;
+	stack-arg;
 	doc	= <<-  _EndOfDoc_
 	If specified SNTP will listen to the specified broadcast address
 	for NTP broadcasts.  The default maximum wait time,

@@ -183,6 +183,7 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -c Str concurrent     Send concurrent queries to all IPs returned for host-name
                                 - may appear multiple times
    -b Str broadcast      Use broadcasts to the address specified for synchronisation
+                                - may appear multiple times
    -t Num timeout        Specify the number of seconds to wait for broadcasts
    -a Num authentication Enable authentication with the key auth-keynumber
    -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
@@ -264,8 +265,14 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">broadcast option (-b)</h4>
 
 <p><a name="index-sntp_002dbroadcast-6"></a>
-This is the &ldquo;use broadcasts to the address specified for synchronisation&rdquo; option. 
-If specified SNTP will listen to the specified broadcast address
+This is the &ldquo;use broadcasts to the address specified for synchronisation&rdquo; option.
+
+  <p>This option has some usage constraints.  It:
+     <ul>
+<li>may appear an unlimited number of times. 
+</ul>
+
+  <p>If specified SNTP will listen to the specified broadcast address
 for NTP broadcasts.  The default maximum wait time,
 68 seconds, can be modified with -t.
 

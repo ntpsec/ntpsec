@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  January 10, 2011 at 11:23:56 PM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  January 11, 2011 at 01:30:08 AM by AutoGen 5.11.6pre7
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -108,6 +108,7 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -c Str concurrent     Send concurrent queries to all IPs returned for host-name
                                 - may appear multiple times
    -b Str broadcast      Use broadcasts to the address specified for synchronisation
+                                - may appear multiple times
    -t Num timeout        Specify the number of seconds to wait for broadcasts
    -a Num authentication Enable authentication with the key auth-keynumber
    -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
@@ -171,6 +172,13 @@ key's identifier. See the keyfile option (-k) for more details.
 @cindex sntp-broadcast
 
 This is the ``use broadcasts to the address specified for synchronisation'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+may appear an unlimited number of times.
+@end itemize
+
 If specified SNTP will listen to the specified broadcast address
 for NTP broadcasts.  The default maximum wait time,
 68 seconds, can be modified with -t.
