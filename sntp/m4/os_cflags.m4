@@ -7,7 +7,7 @@ AC_DEFUN([NTP_OS_CFLAGS], [
      set)
 	;;
      *)
-	ntp_os_cflags=""
+	ntp_os_cflags=
 	case "$host_os" in
 	 aix[[1-3]]*)
 	    ;;
@@ -91,8 +91,8 @@ AC_DEFUN([NTP_OS_CFLAGS], [
 	;;
      *)
 	ntp_os_cflags_msg="$ntp_os_cflags"
-	CFLAGS="$CFLAGS $ntp_os_cflags"
     esac
+    CFLAGS_NTP="$CFLAGS_NTP $ntp_os_cflags"
     AC_MSG_RESULT([$ntp_os_cflags_msg])
     AS_UNSET([ntp_os_cflags_msg])
 ])

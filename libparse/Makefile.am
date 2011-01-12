@@ -56,10 +56,14 @@ libparse_kernel_a_LIBADD =	\
 	kgpstolfp.o		\
 	$(NULL)
 
+INCLUDES = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES += -I$(top_srcdir)/kernel
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
-	-I$(top_srcdir)/lib/isc/nothreads/include \
-	-I$(top_srcdir)/lib/isc/unix/include -I$(top_srcdir)/kernel
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 ETAGS_ARGS = Makefile.am
 

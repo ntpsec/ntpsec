@@ -117,6 +117,7 @@
 #include <process.h>
 #include <time.h>		/* time_t for timeval decl */
 #include <io.h>
+#include <isc/strerror.h>
 
 /* ---------------------------------------------------------------------
  * Above this line are #include lines and the few #define lines
@@ -297,6 +298,7 @@ typedef int socklen_t;
 #define isatty		_isatty
 #define mktemp		_mktemp
 #define getpid		_getpid
+#define errno_to_str	isc__strerror
 
 typedef int pid_t;		/* PID is an int */
 typedef int ssize_t;		/* ssize is an int */
@@ -361,11 +363,12 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define SIZEOF_SHORT		2
 # define SIZEOF_INT		4	/* for ntp_types.h */
 
+# define HAVE_ALLOCA
 # define HAVE_SETVBUF
+# define HAVE_VPRINTF
 # define HAVE_VSPRINTF
 # define HAVE_SNPRINTF
 # define HAVE_VSNPRINTF
-# define HAVE_PROTOTYPES		/* from ntpq.mak */
 # define HAVE_MEMMOVE
 # define HAVE_TERMIOS_H
 # define HAVE_ERRNO_H
@@ -377,7 +380,6 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define HAVE_IO_COMPLETION_PORT
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
-# define HAVE_VPRINTF
 
 #define HAVE_LIMITS_H	1
 #define HAVE_STRDUP
@@ -415,8 +417,6 @@ typedef unsigned long uintptr_t;
 #endif
 
 #define NEED_S_CHAR_TYPEDEF
-
-#define USE_PROTOTYPES 		/* for ntp_types.h */
 
 /* Directory separator, usually / or \ */
 #define	DIR_SEP	'\\'

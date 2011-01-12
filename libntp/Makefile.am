@@ -1,5 +1,4 @@
 NULL=
-#AUTOMAKE_OPTIONS = ../ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
 BUILT_SOURCES =
 CLEANFILES =
@@ -104,9 +103,15 @@ libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c
 ETAGS_ARGS = Makefile.am
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
- -I$(top_srcdir)/lib/isc/nothreads/include \
- -I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
+
+INCLUDES  = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES +=  $(LIBOPTS_CFLAGS)
+
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 EXTRA_DIST = README
 

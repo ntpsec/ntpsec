@@ -1,3 +1,12 @@
+* Add configure --without-sntp option to disable building sntp and
+  sntp/tests.  withsntp=no in the environment changes the default.
+* Build infrastructure cleanup:
+  Move m4 directory to sntp/m4.
+  Share a single set of genver output between sntp and the top level.
+  Share a single set of autogen included .defs in sntp/include.
+  Share a single set of build-aux scripts (e.g. config.guess, missing).
+  Add ntp_libntp.m4 and ntp_ipv6.m4 to reduce configure.ac duplication.
+  Warn and exit build/flock-build if bootstrap needs to be run.
 (4.2.7p116) 2011/01/10 Released by Harlan Stenn <stenn@ntp.org>
 * refclock_nmea.c refactoring by Juergen Perlinger.
 (4.2.7p115) 2011/01/09 Released by Harlan Stenn <stenn@ntp.org>

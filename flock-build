@@ -52,6 +52,10 @@ esac
 # * pogo	   sparc-sun-solaris2.10
 # * rackety	   freebsd-6.1
 
+if [ ! -r sntp/build-aux/config.guess ] ; then
+	echo "Error: bootstrap required." 1>&2 && exit 1
+fi
+
 # HMS: we need $PWD because solaris produces /deacon/backroom when
 # we are in /backroom and in general there is no /deacon/backroom.
 c_d=${PWD:-`pwd`}
@@ -59,7 +63,7 @@ c_d=${PWD:-`pwd`}
 SIG=`perl -e 'print rand'`
 
 case "$LIST" in
- '') LIST="malarky rackety" ;;
+ '') LIST="pogo" ;;
 esac
 
 for i in $LIST

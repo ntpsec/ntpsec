@@ -3,6 +3,7 @@
  */
 
 #include <ntp_types.h>
+#include <ntp_malloc.h>			/* for ZERO() */
 
 /*
  * Sizes of things
@@ -20,8 +21,6 @@ extern int lib_inited;
  */
 #define	LIB_GETBUF(bufp)					\
 	do {							\
-		if (!lib_inited)				\
-			init_lib();				\
 		ZERO(lib_stringbuf[lib_nextbuf]);		\
 		(bufp) = &lib_stringbuf[lib_nextbuf++][0];	\
 		lib_nextbuf %= COUNTOF(lib_stringbuf);		\

@@ -9,7 +9,16 @@ endif
 BUILT_SOURCES=
 CLEANFILES=
 EXTRA_PROGRAMS=	adjtimed
-AM_CPPFLAGS=	-I$(top_srcdir)/include
+
+INCLUDES  = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES += $(LIBOPTS_CFLAGS)
+
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
+
 LDADD=		../libntp/libntp.a
 ETAGS_ARGS=	Makefile.am
 
