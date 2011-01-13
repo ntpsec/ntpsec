@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  January 10, 2011 at 11:26:24 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 13, 2011 at 07:30:47 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -38,7 +38,7 @@ extern "C" {
                 cannot ever change your mind. */
 tSCC zCopyright[] =
        "sntp copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from ../include/copyright.def near line 8 */
+/* extracted from include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
@@ -473,7 +473,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[123] =
-"sntp - standard SNTP program - Ver. 4.2.7p116\n\
+"sntp - standard SNTP program - Ver. 4.2.7p117\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {

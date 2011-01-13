@@ -1,3 +1,4 @@
+(4.2.7p117) 2011/01/13 Released by Harlan Stenn <stenn@ntp.org>
 * Add configure --without-sntp option to disable building sntp and
   sntp/tests.  withsntp=no in the environment changes the default.
 * Build infrastructure cleanup:
