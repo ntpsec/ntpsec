@@ -9,7 +9,7 @@ endif
 
 EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
-BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
+BUILT_SOURCES=	check-libntp @MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
@@ -71,6 +71,11 @@ check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 
 $(PROGRAMS): $(LDADD)
 
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
+
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)
 
@@ -78,7 +83,7 @@ $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
 
 version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
-	env CSET=`cat $(top_srcdir)/sntp/sntp/version` $(top_builddir)/scripts/mkver ntpdc
+	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpdc
 	$(COMPILE) -c version.c
 
 # I ran nl_in.c (attached, to be installed into ntpdc) through

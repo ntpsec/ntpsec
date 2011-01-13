@@ -30,7 +30,7 @@ ntp_keygen_LDADD= version.o $(LIBOPTS_LDADD) ../libntp/libntp.a @LCRYPTO@
 ETAGS_ARGS=	Makefile.am
 #EXTRA_DIST=	README TAGS
 EXTRA_DIST=	ntp-keygen-opts.def ntp-keygen.1 ntp-keygen-opts.texi ntp-keygen-opts.menu
-BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
+BUILT_SOURCES=	check-libntp ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
 DISTCLEANFILES=	.version version.c
 noinst_DATA=	$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu
@@ -64,6 +64,11 @@ $(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 
 jitter_SOURCES=	jitter.c jitter.h
 jitter_LDADD=
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

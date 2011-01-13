@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS =
 noinst_PROGRAMS = @PROPDELAY@ @CHUTEST@ @CLKTEST@
 EXTRA_PROGRAMS = propdelay chutest clktest
 
-BUILT_SOURCES =	clktest-opts.c clktest-opts.h
+BUILT_SOURCES =	check-libntp clktest-opts.c clktest-opts.h
 EXTRA_DIST = clktest-opts.def
 
 clktest_SOURCES = clktest.c clktest-opts.c clktest-opts.h
@@ -37,6 +37,11 @@ $(srcdir)/clktest-opts.c: $(srcdir)/clktest-opts.def $(std_def_list)
 
 ## chutest$(EXEEXT): ../libntp/libntp.a
 ## clktest$(EXEEXT): ../libntp/libntp.a
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

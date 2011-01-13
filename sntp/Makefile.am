@@ -78,6 +78,7 @@ EXTRA_DIST =				\
 	$(NULL)
 
 BUILT_SOURCES =				\
+	check-libntp			\
 	$(srcdir)/COPYRIGHT		\
 	libtool				\
 	$(srcdir)/sntp-opts.c		\
@@ -176,8 +177,11 @@ $(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )
 
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
 ../libntp/libntp.a:
-	cd ../libntp && $(MAKE) libntp.a
+	cd ../libntp && $(MAKE)
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck

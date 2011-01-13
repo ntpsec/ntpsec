@@ -1,7 +1,7 @@
 NULL=
 AUTOMAKE_OPTIONS=
 
-BUILT_SOURCES=
+BUILT_SOURCES= check-libntp
 CLEANFILES=
 
 if NTP_BINSUBDIR_IS_BIN
@@ -30,6 +30,11 @@ noinst_HEADERS=	ntpdate.h
 ETAGS_ARGS=	Makefile.am
 
 $(PROGRAMS): $(LDADD)
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

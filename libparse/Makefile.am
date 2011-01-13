@@ -1,6 +1,6 @@
 NULL=
 AUTOMAKE_OPTIONS =
-BUILT_SOURCES =
+BUILT_SOURCES = check-libntp
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris
@@ -130,6 +130,11 @@ parsestreams.loadable_module.o: $(parsestreams_OBJECTS) libparse_kernel.a ../lib
 
 parse: $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 	$(LD) -r -o $@ $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

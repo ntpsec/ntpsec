@@ -76,6 +76,7 @@ B_S_DIST=			\
 
 BUILT_SOURCES=		\
 	$(VPHACK) 	\
+	check-libntp	\
 	ntp_parser.c 	\
 	ntp_parser.h 	\
 	$(VPHACK_AFTER)	\
@@ -269,8 +270,13 @@ check-saveconfig: $(srcdir)/complete.conf compsave.conf
 ../libopts/libopts.la:
 	cd ../libopts && $(MAKE) libopts.la
 
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
+
 ../libntp/libntp.a:
-	cd ../libntp && $(MAKE) libntp.a
+	cd ../libntp && $(MAKE)
 
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE) libparse.a

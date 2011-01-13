@@ -26,7 +26,7 @@ CLEANFILES=
 DISTCLEANFILES=	.version version.c
 ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
-BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h
+BUILT_SOURCES=	check-libntp ntpq-opts.c ntpq-opts.h
 man_MANS=	$(srcdir)/ntpq.1
 noinst_DATA=	$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
@@ -59,6 +59,11 @@ $(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(top_srcdir)/scripts/check--help $@
 
 $(PROGRAMS): $(LDADD)
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

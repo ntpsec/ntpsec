@@ -6,7 +6,7 @@ else
 sbin_PROGRAMS=	@MAKE_ADJTIMED@
 endif
 
-BUILT_SOURCES=
+BUILT_SOURCES= check-libntp
 CLEANFILES=
 EXTRA_PROGRAMS=	adjtimed
 
@@ -21,6 +21,11 @@ AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 LDADD=		../libntp/libntp.a
 ETAGS_ARGS=	Makefile.am
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf
