@@ -55,7 +55,7 @@ AM_PROG_CC_C_O
 AC_PROG_CPP
 
 AC_DISABLE_SHARED
-LT_INIT
+AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
 # NTP has (so far) been relying on leading-edge autogen.
