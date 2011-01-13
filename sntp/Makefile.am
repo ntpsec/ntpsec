@@ -114,7 +114,7 @@ FRC FRC.version:
 	@: each time they or a dependent is built.
 
 built-sources-only: $(BUILT_SOURCES)
-	@touch $@
+	@umask 0 && touch $@
 
 # HMS: The next bit is still suboptimal.  If bk is present but this NTP
 # repo is not a bk repo, we'll get an error message from the prs command.
