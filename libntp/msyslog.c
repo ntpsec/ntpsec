@@ -54,19 +54,28 @@ errno_to_str(
 	size_t	bufsiz
 	)
 {
+# if defined(STRERROR_R_CHAR_P) || !HAVE_DECL_STRERROR_R
 	char *	pstatic;
 
-# ifdef STRERROR_R_CHAR_P
+#  ifdef STRERROR_R_CHAR_P
 	/*
 	 * For older GNU strerror_r, the return value either points to
 	 * buf, or to static storage.  We want the result always in buf
 	 */
 	pstatic = strerror_r(err, buf, bufsiz);
-# else
+#  else
 	pstatic = strerror(err);
-# endif
+#  endif
 	if (pstatic != buf)
 		strncpy(buf, pstatic, bufsiz);
+# else
+	int	rc;
+
+	rc = strerror_r(err, buf, bufsiz);
+	if (rc < 0)
+		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
+			 err, errno);
+# endif
 }
 #endif	/* errno_to_str */
 
