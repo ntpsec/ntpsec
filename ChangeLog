@@ -1,3 +1,4 @@
+* Simplify the built-sources stuff in sntp/ .
 * Fix check for -lipv6 on HP-UX 11.
 (4.2.7p117) 2011/01/13 Released by Harlan Stenn <stenn@ntp.org>
 * Add configure --without-sntp option to disable building sntp and
