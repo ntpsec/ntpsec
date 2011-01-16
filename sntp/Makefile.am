@@ -6,17 +6,8 @@ NULL =
 AUTOMAKE_OPTIONS = foreign 1.10
 ACLOCAL_AMFLAGS = -I m4 -I libopts/m4
 
-#AM_CPPFLAGS =					\
-#	$(LIBEVENT_CPPFLAGS)			\
-#	$(LIBOPTS_CFLAGS)			\
-#	-I$(top_srcdir)/../include		\
-#	-I$(top_srcdir)/../lib/isc/include	\
-#	-I$(top_srcdir)/../lib/isc/nothreads/include	\
-#	-I$(top_srcdir)/../lib/isc/unix/include	\
-#	$(NULL)
-
 CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
+AM_CPPFLAGS = $(LIBEVENT_CPPFLAGS) @CPPFLAGS_NTP@
 
 INCLUDES  = $(LIBOPTS_CFLAGS)
 INCLUDES += -I$(top_srcdir)/../include
