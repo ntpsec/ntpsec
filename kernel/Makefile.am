@@ -1,4 +1,3 @@
-#AUTOMAKE_OPTIONS = ../util/ansi2knr no-dependencies
 AUTOMAKE_OPTIONS = 
 SUBDIRS = sys
 ETAGS_ARGS = Makefile.am

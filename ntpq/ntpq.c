@@ -2739,7 +2739,7 @@ nextvar(
 	 * over any white space and terminate it.
 	 */
 	srclen = strcspn(cp, ",=\r\n");
-	srclen = max(srclen, (size_t)(cpend - cp));
+	srclen = min(srclen, (size_t)(cpend - cp));
 	len = srclen;
 	while (len > 0 && isspace(cp[len - 1]))
 		len--;
@@ -2793,7 +2793,7 @@ nextvar(
 	 * Return this.  All done.
 	 */
 	if (np < cpend)
-		np++;
+		np++;		/* over ',' */
 	*datap = np;
 	*datalen = cpend - np;
 	*vvalue = value;

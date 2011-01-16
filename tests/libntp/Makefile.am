@@ -1,7 +1,18 @@
+NULL =
+
 check_PROGRAMS = tests
-LDADD = @top_builddir@/libntp/libntp.a @LCRYPTO@ @GTEST_LDFLAGS@ @GTEST_LIBS@
+
+LDADD =					\
+	@top_builddir@/libntp/libntp.a	\
+	@LCRYPTO@			\
+	@GTEST_LDFLAGS@			\
+	@GTEST_LIBS@			\
+	$(NULL)
+	
+AM_CFLAGS   = @CFLAGS_NTP@
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
-AM_CPPFLAGS = @GTEST_CPPFLAGS@
+AM_CPPFLAGS = @GTEST_CPPFLAGS@ @CPPFLAGS_NTP@
+
 tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		libntptest.cpp		\
 		a_md5encrypt.cpp	\
@@ -51,7 +62,7 @@ INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES += -I$(top_srcdir)/sntp
 
-TESTS = 
+TESTS =
 
 if !NTP_CROSSCOMPILE
 TESTS += tests

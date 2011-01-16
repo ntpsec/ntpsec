@@ -17,7 +17,7 @@ libbufstr lib_stringbuf[LIB_NUMBUF];
 int lib_nextbuf;
 int ipv4_works;
 int ipv6_works;
-int lib_inited = 0;
+int lib_inited;
 
 /*
  * initialization routine.  Might be needed if the code is ROMized.
@@ -25,8 +25,7 @@ int lib_inited = 0;
 void
 init_lib(void)
 {
-	lib_nextbuf = 0;
 	ipv4_works = (ISC_R_SUCCESS == isc_net_probeipv4());
 	ipv6_works = (ISC_R_SUCCESS == isc_net_probeipv6());
-	lib_inited = 1;
+	lib_inited = TRUE;
 }

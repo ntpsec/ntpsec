@@ -26,6 +26,7 @@
 #include <syslog.h>
 
 #include <isc/strerror.h>
+#include <lib_strbuf.h>
 
 #include "messages.h"
 
@@ -208,9 +209,10 @@ ntp_strerror(
 	int code
 	)
 {
-	static char msgbuf[128];
+	char *	buf;
 
-	isc__strerror(code, msgbuf, sizeof(msgbuf));
+	LIB_GETBUF(buf);
+	isc__strerror(code, buf, LIB_BUFLENGTH);
 
-	return msgbuf;
+	return buf;
 }

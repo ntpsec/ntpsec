@@ -1,3 +1,19 @@
+(4.2.7p118) 2011/01/15 Released by Harlan Stenn <stenn@ntp.org>
+* Simplify the built-sources stuff in sntp/ .
+* Fix check for -lipv6 on HP-UX 11.
+(4.2.7p117) 2011/01/13 Released by Harlan Stenn <stenn@ntp.org>
+* Add configure --without-sntp option to disable building sntp and
+  sntp/tests.  withsntp=no in the environment changes the default.
+* Build infrastructure cleanup:
+  Move m4 directory to sntp/m4.
+  Share a single set of genver output between sntp and the top level.
+  Share a single set of autogen included .defs in sntp/include.
+  Share a single set of build-aux scripts (e.g. config.guess, missing).
+  Add ntp_libntp.m4 and ntp_ipv6.m4 to reduce configure.ac duplication.
+  Warn and exit build/flock-build if bootstrap needs to be run.
+(4.2.7p116) 2011/01/10 Released by Harlan Stenn <stenn@ntp.org>
+* refclock_nmea.c refactoring by Juergen Perlinger.
+(4.2.7p115) 2011/01/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1780] Windows ntpd 4.2.7p114 crashes in ioctl().
 * [Bug 1781] longlong undefined in sntp handle_pkt() on Debian amd64.
 (4.2.7p114) 2011/01/08 Released by Harlan Stenn <stenn@ntp.org>

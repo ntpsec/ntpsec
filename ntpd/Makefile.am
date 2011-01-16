@@ -9,9 +9,14 @@ endif
 
 noinst_LIBRARIES=	libntpd.a
 
-AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
-	-I$(top_srcdir)/lib/isc/nothreads/include \
-	-I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
+INCLUDES  = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES +=  $(LIBOPTS_CFLAGS)
+
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 # LDADD might need RESLIB and ADJLIB.
 LDADD=	version.o libntpd.a @LIBPARSE@
@@ -71,6 +76,7 @@ B_S_DIST=			\
 
 BUILT_SOURCES=		\
 	$(VPHACK) 	\
+	check-libntp	\
 	ntp_parser.c 	\
 	ntp_parser.h 	\
 	$(VPHACK_AFTER)	\
@@ -120,10 +126,14 @@ check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
 noinst_DATA =	$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L ../include --writable
-std_def_list=	$(top_srcdir)/include/autogen-version.def 	\
-		$(top_srcdir)/include/copyright.def 		\
-		$(top_srcdir)/include/version.def
+		autogen -L ../sntp/include --writable
+std_def_list =							\
+	$(top_srcdir)/sntp/include/debug-opt.def		\
+	$(top_srcdir)/sntp/include/autogen-version.def 		\
+	$(top_srcdir)/sntp/include/copyright.def 		\
+	$(top_srcdir)/sntp/include/homerc.def 			\
+	$(top_srcdir)/sntp/include/version.def			\
+	$(NULL)
 
 check-local: @MAKE_CHECK_Y2K@ $(CHECK_SAVECONFIG)
 	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
@@ -260,17 +270,22 @@ check-saveconfig: $(srcdir)/complete.conf compsave.conf
 ../libopts/libopts.la:
 	cd ../libopts && $(MAKE) libopts.la
 
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
+
 ../libntp/libntp.a:
-	cd ../libntp && $(MAKE) libntp.a
+	cd ../libntp && $(MAKE)
 
 ../libparse/libparse.a:
 	cd ../libparse && $(MAKE) libparse.a
 
-$(top_srcdir)/version:
-	cd $(top_srcdir) && $(MAKE) version
+$(top_srcdir)/sntp/version:
+	cd $(top_srcdir)/sntp && $(MAKE) version
 
-version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/version
-	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntpd
+version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/sntp/version
+	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpd
 	$(COMPILE) -c version.c
 
 include $(top_srcdir)/bincheck.mf

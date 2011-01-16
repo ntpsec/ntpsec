@@ -37,6 +37,9 @@ extern	int	msnprintf(char *, size_t, const char *, ...)
 				__attribute__((__format__(__printf__, 3, 4)));
 extern	void	msyslog(int, const char *, ...)
 				__attribute__((__format__(__printf__, 2, 3)));
+#ifndef errno_to_str
+extern	void	errno_to_str(int, char *, size_t);
+#endif
 
 /*
  * When building without OpenSSL, use a few macros of theirs to

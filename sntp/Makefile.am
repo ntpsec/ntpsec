@@ -4,31 +4,46 @@ NULL =
 
 ## LIBOPTS_CHECK_NOBUILD works with Automake 1.10 now
 AUTOMAKE_OPTIONS = foreign 1.10
-ACLOCAL_AMFLAGS = -I ../m4 -I libopts/m4
+ACLOCAL_AMFLAGS = -I m4 -I libopts/m4
 
-AM_CPPFLAGS =					\
-	$(LIBEVENT_CPPFLAGS)			\
-	$(LIBOPTS_CFLAGS)			\
-	-I$(top_srcdir)/../include		\
-	-I$(top_srcdir)/../lib/isc/include	\
-	-I$(top_srcdir)/../lib/isc/nothreads/include	\
-	-I$(top_srcdir)/../lib/isc/unix/include	\
-	$(NULL)
+#AM_CPPFLAGS =					\
+#	$(LIBEVENT_CPPFLAGS)			\
+#	$(LIBOPTS_CFLAGS)			\
+#	-I$(top_srcdir)/../include		\
+#	-I$(top_srcdir)/../lib/isc/include	\
+#	-I$(top_srcdir)/../lib/isc/nothreads/include	\
+#	-I$(top_srcdir)/../lib/isc/unix/include	\
+#	$(NULL)
 
-LDADD =	version.o $(LIBOPTS_LDADD) $(LIBEVENT_LDADD) $(LIBM) ../libntp/libntp.a @LCRYPTO@
+CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
+
+INCLUDES  = $(LIBOPTS_CFLAGS)
+INCLUDES += -I$(top_srcdir)/../include
+INCLUDES += -I$(top_srcdir)/../lib/isc/include
+INCLUDES += -I$(top_srcdir)/../lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/../lib/isc/unix/include
+
+LDADD  = version.o
+LDADD += $(LIBOPTS_LDADD)
+LDADD += $(LIBEVENT_LDADD)
+LDADD += $(LIBM)
+LDADD += ../libntp/libntp.a
+LDADD += @LCRYPTO@
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L ../include --writable
+		autogen -L include --writable
+
+EXTRA_PROGRAMS = sntp
 
 if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS =	sntp
+bin_PROGRAMS =	@SNTP@
 else
-sbin_PROGRAMS =	sntp
+sbin_PROGRAMS =	@SNTP@
 endif
 
-CLEANFILES = check-COPYRIGHT-submake
+SUBDIRS = include
 
-SUBDIRS =
 if NEED_LIBOPTS
 SUBDIRS += libopts
 endif
@@ -65,7 +80,6 @@ DISTCLEANFILES =			\
 	$(NULL)
 
 EXTRA_DIST =				\
-	$(srcdir)/autogen-version.def	\
 	bincheck.mf			\
 	$(srcdir)/COPYRIGHT		\
 	deps-ver			\
@@ -78,24 +92,24 @@ EXTRA_DIST =				\
 	sntp.texi			\
 	tests_main.h			\
 	$(srcdir)/version		\
-	$(srcdir)/version.def		\
-	$(srcdir)/version.m4		\
-	$(srcdir)/version.texi		\
+	$(srcdir)/m4/version.m4		\
 	$(NULL)
 
-OLD_EXTRA_DIST=		\
-		autogen-version.def version.def version.m4 version.texi
-
-BUILT_SOURCES=				\
-	check-autogen-version.def	\
-	check-version.def		\
-	check-version.m4		\
-	check-version.texi		\
+BUILT_SOURCES =				\
+	check-libntp			\
 	$(srcdir)/COPYRIGHT		\
 	libtool				\
 	$(srcdir)/sntp-opts.c		\
 	$(srcdir)/sntp-opts.h		\
 	$(srcdir)/version		\
+	$(srcdir)/include/version.def	\
+	$(srcdir)/m4/version.m4		\
+	$(srcdir)/include/version.texi	\
+	$(NULL)
+
+CLEANFILES =				\
+	built-sources-only		\
+	check-COPYRIGHT-submake		\
 	$(NULL)
 
 man_MANS=	$(srcdir)/sntp.1
@@ -110,18 +124,12 @@ noinst_DATA=				\
 	$(srcdir)/sntp-opts.menu	\
 	$(NULL)
 
-FRC:
+FRC FRC.version:
 	@: do-nothing action to prevent default SCCS get
 	@: FRC "force" depends on nothing and is not a file, so is
 	@: always out-of-date causing targets which depend on it to
 	@: similarly always be outdated causing their rules to fire
 	@: each time they or a dependent is built.
-
-$(srcdir)/version: FRC
-	@cd $(srcdir)				\
-	&& test -f ../version			\
-	&& ( cd .. && $(MAKE) version )		\
-	&& ( cmp -s version ../version || cp ../version version )
 
 # We probably need something about libevent, too
 version.o: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
@@ -140,41 +148,33 @@ check-autogen-version.def: FRC
 $(srcdir)/autogen-version.def:
 	$(MAKE) check-autogen-version.def
 
-check-version.def: FRC
-	@cd $(srcdir)					\
-	&& test -r ../include/version.def		\
-	&& ( if cmp -s ../include/version.def version.def;	\
-	   then : ;						\
-	   else cp ../include/version.def version.def;		\
-		echo "Installing new sntp/version.def file";	\
-	   fi )
+built-sources-only: $(BUILT_SOURCES)
+	@: do-nothing action to avoid default SCCS get
 
-$(srcdir)/version.def:
-	$(MAKE) check-version.def
+# HMS: The next bit is still suboptimal.  If bk is present but this NTP
+# repo is not a bk repo, we'll get an error message from the prs command.
+# Unfortunately, I haven't found the necessary magic to redirect this error
+# output to /dev/null under ancient/unique shells like the one Ultrix uses.
+# We'll also get an error if srcdir or version is unwritable.
+$(srcdir)/version: FRC.version
+	-test -r $(srcdir)/../SCCS/s.ChangeSet &&				\
+	    (bk version) >/dev/null 2>&1 &&			\
+	    cd $(srcdir)/.. &&					\
+	    x=`bk -R prs -hr+ -nd:I: ChangeSet` &&		\
+	    y=`cat sntp/version 2>/dev/null` || true &&		\
+	    case "$$x" in ''|$$y) ;; *) echo $$x > sntp/version ;; esac
 
-check-version.m4: FRC
-	@cd $(srcdir)					\
-	&& test -r ../version.m4			\
-	&& ( if cmp -s ../version.m4 version.m4;	\
-	   then : ;					\
-	   else cp ../version.m4 version.m4;		\
-		echo "Installing new sntp/version.m4 file";	\
-	   fi )
+$(srcdir)/m4/version.m4: $(srcdir)/../packageinfo.sh
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
+	../scripts/genver m4/version.m4
 
-$(srcdir)/version.m4:
-	$(MAKE) check-version.m4
+$(srcdir)/include/version.def: $(srcdir)/../packageinfo.sh
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
+	../scripts/genver include/version.def
 
-check-version.texi: FRC
-	@cd $(srcdir)					\
-	&& test -r ../include/version.texi			\
-	&& ( if cmp -s ../include/version.texi version.texi;	\
-	   then : ;					\
-	   else cp ../include/version.texi version.texi;	\
-		echo "Installing new sntp/version.texi file";	\
-	   fi )
-
-$(srcdir)/version.texi:
-	$(MAKE) check-version.texi
+$(srcdir)/include/version.texi: $(srcdir)/../packageinfo.sh
+	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
+	../scripts/genver include/version.texi
 
 $(srcdir)/../COPYRIGHT:
 	cd .. && $(MAKE) COPYRIGHT-please
@@ -196,24 +196,27 @@ $(srcdir)/COPYRIGHT: check-COPYRIGHT
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
 
-$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
 	$(run_ag) sntp-opts.def
 
-$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
+$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
 	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
 
 $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/version.def $(srcdir)/../include/copyright.def
+$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 	$(top_srcdir)/../scripts/check--help $@
 
-$(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/version.texi
+$(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )
 
-../libntp/libntp.a: FRC
-	cd ../libntp && $(MAKE) libntp.a
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+../libntp/libntp.a:
+	cd ../libntp && $(MAKE)
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck

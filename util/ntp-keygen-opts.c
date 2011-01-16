@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  January  8, 2011 at 04:48:50 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 15, 2011 at 10:45:03 AM by AutoGen 5.11.6pre7
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -39,7 +39,7 @@ extern "C" {
                 cannot ever change your mind. */
 tSCC zCopyright[] =
        "ntp-keygen copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from ../include/copyright.def near line 8 */
+/* extracted from ../sntp/include/copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
@@ -757,7 +757,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[11] = "NTP_KEYGEN";
 static char const zUsageTitle[116] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p114\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p118\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -843,7 +843,7 @@ doUsageOpt(
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from ../include/debug-opt.def, line 27 */
+    /* extracted from ../sntp/include/debug-opt.def, line 27 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTP_KEYGEN_OPTS) */

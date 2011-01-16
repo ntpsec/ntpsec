@@ -1,7 +1,6 @@
 NULL =
 AUTOMAKE_OPTIONS = 
 ETAGS_ARGS = $(srcdir)/Makefile.am
-EXTRA_DIST = autogen-version.def copyright.def debug-opt.def homerc.def version.def version.texi
 
 SUBDIRS = isc
 

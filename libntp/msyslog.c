@@ -41,6 +41,38 @@ void	format_errmsg	(char *, size_t, const char *, int);
 
 
 /*
+ * errno_to_str() - a thread-safe strerror() replacement.
+ *		    Hides the varied signatures of strerror_r().
+ *		    For Windows, we have:
+ *			#define errno_to_str isc_strerror
+ */
+#ifndef errno_to_str
+void
+errno_to_str(
+	int	err,
+	char *	buf,
+	size_t	bufsiz
+	)
+{
+	char *	pstatic;
+
+# ifdef STRERROR_R_CHAR_P
+	/*
+	 * For older GNU strerror_r, the return value either points to
+	 * buf, or to static storage.  We want the result always in buf
+	 */
+	pstatic = strerror_r(err, buf, bufsiz);
+# else
+	pstatic = strerror(err);
+# endif
+	if (pstatic != buf)
+		strncpy(buf, pstatic, bufsiz);
+}
+#endif	/* errno_to_str */
+
+
+/*
+ * addto_syslog()
  * This routine adds the contents of a buffer to the syslog or an
  * application-specific logfile.
  */
@@ -122,11 +154,11 @@ format_errmsg(
 	int		errval
 	)
 {
+	char errmsg[256];
 	char c;
 	char *n;
 	const char *f;
 	size_t len;
-	char *err;
 
 	n = nfmt;
 	f = fmt;
@@ -142,12 +174,12 @@ format_errmsg(
 			*n++ = c;
 			continue;
 		}
-		err = strerror(errval);
-		len = strlen(err);
+		errno_to_str(errval, errmsg, sizeof(errmsg));
+		len = strlen(errmsg);
 
 		/* Make sure we have enough space for the error message */
 		if ((n + len) < (nfmt + lennfmt - 1)) {
-			memcpy(n, err, len);
+			memcpy(n, errmsg, len);
 			n += len;
 		}
 	}

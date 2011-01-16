@@ -2,6 +2,9 @@ dnl ######################################################################
 dnl OpenSSL support shared by top-level and sntp/configure.ac
 AC_DEFUN([NTP_OPENSSL], [
 
+LCRYPTO=
+AC_SUBST([LCRYPTO])
+
 AC_ARG_WITH(
     [rpath],
     [AS_HELP_STRING(
@@ -212,7 +215,7 @@ case "$ntp_openssl" in
      /usr/include)
 	;;
      *)	
-	CPPFLAGS="$CPPFLAGS -I$OPENSSL_INC"
+	CPPFLAGS_NTP="$CPPFLAGS_NTP -I$OPENSSL_INC"
 	;;
     esac
     case "$OPENSSL_LIB" in
@@ -226,9 +229,12 @@ case "$ntp_openssl" in
 	esac
 	;;
     esac
-    AC_SUBST([LCRYPTO], [-lcrypto])
+    LCRYPTO="-lcrypto"
     AC_DEFINE([OPENSSL], [1], [Use OpenSSL?])
 esac
+
+NTPO_SAVED_CPPFLAGS="$CPPFLAGS"
+NTPO_SAVED_LIBS="$LIBS"
 
 #
 # check for linking with -lcrypto failure, and try -lz -lcrypto.
@@ -236,7 +242,7 @@ esac
 #
 case "$ntp_openssl" in
  yes)
-    NTPO_SAVED_LIBS="$LIBS"
+    CPPFLAGS="$CPPFLAGS $CPPFLAGS_NTP"
     LIBS="$NTPO_SAVED_LIBS $LCRYPTO"
     AC_CACHE_CHECK(
 	[if linking with $LCRYPTO alone works],
@@ -282,8 +288,6 @@ case "$ntp_openssl" in
 	     LCRYPTO="$LCRYPTO -lz"
 	esac
     esac
-    LIBS="$NTPO_SAVED_LIBS"
-    AS_UNSET([NTPO_SAVED_LIBS])
 esac
 
 #
@@ -345,16 +349,22 @@ case "$GCC$ntp_openssl" in
     esac
     case "$openssl_triggers_warnings" in
      yes)
-	CFLAGS="$SAVED_CFLAGS -Wno-strict-prototypes"
+	CFLAGS_NTP="$CFLAGS_NTP -Wno-strict-prototypes"
 	;;
      *)
-	CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
+	CFLAGS_NTP="$CFLAGS_NTP -Wstrict-prototypes"
     esac
     ;;
  yesno)
     # gcc without OpenSSL
-    CFLAGS="$SAVED_CFLAGS -Wstrict-prototypes"
+    CFLAGS_NTP="$CFLAGS_NTP -Wstrict-prototypes"
 esac
+
+CFLAGS="$SAVED_CFLAGS"
+CPPFLAGS="$NTPO_SAVED_CPPFLAGS"
+LIBS="$NTPO_SAVED_LIBS"
 AS_UNSET([SAVED_CFLAGS])
+AS_UNSET([NTPO_SAVED_CPPFLAGS])
+AS_UNSET([NTPO_SAVED_LIBS])
 ])
 dnl ======================================================================

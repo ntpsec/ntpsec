@@ -1,6 +1,6 @@
 NULL=
 AUTOMAKE_OPTIONS =
-BUILT_SOURCES =
+BUILT_SOURCES = check-libntp
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris
@@ -56,10 +56,14 @@ libparse_kernel_a_LIBADD =	\
 	kgpstolfp.o		\
 	$(NULL)
 
+INCLUDES = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES += -I$(top_srcdir)/kernel
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
-	-I$(top_srcdir)/lib/isc/nothreads/include \
-	-I$(top_srcdir)/lib/isc/unix/include -I$(top_srcdir)/kernel
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 ETAGS_ARGS = Makefile.am
 
@@ -126,6 +130,11 @@ parsestreams.loadable_module.o: $(parsestreams_OBJECTS) libparse_kernel.a ../lib
 
 parse: $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 	$(LD) -r -o $@ $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
+
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)

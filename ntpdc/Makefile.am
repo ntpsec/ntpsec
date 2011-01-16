@@ -1,5 +1,5 @@
 NULL=
-AUTOMAKE_OPTIONS=	
+AUTOMAKE_OPTIONS=
 
 if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpdc
@@ -9,10 +9,17 @@ endif
 
 EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
-BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
-AM_CPPFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
-	-I$(top_srcdir)/lib/isc/nothreads/include \
-	-I$(top_srcdir)/lib/isc/unix/include $(LIBOPTS_CFLAGS)
+BUILT_SOURCES=	check-libntp @MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
+
+INCLUDES  = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
+INCLUDES +=  $(LIBOPTS_CFLAGS)
+
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_NTP@
+
 # LDADD might need RESLIB and ADJLIB
 ntpdc_LDADD=	version.o $(LIBOPTS_LDADD) ../libntp/libntp.a \
 		@EDITLINE_LIBS@ @LCRYPTO@
@@ -27,12 +34,14 @@ EXTRA_DIST=	nl_in.c nl.pl layout.std	\
 man_MANS=	$(srcdir)/ntpdc.1
 noinst_DATA=	$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L ../include --writable
-std_def_list=	$(top_srcdir)/include/debug-opt.def		\
-		$(top_srcdir)/include/autogen-version.def 	\
-		$(top_srcdir)/include/copyright.def 		\
-		$(top_srcdir)/include/homerc.def 		\
-		$(top_srcdir)/include/version.def
+		autogen -L ../sntp/include --writable
+std_def_list =							\
+	$(top_srcdir)/sntp/include/debug-opt.def		\
+	$(top_srcdir)/sntp/include/autogen-version.def 		\
+	$(top_srcdir)/sntp/include/copyright.def 		\
+	$(top_srcdir)/sntp/include/homerc.def 			\
+	$(top_srcdir)/sntp/include/version.def			\
+	$(NULL)
 
 $(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
@@ -62,14 +71,19 @@ check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 
 $(PROGRAMS): $(LDADD)
 
+check-libntp: FRC
+	cd ../libntp && $(MAKE)
+
+FRC:
+
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)
 
-$(top_srcdir)/version :
-	cd $(top_srcdir) && $(MAKE) version
+$(top_srcdir)/sntp/version:
+	cd $(top_srcdir)/sntp && $(MAKE) version
 
-version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
-	env CSET=`cat $(top_srcdir)/version` $(top_builddir)/scripts/mkver ntpdc
+version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
+	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpdc
 	$(COMPILE) -c version.c
 
 # I ran nl_in.c (attached, to be installed into ntpdc) through

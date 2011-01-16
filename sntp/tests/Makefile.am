@@ -1,6 +1,9 @@
 NULL =
 
-check_PROGRAMS = tests
+check_PROGRAMS = 
+if BUILD_SNTP
+check_PROGRAMS += tests
+endif
 
 sntp_objs = ..
 
@@ -50,10 +53,12 @@ LDADD =		$(LIBOPTS_LDADD)			\
 		@LCRYPTO@				\
 		@GTEST_LDFLAGS@				\
 		@GTEST_LIBS@				\
-		$(sntp_SOURCES_USED)
+		$(sntp_SOURCES_USED)			\
+		$(NULL)
 
+AM_CFLAGS   = @CFLAGS_NTP@
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
-AM_CPPFLAGS = @GTEST_CPPFLAGS@
+AM_CPPFLAGS = @GTEST_CPPFLAGS@ @CPPFLAGS_NTP@
 
 INCLUDES  = $(LIBOPTS_CFLAGS)
 INCLUDES += -I$(top_srcdir)/../include
@@ -70,6 +75,6 @@ TEST_OUTPUT_DIR = $(abs_builddir)/data
 
 TESTS_ENVIRONMENT = $(top_srcdir)/tests/test-driver $(TEST_INPUT_DIR) $(TEST_OUTPUT_DIR)
 
-if !SNTP_CROSSCOMPILE
+if !NTP_CROSSCOMPILE
 TESTS += $(check_PROGRAMS)
 endif

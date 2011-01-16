@@ -12,8 +12,8 @@ do
      -f) 
 	force=1 
 	;;
-     version.m4)
-	outputs="version.m4 $outputs"
+     *version.m4)
+	outputs="m4/version.m4 $outputs"
 	;;
      *version.def)
 	outputs="include/version.def $outputs"
@@ -28,14 +28,14 @@ do
 done
 
 case "$outputs" in
- '') outputs="version.m4 include/version.def include/version.texi" ;;
+ '') outputs="m4/version.m4 include/version.def include/version.texi" ;;
 esac
 
 set -e
 
-. ./packageinfo.sh
+. ../packageinfo.sh
 
-dversion=`scripts/VersionName`
+dversion=`../scripts/VersionName -p ../packageinfo.sh`
 
 set +e
 
@@ -48,14 +48,14 @@ TEMPDIR=${TEMPDIR=/tmp}
 case "$outputs" in
  *version.m4*)
     echo "m4_define([VERSION_NUMBER],[${dversion}])" > "${TEMPDIR}/version.m4+"
-    cmp -s "${TEMPDIR}/version.m4+" version.m4
+    cmp -s "${TEMPDIR}/version.m4+" m4/version.m4
     rc=$?
     case "$force$rc" in
      00)
 	rm -f "${TEMPDIR}/version.m4+"
 	;;
      *)
-	mv "${TEMPDIR}/version.m4+" version.m4
+	mv "${TEMPDIR}/version.m4+" m4/version.m4
 	;;
     esac
     ;;
