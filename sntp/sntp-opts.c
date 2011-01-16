@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  January 15, 2011 at 10:39:47 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 16, 2011 at 10:45:30 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -26,7 +26,8 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <errno.h>
+extern FILE * option_usage_fp;
 #define OPTION_CODE_COMPILE 1
 #include "sntp-opts.h"
 
@@ -110,6 +111,57 @@ static const int
 #define IPV6_FLAGS       (OPTST_DISABLED)
 
 /*
+ *  Authentication option description:
+ */
+static char const zAuthenticationText[] =
+        "Enable authentication with the key auth-keynumber";
+static char const zAuthentication_NAME[]     = "AUTHENTICATION";
+static char const zAuthentication_Name[]     = "authentication";
+#define AUTHENTICATION_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
+
+/*
+ *  Bctimeout option description:
+ */
+static char const zBctimeoutText[] =
+        "Specify the number of seconds to wait for broadcasts";
+static char const zBctimeout_NAME[]          = "BCTIMEOUT";
+static char const zBctimeout_Name[]          = "bctimeout";
+#define zBctimeoutDefaultArg         ((char const*)68)
+#define BCTIMEOUT_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
+
+/*
+ *  Broadcast option description:
+ */
+static char const zBroadcastText[] =
+        "Listen to the address specified for broadcast time sync";
+static char const zBroadcast_NAME[]          = "BROADCAST";
+static char const zBroadcast_Name[]          = "broadcast";
+#define BROADCAST_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+/*
+ *  Concurrent option description:
+ */
+static char const zConcurrentText[] =
+        "Concurrent query all IPs returned for host-name";
+static char const zConcurrent_NAME[]         = "CONCURRENT";
+static char const zConcurrent_Name[]         = "concurrent";
+#define CONCURRENT_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+/*
+ *  Filelog option description:
+ */
+static char const zFilelogText[] =
+        "Log to specified logfile";
+static char const zFilelog_NAME[]            = "FILELOG";
+static char const zFilelog_Name[]            = "filelog";
+#define FILELOG_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
+
+/*
  *  Kod option description:
  */
 static char const zKodText[] =
@@ -119,117 +171,6 @@ static char const zKod_Name[]                = "kod";
 static char const zKodDefaultArg[]             = "/var/db/ntp-kod";
 #define KOD_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
-
-/*
- *  Syslog option description with
- *  "Must also have options" and "Incompatible options":
- */
-static char const zSyslogText[] =
-        "Logging with syslog";
-static char const zSyslog_NAME[]             = "SYSLOG";
-static char const zSyslog_Name[]             = "syslog";
-static const int
-    aSyslogCantList[] = {
-    INDEX_OPT_FILELOG, NO_EQUIVALENT };
-#define SYSLOG_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Filelog option description with
- *  "Must also have options" and "Incompatible options":
- */
-static char const zFilelogText[] =
-        "Log to specified logfile";
-static char const zFilelog_NAME[]            = "FILELOG";
-static char const zFilelog_Name[]            = "filelog";
-static const int
-    aFilelogCantList[] = {
-    INDEX_OPT_SYSLOG, NO_EQUIVALENT };
-#define FILELOG_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
-
-/*
- *  Steplimit option description with
- *  "Must also have options" and "Incompatible options":
- */
-static char const zSteplimitText[] =
-        "Adjustments less than steplimit msec will be slewed.";
-static char const zSteplimit_NAME[]          = "STEPLIMIT";
-static char const zSteplimit_Name[]          = "steplimit";
-static const int
-    aSteplimitCantList[] = {
-    INDEX_OPT_ADJTIME,
-    INDEX_OPT_SETTOD, NO_EQUIVALENT };
-#define STEPLIMIT_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
-
-/*
- *  Settod option description with
- *  "Must also have options" and "Incompatible options":
- */
-static char const zSettodText[] =
-        "Set (step) the time with settimeofday()";
-static char const zSettod_NAME[]             = "SETTOD";
-static char const zSettod_Name[]             = "settod";
-static const int
-    aSettodCantList[] = {
-    INDEX_OPT_ADJTIME,
-    INDEX_OPT_STEPLIMIT, NO_EQUIVALENT };
-#define SETTOD_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Adjtime option description with
- *  "Must also have options" and "Incompatible options":
- */
-static char const zAdjtimeText[] =
-        "Set (slew) the time with adjtime()";
-static char const zAdjtime_NAME[]            = "ADJTIME";
-static char const zAdjtime_Name[]            = "adjtime";
-static const int
-    aAdjtimeCantList[] = {
-    INDEX_OPT_SETTOD,
-    INDEX_OPT_STEPLIMIT, NO_EQUIVALENT };
-#define ADJTIME_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Concurrent option description:
- */
-static char const zConcurrentText[] =
-        "Send concurrent queries to all IPs returned for host-name";
-static char const zConcurrent_NAME[]         = "CONCURRENT";
-static char const zConcurrent_Name[]         = "concurrent";
-#define CONCURRENT_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-/*
- *  Broadcast option description:
- */
-static char const zBroadcastText[] =
-        "Use broadcasts to the address specified for synchronisation";
-static char const zBroadcast_NAME[]          = "BROADCAST";
-static char const zBroadcast_Name[]          = "broadcast";
-#define BROADCAST_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-/*
- *  Timeout option description:
- */
-static char const zTimeoutText[] =
-        "Specify the number of seconds to wait for broadcasts";
-static char const zTimeout_NAME[]            = "TIMEOUT";
-static char const zTimeout_Name[]            = "timeout";
-#define zTimeoutDefaultArg           ((char const*)68)
-#define TIMEOUT_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
-
-/*
- *  Authentication option description:
- */
-static char const zAuthenticationText[] =
-        "Enable authentication with the key auth-keynumber";
-static char const zAuthentication_NAME[]     = "AUTHENTICATION";
-static char const zAuthentication_Name[]     = "authentication";
-#define AUTHENTICATION_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
  *  Keyfile option description:
@@ -242,13 +183,52 @@ static char const zKeyfile_Name[]            = "keyfile";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
 /*
- *  Unpriv_Port option description:
+ *  Steplimit option description:
  */
-static char const zUnpriv_PortText[] =
-        "Use an unprivileged port for communicating";
-static char const zUnpriv_Port_NAME[]        = "UNPRIV_PORT";
-static char const zUnpriv_Port_Name[]        = "unpriv-port";
-#define UNPRIV_PORT_FLAGS       (OPTST_DISABLED)
+static char const zSteplimitText[] =
+        "Adjustments less than steplimit msec will be slewed.";
+static char const zSteplimit_NAME[]          = "STEPLIMIT";
+static char const zSteplimit_Name[]          = "steplimit";
+#define STEPLIMIT_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
+
+/*
+ *  Ntpversion option description:
+ */
+static char const zNtpversionText[] =
+        "Send <int> as our NTP version";
+static char const zNtpversion_NAME[]         = "NTPVERSION";
+static char const zNtpversion_Name[]         = "ntpversion";
+#define zNtpversionDefaultArg        ((char const*)4)
+#define NTPVERSION_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
+
+/*
+ *  Usereservedport option description:
+ */
+static char const zUsereservedportText[] =
+        "Use the NTP Reserved Port (port 123)";
+static char const zUsereservedport_NAME[]    = "USERESERVEDPORT";
+static char const zUsereservedport_Name[]    = "usereservedport";
+#define USERESERVEDPORT_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Step option description:
+ */
+static char const zStepText[] =
+        "OK to 'step' the time with settimeofday()";
+static char const zStep_NAME[]               = "STEP";
+static char const zStep_Name[]               = "step";
+#define STEP_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Slew option description:
+ */
+static char const zSlewText[] =
+        "OK to 'slew' the time with adjtime()";
+static char const zSlew_NAME[]               = "SLEW";
+static char const zSlew_Name[]               = "slew";
+#define SLEW_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -289,7 +269,8 @@ static char const zNotLoad_Opts_Pfx[]  = "no";
  *  if multiple copies are allowed.
  */
 static tOptProc
-    doOptFilelog, doOptKeyfile, doOptKod, doUsageOpt;
+    doOptFilelog,    doOptKeyfile,    doOptKod,        doOptNtpversion,
+    doOptSteplimit,  doUsageOpt;
 
 /*
  *  #define map the "normal" callout procs to the test ones...
@@ -307,7 +288,9 @@ extern tOptProc
     optionStackArg,      optionTimeVal,       optionUnstackArg,
     optionVersionStderr;
 static tOptProc
-    doOptFilelog, doOptKeyfile, doOptKod, doOptSet_Debug_Level, doUsageOpt;
+    doOptFilelog,         doOptKeyfile,         doOptKod,
+    doOptNtpversion,      doOptSet_Debug_Level, doOptSteplimit,
+    doUsageOpt;
 
 /*
  *  #define map the "normal" callout procs
@@ -375,116 +358,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 4, VALUE_OPT_KOD,
-     /* equiv idx, value */ 4, VALUE_OPT_KOD,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ KOD_FLAGS, 0,
-     /* last opt argumnt */ { zKodDefaultArg },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ doOptKod,
-     /* desc, NAME, name */ zKodText, zKod_NAME, zKod_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 5, VALUE_OPT_SYSLOG,
-     /* equiv idx, value */ 5, VALUE_OPT_SYSLOG,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ SYSLOG_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aSyslogCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zSyslogText, zSyslog_NAME, zSyslog_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 6, VALUE_OPT_FILELOG,
-     /* equiv idx, value */ 6, VALUE_OPT_FILELOG,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ FILELOG_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aFilelogCantList,
-     /* option proc      */ doOptFilelog,
-     /* desc, NAME, name */ zFilelogText, zFilelog_NAME, zFilelog_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 7, VALUE_OPT_STEPLIMIT,
-     /* equiv idx, value */ 7, VALUE_OPT_STEPLIMIT,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ STEPLIMIT_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aSteplimitCantList,
-     /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zSteplimitText, zSteplimit_NAME, zSteplimit_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 8, VALUE_OPT_SETTOD,
-     /* equiv idx, value */ 8, VALUE_OPT_SETTOD,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ SETTOD_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aSettodCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zSettodText, zSettod_NAME, zSettod_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 9, VALUE_OPT_ADJTIME,
-     /* equiv idx, value */ 9, VALUE_OPT_ADJTIME,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ ADJTIME_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aAdjtimeCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zAdjtimeText, zAdjtime_NAME, zAdjtime_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 10, VALUE_OPT_CONCURRENT,
-     /* equiv idx, value */ 10, VALUE_OPT_CONCURRENT,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ CONCURRENT_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ optionStackArg,
-     /* desc, NAME, name */ zConcurrentText, zConcurrent_NAME, zConcurrent_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 11, VALUE_OPT_BROADCAST,
-     /* equiv idx, value */ 11, VALUE_OPT_BROADCAST,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ BROADCAST_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ optionStackArg,
-     /* desc, NAME, name */ zBroadcastText, zBroadcast_NAME, zBroadcast_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 12, VALUE_OPT_TIMEOUT,
-     /* equiv idx, value */ 12, VALUE_OPT_TIMEOUT,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ TIMEOUT_FLAGS, 0,
-     /* last opt argumnt */ { zTimeoutDefaultArg },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zTimeoutText, zTimeout_NAME, zTimeout_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 13, VALUE_OPT_AUTHENTICATION,
-     /* equiv idx, value */ 13, VALUE_OPT_AUTHENTICATION,
+  {  /* entry idx, value */ 4, VALUE_OPT_AUTHENTICATION,
+     /* equiv idx, value */ 4, VALUE_OPT_AUTHENTICATION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ AUTHENTICATION_FLAGS, 0,
@@ -495,8 +370,68 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zAuthenticationText, zAuthentication_NAME, zAuthentication_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 14, VALUE_OPT_KEYFILE,
-     /* equiv idx, value */ 14, VALUE_OPT_KEYFILE,
+  {  /* entry idx, value */ 5, VALUE_OPT_BCTIMEOUT,
+     /* equiv idx, value */ 5, VALUE_OPT_BCTIMEOUT,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ BCTIMEOUT_FLAGS, 0,
+     /* last opt argumnt */ { zBctimeoutDefaultArg },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ optionNumericVal,
+     /* desc, NAME, name */ zBctimeoutText, zBctimeout_NAME, zBctimeout_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 6, VALUE_OPT_BROADCAST,
+     /* equiv idx, value */ 6, VALUE_OPT_BROADCAST,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* opt state flags  */ BROADCAST_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ optionStackArg,
+     /* desc, NAME, name */ zBroadcastText, zBroadcast_NAME, zBroadcast_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 7, VALUE_OPT_CONCURRENT,
+     /* equiv idx, value */ 7, VALUE_OPT_CONCURRENT,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* opt state flags  */ CONCURRENT_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ optionStackArg,
+     /* desc, NAME, name */ zConcurrentText, zConcurrent_NAME, zConcurrent_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 8, VALUE_OPT_FILELOG,
+     /* equiv idx, value */ 8, VALUE_OPT_FILELOG,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ FILELOG_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ doOptFilelog,
+     /* desc, NAME, name */ zFilelogText, zFilelog_NAME, zFilelog_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 9, VALUE_OPT_KOD,
+     /* equiv idx, value */ 9, VALUE_OPT_KOD,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ KOD_FLAGS, 0,
+     /* last opt argumnt */ { zKodDefaultArg },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ doOptKod,
+     /* desc, NAME, name */ zKodText, zKod_NAME, zKod_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 10, VALUE_OPT_KEYFILE,
+     /* equiv idx, value */ 10, VALUE_OPT_KEYFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ KEYFILE_FLAGS, 0,
@@ -507,16 +442,64 @@ static tOptDesc optDesc[ OPTION_CT ] = {
      /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 15, VALUE_OPT_UNPRIV_PORT,
-     /* equiv idx, value */ 15, VALUE_OPT_UNPRIV_PORT,
+  {  /* entry idx, value */ 11, VALUE_OPT_STEPLIMIT,
+     /* equiv idx, value */ 11, VALUE_OPT_STEPLIMIT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ UNPRIV_PORT_FLAGS, 0,
+     /* opt state flags  */ STEPLIMIT_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ doOptSteplimit,
+     /* desc, NAME, name */ zSteplimitText, zSteplimit_NAME, zSteplimit_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 12, VALUE_OPT_NTPVERSION,
+     /* equiv idx, value */ 12, VALUE_OPT_NTPVERSION,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ NTPVERSION_FLAGS, 0,
+     /* last opt argumnt */ { zNtpversionDefaultArg },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ doOptNtpversion,
+     /* desc, NAME, name */ zNtpversionText, zNtpversion_NAME, zNtpversion_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 13, VALUE_OPT_USERESERVEDPORT,
+     /* equiv idx, value */ 13, VALUE_OPT_USERESERVEDPORT,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ USERESERVEDPORT_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zUnpriv_PortText, zUnpriv_Port_NAME, zUnpriv_Port_Name,
+     /* desc, NAME, name */ zUsereservedportText, zUsereservedport_NAME, zUsereservedport_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 14, VALUE_OPT_STEP,
+     /* equiv idx, value */ 14, VALUE_OPT_STEP,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ STEP_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zStepText, zStep_NAME, zStep_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 15, VALUE_OPT_SLEW,
+     /* equiv idx, value */ 15, VALUE_OPT_SLEW,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ SLEW_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zSlewText, zSlew_NAME, zSlew_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
@@ -680,17 +663,17 @@ doUsageOpt(
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from ../include/debug-opt.def, line 27 */
+    /* extracted from include/debug-opt.def, line 27 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_SNTP_OPTS) */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   For the kod option.
+ *   For the filelog option.
  */
 static void
-doOptKod(tOptions* pOptions, tOptDesc* pOptDesc)
+doOptFilelog(tOptions* pOptions, tOptDesc* pOptDesc)
 {
     static teOptFileType const  type =
         FTYPE_MODE_MAY_EXIST + FTYPE_MODE_NO_OPEN;
@@ -705,10 +688,10 @@ doOptKod(tOptions* pOptions, tOptDesc* pOptDesc)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   For the filelog option.
+ *   For the kod option.
  */
 static void
-doOptFilelog(tOptions* pOptions, tOptDesc* pOptDesc)
+doOptKod(tOptions* pOptions, tOptDesc* pOptDesc)
 {
     static teOptFileType const  type =
         FTYPE_MODE_MAY_EXIST + FTYPE_MODE_NO_OPEN;
@@ -737,6 +720,106 @@ doOptKeyfile(tOptions* pOptions, tOptDesc* pOptDesc)
     mode.file_flags = O_CLOEXEC;
 
     optionFileCheck(pOptions, pOptDesc, type, mode);
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   For the steplimit option.
+ */
+static void
+doOptSteplimit(tOptions* pOptions, tOptDesc* pOptDesc)
+{
+    static const struct {long const rmin, rmax;} rng[1] = {
+        { 0, LONG_MAX } };
+    long val;
+    int  ix;
+    char * pzEnd;
+
+    if (pOptions <= OPTPROC_EMIT_LIMIT)
+        goto emit_ranges;
+
+    errno = 0;
+    val = strtol(pOptDesc->optArg.argString, &pzEnd, 0);
+    if ((pOptDesc->optArg.argString == pzEnd) || (errno != 0))
+        goto bad_value;
+
+    if (*pzEnd != '\0')
+        goto bad_value;
+    for (ix = 0; ix < 1; ix++) {
+        if (val < rng[ix].rmin)
+            continue;  /* ranges need not be ordered. */
+        if (val == rng[ix].rmin)
+            goto valid_return;
+        if (rng[ix].rmax == LONG_MIN)
+            continue;
+        if (val <= rng[ix].rmax)
+            goto valid_return;
+    }
+
+  bad_value:
+
+    option_usage_fp = stderr;
+
+  emit_ranges:
+    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
+    return;
+
+  valid_return:
+    if ((pOptDesc->fOptState & OPTST_ALLOC_ARG) != 0) {
+        free((void *)pOptDesc->optArg.argString);
+        pOptDesc->fOptState &= ~OPTST_ALLOC_ARG;
+    }
+    pOptDesc->optArg.argInt = val;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   For the ntpversion option.
+ */
+static void
+doOptNtpversion(tOptions* pOptions, tOptDesc* pOptDesc)
+{
+    static const struct {long const rmin, rmax;} rng[1] = {
+        { 0, 7 } };
+    long val;
+    int  ix;
+    char * pzEnd;
+
+    if (pOptions <= OPTPROC_EMIT_LIMIT)
+        goto emit_ranges;
+
+    errno = 0;
+    val = strtol(pOptDesc->optArg.argString, &pzEnd, 0);
+    if ((pOptDesc->optArg.argString == pzEnd) || (errno != 0))
+        goto bad_value;
+
+    if (*pzEnd != '\0')
+        goto bad_value;
+    for (ix = 0; ix < 1; ix++) {
+        if (val < rng[ix].rmin)
+            continue;  /* ranges need not be ordered. */
+        if (val == rng[ix].rmin)
+            goto valid_return;
+        if (rng[ix].rmax == LONG_MIN)
+            continue;
+        if (val <= rng[ix].rmax)
+            goto valid_return;
+    }
+
+  bad_value:
+
+    option_usage_fp = stderr;
+
+  emit_ranges:
+    optionShowRange(pOptions, pOptDesc, (void *)rng, 1);
+    return;
+
+  valid_return:
+    if ((pOptDesc->fOptState & OPTST_ALLOC_ARG) != 0) {
+        free((void *)pOptDesc->optArg.argString);
+        pOptDesc->fOptState &= ~OPTST_ALLOC_ARG;
+    }
+    pOptDesc->optArg.argInt = val;
 }
 /* extracted from /usr/local/share/autogen/optmain.tpl near line 107 */
 

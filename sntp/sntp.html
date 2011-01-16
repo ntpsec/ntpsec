@@ -38,7 +38,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p116 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p114 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -69,9 +69,13 @@ IETF specification.
 <p>By default, <code>sntp</code> writes the local data and time (i.e., not UTC) to the
 standard output in the format:
 
-<pre class="example">     1996 Oct 15 20:17:25.123 +4.567 +/- 0.089 secs
+<pre class="example">     1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
 </pre>
-  <p>where the +4.567 +/- 0.089 secs indicates the time offset and
+  <p>where
+YYYY-MM-DD HH:MM:SS.SUBSEC is the local date and time,
+(+0800) is the local timezone adjustment (so we would add 8 hours and 0 minutes to convert the reported local time to UTC),
+and
+the +4.567 +/- 0.089 secs indicates the time offset and
 error bound of the system clock relative to the server clock.
 
 <div class="node">
@@ -117,8 +121,8 @@ the aginfo template and the option descriptions for the <samp><span class="comma
 
 <ul class="menu">
 <li><a accesskey="1" href="#sntp-usage">sntp usage</a>:                   sntp usage help (-?) 
-<li><a accesskey="2" href="#sntp-adjtime">sntp adjtime</a>:                adjtime option (-j)
-<li><a accesskey="3" href="#sntp-authentication">sntp authentication</a>:         authentication option (-a)
+<li><a accesskey="2" href="#sntp-authentication">sntp authentication</a>:         authentication option (-a)
+<li><a accesskey="3" href="#sntp-bctimeout">sntp bctimeout</a>:              bctimeout option (-B)
 <li><a accesskey="4" href="#sntp-broadcast">sntp broadcast</a>:              broadcast option (-b)
 <li><a accesskey="5" href="#sntp-concurrent">sntp concurrent</a>:             concurrent option (-c)
 <li><a accesskey="6" href="#sntp-debug_002dlevel">sntp debug-level</a>:            debug-level option (-d)
@@ -127,18 +131,18 @@ the aginfo template and the option descriptions for the <samp><span class="comma
 <li><a accesskey="9" href="#sntp-ipv6">sntp ipv6</a>:                   ipv6 option (-6)
 <li><a href="#sntp-keyfile">sntp keyfile</a>:                keyfile option (-k)
 <li><a href="#sntp-kod">sntp kod</a>:                    kod option (-K)
+<li><a href="#sntp-ntpversion">sntp ntpversion</a>:             ntpversion option (-o)
 <li><a href="#sntp-set_002ddebug_002dlevel">sntp set-debug-level</a>:        set-debug-level option (-D)
-<li><a href="#sntp-settod">sntp settod</a>:                 settod option (-s)
-<li><a href="#sntp-steplimit">sntp steplimit</a>:              steplimit option (-S)
-<li><a href="#sntp-syslog">sntp syslog</a>:                 syslog option (-p)
-<li><a href="#sntp-timeout">sntp timeout</a>:                timeout option (-t)
-<li><a href="#sntp-unpriv_002dport">sntp unpriv-port</a>:            unpriv-port option (-u)
+<li><a href="#sntp-slew">sntp slew</a>:                   slew option (-s)
+<li><a href="#sntp-step">sntp step</a>:                   step option (-S)
+<li><a href="#sntp-steplimit">sntp steplimit</a>:              steplimit option (-M)
+<li><a href="#sntp-usereservedport">sntp usereservedport</a>:        usereservedport option (-r)
 </ul>
 
 <div class="node">
 <p><hr>
 <a name="sntp-usage"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-adjtime">sntp adjtime</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-authentication">sntp authentication</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
@@ -162,33 +166,22 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits these options:
                                 ipv4
-   -K Fil kod            KoD history filename
-   -p no  syslog         Logging with syslog
-                                - prohibits these options:
-                                filelog
-   -l Fil filelog        Log to specified logfile
-                                - prohibits these options:
-                                syslog
-   -S Num steplimit      Adjustments less than steplimit msec will be slewed.
-                                - prohibits these options:
-                                adjtime
-                                settod
-   -s no  settod         Set (step) the time with settimeofday()
-                                - prohibits these options:
-                                adjtime
-                                steplimit
-   -j no  adjtime        Set (slew) the time with adjtime()
-                                - prohibits these options:
-                                settod
-                                steplimit
-   -c Str concurrent     Send concurrent queries to all IPs returned for host-name
-                                - may appear multiple times
-   -b Str broadcast      Use broadcasts to the address specified for synchronisation
-                                - may appear multiple times
-   -t Num timeout        Specify the number of seconds to wait for broadcasts
    -a Num authentication Enable authentication with the key auth-keynumber
+   -B Num bctimeout      Specify the number of seconds to wait for broadcasts
+   -b Str broadcast      Listen to the address specified for broadcast time sync
+                                - may appear multiple times
+   -c Str concurrent     Concurrent query all IPs returned for host-name
+                                - may appear multiple times
+   -l Fil filelog        Log to specified logfile
+   -K Fil kod            KoD history filename
    -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
-   -u no  unpriv-port    Use an unprivileged port for communicating
+   -M Num steplimit      Adjustments less than steplimit msec will be slewed.
+                                - it must be:  greater than or equal to 0
+   -o Num ntpversion     Send &lt;int&gt; as our NTP version
+                                - it must be:  0 to 7
+   -r no  usereservedport Use the NTP Reserved Port (port 123)
+   -S no  step           OK to 'step' the time with settimeofday()
+   -s no  slew           OK to 'slew' the time with adjtime()
       opt version        Output version information and exit
    -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
@@ -220,36 +213,16 @@ please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
 </pre>
   <div class="node">
 <p><hr>
-<a name="sntp-adjtime"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-authentication">sntp authentication</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-usage">sntp usage</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
-
-</div>
-
-<h4 class="subsection">adjtime option (-j)</h4>
-
-<p><a name="index-sntp_002dadjtime-4"></a>
-This is the &ldquo;set (slew) the time with adjtime()&rdquo; option.
-
-  <p>This option has some usage constraints.  It:
-     <ul>
-<li>must not appear in combination with any of the following options:
-settod, steplimit. 
-</ul>
-
-<div class="node">
-<p><hr>
 <a name="sntp-authentication"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-broadcast">sntp broadcast</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-adjtime">sntp adjtime</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-bctimeout">sntp bctimeout</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-usage">sntp usage</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
 <h4 class="subsection">authentication option (-a)</h4>
 
-<p><a name="index-sntp_002dauthentication-5"></a>
+<p><a name="index-sntp_002dauthentication-4"></a>
 This is the &ldquo;enable authentication with the key auth-keynumber&rdquo; option. 
 This option enables authentication using the key specified in this option's argument. 
 The argument of this option is the keyid, a number specified in the keyfile as this
@@ -257,9 +230,25 @@ key's identifier. See the keyfile option (-k) for more details.
 
 <div class="node">
 <p><hr>
+<a name="sntp-bctimeout"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-broadcast">sntp broadcast</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-authentication">sntp authentication</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">bctimeout option (-B)</h4>
+
+<p><a name="index-sntp_002dbctimeout-5"></a>
+This is the &ldquo;specify the number of seconds to wait for broadcasts&rdquo; option. 
+When waiting for a broadcast packet SNTP will wait the number
+of seconds specified before giving up.  Default 68 seconds.
+
+<div class="node">
+<p><hr>
 <a name="sntp-broadcast"></a>
 Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-concurrent">sntp concurrent</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-authentication">sntp authentication</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-bctimeout">sntp bctimeout</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
@@ -267,16 +256,16 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">broadcast option (-b)</h4>
 
 <p><a name="index-sntp_002dbroadcast-6"></a>
-This is the &ldquo;use broadcasts to the address specified for synchronisation&rdquo; option.
+This is the &ldquo;listen to the address specified for broadcast time sync&rdquo; option.
 
   <p>This option has some usage constraints.  It:
      <ul>
 <li>may appear an unlimited number of times. 
 </ul>
 
-  <p>If specified SNTP will listen to the specified broadcast address
+  <p>If specified SNTP will listen to the specified address
 for NTP broadcasts.  The default maximum wait time,
-68 seconds, can be modified with -t.
+68 seconds, can be modified with -B.
 
 <div class="node">
 <p><hr>
@@ -290,7 +279,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">concurrent option (-c)</h4>
 
 <p><a name="index-sntp_002dconcurrent-7"></a>
-This is the &ldquo;send concurrent queries to all ips returned for host-name&rdquo; option.
+This is the &ldquo;concurrent query all ips returned for host-name&rdquo; option.
 
   <p>This option has some usage constraints.  It:
      <ul>
@@ -341,15 +330,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">filelog option (-l)</h4>
 
 <p><a name="index-sntp_002dfilelog-9"></a>
-This is the &ldquo;log to specified logfile&rdquo; option.
-
-  <p>This option has some usage constraints.  It:
-     <ul>
-<li>must not appear in combination with any of the following options:
-syslog. 
-</ul>
-
-  <p>This option causes the client to write log messages to the specified
+This is the &ldquo;log to specified logfile&rdquo; option. 
+This option causes the client to write log messages to the specified
 logfile.
 
 <div class="node">
@@ -428,7 +410,7 @@ M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
 <div class="node">
 <p><hr>
 <a name="sntp-kod"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-set_002ddebug_002dlevel">sntp set-debug-level</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ntpversion">sntp ntpversion</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-keyfile">sntp keyfile</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
@@ -444,17 +426,33 @@ responses received from servers.  The default is
 
 <div class="node">
 <p><hr>
+<a name="sntp-ntpversion"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-set_002ddebug_002dlevel">sntp set-debug-level</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-kod">sntp kod</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">ntpversion option (-o)</h4>
+
+<p><a name="index-sntp_002dntpversion-14"></a>
+This is the &ldquo;send &lt;int&gt; as our ntp version&rdquo; option. 
+When sending requests to a remote server, tell them we are running
+NTP protocol version &lt;ntpversion&gt; .
+
+<div class="node">
+<p><hr>
 <a name="sntp-set-debug-level"></a>
 <a name="sntp-set_002ddebug_002dlevel"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-settod">sntp settod</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-kod">sntp kod</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-slew">sntp slew</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-ntpversion">sntp ntpversion</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
 <h4 class="subsection">set-debug-level option (-D)</h4>
 
-<p><a name="index-sntp_002dset_002ddebug_002dlevel-14"></a>
+<p><a name="index-sntp_002dset_002ddebug_002dlevel-15"></a>
 This is the &ldquo;set the output debug message level&rdquo; option.
 
   <p>This option has some usage constraints.  It:
@@ -467,97 +465,60 @@ but each overrides the previous value(s).
 
 <div class="node">
 <p><hr>
-<a name="sntp-settod"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-steplimit">sntp steplimit</a>,
+<a name="sntp-slew"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-step">sntp step</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-set_002ddebug_002dlevel">sntp set-debug-level</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
-<h4 class="subsection">settod option (-s)</h4>
+<h4 class="subsection">slew option (-s)</h4>
 
-<p><a name="index-sntp_002dsettod-15"></a>
-This is the &ldquo;set (step) the time with settimeofday()&rdquo; option.
-
-  <p>This option has some usage constraints.  It:
-     <ul>
-<li>must not appear in combination with any of the following options:
-adjtime, steplimit. 
-</ul>
+<p><a name="index-sntp_002dslew-16"></a>
+This is the &ldquo;ok to 'slew' the time with adjtime()&rdquo; option.
 
 <div class="node">
 <p><hr>
-<a name="sntp-steplimit"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-syslog">sntp syslog</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-settod">sntp settod</a>,
+<a name="sntp-step"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-steplimit">sntp steplimit</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-slew">sntp slew</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
-<h4 class="subsection">steplimit option (-S)</h4>
+<h4 class="subsection">step option (-S)</h4>
 
-<p><a name="index-sntp_002dsteplimit-16"></a>
-This is the &ldquo;adjustments less than steplimit msec will be slewed.&rdquo; option.
-
-  <p>This option has some usage constraints.  It:
-     <ul>
-<li>must not appear in combination with any of the following options:
-adjtime, settod. 
-</ul>
-
-  <p>If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+<p><a name="index-sntp_002dstep-17"></a>
+This is the &ldquo;ok to 'step' the time with settimeofday()&rdquo; option.
 
 <div class="node">
 <p><hr>
-<a name="sntp-syslog"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-timeout">sntp timeout</a>,
+<a name="sntp-steplimit"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-usereservedport">sntp usereservedport</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-step">sntp step</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">steplimit option (-M)</h4>
+
+<p><a name="index-sntp_002dsteplimit-18"></a>
+This is the &ldquo;adjustments less than steplimit msec will be slewed.&rdquo; option. 
+If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+
+<div class="node">
+<p><hr>
+<a name="sntp-usereservedport"></a>
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-steplimit">sntp steplimit</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
-<h4 class="subsection">syslog option (-p)</h4>
+<h4 class="subsection">usereservedport option (-r)</h4>
 
-<p><a name="index-sntp_002dsyslog-17"></a>
-This is the &ldquo;logging with syslog&rdquo; option.
-
-  <p>This option has some usage constraints.  It:
-     <ul>
-<li>must not appear in combination with any of the following options:
-filelog. 
-</ul>
-
-  <p>When this option is set all logging will be done using syslog.
-
-<div class="node">
-<p><hr>
-<a name="sntp-timeout"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-unpriv_002dport">sntp unpriv-port</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-syslog">sntp syslog</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
-
-</div>
-
-<h4 class="subsection">timeout option (-t)</h4>
-
-<p><a name="index-sntp_002dtimeout-18"></a>
-This is the &ldquo;specify the number of seconds to wait for broadcasts&rdquo; option. 
-When waiting for a broadcast packet SNTP will wait the number
-of seconds specified before giving up.  Default 68 seconds.
-
-<div class="node">
-<p><hr>
-<a name="sntp-unpriv-port"></a>
-<a name="sntp-unpriv_002dport"></a>
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-timeout">sntp timeout</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
-
-</div>
-
-<h4 class="subsection">unpriv-port option (-u)</h4>
-
-<p><a name="index-sntp_002dunpriv_002dport-19"></a>
-This is the &ldquo;use an unprivileged port for communicating&rdquo; option.
+<p><a name="index-sntp_002dusereservedport-19"></a>
+This is the &ldquo;use the ntp reserved port (port 123)&rdquo; option. 
+Use port 123, which is reserved for NTP, for our network communications.
 
 <div class="node">
 <p><hr>

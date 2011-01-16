@@ -49,78 +49,51 @@ flag = {
 	_EndOfDoc_;
 };
 
-
 flag = {
-    name      = kod;
-    value     = K;
-    arg-type  = file;
-    arg-name  = "file-name";
-    arg-default = "/var/db/ntp-kod";
-    descrip   = "KoD history filename";
-    doc = <<-  _EndOfDoc_
-	Specifies the filename to be used for the  persistent history of KoD
-	responses received from servers.  The default is
-	/var/db/ntp-kod.
-	_EndOfDoc_;
-};
-
-
-flag = {
-	name	= syslog;
-	value	= p;
-	flags-cant = filelog;
-	descrip = "Logging with syslog";
-	doc = <<-  _EndOfDoc_
-	When this option is set all logging will be done using syslog.
+	name	= authentication;
+	value	= a;
+	descrip	= "Enable authentication with the key auth-keynumber";
+	arg-type = number;
+	arg-name = "auth-keynumber";
+	doc	= <<- _EndOfDoc_
+	This option enables authentication using the key specified in this option's argument.
+	The argument of this option is the keyid, a number specified in the keyfile as this
+	key's identifier. See the keyfile option (-k) for more details.
 	_EndOfDoc_;
 };
 
 flag = {
-	name	   = filelog;
-	value	   = l;
-	arg-type   = file;
-	arg-name   = "file-name";
-	flags-cant = syslog;
-	descrip = "Log to specified logfile";
-	doc = <<-  _EndOfDoc_
-	This option causes the client to write log messages to the specified
-	logfile.
+	name	= bctimeout;
+	value	= B;
+	descrip	= "Specify the number of seconds to wait for broadcasts";
+	arg-type = number;
+	arg-name = "seconds";
+	arg-default = 68;
+	doc	= <<-  _EndOfDoc_
+	When waiting for a broadcast packet SNTP will wait the number
+	of seconds specified before giving up.  Default 68 seconds.
 	_EndOfDoc_;
 };
 
 flag = {
-	name       = steplimit;
-	value      = S;
-	arg-type   = number;
-	flags-cant = adjtime, settod;
-	descrip    = "Adjustments less than steplimit msec will be slewed.";
-	doc = <<-  _EndOfDoc_
-	If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
-	_EndOfDoc_;
-	};
-
-flag = {
-	name       = settod;
-	value      = s;
-	flags-cant = adjtime, steplimit;
-	descrip    = "Set (step) the time with settimeofday()";
-	doc = <<-  _EndOfDoc_
-	_EndOfDoc_;
-};
-
-flag = {
-	name       = adjtime;
-	value      = j;
-	flags-cant = settod, steplimit;
-	descrip    = "Set (slew) the time with adjtime()";
-	doc = <<-  _EndOfDoc_
+	name	= broadcast;
+	value	= b;
+	descrip	= "Listen to the address specified for broadcast time sync";
+	arg-type = string;
+	arg-name = "broadcast-address";
+	max	 = NOLIMIT;
+	stack-arg;
+	doc	= <<-  _EndOfDoc_
+	If specified SNTP will listen to the specified address
+	for NTP broadcasts.  The default maximum wait time,
+	68 seconds, can be modified with -B.
 	_EndOfDoc_;
 };
 
 flag = {
 	name	 = concurrent;
 	value	 = c;
-	descrip	 = "Send concurrent queries to all IPs returned for host-name";
+	descrip	 = "Concurrent query all IPs returned for host-name";
 	arg-type = string;
 	arg-name = "host-name";
 	max	 = NOLIMIT;
@@ -139,43 +112,28 @@ flag = {
 };
 
 flag = {
-	name	= broadcast;
-	value	= b;
-	descrip	= "Use broadcasts to the address specified for synchronisation";
-	arg-type = string;
-	arg-name = "broadcast-address";
-	max	 = NOLIMIT;
-	stack-arg;
-	doc	= <<-  _EndOfDoc_
-	If specified SNTP will listen to the specified broadcast address
-	for NTP broadcasts.  The default maximum wait time,
-	68 seconds, can be modified with -t.
+	name	   = filelog;
+	value	   = l;
+	arg-type   = file;
+	arg-name   = "file-name";
+	descrip = "Log to specified logfile";
+	doc = <<-  _EndOfDoc_
+	This option causes the client to write log messages to the specified
+	logfile.
 	_EndOfDoc_;
 };
 
 flag = {
-	name	= timeout;
-	value	= t;
-	descrip	= "Specify the number of seconds to wait for broadcasts";
-	arg-type = number;
-	arg-name = "seconds";
-	arg-default = 68;
-	doc	= <<-  _EndOfDoc_
-	When waiting for a broadcast packet SNTP will wait the number
-	of seconds specified before giving up.  Default 68 seconds.
-	_EndOfDoc_;
-};
-
-flag = {
-	name	= authentication;
-	value	= a;
-	descrip	= "Enable authentication with the key auth-keynumber";
-	arg-type = number;
-	arg-name = "auth-keynumber";
-	doc	= <<- _EndOfDoc_
-	This option enables authentication using the key specified in this option's argument.
-	The argument of this option is the keyid, a number specified in the keyfile as this
-	key's identifier. See the keyfile option (-k) for more details.
+    name      = kod;
+    value     = K;
+    arg-type  = file;
+    arg-name  = "file-name";
+    arg-default = "/var/db/ntp-kod";
+    descrip   = "KoD history filename";
+    doc = <<-  _EndOfDoc_
+	Specifies the filename to be used for the  persistent history of KoD
+	responses received from servers.  The default is
+	/var/db/ntp-kod.
 	_EndOfDoc_;
 };
 
@@ -203,10 +161,51 @@ flag = {
 };
 
 flag = {
-    name      = unpriv-port;
-    value     = u;
-    descrip   = "Use an unprivileged port for communicating";
-    doc = <<-  _EndOfDoc_
+	name       = steplimit;
+	value      = M;
+	arg-type   = number;
+	arg-range  = "0->";
+	descrip    = "Adjustments less than steplimit msec will be slewed.";
+	doc = <<-  _EndOfDoc_
+	If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+	_EndOfDoc_;
+	};
+
+flag = {
+	name	= ntpversion;
+	value	= o;
+	descrip = "Send <int> as our NTP version";
+	arg-type = number;
+	arg-default = 4;
+	arg-range   = "0->7";
+	doc = <<-  _EndOfDoc_
+	When sending requests to a remote server, tell them we are running
+	NTP protocol version <ntpversion> .
+	_EndOfDoc_;
+};
+
+flag = {
+	name	= usereservedport;
+	value	= r;
+	descrip = "Use the NTP Reserved Port (port 123)";
+	doc = <<-  _EndOfDoc_
+	Use port 123, which is reserved for NTP, for our network communications.
+	_EndOfDoc_;
+};
+
+flag = {
+	name       = step;
+	value      = S;
+	descrip    = "OK to 'step' the time with settimeofday()";
+	doc = <<-  _EndOfDoc_
+	_EndOfDoc_;
+};
+
+flag = {
+	name       = slew;
+	value      = s;
+	descrip    = "OK to 'slew' the time with adjtime()";
+	doc = <<-  _EndOfDoc_
 	_EndOfDoc_;
 };
 

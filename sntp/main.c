@@ -14,6 +14,8 @@
 int n_pending_dns = 0;
 int n_pending_ntp = 0;
 int ai_fam_pref = AF_UNSPEC;
+int ntpver = 4;
+double steplimit = -1;
 int xmt_delay;
 SOCKET sock4 = -1;		/* Socket for IPv4 */
 SOCKET sock6 = -1;		/* Socket for IPv6 */
@@ -106,6 +108,12 @@ sntp_main (
 	DPRINTF(1, ("%s\n", Version));
 #endif
 
+	if (atoint(OPT_ARG(NTPVERSION), &l))
+		ntpver = l;
+
+	if (atoint(OPT_ARG(STEPLIMIT), &l))
+		steplimit = (double)l / 1000;
+
 	/* Initialize logging system */
 	init_logging();
 	if (HAVE_OPT(FILELOG))
@@ -121,7 +129,7 @@ sntp_main (
 	** - separate bcst and ucst timeouts
 	** - multiple --timeout values in the commandline
 	*/
-	if (ENABLED_OPT(TIMEOUT) && atoint(OPT_ARG(TIMEOUT), &l))
+	if (atoint(OPT_ARG(BCTIMEOUT), &l))
 		timeout_tv.tv_sec = l;
 	else 
 		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
@@ -230,7 +238,7 @@ open_sockets(
 		ZERO(name);
 		AF(&name) = AF_INET;
 		SET_ADDR4N(&name, INADDR_ANY);
-		SET_PORT(&name, (HAVE_OPT(UNPRIV_PORT) ? 0 : 123));
+		SET_PORT(&name, (HAVE_OPT(USERESERVEDPORT) ? 123 : 0));
 
 		if (-1 == bind(sock4, &name.sa,
 			       SOCKLEN(&name))) {
@@ -254,7 +262,7 @@ open_sockets(
 		ZERO(name);
 		AF(&name) = AF_INET6;
 		SET_ADDR6N(&name, in6addr_any);
-		SET_PORT(&name, 0);
+		SET_PORT(&name, (HAVE_OPT(USERESERVEDPORT) ? 123 : 0));
 
 		if (-1 == bind(sock6, &name.sa,
 			       SOCKLEN(&name))) {
@@ -613,7 +621,7 @@ generate_pkt (
 	x_pkt->stratum = STRATUM_TO_PKT(STRATUM_UNSPEC);
 	x_pkt->ppoll = 8;
 	/* FIXME! Modus broadcast + adr. check -> bdr. pkt */
-	set_li_vn_mode(x_pkt, LEAP_NOTINSYNC, 4, 3);
+	set_li_vn_mode(x_pkt, LEAP_NOTINSYNC, ntpver, 3);
 	if (pkt_key != NULL) {
 		int mac_size = 20; /* max room for MAC */
 
@@ -679,7 +687,12 @@ handle_pkt (
 		break;
 
 	    case KOD_RATE:
-		/* Hmm... probably we should sleep a bit here */
+		/*
+		** Hmm...
+		** We should probably call add_entry() with an
+		** expiration timestamp of several seconds in the future,
+		** and back-off even more if we get more RATE responses.
+		*/
 		break;
 
 	    case 1:
@@ -729,7 +742,7 @@ handle_pkt (
 		if (p_SNTP_PRETEND_TIME)
 			return 0;
 
-		if (ENABLED_OPT(SETTOD) || ENABLED_OPT(ADJTIME))
+		if (ENABLED_OPT(STEP) || ENABLED_OPT(SLEW))
 			return set_time(offset);
 
 		return 0;
@@ -815,8 +828,13 @@ set_li_vn_mode (
 	)
 {
 	if (leap > 3) {
-		msyslog(LOG_DEBUG, "set_li_vn_mode: leap > 3 using max. 3");
+		msyslog(LOG_DEBUG, "set_li_vn_mode: leap > 3, using max. 3");
 		leap = 3;
+	}
+
+	if (version < 0 || version > 7) {
+		msyslog(LOG_DEBUG, "set_li_vn_mode: version < 0 or > 7, using 4");
+		version = 4;
 	}
 
 	if (mode > 7) {
@@ -831,8 +849,8 @@ set_li_vn_mode (
 
 
 /*
-** set_time corrects the local clock by offset with either settimeofday() or
-** by default with adjtime()/adjusttimeofday().
+** set_time corrects the local clock by offset with either
+** settimeofday() oradjtime()/adjusttimeofday().
 */
 int
 set_time(
@@ -841,27 +859,34 @@ set_time(
 {
 	struct timeval tp;
 
-	if (ENABLED_OPT(SETTOD)) {
-		GETTIMEOFDAY(&tp, NULL);
+	/* check offset against steplimit */
+	if (fabs(offset) > steplimit || !ENABLED_OPT(SLEW)) {
+		if (ENABLED_OPT(STEP)) {
+			GETTIMEOFDAY(&tp, NULL);
 
-		tp.tv_sec += (long)offset;
-		tp.tv_usec += 1e6 * (offset - (long)offset);
+			tp.tv_sec += (long)offset;
+			tp.tv_usec += 1e6 * (offset - (long)offset);
+			NORMALIZE_TIMEVAL(tp);
+
+			if (SETTIMEOFDAY(&tp, NULL) < 0) {
+				msyslog(LOG_ERR, "Time not set: settimeofday(): %m");
+				return -1;
+			}
+			return 0;
+		}
+	}
+
+	if (ENABLED_OPT(SLEW)) {
+		tp.tv_sec = (long)offset;
+		tp.tv_usec = 1e6 * (offset - (long)offset);
 		NORMALIZE_TIMEVAL(tp);
 
-		if (SETTIMEOFDAY(&tp, NULL) < 0) {
-			msyslog(LOG_ERR, "Time not set: settimeofday(): %m");
+		if (ADJTIMEOFDAY(&tp, NULL) < 0) {
+			msyslog(LOG_ERR, "Time not set: adjtime(): %m");
 			return -1;
 		}
 		return 0;
 	}
 
-	tp.tv_sec = (long)offset;
-	tp.tv_usec = 1e6 * (offset - (long)offset);
-	NORMALIZE_TIMEVAL(tp);
-
-	if (ADJTIMEOFDAY(&tp, NULL) < 0) {
-		msyslog(LOG_ERR, "Time not set: adjtime(): %m");
-		return -1;
-	}
-	return 0;
+	return -1;
 }

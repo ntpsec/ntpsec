@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  January 15, 2011 at 10:39:47 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  January 16, 2011 at 10:45:30 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -54,18 +54,18 @@ typedef enum {
     INDEX_OPT_SET_DEBUG_LEVEL  =  1,
     INDEX_OPT_IPV4             =  2,
     INDEX_OPT_IPV6             =  3,
-    INDEX_OPT_KOD              =  4,
-    INDEX_OPT_SYSLOG           =  5,
-    INDEX_OPT_FILELOG          =  6,
-    INDEX_OPT_STEPLIMIT        =  7,
-    INDEX_OPT_SETTOD           =  8,
-    INDEX_OPT_ADJTIME          =  9,
-    INDEX_OPT_CONCURRENT       = 10,
-    INDEX_OPT_BROADCAST        = 11,
-    INDEX_OPT_TIMEOUT          = 12,
-    INDEX_OPT_AUTHENTICATION   = 13,
-    INDEX_OPT_KEYFILE          = 14,
-    INDEX_OPT_UNPRIV_PORT      = 15,
+    INDEX_OPT_AUTHENTICATION   =  4,
+    INDEX_OPT_BCTIMEOUT        =  5,
+    INDEX_OPT_BROADCAST        =  6,
+    INDEX_OPT_CONCURRENT       =  7,
+    INDEX_OPT_FILELOG          =  8,
+    INDEX_OPT_KOD              =  9,
+    INDEX_OPT_KEYFILE          = 10,
+    INDEX_OPT_STEPLIMIT        = 11,
+    INDEX_OPT_NTPVERSION       = 12,
+    INDEX_OPT_USERESERVEDPORT  = 13,
+    INDEX_OPT_STEP             = 14,
+    INDEX_OPT_SLEW             = 15,
     INDEX_OPT_VERSION          = 16,
     INDEX_OPT_HELP             = 17,
     INDEX_OPT_MORE_HELP        = 18,
@@ -127,71 +127,71 @@ typedef enum {
 #  warning undefining IPV6 due to option name conflict
 #  undef   IPV6
 # endif
-# ifdef    KOD
-#  warning undefining KOD due to option name conflict
-#  undef   KOD
+# ifdef    AUTHENTICATION
+#  warning undefining AUTHENTICATION due to option name conflict
+#  undef   AUTHENTICATION
 # endif
-# ifdef    SYSLOG
-#  warning undefining SYSLOG due to option name conflict
-#  undef   SYSLOG
-# endif
-# ifdef    FILELOG
-#  warning undefining FILELOG due to option name conflict
-#  undef   FILELOG
-# endif
-# ifdef    STEPLIMIT
-#  warning undefining STEPLIMIT due to option name conflict
-#  undef   STEPLIMIT
-# endif
-# ifdef    SETTOD
-#  warning undefining SETTOD due to option name conflict
-#  undef   SETTOD
-# endif
-# ifdef    ADJTIME
-#  warning undefining ADJTIME due to option name conflict
-#  undef   ADJTIME
-# endif
-# ifdef    CONCURRENT
-#  warning undefining CONCURRENT due to option name conflict
-#  undef   CONCURRENT
+# ifdef    BCTIMEOUT
+#  warning undefining BCTIMEOUT due to option name conflict
+#  undef   BCTIMEOUT
 # endif
 # ifdef    BROADCAST
 #  warning undefining BROADCAST due to option name conflict
 #  undef   BROADCAST
 # endif
-# ifdef    TIMEOUT
-#  warning undefining TIMEOUT due to option name conflict
-#  undef   TIMEOUT
+# ifdef    CONCURRENT
+#  warning undefining CONCURRENT due to option name conflict
+#  undef   CONCURRENT
 # endif
-# ifdef    AUTHENTICATION
-#  warning undefining AUTHENTICATION due to option name conflict
-#  undef   AUTHENTICATION
+# ifdef    FILELOG
+#  warning undefining FILELOG due to option name conflict
+#  undef   FILELOG
+# endif
+# ifdef    KOD
+#  warning undefining KOD due to option name conflict
+#  undef   KOD
 # endif
 # ifdef    KEYFILE
 #  warning undefining KEYFILE due to option name conflict
 #  undef   KEYFILE
 # endif
-# ifdef    UNPRIV_PORT
-#  warning undefining UNPRIV_PORT due to option name conflict
-#  undef   UNPRIV_PORT
+# ifdef    STEPLIMIT
+#  warning undefining STEPLIMIT due to option name conflict
+#  undef   STEPLIMIT
+# endif
+# ifdef    NTPVERSION
+#  warning undefining NTPVERSION due to option name conflict
+#  undef   NTPVERSION
+# endif
+# ifdef    USERESERVEDPORT
+#  warning undefining USERESERVEDPORT due to option name conflict
+#  undef   USERESERVEDPORT
+# endif
+# ifdef    STEP
+#  warning undefining STEP due to option name conflict
+#  undef   STEP
+# endif
+# ifdef    SLEW
+#  warning undefining SLEW due to option name conflict
+#  undef   SLEW
 # endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
 # undef IPV4
 # undef IPV6
-# undef KOD
-# undef SYSLOG
-# undef FILELOG
-# undef STEPLIMIT
-# undef SETTOD
-# undef ADJTIME
-# undef CONCURRENT
-# undef BROADCAST
-# undef TIMEOUT
 # undef AUTHENTICATION
+# undef BCTIMEOUT
+# undef BROADCAST
+# undef CONCURRENT
+# undef FILELOG
+# undef KOD
 # undef KEYFILE
-# undef UNPRIV_PORT
+# undef STEPLIMIT
+# undef NTPVERSION
+# undef USERESERVEDPORT
+# undef STEP
+# undef SLEW
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -202,24 +202,26 @@ typedef enum {
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
-#define VALUE_OPT_KOD            'K'
-#define VALUE_OPT_SYSLOG         'p'
-#define VALUE_OPT_FILELOG        'l'
-#define VALUE_OPT_STEPLIMIT      'S'
-
-#define OPT_VALUE_STEPLIMIT      (DESC(STEPLIMIT).optArg.argInt)
-#define VALUE_OPT_SETTOD         's'
-#define VALUE_OPT_ADJTIME        'j'
-#define VALUE_OPT_CONCURRENT     'c'
-#define VALUE_OPT_BROADCAST      'b'
-#define VALUE_OPT_TIMEOUT        't'
-
-#define OPT_VALUE_TIMEOUT        (DESC(TIMEOUT).optArg.argInt)
 #define VALUE_OPT_AUTHENTICATION 'a'
 
 #define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
+#define VALUE_OPT_BCTIMEOUT      'B'
+
+#define OPT_VALUE_BCTIMEOUT      (DESC(BCTIMEOUT).optArg.argInt)
+#define VALUE_OPT_BROADCAST      'b'
+#define VALUE_OPT_CONCURRENT     'c'
+#define VALUE_OPT_FILELOG        'l'
+#define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_KEYFILE        'k'
-#define VALUE_OPT_UNPRIV_PORT    'u'
+#define VALUE_OPT_STEPLIMIT      'M'
+
+#define OPT_VALUE_STEPLIMIT      (DESC(STEPLIMIT).optArg.argInt)
+#define VALUE_OPT_NTPVERSION     'o'
+
+#define OPT_VALUE_NTPVERSION     (DESC(NTPVERSION).optArg.argInt)
+#define VALUE_OPT_USERESERVEDPORT 'r'
+#define VALUE_OPT_STEP           'S'
+#define VALUE_OPT_SLEW           's'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
