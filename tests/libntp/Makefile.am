@@ -8,7 +8,7 @@ LDADD =					\
 	@GTEST_LDFLAGS@			\
 	@GTEST_LIBS@			\
 	$(NULL)
-	
+
 AM_CFLAGS   = @CFLAGS_NTP@
 AM_CXXFLAGS = @GTEST_CXXFLAGS@
 AM_CPPFLAGS = @GTEST_CPPFLAGS@ @CPPFLAGS_NTP@
@@ -45,6 +45,7 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		ssl_init.cpp		\
 		statestr.cpp		\
 		strtolfp.cpp		\
+		tspecops.cpp		\
 		tsftomsu.cpp		\
 		tstotv.cpp		\
 		tvtots.cpp		\
