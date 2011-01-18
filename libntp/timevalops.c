@@ -13,6 +13,14 @@
 
 #include "timevalops.h"
 
+/* formatting to string needs at max 29 bytes (even with 64 bit time_t),
+ * so we check LIB_BUFLENGTH is big enough for our pupose.
+ */
+#if LIB_BUFLENGTH < 29
+#error LIB_BUFLENGTH not big enough
+#endif
+
+/* make sure we have the right definition for MICROSECONDS */
 #undef MICROSECONDS
 #define MICROSECONDS 1000000
 
@@ -28,7 +36,7 @@
 
 #define COPYNORM(dst,src) \
   do {	  *(dst) = *(src);		\
-	  if (timeval_isdenormal((dst)))	\
+	  if (timeval_isdenormal((dst)))\
 		  timeval_norm((dst));	\
   } while (0)
 	
@@ -40,19 +48,19 @@ timeval_norm(
 {
 	/* If the fraction becomes excessive denormal, we use division
 	 * to do first partial normalisation. The normalisation loops
-	 * following will do the remaining cleanup.
-	 */
-	if (abs(x->tv_usec) >= 4*MICROSECONDS) {
-		long z;
+	 * following will do the remaining cleanup.  Also note that
+	 * 'abs' returns int, which might not be good here. */
+	long z;
+	z = x->tv_usec;
+	if ((z < 0 ? -z : z) > 3*MICROSECONDS) {
 		z = x->tv_usec / MICROSECONDS;
 		x->tv_usec -= z * MICROSECONDS;
 		x->tv_sec  += z;
 	}
-
-	/* since 10**9 is close to 2**32, we don't divide but do a
-	 * normalisation in a loop; this takes 3 steps max, and should
-	 * outperform a division even if the mul-by-inverse trick is
-	 * employed. */
+	/* Do any remaining normalisation steps in loops. This takes 3
+	 * steps max, and should outperform a division even if the
+	 * mul-by-inverse trick is employed. (It also does the floor
+	 * division adjustment if the above division was executed.) */
 	if (x->tv_usec < 0)
 		do {
 			x->tv_usec += MICROSECONDS;
@@ -201,12 +209,19 @@ timeval_cmp(
 	const struct timeval *b
 	)
 {
+	int	       r;
 	struct timeval A;
 	struct timeval B;
 
 	COPYNORM(&A, a);
 	COPYNORM(&B, b);
-	return timeval_cmp_fast(&A, &B);
+	r = (A.tv_sec > B.tv_sec)
+	  - (A.tv_sec < B.tv_sec);
+	if (r == 0)
+		r = (A.tv_usec > B.tv_usec)
+		  - (A.tv_usec < B.tv_usec);
+	
+	return r;
 }
 
 /* test a
@@ -248,20 +263,45 @@ timeval_tostr(
 	const struct timeval *x
 	)
 {
+	/* see timespecops.c for rationale -- this needs refactoring */
 	struct timeval v;
 	int	       s;
+	int	       digits;
+	int	       dig;
 	char	      *cp;
+	time_t	       itmp;
+	long	       ftmp;
+
+	s = timeval_abs(&v, x);
 
 	LIB_GETBUF(cp);
-	s = timeval_abs(&v, x);
-	if (v.tv_sec >= 0)
-		snprintf(cp, LIB_BUFLENGTH, "%s%ld.%06ld",
-			 "-"+(s==0), (long)v.tv_sec, (long)v.tv_usec);
-	else if (v.tv_usec == 0)
-		snprintf(cp, LIB_BUFLENGTH, "%ld.000000",
-			 (long)v.tv_sec);
-	else
-		cp = "#OVERFLOW#";
+	cp += LIB_BUFLENGTH - 1;
+	*cp = '\0';
+
+	/* convert fraction to decimal digits */
+	for (digits = 6; digits;  digits--) {
+		ftmp = v.tv_usec / 10;		
+		dig  = (int)(v.tv_usec - ftmp * 10);
+		v.tv_usec = ftmp;
+		*--cp = '0' + dig;
+	}
+	*--cp = '.';
+
+	/* convert first digit */
+	itmp = v.tv_sec / 10;		
+	dig  = (int)(v.tv_sec - itmp * 10);
+	v.tv_sec = (itmp < 0) ? -itmp : itmp;
+	*--cp = '0' + ((dig < 0) ? -dig : dig);
+	/* -*- convert remaining digits */
+	while (v.tv_sec != 0) {
+		itmp = v.tv_sec / 10;		
+		dig  = (int)(v.tv_sec - itmp * 10);
+		v.tv_sec = itmp;
+		*--cp = '0' + dig;
+	}
+	/* add minus sign for negative integer part */
+	if (s)
+		*--cp = '-';
 
 	return cp;
 }
@@ -290,7 +330,6 @@ timeval_reltolfp(
 	COPYNORM(&v, x);
 	MYTVUTOF(v.tv_usec, y->l_uf);
 	y->l_i = (int32)v.tv_sec;
-
 }
 
 
@@ -300,9 +339,18 @@ timeval_relfromlfp(
 	const l_fp     *x)
 {
 	struct timeval out;
-
+	l_fp	       tmp;
+	int	       neg;
+	
+	tmp = *x;
+	if ((neg = L_ISNEG(&tmp)) != 0)
+		L_NEG(&tmp);	
 	MYFTOTVU(x->l_uf, out.tv_usec);
-	out.tv_sec = x->l_i;
+	out.tv_sec = x->l_ui;
+	if (neg) {
+		out.tv_sec  = - out.tv_sec;
+		out.tv_usec = - out.tv_usec;
+	}
 	COPYNORM(y, &out);
 }
 
@@ -332,12 +380,12 @@ timeval_absfromlfp(
 	MYFTOTVU(x->l_uf, out.tv_usec);
 
 	/* copying a vint64 to a time_t needs some care... */
-#   ifdef HAVE_INT64
-	out.tv_sec = (time_t)sec.q_s;
-#   elif SIZEOF_TIME_T > 4
-	out.tv_sec = ((time_t)sec.d_s.hi << 32) + sec.d_s.lo;
-#   else
+#   if SIZEOF_TIME_T == 4
 	out.tv_sec = (time_t)sec.d_s.lo;
+#   elif defined(HAVE_INT64)
+	out.tv_sec = (time_t)sec.q_s;
+#   else
+	out.tv_sec = ((time_t)sec.d_s.hi << 32) + sec.d_s.lo;
 #   endif
 	
 	COPYNORM(y, &out);

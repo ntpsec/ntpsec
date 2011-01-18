@@ -324,4 +324,26 @@ TEST_F(timespecTest, ToLFPabs) {
 	}
 }
 
+
+TEST_F(timespecTest, ToString) {
+	static const struct {
+		time_t	   sec;
+		long	   nsec;
+		const char *repr;
+	} data [] = {
+		{ 0, 0,	 "0.000000000" },
+		{ 2, 0,	 "2.000000000" },
+		{-2, 0, "-2.000000000" },
+		{ 0, 1,	 "0.000000001" },
+		{ 1,-1,	 "0.999999999" },
+		{-1, 1, "-0.999999999" }
+	};
+	for (int i = 0; i < sizeof(data)/sizeof(*data); ++i) {
+		TSPEC a(data[i].sec, data[i].nsec);
+		std::string E(data[i].repr);
+		std::string r(timespec_tostr(a));
+		ASSERT_EQ(E, r);
+	}
+}
+
 // -*- EOF -*-

@@ -31,6 +31,9 @@
  * The exception to this are functions fix a '_fast' suffix, which do no
  * normalisation on input data and therefore expect the input data to be
  * normalised.
+ *
+ * Input and output operands may overlap; all input is consumed before
+ * the output is written to.
  */
 #ifndef TIMPESPECOPS_H
 #define TIMPESPECOPS_H
