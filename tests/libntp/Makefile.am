@@ -46,6 +46,7 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		statestr.cpp		\
 		strtolfp.cpp		\
 		tspecops.cpp		\
+		tvalops.cpp		\
 		tsftomsu.cpp		\
 		tstotv.cpp		\
 		tvtots.cpp		\
