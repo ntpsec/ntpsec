@@ -1,4 +1,7 @@
 * Correct msyslog.c build break on Solaris 2.9 from #ifdef/#if mixup.
+(4.2.7p118) 2011/01/15 Released by Harlan Stenn <stenn@ntp.org>
+* Simplify the built-sources stuff in sntp/ .
+* Fix check for -lipv6 on HP-UX 11.
 (4.2.7p117) 2011/01/13 Released by Harlan Stenn <stenn@ntp.org>
 * Add configure --without-sntp option to disable building sntp and
   sntp/tests.  withsntp=no in the environment changes the default.
