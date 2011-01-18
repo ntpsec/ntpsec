@@ -1,3 +1,4 @@
+(4.2.7p119) 2011/01/18 Released by Harlan Stenn <stenn@ntp.org>
 * added timespecops.{c,h} and tievalops.{c.h} to libntp and include
   added tspecops.cpp to tests/libntp
 * Correct msyslog.c build break on Solaris 2.9 from #ifdef/#if mixup.
