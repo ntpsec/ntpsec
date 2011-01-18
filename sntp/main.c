@@ -103,16 +103,12 @@ sntp_main (
 	argc -= optct;
 	argv += optct;
 
-#ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 	DPRINTF(1, ("%s\n", Version));
-#endif
 
-	if (atoint(OPT_ARG(NTPVERSION), &l))
-		ntpver = l;
+	ntpver = OPT_VALUE_NTPVERSION;
 
-	if (atoint(OPT_ARG(STEPLIMIT), &l))
-		steplimit = (double)l / 1000;
+	steplimit = (double) ( OPT_VALUE_STEPLIMIT ) / 1000;
 
 	/* Initialize logging system */
 	init_logging();
@@ -129,10 +125,7 @@ sntp_main (
 	** - separate bcst and ucst timeouts
 	** - multiple --timeout values in the commandline
 	*/
-	if (atoint(OPT_ARG(BCTIMEOUT), &l))
-		timeout_tv.tv_sec = l;
-	else 
-		timeout_tv.tv_sec = 68; /* ntpd broadcasts every 64s */
+	timeout_tv.tv_sec = OPT_VALUE_BCTIMEOUT;
 	timeout_tv.tv_usec = 0;
 
 	/* IPv6 available? */
@@ -182,7 +175,7 @@ sntp_main (
 	open_sockets();
 
 	if (HAVE_OPT(BROADCAST)) {
-		int		cn = STACKCT_OPT( BROADCAST );
+		int		cn = STACKCT_OPT(  BROADCAST );
 		const char **	cp = STACKLST_OPT( BROADCAST );
 
 		while (cn-- > 0) {
@@ -779,7 +772,6 @@ offset_calculation (
 
 	*root_dispersion = FPTOD(p_rdsp);
 
-#ifdef DEBUG
 	if (debug > 2) {
 		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
 		printf("sntp rootdisp: %f\n", *root_dispersion);
@@ -799,7 +791,6 @@ offset_calculation (
 		printf("sntp offset_calculation: rpkt->xmt:\n");
 		l_fp_output(&(rpkt->xmt), stdout);
 	}
-#endif
 
 	/* Compute offset etc. */
 	tmp = p_rec;
