@@ -11,9 +11,29 @@ class timespecTest : public libntptest {
 protected:
 	static const long NANOSECONDS;
 	// that's it...
+	struct lfpfracdata {
+		long	nsec;
+		u_int32 frac;
+	};
+	static const lfpfracdata fdata[];
 };
 const long timespecTest::NANOSECONDS = 1000000000;
-
+const timespecTest::lfpfracdata timespecTest::fdata [] = {
+		{	  0, 0x00000000 }, {   2218896, 0x00916ae6 },
+		{  16408100, 0x0433523d }, { 125000000, 0x20000000 },
+		{ 250000000, 0x40000000 }, { 287455871, 0x4996b53d },
+		{ 375000000, 0x60000000 }, { 500000000, 0x80000000 },
+		{ 518978897, 0x84dbcd0e }, { 563730222, 0x90509fb3 },
+		{ 563788007, 0x9054692c }, { 583289882, 0x95527c57 },
+		{ 607074509, 0x9b693c2a }, { 625000000, 0xa0000000 },
+		{ 645184059, 0xa52ac851 }, { 676497788, 0xad2ef583 },
+		{ 678910895, 0xadcd1abb }, { 679569625, 0xadf84663 },
+		{ 690926741, 0xb0e0932d }, { 705656483, 0xb4a5e73d },
+		{ 723553854, 0xb93ad34c }, { 750000000, 0xc0000000 },
+		{ 763550253, 0xc3780785 }, { 775284917, 0xc6791284 },
+		{ 826190764, 0xd3813ce8 }, { 875000000, 0xe0000000 },
+		{ 956805507, 0xf4f134a9 }, { 982570733, 0xfb89c16c }
+};
 
 struct TSPEC{
 	struct timespec V;
@@ -36,7 +56,7 @@ struct TSPEC{
 		{ V = rhs; return *this; }
 };
 
-std::ostream&
+static std::ostream&
 operator << (std::ostream& os, const TSPEC &val)
 {
 	os << timespec_tostr(&val.V);
@@ -266,29 +286,20 @@ TEST_F(timespecTest, AbsWithFrac) {
 }
 
 // conversion to l_fp
-TEST_F(timespecTest, ToLFPrel) {
-	static const struct {
-		long	nsec;
-		u_int32 frac;
-	} data [] = {
-		{	  0, 0x00000000 }, {   2218896, 0x00916ae6 },
-		{  16408100, 0x0433523d }, { 125000000, 0x20000000 },
-		{ 250000000, 0x40000000 }, { 287455871, 0x4996b53d },
-		{ 375000000, 0x60000000 }, { 500000000, 0x80000000 },
-		{ 518978897, 0x84dbcd0e }, { 563730222, 0x90509fb3 },
-		{ 563788007, 0x9054692c }, { 583289882, 0x95527c57 },
-		{ 607074509, 0x9b693c2a }, { 625000000, 0xa0000000 },
-		{ 645184059, 0xa52ac851 }, { 676497788, 0xad2ef583 },
-		{ 678910895, 0xadcd1abb }, { 679569625, 0xadf84663 },
-		{ 690926741, 0xb0e0932d }, { 705656483, 0xb4a5e73d },
-		{ 723553854, 0xb93ad34c }, { 750000000, 0xc0000000 },
-		{ 763550253, 0xc3780785 }, { 775284917, 0xc6791284 },
-		{ 826190764, 0xd3813ce8 }, { 875000000, 0xe0000000 },
-		{ 956805507, 0xf4f134a9 }, { 982570733, 0xfb89c16c }
-	};
-	for (int i = 0; i < sizeof(data)/sizeof(*data); ++i) {
-		TSPEC a(1, data[i].nsec);
-		LFP   E(1, data[i].frac);
+TEST_F(timespecTest, ToLFPrelPos) {
+	for (int i = 0; i < sizeof(fdata)/sizeof(*fdata); ++i) {
+		TSPEC a(1, fdata[i].nsec);
+		LFP   E(1, fdata[i].frac);
+		LFP   r;
+		timespec_reltolfp(r, a);
+		ASSERT_EQ(E, r);
+	}
+}
+
+TEST_F(timespecTest, ToLFPrelNeg) {
+	for (int i = 0; i < sizeof(fdata)/sizeof(*fdata); ++i) {
+		TSPEC a(-1, fdata[i].nsec);
+		LFP   E(~0, fdata[i].frac);
 		LFP   r;
 		timespec_reltolfp(r, a);
 		ASSERT_EQ(E, r);
@@ -296,30 +307,33 @@ TEST_F(timespecTest, ToLFPrel) {
 }
 
 TEST_F(timespecTest, ToLFPabs) {
-	static const struct {
-		long	nsec;
-		u_int32 frac;
-	} data [] = {
-		{	  0, 0x00000000 }, {   2218896, 0x00916ae6 },
-		{  16408100, 0x0433523d }, { 125000000, 0x20000000 },
-		{ 250000000, 0x40000000 }, { 287455871, 0x4996b53d },
-		{ 375000000, 0x60000000 }, { 500000000, 0x80000000 },
-		{ 518978897, 0x84dbcd0e }, { 563730222, 0x90509fb3 },
-		{ 563788007, 0x9054692c }, { 583289882, 0x95527c57 },
-		{ 607074509, 0x9b693c2a }, { 625000000, 0xa0000000 },
-		{ 645184059, 0xa52ac851 }, { 676497788, 0xad2ef583 },
-		{ 678910895, 0xadcd1abb }, { 679569625, 0xadf84663 },
-		{ 690926741, 0xb0e0932d }, { 705656483, 0xb4a5e73d },
-		{ 723553854, 0xb93ad34c }, { 750000000, 0xc0000000 },
-		{ 763550253, 0xc3780785 }, { 775284917, 0xc6791284 },
-		{ 826190764, 0xd3813ce8 }, { 875000000, 0xe0000000 },
-		{ 956805507, 0xf4f134a9 }, { 982570733, 0xfb89c16c }
-	};
-	for (int i = 0; i < sizeof(data)/sizeof(*data); ++i) {
-		TSPEC a(1	  , data[i].nsec);
-		LFP   E(1+JAN_1970, data[i].frac);
+	for (int i = 0; i < sizeof(fdata)/sizeof(*fdata); ++i) {
+		TSPEC a(1	  , fdata[i].nsec);
+		LFP   E(1+JAN_1970, fdata[i].frac);
 		LFP   r;
 		timespec_abstolfp(r, a);
+		ASSERT_EQ(E, r);
+	}
+}
+
+
+TEST_F(timespecTest, ToString) {
+	static const struct {
+		time_t	   sec;
+		long	   nsec;
+		const char *repr;
+	} data [] = {
+		{ 0, 0,	 "0.000000000" },
+		{ 2, 0,	 "2.000000000" },
+		{-2, 0, "-2.000000000" },
+		{ 0, 1,	 "0.000000001" },
+		{ 1,-1,	 "0.999999999" },
+		{-1, 1, "-0.999999999" }
+	};
+	for (int i = 0; i < sizeof(data)/sizeof(*data); ++i) {
+		TSPEC a(data[i].sec, data[i].nsec);
+		std::string E(data[i].repr);
+		std::string r(timespec_tostr(a));
 		ASSERT_EQ(E, r);
 	}
 }
