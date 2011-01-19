@@ -130,11 +130,14 @@ static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
 static	int	peer_unfit	(struct peer *);
+#ifdef AUTOKEY
+static	int	group_test	(char *, char *);
+#endif /* AUTOKEY */
 #ifdef WORKER
 void	pool_name_resolved	(int, int, void *, const char *,
 				 const char *, const struct addrinfo *,
 				 const struct addrinfo *);
-#endif
+#endif /* WORKER */
 
 
 /*
@@ -354,6 +357,8 @@ receive(
 	l_fp	p_rec;			/* receive timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
 #ifdef AUTOKEY
+	char	hostname[NTP_MAXSTRLEN + 1];
+	char	*groupname = NULL;;
 	struct autokey *ap;		/* autokey structure pointer */
 	int	rval;			/* cookie snatcher */
 	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
@@ -472,6 +477,9 @@ receive(
 	has_mac = rbufp->recv_length - authlen;
 	while (has_mac != 0) {
 		u_int32	len;
+#ifdef AUTOKEY
+		struct exten *ep;
+#endif /*AUTOKEY */
 
 		if (has_mac % 4 != 0 || has_mac < MIN_MAC_LEN) {
 			sys_badlength++;
@@ -483,12 +491,30 @@ receive(
 
 		} else {
 			opcode = ntohl(((u_int32 *)pkt)[authlen / 4]);
- 			len = opcode & 0xffff;
+			len = opcode & 0xffff;
 			if (len % 4 != 0 || len < 4 || (int)len +
 			    authlen > rbufp->recv_length) {
 				sys_badlength++;
 				return;		/* bad length */
 			}
+#ifdef AUTOKEY
+
+			/*
+			 * Extract calling group name for later.
+			 */
+			if ((opcode & 0x3fff0000) == CRYPTO_ASSOC &&
+			    sys_groupname != NULL) {
+				ep = (struct exten *)&((u_int32 *)pkt)[authlen / 4];
+				memmove(hostname, &ep->pkt, ntohl(ep->vallen));
+				hostname[ntohl(ep->vallen)] = '\0';
+				groupname = strchr(hostname, '@');
+				if (groupname == NULL)
+					return;
+
+				else
+					groupname++;
+			}
+#endif /* AUTOKEY */
 			authlen += len;
 			has_mac -= len;
 		}
@@ -776,6 +802,16 @@ receive(
 			return;			/* not enabled */
 		}
 
+#ifdef AUTOKEY
+		/*
+		 * Do not respond if not the same groupl;
+		 */
+		if (group_test(groupname, NULL)) {
+			sys_declined++;
+			return;
+		}
+#endif /* AUTOKEY */
+
 		/*
 		 * Do not respond if we are not synchronized or our
 		 * stratum is greater than the manycaster or the
@@ -818,6 +854,16 @@ receive(
 	 * the guy is already here, don't fire up a duplicate.
 	 */
 	case AM_MANYCAST:
+
+#ifdef AUTOKEY
+		/*
+		 * Do not respond if not the same groupl;
+		 */
+		if (group_test(groupname, NULL)) {
+			sys_declined++;
+			return;
+		}
+#endif /* AUTOKEY */
 		if ((peer2 = findmanycastpeer(rbufp)) == NULL) {
 			sys_restricted++;
 			return;			/* not enabled */
@@ -869,6 +915,16 @@ receive(
 	 * kiss any frogs here.
 	 */
 	case AM_NEWBCL:
+
+#ifdef AUTOKEY
+		/*
+		 * Do not respond if not the same groupl;
+		 */
+		if (group_test(groupname, sys_ident)) {
+			sys_declined++;
+			return;
+		}
+#endif /* AUTOKEY */
 		if (sys_bclient == 0) {
 			sys_restricted++;
 			return;			/* not enabled */
@@ -943,8 +999,8 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_CLIENT, hisversion, pkt->ppoll,
-		    pkt->ppoll, FLAG_IBURST, MDF_BCLNT, 0, skeyid, sys_ident)) ==
-		    NULL) {
+		    pkt->ppoll, FLAG_IBURST, MDF_BCLNT, 0, skeyid,
+		    sys_ident)) == NULL) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
@@ -961,6 +1017,16 @@ receive(
 	 * mobilize a passive association. If not, kiss the frog.
 	 */
 	case AM_NEWPASS:
+
+#ifdef AUTOKEY
+		/*
+		 * Do not respond if not the same groupl;
+		 */
+		if (group_test(groupname, sys_ident)) {
+			sys_declined++;
+			return;
+		}
+#endif /* AUTOKEY */
 		if (!AUTH(sys_authenticate | (restrict_mask &
 		    (RES_NOPEER | RES_DONTTRUST)), is_authentic)) {
 
@@ -1004,7 +1070,8 @@ receive(
 		 */
 		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
 		    rbufp->dstadr, MODE_PASSIVE, hisversion, pkt->ppoll,
-		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid, sys_ident)) == NULL) {
+		    NTP_MAXDPOLL, 0, MDF_UCAST, 0, skeyid,
+		    sys_ident)) == NULL) {
 			sys_declined++;
 			return;			/* ignore duplicate */
 		}
@@ -1015,6 +1082,16 @@ receive(
 	 * Process regular packet. Nothing special.
 	 */
 	case AM_PROCPKT:
+
+#ifdef AUTOKEY
+		/*
+		 * Do not respond if not the same groupl;
+		 */
+		if (group_test(groupname, peer->ident)) {
+			sys_declined++;
+			return;
+		}
+#endif /* AUTOKEY */
 		break;
 
 	/*
@@ -3022,7 +3099,7 @@ peer_xmit(
 			 */
 			if (!peer->crypto)
 				exten = crypto_args(peer, CRYPTO_ASSOC,
-				    peer->associd, sys_hostname);
+				    peer->associd, hostval.ptr);
 			else if (!(peer->crypto & CRYPTO_FLAG_CERT))
 				exten = crypto_args(peer, CRYPTO_CERT,
 				    peer->associd, peer->issuer);
@@ -3065,7 +3142,7 @@ peer_xmit(
 
 			else if (!(peer->crypto & CRYPTO_FLAG_SIGN))
 				exten = crypto_args(peer, CRYPTO_SIGN,
-				    peer->associd, sys_hostname);
+				    peer->associd, hostval.ptr);
 			else if (!(peer->crypto & CRYPTO_FLAG_LEAP))
 				exten = crypto_args(peer, CRYPTO_LEAP,
 				    peer->associd, NULL);
@@ -3089,7 +3166,7 @@ peer_xmit(
 			 */
 			if (!peer->crypto)
 				exten = crypto_args(peer, CRYPTO_ASSOC,
-				    peer->associd, sys_hostname);
+				    peer->associd, hostval.ptr);
 			else if (!(peer->crypto & CRYPTO_FLAG_CERT))
 				exten = crypto_args(peer, CRYPTO_CERT,
 				    peer->associd, peer->issuer);
@@ -3120,7 +3197,7 @@ peer_xmit(
 
 			else if (!(peer->crypto & CRYPTO_FLAG_SIGN))
 				exten = crypto_args(peer, CRYPTO_SIGN,
-				    peer->associd, sys_hostname);
+				    peer->associd, hostval.ptr);
 			else if (!(peer->crypto & CRYPTO_FLAG_LEAP))
 				exten = crypto_args(peer, CRYPTO_LEAP,
 				    peer->associd, NULL);
@@ -3481,6 +3558,39 @@ pool_xmit(
 #endif	/* WORKER */
 }
 
+
+#ifdef AUTOKEY
+	/*
+	 * group_test - test if this is the same group
+	 *
+	 * host		assoc		return		action
+	 * none		none		0		mobilize *
+	 * none		group		0		mobilize *
+	 * group	none		0		mobilize *
+	 * group	group		1		mobilize
+	 * group	different	2		ignore
+	 * * ignore if notrust
+	 */
+int group_test(
+	char	*group,
+	char	*ident
+	)
+{
+	if (group == NULL)
+		return (0);
+
+	if (strcmp(group, sys_groupname) == 0)
+		return (0);
+
+	if (ident == NULL)
+		return (1);
+
+	if (strcmp(group, ident) == 0)
+		return (0);
+
+	return (1);
+}
+#endif /* AUTOKEY */
 
 #ifdef WORKER
 void
