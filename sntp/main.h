@@ -4,7 +4,6 @@
 #include <l_stdlib.h>
 #include <ntp_fp.h>
 #include <ntp.h>
-#define DEBUG
 #include <ntp_debug.h>
 #include <ntp_stdlib.h>
 #include <ntp_unixtime.h>

@@ -14,7 +14,6 @@ No changes should be needed for any system that is even remotely like Unix. */
 #include <time.h>
 
 
-
 #define MAX_SOCKETS        10          /* Maximum number of addresses */
 
 #ifndef LOCKNAME
@@ -23,9 +22,6 @@ No changes should be needed for any system that is even remotely like Unix. */
 #ifndef SAVENAME
 #    define SAVENAME "/etc/sntp.state" /* Stores the recovery state */
 #endif
-
-//#define DEBUG
-
 
 
 /* Defined in main.c */
