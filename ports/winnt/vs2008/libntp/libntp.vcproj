@@ -540,6 +540,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\timespecops.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\libntp\timevalops.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\libntp\tsftomsu.c"
 				>
 			</File>
@@ -849,11 +857,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\sys\time.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\include\timespecops.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\timevalops.h"
 				>
 			</File>
 			<File

@@ -19,10 +19,22 @@
 #include "ntp_worker.h"
 
 #define CHILD_EXIT_REQ	((blocking_pipe_header *)(intptr_t)-1)
+#define WORKITEMS_ALLOC_INC	16
+#define RESPONSES_ALLOC_INC	4
 
-blocking_pipe_header *blocking_workitems[128];
-blocking_pipe_header *blocking_responses[8];
-HANDLE blocking_child_thread;
+/*
+ * blocking workitems and blocking_responses are dynamically-sized
+ * one-dimensional arrays of pointers to blocking worker requests and
+ * responses.
+ */
+blocking_pipe_header **blocking_workitems;
+size_t blocking_workitems_alloc;
+size_t next_workitem;
+blocking_pipe_header **blocking_responses;
+size_t blocking_responses_alloc;
+size_t next_response;
+HANDLE blocking_child_thread;	/* non-NULL when active */
+/* event handles (semaphore references) */
 HANDLE child_is_blocking;
 HANDLE wake_blocking_child;
 HANDLE blocking_response_ready;
@@ -30,6 +42,8 @@ HANDLE wake_scheduled_sleep;
 
 static void	start_blocking_thread(void);
 unsigned WINAPI	blocking_thread(void *);
+static void	ensure_workitems_empty_slot(void);
+static void	ensure_workresp_empty_slot(void);
 static int	queue_req_pointer(blocking_pipe_header *);
 
 
@@ -49,9 +63,9 @@ worker_sleep(
 {
 	DWORD rc;
 
-	NTP_REQUIRE(seconds * 1000 < MAXDWORD);
+	DEBUG_REQUIRE(seconds * 1000 < MAXDWORD);
 	rc = WaitForSingleObject(wake_scheduled_sleep, (DWORD)seconds * 1000);
-	NTP_INSIST(WAIT_FAILED != rc);
+	DEBUG_INSIST(WAIT_FAILED != rc);
 	return (WAIT_TIMEOUT == rc)
 		   ? 0
 		   : -1;
@@ -65,6 +79,54 @@ interrupt_worker_sleep(void)
 }
 
 
+static void
+ensure_workitems_empty_slot(void)
+{
+	const size_t each = sizeof(blocking_workitems[0]);
+	size_t new_alloc;
+	size_t old_octets;
+	size_t new_octets;
+
+	if (blocking_workitems != NULL &&
+	    NULL == blocking_workitems[next_workitem])
+		return;
+
+	new_alloc = blocking_workitems_alloc + WORKITEMS_ALLOC_INC;
+	old_octets = blocking_workitems_alloc * each;
+	new_octets = new_alloc * each;
+	blocking_workitems = erealloc_zero(blocking_workitems,
+					   new_octets,
+					   old_octets);
+	if (0 == next_workitem)
+		next_workitem = blocking_workitems_alloc;
+	blocking_workitems_alloc = new_alloc;
+}
+
+
+static void
+ensure_workresp_empty_slot(void)
+{
+	const size_t each = sizeof(blocking_responses[0]);
+	size_t new_alloc;
+	size_t old_octets;
+	size_t new_octets;
+
+	if (blocking_responses != NULL &&
+	    NULL == blocking_responses[next_response])
+		return;
+
+	new_alloc = blocking_responses_alloc + RESPONSES_ALLOC_INC;
+	old_octets = blocking_responses_alloc * each;
+	new_octets = new_alloc * each;
+	blocking_responses = erealloc_zero(blocking_responses,
+					   new_octets,
+					   old_octets);
+	if (0 == next_response)
+		next_response = blocking_responses_alloc;
+	blocking_responses_alloc = new_alloc;
+}
+
+
 /*
  * queue_req_pointer() - append a work item or idle exit request to
  *			 blocking_workitems[].
@@ -74,17 +136,8 @@ queue_req_pointer(
 	blocking_pipe_header *	hdr
 	)
 {
-	static int next_workitem;
-
-	if (NULL != blocking_workitems[next_workitem]) {
-		DPRINTF(1, ("blocking_workitems full, max %d items\n",
-			    COUNTOF(blocking_workitems)));
-		return -1;
-	}
-
-	blocking_workitems[next_workitem++] = hdr;
-	if (COUNTOF(blocking_workitems) == next_workitem)
-		next_workitem = 0;
+	blocking_workitems[next_workitem] = hdr;
+	next_workitem = (1 + next_workitem) % blocking_workitems_alloc;
 
 	/*
 	 * We only want to signal the wakeup event if the child is
@@ -106,12 +159,15 @@ send_blocking_req_internal(
 {
 	blocking_pipe_header *	threadcopy;
 
-	NTP_REQUIRE(hdr != NULL);
-	NTP_REQUIRE(data != NULL);
-	NTP_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
+	DEBUG_REQUIRE(hdr != NULL);
+	DEBUG_REQUIRE(data != NULL);
+	DEBUG_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
 
-	if (NULL == blocking_child_thread)
+	ensure_workitems_empty_slot();
+	if (NULL == blocking_child_thread) {
+		ensure_workresp_empty_slot();
 		start_blocking_thread();
+	}
 
 	threadcopy = emalloc(hdr->octets);
 	memcpy(threadcopy, hdr, sizeof(*hdr));
@@ -127,16 +183,16 @@ receive_blocking_req_internal(
 	void
 	)
 {
-	static int next_workitem;
+	static size_t next_workeritem;
 	blocking_pipe_header *req;
 	int once;
 
 	once = 1;
 
 	/* we block here when idle */
-	if (NULL == blocking_workitems[next_workitem]) {
+	if (NULL == blocking_workitems[next_workeritem]) {
 		SetEvent(child_is_blocking);
-		while (NULL == blocking_workitems[next_workitem])
+		while (NULL == blocking_workitems[next_workeritem])
 			if (WAIT_OBJECT_0 != 
 			    WaitForSingleObject(wake_blocking_child, INFINITE)) {
 				DPRINTF(1, ("fatal receive_blocking_req_internal wait code\n"));
@@ -145,11 +201,10 @@ receive_blocking_req_internal(
 		ResetEvent(child_is_blocking);
 	}
 
-	req = blocking_workitems[next_workitem];
+	req = blocking_workitems[next_workeritem];
 	blocking_workitems[next_workitem] = NULL;
-	next_workitem++;
-	if (next_workitem >= COUNTOF(blocking_workitems))
-		next_workitem = 0;
+	next_workeritem = (1 + next_workeritem) %
+			  blocking_workitems_alloc;
 
 	if (CHILD_EXIT_REQ == req)	/* idled out */
 		req = NULL;
@@ -163,18 +218,10 @@ send_blocking_resp_internal(
 	blocking_pipe_header *resp
 	)
 {
-	static int next_blocking_response;
+	ensure_workresp_empty_slot();
 
-	if (NULL != blocking_responses[next_blocking_response]) {
-		DPRINTF(1, ("blocking_responses full, max %d items\n",
-			    COUNTOF(blocking_workitems)));
-		return -1;
-	}
-
-	blocking_responses[next_blocking_response] = resp;
-	next_blocking_response++;
-	if (COUNTOF(blocking_responses) == next_blocking_response)
-		next_blocking_response = 0;
+	blocking_responses[next_response] = resp;
+	next_response = (1 + next_response) % blocking_responses_alloc;
 
 	SetEvent(blocking_response_ready);
 
@@ -187,17 +234,16 @@ receive_blocking_resp_internal(
 	void
 	)
 {
-	static int		next_blocking_response;
+	static size_t next_workresp;
 	blocking_pipe_header *	retval;
 
-	retval = blocking_responses[next_blocking_response];
+	retval = blocking_responses[next_workresp];
 
 	if (NULL != retval) {
-		blocking_responses[next_blocking_response] = NULL;
-		next_blocking_response++;
-		if (next_blocking_response == COUNTOF(blocking_responses))
-			next_blocking_response = 0;
-		NTP_ENSURE(BLOCKING_RESP_MAGIC == retval->magic_sig);
+		blocking_responses[next_workresp] = NULL;
+		next_workresp = (1 + next_workresp) %
+				blocking_responses_alloc;
+		DEBUG_ENSURE(BLOCKING_RESP_MAGIC == retval->magic_sig);
 	}
 
 	return retval;
@@ -299,7 +345,7 @@ blocking_thread(
 void
 worker_idle_timer_fired(void)
 {
-	NTP_REQUIRE(0 == intres_req_pending);
+	DEBUG_REQUIRE(0 == intres_req_pending);
 
 	worker_idle_timer = 0;
 	if (NULL != blocking_child_thread) {

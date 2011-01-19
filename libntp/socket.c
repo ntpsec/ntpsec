@@ -9,12 +9,9 @@
 #include <stdio.h>
 
 #include "ntp.h"
-// #include "ntp_assert.h"
 #include "ntp_types.h"
 #include "ntp_net.h"
 #include "ntp_io.h"
-
-#include <isc/util.h>
 
 /*
  * Windows C runtime ioctl() can't deal properly with sockets, 

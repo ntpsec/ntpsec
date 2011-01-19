@@ -25,21 +25,25 @@
 #define MICROSECONDS 1000000
 
 #if SIZEOF_LONG >= 8
-# define MYFTOTVU(tsf,tvu) \
-	(tvu) = (int32)(((u_long)(tsf) * MICROSECONDS + 0x80000000) >> 32)
-# define MYTVUTOF(tvu,tsf) \
-	(tsf) = (u_int32)((((u_long)(tvu)<<32)+MICROSECONDS/2) / MICROSECONDS)
+# define MYFTOTVU(tsf, tvu)						\
+	(tvu) = (int32)							\
+		(((u_long)(tsf) * MICROSECONDS + 0x80000000) >> 32)
+# define MYTVUTOF(tvu, tsf)						\
+	(tsf) = (u_int32)						\
+		((((u_long)(tvu) << 32) + MICROSECONDS / 2) /		\
+		 MICROSECONDS)
 #else
-# define MYFTOTVU(tsf,tvu) TSFTOTVU(tsf, tvu)
-# define MYTVUTOF(tvu,tsf) TVUTOTSF(tvu, tsf)
+# define MYFTOTVU(tsf, tvu)	TSFTOTVU(tsf, tvu)
+# define MYTVUTOF(tvu, tsf)	TVUTOTSF(tvu, tsf)
 #endif
 
-#define COPYNORM(dst,src) \
-  do {	  *(dst) = *(src);		\
-	  if (timeval_isdenormal((dst)))\
-		  timeval_norm((dst));	\
-  } while (0)
-	
+#define COPYNORM(dst, src)				\
+	do {						\
+		*(dst) = *(src);			\
+		if (timeval_isdenormal(dst))		\
+			timeval_norm(dst);		\
+	} while (0)
+
 
 void
 timeval_norm(
@@ -52,7 +56,7 @@ timeval_norm(
 	 * 'abs' returns int, which might not be good here. */
 	long z;
 	z = x->tv_usec;
-	if ((z < 0 ? -z : z) > 3*MICROSECONDS) {
+	if (max(-z, z) > 3 * MICROSECONDS) {
 		z = x->tv_usec / MICROSECONDS;
 		x->tv_usec -= z * MICROSECONDS;
 		x->tv_sec  += z;
@@ -73,22 +77,22 @@ timeval_norm(
 		} while (x->tv_usec >= MICROSECONDS);
 }
 
-/* x = a, normlised */
+/* x = a, normalised */
 void
 timeval_copy(
-	      struct timeval *x,
-	const struct timeval *a
+	struct timeval *	x,
+	const struct timeval *	a
 	)
 {
-	COPYNORM(x,a);
+	COPYNORM(x, a);
 }
 
 /* x = a + b */
 void
 timeval_add(
-	      struct timeval *x,
-	const struct timeval *a,
-	const struct timeval *b
+	struct timeval *	x,
+	const struct timeval *	a,
+	const struct timeval *	b
 	)
 {	
 	struct timeval c;
@@ -101,9 +105,9 @@ timeval_add(
 /* x = a + b, b is fraction only */
 void
 timeval_addus(
-	      struct timeval *x,
-	const struct timeval *a,
-	long		       b
+	struct timeval *	x,
+	const struct timeval *	a,
+	long			b
 	)
 {	
 	struct timeval c;
@@ -113,12 +117,12 @@ timeval_addus(
 	COPYNORM(x, &c);
 }
 
-/* x = a + b */
+/* x = a - b */
 void
 timeval_sub(
-	      struct timeval *x,
-	const struct timeval *a,
-	const struct timeval *b
+	struct timeval *	x,
+	const struct timeval *	a,
+	const struct timeval *	b
 	)
 {	
 	struct timeval c;
@@ -131,9 +135,9 @@ timeval_sub(
 /* x = a - b, b is fraction only */
 void
 timeval_subus(
-	      struct timeval *x,
-	const struct timeval *a,
-	long		       b
+	struct timeval *	x,
+	const struct timeval *	a,
+	long			b
 	)
 {	
 	struct timeval c;
@@ -146,39 +150,36 @@ timeval_subus(
 /* x = -a */
 void
 timeval_neg(
-	      struct timeval *x,
-	const struct timeval *a
+	struct timeval *	x,
+	const struct timeval *	a
 	)
 {	
 	struct timeval c;
 
-	c.tv_sec  = - a->tv_sec;
-	c.tv_usec = - a->tv_usec;
+	c.tv_sec  = -a->tv_sec;
+	c.tv_usec = -a->tv_usec;
 	COPYNORM(x, &c);
 }
 
-/* x = ( a < 0) ? -a : a
- * return if negation was needed
+/*
+ * x = abs(a)
+ * return value is nonzero if negation was needed
  */
 int
 timeval_abs(
-	      struct timeval *x,
-	const struct timeval *a
+	struct timeval *	x,
+	const struct timeval *	a
 	)
 {	
-	struct timeval c;
+	struct timeval	c;
 	int		r;
 
 	COPYNORM(&c, a);
-	if ((r = (c.tv_sec < 0)) != 0) {
-		c.tv_sec  = - c.tv_sec;
-		c.tv_usec = - c.tv_usec;
-		if (c.tv_usec < 0) {
-			c.tv_sec  -= 1;
-			c.tv_usec += MICROSECONDS;
-		}
-	}
-	*x = c;
+	r = (c.tv_sec < 0);
+	if (r)
+		timeval_neg(x, &c);
+	else
+		*x = c;
 
 	return r;
 }
@@ -194,11 +195,10 @@ timeval_cmp_fast(
 {
 	int r;
 
-	r = (a->tv_sec > b->tv_sec)
-	  - (a->tv_sec < b->tv_sec);
+	r = (a->tv_sec > b->tv_sec) - (a->tv_sec < b->tv_sec);
 	if (r == 0)
-		r = (a->tv_usec > b->tv_usec)
-		  - (a->tv_usec < b->tv_usec);
+		r = (a->tv_usec > b->tv_usec) -
+		    (a->tv_usec < b->tv_usec);
 	
 	return r;
 }
@@ -209,22 +209,16 @@ timeval_cmp(
 	const struct timeval *b
 	)
 {
-	int	       r;
 	struct timeval A;
 	struct timeval B;
 
 	COPYNORM(&A, a);
 	COPYNORM(&B, b);
-	r = (A.tv_sec > B.tv_sec)
-	  - (A.tv_sec < B.tv_sec);
-	if (r == 0)
-		r = (A.tv_usec > B.tv_usec)
-		  - (A.tv_usec < B.tv_usec);
-	
-	return r;
+	return timeval_cmp_fast(&A, &B);
 }
 
-/* test a
+/*
+ * test previously-normalised a
  * return 1 / 0 / -1 if	 a < / == / > 0
  */
 int
@@ -241,36 +235,35 @@ timeval_test_fast(
 	return r;
 }
 
+/*
+ * test possibly denormal a
+ * return 1 / 0 / -1 if	 a < / == / > 0
+ */
 int
 timeval_test(
 	const struct timeval *a
 	)
 {
 	struct timeval A;
-	int	       r;
 
 	COPYNORM(&A, a);
-	r = (A.tv_sec > 0) - (A.tv_sec < 0);
-	if (r == 0)
-		r = (A.tv_usec > 0);
-	
-	return r;
+	return timeval_test_fast(&A);
 }
 
 /* return LIB buffer ptr to string rep */
-const char*
+const char *
 timeval_tostr(
 	const struct timeval *x
 	)
 {
 	/* see timespecops.c for rationale -- this needs refactoring */
-	struct timeval v;
-	int	       s;
-	int	       digits;
-	int	       dig;
-	char	      *cp;
-	time_t	       itmp;
-	long	       ftmp;
+	struct timeval	v;
+	int		s;
+	int		digits;
+	int		dig;
+	char *		cp;
+	time_t		itmp;
+	long		ftmp;
 
 	s = timeval_abs(&v, x);
 
@@ -279,25 +272,25 @@ timeval_tostr(
 	*cp = '\0';
 
 	/* convert fraction to decimal digits */
-	for (digits = 6; digits;  digits--) {
-		ftmp = v.tv_usec / 10;		
+	for (digits = 6; digits; digits--) {
+		ftmp = v.tv_usec / 10;
 		dig  = (int)(v.tv_usec - ftmp * 10);
 		v.tv_usec = ftmp;
-		*--cp = '0' + dig;
+		*--cp = '0' + (char)dig;
 	}
 	*--cp = '.';
 
 	/* convert first digit */
-	itmp = v.tv_sec / 10;		
+	itmp = v.tv_sec / 10;
 	dig  = (int)(v.tv_sec - itmp * 10);
-	v.tv_sec = (itmp < 0) ? -itmp : itmp;
-	*--cp = '0' + ((dig < 0) ? -dig : dig);
+	v.tv_sec = max(-itmp, itmp);
+	*--cp = '0' + (char)abs(dig);
 	/* -*- convert remaining digits */
 	while (v.tv_sec != 0) {
-		itmp = v.tv_sec / 10;		
+		itmp = v.tv_sec / 10;
 		dig  = (int)(v.tv_sec - itmp * 10);
 		v.tv_sec = itmp;
-		*--cp = '0' + dig;
+		*--cp = '0' + (char)dig;
 	}
 	/* add minus sign for negative integer part */
 	if (s)
@@ -308,8 +301,8 @@ timeval_tostr(
 
 void
 timeval_abstolfp(
-	l_fp		     *y,
-	const struct timeval *x
+	l_fp *			y,
+	const struct timeval *	x
 	)
 {
 	struct timeval v;
@@ -321,8 +314,8 @@ timeval_abstolfp(
 
 void
 timeval_reltolfp(
-	l_fp		     *y,
-	const struct timeval *x
+	l_fp *			y,
+	const struct timeval *	x
 	)
 {
 	struct timeval v;
@@ -336,20 +329,22 @@ timeval_reltolfp(
 void
 timeval_relfromlfp(
 	struct timeval *y,
-	const l_fp     *x)
+	const l_fp *	x
+	)
 {
-	struct timeval out;
-	l_fp	       tmp;
-	int	       neg;
+	struct timeval	out;
+	l_fp		tmp;
+	int		neg;
 	
 	tmp = *x;
-	if ((neg = L_ISNEG(&tmp)) != 0)
+	neg = L_ISNEG(&tmp);
+	if (neg)
 		L_NEG(&tmp);	
 	MYFTOTVU(x->l_uf, out.tv_usec);
 	out.tv_sec = x->l_ui;
 	if (neg) {
-		out.tv_sec  = - out.tv_sec;
-		out.tv_usec = - out.tv_usec;
+		out.tv_sec = -out.tv_sec;
+		out.tv_usec = -out.tv_usec;
 	}
 	COPYNORM(y, &out);
 }
@@ -357,7 +352,8 @@ timeval_relfromlfp(
 void
 timeval_urelfromlfp(
 	struct timeval *y,
-	const l_fp     *x)
+	const l_fp *	x
+	)
 {
 	struct timeval out;
 	
@@ -369,24 +365,24 @@ timeval_urelfromlfp(
 void
 timeval_absfromlfp(
 	struct timeval *y,
-	const l_fp     *x,
-	const time_t   *p
+	const l_fp *	x,
+	const time_t *	p
 	)
 {
-	struct timeval out;
-	vint64	       sec;
+	struct timeval	out;
+	vint64		sec;
 
 	sec = ntpcal_ntp_to_time(x->l_ui, p);
 	MYFTOTVU(x->l_uf, out.tv_usec);
 
 	/* copying a vint64 to a time_t needs some care... */
-#   if SIZEOF_TIME_T == 4
+#if SIZEOF_TIME_T == 4
 	out.tv_sec = (time_t)sec.d_s.lo;
-#   elif defined(HAVE_INT64)
+#elif defined(HAVE_INT64)
 	out.tv_sec = (time_t)sec.q_s;
-#   else
+#else
 	out.tv_sec = ((time_t)sec.d_s.hi << 32) + sec.d_s.lo;
-#   endif
+#endif
 	
 	COPYNORM(y, &out);
 }

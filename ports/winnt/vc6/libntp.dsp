@@ -422,6 +422,10 @@ SOURCE=..\..\..\lib\isc\task.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\libntp\termios.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\isc\win32\thread.c
 # End Source File
 # Begin Source File
@@ -430,11 +434,15 @@ SOURCE=..\..\..\lib\isc\win32\time.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\libntp\tsftomsu.c
+SOURCE=..\..\..\libntp\timespecops.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\libntp\termios.c
+SOURCE=..\..\..\libntp\timevalops.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libntp\tsftomsu.c
 # End Source File
 # Begin Source File
 

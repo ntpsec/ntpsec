@@ -35,14 +35,14 @@
  * Input and output operands may overlap; all input is consumed before
  * the output is written to.
  */
-#ifndef TIMPESPECOPS_H
-#define TIMPESPECOPS_H
+#ifndef TIMESPECOPS_H
+#define TIMESPECOPS_H
 
-#include <config.h>
 #include <sys/types.h>
 #include <stdio.h>
+
+#include "ntp.h"
 #include "ntp_unixtime.h"
-#include "ntp_fp.h"
 
 
 /*
@@ -51,19 +51,18 @@
  * here.
  */
 
-/* predicate: returns TRUE if the nanoseconds are out-of-bounds */
-#define timespec_isdenormal(x) \
-	((u_long)(x)->tv_nsec >= 1000000000)
-
 /* predicate: returns TRUE if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) \
-	((u_long)(x)->tv_nsec <	 1000000000)
+	((u_long)(x)->tv_nsec < 1000000000)
+
+/* predicate: returns TRUE if the nanoseconds are out-of-bounds */
+#define timespec_isdenormal(x)	(!timespec_isnormal(x))
 
 
 /*make sure nanoseconds are in nominal range */
 extern void timespec_norm(struct timespec *x);
 
-/* x = a, normlised */
+/* x = a, normalised */
 extern void timespec_copy(struct timespec *x, const struct timespec *a);
 
 /* x = a + b */
@@ -71,10 +70,10 @@ extern void timespec_add(struct timespec *x, const struct timespec *a,
 			 const struct timespec *b);
 
 /* x = a + b, b is fraction only */
-extern void timespec_addns(struct timespec *x,	const struct timespec *a,
+extern void timespec_addns(struct timespec *x, const struct timespec *a,
 			   long b);
 
-/* x = a + b */
+/* x = a - b */
 extern void timespec_sub(struct timespec *x, const struct timespec *a,
 			 const struct timespec *b);
 
@@ -85,50 +84,61 @@ extern void timespec_subns(struct timespec *x, const struct timespec *a,
 /* x = -a */
 extern void timespec_neg(struct timespec *x, const struct timespec *a);
 
-/* x = ( a < 0) ? -a : a
- * return if negation was needed
+/*
+ * x = abs(a)
+ * returns nonzero if negation was needed
  */
 extern int timespec_abs(struct timespec *x, const struct timespec *a);
 
-/* compare a <--> b
+/*
+ * compare previously-normalised a and b
  * return 1 / 0 / -1 if	 a < / == / > b
  */
 extern int timespec_cmp_fast(const struct timespec *a,
 			     const struct timespec *b);
 
+/*
+ * compare possibly-denormal a and b
+ * return 1 / 0 / -1 if	 a < / == / > b
+ */
 extern int timespec_cmp(const struct timespec *a,
 			const struct timespec *b);
 
-/* test a
+/*
+ * test previously-normalised a
  * return 1 / 0 / -1 if	 a < / == / > 0
  */
 extern int timespec_test_fast(const struct timespec *a);
+
+/*
+ * test possibly-denormal a
+ * return 1 / 0 / -1 if a < / == / > 0
+ */
 extern int timespec_test(const struct timespec *a);
 
 /* return LIB buffer ptr to string rep */
-extern const char* timespec_tostr(const struct timespec *x);
+extern const char * timespec_tostr(const struct timespec *x);
 
 /*
   convert to l_fp type, relative and absolute
 */
 
-/* convert from duration to duration */
+/* convert from timespec duration to l_fp duration */
 extern void timespec_reltolfp(l_fp *y, const struct timespec *x);
 
-/* 'x' must be UN*X epoch, output will be in NTP epoch */
+/* x must be UN*X epoch, output *y will be in NTP epoch */
 extern void timespec_abstolfp(l_fp *y, const struct timespec *x);
 
-/*
-  convert to l_fp type, relative signed/unsigned and absolute
-*/
+/* convert to l_fp type, relative signed/unsigned and absolute */
 extern void timespec_relfromlfp(struct timespec *y, const l_fp *x);
 extern void timespec_urelfromlfp(struct timespec *y, const l_fp *x);
 
-/* absolute (timestamp) conversion. Input is time in NTP epoch, output
- * is in UN*X epoch. The NTP time stamp will be expanded the pivot time
- * '*' or the current time, if 'p' is NULL.
+/*
+ * absolute (timestamp) conversion. Input is time in NTP epoch, output
+ * is in UN*X epoch. The NTP time stamp will be expanded around the
+ * pivot time *p or the current time, if p is NULL.
  */
 extern void timespec_absfromlfp(struct timespec *y, const l_fp *x,
 				const time_t *p);
-#endif
-/* -*- EOF -*- */
+
+#endif	/* TIMESPECOPS_H */

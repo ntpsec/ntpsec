@@ -35,14 +35,15 @@ const timespecTest::lfpfracdata timespecTest::fdata [] = {
 		{ 956805507, 0xf4f134a9 }, { 982570733, 0xfb89c16c }
 };
 
-struct TSPEC{
+class TSPEC {
+public:
 	struct timespec V;
 
 	TSPEC()
 		{ ZERO(V); }
 	TSPEC(time_t hi, long lo)
 		{ V.tv_sec = hi; V.tv_nsec = lo; }
-	bool operator == (const TSPEC &rhs) const
+	bool operator == (const TSPEC& rhs) const
 		{ return timespec_cmp(&V, &rhs.V) == 0; }
 	bool valid() const
 		{ return timespec_isnormal(&V); }
@@ -50,36 +51,37 @@ struct TSPEC{
 		{ return &V; }
 	operator struct timespec& ()
 		{ return V;	}
-	TSPEC &operator=(const TSPEC &rhs)
+	TSPEC& operator = (const TSPEC& rhs)
 		{ V = rhs.V; return *this; }
-	TSPEC &operator=(const struct timespec &rhs)
+	TSPEC& operator = (const struct timespec& rhs)
 		{ V = rhs; return *this; }
 };
 
 static std::ostream&
-operator << (std::ostream& os, const TSPEC &val)
+operator << (std::ostream& os, const TSPEC& val)
 {
 	os << timespec_tostr(&val.V);
 	return os;
 }
 
 
-struct LFP {
+class LFP {
+public:
 	l_fp V;
 
 	LFP()
 		{ ZERO(V); }
 	LFP(u_int32 hi, u_int32 lo)
 		{ V.l_ui = hi; V.l_uf = lo; }
-	bool operator == (const LFP &rhs) const
+	bool operator == (const LFP& rhs) const
 		{ return L_ISEQU(&V, &rhs.V); }
 	operator l_fp* () 
 		{ return &V; }
 	operator l_fp& ()
-		{ return V;	}
-	LFP &operator=(const LFP &rhs)
+		{ return V; }
+	LFP& operator = (const LFP& rhs)
 		{ V = rhs.V; return *this; }
-	LFP &operator=(const l_fp &rhs)
+	LFP& operator = (const l_fp& rhs)
 		{ V = rhs; return *this; }
 };
 
@@ -107,7 +109,7 @@ TEST_F(timespecTest, SignNoFrac) {
 	// sign test, no fraction
 	for (int i = -4; i <= 4; ++i) {
 		TSPEC a(i, 0);
-		int E = (i>0) - (i<0);
+		int E = (i > 0) - (i < 0);
 		int r = timespec_test(a);
 		ASSERT_EQ(E, r);
 	}
@@ -117,8 +119,9 @@ TEST_F(timespecTest, SignWithFrac) {
 	// sign test, with fraction
 	for (int i = -4; i <= 4; ++i) {
 		TSPEC a(i, 10);
-		int E = (i>=0) - (i<0);
+		int E = (i >= 0) - (i < 0);
 		int r = timespec_test(a);
+
 		ASSERT_EQ(E, r);
 	}
 }
@@ -132,6 +135,7 @@ TEST_F(timespecTest, CmpFracEQ) {
 			TSPEC b( j , 200);
 			int   E = (i > j) - (i < j);
 			int   r = timespec_cmp(a, b);
+
 			ASSERT_EQ(E, r);
 		}
 }
@@ -140,10 +144,11 @@ TEST_F(timespecTest, CmpFracGT) {
 	// fraction a bigger fraction b
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a( i , 999999800);
-			TSPEC b( j , 200);
+			TSPEC a(i, 999999800);
+			TSPEC b(j, 200);
 			int   E = (i >= j) - (i < j);
 			int   r = timespec_cmp(a, b);
+
 			ASSERT_EQ(E, r);
 		}
 }
@@ -152,10 +157,11 @@ TEST_F(timespecTest, CmpFracLT) {
 	// fraction a less fraction b
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a( i , 200);
-			TSPEC b( j , 999999800);
+			TSPEC a(i, 200);
+			TSPEC b(j, 999999800);
 			int   E = (i > j) - (i <= j);
 			int   r = timespec_cmp(a, b);
+
 			ASSERT_EQ(E, r);
 		}
 }
@@ -164,10 +170,11 @@ TEST_F(timespecTest, CmpFracLT) {
 TEST_F(timespecTest, AddFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a( i , 200);
-			TSPEC b( j , 400);
-			TSPEC E(i+j, 600);
+			TSPEC a(i, 200);
+			TSPEC b(j, 400);
+			TSPEC E(i + j, 200 + 400);
 			TSPEC c;
+
 			timespec_add(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -176,10 +183,11 @@ TEST_F(timespecTest, AddFullNorm) {
 TEST_F(timespecTest, AddFullOflow1) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a(  i  , 200);
-			TSPEC b(  j  , 999999900);
-			TSPEC E(i+j+1, 100);
+			TSPEC a(i, 200);
+			TSPEC b(j, 999999900);
+			TSPEC E(i + j + 1, 100);
 			TSPEC c;
+
 			timespec_add(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -190,6 +198,7 @@ TEST_F(timespecTest, AddNsecNorm) {
 		TSPEC a(i, 200);
 		TSPEC E(i, 600);
 		TSPEC c;
+
 		timespec_addns(c, a, 400);
 		ASSERT_EQ(E, c);
 	}
@@ -197,9 +206,10 @@ TEST_F(timespecTest, AddNsecNorm) {
 
 TEST_F(timespecTest, AddNsecOflow1) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a( i , 200);
-		TSPEC E(i+1, 100);
+		TSPEC a(i, 200);
+		TSPEC E(i + 1, 100);
 		TSPEC c;
+
 		timespec_addns(c, a, NANOSECONDS - 100);
 		ASSERT_EQ(E, c);
 	}
@@ -213,6 +223,7 @@ TEST_F(timespecTest, SubFullNorm) {
 			TSPEC b( j , 400);
 			TSPEC E(i-j, 200);
 			TSPEC c;
+
 			timespec_sub(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -225,6 +236,7 @@ TEST_F(timespecTest, SubFullOflow) {
 			TSPEC b(  j  , 999999900);
 			TSPEC E(i-j-1, 200);
 			TSPEC c;
+
 			timespec_sub(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -235,6 +247,7 @@ TEST_F(timespecTest, SubNsecNorm) {
 		TSPEC a(i, 600);
 		TSPEC E(i, 200);
 		TSPEC c;
+
 		timespec_subns(c, a, 400);
 		ASSERT_EQ(E, c);
 	}
@@ -245,6 +258,7 @@ TEST_F(timespecTest, SubNsecOflow) {
 		TSPEC a( i , 100);
 		TSPEC E(i-1, 200);
 		TSPEC c;
+
 		timespec_subns(c, a, NANOSECONDS - 100);
 		ASSERT_EQ(E, c);
 	}
@@ -256,6 +270,7 @@ TEST_F(timespecTest, Neg) {
 		TSPEC a( i , 100);
 		TSPEC b;
 		TSPEC c;
+
 		timespec_neg(b, a);
 		timespec_add(c, a, b);
 		ASSERT_EQ(0, timespec_test(c));
@@ -268,6 +283,7 @@ TEST_F(timespecTest, AbsNoFrac) {
 		TSPEC a(i , 0);
 		TSPEC b;
 		int   c;
+
 		c = timespec_abs(b, a);
 		ASSERT_EQ((i < 0), c);
 		ASSERT_EQ((i != 0), timespec_test(b));
@@ -279,6 +295,7 @@ TEST_F(timespecTest, AbsWithFrac) {
 		TSPEC a(i , 100);
 		TSPEC b;
 		int   c;
+
 		c = timespec_abs(b, a);
 		ASSERT_EQ((i < 0), c);
 		ASSERT_EQ(1, timespec_test(b));
@@ -287,30 +304,33 @@ TEST_F(timespecTest, AbsWithFrac) {
 
 // conversion to l_fp
 TEST_F(timespecTest, ToLFPrelPos) {
-	for (int i = 0; i < sizeof(fdata)/sizeof(*fdata); ++i) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
 		TSPEC a(1, fdata[i].nsec);
 		LFP   E(1, fdata[i].frac);
 		LFP   r;
+
 		timespec_reltolfp(r, a);
 		ASSERT_EQ(E, r);
 	}
 }
 
 TEST_F(timespecTest, ToLFPrelNeg) {
-	for (int i = 0; i < sizeof(fdata)/sizeof(*fdata); ++i) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
 		TSPEC a(-1, fdata[i].nsec);
 		LFP   E(~0, fdata[i].frac);
 		LFP   r;
+
 		timespec_reltolfp(r, a);
 		ASSERT_EQ(E, r);
 	}
 }
 
 TEST_F(timespecTest, ToLFPabs) {
-	for (int i = 0; i < sizeof(fdata)/sizeof(*fdata); ++i) {
-		TSPEC a(1	  , fdata[i].nsec);
-		LFP   E(1+JAN_1970, fdata[i].frac);
+	for (int i = 0; i < COUNTOF(fdata); i++) {
+		TSPEC a(1, fdata[i].nsec);
+		LFP   E(1 + JAN_1970, fdata[i].frac);
 		LFP   r;
+
 		timespec_abstolfp(r, a);
 		ASSERT_EQ(E, r);
 	}
@@ -319,9 +339,9 @@ TEST_F(timespecTest, ToLFPabs) {
 
 TEST_F(timespecTest, ToString) {
 	static const struct {
-		time_t	   sec;
-		long	   nsec;
-		const char *repr;
+		time_t		sec;
+		long		nsec;
+		const char *	repr;
 	} data [] = {
 		{ 0, 0,	 "0.000000000" },
 		{ 2, 0,	 "2.000000000" },
@@ -330,10 +350,11 @@ TEST_F(timespecTest, ToString) {
 		{ 1,-1,	 "0.999999999" },
 		{-1, 1, "-0.999999999" }
 	};
-	for (int i = 0; i < sizeof(data)/sizeof(*data); ++i) {
+	for (int i = 0; i < COUNTOF(data); i++) {
 		TSPEC a(data[i].sec, data[i].nsec);
 		std::string E(data[i].repr);
 		std::string r(timespec_tostr(a));
+
 		ASSERT_EQ(E, r);
 	}
 }

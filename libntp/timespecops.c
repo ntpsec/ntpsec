@@ -25,23 +25,27 @@
 #define NANOSECONDS 1000000000
 
 #if SIZEOF_LONG >= 8
-# define MYFTOTVN(tsf,tvu) \
-	(tvu) = (int32)(((u_long)(tsf) * NANOSECONDS + 0x80000000) >> 32)
-# define MYTVNTOF(tvu,tsf) \
-	(tsf) = (u_int32)((((u_long)(tvu)<<32)+NANOSECONDS/2) / NANOSECONDS)
+# define MYFTOTVN(tsf,tvu)						\
+	((tvu) = (int32)						\
+		(((u_long)(tsf) * NANOSECONDS + 0x80000000) >> 32))
+# define MYTVNTOF(tvu, tsf)						\
+	((tsf) = (u_int32)						\
+		((((u_long)(tvu) << 32) + NANOSECONDS / 2) /		\
+		 NANOSECONDS))
 #else
-# define MYFTOTVN(tsf,tvu) \
-	(tvu) = (int32)floor((tsf) / 4.294967296 + 0.5)
-# define MYTVNTOF(tvu,tsf) \
-	(tsf) = (u_int32)floor((tvu) * 4.294967296 + 0.5)
+# define MYFTOTVN(tsf, tvu)						\
+	((tvu) = (int32)floor((tsf) / 4.294967296 + 0.5))
+# define MYTVNTOF(tvu, tsf)						\
+	((tsf) = (u_int32)floor((tvu) * 4.294967296 + 0.5))
 #endif
 
-#define COPYNORM(dst,src) \
-  do {	  *(dst) = *(src);		\
-	  if (timespec_isdenormal((dst)))	\
-		  timespec_norm((dst));	\
-  } while (0)
-	
+#define COPYNORM(dst, src)						\
+	do {								\
+		*(dst) = *(src);					\
+		if (timespec_isdenormal(dst))				\
+			timespec_norm(dst);				\
+	} while (0)
+
 
 void
 timespec_norm(
@@ -57,8 +61,9 @@ timespec_norm(
 	 * follows with the standard normalisation loops.  Also note
 	 * that 'abs' returns int, which might not be good here. */
 	long z;
+
 	z = x->tv_nsec;
-	if (((z < 0 ? -z : z) >> 32) > 0) {
+	if ((labs(z) >> 32) > 0) {
 		z = x->tv_nsec / NANOSECONDS;
 		x->tv_nsec -= z * NANOSECONDS;
 		x->tv_sec  += z;
@@ -80,22 +85,22 @@ timespec_norm(
 		} while (x->tv_nsec >= NANOSECONDS);
 }
 
-/* x = a, normlised */
+/* x = a, normalised */
 void
 timespec_copy(
-	      struct timespec *x,
-	const struct timespec *a
+	struct timespec *	x,
+	const struct timespec *	a
 	)
 {
-	COPYNORM(x,a);
+	COPYNORM(x, a);
 }
 
 /* x = a + b */
 void
 timespec_add(
-	      struct timespec *x,
-	const struct timespec *a,
-	const struct timespec *b
+	struct timespec *	x,
+	const struct timespec *	a,
+	const struct timespec *	b
 	)
 {	
 	struct timespec c;
@@ -108,9 +113,9 @@ timespec_add(
 /* x = a + b, b is fraction only */
 void
 timespec_addns(
-	      struct timespec *x,
-	const struct timespec *a,
-	long		       b
+	struct timespec *	x,
+	const struct timespec *	a,
+	long			b
 	)
 {	
 	struct timespec c;
@@ -120,12 +125,12 @@ timespec_addns(
 	COPYNORM(x, &c);
 }
 
-/* x = a + b */
+/* x = a - b */
 void
 timespec_sub(
-	      struct timespec *x,
-	const struct timespec *a,
-	const struct timespec *b
+	struct timespec *	x,
+	const struct timespec *	a,
+	const struct timespec *	b
 	)
 {	
 	struct timespec c;
@@ -138,9 +143,9 @@ timespec_sub(
 /* x = a - b, b is fraction only */
 void
 timespec_subns(
-	      struct timespec *x,
-	const struct timespec *a,
-	long		       b
+	struct timespec *	x,
+	const struct timespec *	a,
+	long			b
 	)
 {	
 	struct timespec c;
@@ -153,8 +158,8 @@ timespec_subns(
 /* x = -a */
 void
 timespec_neg(
-	      struct timespec *x,
-	const struct timespec *a
+	struct timespec *	x,
+	const struct timespec *	a
 	)
 {	
 	struct timespec c;
@@ -164,33 +169,31 @@ timespec_neg(
 	COPYNORM(x, &c);
 }
 
-/* x = ( a < 0) ? -a : a
- * return if negation was needed
+/*
+ * x = abs(a)
+ * returns nonzero if negation was needed
  */
 int
 timespec_abs(
-	      struct timespec *x,
-	const struct timespec *a
+	struct timespec *	x,
+	const struct timespec *	a
 	)
 {	
 	struct timespec c;
 	int		r;
 
 	COPYNORM(&c, a);
-	if ((r = (c.tv_sec < 0)) != 0) {
-		c.tv_sec  = - c.tv_sec;
-		c.tv_nsec = - c.tv_nsec;
-		if (c.tv_nsec < 0) {
-			c.tv_sec  -= 1;
-			c.tv_nsec += NANOSECONDS;
-		}
-	}
-	*x = c;
+	r = (c.tv_sec < 0);
+	if (r != 0)
+		timespec_neg(x, &c);
+	else
+		*x = c;
 
 	return r;
 }
 
-/* compare a <--> b
+/*
+ * compare previously-normalised a and b
  * return 1 / 0 / -1 if	 a < / == / > b
  */
 int
@@ -201,37 +204,35 @@ timespec_cmp_fast(
 {
 	int r;
 
-	r = (a->tv_sec > b->tv_sec)
-	  - (a->tv_sec < b->tv_sec);
+	r = (a->tv_sec > b->tv_sec) - (a->tv_sec < b->tv_sec);
 	if (r == 0)
-		r = (a->tv_nsec > b->tv_nsec)
-		  - (a->tv_nsec < b->tv_nsec);
+		r = (a->tv_nsec > b->tv_nsec) -
+		    (a->tv_nsec < b->tv_nsec);
 	
 	return r;
 }
 
+/*
+ * compare possibly denormal a and b
+ * return 1 / 0 / -1 if	 a < / == / > b
+ */
 int
 timespec_cmp(
 	const struct timespec *a,
 	const struct timespec *b
 	)
 {
-	int		r;
-	struct timespec A;
-	struct timespec B;
+	struct timespec	A;
+	struct timespec	B;
 
 	COPYNORM(&A, a);
 	COPYNORM(&B, b);
-	r = (A.tv_sec > B.tv_sec)
-	  - (A.tv_sec < B.tv_sec);
-	if (r == 0)
-		r = (A.tv_nsec > B.tv_nsec)
-		  - (A.tv_nsec < B.tv_nsec);
-	
-	return r;
+
+	return timespec_cmp_fast(&A, &B);
 }
 
-/* test a
+/*
+ * test previously-normalised a
  * return 1 / 0 / -1 if	 a < / == / > 0
  */
 int
@@ -248,20 +249,20 @@ timespec_test_fast(
 	return r;
 }
 
+/*
+ * test possibly denormal a
+ * return 1 / 0 / -1 if	 a < / == / > 0
+ */
 int
 timespec_test(
 	const struct timespec *a
 	)
 {
-	int		r;
 	struct timespec A;
 
 	COPYNORM(&A, a);
-	r = (A.tv_sec > 0) - (A.tv_sec < 0);
-	if (r == 0)
-		r = (A.tv_nsec > 0);
-	
-	return r;
+
+	return timespec_test_fast(&A);
 }
 
 const char*
@@ -301,7 +302,7 @@ timespec_tostr(
 	int		s;
 	int		digits;
 	int		dig;
-	char	       *cp;
+	char *		cp;
 	time_t		itmp;
 	long		ftmp;
 
@@ -318,7 +319,7 @@ timespec_tostr(
 		ftmp = v.tv_nsec / 10;		
 		dig  = (int)(v.tv_nsec - ftmp * 10);
 		v.tv_nsec = ftmp;
-		*--cp = '0' + dig;
+		*--cp = '0' + (char)dig;
 	}
 	*--cp = '.';
 	
@@ -329,14 +330,14 @@ timespec_tostr(
 	 * truncates towards zero, as required by the standard. */
 	itmp = v.tv_sec / 10;		
 	dig  = (int)(v.tv_sec - itmp * 10);
-	v.tv_sec = (itmp < 0) ? -itmp : itmp;
-	*--cp = '0' + ((dig < 0) ? -dig : dig);
+	v.tv_sec = max(-itmp, itmp);
+	*--cp = '0' + (char)abs(dig);
 	/* -*- convert remaining digits */
 	while (v.tv_sec != 0) {
 		itmp = v.tv_sec / 10;		
 		dig  = (int)(v.tv_sec - itmp * 10);
 		v.tv_sec = itmp;
-		*--cp = '0' + dig;
+		*--cp = '0' + (char)dig;
 	}
 	/* add minus sign for negative integer part */
 	if (s)
@@ -347,8 +348,8 @@ timespec_tostr(
 
 void
 timespec_abstolfp(
-	l_fp		      *y,
-	const struct timespec *x
+	l_fp *			y,
+	const struct timespec *	x
 	)
 {
 	struct timespec v;
@@ -360,8 +361,8 @@ timespec_abstolfp(
 
 void
 timespec_reltolfp(
-	l_fp		      *y,
-	const struct timespec *x
+	l_fp *			y,
+	const struct timespec *	x
 	)
 {
 	struct timespec v;
@@ -369,27 +370,28 @@ timespec_reltolfp(
 	COPYNORM(&v, x);
 	MYTVNTOF(v.tv_nsec, y->l_uf);
 	y->l_i = (int32)v.tv_sec;
-
 }
 
 
 void
 timespec_relfromlfp(
 	struct timespec *y,
-	const l_fp	*x)
+	const l_fp	*x
+	)
 {
 	struct timespec out;
 	l_fp		tmp;
 	int		neg;
 	
 	tmp = *x;
-	if ((neg = L_ISNEG(&tmp)) != 0)
+	neg = L_ISNEG(&tmp);
+	if (neg)
 		L_NEG(&tmp);	
 	MYFTOTVN(x->l_uf, out.tv_nsec);
 	out.tv_sec = x->l_ui;
 	if (neg) {
-		out.tv_sec  = - out.tv_sec;
-		out.tv_nsec = - out.tv_nsec;
+		out.tv_sec  = -out.tv_sec;
+		out.tv_nsec = -out.tv_nsec;
 	}
 	COPYNORM(y, &out);
 }
@@ -397,7 +399,8 @@ timespec_relfromlfp(
 void
 timespec_urelfromlfp(
 	struct timespec *y,
-	const l_fp	*x)
+	const l_fp	*x
+	)
 {
 	struct timespec out;
 	
@@ -420,13 +423,13 @@ timespec_absfromlfp(
 	MYFTOTVN(x->l_uf, out.tv_nsec);
 
 	/* copying a vint64 to a time_t needs some care... */
-#   if SIZEOF_TIME_T <= 4
+#if SIZEOF_TIME_T <= 4
 	out.tv_sec = (time_t)sec.d_s.lo;
-#   elif defined(HAVE_INT64)
+#elif defined(HAVE_INT64)
 	out.tv_sec = (time_t)sec.q_s;
-#   else
+#else
 	out.tv_sec = ((time_t)sec.d_s.hi << 32) + sec.d_s.lo;
-#   endif
+#endif
 	
 	COPYNORM(y, &out);
 }

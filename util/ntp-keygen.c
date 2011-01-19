@@ -271,7 +271,7 @@ main(
 	passwd2 = NULL;
 	gettimeofday(&tv, 0);
 	epoch = tv.tv_sec;
-	fstamp = epoch + JAN_1970;
+	fstamp = (u_int)(epoch + JAN_1970);
 
 	{
 		int optct = ntpOptionProcess(&ntp_keygenOptions,
