@@ -1,3 +1,4 @@
+* Lose the RANGEGATE check in PPS, from Dave Mills.
 * ACTS refclock cleanup from Dave Mills.
 * Documentation updates from Dave Mills.
 (4.2.7p119) 2011/01/18 Released by Harlan Stenn <stenn@ntp.org>
