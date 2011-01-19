@@ -1,6 +1,22 @@
 dnl ######################################################################
-dnl Common m4sh code for libntp clients
+dnl Common m4sh code for debug and libntp clients
 AC_DEFUN([NTP_LIBNTP], [
+
+AC_MSG_CHECKING([if we're including debugging code])
+AC_ARG_ENABLE(
+    [debugging],
+    [AS_HELP_STRING(
+        [--enable-debugging],
+        [+ include ntpd debugging code]
+    )],
+    [ntp_ok=$enableval],
+    [ntp_ok=yes]
+)
+case "$ntp_ok" in
+ yes)
+    AC_DEFINE([DEBUG], [1], [Enable debugging code?])
+esac
+AC_MSG_RESULT([$ntp_ok])
 
 # Expose a cross-compilation indicator to makefiles
 AM_CONDITIONAL([NTP_CROSSCOMPILE], [test $build != $host])

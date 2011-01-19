@@ -1971,22 +1971,6 @@ case "$ntp_cv_no_parenb_ignpar" in
 	[Is there a problem using PARENB and IGNPAR?])
 esac
 
-AC_MSG_CHECKING([if we're including ntpd debugging code])
-AC_ARG_ENABLE(
-    [debugging],
-    [AS_HELP_STRING(
-        [--enable-debugging],
-        [+ include ntpd debugging code]
-    )],
-    [ntp_ok=$enableval],
-    [ntp_ok=yes]
-)
-case "$ntp_ok" in
- yes)
-    AC_DEFINE([DEBUG], [1], [Enable ntpd debugging code?])
-esac
-AC_MSG_RESULT([$ntp_ok])
-
 AC_MSG_CHECKING([if we're including processing time debugging code])
 AC_ARG_ENABLE(
     [debug-timing],
