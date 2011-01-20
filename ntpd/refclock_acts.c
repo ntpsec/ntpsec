@@ -154,8 +154,7 @@ extern int async_write(int, const void *, unsigned int);
  * Service identifiers (message length)
  */
 #define REFACTS		"NIST"	/* NIST reference ID */
-#define LENACTSA	50	/* NIST format A */
-#define LENACTSB	48	/* NIST format B */
+#define LENACTS		50	/* NIST format A */
 #define REFUSNO		"USNO"	/* USNO reference ID */
 #define LENUSNO		20	/* USNO */
 #define REFPTB		"PTB\0"	/* PTB/NPL reference ID */
@@ -770,7 +769,7 @@ acts_timecode(
 	 * ACTS format A: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
 	 * UTC(NIST) *".
 	 */
-	case LENACTSA:
+	case LENACTS:
 		if (sscanf(str,
 		    "%5ld %2d-%2d-%2d %2d:%2d:%2d %2d %1d %3lf %5lf %9s %c",
 		    &mjd, &pp->year, &month, &day, &pp->hour,
@@ -792,31 +791,6 @@ acts_timecode(
 		if (flag != '#' && up->msgcnt < 5)
 			return;
 
-		break;
-	
-	/*
-	 * ACTS format B: "jjjjj yy-mm-dd hh:mm:ss ds l uuu aaaaa
-	 * UTC(NIST)".
-	 */
-	case LENACTSB:
-		if (sscanf(str,
-		    "%5ld %2d-%2d-%2d %2d:%2d:%2d %2d %1d %3lf %5lf %9s",
-		    &mjd, &pp->year, &month, &day, &pp->hour,
-		    &pp->minute, &pp->second, &dst, &leap, &dut1,
-		    &msADV, utc) != 12) {
-			refclock_report(peer, CEVNT_BADREPLY);
-			return;
-		}
-		pp->day = ymd2yd(pp->year, month, day);
-		pp->leap = LEAP_NOWARNING;
-		if (leap == 1)
-			pp->leap = LEAP_ADDSECOND;
-		else if (leap == 2)
-			pp->leap = LEAP_DELSECOND;
-		memcpy(&pp->refid, REFACTS, 4);
-		if (up->msgcnt == 0)
-			record_clock_stats(&peer->srcadr, str);
-		up->msgcnt++;
 		break;
 
 	/*

@@ -1322,16 +1322,6 @@ refclock_pps(
 		ap->ts = pps_info.clear_timestamp;
 	else
 		return (0);
-	
-	/*
-	 * There can be zero, one or two PPS pulses between polls,
-	 * depending on the poll interval relative to the PPS interval.
-	 * The pulse must be newer and within the range gate relative
-	 * to the last pulse.
-	 */
-	if (ap->ts.tv_sec <= timeout.tv_sec || abs(ap->ts.tv_nsec -
-	    timeout.tv_nsec) > RANGEGATE)
-		return (0);
 
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.

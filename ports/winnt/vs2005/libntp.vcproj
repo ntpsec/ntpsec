@@ -1799,26 +1799,16 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\timespecops.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\libntp\timevalops.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\tsftomsu.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\tstotv.c"

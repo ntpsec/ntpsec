@@ -1,3 +1,18 @@
+* Grow ntpd/work_thread.c arrays as needed.
+* Add DEBUG_* variants of ntp_assert.h macros which compile away using
+  ./configure --disable-debugging.
+* Fix tvalops.cpp unit test failures for 32-bit builds.
+* Return to a single autoreconf invocation in ./bootstrap script.
+* Fix warnings seen on FreeBSD 9.
+* crypto group changes from Dave Mills.
+* Lose the RANGEGATE check in PPS, from Dave Mills.
+* ACTS refclock cleanup from Dave Mills.
+* Documentation updates from Dave Mills.
+* NMEA driver documentation update from Juergen Perlinger.
+(4.2.7p119) 2011/01/18 Released by Harlan Stenn <stenn@ntp.org>
+* added timespecops.{c,h} and tievalops.{c.h} to libntp and include
+  added tspecops.cpp to tests/libntp
+* Correct msyslog.c build break on Solaris 2.9 from #ifdef/#if mixup.
 (4.2.7p118) 2011/01/15 Released by Harlan Stenn <stenn@ntp.org>
 * Simplify the built-sources stuff in sntp/ .
 * Fix check for -lipv6 on HP-UX 11.

@@ -117,8 +117,12 @@ touch ntpd/ntp_parser.[ch] ntpd/keyword-gen-utd ntpd/ntp_keyword.h
 cp bincheck.mf sntp/
 cp depsver.mf sntp/
 
-${AUTORECONF} -i -v --no-recursive "$@"
+${AUTORECONF} -i -v "$@"
 
+# DH: 20110118: Due to our workaround for the AM_COND_IF bug that was
+# triggering the buggy recursive autoreconf, we can once again use a
+# single autoreconf invocation.  See
+# http://debbugs.gnu.org/cgi/bugreport.cgi?bug=7860
 # DH: 20101120: We are back to a single copy of libopts, and
 # once again it seems we need to run autoreconf in sntp after
 # the top-level run to get a correct sntp/libopts/Makefile.in.
@@ -131,4 +135,4 @@ ${AUTORECONF} -i -v --no-recursive "$@"
 ## we get the correct srcdir path in sntp/libopts/Makefile.in
 #rm -rf sntp/autom4te.cache
 #
-(cd sntp && ${AUTORECONF} -i -v "$@")
+# (cd sntp && ${AUTORECONF} -i -v "$@")

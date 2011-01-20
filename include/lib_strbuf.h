@@ -9,12 +9,13 @@
  * Sizes of things
  */
 #define LIB_NUMBUF	16
-typedef char libbufstr[128];
+#define	LIB_BUFLENGTH	128
+
+typedef char libbufstr[LIB_BUFLENGTH];
 extern libbufstr lib_stringbuf[LIB_NUMBUF];
 extern int lib_nextbuf;
 extern int lib_inited;
 
-#define	LIB_BUFLENGTH	(sizeof(lib_stringbuf) / COUNTOF(lib_stringbuf))
 
 /*
  * Macro to get a pointer to the next buffer

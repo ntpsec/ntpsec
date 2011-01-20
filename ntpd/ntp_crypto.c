@@ -116,8 +116,10 @@
  */
 u_int32	crypto_flags = 0x0;	/* status word */
 int	crypto_nid = KEY_TYPE_MD5; /* digest nid */
-char	*sys_hostname = NULL;	/* host name */
-char	*sys_groupname = NULL;	/* group name */
+char	*sys_hostname = NULL;
+char	*sys_groupname = NULL;
+static char *host_filename = NULL;	/* host file name */
+static char *ident_filename = NULL;	/* group file name */
 
 /*
  * Global cryptodata in network byte order
@@ -1157,10 +1159,6 @@ crypto_xmit(
 		if (vallen == 0 || vallen > MAXHOSTNAME) {
 			rval = XEVNT_LEN;
 			break;
-
-		} else {
-			memcpy(certname, ep->pkt, vallen);
-			certname[vallen] = '\0';
 		}
 
 		/*
@@ -1169,6 +1167,8 @@ crypto_xmit(
 		 * found, use that certificate. If not, use the last non
 		 * self-signed certificate.
 		 */
+		memcpy(certname, ep->pkt, vallen);
+		certname[vallen] = '\0';
 		xp = yp = NULL;
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
 			if (cp->flags & (CERT_PRIV | CERT_ERROR))
@@ -3153,7 +3153,8 @@ cert_hike(
 		 */
 		peer->crypto |= CRYPTO_FLAG_CERT;
 		peer->grpkey = yp->grpkey;
-		if (peer->ident == NULL)
+		if (peer->ident == NULL || !(peer->crypto &
+		    CRYPTO_FLAG_MASK))
 			peer->crypto |= CRYPTO_FLAG_VRFY;
 	}
 
@@ -3705,11 +3706,10 @@ crypto_setup(void)
 	 * Initialize structures.
 	 */
 	gethostname(hostname, MAXFILENAME);
-	if (sys_hostname == NULL)
-		sys_hostname = strdup(hostname);
+	if (host_filename != NULL)
+		strcpy(hostname, host_filename);
 	if (passwd == NULL)
-		passwd = sys_hostname;
-
+		passwd = hostname;
 	memset(&hostval, 0, sizeof(hostval));
 	memset(&pubkey, 0, sizeof(pubkey));
 	memset(&tai_leap, 0, sizeof(tai_leap));
@@ -3781,14 +3781,13 @@ crypto_setup(void)
 		    filename);
 		exit (-1);
 	}
-
-	if (sys_groupname == NULL)
-		snprintf(filename, MAXFILENAME, "%s", sys_hostname);
-	else
-		snprintf(filename, MAXFILENAME, "%s@%s", sys_hostname,
-		    sys_groupname);
-	hostval.vallen = htonl(strlen(filename));
-	hostval.ptr = strdup(filename);
+	hostval.ptr = strdup(cinfo->subject);
+	hostval.vallen = htonl(strlen(cinfo->subject));
+	sys_hostname = hostval.ptr;
+	if ((ptr = strchr(sys_hostname, (int)'@')) != NULL)
+		sys_groupname = strdup(++ptr);
+	if (ident_filename != NULL)
+		strcpy(hostname, ident_filename);
 
 	/*
 	 * Load optional IFF parameters from file
@@ -3856,16 +3855,14 @@ crypto_config(
 	 * Set host name (host).
 	 */
 	case CRYPTO_CONF_PRIV:
-		sys_hostname = emalloc(strlen(cp) + 1);
-		strcpy(sys_hostname, cp);
+		host_filename = strdup(cp);
 		break;
 
 	/*
 	 * Set group name (ident).
 	 */
 	case CRYPTO_CONF_IDENT:
-		sys_groupname = emalloc(strlen(cp) + 1);
-		strcpy(sys_groupname, cp);
+		ident_filename = strdup(cp);
 		break;
 
 	/*
