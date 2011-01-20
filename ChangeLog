@@ -1,3 +1,4 @@
+(4.2.7p120) 2011/01/20 Released by Harlan Stenn <stenn@ntp.org>
 * Change new timeval and timespec to string routines to use snprintf()
   rather than hand-crafted conversion, avoid signed int overflow there.
 * Add configure support for SIZEOF_LONG_LONG to enable portable use of
