@@ -1,3 +1,4 @@
+* Import libevent.
 * Grow ntpd/work_thread.c arrays as needed.
 * Add DEBUG_* variants of ntp_assert.h macros which compile away using
   ./configure --disable-debugging.
