@@ -19,6 +19,12 @@ double steplimit = -1;
 int xmt_delay;
 SOCKET sock4 = -1;		/* Socket for IPv4 */
 SOCKET sock6 = -1;		/* Socket for IPv6 */
+/*
+** BCAST *must* listen on port 123 (by default), so we can only
+** use the UCST sockets, above if they too are using port 123
+*/
+SOCKET bsock4 = -1;		/* Broadcast Socket for IPv4 */
+SOCKET bsock6 = -1;		/* Broadcast Socket for IPv6 */
 char *progname;
 struct event_base *base = NULL;
 struct evdns_base *dnsbase = NULL;
@@ -346,11 +352,13 @@ dns_cb(
 		struct event *ev;
 		struct evutil_addrinfo *ai;
 
+#ifdef DEBUG
 		if (debug > 2)
 			printf("%s [%s]\n", dctx->name,
 			       (addr->ai_canonname)
 			       ? addr->ai_canonname
 			       : "");
+#endif
 
 		xmt_delay = 0;
 		for (ai = addr; ai; ai = ai->ai_next) {
@@ -555,6 +563,7 @@ ntp_cb(
 	int rpktl;
 	int rc;
 
+#ifdef DEBUG
 	if (debug > 1)
 	    printf("ntp_cb: event on socket %d:%s%s%s%s [%s%s] <%s>\n",
 		(int) fd,
@@ -566,6 +575,7 @@ ntp_cb(
 		(nctx->dctx->flags & CTX_UCST)	? "UCST" : "",
 		nctx->dctx->name
 		);
+#endif
 
 	/* Read in the packet */
 	rpktl = recvpkt(fd, &r_pkt, sizeof rbuf,
@@ -670,10 +680,12 @@ handle_pkt (
 		ref = (char *)&rpkt->refid;
 		add_entry(hostname, ref);
 
+#ifdef DEBUG
 		if (debug)
 			printf("sntp handle_pkt: Received KOD packet with code: %c%c%c%c from %s, demobilizing all connections\n",
 				   ref[0], ref[1], ref[2], ref[3],
 				   hostname);
+#endif
 
 		msyslog(LOG_WARNING, "Received a KOD packet with code %c%c%c%c from %s, demobilizing all connections",
 			ref[0], ref[1], ref[2], ref[3], hostname);
@@ -689,12 +701,14 @@ handle_pkt (
 		break;
 
 	    case 1:
+#ifdef DEBUG
 		if (debug > 2) {
 			getnameinfo(host->ai_addr, host->ai_addrlen, addr_buf,
 				sizeof(addr_buf), NULL, 0, NI_NUMERICHOST);
 			printf("sntp handle_pkt: Received %i bytes from %s\n",
 			       rpktl, addr_buf);
 		}
+#endif
 
 		GETTIMEOFDAY(&tv_dst, (struct timezone *)NULL);
 
@@ -772,6 +786,7 @@ offset_calculation (
 
 	*root_dispersion = FPTOD(p_rdsp);
 
+#ifdef DEBUG
 	if (debug > 2) {
 		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
 		printf("sntp rootdisp: %f\n", *root_dispersion);
@@ -791,6 +806,7 @@ offset_calculation (
 		printf("sntp offset_calculation: rpkt->xmt:\n");
 		l_fp_output(&(rpkt->xmt), stdout);
 	}
+#endif
 
 	/* Compute offset etc. */
 	tmp = p_rec;
