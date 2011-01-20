@@ -101,53 +101,11 @@ AC_HEADER_STDC
 
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h syslog.h])
 AC_CHECK_HEADERS([sys/time.h])
-AC_HEADER_TIME
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_TYPE_SIZE_T
-AC_CHECK_SIZEOF([time_t])
-
-AC_C_INLINE
-
-case "$ac_cv_c_inline" in
- '')
-    ;;
- *)
-    AC_DEFINE(HAVE_INLINE,1,[inline keyword or macro available])
-    AC_SUBST(HAVE_INLINE)
-esac
-
-AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
-AC_CHECK_SIZEOF([signed char])
-AC_CHECK_SIZEOF([short])
-AC_CHECK_SIZEOF([int])
-AC_CHECK_SIZEOF([long])
-
-AC_CHECK_TYPES([s_char])
-case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
- *yes)
-    # We have a typedef for s_char.  Might as well believe it...
-    ;;
- no0no)
-    # We have signed chars, can't say 'signed char', no s_char typedef.
-    AC_DEFINE([NEED_S_CHAR_TYPEDEF], 1, [Do we need an s_char typedef?])
-    ;;
- no1no)
-    # We have signed chars, can say 'signed char', no s_char typedef.
-    AC_DEFINE([NEED_S_CHAR_TYPEDEF])
-    ;;
- yes0no)
-    # We have unsigned chars, can't say 'signed char', no s_char typedef.
-    AC_MSG_ERROR([No way to specify a signed character!])
-    ;;
- yes1no)
-    # We have unsigned chars, can say 'signed char', no s_char typedef.
-    AC_DEFINE([NEED_S_CHAR_TYPEDEF])
-    ;;
-esac
-AC_TYPE_UID_T
 
 NTP_OPENSSL
 NTP_IPV6

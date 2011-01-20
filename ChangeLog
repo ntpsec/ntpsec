@@ -1,6 +1,7 @@
-* changed timeval / timespec string conversion (snprintf() format
-  strings for time_t vs. int / long / long long; avoid signed integer
-  overflow)
+* Change new timeval and timespec to string routines to use snprintf()
+  rather than hand-crafted conversion, avoid signed int overflow there.
+* Add configure support for SIZEOF_LONG_LONG to enable portable use of
+  snprintf() with time_t.
 * Grow ntpd/work_thread.c arrays as needed.
 * Add DEBUG_* variants of ntp_assert.h macros which compile away using
   ./configure --disable-debugging.

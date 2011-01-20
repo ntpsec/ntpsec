@@ -45,11 +45,11 @@ typedef unsigned int u_time;
 #elif SIZEOF_TIME_T <= SIZEOF_LONG
 typedef unsigned long u_time;
 #define TIMEFMT "l"
-#elif SIZEOF_TIME_T <= SIZEOF_LONG_LONG
+#elif defined(SIZEOF_LONG_LONG) && SIZEOF_TIME_T <= SIZEOF_LONG_LONG
 typedef unsigned long long u_time;
 #define TIMEFMT "ll"
 #else
-# include "GRONK: what size has a time_t here?"
+#include "GRONK: what size has a time_t here?"
 #endif
 
 /* copy and normalise. Used often enough to warrant a macro. */

@@ -361,7 +361,9 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 
 # define SIZEOF_SIGNED_CHAR	1
 # define SIZEOF_SHORT		2
-# define SIZEOF_INT		4	/* for ntp_types.h */
+# define SIZEOF_INT		4
+# define SIZEOF_LONG		4
+# define SIZEOF_LONG_LONG	8
 
 # define HAVE_ALLOCA
 # define HAVE_SETVBUF
