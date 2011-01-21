@@ -1,4 +1,10 @@
 * Import libevent.
+* [Bug 1786] Remove extra semicolon from ntp_proto.c .
+(4.2.7p120) 2011/01/20 Released by Harlan Stenn <stenn@ntp.org>
+* Change new timeval and timespec to string routines to use snprintf()
+  rather than hand-crafted conversion, avoid signed int overflow there.
+* Add configure support for SIZEOF_LONG_LONG to enable portable use of
+  snprintf() with time_t.
 * Grow ntpd/work_thread.c arrays as needed.
 * Add DEBUG_* variants of ntp_assert.h macros which compile away using
   ./configure --disable-debugging.

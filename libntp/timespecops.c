@@ -24,6 +24,7 @@
 #undef NANOSECONDS
 #define NANOSECONDS 1000000000
 
+/* conversion between l_fp fractions and nanoseconds */
 #if SIZEOF_LONG >= 8
 # define MYFTOTVN(tsf,tvu)						\
 	((tvu) = (int32)						\
@@ -39,6 +40,22 @@
 	((tsf) = (u_int32)floor((tvu) * 4.294967296 + 0.5))
 #endif
 
+/* using snprintf is troublesome with time_t. Try to resolve it. */
+#if SIZEOF_TIME_T <= SIZEOF_INT
+typedef unsigned int u_time;
+#define TIMEFMT ""
+#elif SIZEOF_TIME_T <= SIZEOF_LONG
+typedef unsigned long u_time;
+#define TIMEFMT "l"
+#elif defined(SIZEOF_LONG_LONG) && SIZEOF_TIME_T <= SIZEOF_LONG_LONG
+typedef unsigned long long u_time;
+#define TIMEFMT "ll"
+#else
+#include "GRONK: what size has a time_t here?"
+#endif
+
+
+/* copy and normalise. Used often enough to warrant a macro. */
 #define COPYNORM(dst, src)						\
 	do {								\
 		*(dst) = *(src);					\
@@ -53,17 +70,17 @@ timespec_norm(
 	)
 {
 #if SIZEOF_LONG > 4
-	/* tv_nsec is of type 'long', and on a 64 bit machine
-	 * normalisation by loop becomes prohibitive, once the upper 32
-	 * bits become involved. On the other hand, division by constant
-	 * should be fast enough; so we do a division of the nanoseconds
-	 * if the high dword becomes involved. The floor adjustment step
-	 * follows with the standard normalisation loops.  Also note
-	 * that 'abs' returns int, which might not be good here. */
-	long z;
-
-	z = x->tv_nsec;
-	if ((labs(z) >> 32) > 0) {
+	/* tv_nsec is of type 'long', and on a 64 bit machine using only
+	 * loops becomes prohibitive once the upper 32 bits get
+	 * involved. On the other hand, division by constant should be
+	 * fast enough; so we do a division of the nanoseconds in that
+	 * case. The floor adjustment step follows with the standard
+	 * normalisation loops.  And 'labs' is intentinally not used
+	 * here: its has implementation defined behaviour when applied
+	 * to LONG_MIN. */
+	if (x->tv_nsec < -3l * NANOSECONDS ||
+	    x->tv_nsec >  3l * NANOSECONDS  ) {
+		long z;
 		z = x->tv_nsec / NANOSECONDS;
 		x->tv_nsec -= z * NANOSECONDS;
 		x->tv_sec  += z;
@@ -184,10 +201,15 @@ timespec_abs(
 
 	COPYNORM(&c, a);
 	r = (c.tv_sec < 0);
-	if (r != 0)
-		timespec_neg(x, &c);
-	else
-		*x = c;
+	if (r != 0) {
+		c.tv_sec  = - c.tv_sec;
+		c.tv_nsec = - c.tv_nsec;
+		if (c.tv_nsec < 0) {
+			c.tv_sec  -= 1;
+			c.tv_nsec += NANOSECONDS;
+		}
+	}
+	*x = c;
 
 	return r;
 }
@@ -222,13 +244,18 @@ timespec_cmp(
 	const struct timespec *b
 	)
 {
+	int		r;
 	struct timespec	A;
 	struct timespec	B;
 
 	COPYNORM(&A, a);
 	COPYNORM(&B, b);
+	r = (A.tv_sec > B.tv_sec) - (A.tv_sec < B.tv_sec);
+	if (r == 0)
+		r = (A.tv_nsec > B.tv_nsec) -
+		    (A.tv_nsec < B.tv_nsec);
 
-	return timespec_cmp_fast(&A, &B);
+	return r;
 }
 
 /*
@@ -258,11 +285,15 @@ timespec_test(
 	const struct timespec *a
 	)
 {
+	int		r;
 	struct timespec A;
 
 	COPYNORM(&A, a);
+	r = (A.tv_sec > 0) - (A.tv_sec < 0);
+	if (r == 0)
+		r = (A.tv_nsec > 0);
 
-	return timespec_test_fast(&A);
+	return r;
 }
 
 const char*
@@ -272,77 +303,41 @@ timespec_tostr(
 {
 	/*
 	 * Formatting a 'time_t' to a string of decimal digits poses
-	 * some interesting portability problems:
-	 *
-	 * 1.) The size of 'time_t' is not defined: 32, 64, or arbitray
-	 * bits (though 32 and 64 are most common, of course)
-	 *
-	 * 2.) It's not easy to find an unsigned type with the same width of
-	 * time_t in a portable way. (int / long / long long / __int64
-	 * /...)
-	 *
-	 * 3.) Possible 'printf()' format specs are also difficult to find.
-	 *
-	 * Therefore, this implementation chooses to do the conversion
-	 * manually, doing divisions on a possible negative time_t value
-	 * even after a normalisation step. (-TIME_T_MIN == TIME_T_MIN
-	 * on many systems, though there is no actual definition for
-	 * TIME_T_MIN, but I guess you get my meaning...)
-	 *
-	 * And since we have to do the integer part manually, we do the
-	 * fractional part in the same way, though after the
-	 * normalisation we can be sure that at least the fraction is in
-	 * range.
+	 * some interesting portability problems regarding the size of a
+	 * time_t and the handling of signed integer overflow, which is
+	 * undefined and must be avoided.
 	 *
 	 * Even with 64 bit time_t, 32 chars will suffice. Hopefully,
-	 * LIB_BUFLENGTH is big enough; the current definiton does this
-	 * check by the preprocessor just at the top of this file.
-	 */
-	struct timespec v;
-	int		s;
-	int		digits;
-	int		dig;
-	char *		cp;
-	time_t		itmp;
-	long		ftmp;
-
-	/* normalise to positive value and get sign flag */
-	s = timespec_abs(&v, x);
-
-	/* get buffer, position to end and insert terminating NUL */
-	LIB_GETBUF(cp);
-	cp += LIB_BUFLENGTH - 1;
-	*cp = '\0';
-
-	/* convert fraction to decimal digits */
-	for (digits = 9; digits;  digits--) {
-		ftmp = v.tv_nsec / 10;		
-		dig  = (int)(v.tv_nsec - ftmp * 10);
-		v.tv_nsec = ftmp;
-		*--cp = '0' + (char)dig;
-	}
-	*--cp = '.';
+	 * LIB_BUFLENGTH is big enough; the current definiton checks
+	 * this by the preprocessor just at the top of this file. */
+	static const char *fmt = "-%" TIMEFMT "u.%09lu";
 	
-	/* convert integer part to decimal digits
-	 *
-	 * -*- convert at least one digit, make sure remaining value
-	 * is not negative. This assumes that integer division
-	 * truncates towards zero, as required by the standard. */
-	itmp = v.tv_sec / 10;		
-	dig  = (int)(v.tv_sec - itmp * 10);
-	v.tv_sec = max(-itmp, itmp);
-	*--cp = '0' + (char)abs(dig);
-	/* -*- convert remaining digits */
-	while (v.tv_sec != 0) {
-		itmp = v.tv_sec / 10;		
-		dig  = (int)(v.tv_sec - itmp * 10);
-		v.tv_sec = itmp;
-		*--cp = '0' + (char)dig;
+	struct timespec v;
+	char	       *cp;
+	int		notneg;
+	u_time		itmp;
+	u_long		ftmp;
+	
+	/* normalise and get absolute value into unsigned values. Since
+	 * the negation of TIME_T_MIN (if it existed) is implementation
+	 * defined, we try to avoid it. */
+	COPYNORM(&v, x);
+	notneg = v.tv_sec >= 0;
+	if (notneg != 0) {
+		itmp = (u_time)v.tv_sec;
+		ftmp = (u_long)v.tv_nsec;
+	} else if (v.tv_nsec != 0) {
+		itmp = (u_time)-(v.tv_sec + 1);
+		ftmp = (u_long)(NANOSECONDS - v.tv_nsec);
+	} else {
+		itmp = ((u_time) -(v.tv_sec + 1)) + 1;
+		ftmp = 0;
 	}
-	/* add minus sign for negative integer part */
-	if (s)
-		*--cp = '-';
 
+	/* get buffer and format data */
+	LIB_GETBUF(cp);
+	snprintf(cp, LIB_BUFLENGTH, fmt + notneg, itmp, ftmp);
+	
 	return cp;
 }
 
@@ -372,7 +367,6 @@ timespec_reltolfp(
 	y->l_i = (int32)v.tv_sec;
 }
 
-
 void
 timespec_relfromlfp(
 	struct timespec *y,
@@ -385,11 +379,11 @@ timespec_relfromlfp(
 	
 	tmp = *x;
 	neg = L_ISNEG(&tmp);
-	if (neg)
+	if (neg != 0)
 		L_NEG(&tmp);	
 	MYFTOTVN(x->l_uf, out.tv_nsec);
 	out.tv_sec = x->l_ui;
-	if (neg) {
+	if (neg != 0) {
 		out.tv_sec  = -out.tv_sec;
 		out.tv_nsec = -out.tv_nsec;
 	}

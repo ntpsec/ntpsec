@@ -24,19 +24,35 @@
 #undef MICROSECONDS
 #define MICROSECONDS 1000000
 
+/* conversion between l_fp fractions and microseconds */
 #if SIZEOF_LONG >= 8
 # define MYFTOTVU(tsf, tvu)						\
-	(tvu) = (int32)							\
-		(((u_long)(tsf) * MICROSECONDS + 0x80000000) >> 32)
+	((tvu) = (int32)						\
+	 (((u_long)(tsf) * MICROSECONDS + 0x80000000) >> 32))
 # define MYTVUTOF(tvu, tsf)						\
-	(tsf) = (u_int32)						\
+	((tsf) = (u_int32)						\
 		((((u_long)(tvu) << 32) + MICROSECONDS / 2) /		\
-		 MICROSECONDS)
+		 MICROSECONDS))
 #else
 # define MYFTOTVU(tsf, tvu)	TSFTOTVU(tsf, tvu)
 # define MYTVUTOF(tvu, tsf)	TVUTOTSF(tvu, tsf)
 #endif
 
+/* using snprintf is troublesome with time_t. Try to resolve it. */
+#if SIZEOF_TIME_T <= SIZEOF_INT
+typedef unsigned int u_time;
+#define TIMEFMT ""
+#elif SIZEOF_TIME_T <= SIZEOF_LONG
+typedef unsigned long u_time;
+#define TIMEFMT "l"
+#elif defined(SIZEOF_LONG_LONG) && SIZEOF_TIME_T <= SIZEOF_LONG_LONG
+typedef unsigned long long u_time;
+#define TIMEFMT "ll"
+#else
+#include "GRONK: what size has a time_t here?"
+#endif
+
+/* copy and normalise. Used often enough to warrant a macro. */
 #define COPYNORM(dst, src)				\
 	do {						\
 		*(dst) = *(src);			\
@@ -52,11 +68,13 @@ timeval_norm(
 {
 	/* If the fraction becomes excessive denormal, we use division
 	 * to do first partial normalisation. The normalisation loops
-	 * following will do the remaining cleanup.  Also note that
-	 * 'abs' returns int, which might not be good here. */
-	long z;
-	z = x->tv_usec;
-	if (max(-z, z) > 3 * MICROSECONDS) {
+	 * following will do the remaining cleanup. Since the size of
+	 * tv_usec has a peculiar definition by the standard the range
+	 * check is coded manualla.
+	 */
+	if (x->tv_usec < -3l * MICROSECONDS ||
+	    x->tv_usec >  3l * MICROSECONDS  ) {
+		long z;
 		z = x->tv_usec / MICROSECONDS;
 		x->tv_usec -= z * MICROSECONDS;
 		x->tv_sec  += z;
@@ -176,10 +194,15 @@ timeval_abs(
 
 	COPYNORM(&c, a);
 	r = (c.tv_sec < 0);
-	if (r)
-		timeval_neg(x, &c);
-	else
-		*x = c;
+	if (r != 0) {
+		c.tv_sec  = - c.tv_sec;
+		c.tv_usec = - c.tv_usec;
+		if (c.tv_usec < 0) {
+			c.tv_sec  -= 1;
+			c.tv_usec += MICROSECONDS;
+		}
+	}
+	*x = c;
 
 	return r;
 }
@@ -209,12 +232,18 @@ timeval_cmp(
 	const struct timeval *b
 	)
 {
+	int	       r;
 	struct timeval A;
 	struct timeval B;
 
 	COPYNORM(&A, a);
 	COPYNORM(&B, b);
-	return timeval_cmp_fast(&A, &B);
+	r = (A.tv_sec > B.tv_sec) - (A.tv_sec < B.tv_sec);
+	if (r == 0)
+		r = (A.tv_usec > B.tv_usec) -
+		    (A.tv_usec < B.tv_usec);
+	
+	return r;
 }
 
 /*
@@ -245,57 +274,55 @@ timeval_test(
 	)
 {
 	struct timeval A;
+	int	       r;
 
 	COPYNORM(&A, a);
-	return timeval_test_fast(&A);
+	r = (A.tv_sec > 0) - (A.tv_sec < 0);
+	if (r == 0)
+		r = (A.tv_usec > 0);
+	
+	return r;
 }
 
 /* return LIB buffer ptr to string rep */
-const char *
+const char*
 timeval_tostr(
 	const struct timeval *x
 	)
 {
-	/* see timespecops.c for rationale -- this needs refactoring */
-	struct timeval	v;
-	int		s;
-	int		digits;
-	int		dig;
+	/* see timespecops.c for rationale -- this needs refactoring
+	 *
+	 * Even with 64 bit time_t, 32 chars will suffice. Hopefully,
+	 * LIB_BUFLENGTH is big enough; the current definiton checks
+	 * this by the preprocessor just at the top of this file. */
+	static const char *fmt = "-%" TIMEFMT "u.%06lu";
+	
+	struct timeval v;
 	char *		cp;
-	time_t		itmp;
-	long		ftmp;
+	int	       notneg;
+	u_time	       itmp;
+	u_long	       ftmp;
+	
+	/* normalise and get absolute value into unsigned values. Since
+	 * the negation of TIME_T_MIN (if it existed) is implementation
+	 * defined, we try to avoid it. */
+	COPYNORM(&v, x);
+	notneg = v.tv_sec >= 0;
+	if (notneg != 0) {
+		itmp = (u_time)v.tv_sec;
+		ftmp = (u_long)v.tv_usec;
+	} else if (v.tv_usec != 0) {
+		itmp = (u_time)-(v.tv_sec + 1);
+		ftmp = (u_long)(MICROSECONDS - v.tv_usec);
+	} else {
+		itmp = ((u_time) -(v.tv_sec + 1)) + 1;
+		ftmp = 0;
+	}
 
-	s = timeval_abs(&v, x);
-
+	/* get buffer and format data */
 	LIB_GETBUF(cp);
-	cp += LIB_BUFLENGTH - 1;
-	*cp = '\0';
-
-	/* convert fraction to decimal digits */
-	for (digits = 6; digits; digits--) {
-		ftmp = v.tv_usec / 10;
-		dig  = (int)(v.tv_usec - ftmp * 10);
-		v.tv_usec = ftmp;
-		*--cp = '0' + (char)dig;
-	}
-	*--cp = '.';
-
-	/* convert first digit */
-	itmp = v.tv_sec / 10;
-	dig  = (int)(v.tv_sec - itmp * 10);
-	v.tv_sec = max(-itmp, itmp);
-	*--cp = '0' + (char)abs(dig);
-	/* -*- convert remaining digits */
-	while (v.tv_sec != 0) {
-		itmp = v.tv_sec / 10;
-		dig  = (int)(v.tv_sec - itmp * 10);
-		v.tv_sec = itmp;
-		*--cp = '0' + (char)dig;
-	}
-	/* add minus sign for negative integer part */
-	if (s)
-		*--cp = '-';
-
+	snprintf(cp, LIB_BUFLENGTH, fmt + notneg, itmp, ftmp);
+	
 	return cp;
 }
 
@@ -325,7 +352,6 @@ timeval_reltolfp(
 	y->l_i = (int32)v.tv_sec;
 }
 
-
 void
 timeval_relfromlfp(
 	struct timeval *y,
@@ -338,11 +364,11 @@ timeval_relfromlfp(
 	
 	tmp = *x;
 	neg = L_ISNEG(&tmp);
-	if (neg)
+	if (neg != 0)
 		L_NEG(&tmp);	
 	MYFTOTVU(x->l_uf, out.tv_usec);
 	out.tv_sec = x->l_ui;
-	if (neg) {
+	if (neg != 0) {
 		out.tv_sec = -out.tv_sec;
 		out.tv_usec = -out.tv_usec;
 	}

@@ -415,7 +415,6 @@ AC_EGREP_CPP(
     )]
 )
 AC_CHECK_HEADERS([sys/timers.h sys/tpro.h sys/types.h sys/wait.h])
-AC_HEADER_TIME
 case "$host" in
 *-convex-*)
     AC_CHECK_HEADERS([/sys/sync/queue.h /sys/sync/sema.h])
@@ -932,49 +931,6 @@ AC_CHECK_MEMBERS(
 	#endif
     ]
 )
-
-AC_C_INLINE
-
-case "$ac_cv_c_inline" in
- '')
-    ;;
- *)
-    AC_DEFINE([HAVE_INLINE], [1], [inline keyword or macro available])
-    AC_SUBST([HAVE_INLINE])
-esac
-
-AC_C_CHAR_UNSIGNED		dnl CROSS_COMPILE?
-AC_CHECK_SIZEOF([signed char])
-AC_CHECK_TYPES([s_char])
-AC_CHECK_SIZEOF([short])
-AC_CHECK_SIZEOF([int])
-AC_CHECK_SIZEOF([long])
-
-case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
- *yes)
-    # We have a typedef for s_char.  Might as well believe it...
-    ;;
- no0no)
-    # We have signed chars, can't say 'signed char', no s_char typedef.
-    AC_DEFINE([NEED_S_CHAR_TYPEDEF], [1],
-	[Do we need an s_char typedef?])
-    ;;
- no1no)
-    # We have signed chars, can say 'signed char', no s_char typedef.
-    AC_DEFINE([NEED_S_CHAR_TYPEDEF], [1],
-	[Do we need an s_char typedef?])
-    ;;
- yes0no)
-    # We have unsigned chars, can't say 'signed char', no s_char typedef.
-    AC_MSG_ERROR([No way to specify a signed character!])
-    ;;
- yes1no)
-    # We have unsigned chars, can say 'signed char', no s_char typedef.
-    AC_DEFINE([NEED_S_CHAR_TYPEDEF], [1],
-	[Do we need an s_char typedef?])
-    ;;
-esac
-AC_TYPE_UID_T
 
 case "$host" in
  *-*-aix[[456]]*)
