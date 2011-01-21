@@ -358,7 +358,7 @@ receive(
 	l_fp	p_xmt;			/* transmit timestamp */
 #ifdef AUTOKEY
 	char	hostname[NTP_MAXSTRLEN + 1];
-	char	*groupname = NULL;;
+	char	*groupname = NULL;
 	struct autokey *ap;		/* autokey structure pointer */
 	int	rval;			/* cookie snatcher */
 	keyid_t	pkeyid = 0, tkeyid = 0;	/* key IDs */
