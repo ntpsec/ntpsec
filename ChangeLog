@@ -1,3 +1,4 @@
+* Avoid shadowing the "group" global variable.
 (4.2.7p121) 2011/01/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1786] Remove extra semicolon from ntp_proto.c .
 (4.2.7p120) 2011/01/20 Released by Harlan Stenn <stenn@ntp.org>

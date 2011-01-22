@@ -857,7 +857,7 @@ receive(
 
 #ifdef AUTOKEY
 		/*
-		 * Do not respond if not the same groupl;
+		 * Do not respond if not the same group.
 		 */
 		if (group_test(groupname, NULL)) {
 			sys_declined++;
@@ -918,7 +918,7 @@ receive(
 
 #ifdef AUTOKEY
 		/*
-		 * Do not respond if not the same groupl;
+		 * Do not respond if not the same group.
 		 */
 		if (group_test(groupname, sys_ident)) {
 			sys_declined++;
@@ -1020,7 +1020,7 @@ receive(
 
 #ifdef AUTOKEY
 		/*
-		 * Do not respond if not the same groupl;
+		 * Do not respond if not the same group.
 		 */
 		if (group_test(groupname, sys_ident)) {
 			sys_declined++;
@@ -1085,7 +1085,7 @@ receive(
 
 #ifdef AUTOKEY
 		/*
-		 * Do not respond if not the same groupl;
+		 * Do not respond if not the same group.
 		 */
 		if (group_test(groupname, peer->ident)) {
 			sys_declined++;
@@ -3572,20 +3572,20 @@ pool_xmit(
 	 * * ignore if notrust
 	 */
 int group_test(
-	char	*group,
+	char	*grp,
 	char	*ident
 	)
 {
-	if (group == NULL)
+	if (grp == NULL)
 		return (0);
 
-	if (strcmp(group, sys_groupname) == 0)
+	if (strcmp(grp, sys_groupname) == 0)
 		return (0);
 
 	if (ident == NULL)
 		return (1);
 
-	if (strcmp(group, ident) == 0)
+	if (strcmp(grp, ident) == 0)
 		return (0);
 
 	return (1);
