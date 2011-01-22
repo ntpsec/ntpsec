@@ -188,7 +188,7 @@ const char *modem_setup = def_modem_setup;
 #define	REDIAL		30	/* redial timeout */
 #define ANSWER		60	/* answer timeout */
 #define TIMECODE	60	/* message timeout */
-#define	MAXCODE		10	/* max timecodes */
+#define	MAXCODE		20	/* max timecodes */
 
 /*
  * State machine codes
@@ -208,7 +208,7 @@ struct actsunit {
 	int	retry;		/* retry index */
 	int	msgcnt;		/* count of messages received */
 	l_fp	tstamp;		/* on-time timestamp */
-	char *	bufptr;		/* next incoming char stored here */
+	char	*bufptr;		/* next incoming char stored here */
 	char	buf[BMAX];	/* bufptr roams within buf[] */
 };
 
@@ -360,8 +360,8 @@ acts_receive (
  */
 void
 acts_message(
-	struct peer *	peer,
-	const char *	msg
+	struct peer *peer,
+	const char *msg
 	)
 {
 	struct actsunit *up;
@@ -578,6 +578,7 @@ acts_timeout(
 			report_event(PEVNT_CLOCK, peer, "no timecodes");
 		} else {
 			pp->lastref = pp->lastrec;
+			record_clock_stats(&peer->srcadr, pp->a_lastcode);
 			refclock_receive(peer);
 		}
 		break;
@@ -617,7 +618,7 @@ acts_close(
 		unlink(lockfile);
 	}
 	if (up->msgcnt == 0 && up->retry > 0) {
-	    if (sys_phone[up->retry] != NULL) {
+		if (sys_phone[up->retry] != NULL) {
 			up->state = S_IDLE;
 			up->timer = REDIAL;
 			return;
@@ -785,10 +786,8 @@ acts_timecode(
 		else if (leap == 2)
 			pp->leap = LEAP_DELSECOND;
 		memcpy(&pp->refid, REFACTS, 4);
-		if (up->msgcnt == 0)
-			record_clock_stats(&peer->srcadr, str);
 		up->msgcnt++;
-		if (flag != '#' && up->msgcnt < 5)
+		if (flag != '#' && up->msgcnt < 10)
 			return;
 
 		break;
@@ -811,8 +810,6 @@ acts_timecode(
 		 */
 		pp->leap = LEAP_NOWARNING;
 		memcpy(&pp->refid, REFUSNO, 4);
-		if (up->msgcnt == 0)
-			record_clock_stats(&peer->srcadr, str);
 		up->msgcnt++;
 		break;
 
@@ -837,8 +834,6 @@ acts_timecode(
 		}
 		pp->day = ymd2yd(pp->year, month, day);
 		memcpy(&pp->refid, REFPTB, 4);
-		if (up->msgcnt == 0)
-			record_clock_stats(&peer->srcadr, str);
 		up->msgcnt++;
 		break;
 
@@ -857,8 +852,6 @@ acts_timecode(
 		if (synchar != ' ')
 			pp->leap = LEAP_NOTINSYNC;
 		memcpy(&pp->refid, REFWWVB, 4);
-		if (up->msgcnt == 0)
-			record_clock_stats(&peer->srcadr, str);
 		up->msgcnt++;
 		break;
 
@@ -880,8 +873,6 @@ acts_timecode(
 		else if (leapchar == 'L')
 			pp->leap = LEAP_ADDSECOND;
 		memcpy(&pp->refid, REFWWVB, 4);
-		if (up->msgcnt == 0)
-			record_clock_stats(&peer->srcadr, str);
 		up->msgcnt++;
 		break;
 
@@ -903,9 +894,9 @@ acts_timecode(
 	pp->lastrec = up->tstamp;
 	if (up->msgcnt == 0)
 		return;
+
 	strncpy(pp->a_lastcode, str, sizeof(pp->a_lastcode));
 	pp->lencode = strlen(pp->a_lastcode);
-
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
