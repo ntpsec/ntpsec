@@ -59,9 +59,9 @@ int getclock (int clock_type, struct timespec *tp);
  * Convert usec to a time stamp fraction.  If you use this the program
  * must include the following declarations:
  */
-extern u_long ustotslo[];
-extern u_long ustotsmid[];
-extern u_long ustotshi[];
+extern const u_int32 ustotslo[];
+extern const u_int32 ustotsmid[];
+extern const u_int32 ustotshi[];
 
 #define	TVUTOTSF(tvu, tsf) \
 	(tsf) = ustotslo[(tvu) & 0xff] \
@@ -106,9 +106,9 @@ extern u_long ustotshi[];
  * Convert a time stamp fraction to microseconds.  The time stamp
  * fraction is assumed to be unsigned.  To use this in a program, declare:
  */
-extern long tstouslo[];
-extern long tstousmid[];
-extern long tstoushi[];
+extern const u_int32 tstouslo[];
+extern const u_int32 tstousmid[];
+extern const u_int32 tstoushi[];
 
 #define	TSFTOTVU(tsf, tvu) \
 	(tvu) = (tstoushi[((tsf) >> 24) & 0xff] \
@@ -134,8 +134,8 @@ extern long tstoushi[];
  * here, but it is convenient since the guys who use the definition will
  * often be including this file anyway.
  */
-extern u_long msutotsflo[];
-extern u_long msutotsfhi[];
+extern const u_int32 msutotsflo[];
+extern const u_int32 msutotsfhi[];
 
 #define	MSUTOTSF(msu, tsf) \
 	(tsf) = msutotsfhi[((msu) >> 5) & 0x1f] + msutotsflo[(msu) & 0x1f]
