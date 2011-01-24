@@ -1,3 +1,4 @@
+(4.2.7p123) 2011/01/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1788] tvtots.c tables inaccurate
 (4.2.7p122) 2011/01/22 Released by Harlan Stenn <stenn@ntp.org>
 * ACTS refclock cleanup from Dave Mills.
