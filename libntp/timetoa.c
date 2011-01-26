@@ -20,9 +20,11 @@
 
 #include "config.h"
 
+#include <math.h>
 #include <stdio.h>
 
 #include "timetoa.h"
+#include "ntp_assert.h"
 #include "lib_strbuf.h"
 
 /*
@@ -49,18 +51,15 @@ format_time_fraction(
 	int	prec
 	)
 {
-	static const long limit[10] = {
-		1,
-		10, 100, 1000,
-		10000, 100000, 1000000,
-		10000000, 100000000, 1000000000
-	};
-
 	char *		cp;
 	u_time		ttmp;	/* unsigned storage for seconds */
+	int		i;
+	long		fraclimit;
 	int		notneg;	/* flag for non-negative value	*/
 	const char *	fmt;
 	ldiv_t		qr;
+
+	DEBUG_REQUIRE(prec != 0);
 
 	LIB_GETBUF(cp);
 	ttmp = (u_time)secs;
@@ -69,43 +68,36 @@ format_time_fraction(
 	/* check if we need signed or unsigned mode */
 	notneg = (prec < 0);
 	prec = abs(prec);
-	if (prec <= 0 || prec > COUNTOF(limit)) {
-		if (notneg)
-			fmt = "%" UTIME_FORMAT;
-		else
-			fmt = "%" TIME_FORMAT;
-		snprintf(cp, LIB_BUFLENGTH, fmt, secs);
-
-		return cp;
-	}
+	/* fraclimit = (long)pow(10, prec); */
+	for (fraclimit = 10, i = 1; i < prec; i++)
+		fraclimit *= 10;
+	DEBUG_INSIST(fraclimit > 0);
 
 	/*
 	 * Since conversion to string uses lots of divisions anyway,
 	 * there's no big extra penalty for normalisation. We do it for
 	 * consistency.
 	 */
-	if (frac < 0 || frac >= limit[prec]) {
-		qr = ldiv(frac, limit[prec]);
+	if (frac < 0 || frac >= fraclimit) {
+		qr = ldiv(frac, fraclimit);
 		if (qr.rem < 0) {
 			qr.quot--;
-			qr.rem += limit[prec];
+			qr.rem += fraclimit;
 		}
 		ttmp += (time_t)qr.quot;
 		frac = qr.rem;
 	}
 
-	/*
-	 * Get the absolute value of the time stamp.
-	 */
+	/* Get the absolute value of the time stamp. */
 	notneg = notneg || ((time_t)ttmp >= 0);
-	if (!notneg) {
+	if (notneg) {
+		fmt++; /* skip sign char in format string */
+	} else {
 		ttmp = ~ttmp;
 		if (frac != 0)
-			frac = limit[prec] - frac;
+			frac = fraclimit - frac;
 		else
 			ttmp += 1;
-	} else {
-		fmt++; /* skip sign char in format string */
 	}
 
 	/* finally format the data and return the result */
