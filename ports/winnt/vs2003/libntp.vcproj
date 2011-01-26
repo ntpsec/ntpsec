@@ -1678,10 +1678,13 @@
 				RelativePath="..\..\..\lib\isc\win32\time.c">
 			</File>
 			<File
-				RelativePath="..\libntp\timespecops.c">
+				RelativePath="..\..\..\libntp\timespecops.c">
 			</File>
 			<File
-				RelativePath="..\libntp\timevalops.c">
+				RelativePath="..\..\..\libntp\timetoa.c">
+			</File>
+			<File
+				RelativePath="..\..\..\libntp\timevalops.c">
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\tsftomsu.c">

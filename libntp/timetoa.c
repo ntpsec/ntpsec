@@ -20,13 +20,14 @@
 
 #include "config.h"
 
+#include <stdio.h>
+
 #include "timetoa.h"
 #include "lib_strbuf.h"
-#include <stdio.h>
 
 /*
  * Formatting to string needs at max 40 bytes (even with 64 bit time_t),
- * so we check LIB_BUFLENGTH is big enough for our pupose.
+ * so we check LIB_BUFLENGTH is big enough for our purpose.
  */
 #if LIB_BUFLENGTH < 40
 # include "GRONK: LIB_BUFLENGTH is not sufficient"
@@ -43,22 +44,23 @@
  */
 const char *
 format_time_fraction(
-	time_t secs,
-	long   frac,
-	int    prec
+	time_t	secs,
+	long	frac,
+	int	prec
 	)
 {
-	static const long   limit[10] = {
+	static const long limit[10] = {
 		1,
 		10, 100, 1000,
 		10000, 100000, 1000000,
 		10000000, 100000000, 1000000000
 	};
 
-	char * cp;
-	u_time ttmp;	/* unsigned storage for seconds */
-	int    notneg;	/* flag for non-negative value	*/
-	const char * fmt;
+	char *		cp;
+	u_time		ttmp;	/* unsigned storage for seconds */
+	int		notneg;	/* flag for non-negative value	*/
+	const char *	fmt;
+	ldiv_t		qr;
 
 	LIB_GETBUF(cp);
 	ttmp = (u_time)secs;
@@ -66,14 +68,15 @@ format_time_fraction(
 	
 	/* check if we need signed or unsigned mode */
 	notneg = (prec < 0);
-	prec   = abs(prec);
-	if (prec <= 0 || prec > 9) {
+	prec = abs(prec);
+	if (prec <= 0 || prec > COUNTOF(limit)) {
 		if (notneg)
 			fmt = "%" UTIME_FORMAT;
 		else
 			fmt = "%" TIME_FORMAT;
 		snprintf(cp, LIB_BUFLENGTH, fmt, secs);
-		return (cp);
+
+		return cp;
 	}
 
 	/*
@@ -82,7 +85,6 @@ format_time_fraction(
 	 * consistency.
 	 */
 	if (frac < 0 || frac >= limit[prec]) {
-		ldiv_t qr;
 		qr = ldiv(frac, limit[prec]);
 		if (qr.rem < 0) {
 			qr.quot--;
@@ -96,17 +98,18 @@ format_time_fraction(
 	 * Get the absolute value of the time stamp.
 	 */
 	notneg = notneg || ((time_t)ttmp >= 0);
-	if (notneg == 0) {
+	if (!notneg) {
 		ttmp = ~ttmp;
 		if (frac != 0)
 			frac = limit[prec] - frac;
 		else
-			  ttmp += 1;
-	} else
+			ttmp += 1;
+	} else {
 		fmt++; /* skip sign char in format string */
+	}
 
 	/* finally format the data and return the result */
 	snprintf(cp, LIB_BUFLENGTH, fmt, ttmp, prec, frac);
 	
-	return (cp);
+	return cp;
 }

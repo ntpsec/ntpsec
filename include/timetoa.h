@@ -22,7 +22,6 @@
 #ifndef TIMETOA_H
 #define TIMETOA_H
 
-#include "config.h"
 #include "ntp_fp.h"
 #include "ntp_stdlib.h"
 #include "ntp_unixtime.h"
