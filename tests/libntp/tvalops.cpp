@@ -1,4 +1,5 @@
 #include "libntptest.h"
+#include "timestructs.h"
 
 extern "C" {
 #include <math.h>
@@ -8,8 +9,14 @@ extern "C" {
 #include <string>
 #include <sstream>
 
+using namespace timeStruct;
+
 class timevalTest : public libntptest {
 protected:
+
+	static u_int32 my_tick_to_tsf(u_int32 ticks);
+	static u_int32 my_tsf_to_tick(u_int32 tsf);
+
 	static const long MICROSECONDS;
 	// that's it...
 	struct lfpfracdata {
@@ -18,6 +25,39 @@ protected:
 	};
 	static const lfpfracdata fdata[];
 };
+
+u_int32
+timevalTest::my_tick_to_tsf(
+	u_int32 ticks
+	)
+{
+	// convert microseconds to l_fp fractional units, using double
+	// precision float calculations or, if available, 64bit integer
+	// arithmetic. This should give the precise fraction, rounded to
+	// the nearest representation.
+#if SIZEOF_LONG >= 8
+	return (u_int32)((((u_long)ticks << 32) + 500000) / 1000000);
+#else
+	return (u_int32)floor((double)ticks * 4294.967296 + 0.5);
+#endif
+	// And before you ask: if ticks >= 1000000, the result is
+	// truncated nonsense, so don't use it out-of-bounds.
+}
+
+u_int32
+timevalTest::my_tsf_to_tick(
+	u_int32 tsf
+	)
+{
+	// Inverse operation: converts fraction to microseconds.
+#if SIZEOF_LONG >= 8
+	return (u_int32)(((u_long)tsf * 1000000 + 0x80000000) >> 32);
+#else
+	return (u_int32)floor((double)tsf / 4294.967296 + 0.5);
+#endif
+	// Beware: The result might be 10^6 due to rounding!
+}
+
 
 const long timevalTest::MICROSECONDS = 1000000;
 const timevalTest::lfpfracdata timevalTest::fdata [] = {
@@ -38,63 +78,11 @@ const timevalTest::lfpfracdata timevalTest::fdata [] = {
 };
 
 
-class TVAL {
-public:
-	struct timeval V;
+// and the global predicate instances we're using here
 
-	TVAL()
-		{ ZERO(V); }
-	TVAL(time_t hi, long lo)
-		{ V.tv_sec = hi; V.tv_usec = lo; }
-	bool operator == (const TVAL& rhs) const
-		{ return timeval_cmp(&V, &rhs.V) == 0; }
-	bool valid() const
-		{ return timeval_isnormal(&V); }
-	operator struct timeval* () 
-		{ return &V; }
-	operator struct timeval& ()
-		{ return V; }
-	TVAL& operator = (const TVAL& rhs)
-		{ V = rhs.V; return *this; }
-	TVAL& operator = (const struct timeval& rhs)
-		{ V = rhs; return *this; }
-};
+static AssertFpClose FpClose(0, 1);
 
-std::ostream&
-operator << (std::ostream& os, const TVAL& val)
-{
-	os << timeval_tostr(&val.V);
-	return os;
-}
-
-
-class LFP {
-public:
-	l_fp V;
-
-	LFP()
-		{ ZERO(V); }
-	LFP(u_int32 hi, u_int32 lo)
-		{ V.l_ui = hi; V.l_uf = lo; }
-	bool operator == (const LFP& rhs) const
-		{ return L_ISEQU(&V, &rhs.V); }
-	operator l_fp* () 
-		{ return &V; }
-	operator l_fp& ()
-		{ return V; }
-	LFP& operator = (const LFP& rhs)
-		{ V = rhs.V; return *this; }
-	LFP& operator = (const l_fp& rhs)
-		{ V = rhs; return *this; }
-};
-
-static std::ostream&
-operator << (std::ostream& os, const LFP& val)
-{
-	os << ulfptoa(&val.V, 10);
-	return os;
-}
-
+static AssertTimevalClose TimevalClose(0, 1);
 
 // ---------------------------------------------------------------------
 // test support stuff
@@ -102,7 +90,7 @@ operator << (std::ostream& os, const LFP& val)
 
 TEST_F(timevalTest, Normalise) {
 	for (long ns = -2000000000; ns <= 2000000000; ns += 10000000) {
-		TVAL	x(0, ns);
+		timeval_wrap x(0, ns);
 
 		timeval_norm(x);
 		ASSERT_TRUE(x.valid());
@@ -112,9 +100,9 @@ TEST_F(timevalTest, Normalise) {
 TEST_F(timevalTest, SignNoFrac) {
 	// sign test, no fraction
 	for (int i = -4; i <= 4; ++i) {
-		TVAL	a(i, 0);
-		int	E = (i > 0) - (i < 0);
-		int	r = timeval_test(a);
+		timeval_wrap a(i, 0);
+		int	     E = (i > 0) - (i < 0);
+		int	     r = timeval_test(a);
 
 		ASSERT_EQ(E, r);
 	}
@@ -123,9 +111,9 @@ TEST_F(timevalTest, SignNoFrac) {
 TEST_F(timevalTest, SignWithFrac) {
 	// sign test, with fraction
 	for (int i = -4; i <= 4; ++i) {
-		TVAL	a(i, 10);
-		int	E = (i >= 0) - (i < 0);
-		int	r = timeval_test(a);
+		timeval_wrap a(i, 10);
+		int	     E = (i >= 0) - (i < 0);
+		int	     r = timeval_test(a);
 
 		ASSERT_EQ(E, r);
 	}
@@ -136,10 +124,10 @@ TEST_F(timevalTest, CmpFracEQ) {
 	// fractions are equal
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL	a(i, 200);
-			TVAL	b(j, 200);
-			int	E = (i > j) - (i < j);
-			int	r = timeval_cmp(a, b);
+			timeval_wrap a(i, 200);
+			timeval_wrap b(j, 200);
+			int	     E = (i > j) - (i < j);
+			int	     r = timeval_cmp(a, b);
 
 			ASSERT_EQ(E, r);
 		}
@@ -149,10 +137,10 @@ TEST_F(timevalTest, CmpFracGT) {
 	// fraction a bigger fraction b
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL	a( i , 999800);
-			TVAL	b( j , 200);
-			int	E = (i >= j) - (i < j);
-			int	r = timeval_cmp(a, b);
+			timeval_wrap a( i , 999800);
+			timeval_wrap b( j , 200);
+			int	     E = (i >= j) - (i < j);
+			int	     r = timeval_cmp(a, b);
 
 			ASSERT_EQ(E, r);
 		}
@@ -162,10 +150,10 @@ TEST_F(timevalTest, CmpFracLT) {
 	// fraction a less fraction b
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL	a(i, 200);
-			TVAL	b(j, 999800);
-			int	E = (i > j) - (i <= j);
-			int	r = timeval_cmp(a, b);
+			timeval_wrap a(i, 200);
+			timeval_wrap b(j, 999800);
+			int	     E = (i > j) - (i <= j);
+			int	     r = timeval_cmp(a, b);
 
 			ASSERT_EQ(E, r);
 		}
@@ -175,10 +163,10 @@ TEST_F(timevalTest, CmpFracLT) {
 TEST_F(timevalTest, AddFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL a(i, 200);
-			TVAL b(j, 400);
-			TVAL E(i + j, 200 + 400);
-			TVAL c;
+			timeval_wrap a(i, 200);
+			timeval_wrap b(j, 400);
+			timeval_wrap E(i + j, 200 + 400);
+			timeval_wrap c;
 
 			timeval_add(c, a, b);
 			ASSERT_EQ(E, c);
@@ -188,10 +176,10 @@ TEST_F(timevalTest, AddFullNorm) {
 TEST_F(timevalTest, AddFullOflow1) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL a(i, 200);
-			TVAL b(j, 999900);
-			TVAL E(i + j + 1, 100);
-			TVAL c;
+			timeval_wrap a(i, 200);
+			timeval_wrap b(j, 999900);
+			timeval_wrap E(i + j + 1, 100);
+			timeval_wrap c;
 			timeval_add(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -199,9 +187,9 @@ TEST_F(timevalTest, AddFullOflow1) {
 
 TEST_F(timevalTest, AddUsecNorm) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL a(i, 200);
-		TVAL E(i, 600);
-		TVAL c;
+		timeval_wrap a(i, 200);
+		timeval_wrap E(i, 600);
+		timeval_wrap c;
 
 		timeval_addus(c, a, 400);
 		ASSERT_EQ(E, c);
@@ -210,9 +198,9 @@ TEST_F(timevalTest, AddUsecNorm) {
 
 TEST_F(timevalTest, AddUsecOflow1) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL a(i, 200);
-		TVAL E(i + 1, 100);
-		TVAL c;
+		timeval_wrap a(i, 200);
+		timeval_wrap E(i + 1, 100);
+		timeval_wrap c;
 
 		timeval_addus(c, a, MICROSECONDS - 100);
 		ASSERT_EQ(E, c);
@@ -223,10 +211,10 @@ TEST_F(timevalTest, AddUsecOflow1) {
 TEST_F(timevalTest, SubFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL a(i, 600);
-			TVAL b(j, 400);
-			TVAL E(i - j, 600 - 400);
-			TVAL c;
+			timeval_wrap a(i, 600);
+			timeval_wrap b(j, 400);
+			timeval_wrap E(i - j, 600 - 400);
+			timeval_wrap c;
 
 			timeval_sub(c, a, b);
 			ASSERT_EQ(E, c);
@@ -236,10 +224,10 @@ TEST_F(timevalTest, SubFullNorm) {
 TEST_F(timevalTest, SubFullOflow) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TVAL a(i, 100);
-			TVAL b(j, 999900);
-			TVAL E(i - j - 1, 200);
-			TVAL c;
+			timeval_wrap a(i, 100);
+			timeval_wrap b(j, 999900);
+			timeval_wrap E(i - j - 1, 200);
+			timeval_wrap c;
 
 			timeval_sub(c, a, b);
 			ASSERT_EQ(E, c);
@@ -248,9 +236,9 @@ TEST_F(timevalTest, SubFullOflow) {
 
 TEST_F(timevalTest, SubUsecNorm) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL a(i, 600);
-		TVAL E(i, 200);
-		TVAL c;
+		timeval_wrap a(i, 600);
+		timeval_wrap E(i, 200);
+		timeval_wrap c;
 
 		timeval_subus(c, a, 600 - 200);
 		ASSERT_EQ(E, c);
@@ -259,9 +247,9 @@ TEST_F(timevalTest, SubUsecNorm) {
 
 TEST_F(timevalTest, SubUsecOflow) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL a(i, 100);
-		TVAL E(i - 1, 200);
-		TVAL c;
+		timeval_wrap a(i, 100);
+		timeval_wrap E(i - 1, 200);
+		timeval_wrap c;
 
 		timeval_subus(c, a, MICROSECONDS - 100);
 		ASSERT_EQ(E, c);
@@ -271,9 +259,10 @@ TEST_F(timevalTest, SubUsecOflow) {
 // test negation
 TEST_F(timevalTest, Neg) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL a(i, 100);
-		TVAL b;
-		TVAL c;
+		timeval_wrap a(i, 100);
+		timeval_wrap b;
+		timeval_wrap c;
+
 		timeval_neg(b, a);
 		timeval_add(c, a, b);
 		ASSERT_EQ(0, timeval_test(c));
@@ -283,9 +272,9 @@ TEST_F(timevalTest, Neg) {
 // test abs value
 TEST_F(timevalTest, AbsNoFrac) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL	a(i, 0);
-		TVAL	b;
-		int	c;
+		timeval_wrap a(i, 0);
+		timeval_wrap b;
+		int	     c;
 
 		c = timeval_abs(b, a);
 		ASSERT_EQ((i < 0), c);
@@ -295,9 +284,9 @@ TEST_F(timevalTest, AbsNoFrac) {
 
 TEST_F(timevalTest, AbsWithFrac) {
 	for (int i = -4; i <= 4; ++i) {
-		TVAL	a(i, 100);
-		TVAL	b;
-		int	c;
+		timeval_wrap a(i, 100);
+		timeval_wrap b;
+		int	     c;
 
 		c = timeval_abs(b, a);
 		ASSERT_EQ((i < 0), c);
@@ -306,56 +295,88 @@ TEST_F(timevalTest, AbsWithFrac) {
 }
 
 // conversion to l_fp
-TEST_F(timevalTest, ToLFPrelPos) {
-	for (int i = 0; i < COUNTOF(fdata); i++) {
-		TVAL	a(1, fdata[i].usec);
-		LFP	E(1, fdata[i].frac);
-		LFP	r;
-		double	Ef;
-		double	rf;
+TEST_F(timevalTest, ToLFPbittest) {
+	for (u_int32 i = 0; i < 1000000; i++) {
+		timeval_wrap a(1, i);
+		l_fp_wrap    E(1, my_tick_to_tsf(i));
+		l_fp_wrap    r;
 
 		timeval_reltolfp(r, a);
-		LFPTOD(&E.V, Ef);
-		LFPTOD(&r.V, rf);
-		ASSERT_NEAR(Ef, rf, 1. / MICROSECONDS);
+		ASSERT_PRED_FORMAT2(FpClose, E, r);
+	}
+}
+
+TEST_F(timevalTest, ToLFPrelPos) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
+		timeval_wrap a(1, fdata[i].usec);
+		l_fp_wrap    E(1, fdata[i].frac);
+		l_fp_wrap    r;
+
+		timeval_reltolfp(r, a);
+		ASSERT_PRED_FORMAT2(FpClose, E, r);
 	}
 }
 
 TEST_F(timevalTest, ToLFPrelNeg) {
 	for (int i = 0; i < COUNTOF(fdata); i++) {
-		TVAL	a(-1, fdata[i].usec);
-		LFP	E(~0, fdata[i].frac);
-		LFP	r;
-		double	Ef;
-		double	rf;
+		timeval_wrap a(-1, fdata[i].usec);
+		l_fp_wrap    E(~0, fdata[i].frac);
+		l_fp_wrap    r;
 
 		timeval_reltolfp(r, a);
-		LFPTOD(&E.V, Ef);
-		LFPTOD(&r.V, rf);
-		ASSERT_NEAR(Ef, rf, 1. / MICROSECONDS);
+		ASSERT_PRED_FORMAT2(FpClose, E, r);
 	}
 }
 
 TEST_F(timevalTest, ToLFPabs) {
 	for (int i = 0; i < COUNTOF(fdata); i++) {
-		TVAL	a(1, fdata[i].usec);
-		LFP	E(1 + JAN_1970, fdata[i].frac);
-		LFP	r;
-		double	Ef;
-		double	rf;
+		timeval_wrap a(1, fdata[i].usec);
+		l_fp_wrap    E(1 + JAN_1970, fdata[i].frac);
+		l_fp_wrap    r;
 
 		timeval_abstolfp(r, a);
-		LFPTOD(&E.V, Ef);
-		LFPTOD(&r.V, rf);
-		ASSERT_NEAR(Ef, rf, 1. / MICROSECONDS);
+		ASSERT_PRED_FORMAT2(FpClose, E, r);
+	}
+}
+
+// conversion from l_fp
+TEST_F(timevalTest, FromLFPbittest) {
+	// Not *exactly* a bittest, because 2**32 tests would take a
+	// really long time even on very fast machines! So we do test
+	// every 1000 fractional units.
+	for (u_int32 tsf = 0; tsf < ~u_int32(1000); tsf += 1000) {
+		timeval_wrap E(1, my_tsf_to_tick(tsf));
+		l_fp_wrap    a(1, tsf);
+		timeval_wrap r;
+
+		timeval_relfromlfp(r, a);
+
+		// The conversion might be off by one microsecond when
+		// comparing to calculated value; the table-driven
+		// conversion does not use all bits from the FP fraction
+		// and this truncation will affect the rounding.
+		ASSERT_PRED_FORMAT2(TimevalClose, E, r);
+	}
+}
+
+// usec -> frac -> usec roundtrip
+TEST_F(timevalTest, LFProundtrip) {
+	for (u_int32 i = 0; i < 1000000; i++) {
+		timeval_wrap E(1, i);
+		l_fp_wrap    a;
+		timeval_wrap r;
+
+		timeval_reltolfp(a, E);
+		timeval_relfromlfp(r, a);
+		ASSERT_EQ(E, r);
 	}
 }
 
 TEST_F(timevalTest, ToString) {
 	static const struct {
-		time_t		sec;
-		long		usec;
-		const char *	repr;
+		time_t	     sec;
+		long	     usec;
+		const char * repr;
 	} data [] = {
 		{ 0, 0,	 "0.000000" },
 		{ 2, 0,	 "2.000000" },
@@ -365,9 +386,9 @@ TEST_F(timevalTest, ToString) {
 		{-1, 1, "-0.999999" }
 	};
 	for (int i = 0; i < COUNTOF(data); ++i) {
-		TVAL a(data[i].sec, data[i].usec);
-		std::string E(data[i].repr);
-		std::string r(timeval_tostr(a));
+		timeval_wrap a(data[i].sec, data[i].usec);
+		std::string  E(data[i].repr);
+		std::string  r(timeval_tostr(a));
 
 		ASSERT_EQ(E, r);
 	}

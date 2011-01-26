@@ -70,6 +70,7 @@ noinst_HEADERS =	\
 	timepps-Solaris.h	\
 	timepps-SunOS.h	\
 	timespecops.h	\
+	timetoa.h	\
 	timevalops.h	\
 	trimble.h	\
 	$(NULL)

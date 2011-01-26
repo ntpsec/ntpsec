@@ -1803,6 +1803,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\timetoa.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\timevalops.c"
 				>
 			</File>

@@ -45,6 +45,7 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		ssl_init.cpp		\
 		statestr.cpp		\
 		strtolfp.cpp		\
+		timestructs.cpp		\
 		tspecops.cpp		\
 		tvalops.cpp		\
 		tsftomsu.cpp		\
@@ -52,11 +53,14 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		tvtots.cpp		\
 		uglydate.cpp		\
 		uinttoa.cpp		\
-		ymd2yd.cpp
+		ymd2yd.cpp		\
+		$(NULL)
 
 noinst_HEADERS =	lfptest.h	\
 			libntptest.h	\
-			sockaddrtest.h
+			sockaddrtest.h	\
+			timestructs.h	\
+			$(NULL)
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
