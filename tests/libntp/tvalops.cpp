@@ -53,7 +53,7 @@ timevalTest::my_tsf_to_tick(
 #if SIZEOF_LONG >= 8
 	return (u_int32)(((u_long)tsf * 1000000 + 0x80000000) >> 32);
 #else
-	return (u_int32)floor((double)ticks / 4294.967296 + 0.5);
+	return (u_int32)floor((double)tsf / 4294.967296 + 0.5);
 #endif
 	// Beware: The result might be 10^6 due to rounding!
 }
