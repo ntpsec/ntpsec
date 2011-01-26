@@ -65,6 +65,7 @@ libntp_a_SRCS =						\
 	strdup.c					\
 	syssignal.c					\
 	timespecops.c					\
+	timetoa.c					\
 	timevalops.c					\
 	tsftomsu.c					\
 	tstotv.c					\

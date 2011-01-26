@@ -8,17 +8,10 @@
 #include <config.h>
 #include <math.h>
 
-#include "lib_strbuf.h"
-#include "ntp_calendar.h"
-
 #include "timevalops.h"
 
-/* formatting to string needs at max 29 bytes (even with 64 bit time_t),
- * so we check LIB_BUFLENGTH is big enough for our pupose.
- */
-#if LIB_BUFLENGTH < 29
-#error LIB_BUFLENGTH not big enough
-#endif
+#include "timetoa.h"
+#include "ntp_calendar.h"
 
 /* make sure we have the right definition for MICROSECONDS */
 #undef MICROSECONDS
@@ -36,20 +29,6 @@
 #else
 # define MYFTOTVU(tsf, tvu)	TSFTOTVU(tsf, tvu)
 # define MYTVUTOF(tvu, tsf)	TVUTOTSF(tvu, tsf)
-#endif
-
-/* using snprintf is troublesome with time_t. Try to resolve it. */
-#if SIZEOF_TIME_T <= SIZEOF_INT
-typedef unsigned int u_time;
-#define TIMEFMT ""
-#elif SIZEOF_TIME_T <= SIZEOF_LONG
-typedef unsigned long u_time;
-#define TIMEFMT "l"
-#elif defined(SIZEOF_LONG_LONG) && SIZEOF_TIME_T <= SIZEOF_LONG_LONG
-typedef unsigned long long u_time;
-#define TIMEFMT "ll"
-#else
-#include "GRONK: what size has a time_t here?"
 #endif
 
 /* copy and normalise. Used often enough to warrant a macro. */
@@ -70,7 +49,7 @@ timeval_norm(
 	 * to do first partial normalisation. The normalisation loops
 	 * following will do the remaining cleanup. Since the size of
 	 * tv_usec has a peculiar definition by the standard the range
-	 * check is coded manualla.
+	 * check is coded manually.
 	 */
 	if (x->tv_usec < -3l * MICROSECONDS ||
 	    x->tv_usec >  3l * MICROSECONDS  ) {
@@ -290,40 +269,7 @@ timeval_tostr(
 	const struct timeval *x
 	)
 {
-	/* see timespecops.c for rationale -- this needs refactoring
-	 *
-	 * Even with 64 bit time_t, 32 chars will suffice. Hopefully,
-	 * LIB_BUFLENGTH is big enough; the current definiton checks
-	 * this by the preprocessor just at the top of this file. */
-	static const char *fmt = "-%" TIMEFMT "u.%06lu";
-	
-	struct timeval v;
-	char *		cp;
-	int	       notneg;
-	u_time	       itmp;
-	u_long	       ftmp;
-	
-	/* normalise and get absolute value into unsigned values. Since
-	 * the negation of TIME_T_MIN (if it existed) is implementation
-	 * defined, we try to avoid it. */
-	COPYNORM(&v, x);
-	notneg = v.tv_sec >= 0;
-	if (notneg != 0) {
-		itmp = (u_time)v.tv_sec;
-		ftmp = (u_long)v.tv_usec;
-	} else if (v.tv_usec != 0) {
-		itmp = (u_time)-(v.tv_sec + 1);
-		ftmp = (u_long)(MICROSECONDS - v.tv_usec);
-	} else {
-		itmp = ((u_time) -(v.tv_sec + 1)) + 1;
-		ftmp = 0;
-	}
-
-	/* get buffer and format data */
-	LIB_GETBUF(cp);
-	snprintf(cp, LIB_BUFLENGTH, fmt + notneg, itmp, ftmp);
-	
-	return cp;
+	return format_time_fraction(x->tv_sec, x->tv_usec, 6);
 }
 
 void
