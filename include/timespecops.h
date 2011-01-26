@@ -53,7 +53,7 @@
 
 /* predicate: returns TRUE if the nanoseconds are in nominal range */
 #define timespec_isnormal(x) \
-	((u_long)(x)->tv_nsec < 1000000000)
+	((x)->tv_nsec >= 0 && (x)->tv_nsec < 1000000000)
 
 /* predicate: returns TRUE if the nanoseconds are out-of-bounds */
 #define timespec_isdenormal(x)	(!timespec_isnormal(x))
