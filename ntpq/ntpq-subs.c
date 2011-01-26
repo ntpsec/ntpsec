@@ -405,7 +405,7 @@ doaddvlist(
 	const char *vars
 	)
 {
-	register struct varlist *vl;
+	struct varlist *vl;
 	int len;
 	char *name;
 	char *value;
@@ -413,12 +413,12 @@ doaddvlist(
 	len = strlen(vars);
 	while (nextvar(&len, &vars, &name, &value)) {
 		vl = findlistvar(vlist, name);
-		if (vl == 0) {
-			(void) fprintf(stderr, "Variable list full\n");
+		if (NULL == vl) {
+			fprintf(stderr, "Variable list full\n");
 			return;
 		}
 
-		if (vl->name == NULL) {
+		if (NULL == vl->name) {
 			vl->name = estrdup(name);
 		} else if (vl->value != NULL) {
 			free(vl->value);
@@ -440,7 +440,7 @@ dormvlist(
 	const char *vars
 	)
 {
-	register struct varlist *vl;
+	struct varlist *vl;
 	int len;
 	char *name;
 	char *value;
@@ -667,15 +667,16 @@ dolist(
 		return 0;
 
 	if (numhosts > 1)
-		(void) fprintf(fp, "server=%s ", currenthost);
+		fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0) {
 		if (associd == 0)
-			(void) fprintf(fp, "No system%s variables returned\n",
-				   (type == TYPE_CLOCK) ? " clock" : "");
+			fprintf(fp, "No system%s variables returned\n",
+				(type == TYPE_CLOCK) ? " clock" : "");
 		else
-			(void) fprintf(fp,
-				   "No information returned for%s association %u\n",
-				   (type == TYPE_CLOCK) ? " clock" : "", associd);
+			fprintf(fp,
+				"No information returned for%s association %u\n",
+				(type == TYPE_CLOCK) ? " clock" : "",
+				associd);
 		return 1;
 	}
 
