@@ -1,3 +1,4 @@
+(4.2.7p125) 2011/01/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1794] ntpq -c rv missing clk_wander information.
 * [Bug 1795] ntpq readvar does not display last variable.
 (4.2.7p124) 2011/01/25 Released by Harlan Stenn <stenn@ntp.org>
