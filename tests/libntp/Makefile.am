@@ -45,9 +45,9 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		ssl_init.cpp		\
 		statestr.cpp		\
 		strtolfp.cpp		\
+		timespecops.cpp		\
 		timestructs.cpp		\
-		tspecops.cpp		\
-		tvalops.cpp		\
+		timevalops.cpp		\
 		tsftomsu.cpp		\
 		tstotv.cpp		\
 		tvtots.cpp		\
