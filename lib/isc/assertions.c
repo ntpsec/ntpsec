@@ -32,7 +32,8 @@
  */
 /* coverity[+kill] */
 static void
-default_callback(const char *, int, isc_assertiontype_t, const char *);
+default_callback(const char *, int, isc_assertiontype_t, const char *)
+	__attribute__ ((__noreturn__));
 
 /*%
  * Public.

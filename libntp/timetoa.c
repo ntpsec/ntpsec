@@ -52,8 +52,9 @@ format_time_fraction(
 	)
 {
 	char *		cp;
-	u_time		ttmp;	/* unsigned storage for seconds */
-	int		i;
+	u_int		prec_u;
+	u_time		secs_u;
+	u_int		u;
 	long		fraclimit;
 	int		notneg;	/* flag for non-negative value	*/
 	const char *	fmt;
@@ -62,16 +63,17 @@ format_time_fraction(
 	DEBUG_REQUIRE(prec != 0);
 
 	LIB_GETBUF(cp);
-	ttmp = (u_time)secs;
+	secs_u = (u_time)secs;
 	fmt = "-%" UTIME_FORMAT ".%0*ld";
 	
 	/* check if we need signed or unsigned mode */
 	notneg = (prec < 0);
-	prec = abs(prec);
-	/* fraclimit = (long)pow(10, prec); */
-	for (fraclimit = 10, i = 1; i < prec; i++)
+	prec_u = abs(prec);
+	/* fraclimit = (long)pow(10, prec_u); */
+	for (fraclimit = 10, u = 1; u < prec_u; u++) {
+		DEBUG_INSIST(fraclimit < fraclimit * 10);
 		fraclimit *= 10;
-	DEBUG_INSIST(fraclimit > 0);
+	}
 
 	/*
 	 * Since conversion to string uses lots of divisions anyway,
@@ -84,24 +86,24 @@ format_time_fraction(
 			qr.quot--;
 			qr.rem += fraclimit;
 		}
-		ttmp += (time_t)qr.quot;
+		secs_u += (time_t)qr.quot;
 		frac = qr.rem;
 	}
 
-	/* Get the absolute value of the time stamp. */
-	notneg = notneg || ((time_t)ttmp >= 0);
+	/* Get the absolute value of the split representation time. */
+	notneg = notneg || ((time_t)secs_u >= 0);
 	if (notneg) {
-		fmt++; /* skip sign char in format string */
+		fmt++;		/* skip '-' */
 	} else {
-		ttmp = ~ttmp;
-		if (frac != 0)
-			frac = fraclimit - frac;
+		secs_u = ~secs_u;
+		if (0 == frac)
+			secs_u++;
 		else
-			ttmp += 1;
+			frac = fraclimit - frac;
 	}
 
 	/* finally format the data and return the result */
-	snprintf(cp, LIB_BUFLENGTH, fmt, ttmp, prec, frac);
+	snprintf(cp, LIB_BUFLENGTH, fmt, secs_u, prec_u, frac);
 	
 	return cp;
 }
