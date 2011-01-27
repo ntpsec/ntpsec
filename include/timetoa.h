@@ -65,12 +65,10 @@ typedef unsigned long long u_time;
  *
  * secs - integral seconds of time stamp
  * frac - fractional units
- * prec - log10 of units per second (3=miliseconds, 6=microseconds,..)
+ * prec - log10 of units per second (3=milliseconds, 6=microseconds,..)
  *	  or in other words: the number decimal digits required.
- *	  If prec is < 0, abs(prec) is taken and for the precision
- *	  and 'secs' is treated as an unsigned value.
- *
- * abs(prec) must be in [1 .. 9], or only the seconds are formatted.
+ *	  If prec is < 0, abs(prec) is taken for the precision and secs
+ *	  is treated as an unsigned value.
  *
  * The function will eventually normalise the fraction and adjust the
  * seconds accordingly.

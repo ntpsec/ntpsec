@@ -236,7 +236,8 @@ int		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
 static void	assertion_failed	(const char *, int,
 					 isc_assertiontype_t,
-					 const char *);
+					 const char *)
+			__attribute__	((__noreturn__));
 static void	library_fatal_error	(const char *, int, 
 					 const char *, va_list)
 					ISC_FORMAT_PRINTF(3, 0);

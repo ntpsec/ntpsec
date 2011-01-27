@@ -20,9 +20,11 @@
 
 #include "config.h"
 
+#include <math.h>
 #include <stdio.h>
 
 #include "timetoa.h"
+#include "ntp_assert.h"
 #include "lib_strbuf.h"
 
 /*
@@ -49,34 +51,28 @@ format_time_fraction(
 	int	prec
 	)
 {
-	static const long limit[10] = {
-		1,
-		10, 100, 1000,
-		10000, 100000, 1000000,
-		10000000, 100000000, 1000000000
-	};
-
 	char *		cp;
-	u_time		ttmp;	/* unsigned storage for seconds */
+	u_int		prec_u;
+	u_time		secs_u;
+	u_int		u;
+	long		fraclimit;
 	int		notneg;	/* flag for non-negative value	*/
 	const char *	fmt;
 	ldiv_t		qr;
 
+	DEBUG_REQUIRE(prec != 0);
+
 	LIB_GETBUF(cp);
-	ttmp = (u_time)secs;
+	secs_u = (u_time)secs;
 	fmt = "-%" UTIME_FORMAT ".%0*ld";
 	
 	/* check if we need signed or unsigned mode */
 	notneg = (prec < 0);
-	prec = abs(prec);
-	if (prec <= 0 || prec > COUNTOF(limit)) {
-		if (notneg)
-			fmt = "%" UTIME_FORMAT;
-		else
-			fmt = "%" TIME_FORMAT;
-		snprintf(cp, LIB_BUFLENGTH, fmt, secs);
-
-		return cp;
+	prec_u = abs(prec);
+	/* fraclimit = (long)pow(10, prec_u); */
+	for (fraclimit = 10, u = 1; u < prec_u; u++) {
+		DEBUG_INSIST(fraclimit < fraclimit * 10);
+		fraclimit *= 10;
 	}
 
 	/*
@@ -84,32 +80,30 @@ format_time_fraction(
 	 * there's no big extra penalty for normalisation. We do it for
 	 * consistency.
 	 */
-	if (frac < 0 || frac >= limit[prec]) {
-		qr = ldiv(frac, limit[prec]);
+	if (frac < 0 || frac >= fraclimit) {
+		qr = ldiv(frac, fraclimit);
 		if (qr.rem < 0) {
 			qr.quot--;
-			qr.rem += limit[prec];
+			qr.rem += fraclimit;
 		}
-		ttmp += (time_t)qr.quot;
+		secs_u += (time_t)qr.quot;
 		frac = qr.rem;
 	}
 
-	/*
-	 * Get the absolute value of the time stamp.
-	 */
-	notneg = notneg || ((time_t)ttmp >= 0);
-	if (!notneg) {
-		ttmp = ~ttmp;
-		if (frac != 0)
-			frac = limit[prec] - frac;
-		else
-			ttmp += 1;
+	/* Get the absolute value of the split representation time. */
+	notneg = notneg || ((time_t)secs_u >= 0);
+	if (notneg) {
+		fmt++;		/* skip '-' */
 	} else {
-		fmt++; /* skip sign char in format string */
+		secs_u = ~secs_u;
+		if (0 == frac)
+			secs_u++;
+		else
+			frac = fraclimit - frac;
 	}
 
 	/* finally format the data and return the result */
-	snprintf(cp, LIB_BUFLENGTH, fmt, ttmp, prec, frac);
+	snprintf(cp, LIB_BUFLENGTH, fmt, secs_u, prec_u, frac);
 	
 	return cp;
 }
