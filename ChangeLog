@@ -1,3 +1,4 @@
+(4.2.7p126) 2011/01/27 Released by Harlan Stenn <stenn@ntp.org>
 * Fix unexposed fencepost error in COUNTOF().
 * Add more unit tests for timeval_tostr() and timespec_tostr().
 (4.2.7p125) 2011/01/26 Released by Harlan Stenn <stenn@ntp.org>
