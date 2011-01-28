@@ -1323,6 +1323,9 @@ refclock_pps(
 	else
 		return (0);
 
+	if (timeout.tv_sec == ap->ts.tv_sec)
+		return (0);
+
 	/*
 	 * Convert to signed fraction offset and stuff in median filter.
 	 */

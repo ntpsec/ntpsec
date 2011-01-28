@@ -1,3 +1,4 @@
+* [Bug 1797] Restore stale timestamp check from the RANGEGATE cleanup.
 (4.2.7p126) 2011/01/27 Released by Harlan Stenn <stenn@ntp.org>
 * Fix unexposed fencepost error in COUNTOF().
 * Add more unit tests for timeval_tostr() and timespec_tostr().
