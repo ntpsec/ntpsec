@@ -1,7 +1,9 @@
+* [Bug 1799] ntpq mrv crash.
+* [Bug 1801] ntpq mreadvar requires prior association caching.
 (4.2.7p127) 2011/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1797] Restore stale timestamp check from the RANGEGATE cleanup.
 (4.2.7p126) 2011/01/27 Released by Harlan Stenn <stenn@ntp.org>
-* Fix unexposed fencepost error in COUNTOF().
+* Fix unexposed fencepost error in format_time_fraction().
 * Add more unit tests for timeval_tostr() and timespec_tostr().
 (4.2.7p125) 2011/01/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1794] ntpq -c rv missing clk_wander information.
