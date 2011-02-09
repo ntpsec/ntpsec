@@ -161,6 +161,8 @@ mon_reclaim_entry(
 	mon_entry *m
 	)
 {
+	DEBUG_INSIST(NULL != m);
+
 	UNLINK_DLIST(m, mru);
 	remove_from_hash(m);
 	ZERO(*m);
@@ -451,9 +453,9 @@ ntp_monitor(
 			UNLINK_HEAD_SLIST(mon, mon_free, hash_next);
 		/* Preempt from the MRU list if old enough. */
 		} else if (ntp_random() / (2. * FRAC) >
-			   (double)oldest_age / mon_age)
+			   (double)oldest_age / mon_age) {
 			return ~(RES_LIMITED | RES_KOD) & flags;
-		else {
+		} else {
 			mon_reclaim_entry(oldest);
 			mon = oldest;
 		}

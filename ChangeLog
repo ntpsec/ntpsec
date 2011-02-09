@@ -1,3 +1,6 @@
+* Add missing "break;" to ntp_control.c ctl_putsys() for caliberrs, used
+  by ntpq -c kerninfo introduced in 4.2.7p104.
+* Fix leak in ntp_control.c read_mru_list().
 (4.2.7p128) 2011/01/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1799] ntpq mrv crash.
 * [Bug 1801] ntpq mreadvar requires prior association caching.

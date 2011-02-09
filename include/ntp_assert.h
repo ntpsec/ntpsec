@@ -36,7 +36,11 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
 #define ALWAYS_INVARIANT(x)	calysto_assume(x)
 #define ALWAYS_ENSURE(x)	calysto_assert(x)
 
-# elif defined(__COVERITY__)
+/* # elif defined(__COVERITY__) */
+/*
+ * DH: try letting coverity scan our actual assertion macros, now that
+ * isc_assertioncallback_t is marked __attribute__ __noreturn__.
+ */
 
 /*
  * Coverity has special knowledge that assert(x) terminates the process
@@ -46,10 +50,12 @@ extern void calysto_assert(unsigned char cnd); /* check whether this holds */
  * that seems to be a reasonable trade-off.
  */
 
+/*
 #define ALWAYS_REQUIRE(x)	assert(x)
 #define ALWAYS_INSIST(x)	assert(x)
 #define ALWAYS_INVARIANT(x)	assert(x)
 #define ALWAYS_ENSURE(x)	assert(x)
+*/
 
 # else	/* neither Coverity nor Calysto */
 

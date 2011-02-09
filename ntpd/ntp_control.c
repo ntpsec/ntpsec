@@ -2111,6 +2111,7 @@ ctl_putsys(
 			ctl_putint,
 			(sys_var[varid].text, ntx.errcnt)
 		);
+		break;
 
 	case CS_K_PPS_JITEXC:
 		CTL_IF_KERNPPS(
@@ -3543,9 +3544,11 @@ static void read_mru_list(
 	while (NULL != (v = ctl_getitem(in_parms, &val)) &&
 	       !(EOV & v->flags)) {
 
-		if (!strcmp(nonce_text, v->text))
+		if (!strcmp(nonce_text, v->text)) {
+			if (NULL != pnonce)
+				free(pnonce);
 			pnonce = estrdup(val);
-		else if (!strcmp(limit_text, v->text))
+		} else if (!strcmp(limit_text, v->text))
 			sscanf(val, "%u", &limit);
 		else if (!strcmp(mincount_text, v->text)) {
 			if (1 != sscanf(val, "%d", &mincount) ||
