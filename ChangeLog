@@ -1,3 +1,4 @@
+(4.2.7p130) 2011/02/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1811] Update the download location in WHERE-TO-START.
 (4.2.7p129) 2011/02/09 Released by Harlan Stenn <stenn@ntp.org>
 * Add missing "break;" to ntp_control.c ctl_putsys() for caliberrs, used
