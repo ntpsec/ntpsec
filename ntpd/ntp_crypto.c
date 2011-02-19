@@ -3781,11 +3781,12 @@ crypto_setup(void)
 		    filename);
 		exit (-1);
 	}
-	hostval.ptr = strdup(cinfo->subject);
+	hostval.ptr = estrdup(cinfo->subject);
 	hostval.vallen = htonl(strlen(cinfo->subject));
 	sys_hostname = hostval.ptr;
-	if ((ptr = strchr(sys_hostname, (int)'@')) != NULL)
-		sys_groupname = strdup(++ptr);
+	ptr = (u_char *)strchr(sys_hostname, '@');
+	if (ptr != NULL)
+		sys_groupname = estrdup((char *)++ptr);
 	if (ident_filename != NULL)
 		strcpy(hostname, ident_filename);
 
@@ -3855,30 +3856,36 @@ crypto_config(
 	 * Set host name (host).
 	 */
 	case CRYPTO_CONF_PRIV:
-		host_filename = strdup(cp);
+		if (NULL != host_filename)
+			free(host_filename);
+		host_filename = estrdup(cp);
 		break;
 
 	/*
 	 * Set group name (ident).
 	 */
 	case CRYPTO_CONF_IDENT:
-		ident_filename = strdup(cp);
+		if (NULL != ident_filename)
+			free(ident_filename);
+		ident_filename = estrdup(cp);
 		break;
 
 	/*
 	 * Set private key password (pw).
 	 */
 	case CRYPTO_CONF_PW:
-		passwd = emalloc(strlen(cp) + 1);
-		strcpy(passwd, cp);
+		if (NULL != passwd)
+			free(passwd);
+		passwd = estrdup(cp);
 		break;
 
 	/*
 	 * Set random seed file name (randfile).
 	 */
 	case CRYPTO_CONF_RAND:
-		rand_file = emalloc(strlen(cp) + 1);
-		strcpy(rand_file, cp);
+		if (NULL != rand_file)
+			free(rand_file);
+		rand_file = estrdup(cp);
 		break;
 
 	/*
