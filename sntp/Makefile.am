@@ -1,25 +1,26 @@
-# Makefile.am for JMK's SNTP, by Harlan Stenn
+## Makefile.am for JMK's SNTP, by Harlan Stenn
 
 NULL =
 
 ## LIBOPTS_CHECK_NOBUILD works with Automake 1.10 now
 AUTOMAKE_OPTIONS = foreign 1.10
-ACLOCAL_AMFLAGS = -I m4 -I libopts/m4
+ACLOCAL_AMFLAGS = -I m4 -I libopts/m4 -I libevent/m4
 
-CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = $(LIBEVENT_CPPFLAGS) @CPPFLAGS_NTP@
+AM_CFLAGS = @CFLAGS_NTP@
+AM_CPPFLAGS = @CPPFLAGS_LIBEVENT@ @CPPFLAGS_NTP@
 
-INCLUDES  = $(LIBOPTS_CFLAGS)
-INCLUDES += -I$(top_srcdir)/../include
+INCLUDES  = -I$(top_srcdir)/../include
 INCLUDES += -I$(top_srcdir)/../lib/isc/include
-INCLUDES += -I$(top_srcdir)/../lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/../lib/isc/unix/include
+INCLUDES += $(LIBOPTS_CFLAGS)
 
 LDADD  = version.o
 LDADD += $(LIBOPTS_LDADD)
-LDADD += $(LIBEVENT_LDADD)
+LDADD += @LDADD_LIBEVENT@
 LDADD += $(LIBM)
-LDADD += ../libntp/libntp.a
+LDADD += ../libntp/libntp.a @LDADD_LIBNTP@
+LDADD += @PTHREAD_LIBS@
 LDADD += @LCRYPTO@
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
@@ -33,18 +34,40 @@ else
 sbin_PROGRAMS =	@SNTP@
 endif
 
+##
+## DIST_SUBDIRS is typically automatically derived by automake including
+## all possible SUBDIRS values, as even items which are not built are
+## typically distributed.
+##
+## To allow us to avoid configuring the libevent tearoff entirely when
+## it is not needed, we define DIST_SUBDIRS manually excluding libevent
+## when not building it, and in that case arrange for its distribution
+## with EXTRA_DIST copying the entire directory and libevent-dist-hook
+## cleaning unwanted VCS remnants.
+##
+## When we are building libevent, it is distributed conventionally, by
+## recursive make dist in sntp including libevent.
+##
+
 SUBDIRS = include
+DIST_SUBDIRS = include
+
+if BUILD_SNTP
+if BUILD_LIBEVENT
+SUBDIRS += libevent
+DIST_SUBDIRS += libevent
+endif
+endif
 
 if NEED_LIBOPTS
 SUBDIRS += libopts
-endif
-if NEED_LIBEVENT
-SUBDIRS += build-libevent
 endif
 
 if GTEST_AVAILABLE
 SUBDIRS += tests
 endif
+
+DIST_SUBDIRS += libopts tests
 
 sntp_SOURCES =		\
 	crypto.c	\
@@ -67,6 +90,7 @@ sntp_SOURCES =		\
 	$(NULL)
 
 DISTCLEANFILES =			\
+	.version			\
 	version.c			\
 	$(NULL)
 
@@ -75,6 +99,8 @@ EXTRA_DIST =				\
 	$(srcdir)/COPYRIGHT		\
 	deps-ver			\
 	depsver.mf			\
+	@NTP_FORCE_LIBEVENT_DIST@	\
+	libevent-cfg			\
 	sntp-opts.def			\
 	sntp-opts.menu			\
 	sntp-opts.texi			\
@@ -105,9 +131,9 @@ CLEANFILES =				\
 
 man_MANS=	$(srcdir)/sntp.1
 
-# HMS: Real Soon Now...
-#info_TEXINFOS=	sntp.texi
-#sntp_TEXINFOS=	sntp-opts.texi
+## HMS: Real Soon Now...
+##info_TEXINFOS=	sntp.texi
+##sntp_TEXINFOS=	sntp-opts.texi
 
 noinst_DATA=				\
 	$(srcdir)/sntp.html		\
@@ -122,7 +148,9 @@ FRC FRC.version:
 	@: similarly always be outdated causing their rules to fire
 	@: each time they or a dependent is built.
 
-# We probably need something about libevent, too
+$(PROGRAMS): version.o
+
+## We probably need something about libevent, too
 version.o: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
 	env CSET=`cat $(top_srcdir)/version` ../$(top_builddir)/scripts/mkver sntp
 	$(COMPILE) -c version.c
@@ -211,6 +239,12 @@ check-libntp: FRC
 
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
+
+libevent-dist-hook:
+	if test -n "@NTP_FORCE_LIBEVENT_DIST@" ; then rm -rf $(distdir)/libevent/autom4te.cache $(distdir)/libevent/config.h.in~ ; find $(distdir)/libevent -type d -name SCCS -print | xargs rm -rf ; fi
+
+dist-hook: libevent-dist-hook
+	@: do-nothing action to avoid default SCCS get
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf

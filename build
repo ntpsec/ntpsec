@@ -172,10 +172,11 @@ CONFIGURE="../configure --cache-file=../config.cache-$IAM$CCSUF $CONFIG_ARGS"
 	( "$TEST" config.status -nt ../configure &&
 		$TEST sntp/config.status -nt ../sntp/configure ) ||
 		"$NICEB" -7 $CONFIGURE
-	"$NICEB" -5 ./config.status &&
-		( cd sntp && "$NICEB" -5 ./config.status ) &&
-		"$NICEB" -14 ${MAKE-make} &&
-		"$NICEB" -11 ${MAKE-make} check
+	"$TEST" Makefile -nt config.status ||
+		"$NICEB" -5 ./config.status
+	"$TEST" sntp/Makefile -nt sntp/config.status ||
+		( cd sntp && "$NICEB" -5 ./config.status )
+	"$NICEB" -14 ${MAKE-make} && "$NICEB" -11 ${MAKE-make} check
 ) > $LOGF 2>&1
 
 EXITCODE=$?

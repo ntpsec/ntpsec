@@ -226,21 +226,21 @@ ntservice_exit( void )
  * to the service.
  */
 void WINAPI
-ServiceControl(DWORD dwCtrlCode) {
-	/* Handle the requested control code */
-	HANDLE exitEvent = get_exit_event();
-
-	switch(dwCtrlCode) {
+ServiceControl(
+	DWORD dwCtrlCode
+	) 
+{
+	switch (dwCtrlCode) {
 
 	case SERVICE_CONTROL_SHUTDOWN:
 		computer_shutting_down = TRUE;
 		/* fall through to stop case */
 
 	case SERVICE_CONTROL_STOP:
-		if (exitEvent != NULL) {
-			SetEvent(exitEvent);
+		if (WaitableExitEventHandle != NULL) {
+			SetEvent(WaitableExitEventHandle);
 			UpdateSCM(SERVICE_STOP_PENDING);
-			Sleep( 100 );  //##++
+			Sleep(100);  //##++
 		}
 		return;
 
@@ -283,8 +283,6 @@ OnConsoleEvent(
 	DWORD dwCtrlType
 	)
 {
-	HANDLE exitEvent = get_exit_event();
-
 	switch (dwCtrlType) {
 #ifdef DEBUG
 		case CTRL_BREAK_EVENT:
@@ -307,9 +305,9 @@ OnConsoleEvent(
 		case CTRL_C_EVENT:
 		case CTRL_CLOSE_EVENT:
 		case CTRL_SHUTDOWN_EVENT:
-			if (exitEvent != NULL) {
-				SetEvent(exitEvent);
-				Sleep( 100 );  //##++
+			if (WaitableExitEventHandle != NULL) {
+				SetEvent(WaitableExitEventHandle);
+				Sleep(100);  //##++
 			}
 			break;
 

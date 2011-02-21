@@ -60,11 +60,6 @@
 #define putshort(s) ((u_short)(s))
 #endif
 
-/* XXX */
-#ifdef sun
-char *strerror(int);
-#endif
-
 /*
  * This driver supports the Rockwell Jupiter GPS Receiver board
  * adapted to precision timing applications.  It requires the
@@ -138,8 +133,9 @@ struct instance {
 static	void	jupiter_canmsg	(struct instance *, u_int);
 static	u_short	jupiter_cksum	(u_short *, u_int);
 static	int	jupiter_config	(struct instance *);
-static	void	jupiter_debug	(struct peer *, char *, char *, ...)
-    __attribute__ ((format (printf, 3, 4)));
+static	void	jupiter_debug	(struct peer *, const char *,
+				 const char *, ...)
+			__attribute__ ((format (printf, 3, 4)));
 static	char *	jupiter_parse_t	(struct instance *, u_short *);
 static	char *	jupiter_parse_gpos	(struct instance *, u_short *);
 static	void	jupiter_platform	(struct instance *, u_int);
@@ -191,26 +187,26 @@ jupiter_start(
 	snprintf(gpsdev, sizeof(gpsdev), DEVICE, unit);
 	fd = refclock_open(gpsdev, SPEED232, LDISC_RAW);
 	if (fd <= 0) {
-		jupiter_debug(peer, "jupiter_start", "open %s: %s",
-		    gpsdev, strerror(errno));
+		jupiter_debug(peer, "jupiter_start", "open %s: %m",
+			      gpsdev);
 		return (0);
 	}
 
 	/* Allocate unit structure */
-	instance = emalloc(sizeof(*instance));
-	memset(instance, 0, sizeof(*instance));
+	instance = emalloc_zero(sizeof(*instance));
 	instance->peer = peer;
 	pp = peer->procptr;
 	pp->io.clock_recv = jupiter_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
 		close(fd);
+		pp->io.fd = -1;
 		free(instance);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)instance;
+	pp->unitptr = instance;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -257,7 +253,7 @@ jupiter_shutdown(int unit, struct peer *peer)
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	instance = (struct instance *)pp->unitptr;
+	instance = pp->unitptr;
 	if (!instance)
 		return;
 
@@ -268,7 +264,8 @@ jupiter_shutdown(int unit, struct peer *peer)
 	}
 #endif /* HAVE_PPSAPI */
 
-	io_closeclock(&pp->io);
+	if (pp->io.fd != -1)
+		io_closeclock(&pp->io);
 	free(instance);
 }
 
@@ -440,7 +437,7 @@ jupiter_poll(int unit, struct peer *peer)
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	instance = (struct instance *)pp->unitptr;
+	instance = pp->unitptr;
 
 	/*
 	 * You don't need to poll this clock.  It puts out timecodes
@@ -485,7 +482,7 @@ jupiter_control(
 	u_char sloppyclockflag;
 
 	pp = peer->procptr;
-	instance = (struct instance *)pp->unitptr;
+	instance = pp->unitptr;
 
 	DTOLFP(pp->fudgetime2, &instance->limit);
 	/* Force positive value. */
@@ -530,9 +527,9 @@ jupiter_receive(struct recvbuf *rbufp)
 	l_fp tstamp;
 
 	/* Initialize pointers and read the timecode and timestamp */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	instance = (struct instance *)pp->unitptr;
+	instance = pp->unitptr;
 
 	bp = (u_char *)rbufp->recv_buffer;
 	bpcnt = rbufp->recv_length;
@@ -873,36 +870,27 @@ jupiter_parse_gpos(struct instance *instance, u_short *sp)
 /*
  * jupiter_debug - print debug messages
  */
-#if defined(__STDC__) || defined(SYS_WINNT)
 static void
-jupiter_debug(struct peer *peer, char *function, char *fmt, ...)
-#else
-static void
-jupiter_debug(peer, function, fmt, va_alist)
-	struct peer *peer;
-	char *function;
-	char *fmt;
-#endif /* __STDC__ */
+jupiter_debug(
+	struct peer *	peer,
+	const char *	function,
+	const char *	fmt,
+	...
+	)
 {
-	char buffer[200];
-	va_list ap;
+	char	buffer[200];
+	va_list	ap;
 
-#if defined(__STDC__) || defined(SYS_WINNT)
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-#endif /* __STDC__ */
 	/*
 	 * Print debug message to stdout
 	 * In the future, we may want to get get more creative...
 	 */
-	vsnprintf(buffer, sizeof(buffer), fmt, ap);
-	record_clock_stats(&(peer->srcadr), buffer);
+	mvsnprintf(buffer, sizeof(buffer), fmt, ap);
+	record_clock_stats(&peer->srcadr, buffer);
 #ifdef DEBUG
 	if (debug) {
-		fprintf(stdout, "%s: ", function);
-		fprintf(stdout, buffer);
-		fprintf(stdout, "\n");
+		printf("%s: %s\n", function, buffer);
 		fflush(stdout);
 	}
 #endif
@@ -930,7 +918,7 @@ jupiter_send(struct instance *instance, struct jheader *hp)
 	}
 
 	if ((cc = write(instance->peer->procptr->io.fd, (char *)hp, size)) < 0) {
-		snprintf(errstr, sizeof(errstr), "write: %s", strerror(errno));
+		msnprintf(errstr, sizeof(errstr), "write: %m");
 		return (errstr);
 	} else if (cc != (int)size) {
 		snprintf(errstr, sizeof(errstr), "short write (%d != %u)", cc, size);

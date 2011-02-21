@@ -506,12 +506,11 @@ chu_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 	pp->io.clock_recv = chu_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -592,7 +591,7 @@ chu_shutdown(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up == NULL)
 		return;
 
@@ -618,9 +617,9 @@ chu_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * If the audio codec is warmed up, the buffer contains codec
@@ -658,9 +657,9 @@ chu_audio_receive(
 	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Main loop - read until there ain't no more. Note codec
@@ -745,7 +744,7 @@ chu_rf(
 	int	i, j;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Bandpass filter. 4th-order elliptic, 500-Hz bandpass centered
@@ -970,9 +969,9 @@ chu_serial_receive(
 
 	u_char	*dpt;		/* receive buffer pointer */
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	dpt = (u_char *)&rbufp->recv_space;
 	chu_decode(peer, *dpt, rbufp->recv_time);
@@ -996,7 +995,7 @@ chu_decode(
 	double	dtemp;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * If the interval since the last character is greater than the
@@ -1044,7 +1043,7 @@ chu_burst(
 	int	i;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Correlate a block of five characters with the next block of
@@ -1107,7 +1106,7 @@ chu_b(
 	int	i;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * In a format B burst, a character is considered valid only if
@@ -1183,7 +1182,7 @@ chu_a(
 	int	i, j, k;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Determine correct burst phase. There are three cases
@@ -1334,7 +1333,7 @@ chu_second(
 	double	dtemp;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * This routine is called once per minute to process the
@@ -1441,7 +1440,7 @@ chu_major(
 	int	i, j, k;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Majority decoder. Each burst encodes two replications at each
@@ -1502,7 +1501,7 @@ chu_clear(
 	int	i, j;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Clear stuff for the minute.
@@ -1535,7 +1534,7 @@ chu_newchan(
 	int	i;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * The radio can be tuned to three channels: 0 (3330 kHz), 1
@@ -1653,7 +1652,7 @@ chu_gain(
 	struct chuunit *up;
 
 	pp = peer->procptr;
-	up = (struct chuunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Apparently, the codec uses only the high order bits of the

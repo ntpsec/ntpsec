@@ -173,11 +173,10 @@ as2201_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = as2201_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -186,7 +185,7 @@ as2201_start(
 		free(up);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -214,7 +213,7 @@ as2201_shutdown(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct as2201unit *)pp->unitptr;
+	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	if (NULL != up)
@@ -239,9 +238,9 @@ as2201_receive(
 	/*
 	 * Initialize pointers and read the timecode and timestamp.
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct as2201unit *)pp->unitptr;
+	up = pp->unitptr;
 	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
 #ifdef DEBUG
 	if (debug)

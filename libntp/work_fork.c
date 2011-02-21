@@ -19,22 +19,18 @@
 #include "ntp_unixtime.h"
 #include "ntp_worker.h"
 
-/* 
- * pipe descriptors for both directions
- * 0 indicates invalid/unopened, not descriptor 0.
- */
-static	int	parent_req_write_pipe;
-	int	parent_resp_read_pipe;
-static	int	child_req_read_pipe;
-static	int	child_resp_write_pipe;
-static	int	blocking_worker_pid;
-static	volatile int worker_sighup_received;
+/* === variables === */
+	int			worker_process;
+	addremove_io_fd_func	addremove_io_fd;
+static	volatile int		worker_sighup_received;
 
-static void		fork_blocking_child(void);
-static RETSIGTYPE	worker_sighup(int);
-static void		send_worker_home_atexit(void);
+/* === function prototypes === */
+static	void		fork_blocking_child(blocking_child *);
+static	RETSIGTYPE	worker_sighup(int);
+static	void		send_worker_home_atexit(void);
+static	void		cleanup_after_child(blocking_child *);
 
-
+/* === functions === */
 /*
  * exit_worker()
  *
@@ -71,7 +67,8 @@ worker_sighup(
 
 int
 worker_sleep(
-	time_t	seconds
+	blocking_child *	c,
+	time_t			seconds
 	)
 {
 	u_int sleep_remain;
@@ -95,31 +92,86 @@ worker_sleep(
 void
 interrupt_worker_sleep(void)
 {
-	if (blocking_worker_pid != 0 &&
-	    -1 == kill(blocking_worker_pid, SIGHUP))
-		msyslog(LOG_ERR,
-			"Unable to signal HUP to wake child pid %d: %m",
-			blocking_worker_pid);
+	u_int			idx;
+	blocking_child *	c;
+	int			rc;
+
+	for (idx = 0; idx < blocking_children_alloc; idx++) {
+		c = blocking_children[idx];
+		if (NULL == c)
+			continue;
+		rc = kill(c->pid, SIGHUP);
+		if (rc < 0)
+			msyslog(LOG_ERR,
+				"Unable to signal HUP to wake child pid %d: %m",
+				c->pid);
+	}
+}
+
+
+/*
+ * req_child_exit() runs in the parent.
+ */
+int
+req_child_exit(
+	blocking_child *	c
+	)
+{
+	if (-1 != c->req_write_pipe) {
+		close(c->req_write_pipe);
+		c->req_write_pipe = -1;
+		return 0;
+	}
+	return -1;
+}
+
+
+/*
+ * cleanup_after_child() runs in parent.
+ */
+static void
+cleanup_after_child(
+	blocking_child *	c
+	)
+{
+	if (-1 != c->req_write_pipe) {
+		close(c->req_write_pipe);
+		c->req_write_pipe = -1;
+	}
+	if (-1 != c->resp_read_pipe) {
+		(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, TRUE);
+		close(c->resp_read_pipe);
+		c->resp_read_pipe = -1;
+	}
+	c->pid = 0;
+	c->resp_read_ctx = NULL;
+	DEBUG_INSIST(-1 == c->req_read_pipe);
+	DEBUG_INSIST(-1 == c->resp_write_pipe);
+	c->reusable = TRUE;
 }
 
 
 static void
 send_worker_home_atexit(void)
 {
-	if (!parent_req_write_pipe)
+	u_int			idx;
+	blocking_child *	c;
+
+	if (worker_process)
 		return;
 
-	close(parent_req_write_pipe);
-	parent_req_write_pipe = 0;
-	close(parent_resp_read_pipe);
-	parent_resp_read_pipe = 0;
-	interrupt_worker_sleep();
-	blocking_worker_pid = 0;
+	for (idx = 0; idx < blocking_children_alloc; idx++) {
+		c = blocking_children[idx];
+		if (NULL == c)
+			continue;
+		req_child_exit(c);
+	}
 }
 
 
 int
 send_blocking_req_internal(
+	blocking_child *	c,
 	blocking_pipe_header *	hdr,
 	void *			data
 	)
@@ -127,31 +179,33 @@ send_blocking_req_internal(
 	int octets;
 	int rc;
 
-	NTP_REQUIRE(hdr != NULL);
-	NTP_REQUIRE(data != NULL);
-	NTP_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
+	DEBUG_REQUIRE(hdr != NULL);
+	DEBUG_REQUIRE(data != NULL);
+	DEBUG_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
 
-	if (!parent_req_write_pipe) {
-		fork_blocking_child();
-		NTP_INSIST(parent_req_write_pipe);
+	if (-1 == c->req_write_pipe) {
+		fork_blocking_child(c);
+		DEBUG_INSIST(-1 != c->req_write_pipe);
 	}
 
 	octets = sizeof(*hdr);
-	rc = write(parent_req_write_pipe, hdr, octets);
+	rc = write(c->req_write_pipe, hdr, octets);
 
 	if (rc == octets) {
 		octets = hdr->octets - sizeof(*hdr);
-		rc = write(parent_req_write_pipe, data,
-			   octets);
+		rc = write(c->req_write_pipe, data, octets);
 
 		if (rc == octets)
 			return 0;
 	}
 
 	if (rc < 0)
-		msyslog(LOG_ERR, "send_blocking_req_internal: pipe write: %m");
+		msyslog(LOG_ERR,
+			"send_blocking_req_internal: pipe write: %m");
 	else
-		msyslog(LOG_ERR, "send_blocking_req_internal: short write %d of %d\n", rc, octets);
+		msyslog(LOG_ERR,
+			"send_blocking_req_internal: short write %d of %d\n",
+			rc, octets);
 
 	exit(1);	/* otherwise would be return -1 */
 }
@@ -159,46 +213,47 @@ send_blocking_req_internal(
 
 blocking_pipe_header *
 receive_blocking_req_internal(
-	void
+	blocking_child *	c
 	)
 {
-	blocking_pipe_header hdr;
-	blocking_pipe_header *req;
-	int rc;
+	blocking_pipe_header	hdr;
+	blocking_pipe_header *	req;
+	int			rc;
+	long			octets;
 
-	NTP_REQUIRE(child_req_read_pipe);
+	DEBUG_REQUIRE(-1 != c->req_read_pipe);
 
 	req = NULL;
 
 	do {
-		rc = read(child_req_read_pipe, &hdr, sizeof(hdr));
+		rc = read(c->req_read_pipe, &hdr, sizeof(hdr));
 	} while (rc < 0 && EINTR == errno);
 
-	if (rc < 0)
+	if (rc < 0) {
 		msyslog(LOG_ERR,
 			"receive_blocking_req_internal: pipe read %m\n");
-	else if (0 == rc)
-		DPRINTF(1, ("parent closed request pipe\n"));
-	else if (rc != sizeof(hdr))
+	} else if (0 == rc) {
+		DPRINTF(4, ("parent closed request pipe, child %d terminating\n",
+			c->pid));
+	} else if (rc != sizeof(hdr)) {
 		msyslog(LOG_ERR,
 			"receive_blocking_req_internal: short header read %d of %lu\n",
 			rc, (u_long)sizeof(hdr));
-	else {
-		NTP_INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 4 * 1024);
+	} else {
+		INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 4 * 1024);
 		req = emalloc(hdr.octets);
 		memcpy(req, &hdr, sizeof(*req));
-
-		rc = read(child_req_read_pipe,
-			  (char *)req + sizeof(*req),
-			  hdr.octets - sizeof(hdr));
+		octets = hdr.octets - sizeof(hdr);
+		rc = read(c->req_read_pipe, (char *)req + sizeof(*req),
+			  octets);
 
 		if (rc < 0)
 			msyslog(LOG_ERR,
 				"receive_blocking_req_internal: pipe data read %m\n");
-		else if (rc != hdr.octets - sizeof(hdr))
+		else if (rc != octets)
 			msyslog(LOG_ERR,
-				"receive_blocking_req_internal: short read %d of %lu\n",
-				rc, (u_long)(hdr.octets - sizeof(hdr)));
+				"receive_blocking_req_internal: short read %d of %ld\n",
+				rc, octets);
 		else if (BLOCKING_REQ_MAGIC != req->magic_sig)
 			msyslog(LOG_ERR,
 				"receive_blocking_req_internal: packet header mismatch (0x%x)",
@@ -207,7 +262,7 @@ receive_blocking_req_internal(
 			return req;
 	}
 
-	if (req)
+	if (req != NULL)
 		free(req);
 
 	return NULL;
@@ -216,16 +271,17 @@ receive_blocking_req_internal(
 
 int
 send_blocking_resp_internal(
-	blocking_pipe_header *resp
+	blocking_child *	c,
+	blocking_pipe_header *	resp
 	)
 {
-	int octets;
-	int rc;
+	long	octets;
+	int	rc;
 
-	NTP_REQUIRE(child_resp_write_pipe);
+	DEBUG_REQUIRE(-1 != c->resp_write_pipe);
 
 	octets = resp->octets;
-	rc = write(child_resp_write_pipe, resp, octets);
+	rc = write(c->resp_write_pipe, resp, octets);
 	free(resp);
 
 	if (octets == rc)
@@ -234,7 +290,8 @@ send_blocking_resp_internal(
 	if (rc < 0)
 		DPRINTF(1, ("send_blocking_resp_internal: pipe write %m\n"));
 	else
-		DPRINTF(1, ("send_blocking_resp_internal: short write %d of %d\n", rc, octets));
+		DPRINTF(1, ("send_blocking_resp_internal: short write %d of %ld\n",
+			rc, octets));
 
 	return -1;
 }
@@ -242,46 +299,51 @@ send_blocking_resp_internal(
 
 blocking_pipe_header *
 receive_blocking_resp_internal(
-	void
+	blocking_child *	c
 	)
 {
-	blocking_pipe_header hdr;
-	blocking_pipe_header *resp;
-	int rc;
+	blocking_pipe_header	hdr;
+	blocking_pipe_header *	resp;
+	int			rc;
+	long			octets;
 
-	NTP_REQUIRE(parent_resp_read_pipe);
+	DEBUG_REQUIRE(c->resp_read_pipe != -1);
 
 	resp = NULL;
+	rc = read(c->resp_read_pipe, &hdr, sizeof(hdr));
 
-	rc = read(parent_resp_read_pipe, &hdr, sizeof(hdr));
-
-	if (rc < 0)
+	if (rc < 0) {
 		DPRINTF(1, ("receive_blocking_resp_internal: pipe read %m\n"));
-	else if (rc != sizeof(hdr))
+	} else if (0 == rc) {
+		/* this is the normal child exited indication */
+	} else if (rc != sizeof(hdr)) {
 		DPRINTF(1, ("receive_blocking_resp_internal: short header read %d of %lu\n",
 			    rc, (u_long)sizeof(hdr)));
-	else if (BLOCKING_RESP_MAGIC != hdr.magic_sig)
+	} else if (BLOCKING_RESP_MAGIC != hdr.magic_sig) {
 		DPRINTF(1, ("receive_blocking_resp_internal: header mismatch (0x%x)\n",
 			    hdr.magic_sig));
-	else {
-		NTP_INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 16 * 1024);
+	} else {
+		INSIST(sizeof(hdr) < hdr.octets &&
+		       hdr.octets < 16 * 1024);
 		resp = emalloc(hdr.octets);
 		memcpy(resp, &hdr, sizeof(*resp));
-
-		rc = read(parent_resp_read_pipe,
+		octets = hdr.octets - sizeof(hdr);
+		rc = read(c->resp_read_pipe,
 			  (char *)resp + sizeof(*resp),
-			  hdr.octets - sizeof(hdr));
+			  octets);
 
 		if (rc < 0)
 			DPRINTF(1, ("receive_blocking_resp_internal: pipe data read %m\n"));
-		else if (rc < hdr.octets - sizeof(hdr))
-			DPRINTF(1, ("receive_blocking_resp_internal: short read %d of %lu\n",
-				    rc, (u_long)(hdr.octets - sizeof(hdr))));
+		else if (rc < octets)
+			DPRINTF(1, ("receive_blocking_resp_internal: short read %d of %ld\n",
+				    rc, octets));
 		else
 			return resp;
 	}
 
-	if (resp)
+	cleanup_after_child(c);
+
+	if (resp != NULL)
 		free(resp);
 
 	return NULL;
@@ -292,25 +354,36 @@ receive_blocking_resp_internal(
 void
 fork_deferred_worker(void)
 {
-	NTP_REQUIRE(droproot);
-	NTP_REQUIRE(root_dropped);
+	u_int			idx;
+	blocking_child *	c;
 
-	if (parent_req_write_pipe && !blocking_worker_pid)
-		fork_blocking_child();
+	REQUIRE(droproot && root_dropped);
+
+	for (idx = 0; idx < blocking_children_alloc; idx++) {
+		c = blocking_children[idx];
+		if (NULL == c)
+			continue;
+		if (-1 != c->req_write_pipe && 0 == c->pid)
+			fork_blocking_child(c);
+	}
 }
 #endif
 
 
 static void
 fork_blocking_child(
-	void
+	blocking_child *	c
 	)
 {
-	static int atexit_installed;
-	static int blocking_pipes[4];
-	int childpid;
-	int keep_fd;
-	int fd;
+	static int	atexit_installed;
+	static int	blocking_pipes[4] = { -1, -1, -1, -1 };
+	int		rc;
+	int		was_pipe;
+	int		is_pipe;
+	int		saved_errno;
+	int		childpid;
+	int		keep_fd;
+	int		fd;
 
 	/*
 	 * parent and child communicate via a pair of pipes.
@@ -320,9 +393,22 @@ fork_blocking_child(
 	 * 2 parent read response
 	 * 3 child write response
 	 */
-	if (!parent_req_write_pipe) {
-		if (pipe(&blocking_pipes[0]) < 0 ||
-		    pipe(&blocking_pipes[2]) < 0) {
+	if (-1 == c->req_write_pipe) {
+		rc = pipe_socketpair(&blocking_pipes[0], &was_pipe);
+		if (0 != rc) {
+			saved_errno = errno;
+		} else {
+			rc = pipe_socketpair(&blocking_pipes[2], &is_pipe);
+			if (0 != rc) {
+				saved_errno = errno;
+				close(blocking_pipes[0]);
+				close(blocking_pipes[1]);
+			} else {
+				INSIST(was_pipe == is_pipe);
+			}
+		}
+		if (0 != rc) {
+			errno = saved_errno;
 			msyslog(LOG_ERR, "unable to create worker pipes: %m");
 			exit(1);
 		}
@@ -331,11 +417,8 @@ fork_blocking_child(
 		 * Move the descriptors the parent will keep open out of the
 		 * low descriptors preferred by C runtime buffered FILE *.
 		 */
-		parent_req_write_pipe = move_fd(blocking_pipes[1]);
-		parent_resp_read_pipe = move_fd(blocking_pipes[2]);
-		/* zero is reserved to mean invalid/not open */
-		NTP_INSIST(parent_req_write_pipe != 0);
-		NTP_INSIST(parent_resp_read_pipe != 0);
+		c->req_write_pipe = move_fd(blocking_pipes[1]);
+		c->resp_read_pipe = move_fd(blocking_pipes[2]);
 		/*
 		 * wake any worker child on orderly shutdown of the
 		 * daemon so that it can notice the broken pipes and
@@ -343,7 +426,7 @@ fork_blocking_child(
 		 */
 		if (!atexit_installed) {
 			atexit(&send_worker_home_atexit);
-			atexit_installed = 1;
+			atexit_installed = TRUE;
 		}
 	}
 
@@ -367,40 +450,49 @@ fork_blocking_child(
 
 	if (childpid) {
 		/* this is the parent */
-		NLOG(NLOG_SYSEVENT)
-			msyslog(LOG_INFO,
-				"forked worker child (pid %d)",
-				childpid);
-		blocking_worker_pid = childpid;
+		DPRINTF(1, ("forked worker child (pid %d)", childpid));
+		c->pid = childpid;
+		c->ispipe = is_pipe;
 
 		/* close the child's pipe descriptors. */
 		close(blocking_pipes[0]);
 		close(blocking_pipes[3]);
 
+		memset(blocking_pipes, -1, sizeof(blocking_pipes));
+
 		/* wire into I/O loop */
-		update_resp_pipe_fd(parent_resp_read_pipe, 0);
+		(*addremove_io_fd)(c->resp_read_pipe, is_pipe, FALSE);
 
 		return;		/* parent returns */
 	}
 
 	/*
+	 * The parent gets the child pid as the return value of fork().
+	 * The child must work for it.
+	 */
+	c->pid = getpid();
+	worker_process = TRUE;
+
+	/*
 	 * In the child, close all files except stdin, stdout, stderr,
 	 * and the two child ends of the pipes.
 	 */
-	child_req_read_pipe = blocking_pipes[0];
-	child_resp_write_pipe = blocking_pipes[3];
+	DEBUG_INSIST(-1 == c->req_read_pipe);
+	DEBUG_INSIST(-1 == c->resp_write_pipe);
+	c->req_read_pipe = blocking_pipes[0];
+	c->resp_write_pipe = blocking_pipes[3];
 
 	kill_asyncio(0);
 	closelog();
 	if (syslog_file != NULL) {
 		fclose(syslog_file);
 		syslog_file = NULL;
-		syslogit = 1;
+		syslogit = TRUE;
 	}
-	keep_fd = max(child_req_read_pipe, child_resp_write_pipe);
+	keep_fd = max(c->req_read_pipe, c->resp_write_pipe);
 	for (fd = 3; fd < keep_fd; fd++)
-		if (fd != child_req_read_pipe && 
-		    fd != child_resp_write_pipe)
+		if (fd != c->req_read_pipe && 
+		    fd != c->resp_write_pipe)
 			close(fd);
 	close_all_beyond(keep_fd);
 	/*
@@ -417,42 +509,13 @@ fork_blocking_child(
 	signal_no_reset(SIGPOLL, SIG_DFL);
 #endif
 	signal_no_reset(SIGHUP, worker_sighup);
-	init_logging("ntpd_intres", 0);
-	setup_logfile(0);
+	init_logging("ntp_intres", 0, NULL, FALSE);
+	setup_logfile(NULL, NULL);
 
 	/*
 	 * And now back to the portable code
 	 */
-	exit_worker(blocking_child_common());
-}
-
-/*
- * worker_idle_timer_fired()
- *
- * The parent starts this timer when the last pending response has been
- * received from the child, making it idle, and clears the timer when a
- * request is dispatched to the child.  Once the timer expires, the
- * child is sent packing.
- *
- * This is called when worker_idle_timer is nonzero and less than or
- * equal to current_time, and is responsible for resetting
- * worker_idle_timer.
- *
- * Note there are implementations in both work_fork.c and work_thread.c
- * that should remain in sync.
- */
-void
-worker_idle_timer_fired(void)
-{
-	NTP_REQUIRE(0 == intres_req_pending);
-
-	worker_idle_timer = 0;
-	blocking_worker_pid = 0;
-	close(parent_req_write_pipe);
-	parent_req_write_pipe = 0;
-	update_resp_pipe_fd(parent_resp_read_pipe, 1);
-	close(parent_resp_read_pipe);
-	parent_resp_read_pipe = 0;
+	exit_worker(blocking_child_common(c));
 }
 
 

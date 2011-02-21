@@ -6,12 +6,14 @@ CLEANFILES =
 noinst_PROGRAMS = @TESTDCF@ @DCFD@
 EXTRA_PROGRAMS = testdcf dcfd
 
-INCLUDES = -I$(top_srcdir)/include -I$(top_srcdir)/lib/isc/include \
-		-I$(top_srcdir)/lib/isc/nothreads/include \
-		-I$(top_srcdir)/lib/isc/unix/include
+INCLUDES  = -I$(top_srcdir)/include
+INCLUDES += -I$(top_srcdir)/lib/isc/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
+INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 
 AM_CFLAGS = @CFLAGS_NTP@
 AM_CPPFLAGS = @CPPFLAGS_NTP@
+LDADD = @LDADD_LIBNTP@
 
 ETAGS_ARGS = Makefile.am
 DISTCLEANFILES = $(EXTRA_PROGRAMS)

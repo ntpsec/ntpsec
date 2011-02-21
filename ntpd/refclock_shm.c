@@ -120,13 +120,13 @@ struct shmTime *getShmTime (int unit) {
 	shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), 
 		      IPC_CREAT|(unit<2?0600:0666));
 	if (shmid==-1) { /*error */
-		msyslog(LOG_ERR,"SHM shmget (unit %d): %s",unit,strerror(errno));
+		msyslog(LOG_ERR, "SHM shmget (unit %d): %m", unit);
 		return 0;
 	}
 	else { /* no error  */
 		struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
 		if ((int)(long)p==-1) { /* error */
-			msyslog(LOG_ERR,"SHM shmat (unit %d): %s",unit,strerror(errno));
+			msyslog(LOG_ERR, "SHM shmat (unit %d): %m", unit);
 			return 0;
 		}
 		return p;
@@ -189,13 +189,11 @@ shm_start(
 
 	pp = peer->procptr;
 	pp->io.clock_recv = noentry;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = -1;
 
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
-	pp->unitptr = (caddr_t)up;
+	up = emalloc_zero(sizeof(*up));
 
 	up->shm = getShmTime(unit);
 
@@ -204,6 +202,7 @@ shm_start(
 	 */
 	memcpy((char *)&pp->refid, REFID, 4);
 	if (up->shm != 0) {
+		pp->unitptr = up;
 		up->shm->precision = PRECISION;
 		peer->precision = up->shm->precision;
 		up->shm->valid=0;
@@ -212,6 +211,7 @@ shm_start(
 		return (1);
 	}
 	else {
+		free(up);
 		return 0;
 	}
 }
@@ -230,7 +230,7 @@ shm_shutdown(
 	struct shmunit *up;
 
 	pp = peer->procptr;
-	up = (struct shmunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (NULL == up)
 		return;
@@ -307,7 +307,7 @@ int shm_peek(
 	 * board and tacks on a local timestamp.
 	 */
 	pp = peer->procptr;
-	up = (struct shmunit*)pp->unitptr;
+	up = pp->unitptr;
 	up->ticks++;
 	if (up->shm == 0) {
 		/* try to map again - this may succeed if meanwhile some-
@@ -400,7 +400,7 @@ void shm_clockstats(
 	char logbuf[256];
 
 	pp = peer->procptr;
-	up = (struct shmunit*)pp->unitptr;
+	up = pp->unitptr;
 
 	if (!(pp->sloppyclockflag & CLK_FLAG4)) return;
 

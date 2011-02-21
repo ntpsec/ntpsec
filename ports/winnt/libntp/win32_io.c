@@ -36,9 +36,10 @@ InitSockets(
  
 	err = WSAStartup(wVersionRequested, &wsaData);
 	if ( err != 0 ) {
-		fprintf(stderr, "No useable winsock.dll: %s\n", strerror(err));
 		SetLastError(err);
-		msyslog(LOG_ERR, "No usable winsock.dll: %m");
+		mfprintf(stderr, "No usable winsock: %m\n");
+		SetLastError(err);
+		msyslog(LOG_ERR, "No usable winsock: %m\n");
 		exit(1);
 	}
 }

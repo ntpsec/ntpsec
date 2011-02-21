@@ -63,8 +63,8 @@ static  u_long interface_timer;	/* interface update timer */
 static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
+static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;		/* leapseconds countdown */
-u_long	worker_idle_timer;	/* next check for idle intres */
 u_long	orphwait; 		/* orphan wait time */
 #ifdef AUTOKEY
 static	u_long revoke_timer;	/* keys revoke timer */
@@ -96,8 +96,8 @@ static int vmstimer[2]; 	/* time for next timer AST */
 static int vmsinc[2];		/* timer increment */
 #endif /* VMS */
 
-#if defined SYS_WINNT
-static HANDLE WaitableTimerHandle = NULL;
+#ifdef SYS_WINNT
+HANDLE WaitableTimerHandle;
 #else
 static	RETSIGTYPE alarming (int);
 #endif /* SYS_WINNT */
@@ -186,7 +186,7 @@ init_timer(void)
 		fprintf (stderr, "timer create FAILED\n");
 		exit (0);
 	}
-	(void) signal_no_reset(SIGALRM, alarming);
+	signal_no_reset(SIGALRM, alarming);
 	itimer.it_interval.tv_sec = itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
 	itimer.it_interval.tv_nsec = itimer.it_value.tv_nsec = 0;
 	timer_settime(timer_id, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
@@ -231,13 +231,26 @@ init_timer(void)
 }
 
 
-#if defined(SYS_WINNT)
-extern HANDLE 
-get_timer_handle(void)
+/*
+ * intres_timeout_req(s) is invoked in the parent to schedule an idle
+ * timeout to fire in s seconds, if not reset earlier by a call to
+ * intres_timeout_req(0), which clears any pending timeout.  When the
+ * timeout expires, worker_idle_timer_fired() is invoked (again, in the
+ * parent).
+ *
+ * sntp and ntpd each provide implementations adapted to their timers.
+ */
+void
+intres_timeout_req(
+	u_int	seconds		/* 0 cancels */
+	)
 {
-	return WaitableTimerHandle;
+	if (0 == seconds) {
+		worker_idle_timer = 0;
+		return;
+	}
+	worker_idle_timer = current_time + seconds;
 }
-#endif
 
 
 /*

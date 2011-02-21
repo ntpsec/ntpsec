@@ -2,7 +2,9 @@
 
 #if defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
 #define GETDTABLESIZE()	((int)sysconf(_SC_OPEN_MAX))
-#elif !defined(HAVE_GETDTABLESIZE)
+#elif defined(HAVE_GETDTABLESIZE)
+#define GETDTABLESIZE	getdtablesize
+#else
 /*
  * if we have no idea about the max fd value set up things
  * so we will start at FOPEN_MAX

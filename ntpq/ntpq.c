@@ -517,6 +517,8 @@ openhost(
 	char temphost[LENHOSTNAME];
 	int a_info, i;
 	struct addrinfo hints, *ai;
+	sockaddr_u addr;
+	size_t octets;
 	register const char *cp;
 	char name[LENHOSTNAME];
 
@@ -572,19 +574,20 @@ openhost(
 	}
 #endif
 	if (a_info != 0) {
-		(void) fprintf(stderr, "%s\n", gai_strerror(a_info));
+		fprintf(stderr, "%s\n", gai_strerror(a_info));
 		return 0;
 	}
 
-	if (ai->ai_canonname == NULL) {
-		strncpy(temphost, 
-			stoa((sockaddr_u *)ai->ai_addr),
-			LENHOSTNAME);
+	INSIST(ai != NULL);
+	ZERO(addr);
+	octets = min(sizeof(addr), ai->ai_addrlen);
+	memcpy(&addr, ai->ai_addr, octets);
 
-	} else {
-		strncpy(temphost, ai->ai_canonname, LENHOSTNAME);
-	}
-	temphost[LENHOSTNAME-1] = '\0';
+	if (ai->ai_canonname == NULL)
+		strncpy(temphost, stoa(&addr), sizeof(temphost));
+	else
+		strncpy(temphost, ai->ai_canonname, sizeof(temphost));
+	temphost[sizeof(temphost) - 1] = '\0';
 
 	if (debug > 2)
 		printf("Opening host %s\n", temphost);
@@ -592,13 +595,13 @@ openhost(
 	if (havehost == 1) {
 		if (debug > 2)
 			printf("Closing old host %s\n", currenthost);
-		(void) closesocket(sockfd);
+		closesocket(sockfd);
 		havehost = 0;
 	}
 	strncpy(currenthost, temphost, sizeof(currenthost));
 
 	/* port maps to the same location in both families */
-	s_port = ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port;
+	s_port = NSRCPORT(&addr);
 #ifdef SYS_VXWORKS
 	((struct sockaddr_in6 *)&hostaddr)->sin6_port = htons(SERVER_PORT_NUM);
 	if (ai->ai_family == AF_INET)
@@ -617,18 +620,21 @@ openhost(
 		err = setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE,
 				 (char *)&optionValue, sizeof(optionValue));
 		if (err) {
-			err = WSAGetLastError();
-			fprintf(stderr,
-				"setsockopt(SO_SYNCHRONOUS_NONALERT) "
-				"error: %s\n", strerror(err));
+			mfprintf(stderr,
+				 "setsockopt(SO_SYNCHRONOUS_NONALERT)"
+				 " error: %m\n");
+			freeaddrinfo(ai);
 			exit(1);
 		}
 	}
 #endif /* SYS_WINNT */
 
-	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
+	sockfd = socket(ai->ai_family, ai->ai_socktype,
+			ai->ai_protocol);
 	if (sockfd == INVALID_SOCKET) {
 		error("socket", "", "");
+		freeaddrinfo(ai);
+		return 0;
 	}
 
 	
@@ -637,21 +643,23 @@ openhost(
 	{ int rbufsize = DATASIZE + 2048;	/* 2K for slop */
 	if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF,
 		       &rbufsize, sizeof(int)) == -1)
-	    error("setsockopt", "", "");
+		error("setsockopt", "", "");
 	}
 # endif
 #endif
 
 #ifdef SYS_VXWORKS
 	if (connect(sockfd, (struct sockaddr *)&hostaddr,
-		    sizeof(hostaddr)) == -1)
+		    sizeof(hostaddr)) == -1) {
 #else
 	if (connect(sockfd, (struct sockaddr *)ai->ai_addr,
-		    ai->ai_addrlen) == -1)
+		    ai->ai_addrlen) == -1) {
 #endif /* SYS_VXWORKS */
-	    error("connect", "", "");
-	if (a_info == 0)
+		error("connect", "", "");
 		freeaddrinfo(ai);
+		return 0;
+	}
+	freeaddrinfo(ai);
 	havehost = 1;
 	numassoc = 0;
 
@@ -1053,7 +1061,7 @@ getresponse(
 		/*
 		 * Copy the data into the data buffer.
 		 */
-		memcpy((char *)pktdata + offset, rpkt.data, count);
+		memcpy((char *)pktdata + offset, &rpkt.u, count);
 
 		/*
 		 * If we've seen the last fragment, look for holes in the sequence.
@@ -1122,10 +1130,10 @@ sendrequest(
 	 * If we have data, copy and pad it out to a 32-bit boundary.
 	 */
 	if (qsize > 0) {
-		memcpy(qpkt.data, qdata, (size_t)qsize);
+		memcpy(&qpkt.u, qdata, (size_t)qsize);
 		pktsize += qsize;
 		while (pktsize & (sizeof(u_int32) - 1)) {
-			qpkt.data[qsize++] = 0;
+			qpkt.u.data[qsize++] = 0;
 			pktsize++;
 		}
 	}
@@ -1143,7 +1151,7 @@ sendrequest(
 	 * receiver can handle it.
 	 */
 	while (pktsize & 7) {
-		qpkt.data[qsize++] = 0;
+		qpkt.u.data[qsize++] = 0;
 		pktsize++;
 	}
 
@@ -1717,7 +1725,7 @@ getnetnum(
 				    LENHOSTNAME, NULL, 0, 0); 
 		return 1;
 	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
-		NTP_INSIST(sizeof(*num) >= ai->ai_addrlen);
+		INSIST(sizeof(*num) >= ai->ai_addrlen);
 		memcpy(num, ai->ai_addr, ai->ai_addrlen);
 		if (fullhost != NULL) {
 			if (ai->ai_canonname != NULL)
@@ -1728,6 +1736,7 @@ getnetnum(
 					    fullhost, LENHOSTNAME, NULL,
 					    0, 0);
 		}
+		freeaddrinfo(ai);
 		return 1;
 	}
 	fprintf(stderr, "***Can't find host %s\n", hname);

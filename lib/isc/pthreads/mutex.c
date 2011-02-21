@@ -30,6 +30,15 @@
 #include <isc/util.h>
 #include <isc/strerror.h>
 
+#if HAVE_PTHREADS < 5		/* HP-UX 10.20 has 4, needs this */
+# define pthread_mutex_init(m, a)					\
+	 pthread_mutex_init(m, (a)					\
+				? *(const pthread_mutexattr_t *)(a)	\
+				: pthread_mutexattr_default)
+# define PTHREAD_MUTEX_RECURSIVE	MUTEX_RECURSIVE_NP
+# define pthread_mutexattr_settype	pthread_mutexattr_setkind_np
+#endif
+
 #if ISC_MUTEX_PROFILE
 
 /*@{*/

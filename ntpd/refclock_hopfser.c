@@ -146,12 +146,11 @@ hopfserial_start (
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 	pp->io.clock_recv = hopfserial_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -193,7 +192,7 @@ hopfserial_shutdown (
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct hopfclock_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
@@ -224,9 +223,9 @@ hopfserial_receive (
 	/*
 	 * Initialize pointers and read the timecode and timestamp.
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct hopfclock_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (up->rpt_next == 0 )
 		return;
@@ -356,7 +355,7 @@ hopfserial_poll (
 	struct refclockproc *pp;
 	pp = peer->procptr;
 
-	up = (struct hopfclock_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	pp->polls++;
 	up->rpt_next = 1;

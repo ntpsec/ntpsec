@@ -659,15 +659,10 @@ wwv_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	if (!(up = (struct wwvunit *)emalloc(sizeof(struct wwvunit)))) {
-		close(fd);
-		return (0);
-	}
-	memset(up, 0, sizeof(struct wwvunit));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
 	pp->io.clock_recv = wwv_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -675,6 +670,7 @@ wwv_start(
 		free(up);
 		return (0);
 	}
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -693,8 +689,8 @@ wwv_start(
 	for (i = 3; i < OFFSET; i++) {
 		up->comp[i] = up->comp[i - 1] + step;
 		up->comp[OFFSET + i] = -up->comp[i];
-                if (i % 16 == 0)
-		    step *= 2.;
+		if (i % 16 == 0)
+			step *= 2.;
 	}
 	DTOLFP(1. / SECOND, &up->tick);
 
@@ -765,7 +761,7 @@ wwv_shutdown(
 	struct wwvunit *up;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up == NULL)
 		return;
 
@@ -803,9 +799,9 @@ wwv_receive(
 	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Main loop - read until there ain't no more. Note codec
@@ -884,7 +880,7 @@ wwv_poll(
 	struct wwvunit *up;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up->errflg)
 		refclock_report(peer, up->errflg);
 	up->errflg = 0;
@@ -978,7 +974,7 @@ wwv_rf(
 	int	i;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (!iniflg) {
 		iniflg = 1;
@@ -1308,7 +1304,7 @@ wwv_qrz(
 	long	epoch;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Find the sample with peak amplitude, which defines the minute
@@ -1409,10 +1405,10 @@ wwv_endpoc(
 	int tmp2;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (!iniflg) {
 		iniflg = 1;
-		memset((char *)epoch_mf, 0, sizeof(epoch_mf));
+		ZERO(epoch_mf);
 	}
 
 	/*
@@ -1625,7 +1621,7 @@ wwv_epoch(
 	static double sigmin, sigzer, sigone, engmax, engmin;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Find the maximum minute sync pulse energy for both the
@@ -1763,10 +1759,10 @@ wwv_rsec(
 	int	sw, arg, nsec;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (!iniflg) {
 		iniflg = 1;
-		memset((char *)bitvec, 0, sizeof(bitvec));
+		ZERO(bitvec);
 	}
 
 	/*
@@ -2059,7 +2055,7 @@ wwv_clock(
 	l_fp	offset;		/* offset in NTP seconds */
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (!(up->status & SSYNC))
 		up->alarm |= SYNERR;
 	if (up->digcnt < 9)
@@ -2132,7 +2128,7 @@ wwv_corr4(
 	int	i, j;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Correlate digit vector with each BCD coefficient vector. If
@@ -2225,7 +2221,7 @@ wwv_tsec(
 	int temp;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Advance minute unit of the day. Don't propagate carries until
@@ -2404,7 +2400,7 @@ wwv_newchan(
 	int i, j, rval;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Search all five station pairs looking for the channel with
@@ -2496,7 +2492,7 @@ wwv_newgame(
 	int i;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Initialize strategic values. Note we set the leap bits
@@ -2573,7 +2569,7 @@ wwv_qsy(
 	struct wwvunit *up;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up->fd_icom > 0) {
 		up->mitig[up->achan].gain = up->gain;
 		rval = icom_freq(up->fd_icom, peer->ttl & 0x7f,
@@ -2676,7 +2672,7 @@ wwv_gain(
 	struct wwvunit *up;
 
 	pp = peer->procptr;
-	up = (struct wwvunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Apparently, the codec uses only the high order bits of the

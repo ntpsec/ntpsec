@@ -266,19 +266,18 @@ vme_start(
 	/*
 	 * Allocate unit structure
 	 */
-	vme = (struct vmeunit *)emalloc(sizeof(struct vmeunit));
-	bzero((char *)vme, sizeof(struct vmeunit));
+	vme = emalloc_zero(sizeof(struct vmeunit));
 
 
 	/*
 	 * Set up the structures
 	 */
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t) vme;
+	pp->unitptr = vme;
 	pp->timestarted = current_time;
 
 	pp->io.clock_recv = vme_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd_vme;
 	/* shouldn't there be an io_addclock() call? */
@@ -310,7 +309,7 @@ vme_shutdown(
 	 * Tell the I/O module to turn us off.  We're history.
 	 */
 	pp = peer->procptr;
-	vme = (struct vmeunit *)pp->unitptr;
+	vme = pp->unitptr;
 	io_closeclock(&pp->io);
 	pp->unitptr = NULL;
 	if (NULL != vme)
@@ -350,7 +349,7 @@ vme_poll(
 	struct tm *tadr;
         
 	pp = peer->procptr;	 
-	vme = (struct vmeunit *)pp->unitptr;        /* Here is the structure */
+	vme = pp->unitptr;        /* Here is the structure */
 
 	tptr = &vme->vmedata; 
 	if ((tptr = get_datumtime(tptr)) == NULL ) {

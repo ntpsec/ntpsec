@@ -80,11 +80,11 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 	switch (family) {
 	case AF_INET:
 		memcpy(&dst->type.in,
-		       &((struct sockaddr_in *) src)->sin_addr,
+		       &((struct sockaddr_in *)(void *)src)->sin_addr,
 		       sizeof(struct in_addr));
 		break;
 	case AF_INET6:
-		sa6 = (struct sockaddr_in6 *)src;
+		sa6 = (struct sockaddr_in6 *)(void *)src;
 		memcpy(&dst->type.in6, &sa6->sin6_addr,
 		       sizeof(struct in6_addr));
 #ifdef ISC_PLATFORM_HAVESCOPEID

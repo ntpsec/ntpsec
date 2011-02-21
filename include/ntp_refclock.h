@@ -98,7 +98,7 @@ struct refclockio {
 				to avoid excessive buffer use
 				due to small bursts
 				of refclock input data */
-	caddr_t	srcclock;	/* pointer to clock structure */
+	struct peer *srcclock;	/* refclock peer */
 	int	datalen;	/* length of data */
 	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
@@ -130,25 +130,10 @@ struct refclockbug {
 #define GMT		0	/* I hope nobody sees this */
 #define MAXDIAL		60	/* max length of modem dial strings */
 
-/*
- * Line discipline flags. These require line discipline or streams
- * modules to be installed/loaded in the kernel. If specified, but not
- * installed, the code runs as if unspecified.
- */
-#define LDISC_STD	0x00	/* standard */
-#define LDISC_CLK	0x01	/* tty_clk \n intercept */
-#define LDISC_CLKPPS	0x02	/* tty_clk \377 intercept */
-#define LDISC_ACTS	0x04	/* tty_clk #* intercept */
-#define LDISC_CHU	0x08	/* depredated */
-#define LDISC_PPS	0x10	/* ppsclock, ppsapi */
-#define LDISC_RAW	0x20	/* raw binary */
-#define LDISC_ECHO	0x40	/* enable echo */
-#define	LDISC_REMOTE	0x80	/* remote mode */
-#define	LDISC_7O1      0x100    /* 7-bit, odd parity for Z3801A */
 
 struct refclockproc {
 	struct	refclockio io;	/* I/O handler structure */
-	caddr_t	unitptr;	/* pointer to unit structure */
+	void *	unitptr;	/* pointer to unit structure */
 	u_char	leap;		/* leap/synchronization code */
 	u_char	currentstatus;	/* clock status */
 	u_char	lastevent;	/* last exception event */

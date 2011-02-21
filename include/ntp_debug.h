@@ -9,6 +9,7 @@
 #define NTP_DEBUG_H
 
 #include "ntp_assert.h"
+#include "ntp_stdlib.h"
 
 /*
  * macros for debugging output - cut down on #ifdef pollution in the code
@@ -18,7 +19,7 @@
 #define DPRINTF(_lvl_, _arg_)				\
 	do { 						\
 		if (debug >= (_lvl_))			\
-			printf _arg_;			\
+			mprintf _arg_;			\
 	} while (0)
 #else
 #define DPRINTF(_lvl_, _arg_)	do {} while (0)

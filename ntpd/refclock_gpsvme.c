@@ -122,10 +122,10 @@ psc_start(
     /* initialize peer variables	*/
     pp = peer->procptr;
     pp->io.clock_recv = noentry;
-    pp->io.srcclock = (caddr_t) peer;
+    pp->io.srcclock = peer;
     pp->io.datalen = 0;
     pp->io.fd = -1;
-    pp->unitptr = (caddr_t) up;
+    pp->unitptr = up;
     get_systime(&pp->lastrec);
     memcpy(&pp->refid, REFID, 4);
     peer->precision = PRECISION;

@@ -150,7 +150,7 @@ zyfer_start(
 	memset(up, 0, sizeof(struct zyferunit));
 	pp = peer->procptr;
 	pp->io.clock_recv = zyfer_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -159,7 +159,7 @@ zyfer_start(
 		free(up);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -187,7 +187,7 @@ zyfer_shutdown(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct zyferunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (pp->io.fd != -1)
 		io_closeclock(&pp->io);
 	if (up != NULL)
@@ -221,9 +221,9 @@ zyfer_receive(
 #endif
 #endif /* PPS */
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct zyferunit *)pp->unitptr;
+	up = pp->unitptr;
 	p = (u_char *) &rbufp->recv_space;
 	/*
 	 * If lencode is 0:
@@ -334,7 +334,7 @@ zyfer_poll(
 	 * side to capture a sample and check for timeouts.
 	 */
 	pp = peer->procptr;
-	up = (struct zyferunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (!up->pollcnt)
 		refclock_report(peer, CEVNT_TIMEOUT);
 	else

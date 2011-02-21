@@ -591,7 +591,7 @@ arc_event_handler(
 	)
 {
 	struct refclockproc *pp = peer->procptr;
-	register struct arcunit *up = (struct arcunit *)pp->unitptr;
+	register struct arcunit *up = pp->unitptr;
 	int i;
 	char c;
 #ifdef DEBUG
@@ -691,12 +691,11 @@ arc_start(
 
 #endif
 
-	up = emalloc(sizeof(*up));
 	/* Set structure to all zeros... */
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = arc_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -705,7 +704,7 @@ arc_start(
 		free(up); 
 		return(0); 
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -776,7 +775,7 @@ arc_shutdown(
 	peer->action = dummy_event_handler;
 
 	pp = peer->procptr;
-	up = (struct arcunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	if (NULL != up)
@@ -876,9 +875,9 @@ arc_receive(
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct arcunit *)pp->unitptr;
+	up = pp->unitptr;
 
 
 	/*
@@ -1455,7 +1454,7 @@ request_time(
 	)
 {
 	struct refclockproc *pp = peer->procptr;
-	register struct arcunit *up = (struct arcunit *)pp->unitptr;
+	register struct arcunit *up = pp->unitptr;
 #ifdef DEBUG
 	if(debug) { printf("arc: unit %d: requesting time.\n", unit); }
 #endif
@@ -1486,7 +1485,7 @@ arc_poll(
 	int resync_needed;              /* Should we start a resync? */
 
 	pp = peer->procptr;
-	up = (struct arcunit *)pp->unitptr;
+	up = pp->unitptr;
 #if 0
 	pp->lencode = 0;
 	memset(pp->a_lastcode, 0, sizeof(pp->a_lastcode));

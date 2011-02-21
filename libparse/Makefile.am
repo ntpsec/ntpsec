@@ -58,7 +58,7 @@ libparse_kernel_a_LIBADD =	\
 
 INCLUDES = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES += -I$(top_srcdir)/kernel
 

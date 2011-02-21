@@ -25,6 +25,8 @@ int lib_inited;
 void
 init_lib(void)
 {
+	if (lib_inited)
+		return;
 	ipv4_works = (ISC_R_SUCCESS == isc_net_probeipv4());
 	ipv6_works = (ISC_R_SUCCESS == isc_net_probeipv6());
 	lib_inited = TRUE;

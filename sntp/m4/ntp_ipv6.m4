@@ -2,7 +2,6 @@ dnl ######################################################################
 dnl Common IPv6 detection for NTP configure.ac files
 AC_DEFUN([NTP_IPV6], [
 
-
 AC_CACHE_CHECK(
     [for struct sockaddr_storage],
     [ntp_cv_sockaddr_storage],
@@ -31,36 +30,6 @@ case "$ntp_cv_sockaddr_storage" in
  yes)
     AC_DEFINE([HAVE_STRUCT_SOCKADDR_STORAGE], [1],
 	[Does a system header define struct sockaddr_storage?])
-esac
-
-AC_CACHE_CHECK(
-    [for sockaddr_storage.ss_family],
-    [ntp_cv_have_ss_family],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
-		#ifdef HAVE_SYS_SOCKET_H
-		# include <sys/socket.h>
-		#endif
-		#ifdef HAVE_NETINET_IN_H
-		# include <netinet/in.h>
-		#endif
-	    ]],
-	    [[
-		struct sockaddr_storage s;
-		s.ss_family = 1;
-	    ]]
-	)],
-	[ntp_cv_have_ss_family=yes],
-	[ntp_cv_have_ss_family=no]
-    )]
-)
-
-case "$ntp_cv_have_ss_family" in
- no)
     AC_CACHE_CHECK(
 	[for sockaddr_storage.__ss_family],
 	[ntp_cv_have___ss_family],
@@ -89,91 +58,19 @@ case "$ntp_cv_have_ss_family" in
     case "$ntp_cv_have___ss_family" in
      yes)
 	AC_DEFINE([HAVE___SS_FAMILY_IN_SS], [1],
-	    [Does struct sockaddr_storage have __ss_family?])
+		  [Does struct sockaddr_storage have __ss_family?])
     esac
-    ;;
-esac
-
-AH_VERBATIM(
-    [HAVE___SS_FAMILY_IN_SS_VERBATIM],
-    [
-	/* Handle sockaddr_storage.__ss_family */
-	#ifdef HAVE___SS_FAMILY_IN_SS
-	# define ss_family __ss_family
-	#endif /* HAVE___SS_FAMILY_IN_SS */
-    ]
-)
-
-AC_CACHE_CHECK(
-    [for sockaddr_storage.ss_len],
-    [ntp_cv_have_ss_len],
-    [AC_COMPILE_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#ifdef HAVE_SYS_TYPES_H
-		# include <sys/types.h>
-		#endif
-		#ifdef HAVE_SYS_SOCKET_H
-		# include <sys/socket.h>
-		#endif
-		#ifdef HAVE_NETINET_IN_H
-		# include <netinet/in.h>
-		#endif
-	    ]],
-	    [[
-		struct sockaddr_storage s;
-		s.ss_len = 1;
-	    ]]
-	)],
-	[ntp_cv_have_ss_len=yes],
-	[ntp_cv_have_ss_len=no]
-    )]
-)
-
-case "$ntp_cv_have_ss_len" in
- no)
-    AC_CACHE_CHECK(
-	[for sockaddr_storage.__ss_len],
-	[ntp_cv_have___ss_len],
-	[AC_COMPILE_IFELSE(
-	    [AC_LANG_PROGRAM(
-		[[
-		    #ifdef HAVE_SYS_TYPES_H
-		    # include <sys/types.h>
-		    #endif
-		    #ifdef HAVE_SYS_SOCKET_H
-		    # include <sys/socket.h>
-		    #endif
-		    #ifdef HAVE_NETINET_IN_H
-		    # include <netinet/in.h>
-		    #endif
-		]],
-		[[
-		    struct sockaddr_storage s;
-		    s.__ss_len = 1;
-		]]
-	    )],
-	    [ntp_cv_have___ss_len=yes],
-	    [ntp_cv_have___ss_len=no]
-	)]
+    AH_VERBATIM(
+	[HAVE___SS_FAMILY_IN_SS_VERBATIM],
+	[
+	    /* Handle sockaddr_storage.__ss_family */
+	    #ifdef HAVE___SS_FAMILY_IN_SS
+	    # define ss_family __ss_family
+	    #endif /* HAVE___SS_FAMILY_IN_SS */
+	]
     )
-    case "$ntp_cv_have___ss_len" in
-     yes)
-	AC_DEFINE([HAVE___SS_LEN_IN_SS], [1],
-	    [Does struct sockaddr_storage have __ss_len?])
-    esac
-    ;;
 esac
 
-AH_VERBATIM(
-    [HAVE___SS_LEN_IN_SS_VERBATIM],
-    [
-	/* Handle sockaddr_storage.__ss_len */
-	#ifdef HAVE___SS_LEN_IN_SS
-	# define ss_len __ss_len
-	#endif /* HAVE___SS_LEN_IN_SS */
-    ]
-)
 
 #
 # Look for in_port_t.
@@ -522,6 +419,124 @@ case "$isc_cv_struct_if_laddrreq" in
 	[have struct if_laddrreq?])
 esac
 
+AC_CACHE_CHECK(
+    [for multicast IP support],
+    [ntp_cv_multicast],
+    [
+	ntp_cv_multicast=no
+	case "$host" in
+	 i386-sequent-sysv4)
+	    ;;
+	 *)
+	    AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+		    [[
+			#ifdef HAVE_NETINET_IN_H
+			# include <netinet/in.h>
+			#endif
+		    ]],
+		    [[
+			struct ip_mreq ipmr;
+			ipmr.imr_interface.s_addr = 0;
+		    ]]
+		)],
+		[ntp_cv_multicast=yes],
+		[]
+	    )
+	    ;;
+	esac
+    ]
+)
+case "$ntp_cv_multicast" in
+ yes)
+    AC_DEFINE([MCAST], [1], [Does the target support multicast IP?])
+    AC_CACHE_CHECK(
+	[arg type needed for setsockopt() IP*_MULTICAST_LOOP],
+	[ntp_cv_typeof_ip_multicast_loop],
+	[
+	    case "$host" in
+	     *-*-netbsd*|*-*-*linux*)
+		ntp_cv_typeof_ip_multicast_loop=u_int
+		;;
+	     *)
+		ntp_cv_typeof_ip_multicast_loop=u_char
+		;;
+	    esac
+	]
+    )
+    AC_DEFINE_UNQUOTED([TYPEOF_IP_MULTICAST_LOOP],
+	[$ntp_cv_typeof_ip_multicast_loop],
+	[What type to use for setsockopt])
+esac
+
+AC_ARG_ENABLE(
+    [getifaddrs],
+    [AS_HELP_STRING(
+	[--enable-getifaddrs],
+	[s Enable the use of getifaddrs() [[yes|no|glibc]].
+glibc: Use getifaddrs() in glibc if you know it supports IPv6.]
+    )],
+    [want_getifaddrs="$enableval"],
+    [want_getifaddrs="yes"]
+)
+
+case $want_getifaddrs in
+ yes|glibc)
+    #
+    # Do we have getifaddrs() ?
+    #
+    case $host in
+     *-*linux*)
+	# Some recent versions of glibc support getifaddrs() which does not
+	# provide AF_INET6 addresses while the function provided by the USAGI
+	# project handles the AF_INET6 case correctly.  We need to avoid
+	# using the former but prefer the latter unless overridden by
+	# --enable-getifaddrs=glibc.
+	case "$want_getifaddrs" in
+	 glibc)
+	    AC_CHECK_FUNCS([getifaddrs])
+	    ;;
+	 *)
+	    save_LIBS="$LIBS"
+	    LIBS="-L/usr/local/v6/lib $LIBS"
+	    AC_CHECK_LIB(
+		[inet6],
+		[getifaddrs],
+		[ans=yes],
+		[ans=no]
+	    )
+	    case "$ans" in
+	     yes)
+		LIBS="$LIBS -linet6"
+		AC_DEFINE([HAVE_GETIFADDRS], [1])
+		;;
+	     *)
+		LIBS=${save_LIBS}
+		;;
+	    esac
+	    ;;
+	esac
+	;;
+    esac
+    ;;
+ *)
+    AC_CHECK_FUNCS([getifaddrs])
+    ;;
+esac
+
+#
+# Check for if_nametoindex() for IPv6 scoped addresses support
+#
+case "$host" in
+ *-hp-hpux*)
+    AC_SEARCH_LIBS([if_nametoindex], [ipv6])
+esac
+AC_CHECK_FUNCS([if_nametoindex])
+case "$ac_cv_func_if_nametoindex" in
+ yes)
+	AC_DEFINE([ISC_PLATFORM_HAVEIFNAMETOINDEX], [1],
+	    [ISC: do we have if_nametoindex()?])
+esac
 
 ])dnl
 dnl ======================================================================

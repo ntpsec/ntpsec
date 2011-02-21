@@ -140,14 +140,7 @@ static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
 #define	DEG_4		63
 #define	SEP_4		1
 
-/*
- * Array versions of the above information to make code run faster --
- * relies on fact that TYPE_i == i.
- */
 #define	MAX_TYPES	5		/* max number of types above */
-
-static long degrees[MAX_TYPES] =	{ DEG_0, DEG_1, DEG_2, DEG_3, DEG_4 };
-static long seps [MAX_TYPES] =	{ SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
 
 /*
  * Initially, everything is set up as if from:
@@ -307,6 +300,24 @@ ntp_srandomdev( void )
 }
 #endif
 
+
+/*
+ * ntp_initstate() and ntp_setstate() are unused in our codebase and
+ * trigger warnings due to casting to a more-strictly-aligned pointer
+ * on alignment-sensitive platforms.  #ifdef them away to save noise,
+ * build time, and binary space, but retain the code in case we find a
+ * use.
+ */
+#ifdef COMPILE_UNUSED_FUNCTIONS
+/*
+ * Array versions of the above information to make code run faster --
+ * relies on fact that TYPE_i == i.
+ */
+#define	MAX_TYPES	5		/* max number of types above */
+
+static long degrees[MAX_TYPES] =	{ DEG_0, DEG_1, DEG_2, DEG_3, DEG_4 };
+static long seps [MAX_TYPES] =	{ SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
+
 /*
  * initstate:
  *
@@ -435,6 +446,8 @@ ntp_setstate(
 	end_ptr = &state[rand_deg];		/* set end_ptr too */
 	return(ostate);
 }
+#endif	/* COMPILE_UNUSED_FUNCTIONS */
+
 
 /*
  * random:

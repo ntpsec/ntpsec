@@ -504,11 +504,10 @@ ripencc_start(int unit, struct peer *peer)
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 
 	pp->io.clock_recv = ripencc_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	if (!io_addclock(&pp->io)) {
 		pp->io.fd = -1;
@@ -516,7 +515,7 @@ ripencc_start(int unit, struct peer *peer)
 		free(up);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -650,7 +649,7 @@ ripencc_ppsapi(
 	int capability;
 
 	pp = peer->procptr;
-	up = (struct ripencc_unit *)pp->unitptr;
+	up = pp->unitptr;
 	if (time_pps_getcap(up->handle, &capability) < 0) {
 		msyslog(LOG_ERR,
 			"refclock_ripencc: time_pps_getcap failed: %m");
@@ -771,7 +770,7 @@ ripencc_shutdown(int unit, struct peer *peer)
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct ripencc_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (up != NULL) {
 		if (up->handle != 0)
@@ -799,7 +798,7 @@ ripencc_poll(int unit, struct peer *peer)
 		fprintf(stderr, "ripencc_poll(%d)\n", unit);
 #endif /* DEBUG_NCC */
 	pp = peer->procptr;
-	up = (struct ripencc_unit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up->pollcnt == 0)
 		refclock_report(peer, CEVNT_TIMEOUT);
 	else
@@ -830,7 +829,7 @@ ripencc_send(struct peer *peer, TSIPPKT spt)
 		register struct refclockproc *pp;	
 
 		pp = peer->procptr;
-		up = (struct ripencc_unit *)pp->unitptr;
+		up = pp->unitptr;
 		if (debug)
 			printf("ripencc_send(%d, %02X)\n", up->unit, cmd);
 	}
@@ -905,9 +904,9 @@ ripencc_receive(struct recvbuf *rbufp)
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct ripencc_unit *)pp->unitptr;
+	up = pp->unitptr;
 	rd_lencode = refclock_gtlin(rbufp, rd_lastcode, BMAX, &rd_tmp);
 
 #ifdef DEBUG_RAW

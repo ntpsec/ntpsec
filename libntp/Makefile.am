@@ -4,6 +4,42 @@ BUILT_SOURCES =
 CLEANFILES =
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
 EXTRA_LIBRARIES = libntpsim.a
+
+libisc_SRCS =								\
+	$(srcdir)/../lib/isc/assertions.c				\
+	$(srcdir)/../lib/isc/buffer.c					\
+	$(srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/condition.c	\
+	$(srcdir)/../lib/isc/unix/dir.c					\
+	$(srcdir)/../lib/isc/error.c					\
+	$(srcdir)/../lib/isc/unix/errno2result.c			\
+	$(srcdir)/../lib/isc/event.c					\
+	$(srcdir)/../lib/isc/unix/file.c				\
+	$(srcdir)/../lib/isc/inet_ntop.c				\
+	$(srcdir)/../lib/isc/inet_pton.c				\
+	$(srcdir)/../lib/isc/unix/interfaceiter.c			\
+	$(srcdir)/../lib/isc/lib.c					\
+	$(srcdir)/../lib/isc/log.c					\
+	$(srcdir)/../lib/isc/md5.c					\
+	$(srcdir)/../lib/isc/nls/msgcat.c				\
+	$(srcdir)/../lib/isc/unix/net.c					\
+	$(srcdir)/../lib/isc/netaddr.c					\
+	$(srcdir)/../lib/isc/netscope.c					\
+	$(srcdir)/../lib/isc/ondestroy.c				\
+	$(srcdir)/../lib/isc/random.c					\
+	$(srcdir)/../lib/isc/result.c					\
+	$(srcdir)/../lib/isc/unix/stdio.c				\
+	$(srcdir)/../lib/isc/unix/stdtime.c				\
+	$(srcdir)/../lib/isc/unix/strerror.c				\
+	$(srcdir)/../lib/isc/task.c					\
+	$(srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/thread.c	\
+	$(srcdir)/../lib/isc/unix/time.c				\
+	$(srcdir)/../lib/isc/sockaddr.c					\
+	$(NULL)
+
+if PTHREADS
+libisc_SRCS += $(srcdir)/../lib/isc/pthreads/mutex.c
+endif
+
 libntp_a_SRCS =						\
 	a_md5encrypt.c					\
 	adjtime.c					\
@@ -46,9 +82,11 @@ libntp_a_SRCS =						\
 	msyslog.c					\
 	netof.c						\
 	ntp_calendar.c					\
+	ntp_intres.c					\
 	ntp_libopts.c					\
 	ntp_lineedit.c					\
 	ntp_rfc2553.c					\
+	ntp_worker.c					\
 	numtoa.c					\
 	numtohost.c					\
 	octtoint.c					\
@@ -71,36 +109,12 @@ libntp_a_SRCS =						\
 	tvtots.c					\
 	uglydate.c					\
 	uinttoa.c					\
+	work_fork.c					\
+	work_thread.c					\
 	ymd2yd.c					\
-	$(srcdir)/../lib/isc/assertions.c		\
-	$(srcdir)/../lib/isc/buffer.c			\
-	$(srcdir)/../lib/isc/nothreads/condition.c	\
-	$(srcdir)/../lib/isc/unix/dir.c			\
-	$(srcdir)/../lib/isc/error.c			\
-	$(srcdir)/../lib/isc/unix/errno2result.c	\
-	$(srcdir)/../lib/isc/event.c			\
-	$(srcdir)/../lib/isc/unix/file.c		\
-	$(srcdir)/../lib/isc/inet_ntop.c		\
-	$(srcdir)/../lib/isc/inet_pton.c		\
-	$(srcdir)/../lib/isc/unix/interfaceiter.c	\
-	$(srcdir)/../lib/isc/lib.c			\
-	$(srcdir)/../lib/isc/log.c			\
-	$(srcdir)/../lib/isc/md5.c			\
-	$(srcdir)/../lib/isc/nls/msgcat.c		\
-	$(srcdir)/../lib/isc/unix/net.c			\
-	$(srcdir)/../lib/isc/netaddr.c			\
-	$(srcdir)/../lib/isc/netscope.c			\
-	$(srcdir)/../lib/isc/ondestroy.c		\
-	$(srcdir)/../lib/isc/random.c			\
-	$(srcdir)/../lib/isc/result.c			\
-	$(srcdir)/../lib/isc/unix/stdio.c		\
-	$(srcdir)/../lib/isc/unix/stdtime.c		\
-	$(srcdir)/../lib/isc/unix/strerror.c		\
-	$(srcdir)/../lib/isc/task.c			\
-	$(srcdir)/../lib/isc/nothreads/thread.c		\
-	$(srcdir)/../lib/isc/unix/time.c		\
-	$(srcdir)/../lib/isc/sockaddr.c			\
+	$(libisc_SRCS)					\
 	$(NULL)
+
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c
@@ -108,7 +122,7 @@ ETAGS_ARGS = Makefile.am
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES +=  $(LIBOPTS_CFLAGS)
 

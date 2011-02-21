@@ -9,14 +9,14 @@ clktest_SOURCES = clktest.c clktest-opts.c clktest-opts.h
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES += $(LIBOPTS_CFLAGS)
 
 AM_CFLAGS = @CFLAGS_NTP@
 AM_CPPFLAGS = @CPPFLAGS_NTP@
 
-LDADD = ../libntp/libntp.a
+LDADD = ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
 propdelay_LDADD = $(LIBM) $(LDADD)
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\

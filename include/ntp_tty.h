@@ -78,16 +78,16 @@
  * modules to be installed/loaded in the kernel. If specified, but not
  * installed, the code runs as if unspecified.
  */
-#define LDISC_STD	0x00	/* standard */
-#define LDISC_CLK	0x01	/* tty_clk \n intercept */
-#define LDISC_CLKPPS	0x02	/* tty_clk \377 intercept */
-#define LDISC_ACTS	0x04	/* tty_clk #* intercept */
-#define LDISC_CHU	0x08	/* depredated */
-#define LDISC_PPS	0x10	/* ppsclock, ppsapi */
-#define LDISC_RAW	0x20	/* raw binary */
-#define LDISC_ECHO	0x40	/* enable echo */
-#define	LDISC_REMOTE	0x80	/* remote mode */
-#define	LDISC_7O1      0x100	/* 7-bit, odd parity for Z3801A */
+#define LDISC_STD	0x000	/* standard */
+#define LDISC_CLK	0x001	/* tty_clk \n intercept */
+#define LDISC_CLKPPS	0x002	/* tty_clk \377 intercept */
+#define LDISC_ACTS	0x004	/* tty_clk #* intercept */
+#define LDISC_CHU	0x008	/* depredated */
+#define LDISC_PPS	0x010	/* ppsclock, ppsapi */
+#define LDISC_RAW	0x020	/* raw binary */
+#define LDISC_ECHO	0x040	/* enable echo */
+#define	LDISC_REMOTE	0x080	/* remote mode */
+#define	LDISC_7O1	0x100	/* 7-bit, odd parity for Z3801A */
 
 /* function prototypes for ntp_tty.c */
 #if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)

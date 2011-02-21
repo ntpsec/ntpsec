@@ -112,16 +112,17 @@ l_fp_output_dec (
  */
 char *
 addrinfo_to_str (
-	struct addrinfo *addr
+	const struct addrinfo *addr
 	)
 {
 	sockaddr_u	s;
 	
-	memset(&s, 0, sizeof(s));
+	ZERO(s);
 	memcpy(&s, addr->ai_addr, min(sizeof(s), addr->ai_addrlen));
 
 	return ss_to_str(&s);
 }
+
 
 /* Convert a sockaddr_u to a string containing the address in
  * style of inet_ntoa
@@ -140,6 +141,8 @@ ss_to_str (
 
 	return buf;
 }
+
+
 /*
  * Converts a struct tv to a date string
  */
@@ -185,6 +188,3 @@ tv_to_str(
 	return buf;
 }
 
-
-
-		

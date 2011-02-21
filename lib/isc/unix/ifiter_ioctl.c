@@ -453,7 +453,7 @@ internal_current4(isc_interfaceiter_t *iter) {
 
 	INSIST( iter->pos < (unsigned int) iter->ifc.ifc_len);
 
-	ifrp = (struct ifreq *)((char *) iter->ifc.ifc_req + iter->pos);
+	ifrp = (void *)((char *) iter->ifc.ifc_req + iter->pos);
 
 	memset(&ifreq, 0, sizeof(ifreq));
 	memcpy(&ifreq, ifrp, sizeof(ifreq));
@@ -666,7 +666,7 @@ internal_current6(isc_interfaceiter_t *iter) {
 		return (iter->result6);
 	REQUIRE(iter->pos6 < (unsigned int) iter->lifc.lifc_len);
 
-	ifrp = (struct LIFREQ *)((char *) iter->lifc.lifc_req + iter->pos6);
+	ifrp = (void *)((char *)iter->lifc.lifc_req + iter->pos6);
 
 	memset(&lifreq, 0, sizeof(lifreq));
 	memcpy(&lifreq, ifrp, sizeof(lifreq));

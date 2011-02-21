@@ -533,7 +533,7 @@ msfees_start(
 	ees->timestarted= current_time;
 	ees->ttytype	= 0;
 	ees->io.clock_recv= ees_receive;
-	ees->io.srcclock= (caddr_t)ees;
+	ees->io.srcclock= ees;
 	ees->io.datalen	= 0;
 	ees->io.fd	= fd232;
 
@@ -585,7 +585,7 @@ msfees_start(
 		peer->refid = htonl(EESHSREFID);
 	}
 	unitinuse[unit] = 1;
-	pp->unitptr = (caddr_t) &eesunits[unit];
+	pp->unitptr = &eesunits[unit];
 	pp->clockdesc = EESDESCRIPTION;
 	msyslog(LOG_ERR, "ees clock: %s OK on %d", eesdev, unit);
 	return (1);

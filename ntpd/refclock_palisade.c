@@ -305,8 +305,7 @@ palisade_start (
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 
 	up->type = CLK_TYPE(peer);
 	switch (up->type) {
@@ -342,7 +341,7 @@ palisade_start (
 
 	pp = peer->procptr;
 	pp->io.clock_recv = palisade_io;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -358,7 +357,7 @@ palisade_start (
 	/*
 	 * Initialize miscellaneous variables
 	 */
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 	pp->clockdesc = DESCRIPTION;
 
 	peer->precision = PRECISION;
@@ -393,7 +392,7 @@ palisade_shutdown (
 	struct palisade_unit *up;
 	struct refclockproc *pp;
 	pp = peer->procptr;
-	up = (struct palisade_unit *)pp->unitptr;
+	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	if (NULL != up)
@@ -447,7 +446,7 @@ TSIP_decode (
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct palisade_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Check the time packet, decode its contents. 
@@ -899,7 +898,7 @@ palisade_receive (
 	 * Initialize pointers and read the timecode and timestamp.
 	 */
 	pp = peer->procptr;
-	up = (struct palisade_unit *)pp->unitptr;
+	up = pp->unitptr;
 		
 	if (! TSIP_decode(peer)) return;
 	
@@ -964,7 +963,7 @@ palisade_poll (
 	struct refclockproc *pp;
 	
 	pp = peer->procptr;
-	up = (struct palisade_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	pp->polls++;
 	if (up->polled > 0) /* last reply never arrived or error */ 
@@ -1037,9 +1036,9 @@ palisade_io (
 
 	char * c, * d;
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct palisade_unit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if(up->type == CLK_PRAECIS) {
 		if(praecis_msg) {
@@ -1140,14 +1139,12 @@ HW_poll (
 	int x;	/* state before & after RTS set */
 	struct palisade_unit *up;
 
-	up = (struct palisade_unit *) pp->unitptr;
+	up = pp->unitptr;
 
 	/* read the current status, so we put things back right */
 	if (ioctl(pp->io.fd, TIOCMGET, &x) < 0) {
-#ifdef DEBUG
-		if (debug)
-			printf("Palisade HW_poll: unit %d: GET %s\n", up->unit, strerror(errno));
-#endif
+		DPRINTF(1, ("Palisade HW_poll: unit %d: GET %m\n",
+			up->unit));
 		msyslog(LOG_ERR, "Palisade(%d) HW_poll: ioctl(fd,GET): %m", 
 			up->unit);
 		return -1;
@@ -1231,7 +1228,10 @@ getint (
 	u_char *bp
 	)
 {
-	return (short)ntohs(*(u_short *)bp);
+	u_short us;
+
+	memcpy(&us, bp, sizeof(us));
+	return (short)ntohs(us);
 }
 
 /*
@@ -1242,7 +1242,10 @@ getlong(
 	u_char *bp
 	)
 {
-	return (int32)(u_int32)ntohl(*(u_int32 *)bp);
+	u_int32 u32;
+
+	memcpy(&u32, bp, sizeof(u32));
+	return (int32)(u_int32)ntohl(u32);
 }
 
 #else	/* REFCLOCK && CLOCK_PALISADE*/

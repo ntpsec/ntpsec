@@ -22,25 +22,17 @@ protected:
 	}
 
 	virtual void TearDown() {
-		/* 
-		 * When calling kod_init_kod_db(), it will place an exit handler
-		 * that runs write_kod_db() when the test executable stops running.
-		 * To prevent write_kod_db() from messing up our pre-written input
-		 * files, kod_db_file is set to /dev/null at the end of every test.
-		 */
-
-		kod_db_file = estrdup("/dev/null");
 	}
 };
 
 TEST_F(kodFileTest, ReadEmptyFile) {
-	kod_init_kod_db(CreatePath("kod-test-empty", INPUT_DIR).c_str());
+	kod_init_kod_db(CreatePath("kod-test-empty", INPUT_DIR).c_str(), TRUE);
 
 	EXPECT_EQ(0, kod_db_cnt);
 }
 
 TEST_F(kodFileTest, ReadCorrectFile) {
-	kod_init_kod_db(CreatePath("kod-test-correct", INPUT_DIR).c_str());
+	kod_init_kod_db(CreatePath("kod-test-correct", INPUT_DIR).c_str(), TRUE);
 	
 	EXPECT_EQ(2, kod_db_cnt);
 
@@ -58,7 +50,7 @@ TEST_F(kodFileTest, ReadCorrectFile) {
 }
 
 TEST_F(kodFileTest, ReadFileWithBlankLines) {
-	kod_init_kod_db(CreatePath("kod-test-blanks", INPUT_DIR).c_str());
+	kod_init_kod_db(CreatePath("kod-test-blanks", INPUT_DIR).c_str(), TRUE);
 
 	EXPECT_EQ(3, kod_db_cnt);
 

@@ -11,7 +11,7 @@ noinst_LIBRARIES=	libntpd.a
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES +=  $(LIBOPTS_CFLAGS)
 
@@ -19,8 +19,8 @@ AM_CFLAGS = @CFLAGS_NTP@
 AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 # LDADD might need RESLIB and ADJLIB.
-LDADD=	version.o libntpd.a @LIBPARSE@
-AM_YFLAGS=	-d -t -r all
+LDADD = version.o libntpd.a @LIBPARSE@
+AM_YFLAGS = -d -t -r all
 
 if SAVECONFIG_ENABLED
 if NTP_CROSSCOMPILE
@@ -89,11 +89,14 @@ man_MANS=	$(srcdir)/ntpd.1
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
 # longer a reason to have ntpdbase-opts.def split off of ntpd-opts.def.
 
-ntpd_LDADD = $(LDADD) $(LIBOPTS_LDADD) ../libntp/libntp.a $(LIBM) @LCRYPTO@ @LSCF@
-ntpdsim_LDADD = $(LDADD) $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntpsim.a @LCRYPTO@ @LSCF@
-ntpdsim_CFLAGS = $(CFLAGS) -DSIM
-check_y2k_LDADD = $(LDADD) ../libntp/libntp.a
-keyword_gen_LDADD = ../libntp/libntp.a	# we don't want $(LDADD) here
+LDADD_NTPD_COMMON  = @LDADD_LIBNTP@ $(LIBOPTS_LDADD) @PTHREAD_LIBS@
+LDADD_NTPD_COMMON += $(LIBM) @LCRYPTO@ @LSCF@
+ntpd_LDADD = $(LDADD) ../libntp/libntp.a $(LDADD_NTPD_COMMON)
+ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a $(LDADD_NTPD_COMMON)
+ntpdsim_CPPFLAGS = $(AM_CPPFLAGS) -DSIM
+check_y2k_LDADD = $(LDADD) ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
+## we don't want $(LDADD) in keyword_gen_LDADD
+keyword_gen_LDADD = ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
 
 DISTCLEANFILES =		\
 	keyword-gen		\
@@ -164,7 +167,6 @@ libntpd_a_SOURCES =		\
 	ntp_control.c		\
 	ntp_crypto.c		\
 	ntp_filegen.c		\
-	ntp_intres.c		\
 	ntp_loopfilter.c	\
 	ntp_monitor.c		\
 	ntp_peer.c		\
@@ -175,7 +177,6 @@ libntpd_a_SOURCES =		\
 	ntp_signd.c		\
 	ntp_timer.c		\
 	ntp_util.c		\
-	ntp_worker.c		\
 	ppsapi_timepps.h	\
 	refclock_acts.c		\
 	refclock_arbiter.c	\
@@ -217,8 +218,6 @@ libntpd_a_SOURCES =		\
 	refclock_wwv.c		\
 	refclock_wwvb.c		\
 	refclock_zyfer.c	\
-	work_fork.c		\
-	work_thread.c		\
 	$(NULL)
 
 k-g-u-submake: keyword-gen

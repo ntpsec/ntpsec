@@ -223,11 +223,6 @@ static	const char *chosts[MAXHOSTS];
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 /*
- * For converting time stamps to dates
- */
-#define	JAN_1970	2208988800	/* 1970 - 1900 in seconds */
-
-/*
  * Jump buffer for longjumping back to the command level
  */
 static	jmp_buf interrupt_buf;
@@ -397,6 +392,8 @@ openhost(
 	char temphost[LENHOSTNAME];
 	int a_info, i;
 	struct addrinfo hints, *ai = NULL;
+	sockaddr_u addr;
+	size_t octets;
 	register const char *cp;
 	char name[LENHOSTNAME];
 	char service[5];
@@ -451,7 +448,7 @@ openhost(
 		a_info = getaddrinfo(hname, service, &hints, &ai);	
 	}
 	if (a_info != 0) {
-		(void) fprintf(stderr, "%s\n", gai_strerror(a_info));
+		fprintf(stderr, "%s\n", gai_strerror(a_info));
 		if (ai != NULL)
 			freeaddrinfo(ai);
 		return 0;
@@ -461,30 +458,30 @@ openhost(
 	 * getaddrinfo() has returned without error so ai should not 
 	 * be NULL.
 	 */
-	NTP_INSIST(ai != NULL);
+	INSIST(ai != NULL);
+	ZERO(addr);
+	octets = min(sizeof(addr), ai->ai_addrlen);
+	memcpy(&addr, ai->ai_addr, octets);
 
-	if (ai->ai_canonname == NULL) {
-		strncpy(temphost, stoa((sockaddr_u *)ai->ai_addr),
-		    LENHOSTNAME);
-		temphost[LENHOSTNAME-1] = '\0';
-	} else {
-		strncpy(temphost, ai->ai_canonname, LENHOSTNAME);
-		temphost[LENHOSTNAME-1] = '\0';
-	}
+	if (ai->ai_canonname == NULL)
+		strncpy(temphost, stoa(&addr), sizeof(temphost));
+	else
+		strncpy(temphost, ai->ai_canonname, sizeof(temphost));
+	temphost[sizeof(temphost) - 1] = '\0';
 
 	if (debug > 2)
-	    printf("Opening host %s\n", temphost);
+		printf("Opening host %s\n", temphost);
 
 	if (havehost == 1) {
 		if (debug > 2)
-		    printf("Closing old host %s\n", currenthost);
-		(void) closesocket(sockfd);
+			printf("Closing old host %s\n", currenthost);
+		closesocket(sockfd);
 		havehost = 0;
 	}
 	strncpy(currenthost, temphost, sizeof(currenthost));
 	
 	/* port maps to the same in both families */
-	s_port = ((struct sockaddr_in6 *)ai->ai_addr)->sin6_port; 
+	s_port = NSRCPORT(&addr);; 
 #ifdef SYS_VXWORKS
 	((struct sockaddr_in6 *)&hostaddr)->sin6_port = htons(SERVER_PORT_NUM);
 	if (ai->ai_family == AF_INET)
@@ -506,18 +503,13 @@ openhost(
 			exit(1);
 		}
 	}
+#endif /* SYS_WINNT */
 
 	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
 	if (sockfd == INVALID_SOCKET) {
 		error("socket", "", "");
 		exit(-1);
 	}
-#else
-	sockfd = socket(ai->ai_family, SOCK_DGRAM, 0);
-	if (sockfd == -1)
-	    error("socket", "", "");
-#endif /* SYS_WINNT */
-
 	
 #ifdef NEED_RCVBUF_SLOP
 # ifdef SO_RCVBUF
@@ -533,12 +525,13 @@ openhost(
 
 #ifdef SYS_VXWORKS
 	if (connect(sockfd, (struct sockaddr *)&hostaddr, 
-		    sizeof(hostaddr)) == -1)
+		    sizeof(hostaddr)) == -1) {
 #else
-	if (connect(sockfd, (struct sockaddr *)ai->ai_addr,
-		    ai->ai_addrlen) == -1)
+	if (connect(sockfd, ai->ai_addr, ai->ai_addrlen) == -1) {
 #endif /* SYS_VXWORKS */
-	    error("connect", "", "");
+		error("connect", "", "");
+		exit(-1);
+	}
 
 	freeaddrinfo(ai);
 	havehost = 1;
@@ -678,35 +671,35 @@ getresponse(
 	 */
 	if (n < RESP_HEADER_SIZE) {
 		if (debug)
-		    printf("Short (%d byte) packet received\n", n);
+			printf("Short (%d byte) packet received\n", n);
 		goto again;
 	}
 	if (INFO_VERSION(rpkt.rm_vn_mode) > NTP_VERSION ||
 	    INFO_VERSION(rpkt.rm_vn_mode) < NTP_OLDVERSION) {
 		if (debug)
-		    printf("Packet received with version %d\n",
-			   INFO_VERSION(rpkt.rm_vn_mode));
+			printf("Packet received with version %d\n",
+			       INFO_VERSION(rpkt.rm_vn_mode));
 		goto again;
 	}
 	if (INFO_MODE(rpkt.rm_vn_mode) != MODE_PRIVATE) {
 		if (debug)
-		    printf("Packet received with mode %d\n",
-			   INFO_MODE(rpkt.rm_vn_mode));
+			printf("Packet received with mode %d\n",
+			       INFO_MODE(rpkt.rm_vn_mode));
 		goto again;
 	}
 	if (INFO_IS_AUTH(rpkt.auth_seq)) {
 		if (debug)
-		    printf("Encrypted packet received\n");
+			printf("Encrypted packet received\n");
 		goto again;
 	}
 	if (!ISRESPONSE(rpkt.rm_vn_mode)) {
 		if (debug)
-		    printf("Received request packet, wanted response\n");
+			printf("Received request packet, wanted response\n");
 		goto again;
 	}
 	if (INFO_MBZ(rpkt.mbz_itemsize) != 0) {
 		if (debug)
-		    printf("Received packet with nonzero MBZ field!\n");
+			printf("Received packet with nonzero MBZ field!\n");
 		goto again;
 	}
 
@@ -715,7 +708,7 @@ getresponse(
 	 */
 	if (rpkt.implementation != implcode || rpkt.request != reqcode) {
 		if (debug)
-		    printf(
+			printf(
 			    "Received implementation/request of %d/%d, wanted %d/%d",
 			    rpkt.implementation, rpkt.request,
 			    implcode, reqcode);
@@ -797,7 +790,7 @@ getresponse(
 	 * items.  This is so we can play nice with older implementations
 	 */
 
-	tmp_data = rpkt.data;
+	tmp_data = rpkt.u.data;
 	for (i = 0; i < items; i++) {
 		memcpy(datap, tmp_data, (unsigned)size);
 		tmp_data += size;
@@ -871,7 +864,7 @@ sendrequest(
 
 	datasize = qitems * qsize;
 	if (datasize && qdata != NULL) {
-		memcpy(qpkt.data, qdata, datasize);
+		memcpy(qpkt.u.data, qdata, datasize);
 		qpkt.err_nitems = ERR_NITEMS(0, qitems);
 		qpkt.mbz_itemsize = MBZ_ITEMSIZE(qsize);
 	} else {

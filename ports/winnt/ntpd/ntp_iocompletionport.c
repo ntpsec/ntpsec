@@ -9,19 +9,13 @@
 #include <process.h>
 #include <syslog.h>
 
-#include "ntp_stdlib.h"
-#include "ntp_machine.h"
-#include "ntp_fp.h"
-#include "ntp.h"
 #include "ntpd.h"
-#include "ntp_refclock.h"
+#include "ntp_machine.h"
 #include "ntp_iocompletionport.h"
 #include "ntp_request.h"
 #include "ntp_assert.h"
-#include "clockstuff.h"
 #include "ntp_io.h"
 #include "ntp_lists.h"
-#include "clockstuff.h"
 
 
 #define CONTAINEROF(p, type, member) \
@@ -63,24 +57,28 @@ typedef struct olplus_tag {
 /*
  * local function definitions
  */
-static int QueueSerialWait(struct refclockio *, recvbuf_t *buff,
-			   olplus *lpo, BOOL clear_timestamp);
-static int QueueRawSerialRead(struct refclockio *, recvbuf_t *buff,
-			      olplus *lpo);
+	void	ntpd_addremove_semaphore(HANDLE, int);
+static	int	QueueSerialWait(struct refclockio *, recvbuf_t *buff,
+				olplus *lpo, BOOL clear_timestamp);
+static	int	QueueRawSerialRead(struct refclockio *, recvbuf_t *buff,
+				   olplus *lpo);
+static	int	OnSocketRecv(ULONG_PTR, olplus *, DWORD, int);
+static	int	OnSerialWaitComplete(struct refclockio *, olplus *,
+				     DWORD, int);
+static	int	OnSerialReadComplete(struct refclockio *, olplus *,
+				     DWORD, int);
+static	int	OnRawSerialReadComplete(struct refclockio *, olplus *,
+					DWORD, int);
+static	int	OnWriteComplete(ULONG_PTR, olplus *, DWORD, int);
 
-static int OnSocketRecv(ULONG_PTR, olplus *, DWORD, int);
-static int OnSerialWaitComplete(struct refclockio *, olplus *, DWORD, int);
-static int OnSerialReadComplete(struct refclockio *, olplus *, DWORD, int);
-static int OnRawSerialReadComplete(struct refclockio *, olplus *, DWORD, int);
-static int OnWriteComplete(ULONG_PTR, olplus *, DWORD, int);
 
 /* keep a list to traverse to free memory on debug builds */
 #ifdef DEBUG
 static void free_io_completion_port_mem(void);
-olplus *	compl_info_list;
+olplus *		compl_info_list;
 CRITICAL_SECTION	compl_info_lock;
-#define LOCK_COMPL()	EnterCriticalSection(&compl_info_lock);
-#define UNLOCK_COMPL()	LeaveCriticalSection(&compl_info_lock);
+#define LOCK_COMPL()	EnterCriticalSection(&compl_info_lock)
+#define UNLOCK_COMPL()	LeaveCriticalSection(&compl_info_lock)
 #endif
 
 /* #define USE_HEAP */
@@ -89,10 +87,9 @@ CRITICAL_SECTION	compl_info_lock;
 static HANDLE hHeapHandle = NULL;
 #endif
 
-static HANDLE hIoCompletionPort = NULL;
-
-static HANDLE WaitableIoEventHandle = NULL;
-static HANDLE WaitableExitEventHandle = NULL;
+	HANDLE WaitableExitEventHandle;
+static	HANDLE hIoCompletionPort = NULL;
+static	HANDLE WaitableIoEventHandle = NULL;
 
 #ifdef NTPNEEDNAMEDHANDLE
 #define WAITABLEIOEVENTHANDLE "WaitableIoEventHandle"
@@ -100,8 +97,8 @@ static HANDLE WaitableExitEventHandle = NULL;
 #define WAITABLEIOEVENTHANDLE NULL
 #endif
 
-#define MAXHANDLES 4
-HANDLE WaitHandles[MAXHANDLES];
+DWORD	ActiveWaitHandles;
+HANDLE	WaitHandles[16];
 
 olplus *
 GetHeapAlloc(char *fromfunc)
@@ -145,18 +142,6 @@ FreeHeap(olplus *lpo, char *fromfunc)
 #else
 	free(lpo);
 #endif
-}
-
-HANDLE
-get_io_event(void)
-{
-	return( WaitableIoEventHandle );
-}
-
-HANDLE
-get_exit_event(void)
-{
-	return( WaitableExitEventHandle );
 }
 
 /*  This function will add an entry to the I/O completion port
@@ -316,17 +301,25 @@ init_io_completion_port(
 		exit(1);
 	}
 
-	blocking_response_ready = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	/*
 	 * Initialize the Wait Handles
 	 */
 	WaitHandles[0] = WaitableIoEventHandle;
 	WaitHandles[1] = WaitableExitEventHandle; /* exit request */
-	WaitHandles[2] = get_timer_handle();
-	WaitHandles[3] = blocking_response_ready;
+	WaitHandles[2] = WaitableTimerHandle;
+	ActiveWaitHandles = 3;
 
-	/* Have one thread servicing I/O - there were 4, but this would 
+	/*
+	 * Supply ntp_worker.c with function to add or remove a
+	 * semaphore to the ntpd I/O loop which is signalled by a worker
+	 * when a response is ready.  The callback is invoked in the
+	 * parent.
+	 */
+	addremove_io_semaphore = &ntpd_addremove_semaphore;
+
+	/*
+	 * Have one thread servicing I/O - there were 4, but this would 
 	 * somehow cause NTP to stop replying to ntpq requests; TODO
  	 */
 	thread = (HANDLE)_beginthreadex(
@@ -339,7 +332,41 @@ init_io_completion_port(
 	ResumeThread(thread);
 	CloseHandle(thread);
 }
-	
+
+
+void
+ntpd_addremove_semaphore(
+	HANDLE	sem,
+	int	remove
+	)
+{
+	const size_t	hnd_sz = sizeof(WaitHandles[0]);
+	u_int		hi;
+
+	if (!remove) {
+		INSIST((ActiveWaitHandles + 1) < COUNTOF(WaitHandles));
+		WaitHandles[ActiveWaitHandles] = sem;
+		ActiveWaitHandles++;
+
+		return;
+	}
+
+	/* removing semaphore */
+	for (hi = 3; hi < ActiveWaitHandles; hi++)
+		if (sem == WaitHandles[hi])
+			break;
+
+	if (hi == ActiveWaitHandles)
+		return;
+
+	ActiveWaitHandles--;
+	if (hi < ActiveWaitHandles)
+		memmove(&WaitHandles[hi],
+			&WaitHandles[hi + 1],
+			(ActiveWaitHandles - hi) * hnd_sz);
+	WaitHandles[ActiveWaitHandles] = NULL;
+}
+
 
 #ifdef DEBUG
 static void
@@ -369,7 +396,7 @@ free_io_completion_port_mem(
 		FreeHeap(pci, "free_io_completion_port_mem");
 		/* FreeHeap() removed this item from compl_info_list */
 	}
-	UNLOCK_COMPL()
+	UNLOCK_COMPL();
 
 #if defined(_MSC_VER) && defined (_DEBUG)
 	_CrtCheckMemory();
@@ -1018,37 +1045,49 @@ async_write(
  */
 int GetReceivedBuffers()
 {
-	isc_boolean_t have_packet = ISC_FALSE;
+	DWORD	index;
+	HANDLE	ready;
+	int	have_packet;
+
+	have_packet = FALSE;
 	while (!have_packet) {
-		DWORD Index = WaitForMultipleObjects(MAXHANDLES, WaitHandles, FALSE, INFINITE);
-		switch (Index) {
+		index = WaitForMultipleObjects(ActiveWaitHandles,
+					       WaitHandles, FALSE,
+					       INFINITE);
+		switch (index) {
+
 		case WAIT_OBJECT_0 + 0: /* Io event */
 			DPRINTF(4, ("IoEvent occurred\n"));
-			have_packet = ISC_TRUE;
+			have_packet = TRUE;
 			break;
+
 		case WAIT_OBJECT_0 + 1: /* exit request */
 			exit(0);
 			break;
+
 		case WAIT_OBJECT_0 + 2: /* timer */
 			timer();
 			break;
-		case WAIT_OBJECT_0 + 3: /* blocking response */
-			process_blocking_response();
-			break;
+
 		case WAIT_IO_COMPLETION: /* loop */
 			break;
+
 		case WAIT_TIMEOUT:
 			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects INFINITE timed out.");
 			exit(1);
 			break;
+
 		case WAIT_FAILED:
 			msyslog(LOG_ERR, "ntpd: WaitForMultipleObjects Failed: Error: %m");
 			exit(1);
 			break;
 
-			/* For now do nothing if not expected */
 		default:
-			break;		
+			DEBUG_INSIST((index - WAIT_OBJECT_0) <
+				     ActiveWaitHandles);
+			ready = WaitHandles[index - WAIT_OBJECT_0];
+			handle_blocking_resp_sem(ready);
+			break;
 				
 		} /* switch */
 	}

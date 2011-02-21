@@ -137,7 +137,7 @@ ulink_start(
 	memset(up, 0, sizeof(struct ulinkunit));
 	pp = peer->procptr;
 	pp->io.clock_recv = ulink_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -146,7 +146,7 @@ ulink_start(
 		free(up);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -172,7 +172,7 @@ ulink_shutdown(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct ulinkunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (pp->io.fd != -1)
 		io_closeclock(&pp->io);
 	if (up != NULL)
@@ -204,9 +204,9 @@ ulink_receive(
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct ulinkunit *)pp->unitptr;
+	up = pp->unitptr;
 	temp = refclock_gtlin(rbufp, pp->a_lastcode, BMAX, &trtmp);
 
 	/*

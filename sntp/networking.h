@@ -34,14 +34,13 @@
 
 
 /* From ntpdate.c */
-void sendpkt (SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
-
-int recvdata (SOCKET rsock, sockaddr_u *sender, char *rdata, int rdata_len);
-
-int recvpkt (SOCKET rsock, struct pkt *rpkt, unsigned int rsize, struct pkt *spkt);
-
-int process_pkt (struct pkt *rpkt, sockaddr_u *sas, int pkt_len,
-		 int mode, struct pkt *spkt, const char *func_name);
+void sendpkt(SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
+int recvdata(SOCKET rsock, sockaddr_u *sender, struct pkt *rdata,
+	     int rdata_len);
+int recvpkt(SOCKET rsock, struct pkt *rpkt, unsigned int rsize,
+	    struct pkt *spkt);
+int process_pkt(struct pkt *rpkt, sockaddr_u *sas, int pkt_len,
+		int mode, struct pkt *spkt, const char *func_name);
 
 /* Shortened peer structure. Not absolutely necessary yet */
 struct speer {

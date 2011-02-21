@@ -326,6 +326,10 @@ SOURCE=..\..\..\libntp\ntp_calendar.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\ntp_intres.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\ntp_libopts.c
 # End Source File
 # Begin Source File
@@ -339,6 +343,10 @@ SOURCE=..\..\..\libntp\ntp_random.c
 # Begin Source File
 
 SOURCE=..\..\..\libntp\ntp_rfc2553.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libntp\ntp_worker.c
 # End Source File
 # Begin Source File
 
@@ -474,6 +482,14 @@ SOURCE=..\..\..\lib\isc\win32\win32os.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\work_fork.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\libntp\work_thread.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\ymd2yd.c
 # End Source File
 # End Group
@@ -507,6 +523,10 @@ SOURCE=..\include\netinet\in.h
 # Begin Source File
 
 SOURCE=..\include\arpa\inet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\intreswork.h
 # End Source File
 # Begin Source File
 
@@ -583,6 +603,10 @@ SOURCE=..\..\..\include\ntp_io.h
 # Begin Source File
 
 SOURCE=..\include\ntp_iocompletionport.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\include\ntp_intres.h
 # End Source File
 # Begin Source File
 

@@ -33,6 +33,8 @@ socktohost(
 	struct addrinfo		hints;
 	struct addrinfo *	alist;
 	struct addrinfo *	ai;
+	sockaddr_u		addr;
+	size_t			octets;
 	int			a_info;
 
 	/* reverse the address to purported DNS name */
@@ -79,9 +81,20 @@ socktohost(
 
 	NTP_INSIST(alist != NULL);
 
-	for (ai = alist; ai != NULL; ai = ai->ai_next)
-		if (SOCK_EQ(sock, (sockaddr_u *)ai->ai_addr))
+	for (ai = alist; ai != NULL; ai = ai->ai_next) {
+		/*
+		 * Make a convenience sockaddr_u copy from ai->ai_addr
+		 * because casting from sockaddr * to sockaddr_u * is
+		 * risking alignment problems on platforms where
+		 * sockaddr_u has stricter alignment than sockaddr,
+		 * such as sparc.
+		 */
+		ZERO_SOCK(&addr);
+		octets = min(sizeof(addr), ai->ai_addrlen);
+		memcpy(&addr, ai->ai_addr, octets);
+		if (SOCK_EQ(sock, &addr))
 			break;
+	}
 	freeaddrinfo(alist);
 
 	if (ai != NULL)

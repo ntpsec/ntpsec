@@ -292,7 +292,7 @@ setup_stream(
 	mp = allocb(sizeof(struct stroptions), BPRI_MED);
 	if (mp)
 	{
-		struct stroptions *str = (struct stroptions *)mp->b_wptr;
+		struct stroptions *str = (void *)mp->b_wptr;
 
 		str->so_flags   = SO_READOPT|SO_HIWAT|SO_LOWAT|SO_ISNTTY;
 		str->so_readopt = (mode == M_PARSE) ? RMSGD : RNORM;
@@ -487,7 +487,7 @@ parsewput(
 		break;
       
 	    case M_IOCTL:
-		iocp = (struct iocblk *)mp->b_rptr;
+		iocp = (void *)mp->b_rptr;
 		switch (iocp->ioc_cmd)
 		{
 		    default:
@@ -511,7 +511,8 @@ parsewput(
 			}
 
 			mp->b_cont = datap;
-			*(struct ppsclockev *)datap->b_wptr = parse->parse_ppsclockev;
+			/* (void *) quiets cast alignment warning */
+			*(struct ppsclockev *)(void *)datap->b_wptr = parse->parse_ppsclockev;
 			datap->b_wptr +=
 				sizeof(struct ppsclockev) / sizeof(*datap->b_wptr);
 			mp->b_datap->db_type = M_IOCACK;
@@ -544,7 +545,7 @@ parsewput(
 		    case PARSEIOC_SETCS:
 			if (iocp->ioc_count == sizeof(parsectl_t))
 			{
-				parsectl_t *dct = (parsectl_t *)mp->b_cont->b_rptr;
+				parsectl_t *dct = (void *)mp->b_cont->b_rptr;
 
 				switch (iocp->ioc_cmd)
 				{
@@ -987,7 +988,7 @@ zs_xsisr(
 	 struct zscom *zs
 	 )
 {
-	register struct asyncline *za = (struct asyncline *)zs->zs_priv;
+	register struct asyncline *za = (void *)zs->zs_priv;
 	register queue_t *q;
 	register unsigned char zsstatus;
 	register int loopcheck;

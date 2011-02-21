@@ -1366,6 +1366,8 @@ addserver(
 	int error;
 	/* Service name */
 	char service[5];
+	sockaddr_u addr;
+
 	strncpy(service, "ntp", sizeof(service));
 
 	/* Get host address. Looking for UDP datagram connection. */
@@ -1398,16 +1400,21 @@ addserver(
 		return;
 	}
 #ifdef DEBUG
-	else if (debug) {
-		fprintf(stderr, "host found : %s\n", stohost((sockaddr_u *)addrResult->ai_addr));
+	if (debug) {
+		ZERO(addr);
+		INSIST(addrResult->ai_addrlen <= sizeof(addr));
+		memcpy(&addr, addrResult->ai_addr, addrResult->ai_addrlen);
+		fprintf(stderr, "host found : %s\n", stohost(&addr));
 	}
 #endif
 
 	/* We must get all returned server in case the first one fails */
 	for (ptr = addrResult; ptr != NULL; ptr = ptr->ai_next) {
-		if (is_reachable ((sockaddr_u *)ptr->ai_addr)) {
+		ZERO(addr);
+		INSIST(ptr->ai_addrlen <= sizeof(addr));
+		memcpy(&addr, ptr->ai_addr, ptr->ai_addrlen);
+		if (is_reachable(&addr)) {
 			server = emalloc_zero(sizeof(*server));
-
 			memcpy(&server->srcadr, ptr->ai_addr, ptr->ai_addrlen);
 			server->event_time = ++sys_numservers;
 			if (sys_servers == NULL)
@@ -1683,7 +1690,9 @@ init_io(void)
 {
 	struct addrinfo *res, *ressave;
 	struct addrinfo hints;
+	sockaddr_u addr;
 	char service[5];
+	int rc;
 	int optval = 1;
 	int check_ntp_port_in_use = !debug && !simple_query && !unpriv_port;
 
@@ -1765,13 +1774,12 @@ init_io(void)
 		 * bind the socket to the NTP port
 		 */
 		if (check_ntp_port_in_use) {
-			if (bind(fd[nbsock], res->ai_addr, 
-				 SOCKLEN((sockaddr_u *)res->ai_addr)) < 0) {
-#ifndef SYS_WINNT
-				if (errno == EADDRINUSE)
-#else
-				if (WSAGetLastError() == WSAEADDRINUSE)
-#endif /* SYS_WINNT */
+			ZERO(addr);
+			INSIST(res->ai_addrlen < sizeof(addr));
+			memcpy(&addr, res->ai_addr, res->ai_addrlen);
+			rc = bind(fd[nbsock], &addr.sa, SOCKLEN(&addr));
+			if (rc < 0) {
+				if (EADDRINUSE == socket_errno())
 					msyslog(LOG_ERR, "the NTP socket is in use, exiting");
 				else
 					msyslog(LOG_ERR, "bind() fails: %m");

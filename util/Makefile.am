@@ -14,7 +14,7 @@ EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES += $(LIBOPTS_CFLAGS)
 
@@ -22,10 +22,11 @@ AM_CFLAGS = @CFLAGS_NTP@
 AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 # LDADD might need RESLIB and ADJLIB
-LDADD=		../libntp/libntp.a
+LDADD=		../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
 tg2_LDADD=	$(LIBM)
+ntp_keygen_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a @LDADD_LIBNTP@
+ntp_keygen_LDADD += @PTHREAD_LIBS@ @LCRYPTO@
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
-ntp_keygen_LDADD= version.o $(LIBOPTS_LDADD) ../libntp/libntp.a @LCRYPTO@
 
 ETAGS_ARGS=	Makefile.am
 #EXTRA_DIST=	README TAGS
@@ -65,10 +66,9 @@ $(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 jitter_SOURCES=	jitter.c jitter.h
 jitter_LDADD=
 
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
 FRC:
+
+check-libntp: FRC ../libntp/libntp.a
 
 ../libntp/libntp.a:
 	cd ../libntp && $(MAKE)
@@ -79,7 +79,9 @@ kern.o: kern.c
 $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
 
-version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
+$(PROGRAMS): version.o
+
+version.o: $(ntp_keygen_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
 	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntp-keygen
 	$(COMPILE) -c version.c
 

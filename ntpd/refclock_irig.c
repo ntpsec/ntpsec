@@ -332,11 +332,10 @@ irig_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = irig_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -345,7 +344,7 @@ irig_start(
 		free(up);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous variables
@@ -389,7 +388,7 @@ irig_shutdown(
 	struct irigunit *up;
 
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (-1 != pp->io.fd)
 		io_closeclock(&pp->io);
 	if (NULL != up)
@@ -420,9 +419,9 @@ irig_receive(
 	int	bufcnt;		/* buffer counter */
 	l_fp	ltemp;		/* l_fp temp */
 
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Main loop - read until there ain't no more. Note codec
@@ -518,7 +517,7 @@ irig_rf(
 	double	irig_b, irig_e;	/* irig filter outputs */
 
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * IRIG-B filter. Matlab 4th-order IIR elliptic, 800-1200 Hz
@@ -600,7 +599,7 @@ irig_base(
 	int	carphase;	/* carrier phase */
 
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Synchronous baud integrator. Corresponding samples of current
@@ -753,7 +752,7 @@ irig_baud(
 	l_fp	ltemp;
 
         pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * The PLL time constant starts out small, in order to
@@ -847,8 +846,9 @@ irig_decode(
 	char	spare[2 + 1];	/* mulligan digits */
 	int	temp;
 
+	syncdig = 0;
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Assemble frame bits.
@@ -983,7 +983,7 @@ irig_poll(
 	struct irigunit *up;
 
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
@@ -1020,7 +1020,7 @@ irig_gain(
 	struct irigunit *up;
 
 	pp = peer->procptr;
-	up = (struct irigunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Apparently, the codec uses only the high order bits of the

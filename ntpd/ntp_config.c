@@ -30,6 +30,9 @@
 # include <sys/wait.h>
 #endif
 
+#include <isc/net.h>
+#include <isc/result.h>
+
 #include "ntp.h"
 #include "ntpd.h"
 #include "ntp_io.h"
@@ -39,23 +42,16 @@
 #include "ntp_stdlib.h"
 #include "lib_strbuf.h"
 #include "ntp_assert.h"
-#include "ntpd-opts.h"
 #include "ntp_random.h"
-#include "ntp_workimpl.h"
-#include <isc/net.h>
-#include <isc/result.h>
-
-
 /*
  * [Bug 467]: Some linux headers collide with CONFIG_PHONE and CONFIG_KEYS
  * so #include these later.
  */
-
 #include "ntp_config.h"
 #include "ntp_cmdargs.h"
-
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
+#include "ntpd-opts.h"
 
 
 /* list of servers from command line for config_peers() */
@@ -1628,7 +1624,7 @@ get_next_address(
 	char addr_string[ADDR_LENGTH];
 	sockaddr_u *final_addr;
 	struct addrinfo *ptr;
-	int gai_error;
+	int gai_err;
 	
 	final_addr = emalloc(sizeof(*final_addr));
 
@@ -1637,12 +1633,12 @@ get_next_address(
 			 addr_prefix, curr_addr_num++);
 		printf("Selecting ip address %s for hostname %s\n",
 		       addr_string, addr->address);
-		gai_error = getaddrinfo(addr_string, "ntp", NULL, &ptr);
+		gai_err = getaddrinfo(addr_string, "ntp", NULL, &ptr);
 	} else {
-		gai_error = getaddrinfo(addr->address, "ntp", NULL, &ptr);
+		gai_err = getaddrinfo(addr->address, "ntp", NULL, &ptr);
 	}
 
-	if (gai_error) {
+	if (gai_err) {
 		fprintf(stderr, "ERROR!! Could not get a new address\n");
 		exit(1);
 	}
@@ -4197,7 +4193,7 @@ getconfig(
 	char **	argv
 	)
 {
-	char line[MAXLINE];
+	char	line[256];
 
 #ifdef DEBUG
 	atexit(free_all_config_trees);
@@ -4206,14 +4202,16 @@ getconfig(
 	config_file = CONFIG_FILE;
 #else
 	temp = CONFIG_FILE;
-	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)config_file_storage, (DWORD)sizeof(config_file_storage))) {
+	if (!ExpandEnvironmentStringsA(temp, config_file_storage,
+				       sizeof(config_file_storage))) {
 		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m\n");
 		exit(1);
 	}
 	config_file = config_file_storage;
 
 	temp = ALT_CONFIG_FILE;
-	if (!ExpandEnvironmentStrings((LPCTSTR)temp, (LPTSTR)alt_config_file_storage, (DWORD)sizeof(alt_config_file_storage))) {
+	if (!ExpandEnvironmentStringsA(temp, alt_config_file_storage,
+				       sizeof(alt_config_file_storage))) {
 		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
 		exit(1);
 	}
@@ -4224,7 +4222,7 @@ getconfig(
 	 * install a non default variable with this daemon version
 	 */
 	snprintf(line, sizeof(line), "daemon_version=\"%s\"", Version);
-	set_sys_var(line, strlen(line)+1, RO);
+	set_sys_var(line, strlen(line) + 1, RO);
 
 	/*
 	 * Set up for the first time step to install a variable showing
@@ -4327,10 +4325,9 @@ save_and_apply_config_tree(void)
 		dumpfile = fopen(OPT_ARG( SAVECONFIGQUIT ), "w");
 		if (NULL == dumpfile) {
 			err = errno;
-			fprintf(stderr,
-				"can not create save file %s, error %d %s\n",
-				OPT_ARG( SAVECONFIGQUIT ), err,
-				strerror(err));
+			mfprintf(stderr,
+				 "can not create save file %s, error %d %m\n",
+				 OPT_ARG(SAVECONFIGQUIT), err);
 			exit(err);
 		}
 		

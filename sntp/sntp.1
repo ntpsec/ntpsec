@@ -1,19 +1,19 @@
-.TH SNTP 1 2011-01-20 "( 4.2.7p120)" "Programmer's Manual"
+.TH SNTP 1 2011-02-07 "( 4.2.7p120)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp.1)
 .\"  
-.\"  It has been AutoGen-ed  January 20, 2011 at 11:16:10 AM by AutoGen 5.11.6pre7
+.\"  It has been AutoGen-ed  February  7, 2011 at 02:10:44 AM by AutoGen 5.11.6pre20
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman1.tpl
 .\"
 .SH NAME
-sntp \- standard SNTP program
+sntp \- standard Simple Network Time Protocol program
 .SH SYNOPSIS
 .B sntp
 .\" Mixture of short (flag) options and long options
 .RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \--\fIopt-name\fP " [[=| ]\fIvalue\fP]]..."
 .br
 .in +8
-hostname-or-IP ...
+[ hostname-or-IP ...]
 .PP
 
 .SH "DESCRIPTION"
@@ -47,6 +47,19 @@ is believed to be correct to within
 seconds.
 .SH OPTIONS
 .TP
+.BR \-d ", " \--debug-level
+Increase output debug message level.
+This option may appear an unlimited number of times.
+.sp
+Increase the debugging message output level.
+.TP
+.BR \-D " \fIstring\fP, " \--set-debug-level "=" \fIstring\fP
+Set the output debug message level.
+This option may appear an unlimited number of times.
+.sp
+Set the output debugging level.  Can be supplied multiple times,
+but each overrides the previous value(s).
+.TP
 .BR \-4 ", " \--ipv4
 Force IPv4 DNS name resolution.
 This option must not appear in combination with any of the following options:
@@ -63,67 +76,6 @@ ipv4.
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 .TP
-.BR \-d ", " \--normalverbose
-Normal verbose.
-.sp
-Diagnostic messages for non-fatal errors and a limited amount of
-tracing should be written to standard error.  Fatal ones always
-produce a diagnostic.  This option should be set when there is a
-suspected problem with the server, network or the source.
-.TP
-.BR \-K " \fIfile-name\fP, " \--kod "=" \fIfile-name\fP
-KoD history filename.
-.sp
-Modifies the filename to be used to persist the history of KoD
-responses received from servers.  The default is
-/var/db/ntp-kod.
-.TP
-.BR \-p ", " \--syslog
-Logging with syslog.
-This option must not appear in combination with any of the following options:
-filelog.
-.sp
-When this option is set all logging will be done using syslog.
-.TP
-.BR \-l " \fIfile-name\fP, " \--filelog "=" \fIfile-name\fP
-Log to specified logfile.
-This option must not appear in combination with any of the following options:
-syslog.
-.sp
-This option causes the client to write log messages to the specified
-logfile.
-.TP
-.BR \-s ", " \--settod
-Set (step) the time with settimeofday().
-This option must not appear in combination with any of the following options:
-adjtime.
-.sp
-
-.TP
-.BR \-j ", " \--adjtime
-Set (slew) the time with adjtime().
-This option must not appear in combination with any of the following options:
-settod.
-.sp
-
-.TP
-.BR \-b " \fIbroadcast-address\fP, " \--broadcast "=" \fIbroadcast-address\fP
-Use broadcasts to the address specified for synchronisation.
-.sp
-If specified SNTP will listen to the specified broadcast address
-for NTP broadcasts.  The default maximum wait time,
-68 seconds, can be modified with \-t.
-.TP
-.BR \-t " \fIseconds\fP, " \--timeout "=" \fIseconds\fP
-Specify the number of seconds to wait for broadcasts.
-This option takes an integer number as its argument.
-The default \fIseconds\fP for this option is:
-.ti +4
- 68
-.sp
-When waiting for a broadcast packet SNTP will wait the number
-of seconds specified before giving up.  Default 68 seconds.
-.TP
 .BR \-a " \fIauth-keynumber\fP, " \--authentication "=" \fIauth-keynumber\fP
 Enable authentication with the key auth-keynumber.
 This option takes an integer number as its argument.
@@ -132,8 +84,63 @@ This option enables authentication using the key specified in this option's argu
 The argument of this option is the keyid, a number specified in the keyfile as this
 key's identifier. See the keyfile option (-k) for more details.
 .TP
+.BR \-B " \fIseconds\fP, " \--bctimeout "=" \fIseconds\fP
+The number of seconds to wait for broadcasts.
+This option takes an integer number as its argument.
+The default \fIseconds\fP for this option is:
+.ti +4
+ 68
+.sp
+When waiting for a broadcast packet SNTP will wait the number
+of seconds specified before giving up.  Default 68 seconds.
+.TP
+.BR \-b " \fIbroadcast-address\fP, " \--broadcast "=" \fIbroadcast-address\fP
+Listen to the address specified for broadcast time sync.
+This option may appear an unlimited number of times.
+.sp
+If specified SNTP will listen to the specified address
+for NTP broadcasts.  The default maximum wait time,
+68 seconds, can be modified with \-B.
+.TP
+.BR \-c " \fIhost-name\fP, " \--concurrent "=" \fIhost-name\fP
+Concurrent query all IPs returned for host-name.
+This option may appear an unlimited number of times.
+.sp
+Requests from an NTP "client" to a "server" should never be sent
+more rapidly than one every 2 seconds.  By default, any IPs returned
+as part of a DNS lookup are assumed to be for a single instance of
+ntpd, and therefore sntp will send  queries to these IPs one after
+another, with a 2-second gap in between each query.
+
+The \-c or \--concurrent flag says that any IPs returned for the
+DNS lookup of the supplied host-name are on different machines,
+so we can send concurrent queries.
+.TP
+.BR \-h " \fImilliseconds\fP, " \--headspace "=" \fImilliseconds\fP
+The gap (in milliseconds) between time requests.
+This option takes an integer number as its argument.
+The default \fImilliseconds\fP for this option is:
+.ti +4
+ 10
+.sp
+Since we're only going to use the first valid response we get and
+there is benefit to specifying a good number of servers to query,
+separate the queries we send out by the specified number of
+milliseconds.
+Default 10 milliseconds.
+.TP
+.BR \-K " \fIfile-name\fP, " \--kod "=" \fIfile-name\fP
+KoD history filename.
+The default \fIfile-name\fP for this option is:
+.ti +4
+ /var/db/ntp-kod
+.sp
+Specifies the filename to be used for the  persistent history of KoD
+responses received from servers.  The default is
+/var/db/ntp-kod.
+.TP
 .BR \-k " \fIfile-name\fP, " \--keyfile "=" \fIfile-name\fP
-Specify a keyfile. SNTP will look in this file for the key specified with \-a.
+Look in this file for the key specified with \-a.
 .sp
 This option specifies the keyfile. SNTP will search for the key specified with \-a keyno in this
 file. Key files follow the following format:
@@ -148,6 +155,74 @@ A  Key in a 1-to-8 character ASCII string.
 M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
 For more information see ntp.keys(5).
+.TP
+.BR \-l " \fIfile-name\fP, " \--filelog "=" \fIfile-name\fP
+Log to specified logfile.
+.sp
+This option causes the client to write log messages to the specified
+logfile.
+.TP
+.BR \-M " \fInumber\fP, " \--steplimit "=" \fInumber\fP
+Adjustments less than steplimit msec will be slewed..
+This option takes an integer number as its argument.
+The value of \fInumber\fP is constrained to being:
+.in +4
+.nf
+.na
+greater than or equal to 0
+.fi
+.in -4
+.sp
+If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+.TP
+.BR \-o " \fInumber\fP, " \--ntpversion "=" \fInumber\fP
+Send <int> as our NTP version.
+This option takes an integer number as its argument.
+The value of \fInumber\fP is constrained to being:
+.in +4
+.nf
+.na
+in the range  0 through 7
+.fi
+.in -4
+The default \fInumber\fP for this option is:
+.ti +4
+ 4
+.sp
+When sending requests to a remote server, tell them we are running
+NTP protocol version <ntpversion> .
+.TP
+.BR \-r ", " \--usereservedport
+Use the NTP Reserved Port (port 123).
+.sp
+Use port 123, which is reserved for NTP, for our network communications.
+.TP
+.BR \-S ", " \--step
+OK to 'step' the time with settimeofday().
+.sp
+
+.TP
+.BR \-s ", " \--slew
+OK to 'slew' the time with adjtime().
+.sp
+
+.TP
+.BR \-u " \fIseconds\fP, " \--uctimeout "=" \fIseconds\fP
+The number of seconds to wait for unicast responses.
+This option takes an integer number as its argument.
+The default \fIseconds\fP for this option is:
+.ti +4
+ 5
+.sp
+When waiting for a unicast reply, SNTP will wait the number
+of seconds specified before giving up.  Default 5 seconds.
+.TP
+.BR \--wait, " \fB--no-wait\fP"
+Wait for pending replies (if not setting the time).
+The \fIno-wait\fP form will disable the option.
+This option is enabled by default.
+.sp
+If we are not setting the time, wait for all pending responses.
 .TP
 .BR \-? , " \--help"
 Display extended usage information and exit.

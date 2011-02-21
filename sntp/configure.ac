@@ -26,7 +26,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-sntp_configure_cache_version=20100916
+sntp_configure_cache_version=20110219
 
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -47,16 +47,13 @@ AC_DEFINE_UNQUOTED([STR_SYSTEM], "$host", [canonical system (cpu-vendor-os) of w
 AC_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
 
-dnl must come before AC_PROG_CC or similar
-AC_USE_SYSTEM_EXTENSIONS
-
-# Checks for programs.
-AM_PROG_CC_C_O
-AC_PROG_CPP
+NTP_LIBNTP
 
 AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
+
+NTP_WITHSNTP
 
 # NTP has (so far) been relying on leading-edge autogen.
 # Therefore, by default:
@@ -72,101 +69,27 @@ case "${enable_libopts_install+set}" in
  *) enable_libopts_install=no ;;
 esac
 LIBOPTS_CHECK
-NTP_LIBEVENT_CHECK
 
-NTP_LIBNTP
+AM_COND_IF(
+    [BUILD_SNTP],
+    [NTP_LIBEVENT_CHECK],
+    [NTP_LIBEVENT_CHECK_NOBUILD]
+)
 
 # Checks for libraries.
 
-AC_SEARCH_LIBS([inet_pton], [nsl])
+dnl NTP_LIBNTP checks for inet_XtoY
+dnl AC_SEARCH_LIBS([inet_pton], [nsl])
 AC_SEARCH_LIBS([openlog], [gen syslog])
 
-# -lrt may only be needed by tests/
-case "$host" in
- *-*-aix[[456]]*)
-	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
-	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
-	# IBM pulls its thumbs out long enough to implement clock_settime,
-	# this conditional will need to change.  Maybe use AC_TRY_RUN
-	# instead to try to set the time to itself and check errno.
-    ;;
- *)
-    AC_SEARCH_LIBS([clock_gettime], [rt])
-    AC_CHECK_FUNCS([clock_gettime clock_settime])
-    ;;
-esac
-
 # Checks for header files.
-AC_HEADER_STDC
-
-
-AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h strings.h syslog.h])
-AC_CHECK_HEADERS([sys/time.h])
+AC_CHECK_HEADERS([netdb.h string.h strings.h syslog.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
-AC_C_CONST
-AC_TYPE_SIZE_T
 
 NTP_OPENSSL
 NTP_IPV6
-
-AC_CACHE_CHECK(
-    [for multicast IP support],
-    [ntp_cv_multicast],
-    [
-	ntp_cv_multicast=no
-	case "$host" in
-	 i386-sequent-sysv4)
-	    ;;
-	 *)
-	    AC_COMPILE_IFELSE(
-		[AC_LANG_PROGRAM(
-		    [[
-			#ifdef HAVE_NETINET_IN_H
-			#include <netinet/in.h>
-			#endif
-		    ]],
-		    [[
-			struct ip_mreq ipmr;
-			ipmr.imr_interface.s_addr = 0;
-		    ]]
-		)],
-		[ntp_cv_multicast=yes],
-		[]
-	    )
-	esac
-    ]
-)
-case "$ntp_cv_multicast" in
- yes)
-    AC_DEFINE([MCAST], [1], [Does the target support multicast IP?])
-    AC_CACHE_CHECK(
-	[arg type needed for setsockopt() IP*_MULTICAST_LOOP],
-	[ntp_cv_typeof_ip_multicast_loop],
-	[
-	    case "$host" in
-	     *-*-netbsd*|*-*-*linux*)
-		ntp_cv_typeof_ip_multicast_loop=u_int
-		;;
-	     *)
-		ntp_cv_typeof_ip_multicast_loop=u_char
-	    esac
-	]
-    )
-    AC_DEFINE_UNQUOTED([TYPEOF_IP_MULTICAST_LOOP],
-	$ntp_cv_typeof_ip_multicast_loop,
-	[What type to use for setsockopt])
-esac
-
-# HMS: We don't need res_init, but since we may be using cached 
-# values from ntpd we need to test the same way 
-AC_SEARCH_LIBS([res_init], [resolv], , , [-lsocket -lnsl]) 
-AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
-AC_CHECK_FUNC([inet_ntop], [], 
-    [AC_DEFINE([ISC_PLATFORM_NEEDNTOP], [1], [ISC: provide inet_ntop()])])
-AC_CHECK_FUNC([inet_pton], [],
-    [AC_DEFINE([ISC_PLATFORM_NEEDPTON], [1], [ISC: provide inet_pton()])])
 
 ###
 
@@ -182,14 +105,7 @@ AC_CHECK_FUNCS([socket vsnprintf vsprintf])
 AC_PROG_CXX
 NTP_GOOGLETEST
 
-case "$NEED_LIBEVENT_DIR" in
- true)
-    AC_CONFIG_SUBDIRS([libevent])
-    ;;
-esac
-
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES(build-libevent/Makefile)
 AC_CONFIG_FILES([include/Makefile])
 AC_CONFIG_FILES([tests/Makefile])
 

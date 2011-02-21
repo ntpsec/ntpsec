@@ -9,9 +9,9 @@
 #include <stdio.h>
 
 #include "ntp.h"
-#include "ntp_types.h"
-#include "ntp_net.h"
 #include "ntp_io.h"
+#include "ntp_net.h"
+#include "ntp_debug.h"
 
 /*
  * Windows C runtime ioctl() can't deal properly with sockets, 
@@ -100,11 +100,9 @@ move_fd(
 	if (socket_boundary == -1) {
 		socket_boundary = max(0, min(GETDTABLESIZE() - FD_CHUNK,
 					     min(FOPEN_MAX, FD_PREFERRED_SOCKBOUNDARY)));
-#ifdef DEBUG
-		msyslog(LOG_DEBUG,
-			"ntp_io: estimated max descriptors: %d, initial socket boundary: %d",
-			GETDTABLESIZE(), socket_boundary);
-#endif
+		DPRINTF(1,("move_fd: estimated max descriptors: %d, "
+			"initial socket boundary: %d",
+			GETDTABLESIZE(), socket_boundary));
 	}
 
 	/*
@@ -128,7 +126,7 @@ move_fd(
 		socket_boundary = max(0, socket_boundary - FD_CHUNK);
 #ifdef DEBUG
 		msyslog(LOG_DEBUG,
-			"ntp_io: selecting new socket boundary: %d",
+			"move_fd: selecting new socket boundary: %d",
 			socket_boundary);
 #endif
 	} while (socket_boundary > 0);

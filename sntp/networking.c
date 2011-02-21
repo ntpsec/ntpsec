@@ -39,64 +39,43 @@ sendpkt (
 }
 
 
-/*
-** Fetch data, check if it's data for us and whether it's useable or not.
-**
-** If not, return a failure code so we can delete this server from our list
-** and continue with another one.
-*/
-int
-recvpkt (
-	SOCKET rsock,
-	struct pkt *rpkt,    /* received packet (response) */
-	unsigned int rsize,  /* size of rpkt buffer */
-	struct pkt *spkt     /* sent     packet (request) */
-	)
-{
-	int pkt_len;
-	sockaddr_u sender;
-
-	pkt_len = recvdata(rsock, &sender, (char *)rpkt, rsize);
-	if (pkt_len > 0)
-		pkt_len = process_pkt(rpkt, &sender, pkt_len, MODE_SERVER, spkt, "recvpkt");
-
-	return pkt_len;
-}
-
-
 /* Receive raw data */
 int
 recvdata(
-	SOCKET rsock,
-	sockaddr_u *sender,
-	char *rdata,
-	int rdata_length
+	SOCKET		rsock,
+	sockaddr_u *	sender,
+	struct pkt *	rdata,
+	int		rdata_length
 	)
 {
 	GETSOCKNAME_SOCKLEN_TYPE slen;
 	int recvc;
 
 	slen = sizeof(*sender);
-	recvc = recvfrom(rsock, rdata, rdata_length, 0, 
+	recvc = recvfrom(rsock, (void *)rdata, rdata_length, 0,
 			 &sender->sa, &slen);
-	if (-1 == recvc) {
-		msyslog(LOG_ERR, "recvdata(%d) failed: %m", rsock);
+	if (recvc < 0)
 		return recvc;
-	}
 #ifdef DEBUG
 	if (debug > 2) {
 		printf("Received %d bytes from %s:\n", recvc, sptoa(sender));
-		pkt_output((struct pkt *)rdata, recvc, stdout);
+		pkt_output(rdata, recvc, stdout);
 	}
 #endif
 	return recvc;
 }
 
 
+/*
+** Check if it's data for us and whether it's useable or not.
+**
+** If not, return a failure code so we can delete this server from our list
+** and continue with another one.
+*/
 int
 process_pkt (
 	struct pkt *rpkt,
-	sockaddr_u *sas,
+	sockaddr_u *sender,
 	int pkt_len,
 	int mode,
 	struct pkt *spkt,
@@ -105,9 +84,11 @@ process_pkt (
 {
 	unsigned int key_id = 0;
 	struct key *pkt_key = NULL;
-	int is_authentic = -1;
+	int is_authentic;
 	unsigned int exten_words, exten_words_used = 0;
 	int mac_size;
+
+	is_authentic = (HAVE_OPT(AUTHENTICATION)) ? 0 : -1;
 
 	/*
 	 * Parse the extension field if present. We figure out whether
@@ -142,14 +123,17 @@ unusable:
 	}
 
 	switch (exten_words) {
-	    case 0:
+
+	case 0:
 		break;
-	    case 1:
+
+	case 1:
 		key_id = ntohl(rpkt->exten[exten_words_used]);
 		printf("Crypto NAK = 0x%08x\n", key_id);
 		break;
-	    case 5:
-	    case 6:
+
+	case 5:
+	case 6:
 		/*
 		** Look for the key used by the server in the specified
 		** keyfile and if existent, fetch it or else leave the
@@ -168,33 +152,34 @@ unusable:
 		** keyfile and compare those md5sums.
 		*/
 		mac_size = exten_words << 2;
-		if (!auth_md5((char *)rpkt, pkt_len - mac_size, mac_size - 4, pkt_key)) {
-			is_authentic = 0;
+		if (!auth_md5((char *)rpkt, pkt_len - mac_size,
+			      mac_size - 4, pkt_key)) {
+			is_authentic = FALSE;
 			break;
 		}
 		/* Yay! Things worked out! */
-		if (debug) {
-			char *hostname = ss_to_str(sas);
-
-			printf("sntp %s: packet received from %s successfully authenticated using key id %i.\n",
-				func_name, hostname, key_id);
-			free(hostname);
-		}
-		is_authentic = 1;
+		is_authentic = TRUE;
+		DPRINTF(1, ("sntp %s: packet from %s authenticated using key id %d.\n",
+			func_name, stoa(sender), key_id));
 		break;
-	    default:
+
+	default:
 		goto unusable;
 		break;
 	}
 
 	switch (is_authentic) {
+
 	case -1:	/* unknown */
 		break;
+
 	case 0:		/* not authentic */
 		return SERVER_AUTH_FAIL;
 		break;
+
 	case 1:		/* authentic */
 		break;
+
 	default:	/* error */
 		break;
 	}

@@ -93,8 +93,7 @@ ntp_readline_init(
 
 			if (NULL == ntp_hist) {
 
-				fprintf(stderr, "history_init(): %s\n",
-						strerror(errno));
+				mfprintf(stderr, "history_init(): %m\n");
 				fflush(stderr);
 
 				el_end(ntp_el);

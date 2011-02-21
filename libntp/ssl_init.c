@@ -16,19 +16,35 @@
 #include "openssl/err.h"
 #include "openssl/evp.h"
 
+void	atexit_ssl_cleanup(void);
 
 int ssl_init_done;
 
 void
 ssl_init(void)
 {
+	init_lib();
+
 	if (ssl_init_done)
 		return;
 
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
+	atexit(&atexit_ssl_cleanup);
 
-	ssl_init_done = 1;
+	ssl_init_done = TRUE;
+}
+
+
+void
+atexit_ssl_cleanup(void)
+{
+	if (!ssl_init_done)
+		return;
+
+	ssl_init_done = FALSE;
+	EVP_cleanup();
+	ERR_free_strings();
 }
 
 

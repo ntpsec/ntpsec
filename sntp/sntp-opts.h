@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  January 20, 2011 at 11:14:55 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  February  7, 2011 at 02:10:40 AM by AutoGen 5.11.6pre20
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -50,33 +50,40 @@
  *  Enumeration of each option:
  */
 typedef enum {
-    INDEX_OPT_IPV4            =  0,
-    INDEX_OPT_IPV6            =  1,
-    INDEX_OPT_NORMALVERBOSE   =  2,
-    INDEX_OPT_KOD             =  3,
-    INDEX_OPT_SYSLOG          =  4,
-    INDEX_OPT_FILELOG         =  5,
-    INDEX_OPT_SETTOD          =  6,
-    INDEX_OPT_ADJTIME         =  7,
-    INDEX_OPT_BROADCAST       =  8,
-    INDEX_OPT_TIMEOUT         =  9,
-    INDEX_OPT_AUTHENTICATION  = 10,
-    INDEX_OPT_KEYFILE         = 11,
-    INDEX_OPT_VERSION         = 12,
-    INDEX_OPT_HELP            = 13,
-    INDEX_OPT_MORE_HELP       = 14,
-    INDEX_OPT_SAVE_OPTS       = 15,
-    INDEX_OPT_LOAD_OPTS       = 16
+    INDEX_OPT_DEBUG_LEVEL      =  0,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  1,
+    INDEX_OPT_IPV4             =  2,
+    INDEX_OPT_IPV6             =  3,
+    INDEX_OPT_AUTHENTICATION   =  4,
+    INDEX_OPT_BCTIMEOUT        =  5,
+    INDEX_OPT_BROADCAST        =  6,
+    INDEX_OPT_CONCURRENT       =  7,
+    INDEX_OPT_HEADSPACE        =  8,
+    INDEX_OPT_KOD              =  9,
+    INDEX_OPT_KEYFILE          = 10,
+    INDEX_OPT_FILELOG          = 11,
+    INDEX_OPT_STEPLIMIT        = 12,
+    INDEX_OPT_NTPVERSION       = 13,
+    INDEX_OPT_USERESERVEDPORT  = 14,
+    INDEX_OPT_STEP             = 15,
+    INDEX_OPT_SLEW             = 16,
+    INDEX_OPT_UCTIMEOUT        = 17,
+    INDEX_OPT_WAIT             = 18,
+    INDEX_OPT_VERSION          = 19,
+    INDEX_OPT_HELP             = 20,
+    INDEX_OPT_MORE_HELP        = 21,
+    INDEX_OPT_SAVE_OPTS        = 22,
+    INDEX_OPT_LOAD_OPTS        = 23
 } teOptIndex;
 
-#define OPTION_CT    17
+#define OPTION_CT    24
 #define SNTP_VERSION       "4.2.7p120"
-#define SNTP_FULL_VERSION  "sntp - standard SNTP program - Ver. 4.2.7p120"
+#define SNTP_FULL_VERSION  "sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p120"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT(IPV4)
+ *  e.g. HAVE_OPT(DEBUG_LEVEL)
  */
 #define         DESC(n) (sntpOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -107,6 +114,14 @@ typedef enum {
  *  Make sure there are no #define name conflicts with the option names
  */
 #ifndef     NO_OPTION_NAME_WARNINGS
+# ifdef    DEBUG_LEVEL
+#  warning undefining DEBUG_LEVEL due to option name conflict
+#  undef   DEBUG_LEVEL
+# endif
+# ifdef    SET_DEBUG_LEVEL
+#  warning undefining SET_DEBUG_LEVEL due to option name conflict
+#  undef   SET_DEBUG_LEVEL
+# endif
 # ifdef    IPV4
 #  warning undefining IPV4 due to option name conflict
 #  undef   IPV4
@@ -115,81 +130,133 @@ typedef enum {
 #  warning undefining IPV6 due to option name conflict
 #  undef   IPV6
 # endif
-# ifdef    NORMALVERBOSE
-#  warning undefining NORMALVERBOSE due to option name conflict
-#  undef   NORMALVERBOSE
+# ifdef    AUTHENTICATION
+#  warning undefining AUTHENTICATION due to option name conflict
+#  undef   AUTHENTICATION
 # endif
-# ifdef    KOD
-#  warning undefining KOD due to option name conflict
-#  undef   KOD
-# endif
-# ifdef    SYSLOG
-#  warning undefining SYSLOG due to option name conflict
-#  undef   SYSLOG
-# endif
-# ifdef    FILELOG
-#  warning undefining FILELOG due to option name conflict
-#  undef   FILELOG
-# endif
-# ifdef    SETTOD
-#  warning undefining SETTOD due to option name conflict
-#  undef   SETTOD
-# endif
-# ifdef    ADJTIME
-#  warning undefining ADJTIME due to option name conflict
-#  undef   ADJTIME
+# ifdef    BCTIMEOUT
+#  warning undefining BCTIMEOUT due to option name conflict
+#  undef   BCTIMEOUT
 # endif
 # ifdef    BROADCAST
 #  warning undefining BROADCAST due to option name conflict
 #  undef   BROADCAST
 # endif
-# ifdef    TIMEOUT
-#  warning undefining TIMEOUT due to option name conflict
-#  undef   TIMEOUT
+# ifdef    CONCURRENT
+#  warning undefining CONCURRENT due to option name conflict
+#  undef   CONCURRENT
 # endif
-# ifdef    AUTHENTICATION
-#  warning undefining AUTHENTICATION due to option name conflict
-#  undef   AUTHENTICATION
+# ifdef    HEADSPACE
+#  warning undefining HEADSPACE due to option name conflict
+#  undef   HEADSPACE
+# endif
+# ifdef    KOD
+#  warning undefining KOD due to option name conflict
+#  undef   KOD
 # endif
 # ifdef    KEYFILE
 #  warning undefining KEYFILE due to option name conflict
 #  undef   KEYFILE
 # endif
+# ifdef    FILELOG
+#  warning undefining FILELOG due to option name conflict
+#  undef   FILELOG
+# endif
+# ifdef    STEPLIMIT
+#  warning undefining STEPLIMIT due to option name conflict
+#  undef   STEPLIMIT
+# endif
+# ifdef    NTPVERSION
+#  warning undefining NTPVERSION due to option name conflict
+#  undef   NTPVERSION
+# endif
+# ifdef    USERESERVEDPORT
+#  warning undefining USERESERVEDPORT due to option name conflict
+#  undef   USERESERVEDPORT
+# endif
+# ifdef    STEP
+#  warning undefining STEP due to option name conflict
+#  undef   STEP
+# endif
+# ifdef    SLEW
+#  warning undefining SLEW due to option name conflict
+#  undef   SLEW
+# endif
+# ifdef    UCTIMEOUT
+#  warning undefining UCTIMEOUT due to option name conflict
+#  undef   UCTIMEOUT
+# endif
+# ifdef    WAIT
+#  warning undefining WAIT due to option name conflict
+#  undef   WAIT
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
+# undef DEBUG_LEVEL
+# undef SET_DEBUG_LEVEL
 # undef IPV4
 # undef IPV6
-# undef NORMALVERBOSE
-# undef KOD
-# undef SYSLOG
-# undef FILELOG
-# undef SETTOD
-# undef ADJTIME
-# undef BROADCAST
-# undef TIMEOUT
 # undef AUTHENTICATION
+# undef BCTIMEOUT
+# undef BROADCAST
+# undef CONCURRENT
+# undef HEADSPACE
+# undef KOD
 # undef KEYFILE
+# undef FILELOG
+# undef STEPLIMIT
+# undef NTPVERSION
+# undef USERESERVEDPORT
+# undef STEP
+# undef SLEW
+# undef UCTIMEOUT
+# undef WAIT
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
  *
  *  Interface defines for specific options.
  */
+#define VALUE_OPT_DEBUG_LEVEL    'd'
+#define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
-#define VALUE_OPT_NORMALVERBOSE  'd'
-#define VALUE_OPT_KOD            'K'
-#define VALUE_OPT_SYSLOG         'p'
-#define VALUE_OPT_FILELOG        'l'
-#define VALUE_OPT_SETTOD         's'
-#define VALUE_OPT_ADJTIME        'j'
-#define VALUE_OPT_BROADCAST      'b'
-#define VALUE_OPT_TIMEOUT        't'
-
-#define OPT_VALUE_TIMEOUT        (DESC(TIMEOUT).optArg.argInt)
 #define VALUE_OPT_AUTHENTICATION 'a'
 
 #define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
+#define VALUE_OPT_BCTIMEOUT      'B'
+
+#define OPT_VALUE_BCTIMEOUT      (DESC(BCTIMEOUT).optArg.argInt)
+#define VALUE_OPT_BROADCAST      'b'
+#define VALUE_OPT_CONCURRENT     'c'
+#define VALUE_OPT_HEADSPACE      'h'
+
+#define OPT_VALUE_HEADSPACE      (DESC(HEADSPACE).optArg.argInt)
+#define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_KEYFILE        'k'
+#define VALUE_OPT_FILELOG        'l'
+#define VALUE_OPT_STEPLIMIT      'M'
+
+#define OPT_VALUE_STEPLIMIT      (DESC(STEPLIMIT).optArg.argInt)
+#define VALUE_OPT_NTPVERSION     'o'
+
+#define OPT_VALUE_NTPVERSION     (DESC(NTPVERSION).optArg.argInt)
+#define VALUE_OPT_USERESERVEDPORT 'r'
+#define VALUE_OPT_STEP           'S'
+#define VALUE_OPT_SLEW           's'
+#define VALUE_OPT_UCTIMEOUT      'u'
+
+#define OPT_VALUE_UCTIMEOUT      (DESC(UCTIMEOUT).optArg.argInt)
+#define VALUE_OPT_WAIT           18
+
+#define SET_OPT_WAIT   STMTS( \
+        DESC(WAIT).optActualIndex = 18; \
+        DESC(WAIT).optActualValue = VALUE_OPT_WAIT; \
+        DESC(WAIT).fOptState &= OPTST_PERSISTENT_MASK; \
+        DESC(WAIT).fOptState |= OPTST_SET )
+#define DISABLE_OPT_WAIT   STMTS( \
+        DESC(WAIT).fOptState &= OPTST_PERSISTENT_MASK; \
+        DESC(WAIT).fOptState |= OPTST_SET | OPTST_DISABLED; \
+        DESC(WAIT).optArg.argString = NULL )
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
@@ -209,7 +276,7 @@ typedef enum {
                 sntpOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*sntpOptions.pUsageProc)(&sntpOptions, c)
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 435 */
+/* extracted from /usr/local/share/autogen/opthead.tlib near line 435 */
 
 /* * * * * *
  *

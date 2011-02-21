@@ -87,14 +87,13 @@ tpro_start(
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(*up));
-	memset(up, 0, sizeof(*up));
+	up = emalloc_zero(sizeof(*up));
 	pp = peer->procptr;
 	pp->io.clock_recv = noentry;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 
 	/*
 	 * Initialize miscellaneous peer variables
@@ -120,7 +119,7 @@ tpro_shutdown(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct tprounit *)pp->unitptr;
+	up = pp->unitptr;
 	io_closeclock(&pp->io);
 	if (NULL != up)
 		free(up);
@@ -145,7 +144,7 @@ tpro_poll(
 	 * board and tacks on a local timestamp.
 	 */
 	pp = peer->procptr;
-	up = (struct tprounit *)pp->unitptr;
+	up = pp->unitptr;
 
 	tp = &up->tprodata;
 	if (read(pp->io.fd, (char *)tp, sizeof(struct tproval)) < 0) {

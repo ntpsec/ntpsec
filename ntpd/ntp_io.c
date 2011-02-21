@@ -29,8 +29,8 @@
 #include "ntp_lists.h"
 #include "ntp_refclock.h"
 #include "ntp_stdlib.h"
+#include "ntp_worker.h"
 #include "ntp_request.h"
-#include "ntp.h"
 #include "ntp_unixtime.h"
 #include "ntp_assert.h"
 #include "ntpd-opts.h"
@@ -162,12 +162,6 @@ static	struct refclockio *refio;
 fd_set activefds;
 int maxactivefd;
 
-#ifndef HAVE_IO_COMPLETION_PORT
-static void	maintain_activefds(int fd, int closing);
-#else
-#define		maintain_activefds(fd, closing)	do {} while (0)
-#endif
-
 /*
  * bit alternating value to detect verified interfaces during an update cycle
  */
@@ -296,14 +290,15 @@ static int		cmp_addr_distance(const sockaddr_u *,
  * Routines to read the ntp packets
  */
 #if !defined(HAVE_IO_COMPLETION_PORT)
-static inline int     read_network_packet	(SOCKET, struct interface *, l_fp);
-static inline int     read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
+static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
+static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
+void			ntpd_addremove_io_fd	(int, int, int);
 #endif
 
 
 
 #ifndef HAVE_IO_COMPLETION_PORT
-static void
+void
 maintain_activefds(
 	int fd,
 	int closing
@@ -334,189 +329,6 @@ maintain_activefds(
 	}
 }
 #endif	/* !HAVE_IO_COMPLETION_PORT */
-
-
-#ifdef WORK_FORK
-void
-update_resp_pipe_fd(
-	int resp_pipe_fd,
-	int closing
-	)
-{
-	maintain_activefds(resp_pipe_fd, closing);
-}
-#endif
-
-
-/* MOVED to libntp/socket.c for inclusion by libntp */
-#if 0
-/*
- * on Unix systems the stdio library typically
- * makes use of file descriptors in the lower
- * integer range.  stdio usually will make use
- * of the file descriptors in the range of
- * [0..FOPEN_MAX)
- * in order to keep this range clean, for socket
- * file descriptors we attempt to move them above
- * FOPEN_MAX. This is not as easy as it sounds as
- * FOPEN_MAX changes from implementation to implementation
- * and may exceed to current file decriptor limits.
- * We are using following strategy:
- * - keep a current socket fd boundary initialized with
- *   max(0, min(GETDTABLESIZE() - FD_CHUNK, FOPEN_MAX))
- * - attempt to move the descriptor to the boundary or
- *   above.
- *   - if that fails and boundary > 0 set boundary
- *     to min(0, socket_fd_boundary - FD_CHUNK)
- *     -> retry
- *     if failure and boundary == 0 return old fd
- *   - on success close old fd return new fd
- *
- * effects:
- *   - fds will be moved above the socket fd boundary
- *     if at all possible.
- *   - the socket boundary will be reduced until
- *     allocation is possible or 0 is reached - at this
- *     point the algrithm will be disabled
- */
-SOCKET
-move_fd(
-	SOCKET fd
-	)
-{
-#if !defined(SYS_WINNT) && defined(F_DUPFD)
-#ifndef FD_CHUNK
-#define FD_CHUNK	10
-#endif
-#ifndef FOPEN_MAX
-#define FOPEN_MAX	20
-#endif
-/*
- * number of fds we would like to have for
- * stdio FILE* available.
- * we can pick a "low" number as our use of
- * FILE* is limited to log files and temporarily
- * to data and config files. Except for log files
- * we don't keep the other FILE* open beyond the
- * scope of the function that opened it.
- */
-#ifndef FD_PREFERRED_SOCKBOUNDARY
-#define FD_PREFERRED_SOCKBOUNDARY 48
-#endif
-
-#if defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
-#define GETDTABLESIZE()	((int)sysconf(_SC_OPEN_MAX))
-#elif !defined(HAVE_GETDTABLESIZE)
-/*
- * if we have no idea about the max fd value set up things
- * so we will start at FOPEN_MAX
- */
-#define GETDTABLESIZE()	(FOPEN_MAX + FD_CHUNK)
-#endif
-
-	static SOCKET socket_boundary = -1;
-	SOCKET newfd;
-
-	NTP_REQUIRE((int)fd >= 0);
-
-	/*
-	 * check whether boundary has be set up
-	 * already
-	 */
-	if (socket_boundary == -1) {
-		socket_boundary = max(0, min(GETDTABLESIZE() - FD_CHUNK, 
-					     min(FOPEN_MAX, FD_PREFERRED_SOCKBOUNDARY)));
-#ifdef DEBUG
-		msyslog(LOG_DEBUG,
-			"ntp_io: estimated max descriptors: %d, initial socket boundary: %d",
-			GETDTABLESIZE(), socket_boundary);
-#endif
-	}
-
-	/*
-	 * Leave a space for stdio to work in. potentially moving the
-	 * socket_boundary lower until allocation succeeds.
-	 */
-	do {
-		if (fd >= 0 && fd < socket_boundary) {
-			/* inside reserved range: attempt to move fd */
-			newfd = fcntl(fd, F_DUPFD, socket_boundary);
-			
-			if (newfd != -1) {
-				/* success: drop the old one - return the new one */
-				close(fd);
-				return newfd;
-			}
-		} else {
-			/* outside reserved range: no work - return the original one */
-			return fd;
-		}
-		socket_boundary = max(0, socket_boundary - FD_CHUNK);
-#ifdef DEBUG
-		msyslog(LOG_DEBUG,
-			"ntp_io: selecting new socket boundary: %d",
-			socket_boundary);
-#endif
-	} while (socket_boundary > 0);
-#else
-	NTP_REQUIRE((int)fd >= 0);
-#endif /* !defined(SYS_WINNT) && defined(F_DUPFD) */
-	return fd;
-}
-#endif /* 0 */
-
-
-#ifndef HAVE_IO_COMPLETION_PORT
-/*
- * close_all_except()
- *
- * Close all file descriptors except the given keep_fd.
- */
-void
-close_all_except(
-	int keep_fd
-	)
-{
-	int fd;
-
-	for (fd = 0; fd < keep_fd; fd++)
-		close(fd);
-
-	close_all_beyond(keep_fd);
-}
-
-
-/*
- * close_all_beyond()
- *
- * Close all file descriptors after the given keep_fd, which is the
- * highest fd to keep open.
- */
-void
-close_all_beyond(
-	int keep_fd
-	)
-{
-# ifdef HAVE_CLOSEFROM
-	closefrom(keep_fd + 1);
-# elif defined(F_CLOSEM)
-	/*
-	 * From 'Writing Reliable AIX Daemons,' SG24-4946-00,
-	 * by Eric Agar (saves us from doing 32767 system
-	 * calls)
-	 */
-	if (fcntl(keep_fd + 1, F_CLOSEM, 0) == -1)
-		msyslog(LOG_ERR, "F_CLOSEM(%d): %m", keep_fd + 1);
-# else	/* !HAVE_CLOSEFROM && !F_CLOSEM follows */
-	int fd;
-	int max_fd;
-
-	max_fd = GETDTABLESIZE();
-	for (fd = keep_fd + 1; fd < max_fd; fd++)
-		close(fd);
-# endif	/* !HAVE_CLOSEFROM && !F_CLOSEM */
-}
-#endif	/* HAVE_IO_COMPLETION_PORT */
 
 
 #ifdef DEBUG_TIMING
@@ -591,6 +403,10 @@ init_io(void)
 	/* update interface every 5 minutes as default */
 	interface_interval = 300;
 
+#ifdef WORK_PIPE
+	addremove_io_fd = &ntpd_addremove_io_fd;
+#endif
+
 #ifdef SYS_WINNT
 	init_io_completion_port();
 #endif
@@ -598,6 +414,18 @@ init_io(void)
 #if defined(HAVE_SIGNALED_IO)
 	(void) set_signal();
 #endif
+}
+
+
+void
+ntpd_addremove_io_fd(
+	int	fd,
+	int	is_pipe,
+	int	remove_it
+	)
+{
+	UNUSED_ARG(is_pipe);
+	maintain_activefds(fd, remove_it);
 }
 
 
@@ -3276,7 +3104,7 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 	 * put it on the full list and do bookkeeping.
 	 */
 	rb->recv_length = buflen;
-	rb->recv_srcclock = rp->srcclock;
+	rb->recv_peer = rp->srcclock;
 	rb->dstadr = 0;
 	rb->fd = fd;
 	rb->recv_time = ts;
@@ -3481,22 +3309,24 @@ read_network_packet(
  */
 void
 input_handler(
-	l_fp *cts
+	l_fp *	cts
 	)
 {
-	int buflen;
-	int n;
-	int doing;
-	SOCKET fd;
-	struct timeval tvzero;
-	l_fp ts;		/* Timestamp at BOselect() gob */
+	int		buflen;
+	int		n;
+	u_int		idx;
+	int		doing;
+	SOCKET		fd;
+	blocking_child *c;
+	struct timeval	tvzero;
+	l_fp		ts;	/* Timestamp at BOselect() gob */
 #ifdef DEBUG_TIMING
-	l_fp ts_e;		/* Timestamp at EOselect() gob */
+	l_fp		ts_e;	/* Timestamp at EOselect() gob */
 #endif
-	fd_set fds;
-	size_t select_count;
-	endpt *ep;
-#if defined(HAS_ROUTING_SOCKET)
+	fd_set		fds;
+	size_t		select_count;
+	endpt *		ep;
+#ifdef HAS_ROUTING_SOCKET
 	struct asyncio_reader *asyncio_reader;
 #endif
 
@@ -3617,19 +3447,20 @@ input_handler(
 #endif /* HAS_ROUTING_SOCKET */
 	
 	/*
-	 * Check for a response from the blocking child
+	 * Check for a response from a blocking child
 	 */
-	if (parent_resp_read_pipe &&
-	    FD_ISSET(parent_resp_read_pipe, &fds)) {
-		select_count++;
-		process_blocking_response();
+	for (idx = 0; idx < blocking_children_alloc; idx++) {
+		c = blocking_children[idx];
+		if (NULL == c || -1 == c->resp_read_pipe)
+			continue;
+		if (FD_ISSET(c->resp_read_pipe, &fds)) {
+			select_count++;
+			process_blocking_resp(c);
+		}
 	}
 
 	/*
 	 * Done everything from that select.
-	 */
-
-	/*
 	 * If nothing to do, just return.
 	 * If an error occurred, complain and return.
 	 */
@@ -4150,7 +3981,9 @@ io_closeclock(
  */
 #ifndef SYS_WINNT
 void
-kill_asyncio(int startfd)
+kill_asyncio(
+	int	startfd
+	)
 {
 	BLOCKIO();
 
@@ -4368,7 +4201,7 @@ process_routing_msgs(struct asyncio_reader *reader)
 #ifdef HAVE_RTNETLINK
 	struct nlmsghdr *nh;
 #else
-	struct rt_msghdr *rtm;
+	struct rt_msghdr rtm;
 	char *p;
 #endif
 	
@@ -4403,18 +4236,18 @@ process_routing_msgs(struct asyncio_reader *reader)
 #else
 	for (p = buffer;
 	     (p + sizeof(struct rt_msghdr)) <= (buffer + cnt);
-	     p += rtm->rtm_msglen) {
-		rtm = (struct rt_msghdr *)p;
-		if (rtm->rtm_version != RTM_VERSION) {
+	     p += rtm.rtm_msglen) {
+		memcpy(&rtm, p, sizeof(rtm));
+		if (rtm.rtm_version != RTM_VERSION) {
 			msyslog(LOG_ERR,
 				"version mismatch (got %d - expected %d) on routing socket - disabling",
-				rtm->rtm_version, RTM_VERSION);
+				rtm.rtm_version, RTM_VERSION);
 
 			remove_asyncio_reader(reader);
 			delete_asyncio_reader(reader);
 			return;
 		}
-		msg_type = rtm->rtm_type;
+		msg_type = rtm.rtm_type;
 #endif
 		switch (msg_type) {
 #ifdef RTM_NEWADDR

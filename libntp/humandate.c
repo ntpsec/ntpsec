@@ -1,8 +1,9 @@
 /*
- * humandate - convert an NTP (or the current) time to something readable
+ * humandate.c - convert an NTP (or the current) time to something readable
  */
 #include <config.h>
 #include <stdio.h>
+
 #include "ntp_fp.h"
 #include "ntp_unixtime.h"	/* includes <sys/time.h> and <time.h> */
 #include "lib_strbuf.h"

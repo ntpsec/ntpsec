@@ -4,6 +4,8 @@
 #ifndef NTP_CALENDAR_H
 #define NTP_CALENDAR_H
 
+#include <time.h>
+
 #include "ntp_types.h"
 
 /* gregorian calendar date */

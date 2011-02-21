@@ -709,7 +709,7 @@ again:
 		}
 		pl->port = (u_short)s_port;
 		pl->hmode = pl->flags = 0;
-		pl = (struct info_peer_list *)((char *)pl + sendsize);
+		pl = (void *)((char *)pl + sendsize);
 	}
 
 	res = doquery(impl_ver, REQ_PEER_INFO, 0, qitems,
@@ -722,19 +722,19 @@ again:
 	}
 
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
-	    return;
+		return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_peer)) &&
 	    !checkitemsize(itemsize, v4sizeof(struct info_peer)))
-	    return;
+		return;
 
 	while (items-- > 0) {
 		printpeer(pp, fp);
 		if (items > 0)
-		    (void) fprintf(fp, "\n");
+			fprintf(fp, "\n");
 		pp++;
 	}
 }
@@ -785,7 +785,7 @@ again:
 		}
 		pl->port = (u_short)s_port;
 		pl->hmode = plist[qitems].flags = 0;
-		pl = (struct info_peer_list *)((char *)pl + sendsize);
+		pl = (void *)((char *)pl + sendsize);
 	}
 
 	res = doquery(impl_ver, REQ_PEER_STATS, 0, qitems,
@@ -799,7 +799,7 @@ again:
 	}
 
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
 	    return;
@@ -1510,7 +1510,7 @@ again:
 			    SOCK_ADDR6(&pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
-		pl = (struct conf_unpeer *)((char *)pl + sendsize);
+		pl = (void *)((char *)pl + sendsize);
 	}
 
 	res = doquery(impl_ver, REQ_UNCONFIG, 1, qitems,
@@ -1943,6 +1943,9 @@ monlist(
 	)
 {
 	char *struct_star;
+	struct info_monitor *ml;
+	struct info_monitor_1 *m1;
+	struct old_info_monitor *oml;
 	sockaddr_u addr;
 	sockaddr_u dstadr;
 	int items;
@@ -1950,14 +1953,13 @@ monlist(
 	int res;
 	int version = -1;
 
-	if (pcmd->nargs > 0) {
+	if (pcmd->nargs > 0)
 		version = pcmd->argval[0].ival;
-	}
 
 again:
 	res = doquery(impl_ver,
 		      (version == 1 || version == -1) ? REQ_MON_GETLIST_1 :
-		      REQ_MON_GETLIST, 0, 0, 0, (char *)NULL,
+		      REQ_MON_GETLIST, 0, 0, 0, NULL,
 		      &items, &itemsize, &struct_star,
 		      (version < 0) ? (1 << INFO_ERR_REQ) : 0, 
 		      sizeof(struct info_monitor_1));
@@ -1968,57 +1970,57 @@ again:
 	}
 
 	if (res == INFO_ERR_REQ && version < 0) 
-	    res = doquery(impl_ver, REQ_MON_GETLIST, 0, 0, 0, (char *)NULL,
-			  &items, &itemsize, &struct_star, 0, 
-			  sizeof(struct info_monitor));
+		res = doquery(impl_ver, REQ_MON_GETLIST, 0, 0, 0, NULL,
+			      &items, &itemsize, &struct_star, 0,
+			      sizeof(struct info_monitor));
 	
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
-	    return;
+		return;
 
 	if (itemsize == sizeof(struct info_monitor_1) ||
 	    itemsize == v4sizeof(struct info_monitor_1)) {
-		struct info_monitor_1 *ml = (struct info_monitor_1 *) struct_star;
 
-		(void) fprintf(fp,
-			       "remote address          port local address      count m ver rstr avgint  lstint\n");
-		(void) fprintf(fp,
-			       "===============================================================================\n");
+		m1 = (void *)struct_star;
+		fprintf(fp,
+			"remote address          port local address      count m ver rstr avgint  lstint\n");
+		fprintf(fp,
+			"===============================================================================\n");
 		while (items > 0) {
-			SET_ADDRS(dstadr, addr, ml, daddr, addr);
+			SET_ADDRS(dstadr, addr, m1, daddr, addr);
 			if ((pcmd->nargs == 0) ||
-			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
-			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
+			    ((pcmd->argval->ival == 6) && (m1->v6_flag != 0)) ||
+			    ((pcmd->argval->ival == 4) && (m1->v6_flag == 0)))
 				fprintf(fp, 
 				    "%-22.22s %5d %-15s %8lu %1u %1u %6lx %6lu %7lu\n",
 				    nntohost(&addr), 
-				    ntohs(ml->port),
+				    ntohs(m1->port),
 				    stoa(&dstadr),
-				    (u_long)ntohl(ml->count),
-				    ml->mode,
-				    ml->version,
-				    (u_long)ntohl(ml->restr),
-				    (u_long)ntohl(ml->avg_int),
-				    (u_long)ntohl(ml->last_int));
-			ml++;
+				    (u_long)ntohl(m1->count),
+				    m1->mode,
+				    m1->version,
+				    (u_long)ntohl(m1->restr),
+				    (u_long)ntohl(m1->avg_int),
+				    (u_long)ntohl(m1->last_int));
+			m1++;
 			items--;
 		}
 	} else if (itemsize == sizeof(struct info_monitor) ||
 	    itemsize == v4sizeof(struct info_monitor)) {
-		struct info_monitor *ml = (struct info_monitor *) struct_star;
 
-		(void) fprintf(fp,
-			       "     address               port     count mode ver rstr avgint  lstint\n");
-		(void) fprintf(fp,
-			       "===============================================================================\n");
+		ml = (void *) struct_star;
+		fprintf(fp,
+			"     address               port     count mode ver rstr avgint  lstint\n");
+		fprintf(fp,
+			"===============================================================================\n");
 		while (items > 0) {
 			SET_ADDR(dstadr, ml->v6_flag, ml->addr, ml->addr6);
 			if ((pcmd->nargs == 0) ||
 			    ((pcmd->argval->ival == 6) && (ml->v6_flag != 0)) ||
 			    ((pcmd->argval->ival == 4) && (ml->v6_flag == 0)))
-				(void) fprintf(fp,
+				fprintf(fp,
 				    "%-25.25s %5u %9lu %4u %2u %9lx %9lu %9lu\n",
 				    nntohost(&dstadr),
 				    ntohs(ml->port),
@@ -2032,21 +2034,22 @@ again:
 			items--;
 		}
 	} else if (itemsize == sizeof(struct old_info_monitor)) {
-		struct old_info_monitor *oml = (struct old_info_monitor *)struct_star;
-		(void) fprintf(fp,
-			       "     address          port     count  mode version  lasttime firsttime\n");
-		(void) fprintf(fp,
-			       "======================================================================\n");
+
+		oml = (void *)struct_star;
+		fprintf(fp,
+			"     address          port     count  mode version  lasttime firsttime\n");
+		fprintf(fp,
+			"======================================================================\n");
 		while (items > 0) {
 			SET_ADDR(dstadr, oml->v6_flag, oml->addr, oml->addr6);
-			(void) fprintf(fp, "%-20.20s %5u %9lu %4u   %3u %9lu %9lu\n",
-				       nntohost(&dstadr),
-				       ntohs(oml->port),
-				       (u_long)ntohl(oml->count),
-				       oml->mode,
-				       oml->version,
-				       (u_long)ntohl(oml->lasttime),
-				       (u_long)ntohl(oml->firsttime));
+			fprintf(fp, "%-20.20s %5u %9lu %4u   %3u %9lu %9lu\n",
+				nntohost(&dstadr),
+				ntohs(oml->port),
+				(u_long)ntohl(oml->count),
+				oml->mode,
+				oml->version,
+				(u_long)ntohl(oml->lasttime),
+				(u_long)ntohl(oml->firsttime));
 			oml++;
 			items--;
 		}
@@ -2170,7 +2173,7 @@ again:
 			    SOCK_ADDR6(&pcmd->argval[qitems].netnum);
 			pl->v6_flag = 1;
 		}
-		pl = (struct conf_unpeer *)((char *)pl + sendsize);
+		pl = (void *)((char *)pl + sendsize);
 	}
 
 	res = doquery(impl_ver, REQ_RESET_PEER, 1, qitems,

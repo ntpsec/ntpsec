@@ -118,11 +118,6 @@ SOURCE=..\..\..\ntpd\ntp_filegen.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\ntp_intres.c
-# SUBTRACT CPP /YX
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\ntpd\ntp_io.c
 # SUBTRACT CPP /YX
 # End Source File
@@ -186,11 +181,6 @@ SOURCE=..\..\..\ntpd\ntp_util.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\ntpd\ntp_worker.c
-# SUBTRACT CPP /YX
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\..\ntpd\ntpd-opts.c"
 # End Source File
 # Begin Source File
@@ -201,16 +191,6 @@ SOURCE=..\..\..\ntpd\ntpd.c
 # Begin Source File
 
 SOURCE=..\ntpd\ntservice.c
-# SUBTRACT CPP /YX
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\ntpd\work_fork.c
-# SUBTRACT CPP /YX
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\ntpd\work_thread.c
 # SUBTRACT CPP /YX
 # End Source File
 

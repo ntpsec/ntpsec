@@ -169,81 +169,93 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 }
 
 TEST_F(mainTest, HandleUnusableServer) {
-	pkt rpkt;
-	addrinfo host;
-	int rpktl = SERVER_UNUSEABLE;
+	pkt		rpkt;
+	sockaddr_u	host;
+	int		rpktl;
 
-	EXPECT_EQ(-1, handle_pkt(rpktl, &rpkt, &host));
+	ZERO(rpkt);
+	ZERO(host);
+	rpktl = SERVER_UNUSEABLE;
+	EXPECT_EQ(-1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
 TEST_F(mainTest, HandleUnusablePacket) {
-	pkt rpkt;
-	addrinfo host;
-	int rpktl = PACKET_UNUSEABLE;
+	pkt		rpkt;
+	sockaddr_u	host;
+	int		rpktl;
 
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+	ZERO(rpkt);
+	ZERO(host);
+	rpktl = PACKET_UNUSEABLE;
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
 TEST_F(mainTest, HandleServerAuthenticationFailure) {
-	pkt rpkt;
-	addrinfo host;
-	int rpktl = SERVER_AUTH_FAIL;
+	pkt		rpkt;
+	sockaddr_u	host;
+	int		rpktl;
 
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+	ZERO(rpkt);
+	ZERO(host);
+	rpktl = SERVER_AUTH_FAIL;
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
 TEST_F(mainTest, HandleKodDemobilize) {
-	const char* HOSTNAME = "192.0.2.1";
-	const char* REASON = "DENY";
+	const char *	HOSTNAME = "192.0.2.1";
+	const char *	REASON = "DENY";
+	pkt		rpkt;
+	sockaddr_u	host;
+	int		rpktl;
+	kod_entry *	entry;
 
-	pkt rpkt;
-	addrinfo host;
-	int rpktl = KOD_DEMOBILIZE;
-
-	host.ai_family = AF_INET;
-	host.ai_addrlen = sizeof(sockaddr_in);
-
-	sockaddr_u s;
-	s.sa4.sin_family = AF_INET;
-	s.sa4.sin_addr.s_addr = inet_addr(HOSTNAME);
-	host.ai_addr = &s.sa;
-
+	rpktl = KOD_DEMOBILIZE;
+	ZERO(rpkt);
 	memcpy(&rpkt.refid, REASON, 4);
+	ZERO(host);
+	host.sa4.sin_family = AF_INET;
+	host.sa4.sin_addr.s_addr = inet_addr(HOSTNAME);
 
 	// Test that the KOD-entry is added to the database.
-	kod_init_kod_db("/dev/null");
+	kod_init_kod_db("/dev/null", TRUE);
 
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, HOSTNAME));
 
-	kod_entry *entry;
-	ASSERT_EQ(1, search_entry((char*)HOSTNAME, &entry));
+	ASSERT_EQ(1, search_entry(HOSTNAME, &entry));
 	EXPECT_TRUE(memcmp(REASON, entry->type, 4) == 0);
 }
 
 TEST_F(mainTest, HandleKodRate) {
-	pkt rpkt;
-	addrinfo host;
-	int rpktl = KOD_RATE;
+	pkt		rpkt;
+	sockaddr_u	host;
+	int		rpktl;
 
-	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host));
+	ZERO(rpkt);
+	ZERO(host);
+	rpktl = KOD_RATE;
+	EXPECT_EQ(1, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
 TEST_F(mainTest, HandleCorrectPacket) {
+	pkt		rpkt;
+	sockaddr_u	host;
+	int		rpktl;
+	l_fp		now;
+
 	// We don't want our testing code to actually change the system clock.
-	ASSERT_FALSE(ENABLED_OPT(SETTOD));
-	ASSERT_FALSE(ENABLED_OPT(ADJTIME));
+	ASSERT_FALSE(ENABLED_OPT(STEP));
+	ASSERT_FALSE(ENABLED_OPT(SLEW));
 
-	pkt rpkt;
-	addrinfo host;
-	int rpktl = LEN_PKT_NOMAC;
-
-	l_fp now;
 	get_systime(&now);
 	HTONL_FP(&now, &rpkt.reftime);
 	HTONL_FP(&now, &rpkt.org);
 	HTONL_FP(&now, &rpkt.rec);
 	HTONL_FP(&now, &rpkt.xmt);
+	rpktl = LEN_PKT_NOMAC;
+	ZERO(host);
+	AF(&host) = AF_INET;
 
-	EXPECT_EQ(0, handle_pkt(rpktl, &rpkt, &host));
+	EXPECT_EQ(0, handle_pkt(rpktl, &rpkt, &host, ""));
 }
 
+/* packetHandling.cpp */

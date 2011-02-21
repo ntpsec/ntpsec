@@ -1,37 +1,16 @@
 ## LIBOPTS_CHECK_NOBUILD works with Automake 1.10 now
 AUTOMAKE_OPTIONS = foreign 1.10
-ACLOCAL_AMFLAGS = -I sntp/m4 -I sntp/libopts/m4
+ACLOCAL_AMFLAGS = -I sntp/m4 -I sntp/libopts/m4 -I sntp/libevent/m4
 
 NULL =
 
-SUBDIRS =
-SUBDIRS += 		\
+SUBDIRS = 		\
 	scripts 	\
 	include 	\
 	ElectricFence	\
 	libntp		\
 	sntp		\
 	libparse	\
-	ntpd		\
-	ntpdate		\
-	ntpdc		\
-	ntpq		\
-	ntpsnmpd	\
-	parseutil	\
-	adjtimed	\
-	clockstuff	\
-	kernel		\
-	util		\
-	tests		\
-	$(NULL)
-
-DIST_SUBDIRS =		\
-	scripts		\
-	include		\
-	ElectricFence	\
-	libntp		\
-	libparse	\
-	sntp		\
 	ntpd		\
 	ntpdate		\
 	ntpdc		\

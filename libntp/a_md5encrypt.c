@@ -100,6 +100,6 @@ addr2refid(sockaddr_u *addr)
 	EVP_DigestUpdate(&ctx, (u_char *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
 	EVP_DigestFinal(&ctx, digest, &len);
-	memcpy(&addr_refid, digest, 4);
+	memcpy(&addr_refid, digest, sizeof(addr_refid));
 	return (addr_refid);
 }

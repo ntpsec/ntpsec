@@ -13,7 +13,7 @@ BUILT_SOURCES=	check-libntp @MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES +=  $(LIBOPTS_CFLAGS)
 
@@ -21,10 +21,11 @@ AM_CFLAGS = @CFLAGS_NTP@
 AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD=	version.o $(LIBOPTS_LDADD) ../libntp/libntp.a \
-		@EDITLINE_LIBS@ @LCRYPTO@
+ntpdc_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a @LDADD_LIBNTP@
+ntpdc_LDADD += @PTHREAD_LIBS@ @EDITLINE_LIBS@ @LCRYPTO@
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
+
 DISTCLEANFILES=	.version version.c
 CLEANFILES=	check-layout layout.here nl.c ntpdc-layout
 noinst_HEADERS=	ntpdc.h
@@ -69,7 +70,7 @@ layout.here: ntpdc-layout
 check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 	cmp $(srcdir)/layout.std layout.here && echo stamp > $@
 
-$(PROGRAMS): $(LDADD)
+$(PROGRAMS): version.o
 
 check-libntp: FRC
 	cd ../libntp && $(MAKE)

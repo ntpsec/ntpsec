@@ -20,11 +20,12 @@
 
 void
 caljulian(
-	u_int32		 ntp,
-	struct calendar	*jt )
+	u_int32			ntp,
+	struct calendar *	jt
+	)
 {
-	vint64	     vlong;
-	ntpcal_split split;
+	vint64		vlong;
+	ntpcal_split	split;
 	
 	
 	NTP_INSIST(NULL != jt);

@@ -158,8 +158,8 @@ do {								\
 	entrytype **ppentry;					\
 								\
 	ppentry = &(listhead);					\
-	while (*ppentry != NULL) {				\
-		if (beforecur) {				\
+	while (TRUE) {						\
+		if (NULL == *ppentry || (beforecur)) {		\
 			(pentry)->nextlink = *ppentry;		\
 			*ppentry = (pentry);			\
 			break;					\
@@ -171,7 +171,7 @@ do {								\
 			break;					\
 		}						\
 	}							\
-} while (0)
+} while (FALSE)
 
 #define UNLINK_HEAD_SLIST(punlinked, listhead, nextlink)	\
 do {								\

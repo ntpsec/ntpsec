@@ -15,6 +15,15 @@
 
 extern const char *Version;	/* version.c for each program */
 
+typedef struct options_fv_tag {
+	u_char		padding[offsetof(tOptions, pzFullVersion)];
+	const char *	pzFullVersion;
+} options_fv;
+
+typedef union options_const_trick_tag {
+	tOptions	orig;	/* for alignment */
+	options_fv	fv;
+} options_const_trick;
 
 /*
  * ntpOptionProcess() is a clone of libopts' optionProcess which
@@ -28,26 +37,23 @@ ntpOptionProcess(
 	char **		argv
 	)
 {
-	char *		pchOpts;
-	char **		ppzFullVersion;
-	char *		pzNewFV;
-	char *		pzAutogenFV;
-	size_t		octets;
-	int		rc;
+	options_const_trick *	pOpts_fv;
+	const char *		pzAutogenFV;
+	char *			pzNewFV;
+	size_t			octets;
+	int			rc;
 
-	pchOpts = (void *)pOpts;
-	ppzFullVersion = (char **)(pchOpts + offsetof(tOptions,
-						      pzFullVersion));
-	pzAutogenFV = *ppzFullVersion;
+	pOpts_fv = (void *)pOpts;
+	pzAutogenFV = pOpts_fv->fv.pzFullVersion;
 	octets = strlen(pzAutogenFV) +
 		 1 +	/* '\n' */
 		 strlen(Version) +
 		 1;	/* '\0' */
 	pzNewFV = emalloc(octets);
 	snprintf(pzNewFV, octets, "%s\n%s", pzAutogenFV, Version);
-	*ppzFullVersion = pzNewFV;
+	pOpts_fv->fv.pzFullVersion = pzNewFV;
 	rc = optionProcess(pOpts, argc, argv);
-	*ppzFullVersion = pzAutogenFV;
+	pOpts_fv->fv.pzFullVersion = pzAutogenFV;
 	free(pzNewFV);
 
 	return rc;

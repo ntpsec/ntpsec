@@ -119,9 +119,9 @@ fg_start(
 	up = emalloc(sizeof(struct fgunit));
 	memset(up, 0, sizeof(struct fgunit));
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 	pp->io.clock_recv = fg_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
  	if (!io_addclock(&pp->io)) {
@@ -163,7 +163,7 @@ fg_shutdown(
 	struct fgunit *up;
 	
 	pp = peer->procptr;
-	up = (struct fgunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (pp->io.fd != -1)
 		io_closeclock(&pp->io);
 	if (up != NULL)
@@ -230,9 +230,9 @@ fg_receive(
          * Initialize pointers and read the timecode and timestamp
 	 * We can't use gtlin function because we need bynary data in buf */
 
-        peer = (struct peer *)rbufp->recv_srcclock;
+        peer = rbufp->recv_peer;
         pp = peer->procptr;
-        up = (struct fgunit *)pp->unitptr;
+        up = pp->unitptr;
 
 	/*
          * Below hug to implement receiving of status information

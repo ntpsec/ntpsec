@@ -9,7 +9,7 @@ endif
 
 INCLUDES  = -I$(top_srcdir)/include
 INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/nothreads/include
+INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
 INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
 INCLUDES += $(LIBOPTS_CFLAGS)
 
@@ -17,8 +17,8 @@ AM_CFLAGS = @CFLAGS_NTP@
 AM_CPPFLAGS = @CPPFLAGS_NTP@
 
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD=	version.o $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a \
-		@EDITLINE_LIBS@ @LCRYPTO@
+ntpq_LDADD  = version.o $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a @LDADD_LIBNTP@
+ntpq_LDADD += @PTHREAD_LIBS@ @EDITLINE_LIBS@ @LCRYPTO@
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a
 libntpq_a_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB
@@ -58,8 +58,6 @@ $(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
-$(PROGRAMS): $(LDADD)
-
 check-libntp: FRC
 	cd ../libntp && $(MAKE)
 
@@ -70,6 +68,8 @@ FRC:
 
 $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
+
+$(PROGRAMS): version.o
 
 version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
 	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpq

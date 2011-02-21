@@ -122,6 +122,11 @@ union addrun
 	struct in_addr  addr;
 };
 
+typedef union req_data_u_tag {
+	u_int32	u32[(MAXFILENAME + 48) / sizeof(u_int32)];
+	char data[MAXFILENAME + 48];	/* data area [32 prev](176 byte max) */
+} req_data_u;				/* struct conf_peer must fit */
+
 /*
  * A request packet.  These are almost a fixed length.
  */
@@ -132,8 +137,7 @@ struct req_pkt {
 	u_char request;			/* request number */
 	u_short err_nitems;		/* error code/number of data items */
 	u_short mbz_itemsize;		/* item size */
-	char data[MAXFILENAME + 48];	/* data area [32 prev](176 byte max) */
-					/* struct conf_peer must fit */
+	req_data_u u;			/* data area */
 	l_fp tstamp;			/* time stamp, for authentication */
 	keyid_t keyid;			/* (optional) encryption key */
 	char mac[MAX_MAC_LEN-sizeof(keyid_t)]; /* (optional) auth code */
@@ -150,7 +154,7 @@ struct req_pkt_tail {
 };
 
 /* MODE_PRIVATE request packet header length before optional items. */
-#define	REQ_LEN_HDR	(offsetof(struct req_pkt, data))
+#define	REQ_LEN_HDR	(offsetof(struct req_pkt, u))
 /* MODE_PRIVATE request packet fixed length without MAC. */
 #define	REQ_LEN_NOMAC	(offsetof(struct req_pkt, keyid))
 /* MODE_PRIVATE req_pkt_tail minimum size (16 octet digest) */
@@ -162,8 +166,13 @@ struct req_pkt_tail {
  * is a maximally sized one.  Note that this implementation doesn't
  * authenticate responses.
  */
-#define	RESP_HEADER_SIZE	(offsetof(struct resp_pkt, data))
-#define	RESP_DATA_SIZE		(500)
+#define	RESP_HEADER_SIZE	(offsetof(struct resp_pkt, u))
+#define	RESP_DATA_SIZE		500
+
+typedef union resp_pkt_u_tag {
+	char data[RESP_DATA_SIZE];
+	u_int32 u32[RESP_DATA_SIZE / sizeof(u_int32)];
+} resp_pkt_u;
 
 struct resp_pkt {
 	u_char rm_vn_mode;		/* response, more, version, mode */
@@ -172,7 +181,7 @@ struct resp_pkt {
 	u_char request;			/* request number */
 	u_short err_nitems;		/* error code/number of data items */
 	u_short mbz_itemsize;		/* item size */
-	char data[RESP_DATA_SIZE];	/* data area */
+	resp_pkt_u u;			/* data area */
 };
 
 
@@ -890,26 +899,26 @@ struct info_kernel {
  * interface statistics
  */
 struct info_if_stats {
-	union addrun unaddr;            /* address */
-        union addrun unbcast;	        /* broadcast */
-	union addrun unmask;	        /* mask */
-	u_int32 v6_flag;                /* is this v6 */
+	union addrun unaddr;		/* address */
+	union addrun unbcast;		/* broadcast */
+	union addrun unmask;		/* mask */
+	u_int32 v6_flag;		/* is this v6 */
 	char name[32];			/* name of interface */
 	int32 flags;			/* interface flags */
 	int32 last_ttl;			/* last TTL specified */
 	int32 num_mcast;		/* No. of IP addresses in multicast socket */
-        int32 received;	                /* number of incoming packets */
+	int32 received;			/* number of incoming packets */
 	int32 sent;			/* number of outgoing packets */
 	int32 notsent;			/* number of send failures */
-	int32 uptime;		        /* number of seconds this interface was active */
+	int32 uptime;			/* number of seconds this interface was active */
 	u_int32 scopeid;		/* Scope used for Multicasting */
 	u_int32 ifindex;		/* interface index - from system */
-	u_int32 ifnum;		        /* sequential interface number */
-        u_int32 peercnt;		/* number of peers referencinf this interface - informational only */
+	u_int32 ifnum;			/* sequential interface number */
+	u_int32 peercnt;		/* number of peers referencinf this interface - informational only */
 	u_short family;			/* Address family */
-	u_char ignore_packets;	        /* Specify whether the packet should be ignored */
-        u_char action;		        /* reason the item is listed */
-	int32 _filler0;		        /* pad to a 64 bit size boundary */
+	u_char ignore_packets;		/* Specify whether the packet should be ignored */
+	u_char action;			/* reason the item is listed */
+	int32 _filler0;			/* pad to a 64 bit size boundary */
 };
 
 #define IFS_EXISTS	1	/* just exists */

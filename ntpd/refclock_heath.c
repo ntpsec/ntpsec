@@ -228,7 +228,7 @@ heath_start(
 		return (0);
 	pp = peer->procptr;
 	pp->io.clock_recv = heath_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
@@ -283,7 +283,7 @@ heath_receive(
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	pp->lencode = refclock_gtlin(rbufp, pp->a_lastcode, BMAX,
 	    &trtmp);

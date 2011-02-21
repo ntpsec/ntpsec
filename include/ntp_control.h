@@ -4,6 +4,11 @@
 
 #include "ntp_types.h"
 
+typedef union ctl_pkt_u_tag {
+	u_char data[480 + MAX_MAC_LEN]; /* data + auth */
+	u_int32 u32[(480 + MAX_MAC_LEN) / sizeof(u_int32)];
+} ctl_pkt_u;
+
 struct ntp_control {
 	u_char li_vn_mode;		/* leap, version, mode */
 	u_char r_m_e_op;		/* response, more, error, opcode */
@@ -12,13 +17,13 @@ struct ntp_control {
 	associd_t associd;		/* association ID */
 	u_short offset;			/* offset of this batch of data */
 	u_short count;			/* count of data in this packet */
-	u_char data[(480 + MAX_MAC_LEN)]; /* data + auth */
+	ctl_pkt_u u;
 };
 
 /*
  * Length of the control header, in octets
  */
-#define	CTL_HEADER_LEN		(offsetof(struct ntp_control, data))
+#define	CTL_HEADER_LEN		(offsetof(struct ntp_control, u))
 #define	CTL_MAX_DATA_LEN	468
 
 

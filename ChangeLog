@@ -1,4 +1,22 @@
-* Import libevent.
+* Convert sntp to libevent event-driven socket programming.  Instead of
+  blocking name resolution and querying one NTP server at a time,
+  resolve server names and send NTP queries without blocking.  Add
+  sntp command-line options to adjust timing and optionally wait for all
+  servers to respond instead of exiting after the first.
+* Move "can't write KoD file" warning from sntp shutdown to startup.
+* Import libevent 2.0.10-stable plus local patches as a tearoff, used
+  only if the target system lacks an installed libevent 2.0.9 or later.
+* Move blocking worker and resolver to libntp from ntpd.
+* Use threads rather than forked child processes for blocking worker
+  when possible.  Override with configure --disable-thread-support.
+* Move init_logging(), change_logfile(), and setup_logfile() from ntpd
+  to libntp, use them in sntp.
+* Test --without-sntp in flock-build script's -no-refclocks variety.
+* Avoid invoking config.status twice in a row in build script.
+* Move more m4sh tests needed by libntp to shared .m4 files.
+* Split up ntp_libntp.m4 into smaller, more specific subsets.
+* Enable gcc -Wcast-align, fix many instances of warnings when casting
+  a pointer to a more-strictly-aligned underlying type.
 * [Bug 1786] Remove extra semicolon from ntp_proto.c .
 (4.2.7p120) 2011/01/20 Released by Harlan Stenn <stenn@ntp.org>
 * Change new timeval and timespec to string routines to use snprintf()

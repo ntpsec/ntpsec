@@ -107,6 +107,45 @@
  * not being defined, copy_addrinfo_list() is an exception.
  */
 struct addrinfo *
+copy_addrinfo_impl(
+	const struct addrinfo *	ai_src
+#ifdef EREALLOC_CALLSITE
+				   ,
+	const char *		caller_file,
+	int			caller_line
+#endif
+	)
+{
+	struct addrinfo *	dst;
+	size_t			octets;
+	size_t			canons_octets;
+	sockaddr_u *		psau;
+	char *			pcanon;
+
+	octets = sizeof(*ai_src) + sizeof(*psau);
+	if (NULL != ai_src->ai_canonname)
+		canons_octets = 1 + strlen(ai_src->ai_canonname);
+	else
+		canons_octets = 0;
+	octets += canons_octets;
+	dst = erealloczsite(NULL, octets, 0, TRUE, caller_file,
+			    caller_line);
+	psau = (void *)(dst + 1);
+	pcanon = (void *)(psau + 1);
+	*dst = *ai_src;
+	REQUIRE(ai_src->ai_addrlen <= sizeof(sockaddr_u));
+	memcpy(psau, ai_src->ai_addr, ai_src->ai_addrlen);
+	dst->ai_addr = &psau->sa;
+	if (NULL != ai_src->ai_canonname) {
+		dst->ai_canonname = pcanon;
+		memcpy(pcanon, ai_src->ai_canonname, canons_octets);
+	}
+
+	return dst;
+}
+
+
+struct addrinfo *
 copy_addrinfo_list_impl(
 	const struct addrinfo *	src
 #ifdef EREALLOC_CALLSITE
@@ -146,7 +185,7 @@ copy_addrinfo_list_impl(
 
 	for (ai_src = src; NULL != ai_src; ai_src = ai_src->ai_next) {
 		*ai_cpy = *ai_src;
-		NTP_REQUIRE(ai_src->ai_addrlen <= sizeof(sockaddr_u));
+		REQUIRE(ai_src->ai_addrlen <= sizeof(sockaddr_u));
 		memcpy(psau, ai_src->ai_addr, ai_src->ai_addrlen);
 		ai_cpy->ai_addr = &psau->sa;
 		++psau;

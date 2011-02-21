@@ -339,28 +339,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_intres.c"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\ntpd\ntp_io.c"
 				>
 				<FileConfiguration
@@ -647,10 +625,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\ntpd\ntp_worker.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\ntpd\ntpd-opts.c"
 				>
 				<FileConfiguration
@@ -715,14 +689,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\work_fork.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\ntpd\work_thread.c"
-				>
 			</File>
 		</Filter>
 		<Filter

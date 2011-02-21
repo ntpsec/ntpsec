@@ -409,9 +409,9 @@ jjy_start ( int unit, struct peer *peer )
 	}
 
 	pp = peer->procptr ;
-	pp->unitptr       = (caddr_t) up ;
+	pp->unitptr       = up ;
 	pp->io.clock_recv = jjy_receive ;
-	pp->io.srcclock   = (caddr_t) peer ;
+	pp->io.srcclock   = peer ;
 	pp->io.datalen	  = 0 ;
 	pp->io.fd	  = fd ;
 	if ( ! io_addclock(&pp->io) ) {
@@ -446,7 +446,7 @@ jjy_shutdown ( int unit, struct peer *peer )
 	struct refclockproc *pp;
 
 	pp = peer->procptr ;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 	if ( -1 != pp->io.fd )
 		io_closeclock ( &pp->io ) ;
 	if ( NULL != up )
@@ -474,9 +474,9 @@ jjy_receive ( struct recvbuf *rbufp )
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *) rbufp->recv_srcclock ;
+	peer = rbufp->recv_peer ;
 	pp = peer->procptr ;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	/*
 	 * Get next input line
@@ -672,9 +672,9 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *) rbufp->recv_srcclock ;
+	peer = rbufp->recv_peer ;
 	pp = peer->procptr ;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
 		pBuf = up->rawbuf ;
@@ -854,9 +854,9 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *) rbufp->recv_srcclock ;
+	peer = rbufp->recv_peer ;
 	pp = peer->procptr ;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
 		pBuf = up->rawbuf ;
@@ -934,9 +934,9 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 	/*
 	 * Initialize pointers and read the timecode and timestamp
 	 */
-	peer = (struct peer *) rbufp->recv_srcclock ;
+	peer = rbufp->recv_peer ;
 	pp = peer->procptr ;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
 		pBuf = up->rawbuf ;
@@ -1093,9 +1093,9 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 	/*
 	* Initialize pointers and read the timecode and timestamp
 	*/
-	peer = (struct peer *) rbufp->recv_srcclock ;
+	peer = rbufp->recv_peer ;
 	pp = peer->procptr ;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	if ( up->linediscipline == LDISC_RAW ) {
 		pBuf = up->rawbuf ;
@@ -1177,7 +1177,7 @@ jjy_poll ( int unit, struct peer *peer )
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	if ( pp->polls > 0  &&  up->linecount == 0 ) {
 		/*
@@ -1239,7 +1239,7 @@ jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 	int 	iCmdLen ;
 
 	pp = peer->procptr;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	if ( ( pp->sloppyclockflag & CLK_FLAG1 ) == 0 ) {
 		up->linecount = 2 ;
@@ -1311,7 +1311,7 @@ jjy_poll_echokeisokuki_lt2000 ( int unit, struct peer *peer )
 	char	sCmd[2] ;
 
 	pp = peer->procptr;
-	up = (struct jjyunit *) pp->unitptr ;
+	up = pp->unitptr ;
 
 	/*
 	 * Send "T" or "C" command

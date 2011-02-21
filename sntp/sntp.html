@@ -3,7 +3,7 @@
 <title>Sntp User's Manual</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name="description" content="Sntp User's Manual">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="generator" content="makeinfo 4.11">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -38,7 +38,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p114 of <code>sntp</code>.
+  <p>This document applies to version {No value for `VERSION'} of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -87,7 +87,7 @@ error bound of the system clock relative to the server clock.
 
 <h3 class="section">Invoking sntp</h3>
 
-<p><a name="index-sntp-1"></a><a name="index-standard-SNTP-program-2"></a>
+<p><a name="index-sntp-1"></a><a name="index-standard-Simple-Network-Time-Protocol-program-2"></a>
 <code>sntp</code>
 can be used as a SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
@@ -127,8 +127,9 @@ the aginfo template and the option descriptions for the <samp><span class="comma
 <li><a accesskey="5" href="#sntp-concurrent">sntp concurrent</a>:             concurrent option (-c)
 <li><a accesskey="6" href="#sntp-debug_002dlevel">sntp debug-level</a>:            debug-level option (-d)
 <li><a accesskey="7" href="#sntp-filelog">sntp filelog</a>:                filelog option (-l)
-<li><a accesskey="8" href="#sntp-ipv4">sntp ipv4</a>:                   ipv4 option (-4)
-<li><a accesskey="9" href="#sntp-ipv6">sntp ipv6</a>:                   ipv6 option (-6)
+<li><a accesskey="8" href="#sntp-headspace">sntp headspace</a>:              headspace option (-h)
+<li><a accesskey="9" href="#sntp-ipv4">sntp ipv4</a>:                   ipv4 option (-4)
+<li><a href="#sntp-ipv6">sntp ipv6</a>:                   ipv6 option (-6)
 <li><a href="#sntp-keyfile">sntp keyfile</a>:                keyfile option (-k)
 <li><a href="#sntp-kod">sntp kod</a>:                    kod option (-K)
 <li><a href="#sntp-ntpversion">sntp ntpversion</a>:             ntpversion option (-o)
@@ -136,7 +137,9 @@ the aginfo template and the option descriptions for the <samp><span class="comma
 <li><a href="#sntp-slew">sntp slew</a>:                   slew option (-s)
 <li><a href="#sntp-step">sntp step</a>:                   step option (-S)
 <li><a href="#sntp-steplimit">sntp steplimit</a>:              steplimit option (-M)
+<li><a href="#sntp-uctimeout">sntp uctimeout</a>:              uctimeout option (-u)
 <li><a href="#sntp-usereservedport">sntp usereservedport</a>:        usereservedport option (-r)
+<li><a href="#sntp-wait">sntp wait</a>:                   wait option
 </ul>
 
 <div class="node">
@@ -152,7 +155,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <p><a name="index-sntp-usage-3"></a>
 This is the automatically generated usage text for sntp:
 
-<pre class="example">sntp - standard SNTP program - Ver. 4.2.7p120
+<pre class="example"> 7 Feb 02:10:44 sntp[16648]: sntp 4.2.7p120@1.2505-o Mon Feb  7 07:10:42 UTC 2011 (16)
+sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p120
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -167,14 +171,15 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
                                 - prohibits these options:
                                 ipv4
    -a Num authentication Enable authentication with the key auth-keynumber
-   -B Num bctimeout      Specify the number of seconds to wait for broadcasts
+   -B Num bctimeout      The number of seconds to wait for broadcasts
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
    -c Str concurrent     Concurrent query all IPs returned for host-name
                                 - may appear multiple times
-   -l Fil filelog        Log to specified logfile
+   -h Num headspace      The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
-   -k Fil keyfile        Specify a keyfile. SNTP will look in this file for the key specified with -a
+   -k Fil keyfile        Look in this file for the key specified with -a
+   -l Fil filelog        Log to specified logfile
    -M Num steplimit      Adjustments less than steplimit msec will be slewed.
                                 - it must be:  greater than or equal to 0
    -o Num ntpversion     Send &lt;int&gt; as our NTP version
@@ -182,6 +187,10 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -r no  usereservedport Use the NTP Reserved Port (port 123)
    -S no  step           OK to 'step' the time with settimeofday()
    -s no  slew           OK to 'slew' the time with adjtime()
+   -u Num uctimeout      The number of seconds to wait for unicast responses
+      no  wait           Wait for pending replies (if not setting the time)
+                                - disabled as --no-wait
+                                - enabled by default
       opt version        Output version information and exit
    -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
@@ -200,14 +209,14 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
 
-sntp implements the Simple Network Time Protocol and is used to query
-an NTP or SNTP server and either display the time or set the local
-system's time (given suitable privilege).
+sntp implements the Simple Network Time Protocol and is used to query an
+NTP or SNTP server and either display the time or set the local system's
+time (given suitable privilege).
 
 It can be run interactively from the command line or as a cron job.
 
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC
-1305.
+NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and
+RFC 1305.
 
 please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
 </pre>
@@ -240,7 +249,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">bctimeout option (-B)</h4>
 
 <p><a name="index-sntp_002dbctimeout-5"></a>
-This is the &ldquo;specify the number of seconds to wait for broadcasts&rdquo; option. 
+This is the &ldquo;the number of seconds to wait for broadcasts&rdquo; option. 
 When waiting for a broadcast packet SNTP will wait the number
 of seconds specified before giving up.  Default 68 seconds.
 
@@ -321,7 +330,7 @@ This is the &ldquo;increase output debug message level&rdquo; option.
 <div class="node">
 <p><hr>
 <a name="sntp-filelog"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ipv4">sntp ipv4</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-headspace">sntp headspace</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-debug_002dlevel">sntp debug-level</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
@@ -336,16 +345,35 @@ logfile.
 
 <div class="node">
 <p><hr>
+<a name="sntp-headspace"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ipv4">sntp ipv4</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-filelog">sntp filelog</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">headspace option (-h)</h4>
+
+<p><a name="index-sntp_002dheadspace-10"></a>
+This is the &ldquo;the gap (in milliseconds) between time requests&rdquo; option. 
+Since we're only going to use the first valid response we get and
+there is benefit to specifying a good number of servers to query,
+separate the queries we send out by the specified number of
+milliseconds. 
+Default 10 milliseconds.
+
+<div class="node">
+<p><hr>
 <a name="sntp-ipv4"></a>
 Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ipv6">sntp ipv6</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-filelog">sntp filelog</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-headspace">sntp headspace</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
 <h4 class="subsection">ipv4 option (-4)</h4>
 
-<p><a name="index-sntp_002dipv4-10"></a>
+<p><a name="index-sntp_002dipv4-11"></a>
 This is the &ldquo;force ipv4 dns name resolution&rdquo; option.
 
   <p>This option has some usage constraints.  It:
@@ -368,7 +396,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">ipv6 option (-6)</h4>
 
-<p><a name="index-sntp_002dipv6-11"></a>
+<p><a name="index-sntp_002dipv6-12"></a>
 This is the &ldquo;force ipv6 dns name resolution&rdquo; option.
 
   <p>This option has some usage constraints.  It:
@@ -391,8 +419,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">keyfile option (-k)</h4>
 
-<p><a name="index-sntp_002dkeyfile-12"></a>
-This is the &ldquo;specify a keyfile. sntp will look in this file for the key specified with -a&rdquo; option. 
+<p><a name="index-sntp_002dkeyfile-13"></a>
+This is the &ldquo;look in this file for the key specified with -a&rdquo; option. 
 This option specifies the keyfile. SNTP will search for the key specified with -a keyno in this
 file. Key files follow the following format:
 
@@ -418,7 +446,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">kod option (-K)</h4>
 
-<p><a name="index-sntp_002dkod-13"></a>
+<p><a name="index-sntp_002dkod-14"></a>
 This is the &ldquo;kod history filename&rdquo; option. 
 Specifies the filename to be used for the  persistent history of KoD
 responses received from servers.  The default is
@@ -435,7 +463,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">ntpversion option (-o)</h4>
 
-<p><a name="index-sntp_002dntpversion-14"></a>
+<p><a name="index-sntp_002dntpversion-15"></a>
 This is the &ldquo;send &lt;int&gt; as our ntp version&rdquo; option. 
 When sending requests to a remote server, tell them we are running
 NTP protocol version &lt;ntpversion&gt; .
@@ -452,7 +480,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">set-debug-level option (-D)</h4>
 
-<p><a name="index-sntp_002dset_002ddebug_002dlevel-15"></a>
+<p><a name="index-sntp_002dset_002ddebug_002dlevel-16"></a>
 This is the &ldquo;set the output debug message level&rdquo; option.
 
   <p>This option has some usage constraints.  It:
@@ -474,7 +502,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">slew option (-s)</h4>
 
-<p><a name="index-sntp_002dslew-16"></a>
+<p><a name="index-sntp_002dslew-17"></a>
 This is the &ldquo;ok to 'slew' the time with adjtime()&rdquo; option.
 
 <div class="node">
@@ -488,13 +516,13 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">step option (-S)</h4>
 
-<p><a name="index-sntp_002dstep-17"></a>
+<p><a name="index-sntp_002dstep-18"></a>
 This is the &ldquo;ok to 'step' the time with settimeofday()&rdquo; option.
 
 <div class="node">
 <p><hr>
 <a name="sntp-steplimit"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-usereservedport">sntp usereservedport</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-uctimeout">sntp uctimeout</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-step">sntp step</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
@@ -502,23 +530,60 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">steplimit option (-M)</h4>
 
-<p><a name="index-sntp_002dsteplimit-18"></a>
+<p><a name="index-sntp_002dsteplimit-19"></a>
 This is the &ldquo;adjustments less than steplimit msec will be slewed.&rdquo; option. 
 If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
 
 <div class="node">
 <p><hr>
-<a name="sntp-usereservedport"></a>
+<a name="sntp-uctimeout"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-usereservedport">sntp usereservedport</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-steplimit">sntp steplimit</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">uctimeout option (-u)</h4>
+
+<p><a name="index-sntp_002ductimeout-20"></a>
+This is the &ldquo;the number of seconds to wait for unicast responses&rdquo; option. 
+When waiting for a unicast reply, SNTP will wait the number
+of seconds specified before giving up.  Default 5 seconds.
+
+<div class="node">
+<p><hr>
+<a name="sntp-usereservedport"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-wait">sntp wait</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-uctimeout">sntp uctimeout</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 </div>
 
 <h4 class="subsection">usereservedport option (-r)</h4>
 
-<p><a name="index-sntp_002dusereservedport-19"></a>
+<p><a name="index-sntp_002dusereservedport-21"></a>
 This is the &ldquo;use the ntp reserved port (port 123)&rdquo; option. 
 Use port 123, which is reserved for NTP, for our network communications.
+
+<div class="node">
+<p><hr>
+<a name="sntp-wait"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-usereservedport">sntp usereservedport</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
+
+</div>
+
+<h4 class="subsection">wait option</h4>
+
+<p><a name="index-sntp_002dwait-22"></a>
+This is the &ldquo;wait for pending replies (if not setting the time)&rdquo; option.
+
+  <p>This option has some usage constraints.  It:
+     <ul>
+<li>is enabled by default. 
+</ul>
+
+  <p>If we are not setting the time, wait for all pending responses.
 
 <div class="node">
 <p><hr>

@@ -304,6 +304,7 @@ nmea_start(
 	char *baudtext;
 
 	pp = peer->procptr;
+	pp->io.fd = -1;
 
 	/* Open serial port. Use CLK line discipline, if available. Use
 	 * baudrate based on the value of bit 4/5/6
@@ -343,6 +344,7 @@ nmea_start(
 #endif
 	}
 
+	pp->io.fd = -1;
 	fd = refclock_open(device, baudrate, LDISC_CLK);
 	if (fd <= 0) {
 #ifdef HAVE_READLINK
@@ -361,10 +363,10 @@ nmea_start(
 		char *nmea_host, *nmea_tail;
 		u_long nmea_port;
 		int   len;
-		struct hostent *he;
-		struct protoent *p;
-		struct sockaddr_in so_addr;
-
+		struct addrinfo hints;
+		struct addrinfo *ai;
+		int rc;
+	
 		if ((len = readlink(device,buffer,sizeof(buffer))) == -1)
 			return(0);
 		buffer[len] = 0;
@@ -377,24 +379,34 @@ nmea_start(
 		    nmea_port > USHRT_MAX)
 			return 0;
 
-		if ((he = gethostbyname(nmea_host)) == NULL)
-			return(0);
-		if ((p = getprotobyname("tcp")) == NULL)
-			return(0);
-		memset(&so_addr, 0, sizeof(so_addr));
-		so_addr.sin_family = AF_INET;
-		so_addr.sin_port = htons((u_short)nmea_port);
-		so_addr.sin_addr = *((struct in_addr *) he->h_addr);
+		/*
+		 * This getaddrinfo() is naughty in ntpd's nonblocking
+		 * main thread, but you have to go out of your wary to
+		 * use this code and typically the blocking is at
+		 * startup where its impact is reduced.
+		 */
+		ZERO(hints);
+		hints.ai_flags = Z_AI_NUMERICSERV;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		rc = getaddrinfo(nmea_host, nmea_tail, &hints, &ai);
+		if (rc != 0)
+			return 0;
 
-		if ((fd = socket(PF_INET,SOCK_STREAM,p->p_proto)) == -1)
-			return(0);
-		if (connect(fd,(struct sockaddr *)&so_addr, sizeof(so_addr)) == -1) {
+		fd = socket(ai->ai_family, ai->ai_socktype,
+			    ai->ai_protocol);
+		if (INVALID_SOCKET == fd) {
+			freeaddrinfo(ai);
+			return 0;
+		}
+		rc = connect(fd, ai->ai_addr, ai->ai_addrlen);
+		freeaddrinfo(ai);
+		if (-1 == rc) {
 			close(fd);
-			return (0);
+			return 0;
 		}
 #else
-		pp->io.fd = -1;
-		return (0);
+		return 0;
 #endif
 	}
 
@@ -404,16 +416,16 @@ nmea_start(
 	/* Allocate and initialize unit structure */
 	up = emalloc_zero(sizeof(*up));
 	pp->io.clock_recv = nmea_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd;
 	if (!io_addclock(&pp->io)) {
-		pp->io.fd = -1;
 		close(fd);
+		pp->io.fd = -1;
 		free(up);
-		return (0);
+		return 0;
 	}
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 	/* force change detection on first valid message */
 	up->last_daytime = -1;
 	/* force checksum on GPRMC, see below */
@@ -431,7 +443,7 @@ nmea_start(
 	 */
 	gps_send(fd, "PMOTG,RMC,0001", peer);
 	
-	return (1);
+	return 1;
 }
 
 
@@ -455,7 +467,7 @@ nmea_shutdown(
 	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
-	up = (struct nmeaunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up != NULL) {
 #ifdef HAVE_PPSAPI
 		if (up->ppsapi_lit) {
@@ -493,7 +505,7 @@ nmea_control(
 	UNUSED_ARG(out_st);
 
 	pp = peer->procptr;
-	up = (struct nmeaunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (!(CLK_FLAG1 & pp->sloppyclockflag)) {
 		if (!up->ppsapi_tried)
@@ -563,7 +575,7 @@ nmea_timer(
 	UNUSED_ARG(unit);
 
 	pp = peer->procptr;
-	up = (struct nmeaunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	if (up->ppsapi_lit && up->ppsapi_gate &&
 	    refclock_pps(peer, &up->atom, pp->sloppyclockflag) > 0) {
@@ -712,7 +724,7 @@ nmea_receive(
 	/* declare & init control structure ptrs */
 	struct peer	    * const peer = rbufp->recv_peer;
 	struct refclockproc * const pp	= peer->procptr;
-	struct nmeaunit	    * const up	= (struct nmeaunit*)pp->unitptr;
+	struct nmeaunit	    * const up	= pp->unitptr;
 
 	/* Use these variables to hold data until we decide its worth keeping */
 	struct nmeadata rdata;
@@ -1002,7 +1014,7 @@ nmea_poll(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	up = (struct nmeaunit *)pp->unitptr;
+	up = pp->unitptr;
 
 # if 0
 	/*

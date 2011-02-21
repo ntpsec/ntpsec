@@ -391,7 +391,7 @@ leitch_start(
 	leitch->fudge1 = 15;	/* 15ms */
 
 	leitch->leitchio.clock_recv = leitch_receive;
-	leitch->leitchio.srcclock = (caddr_t) leitch;
+	leitch->leitchio.srcclock = peer;
 	leitch->leitchio.datalen = 0;
 	leitch->leitchio.fd = fd232;
 	if (!io_addclock(&leitch->leitchio)) {
@@ -426,7 +426,7 @@ leitch_receive(
 	struct recvbuf *rbufp
 	)
 {
-	struct leitchunit *leitch = (struct leitchunit *)rbufp->recv_srcclock;
+	struct leitchunit *leitch = rbufp->recv_peer->procptr->unitptr;
 
 #ifdef DEBUG
 	if (debug)

@@ -141,3 +141,5 @@ ylwrap
 */m4/ltsugar.m4
 */m4/ltversion.m4
 */m4/lt~obsolete.m4
+sntp/libevent/test/regress.gen.c
+sntp/libevent/test/regress.gen.h

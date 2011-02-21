@@ -730,7 +730,7 @@ oncore_start(
 		return(0);
 
 	pp->io.clock_recv = oncore_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = fd1;
 	if (!io_addclock(&pp->io)) {
@@ -740,7 +740,7 @@ oncore_start(
 		free(instance);
 		return (0);
 	}
-	pp->unitptr = (caddr_t)instance;
+	pp->unitptr = instance;
 
 #ifdef ONCORE_SHMEM_STATUS
 	/*
@@ -783,7 +783,7 @@ oncore_shutdown(
 	struct refclockproc *pp;
 
 	pp = peer->procptr;
-	instance = (struct instance *) pp->unitptr;
+	instance = pp->unitptr;
 
 	if (pp->io.fd != -1)
 		io_closeclock(&pp->io);
@@ -817,7 +817,7 @@ oncore_poll(
 {
 	struct instance *instance;
 
-	instance = (struct instance *) peer->procptr->unitptr;
+	instance = peer->procptr->unitptr;
 	if (instance->timeout) {
 		instance->timeout--;
 		if (instance->timeout == 0) {
@@ -1433,8 +1433,8 @@ oncore_receive(
 	struct peer *peer;
 	struct instance *instance;
 
-	peer = (struct peer *)rbufp->recv_srcclock;
-	instance = (struct instance *) peer->procptr->unitptr;
+	peer = rbufp->recv_peer;
+	instance = peer->procptr->unitptr;
 	p = (u_char *) &rbufp->recv_space;
 
 #ifdef ONCORE_VERBOSE_RECEIVE

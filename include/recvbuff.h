@@ -2,7 +2,7 @@
 #define RECVBUFF_H
 
 #include "ntp.h"
-#include "ntp_fp.h"
+#include "ntp_net.h"
 #include "ntp_lists.h"
 
 #include <isc/result.h>

@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
+#ifdef HAVE_LINUX_SIGNAL_H
+#include <linux/signal.h>	/* provides SA_RESTORER on Linux */
+#endif
 
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
@@ -12,19 +15,31 @@
 
 #ifdef HAVE_SIGACTION
 
-#ifdef SA_RESTART
-# define Z_SA_RESTART	SA_RESTART
-#else
-# define Z_SA_RESTART	0
-#endif
-
-# ifdef SA_SIGINFO
-#  define Z_SA_SIGINFO	SA_SIGINFO
+# ifdef SA_RESTART
+#  define Z_SA_RESTART		SA_RESTART
 # else
-#  define Z_SA_SIGINFO	0
+#  define Z_SA_RESTART		0
+# endif
+# ifdef SA_SIGINFO
+#  define Z_SA_SIGINFO		SA_SIGINFO
+# else
+#  define Z_SA_SIGINFO		0
+# endif
+# ifdef SA_NOCLDSTOP
+#  define Z_SA_NOCLDSTOP	SA_NOCLDSTOP
+# else
+#  define Z_SA_NOCLDSTOP	0
+# endif
+# ifdef SA_RESTORER
+#  define Z_SA_RESTORER		SA_RESTORER
+# else
+#  define Z_SA_RESTORER		0
 # endif
 
-# define IGNORED_SA_FLAGS	(Z_SA_RESTART | Z_SA_SIGINFO)
+# define IGNORED_SA_FLAGS	(Z_SA_NOCLDSTOP |	\
+				 Z_SA_RESTART  |	\
+				 Z_SA_RESTORER |	\
+				 Z_SA_SIGINFO)
 
 
 void

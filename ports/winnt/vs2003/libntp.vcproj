@@ -1207,24 +1207,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\ntp_calendar.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\libntp\ntp_intres.c">
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\ntp_lineedit.c">
@@ -1252,66 +1237,15 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\ntp_random.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\ntp_rfc2553.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\libntp\ntp_worker.c">
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\numtoa.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\numtohost.c">
@@ -1852,25 +1786,13 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\work_fork.c">
+			</File>
+			<File
+				RelativePath="..\..\..\libntp\work_thread.c">
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\ymd2yd.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -1911,6 +1833,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\lib\isc\include\isc\interfaceiter.h">
+			</File>
+			<File
+				RelativePath="..\include\intreswork.h">
 			</File>
 			<File
 				RelativePath="..\include\inttypes.h">
@@ -1965,6 +1890,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_if.h">
+			</File>
+			<File
+				RelativePath="..\..\..\include\ntp_intres.h">
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_io.h">

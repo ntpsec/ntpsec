@@ -294,9 +294,9 @@ neoclock4x_start(int unit,
   memset((char *)up, 0, sizeof(struct neoclock4x_unit));
   pp = peer->procptr;
   pp->clockdesc = "NeoClock4X";
-  pp->unitptr = (caddr_t)up;
+  pp->unitptr = up;
   pp->io.clock_recv = neoclock4x_receive;
-  pp->io.srcclock = (caddr_t)peer;
+  pp->io.srcclock = peer;
   pp->io.datalen = 0;
   pp->io.fd = fd;
   /*
@@ -401,7 +401,7 @@ neoclock4x_shutdown(int unit,
       pp = peer->procptr;
       if(pp != NULL)
         {
-          up = (struct neoclock4x_unit *)pp->unitptr;
+          up = pp->unitptr;
           if(up != NULL)
             {
               if(-1 !=  pp->io.fd)
@@ -455,9 +455,9 @@ neoclock4x_receive(struct recvbuf *rbufp)
   unsigned char calc_chksum;
   int recv_chksum;
 
-  peer = (struct peer *)rbufp->recv_srcclock;
+  peer = rbufp->recv_peer;
   pp = peer->procptr;
-  up = (struct neoclock4x_unit *)pp->unitptr;
+  up = pp->unitptr;
 
   /* wait till poll interval is reached */
   if(0 == up->recvnow)
@@ -664,7 +664,7 @@ neoclock4x_poll(int unit,
   struct refclockproc *pp;
 
   pp = peer->procptr;
-  up = (struct neoclock4x_unit *)pp->unitptr;
+  up = pp->unitptr;
 
   pp->polls++;
   up->recvnow = 1;
@@ -692,7 +692,7 @@ neoclock4x_control(int unit,
       return;
     }
 
-  up = (struct neoclock4x_unit *)pp->unitptr;
+  up = pp->unitptr;
   if(NULL == up)
     {
       msyslog(LOG_ERR, "NeoClock4X(%d): control: unit invalid/inactive", unit);
@@ -945,7 +945,7 @@ neol_query_firmware(int fd,
 	    {
               if(EAGAIN != errno)
                 {
-                  msyslog(LOG_DEBUG, "NeoClock4x(%d): read: %s", unit ,strerror(errno));
+                  msyslog(LOG_DEBUG, "NeoClock4x(%d): read: %m", unit);
                   read_errors++;
                 }
               else

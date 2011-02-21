@@ -254,13 +254,12 @@ acts_start (
 	/*
 	 * Allocate and initialize unit structure
 	 */
-	up = emalloc(sizeof(struct actsunit));
-	memset(up, 0, sizeof(struct actsunit));
+	up = emalloc_zero(sizeof(struct actsunit));
 	up->unit = unit;
 	pp = peer->procptr;
-	pp->unitptr = (caddr_t)up;
+	pp->unitptr = up;
 	pp->io.clock_recv = acts_receive;
-	pp->io.srcclock = (caddr_t)peer;
+	pp->io.srcclock = peer;
 	pp->io.datalen = 0;
 	pp->io.fd = -1;
 
@@ -298,7 +297,7 @@ acts_shutdown (
 	 * Warning: do this only when a call is not in progress.
 	 */
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (-1 != pp->io.fd) {
 		io_closeclock(&pp->io);
 		pp->io.fd = -1;
@@ -328,9 +327,9 @@ acts_receive (
 	 * arbitrary fragments. Capture the timecode at the beginning of
 	 * the message and at the '*' and '#' on-time characters.
 	 */
-	peer = (struct peer *)rbufp->recv_srcclock;
+	peer = rbufp->recv_peer;
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	refclock_gtraw(rbufp, tbuf, BMAX - (up->bufptr - up->buf), &pp->lastrec);
 	for (tptr = tbuf; *tptr != '\0'; tptr++) {
 		if (*tptr == LF) {
@@ -376,7 +375,7 @@ acts_message(
 	 * message.
 	 */
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 
 	/*
 	 * Extract the first token in the line.
@@ -475,7 +474,7 @@ acts_timeout(
 	 * when first started and at timeout.
 	 */
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	switch (dstate) {
 
 	/*
@@ -604,7 +603,7 @@ acts_close(
 	int		dtr = TIOCM_DTR;
 
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (pp->io.fd != 0) {
 		report_event(PEVNT_CLOCK, peer, "close");
 		ioctl(pp->io.fd, TIOCMBIC, &dtr);
@@ -646,7 +645,7 @@ acts_poll(
 	 * the timeout routine and state machine.
 	 */
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	switch (peer->ttl) {
 
 	/*
@@ -701,7 +700,7 @@ acts_timer(
 	 * called. If flag1 is set while timer is zero, force a call.
 	 */
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	if (up->timer == 0) {
 		if (pp->sloppyclockflag & CLK_FLAG1) {
 			pp->sloppyclockflag &= ~CLK_FLAG1;
@@ -751,7 +750,7 @@ acts_timecode(
 	 * errors due noise are forgivable.
 	 */
 	pp = peer->procptr;
-	up = (struct actsunit *)pp->unitptr;
+	up = pp->unitptr;
 	pp->nsec = 0;
 	switch (strlen(str)) {
 

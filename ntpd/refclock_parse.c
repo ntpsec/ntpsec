@@ -2651,10 +2651,10 @@ parse_shutdown(
 	struct peer *peer
 	)
 {
-	struct parseunit *parse = (struct parseunit *)0;
+	struct parseunit *parse = NULL;
 
 	if (peer && peer->procptr)
-		parse = (struct parseunit *)peer->procptr->unitptr;
+		parse = peer->procptr->unitptr;
 
 	if (!parse)
 	{
@@ -2662,7 +2662,7 @@ parse_shutdown(
 		return;
 	}
 
-        if (!parse->peer)
+	if (!parse->peer)
 	{
 		msyslog(LOG_INFO, "PARSE receiver #%d: INTERNAL ERROR - unit already inactive - shutdown ignored", unit);
 		return;
@@ -3101,7 +3101,7 @@ parse_start(
 	/*
 	 * pick correct input machine
 	 */
-	parse->generic->io.srcclock = (caddr_t)parse;
+	parse->generic->io.srcclock = (void *)parse;
 	parse->generic->io.datalen = 0;
 	
 	parse->binding = init_iobinding(parse);
@@ -3305,7 +3305,7 @@ parse_poll(
 	struct peer *peer
 	)
 {
-	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = peer->procptr->unitptr;
 
 	if (peer != parse->peer)
 	{
@@ -3362,7 +3362,7 @@ parse_control(
 	struct peer *peer
 	)
 {
-	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = peer->procptr->unitptr;
 	parsectl_t tmpctl;
 
 	static char outstatus[400];	/* status output buffer */
@@ -4526,7 +4526,7 @@ gps16x_poll(
 	    struct peer *peer
 	    )
 {
-	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = peer->procptr->unitptr;
 	
 	static GPS_MSG_HDR sequence[] = 
 	{
@@ -4668,7 +4668,7 @@ poll_poll(
 	struct peer *peer
 	)
 {
-	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = peer->procptr->unitptr;
 	
 	if (parse->parse_type->cl_poll)
 		parse->parse_type->cl_poll(parse);
@@ -5063,7 +5063,7 @@ trimble_check(
 	      struct peer *peer
 	      )
 {
-	struct parseunit *parse = (struct parseunit *)peer->procptr->unitptr;
+	struct parseunit *parse = peer->procptr->unitptr;
 	trimble_t *t = parse->localdata;
 	u_char buffer[256];
 	struct txbuf buf;

@@ -1008,8 +1008,8 @@ process_control(
 	req_count = (int)ntohs(pkt->count);
 	datanotbinflag = 0;
 	datalinelen = 0;
-	datapt = rpkt.data;
-	dataend = &(rpkt.data[CTL_MAX_DATA_LEN]);
+	datapt = rpkt.u.data;
+	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 
 	if ((rbufp->recv_length & 0x3) != 0)
 		DPRINTF(3, ("Control packet length %d unrounded\n",
@@ -1057,7 +1057,7 @@ process_control(
 	/*
 	 * Set up translate pointers
 	 */
-	reqpt = (char *)pkt->data;
+	reqpt = (char *)pkt->u.data;
 	reqend = reqpt + req_count;
 
 	/*
@@ -1168,7 +1168,7 @@ ctl_flushpkt(
 	int totlen;
 	keyid_t keyid;
 
-	dlen = datapt - rpkt.data;
+	dlen = datapt - rpkt.u.data;
 	if (!more && datanotbinflag && dlen + 2 < CTL_MAX_DATA_LEN) {
 		/*
 		 * Big hack, output a trailing \r\n
@@ -1243,7 +1243,7 @@ ctl_flushpkt(
 	 * Set us up for another go around.
 	 */
 	res_offset += dlen;
-	datapt = rpkt.data;
+	datapt = rpkt.u.data;
 }
 
 
@@ -1264,7 +1264,7 @@ ctl_putdata(
 	if (!bin) {
 		datanotbinflag = 1;
 		overhead = 3;
-		if (datapt != rpkt.data) {
+		if (datapt != rpkt.u.data) {
 			*datapt++ = ',';
 			datalinelen++;
 			if ((dlen + datalinelen + 1) >= MAXDATALINELEN) {
@@ -4302,8 +4302,8 @@ report_event(
 	res_offset = 0;
 	res_async = 1;
 	res_authenticate = 0;
-	datapt = rpkt.data;
-	dataend = &(rpkt.data[CTL_MAX_DATA_LEN]);
+	datapt = rpkt.u.data;
+	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 	if (!(err & PEER_EVENT)) {
 		rpkt.associd = 0;
 		rpkt.status = htons(ctlsysstatus());

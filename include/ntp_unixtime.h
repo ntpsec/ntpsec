@@ -6,11 +6,12 @@
 #ifndef NTP_UNIXTIME_H
 #define NTP_UNIXTIME_H
 
-#include "ntp_types.h"
-
-#ifdef SIM
-#include "ntpsim.h"
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
 #endif
+#include <time.h>
+
+#include "ntp_types.h"
 
 #ifdef SIM
 #   define GETTIMEOFDAY(a, b) (node_gettime(&ntp_node, a))
@@ -22,7 +23,7 @@
 # if defined(HAVE_SYS_TIMERS_H) && defined(HAVE_GETCLOCK)
 #  include <sys/timers.h>
 int getclock (int clock_type, struct timespec *tp);
-/* Don't #define GETTIMEOFDAY because we shouldn't be using it in this case. */
+#   define GETTIMEOFDAY(a, b) (gettimeofday(a, b))
 #   define SETTIMEOFDAY(a, b) (settimeofday(a, b))
 # else /* not (HAVE_SYS_TIMERS_H && HAVE_GETCLOCK) */
 #  ifdef SYSV_TIMEOFDAY

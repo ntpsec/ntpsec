@@ -28,6 +28,9 @@
  * blocking child worker with the ntpd mainline.  The threaded code
  * uses arrays of pointers to queue requests and responses.
  *
+ * The parent drives the process, including scheduling sleeps between
+ * retries.
+ *
  * Memory is managed differently for a child process, which mallocs
  * request buffers to read from the pipe into, whereas the threaded
  * code mallocs a copy of the request to hand off to the worker via
@@ -89,14 +92,13 @@
 # endif
 #endif
 
-#include "ntp_stdlib.h"
+#include "ntp.h"
+#include "ntp_debug.h"
 #include "ntp_malloc.h"
 #include "ntp_syslog.h"
-#include "ntpd.h"
-#include "ntp_io.h"
-#include "ntp_assert.h"
 #include "ntp_unixtime.h"
 #include "ntp_intres.h"
+#include "intreswork.h"
 
 
 /*
@@ -116,8 +118,10 @@
  * is managed by the code which calls the *_complete routines.
  */
 
-typedef struct blocking_gai_req_tag {
+/* === typedefs === */
+typedef struct blocking_gai_req_tag {	/* marshalled args */
 	size_t			octets;
+	u_int			dns_idx;
 	time_t			scheduled;
 	time_t			earliest;
 	struct addrinfo		hints;
@@ -131,6 +135,7 @@ typedef struct blocking_gai_req_tag {
 typedef struct blocking_gai_resp_tag {
 	size_t			octets;
 	int			retcode;
+	int			retry;
 	int			gai_errno; /* for EAI_SYSTEM case */
 	int			ai_count;
 	/*
@@ -141,6 +146,7 @@ typedef struct blocking_gai_resp_tag {
 
 typedef struct blocking_gni_req_tag {
 	size_t			octets;
+	u_int			dns_idx;
 	time_t			scheduled;
 	time_t			earliest;
 	int			retry;
@@ -156,6 +162,7 @@ typedef struct blocking_gni_resp_tag {
 	size_t			octets;
 	int			retcode;
 	int			gni_errno; /* for EAI_SYSTEM case */
+	int			retry;
 	size_t			hostoctets;
 	size_t			servoctets;
 	/*
@@ -164,22 +171,62 @@ typedef struct blocking_gni_resp_tag {
 	 */
 } blocking_gni_resp;
 
-static	time_t	next_dns_timeslot;
-static	time_t	ignore_scheduled_before;
+/* per-DNS-worker state in parent */
+typedef struct dnschild_ctx_tag {
+	u_int	index;
+	time_t	next_dns_timeslot;
+} dnschild_ctx;
+
+/* per-DNS-worker state in worker */
+typedef struct dnsworker_ctx_tag {
+	blocking_child *	c;
+	time_t			ignore_scheduled_before;
 #ifdef HAVE_RES_INIT
-static	time_t	next_res_init;
+	time_t	next_res_init;
+#endif
+} dnsworker_ctx;
+
+
+/* === variables === */
+dnschild_ctx **		dnschild_contexts;		/* parent */
+u_int			dnschild_contexts_alloc;
+dnsworker_ctx **	dnsworker_contexts;		/* child */
+u_int			dnsworker_contexts_alloc;
+
+#ifdef HAVE_RES_INIT
+static	time_t		next_res_init;
 #endif
 
-static	void	scheduled_sleep(time_t, time_t);
-static	void	manage_dns_retry_interval(time_t *, time_t *, int *);
-static	int	should_retry_dns(int, int);
-static	void	getaddrinfo_sometime_complete(blocking_work_req, void *,
-					      size_t, void *);
-static	void	getnameinfo_sometime_complete(blocking_work_req, void *,
-					      size_t, void *);
+
+/* === forward declarations === */
+static	u_int		reserve_dnschild_ctx(void);
+static	u_int		get_dnschild_ctx(void);
+static	void		alloc_dnsworker_context(u_int);
+/* static	void		free_dnsworker_context(u_int); */
+static	dnsworker_ctx *	get_worker_context(blocking_child *, u_int);
+static	void		scheduled_sleep(time_t, time_t,
+					dnsworker_ctx *);
+static	void		manage_dns_retry_interval(time_t *, time_t *,
+						  int *,
+						  time_t *);
+static	int		should_retry_dns(int, int);
+#ifdef HAVE_RES_INIT
+static	void		reload_resolv_conf(dnsworker_ctx *);
+#else
+# define		reload_resolv_conf(wc)		\
+	do {						\
+		(void)(wc);				\
+	} while (FALSE)
+#endif
+static	void		getaddrinfo_sometime_complete(blocking_work_req,
+						      void *, size_t,
+						      void *);
+static	void		getnameinfo_sometime_complete(blocking_work_req,
+						      void *, size_t,
+						      void *);
 
 
-
+/* === functions === */
 /*
  * getaddrinfo_sometime - uses blocking child to call getaddrinfo then
  *			  invokes provided callback completion function.
@@ -195,6 +242,8 @@ getaddrinfo_sometime(
 	)
 {
 	blocking_gai_req *	gai_req;
+	u_int			idx;
+	dnschild_ctx *		child_ctx;
 	size_t			req_size;
 	size_t			nodesize;
 	size_t			servsize;
@@ -208,6 +257,9 @@ getaddrinfo_sometime(
 		NTP_REQUIRE(NULL == hints->ai_next);
 	}
 
+	idx = get_dnschild_ctx();
+	child_ctx = dnschild_contexts[idx];
+
 	nodesize = strlen(node) + 1;
 	servsize = strlen(service) + 1;
 	req_size = sizeof(*gai_req) + nodesize + servsize;
@@ -215,10 +267,11 @@ getaddrinfo_sometime(
 	gai_req = emalloc_zero(req_size);
 
 	gai_req->octets = req_size;
+	gai_req->dns_idx = idx;
 	now = time(NULL);
-	next_dns_timeslot = max(now, next_dns_timeslot);
 	gai_req->scheduled = now;
-	gai_req->earliest = next_dns_timeslot;
+	gai_req->earliest = max(now, child_ctx->next_dns_timeslot);
+	child_ctx->next_dns_timeslot = gai_req->earliest;
 	if (hints != NULL)
 		gai_req->hints = *hints;
 	gai_req->retry = retry;
@@ -248,10 +301,12 @@ getaddrinfo_sometime(
 
 int
 blocking_getaddrinfo(
+	blocking_child *	c,
 	blocking_pipe_header *	req
 	)
 {
 	blocking_gai_req *	gai_req;
+	dnsworker_ctx *		worker_ctx;
 	blocking_pipe_header *	resp;
 	blocking_gai_resp *	gai_resp;
 	char *			node;
@@ -269,50 +324,39 @@ blocking_getaddrinfo(
 	node = (char *)gai_req + sizeof(*gai_req);
 	service = node + gai_req->nodesize;
 
-	scheduled_sleep(gai_req->scheduled, gai_req->earliest);
-
-#ifdef HAVE_RES_INIT
-	/*
-	 * This is ad-hoc.  Reload /etc/resolv.conf once per minute
-	 * to pick up on changes from the DHCP client.  [Bug 1226]
-	 */
-	time_now = time(NULL);
-	if (next_res_init <= time_now) {
-		if (next_res_init)
-			res_init();
-		next_res_init = time_now + 60;
-	}
-#endif
+	worker_ctx = get_worker_context(c, gai_req->dns_idx);
+	scheduled_sleep(gai_req->scheduled, gai_req->earliest,
+			worker_ctx);
+	reload_resolv_conf(worker_ctx);
 
 	/*
 	 * Take a shot at the final size, better to overestimate
 	 * at first and then realloc to a smaller size.
 	 */
 
-	resp = emalloc(sizeof(*resp) + sizeof(*gai_resp) 
-			   + 16 * (sizeof(struct addrinfo)
-				   + sizeof(sockaddr_u))
-			   + 256);
+	resp_octets = sizeof(*resp) + sizeof(*gai_resp) +
+		      16 * (sizeof(struct addrinfo) +
+			    sizeof(sockaddr_u)) +
+		      256;
+	resp = emalloc_zero(resp_octets);
 	gai_resp = (void *)(resp + 1);
 
 	DPRINTF(2, ("blocking_getaddrinfo given node %s serv %s fam %d flags %x\n", 
 		    node, service, gai_req->hints.ai_family,
 		    gai_req->hints.ai_flags));
-	
+#ifdef DEBUG
+	if (debug >= 2)
+		fflush(stdout);
+#endif	
 	ai_res = NULL;
-	gai_resp->retcode = getaddrinfo(node, service, &gai_req->hints, &ai_res);
-
-	switch (gai_resp->retcode) {
+	gai_resp->retcode = getaddrinfo(node, service, &gai_req->hints,
+					&ai_res);
+	gai_resp->retry = gai_req->retry;
 #ifdef EAI_SYSTEM
-	case EAI_SYSTEM:
+	if (EAI_SYSTEM == gai_resp->retcode)
 		gai_resp->gai_errno = errno;
-		break;
 #endif
-	default:
-		gai_resp->gai_errno = 0;
-	}
-
-	gai_resp->ai_count = canons_octets = 0;
+	canons_octets = 0;
 
 	if (!gai_resp->retcode) {
 		ai = ai_res;
@@ -329,12 +373,15 @@ blocking_getaddrinfo(
 		 * the way scheduled_sleep() does when its worker_sleep()
 		 * is interrupted.
 		 */
-		if (gai_req->retry > INITIAL_DNS_RETRY) {
+		if (gai_resp->retry > INITIAL_DNS_RETRY) {
 			time_now = time(NULL);
-			ignore_scheduled_before = time_now;
-			next_dns_timeslot = time_now;
+			worker_ctx->ignore_scheduled_before = time_now;
 			DPRINTF(1, ("DNS success after retry, ignoring sleeps scheduled before now (%s)",
 				humantime(time_now)));
+#ifdef DEBUG
+			if (debug >= 1)
+				fflush(stdout);
+#endif	
 		}
 	}
 
@@ -358,7 +405,6 @@ blocking_getaddrinfo(
 	canons_octets = 0;
 
 	if (!gai_resp->retcode) {
-		
 		ai = ai_res;
 		while (NULL != ai) {
 			memcpy(cp, ai, sizeof(*ai));
@@ -400,10 +446,11 @@ blocking_getaddrinfo(
 	/*
 	 * make sure our walk and earlier calc match
 	 */
-	NTP_INSIST((size_t)(cp - (char *)resp) == resp_octets);
+	DEBUG_INSIST((size_t)(cp - (char *)resp) == resp_octets);
+	freeaddrinfo(ai_res);
 
-	if (queue_blocking_response(resp, resp_octets, req)) {
-		DPRINTF(1, ("blocking_getaddrinfo unable to queue response"));
+	if (queue_blocking_response(c, resp, resp_octets, req)) {
+		msyslog(LOG_ERR, "blocking_getaddrinfo can not queue response");
 		return -1;
 	}
 
@@ -419,30 +466,46 @@ getaddrinfo_sometime_complete(
 	void *			resp
 	)
 {
-	blocking_gai_req *		gai_req;
-	blocking_gai_resp *		gai_resp;
-	struct addrinfo *		ai;
-	struct addrinfo *		next_ai;
-	sockaddr_u *			psau;
-	char *				node;
-	char *				service;
-	char *				canon_start;
-	int				again;
-	int				af;
-	const char *			fam_spec;
-	int				i;
+	blocking_gai_req *	gai_req;
+	blocking_gai_resp *	gai_resp;
+	dnschild_ctx *		child_ctx;
+	struct addrinfo *	ai;
+	struct addrinfo *	next_ai;
+	sockaddr_u *		psau;
+	char *			node;
+	char *			service;
+	char *			canon_start;
+	time_t			time_now;
+	int			again;
+	int			af;
+	const char *		fam_spec;
+	int			i;
 
 	gai_req = context;
 	gai_resp = resp;
 
-	NTP_REQUIRE(BLOCKING_GETADDRINFO == rtype);
-	NTP_REQUIRE(respsize == gai_resp->octets);
+	DEBUG_REQUIRE(BLOCKING_GETADDRINFO == rtype);
+	DEBUG_REQUIRE(respsize == gai_resp->octets);
 
 	node = (char *)gai_req + sizeof(*gai_req);
 	service = node + gai_req->nodesize;
 
-	if (gai_resp->retcode) {
-		again = should_retry_dns(gai_resp->retcode, gai_resp->gai_errno);
+	child_ctx = dnschild_contexts[gai_req->dns_idx];
+
+	if (0 == gai_resp->retcode) {
+		/*
+		 * If this query succeeded only after retrying, DNS may have
+		 * just become responsive.
+		 */
+		if (gai_resp->retry > INITIAL_DNS_RETRY) {
+			time_now = time(NULL);
+			child_ctx->next_dns_timeslot = time_now;
+			DPRINTF(1, ("DNS success after retry, %u next_dns_timeslot reset (%s)",
+				gai_req->dns_idx, humantime(time_now)));
+		}
+	} else {
+		again = should_retry_dns(gai_resp->retcode,
+					 gai_resp->gai_errno);
 		/*
 		 * exponential backoff of DNS retries to 64s
 		 */
@@ -457,13 +520,13 @@ getaddrinfo_sometime_complete(
 							     ? " (A)"
 							     : "";
 #ifdef EAI_SYSTEM
-					if (EAI_SYSTEM == gai_resp->retcode)
+					if (EAI_SYSTEM == gai_resp->retcode) {
+						errno = gai_resp->gai_errno;
 						msyslog(LOG_INFO,
-							"retrying DNS %s%s: EAI_SYSTEM %s (%d)",
+							"retrying DNS %s%s: EAI_SYSTEM %d: %m",
 							node, fam_spec,
-							strerror(gai_resp->gai_errno),
 							gai_resp->gai_errno);
-					else
+					} else
 #endif
 						msyslog(LOG_INFO,
 							"retrying DNS %s%s: %s (%d)",
@@ -472,7 +535,8 @@ getaddrinfo_sometime_complete(
 							gai_resp->retcode);
 				}
 			manage_dns_retry_interval(&gai_req->scheduled,
-			    &gai_req->earliest, &gai_req->retry);
+			    &gai_req->earliest, &gai_req->retry,
+			    &child_ctx->next_dns_timeslot);
 			if (!queue_blocking_request(
 					BLOCKING_GETADDRINFO,
 					gai_req,
@@ -481,7 +545,9 @@ getaddrinfo_sometime_complete(
 					gai_req))
 				return;
 			else
-				msyslog(LOG_ERR, "unable to retry hostname %s", node);
+				msyslog(LOG_ERR,
+					"unable to retry hostname %s",
+					node);
 		}
 	}
 
@@ -516,7 +582,7 @@ getaddrinfo_sometime_complete(
 			     &gai_req->hints, ai);
 
 	free(gai_req);
-	/* gai_resp is part of block freed by process_blocking_response() */
+	/* gai_resp is part of block freed by process_blocking_resp() */
 }
 
 
@@ -568,18 +634,24 @@ getnameinfo_sometime(
 	)
 {
 	blocking_gni_req *	gni_req;
+	u_int			idx;
+	dnschild_ctx *		child_ctx;
 	time_t			time_now;
 	
 	NTP_REQUIRE(hostoctets);
 	NTP_REQUIRE(hostoctets + servoctets < 1024);
 
+	idx = get_dnschild_ctx();
+	child_ctx = dnschild_contexts[idx];
+
 	gni_req = emalloc_zero(sizeof(*gni_req));
 
 	gni_req->octets = sizeof(*gni_req);
+	gni_req->dns_idx = idx;
 	time_now = time(NULL);
-	next_dns_timeslot = max(time_now, next_dns_timeslot);
 	gni_req->scheduled = time_now;
-	gni_req->earliest = next_dns_timeslot;
+	gni_req->earliest = max(time_now, child_ctx->next_dns_timeslot);
+	child_ctx->next_dns_timeslot = gni_req->earliest;
 	memcpy(&gni_req->socku, psau, SOCKLEN(psau));
 	gni_req->hostoctets = hostoctets;
 	gni_req->servoctets = servoctets;
@@ -606,10 +678,12 @@ getnameinfo_sometime(
 
 int
 blocking_getnameinfo(
+	blocking_child *	c,
 	blocking_pipe_header *	req
 	)
 {
 	blocking_gni_req *	gni_req;
+	dnsworker_ctx *		worker_ctx;
 	blocking_pipe_header *	resp;
 	blocking_gni_resp *	gni_resp;
 	size_t			octets;
@@ -644,20 +718,10 @@ blocking_getnameinfo(
 #endif
 	service = host + gni_req->hostoctets;
 
-	scheduled_sleep(gni_req->scheduled, gni_req->earliest);
-
-#ifdef HAVE_RES_INIT
-	/*
-	 * This is ad-hoc.  Reload /etc/resolv.conf once per minute
-	 * to pick up on changes from the DHCP client.  [Bug 1226]
-	 */
-	time_now = time(NULL);
-	if (next_res_init <= time_now) {
-		if (next_res_init)
-			res_init();
-		next_res_init = time_now + 60;
-	}
-#endif
+	worker_ctx = get_worker_context(c, gni_req->dns_idx);
+	scheduled_sleep(gni_req->scheduled, gni_req->earliest,
+			worker_ctx);
+	reload_resolv_conf(worker_ctx);
 
 	/*
 	 * Take a shot at the final size, better to overestimate
@@ -665,7 +729,7 @@ blocking_getnameinfo(
 	 */
 
 	resp_octets = sizeof(*resp) + sizeof(*gni_resp) + octets;
-	resp = emalloc(resp_octets);
+	resp = emalloc_zero(resp_octets);
 	gni_resp = (void *)((char *)resp + sizeof(*resp));
 
 	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
@@ -679,16 +743,11 @@ blocking_getnameinfo(
 					service,
 					gni_req->servoctets,
 					gni_req->flags);
-
-	switch (gni_resp->retcode) {
+	gni_resp->retry = gni_req->retry;
 #ifdef EAI_SYSTEM
-	case EAI_SYSTEM:
+	if (EAI_SYSTEM == gni_resp->retcode)
 		gni_resp->gni_errno = errno;
-		break;
 #endif
-	default:
-		gni_resp->gni_errno = 0;
-	}
 
 	if (gni_resp->retcode) {
 		gni_resp->hostoctets = 0;
@@ -705,8 +764,7 @@ blocking_getnameinfo(
 		 */
 		if (gni_req->retry > INITIAL_DNS_RETRY) {
 			time_now = time(NULL);
-			ignore_scheduled_before = time_now;
-			next_dns_timeslot = time_now;
+			worker_ctx->ignore_scheduled_before = time_now;
 			DPRINTF(1, ("DNS success after retrying, ignoring sleeps scheduled before now (%s)",
 				humantime(time_now)));
 		}
@@ -736,7 +794,7 @@ blocking_getnameinfo(
 	NTP_INSIST((size_t)(cp - (char *)resp) == resp_octets);
 	NTP_INSIST(resp_octets - sizeof(*resp) == gni_resp->octets);
 
-	rc = queue_blocking_response(resp, resp_octets, req);
+	rc = queue_blocking_response(c, resp, resp_octets, req);
 	if (rc)
 		msyslog(LOG_ERR, "blocking_getnameinfo unable to queue response");
 #ifndef HAVE_ALLOCA
@@ -756,24 +814,40 @@ getnameinfo_sometime_complete(
 {
 	blocking_gni_req *	gni_req;
 	blocking_gni_resp *	gni_resp;
+	dnschild_ctx *		child_ctx;
 	char *			host;
 	char *			service;
+	time_t			time_now;
 	int			again;
 
 	gni_req = context;
 	gni_resp = resp;
 
-	NTP_REQUIRE(BLOCKING_GETNAMEINFO == rtype);
-	NTP_REQUIRE(respsize == gni_resp->octets);
+	DEBUG_REQUIRE(BLOCKING_GETNAMEINFO == rtype);
+	DEBUG_REQUIRE(respsize == gni_resp->octets);
 
-	if (gni_resp->retcode) {
+	child_ctx = dnschild_contexts[gni_req->dns_idx];
+
+	if (0 == gni_resp->retcode) {
+		/*
+		 * If this query succeeded only after retrying, DNS may have
+		 * just become responsive.
+		 */
+		if (gni_resp->retry > INITIAL_DNS_RETRY) {
+			time_now = time(NULL);
+			child_ctx->next_dns_timeslot = time_now;
+			DPRINTF(1, ("DNS success after retry, %u next_dns_timeslot reset (%s)",
+				gni_req->dns_idx, humantime(time_now)));
+		}
+	} else {
 		again = should_retry_dns(gni_resp->retcode, gni_resp->gni_errno);
 		/*
 		 * exponential backoff of DNS retries to 64s
 		 */
 		if (gni_req->retry)
 			manage_dns_retry_interval(&gni_req->scheduled,
-			    &gni_req->earliest, &gni_req->retry);
+			    &gni_req->earliest, &gni_req->retry,
+			    &child_ctx->next_dns_timeslot);
 
 		if (gni_req->retry && again) {
 			if (!queue_blocking_request(
@@ -803,7 +877,7 @@ getnameinfo_sometime_complete(
 			     service, gni_req->context);
 
 	free(gni_req);
-	/* gni_resp is part of block freed by process_blocking_response() */
+	/* gni_resp is part of block freed by process_blocking_resp() */
 }
 
 
@@ -820,18 +894,137 @@ void gni_test_callback(int rescode, int gni_errno, sockaddr_u *psau, int flags, 
 #endif	/* TEST_BLOCKING_WORKER */
 
 
+#ifdef HAVE_RES_INIT
+static void
+reload_resolv_conf(
+	dnsworker_ctx *	worker_ctx
+	)
+{
+	time_t	time_now;
+
+	/*
+	 * This is ad-hoc.  Reload /etc/resolv.conf once per minute
+	 * to pick up on changes from the DHCP client.  [Bug 1226]
+	 * When using threads for the workers, this needs to happen
+	 * only once per minute process-wide.
+	 */
+	time_now = time(NULL);
+# ifdef WORK_THREAD
+	worker_ctx->next_res_init = next_res_init;
+# endif
+	if (worker_ctx->next_res_init <= time_now) {
+		if (worker_ctx->next_res_init != 0)
+			res_init();
+		worker_ctx->next_res_init = time_now + 60;
+# ifdef WORK_THREAD
+		next_res_init = worker_ctx->next_res_init;
+# endif
+	}
+}
+#endif	/* HAVE_RES_INIT */
+
+
+static u_int
+reserve_dnschild_ctx(void)
+{
+	const size_t	ps = sizeof(dnschild_contexts[0]);
+	const size_t	cs = sizeof(*dnschild_contexts[0]);
+	u_int		c;
+	u_int		new_alloc;
+	size_t		octets;
+	size_t		new_octets;
+
+	c = 0;
+	while (TRUE) {
+		for ( ; c < dnschild_contexts_alloc; c++) {
+			if (NULL == dnschild_contexts[c]) {
+				dnschild_contexts[c] = emalloc_zero(cs);
+
+				return c;
+			}
+		}
+		new_alloc = dnschild_contexts_alloc + 20;
+		new_octets = new_alloc * ps;
+		octets = dnschild_contexts_alloc * ps;
+		dnschild_contexts = erealloc_zero(dnschild_contexts,
+						  new_octets, octets);
+		dnschild_contexts_alloc = new_alloc;
+	}
+}
+
+
+static u_int
+get_dnschild_ctx(void)
+{
+	static u_int	shared_ctx = UINT_MAX;
+
+	if (worker_per_query)
+		return reserve_dnschild_ctx();
+
+	if (UINT_MAX == shared_ctx)
+		shared_ctx = reserve_dnschild_ctx();
+
+	return shared_ctx;
+}
+
+
+static void
+alloc_dnsworker_context(
+	u_int idx
+	)
+{
+	const size_t worker_context_sz = sizeof(*dnsworker_contexts[0]);
+
+	REQUIRE(NULL == dnsworker_contexts[idx]);
+	dnsworker_contexts[idx] = emalloc_zero(worker_context_sz);
+}
+
+
+static dnsworker_ctx *
+get_worker_context(
+	blocking_child *	c,
+	u_int			idx
+	)
+{
+	static size_t	ps = sizeof(dnsworker_contexts[0]);
+	u_int	min_new_alloc;
+	u_int	new_alloc;
+	size_t	octets;
+	size_t	new_octets;
+
+	if (dnsworker_contexts_alloc <= idx) {
+		min_new_alloc = 1 + idx;
+		/* round new_alloc up to nearest multiple of 4 */
+		new_alloc = (min_new_alloc + 4) & ~(4 - 1);
+		new_octets = new_alloc * ps;
+		octets = dnsworker_contexts_alloc * ps;
+		dnsworker_contexts = erealloc_zero(dnsworker_contexts,
+						   new_octets, octets);
+		dnsworker_contexts_alloc = new_alloc;
+	}
+
+	if (NULL == dnsworker_contexts[idx])
+		alloc_dnsworker_context(idx);
+	ZERO(*dnsworker_contexts[idx]);
+	dnsworker_contexts[idx]->c = c;
+
+	return dnsworker_contexts[idx];
+}
+
+
 static void
 scheduled_sleep(
-	time_t scheduled,
-	time_t earliest
+	time_t		scheduled,
+	time_t		earliest,
+	dnsworker_ctx *	worker_ctx
 	)
 {
 	time_t now;
 
-	if (scheduled < ignore_scheduled_before) {
+	if (scheduled < worker_ctx->ignore_scheduled_before) {
 		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)\n",
 			humantime(earliest), humantime(scheduled),
-			humantime(ignore_scheduled_before)));
+			humantime(worker_ctx->ignore_scheduled_before)));
 		return;
 	}
 
@@ -840,18 +1033,18 @@ scheduled_sleep(
 	if (now < earliest) {
 		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)\n",
 			humantime(earliest), humantime(scheduled),
-			humantime(ignore_scheduled_before)));
-		if (-1 == worker_sleep(earliest - now)) {
+			humantime(worker_ctx->ignore_scheduled_before)));
+		if (-1 == worker_sleep(worker_ctx->c, earliest - now)) {
 			/* our sleep was interrupted */
 			now = time(NULL);
-			ignore_scheduled_before = now;
-			next_dns_timeslot = now;
+			worker_ctx->ignore_scheduled_before = now;
 #ifdef HAVE_RES_INIT
-			next_res_init = now + 60;
+			worker_ctx->next_res_init = now + 60;
+			next_res_init = worker_ctx->next_res_init;
 			res_init();
 #endif
 			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)\n",
-				humantime(ignore_scheduled_before)));
+				humantime(worker_ctx->ignore_scheduled_before)));
 		}
 	}
 }
@@ -866,7 +1059,8 @@ static void
 manage_dns_retry_interval(
 	time_t *	pscheduled,
 	time_t *	pwhen,
-	int *		pretry
+	int *		pretry,
+	time_t *	pnext_timeslot
 	)
 {
 	time_t	now;
@@ -875,8 +1069,8 @@ manage_dns_retry_interval(
 		
 	now = time(NULL);
 	retry = *pretry;
-	when = max(now + retry, next_dns_timeslot);
-	next_dns_timeslot = when;
+	when = max(now + retry, *pnext_timeslot);
+	*pnext_timeslot = when;
 	retry = min(64, retry << 1);
 
 	*pscheduled = now;
@@ -897,6 +1091,9 @@ should_retry_dns(
 {
 	static int	eai_again_seen;
 	int		again;
+#if defined (EAI_SYSTEM) && defined(DEBUG)
+	char		msg[256];
+#endif
 
 	/*
 	 * If the resolver failed, see if the failure is
@@ -930,8 +1127,11 @@ should_retry_dns(
 		 * this matches existing behavior.
 		 */
 		again = 1;
+# ifdef DEBUG
+		errno_to_str(res_errno, msg, sizeof(msg));
 		DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",
-			    res_errno, strerror(res_errno)));
+			    res_errno, msg));
+# endif
 		break;
 #endif
 	}

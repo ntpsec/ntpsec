@@ -7,6 +7,7 @@
 #include "log.h"
 #include "sntp-opts.h"
 #include "ntp_stdlib.h"
+#include "ntp_worker.h"
 #include "ntp_debug.h"
 
 int kod_init = 0, kod_db_cnt = 0;
@@ -18,7 +19,7 @@ struct kod_entry **kod_db;	/* array of pointers to kod_entry */
  * Search for a KOD entry
  */
 int
-search_entry (
+search_entry(
 	const char *hostname,
 	struct kod_entry **dst
 	)
@@ -56,7 +57,7 @@ add_entry(
 	int n;
 	struct kod_entry *pke;
 
-	pke = emalloc(sizeof(*pke));
+	pke = emalloc_zero(sizeof(*pke));
 	pke->timestamp = time(NULL);
 	memcpy(pke->type, type, 4);
 	pke->type[sizeof(pke->type) - 1] = '\0';
@@ -113,6 +114,17 @@ delete_entry(
 
 
 void
+atexit_write_kod_db(void)
+{
+#ifdef WORK_FORK
+	if (worker_process)
+		return;
+#endif
+	write_kod_db();
+}
+
+
+int
 write_kod_db(void)
 {
 	FILE *db_s;
@@ -144,7 +156,7 @@ write_kod_db(void)
 		msyslog(LOG_WARNING, "Can't open KOD db file %s for writing!",
 			kod_db_file);
 
-		return;
+		return FALSE;
 	}
 
 	for (a = 0; a < kod_db_cnt; a++) {
@@ -155,12 +167,15 @@ write_kod_db(void)
 
 	fflush(db_s);
 	fclose(db_s);
+
+	return TRUE;
 }
 
 
 void
 kod_init_kod_db(
-	const char *db_file
+	const char *	db_file,
+	int		readonly
 	)
 {
 	/*
@@ -174,12 +189,9 @@ kod_init_kod_db(
 	char *str_ptr;
 	char error = 0;
 
-	atexit(write_kod_db);
-
 	DPRINTF(2, ("Initializing KOD DB...\n"));
 
 	kod_db_file = estrdup(db_file);
-
 
 	db_s = fopen(db_file, "r");
 
@@ -224,8 +236,7 @@ kod_init_kod_db(
 
 	if (0 == kod_db_cnt) {
 		DPRINTF(2, ("KoD DB %s empty.\n", db_file));
-		fclose(db_s);
-		return;
+		goto wrapup;
 	}
 
 	DPRINTF(2, ("KoD DB %s contains %d entries, reading...\n", db_file, kod_db_cnt));
@@ -274,11 +285,14 @@ kod_init_kod_db(
 		return;
 	}
 
+    wrapup:
 	fclose(db_s);
-	if (debug > 1)
-	    for (a = 0; a < kod_db_cnt; a++)
-		printf("KoD entry %d: %s at %llx type %s\n", a,
-		       kod_db[a]->hostname,
-		       (unsigned long long)kod_db[a]->timestamp,
-		       kod_db[a]->type);
+	for (a = 0; a < kod_db_cnt; a++)
+		DPRINTF(2, ("KoD entry %d: %s at %llx type %s\n", a,
+			kod_db[a]->hostname,
+			(unsigned long long)kod_db[a]->timestamp,
+			kod_db[a]->type));
+
+	if (!readonly && write_kod_db())
+		atexit(&atexit_write_kod_db);
 }

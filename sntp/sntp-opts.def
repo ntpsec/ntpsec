@@ -7,7 +7,7 @@ autogen definitions options;
 #include debug-opt.def
 
 prog-name      = "sntp";
-prog-title     = "standard SNTP program";
+prog-title     = "standard Simple Network Time Protocol program";
 homerc         =  $HOME, ".";
 argument       = '[ hostname-or-IP ...]';
 
@@ -65,7 +65,7 @@ flag = {
 flag = {
 	name	= bctimeout;
 	value	= B;
-	descrip	= "Specify the number of seconds to wait for broadcasts";
+	descrip	= "The number of seconds to wait for broadcasts";
 	arg-type = number;
 	arg-name = "seconds";
 	arg-default = 68;
@@ -112,14 +112,18 @@ flag = {
 };
 
 flag = {
-	name	   = filelog;
-	value	   = l;
-	arg-type   = file;
-	arg-name   = "file-name";
-	descrip = "Log to specified logfile";
-	doc = <<-  _EndOfDoc_
-	This option causes the client to write log messages to the specified
-	logfile.
+	name	= headspace;
+	value	= h;
+	descrip	= "The gap (in milliseconds) between time requests";
+	arg-type = number;
+	arg-name = "milliseconds";
+	arg-default = 10;
+	doc	= <<-  _EndOfDoc_
+	Since we're only going to use the first valid response we get and
+	there is benefit to specifying a good number of servers to query,
+	separate the queries we send out by the specified number of
+	milliseconds.
+	Default 10 milliseconds.
 	_EndOfDoc_;
 };
 
@@ -140,7 +144,7 @@ flag = {
 flag = {
 	name	= keyfile;
 	value	= k;
-	descrip	= "Specify a keyfile. SNTP will look in this file for the key specified with -a";
+	descrip	= "Look in this file for the key specified with -a";
 	arg-type = file;
 	arg-name = "file-name";
 	doc	= <<-  _EndOfDoc_
@@ -157,6 +161,18 @@ flag = {
 			M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
 	For more information see ntp.keys(5).
+	_EndOfDoc_;
+};
+
+flag = {
+	name	   = filelog;
+	value	   = l;
+	arg-type   = file;
+	arg-name   = "file-name";
+	descrip = "Log to specified logfile";
+	doc = <<-  _EndOfDoc_
+	This option causes the client to write log messages to the specified
+	logfile.
 	_EndOfDoc_;
 };
 
@@ -209,6 +225,30 @@ flag = {
 	_EndOfDoc_;
 };
 
+
+flag = {
+	name	= uctimeout;
+	value	= u;
+	descrip	= "The number of seconds to wait for unicast responses";
+	arg-type = number;
+	arg-name = "seconds";
+	arg-default = 5;
+	doc	= <<-  _EndOfDoc_
+	When waiting for a unicast reply, SNTP will wait the number
+	of seconds specified before giving up.  Default 5 seconds.
+	_EndOfDoc_;
+};
+
+flag = {
+	name      = "wait";
+	descrip   = "Wait for pending replies (if not setting the time)";
+	disable   = no;
+	enabled;
+	settable;
+	doc = <<-  _EndOfDoc_
+	If we are not setting the time, wait for all pending responses.
+	_EndOfDoc_;
+};
 
 /* explain: Additional information whenever the usage routine is invoked */
 explain = <<- _END_EXPLAIN

@@ -15,7 +15,7 @@
 #include "ntp_select.h"
 #include "ntp_malloc.h"
 #include "ntp_refclock.h"
-#include "ntp_workimpl.h"
+#include "ntp_intres.h"
 #include "recvbuff.h"
 
 /*
@@ -41,9 +41,6 @@ extern	u_short ctlpeerstatus	(struct peer *);
 extern	int	ctlsettrap	(sockaddr_u *, struct interface *, int, int);
 extern	u_short ctlsysstatus	(void);
 extern	void	init_control	(void);
-extern	void	init_logging	(const char *, int);
-extern	int	change_logfile	(const char *, int);
-extern	void	setup_logfile	(int);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);
 extern	int	mprintf_event	(int, struct peer *, const char *, ...)
@@ -79,40 +76,6 @@ extern	void	set_var (struct ctl_var **, const char *, u_long, u_short);
 extern	void	set_sys_var (const char *, u_long, u_short);
 extern	const char *	get_ext_sys_var(const char *tag);
 
-/* ntp_intres.c */
-#ifdef WORKER
-#define	INITIAL_DNS_RETRY	2	/* seconds between queries */
-
-/*
- * you call getaddrinfo_sometime(name, service, &hints, retry, callback_func, context);
- * later (*callback_func)(rescode, gai_errno, context, name, service, hints, ai_result) is called.
- */
-typedef void	(*gai_sometime_callback)
-		    (int, int, void *, const char *, const char *,
-		     const struct addrinfo *, const struct addrinfo *);
-extern int	getaddrinfo_sometime(const char *, const char *,
-				     const struct addrinfo *, int,
-				     gai_sometime_callback, void *);
-/*
- * In gai_sometime_callback routines, the resulting addrinfo list is
- * only available until the callback returns.  To hold on to the list
- * of addresses after the callback returns, use copy_addrinfo_list():
- *
- * struct addrinfo *copy_addrinfo_list(const struct addrinfo *);
- */
-
-
-/*
- * you call getnameinfo_sometime(sockaddr, namelen, servlen, flags, callback_func, context);
- * later (*callback_func)(rescode, gni_errno, sockaddr, flags, name, service, context) is called.
- */
-typedef void	(*gni_sometime_callback)
-		    (int, int, sockaddr_u *, int, const char *,
-		     const char *, void *);
-extern int getnameinfo_sometime(sockaddr_u *, size_t, size_t, int,
-				gni_sometime_callback, void *);
-#endif	/* WORKER */
-
 /* ntp_io.c */
 typedef struct interface_info {
 	endpt *	ep;
@@ -138,9 +101,6 @@ extern	void	io_unsetbclient	(void);
 extern	void	io_multicast_add(sockaddr_u *);
 extern	void	io_multicast_del(sockaddr_u *);
 extern	void	sendpkt 	(sockaddr_u *, struct interface *, int, struct pkt *, int);
-#ifndef SYS_WINNT
-extern	void	kill_asyncio	(int);
-#endif
 #ifdef DEBUG
 extern	void	collect_timing  (struct recvbuf *, const char *, int, l_fp *);
 #endif
@@ -280,7 +240,6 @@ extern	void	timer		(void);
 extern	void	timer_clr_stats (void);
 extern	void	timer_interfacetimeout (u_long);
 extern	volatile int interface_interval;
-extern	u_long	worker_idle_timer;	/* next check current_time */
 extern	u_long	orphwait;		/* orphan wait time */
 #ifdef AUTOKEY
 extern	char	*sys_hostname;	/* host name */
@@ -307,18 +266,6 @@ extern	void	record_crypto_stats (sockaddr_u *, const char *);
 extern	void	record_timing_stats (const char *);
 #endif
 extern	char *	fstostr(time_t);	/* NTP timescale seconds */
-
-/* ntp_worker.c */
-#ifdef WORKER
-extern void	process_blocking_response(void);
-extern void	worker_idle_timer_fired(void);
-extern void	interrupt_worker_sleep(void);
-#endif	/* WORKER */
-#if defined(HAVE_DROPROOT) && defined(WORK_FORK)
-extern void	fork_deferred_worker(void);
-#else
-# define	fork_deferred_worker()	do {} while (0)
-#endif
 
 /* ntpd.c */
 extern	void	parse_cmdline_opts(int *, char ***);
@@ -551,19 +498,15 @@ extern u_long	current_time;		/* seconds since startup */
 extern u_long	timer_timereset;
 extern u_long	timer_overflows;
 extern u_long	timer_xmtcalls;
+#ifdef SYS_WINNT
+HANDLE WaitableTimerHandle;
+#endif
 
 /* ntp_util.c */
 extern	int	stats_control;		/* write stats to fileset? */
 extern	int	stats_write_period;	/* # of seconds between writes. */
 extern	double	stats_write_tolerance;
 extern	double	wander_threshold;
-
-/* ntp_worker.c */
-#if defined(WORK_FORK)
-extern	int	parent_resp_read_pipe;
-#elif defined (WORK_THREAD)
-extern	HANDLE	blocking_response_ready;
-#endif
 
 /* ntpd.c */
 extern volatile int debug;	/* debugging flag */

@@ -88,11 +88,10 @@ extern void	add_nic_rule(nic_rule_match match_type,
 			     const char *if_name, int prefixlen,
 			     nic_rule_action action);
 #ifndef HAVE_IO_COMPLETION_PORT
-extern void	close_all_beyond(int);
-extern void	close_all_except(int);
+extern	void	maintain_activefds(int fd, int closing);
+#else
+#define		maintain_activefds(f, c)	do {} while (0)
 #endif
-#ifdef WORK_FORK
-extern void	update_resp_pipe_fd(int, int);
-#endif
+
 
 #endif	/* NTP_IO_H */

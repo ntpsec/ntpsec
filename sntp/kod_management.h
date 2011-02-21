@@ -12,8 +12,9 @@ struct kod_entry {
 int search_entry(const char *hostname, struct kod_entry **dst);
 void add_entry(const char *hostname, const char *type);
 void delete_entry(const char *hostname, const char *type);
-void kod_init_kod_db(const char *db_file);
-void write_kod_db(void);
+void kod_init_kod_db(const char *db_file, int readonly);
+int  write_kod_db(void);
+void atexit_write_kod_db(void);
 
 
 #endif

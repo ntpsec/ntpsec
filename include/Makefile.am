@@ -14,6 +14,7 @@ noinst_HEADERS =	\
 	hopf6039.h	\
 	icom.h		\
 	ieee754io.h	\
+	intreswork.h	\
 	iosignal.h	\
 	l_stdlib.h	\
 	lib_strbuf.h	\
