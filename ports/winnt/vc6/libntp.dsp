@@ -446,6 +446,10 @@ SOURCE=..\..\..\libntp\timespecops.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\timetoa.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\libntp\timevalops.c
 # End Source File
 # Begin Source File

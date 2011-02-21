@@ -27,7 +27,7 @@
  * use like: int timeval_isnormal(const struct timeval *x)
  */
 #define timeval_isnormal(x) \
-	((u_long)(x)->tv_usec < 1000000)
+	((x)->tv_usec >= 0 && (x)->tv_usec < 1000000)
 
 /*
  * predicate: returns TRUE if the microseconds are out-of-bounds

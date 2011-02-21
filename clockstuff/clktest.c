@@ -85,10 +85,6 @@ volatile int iosig;
 
 struct timeval lasttv;
 
-extern u_long ustotslo[];
-extern u_long ustotsmid[];
-extern u_long ustotshi[];
-
 int alarming();
 int ioready();
 

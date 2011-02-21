@@ -72,10 +72,6 @@ int usechuldisc = 0;	/* set to 1 when CHU line discipline should be used */
 struct timeval lasttv;
 struct chucode chudata;
 
-extern u_long ustotslo[];
-extern u_long ustotsmid[];
-extern u_long ustotshi[];
-
 void	error(char *fmt, char *s1, char *s2);
 void	init_chu(void);
 int	openterm(char *dev);
@@ -512,14 +508,6 @@ static u_long yearstart;
  */
 extern u_long current_time;
 extern struct event timerqueue[];
-
-/*
- * Time conversion tables imported from the library
- */
-extern u_long ustotslo[];
-extern u_long ustotsmid[];
-extern u_long ustotshi[];
-
 
 /*
  * init_chu - initialize internal chu driver data

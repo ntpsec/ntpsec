@@ -2780,15 +2780,16 @@ nextvar(
 	if ('"' == *np) {
 		do {
 			np++;
-		} while (np < cpend && '"' != *np);
-		if (np < cpend)
+		} while (np < cpend && '"' != *np && '\r' != *np);
+		if (np < cpend && '"' == *np)
 			np++;
 	} else {
-		while (np < cpend && ',' != *np)
+		while (np < cpend && ',' != *np && '\r' != *np)
 			np++;
 	}
 	len = np - cp;
-	if (np >= cpend || ',' != *np || len >= sizeof(value))
+	if (np >= cpend || len >= sizeof(value) ||
+	    (',' != *np && '\r' != *np))
 		return 0;
 	memcpy(value, cp, len);
 	/*
@@ -2801,8 +2802,8 @@ nextvar(
 	/*
 	 * Return this.  All done.
 	 */
-	if (np < cpend)
-		np++;		/* over ',' */
+	if (np < cpend && ',' == *np)
+		np++;
 	*datap = np;
 	*datalen = cpend - np;
 	*vvalue = value;

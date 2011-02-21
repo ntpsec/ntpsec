@@ -552,6 +552,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\timetoa.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\libntp\timevalops.c"
 				>
 			</File>
@@ -894,6 +898,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\include\timespecops.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\timetoa.h"
 				>
 			</File>
 			<File

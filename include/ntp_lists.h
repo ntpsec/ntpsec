@@ -106,13 +106,8 @@
 #ifndef NTP_LISTS_H
 #define NTP_LISTS_H
 
+#include "ntp_types.h"		/* TRUE and FALSE */
 #include "ntp_assert.h"
-
-/*
- * For now enable extra debugging code on all builds.  Before long, it
- * will probably make sense to only include the debugging #ifdef DEBUG
- */
-#define NTP_DEBUG_LISTS_H
 
 /*
  * If list debugging is not enabled, save a little time by not clearing
@@ -124,11 +119,6 @@
 #define MAYBE_Z_LISTS(p)	do { } while (0)
 #else
 #define MAYBE_Z_LISTS(p)	(p) = NULL
-#endif
-
-#ifndef TRUE
-# define TRUE	1
-# define NTP_LISTS_UNDEF_TRUE
 #endif
 
 #define LINK_SLIST(listhead, pentry, nextlink)			\
@@ -389,10 +379,5 @@ do {								\
 #define REV_ITER_DLIST_END()					\
 	}							\
 }
-
-
-#ifdef NTP_LISTS_UNDEF_TRUE
-# undef TRUE
-#endif
 
 #endif	/* NTP_LISTS_H */

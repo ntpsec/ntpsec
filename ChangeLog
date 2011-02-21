@@ -17,6 +17,31 @@
 * Split up ntp_libntp.m4 into smaller, more specific subsets.
 * Enable gcc -Wcast-align, fix many instances of warnings when casting
   a pointer to a more-strictly-aligned underlying type.
+(4.2.7p130) 2011/02/12 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1811] Update the download location in WHERE-TO-START.
+(4.2.7p129) 2011/02/09 Released by Harlan Stenn <stenn@ntp.org>
+* Add missing "break;" to ntp_control.c ctl_putsys() for caliberrs, used
+  by ntpq -c kerninfo introduced in 4.2.7p104.
+* Fix leak in ntp_control.c read_mru_list().
+(4.2.7p128) 2011/01/30 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1799] ntpq mrv crash.
+* [Bug 1801] ntpq mreadvar requires prior association caching.
+(4.2.7p127) 2011/01/28 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1797] Restore stale timestamp check from the RANGEGATE cleanup.
+(4.2.7p126) 2011/01/27 Released by Harlan Stenn <stenn@ntp.org>
+* Fix unexposed fencepost error in format_time_fraction().
+* Add more unit tests for timeval_tostr() and timespec_tostr().
+(4.2.7p125) 2011/01/26 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1794] ntpq -c rv missing clk_wander information.
+* [Bug 1795] ntpq readvar does not display last variable.
+(4.2.7p124) 2011/01/25 Released by Harlan Stenn <stenn@ntp.org>
+* sntp/Makefile.am needs any passed-in CFLAGS.
+(4.2.7p123) 2011/01/24 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1788] tvtots.c tables inaccurate
+(4.2.7p122) 2011/01/22 Released by Harlan Stenn <stenn@ntp.org>
+* ACTS refclock cleanup from Dave Mills.
+* Avoid shadowing the "group" global variable.
+(4.2.7p121) 2011/01/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1786] Remove extra semicolon from ntp_proto.c .
 (4.2.7p120) 2011/01/20 Released by Harlan Stenn <stenn@ntp.org>
 * Change new timeval and timespec to string routines to use snprintf()

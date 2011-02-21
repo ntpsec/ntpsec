@@ -128,10 +128,6 @@ parse_timedout(
 		delta.tv_usec += 1000000;
 	}
 #else
-	extern long tstouslo[];
-	extern long tstousmid[];
-	extern long tstoushi[];
-
 	l_fp delt;
 
 	delt = tstamp->fp;

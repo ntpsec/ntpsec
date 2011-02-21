@@ -53,18 +53,22 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		ssl_init.cpp		\
 		statestr.cpp		\
 		strtolfp.cpp		\
-		tspecops.cpp		\
-		tvalops.cpp		\
+		timespecops.cpp		\
+		timestructs.cpp		\
+		timevalops.cpp		\
 		tsftomsu.cpp		\
 		tstotv.cpp		\
 		tvtots.cpp		\
 		uglydate.cpp		\
 		uinttoa.cpp		\
-		ymd2yd.cpp
+		ymd2yd.cpp		\
+		$(NULL)
 
 noinst_HEADERS =	lfptest.h	\
 			libntptest.h	\
-			sockaddrtest.h
+			sockaddrtest.h	\
+			timestructs.h	\
+			$(NULL)
 
 TESTS =
 

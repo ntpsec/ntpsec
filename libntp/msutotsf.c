@@ -13,7 +13,7 @@
  * truncated).  The error in the result will thus be +-1 low order
  * bit in the time stamp fraction.
  */
-u_long msutotsflo[32] = {
+const u_int32 msutotsflo[32] = {
 	0x00000000, 0x00418937, 0x0083126f, 0x00c49ba6,
 	0x010624dd, 0x0147ae14, 0x0189374c, 0x01cac083,
 	0x020c49ba, 0x024dd2f2, 0x028f5c29, 0x02d0e560,
@@ -24,7 +24,7 @@ u_long msutotsflo[32] = {
 	0x072b020c, 0x076c8b44, 0x07ae147b, 0x07ef9db2
 };
 
-u_long msutotsfhi[32] = {
+const u_int32 msutotsfhi[32] = {
 	0x00000000, 0x083126e9, 0x10624dd3, 0x189374bc,
 	0x20c49ba6, 0x28f5c28f, 0x3126e979, 0x39581062,
 	0x4189374c, 0x49ba5e35, 0x51eb851f, 0x5a1cac08,

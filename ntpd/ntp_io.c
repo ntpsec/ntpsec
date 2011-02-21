@@ -936,10 +936,14 @@ add_interface(
 		    ? "4"
 		    : "6"));
 
+	if (INVALID_SOCKET == ep->fd)
+		return;
+
 	/*
 	 * select the local address from which to send to multicast.
 	 */
 	switch (AF(&ep->sin)) {
+
 	case AF_INET :
 		rc = setsockopt(ep->fd, IPPROTO_IP,
 				IP_MULTICAST_IF,
@@ -950,6 +954,7 @@ add_interface(
 				"setsockopt IP_MULTICAST_IF %s fails: %m",
 				stoa(&ep->sin));
 		break;
+
 # ifdef INCLUDE_IPV6_MULTICAST_SUPPORT
 	case AF_INET6 :
 		rc = setsockopt(ep->fd, IPPROTO_IPV6,

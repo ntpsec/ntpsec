@@ -38,7 +38,8 @@ static	void	readvar 	(struct parse *, FILE *);
 static	void	writevar	(struct parse *, FILE *);
 static	void	clocklist	(struct parse *, FILE *);
 static	void	clockvar	(struct parse *, FILE *);
-static	int	findassidrange	(u_int32, u_int32, int *, int *);
+static	int	findassidrange	(u_int32, u_int32, int *, int *,
+				 FILE *);
 static	void	mreadlist	(struct parse *, FILE *);
 static	void	mreadvar	(struct parse *, FILE *);
 static	void	printassoc	(int, FILE *);
@@ -123,16 +124,16 @@ struct xcmd opcmds[] = {
 	  { "assocID", "name=value,[...]", "", "" },
 	  "write system or peer variables" },
 	{ "mreadlist",  mreadlist,  { NTP_UINT, NTP_UINT, NO, NO },
-	  { "assocID", "assocID", "", "" },
+	  { "assocIDlow", "assocIDhigh", "", "" },
 	  "read the peer variables in the variable list for multiple peers" },
 	{ "mrl",    mreadlist,  { NTP_UINT, NTP_UINT, NO, NO },
-	  { "assocID", "assocID", "", "" },
+	  { "assocIDlow", "assocIDhigh", "", "" },
 	  "read the peer variables in the variable list for multiple peers" },
 	{ "mreadvar",   mreadvar,   { NTP_UINT, NTP_UINT, OPT|NTP_STR, NO },
-	  { "assocID", "assocID", "name=value[,...]", "" },
+	  { "assocIDlow", "assocIDhigh", "name=value[,...]", "" },
 	  "read peer variables from multiple peers" },
 	{ "mrv",    mreadvar,   { NTP_UINT, NTP_UINT, OPT|NTP_STR, NO },
-	  { "assocID", "assocID", "name=value[,...]", "" },
+	  { "assocIDlow", "assocIDhigh", "name=value[,...]", "" },
 	  "read peer variables from multiple peers" },
 	{ "clocklist",  clocklist,  { OPT|NTP_UINT, NO, NO, NO },
 	  { "assocID", "", "", "" },
@@ -405,7 +406,7 @@ doaddvlist(
 	const char *vars
 	)
 {
-	register struct varlist *vl;
+	struct varlist *vl;
 	int len;
 	char *name;
 	char *value;
@@ -413,12 +414,12 @@ doaddvlist(
 	len = strlen(vars);
 	while (nextvar(&len, &vars, &name, &value)) {
 		vl = findlistvar(vlist, name);
-		if (vl == 0) {
-			(void) fprintf(stderr, "Variable list full\n");
+		if (NULL == vl) {
+			fprintf(stderr, "Variable list full\n");
 			return;
 		}
 
-		if (vl->name == NULL) {
+		if (NULL == vl->name) {
 			vl->name = estrdup(name);
 		} else if (vl->value != NULL) {
 			free(vl->value);
@@ -440,7 +441,7 @@ dormvlist(
 	const char *vars
 	)
 {
-	register struct varlist *vl;
+	struct varlist *vl;
 	int len;
 	char *name;
 	char *value;
@@ -667,15 +668,16 @@ dolist(
 		return 0;
 
 	if (numhosts > 1)
-		(void) fprintf(fp, "server=%s ", currenthost);
+		fprintf(fp, "server=%s ", currenthost);
 	if (dsize == 0) {
 		if (associd == 0)
-			(void) fprintf(fp, "No system%s variables returned\n",
-				   (type == TYPE_CLOCK) ? " clock" : "");
+			fprintf(fp, "No system%s variables returned\n",
+				(type == TYPE_CLOCK) ? " clock" : "");
 		else
-			(void) fprintf(fp,
-				   "No information returned for%s association %u\n",
-				   (type == TYPE_CLOCK) ? " clock" : "", associd);
+			fprintf(fp,
+				"No information returned for%s association %u\n",
+				(type == TYPE_CLOCK) ? " clock" : "",
+				associd);
 		return 1;
 	}
 
@@ -904,16 +906,21 @@ clockvar(
  */
 static int
 findassidrange(
-	u_int32 assid1,
-	u_int32 assid2,
-	int *from,
-	int *to
+	u_int32	assid1,
+	u_int32	assid2,
+	int *	from,
+	int *	to,
+	FILE *	fp
 	)
 {
 	associd_t	assids[2];
 	int		ind[COUNTOF(assids)];
 	u_int		i;
 	size_t		a;
+
+
+	if (0 == numassoc)
+		dogetassoc(fp);
 
 	assids[0] = checkassocid(assid1);
 	if (0 == assids[0])
@@ -961,16 +968,15 @@ mreadlist(
 	int from;
 	int to;
 
-	/* HMS: uval? */
 	if (!findassidrange(pcmd->argval[0].uval, pcmd->argval[1].uval,
-				&from, &to))
+			    &from, &to, fp))
 		return;
 
 	for (i = from; i <= to; i++) {
 		if (i != from)
-			(void) fprintf(fp, "\n");
-		if (!dolist(g_varlist, (int)assoc_cache[i].assid,
-				CTL_OP_READVAR, TYPE_PEER, fp))
+			fprintf(fp, "\n");
+		if (!dolist(g_varlist, assoc_cache[i].assid,
+			    CTL_OP_READVAR, TYPE_PEER, fp))
 			return;
 	}
 	return;
@@ -992,9 +998,8 @@ mreadvar(
 	struct varlist tmplist[MAXLIST];
 	struct varlist *pvars;
 
-	/* HMS: uval? */
 	if (!findassidrange(pcmd->argval[0].uval, pcmd->argval[1].uval,
-				&from, &to))
+				&from, &to, fp))
 		return;
 
 	if (pcmd->nargs >= 3) {
@@ -1008,11 +1013,14 @@ mreadvar(
 	for (i = from; i <= to; i++) {
 		if (i != from)
 			fprintf(fp, "\n");
-		if (!dolist(pvars, (int)assoc_cache[i].assid,
-			    CTL_OP_READVAR, TYPE_PEER, fp))
+		if (!dolist(pvars, assoc_cache[i].assid, CTL_OP_READVAR,
+			    TYPE_PEER, fp))
 			break;
 	}
-	doclearvlist(tmplist);
+
+	if (pvars == tmplist)
+		doclearvlist(tmplist);
+
 	return;
 }
 
