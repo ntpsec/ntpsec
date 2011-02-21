@@ -1,3 +1,4 @@
+(4.2.7p131) 2011/02/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1087] -v/--normalverbose conflicts with -v/--version in sntp.
 * [Bug 1088] sntp should (only) report the time difference without -s/-a.
 * older autoconf sometimes dislikes [].

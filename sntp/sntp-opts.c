@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  February  7, 2011 at 02:10:40 AM by AutoGen 5.11.6pre20
+ *  It has been AutoGen-ed  February 21, 2011 at 09:18:09 AM by AutoGen 5.11.6pre7
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -642,7 +642,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p120\n\
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p131\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
@@ -654,14 +654,14 @@ static char const * const apzHomeList[3] = {
 static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 static char const zExplain[] = "\n\n";
 static char const zDetail[351] = "\n\
-sntp implements the Simple Network Time Protocol and is used to query an\n\
-NTP or SNTP server and either display the time or set the local system's\n\
-time (given suitable privilege).\n\n\
+sntp implements the Simple Network Time Protocol and is used to query\n\
+an NTP or SNTP server and either display the time or set the local\n\
+system's time (given suitable privilege).\n\n\
 It can be run interactively from the command line or as a cron job.\n\n\
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and\n\
-RFC 1305.\n";
+NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
+1305.\n";
 static char const zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from /usr/local/share/autogen/optcode.tlib near line 504 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -676,22 +676,6 @@ static char const zFullVersion[] = SNTP_FULL_VERSION;
 #define sntp_short_usage NULL
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
-#endif
-
-#ifndef  WITH_PACKAGER
-# define sntp_packager_info NULL
-#else
-static char const sntp_packager_info[] =
-    "Packaged by " WITH_PACKAGER
-
-# ifdef WITH_PACKAGER_VERSION
-        " ("WITH_PACKAGER_VERSION")"
-# endif
-
-# ifdef WITH_PACKAGER_BUG_REPORTS
-    "\nReport sntp bugs to " WITH_PACKAGER_BUG_REPORTS
-# endif
-    "\n";
 #endif
 
 tOptions sntpOptions = {
@@ -712,7 +696,7 @@ tOptions sntpOptions = {
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */
     NULL, NULL,                 /* extensions/saved state  */
-    optionUsage, /* usage procedure */
+    optionUsage,       /* usage procedure */
     translate_option_strings,   /* translation procedure */
     /*
      *  Indexes to special options
@@ -725,7 +709,7 @@ tOptions sntpOptions = {
     24 /* full option count */, 19 /* user option count */,
     sntp_full_usage, sntp_short_usage,
     NULL, NULL,
-    PKGDATADIR, sntp_packager_info
+    PKGDATADIR
 };
 
 /*
@@ -907,7 +891,7 @@ doOptNtpversion(tOptions* pOptions, tOptDesc* pOptDesc)
     }
     pOptDesc->optArg.argInt = val;
 }
-/* extracted from /usr/local/share/autogen/optmain.tlib near line 107 */
+/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -925,7 +909,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from /usr/local/share/autogen/optcode.tlib near line 657 */
+/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -969,6 +953,7 @@ translate_option_strings(void)
      *  been changed by the first pass through this code.  One shot only.
      */
     if (option_usage_text.field_ct != 0) {
+
         /*
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
@@ -988,7 +973,6 @@ translate_option_strings(void)
         COERSION(pzUsageTitle);
         COERSION(pzExplain);
         COERSION(pzDetail);
-        COERSION(pzPackager);
         option_usage_text.field_ct = 0;
 
         for (ix = sntpOptions.optCt; ix > 0; ix--, pOD++)

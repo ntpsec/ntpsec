@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  February  7, 2011 at 02:10:44 AM by AutoGen 5.11.6pre20
+# It has been AutoGen-ed  February 21, 2011 at 09:18:24 AM by AutoGen 5.11.6pre7
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -76,8 +76,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
- 7 Feb 02:10:44 sntp[16648]: sntp 4.2.7p120@@1.2505-o Mon Feb  7 07:10:42 UTC 2011 (16)
-sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p120
+sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p131
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -130,14 +129,14 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
 
-sntp implements the Simple Network Time Protocol and is used to query an
-NTP or SNTP server and either display the time or set the local system's
-time (given suitable privilege).
+sntp implements the Simple Network Time Protocol and is used to query
+an NTP or SNTP server and either display the time or set the local
+system's time (given suitable privilege).
 
 It can be run interactively from the command line or as a cron job.
 
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and
-RFC 1305.
+NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC
+1305.
 
 please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
