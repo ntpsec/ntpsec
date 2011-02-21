@@ -165,7 +165,8 @@ extern int async_write(int, const void *, unsigned int);
 #define LF		0x0a	/* ASCII LF */
 
 /*
- * Modem setup strings. These may have to be changed for some modems.
+ * Modem setup strings. These may have to be changed for
+ * some modems.
  *
  * AT	command prefix
  * B1	US answer tone
@@ -381,7 +382,7 @@ acts_message(
 	/*
 	 * Extract the first token in the line.
 	 */
-	strncpy(tbuf, msg, sizeof(tbuf));
+	strncpy(tbuf, msg, sizeof(tbuf) - 1);
 	strtok(tbuf, " ");
 	switch (up->state) {
 
@@ -895,7 +896,7 @@ acts_timecode(
 	if (up->msgcnt == 0)
 		return;
 
-	strncpy(pp->a_lastcode, str, sizeof(pp->a_lastcode));
+	strncpy(pp->a_lastcode, str, sizeof(pp->a_lastcode) - 1);
 	pp->lencode = strlen(pp->a_lastcode);
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
