@@ -88,12 +88,12 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include "ntp_types.h"
+
 #include "ntp_random.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
-
 #include "ntp_libopts.h"
+#include "ntp_unixtime.h"
 #include "ntp-keygen-opts.h"
 
 #ifdef OPENSSL

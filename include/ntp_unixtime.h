@@ -6,12 +6,7 @@
 #ifndef NTP_UNIXTIME_H
 #define NTP_UNIXTIME_H
 
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
-#include <time.h>
-
-#include "ntp_types.h"
+#include "ntp_types.h"	/* picks up time.h via ntp_machine.h */
 
 #ifdef SIM
 #   define GETTIMEOFDAY(a, b) (node_gettime(&ntp_node, a))

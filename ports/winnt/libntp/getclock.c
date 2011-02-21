@@ -2,6 +2,8 @@
  * getclock.c - Emulate Unix getclock(3) nanosecond interface for libntp/ntpd
  */
 #include "config.h"
+
+#include "ntp_unixtime.h"
 #include "clockstuff.h"
 #include "ntp_stdlib.h"
 

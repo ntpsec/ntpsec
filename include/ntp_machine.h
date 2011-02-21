@@ -10,7 +10,11 @@
 #ifndef NTP_MACHINE_H
 #define NTP_MACHINE_H
 
-#include "ntp_unixtime.h"
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#include <time.h>
+
 #include "ntp_proto.h"
 
 /*

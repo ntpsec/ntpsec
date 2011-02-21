@@ -1,7 +1,9 @@
 
 #include <config.h>
+
 #include "clockstuff.h"
 #include "ntp_stdlib.h"
+#include "ntp_unixtime.h"
 
 pset_tod_using		set_tod_using = NULL;
 
