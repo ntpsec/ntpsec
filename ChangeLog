@@ -1,3 +1,5 @@
+* [Bug 1087] -v/--normalverbose conflicts with -v/--version in sntp.
+* [Bug 1088] sntp should (only) report the time difference without -s/-a.
 * older autoconf sometimes dislikes [].
 * Move "can't write KoD file" warning from sntp shutdown to startup.
 * refclock_acts.c cleanup from Dave Mills.
