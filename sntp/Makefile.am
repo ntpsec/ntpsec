@@ -100,7 +100,6 @@ EXTRA_DIST =				\
 	deps-ver			\
 	depsver.mf			\
 	@NTP_FORCE_LIBEVENT_DIST@	\
-	libevent-cfg			\
 	sntp-opts.def			\
 	sntp-opts.menu			\
 	sntp-opts.texi			\
