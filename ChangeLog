@@ -1,3 +1,4 @@
+* older autoconf sometimes dislikes [].
 * Move "can't write KoD file" warning from sntp shutdown to startup.
 * refclock_acts.c cleanup from Dave Mills.
 * Convert sntp to libevent event-driven socket programming.  Instead of

@@ -299,7 +299,7 @@ AC_CHECK_FUNCS([sem_timedwait socketpair])
 AC_ARG_ENABLE(
     [thread-support],
     [AS_HELP_STRING([--disable-thread-support, do not use threads])],
-    [], 
+    , 
     [enable_thread_support=yes]
     )
 have_pthreads=no
@@ -320,7 +320,7 @@ case "$have_pthreads" in
     CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
     AC_CHECK_SIZEOF(
 	[pthread_t],
-	[],
+	,
 	[
 	    AC_INCLUDES_DEFAULT()
 	    #include <pthread.h>
@@ -357,8 +357,7 @@ case "$have_pthreads" in
 	AC_CHECK_LIB(
 	    [c_r],
 	    [sigwait],
-	    [have_sigwait=yes],
-	    []
+	    [have_sigwait=yes]
 	)
     esac
     case "$have_sigwait" in
@@ -388,8 +387,7 @@ case "$have_pthreads" in
 	AC_CHECK_FUNC(
 	    [pthread_setconcurrency],
 	    [AC_DEFINE([CALL_PTHREAD_SETCONCURRENCY], [1],
-		       [why not HAVE_P_S?])],
-	    []
+		       [why not HAVE_P_S?])]
 	)
 	;;
      *-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
