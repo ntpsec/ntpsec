@@ -1,9 +1,10 @@
+* Move "can't write KoD file" warning from sntp shutdown to startup.
+* refclock_acts.c cleanup from Dave Mills.
 * Convert sntp to libevent event-driven socket programming.  Instead of
   blocking name resolution and querying one NTP server at a time,
   resolve server names and send NTP queries without blocking.  Add
   sntp command-line options to adjust timing and optionally wait for all
   servers to respond instead of exiting after the first.
-* Move "can't write KoD file" warning from sntp shutdown to startup.
 * Import libevent 2.0.10-stable plus local patches as a tearoff, used
   only if the target system lacks an installed libevent 2.0.9 or later.
 * Move blocking worker and resolver to libntp from ntpd.
