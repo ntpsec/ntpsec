@@ -1,11 +1,13 @@
 * [Bug 1832] ntpdate doesn't allow timeout > 2s.
 * [Bug 1833] The checking sem_timedwait() fails without -pthread.
-* ElectricFence was suffering bitrot - remove it.  valgrind seems better.
+* ElectricFence was suffering bitrot - remove it.  valgrind works well.
 * Enable all relevant automake warnings.
 * Correct Solaris 2.1x PTHREAD_ONCE_INIT extra braces test to avoid
   triggering warnings due to excess braces.
 * Remove libevent-cfg from sntp/Makefile.am.
 * Provide bug report and URL options to Autoconf.
+* Avoid relying on remake rules for routine build/flock-build for
+  libevent as for the top-level and sntp subproject.
 (4.2.7p131) 2011/02/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1087] -v/--normalverbose conflicts with -v/--version in sntp.
 * [Bug 1088] sntp should (only) report the time difference without -s/-a.
