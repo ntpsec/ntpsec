@@ -1,27 +1,24 @@
 ## Makefile.am for JMK's SNTP, by Harlan Stenn
 
+ACLOCAL_AMFLAGS = -I m4 -I libevent/m4 -I libopts/m4
+
 NULL =
 
-## LIBOPTS_CHECK_NOBUILD works with Automake 1.10 now
-AUTOMAKE_OPTIONS = foreign 1.10
-ACLOCAL_AMFLAGS = -I m4 -I libopts/m4 -I libevent/m4
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_LIBEVENT@ @CPPFLAGS_NTP@
-
-INCLUDES  = -I$(top_srcdir)/../include
-INCLUDES += -I$(top_srcdir)/../lib/isc/include
-INCLUDES += -I$(top_srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/../lib/isc/unix/include
-INCLUDES += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS  = $(SNTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_LIBEVENT)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 LDADD  = version.o
 LDADD += $(LIBOPTS_LDADD)
-LDADD += @LDADD_LIBEVENT@
+LDADD += $(LDADD_LIBEVENT)
 LDADD += $(LIBM)
-LDADD += ../libntp/libntp.a @LDADD_LIBNTP@
-LDADD += @PTHREAD_LIBS@
-LDADD += @LCRYPTO@
+LDADD += ../libntp/libntp.a
+LDADD += $(LDADD_LIBNTP)
+LDADD += $(PTHREAD_LIBS)
+LDADD += $(LCRYPTO)
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L include --writable
@@ -240,10 +237,11 @@ libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
 
 libevent-dist-hook:
-	if test -n "@NTP_FORCE_LIBEVENT_DIST@" ; then rm -rf $(distdir)/libevent/autom4te.cache $(distdir)/libevent/config.h.in~ ; find $(distdir)/libevent -type d -name SCCS -print | xargs rm -rf ; fi
+	if test -n "$(NTP_FORCE_LIBEVENT_DIST)" ; then rm -rf $(distdir)/libevent/autom4te.cache $(distdir)/libevent/config.h.in~ ; find $(distdir)/libevent -type d -name SCCS -print | xargs rm -rf ; fi
 
 dist-hook: libevent-dist-hook
 	@: do-nothing action to avoid default SCCS get
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

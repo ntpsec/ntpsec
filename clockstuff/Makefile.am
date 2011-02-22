@@ -1,4 +1,3 @@
-AUTOMAKE_OPTIONS =
 noinst_PROGRAMS = @PROPDELAY@ @CHUTEST@ @CLKTEST@
 EXTRA_PROGRAMS = propdelay chutest clktest
 
@@ -7,16 +6,13 @@ EXTRA_DIST = clktest-opts.def
 
 clktest_SOURCES = clktest.c clktest-opts.c clktest-opts.h
 
-INCLUDES  = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES += $(LIBOPTS_CFLAGS)
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
-LDADD = ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
+LDADD = ../libntp/libntp.a $(LDADD_LIBNTP) $(PTHREAD_LIBS)
 propdelay_LDADD = $(LIBM) $(LDADD)
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
@@ -47,4 +43,6 @@ FRC:
 	cd ../libntp && $(MAKE)
 
 CLEANFILES =
+
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

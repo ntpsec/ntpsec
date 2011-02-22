@@ -1,5 +1,4 @@
 NULL=
-AUTOMAKE_OPTIONS =
 BUILT_SOURCES = check-libntp
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
@@ -56,16 +55,11 @@ libparse_kernel_a_LIBADD =	\
 	kgpstolfp.o		\
 	$(NULL)
 
-INCLUDES = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES += -I$(top_srcdir)/kernel
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
-
-ETAGS_ARGS = Makefile.am
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += -I$(top_srcdir)/kernel
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 EXTRA_DIST = parsesolaris.c parsestreams.c mkinfo_scmd.sed mkinfo_rcmd.sed info_trimble.c
 
@@ -146,3 +140,4 @@ sys/systm.h:
 	sed -e '/ffs(.*)/d' < /usr/include/sys/systm.h > sys/systm.h
 
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

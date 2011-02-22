@@ -1,5 +1,4 @@
 NULL=
-AUTOMAKE_OPTIONS=	
 
 if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpq
@@ -7,18 +6,16 @@ else
 sbin_PROGRAMS=	ntpq
 endif
 
-INCLUDES  = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES += $(LIBOPTS_CFLAGS)
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD  = version.o $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a @LDADD_LIBNTP@
-ntpq_LDADD += @PTHREAD_LIBS@ @EDITLINE_LIBS@ @LCRYPTO@
+ntpq_LDADD  = version.o $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a
+ntpq_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(EDITLINE_LIBS)
+ntpq_LDADD += $(LCRYPTO)
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a
 libntpq_a_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB
@@ -77,3 +74,4 @@ version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/versio
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

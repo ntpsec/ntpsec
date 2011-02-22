@@ -1,4 +1,5 @@
 NULL =
+BUILT_SOURCES =
 
 check_PROGRAMS = 
 if BUILD_SNTP
@@ -56,26 +57,25 @@ CLEANFILES =				\
 
 LDADD =						\
 	$(LIBOPTS_LDADD)			\
-	@LDADD_LIBEVENT@			\
-	@top_builddir@/../libntp/libntp.a	\
-	@LDADD_LIBNTP@				\
-	@LCRYPTO@				\
-	@GTEST_LDFLAGS@				\
-	@GTEST_LIBS@				\
+	$(LDADD_LIBEVENT)			\
+	$(top_builddir)/../libntp/libntp.a	\
+	$(LDADD_LIBNTP)				\
+	$(LCRYPTO)				\
+	$(GTEST_LDFLAGS)			\
+	$(GTEST_LIBS)				\
 	$(sntp_SOURCES_USED)			\
 	$(NULL)
 
-AM_CFLAGS   = @CFLAGS_NTP@
-AM_CXXFLAGS = @GTEST_CXXFLAGS@
-AM_CPPFLAGS = @CPPFLAGS_LIBEVENT@ @GTEST_CPPFLAGS@ @CPPFLAGS_NTP@
+AM_CFLAGS   = $(CFLAGS_NTP)
+AM_CXXFLAGS = $(GTEST_CXXFLAGS)
 
-INCLUDES  = $(LIBOPTS_CFLAGS)
-INCLUDES += -I$(top_srcdir)/../include
-INCLUDES += -I$(top_srcdir)/../lib/isc/include
-INCLUDES += -I$(top_srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/../lib/isc/unix/include
-INCLUDES += -I$(top_srcdir)/../tests
-INCLUDES += -I$(top_srcdir)
+AM_CPPFLAGS  = $(SNTP_INCS)
+AM_CPPFLAGS += -I$(srcdir)/..
+AM_CPPFLAGS += -I$(top_srcdir)/../tests
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_LIBEVENT)
+AM_CPPFLAGS += $(GTEST_CPPFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 TESTS = 
 
@@ -87,3 +87,6 @@ TESTS_ENVIRONMENT = $(top_srcdir)/tests/test-driver $(TEST_INPUT_DIR) $(TEST_OUT
 if !NTP_CROSSCOMPILE
 TESTS += $(check_PROGRAMS)
 endif
+
+include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

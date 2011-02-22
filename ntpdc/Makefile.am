@@ -1,5 +1,4 @@
 NULL=
-AUTOMAKE_OPTIONS=
 
 if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpdc
@@ -11,18 +10,16 @@ EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
 BUILT_SOURCES=	check-libntp @MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
 
-INCLUDES  = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES +=  $(LIBOPTS_CFLAGS)
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a @LDADD_LIBNTP@
-ntpdc_LDADD += @PTHREAD_LIBS@ @EDITLINE_LIBS@ @LCRYPTO@
+ntpdc_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a
+ntpdc_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(EDITLINE_LIBS)
+ntpdc_LDADD += $(LCRYPTO)
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 
@@ -94,3 +91,4 @@ nl.c: nl_in.c nl.pl Makefile.am ../config.h ../include/ntp_request.h ntpdc.h
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

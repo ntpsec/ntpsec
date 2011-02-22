@@ -1,8 +1,14 @@
-dnl -*-fundamental-*-
-dnl Process this file with autoconf to produce a configure script.
+dnl NTP top-level configure.ac				-*- Autoconf -*-
+dnl
 m4_include([sntp/m4/version.m4])
 AC_PREREQ([2.61])
-AC_INIT([ntp], [VERSION_NUMBER])
+AC_INIT(
+    [ntp],
+    [VERSION_NUMBER],
+    [http://bugs.ntp.org./],
+    [],
+    [http://www.ntp.org./]dnl
+)
 AC_CONFIG_MACRO_DIR([sntp/m4])
 AC_CONFIG_AUX_DIR([sntp/build-aux])
 
@@ -33,7 +39,8 @@ ntp_configure_cache_version=20110219
 
 NTP_CACHEVERSION([main], [$ntp_configure_cache_version])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.10 foreign -Wall -Wno-gnu])
+
 dnl AM_SILENT_RULES req. automake 1.11.  [yes] defaults V=0
 m4_ifdef(
     [AM_SILENT_RULES],

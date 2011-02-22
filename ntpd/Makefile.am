@@ -9,17 +9,14 @@ endif
 
 noinst_LIBRARIES=	libntpd.a
 
-INCLUDES  = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES +=  $(LIBOPTS_CFLAGS)
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 # LDADD might need RESLIB and ADJLIB.
-LDADD = version.o libntpd.a @LIBPARSE@
+LDADD = version.o libntpd.a $(LIBPARSE)
 AM_YFLAGS = -d -t -r all
 
 if SAVECONFIG_ENABLED
@@ -289,3 +286,4 @@ version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

@@ -1,5 +1,4 @@
 NULL=
-AUTOMAKE_OPTIONS= 
 
 if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	@MAKE_NTPSNMPD@
@@ -12,19 +11,17 @@ ntpsnmpd_SOURCES= netsnmp_daemonize.c ntpsnmpd.c ntpSnmpSubagentObject.c \
 		ntpsnmpd-opts.c ntpsnmpd-opts.h ntpSnmpSubagentObject.h \
 		ntp_snmp.h
 # HMS: we probably want a version.o file here, too.
-LDADD  = ../ntpq/libntpq.a ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@ @LCRYPTO@
-LDADD += @SNMP_LIBS@ $(LIBOPTS_LDADD)
+LDADD  = ../ntpq/libntpq.a ../libntp/libntp.a $(LDADD_LIBNTP)
+LDADD += $(PTHREAD_LIBS) $(LCRYPTO) $(SNMP_LIBS) $(LIBOPTS_LDADD)
 
-INCLUDES  = -I$(top_srcdir)/ntpq
-INCLUDES += -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES += $(LIBOPTS_CFLAGS)
-INCLUDES += @SNMP_CPPFLAGS@
+AM_CFLAGS = $(SNMP_CFLAGS) $(CFLAGS_NTP)
 
-AM_CFLAGS =	@SNMP_CFLAGS@ @CFLAGS_NTP@
-AM_CPPFLAGS =	@CPPFLAGS_NTP@
+AM_CPPFLAGS  = -I$(top_srcdir)/ntpq
+AM_CPPFLAGS += $(NTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(SNMP_CPPFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
+
 EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\
 		ntpsnmpd-opts.menu ntpv4-mib.mib
 BUILT_SOURCES=	check-libntp ntpsnmpd-opts.c ntpsnmpd-opts.h
@@ -67,3 +64,4 @@ FRC:
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

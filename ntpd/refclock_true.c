@@ -12,14 +12,14 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_TRUETIME)
 
+#include <stdio.h>
+#include <ctype.h>
+
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
 #include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
-
-#include <stdio.h>
-#include <ctype.h>
 
 #ifdef SYS_WINNT
 extern int async_write(int, const void *, unsigned int);

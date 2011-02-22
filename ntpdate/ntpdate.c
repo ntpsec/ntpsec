@@ -419,18 +419,7 @@ ntpdatemain (
 			} else {
 				sys_timeout = ((LFPTOFP(&tmp) * TIMER_HZ)
 					   + 0x8000) >> 16;
-				/*
-				 * No less than 1s between requests to
-				 * a server to stay within ntpd's
-				 * default "discard minimum 1" (and 1s
-				 * enforcement slop).  That is enforced
-				 * only if the nondefault limited
-				 * restriction is in place, such as with
-				 * "restrict ... limited" and "restrict
-				 * ... kod limited".
-				 */
-				if (MINTIMEOUT < sys_timeout)
-					sys_timeout = MINTIMEOUT;
+				sys_timeout = max(sys_timeout, MINTIMEOUT);
 			}
 			break;
 		case 'v':

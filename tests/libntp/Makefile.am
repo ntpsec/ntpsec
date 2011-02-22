@@ -1,25 +1,25 @@
 NULL =
+BUILT_SOURCES =
+CLEANFILES =
 
 check_PROGRAMS = tests
 
 LDADD =					\
-	@top_builddir@/libntp/libntp.a	\
-	@LDADD_LIBNTP@			\
-	@PTHREAD_LIBS@			\
-	@LCRYPTO@			\
-	@GTEST_LDFLAGS@			\
-	@GTEST_LIBS@			\
+	$(top_builddir)/libntp/libntp.a	\
+	$(LDADD_LIBNTP)			\
+	$(PTHREAD_LIBS)			\
+	$(LCRYPTO)			\
+	$(GTEST_LDFLAGS)		\
+	$(GTEST_LIBS)			\
 	$(NULL)
 
-AM_CFLAGS   = @CFLAGS_NTP@
-AM_CXXFLAGS = @GTEST_CXXFLAGS@
-AM_CPPFLAGS = @GTEST_CPPFLAGS@ @CPPFLAGS_NTP@
+AM_CFLAGS   = $(CFLAGS_NTP)
+AM_CXXFLAGS = $(GTEST_CXXFLAGS)
 
-INCLUDES  = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES += -I$(top_srcdir)/sntp
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += -I$(top_srcdir)/sntp
+AM_CPPFLAGS += $(GTEST_CPPFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		libntptest.cpp		\
@@ -75,3 +75,6 @@ TESTS =
 if !NTP_CROSSCOMPILE
 TESTS += tests
 endif
+
+include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf

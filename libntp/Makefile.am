@@ -1,5 +1,4 @@
 NULL=
-AUTOMAKE_OPTIONS = 
 BUILT_SOURCES =
 CLEANFILES =
 noinst_LIBRARIES = libntp.a @MAKE_LIBNTPSIM@
@@ -8,7 +7,7 @@ EXTRA_LIBRARIES = libntpsim.a
 libisc_SRCS =								\
 	$(srcdir)/../lib/isc/assertions.c				\
 	$(srcdir)/../lib/isc/buffer.c					\
-	$(srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/condition.c	\
+	$(srcdir)/../lib/isc/$(LIBISC_PTHREADS_NOTHREADS)/condition.c	\
 	$(srcdir)/../lib/isc/unix/dir.c					\
 	$(srcdir)/../lib/isc/error.c					\
 	$(srcdir)/../lib/isc/unix/errno2result.c			\
@@ -31,7 +30,7 @@ libisc_SRCS =								\
 	$(srcdir)/../lib/isc/unix/stdtime.c				\
 	$(srcdir)/../lib/isc/unix/strerror.c				\
 	$(srcdir)/../lib/isc/task.c					\
-	$(srcdir)/../lib/isc/@LIBISC_PTHREADS_NOTHREADS@/thread.c	\
+	$(srcdir)/../lib/isc/$(LIBISC_PTHREADS_NOTHREADS)/thread.c	\
 	$(srcdir)/../lib/isc/unix/time.c				\
 	$(srcdir)/../lib/isc/sockaddr.c					\
 	$(NULL)
@@ -119,17 +118,14 @@ libntp_a_SRCS =						\
 libntp_a_SOURCES = systime.c $(libntp_a_SRCS)
 libntpsim_a_SOURCES = systime_s.c $(libntp_a_SRCS)
 EXTRA_libntp_a_SOURCES = adjtimex.c
-ETAGS_ARGS = Makefile.am
 
-INCLUDES  = -I$(top_srcdir)/include
-INCLUDES += -I$(top_srcdir)/lib/isc/include
-INCLUDES += -I$(top_srcdir)/lib/isc/@LIBISC_PTHREADS_NOTHREADS@/include
-INCLUDES += -I$(top_srcdir)/lib/isc/unix/include
-INCLUDES +=  $(LIBOPTS_CFLAGS)
+AM_CFLAGS = $(CFLAGS_NTP)
 
-AM_CFLAGS = @CFLAGS_NTP@
-AM_CPPFLAGS = @CPPFLAGS_NTP@
+AM_CPPFLAGS  = $(NTP_INCS)
+AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
+AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 EXTRA_DIST = README
 
 include $(top_srcdir)/depsver.mf
+include $(top_srcdir)/includes.mf
