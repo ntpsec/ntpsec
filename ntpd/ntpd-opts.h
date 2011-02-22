@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  February 21, 2011 at 09:18:28 AM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  February 22, 2011 at 01:17:01 AM by AutoGen 5.11.6
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -352,7 +352,7 @@ typedef enum {
                 ntpdOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdOptions.pUsageProc)(&ntpdOptions, c)
-/* extracted from /usr/local/gnu/share/autogen/opthead.tpl near line 435 */
+/* extracted from opthead.tlib near line 435 */
 
 /* * * * * *
  *

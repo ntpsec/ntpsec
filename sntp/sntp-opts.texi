@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  February 21, 2011 at 09:18:24 AM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  February 22, 2011 at 01:16:55 AM by AutoGen 5.11.6
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -119,8 +119,8 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                                 - disabled as --no-load-opts
                                 - may appear multiple times
 
-Options are specified by doubled hyphens and their name
-or by a single hyphen and the flag character.
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
 
 
 
@@ -129,9 +129,9 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
 
-sntp implements the Simple Network Time Protocol and is used to query
-an NTP or SNTP server and either display the time or set the local
-system's time (given suitable privilege).
+sntp implements the Simple Network Time Protocol and is used to query an
+NTP or SNTP server and either display the time or set the local system's
+time (given suitable privilege).
 
 It can be run interactively from the command line or as a cron job.
 

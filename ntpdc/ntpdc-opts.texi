@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  February 21, 2011 at 09:20:08 AM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  February 22, 2011 at 01:19:04 AM by AutoGen 5.11.6
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -97,30 +97,23 @@ USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
                                 - disabled as --no-load-opts
                                 - may appear multiple times
 
-Options are specified by doubled hyphens and their name
-or by a single hyphen and the flag character.
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
 
 The following option preset mechanisms are supported:
  - reading file $HOME/.ntprc
  - reading file ./.ntprc
  - examining environment variables named NTPDC_*
 
-The
-[= prog-name =]
-utility program is used to query an NTP daemon about its
-current state and to request changes in that state.
-It uses NTP mode 7 control message formats described in the source code.
-The program may
+The [= prog-name =] utility program is used to query an NTP daemon about
+its current state and to request changes in that state.  It uses NTP mode
+7 control message formats described in the source code.  The program may
 be run either in interactive mode or controlled using command line
-arguments.
-Extensive state and statistics information is available
-through the
-[= prog-name =]
-interface.
-In addition, nearly all the
-configuration options which can be specified at startup using
-ntpd's configuration file may also be specified at run time using
-[= prog-name =] .
+arguments.  Extensive state and statistics information is available
+through the [= prog-name =] interface.  In addition, nearly all the
+configuration options which can be specified at startup using ntpd's
+configuration file may also be specified at run time using [= prog-name =]
+.
 
 please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
