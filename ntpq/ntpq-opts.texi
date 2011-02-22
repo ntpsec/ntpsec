@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  February 21, 2011 at 09:20:20 AM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  February 22, 2011 at 01:19:24 AM by AutoGen 5.11.6
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -79,22 +79,20 @@ USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
                                 - disabled as --no-load-opts
                                 - may appear multiple times
 
-Options are specified by doubled hyphens and their name
-or by a single hyphen and the flag character.
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
 
 The following option preset mechanisms are supported:
  - reading file $HOME/.ntprc
  - reading file ./.ntprc
  - examining environment variables named NTPQ_*
 
-The
-[= prog-name =]
-utility program is used to query NTP servers which
-implement the standard NTP mode 6 control message formats defined
-in Appendix B of the NTPv3 specification RFC1305, requesting
-information about current state and/or changes in that state.
-The same formats are used in NTPv4, although some of the
-variables have changed and new ones added.
+The [= prog-name =] utility program is used to query NTP servers which
+implement the standard NTP mode 6 control message formats defined in
+Appendix B of the NTPv3 specification RFC1305, requesting information
+about current state and/or changes in that state.  The same formats are
+used in NTPv4, although some of the variables have changed and new ones
+added.
 
 please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
