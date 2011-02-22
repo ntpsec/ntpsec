@@ -2,7 +2,7 @@
 /*
  * \file usage.c
  *
- * Time-stamp:      "2010-12-18 11:41:41 bkorb"
+ * Time-stamp:      "2011-02-01 14:42:37 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -16,7 +16,7 @@
 /*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2010 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -274,13 +274,11 @@ print_usage_details(tOptions * opts, int exit_code)
     case 0:                 fputs(zOptsOnly, option_usage_fp); break;
     }
 
-    if ((opts->fOptSet & OPTPROC_NUM_OPT) != 0) {
+    if ((opts->fOptSet & OPTPROC_NUM_OPT) != 0)
         fputs(zNumberOpt, option_usage_fp);
-    }
 
-    if ((opts->fOptSet & OPTPROC_REORDER) != 0) {
+    if ((opts->fOptSet & OPTPROC_REORDER) != 0)
         fputs(zReorder, option_usage_fp);
-    }
 
     if (opts->pzExplain != NULL)
         fputs(opts->pzExplain, option_usage_fp);
@@ -292,7 +290,13 @@ print_usage_details(tOptions * opts, int exit_code)
     if (exit_code == EXIT_SUCCESS)
         prt_prog_detail(opts);
 
-    if (opts->pzBugAddr != NULL)
+    /*
+     * Give bug notification preference to the packager information
+     */
+    if (HAS_pzPkgDataDir(opts) && (opts->pzPackager != NULL))
+        fputs(opts->pzPackager, option_usage_fp);
+
+    else if (opts->pzBugAddr != NULL)
         fprintf(option_usage_fp, zPlsSendBugs, opts->pzBugAddr);
 
     fflush(option_usage_fp);

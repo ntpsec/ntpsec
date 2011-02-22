@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  January  3, 2011 at 09:18:39 PM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  February 22, 2011 at 12:29:02 AM by AutoGen 5.11.6
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -38,7 +38,7 @@ extern "C" {
                 cannot ever change your mind. */
 tSCC zCopyright[] =
        "ntpsnmpd copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from ../include/copyright.def near line 8 */
+/* extracted from copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
@@ -267,7 +267,7 @@ static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 #define zDetail         NULL
 static char const zFullVersion[] = NTPSNMPD_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
+/* extracted from optcode.tlib near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -282,6 +282,22 @@ static char const zFullVersion[] = NTPSNMPD_FULL_VERSION;
 #define ntpsnmpd_short_usage NULL
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
+#endif
+
+#ifndef  WITH_PACKAGER
+# define ntpsnmpd_packager_info NULL
+#else
+static char const ntpsnmpd_packager_info[] =
+    "Packaged by " WITH_PACKAGER
+
+# ifdef WITH_PACKAGER_VERSION
+        " ("WITH_PACKAGER_VERSION")"
+# endif
+
+# ifdef WITH_PACKAGER_BUG_REPORTS
+    "\nReport ntpsnmpd bugs to " WITH_PACKAGER_BUG_REPORTS
+# endif
+    "\n";
 #endif
 
 tOptions ntpsnmpdOptions = {
@@ -302,7 +318,7 @@ tOptions ntpsnmpdOptions = {
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */
     NULL, NULL,                 /* extensions/saved state  */
-    optionUsage,       /* usage procedure */
+    optionUsage, /* usage procedure */
     translate_option_strings,   /* translation procedure */
     /*
      *  Indexes to special options
@@ -315,7 +331,7 @@ tOptions ntpsnmpdOptions = {
     8 /* full option count */, 3 /* user option count */,
     ntpsnmpd_full_usage, ntpsnmpd_short_usage,
     NULL, NULL,
-    PKGDATADIR
+    PKGDATADIR, ntpsnmpd_packager_info
 };
 
 /*
@@ -329,7 +345,7 @@ doUsageOpt(
     (void)pOptions;
     USAGE(EXIT_SUCCESS);
 }
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
+/* extracted from optmain.tlib near line 107 */
 
 #if defined(TEST_NTPSNMPD_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -347,7 +363,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPSNMPD_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
+/* extracted from optcode.tlib near line 657 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -391,7 +407,6 @@ translate_option_strings(void)
      *  been changed by the first pass through this code.  One shot only.
      */
     if (option_usage_text.field_ct != 0) {
-
         /*
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
@@ -411,6 +426,7 @@ translate_option_strings(void)
         COERSION(pzUsageTitle);
         COERSION(pzExplain);
         COERSION(pzDetail);
+        COERSION(pzPackager);
         option_usage_text.field_ct = 0;
 
         for (ix = ntpsnmpdOptions.optCt; ix > 0; ix--, pOD++)

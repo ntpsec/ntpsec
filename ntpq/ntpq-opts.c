@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  January  3, 2011 at 09:18:23 PM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  February 22, 2011 at 12:29:01 AM by AutoGen 5.11.6
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -38,7 +38,7 @@ extern "C" {
                 cannot ever change your mind. */
 tSCC zCopyright[] =
        "ntpq copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from ../include/copyright.def near line 8 */
+/* extracted from copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
@@ -438,17 +438,15 @@ static char const * const apzHomeList[3] = {
 
 static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-static char const zDetail[389] = "\n\
-The\n\
-[= prog-name =]\n\
-utility program is used to query NTP servers which\n\
-implement the standard NTP mode 6 control message formats defined\n\
-in Appendix B of the NTPv3 specification RFC1305, requesting\n\
-information about current state and/or changes in that state.\n\
-The same formats are used in NTPv4, although some of the\n\
-variables have changed and new ones added.\n";
+static char const zDetail[384] = "\n\
+The [= prog-name =] utility program is used to query NTP servers which\n\
+implement the standard NTP mode 6 control message formats defined in\n\
+Appendix B of the NTPv3 specification RFC1305, requesting information\n\
+about current state and/or changes in that state.  The same formats are\n\
+used in NTPv4, although some of the variables have changed and new ones\n\
+added.\n";
 static char const zFullVersion[] = NTPQ_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
+/* extracted from optcode.tlib near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -463,6 +461,22 @@ static char const zFullVersion[] = NTPQ_FULL_VERSION;
 #define ntpq_short_usage NULL
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
+#endif
+
+#ifndef  WITH_PACKAGER
+# define ntpq_packager_info NULL
+#else
+static char const ntpq_packager_info[] =
+    "Packaged by " WITH_PACKAGER
+
+# ifdef WITH_PACKAGER_VERSION
+        " ("WITH_PACKAGER_VERSION")"
+# endif
+
+# ifdef WITH_PACKAGER_BUG_REPORTS
+    "\nReport ntpq bugs to " WITH_PACKAGER_BUG_REPORTS
+# endif
+    "\n";
 #endif
 
 tOptions ntpqOptions = {
@@ -482,7 +496,7 @@ tOptions ntpqOptions = {
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */
     NULL, NULL,                 /* extensions/saved state  */
-    optionUsage,       /* usage procedure */
+    optionUsage, /* usage procedure */
     translate_option_strings,   /* translation procedure */
     /*
      *  Indexes to special options
@@ -495,7 +509,7 @@ tOptions ntpqOptions = {
     14 /* full option count */, 9 /* user option count */,
     ntpq_full_usage, ntpq_short_usage,
     NULL, NULL,
-    PKGDATADIR
+    PKGDATADIR, ntpq_packager_info
 };
 
 /*
@@ -519,11 +533,11 @@ doUsageOpt(
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from ../include/debug-opt.def, line 27 */
+    /* extracted from debug-opt.def, line 27 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPQ_OPTS) */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
+/* extracted from optmain.tlib near line 107 */
 
 #if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -541,7 +555,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
+/* extracted from optcode.tlib near line 657 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -585,7 +599,6 @@ translate_option_strings(void)
      *  been changed by the first pass through this code.  One shot only.
      */
     if (option_usage_text.field_ct != 0) {
-
         /*
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
@@ -605,6 +618,7 @@ translate_option_strings(void)
         COERSION(pzUsageTitle);
         COERSION(pzExplain);
         COERSION(pzDetail);
+        COERSION(pzPackager);
         option_usage_text.field_ct = 0;
 
         for (ix = ntpqOptions.optCt; ix > 0; ix--, pOD++)

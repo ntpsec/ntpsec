@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  January  3, 2011 at 09:18:50 PM by AutoGen 5.11.6pre7
+ *  It has been AutoGen-ed  February 22, 2011 at 12:29:04 AM by AutoGen 5.11.6
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -39,7 +39,7 @@ extern "C" {
                 cannot ever change your mind. */
 tSCC zCopyright[] =
        "ntp-keygen copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from ../include/copyright.def near line 8 */
+/* extracted from copyright.def near line 8 */
 ;
 tSCC zCopyrightNotice[24] =
 "see html/copyright.html";
@@ -737,11 +737,11 @@ static char const * const apzHomeList[3] = {
 
 static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-static char const zDetail[98] = "\n\
-If there is no new host key, look for an existing one.\n\
-If one is not found, create it.\n";
+static char const zDetail[99] = "\n\
+If there is no new host key, look for an existing one.  If one is not\n\
+found, create it.\n";
 static char const zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 504 */
+/* extracted from optcode.tlib near line 504 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -756,6 +756,22 @@ static char const zFullVersion[] = NTP_KEYGEN_FULL_VERSION;
 #define ntp_keygen_short_usage NULL
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
+#endif
+
+#ifndef  WITH_PACKAGER
+# define ntp_keygen_packager_info NULL
+#else
+static char const ntp_keygen_packager_info[] =
+    "Packaged by " WITH_PACKAGER
+
+# ifdef WITH_PACKAGER_VERSION
+        " ("WITH_PACKAGER_VERSION")"
+# endif
+
+# ifdef WITH_PACKAGER_BUG_REPORTS
+    "\nReport ntp_keygen bugs to " WITH_PACKAGER_BUG_REPORTS
+# endif
+    "\n";
 #endif
 
 tOptions ntp_keygenOptions = {
@@ -776,7 +792,7 @@ tOptions ntp_keygenOptions = {
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */
     NULL, NULL,                 /* extensions/saved state  */
-    optionUsage,       /* usage procedure */
+    optionUsage, /* usage procedure */
     translate_option_strings,   /* translation procedure */
     /*
      *  Indexes to special options
@@ -789,7 +805,7 @@ tOptions ntp_keygenOptions = {
     23 /* full option count */, 18 /* user option count */,
     ntp_keygen_full_usage, ntp_keygen_short_usage,
     NULL, NULL,
-    PKGDATADIR
+    PKGDATADIR, ntp_keygen_packager_info
 };
 
 /*
@@ -813,7 +829,7 @@ doUsageOpt(
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from ../include/debug-opt.def, line 27 */
+    /* extracted from debug-opt.def, line 27 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTP_KEYGEN_OPTS) */
@@ -869,7 +885,7 @@ doOptModulus(tOptions* pOptions, tOptDesc* pOptDesc)
     pOptDesc->optArg.argInt = val;
 }
 #endif /* defined OPENSSL */
-/* extracted from /usr/local/gnu/share/autogen/optmain.tpl near line 107 */
+/* extracted from optmain.tlib near line 107 */
 
 #if defined(TEST_NTP_KEYGEN_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -887,7 +903,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTP_KEYGEN_OPTS */
-/* extracted from /usr/local/gnu/share/autogen/optcode.tpl near line 641 */
+/* extracted from optcode.tlib near line 657 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -931,7 +947,6 @@ translate_option_strings(void)
      *  been changed by the first pass through this code.  One shot only.
      */
     if (option_usage_text.field_ct != 0) {
-
         /*
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
@@ -951,6 +966,7 @@ translate_option_strings(void)
         COERSION(pzUsageTitle);
         COERSION(pzExplain);
         COERSION(pzDetail);
+        COERSION(pzPackager);
         option_usage_text.field_ct = 0;
 
         for (ix = ntp_keygenOptions.optCt; ix > 0; ix--, pOD++)

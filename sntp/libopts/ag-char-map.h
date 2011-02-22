@@ -1,10 +1,10 @@
 /*
- *   Character mapping generated 12/18/10 12:13:30
+ *   Character mapping generated 02/17/11 16:58:35
  *
  *  This file contains the character classifications
  *  used by AutoGen and AutoOpts for identifying tokens.
  *  This file is part of AutoGen.
- *  AutoGen Copyright (c) 1992-2010 by Bruce Korb - all rights reserved
+ *  AutoGen Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
  *  AutoGen is free software: you can redistribute it and/or modify it under the
  *  terms of the GNU General Public License as published by the Free Software
  *  Foundation, either version 3 of the License, or (at your option) any later
@@ -77,7 +77,7 @@
 //   used by AutoGen and AutoOpts for identifying tokens.
 // 
 //   This file is part of AutoGen.
-//   AutoGen Copyright (c) 1992-2010 by Bruce Korb - all rights reserved
+//   AutoGen Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
 // 
 //   AutoGen is free software: you can redistribute it and/or modify it under the
 //   terms of the GNU General Public License as published by the Free Software

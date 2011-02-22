@@ -2,7 +2,7 @@
 /**
  * \file autoopts.c
  *
- *  Time-stamp:      "2010-12-18 12:09:04 bkorb"
+ *  Time-stamp:      "2011-01-06 12:44:21 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -11,7 +11,7 @@
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2010 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -805,8 +805,9 @@ nextOption(tOptions* pOpts, tOptState* pOptState)
  *  line arguments.
  */
 
-/*
- *  doImmediateOpts - scan the command line for immediate action options
+/**
+ *  scan the command line for immediate action options.
+ *  This is only called the first time through.
  */
 LOCAL tSuccess
 doImmediateOpts(tOptions* pOpts)
@@ -822,65 +823,68 @@ doImmediateOpts(tOptions* pOpts)
         tOptState optState = OPTSTATE_INITIALIZER(PRESET);
 
         switch (nextOption(pOpts, &optState)) {
-        case FAILURE: goto optionsDone;
+        case FAILURE: goto   failed_option;
         case PROBLEM: return SUCCESS; /* no more args */
         case SUCCESS: break;
         }
 
         /*
-         *  IF this *is* an immediate-attribute option, then do it.
+         *  IF this is an immediate-attribute option, then do it.
          */
         if (! DO_IMMEDIATELY(optState.flags))
             continue;
 
         if (! SUCCESSFUL(handle_opt(pOpts, &optState)))
             break;
-    } optionsDone:;
+    } failed_option:;
 
     if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
         (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
+
     return FAILURE;
 }
 
-
+/**
+ * Process all the options from our current position onward.  (This allows
+ * interspersed options and arguments for the few non-standard programs that
+ * require it.)  Thus, do not rewind option indexes because some programs
+ * choose to re-invoke after a non-option.
+ */
 LOCAL tSuccess
 doRegularOpts(tOptions* pOpts)
 {
-    /*
-     *  Now, process all the options from our current position onward.
-     *  (This allows interspersed options and arguments for the few
-     *  non-standard programs that require it.)
-     */
     for (;;) {
         tOptState optState = OPTSTATE_INITIALIZER(DEFINED);
 
         switch (nextOption(pOpts, &optState)) {
-        case FAILURE: goto optionsDone;
+        case FAILURE: goto   failed_option;
         case PROBLEM: return SUCCESS; /* no more args */
         case SUCCESS: break;
         }
 
         /*
-         *  IF this is not being processed normally (i.e. is immediate action)
+         *  IF this is an immediate action option,
          *  THEN skip it (unless we are supposed to do it a second time).
          */
         if (! DO_NORMALLY(optState.flags)) {
             if (! DO_SECOND_TIME(optState.flags))
                 continue;
-            optState.pOD->optOccCt--; /* don't count last time */
+            optState.pOD->optOccCt--; /* don't count this repetition */
         }
 
         if (! SUCCESSFUL(handle_opt(pOpts, &optState)))
             break;
-    } optionsDone:;
+    } failed_option:;
+
     if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
         (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
+
     return FAILURE;
 }
 
 
-/*
- *  doPresets - check for preset values from a config file or the envrionment
+/**
+ *  check for preset values from a config files or envrionment variables
  */
 static tSuccess
 doPresets(tOptions* pOpts)
