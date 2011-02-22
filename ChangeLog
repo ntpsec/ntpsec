@@ -1,5 +1,6 @@
 * [Bug 1832] ntpdate doesn't allow timeout > 2s.
 * [Bug 1833] The checking sem_timedwait() fails without -pthread.
+* ElectricFence was suffering bitrot - remove it.  valgrind seems better.
 * Enable all relevant automake warnings.
 * Correct Solaris 2.1x PTHREAD_ONCE_INIT extra braces test to avoid
   triggering warnings due to excess braces.

@@ -2815,29 +2815,6 @@ case "$ntp_autokey" in
 esac
 AC_MSG_RESULT([$ntp_autokey])
 
-AC_MSG_CHECKING([if we want to compile with ElectricFence])
-AC_ARG_WITH(
-    [electricfence],
-    [AS_HELP_STRING(
-	[--with-electricfence],
-	[- compile with ElectricFence malloc debugger]
-    )],
-    [ans=$withval],
-    [ans=no]
-)
-case "$ans" in
- no) ;;
- *)
-    LIBS="$LIBS \${top_builddir}/ElectricFence/libefence.a"
-    EF_PROGS="eftest tstheap"
-    AC_SUBST([EF_PROGS])
-    EF_LIBS=libefence.a
-    AC_SUBST([EF_LIBS])
-    ans=yes
-    ;;
-esac
-AC_MSG_RESULT([$ans])
-
 AC_SUBST([MAKE_CHECK_LAYOUT])
 AC_MSG_CHECKING([if we want to run check-layout])
 case "$cross_compiling$PATH_PERL" in
@@ -4056,7 +4033,6 @@ AC_DEFINE_DIR([NTP_KEYSDIR], [sysconfdir],
     [Default location of crypto key info])
 
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([ElectricFence/Makefile])
 AC_CONFIG_FILES([adjtimed/Makefile])
 AC_CONFIG_FILES([clockstuff/Makefile])
 AC_CONFIG_FILES([include/Makefile])

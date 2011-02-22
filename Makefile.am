@@ -5,7 +5,6 @@ NULL =
 SUBDIRS = 		\
 	scripts 	\
 	include 	\
-	ElectricFence	\
 	libntp		\
 	sntp		\
 	libparse	\
