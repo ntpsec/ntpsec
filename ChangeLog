@@ -1,3 +1,4 @@
+(4.2.7p132) 2011/02/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1832] ntpdate doesn't allow timeout > 2s.
 * [Bug 1833] The checking sem_timedwait() fails without -pthread.
 * ElectricFence was suffering bitrot - remove it.  valgrind works well.
