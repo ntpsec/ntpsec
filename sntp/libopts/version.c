@@ -1,6 +1,6 @@
 
 /*
- * Time-stamp:      "2010-09-05 05:53:20 bkorb"
+ * Time-stamp:      "2011-02-01 13:20:14 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -9,7 +9,7 @@
 /*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2010 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -27,11 +27,6 @@
  *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
-
-/* = = = START-STATIC-FORWARD = = = */
-static void
-printVersion(tOptions* pOpts, tOptDesc* pOD, FILE* fp);
-/* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  optionVersion
  *
@@ -51,9 +46,8 @@ optionVersion(void)
     return zVersion;
 }
 
-
 static void
-printVersion(tOptions* pOpts, tOptDesc* pOD, FILE* fp)
+print_ver(tOptions* pOpts, tOptDesc* pOD, FILE* fp)
 {
     char swCh;
 
@@ -103,7 +97,10 @@ printVersion(tOptions* pOpts, tOptDesc* pOD, FILE* fp)
         }
 
         fprintf(fp, zAO_Ver, optionVersion());
-        if (pOpts->pzBugAddr != NULL)
+
+        if (HAS_pzPkgDataDir(pOpts) && (pOpts->pzPackager != NULL))
+            fputs(pOpts->pzPackager, fp);
+        else if (pOpts->pzBugAddr != NULL)
             fprintf(fp, zPlsSendBugs, pOpts->pzBugAddr);
         break;
 
@@ -133,7 +130,7 @@ printVersion(tOptions* pOpts, tOptDesc* pOD, FILE* fp)
 void
 optionPrintVersion(tOptions*  pOpts, tOptDesc*  pOD)
 {
-    printVersion(pOpts, pOD, stdout);
+    print_ver(pOpts, pOD, stdout);
 }
 
 /*=export_func  optionVersionStderr
@@ -149,7 +146,7 @@ optionPrintVersion(tOptions*  pOpts, tOptDesc*  pOD)
 void
 optionVersionStderr(tOptions*  pOpts, tOptDesc*  pOD)
 {
-    printVersion(pOpts, pOD, stderr);
+    print_ver(pOpts, pOD, stderr);
 }
 
 /*
