@@ -384,11 +384,12 @@ case "$have_pthreads" in
 	;;
      *-solaris*)
 	AC_DEFINE([_POSIX_PTHREAD_SEMANTICS], [1])
-	AC_CHECK_FUNC(
-	    [pthread_setconcurrency],
-	    [AC_DEFINE([CALL_PTHREAD_SETCONCURRENCY], [1],
-		       [why not HAVE_P_S?])]
-	)
+	AC_CHECK_FUNCS([pthread_setconcurrency])
+	case "$ac_cv_func_pthread_setconcurrency" in
+	 yes)
+	    AC_DEFINE([CALL_PTHREAD_SETCONCURRENCY], [1],
+		      [why not HAVE_P_S?])
+	esac
 	;;
      *-sco-sysv*uw*|*-*-sysv*UnixWare*|*-*-sysv*OpenUNIX*)
 	AC_DEFINE([HAVE_UNIXWARE_SIGWAIT], [1], [deviant sigwait?])
@@ -405,7 +406,7 @@ case "$have_pthreads" in
      *-solaris2.1[[0-9]])
 	AC_CACHE_CHECK(
 	    [if extra braces are needed for PTHREAD_ONCE_INIT],
-	    [ntp_cv_brace_pthread_once_init],
+	    [ntp_cv_braces_around_pthread_once_init],
 	    [AC_COMPILE_IFELSE(
 		[AC_LANG_PROGRAM(
 		    [[
@@ -413,14 +414,14 @@ case "$have_pthreads" in
 		    ]],
 		    [[
 		        static pthread_once_t once_test =
-						  { PTHREAD_ONCE_INIT };
+						PTHREAD_ONCE_INIT;
 		    ]]
 		)],
-		[ntp_cv_brace_pthread_once_init=yes],
-		[ntp_cv_brace_pthread_once_init=no]
+		[ntp_cv_braces_around_pthread_once_init=no],
+		[ntp_cv_braces_around_pthread_once_init=yes]
 	    )]
 	)
-	case "$ntp_cv_brace_pthread_once_init" in
+	case "$ntp_cv_braces_around_pthread_once_init" in
 	 yes)
 	    hack_shutup_pthreadonceinit=yes
 	esac

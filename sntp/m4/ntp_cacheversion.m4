@@ -59,11 +59,13 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 		# Parent configure just created cache from empty,
 		# flushing would be counterproductive.
 		ntp_cache_flush=0;
+		;;
 	    esac
 	esac
 	;;
      *)
 	# configure cache version mismatches config.cache version
+	;;
     esac
     
     case "$ntp_cache_flush" in
@@ -100,7 +102,12 @@ AC_DEFUN_ONCE([NTP_CACHEVERSION], [
 	
 	for c_varname in $c_varname_list
 	do
-	    AS_UNSET([$c_varname])
+	    dnl AS_UNSET([$c_varname])
+	    dnl With Autoconf 2.61 and automake 1.10.3, using AS_UNSET
+	    dnl here triggers generation of a syntax error in configure.
+	    dnl Once we require a newer Autoconf we can revert to the
+	    dnl AS_UNSET code.
+	    { eval $c_varname=; unset $c_varname; }
 	done
 	
 	AC_MSG_NOTICE([[$cache_file saved by another version, ignored.]])
