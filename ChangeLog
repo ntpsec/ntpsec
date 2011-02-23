@@ -1,4 +1,7 @@
 * [Bug 1834] ntpdate 4.2.7p131 aborts with assertion failure.
+* [Bug 1837] Build fails on Win7 due to regedit requiring privilege.
+* Provide fallback definitions for GetAdaptersAddresses() for Windows
+  build environments lacking iphlpapi.h.
 * Move sntp last in top-level Makefile.am SUBDIRS so that the libevent
   tearoff (if required) and sntp are compiled after the rest.
 * Use a single set of Automake options for each package in configure.ac
@@ -7,6 +10,10 @@
   sntp/version was out-of-date relative to phony target FRC.version.
 * Do not cache paths to perl, test, or pkg-config, searching the PATH
   at configure time is worth it to pick up tool updates.
+* Rename file containing 1.xxxx ChangeSet revision from version to
+  scm-rev to avoid invoking GNU make implicit rules attempting to
+  compile version.c into version.  Problem was with sntp/version.o
+  during make distcheck after fix for spurious sntp rebuilds.
 (4.2.7p132) 2011/02/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1832] ntpdate doesn't allow timeout > 2s.
 * [Bug 1833] The checking sem_timedwait() fails without -pthread.
