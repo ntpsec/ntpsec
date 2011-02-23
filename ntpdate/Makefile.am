@@ -1,17 +1,17 @@
-NULL=
+NULL =
 
-BUILT_SOURCES= check-libntp
-CLEANFILES=
+BUILT_SOURCES =
+CLEANFILES =
 
 if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS=	ntpdate
+bin_PROGRAMS = ntpdate
 else
-sbin_PROGRAMS=	ntpdate
+sbin_PROGRAMS = ntpdate
 endif
 
-EXTRA_PROGRAMS=	ntptimeset
+EXTRA_PROGRAMS = ntptimeset
 
-ntptimeset_SOURCES=	ntptimeset.c ntptime_config.c
+ntptimeset_SOURCES = ntptimeset.c ntptime_config.c
 
 AM_CFLAGS = $(CFLAGS_NTP)
 
@@ -27,14 +27,6 @@ noinst_HEADERS=	ntpdate.h
 
 $(PROGRAMS): $(LDADD)
 
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-FRC:
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
 
@@ -43,5 +35,6 @@ version.o: $(ntpdate_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/ver
 	$(COMPILE) -c version.c
 
 include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/sntp/check-libntp.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

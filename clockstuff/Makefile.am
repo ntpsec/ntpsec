@@ -1,7 +1,7 @@
 noinst_PROGRAMS = @PROPDELAY@ @CHUTEST@ @CLKTEST@
 EXTRA_PROGRAMS = propdelay chutest clktest
 
-BUILT_SOURCES =	check-libntp clktest-opts.c clktest-opts.h
+BUILT_SOURCES =	clktest-opts.c clktest-opts.h
 EXTRA_DIST = clktest-opts.def
 
 clktest_SOURCES = clktest.c clktest-opts.c clktest-opts.h
@@ -31,18 +31,9 @@ $(srcdir)/clktest-opts.h: $(srcdir)/clktest-opts.c
 $(srcdir)/clktest-opts.c: $(srcdir)/clktest-opts.def $(std_def_list)
 	$(run_ag) clktest-opts.def
 
-## chutest$(EXEEXT): ../libntp/libntp.a
-## clktest$(EXEEXT): ../libntp/libntp.a
-
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-FRC:
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 CLEANFILES =
 
+include $(top_srcdir)/sntp/check-libntp.mf
+include $(top_srcdir)/check-libopts.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

@@ -1,6 +1,4 @@
 NULL =
-AUTOMAKE_OPTIONS = 
-ETAGS_ARGS = $(srcdir)/Makefile.am
 
 SUBDIRS = isc
 

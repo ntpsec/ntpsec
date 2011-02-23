@@ -1764,7 +1764,7 @@ init_io(void)
 		 */
 		if (check_ntp_port_in_use) {
 			ZERO(addr);
-			INSIST(res->ai_addrlen < sizeof(addr));
+			INSIST(res->ai_addrlen <= sizeof(addr));
 			memcpy(&addr, res->ai_addr, res->ai_addrlen);
 			rc = bind(fd[nbsock], &addr.sa, SOCKLEN(&addr));
 			if (rc < 0) {

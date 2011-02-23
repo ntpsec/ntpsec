@@ -14,6 +14,7 @@ AC_ARG_WITH(
 case "$try_gtest" in
  yes)
     AC_PATH_PROG([GTEST_CONFIG], [gtest-config])
+    AS_UNSET([ac_cv_path_GTEST_CONFIG])
     case x${GTEST_CONFIG} in
      x) ;;
      *)

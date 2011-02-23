@@ -25,7 +25,7 @@ ntp_keygen_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LCRYPTO)
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
 
 EXTRA_DIST=	ntp-keygen-opts.def ntp-keygen.1 ntp-keygen-opts.texi ntp-keygen-opts.menu
-BUILT_SOURCES=	check-libntp ntp-keygen-opts.c ntp-keygen-opts.h
+BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
 DISTCLEANFILES=	.version version.c
 noinst_DATA=	$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu
@@ -60,13 +60,6 @@ $(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 jitter_SOURCES=	jitter.c jitter.h
 jitter_LDADD=
 
-FRC:
-
-check-libntp: FRC ../libntp/libntp.a
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 kern.o: kern.c
 	$(COMPILE) -DHAVE_TIMEX_H -c kern.c
 
@@ -80,5 +73,7 @@ version.o: $(ntp_keygen_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/
 	$(COMPILE) -c version.c
 
 include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/sntp/check-libntp.mf
+include $(top_srcdir)/check-libopts.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

@@ -8,7 +8,7 @@ endif
 
 EXTRA_PROGRAMS=	ntpdc-layout
 EXTRA_DATA=	check-layout
-BUILT_SOURCES=	check-libntp @MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
+BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
 
 AM_CFLAGS = $(CFLAGS_NTP)
 
@@ -69,14 +69,6 @@ check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 
 $(PROGRAMS): version.o
 
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-FRC:
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
 
@@ -90,5 +82,7 @@ nl.c: nl_in.c nl.pl Makefile.am ../config.h ../include/ntp_request.h ntpdc.h
 	$(CC) -E $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(srcdir)/nl_in.c | ./nl.pl > nl.c
 
 include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/check-libopts.mf
+include $(top_srcdir)/sntp/check-libntp.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

@@ -14,27 +14,13 @@ dnl    NTP_LIBEVENT_CHECK_NOBUILD([2.0.9], [sntp/libevent])
 dnl    NTP_LIBEVENT_CHECK
 dnl
 AC_DEFUN([NTP_LIBEVENT_CHECK_NOBUILD], [
+AC_REQUIRE([NTP_PKG_CONFIG])dnl
 
-ntp_pkgconfig_min_version='0.15.0'
 ntp_libevent_min_version=m4_default([$1], [2.0.9])
 ntp_libevent_tearoff=m4_default([$2], [libevent])
 
 AC_SUBST([CPPFLAGS_LIBEVENT])
 AC_SUBST([LDADD_LIBEVENT])
-
-AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
-# Make sure pkg-config is recent enough
-case "$PKG_CONFIG" in
- /*)
-    AC_MSG_CHECKING([if pkg-config is at least version $ntp_pkgconfig_min_version])
-    if $PKG_CONFIG --atleast-pkgconfig-version $ntp_pkgconfig_min_version; then
-	AC_MSG_RESULT([yes])
-    else
-	AC_MSG_RESULT([no])
-	PKG_CONFIG=""
-    fi
-    ;;
-esac
 
 AC_ARG_ENABLE(
     [local-libevent],

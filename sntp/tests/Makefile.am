@@ -88,5 +88,17 @@ if !NTP_CROSSCOMPILE
 TESTS += $(check_PROGRAMS)
 endif
 
+## check-libntp.mf - automake fragment
+## slightly adapted for deeper directory
+
+BUILT_SOURCES	+= check-libntp
+CLEANFILES	+= check-libntp
+
+check-libntp: ../../libntp/libntp.a
+	@echo stamp > $@
+
+../../libntp/libntp.a:
+	cd ../../libntp && $(MAKE) libntp.a
+
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

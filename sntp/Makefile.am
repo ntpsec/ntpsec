@@ -92,10 +92,8 @@ DISTCLEANFILES =			\
 	$(NULL)
 
 EXTRA_DIST =				\
-	bincheck.mf			\
 	$(srcdir)/COPYRIGHT		\
 	deps-ver			\
-	depsver.mf			\
 	@NTP_FORCE_LIBEVENT_DIST@	\
 	sntp-opts.def			\
 	sntp-opts.menu			\
@@ -109,12 +107,11 @@ EXTRA_DIST =				\
 	$(NULL)
 
 BUILT_SOURCES =				\
-	check-libntp			\
 	$(srcdir)/COPYRIGHT		\
 	libtool				\
 	$(srcdir)/sntp-opts.c		\
 	$(srcdir)/sntp-opts.h		\
-	$(srcdir)/version		\
+	check-version			\
 	$(srcdir)/include/version.def	\
 	$(srcdir)/m4/version.m4		\
 	$(srcdir)/include/version.texi	\
@@ -137,7 +134,7 @@ noinst_DATA=				\
 	$(srcdir)/sntp-opts.menu	\
 	$(NULL)
 
-FRC FRC.version:
+FRC:
 	@: do-nothing action to prevent default SCCS get
 	@: FRC "force" depends on nothing and is not a file, so is
 	@: always out-of-date causing targets which depend on it to
@@ -147,8 +144,11 @@ FRC FRC.version:
 $(PROGRAMS): version.o
 
 ## We probably need something about libevent, too
-version.o: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/version
-	env CSET=`cat $(top_srcdir)/version` ../$(top_builddir)/scripts/mkver sntp
+## That is probably not possible since LDADD_LIBEVENT may be
+## non-file "-levent_core".
+
+version.o: $(sntp_OBJECTS) ../libntp/libntp.a $(srcdir)/version
+	env CSET=`cat $(srcdir)/version` $(top_builddir)/../scripts/mkver sntp
 	$(COMPILE) -c version.c
 
 check-autogen-version.def: FRC
@@ -166,13 +166,11 @@ $(srcdir)/autogen-version.def:
 built-sources-only: $(BUILT_SOURCES)
 	@: do-nothing action to avoid default SCCS get
 
-# HMS: The next bit is still suboptimal.  If bk is present but this NTP
-# repo is not a bk repo, we'll get an error message from the prs command.
-# Unfortunately, I haven't found the necessary magic to redirect this error
-# output to /dev/null under ancient/unique shells like the one Ultrix uses.
-# We'll also get an error if srcdir or version is unwritable.
-$(srcdir)/version: FRC.version
-	-test -r $(srcdir)/../SCCS/s.ChangeSet &&				\
+## HMS: The next bit is still suboptimal.  We'll get an error if this is
+## a bk repo and srcdir or version is unwritable.
+
+check-version:
+	-test -r $(srcdir)/../SCCS/s.ChangeSet &&		\
 	    (bk version) >/dev/null 2>&1 &&			\
 	    cd $(srcdir)/.. &&					\
 	    x=`bk -R prs -hr+ -nd:I: ChangeSet` &&		\
@@ -227,12 +225,6 @@ $(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def 
 $(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )
 
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 libtool: $(LIBTOOL_DEPS)
 	./config.status --recheck
 
@@ -243,5 +235,7 @@ dist-hook: libevent-dist-hook
 	@: do-nothing action to avoid default SCCS get
 
 include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/check-libntp.mf
+include $(top_srcdir)/check-libopts.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

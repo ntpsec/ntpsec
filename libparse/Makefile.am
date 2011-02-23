@@ -1,10 +1,10 @@
 NULL=
-BUILT_SOURCES = check-libntp
+BUILT_SOURCES =
+CLEANFILES =
 noinst_LIBRARIES = @MAKE_LIBPARSE@ @MAKE_LIBPARSE_KERNEL@
 EXTRA_LIBRARIES = libparse.a libparse_kernel.a
 EXTRA_PROGRAMS = parsestreams parsesolaris
 noinst_PROGRAMS = @MAKE_PARSEKMODULE@
-CLEANFILES =
 
 K_CFLAGS = -DPARSESTREAM -DNTP_NEED_BOPS
 
@@ -125,19 +125,16 @@ parsestreams.loadable_module.o: $(parsestreams_OBJECTS) libparse_kernel.a ../lib
 parse: $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 	$(LD) -r -o $@ $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-FRC:
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 parsesolaris.o: sys/systm.h
 
 sys/systm.h:
 	-mkdir sys
 	sed -e '/ffs(.*)/d' < /usr/include/sys/systm.h > sys/systm.h
 
+## check-libparse is invoked by ntpd/Makefile.am
+check-libparse: $(noinst_LIBRARIES)
+	@: do-nothing action to avoid default SCCS get
+
+include $(top_srcdir)/sntp/check-libntp.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

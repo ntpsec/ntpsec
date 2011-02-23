@@ -1,6 +1,7 @@
 dnl ######################################################################
 dnl OpenSSL support shared by top-level and sntp/configure.ac
 AC_DEFUN([NTP_OPENSSL], [
+AC_REQUIRE([NTP_PKG_CONFIG])dnl
 
 LCRYPTO=
 AC_SUBST([LCRYPTO])
@@ -14,31 +15,19 @@ AC_ARG_WITH(
     [ans=$withval],
     [ans=x]
 )
+need_dash_r=
 case "$ans" in
- no)
-    need_dash_r=
-    ;;
  yes)
     need_dash_r=1
     ;;
-esac
-# HMS: Why isn't this $build?
-# Well, that depends on if we need this for the build toolchain or
-# for info in the host executable...
-# I still have no idea which way this should go, but nobody has complained.
-case "$host" in
- *-*-netbsd*)
-    case "$need_dash_r" in
-     no) ;;
-     *)  need_dash_r=1
-	 ;;
-    esac
-    ;;
- *-*-solaris*)
-    case "$need_dash_r" in
-     no) ;;
-     *)  need_dash_r=1
-	 ;;
+ x)
+    case "$host" in
+     *-*-netbsd*)
+	need_dash_r=1
+	;;
+     *-*-solaris*)
+	need_dash_r=1
+	;;
     esac
     ;;
 esac
@@ -46,8 +35,6 @@ esac
 AC_SUBST([OPENSSL])
 AC_SUBST([OPENSSL_INC])
 AC_SUBST([OPENSSL_LIB])
-
-AC_PATH_PROG([PKG_CONFIG], [pkg-config])
 
 AC_MSG_CHECKING([for openssl library directory])
 AC_ARG_WITH(

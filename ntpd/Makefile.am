@@ -1,5 +1,4 @@
 NULL=
-AUTOMAKE_OPTIONS= 
 
 if NTP_BINSUBDIR_IS_BIN
 bin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
@@ -73,7 +72,7 @@ B_S_DIST=			\
 
 BUILT_SOURCES=		\
 	$(VPHACK) 	\
-	check-libntp	\
+	$(LIBPARSE)	\
 	ntp_parser.c 	\
 	ntp_parser.h 	\
 	$(VPHACK_AFTER)	\
@@ -86,14 +85,14 @@ man_MANS=	$(srcdir)/ntpd.1
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
 # longer a reason to have ntpdbase-opts.def split off of ntpd-opts.def.
 
-LDADD_NTPD_COMMON  = @LDADD_LIBNTP@ $(LIBOPTS_LDADD) @PTHREAD_LIBS@
-LDADD_NTPD_COMMON += $(LIBM) @LCRYPTO@ @LSCF@
+LDADD_NTPD_COMMON  = @LDADD_LIBNTP@ $(LIBOPTS_LDADD) $(PTHREAD_LIBS)
+LDADD_NTPD_COMMON += $(LIBM) $(LCRYPTO) $(LSCF)
 ntpd_LDADD = $(LDADD) ../libntp/libntp.a $(LDADD_NTPD_COMMON)
 ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a $(LDADD_NTPD_COMMON)
 ntpdsim_CPPFLAGS = $(AM_CPPFLAGS) -DSIM
-check_y2k_LDADD = $(LDADD) ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
+check_y2k_LDADD = $(LDADD) ../libntp/libntp.a $(LDADD_LIBNTP) $(PTHREAD_LIBS)
 ## we don't want $(LDADD) in keyword_gen_LDADD
-keyword_gen_LDADD = ../libntp/libntp.a @LDADD_LIBNTP@ @PTHREAD_LIBS@
+keyword_gen_LDADD = ../libntp/libntp.a $(LDADD_LIBNTP) $(PTHREAD_LIBS)
 
 DISTCLEANFILES =		\
 	keyword-gen		\
@@ -120,7 +119,6 @@ EXTRA_DIST =			\
 	$(B_S_DIST)		\
 	$(NULL)
 
-ETAGS_ARGS = Makefile.am
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
@@ -135,8 +133,8 @@ std_def_list =							\
 	$(top_srcdir)/sntp/include/version.def			\
 	$(NULL)
 
-check-local: @MAKE_CHECK_Y2K@ $(CHECK_SAVECONFIG)
-	test -z "@MAKE_CHECK_Y2K@" || ./@MAKE_CHECK_Y2K@
+check-local: $(MAKE_CHECK_Y2K) $(CHECK_SAVECONFIG)
+	test -z "$(MAKE_CHECK_Y2K)" || ./$(MAKE_CHECK_Y2K)
 
 ntpd_SOURCES =			\
 	ntp_config.c		\
@@ -263,19 +261,11 @@ check-saveconfig: $(srcdir)/complete.conf compsave.conf
 	-diff $(srcdir)/complete.conf compsave.conf
 	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
 
-../libopts/libopts.la:
-	cd ../libopts && $(MAKE) libopts.la
-
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-FRC:
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
+../libntp/libntpsim.a:
+	cd ../libntp && $(MAKE) libntpsim.a
 
 ../libparse/libparse.a:
-	cd ../libparse && $(MAKE) libparse.a
+	cd ../libparse && $(MAKE) check-libparse
 
 $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
@@ -285,5 +275,7 @@ version.o: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/
 	$(COMPILE) -c version.c
 
 include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/check-libopts.mf
+include $(top_srcdir)/sntp/check-libntp.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

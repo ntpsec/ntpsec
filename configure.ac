@@ -103,6 +103,8 @@ esac
 
 dnl  we need to check for cross compile tools for vxWorks here
 AC_PROG_AWK
+AS_UNSET([ac_cv_prog_AWK])
+AC_SUBST([AWK])				dnl scripts/ntpver.in
 AC_PROG_MAKE_SET
 
 AC_SUBST([CFLAGS])
@@ -111,9 +113,16 @@ AC_SUBST([LDFLAGS])
 AC_PROG_LN_S
 AC_ISC_POSIX
 
+
 AC_PATH_PROG([PATH_PERL], [perl])
-AC_PATH_PROG([PATH_SH], [sh])
+dnl  Saving cached hardcoded paths rather than searching $PATH during a
+dnl  cached configure run is an optimization not worth the the cost of
+dnl  preventing newly-installed tools from being found.  Short-circuit
+dnl  the caching after the tests so preset overrides still work.
+AS_UNSET([ac_cv_path_PATH_PERL])
 AC_PATH_PROG([PATH_TEST], [test])
+AS_UNSET([ac_cv_path_PATH_TEST])
+AC_SUBST([CONFIG_SHELL])		dnl for scripts #!/path/to/sh
 
 AC_ARG_WITH(
     [net-snmp-config],
@@ -147,7 +156,8 @@ case "$PROG_NET_SNMP_CONFIG" in
     ;;
  *)
     AC_PATH_PROG([PATH_NET_SNMP_CONFIG], [$PROG_NET_SNMP_CONFIG])
-    ;;
+    AS_UNSET([ac_cv_path_PATH_NET_SNMP_CONFIG])
+;;
 esac
 AC_MSG_RESULT([$PATH_NET_SNMP_CONFIG])
 

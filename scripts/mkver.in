@@ -1,4 +1,4 @@
-#!@PATH_SH@
+#!@CONFIG_SHELL@
 PROG=${1-UNKNOWN}
 
 ConfStr="$PROG"

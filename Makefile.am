@@ -6,7 +6,6 @@ SUBDIRS = 		\
 	scripts 	\
 	include 	\
 	libntp		\
-	sntp		\
 	libparse	\
 	ntpd		\
 	ntpdate		\
@@ -18,6 +17,7 @@ SUBDIRS = 		\
 	clockstuff	\
 	kernel		\
 	util		\
+	sntp		\
 	tests		\
 	$(NULL)
 
@@ -51,16 +51,12 @@ EXTRA_DIST =			\
 	lib/isc			\
 	ports			\
 	\
-	bincheck.mf		\
-	depsver.mf		\
 	deps-ver		\
 	\
 	$(NULL)
 
 CLEANFILES =
 DISTCLEANFILES = .gcc-warning
-
-ETAGS_ARGS = Makefile.am configure.ac
 
 # HMS: Keep .gcc-warning first, as that way it gets printed first.
 BUILT_SOURCES =				\

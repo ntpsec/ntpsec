@@ -23,7 +23,7 @@ CLEANFILES=
 DISTCLEANFILES=	.version version.c
 ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=	ntpq-opts.def ntpq.1 ntpq-opts.texi ntpq-opts.menu
-BUILT_SOURCES=	check-libntp ntpq-opts.c ntpq-opts.h
+BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h
 man_MANS=	$(srcdir)/ntpq.1
 noinst_DATA=	$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
@@ -55,14 +55,6 @@ $(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
-check-libntp: FRC
-	cd ../libntp && $(MAKE)
-
-FRC:
-
-../libntp/libntp.a:
-	cd ../libntp && $(MAKE)
-
 $(top_srcdir)/sntp/version:
 	cd $(top_srcdir)/sntp && $(MAKE) version
 
@@ -73,5 +65,7 @@ version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/versio
 	$(COMPILE) -c version.c
 
 include $(top_srcdir)/bincheck.mf
+include $(top_srcdir)/check-libopts.mf
+include $(top_srcdir)/sntp/check-libntp.mf
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf
