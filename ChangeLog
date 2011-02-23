@@ -1,3 +1,4 @@
+(4.2.7p133) 2011/02/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1834] ntpdate 4.2.7p131 aborts with assertion failure.
 * Move sntp last in top-level Makefile.am SUBDIRS so that the libevent
   tearoff (if required) and sntp are compiled after the rest.
