@@ -215,7 +215,7 @@ $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(s
 	$(run_ag) sntp-opts.def
 
 $(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
-	$(run_ag) -Tagman1.tpl -bsntp sntp-opts.def
+	$(run_ag) -DMAN_SECTION=1 -Tagman-cmd.tpl -bsntp sntp-opts.def
 
 $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
