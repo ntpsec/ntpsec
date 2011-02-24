@@ -1,12 +1,13 @@
 #ifndef TESTS_MAIN_H
 #define TESTS_MAIN_H
 
-#include <gtest/gtest.h>
-
 #include "config.h"
 
 #include <string>
 #include <vector>
+
+#include <gtest/gtest.h>
+
 
 class ntptest : public ::testing::Test {
 public:
