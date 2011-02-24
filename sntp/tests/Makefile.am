@@ -43,7 +43,22 @@ noinst_HEADERS =		\
 
 dist_check_SCRIPTS =	test-driver
 
-EXTRA_DIST =	data
+EXTRA_DIST =				\
+	data/debug-input-lfp-bin	\
+	data/debug-input-lfp-dec	\
+	data/debug-input-lfp-hex	\
+	data/debug-input-pkt		\
+	data/key-test-ascii		\
+	data/key-test-comments		\
+	data/key-test-empty		\
+	data/key-test-hex		\
+	data/key-test-invalid-hex	\
+	data/kod-expected-multiple	\
+	data/kod-expected-single	\
+	data/kod-test-blanks		\
+	data/kod-test-correct		\
+	data/kod-test-empty		\
+	$(NULL)
 
 CLEANFILES =				\
 	data/kod-output-multiple	\

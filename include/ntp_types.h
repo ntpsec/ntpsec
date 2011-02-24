@@ -186,6 +186,32 @@ typedef u_int32 keyid_t;	/* cryptographic key ID */
 typedef u_int32 tstamp_t;	/* NTP seconds timestamp */
 
 /*
+ * Cloning malloc()'s behavior of always returning pointers suitably
+ * aligned for the strictest alignment requirement of any type is not
+ * easy to do portably, as the maximum alignment required is not
+ * exposed.  Use the size of a union of the types known to represent the
+ * strictest alignment on some platform.
+ */
+typedef union max_alignment_tag {
+	double		d;
+} max_alignment;
+
+#define MAXALIGN		sizeof(max_alignment)
+#define ALIGN_UNITS(sz)		(((sz) + MAXALIGN - 1) / MAXALIGN)
+#define ALIGNED_SIZE(sz)	(MAXALIGN * ALIGN_UNITS(sz))
+#define INC_ALIGNED_PTR(b, m)	((void *)aligned_ptr((void *)(b), m))
+
+static inline
+max_alignment *
+aligned_ptr(
+	max_alignment *	base,
+	size_t		minsize
+	)
+{
+	return base + ALIGN_UNITS((minsize < 1) ? 1 : minsize);
+}
+
+/*
  * On Unix struct sock_timeval is equivalent to struct timeval.
  * On Windows built with 64-bit time_t, sock_timeval.tv_sec is a long
  * as required by Windows' socket() interface timeout argument, while

@@ -102,7 +102,7 @@ EXTRA_DIST =				\
 	sntp.html			\
 	sntp.texi			\
 	tests_main.h			\
-	$(srcdir)/version		\
+	$(srcdir)/scm-rev		\
 	$(srcdir)/m4/version.m4		\
 	$(NULL)
 
@@ -111,7 +111,7 @@ BUILT_SOURCES =				\
 	libtool				\
 	$(srcdir)/sntp-opts.c		\
 	$(srcdir)/sntp-opts.h		\
-	check-version			\
+	check-scm-rev			\
 	$(srcdir)/include/version.def	\
 	$(srcdir)/m4/version.m4		\
 	$(srcdir)/include/version.texi	\
@@ -147,9 +147,11 @@ $(PROGRAMS): version.o
 ## That is probably not possible since LDADD_LIBEVENT may be
 ## non-file "-levent_core".
 
-version.o: $(sntp_OBJECTS) ../libntp/libntp.a $(srcdir)/version
-	env CSET=`cat $(srcdir)/version` $(top_builddir)/../scripts/mkver sntp
-	$(COMPILE) -c version.c
+version.c: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(srcdir)/scm-rev
+	env CSET=`cat $(srcdir)/scm-rev` $(top_builddir)/../scripts/mkver sntp
+	
+version.o: version.c
+	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 
 check-autogen-version.def: FRC
 	@cd $(srcdir)							\
@@ -167,15 +169,18 @@ built-sources-only: $(BUILT_SOURCES)
 	@: do-nothing action to avoid default SCCS get
 
 ## HMS: The next bit is still suboptimal.  We'll get an error if this is
-## a bk repo and srcdir or version is unwritable.
+## a bk repo and srcdir or scm-rev is unwritable.
 
-check-version:
+check-scm-rev: $(srcdir)/scm-rev
+	@: do-nothing
+
+$(srcdir)/scm-rev:
 	-test -r $(srcdir)/../SCCS/s.ChangeSet &&		\
 	    (bk version) >/dev/null 2>&1 &&			\
 	    cd $(srcdir)/.. &&					\
 	    x=`bk -R prs -hr+ -nd:I: ChangeSet` &&		\
-	    y=`cat sntp/version 2>/dev/null` || true &&		\
-	    case "$$x" in ''|$$y) ;; *) echo $$x > sntp/version ;; esac
+	    y=`cat sntp/scm-rev 2>/dev/null` || true &&		\
+	    case "$$x" in ''|$$y) ;; *) echo $$x > sntp/scm-rev ;; esac
 
 $(srcdir)/m4/version.m4: $(srcdir)/../packageinfo.sh
 	TEMPDIR=`pwd` && export TEMPDIR && cd $(srcdir) && \
