@@ -331,11 +331,11 @@ as2201_receive(
 	 */
 	if ((int)(up->lastptr - up->stats + pp->lencode) > SMAX - 2)
 	    return;
-	(void)strcpy(up->lastptr, pp->a_lastcode);
+	memcpy(up->lastptr, pp->a_lastcode, pp->lencode);
 	up->lastptr += pp->lencode;
 	if (pp->sloppyclockflag & CLK_FLAG4) {
 		octets = strlen(stat_command[up->index]);
-		if ((int)(up->lastptr - up->stats + octets) > SMAX - 2)
+		if ((int)(up->lastptr - up->stats + 1 + octets) > SMAX - 2)
 		    return;
 		*up->lastptr++ = ' ';
 		memcpy(up->lastptr, stat_command[up->index], octets);

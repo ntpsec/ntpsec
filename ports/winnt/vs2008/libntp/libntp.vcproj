@@ -637,6 +637,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\gaa_compat.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\include\global.h"
 				>
 			</File>
@@ -885,15 +889,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\sys\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

@@ -27,12 +27,14 @@ noinst_HEADERS=	ntpdate.h
 
 $(PROGRAMS): $(LDADD)
 
-$(top_srcdir)/sntp/version:
-	cd $(top_srcdir)/sntp && $(MAKE) version
+$(top_srcdir)/sntp/scm-rev:
+	cd $(top_srcdir)/sntp && $(MAKE) check-scm-rev
 
-version.o: $(ntpdate_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
-	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpdate
-	$(COMPILE) -c version.c
+version.c: $(ntpdate_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpdate
+	
+version.o: version.c
+	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/sntp/check-libntp.mf

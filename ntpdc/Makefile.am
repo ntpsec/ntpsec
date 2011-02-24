@@ -69,12 +69,14 @@ check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 
 $(PROGRAMS): version.o
 
-$(top_srcdir)/sntp/version:
-	cd $(top_srcdir)/sntp && $(MAKE) version
+$(top_srcdir)/sntp/scm-rev:
+	cd $(top_srcdir)/sntp && $(MAKE) check-scm-rev
 
-version.o: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
-	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpdc
-	$(COMPILE) -c version.c
+version.c: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpdc
+	
+version.o: version.c
+	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 
 # I ran nl_in.c (attached, to be installed into ntpdc) through
 # $(CC) -E nl_in.c | nl.pl > nl.c

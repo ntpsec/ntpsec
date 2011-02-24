@@ -2387,17 +2387,17 @@ clock_select(void)
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
 	endpoint_size = nlist * 2 * sizeof(struct endpoint);
-	synch_size = nlist * sizeof(double);
-	error_size = nlist * sizeof(double);
-	peers_size = nlist * sizeof(struct peer *);
-	indx_size = nlist * 2 * sizeof(int);
+	synch_size = ALIGNED_SIZE(nlist * sizeof(double));
+	error_size = ALIGNED_SIZE(nlist * sizeof(double));
+	peers_size = ALIGNED_SIZE(nlist * sizeof(struct peer *));
+	indx_size = ALIGNED_SIZE(nlist * 2 * sizeof(int));
 	octets = endpoint_size + indx_size + peers_size + synch_size +
 	    error_size;
 	endpoint = erealloc(endpoint, octets);
-	synch = (double *)((char *)endpoint + endpoint_size);
-	error = (double *)((char *)synch + synch_size);
-	peers = (struct peer **)((char *)error + error_size);
-	indx = (int *)((char *)peers + peers_size);
+	synch = INC_ALIGNED_PTR(endpoint, endpoint_size);
+	error = INC_ALIGNED_PTR(synch, synch_size);
+	peers = INC_ALIGNED_PTR(error, error_size);
+	indx = INC_ALIGNED_PTR(peers, peers_size);
 
 	/*
 	 * Initially, we populate the island with all the rifraff peers
@@ -3499,7 +3499,7 @@ pool_xmit(
 			free(pool->addrs);
 			pool->addrs = NULL;
 		}
-		memset(&hints, 0, sizeof(hints));
+		ZERO(hints);
 		hints.ai_family = AF(&pool->srcadr);
 		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_protocol = IPPROTO_UDP;
@@ -3521,7 +3521,8 @@ pool_xmit(
 	}
 
 	do {
-		rmtadr = (sockaddr_u *)pool->ai->ai_addr;
+		/* copy_addrinfo_list ai_addr points to a sockaddr_u */
+		rmtadr = (sockaddr_u *)(void *)pool->ai->ai_addr;
 		pool->ai = pool->ai->ai_next;
 		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
 	} while (p != NULL && pool->ai != NULL);

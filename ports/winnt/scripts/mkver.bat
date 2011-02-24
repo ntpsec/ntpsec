@@ -20,6 +20,8 @@ see notes/remarks directly below this header:
 #
 #
 # Changes:
+# 02/23/2011	David J Taylor	- Use reg instead of regedit so "run as
+#				  administrator" is not required.
 # 12/21/2009	Dave Hart
 #				- packageinfo.sh uses prerelease= now not
 #				  releasecandidate=
@@ -135,7 +137,8 @@ REM ****************************************************************************
 	SET UTC_SIGN=
 	
 	REM *** Now get the timezone settings from the registry
-	regedit /e %TEMP%\TZ-%GENERATED_PROGRAM%.TMP "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+	reg export "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" %TEMP%\TZ-%GENERATED_PROGRAM%.TMP
+	REM was: regedit /e %TEMP%\TZ-%GENERATED_PROGRAM%.TMP "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
 	IF NOT EXIST %TEMP%\TZ-%GENERATED_PROGRAM%.TMP GOTO NOTZINFO
 
 	for /f "Tokens=1* Delims==" %%a in ('type %TEMP%\TZ-%GENERATED_PROGRAM%.TMP') do if %%a == "ActiveTimeBias" SET ACTIVEBIAS=%%b
@@ -237,13 +240,13 @@ REM ****************************************************************************
 
 :NOBK
 	REM ** If that was not successful, we'll take a look into a version file, if available
-	IF EXIST ..\..\..\..\sntp\version (
-		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\..\sntp\version') DO @SET CSET=%%a
+	IF EXIST ..\..\..\..\sntp\scm-rev (
+		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\..\sntp\scm-rev') DO @SET CSET=%%a
 	)
 	REM next if block can go away once all windows compilers are building in
 	REM ports\winnt\<compiler dir>\<binary name dir> (ports\winnt\vs2008\ntpd)
-	IF EXIST ..\..\..\sntp\version (
-		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\sntp\version') DO @SET CSET=%%a
+	IF EXIST ..\..\..\sntp\scm-rev (
+		IF "%CSET%"=="" FOR /F "TOKENS=1" %%a IN ('type ..\..\..\sntp\scm-rev') DO @SET CSET=%%a
 	)
 
 	REM ** Now, expand our version number with the CSet revision, if we managed to get one
@@ -263,7 +266,8 @@ REM ****************************************************************************
 	IF exist userset.reg del userset.reg
 	IF exist userset.txt del userset.txt
 	
-	regedit /E userset.reg "HKEY_CURRENT_USER\Control Panel\International"
+	reg export "HKEY_CURRENT_USER\Control Panel\International" userset.reg
+	REM was: regedit /E userset.reg "HKEY_CURRENT_USER\Control Panel\International"
 	IF not exist userset.reg goto ERRNOREG
 
 	rem *** convert from unicode to ascii if necessary
@@ -398,7 +402,7 @@ REM ****************************************************************************
 REM Here are the error messages I know
 REM *****************************************************************************************************************
 :ERRNOREG
-   ECHO "Error: Registry could not be read (check if regedit.exe is available and works as expected)"
+   ECHO "Error: Registry could not be read (check if reg.exe is available and works as expected)"
    GOTO EOF
 
 

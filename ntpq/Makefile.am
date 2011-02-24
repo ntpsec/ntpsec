@@ -55,14 +55,16 @@ $(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
-$(top_srcdir)/sntp/version:
-	cd $(top_srcdir)/sntp && $(MAKE) version
-
 $(PROGRAMS): version.o
 
-version.o: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/version
-	env CSET=`cat $(top_srcdir)/sntp/version` $(top_builddir)/scripts/mkver ntpq
-	$(COMPILE) -c version.c
+$(top_srcdir)/sntp/scm-rev:
+	cd $(top_srcdir)/sntp && $(MAKE) check-scm-rev
+
+version.c: $(ntpq_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
+	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpq
+	
+version.o: version.c
+	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/check-libopts.mf
