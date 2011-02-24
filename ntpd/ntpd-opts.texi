@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  February 23, 2011 at 10:54:29 AM by AutoGen 5.11.6
+# It has been AutoGen-ed  February 24, 2011 at 10:43:07 AM by AutoGen 5.11.6
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -64,7 +64,7 @@ This is the automatically generated usage text for ntpd:
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p133
+ntpd - NTP daemon program - Ver. 4.2.7p134
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description

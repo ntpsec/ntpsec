@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  February 23, 2011 at 10:58:18 AM by AutoGen 5.11.6
+ *  It has been AutoGen-ed  February 24, 2011 at 10:45:05 AM by AutoGen 5.11.6
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -428,7 +428,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[5] = "NTPQ";
 static char const zUsageTitle[121] =
-"ntpq - standard NTP query program - Ver. 4.2.7p133\n\
+"ntpq - standard NTP query program - Ver. 4.2.7p134\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
