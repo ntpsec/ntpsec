@@ -122,6 +122,7 @@ dnl  the caching after the tests so preset overrides still work.
 AS_UNSET([ac_cv_path_PATH_PERL])
 AC_PATH_PROG([PATH_TEST], [test])
 AS_UNSET([ac_cv_path_PATH_TEST])
+test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh
 AC_SUBST([CONFIG_SHELL])		dnl for scripts #!/path/to/sh
 
 AC_ARG_WITH(
