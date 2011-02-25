@@ -1,3 +1,4 @@
+* [Bug 1839] 4.2.7p131 installs libevent ev*.h headers.
 * Ensure CONFIG_SHELL is not empty before relying on it for #! scripts.
 (4.2.7p134) 2011/02/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1837] Build fails on Win7 due to regedit requiring privilege.
