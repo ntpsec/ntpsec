@@ -9,6 +9,7 @@ dnl lower the minimum version if you find an earlier one works
 ntp_pkgconfig_min_version='0.15.0'
 AC_PATH_TOOL([PKG_CONFIG], [pkg-config])
 AS_UNSET([ac_cv_path_PKG_CONFIG])
+AS_UNSET([ac_cv_path_ac_pt_PKG_CONFIG])
 
 case "$PKG_CONFIG" in
  /*)
