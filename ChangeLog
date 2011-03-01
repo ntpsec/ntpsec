@@ -1,3 +1,15 @@
+* libevent: When building on systems with CLOCK_MONOTONIC available,
+  separate the internal timeline (possibly counting since system boot)
+  from the gettimeofday() timeline in event_base cached timevals.  Adds
+  new event_base_tv_cached() to retrieve cached callback round start
+  time on the internal timeline, and changes
+  event_based_gettimeofday_cached() to always return times using the
+  namesake timeline.  This preserves the benefit of using the never-
+  stepped monotonic clock for event timeouts while providing clients
+  with times consistently using gettimeofday().
+* Correct event_base_gettimeofday_cached() workaround code in
+  sntp to work with corrected libevent.
+* Remove sntp l_fp_output() test now that it uses prettydate().
 * [Bug 1839] 4.2.7p131 installs libevent ev*.h headers.
 * Ensure CONFIG_SHELL is not empty before relying on it for #! scripts.
 (4.2.7p134) 2011/02/24 Released by Harlan Stenn <stenn@ntp.org>

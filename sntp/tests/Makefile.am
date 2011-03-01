@@ -46,7 +46,6 @@ dist_check_SCRIPTS =	test-driver
 EXTRA_DIST =				\
 	data/debug-input-lfp-bin	\
 	data/debug-input-lfp-dec	\
-	data/debug-input-lfp-hex	\
 	data/debug-input-pkt		\
 	data/key-test-ascii		\
 	data/key-test-comments		\
@@ -67,7 +66,6 @@ CLEANFILES =				\
 	data/debug-output-lfp-dec	\
 	data/kod-output-blank		\
 	data/debug-output-lfp-bin	\
-	data/debug-output-lfp-hex	\
 	$(NULL)
 
 LDADD =						\

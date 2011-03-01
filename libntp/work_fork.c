@@ -450,7 +450,7 @@ fork_blocking_child(
 
 	if (childpid) {
 		/* this is the parent */
-		DPRINTF(1, ("forked worker child (pid %d)", childpid));
+		DPRINTF(1, ("forked worker child (pid %d)\n", childpid));
 		c->pid = childpid;
 		c->ispipe = is_pipe;
 

@@ -278,12 +278,12 @@ TEST_F(packetProcessingTest, AcceptNoSentPacketBroadcastMode) {
 	ASSERT_FALSE(ENABLED_OPT(AUTHENTICATION));
 
 	testpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING,
-										NTP_VERSION,
-										MODE_BROADCAST);
+					    NTP_VERSION,
+					    MODE_BROADCAST);
 
 	EXPECT_EQ(LEN_PKT_NOMAC,
-			  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
-						  MODE_BROADCAST, NULL, "UnitTest"));
+		  process_pkt(&testpkt, &testsock, LEN_PKT_NOMAC,
+			      MODE_BROADCAST, NULL, "UnitTest"));
 }
 
 TEST_F(packetProcessingTest, CorrectUnauthenticatedPacket) {

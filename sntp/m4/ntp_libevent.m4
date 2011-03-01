@@ -46,7 +46,7 @@ case "$ntp_use_local_libevent" in
 	    ntp_use_local_libevent=no
 	    AC_MSG_NOTICE([Using the installed libevent])
 	    CPPFLAGS_LIBEVENT=`$PKG_CONFIG --cflags-only-I libevent`
-	    LDADD_LIBEVENT=`$PKG_CONFIG --libs-only-L libevent`
+	    LDADD_LIBEVENT=`$PKG_CONFIG --libs libevent | sed 's:-levent::'`
 	    case "$LIBISC_PTHREADS_NOTHREADS" in
 	     pthreads)
 		LDADD_LIBEVENT="$LDADD_LIBEVENT -levent_pthreads"
@@ -102,6 +102,7 @@ case "$ntp_use_local_libevent" in
     ac_configure_args=" --disable-shared${ac_configure_args}"
     ac_configure_args=" --disable-libevent-regress${ac_configure_args}"
     ac_configure_args=" --disable-libevent-install${ac_configure_args}"
+    ac_configure_args=" --enable-silent-rules${ac_configure_args}"
     AC_CONFIG_SUBDIRS([libevent])
     ;;
  *)

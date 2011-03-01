@@ -82,12 +82,19 @@ process_pkt (
 	const char * func_name
 	)
 {
-	unsigned int key_id = 0;
-	struct key *pkt_key = NULL;
-	int is_authentic;
-	unsigned int exten_words, exten_words_used = 0;
-	int mac_size;
+	u_int		key_id;
+	struct key *	pkt_key;
+	int		is_authentic;
+	u_int		exten_words;
+	u_int		exten_words_used;
+	int		mac_size;
+	u_int		exten_len;
+	l_fp		sent_xmt;
+	l_fp		resp_org;
 
+	key_id = 0;
+	pkt_key = NULL;
+	exten_words_used = 0;
 	is_authentic = (HAVE_OPT(AUTHENTICATION)) ? 0 : -1;
 
 	/*
@@ -105,15 +112,13 @@ process_pkt (
 	if (pkt_len < LEN_PKT_NOMAC || (pkt_len & 3) != 0) {
 unusable:
 		msyslog(LOG_ERR,
-			"%s: Funny packet length: %i. Discarding packet.",
+			"%s: Incredible packet length: %d.  Discarding.",
 			func_name, pkt_len);
 		return PACKET_UNUSEABLE;
 	}
 	/* skip past the extensions, if any */
 	exten_words = ((unsigned)pkt_len - LEN_PKT_NOMAC) >> 2;
 	while (exten_words > 6) {
-		unsigned int exten_len;
-
 		exten_len = ntohl(rpkt->exten[exten_words_used]) & 0xffff;
 		exten_len = (exten_len + 7) >> 2; /* convert to words, add 1 */
 		if (exten_len > exten_words || exten_len < 5)
@@ -188,7 +193,7 @@ unusable:
 	if (PKT_VERSION(rpkt->li_vn_mode) < NTP_OLDVERSION ||
 		PKT_VERSION(rpkt->li_vn_mode) > NTP_VERSION) {
 		msyslog(LOG_ERR,
-			"%s: Packet shows wrong version (%i)",
+			"%s: Packet shows wrong version (%d)",
 			func_name, PKT_VERSION(rpkt->li_vn_mode));
 		return SERVER_UNUSEABLE;
 	} 
@@ -196,7 +201,7 @@ unusable:
 	if (PKT_MODE(rpkt->li_vn_mode) != mode &&
 	    PKT_MODE(rpkt->li_vn_mode) != MODE_PASSIVE) {
 		msyslog(LOG_ERR,
-			"%s: mode %d stratum %i", func_name, 
+			"%s: mode %d stratum %d", func_name, 
 			PKT_MODE(rpkt->li_vn_mode), rpkt->stratum);
 		return SERVER_UNUSEABLE;
 	}
@@ -204,11 +209,11 @@ unusable:
 	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
 		char *ref_char;
 
-		DPRINTF(1, ("%s: Stratum unspecified, going to check for KOD (stratum: %i)\n", 
-				func_name, rpkt->stratum));
+		DPRINTF(1, ("%s: Stratum unspecified, going to check for KOD (stratum: %d)\n", 
+			func_name, rpkt->stratum));
 		ref_char = (char *) &rpkt->refid;
 		DPRINTF(1, ("%s: Packet refid: %c%c%c%c\n", func_name,
-			       ref_char[0], ref_char[1], ref_char[2], ref_char[3]));
+			ref_char[0], ref_char[1], ref_char[2], ref_char[3]));
 		/* If it's a KOD packet we'll just use the KOD information */
 		if (ref_char[0] != 'X') {
 			if (strncmp(ref_char, "DENY", 4) == 0)
@@ -226,7 +231,8 @@ unusable:
 	/* If the server is not synced it's not really useable for us */
 	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode)) {
 		msyslog(LOG_ERR,
-			"%s: Server not in sync, skipping this server", func_name);
+			"%s: %s not in sync, skipping this server",
+			func_name, stoa(sender));
 		return SERVER_UNUSEABLE;
 	}
 
@@ -234,17 +240,17 @@ unusable:
 	 * Decode the org timestamp and make sure we're getting a response
 	 * to our last request, but only if we're not in broadcast mode.
 	 */
-#ifdef DEBUG
-	if (debug > 2) {
-		printf("rpkt->org:\n");
-		l_fp_output(&rpkt->org, stdout);
-		printf("spkt->xmt:\n");
-		l_fp_output(&spkt->xmt, stdout);
-	}
-#endif
-	if (mode != MODE_BROADCAST && !L_ISEQU(&rpkt->org, &spkt->xmt)) {
+	if (MODE_BROADCAST == mode)
+		return pkt_len;
+
+	if (!L_ISEQU(&rpkt->org, &spkt->xmt)) {
+		NTOHL_FP(&rpkt->org, &resp_org);
+		NTOHL_FP(&spkt->xmt, &sent_xmt);
 		msyslog(LOG_ERR,
-			"process_pkt: pkt.org and peer.xmt differ");
+			"%s response org expected to match sent xmt",
+			stoa(sender));
+		msyslog(LOG_ERR, "resp org: %s\n", prettydate(&resp_org));
+		msyslog(LOG_ERR, "sent xmt: %s\n", prettydate(&sent_xmt));
 		return PACKET_UNUSEABLE;
 	}
 

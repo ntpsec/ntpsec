@@ -361,6 +361,61 @@ gettime(struct event_base *base, struct timeval *tp)
 	return (evutil_gettimeofday(tp, NULL));
 }
 
+/** Set 'tp' to the current time according to 'base'.  We must hold the lock
+ * on 'base'.  If there is a cached time, return it.  Otherwise, use
+ * gettimeofday to find out the right time.
+ * Return 0 on success, -1 on failure.
+ */
+static int
+gettod(struct event_base *base, struct timeval *tp)
+{
+	EVENT_BASE_ASSERT_LOCKED(base);
+
+#if defined(_EVENT_HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+	if (base->tod_tv_cache.tv_sec) {
+		*tp = base->tod_tv_cache;
+		return (0);
+	}
+#else
+	if (base->tv_cache.tv_sec) {
+		*tp = base->tv_cache;
+		return (0);
+	}
+#endif
+
+	return (evutil_gettimeofday(tp, NULL));
+}
+
+int
+event_base_tv_cached(struct event_base *base, struct timeval *tv)
+{
+	int r;
+	if (!base) {
+		base = current_base;
+		if (!current_base) {
+#if defined(_EVENT_HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+			if (use_monotonic) {
+				struct timespec	ts;
+
+				if (clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
+					return (-1);
+
+				tv->tv_sec = ts.tv_sec;
+				tv->tv_usec = ts.tv_nsec / 1000;
+				return (0);
+			}
+#endif
+
+			return evutil_gettimeofday(tv, NULL);
+		}
+	}
+
+	EVBASE_ACQUIRE_LOCK(base, th_base_lock);
+	r = gettime(base, tv);
+	EVBASE_RELEASE_LOCK(base, th_base_lock);
+	return r;
+}
+
 int
 event_base_gettimeofday_cached(struct event_base *base, struct timeval *tv)
 {
@@ -372,7 +427,7 @@ event_base_gettimeofday_cached(struct event_base *base, struct timeval *tv)
 	}
 
 	EVBASE_ACQUIRE_LOCK(base, th_base_lock);
-	r = gettime(base, tv);
+	r = gettod(base, tv);
 	EVBASE_RELEASE_LOCK(base, th_base_lock);
 	return r;
 }
@@ -382,15 +437,28 @@ static inline void
 clear_time_cache(struct event_base *base)
 {
 	base->tv_cache.tv_sec = 0;
+#if defined(_EVENT_HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+	base->tod_tv_cache.tv_sec = 0;
+#endif
 }
 
 /** Replace the cached time in 'base' with the current time. */
 static inline void
 update_time_cache(struct event_base *base)
 {
-	base->tv_cache.tv_sec = 0;
-	if (!(base->flags & EVENT_BASE_FLAG_NO_CACHE_TIME))
-	    gettime(base, &base->tv_cache);
+	clear_time_cache(base);
+	if (base->flags & EVENT_BASE_FLAG_NO_CACHE_TIME)
+		return;
+
+#if defined(_EVENT_HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
+	gettod(base, &base->tod_tv_cache);
+	if (use_monotonic)
+		gettime(base, &base->tv_cache);
+	else
+		base->tv_cache = base->tod_tv_cache;
+#else
+	gettime(base, &base->tv_cache);
+#endif
 }
 
 struct event_base *
@@ -1795,7 +1863,7 @@ event_pending(const struct event *ev, short event, struct timeval *tv)
 	/* See if there is a timeout that we should report */
 	if (tv != NULL && (flags & event & EV_TIMEOUT)) {
 		struct timeval tmp = ev->ev_timeout;
-		event_base_gettimeofday_cached(ev->ev_base, &now);
+		event_base_tv_cached(ev->ev_base, &now);
 		tmp.tv_usec &= MICROSECONDS_MASK;
 		evutil_timersub(&tmp, &now, &res);
 		/* correctly remap to real time */
