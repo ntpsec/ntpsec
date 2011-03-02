@@ -1,3 +1,4 @@
+(4.2.7p135) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
 * libevent: When building on systems with CLOCK_MONOTONIC available,
   separate the internal timeline (possibly counting since system boot)
   from the gettimeofday() timeline in event_base cached timevals.  Adds
