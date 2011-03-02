@@ -1,3 +1,4 @@
+(4.2.7p136) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1839] 4.2.7p135 still installs libevent ev*.h headers.
 (4.2.7p135) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
 * libevent: When building on systems with CLOCK_MONOTONIC available,
