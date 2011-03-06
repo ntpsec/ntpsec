@@ -43,9 +43,8 @@ int setpriority(
 	BOOL success;
 	DWORD prio_class;
 
-	if (PRIO_PROCESS != which || who || NTP_PRIO != prio) {
-		DPRINTF(1,("windows setpriority() clone needs work.\n"));
-	}
+	if (PRIO_PROCESS != which || who || NTP_PRIO != prio)
+		TRACE(1, ("windows setpriority() clone needs work.\n"));
 
 	prio_class = GetPriorityClass(GetCurrentProcess());
 	

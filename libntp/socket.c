@@ -100,9 +100,9 @@ move_fd(
 	if (socket_boundary == -1) {
 		socket_boundary = max(0, min(GETDTABLESIZE() - FD_CHUNK,
 					     min(FOPEN_MAX, FD_PREFERRED_SOCKBOUNDARY)));
-		DPRINTF(1,("move_fd: estimated max descriptors: %d, "
-			"initial socket boundary: %d\n",
-			GETDTABLESIZE(), socket_boundary));
+		TRACE(1, ("move_fd: estimated max descriptors: %d, "
+			  "initial socket boundary: %d\n",
+			  GETDTABLESIZE(), socket_boundary));
 	}
 
 	/*
@@ -124,8 +124,8 @@ move_fd(
 			return fd;
 		}
 		socket_boundary = max(0, socket_boundary - FD_CHUNK);
-		DPRINTF(1, ("move_fd: selecting new socket boundary: %d\n",
-			socket_boundary));
+		TRACE(1, ("move_fd: selecting new socket boundary: %d\n",
+			  socket_boundary));
 	} while (socket_boundary > 0);
 #else
 	NTP_REQUIRE((int)fd >= 0);
@@ -375,13 +375,13 @@ open_socket(
 				"setsockopt SO_TIMESTAMP on fails on address %s: %m",
 				stoa(addr));
 		else
-			DPRINTF(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
-				    fd, stoa(addr)));
+			TRACE(4, ("setsockopt SO_TIMESTAMP enabled on fd %d address %s\n",
+				  fd, stoa(addr)));
 	}
 #endif
-	DPRINTF(4, ("bind(%d) AF_INET%s, addr %s%%%d#%d, flags 0x%x\n",
-		   fd, IS_IPV6(addr) ? "6" : "", stoa(addr),
-		   SCOPE(addr), SRCPORT(addr), interf->flags));
+	TRACE(4, ("bind(%d) AF_INET%s, addr %s%%%d#%d, flags 0x%x\n",
+		  fd, IS_IPV6(addr) ? "6" : "", stoa(addr),
+		  SCOPE(addr), SRCPORT(addr), interf->flags));
 
 	init_nonblocking_io(fd);
 
@@ -392,8 +392,8 @@ open_socket(
 	add_fd_to_list(fd, FD_TYPE_SOCKET);
 
 #if !defined(SYS_WINNT) && !defined(VMS)
-	DPRINTF(4, ("flags for fd %d: 0x%x\n", fd,
-		    fcntl(fd, F_GETFL, 0)));
+	TRACE(4, ("flags for fd %d: 0x%x\n", fd,
+		  fcntl(fd, F_GETFL, 0)));
 #endif /* SYS_WINNT || VMS */
 
 #if defined (HAVE_IO_COMPLETION_PORT)
@@ -448,16 +448,16 @@ sendpkt(
 		 * unbound peer - drop request and wait for better
 		 * network conditions
 		 */
-		DPRINTF(2, ("%ssendpkt(dst=%s, ttl=%d, len=%d): no interface - IGNORED\n",
-			    ismcast ? "\tMCAST\t***** " : "",
-			    stoa(dest), ttl, len));
+		TRACE(2, ("%ssendpkt(dst=%s, ttl=%d, len=%d): no interface - IGNORED\n",
+			  ismcast ? "\tMCAST\t***** " : "",
+			  stoa(dest), ttl, len));
 		return;
 	}
 
 	do {
-		DPRINTF(2, ("%ssendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
-			    ismcast ? "\tMCAST\t***** " : "", src->fd,
-			    stoa(dest), stoa(&src->sin), ttl, len));
+		TRACE(2, ("%ssendpkt(%d, dst=%s, src=%s, ttl=%d, len=%d)\n",
+			  ismcast ? "\tMCAST\t***** " : "", src->fd,
+			  stoa(dest), stoa(&src->sin), ttl, len));
 #ifdef MCAST
 		/*
 		 * for the moment we use the bcast option to set multicast ttl
@@ -626,11 +626,11 @@ read_network_packet(
 		fromlen = sizeof(from);
 		buflen = recvfrom(fd, buf, sizeof(buf), 0,
 				  &from.sa, &fromlen);
-		DPRINTF(4, ("%s on (%lu) fd=%d from %s\n",
-			(itf->ignore_packets)
-			    ? "ignore"
-			    : "drop",
-			free_recvbuffs(), fd, stoa(&from)));
+		TRACE(4, ("%s on (%lu) fd=%d from %s\n",
+			  (itf->ignore_packets)
+			      ? "ignore"
+			      : "drop",
+			  free_recvbuffs(), fd, stoa(&from)));
 		if (itf->ignore_packets)
 			packets_ignored++;
 		else
@@ -670,13 +670,13 @@ read_network_packet(
 	} else if (buflen < 0) {
 		msyslog(LOG_ERR, "recvfrom(%s) fd=%d: %m",
 			stoa(&rb->recv_srcadr), fd);
-		DPRINTF(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
-			    fd));
+		TRACE(5, ("read_network_packet: fd=%d dropped (bad recvfrom)\n",
+			  fd));
 		freerecvbuf(rb);
 		return (buflen);
 	}
 
-	DPRINTF(3, ("read_network_packet: fd=%d length %d from %s\n",
+	TRACE(3, ("read_network_packet: fd=%d length %d from %s\n",
 		    fd, buflen, stoa(&rb->recv_srcadr)));
 
 	/*

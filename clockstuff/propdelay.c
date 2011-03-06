@@ -118,7 +118,6 @@ int Gflag = 0;
 int height;
 
 char *progname;
-volatile int debug;
 
 static	void	doit		(double, double, double, double, double, char *);
 static	double	latlong		(char *, int);

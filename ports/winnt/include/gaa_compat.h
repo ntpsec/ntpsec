@@ -766,6 +766,6 @@ GetAdaptersAddresses(
 #endif
 /* +++++++++++++++++++++++ from iphlpapi.h */
 
-#endif	/* !_W64 */
 #pragma warning(pop)
+#endif	/* !_W64 */
 #endif	/* GAA_COMPAT_H */

@@ -239,7 +239,6 @@ static	FILE *current_output;
 extern struct xcmd opcmds[];
 
 char *progname;
-volatile int debug;
 
 #ifdef NO_MAIN_ALLOWED
 CALL(ntpdc,"ntpdc",ntpdcmain);

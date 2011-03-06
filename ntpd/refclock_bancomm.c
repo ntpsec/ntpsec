@@ -146,11 +146,6 @@ typedef void *SYMMT_PCI_HANDLE;
 extern u_long current_time;     /* current time(s) */
 
 /*
- * Imported from ntpd module
- */
-extern volatile int debug;               /* global debug flag */
-
-/*
  * VME unit control structure.
  * Changes made to vmeunit structure. Most members are now available in the 
  * new refclockproc structure in ntp_refclock.h - 07/99 - Ganesh Ramasivan

@@ -110,18 +110,13 @@ static timer_t ntpdate_timerid;
 s_char	sys_precision;		/* local clock precision (log2 s) */
 
 /*
- * Debugging flag
- */
-volatile int debug = 0;
-
-/*
  * File descriptor masks etc. for call to select
  */
 
 int ai_fam_templ;
-int nbsock;             /* the number of sockets used */
+int nbsock;			/* the number of sockets used */
 SOCKET fd[MAX_AF];
-int fd_family[MAX_AF];	/* to remember the socket family */
+int fd_family[MAX_AF];		/* to remember the socket family */
 #ifdef HAVE_POLL_H
 struct pollfd fdmask[MAX_AF];
 #else

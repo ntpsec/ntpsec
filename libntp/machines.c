@@ -436,7 +436,7 @@ ntp_set_tod(
 	int		rc;
 	int		saved_errno;
 
-	DPRINTF(1, ("In ntp_set_tod\n"));
+	TRACE(1, ("In ntp_set_tod\n"));
 	rc = -1;
 	saved_errno = 0;
 
@@ -451,7 +451,7 @@ ntp_set_tod(
 		errno = 0;
 		rc = clock_settime(CLOCK_REALTIME, &ts);
 		saved_errno = errno;
-		DPRINTF(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
+		TRACE(1, ("ntp_set_tod: clock_settime: %d %m\n", rc));
 		if (!tod && !rc)
 			tod = SET_TOD_CLOCK_SETTIME;
 
@@ -470,7 +470,7 @@ ntp_set_tod(
 		errno = 0;
 		rc = SETTIMEOFDAY(tvp, tzp);
 		saved_errno = errno;
-		DPRINTF(1, ("ntp_set_tod: settimeofday: %d %m\n", rc));
+		TRACE(1, ("ntp_set_tod: settimeofday: %d %m\n", rc));
 		if (!tod && !rc)
 			tod = SET_TOD_SETTIMEOFDAY;
 	}
@@ -482,15 +482,15 @@ ntp_set_tod(
 		errno = 0;
 		rc = stime(&tp); /* lie as bad as SysVR4 */
 		saved_errno = errno;
-		DPRINTF(1, ("ntp_set_tod: stime: %d %m\n", rc));
+		TRACE(1, ("ntp_set_tod: stime: %d %m\n", rc));
 		if (!tod && !rc)
 			tod = SET_TOD_STIME;
 	}
 #endif /* HAVE_STIME */
 
 	errno = saved_errno;	/* for %m below */
-	DPRINTF(1, ("ntp_set_tod: Final result: %s: %d %m\n",
-		set_tod_used[tod], rc));
+	TRACE(1, ("ntp_set_tod: Final result: %s: %d %m\n",
+		  set_tod_used[tod], rc));
 	/*
 	 * Say how we're setting the time of day
 	 */

@@ -19,11 +19,11 @@
 #include <errno.h>
 #include <string.h>
 
+#include "ntpd.h"
 #include "ntp_config.h"
 #include "ntpsim.h"
 #include "ntp_scanner.h"
 #include "ntp_parser.h"
-#include "ntp_debug.h"
 
 /* ntp_keyword.h declares finite state machine and token text */
 #include "ntp_keyword.h"

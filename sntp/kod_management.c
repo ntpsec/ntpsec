@@ -189,7 +189,7 @@ kod_init_kod_db(
 	char *str_ptr;
 	char error = 0;
 
-	DPRINTF(2, ("Initializing KOD DB...\n"));
+	TRACE(2, ("Initializing KOD DB...\n"));
 
 	kod_db_file = estrdup(db_file);
 
@@ -235,11 +235,11 @@ kod_init_kod_db(
 	}
 
 	if (0 == kod_db_cnt) {
-		DPRINTF(2, ("KoD DB %s empty.\n", db_file));
+		TRACE(2, ("KoD DB %s empty.\n", db_file));
 		goto wrapup;
 	}
 
-	DPRINTF(2, ("KoD DB %s contains %d entries, reading...\n", db_file, kod_db_cnt));
+	TRACE(2, ("KoD DB %s contains %d entries, reading...\n", db_file, kod_db_cnt));
 
 	rewind(db_s);
 
@@ -288,10 +288,10 @@ kod_init_kod_db(
     wrapup:
 	fclose(db_s);
 	for (a = 0; a < kod_db_cnt; a++)
-		DPRINTF(2, ("KoD entry %d: %s at %llx type %s\n", a,
-			kod_db[a]->hostname,
-			(unsigned long long)kod_db[a]->timestamp,
-			kod_db[a]->type));
+		TRACE(2, ("KoD entry %d: %s at %llx type %s\n", a,
+			  kod_db[a]->hostname,
+			  (unsigned long long)kod_db[a]->timestamp,
+			  kod_db[a]->type));
 
 	if (!readonly && write_kod_db())
 		atexit(&atexit_write_kod_db);

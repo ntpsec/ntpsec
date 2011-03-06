@@ -156,7 +156,6 @@ u_long	asn2ntp		(ASN1_TIME *);
  */
 extern char *optarg;		/* command line argument */
 char	*progname;
-volatile int	debug = 0;	/* debug, not de bug */
 u_int	lifetime = YEAR;	/* certificate lifetime (days) */
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */

@@ -213,7 +213,6 @@ main(
 #define	STREQ(a, b)	(*(a) == *(b) && strcmp((a), (b)) == 0)
 
 char *progname;
-volatile int debug;
 
 int dokmem = 1;
 int writetickadj = 0;

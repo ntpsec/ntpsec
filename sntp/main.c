@@ -140,21 +140,21 @@ sntp_main (
 		exit(EX_SOFTWARE);
 
 	init_lib();
-	DPRINTF(2, ("init_lib() done, %s%s\n",
-		(ipv4_works)
-		    ? "ipv4_works "
-		    : "",
-		(ipv6_works)
-		    ? "ipv6_works "
-		    : ""));
 
 	optct = ntpOptionProcess(&sntpOptions, argc, argv);
 	argc -= optct;
 	argv += optct;
 
 	debug = DESC(DEBUG_LEVEL).optOccCt;
-	DPRINTF(1, ("%s\n", Version));
+	TRACE(1, ("%s\n", Version));
 
+	TRACE(2, ("init_lib() done, %s%s\n",
+		  (ipv4_works)
+		      ? "ipv4_works "
+		      : "",
+		  (ipv6_works)
+		      ? "ipv6_works "
+		      : ""));
 	ntpver = OPT_VALUE_NTPVERSION;
 	steplimit = OPT_VALUE_STEPLIMIT / 1e3;
 	headspace.tv_usec = max(0, OPT_VALUE_HEADSPACE * 1000);
@@ -183,7 +183,7 @@ sntp_main (
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 		ai_fam_pref = AF_INET;
-		DPRINTF(1, ("No ipv6 support available, forcing ipv4\n"));
+		TRACE(1, ("No ipv6 support available, forcing ipv4\n"));
 	} else {
 		/* Check for options -4 and -6 */
 		if (HAVE_OPT(IPV4))
@@ -381,7 +381,7 @@ handle_lookup(
 	size_t		name_sz;
 	size_t		octets;
 
-	DPRINTF(1, ("handle_lookup(%s,%#x)\n", name, flags));
+	TRACE(1, ("handle_lookup(%s,%#x)\n", name, flags));
 
 	ZERO(hints);
 	hints.ai_family = ai_fam_pref;
@@ -464,10 +464,10 @@ sntp_name_resolved(
 			fprintf(stderr, "%s lookup error %s\n",
 				dctx->name, gai_strerror(rescode));
 	} else {
-		DPRINTF(3, ("%s [%s]\n", dctx->name,
-			(addr->ai_canonname != NULL)
-			    ? addr->ai_canonname
-			    : ""));
+		TRACE(3, ("%s [%s]\n", dctx->name,
+			  (addr->ai_canonname != NULL)
+			      ? addr->ai_canonname
+			      : ""));
 
 		for (ai = addr; ai != NULL; ai = ai->ai_next) {
 
@@ -592,8 +592,8 @@ queue_xmt(
 		if (xctx->sched > start_cb.tv_sec)
 			delay.tv_sec = xctx->sched - start_cb.tv_sec;
 		event_add(ev_xmt_timer, &delay);
-		DPRINTF(2, ("queue_xmt: xmt timer for %u usec\n",
-			(u_int)delay.tv_usec));
+		TRACE(2, ("queue_xmt: xmt timer for %u usec\n",
+			  (u_int)delay.tv_usec));
 	}
 }
 
@@ -621,8 +621,8 @@ xmt_timer_cb(
 	gettimeofday_cached(base, &start_cb);
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		UNLINK_HEAD_SLIST(x, xmt_q, link);
-		DPRINTF(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
-			(u_int)start_cb.tv_usec, stoa(&x->spkt->addr)));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
+			  (u_int)start_cb.tv_usec, stoa(&x->spkt->addr)));
 		xmt(x);
 		free(x);
 		if (NULL == xmt_q)
@@ -630,16 +630,16 @@ xmt_timer_cb(
 	}
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		event_add(ev_xmt_timer, &headspace);
-		DPRINTF(2, ("xmt_timer_cb: at .%6.6u headspace %6.6u\n",
-			(u_int)start_cb.tv_usec,
-			(u_int)headspace.tv_usec));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u headspace %6.6u\n",
+			  (u_int)start_cb.tv_usec,
+			  (u_int)headspace.tv_usec));
 	} else {
 		delay.tv_sec = xmt_q->sched - start_cb.tv_sec;
 		delay.tv_usec = 0;
 		event_add(ev_xmt_timer, &delay);
-		DPRINTF(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
-			(u_int)start_cb.tv_usec,
-			(long)delay.tv_sec));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
+			  (u_int)start_cb.tv_usec,
+			  (long)delay.tv_sec));
 	}
 }
 
@@ -676,8 +676,8 @@ xmt(
 	memcpy(&spkt->x_pkt, &x_pkt, min(sizeof(spkt->x_pkt), pkt_len));
 	spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
-	DPRINTF(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
-		(u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
+	TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
+		  (u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
 
 	/*
 	** If the send fails:
@@ -710,8 +710,8 @@ timeout_queries(void)
 			if (0 == spkt->stime || spkt->done)
 				continue;
 			age = start_cb.tv_sec - spkt->stime;
-			DPRINTF(3, ("%s %s age %ld\n", stoa(&spkt->addr),
-				spkt->dctx->name, age));
+			TRACE(3, ("%s %s age %ld\n", stoa(&spkt->addr),
+				  spkt->dctx->name, age));
 			if (age > ucst_timeout)
 				timeout_query(spkt);
 		}
@@ -729,8 +729,8 @@ void dec_pending_ntp(
 		check_exit_conditions();
 	} else {
 		INSIST(0 == n_pending_ntp);
-		DPRINTF(1, ("n_pending_ntp reached zero before dec for %s %s\n",
-			name, stoa(server)));
+		TRACE(1, ("n_pending_ntp reached zero before dec for %s %s\n",
+			  name, stoa(server)));
 	}
 }
 
@@ -762,7 +762,7 @@ check_kod(
 
 	/* Is there a KoD on file for this address? */
 	hostname = addrinfo_to_str(ai);
-	DPRINTF(2, ("check_kod: checking <%s>\n", hostname));
+	TRACE(2, ("check_kod: checking <%s>\n", hostname));
 	if (search_entry(hostname, &reason)) {
 		printf("prior KoD for %s, skipping.\n",
 			hostname);
@@ -802,14 +802,14 @@ sock_cb(
 	int		rc;
 
 	INSIST(sock4 == fd || sock6 == fd);
-	DPRINTF(3, ("sock_cb: event on sock%s:%s%s%s%s [UCST]\n",
-		(fd == sock6)
-		    ? "6"
-		    : "4",
-		(what & EV_TIMEOUT) ? " timeout" : "",
-		(what & EV_READ)    ? " read" : "",
-		(what & EV_WRITE)   ? " write" : "",
-		(what & EV_SIGNAL)  ? " signal" : ""));
+	TRACE(3, ("sock_cb: event on sock%s:%s%s%s%s [UCST]\n",
+		  (fd == sock6)
+		      ? "6"
+		      : "4",
+		  (what & EV_TIMEOUT) ? " timeout" : "",
+		  (what & EV_READ)    ? " read" : "",
+		  (what & EV_WRITE)   ? " write" : "",
+		  (what & EV_SIGNAL)  ? " signal" : ""));
 
 	if (!(EV_READ & what)) {
 		if (EV_TIMEOUT & what)
@@ -842,13 +842,13 @@ sock_cb(
 		return;
 	}
 
-	DPRINTF(1, ("sock_cb: %s %s\n", spkt->dctx->name,
-		sptoa(&sender)));
+	TRACE(1, ("sock_cb: %s %s\n", spkt->dctx->name,
+		  sptoa(&sender)));
 
 	rpktl = process_pkt(&r_pkt, &sender, rpktl, MODE_SERVER,
 			    &spkt->x_pkt, "sock_cb");
 
-	DPRINTF(2, ("sock_cb: process_pkt returned %d\n", rpktl));
+	TRACE(2, ("sock_cb: process_pkt returned %d\n", rpktl));
 
 	/* If this is a Unicast packet, one down ... */
 	if (!spkt->done && (CTX_UCST & spkt->dctx->flags)) {
@@ -860,7 +860,7 @@ sock_cb(
 	/* If the packet is good, set the time and we're all done */
 	rc = handle_pkt(rpktl, &r_pkt, &spkt->addr, spkt->dctx->name);
 	if (0 != rc)
-		DPRINTF(1, ("sock_cb: handle_pkt() returned %d\n", rc));
+		TRACE(1, ("sock_cb: handle_pkt() returned %d\n", rc));
 	check_exit_conditions();
 }
 
@@ -879,8 +879,8 @@ check_exit_conditions(void)
 		event_base_loopexit(base, NULL);
 		shutting_down = TRUE;
 	} else {
-		DPRINTF(2, ("%d NTP and %d name queries pending\n",
-			    n_pending_ntp, n_pending_dns));
+		TRACE(2, ("%d NTP and %d name queries pending\n",
+			  n_pending_ntp, n_pending_dns));
 	}
 }
 
@@ -1159,8 +1159,8 @@ handle_pkt(
 		break;
 
 	case 1:
-		DPRINTF(3, ("handle_pkt: %d bytes from %s %s\n",
-			       rpktl, stoa(host), hostname));
+		TRACE(3, ("handle_pkt: %d bytes from %s %s\n",
+			  rpktl, stoa(host), hostname));
 
 		gettimeofday_cached(base, &tv_dst);
 
@@ -1236,7 +1236,7 @@ offset_calculation(
 	NTOHL_FP(&rpkt->xmt, &p_xmt);
 
 	*precision = LOGTOD(rpkt->precision);
-	DPRINTF(3, ("offset_calculation: precision: %f\n", *precision));
+	TRACE(3, ("offset_calculation: precision: %f\n", *precision));
 
 	*root_dispersion = FPTOD(p_rdsp);
 
@@ -1270,9 +1270,9 @@ offset_calculation(
 	*offset = (t21 + t34) / 2.;
 	delta = t21 - t34;
 
-	DPRINTF(3, ("sntp offset_calculation:\trec - org t21: %.6f\n"
-		"\txmt - dst t34: %.6f\tdelta: %.6f\toffset: %.6f\n",
-		t21, t34, delta, *offset));
+	TRACE(3, ("sntp offset_calculation:\trec - org t21: %.6f\n"
+		  "\txmt - dst t34: %.6f\tdelta: %.6f\toffset: %.6f\n",
+		  t21, t34, delta, *offset));
 }
 
 

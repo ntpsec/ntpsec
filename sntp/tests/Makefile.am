@@ -21,7 +21,6 @@ sntp_SOURCES_USED =			\
 
 base_SOURCES =				\
 	$(srcdir)/../tests_main.cpp	\
-	sntptest.cpp			\
 	$(NULL)
 
 tests_SOURCES =			\

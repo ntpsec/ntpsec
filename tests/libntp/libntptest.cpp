@@ -5,7 +5,6 @@
  */
 
 u_long current_time = 4; // needed by authkeys. Used only in to calculate lifetime.
-volatile int debug = 0;
 const char *progname = "libntptest";
 
 time_t libntptest::nowtime = 0;

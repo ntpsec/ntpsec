@@ -341,9 +341,9 @@ blocking_getaddrinfo(
 	resp = emalloc_zero(resp_octets);
 	gai_resp = (void *)(resp + 1);
 
-	DPRINTF(2, ("blocking_getaddrinfo given node %s serv %s fam %d flags %x\n", 
-		    node, service, gai_req->hints.ai_family,
-		    gai_req->hints.ai_flags));
+	TRACE(2, ("blocking_getaddrinfo given node %s serv %s fam %d flags %x\n", 
+		  node, service, gai_req->hints.ai_family,
+		  gai_req->hints.ai_flags));
 #ifdef DEBUG
 	if (debug >= 2)
 		fflush(stdout);
@@ -376,12 +376,8 @@ blocking_getaddrinfo(
 		if (gai_resp->retry > INITIAL_DNS_RETRY) {
 			time_now = time(NULL);
 			worker_ctx->ignore_scheduled_before = time_now;
-			DPRINTF(1, ("DNS success after retry, ignoring sleeps scheduled before now (%s)",
-				humantime(time_now)));
-#ifdef DEBUG
-			if (debug >= 1)
-				fflush(stdout);
-#endif	
+			TRACE(1, ("DNS success after retry, ignoring sleeps scheduled before now (%s)\n",
+				  humantime(time_now)));
 		}
 	}
 
@@ -500,8 +496,8 @@ getaddrinfo_sometime_complete(
 		if (gai_resp->retry > INITIAL_DNS_RETRY) {
 			time_now = time(NULL);
 			child_ctx->next_dns_timeslot = time_now;
-			DPRINTF(1, ("DNS success after retry, %u next_dns_timeslot reset (%s)",
-				gai_req->dns_idx, humantime(time_now)));
+			TRACE(1, ("DNS success after retry, %u next_dns_timeslot reset (%s)\n",
+				  gai_req->dns_idx, humantime(time_now)));
 		}
 	} else {
 		again = should_retry_dns(gai_resp->retcode,
@@ -592,28 +588,28 @@ void gai_test_callback(int rescode, int gai_errno, void *context, const char *na
 	sockaddr_u addr;
 
 	if (rescode) {
-		DPRINTF(1, ("gai_test_callback context %p error rescode %d %s serv %s\n",
-			    context, rescode, name, service));
+		TRACE(1, ("gai_test_callback context %p error rescode %d %s serv %s\n",
+			  context, rescode, name, service));
 		return;
 	}
 	while (!rescode && NULL != ai_res) {
 		ZERO_SOCK(&addr);
 		memcpy(&addr, ai_res->ai_addr, ai_res->ai_addrlen);
-		DPRINTF(1, ("ctx %p fam %d addr %s canon '%s' type %s at %p ai_addr %p ai_next %p\n", 
-			    context,
-			    AF(&addr),
-			    stoa(&addr), 
-			    (ai_res->ai_canonname)
-				? ai_res->ai_canonname
-				: "",
-			    (SOCK_DGRAM == ai_res->ai_socktype) 
-				? "DGRAM" 
-				: (SOCK_STREAM == ai_res->ai_socktype) 
-					? "STREAM" 
-					: "(other)",
-			    ai_res,
-			    ai_res->ai_addr,
-			    ai_res->ai_next));
+		TRACE(1, ("ctx %p fam %d addr %s canon '%s' type %s at %p ai_addr %p ai_next %p\n", 
+			  context,
+			  AF(&addr),
+			  stoa(&addr), 
+			  (ai_res->ai_canonname)
+			      ? ai_res->ai_canonname
+			      : "",
+			  (SOCK_DGRAM == ai_res->ai_socktype) 
+			      ? "DGRAM" 
+			      : (SOCK_STREAM == ai_res->ai_socktype) 
+				    ? "STREAM" 
+				    : "(other)",
+			  ai_res,
+			  ai_res->ai_addr,
+			  ai_res->ai_next));
 
 		getnameinfo_sometime((sockaddr_u *)ai_res->ai_addr, 128, 32, 0, gni_test_callback, context);
 
@@ -732,9 +728,9 @@ blocking_getnameinfo(
 	resp = emalloc_zero(resp_octets);
 	gni_resp = (void *)((char *)resp + sizeof(*resp));
 
-	DPRINTF(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
-		    stoa(&gni_req->socku), gni_req->flags,
-		    (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
+	TRACE(2, ("blocking_getnameinfo given addr %s flags 0x%x hostlen %lu servlen %lu\n",
+		  stoa(&gni_req->socku), gni_req->flags,
+		  (u_long)gni_req->hostoctets, (u_long)gni_req->servoctets));
 	
 	gni_resp->retcode = getnameinfo(&gni_req->socku.sa,
 					SOCKLEN(&gni_req->socku),
@@ -765,7 +761,7 @@ blocking_getnameinfo(
 		if (gni_req->retry > INITIAL_DNS_RETRY) {
 			time_now = time(NULL);
 			worker_ctx->ignore_scheduled_before = time_now;
-			DPRINTF(1, ("DNS success after retrying, ignoring sleeps scheduled before now (%s)",
+			TRACE(1, ("DNS success after retrying, ignoring sleeps scheduled before now (%s)\n",
 				humantime(time_now)));
 		}
 	}
@@ -836,8 +832,8 @@ getnameinfo_sometime_complete(
 		if (gni_resp->retry > INITIAL_DNS_RETRY) {
 			time_now = time(NULL);
 			child_ctx->next_dns_timeslot = time_now;
-			DPRINTF(1, ("DNS success after retry, %u next_dns_timeslot reset (%s)",
-				gni_req->dns_idx, humantime(time_now)));
+			TRACE(1, ("DNS success after retry, %u next_dns_timeslot reset (%s)\n",
+				  gni_req->dns_idx, humantime(time_now)));
 		}
 	} else {
 		again = should_retry_dns(gni_resp->retcode, gni_resp->gni_errno);
@@ -885,11 +881,11 @@ getnameinfo_sometime_complete(
 void gni_test_callback(int rescode, int gni_errno, sockaddr_u *psau, int flags, const char *host, const char *service, void *context)
 {
 	if (!rescode)
-		DPRINTF(1, ("gni_test_callback got host '%s' serv '%s' for addr %s context %p\n", 
-			    host, service, stoa(psau), context));
+		TRACE(1, ("gni_test_callback got host '%s' serv '%s' for addr %s context %p\n", 
+			  host, service, stoa(psau), context));
 	else
-		DPRINTF(1, ("gni_test_callback context %p rescode %d gni_errno %d flags 0x%x addr %s\n",
-			    context, rescode, gni_errno, flags, stoa(psau)));
+		TRACE(1, ("gni_test_callback context %p rescode %d gni_errno %d flags 0x%x addr %s\n",
+			  context, rescode, gni_errno, flags, stoa(psau)));
 }
 #endif	/* TEST_BLOCKING_WORKER */
 
@@ -1022,18 +1018,18 @@ scheduled_sleep(
 	time_t now;
 
 	if (scheduled < worker_ctx->ignore_scheduled_before) {
-		DPRINTF(1, ("ignoring sleep until %s scheduled at %s (before %s)\n",
-			humantime(earliest), humantime(scheduled),
-			humantime(worker_ctx->ignore_scheduled_before)));
+		TRACE(1, ("ignoring sleep until %s scheduled at %s (before %s)\n",
+			  humantime(earliest), humantime(scheduled),
+			  humantime(worker_ctx->ignore_scheduled_before)));
 		return;
 	}
 
 	now = time(NULL);
 
 	if (now < earliest) {
-		DPRINTF(1, ("sleep until %s scheduled at %s (>= %s)\n",
-			humantime(earliest), humantime(scheduled),
-			humantime(worker_ctx->ignore_scheduled_before)));
+		TRACE(1, ("sleep until %s scheduled at %s (>= %s)\n",
+			  humantime(earliest), humantime(scheduled),
+			  humantime(worker_ctx->ignore_scheduled_before)));
 		if (-1 == worker_sleep(worker_ctx->c, earliest - now)) {
 			/* our sleep was interrupted */
 			now = time(NULL);
@@ -1043,8 +1039,8 @@ scheduled_sleep(
 			next_res_init = worker_ctx->next_res_init;
 			res_init();
 #endif
-			DPRINTF(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)\n",
-				humantime(worker_ctx->ignore_scheduled_before)));
+			TRACE(1, ("sleep interrupted by daemon, ignoring sleeps scheduled before now (%s)\n",
+				  humantime(worker_ctx->ignore_scheduled_before)));
 		}
 	}
 }
@@ -1129,15 +1125,15 @@ should_retry_dns(
 		again = 1;
 # ifdef DEBUG
 		errno_to_str(res_errno, msg, sizeof(msg));
-		DPRINTF(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",
-			    res_errno, msg));
+		TRACE(1, ("intres: EAI_SYSTEM errno %d (%s) means try again, right?\n",
+			  res_errno, msg));
 # endif
 		break;
 #endif
 	}
 
-	DPRINTF(2, ("intres: resolver returned: %s (%d), %sretrying\n",
-		gai_strerror(rescode), rescode, again ? "" : "not "));
+	TRACE(2, ("intres: resolver returned: %s (%d), %sretrying\n",
+		  gai_strerror(rescode), rescode, again ? "" : "not "));
 
 	return again;
 }

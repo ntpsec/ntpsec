@@ -150,13 +150,6 @@ int priority_done = 2;		/* 0 - Set priority */
 				/* 2 - Don't set priority */
 				/* 1 and 2 are pretty much the same */
 
-#ifdef DEBUG
-/*
- * Debugging flag
- */
-volatile int debug = 0;		/* No debugging by default */
-#endif
-
 int	listen_to_virtual_ips = 1;
 
 /*

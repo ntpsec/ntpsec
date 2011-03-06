@@ -34,7 +34,7 @@ sendpkt (
 			/* oh well */
 		}
 	} else {
-		DPRINTF(3, ("Packet sent.\n"));
+		TRACE(3, ("Packet sent.\n"));
 	}
 }
 
@@ -164,8 +164,8 @@ unusable:
 		}
 		/* Yay! Things worked out! */
 		is_authentic = TRUE;
-		DPRINTF(1, ("sntp %s: packet from %s authenticated using key id %d.\n",
-			func_name, stoa(sender), key_id));
+		TRACE(1, ("sntp %s: packet from %s authenticated using key id %d.\n",
+			  func_name, stoa(sender), key_id));
 		break;
 
 	default:
@@ -209,11 +209,11 @@ unusable:
 	if (STRATUM_PKT_UNSPEC == rpkt->stratum) {
 		char *ref_char;
 
-		DPRINTF(1, ("%s: Stratum unspecified, going to check for KOD (stratum: %d)\n", 
-			func_name, rpkt->stratum));
+		TRACE(1, ("%s: Stratum unspecified, going to check for KOD (stratum: %d)\n", 
+			  func_name, rpkt->stratum));
 		ref_char = (char *) &rpkt->refid;
-		DPRINTF(1, ("%s: Packet refid: %c%c%c%c\n", func_name,
-			ref_char[0], ref_char[1], ref_char[2], ref_char[3]));
+		TRACE(1, ("%s: Packet refid: %c%c%c%c\n", func_name,
+			  ref_char[0], ref_char[1], ref_char[2], ref_char[3]));
 		/* If it's a KOD packet we'll just use the KOD information */
 		if (ref_char[0] != 'X') {
 			if (strncmp(ref_char, "DENY", 4) == 0)

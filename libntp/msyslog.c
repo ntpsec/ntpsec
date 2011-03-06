@@ -471,7 +471,7 @@ change_logfile(
 		} else
 #endif
 			abs_fname = estrdup(log_fname);
-		DPRINTF(1, ("attempting to open log %s\n", abs_fname));
+		TRACE(1, ("attempting to open log %s\n", abs_fname));
 		new_file = fopen(abs_fname, "a");
 	}
 

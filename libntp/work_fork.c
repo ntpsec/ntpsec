@@ -78,8 +78,8 @@ worker_sleep(
 		if (!worker_sighup_received)
 			sleep_remain = sleep(sleep_remain);
 		if (worker_sighup_received) {
-			DPRINTF(1, ("worker SIGHUP with %us left to sleep",
-				    sleep_remain));
+			TRACE(1, ("worker SIGHUP with %us left to sleep",
+				  sleep_remain));
 			worker_sighup_received = 0;
 			return -1;
 		}
@@ -233,8 +233,8 @@ receive_blocking_req_internal(
 		msyslog(LOG_ERR,
 			"receive_blocking_req_internal: pipe read %m\n");
 	} else if (0 == rc) {
-		DPRINTF(4, ("parent closed request pipe, child %d terminating\n",
-			c->pid));
+		TRACE(4, ("parent closed request pipe, child %d terminating\n",
+			  c->pid));
 	} else if (rc != sizeof(hdr)) {
 		msyslog(LOG_ERR,
 			"receive_blocking_req_internal: short header read %d of %lu\n",
@@ -288,10 +288,10 @@ send_blocking_resp_internal(
 		return 0;
 
 	if (rc < 0)
-		DPRINTF(1, ("send_blocking_resp_internal: pipe write %m\n"));
+		TRACE(1, ("send_blocking_resp_internal: pipe write %m\n"));
 	else
-		DPRINTF(1, ("send_blocking_resp_internal: short write %d of %ld\n",
-			rc, octets));
+		TRACE(1, ("send_blocking_resp_internal: short write %d of %ld\n",
+			  rc, octets));
 
 	return -1;
 }
@@ -313,15 +313,15 @@ receive_blocking_resp_internal(
 	rc = read(c->resp_read_pipe, &hdr, sizeof(hdr));
 
 	if (rc < 0) {
-		DPRINTF(1, ("receive_blocking_resp_internal: pipe read %m\n"));
+		TRACE(1, ("receive_blocking_resp_internal: pipe read %m\n"));
 	} else if (0 == rc) {
 		/* this is the normal child exited indication */
 	} else if (rc != sizeof(hdr)) {
-		DPRINTF(1, ("receive_blocking_resp_internal: short header read %d of %lu\n",
-			    rc, (u_long)sizeof(hdr)));
+		TRACE(1, ("receive_blocking_resp_internal: short header read %d of %lu\n",
+			  rc, (u_long)sizeof(hdr)));
 	} else if (BLOCKING_RESP_MAGIC != hdr.magic_sig) {
-		DPRINTF(1, ("receive_blocking_resp_internal: header mismatch (0x%x)\n",
-			    hdr.magic_sig));
+		TRACE(1, ("receive_blocking_resp_internal: header mismatch (0x%x)\n",
+			  hdr.magic_sig));
 	} else {
 		INSIST(sizeof(hdr) < hdr.octets &&
 		       hdr.octets < 16 * 1024);
@@ -333,10 +333,10 @@ receive_blocking_resp_internal(
 			  octets);
 
 		if (rc < 0)
-			DPRINTF(1, ("receive_blocking_resp_internal: pipe data read %m\n"));
+			TRACE(1, ("receive_blocking_resp_internal: pipe data read %m\n"));
 		else if (rc < octets)
-			DPRINTF(1, ("receive_blocking_resp_internal: short read %d of %ld\n",
-				    rc, octets));
+			TRACE(1, ("receive_blocking_resp_internal: short read %d of %ld\n",
+				  rc, octets));
 		else
 			return resp;
 	}
@@ -450,7 +450,7 @@ fork_blocking_child(
 
 	if (childpid) {
 		/* this is the parent */
-		DPRINTF(1, ("forked worker child (pid %d)\n", childpid));
+		TRACE(1, ("forked worker child (pid %d)\n", childpid));
 		c->pid = childpid;
 		c->ispipe = is_pipe;
 

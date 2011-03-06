@@ -248,7 +248,6 @@ char *		symb[1024];	/* map token ID to symbolic name */
 
 /* for libntp */
 const char *	progname = "keyword-gen";
-volatile int	debug = 1;
 
 int		main			(int, char **);
 static void	generate_preamble	(void);
@@ -268,6 +267,8 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Usage:\n%s t_header.h\n", argv[0]);
 		exit(1);
 	}
+	debug = 1;
+
 	populate_symb(argv[1]);
 
 	generate_preamble();

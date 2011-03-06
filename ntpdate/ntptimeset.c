@@ -192,11 +192,6 @@ static timer_t ntpdate_timerid;
 #define PEER_SHIFT	8	/* 8 suitable for crystal time base */
 
 /*
- * Debugging flag
- */
-volatile int debug = 0;
-
-/*
  * File descriptor masks etc. for call to select
  */
 int fd;
