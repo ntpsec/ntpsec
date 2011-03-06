@@ -11,7 +11,11 @@
  * "debug".  The libntp and utilities variant always declares debug,
  * as it is used in those codebases even without DEBUG defined.
  */
+#ifndef DECLCOND_H
+#define DECLCOND_H
 
 /* #ifdef DEBUG */		/* uncommented in ntpd/declcond.h */
 extern int debug;
 /* #endif */			/* uncommented in ntpd/declcond.h */
+
+#endif	/* DECLCOND_H */
