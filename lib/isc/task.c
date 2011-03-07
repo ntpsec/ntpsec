@@ -186,12 +186,13 @@ isc_task_create(isc_taskmgr_t *manager, unsigned int quantum,
 	if (task == NULL)
 		return (ISC_R_NOMEMORY);
 	XTRACE("isc_task_create");
-	task->manager = manager;
 	result = isc_mutex_init(&task->lock);
 	if (result != ISC_R_SUCCESS) {
 		isc_mem_put(manager->mctx, task, sizeof(*task));
 		return (result);
 	}
+	LOCK(&task->lock);	/* helps coverity analysis noise ratio */
+	task->manager = manager;
 	task->state = task_state_idle;
 	task->references = 1;
 	INIT_LIST(task->events);
@@ -203,6 +204,7 @@ isc_task_create(isc_taskmgr_t *manager, unsigned int quantum,
 	task->tag = NULL;
 	INIT_LINK(task, link);
 	INIT_LINK(task, ready_link);
+	UNLOCK(&task->lock);
 
 	exiting = ISC_FALSE;
 	LOCK(&manager->lock);
@@ -1057,11 +1059,12 @@ isc_taskmgr_create(isc_mem_t *mctx, unsigned int workers,
 	manager = isc_mem_get(mctx, sizeof(*manager));
 	if (manager == NULL)
 		return (ISC_R_NOMEMORY);
-	manager->magic = TASK_MANAGER_MAGIC;
-	manager->mctx = NULL;
 	result = isc_mutex_init(&manager->lock);
 	if (result != ISC_R_SUCCESS)
 		goto cleanup_mgr;
+	LOCK(&manager->lock);
+	manager->magic = TASK_MANAGER_MAGIC;
+	manager->mctx = NULL;
 
 #ifdef ISC_PLATFORM_USETHREADS
 	manager->workers = 0;
@@ -1100,7 +1103,6 @@ isc_taskmgr_create(isc_mem_t *mctx, unsigned int workers,
 	isc_mem_attach(mctx, &manager->mctx);
 
 #ifdef ISC_PLATFORM_USETHREADS
-	LOCK(&manager->lock);
 	/*
 	 * Start workers.
 	 */
@@ -1121,6 +1123,7 @@ isc_taskmgr_create(isc_mem_t *mctx, unsigned int workers,
 	isc_thread_setconcurrency(workers);
 #else /* ISC_PLATFORM_USETHREADS */
 	manager->refs = 1;
+	UNLOCK(&manager->lock);
 	taskmgr = manager;
 #endif /* ISC_PLATFORM_USETHREADS */
 
@@ -1134,6 +1137,7 @@ isc_taskmgr_create(isc_mem_t *mctx, unsigned int workers,
  cleanup_threads:
 	isc_mem_free(mctx, manager->threads);
  cleanup_lock:
+	UNLOCK(&manager->lock);
 	DESTROYLOCK(&manager->lock);
 #endif
  cleanup_mgr:

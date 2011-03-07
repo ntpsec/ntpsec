@@ -2,6 +2,9 @@
   use the "debug" variable regardless of #ifdef DEBUG.
 * Declare debug in libntp instead of each program.  Expose extern
   declaration to utilities, libntp, and DEBUG ntpd.
+* Lock under-construction task, taskmgr objects to satisfy Coverity's
+  mostly-correct assumptions about which variables are protected by
+  which locks.
 (4.2.7p136) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1839] 4.2.7p135 still installs libevent ev*.h headers.
 (4.2.7p135) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
