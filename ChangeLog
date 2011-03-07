@@ -1,3 +1,4 @@
+(4.2.7p137) 2011/03/07 Released by Harlan Stenn <stenn@ntp.org>
 * Use TRACE() instead of DPRINTF() for libntp and utilities, which
   use the "debug" variable regardless of #ifdef DEBUG.
 * Declare debug in libntp instead of each program.  Expose extern
