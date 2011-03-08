@@ -144,6 +144,8 @@ main(
 	double lat2, long2;
 	double lat3, long3;
 
+	init_lib();
+
 	progname = argv[0];
 	while ((c = ntp_getopt(argc, argv, "dh:CWG")) != EOF)
 	    switch (c) {

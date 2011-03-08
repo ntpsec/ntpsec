@@ -255,6 +255,8 @@ main(
 	int recommend_tickadj;
 	long tmp;
 
+	init_lib();
+
 	progname = argv[0];
 	while ((c = ntp_getopt(argc, argv, "a:Adkpqst:")) != EOF)
 	{
