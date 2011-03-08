@@ -1,3 +1,4 @@
+* [Bug 1846] MacOSX: debug symbol not found by propdelay or tickadj.
 (4.2.7p137) 2011/03/07 Released by Harlan Stenn <stenn@ntp.org>
 * Use TRACE() instead of DPRINTF() for libntp and utilities, which
   use the "debug" variable regardless of #ifdef DEBUG.
