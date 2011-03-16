@@ -1,3 +1,4 @@
+* [Bug 1848] make check ntpd --saveconfigquit clutters syslog.
 (4.2.7p138) 2011/03/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1846] MacOSX: debug symbol not found by propdelay or tickadj.
 (4.2.7p137) 2011/03/07 Released by Harlan Stenn <stenn@ntp.org>
@@ -1191,7 +1192,7 @@
 * [Bug 1343] ntpd/ntp_io.c close_fd() does not compile on Solaris 7.
 * [Bug 1353] ntpq "rv 0 settimeofday" always shows UNKNOWN on unix.
 * Do not attempt to execute built binaries from ntpd/Makefile when
-  cross-compiling (keyword-gen and ntpd --saveconfigquit).
+  cross-compiling (keyword-gen and ntpd --saveconfigqui).
 * sntp/main.c: Remove duplicate global adr_buf[] (also defined in
   networking.c) which Piotr Grudzinski identified breaking his build.
 * Correct in6addr_any test in configure.ac to attempt link too.

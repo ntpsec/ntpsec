@@ -456,12 +456,43 @@ ntpdmain(
 	struct rlimit	rl;
 #  endif
 # endif
+# ifdef HAVE_UMASK
+	uv = umask(0);
+	if (uv)
+		umask(uv);
+	else
+		umask(022);
+# endif
 
 	progname = argv[0];
 	initializing = TRUE;		/* mark that we are initializing */
 	parse_cmdline_opts(&argc, &argv);
-	/* Open the log file */
-	init_logging(progname, NLOG_SYNCMASK, Version, TRUE);
+# ifdef DEBUG
+	debug = DESC(DEBUG_LEVEL).optOccCt;
+# endif
+
+	if (HAVE_OPT(NOFORK) || HAVE_OPT(QUIT)
+# ifdef DEBUG
+	    || debug
+# endif
+	    || HAVE_OPT(SAVECONFIGQUIT))
+		nofork = TRUE;
+
+	init_logging(progname, NLOG_SYNCMASK, TRUE);
+	/* honor -l/--logfile option to log to a file */
+	if (HAVE_OPT(LOGFILE)) {
+		logfilename = OPT_ARG(LOGFILE);
+		syslogit = FALSE;
+		change_logfile(logfilename, FALSE);
+	} else {
+		logfilename = NULL;
+		if (nofork) {
+			msyslog_term = FALSE;
+			syslogit = FALSE;
+			change_logfile("stderr", FALSE);
+		}
+	}
+	msyslog(LOG_NOTICE, "%s\n", Version);
 
 	/*
 	 * Install trap handlers to log errors and assertion failures.
@@ -471,37 +502,16 @@ ntpdmain(
 	isc_error_setfatal(library_fatal_error);
 	isc_error_setunexpected(library_unexpected_error);
 
-# ifdef HAVE_UMASK
-	uv = umask(0);
-	if (uv)
-		umask(uv);
-	else
-		umask(022);
-# endif
-
 	/* MPE lacks the concept of root */
 # if defined(HAVE_GETUID) && !defined(MPE)
 	uid = getuid();
 	if (uid && !HAVE_OPT( SAVECONFIGQUIT )) {
+		msyslog_term = TRUE;
 		msyslog(LOG_ERR,
 			"must be run as root, not uid %ld", (long)uid);
-		printf("%s must be run as root, not uid %ld\n",
-		       progname, (long)uid);
 		exit(1);
 	}
 # endif
-
-# ifdef DEBUG
-	debug = DESC(DEBUG_LEVEL).optOccCt;
-	DPRINTF(1, ("%s\n", Version));
-# endif
-
-	/* honor -l/--logfile option to log to a file */
-	if (HAVE_OPT(LOGFILE))
-		logfilename = OPT_ARG(LOGFILE);
-	else
-		logfilename = NULL;
-	setup_logfile(logfilename, Version);
 
 /*
  * Enable the Multi-Media Timer for Windows?
@@ -510,16 +520,6 @@ ntpdmain(
 	if (HAVE_OPT( MODIFYMMTIMER ))
 		set_mm_timer(MM_TIMER_HIRES);
 # endif
-
-	if (HAVE_OPT( NOFORK ) || HAVE_OPT( QUIT )
-# ifdef DEBUG
-	    || debug
-# endif
-	    || HAVE_OPT( SAVECONFIGQUIT )) {
-		nofork = 1;
-		/* duplicate all syslog to stdout */
-		msyslog_term = TRUE;
-	}
 
 	if (HAVE_OPT( NOVIRTUALIPS ))
 		listen_to_virtual_ips = 0;
@@ -623,9 +623,9 @@ ntpdmain(
 		dup2(0, 1);
 		dup2(0, 2);
 
-		init_logging(progname, 0, NULL, TRUE);
+		init_logging(progname, 0, TRUE);
 		/* we lost our logfile (if any) daemonizing */
-		setup_logfile(logfilename, NULL);
+		setup_logfile(logfilename);
 
 #  ifdef SYS_DOMAINOS
 		{
@@ -693,7 +693,7 @@ ntpdmain(
 	/*
 	 * The default RLIMIT_MEMLOCK is very low on Linux systems.
 	 * Unless we increase this limit malloc calls are likely to
-	 * fail if we drop root privlege.  To be useful the value
+	 * fail if we drop root privilege.  To be useful the value
 	 * has to be larger than the largest ntpd resident set size.
 	 */
 	rl.rlim_cur = rl.rlim_max = 32 * 1024 * 1024;
@@ -704,7 +704,8 @@ ntpdmain(
 	/*
 	 * lock the process into memory
 	 */
-	if (mlockall(MCL_CURRENT|MCL_FUTURE) < 0)
+	if (!HAVE_OPT(SAVECONFIGQUIT) &&
+	    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 		msyslog(LOG_ERR, "mlockall(): %m");
 # else	/* !HAVE_MLOCKALL || !MCL_CURRENT || !MCL_FUTURE follows */
 #  ifdef HAVE_PLOCK
@@ -721,14 +722,14 @@ ntpdmain(
 	/*
 	 * lock the process into memory
 	 */
-	if (plock(PROCLOCK) < 0)
+	if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(PROCLOCK))
 		msyslog(LOG_ERR, "plock(PROCLOCK): %m");
 #   else	/* !PROCLOCK follows  */
 #    ifdef TXTLOCK
 	/*
 	 * Lock text into ram
 	 */
-	if (plock(TXTLOCK) < 0)
+	if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(TXTLOCK))
 		msyslog(LOG_ERR, "plock(TXTLOCK) error: %m");
 #    else	/* !TXTLOCK follows */
 	msyslog(LOG_ERR, "plock() - don't know what to lock!");

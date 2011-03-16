@@ -12,7 +12,7 @@ sntp_init_logging(
 	)
 {
 	msyslog_term = TRUE;
-	init_logging(prog, 0, NULL, FALSE);
+	init_logging(prog, 0, FALSE);
 }
 
 
@@ -21,7 +21,8 @@ open_logfile(
 	const char *logfile
 	)
 {
-	change_logfile(logfile, Version);
+	change_logfile(logfile, FALSE);
+	msyslog(LOG_NOTICE, "%s\n", Version);
 	atexit(cleanup_log);
 }
 

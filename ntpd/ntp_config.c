@@ -3378,7 +3378,7 @@ config_vars(
 			break;
 
 		case T_Logfile:
-			if (-1 == change_logfile(curr_var->value.s, 0))
+			if (-1 == change_logfile(curr_var->value.s, TRUE))
 				msyslog(LOG_ERR,
 					"Cannot open logfile %s: %m",
 					curr_var->value.s);
