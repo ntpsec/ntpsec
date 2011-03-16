@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (clktest-opts.c)
  *  
- *  It has been AutoGen-ed  March  8, 2011 at 11:13:24 AM by AutoGen 5.11.6
+ *  It has been AutoGen-ed  March 16, 2011 at 11:34:28 AM by AutoGen 5.11.6
  *  From the definitions    clktest-opts.def
  *  and the template file   options
  *
@@ -325,7 +325,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[8] = "CLKTEST";
 static char const zUsageTitle[129] =
-"clktest - test the clock line discipline - Ver. 4.2.7p138\n\
+"clktest - test the clock line discipline - Ver. 4.2.7p139\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... <tty_device>\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {

@@ -1,3 +1,4 @@
+(4.2.7p139) 2011/03/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1848] make check ntpd --saveconfigquit clutters syslog.
 (4.2.7p138) 2011/03/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1846] MacOSX: debug symbol not found by propdelay or tickadj.
