@@ -431,8 +431,7 @@ change_logfile(
 	 * and it's still open, there's nothing to do here.
 	 */
 	if (syslog_file != NULL && syslog_fname != NULL &&
-	    (log_fname == syslog_fname ||
-	     0 == strcmp(syslog_fname, log_fname)))
+	    0 == strcmp(syslog_fname, log_fname))
 		return 0;
 
 	if (0 == strcmp(log_fname, "stderr")) {
@@ -486,7 +485,9 @@ change_logfile(
 	    fileno(syslog_file) != fileno(new_file))
 		fclose(syslog_file);
 	syslog_file = new_file;
-	if (log_fname != syslog_abs_fname) {
+	if (log_fname == syslog_abs_fname) {
+		free(abs_fname);
+	} else {
 		if (syslog_abs_fname != NULL &&
 		    syslog_abs_fname != syslog_fname)
 			free(syslog_abs_fname);

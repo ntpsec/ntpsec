@@ -509,8 +509,8 @@ fork_blocking_child(
 	signal_no_reset(SIGPOLL, SIG_DFL);
 #endif
 	signal_no_reset(SIGHUP, worker_sighup);
-	init_logging("ntp_intres", 0, NULL, FALSE);
-	setup_logfile(NULL, NULL);
+	init_logging("ntp_intres", 0, FALSE);
+	setup_logfile(NULL);
 
 	/*
 	 * And now back to the portable code

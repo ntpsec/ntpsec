@@ -191,6 +191,7 @@ isc_task_create(isc_taskmgr_t *manager, unsigned int quantum,
 		isc_mem_put(manager->mctx, task, sizeof(*task));
 		return (result);
 	}
+	LOCK(&manager->lock);
 	LOCK(&task->lock);	/* helps coverity analysis noise ratio */
 	task->manager = manager;
 	task->state = task_state_idle;
@@ -205,6 +206,7 @@ isc_task_create(isc_taskmgr_t *manager, unsigned int quantum,
 	INIT_LINK(task, link);
 	INIT_LINK(task, ready_link);
 	UNLOCK(&task->lock);
+	UNLOCK(&manager->lock);
 
 	exiting = ISC_FALSE;
 	LOCK(&manager->lock);

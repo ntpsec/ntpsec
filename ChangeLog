@@ -1,3 +1,6 @@
+* [Bug 1848] ntpd 4.2.7p139 --disable-thread-support does not compile.
+* Add --disable-thread-support to one flock-build variation.
+* One more lock-while-init in lib/isc/task.c to quiet lock analysis.
 (4.2.7p139) 2011/03/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1848] make check ntpd --saveconfigquit clutters syslog.
 (4.2.7p138) 2011/03/08 Released by Harlan Stenn <stenn@ntp.org>
