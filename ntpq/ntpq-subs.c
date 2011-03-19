@@ -73,6 +73,7 @@ static	void	sysstats	(struct parse *, FILE *);
 static	void	sysinfo		(struct parse *, FILE *);
 static	void	kerninfo	(struct parse *, FILE *);
 static	void	monstats	(struct parse *, FILE *);
+static	void	iostats		(struct parse *, FILE *);
 
 /*
  * Commands we understand.	Ntpdc imports this.
@@ -189,6 +190,9 @@ struct xcmd opcmds[] = {
 	{ "authinfo", authinfo, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display symmetric authentication counters" },
+	{ "iostats", iostats, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "display network input and output counters" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -3420,7 +3424,36 @@ monstats(
 
 
 /*
- * monstats - implements ntpq -c monstats
+ * iostats - ntpq -c iostats - network input and output counters
+ */
+static void
+iostats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc iostats_vdc[] = {
+	{ "iostats_reset",	"time since reset:     ", NTP_STR },
+	{ "total_rbuf",		"receive buffers:      ", NTP_STR },
+	{ "free_rbuf",		"free receive buffers: ", NTP_STR },
+	{ "used_rbuf",		"used receive buffers: ", NTP_STR },
+	{ "rbuf_lowater",	"low water refills:    ", NTP_STR },
+	{ "io_dropped",		"dropped packets:      ", NTP_STR },
+	{ "io_ignored",		"ignored packets:      ", NTP_STR },
+	{ "io_received",	"received packets:     ", NTP_STR },
+	{ "io_sent",		"packets sent:         ", NTP_STR },
+	{ "io_sendfailed",	"packet send failures: ", NTP_STR },
+	{ "io_wakeups",		"input wakeups:        ", NTP_STR },
+	{ "io_goodwakeups",	"useful input wakeups: ", NTP_STR },
+	{ NULL,			NULL,			0	}
+    };
+
+	collect_display_vdc(0, iostats_vdc, FALSE, fp);
+}
+
+
+/*
+ * authinfo - implements ntpq -c authinfo
  */
 static void
 authinfo(

@@ -1323,7 +1323,7 @@ refclock_pps(
 	else
 		return (0);
 
-	if (timeout.tv_sec == ap->ts.tv_sec)
+	if (0 == memcmp(&timeout, &ap->ts, sizeof(timeout)))
 		return (0);
 
 	/*

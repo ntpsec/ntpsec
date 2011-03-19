@@ -197,7 +197,19 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_K_PPS_STBEXC		72
 #define	CS_KERN_FIRST		CS_K_OFFSET
 #define	CS_KERN_LAST		CS_K_PPS_STBEXC
-#define	CS_MAX_NOAUTOKEY	CS_KERN_LAST
+#define	CS_IOSTATS_RESET	73
+#define	CS_TOTAL_RBUF		74
+#define	CS_FREE_RBUF		75
+#define	CS_USED_RBUF		76
+#define	CS_RBUF_LOWATER		77
+#define	CS_IO_DROPPED		78
+#define	CS_IO_IGNORED		79
+#define	CS_IO_RECEIVED		80
+#define	CS_IO_SENT		81
+#define	CS_IO_SENDFAILED	82
+#define	CS_IO_WAKEUPS		83
+#define	CS_IO_GOODWAKEUPS	84
+#define	CS_MAX_NOAUTOKEY	CS_IO_GOODWAKEUPS
 #ifdef AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
@@ -376,6 +388,18 @@ static const struct ctl_var sys_var[] = {
 	{ CS_K_PPS_CALIBERRS,	RO, "kppscaliberrs" },	/* 70 */
 	{ CS_K_PPS_JITEXC,	RO, "kppsjitexc" },	/* 71 */
 	{ CS_K_PPS_STBEXC,	RO, "kppsstbexc" },	/* 72 */
+	{ CS_IOSTATS_RESET,	RO, "iostats_reset" },	/* 73 */
+	{ CS_TOTAL_RBUF,	RO, "total_rbuf" },	/* 74 */
+	{ CS_FREE_RBUF,		RO, "free_rbuf" },	/* 75 */
+	{ CS_USED_RBUF,		RO, "used_rbuf" },	/* 76 */
+	{ CS_RBUF_LOWATER,	RO, "rbuf_lowater" },	/* 77 */
+	{ CS_IO_DROPPED,	RO, "io_dropped" },	/* 78 */
+	{ CS_IO_IGNORED,	RO, "io_ignored" },	/* 79 */
+	{ CS_IO_RECEIVED,	RO, "io_received" },	/* 80 */
+	{ CS_IO_SENT,		RO, "io_sent" },	/* 81 */
+	{ CS_IO_SENDFAILED,	RO, "io_sendfailed" },	/* 82 */
+	{ CS_IO_WAKEUPS,	RO, "io_wakeups" },	/* 83 */
+	{ CS_IO_GOODWAKEUPS,	RO, "io_goodwakeups" },	/* 84 */
 #ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
@@ -2125,6 +2149,55 @@ ctl_putsys(
 			ctl_putint,
 			(sys_var[varid].text, ntx.stbcnt)
 		);
+		break;
+
+	case CS_IOSTATS_RESET:
+		ctl_putuint(sys_var[varid].text,
+			    current_time - io_timereset);
+		break;
+
+	case CS_TOTAL_RBUF:
+		ctl_putuint(sys_var[varid].text, total_recvbuffs());
+		break;
+
+	case CS_FREE_RBUF:
+		ctl_putuint(sys_var[varid].text, free_recvbuffs());
+		break;
+
+	case CS_USED_RBUF:
+		ctl_putuint(sys_var[varid].text, full_recvbuffs());
+		break;
+
+	case CS_RBUF_LOWATER:
+		ctl_putuint(sys_var[varid].text, lowater_additions());
+		break;
+
+	case CS_IO_DROPPED:
+		ctl_putuint(sys_var[varid].text, packets_dropped);
+		break;
+
+	case CS_IO_IGNORED:
+		ctl_putuint(sys_var[varid].text, packets_ignored);
+		break;
+
+	case CS_IO_RECEIVED:
+		ctl_putuint(sys_var[varid].text, packets_received);
+		break;
+
+	case CS_IO_SENT:
+		ctl_putuint(sys_var[varid].text, packets_sent);
+		break;
+
+	case CS_IO_SENDFAILED:
+		ctl_putuint(sys_var[varid].text, packets_notsent);
+		break;
+
+	case CS_IO_WAKEUPS:
+		ctl_putuint(sys_var[varid].text, handler_calls);
+		break;
+
+	case CS_IO_GOODWAKEUPS:
+		ctl_putuint(sys_var[varid].text, handler_pkts);
 		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:

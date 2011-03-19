@@ -198,6 +198,7 @@ iocompletionthread(void *NotUsed)
 			DPRINTF(2, ("Overlapped IO Thread Exiting\n"));
 			break; /* fail */
 		}
+		handler_calls++;
 		lpo = CONTAINEROF(pol, olplus, ol);
 		rio = (struct refclockio *)key;
 		
@@ -584,8 +585,9 @@ OnSerialReadComplete(
 		buff->recv_length = (int) Bytes;
 		buff->receiver = rio->clock_recv;
 		buff->dstadr = NULL;
-		buff->recv_srcclock = rio->srcclock;
+		buff->recv_peer = rio->srcclock;
 		packets_received++;
+		handler_pkts++;
 		/*
 		 * Eat the first line of input as it's possibly
 		 * partial and if a PPS is present, it may not 
@@ -610,7 +612,7 @@ OnSerialReadComplete(
 			buff->fd = rio->fd;
 			buff->receiver = rio->clock_recv;
 			buff->dstadr = NULL;
-			buff->recv_srcclock = rio->srcclock;
+			buff->recv_peer = rio->srcclock;
 			add_full_recv_buffer(buff);
 			/*
 			 * Now signal we have something to process
@@ -677,9 +679,10 @@ OnRawSerialReadComplete(
 		rbufp->dstadr = NULL;
 		rbufp->recv_time = arrival_time;
 		rbufp->receiver = rio->clock_recv;
-		rbufp->recv_srcclock = rio->srcclock;
+		rbufp->recv_peer = rio->srcclock;
 		rbufp->fd = rio->fd; /* was handle */
 		packets_received++;
+		handler_pkts++;
 		add_full_recv_buffer(rbufp);
 		/*
 		 * Now signal we have something to process
@@ -847,6 +850,7 @@ OnSocketRecv(ULONG_PTR i, olplus *lpo, DWORD Bytes, int errstatus)
 		buff->receiver = &receive; 
 		buff->dstadr = inter;
 		packets_received++;
+		handler_pkts++;
 		inter->received++;
 		add_full_recv_buffer(buff);
 
