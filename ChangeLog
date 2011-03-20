@@ -1,4 +1,5 @@
 * Add "ntpq -c iostats" similar to "ntpdc -c iostats".
+* Compare entire timestamp to reject duplicates in refclock_pps().
 (4.2.7p140) 2011/03/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1848] ntpd 4.2.7p139 --disable-thread-support does not compile.
 * Add --disable-thread-support to one flock-build variation.
