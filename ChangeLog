@@ -1,3 +1,5 @@
+* [Bug 1844] ntpd 4.2.7p131 NetBSD, --gc-sections links bad executable.
+* Fix "make distcheck" break in libevent/sample caused by typo.
 (4.2.7p141) 2011/03/20 Released by Harlan Stenn <stenn@ntp.org>
 * Add "ntpq -c iostats" similar to "ntpdc -c iostats".
 * Compare entire timestamp to reject duplicates in refclock_pps().
