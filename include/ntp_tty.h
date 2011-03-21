@@ -74,16 +74,18 @@
 #endif
 
 /*
- * Line discipline flags. These require line discipline or streams
- * modules to be installed/loaded in the kernel. If specified, but not
- * installed, the code runs as if unspecified.
+ * Line discipline flags.  The depredated ones required line discipline
+ * or streams modules to be installed/loaded in the kernel and are now
+ * ignored.  Leave the LDISC_CLK and other deprecated symbols defined
+ * until 2013 or 2014 to avoid complicating the use of newer drivers on
+ * older ntpd, which is often as easy as dropping in the refclock *.c.
  */
 #define LDISC_STD	0x000	/* standard */
-#define LDISC_CLK	0x001	/* tty_clk \n intercept */
-#define LDISC_CLKPPS	0x002	/* tty_clk \377 intercept */
-#define LDISC_ACTS	0x004	/* tty_clk #* intercept */
+#define LDISC_CLK	0x001	/* depredated tty_clk \n */
+#define LDISC_CLKPPS	0x002	/* depredated tty_clk \377 */
+#define LDISC_ACTS	0x004	/* depredated tty_clk #* */
 #define LDISC_CHU	0x008	/* depredated */
-#define LDISC_PPS	0x010	/* ppsclock, ppsapi */
+#define LDISC_PPS	0x010	/* depredated */
 #define LDISC_RAW	0x020	/* raw binary */
 #define LDISC_ECHO	0x040	/* enable echo */
 #define	LDISC_REMOTE	0x080	/* remote mode */

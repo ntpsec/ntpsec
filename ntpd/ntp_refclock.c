@@ -21,16 +21,6 @@
 
 #ifdef REFCLOCK
 
-#ifdef TTYCLK
-# ifdef HAVE_SYS_CLKDEFS_H
-#  include <sys/clkdefs.h>
-#  include <stropts.h>
-# endif
-# ifdef HAVE_SYS_SIO_H
-#  include <sys/sio.h>
-# endif
-#endif /* TTYCLK */
-
 #ifdef KERNEL_PLL
 #include "ntp_syscall.h"
 #endif /* KERNEL_PLL */
@@ -50,8 +40,8 @@
  * clock data on through the filters.  Routines refclock_peer() and
  * refclock_unpeer() are called to initialize and terminate reference
  * clock associations.  A set of utility routines is included to open
- * serial devices, process sample data, edit input lines to extract
- * embedded timestamps and to perform various debugging functions.
+ * serial devices, process sample data, and to perform various debugging
+ * functions.
  *
  * The main interface used by these routines is the refclockproc
  * structure, which contains for most drivers the decimal equivalants
@@ -70,10 +60,6 @@
  */
 #define FUDGEFAC	.1	/* fudge correction factor */
 #define LF		0x0a	/* ASCII LF */
-
-#ifdef PPS
-int	fdpps;			/* ppsclock legacy */
-#endif /* PPS */
 
 int	cal_enable;		/* enable refclock calibrate */
 
@@ -623,9 +609,7 @@ refclock_gtlin(
  * followed by a NULL character ('\0'), which is not included in the
  * count.
  *
- * If a timestamp is present in the timecode, as produced by the tty_clk
- * STREAMS module, it returns that as the timestamp; otherwise, it
- * returns the buffer timestamp.
+ * *tsptr receives a copy of the buffer timestamp.
  */
 int
 refclock_gtraw(
@@ -636,45 +620,14 @@ refclock_gtraw(
 	)
 {
 	char	*dpt, *dpend, *dp;
-	l_fp	trtmp, tstmp;
 	int	i;
 
-	/*
-	 * Check for the presence of a timestamp left by the tty_clock
-	 * module and, if present, use that instead of the buffer
-	 * timestamp captured by the I/O routines. We recognize a
-	 * timestamp by noting its value is earlier than the buffer
-	 * timestamp, but not more than one second earlier.
-	 */
 	dpt = (char *)rbufp->recv_buffer;
 	dpend = dpt + rbufp->recv_length;
-	trtmp = rbufp->recv_time;
-	if (dpend >= dpt + 8) {
-		if (buftvtots(dpend - 8, &tstmp)) {
-			L_SUB(&trtmp, &tstmp);
-			if (trtmp.l_ui == 0) {
-#ifdef DEBUG
-				if (debug > 1) {
-					printf(
-					    "refclock_gtlin: fd %d ldisc %s",
-					    rbufp->fd, lfptoa(&trtmp,
-					    6));
-					get_systime(&trtmp);
-					L_SUB(&trtmp, &tstmp);
-					printf(" sigio %s\n",
-					    lfptoa(&trtmp, 6));
-				}
-#endif
-				dpend -= 8;
-				trtmp = tstmp;
-			} else
-				trtmp = rbufp->recv_time;
-		}
-	}
 
 	/*
 	 * Copy the raw buffer to the user string. The string is padded
-	 * with a NULL, which is not included in the character count.
+	 * with a NUL, which is not included in the character count.
 	 */
 	if (dpend - dpt > bmax - 1)
 		dpend = dpt + bmax - 1;
@@ -682,12 +635,10 @@ refclock_gtraw(
 		*dp++ = *dpt;
 	*dp = '\0';
 	i = dp - lineptr;
-#ifdef DEBUG
-	if (debug > 1)
-		printf("refclock_gtraw: fd %d time %s timecode %d %s\n",
-		    rbufp->fd, ulfptoa(&trtmp, 6), i, lineptr);
-#endif
-	*tsptr = trtmp;
+	*tsptr = rbufp->recv_time;
+	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %d %s\n",
+		    rbufp->fd, ulfptoa(&rbufp->recv_time, 6), i,
+		    lineptr));
 	return (i);
 }
 
@@ -777,9 +728,6 @@ refclock_setup(
 {
 	int	i;
 	TTY	ttyb, *ttyp;
-#ifdef PPS
-	fdpps = fd;		/* ppsclock legacy */
-#endif /* PPS */
 
 	/*
 	 * By default, the serial line port is initialized in canonical
@@ -985,53 +933,8 @@ refclock_ioctl(
 	/*
 	 * simply return TRUE if no UNIX line discipline is supported
 	 */
-#if defined(HAVE_TERMIOS) || defined(HAVE_SYSV_TTYS) || defined(HAVE_BSD_TTYS)
+	DPRINTF(1, ("refclock_ioctl: fd %d flags 0x%x\n", fd, lflags));
 
-#ifdef DEBUG
-	if (debug)
-		printf("refclock_ioctl: fd %d flags 0x%x\n", fd,
-		    lflags);
-#endif
-#ifdef TTYCLK
-
-	/*
-	 * The TTYCLK option provides timestamping at the driver level.
-	 * It requires the tty_clk streams module and System V STREAMS
-	 * support. If not available, don't complain.
-	 */
-	if (lflags & (LDISC_CLK | LDISC_CLKPPS | LDISC_ACTS)) {
-		int rval = 0;
-
-		if (ioctl(fd, I_PUSH, "clk") < 0) {
-			SAVE_ERRNO(
-				msyslog(LOG_ERR,
-					"refclock_ioctl fd %d I_PUSH: %m",
-					fd);
-			)
-			return FALSE;
-#ifdef CLK_SETSTR
-		} else {
-			char *str;
-
-			if (lflags & LDISC_CLKPPS)
-				str = "\377";
-			else if (lflags & LDISC_ACTS)
-				str = "*";
-			else
-				str = "\n";
-			if (ioctl(fd, CLK_SETSTR, str) < 0) {
-				SAVE_ERRNO(
-					msyslog(LOG_ERR,
-						"refclock_ioctl fd %d CLK_SETSTR: %m",
-						fd);
-				)
-				return FALSE;
-			}
-#endif /*CLK_SETSTR */
-		}
-	}
-#endif /* TTYCLK */
-#endif /* HAVE_TERMIOS || HAVE_SYSV_TTYS || HAVE_BSD_TTYS */
 	return TRUE;
 }
 #endif /* !defined(SYS_VXWORKS) && !defined(SYS_WINNT) */

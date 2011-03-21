@@ -488,13 +488,6 @@ extern u_long	sys_declined;		/* declined */
 extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
 
-/* ntp_refclock.c */
-#ifdef REFCLOCK
-#ifdef PPS
-extern int	fdpps;			/* pps file descriptor */
-#endif /* PPS */
-#endif
-
 /* ntp_request.c */
 extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 extern u_long	auth_timereset;
