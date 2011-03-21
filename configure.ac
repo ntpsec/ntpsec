@@ -280,9 +280,7 @@ case "$ac_cv_header_netinfo_ni_h" in
  yes)
     AC_DEFINE([HAVE_NETINFO], [1], [NetInfo support?])
 esac
-AC_CHECK_HEADERS([sun/audioio.h sys/audioio.h])
-AC_CHECK_HEADERS([sys/chudefs.h])
-AC_CHECK_HEADERS([sys/clkdefs.h sys/file.h])
+AC_CHECK_HEADERS([sun/audioio.h sys/audioio.h sys/file.h])
 case "$host" in
  *-*-sunos4*)
     ;;
@@ -298,11 +296,6 @@ case "$ac_cv_header_sched_h" in
     ;;
  *) 
     AC_CHECK_HEADERS([sys/sched.h])
-    ;;
-esac
-case "$host" in
- *-*-sco*)
-    AC_CHECK_HEADERS([sys/sio.h])
     ;;
 esac
 # HMS: Check sys/shm.h after some others
@@ -1341,58 +1334,6 @@ case "$ans" in
  yes)
     AC_DEFINE([IGNORE_DNS_ERRORS], [1],
 	[Retry queries on _any_ DNS error?])
-esac
-AC_MSG_RESULT([$ans])
-
-case "$ac_cv_header_sys_sio_h" in
- yes)
-    AC_CACHE_CHECK(
-	[sys/sio.h for TIOCDCDTIMESTAMP],
-	[ntp_cv_hdr_def_tiocdcdtimestamp],
-	[AC_EGREP_CPP(
-	    [yes],
-	    [
-		#include <sys/sio.h>
-
-		#ifdef TIOCDCDTIMESTAMP
-		    yes
-		#endif
-	    ],
-	    [ntp_cv_hdr_def_tiocdcdtimestamp=yes],
-	    [ntp_cv_hdr_def_tiocdcdtimestamp=no]
-	)]
-    )
-esac
-
-AC_CACHE_CHECK(
-    [if we have the tty_clk line discipline/streams module],
-    [ntp_cv_tty_clk],
-    [
-	case "$ac_cv_header_sys_clkdefs_h$ntp_cv_hdr_def_tiocdcdtimestamp" in
-	 *yes*)
-	    ntp_cv_tty_clk=yes
-	    ;;
-	 *)
-	    ntp_cv_tty_clk=no
-	    ;;
-	esac
-    ]
-)
-case "$ntp_cv_tty_clk" in
- yes)
-    AC_DEFINE([TTYCLK], [1],
-	[Do we have the tty_clk line discipline/streams module?])
-esac
-
-AC_MSG_CHECKING([for the ppsclock streams module])
-case "$ntp_cv_struct_ppsclockev" in
- yes)
-    ans=yes
-    AC_DEFINE([PPS], [1],
-	[Do we have the ppsclock streams module?])
-    ;;
- *)
-    ans=no
 esac
 AC_MSG_RESULT([$ans])
 
@@ -2887,7 +2828,6 @@ AC_MSG_RESULT($ntp_refclock)
 dnl Things that can be made in clockstuff
 AC_SUBST([PROPDELAY], [propdelay])
 AC_SUBST([CHUTEST]) dnl needs work to compile
-AC_SUBST([CLKTEST]) dnl needs work to compile
 
 AC_SUBST([MAKE_ADJTIMED])
 AC_MSG_CHECKING([if we want HP-UX adjtimed support])

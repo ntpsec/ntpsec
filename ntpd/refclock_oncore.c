@@ -181,10 +181,6 @@
 # include "ppsapi_timepps.h"
 #endif
 
-#ifdef HAVE_SYS_SIO_H
-# include <sys/sio.h>
-#endif
-
 struct Bl {
 	int	dt_ls;
 	int	dt_lsf;

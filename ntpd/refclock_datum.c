@@ -29,9 +29,6 @@
 
 #if defined(STREAM)
 #include <stropts.h>
-#if defined(WWVBCLK)
-#include <sys/clkdefs.h>
-#endif /* WWVBCLK */
 #endif /* STREAM */
 
 #include "ntp_stdlib.h"

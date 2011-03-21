@@ -1,3 +1,6 @@
+* Remove kernel line discipline driver code for clk and chu, deprecate
+  related LDISC_ flags, and remove associated ntpd code to decode the
+  timestamps, remove clktest line discipline test program.
 (4.2.7p141) 2011/03/20 Released by Harlan Stenn <stenn@ntp.org>
 * Add "ntpq -c iostats" similar to "ntpdc -c iostats".
 * Compare entire timestamp to reject duplicates in refclock_pps().
