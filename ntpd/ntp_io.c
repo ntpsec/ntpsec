@@ -3076,7 +3076,8 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 {
 	int i;
 	int buflen;
-	register struct recvbuf *rb;
+	int saved_errno;
+	struct recvbuf *rb;
 
 	rb = get_free_recv_buffer();
 
@@ -3095,13 +3096,15 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 	     || rp->datalen > sizeof(rb->recv_space))
 		? sizeof(rb->recv_space)
 		: rp->datalen;
-	buflen = read(fd, (char *)&rb->recv_space, (unsigned)i);
+	do {
+		buflen = read(fd, (char *)&rb->recv_space, (u_int)i);
+	} while (buflen < 0 && EINTR == errno);
 
-	if (buflen < 0) {
-		if (errno != EINTR && errno != EAGAIN)
-			msyslog(LOG_ERR, "clock read fd %d: %m", fd);
+	if (buflen <= 0) {
+		saved_errno = errno;
 		freerecvbuf(rb);
-		return (buflen);
+		errno = saved_errno;
+		return buflen;
 	}
 
 	/*
@@ -3330,6 +3333,9 @@ input_handler(
 #endif
 	fd_set		fds;
 	size_t		select_count;
+	struct refclockio *rp;
+	int		saved_errno;
+	const char *	clk;
 	endpt *		ep;
 #ifdef HAS_ROUTING_SOCKET
 	struct asyncio_reader *asyncio_reader;
@@ -3397,17 +3403,38 @@ input_handler(
 	 */
 
 	if (refio != NULL) {
-		register struct refclockio *rp;
-
 		for (rp = refio; rp != NULL; rp = rp->next) {
 			fd = rp->fd;
 
-			if (FD_ISSET(fd, &fds))
+			if (!FD_ISSET(fd, &fds))
+				continue;
+			++select_count;
+			buflen = read_refclock_packet(fd, rp, ts);
+			/*
+			 * The first read must succeed after select()
+			 * indicates readability, or we've reached
+			 * a permanent EOF.  http://bugs.ntp.org/1732
+			 * reported ntpd munching CPU after a USB GPS
+			 * was unplugged because select was indicating
+			 * EOF but ntpd didn't remove the descriptor
+			 * from the activefds set.
+			 */
+			if (buflen < 0 && EAGAIN != errno) {
+				saved_errno = errno;
+				clk = refnumtoa(&rp->srcclock->srcadr);
+				errno = saved_errno;
+				msyslog(LOG_ERR, "%s read: %m", clk);
+				maintain_activefds(fd, TRUE);
+			} else if (0 == buflen) {
+				clk = refnumtoa(&rp->srcclock->srcadr);
+				msyslog(LOG_ERR, "%s read EOF", clk);
+				maintain_activefds(fd, TRUE);
+			} else {
+				/* drain any remaining refclock input */
 				do {
-					++select_count;
-					buflen = read_refclock_packet(
-							fd, rp, ts);
+					buflen = read_refclock_packet(fd, rp, ts);
 				} while (buflen > 0);
+			}
 		}
 	}
 #endif /* REFCLOCK */
