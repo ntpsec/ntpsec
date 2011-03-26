@@ -1,4 +1,5 @@
 * [Bug 1732] ntpd ties up CPU on disconnected USB refclock.
+* [Bug 1861] tickadj build failure using uClibc.
 * Remove kernel line discipline driver code for clk and chu, deprecate
   related LDISC_ flags, and remove associated ntpd code to decode the
   timestamps, remove clktest line discipline test program.

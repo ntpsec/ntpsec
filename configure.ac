@@ -320,14 +320,48 @@ case "$host" in
 esac
 
 case "$host" in
- *-*-*linux*)
-    AC_CHECK_FUNCS([__adjtimex __ntp_gettime])
-    ;;
-esac
-case "$ac_cv_func___adjtimex" in
- yes)
+ *-*-solaris2.6)
+    # Broken...
     ;;
  *)
+    AC_CHECK_FUNCS([ntp_adjtime ntp_gettime])
+    ;;
+esac
+
+case "$host" in
+ *-*-*linux*)
+    case "$ac_cv_func_ntp_gettime" in
+     yes)
+	;;
+     *)
+	AC_CHECK_FUNCS([__ntp_gettime])
+	case "$ac_cv_func___ntp_gettime" in
+	 yes)
+	    AC_DEFINE([ntp_gettime], [__ntp_gettime], [deviant])
+		    AC_DEFINE([HAVE_NTP_GETTIME], [1], [via __ntp_gettime])
+	esac
+	;;
+    esac
+    AC_CHECK_FUNCS([adjtimex])
+    case "$ac_cv_func_adjtimex" in
+     yes)
+	AC_DEFINE([ntp_adjtime], [adjtimex], [deviant])
+	AC_DEFINE([HAVE_NTP_ADJTIME], [1], [via adjtimex])
+	;;
+     *)
+	AC_CHECK_FUNCS([__adjtimex])
+	case "$ac_cv_func___adjtimex" in
+	 yes)
+	    AC_DEFINE([ntp_adjtime], [__adjtimex], [deviant])
+	    AC_DEFINE([HAVE_NTP_ADJTIME], [1], [via __adjtimex])
+	    AC_DEFINE([adjtimex], [__adjtimex], [deviant])
+	    AC_DEFINE([HAVE_ADJTIMEX], [1], [via __adjtimex])
+	esac
+	;;
+    esac
+esac
+case "$HAVE_ADJTIMEX" in
+ '')
     AC_CHECK_LIB([elf], [nlist])	dnl Only needed for tickadj...
     dnl AC_CHECK_LIB(kvm, main, , , -lelf)
     AC_CHECK_LIB([kvm], [main])		dnl We already know about -lelf here...
@@ -337,30 +371,29 @@ case "$ac_cv_func___adjtimex" in
     case "$ac_cv_header_nlist_h" in
      yes)
 	AC_DEFINE([NLIST_STRUCT], [1], [nlist stuff])
-    esac
-    AC_CACHE_CHECK(
-	[for n_un in struct nlist],
-	[ntp_cv_struct_nlist_n_un],
-	[AC_COMPILE_IFELSE(
-	    [AC_LANG_PROGRAM(
-		[[
-		    #include <nlist.h>
-		]],
-		[[
-		    struct nlist n;
-		    n.n_un.n_name = 0;
-		]]
+	AC_CACHE_CHECK(
+	    [for n_un in struct nlist],
+	    [ntp_cv_struct_nlist_n_un],
+	    [AC_COMPILE_IFELSE(
+		[AC_LANG_PROGRAM(
+		    [[
+			#include <nlist.h>
+		    ]],
+		    [[
+			struct nlist n;
+			n.n_un.n_name = 0;
+		    ]]
+		)]
+		[ntp_cv_struct_nlist_n_un=yes],
+		[ntp_cv_struct_nlist_n_un=no]
 	    )]
-	    [ntp_cv_struct_nlist_n_un=yes],
-	    [ntp_cv_struct_nlist_n_un=no]
-	)]
-    )
-    case "$ntp_cv_struct_nlist_n_un" in
-     yes)
-	AC_DEFINE([NLIST_NAME_UNION], [1],
-	    [does struct nlist use a name union?])
+	)
+	case "$ntp_cv_struct_nlist_n_un" in
+	 yes)
+	    AC_DEFINE([NLIST_NAME_UNION], [1],
+		[does struct nlist use a name union?])
+	esac
     esac
-    ;;
 esac
 
 AC_CHECK_HEADERS([sys/proc.h], [], [], [
@@ -756,15 +789,7 @@ case "$host" in
  *) AC_CHECK_FUNCS([mlockall])
     ;;
 esac
-AC_CHECK_FUNCS([nice nlist])
-case "$host" in
- *-*-solaris2.6)
-    # Broken...
-    ;;
- *) AC_CHECK_FUNCS([ntp_adjtime ntp_gettime])
-    ;;
-esac
-AC_CHECK_FUNCS([plock pututline pututxline readlink recvmsg rtprio])
+AC_CHECK_FUNCS([nice nlist plock pututline pututxline readlink recvmsg rtprio])
 case "$host" in
  *-*-aix[[456]]*)
     # Just a stub in AIX 4.  Idiots.
