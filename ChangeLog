@@ -3,6 +3,10 @@
 * Remove kernel line discipline driver code for clk and chu, deprecate
   related LDISC_ flags, and remove associated ntpd code to decode the
   timestamps, remove clktest line discipline test program.
+* Remove "signal_no_reset: signal 17 had flags 4000000" logging, as it
+  indicates no problem and is interpreted as an error.  Previously some
+  bits had been ignored one-by-one, but Linux SA_RESTORER definition is
+  unavailable to user headers.
 (4.2.7p142) 2011/03/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1844] ntpd 4.2.7p131 NetBSD, --gc-sections links bad executable.
 * Fix "make distcheck" break in libevent/sample caused by typo.
