@@ -354,10 +354,10 @@ AC_CACHE_CHECK(
 		#include <netinet/in.h>
 		$isc_netinetin6_hack
 		$isc_netinet6in6_hack
+		
+		struct in6_addr * pin6addr_any = &in6addr_any;
 	    ]],
 	    [[
-		struct in6_addr in6; 
-		in6 = in6addr_any;
 	    ]]
 	)],
 	[isc_cv_have_in6addr_any=yes],

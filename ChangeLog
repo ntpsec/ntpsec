@@ -1,5 +1,6 @@
 * [Bug 1732] ntpd ties up CPU on disconnected USB refclock.
 * [Bug 1861] tickadj build failure using uClibc.
+* [Bug 1862] in6addr_any test in configure fooled by arm gcc 4.1.3 -O2.
 * Remove kernel line discipline driver code for clk and chu, deprecate
   related LDISC_ flags, and remove associated ntpd code to decode the
   timestamps, remove clktest line discipline test program.

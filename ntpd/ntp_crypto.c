@@ -2981,7 +2981,6 @@ cert_sign(
 	subj = X509_get_subject_name(req);
 	X509_set_subject_name(cert, subj);
 	X509_set_pubkey(cert, pkey);
-	ext = X509_get_ext(req, 0);
 	temp = X509_get_ext_count(req);
 	for (i = 0; i < temp; i++) {
 		ext = X509_get_ext(req, i);
