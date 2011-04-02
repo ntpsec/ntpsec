@@ -303,7 +303,7 @@ struct xcmd builtins[] = {
 #define	MAXLINE		512		/* maximum line length */
 #define	MAXTOKENS	(1+MAXARGS+2)	/* maximum number of usable tokens */
 #define	MAXVARLEN	256		/* maximum length of a variable name */
-#define	MAXVALLEN	400		/* maximum length of a variable value */
+#define	MAXVALLEN	2048		/* maximum length of a variable value */
 #define	MAXOUTLINE	72		/* maximum length of an output line */
 #define SCREENWIDTH	76		/* nominal screen width in columns */
 
@@ -2585,10 +2585,10 @@ atoascii(
 	size_t out_octets
 	)
 {
-	register const u_char *	pchIn;
-		 const u_char *	pchInLimit;
-	register u_char *	pchOut;
-	register u_char		c;
+	const u_char *	pchIn;
+	const u_char *	pchInLimit;
+	u_char *	pchOut;
+	u_char		c;
 
 	pchIn = (const u_char *)in;
 	pchInLimit = pchIn + in_octets;
@@ -2761,7 +2761,7 @@ nextvar(
 	if ('"' == *np) {
 		do {
 			np++;
-		} while (np < cpend && '"' != *np && '\r' != *np);
+		} while (np < cpend && '"' != *np);
 		if (np < cpend && '"' == *np)
 			np++;
 	} else {
@@ -2769,8 +2769,8 @@ nextvar(
 			np++;
 	}
 	len = np - cp;
-	if (np >= cpend || len >= sizeof(value) ||
-	    (',' != *np && '\r' != *np))
+	if (np > cpend || len >= sizeof(value) ||
+	    (np < cpend && ',' != *np && '\r' != *np))
 		return 0;
 	memcpy(value, cp, len);
 	/*
@@ -3049,7 +3049,7 @@ cookedprint(
 	l_fp lfparr[8];
 	char b[12];
 	char bn[2 * MAXVARLEN];
-	char bv[2 * MAXVARLEN];
+	char bv[2 * MAXVALLEN];
 
 	UNUSED_ARG(datatype);
 
@@ -3146,7 +3146,7 @@ cookedprint(
 
 		if (output_raw != 0) {
 			atoascii(name, MAXVARLEN, bn, sizeof(bn));
-			atoascii(value, MAXVARLEN, bv, sizeof(bv));
+			atoascii(value, MAXVALLEN, bv, sizeof(bv));
 			if (output_raw != '*') {
 				len = strlen(bv);
 				bv[len] = output_raw;

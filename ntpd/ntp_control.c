@@ -307,7 +307,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CC_FUDGEVAL2	10
 #define	CC_FLAGS	11
 #define	CC_DEVICE	12
-#define CC_VARLIST	13
+#define	CC_VARLIST	13
 #define	CC_MAXCODE	CC_VARLIST
 
 /*
@@ -1648,17 +1648,15 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
-	char buf[CTL_MAX_DATA_LEN];
 	u_int u;
 	double kb;
 	double dtemp;
-	char *s, *t, *be;
 	const char *ss;
-	int i;
+	size_t len;
+	int firstvarname;
 	const struct ctl_var *k;
 #ifdef AUTOKEY
 	struct cert_info *cp;
-	char cbuf[256];
 #endif	/* AUTOKEY */
 #ifdef KERNEL_PLL
 	static struct timex ntx;
@@ -1800,54 +1798,39 @@ ctl_putsys(
 		break;
 
 	case CS_VARLIST:
-		s = buf;
-		be = buf + sizeof(buf);
-		if (strlen(sys_var[CS_VARLIST].text) + 4 > sizeof(buf))
-			break;	/* really long var name */
-
-		snprintf(s, sizeof(buf), "%s=\"",
+		snprintf(str, sizeof(str), "%s=\"",
 			 sys_var[CS_VARLIST].text);
-		s += strlen(s);
-		t = s;
+		ctl_putdata(str, strlen(str), TRUE);
+
+		firstvarname = TRUE;
 		for (k = sys_var; !(EOV & k->flags); k++) {
 			if (PADDING & k->flags)
 				continue;
-			i = strlen(k->text);
-			if (s + i + 1 >= be)
-				break;
-
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, i);
-			s += i;
+			len = strlen(k->text);
+			if (0 == len)
+				continue;
+			if (!firstvarname)
+				ctl_putdata(",", 1, TRUE);
+			else
+				firstvarname = FALSE;
+			ctl_putdata(k->text, len, TRUE);
 		}
 
 		for (k = ext_sys_var; k && !(EOV & k->flags); k++) {
 			if (PADDING & k->flags)
 				continue;
-
-			ss = k->text;
-			if (NULL == ss)
+			if (NULL == k->text)
 				continue;
-
-			while (*ss != '\0' && *ss != '=')
-				ss++;
-			i = ss - k->text;
-			if (s + i + 1 >= be)
-				break;
-
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, (unsigned)i);
-			s += i;
+			ss = strchr(k->text, '=');
+			if (NULL == ss)
+				len = strlen(k->text);
+			else
+				len = ss - k->text;
+			ctl_putdata(",", 1, TRUE);
+			ctl_putdata(k->text, len, TRUE);
 		}
-		if (s + 2 >= be)
-			break;
 
-		*s++ = '"';
-		*s = '\0';
-
-		ctl_putdata(buf, (unsigned)(s - buf), 0);
+		ctl_putdata("\"", 1, TRUE);
 		break;
 
 	case CS_TAI:
@@ -2243,10 +2226,10 @@ ctl_putsys(
 
 	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			snprintf(cbuf, sizeof(cbuf), "%s %s 0x%x",
+			snprintf(str, sizeof(str), "%s %s 0x%x",
 			    cp->subject, cp->issuer, cp->flags);
-			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
-			    strlen(cbuf));
+			ctl_putstr(sys_var[CS_CERTIF].text, str,
+			    strlen(str));
 			ctl_putfs(sys_var[CS_REVTIME].text, cp->last);
 		}
 		break;

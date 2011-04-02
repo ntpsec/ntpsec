@@ -1,3 +1,4 @@
+* [Bug 1874] ntpq -c "rv 0 sys_var_list" empty.
 (4.2.7p143) 2011/03/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1732] ntpd ties up CPU on disconnected USB refclock.
 * [Bug 1861] tickadj build failure using uClibc.
