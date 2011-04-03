@@ -954,6 +954,30 @@ dump_config_tree(
 
 
 /* generic fifo routines for structs linked by 1st member */
+#ifdef NTP_DEBUG_LISTS_H
+void
+check_gen_fifo_consistency(void *pfv)
+{
+	gen_fifo *pf;
+	gen_node *pthis;
+	gen_node **pptail;
+
+	pf = pfv;
+	REQUIRE((NULL == pf->phead && NULL == pf->pptail) ||
+		(NULL != pf->phead && NULL != pf->pptail));
+
+	pptail = &pf->phead;
+	for (pthis = pf->phead;
+	     pthis != NULL;
+	     pthis = pthis->link)
+		if (NULL != pthis->link)
+			pptail = &pthis->link;
+
+	REQUIRE(NULL == pf->pptail || pptail == pf->pptail);
+}
+#endif	/* NTP_DEBUG_LISTS_H */
+
+
 void *
 append_gen_fifo(
 	void *fifo,
@@ -967,8 +991,11 @@ append_gen_fifo(
 	pe = entry;
 	if (NULL == pf)
 		pf = emalloc_zero(sizeof(*pf));
+	else
+		CHECK_FIFO_CONSISTENCY(*pf);
 	if (pe != NULL)
 		LINK_FIFO(*pf, pe, link);
+	CHECK_FIFO_CONSISTENCY(*pf);
 
 	return pf;
 }
@@ -990,6 +1017,8 @@ concat_gen_fifos(
 	else if (NULL == pf2)
 		return pf1;
 
+	CHECK_FIFO_CONSISTENCY(*pf1);
+	CHECK_FIFO_CONSISTENCY(*pf2);
 	CONCAT_FIFO(*pf1, *pf2, link);
 	free(pf2);
 
@@ -1162,6 +1191,8 @@ create_peer_node(
 	 * FIFO.  The options FIFO is consumed and reclaimed here.
 	 */
 
+	if (options != NULL)
+		CHECK_FIFO_CONSISTENCY(*options);
 	while (options != NULL) {
 		UNLINK_FIFO(option, *options, link);
 		if (NULL == option) {
