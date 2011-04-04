@@ -18,6 +18,7 @@
 #include "ntp_string.h"
 #include "ntp_random.h"
 #include "ntp_assert.h"
+#include "ntp_calendar.h"
 
 #include "openssl/asn1_mac.h"
 #include "openssl/bn.h"
