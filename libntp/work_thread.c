@@ -204,9 +204,9 @@ send_blocking_req_internal(
 {
 	blocking_pipe_header *	threadcopy;
 
-	DEBUG_REQUIRE(hdr != NULL);
-	DEBUG_REQUIRE(hdr->octets > sizeof(*hdr));
-	DEBUG_REQUIRE(data != NULL);
+	REQUIRE(hdr != NULL);
+	REQUIRE(hdr->octets > sizeof(*hdr));
+	REQUIRE(data != NULL);
 	DEBUG_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
 
 	ensure_workitems_empty_slot(c);

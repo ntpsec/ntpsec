@@ -359,7 +359,7 @@ nmea_start(
 		 *
 		 * ln -s server:port /dev/gps1
 		 */
-		char buffer[80];
+		char buffer[PATH_MAX];
 		char *nmea_host, *nmea_tail;
 		u_long nmea_port;
 		int   len;
@@ -367,14 +367,15 @@ nmea_start(
 		struct addrinfo *ai;
 		int rc;
 	
-		if ((len = readlink(device,buffer,sizeof(buffer))) == -1)
-			return(0);
-		buffer[len] = 0;
+		len = readlink(device, buffer, sizeof(buffer) - 1);
+		if (-1 == len)
+			return 0;
+		buffer[len] = '\0';
 
 		if ((nmea_host = strtok(buffer,":")) == NULL)
-			return(0);
+			return 0;
 		if ((nmea_tail = strtok(NULL,":")) == NULL)
-			return(0);
+			return 0;
 		if (!atouint(nmea_tail, &nmea_port) ||
 		    nmea_port > USHRT_MAX)
 			return 0;
@@ -399,6 +400,7 @@ nmea_start(
 			freeaddrinfo(ai);
 			return 0;
 		}
+		/* blocking connect also naughty, see above. */
 		rc = connect(fd, ai->ai_addr, ai->ai_addrlen);
 		freeaddrinfo(ai);
 		if (-1 == rc) {

@@ -956,13 +956,13 @@ dump_config_tree(
 /* generic fifo routines for structs linked by 1st member */
 #ifdef NTP_DEBUG_LISTS_H
 void
-check_gen_fifo_consistency(void *pfv)
+check_gen_fifo_consistency(void *fifo)
 {
 	gen_fifo *pf;
 	gen_node *pthis;
 	gen_node **pptail;
 
-	pf = pfv;
+	pf = fifo;
 	REQUIRE((NULL == pf->phead && NULL == pf->pptail) ||
 		(NULL != pf->phead && NULL != pf->pptail));
 
