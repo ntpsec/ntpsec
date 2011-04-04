@@ -1903,7 +1903,7 @@ asn2ntp	(
 	)
 {
 	char	*v;		/* pointer to ASN1_TIME string */
-	struct	tm tm;		/* used to convert to NTP time */
+	struct calendar jd;	/* used to convert to NTP time */
 
 	/*
 	 * Extract time string YYMMDDHHMMSSZ from ASN1 time structure.
@@ -1913,18 +1913,19 @@ asn2ntp	(
 	 * 100. Dontcha love ASN.1? Better than MIL-188.
 	 */
 	v = (char *)asn1time->data;
-	tm.tm_year = (v[0] - '0') * 10 + v[1] - '0';
-	if (tm.tm_year < 50)
-		tm.tm_year += 100;
-	tm.tm_mon = (v[2] - '0') * 10 + v[3] - '0' - 1;
-	tm.tm_mday = (v[4] - '0') * 10 + v[5] - '0';
-	tm.tm_hour = (v[6] - '0') * 10 + v[7] - '0';
-	tm.tm_min = (v[8] - '0') * 10 + v[9] - '0';
-	tm.tm_sec = (v[10] - '0') * 10 + v[11] - '0';
-	tm.tm_wday = 0;
-	tm.tm_yday = 0;
-	tm.tm_isdst = 0;
-	return ((u_long)timegm(&tm) + JAN_1970);
+	jd.year = (v[0] - '0') * 10 + v[1] - '0';
+	if (jd.year < 50)
+		jd.year += 100;
+	jd.year += 1900; /* should we do century unfolding here? */
+	jd.month = (v[2] - '0') * 10 + v[3] - '0';
+	jd.monthday = (v[4] - '0') * 10 + v[5] - '0';
+	jd.hour = (v[6] - '0') * 10 + v[7] - '0';
+	jd.minute = (v[8] - '0') * 10 + v[9] - '0';
+	jd.second = (v[10] - '0') * 10 + v[11] - '0';
+	jd.yearday = 0;
+	jd.weekday = 0;
+
+	return caltontp(&jd);
 }
 
 
