@@ -1,3 +1,4 @@
+(4.2.7p146) 2011/04/05 Released by Harlan Stenn <stenn@ntp.org>
 * String buffer safety cleanup, converting to strlcpy() and strlcat().
 * Use utmpname() before pututline() so repeated steps do not
   accidentally record into wtmp where utmp was intended.
