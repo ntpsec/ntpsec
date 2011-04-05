@@ -1,3 +1,5 @@
+* [Bug 1875] 'asn2ntp()' rewritten with 'caltontp()'; 'timegm()'
+  substitute likely to crash with 64bit time_t.
 (4.2.7p145) 2011/04/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1840] ntp_lists.h FIFO macros buggy.
 (4.2.7p144) 2011/04/03 Released by Harlan Stenn <stenn@ntp.org>
