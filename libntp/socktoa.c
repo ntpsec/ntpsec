@@ -42,7 +42,7 @@ socktoa(
 	LIB_GETBUF(res);
 
 	if (NULL == sock)
-		strncpy(res, "(null)", LIB_BUFLENGTH);
+		strlcpy(res, "(null)", LIB_BUFLENGTH);
 	else {
 		switch(AF(sock)) {
 

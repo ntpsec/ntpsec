@@ -354,7 +354,7 @@ MD5auth_setkey(
 #ifndef DISABLE_BUG1243_FIX
 			memcpy(sk->k.MD5_key, key, sk->keylen);
 #else
-			strncpy((char *)sk->k.MD5_key, (const char *)key,
+			strlcpy((char *)sk->k.MD5_key, (const char *)key,
 			    sizeof(sk->k.MD5_key));
 #endif
 			if (cache_keyid == keyno) {
@@ -384,7 +384,7 @@ MD5auth_setkey(
 #ifndef DISABLE_BUG1243_FIX
 	memcpy(sk->k.MD5_key, key, sk->keylen);
 #else
-	strncpy((char *)sk->k.MD5_key, (const char *)key,
+	strlcpy((char *)sk->k.MD5_key, (const char *)key,
 	    sizeof(sk->k.MD5_key));
 #endif
 	sk->next = key_hash[KEYHASH(keyno)];

@@ -689,7 +689,7 @@ main(
 	/*
 	 * Parse options
 	 */
-	strcpy(device, DEVICE);
+	strlcpy(device, DEVICE, sizeof(device));
 	Year = 0;
 	SetSampleRate = SECOND;
 	
@@ -701,7 +701,7 @@ main(
 		switch (temp) {
 
 		case 'a':	/* specify audio device (/dev/audio) */
-			strcpy(device, optarg);
+			strlcpy(device, optarg, sizeof(device));
 			break;
 
 		case 'b':	/* Remove (delete) a leap second at the end of the specified minute. */
@@ -1521,7 +1521,7 @@ main(
 		/*
 		 * Generate data for the second
 		 */
-		switch(encode) {
+		switch (encode) {
 
 		/*
 		 * The IRIG second consists of 20 BCD digits of width-
@@ -1529,7 +1529,8 @@ main(
 		 * percent on the 1000-Hz carrier.
 		 */
 		case IRIG:
-			strcpy (OutputDataString, "");	/* Initialize the output string */
+			/* Initialize the output string */
+			OutputDataString[0] = '\0';
 
 			for (BitNumber = 0; BitNumber < 100; BitNumber++) {
 				FrameNumber = (BitNumber/10) + 1;
@@ -1618,8 +1619,7 @@ main(
 
 									TotalCyclesRemoved += 1;
 									}
-				        	    /* OutputDataString OUTPUT_DATA_STRING_LENGTH */
-								strncat(OutputDataString, "x", OUTPUT_DATA_STRING_LENGTH);
+								strlcat(OutputDataString, "x", OUTPUT_DATA_STRING_LENGTH);
 								}
 							else 
 								{
@@ -1637,7 +1637,7 @@ main(
 
 									TotalCyclesRemoved += 1;
 									}
-								strncat(OutputDataString, "o", OUTPUT_DATA_STRING_LENGTH);
+								strlcat(OutputDataString, "o", OUTPUT_DATA_STRING_LENGTH);
 								}
 							}	// End of true clause for "if  (RateCorrection < 0)"
 						else
@@ -1660,8 +1660,7 @@ main(
 
 										TotalCyclesAdded += 1;
 										}
-					        	    /* OutputDataString OUTPUT_DATA_STRING_LENGTH */
-									strncat(OutputDataString, "+", OUTPUT_DATA_STRING_LENGTH);
+									strlcat(OutputDataString, "+", OUTPUT_DATA_STRING_LENGTH);
 									}
 								else 
 									{
@@ -1679,7 +1678,7 @@ main(
 
 										TotalCyclesAdded += 1;
 										}
-									strncat(OutputDataString, "*", OUTPUT_DATA_STRING_LENGTH);
+									strlcat(OutputDataString, "*", OUTPUT_DATA_STRING_LENGTH);
 									}
 								}	// End of true clause for "if  (RateCorrection > 0)"
 							else
@@ -1697,8 +1696,7 @@ main(
 										peep(M5, 1000, HIGH);
 										peep(M5, 1000, LOW);
 										}
-					        	    /* OutputDataString OUTPUT_DATA_STRING_LENGTH */
-									strncat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
+									strlcat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
 									}
 								else 
 									{
@@ -1712,7 +1710,7 @@ main(
 										peep(M2, 1000, HIGH);
 										peep(M8, 1000, LOW);
 										}
-									strncat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
+									strlcat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
 									}
 								}	// End of else clause for "if  (RateCorrection > 0)"
 							}	// End of else claues for "if  (RateCorrection < 0)"
@@ -1731,8 +1729,7 @@ main(
 								peep(M5, 1000, HIGH);
 								peep(M5, 1000, LOW);
 								}
-			        	    /* OutputDataString OUTPUT_DATA_STRING_LENGTH */
-							strncat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
+							strlcat(OutputDataString, "1", OUTPUT_DATA_STRING_LENGTH);
 							}
 						else 
 							{
@@ -1746,7 +1743,7 @@ main(
 								peep(M2, 1000, HIGH);
 								peep(M8, 1000, LOW);
 								}
-							strncat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
+							strlcat(OutputDataString, "0", OUTPUT_DATA_STRING_LENGTH);
 							}
 						} // end of else clause for "if  ((FrameNumber == 5) && (BitNumber == 8))"
 					break;
@@ -1763,7 +1760,7 @@ main(
 						peep(M2, 1000, HIGH);
 						peep(M8, 1000, LOW);
 						}
-					strncat(OutputDataString, "-", OUTPUT_DATA_STRING_LENGTH);
+					strlcat(OutputDataString, "-", OUTPUT_DATA_STRING_LENGTH);
 					break;
 
 				case DEC:	/* send marker/position indicator IM/PI bit */
@@ -1780,7 +1777,7 @@ main(
 						peep(arg,      1000, HIGH);
 						peep(10 - arg, 1000, LOW);
 						}
-					strncat(OutputDataString, ".", OUTPUT_DATA_STRING_LENGTH);
+					strlcat(OutputDataString, ".", OUTPUT_DATA_STRING_LENGTH);
 					break;
 
 				default:

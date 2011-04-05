@@ -248,7 +248,7 @@ arb_receive(
 	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	up = pp->unitptr;
-	temp = refclock_gtlin(rbufp, tbuf, BMAX, &trtmp);
+	temp = refclock_gtlin(rbufp, tbuf, sizeof(tbuf), &trtmp);
 
 	/*
 	 * Note we get a buffer and timestamp for both a <cr> and <lf>,
@@ -289,7 +289,7 @@ arb_receive(
 			return;
 
 		} else if (!strncmp(tbuf, "SR", 2)) {
-			strncpy(up->status, tbuf + 2,
+			strlcpy(up->status, tbuf + 2,
 				sizeof(up->status));
 			if (pp->sloppyclockflag & CLK_FLAG4)
 				write(pp->io.fd, "LA", 2);
@@ -298,25 +298,25 @@ arb_receive(
 			return;
 
 		} else if (!strncmp(tbuf, "LA", 2)) {
-			strncpy(up->latlon, tbuf + 2, sizeof(up->latlon));
+			strlcpy(up->latlon, tbuf + 2, sizeof(up->latlon));
 			write(pp->io.fd, "LO", 2);
 			return;
 
 		} else if (!strncmp(tbuf, "LO", 2)) {
-			strcat(up->latlon, " ");
-			strcat(up->latlon, tbuf + 2);
+			strlcat(up->latlon, " ", sizeof(up->latlon));
+			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
 			write(pp->io.fd, "LH", 2);
 			return;
 
 		} else if (!strncmp(tbuf, "LH", 2)) {
-			strcat(up->latlon, " ");
-			strcat(up->latlon, tbuf + 2);
+			strlcat(up->latlon, " ", sizeof(up->latlon));
+			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
 			write(pp->io.fd, "DB", 2);
 			return;
 
 		} else if (!strncmp(tbuf, "DB", 2)) {
-			strcat(up->latlon, " ");
-			strcat(up->latlon, tbuf + 2);
+			strlcat(up->latlon, " ", sizeof(up->latlon));
+			strlcat(up->latlon, tbuf + 2, sizeof(up->latlon));
 			record_clock_stats(&peer->srcadr, up->latlon);
 #ifdef DEBUG
 			if (debug)
@@ -342,9 +342,9 @@ arb_receive(
 	/*
 	 * Timecode format B5: "i yy ddd hh:mm:ss.000   "
 	 */
-	strncpy(pp->a_lastcode, tbuf, BMAX);
+	strlcpy(pp->a_lastcode, tbuf, sizeof(pp->a_lastcode));
 	pp->a_lastcode[LENARB - 2] = up->qualchar;
-	strcat(pp->a_lastcode, up->status);
+	strlcat(pp->a_lastcode, up->status, sizeof(pp->a_lastcode));
 	pp->lencode = strlen(pp->a_lastcode);
 	syncchar = ' ';
 	if (sscanf(pp->a_lastcode, "%c%2d %3d %2d:%2d:%2d",

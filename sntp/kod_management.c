@@ -61,9 +61,7 @@ add_entry(
 	pke->timestamp = time(NULL);
 	memcpy(pke->type, type, 4);
 	pke->type[sizeof(pke->type) - 1] = '\0';
-	strncpy(pke->hostname, hostname,
-		sizeof(pke->hostname));
-	pke->hostname[sizeof(pke->hostname) - 1] = '\0';
+	strlcpy(pke->hostname, hostname, sizeof(pke->hostname));
 
 	/*
 	 * insert in address ("hostname") order to find duplicates

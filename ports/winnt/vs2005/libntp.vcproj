@@ -501,6 +501,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\strl_obsd.c"
+				>
+			</File>
+			<File
 				RelativePath="..\libntp\syslog.c"
 				>
 			</File>

@@ -63,7 +63,7 @@
  *
  * Fudge factors
  *
- * Fudge flag4 causes the dubugging output described above to be
+ * Fudge flag4 causes the debugging output described above to be
  * recorded in the clockstats file. Fudge flag2 selects the audio input
  * port, where 0 is the mike port (default) and 1 is the line-in port.
  * It does not seem useful to select the compact disc player port. Fudge
@@ -596,7 +596,7 @@ static	void	wwv_corr4	(struct peer *, struct decvec *,
 				    double [], double [][4]);
 static	void	wwv_gain	(struct peer *);
 static	void	wwv_tsec	(struct peer *);
-static	int	timecode	(struct wwvunit *, char *);
+static	int	timecode	(struct wwvunit *, char *, size_t);
 static	double	wwv_snr		(double, double);
 static	int	carry		(struct decvec *);
 static	int	wwv_newchan	(struct peer *);
@@ -2091,7 +2091,8 @@ wwv_clock(
 			refclock_receive(peer);
 		}
 	}
-	pp->lencode = timecode(up, pp->a_lastcode);
+	pp->lencode = timecode(up, pp->a_lastcode,
+			       sizeof(pp->a_lastcode));
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
@@ -2610,7 +2611,8 @@ wwv_qsy(
 static int
 timecode(
 	struct wwvunit *up,	/* driver structure pointer */
-	char *ptr		/* target string */
+	char *		tc,	/* target string */
+	size_t		tcsiz	/* target max chars */
 	)
 {
 	struct sync *sp;
@@ -2635,20 +2637,23 @@ timecode(
 	dut = up->misc & 0x7;
 	if (!(up->misc & DUTS))
 		dut = -dut;
-	sprintf(ptr, "%c%1X", synchar, up->alarm);
-	sprintf(cptr, " %4d %03d %02d:%02d:%02d %c%c %+d",
-	    year, day, hour, minute, second, leapchar, dst, dut);
-	strcat(ptr, cptr);
+	snprintf(tc, tcsiz, "%c%1X", synchar, up->alarm);
+	snprintf(cptr, sizeof(cptr),
+		 " %4d %03d %02d:%02d:%02d %c%c %+d",
+		 year, day, hour, minute, second, leapchar, dst, dut);
+	strlcat(tc, cptr, tcsiz);
 
 	/*
 	 * Specific variable-format fields
 	 */
 	sp = up->sptr;
-	sprintf(cptr, " %d %d %s %.0f %d %.1f %d", up->watch,
-	    up->mitig[up->dchan].gain, sp->refid, sp->metric,
-	    up->errcnt, up->freq / SECOND * 1e6, up->avgint);
-	strcat(ptr, cptr);
-	return (strlen(ptr));
+	snprintf(cptr, sizeof(cptr), " %d %d %s %.0f %d %.1f %d",
+		 up->watch, up->mitig[up->dchan].gain, sp->refid,
+		 sp->metric, up->errcnt, up->freq / SECOND * 1e6,
+		 up->avgint);
+	strlcat(tc, cptr, tcsiz);
+
+	return strlen(tc);
 }
 
 

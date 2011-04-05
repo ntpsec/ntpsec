@@ -1017,8 +1017,6 @@ concat_gen_fifos(
 	else if (NULL == pf2)
 		return pf1;
 
-	CHECK_FIFO_CONSISTENCY(*pf1);
-	CHECK_FIFO_CONSISTENCY(*pf2);
 	CONCAT_FIFO(*pf1, *pf2, link);
 	free(pf2);
 
@@ -4266,7 +4264,7 @@ getconfig(
 	 * initialize it to "UNKNOWN".
 	 */
 #ifndef SYS_WINNT
-	strncpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
+	strlcpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
 	set_sys_var(line, strlen(line) + 1, RO);
 #endif
 	getCmdOpts(argc, argv);
@@ -4441,7 +4439,7 @@ normal_dtoa(
 		pch_nz++;
 	if (pch_nz == pch_e)
 		return buf;
-	strncpy(pch_e, pch_nz, LIB_BUFLENGTH - (pch_e - buf));
+	strlcpy(pch_e, pch_nz, LIB_BUFLENGTH - (pch_e - buf));
 
 	return buf;
 }

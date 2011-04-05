@@ -395,7 +395,7 @@ quote_if_needed(char *str)
 		|| strchr(str, ' ') != NULL)) {
 		snprintf(ret, octets, "\"%s\"", str);
 	} else
-		strncpy(ret, str, octets);
+		strlcpy(ret, str, octets);
 
 	return ret;
 }

@@ -583,10 +583,9 @@ openhost(
 	memcpy(&addr, ai->ai_addr, octets);
 
 	if (ai->ai_canonname == NULL)
-		strncpy(temphost, stoa(&addr), sizeof(temphost));
+		strlcpy(temphost, stoa(&addr), sizeof(temphost));
 	else
-		strncpy(temphost, ai->ai_canonname, sizeof(temphost));
-	temphost[sizeof(temphost) - 1] = '\0';
+		strlcpy(temphost, ai->ai_canonname, sizeof(temphost));
 
 	if (debug > 2)
 		printf("Opening host %s\n", temphost);
@@ -597,7 +596,7 @@ openhost(
 		closesocket(sockfd);
 		havehost = 0;
 	}
-	strncpy(currenthost, temphost, sizeof(currenthost));
+	strlcpy(currenthost, temphost, sizeof(currenthost));
 
 	/* port maps to the same location in both families */
 	s_port = NSRCPORT(&addr);
@@ -1710,7 +1709,7 @@ getnetnum(
 		memcpy(num, ai->ai_addr, ai->ai_addrlen);
 		if (fullhost != NULL) {
 			if (ai->ai_canonname != NULL)
-				strncpy(fullhost, ai->ai_canonname,
+				strlcpy(fullhost, ai->ai_canonname,
 					LENHOSTNAME);
 			else
 				getnameinfo(&num->sa, SOCKLEN(num),
@@ -2999,7 +2998,7 @@ tstflags(
 	cp += strlen(cp);
 	cb -= strlen(cp);
 	if (!val) {
-		strncat(cp, " ok", cb);
+		strlcat(cp, " ok", cb);
 		cp += strlen(cp);
 		cb -= strlen(cp);
 	} else {

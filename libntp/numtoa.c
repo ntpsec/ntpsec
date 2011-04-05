@@ -48,7 +48,7 @@ refid_str(
 
 	LIB_GETBUF(text);
 	text[0] = '.';
-	strncpy(&text[1], (void *)&refid, sizeof(refid));
+	memcpy(&text[1], &refid, sizeof(refid));
 	text[1 + sizeof(refid)] = '\0';
 	tlen = strlen(text);
 	text[tlen] = '.';

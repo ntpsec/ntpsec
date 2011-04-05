@@ -112,13 +112,14 @@ filegen_open(
 	fullname = emalloc(len);
 	savename = NULL;
 	snprintf(filename, len, "%s%s", gen->prefix, gen->basename);
-	strncpy(fullname, filename, len);
-	fullname[len-1] = '\0'; /* prepare overflow detection */
 
 	/* where to place suffix */
-	suflen = strlen(fullname);
+	suflen = strlcpy(fullname, filename, len);
 	suffix = fullname + suflen;
 	suflen = len - suflen;
+
+	/* last octet of fullname set to '\0' for truncation check */
+	fullname[len - 1] = '\0';
 
 	switch (gen->type) {
 
@@ -128,10 +129,10 @@ filegen_open(
 			"\"%s\" - reverting to FILEGEN_NONE",
 			gen->type, filename);
 		gen->type = FILEGEN_NONE;
-		/* fall through to FILEGEN_NONE */
+		break;
 
 	case FILEGEN_NONE:
-		strncpy(fullname, filename, len);
+		/* no suffix, all set */
 		break;
 
 	case FILEGEN_PID:
@@ -195,10 +196,8 @@ filegen_open(
 	}
   
 	/* check possible truncation */
-	if (fullname[len-1]) {
-		fullname[len-1] = '\0';
-		DPRINTF(1, ("logfile name truncated: \"%s\"",
-			    fullname));
+	if ('\0' != fullname[len - 1]) {
+		fullname[len - 1] = '\0';
 		msyslog(LOG_ERR, "logfile name truncated: \"%s\"",
 			fullname);
 	}

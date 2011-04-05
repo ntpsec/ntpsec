@@ -121,16 +121,11 @@ addrinfo_to_str (
  * in that case.
  */
 char *
-ss_to_str (
+ss_to_str(
 	sockaddr_u *saddr
 	)
 {
-	char *	buf;
-	
-	buf = emalloc(INET6_ADDRSTRLEN);
-	strncpy(buf, stoa(saddr), INET6_ADDRSTRLEN);
-
-	return buf;
+	return estrdup(stoa(saddr));
 }
 
 

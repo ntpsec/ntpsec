@@ -1699,19 +1699,19 @@ again:
 	}
 
 	if (res != 0)
-	    return;
+		return;
 
 	if (!checkitems(items, fp))
-	    return;
+		return;
 
 	if (!checkitemsize(itemsize, sizeof(struct info_restrict)) &&
 	    !checkitemsize(itemsize, v4sizeof(struct info_restrict)))
-	    return;
+		return;
 
-	(void) fprintf(fp,
-	       "   address          mask            count        flags\n");
-	(void) fprintf(fp,
-		       "=====================================================================\n");
+	fprintf(fp,
+		"   address          mask            count        flags\n");
+	fprintf(fp,
+		"=====================================================================\n");
 
 	while (items > 0) {
 		SET_ADDRS(resaddr, maskaddr, rl, addr, mask);
@@ -1739,29 +1739,33 @@ again:
 		while (rf->bit != 0) {
 			if (mflags & rf->bit) {
 				if (!res)
-				    (void) strcat(flagstr, comma);
+					strlcat(flagstr, comma,
+						sizeof(flagstr));
 				res = 0;
-				(void) strcat(flagstr, rf->str);
+				strlcat(flagstr, rf->str,
+					sizeof(flagstr));
 			}
 			rf++;
 		}
 
 		rf = (impl_ver == IMPL_XNTPD_OLD)
-		     ? &resflagsV2[0]
-		     : &resflagsV3[0]
-		     ;
+			 ? &resflagsV2[0]
+			 : &resflagsV3[0];
+
 		while (rf->bit != 0) {
 			if (flags & rf->bit) {
 				if (!res)
-				    (void) strcat(flagstr, comma);
+					strlcat(flagstr, comma,
+						sizeof(flagstr));
 				res = 0;
-				(void) strcat(flagstr, rf->str);
+				strlcat(flagstr, rf->str,
+					sizeof(flagstr));
 			}
 			rf++;
 		}
 
 		if (flagstr[0] == '\0')
-			strncpy(flagstr, "none", sizeof(flagstr));
+			strlcpy(flagstr, "none", sizeof(flagstr));
 
 		if (!skip)
 			fprintf(fp, "%-15.15s %-15.15s %9lu  %s\n",

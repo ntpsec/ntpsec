@@ -707,12 +707,13 @@ is_ip_address(
 	if (AF_UNSPEC == af || AF_INET6 == af)
 		if (sizeof(tmpbuf) > strlen(host)) {
 			if ('[' == host[0]) {
-				strncpy(tmpbuf, &host[1], sizeof(tmpbuf));
+				strlcpy(tmpbuf, &host[1], sizeof(tmpbuf));
 				pch = strchr(tmpbuf, ']');
 				if (pch != NULL)
 					*pch = '\0';
-			} else
-				strncpy(tmpbuf, host, sizeof(tmpbuf));
+			} else {
+				strlcpy(tmpbuf, host, sizeof(tmpbuf));
+			}
 			pch = strchr(tmpbuf, '%');
 			if (pch != NULL)
 				*pch = '\0';
@@ -1086,7 +1087,7 @@ create_wildcards(
 	if (v4wild) {
 		wildif = new_interface(NULL);
 
-		strncpy(wildif->name, "v4wildcard", sizeof(wildif->name));
+		strlcpy(wildif->name, "v4wildcard", sizeof(wildif->name));
 		memcpy(&wildif->sin, &wildaddr, sizeof(wildif->sin));
 		wildif->family = AF_INET;
 		AF(&wildif->mask) = AF_INET;
@@ -1140,7 +1141,7 @@ create_wildcards(
 	if (v6wild) {
 		wildif = new_interface(NULL);
 
-		strncpy(wildif->name, "v6wildcard", sizeof(wildif->name));
+		strlcpy(wildif->name, "v6wildcard", sizeof(wildif->name));
 		memcpy(&wildif->sin, &wildaddr, sizeof(wildif->sin));
 		wildif->family = AF_INET6;
 		AF(&wildif->mask) = AF_INET6;
@@ -1387,8 +1388,7 @@ convert_isc_if(
 	const u_char v6loop[16] = {0, 0, 0, 0, 0, 0, 0, 0,
 				   0, 0, 0, 0, 0, 0, 0, 1};
 
-	strncpy(itf->name, isc_if->name, sizeof(itf->name));
-	itf->name[sizeof(itf->name) - 1] = 0; /* strncpy may not */
+	strlcpy(itf->name, isc_if->name, sizeof(itf->name));
 	itf->ifindex = isc_if->ifindex;
 	itf->family = (u_short)isc_if->af;
 	AF(&itf->sin) = itf->family;
@@ -1603,7 +1603,7 @@ is_anycast(
 		return ISC_FALSE;
 	ZERO(ifr6);
 	memcpy(&ifr6.ifr_addr, &psau->sa6, sizeof(ifr6.ifr_addr));
-	strncpy(ifr6.ifr_name, name, sizeof(ifr6.ifr_name));
+	strlcpy(ifr6.ifr_name, name, sizeof(ifr6.ifr_name));
 	if (ioctl(fd, SIOCGIFAFLAG_IN6, &ifr6) < 0) {
 		close(fd);
 		return ISC_FALSE;
@@ -1766,7 +1766,7 @@ update_interfaces(
 				 * new prototype to respect any runtime
 				 * changes to the nic rules.
 				 */
-				strncpy(ep->name, enumep.name,
+				strlcpy(ep->name, enumep.name,
 					sizeof(ep->name));
 				if (ep->ignore_packets !=
 				    enumep.ignore_packets) {
@@ -1779,7 +1779,7 @@ update_interfaces(
 				}
 			} else {
 				/* name collision - rename interface */
-				strncpy(ep->name, "*multiple*",
+				strlcpy(ep->name, "*multiple*",
 					sizeof(ep->name));
 			}
 
@@ -2614,7 +2614,7 @@ io_multicast_add(
 		ep->ignore_packets = ISC_FALSE;
 		ep->flags |= INT_MCASTIF;
 		
-		strncpy(ep->name, "multicast", sizeof(ep->name));
+		strlcpy(ep->name, "multicast", sizeof(ep->name));
 		DPRINT_INTERFACE(2, (ep, "multicast add ", "\n"));
 		add_interface(ep);
 		log_listen_address(ep);

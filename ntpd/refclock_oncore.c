@@ -1441,17 +1441,17 @@ oncore_receive(
 		oncore_log_f(instance, LOG_DEBUG,
 			     ">>> %d bytes available",
 			     rbufp->recv_length);
-		strncpy(Msg, ">>>", sizeof(Msg));
+		strlcpy(Msg, ">>>", sizeof(Msg));
 		for (i = 0; i < rbufp->recv_length; i++) {
 			snprintf(Msg2, sizeof(Msg2), "%02x ", p[i]);
-			strncat(Msg, Msg2, sizeof(Msg));
+			strlcat(Msg, Msg2, sizeof(Msg));
 		}
 		oncore_log(instance, LOG_DEBUG, Msg);
 
-		strncpy(Msg, ">>>", sizeof(Msg));
+		strlcpy(Msg, ">>>", sizeof(Msg));
 		for (i = 0; i < rbufp->recv_length; i++) {
 			snprintf(Msg2, sizeof(Msg2), "%03o ", p[i]);
-			strncat(Msg, Msg2, sizeof(Msg));
+			strlcat(Msg, Msg2, sizeof(Msg));
 		}
 		oncore_log(instance, LOG_DEBUG, Msg);
 	}
@@ -1554,7 +1554,7 @@ oncore_consume(
 				for (i = 4; i < l; i++) {
 					snprintf(Msg2, sizeof(Msg2),
 						 "%03o ", rcvbuf[i]);
-					strncat(Msg, Msg2, sizeof(Msg));
+					strlcat(Msg, Msg2, sizeof(Msg));
 				}
 				oncore_log(instance, LOG_DEBUG, Msg);
 			}
@@ -1805,10 +1805,10 @@ oncore_get_timestamp(
 			snprintf(f4, sizeof(f4), "%3d",
 				 (s_char)instance->BEHn[25]);
 		} else {
-			strncpy(f1, "x", sizeof(f1));
-			strncpy(f2, "x", sizeof(f2));
-			strncpy(f3, "xx", sizeof(f3));
-			strncpy(f4, "xxx", sizeof(f4));
+			strlcpy(f1, "x", sizeof(f1));
+			strlcpy(f2, "x", sizeof(f2));
+			strlcpy(f3, "xx", sizeof(f3));
+			strlcpy(f4, "xxx", sizeof(f4));
 		}
 		snprintf(Msg, sizeof(Msg),	/* MAX length 128, currently at 127 */
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat   %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d",
@@ -1838,10 +1838,10 @@ oncore_get_timestamp(
 			snprintf(f4, sizeof(f4), "%3d",
 				 (s_char)instance->BEHn[14]);
 		} else {
-			strncpy(f1, "x", sizeof(f1));
-			strncpy(f2, "x", sizeof(f2));
-			strncpy(f3, "xx", sizeof(f3));
-			strncpy(f4, "xxx", sizeof(f4));
+			strlcpy(f1, "x", sizeof(f1));
+			strlcpy(f2, "x", sizeof(f2));
+			strlcpy(f3, "xx", sizeof(f3));
+			strlcpy(f4, "xxx", sizeof(f4));
 		}
 		snprintf(Msg, sizeof(Msg),
  "%u.%09lu %d %d %2d %2d %2d %2ld rstat %02x dop %4.1f nsat %2d,%d traim %d,%s,%s sigma %s neg-sawtooth %s sat %d%d%d%d%d%d%d%d%d%d%d%d",
@@ -1925,13 +1925,12 @@ oncore_msg_any(
 			for(i = 2; i < len && i < 2400 ; i++) {
 				snprintf(Msg2, sizeof(Msg2), "%02x",
 					 buf[i]);
-				strncpy(Msg, Msg2, sizeof(Msg));
-
+				strlcat(Msg, Msg2, sizeof(Msg));
 			}
 			oncore_log(instance, LOG_DEBUG, Msg);
 			return;
 		} else {
-			strncat(Msg, "##", sizeof(Msg));
+			strlcpy(Msg, "##", sizeof(Msg));
 			qlim = Msg + sizeof(Msg) - 3;
 			for (p = fmt, q = Msg + 2; q < qlim && *p; ) {
 				*q++ = *p++;
@@ -1944,7 +1943,7 @@ oncore_msg_any(
 			i = 4;
 			for (p = fmt; *p; p++) {
 				snprintf(Msg2, "%02x", buf[i++]);
-				strncat(Msg, Msg2, sizeof(Msg));
+				strlcat(Msg, Msg2, sizeof(Msg));
 			}
 			oncore_log(instance, LOG_DEBUG, Msg);
 		}
@@ -3620,7 +3619,7 @@ oncore_print_Cb(
 		*(cp+5));
 	for (ii = 0; ii < 33; ii++) {
 		snprintf(Msg2, sizeof(Msg2), " %d", *(cp+ii));
-		strncat(Msg, Msg2, sizeof(Msg));
+		strlcat(Msg, Msg2, sizeof(Msg));
 	}
 	oncore_log(instance, LOG_DEBUG, Msg);
 
