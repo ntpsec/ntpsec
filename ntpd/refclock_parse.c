@@ -2418,41 +2418,42 @@ parsestate(
 		if (flagstrings[i].bit & lstate)
 		{
 			if (s != t)
-				strncpy(t, "; ", BUFFER_SIZES(buffer, t, size));
-			strncat(t, flagstrings[i].name, BUFFER_SIZES(buffer, t, size));
-			t += strlen(t);
+				strlcpy(t, "; ", BUFFER_SIZES(buffer, t, size));
+			if (strlcat(t, flagstrings[i].name, BUFFER_SIZES(buffer, t, size)) <
+			    BUFFER_SIZES(buffer, t, size))
+				t += strlen(t);
 		}
 		i++;
 	}
 
 	if (lstate & (PARSEB_S_LEAP|PARSEB_S_ANTENNA|PARSEB_S_PPS|PARSEB_S_POSITION))
 	{
-		if (s != t)
-			strncpy(t, "; ", BUFFER_SIZES(buffer, t, size));
+		if (s != t &&
+		    strlcpy(t, "; ", BUFFER_SIZES(buffer, t, size)) <
+		    BUFFER_SIZES(buffer, t, size))
+			t += strlen(t);
 
-		t += strlen(t);
-
-		strncpy(t, "(", BUFFER_SIZES(buffer, t, size));
-
-		s = t = t + strlen(t);
+		if (strlcpy(t, "(", BUFFER_SIZES(buffer, t, size)) < 
+		    BUFFER_SIZES(buffer, t, size))
+			s = t = t + strlen(t);
 
 		i = 0;
 		while (sflagstrings[i].bit)
 		{
 			if (sflagstrings[i].bit & lstate)
 			{
-				if (t != s)
-				{
-					strncpy(t, "; ", BUFFER_SIZES(buffer, t, size));
+				if (t != s &&
+				    strlcpy(t, "; ", BUFFER_SIZES(buffer, t, size)) <
+				    BUFFER_SIZES(buffer, t, size))
 					t += 2;
-				}
 	
-				strncpy(t, sflagstrings[i].name, BUFFER_SIZES(buffer, t, size));
-				t += strlen(t);
+				if (strlcpy(t, sflagstrings[i].name, BUFFER_SIZES(buffer, t, size)) <
+				    BUFFER_SIZES(buffer, t, size))
+					t += strlen(t);
 			}
 			i++;
 		}
-		strncpy(t, ")", BUFFER_SIZES(buffer, t, size));
+		strlcpy(t, ")", BUFFER_SIZES(buffer, t, size));
 	}
 	return buffer;
 }
@@ -2492,8 +2493,8 @@ parsestatus(
 		if (flagstrings[i].bit & lstate)
 		{
 			if (buffer[0])
-				strncat(buffer, "; ", size);
-			strncat(buffer, flagstrings[i].name, size);
+				strlcat(buffer, "; ", size);
+			strlcat(buffer, flagstrings[i].name, size);
 		}
 		i++;
 	}
@@ -3111,7 +3112,7 @@ parse_start(
 			msyslog(LOG_ERR, "PARSE receiver #%d: parse_start: io sub system initialisation failed.", CLK_UNIT(parse->peer));
 			parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 			return 0;			/* well, ok - special initialisation broke */
-		}      
+		}
 
 	parse->generic->io.clock_recv = parse->binding->bd_receive; /* pick correct receive routine */
 	parse->generic->io.io_input   = parse->binding->bd_io_input; /* pick correct input routine */
@@ -3149,9 +3150,12 @@ parse_start(
 		parse_shutdown(CLK_UNIT(parse->peer), peer); /* let our cleaning staff do the work */
 		return 0;			/* well, ok - special initialisation broke */
 	}
-  
-	strncpy(tmp_ctl.parseformat.parse_buffer, parse->parse_type->cl_format, sizeof(tmp_ctl.parseformat.parse_buffer));
-	tmp_ctl.parseformat.parse_count = strlen(tmp_ctl.parseformat.parse_buffer);
+
+	tmp_ctl.parseformat.parse_count = strlcpy(tmp_ctl.parseformat.parse_buffer,
+						  parse->parse_type->cl_format,
+						  sizeof(tmp_ctl.parseformat.parse_buffer));
+	if (tmp_ctl.parseformat.parse_count >= sizeof(tmp_ctl.parseformat.parse_buffer))
+		tmp_ctl.parseformat.parse_count = sizeof(tmp_ctl.parseformat.parse_buffer) - 1;
 
 	if (!PARSE_SETFMT(parse, &tmp_ctl))
 	{
@@ -3439,7 +3443,7 @@ parse_control(
 
 		if (parse->timedata.parse_time.fp.l_ui == 0)
 		{
-			strncpy(tt, "<UNDEFINED>\"", BUFFER_SIZES(start, tt, 128));
+			strlcpy(tt, "<UNDEFINED>\"", BUFFER_SIZES(start, tt, 128));
 		}
 		else
 		{
@@ -3465,7 +3469,7 @@ parse_control(
 
 			(void) parsestate(tmpctl.parsegettc.parse_state, tt, BUFFER_SIZES(start, tt, 512));
 
-			strncat(tt, "\"", BUFFER_SIZES(start, tt, 512));
+			strlcat(tt, "\"", BUFFER_SIZES(start, tt, 512));
 
 			if (tmpctl.parsegettc.parse_count)
 			    mkascii(outstatus+strlen(outstatus), (int)(sizeof(outstatus)- strlen(outstatus) - 1),
@@ -3485,8 +3489,8 @@ parse_control(
 			tt = add_var(&out->kv_list, 80, RO|DEF);
 			snprintf(tt, 80, "refclock_format=\"");
 
-			strncat(tt, tmpctl.parseformat.parse_buffer, tmpctl.parseformat.parse_count);
-			strncat(tt,"\"", 80);
+			strlcat(tt, tmpctl.parseformat.parse_buffer, 80);
+			strlcat(tt,"\"", 80);
 		}
 
 		/*
@@ -3494,7 +3498,7 @@ parse_control(
 		 */
 
 		start = tt = add_var(&out->kv_list, LEN_STATES, RO|DEF);
-		strncpy(tt, "refclock_states=\"", LEN_STATES);
+		strlcpy(tt, "refclock_states=\"", LEN_STATES);
 		tt += strlen(tt);
 
 		for (i = 0; i <= CEVNT_MAX; i++)
@@ -3529,7 +3533,7 @@ parse_control(
 					(int)(percent / 100), (int)(percent % 100));
 				if ((count = strlen(item)) < (LEN_STATES - 40 - (tt - start)))
 					{
-						strncpy(tt, item, BUFFER_SIZES(start, tt, LEN_STATES));
+						strlcpy(tt, item, BUFFER_SIZES(start, tt, LEN_STATES));
 						tt  += count;
 					}
 				sum += s_time;
@@ -4218,7 +4222,7 @@ gps16x_message(
 									*p++ = ' ';
 								}
 								
-								strncat(p, (const char *)s->string, sizeof(buffer));
+								strlcat(p, (const char *)s->string, sizeof(buffer));
 							}
 							s++;
 						}
@@ -4228,7 +4232,7 @@ gps16x_message(
 					}
 					else
 					{
-						strncat(buffer, "<OK>\"", sizeof(buffer));
+						strlcat(buffer, "<OK>\"", sizeof(buffer));
 					}
 		
 					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
@@ -4288,12 +4292,12 @@ gps16x_message(
 					switch (antinfo.status)
 					{
 					case ANT_INVALID:
-						strncat(p, "<OK>", BUFFER_SIZE(buffer, p));
+						strlcat(p, "<OK>", BUFFER_SIZE(buffer, p));
 						p += strlen(p);
 						break;
 						
 					case ANT_DISCONN:
-						strncat(p, "DISCONNECTED since ", BUFFER_SIZE(buffer, p));
+						strlcat(p, "DISCONNECTED since ", BUFFER_SIZE(buffer, p));
 						NLOG(NLOG_CLOCKSTATUS)
 							ERR(ERR_BADSTATUS)
 							msyslog(LOG_ERR,"PARSE receiver #%d: ANTENNA FAILURE: %s",
@@ -4305,7 +4309,7 @@ gps16x_message(
 						break;
 		    
 					case ANT_RECONN:
-						strncat(p, "RECONNECTED on ", BUFFER_SIZE(buffer, p));
+						strlcat(p, "RECONNECTED on ", BUFFER_SIZE(buffer, p));
 						p += strlen(p);
 						mbg_tm_str(&p, &antinfo.tm_reconn, BUFFER_SIZE(buffer, p));
 						snprintf(p, BUFFER_SIZE(buffer, p), ", reconnect clockoffset %c%ld.%07ld s, disconnect time ",
@@ -4323,7 +4327,7 @@ gps16x_message(
 						break;
 					}
 					
-					strncat(p, "\"", BUFFER_SIZE(buffer, p));
+					strlcat(p, "\"", BUFFER_SIZE(buffer, p));
 					
 					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
 				}
@@ -4344,24 +4348,24 @@ gps16x_message(
 						int i;
 						
 						p = buffer;
-						strncpy(buffer, "gps_tot_51=\"", BUFFER_SIZE(buffer, p));
+						strlcpy(buffer, "gps_tot_51=\"", BUFFER_SIZE(buffer, p));
 						p += strlen(p);
 						mbg_tgps_str(&p, &cfgh.tot_51, BUFFER_SIZE(buffer, p));
-						strncpy(p, "\"", BUFFER_SIZE(buffer, p));
+						strlcpy(p, "\"", BUFFER_SIZE(buffer, p));
 						set_var(&parse->kv, buffer, strlen(buffer)+1, RO);
 						
 						p = buffer;
-						strncpy(buffer, "gps_tot_63=\"", BUFFER_SIZE(buffer, p));
+						strlcpy(buffer, "gps_tot_63=\"", BUFFER_SIZE(buffer, p));
 						p += strlen(p);
 						mbg_tgps_str(&p, &cfgh.tot_63, BUFFER_SIZE(buffer, p));
-						strncpy(p, "\"", BUFFER_SIZE(buffer, p));
+						strlcpy(p, "\"", BUFFER_SIZE(buffer, p));
 						set_var(&parse->kv, buffer, strlen(buffer)+1, RO);
 						
 						p = buffer;
-						strncpy(buffer, "gps_t0a=\"", BUFFER_SIZE(buffer, p));
+						strlcpy(buffer, "gps_t0a=\"", BUFFER_SIZE(buffer, p));
 						p += strlen(p);
 						mbg_tgps_str(&p, &cfgh.t0a, BUFFER_SIZE(buffer, p));
-						strncpy(p, "\"", BUFFER_SIZE(buffer, p));
+						strlcpy(p, "\"", BUFFER_SIZE(buffer, p));
 						set_var(&parse->kv, buffer, strlen(buffer)+1, RO);
 						
 						for (i = MIN_SVNO; i < MAX_SVNO; i++)
@@ -4372,16 +4376,16 @@ gps16x_message(
 							switch (cfgh.cfg[i] & 0x7)
 							{
 							case 0:
-								strncpy(p, "BLOCK I", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "BLOCK I", BUFFER_SIZE(buffer, p));
 								break;
 							case 1:
-								strncpy(p, "BLOCK II", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "BLOCK II", BUFFER_SIZE(buffer, p));
 								break;
 							default:
-								strncpy(p, "bad CFG", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "bad CFG", BUFFER_SIZE(buffer, p));
 								break;
 							}
-							strncat(p, "\"", BUFFER_SIZE(buffer, p));
+							strlcat(p, "\"", BUFFER_SIZE(buffer, p));
 							set_var(&parse->kv, buffer, strlen(buffer)+1, RO);
 							
 							p = buffer;
@@ -4390,28 +4394,28 @@ gps16x_message(
 							switch ((cfgh.health[i] >> 5) & 0x7 )
 							{
 							case 0:
-								strncpy(p, "OK;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "OK;", BUFFER_SIZE(buffer, p));
 								break;
 							case 1:
-								strncpy(p, "PARITY;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "PARITY;", BUFFER_SIZE(buffer, p));
 								break;
 							case 2:
-								strncpy(p, "TLM/HOW;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "TLM/HOW;", BUFFER_SIZE(buffer, p));
 								break;
 							case 3:
-								strncpy(p, "Z-COUNT;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "Z-COUNT;", BUFFER_SIZE(buffer, p));
 								break;
 							case 4:
-								strncpy(p, "SUBFRAME 1,2,3;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "SUBFRAME 1,2,3;", BUFFER_SIZE(buffer, p));
 								break;
 							case 5:
-								strncpy(p, "SUBFRAME 4,5;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "SUBFRAME 4,5;", BUFFER_SIZE(buffer, p));
 								break;
 							case 6:
-								strncpy(p, "UPLOAD BAD;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "UPLOAD BAD;", BUFFER_SIZE(buffer, p));
 								break;
 							case 7:
-								strncpy(p, "DATA BAD;", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "DATA BAD;", BUFFER_SIZE(buffer, p));
 								break;
 							}
 							
@@ -4420,25 +4424,25 @@ gps16x_message(
 							switch (cfgh.health[i] & 0x1F)
 							{
 							case 0:
-								strncpy(p, "SIGNAL OK", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "SIGNAL OK", BUFFER_SIZE(buffer, p));
 								break;
 							case 0x1C:
-								strncpy(p, "SV TEMP OUT", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "SV TEMP OUT", BUFFER_SIZE(buffer, p));
 								break;
 							case 0x1D:
-								strncpy(p, "SV WILL BE TEMP OUT", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "SV WILL BE TEMP OUT", BUFFER_SIZE(buffer, p));
 								break;
 							case 0x1E:
 								break;
 							case 0x1F:
-								strncpy(p, "MULTIPLE ERRS", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "MULTIPLE ERRS", BUFFER_SIZE(buffer, p));
 								break;
 							default:
-								strncpy(p, "TRANSMISSION PROBLEMS", BUFFER_SIZE(buffer, p));
+								strlcpy(p, "TRANSMISSION PROBLEMS", BUFFER_SIZE(buffer, p));
 								break;
 							}
 							
-							strncat(p, "\"", sizeof(buffer));
+							strlcat(p, "\"", sizeof(buffer));
 							set_var(&parse->kv, buffer, strlen(buffer)+1, RO);
 						}
 					}
@@ -4463,14 +4467,14 @@ gps16x_message(
 					
 					if (utc.valid)
 					{
-						strncpy(p, "gps_utc_correction=\"", sizeof(buffer));
+						strlcpy(p, "gps_utc_correction=\"", sizeof(buffer));
 						p += strlen(p);
 						mk_utcinfo(p, utc.t0t.wn, utc.WNlsf, utc.DNt, utc.delta_tls, utc.delta_tlsf, BUFFER_SIZE(buffer, p));
-						strncat(p, "\"", BUFFER_SIZE(buffer, p));
+						strlcat(p, "\"", BUFFER_SIZE(buffer, p));
 					}
 					else
 					{
-						strncpy(p, "gps_utc_correction=\"<NO UTC DATA>\"", BUFFER_SIZE(buffer, p));
+						strlcpy(p, "gps_utc_correction=\"<NO UTC DATA>\"", BUFFER_SIZE(buffer, p));
 					}
 					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
 				}
@@ -4494,7 +4498,7 @@ gps16x_message(
 							snprintf(buffer, sizeof(buffer), "gps_message=\"%s\"", buffer1);
 						}
 					else
-						strncpy(buffer, "gps_message=<NONE>", sizeof(buffer));
+						strlcpy(buffer, "gps_message=<NONE>", sizeof(buffer));
 					
 					set_var(&parse->kv, buffer, strlen(buffer)+1, RO|DEF);
 				}
@@ -5362,7 +5366,7 @@ trimbletsip_message(
 			break;
 			
 		case CMD_RBEST4:
-			strncpy(t, "mode: ", BUFFER_SIZE(pbuffer, t));
+			strlcpy(t, "mode: ", BUFFER_SIZE(pbuffer, t));
 			t += strlen(t);
 			switch (mb(0) & 0xF)
 			{
@@ -5371,22 +5375,22 @@ trimbletsip_message(
 				break;
 
 			case 1:
-				strncpy(t, "0D", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "0D", BUFFER_SIZE(pbuffer, t));
 				break;
 				
 			case 3:
-				strncpy(t, "2D", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "2D", BUFFER_SIZE(pbuffer, t));
 				break;
 				
 			case 4:
-				strncpy(t, "3D", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "3D", BUFFER_SIZE(pbuffer, t));
 				break;
 			}
 			t += strlen(t);
 			if (mb(0) & 0x10)
-				strncpy(t, "-MANUAL, ", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "-MANUAL, ", BUFFER_SIZE(pbuffer, t));
 			else
-				strncpy(t, "-AUTO, ", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "-AUTO, ", BUFFER_SIZE(pbuffer, t));
 			t += strlen(t);
 			
 			snprintf(t, BUFFER_SIZE(pbuffer, t), "satellites %02d %02d %02d %02d, PDOP %.2f, HDOP %.2f, VDOP %.2f, TDOP %.2f",
@@ -5425,28 +5429,28 @@ trimbletsip_message(
 				snprintf(t, BUFFER_SIZE(pbuffer, t), "illegal value 0x%02x", mb(0) & 0xFF);
 				break;
 			case 0x00:
-				strncpy(t, "doing position fixes", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "doing position fixes", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x01:
-				strncpy(t, "no GPS time yet", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "no GPS time yet", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x03:
-				strncpy(t, "PDOP too high", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "PDOP too high", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x08:
-				strncpy(t, "no usable satellites", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "no usable satellites", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x09:
-				strncpy(t, "only ONE usable satellite", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "only ONE usable satellite", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x0A:
-				strncpy(t, "only TWO usable satellites", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "only TWO usable satellites", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x0B:
-				strncpy(t, "only THREE usable satellites", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "only THREE usable satellites", BUFFER_SIZE(pbuffer, t));
 				break;
 			case 0x0C:
-				strncpy(t, "the chosen satellite is unusable", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "the chosen satellite is unusable", BUFFER_SIZE(pbuffer, t));
 				break;
 			}
 
@@ -5515,13 +5519,13 @@ trimbletsip_message(
 			short dtlsf = getshort((unsigned char *)&mb(24));
 
 			if ((int)t0t != 0)
-			  {
-				  mk_utcinfo(t, wnt, wnlsf, dn, dtls, dtlsf, BUFFER_SIZE(pbuffer, t));
-			  }
+			{
+				mk_utcinfo(t, wnt, wnlsf, dn, dtls, dtlsf, BUFFER_SIZE(pbuffer, t));
+			}
 			else
-			  {
-			    strncpy(t, "<NO UTC DATA>", BUFFER_SIZE(pbuffer, t));
-			  }
+			{
+				strlcpy(t, "<NO UTC DATA>", BUFFER_SIZE(pbuffer, t));
+			}
 		}
 		break;
 
@@ -5550,11 +5554,11 @@ trimbletsip_message(
 			double f = getflt((unsigned char *)&mb(12));
 			
 			if (f > 0.0)
-			  snprintf(t, BUFFER_SIZE(pbuffer, t), "x= %.1fm, y= %.1fm, z= %.1fm, time_of_fix= %f sec",
-				  x, y, z,
-				  f);
+				snprintf(t, BUFFER_SIZE(pbuffer, t), "x= %.1fm, y= %.1fm, z= %.1fm, time_of_fix= %f sec",
+					 x, y, z,
+					 f);
 			else
-			  return;
+				return;
 		}
 		break;
 
@@ -5565,12 +5569,12 @@ trimbletsip_message(
 			double f   = getflt((unsigned char *)&mb(12));
 			
 			if (f > 0.0)
-			  snprintf(t, BUFFER_SIZE(pbuffer, t), "lat %f %c, long %f %c, alt %.2fm",
-				  ((lat < 0.0) ? (-lat) : (lat))*RTOD, (lat < 0.0 ? 'S' : 'N'),
-				  ((lng < 0.0) ? (-lng) : (lng))*RTOD, (lng < 0.0 ? 'W' : 'E'),
-				  getflt((unsigned char *)&mb(8)));
+				snprintf(t, BUFFER_SIZE(pbuffer, t), "lat %f %c, long %f %c, alt %.2fm",
+					 ((lat < 0.0) ? (-lat) : (lat))*RTOD, (lat < 0.0 ? 'S' : 'N'),
+					 ((lng < 0.0) ? (-lng) : (lng))*RTOD, (lng < 0.0 ? 'W' : 'E'),
+					 getflt((unsigned char *)&mb(8)));
 			else
-			  return;
+				return;
 		}
 		break;
 
@@ -5580,7 +5584,7 @@ trimbletsip_message(
 			double y = getdbl((unsigned char *)&mb(8));
 			double z = getdbl((unsigned char *)&mb(16));
 			snprintf(t, BUFFER_SIZE(pbuffer, t), "x= %.1fm, y= %.1fm, z= %.1fm",
-				x, y, z);
+				 x, y, z);
 		}
 		break;
 				
@@ -5599,7 +5603,7 @@ trimbletsip_message(
 		{
 			int i, sats;
 			
-			strncpy(t, "mode: ", BUFFER_SIZE(pbuffer, t));
+			strlcpy(t, "mode: ", BUFFER_SIZE(pbuffer, t));
 			t += strlen(t);
 			switch (mb(0) & 0x7)
 			{
@@ -5608,18 +5612,18 @@ trimbletsip_message(
 				break;
 
 			case 3:
-				strncpy(t, "2D", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "2D", BUFFER_SIZE(pbuffer, t));
 				break;
 				
 			case 4:
-				strncpy(t, "3D", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "3D", BUFFER_SIZE(pbuffer, t));
 				break;
 			}
 			t += strlen(t);
 			if (mb(0) & 0x8)
-				strncpy(t, "-MANUAL, ", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "-MANUAL, ", BUFFER_SIZE(pbuffer, t));
 			else
-				strncpy(t, "-AUTO, ", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "-AUTO, ", BUFFER_SIZE(pbuffer, t));
 			t += strlen(t);
 			
 			sats = (mb(0)>>4) & 0xF;
@@ -5641,7 +5645,7 @@ trimbletsip_message(
 			}
 
 			if (tr)
-                        { /* mark for tracking status query */
+			{	/* mark for tracking status query */
 				tr->qtracking = 1;
 			}
 		}
@@ -5654,7 +5658,7 @@ trimbletsip_message(
 
 			if (getflt((unsigned char *)&mb(4)) < 0.0)
 			{
-				strncpy(t, "<NO MEASUREMENTS>", BUFFER_SIZE(pbuffer, t));
+				strlcpy(t, "<NO MEASUREMENTS>", BUFFER_SIZE(pbuffer, t));
 				var_flag &= ~DEF;
 			}
 			else
@@ -5670,31 +5674,31 @@ trimbletsip_message(
 				if (mb(20))
 				{
 					var_flag &= ~DEF;
-					strncpy(t, ", OLD", BUFFER_SIZE(pbuffer, t));
+					strlcpy(t, ", OLD", BUFFER_SIZE(pbuffer, t));
 				}
 				t += strlen(t);
 				if (mb(22))
 				{
 					if (mb(22) == 1)
-						strncpy(t, ", BAD PARITY", BUFFER_SIZE(pbuffer, t));
+						strlcpy(t, ", BAD PARITY", BUFFER_SIZE(pbuffer, t));
 					else
 						if (mb(22) == 2)
-							strncpy(t, ", BAD EPH HEALTH", BUFFER_SIZE(pbuffer, t));
+							strlcpy(t, ", BAD EPH HEALTH", BUFFER_SIZE(pbuffer, t));
 				}
 				t += strlen(t);
 				if (mb(23))
-					strncpy(t, ", collecting data", BUFFER_SIZE(pbuffer, t));
+					strlcpy(t, ", collecting data", BUFFER_SIZE(pbuffer, t));
 			}
 		}
 		break;
 		
 		default:
-			strncpy(t, "<UNDECODED>", BUFFER_SIZE(pbuffer, t));
+			strlcpy(t, "<UNDECODED>", BUFFER_SIZE(pbuffer, t));
 			break;
 		}
 		t += strlen(t);
 
-		strncpy(t,"\"", BUFFER_SIZE(pbuffer, t));
+		strlcpy(t,"\"", BUFFER_SIZE(pbuffer, t));
 		set_var(&parse->kv, pbuffer, sizeof(pbuffer), var_flag);
 	}
 }

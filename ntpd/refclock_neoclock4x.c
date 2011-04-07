@@ -317,10 +317,10 @@ neoclock4x_start(int unit,
 
   up->leap_status = 0;
   up->unit = unit;
-  strncpy(up->firmware, "?", sizeof(up->firmware));
+  strlcpy(up->firmware, "?", sizeof(up->firmware));
   up->firmwaretag = '?';
-  strncpy(up->serial, "?", sizeof(up->serial));
-  strncpy(up->radiosignal, "?", sizeof(up->radiosignal));
+  strlcpy(up->serial, "?", sizeof(up->serial));
+  strlcpy(up->radiosignal, "?", sizeof(up->radiosignal));
   up->timesource  = '?';
   up->dststatus   = '?';
   up->quarzstatus = '?';
@@ -336,7 +336,7 @@ neoclock4x_start(int unit,
 
 #if defined(NEOCLOCK4X_FIRMWARE)
 #if NEOCLOCK4X_FIRMWARE == NEOCLOCK4X_FIRMWARE_VERSION_A
-  strncpy(up->firmware, "(c) 2002 NEOL S.A. FRANCE / L0.01 NDF:A:* (compile time)",
+  strlcpy(up->firmware, "(c) 2002 NEOL S.A. FRANCE / L0.01 NDF:A:* (compile time)",
 	  sizeof(up->firmware));
   up->firmwaretag = 'A';
 #else
@@ -932,13 +932,13 @@ neol_query_firmware(int fd,
 	  if(read_errors > 5)
 	    {
 	      msyslog(LOG_ERR, "NeoClock4X(%d): can't read firmware version (timeout)", unit);
-	      strncpy(tmpbuf, "unknown due to timeout", sizeof(tmpbuf));
+	      strlcpy(tmpbuf, "unknown due to timeout", sizeof(tmpbuf));
 	      break;
 	    }
           if(chars_read > 500)
             {
 	      msyslog(LOG_ERR, "NeoClock4X(%d): can't read firmware version (garbage)", unit);
-	      strncpy(tmpbuf, "unknown due to garbage input", sizeof(tmpbuf));
+	      strlcpy(tmpbuf, "unknown due to garbage input", sizeof(tmpbuf));
 	      break;
             }
 	  if(-1 == read(fd, &c, 1))
@@ -964,7 +964,7 @@ neol_query_firmware(int fd,
 	      if(0xA9 != c) /* wait for (c) char in input stream */
 		continue;
 
-	      strncpy(tmpbuf, "(c)", sizeof(tmpbuf));
+	      strlcpy(tmpbuf, "(c)", sizeof(tmpbuf));
 	      len = 3;
 	      init = 0;
 	      continue;
@@ -1009,10 +1009,10 @@ neol_query_firmware(int fd,
   else
     {
       msyslog(LOG_ERR, "NeoClock4X(%d): can't query firmware version", unit);
-      strncpy(tmpbuf, "unknown error", sizeof(tmpbuf));
+      strlcpy(tmpbuf, "unknown error", sizeof(tmpbuf));
     }
-  strncpy(firmware, tmpbuf, maxlen);
-  firmware[maxlen] = '\0';
+  if (strlcpy(firmware, tmpbuf, maxlen) >= maxlen)
+    strlcpy(firmware, "buffer too small", maxlen);
 
   if(flag)
     {

@@ -1352,7 +1352,7 @@ addserver(
 	char service[5];
 	sockaddr_u addr;
 
-	strncpy(service, "ntp", sizeof(service));
+	strlcpy(service, "ntp", sizeof(service));
 
 	/* Get host address. Looking for UDP datagram connection. */
 	ZERO(hints);
@@ -1689,7 +1689,7 @@ init_io(void)
 	 * Open the socket
 	 */
 
-	strncpy(service, "ntp", sizeof(service));
+	strlcpy(service, "ntp", sizeof(service));
 
 	/*
 	 * Init hints addrinfo structure

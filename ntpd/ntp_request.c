@@ -2598,7 +2598,7 @@ fill_info_if_stats(void *data, interface_info_t *interface_info)
 		ifs->unmask.addr = SOCK_ADDR4(&ep->mask);
 	}
 	ifs->v6_flag = htonl(ifs->v6_flag);
-	strncpy(ifs->name, ep->name, sizeof(ifs->name));
+	strlcpy(ifs->name, ep->name, sizeof(ifs->name));
 	ifs->family = htons(ep->family);
 	ifs->flags = htonl(ep->flags);
 	ifs->last_ttl = htonl(ep->last_ttl);

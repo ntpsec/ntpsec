@@ -1616,11 +1616,12 @@ doprintpeers(
 			decodeint(value, &hmode);
 		} else if (!strcmp("refid", name)) {
 			if (pvl == peervarlist) {
-				if (*value == '\0') {
+				drlen = strlen(value);
+				if (0 == drlen) {
 					dstadr_refid = "";
-				} else if (strlen(value) <= 4) {
-					strncpy((void *)&u32, value,
-						sizeof(u32));
+				} else if (drlen <= 4) {
+					ZERO(u32);
+					memcpy(&u32, value, drlen);
 					dstadr_refid = refid_str(u32, 1);
 				} else if (decodenetnum(value, &dstadr)) {
 					dstadr_refid =
@@ -1706,7 +1707,7 @@ doprintpeers(
 		fprintf(fp, "%-*s ", (int)maxhostlen, currenthost);
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
 		if (!have_srchost)
-			strncpy(clock_name, nntohost(&srcadr),
+			strlcpy(clock_name, nntohost(&srcadr),
 				sizeof(clock_name));
 		fprintf(fp, "%c%-15.15s ", c, clock_name);
 		drlen = strlen(dstadr_refid);
@@ -2476,7 +2477,7 @@ collect_mru_list(
 
 			case 'n':
 				if (!strcmp(tag, "nonce")) {
-					strncpy(nonce, val, sizeof(nonce));
+					strlcpy(nonce, val, sizeof(nonce));
 					nonce_uses = 0;
 					break; /* case */
 				} else if (strcmp(tag, "now") ||

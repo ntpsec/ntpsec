@@ -886,9 +886,7 @@ save_config(
 	if (0 == reqend - reqpt)
 		return;
 
-	strncpy(filespec, reqpt, sizeof(filespec));
-	filespec[sizeof(filespec) - 1] = '\0';
-
+	strlcpy(filespec, reqpt, sizeof(filespec));
 	time(&now);
 
 	/*
@@ -898,10 +896,16 @@ save_config(
 	 */
 	if (0 == strftime(filename, sizeof(filename), filespec,
 			       localtime(&now)))
-		strncpy(filename, filespec, sizeof(filename));
-
-	filename[sizeof(filename) - 1] = '\0';
+		strlcpy(filename, filespec, sizeof(filename));
 	
+	/*
+	 * Conceptually we should be searching for DIRSEP in filename,
+	 * however Windows actually recognizes both forward and
+	 * backslashes as equivalent directory separators at the API
+	 * level.  On POSIX systems we could allow '\\' but such
+	 * filenames are tricky to manipulate from a shell, so just
+	 * reject both types of slashes on all platforms.
+	 */
 	if (strchr(filename, '\\') || strchr(filename, '/')) {
 		snprintf(reply, sizeof(reply),
 			 "saveconfig does not allow directory in filename");
@@ -2191,9 +2195,8 @@ ctl_putsys(
 
 	case CS_DIGEST:
 		if (crypto_flags) {
-			strncpy(str, OBJ_nid2ln(crypto_nid),
+			strlcpy(str, OBJ_nid2ln(crypto_nid),
 			    COUNTOF(str));
-			str[COUNTOF(str) - 1] = '\0';
 			ctl_putstr(sys_var[CS_DIGEST].text, str,
 			    strlen(str));
 		}
@@ -2204,9 +2207,8 @@ ctl_putsys(
 			const EVP_MD *dp;
 
 			dp = EVP_get_digestbynid(crypto_flags >> 16);
-			strncpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)),
+			strlcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)),
 			    COUNTOF(str));
-			str[COUNTOF(str) - 1] = '\0';
 			ctl_putstr(sys_var[CS_SIGNATURE].text, str,
 			    strlen(str));
 		}

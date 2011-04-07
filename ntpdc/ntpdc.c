@@ -422,7 +422,7 @@ openhost(
 	 * will return an "IPv4-mapped IPv6 address" address if you
 	 * give it an IPv4 address to lookup.
 	 */
-	strncpy(service, "ntp", sizeof(service));
+	strlcpy(service, "ntp", sizeof(service));
 	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_protocol = IPPROTO_UDP;
@@ -463,10 +463,9 @@ openhost(
 	memcpy(&addr, ai->ai_addr, octets);
 
 	if (ai->ai_canonname == NULL)
-		strncpy(temphost, stoa(&addr), sizeof(temphost));
+		strlcpy(temphost, stoa(&addr), sizeof(temphost));
 	else
-		strncpy(temphost, ai->ai_canonname, sizeof(temphost));
-	temphost[sizeof(temphost) - 1] = '\0';
+		strlcpy(temphost, ai->ai_canonname, sizeof(temphost));
 
 	if (debug > 2)
 		printf("Opening host %s\n", temphost);
@@ -477,7 +476,7 @@ openhost(
 		closesocket(sockfd);
 		havehost = 0;
 	}
-	strncpy(currenthost, temphost, sizeof(currenthost));
+	strlcpy(currenthost, temphost, sizeof(currenthost));
 	
 	/* port maps to the same in both families */
 	s_port = NSRCPORT(&addr);; 
@@ -1442,7 +1441,7 @@ getnetnum(
 		memcpy(num, ai->ai_addr, ai->ai_addrlen);
 		if (fullhost != NULL) {
 			if (ai->ai_canonname != NULL)
-				strncpy(fullhost, ai->ai_canonname,
+				strlcpy(fullhost, ai->ai_canonname,
 					LENHOSTNAME);
 			else
 				getnameinfo(&num->sa, SOCKLEN(num),

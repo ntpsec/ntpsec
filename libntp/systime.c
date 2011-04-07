@@ -291,14 +291,19 @@ step_systime(
 
 #ifdef UPDATE_UTMP
 # ifdef HAVE_PUTUTLINE
+#  ifndef _PATH_UTMP
+#   define _PATH_UTMP UTMP_FILE
+#  endif
+		utmpname(_PATH_UTMP);
 		ut.ut_type = OLD_TIME;
-		strncpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
+		strlcpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
 		ut.ut_time = oldtimetv.tv_sec;
-		pututline(&ut);
 		setutent();
+		pututline(&ut);
 		ut.ut_type = NEW_TIME;
-		strncpy(ut.ut_line, NTIME_MSG, sizeof(ut.ut_line));
+		strlcpy(ut.ut_line, NTIME_MSG, sizeof(ut.ut_line));
 		ut.ut_time = timetv.tv_sec;
+		setutent();
 		pututline(&ut);
 		endutent();
 # else /* not HAVE_PUTUTLINE */
@@ -310,13 +315,14 @@ step_systime(
 #ifdef UPDATE_UTMPX
 # ifdef HAVE_PUTUTXLINE
 		utx.ut_type = OLD_TIME;
-		strncpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
+		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
 		utx.ut_tv = oldtimetv;
-		pututxline(&utx);
 		setutxent();
+		pututxline(&utx);
 		utx.ut_type = NEW_TIME;
-		strncpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
+		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
 		utx.ut_tv = timetv;
+		setutxent();
 		pututxline(&utx);
 		endutxent();
 # else /* not HAVE_PUTUTXLINE */
@@ -327,14 +333,19 @@ step_systime(
 
 #ifdef UPDATE_WTMP
 # ifdef HAVE_PUTUTLINE
-		utmpname(WTMP_FILE);
+#  ifndef _PATH_WTMP
+#   define _PATH_WTMP WTMP_FILE
+#  endif
+		utmpname(_PATH_WTMP);
 		ut.ut_type = OLD_TIME;
-		strncpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
+		strlcpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
 		ut.ut_time = oldtimetv.tv_sec;
+		setutent();
 		pututline(&ut);
 		ut.ut_type = NEW_TIME;
-		strncpy(ut.ut_line, NTIME_MSG, sizeof(ut.ut_line));
+		strlcpy(ut.ut_line, NTIME_MSG, sizeof(ut.ut_line));
 		ut.ut_time = timetv.tv_sec;
+		setutent();
 		pututline(&ut);
 		endutent();
 # else /* not HAVE_PUTUTLINE */
@@ -347,7 +358,7 @@ step_systime(
 # ifdef HAVE_PUTUTXLINE
 		utx.ut_type = OLD_TIME;
 		utx.ut_tv = oldtimetv;
-		strncpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
+		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
 #  ifdef HAVE_UPDWTMPX
 		updwtmpx(WTMPX_FILE, &utx);
 #  else /* not HAVE_UPDWTMPX */
@@ -357,7 +368,7 @@ step_systime(
 # ifdef HAVE_PUTUTXLINE
 		utx.ut_type = NEW_TIME;
 		utx.ut_tv = timetv;
-		strncpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
+		strlcpy(utx.ut_line, NTIME_MSG, sizeof(utx.ut_line));
 #  ifdef HAVE_UPDWTMPX
 		updwtmpx(WTMPX_FILE, &utx);
 #  else /* not HAVE_UPDWTMPX */

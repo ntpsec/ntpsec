@@ -359,27 +359,27 @@ stats_config(
 	if (!ExpandEnvironmentStrings(invalue, newvalue, MAX_PATH)) {
 		switch (item) {
 		case STATS_FREQ_FILE:
-			strncpy(parameter, "STATS_FREQ_FILE",
+			strlcpy(parameter, "STATS_FREQ_FILE",
 				sizeof(parameter));
 			break;
 
 		case STATS_LEAP_FILE:
-			strncpy(parameter, "STATS_LEAP_FILE",
+			strlcpy(parameter, "STATS_LEAP_FILE",
 				sizeof(parameter));
 			break;
 
 		case STATS_STATSDIR:
-			strncpy(parameter, "STATS_STATSDIR",
+			strlcpy(parameter, "STATS_STATSDIR",
 				sizeof(parameter));
 			break;
 
 		case STATS_PID_FILE:
-			strncpy(parameter, "STATS_PID_FILE",
+			strlcpy(parameter, "STATS_PID_FILE",
 				sizeof(parameter));
 			break;
 
 		default:
-			strncpy(parameter, "UNKNOWN",
+			strlcpy(parameter, "UNKNOWN",
 				sizeof(parameter));
 			break;
 		}
@@ -1018,7 +1018,7 @@ getauthkeys(
 				      _MAX_PATH)) {
 		msyslog(LOG_ERR,
 			"ExpandEnvironmentStrings(KEY_FILE) failed: %m");
-		strncpy(key_file_name, keyfile, _MAX_PATH);
+		strlcpy(key_file_name, keyfile, _MAX_PATH);
 	}
 	key_file_name = erealloc(key_file_name,
 				 1 + strlen(key_file_name));
@@ -1069,7 +1069,7 @@ char * fstostr(
 #ifdef WAIT_FOR_NTP_CRYPTO_C_CALLERS_ABLE_TO_HANDLE_MORE_THAN_20_CHARS
 		msnprintf(buf, LIB_BUFLENGTH, "gmtime: %m");
 #else
-		strncpy(buf, "gmtime() error", LIB_BUFLENGTH);
+		strlcpy(buf, "gmtime() error", LIB_BUFLENGTH);
 #endif
 	else
 		snprintf(buf, LIB_BUFLENGTH, "%04d%02d%02d%02d%02d",

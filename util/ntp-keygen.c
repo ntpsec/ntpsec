@@ -135,6 +135,7 @@
  */
 FILE	*fheader	(const char *, const char *, const char *);
 int	gen_md5		(char *);
+void	followlink	(char *, size_t);
 #ifdef AUTOKEY
 EVP_PKEY *gen_rsa	(char *);
 EVP_PKEY *gen_dsa	(char *);
@@ -176,12 +177,12 @@ long	d0, d1, d2, d3;		/* callback counters */
 BOOL init_randfile();
 
 /*
- * Don't try to follow symbolic links
+ * Don't try to follow symbolic links.  Assumes link == file.
  */
 int
 readlink(char *link, char *file, int len)
 {
-	return (-1);
+	return strlen(file);
 }
 
 /*
@@ -194,6 +195,7 @@ symlink(char *filename, char *linkname) {
 	MoveFile(filename, linkname);
 	return (0);
 }
+
 void
 InitWin32Sockets() {
 	WORD wVersionRequested;
@@ -206,6 +208,29 @@ InitWin32Sockets() {
 	}
 }
 #endif /* SYS_WINNT */
+
+
+/*
+ * followlink() - replace filename with its target if symlink.
+ *
+ * Some readlink() implementations do not null-terminate the result.
+ */
+void
+followlink(
+	char *	fname,
+	size_t	bufsiz
+	)
+{
+	int len;
+
+	len = readlink(fname, fname, (int)bufsiz);
+	if (len < 0 || bufsiz < 1)
+		return;
+	if (len > (int)bufsiz - 1)
+		len = (int)bufsiz - 1;
+	fname[len] = '\0';
+}
+
 
 /*
  * Main program
@@ -293,16 +318,16 @@ main(
 
 #ifdef AUTOKEY
 	if (HAVE_OPT( PVT_PASSWD ))
-		passwd1 = strdup(OPT_ARG( PVT_PASSWD ));
+		passwd1 = estrdup(OPT_ARG( PVT_PASSWD ));
 
 	if (HAVE_OPT( GET_PVT_PASSWD ))
-		passwd2 = strdup(OPT_ARG( GET_PVT_PASSWD ));
+		passwd2 = estrdup(OPT_ARG( GET_PVT_PASSWD ));
 
 	if (HAVE_OPT( HOST_KEY ))
 		hostkey++;
 
 	if (HAVE_OPT( SIGN_KEY ))
-		sign = strdup(OPT_ARG( SIGN_KEY ));
+		sign = estrdup(OPT_ARG( SIGN_KEY ));
 
 	if (HAVE_OPT( GQ_PARAMS ))
 		gqkey++;
@@ -326,16 +351,16 @@ main(
 
 	if (HAVE_OPT( SUBJECT_NAME )) {
 		if (*OPT_ARG(SUBJECT_NAME) != '@') {
-			certname = strdup(OPT_ARG(SUBJECT_NAME));
+			certname = estrdup(OPT_ARG(SUBJECT_NAME));
 		} else {
-			strcpy(str, certname);
-			strcat(str, OPT_ARG(SUBJECT_NAME));
-			certname = strdup(str);
+			strlcpy(str, certname, sizeof(str));
+			strlcat(str, OPT_ARG(SUBJECT_NAME), sizeof(str));
+			certname = estrdup(str);
 		}
 	}
 
 	if (HAVE_OPT( ISSUER_NAME ))
-		groupname = strdup(OPT_ARG( ISSUER_NAME ));
+		groupname = estrdup(OPT_ARG( ISSUER_NAME ));
 
 	if (HAVE_OPT( LIFETIME ))
 		lifetime = OPT_VALUE_LIFETIME;
@@ -354,7 +379,7 @@ main(
 	if (!RAND_status()) {
 		u_int	temp;
 
-		if (RAND_file_name(pathbuf, MAXFILENAME) == NULL) {
+		if (RAND_file_name(pathbuf, sizeof(pathbuf)) == NULL) {
 			fprintf(stderr, "RAND_file_name %s\n",
 			    ERR_error_string(ERR_get_error(), NULL));
 			exit (-1);
@@ -374,7 +399,7 @@ main(
 	/*
 	 * Load previous certificate if available.
 	 */
-	sprintf(filename, "ntpkey_cert_%s", hostname);
+	snprintf(filename, sizeof(filename), "ntpkey_cert_%s", hostname);
 	if ((fstr = fopen(filename, "r")) != NULL) {
 		cert = PEM_read_X509(fstr, NULL, NULL, NULL);
 		fclose(fstr);
@@ -453,10 +478,10 @@ main(
 	if (hostkey)
 		pkey_host = genkey("RSA", "host");
 	if (pkey_host == NULL) {
-		sprintf(filename, "ntpkey_host_%s", hostname);
+		snprintf(filename, sizeof(filename), "ntpkey_host_%s", hostname);
 		pkey_host = readkey(filename, passwd1, &fstamp, NULL);
 		if (pkey_host != NULL) {
-			readlink(filename, filename, sizeof(filename));
+			followlink(filename, sizeof(filename));
 			fprintf(stderr, "Using host key %s\n",
 			    filename);
 		} else {
@@ -476,10 +501,11 @@ main(
 	if (sign != NULL)
 		pkey_sign = genkey(sign, "sign");
 	if (pkey_sign == NULL) {
-		sprintf(filename, "ntpkey_sign_%s", hostname);
+		snprintf(filename, sizeof(filename), "ntpkey_sign_%s",
+			 hostname);
 		pkey_sign = readkey(filename, passwd1, &fstamp, NULL);
 		if (pkey_sign != NULL) {
-			readlink(filename, filename, sizeof(filename));
+			followlink(filename, sizeof(filename));
 			fprintf(stderr, "Using sign key %s\n",
 			    filename);
 		} else {
@@ -499,7 +525,7 @@ main(
 		sprintf(filename, "ntpkey_gqkey_%s", groupname);
 		pkey_gqkey = readkey(filename, passwd1, &fstamp, NULL);
 		if (pkey_gqkey != NULL) {
-			readlink(filename, filename, sizeof(filename));
+			followlink(filename, sizeof(filename));
 			fprintf(stderr, "Using GQ parameters %s\n",
 			    filename);
 		}
@@ -565,7 +591,7 @@ main(
 		sprintf(filename, "ntpkey_iffkey_%s", groupname);
 		pkey_iffkey = readkey(filename, passwd1, &fstamp, NULL);
 		if (pkey_iffkey != NULL) {
-			readlink(filename, filename, sizeof(filename));
+			followlink(filename, sizeof(filename));
 			fprintf(stderr, "Using IFF keys %s\n",
 			    filename);
 		}
@@ -629,7 +655,7 @@ main(
 		pkey_mvkey = readkey(filename, passwd1, &fstamp,
 		   pkey_mvpar);
 		if (pkey_mvkey != NULL) {
-			readlink(filename, filename, sizeof(filename));
+			followlink(filename, sizeof(filename));
 			fprintf(stderr, "Using MV keys %s\n",
 			    filename);
 		}

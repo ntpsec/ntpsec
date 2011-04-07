@@ -1,5 +1,10 @@
 * [Bug 1875] 'asn2ntp()' rewritten with 'caltontp()'; 'timegm()'
   substitute likely to crash with 64bit time_t.
+(4.2.7p146) 2011/04/05 Released by Harlan Stenn <stenn@ntp.org>
+* String buffer safety cleanup, converting to strlcpy() and strlcat().
+* Use utmpname() before pututline() so repeated steps do not
+  accidentally record into wtmp where utmp was intended.
+* Use setutent() before each pututline() including first.
 (4.2.7p145) 2011/04/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1840] ntp_lists.h FIFO macros buggy.
 (4.2.7p144) 2011/04/03 Released by Harlan Stenn <stenn@ntp.org>

@@ -381,7 +381,7 @@ acts_message(
 	/*
 	 * Extract the first token in the line.
 	 */
-	strncpy(tbuf, msg, sizeof(tbuf) - 1);
+	strlcpy(tbuf, msg, sizeof(tbuf));
 	strtok(tbuf, " ");
 	switch (up->state) {
 
@@ -895,7 +895,7 @@ acts_timecode(
 	if (up->msgcnt == 0)
 		return;
 
-	strncpy(pp->a_lastcode, str, sizeof(pp->a_lastcode) - 1);
+	strlcpy(pp->a_lastcode, str, sizeof(pp->a_lastcode));
 	pp->lencode = strlen(pp->a_lastcode);
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);

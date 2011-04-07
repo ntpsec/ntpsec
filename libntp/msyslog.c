@@ -68,7 +68,7 @@ errno_to_str(
 	pstatic = strerror(err);
 #  endif
 	if (pstatic != buf)
-		strncpy(buf, pstatic, bufsiz);
+		strlcpy(buf, pstatic, bufsiz);
 # else
 	int	rc;
 

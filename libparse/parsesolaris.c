@@ -143,7 +143,7 @@ _init(
 	{
 		if (strlen(t) >= (S - s))
 		{
-			(void) strncpy(t, s, (unsigned)(S - s));
+			strlcpy(t, s, (unsigned)(S - s));
 		}
 	}
 	return (mod_install(&modlinkage));

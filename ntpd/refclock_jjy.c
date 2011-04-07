@@ -575,22 +575,19 @@ jjy_receive ( struct recvbuf *rbufp )
 
 	if ( up->lineerror != 0 ) {
 		refclock_report ( peer, CEVNT_BADREPLY ) ;
-		strncpy  ( sLogText, "BAD REPLY [",
+		strlcpy  ( sLogText, "BAD REPLY [",
 			   sizeof( sLogText ) ) ;
 		if ( up->linediscipline == LDISC_RAW ) {
-			strncat ( sLogText, up->rawbuf,
-				  sizeof( sLogText ) -
-				      strlen ( sLogText ) - 1 ) ;
+			strlcat ( sLogText, up->rawbuf,
+				  sizeof( sLogText ) ) ;
 		} else {
-			strncat ( sLogText, pp->a_lastcode,
-				  sizeof( sLogText ) -
-				      strlen ( sLogText ) - 1 ) ;
+			strlcat ( sLogText, pp->a_lastcode,
+				  sizeof( sLogText ) ) ;
 		}
 		sLogText[MAX_LOGTEXT-1] = 0 ;
 		if ( strlen ( sLogText ) < MAX_LOGTEXT - 2 )
-			strncat ( sLogText, "]",
-				  sizeof( sLogText ) -
-				      strlen ( sLogText ) - 1 ) ;
+			strlcat ( sLogText, "]",
+				  sizeof( sLogText ) ) ;
 		record_clock_stats ( &peer->srcadr, sLogText ) ;
 		return ;
 	}
@@ -1379,7 +1376,7 @@ printableString ( char *sOutput, int iOutputLen, char *sInput, int iInputLen )
 			n = strlen( printableControlChar[sInput[i] & 0xFF] ) ;
 			if ( j + n + 1 >= OutputLen )
 				break ;
-			strncpy( sOutput + j,
+			strlcpy( sOutput + j,
 				 printableControlChar[sInput[i] & 0xFF],
 				 OutputLen - j ) ;
 		} else {

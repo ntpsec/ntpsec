@@ -100,6 +100,7 @@ libntp_a_SRCS =						\
 	ssl_init.c					\
 	statestr.c					\
 	strdup.c					\
+	strl_obsd.c					\
 	syssignal.c					\
 	timespecops.c					\
 	timetoa.c					\

@@ -331,7 +331,7 @@ hpgps_receive(
 	 *
 	 */
 
-	strncpy(prompt, pp->a_lastcode, sizeof(prompt));
+	strlcpy(prompt, pp->a_lastcode, sizeof(prompt));
 	tcp = strrchr(pp->a_lastcode,'>');
 	if (tcp == NULL)
 	    tcp = pp->a_lastcode; 

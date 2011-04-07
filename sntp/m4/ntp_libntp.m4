@@ -80,7 +80,7 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNCS([getclock stime timegm])
+AC_CHECK_FUNCS([getclock stime timegm strlcpy strlcat])
 
 dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
 dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3

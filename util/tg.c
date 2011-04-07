@@ -266,13 +266,13 @@ main(
 	/*
 	 * Parse options
 	 */
-	strcpy(device, DEVICE);
+	strlcpy(device, DEVICE, sizeof(device));
 	year = 0;
 	while ((temp = getopt(argc, argv, "a:dhilsu:v:y:")) != -1) {
 		switch (temp) {
 
 		case 'a':	/* specify audio device (/dev/audio) */
-			strcpy(device, optarg);
+			strlcpy(device, optarg, sizeof(device));
 			break;
 
 		case 'd':	/* set DST for summer (WWV/H only) */

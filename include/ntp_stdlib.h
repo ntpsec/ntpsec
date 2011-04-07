@@ -230,6 +230,27 @@ extern	int	keytype_from_text	(const char *,	size_t *);
 extern	const char *keytype_name	(int);
 extern	char *	getpass_keytype		(int);
 
+/* strl-obsd.c */
+#ifndef HAVE_STRLCPY		/* + */
+/*
+ * Copy src to string dst of size siz.  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz == 0).
+ * Returns strlen(src); if retval >= siz, truncation occurred.
+ */
+extern	size_t	strlcpy(char *dst, const char *src, size_t siz);
+#endif
+#ifndef HAVE_STRLCAT		/* + */
+/*
+ * Appends src to string dst of size siz (unlike strncat, siz is the
+ * full size of dst, not space left).  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz <= strlen(dst)).
+ * Returns strlen(src) + MIN(siz, strlen(initial dst)).
+ * If retval >= siz, truncation occurred.
+ */
+extern	size_t	strlcat(char *dst, const char *src, size_t siz);
+#endif
+
+
 
 /* lib/isc/win32/strerror.c
  *
