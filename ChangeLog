@@ -1,3 +1,4 @@
+(4.2.7p147) 2011/04/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1875] 'asn2ntp()' rewritten with 'caltontp()'; 'timegm()'
   substitute likely to crash with 64bit time_t.
 (4.2.7p146) 2011/04/05 Released by Harlan Stenn <stenn@ntp.org>
