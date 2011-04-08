@@ -1,3 +1,9 @@
+* Use _mkgmtime() as timegm() in the Windows port, rather than
+  libntp/mktime.c's timegm().  Fixed [Bug 1875] on Windows using the old
+  asn2ntp() code from before 4.2.7p147.
+* ntp_crypto.c string buffer safety.
+* Remove use of MAXFILENAME in mode 7 (ntpdc) on-wire structs.
+* Change ntpd MAXFILENAME from 128 to 256 to match ntp-keygen.
 (4.2.7p147) 2011/04/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1875] 'asn2ntp()' rewritten with 'caltontp()'; 'timegm()'
   substitute likely to crash with 64bit time_t.

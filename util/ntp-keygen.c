@@ -522,7 +522,8 @@ main(
 	if (gqkey)
 		pkey_gqkey = gen_gqkey("gqkey");
 	if (pkey_gqkey == NULL) {
-		sprintf(filename, "ntpkey_gqkey_%s", groupname);
+		snprintf(filename, sizeof(filename), "ntpkey_gqkey_%s",
+		    groupname);
 		pkey_gqkey = readkey(filename, passwd1, &fstamp, NULL);
 		if (pkey_gqkey != NULL) {
 			followlink(filename, sizeof(filename));
@@ -541,8 +542,8 @@ main(
 	if (pkey_gqkey != NULL && HAVE_OPT(ID_KEY)) {
 		RSA	*rsa;
 
-		sprintf(filename, "ntpkey_gqpar_%s.%u", groupname,
-		    fstamp);
+		snprintf(filename, sizeof(filename),
+		    "ntpkey_gqpar_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing GQ parameters %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
@@ -565,8 +566,8 @@ main(
 	if (pkey_gqkey != NULL && passwd2 != NULL) {
 		RSA	*rsa;
 
-		sprintf(filename, "ntpkey_gqkey_%s.%u", groupname,
-		    fstamp);
+		snprintf(filename, sizeof(filename),
+		    "ntpkey_gqkey_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing GQ keys %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
@@ -588,7 +589,8 @@ main(
 	if (iffkey)
 		pkey_iffkey = gen_iffkey("iffkey");
 	if (pkey_iffkey == NULL) {
-		sprintf(filename, "ntpkey_iffkey_%s", groupname);
+		snprintf(filename, sizeof(filename), "ntpkey_iffkey_%s",
+		    groupname);
 		pkey_iffkey = readkey(filename, passwd1, &fstamp, NULL);
 		if (pkey_iffkey != NULL) {
 			followlink(filename, sizeof(filename));
@@ -605,8 +607,8 @@ main(
 	if (pkey_iffkey != NULL && HAVE_OPT(ID_KEY)) {
 		DSA	*dsa;
 
-		sprintf(filename, "ntpkey_iffpar_%s.%u", groupname,
-		    fstamp);
+		snprintf(filename, sizeof(filename),
+		    "ntpkey_iffpar_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing IFF parameters %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
@@ -628,8 +630,8 @@ main(
 	if (pkey_iffkey != NULL && passwd2 != NULL) {
 		DSA	*dsa;
 
-		sprintf(filename, "ntpkey_iffkey_%s.%u", groupname,
-		    fstamp);
+		snprintf(filename, sizeof(filename),
+		    "ntpkey_iffkey_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing IFF keys %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
@@ -651,9 +653,10 @@ main(
 	if (mvkey)
 		pkey_mvkey = gen_mvkey("mv", pkey_mvpar);
 	if (pkey_mvkey == NULL) {
-		sprintf(filename, "ntpkey_mvta_%s", groupname);
+		snprintf(filename, sizeof(filename), "ntpkey_mvta_%s",
+		    groupname);
 		pkey_mvkey = readkey(filename, passwd1, &fstamp,
-		   pkey_mvpar);
+		    pkey_mvpar);
 		if (pkey_mvkey != NULL) {
 			followlink(filename, sizeof(filename));
 			fprintf(stderr, "Using MV keys %s\n",
@@ -667,8 +670,8 @@ main(
 	 * associated with client key 1.
 	 */
 	if (pkey_mvkey != NULL && HAVE_OPT(ID_KEY)) {
-		sprintf(filename, "ntpkey_mvpar_%s.%u", groupname,
-		    fstamp);
+		snprintf(filename, sizeof(filename),
+		    "ntpkey_mvpar_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing MV parameters %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
@@ -685,8 +688,8 @@ main(
 	 * Write the encrypted MV server keys to the stdout stream.
 	 */
 	if (pkey_mvkey != NULL && passwd2 != NULL) {
-		sprintf(filename, "ntpkey_mvkey_%s.%u", groupname,
-		    fstamp);
+		snprintf(filename, sizeof(filename),
+		    "ntpkey_mvkey_%s.%u", groupname, fstamp);
 		fprintf(stderr, "Writing MV keys %s to stdout\n",
 		    filename);
 		fprintf(stdout, "# %s\n# %s\n", filename,
@@ -1220,8 +1223,8 @@ gen_gqkey(
 		    ERR_error_string(ERR_get_error(), NULL));
 		return (NULL);
 	}
-	ctx = BN_CTX_new(); u = BN_new(); v = BN_new();
-	g = BN_new(); k = BN_new(); r = BN_new(); y = BN_new();
+	u = BN_new(); v = BN_new(); g = BN_new();
+	k = BN_new(); r = BN_new(); y = BN_new();
 
 	/*
 	 * Generate the group key b, which is saved in the e member of
@@ -1957,7 +1960,7 @@ x509	(
 	/*
 	 * Write the certificate encoded in PEM.
 	 */
-	sprintf(pathbuf, "%scert", id);
+	snprintf(pathbuf, sizeof(pathbuf), "%scert", id);
 	str = fheader(pathbuf, "cert", hostname);
 	PEM_write_X509(str, cert);
 	fclose(str);
@@ -2076,12 +2079,14 @@ fheader	(
 	char	linkname[MAXFILENAME]; /* link name */
 	int	temp;
 
-	sprintf(filename, "ntpkey_%s_%s.%u", file, owner, fstamp); 
+	snprintf(filename, sizeof(filename), "ntpkey_%s_%s.%u", file,
+	    owner, fstamp); 
 	if ((str = fopen(filename, "w")) == NULL) {
 		perror("Write");
 		exit (-1);
 	}
-	sprintf(linkname, "ntpkey_%s_%s", ulink, hostname);
+	snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
+	    hostname);
 	remove(linkname);
 	temp = symlink(filename, linkname);
 	if (temp < 0)

@@ -26,16 +26,17 @@ protected:
 	}
 
 	::testing::AssertionResult CompareKeys(int key_id,
-										  int key_len,
-										  const char* type,
-										  const char* key_seq,
-										  key& actual) {
+					       int key_len,
+					       const char* type,
+					       const char* key_seq,
+					       key& actual) {
 		key temp;
+
 		temp.key_id = key_id;
 		temp.key_len = key_len;
-		strncpy(temp.type, type, sizeof(temp.type));
-		temp.type[sizeof(temp.type)-1] = '\0';
+		strlcpy(temp.type, type, sizeof(temp.type));
 		memcpy(temp.key_seq, key_seq, key_len);
+
 		return CompareKeys(temp, actual);
 	}
 };
