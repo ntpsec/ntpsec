@@ -964,7 +964,7 @@ getresponse(
 
 		TRACE(2, ("Got packet, size = %d\n", n));
 		if ((int)count > (n - CTL_HEADER_LEN)) {
-			TRACE(1, ("Received count of %d octets, data in packet is %d\n",
+			TRACE(1, ("Received count of %u octets, data in packet is %d\n",
 				  count, (n - CTL_HEADER_LEN)));
 			continue;
 		}
@@ -973,7 +973,7 @@ getresponse(
 			continue;
 		}
 		if (offset + count > sizeof(pktdata)) {
-			TRACE(1, ("Offset %d, count %d, too big for buffer\n",
+			TRACE(1, ("Offset %u, count %u, too big for buffer\n",
 				  offset, count));
 			return ERR_TOOMUCH;
 		}

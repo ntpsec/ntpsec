@@ -217,7 +217,7 @@ fetch_ieee754(
       mantissa_high  = 0;
 
       mantissa_low   = (val &0x7F) << 16;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low  |= (u_long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
       
@@ -226,12 +226,12 @@ fetch_ieee754(
       characteristic  |= (val & 0xF0) >> 4; /* grab lower characteristic bits */
 
       mantissa_high  = (val & 0x0F) << 16;
-      mantissa_high |= get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_high |= (u_long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_high |= get_byte(bufp, offsets, &fieldindex);
 
-      mantissa_low   = get_byte(bufp, offsets, &fieldindex) << 24;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 16;
-      mantissa_low  |= get_byte(bufp, offsets, &fieldindex) << 8;
+      mantissa_low   = (u_long)get_byte(bufp, offsets, &fieldindex) << 24;
+      mantissa_low  |= (u_long)get_byte(bufp, offsets, &fieldindex) << 16;
+      mantissa_low  |= (u_long)get_byte(bufp, offsets, &fieldindex) << 8;
       mantissa_low  |= get_byte(bufp, offsets, &fieldindex);
       break;
       

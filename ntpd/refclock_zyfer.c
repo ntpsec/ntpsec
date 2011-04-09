@@ -136,7 +136,7 @@ zyfer_start(
 	 * Open serial port.
 	 * Something like LDISC_ACTS that looked for ! would be nice...
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 	if (fd <= 0)
 		return (0);
