@@ -1,3 +1,4 @@
+(4.2.7p148) 2011/04/09 Released by Harlan Stenn <stenn@ntp.org>
 * Use _mkgmtime() as timegm() in the Windows port, rather than
   libntp/mktime.c's timegm().  Fixed [Bug 1875] on Windows using the old
   asn2ntp() code from before 4.2.7p147.
