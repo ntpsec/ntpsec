@@ -33,21 +33,12 @@ pkt_output (
 /* Output a long floating point value in hex in the style described above 
  */
 void
-l_fp_output (
-		l_fp *ts,
-		FILE *output
-	    )
+l_fp_output(
+	l_fp *	ts,
+	FILE *	output
+	)
 {
-	register int a;
-
-	fprintf(output, HLINE);
-
-	for(a=0; a<8; a++) 
-		fprintf(output, "%i: %x \t", a, ((unsigned char *) ts)[a]);
-
-	fprintf(output, "\n");
-	fprintf(output, HLINE);
-
+	fprintf(output, "%s\n", prettydate(ts));
 }
 
 /* Output a long floating point value in binary in the style described above
@@ -130,16 +121,11 @@ addrinfo_to_str (
  * in that case.
  */
 char *
-ss_to_str (
+ss_to_str(
 	sockaddr_u *saddr
 	)
 {
-	char *	buf;
-	
-	buf = emalloc(INET6_ADDRSTRLEN);
-	strncpy(buf, stoa(saddr), INET6_ADDRSTRLEN);
-
-	return buf;
+	return estrdup(stoa(saddr));
 }
 
 

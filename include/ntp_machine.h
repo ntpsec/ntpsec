@@ -32,13 +32,6 @@
 
 /*
 
-INFO ON NEW KERNEL PLL SYS CALLS
-
-  NTP_SYSCALLS_STD	- use the "normal" ones
-  NTP_SYSCALL_GET	- SYS_ntp_gettime id
-  NTP_SYSCALL_ADJ	- SYS_ntp_adjtime id
-  NTP_SYSCALLS_LIBC - ntp_adjtime() and ntp_gettime() are in libc.
-
 HOW TO GET IP INTERFACE INFORMATION
 
   Some UNIX V.4 machines implement a sockets library on top of
@@ -71,10 +64,6 @@ MISC
   NO_SIGNED_CHAR_DECL - No "signed char" see include/ntp.h
   LOCK_PROCESS		- Have plock.
 */
-
-#if !defined(HAVE_NTP_ADJTIME) && defined(HAVE___ADJTIMEX)
-# define ntp_adjtime __adjtimex
-#endif
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);
 

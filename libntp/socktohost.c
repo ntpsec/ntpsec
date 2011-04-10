@@ -44,7 +44,7 @@ socktohost(
 			NULL, 0, gni_flags))
 		return stoa(sock);	/* use address */
 
-	DPRINTF(1, ("%s reversed to %s\n", stoa(sock), pbuf));
+	TRACE(1, ("%s reversed to %s\n", stoa(sock), pbuf));
 
 	/*
 	 * Resolve the reversed name and make sure the reversed address
@@ -101,7 +101,8 @@ socktohost(
 		return pbuf;	/* forward check passed */
 
     forward_fail:
-	DPRINTF(1, ("forward check lookup fail: %s\n", pbuf));
+	TRACE(1, ("%s forward check lookup fail: %s\n", pbuf,
+		  gai_strerror(a_info)));
 	LIB_GETBUF(pliar);
 	snprintf(pliar, LIB_BUFLENGTH, "%s (%s)", stoa(sock), pbuf);
 

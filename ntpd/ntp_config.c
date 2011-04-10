@@ -954,6 +954,30 @@ dump_config_tree(
 
 
 /* generic fifo routines for structs linked by 1st member */
+#ifdef NTP_DEBUG_LISTS_H
+void
+check_gen_fifo_consistency(void *fifo)
+{
+	gen_fifo *pf;
+	gen_node *pthis;
+	gen_node **pptail;
+
+	pf = fifo;
+	REQUIRE((NULL == pf->phead && NULL == pf->pptail) ||
+		(NULL != pf->phead && NULL != pf->pptail));
+
+	pptail = &pf->phead;
+	for (pthis = pf->phead;
+	     pthis != NULL;
+	     pthis = pthis->link)
+		if (NULL != pthis->link)
+			pptail = &pthis->link;
+
+	REQUIRE(NULL == pf->pptail || pptail == pf->pptail);
+}
+#endif	/* NTP_DEBUG_LISTS_H */
+
+
 void *
 append_gen_fifo(
 	void *fifo,
@@ -967,8 +991,11 @@ append_gen_fifo(
 	pe = entry;
 	if (NULL == pf)
 		pf = emalloc_zero(sizeof(*pf));
+	else
+		CHECK_FIFO_CONSISTENCY(*pf);
 	if (pe != NULL)
 		LINK_FIFO(*pf, pe, link);
+	CHECK_FIFO_CONSISTENCY(*pf);
 
 	return pf;
 }
@@ -1162,6 +1189,8 @@ create_peer_node(
 	 * FIFO.  The options FIFO is consumed and reclaimed here.
 	 */
 
+	if (options != NULL)
+		CHECK_FIFO_CONSISTENCY(*options);
 	while (options != NULL) {
 		UNLINK_FIFO(option, *options, link);
 		if (NULL == option) {
@@ -3378,7 +3407,7 @@ config_vars(
 			break;
 
 		case T_Logfile:
-			if (-1 == change_logfile(curr_var->value.s, 0))
+			if (-1 == change_logfile(curr_var->value.s, TRUE))
 				msyslog(LOG_ERR,
 					"Cannot open logfile %s: %m",
 					curr_var->value.s);
@@ -4235,7 +4264,7 @@ getconfig(
 	 * initialize it to "UNKNOWN".
 	 */
 #ifndef SYS_WINNT
-	strncpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
+	strlcpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
 	set_sys_var(line, strlen(line) + 1, RO);
 #endif
 	getCmdOpts(argc, argv);
@@ -4410,7 +4439,7 @@ normal_dtoa(
 		pch_nz++;
 	if (pch_nz == pch_e)
 		return buf;
-	strncpy(pch_e, pch_nz, LIB_BUFLENGTH - (pch_e - buf));
+	strlcpy(pch_e, pch_nz, LIB_BUFLENGTH - (pch_e - buf));
 
 	return buf;
 }

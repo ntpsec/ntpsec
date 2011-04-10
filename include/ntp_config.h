@@ -289,8 +289,9 @@ typedef struct settrap_parms_tag {
 const char * token_name(int token);
 
 /* generic fifo routines for structs linked by 1st member */
-void *append_gen_fifo(void *fifo, void *entry);
-void *concat_gen_fifos(void *first, void *second);
+void	check_gen_fifo_consistency(void *fifo);
+void*	append_gen_fifo(void *fifo, void *entry);
+void *	concat_gen_fifos(void *first, void *second);
 #define APPEND_G_FIFO(pf, pe)		\
 	((pf) = append_gen_fifo((pf), (pe)))
 #define CONCAT_G_FIFOS(first, second)	\

@@ -526,7 +526,7 @@ chu_start(
 	 */
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
-	strncpy(up->ident, "CHU", sizeof(up->ident));
+	strlcpy(up->ident, "CHU", sizeof(up->ident));
 	memcpy(&pp->refid, up->ident, 4); 
 	DTOLFP(CHAR, &up->charstamp);
 #ifdef HAVE_AUDIO

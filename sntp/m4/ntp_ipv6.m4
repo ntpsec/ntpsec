@@ -345,27 +345,31 @@ esac
 
 AC_CACHE_CHECK(
     [for in6addr_any],
-    [isc_cv_have_in6addr_any],
-    [AC_LINK_IFELSE(
-	[AC_LANG_PROGRAM(
-	    [[
-		#include <sys/types.h>
-		#include <sys/socket.h>
-		#include <netinet/in.h>
-		$isc_netinetin6_hack
-		$isc_netinet6in6_hack
-	    ]],
-	    [[
-		struct in6_addr in6; 
-		in6 = in6addr_any;
-	    ]]
-	)],
-	[isc_cv_have_in6addr_any=yes],
-	[isc_cv_have_in6addr_any=no]
-    )]
+    [isc_cv_in6addr_any_links],
+    [
+	SAVED_LIBS="$LIBS"
+	LIBS="$LDADD_LIBNTP $LIBS"
+	AC_LINK_IFELSE(
+	    [AC_LANG_PROGRAM(
+		AC_INCLUDES_DEFAULT [[
+		    #include <sys/socket.h>
+		    #include <netinet/in.h>
+		    $isc_netinetin6_hack
+		    $isc_netinet6in6_hack
+		]],
+		[[
+		    printf("%x", in6addr_any.s6_addr[15]);
+		]]
+	    )],
+	    [isc_cv_in6addr_any_links=yes],
+	    [isc_cv_in6addr_any_links=no]
+	)
+	LIBS="$SAVED_LIBS"
+	AS_UNSET([SAVED_LIBS])
+    ]
 )
 
-case "$isc_cv_have_in6addr_any" in
+case "$isc_cv_in6addr_any_links" in
  no)
     AC_DEFINE([ISC_PLATFORM_NEEDIN6ADDRANY], [1], [missing in6addr_any?])
 esac

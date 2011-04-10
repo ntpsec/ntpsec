@@ -587,7 +587,8 @@ cvt_rawdcf(
 			/*
 			 * invalid character (no consecutive bit sequence)
 			 */
-			dprintf(("parse: cvt_rawdcf: character check for 0x%x@%d FAILED\n", *s, s - buffer));
+			dprintf(("parse: cvt_rawdcf: character check for 0x%x@%d FAILED\n",
+				 (u_int)*s, s - buffer));
 			*s = (unsigned char)~0;
 			rtc = CVT_FAIL|CVT_BADFMT;
 		}
@@ -898,15 +899,19 @@ static const char *wday[8] =
  */
 static char *
 pr_timeval(
-	   struct timeval *val
-	   )
+	struct timeval *val
+	)
 {
 	static char buf[20];
 
 	if (val->tv_sec == 0)
-	    sprintf(buf, "%c0.%06ld", (val->tv_usec < 0) ? '-' : '+', (long int)l_abs(val->tv_usec));
+		snprintf(buf, sizeof(buf), "%c0.%06ld",
+			 (val->tv_usec < 0) ? '-' : '+',
+			 (long int)l_abs(val->tv_usec));
 	else
-	    sprintf(buf, "%ld.%06ld", (long int)val->tv_sec, (long int)l_abs(val->tv_usec));
+		snprintf(buf, sizeof(buf), "%ld.%06ld",
+			 (long int)val->tv_sec,
+			 (long int)l_abs(val->tv_usec));
 	return buf;
 }
 

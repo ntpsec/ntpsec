@@ -13,11 +13,12 @@
 /*
  * Storage declarations
  */
-libbufstr lib_stringbuf[LIB_NUMBUF];
-int lib_nextbuf;
-int ipv4_works;
-int ipv6_works;
-int lib_inited;
+int		debug;
+libbufstr	lib_stringbuf[LIB_NUMBUF];
+int		lib_nextbuf;
+int		ipv4_works;
+int		ipv6_works;
+int		lib_inited;
 
 /*
  * initialization routine.  Might be needed if the code is ROMized.

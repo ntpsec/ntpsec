@@ -303,7 +303,7 @@ struct xcmd builtins[] = {
 #define	MAXLINE		512		/* maximum line length */
 #define	MAXTOKENS	(1+MAXARGS+2)	/* maximum number of usable tokens */
 #define	MAXVARLEN	256		/* maximum length of a variable name */
-#define	MAXVALLEN	400		/* maximum length of a variable value */
+#define	MAXVALLEN	2048		/* maximum length of a variable value */
 #define	MAXOUTLINE	72		/* maximum length of an output line */
 #define SCREENWIDTH	76		/* nominal screen width in columns */
 
@@ -381,7 +381,6 @@ FILE *current_output;
 extern struct xcmd opcmds[];
 
 char *progname;
-volatile int debug;
 
 #ifdef NO_MAIN_ALLOWED
 #ifndef BUILD_AS_LIB
@@ -584,10 +583,9 @@ openhost(
 	memcpy(&addr, ai->ai_addr, octets);
 
 	if (ai->ai_canonname == NULL)
-		strncpy(temphost, stoa(&addr), sizeof(temphost));
+		strlcpy(temphost, stoa(&addr), sizeof(temphost));
 	else
-		strncpy(temphost, ai->ai_canonname, sizeof(temphost));
-	temphost[sizeof(temphost) - 1] = '\0';
+		strlcpy(temphost, ai->ai_canonname, sizeof(temphost));
 
 	if (debug > 2)
 		printf("Opening host %s\n", temphost);
@@ -598,7 +596,7 @@ openhost(
 		closesocket(sockfd);
 		havehost = 0;
 	}
-	strncpy(currenthost, temphost, sizeof(currenthost));
+	strlcpy(currenthost, temphost, sizeof(currenthost));
 
 	/* port maps to the same location in both families */
 	s_port = NSRCPORT(&addr);
@@ -733,6 +731,7 @@ getresponse(
 	int len;
 	int first;
 	char *data;
+	int errcode;
 
 	/*
 	 * This is pretty tricky.  We may get between 1 and MAXFRAG packets
@@ -874,15 +873,12 @@ getresponse(
 		 * Check the error code.  If non-zero, return it.
 		 */
 		if (CTL_ISERROR(rpkt.r_m_e_op)) {
-			int errcode;
-
 			errcode = (ntohs(rpkt.status) >> 8) & 0xff;
-			if (debug && CTL_ISMORE(rpkt.r_m_e_op)) {
-				printf("Error code %d received on not-final packet\n",
-				       errcode);
-			}
+			if (CTL_ISMORE(rpkt.r_m_e_op))
+				TRACE(1, ("Error code %d received on not-final packet\n",
+					  errcode));
 			if (errcode == CERR_UNSPEC)
-			    return ERR_UNSPEC;
+				return ERR_UNSPEC;
 			return errcode;
 		}
 
@@ -891,9 +887,8 @@ getresponse(
 		 * we sent.
 		 */
 		if (ntohs(rpkt.associd) != associd) {
-			if (debug)
-			    printf("Association ID %d doesn't match expected %d\n",
-				   ntohs(rpkt.associd), associd);
+			TRACE(1, ("Association ID %d doesn't match expected %d\n",
+				  ntohs(rpkt.associd), associd));
 			/*
 			 * Hack for silly fuzzballs which, at the time of writing,
 			 * return an assID of sys.peer when queried for system variables.
@@ -914,16 +909,16 @@ getresponse(
 		 * boundary and no smaller than claimed by rpkt.count
 		 */
 		if (n & 0x3) {
-			DPRINTF(1, ("Response packet not padded, size = %d\n",
-				n));
+			TRACE(1, ("Response packet not padded, size = %d\n",
+				  n));
 			continue;
 		}
 
 		shouldbesize = (CTL_HEADER_LEN + count + 3) & ~3;
 
 		if (n < shouldbesize) {
-			printf("Response packet claims %u octets payload, above %ld received\n",
-			       count, (long)(n - CTL_HEADER_LEN));
+			printf("Response packet claims %u octets payload, above %d received\n",
+			       count, n - CTL_HEADER_LEN);
 			return ERR_INCOMPLETE;
 		}
 
@@ -967,29 +962,23 @@ getresponse(
 			}
 		}
 
-		if (debug >= 2)
-			printf("Got packet, size = %d\n", n);
+		TRACE(2, ("Got packet, size = %d\n", n));
 		if ((int)count > (n - CTL_HEADER_LEN)) {
-			if (debug)
-				printf("Received count of %d octets, data in packet is %ld\n",
-					count,
-					(long)(n - CTL_HEADER_LEN));
+			TRACE(1, ("Received count of %u octets, data in packet is %d\n",
+				  count, (n - CTL_HEADER_LEN)));
 			continue;
 		}
 		if (count == 0 && CTL_ISMORE(rpkt.r_m_e_op)) {
-			if (debug)
-				printf("Received count of 0 in non-final fragment\n");
+			TRACE(1, ("Received count of 0 in non-final fragment\n"));
 			continue;
 		}
 		if (offset + count > sizeof(pktdata)) {
-			if (debug)
-				printf("Offset %d, count %d, too big for buffer\n",
-				       offset, count);
+			TRACE(1, ("Offset %u, count %u, too big for buffer\n",
+				  offset, count));
 			return ERR_TOOMUCH;
 		}
 		if (seenlastfrag && !CTL_ISMORE(rpkt.r_m_e_op)) {
-			if (debug)
-				printf("Received second last fragment packet\n");
+			TRACE(1, ("Received second last fragment packet\n"));
 			continue;
 		}
 
@@ -997,13 +986,11 @@ getresponse(
 		 * So far, so good.  Record this fragment, making sure it doesn't
 		 * overlap anything.
 		 */
-		if (debug >= 2)
-			printf("Packet okay\n");;
+		TRACE(2, ("Packet okay\n"));
 
 		if (numfrags > (MAXFRAGS - 1)) {
-			if (debug)
-				printf("Number of fragments exceeds maximum %d\n",
-				       MAXFRAGS - 1);
+			TRACE(2, ("Number of fragments exceeds maximum %d\n",
+				  MAXFRAGS - 1));
 			return ERR_TOOMUCH;
 		}
 
@@ -1018,25 +1005,20 @@ getresponse(
 		}
 
 		if (f < numfrags && offset == offsets[f]) {
-			if (debug)
-				printf("duplicate %u octets at %u ignored, prior %u at %u\n",
-				       count, offset, counts[f],
-				       offsets[f]);
+			TRACE(1, ("duplicate %u octets at %u ignored, prior %u at %u\n",
+				  count, offset, counts[f], offsets[f]));
 			continue;
 		}
 
 		if (f > 0 && (offsets[f-1] + counts[f-1]) > offset) {
-			if (debug)
-				printf("received frag at %u overlaps with %u octet frag at %u\n",
-				       offset, counts[f-1],
-				       offsets[f-1]);
+			TRACE(1, ("received frag at %u overlaps with %u octet frag at %u\n",
+				  offset, counts[f-1], offsets[f-1]));
 			continue;
 		}
 
 		if (f < numfrags && (offset + count) > offsets[f]) {
-			if (debug)
-				printf("received %u octet frag at %u overlaps with frag at %u\n",
-				       count, offset, offsets[f]);
+			TRACE(1, ("received %u octet frag at %u overlaps with frag at %u\n",
+				  count, offset, offsets[f]));
 			continue;
 		}
 
@@ -1074,10 +1056,8 @@ getresponse(
 					break;
 			if (f == numfrags) {
 				*rsize = offsets[f-1] + counts[f-1];
-				if (debug)
-					fprintf(stderr,
-						"%lu packets reassembled into response\n",
-						(u_long)numfrags);
+				TRACE(1, ("%lu packets reassembled into response\n",
+					  (u_long)numfrags));
 				return 0;
 			}
 		}
@@ -1729,7 +1709,7 @@ getnetnum(
 		memcpy(num, ai->ai_addr, ai->ai_addrlen);
 		if (fullhost != NULL) {
 			if (ai->ai_canonname != NULL)
-				strncpy(fullhost, ai->ai_canonname,
+				strlcpy(fullhost, ai->ai_canonname,
 					LENHOSTNAME);
 			else
 				getnameinfo(&num->sa, SOCKLEN(num),
@@ -2604,10 +2584,10 @@ atoascii(
 	size_t out_octets
 	)
 {
-	register const u_char *	pchIn;
-		 const u_char *	pchInLimit;
-	register u_char *	pchOut;
-	register u_char		c;
+	const u_char *	pchIn;
+	const u_char *	pchInLimit;
+	u_char *	pchOut;
+	u_char		c;
 
 	pchIn = (const u_char *)in;
 	pchInLimit = pchIn + in_octets;
@@ -2780,7 +2760,7 @@ nextvar(
 	if ('"' == *np) {
 		do {
 			np++;
-		} while (np < cpend && '"' != *np && '\r' != *np);
+		} while (np < cpend && '"' != *np);
 		if (np < cpend && '"' == *np)
 			np++;
 	} else {
@@ -2788,8 +2768,8 @@ nextvar(
 			np++;
 	}
 	len = np - cp;
-	if (np >= cpend || len >= sizeof(value) ||
-	    (',' != *np && '\r' != *np))
+	if (np > cpend || len >= sizeof(value) ||
+	    (np < cpend && ',' != *np && '\r' != *np))
 		return 0;
 	memcpy(value, cp, len);
 	/*
@@ -3018,7 +2998,7 @@ tstflags(
 	cp += strlen(cp);
 	cb -= strlen(cp);
 	if (!val) {
-		strncat(cp, " ok", cb);
+		strlcat(cp, " ok", cb);
 		cp += strlen(cp);
 		cb -= strlen(cp);
 	} else {
@@ -3068,7 +3048,7 @@ cookedprint(
 	l_fp lfparr[8];
 	char b[12];
 	char bn[2 * MAXVARLEN];
-	char bv[2 * MAXVARLEN];
+	char bv[2 * MAXVALLEN];
 
 	UNUSED_ARG(datatype);
 
@@ -3165,7 +3145,7 @@ cookedprint(
 
 		if (output_raw != 0) {
 			atoascii(name, MAXVARLEN, bn, sizeof(bn));
-			atoascii(value, MAXVARLEN, bv, sizeof(bv));
+			atoascii(value, MAXVALLEN, bv, sizeof(bv));
 			if (output_raw != '*') {
 				len = strlen(bv);
 				bv[len] = output_raw;

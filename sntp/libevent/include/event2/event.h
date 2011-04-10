@@ -764,13 +764,28 @@ void event_set_mem_functions(
 
 void event_base_dump_events(struct event_base *, FILE *);
 
-/** Sets 'tv' to the current time (as returned by gettimeofday()),
+/** Sets 'tv' to the internal time (used for timeout scheduling),
     looking at the cached value in 'base' if possible, and calling
     gettimeofday() or clock_gettime() as appropriate if there is no
-    cached time.
+    cached time.  If clock_gettime(CLOCK_MONOTONIC) is being used
+    internally, the tv_sec of internal times represent system uptime
+    rather than time since UNIX epoch.
 
     Generally, this value will only be cached while actually
-    processing event callbacks, and may be very inaccuate if your
+    processing event callbacks, and may be very inaccurate if your
+    callbacks take a long time to execute.
+
+    Returns 0 on success, negative on failure.
+ */
+int event_base_tv_cached(struct event_base *base,
+    struct timeval *tv);
+
+/** Sets 'tv' to the current time (as returned by gettimeofday()),
+    looking at the cached value in 'base' if possible, and calling
+    gettimeofday() if there is no cached time.
+
+    Generally, this value will only be cached while actually
+    processing event callbacks, and may be very inaccurate if your
     callbacks take a long time to execute.
 
     Returns 0 on success, negative on failure.

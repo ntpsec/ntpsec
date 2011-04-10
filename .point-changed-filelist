@@ -1,6 +1,4 @@
 ChangeLog
-clockstuff/clktest-opts.c
-clockstuff/clktest-opts.h
 ntpd/ntpd-opts.c
 ntpd/ntpd-opts.h
 ntpd/ntpd-opts.texi

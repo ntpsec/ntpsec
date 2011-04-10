@@ -197,7 +197,19 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_K_PPS_STBEXC		72
 #define	CS_KERN_FIRST		CS_K_OFFSET
 #define	CS_KERN_LAST		CS_K_PPS_STBEXC
-#define	CS_MAX_NOAUTOKEY	CS_KERN_LAST
+#define	CS_IOSTATS_RESET	73
+#define	CS_TOTAL_RBUF		74
+#define	CS_FREE_RBUF		75
+#define	CS_USED_RBUF		76
+#define	CS_RBUF_LOWATER		77
+#define	CS_IO_DROPPED		78
+#define	CS_IO_IGNORED		79
+#define	CS_IO_RECEIVED		80
+#define	CS_IO_SENT		81
+#define	CS_IO_SENDFAILED	82
+#define	CS_IO_WAKEUPS		83
+#define	CS_IO_GOODWAKEUPS	84
+#define	CS_MAX_NOAUTOKEY	CS_IO_GOODWAKEUPS
 #ifdef AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
@@ -295,7 +307,7 @@ static const struct ctl_proc control_codes[] = {
 #define	CC_FUDGEVAL2	10
 #define	CC_FLAGS	11
 #define	CC_DEVICE	12
-#define CC_VARLIST	13
+#define	CC_VARLIST	13
 #define	CC_MAXCODE	CC_VARLIST
 
 /*
@@ -376,6 +388,18 @@ static const struct ctl_var sys_var[] = {
 	{ CS_K_PPS_CALIBERRS,	RO, "kppscaliberrs" },	/* 70 */
 	{ CS_K_PPS_JITEXC,	RO, "kppsjitexc" },	/* 71 */
 	{ CS_K_PPS_STBEXC,	RO, "kppsstbexc" },	/* 72 */
+	{ CS_IOSTATS_RESET,	RO, "iostats_reset" },	/* 73 */
+	{ CS_TOTAL_RBUF,	RO, "total_rbuf" },	/* 74 */
+	{ CS_FREE_RBUF,		RO, "free_rbuf" },	/* 75 */
+	{ CS_USED_RBUF,		RO, "used_rbuf" },	/* 76 */
+	{ CS_RBUF_LOWATER,	RO, "rbuf_lowater" },	/* 77 */
+	{ CS_IO_DROPPED,	RO, "io_dropped" },	/* 78 */
+	{ CS_IO_IGNORED,	RO, "io_ignored" },	/* 79 */
+	{ CS_IO_RECEIVED,	RO, "io_received" },	/* 80 */
+	{ CS_IO_SENT,		RO, "io_sent" },	/* 81 */
+	{ CS_IO_SENDFAILED,	RO, "io_sendfailed" },	/* 82 */
+	{ CS_IO_WAKEUPS,	RO, "io_wakeups" },	/* 83 */
+	{ CS_IO_GOODWAKEUPS,	RO, "io_goodwakeups" },	/* 84 */
 #ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
@@ -862,9 +886,7 @@ save_config(
 	if (0 == reqend - reqpt)
 		return;
 
-	strncpy(filespec, reqpt, sizeof(filespec));
-	filespec[sizeof(filespec) - 1] = '\0';
-
+	strlcpy(filespec, reqpt, sizeof(filespec));
 	time(&now);
 
 	/*
@@ -874,10 +896,16 @@ save_config(
 	 */
 	if (0 == strftime(filename, sizeof(filename), filespec,
 			       localtime(&now)))
-		strncpy(filename, filespec, sizeof(filename));
-
-	filename[sizeof(filename) - 1] = '\0';
+		strlcpy(filename, filespec, sizeof(filename));
 	
+	/*
+	 * Conceptually we should be searching for DIRSEP in filename,
+	 * however Windows actually recognizes both forward and
+	 * backslashes as equivalent directory separators at the API
+	 * level.  On POSIX systems we could allow '\\' but such
+	 * filenames are tricky to manipulate from a shell, so just
+	 * reject both types of slashes on all platforms.
+	 */
 	if (strchr(filename, '\\') || strchr(filename, '/')) {
 		snprintf(reply, sizeof(reply),
 			 "saveconfig does not allow directory in filename");
@@ -1624,17 +1652,15 @@ ctl_putsys(
 {
 	l_fp tmp;
 	char str[256];
-	char buf[CTL_MAX_DATA_LEN];
 	u_int u;
 	double kb;
 	double dtemp;
-	char *s, *t, *be;
 	const char *ss;
-	int i;
+	size_t len;
+	int firstvarname;
 	const struct ctl_var *k;
 #ifdef AUTOKEY
 	struct cert_info *cp;
-	char cbuf[256];
 #endif	/* AUTOKEY */
 #ifdef KERNEL_PLL
 	static struct timex ntx;
@@ -1776,54 +1802,39 @@ ctl_putsys(
 		break;
 
 	case CS_VARLIST:
-		s = buf;
-		be = buf + sizeof(buf);
-		if (strlen(sys_var[CS_VARLIST].text) + 4 > sizeof(buf))
-			break;	/* really long var name */
-
-		snprintf(s, sizeof(buf), "%s=\"",
+		snprintf(str, sizeof(str), "%s=\"",
 			 sys_var[CS_VARLIST].text);
-		s += strlen(s);
-		t = s;
+		ctl_putdata(str, strlen(str), TRUE);
+
+		firstvarname = TRUE;
 		for (k = sys_var; !(EOV & k->flags); k++) {
 			if (PADDING & k->flags)
 				continue;
-			i = strlen(k->text);
-			if (s + i + 1 >= be)
-				break;
-
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, i);
-			s += i;
+			len = strlen(k->text);
+			if (0 == len)
+				continue;
+			if (!firstvarname)
+				ctl_putdata(",", 1, TRUE);
+			else
+				firstvarname = FALSE;
+			ctl_putdata(k->text, len, TRUE);
 		}
 
 		for (k = ext_sys_var; k && !(EOV & k->flags); k++) {
 			if (PADDING & k->flags)
 				continue;
-
-			ss = k->text;
-			if (NULL == ss)
+			if (NULL == k->text)
 				continue;
-
-			while (*ss != '\0' && *ss != '=')
-				ss++;
-			i = ss - k->text;
-			if (s + i + 1 >= be)
-				break;
-
-			if (s != t)
-				*s++ = ',';
-			memcpy(s, k->text, (unsigned)i);
-			s += i;
+			ss = strchr(k->text, '=');
+			if (NULL == ss)
+				len = strlen(k->text);
+			else
+				len = ss - k->text;
+			ctl_putdata(",", 1, TRUE);
+			ctl_putdata(k->text, len, TRUE);
 		}
-		if (s + 2 >= be)
-			break;
 
-		*s++ = '"';
-		*s = '\0';
-
-		ctl_putdata(buf, (unsigned)(s - buf), 0);
+		ctl_putdata("\"", 1, TRUE);
 		break;
 
 	case CS_TAI:
@@ -2126,6 +2137,55 @@ ctl_putsys(
 			(sys_var[varid].text, ntx.stbcnt)
 		);
 		break;
+
+	case CS_IOSTATS_RESET:
+		ctl_putuint(sys_var[varid].text,
+			    current_time - io_timereset);
+		break;
+
+	case CS_TOTAL_RBUF:
+		ctl_putuint(sys_var[varid].text, total_recvbuffs());
+		break;
+
+	case CS_FREE_RBUF:
+		ctl_putuint(sys_var[varid].text, free_recvbuffs());
+		break;
+
+	case CS_USED_RBUF:
+		ctl_putuint(sys_var[varid].text, full_recvbuffs());
+		break;
+
+	case CS_RBUF_LOWATER:
+		ctl_putuint(sys_var[varid].text, lowater_additions());
+		break;
+
+	case CS_IO_DROPPED:
+		ctl_putuint(sys_var[varid].text, packets_dropped);
+		break;
+
+	case CS_IO_IGNORED:
+		ctl_putuint(sys_var[varid].text, packets_ignored);
+		break;
+
+	case CS_IO_RECEIVED:
+		ctl_putuint(sys_var[varid].text, packets_received);
+		break;
+
+	case CS_IO_SENT:
+		ctl_putuint(sys_var[varid].text, packets_sent);
+		break;
+
+	case CS_IO_SENDFAILED:
+		ctl_putuint(sys_var[varid].text, packets_notsent);
+		break;
+
+	case CS_IO_WAKEUPS:
+		ctl_putuint(sys_var[varid].text, handler_calls);
+		break;
+
+	case CS_IO_GOODWAKEUPS:
+		ctl_putuint(sys_var[varid].text, handler_pkts);
+		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:
 		if (crypto_flags)
@@ -2135,9 +2195,8 @@ ctl_putsys(
 
 	case CS_DIGEST:
 		if (crypto_flags) {
-			strncpy(str, OBJ_nid2ln(crypto_nid),
+			strlcpy(str, OBJ_nid2ln(crypto_nid),
 			    COUNTOF(str));
-			str[COUNTOF(str) - 1] = '\0';
 			ctl_putstr(sys_var[CS_DIGEST].text, str,
 			    strlen(str));
 		}
@@ -2148,9 +2207,8 @@ ctl_putsys(
 			const EVP_MD *dp;
 
 			dp = EVP_get_digestbynid(crypto_flags >> 16);
-			strncpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)),
+			strlcpy(str, OBJ_nid2ln(EVP_MD_pkey_type(dp)),
 			    COUNTOF(str));
-			str[COUNTOF(str) - 1] = '\0';
 			ctl_putstr(sys_var[CS_SIGNATURE].text, str,
 			    strlen(str));
 		}
@@ -2170,10 +2228,10 @@ ctl_putsys(
 
 	case CS_CERTIF:
 		for (cp = cinfo; cp != NULL; cp = cp->link) {
-			snprintf(cbuf, sizeof(cbuf), "%s %s 0x%x",
+			snprintf(str, sizeof(str), "%s %s 0x%x",
 			    cp->subject, cp->issuer, cp->flags);
-			ctl_putstr(sys_var[CS_CERTIF].text, cbuf,
-			    strlen(cbuf));
+			ctl_putstr(sys_var[CS_CERTIF].text, str,
+			    strlen(str));
 			ctl_putfs(sys_var[CS_REVTIME].text, cp->last);
 		}
 		break;
@@ -4243,7 +4301,7 @@ report_event(
 
 		ctl_sys_last_event = (u_char)err;
 		ctl_sys_num_events++;
-		snprintf(statstr, NTP_MAXSTRLEN,
+		snprintf(statstr, sizeof(statstr),
 		    "0.0.0.0 %04x %02x %s",
 		    ctlsysstatus(), err, eventstr(err));
 		if (str != NULL) {
@@ -4275,7 +4333,7 @@ report_event(
 		else
 			src = stoa(&peer->srcadr);
 
-		snprintf(statstr, NTP_MAXSTRLEN,
+		snprintf(statstr, sizeof(statstr),
 		    "%s %04x %02x %s", src,
 		    ctlpeerstatus(peer), err, eventstr(err));
 		if (str != NULL) {

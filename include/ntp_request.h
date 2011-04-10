@@ -116,15 +116,16 @@
 /*
  * union of raw addresses to save space
  */
-union addrun
-{
+union addrun {
 	struct in6_addr addr6;
 	struct in_addr  addr;
 };
 
+#define	MODE7_PAYLOAD_LIM	176
+
 typedef union req_data_u_tag {
-	u_int32	u32[(MAXFILENAME + 48) / sizeof(u_int32)];
-	char data[MAXFILENAME + 48];	/* data area [32 prev](176 byte max) */
+	u_int32	u32[MODE7_PAYLOAD_LIM / sizeof(u_int32)];
+	char data[MODE7_PAYLOAD_LIM];	/* data area (176 byte max) */
 } req_data_u;				/* struct conf_peer must fit */
 
 /*
@@ -600,7 +601,7 @@ struct conf_peer {
 	u_char ttl;		/* time to live (multicast) or refclock mode */
 	u_short unused1;	/* unused */
 	keyid_t keyid;		/* key to use for this association */
-	char keystr[MAXFILENAME]; /* public key file name*/
+	char keystr[128];	/* public key file name */
 	u_int v6_flag;		/* is this v6 or not */
 	u_int unused2;			/* unused, padding for peeraddr6 */
 	struct in6_addr peeraddr6;	/* ipv6 address to poll */

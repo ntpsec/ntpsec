@@ -51,7 +51,7 @@ decodenetnum(
 		else if (NULL != strchr(pp + 1, ':'))
 			cp = num;	/* two or more colons */
 		else {			/* one colon */
-			strncpy(name, num, sizeof(name));
+			strlcpy(name, num, sizeof(name));
 			cp = name;
 			pp = strchr(cp, ':');
 			*pp = '\0';

@@ -63,7 +63,7 @@
  *
  * Fudge factors
  *
- * Fudge flag4 causes the dubugging output described above to be
+ * Fudge flag4 causes the debugging output described above to be
  * recorded in the clockstats file. Fudge flag2 selects the audio input
  * port, where 0 is the mike port (default) and 1 is the line-in port.
  * It does not seem useful to select the compact disc player port. Fudge
@@ -596,7 +596,7 @@ static	void	wwv_corr4	(struct peer *, struct decvec *,
 				    double [], double [][4]);
 static	void	wwv_gain	(struct peer *);
 static	void	wwv_tsec	(struct peer *);
-static	int	timecode	(struct wwvunit *, char *);
+static	int	timecode	(struct wwvunit *, char *, size_t);
 static	double	wwv_snr		(double, double);
 static	int	carry		(struct decvec *);
 static	int	wwv_newchan	(struct peer *);
@@ -1351,7 +1351,7 @@ wwv_qrz(
 		else
 			sp->metric = wwv_metric(sp);
 		if (pp->sloppyclockflag & CLK_FLAG4) {
-			sprintf(tbuf,
+			snprintf(tbuf, sizeof(tbuf),
 			    "wwv8 %04x %3d %s %04x %.0f %.0f/%.1f %ld %ld",
 			    up->status, up->gain, sp->refid,
 			    sp->reach & 0xffff, sp->metric, sp->synmax,
@@ -1478,7 +1478,7 @@ wwv_endpoc(
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
 	    MSYNC)) {
-		sprintf(tbuf,
+		snprintf(tbuf, sizeof(tbuf),
 		    "wwv1 %04x %3d %4d %5.0f %5.1f %5d %4d %4d %4d",
 		    up->status, up->gain, tepoch, up->epomax,
 		    up->eposnr, tmp2, avgcnt, syncnt,
@@ -1856,7 +1856,7 @@ wwv_rsec(
 		}
 		rp->metric = wwv_metric(rp);
 		if (pp->sloppyclockflag & CLK_FLAG4) {
-			sprintf(tbuf,
+			snprintf(tbuf, sizeof(tbuf),
 			    "wwv5 %04x %3d %4d %.0f/%.1f %.0f/%.1f %s %04x %.0f %.0f/%.1f %s %04x %.0f %.0f/%.1f",
 			    up->status, up->gain, up->yepoch,
 			    up->epomax, up->eposnr, up->datsig,
@@ -2091,7 +2091,8 @@ wwv_clock(
 			refclock_receive(peer);
 		}
 	}
-	pp->lencode = timecode(up, pp->a_lastcode);
+	pp->lencode = timecode(up, pp->a_lastcode,
+			       sizeof(pp->a_lastcode));
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 #ifdef DEBUG
 	if (debug)
@@ -2189,7 +2190,7 @@ wwv_corr4(
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
 	    INSYNC)) {
-		sprintf(tbuf,
+		snprintf(tbuf, sizeof(tbuf),
 		    "wwv4 %2d %04x %3d %4d %5.0f %2d %d %d %d %5.0f %5.1f",
 		    up->rsec - 1, up->status, up->gain, up->yepoch,
 		    up->epomax, vp->radix, vp->digit, mldigit,
@@ -2517,9 +2518,11 @@ wwv_newgame(
 		cp = &up->mitig[i];
 		cp->gain = up->gain;
 		cp->wwv.select = SELV;
-		sprintf(cp->wwv.refid, "WV%.0f", floor(qsy[i])); 
+		snprintf(cp->wwv.refid, sizeof(cp->wwv.refid), "WV%.0f",
+		    floor(qsy[i])); 
 		cp->wwvh.select = SELH;
-		sprintf(cp->wwvh.refid, "WH%.0f", floor(qsy[i])); 
+		snprintf(cp->wwvh.refid, sizeof(cp->wwvh.refid), "WH%.0f",
+		    floor(qsy[i])); 
 	}
 	up->dchan = (DCHAN + NCHAN - 1) % NCHAN;
 	wwv_newchan(peer);
@@ -2610,7 +2613,8 @@ wwv_qsy(
 static int
 timecode(
 	struct wwvunit *up,	/* driver structure pointer */
-	char *ptr		/* target string */
+	char *		tc,	/* target string */
+	size_t		tcsiz	/* target max chars */
 	)
 {
 	struct sync *sp;
@@ -2635,20 +2639,23 @@ timecode(
 	dut = up->misc & 0x7;
 	if (!(up->misc & DUTS))
 		dut = -dut;
-	sprintf(ptr, "%c%1X", synchar, up->alarm);
-	sprintf(cptr, " %4d %03d %02d:%02d:%02d %c%c %+d",
-	    year, day, hour, minute, second, leapchar, dst, dut);
-	strcat(ptr, cptr);
+	snprintf(tc, tcsiz, "%c%1X", synchar, up->alarm);
+	snprintf(cptr, sizeof(cptr),
+		 " %4d %03d %02d:%02d:%02d %c%c %+d",
+		 year, day, hour, minute, second, leapchar, dst, dut);
+	strlcat(tc, cptr, tcsiz);
 
 	/*
 	 * Specific variable-format fields
 	 */
 	sp = up->sptr;
-	sprintf(cptr, " %d %d %s %.0f %d %.1f %d", up->watch,
-	    up->mitig[up->dchan].gain, sp->refid, sp->metric,
-	    up->errcnt, up->freq / SECOND * 1e6, up->avgint);
-	strcat(ptr, cptr);
-	return (strlen(ptr));
+	snprintf(cptr, sizeof(cptr), " %d %d %s %.0f %d %.1f %d",
+		 up->watch, up->mitig[up->dchan].gain, sp->refid,
+		 sp->metric, up->errcnt, up->freq / SECOND * 1e6,
+		 up->avgint);
+	strlcat(tc, cptr, tcsiz);
+
+	return strlen(tc);
 }
 
 

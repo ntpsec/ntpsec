@@ -80,7 +80,7 @@ case "$host" in
     ;;
 esac
 
-AC_CHECK_FUNCS([getclock stime timegm])
+AC_CHECK_FUNCS([getclock stime timegm strlcpy strlcat])
 
 dnl  HP-UX 11.31 on HPPA has a net/if.h that can't be compiled with gcc4
 dnl  due to an incomplete type (a union) mpinfou used in an array.  gcc3
@@ -518,18 +518,6 @@ case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
     AC_DEFINE([HAVE_DROPROOT], [1],
 	[Can we drop root privileges?])
 esac
-
-dnl libntp wants to use sigaction() flag SA_RESTORER (to ignore it) but
-dnl the public headers don't define it.  On systems where's it's been
-dnl seen, it's declared in /usr/include/asm/signal.h which is included
-dnl by linux/signal.h
-dnl case "$host" in
-dnl  *-*-linux*)
-dnl     AC_CHECK_HEADERS([linux/signal.h])
-dnl esac
-dnl The above doesn't work due to "present but cannot be compiled" --
-dnl linux/signal.h is apparently a kernel header that conflicts with
-dnl user headers.  We may need to grep the SA_RESTORER definition out.
 
 case "$host" in
  *-*-darwin*)

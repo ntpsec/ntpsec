@@ -138,7 +138,7 @@ typedef char s_char;
 /*
  * Limits of things
  */
-#define	MAXFILENAME	128	/* max length of file name */
+#define	MAXFILENAME	256	/* max length of file name */
 #define MAXHOSTNAME	512	/* max length of host/node name */
 #define NTP_MAXSTRLEN	256	/* max string length */
 

@@ -68,7 +68,7 @@ errno_to_str(
 	pstatic = strerror(err);
 #  endif
 	if (pstatic != buf)
-		strncpy(buf, pstatic, bufsiz);
+		strlcpy(buf, pstatic, bufsiz);
 # else
 	int	rc;
 
@@ -335,7 +335,6 @@ void
 init_logging(
 	const char *	name,
 	u_long		def_syslogmask,
-	const char *	version_str,
 	int		is_daemon
 	)
 {
@@ -394,9 +393,6 @@ init_logging(
 		setlogmask(LOG_UPTO(LOG_DEBUG)); /* @@@ was INFO */
 # endif /* LOG_DAEMON */
 #endif	/* !VMS */
-
-	if (NULL != version_str)
-		msyslog(LOG_NOTICE, "%s", version_str);
 }
 
 
@@ -412,7 +408,7 @@ init_logging(
 int
 change_logfile(
 	const char *	fname,
-	const char *	version_str
+	int		leave_crumbs
 	)
 {
 	FILE *		new_file;
@@ -435,8 +431,7 @@ change_logfile(
 	 * and it's still open, there's nothing to do here.
 	 */
 	if (syslog_file != NULL && syslog_fname != NULL &&
-	    (log_fname == syslog_fname ||
-	     0 == strcmp(syslog_fname, log_fname)))
+	    0 == strcmp(syslog_fname, log_fname))
 		return 0;
 
 	if (0 == strcmp(log_fname, "stderr")) {
@@ -471,7 +466,7 @@ change_logfile(
 		} else
 #endif
 			abs_fname = estrdup(log_fname);
-		DPRINTF(1, ("attempting to open log %s\n", abs_fname));
+		TRACE(1, ("attempting to open log %s\n", abs_fname));
 		new_file = fopen(abs_fname, "a");
 	}
 
@@ -481,7 +476,7 @@ change_logfile(
 	}
 
 	/* leave a pointer in the old log */
-	if (syslogit || log_fname != syslog_abs_fname)
+	if (leave_crumbs && (syslogit || log_fname != syslog_abs_fname))
 		msyslog(LOG_NOTICE, "switching logging to file %s",
 			abs_fname);
 
@@ -490,7 +485,9 @@ change_logfile(
 	    fileno(syslog_file) != fileno(new_file))
 		fclose(syslog_file);
 	syslog_file = new_file;
-	if (log_fname != syslog_abs_fname) {
+	if (log_fname == syslog_abs_fname) {
+		free(abs_fname);
+	} else {
 		if (syslog_abs_fname != NULL &&
 		    syslog_abs_fname != syslog_fname)
 			free(syslog_abs_fname);
@@ -500,8 +497,6 @@ change_logfile(
 		syslog_abs_fname = abs_fname;
 	}
 	syslogit = FALSE;
-	if (NULL != version_str)
-		msyslog(LOG_NOTICE, "%s", version_str);
 
 	return 0;
 }
@@ -525,12 +520,11 @@ change_logfile(
  */
 void
 setup_logfile(
-	const char *	name,
-	const char *	version_str
+	const char *	name
 	)
 {
 	if (NULL == syslog_fname && NULL != name) {
-		if (-1 == change_logfile(name, version_str))
+		if (-1 == change_logfile(name, TRUE))
 			msyslog(LOG_ERR, "Cannot open log file %s, %m",
 				name);
 		return ;
@@ -538,7 +532,7 @@ setup_logfile(
 	if (NULL == syslog_fname)
 		return;
 
-	if (-1 == change_logfile(syslog_fname, version_str))
+	if (-1 == change_logfile(syslog_fname, FALSE))
 		msyslog(LOG_ERR, "Cannot reopen log file %s, %m",
 			syslog_fname);
 }

@@ -94,7 +94,7 @@ keytype_from_text(
 	 */
 	INIT_SSL();
 	LIB_GETBUF(upcased);
-	strncpy(upcased, text, LIB_BUFLENGTH);
+	strlcpy(upcased, text, LIB_BUFLENGTH);
 	for (pch = upcased; '\0' != *pch; pch++)
 		*pch = (char)toupper(*pch);
 	key_type = OBJ_sn2nid(upcased);

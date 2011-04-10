@@ -4,15 +4,11 @@
 #include <config.h>
 #include <io.h>
 #include <stdio.h>
-#include "ntp_machine.h"
-#include "ntp_stdlib.h"
-#include "lib_strbuf.h"
-#include "ntp_syslog.h"
-#include "ntp_assert.h"
-#include "ntp_debug.h"
-#include "ntp_fp.h"
+
 #include "ntp.h"
-#include "ntp_refclock.h"
+#include "ntp_tty.h"
+#include "lib_strbuf.h"
+#include "ntp_assert.h"
 #include "win32_io.h"
 
 #define MAX_SERIAL 255	/* COM1: - COM255: */
@@ -55,7 +51,7 @@ HANDLE common_serial_open(
 	 * equanimously.
 	 */
 
-	DPRINTF(1, ("common_serial_open given %s\n", dev));
+	TRACE(1, ("common_serial_open given %s\n", dev));
 
 	pch = NULL;
 	if ('/' == dev[0]) {
@@ -67,23 +63,23 @@ HANDLE common_serial_open(
 			}
 			pch++;
 		}
-		DPRINTF(1, ("common_serial_open skipped to ending digits leaving %s\n", pch));
+		TRACE(1, ("common_serial_open skipped to ending digits leaving %s\n", pch));
 	} else if ('c' == tolower(dev[0])
 		   && 'o' == tolower(dev[1])
 		   && 'm' == tolower(dev[2])) {
 		pch = dev + 3;
-		DPRINTF(1, ("common_serial_open skipped COM leaving %s\n", pch));
+		TRACE(1, ("common_serial_open skipped COM leaving %s\n", pch));
 	}
 
 	if (!pch || !isdigit(pch[0])) {
-		DPRINTF(1, ("not a digit: %s\n", pch ? pch : "[NULL]"));
+		TRACE(1, ("not a digit: %s\n", pch ? pch : "[NULL]"));
 		return INVALID_HANDLE_VALUE;
 	}
 
 	if (1 != sscanf(pch, "%d", &unit) 
 	    || unit > MAX_SERIAL
 	    || unit < 0) {
-		DPRINTF(1, ("sscanf failure of %s\n", pch));
+		TRACE(1, ("sscanf failure of %s\n", pch));
 		return INVALID_HANDLE_VALUE;
 	}
 
@@ -101,7 +97,7 @@ HANDLE common_serial_open(
 		NTP_ENSURE(0 == hnds[unit].opens);
 		LIB_GETBUF(windev);
 		snprintf(windev, LIB_BUFLENGTH, "\\\\.\\COM%d", unit);
-		DPRINTF(1, ("windows device %s\n", windev));
+		TRACE(1, ("windows device %s\n", windev));
 		*pwindev = windev;
 		hnds[unit].h =
 		    CreateFile(

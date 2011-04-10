@@ -204,9 +204,9 @@ send_blocking_req_internal(
 {
 	blocking_pipe_header *	threadcopy;
 
-	DEBUG_REQUIRE(hdr != NULL);
-	DEBUG_REQUIRE(hdr->octets > sizeof(*hdr));
-	DEBUG_REQUIRE(data != NULL);
+	REQUIRE(hdr != NULL);
+	REQUIRE(hdr->octets > sizeof(*hdr));
+	REQUIRE(data != NULL);
 	DEBUG_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
 
 	ensure_workitems_empty_slot(c);
@@ -379,7 +379,7 @@ start_blocking_thread_internal(
 			&blocking_thread_id);
 
 	if (NULL == blocking_child_thread) {
-		DPRINTF(1, ("fatal can not start blocking thread\n"));
+		msyslog(LOG_ERR, "start blocking thread failed: %m\n");
 		exit(-1);
 	}
 	c->thread_id = blocking_thread_id;
@@ -387,7 +387,7 @@ start_blocking_thread_internal(
 	/* remember the thread priority is only within the process class */
 	if (!SetThreadPriority(blocking_child_thread,
 			       THREAD_PRIORITY_BELOW_NORMAL))
-		DPRINTF(1, ("Error lowering blocking thread priority\n"));
+		msyslog(LOG_ERR, "Error lowering blocking thread priority: %m\n");
 
 	resumed = ResumeThread(blocking_child_thread);
 	DEBUG_INSIST(resumed);

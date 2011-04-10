@@ -367,10 +367,8 @@ M
 			break;
 			
 			case CONFIG_KEYS:
-			if (ntokens >= 2) {
-				key_file = (char *) emalloc(strlen(tokens[1]) + 1);
-				strcpy(key_file, tokens[1]);
-			}
+			if (ntokens >= 2)
+				key_file = estrdup(tokens[1]);
 			break;
 		}
 	}

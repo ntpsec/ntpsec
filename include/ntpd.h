@@ -23,6 +23,29 @@
  * -----------------------------------------
  */
 
+/*
+ * macro for debugging output - cut down on #ifdef pollution.
+ *
+ * DPRINTF() is for use by ntpd only, and compiles away to nothing
+ * without DEBUG (configure --disable-debugging).
+ *
+ * TRACE() is similar for libntp and utilities, which retain full
+ * debug capability even when compiled without DEBUG.
+ *
+ * The calling convention is not attractive:
+ *     DPRINTF(debuglevel, (fmt, ...));
+ *     DPRINTF(2, ("shows #ifdef DEBUG and if debug >= %d\n", 2));
+ */
+#ifdef DEBUG
+# define DPRINTF(lvl, arg)				\
+	do { 						\
+		if (debug >= (lvl))			\
+			mprintf arg;			\
+	} while (0)
+#else
+# define DPRINTF(lvl, arg)	do {} while (0)
+#endif
+
 
 /* nt_clockstuff.c */
 #ifdef SYS_WINNT
@@ -465,13 +488,6 @@ extern u_long	sys_declined;		/* declined */
 extern u_long	sys_limitrejected;	/* rate exceeded */
 extern u_long	sys_kodsent;		/* KoD sent */
 
-/* ntp_refclock.c */
-#ifdef REFCLOCK
-#ifdef PPS
-extern int	fdpps;			/* pps file descriptor */
-#endif /* PPS */
-#endif
-
 /* ntp_request.c */
 extern keyid_t	info_auth_keyid;	/* keyid used to authenticate requests */
 extern u_long	auth_timereset;
@@ -509,7 +525,6 @@ extern	double	stats_write_tolerance;
 extern	double	wander_threshold;
 
 /* ntpd.c */
-extern volatile int debug;	/* debugging flag */
 extern	int	nofork;		/* no-fork flag */
 extern	int	initializing;	/* initializing flag */
 #ifdef HAVE_DROPROOT

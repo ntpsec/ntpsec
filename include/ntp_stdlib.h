@@ -9,10 +9,12 @@
 #include <sys/socket.h>
 #endif
 
+#include "declcond.h"	/* ntpd uses ntpd/declcond.h, others include/ */
 #include "l_stdlib.h"
+#include "ntp_net.h"
+#include "ntp_debug.h"
 #include "ntp_malloc.h"
 #include "ntp_string.h"
-#include "ntp_net.h"
 #include "ntp_syslog.h"
 
 
@@ -47,10 +49,9 @@ extern	int	msnprintf(char *, size_t, const char *, ...)
 			__attribute__((__format__(__printf__, 3, 4)));
 extern	void	msyslog(int, const char *, ...)
 			__attribute__((__format__(__printf__, 2, 3)));
-extern	void	init_logging	(const char *, u_long, const char *,
-				 int);
-extern	int	change_logfile	(const char *, const char *);
-extern	void	setup_logfile	(const char *, const char *);
+extern	void	init_logging	(const char *, u_long, int);
+extern	int	change_logfile	(const char *, int);
+extern	void	setup_logfile	(const char *);
 #ifndef errno_to_str
 extern	void	errno_to_str(int, char *, size_t);
 #endif
@@ -181,11 +182,6 @@ extern	void	rereadkeys	(void);
  * Variable declarations for libntp.
  */
 
-/*
- * Defined by any program.
- */
-extern volatile int debug;		/* debugging flag */
-
 /* authkeys.c */
 extern u_long	authkeynotfound;	/* keys not found */
 extern u_long	authkeylookups;		/* calls to lookup keys */
@@ -233,6 +229,27 @@ extern	int	ssl_init_done;
 extern	int	keytype_from_text	(const char *,	size_t *);
 extern	const char *keytype_name	(int);
 extern	char *	getpass_keytype		(int);
+
+/* strl-obsd.c */
+#ifndef HAVE_STRLCPY		/* + */
+/*
+ * Copy src to string dst of size siz.  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz == 0).
+ * Returns strlen(src); if retval >= siz, truncation occurred.
+ */
+extern	size_t	strlcpy(char *dst, const char *src, size_t siz);
+#endif
+#ifndef HAVE_STRLCAT		/* + */
+/*
+ * Appends src to string dst of size siz (unlike strncat, siz is the
+ * full size of dst, not space left).  At most siz-1 characters
+ * will be copied.  Always NUL terminates (unless siz <= strlen(dst)).
+ * Returns strlen(src) + MIN(siz, strlen(initial dst)).
+ * If retval >= siz, truncation occurred.
+ */
+extern	size_t	strlcat(char *dst, const char *src, size_t siz);
+#endif
+
 
 
 /* lib/isc/win32/strerror.c

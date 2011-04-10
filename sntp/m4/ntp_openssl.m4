@@ -224,7 +224,7 @@ NTPO_SAVED_CPPFLAGS="$CPPFLAGS"
 NTPO_SAVED_LIBS="$LIBS"
 
 #
-# check for linking with -lcrypto failure, and try -lz -lcrypto.
+# check for linking with -lcrypto failure, and try -lcrypto -lz.
 # Helps m68k-atari-mint
 #
 case "$ntp_openssl" in

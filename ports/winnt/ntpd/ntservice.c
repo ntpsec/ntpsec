@@ -41,7 +41,6 @@ static BOOL computer_shutting_down = FALSE;
 static int glb_argc;
 static char **glb_argv;
 HANDLE hServDoneEvent = NULL;
-extern volatile int debug;
 extern int accept_wildcard_if_for_winnt;
 
 /*

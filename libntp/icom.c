@@ -126,14 +126,23 @@ icom_init(
 	int trace		/* trace flags */	)
 {
 	TTY ttyb;
-	int fd, flags;
+	int fd;
+	int flags;
+	int rc;
+	int saved_errno;
 
 	flags = trace;
 	fd = tty_open(device, O_RDWR, 0777);
 	if (fd < 0)
-		return (fd);
+		return -1;
 
-	tcgetattr(fd, &ttyb);
+	rc = tcgetattr(fd, &ttyb);
+	if (rc < 0) {
+		saved_errno = errno;
+		close(fd);
+		errno = saved_errno;
+		return -1;
+	}
 	ttyb.c_iflag = 0;	/* input modes */
 	ttyb.c_oflag = 0;	/* output modes */
 	ttyb.c_cflag = IBAUD|CS8|CLOCAL; /* control modes  (no read) */
@@ -143,6 +152,12 @@ icom_init(
 	cfsetispeed(&ttyb, (u_int)speed);
 	cfsetospeed(&ttyb, (u_int)speed);
 	tcsetattr(fd, TCSANOW, &ttyb);
+	if (rc < 0) {
+		saved_errno = errno;
+		close(fd);
+		errno = saved_errno;
+		return -1;
+	}
 	return (fd);
 }
 

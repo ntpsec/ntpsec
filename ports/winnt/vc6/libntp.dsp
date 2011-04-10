@@ -414,6 +414,10 @@ SOURCE=..\..\..\libntp\statestr.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\strl_obsd.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\libntp\syslog.c
 # End Source File
 # Begin Source File

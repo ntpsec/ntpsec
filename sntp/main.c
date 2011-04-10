@@ -3,6 +3,11 @@
 #include <event2/util.h>
 #include <event2/event.h>
 
+#include "ntp_workimpl.h"
+#ifdef WORK_THREAD
+# include <event2/thread.h>
+#endif
+
 #include "main.h"
 #include "ntp_libopts.h"
 #include "kod_management.h"
@@ -109,6 +114,7 @@ void sntp_libevent_log_cb(int, const char *);
 void set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode);
 int  sntp_main(int argc, char **argv);
 int  set_time(double offset);
+void dec_pending_ntp(const char *, sockaddr_u *);
 int  libevent_version_ok(void);
 int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 
@@ -134,21 +140,21 @@ sntp_main (
 		exit(EX_SOFTWARE);
 
 	init_lib();
-	DPRINTF(2, ("init_lib() done, %s%s\n",
-		(ipv4_works)
-		    ? "ipv4_works "
-		    : "",
-		(ipv6_works)
-		    ? "ipv6_works "
-		    : ""));
 
 	optct = ntpOptionProcess(&sntpOptions, argc, argv);
 	argc -= optct;
 	argv += optct;
 
 	debug = DESC(DEBUG_LEVEL).optOccCt;
-	DPRINTF(1, ("%s\n", Version));
+	TRACE(1, ("%s\n", Version));
 
+	TRACE(2, ("init_lib() done, %s%s\n",
+		  (ipv4_works)
+		      ? "ipv4_works "
+		      : "",
+		  (ipv6_works)
+		      ? "ipv6_works "
+		      : ""));
 	ntpver = OPT_VALUE_NTPVERSION;
 	steplimit = OPT_VALUE_STEPLIMIT / 1e3;
 	headspace.tv_usec = max(0, OPT_VALUE_HEADSPACE * 1000);
@@ -177,7 +183,7 @@ sntp_main (
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 		ai_fam_pref = AF_INET;
-		DPRINTF(1, ("No ipv6 support available, forcing ipv4\n"));
+		TRACE(1, ("No ipv6 support available, forcing ipv4\n"));
 	} else {
 		/* Check for options -4 and -6 */
 		if (HAVE_OPT(IPV4))
@@ -208,6 +214,12 @@ sntp_main (
 	event_set_log_callback(&sntp_libevent_log_cb);
 	if (debug > 0)
 		event_enable_debug_mode();
+#ifdef WORK_THREAD
+	evthread_use_pthreads();
+	/* we use libevent from main thread only, locks should be academic */
+	if (debug > 0)
+		evthread_enable_lock_debuging();
+#endif
 	evcfg = event_config_new();
 	if (NULL == evcfg) {
 		printf("%s: event_config_new() failed!\n", progname);
@@ -216,6 +228,8 @@ sntp_main (
 #ifndef HAVE_SOCKETPAIR
 	event_config_require_features(evcfg, EV_FEATURE_FDS);
 #endif
+	/* all libevent calls are from main thread */
+	/* event_config_set_flag(evcfg, EVENT_BASE_FLAG_NOLOCK); */
 	base = event_base_new_with_config(evcfg);
 	event_config_free(evcfg);
 	if (NULL == base) {
@@ -367,7 +381,7 @@ handle_lookup(
 	size_t		name_sz;
 	size_t		octets;
 
-	DPRINTF(1, ("handle_lookup(%s,%#x)\n", name, flags));
+	TRACE(1, ("handle_lookup(%s,%#x)\n", name, flags));
 
 	ZERO(hints);
 	hints.ai_family = ai_fam_pref;
@@ -450,10 +464,10 @@ sntp_name_resolved(
 			fprintf(stderr, "%s lookup error %s\n",
 				dctx->name, gai_strerror(rescode));
 	} else {
-		DPRINTF(3, ("%s [%s]\n", dctx->name,
-			(addr->ai_canonname != NULL)
-			    ? addr->ai_canonname
-			    : ""));
+		TRACE(3, ("%s [%s]\n", dctx->name,
+			  (addr->ai_canonname != NULL)
+			      ? addr->ai_canonname
+			      : ""));
 
 		for (ai = addr; ai != NULL; ai = ai->ai_next) {
 
@@ -519,6 +533,7 @@ queue_xmt(
 {
 	sockaddr_u *	dest;
 	sent_pkt **	pkt_listp;
+	sent_pkt *	match;
 	xmt_ctx *	xctx;
 	struct timeval	start_cb;
 	struct timeval	delay;
@@ -528,6 +543,25 @@ queue_xmt(
 		pkt_listp = &v6_pkts_list;
 	else
 		pkt_listp = &v4_pkts_list;
+
+	/* reject attempts to add address already listed */
+	for (match = *pkt_listp; match != NULL; match = match->link) {
+		if (ADDR_PORT_EQ(&spkt->addr, &match->addr)) {
+			if (strcasecmp(spkt->dctx->name,
+				       match->dctx->name))
+				printf("%s %s duplicate address from %s ignored.\n",
+				       sptoa(&match->addr),
+				       match->dctx->name,
+				       spkt->dctx->name);
+			else
+				printf("%s %s, duplicate address ignored.\n",
+				       sptoa(&match->addr),
+				       match->dctx->name);
+			dec_pending_ntp(spkt->dctx->name, &spkt->addr);
+			free(spkt);
+			return;
+		}
+	}
 
 	LINK_SLIST(*pkt_listp, spkt, link);	
 
@@ -558,8 +592,8 @@ queue_xmt(
 		if (xctx->sched > start_cb.tv_sec)
 			delay.tv_sec = xctx->sched - start_cb.tv_sec;
 		event_add(ev_xmt_timer, &delay);
-		DPRINTF(2, ("queue_xmt: xmt timer for %u usec\n",
-			(u_int)delay.tv_usec));
+		TRACE(2, ("queue_xmt: xmt timer for %u usec\n",
+			  (u_int)delay.tv_usec));
 	}
 }
 
@@ -587,8 +621,8 @@ xmt_timer_cb(
 	gettimeofday_cached(base, &start_cb);
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		UNLINK_HEAD_SLIST(x, xmt_q, link);
-		DPRINTF(2, ("xmt_timer_cb: at .%6.6u -> %s",
-			(u_int)start_cb.tv_usec, stoa(&x->spkt->addr)));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u -> %s\n",
+			  (u_int)start_cb.tv_usec, stoa(&x->spkt->addr)));
 		xmt(x);
 		free(x);
 		if (NULL == xmt_q)
@@ -596,16 +630,16 @@ xmt_timer_cb(
 	}
 	if (xmt_q->sched <= start_cb.tv_sec) {
 		event_add(ev_xmt_timer, &headspace);
-		DPRINTF(2, ("xmt_timer_cb: at .%6.6u headspace %6.6u\n",
-			(u_int)start_cb.tv_usec,
-			(u_int)headspace.tv_usec));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u headspace %6.6u\n",
+			  (u_int)start_cb.tv_usec,
+			  (u_int)headspace.tv_usec));
 	} else {
 		delay.tv_sec = xmt_q->sched - start_cb.tv_sec;
 		delay.tv_usec = 0;
 		event_add(ev_xmt_timer, &delay);
-		DPRINTF(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
-			(u_int)start_cb.tv_usec,
-			(long)delay.tv_sec));
+		TRACE(2, ("xmt_timer_cb: at .%6.6u next %ld seconds\n",
+			  (u_int)start_cb.tv_usec,
+			  (long)delay.tv_sec));
 	}
 }
 
@@ -626,7 +660,7 @@ xmt(
 	struct pkt	x_pkt;
 	int		pkt_len;
 
-	if (0 != GETTIMEOFDAY(&tv_xmt, NULL)) {
+	if (0 != gettimeofday(&tv_xmt, NULL)) {
 		msyslog(LOG_ERR,
 			"xmt: gettimeofday() failed: %m");
 		exit(1);
@@ -642,8 +676,8 @@ xmt(
 	memcpy(&spkt->x_pkt, &x_pkt, min(sizeof(spkt->x_pkt), pkt_len));
 	spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
-	DPRINTF(2, ("xmt: %lu.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
-		(u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
+	TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
+		  (u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
 
 	/*
 	** If the send fails:
@@ -676,11 +710,27 @@ timeout_queries(void)
 			if (0 == spkt->stime || spkt->done)
 				continue;
 			age = start_cb.tv_sec - spkt->stime;
-			DPRINTF(3, ("%s %s age %ld\n", stoa(&spkt->addr),
-				spkt->dctx->name, age));
+			TRACE(3, ("%s %s age %ld\n", stoa(&spkt->addr),
+				  spkt->dctx->name, age));
 			if (age > ucst_timeout)
 				timeout_query(spkt);
 		}
+	}
+}
+
+
+void dec_pending_ntp(
+	const char *	name,
+	sockaddr_u *	server
+	)
+{
+	if (n_pending_ntp > 0) {
+		--n_pending_ntp;
+		check_exit_conditions();
+	} else {
+		INSIST(0 == n_pending_ntp);
+		TRACE(1, ("n_pending_ntp reached zero before dec for %s %s\n",
+			  name, stoa(server)));
 	}
 }
 
@@ -695,14 +745,7 @@ void timeout_query(
 	server = &spkt->addr;
 	msyslog(LOG_NOTICE, "%s %s no response after %d seconds",
 		spkt->dctx->name, stoa(server), ucst_timeout);
-	if (n_pending_ntp > 0) {
-		--n_pending_ntp;
-		check_exit_conditions();
-	} else {
-		INSIST(0 == n_pending_ntp);
-		DPRINTF(1, ("n_pending_ntp reached zero before dec for %s %s\n",
-			spkt->dctx->name, stoa(server)));
-	}
+	dec_pending_ntp(spkt->dctx->name, server);
 }
 
 
@@ -719,7 +762,7 @@ check_kod(
 
 	/* Is there a KoD on file for this address? */
 	hostname = addrinfo_to_str(ai);
-	DPRINTF(2, ("check_kod: checking <%s>\n", hostname));
+	TRACE(2, ("check_kod: checking <%s>\n", hostname));
 	if (search_entry(hostname, &reason)) {
 		printf("prior KoD for %s, skipping.\n",
 			hostname);
@@ -753,20 +796,20 @@ sock_cb(
 {
 	sockaddr_u	sender;
 	sockaddr_u *	psau;
-	sent_pkt *	pktlist;
+	sent_pkt **	p_pktlist;
 	sent_pkt *	spkt;
 	int		rpktl;
 	int		rc;
 
 	INSIST(sock4 == fd || sock6 == fd);
-	DPRINTF(3, ("sock_cb: event on sock%s:%s%s%s%s [UCST]\n",
-		(fd == sock6)
-		    ? "6"
-		    : "4",
-		(what & EV_TIMEOUT) ? " timeout" : "",
-		(what & EV_READ)    ? " read" : "",
-		(what & EV_WRITE)   ? " write" : "",
-		(what & EV_SIGNAL)  ? " signal" : ""));
+	TRACE(3, ("sock_cb: event on sock%s:%s%s%s%s [UCST]\n",
+		  (fd == sock6)
+		      ? "6"
+		      : "4",
+		  (what & EV_TIMEOUT) ? " timeout" : "",
+		  (what & EV_READ)    ? " read" : "",
+		  (what & EV_WRITE)   ? " write" : "",
+		  (what & EV_SIGNAL)  ? " signal" : ""));
 
 	if (!(EV_READ & what)) {
 		if (EV_TIMEOUT & what)
@@ -783,11 +826,11 @@ sock_cb(
 	}
 
 	if (sock6 == fd)
-		pktlist = v6_pkts_list;
+		p_pktlist = &v6_pkts_list;
 	else
-		pktlist = v4_pkts_list;
+		p_pktlist = &v4_pkts_list;
 
-	for (spkt = pktlist; spkt != NULL; spkt = spkt->link) {
+	for (spkt = *p_pktlist; spkt != NULL; spkt = spkt->link) {
 		psau = &spkt->addr;
 		if (SOCK_EQ(&sender, psau))
 			break;
@@ -799,23 +842,17 @@ sock_cb(
 		return;
 	}
 
-	DPRINTF(1, ("sock_cb: %s %s\n", spkt->dctx->name,
-		sptoa(&sender)));
+	TRACE(1, ("sock_cb: %s %s\n", spkt->dctx->name,
+		  sptoa(&sender)));
 
 	rpktl = process_pkt(&r_pkt, &sender, rpktl, MODE_SERVER,
 			    &spkt->x_pkt, "sock_cb");
 
-	DPRINTF(2, ("sock_cb: process_pkt returned %d\n", rpktl));
+	TRACE(2, ("sock_cb: process_pkt returned %d\n", rpktl));
 
 	/* If this is a Unicast packet, one down ... */
-	if (!spkt->done && CTX_UCST & spkt->dctx->flags) {
-		if (n_pending_ntp > 0) {
-			--n_pending_ntp;
-		} else {
-			INSIST(0 == n_pending_ntp);
-			DPRINTF(1, ("n_pending_ntp reached zero before dec for %s %s\n",
-				spkt->dctx->name, stoa(&sender)));
-		}
+	if (!spkt->done && (CTX_UCST & spkt->dctx->flags)) {
+		dec_pending_ntp(spkt->dctx->name, &spkt->addr);
 		spkt->done = TRUE;
 	}
 
@@ -823,7 +860,7 @@ sock_cb(
 	/* If the packet is good, set the time and we're all done */
 	rc = handle_pkt(rpktl, &r_pkt, &spkt->addr, spkt->dctx->name);
 	if (0 != rc)
-		DPRINTF(1, ("sock_cb: handle_pkt() returned %d\n", rc));
+		TRACE(1, ("sock_cb: handle_pkt() returned %d\n", rc));
 	check_exit_conditions();
 }
 
@@ -842,8 +879,8 @@ check_exit_conditions(void)
 		event_base_loopexit(base, NULL);
 		shutting_down = TRUE;
 	} else {
-		DPRINTF(2, ("%d NTP and %d name queries pending\n",
-			    n_pending_ntp, n_pending_dns));
+		TRACE(2, ("%d NTP and %d name queries pending\n",
+			  n_pending_ntp, n_pending_dns));
 	}
 }
 
@@ -1122,8 +1159,8 @@ handle_pkt(
 		break;
 
 	case 1:
-		DPRINTF(3, ("handle_pkt: %d bytes from %s %s\n",
-			       rpktl, stoa(host), hostname));
+		TRACE(3, ("handle_pkt: %d bytes from %s %s\n",
+			  rpktl, stoa(host), hostname));
 
 		gettimeofday_cached(base, &tv_dst);
 
@@ -1177,7 +1214,7 @@ handle_pkt(
 
 
 void
-offset_calculation (
+offset_calculation(
 	struct pkt *rpkt,
 	int rpktl,
 	struct timeval *tv_dst,
@@ -1199,7 +1236,7 @@ offset_calculation (
 	NTOHL_FP(&rpkt->xmt, &p_xmt);
 
 	*precision = LOGTOD(rpkt->precision);
-	DPRINTF(3, ("offset_calculation: precision: %f", *precision));
+	TRACE(3, ("offset_calculation: precision: %f\n", *precision));
 
 	*root_dispersion = FPTOD(p_rdsp);
 
@@ -1211,17 +1248,13 @@ offset_calculation (
 		pkt_output(rpkt, rpktl, stdout);
 
 		printf("sntp offset_calculation: rpkt->reftime:\n");
-		l_fp_output(&(rpkt->reftime), stdout);
+		l_fp_output(&p_ref, stdout);
 		printf("sntp offset_calculation: rpkt->org:\n");
-		l_fp_output(&(rpkt->org), stdout);
+		l_fp_output(&p_org, stdout);
 		printf("sntp offset_calculation: rpkt->rec:\n");
-		l_fp_output(&(rpkt->rec), stdout);
-		printf("sntp offset_calculation: rpkt->rec:\n");
-		l_fp_output_bin(&(rpkt->rec), stdout);
-		printf("sntp offset_calculation: rpkt->rec:\n");
-		l_fp_output_dec(&(rpkt->rec), stdout);
+		l_fp_output(&p_rec, stdout);
 		printf("sntp offset_calculation: rpkt->xmt:\n");
-		l_fp_output(&(rpkt->xmt), stdout);
+		l_fp_output(&p_xmt, stdout);
 	}
 #endif
 
@@ -1237,7 +1270,9 @@ offset_calculation (
 	*offset = (t21 + t34) / 2.;
 	delta = t21 - t34;
 
-	DPRINTF(3, ("sntp offset_calculation:\tt21: %.6f\t\t t34: %.6f\n\t\tdelta: %.6f\t offset: %.6f\n", t21, t34, delta, *offset));
+	TRACE(3, ("sntp offset_calculation:\trec - org t21: %.6f\n"
+		  "\txmt - dst t34: %.6f\tdelta: %.6f\toffset: %.6f\n",
+		  t21, t34, delta, *offset));
 }
 
 
@@ -1348,7 +1383,27 @@ libevent_version_ok(void)
 	return 1;
 }
 
-
+/*
+ * gettimeofday_cached()
+ *
+ * Clones the event_base_gettimeofday_cached() interface but ensures the
+ * times are always on the gettimeofday() 1970 scale.  Older libevent 2
+ * sometimes used gettimeofday(), sometimes the since-system-start
+ * clock_gettime(CLOCK_MONOTONIC), depending on the platform.
+ *
+ * It is not cleanly possible to tell which timescale older libevent is
+ * using.
+ *
+ * The strategy involves 1 hour thresholds chosen to be far longer than
+ * the duration of a round of libevent callbacks, which share a cached
+ * start-of-round time.  First compare the last cached time with the
+ * current gettimeofday() time.  If they are within one hour, libevent
+ * is using the proper timescale so leave the offset 0.  Otherwise,
+ * compare libevent's cached time and the current time on the monotonic
+ * scale.  If they are within an hour, libevent is using the monotonic
+ * scale so calculate the offset to add to such times to bring them to
+ * gettimeofday()'s scale.
+ */
 int
 gettimeofday_cached(
 	struct event_base *	b,
@@ -1366,7 +1421,8 @@ gettimeofday_cached(
 	struct timespec			ts;
 	struct timeval			mono;
 	struct timeval			diff;
-	int				rc;
+	int				cgt_rc;
+	int				gtod_rc;
 
 	event_base_gettimeofday_cached(b, &latest);
 	if (b == cached_b &&
@@ -1377,25 +1433,41 @@ gettimeofday_cached(
 	cached = latest;
 	cached_b = b;
 	if (!offset_ready) {
-		rc = clock_gettime(CLOCK_MONOTONIC, &ts);
-		if (0 == rc) {
-			rc = evutil_gettimeofday(&systemt, NULL);
-			if (0 != rc) {
-				msyslog(LOG_ERR,
-					"%s: gettimeofday() error %m",
-					progname);
-				exit(1);
-			}
+		cgt_rc = clock_gettime(CLOCK_MONOTONIC, &ts);
+		gtod_rc = gettimeofday(&systemt, NULL);
+		if (0 != gtod_rc) {
+			msyslog(LOG_ERR,
+				"%s: gettimeofday() error %m",
+				progname);
+			exit(1);
+		}
+		timeval_sub(&diff, &systemt, &latest);
+		if (debug > 1)
+			printf("system minus cached %+ld.%06ld\n",
+			       (long)diff.tv_sec, diff.tv_usec);
+		if (0 != cgt_rc || labs((long)diff.tv_sec) < 3600) {
+			/*
+			 * Either use_monotonic == 0, or this libevent
+			 * has been repaired.  Leave offset at zero.
+			 */
+		} else {
 			mono.tv_sec = ts.tv_sec;
 			mono.tv_usec = ts.tv_nsec / 1000;
-			evutil_timersub(&systemt, &mono, &diff);
-			if (labs((long)diff.tv_sec) > 3600) {
-				offset = diff;
+			timeval_sub(&diff, &latest, &mono);
+			if (debug > 1)
+				printf("cached minus monotonic %+ld.%06ld\n",
+				       (long)diff.tv_sec, diff.tv_usec);
+			if (labs((long)diff.tv_sec) < 3600) {
+				/* older libevent2 using monotonic */
+				timeval_sub(&offset, &systemt, &mono);
+				msyslog(LOG_NOTICE,
+					"Offsetting CLOCK_MONOTONIC times by %+ld.%06ld\n",
+					(long)offset.tv_sec, offset.tv_usec);
 			}
 		}
 		offset_ready = TRUE;
 	}
-	evutil_timeradd(&cached, &offset, &adj_cached);
+	timeval_add(&adj_cached, &cached, &offset);
 	*caller_tv = adj_cached;
 
 	return 0;

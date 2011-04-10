@@ -1,3 +1,73 @@
+(4.2.7p148) 2011/04/09 Released by Harlan Stenn <stenn@ntp.org>
+* Use _mkgmtime() as timegm() in the Windows port, rather than
+  libntp/mktime.c's timegm().  Fixed [Bug 1875] on Windows using the old
+  asn2ntp() code from before 4.2.7p147.
+* ntp_crypto.c string buffer safety.
+* Remove use of MAXFILENAME in mode 7 (ntpdc) on-wire structs.
+* Change ntpd MAXFILENAME from 128 to 256 to match ntp-keygen.
+* Buffer safety and sign extension fixes (thanks Coverity Scan).
+(4.2.7p147) 2011/04/07 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1875] 'asn2ntp()' rewritten with 'caltontp()'; 'timegm()'
+  substitute likely to crash with 64bit time_t.
+(4.2.7p146) 2011/04/05 Released by Harlan Stenn <stenn@ntp.org>
+* String buffer safety cleanup, converting to strlcpy() and strlcat().
+* Use utmpname() before pututline() so repeated steps do not
+  accidentally record into wtmp where utmp was intended.
+* Use setutent() before each pututline() including first.
+(4.2.7p145) 2011/04/04 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1840] ntp_lists.h FIFO macros buggy.
+(4.2.7p144) 2011/04/03 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1874] ntpq -c "rv 0 sys_var_list" empty.
+(4.2.7p143) 2011/03/31 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1732] ntpd ties up CPU on disconnected USB refclock.
+* [Bug 1861] tickadj build failure using uClibc.
+* [Bug 1862] in6addr_any test in configure fooled by arm gcc 4.1.3 -O2.
+* Remove kernel line discipline driver code for clk and chu, deprecate
+  related LDISC_ flags, and remove associated ntpd code to decode the
+  timestamps, remove clktest line discipline test program.
+* Remove "signal_no_reset: signal 17 had flags 4000000" logging, as it
+  indicates no problem and is interpreted as an error.  Previously some
+  bits had been ignored one-by-one, but Linux SA_RESTORER definition is
+  unavailable to user headers.
+(4.2.7p142) 2011/03/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1844] ntpd 4.2.7p131 NetBSD, --gc-sections links bad executable.
+* Fix "make distcheck" break in libevent/sample caused by typo.
+(4.2.7p141) 2011/03/20 Released by Harlan Stenn <stenn@ntp.org>
+* Add "ntpq -c iostats" similar to "ntpdc -c iostats".
+* Compare entire timestamp to reject duplicates in refclock_pps().
+(4.2.7p140) 2011/03/17 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1848] ntpd 4.2.7p139 --disable-thread-support does not compile.
+* Add --disable-thread-support to one flock-build variation.
+* One more lock-while-init in lib/isc/task.c to quiet lock analysis.
+(4.2.7p139) 2011/03/16 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1848] make check ntpd --saveconfigquit clutters syslog.
+(4.2.7p138) 2011/03/08 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1846] MacOSX: debug symbol not found by propdelay or tickadj.
+(4.2.7p137) 2011/03/07 Released by Harlan Stenn <stenn@ntp.org>
+* Use TRACE() instead of DPRINTF() for libntp and utilities, which
+  use the "debug" variable regardless of #ifdef DEBUG.
+* Declare debug in libntp instead of each program.  Expose extern
+  declaration to utilities, libntp, and DEBUG ntpd.
+* Lock under-construction task, taskmgr objects to satisfy Coverity's
+  mostly-correct assumptions about which variables are protected by
+  which locks.
+(4.2.7p136) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1839] 4.2.7p135 still installs libevent ev*.h headers.
+(4.2.7p135) 2011/03/02 Released by Harlan Stenn <stenn@ntp.org>
+* libevent: When building on systems with CLOCK_MONOTONIC available,
+  separate the internal timeline (possibly counting since system boot)
+  from the gettimeofday() timeline in event_base cached timevals.  Adds
+  new event_base_tv_cached() to retrieve cached callback round start
+  time on the internal timeline, and changes
+  event_based_gettimeofday_cached() to always return times using the
+  namesake timeline.  This preserves the benefit of using the never-
+  stepped monotonic clock for event timeouts while providing clients
+  with times consistently using gettimeofday().
+* Correct event_base_gettimeofday_cached() workaround code in
+  sntp to work with corrected libevent.
+* Remove sntp l_fp_output() test now that it uses prettydate().
+* [Bug 1839] 4.2.7p131 installs libevent ev*.h headers.
+* Ensure CONFIG_SHELL is not empty before relying on it for #! scripts.
 (4.2.7p134) 2011/02/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1837] Build fails on Win7 due to regedit requiring privilege.
 * Provide fallback definitions for GetAdaptersAddresses() for Windows

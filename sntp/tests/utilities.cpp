@@ -142,22 +142,6 @@ TEST_F(debugUtilitiesTest, PktOutput) {
 	FinishDebugTest(CreatePath("debug-input-pkt", INPUT_DIR), filename);
 }
 
-TEST_F(debugUtilitiesTest, LfpOutputHexFormat) {
-	string filename = CreatePath("debug-output-lfp-hex", OUTPUT_DIR);
-	InitDebugTest(filename);
-
-	l_fp test;
-	test.l_ui = 127; // 0x7f
-	test.l_uf = 2147483647; // 0x7fffffff
-
-	l_fp network;
-	HTONL_FP(&test, &network);
-
-	l_fp_output(&network, outputFile);
-
-	FinishDebugTest(CreatePath("debug-input-lfp-hex", INPUT_DIR), filename);
-}
-
 TEST_F(debugUtilitiesTest, LfpOutputBinaryFormat) {
 	string filename = CreatePath("debug-output-lfp-bin", OUTPUT_DIR);
 	InitDebugTest(filename);
