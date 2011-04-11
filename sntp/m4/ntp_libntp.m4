@@ -8,7 +8,8 @@ dnl subpackage while retaining access to such test results.
 dnl
 AC_DEFUN([NTP_LIBNTP], [
 
-AC_REQUIRE([NTP_DEBUG])
+# HMS: Move NTP_DEBUG later.
+dnl AC_REQUIRE([NTP_DEBUG])
 AC_REQUIRE([NTP_CROSSCOMPILE])
 
 # HMS: Save $LIBS and empty it.
@@ -293,12 +294,19 @@ esac
 AC_TYPE_UID_T
 AC_FUNC_STRERROR_R
 
+m4_divert_text([HELP_ENABLE],
+[AS_HELP_STRING([defaults:],
+    [+ yes, - no, s system-specific])])
+
+AC_REQUIRE([NTP_DEBUG])
+
 # check if we can compile with pthreads
 AC_CHECK_HEADERS([semaphore.h])
 AC_CHECK_FUNCS([socketpair])
 AC_ARG_ENABLE(
     [thread-support],
-    [AS_HELP_STRING([--disable-thread-support, do not use threads])],
+    [AS_HELP_STRING([--enable-thread-support],
+		    [+ use threads (if available)?])],
     [],
     [enable_thread_support=yes]
     )

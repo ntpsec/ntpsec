@@ -12,6 +12,8 @@ AC_INIT(
 AC_CONFIG_MACRO_DIR([sntp/m4])
 AC_CONFIG_AUX_DIR([sntp/build-aux])
 
+AC_PRESERVE_HELP_ORDER
+
 # Bump ntp_configure_cache_version for each change to configure.ac or
 # .m4 files which invalidates cached values from previous configure 
 # runs.
@@ -65,7 +67,6 @@ AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_YACC
 
-NTP_LIBNTP
 NTP_VPATH_HACK		dnl used only by ntpd/Makefile.am
 
 # So far, the only shared library we might use is libopts.
@@ -88,6 +89,8 @@ case "${enable_libopts_install+set}" in
  *) enable_libopts_install=no ;;
 esac
 LIBOPTS_CHECK_NOBUILD([sntp/libopts])
+
+NTP_LIBNTP
 
 AC_MSG_CHECKING([for deprecated --with-arlib])
 AC_ARG_WITH([arlib],
@@ -1336,7 +1339,7 @@ AC_ARG_ENABLE(
     [dst-minutes],
     [AS_HELP_STRING(
 	[--enable-dst-minutes],
-	[n minutes per DST adjustment @<:@60@:>@])   dnl @<:@ is [, @:>@ is ]
+	[=60 minutes per DST adjustment])   dnl @<:@ is [, @:>@ is ]
     ],
     [ans=$enableval],
     [ans=60]
