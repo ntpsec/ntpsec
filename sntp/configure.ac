@@ -53,6 +53,7 @@ AC_DEFINE_UNQUOTED([STR_SYSTEM], "$host", [canonical system (cpu-vendor-os) of w
 AC_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
 
+NTP_PROG_CC
 NTP_LIBNTP
 
 AC_DISABLE_SHARED

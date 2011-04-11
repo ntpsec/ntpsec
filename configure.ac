@@ -63,6 +63,7 @@ ntp_parse_ok=${ntp_parse_ok=no}
 ntp_ripe_ncc_ok=${ntp_parse_ok=no}
 ntp_jupiter_ok=${ntp_jupiter_ok=no}
 
+NTP_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_YACC

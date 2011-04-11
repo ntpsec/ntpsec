@@ -18,19 +18,8 @@ AC_SUBST([LDADD_LIBNTP])
 __LIBS=$LIBS
 LIBS=
 
-dnl must come before AC_PROG_CC or similar
-AC_USE_SYSTEM_EXTENSIONS
+dnl The contents of NTP_PROG_CC used to be here...
 
-dnl  we need to check for cross compile tools for vxWorks here
-AC_PROG_CC
-# Ralf Wildenhues: With per-target flags we need CC_C_O
-# AM_PROG_CC_C_O supersets AC_PROG_CC_C_O
-AM_PROG_CC_C_O
-AC_PROG_GCC_TRADITIONAL
-NTP_COMPILER
-AC_C_BIGENDIAN
-AC_C_VOLATILE
-AC_PROG_CPP
 AC_PROG_INSTALL
 
 NTP_BINDIR
