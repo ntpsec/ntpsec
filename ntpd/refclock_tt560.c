@@ -76,14 +76,14 @@ tt560_start(
 {
 	register struct tt560unit *up;
 	struct refclockproc *pp;
-	char device[20];
-	int     fd;
-        caddr_t membase;
+	char	device[20];
+	int	fd;
+	caddr_t membase;
 
 	/*
 	 * Open TT560 device
 	 */
-	(void)sprintf(device, DEVICE, unit);
+	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = open(device, O_RDWR);
 	if (fd == -1) {
 		msyslog(LOG_ERR, "tt560_start: open of %s: %m", device);
@@ -195,9 +195,9 @@ tt560_poll(
 	 * proper format, we declare bad format and exit. Note: we
 	 * can't use the sec/usec conversion produced by the driver,
 	 * since the year may be suspect. All format error checking is
-	 * done by the sprintf() and sscanf() routines.
+	 * done by the snprintf() and sscanf() routines.
 	 */
-	sprintf(pp->a_lastcode,
+	snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
 	    "%1x%1x%1x %1x%1x:%1x%1x:%1x%1x.%1x%1x%1x%1x%1x%1x %1x",
 	    tp->hun_day,  tp->tens_day,  tp->unit_day,
 	                  tp->tens_hour, tp->unit_hour,

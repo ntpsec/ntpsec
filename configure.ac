@@ -895,12 +895,6 @@ case "$ac_cv_func_recvmsg" in
     esac
 esac
 
-case "$host" in
- *-*-sunos4*)
-    AC_DEFINE([SPRINTF_CHAR], [1], [*s*printf() functions are char*])
-    ;;
-esac
-
 AC_CACHE_CHECK(
     [number of arguments taken by setpgrp()],
     [ntp_cv_func_setpgrp_nargs],

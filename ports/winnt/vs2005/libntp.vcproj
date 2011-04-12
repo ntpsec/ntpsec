@@ -766,10 +766,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\include\ntp_sprintf.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\include\ntp_stdlib.h"
 				>
 			</File>

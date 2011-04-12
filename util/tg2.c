@@ -1098,7 +1098,7 @@ main(
 		printf("WWV time signal, starting point:\n");
 		printf(" Year = %02d, Day of year = %03d, Time = %02d:%02d:%02d, Minute tone = %d Hz, Hour tone = %d Hz.\n",
 		    Year, DayOfYear, Hour, Minute, Second, tone, HourTone);
-		sprintf(code, "%01d%03d%02d%02d%01d",
+		snprintf(code, sizeof(code), "%01d%03d%02d%02d%01d",
 		    Year / 10, DayOfYear, Hour, Minute, Year % 10);
 		if  (Verbose)
 			{
@@ -1371,8 +1371,9 @@ main(
 				Year++;
 			}
 			if (encode == WWV) {
-				sprintf(code, "%01d%03d%02d%02d%01d",
-				    Year / 10, DayOfYear, Hour, Minute, Year % 10);
+				snprintf(code, sizeof(code),
+				    "%01d%03d%02d%02d%01d", Year / 10,
+				    DayOfYear, Hour, Minute, Year % 10);
 				if  (Verbose)
 				    printf("\n Year = %2.2d, Day of year = %3d, Time = %2.2d:%2.2d:%2.2d, Code = %s", 
 						Year, DayOfYear, Hour, Minute, Second, code);
@@ -1441,17 +1442,20 @@ main(
 				ControlFunctions = 0;
 
 			/*
-			                   YearDay HourMin Sec
-			sprintf(code, "%04x%04d%06d%02d%02d%02d",
+						      YearDay HourMin Sec
+			snprintf(code, sizeof(code), "%04x%04d%06d%02d%02d%02d",
 				0, Year, DayOfYear, Hour, Minute, Second);
 			*/
 			if  (IrigIncludeYear) {
-				sprintf(ParityString, "%04X%02d%04d%02d%02d%02d",
-					ControlFunctions & 0x7FFF, Year, DayOfYear, Hour, Minute, Second);
-			}
-			else {
-				sprintf(ParityString, "%04X%02d%04d%02d%02d%02d",
-					ControlFunctions & 0x7FFF,    0, DayOfYear, Hour, Minute, Second);
+				snprintf(ParityString, sizeof(ParityString),
+				    "%04X%02d%04d%02d%02d%02d",
+				    ControlFunctions & 0x7FFF, Year,
+				    DayOfYear, Hour, Minute, Second);
+			} else {
+				snprintf(ParityString, sizeof(ParityString),
+				    "%04X%02d%04d%02d%02d%02d",
+				    ControlFunctions & 0x7FFF,
+				    0, DayOfYear, Hour, Minute, Second);
 			}
 
 			if  (IrigIncludeIeee)
@@ -1501,14 +1505,19 @@ main(
 			ControlFunctions |= ((ParityValue & 0x01) << 14);
 
 			if  (IrigIncludeYear) {
-				/*                 YearDay HourMin Sec*/
-				sprintf(code, "%05X%05X%02d%04d%02d%02d%02d",
-					StraightBinarySeconds, ControlFunctions, Year, DayOfYear, Hour, Minute, Second);
-			}
-			else {
-				/*                 YearDay HourMin Sec*/
-				sprintf(code, "%05X%05X%02d%04d%02d%02d%02d",
-					StraightBinarySeconds, ControlFunctions,    0, DayOfYear, Hour, Minute, Second);
+				snprintf(code, sizeof(code),
+				    /* YearDay HourMin Sec */
+				    "%05X%05X%02d%04d%02d%02d%02d",
+				    StraightBinarySeconds,
+				    ControlFunctions, Year, DayOfYear,
+				    Hour, Minute, Second);
+			} else {
+				snprintf(code, sizeof(code),
+				    /* YearDay HourMin Sec */
+				    "%05X%05X%02d%04d%02d%02d%02d",
+				    StraightBinarySeconds,
+				    ControlFunctions, 0, DayOfYear,
+				    Hour, Minute, Second);
 			}
 
 			if  (Debug)

@@ -10,7 +10,7 @@
  * C99-compliant implementations.
  */
 
-/* $Id: snprintf.c 1.9 2011/04/11 21:24:10+00:00 davehart@shiny.ad.hartbrothers.com $ */
+/* $Id: snprintf.c 1.10 2011/04/12 06:01:53+00:00 davehart@shiny.ad.hartbrothers.com $ */
 
 /*
  * Copyright (c) 1995 Patrick Powell.
@@ -123,10 +123,10 @@
  *	HW_WANT_RPL_SNPRINTF
  *	HW_WANT_RPL_VASPRINTF
  *	HW_WANT_RPL_ASPRINTF
- *	HAVE_VSNPRINTF
- *	HAVE_SNPRINTF
- *	HAVE_VASPRINTF
- *	HAVE_ASPRINTF
+ *	HAVE_VSNPRINTF	// define to 1 #if HW_WANT_RPL_VSNPRINTF
+ *	HAVE_SNPRINTF	// define to 1 #if HW_WANT_RPL_SNPRINTF
+ *	HAVE_VASPRINTF	// define to 1 #if HW_WANT_RPL_VASPRINTF
+ *	HAVE_ASPRINTF	// define to 1 #if HW_WANT_RPL_ASPRINTF
  *	HAVE_STDARG_H
  *	HAVE_STDDEF_H
  *	HAVE_STDINT_H

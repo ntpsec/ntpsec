@@ -262,8 +262,8 @@ typedef int socklen_t;
  * to other names
  */
 #define inline		__inline
-#define vsnprintf	_vsnprintf
-#define snprintf	_snprintf
+/* #define vsnprintf	_vsnprintf */
+/* #define snprintf	_snprintf */
 #define stricmp		_stricmp
 #define strcasecmp	_stricmp
 #define isascii		__isascii
@@ -390,6 +390,8 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 
 #define HW_WANT_RPL_VSNPRINTF		1
 #define HW_WANT_RPL_SNPRINTF		1
+#define HAVE_VSNPRINTF			1
+#define HAVE_SNPRINTF			1
 
 typedef char *caddr_t;
 

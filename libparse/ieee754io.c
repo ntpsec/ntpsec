@@ -89,14 +89,15 @@ fmt_flt(
 	unsigned long ch
 	)
 {
-  char *buf;
+	char *buf;
 
-  LIB_GETBUF(buf);
-  sprintf(buf, "%c %s %s %s", sign ? '-' : '+',
-	  fmt_blong(ch, 11),
-	  fmt_blong(mh, 20),
-	  fmt_blong(ml, 32));
-  return buf;
+	LIB_GETBUF(buf);
+	snprintf(buf, LIB_BUFLENGTH, "%c %s %s %s", sign ? '-' : '+',
+		 fmt_blong(ch, 11),
+		 fmt_blong(mh, 20),
+		 fmt_blong(ml, 32));
+
+	return buf;
 }
 
 static char *
@@ -105,15 +106,18 @@ fmt_hex(
 	int length
 	)
 {
-  char *buf;
-  int i;
+	char *	buf;
+	char	hex[4];
+	int	i;
 
-  LIB_GETBUF(buf);
-  for (i = 0; i < length; i++)
-    {
-      sprintf(buf+i*2, "%02x", bufp[i]);
-    }
-  return buf;
+	LIB_GETBUF(buf);
+	buf[0] = '\0';
+	for (i = 0; i < length; i++) {
+		snprintf(hex, sizeof(hex), "%02x", bufp[i]);
+		strlcat(buf, hex, LIB_BUFLENGTH);
+	}
+
+	return buf;
 }
 
 #endif

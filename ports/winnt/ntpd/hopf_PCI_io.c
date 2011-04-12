@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <winioctl.h>
+
+#include "ntp_stdlib.h"
 #include "hopf_PCI_io.h"
 
 
