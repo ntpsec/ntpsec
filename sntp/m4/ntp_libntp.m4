@@ -8,7 +8,8 @@ dnl subpackage while retaining access to such test results.
 dnl
 AC_DEFUN([NTP_LIBNTP], [
 
-AC_REQUIRE([NTP_DEBUG])
+# HMS: Move NTP_DEBUG later.
+dnl AC_REQUIRE([NTP_DEBUG])
 AC_REQUIRE([NTP_CROSSCOMPILE])
 
 # HMS: Save $LIBS and empty it.
@@ -17,19 +18,8 @@ AC_SUBST([LDADD_LIBNTP])
 __LIBS=$LIBS
 LIBS=
 
-dnl must come before AC_PROG_CC or similar
-AC_USE_SYSTEM_EXTENSIONS
+dnl The contents of NTP_PROG_CC used to be here...
 
-dnl  we need to check for cross compile tools for vxWorks here
-AC_PROG_CC
-# Ralf Wildenhues: With per-target flags we need CC_C_O
-# AM_PROG_CC_C_O supersets AC_PROG_CC_C_O
-AM_PROG_CC_C_O
-AC_PROG_GCC_TRADITIONAL
-NTP_COMPILER
-AC_C_BIGENDIAN
-AC_C_VOLATILE
-AC_PROG_CPP
 AC_PROG_INSTALL
 
 NTP_BINDIR
@@ -293,12 +283,19 @@ esac
 AC_TYPE_UID_T
 AC_FUNC_STRERROR_R
 
+m4_divert_text([HELP_ENABLE],
+[AS_HELP_STRING([defaults:],
+    [+ yes, - no, s system-specific])])
+
+AC_REQUIRE([NTP_DEBUG])
+
 # check if we can compile with pthreads
 AC_CHECK_HEADERS([semaphore.h])
 AC_CHECK_FUNCS([socketpair])
 AC_ARG_ENABLE(
     [thread-support],
-    [AS_HELP_STRING([--disable-thread-support, do not use threads])],
+    [AS_HELP_STRING([--enable-thread-support],
+		    [+ use threads (if available)?])],
     [],
     [enable_thread_support=yes]
     )

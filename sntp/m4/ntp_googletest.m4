@@ -6,7 +6,7 @@ AC_ARG_WITH(
     [gtest],
     [AS_HELP_STRING(
 	[--with-gtest],
-	[Use the gtest framework if it's available]
+	[Use the gtest framework (Default: if it's available)]
     )],
     [try_gtest=$withval],
     [try_gtest=yes]
