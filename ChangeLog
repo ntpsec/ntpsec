@@ -1,3 +1,6 @@
+* Remove never-used, incomplete ports/winnt/ntpd/refclock_trimbledc.[ch]
+* On systems without C99-compliant (v)snprintf(), use C99-snprintf
+  replacements (http://www.jhweiss.de/software/snprintf.html)
 (4.2.7p149) 2011/04/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1881] describe the {+,-,s} characters in configure --help output.
 (4.2.7p148) 2011/04/09 Released by Harlan Stenn <stenn@ntp.org>

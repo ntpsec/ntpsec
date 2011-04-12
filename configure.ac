@@ -804,7 +804,7 @@ case "$host" in
  *) AC_CHECK_FUNCS([sched_setscheduler])
     ;;
 esac
-AC_CHECK_FUNCS([setlinebuf setpgid setpriority setsid setvbuf snprintf])
+AC_CHECK_FUNCS([setlinebuf setpgid setpriority setsid setvbuf])
 AC_CHECK_FUNCS([strdup strerror setrlimit strchr])
 case "$host" in
  *-*-aix[[456]]*)
@@ -838,7 +838,7 @@ esac
 AC_DEFINE_UNQUOTED([WORKER_CHILD_EXIT], [$ntp_worker_child_exit],
 		   [routine worker child proc uses to exit.])
 
-AC_CHECK_FUNCS([umask uname updwtmp updwtmpx vsnprintf vsprintf])
+AC_CHECK_FUNCS([umask uname updwtmp updwtmpx])
 
 ###
 

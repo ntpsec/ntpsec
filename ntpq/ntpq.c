@@ -917,8 +917,8 @@ getresponse(
 		shouldbesize = (CTL_HEADER_LEN + count + 3) & ~3;
 
 		if (n < shouldbesize) {
-			printf("Response packet claims %u octets payload, above %d received\n",
-			       count, n - CTL_HEADER_LEN);
+			printf("Response packet claims %u octets payload, above %ld received\n",
+			       count, (long)n - CTL_HEADER_LEN);
 			return ERR_INCOMPLETE;
 		}
 

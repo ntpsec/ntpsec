@@ -69,7 +69,7 @@
 #include <arpa/inet.h>
 /**/
 #ifdef HAVE_SYS_PARAM_H
-# include <sys/param.h>		/* MAXHOSTNAMELEN (often) */
+# include <sys/param.h>
 #endif
 
 #if !defined(HAVE_RES_INIT) && defined(HAVE___RES_INIT)

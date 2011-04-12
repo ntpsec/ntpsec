@@ -8,8 +8,6 @@ dnl subpackage while retaining access to such test results.
 dnl
 AC_DEFUN([NTP_LIBNTP], [
 
-# HMS: Move NTP_DEBUG later.
-dnl AC_REQUIRE([NTP_DEBUG])
 AC_REQUIRE([NTP_CROSSCOMPILE])
 
 # HMS: Save $LIBS and empty it.
@@ -287,7 +285,7 @@ m4_divert_text([HELP_ENABLE],
 [AS_HELP_STRING([defaults:],
     [+ yes, - no, s system-specific])])
 
-AC_REQUIRE([NTP_DEBUG])
+NTP_DEBUG
 
 # check if we can compile with pthreads
 AC_CHECK_HEADERS([semaphore.h])
@@ -295,7 +293,7 @@ AC_CHECK_FUNCS([socketpair])
 AC_ARG_ENABLE(
     [thread-support],
     [AS_HELP_STRING([--enable-thread-support],
-		    [+ use threads (if available)?])],
+		    [s use threads (+ if available)])],
     [],
     [enable_thread_support=yes]
     )
@@ -455,6 +453,32 @@ case "$have_pthreads" in
 esac
 AC_SUBST([LIBISC_PTHREADS_NOTHREADS])
 AM_CONDITIONAL([PTHREADS], [test "$have_pthreads" != "no"])
+
+AC_DEFUN([NTP_BEFORE_HW_FUNC_VSNPRINTF], [
+AC_BEFORE([$0], [HW_FUNC_VSNPRINTF])
+AC_BEFORE([$0], [HW_FUNC_SNPRINTF])
+AC_ARG_ENABLE(
+    [c99-snprintf],
+    [AS_HELP_STRING([--enable-c99-snprintf], [s force replacement])],
+    [force_c99_snprintf=$enableval],
+    [force_c99_snprintf=no]
+    )
+case "$force_c99_snprintf" in
+ yes)
+    hw_force_rpl_snprintf=yes
+    hw_force_rpl_vsnprintf=yes
+esac
+hw_nodef_snprintf=yes
+hw_nodef_vsnprintf=yes
+]) dnl end of AC_DEFUN of NTP_BEFORE_HW_FUNC_VSNPRINTF
+
+AC_DEFUN([NTP_C99_SNPRINTF], [
+AC_REQUIRE([NTP_BEFORE_HW_FUNC_VSNPRINTF])
+AC_REQUIRE([HW_FUNC_VSNPRINTF])
+AC_REQUIRE([HW_FUNC_SNPRINTF])
+]) dnl end of DEFUN of NTP_C99_SNPRINTF
+
+NTP_C99_SNPRINTF
 
 AC_CHECK_HEADERS([sys/clockctl.h])
 
