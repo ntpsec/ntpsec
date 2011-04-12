@@ -3333,10 +3333,12 @@ input_handler(
 #endif
 	fd_set		fds;
 	size_t		select_count;
+	endpt *		ep;
+#ifdef REFCLOCK
 	struct refclockio *rp;
 	int		saved_errno;
 	const char *	clk;
-	endpt *		ep;
+#endif
 #ifdef HAS_ROUTING_SOCKET
 	struct asyncio_reader *asyncio_reader;
 #endif

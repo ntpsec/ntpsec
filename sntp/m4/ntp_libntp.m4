@@ -40,6 +40,32 @@ NTP_LIB_M
 AC_FUNC_FORK
 AC_FUNC_ALLOCA
 
+AC_DEFUN([NTP_BEFORE_HW_FUNC_VSNPRINTF], [
+AC_BEFORE([$0], [HW_FUNC_VSNPRINTF])
+AC_BEFORE([$0], [HW_FUNC_SNPRINTF])
+AC_ARG_ENABLE(
+    [c99-snprintf],
+    [AS_HELP_STRING([--enable-c99-snprintf], [s force replacement])],
+    [force_c99_snprintf=$enableval],
+    [force_c99_snprintf=no]
+    )
+case "$force_c99_snprintf" in
+ yes)
+    hw_force_rpl_snprintf=yes
+    hw_force_rpl_vsnprintf=yes
+esac
+hw_nodef_snprintf=yes
+hw_nodef_vsnprintf=yes
+]) dnl end of AC_DEFUN of NTP_BEFORE_HW_FUNC_VSNPRINTF
+
+AC_DEFUN([NTP_C99_SNPRINTF], [
+AC_REQUIRE([NTP_BEFORE_HW_FUNC_VSNPRINTF])
+AC_REQUIRE([HW_FUNC_VSNPRINTF])
+AC_REQUIRE([HW_FUNC_SNPRINTF])
+]) dnl end of DEFUN of NTP_C99_SNPRINTF
+
+NTP_C99_SNPRINTF
+
 ac_busted_vpath_in_make=no
 case "$build" in
  *-*-irix6.1*)	# 64 bit only
@@ -298,7 +324,7 @@ AC_CHECK_HEADERS([semaphore.h])
 AC_CHECK_FUNCS([socketpair])
 AC_ARG_ENABLE(
     [thread-support],
-    [AS_HELP_STRING([--disable-thread-support, do not use threads])],
+    [AS_HELP_STRING([--disable-thread-support], [s do not use threads])],
     [],
     [enable_thread_support=yes]
     )

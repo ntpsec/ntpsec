@@ -2182,57 +2182,6 @@ printserver(
 			   lfptoa(&pp->offset, 6));
 }
 
-#if !defined(HAVE_VSPRINTF)
-int
-vsprintf(
-	char *str,
-	const char *fmt,
-	va_list ap
-	)
-{
-	FILE f;
-	int len;
-
-	f._flag = _IOWRT+_IOSTRG;
-	f._ptr = str;
-	f._cnt = 32767;
-	len = _doprnt(fmt, ap, &f);
-	*f._ptr = 0;
-	return (len);
-}
-#endif
-
-#if 0
-/* override function in library since SA_RESTART makes ALL syscalls restart */
-#ifdef SA_RESTART
-void
-signal_no_reset(
-	int sig,
-	void (*func)()
-	)
-{
-	int n;
-	struct sigaction vec;
-
-	vec.sa_handler = func;
-	sigemptyset(&vec.sa_mask);
-	vec.sa_flags = 0;
-
-	while (1)
-	{
-		n = sigaction(sig, &vec, NULL);
-		if (n == -1 && errno == EINTR)
-			continue;
-		break;
-	}
-	if (n == -1)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-}
-#endif
-#endif
 
 #ifdef HAVE_NETINFO
 static ni_namelist *

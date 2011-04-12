@@ -390,6 +390,10 @@ SOURCE=..\libntp\SetSystemTime.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\libntp\snprintf.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\isc\sockaddr.c
 # End Source File
 # Begin Source File
