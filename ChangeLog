@@ -3,7 +3,7 @@
   replacements (http://www.jhweiss.de/software/snprintf.html)
 * Remove remaining sprintf() calls except refclock_ripencc.c (which is
   kept out of --enable-all-clocks as a result), upstream libs which use
-  sprintf() ony after careful buffer sizing, and ntp_proto.c.
+  sprintf() only after careful buffer sizing.
 (4.2.7p149) 2011/04/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1881] describe the {+,-,s} characters in configure --help output.
 (4.2.7p148) 2011/04/09 Released by Harlan Stenn <stenn@ntp.org>
