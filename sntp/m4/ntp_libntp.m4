@@ -27,6 +27,7 @@ NTP_LIB_M
 
 AC_FUNC_FORK
 AC_FUNC_ALLOCA
+AC_FUNC_STRERROR_R
 
 ac_busted_vpath_in_make=no
 case "$build" in
@@ -279,7 +280,6 @@ case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
 esac
 
 AC_TYPE_UID_T
-AC_FUNC_STRERROR_R
 
 m4_divert_text([HELP_ENABLE],
 [AS_HELP_STRING([defaults:],
@@ -455,27 +455,53 @@ AC_SUBST([LIBISC_PTHREADS_NOTHREADS])
 AM_CONDITIONAL([PTHREADS], [test "$have_pthreads" != "no"])
 
 AC_DEFUN([NTP_BEFORE_HW_FUNC_VSNPRINTF], [
-AC_BEFORE([$0], [HW_FUNC_VSNPRINTF])
-AC_BEFORE([$0], [HW_FUNC_SNPRINTF])
-AC_ARG_ENABLE(
-    [c99-snprintf],
-    [AS_HELP_STRING([--enable-c99-snprintf], [s force replacement])],
-    [force_c99_snprintf=$enableval],
-    [force_c99_snprintf=no]
-    )
-case "$force_c99_snprintf" in
- yes)
-    hw_force_rpl_snprintf=yes
-    hw_force_rpl_vsnprintf=yes
-esac
-hw_nodef_snprintf=yes
-hw_nodef_vsnprintf=yes
+    AC_BEFORE([$0], [HW_FUNC_VSNPRINTF])dnl
+    AC_BEFORE([$0], [HW_FUNC_SNPRINTF])dnl
+    AC_ARG_ENABLE(
+	[c99-snprintf],
+	[AS_HELP_STRING([--enable-c99-snprintf], [s force replacement])],
+	[force_c99_snprintf=$enableval],
+	[force_c99_snprintf=no]
+	)
+    case "$force_c99_snprintf" in
+     yes)
+	hw_force_rpl_snprintf=yes
+	hw_force_rpl_vsnprintf=yes
+    esac
+    AH_TOP([
+	#if !defined(_KERNEL) && !defined(PARSESTREAM)
+	# include <stdio.h>	/* before #define vsnprintf rpl_... */
+	#endif
+	])
+    AH_BOTTOM([
+	#if !defined(_KERNEL) && !defined(PARSESTREAM)
+	# if defined(HW_WANT_RPL_VSNPRINTF)
+	#  if defined(__cplusplus)
+	extern "C" {
+	# endif
+	# include <stdarg.h>
+	int rpl_vsnprintf(char *, size_t, const char *, va_list);
+	# if defined(__cplusplus)
+	}
+	#  endif
+	# endif
+	# if defined(HW_WANT_RPL_SNPRINTF)
+	#  if defined(__cplusplus)
+	extern "C" {
+	#  endif
+	int rpl_snprintf(char *, size_t, const char *, ...);
+	#  if defined(__cplusplus)
+	}
+	#  endif
+	# endif
+	#endif	/* !defined(_KERNEL) && !defined(PARSESTREAM) */
+	])
 ]) dnl end of AC_DEFUN of NTP_BEFORE_HW_FUNC_VSNPRINTF
 
 AC_DEFUN([NTP_C99_SNPRINTF], [
-AC_REQUIRE([NTP_BEFORE_HW_FUNC_VSNPRINTF])
-AC_REQUIRE([HW_FUNC_VSNPRINTF])
-AC_REQUIRE([HW_FUNC_SNPRINTF])
+    AC_REQUIRE([NTP_BEFORE_HW_FUNC_VSNPRINTF])dnl
+    AC_REQUIRE([HW_FUNC_VSNPRINTF])dnl
+    AC_REQUIRE([HW_FUNC_SNPRINTF])dnl
 ]) dnl end of DEFUN of NTP_C99_SNPRINTF
 
 NTP_C99_SNPRINTF

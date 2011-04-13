@@ -131,16 +131,6 @@ struct sigvec;
 extern	int	sigvec		(int, struct sigvec *, struct sigvec *);
 #endif
 
-#if HW_WANT_RPL_VSNPRINTF
-#define vsnprintf rpl_vsnprintf
-int rpl_vsnprintf(char *, size_t, const char *, va_list);
-#endif
-
-#if HW_WANT_RPL_SNPRINTF
-#define snprintf rpl_snprintf
-int rpl_snprintf(char *, size_t, const char *, ...);
-#endif
-
 #ifdef DECL_STDIO_0
 #if defined(FILE) || defined(BUFSIZ)
 extern	int	_flsbuf		(int, FILE *);

@@ -7,12 +7,7 @@
 # libopts to avoid their own replacement of snprintf.
 #
 # Changed to honor hw_nodef_snprintf, etc. which prevent config.h from
-# aliasing snprintf to rpl_snprintf, etc.  NTP uses this to defer that
-# definition until after system include files to avoid problems seen
-# on Linux building sntp/tests:
-# /usr/include/c++/4.4/cstdio:165: error: '::snprintf' has not been declared
-# This cstdio #undef's snprintf and then re-declares ::snprintf, however
-# the earlier stdio.h had its declarations aliased to rpl_snprintf, etc.
+# aliasing snprintf to rpl_snprintf, etc.
 #
 # Changed to honor hw_force_rpl_snprintf=yes, etc.  This is used by NTP
 # to test rpl_snprintf() and rpl_vsnprintf() on platforms which provide

@@ -2,6 +2,7 @@
 
 extern "C" {
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 // format_errmsg() is normally private to msyslog.c
 void	format_errmsg	(char *, size_t, const char *, int);

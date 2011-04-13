@@ -28,6 +28,8 @@
 #include <isc/strerror.h>
 #include <lib_strbuf.h>
 
+#include "ntp_stdlib.h"
+
 #include "messages.h"
 
 static HANDLE hAppLog = NULL;

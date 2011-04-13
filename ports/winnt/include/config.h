@@ -389,7 +389,12 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 #define HAVE_BSD_NICE			/* emulate BSD setpriority() */
 
 #define HW_WANT_RPL_VSNPRINTF		1
+#define vsnprintf			rpl_vsnprintf
+#include <stdarg.h>
+int rpl_vsnprintf(char *, size_t, const char *, va_list);
 #define HW_WANT_RPL_SNPRINTF		1
+#define snprintf			rpl_snprintf
+int rpl_snprintf(char *, size_t, const char *, ...);
 #define HAVE_VSNPRINTF			1
 #define HAVE_SNPRINTF			1
 

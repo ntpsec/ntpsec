@@ -15,9 +15,9 @@
 #endif
 #include <stdio.h>
 
+#include "ntp_string.h"
 #include "ntp.h"
 #include "ntp_debug.h"
-#include "ntp_string.h"
 #include "ntp_syslog.h"
 
 #ifdef SYS_WINNT
@@ -40,6 +40,13 @@ extern	char *	progname;
 void	addto_syslog	(int, const char *);
 void	format_errmsg	(char *, size_t, const char *, int);
 
+/*
+ * Work around misdetection by AC_FUNC_STRERROR_R on Debian Linux.
+ */
+#if defined(STRERROR_R_CHAR_P) && strerror_r == __xpg_strerror_r
+# undef STRERROR_R_CHAR_P
+#endif
+
 
 /*
  * errno_to_str() - a thread-safe strerror() replacement.
@@ -58,6 +65,7 @@ errno_to_str(
 # if defined(STRERROR_R_CHAR_P) || !HAVE_DECL_STRERROR_R
 	char *	pstatic;
 
+	buf[0] = '\0';
 #  ifdef STRERROR_R_CHAR_P
 	/*
 	 * For older GNU strerror_r, the return value either points to
@@ -67,7 +75,16 @@ errno_to_str(
 #  else
 	pstatic = strerror(err);
 #  endif
-	if (pstatic != buf)
+	if (NULL == pstatic && '\0' == buf[0])
+		snprintf(buf, bufsiz, "%s(%d): errno %d",
+#  ifdef STRERROR_R_CHAR_P
+			 "strerror_r",
+#  else
+			 "strerror",
+#  endif
+			 err, errno);
+	/* protect against believing an int return is a pointer */
+	else if (pstatic != buf && pstatic > (char *)bufsiz)
 		strlcpy(buf, pstatic, bufsiz);
 # else
 	int	rc;
