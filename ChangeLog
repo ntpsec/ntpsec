@@ -1,3 +1,4 @@
+(4.2.7p150) 2011/04/13 Released by Harlan Stenn <stenn@ntp.org>
 * Remove never-used, incomplete ports/winnt/ntpd/refclock_trimbledc.[ch]
 * On systems without C99-compliant (v)snprintf(), use C99-snprintf
   replacements (http://www.jhweiss.de/software/snprintf.html)
