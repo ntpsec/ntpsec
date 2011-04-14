@@ -506,6 +506,68 @@ AC_DEFUN([NTP_C99_SNPRINTF], [
 
 NTP_C99_SNPRINTF
 
+dnl C99-snprintf does not handle %m
+case "$hw_use_rpl_vsnprintf:$hw_cv_func_vsnprintf" in
+ no:yes)
+    AC_CACHE_CHECK(
+	[if vsnprintf expands "%m" to strerror(errno)],
+	[ntp_cv_vsnprintf_percent_m],
+	[AC_RUN_IFELSE(
+	    [AC_LANG_PROGRAM(
+		[[
+		    #include <stdarg.h>
+		    #include <errno.h>
+		    #include <stdio.h>
+		    #include <string.h>
+
+		    int call_vsnprintf(
+			    char *	dst,
+			    size_t	sz,
+			    const char *fmt,
+			    ...
+			    );
+
+		    int call_vsnprintf(
+			    char *	dst,
+			    size_t	sz,
+			    const char *fmt,
+			    ...
+			    )
+		    {
+			    va_list	ap;
+			    int		rc;
+
+			    va_start(ap, fmt);
+			    rc = vsnprintf(dst, sz, fmt, ap);
+			    va_end(ap);
+
+			    return rc;
+		    }
+		]],
+		[[
+		    char	sbuf[512];
+		    char	pbuf[512];
+		    int		slen;
+
+		    strcpy(sbuf, strerror(ENOENT));
+		    errno = ENOENT;
+		    slen = call_vsnprintf(pbuf, sizeof(pbuf), "%m",
+					  "wrong");
+		    return strcmp(sbuf, pbuf);
+		]]
+	    )],
+	    [ntp_cv_vsnprintf_percent_m=yes],
+	    [ntp_cv_vsnprintf_percent_m=no],
+	    [ntp_cv_vsnprintf_percent_m=no]
+	)]
+    )
+    case "$ntp_cv_vsnprintf_percent_m" in
+     yes)
+	AC_DEFINE([VSNPRINTF_PERCENT_M], [1],
+		  [vsnprintf expands "%m" to strerror(errno)])
+    esac
+esac
+
 AC_CHECK_HEADERS([sys/clockctl.h])
 
 AC_ARG_ENABLE(

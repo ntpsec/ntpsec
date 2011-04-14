@@ -38,14 +38,15 @@ extern	char *	progname;
 
 /* Declare the local functions */
 void	addto_syslog	(int, const char *);
+#ifndef VSNPRINTF_PERCENT_M
 void	format_errmsg	(char *, size_t, const char *, int);
 
 /*
  * Work around misdetection by AC_FUNC_STRERROR_R on Debian Linux.
  */
-#if defined(STRERROR_R_CHAR_P) && strerror_r == __xpg_strerror_r
-# undef STRERROR_R_CHAR_P
-#endif
+# if defined(STRERROR_R_CHAR_P) && strerror_r == __xpg_strerror_r
+#  undef STRERROR_R_CHAR_P
+# endif
 
 
 /*
@@ -54,7 +55,7 @@ void	format_errmsg	(char *, size_t, const char *, int);
  *		    For Windows, we have:
  *			#define errno_to_str isc_strerror
  */
-#ifndef errno_to_str
+# ifndef errno_to_str
 void
 errno_to_str(
 	int	err,
@@ -62,40 +63,82 @@ errno_to_str(
 	size_t	bufsiz
 	)
 {
-# if defined(STRERROR_R_CHAR_P) || !HAVE_DECL_STRERROR_R
+#  if defined(STRERROR_R_CHAR_P) || !HAVE_DECL_STRERROR_R
 	char *	pstatic;
 
 	buf[0] = '\0';
-#  ifdef STRERROR_R_CHAR_P
+#   ifdef STRERROR_R_CHAR_P
 	/*
 	 * For older GNU strerror_r, the return value either points to
 	 * buf, or to static storage.  We want the result always in buf
 	 */
 	pstatic = strerror_r(err, buf, bufsiz);
-#  else
+#   else
 	pstatic = strerror(err);
-#  endif
+#   endif
 	if (NULL == pstatic && '\0' == buf[0])
 		snprintf(buf, bufsiz, "%s(%d): errno %d",
-#  ifdef STRERROR_R_CHAR_P
+#   ifdef STRERROR_R_CHAR_P
 			 "strerror_r",
-#  else
+#   else
 			 "strerror",
-#  endif
+#   endif
 			 err, errno);
 	/* protect against believing an int return is a pointer */
 	else if (pstatic != buf && pstatic > (char *)bufsiz)
 		strlcpy(buf, pstatic, bufsiz);
-# else
+#  else
 	int	rc;
 
 	rc = strerror_r(err, buf, bufsiz);
 	if (rc < 0)
 		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
 			 err, errno);
-# endif
+#  endif
 }
-#endif	/* errno_to_str */
+# endif	/* errno_to_str */
+
+
+void
+format_errmsg(
+	char *		nfmt,
+	size_t		lennfmt,
+	const char *	fmt,
+	int		errval
+	)
+{
+	char errmsg[256];
+	char c;
+	char *n;
+	const char *f;
+	size_t len;
+
+	n = nfmt;
+	f = fmt;
+	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 1)) {
+		if (c != '%') {
+			*n++ = c;
+			continue;
+		}
+		if ((c = *f++) != 'm') {
+			*n++ = '%';
+			if ('\0' == c)
+				break;
+			*n++ = c;
+			continue;
+		}
+		errno_to_str(errval, errmsg, sizeof(errmsg));
+		len = strlen(errmsg);
+
+		/* Make sure we have enough space for the error message */
+		if ((n + len) < (nfmt + lennfmt - 1)) {
+			memcpy(n, errmsg, len);
+			n += len;
+		}
+	}
+	*n = '\0';
+}
+#endif	/* VSNPRINTF_PERCENT_M */
 
 
 /*
@@ -173,47 +216,6 @@ addto_syslog(
 }
 
 
-void
-format_errmsg(
-	char *		nfmt,
-	size_t		lennfmt,
-	const char *	fmt,
-	int		errval
-	)
-{
-	char errmsg[256];
-	char c;
-	char *n;
-	const char *f;
-	size_t len;
-
-	n = nfmt;
-	f = fmt;
-	while ((c = *f++) != '\0' && n < (nfmt + lennfmt - 1)) {
-		if (c != '%') {
-			*n++ = c;
-			continue;
-		}
-		if ((c = *f++) != 'm') {
-			*n++ = '%';
-			if ('\0' == c)
-				break;
-			*n++ = c;
-			continue;
-		}
-		errno_to_str(errval, errmsg, sizeof(errmsg));
-		len = strlen(errmsg);
-
-		/* Make sure we have enough space for the error message */
-		if ((n + len) < (nfmt + lennfmt - 1)) {
-			memcpy(n, errmsg, len);
-			n += len;
-		}
-	}
-	*n = '\0';
-}
-
-
 int
 mvsnprintf(
 	char *		buf,
@@ -222,9 +224,10 @@ mvsnprintf(
 	va_list		ap
 	)
 {
+#ifndef VSNPRINTF_PERCENT_M
 	char	nfmt[256];
+#endif
 	int	errval;
-	int	rc;
 
 	/*
 	 * Save the error value as soon as possible
@@ -235,13 +238,12 @@ mvsnprintf(
 #endif /* SYS_WINNT */
 		errval = errno;
 
+#ifndef VSNPRINTF_PERCENT_M
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-
-	rc = vsnprintf(buf, bufsiz, nfmt, ap);
-	/* terminate buf, as MS vsnprintf() does not when truncating */
-	buf[bufsiz - 1] = '\0';
-
-	return rc;
+#else
+	errno = errval;
+#endif
+	return vsnprintf(buf, bufsiz, nfmt, ap);
 }
 
 
@@ -252,9 +254,10 @@ mvfprintf(
 	va_list		ap
 	)
 {
+#ifndef VSNPRINTF_PERCENT_M
 	char	nfmt[256];
+#endif
 	int	errval;
-	int	rc;
 
 	/*
 	 * Save the error value as soon as possible
@@ -265,10 +268,12 @@ mvfprintf(
 #endif /* SYS_WINNT */
 		errval = errno;
 
+#ifndef VSNPRINTF_PERCENT_M
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-	rc = vfprintf(fp, nfmt, ap);
-
-	return rc;
+#else
+	errno = errval;
+#endif
+	return vfprintf(fp, nfmt, ap);
 }
 
 

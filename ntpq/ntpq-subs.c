@@ -1590,7 +1590,9 @@ doprintpeers(
 	while (nextvar(&datalen, &data, &name, &value)) {
 		if (!strcmp("srcadr", name) ||
 		    !strcmp("peeradr", name)) {
-			decodenetnum(value, &srcadr);
+			if (!decodenetnum(value, &srcadr))
+				fprintf(stderr, "malformed %s=%s\n",
+					name, value);
 		} else if (!strcmp("srchost", name)) {
 			if (pvl == peervarlist) {
 				len = strlen(value);
@@ -3238,12 +3240,17 @@ collect_display_vdc(
 			break;
 
 		case NTP_ADP:
-			decodenetnum(val, &pvdc->v.sau);
+			if (!decodenetnum(val, &pvdc->v.sau))
+				fprintf(stderr, "malformed %s=%s\n",
+					pvdc->tag, val);
 			break;
 
 		case NTP_ADD:
 			if (0 == n) {	/* adr */
-				decodenetnum(val, &pvdc->v.sau);
+				if (!decodenetnum(val, &pvdc->v.sau))
+					fprintf(stderr,
+						"malformed %s=%s\n",
+						pvdc->tag, val);
 			} else {	/* port */
 				if (atouint(val, &ul))
 					SET_PORT(&pvdc->v.sau, 

@@ -10,7 +10,7 @@
  * C99-compliant implementations.
  */
 
-/* $Id: snprintf.c 1.10 2011/04/12 06:01:53+00:00 davehart@shiny.ad.hartbrothers.com $ */
+/* $Id: snprintf.c 1.11 2011/04/14 02:00:01+00:00 davehart@shiny.ad.hartbrothers.com $ */
 
 /*
  * Copyright (c) 1995 Patrick Powell.
@@ -803,6 +803,7 @@ rpl_vsnprintf(char *str, size_t size, const char *format, va_list args)
 				/* FALLTHROUGH */
 			case 'F':
 				flags |= PRINT_F_UP;
+				/* FALLTHROUGH */
 			case 'a':
 				/* Not yet supported, we'll use "%f". */
 				/* FALLTHROUGH */

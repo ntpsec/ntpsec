@@ -81,7 +81,7 @@ do
 	 0)
 	    ssh $i "cd $c_d ; ./build $SIG $PARSE $STD $BUILD_ARGS" &
 	    ssh $i "cd $c_d ; ./build $SIG $PARSE $STD --disable-debugging $BUILD_ARGS" &
-	    ssh $i "cd $c_d ; ./build $SIG $PARSE $STD --without-crypto $BUILD_ARGS" &
+	    ssh $i "cd $c_d ; ./build $SIG $PARSE $STD --without-crypto --enable-c99-snprintf $BUILD_ARGS" &
 	    ssh $i "cd $c_d ; ./build $SIG        $STD --disable-all-clocks --disable-autokey --without-sntp --disable-thread-support $BUILD_ARGS" &
 	    ;;
 	 1)
@@ -109,7 +109,7 @@ do
 			echo \`date -u '+%H:%M:%S'\` $i started build \$COUNT of 4
 			[ 0 -lt \`expr \$COUNT % $PARALLEL_BUILDS\` ] || wait
 
-			./build $SIG $PARSE $STD --without-crypto $BUILD_ARGS &
+			./build $SIG $PARSE $STD --without-crypto --enable-c99-snprintf $BUILD_ARGS &
 
 			COUNT=\`expr \$COUNT + 1\`
 			echo \`date -u '+%H:%M:%S'\` $i started build \$COUNT of 4
