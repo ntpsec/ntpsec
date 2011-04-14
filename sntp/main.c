@@ -498,11 +498,6 @@ sntp_name_resolved(
 				break;
 			}
 
-			spkt = emalloc_zero(sizeof(*spkt));
-			spkt->dctx = dctx;
-			octets = min(ai->ai_addrlen, sizeof(spkt->addr));
-			memcpy(&spkt->addr, ai->ai_addr, octets);
-
 			/*
 			** We're waiting for a response for either unicast
 			** or broadcast, so...
@@ -510,8 +505,13 @@ sntp_name_resolved(
 			++n_pending_ntp;
 
 			/* If this is for a unicast IP, queue a request */
-			if (dctx->flags & CTX_UCST)
+			if (dctx->flags & CTX_UCST) {
+				spkt = emalloc_zero(sizeof(*spkt));
+				spkt->dctx = dctx;
+				octets = min(ai->ai_addrlen, sizeof(spkt->addr));
+				memcpy(&spkt->addr, ai->ai_addr, octets);
 				queue_xmt(sock, dctx, spkt, xmt_delay);
+			}
 		}
 	}
 	/* n_pending_dns really should be >0 here... */
@@ -819,7 +819,7 @@ sock_cb(
 	}
 
 	/* Read in the packet */
-	rpktl = recvdata(fd, &sender, &r_pkt, sizeof(rbuf));
+	rpktl = recvdata(fd, &sender, &rbuf, sizeof(rbuf));
 	if (rpktl < 0) {
 		msyslog(LOG_DEBUG, "recvfrom error %m");
 		return;

@@ -49,56 +49,7 @@ void	format_errmsg	(char *, size_t, const char *, int);
 # endif
 
 
-/*
- * errno_to_str() - a thread-safe strerror() replacement.
- *		    Hides the varied signatures of strerror_r().
- *		    For Windows, we have:
- *			#define errno_to_str isc_strerror
- */
-# ifndef errno_to_str
-void
-errno_to_str(
-	int	err,
-	char *	buf,
-	size_t	bufsiz
-	)
-{
-#  if defined(STRERROR_R_CHAR_P) || !HAVE_DECL_STRERROR_R
-	char *	pstatic;
-
-	buf[0] = '\0';
-#   ifdef STRERROR_R_CHAR_P
-	/*
-	 * For older GNU strerror_r, the return value either points to
-	 * buf, or to static storage.  We want the result always in buf
-	 */
-	pstatic = strerror_r(err, buf, bufsiz);
-#   else
-	pstatic = strerror(err);
-#   endif
-	if (NULL == pstatic && '\0' == buf[0])
-		snprintf(buf, bufsiz, "%s(%d): errno %d",
-#   ifdef STRERROR_R_CHAR_P
-			 "strerror_r",
-#   else
-			 "strerror",
-#   endif
-			 err, errno);
-	/* protect against believing an int return is a pointer */
-	else if (pstatic != buf && pstatic > (char *)bufsiz)
-		strlcpy(buf, pstatic, bufsiz);
-#  else
-	int	rc;
-
-	rc = strerror_r(err, buf, bufsiz);
-	if (rc < 0)
-		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
-			 err, errno);
-#  endif
-}
-# endif	/* errno_to_str */
-
-
+/* format_errmsg() is under #ifndef VSNPRINTF_PERCENT_M above */
 void
 format_errmsg(
 	char *		nfmt,
@@ -139,6 +90,56 @@ format_errmsg(
 	*n = '\0';
 }
 #endif	/* VSNPRINTF_PERCENT_M */
+
+
+/*
+ * errno_to_str() - a thread-safe strerror() replacement.
+ *		    Hides the varied signatures of strerror_r().
+ *		    For Windows, we have:
+ *			#define errno_to_str isc_strerror
+ */
+#ifndef errno_to_str
+void
+errno_to_str(
+	int	err,
+	char *	buf,
+	size_t	bufsiz
+	)
+{
+# if defined(STRERROR_R_CHAR_P) || !HAVE_DECL_STRERROR_R
+	char *	pstatic;
+
+	buf[0] = '\0';
+#  ifdef STRERROR_R_CHAR_P
+	/*
+	 * For older GNU strerror_r, the return value either points to
+	 * buf, or to static storage.  We want the result always in buf
+	 */
+	pstatic = strerror_r(err, buf, bufsiz);
+#  else
+	pstatic = strerror(err);
+#  endif
+	if (NULL == pstatic && '\0' == buf[0])
+		snprintf(buf, bufsiz, "%s(%d): errno %d",
+#  ifdef STRERROR_R_CHAR_P
+			 "strerror_r",
+#  else
+			 "strerror",
+#  endif
+			 err, errno);
+	/* protect against believing an int return is a pointer */
+	else if (pstatic != buf && pstatic > (char *)bufsiz)
+		strlcpy(buf, pstatic, bufsiz);
+# else
+	int	rc;
+
+	rc = strerror_r(err, buf, bufsiz);
+	if (rc < 0)
+		snprintf(buf, bufsiz, "strerror_r(%d): errno %d",
+			 err, errno);
+# endif
+}
+#endif	/* errno_to_str */
 
 
 /*
@@ -225,9 +226,11 @@ mvsnprintf(
 	)
 {
 #ifndef VSNPRINTF_PERCENT_M
-	char	nfmt[256];
+	char		nfmt[256];
+#else
+	const char *	nfmt = fmt;
 #endif
-	int	errval;
+	int		errval;
 
 	/*
 	 * Save the error value as soon as possible
@@ -255,9 +258,11 @@ mvfprintf(
 	)
 {
 #ifndef VSNPRINTF_PERCENT_M
-	char	nfmt[256];
+	char		nfmt[256];
+#else
+	const char *	nfmt = fmt;
 #endif
-	int	errval;
+	int		errval;
 
 	/*
 	 * Save the error value as soon as possible
