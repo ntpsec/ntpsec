@@ -1,3 +1,22 @@
+commit d28fc52815023113840fb9e108ada0126964a799
+Merge: bfdda26 2e9f665
+Author: Nick Mathewson <nickm@torproject.org>
+Date:   Thu Apr 14 14:20:09 2011 -0400
+
+    Merge remote-tracking branch 'origin/patches-2.0'
+
+commit 2e9f66554897279f9aae2ce5a3933b99b6e08e38
+Author: Nick Mathewson <nickm@torproject.org>
+Date:   Thu Apr 14 14:15:13 2011 -0400
+
+    Fix a couple of memory leaks in samples/http-server.c. Found by Dave Hart.
+
+commit 3417f6808d4c86b02148cde4f7a32b18d8d260b4
+Author: Nick Mathewson <nickm@torproject.org>
+Date:   Wed Apr 13 11:20:30 2011 -0400
+
+    Avoid a free(NULL) if out-of-memory in evdns_getaddrinfo. Found by Dave Hart
+
 commit bfdda26534ea66b847760720260a4b4d8fcefe58
 Merge: d7c0ffa 1a21d7b
 Author: Nick Mathewson <nickm@torproject.org>
