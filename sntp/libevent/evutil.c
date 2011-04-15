@@ -25,8 +25,7 @@
  */
 
 #include "event2/event-config.h"
-
-#define _GNU_SOURCE
+#include "evconfig-private.h"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -351,6 +350,8 @@ evutil_strtoll(const char *s, char **endptr, int base)
 	r = (ev_int64_t) _atoi64(s);
 	while (isspace(*s))
 		++s;
+	if (*s == '-')
+		++s;
 	while (isdigit(*s))
 		++s;
 	if (endptr)
@@ -358,32 +359,77 @@ evutil_strtoll(const char *s, char **endptr, int base)
 	return r;
 #elif defined(WIN32)
 	return (ev_int64_t) _strtoi64(s, endptr, base);
+#elif defined(_EVENT_SIZEOF_LONG_LONG) && _EVENT_SIZEOF_LONG_LONG == 8
+	long long r;
+	int n;
+	if (base != 10 && base != 16)
+		return 0;
+	if (base == 10) {
+		n = sscanf(s, "%lld", &r);
+	} else {
+		unsigned long long ru=0;
+		n = sscanf(s, "%llx", &ru);
+		if (ru > EV_INT64_MAX)
+			return 0;
+		r = (long long) ru;
+	}
+	if (n != 1)
+		return 0;
+	while (EVUTIL_ISSPACE(*s))
+		++s;
+	if (*s == '-')
+		++s;
+	if (base == 10) {
+		while (EVUTIL_ISDIGIT(*s))
+			++s;
+	} else {
+		while (EVUTIL_ISXDIGIT(*s))
+			++s;
+	}
+	if (endptr)
+		*endptr = (char*) s;
+	return r;
 #else
 #error "I don't know how to parse 64-bit integers."
 #endif
 }
 
 #ifndef _EVENT_HAVE_GETTIMEOFDAY
-/* No gettimeofday; this muse be windows. */
+/* No gettimeofday; this must be windows. */
 int
 evutil_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-	struct _timeb tb;
+#ifdef _MSC_VER
+#define U64_LITERAL(n) n##ui64
+#else
+#define U64_LITERAL(n) n##llu
+#endif
+
+	/* Conversion logic taken from Tor, which in turn took it
+	 * from Perl.  GetSystemTimeAsFileTime returns its value as
+	 * an unaligned (!) 64-bit value containing the number of
+	 * 100-nanosecond intervals since 1 January 1601 UTC. */
+#define EPOCH_BIAS U64_LITERAL(116444736000000000)
+#define UNITS_PER_SEC U64_LITERAL(10000000)
+#define USEC_PER_SEC U64_LITERAL(1000000)
+#define UNITS_PER_USEC U64_LITERAL(10)
+	union {
+		FILETIME ft_ft;
+		ev_uint64_t ft_64;
+	} ft;
 
 	if (tv == NULL)
 		return -1;
 
-	/* XXXX
-	 * _ftime is not the greatest interface here; GetSystemTimeAsFileTime
-	 * would give us better resolution, whereas something cobbled together
-	 * with GetTickCount could maybe give us monotonic behavior.
-	 *
-	 * Either way, I think this value might be skewed to ignore the
-	 * timezone, and just return local time.  That's not so good.
-	 */
-	_ftime(&tb);
-	tv->tv_sec = (long) tb.time;
-	tv->tv_usec = ((int) tb.millitm) * 1000;
+	GetSystemTimeAsFileTime(&ft.ft_ft);
+
+	if (EVUTIL_UNLIKELY(ft.ft_64 < EPOCH_BIAS)) {
+		/* Time before the unix epoch. */
+		return -1;
+	}
+	ft.ft_64 -= EPOCH_BIAS;
+	tv->tv_sec = (long) (ft.ft_64 / UNITS_PER_SEC);
+	tv->tv_usec = (long) ((ft.ft_64 / UNITS_PER_USEC) % USEC_PER_SEC);
 	return 0;
 }
 #endif
@@ -479,6 +525,15 @@ evutil_socket_finished_connecting(evutil_socket_t fd)
    set by evutil_check_interfaces. */
 static int have_checked_interfaces, had_ipv4_address, had_ipv6_address;
 
+/* Macro: True iff the IPv4 address 'addr', in host order, is in 127.0.0.0/8
+ */
+#define EVUTIL_V4ADDR_IS_LOCALHOST(addr) (((addr)>>24) == 127)
+
+/* Macro: True iff the IPv4 address 'addr', in host order, is a class D
+ * (multiclass) address.
+ */
+#define EVUTIL_V4ADDR_IS_CLASSD(addr) ((((addr)>>24) & 0xf0) == 0xe0)
+
 /* Test whether we have an ipv4 interface and an ipv6 interface.  Return 0 if
  * the test seemed successful. */
 static int
@@ -522,8 +577,9 @@ evutil_check_interfaces(int force_recheck)
 	    getsockname(fd, (struct sockaddr*)&sin_out, &sin_out_len) == 0) {
 		/* We might have an IPv4 interface. */
 		ev_uint32_t addr = ntohl(sin_out.sin_addr.s_addr);
-		if (addr == 0 || (addr&0xff000000) == 127 ||
-		    (addr & 0xff) == 255 || (addr & 0xf0) == 14) {
+		if (addr == 0 ||
+		    EVUTIL_V4ADDR_IS_LOCALHOST(addr) ||
+		    EVUTIL_V4ADDR_IS_CLASSD(addr)) {
 			evutil_inet_ntop(AF_INET, &sin_out.sin_addr,
 			    buf, sizeof(buf));
 			/* This is a reserved, ipv4compat, ipv4map, loopback,
@@ -721,6 +777,10 @@ evutil_getaddrinfo_infer_protocols(struct evutil_addrinfo *hints)
 	}
 }
 
+#if AF_UNSPEC != PF_UNSPEC
+#error "I cannot build on a system where AF_UNSPEC != PF_UNSPEC"
+#endif
+
 /** Implements the part of looking up hosts by name that's common to both
  * the blocking and nonblocking resolver:
  *   - Adjust 'hints' to have a reasonable socktype and protocol.
@@ -771,7 +831,7 @@ evutil_getaddrinfo_common(const char *nodename, const char *servname,
 			memset(&sin6, 0, sizeof(sin6));
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port = htons(port);
-			if (hints->ai_flags & AI_PASSIVE) {
+			if (hints->ai_flags & EVUTIL_AI_PASSIVE) {
 				/* Bind to :: */
 			} else {
 				/* connect to ::1 */
@@ -788,7 +848,7 @@ evutil_getaddrinfo_common(const char *nodename, const char *servname,
 			memset(&sin, 0, sizeof(sin));
 			sin.sin_family = AF_INET;
 			sin.sin_port = htons(port);
-			if (hints->ai_flags & AI_PASSIVE) {
+			if (hints->ai_flags & EVUTIL_AI_PASSIVE) {
 				/* Bind to 0.0.0.0 */
 			} else {
 				/* connect to 127.0.0.1 */
@@ -958,8 +1018,13 @@ addrinfo_from_hostent(const struct hostent *ent,
 		res = evutil_addrinfo_append(res, ai);
 	}
 
-	if (res && ((hints->ai_flags & EVUTIL_AI_CANONNAME) && ent->h_name))
+	if (res && ((hints->ai_flags & EVUTIL_AI_CANONNAME) && ent->h_name)) {
 		res->ai_canonname = mm_strdup(ent->h_name);
+		if (res->ai_canonname == NULL) {
+			evutil_freeaddrinfo(res);
+			return NULL;
+		}
+	}
 
 	return res;
 }
@@ -1083,7 +1148,7 @@ apply_numeric_port_hack(int port, struct evutil_addrinfo **ai)
 	}
 }
 
-static void
+static int
 apply_socktype_protocol_hack(struct evutil_addrinfo *ai)
 {
 	struct evutil_addrinfo *ai_new;
@@ -1092,6 +1157,8 @@ apply_socktype_protocol_hack(struct evutil_addrinfo *ai)
 		if (ai->ai_socktype || ai->ai_protocol)
 			continue;
 		ai_new = mm_malloc(sizeof(*ai_new));
+		if (!ai_new)
+			return -1;
 		memcpy(ai_new, ai, sizeof(*ai_new));
 		ai->ai_socktype = SOCK_STREAM;
 		ai->ai_protocol = IPPROTO_TCP;
@@ -1101,6 +1168,7 @@ apply_socktype_protocol_hack(struct evutil_addrinfo *ai)
 		ai_new->ai_next = ai->ai_next;
 		ai->ai_next = ai_new;
 	}
+	return 0;
 }
 #endif
 
@@ -1191,7 +1259,11 @@ evutil_getaddrinfo(const char *nodename, const char *servname,
 		apply_numeric_port_hack(portnum, res);
 
 	if (need_socktype_protocol_hack()) {
-		apply_socktype_protocol_hack(*res);
+		if (apply_socktype_protocol_hack(*res) < 0) {
+			evutil_freeaddrinfo(*res);
+			*res = NULL;
+			return EVUTIL_EAI_MEMORY;
+		}
 	}
 	return err;
 #else

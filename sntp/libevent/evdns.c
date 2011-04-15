@@ -34,8 +34,10 @@
  * Version: 0.1b
  */
 
-#include <sys/types.h>
 #include "event2/event-config.h"
+#include "evconfig-private.h"
+
+#include <sys/types.h>
 
 #ifndef _FORTIFY_SOURCE
 #define _FORTIFY_SOURCE 3
@@ -3069,6 +3071,10 @@ search_request_new(struct evdns_base *base, struct evdns_request *handle,
 		}
 		EVUTIL_ASSERT(handle->search_origname == NULL);
 		handle->search_origname = mm_strdup(name);
+		if (handle->search_origname == NULL) {
+			/* XXX Should we dealloc req? If yes, how? */
+			return NULL;
+		}
 		handle->search_state = base->global_search_state;
 		handle->search_flags = flags;
 		base->global_search_state->refcount++;

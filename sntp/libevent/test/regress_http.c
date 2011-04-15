@@ -56,6 +56,7 @@
 #include "event2/http.h"
 #include "event2/buffer.h"
 #include "event2/bufferevent.h"
+#include "event2/util.h"
 #include "log-internal.h"
 #include "util-internal.h"
 #include "http-internal.h"
@@ -128,38 +129,23 @@ static evutil_socket_t
 http_connect(const char *address, u_short port)
 {
 	/* Stupid code for connecting */
-#ifdef WIN32
-	struct hostent *he;
-	struct sockaddr_in sin;
-#else
-	struct addrinfo ai, *aitop;
+	struct evutil_addrinfo ai, *aitop;
 	char strport[NI_MAXSERV];
-#endif
+
 	struct sockaddr *sa;
 	int slen;
 	evutil_socket_t fd;
 
-#ifdef WIN32
-	if (!(he = gethostbyname(address))) {
-		event_warn("gethostbyname");
-	}
-	memcpy(&sin.sin_addr, he->h_addr_list[0], he->h_length);
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(port);
-	slen = sizeof(struct sockaddr_in);
-	sa = (struct sockaddr*)&sin;
-#else
 	memset(&ai, 0, sizeof(ai));
 	ai.ai_family = AF_INET;
 	ai.ai_socktype = SOCK_STREAM;
 	evutil_snprintf(strport, sizeof(strport), "%d", port);
-	if (getaddrinfo(address, strport, &ai, &aitop) != 0) {
+	if (evutil_getaddrinfo(address, strport, &ai, &aitop) != 0) {
 		event_warn("getaddrinfo");
 		return (-1);
 	}
 	sa = aitop->ai_addr;
 	slen = aitop->ai_addrlen;
-#endif
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd == -1)
@@ -178,9 +164,7 @@ http_connect(const char *address, u_short port)
 #endif
 	}
 
-#ifndef WIN32
-	freeaddrinfo(aitop);
-#endif
+	evutil_freeaddrinfo(aitop);
 
 	return (fd);
 }
@@ -2006,8 +1990,13 @@ end:
 static void
 http_parse_uri_test(void *ptr)
 {
+	const int nonconform = (ptr != NULL);
+	const unsigned parse_flags =
+	    nonconform ? EVHTTP_URI_NONCONFORMANT : 0;
 	struct evhttp_uri *uri = NULL;
 	char url_tmp[4096];
+#define URI_PARSE(uri) \
+	evhttp_uri_parse_with_flags((uri), parse_flags)
 
 #define TT_URI(want) do { 						\
 	char *ret = evhttp_uri_join(uri, url_tmp, sizeof(url_tmp));	\
@@ -2023,21 +2012,37 @@ http_parse_uri_test(void *ptr)
 
 	/* bad URIs: parsing */
 #define BAD(s) do {							\
-		if (evhttp_uri_parse(s) != NULL)			\
+		if (URI_PARSE(s) != NULL)				\
 			TT_FAIL(("Expected error parsing \"%s\"",s));	\
 	} while(0)
-	BAD("http://www.test.com/ why hello");
-	BAD("http://www.test.com/why-hello\x01");
-	BAD("http://www.test.com/why-hello?\x01");
-	BAD("http://www.test.com/why-hello#\x01");
+	/* Nonconformant URIs we can parse: parsing */
+#define NCF(s) do {							\
+		uri = URI_PARSE(s);					\
+		if (uri != NULL && !nonconform) {			\
+			TT_FAIL(("Expected error parsing \"%s\"",s));	\
+		} else if (uri == NULL && nonconform) {			\
+			TT_FAIL(("Couldn't parse nonconformant URI \"%s\"", \
+				s));					\
+		}							\
+		if (uri) {						\
+			tt_want(evhttp_uri_join(uri, url_tmp,		\
+				sizeof(url_tmp)));			\
+			evhttp_uri_free(uri);				\
+		}							\
+	} while(0)
+
+	NCF("http://www.test.com/ why hello");
+	NCF("http://www.test.com/why-hello\x01");
+	NCF("http://www.test.com/why-hello?\x01");
+	NCF("http://www.test.com/why-hello#\x01");
 	BAD("http://www.\x01.test.com/why-hello");
 	BAD("http://www.%7test.com/why-hello");
-	BAD("http://www.test.com/why-hell%7o");
+	NCF("http://www.test.com/why-hell%7o");
 	BAD("h%3ttp://www.test.com/why-hello");
-	BAD("http://www.test.com/why-hello%7");
-	BAD("http://www.test.com/why-hell%7o");
-	BAD("http://www.test.com/foo?ba%r");
-	BAD("http://www.test.com/foo#ba%r");
+	NCF("http://www.test.com/why-hello%7");
+	NCF("http://www.test.com/why-hell%7o");
+	NCF("http://www.test.com/foo?ba%r");
+	NCF("http://www.test.com/foo#ba%r");
 	BAD("99:99/foo");
 	BAD("http://www.test.com:999x/");
 	BAD("http://www.test.com:x/");
@@ -2073,7 +2078,7 @@ http_parse_uri_test(void *ptr)
 	tt_want(evhttp_uri_join(uri, NULL, sizeof(url_tmp))==NULL);
 	tt_want(evhttp_uri_join(uri, url_tmp, 0)==NULL);
 	evhttp_uri_free(uri);
-	uri = evhttp_uri_parse("mailto:foo@bar");
+	uri = URI_PARSE("mailto:foo@bar");
 	tt_want(uri != NULL);
 	tt_want(evhttp_uri_get_host(uri) == NULL);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
@@ -2125,7 +2130,7 @@ http_parse_uri_test(void *ptr)
 	evhttp_uri_free(uri);
 
 	/* Valid parsing */
-	uri = evhttp_uri_parse("http://www.test.com/?q=t%33est");
+	uri = URI_PARSE("http://www.test.com/?q=t%33est");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "www.test.com") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2136,7 +2141,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://www.test.com/?q=t%33est");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://%77ww.test.com");
+	uri = URI_PARSE("http://%77ww.test.com");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "%77ww.test.com") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "") == 0);
@@ -2147,7 +2152,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://%77ww.test.com");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://www.test.com?q=test");
+	uri = URI_PARSE("http://www.test.com?q=test");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "www.test.com") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "") == 0);
@@ -2158,7 +2163,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://www.test.com?q=test");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://www.test.com#fragment");
+	uri = URI_PARSE("http://www.test.com#fragment");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "www.test.com") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "") == 0);
@@ -2169,7 +2174,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://www.test.com#fragment");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://8000/");
+	uri = URI_PARSE("http://8000/");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "8000") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2180,7 +2185,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://8000/");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://:8000/");
+	uri = URI_PARSE("http://:8000/");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2191,7 +2196,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://:8000/");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://www.test.com:/"); /* empty port */
+	uri = URI_PARSE("http://www.test.com:/"); /* empty port */
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "www.test.com") == 0);
 	tt_want_str_op(evhttp_uri_get_path(uri), ==, "/");
@@ -2202,7 +2207,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://www.test.com/");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("http://www.test.com:"); /* empty port 2 */
+	uri = URI_PARSE("http://www.test.com:"); /* empty port 2 */
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "http") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "www.test.com") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "") == 0);
@@ -2213,7 +2218,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("http://www.test.com");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("ftp://www.test.com/?q=test");
+	uri = URI_PARSE("ftp://www.test.com/?q=test");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "ftp") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "www.test.com") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2224,7 +2229,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("ftp://www.test.com/?q=test");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("ftp://[::1]:999/?q=test");
+	uri = URI_PARSE("ftp://[::1]:999/?q=test");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "ftp") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "[::1]") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2235,7 +2240,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("ftp://[::1]:999/?q=test");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("ftp://[ff00::127.0.0.1]/?q=test");
+	uri = URI_PARSE("ftp://[ff00::127.0.0.1]/?q=test");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "ftp") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "[ff00::127.0.0.1]") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2246,7 +2251,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("ftp://[ff00::127.0.0.1]/?q=test");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("ftp://[v99.not_(any:time)_soon]/?q=test");
+	uri = URI_PARSE("ftp://[v99.not_(any:time)_soon]/?q=test");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "ftp") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "[v99.not_(any:time)_soon]") == 0);
 	tt_want(strcmp(evhttp_uri_get_path(uri), "/") == 0);
@@ -2257,7 +2262,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("ftp://[v99.not_(any:time)_soon]/?q=test");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("scheme://user:pass@foo.com:42/?q=test&s=some+thing#fragment");
+	uri = URI_PARSE("scheme://user:pass@foo.com:42/?q=test&s=some+thing#fragment");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "scheme") == 0);
 	tt_want(strcmp(evhttp_uri_get_userinfo(uri), "user:pass") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "foo.com") == 0);
@@ -2268,7 +2273,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("scheme://user:pass@foo.com:42/?q=test&s=some+thing#fragment");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("scheme://user@foo.com/#fragment");
+	uri = URI_PARSE("scheme://user@foo.com/#fragment");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "scheme") == 0);
 	tt_want(strcmp(evhttp_uri_get_userinfo(uri), "user") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "foo.com") == 0);
@@ -2279,7 +2284,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("scheme://user@foo.com/#fragment");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("scheme://%75ser@foo.com/#frag@ment");
+	uri = URI_PARSE("scheme://%75ser@foo.com/#frag@ment");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "scheme") == 0);
 	tt_want(strcmp(evhttp_uri_get_userinfo(uri), "%75ser") == 0);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "foo.com") == 0);
@@ -2290,7 +2295,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("scheme://%75ser@foo.com/#frag@ment");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("file:///some/path/to/the/file");
+	uri = URI_PARSE("file:///some/path/to/the/file");
 	tt_want(strcmp(evhttp_uri_get_scheme(uri), "file") == 0);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
 	tt_want(strcmp(evhttp_uri_get_host(uri), "") == 0);
@@ -2301,7 +2306,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("file:///some/path/to/the/file");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("///some/path/to/the-file");
+	uri = URI_PARSE("///some/path/to/the-file");
 	tt_want(uri != NULL);
 	tt_want(evhttp_uri_get_scheme(uri) == NULL);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
@@ -2313,7 +2318,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("///some/path/to/the-file");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("/s:ome/path/to/the-file?q=99#fred");
+	uri = URI_PARSE("/s:ome/path/to/the-file?q=99#fred");
 	tt_want(uri != NULL);
 	tt_want(evhttp_uri_get_scheme(uri) == NULL);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
@@ -2325,7 +2330,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("/s:ome/path/to/the-file?q=99#fred");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("relative/path/with/co:lon");
+	uri = URI_PARSE("relative/path/with/co:lon");
 	tt_want(uri != NULL);
 	tt_want(evhttp_uri_get_scheme(uri) == NULL);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
@@ -2337,7 +2342,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("relative/path/with/co:lon");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("bob?q=99&q2=q?33#fr?ed");
+	uri = URI_PARSE("bob?q=99&q2=q?33#fr?ed");
 	tt_want(uri != NULL);
 	tt_want(evhttp_uri_get_scheme(uri) == NULL);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
@@ -2349,7 +2354,7 @@ http_parse_uri_test(void *ptr)
 	TT_URI("bob?q=99&q2=q?33#fr?ed");
 	evhttp_uri_free(uri);
 
-	uri = evhttp_uri_parse("#fr?ed");
+	uri = URI_PARSE("#fr?ed");
 	tt_want(uri != NULL);
 	tt_want(evhttp_uri_get_scheme(uri) == NULL);
 	tt_want(evhttp_uri_get_userinfo(uri) == NULL);
@@ -2360,6 +2365,9 @@ http_parse_uri_test(void *ptr)
 	tt_want(strcmp(evhttp_uri_get_fragment(uri), "fr?ed") == 0);
 	TT_URI("#fr?ed");
 	evhttp_uri_free(uri);
+#undef URI_PARSE
+#undef TT_URI
+#undef BAD
 }
 
 static void
@@ -3505,6 +3513,7 @@ struct testcase_t http_testcases[] = {
 	{ "bad_headers", http_bad_header_test, 0, NULL, NULL },
 	{ "parse_query", http_parse_query_test, 0, NULL, NULL },
 	{ "parse_uri", http_parse_uri_test, 0, NULL, NULL },
+	{ "parse_uri_nc", http_parse_uri_test, 0, &basic_setup, (void*)"nc" },
 	{ "uriencode", http_uriencode_test, 0, NULL, NULL },
 	HTTP(basic),
 	HTTP(cancel),
