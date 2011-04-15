@@ -1,3 +1,4 @@
+* Update embedded libevent to current 2.1 git HEAD.
 (4.2.7p151) 2011/04/14 Released by Harlan Stenn <stenn@ntp.org>
 * Detect vsnprintf() support for "%m" and disable our "%m" expansion.
 * Add --enable-c99-sprintf to configure args for -noopenssl variety of
