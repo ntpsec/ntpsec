@@ -32,7 +32,9 @@ extern "C" {
 #endif
 
 #include "event2/event-config.h"
-#include <time.h>			/* for CLOCK_MONOTONIC */
+#include "evconfig-private.h"
+
+#include <time.h>
 #include <sys/queue.h>
 #include "event2/event_struct.h"
 #include "minheap-internal.h"
@@ -236,13 +238,16 @@ struct event_base {
 	/** Priority queue of events with timeouts. */
 	struct min_heap timeheap;
 
-	/** Stored timevals: used to avoid calling gettimeofday/getclock too
-	 * often.  tv_cache uses the internal timeline, which may be getclock
-	 * CLOCK_MONOTONIC or gettimeofday.  tod_tv_cache always is from
-	 * gettimeofday. */
+	/** Stored timeval: used to avoid calling gettimeofday/clock_gettime
+	 * too often. */
 	struct timeval tv_cache;
+
 #if defined(_EVENT_HAVE_CLOCK_GETTIME) && defined(CLOCK_MONOTONIC)
-	struct timeval tod_tv_cache;
+	/** Difference between internal time (maybe from clock_gettime) and
+	 * gettimeofday. */
+	struct timeval tv_clock_diff;
+	/** Second in which we last updated tv_clock_diff, in monotonic time. */
+	time_t last_updated_clock_diff;
 #endif
 
 #ifndef _EVENT_DISABLE_THREAD_SUPPORT

@@ -25,6 +25,7 @@
  */
 
 #include "event2/event-config.h"
+#include "evconfig-private.h"
 
 #ifndef _EVENT_DISABLE_THREAD_SUPPORT
 
@@ -155,6 +156,7 @@ debug_lock_free(void *lock_, unsigned locktype)
 	}
 	lock->lock = NULL;
 	lock->count = -100;
+	lock->signature = 0x12300fda;
 	mm_free(lock);
 }
 

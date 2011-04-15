@@ -25,9 +25,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-
 #include "event2/event-config.h"
+#include "evconfig-private.h"
+
+#include <sys/types.h>
 
 #ifdef _EVENT_HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -472,6 +473,24 @@ bufferevent_settimeout(struct bufferevent *bufev,
 	bufferevent_set_timeouts(bufev, ptv_read, ptv_write);
 }
 
+
+int
+bufferevent_disable_hard(struct bufferevent *bufev, short event)
+{
+	int r = 0;
+	struct bufferevent_private *bufev_private =
+	    EVUTIL_UPCAST(bufev, struct bufferevent_private, bev);
+
+	BEV_LOCK(bufev);
+	bufev->enabled &= ~event;
+
+	bufev_private->connecting = 0;
+	if (bufev->be_ops->disable(bufev, event) < 0)
+		r = -1;
+
+	BEV_UNLOCK(bufev);
+	return r;
+}
 
 int
 bufferevent_disable(struct bufferevent *bufev, short event)

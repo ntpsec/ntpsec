@@ -41,7 +41,8 @@
 # endif
 #endif
 
-#include <../util-internal.h>
+/* Compatibility for possible missing IPv6 declarations */
+#include "../util-internal.h"
 
 #ifdef WIN32
 #define stat _stat
