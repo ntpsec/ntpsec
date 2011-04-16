@@ -35,6 +35,7 @@
 #include <isc/util.h>
 
 #include "errno2result.h"
+#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define ISC_DIR_MAGIC		ISC_MAGIC('D', 'I', 'R', '*')
 #define VALID_DIR(dir)		ISC_MAGIC_VALID(dir, ISC_DIR_MAGIC)
@@ -58,6 +59,7 @@ isc_dir_init(isc_dir_t *dir) {
 isc_result_t
 isc_dir_open(isc_dir_t *dir, const char *dirname) {
 	char *p;
+	size_t octets;
 	isc_result_t result = ISC_R_SUCCESS;
 
 	REQUIRE(VALID_DIR(dir));
@@ -67,10 +69,11 @@ isc_dir_open(isc_dir_t *dir, const char *dirname) {
 	 * Copy directory name.  Need to have enough space for the name,
 	 * a possible path separator, the wildcard, and the final NUL.
 	 */
-	if (strlen(dirname) + 3 > sizeof(dir->dirname))
+	octets = strlen(dirname) + 1;
+	if (octets + 2 > sizeof(dir->dirname))
 		/* XXXDCL ? */
 		return (ISC_R_NOSPACE);
-	strcpy(dir->dirname, dirname);
+	strlcpy(dir->dirname, dirname, octets);
 
 	/*
 	 * Append path separator, if needed, and "*".
@@ -102,6 +105,7 @@ isc_dir_open(isc_dir_t *dir, const char *dirname) {
 isc_result_t
 isc_dir_read(isc_dir_t *dir) {
 	struct dirent *entry;
+	size_t octets;
 
 	REQUIRE(VALID_DIR(dir) && dir->handle != NULL);
 
@@ -116,10 +120,11 @@ isc_dir_read(isc_dir_t *dir) {
 	/*
 	 * Make sure that the space for the name is long enough.
 	 */
-	if (sizeof(dir->entry.name) <= strlen(entry->d_name))
-	    return (ISC_R_UNEXPECTED);
+	octets = strlen(entry->d_name) + 1;
+	if (sizeof(dir->entry.name) < octets)
+		return (ISC_R_UNEXPECTED);
 
-	strcpy(dir->entry.name, entry->d_name);
+	strlcpy(dir->entry.name, entry->d_name, octets);
 
 	/*
 	 * Some dirents have d_namlen, but it is not portable.

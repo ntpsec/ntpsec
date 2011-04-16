@@ -220,6 +220,7 @@ datum_pts_start(
 	struct datum_pts_unit *datum_pts;
 	int fd;
 #ifdef HAVE_TERMIOS
+	int rc;
 	struct termios arg;
 #endif
 
@@ -273,7 +274,12 @@ datum_pts_start(
 	arg.c_cc[VMIN] = 0;		/* start timeout timer right away (not used) */
 	arg.c_cc[VTIME] = 30;		/* 3 second timout on reads (not used) */
 
-	tcsetattr(datum_pts->PTS_fd, TCSANOW, &arg);
+	rc = tcsetattr(datum_pts->PTS_fd, TCSANOW, &arg);
+	if (rc < 0) {
+		msyslog(LOG_ERR, "Datum_PTS: tcsetattr(\"%s\") failed: %m", DATUM_DEV);
+		close(datum_pts->PTS_fd);
+		return 0;
+	}
 
 	/*
 	** Initialize the ntpd IO structure

@@ -151,7 +151,7 @@ icom_init(
 	ttyb.c_cc[VTIME] = 5;	/* receive timeout */
 	cfsetispeed(&ttyb, (u_int)speed);
 	cfsetospeed(&ttyb, (u_int)speed);
-	tcsetattr(fd, TCSANOW, &ttyb);
+	rc = tcsetattr(fd, TCSANOW, &ttyb);
 	if (rc < 0) {
 		saved_errno = errno;
 		close(fd);

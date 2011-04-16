@@ -205,9 +205,11 @@ send_blocking_req_internal(
 	blocking_pipe_header *	threadcopy;
 
 	REQUIRE(hdr != NULL);
-	REQUIRE(hdr->octets > sizeof(*hdr));
 	REQUIRE(data != NULL);
 	DEBUG_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
+
+	if (sizeof(*hdr) < hdr->octets)
+		return 1;	/* failure */
 
 	ensure_workitems_empty_slot(c);
 	if (NULL == c->thread_ref) {

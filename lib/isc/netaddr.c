@@ -31,6 +31,7 @@
 #include <isc/sockaddr.h>
 #include <isc/string.h>
 #include <isc/util.h>
+#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 isc_boolean_t
 isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {
@@ -308,7 +309,7 @@ isc_netaddr_frompath(isc_netaddr_t *netaddr, const char *path) {
 
         memset(netaddr, 0, sizeof(*netaddr));
         netaddr->family = AF_UNIX;
-        strcpy(netaddr->type.un, path);
+	strlcpy(netaddr->type.un, path, sizeof(netaddr->type.un));
         netaddr->zone = 0;
         return (ISC_R_SUCCESS);
 #else 

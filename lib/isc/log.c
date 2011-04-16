@@ -41,6 +41,7 @@
 #include <isc/string.h>
 #include <isc/time.h>
 #include <isc/util.h>
+#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define LCTX_MAGIC		ISC_MAGIC('L', 'c', 't', 'x')
 #define VALID_CONTEXT(lctx)	ISC_MAGIC_VALID(lctx, LCTX_MAGIC)
@@ -1408,6 +1409,7 @@ isc_log_doit(isc_log_t *lctx, isc_logcategory_t *category,
 	int syslog_level;
 	char time_string[64];
 	char level_string[24];
+	size_t octets;
 	const char *iformat;
 	struct stat statbuf;
 	isc_boolean_t matched = ISC_FALSE;
@@ -1618,16 +1620,17 @@ isc_log_doit(isc_log_t *lctx, isc_logcategory_t *category,
 				 * It wasn't in the duplicate interval,
 				 * so add it to the message list.
 				 */
+				octets = strlen(lctx->buffer) + 1;
 				new = isc_mem_get(lctx->mctx,
 						  sizeof(isc_logmessage_t) +
-						  strlen(lctx->buffer) + 1);
+						  octets);
 				if (new != NULL) {
 					/*
 					 * Put the text immediately after
 					 * the struct.  The strcpy is safe.
 					 */
 					new->text = (char *)(new + 1);
-					strcpy(new->text, lctx->buffer);
+					strlcpy(new->text, lctx->buffer, octets);
 
 					TIME_NOW(&new->time);
 

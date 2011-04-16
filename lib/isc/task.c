@@ -1019,14 +1019,16 @@ static void
 manager_free(isc_taskmgr_t *manager) {
 	isc_mem_t *mctx;
 
+	LOCK(&manager->lock);
 #ifdef ISC_PLATFORM_USETHREADS
 	(void)isc_condition_destroy(&manager->exclusive_granted);
 	(void)isc_condition_destroy(&manager->work_available);
 	isc_mem_free(manager->mctx, manager->threads);
 #endif /* ISC_PLATFORM_USETHREADS */
 	manager->magic = 0;
-	DESTROYLOCK(&manager->lock);
 	mctx = manager->mctx;
+	UNLOCK(&manager->lock);
+	DESTROYLOCK(&manager->lock);
 	isc_mem_put(mctx, manager, sizeof(*manager));
 	isc_mem_detach(&mctx);
 }

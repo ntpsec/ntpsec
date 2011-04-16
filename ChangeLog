@@ -1,3 +1,4 @@
+* A few more Coverity Scan cleanups.
 (4.2.7p152) 2011/04/15 Released by Harlan Stenn <stenn@ntp.org>
 * Update embedded libevent to current 2.1 git HEAD.
 (4.2.7p151) 2011/04/14 Released by Harlan Stenn <stenn@ntp.org>
