@@ -203,13 +203,15 @@ send_blocking_req_internal(
 	)
 {
 	blocking_pipe_header *	threadcopy;
+	size_t			payload_octets;
 
 	REQUIRE(hdr != NULL);
 	REQUIRE(data != NULL);
 	DEBUG_REQUIRE(BLOCKING_REQ_MAGIC == hdr->magic_sig);
 
-	if (sizeof(*hdr) < hdr->octets)
+	if (hdr->octets <= sizeof(*hdr))
 		return 1;	/* failure */
+	payload_octets = hdr->octets - sizeof(*hdr);
 
 	ensure_workitems_empty_slot(c);
 	if (NULL == c->thread_ref) {
@@ -219,8 +221,7 @@ send_blocking_req_internal(
 
 	threadcopy = emalloc(hdr->octets);
 	memcpy(threadcopy, hdr, sizeof(*hdr));
-	memcpy((char *)threadcopy + sizeof(*hdr),
-	       data, hdr->octets - sizeof(*hdr));
+	memcpy((char *)threadcopy + sizeof(*hdr), data, payload_octets);
 
 	return queue_req_pointer(c, threadcopy);
 }
