@@ -1,4 +1,5 @@
 * [Bug 1887] DNS fails on 4.2.7p153 using threads.
+* Fix leak in refclock_datum.c start failure path.
 (4.2.7p153) 2011/04/16 Released by Harlan Stenn <stenn@ntp.org>
 * A few more Coverity Scan cleanups.
 (4.2.7p152) 2011/04/15 Released by Harlan Stenn <stenn@ntp.org>

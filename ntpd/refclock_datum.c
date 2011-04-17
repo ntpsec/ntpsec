@@ -278,6 +278,7 @@ datum_pts_start(
 	if (rc < 0) {
 		msyslog(LOG_ERR, "Datum_PTS: tcsetattr(\"%s\") failed: %m", DATUM_DEV);
 		close(datum_pts->PTS_fd);
+		free(datum_pts);
 		return 0;
 	}
 
