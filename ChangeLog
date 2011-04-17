@@ -1,3 +1,4 @@
+(4.2.7p154) 2011/04/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1887] DNS fails on 4.2.7p153 using threads.
 (4.2.7p153) 2011/04/16 Released by Harlan Stenn <stenn@ntp.org>
 * A few more Coverity Scan cleanups.
