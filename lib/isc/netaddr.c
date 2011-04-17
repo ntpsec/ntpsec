@@ -31,7 +31,7 @@
 #include <isc/sockaddr.h>
 #include <isc/string.h>
 #include <isc/util.h>
-#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
+#include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 isc_boolean_t
 isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {

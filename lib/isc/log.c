@@ -41,7 +41,7 @@
 #include <isc/string.h>
 #include <isc/time.h>
 #include <isc/util.h>
-#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
+#include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define LCTX_MAGIC		ISC_MAGIC('L', 'c', 't', 'x')
 #define VALID_CONTEXT(lctx)	ISC_MAGIC_VALID(lctx, LCTX_MAGIC)

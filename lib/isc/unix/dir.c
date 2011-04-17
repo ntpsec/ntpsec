@@ -35,7 +35,7 @@
 #include <isc/util.h>
 
 #include "errno2result.h"
-#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
+#include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 #define ISC_DIR_MAGIC		ISC_MAGIC('D', 'I', 'R', '*')
 #define VALID_DIR(dir)		ISC_MAGIC_VALID(dir, ISC_DIR_MAGIC)

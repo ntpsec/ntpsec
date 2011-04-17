@@ -74,7 +74,7 @@
 #include <isc/util.h>
 
 #include "errno2result.h"
-#include "l_stdlib.h"		/* NTP change for strlcpy, strlcat */
+#include "ntp_stdlib.h"		/* NTP change for strlcpy, strlcat */
 
 /*
  * XXXDCL As the API for accessing file statistics undoubtedly gets expanded,
