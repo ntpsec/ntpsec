@@ -444,7 +444,6 @@ blocking_getaddrinfo(
 	 * make sure our walk and earlier calc match
 	 */
 	DEBUG_INSIST((size_t)(cp - (char *)resp) == resp_octets);
-	freeaddrinfo(ai_res);
 
 	if (queue_blocking_response(c, resp, resp_octets, req)) {
 		msyslog(LOG_ERR, "blocking_getaddrinfo can not queue response");
