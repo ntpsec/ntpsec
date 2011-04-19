@@ -358,7 +358,7 @@ blocking_getaddrinfo(
 #endif
 	canons_octets = 0;
 
-	if (!gai_resp->retcode) {
+	if (0 == gai_resp->retcode) {
 		ai = ai_res;
 		while (NULL != ai) {
 			gai_resp->ai_count++;
@@ -400,7 +400,7 @@ blocking_getaddrinfo(
 	cp = (void *)(gai_resp + 1);
 	canons_octets = 0;
 
-	if (!gai_resp->retcode) {
+	if (0 == gai_resp->retcode) {
 		ai = ai_res;
 		while (NULL != ai) {
 			memcpy(cp, ai, sizeof(*ai));
@@ -437,6 +437,7 @@ blocking_getaddrinfo(
 
 			ai = ai->ai_next;
 		}
+		freeaddrinfo(ai_res);
 	}
 
 	/*
@@ -505,7 +506,7 @@ getaddrinfo_sometime_complete(
 		/*
 		 * exponential backoff of DNS retries to 64s
 		 */
-		if (gai_req->retry && again) {
+		if (gai_req->retry > 0 && again) {
 			/* log the first retry only */
 			if (INITIAL_DNS_RETRY == gai_req->retry)
 				NLOG(NLOG_SYSINFO) {
@@ -745,7 +746,7 @@ blocking_getnameinfo(
 		gni_resp->gni_errno = errno;
 #endif
 
-	if (gni_resp->retcode) {
+	if (0 != gni_resp->retcode) {
 		gni_resp->hostoctets = 0;
 		gni_resp->servoctets = 0;
 	} else {
@@ -780,7 +781,7 @@ blocking_getnameinfo(
 	/* cp serves as our current pointer while serializing */
 	cp = (void *)(gni_resp + 1);
 
-	if (!gni_resp->retcode) {
+	if (0 == gni_resp->retcode) {
 		memcpy(cp, host, gni_resp->hostoctets);
 		cp += gni_resp->hostoctets;
 		memcpy(cp, service, gni_resp->servoctets);
@@ -840,12 +841,12 @@ getnameinfo_sometime_complete(
 		/*
 		 * exponential backoff of DNS retries to 64s
 		 */
-		if (gni_req->retry)
+		if (gni_req->retry > 0)
 			manage_dns_retry_interval(&gni_req->scheduled,
 			    &gni_req->earliest, &gni_req->retry,
 			    &child_ctx->next_dns_timeslot);
 
-		if (gni_req->retry && again) {
+		if (gni_req->retry > 0 && again) {
 			if (!queue_blocking_request(
 				BLOCKING_GETNAMEINFO,
 				gni_req,

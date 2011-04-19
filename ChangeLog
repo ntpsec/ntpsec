@@ -1,3 +1,4 @@
+* [Bug 1851] freeaddrinfo() called after getaddrinfo() fails.
 (4.2.7p155) 2011/04/18 Released by Harlan Stenn <stenn@ntp.org>
 * Fix leak in refclock_datum.c start failure path.
 (4.2.7p154) 2011/04/17 Released by Harlan Stenn <stenn@ntp.org>
