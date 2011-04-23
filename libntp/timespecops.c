@@ -8,17 +8,10 @@
 #include <config.h>
 #include <math.h>
 
-#include "lib_strbuf.h"
-#include "ntp_calendar.h"
-
 #include "timespecops.h"
 
-/* formatting to string needs at max 31 bytes (even with 64 bit time_t),
- * so we check LIB_BUFLENGTH is big enough for our pupose.
- */
-#if LIB_BUFLENGTH < 32
-#error LIB_BUFLENGTH not big enough
-#endif
+#include "timetoa.h"
+#include "ntp_calendar.h"
 
 /* make sure we have the right definition for NANOSECONDS */
 #undef NANOSECONDS
@@ -26,7 +19,7 @@
 
 /* conversion between l_fp fractions and nanoseconds */
 #if SIZEOF_LONG >= 8
-# define MYFTOTVN(tsf,tvu)						\
+# define MYFTOTVN(tsf, tvu)						\
 	((tvu) = (int32)						\
 		(((u_long)(tsf) * NANOSECONDS + 0x80000000) >> 32))
 # define MYTVNTOF(tvu, tsf)						\
@@ -38,20 +31,6 @@
 	((tvu) = (int32)floor((tsf) / 4.294967296 + 0.5))
 # define MYTVNTOF(tvu, tsf)						\
 	((tsf) = (u_int32)floor((tvu) * 4.294967296 + 0.5))
-#endif
-
-/* using snprintf is troublesome with time_t. Try to resolve it. */
-#if SIZEOF_TIME_T <= SIZEOF_INT
-typedef unsigned int u_time;
-#define TIMEFMT ""
-#elif SIZEOF_TIME_T <= SIZEOF_LONG
-typedef unsigned long u_time;
-#define TIMEFMT "l"
-#elif defined(SIZEOF_LONG_LONG) && SIZEOF_TIME_T <= SIZEOF_LONG_LONG
-typedef unsigned long long u_time;
-#define TIMEFMT "ll"
-#else
-#include "GRONK: what size has a time_t here?"
 #endif
 
 
@@ -75,7 +54,7 @@ timespec_norm(
 	 * involved. On the other hand, division by constant should be
 	 * fast enough; so we do a division of the nanoseconds in that
 	 * case. The floor adjustment step follows with the standard
-	 * normalisation loops.  And 'labs' is intentinally not used
+	 * normalisation loops.	 And 'labs' is intentinally not used
 	 * here: its has implementation defined behaviour when applied
 	 * to LONG_MIN. */
 	if (x->tv_nsec < -3l * NANOSECONDS ||
@@ -188,7 +167,7 @@ timespec_neg(
 
 /*
  * x = abs(a)
- * returns nonzero if negation was needed
+ * return value is nonzero if negation was needed
  */
 int
 timespec_abs(
@@ -216,7 +195,7 @@ timespec_abs(
 
 /*
  * compare previously-normalised a and b
- * return 1 / 0 / -1 if	 a < / == / > b
+ * return -1 / 0 / 1 if	 a < / == / > b
  */
 int
 timespec_cmp_fast(
@@ -236,7 +215,7 @@ timespec_cmp_fast(
 
 /*
  * compare possibly denormal a and b
- * return 1 / 0 / -1 if	 a < / == / > b
+ * return -1 / 0 / 1 if	 a < / == / > b
  */
 int
 timespec_cmp(
@@ -260,7 +239,7 @@ timespec_cmp(
 
 /*
  * test previously-normalised a
- * return 1 / 0 / -1 if	 a < / == / > 0
+ * return -1 / 0 / 1 if	 a < / == / > 0
  */
 int
 timespec_test_fast(
@@ -278,15 +257,15 @@ timespec_test_fast(
 
 /*
  * test possibly denormal a
- * return 1 / 0 / -1 if	 a < / == / > 0
+ * return -1 / 0 / 1 if	 a < / == / > 0
  */
 int
 timespec_test(
 	const struct timespec *a
 	)
 {
-	int		r;
 	struct timespec A;
+	int		r;
 
 	COPYNORM(&A, a);
 	r = (A.tv_sec > 0) - (A.tv_sec < 0);
@@ -296,49 +275,13 @@ timespec_test(
 	return r;
 }
 
+/* return LIB buffer ptr to string rep */
 const char*
 timespec_tostr(
 	const struct timespec *x
 	)
 {
-	/*
-	 * Formatting a 'time_t' to a string of decimal digits poses
-	 * some interesting portability problems regarding the size of a
-	 * time_t and the handling of signed integer overflow, which is
-	 * undefined and must be avoided.
-	 *
-	 * Even with 64 bit time_t, 32 chars will suffice. Hopefully,
-	 * LIB_BUFLENGTH is big enough; the current definiton checks
-	 * this by the preprocessor just at the top of this file. */
-	static const char *fmt = "-%" TIMEFMT "u.%09lu";
-	
-	struct timespec v;
-	char	       *cp;
-	int		notneg;
-	u_time		itmp;
-	u_long		ftmp;
-	
-	/* normalise and get absolute value into unsigned values. Since
-	 * the negation of TIME_T_MIN (if it existed) is implementation
-	 * defined, we try to avoid it. */
-	COPYNORM(&v, x);
-	notneg = v.tv_sec >= 0;
-	if (notneg != 0) {
-		itmp = (u_time)v.tv_sec;
-		ftmp = (u_long)v.tv_nsec;
-	} else if (v.tv_nsec != 0) {
-		itmp = (u_time)-(v.tv_sec + 1);
-		ftmp = (u_long)(NANOSECONDS - v.tv_nsec);
-	} else {
-		itmp = ((u_time) -(v.tv_sec + 1)) + 1;
-		ftmp = 0;
-	}
-
-	/* get buffer and format data */
-	LIB_GETBUF(cp);
-	snprintf(cp, LIB_BUFLENGTH, fmt + notneg, itmp, ftmp);
-	
-	return cp;
+	return format_time_fraction(x->tv_sec, x->tv_nsec, 9);
 }
 
 void

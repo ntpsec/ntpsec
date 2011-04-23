@@ -186,8 +186,9 @@ timeval_abs(
 	return r;
 }
 
-/* compare a <--> b
- * return 1 / 0 / -1 if	 a < / == / > b
+/*
+ * compare previously-normalised a and b
+ * return -1 / 0 / 1 if	 a < / == / > b
  */
 int
 timeval_cmp_fast(
@@ -205,6 +206,10 @@ timeval_cmp_fast(
 	return r;
 }
 
+/*
+ * compare possibly denormal a and b
+ * return -1 / 0 / 1 if	 a < / == / > b
+ */
 int
 timeval_cmp(
 	const struct timeval *a,
@@ -227,7 +232,7 @@ timeval_cmp(
 
 /*
  * test previously-normalised a
- * return 1 / 0 / -1 if	 a < / == / > 0
+ * return -1 / 0 / 1 if	 a < / == / > 0
  */
 int
 timeval_test_fast(
@@ -245,7 +250,7 @@ timeval_test_fast(
 
 /*
  * test possibly denormal a
- * return 1 / 0 / -1 if	 a < / == / > 0
+ * return -1 / 0 / 1 if	 a < / == / > 0
  */
 int
 timeval_test(
