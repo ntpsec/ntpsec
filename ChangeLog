@@ -1,4 +1,7 @@
 * cleanup in timespecops.c / timevalops.c
+(4.2.7p158) 2011/04/24 Released by Harlan Stenn <stenn@ntp.org>
+* Update libevent --disable-libevent-regress handling to work when
+  building libevent using mingw.
 (4.2.7p157) 2011/04/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1890] 4.2.7p156 segfault in duplicate freeaddrinfo().
 (4.2.7p156) 2011/04/19 Released by Harlan Stenn <stenn@ntp.org>
