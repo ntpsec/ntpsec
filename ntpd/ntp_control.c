@@ -665,6 +665,7 @@ int num_ctl_traps;
  * the reference clock driver doesn't set peer->sstclktype to something
  * different than CTL_SST_TS_UNSPEC.
  */
+#ifdef REFCLOCK
 static u_char clocktypes[] = {
 	CTL_SST_TS_NTP, 	/* REFCLK_NONE (0) */
 	CTL_SST_TS_LOCAL,	/* REFCLK_LOCALCLOCK (1) */
@@ -712,6 +713,7 @@ static u_char clocktypes[] = {
 	CTL_SST_TS_UHF,		/* REFCLK_RIPENCC (43) */
 	CTL_SST_TS_UHF,		/* REFCLK_NEOCLOCK4X (44) */
 };
+#endif  /* REFCLOCK */
 
 
 /*

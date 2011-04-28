@@ -1,3 +1,4 @@
+* Fix a couple of unused variable warnings.
 * cleanup in timespecops.c / timevalops.c
 (4.2.7p158) 2011/04/24 Released by Harlan Stenn <stenn@ntp.org>
 * Update libevent --disable-libevent-regress handling to work when
