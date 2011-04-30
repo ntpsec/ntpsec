@@ -1,3 +1,18 @@
+* Change "pool DNS" messages from msyslog to debug trace output.
+* Prefer LOCAL and ACTS drivers to orphan parent peer as documented.
+* Include LOCAL and ACTS drivers marked prefer in candidate list.
+* Remove unused FLAG_SYSPEER from peer->status.
+* Respect "tos orphanwait 0" at startup.  Previously there was an
+  unconditional 300 s. startup orphanwait, though other values were
+  respected for subsequent orphan wait periods after no_sys_peer events.
+* Apply "tos orphanwait" (def. 300 seconds) to LOCAL and ACTS reference
+  clock drivers, in addition to orphan parent operation.  LOCAL and ACTS
+  are not selectable during the orphanwait delay at startup and after
+  each no_sys_peer event.  This prevents a particular form of clock-
+  hopping, such as using LOCAL briefly at startup before remote peers
+  are selectable.  This fixes the issue reported in [Bug 988].
+* [Bug 988] Local clock eats up -g option, so ntpd stops with large
+  initial time offset.
 (4.2.7p159) 2011/04/28 Released by Harlan Stenn <stenn@ntp.org>
 * Fix a couple of unused variable warnings.
 * cleanup in timespecops.c / timevalops.c
