@@ -484,6 +484,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\libntp\snprintf.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\isc\sockaddr.c"
 				>
 			</File>
@@ -817,10 +821,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\include\ntp_sprintf.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\include\ntp_stdlib.h"
 				>
 			</File>
@@ -901,11 +901,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File

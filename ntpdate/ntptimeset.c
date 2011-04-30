@@ -4,7 +4,7 @@
  * GOAL:
  * The goal of ntptime is to set the current time on system startup
  * to the best possible time using the network very wisely. It is assumed
- * that after a resonable time has been sett then ntp daemon will
+ * that after a reasonable time has been set then ntp daemon will
  * maintain it.
  *
  * PROBLEM DOMAIN:
@@ -51,7 +51,7 @@
  * NOTE: Please do not have this program print out every minute some line,
  *       of output. If this happens and the environment is in trouble then
  *       many pages of paper on many different machines will be filled up.
- *       Save some tress in your lifetime.
+ *       Save some trees in your lifetime.
  * 
  * CONCLUSION:
  * The behavior of the program derived from these three issues should be
@@ -318,9 +318,6 @@ static	void	init_io		P((void));
 static	int	sendpkt		P((struct sockaddr_in *dest, struct pkt *pkt, int len));
 	void 	input_handler	P((l_fp *xts));
 static	void	printserver	P((register struct server *pp, FILE *fp));
-#if !defined(HAVE_VSPRINTF)
-int	vsprintf	P((char *str, const char *fmt, va_list ap));
-#endif
 
 #ifdef HAVE_SIGNALED_IO
 extern  void    wait_for_signal P((void));
@@ -592,10 +589,8 @@ ntptimesetmain(
 			exit(1);
 		}
 		if (!authistrusted(sys_authkey)) {
-			char buf[10];
-
-			(void) sprintf(buf, "%lu", (unsigned long)sys_authkey);
-			msyslog(LOG_ERR, "authentication key %s unknown", buf);
+			msyslog(LOG_ERR, "authentication key %lu unknown",
+				(u_long)sys_authkey);
 			exit(1);
 		}
 	}
@@ -2137,23 +2132,3 @@ printserver(
 	(void) fprintf(fp, "offset %s\n\n",
 			   lfptoa(&pp->offset, 6));
 }
-
-#if !defined(HAVE_VSPRINTF)
-int
-vsprintf(
-	char *str,
-	const char *fmt,
-	va_list ap
-	)
-{
-	FILE f;
-	int len;
-
-	f._flag = _IOWRT+_IOSTRG;
-	f._ptr = str;
-	f._cnt = 32767;
-	len = _doprnt(fmt, ap, &f);
-	*f._ptr = 0;
-	return (len);
-}
-#endif

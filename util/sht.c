@@ -62,7 +62,7 @@ getShmTime (
 #else
 	char buf[10];
 	LPSECURITY_ATTRIBUTES psec=0;
-	sprintf (buf,"NTP%d",unit);
+	snprintf (buf, sizeof(buf), "NTP%d", unit);
 	SECURITY_DESCRIPTOR sd;
 	SECURITY_ATTRIBUTES sa;
 	HANDLE shmid;

@@ -8,8 +8,6 @@ dnl subpackage while retaining access to such test results.
 dnl
 AC_DEFUN([NTP_LIBNTP], [
 
-# HMS: Move NTP_DEBUG later.
-dnl AC_REQUIRE([NTP_DEBUG])
 AC_REQUIRE([NTP_CROSSCOMPILE])
 
 # HMS: Save $LIBS and empty it.
@@ -29,6 +27,7 @@ NTP_LIB_M
 
 AC_FUNC_FORK
 AC_FUNC_ALLOCA
+AC_FUNC_STRERROR_R
 
 ac_busted_vpath_in_make=no
 case "$build" in
@@ -281,13 +280,12 @@ case "$ac_cv_c_char_unsigned$ac_cv_sizeof_signed_char$ac_cv_type_s_char" in
 esac
 
 AC_TYPE_UID_T
-AC_FUNC_STRERROR_R
 
 m4_divert_text([HELP_ENABLE],
 [AS_HELP_STRING([defaults:],
     [+ yes, - no, s system-specific])])
 
-AC_REQUIRE([NTP_DEBUG])
+NTP_DEBUG
 
 # check if we can compile with pthreads
 AC_CHECK_HEADERS([semaphore.h])
@@ -295,7 +293,7 @@ AC_CHECK_FUNCS([socketpair])
 AC_ARG_ENABLE(
     [thread-support],
     [AS_HELP_STRING([--enable-thread-support],
-		    [+ use threads (if available)?])],
+		    [s use threads (+ if available)])],
     [],
     [enable_thread_support=yes]
     )
@@ -455,6 +453,120 @@ case "$have_pthreads" in
 esac
 AC_SUBST([LIBISC_PTHREADS_NOTHREADS])
 AM_CONDITIONAL([PTHREADS], [test "$have_pthreads" != "no"])
+
+AC_DEFUN([NTP_BEFORE_HW_FUNC_VSNPRINTF], [
+    AC_BEFORE([$0], [HW_FUNC_VSNPRINTF])dnl
+    AC_BEFORE([$0], [HW_FUNC_SNPRINTF])dnl
+    AC_ARG_ENABLE(
+	[c99-snprintf],
+	[AS_HELP_STRING([--enable-c99-snprintf], [s force replacement])],
+	[force_c99_snprintf=$enableval],
+	[force_c99_snprintf=no]
+	)
+    case "$force_c99_snprintf" in
+     yes)
+	hw_force_rpl_snprintf=yes
+	hw_force_rpl_vsnprintf=yes
+    esac
+    AH_TOP([
+	#if !defined(_KERNEL) && !defined(PARSESTREAM)
+	# include <stdio.h>	/* before #define vsnprintf rpl_... */
+	#endif
+	])
+    AH_BOTTOM([
+	#if !defined(_KERNEL) && !defined(PARSESTREAM)
+	# if defined(HW_WANT_RPL_VSNPRINTF)
+	#  if defined(__cplusplus)
+	extern "C" {
+	# endif
+	# include <stdarg.h>
+	int rpl_vsnprintf(char *, size_t, const char *, va_list);
+	# if defined(__cplusplus)
+	}
+	#  endif
+	# endif
+	# if defined(HW_WANT_RPL_SNPRINTF)
+	#  if defined(__cplusplus)
+	extern "C" {
+	#  endif
+	int rpl_snprintf(char *, size_t, const char *, ...);
+	#  if defined(__cplusplus)
+	}
+	#  endif
+	# endif
+	#endif	/* !defined(_KERNEL) && !defined(PARSESTREAM) */
+	])
+]) dnl end of AC_DEFUN of NTP_BEFORE_HW_FUNC_VSNPRINTF
+
+AC_DEFUN([NTP_C99_SNPRINTF], [
+    AC_REQUIRE([NTP_BEFORE_HW_FUNC_VSNPRINTF])dnl
+    AC_REQUIRE([HW_FUNC_VSNPRINTF])dnl
+    AC_REQUIRE([HW_FUNC_SNPRINTF])dnl
+]) dnl end of DEFUN of NTP_C99_SNPRINTF
+
+NTP_C99_SNPRINTF
+
+dnl C99-snprintf does not handle %m
+case "$hw_use_rpl_vsnprintf:$hw_cv_func_vsnprintf" in
+ no:yes)
+    AC_CACHE_CHECK(
+	[if vsnprintf expands "%m" to strerror(errno)],
+	[ntp_cv_vsnprintf_percent_m],
+	[AC_RUN_IFELSE(
+	    [AC_LANG_PROGRAM(
+		[[
+		    #include <stdarg.h>
+		    #include <errno.h>
+		    #include <stdio.h>
+		    #include <string.h>
+
+		    int call_vsnprintf(
+			    char *	dst,
+			    size_t	sz,
+			    const char *fmt,
+			    ...
+			    );
+
+		    int call_vsnprintf(
+			    char *	dst,
+			    size_t	sz,
+			    const char *fmt,
+			    ...
+			    )
+		    {
+			    va_list	ap;
+			    int		rc;
+
+			    va_start(ap, fmt);
+			    rc = vsnprintf(dst, sz, fmt, ap);
+			    va_end(ap);
+
+			    return rc;
+		    }
+		]],
+		[[
+		    char	sbuf[512];
+		    char	pbuf[512];
+		    int		slen;
+
+		    strcpy(sbuf, strerror(ENOENT));
+		    errno = ENOENT;
+		    slen = call_vsnprintf(pbuf, sizeof(pbuf), "%m",
+					  "wrong");
+		    return strcmp(sbuf, pbuf);
+		]]
+	    )],
+	    [ntp_cv_vsnprintf_percent_m=yes],
+	    [ntp_cv_vsnprintf_percent_m=no],
+	    [ntp_cv_vsnprintf_percent_m=no]
+	)]
+    )
+    case "$ntp_cv_vsnprintf_percent_m" in
+     yes)
+	AC_DEFINE([VSNPRINTF_PERCENT_M], [1],
+		  [vsnprintf expands "%m" to strerror(errno)])
+    esac
+esac
 
 AC_CHECK_HEADERS([sys/clockctl.h])
 

@@ -255,7 +255,6 @@ struct servent *getservbyname (char *name, char *type);
 # define IN_CLASSD(i)	((((long)(i))&0xf0000000)==0xe0000000)
 # define IN_MULTICAST IN_CLASSD
 # define ITIMER_REAL 0
-# define MAXHOSTNAMELEN 64
 
 /* standard structures missing from MPE include files */
 

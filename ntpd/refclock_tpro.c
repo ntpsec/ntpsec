@@ -160,7 +160,7 @@ tpro_poll(
 	 * proper format, we declare bad format and exit. Note: we
 	 * can't use the sec/usec conversion produced by the driver,
 	 * since the year may be suspect. All format error checking is
-	 * done by the sprintf() and sscanf() routines.
+	 * done by the snprintf() and sscanf() routines.
 	 *
 	 * Note that the refclockproc usec member has now become nsec.
 	 * We could either multiply the read-in usec value by 1000 or

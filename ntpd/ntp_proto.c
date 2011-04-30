@@ -1573,7 +1573,8 @@ process_packet(
 		p_del = t21 - t34;
 		p_offset = (t21 + t34) / 2.;
 		if (p_del < 0 || p_del > 1.) {
-			sprintf(statstr, "t21 %.6f t34 %.6f", t21, t34);
+			snprintf(statstr, sizeof(statstr),
+			    "t21 %.6f t34 %.6f", t21, t34);
 			report_event(PEVNT_XERR, peer, statstr);
 			return;
 		}
@@ -1597,7 +1598,7 @@ process_packet(
 			peer->aorg = p_xmt;
 			peer->borg = peer->dst;
 			if (t34 < 0 || t34 > 1.) {
-				sprintf(statstr,
+				snprintf(statstr, sizeof(statstr),
 				    "offset %.6f delay %.6f", t21, t34);
 				report_event(PEVNT_XERR, peer, statstr);
 				return;

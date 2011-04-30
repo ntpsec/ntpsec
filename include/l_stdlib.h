@@ -131,16 +131,6 @@ struct sigvec;
 extern	int	sigvec		(int, struct sigvec *, struct sigvec *);
 #endif
 
-#ifndef HAVE_SNPRINTF
-/* PRINTFLIKE3 */
-extern	int	snprintf	(char *, size_t, const char *, ...);
-#endif
-
-/* HMS: does this need further protection? */
-#ifndef HAVE_VSNPRINTF
-extern	int	vsnprintf	(char *, size_t, const char *, va_list);
-#endif
-
 #ifdef DECL_STDIO_0
 #if defined(FILE) || defined(BUFSIZ)
 extern	int	_flsbuf		(int, FILE *);

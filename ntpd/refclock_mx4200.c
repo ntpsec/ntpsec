@@ -67,8 +67,6 @@
 # include <sys/ppsclock.h>
 #endif
 
-#include "ntp_sprintf.h"
-
 #ifndef HAVE_STRUCT_PPSCLOCKEV
 struct ppsclockev {
 # ifdef HAVE_STRUCT_TIMESPEC

@@ -106,7 +106,7 @@ AC_DEFINE([HAVE_NO_NICE], 1, [sntp does not care about 'nice'])
 AC_DEFINE([HAVE_TERMIOS], 1, [sntp does not care about TTY stuff])
 
 # Checks for library functions.
-AC_CHECK_FUNCS([socket vsnprintf vsprintf])
+AC_CHECK_FUNCS([socket])
 
 # HMS: if we don't find c++ we should not look for gtest.
 AC_PROG_CXX

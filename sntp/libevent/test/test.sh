@@ -7,10 +7,11 @@ then
 	TEST_OUTPUT_FILE=/dev/null
 fi
 
-# /bin/echo is a little more likely to support -n than sh's builtin echo.
-if test "`printf hello 2>&1`" = "hello"
+# /bin/echo is a little more likely to support -n than sh's builtin echo,
+# printf is even more likely
+if test "`printf %s hello 2>&1`" = "hello"
 then
-	ECHO_N="printf"
+	ECHO_N="printf %s"
 else
 	if test -x /bin/echo
 	then

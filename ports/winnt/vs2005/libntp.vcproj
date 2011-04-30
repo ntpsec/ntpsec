@@ -469,6 +469,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\libntp\snprintf.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\lib\isc\sockaddr.c"
 				>
 			</File>
@@ -759,10 +763,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_select.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\include\ntp_sprintf.h"
 				>
 			</File>
 			<File

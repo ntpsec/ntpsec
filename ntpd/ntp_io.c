@@ -1056,7 +1056,10 @@ create_wildcards(
 	u_short	port
 	)
 {
-	int			v4wild, v6wild;
+	int			v4wild;
+#ifdef INCLUDE_IPV6_SUPPORT
+	int			v6wild;
+#endif
 	sockaddr_u		wildaddr;
 	nic_rule_action		action;
 	struct interface *	wildif;
@@ -3333,10 +3336,12 @@ input_handler(
 #endif
 	fd_set		fds;
 	size_t		select_count;
+	endpt *		ep;
+#ifdef REFCLOCK
 	struct refclockio *rp;
 	int		saved_errno;
 	const char *	clk;
-	endpt *		ep;
+#endif
 #ifdef HAS_ROUTING_SOCKET
 	struct asyncio_reader *asyncio_reader;
 #endif

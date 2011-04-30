@@ -25,6 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "event2/event-config.h"
+#include "evconfig-private.h"
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -98,7 +99,7 @@ evrpc_free(struct evrpc_base *base)
 
 	while ((rpc = TAILQ_FIRST(&base->registered_rpcs)) != NULL) {
 		r = evrpc_unregister_rpc(base, rpc->uri);
-		EVUTIL_ASSERT(r);
+		EVUTIL_ASSERT(r == 0);
 	}
 	while ((pause = TAILQ_FIRST(&base->paused_requests)) != NULL) {
 		TAILQ_REMOVE(&base->paused_requests, pause, next);
@@ -263,9 +264,6 @@ evrpc_unregister_rpc(struct evrpc_base *base, const char *name)
 	}
 	TAILQ_REMOVE(&base->registered_rpcs, rpc, next);
 
-	mm_free((char *)rpc->uri);
-	mm_free(rpc);
-
 	registered_uri = evrpc_construct_uri(name);
 
 	/* remove the http server callback */
@@ -273,6 +271,9 @@ evrpc_unregister_rpc(struct evrpc_base *base, const char *name)
 	EVUTIL_ASSERT(r == 0);
 
 	mm_free(registered_uri);
+
+	mm_free((char *)rpc->uri);
+	mm_free(rpc);
 	return (0);
 }
 
@@ -584,8 +585,8 @@ evrpc_pool_add_connection(struct evrpc_pool *pool,
 	 * unless a timeout was specifically set for a connection,
 	 * the connection inherits the timeout from the pool.
 	 */
-	if (connection->timeout == -1)
-		connection->timeout = pool->timeout;
+	if (!evutil_timerisset(&connection->timeout))
+		evhttp_connection_set_timeout(connection, pool->timeout);
 
 	/*
 	 * if we have any requests pending, schedule them with the new
@@ -612,7 +613,7 @@ evrpc_pool_set_timeout(struct evrpc_pool *pool, int timeout_in_secs)
 {
 	struct evhttp_connection *evcon;
 	TAILQ_FOREACH(evcon, &pool->connections, next) {
-		evcon->timeout = timeout_in_secs;
+		evhttp_connection_set_timeout(evcon, timeout_in_secs);
 	}
 	pool->timeout = timeout_in_secs;
 }

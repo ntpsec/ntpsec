@@ -246,7 +246,6 @@ typedef int socklen_t;
 #define TYPEOF_IP_MULTICAST_LOOP	BOOL
 #define SETSOCKOPT_ARG_CAST		(const char *)
 #define HAVE_RANDOM 
-#define MAXHOSTNAMELEN			64
 #define AUTOKEY
 #define SAVECONFIG			1
 
@@ -263,8 +262,8 @@ typedef int socklen_t;
  * to other names
  */
 #define inline		__inline
-#define vsnprintf	_vsnprintf
-#define snprintf	_snprintf
+/* #define vsnprintf	_vsnprintf */
+/* #define snprintf	_snprintf */
 #define stricmp		_stricmp
 #define strcasecmp	_stricmp
 #define isascii		__isascii
@@ -358,7 +357,6 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define NTP_POSIX_SOURCE
 
 # define SYSLOG_FILE			/* from libntp.mak */
-# define HAVE_GETCLOCK
 
 # define SIZEOF_SIGNED_CHAR	1
 # define SIZEOF_SHORT		2
@@ -366,49 +364,57 @@ typedef __int32 int32_t;	/* define a typedef for int32_t */
 # define SIZEOF_LONG		4
 # define SIZEOF_LONG_LONG	8
 
-# define HAVE_ALLOCA
-# define HAVE_SETVBUF
-# define HAVE_VPRINTF
-# define HAVE_VSPRINTF
-# define HAVE_SNPRINTF
-# define HAVE_VSNPRINTF
-# define HAVE_MEMMOVE
-# define HAVE_TERMIOS_H
-# define HAVE_ERRNO_H
-# define HAVE_STDARG_H
-# define HAVE_NO_NICE
-# define HAVE_MKTIME
-# define HAVE_TIMEGM			/* actually _mkgmtime */
+# define HAVE_ERRNO_H			1
+# define HAVE_FCNTL_H			1
+# define HAVE_LIMITS_H			1
+# define HAVE_STDARG_H			1
+# define HAVE_SYS_RESOURCE_H		1
+# define HAVE_SYS_TIME_H		1
+# define HAVE_TERMIOS_H			1
+
+# define HAVE_ALLOCA			1
+# define HAVE_GETCLOCK			1
+# define HAVE_MEMMOVE			1
+# define HAVE_MKTIME			1
+# define HAVE_SETVBUF			1
+# define HAVE_STRCHR			1	/* for libopts */
+# define HAVE_STRDUP			1
+# define HAVE_TIMEGM			1	/* actually _mkgmtime */
+
 # define HAVE_STRUCT_TIMESPEC
-# define HAVE_SYS_TIME_H
 # define HAVE_IO_COMPLETION_PORT
 # define ISC_PLATFORM_NEEDNTOP
 # define ISC_PLATFORM_NEEDPTON
 
-#define HAVE_LIMITS_H	1
-#define HAVE_STRDUP
-#define HAVE_STRCHR			/* for libopts */
-#define HAVE_FCNTL_H	1
-#define HAVE_SYS_RESOURCE_H
 #define HAVE_BSD_NICE			/* emulate BSD setpriority() */
+
+#define HW_WANT_RPL_VSNPRINTF		1
+#define vsnprintf			rpl_vsnprintf
+#include <stdarg.h>
+int rpl_vsnprintf(char *, size_t, const char *, va_list);
+#define HW_WANT_RPL_SNPRINTF		1
+#define snprintf			rpl_snprintf
+int rpl_snprintf(char *, size_t, const char *, ...);
+#define HAVE_VSNPRINTF			1
+#define HAVE_SNPRINTF			1
 
 typedef char *caddr_t;
 
 #ifdef _WCTYPE_T_DEFINED	/* see vc/include/crtdefs.h */
-#define HAVE_WINT_T
+#define HAVE_WINT_T			1
 #endif
 
 #ifndef _INTPTR_T_DEFINED
 typedef long intptr_t;
 #define _INTPTR_T_DEFINED
 #endif
-#define HAVE_INTPTR_T
+#define HAVE_INTPTR_T			1
 
 #ifndef _UINTPTR_T_DEFINED
 typedef unsigned long uintptr_t;
 #define _UINTPTR_T_DEFINED
 #endif
-#define HAVE_UINTPTR_T
+#define HAVE_UINTPTR_T			1
 
 #if !defined( _W64 )
   /*

@@ -194,7 +194,9 @@ hopfpci_poll(
 	pp = peer->procptr;
 
 #ifndef SYS_WINNT
-	ioctl(fd,HOPF_CLOCK_GET_UTC,&m_time);
+	if (ioctl(fd, HOPF_CLOCK_GET_UTC, &m_time) < 0)
+		msyslog(LOG_ERR, "HOPF_P(%d): HOPF_CLOCK_GET_UTC: %m\n",
+			unit);
 #else
 	GetHopfSystemTime(&m_time);
 #endif

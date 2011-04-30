@@ -1569,7 +1569,7 @@ wwv_endpoc(
 		}
 	}
 	if (pp->sloppyclockflag & CLK_FLAG4) {
-		sprintf(tbuf,
+		snprintf(tbuf, sizeof(tbuf),
 		    "wwv2 %04x %5.0f %5.1f %5d %4d %4d %4d %4.0f %7.2f",
 		    up->status, up->epomax, up->eposnr, mepoch,
 		    up->avgint, maxrun, mcount - zcount, dtemp,
@@ -2021,7 +2021,7 @@ wwv_rsec(
 	}
 	if ((pp->sloppyclockflag & CLK_FLAG4) && !(up->status &
 	    DSYNC)) {
-		sprintf(tbuf,
+		snprintf(tbuf, sizeof(tbuf),
 		    "wwv3 %2d %04x %3d %4d %5.0f %5.1f %5.0f %5.1f %5.0f",
 		    nsec, up->status, up->gain, up->yepoch, up->epomax,
 		    up->eposnr, up->datsig, up->datsnr, bit);

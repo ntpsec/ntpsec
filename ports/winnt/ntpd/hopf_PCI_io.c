@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <winioctl.h>
+
+#include "ntp_stdlib.h"
 #include "hopf_PCI_io.h"
 
 
@@ -135,6 +137,7 @@ ReadHopfDevice(void)
 }
 
 
+#ifdef NOTUSED
 void
 GetHardwareData(
 	LPDWORD	Data32,
@@ -147,6 +150,7 @@ GetHardwareData(
 	ReadHopfDevice();
 	*Data32 = iobuffer[0];
 }
+#endif	/* NOTUSED */
 
 
 void
@@ -194,6 +198,7 @@ GetHopfTime(
 }
 
 
+#ifdef NOTUSED
 void
 GetHopfLocalTime(
 	LPHOPFTIME Data
@@ -203,6 +208,7 @@ GetHopfLocalTime(
 
 	GetHopfTime(Data, Offset);
 }
+#endif	/* NOTUSED */
 
 
 void
@@ -216,6 +222,7 @@ GetHopfSystemTime(
 }
 
 
+#ifdef NOTUSED
 void
 GetSatData(
 	LPSATSTAT Data
@@ -324,4 +331,5 @@ GetDCFAntenne(
 	Data->bStatus	= LOBYTE(HIWORD(iobuffer[0]));
 	Data->wAntValue	= LOWORD(iobuffer[0]);
 }
+#endif	/* NOTUSED */
 

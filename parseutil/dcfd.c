@@ -587,8 +587,8 @@ cvt_rawdcf(
 			/*
 			 * invalid character (no consecutive bit sequence)
 			 */
-			dprintf(("parse: cvt_rawdcf: character check for 0x%x@%d FAILED\n",
-				 (u_int)*s, s - buffer));
+			dprintf(("parse: cvt_rawdcf: character check for 0x%x@%ld FAILED\n",
+				 (u_int)*s, (long)(s - buffer)));
 			*s = (unsigned char)~0;
 			rtc = CVT_FAIL|CVT_BADFMT;
 		}

@@ -1,3 +1,36 @@
+(4.2.7p159) 2011/04/28 Released by Harlan Stenn <stenn@ntp.org>
+* Fix a couple of unused variable warnings.
+* cleanup in timespecops.c / timevalops.c
+(4.2.7p158) 2011/04/24 Released by Harlan Stenn <stenn@ntp.org>
+* Update libevent --disable-libevent-regress handling to work when
+  building libevent using mingw.
+(4.2.7p157) 2011/04/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1890] 4.2.7p156 segfault in duplicate freeaddrinfo().
+(4.2.7p156) 2011/04/19 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1851] freeaddrinfo() called after getaddrinfo() fails.
+(4.2.7p155) 2011/04/18 Released by Harlan Stenn <stenn@ntp.org>
+* Fix leak in refclock_datum.c start failure path.
+(4.2.7p154) 2011/04/17 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1887] DNS fails on 4.2.7p153 using threads.
+(4.2.7p153) 2011/04/16 Released by Harlan Stenn <stenn@ntp.org>
+* A few more Coverity Scan cleanups.
+(4.2.7p152) 2011/04/15 Released by Harlan Stenn <stenn@ntp.org>
+* Update embedded libevent to current 2.1 git HEAD.
+(4.2.7p151) 2011/04/14 Released by Harlan Stenn <stenn@ntp.org>
+* Detect vsnprintf() support for "%m" and disable our "%m" expansion.
+* Add --enable-c99-sprintf to configure args for -noopenssl variety of
+  flock-build to avoid regressions in (v)snprintf() replacement.
+* More msnprintf() unit tests.
+* Coverity Scan error checking fixes.
+* Log failure to fetch time from HOPF_P hardware.
+* Check HOPF_S sscanf() conversion count before converted values.
+(4.2.7p150) 2011/04/13 Released by Harlan Stenn <stenn@ntp.org>
+* Remove never-used, incomplete ports/winnt/ntpd/refclock_trimbledc.[ch]
+* On systems without C99-compliant (v)snprintf(), use C99-snprintf
+  replacements (http://www.jhweiss.de/software/snprintf.html)
+* Remove remaining sprintf() calls except refclock_ripencc.c (which is
+  kept out of --enable-all-clocks as a result), upstream libs which use
+  sprintf() only after careful buffer sizing.
 (4.2.7p149) 2011/04/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1881] describe the {+,-,s} characters in configure --help output.
 (4.2.7p148) 2011/04/09 Released by Harlan Stenn <stenn@ntp.org>

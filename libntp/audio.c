@@ -174,20 +174,20 @@ audio_config_read(
 		for (; *ca && isascii((int)*ca) && (isspace((int)*ca) || (*ca == '=')); ca++)
 			continue;
 
-		if (!strncmp(cc, "IDEV", (size_t) 4)) {
-			sscanf(ca, "%99s", ab);
+		if (!strncmp(cc, "IDEV", 4) &&
+		    1 == sscanf(ca, "%99s", ab)) {
 			strlcpy(cf_i_dev, ab, sizeof(cf_i_dev));
 			printf("idev <%s>\n", ab);
-		} else if (!strncmp(cc, "CDEV", (size_t) 4)) {
-			sscanf(ca, "%99s", ab);
+		} else if (!strncmp(cc, "CDEV", 4) &&
+			   1 == sscanf(ca, "%99s", ab)) {
 			strlcpy(cf_c_dev, ab, sizeof(cf_c_dev));
 			printf("cdev <%s>\n", ab);
-		} else if (!strncmp(cc, "AGC", (size_t) 3)) {
-			sscanf(ca, "%99s", ab);
+		} else if (!strncmp(cc, "AGC", 3) &&
+			   1 == sscanf(ca, "%99s", ab)) {
 			strlcpy(cf_agc, ab, sizeof(cf_agc));
 			printf("agc <%s> %d\n", ab, i);
-		} else if (!strncmp(cc, "MONITOR", (size_t) 7)) {
-			sscanf(ca, "%99s", ab);
+		} else if (!strncmp(cc, "MONITOR", 7) &&
+			   1 == sscanf(ca, "%99s", ab)) {
 			strlcpy(cf_monitor, ab, sizeof(cf_monitor));
 			printf("monitor <%s> %d\n", ab, mixer_name(ab, -1));
 		}

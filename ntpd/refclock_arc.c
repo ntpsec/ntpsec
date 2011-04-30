@@ -627,51 +627,49 @@ arc_start(
 {
 	register struct arcunit *up;
 	struct refclockproc *pp;
+	int temp_fd;
 	int fd;
 	char device[20];
 #ifdef HAVE_TERMIOS
 	struct termios arg;
 #endif
 
-	msyslog(LOG_NOTICE, "ARCRON: %s: opening unit %d", arc_version, unit);
-#ifdef DEBUG
-	if(debug) {
-		printf("arc: %s: attempt to open unit %d.\n", arc_version, unit);
-	}
-#endif
-
-	/* Prevent a ridiculous device number causing overflow of device[]. */
-	if((unit < 0) || (unit > 255)) { return(0); }
+	msyslog(LOG_NOTICE, "MSF_ARCRON %s: opening unit %d",
+		arc_version, unit);
+	DPRINTF(1, ("arc: %s: attempt to open unit %d.\n", arc_version,
+		unit));
 
 	/*
 	 * Open serial port. Use CLK line discipline, if available.
 	 */
 	snprintf(device, sizeof(device), DEVICE, unit);
-	fd = refclock_open(device, SPEED, LDISC_CLK);
-	if (fd <= 0)
-		return(0);
-#ifdef DEBUG
-	if(debug) { printf("arc: unit %d using open().\n", unit); }
-#endif
+	temp_fd = refclock_open(device, SPEED, LDISC_CLK);
+	if (temp_fd <= 0)
+		return 0;
+	DPRINTF(1, ("arc: unit %d using tty_open().\n", unit));
 	fd = tty_open(device, OPEN_FLAGS, 0777);
-	if(fd < 0) {
-#ifdef DEBUG
-		if(debug) { printf("arc: failed [tty_open()] to open %s.\n", device); }
-#endif
-		return(0);
+	if (fd < 0) {
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): failed second open(%s, 0777): %m.\n",
+			unit, device);
+		close(temp_fd);
+		return 0;
 	}
+	close(temp_fd);
+	temp_fd = -1;
 
 #ifndef SYS_WINNT
 	fcntl(fd, F_SETFL, 0); /* clear the descriptor flags */
 #endif
-#ifdef DEBUG
-	if(debug)
-	{ printf("arc: opened RS232 port with file descriptor %d.\n", fd); }
-#endif
+	DPRINTF(1, ("arc: opened RS232 port with file descriptor %d.\n", fd));
 
 #ifdef HAVE_TERMIOS
 
-	tcgetattr(fd, &arg);
+	if (tcgetattr(fd, &arg) < 0) {
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcgetattr(%s): %m.\n",
+			unit, device);
+		close(fd);
+		return 0;
+	}
 
 	arg.c_iflag = IGNBRK | ISTRIP;
 	arg.c_oflag = 0;
@@ -680,11 +678,16 @@ arc_start(
 	arg.c_cc[VMIN] = 1;
 	arg.c_cc[VTIME] = 0;
 
-	tcsetattr(fd, TCSANOW, &arg);
+	if (tcsetattr(fd, TCSANOW, &arg) < 0) {
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcsetattr(%s): %m.\n",
+			unit, device);
+		close(fd);
+		return 0;
+	}
 
 #else
 
-	msyslog(LOG_ERR, "ARCRON: termios not supported in this driver");
+	msyslog(LOG_ERR, "ARCRON: termios required by this driver");
 	(void)close(fd);
 
 	return 0;

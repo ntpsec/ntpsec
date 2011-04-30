@@ -28,6 +28,8 @@
 #include <isc/strerror.h>
 #include <lib_strbuf.h>
 
+#include "ntp_stdlib.h"
+
 #include "messages.h"
 
 static HANDLE hAppLog = NULL;
@@ -102,7 +104,7 @@ syslog(int level, const char *fmt, ...) {
 	str[0] = buf;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
 	/* Make sure that the channel is open to write the event */

@@ -34,8 +34,10 @@
  * Version: 0.1b
  */
 
-#include <sys/types.h>
 #include "event2/event-config.h"
+#include "evconfig-private.h"
+
+#include <sys/types.h>
 
 #ifndef _FORTIFY_SOURCE
 #define _FORTIFY_SOURCE 3
@@ -4310,7 +4312,8 @@ evdns_getaddrinfo_gotresolve(int result, char type, int count,
 				evdns_cancel_request(NULL, other_req->r);
 			}
 			data->user_cb(EVUTIL_EAI_MEMORY, NULL, data->user_data);
-			evutil_freeaddrinfo(res);
+			if (res)
+				evutil_freeaddrinfo(res);
 
 			if (other_req->r == NULL)
 				free_getaddrinfo_request(data);
