@@ -268,6 +268,7 @@ main(
 	char *argv[]
 	)
 {
+	progname = argv[0];
 	parse_cmdline_opts(&argc, &argv);
 #ifdef DEBUG
 	debug = DESC(DEBUG_LEVEL).optOccCt;

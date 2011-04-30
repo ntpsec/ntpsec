@@ -1,3 +1,4 @@
+* [Bug 1901] Simulator does not set progname.
 (4.2.7p159) 2011/04/28 Released by Harlan Stenn <stenn@ntp.org>
 * Fix a couple of unused variable warnings.
 * cleanup in timespecops.c / timevalops.c
