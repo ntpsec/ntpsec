@@ -5,7 +5,10 @@ copyright = {
     owner = "David L. Mills and/or others";
     eaddr = "http://bugs.ntp.org, bugs@ntp.org";
     type  = note;
-    text  = "see html/copyright.html";
+    text  = <<- _EndOfDoc_
+	see html/copyright.html
+
+	_EndOfDoc_;
 };
 
 long-opts;
