@@ -2,7 +2,7 @@
 /**
  * \file pgusage.c
  *
- * Time-stamp:      "2010-07-17 10:42:53 bkorb"
+ * Time-stamp:      "2011-03-25 17:54:41 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -29,8 +29,6 @@
  *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
-
-tePagerState pagerState = PAGER_STATE_INITIAL;
 
 /*=export_func  optionPagedUsage
  * private:

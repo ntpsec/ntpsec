@@ -2,7 +2,7 @@
 /*
  * \file save.c
  *
- * Time-stamp:      "2010-07-17 10:27:48 bkorb"
+ * Time-stamp:      "2011-04-06 09:21:44 bkorb"
  *
  *  This module's routines will take the currently set options and
  *  store them into an ".rc" file for re-interpretation the next
@@ -36,8 +36,8 @@ static char const close_xml[] = "</%s>\n";
 static tCC*
 findDirName(tOptions* pOpts, int* p_free);
 
-static tCC*
-findFileName(tOptions* pOpts, int* p_free_name);
+static char const *
+findFileName(tOptions * pOpts, int * p_free_name);
 
 static void
 printEntry(
@@ -117,8 +117,8 @@ findDirName(tOptions* pOpts, int* p_free)
             char z[ AO_NAME_SIZE ];
             if ((pzEndDir - pzDir) > AO_NAME_LIMIT )
                 return NULL;
-            strncpy(z, pzDir, (size_t)(pzEndDir - pzDir));
-            z[ (pzEndDir - pzDir) ] = NUL;
+            memcpy(z, pzDir, (size_t)(pzEndDir - pzDir));
+            z[pzEndDir - pzDir] = NUL;
             pzEnv = getenv(z);
         } else {
 
@@ -157,14 +157,13 @@ findDirName(tOptions* pOpts, int* p_free)
 }
 
 
-static tCC*
-findFileName(tOptions* pOpts, int* p_free_name)
+static char const *
+findFileName(tOptions * pOpts, int * p_free_name)
 {
-    tCC*   pzDir;
     struct stat stBuf;
     int    free_dir_name = 0;
 
-    pzDir = findDirName(pOpts, &free_dir_name);
+    char const * pzDir = findDirName(pOpts, &free_dir_name);
     if (pzDir == NULL)
         return NULL;
 
@@ -173,47 +172,41 @@ findFileName(tOptions* pOpts, int* p_free_name)
      *  structure so we can bail out early.
      */
     if (stat(pzDir, &stBuf) != 0) do {
+        char z[AG_PATH_MAX];
+        char * dirchp;
 
         /*
          *  IF we could not, check to see if we got a full
          *  path to a file name that has not been created yet.
          */
-        if (errno == ENOENT) {
-            char z[AG_PATH_MAX];
-
-            /*
-             *  Strip off the last component, stat the remaining string and
-             *  that string must name a directory
-             */
-            char* pzDirCh = strrchr(pzDir, DIRCH);
-            if (pzDirCh == NULL) {
-                stBuf.st_mode = S_IFREG;
-                continue;  /* bail out of error condition */
-            }
-
-            strncpy(z, pzDir, (size_t)(pzDirCh - pzDir));
-            z[ pzDirCh - pzDir ] = NUL;
-
-            if (  (stat(z, &stBuf) == 0)
-               && S_ISDIR(stBuf.st_mode)) {
-
-                /*
-                 *  We found the directory.  Restore the file name and
-                 *  mark the full name as a regular file
-                 */
-                stBuf.st_mode = S_IFREG;
-                continue;  /* bail out of error condition */
-            }
+        if (errno != ENOENT) {
+        bogus_name:
+            fprintf(stderr, zWarn, pOpts->pzProgName);
+            fprintf(stderr, zNoStat, errno, strerror(errno), pzDir);
+            if (free_dir_name)
+                AGFREE((void*)pzDir);
+            return NULL;
         }
 
         /*
-         *  We got a bogus name.
+         *  Strip off the last component, stat the remaining string and
+         *  that string must name a directory
          */
-        fprintf(stderr, zWarn, pOpts->pzProgName);
-        fprintf(stderr, zNoStat, errno, strerror(errno), pzDir);
-        if (free_dir_name)
-            AGFREE((void*)pzDir);
-        return NULL;
+        dirchp = strrchr(pzDir, DIRCH);
+        if (dirchp == NULL) {
+            stBuf.st_mode = S_IFREG;
+            break; /* found directory -- viz.,  "." */
+        }
+
+        if ((dirchp - pzDir) >= sizeof(z))
+            goto bogus_name;
+
+        memcpy(z, pzDir, (size_t)(dirchp - pzDir));
+        z[dirchp - pzDir] = NUL;
+
+        if ((stat(z, &stBuf) != 0) || ! S_ISDIR(stBuf.st_mode))
+            goto bogus_name;
+        stBuf.st_mode = S_IFREG; /* file within this directory */
     } while (0);
 
     /*

@@ -1,7 +1,7 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2011-01-06 16:11:24 bkorb"
+ *  Time-stamp:      "2011-04-06 09:31:24 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
@@ -662,7 +662,7 @@ program_directive(tOptions * pOpts, char * pzText)
     size_t name_len = strlen(pOpts->pzProgName);
 
     memcpy(ttl, ttlfmt, sizeof(ttlfmt) - 1);
-    strcpy(ttl + sizeof(ttlfmt) - 1, zCfgProg);
+    memcpy(ttl + sizeof(ttlfmt) - 1, zCfgProg, ttl_len - (sizeof(ttlfmt) - 1));
 
     do  {
         while (IS_WHITESPACE_CHAR(*++pzText))  ;
@@ -1026,15 +1026,15 @@ internalFileLoad(tOptions* pOpts)
 
         if (S_ISDIR(StatBuf.st_mode)) {
             size_t len = strlen(zFileName);
-            char* pz;
+            size_t nln = strlen(pOpts->pzRcName) + 1;
+            char * pz  = zFileName + len;
 
-            if (len + 1 + strlen(pOpts->pzRcName) >= sizeof(zFileName))
+            if (len + 1 + nln >= sizeof(zFileName))
                 continue;
 
-            pz = zFileName + len;
             if (pz[-1] != DIRCH)
                 *(pz++) = DIRCH;
-            strcpy(pz, pOpts->pzRcName);
+            memcpy(pz, pOpts->pzRcName, nln);
         }
 
         file_preset(pOpts, zFileName, inc);
@@ -1362,6 +1362,8 @@ validateOptionsStruct(tOptions* pOpts, char const* pzProgram)
        && (  (pOpts->structVersion > OPTIONS_STRUCT_VERSION  )
           || (pOpts->structVersion < OPTIONS_MINIMUM_VERSION )
        )  )  {
+        static char const aover[] =
+            __STR(AO_CURRENT)":"__STR(AO_REVISION)":"__STR(AO_AGE)"\n";
 
         fprintf(stderr, zAO_Err, pzProgram, NUM_TO_VER(pOpts->structVersion));
         if (pOpts->structVersion > OPTIONS_STRUCT_VERSION )
@@ -1369,9 +1371,7 @@ validateOptionsStruct(tOptions* pOpts, char const* pzProgram)
         else
             fputs(zAO_Sml, stderr);
 
-        fputs(ShellAsString(AO_CURRENT)  ":"
-              ShellAsString(AO_REVISION) ":"
-              ShellAsString(AO_AGE)      "\n", stderr);
+        fwrite(aover, sizeof(aover) - 1, 1, stderr);
         return FAILURE;
     }
 

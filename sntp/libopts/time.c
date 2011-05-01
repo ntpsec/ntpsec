@@ -2,7 +2,7 @@
 /**
  * \file time.c
  *
- *  Time-stamp:      "2010-07-17 10:36:19 bkorb"
+ *  Time-stamp:      "2011-03-06 11:52:23 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
@@ -25,28 +25,10 @@
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
-#ifndef HAVE_PARSE_DURATION
-#include <time.h>
-
-static inline char *
-ao_xstrdup(char const * pz)
-{
-    char * str;
-    AGDUPSTR(str, pz, "time val str");
-    return str;
-}
-
-#define xstrdup(_s) ao_xstrdup(_s)
-
-#include "parse-duration.c"
-
-#undef xstrdup
-#endif
-
 /*=export_func  optionTimeVal
  * private:
  *
- * what:  process an option with a time value.
+ * what:  process an option with a time duration.
  * arg:   + tOptions* + pOpts    + program options descriptor +
  * arg:   + tOptDesc* + pOptDesc + the descriptor for this arg +
  *
@@ -54,16 +36,19 @@ ao_xstrdup(char const * pz)
  *  Decipher a time duration value.
 =*/
 void
-optionTimeVal(tOptions* pOpts, tOptDesc* pOD )
+optionTimeVal(tOptions * pOpts, tOptDesc * pOD)
 {
-    long  val;
+    time_t val;
 
     if ((pOD->fOptState & OPTST_RESET) != 0)
         return;
 
     val = parse_duration(pOD->optArg.argString);
-    if (errno != 0)
-        goto bad_time;
+    if (val == BAD_TIME) {
+        fprintf(stderr, zNotDuration, pOpts->pzProgName, pOD->optArg.argString);
+        if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
+            (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
+    }
 
     if (pOD->fOptState & OPTST_ALLOC_ARG) {
         AGFREE(pOD->optArg.argString);
@@ -71,14 +56,77 @@ optionTimeVal(tOptions* pOpts, tOptDesc* pOD )
     }
 
     pOD->optArg.argInt = val;
+}
+
+/*=export_func  optionTimeDate
+ * private:
+ *
+ * what:  process an option with a time and date.
+ * arg:   + tOptions* + pOpts    + program options descriptor +
+ * arg:   + tOptDesc* + pOptDesc + the descriptor for this arg +
+ *
+ * doc:
+ *  Decipher a time and date value.
+=*/
+void
+optionTimeDate(tOptions * pOpts, tOptDesc * pOD)
+{
+#if defined(HAVE_GETDATE_R) && defined(HAVE_PUTENV)
+    if ((! HAS_pzPkgDataDir(pOpts)) || (pOpts->pzPkgDataDir == NULL))
+        goto default_action;
+
+    /*
+     *  Export the DATEMSK environment variable.  getdate_r() uses it to
+     *  find the file with the strptime formats.  If we cannot find the file
+     *  we need ($PKGDATADIR/datemsk), then fall back to just a time duration.
+     */
+    {
+        static char * envptr = NULL;
+
+        if (envptr == NULL) {
+            static char const fmt[] = "DATEMSK=%s/datemsk";
+            envptr = AGALOC(sizeof(fmt) + strlen(pOpts->pzPkgDataDir), fmt);
+            sprintf(envptr, fmt, pOpts->pzPkgDataDir);
+
+            putenv(envptr);
+        }
+
+        if (access(envptr+8, R_OK) != 0)
+            goto default_action;
+    }
+
+    /*
+     *  Convert the date to a time since the epoch and stash it in a long int.
+     */
+    {
+        struct tm stm;
+        time_t tm;
+
+        if (getdate_r(pOD->optArg.argString, &stm) != 0) {
+            fprintf(stderr, zNotDate, pOpts->pzProgName,
+                    pOD->optArg.argString);
+            if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
+                (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
+            return;
+        }
+
+        tm = mktime(&stm);
+
+        if (pOD->fOptState & OPTST_ALLOC_ARG) {
+            AGFREE(pOD->optArg.argString);
+            pOD->fOptState &= ~OPTST_ALLOC_ARG;
+        }
+
+        pOD->optArg.argInt = tm;
+    }
     return;
 
-bad_time:
-    fprintf(stderr, zNotNumber, pOpts->pzProgName, pOD->optArg.argString);
-    if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0)
-        (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
+default_action:
 
-    pOD->optArg.argInt = ~0;
+#endif
+    optionTimeVal(pOpts, pOD);
+    if (pOD->optArg.argInt != BAD_TIME)
+        pOD->optArg.argInt += (unsigned long)time(NULL);
 }
 /*
  * Local Variables:

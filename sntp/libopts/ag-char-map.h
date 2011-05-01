@@ -1,5 +1,5 @@
 /*
- *   Character mapping generated 02/17/11 16:58:35
+ *   Character mapping generated 04/29/11 15:43:58
  *
  *  This file contains the character classifications
  *  used by AutoGen and AutoOpts for identifying tokens.
@@ -70,7 +70,7 @@
 // 
 // %guard          autoopts_internal
 // %file           ag-char-map.h
-// %table          option-char-category
+// %static-table   option-char-category
 // 
 // %comment
 //   This file contains the character classifications
@@ -121,11 +121,11 @@
 #endif /* 0 -- mapping spec. source */
 
 typedef uint32_t option_char_category_mask_t;
-extern option_char_category_mask_t const option_char_category[128];
+static option_char_category_mask_t const option_char_category[128];
 
 static inline int is_option_char_category_char(char ch, option_char_category_mask_t mask) {
     unsigned int ix = (unsigned char)ch;
-    return ((ix < 0x7F) && ((option_char_category[ix] & mask) != 0)); }
+    return ((ix < 128) && ((option_char_category[ix] & mask) != 0)); }
 
 #define IS_LOWER_CASE_CHAR(_c)      is_option_char_category_char((_c), 0x000001)
 #define IS_UPPER_CASE_CHAR(_c)      is_option_char_category_char((_c), 0x000002)
@@ -153,8 +153,8 @@ static inline int is_option_char_category_char(char ch, option_char_category_mas
 #define IS_END_TOKEN_CHAR(_c)       is_option_char_category_char((_c), 0x100500)
 #define IS_END_LIST_ENTRY_CHAR(_c)  is_option_char_category_char((_c), 0x300500)
 
-#ifdef AUTOOPTS_INTERNAL
-option_char_category_mask_t const option_char_category[128] = {
+#if 1 /* def AUTOOPTS_INTERNAL */
+static option_char_category_mask_t const option_char_category[128] = {
   /*x00*/ 0x140000, /*x01*/ 0x000000, /*x02*/ 0x000000, /*x03*/ 0x000000,
   /*x04*/ 0x000000, /*x05*/ 0x000000, /*x06*/ 0x000000, /*\a */ 0x000000,
   /*\b */ 0x000400, /*\t */ 0x000100, /*\n */ 0x000400, /*\v */ 0x000400,

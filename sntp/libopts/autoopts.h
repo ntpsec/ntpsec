@@ -2,7 +2,7 @@
 /*
  *  \file autoopts.h
  *
- *  Time-stamp:      "2010-12-18 11:53:11 bkorb"
+ *  Time-stamp:      "2011-03-25 17:51:34 bkorb"
  *
  *  This file defines all the global structures and special values
  *  used in the automated option processing library.
@@ -88,37 +88,6 @@ typedef int tDirection;
 #define PRESETTING(d)           ((d)<0)
 
 /*
- *  Procedure success codes
- *
- *  USAGE:  define procedures to return "tSuccess".  Test their results
- *          with the SUCCEEDED, FAILED and HADGLITCH macros.
- *
- *  Microsoft sticks its nose into user space here, so for Windows' sake,
- *  make sure all of these are undefined.
- */
-#undef  SUCCESS
-#undef  FAILURE
-#undef  PROBLEM
-#undef  SUCCEEDED
-#undef  SUCCESSFUL
-#undef  FAILED
-#undef  HADGLITCH
-
-#define SUCCESS                 ((tSuccess) 0)
-#define FAILURE                 ((tSuccess)-1)
-#define PROBLEM                 ((tSuccess) 1)
-
-typedef int tSuccess;
-
-#define SUCCEEDED(p)          ((p) == SUCCESS)
-#define SUCCESSFUL(p)         SUCCEEDED(p)
-#define FAILED(p)             ((p) <  SUCCESS)
-#define HADGLITCH(p)          ((p) >  SUCCESS)
-
-#define ShellAsString(_s)  #_s
-#define DEFAULT_SHELL ShellAsString(CONFIG_SHELL)
-
-/*
  *  When loading a line (or block) of text as an option, the value can
  *  be processed in any of several modes:
  *
@@ -160,8 +129,6 @@ typedef enum {
     PAGER_STATE_READY,
     PAGER_STATE_CHILD
 } tePagerState;
-
-extern tePagerState pagerState;
 
 typedef enum {
     ENV_ALL,
@@ -216,7 +183,7 @@ typedef struct {
 
 #define AGALOC(c, w)          ao_malloc((size_t)c)
 #define AGREALOC(p, c, w)     ao_realloc((void*)p, (size_t)c)
-#define AGFREE(_p)            do{void*X=(void*)_p;ao_free(X);}while(0)
+#define AGFREE(_p)            free((void *)_p)
 #define AGDUPSTR(p, s, w)     (p = ao_strdup(s))
 
 static void *
@@ -225,8 +192,7 @@ ao_malloc(size_t sz);
 static void *
 ao_realloc(void *p, size_t sz);
 
-static void
-ao_free(void *p);
+#define ao_free(_p) free((void *)_p)
 
 static char *
 ao_strdup(char const *str);

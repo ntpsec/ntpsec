@@ -1,6 +1,7 @@
-#define AUTOOPTS_INTERNAL
+#include "autoopts/project.h"
+#define  AUTOOPTS_INTERNAL 1
 #include "compat/compat.h"
-#define LOCAL static
+#define  LOCAL static
 #include "autoopts/options.h"
 #include "autoopts/usage-txt.h"
 #include "genshell.h"
@@ -9,6 +10,8 @@
 #include "ag-char-map.h"
 #include "autoopts.h"
 #include "proto.h"
+#include "parse-duration.h"
+#include "parse-duration.c"
 #include "value-type.c"
 #include "xat-attribute.c"
 #include "autoopts.c"
