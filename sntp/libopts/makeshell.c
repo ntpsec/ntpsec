@@ -2,7 +2,7 @@
 /**
  * \file makeshell.c
  *
- * Time-stamp:      "2010-12-16 14:09:32 bkorb"
+ * Time-stamp:      "2011-04-20 11:06:57 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -28,7 +28,7 @@
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
-tOptions*  pShellParseOptions = NULL;
+tOptions * optionParseShellOptions = NULL;
 
 /* * * * * * * * * * * * * * * * * * * * *
  *
@@ -343,7 +343,10 @@ static char*  pzTrailer = NULL;
 
 /* = = = START-STATIC-FORWARD = = = */
 static void
-textToVariable(tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD);
+emit_var_text(char const * prog, char const * var, int fdin);
+
+static void
+textToVariable(tOptions * pOpts, teTextTo whichVar, tOptDesc * pOD);
 
 static void
 emitUsage(tOptions* pOpts);
@@ -387,22 +390,22 @@ optionParseShell(tOptions* pOpts)
      *  IF the output file contains the "#!" magic marker,
      *  it will override anything we do here.
      */
-    if (HAVE_OPT(SHELL))
-        pzShell = OPT_ARG(SHELL);
+    if (HAVE_GENSHELL_OPT(SHELL))
+        pzShell = GENSHELL_OPT_ARG(SHELL);
 
-    else if (! ENABLED_OPT(SHELL))
+    else if (! ENABLED_GENSHELL_OPT(SHELL))
         pzShell = NULL;
 
     else if ((pzShell = getenv("SHELL")),
              pzShell == NULL)
 
-        pzShell = DEFAULT_SHELL;
+        pzShell = POSIX_SHELL;
 
     /*
      *  Check for a specified output file
      */
-    if (HAVE_OPT(SCRIPT))
-        openOutput(OPT_ARG(SCRIPT));
+    if (HAVE_GENSHELL_OPT(SCRIPT))
+        openOutput(GENSHELL_OPT_ARG(SCRIPT));
 
     emitUsage(pOpts);
     emitSetup(pOpts);
@@ -464,7 +467,7 @@ optionParseShell(tOptions* pOpts)
     printf(zLoopEnd, pOpts->pzPROGNAME, zTrailerMarker);
     if ((pzTrailer != NULL) && (*pzTrailer != '\0'))
         fputs(pzTrailer, stdout);
-    else if (ENABLED_OPT(SHELL))
+    else if (ENABLED_GENSHELL_OPT(SHELL))
         printf("\nenv | grep '^%s_'\n", pOpts->pzPROGNAME);
 
     fflush(stdout);
@@ -476,27 +479,80 @@ optionParseShell(tOptions* pOpts)
     }
 }
 
-
+#ifdef HAVE_WORKING_FORK
 static void
-textToVariable(tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD)
+emit_var_text(char const * prog, char const * var, int fdin)
 {
-#   define _TT_(n) tSCC z ## n [] = #n;
+    FILE * fp   = fdopen(fdin, "r" FOPEN_BINARY_FLAG);
+    int    nlct = 0; /* defer newlines and skip trailing ones */
+
+    printf("%s_%s_TEXT='", prog, var);
+    if (fp == NULL)
+        goto skip_text;
+
+    for (;;) {
+        int  ch = fgetc(fp);
+        switch (ch) {
+
+        case '\n':
+            nlct++;
+            break;
+
+        case '\'':
+            while (nlct > 0) {
+                fputc('\n', stdout);
+                nlct--;
+            }
+            fputs("'\\''", stdout);
+            break;
+
+        case EOF:
+            goto endCharLoop;
+
+        default:
+            while (nlct > 0) {
+                fputc('\n', stdout);
+                nlct--;
+            }
+            fputc(ch, stdout);
+            break;
+        }
+    } endCharLoop:;
+
+    fclose(fp);
+
+skip_text:
+
+    fputs("'\n\n", stdout);
+}
+
+#endif
+
+/*
+ *  The purpose of this function is to assign "long usage", short usage
+ *  and version information to a shell variable.  Rather than wind our
+ *  way through all the logic necessary to emit the text directly, we
+ *  fork(), have our child process emit the text the normal way and
+ *  capture the output in the parent process.
+ */
+static void
+textToVariable(tOptions * pOpts, teTextTo whichVar, tOptDesc * pOD)
+{
+#   define _TT_(n) static char const z ## n [] = #n;
     TEXTTO_TABLE
 #   undef _TT_
 #   define _TT_(n) z ## n ,
-      static char const*  apzTTNames[] = { TEXTTO_TABLE };
+      static char const * apzTTNames[] = { TEXTTO_TABLE };
 #   undef _TT_
 
 #if ! defined(HAVE_WORKING_FORK)
     printf("%1$s_%2$s_TEXT='no %2$s text'\n",
            pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
 #else
-    int  nlHoldCt = 0;
     int  pipeFd[2];
-    FILE* fp;
 
-    printf("%s_%s_TEXT='", pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
     fflush(stdout);
+    fflush(stderr);
 
     if (pipe(pipeFd) != 0) {
         fprintf(stderr, zBadPipe, errno, strerror(errno));
@@ -510,6 +566,10 @@ textToVariable(tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD)
         break;
 
     case 0:
+        /*
+         * Send both stderr and stdout to the pipe.  No matter which
+         * descriptor is used, we capture the output on the read end.
+         */
         dup2(pipeFd[1], STDERR_FILENO);
         dup2(pipeFd[1], STDOUT_FILENO);
         close(pipeFd[0]);
@@ -518,12 +578,10 @@ textToVariable(tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD)
         case TT_LONGUSAGE:
             (*(pOpts->pUsageProc))(pOpts, EXIT_SUCCESS);
             /* NOTREACHED */
-            exit(EXIT_FAILURE);
 
         case TT_USAGE:
             (*(pOpts->pUsageProc))(pOpts, EXIT_FAILURE);
             /* NOTREACHED */
-            exit(EXIT_FAILURE);
 
         case TT_VERSION:
             if (pOD->fOptState & OPTST_ALLOC_ARG) {
@@ -540,40 +598,9 @@ textToVariable(tOptions* pOpts, teTextTo whichVar, tOptDesc* pOD)
 
     default:
         close(pipeFd[1]);
-        fp = fdopen(pipeFd[0], "r" FOPEN_BINARY_FLAG);
     }
 
-    for (;;) {
-        int  ch = fgetc(fp);
-        switch (ch) {
-
-        case '\n':
-            nlHoldCt++;
-            break;
-
-        case '\'':
-            while (nlHoldCt > 0) {
-                fputc('\n', stdout);
-                nlHoldCt--;
-            }
-            fputs("'\\''", stdout);
-            break;
-
-        case EOF:
-            goto endCharLoop;
-
-        default:
-            while (nlHoldCt > 0) {
-                fputc('\n', stdout);
-                nlHoldCt--;
-            }
-            fputc(ch, stdout);
-            break;
-        }
-    } endCharLoop:;
-
-    fputs("'\n\n", stdout);
-    close(pipeFd[0]);
+    emit_var_text(pOpts->pzPROGNAME, apzTTNames[whichVar], pipeFd[0]);
 #endif
 }
 
@@ -602,8 +629,8 @@ emitUsage(tOptions* pOpts)
             strftime(zTimeBuf, AO_NAME_SIZE, "%A %B %e, %Y at %r %Z", pTime );
         }
 
-        if (HAVE_OPT(SCRIPT))
-             pzOutName = OPT_ARG(SCRIPT);
+        if (HAVE_GENSHELL_OPT(SCRIPT))
+             pzOutName = GENSHELL_OPT_ARG(SCRIPT);
         else pzOutName = zStdout;
 
         if ((pzLeader == NULL) && (pzShell != NULL))
@@ -1025,7 +1052,7 @@ openOutput(char const* pzFile)
  *  and create shell script variables containing the two types of text.
 =*/
 void
-genshelloptUsage(tOptions*  pOpts, int exitCode)
+genshelloptUsage(tOptions * pOpts, int exitCode)
 {
 #if ! defined(HAVE_WORKING_FORK)
     optionUsage(pOpts, exitCode);
@@ -1050,7 +1077,6 @@ genshelloptUsage(tOptions*  pOpts, int exitCode)
     case -1:
         optionUsage(pOpts, EXIT_FAILURE);
         /* NOTREACHED */
-        _exit(EXIT_FAILURE);
 
     case 0:
         pagerState = PAGER_STATE_CHILD;
@@ -1071,8 +1097,8 @@ genshelloptUsage(tOptions*  pOpts, int exitCode)
      */
     {
         char *  pz;
-        char ** pp = (char **)(void *)&(pShellParseOptions->pzProgName);
-        AGDUPSTR(pz, pShellParseOptions->pzPROGNAME, "program name");
+        char ** pp = (char **)(void *)&(optionParseShellOptions->pzProgName);
+        AGDUPSTR(pz, optionParseShellOptions->pzPROGNAME, "program name");
         *pp = pz;
         while (*pz != NUL) {
             *pz = tolower(*pz);
@@ -1083,7 +1109,7 @@ genshelloptUsage(tOptions*  pOpts, int exitCode)
     /*
      *  Separate the makeshell usage from the client usage
      */
-    fprintf(option_usage_fp, zGenshell, pShellParseOptions->pzProgName);
+    fprintf(option_usage_fp, zGenshell, optionParseShellOptions->pzProgName);
     fflush(option_usage_fp);
 
     /*
@@ -1094,7 +1120,7 @@ genshelloptUsage(tOptions*  pOpts, int exitCode)
         pagerState = PAGER_STATE_CHILD;
         /*FALLTHROUGH*/
     case -1:
-        optionUsage(pShellParseOptions, EXIT_FAILURE);
+        optionUsage(optionParseShellOptions, EXIT_FAILURE);
 
     default:
     {

@@ -2,7 +2,7 @@
 /**
  * \file environment.c
  *
- * Time-stamp:      "2010-12-06 15:01:45 bkorb"
+ * Time-stamp:      "2011-04-06 09:35:55 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -206,6 +206,8 @@ doEnvPresets(tOptions* pOpts, teEnvPresetType type)
     spaceLeft = AO_NAME_SIZE - (pzFlagName - zEnvName) - 1;
 
     for (;ct-- > 0; st.pOD++) {
+        size_t nln;
+
         /*
          *  If presetting is disallowed, then skip this entry
          */
@@ -217,14 +219,14 @@ doEnvPresets(tOptions* pOpts, teEnvPresetType type)
          *  IF there is no such environment variable,
          *  THEN skip this entry, too.
          */
-        if (strlen(st.pOD->pz_NAME) >= spaceLeft)
-            continue;
-
-        /*
-         *  Set up the option state
-         */
-        strcpy(pzFlagName, st.pOD->pz_NAME);
-        do_env_opt(&st, zEnvName, pOpts, type);
+        nln = strlen(st.pOD->pz_NAME) + 1;
+        if (nln <= spaceLeft) {
+            /*
+             *  Set up the option state
+             */
+            memcpy(pzFlagName, st.pOD->pz_NAME, nln);
+            do_env_opt(&st, zEnvName, pOpts, type);
+        }
     }
 
     /*
@@ -232,12 +234,19 @@ doEnvPresets(tOptions* pOpts, teEnvPresetType type)
      */
     if (  (pOpts->specOptIdx.save_opts != NO_EQUIVALENT)
        && (pOpts->specOptIdx.save_opts != 0)) {
+        size_t nln;
         st.pOD = pOpts->pOptDesc + pOpts->specOptIdx.save_opts + 1;
 
-        if (st.pOD->pz_NAME != NULL) {
-            strcpy(pzFlagName, st.pOD->pz_NAME);
-            do_env_opt(&st, zEnvName, pOpts, type);
-        }
+        if (st.pOD->pz_NAME == NULL)
+            return;
+
+        nln = strlen(st.pOD->pz_NAME) + 1;
+            
+        if (nln > spaceLeft)
+            return;
+
+        memcpy(pzFlagName, st.pOD->pz_NAME, nln);
+        do_env_opt(&st, zEnvName, pOpts, type);
     }
 }
 

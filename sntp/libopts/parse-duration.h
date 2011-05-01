@@ -28,10 +28,12 @@
 
   ==== if it is a digit
 
-  the string may contain:  NNN d NNN h NNN m NNN s
-  This represents NNN days, NNN hours, NNN minutes and NNN seconds.
+  the string may contain:  NNN Y NNN M NNN W NNN d NNN h NNN m NNN s
+  This represents NNN years, NNN months, NNN weeks, NNN days, NNN hours,
+    NNN minutes and NNN seconds.
   The embeded white space is optional.
   These terms must appear in this order.
+  Case is significant:  'M' is months and 'm' is minutes.
   The final "s" is optional.
   All of the terms ("NNN" plus designator) are optional.
   Minutes and seconds may optionally be represented as NNN:NNN.
@@ -47,9 +49,11 @@
     yy Y mm M ww W dd D
 
   or it may be empty and followed by a 'T'.  The "yyyymmdd" must be eight
-  digits long.  Note:  months are always 30 days and years are always 365
-  days long.  5 years is always 1825, not 1826 or 1827 depending on leap
-  year considerations.  3 months is always 90 days.  There is no consideration
+  digits long.
+
+  NOTE!  Months are always 30 days and years are always 365 days long.
+  5 years is always 1825 days, not 1826 or 1827 depending on leap year
+  considerations.  3 months is always 90 days.  There is no consideration
   for how many days are in the current, next or previous months.
 
   For the final format:
@@ -75,16 +79,12 @@
 
 #include <time.h>
 
+/* Return value when a valid duration cannot be parsed.  */
 #define BAD_TIME        ((time_t)~0)
 
-extern time_t parse_duration(char const * in_pz);
+/* Parses the given string.  If it has the syntax of a valid duration,
+   this duration is returned.  Otherwise, the return value is BAD_TIME,
+   and errno is set to either EINVAL (bad syntax) or ERANGE (out of range).  */
+extern time_t parse_duration (char const * in_pz);
 
 #endif /* GNULIB_PARSE_DURATION_H */
-
-/*
- * Local Variables:
- * mode: C
- * c-file-style: "gnu"
- * indent-tabs-mode: nil
- * End:
- * end of autoopts/parse-duration.h */

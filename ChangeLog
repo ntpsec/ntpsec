@@ -1,3 +1,4 @@
+* from 4.2.6p4-RC1: Upgrade to libopts 35.0.10 from AutoGen 5.11.9pre8.
 * [Bug 1901] Simulator does not set progname.
 (4.2.7p159) 2011/04/28 Released by Harlan Stenn <stenn@ntp.org>
 * Fix a couple of unused variable warnings.
@@ -870,6 +871,10 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* Upgrade to libopts 35.0.10 from AutoGen 5.11.9pre8.
+
 ---
 (4.2.6p3) 2011/01/03 Released by Harlan Stenn <stenn@ntp.org>
 

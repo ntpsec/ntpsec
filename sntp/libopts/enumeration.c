@@ -2,7 +2,7 @@
 /**
  * \file enumeration.c
  *
- * Time-stamp:      "2010-08-22 15:36:14 bkorb"
+ * Time-stamp:      "2011-04-06 10:48:22 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -30,7 +30,7 @@
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
 
-tSCC*  pz_enum_err_fmt;
+static char const * pz_enum_err_fmt;
 
 /* = = = START-STATIC-FORWARD = = = */
 static void
@@ -348,10 +348,13 @@ static void
 set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
                unsigned int name_ct)
 {
-    char*     pz;
+    static char const none[]  = "none";
+    static char const plus[3] = " + ";
+
+    char *    pz;
     uintptr_t bits = (uintptr_t)pOD->optCookie;
     int       ix   = 0;
-    size_t    len  = 5;
+    size_t    len  = sizeof(none);
 
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
 
@@ -361,7 +364,7 @@ set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
      */
     while (bits != 0) {
         if (bits & 1)
-            len += strlen(paz_names[ix]) + 8;
+            len += strlen(paz_names[ix]) + sizeof(plus);
         if (++ix >= name_ct) break;
         bits >>= 1;
     }
@@ -373,21 +376,23 @@ set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
      *  because we will be restoring to current state, not adding to
      *  the default set of bits.
      */
-    strcpy(pz, "none");
-    pz += 4;
+    memcpy(pz, none, sizeof(none)-1);
+    pz += sizeof(none)-1;
     bits = (uintptr_t)pOD->optCookie;
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
     ix = 0;
 
     while (bits != 0) {
         if (bits & 1) {
-            strcpy(pz, " + ");
-            strcpy(pz+3, paz_names[ix]);
+            size_t nln = strlen(paz_names[ix]);
+            memcpy(pz, plus, sizeof(plus));
+            memcpy(pz+sizeof(plus), paz_names[ix], nln);
             pz += strlen(paz_names[ix]) + 3;
         }
         if (++ix >= name_ct) break;
         bits >>= 1;
     }
+    *pz = NUL;
 }
 
 /*=export_func  optionSetMembers
@@ -477,7 +482,7 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
                     if (*pz != NUL) {
                         if (len >= AO_NAME_LIMIT)
                             break;
-                        strncpy(z, pzArg, (size_t)len);
+                        memcpy(z, pzArg, (size_t)len);
                         z[len] = NUL;
                         p = z;
                     } else {
