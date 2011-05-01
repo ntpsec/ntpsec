@@ -150,7 +150,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <p><a name="index-sntp-usage-3"></a>
 This is the automatically generated usage text for sntp:
 
-<pre class="example">sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p159
+<pre class="example">sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p160
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -175,9 +175,11 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -k Fil keyfile        Look in this file for the key specified with -a
    -l Fil filelog        Log to specified logfile
    -M Num steplimit      Adjustments less than steplimit msec will be slewed.
-                                - it must be:  greater than or equal to 0
+                                - It must be in the range:
+                                  greater than or equal to 0
    -o Num ntpversion     Send &lt;int&gt; as our NTP version
-                                - it must be:  0 to 7
+                                - It must be in the range:
+                                  0 to 7
    -r no  usereservedport Use the NTP Reserved Port (port 123)
    -S no  step           OK to 'step' the time with settimeofday()
    -s no  slew           OK to 'slew' the time with adjtime()

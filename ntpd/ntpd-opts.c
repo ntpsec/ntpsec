@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  April 28, 2011 at 06:46:25 AM by AutoGen 5.11.6
+ *  It has been AutoGen-ed  May  1, 2011 at 08:13:49 AM by AutoGen 5.11.9pre8
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 34:0:9 templates.
+ * Generated from AutoOpts 35:0:10 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -20,9 +20,11 @@
  * ntpd copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
+ * 
  */
 
 #include <sys/types.h>
+
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,15 +35,15 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-tSCC zCopyright[] =
-       "ntpd copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from copyright.def near line 8 */
-;
-tSCC zCopyrightNotice[24] =
-"see html/copyright.html";
+static char const zCopyright[40] =
+"ntpd 4.2.7p160\n\
+see html/copyright.html\n";
+static char const zCopyrightNotice[25] =
+"see html/copyright.html\n";
 
 extern tUsageProc optionUsage;
 
@@ -56,12 +58,6 @@ extern tUsageProc optionUsage;
 
 #ifndef NULL
 #  define NULL 0
-#endif
-#ifndef EXIT_SUCCESS
-#  define  EXIT_SUCCESS 0
-#endif
-#ifndef EXIT_FAILURE
-#  define  EXIT_FAILURE 1
 #endif
 
 /*
@@ -542,8 +538,8 @@ static tOptProc
 extern tOptProc
     optionBooleanVal,    optionNestedVal,     optionNumericVal,
     optionPagedUsage,    optionPrintVersion,  optionResetOpt,
-    optionStackArg,      optionTimeVal,       optionUnstackArg,
-    optionVersionStderr;
+    optionStackArg,      optionTimeDate,      optionTimeVal,
+    optionUnstackArg,    optionVersionStderr;
 static tOptProc
     doUsageOpt;
 
@@ -564,7 +560,7 @@ static tOptProc
  *
  *  Define the Ntpd Option Descriptions.
  */
-static tOptDesc optDesc[ OPTION_CT ] = {
+static tOptDesc optDesc[OPTION_CT] = {
   {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
      /* equiv idx, value */ 0, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -1006,7 +1002,7 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  */
 static char const zPROGNAME[5] = "NTPD";
 static char const zUsageTitle[133] =
-"ntpd - NTP daemon program - Ver. 4.2.7p159\n\
+"ntpd - NTP daemon program - Ver. 4.2.7p160\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n";
 #define zRcName     NULL
@@ -1016,7 +1012,7 @@ static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
 static char const zDetail[7] = "\n\n";
 static char const zFullVersion[] = NTPD_FULL_VERSION;
-/* extracted from optcode.tlib near line 504 */
+/* extracted from optcode.tlib near line 515 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -1086,12 +1082,10 @@ tOptions ntpdOptions = {
  *  Create the static procedure(s) declared above.
  */
 static void
-doUsageOpt(
-    tOptions*   pOptions,
-    tOptDesc*   pOptDesc )
+doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 {
     (void)pOptions;
-    USAGE(EXIT_SUCCESS);
+    USAGE(NTPD_EXIT_SUCCESS);
 }
 
 #if ! defined(TEST_NTPD_OPTS)
@@ -1109,16 +1103,16 @@ DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined DEBUG */
 #endif /* defined(TEST_NTPD_OPTS) */
-/* extracted from optmain.tlib near line 107 */
+/* extracted from optmain.tlib near line 128 */
 
 #if defined(TEST_NTPD_OPTS) /* TEST MAIN PROCEDURE: */
 
 extern void optionPutShell(tOptions*);
 
 int
-main(int argc, char** argv)
+main(int argc, char ** argv)
 {
-    int res = EXIT_SUCCESS;
+    int res = NTPD_EXIT_SUCCESS;
     (void)optionProcess(&ntpdOptions, argc, argv);
     optionPutShell(&ntpdOptions);
     res = ferror(stdout);
@@ -1127,7 +1121,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_NTPD_OPTS */
-/* extracted from optcode.tlib near line 657 */
+/* extracted from optcode.tlib near line 666 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -1151,14 +1145,13 @@ AO_gettext(char const* pz)
     pzRes = strdup(pzRes);
     if (pzRes == NULL) {
         fputs(_("No memory for duping translated strings\n"), stderr);
-        exit(EXIT_FAILURE);
+        exit(NTPD_EXIT_FAILURE);
     }
     return pzRes;
 }
 
-static void coerce_it(void** s) { *s = AO_gettext(*s); }
-#define COERSION(_f) \
-  coerce_it((void*)&(ntpdOptions._f))
+static void coerce_it(void** s) { *s = AO_gettext(*s);
+}
 
 /*
  *  This invokes the translation code (e.g. gettext(3)).
@@ -1166,6 +1159,8 @@ static void coerce_it(void** s) { *s = AO_gettext(*s); }
 static void
 translate_option_strings(void)
 {
+    tOptions * const pOpt = &ntpdOptions;
+
     /*
      *  Guard against re-translation.  It won't work.  The strings will have
      *  been changed by the first pass through this code.  One shot only.
@@ -1175,33 +1170,33 @@ translate_option_strings(void)
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
          */
-        tOptDesc* pOD = ntpdOptions.pOptDesc;
-        char**    ppz = (char**)(void*)&(option_usage_text);
-        int       ix  = option_usage_text.field_ct;
+        tOptDesc * pOD = pOpt->pOptDesc;
+        char **    ppz = (char**)(void*)&(option_usage_text);
+        int        ix  = option_usage_text.field_ct;
 
         do {
             ppz++;
             *ppz = AO_gettext(*ppz);
         } while (--ix > 0);
 
-        COERSION(pzCopyright);
-        COERSION(pzCopyNotice);
-        COERSION(pzFullVersion);
-        COERSION(pzUsageTitle);
-        COERSION(pzExplain);
-        COERSION(pzDetail);
-        COERSION(pzPackager);
+        coerce_it((void*)&(pOpt->pzCopyright));
+        coerce_it((void*)&(pOpt->pzCopyNotice));
+        coerce_it((void*)&(pOpt->pzFullVersion));
+        coerce_it((void*)&(pOpt->pzUsageTitle));
+        coerce_it((void*)&(pOpt->pzExplain));
+        coerce_it((void*)&(pOpt->pzDetail));
+        coerce_it((void*)&(pOpt->pzPackager));
         option_usage_text.field_ct = 0;
 
-        for (ix = ntpdOptions.optCt; ix > 0; ix--, pOD++)
+        for (ix = pOpt->optCt; ix > 0; ix--, pOD++)
             coerce_it((void*)&(pOD->pzText));
     }
 
-    if ((ntpdOptions.fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
-        tOptDesc* pOD = ntpdOptions.pOptDesc;
-        int       ix;
+    if ((pOpt->fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
+        tOptDesc * pOD = pOpt->pOptDesc;
+        int        ix;
 
-        for (ix = ntpdOptions.optCt; ix > 0; ix--, pOD++) {
+        for (ix = pOpt->optCt; ix > 0; ix--, pOD++) {
             coerce_it((void*)&(pOD->pz_Name));
             coerce_it((void*)&(pOD->pz_DisableName));
             coerce_it((void*)&(pOD->pz_DisablePfx));

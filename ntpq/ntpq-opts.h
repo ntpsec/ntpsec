@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  April 28, 2011 at 06:47:12 AM by AutoGen 5.11.6
+ *  It has been AutoGen-ed  May  1, 2011 at 04:28:41 AM by AutoGen 5.11.9pre8
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 34:0:9 templates.
+ * Generated from AutoOpts 35:0:10 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -20,6 +20,7 @@
  * ntpq copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
+ * 
  */
 /*
  *  This file contains the programmatic interface to the Automated
@@ -39,7 +40,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 139264
+#define AO_TEMPLATE_VERSION 143360
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -67,8 +68,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    14
-#define NTPQ_VERSION       "4.2.7p159"
-#define NTPQ_FULL_VERSION  "ntpq - standard NTP query program - Ver. 4.2.7p159"
+#define NTPQ_VERSION       "4.2.7p160"
+#define NTPQ_FULL_VERSION  "ntpq 4.2.7p160"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -99,7 +100,6 @@ typedef enum {
     NTPQ_EXIT_SUCCESS = 0,
     NTPQ_EXIT_FAILURE = 1
 } ntpq_exit_code_t;
-
 /*
  *  Make sure there are no #define name conflicts with the option names
  */
@@ -184,17 +184,17 @@ typedef enum {
                 ntpqOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpqOptions.pUsageProc)(&ntpqOptions, c)
-/* extracted from opthead.tlib near line 435 */
+/* extracted from opthead.tlib near line 451 */
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 /* * * * * *
  *
  *  Declare the ntpq option descriptor.
  */
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-extern tOptions   ntpqOptions;
+extern tOptions ntpqOptions;
 
 #if defined(ENABLE_NLS)
 # ifndef _

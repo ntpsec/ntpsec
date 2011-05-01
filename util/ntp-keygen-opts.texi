@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  April 28, 2011 at 06:47:40 AM by AutoGen 5.11.6
+# It has been AutoGen-ed  May  1, 2011 at 04:29:27 AM by AutoGen 5.11.9pre8
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -51,7 +51,7 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p159
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p160
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
@@ -67,7 +67,8 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -l Num lifetime       set certificate lifetime
    -M no  md5key         generate MD5 keys
    -m Num modulus        modulus
-                                - it must be:  256 to 2048
+                                - It must be in the range:
+                                  256 to 2048
    -P no  pvt-cert       generate PC private certificate
    -p Str pvt-passwd     output private password
    -q Str get-pvt-passwd input private password
