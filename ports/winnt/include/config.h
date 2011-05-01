@@ -431,6 +431,7 @@ typedef unsigned long uintptr_t;
 /* Directory separator, usually / or \ */
 #define	DIR_SEP	'\\'
 
+#define	POSIX_SHELL	"/bin/sh"	/* libopts/makeshell.c */
 
 #define ULONG_CONST(a) a ## UL
 
