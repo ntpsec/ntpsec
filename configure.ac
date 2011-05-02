@@ -10,7 +10,7 @@ AC_INIT(
     [http://www.ntp.org./]dnl
 )
 AC_CONFIG_MACRO_DIR([sntp/m4])
-AC_CONFIG_AUX_DIR([sntp/build-aux])
+AC_CONFIG_AUX_DIR([sntp/libevent/build-aux])
 
 AC_PRESERVE_HELP_ORDER
 

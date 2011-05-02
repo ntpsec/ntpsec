@@ -4,6 +4,7 @@ AC_PREREQ(2.59)
 AC_INIT(event.c)
 
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
 
 AM_INIT_AUTOMAKE(libevent,2.1.0-alpha-dev)
 dnl AM_SILENT_RULES req. automake 1.11.  [no] defaults V=1

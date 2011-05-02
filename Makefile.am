@@ -113,7 +113,7 @@ libtool: $(LIBTOOL_DEPS)
 
 # HMS: The following seems to be a work-in-progress...
 
-CVO=`$(srcdir)/sntp/build-aux/config.guess`
+CVO=`$(srcdir)/sntp/libevent/build-aux/config.guess`
 
 .buildcvo:
 	echo "$(CVO)" > .buildcvo

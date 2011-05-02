@@ -52,7 +52,7 @@ esac
 # * pogo	   sparc-sun-solaris2.10
 # * rackety	   freebsd-6.1
 
-if [ ! -r sntp/build-aux/config.guess ] ; then
+if [ ! -r sntp/libevent/build-aux/config.guess ] ; then
 	echo "Error: bootstrap required." 1>&2 && exit 1
 fi
 
