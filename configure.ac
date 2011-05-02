@@ -91,6 +91,8 @@ case "${enable_libopts_install+set}" in
 esac
 LIBOPTS_CHECK_NOBUILD([sntp/libopts])
 
+NTP_ENABLE_LOCAL_LIBEVENT
+
 NTP_LIBNTP
 
 AC_MSG_CHECKING([for deprecated --with-arlib])

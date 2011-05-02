@@ -3,6 +3,7 @@
   library object in ./libevent
 * Share a single sntp/libevent/build-aux directory between all three
   configure scripts.
+* Add missing --enable-local-libevent help to top-level configure.
 (4.2.7p160) 2011/05/01 Released by Harlan Stenn <stenn@ntp.org>
 * from 4.2.6p4-RC1: Upgrade to libopts 35.0.10 from AutoGen 5.11.9pre8.
 * [Bug 1901] Simulator does not set progname.

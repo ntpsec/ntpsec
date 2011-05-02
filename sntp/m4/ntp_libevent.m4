@@ -1,3 +1,26 @@
+dnl NTP_ENABLE_LOCAL_LIBEVENT				     -*- Autoconf -*-
+dnl
+dnl Provide only the --enable-local-libevent command-line option.
+dnl
+dnl Used standalone by top-level NTP configure.ac, which should have
+dnl --enable-local-libevent in its --help output but which doesn't do
+dnl anything differently based upon its presence or value.
+dnl
+dnl Also AC_REQUIRE'd by NTP_LIBEVENT_CHECK_NOBUILD.
+AC_DEFUN([NTP_ENABLE_LOCAL_LIBEVENT], [
+
+AC_ARG_ENABLE(
+    [local-libevent],
+    [AC_HELP_STRING(
+	[--enable-local-libevent],
+	[Force using the supplied libevent tearoff code]
+    )],
+    [ntp_use_local_libevent=$enableval],
+    [ntp_use_local_libevent=${ntp_use_local_libevent-detect}]
+)
+
+]) dnl NTP_ENABLE_LOCAL_LIBEVENT
+
 dnl NTP_LIBEVENT_CHECK_NOBUILD([MINVERSION [, DIR]])	     -*- Autoconf -*-
 dnl
 dnl Look for libevent, which must be at least MINVERSION.
@@ -15,22 +38,13 @@ dnl    NTP_LIBEVENT_CHECK
 dnl
 AC_DEFUN([NTP_LIBEVENT_CHECK_NOBUILD], [
 AC_REQUIRE([NTP_PKG_CONFIG])dnl
+AC_REQUIRE([NTP_ENABLE_LOCAL_LIBEVENT])dnl
 
 ntp_libevent_min_version=m4_default([$1], [2.0.9])
 ntp_libevent_tearoff=m4_default([$2], [libevent])
 
 AC_SUBST([CPPFLAGS_LIBEVENT])
 AC_SUBST([LDADD_LIBEVENT])
-
-AC_ARG_ENABLE(
-    [local-libevent],
-    [AC_HELP_STRING(
-	[--enable-local-libevent],
-	[Force using the supplied libevent tearoff code]
-    )],
-    [ntp_use_local_libevent=$enableval],
-    [ntp_use_local_libevent=${ntp_use_local_libevent-detect}]
-)
 
 case "$ntp_use_local_libevent" in
  yes)
