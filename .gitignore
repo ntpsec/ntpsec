@@ -35,26 +35,18 @@ adjtimed/Makefile.in
 am.log
 ansi2knr.1
 ansi2knr.c
-arlib/depcomp
-arlib/install-sh
-arlib/missing
-arlib/mkinstalldirs
 autom4te.cache -prune
 br-flock
 builderrors.txt
 clockstuff/Makefile.in
 cmd_args.diff
-compile
 config.cache-*
-config.guess
 config.h
 config.h.in
 config.log
 config.status
-config.sub
 configure
 configure.in.$$$
-depcomp
 firefly.sh
 html/man/*
 html/pic/thumbs.db
@@ -75,8 +67,6 @@ libntp/net.c.bak
 libparse/Makefile.in
 librsaref/*.h
 librsaref/Makefile.in
-ltmain.sh
-missing
 mkinstalldirs
 ntp_io.diff
 ntpd/Copy of ntp_io.csave
@@ -133,6 +123,13 @@ scripts/Makefile.in
 sntp/autogen-version.def
 sntp/bincheck.mf
 sntp/depsver.mf
+sntp/libevent/build-aux/compile
+sntp/libevent/build-aux/config.guess
+sntp/libevent/build-aux/config.sub
+sntp/libevent/build-aux/depcomp
+sntp/libevent/build-aux/ltmain.sh
+sntp/libevent/build-aux/missing
+sntp/libevent/build-aux/ylwrap
 sntp/libevent/test/regress.gen.c
 sntp/libevent/test/regress.gen.h
 sntp/scm-rev
@@ -143,4 +140,3 @@ test.kod
 util/Makefile.in
 version
 version.m4
-ylwrap
