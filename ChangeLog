@@ -1,3 +1,4 @@
+(4.2.7p162) 2011/05/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1910] Support the Tristate Ltd. TS-GPSclock-01.
 (4.2.7p161) 2011/05/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1904] 4.2.7p160 Windows build broken (POSIX_SHELL).
