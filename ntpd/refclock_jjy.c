@@ -4,7 +4,7 @@
 
 /**********************************************************************/
 /*								      */
-/*  Copyright (C) 2001-2004, Takao Abe.  All rights reserved.	      */
+/*  Copyright (C) 2001-2011, Takao Abe.  All rights reserved.	      */
 /*								      */
 /*  Permission to use, copy, modify, and distribute this software     */
 /*  and its documentation for any purpose is hereby granted	      */
@@ -92,6 +92,9 @@
 /*	       when "fudge 127.127.40.X flag1 1" is specified	      */
 /*	       ( DATE,STIM -> DCST,STUS,DATE,STIM )		      */
 /*								      */
+/*  2011/04/30							      */
+/*    [Add]    Support the Tristate Ltd. TS-GPSclock-01		      */
+/*								      */
 /**********************************************************************/
 
 #ifdef HAVE_CONFIG_H
@@ -122,7 +125,7 @@
 /*  dcst<CR><LF>   VALID|INVALID<CR><LF>			      */
 /*  stus<CR><LF>   ADJUSTED|UNADJUSTED<CR><LF>			      */
 /*  date<CR><LF>   YYYY/MM/DD XXX<CR><LF>			      */
-/*  time<CR><LF>   HH:MM:SS<CR><LF>				      */
+/*  time<CR><LF>   HH:MM:SS<CR><LF>	    Not used by this driver   */
 /*  stim<CR><LF>   HH:MM:SS<CR><LF>	    Reply at just second      */
 /*								      */
 /*  During synchronization after a receiver is turned on,	      */
@@ -161,6 +164,23 @@
 /*					    W:  0(Monday)-6(Sunday)   */
 /*								      */
 /**********************************************************************/
+/*								      */
+/*  The Tristate Ltd. GPS clock TS-GPSCLOCK-01			      */
+/*								      */
+/*  This clock has NMEA mode and command/respose mode.		      */
+/*  When this jjy driver are used, set to command/respose mode        */
+/*  of this clock by the onboard switch SW4, and make sure the        */
+/*  LED-Y is tured on.						      */
+/*  Other than this JJY driver, the refclock driver type 20,	      */
+/*  generic NMEA driver, works with the NMEA mode of this clock.      */
+/*								      */
+/*  Command	   Response		    Remarks		      */
+/*  ------------   ----------------------   ---------------------     */
+/*  stus<CR><LF>   *R|*G|*U|+U<CR><LF>				      */
+/*  date<CR><LF>   YY/MM/DD<CR><LF>				      */
+/*  time<CR><LF>   HH:MM:SS<CR><LF>				      */
+/*								      */
+/**********************************************************************/
 
 /*
  * Interface definitions
@@ -171,6 +191,7 @@
 #define	SPEED232_CDEX_JST2000		B9600   /* UART speed (9600 baud) */
 #define	SPEED232_ECHOKEISOKUKI_LT2000	B9600   /* UART speed (9600 baud) */
 #define	SPEED232_CITIZENTIC_JJY200	B4800   /* UART speed (4800 baud) */
+#define	SPEED232_TRISTATE_GPSCLOCK01	B38400  /* USB  speed (38400 baud) */
 #define	REFID   	"JJY"		/* reference ID */
 #define	DESCRIPTION	"JJY Receiver"
 #define	PRECISION	(-3)		/* precision assumed (about 100 ms) */
@@ -196,26 +217,32 @@ struct jjyunit {
 	char	rawbuf [ MAX_RAWBUF ] ;
 };
 
-#define	UNITTYPE_TRISTATE_JJY01	1
-#define	UNITTYPE_CDEX_JST2000  	2
+#define	UNITTYPE_TRISTATE_JJY01		1
+#define	UNITTYPE_CDEX_JST2000		2
 #define	UNITTYPE_ECHOKEISOKUKI_LT2000  	3
 #define	UNITTYPE_CITIZENTIC_JJY200  	4
+#define	UNITTYPE_TRISTATE_GPSCLOCK01	5
 
 /*
  * Function prototypes
  */
-static	int 	jjy_start		    (int, struct peer *);
-static	void	jjy_shutdown		    (int, struct peer *);
-static	void	jjy_poll		    (int, struct peer *);
-static	void	jjy_poll_tristate_jjy01	    (int, struct peer *);
-static	void	jjy_poll_cdex_jst2000	    (int, struct peer *);
-static	void	jjy_poll_echokeisokuki_lt2000(int, struct peer *);
-static	void	jjy_poll_citizentic_jjy200  (int, struct peer *);
-static	void	jjy_receive		    (struct recvbuf *);
-static	int	jjy_receive_tristate_jjy01  (struct recvbuf *);
-static	int	jjy_receive_cdex_jst2000    (struct recvbuf *);
+ 
+static	int 	jjy_start			(int, struct peer *);
+static	void	jjy_shutdown			(int, struct peer *);
+
+static	void	jjy_poll		    	(int, struct peer *);
+static	void	jjy_poll_tristate_jjy01	    	(int, struct peer *);
+static	void	jjy_poll_cdex_jst2000	    	(int, struct peer *);
+static	void	jjy_poll_echokeisokuki_lt2000	(int, struct peer *);
+static	void	jjy_poll_citizentic_jjy200	(int, struct peer *);
+static	void	jjy_poll_tristate_gpsclock01	(int, struct peer *);
+
+static	void	jjy_receive			(struct recvbuf *);
+static	int	jjy_receive_tristate_jjy01	(struct recvbuf *);
+static	int	jjy_receive_cdex_jst2000	(struct recvbuf *);
 static	int	jjy_receive_echokeisokuki_lt2000 (struct recvbuf *);
-static  int	jjy_receive_citizentic_jjy200 (struct recvbuf *);
+static  int	jjy_receive_citizentic_jjy200	(struct recvbuf *);
+static	int	jjy_receive_tristate_gpsclock01	(struct recvbuf *);
 
 static	void	printableString ( char*, int, char*, int ) ;
 
@@ -284,9 +311,46 @@ static  struct
 	{ TS_JJY01_COMMAND_NUMBER_DATE, "date", "date\r\n", 6 },
 	/* stim<CR><LF> -> HH:MM:SS<CR><LF> */
 	{ TS_JJY01_COMMAND_NUMBER_STIM, "stim", "stim\r\n", 6 },
-	{ 0			      , NULL  , NULL	  , 0 }
+	/* End of command */
+	{ 0, NULL, NULL, 0 }
 } ;
 
+/*
+ * Tristate TS-GPSCLOCK01 constants definition
+ */
+
+#define	TS_GPSCLOCK01_COMMAND_NUMBER_DATE	1
+#define	TS_GPSCLOCK01_COMMAND_NUMBER_TIME	2
+#define	TS_GPSCLOCK01_COMMAND_NUMBER_STUS	4
+
+#define	TS_GPSCLOCK01_REPLY_DATE		"yyyy/mm/dd\r\n"
+#define	TS_GPSCLOCK01_REPLY_TIME		"hh:mm:ss\r\n"
+#define	TS_GPSCLOCK01_REPLY_STUS_RTC		"*R\r\n"
+#define	TS_GPSCLOCK01_REPLY_STUS_GPS		"*G\r\n"
+#define	TS_GPSCLOCK01_REPLY_STUS_UTC		"*U\r\n"
+#define	TS_GPSCLOCK01_REPLY_STUS_PPS		"+U\r\n"
+
+#define	TS_GPSCLOCK01_REPLY_LENGTH_DATE	    10	/* Length without <CR><LF> */
+#define	TS_GPSCLOCK01_REPLY_LENGTH_TIME	    8	/* Length without <CR><LF> */
+#define	TS_GPSCLOCK01_REPLY_LENGTH_STUS	    2	/* Length without <CR><LF> */
+
+static  struct
+{
+	char	commandNumber ;
+	char	*commandLog ;
+	char	*command ;
+	int	commandLength ;
+} tristate_gpsclock01_command_sequence[] =
+{
+	/* stus<CR><LF> -> *R<CR><LF> or *G<CR><LF> or *U<CR><LF> or +U<CR><LF> */
+	{ TS_GPSCLOCK01_COMMAND_NUMBER_STUS, "stus", "stus\r\n", 6 },
+	/* date<CR><LF> -> YYYY/MM/DD WWW<CR><LF> */
+	{ TS_GPSCLOCK01_COMMAND_NUMBER_DATE, "date", "date\r\n", 6 },
+	/* time<CR><LF> -> HH:MM:SS<CR><LF> */
+	{ TS_GPSCLOCK01_COMMAND_NUMBER_TIME, "time", "time\r\n", 6 },
+	/* End of command */
+	{ 0, NULL, NULL, 0 }
+} ;
 
 /**************************************************************************************************/
 /*  jjy_start - open the devices and initialize data for processing                               */
@@ -302,6 +366,8 @@ jjy_start ( int unit, struct peer *peer )
 	short	iDiscipline ;
 	int 	iSpeed232 ;
 
+	char	sLogText [ MAX_LOGTEXT ] , sDevText [ MAX_LOGTEXT ] ;
+
 #ifdef DEBUG
 	if ( debug ) {
 		printf ( "jjy_start (refclock_jjy.c) : %s  mode=%d  ", ntoa(&peer->srcadr), peer->ttl ) ;
@@ -309,6 +375,10 @@ jjy_start ( int unit, struct peer *peer )
 		printf ( "\n" ) ;
 	}
 #endif
+	snprintf ( sDevText, sizeof(sDevText), DEVICE, unit ) ;
+	snprintf ( sLogText, sizeof(sLogText), "*Initialze*  %s  mode=%d", sDevText, peer->ttl ) ;
+	record_clock_stats ( &peer->srcadr, sLogText ) ;
+
 	/*
 	 * Open serial port
 	 */
@@ -335,6 +405,10 @@ jjy_start ( int unit, struct peer *peer )
 	case 4 :
 		iDiscipline = LDISC_CLK ;
 		iSpeed232   = SPEED232_CITIZENTIC_JJY200 ;
+		break ;
+	case 5 :
+		iDiscipline = LDISC_CLK ;
+		iSpeed232   = SPEED232_TRISTATE_GPSCLOCK01 ;
 		break ;
 	default :
 		msyslog ( LOG_ERR, "JJY receiver [ %s mode %d ] : Unsupported mode",
@@ -398,6 +472,9 @@ jjy_start ( int unit, struct peer *peer )
 		up->unittype = UNITTYPE_CITIZENTIC_JJY200 ;
 		up->lineexpect = 1 ;
 		up->charexpect[0] = 23 ; /* 'XX YY/MM/DD W HH:MM:SS<CR> */
+		break ;
+	case 5 :
+		up->unittype = UNITTYPE_TRISTATE_GPSCLOCK01 ;
 		break ;
 
 	/* 2010/11/20 */
@@ -524,6 +601,17 @@ jjy_receive ( struct recvbuf *rbufp )
 	 * We get down to business
 	 */
 
+#ifdef DEBUG
+	if ( debug ) {
+		if ( up->linediscipline == LDISC_RAW ) {
+			printableString( sLogText, MAX_LOGTEXT, up->rawbuf, up->charcount ) ;
+		} else {
+			printableString( sLogText, MAX_LOGTEXT, pp->a_lastcode, pp->lencode ) ;
+		}
+		printf ( "jjy_receive (refclock_jjy.c) : [%s]\n", sLogText ) ;
+	}
+#endif
+
 	pp->lastrec = tRecvTimestamp ;
 
 	up->linecount ++ ;
@@ -548,6 +636,10 @@ jjy_receive ( struct recvbuf *rbufp )
 		rc = jjy_receive_citizentic_jjy200 ( rbufp ) ;
 		break ;
 
+	case UNITTYPE_TRISTATE_GPSCLOCK01 :
+		rc = jjy_receive_tristate_gpsclock01  ( rbufp ) ;
+		break ;
+
 	default :
 		rc = 0 ;
 		break ;
@@ -568,8 +660,9 @@ jjy_receive ( struct recvbuf *rbufp )
 		}
 	}
 
-	if ( rc == 0 ) 
+	if ( rc == 0 ) {
 		return ;
+	}
 
 	up->bPollFlag = 0 ;
 
@@ -648,8 +741,9 @@ jjy_receive ( struct recvbuf *rbufp )
 static int
 jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 {
-
+#ifdef DEBUG
 	static	char	*sFunctionName = "jjy_receive_tristate_jjy01" ;
+#endif
 
 	struct jjyunit	    *up ;
 	struct refclockproc *pp ;
@@ -732,8 +826,7 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 		}
 
 		up->msecond = 0 ;
-		if ( up->hour == 0 && up->minute == 0 &&
-		     up->second <= 2 ) {
+		if ( up->hour == 0 && up->minute == 0 && up->second <= 2 ) {
 			/*
 			 * The command "date" and "time" ( or "stim" ) were sent to the JJY receiver separately,
 			 * and the JJY receiver replies a date and time separately.
@@ -837,8 +930,9 @@ jjy_receive_tristate_jjy01 ( struct recvbuf *rbufp )
 static int
 jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 {
-
+#ifdef DEBUG
 	static	char	*sFunctionName = "jjy_receive_cdex_jst2000" ;
+#endif
 
 	struct jjyunit      *up ;
 	struct refclockproc *pp ;
@@ -916,8 +1010,9 @@ jjy_receive_cdex_jst2000 ( struct recvbuf *rbufp )
 static int
 jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 {
-
+#ifdef DEBUG
 	static	char	*sFunctionName = "jjy_receive_echokeisokuki_lt2000" ;
+#endif
 
 	struct jjyunit      *up ;
 	struct refclockproc *pp ;
@@ -1074,8 +1169,9 @@ jjy_receive_echokeisokuki_lt2000 ( struct recvbuf *rbufp )
 static int
 jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 {
-
+#ifdef DEBUG
 	static char *sFunctionName = "jjy_receive_citizentic_jjy200" ;
+#endif
 
 	struct jjyunit		*up ;
 	struct refclockproc	*pp ;
@@ -1164,6 +1260,199 @@ jjy_receive_citizentic_jjy200 ( struct recvbuf *rbufp )
 }
 
 /**************************************************************************************************/
+
+static int
+jjy_receive_tristate_gpsclock01 ( struct recvbuf *rbufp )
+{
+#ifdef DEBUG
+	static	char	*sFunctionName = "jjy_receive_tristate_gpsclock01" ;
+#endif
+
+	struct jjyunit	    *up ;
+	struct refclockproc *pp ;
+	struct peer	    *peer;
+
+	char	*pBuf ;
+	int 	iLen ;
+	int 	rc ;
+
+	int 	bOverMidnight = 0 ;
+
+	char	sLogText [ MAX_LOGTEXT ], sReplyText [ MAX_LOGTEXT ] ;
+
+	char	*pCmd ;
+	int 	iCmdLen ;
+
+	/*
+	 * Initialize pointers and read the timecode and timestamp
+	 */
+	peer = rbufp->recv_peer ;
+	pp = peer->procptr ;
+	up = pp->unitptr ;
+
+	if ( up->linediscipline == LDISC_RAW ) {
+		pBuf = up->rawbuf ;
+		iLen = up->charcount ;
+	} else {
+		pBuf = pp->a_lastcode ;
+		iLen = pp->lencode ;
+	}
+
+	/*
+	 * Ignore NMEA data stream
+	 */
+	if ( iLen > 5
+	  && ( strncmp( pBuf, "$GP", 3 ) == 0 || strncmp( pBuf, "$PFEC", 5 ) == 0 ) ) {
+#ifdef DEBUG
+		if ( debug ) {
+			printf ( "%s (refclock_jjy.c) : Skip NMEA stream [%s]\n",
+				sFunctionName, pBuf ) ;
+		}
+#endif
+		return 0 ;
+	}
+
+	/*
+	 * Skip command prompt '$Cmd>' from the TS-GPSclock-01
+	 */
+	if ( iLen == 5 && strncmp( pBuf, "$Cmd>", 5 ) == 0 ) {
+		return 0 ;
+	} else if ( iLen > 5 && strncmp( pBuf, "$Cmd>", 5 ) == 0 ) {
+		pBuf += 5 ;
+		iLen -= 5 ;
+	}
+
+	/*
+	 * Ignore NMEA data stream after command prompt
+	 */
+	if ( iLen > 5
+	  && ( strncmp( pBuf, "$GP", 3 ) == 0 || strncmp( pBuf, "$PFEC", 5 ) == 0 ) ) {
+#ifdef DEBUG
+		if ( debug ) {
+			printf ( "%s (refclock_jjy.c) : Skip NMEA stream [%s]\n",
+				sFunctionName, pBuf ) ;
+		}
+#endif
+		return 0 ;
+	}
+
+	switch ( tristate_gpsclock01_command_sequence[up->linecount-1].commandNumber ) {
+
+	case TS_GPSCLOCK01_COMMAND_NUMBER_DATE : /* YYYY/MM/DD */
+
+		if ( iLen != TS_GPSCLOCK01_REPLY_LENGTH_DATE ) {
+			up->lineerror = 1 ;
+			break ;
+		}
+
+		rc = sscanf ( pBuf, "%4d/%2d/%2d", &up->year, &up->month, &up->day ) ;
+		if ( rc != 3 || up->year < 2000 || up->month < 1 || up->month > 12 ||
+		     up->day < 1 || up->day > 31 ) {
+			up->lineerror = 1 ;
+			break ;
+		}
+
+		break ;
+
+	case TS_GPSCLOCK01_COMMAND_NUMBER_TIME : /* HH:MM:SS */
+
+		if ( iLen != TS_GPSCLOCK01_REPLY_LENGTH_TIME ) {
+			up->lineerror = 1 ;
+			break ;
+		}
+
+		rc = sscanf ( pBuf, "%2d:%2d:%2d", &up->hour, &up->minute, &up->second ) ;
+		if ( rc != 3 || up->hour > 23 || up->minute > 59 || up->second > 60 ) {
+			up->lineerror = 1 ;
+			break ;
+		}
+
+		up->msecond = 0 ;
+
+		if ( up->hour == 0 && up->minute == 0 && up->second <= 2 ) {
+			/*
+			 * The command "date" and "time" were sent to the JJY receiver separately,
+			 * and the JJY receiver replies a date and time separately.
+			 * Just after midnight transitions, we ignore this time.
+			 */
+			bOverMidnight = 1 ;
+		}
+
+		break ;
+
+	case TS_GPSCLOCK01_COMMAND_NUMBER_STUS :
+
+		if ( iLen == TS_GPSCLOCK01_REPLY_LENGTH_STUS
+		  && ( strncmp( pBuf, TS_GPSCLOCK01_REPLY_STUS_RTC, TS_GPSCLOCK01_REPLY_LENGTH_STUS ) == 0
+		    || strncmp( pBuf, TS_GPSCLOCK01_REPLY_STUS_GPS, TS_GPSCLOCK01_REPLY_LENGTH_STUS ) == 0
+		    || strncmp( pBuf, TS_GPSCLOCK01_REPLY_STUS_UTC, TS_GPSCLOCK01_REPLY_LENGTH_STUS ) == 0
+		    || strncmp( pBuf, TS_GPSCLOCK01_REPLY_STUS_PPS, TS_GPSCLOCK01_REPLY_LENGTH_STUS ) == 0 ) ) {
+			/* Good */
+		} else {
+			up->lineerror = 1 ;
+			break ;
+		}
+
+		break ;
+
+	default : /*  Unexpected reply */
+
+		up->lineerror = 1 ;
+		break ;
+
+	}
+
+	/* Clockstats Log */
+
+	printableString( sReplyText, sizeof(sReplyText), pBuf, iLen ) ;
+	snprintf ( sLogText, sizeof(sLogText), "%d: %s -> %c: %s",
+		   up->linecount,
+		   tristate_gpsclock01_command_sequence[up->linecount-1].commandLog,
+		   ( up->lineerror == 0 ) 
+			? ( ( bOverMidnight == 0 )
+				? 'O' 
+				: 'S' ) 
+			: 'X',
+		   sReplyText ) ;
+	record_clock_stats ( &peer->srcadr, sLogText ) ;
+
+	/* Check before issue next command */
+
+	if ( up->lineerror != 0 ) {
+		/* Do not issue next command */
+		return 0 ;
+	}
+
+	if ( bOverMidnight != 0 ) {
+		/* Do not issue next command */
+		return 0 ;
+	}
+
+	if ( tristate_gpsclock01_command_sequence[up->linecount].command == NULL ) {
+		/* Command sequence completed */
+		return 1 ;
+	}
+
+	/* Issue next command */
+
+#ifdef DEBUG
+	if ( debug ) {
+		printf ( "%s (refclock_jjy.c) : send '%s'\n",
+			sFunctionName, tristate_gpsclock01_command_sequence[up->linecount].commandLog ) ;
+	}
+#endif
+
+	pCmd =  tristate_gpsclock01_command_sequence[up->linecount].command ;
+	iCmdLen = tristate_gpsclock01_command_sequence[up->linecount].commandLength ;
+	if ( write ( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+		refclock_report ( peer, CEVNT_FAULT ) ;
+	}
+
+	return 0 ;
+
+}
+
+/**************************************************************************************************/
 /*  jjy_poll - called by the transmit procedure                                                   */
 /**************************************************************************************************/
 static void
@@ -1214,6 +1503,10 @@ jjy_poll ( int unit, struct peer *peer )
 		jjy_poll_citizentic_jjy200 ( unit, peer ) ;
 		break ;
 
+	case UNITTYPE_TRISTATE_GPSCLOCK01 :
+		jjy_poll_tristate_gpsclock01  ( unit, peer ) ;
+		break ;
+
 	default :
 		break ;
 
@@ -1226,8 +1519,9 @@ jjy_poll ( int unit, struct peer *peer )
 static void
 jjy_poll_tristate_jjy01  ( int unit, struct peer *peer )
 {
-
+#ifdef DEBUG
 	static char *sFunctionName = "jjy_poll_tristate_jjy01" ;
+#endif
 
 	struct jjyunit	    *up;
 	struct refclockproc *pp;
@@ -1339,6 +1633,56 @@ jjy_poll_citizentic_jjy200 ( int unit, struct peer *peer )
 {
 
 	/* Do nothing ( up->bPollFlag is set by the jjy_poll ) */
+
+}
+
+/**************************************************************************************************/
+
+static void
+jjy_poll_tristate_gpsclock01  ( int unit, struct peer *peer )
+{
+#ifdef DEBUG
+	static char *sFunctionName = "jjy_poll_tristate_gpsclock01" ;
+#endif
+
+	struct jjyunit	    *up;
+	struct refclockproc *pp;
+
+	char	*pCmd ;
+	int 	iCmdLen ;
+
+	pp = peer->procptr;
+	up = pp->unitptr ;
+
+	if ( ( pp->sloppyclockflag & CLK_FLAG1 ) == 0 ) {
+		up->linecount = 1 ;
+	}
+
+#ifdef DEBUG
+	if ( debug ) {
+		printf ( "%s (refclock_jjy.c) : flag1=%X CLK_FLAG1=%X up->linecount=%d\n",
+			sFunctionName, pp->sloppyclockflag, CLK_FLAG1,
+			up->linecount ) ;
+	}
+#endif
+
+	/*
+	 * Send a first command
+	 */
+
+#ifdef DEBUG
+	if ( debug ) {
+		printf ( "%s (refclock_jjy.c) : send '%s'\n",
+			 sFunctionName,
+			 tristate_gpsclock01_command_sequence[up->linecount].commandLog ) ;
+	}
+#endif
+
+	pCmd =  tristate_gpsclock01_command_sequence[up->linecount].command ;
+	iCmdLen = tristate_gpsclock01_command_sequence[up->linecount].commandLength ;
+	if ( write ( pp->io.fd, pCmd, iCmdLen ) != iCmdLen ) {
+		refclock_report ( peer, CEVNT_FAULT ) ;
+	}
 
 }
 
