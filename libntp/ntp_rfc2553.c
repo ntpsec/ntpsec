@@ -85,7 +85,8 @@
 
 
 /*
- * copy_addrinfo_list - copy an addrinfo list
+ * copy_addrinfo()	- copy a single addrinfo to malloc()'d block.
+ * copy_addrinfo_list() - copy an addrinfo list to malloc()'d block.
  *
  * Copies an addrinfo list and its associated data to a contiguous block
  * of storage from emalloc().  Callback routines invoked via
@@ -104,11 +105,19 @@
  * former union and so compatible.
  *
  * The rest of ntp_rfc2553.c is conditioned on ISC_PLATFORM_HAVEIPV6
- * not being defined, copy_addrinfo_list() is an exception.
+ * not being defined, copy_addrinfo_*() are exceptions.
  */
+struct addrinfo * copy_addrinfo_common(const struct addrinfo *, int
+#ifdef EREALLOC_CALLSITE
+								   ,
+				       const char *, int
+#endif
+				       );
+
+
 struct addrinfo *
 copy_addrinfo_impl(
-	const struct addrinfo *	ai_src
+	const struct addrinfo *	src
 #ifdef EREALLOC_CALLSITE
 				   ,
 	const char *		caller_file,
@@ -116,32 +125,12 @@ copy_addrinfo_impl(
 #endif
 	)
 {
-	struct addrinfo *	dst;
-	size_t			octets;
-	size_t			canons_octets;
-	sockaddr_u *		psau;
-	char *			pcanon;
-
-	octets = sizeof(*ai_src) + sizeof(*psau);
-	if (NULL != ai_src->ai_canonname)
-		canons_octets = 1 + strlen(ai_src->ai_canonname);
-	else
-		canons_octets = 0;
-	octets += canons_octets;
-	dst = erealloczsite(NULL, octets, 0, TRUE, caller_file,
-			    caller_line);
-	psau = (void *)(dst + 1);
-	pcanon = (void *)(psau + 1);
-	*dst = *ai_src;
-	REQUIRE(ai_src->ai_addrlen <= sizeof(sockaddr_u));
-	memcpy(psau, ai_src->ai_addr, ai_src->ai_addrlen);
-	dst->ai_addr = &psau->sa;
-	if (NULL != ai_src->ai_canonname) {
-		dst->ai_canonname = pcanon;
-		memcpy(pcanon, ai_src->ai_canonname, canons_octets);
-	}
-
-	return dst;
+	return copy_addrinfo_common(src, TRUE
+#ifdef EREALLOC_CALLSITE
+					      ,
+				    caller_file, caller_line
+#endif
+				    );
 }
 
 
@@ -155,7 +144,28 @@ copy_addrinfo_list_impl(
 #endif
 	)
 {
+	return copy_addrinfo_common(src, FALSE
+#ifdef EREALLOC_CALLSITE
+					      ,
+				    caller_file, caller_line
+#endif
+				    );
+}
+
+
+struct addrinfo *
+copy_addrinfo_common(
+	const struct addrinfo *	src,
+	int			just_one
+#ifdef EREALLOC_CALLSITE
+					,
+	const char *		caller_file,
+	int			caller_line
+#endif
+	)
+{
 	const struct addrinfo *	ai_src;
+	const struct addrinfo *	ai_nxt;
 	struct addrinfo *	ai_cpy;
 	struct addrinfo *	dst;
 	sockaddr_u *		psau;
@@ -168,7 +178,11 @@ copy_addrinfo_list_impl(
 	elements = 0;
 	canons_octets = 0;
 
-	for (ai_src = src; NULL != ai_src; ai_src = ai_src->ai_next) {
+	for (ai_src = src; NULL != ai_src; ai_src = ai_nxt) {
+		if (just_one)
+			ai_nxt = NULL;
+		else
+			ai_nxt = ai_src->ai_next;
 		++elements;
 		if (NULL != ai_src->ai_canonname)
 			canons_octets += 1 + strlen(ai_src->ai_canonname);
@@ -183,7 +197,11 @@ copy_addrinfo_list_impl(
 	psau = (void *)(ai_cpy + elements);
 	pcanon = (void *)(psau + elements);
 
-	for (ai_src = src; NULL != ai_src; ai_src = ai_src->ai_next) {
+	for (ai_src = src; NULL != ai_src; ai_src = ai_nxt) {
+		if (just_one)
+			ai_nxt = NULL;
+		else
+			ai_nxt = ai_src->ai_next;
 		*ai_cpy = *ai_src;
 		REQUIRE(ai_src->ai_addrlen <= sizeof(sockaddr_u));
 		memcpy(psau, ai_src->ai_addr, ai_src->ai_addrlen);
@@ -195,8 +213,12 @@ copy_addrinfo_list_impl(
 			memcpy(pcanon, ai_src->ai_canonname, str_octets);
 			pcanon += str_octets;
 		}
-		if (NULL != ai_cpy->ai_next)
-			ai_cpy->ai_next = ai_cpy + 1;
+		if (NULL != ai_cpy->ai_next) {
+			if (just_one)
+				ai_cpy->ai_next = NULL;
+			else
+				ai_cpy->ai_next = ai_cpy + 1;
+		}
 		++ai_cpy;
 	}
 	NTP_ENSURE(pcanon == ((char *)dst + octets));
@@ -424,7 +446,7 @@ getnameinfo (const struct sockaddr *sa, u_int salen, char *host,
 		else
 			return (EAI_FAIL);
 	}
-	if (host != NULL && hostlen > 0) {
+	if (host != NULL && hostlen > 0)
 		strlcpy(host, hp->h_name, hostlen);
 	return (0);
 }
@@ -546,7 +568,7 @@ do_nodename(
 #ifdef ISC_PLATFORM_HAVESALEN
 	ai->ai_addr->sa_len = sizeof(struct sockaddr);
 #endif
-	if (hints != NULL && hints->ai_flags & AI_CANONNAME)
+	if (hints != NULL && (hints->ai_flags & AI_CANONNAME))
 		ai->ai_canonname = estrdup(hp->h_name);
 	return (0);
 }
