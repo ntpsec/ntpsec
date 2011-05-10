@@ -1,3 +1,22 @@
+* [Bug 988] Local clock eats up -g option, so ntpd stops with large
+  initial time offset.
+* [Bug 1921] LOCAL, ACTS drivers with "prefer" excluded from initial
+  candidate list.
+* [Bug 1922] "tos orphanwait" applied incorrectly at startup.
+* [Bug 1923] orphan parent favored over LOCAL, ACTS drivers.
+* [Bug 1924] Billboard tally codes sometimes do not match operation,
+  variables.
+* Change "pool DNS" messages from msyslog to debug trace output.
+* Remove unused FLAG_SYSPEER from peer->status.
+* Respect "tos orphanwait" at startup.  Previously there was an
+  unconditional 300 s. startup orphanwait, though other values were
+  respected for subsequent orphan wait periods after no_sys_peer events.
+* Apply "tos orphanwait" (def. 300 seconds) to LOCAL and ACTS reference
+  clock drivers, in addition to orphan parent operation.  LOCAL and ACTS
+  are not selectable during the orphanwait delay at startup and after
+  each no_sys_peer event.  This prevents a particular form of clock-
+  hopping, such as using LOCAL briefly at startup before remote peers
+  are selectable.  This fixes the issue reported in [Bug 988].
 (4.2.7p163) 2011/05/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1911] missing curly brace in libntp/ntp_rfc2553.c
 (4.2.7p162) 2011/05/03 Released by Harlan Stenn <stenn@ntp.org>

@@ -209,7 +209,7 @@ struct actsunit {
 	int	retry;		/* retry index */
 	int	msgcnt;		/* count of messages received */
 	l_fp	tstamp;		/* on-time timestamp */
-	char	*bufptr;		/* next incoming char stored here */
+	char	*bufptr;	/* next incoming char stored here */
 	char	buf[BMAX];	/* bufptr roams within buf[] */
 };
 
@@ -229,7 +229,7 @@ static	void	acts_close	(struct peer *);
 /*
  * Transfer vector (conditional structure name)
  */
-struct	refclock refclock_acts = {
+struct refclock refclock_acts = {
 	acts_start,		/* start up driver */
 	acts_shutdown,		/* shut down driver */
 	acts_poll,		/* transmit poll message */
@@ -243,7 +243,7 @@ struct	refclock refclock_acts = {
  * Initialize data for processing
  */
 static int
-acts_start (
+acts_start(
 	int	unit,
 	struct peer *peer
 	)
@@ -286,7 +286,7 @@ acts_start (
  * acts_shutdown - shut down the clock
  */
 static void
-acts_shutdown (
+acts_shutdown(
 	int	unit,
 	struct peer *peer
 	)
@@ -311,7 +311,7 @@ acts_shutdown (
  * acts_receive - receive data from the serial interface
  */
 static void
-acts_receive (
+acts_receive(
 	struct recvbuf *rbufp
 	)
 {
@@ -602,12 +602,13 @@ acts_close(
 	struct actsunit *up;
 	struct refclockproc *pp;
 	char	lockfile[128];
-	int		dtr = TIOCM_DTR;
+	int	dtr;
 
 	pp = peer->procptr;
 	up = pp->unitptr;
 	if (pp->io.fd != 0) {
 		report_event(PEVNT_CLOCK, peer, "close");
+		dtr = TIOCM_DTR;
 		ioctl(pp->io.fd, TIOCMBIC, &dtr);
 		io_closeclock(&pp->io);
 		pp->io.fd = -1;

@@ -332,6 +332,7 @@ struct peer {
 	 * Ephemeral state variables
 	 */
 	u_char	status;		/* peer status */
+	u_char	new_status;	/* under-construction status */
 	u_char	reach;		/* reachability register */
 	int	flash;		/* protocol error test tally bits */
 	u_long	epoch;		/* reference epoch */
@@ -439,17 +440,16 @@ struct peer {
  * Values for peer.flags
  */
 #define	FLAG_CONFIG	0x0001	/* association was configured */
-#define FLAG_PREEMPT	0x0002	/* preemptable association */
+#define	FLAG_PREEMPT	0x0002	/* preemptable association */
 #define	FLAG_AUTHENTIC	0x0004	/* last message was authentic */
 #define	FLAG_REFCLOCK	0x0008	/* this is actually a reference clock */
-#define	FLAG_SYSPEER	0x0010	/* system peer */
-#define FLAG_PREFER	0x0020	/* prefer peer */
-#define FLAG_BURST	0x0040	/* burst mode */
-#define FLAG_PPS	0x0080	/* steered by PPS */
-#define FLAG_IBURST	0x0100	/* initial burst mode */
-#define FLAG_NOSELECT	0x0200	/* never select */
-#define FLAG_TRUE	0x0400	/* force truechimer */
-#define FLAG_SKEY	0x0800  /* autokey authentication */
+#define	FLAG_PREFER	0x0020	/* prefer peer */
+#define	FLAG_BURST	0x0040	/* burst mode */
+#define	FLAG_PPS	0x0080	/* steered by PPS */
+#define	FLAG_IBURST	0x0100	/* initial burst mode */
+#define	FLAG_NOSELECT	0x0200	/* never select */
+#define	FLAG_TRUE	0x0400	/* force truechimer */
+#define	FLAG_SKEY	0x0800  /* autokey authentication */
 #define	FLAG_XLEAVE	0x1000	/* interleaved protocol */
 #define	FLAG_XB		0x2000	/* interleaved broadcast */
 #define	FLAG_XBOGUS	0x4000	/* interleaved bogus packet */

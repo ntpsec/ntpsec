@@ -323,7 +323,7 @@ local_clock(
 		switch (state) {
 
 		/*
-		 * In SYNC state we ignore the first outlyer amd switch
+		 * In SYNC state we ignore the first outlyer and switch
 		 * to SPIK state.
 		 */
 		case EVNT_SYNC:
