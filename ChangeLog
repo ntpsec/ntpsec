@@ -1,5 +1,6 @@
 ---
 
+* Upgrade to AutoGen 5.11.9 (and require it).
 * Upgrade to libopts 35.0.10 from AutoGen 5.11.9pre8.
 
 ---
