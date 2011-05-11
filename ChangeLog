@@ -17,6 +17,7 @@
   each no_sys_peer event.  This prevents a particular form of clock-
   hopping, such as using LOCAL briefly at startup before remote peers
   are selectable.  This fixes the issue reported in [Bug 988].
+* Documentation updates from Dave Mills.
 (4.2.7p163) 2011/05/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1911] missing curly brace in libntp/ntp_rfc2553.c
 (4.2.7p162) 2011/05/03 Released by Harlan Stenn <stenn@ntp.org>
