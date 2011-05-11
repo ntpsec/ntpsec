@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename sntp.info
 @settitle Sntp User's Manual
-@include version.texi
+@include include/version.texi
 @paragraphindent 2
 @c %**end of header
 
