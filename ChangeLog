@@ -1,4 +1,5 @@
 * Convert snmp docs to mdoc format, which requires autogen 5.11.9.
+* from 4.2.6p4-RC1: Require autogen 5.11.9.
 (4.2.7p164) 2011/05/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 988] Local clock eats up -g option, so ntpd stops with large
   initial time offset.
@@ -907,6 +908,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* Upgrade to AutoGen 5.11.9 (and require it).
 * Upgrade to libopts 35.0.10 from AutoGen 5.11.9pre8.
 
 ---
