@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  May 11, 2011 at 12:48:09 AM by AutoGen 5.11.9pre10
+# It has been AutoGen-ed  May 11, 2011 at 07:29:02 PM by AutoGen 5.11.9
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -76,14 +76,10 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p164
+sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p165
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
-   -d no  debug-level    Increase output debug message level
-                                - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
-                                - may appear multiple times
    -4 no  ipv4           Force IPv4 DNS name resolution
                                 - prohibits these options:
                                 ipv6
@@ -95,6 +91,10 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
    -c Str concurrent     Concurrent query all IPs returned for host-name
+                                - may appear multiple times
+   -d no  debug-level    Increase output debug message level
+                                - may appear multiple times
+   -D Str set-debug-level Set the output debug message level
                                 - may appear multiple times
    -h Num headspace      The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
@@ -149,9 +149,10 @@ please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @cindex sntp-authentication
 
 This is the ``enable authentication with the key auth-keynumber'' option.
-This option enables authentication using the key specified in this option's argument.
-The argument of this option is the keyid, a number specified in the keyfile as this
-key's identifier. See the keyfile option (-k) for more details.
+This option enables authentication using the key specified in this
+option's argument.  The argument of this option is the keyid, a
+number specified in the keyfile as this key's identifier. See the
+keyfile option (-k) for more details.
 
 @node sntp bctimeout
 @subsection bctimeout option (-B)
@@ -192,12 +193,12 @@ may appear an unlimited number of times.
 Requests from an NTP "client" to a "server" should never be sent
 more rapidly than one every 2 seconds.  By default, any IPs returned
 as part of a DNS lookup are assumed to be for a single instance of
-ntpd, and therefore sntp will send  queries to these IPs one after
+ntpd, and therefore sntp will send queries to these IPs one after
 another, with a 2-second gap in between each query.
 
-The -c or --concurrent flag says that any IPs returned for the
-DNS lookup of the supplied host-name are on different machines,
-so we can send concurrent queries.
+The -c or --concurrent flag says that any IPs returned for the DNS
+lookup of the supplied host-name are on different machines, so we
+can send concurrent queries.
 
 @node sntp debug-level
 @subsection debug-level option (-d)
@@ -269,7 +270,8 @@ to the IPv6 namespace.
 @cindex sntp-keyfile
 
 This is the ``look in this file for the key specified with -a'' option.
-This option specifies the keyfile. SNTP will search for the key specified with -a keyno in this
+This option specifies the keyfile.
+SNTP will search for the key specified with -a keyno in this
 file. Key files follow the following format:
 
 keyid keytype key
@@ -288,9 +290,9 @@ For more information see ntp.keys(5).
 @cindex sntp-kod
 
 This is the ``kod history filename'' option.
-Specifies the filename to be used for the  persistent history of KoD
+Specifies the filename to be used for the persistent history of KoD
 responses received from servers.  The default is
-/var/db/ntp-kod.
+/var/db/ntp-kod .
 
 @node sntp ntpversion
 @subsection ntpversion option (-o)
@@ -334,7 +336,9 @@ This is the ``ok to 'step' the time with settimeofday()'' option.
 @cindex sntp-steplimit
 
 This is the ``adjustments less than steplimit msec will be slewed.'' option.
-If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+If the time adjustment is less than steplimit milliseconds, slew the
+amount using adjtime().  Otherwise, step the correction using
+settimeofday(). 
 
 @node sntp uctimeout
 @subsection uctimeout option (-u)
@@ -349,7 +353,8 @@ of seconds specified before giving up.  Default 5 seconds.
 @cindex sntp-usereservedport
 
 This is the ``use the ntp reserved port (port 123)'' option.
-Use port 123, which is reserved for NTP, for our network communications.
+Use port 123, which is reserved for NTP, for our network
+communications.
 
 @node sntp wait
 @subsection wait option

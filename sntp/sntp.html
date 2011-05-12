@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p116 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p165 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -150,14 +150,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <p><a name="index-sntp-usage-3"></a>
 This is the automatically generated usage text for sntp:
 
-<pre class="example">sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p164
+<pre class="example">sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p165
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
-   -d no  debug-level    Increase output debug message level
-                                - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
-                                - may appear multiple times
    -4 no  ipv4           Force IPv4 DNS name resolution
                                 - prohibits these options:
                                 ipv6
@@ -169,6 +165,10 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
    -c Str concurrent     Concurrent query all IPs returned for host-name
+                                - may appear multiple times
+   -d no  debug-level    Increase output debug message level
+                                - may appear multiple times
+   -D Str set-debug-level Set the output debug message level
                                 - may appear multiple times
    -h Num headspace      The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
@@ -228,9 +228,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <p><a name="index-sntp_002dauthentication-4"></a>
 This is the &ldquo;enable authentication with the key auth-keynumber&rdquo; option. 
-This option enables authentication using the key specified in this option's argument. 
-The argument of this option is the keyid, a number specified in the keyfile as this
-key's identifier. See the keyfile option (-k) for more details.
+This option enables authentication using the key specified in this
+option's argument.  The argument of this option is the keyid, a
+number specified in the keyfile as this key's identifier. See the
+keyfile option (-k) for more details.
 
 <div class="node">
 <p><hr>
@@ -290,12 +291,12 @@ This is the &ldquo;concurrent query all ips returned for host-name&rdquo; option
   <p>Requests from an NTP "client" to a "server" should never be sent
 more rapidly than one every 2 seconds.  By default, any IPs returned
 as part of a DNS lookup are assumed to be for a single instance of
-ntpd, and therefore sntp will send  queries to these IPs one after
+ntpd, and therefore sntp will send queries to these IPs one after
 another, with a 2-second gap in between each query.
 
-  <p>The -c or &ndash;concurrent flag says that any IPs returned for the
-DNS lookup of the supplied host-name are on different machines,
-so we can send concurrent queries.
+  <p>The -c or &ndash;concurrent flag says that any IPs returned for the DNS
+lookup of the supplied host-name are on different machines, so we
+can send concurrent queries.
 
 <div class="node">
 <p><hr>
@@ -406,7 +407,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <p><a name="index-sntp_002dkeyfile-13"></a>
 This is the &ldquo;look in this file for the key specified with -a&rdquo; option. 
-This option specifies the keyfile. SNTP will search for the key specified with -a keyno in this
+This option specifies the keyfile. 
+SNTP will search for the key specified with -a keyno in this
 file. Key files follow the following format:
 
   <p>keyid keytype key
@@ -432,9 +434,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <p><a name="index-sntp_002dkod-14"></a>
 This is the &ldquo;kod history filename&rdquo; option. 
-Specifies the filename to be used for the  persistent history of KoD
+Specifies the filename to be used for the persistent history of KoD
 responses received from servers.  The default is
-/var/db/ntp-kod.
+/var/db/ntp-kod .
 
 <div class="node">
 <p><hr>
@@ -510,7 +512,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <p><a name="index-sntp_002dsteplimit-19"></a>
 This is the &ldquo;adjustments less than steplimit msec will be slewed.&rdquo; option. 
-If the time adjustment is less than steplimit milliseconds, slew the amount using adjtime().  Otherwise, step the correction using settimeofday().
+If the time adjustment is less than steplimit milliseconds, slew the
+amount using adjtime().  Otherwise, step the correction using
+settimeofday().
 
 <div class="node">
 <p><hr>
@@ -539,7 +543,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <p><a name="index-sntp_002dusereservedport-21"></a>
 This is the &ldquo;use the ntp reserved port (port 123)&rdquo; option. 
-Use port 123, which is reserved for NTP, for our network communications.
+Use port 123, which is reserved for NTP, for our network
+communications.
 
 <div class="node">
 <p><hr>

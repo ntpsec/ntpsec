@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  May 11, 2011 at 12:47:49 AM by AutoGen 5.11.9pre10
+ *  It has been AutoGen-ed  May 11, 2011 at 11:32:43 AM by AutoGen 5.11.9
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -40,9 +40,9 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[52] =
-"ntp-keygen (ntp) 4.2.7p164\n\
+"ntp-keygen (ntp) 4.2.7p165\n\
 see html/copyright.html\n";
-static char const zCopyrightNotice[25] =
+static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
 
 extern tUsageProc optionUsage;
@@ -752,7 +752,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[11] = "NTP_KEYGEN";
 static char const zUsageTitle[116] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p164\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p165\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -812,7 +812,7 @@ tOptions ntp_keygenOptions = {
     + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
-    zRcName,      zCopyright,   zCopyrightNotice,
+    zRcName,      zCopyright,   zLicenseDescrip,
     zFullVersion, apzHomeList,  zUsageTitle,
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */

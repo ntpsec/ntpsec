@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  May 11, 2011 at 12:43:30 AM by AutoGen 5.11.9pre10
+ *  It has been AutoGen-ed  May 11, 2011 at 11:08:32 AM by AutoGen 5.11.9
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -40,9 +40,9 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[40] =
-"sntp 4.2.7p164\n\
+"sntp 4.2.7p165\n\
 see html/copyright.html\n";
-static char const zCopyrightNotice[25] =
+static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
 
 extern tUsageProc optionUsage;
@@ -59,25 +59,6 @@ extern tUsageProc optionUsage;
 #ifndef NULL
 #  define NULL 0
 #endif
-
-/*
- *  Debug_Level option description:
- */
-static char const zDebug_LevelText[] =
-        "Increase output debug message level";
-static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
-static char const zDebug_Level_Name[]        = "debug-level";
-#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Set_Debug_Level option description:
- */
-static char const zSet_Debug_LevelText[] =
-        "Set the output debug message level";
-static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
-static char const zSet_Debug_Level_Name[]    = "set-debug-level";
-#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Ipv4 option description with
@@ -144,6 +125,25 @@ static char const zConcurrentText[] =
 static char const zConcurrent_NAME[]         = "CONCURRENT";
 static char const zConcurrent_Name[]         = "concurrent";
 #define CONCURRENT_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+/*
+ *  Debug_Level option description:
+ */
+static char const zDebug_LevelText[] =
+        "Increase output debug message level";
+static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
+static char const zDebug_Level_Name[]        = "debug-level";
+#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Set_Debug_Level option description:
+ */
+static char const zSet_Debug_LevelText[] =
+        "Set the output debug message level";
+static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
+static char const zSet_Debug_Level_Name[]    = "set-debug-level";
+#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
@@ -338,32 +338,8 @@ static tOptProc
  *  Define the Sntp Option Descriptions.
  */
 static tOptDesc optDesc[OPTION_CT] = {
-  {  /* entry idx, value */ 0, VALUE_OPT_DEBUG_LEVEL,
-     /* equiv idx, value */ 0, VALUE_OPT_DEBUG_LEVEL,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 1, VALUE_OPT_SET_DEBUG_LEVEL,
-     /* equiv idx, value */ 1, VALUE_OPT_SET_DEBUG_LEVEL,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, NOLIMIT, 0,
-     /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
-     /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 2, VALUE_OPT_IPV4,
-     /* equiv idx, value */ 2, VALUE_OPT_IPV4,
+  {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
+     /* equiv idx, value */ 0, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
@@ -374,8 +350,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 3, VALUE_OPT_IPV6,
-     /* equiv idx, value */ 3, VALUE_OPT_IPV6,
+  {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
+     /* equiv idx, value */ 1, VALUE_OPT_IPV6,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
@@ -386,8 +362,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 4, VALUE_OPT_AUTHENTICATION,
-     /* equiv idx, value */ 4, VALUE_OPT_AUTHENTICATION,
+  {  /* entry idx, value */ 2, VALUE_OPT_AUTHENTICATION,
+     /* equiv idx, value */ 2, VALUE_OPT_AUTHENTICATION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ AUTHENTICATION_FLAGS, 0,
@@ -398,8 +374,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zAuthenticationText, zAuthentication_NAME, zAuthentication_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 5, VALUE_OPT_BCTIMEOUT,
-     /* equiv idx, value */ 5, VALUE_OPT_BCTIMEOUT,
+  {  /* entry idx, value */ 3, VALUE_OPT_BCTIMEOUT,
+     /* equiv idx, value */ 3, VALUE_OPT_BCTIMEOUT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ BCTIMEOUT_FLAGS, 0,
@@ -410,8 +386,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zBctimeoutText, zBctimeout_NAME, zBctimeout_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 6, VALUE_OPT_BROADCAST,
-     /* equiv idx, value */ 6, VALUE_OPT_BROADCAST,
+  {  /* entry idx, value */ 4, VALUE_OPT_BROADCAST,
+     /* equiv idx, value */ 4, VALUE_OPT_BROADCAST,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ BROADCAST_FLAGS, 0,
@@ -422,8 +398,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zBroadcastText, zBroadcast_NAME, zBroadcast_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 7, VALUE_OPT_CONCURRENT,
-     /* equiv idx, value */ 7, VALUE_OPT_CONCURRENT,
+  {  /* entry idx, value */ 5, VALUE_OPT_CONCURRENT,
+     /* equiv idx, value */ 5, VALUE_OPT_CONCURRENT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ CONCURRENT_FLAGS, 0,
@@ -432,6 +408,30 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionStackArg,
      /* desc, NAME, name */ zConcurrentText, zConcurrent_NAME, zConcurrent_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 6, VALUE_OPT_DEBUG_LEVEL,
+     /* equiv idx, value */ 6, VALUE_OPT_DEBUG_LEVEL,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 7, VALUE_OPT_SET_DEBUG_LEVEL,
+     /* equiv idx, value */ 7, VALUE_OPT_SET_DEBUG_LEVEL,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, NOLIMIT, 0,
+     /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
+     /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 8, VALUE_OPT_HEADSPACE,
@@ -637,7 +637,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p164\n\
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p165\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
@@ -702,7 +702,7 @@ tOptions sntpOptions = {
     + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
-    zRcName,      zCopyright,   zCopyrightNotice,
+    zRcName,      zCopyright,   zLicenseDescrip,
     zFullVersion, apzHomeList,  zUsageTitle,
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */

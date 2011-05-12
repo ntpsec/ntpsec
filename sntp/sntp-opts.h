@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  May 11, 2011 at 12:43:30 AM by AutoGen 5.11.9pre10
+ *  It has been AutoGen-ed  May 11, 2011 at 11:08:32 AM by AutoGen 5.11.9
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -51,14 +51,14 @@
  *  Enumeration of each option:
  */
 typedef enum {
-    INDEX_OPT_DEBUG_LEVEL      =  0,
-    INDEX_OPT_SET_DEBUG_LEVEL  =  1,
-    INDEX_OPT_IPV4             =  2,
-    INDEX_OPT_IPV6             =  3,
-    INDEX_OPT_AUTHENTICATION   =  4,
-    INDEX_OPT_BCTIMEOUT        =  5,
-    INDEX_OPT_BROADCAST        =  6,
-    INDEX_OPT_CONCURRENT       =  7,
+    INDEX_OPT_IPV4             =  0,
+    INDEX_OPT_IPV6             =  1,
+    INDEX_OPT_AUTHENTICATION   =  2,
+    INDEX_OPT_BCTIMEOUT        =  3,
+    INDEX_OPT_BROADCAST        =  4,
+    INDEX_OPT_CONCURRENT       =  5,
+    INDEX_OPT_DEBUG_LEVEL      =  6,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  7,
     INDEX_OPT_HEADSPACE        =  8,
     INDEX_OPT_KOD              =  9,
     INDEX_OPT_KEYFILE          = 10,
@@ -78,13 +78,13 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    24
-#define SNTP_VERSION       "4.2.7p164"
-#define SNTP_FULL_VERSION  "sntp 4.2.7p164"
+#define SNTP_VERSION       "4.2.7p165"
+#define SNTP_FULL_VERSION  "sntp 4.2.7p165"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT(DEBUG_LEVEL)
+ *  e.g. HAVE_OPT(IPV4)
  */
 #define         DESC(n) (sntpOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -114,14 +114,6 @@ typedef enum {
  *  Make sure there are no #define name conflicts with the option names
  */
 #ifndef     NO_OPTION_NAME_WARNINGS
-# ifdef    DEBUG_LEVEL
-#  warning undefining DEBUG_LEVEL due to option name conflict
-#  undef   DEBUG_LEVEL
-# endif
-# ifdef    SET_DEBUG_LEVEL
-#  warning undefining SET_DEBUG_LEVEL due to option name conflict
-#  undef   SET_DEBUG_LEVEL
-# endif
 # ifdef    IPV4
 #  warning undefining IPV4 due to option name conflict
 #  undef   IPV4
@@ -145,6 +137,14 @@ typedef enum {
 # ifdef    CONCURRENT
 #  warning undefining CONCURRENT due to option name conflict
 #  undef   CONCURRENT
+# endif
+# ifdef    DEBUG_LEVEL
+#  warning undefining DEBUG_LEVEL due to option name conflict
+#  undef   DEBUG_LEVEL
+# endif
+# ifdef    SET_DEBUG_LEVEL
+#  warning undefining SET_DEBUG_LEVEL due to option name conflict
+#  undef   SET_DEBUG_LEVEL
 # endif
 # ifdef    HEADSPACE
 #  warning undefining HEADSPACE due to option name conflict
@@ -191,14 +191,14 @@ typedef enum {
 #  undef   WAIT
 # endif
 #else  /* NO_OPTION_NAME_WARNINGS */
-# undef DEBUG_LEVEL
-# undef SET_DEBUG_LEVEL
 # undef IPV4
 # undef IPV6
 # undef AUTHENTICATION
 # undef BCTIMEOUT
 # undef BROADCAST
 # undef CONCURRENT
+# undef DEBUG_LEVEL
+# undef SET_DEBUG_LEVEL
 # undef HEADSPACE
 # undef KOD
 # undef KEYFILE
@@ -216,8 +216,6 @@ typedef enum {
  *
  *  Interface defines for specific options.
  */
-#define VALUE_OPT_DEBUG_LEVEL    'd'
-#define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_AUTHENTICATION 'a'
@@ -228,6 +226,8 @@ typedef enum {
 #define OPT_VALUE_BCTIMEOUT      (DESC(BCTIMEOUT).optArg.argInt)
 #define VALUE_OPT_BROADCAST      'b'
 #define VALUE_OPT_CONCURRENT     'c'
+#define VALUE_OPT_DEBUG_LEVEL    'd'
+#define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 #define VALUE_OPT_HEADSPACE      'h'
 
 #define OPT_VALUE_HEADSPACE      (DESC(HEADSPACE).optArg.argInt)

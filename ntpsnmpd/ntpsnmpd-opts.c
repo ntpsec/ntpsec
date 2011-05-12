@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  May 11, 2011 at 12:47:43 AM by AutoGen 5.11.9pre10
+ *  It has been AutoGen-ed  May 11, 2011 at 11:32:14 AM by AutoGen 5.11.9
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -40,9 +40,9 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[44] =
-"ntpsnmpd 4.2.7p164\n\
+"ntpsnmpd 4.2.7p165\n\
 see html/copyright.html\n";
-static char const zCopyrightNotice[25] =
+static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
 
 extern tUsageProc optionUsage;
@@ -251,7 +251,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[105] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p164\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p165\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -309,7 +309,7 @@ tOptions ntpsnmpdOptions = {
     + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
-    zRcName,      zCopyright,   zCopyrightNotice,
+    zRcName,      zCopyright,   zLicenseDescrip,
     zFullVersion, apzHomeList,  zUsageTitle,
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */
