@@ -93,6 +93,7 @@ DISTCLEANFILES =			\
 
 EXTRA_DIST =				\
 	$(srcdir)/COPYRIGHT		\
+	ag-tpl				\
 	deps-ver			\
 	@NTP_FORCE_LIBEVENT_DIST@	\
 	sntp-opts.def			\
