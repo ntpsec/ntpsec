@@ -1,3 +1,4 @@
+(4.2.7p166) 2011/05/13 Released by Harlan Stenn <stenn@ntp.org>
 * If we have local overrides for autogen template files, use them.
 * Convert more of the sntp-opt.def documentation from man to mdoc.
 (4.2.7p165) 2011/05/11 Released by Harlan Stenn <stenn@ntp.org>
