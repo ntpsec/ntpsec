@@ -340,27 +340,31 @@ seconds.
 
 doc-section	= {
   ds-type	= 'USAGE';
-  ds-format	= 'man';
-  ds-text	= <<-  _END_MAN_DOC
-.SH USAGE
-The simplest use of this program is as an unprivileged command to check the
-current time and error in the local clock.  For example:
-.IP
-.B sntp ntpserver.somewhere
-.PP
-With suitable privilege, it can be run as a command or in a
-.I cron
-job to reset the local clock from a reliable server, like the
-.I ntpdate
-and
-.I rdate
-commands.  For example:
-.IP
-.B sntp -a ntpserver.somewhere
-.SH RETURN VALUE
+  ds-format	= 'mdoc';
+  ds-text	= <<-  _END_MDOC_USAGE
+.Bl -tag -width indent
+.It Li "sntp ntpserver.somewhere"
+is the simplest use of this program
+and can be run as an unprivileged command
+to check the current time and error in the local clock.
+.It Li "sntp -a ntpserver.somewhere"
+With suitable privilege,
+run as a command
+or from a
+.Xr cron 8
+job,
+.Ic "sntp -a"
+will reset the local clock from a synchronized specified server,
+like the (deprecated)
+.Xr ntpdate 8 ,
+or
+.Xr rdate 8
+commands.
+.El
+.Sh RETURN VALUE
 The program returns a zero exit
 status for success, and a non-zero one otherwise.
-.SH BUGS
+.Sh BUGS
 Please report bugs to http://bugs.ntp.org .
-	_END_MAN_DOC;
+	_END_MDOC_USAGE;
 };

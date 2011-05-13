@@ -21,7 +21,7 @@ LDADD += $(PTHREAD_LIBS)
 LDADD += $(LCRYPTO)
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L include --writable
+		autogen -L include -L ag-tpl --writable
 
 EXTRA_PROGRAMS = sntp
 
