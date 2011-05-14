@@ -1,4 +1,5 @@
 * [Bug 1927] io_closeclock() should purge pending recvbufs.
+* [Bug 1931] cv always includes fudgetime1, never fudgetime2.
 * Use acts_close() in acts_shutdown() to avoid leaving a stale lockfile
   if unpeered via runtime configuration while the modem is open.
 * Correct acts_close() test of pp->io.fd to see if it is open.

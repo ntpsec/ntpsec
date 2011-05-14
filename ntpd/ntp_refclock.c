@@ -986,7 +986,7 @@ refclock_control(
 	/*
 	 * Initialize requested data
 	 */
-	if (in != 0) {
+	if (in != NULL) {
 		if (in->haveflags & CLK_HAVETIME1)
 			pp->fudgetime1 = in->fudgetime1;
 		if (in->haveflags & CLK_HAVETIME2)
@@ -1016,14 +1016,25 @@ refclock_control(
 	/*
 	 * Readback requested data
 	 */
-	if (out != 0) {
-		out->haveflags = CLK_HAVETIME1 | CLK_HAVEVAL1 |
-			CLK_HAVEVAL2 | CLK_HAVEFLAG4;
-		out->fudgetime1 = pp->fudgetime1;
-		out->fudgetime2 = pp->fudgetime2;
+	if (out != NULL) {
 		out->fudgeval1 = pp->stratum;
 		out->fudgeval2 = pp->refid;
+		out->haveflags = CLK_HAVEVAL1 | CLK_HAVEVAL2;
+		out->fudgetime1 = pp->fudgetime1;
+		if (0.0 != out->fudgetime1)
+			out->haveflags |= CLK_HAVETIME1;
+		out->fudgetime2 = pp->fudgetime2;
+		if (0.0 != out->fudgetime2)
+			out->haveflags |= CLK_HAVETIME2;
 		out->flags = (u_char) pp->sloppyclockflag;
+		if (CLK_FLAG1 & out->flags)
+			out->haveflags |= CLK_HAVEFLAG1;
+		if (CLK_FLAG2 & out->flags)
+			out->haveflags |= CLK_HAVEFLAG2;
+		if (CLK_FLAG3 & out->flags)
+			out->haveflags |= CLK_HAVEFLAG3;
+		if (CLK_FLAG4 & out->flags)
+			out->haveflags |= CLK_HAVEFLAG4;
 
 		out->timereset = current_time - pp->timestarted;
 		out->polls = pp->polls;

@@ -2648,10 +2648,7 @@ ctl_putclock(
 		break;
 
 	case CC_FLAGS:
-		if (mustput || (pcs->haveflags &	(CLK_HAVEFLAG1 |
-							 CLK_HAVEFLAG2 | CLK_HAVEFLAG3 | CLK_HAVEFLAG4)))
-			ctl_putuint(clock_var[id].text,
-				    pcs->flags);
+		ctl_putuint(clock_var[id].text, pcs->flags);
 		break;
 
 	case CC_DEVICE:
@@ -3929,19 +3926,20 @@ read_clockstatus(
 	 */
 	ctl_error(CERR_BADASSOC);
 #else
-	const struct ctl_var *v;
-	int i;
-	struct peer *peer;
-	char *valuep;
-	u_char *wants;
-	unsigned int gotvar;
-	const u_char *cc;
-	struct ctl_var *kv;
-	struct refclockstat cs;
+	const struct ctl_var *	v;
+	int			i;
+	struct peer *		peer;
+	char *			valuep;
+	u_char *		wants;
+	size_t			wants_alloc;
+	int			gotvar;
+	const u_char *		cc;
+	struct ctl_var *	kv;
+	struct refclockstat	cs;
 
-	if (res_associd)
+	if (res_associd != 0) {
 		peer = findpeerbyassoc(res_associd);
-	else {
+	} else {
 		/*
 		 * Find a clock for this jerk.	If the system peer
 		 * is a clock use it, else search peer_list for one.
@@ -3951,7 +3949,7 @@ read_clockstatus(
 			peer = sys_peer;
 		else
 			for (peer = peer_list;
-			     peer != NULL; 
+			     peer != NULL;
 			     peer = peer->p_link)
 				if (FLAG_REFCLOCK & peer->flags)
 					break;
@@ -3971,13 +3969,13 @@ read_clockstatus(
 	 * Look for variables in the packet.
 	 */
 	rpkt.status = htons(ctlclkstatus(&cs));
-	gotvar = CC_MAXCODE + 1 + count_var(kv);
-	wants = emalloc_zero(gotvar);
-	gotvar = 0;
+	wants_alloc = CC_MAXCODE + 1 + count_var(kv);
+	wants = emalloc_zero(wants_alloc);
+	gotvar = FALSE;
 	while (NULL != (v = ctl_getitem(clock_var, &valuep))) {
 		if (!(EOV & v->flags)) {
-			wants[v->code] = 1;
-			gotvar = 1;
+			wants[v->code] = TRUE;
+			gotvar = TRUE;
 		} else {
 			v = ctl_getitem(kv, &valuep);
 			NTP_INSIST(NULL != v);
@@ -3987,27 +3985,28 @@ read_clockstatus(
 				free_varlist(cs.kv_list);
 				return;
 			}
-			wants[CC_MAXCODE + 1 + v->code] = 1;
-			gotvar = 1;
+			wants[CC_MAXCODE + 1 + v->code] = TRUE;
+			gotvar = TRUE;
 		}
 	}
 
 	if (gotvar) {
 		for (i = 1; i <= CC_MAXCODE; i++)
 			if (wants[i])
-				ctl_putclock(i, &cs, 1);
+				ctl_putclock(i, &cs, TRUE);
 		if (kv != NULL)
 			for (i = 0; !(EOV & kv[i].flags); i++)
 				if (wants[i + CC_MAXCODE + 1])
 					ctl_putdata(kv[i].text,
-					    strlen(kv[i].text), 0);
+						    strlen(kv[i].text),
+						    FALSE);
 	} else {
 		for (cc = def_clock_var; *cc != 0; cc++)
-			ctl_putclock((int)*cc, &cs, 0);
+			ctl_putclock((int)*cc, &cs, FALSE);
 		for ( ; kv != NULL && !(EOV & kv->flags); kv++)
 			if (DEF & kv->flags)
 				ctl_putdata(kv->text, strlen(kv->text),
-					    0);
+					    FALSE);
 	}
 
 	free(wants);
@@ -4413,12 +4412,14 @@ report_event(
 				   ctlclkstatus(&cs));
 
 			for (i = 1; i <= CC_MAXCODE; i++)
-				ctl_putclock(i, &cs, 0);
-			for (kv = cs.kv_list; kv &&
-				 !(kv->flags & EOV); kv++)
-				if (kv->flags & DEF)
+				ctl_putclock(i, &cs, FALSE);
+			for (kv = cs.kv_list;
+			     kv != NULL && !(EOV & kv->flags);
+			     kv++)
+				if (DEF & kv->flags)
 					ctl_putdata(kv->text,
-						    strlen(kv->text), 0);
+						    strlen(kv->text),
+						    FALSE);
 			free_varlist(cs.kv_list);
 		}
 #endif /* REFCLOCK */
