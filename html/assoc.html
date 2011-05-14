@@ -11,7 +11,7 @@
 <img src="pic/alice51.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>Make sure who your friends are.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->14-Oct-2010  3:20<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->12-May-2011  13:16<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -31,7 +31,7 @@
 <h4 id="modes">Association Modes</h4>
 <p>This page describes the various modes of operation provided in NTPv4. There are three types of associations in NTP: <em>persistent</em>, <em>preemptable</em> and <em>ephemeral</em>. Persistent associations are mobilized by a configuration command and never demobilized. Preemptable associations, which are new to NTPv4, are mobilized by a configuration command which includes the <tt>preempt</tt> option or upon arrival of an automatic server discovery packet. They are are demobilized by timeout or when preempted by  a &quot;better&quot; server, as described on the <a href="discover.html">Automatic Server Discovery Schemes</a> page. Ephemeral associations are mobilized upon arrival of   broadcast or multicast server packets and demobilized by timeout.</p>
 <p>Ordinarily, successful mobilization of ephemeral associations requires the server to be cryptographically authenticated to the client. This can be done using either symmetric key or Autokey public key cryptography, as described on the <a href="authentic.html">Authentication Support</a> page.</p>
-<p>There are three principal modes of operation in NTP: client/server, symmetric active/passive and broadcast/multicast. There are three automatic server discovery schemes in NTP: broadcast/multicast, manycast and pool described on the <a href="discover.html">Automatic Server Discovery Schemes</a> page. In addition, the orphan mode and burst options described on this page can be used in appropriate cases.</p>
+<p>There are three principal modes of operation in NTP: client/server, symmetric active/passive and broadcast/multicast. There are three automatic server discovery schemes in NTP: broadcast/multicast, manycast and pool described on the <a href="discover.html">Automatic Server Discovery Schemes</a> page. In addition, the <a href="#burst">burst options</a> and <a href="orphan.html">orphan mode</a> can be used in appropriate cases.</p>
 <p>Following is a summary of the operations in each mode. Note that reference to option applies to the commands described on the <a href="confopt.html">Server Commands and  Options</a> page. See that page for applicability and defaults.</p>
 <h4 id="client">Client/Server Mode</h4>
 <p>Client/server mode is the most common configuration in the Internet today. It operates in the classic remote-procedure-call (RPC) paradigm with stateless servers and stateful clients. In this mode a host sends a client (mode 3) request to the specified server and expects a server (mode 4) reply at some future time. In some contexts this would be described as a &quot;pull&quot; operation, in that the host pulls the time and related values from the server.</p>

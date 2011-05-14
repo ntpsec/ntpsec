@@ -3,6 +3,7 @@
 * Use acts_close() in acts_shutdown() to avoid leaving a stale lockfile
   if unpeered via runtime configuration while the modem is open.
 * Correct acts_close() test of pp->io.fd to see if it is open.
+* 4.2.7p164 documentation updates regarding 'tos orphanwait' expanded scope.
 (4.2.7p166) 2011/05/13 Released by Harlan Stenn <stenn@ntp.org>
 * If we have local overrides for autogen template files, use them.
 * Convert more of the sntp-opt.def documentation from man to mdoc.

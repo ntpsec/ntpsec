@@ -9,7 +9,7 @@
 <body>
 <h3>Orphan Mode</h3>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->04-Sep-2010  23:19<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->12-May-2011  13:18<!-- #EndDate -->
   UTC</p>
 <hr>
 <p>Sometimes an NTP subnet becomes isolated from all UTC sources such as local reference clocks or Internet time servers. In such cases it may be necessary that the subnet servers and clients remain synchronized to a common timescale, not necessarily the UTC timescale. Previously, this function was provided by the local clock driver to simulate a UTC source. A server with this driver could be used to synchronize other hosts in the subnet directly or indirectly.</p>
@@ -17,9 +17,9 @@
 <p>A common configuration for private networks includes one or more core servers operating at the lowest stratum. Good practice is to configure each of these servers as backup for the others using symmetric or broadcast modes. As long as at least one core server can reach a UTC source, the entire subnet can synchronize to it.</p>
 <p>If no UTC sources are available to any core server, one of them can provide a simulated UTC source for all other hosts in the subnet. However, only one core server can simulate the UTC source and all direct dependents, called orphan children, must select the same one, called the orphan parent.</p>
 <p>A host is enabled for orphan mode using the <tt>tos orphan <i>stratum</i></tt> command, where <tt><i>stratum</i></tt> is some stratum less than 16 and greater than any anticipated stratum that might occur with configured Internet time servers. However, sufficient headroom should remain so every subnet host dependent on the orphan children has stratum less than 16. Where no associations for other servers or reference clocks are configured, the orphan stratum can be set to 1. These are the same considerations that guide the local clock driver stratum selection.</p>
-<p>In order to avoid premature enabling orphan mode, a holdoff delay occurs when the daemon is first started and when all sources have been lost after that. The delay is intended to allow time for other sources to become reachable and selected. Only when the delay has expired with no sources will orphan mode be enabled. By default the delay is 600 s (five minutes), but this can be changed using the <tt>tos orphanwait <em>delay</em></tt> command.</p>
+<p>In order to avoid premature enabling orphan mode, a holdoff delay occurs when the daemon is first started and when all sources have been lost after that. The delay is intended to allow time for other sources to become reachable and selected. Only when the delay has expired with no sources will orphan parent mode be enabled. By default the delay is 300 s (five minutes), but this can be changed using the <tt>tos orphanwait <em>delay</em></tt> command.</p>
 <p>A orphan parent with no sources shows reference ID <font face="Courier New, Courier, Monaco, monospace">LOOP</font>&nbsp;if
-  operating at stratum 1 and 127.0.0.1 (Unix loopback address) otherwise.
+  operating at stratum 1 and 127.0.0.1 (IPv4 loopback address) otherwise.
   While ordinary NTP clients use a selection metric based on delay
   and dispersion, orphan children use a metric computed from the IP
   address of each core server. Each orphan child chooses the orphan
