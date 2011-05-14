@@ -24,7 +24,7 @@
 
 /*  Return the event which is set when items are added to the full list
  */
-extern HANDLE	get_recv_buff_event (void);
+extern HANDLE	get_recv_buff_event(void);
 #else
 # define RECV_BLOCK_IO()	
 # define RECV_UNBLOCK_IO()	
@@ -76,11 +76,11 @@ struct recvbuf {
 	int used;			/* reference count */
 };
 
-extern	void	init_recvbuff	(int);
+extern	void	init_recvbuff(int);
 
 /* freerecvbuf - make a single recvbuf available for reuse
  */
-extern	void	freerecvbuf (struct recvbuf *);
+extern	void	freerecvbuf(struct recvbuf *);
 
 /*  Get a free buffer (typically used so an async
  *  read can directly place data into the buffer
@@ -88,29 +88,36 @@ extern	void	freerecvbuf (struct recvbuf *);
  *  The buffer is removed from the free list. Make sure
  *  you put it back with freerecvbuf() or 
  */
-extern	struct recvbuf *get_free_recv_buffer (void); /* signal safe - no malloc */
-extern	struct recvbuf *get_free_recv_buffer_alloc (void); /* signal unsafe - may malloc */
+
+/* signal safe - no malloc */
+extern	struct recvbuf *get_free_recv_buffer(void);
+/* signal unsafe - may malloc */
+extern	struct recvbuf *get_free_recv_buffer_alloc(void);
 
 /*   Add a buffer to the full list
  */
-extern	void	add_full_recv_buffer	 (struct recvbuf *);
-
-/*extern	void	process_recv_buffers	 (void); */
+extern	void	add_full_recv_buffer(struct recvbuf *);
 
 /* number of recvbufs on freelist */
-extern u_long free_recvbuffs (void);		
-extern u_long full_recvbuffs (void);		
-extern u_long total_recvbuffs (void);
-extern u_long lowater_additions (void);
+extern u_long free_recvbuffs(void);		
+extern u_long full_recvbuffs(void);		
+extern u_long total_recvbuffs(void);
+extern u_long lowater_additions(void);
 		
 /*  Returns the next buffer in the full list.
  *
  */
-extern	struct recvbuf *get_full_recv_buffer (void);
+extern	struct recvbuf *get_full_recv_buffer(void);
+
+/*
+ * purge_recv_buffers_for_fd() - purges any previously-received input
+ *				 from a given file descriptor.
+ */
+extern	void purge_recv_buffers_for_fd(SOCKET);
 
 /*
  * Checks to see if there are buffers to process
  */
-extern isc_boolean_t has_full_recv_buffer (void);
+extern isc_boolean_t has_full_recv_buffer(void);
 
 #endif	/* RECVBUFF_H */

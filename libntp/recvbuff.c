@@ -160,7 +160,7 @@ freerecvbuf(recvbuf_t *rb)
 	}
 
 	LOCK();
-	(rb->used)--;
+	rb->used--;
 	if (rb->used != 0)
 		msyslog(LOG_ERR, "******** freerecvbuff non-zero usage: %d *******", rb->used);
 	LINK_SLIST(free_recv_list, rb, link.next);
@@ -183,6 +183,7 @@ add_full_recv_buffer(recvbuf_t *rb)
 	UNLOCK();
 }
 
+
 recvbuf_t *
 get_free_recv_buffer(void)
 {
@@ -200,6 +201,7 @@ get_free_recv_buffer(void)
 	return (buffer);
 }
 
+
 #ifdef HAVE_IO_COMPLETION_PORT
 recvbuf_t *
 get_free_recv_buffer_alloc(void)
@@ -215,6 +217,7 @@ get_free_recv_buffer_alloc(void)
 	return (buffer);
 }
 #endif
+
 
 recvbuf_t *
 get_full_recv_buffer(void)
@@ -259,6 +262,37 @@ get_full_recv_buffer(void)
 
 	return rbuf;
 }
+
+
+/*
+ * purge_recv_buffers_for_fd() - purges any previously-received input
+ *				 from a given file descriptor.
+ */
+void
+purge_recv_buffers_for_fd(
+	SOCKET	fd
+	)
+{
+	recvbuf_t *rbufp;
+	recvbuf_t *next;
+
+	LOCK();
+
+	for (rbufp = ISC_LIST_HEAD(full_recv_list);
+	     rbufp != NULL;
+	     rbufp = next) {
+		next = ISC_LIST_NEXT(rbufp, link);
+		if (rbufp->fd == fd) {
+			ISC_LIST_DEQUEUE_TYPE(full_recv_list, rbufp,
+					      link, recvbuf_t);
+			full_recvbufs--;
+			freerecvbuf(rbufp);
+		}
+	}
+
+	UNLOCK();
+}
+
 
 /*
  * Checks to see if there are buffers to process

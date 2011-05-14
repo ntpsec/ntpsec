@@ -299,10 +299,7 @@ acts_shutdown(
 	 */
 	pp = peer->procptr;
 	up = pp->unitptr;
-	if (-1 != pp->io.fd) {
-		io_closeclock(&pp->io);
-		pp->io.fd = -1;
-	}
+	acts_close(peer);
 	free(up);
 }
 
@@ -318,8 +315,9 @@ acts_receive(
 	struct actsunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
-	char	tbuf[BMAX];
-	char	*tptr;
+	char	tbuf[sizeof(up->buf)];
+	char *	tptr;
+	int	octets;
 
 	/*
 	 * Initialize pointers and read the timecode and timestamp. Note
@@ -331,13 +329,13 @@ acts_receive(
 	peer = rbufp->recv_peer;
 	pp = peer->procptr;
 	up = pp->unitptr;
-	refclock_gtraw(rbufp, tbuf, BMAX - (up->bufptr - up->buf), &pp->lastrec);
+	octets = sizeof(up->buf) - (up->bufptr - up->buf);
+	refclock_gtraw(rbufp, tbuf, octets, &pp->lastrec);
 	for (tptr = tbuf; *tptr != '\0'; tptr++) {
 		if (*tptr == LF) {
 			if (up->bufptr == up->buf) {
 				up->tstamp = pp->lastrec;
 				continue;
-
 			} else {
 				*up->bufptr = '\0';
 				up->bufptr = up->buf;
@@ -606,7 +604,7 @@ acts_close(
 
 	pp = peer->procptr;
 	up = pp->unitptr;
-	if (pp->io.fd != 0) {
+	if (pp->io.fd != -1) {
 		report_event(PEVNT_CLOCK, peer, "close");
 		dtr = TIOCM_DTR;
 		ioctl(pp->io.fd, TIOCMBIC, &dtr);

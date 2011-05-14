@@ -3938,7 +3938,6 @@ io_addclock(
 	 * in use.  There is a harmless (I hope) race condition here.
 	 */
 	rio->active = TRUE;
-	rio->next = refio;
 
 # ifdef HAVE_SIGNALED_IO
 	if (init_clock_sig(rio)) {
@@ -3955,7 +3954,7 @@ io_addclock(
 	/*
 	 * enqueue
 	 */
-	refio = rio;
+	LINK_SLIST(refio, rio, next);
 
 	/*
 	 * register fd
@@ -3966,6 +3965,7 @@ io_addclock(
 	return 1;
 }
 
+
 /*
  * io_closeclock - close the clock in the I/O structure given
  */
@@ -3974,7 +3974,7 @@ io_closeclock(
 	struct refclockio *rio
 	)
 {
-	register struct refclockio *rp;
+	struct refclockio *unlinked;
 
 	BLOCKIO();
 
@@ -3982,30 +3982,20 @@ io_closeclock(
 	 * Remove structure from the list
 	 */
 	rio->active = FALSE;
-	if (refio == rio)
-		refio = rio->next;
-	else {
-		for (rp = refio; rp != NULL; rp = rp->next)
-			if (rp->next == rio) {
-				rp->next = rio->next;
-				break;
-			}
-
-		if (NULL == rp) {
-			UNBLOCKIO();
-			return;
-		}
+	UNLINK_SLIST(unlinked, refio, rio, next, struct refclockio);
+	if (NULL != unlinked) {
+		purge_recv_buffers_for_fd(rio->fd);
+		/*
+		 * Close the descriptor.
+		 */
+		close_and_delete_fd_from_list(rio->fd);
 	}
-	rio->next = NULL;
-
-	/*
-	 * Close the descriptor.
-	 */
-	close_and_delete_fd_from_list(rio->fd);
 	rio->fd = -1;
+
 	UNBLOCKIO();
 }
 #endif	/* REFCLOCK */
+
 
 /*
  * On NT a SOCKET is an unsigned int so we cannot possibly keep it in
@@ -4038,6 +4028,7 @@ kill_asyncio(
 }
 #endif	/* !SYS_WINNT */
 
+
 /*
  * Add and delete functions for the list of open sockets
  */
@@ -4055,6 +4046,7 @@ add_fd_to_list(
 	LINK_SLIST(fd_list, lsock, link);
 	maintain_activefds(fd, 0);
 }
+
 
 static void
 close_and_delete_fd_from_list(
@@ -4092,6 +4084,7 @@ close_and_delete_fd_from_list(
 	 */
 	maintain_activefds(fd, 1);
 }
+
 
 static void
 add_addr_to_list(
