@@ -1,3 +1,4 @@
+* Convert receive buffer queue from doubly-linked list to FIFO.
 (4.2.7p167) 2011/05/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1927] io_closeclock() should purge pending recvbufs.
 * [Bug 1931] cv always includes fudgetime1, never fudgetime2.

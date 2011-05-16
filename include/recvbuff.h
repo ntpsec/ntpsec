@@ -47,33 +47,33 @@ extern HANDLE	get_recv_buff_event(void);
 typedef struct recvbuf recvbuf_t;
 
 struct recvbuf {
-	ISC_LINK(recvbuf_t)	link;	/* next in list */
+	recvbuf_t *	link;	/* next in list */
 	union {
-		sockaddr_u X_recv_srcadr;
-		caddr_t X_recv_srcclock;
-		struct peer *X_recv_peer;
+		sockaddr_u	X_recv_srcadr;
+		caddr_t		X_recv_srcclock;
+		struct peer *	X_recv_peer;
 	} X_from_where;
-#define recv_srcadr	X_from_where.X_recv_srcadr
-#define	recv_srcclock	X_from_where.X_recv_srcclock
-#define recv_peer	X_from_where.X_recv_peer
+#define recv_srcadr		X_from_where.X_recv_srcadr
+#define	recv_srcclock		X_from_where.X_recv_srcclock
+#define recv_peer		X_from_where.X_recv_peer
 #ifndef HAVE_IO_COMPLETION_PORT
-	sockaddr_u srcadr;		/* where packet came from */
+	sockaddr_u	srcadr;		/* where packet came from */
 #else
-	int recv_srcadr_len;		/* filled in on completion */
+	int		recv_srcadr_len;/* filled in on completion */
 #endif
-	endpt *	dstadr;			/* address pkt arrived on */
-	SOCKET	fd;			/* fd on which it was received */
-	int msg_flags;			/* Flags received about the packet */
-	l_fp recv_time;			/* time of arrival */
-	void (*receiver)(struct recvbuf *); /* routine to receive buffer */
-	int recv_length;		/* number of octets received */
+	endpt *		dstadr;		/* address pkt arrived on */
+	SOCKET		fd;		/* fd on which it was received */
+	int		msg_flags;	/* Flags received about the packet */
+	l_fp		recv_time;	/* time of arrival */
+	void		(*receiver)(struct recvbuf *); /* callback */
+	int		recv_length;	/* number of octets received */
 	union {
-		struct pkt X_recv_pkt;
-		u_char X_recv_buffer[RX_BUFF_SIZE];
+		struct pkt	X_recv_pkt;
+		u_char		X_recv_buffer[RX_BUFF_SIZE];
 	} recv_space;
-#define	recv_pkt	recv_space.X_recv_pkt
-#define	recv_buffer	recv_space.X_recv_buffer
-	int used;			/* reference count */
+#define	recv_pkt		recv_space.X_recv_pkt
+#define	recv_buffer		recv_space.X_recv_buffer
+	int used;		/* reference count */
 };
 
 extern	void	init_recvbuff(int);

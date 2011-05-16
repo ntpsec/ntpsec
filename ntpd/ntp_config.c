@@ -954,30 +954,6 @@ dump_config_tree(
 
 
 /* generic fifo routines for structs linked by 1st member */
-#ifdef NTP_DEBUG_LISTS_H
-void
-check_gen_fifo_consistency(void *fifo)
-{
-	gen_fifo *pf;
-	gen_node *pthis;
-	gen_node **pptail;
-
-	pf = fifo;
-	REQUIRE((NULL == pf->phead && NULL == pf->pptail) ||
-		(NULL != pf->phead && NULL != pf->pptail));
-
-	pptail = &pf->phead;
-	for (pthis = pf->phead;
-	     pthis != NULL;
-	     pthis = pthis->link)
-		if (NULL != pthis->link)
-			pptail = &pthis->link;
-
-	REQUIRE(NULL == pf->pptail || pptail == pf->pptail);
-}
-#endif	/* NTP_DEBUG_LISTS_H */
-
-
 void *
 append_gen_fifo(
 	void *fifo,

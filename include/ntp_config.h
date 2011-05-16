@@ -64,15 +64,6 @@
 extern	int	cmdline_server_count;
 extern	char **	cmdline_servers;
 
-/* generic FIFO element */
-typedef struct gen_node_tag gen_node;
-struct gen_node_tag {
-	gen_node *	link;
-};
-
-/* generic FIFO */
-typedef DECL_FIFO_ANCHOR(gen_node) gen_fifo;
-
 typedef struct int_range_tag {
 	int	first;
 	int	last;
@@ -289,7 +280,6 @@ typedef struct settrap_parms_tag {
 const char * token_name(int token);
 
 /* generic fifo routines for structs linked by 1st member */
-void	check_gen_fifo_consistency(void *fifo);
 void*	append_gen_fifo(void *fifo, void *entry);
 void *	concat_gen_fifos(void *first, void *second);
 #define APPEND_G_FIFO(pf, pe)		\

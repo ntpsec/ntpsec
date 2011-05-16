@@ -187,9 +187,9 @@ do {								\
 	ppentry = &(listhead);					\
 								\
 	while (!(expr))						\
-		if ((*ppentry)->nextlink != NULL)		\
+		if ((*ppentry)->nextlink != NULL) {		\
 			ppentry = &((*ppentry)->nextlink);	\
-		else {						\
+		} else {					\
 			ppentry = NULL;				\
 			break;					\
 		}						\
@@ -198,8 +198,9 @@ do {								\
 		(punlinked) = *ppentry;				\
 		*ppentry = (punlinked)->nextlink;		\
 		MAYBE_Z_LISTS((punlinked)->nextlink);		\
-	} else							\
+	} else {						\
 		(punlinked) = NULL;				\
+	}							\
 } while (FALSE)
 
 #define UNLINK_SLIST(punlinked, listhead, ptounlink, nextlink,	\
@@ -243,7 +244,21 @@ struct {							\
 #else
 #define	CHECK_FIFO_CONSISTENCY(anchor)				\
 	check_gen_fifo_consistency(&(anchor))
+void	check_gen_fifo_consistency(void *fifo);
 #endif
+
+/*
+ * generic FIFO element used to access any FIFO where each element
+ * begins with the link pointer
+ */
+typedef struct gen_node_tag gen_node;
+struct gen_node_tag {
+	gen_node *	link;
+};
+
+/* generic FIFO */
+typedef DECL_FIFO_ANCHOR(gen_node) gen_fifo;
+
 
 #define LINK_FIFO(anchor, pentry, nextlink)			\
 do {								\
@@ -276,6 +291,38 @@ do {								\
 			(anchor).pptail = &(anchor).phead;	\
 		MAYBE_Z_LISTS((punlinked)->nextlink);		\
 		CHECK_FIFO_CONSISTENCY(anchor);			\
+	}							\
+} while (FALSE)
+
+#define UNLINK_MID_FIFO(punlinked, anchor, tounlink, nextlink,	\
+			entrytype)				\
+do {								\
+	entrytype **ppentry;					\
+								\
+	CHECK_FIFO_CONSISTENCY(anchor);				\
+								\
+	ppentry = &(anchor).phead;				\
+								\
+	while ((tounlink) != *ppentry)				\
+		if ((*ppentry)->nextlink != NULL) {		\
+			ppentry = &((*ppentry)->nextlink);	\
+		} else {					\
+			ppentry = NULL;				\
+			break;					\
+		}						\
+								\
+	if (ppentry != NULL) {					\
+		(punlinked) = *ppentry;				\
+		*ppentry = (punlinked)->nextlink;		\
+		if (NULL == *ppentry)				\
+			(anchor).pptail = NULL;			\
+		else if ((anchor).pptail ==			\
+			 &(punlinked)->nextlink)		\
+			(anchor).pptail = &(anchor).phead;	\
+		MAYBE_Z_LISTS((punlinked)->nextlink);		\
+		CHECK_FIFO_CONSISTENCY(anchor);			\
+	} else {						\
+		(punlinked) = NULL;				\
 	}							\
 } while (FALSE)
 
