@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  February 22, 2011 at 12:29:02 AM by AutoGen 5.11.6
+ *  It has been AutoGen-ed  May 16, 2011 at 04:23:15 AM by AutoGen 5.11.9
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 34:0:9 templates.
+ * Generated from AutoOpts 35:0:10 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -20,9 +20,11 @@
  * sntp copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
  *
  * see html/copyright.html
+ * 
  */
 
 #include <sys/types.h>
+
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,26 +35,20 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
+extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-tSCC zCopyright[] =
-       "sntp copyright (c) 1970-2011 David L. Mills and/or others, all rights reserved"
-/* extracted from copyright.def near line 8 */
-;
-tSCC zCopyrightNotice[24] =
-"see html/copyright.html";
+static char const zCopyright[44] =
+"sntp 4.2.6p4-beta1\n\
+see html/copyright.html\n";
+static char const zLicenseDescrip[25] =
+"see html/copyright.html\n";
 
 extern tUsageProc optionUsage;
 
 #ifndef NULL
 #  define NULL 0
-#endif
-#ifndef EXIT_SUCCESS
-#  define  EXIT_SUCCESS 0
-#endif
-#ifndef EXIT_FAILURE
-#  define  EXIT_FAILURE 1
 #endif
 
 /*
@@ -242,8 +238,8 @@ static tOptProc
 extern tOptProc
     optionBooleanVal,    optionNestedVal,     optionNumericVal,
     optionPagedUsage,    optionPrintVersion,  optionResetOpt,
-    optionStackArg,      optionTimeVal,       optionUnstackArg,
-    optionVersionStderr;
+    optionStackArg,      optionTimeDate,      optionTimeVal,
+    optionUnstackArg,    optionVersionStderr;
 static tOptProc
     doUsageOpt;
 #endif /* defined(TEST_SNTP_OPTS) */
@@ -257,7 +253,7 @@ static tOptProc
  *
  *  Define the Sntp Option Descriptions.
  */
-static tOptDesc optDesc[ OPTION_CT ] = {
+static tOptDesc optDesc[OPTION_CT] = {
   {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
      /* equiv idx, value */ 0, VALUE_OPT_IPV4,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -472,8 +468,8 @@ static tOptDesc optDesc[ OPTION_CT ] = {
  *  Define the Sntp Option Environment
  */
 static char const zPROGNAME[5] = "SNTP";
-static char const zUsageTitle[121] =
-"sntp - standard SNTP program - Ver. 4.2.6p3\n\
+static char const zUsageTitle[127] =
+"sntp - standard SNTP program - Ver. 4.2.6p4-beta1\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -491,7 +487,7 @@ It can be run interactively from the command line or as a cron job.\n\n\
 NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
 1305.\n";
 static char const zFullVersion[] = SNTP_FULL_VERSION;
-/* extracted from optcode.tlib near line 504 */
+/* extracted from optcode.tlib near line 515 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -537,7 +533,7 @@ tOptions sntpOptions = {
     + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
-    zRcName,      zCopyright,   zCopyrightNotice,
+    zRcName,      zCopyright,   zLicenseDescrip,
     zFullVersion, apzHomeList,  zUsageTitle,
     zExplain,     zDetail,      optDesc,
     zBugsAddr,                  /* address to send bugs to */
@@ -562,23 +558,21 @@ tOptions sntpOptions = {
  *  Create the static procedure(s) declared above.
  */
 static void
-doUsageOpt(
-    tOptions*   pOptions,
-    tOptDesc*   pOptDesc )
+doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 {
     (void)pOptions;
-    USAGE(EXIT_SUCCESS);
+    USAGE(SNTP_EXIT_SUCCESS);
 }
-/* extracted from optmain.tlib near line 107 */
+/* extracted from optmain.tlib near line 128 */
 
 #if defined(TEST_SNTP_OPTS) /* TEST MAIN PROCEDURE: */
 
 extern void optionPutShell(tOptions*);
 
 int
-main(int argc, char** argv)
+main(int argc, char ** argv)
 {
-    int res = EXIT_SUCCESS;
+    int res = SNTP_EXIT_SUCCESS;
     (void)optionProcess(&sntpOptions, argc, argv);
     optionPutShell(&sntpOptions);
     res = ferror(stdout);
@@ -587,7 +581,7 @@ main(int argc, char** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from optcode.tlib near line 657 */
+/* extracted from optcode.tlib near line 666 */
 
 #if ENABLE_NLS
 #include <stdio.h>
@@ -611,14 +605,13 @@ AO_gettext(char const* pz)
     pzRes = strdup(pzRes);
     if (pzRes == NULL) {
         fputs(_("No memory for duping translated strings\n"), stderr);
-        exit(EXIT_FAILURE);
+        exit(SNTP_EXIT_FAILURE);
     }
     return pzRes;
 }
 
-static void coerce_it(void** s) { *s = AO_gettext(*s); }
-#define COERSION(_f) \
-  coerce_it((void*)&(sntpOptions._f))
+static void coerce_it(void** s) { *s = AO_gettext(*s);
+}
 
 /*
  *  This invokes the translation code (e.g. gettext(3)).
@@ -626,6 +619,8 @@ static void coerce_it(void** s) { *s = AO_gettext(*s); }
 static void
 translate_option_strings(void)
 {
+    tOptions * const pOpt = &sntpOptions;
+
     /*
      *  Guard against re-translation.  It won't work.  The strings will have
      *  been changed by the first pass through this code.  One shot only.
@@ -635,33 +630,33 @@ translate_option_strings(void)
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
          */
-        tOptDesc* pOD = sntpOptions.pOptDesc;
-        char**    ppz = (char**)(void*)&(option_usage_text);
-        int       ix  = option_usage_text.field_ct;
+        tOptDesc * pOD = pOpt->pOptDesc;
+        char **    ppz = (char**)(void*)&(option_usage_text);
+        int        ix  = option_usage_text.field_ct;
 
         do {
             ppz++;
             *ppz = AO_gettext(*ppz);
         } while (--ix > 0);
 
-        COERSION(pzCopyright);
-        COERSION(pzCopyNotice);
-        COERSION(pzFullVersion);
-        COERSION(pzUsageTitle);
-        COERSION(pzExplain);
-        COERSION(pzDetail);
-        COERSION(pzPackager);
+        coerce_it((void*)&(pOpt->pzCopyright));
+        coerce_it((void*)&(pOpt->pzCopyNotice));
+        coerce_it((void*)&(pOpt->pzFullVersion));
+        coerce_it((void*)&(pOpt->pzUsageTitle));
+        coerce_it((void*)&(pOpt->pzExplain));
+        coerce_it((void*)&(pOpt->pzDetail));
+        coerce_it((void*)&(pOpt->pzPackager));
         option_usage_text.field_ct = 0;
 
-        for (ix = sntpOptions.optCt; ix > 0; ix--, pOD++)
+        for (ix = pOpt->optCt; ix > 0; ix--, pOD++)
             coerce_it((void*)&(pOD->pzText));
     }
 
-    if ((sntpOptions.fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
-        tOptDesc* pOD = sntpOptions.pOptDesc;
-        int       ix;
+    if ((pOpt->fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
+        tOptDesc * pOD = pOpt->pOptDesc;
+        int        ix;
 
-        for (ix = sntpOptions.optCt; ix > 0; ix--, pOD++) {
+        for (ix = pOpt->optCt; ix > 0; ix--, pOD++) {
             coerce_it((void*)&(pOD->pz_Name));
             coerce_it((void*)&(pOD->pz_DisableName));
             coerce_it((void*)&(pOD->pz_DisablePfx));

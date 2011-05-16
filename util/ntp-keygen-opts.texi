@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  January  3, 2011 at 09:19:07 PM by AutoGen 5.11.6pre7
+# It has been AutoGen-ed  May 16, 2011 at 04:24:43 AM by AutoGen 5.11.9
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -50,7 +50,7 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p3
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.6p4-beta1
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
@@ -65,7 +65,8 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -i Str issuer-name    set issuer name
    -M no  md5key         generate MD5 keys
    -m Num modulus        modulus
-                                - it must be:  256 to 2048
+                                - It must be in the range:
+                                  256 to 2048
    -P no  pvt-cert       generate PC private certificate
    -p Str pvt-passwd     output private password
    -q Str get-pvt-passwd input private password
@@ -82,16 +83,16 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
                                 - disabled as --no-load-opts
                                 - may appear multiple times
 
-Options are specified by doubled hyphens and their name
-or by a single hyphen and the flag character.
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
 
 The following option preset mechanisms are supported:
  - reading file $HOME/.ntprc
  - reading file ./.ntprc
  - examining environment variables named NTP_KEYGEN_*
 
-If there is no new host key, look for an existing one.
-If one is not found, create it.
+If there is no new host key, look for an existing one.  If one is not
+found, create it.
 
 please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
