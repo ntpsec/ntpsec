@@ -77,7 +77,7 @@ double	sys_offset;	/* current local clock offset */
 double	sys_mindisp = MINDISPERSE; /* minimum distance (s) */
 double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
-u_long 	sys_epoch;		/* last clock update time */
+u_long	sys_epoch;		/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
 int	leap_tai;		/* TAI at next next leap */
 u_long	leap_sec;		/* next scheduled leap from file */
@@ -2016,7 +2016,7 @@ clock_filter(
 	/*
 	 * A sample consists of the offset, delay, dispersion and epoch
 	 * of arrival. The offset and delay are determined by the on-
-	 * wire protcol. The dispersion grows from the last outbound
+	 * wire protocol. The dispersion grows from the last outbound
 	 * packet to the arrival of this one increased by the sum of the
 	 * peer precision and the system precision as required by the
 	 * error budget. First, shift the new arrival into the shift
@@ -2120,8 +2120,10 @@ clock_filter(
 	 * save the offset, delay and jitter. Note the jitter must not
 	 * be less than the precision.
 	 */
-	if (m == 0)
+	if (m == 0) {
+		clock_select();
 		return;
+	}
 
 	etemp = fabs(peer->offset - peer->filter_offset[k]);
 	peer->offset = peer->filter_offset[k];
@@ -2267,8 +2269,7 @@ clock_select(void)
 	for (n = 0; n < NTP_HASH_SIZE; n++) {
 		for (peer = peer_hash[n]; peer != NULL; peer =
 		    peer->next) {
-			peer->flags &= ~FLAG_SYSPEER;
-			peer->status = CTL_PST_SEL_REJECT;
+			peer->new_status = CTL_PST_SEL_REJECT;
 
 			/*
 			 * Leave the island immediately if the peer is
@@ -2297,18 +2298,18 @@ clock_select(void)
 			 * The following are special cases. We deal
 			 * with them later.
 			 */
-			switch (peer->refclktype) { 
-			case REFCLK_LOCALCLOCK:
-				if (typelocal == NULL &&
-				    !(peer->flags & FLAG_PREFER))
-					typelocal = peer;
-				continue;
+			if (!(peer->flags & FLAG_PREFER)) {
+				switch (peer->refclktype) {
+				case REFCLK_LOCALCLOCK:
+					if (typelocal == NULL)
+						typelocal = peer;
+					continue;
 
-			case REFCLK_ACTS:
-				if (typeacts == NULL &&
-				    !(peer->flags & FLAG_PREFER))
-					typeacts = peer;
-				continue;
+				case REFCLK_ACTS:
+					if (typeacts == NULL)
+						typeacts = peer;
+					continue;
+				}
 			}
 #endif /* REFCLOCK */
 
@@ -2317,7 +2318,7 @@ clock_select(void)
 			 * island, but does not yet have the immunity
 			 * idol.
 			 */
-			peer->status = CTL_PST_SEL_SANE;
+			peer->new_status = CTL_PST_SEL_SANE;
 			peer_list[nlist++] = peer;
 
 			/*
@@ -2386,7 +2387,7 @@ clock_select(void)
 	 *
 	 * Here, nlist is the number of candidates and allow is the
 	 * number of falsetickers. Upon exit, the truechimers are the
-	 * susvivors with offsets not less than low and not greater than
+	 * survivors with offsets not less than low and not greater than
 	 * high. There may be none of them.
 	 */
 	low = 1e9;
@@ -2454,7 +2455,7 @@ clock_select(void)
 
 #ifdef REFCLOCK
 		/*
-		 * Elegible PPS peers must survive the intersection
+		 * Eligible PPS peers must survive the intersection
 		 * algorithm. Use the first one found, but don't
 		 * include any of them in the cluster population.
 		 */
@@ -2508,7 +2509,7 @@ clock_select(void)
 		} else if (typelocal != NULL) {
 			peer_list[0] = typelocal;
 			nlist = 1;
-		}
+		} else
 #endif /* REFCLOCK */
 		if (typeorphan != NULL) {
 			peer_list[0] = typeorphan;
@@ -2520,7 +2521,7 @@ clock_select(void)
 	 * Mark the candidates at this point as truechimers.
 	 */
 	for (i = 0; i < nlist; i++) {
-		peer_list[i]->status = CTL_PST_SEL_SELCAND;
+		peer_list[i]->new_status = CTL_PST_SEL_SELCAND;
 #ifdef DEBUG
 		if (debug > 1)
 			printf("select: survivor %s %f\n",
@@ -2574,7 +2575,7 @@ clock_select(void)
 			    ntoa(&peer_list[k]->srcadr), g, d);
 #endif
 		if (nlist > sys_maxclock)
-			peer_list[k]->status = CTL_PST_SEL_EXCESS;
+			peer_list[k]->new_status = CTL_PST_SEL_EXCESS;
 		for (j = k + 1; j < nlist; j++) {
 			peer_list[j - 1] = peer_list[j];
 			synch[j - 1] = synch[j];
@@ -2598,7 +2599,7 @@ clock_select(void)
 	for (i = 0; i < nlist; i++) {
 		peer = peer_list[i];
 		peer->unreach = 0;
-		peer->status = CTL_PST_SEL_SYNCCAND;
+		peer->new_status = CTL_PST_SEL_SYNCCAND;
 		sys_survivors++;
 		if (peer->leap == LEAP_ADDSECOND) {
 			if (peer->flags & FLAG_REFCLOCK)
@@ -2651,14 +2652,14 @@ clock_select(void)
 	 */
 	if (typesystem != NULL) {
 		if (sys_prefer == NULL) {
-			typesystem->status = CTL_PST_SEL_SYSPEER;
+			typesystem->new_status = CTL_PST_SEL_SYSPEER;
 			clock_combine(peer_list, sys_survivors);
 			sys_jitter = SQRT(SQUARE(typesystem->jitter) +
 			    SQUARE(sys_jitter) + SQUARE(seljitter));
 		} else {
 			typesystem = sys_prefer;
 			sys_clockhop = 0;
-			typesystem->status = CTL_PST_SEL_SYSPEER;
+			typesystem->new_status = CTL_PST_SEL_SYSPEER;
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
 		}
@@ -2682,7 +2683,7 @@ clock_select(void)
 	    NULL || (typesystem == NULL && sys_minsane == 0))))) {
 		typesystem = typepps;
 		sys_clockhop = 0;
-		typesystem->status = CTL_PST_SEL_PPS;
+		typesystem->new_status = CTL_PST_SEL_PPS;
  		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
 #ifdef DEBUG
@@ -2702,6 +2703,10 @@ clock_select(void)
 		if (osys_peer != NULL)
 			report_event(EVNT_NOPEER, NULL, NULL);
 		sys_peer = NULL;			
+		for (n = 0; n < NTP_HASH_SIZE; n++)
+			for (peer = peer_hash[n]; peer != NULL; peer =
+			    peer->next)
+				peer->status = peer->new_status;
 		return;
 	}
 
@@ -2715,9 +2720,12 @@ clock_select(void)
 	/*
 	 * We have found the alpha male. Wind the clock.
 	 */
- 	if (osys_peer != typesystem)
+	if (osys_peer != typesystem)
 		report_event(PEVNT_NEWPEER, typesystem, NULL);
-	typesystem->flags |= FLAG_SYSPEER;
+	for (n = 0; n < NTP_HASH_SIZE; n++)
+		for (peer = peer_hash[n]; peer != NULL; peer =
+		    peer->next)
+			peer->status = peer->new_status;
 	clock_update(typesystem);
 }
 

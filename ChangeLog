@@ -1,5 +1,14 @@
 ---
 
+* [Bug 1554] peer may stay selected as system peer after becoming
+  unreachable.
+* [Bug 1921] LOCAL, ACTS drivers with "prefer" excluded from initial
+  candidate list.
+* [Bug 1923] orphan parent favored over LOCAL, ACTS drivers.
+* [Bug 1924] Billboard tally codes sometimes do not match operation,
+  variables.
+* Enable tickadj-like taming of wildly off-spec Windows clock using
+  NTPD_TICKADJ_PPM env. var. specifying baseline slew.
 * Upgrade to AutoGen 5.11.9 (and require it).
 * Upgrade to libopts 35.0.10 from AutoGen 5.11.9pre8.
 
