@@ -27,12 +27,30 @@ DISTCLEANFILES=	.version version.c
 CLEANFILES=	check-layout layout.here nl.c ntpdc-layout
 noinst_HEADERS=	ntpdc.h
 ETAGS_ARGS= 	Makefile.am
-EXTRA_DIST=	nl_in.c nl.pl layout.std	\
-		ntpdc-opts.def ntpdc.1 ntpdc-opts.texi ntpdc-opts.menu
+EXTRA_DIST=			\
+	nl_in.c			\
+	nl.pl			\
+	layout.std		\
+	ntpdc-opts.def		\
+	ntpdc.1			\
+	ntpdc.html		\
+	ntpdc.texi		\
+	ntpdc-opts.texi		\
+	ntpdc-opts.menu		\
+	$(NULL)
 man_MANS=	$(srcdir)/ntpdc.1
-noinst_DATA=	$(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc-opts.menu
+
+## HMS: Real Soon Now...
+##info_TEXINFOS=	ntpdc.texi
+##ntpdc_TEXINFOS=	ntpdc-opts.texi
+
+noinst_DATA=				\
+	$(srcdir)/ntpdc.html		\
+	$(srcdir)/ntpdc-opts.texi	\
+	$(srcdir)/ntpdc-opts.menu	\
+	$(NULL)
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L ../sntp/include --writable
+		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
 	$(top_srcdir)/sntp/include/debug-opt.def		\
 	$(top_srcdir)/sntp/include/autogen-version.def 		\
@@ -48,7 +66,7 @@ $(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
 $(srcdir)/ntpdc.1: $(srcdir)/ntpdc-opts.def $(std_def_list)
-	$(run_ag) -Tagman1.tpl -bntpdc ntpdc-opts.def
+	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpdc-opts.def
 
 $(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
@@ -56,6 +74,9 @@ $(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.texi
 $(srcdir)/ntpdc-opts.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
 	$(top_srcdir)/scripts/check--help $@
+
+$(srcdir)/ntpdc.html: $(srcdir)/ntpdc-opts.menu $(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntpdc.html ntpdc.texi || true )
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
 
