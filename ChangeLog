@@ -1,3 +1,4 @@
+* [Bug 1933] WWVB/Spectracom driver timestamps LFs, not CRs.
 (4.2.7p168) 2011/05/16 Released by Harlan Stenn <stenn@ntp.org>
 * Convert receive buffer queue from doubly-linked list to FIFO.
 (4.2.7p167) 2011/05/14 Released by Harlan Stenn <stenn@ntp.org>
