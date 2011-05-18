@@ -49,8 +49,10 @@ noinst_DATA=				\
 	$(srcdir)/ntpdc-opts.texi	\
 	$(srcdir)/ntpdc-opts.menu	\
 	$(NULL)
+
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
+
 std_def_list =							\
 	$(top_srcdir)/sntp/include/debug-opt.def		\
 	$(top_srcdir)/sntp/include/autogen-version.def 		\
@@ -65,6 +67,11 @@ $(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.c
 $(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
+# For man pages, use agman-cmd.tpl
+# For mdoc pages, use agmdoc-cmd.tpl
+#$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
+#	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl sntp-opts.def
+###
 $(srcdir)/ntpdc.1: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpdc-opts.def
 
@@ -76,7 +83,7 @@ $(srcdir)/ntpdc-opts.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(top_srcdir)/scripts/check--help $@
 
 $(srcdir)/ntpdc.html: $(srcdir)/ntpdc-opts.menu $(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc.texi $(top_srcdir)/sntp/include/version.texi
-	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntpdc.html ntpdc.texi || true )
+	cd $(srcdir) && ( makeinfo --force --html --no-split -I ../sntp -o ntpdc.html ntpdc.texi || true )
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
 

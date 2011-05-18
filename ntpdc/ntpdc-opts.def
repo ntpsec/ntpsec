@@ -2,13 +2,14 @@
 
 autogen definitions options;
 
+#include autogen-version.def
+#include copyright.def
+
 prog-name      = "ntpdc";
 prog-title     = "vendor-specific NTP query program";
 argument       = '[ host ...]';
 
-#include copyright.def
 #include homerc.def
-#include autogen-version.def
 
 test-main;
 
@@ -775,7 +776,14 @@ for further information.
 Clear the statistics counters in various modules of the server.
 See the source listing for further information.
 .El
-.Sh SEE ALSO
+	_END_MDOC_USAGE;
+};
+
+
+doc-section	= {
+  ds-type	= 'SEE ALSO';
+  ds-format     = 'mdoc';
+  ds-text       = <<-  _END_MDOC_SEEALSO
 .Xr ntp.conf 5 ,
 .Xr ntpd 8
 .Rs
@@ -783,7 +791,23 @@ See the source listing for further information.
 .%T Network Time Protocol (Version 3)
 .%O RFC1305
 .Re
-.Sh BUGS
+	_END_MDOC_SEEALSO;
+};
+
+
+doc-section	= {
+  ds-type	= 'AUTHORS';
+  ds-format     = 'mdoc';
+  ds-text       = <<-  _END_MDOC_AUTHORS
+Portions of this document came from FreeBSD.
+	_END_MDOC_AUTHORS;
+};
+
+
+doc-section	= {
+  ds-type	= 'BUGS';
+  ds-format     = 'mdoc';
+  ds-text       = <<-  _END_MDOC_BUGS
 The
 .Nm
 utility is a crude hack.
@@ -794,5 +818,5 @@ program was designed so that new (and temporary) features were easy
 to hack in, at great expense to the program's ease of use.
 Despite
 this, the program is occasionally useful.
-	_END_MDOC_USAGE;
+	_END_MDOC_BUGS;
 };

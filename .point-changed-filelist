@@ -7,6 +7,7 @@ ntpdc/ntpdc-opts.c
 ntpdc/ntpdc-opts.h
 ntpdc/ntpdc-opts.texi
 ntpdc/ntpdc.1
+ntpdc/ntpdc.html
 ntpq/ntpq-opts.c
 ntpq/ntpq-opts.h
 ntpq/ntpq-opts.texi

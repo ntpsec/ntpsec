@@ -10,15 +10,11 @@ prog-title     = "standard Simple Network Time Protocol program";
 homerc         =  $HOME, ".";
 argument       = '[ hostname-or-IP ...]';
 
+#include homerc.def
+
 long-opts;
 
 config-header  = "config.h";
-
-#ifndef __windows__
-rcfile         = ".ntprc";
-#else
-rcfile         = "ntp.ini";
-#endif
 
 environrc;
 
