@@ -1,3 +1,4 @@
+(4.2.7p170) 2011/05/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1932] libevent/util_internal.h builtin_expect compile error with
   gcc 2.95.
 * Use 64-bit scalars in LFPTOD() and DTOLFP() on more platforms by
