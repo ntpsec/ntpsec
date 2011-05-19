@@ -1,3 +1,7 @@
+* [Bug 1932] libevent/util_internal.h builtin_expect compile error with
+  gcc 2.95.
+* Use 64-bit scalars in LFPTOD() and DTOLFP() on more platforms by
+  conditionalizing on HAVE_U_INT64 rather than UINT64_MAX.
 (4.2.7p169) 2011/05/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1933] WWVB/Spectracom driver timestamps LFs, not CRs.
 (4.2.7p168) 2011/05/16 Released by Harlan Stenn <stenn@ntp.org>
@@ -8,7 +12,7 @@
 * Use acts_close() in acts_shutdown() to avoid leaving a stale lockfile
   if unpeered via runtime configuration while the modem is open.
 * Correct acts_close() test of pp->io.fd to see if it is open.
-* 4.2.7p164 documentation updates regarding 'tos orphanwait' expanded scope.
+* 4.2.7p164 documentation updates re: 'tos orphanwait' expanded scope.
 (4.2.7p166) 2011/05/13 Released by Harlan Stenn <stenn@ntp.org>
 * If we have local overrides for autogen template files, use them.
 * Convert more of the sntp-opt.def documentation from man to mdoc.

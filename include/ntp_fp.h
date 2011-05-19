@@ -244,22 +244,26 @@ typedef u_int32 u_fp;
 #define FRAC		4294967296.0 		/* 2^32 as a double */
 
 
-#ifdef UINT64_MAX	/* use 64 bit integers if available */
+#ifdef HAVE_U_INT64	/* use 64 bit integers if available */
 
-#define M_DTOLFP(d, r_ui, r_uf)		/* double to l_fp */	\
+#include <math.h>	/* ldexp() */
+
+#define M_DTOLFP(d, r_ui, r_uf)		/* double to l_fp */ \
 	do { \
-		uint64_t q_tmp; double d_tmp; \
+		double d_tmp; \
+		u_int64 q_tmp; \
 		if ((d_tmp = (d)) < 0.0) \
-			q_tmp = ~(uint64_t)ldexp(-d_tmp, 32) + 1; \
+			q_tmp = ~(u_int64)ldexp(-d_tmp, 32) + 1; \
 		else \
-			q_tmp = (uint64_t)ldexp(d_tmp, 32); \
+			q_tmp = (u_int64)ldexp(d_tmp, 32); \
 		(r_uf) = (u_int32)q_tmp; \
 		(r_ui) = (u_int32)(q_tmp >> 32); \
 	} while(0)
 
 #define M_LFPTOD(r_ui, r_uf, d) 		/* l_fp to double */ \
 	do { \
-		uint64_t q_tmp = ((uint64_t)(r_ui) << 32) + (uint64_t)(r_uf); \
+		u_int64 q_tmp; \
+		q_tmp = ((u_int64)(r_ui) << 32) + (u_int64)(r_uf); \
 		if (M_ISNEG((r_ui), (r_uf))) \
 			d = -ldexp((double)(~q_tmp + 1), -32); \
 		else \
@@ -268,7 +272,7 @@ typedef u_int32 u_fp;
 
 #else /* use only 32 bit unsigned values */
 
-#define M_DTOLFP(d, r_ui, r_uf) 		/* double to l_fp */	\
+#define M_DTOLFP(d, r_ui, r_uf) 		/* double to l_fp */ \
 	do { \
 		double d_tmp; \
 		if ((d_tmp = (d)) < 0) { \
@@ -284,7 +288,7 @@ typedef u_int32 u_fp;
 	do { \
 		u_int32 l_thi, l_tlo; \
 		l_thi = (r_ui); l_tlo = (r_uf); \
-		if (M_ISNEG(l_thi, l_tlo)) {		      \
+		if (M_ISNEG(l_thi, l_tlo)) { \
 			M_NEG(l_thi, l_tlo); \
 			(d) = -((double)l_thi + (double)l_tlo / FRAC); \
 		} else { \
