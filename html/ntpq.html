@@ -11,7 +11,7 @@
 <img src="pic/bustardfly.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>A typical NTP monitoring packet</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->21-Dec-2010  14:31<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->20-May-2011  20:04<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>More Help</h4>
@@ -51,34 +51,36 @@
 <h4>Internal Commands</h4>
 <p>Interactive format commands consist of a keyword followed by zero to four arguments. Only enough characters of the full keyword to uniquely identify the command need be typed. The output of a command is normally sent to the standard output, but optionally the output of individual commands may be sent to a file by appending a <tt>&gt;</tt>, followed by a file name, to the command line. A number of interactive format commands are executed entirely within the <tt>ntpq</tt> program itself and do not result in NTP mode-6 requests being sent to a server. These are described following.</p>
 <dl>
-  <dt><tt>? [<i>command_keyword</i>]</tt><br>
+  <dt id="help"><tt>? [<i>command_keyword</i>]</tt><br>
     <tt>help [<i>command_keyword</i>]</tt></dt>
   <dd>A <tt>?</tt> by itself will print a list of all the command keywords known to <tt>ntpq</tt>. A <tt>?</tt> followed by a command keyword will print function and usage information about the command.</dd>
-  <dt><tt>addvars <i>name</i> [ = <i>value</i>] [...]</tt><br>
+  <dt id="addvars"><tt>addvars <i>name</i> [ = <i>value</i>] [...]</tt><br>
     <tt>rmvars <i>name</i> [...]</tt><br>
     <tt>clearvars</tt></dt>
   <dd>The arguments to this command consist of a list of items of the form <tt><i>name</i> = <i>value</i></tt>, where the <tt>= <i>value</i></tt> is ignored, and can be omitted in read requests. <tt>ntpq</tt> maintains an internal list in which data to be included in control messages can be assembled, and sent using the <tt>readlist</tt> and <tt>writelist</tt> commands described below. The <tt>addvars</tt> command allows variables and optional values to be added to the list. If more than one variable is to be added, the list should be comma-separated and not contain white space. The <tt>rmvars</tt> command can be used to remove individual variables from the list, while the <tt>clearlist</tt> command removes all variables from the list.</dd>
-  <dt><tt>cooked</tt></dt>
+  <dt id="cooked"><tt>cooked</tt></dt>
   <dd>Display server messages in prettyprint format.</dd>
-  <dt><tt>debug more | less | off</tt></dt>
+  <dt id="debug"><tt>debug more | less | off</tt></dt>
   <dd>Turns internal query program debugging on and off.</dd>
-  <dt><tt>delay <i>milliseconds</i></tt></dt>
+  <dt id="delay"><tt>delay <i>milliseconds</i></tt></dt>
   <dd>Specify a time interval to be added to timestamps included in requests which require authentication. This is used to enable (unreliable) server reconfiguration over long delay network paths or between machines whose clocks are unsynchronized. Actually the server does not now require timestamps in authenticated requests, so this command may be obsolete.</dd>
-  <dt><tt>host <i>name</i></tt></dt>
+  <dt id="host"><tt>host <i>name</i></tt></dt>
   <dd>Set the host to which future queries will be sent. The name may be either a DNS name or a numeric address.</dd>
-  <dt><tt>hostnames [yes | no]</tt></dt>
+  <dt id="hostnames"><tt>hostnames [yes | no]</tt></dt>
   <dd>If <tt>yes</tt> is specified, host names are printed in information displays. If <tt>no</tt> is specified, numeric addresses are printed instead. The default is <tt>yes</tt>, unless modified using the command line <tt>-n</tt> switch.</dd>
-  <dt><tt>keyid <i>keyid</i></tt></dt>
-  <dd>This command specifies the key number to be used to authenticate configuration requests. This must correspond to a key number the server has been configured to use for this purpose.</dd>
-  <dt><tt>ntpversion 1 | 2 | 3 | 4</tt></dt>
+  <dt id="keyid"><tt>keyid <i>keyid</i></tt></dt>
+  <dd>This command specifies the key number to be used to authenticate configuration requests. This must correspond to a key ID configured in <tt>ntp.conf</tt> for this purpose.</dd>
+  <dt id="keytype"><tt>keytype</tt></dt>
+  <dd>Specify the digest algorithm to use for authenticated requests, with default <tt>MD5</tt>. If the OpenSSL library is installed, digest can be be any message digest algorithm supported by the library. The current selections are: <tt>MD2</tt>, <tt>MD4</tt>, <tt>MD5</tt>, <tt>MDC2</tt>, <tt>RIPEMD160</tt>, <tt>SHA</tt> and <tt>SHA1</tt>.</dd>
+  <dt id="ntpversion"><tt>ntpversion 1 | 2 | 3 | 4</tt></dt>
   <dd>Sets the NTP version number which <tt>ntpq</tt> claims in packets. Defaults to 2, Note that mode-6 control messages (and modes, for that matter) didn't exist in NTP version 1.</dd>
-  <dt><tt>passwd</tt></dt>
-  <dd>This command prompts for a password to authenticate configuration requests. The password must correspond to the key configured for NTP server for this purpose.</dd>
-  <dt><tt>quit</tt></dt>
+  <dt id="passwd"><tt>passwd</tt></dt>
+  <dd>This command prompts for a password to authenticate requests. The password must correspond to the key ID configured in <tt>ntp.conf</tt> for this purpose.</dd>
+  <dt id="quit"><tt>quit</tt></dt>
   <dd>Exit <tt>ntpq</tt>.</dd>
-  <dt><tt>raw</tt></dt>
+  <dt id="raw"><tt>raw</tt></dt>
   <dd>Display server messages as received and without reformatting.</dd>
-  <dt><tt>timeout <i>millseconds</i></tt></dt>
+  <dt id="timeout"><tt>timeout <i>millseconds</i></tt></dt>
   <dd>Specify a timeout period for responses to server queries. The default is about 5000 milliseconds. Note that since <tt>ntpq</tt> retries each query once after a timeout, the total waiting time for a timeout will be twice the timeout value set.</dd>
 </dl>
 <h4>Control Message Commands</h4>
@@ -131,16 +133,20 @@
       </tr>
     </table>
   </dd>
-  <dt><tt>clockvar <i>assocID</i> [<i>name</i> [ = <i>value</i> [...]] [...]</tt><br>
+  <dt id="cv"><tt>clockvar <i>assocID</i> [<i>name</i> [ = <i>value</i> [...]] [...]</tt><br>
     <tt>cv <i>assocID</i> [<i>name</i> [ = <i>value</i> [...] ][...]</tt></dt>
   <dd>Display a list of <a href="#clock">clock variables</a> for those associations supporting a reference clock.</dd>
-  <dt><tt>:config [...]</tt></dt>
+  <dt id=":config"><tt>:config [...]</tt></dt>
   <dd>Send the remainder of the command line, including whitespace, to the server as a run-time configuration command in the same format as the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.</dd>
-  <dt><tt>config-from-file <i>filename</i></tt></dt>
-  <dd>Send the each line of <i>filename</i> to the server as run-time configuration commands in the same format as the configuration file. This command is experimental until further notice and clarification. Authentication is of course required.</dd>
-  <dt><tt>keyid</tt></dt>
-  <dd>Specify the key ID to use for write requests.</dd>
-  <dt><tt>lassociations</tt></dt>
+  <dt id="config-from-file"><tt>config-from-file <i>filename</i></tt></dt>
+  <dd>Send the each line of <i>filename</i> to the server as run-time configuration commands in the same format as the configuration file. This command is experimental until further notice and clarification. Authentication is required.</dd>
+  <dt id="ifstats"><tt>ifstats</tt></dt>
+  <dd>Display statistics for each local network address. Authentication is required.</dd>
+  <dt id="iostats"><tt>iostats</tt></dt>
+  <dd>Display network and reference clock I/O statistics.</dd>
+  <dt id="kerninfo"><tt>kerninfo</tt></dt>
+  <dd>Display kernel loop and PPS statistics. As with other ntpq output, times are in milliseconds. The precision value displayed is in milliseconds as well, unlike the precision system variable.</dd>
+  <dt id="lassoc"><tt>lassociations</tt></dt>
   <dd>Perform the same function as the associations command, except display mobilized and unmobilized associations.</dd>
   <dt id="monstats"><tt>monstats</tt></dt>
   <dd>Display monitor facility statistics.</dd>
@@ -194,13 +200,11 @@
       </tr>
     </table>
   </dd>
-  <dt><tt>mreadvar <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt></dt>
-  <dt><tt>mrv <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt></dt>
+  <dt id="mreadvar"><tt>mreadvar <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt></dt>
+  <dt id="mrv"><tt>mrv <i>assocID</i> <i>assocID</i> [ <i>variable_name</i> [ = <i>value</i>[ ... ]</tt></dt>
   <dd>Perform the same function as the <tt>readvar</tt> command, except for a range of association IDs. This range is determined from the association list cached by the most recent <tt>associations</tt> command.</dd>
-  <dt><tt>passociations</tt></dt>
+  <dt id="passoc"><tt>passociations</tt></dt>
   <dd>Perform the same function as the <tt>associations command</tt>, except that it uses previously stored data rather than making a new query.</dd>
-  <dt><tt>passwd</tt></dt>
-  <dd>Specify the password to use for write requests.</dd>
   <dt id="pe"><tt>peers</tt></dt>
   <dd>Display a list of peers in the form</dd>
   <dd><tt>[tally]remote refid st t when pool reach delay offset jitter</tt></dd>
@@ -273,8 +277,10 @@
     of year, DD the day of month and TTTT the time of day.</dd>
   <dt id="saveconfig"><tt>saveconfig <i>filename</i></tt></dt>
   <dd>Write the current configuration, including any runtime modifications given with <tt>:config</tt> or <tt>config-from-file</tt>, to the ntpd host's file <i>filename</i>.  This command will be rejected by the server unless <a href="miscopt.html#saveconfigdir">saveconfigdir</a> appears in the <tt>ntpd</tt> configuration file. <i>filename</i> can use strftime() format specifies to substitute the current date and time, for example, <tt>saveconfig ntp-%Y%m%d-%H%M%S.conf</tt>. The filename used is stored in system variable <tt>savedconfig</tt>. Authentication is required.</dd>
-  <dt><tt>writevar <i>assocID</i> <i>name</i> = <i>value</i> [,...]</tt></dt>
+  <dt id="writevar"><tt>writevar <i>assocID</i> <i>name</i> = <i>value</i> [,...]</tt></dt>
   <dd>Write the specified variables. If the <tt><i>assocID</i></tt> is zero, the variables are from the <a href="#system">system variables</a> name space, otherwise they are from the <a href="#peer">peer variables</a> name	space. The <tt><i>assocID</i></tt> is required, as the same name can occur in both spaces.</dd>
+  <dt id="sysinfo"><tt>sysinfo</tt></dt>
+  <dd>Display operational summary.</dd>
   <dt id="sysstats"><tt>sysstats</tt></dt>
   <dd>Print statistics counters maintained in the protocol module.</dd>
 </dl>
@@ -590,7 +596,7 @@
     <td>Description</td>
   </tr>
   <tr>
-    <td><tt>assoc id</tt></td>
+    <td><tt>associd</tt></td>
     <td>association ID</td>
   </tr>
   <tr>
@@ -602,7 +608,7 @@
     <td>device description</td>
   </tr>
   <tr>
-    <td><tt>time code</tt></td>
+    <td><tt>timecode</tt></td>
     <td>ASCII time code string (specific to device)</td>
   </tr>
   <tr>
@@ -610,15 +616,15 @@
     <td>poll messages sent</td>
   </tr>
   <tr>
-    <td><tt>no reply</tt></td>
+    <td><tt>noreply</tt></td>
     <td>no reply</td>
   </tr>
   <tr>
-    <td><tt>bad format</tt></td>
+    <td><tt>badformat</tt></td>
     <td>bad format</td>
   </tr>
   <tr>
-    <td><tt>bad data</tt></td>
+    <td><tt>baddata</tt></td>
     <td>bad date or time</td>
   </tr>
   <tr>
@@ -634,7 +640,7 @@
     <td>driver stratum</td>
   </tr>
   <tr>
-    <td><tt>re fid</tt></td>
+    <td><tt>refid</tt></td>
     <td>driver reference ID</td>
   </tr>
   <tr>
