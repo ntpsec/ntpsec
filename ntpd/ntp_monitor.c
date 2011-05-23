@@ -270,7 +270,7 @@ mon_stop(
  */
 void
 mon_clearinterface(
-	struct interface *lcladr
+	endpt *lcladr
 	)
 {
 	mon_entry *mon;

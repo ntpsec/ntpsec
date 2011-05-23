@@ -76,12 +76,8 @@ double	wander_threshold = 1e-7;	/* initial frequency threshold */
 # endif /* SYS_WINNT */
 #endif
 
-#ifndef MAXPATHLEN
-# define MAXPATHLEN 256
-#endif
 
-
-static	char statsdir[MAXPATHLEN] = NTP_VAR;
+char statsdir[MAXPATHLEN] = NTP_VAR;
 static FILEGEN peerstats;
 static FILEGEN loopstats;
 static FILEGEN clockstats;
@@ -434,24 +430,19 @@ stats_config(
 	 * Specify statistics directory.
 	 */
 	case STATS_STATSDIR:
-
-		/*
-		 * HMS: the following test is insufficient:
-		 * - value may be missing the DIR_SEP
-		 * - we still need the filename after it
-		 */
-		if (strlen(value) >= sizeof(statsdir)) {
+		/* - 1 since value may be missing the DIR_SEP. */
+		if (strlen(value) >= sizeof(statsdir) - 1) {
 			msyslog(LOG_ERR,
 			    "statsdir too long (>%d, sigh)",
-			    (int)sizeof(statsdir) - 1);
+			    (int)sizeof(statsdir) - 2);
 		} else {
-			l_fp now;
 			int add_dir_sep;
-			int value_l = strlen(value);
+			int value_l;
 
 			/* Add a DIR_SEP unless we already have one. */
-			if (value_l == 0)
-				add_dir_sep = 0;
+			value_l = strlen(value);
+			if (0 == value_l)
+				add_dir_sep = FALSE;
 			else
 				add_dir_sep = (DIR_SEP !=
 				    value[value_l - 1]);
@@ -462,59 +453,7 @@ stats_config(
 			else
 				snprintf(statsdir, sizeof(statsdir),
 				    "%s", value);
-			get_systime(&now);
-			if (peerstats.prefix == &statsdir[0] &&
-			    peerstats.fp != NULL) {
-				fclose(peerstats.fp);
-				peerstats.fp = NULL;
-				filegen_setup(&peerstats, now.l_ui);
-			}
-			if (loopstats.prefix == &statsdir[0] &&
-			    loopstats.fp != NULL) {
-				fclose(loopstats.fp);
-				loopstats.fp = NULL;
-				filegen_setup(&loopstats, now.l_ui);
-			}
-			if (clockstats.prefix == &statsdir[0] &&
-			    clockstats.fp != NULL) {
-				fclose(clockstats.fp);
-				clockstats.fp = NULL;
-				filegen_setup(&clockstats, now.l_ui);
-			}
-			if (rawstats.prefix == &statsdir[0] &&
-			    rawstats.fp != NULL) {
-				fclose(rawstats.fp);
-				rawstats.fp = NULL;
-				filegen_setup(&rawstats, now.l_ui);
-			}
-			if (sysstats.prefix == &statsdir[0] &&
-			    sysstats.fp != NULL) {
-				fclose(sysstats.fp);
-				sysstats.fp = NULL;
-				filegen_setup(&sysstats, now.l_ui);
-			}
-			if (protostats.prefix == &statsdir[0] &&
-			    protostats.fp != NULL) {
-				fclose(protostats.fp);
-				protostats.fp = NULL;
-				filegen_setup(&protostats, now.l_ui);
-			}
-#ifdef AUTOKEY
-			if (cryptostats.prefix == &statsdir[0] &&
-			    cryptostats.fp != NULL) {
-				fclose(cryptostats.fp);
-				cryptostats.fp = NULL;
-				filegen_setup(&cryptostats, now.l_ui);
-			}
-#endif	/* AUTOKEY */
-#ifdef DEBUG_TIMING
-			if (timingstats.prefix == &statsdir[0] &&
-			    timingstats.fp != NULL) {
-				fclose(timingstats.fp);
-				timingstats.fp = NULL;
-				filegen_setup(&timingstats, now.l_ui);
-			}
-#endif	/* DEBUG_TIMING */
+			filegen_statsdir();
 		}
 		break;
 

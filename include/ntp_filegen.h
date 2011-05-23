@@ -34,20 +34,21 @@
 #define FGEN_FLAG_ENABLED	0x80 /* set this to really create files	  */
 				     /* without this, open is suppressed */
 
-typedef struct FILEGEN
-{
-	FILE *	     fp;	/* file referring to current generation */
-	const char * prefix;	/* filename prefix and basename to be used*/
-	char *	     basename;	/* for constructing filename of generation file */
-				/* WARNING: must be malloced !!! will be fed to free()*/
-	u_long	     id_lo;	/* lower bound of ident value */
-	u_long	     id_hi;	/* upper bound of ident value */
-	u_char	     type;	/* type of file generation */
-	u_char	     flag;	/* flags modifying processing of file generation */
-}	FILEGEN;
+typedef struct filegen_tag {
+	FILE *	fp;	/* file referring to current generation */
+	char *	dir;	/* currently always statsdir */
+	char *	fname;	/* filename prefix of generation file */
+			/* must be malloced, will be fed to free() */
+	u_long	id_lo;	/* lower bound of ident value */
+	u_long	id_hi;	/* upper bound of ident value */
+	u_char	type;	/* type of file generation */
+	u_char	flag;	/* flags modifying processing of file generation */
+} FILEGEN;
 
 extern	void	filegen_setup	(FILEGEN *, u_int32);
-extern	void	filegen_config	(FILEGEN *, const char *, u_int, u_int);
+extern	void	filegen_config	(FILEGEN *, const char *, const char *,
+				 u_int, u_int);
+extern	void	filegen_statsdir(void);
 extern	FILEGEN *filegen_get	(const char *);
 extern	void	filegen_register (const char *, const char *, FILEGEN *);
 #ifdef DEBUG

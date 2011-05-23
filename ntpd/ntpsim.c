@@ -19,6 +19,7 @@ int determine_event_ordering(const Event *e1, const Event *e2);
 int determine_recv_buf_ordering(const struct recvbuf *b1, 
 				const struct recvbuf *b2);
 void create_server_associations(void);
+void init_sim_io(void);
 
 /* Global Variable Definitions */
 sim_info simulation;		/* Simulation Control Variables */
@@ -76,7 +77,7 @@ void create_server_associations(void)
 		printf("%s\n", stoa(simulation.servers[i].addr));
 		if (peer_config(simulation.servers[i].addr,
 				NULL,
-				ANY_INTERFACE_CHOOSE(simulation.servers[i].addr),
+				loopback_interface,
 				MODE_CLIENT,
 				NTP_VERSION,
 				NTP_MINDPOLL,
@@ -86,7 +87,7 @@ void create_server_associations(void)
 				0, /* peerkey */
 				NULL /* group ident */) == 0) {
 			fprintf(stderr,
-				"ERROR!! Could not create association for: %s",
+				"ERROR!! Could not create association for: %s\n",
 				stoa(simulation.servers[i].addr));
 		}
 	}
@@ -107,7 +108,7 @@ ntpsim(
 	/* Initialize the local Clock */
 	simclock.local_time = 0;
 	simclock.adj = 0;
-	simclock.slew = 0;
+	simclock.slew = 500e-6;
 
 	/* Initialize the simulation */
 	simulation.num_of_servers = 0;
@@ -116,7 +117,9 @@ ntpsim(
 	simulation.end_time = SIM_TIME;
 
 	/* Initialize ntp modules */
-	initializing = 1;
+	initializing = TRUE;
+	msyslog_term = TRUE;
+	init_sim_io();
 	init_auth();
 	init_util();
 	init_restrict();
@@ -133,7 +136,7 @@ ntpsim(
 	/* Call getconfig to parse the configuration file */
 	getconfig(argc, argv);
 	loop_config(LOOP_DRIFTINIT, 0);
-	initializing = 0;
+	initializing = FALSE;
 
 	/*
 	 * Watch out here, we want the real time, not the silly stuff.
@@ -167,9 +170,37 @@ ntpsim(
 		(*event_ptr[curr_event->function])(curr_event);
 		free_node(curr_event);
 	}
+	printf("sys_received: %lu\n", sys_received);
+	printf("sys_badlength: %lu\n", sys_badlength);
+	printf("sys_declined: %lu\n", sys_declined);
+	printf("sys_restricted: %lu\n", sys_restricted);
+	printf("sys_newversion: %lu\n", sys_newversion);
+	printf("sys_oldversion: %lu\n", sys_oldversion);
+	printf("sys_limitrejected: %lu\n", sys_limitrejected);
+	printf("sys_badauth: %lu\n", sys_badauth);
+
 	return (0);
 }
 
+
+void
+init_sim_io(void)
+{
+	loopback_interface = emalloc_zero(sizeof(*loopback_interface));
+	ep_list = loopback_interface;
+	strlcpy(loopback_interface->name, "IPv4loop",
+		sizeof(loopback_interface->name));
+	loopback_interface->flags = INT_UP | INT_LOOPBACK;
+	loopback_interface->fd = -1;
+	loopback_interface->bfd = -1;
+	loopback_interface->ifnum = 1;
+	loopback_interface->family = AF_INET;
+	AF(&loopback_interface->sin) = AF_INET;
+	SET_ADDR4(&loopback_interface->sin, LOOPBACKADR);
+	SET_PORT(&loopback_interface->sin, NTP_PORT);
+	AF(&loopback_interface->mask) = AF_INET;
+	SET_ADDR4(&loopback_interface->mask, LOOPNETMASK);
+}
 
 
 /* Define a function to create an return an Event  */
@@ -205,7 +236,7 @@ void sim_event_timer(Event *e)
     /* Process received buffers */
     while (!empty(recv_queue)) {
 	rbuf = (struct recvbuf *)dequeue(recv_queue);
-	(rbuf->receiver)(rbuf);
+	(*rbuf->receiver)(rbuf);
 	free_node(rbuf);
     }
 
@@ -221,22 +252,23 @@ void sim_event_timer(Event *e)
  * creates a reply packet and pushes the reply packet onto the event queue
  */
 int simulate_server(
-    sockaddr_u *serv_addr,		/* Address of the server */
-    struct interface *inter,		/* Interface on which the reply should
-					   be inserted */
-    struct pkt *rpkt			/* Packet sent to the server that
-					   needs to be processed. */
-)
+    sockaddr_u *serv_addr,	/* Address of the server */
+    endpt *	inter,		/* Interface on which the reply should
+				   be inserted */
+    struct pkt *rpkt		/* Packet sent to the server that
+				   needs to be processed. */
+    )
 {
-    struct pkt xpkt;	       /* Packet to be transmitted back
-				  to the client */
-    struct recvbuf rbuf;       /* Buffer for the received packet */
-    Event *e;		       /* Packet receive event */
-    server_info *server;       /* Pointer to the server being simulated */
-    script_info *curr_script;  /* Current script being processed */
+    struct pkt xpkt;		/* Packet to be transmitted back
+				   to the client */
+    struct recvbuf rbuf;	/* Buffer for the received packet */
+    Event *e;			/* Packet receive event */
+    server_info *server;	/* Pointer to the server being simulated */
+    script_info *curr_script;	/* Current script being processed */
     int i;
-    double d1, d2, d3;	       /* Delays while the packet is enroute */
-    double t1, t2, t3, t4;     /* The four timestamps in the packet */
+    double d1, d2, d3;		/* Delays while the packet is enroute */
+    double t1, t2, t3, t4;	/* The four timestamps in the packet */
+    l_fp lfp_host;		/* host-order l_fp */
 
     ZERO(xpkt);
     ZERO(rbuf);
@@ -244,7 +276,6 @@ int simulate_server(
     /* Search for the server with the desired address */
     server = NULL;
     for (i = 0; i < simulation.num_of_servers; ++i) {
-	fprintf(stderr,"Checking address: %s\n", stoa(simulation.servers[i].addr));
 	if (memcmp(simulation.servers[i].addr, serv_addr, 
 		   sizeof(*serv_addr)) == 0) { 
 	    server = &simulation.servers[i];
@@ -252,7 +283,8 @@ int simulate_server(
 	}
     }
 
-    fprintf(stderr, "Received packet for: %s\n", stoa(serv_addr));
+    fprintf(stderr, "Received packet from %s on %s\n",
+	    stoa(serv_addr), latoa(inter));
     if (server == NULL)
 	abortsim("Server with specified address not found!!!");
     
@@ -263,7 +295,7 @@ int simulate_server(
      * Masquerade the reply as a stratum-1 server with a GPS clock
      */
     xpkt.li_vn_mode = PKT_LI_VN_MODE(LEAP_NOWARNING, NTP_VERSION,
-                                     MODE_SERVER);
+				     MODE_SERVER);
     xpkt.stratum = STRATUM_TO_PKT(((u_char)1));
     memcpy(&xpkt.refid, "GPS", 4);
     xpkt.ppoll = rpkt->ppoll;
@@ -291,41 +323,40 @@ int simulate_server(
      * Note: This function is called at time t1. 
      */
 
-    LFPTOD(&rpkt->xmt, t1);
+    NTOHL_FP(&rpkt->xmt, &lfp_host);
+    LFPTOD(&lfp_host, t1);
     t2 = server->server_time + d1;
     t3 = server->server_time + d1 + d2;
     t4 = t1 + d1 + d2 + d3;
 
     /* Save the timestamps */
-    xpkt.org = rpkt->xmt;     
-    DTOLFP(t2, &xpkt.rec);
-    DTOLFP(t3, &xpkt.xmt);
+    xpkt.org = rpkt->xmt;
+    DTOLFP(t2, &lfp_host);
+    HTONL_FP(&lfp_host, &xpkt.rec);
+    DTOLFP(t3, &lfp_host);
+    HTONL_FP(&lfp_host, &xpkt.xmt);
     xpkt.reftime = xpkt.xmt;
 
-
-
-    /* Ok, we are done with the packet. Now initialize the receive buffer for
-     * the packet.
+    /* 
+     * Ok, we are done with the packet. Now initialize the receive
+     * buffer for the packet.
      */
-    rbuf.receiver = receive;   /* Function to call to process the packet */
+    rbuf.used = 1;
+    rbuf.receiver = &receive;   /* callback to process the packet */
     rbuf.recv_length = LEN_PKT_NOMAC;
     rbuf.recv_pkt = xpkt;
-    rbuf.used = 1;
-
+    rbuf.dstadr = inter;
+    rbuf.fd = inter->fd;
     memcpy(&rbuf.srcadr, serv_addr, sizeof(rbuf.srcadr));
     memcpy(&rbuf.recv_srcadr, serv_addr, sizeof(rbuf.recv_srcadr));
-    if ((rbuf.dstadr = malloc(sizeof(*rbuf.dstadr))) == NULL)
-	abortsim("malloc failed in simulate_server");
-    memcpy(rbuf.dstadr, inter, sizeof(*rbuf.dstadr));
-    /* rbuf.link = NULL; */
 
-    /* Create a packet event and insert it onto the event_queue at the 
+    /*
+     * Create a packet event and insert it onto the event_queue at the
      * arrival time (t4) of the packet at the client 
      */
     e = event(t4, PACKET);
     e->rcv_buf = rbuf;
     enqueue(event_queue, e);
-    
 
     /*
      * Check if the time of the script has expired. If yes, delete it.
@@ -349,7 +380,7 @@ int simulate_server(
  * Most of the code is modified from the systime.c file by Prof. Mills
  */
 
-void sim_update_clocks (Event *e)
+void sim_update_clocks(Event *e)
 {
     double time_gap;
     double adj;
@@ -358,7 +389,14 @@ void sim_update_clocks (Event *e)
     /* Compute the time between the last update event and this update */
     time_gap = e->time - simulation.sim_time;
 
+    if (time_gap < 0)
+	    printf("WARNING: e->time %.6g comes before sim_time %.6g (gap %+.6g)\n",
+		   e->time, simulation.sim_time, time_gap);
+
     /* Advance the client clock */
+    if (e->time + time_gap < simclock.local_time)
+	    printf("WARNING: e->time + gap %.6g comes before local_time %.6g\n",
+		   e->time + time_gap, simclock.local_time);
     simclock.local_time = e->time + time_gap;
 
     /* Advance the simulation time */
@@ -368,14 +406,13 @@ void sim_update_clocks (Event *e)
      * errors. The random error is a random walk computed as the
      * integral of samples from a Gaussian distribution.
      */
-    for (i = 0;i < simulation.num_of_servers; ++i) {
+    for (i = 0; i < simulation.num_of_servers; ++i) {
 	simulation.servers[i].curr_script->freq_offset +=
 	    gauss(0, time_gap * simulation.servers[i].curr_script->wander);
 
 	simulation.servers[i].server_time += time_gap * 
 	    (1 + simulation.servers[i].curr_script->freq_offset);
     }
-
 
     /* Perform the adjtime() function. If the adjustment completed
      * in the previous interval, amortize the entire amount; if not,
@@ -387,13 +424,11 @@ void sim_update_clocks (Event *e)
 	if (simclock.adj < 0) {
 	    simclock.adj += adj;
 	    simclock.local_time -= adj;
-	} 
-	else {
+	} else {
 	    simclock.adj -= adj;
 	    simclock.local_time += adj;
 	}    
-    } 
-    else {
+    } else {
 	simclock.local_time += simclock.adj;
 	simclock.adj = 0;
     }
@@ -589,7 +624,8 @@ gauss(
      */
     if (s == 0)
         return (m);
-    while ((q1 = drand48()) == 0);
+    while ((q1 = drand48()) == 0)
+	/* empty statement */;
     q2 = drand48();
     return (m + s * sqrt(-2. * log(q1)) * cos(2. * PI * q2));
 }
@@ -613,7 +649,8 @@ poisson(
      */
     if (s == 0)
         return (m);
-    while ((q1 = drand48()) == 0);
+    while ((q1 = drand48()) == 0)
+	/* empty statement */;
     return (m - s * log(q1 * s));
 }
 

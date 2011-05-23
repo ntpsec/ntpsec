@@ -117,6 +117,7 @@ typedef struct peer_resolved_ctx_tag {
 /*
  * Definitions of things either imported from or exported to outside
  */
+extern int yyparse(void);
 extern int yydebug;			/* ntp_parser.c (.y) */
 int curr_include_level;			/* The current include level */
 struct FILE_INFO *fp[MAXINCLUDELEVEL+1];
@@ -2023,22 +2024,26 @@ config_monitor(
 			continue;
 		}
 		DPRINTF(4, ("enabling filegen for %s statistics '%s%s'\n",
-			    filegen_string, filegen->prefix, 
-			    filegen->basename));
-		filegen->flag |= FGEN_FLAG_ENABLED;
+			    filegen_string, filegen->dir,
+			    filegen->fname));
+		filegen_flag = filegen->flag;
+		filegen_flag |= FGEN_FLAG_ENABLED;
+		filegen_config(filegen, statsdir, filegen_string,
+			       filegen->type, filegen_flag);
 	}
 
 	/* Configure the statistics with the options */
 	my_node = HEAD_PFIFO(ptree->filegen_opts);
 	for (; my_node != NULL; my_node = my_node->link) {
-		filegen_file = keyword(my_node->filegen_token);
-		filegen = filegen_get(filegen_file);
+		filegen_string = keyword(my_node->filegen_token);
+		filegen = filegen_get(filegen_string);
 		if (NULL == filegen) {
 			msyslog(LOG_ERR,
 				"filegen category '%s' unrecognized",
-				filegen_file);
+				filegen_string);
 			continue;
 		}
+		filegen_file = filegen_string;
 
 		/* Initialize the filegen variables to their pre-configuration states */
 		filegen_flag = filegen->flag;
@@ -2126,8 +2131,8 @@ config_monitor(
 				exit(1);
 			}
 		}
-		filegen_config(filegen, filegen_file, filegen_type,
-			       filegen_flag);
+		filegen_config(filegen, statsdir, filegen_file,
+			       filegen_type, filegen_flag);
 	}
 }
 

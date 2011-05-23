@@ -462,6 +462,7 @@ wwvb_timer(
 	register struct wwvbunit *up;
 	struct refclockproc *pp;
 	char	pollchar;	/* character sent to clock */
+	l_fp	now;
 
 	/*
 	 * Time to poll the clock. The Spectracom clock responds to a
@@ -478,6 +479,11 @@ wwvb_timer(
 		pollchar = 'T';
 	if (write(pp->io.fd, &pollchar, 1) != 1)
 		refclock_report(peer, CEVNT_FAULT);
+#ifdef DEBUG
+	get_systime(&now);
+	if (debug)
+		printf("%c poll at %s\n", pollchar, prettydate(&now));
+#endif
 #ifdef HAVE_PPSAPI
 	if (up->ppsapi_lit &&
 	    refclock_pps(peer, &up->atom, pp->sloppyclockflag) > 0) {

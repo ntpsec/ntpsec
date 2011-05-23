@@ -14,12 +14,6 @@
 #include "ntp_control.h"
 #include <ntp_random.h>
 
-#ifdef SYS_WINNT
-int accept_wildcard_if_for_winnt;
-#else
-const int accept_wildcard_if_for_winnt = FALSE;
-#endif
-
 /*
  *                  Table of valid association combinations
  *                  ---------------------------------------
@@ -125,9 +119,6 @@ static struct peer *	findexistingpeer_addr(sockaddr_u *,
 static void		free_peer(struct peer *, int);
 static void		getmorepeermem(void);
 static int		score(struct peer *);
-static struct interface *select_peerinterface(struct peer *,
-					      sockaddr_u *,
-					      struct interface *);
 
 
 /*
@@ -273,8 +264,7 @@ findpeer(
 	srcadr = &rbufp->recv_srcadr;
 	hash = NTP_HASH_ADDR(srcadr);
 	for (p = peer_hash[hash]; p != NULL; p = p->adr_link) {
-		if (SOCK_EQ(srcadr, &p->srcadr) &&
-		    NSRCPORT(srcadr) == NSRCPORT(&p->srcadr)) {
+		if (ADDR_PORT_EQ(srcadr, &p->srcadr)) {
 
 			/*
 			 * if the association matching rules determine
@@ -322,9 +312,10 @@ findpeer(
 	if (NULL == p) {
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
 	} else if (p->dstadr != rbufp->dstadr) {
+		DPRINTF(1, ("%s local addr %s -> %s to match response\n",
+			stoa(&p->srcadr), latoa(p->dstadr),
+			latoa(rbufp->dstadr)));
 		set_peerdstadr(p, rbufp->dstadr);
-		DPRINTF(1, ("changed %s local address to match response",
-			    stoa(&p->srcadr)));
 	}
 	return p;
 }
@@ -618,11 +609,9 @@ set_peerdstadr(
 		p->dstadr->peercnt--;
 		UNLINK_SLIST(unlinked, p->dstadr->peers, p, ilink,
 			     struct peer);
-		msyslog(LOG_INFO, "%s interface %s -> %s",
-			stoa(&p->srcadr), stoa(&p->dstadr->sin),
-			(dstadr != NULL)
-			    ? stoa(&dstadr->sin)
-			    : "(none)");
+		msyslog(LOG_INFO, "%s local addr %s -> %s",
+			stoa(&p->srcadr), latoa(p->dstadr),
+			latoa(dstadr));
 	}
 	p->dstadr = dstadr;
 	if (dstadr != NULL) {
@@ -666,7 +655,7 @@ peer_refresh_interface(
 
 	piface = p->dstadr;
 	set_peerdstadr(p, niface);
-	if (p->dstadr) {
+	if (p->dstadr != NULL) {
 		/*
 		 * clear crypto if we change the local address
 		 */
@@ -707,88 +696,28 @@ refresh_all_peerinterfaces(void)
 		peer_refresh_interface(p);
 }
 
-	
-/*
- * find an interface suitable for the src address
- */
-static endpt *
-select_peerinterface(
-	struct peer *	peer,
-	sockaddr_u *	srcadr,
-	endpt *		dstadr
-	)
-{
-	endpt *ep;
-	endpt *wild;
-
-	wild = ANY_INTERFACE_CHOOSE(srcadr);
-
-	/*
-	 * Initialize the peer structure and dance the interface jig.
-	 * Reference clocks step the loopback waltz, the others
-	 * squaredance around the interface list looking for a buddy. If
-	 * the dance peters out, there is always the wildcard interface.
-	 * This might happen in some systems and would preclude proper
-	 * operation with public key cryptography.
-	 */
-	if (ISREFCLOCKADR(srcadr)) {
-		ep = loopback_interface;
-	} else if (peer->cast_flags & 
-		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
-		ep = findbcastinter(srcadr);
-		if (ep != NULL)
-			DPRINTF(4, ("Found *-cast interface %s for address %s\n",
-				stoa(&ep->sin), stoa(srcadr)));
-		else
-			DPRINTF(4, ("No *-cast local address found for address %s\n",
-				stoa(srcadr)));
-	} else {
-		ep = dstadr;
-		if (NULL == ep)
-			ep = wild;
-	} 
-	/*
-	 * If it is a multicast address, findbcastinter() may not find
-	 * it.  For unicast, we get to find the interface when dstadr is
-	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).  Either
-	 * way, try a little harder.
-	 */
-	if (wild == ep)
-		ep = findinterface(srcadr);
-	/*
-	 * we do not bind to the wildcard interfaces for output 
-	 * as our (network) source address would be undefined and
-	 * crypto will not work without knowing the own transmit address
-	 */
-	if (ep != NULL && INT_WILDCARD & ep->flags)
-		if (!accept_wildcard_if_for_winnt)  
-			ep = NULL;
-
-	return ep;
-}
-
 
 /*
  * newpeer - initialize a new peer association
  */
 struct peer *
 newpeer(
-	sockaddr_u *srcadr,
-	const char *hostname,
-	struct interface *dstadr,
-	u_char	hmode,
-	u_char	version,
-	u_char	minpoll,
-	u_char	maxpoll,
-	u_int	flags,
-	u_char	cast_flags,
-	u_char	ttl,
-	keyid_t	key,
-	const char *ident
+	sockaddr_u *	srcadr,
+	const char *	hostname,
+	endpt *		dstadr,
+	u_char		hmode,
+	u_char		version,
+	u_char		minpoll,
+	u_char		maxpoll,
+	u_int		flags,
+	u_char		cast_flags,
+	u_char		ttl,
+	keyid_t		key,
+	const char *	ident
 	)
 {
-	struct peer *peer;
-	u_int	hash;
+	struct peer *	peer;
+	u_int		hash;
 
 #ifdef AUTOKEY
 	/*
@@ -867,7 +796,8 @@ newpeer(
 	peer->version = version;
 	peer->flags = flags;
 	peer->cast_flags = cast_flags;
-	set_peerdstadr(peer, select_peerinterface(peer, srcadr, dstadr));
+	set_peerdstadr(peer, 
+		       select_peerinterface(peer, srcadr, dstadr));
 
 	/*
 	 * It is an error to set minpoll less than NTP_MINPOLL or to
@@ -887,7 +817,7 @@ newpeer(
 	if (peer->minpoll > peer->maxpoll)
 		peer->minpoll = peer->maxpoll;
 
-	if (peer->dstadr)
+	if (peer->dstadr != NULL)
 		DPRINTF(3, ("newpeer(%s): using fd %d and our addr %s\n",
 			stoa(srcadr), peer->dstadr->fd,
 			stoa(&peer->dstadr->sin)));
