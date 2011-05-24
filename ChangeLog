@@ -1,3 +1,4 @@
+(4.2.7p172) 2011/05/24 Released by Harlan Stenn <stenn@ntp.org>
 * Remove hardcoded 1/960 s. fudge for <CR> transmission time at 9600 8n1
   from WWVB/Spectracom driver introduced in 4.2.7p169.
 (4.2.7p171) 2011/05/23 Released by Harlan Stenn <stenn@ntp.org>
