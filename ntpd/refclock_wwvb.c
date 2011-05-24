@@ -249,7 +249,6 @@ wwvb_receive(
 	struct recvbuf *rbufp
 	)
 {
-	const l_fp one_char_time = { { 0 }, { (u_int32)(FRAC / 960) } };
 	struct wwvbunit *up;
 	struct refclockproc *pp;
 	struct peer *peer;
@@ -312,12 +311,6 @@ wwvb_receive(
 		    prettydate(&trtmp), prettydate(&pp->lastrec)));
 	if (L_ISZERO(&pp->lastrec))
 		return;
-
-	/*
-	 * The start of the <CR> is the on-time event, while our
-	 * timestamp reflects the end of that <CR> at best. Adjust.
-	 */
-	L_SUB(&pp->lastrec, &one_char_time);
 
 	/*
 	 * We get down to business, check the timecode format and decode
