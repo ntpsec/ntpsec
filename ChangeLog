@@ -937,6 +937,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p4-beta2) 2011/05/25 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1695] ntpdate takes longer than necessary.
 * [Bug 1832] ntpdate doesn't allow timeout > 2s.
