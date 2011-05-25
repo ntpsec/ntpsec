@@ -153,7 +153,7 @@ format_errmsg(
 }
 
 
-size_t
+int
 mvsnprintf(
 	char *		buf,
 	size_t		bufsiz,
@@ -161,26 +161,99 @@ mvsnprintf(
 	va_list		ap
 	)
 {
-	char	nfmt[256];
-	int	errval;
+#ifndef VSNPRINTF_PERCENT_M
+	char		nfmt[256];
+#else
+	const char *	nfmt = fmt;
+#endif
+	int		errval;
 
 	/*
 	 * Save the error value as soon as possible
 	 */
-	errval = errno;
-
 #ifdef SYS_WINNT
 	errval = GetLastError();
 	if (NO_ERROR == errval)
-		errval = errno;
 #endif /* SYS_WINNT */
+		errval = errno;
 
+#ifndef VSNPRINTF_PERCENT_M
 	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
-
+#else
+	errno = errval;
+#endif
 	return vsnprintf(buf, bufsiz, nfmt, ap);
 }
 
-size_t
+
+int
+mvfprintf(
+	FILE *		fp,
+	const char *	fmt,
+	va_list		ap
+	)
+{
+#ifndef VSNPRINTF_PERCENT_M
+	char		nfmt[256];
+#else
+	const char *	nfmt = fmt;
+#endif
+	int		errval;
+
+	/*
+	 * Save the error value as soon as possible
+	 */
+#ifdef SYS_WINNT
+	errval = GetLastError();
+	if (NO_ERROR == errval)
+#endif /* SYS_WINNT */
+		errval = errno;
+
+#ifndef VSNPRINTF_PERCENT_M
+	format_errmsg(nfmt, sizeof(nfmt), fmt, errval);
+#else
+	errno = errval;
+#endif
+	return vfprintf(fp, nfmt, ap);
+}
+
+
+int
+mfprintf(
+	FILE *		fp,
+	const char *	fmt,
+	...
+	)
+{
+	va_list		ap;
+	int		rc;
+
+	va_start(ap, fmt);
+	rc = mvfprintf(fp, fmt, ap);
+	va_end(ap);
+
+	return rc;
+}
+
+
+int
+mprintf(
+	const char *	fmt,
+	...
+	)
+{
+	va_list		ap;
+	int		rc;
+
+	va_start(ap, fmt);
+	rc = mvfprintf(stdout, fmt, ap);
+	va_end(ap);
+
+	return rc;
+}
+
+
+int
 msnprintf(
 	char *		buf,
 	size_t		bufsiz,

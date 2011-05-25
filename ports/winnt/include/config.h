@@ -35,6 +35,8 @@
 #include <malloc.h>
 #include <crtdbg.h>
 /* #define MALLOC_LINT */	/* defers free() */
+# define EREALLOC_IMPL(ptr, newsz, filenm, loc) \
+	 _realloc_dbg(ptr, newsz, _NORMAL_BLOCK, filenm, loc)
 #endif
 
 /*

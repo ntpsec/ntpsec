@@ -20,6 +20,7 @@
 #include "ntp_syslog.h"
 #include "ntp_select.h"
 #include "ntp_stdlib.h"
+#include "ntp_assert.h"
 #include <ssl_applink.c>
 
 #include "isc/net.h"
@@ -119,9 +120,9 @@ volatile int debug = 0;
  */
 
 int ai_fam_templ;
-int nbsock;             /* the number of sockets used */
+int nbsock;			/* the number of sockets used */
 SOCKET fd[MAX_AF];
-int fd_family[MAX_AF];	/* to remember the socket family */
+int fd_family[MAX_AF];		/* to remember the socket family */
 #ifdef HAVE_POLL_H
 struct pollfd fdmask[MAX_AF];
 #else
@@ -419,18 +420,7 @@ ntpdatemain (
 			} else {
 				sys_timeout = ((LFPTOFP(&tmp) * TIMER_HZ)
 					   + 0x8000) >> 16;
-				/*
-				 * No less than 1s between requests to
-				 * a server to stay within ntpd's
-				 * default "discard minimum 1" (and 1s
-				 * enforcement slop).  That is enforced
-				 * only if the nondefault limited
-				 * restriction is in place, such as with
-				 * "restrict ... limited" and "restrict
-				 * ... kod limited".
-				 */
-				if (MINTIMEOUT < sys_timeout)
-					sys_timeout = MINTIMEOUT;
+				sys_timeout = max(sys_timeout, MINTIMEOUT);
 			}
 			break;
 		case 'v':
@@ -921,6 +911,17 @@ receive(
 	 * Shift this data in, then schedule another transmit.
 	 */
 	server_data(server, (s_fp) di, &ci, 0);
+
+	if ((int)server->filter_nextpt >= sys_samples) {
+		/*
+		 * Got all the data we need.  Mark this guy
+		 * completed and return.
+		 */
+		server->event_time = 0;
+		complete_servers++;
+		return;
+	}
+
 	server->event_time = current_time + sys_timeout;
 }
 
@@ -1355,10 +1356,12 @@ addserver(
 	int error;
 	/* Service name */
 	char service[5];
-	strcpy(service, "ntp");
+	sockaddr_u addr;
+
+	strncpy(service, "ntp", sizeof(service));
 
 	/* Get host address. Looking for UDP datagram connection. */
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_socktype = SOCK_DGRAM;
 
@@ -1387,17 +1390,21 @@ addserver(
 		return;
 	}
 #ifdef DEBUG
-	else if (debug) {
-		fprintf(stderr, "host found : %s\n", stohost((sockaddr_u *)addrResult->ai_addr));
+	if (debug) {
+		ZERO(addr);
+		INSIST(addrResult->ai_addrlen <= sizeof(addr));
+		memcpy(&addr, addrResult->ai_addr, addrResult->ai_addrlen);
+		fprintf(stderr, "host found : %s\n", stohost(&addr));
 	}
 #endif
 
 	/* We must get all returned server in case the first one fails */
 	for (ptr = addrResult; ptr != NULL; ptr = ptr->ai_next) {
-		if (is_reachable ((sockaddr_u *)ptr->ai_addr)) {
-			server = emalloc(sizeof(*server));
-			memset(server, 0, sizeof(*server));
-
+		ZERO(addr);
+		INSIST(ptr->ai_addrlen <= sizeof(addr));
+		memcpy(&addr, ptr->ai_addr, ptr->ai_addrlen);
+		if (is_reachable(&addr)) {
+			server = emalloc_zero(sizeof(*server));
 			memcpy(&server->srcadr, ptr->ai_addr, ptr->ai_addrlen);
 			server->event_time = ++sys_numservers;
 			if (sys_servers == NULL)
@@ -1406,7 +1413,8 @@ addserver(
 				struct server *sp;
 
 				for (sp = sys_servers; sp->next_server != NULL;
-				     sp = sp->next_server) ;
+				     sp = sp->next_server)
+					/* empty */;
 				sp->next_server = server;
 			}
 		}
@@ -1452,15 +1460,15 @@ findserver(
 			complete_servers++;
 		}
 
-		server = emalloc(sizeof(*server));
-		memset(server, 0, sizeof(*server));
+		server = emalloc_zero(sizeof(*server));
 
 		server->srcadr = *addr;
 
 		server->event_time = ++sys_numservers;
 
 		for (sp = sys_servers; sp->next_server != NULL;
-		     sp = sp->next_server) ;
+		     sp = sp->next_server)
+			/* empty */;
 		sp->next_server = server;
 		transmit(server);
 	}
@@ -1672,7 +1680,9 @@ init_io(void)
 {
 	struct addrinfo *res, *ressave;
 	struct addrinfo hints;
+	sockaddr_u addr;
 	char service[5];
+	int rc;
 	int optval = 1;
 	int check_ntp_port_in_use = !debug && !simple_query && !unpriv_port;
 
@@ -1685,20 +1695,20 @@ init_io(void)
 	 * Open the socket
 	 */
 
-	strcpy(service, "ntp");
+	strncpy(service, "ntp", sizeof(service));
 
 	/*
 	 * Init hints addrinfo structure
 	 */
-	memset(&hints, 0, sizeof(hints));
+	ZERO(hints);
 	hints.ai_family = ai_fam_templ;
 	hints.ai_flags = AI_PASSIVE;
 	hints.ai_socktype = SOCK_DGRAM;
 
-	if(getaddrinfo(NULL, service, &hints, &res) != 0) {
-	       msyslog(LOG_ERR, "getaddrinfo() failed: %m");
-	       exit(1);
-	       /*NOTREACHED*/
+	if (getaddrinfo(NULL, service, &hints, &res) != 0) {
+		msyslog(LOG_ERR, "getaddrinfo() failed: %m");
+		exit(1);
+		/*NOTREACHED*/
 	}
 
 #ifdef SYS_WINNT
@@ -1754,13 +1764,12 @@ init_io(void)
 		 * bind the socket to the NTP port
 		 */
 		if (check_ntp_port_in_use) {
-			if (bind(fd[nbsock], res->ai_addr, 
-				 SOCKLEN((sockaddr_u *)res->ai_addr)) < 0) {
-#ifndef SYS_WINNT
-				if (errno == EADDRINUSE)
-#else
-				if (WSAGetLastError() == WSAEADDRINUSE)
-#endif /* SYS_WINNT */
+			ZERO(addr);
+			INSIST(res->ai_addrlen <= sizeof(addr));
+			memcpy(&addr, res->ai_addr, res->ai_addrlen);
+			rc = bind(fd[nbsock], &addr.sa, SOCKLEN(&addr));
+			if (rc < 0) {
+				if (EADDRINUSE == socket_errno())
 					msyslog(LOG_ERR, "the NTP socket is in use, exiting");
 				else
 					msyslog(LOG_ERR, "bind() fails: %m");
@@ -1877,7 +1886,7 @@ input_handler(void)
 	register int n;
 	register struct recvbuf *rb;
 	struct sock_timeval tvzero;
-	int fromlen;
+	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	l_fp ts;
 	int i;
 #ifdef HAVE_POLL_H
@@ -2116,7 +2125,7 @@ printserver(
 {
 	register int i;
 	char junk[5];
-	char *str;
+	const char *str;
 
 	if (!debug) {
 		(void) fprintf(fp, "server %s, stratum %d, offset %s, delay %s\n",
@@ -2179,57 +2188,6 @@ printserver(
 			   lfptoa(&pp->offset, 6));
 }
 
-#if !defined(HAVE_VSPRINTF)
-int
-vsprintf(
-	char *str,
-	const char *fmt,
-	va_list ap
-	)
-{
-	FILE f;
-	int len;
-
-	f._flag = _IOWRT+_IOSTRG;
-	f._ptr = str;
-	f._cnt = 32767;
-	len = _doprnt(fmt, ap, &f);
-	*f._ptr = 0;
-	return (len);
-}
-#endif
-
-#if 0
-/* override function in library since SA_RESTART makes ALL syscalls restart */
-#ifdef SA_RESTART
-void
-signal_no_reset(
-	int sig,
-	void (*func)()
-	)
-{
-	int n;
-	struct sigaction vec;
-
-	vec.sa_handler = func;
-	sigemptyset(&vec.sa_mask);
-	vec.sa_flags = 0;
-
-	while (1)
-	{
-		n = sigaction(sig, &vec, NULL);
-		if (n == -1 && errno == EINTR)
-			continue;
-		break;
-	}
-	if (n == -1)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-}
-#endif
-#endif
 
 #ifdef HAVE_NETINFO
 static ni_namelist *

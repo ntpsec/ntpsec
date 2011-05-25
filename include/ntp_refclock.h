@@ -177,7 +177,7 @@ struct refclockbug {
 
 struct refclockproc {
 	struct	refclockio io;	/* I/O handler structure */
-	caddr_t	unitptr;	/* pointer to unit structure */
+	void *	unitptr;	/* pointer to unit structure */
 	u_char	leap;		/* leap/synchronization code */
 	u_char	currentstatus;	/* clock status */
 	u_char	lastevent;	/* last exception event */

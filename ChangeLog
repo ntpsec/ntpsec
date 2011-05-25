@@ -1,4 +1,11 @@
 ---
+
+* [Bug 1695] ntpdate takes longer than necessary.
+* [Bug 1832] ntpdate doesn't allow timeout > 2s.
+* [Bug 1933] WWVB/Spectracom driver timestamps LFs, not CRs.
+* Backport utility routines from ntp-dev: mprintf(), emalloc_zero().
+
+---
 (4.2.6p4-beta1) 2011/05/16 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1554] peer may stay selected as system peer after becoming
