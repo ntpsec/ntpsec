@@ -43,7 +43,7 @@ ereallocz(
 	mem = EREALLOC_IMPL(ptr, allocsz, file, line);
 	if (NULL == mem) {
 		msyslog_term = TRUE;
-#ifndef REALLOC_CALLSITE
+#ifndef EREALLOC_CALLSITE
 		msyslog(LOG_ERR, "fatal out of memory (%lu bytes)",
 			(u_long)newsz);
 #else
