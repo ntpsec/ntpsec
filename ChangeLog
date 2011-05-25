@@ -1,3 +1,4 @@
+* Typo in emalloc.c hides file and line number from emalloc() error msg.
 (4.2.7p172) 2011/05/24 Released by Harlan Stenn <stenn@ntp.org>
 * Remove hardcoded 1/960 s. fudge for <CR> transmission time at 9600 8n1
   from WWVB/Spectracom driver introduced in 4.2.7p169.
@@ -935,6 +936,13 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1695] ntpdate takes longer than necessary.
+* [Bug 1832] ntpdate doesn't allow timeout > 2s.
+* [Bug 1933] WWVB/Spectracom driver timestamps LFs, not CRs.
+* Backport utility routines from ntp-dev: mprintf(), emalloc_zero().
+
 ---
 (4.2.6p4-beta1) 2011/05/16 Released by Harlan Stenn <stenn@ntp.org>
 
