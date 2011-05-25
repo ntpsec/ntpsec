@@ -264,6 +264,12 @@ endpt *		mc6_list;	/* IPv6 mcast-capable unicast endpts */
 static endpt *	wildipv4;
 static endpt *	wildipv6;
 
+#ifdef SYS_WINNT
+int accept_wildcard_if_for_winnt;
+#else
+const int accept_wildcard_if_for_winnt = FALSE;
+#endif
+
 static void	add_fd_to_list		(SOCKET, enum desc_type);
 static endpt *	find_addr_in_list	(sockaddr_u *);
 static endpt *	find_flagged_addr_in_list(sockaddr_u *, u_int32);
@@ -3527,6 +3533,71 @@ input_handler(
 	return;
 }
 #endif
+
+
+/*
+ * find an interface suitable for the src address
+ */
+endpt *
+select_peerinterface(
+	struct peer *	peer,
+	sockaddr_u *	srcadr,
+	endpt *		dstadr
+	)
+{
+	endpt *ep;
+#ifndef SIM
+	endpt *wild;
+
+	wild = ANY_INTERFACE_CHOOSE(srcadr);
+
+	/*
+	 * Initialize the peer structure and dance the interface jig.
+	 * Reference clocks step the loopback waltz, the others
+	 * squaredance around the interface list looking for a buddy. If
+	 * the dance peters out, there is always the wildcard interface.
+	 * This might happen in some systems and would preclude proper
+	 * operation with public key cryptography.
+	 */
+	if (ISREFCLOCKADR(srcadr)) {
+		ep = loopback_interface;
+	} else if (peer->cast_flags & 
+		   (MDF_BCLNT | MDF_ACAST | MDF_MCAST | MDF_BCAST)) {
+		ep = findbcastinter(srcadr);
+		if (ep != NULL)
+			DPRINTF(4, ("Found *-cast interface %s for address %s\n",
+				stoa(&ep->sin), stoa(srcadr)));
+		else
+			DPRINTF(4, ("No *-cast local address found for address %s\n",
+				stoa(srcadr)));
+	} else {
+		ep = dstadr;
+		if (NULL == ep)
+			ep = wild;
+	} 
+	/*
+	 * If it is a multicast address, findbcastinter() may not find
+	 * it.  For unicast, we get to find the interface when dstadr is
+	 * given to us as the wildcard (ANY_INTERFACE_CHOOSE).  Either
+	 * way, try a little harder.
+	 */
+	if (wild == ep)
+		ep = findinterface(srcadr);
+	/*
+	 * we do not bind to the wildcard interfaces for output 
+	 * as our (network) source address would be undefined and
+	 * crypto will not work without knowing the own transmit address
+	 */
+	if (ep != NULL && INT_WILDCARD & ep->flags)
+		if (!accept_wildcard_if_for_winnt)  
+			ep = NULL;
+#else	/* SIM follows */
+	ep = loopback_interface;
+#endif
+
+	return ep;
+}
+
 
 /*
  * findinterface - find local interface corresponding to address

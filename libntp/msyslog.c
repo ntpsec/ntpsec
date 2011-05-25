@@ -310,7 +310,7 @@ mprintf(
 	int		rc;
 
 	va_start(ap, fmt);
-	rc = mvfprintf(stderr, fmt, ap);
+	rc = mvfprintf(stdout, fmt, ap);
 	va_end(ap);
 
 	return rc;

@@ -53,7 +53,7 @@ double	sys_tick = 0;		/* precision (time to read the clock) */
 double	sys_residual = 0;	/* adjustment residue (s) */
 time_stepped_callback	step_callback;
 
-#ifndef SIM
+#ifndef SIM	/* ntpsim.c has get_systime() and friends for sim */
 
 /*
  * get_systime - return system time in NTP timestamp format.
@@ -381,15 +381,4 @@ step_systime(
 	return (1);
 }
 
-#else /* SIM */
-/*
- * Clock routines for the simulator - Harish Nair, with help
- */
-
-
-/* SK: 
- * The code that used to be here has been moved to ntpsim.c,
- * where, IMHO, it rightfully belonged.
- */
-
-#endif
+#endif	/* !SIM */

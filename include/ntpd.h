@@ -109,6 +109,8 @@ typedef void	(*interface_receiver_t)	(void *, interface_info_t *);
 
 extern	void	interface_enumerate	(interface_receiver_t, void *);
 extern	endpt *	getinterface		(sockaddr_u *, u_int32);
+extern	endpt *	select_peerinterface	(struct peer *, sockaddr_u *,
+					 endpt *);
 extern	endpt *	findinterface		(sockaddr_u *);
 extern	endpt *	findbcastinter		(sockaddr_u *);
 extern	void	enable_broadcast	(endpt *, sockaddr_u *);
@@ -158,7 +160,7 @@ extern	void	init_mon	(void);
 extern	void	mon_start	(int);
 extern	void	mon_stop	(int);
 extern	u_short	ntp_monitor	(struct recvbuf *, u_short);
-extern	void	mon_clearinterface(struct interface *interface);
+extern	void	mon_clearinterface(endpt *interface);
 
 /* ntp_peer.c */
 extern	void	init_peer	(void);
@@ -167,15 +169,15 @@ extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
 extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
 extern  void	set_peerdstadr	(struct peer *peer,
-				 struct interface *interface);
+				 endpt *interface);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
-				 struct interface *, u_char, u_char,
+				 endpt *, u_char, u_char,
 				 u_char, u_char, u_int, u_char, u_char,
 				 keyid_t, const char *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
-				 struct interface *, u_char, u_char,
+				 endpt *, u_char, u_char,
 				 u_char, u_char, u_int, u_char, keyid_t,
 				 const char *);
 extern	void	peer_reset	(struct peer *);
@@ -519,6 +521,10 @@ HANDLE WaitableTimerHandle;
 #endif
 
 /* ntp_util.c */
+#ifndef MAXPATHLEN
+# define MAXPATHLEN 256
+#endif
+extern	char	statsdir[MAXPATHLEN];
 extern	int	stats_control;		/* write stats to fileset? */
 extern	int	stats_write_period;	/* # of seconds between writes. */
 extern	double	stats_write_tolerance;
