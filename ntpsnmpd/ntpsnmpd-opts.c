@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  May 16, 2011 at 04:24:31 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 25, 2011 at 01:23:20 AM by AutoGen 5.11.9
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -40,7 +40,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[48] =
-"ntpsnmpd 4.2.6p4-beta1\n\
+"ntpsnmpd 4.2.6p4-beta2\n\
 see html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
@@ -251,7 +251,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[109] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p4-beta1\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p4-beta2\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {

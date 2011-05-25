@@ -77,7 +77,7 @@ point=4
 # Should be zeroed at release, and left at zero until first beta.
 # The first beta is -beta1.
 # betapoint is always zero in ntp-dev.
-betapoint=1
+betapoint=2
 
 ### rcpoint is normally modified by script except for GO.
 # RC number (rcpoint)
