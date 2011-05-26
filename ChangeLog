@@ -1,4 +1,6 @@
 * Typo in emalloc.c hides file and line number from emalloc() error msg.
+* parsesolaris.c compile fails on SPARC Solaris with conflicting printf.
+* ntp_util.c compile fails on AIX and OSF with conflicting statsdir.
 (4.2.7p172) 2011/05/24 Released by Harlan Stenn <stenn@ntp.org>
 * Remove hardcoded 1/960 s. fudge for <CR> transmission time at 9600 8n1
   from WWVB/Spectracom driver introduced in 4.2.7p169.
