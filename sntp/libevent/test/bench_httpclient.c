@@ -26,7 +26,7 @@
  */
 
 #include <sys/types.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <sys/socket.h>
@@ -36,6 +36,7 @@
 # endif
 #endif
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
 #include "event2/event.h"
@@ -87,7 +88,7 @@ errorcb(struct bufferevent *b, short what, void *arg)
 	if (what & BEV_EVENT_EOF) {
 		++total_n_handled;
 		total_n_bytes += ri->n_read;
-		gettimeofday(&now, NULL);
+		evutil_gettimeofday(&now, NULL);
 		evutil_timersub(&now, &ri->started, &diff);
 		evutil_timeradd(&diff, &total_time, &total_time);
 
@@ -130,6 +131,8 @@ launch_request(void)
 
 	struct request_info *ri;
 
+	memset(&sin, 0, sizeof(sin));
+
 	++total_n_launched;
 
 	sin.sin_family = AF_INET;
@@ -149,7 +152,7 @@ launch_request(void)
 
 	ri = malloc(sizeof(*ri));
 	ri->n_read = 0;
-	gettimeofday(&ri->started, NULL);
+	evutil_gettimeofday(&ri->started, NULL);
 
 	b = bufferevent_socket_new(base, sock, BEV_OPT_CLOSE_ON_FREE);
 
@@ -181,11 +184,11 @@ main(int argc, char **argv)
 			perror("launch");
 	}
 
-	gettimeofday(&start, NULL);
+	evutil_gettimeofday(&start, NULL);
 
 	event_base_dispatch(base);
 
-	gettimeofday(&end, NULL);
+	evutil_gettimeofday(&end, NULL);
 	evutil_timersub(&end, &start, &total);
 	usec = total_time.tv_sec * 1000000 + total_time.tv_usec;
 
@@ -198,7 +201,7 @@ main(int argc, char **argv)
 	throughput = total_n_handled /
 	    (total.tv_sec+ ((double)total.tv_usec)/1000000.0);
 
-#ifdef WIN32
+#ifdef _WIN32
 #define I64_FMT "%I64d"
 #define I64_TYP __int64
 #else

@@ -26,20 +26,20 @@
 #include "event2/event-config.h"
 #include "evconfig-private.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #undef WIN32_LEAN_AND_MEAN
 #endif
 #include <sys/types.h>
-#if !defined(WIN32) && defined(_EVENT_HAVE_SYS_TIME_H)
+#if !defined(_WIN32) && defined(_EVENT_HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 #include <errno.h>
@@ -149,6 +149,7 @@ void evmap_io_clear(struct event_io_map *ctx)
 		next = HT_NEXT_RMV(event_io_map, ctx, ent);
 		mm_free(this);
 	}
+	HT_CLEAR(event_io_map, ctx); /* remove all storage held by the ctx. */
 }
 #endif
 
@@ -164,7 +165,6 @@ void evmap_io_clear(struct event_io_map *ctx)
 #define GET_SIGNAL_SLOT_AND_CTOR(x, map, slot, type, ctor, fdinfo_len)	\
 	do {								\
 		if ((map)->entries[slot] == NULL) {			\
-			EVUTIL_ASSERT(ctor != NULL);				\
 			(map)->entries[slot] =				\
 			    mm_calloc(1,sizeof(struct type)+fdinfo_len); \
 			EVUTIL_ASSERT((map)->entries[slot] != NULL);		\

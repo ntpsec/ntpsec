@@ -46,7 +46,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
@@ -71,7 +71,7 @@
 #include "mm-internal.h"
 #include "bufferevent-internal.h"
 #include "util-internal.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include "iocp-internal.h"
 #endif
 
@@ -232,7 +232,7 @@ bufferevent_writecb(evutil_socket_t fd, short event, void *arg)
 			goto done;
 		} else {
 			connected = 1;
-#ifdef WIN32
+#ifdef _WIN32
 			if (BEV_IS_ASYNC(bufev)) {
 				event_del(&bufev->ev_write);
 				bufferevent_async_set_connected(bufev);
@@ -314,7 +314,7 @@ bufferevent_socket_new(struct event_base *base, evutil_socket_t fd,
 	struct bufferevent_private *bufev_p;
 	struct bufferevent *bufev;
 
-#ifdef WIN32
+#ifdef _WIN32
 	if (base && event_base_get_iocp(base))
 		return bufferevent_async_new(base, fd, options);
 #endif
@@ -371,7 +371,7 @@ bufferevent_socket_connect(struct bufferevent *bev,
 		ownfd = 1;
 	}
 	if (sa) {
-#ifdef WIN32
+#ifdef _WIN32
 		if (bufferevent_async_can_connect(bev)) {
 			bufferevent_setfd(bev, fd);
 			r = bufferevent_async_connect(bev, fd, sa, socklen);
@@ -386,7 +386,7 @@ bufferevent_socket_connect(struct bufferevent *bev,
 		if (r < 0)
 			goto freesock;
 	}
-#ifdef WIN32
+#ifdef _WIN32
 	/* ConnectEx() isn't always around, even when IOCP is enabled.
 	 * Here, we borrow the socket object's write handler to fall back
 	 * on a non-blocking connect() when ConnectEx() is unavailable. */
@@ -452,6 +452,7 @@ bufferevent_connect_getaddrinfo_cb(int result, struct evutil_addrinfo *ai,
 	/* XXX use the other addrinfos? */
 	/* XXX use this return value */
 	r = bufferevent_socket_connect(bev, ai->ai_addr, (int)ai->ai_addrlen);
+	(void)r;
 	_bufferevent_decref_and_unlock(bev);
 	evutil_freeaddrinfo(ai);
 }

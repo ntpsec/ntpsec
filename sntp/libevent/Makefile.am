@@ -97,7 +97,7 @@ SUBDIRS = . include sample test
 
 if BUILD_WIN32
 
-SYS_LIBS = -lws2_32
+SYS_LIBS = -lws2_32 -lshell32 -ladvapi32
 SYS_SRC = win32select.c evthread_win32.c buffer_iocp.c event_iocp.c \
 	bufferevent_async.c
 SYS_INCLUDES = -IWIN32-Code
@@ -189,7 +189,7 @@ libevent_extra_la_LDFLAGS = $(GENERIC_LDFLAGS)
 
 if OPENSSL
 libevent_openssl_la_SOURCES = bufferevent_openssl.c
-libevent_openssl_la_LIBADD = $(MAYBE_CORE) -lcrypto -lssl
+libevent_openssl_la_LIBADD = $(MAYBE_CORE) $(OPENSSL_LIBS)
 libevent_openssl_la_LDFLAGS = $(GENERIC_LDFLAGS)
 endif
 
