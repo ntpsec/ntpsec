@@ -222,15 +222,8 @@ ENDIF - "main" exists                   :+][+:
 
 
 INVOKE options                          :+][+:
-INVOKE implementation-notes             :+][+:
-INVOKE environment                      :+][+:
-INVOKE examples                         :+][+:
-INVOKE compatibility                    :+][+:
-INVOKE see-also                         :+][+:
-INVOKE standards                        :+][+:
-INVOKE history                          :+][+:
+INVOKE exit-status                      :+][+:
 INVOKE authors                          :+][+:
-INVOKE bugs                             :+][+:
 
 IF (or home-rc-files environ-init)      :+][+:
 
@@ -257,7 +250,6 @@ ENDIF                                   :+][+:
 
 (if home-rc-files
   (begin
-    ;; XXX: Will /files conflict with a FILES stanza?
     (set! tmp-val (string-append tmp-dir "/files"))
     (if (access? tmp-val R_OK)
       (begin
@@ -502,132 +494,34 @@ is searched for within those directories.[+:
 ENDDEF option-presets
 
 .\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  I M P L E M E N T A T I O N   N O T E S
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE implementation-notes           :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/implementation-notes"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "IMPLEMENTATION NOTES"
-[+: (out-pop)                         :+][+:
-ENDIF implementation-notes            :+][+:
-
-ENDDEF implementation-notes
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  E N V I R O N M E N T
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE environment                    :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/environment"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "ENVIRONMENT"
-[+: (out-pop)                         :+][+:
-ENDIF environment                     :+][+:
-
-ENDDEF environment
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  E X A M P L E S
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE examples                       :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/examples"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "EXAMPLES"
-[+: (out-pop)                         :+][+:
-ENDIF examples                        :+][+:
-
-ENDDEF examples
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 .\"  E X I T   S T A T U S
 .\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
 
 DEFINE exit-status                    :+][+:
 
-IF (set! tmp-val (string-append tmp-dir "/exit-status"))
-   (out-push-new tmp-val)
+(set! tmp-val (string-append tmp-dir "/exit-status"))
+(out-push-new tmp-val)
 
 :+]
 .Sh "EXIT STATUS"
+One of the following exit values will be returned:
+.Bl -tag
+[+:
+(ag-fprintf 0 ".It 0\n%s\n"
+    (get "exit-desc[0]" "Successful program execution.") )
+
+(ag-fprintf 0 ".It 1\n%s\n"
+    (get "exit-desc[1]"
+    "The operation failed or the command syntax was not valid.")) :+][+:
+
+FOR exit-desc (for-from 2)            :+][+:
+  (sprintf ".It %d\n%s\n"
+    (for-index) (get "exit-desc"))    :+][+:
+ENDFOR exit-desc                      :+]
+.El
 [+: (out-pop)                         :+][+:
-ENDIF exit-status                     :+][+:
 
 ENDDEF exit-status
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  C O M P A T I B I L I T Y
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE compatibility                  :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/compatibility"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "COMPATIBILITY"
-[+: (out-pop)                         :+][+:
-ENDIF compatibility                   :+][+:
-
-ENDDEF compatibility
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  S E E   A L S O
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE see-also                       :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/see-also"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "SEE ALSO"
-[+: (out-pop)                         :+][+:
-ENDIF see-also                        :+][+:
-
-ENDDEF see-also
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  S T A N D A R D S
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE standards                      :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/standards"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "STANDARDS"
-[+: (out-pop)                         :+][+:
-ENDIF standards                       :+][+:
-
-ENDDEF standards
-
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-.\"  H I S T O R Y
-.\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
-
-DEFINE history                        :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/history"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "HISTORY"
-[+: (out-pop)                         :+][+:
-ENDIF history                         :+][+:
-
-ENDDEF history
 
 .\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 .\"  A U T H O R S
@@ -635,18 +529,18 @@ ENDDEF history
 
 DEFINE authors :+][+:
 
-IF (set! tmp-val (string-append tmp-dir "/authors"))
-   (out-push-new tmp-val)
-   (set! tmp-val (get "copyright.author" (get "copyright.owner")))
-   (> (string-length tmp-val) 0) :+]
-.Sh AUTHORS
-[+: (. tmp-val) :+][+:
+IF (not (access? (string-append tmp-dir "/authors") R_OK)) :+][+: 
+    (set! tmp-val (get "copyright.eaddr" (get "eaddr"))) 
+    (if (> (string-length tmp-val) 1)
+      (shellf 
+	"printf '%s\\n' > ${tmp_dir}/authors" 
+	tmp-val    ) )		      :+][+: 
+ENDIF				      :+][+: 
 
- (set! tmp-val (get "copyright.eaddr" (get "eaddr")))
- (if (> (string-length tmp-val) 0)
-   (string-append "\n.br\nPlease send bug reports to:  " tmp-val) ) :+][+:
+(set! tmp-val (string-append tmp-dir "/authors"))
+(out-push-new tmp-val)                :+][+:
 
-  CASE copyright.type :+][+:
+CASE copyright.type :+][+:
    =  gpl  :+]
 .Pp
 Released under the GNU General Public License.[+:
@@ -657,7 +551,7 @@ Released under the GNU General Public License with Library Extensions.[+:
 .Pp
 Released under the Free BSD License.[+:
    *       :+][+:
-    IF (exist? "copyright.text")
+  IF (exist? "copyright.text")
            :+]
 .Pp
 .nf
@@ -665,14 +559,14 @@ Released under the Free BSD License.[+:
 [+: copyright.text :+]
 .fi
 .ad[+:
-    ELIF (exist? "copyright.date")    :+]
+  ELIF (exist? "copyright.date")      :+]
 .Pp
 Released under an unspecified copyright license.[+:
-    ENDIF                             :+][+:
-  ESAC                                :+][+:
-ENDIF copyright author/owner          :+]
+  ENDIF                               :+][+:
+ESAC                                  :+]
 .Pp
-This manual page was \fIAutoGen\fP-erated from the \fB[+: prog-name :+]\fP
+This manual page was \fIAutoGen\fP-erated from the
+.Nm
 option definitions.[+:
 
 (out-pop) :+][+:
@@ -683,16 +577,13 @@ ENDDEF authors
 .\"  B U G S
 .\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = :+][+:
 
-DEFINE bugs                            :+][+:
-
-IF (set! tmp-val (string-append tmp-dir "/bugs"))
-   (out-push-new tmp-val)
-
-:+]
-.Sh "BUGS"
-[+: (out-pop)                         :+][+:
-ENDIF bugs                            :+][+:
-
+DEFINE bugs                           :+][+:
+IF (not (access? (string-append tmp-dir "/bugs") R_OK)) :+][+: 
+    (set! tmp-val (get "copyright.eaddr" (get "eaddr"))) 
+    (if (> (string-length tmp-val) 1)       (shellf 
+      "printf 'Please send bug reports to: %s\\n' > ${tmp_dir}/bugs" 
+      tmp-val    ) )		      :+][+: 
+ENDIF				      :+][+: 
 ENDDEF bugs
 
 .\" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =

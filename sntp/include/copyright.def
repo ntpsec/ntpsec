@@ -2,11 +2,11 @@
 
 copyright = {
     date  = "1970-2011";
-    owner = "David L. Mills and/or others";
+    owner = "David L. Mills and/or others.";
     eaddr = "http://bugs.ntp.org, bugs@ntp.org";
     type  = note;
     text  = <<- _EndOfDoc_
-	see html/copyright.html
+	See html/copyright.html
 
 	_EndOfDoc_;
 };
