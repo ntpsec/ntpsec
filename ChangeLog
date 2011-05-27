@@ -1,3 +1,5 @@
+* Don't build libevent with openssl support.  Right now, libevent
+  doesn't use pkg-config to find openssl's installation location.
 (4.2.7p173) 2011/05/25 Released by Harlan Stenn <stenn@ntp.org>
 * Typo in emalloc.c hides file and line number from emalloc() error msg.
 * parsesolaris.c compile fails on SPARC Solaris with conflicting printf.

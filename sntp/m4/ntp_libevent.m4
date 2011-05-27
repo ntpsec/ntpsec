@@ -113,6 +113,7 @@ esac
 case "$ntp_use_local_libevent" in
  yes)
     dnl ac_configure_args is undocumented but widely abused.
+    ac_configure_args=" --disable-openssl${ac_configure_args}"
     ac_configure_args=" --disable-shared${ac_configure_args}"
     ac_configure_args=" --disable-libevent-regress${ac_configure_args}"
     ac_configure_args=" --disable-libevent-install${ac_configure_args}"
