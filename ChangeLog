@@ -1,3 +1,4 @@
+* ntpdc documentation cleanup.
 * Don't build libevent with openssl support.  Right now, libevent
   doesn't use pkg-config to find openssl's installation location.
 (4.2.7p173) 2011/05/25 Released by Harlan Stenn <stenn@ntp.org>

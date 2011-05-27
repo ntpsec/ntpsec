@@ -6,7 +6,7 @@ autogen definitions options;
 #include copyright.def
 
 prog-name      = "ntpdc";
-prog-title     = "vendor-specific NTP query program";
+prog-title     = "vendor-specific NTPD control program";
 argument       = '[ host ...]';
 
 #include homerc.def
@@ -799,7 +799,7 @@ doc-section	= {
   ds-type	= 'AUTHORS';
   ds-format     = 'mdoc';
   ds-text       = <<-  _END_MDOC_AUTHORS
-Portions of this document came from FreeBSD.
+The formatting directives in this document came from FreeBSD.
 	_END_MDOC_AUTHORS;
 };
 
@@ -818,5 +818,7 @@ program was designed so that new (and temporary) features were easy
 to hack in, at great expense to the program's ease of use.
 Despite
 this, the program is occasionally useful.
+.Pp
+Please report bugs to http://bugs.ntp.org .
 	_END_MDOC_BUGS;
 };
