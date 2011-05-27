@@ -243,8 +243,17 @@ typedef u_int32 u_fp;
  */
 #define FRAC		4294967296.0 		/* 2^32 as a double */
 
-
-#ifdef HAVE_U_INT64	/* use 64 bit integers if available */
+/*
+ * Use 64 bit integers if available.  Solaris on SPARC has a problem
+ * compiling parsesolaris.c if ntp_fp.h includes math.h, due to
+ * archaic gets() and printf() prototypes used in Solaris kernel
+ * headers.  So far the problem has only been seen with gcc, but it
+ * may also affect Sun compilers, in which case the defined(__GNUC__)
+ * term should be removed.
+ */
+#if defined(HAVE_U_INT64) && \
+    !(defined(__SVR4) && defined(__sun) && \
+      defined(sparc) && defined(__GNUC__))
 
 #include <math.h>	/* ldexp() */
 

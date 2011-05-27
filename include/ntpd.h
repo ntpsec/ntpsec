@@ -521,10 +521,7 @@ HANDLE WaitableTimerHandle;
 #endif
 
 /* ntp_util.c */
-#ifndef MAXPATHLEN
-# define MAXPATHLEN 256
-#endif
-extern	char	statsdir[MAXPATHLEN];
+extern	char	statsdir[MAXFILENAME];
 extern	int	stats_control;		/* write stats to fileset? */
 extern	int	stats_write_period;	/* # of seconds between writes. */
 extern	double	stats_write_tolerance;

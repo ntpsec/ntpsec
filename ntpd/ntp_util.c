@@ -77,7 +77,7 @@ double	wander_threshold = 1e-7;	/* initial frequency threshold */
 #endif
 
 
-char statsdir[MAXPATHLEN] = NTP_VAR;
+char statsdir[MAXFILENAME] = NTP_VAR;
 static FILEGEN peerstats;
 static FILEGEN loopstats;
 static FILEGEN clockstats;
