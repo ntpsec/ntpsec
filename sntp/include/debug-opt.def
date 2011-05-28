@@ -12,9 +12,8 @@ flag = {
     value     = d;
     max       = NOLIMIT;
     nopreset;
-    descrip   = "Increase output debug message level";
-    doc = <<-  _EndOfDoc_
-	Increase the debugging message output level.
+    descrip   = "Increase debug verbosity level";
+    doc		= <<-  _EndOfDoc_
 	_EndOfDoc_;
 };
 
@@ -22,11 +21,9 @@ flag = {
     name      = set-debug-level;
     value     = D;
     max       = NOLIMIT;
-    descrip   = "Set the output debug message level";
+    descrip   = "Set the debug verbosity level";
     arg-type  = string;
     flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
-    doc = <<-  _EndOfDoc_
-	Set the output debugging level.  Can be supplied multiple times,
-	but each overrides the previous value(s).
+    doc		= <<-  _EndOfDoc_
 	_EndOfDoc_;
 };

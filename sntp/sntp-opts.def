@@ -28,7 +28,7 @@ flag = {
   flags-cant	= ipv6;
   descrip	= "Force IPv4 DNS name resolution";
   doc		= <<-  _EndOfDoc_
-	Force DNS resolution of following host names on the command line
+	Force DNS resolution of the following host names on the command line
 	to the IPv4 namespace.
 	_EndOfDoc_;
 };
@@ -39,7 +39,7 @@ flag = {
   flags-cant	= ipv4;
   descrip	= "Force IPv6 DNS name resolution";
   doc		= <<-  _EndOfDoc_
-	Force DNS resolution of following host names on the command line
+	Force DNS resolution of the following host names on the command line
 	to the IPv6 namespace.
 	_EndOfDoc_;
 };
@@ -89,7 +89,7 @@ flag = {
 flag = {
   name	 	= concurrent;
   value		= c;
-  descrip	= "Concurrent query all IPs returned for host-name";
+  descrip	= "Concurrently query all IPs returned for host-name";
   arg-type	= string;
   arg-name	= "host-name";
   max		= NOLIMIT;
@@ -153,11 +153,11 @@ flag = {
 	keyid keytype key
 
 	Where	keyid is a number identifying this key
-		keytype is one of the follow:
-			S  Key in 64 Bit hexadecimal number as specified in in the DES specification.
-			N  Key in 64 Bit hexadecimal number as specified in the NTP standard.
-			A  Key in a 1-to-8 character ASCII string.
-			M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
+		keytype is one of the following:
+			S  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
+			N  Key ina  64 Bit hexadecimal number as specified in the NTP standard.
+			A  Key is a 1-to-8 character ASCII string.
+			M  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
 	For more information see ntp.keys(5).
 	_EndOfDoc_;
@@ -180,7 +180,7 @@ flag = {
   value		= M;
   arg-type	= number;
   arg-range	= "0->";
-  descrip	= "Adjustments less than steplimit msec will be slewed.";
+  descrip	= "Adjustments less than steplimit msec will be slewed";
   doc		= <<-  _EndOfDoc_
 	If the time adjustment is less than steplimit milliseconds, slew the
 	amount using adjtime().  Otherwise, step the correction using
