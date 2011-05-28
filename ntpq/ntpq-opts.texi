@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpq-opts.texi)
 # 
-# It has been AutoGen-ed  May 25, 2011 at 07:28:45 PM by AutoGen 5.11.9
+# It has been AutoGen-ed  May 28, 2011 at 11:00:52 AM by AutoGen 5.11.9
 # From the definitions    ntpq-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -47,7 +47,7 @@ This is the automatically generated usage text for ntpq:
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p173
+ntpq - standard NTP query program - Ver. 4.2.7p174
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -58,9 +58,9 @@ USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
                                 ipv4
    -c Str command        run a command and exit
                                 - may appear multiple times
-   -d no  debug-level    Increase output debug message level
+   -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
+   -D Str set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -p no  peers          Print a list of the peers
                                 - prohibits these options:
@@ -118,7 +118,7 @@ host(s).
 @subsection debug-level option (-d)
 @cindex ntpq-debug-level
 
-This is the ``increase output debug message level'' option.
+This is the ``increase debug verbosity level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -126,7 +126,7 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-Increase the debugging message output level.
+
 
 @node ntpq interactive
 @subsection interactive option (-i)
@@ -217,13 +217,10 @@ of their state. This is equivalent to the 'peers' interactive command.
 @subsection set-debug-level option (-D)
 @cindex ntpq-set-debug-level
 
-This is the ``set the output debug message level'' option.
+This is the ``set the debug verbosity level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
 @item
 may appear an unlimited number of times.
 @end itemize
-
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).

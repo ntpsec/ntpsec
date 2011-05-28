@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 07:28:26 PM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 28, 2011 at 10:59:39 AM by AutoGen 5.11.9
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -17,9 +17,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpdc copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
+ * ntpdc copyright (c) 1970-2011 David L. Mills and/or others. - all rights reserved
  *
- * see html/copyright.html
+ * See html/copyright.html
  * 
  */
 /*
@@ -54,13 +54,13 @@ typedef enum {
     INDEX_OPT_IPV4             =  0,
     INDEX_OPT_IPV6             =  1,
     INDEX_OPT_COMMAND          =  2,
-    INDEX_OPT_LISTPEERS        =  3,
-    INDEX_OPT_PEERS            =  4,
-    INDEX_OPT_SHOWPEERS        =  5,
-    INDEX_OPT_INTERACTIVE      =  6,
-    INDEX_OPT_DEBUG_LEVEL      =  7,
-    INDEX_OPT_SET_DEBUG_LEVEL  =  8,
-    INDEX_OPT_NUMERIC          =  9,
+    INDEX_OPT_DEBUG_LEVEL      =  3,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  4,
+    INDEX_OPT_INTERACTIVE      =  5,
+    INDEX_OPT_LISTPEERS        =  6,
+    INDEX_OPT_NUMERIC          =  7,
+    INDEX_OPT_PEERS            =  8,
+    INDEX_OPT_SHOWPEERS        =  9,
     INDEX_OPT_VERSION          = 10,
     INDEX_OPT_HELP             = 11,
     INDEX_OPT_MORE_HELP        = 12,
@@ -69,8 +69,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    15
-#define NTPDC_VERSION       "4.2.7p173"
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p173"
+#define NTPDC_VERSION       "4.2.7p174"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p174"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -117,9 +117,25 @@ typedef enum {
 #  warning undefining COMMAND due to option name conflict
 #  undef   COMMAND
 # endif
+# ifdef    DEBUG_LEVEL
+#  warning undefining DEBUG_LEVEL due to option name conflict
+#  undef   DEBUG_LEVEL
+# endif
+# ifdef    SET_DEBUG_LEVEL
+#  warning undefining SET_DEBUG_LEVEL due to option name conflict
+#  undef   SET_DEBUG_LEVEL
+# endif
+# ifdef    INTERACTIVE
+#  warning undefining INTERACTIVE due to option name conflict
+#  undef   INTERACTIVE
+# endif
 # ifdef    LISTPEERS
 #  warning undefining LISTPEERS due to option name conflict
 #  undef   LISTPEERS
+# endif
+# ifdef    NUMERIC
+#  warning undefining NUMERIC due to option name conflict
+#  undef   NUMERIC
 # endif
 # ifdef    PEERS
 #  warning undefining PEERS due to option name conflict
@@ -129,33 +145,17 @@ typedef enum {
 #  warning undefining SHOWPEERS due to option name conflict
 #  undef   SHOWPEERS
 # endif
-# ifdef    INTERACTIVE
-#  warning undefining INTERACTIVE due to option name conflict
-#  undef   INTERACTIVE
-# endif
-# ifdef    DEBUG_LEVEL
-#  warning undefining DEBUG_LEVEL due to option name conflict
-#  undef   DEBUG_LEVEL
-# endif
-# ifdef    SET_DEBUG_LEVEL
-#  warning undefining SET_DEBUG_LEVEL due to option name conflict
-#  undef   SET_DEBUG_LEVEL
-# endif
-# ifdef    NUMERIC
-#  warning undefining NUMERIC due to option name conflict
-#  undef   NUMERIC
-# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
 # undef COMMAND
-# undef LISTPEERS
-# undef PEERS
-# undef SHOWPEERS
-# undef INTERACTIVE
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
+# undef INTERACTIVE
+# undef LISTPEERS
 # undef NUMERIC
+# undef PEERS
+# undef SHOWPEERS
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -165,13 +165,13 @@ typedef enum {
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
 #define VALUE_OPT_COMMAND        'c'
-#define VALUE_OPT_LISTPEERS      'l'
-#define VALUE_OPT_PEERS          'p'
-#define VALUE_OPT_SHOWPEERS      's'
-#define VALUE_OPT_INTERACTIVE    'i'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
+#define VALUE_OPT_INTERACTIVE    'i'
+#define VALUE_OPT_LISTPEERS      'l'
 #define VALUE_OPT_NUMERIC        'n'
+#define VALUE_OPT_PEERS          'p'
+#define VALUE_OPT_SHOWPEERS      's'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION

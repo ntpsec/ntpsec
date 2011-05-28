@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p173 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p174 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -150,7 +150,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <p><a name="index-sntp-usage-3"></a>
 This is the automatically generated usage text for sntp:
 
-<pre class="example">sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p173
+<pre class="example">sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p174
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -164,17 +164,17 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -B Num bctimeout      The number of seconds to wait for broadcasts
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
-   -c Str concurrent     Concurrent query all IPs returned for host-name
+   -c Str concurrent     Concurrently query all IPs returned for host-name
                                 - may appear multiple times
-   -d no  debug-level    Increase output debug message level
+   -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
+   -D Str set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -h Num headspace      The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
    -k Fil keyfile        Look in this file for the key specified with -a
    -l Fil filelog        Log to specified logfile
-   -M Num steplimit      Adjustments less than steplimit msec will be slewed.
+   -M Num steplimit      Adjustments less than steplimit msec will be slewed
                                 - It must be in the range:
                                   greater than or equal to 0
    -o Num ntpversion     Send &lt;int&gt; as our NTP version
@@ -201,6 +201,8 @@ hyphen and the flag character.
 
 
 The following option preset mechanisms are supported:
+ - reading file $HOME/.ntprc
+ - reading file ./.ntprc
  - reading file $HOME/.ntprc
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
@@ -281,7 +283,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">concurrent option (-c)</h4>
 
 <p><a name="index-sntp_002dconcurrent-7"></a>
-This is the &ldquo;concurrent query all ips returned for host-name&rdquo; option.
+This is the &ldquo;concurrently query all ips returned for host-name&rdquo; option.
 
   <p>This option has some usage constraints.  It:
      <ul>
@@ -309,14 +311,12 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">debug-level option (-d)</h4>
 
 <p><a name="index-sntp_002ddebug_002dlevel-8"></a>
-This is the &ldquo;increase output debug message level&rdquo; option.
+This is the &ldquo;increase debug verbosity level&rdquo; option.
 
   <p>This option has some usage constraints.  It:
      <ul>
 <li>may appear an unlimited number of times. 
 </ul>
-
-  <p>Increase the debugging message output level.
 
 <div class="node">
 <p><hr>
@@ -370,7 +370,7 @@ This is the &ldquo;force ipv4 dns name resolution&rdquo; option.
 ipv6. 
 </ul>
 
-  <p>Force DNS resolution of following host names on the command line
+  <p>Force DNS resolution of the following host names on the command line
 to the IPv4 namespace.
 
 <div class="node">
@@ -392,7 +392,7 @@ This is the &ldquo;force ipv6 dns name resolution&rdquo; option.
 ipv4. 
 </ul>
 
-  <p>Force DNS resolution of following host names on the command line
+  <p>Force DNS resolution of the following host names on the command line
 to the IPv6 namespace.
 
 <div class="node">
@@ -414,11 +414,11 @@ file. Key files follow the following format:
   <p>keyid keytype key
 
   <p>Where	keyid is a number identifying this key
-keytype is one of the follow:
-S  Key in 64 Bit hexadecimal number as specified in in the DES specification. 
-N  Key in 64 Bit hexadecimal number as specified in the NTP standard. 
-A  Key in a 1-to-8 character ASCII string. 
-M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
+keytype is one of the following:
+S  Key is a 64 Bit hexadecimal number as specified in in the DES specification. 
+N  Key ina  64 Bit hexadecimal number as specified in the NTP standard. 
+A  Key is a 1-to-8 character ASCII string. 
+M  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
   <p>For more information see ntp.keys(5).
 
@@ -464,15 +464,12 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">set-debug-level option (-D)</h4>
 
 <p><a name="index-sntp_002dset_002ddebug_002dlevel-16"></a>
-This is the &ldquo;set the output debug message level&rdquo; option.
+This is the &ldquo;set the debug verbosity level&rdquo; option.
 
   <p>This option has some usage constraints.  It:
      <ul>
 <li>may appear an unlimited number of times. 
 </ul>
-
-  <p>Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
 
 <div class="node">
 <p><hr>
@@ -511,7 +508,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">steplimit option (-M)</h4>
 
 <p><a name="index-sntp_002dsteplimit-19"></a>
-This is the &ldquo;adjustments less than steplimit msec will be slewed.&rdquo; option. 
+This is the &ldquo;adjustments less than steplimit msec will be slewed&rdquo; option. 
 If the time adjustment is less than steplimit milliseconds, slew the
 amount using adjtime().  Otherwise, step the correction using
 settimeofday().

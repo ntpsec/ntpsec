@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 07:25:29 PM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 28, 2011 at 10:47:25 AM by AutoGen 5.11.9
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -17,9 +17,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
+ * sntp copyright (c) 1970-2011 David L. Mills and/or others. - all rights reserved
  *
- * see html/copyright.html
+ * See html/copyright.html
  * 
  */
 
@@ -40,10 +40,10 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[40] =
-"sntp 4.2.7p173\n\
-see html/copyright.html\n";
+"sntp 4.2.7p174\n\
+See html/copyright.html\n";
 static char const zLicenseDescrip[25] =
-"see html/copyright.html\n";
+"See html/copyright.html\n";
 
 extern tUsageProc optionUsage;
 
@@ -121,7 +121,7 @@ static char const zBroadcast_Name[]          = "broadcast";
  *  Concurrent option description:
  */
 static char const zConcurrentText[] =
-        "Concurrent query all IPs returned for host-name";
+        "Concurrently query all IPs returned for host-name";
 static char const zConcurrent_NAME[]         = "CONCURRENT";
 static char const zConcurrent_Name[]         = "concurrent";
 #define CONCURRENT_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
@@ -131,7 +131,7 @@ static char const zConcurrent_Name[]         = "concurrent";
  *  Debug_Level option description:
  */
 static char const zDebug_LevelText[] =
-        "Increase output debug message level";
+        "Increase debug verbosity level";
 static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
 static char const zDebug_Level_Name[]        = "debug-level";
 #define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
@@ -140,7 +140,7 @@ static char const zDebug_Level_Name[]        = "debug-level";
  *  Set_Debug_Level option description:
  */
 static char const zSet_Debug_LevelText[] =
-        "Set the output debug message level";
+        "Set the debug verbosity level";
 static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
 static char const zSet_Debug_Level_Name[]    = "set-debug-level";
 #define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
@@ -192,7 +192,7 @@ static char const zFilelog_Name[]            = "filelog";
  *  Steplimit option description:
  */
 static char const zSteplimitText[] =
-        "Adjustments less than steplimit msec will be slewed.";
+        "Adjustments less than steplimit msec will be slewed";
 static char const zSteplimit_NAME[]          = "STEPLIMIT";
 static char const zSteplimit_Name[]          = "steplimit";
 #define STEPLIMIT_FLAGS       (OPTST_DISABLED \
@@ -637,11 +637,13 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p173\n\
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p174\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
-static char const * const apzHomeList[3] = {
+static char const * const apzHomeList[5] = {
+    "$HOME",
+    ".",
     "$HOME",
     ".",
     NULL };
@@ -742,7 +744,7 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from debug-opt.def, line 27 */
+    /* extracted from debug-opt.def, line 26 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_SNTP_OPTS) */

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 07:28:46 PM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 28, 2011 at 11:00:55 AM by AutoGen 5.11.9
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -17,9 +17,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpsnmpd copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
+ * ntpsnmpd copyright (c) 1970-2011 David L. Mills and/or others. - all rights reserved
  *
- * see html/copyright.html
+ * See html/copyright.html
  * 
  */
 
@@ -40,10 +40,10 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[44] =
-"ntpsnmpd 4.2.7p173\n\
-see html/copyright.html\n";
+"ntpsnmpd 4.2.7p174\n\
+See html/copyright.html\n";
 static char const zLicenseDescrip[25] =
-"see html/copyright.html\n";
+"See html/copyright.html\n";
 
 extern tUsageProc optionUsage;
 
@@ -251,7 +251,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[105] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p173\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p174\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 07:28:26 PM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 28, 2011 at 10:59:40 AM by AutoGen 5.11.9
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -17,9 +17,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpdc copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
+ * ntpdc copyright (c) 1970-2011 David L. Mills and/or others. - all rights reserved
  *
- * see html/copyright.html
+ * See html/copyright.html
  * 
  */
 
@@ -40,10 +40,10 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[41] =
-"ntpdc 4.2.7p173\n\
-see html/copyright.html\n";
+"ntpdc 4.2.7p174\n\
+See html/copyright.html\n";
 static char const zLicenseDescrip[25] =
-"see html/copyright.html\n";
+"See html/copyright.html\n";
 
 extern tUsageProc optionUsage;
 
@@ -97,6 +97,41 @@ static char const zCommand_Name[]            = "command";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
+ *  Debug_Level option description:
+ */
+static char const zDebug_LevelText[] =
+        "Increase debug verbosity level";
+static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
+static char const zDebug_Level_Name[]        = "debug-level";
+#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Set_Debug_Level option description:
+ */
+static char const zSet_Debug_LevelText[] =
+        "Set the debug verbosity level";
+static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
+static char const zSet_Debug_Level_Name[]    = "set-debug-level";
+#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+
+/*
+ *  Interactive option description with
+ *  "Must also have options" and "Incompatible options":
+ */
+static char const zInteractiveText[] =
+        "Force ntpq to operate in interactive mode";
+static char const zInteractive_NAME[]        = "INTERACTIVE";
+static char const zInteractive_Name[]        = "interactive";
+static const int
+    aInteractiveCantList[] = {
+    INDEX_OPT_COMMAND,
+    INDEX_OPT_LISTPEERS,
+    INDEX_OPT_PEERS,
+    INDEX_OPT_SHOWPEERS, NO_EQUIVALENT };
+#define INTERACTIVE_FLAGS       (OPTST_DISABLED)
+
+/*
  *  Listpeers option description with
  *  "Must also have options" and "Incompatible options":
  */
@@ -108,6 +143,15 @@ static const int
     aListpeersCantList[] = {
     INDEX_OPT_COMMAND, NO_EQUIVALENT };
 #define LISTPEERS_FLAGS       (OPTST_DISABLED)
+
+/*
+ *  Numeric option description:
+ */
+static char const zNumericText[] =
+        "numeric host addresses";
+static char const zNumeric_NAME[]            = "NUMERIC";
+static char const zNumeric_Name[]            = "numeric";
+#define NUMERIC_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Peers option description with
@@ -134,50 +178,6 @@ static const int
     aShowpeersCantList[] = {
     INDEX_OPT_COMMAND, NO_EQUIVALENT };
 #define SHOWPEERS_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Interactive option description with
- *  "Must also have options" and "Incompatible options":
- */
-static char const zInteractiveText[] =
-        "Force ntpq to operate in interactive mode";
-static char const zInteractive_NAME[]        = "INTERACTIVE";
-static char const zInteractive_Name[]        = "interactive";
-static const int
-    aInteractiveCantList[] = {
-    INDEX_OPT_COMMAND,
-    INDEX_OPT_LISTPEERS,
-    INDEX_OPT_PEERS,
-    INDEX_OPT_SHOWPEERS, NO_EQUIVALENT };
-#define INTERACTIVE_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Debug_Level option description:
- */
-static char const zDebug_LevelText[] =
-        "Increase output debug message level";
-static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
-static char const zDebug_Level_Name[]        = "debug-level";
-#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
-
-/*
- *  Set_Debug_Level option description:
- */
-static char const zSet_Debug_LevelText[] =
-        "Set the output debug message level";
-static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
-static char const zSet_Debug_Level_Name[]    = "set-debug-level";
-#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
-
-/*
- *  Numeric option description:
- */
-static char const zNumericText[] =
-        "numeric host addresses";
-static char const zNumeric_NAME[]            = "NUMERIC";
-static char const zNumeric_Name[]            = "numeric";
-#define NUMERIC_FLAGS       (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
@@ -292,56 +292,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zCommandText, zCommand_NAME, zCommand_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 3, VALUE_OPT_LISTPEERS,
-     /* equiv idx, value */ 3, VALUE_OPT_LISTPEERS,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ LISTPEERS_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aListpeersCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zListpeersText, zListpeers_NAME, zListpeers_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 4, VALUE_OPT_PEERS,
-     /* equiv idx, value */ 4, VALUE_OPT_PEERS,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ PEERS_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aPeersCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zPeersText, zPeers_NAME, zPeers_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 5, VALUE_OPT_SHOWPEERS,
-     /* equiv idx, value */ 5, VALUE_OPT_SHOWPEERS,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ SHOWPEERS_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aShowpeersCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zShowpeersText, zShowpeers_NAME, zShowpeers_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 6, VALUE_OPT_INTERACTIVE,
-     /* equiv idx, value */ 6, VALUE_OPT_INTERACTIVE,
-     /* equivalenced to  */ NO_EQUIVALENT,
-     /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ INTERACTIVE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
-     /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aInteractiveCantList,
-     /* option proc      */ NULL,
-     /* desc, NAME, name */ zInteractiveText, zInteractive_NAME, zInteractive_Name,
-     /* disablement strs */ NULL, NULL },
-
-  {  /* entry idx, value */ 7, VALUE_OPT_DEBUG_LEVEL,
-     /* equiv idx, value */ 7, VALUE_OPT_DEBUG_LEVEL,
+  {  /* entry idx, value */ 3, VALUE_OPT_DEBUG_LEVEL,
+     /* equiv idx, value */ 3, VALUE_OPT_DEBUG_LEVEL,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
@@ -352,8 +304,8 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 8, VALUE_OPT_SET_DEBUG_LEVEL,
-     /* equiv idx, value */ 8, VALUE_OPT_SET_DEBUG_LEVEL,
+  {  /* entry idx, value */ 4, VALUE_OPT_SET_DEBUG_LEVEL,
+     /* equiv idx, value */ 4, VALUE_OPT_SET_DEBUG_LEVEL,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
@@ -364,8 +316,32 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 9, VALUE_OPT_NUMERIC,
-     /* equiv idx, value */ 9, VALUE_OPT_NUMERIC,
+  {  /* entry idx, value */ 5, VALUE_OPT_INTERACTIVE,
+     /* equiv idx, value */ 5, VALUE_OPT_INTERACTIVE,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ INTERACTIVE_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, aInteractiveCantList,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zInteractiveText, zInteractive_NAME, zInteractive_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 6, VALUE_OPT_LISTPEERS,
+     /* equiv idx, value */ 6, VALUE_OPT_LISTPEERS,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ LISTPEERS_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, aListpeersCantList,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zListpeersText, zListpeers_NAME, zListpeers_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 7, VALUE_OPT_NUMERIC,
+     /* equiv idx, value */ 7, VALUE_OPT_NUMERIC,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NUMERIC_FLAGS, 0,
@@ -374,6 +350,30 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
      /* desc, NAME, name */ zNumericText, zNumeric_NAME, zNumeric_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 8, VALUE_OPT_PEERS,
+     /* equiv idx, value */ 8, VALUE_OPT_PEERS,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ PEERS_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, aPeersCantList,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zPeersText, zPeers_NAME, zPeers_Name,
+     /* disablement strs */ NULL, NULL },
+
+  {  /* entry idx, value */ 9, VALUE_OPT_SHOWPEERS,
+     /* equiv idx, value */ 9, VALUE_OPT_SHOWPEERS,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ SHOWPEERS_FLAGS, 0,
+     /* last opt argumnt */ { NULL },
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, aShowpeersCantList,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ zShowpeersText, zShowpeers_NAME, zShowpeers_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
@@ -446,8 +446,8 @@ static tOptDesc optDesc[OPTION_CT] = {
  *  Define the Ntpdc Option Environment
  */
 static char const zPROGNAME[6] = "NTPDC";
-static char const zUsageTitle[129] =
-"ntpdc - vendor-specific NTP query program - Ver. 4.2.7p173\n\
+static char const zUsageTitle[132] =
+"ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p174\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -457,8 +457,8 @@ static char const * const apzHomeList[3] = {
 
 static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 #define zExplain NULL
-static char const zDetail[601] = "\n\
-The [= prog-name =] utility program is used to query an NTP daemon about\n\
+static char const zDetail[603] = "\n\
+The [+: prog-name :+] utility program is used to query an NTP daemon about\n\
 its current state and to request changes in that state.  It uses NTP mode\n\
 7 control message formats described in the source code.  The program may\n\
 be run either in interactive mode or controlled using command line\n\
@@ -553,7 +553,7 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from debug-opt.def, line 27 */
+    /* extracted from debug-opt.def, line 26 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPDC_OPTS) */

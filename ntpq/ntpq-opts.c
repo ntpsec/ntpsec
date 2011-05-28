@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 07:28:35 PM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 28, 2011 at 11:00:22 AM by AutoGen 5.11.9
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -17,9 +17,9 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpq copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
+ * ntpq copyright (c) 1970-2011 David L. Mills and/or others. - all rights reserved
  *
- * see html/copyright.html
+ * See html/copyright.html
  * 
  */
 
@@ -40,10 +40,10 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[40] =
-"ntpq 4.2.7p173\n\
-see html/copyright.html\n";
+"ntpq 4.2.7p174\n\
+See html/copyright.html\n";
 static char const zLicenseDescrip[25] =
-"see html/copyright.html\n";
+"See html/copyright.html\n";
 
 extern tUsageProc optionUsage;
 
@@ -100,7 +100,7 @@ static char const zCommand_Name[]            = "command";
  *  Debug_Level option description:
  */
 static char const zDebug_LevelText[] =
-        "Increase output debug message level";
+        "Increase debug verbosity level";
 static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
 static char const zDebug_Level_Name[]        = "debug-level";
 #define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
@@ -109,7 +109,7 @@ static char const zDebug_Level_Name[]        = "debug-level";
  *  Set_Debug_Level option description:
  */
 static char const zSet_Debug_LevelText[] =
-        "Set the output debug message level";
+        "Set the debug verbosity level";
 static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
 static char const zSet_Debug_Level_Name[]    = "set-debug-level";
 #define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
@@ -424,7 +424,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "NTPQ";
 static char const zUsageTitle[121] =
-"ntpq - standard NTP query program - Ver. 4.2.7p173\n\
+"ntpq - standard NTP query program - Ver. 4.2.7p174\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
@@ -527,7 +527,7 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 static void
 doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from debug-opt.def, line 27 */
+    /* extracted from debug-opt.def, line 26 */
 DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined(TEST_NTPQ_OPTS) */

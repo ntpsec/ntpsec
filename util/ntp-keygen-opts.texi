@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  May 25, 2011 at 07:29:03 PM by AutoGen 5.11.9
+# It has been AutoGen-ed  May 28, 2011 at 11:01:34 AM by AutoGen 5.11.9
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -51,13 +51,13 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p173
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p174
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
-   -d no  debug-level    Increase output debug message level
+   -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
+   -D Str set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -e no  id-key         Write IFF or GQ identity keys
    -G no  gq-params      Generate GQ parameters and keys
@@ -125,7 +125,7 @@ this option is RSA-MD5.
 @subsection debug-level option (-d)
 @cindex ntp-keygen-debug-level
 
-This is the ``increase output debug message level'' option.
+This is the ``increase debug verbosity level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -133,7 +133,7 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-Increase the debugging message output level.
+
 
 @node ntp-keygen get-pvt-passwd
 @subsection get-pvt-passwd option (-q)
@@ -321,7 +321,7 @@ password and the DES-CBC algorithm.
 @subsection set-debug-level option (-D)
 @cindex ntp-keygen-set-debug-level
 
-This is the ``set the output debug message level'' option.
+This is the ``set the debug verbosity level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -329,8 +329,7 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
+
 
 @node ntp-keygen sign-key
 @subsection sign-key option (-S)

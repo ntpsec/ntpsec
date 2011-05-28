@@ -1,7 +1,7 @@
-.TH NTP-KEYGEN 1 2011-05-25 "(ntp 4.2.7p173)" "Programmer's Manual"
+.TH NTP-KEYGEN 1 2011-05-28 "(ntp 4.2.7p174)" "Programmer's Manual"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen.1)
 .\"  
-.\"  It has been AutoGen-ed  May 25, 2011 at 07:29:02 PM by AutoGen 5.11.9
+.\"  It has been AutoGen-ed  May 28, 2011 at 11:01:33 AM by AutoGen 5.11.9
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman1.tpl
 .\"
@@ -32,17 +32,16 @@ schemes must be used with a DSA sign key.  The default without
 this option is RSA-MD5.
 .TP
 .BR \-d ", " \--debug-level
-Increase output debug message level.
+Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
-Increase the debugging message output level.
+
 .TP
 .BR \-D " \fIstring\fP, " \--set-debug-level "=" \fIstring\fP
-Set the output debug message level.
+Set the debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
+
 .TP
 .BR \-e ", " \--id-key
 Write IFF or GQ identity keys.
@@ -180,14 +179,14 @@ The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .SH AUTHOR
-David L. Mills and/or others
+David L. Mills and/or others.
 .br
 Please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
 
 .PP
 .nf
 .na
-see html/copyright.html
+See html/copyright.html
 
 .fi
 .ad

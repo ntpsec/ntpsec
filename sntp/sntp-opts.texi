@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  May 25, 2011 at 07:29:11 PM by AutoGen 5.11.9
+# It has been AutoGen-ed  May 28, 2011 at 11:01:55 AM by AutoGen 5.11.9
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -76,7 +76,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p173
+sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p174
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -90,17 +90,17 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -B Num bctimeout      The number of seconds to wait for broadcasts
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
-   -c Str concurrent     Concurrent query all IPs returned for host-name
+   -c Str concurrent     Concurrently query all IPs returned for host-name
                                 - may appear multiple times
-   -d no  debug-level    Increase output debug message level
+   -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
+   -D Str set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -h Num headspace      The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
    -k Fil keyfile        Look in this file for the key specified with -a
    -l Fil filelog        Log to specified logfile
-   -M Num steplimit      Adjustments less than steplimit msec will be slewed.
+   -M Num steplimit      Adjustments less than steplimit msec will be slewed
                                 - It must be in the range:
                                   greater than or equal to 0
    -o Num ntpversion     Send <int> as our NTP version
@@ -127,6 +127,8 @@ hyphen and the flag character.
 
 
 The following option preset mechanisms are supported:
+ - reading file $HOME/.ntprc
+ - reading file ./.ntprc
  - reading file $HOME/.ntprc
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
@@ -182,7 +184,7 @@ for NTP broadcasts.  The default maximum wait time,
 @subsection concurrent option (-c)
 @cindex sntp-concurrent
 
-This is the ``concurrent query all ips returned for host-name'' option.
+This is the ``concurrently query all ips returned for host-name'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -204,7 +206,7 @@ can send concurrent queries.
 @subsection debug-level option (-d)
 @cindex sntp-debug-level
 
-This is the ``increase output debug message level'' option.
+This is the ``increase debug verbosity level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -212,7 +214,7 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-Increase the debugging message output level.
+
 
 @node sntp filelog
 @subsection filelog option (-l)
@@ -246,7 +248,7 @@ must not appear in combination with any of the following options:
 ipv6.
 @end itemize
 
-Force DNS resolution of following host names on the command line
+Force DNS resolution of the following host names on the command line
 to the IPv4 namespace.
 
 @node sntp ipv6
@@ -262,7 +264,7 @@ must not appear in combination with any of the following options:
 ipv4.
 @end itemize
 
-Force DNS resolution of following host names on the command line
+Force DNS resolution of the following host names on the command line
 to the IPv6 namespace.
 
 @node sntp keyfile
@@ -277,11 +279,11 @@ file. Key files follow the following format:
 keyid keytype key
 
 Where	keyid is a number identifying this key
-keytype is one of the follow:
-S  Key in 64 Bit hexadecimal number as specified in in the DES specification.
-N  Key in 64 Bit hexadecimal number as specified in the NTP standard.
-A  Key in a 1-to-8 character ASCII string.
-M  Key in a 1-to-8 character ASCII string using the MD5 authentication scheme.
+keytype is one of the following:
+S  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
+N  Key ina  64 Bit hexadecimal number as specified in the NTP standard.
+A  Key is a 1-to-8 character ASCII string.
+M  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
 For more information see ntp.keys(5).
 
@@ -306,7 +308,7 @@ NTP protocol version <ntpversion> .
 @subsection set-debug-level option (-D)
 @cindex sntp-set-debug-level
 
-This is the ``set the output debug message level'' option.
+This is the ``set the debug verbosity level'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -314,8 +316,7 @@ This option has some usage constraints.  It:
 may appear an unlimited number of times.
 @end itemize
 
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
+
 
 @node sntp slew
 @subsection slew option (-s)
@@ -335,7 +336,7 @@ This is the ``ok to 'step' the time with settimeofday()'' option.
 @subsection steplimit option (-M)
 @cindex sntp-steplimit
 
-This is the ``adjustments less than steplimit msec will be slewed.'' option.
+This is the ``adjustments less than steplimit msec will be slewed'' option.
 If the time adjustment is less than steplimit milliseconds, slew the
 amount using adjtime().  Otherwise, step the correction using
 settimeofday(). 

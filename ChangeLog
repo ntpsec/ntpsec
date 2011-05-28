@@ -1,3 +1,4 @@
+(4.2.7p174) 2011/05/28 Released by Harlan Stenn <stenn@ntp.org>
 * ntpdc documentation cleanup.
 * sntp documentation cleanup.
 * Don't build libevent with openssl support.  Right now, libevent
