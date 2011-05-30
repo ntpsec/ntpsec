@@ -2265,7 +2265,12 @@ enable_multicast_if(
 	)
 {
 #ifdef MCAST
+#ifdef IP_MULTICAST_LOOP
 	TYPEOF_IP_MULTICAST_LOOP off = 0;
+#endif
+#ifdef IPV6_MULTICAST_LOOP
+	u_int off6 = 0;
+#endif
 
 	NTP_REQUIRE(AF(maddr) == AF(&iface->sin));
 
@@ -2297,10 +2302,10 @@ enable_multicast_if(
 		 */
 		if (setsockopt(iface->fd, IPPROTO_IPV6,
 			       IPV6_MULTICAST_LOOP,
-			       (char *) &off, sizeof(off))) {
+			       (char *) &off6, sizeof(off6))) {
 
 			msyslog(LOG_ERR,
-				"setsockopt IP_MULTICAST_LOOP failed: %m on socket %d, addr %s for multicast address %s",
+				"setsockopt IPV6_MULTICAST_LOOP failed: %m on socket %d, addr %s for multicast address %s",
 				iface->fd, stoa(&iface->sin),
 				stoa(maddr));
 		}
