@@ -5,16 +5,16 @@ autogen definitions options;
 #include autogen-version.def
 #include copyright.def
 
-prog-name      = "sntp";
-prog-title     = "standard Simple Network Time Protocol program";
-homerc         =  $HOME, ".";
-argument       = '[ hostname-or-IP ...]';
+prog-name	= "sntp";
+prog-title	= "standard Simple Network Time Protocol program";
+homerc		= $HOME, ".";
+argument	= '[ hostname-or-IP ...]';
 
 #include homerc.def
 
 long-opts;
 
-config-header  = "config.h";
+config-header	= "config.h";
 
 environrc;
 
@@ -27,7 +27,7 @@ flag = {
   value		= 4;
   flags-cant	= ipv6;
   descrip	= "Force IPv4 DNS name resolution";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	Force DNS resolution of the following host names on the command line
 	to the IPv4 namespace.
 	_EndOfDoc_;
@@ -38,7 +38,7 @@ flag = {
   value		= 6;
   flags-cant	= ipv4;
   descrip	= "Force IPv6 DNS name resolution";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	Force DNS resolution of the following host names on the command line
 	to the IPv6 namespace.
 	_EndOfDoc_;
@@ -65,7 +65,7 @@ flag = {
   arg-type	= number;
   arg-name	= "seconds";
   arg-default	= 68;
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	When waiting for a broadcast packet SNTP will wait the number
 	of seconds specified before giving up.  Default 68 seconds.
 	_EndOfDoc_;
@@ -79,7 +79,7 @@ flag = {
   arg-name	= "broadcast-address";
   max		 = NOLIMIT;
   stack-arg;
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	If specified SNTP will listen to the specified address
 	for NTP broadcasts.  The default maximum wait time,
 	68 seconds, can be modified with -B.
@@ -94,7 +94,7 @@ flag = {
   arg-name	= "host-name";
   max		= NOLIMIT;
   stack-arg;
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	Requests from an NTP "client" to a "server" should never be sent
 	more rapidly than one every 2 seconds.  By default, any IPs returned
 	as part of a DNS lookup are assumed to be for a single instance of
@@ -116,7 +116,7 @@ flag = {
   arg-type	= number;
   arg-name	= "milliseconds";
   arg-default	= 10;
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	Since we're only going to use the first valid response we get and
 	there is benefit to specifying a good number of servers to query,
 	separate the queries we send out by the specified number of
@@ -132,7 +132,7 @@ flag = {
   arg-name	= "file-name";
   arg-default	= "/var/db/ntp-kod";
   descrip	= "KoD history filename";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	Specifies the filename to be used for the persistent history of KoD
 	responses received from servers.  The default is
 	/var/db/ntp-kod .
@@ -145,7 +145,7 @@ flag = {
   descrip	= "Look in this file for the key specified with -a";
   arg-type	= file;
   arg-name	= "file-name";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	This option specifies the keyfile.
 	SNTP will search for the key specified with -a keyno in this
 	file. Key files follow the following format:
@@ -155,7 +155,7 @@ flag = {
 	Where	keyid is a number identifying this key
 		keytype is one of the following:
 			S  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
-			N  Key ina  64 Bit hexadecimal number as specified in the NTP standard.
+			N  Key is a 64 Bit hexadecimal number as specified in the NTP standard.
 			A  Key is a 1-to-8 character ASCII string.
 			M  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
@@ -169,7 +169,7 @@ flag = {
   arg-type	= file;
   arg-name	= "file-name";
   descrip	= "Log to specified logfile";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	This option causes the client to write log messages to the specified
 	logfile.
 	_EndOfDoc_;
@@ -181,7 +181,7 @@ flag = {
   arg-type	= number;
   arg-range	= "0->";
   descrip	= "Adjustments less than steplimit msec will be slewed";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	If the time adjustment is less than steplimit milliseconds, slew the
 	amount using adjtime().  Otherwise, step the correction using
 	settimeofday(). 
@@ -195,7 +195,7 @@ flag = {
   arg-type	= number;
   arg-default	= 4;
   arg-range	= "0->7";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	When sending requests to a remote server, tell them we are running
 	NTP protocol version <ntpversion> .
 	_EndOfDoc_;
@@ -205,7 +205,7 @@ flag = {
   name		= usereservedport;
   value		= r;
   descrip	= "Use the NTP Reserved Port (port 123)";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	Use port 123, which is reserved for NTP, for our network
 	communications.
 	_EndOfDoc_;
@@ -215,7 +215,7 @@ flag = {
   name		= step;
   value		= S;
   descrip	= "OK to 'step' the time with settimeofday()";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	_EndOfDoc_;
 };
 
@@ -223,7 +223,7 @@ flag = {
   name		= slew;
   value		= s;
   descrip	= "OK to 'slew' the time with adjtime()";
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	_EndOfDoc_;
 };
 
@@ -235,7 +235,7 @@ flag = {
   arg-type	= number;
   arg-name	= "seconds";
   arg-default	= 5;
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	When waiting for a unicast reply, SNTP will wait the number
 	of seconds specified before giving up.  Default 5 seconds.
 	_EndOfDoc_;
@@ -247,7 +247,7 @@ flag = {
   disable	= no;
   enabled;
   settable;
-  doc		= <<-  _EndOfDoc_
+  doc		= <<- _EndOfDoc_
 	If we are not setting the time, wait for all pending responses.
 	_EndOfDoc_;
 };
@@ -256,21 +256,10 @@ flag = {
 explain = <<- _END_EXPLAIN
 	_END_EXPLAIN;
 
-detail = <<-  _END_DETAIL
-sntp implements the Simple Network Time Protocol and is used to query
-an NTP or SNTP server and either display the time or set the local
-system's time (given suitable privilege).
-
-It can be run interactively from the command line or as a cron job.
-
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC
-1305.
-	_END_DETAIL;
-
 doc-section	= {
   ds-type	= 'DESCRIPTION';
   ds-format	= 'mdoc';
-  ds-text	= <<-  _END_PROG_MDOC_DESCRIP
+  ds-text	= <<- _END_PROG_MDOC_DESCRIP
 .Nm
 can be used as a SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
@@ -303,7 +292,7 @@ seconds.
 	_END_PROG_MDOC_DESCRIP;
 };
 
-prog-info-descrip = <<-  _END_PROG_INFO_DESCRIP
+prog-info-descrip = <<- _END_PROG_INFO_DESCRIP
 @code{sntp}
 can be used as a SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
@@ -337,7 +326,7 @@ seconds.
 doc-section	= {
   ds-type	= 'USAGE';
   ds-format	= 'mdoc';
-  ds-text	= <<-  _END_MDOC_USAGE
+  ds-text	= <<- _END_MDOC_USAGE
 .Bl -tag -width indent
 .It Li "sntp ntpserver.somewhere"
 is the simplest use of this program
@@ -362,8 +351,8 @@ commands.
 
 doc-section	= {
   ds-type	= 'EXIT STATUS';
-  ds-format     = 'mdoc';
-  ds-text       = <<-  _END_MDOC_EXITSTATUS
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_EXITSTATUS
 .Nm
 returns a zero exit status for success,
 and a non-zero value otherwise.
@@ -372,8 +361,8 @@ and a non-zero value otherwise.
 
 doc-section	= {
   ds-type	= 'AUTHORS';
-  ds-format     = 'mdoc';
-  ds-text       = <<-  _END_MDOC_AUTHORS
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_AUTHORS
 .An "Johannes Maximilian Kuehn"
 .An "Harlan Stenn"
 .An "Dave Hart"
@@ -382,8 +371,8 @@ doc-section	= {
 
 doc-section	= {
   ds-type	= 'BUGS';
-  ds-format     = 'mdoc';
-  ds-text       = <<-  _END_MDOC_BUGS
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_BUGS
 Please report bugs to http://bugs.ntp.org .
 	_END_MDOC_BUGS;
 };
