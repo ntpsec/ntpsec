@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  May 28, 2011 at 10:59:40 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 30, 2011 at 11:09:01 AM by AutoGen 5.11.9
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -40,7 +40,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[41] =
-"ntpdc 4.2.7p174\n\
+"ntpdc 4.2.7p175\n\
 See html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "See html/copyright.html\n";
@@ -447,7 +447,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[6] = "NTPDC";
 static char const zUsageTitle[132] =
-"ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p174\n\
+"ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p175\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
