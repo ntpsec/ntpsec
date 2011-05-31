@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  May 30, 2011 at 10:52:34 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  May 31, 2011 at 10:46:06 AM by AutoGen 5.11.9
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -40,7 +40,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[40] =
-"sntp 4.2.7p175\n\
+"sntp 4.2.7p176\n\
 See html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "See html/copyright.html\n";
@@ -637,7 +637,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p175\n\
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p176\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
@@ -650,13 +650,7 @@ static char const * const apzHomeList[5] = {
 
 static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
 static char const zExplain[] = "\n\n";
-static char const zDetail[351] = "\n\
-sntp implements the Simple Network Time Protocol and is used to query an\n\
-NTP or SNTP server and either display the time or set the local system's\n\
-time (given suitable privilege).\n\n\
-It can be run interactively from the command line or as a cron job.\n\n\
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
-1305.\n";
+#define zDetail         NULL
 static char const zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from optcode.tlib near line 515 */
 

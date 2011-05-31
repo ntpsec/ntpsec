@@ -1,3 +1,4 @@
+(4.2.7p176) 2011/05/31 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p175) 2011/05/30 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1936] Correctly set IPV6_MULTICAST_LOOP.
 * cmd-doc.tlib cleanup from Bruce Korb.
