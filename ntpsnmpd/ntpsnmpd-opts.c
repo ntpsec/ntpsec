@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  May 31, 2011 at 10:56:50 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  June  1, 2011 at 10:57:58 AM by AutoGen 5.11.9
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -17,10 +17,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpsnmpd copyright (c) 1970-2011 David L. Mills and/or others. - all rights reserved
- *
- * See html/copyright.html
- * 
+ * ntpsnmpd copyright (c) 1970-2011 The University of Delaware, David L. Mills, and/or others - all rights reserved * <<indeterminate license type>>
  */
 
 #include <sys/types.h>
@@ -39,11 +36,24 @@ extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-static char const zCopyright[44] =
-"ntpsnmpd 4.2.7p176\n\
-See html/copyright.html\n";
-static char const zLicenseDescrip[25] =
-"See html/copyright.html\n";
+static char const zCopyright[310] =
+"ntpsnmpd 4.2.7p177\n\
+Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
+This is free software. It is licensed for use, modification and\n\
+redistribution under the terms of the NTP License, copies of which\n\
+can be seen at:\n\
+  <http://opensource.org/licenses/NTP>\n";
+static char const zLicenseDescrip[700] =
+"Permission to use, copy, modify, and distribute this software and its\n\
+documentation for any purpose with or without fee is hereby granted,\n\
+provided that the above copyright notice appears in all copies and that\n\
+both the copyright notice and this permission notice appear in supporting\n\
+documentation, and that the name The University of Delaware, David L.\n\
+Mills, and/or others not be used in advertising or publicity pertaining to\n\
+distribution of the software without specific, written prior permission.\n\
+The University of Delaware, David L. Mills, and/or others makes no\n\
+representations about the suitability this software for any purpose. It is\n\
+provided \"as is\" without express or implied warranty.\n";
 
 extern tUsageProc optionUsage;
 
@@ -251,7 +261,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[105] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p176\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p177\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
