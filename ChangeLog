@@ -1,4 +1,5 @@
 * Use the latest autogen's new copyright template code.
+* Clean up the ntp.lic file.
 (4.2.7p176) 2011/05/31 Released by Harlan Stenn <stenn@ntp.org>
 * sntp documentation cleanup.
 * autogen documentation template cleanup.
