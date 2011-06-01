@@ -125,7 +125,7 @@ EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
 noinst_DATA =	$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu
 noinst_HEADERS = declcond.h
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L ../sntp/include --writable
+		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
 	$(top_srcdir)/sntp/include/debug-opt.def		\
 	$(top_srcdir)/sntp/include/autogen-version.def 		\

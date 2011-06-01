@@ -2,13 +2,9 @@
 
 copyright = {
     date  = "1970-2011";
-    owner = "David L. Mills and/or others.";
+    owner = "The University of Delaware, David L. Mills, and/or others";
     eaddr = "http://bugs.ntp.org, bugs@ntp.org";
-    type  = note;
-    text  = <<- _EndOfDoc_
-	See html/copyright.html
-
-	_EndOfDoc_;
+    type  = ntp;
 };
 
 long-opts;

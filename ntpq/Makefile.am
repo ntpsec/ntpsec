@@ -27,7 +27,7 @@ BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h
 man_MANS=	$(srcdir)/ntpq.1
 noinst_DATA=	$(srcdir)/ntpq-opts.texi $(srcdir)/ntpq-opts.menu
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
-		autogen -L ../sntp/include --writable
+		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
 	$(top_srcdir)/sntp/include/debug-opt.def		\
 	$(top_srcdir)/sntp/include/autogen-version.def 		\
