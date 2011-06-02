@@ -5,6 +5,7 @@ EXTRA_DIST =			\
 	copyright.def		\
 	debug-opt.def		\
 	homerc.def		\
+	ntp.lic			\
 	version.def		\
 	version.texi		\
 	$(NULL)
