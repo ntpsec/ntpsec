@@ -33,6 +33,7 @@ std_def_list =							\
 	$(top_srcdir)/sntp/include/autogen-version.def 		\
 	$(top_srcdir)/sntp/include/copyright.def 		\
 	$(top_srcdir)/sntp/include/homerc.def 			\
+	$(top_srcdir)/sntp/include/ntp.lic			\
 	$(top_srcdir)/sntp/include/version.def			\
 	$(NULL)
 ntpq_SOURCES=	ntpq.c ntpq-subs.c ntpq-opts.c ntpq-opts.h

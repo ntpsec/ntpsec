@@ -1,3 +1,4 @@
+* Update the std_def_list to include the ntp.lic file.
 * Distribute the ntp.lic file.
 * Add http://ntp.org/license to the ntp.lic file.
 (4.2.7p177) 2011/06/01 Released by Harlan Stenn <stenn@ntp.org>

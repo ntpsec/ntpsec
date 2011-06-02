@@ -22,6 +22,14 @@ LDADD += $(LCRYPTO)
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L include -L ag-tpl --writable
+std_def_list =						\
+	$(srcdir)/include/debug-opt.def			\
+	$(srcdir)/include/autogen-version.def 		\
+	$(srcdir)/include/copyright.def 		\
+	$(srcdir)/include/homerc.def 			\
+	$(srcdir)/include/ntp.lic 			\
+	$(srcdir)/include/version.def			\
+	$(NULL)
 
 EXTRA_PROGRAMS = sntp
 
@@ -215,18 +223,18 @@ $(srcdir)/COPYRIGHT: check-COPYRIGHT
 $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
 
-$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
+$(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) sntp-opts.def
 
 # For man pages, use agman-cmd.tpl
 # For mdoc pages, use agmdoc-cmd.tpl
-$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
+$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl sntp-opts.def
 
 $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
+$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
 	$(top_srcdir)/../scripts/check--help $@
 
