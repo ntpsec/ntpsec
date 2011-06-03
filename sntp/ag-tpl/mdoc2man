@@ -2,7 +2,7 @@
 
 ## mdoc2mdoc.sh -- script to convert mdoc-isms to mdoc-isms
 ##
-## Time-stamp:      "2011-05-03 09:39:49 bkorb"
+## Time-stamp:      "2011-05-30 14:17:42 bkorb"
 ##
 ##  This file is part of AutoOpts, a companion to AutoGen.
 ##  AutoOpts is free software.
@@ -231,19 +231,22 @@ do_arg() {
 
 do_NmName() {
     # do we want to downcase the line first?  Yes...
-    set -- `echo $line | sed -e 's/-/\\-/g' -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
-    shift
-    case "$#" in
-    0 ) ;;
-    * ) case "$1" in
+    set -- `echo ${line#.Nm} | \
+        sed -e 's/-/\\-/g' \
+            -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
+    NmNameSfx=
+
+    if test $# -gt 0
+    then case "$1" in
 	[A-Za-z]* )
-	   NmName=$1
-	   shift
-	   ;;
+	    NmName=$1
+	    shift
+	    ;;
 	esac
-	;;
-    esac
-    echo ".B $NmName $*"
+
+        test $# -gt 0 && NmNameSfx=" $*"
+    fi
+    echo ".B $NmName$NmNameSfx"
 }
 
 do_line() {

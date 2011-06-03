@@ -1,4 +1,5 @@
 * Update cmd-doc.tlib to autogen-5.11.10pre5.
+* Upgrade local autoopts templates to 5.11.10pre5.
 (4.2.7p178) 2011/06/02 Released by Harlan Stenn <stenn@ntp.org>
 * Update the std_def_list to include the ntp.lic file.
 * Distribute the ntp.lic file.

@@ -4,7 +4,7 @@
 
 ## agman-cmd.tpl -- Template for command line mdoc pages
 ##
-## Time-stamp:      "2011-03-04 10:05:17 bkorb"
+## Time-stamp:      "2011-05-24 17:59:40 bkorb"
 ##
 ##  This file is part of AutoOpts, a companion to AutoGen.
 ##  AutoOpts is free software.
@@ -45,9 +45,7 @@ INCLUDE "cmd-doc.tlib"
 .Sh NAME
 .Nm [+: prog-name         :+]
 .Nd [+: prog-title        :+]
-[+:
-
-INVOKE build-doc          :+][+:
+[+: INVOKE build-doc      :+][+:
 
 (out-move (string-append (get "prog-name") "."
           man-sect))      :+][+:#
@@ -60,32 +58,34 @@ DEFINE synopsis
 
 :+]
 .Sh SYNOPSIS
-.Nm [+:
+.Nm
+[+:
 
   IF (define use-flags  (exist? "flag.value"))
      (define named-mode (not (or use-flags (exist? "long-opts") )))
      use-flags
                                             :+][+:
-    IF (exist? "long-opts")                 :+]
+    IF (exist? "long-opts")                \:+]
 .\" Mixture of short (flag) options and long options
 .Op Fl flags
 .Op Fl flag Ar value
-.Op Fl \-option-name Ar value[+:
-
-    ELSE no long options:                   :+]
+.Op Fl \-option-name Ar value
+[+: ELSE no long options:                  \:+]
 .Op Fl flags
-.Op Fl flag Ar value[+:
-    ENDIF                                               
+.Op Fl flag Ar value
+[+: ENDIF                                               
                                             :+][+:
   ELIF (exist? "long-opts")                             
-                                            :+]
+                                           \:+]
 .Op Fl \-option-name
-.Op Fl \-option-name Ar value[+:
+.Op Fl \-option-name Ar value
+[+:
 
-  ELIF  (not (exist? "argument"))           :+]
+  ELIF  (not (exist? "argument"))          \:+]
 .Op Ar option\-name Ar value
 .Pp
-All arguments are named options.[+:
+All arguments are named options.
+[+:
   ENDIF                                     :+][+:
 
   IF (exist? "argument")                    :+][+:
@@ -98,11 +98,12 @@ Operands and options may be intermixed.  They will be reordered.
 
   ELIF (or (exist? "long-opts") use-flags) 
 
-:+]
+\:+]
 .Pp
-All arguments must be options.[+:
+All arguments must be options.
+[+:
 
-  ENDIF                                     :+]
+  ENDIF                                    \:+]
 .Pp
 [+:
 
