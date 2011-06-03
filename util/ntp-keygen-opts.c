@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  June  2, 2011 at 07:28:35 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  June  3, 2011 at 08:00:04 AM by AutoGen 5.11.9
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -37,7 +37,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[345] =
-"ntp-keygen (ntp) 4.2.7p178\n\
+"ntp-keygen (ntp) 4.2.7p179\n\
 Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -763,7 +763,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[11] = "NTP_KEYGEN";
 static char const zUsageTitle[116] =
-"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p178\n\
+"ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p179\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
