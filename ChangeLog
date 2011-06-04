@@ -1,3 +1,4 @@
+* Remove the deprecated "detail" stanza from ntpdc-opts.def.
 (4.2.7p179) 2011/06/03 Released by Harlan Stenn <stenn@ntp.org>
 * Update cmd-doc.tlib to autogen-5.11.10pre5.
 * Upgrade local autoopts templates to 5.11.10pre5.
