@@ -46,8 +46,13 @@ $(srcdir)/ntpq-opts.h: $(srcdir)/ntpq-opts.c
 $(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) ntpq-opts.def
 
+# For man pages, use agman-cmd.tpl
+# For mdoc pages, use agmdoc-cmd.tpl
+#$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
+#	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl sntp-opts.def
+###
 $(srcdir)/ntpq.1: $(srcdir)/ntpq-opts.def $(std_def_list)
-	$(run_ag) -Tagman1.tpl -bntpq ntpq-opts.def
+	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpq-opts.def
 
 $(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
