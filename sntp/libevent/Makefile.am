@@ -35,6 +35,20 @@ RELEASE = -release 2.1
 VERSION_INFO = 1:0:0
 
 # History:          RELEASE    VERSION_INFO
+#  2.0.1-alpha --     2.0        1:0:0
+#  2.0.2-alpha --                2:0:0
+#  2.0.3-alpha --                2:0:0  (should have incremented; didn't.)
+#  2.0.4-alpha --                3:0:0
+#  2.0.5-beta  --                4:0:0
+#  2.0.6-rc    --     2.0        2:0:0
+#  2.0.7-rc    --     2.0        3:0:1
+#  2.0.8-rc    --     2.0        4:0:2
+#  2.0.9-rc    --     2.0        5:0:0 (ABI changed slightly)
+#  2.0.10-stable--    2.0        5:1:0 (No ABI change)
+#  2.0.11-stable--    2.0        6:0:1 (ABI changed, backward-compatible)
+#  2.0.12-stable--    2.0        6:1:1 (No ABI change)
+#
+# For Libevent 2.1:
 #  2.1.1-alpha --     2.1        1:0:0
 
 
@@ -98,7 +112,7 @@ SUBDIRS = . include sample test
 
 if BUILD_WIN32
 
-SYS_LIBS = -lws2_32
+SYS_LIBS = -lws2_32 -lshell32 -ladvapi32
 SYS_SRC = win32select.c evthread_win32.c buffer_iocp.c event_iocp.c \
 	bufferevent_async.c
 SYS_INCLUDES = -IWIN32-Code
@@ -161,7 +175,7 @@ CORE_SRC = event.c evthread.c buffer.c \
 	evmap.c	log.c evutil.c evutil_rand.c strlcpy.c $(SYS_SRC)
 EXTRA_SRC = event_tagging.c http.c evdns.c evrpc.c
 
-if BUILD_WIN32
+if BUILD_WITH_NO_UNDEFINED
 NO_UNDEFINED = -no-undefined
 MAYBE_CORE = libevent_core.la
 else
@@ -181,6 +195,7 @@ libevent_core_la_LDFLAGS = $(GENERIC_LDFLAGS)
 
 if PTHREADS
 libevent_pthreads_la_SOURCES = evthread_pthread.c
+libevent_pthreads_la_LIBADD = $(MAYBE_CORE)
 libevent_pthreads_la_LDFLAGS = $(GENERIC_LDFLAGS)
 endif
 
@@ -190,7 +205,7 @@ libevent_extra_la_LDFLAGS = $(GENERIC_LDFLAGS)
 
 if OPENSSL
 libevent_openssl_la_SOURCES = bufferevent_openssl.c
-libevent_openssl_la_LIBADD = $(MAYBE_CORE) -lcrypto -lssl
+libevent_openssl_la_LIBADD = $(MAYBE_CORE) $(OPENSSL_LIBS)
 libevent_openssl_la_LDFLAGS = $(GENERIC_LDFLAGS)
 endif
 

@@ -73,7 +73,7 @@ extern "C" {
    data," and we need to look at the error code.  Second, Windows defines
    a different set of error codes for sockets. */
 
-#ifndef WIN32
+#ifndef _WIN32
 
 /* True iff e is an error that means a read/write operation can be retried. */
 #define EVUTIL_ERR_RW_RETRIABLE(e)				\
@@ -181,7 +181,7 @@ long _evutil_weakrand(void);
 
 /* Evaluates to the same boolean value as 'p', and hints to the compiler that
  * we expect this value to be false. */
-#if defined(__GNUC__) && __GNUC__ >= 3		/* gcc 3.0 or later */
+#if defined(__GNUC__) && __GNUC__ >= 3         /* gcc 3.0 or later */
 #define EVUTIL_UNLIKELY(p) __builtin_expect(!!(p),0)
 #else
 #define EVUTIL_UNLIKELY(p) (p)
@@ -268,7 +268,7 @@ long evutil_tv_to_msec(const struct timeval *tv);
 
 int evutil_hex_char_to_int(char c);
 
-#ifdef WIN32
+#ifdef _WIN32
 HANDLE evutil_load_windows_system_library(const TCHAR *library_name);
 #endif
 

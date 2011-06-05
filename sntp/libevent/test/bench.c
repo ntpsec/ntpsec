@@ -37,8 +37,11 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef _EVENT_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#ifdef WIN32
+#endif
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else
 #include <sys/socket.h>
@@ -49,7 +52,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef _EVENT_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 #include <event.h>
@@ -102,12 +107,12 @@ run_once(void)
 	count = 0;
 	writes = num_writes;
 	{ int xcount = 0;
-	gettimeofday(&ts, NULL);
+	evutil_gettimeofday(&ts, NULL);
 	do {
 		event_loop(EVLOOP_ONCE | EVLOOP_NONBLOCK);
 		xcount++;
 	} while (count != fired);
-	gettimeofday(&te, NULL);
+	evutil_gettimeofday(&te, NULL);
 
 	if (xcount != count) fprintf(stderr, "Xcount: %d, Rcount: %d\n", xcount, count);
 	}
@@ -120,14 +125,14 @@ run_once(void)
 int
 main(int argc, char **argv)
 {
-#ifndef WIN32
+#ifndef _WIN32
 	struct rlimit rl;
 #endif
 	int i, c;
 	struct timeval *tv;
 	int *cp;
 
-#ifdef WIN32
+#ifdef _WIN32
 	WSADATA WSAData;
 	WSAStartup(0x101, &WSAData);
 #endif
@@ -151,7 +156,7 @@ main(int argc, char **argv)
 		}
 	}
 
-#ifndef WIN32
+#ifndef _WIN32
 	rl.rlim_cur = rl.rlim_max = num_pipes * 2 + 50;
 	if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
 		perror("setrlimit");

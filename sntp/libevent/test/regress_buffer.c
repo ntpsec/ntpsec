@@ -25,7 +25,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <windows.h>
 #endif
@@ -38,7 +38,7 @@
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -1296,7 +1296,9 @@ test_evbuffer_callbacks(void *ptr)
 	evbuffer_drain(buf_out2, evbuffer_get_length(buf_out2));
 	/* Let's test the obsolete buffer_setcb function too. */
 	cb1 = evbuffer_add_cb(buf, log_change_callback, buf_out1);
+	tt_assert(cb1 != NULL);
 	cb2 = evbuffer_add_cb(buf, log_change_callback, buf_out2);
+	tt_assert(cb2 != NULL);
 	evbuffer_setcb(buf, self_draining_callback, NULL);
 	evbuffer_add_printf(buf, "This should get drained right away.");
 	tt_uint_op(evbuffer_get_length(buf), ==, 0);
