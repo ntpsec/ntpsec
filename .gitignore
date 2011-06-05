@@ -28,10 +28,6 @@ adjtimed/Makefile.in
 am.log
 ansi2knr.1
 ansi2knr.c
-arlib/depcomp
-arlib/install-sh
-arlib/missing
-arlib/mkinstalldirs
 autom4te.cache -prune
 br-flock
 builderrors.txt
@@ -128,6 +124,7 @@ scripts/Makefile.in
 sntp/autogen-version.def
 sntp/bincheck.mf
 sntp/depsver.mf
+sntp/libevent/.git/*
 sntp/version.def
 sntp/version.texi
 stamp-h.in
@@ -141,3 +138,4 @@ ylwrap
 */m4/ltsugar.m4
 */m4/ltversion.m4
 */m4/lt~obsolete.m4
+.gitignore
