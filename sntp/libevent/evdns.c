@@ -61,7 +61,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdarg.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #ifndef _WIN32_IE
@@ -89,7 +89,7 @@
 #include "ipv6-internal.h"
 #include "util-internal.h"
 #include "evthread-internal.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <ctype.h>
 #include <winsock2.h>
 #include <windows.h>
@@ -796,6 +796,12 @@ reply_schedule_callback(struct request *const req, u32 ttl, u32 err, struct repl
 {
 	struct deferred_reply_callback *d = mm_calloc(1, sizeof(*d));
 
+	if (!d) {
+		event_warn("%s: Couldn't allocate space for deferred callback.",
+		    __func__);
+		return;
+	}
+
 	ASSERT_LOCKED(req->base);
 
 	d->request_type = req->request_type;
@@ -1146,6 +1152,9 @@ request_parse(u8 *packet, int length, struct evdns_server_port *port, struct soc
 	GET16(answers);
 	GET16(authority);
 	GET16(additional);
+	(void)answers;
+	(void)additional;
+	(void)authority;
 
 	if (flags & 0x8000) return -1; /* Must not be an answer. */
 	flags &= 0x0110; /* Only RD and CD get preserved. */
@@ -1995,7 +2004,7 @@ server_request_free(struct server_request *req)
 		EVDNS_LOCK(req->port);
 		lock=1;
 		if (req->port->pending_replies == req) {
-			if (req->next_pending)
+			if (req->next_pending && req->next_pending != req)
 				req->port->pending_replies = req->next_pending;
 			else
 				req->port->pending_replies = NULL;
@@ -2389,7 +2398,7 @@ _evdns_nameserver_add_impl(struct evdns_base *base, const struct sockaddr *addre
 
 	evtimer_assign(&ns->timeout_event, ns->base->event_base, nameserver_prod_callback, ns);
 
-	ns->socket = socket(PF_INET, SOCK_DGRAM, 0);
+	ns->socket = socket(address->sa_family, SOCK_DGRAM, 0);
 	if (ns->socket < 0) { err = 1; goto out1; }
 	evutil_make_socket_closeonexec(ns->socket);
 	evutil_make_socket_nonblocking(ns->socket);
@@ -2695,10 +2704,13 @@ evdns_cancel_request(struct evdns_base *base, struct evdns_request *handle)
 {
 	struct request *req;
 
+	if (!handle->current_req)
+		return;
+
 	if (!base) {
 		/* This redundancy is silly; can we fix it? (Not for 2.0) XXXX */
 		base = handle->base;
-		if (!base && handle->current_req)
+		if (!base)
 			base = handle->current_req->base;
 	}
 
@@ -3425,7 +3437,7 @@ evdns_base_resolv_conf_parse(struct evdns_base *base, int flags, const char *con
 static char *
 evdns_get_default_hosts_filename(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	/* Windows is a little coy about where it puts its configuration
 	 * files.  Sure, they're _usually_ in C:\windows\system32, but
 	 * there's no reason in principle they couldn't be in
@@ -3507,7 +3519,7 @@ evdns_resolv_conf_parse(int flags, const char *const filename) {
 }
 
 
-#ifdef WIN32
+#ifdef _WIN32
 /* Add multiple nameservers from a space-or-comma-separated list. */
 static int
 evdns_nameserver_ip_add_line(struct evdns_base *base, const char *ips) {
@@ -3787,7 +3799,7 @@ evdns_base_new(struct event_base *event_base, int initialize_nameservers)
 
 	if (initialize_nameservers) {
 		int r;
-#ifdef WIN32
+#ifdef _WIN32
 		r = evdns_base_config_windows_nameservers(base);
 #else
 		r = evdns_base_resolv_conf_parse(base, DNS_OPTIONS_ALL, "/etc/resolv.conf");

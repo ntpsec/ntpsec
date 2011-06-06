@@ -25,6 +25,7 @@
 ./.buildkey-*
 ./.flockbuild-*
 ./A.* -prune
+.gitignore
 COPYRIGHT
 CommitLog
 ElectricFence/Makefile.in
@@ -123,6 +124,7 @@ scripts/Makefile.in
 sntp/autogen-version.def
 sntp/bincheck.mf
 sntp/depsver.mf
+sntp/libevent/.git/*
 sntp/libevent/build-aux/compile
 sntp/libevent/build-aux/config.guess
 sntp/libevent/build-aux/config.sub

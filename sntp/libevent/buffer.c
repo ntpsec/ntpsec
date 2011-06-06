@@ -28,7 +28,7 @@
 #include "event2/event-config.h"
 #include "evconfig-private.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <windows.h>
 #include <io.h>
@@ -140,6 +140,8 @@ static int evbuffer_ptr_memcmp(const struct evbuffer *buf,
     const struct evbuffer_ptr *pos, const char *mem, size_t len);
 static struct evbuffer_chain *evbuffer_expand_singlechain(struct evbuffer *buf,
     size_t datlen);
+static int evbuffer_ptr_subtract(struct evbuffer *buf, struct evbuffer_ptr *pos,
+    size_t howfar);
 
 static struct evbuffer_chain *
 evbuffer_chain_new(size_t size)
@@ -194,7 +196,7 @@ evbuffer_chain_free(struct evbuffer_chain *chain)
 			    struct evbuffer_chain_file_segment,
 			    chain);
 		if (info->segment) {
-#ifdef WIN32
+#ifdef _WIN32
 			if (info->segment->type == EVBUF_FS_MMAP)
 				UnmapViewOfFile(chain->buffer);
 #endif
@@ -1373,21 +1375,21 @@ evbuffer_search_eol(struct evbuffer *buffer,
 		break;
 	}
 	case EVBUFFER_EOL_CRLF:
-		while (1) {
-			if (evbuffer_find_eol_char(&it) < 0)
-				goto done;
-			if (evbuffer_getchr(&it) == '\n') {
-				extra_drain = 1;
-				break;
-			} else if (!evbuffer_ptr_memcmp(
-				    buffer, &it, "\r\n", 2)) {
-				extra_drain = 2;
-				break;
-			} else {
-				if (evbuffer_ptr_set(buffer, &it, 1,
-					EVBUFFER_PTR_ADD)<0)
-					goto done;
-			}
+		/* Look for a LF ... */
+		if (evbuffer_strchr(&it, '\n') < 0)
+			goto done;
+		extra_drain = 1;
+		/* ... optionally preceeded by a CR. */
+		if (it.pos < 1) break;
+		/* This potentially does an extra linear walk over the first
+		 * few chains.  Probably, that's not too expensive unless you
+		 * have a really pathological setup. */
+		memcpy(&it2, &it, sizeof(it));
+		if (evbuffer_ptr_subtract(buffer, &it2, 1)<0)
+			break;
+		if (evbuffer_getchr(&it2) == '\r') {
+			memcpy(&it, &it2, sizeof(it));
+			extra_drain = 2;
 		}
 		break;
 	case EVBUFFER_EOL_LF:
@@ -1873,7 +1875,7 @@ evbuffer_expand(struct evbuffer *buf, size_t datlen)
  * Reads data from a file descriptor into a buffer.
  */
 
-#if defined(_EVENT_HAVE_SYS_UIO_H) || defined(WIN32)
+#if defined(_EVENT_HAVE_SYS_UIO_H) || defined(_WIN32)
 #define USE_IOVEC_IMPL
 #endif
 
@@ -1961,7 +1963,7 @@ _evbuffer_read_setup_vecs(struct evbuffer *buf, ev_ssize_t howmuch,
 static int
 get_n_bytes_readable_on_socket(evutil_socket_t fd)
 {
-#if defined(FIONREAD) && defined(WIN32)
+#if defined(FIONREAD) && defined(_WIN32)
 	unsigned long lng = EVBUFFER_MAX_READ;
 	if (ioctlsocket(fd, FIONREAD, &lng) < 0)
 		return -1;
@@ -2027,7 +2029,7 @@ evbuffer_read(struct evbuffer *buf, evutil_socket_t fd, int howmuch)
 			WSABUF_FROM_EVBUFFER_IOV(&vecs[i], &ev_vecs[i]);
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 		{
 			DWORD bytesRead;
 			DWORD flags=0;
@@ -2058,7 +2060,7 @@ evbuffer_read(struct evbuffer *buf, evutil_socket_t fd, int howmuch)
 	/* We can append new data at this point */
 	p = chain->buffer + chain->misalign + chain->off;
 
-#ifndef WIN32
+#ifndef _WIN32
 	n = read(fd, p, howmuch);
 #else
 	n = recv(fd, p, howmuch, 0);
@@ -2137,7 +2139,7 @@ evbuffer_write_iovec(struct evbuffer *buffer, evutil_socket_t fd,
 		}
 		chain = chain->next;
 	}
-#ifdef WIN32
+#ifdef _WIN32
 	{
 		DWORD bytesSent;
 		if (WSASend(fd, iov, i, &bytesSent, 0, NULL, NULL))
@@ -2227,7 +2229,7 @@ evbuffer_write_atmost(struct evbuffer *buffer, evutil_socket_t fd,
 #endif
 #ifdef USE_IOVEC_IMPL
 		n = evbuffer_write_iovec(buffer, fd, howmuch);
-#elif defined(WIN32)
+#elif defined(_WIN32)
 		/* XXX(nickm) Don't disable this code until we know if
 		 * the WSARecv code above works. */
 		void *p = evbuffer_pullup(buffer, howmuch);
@@ -2273,6 +2275,29 @@ evbuffer_find(struct evbuffer *buffer, const unsigned char *what, size_t len)
 	}
 	EVBUFFER_UNLOCK(buffer);
 	return search;
+}
+
+/* Subract <b>howfar</b> from the position of <b>pos</b> within
+ * <b>buf</b>. Returns 0 on success, -1 on failure.
+ *
+ * This isn't exposed yet, because of potential inefficiency issues.
+ * Maybe it should be. */
+static int
+evbuffer_ptr_subtract(struct evbuffer *buf, struct evbuffer_ptr *pos,
+    size_t howfar)
+{
+	if (howfar > (size_t)pos->pos)
+		return -1;
+	if (howfar <= pos->_internal.pos_in_chain) {
+		pos->_internal.pos_in_chain -= howfar;
+		pos->pos -= howfar;
+		return 0;
+	} else {
+		const size_t newpos = pos->pos - howfar;
+		/* Here's the inefficient part: it walks over the
+		 * chains until we hit newpos. */
+		return evbuffer_ptr_set(buf, pos, newpos, EVBUFFER_PTR_SET);
+	}
 }
 
 int
@@ -2600,7 +2625,7 @@ evbuffer_file_segment_new(
 	seg->fd = fd;
 	seg->flags = flags;
 
-#ifdef WIN32
+#ifdef _WIN32
 #define lseek _lseeki64
 #define fstat _fstat
 #define stat _stat
@@ -2661,7 +2686,7 @@ evbuffer_file_segment_new(
 		}
 	}
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 	if (!(flags & EVBUF_FS_DISABLE_MMAP)) {
 		long h = (long)_get_osfhandle(fd);
 		HANDLE m;
@@ -2742,7 +2767,7 @@ evbuffer_file_segment_free(struct evbuffer_file_segment *seg)
 	if (seg->type == EVBUF_FS_SENDFILE) {
 		;
 	} else if (seg->type == EVBUF_FS_MMAP) {
-#ifdef WIN32
+#ifdef _WIN32
 		CloseHandle(seg->mapping_handle);
 #elif defined (_EVENT_HAVE_MMAP)
 		if (munmap(seg->mapping, seg->length) == -1)
@@ -2799,7 +2824,7 @@ evbuffer_add_file_segment(struct evbuffer *buf,
 		chain->off = length;
 		chain->buffer_len = chain->misalign + length;
 	} else if (seg->type == EVBUF_FS_MMAP) {
-#ifdef WIN32
+#ifdef _WIN32
 		ev_uint64_t total_offset = seg->offset+offset;
 		ev_uint64_t offset_rounded=0, offset_remaining=0;
 		LPVOID data;
@@ -2815,7 +2840,7 @@ evbuffer_add_file_segment(struct evbuffer *buf,
 			FILE_MAP_READ,
 			offset_rounded >> 32,
 			offset_rounded & 0xfffffffful,
-			length);
+			length + offset_remaining);
 		if (data == NULL) {
 			mm_free(chain);
 			goto err;

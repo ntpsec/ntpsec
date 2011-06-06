@@ -40,6 +40,7 @@ dnl the 'host' machine is where the resulting stuff runs.
 
 dnl Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AC_PROG_LN_S
 # AC_PROG_MKDIR_P - $(MKDIR_P) should be defined by AM_INIT_AUTOMAKE
@@ -97,6 +98,32 @@ AC_SEARCH_LIBS([inet_aton], [resolv])
 AC_SEARCH_LIBS([clock_gettime], [rt])
 AC_SEARCH_LIBS([sendfile], [sendfile])
 
+dnl - check if the macro _WIN32 is defined on this compiler.
+dnl - (this is how we check for a windows compiler)
+AC_MSG_CHECKING(for WIN32)
+AC_TRY_COMPILE(,
+	[
+#ifndef _WIN32
+die horribly
+#endif
+	],
+	bwin32=true; AC_MSG_RESULT(yes),
+	bwin32=false; AC_MSG_RESULT(no),
+)
+
+dnl - check if the macro __CYGWIN__ is defined on this compiler.
+dnl - (this is how we check for a cygwin version of GCC)
+AC_MSG_CHECKING(for CYGWIN)
+AC_TRY_COMPILE(,
+	[
+#ifndef __CYGWIN__
+die horribly
+#endif
+	],
+	cygwin=true; AC_MSG_RESULT(yes),
+	cygwin=false; AC_MSG_RESULT(no),
+)
+
 AC_CHECK_HEADERS([zlib.h])
 
 if test "x$ac_cv_header_zlib_h" = "xyes"; then
@@ -116,15 +143,29 @@ fi
 AM_CONDITIONAL(ZLIB_REGRESS, [test "$have_zlib" = "yes"])
 
 dnl See if we have openssl.  This doesn't go in LIBS either.
+if test "$bwin32" = true; then
+  EV_LIB_WS32=-lws2_32
+  EV_LIB_GDI=-lgdi32
+else
+  EV_LIB_WS32=
+  EV_LIB_GDI=
+fi
+AC_SUBST(EV_LIB_WS32)
+AC_SUBST(EV_LIB_GDI)
+
+AC_CHECK_HEADERS([openssl/bio.h])
+
 if test "$enable_openssl" = "yes"; then
 save_LIBS="$LIBS"
 LIBS=""
 OPENSSL_LIBS=""
 have_openssl=no
 AC_SEARCH_LIBS([SSL_new], [ssl],
-		[have_openssl=yes
-	        OPENSSL_LIBS="$LIBS"
-		AC_DEFINE(HAVE_OPENSSL, 1, [Define if the system has openssl])])
+	[have_openssl=yes
+	OPENSSL_LIBS="$LIBS -lcrypto $EV_LIB_GDI $EV_LIB_WS32"
+	AC_DEFINE(HAVE_OPENSSL, 1, [Define if the system has openssl])],
+	[have_openssl=no],
+	[-lcrypto $EV_LIB_GDI $EV_LIB_WS32])
 LIBS="$save_LIBS"
 AC_SUBST(OPENSSL_LIBS)
 fi
@@ -215,20 +256,9 @@ if test "x$ac_cv_header_sys_sysctl_h" = "xyes"; then
 	)
 fi
 
-dnl - check if the macro WIN32 is defined on this compiler.
-dnl - (this is how we check for a windows version of GCC)
-AC_MSG_CHECKING(for WIN32)
-AC_TRY_COMPILE(,
-	[
-#ifndef WIN32
-die horribly
-#endif
-	],
-	bwin32=true; AC_MSG_RESULT(yes),
-	bwin32=false; AC_MSG_RESULT(no),
-)
-
 AM_CONDITIONAL(BUILD_WIN32, test x$bwin32 = xtrue)
+AM_CONDITIONAL(BUILD_CYGWIN, test x$cygwin = xtrue)
+AM_CONDITIONAL(BUILD_WITH_NO_UNDEFINED, test x$bwin32 = xtrue || test x$cygwin = xtrue)
 
 if test x$bwin32 = xtrue; then
    AC_SEARCH_LIBS([getservbyname],[ws2_32])
@@ -545,7 +575,7 @@ AC_CHECK_TYPES([struct in6_addr, struct sockaddr_in6, sa_family_t, struct addrin
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #define WIN32_WINNT 0x400
 #define _WIN32_WINNT 0x400
 #define WIN32_LEAN_AND_MEAN
@@ -568,7 +598,7 @@ AC_CHECK_MEMBERS([struct in6_addr.s6_addr32, struct in6_addr.s6_addr16, struct s
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 #define WIN32_WINNT 0x400
 #define _WIN32_WINNT 0x400
 #define WIN32_LEAN_AND_MEAN
@@ -648,6 +678,16 @@ if test x$enable_gcc_warnings = xyes && test "$GCC" = "yes"; then
 #error
 #endif])], have_gcc45=yes, have_gcc45=no)
 
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
+#if !defined(__clang__)
+#error
+#endif])], have_clang=yes, have_clang=no)
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
+#if !defined(__clang__) || (__clang_major__ > 2) || (__clang_major__ == 2 && __clang_minor__ > 9)
+#error
+#endif])], have_clang29orlower=yes, have_clang29orlower=no)
+
   CFLAGS="$CFLAGS -W -Wfloat-equal -Wundef -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wwrite-strings -Wredundant-decls -Wchar-subscripts -Wcomment -Wformat -Wwrite-strings -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wbad-function-cast -Wswitch-enum -Werror"
   CFLAGS="$CFLAGS -Wno-unused-parameter -Wstrict-aliasing"
 
@@ -659,13 +699,27 @@ if test x$enable_gcc_warnings = xyes && test "$GCC" = "yes"; then
 
   if test x$have_gcc42 = xyes ; then
     # These warnings break gcc 4.0.2 and work on gcc 4.2
-    CFLAGS="$CFLAGS -Waddress -Wnormalized=id -Woverride-init"
+    CFLAGS="$CFLAGS -Waddress"
+  fi
+
+  if test x$have_gcc42 = xyes && test x$have_clang29orlower = xno; then
+    # These warnings break gcc 4.0.2 and clang, but work on gcc 4.2
+    # We only disable these for clang 2.9 and lower, in case they are
+    # supported in later versions.
+    CFLAGS="$CFLAGS -Wnormalized=id -Woverride-init"
   fi
 
   if test x$have_gcc45 = xyes ; then
     # These warnings work on gcc 4.5
     CFLAGS="$CFLAGS -Wlogical-op"
   fi
+
+  if test x$have_clang = xyes; then
+    # Disable the unused-function warnings, because these trigger
+    # for minheap-internal.h related code.
+    CFLAGS="$CFLAGS -Wno-unused-function"
+  fi
+
 ##This will break the world on some 64-bit architectures
 # CFLAGS="$CFLAGS -Winline"
 

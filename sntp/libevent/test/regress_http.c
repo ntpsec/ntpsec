@@ -25,8 +25,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #endif
 
@@ -38,7 +39,7 @@
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <signal.h>
 #include <unistd.h>
@@ -153,7 +154,7 @@ http_connect(const char *address, u_short port)
 
 	evutil_make_socket_nonblocking(fd);
 	if (connect(fd, sa, slen) == -1) {
-#ifdef WIN32
+#ifdef _WIN32
 		int tmp_err = WSAGetLastError();
 		if (tmp_err != WSAEINPROGRESS && tmp_err != WSAEINVAL &&
 		    tmp_err != WSAEWOULDBLOCK)
@@ -486,7 +487,7 @@ http_badreq_errorcb(struct bufferevent *bev, short what, void *arg)
 }
 
 #ifndef SHUT_WR
-#ifdef WIN32
+#ifdef _WIN32
 #define SHUT_WR SD_SEND
 #else
 #define SHUT_WR 1
@@ -569,6 +570,8 @@ http_bad_request_test(void *arg)
 
 	/* real NULL request */
 	http_request = "";
+
+	bufferevent_write(bev, http_request, strlen(http_request));
 
 	shutdown(fd, SHUT_WR);
 	timerclear(&tv);
@@ -3005,6 +3008,65 @@ http_stream_in_cancel_test(void *arg)
 }
 
 static void
+http_connection_fail_done(struct evhttp_request *req, void *arg)
+{
+       /* An ENETUNREACH error results in an unrecoverable
+        * evhttp_connection error (see evhttp_connection_fail()).  The
+        * connection will be reset, and the user will be notified with a NULL
+        * req parameter. */
+       tt_assert(!req);
+
+       test_ok = 1;
+
+ end:
+       event_base_loopexit(arg, NULL);
+}
+
+/* Test unrecoverable evhttp_connection errors by generating an ENETUNREACH
+ * error on connection. */
+static void
+http_connection_fail_test(void *arg)
+{
+       struct basic_test_data *data = arg;
+       ev_uint16_t port = 0;
+       struct evhttp_connection *evcon = NULL;
+       struct evhttp_request *req = NULL;
+
+       exit_base = data->base;
+       test_ok = 0;
+
+       /* auto detect a port */
+       http = http_setup(&port, data->base);
+       evhttp_free(http);
+       http = NULL;
+
+       /* Pick an unroutable address.  This administratively scoped multicast
+	* address should do when working with TCP. */
+       evcon = evhttp_connection_base_new(data->base, NULL, "239.10.20.30", 80);
+       tt_assert(evcon);
+
+       /*
+        * At this point, we want to schedule an HTTP GET request
+        * server using our make request method.
+        */
+
+       req = evhttp_request_new(http_connection_fail_done, data->base);
+       tt_assert(req);
+
+       if (evhttp_make_request(evcon, req, EVHTTP_REQ_GET, "/") == -1) {
+               tt_abort_msg("Couldn't make request");
+       }
+
+       event_base_dispatch(data->base);
+
+       tt_int_op(test_ok, ==, 1);
+
+ end:
+       if (evcon)
+               evhttp_connection_free(evcon);
+}
+
+static void
 http_connection_retry_done(struct evhttp_request *req, void *arg)
 {
 	tt_assert(req);
@@ -3543,6 +3605,7 @@ struct testcase_t http_testcases[] = {
 	HTTP(stream_in),
 	HTTP(stream_in_cancel),
 
+	HTTP(connection_fail),
 	HTTP(connection_retry),
 	HTTP(data_length_constraints),
 

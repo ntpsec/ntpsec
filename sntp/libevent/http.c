@@ -42,7 +42,7 @@
 #include <sys/ioccom.h>
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -67,7 +67,7 @@
 #include <netdb.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #endif
 
@@ -75,7 +75,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <syslog.h>
 #endif
 #include <signal.h>
@@ -223,29 +223,30 @@ strsep(char **s, const char *del)
 }
 #endif
 
-static const char *
-html_replace(char ch, char *buf)
+static size_t
+html_replace(const char ch, const char **escaped)
 {
 	switch (ch) {
 	case '<':
-		return "&lt;";
+		*escaped = "&lt;";
+		return 4;
 	case '>':
-		return "&gt;";
+		*escaped = "&gt;";
+		return 4;
 	case '"':
-		return "&quot;";
+		*escaped = "&quot;";
+		return 6;
 	case '\'':
-		return "&#039;";
+		*escaped = "&#039;";
+		return 6;
 	case '&':
-		return "&amp;";
+		*escaped = "&amp;";
+		return 5;
 	default:
 		break;
 	}
 
-	/* Echo the character back */
-	buf[0] = ch;
-	buf[1] = '\0';
-
-	return buf;
+	return 1;
 }
 
 /*
@@ -259,21 +260,34 @@ char *
 evhttp_htmlescape(const char *html)
 {
 	size_t i;
-	size_t new_size = 0, old_size = strlen(html);
+	size_t new_size = 0, old_size = 0;
 	char *escaped_html, *p;
-	char scratch_space[2];
 
-	for (i = 0; i < old_size; ++i)
-		new_size += strlen(html_replace(html[i], scratch_space));
+	if (html == NULL)
+		return (NULL);
 
+	old_size = strlen(html);
+	for (i = 0; i < old_size; ++i) {
+		const char *replaced = NULL;
+		const size_t replace_size = html_replace(html[i], &replaced);
+		if (replace_size > EV_SIZE_MAX - new_size) {
+			event_warn("%s: html_replace overflow", __func__);
+			return (NULL);
+		}
+		new_size += replace_size;
+	}
+
+	if (new_size == EV_SIZE_MAX)
+		return (NULL);
 	p = escaped_html = mm_malloc(new_size + 1);
 	if (escaped_html == NULL) {
-		event_warn("%s: malloc(%ld)", __func__, (long)(new_size + 1));
+		event_warn("%s: malloc(%lu)", __func__,
+		           (unsigned long)(new_size + 1));
 		return (NULL);
 	}
 	for (i = 0; i < old_size; ++i) {
-		const char *replaced = html_replace(html[i], scratch_space);
-		size_t len = strlen(replaced);
+		const char *replaced = &html[i];
+		const size_t len = html_replace(html[i], &replaced);
 		memcpy(p, replaced, len);
 		p += len;
 	}
@@ -486,12 +500,12 @@ evhttp_maybe_add_date_header(struct evkeyvalq *headers)
 {
 	if (evhttp_find_header(headers, "Date") == NULL) {
 		char date[50];
-#ifndef WIN32
+#ifndef _WIN32
 		struct tm cur;
 #endif
 		struct tm *cur_p;
 		time_t t = time(NULL);
-#ifdef WIN32
+#ifdef _WIN32
 		cur_p = gmtime(&t);
 #else
 		gmtime_r(&t, &cur);
@@ -830,9 +844,23 @@ evhttp_connection_done(struct evhttp_connection *evcon)
 static enum message_read_status
 evhttp_handle_chunked_read(struct evhttp_request *req, struct evbuffer *buf)
 {
-	ev_ssize_t len;
+	if (req == NULL || buf == NULL) {
+	    return DATA_CORRUPTED;
+	}
 
-	while ((len = evbuffer_get_length(buf)) > 0) {
+	while (1) {
+		size_t buflen;
+
+		if ((buflen = evbuffer_get_length(buf)) == 0) {
+			break;
+		}
+
+		/* evbuffer_get_length returns size_t, but len variable is ssize_t,
+		 * check for overflow conditions */
+		if (buflen > EV_SSIZE_MAX) {
+			return DATA_CORRUPTED;
+		}
+
 		if (req->ntoread < 0) {
 			/* Read chunk size */
 			ev_int64_t ntoread;
@@ -855,11 +883,18 @@ evhttp_handle_chunked_read(struct evhttp_request *req, struct evbuffer *buf)
 				/* could not get chunk size */
 				return (DATA_CORRUPTED);
 			}
+
+			/* ntoread is signed int64, body_size is unsigned size_t, check for under/overflow conditions */
+			if ((ev_uint64_t)ntoread > EV_SIZE_MAX - req->body_size) {
+			    return DATA_CORRUPTED;
+			}
+
 			if (req->body_size + (size_t)ntoread > req->evcon->max_body_size) {
 				/* failed body length test */
 				event_debug(("Request body is too long"));
 				return (DATA_TOO_LONG);
 			}
+
 			req->body_size += (size_t)ntoread;
 			req->ntoread = ntoread;
 			if (req->ntoread == 0) {
@@ -869,12 +904,17 @@ evhttp_handle_chunked_read(struct evhttp_request *req, struct evbuffer *buf)
 			continue;
 		}
 
+		/* req->ntoread is signed int64, len is ssize_t, based on arch,
+		 * ssize_t could only be 32b, check for these conditions */
+		if (req->ntoread > EV_SSIZE_MAX) {
+			return DATA_CORRUPTED;
+		}
+
 		/* don't have enough to complete a chunk; wait for more */
-		if (len < req->ntoread)
+		if (req->ntoread > 0 && buflen < (ev_uint64_t)req->ntoread)
 			return (MORE_DATA_EXPECTED);
 
 		/* Completed chunk */
-		/* XXXX fixme: what if req->ntoread is > SIZE_T_MAX? */
 		evbuffer_remove_buffer(buf, req->input_buffer, (size_t)req->ntoread);
 		req->ntoread = -1;
 		if (req->chunk_cb != NULL) {
@@ -942,13 +982,19 @@ evhttp_read_body(struct evhttp_connection *evcon, struct evhttp_request *req)
 		}
 	} else if (req->ntoread < 0) {
 		/* Read until connection close. */
+		if ((size_t)(req->body_size + evbuffer_get_length(buf)) < req->body_size) {
+			evhttp_connection_fail(evcon, EVCON_HTTP_INVALID_HEADER);
+			return;
+		}
+
 		req->body_size += evbuffer_get_length(buf);
 		evbuffer_add_buffer(req->input_buffer, buf);
-	} else if (req->chunk_cb != NULL ||
-	    evbuffer_get_length(buf) >= (size_t)req->ntoread) {
+	} else if (req->chunk_cb != NULL || evbuffer_get_length(buf) >= (size_t)req->ntoread) {
+		/* XXX: the above get_length comparison has to be fixed for overflow conditions! */
 		/* We've postponed moving the data until now, but we're
 		 * about to use it. */
 		size_t n = evbuffer_get_length(buf);
+
 		if (n > (size_t) req->ntoread)
 			n = (size_t) req->ntoread;
 		req->ntoread -= n;
@@ -959,6 +1005,7 @@ evhttp_read_body(struct evhttp_connection *evcon, struct evhttp_request *req)
 	if (req->body_size > req->evcon->max_body_size ||
 	    (!req->chunked && req->ntoread >= 0 &&
 		(size_t)req->ntoread > req->evcon->max_body_size)) {
+		/* XXX: The above casted comparison must checked for overflow */
 		/* failed body length test */
 		event_debug(("Request body is too long"));
 		evhttp_connection_fail(evcon,
@@ -1027,6 +1074,7 @@ evhttp_read_cb(struct bufferevent *bufev, void *arg)
 		break;
 	case EVCON_IDLE:
 		{
+#ifdef USE_DEBUG
 			struct evbuffer *input;
 			size_t total_len;
 
@@ -1035,6 +1083,7 @@ evhttp_read_cb(struct bufferevent *bufev, void *arg)
 			event_debug(("%s: read %d bytes in EVCON_IDLE state,"
                                     " resetting connection",
 					__func__, (int)total_len));
+#endif
 
 			evhttp_connection_reset(evcon);
 		}
@@ -1347,7 +1396,7 @@ evhttp_connection_cb(struct bufferevent *bufev, short what, void *arg)
 		 * when connecting to a local address.  the cleanup is going
 		 * to reschedule this function call.
 		 */
-#ifndef WIN32
+#ifndef _WIN32
 		if (errno == ECONNREFUSED)
 			goto cleanup;
 #endif
@@ -1473,6 +1522,8 @@ evhttp_parse_request_line(struct evhttp_request *req, char *line)
 	char *version;
 	const char *hostname;
 	const char *scheme;
+	size_t method_len;
+	enum evhttp_cmd_type type;
 
 	/* Parse the request line */
 	method = strsep(&line, " ");
@@ -1485,30 +1536,121 @@ evhttp_parse_request_line(struct evhttp_request *req, char *line)
 	if (line != NULL)
 		return (-1);
 
+	method_len = (uri - method) - 1;
+	type       = _EVHTTP_REQ_UNKNOWN;
+
 	/* First line */
-	if (strcmp(method, "GET") == 0) {
-		req->type = EVHTTP_REQ_GET;
-	} else if (strcmp(method, "POST") == 0) {
-		req->type = EVHTTP_REQ_POST;
-	} else if (strcmp(method, "HEAD") == 0) {
-		req->type = EVHTTP_REQ_HEAD;
-	} else if (strcmp(method, "PUT") == 0) {
-		req->type = EVHTTP_REQ_PUT;
-	} else if (strcmp(method, "DELETE") == 0) {
-		req->type = EVHTTP_REQ_DELETE;
-	} else if (strcmp(method, "OPTIONS") == 0) {
-		req->type = EVHTTP_REQ_OPTIONS;
-	} else if (strcmp(method, "TRACE") == 0) {
-		req->type = EVHTTP_REQ_TRACE;
-	} else if (strcmp(method, "PATCH") == 0) {
-		req->type = EVHTTP_REQ_PATCH;
-	} else {
-		req->type = _EVHTTP_REQ_UNKNOWN;
-		event_debug(("%s: bad method %s on request %p from %s",
+	switch (method_len) {
+	    case 3:
+		/* The length of the method string is 3, meaning it can only be one of two methods: GET or PUT */
+            
+		/* Since both GET and PUT share the same character 'T' at the end,
+		 * if the string doesn't have 'T', we can immediately determine this
+		 * is an invalid HTTP method */
+            
+		if (method[2] != 'T') {
+		    break;
+		}
+            
+		switch (*method) {
+		    case 'G':
+			/* This first byte is 'G', so make sure the next byte is
+			 * 'E', if it isn't then this isn't a valid method */
+                    
+			if (method[1] == 'E') {
+			    type = EVHTTP_REQ_GET;
+			}
+                    
+			break;
+		    case 'P':
+			/* First byte is P, check second byte for 'U', if not,
+			 * we know it's an invalid method */
+			if (method[1] == 'U') {
+			    type = EVHTTP_REQ_PUT;
+			}
+			break;
+		    default:
+			break;
+		}
+		break;
+	    case 4:
+		/* The method length is 4 bytes, leaving only the methods "POST" and "HEAD" */
+		switch (*method) {
+		    case 'P':
+			if (method[3] == 'T' && method[2] == 'S' && method[1] == 'O') {
+			    type = EVHTTP_REQ_POST;
+			}
+			break;
+		    case 'H':
+			if (method[3] == 'D' && method[2] == 'A' && method[1] == 'E') {
+			    type = EVHTTP_REQ_HEAD;
+			}
+			break;
+		    default:
+			break;
+		}
+	    case 5:
+		/* Method length is 5 bytes, which can only encompass PATCH and TRACE */
+		switch (*method) {
+		    case 'P':
+			if (method[4] == 'H' && method[3] == 'C' && method[2] == 'T' && method[1] == 'A') {
+			    type = EVHTTP_REQ_PATCH;
+			}
+			break;
+		    case 'T':
+			if (method[4] == 'E' && method[3] == 'C' && method[2] == 'A' && method[1] == 'R') {
+			    type = EVHTTP_REQ_TRACE;
+			}
+                    
+			break;
+		    default:
+			break;
+		}
+		break;
+	    case 6:
+		/* Method length is 6, only valid method 6 bytes in length is DELEte */
+            
+		/* If the first byte isn't 'D' then it's invalid */
+		if (*method != 'D') {
+		    break;
+		}
+
+		if (method[5] == 'E' && method[4] == 'T' && method[3] == 'E' && method[2] == 'L' && method[1] == 'E') {
+		    type = EVHTTP_REQ_DELETE;
+		}
+
+		break;
+	    case 7:
+		/* Method length is 7, only valid methods are "OPTIONS" and "CONNECT" */
+		switch (*method) {
+		    case 'O':
+			if (method[6] == 'S' && method[5] == 'N' && method[4] == 'O' &&
+				method[3] == 'I' && method[2] == 'T' && method[1] == 'P') {
+			    type = EVHTTP_REQ_OPTIONS;
+			}
+                   
+		       	break;
+		    case 'C':
+			if (method[6] == 'T' && method[5] == 'C' && method[4] == 'E' &&
+				method[3] == 'N' && method[2] == 'N' && method[1] == 'O') {
+			    type = EVHTTP_REQ_CONNECT;
+			}
+                    
+			break;
+		    default:
+			break;
+		}
+		break;
+	} /* switch */
+
+	if (type == _EVHTTP_REQ_UNKNOWN) {
+	        event_debug(("%s: bad method %s on request %p from %s",
 			__func__, method, req, req->remote_host));
-		/* No error yet; we'll give a better error later when
-		 * we see that req->type is unsupported. */
+                /* No error yet; we'll give a better error later when
+                 * we see that req->type is unsupported. */
 	}
+	    
+	req->type = type;
 
 	if (evhttp_parse_http_version(version, req) < 0)
 		return (-1);
@@ -1778,7 +1920,8 @@ evhttp_parse_headers(struct evhttp_request *req, struct evbuffer* buffer)
 	}
 
 	if (status == MORE_DATA_EXPECTED) {
-		if (req->headers_size + evbuffer_get_length(buffer) > req->evcon->max_headers_size)
+		if (req->evcon != NULL &&
+		req->headers_size + evbuffer_get_length(buffer) > req->evcon->max_headers_size)
 			return (DATA_TOO_LONG);
 	}
 
@@ -1893,11 +2036,12 @@ evhttp_get_body(struct evhttp_connection *evcon, struct evhttp_request *req)
 				   no, we should respond with an error. For
 				   now, just optimistically tell the client to
 				   send their message body. */
-				if (req->ntoread > 0 &&
-				    (size_t)req->ntoread > req->evcon->max_body_size) {
-					evhttp_send_error(req, HTTP_ENTITYTOOLARGE,
-							  NULL);
-					return;
+				if (req->ntoread > 0) {
+					/* ntoread is ev_int64_t, max_body_size is ev_uint64_t */ 
+					if ((req->evcon->max_body_size <= EV_INT64_MAX) && (ev_uint64_t)req->ntoread > req->evcon->max_body_size) {
+						evhttp_send_error(req, HTTP_ENTITYTOOLARGE, NULL);
+						return;
+					}
 				}
 				if (!evbuffer_get_length(bufferevent_get_input(evcon->bufev)))
 					evhttp_send_continue(evcon, req);
@@ -2207,20 +2351,20 @@ evhttp_make_request(struct evhttp_connection *evcon,
 	req->evcon = evcon;
 	EVUTIL_ASSERT(!(req->flags & EVHTTP_REQ_OWN_CONNECTION));
 
+       TAILQ_INSERT_TAIL(&evcon->requests, req, next);
+
 	/* If the connection object is not connected; make it so */
 	if (!evhttp_connected(evcon)) {
 		int res = evhttp_connection_connect(evcon);
-		/*
-		 * Enqueue the request only if we aren't going to
-		 * return failure from evhttp_make_request().
-		 */
-		if (res == 0)
-			TAILQ_INSERT_TAIL(&evcon->requests, req, next);
+	       /* evhttp_connection_fail(), which is called through
+		* evhttp_connection_connect(), assumes that req lies in
+		* evcon->requests.  Thus, enqueue the request in advance and r
+		* it in the error case. */
+	       if (res != 0)
+		       TAILQ_REMOVE(&evcon->requests, req, next);
 
 		return res;
 	}
-
-	TAILQ_INSERT_TAIL(&evcon->requests, req, next);
 
 	/*
 	 * If it's connected already and we are the first in the queue,

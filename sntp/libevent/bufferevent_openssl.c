@@ -44,7 +44,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #endif
 
@@ -1014,6 +1014,7 @@ be_openssl_outbuf_cb(struct evbuffer *buf,
 		consider_writing(bev_ssl);
 	}
 	/* XXX Handle r < 0 */
+        (void)r;
 }
 
 
