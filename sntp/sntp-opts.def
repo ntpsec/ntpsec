@@ -350,16 +350,6 @@ commands.
 };
 
 doc-section	= {
-  ds-type	= 'EXIT STATUS';
-  ds-format	= 'mdoc';
-  ds-text	= <<- _END_MDOC_EXITSTATUS
-.Nm
-returns a zero exit status for success,
-and a non-zero value otherwise.
-	_END_MDOC_EXITSTATUS;
-};
-
-doc-section	= {
   ds-type	= 'AUTHORS';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_AUTHORS

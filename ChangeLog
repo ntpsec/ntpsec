@@ -1,3 +1,4 @@
+* More sntp.1 cleanups.
 * Produce ntpq.1 with the new autogen macros.
 * Remove the deprecated "detail" stanza from ntpdc-opts.def.
 (4.2.7p179) 2011/06/03 Released by Harlan Stenn <stenn@ntp.org>
