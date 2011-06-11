@@ -615,12 +615,12 @@ addr_eqprefix(
 
 	ZERO(isc_sa);
 	memcpy(&isc_sa.type.sa, &a->sa, 
-	       min(sizeof(isc_sa.type), sizeof(a)));
+	       min(sizeof(isc_sa.type), sizeof(*a)));
 	isc_netaddr_fromsockaddr(&isc_a, &isc_sa);
 
 	ZERO(isc_sa);
 	memcpy(&isc_sa.type.sa, &b->sa, 
-	       min(sizeof(isc_sa.type), sizeof(b)));
+	       min(sizeof(isc_sa.type), sizeof(*b)));
 	isc_netaddr_fromsockaddr(&isc_b, &isc_sa);
 
 	return (int)isc_netaddr_eqprefix(&isc_a, &isc_b,

@@ -1,3 +1,7 @@
+(4.2.7p181) 2011/06/07 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1938] addr_eqprefix() doesn't clear enough storage.
+(4.2.7p180) 2011/06/06 Released by Harlan Stenn <stenn@ntp.org>
+* Upgrade to libevent-2.0.12.
 * More sntp.1 cleanups.
 * Produce ntpq.1 with the new autogen macros.
 * Remove the deprecated "detail" stanza from ntpdc-opts.def.
