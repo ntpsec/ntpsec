@@ -47,8 +47,10 @@ $(srcdir)/ntp-keygen-opts.h: $(srcdir)/ntp-keygen-opts.c
 $(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) ntp-keygen-opts.def
 
+# For man pages, use agman-cmd.tpl
+# For mdoc pages, use agmdoc-cmd.tpl
 $(srcdir)/ntp-keygen.1: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
-	$(run_ag) -Tagman1.tpl -bntp-keygen ntp-keygen-opts.def
+	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntp-keygen-opts.def
 
 $(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
