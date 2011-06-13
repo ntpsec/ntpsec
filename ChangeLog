@@ -1,3 +1,4 @@
+* Prepare for ntp.keys.5.
 (4.2.7p181) 2011/06/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1938] addr_eqprefix() doesn't clear enough storage.
 (4.2.7p180) 2011/06/06 Released by Harlan Stenn <stenn@ntp.org>
