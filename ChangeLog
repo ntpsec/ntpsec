@@ -1,3 +1,4 @@
+* Add "license name" to ntp.lic for autogen-5.11.10.
 * Prepare for ntp.keys.5.
 (4.2.7p181) 2011/06/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1938] addr_eqprefix() doesn't clear enough storage.
