@@ -38,3 +38,54 @@ flag = {
 	The default is the Unix Domain socket "unix:/var/agentx/master". Another common alternative is tcp:localhost:705.
 	_EndOfDoc_;
 };
+
+/* explain: Additional information whenever the usage routine is invoked */
+explain = <<- _END_EXPLAIN
+	_END_EXPLAIN;
+
+doc-section	= {
+  ds-type	= 'DESCRIPTION';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_PROG_MDOC_DESCRIP
+	_END_PROG_MDOC_DESCRIP;
+};
+
+/*
+prog-info-descrip = <<- _END_PROG_INFO_DESCRIP
+	_END_PROG_INFO_DESCRIP;
+*/
+
+/*
+doc-section	= {
+  ds-type	= 'USAGE';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_USAGE
+	_END_MDOC_USAGE;
+};
+*/
+
+/*
+doc-section	= {
+  ds-type	= 'NOTES';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_NOTES
+	_END_MDOC_NOTES;
+};
+*/
+
+doc-section	= {
+  ds-type	= 'AUTHORS';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_AUTHORS
+.An "Heiko Gerstung"
+	_END_MDOC_AUTHORS;
+};
+
+/*
+doc-section	= {
+  ds-type	= 'BUGS';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_BUGS
+	_END_MDOC_BUGS;
+};
+*/
