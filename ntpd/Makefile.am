@@ -244,8 +244,10 @@ $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
 $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpd-opts.def
 
+# For man pages, use agman-cmd.tpl
+# For mdoc pages, use agmdoc-cmd.tpl
 $(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -Tagman1.tpl -bntpd ntpd-opts.def
+	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpd-opts.def
 
 $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi

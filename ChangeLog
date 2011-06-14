@@ -1,3 +1,4 @@
+* Update the ntpd autogen docs.
 * Update the ntpsnmpd autogen docs.
 * Use autogen to produce ntp-keygen docs.
 * Add "license name" to ntp.lic for autogen-5.11.10.
