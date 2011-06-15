@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  June  7, 2011 at 10:13:34 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  June 15, 2011 at 09:03:19 AM by AutoGen 5.11.10pre10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,22 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * sntp copyright (c) 1970-2011 The University of Delaware, David L. Mills, and/or others - all rights reserved * <<indeterminate license type>>
+ *  Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.
+ *  This is free software. It is licensed for use, modification and
+ *  redistribution under the terms of the NTP License, copies of which
+ *  can be seen at:
+ *    <http://ntp.org/license>
+ *    <http://opensource.org/licenses/NTP>
+ *  
+PFX>Permission to use, copy, modify, and distribute this software and its
+ *  documentation for any purpose with or without fee is hereby granted,
+ *  provided that the above copyright notice appears in all copies and that
+ *  both the copyright notice and this permission notice appear in
+ *  supporting documentation, and that the name The University of Delaware, David L. Mills, and/or others not be used in
+ *  advertising or publicity pertaining to distribution of the software
+ *  without specific, written prior permission. The University of Delaware, David L. Mills, and/or others makes no
+ *  representations about the suitability this software for any purpose. It
+ *  is provided "as is" without express or implied warranty.
  */
 
 #include <sys/types.h>
@@ -37,7 +52,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[333] =
-"sntp 4.2.7p181\n\
+"sntp 4.2.7p182\n\
 Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -648,7 +663,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p181\n\
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p182\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";

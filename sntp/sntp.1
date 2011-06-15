@@ -1,9 +1,9 @@
-.Dd June 7 2011
+.Dd June 15 2011
 .Dt SNTP 1 User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  June  7, 2011 at 10:32:54 AM by AutoGen 5.11.9
+.\"  It has been AutoGen-ed  June 15, 2011 at 09:03:25 AM by AutoGen 5.11.10pre10
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -15,7 +15,8 @@
 .Op Fl flags
 .Op Fl flag Ar value
 .Op Fl \-option-name Ar value
-[ hostname-or-IP ...].Pp
+[ hostname-or-IP ...]
+.Pp
 .Sh DESCRIPTION
 .Nm
 can be used as a SNTP client to query a NTP or SNTP server and either display
@@ -42,7 +43,7 @@ and the date/time of
 is believed to be correct to within
 +/- 0.089
 seconds.
-.Sh OPTIONS
+.Sh "OPTIONS"
 .Bl -tag
 .It  \-4 ", " -\-ipv4
 Force IPv4 DNS name resolution.
@@ -248,9 +249,9 @@ or
 .Xr rdate 8
 commands.
 .El
-.Sh ENVIRONMENT
+.Sh "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
-.Sh FILES
+.Sh "FILES"
 See \fBOPTION PRESETS\fP for configuration files.
 .Sh "EXIT STATUS"
 One of the following exit values will be returned:
@@ -259,19 +260,16 @@ One of the following exit values will be returned:
 Successful program execution.
 .It 1
 The operation failed or the command syntax was not valid.
-.Pp
-.Nm
-returns a zero exit status for success,
-and a non-zero value otherwise.
 .El
 .Sh AUTHORS
 .An "Johannes Maximilian Kuehn"
 .An "Harlan Stenn"
 .An "Dave Hart"
+.Sh "COPYRIGHT"
+Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others all rights reserved.
+This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh BUGS
 Please report bugs to http://bugs.ntp.org .
-.Pp
-Released under an unspecified copyright license.
-.Pp
+.Sh "NOTES"
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
 option definitions.

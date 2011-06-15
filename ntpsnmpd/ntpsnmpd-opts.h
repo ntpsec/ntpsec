@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *  
- *  It has been AutoGen-ed  June  7, 2011 at 10:28:52 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  June 15, 2011 at 09:03:07 AM by AutoGen 5.11.10pre10
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,22 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpsnmpd copyright (c) 1970-2011 The University of Delaware, David L. Mills, and/or others - all rights reserved * <<indeterminate license type>>
+ *  Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.
+ *  This is free software. It is licensed for use, modification and
+ *  redistribution under the terms of the NTP License, copies of which
+ *  can be seen at:
+ *    <http://ntp.org/license>
+ *    <http://opensource.org/licenses/NTP>
+ *  
+PFX>Permission to use, copy, modify, and distribute this software and its
+ *  documentation for any purpose with or without fee is hereby granted,
+ *  provided that the above copyright notice appears in all copies and that
+ *  both the copyright notice and this permission notice appear in
+ *  supporting documentation, and that the name The University of Delaware, David L. Mills, and/or others not be used in
+ *  advertising or publicity pertaining to distribution of the software
+ *  without specific, written prior permission. The University of Delaware, David L. Mills, and/or others makes no
+ *  representations about the suitability this software for any purpose. It
+ *  is provided "as is" without express or implied warranty.
  */
 /*
  *  This file contains the programmatic interface to the Automated
@@ -59,8 +74,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    8
-#define NTPSNMPD_VERSION       "4.2.7p181"
-#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p181"
+#define NTPSNMPD_VERSION       "4.2.7p182"
+#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p182"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -154,10 +169,10 @@ extern tOptions ntpsnmpdOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
-    static inline char* aoGetsText(char const* pz) {
-        if (pz == NULL) return NULL;
-        return (char*)gettext(pz);
-    }
+static inline char* aoGetsText(char const* pz) {
+    if (pz == NULL) return NULL;
+    return (char*)gettext(pz);
+}
 #   define _(s)  aoGetsText(s)
 # endif /* _() */
 

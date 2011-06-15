@@ -6,11 +6,10 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.texi)
 # 
-# It has been AutoGen-ed  June  7, 2011 at 10:31:03 AM by AutoGen 5.11.9
+# It has been AutoGen-ed  June 15, 2011 at 09:03:11 AM by AutoGen 5.11.10pre10
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
-This program has no explanation.
 
 
 
@@ -34,7 +33,7 @@ This is the automatically generated usage text for ntpsnmpd:
 
 @exampleindent 0
 @example
-ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p181
+ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p182
 USAGE:  ntpsnmpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -n no  nofork         Do not fork
@@ -50,6 +49,8 @@ USAGE:  ntpsnmpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
+
+
 
 The following option preset mechanisms are supported:
  - reading file $HOME/.ntprc
