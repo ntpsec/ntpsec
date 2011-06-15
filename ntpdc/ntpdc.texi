@@ -79,7 +79,7 @@ ntpdc ntpserver.somewhere
 @end example
 
 With suitable privilege, it can be run as a command or in a
-@code{crom} job to reset the local clock from a reliable server, like
+@code{cron} job to reset the local clock from a reliable server, like
 the @code{ntpdate} and @code{rdate} commands.
 For example:
 

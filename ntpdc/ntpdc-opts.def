@@ -106,6 +106,9 @@ flag = {
 	_EndOfDoc_;
 };
 
+/* explain: Additional information whenever the usage routine is invoked */
+explain = <<- _END_EXPLAIN
+	_END_EXPLAIN;
 
 doc-section	= {
   ds-type	= 'DESCRIPTION';
