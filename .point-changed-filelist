@@ -17,6 +17,9 @@ ntpsnmpd/ntpsnmpd-opts.h
 ntpsnmpd/ntpsnmpd-opts.texi
 ntpsnmpd/ntpsnmpd.1
 packageinfo.sh
+scripts/ntp-wait-opts.texi
+scripts/ntp-wait.1
+scripts/ntp-wait.html
 sntp/sntp-opts.c
 sntp/sntp-opts.h
 sntp/sntp-opts.texi

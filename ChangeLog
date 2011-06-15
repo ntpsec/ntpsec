@@ -1,4 +1,5 @@
 * [Bug 1304] Update sntp.html to reflect new implementation.
+* Update .point-changed-filelist .
 * ntpdc documentation fixes.
 * Update ntp-wait autogen docs.
 * Update the ntpd autogen docs.
