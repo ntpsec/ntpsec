@@ -1,0 +1,106 @@
+/* -*- Mode: Text -*- */
+
+autogen definitions options;
+
+#include copyright.def
+// #include homerc.def
+#include autogen-version.def
+
+prog-name      = "ntp-wait";
+prog-title     = "Wait for ntpd to stabilize the system clock";
+package        = ntp;
+
+test-main;
+
+// #include       version.def
+
+flag = {
+    value     = n;
+    arg-type  = number;
+    arg-name  = num-tries;
+    descrip   = "Number of times to check ntpd";
+    doc = <<-  _EndOfDoc_
+	The maximum number of times we will check ntpd to see if it
+	has been able to synchronize and stabilize the system clock.
+
+	The default is 100 times.
+	_EndOfDoc_;
+};
+
+flag = {
+    value     = s;
+    arg-type  = number;
+    arg-name  = secs-between-tries;
+    descrip   = "How long to sleep between tries";
+    doc = <<-  _EndOfDoc_
+	We will sleep for secs-between-tries after each query of ntpd
+	that returns "the time is not yet stable".
+
+	The default is 6 seconds.
+	_EndOfDoc_;
+};
+
+flag = {
+    value     = v;
+    descrip   = "Be verbose";
+    doc = <<-  _EndOfDoc_
+	By default, ntp-wait is silent.  With this option, ntp-wait
+	will provide status information.
+	_EndOfDoc_;
+};
+
+/* explain: Additional information whenever the usage routine is invoked */
+explain = <<- _END_EXPLAIN
+	_END_EXPLAIN;
+
+doc-section	= {
+  ds-type	= 'DESCRIPTION';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_PROG_MDOC_DESCRIP
+.Nm will send at most
+.Ar num-tries
+queries to
+.Xr ntpd 8
+(sleeping for
+.Ar secs-between-tries
+after each status return that says
+.Xr ntpd 8
+has not yet produced a synchronized and stable system clock).
+.Pp
+.Nm
+will do this quietly, unless the
+.Fl v
+flag is provided.
+	_END_PROG_MDOC_DESCRIP;
+};
+
+/*
+prog-info-descrip = <<- _END_PROG_INFO_DESCRIP
+	_END_PROG_INFO_DESCRIP;
+*/
+
+/*
+doc-section	= {
+  ds-type	= 'USAGE';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_USAGE
+	_END_MDOC_USAGE;
+};
+*/
+
+doc-section	= {
+  ds-type	= 'AUTHORS';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_NOTES
+.An "Harlan Stenn"
+	_END_MDOC_NOTES;
+};
+
+/*
+doc-section	= {
+  ds-type	= 'BUGS';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_BUGS
+	_END_MDOC_BUGS;
+};
+*/

@@ -1,3 +1,4 @@
+* Update ntp-wait autogen docs.
 * Update the ntpd autogen docs.
 * Update the ntpsnmpd autogen docs.
 * Use autogen to produce ntp-keygen docs.
