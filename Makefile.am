@@ -42,6 +42,7 @@ EXTRA_DIST =			\
 	config.h.in		\
 	dot.emacs		\
 	flock-build		\
+	loc.freebsd		\
 	loc.legacy		\
 	packageinfo.sh		\
 	readme.y2kfixes		\
