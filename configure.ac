@@ -70,6 +70,8 @@ AC_PROG_YACC
 
 NTP_VPATH_HACK		dnl used only by ntpd/Makefile.am
 
+NTP_LOCINFO		dnl takes over from NTP_BINDIR, in NTP_LIBNTP
+
 # So far, the only shared library we might use is libopts.
 # It's a small library - we might as well use a static version of it.
 AC_DISABLE_SHARED

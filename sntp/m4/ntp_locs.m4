@@ -11,7 +11,13 @@ AC_MSG_CHECKING([for installation directory, man sections, and man format])
 ( cd $ac_abs_confdir && scripts/genLocInfo ) > genLocInfo.i 2>genLocInfo.err
 . genLocInfo.i
 
-AC_MSG_RESULT([done])
+case "$GENLOCINFO" in
+ OK)
+    AC_MSG_RESULT([found in $GENLOCINFOFILE])
+    ;;
+ *) AC_MSG_ERROR([Problem with genLocInfo!])
+    ;;
+esac
 
 AC_SUBST(MANTAGFMT)
 AC_SUBST(NTPDATE_DB)

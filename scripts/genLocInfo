@@ -69,6 +69,7 @@ case "$LF" in
 esac
 
 ${V}echo "Using <$LF>" >&2
+echo "GENLOCINFOFILE=$LF"
 
 ###
 
