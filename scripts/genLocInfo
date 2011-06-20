@@ -153,4 +153,8 @@ done < $LF
 IFS=$oIFS
 echo "MANTAGFMT=$TF"
 
+case "$RC" in
+ 0) echo 'GENLOCINFO=OK' ;;
+esac
+
 exit $RC
