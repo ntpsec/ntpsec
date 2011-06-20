@@ -1,0 +1,66 @@
+#! /bin/sh
+
+# Figure out which loc.* file we want to use.
+
+# Either start parsing them from least- to most-specific,
+# or just grab the one we like best.
+
+LF="loc.legacy";
+
+echo "Using <$LF>"
+
+###
+
+oIFS=$IFS
+IFS=","
+
+TF='?'
+while true
+do
+    if read c d s x
+    then
+	# echo "Got <$c><$d><$s><$x>"
+	case "$c" in
+	 \#*) continue ;;
+	esac
+	case "$x" in
+	 '') ;;
+	 *) echo "Unrecognized input: <$c,$d,$s,$x>"
+	    continue
+	    ;;
+	esac
+	case "$c,$d,$s" in
+	 [Mm][Aa][Nn],,)
+	    TF=man
+	    continue
+	    ;;
+	 [Mm][Dd][Oo][Cc],,)
+	    TF=man
+	    continue
+	    ;;
+	esac
+	case "$c,$d,$s" in
+	 *,bin,*) ;;
+	 *,sbin,*) ;;
+	 *) echo "Unrecognized input: <$c,$d,$s>"
+	    continue
+	    ;;
+	esac
+	case "$c,$d,$s" in
+	 *,*,1) ;;
+	 *,*,1m) ;;
+	 *,*,8) ;;
+	 *) echo "Unrecognized input: <$c,$d,$s>"
+	    continue
+	    ;;
+	esac
+	# Should be OK, mostly...
+	echo "<$c> gets installed in <$d> with a <$s> manpage suffix"
+    else
+	break
+    fi
+done < $LF
+IFS=$oIFS
+
+echo "All done:"
+echo "TF is <$TF>"
