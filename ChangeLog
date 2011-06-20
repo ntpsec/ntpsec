@@ -1,5 +1,5 @@
-* Update the autogen include list for scripts/Makefile.am.
 (4.2.7p183) 2011/06/19 Released by Harlan Stenn <stenn@ntp.org>
+* Update the autogen include list for scripts/Makefile.am.
 * Added loc.freebsd (and distribute it).
 * Added loc.legacy (and distribute it).
 (4.2.7p182) 2011/06/15 Released by Harlan Stenn <stenn@ntp.org>
