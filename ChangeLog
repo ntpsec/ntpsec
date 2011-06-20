@@ -1,3 +1,4 @@
+(4.2.7p184) 2011/06/20 Released by Harlan Stenn <stenn@ntp.org>
 * Added ntp_locs.m4.
 * genLocInfo improvements.
 * Add the man page tag "flavor" to the loc.* files.
