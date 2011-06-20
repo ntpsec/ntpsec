@@ -22,6 +22,7 @@ noinst_SCRIPTS =		\
 	calc_tickadj		\
 	checktime		\
 	freq_adj		\
+	genLocInfo		\
 	html2man		\
 	mkver			\
 	ntpsweep		\

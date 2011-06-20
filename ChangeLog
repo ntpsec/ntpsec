@@ -1,3 +1,4 @@
+* Add/distribute genLocInfo.
 * Added loc.freebsd (and distribute it).
 * Added loc.legacy (and distribute it).
 (4.2.7p182) 2011/06/15 Released by Harlan Stenn <stenn@ntp.org>
