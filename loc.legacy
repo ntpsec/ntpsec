@@ -1,4 +1,5 @@
 # Legacy installations and man page suffixes
+MAN
 ntp-keygen,bin,1
 ntp-wait,bin,1
 ntpd,bin,1

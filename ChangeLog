@@ -1,3 +1,4 @@
+* Add the man page tag "flavor" to the loc.* files.
 * Add/distribute genLocInfo.
 * Added loc.freebsd (and distribute it).
 * Added loc.legacy (and distribute it).
