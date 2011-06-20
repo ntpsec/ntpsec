@@ -75,5 +75,5 @@ $(srcdir)/ntp-wait-opts.texi: $(srcdir)/ntp-wait-opts.def $(std_def_list)
 	-$(top_srcdir)/../scripts/check--help $@
 
 $(srcdir)/ntp-wait.html: $(srcdir)/ntp-wait-opts.menu $(srcdir)/ntp-wait-opts.texi $(srcdir)/ntp-wait.texi $(top_srcdir)/sntp/include/version.texi
-	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp-wait.html ntp-wait.texi || true )
+	cd $(srcdir) && ( makeinfo --force --html --no-split -I ../sntp -o ntp-wait.html ntp-wait.texi || true )
 
