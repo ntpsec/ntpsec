@@ -22,7 +22,6 @@ noinst_SCRIPTS =		\
 	calc_tickadj		\
 	checktime		\
 	freq_adj		\
-	genLocInfo		\
 	html2man		\
 	mkver			\
 	ntpsweep		\
@@ -43,6 +42,7 @@ EXTRA_DIST =			\
 	cvo.sh			\
 	fixautomakedepsmagic	\
 	genCommitLog		\
+	genLocInfo		\
 	genver			\
 	hpadjtime.sh		\
 	monitoring		\
