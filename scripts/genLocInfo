@@ -29,6 +29,7 @@ do
      '') break ;;
     esac
     lf=loc.$CVO_OSNAME$x
+${V}echo "Looking for <$lf>" >&2
     if test -f $lf
     then
 	LF=$lf
@@ -42,6 +43,7 @@ done
 case "$LF" in
  '')
     lf=loc.$CVO_OSNAME
+${V}echo "Looking for <$lf>" >&2
     if test -f $lf
     then
 	LF=$lf
@@ -51,6 +53,7 @@ esac
 case "$LF" in
  '')
     lf=loc.legacy
+${V}echo "Looking for <$lf>" >&2
     if test -f $lf
     then
 	LF=$lf
@@ -98,6 +101,7 @@ do
 	    continue
 	    ;;
 	esac
+
 	case "$c,$d,$s" in
 	 *,bin,*)  DB=bin ; DS= ;;
 	 *,sbin,*) DB= ; DS=sbin ;;
@@ -139,13 +143,14 @@ do
 	# echo "${C}_DB is <`eval echo '$'${C}_DB`>" >&2
 	# echo "${C}_DS is <`eval echo '$'${C}_DS`>" >&2
 	# echo "${C}_MS is <`eval echo '$'${C}_MS`>" >&2
+	echo "${C}_DB=`eval echo '$'${C}_DB`"
+	echo "${C}_DS=`eval echo '$'${C}_DS`"
+	echo "${C}_MS=`eval echo '$'${C}_MS`"
     else
 	break
     fi
 done < $LF
 IFS=$oIFS
-
-${V}echo "All done:" >&2
-${V}echo "TF is <$TF>" >&2
+echo "MANTAGFMT=$TF"
 
 exit $RC
