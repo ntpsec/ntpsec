@@ -1,3 +1,4 @@
+* genLocInfo improvements.
 * Add the man page tag "flavor" to the loc.* files.
 * Add/distribute genLocInfo.
 (4.2.7p183) 2011/06/19 Released by Harlan Stenn <stenn@ntp.org>

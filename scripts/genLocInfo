@@ -1,13 +1,71 @@
 #! /bin/sh
 
-# Figure out which loc.* file we want to use.
+case "$1" in
+ -v)
+    V= ;;
+ *) V=": " ;;
+esac
 
+PATH=$PATH:sntp/libevent/build-aux
+
+RC=0
+
+# Figure out which loc.* file we want to use.
+#
 # Either start parsing them from least- to most-specific,
 # or just grab the one we like best.
 
-LF="loc.legacy";
+set `scripts/cvo.sh @osname@ @osver@` || exit 1
 
-echo "Using <$LF>"
+CVO_OSNAME=$1
+CVO_OSVER=$2
+
+x=$CVO_OSVER
+LF=
+
+while true
+do
+    case "$x" in
+     '') break ;;
+    esac
+    lf=loc.$CVO_OSNAME$x
+    if test -f $lf
+    then
+	LF=$lf
+	break
+    fi
+    case "$x" in
+     *.*) x=`echo $x | sed -e 's/\.[^.]*$//'` ;;
+     *) x= ;;
+    esac
+done
+case "$LF" in
+ '')
+    lf=loc.$CVO_OSNAME
+    if test -f $lf
+    then
+	LF=$lf
+    fi
+    ;;
+esac
+case "$LF" in
+ '')
+    lf=loc.legacy
+    if test -f $lf
+    then
+	LF=$lf
+    fi
+    ;;
+esac
+
+case "$LF" in
+ '')
+    echo "No loc.XXX file found!" >&2
+    exit 1
+    ;;
+esac
+
+${V}echo "Using <$LF>" >&2
 
 ###
 
@@ -19,13 +77,14 @@ while true
 do
     if read c d s x
     then
-	# echo "Got <$c><$d><$s><$x>"
+	# echo "Got <$c><$d><$s><$x>" >&2
 	case "$c" in
 	 \#*) continue ;;
 	esac
 	case "$x" in
 	 '') ;;
-	 *) echo "Unrecognized input: <$c,$d,$s,$x>"
+	 *) echo "Unrecognized input: <$c,$d,$s,$x>" >&2
+	    RC=1
 	    continue
 	    ;;
 	esac
@@ -40,9 +99,10 @@ do
 	    ;;
 	esac
 	case "$c,$d,$s" in
-	 *,bin,*) ;;
-	 *,sbin,*) ;;
-	 *) echo "Unrecognized input: <$c,$d,$s>"
+	 *,bin,*)  DB=bin ; DS= ;;
+	 *,sbin,*) DB= ; DS=sbin ;;
+	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
+	    RC=1
 	    continue
 	    ;;
 	esac
@@ -50,17 +110,42 @@ do
 	 *,*,1) ;;
 	 *,*,1m) ;;
 	 *,*,8) ;;
-	 *) echo "Unrecognized input: <$c,$d,$s>"
+	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
+	    RC=1
 	    continue
 	    ;;
 	esac
+
 	# Should be OK, mostly...
-	echo "<$c> gets installed in <$d> with a <$s> manpage suffix"
+	C=`echo $c | sed -e 'y/abcdefghijklmnopqrstuvwxyz-/ABCDEFGHIJKLMNOPQRSTUVWXYZ_/'`
+	# echo "c: <$c>, C: <$C>, DB: <$DB>, DS: <$DS>" >&2
+
+	case "$d" in
+	 bin)
+	    eval ${C}_DB=$c
+	    eval ${C}_DS=
+	    ;;
+	 sbin)
+	    eval ${C}_DB=
+	    eval ${C}_DS=$c
+	    ;;
+	 *) echo "$0: GRONK: d" >&2
+	    exit 1
+	    ;;
+	esac
+	eval ${C}_MS=$s
+
+	# echo "<$c> gets installed in <$d> with a <$s> manpage suffix" >&2
+	# echo "${C}_DB is <`eval echo '$'${C}_DB`>" >&2
+	# echo "${C}_DS is <`eval echo '$'${C}_DS`>" >&2
+	# echo "${C}_MS is <`eval echo '$'${C}_MS`>" >&2
     else
 	break
     fi
 done < $LF
 IFS=$oIFS
 
-echo "All done:"
-echo "TF is <$TF>"
+${V}echo "All done:" >&2
+${V}echo "TF is <$TF>" >&2
+
+exit $RC
