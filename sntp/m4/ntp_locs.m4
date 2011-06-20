@@ -8,7 +8,8 @@ AC_DEFUN([NTP_LOCINFO], [
 
 AC_MSG_CHECKING([for installation directory, man sections, and man format])
 
-. `cd $scrdir && scripts/genLocInfo`
+( cd $scrdir && scripts/genLocInfo ) > conftest.i
+. conftest.i
 
 AC_MSG_RESULT([done])
 
