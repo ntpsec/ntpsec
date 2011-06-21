@@ -1,4 +1,5 @@
 * [Bug 1950] Control installation of event_rpcgen.py.
+* ntp_locs.m4: handle the case where . is not in the PATH.
 * More genLocInfo cleanup.
 (4.2.7p184) 2011/06/20 Released by Harlan Stenn <stenn@ntp.org>
 * Added ntp_locs.m4.

@@ -9,7 +9,7 @@ AC_DEFUN([NTP_LOCINFO], [
 AC_MSG_CHECKING([for installation directory, man sections, and man format])
 
 ( cd $ac_abs_confdir && scripts/genLocInfo ) > genLocInfo.i 2>genLocInfo.err
-. genLocInfo.i
+. ./genLocInfo.i
 
 case "$GENLOCINFO" in
  OK)
