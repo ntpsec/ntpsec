@@ -1,0 +1,569 @@
+.TH ntpdc @NTPDC_MS@ "22 Jun 2011" "4.2.7p184" "User Commands"
+.\"
+.\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
+.\"  
+.\"  It has been AutoGen-ed  June 22, 2011 at 04:57:51 AM by AutoGen 5.11.10pre10
+.\"  From the definitions    ntpdc-opts.def
+.\"  and the template file   agman-cmd.tpl
+.\"
+.SH NAME
+ntpdc \- vendor-specific NTPD control program
+.SH SYNOPSIS
+.B ntpdc
+.\" Mixture of short (flag) options and long options
+.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..." [ host ...]
+.PP
+.SH DESCRIPTION
+.B 
+is a utility program used to query
+.Xr ntpd 8
+about its
+current state and to request changes in that state.
+It uses NTP mode 7 control message formats described in the source code.
+The program may
+be run either in interactive mode or controlled using command line
+arguments.
+Extensive state and statistics information is available
+through the
+.B 
+interface.
+In addition, nearly all the
+configuration options which can be specified at startup using
+ntpd's configuration file may also be specified at run time using
+.B  .
+.SH "OPTIONS"
+.TP
+.BR \-4 ", " -\-ipv4
+Force IPv4 DNS name resolution.
+This option must not appear in combination with any of the following options:
+ipv6.
+.sp
+Force DNS resolution of following host names on the command line
+to the IPv4 namespace.
+.TP
+.BR \-6 ", " -\-ipv6
+Force IPv6 DNS name resolution.
+This option must not appear in combination with any of the following options:
+ipv4.
+.sp
+Force DNS resolution of following host names on the command line
+to the IPv6 namespace.
+.TP
+.BR \-c " \fIcmd\fP, " \-\-command "=" \fIcmd\fP
+run a command and exit.
+This option may appear an unlimited number of times.
+.sp
+The following argument is interpreted as an interactive format command
+and is added to the list of commands to be executed on the specified
+host(s).
+.TP
+.BR \-d ", " -\-debug\-level
+Increase debug verbosity level.
+This option may appear an unlimited number of times.
+.sp
+.TP
+.BR \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
+Set the debug verbosity level.
+This option may appear an unlimited number of times.
+.sp
+.TP
+.BR \-i ", " -\-interactive
+Force ntpq to operate in interactive mode.
+This option must not appear in combination with any of the following options:
+command, listpeers, peers, showpeers.
+.sp
+Force ntpq to operate in interactive mode.  Prompts will be written
+to the standard output and commands read from the standard input.
+.TP
+.BR \-l ", " -\-listpeers
+Print a list of the peers.
+This option must not appear in combination with any of the following options:
+command.
+.sp
+Print a list of the peers known to the server as well as a summary of
+their state. This is equivalent to the 'listpeers' interactive command.
+.TP
+.BR \-n ", " -\-numeric
+numeric host addresses.
+.sp
+Output all host addresses in dotted-quad numeric format rather than
+converting to the canonical host names. 
+.TP
+.BR \-p ", " -\-peers
+Print a list of the peers.
+This option must not appear in combination with any of the following options:
+command.
+.sp
+Print a list of the peers known to the server as well as a summary
+of their state. This is equivalent to the 'peers' interactive command.
+.TP
+.BR \-s ", " -\-showpeers
+Show a list of the peers.
+This option must not appear in combination with any of the following options:
+command.
+.sp
+Print a list of the peers known to the server as well as a summary
+of their state. This is equivalent to the 'dmpeers' interactive command.
+.TP
+.BR \-? , " \-\-help"
+Display usage information and exit.
+.TP
+.BR \-! , " \-\-more-help"
+Pass the extended usage information through a pager.
+.TP
+.BR \-> " [\fIrcfile\fP]," " \-\-save-opts" "[=\fIrcfile\fP]"
+Save the option state to \fIrcfile\fP.  The default is the \fIlast\fP
+configuration file listed in the \fBOPTION PRESETS\fP section, below.
+.TP
+.BR \-< " \fIrcfile\fP," " \-\-load-opts" "=\fIrcfile\fP," " \-\-no-load-opts"
+Load options from \fIrcfile\fP.
+The \fIno-load-opts\fP form will disable the loading
+of earlier RC/INI files.  \fI\-\-no-load-opts\fP is handled early,
+out of order.
+.TP
+.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
+Output version of program and exit.  The default mode is `v', a simple
+version.  The `c' mode will print copyright information and `n' will
+print the full copyright notice.
+.SH "OPTION PRESETS"
+Any option that is not marked as \fInot presettable\fP may be preset
+by loading values from configuration ("RC" or ".INI") file(s) and values from
+environment variables named:
+.nf
+  \fBNTPDC_<option-name>\fP or \fBNTPDC\fP
+.fi
+.ad
+The environmental presets take precedence (are processed later than)
+the configuration files.
+The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
+If any of these are directories, then the file \fI.ntprc\fP
+is searched for within those directories.
+.SH USAGE
+If one or more request options are included on the command line
+when
+.B 
+is executed, each of the requests will be sent
+to the NTP servers running on each of the hosts given as command
+line arguments, or on localhost by default.
+If no request options
+are given,
+.B 
+will attempt to read commands from the
+standard input and execute these on the NTP server running on the
+first host given on the command line, again defaulting to localhost
+when no other host is specified.
+The
+.B 
+utility will prompt for
+commands if the standard input is a terminal device.
+.PP
+The
+.B 
+utility uses NTP mode 7 packets to communicate with the
+NTP server, and hence can be used to query any compatible server on
+the network which permits it.
+Note that since NTP is a UDP protocol
+this communication will be somewhat unreliable, especially over
+large distances in terms of network topology.
+The
+.B 
+utility makes
+no attempt to retransmit requests, and will time requests out if
+the remote host is not heard from within a suitable timeout
+time.
+.PP
+The operation of
+.B 
+are specific to the particular
+implementation of the
+.Xr ntpd 8
+daemon and can be expected to
+work only with this and maybe some previous versions of the daemon.
+Requests from a remote
+.B 
+utility which affect the
+state of the local server must be authenticated, which requires
+both the remote program and local server share a common key and key
+identifier.
+.PP
+Note that in contexts where a host name is expected, a
+4
+qualifier preceding the host name forces DNS resolution to the IPv4 namespace,
+while a
+6
+qualifier forces DNS resolution to the IPv6 namespace.
+Specifying a command line option other than
+i
+or
+n
+will cause the specified query (queries) to be sent to
+the indicated host(s) immediately.
+Otherwise,
+.B 
+will
+attempt to read interactive format commands from the standard
+input.
+.Ss "Interactive Commands"
+Interactive format commands consist of a keyword followed by zero
+to four arguments.
+Only enough characters of the full keyword to
+uniquely identify the command need be typed.
+The output of a
+command is normally sent to the standard output, but optionally the
+output of individual commands may be sent to a file by appending a
+.Ql \&> ,
+followed by a file name, to the command line.
+.PP
+A number of interactive format commands are executed entirely
+within the
+.B 
+utility itself and do not result in NTP
+mode 7 requests being sent to a server.
+These are described
+following.
+.TP
+.BR Ic \&? Ar command_keyword
+.TP
+.BR Ic help Ar command_keyword
+A
+.Sq Ic \&?
+will print a list of all the command
+keywords known to this incarnation of
+.Nm .
+A
+.Sq Ic \&?
+followed by a command keyword will print function and usage
+information about the command.
+This command is probably a better
+source of information about
+.Xr ntpq 8
+than this manual
+page.
+.TP
+.BR Ic delay Ar milliseconds
+Specify a time interval to be added to timestamps included in
+requests which require authentication.
+This is used to enable
+(unreliable) server reconfiguration over long delay network paths
+or between machines whose clocks are unsynchronized.
+Actually the
+server does not now require timestamps in authenticated requests,
+so this command may be obsolete.
+.TP
+.BR Ic host Ar hostname
+Set the host to which future queries will be sent.
+Hostname may
+be either a host name or a numeric address.
+.TP
+.BR Ic hostnames Op Cm yes | Cm no
+If
+.Cm yes
+is specified, host names are printed in
+information displays.
+If
+.Cm no
+is specified, numeric
+addresses are printed instead.
+The default is
+.Cm yes ,
+unless
+modified using the command line
+n
+switch.
+.TP
+.BR Ic keyid Ar keyid
+This command allows the specification of a key number to be
+used to authenticate configuration requests.
+This must correspond
+to a key number the server has been configured to use for this
+purpose.
+.TP
+.BR Ic quit
+Exit
+.Nm .
+.TP
+.BR Ic passwd
+This command prompts you to type in a password (which will not
+be echoed) which will be used to authenticate configuration
+requests.
+The password must correspond to the key configured for
+use by the NTP server for this purpose if such requests are to be
+successful.
+.TP
+.BR Ic timeout Ar milliseconds
+Specify a timeout period for responses to server queries.
+The
+default is about 8000 milliseconds.
+Note that since
+.Nm
+retries each query once after a timeout, the total waiting time for
+a timeout will be twice the timeout value set.
+.Ss "Control Message Commands"
+Query commands result in NTP mode 7 packets containing requests for
+information being sent to the server.
+These are read-only commands
+in that they make no modification of the server configuration
+state.
+.TP
+.BR Ic listpeers
+Obtains and prints a brief list of the peers for which the
+server is maintaining state.
+These should include all configured
+peer associations as well as those peers whose stratum is such that
+they are considered by the server to be possible future
+synchronization candidates.
+.TP
+.BR Ic peers
+Obtains a list of peers for which the server is maintaining
+state, along with a summary of that state.
+Summary information
+includes the address of the remote peer, the local interface
+address (0.0.0.0 if a local address has yet to be determined), the
+stratum of the remote peer (a stratum of 16 indicates the remote
+peer is unsynchronized), the polling interval, in seconds, the
+reachability register, in octal, and the current estimated delay,
+offset and dispersion of the peer, all in seconds.
+.PP
+The character in the left margin indicates the mode this peer
+entry is operating in.
+A
+.Ql \&+
+denotes symmetric active, a
+.Ql \&-
+indicates symmetric passive, a
+.Ql \&=
+means the
+remote server is being polled in client mode, a
+.Ql \&^
+indicates that the server is broadcasting to this address, a
+.Ql \&~
+denotes that the remote peer is sending broadcasts and a
+.Ql \&~
+denotes that the remote peer is sending broadcasts and a
+.Ql \&*
+marks the peer the server is currently synchronizing
+to.
+.PP
+The contents of the host field may be one of four forms.
+It may
+be a host name, an IP address, a reference clock implementation
+name with its parameter or
+.Fn REFCLK "implementation_number" "parameter" .
+On
+.Ic hostnames
+.Cm no
+only IP-addresses
+will be displayed.
+.TP
+.BR Ic dmpeers
+A slightly different peer summary list.
+Identical to the output
+of the
+.Ic peers
+command, except for the character in the
+leftmost column.
+Characters only appear beside peers which were
+included in the final stage of the clock selection algorithm.
+A
+.Ql \&.
+indicates that this peer was cast off in the falseticker
+detection, while a
+.Ql \&+
+indicates that the peer made it
+through.
+A
+.Ql \&*
+denotes the peer the server is currently
+synchronizing with.
+.TP
+.BR Ic showpeer Ar peer_address Oo Ar ... Oc
+Shows a detailed display of the current peer variables for one
+or more peers.
+Most of these values are described in the NTP
+Version 2 specification.
+.TP
+.BR Ic pstats Ar peer_address Oo Ar ... Oc
+Show per-peer statistic counters associated with the specified
+peer(s).
+.TP
+.BR Ic clockinfo Ar clock_peer_address Oo Ar ... Oc
+Obtain and print information concerning a peer clock.
+The
+values obtained provide information on the setting of fudge factors
+and other clock performance information.
+.TP
+.BR Ic kerninfo
+Obtain and print kernel phase-lock loop operating parameters.
+This information is available only if the kernel has been specially
+modified for a precision timekeeping function.
+.TP
+.BR Ic loopinfo Op Cm oneline | Cm multiline
+Print the values of selected loop filter variables.
+The loop
+filter is the part of NTP which deals with adjusting the local
+system clock.
+The
+.Sq offset
+is the last offset given to the
+loop filter by the packet processing code.
+The
+.Sq frequency
+is the frequency error of the local clock in parts-per-million
+(ppm).
+The
+.Sq time_const
+controls the stiffness of the
+phase-lock loop and thus the speed at which it can adapt to
+oscillator drift.
+The
+.Sq watchdog timer
+value is the number
+of seconds which have elapsed since the last sample offset was
+given to the loop filter.
+The
+.Cm oneline
+and
+.Cm multiline
+options specify the format in which this
+information is to be printed, with
+.Cm multiline
+as the
+default.
+.TP
+.BR Ic sysinfo
+Print a variety of system state variables, i.e., state related
+to the local server.
+All except the last four lines are described
+in the NTP Version 3 specification, RFC-1305.
+.PP
+The
+.Sq system flags
+show various system flags, some of
+which can be set and cleared by the
+.Ic enable
+and
+.Ic disable
+configuration commands, respectively.
+These are
+the
+.Cm auth ,
+.Cm bclient ,
+.Cm monitor ,
+.Cm pll ,
+.Cm pps
+and
+.Cm stats
+flags.
+See the
+.Xr ntpd 8
+documentation for the meaning of these flags.
+There
+are two additional flags which are read only, the
+.Cm kernel_pll
+and
+.Cm kernel_pps .
+These flags indicate
+the synchronization status when the precision time kernel
+modifications are in use.
+The
+.Sq kernel_pll
+indicates that
+the local clock is being disciplined by the kernel, while the
+.Sq kernel_pps
+indicates the kernel discipline is provided by the PPS
+signal.
+.PP
+The
+.Sq stability
+is the residual frequency error remaining
+after the system frequency correction is applied and is intended for
+maintenance and debugging.
+In most architectures, this value will
+initially decrease from as high as 500 ppm to a nominal value in
+the range .01 to 0.1 ppm.
+If it remains high for some time after
+starting the daemon, something may be wrong with the local clock,
+or the value of the kernel variable
+.Va kern.clockrate.tick
+may be
+incorrect.
+.PP
+The
+.Sq broadcastdelay
+shows the default broadcast delay,
+as set by the
+.Ic broadcastdelay
+configuration command.
+.PP
+The
+.Sq authdelay
+shows the default authentication delay,
+as set by the
+.Ic authdelay
+configuration command.
+.TP
+.BR Ic sysstats
+Print statistics counters maintained in the protocol
+module.
+.TP
+.BR Ic memstats
+Print statistics counters related to memory allocation
+code.
+.TP
+.BR Ic iostats
+Print statistics counters maintained in the input-output
+module.
+.TP
+.BR Ic timerstats
+Print statistics counters maintained in the timer/event queue
+support code.
+.TP
+.BR Ic reslist
+Obtain and print the server's restriction list.
+This list is
+(usually) printed in sorted order and may help to understand how
+the restrictions are applied.
+.TP
+.BR Ic monlist Op Ar version
+Obtain and print traffic counts collected and maintained by the
+monitor facility.
+The version number should not normally need to be
+specified.
+.TP
+.BR Ic clkbug Ar clock_peer_address Oo Ar ... Oc
+Obtain debugging information for a reference clock driver.
+This
+information is provided only by some clock drivers and is mostly
+undecodable without a copy of the driver source in hand.
+.Ss "Runtime Configuration Requests"
+All requests which cause state changes in the server are
+authenticated by the server using a configured NTP key (the
+facility can also be disabled by the server by not configuring a
+key).
+The key number and the corresponding key must also be made
+known to
+.B  .
+This can be done using the
+.Ic keyid
+and
+.Ic passwd
+commands, the latter of which will prompt at the terminal for a
+password to use as the encryption key.
+You will also be prompted
+automatically for both the key number and password the first time a
+command which would result in an authenticated request to the
+server is given.
+Authentication not only provides verification that
+the requester has permission to make such changes, but also gives
+an extra degree of protection again transmission errors.
+.PP
+Authenticated requests always include a timestamp in the packet
+data, which is included in the computation of the authentication
+code.
+This timestamp is compared by the server to its receive time
+stamp.
+If they differ by more than a small amount the request is
+rejected.
+This is done for two reasons.
+First, it makes simple
+replay attacks on the server, by someone who might be able to
