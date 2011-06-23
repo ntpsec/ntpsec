@@ -1,14 +1,9 @@
 NULL=
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
-		ntp-keygen
-else
-sbin_PROGRAMS=	@MAKE_NTPTIME@ @MAKE_TICKADJ@ @MAKE_TIMETRIM@ \
-		ntp-keygen
-endif
+bin_PROGRAMS=	$(NTP_KEYGEN_DB) $(NTPTIME_DB) $(TICKADJ_DB) $(TIMETRIM_DB)
+sbin_PROGRAMS=	$(NTP_KEYGEN_DS) $(NTPTIME_DS) $(TICKADJ_DS) $(TIMETRIM_DS)
 
-EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize \
+EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize ntp-keygen \
 	ntptime pps-api precision sht testrs6000 tg tg2 tickadj timetrim
 
 AM_CFLAGS = $(CFLAGS_NTP)
@@ -24,12 +19,31 @@ ntp_keygen_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a
 ntp_keygen_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LCRYPTO)
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
 
-EXTRA_DIST=	ntp-keygen-opts.def ntp-keygen.1 ntp-keygen-opts.texi ntp-keygen-opts.menu
+EXTRA_DIST=				\
+	ntp-keygen-opts.def		\
+	ntp-keygen-opts.menu		\
+	ntp-keygen-opts.texi		\
+	ntp-keygen.1ntp-keygenman	\
+	ntp-keygen.1ntp-keygenmdoc	\
+	ntp-keygen.man.in		\
+	ntp-keygen.mdoc.in		\
+	$(NULL)
+
 BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
-DISTCLEANFILES=	.version version.c
-noinst_DATA=	$(srcdir)/ntp-keygen-opts.texi $(srcdir)/ntp-keygen-opts.menu
-man_MANS=	$(srcdir)/ntp-keygen.1
+DISTCLEANFILES=	.version version.c config.log $(man_MANS)
+noinst_DATA=				\
+	$(srcdir)/ntp-keygen-opts.menu	\
+	$(srcdir)/ntp-keygen-opts.texi	\
+	$(srcdir)/ntp-keygen.man.in	\
+	$(srcdir)/ntp-keygen.mdoc.in	\
+	$(man_MANS)			\
+	$(NULL)
+
+man1_MANS=
+man8_MANS=
+man_MANS=	ntp-keygen.$(NTP_KEYGEN_MS)
+
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
@@ -43,18 +57,39 @@ std_def_list =							\
 
 $(srcdir)/ntp-keygen-opts.h: $(srcdir)/ntp-keygen-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
-	
+
 $(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) ntp-keygen-opts.def
 
-# For man pages, use agman-cmd.tpl
-# For mdoc pages, use agmdoc-cmd.tpl
-$(srcdir)/ntp-keygen.1: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntp-keygen-opts.def
+###
+
+$(srcdir)/ntp-keygen.1ntp-keygenman: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntp-keygenman -Tagman-cmd.tpl ntp-keygen-opts.def
+
+$(srcdir)/ntp-keygen.man.in: $(srcdir)/ntp-keygen.1ntp-keygenman $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-keygen.1ntp-keygenman > $(srcdir)/ntp-keygen.man.in+
+	mv $(srcdir)/ntp-keygen.man.in+ $(srcdir)/ntp-keygen.man.in
+
+###
+
+$(srcdir)/ntp-keygen.1ntp-keygenmdoc: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntp-keygenmdoc -Tagmdoc-cmd.tpl ntp-keygen-opts.def
+
+$(srcdir)/ntp-keygen.mdoc.in: $(srcdir)/ntp-keygen.1ntp-keygenmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-keygen.1ntp-keygenmdoc > $(srcdir)/ntp-keygen.mdoc.in+
+	mv $(srcdir)/ntp-keygen.mdoc.in+ $(srcdir)/ntp-keygen.mdoc.in
+
+###
+
+ntp-keygen.$(NTP_KEYGEN_MS): $(srcdir)/ntp-keygen.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntp-keygen.$(NTP_KEYGEN_MS)+:$(srcdir)/ntp-keygen.$(MANTAGFMT).in
+	mv ntp-keygen.$(NTP_KEYGEN_MS)+ ntp-keygen.$(NTP_KEYGEN_MS)
+
+###
 
 $(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
-	
+
 $(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
 	$(top_srcdir)/scripts/check--help $@
@@ -73,7 +108,7 @@ $(top_srcdir)/sntp/scm-rev:
 
 version.c: $(ntp_keygen_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
 	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntp-keygen
-	
+
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 

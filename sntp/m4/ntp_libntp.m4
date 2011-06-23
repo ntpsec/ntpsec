@@ -20,7 +20,6 @@ dnl The contents of NTP_PROG_CC used to be here...
 
 AC_PROG_INSTALL
 
-NTP_BINDIR
 NTP_DIR_SEP
 NTP_LINEEDITLIBS
 NTP_LIB_M

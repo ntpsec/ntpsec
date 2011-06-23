@@ -12,6 +12,10 @@
 #*
 .#*
 # Simulated bk default ignores end here
+*.man.in
+*.mdoc.in
+*.1*man
+*.1*mdoc
 *.vcproj.*.user
 */autom4te.cache -prune
 */include/version.def
@@ -52,6 +56,7 @@ firefly.sh
 html/man/*
 html/pic/thumbs.db
 html/thumbs.db
+html-new/*
 include/Makefile.in
 include/isc/Makefile.am.$$$
 include/isc/netaddr.h.$$$

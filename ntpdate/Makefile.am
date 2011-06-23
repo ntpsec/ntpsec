@@ -3,13 +3,10 @@ NULL =
 BUILT_SOURCES =
 CLEANFILES =
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS = ntpdate
-else
-sbin_PROGRAMS = ntpdate
-endif
+bin_PROGRAMS = $(NTPDATE_DB)
+sbin_PROGRAMS = $(NTPDATE_DS)
 
-EXTRA_PROGRAMS = ntptimeset
+EXTRA_PROGRAMS = ntpdate ntptimeset
 
 ntptimeset_SOURCES = ntptimeset.c ntptime_config.c
 
