@@ -1,4 +1,5 @@
 * [Bug 1950] Control installation of event_rpcgen.py.
+* Update .point-changed-filelist for the new man pages.
 * Update the building of OS-specific programs.
 * Finish conversion to genLocInfo.
 * validate MANTAGFMT in genLocInfo.
