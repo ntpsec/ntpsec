@@ -1,7 +1,8 @@
+* [Bug 1950] Control installation of event_rpcgen.py.
 * Update the building of OS-specific programs.
 * Finish conversion to genLocInfo.
 * validate MANTAGFMT in genLocInfo.
-* [Bug 1950] Control installation of event_rpcgen.py.
+* Documentation update from Dave Mills.
 (4.2.7p185) 2011/06/21 Released by Harlan Stenn <stenn@ntp.org>
 * ntp_locs.m4: handle the case where . is not in the PATH.
 * More genLocInfo cleanup.
