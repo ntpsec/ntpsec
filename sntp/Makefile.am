@@ -33,11 +33,8 @@ std_def_list =						\
 
 EXTRA_PROGRAMS = sntp
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS =	@SNTP@
-else
-sbin_PROGRAMS =	@SNTP@
-endif
+bin_PROGRAMS =	$(SNTP_DB)
+sbin_PROGRAMS =	$(SNTP_DS)
 
 ##
 ## DIST_SUBDIRS is typically automatically derived by automake including
@@ -97,6 +94,8 @@ sntp_SOURCES =		\
 DISTCLEANFILES =			\
 	.version			\
 	version.c			\
+	config.log			\
+	$(man_MANS)			\
 	$(NULL)
 
 EXTRA_DIST =				\
@@ -107,7 +106,10 @@ EXTRA_DIST =				\
 	sntp-opts.def			\
 	sntp-opts.menu			\
 	sntp-opts.texi			\
-	sntp.1				\
+	sntp.1sntpman			\
+	sntp.1sntpmdoc			\
+	sntp.man.in			\
+	sntp.mdoc.in			\
 	sntp.html			\
 	sntp.texi			\
 	tests_main.h			\
@@ -131,7 +133,9 @@ CLEANFILES =				\
 	check-COPYRIGHT-submake		\
 	$(NULL)
 
-man_MANS=	$(srcdir)/sntp.1
+man1_MANS=
+man8_MANS=
+man_MANS=	sntp.$(SNTP_MS)
 
 ## HMS: Real Soon Now...
 ##info_TEXINFOS=	sntp.texi
@@ -139,6 +143,8 @@ man_MANS=	$(srcdir)/sntp.1
 
 noinst_DATA=				\
 	$(srcdir)/sntp.html		\
+	$(srcdir)/sntp.man.in		\
+	$(srcdir)/sntp.mdoc.in		\
 	$(srcdir)/sntp-opts.texi	\
 	$(srcdir)/sntp-opts.menu	\
 	$(NULL)
@@ -158,7 +164,7 @@ $(PROGRAMS): version.o
 
 version.c: $(sntp_OBJECTS) ../libntp/libntp.a Makefile $(srcdir)/scm-rev
 	env CSET=`cat $(srcdir)/scm-rev` $(top_builddir)/../scripts/mkver sntp
-	
+
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 
@@ -226,10 +232,31 @@ $(srcdir)/sntp-opts.h: $(srcdir)/sntp-opts.c
 $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) sntp-opts.def
 
-# For man pages, use agman-cmd.tpl
-# For mdoc pages, use agmdoc-cmd.tpl
-$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl sntp-opts.def
+###
+
+$(srcdir)/sntp.1sntpman: $(srcdir)/sntp-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1sntpman -Tagman-cmd.tpl sntp-opts.def
+
+$(srcdir)/sntp.man.in: $(srcdir)/sntp.1sntpman $(srcdir)/include/mansec2subst.sed
+	sed -f $(srcdir)/include/mansec2subst.sed $(srcdir)/sntp.1sntpman > $(srcdir)/sntp.man.in+
+	mv $(srcdir)/sntp.man.in+ $(srcdir)/sntp.man.in
+
+###
+
+$(srcdir)/sntp.1sntpmdoc: $(srcdir)/sntp-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1sntpmdoc -Tagmdoc-cmd.tpl sntp-opts.def
+
+$(srcdir)/sntp.mdoc.in: $(srcdir)/sntp.1sntpmdoc $(srcdir)/include/mansec2subst.sed
+	sed -f $(srcdir)/include/mansec2subst.sed $(srcdir)/sntp.1sntpmdoc > $(srcdir)/sntp.mdoc.in+
+	mv $(srcdir)/sntp.mdoc.in+ $(srcdir)/sntp.mdoc.in
+
+###
+
+sntp.$(SNTP_MS): $(srcdir)/sntp.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=sntp.$(SNTP_MS)+:$(srcdir)/sntp.$(MANTAGFMT).in
+	mv sntp.$(SNTP_MS)+ sntp.$(SNTP_MS)
+
+###
 
 $(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi

@@ -1,12 +1,9 @@
 NULL=
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS=	ntpdc
-else
-sbin_PROGRAMS=	ntpdc
-endif
+bin_PROGRAMS=	$(NTPDC_DB)
+sbin_PROGRAMS=	$(NTPDC_DS)
 
-EXTRA_PROGRAMS=	ntpdc-layout
+EXTRA_PROGRAMS=	ntpdc ntpdc-layout
 EXTRA_DATA=	check-layout
 BUILT_SOURCES=	@MAKE_CHECK_LAYOUT@ ntpdc-opts.c ntpdc-opts.h
 
@@ -23,7 +20,7 @@ ntpdc_LDADD += $(LCRYPTO)
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=
 
-DISTCLEANFILES=	.version version.c
+DISTCLEANFILES=	.version version.c config.log $(man_MANS)
 CLEANFILES=	check-layout layout.here nl.c ntpdc-layout
 noinst_HEADERS=	ntpdc.h
 ETAGS_ARGS= 	Makefile.am
@@ -32,13 +29,19 @@ EXTRA_DIST=			\
 	nl.pl			\
 	layout.std		\
 	ntpdc-opts.def		\
-	ntpdc.1			\
+	ntpdc.1ntpdcman		\
+	ntpdc.1ntpdcmdoc	\
+	ntpdc.man.in		\
+	ntpdc.mdoc.in		\
 	ntpdc.html		\
 	ntpdc.texi		\
 	ntpdc-opts.texi		\
 	ntpdc-opts.menu		\
 	$(NULL)
-man_MANS=	$(srcdir)/ntpdc.1
+
+man1_MANS=
+man8_MANS=
+man_MANS=	ntpdc.$(NTPDC_MS)
 
 ## HMS: Real Soon Now...
 ##info_TEXINFOS=	ntpdc.texi
@@ -46,6 +49,8 @@ man_MANS=	$(srcdir)/ntpdc.1
 
 noinst_DATA=				\
 	$(srcdir)/ntpdc.html		\
+	$(srcdir)/ntpdc.man.in		\
+	$(srcdir)/ntpdc.mdoc.in		\
 	$(srcdir)/ntpdc-opts.texi	\
 	$(srcdir)/ntpdc-opts.menu	\
 	$(NULL)
@@ -68,13 +73,31 @@ $(srcdir)/ntpdc-opts.h: $(srcdir)/ntpdc-opts.c
 $(srcdir)/ntpdc-opts.c: $(srcdir)/ntpdc-opts.def $(std_def_list)
 	$(run_ag) ntpdc-opts.def
 
-# For man pages, use agman-cmd.tpl
-# For mdoc pages, use agmdoc-cmd.tpl
-#$(srcdir)/sntp.1: $(srcdir)/sntp-opts.def $(srcdir)/include/version.def $(srcdir)/include/copyright.def
-#	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl sntp-opts.def
 ###
-$(srcdir)/ntpdc.1: $(srcdir)/ntpdc-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpdc-opts.def
+
+$(srcdir)/ntpdc.1ntpdcman: $(srcdir)/ntpdc-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntpdcman -Tagman-cmd.tpl ntpdc-opts.def
+
+$(srcdir)/ntpdc.man.in: $(srcdir)/ntpdc.1ntpdcman $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpdc.1ntpdcman > $(srcdir)/ntpdc.man.in+
+	mv $(srcdir)/ntpdc.man.in+ $(srcdir)/ntpdc.man.in
+
+###
+
+$(srcdir)/ntpdc.1ntpdcmdoc: $(srcdir)/ntpdc-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntpdcmdoc -Tagmdoc-cmd.tpl ntpdc-opts.def
+
+$(srcdir)/ntpdc.mdoc.in: $(srcdir)/ntpdc.1ntpdcmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpdc.1ntpdcmdoc > $(srcdir)/ntpdc.mdoc.in+
+	mv $(srcdir)/ntpdc.mdoc.in+ $(srcdir)/ntpdc.mdoc.in
+
+###
+
+ntpdc.$(NTPDC_MS): $(srcdir)/ntpdc.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntpdc.$(NTPDC_MS)+:$(srcdir)/ntpdc.$(MANTAGFMT).in
+	mv ntpdc.$(NTPDC_MS)+ ntpdc.$(NTPDC_MS)
+
+###
 
 $(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi

@@ -1,10 +1,7 @@
 NULL=
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS=	@MAKE_NTPSNMPD@
-else
-sbin_PROGRAMS=	@MAKE_NTPSNMPD@
-endif
+bin_PROGRAMS=	$(NTPSNMPD_DB)
+sbin_PROGRAMS=	$(NTPSNMPD_DS)
 
 EXTRA_PROGRAMS=	ntpsnmpd
 ntpsnmpd_SOURCES= netsnmp_daemonize.c ntpsnmpd.c ntpSnmpSubagentObject.c \
@@ -22,12 +19,31 @@ AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(SNMP_CPPFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
-EXTRA_DIST=	ntpsnmpd-opts.def ntpsnmpd.1 ntpsnmpd-opts.texi	\
-		ntpsnmpd-opts.menu ntpv4-mib.mib
+EXTRA_DIST=			\
+	ntpsnmpd-opts.def	\
+	ntpsnmpd-opts.menu	\
+	ntpsnmpd-opts.texi	\
+	ntpsnmpd.1ntpsnmpdman	\
+	ntpsnmpd.1ntpsnmpdmdoc	\
+	ntpsnmpd.man.in		\
+	ntpsnmpd.mdoc.in	\
+	ntpv4-mib.mib		\
+	$(NULL)
+
 BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h
 CLEANFILES=
-noinst_DATA=	$(srcdir)/ntpsnmpd-opts.texi $(srcdir)/ntpsnmpd-opts.menu
-man_MANS=	$(srcdir)/ntpsnmpd.1
+DISTCLEANFILES=	config.log $(man_MANS)
+noinst_DATA=				\
+	$(srcdir)/ntpsnmpd-opts.menu	\
+	$(srcdir)/ntpsnmpd-opts.texi	\
+	$(srcdir)/ntpsnmpd.man.in	\
+	$(srcdir)/ntpsnmpd.mdoc.in	\
+	$(NULL)
+
+man1_MANS=
+man8_MANS=
+man_MANS=	ntpsnmpd.$(NTPSNMPD_MS)
+
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
@@ -45,10 +61,31 @@ $(srcdir)/ntpsnmpd-opts.h: $(srcdir)/ntpsnmpd-opts.c
 $(srcdir)/ntpsnmpd-opts.c: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) ntpsnmpd-opts.def
 
-# For man pages, use agman-cmd.tpl
-# For mdoc pages, use agmdoc-cmd.tpl
-$(srcdir)/ntpsnmpd.1: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpsnmpd-opts.def
+###
+
+$(srcdir)/ntpsnmpd.1ntpsnmpdman: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntpsnmpdman -Tagman-cmd.tpl ntpsnmpd-opts.def
+
+$(srcdir)/ntpsnmpd.man.in: $(srcdir)/ntpsnmpd.1ntpsnmpdman $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpsnmpd.1ntpsnmpdman > $(srcdir)/ntpsnmpd.man.in+
+	mv $(srcdir)/ntpsnmpd.man.in+ $(srcdir)/ntpsnmpd.man.in
+
+###
+
+$(srcdir)/ntpsnmpd.1ntpsnmpdmdoc: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntpsnmpdmdoc -Tagmdoc-cmd.tpl ntpsnmpd-opts.def
+
+$(srcdir)/ntpsnmpd.mdoc.in: $(srcdir)/ntpsnmpd.1ntpsnmpdmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpsnmpd.1ntpsnmpdmdoc > $(srcdir)/ntpsnmpd.mdoc.in+
+	mv $(srcdir)/ntpsnmpd.mdoc.in+ $(srcdir)/ntpsnmpd.mdoc.in
+
+###
+
+ntpsnmpd.$(NTPSNMPD_MS): $(srcdir)/ntpsnmpd.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntpsnmpd.$(NTPSNMPD_MS)+:$(srcdir)/ntpsnmpd.$(MANTAGFMT).in
+	mv ntpsnmpd.$(NTPSNMPD_MS)+ ntpsnmpd.$(NTPSNMPD_MS)
+
+###
 
 $(srcdir)/ntpsnmpd-opts.menu: $(srcdir)/ntpsnmpd-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi

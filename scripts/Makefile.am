@@ -1,6 +1,11 @@
 NULL=
 
-man_MANS=	$(srcdir)/ntp-wait.1
+man1_MANS=
+man8_MANS=
+man_MANS=	ntp-wait.$(NTP_WAIT_MS)
+
+DISTCLEANFILES=	config.log $(man_MANS)
+
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
@@ -12,11 +17,9 @@ std_def_list =							\
 	$(top_srcdir)/sntp/include/version.def			\
 	$(NULL)
 
-if NTP_BINSUBDIR_IS_BIN
-bin_SCRIPTS =	ntp-wait ntptrace
-else
-sbin_SCRIPTS =	ntp-wait ntptrace
-endif
+EXTRA_SCRIPTS =	ntp-wait ntptrace
+bin_SCRIPTS =	$(NTP_WAIT_DB) $(NTPTRACE_DB)
+sbin_SCRIPTS =	$(NTP_WAIT_DS) $(NTPTRACE_DS)
 
 noinst_SCRIPTS =		\
 	calc_tickadj		\
@@ -31,9 +34,11 @@ noinst_SCRIPTS =		\
 	$(NULL)
 
 noinst_DATA=				\
-	$(srcdir)/ntp-wait.html		\
-	$(srcdir)/ntp-wait-opts.texi	\
 	$(srcdir)/ntp-wait-opts.menu	\
+	$(srcdir)/ntp-wait-opts.texi	\
+	$(srcdir)/ntp-wait.html		\
+	$(srcdir)/ntp-wait.man.in	\
+	$(srcdir)/ntp-wait.mdoc.in	\
 	$(NULL)
 
 EXTRA_DIST =			\
@@ -50,7 +55,10 @@ EXTRA_DIST =			\
 	ntp-groper		\
 	ntp-restart		\
 	ntp-status		\
-	ntp-wait.1		\
+	ntp-wait.1ntp-waitman	\
+	ntp-wait.1ntp-waitmdoc	\
+	ntp-wait.man.in		\
+	ntp-wait.mdoc.in	\
 	ntp-wait.html		\
 	ntp-wait.texi		\
 	ntp-wait-opts.def	\
@@ -63,10 +71,31 @@ EXTRA_DIST =			\
 	VersionName		\
 	$(NULL)
 
-# For man pages, use agman-cmd.tpl
-# For mdoc pages, use agmdoc-cmd.tpl
-$(srcdir)/ntp-wait.1: $(srcdir)/ntp-wait-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntp-wait-opts.def
+###
+
+$(srcdir)/ntp-wait.1ntp-waitman: $(srcdir)/ntp-wait-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntp-waitman -Tagman-cmd.tpl ntp-wait-opts.def
+
+$(srcdir)/ntp-wait.man.in: $(srcdir)/ntp-wait.1ntp-waitman $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-wait.1ntp-waitman > $(srcdir)/ntp-wait.man.in+
+	mv $(srcdir)/ntp-wait.man.in+ $(srcdir)/ntp-wait.man.in
+
+###
+
+$(srcdir)/ntp-wait.1ntp-waitmdoc: $(srcdir)/ntp-wait-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntp-waitmdoc -Tagmdoc-cmd.tpl ntp-wait-opts.def
+
+$(srcdir)/ntp-wait.mdoc.in: $(srcdir)/ntp-wait.1ntp-waitmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-wait.1ntp-waitmdoc > $(srcdir)/ntp-wait.mdoc.in+
+	mv $(srcdir)/ntp-wait.mdoc.in+ $(srcdir)/ntp-wait.mdoc.in
+
+###
+
+ntp-wait.$(NTP_WAIT_MS): $(srcdir)/ntp-wait.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntp-wait.$(NTP_WAIT_MS)+:$(srcdir)/ntp-wait.$(MANTAGFMT).in
+	mv ntp-wait.$(NTP_WAIT_MS)+ ntp-wait.$(NTP_WAIT_MS)
+
+###
 
 $(srcdir)/ntp-wait-opts.menu: $(srcdir)/ntp-wait-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi

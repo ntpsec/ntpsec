@@ -1,10 +1,7 @@
 NULL=
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
-else
-sbin_PROGRAMS=	ntpd @MAKE_NTPDSIM@
-endif
+bin_PROGRAMS=	$(NTPD_BD) $(NTPDSIM_BD)
+sbin_PROGRAMS=	$(NTPD_BS) $(NTPDSIM_BS)
 
 noinst_LIBRARIES=	libntpd.a
 
@@ -79,7 +76,9 @@ BUILT_SOURCES=		\
 	$(B_S_DIST)	\
 	$(NULL)
 
-man_MANS=	$(srcdir)/ntpd.1
+man1_MANS=
+man8_MANS=
+man_MANS=	ntpd.$(NTPD_MS)
 
 # ntpdsim.1 is a remnant along with all the ntpdsim-opts.* files, the
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
@@ -98,21 +97,27 @@ DISTCLEANFILES =		\
 	keyword-gen		\
 	.version		\
 	version.c		\
+	config.log		\
+	$(man_MANS)		\
 	$(NULL)
 
 CLEANFILES =			\
 	check-saveconfig	\
 	compsave.conf		\
 	k-g-u-submake		\
+	$(EXTRA_PROGRAMS)	\
 	$(NULL)
 
 EXTRA_DIST =			\
 	complete.conf		\
 	keyword-gen-utd		\
-	ntpd.1			\
 	ntpd-opts.def		\
 	ntpd-opts.menu		\
 	ntpd-opts.texi		\
+	ntpd.1ntpdman		\
+	ntpd.1ntpdmdoc		\
+	ntpd.man.in		\
+	ntpd.mdoc.in		\
 	ntpdbase-opts.def	\
 	refclock_msfees.c	\
 	refclock_trak.c		\
@@ -121,8 +126,14 @@ EXTRA_DIST =			\
 
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
-EXTRA_PROGRAMS = check_y2k ntpdsim keyword-gen
-noinst_DATA =	$(srcdir)/ntpd-opts.texi $(srcdir)/ntpd-opts.menu
+EXTRA_PROGRAMS = check_y2k keyword-gen ntpd ntpdsim
+noinst_DATA =				\
+	$(srcdir)/ntpd-opts.menu	\
+	$(srcdir)/ntpd-opts.texi	\
+	$(srcdir)/ntpd.man.in		\
+	$(srcdir)/ntpd.mdoc.in		\
+	$(NULL)
+
 noinst_HEADERS = declcond.h
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
@@ -244,10 +255,31 @@ $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
 $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpd-opts.def
 
-# For man pages, use agman-cmd.tpl
-# For mdoc pages, use agmdoc-cmd.tpl
-$(srcdir)/ntpd.1: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=1 -Tagmdoc-cmd.tpl ntpd-opts.def
+###
+
+$(srcdir)/ntpd.1ntpdman: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntpdman -Tagman-cmd.tpl ntpd-opts.def
+
+$(srcdir)/ntpd.man.in: $(srcdir)/ntpd.1ntpdman $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpd.1ntpdman > $(srcdir)/ntpd.man.in+
+	mv $(srcdir)/ntpd.man.in+ $(srcdir)/ntpd.man.in
+
+###
+
+$(srcdir)/ntpd.1ntpdmdoc: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
+	$(run_ag) -DMAN_SECTION=1ntpdmdoc -Tagmdoc-cmd.tpl ntpd-opts.def
+
+$(srcdir)/ntpd.mdoc.in: $(srcdir)/ntpd.1ntpdmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpd.1ntpdmdoc > $(srcdir)/ntpd.mdoc.in+
+	mv $(srcdir)/ntpd.mdoc.in+ $(srcdir)/ntpd.mdoc.in
+
+###
+
+ntpd.$(NTPD_MS): $(srcdir)/ntpd.$(MANTAGFMT).in $(top_builddir)/config.status
+	$(top_builddir)/config.status --file=ntpd.$(NTPD_MS)+:$(srcdir)/ntpd.$(MANTAGFMT).in
+	mv ntpd.$(NTPD_MS)+ ntpd.$(NTPD_MS)
+
+###
 
 $(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi

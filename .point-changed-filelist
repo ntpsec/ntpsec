@@ -23,7 +23,10 @@ scripts/ntp-wait.html
 sntp/sntp-opts.c
 sntp/sntp-opts.h
 sntp/sntp-opts.texi
-sntp/sntp.1
+sntp/sntp.1sntpman
+sntp/sntp.1sntpmdoc
+sntp/sntp.man.in
+sntp/sntp.mdoc.in
 sntp/sntp.html
 util/ntp-keygen-opts.c
 util/ntp-keygen-opts.h

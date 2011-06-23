@@ -341,7 +341,7 @@ job,
 .Ic "sntp -a"
 will reset the local clock from a synchronized specified server,
 like the (deprecated)
-.Xr ntpdate 8 ,
+.Xr ntpdate 1ntpdatemdoc ,
 or
 .Xr rdate 8
 commands.

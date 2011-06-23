@@ -3507,6 +3507,11 @@ AC_CACHE_CHECK(
 case "$ntp_cv_make_timetrim" in
  yes)
     MAKE_TIMETRIM=timetrim
+    ;;
+ *) TIMETRIM_DB=
+    TIMETRIM_DS=
+    TIMETRIM_MS=
+    ;;
 esac
 
 AC_SUBST([MAKE_LIBNTPSIM])
@@ -3622,6 +3627,13 @@ case "$ans" in
 esac
 AC_SUBST([MAKE_NTPSNMPD])
 
+case "$MAKE_NTPSNMPD" in
+ '')
+    NTPSNMPD_DB=
+    NTPSNMPD_DS=
+    NTPSNMPD_MS=
+    ;;
+esac
 
 AC_MSG_CHECKING([if we should always slew the time])
 
@@ -4041,6 +4053,20 @@ AC_CONFIG_FILES([scripts/summary],	[chmod +x scripts/summary])
 AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([tests/libntp/Makefile])
 AC_CONFIG_FILES([util/Makefile])
+
+###
+case "$SNTP_DB" in
+ '') ;;
+ *) ac_configure_args=" --with-binsubdir=bin${ac_configure_args}" ;;
+esac
+
+case "$SNTP_DS" in
+ '') ;;
+ *) ac_configure_args=" --with-binsubdir=sbin${ac_configure_args}" ;;
+esac
+ac_configure_args=" --with-mansec=$SNTP_MS${ac_configure_args}"
+ac_configure_args=" --with-mansec=$SNTP_MS${ac_configure_args}"
+ac_configure_args=" NTPDATE_MS=$NTPDATE_MS${ac_configure_args}"
 
 AC_CONFIG_SUBDIRS([sntp])
 

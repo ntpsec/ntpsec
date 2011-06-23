@@ -54,6 +54,10 @@ AC_CONFIG_HEADER([config.h])
 dnl AC_ARG_PROGRAM
 
 NTP_PROG_CC
+
+dnl NTP_LOCINFO
+AC_SUBST([NTPDATE_MS])
+
 NTP_LIBNTP
 
 AC_DISABLE_SHARED
@@ -61,6 +65,99 @@ AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
 NTP_WITHSNTP
+
+# We need to know:
+# - where to install sntp {bin,sbin}
+# - what manual section the sntp page belongs in {1,1m,1M,8}
+# - which style of macros should be used {man.mdoc}
+#
+# When configure is invoked from the main NTP directory, we will have:
+# - SNTP_DB={bin,}
+# - SNTP_DS={,sbin}
+# - SNTP_MS={1,1m,1M,8}
+# - MANTAGFMT={man,mdoc}
+
+AC_MSG_CHECKING([for bin subdirectory])
+AC_ARG_WITH(
+    [binsubdir],
+    [AS_HELP_STRING(
+	[--with-binsubdir],
+	[bin ={bin,sbin}]
+    )],
+    [use_binsubdir="$withval"],
+    [use_binsubdir="bin"]
+)
+case "$use_binsubdir" in
+ bin)
+    SNTP_DB=sntp
+    SNTP_DS=
+    ;;
+ sbin)
+    SNTP_DB=
+    SNTP_DS=sntp
+    ;;
+ *)
+    AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
+    ;;
+esac
+AC_MSG_RESULT([$use_binsubdir])
+
+AC_SUBST([SNTP_DB])
+AC_SUBST([SNTP_DS])
+
+AC_MSG_CHECKING([for manual page installation section])
+AC_ARG_WITH(
+    [mansec],
+    [AS_HELP_STRING(
+	[--with-mansec],
+	[1 ={1,1m,1M,8}]
+    )],
+    [use_mansec="$withval"],
+    [use_mansec="1"]
+)
+case "$use_mansec" in
+ 1)
+    ;;
+ 1m)
+    ;;
+ 1M)
+    ;;
+ 8)
+    ;;
+ *)
+    AC_MSG_ERROR([<$use_mansec> is illegal - must be "1" or "1m" or "1M" or "8"])
+    ;;
+esac
+SNTP_MS=$use_mansec
+AC_MSG_RESULT([$use_mansec])
+
+AC_SUBST([SNTP_MS])
+
+AC_MSG_CHECKING([for manual page formatting macros])
+AC_ARG_WITH(
+    [mantagfmt],
+    [AS_HELP_STRING(
+	[--with-mantagfmt],
+	[man ={man,mdoc}]
+    )],
+    [use_mantagfmt="$withval"],
+    [use_mantagfmt="man"]
+)
+case "$use_mantagfmt" in
+ man)
+    ;;
+ mdoc)
+    ;;
+ *)
+    AC_MSG_ERROR([<$use_mantagfmt> is illegal - must be "man" or "mdoc"])
+    ;;
+esac
+MANTAGFMT=$use_mantagfmt
+AC_MSG_RESULT([$use_mantagfmt])
+
+AC_SUBST([MANTAGFMT])
+
+###
 
 # NTP has (so far) been relying on leading-edge autogen.
 # Therefore, by default:
