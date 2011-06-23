@@ -1,4 +1,5 @@
 * Finish conversion to genLocInfo.
+* validate MANTAGFMT in genLocInfo.
 * [Bug 1950] Control installation of event_rpcgen.py.
 * ntp_locs.m4: handle the case where . is not in the PATH.
 * . may not be in the PATH - ntp_locs.m4 fix.

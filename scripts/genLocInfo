@@ -154,7 +154,15 @@ do
     fi
 done < $LF
 IFS=$oIFS
-echo "MANTAGFMT=$TF"
+
+case "$TF" in
+ \?)
+    echo "MANTAGFMT not found!" >&2
+    RC=1
+    ;;
+ *) echo "MANTAGFMT=$TF"
+    ;;
+esac
 
 case "$RC" in
  0) echo 'GENLOCINFO=OK' ;;
