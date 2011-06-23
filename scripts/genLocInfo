@@ -78,7 +78,6 @@ echo "GENLOCINFOFILE=$LF"
 oIFS=$IFS
 IFS=","
 
-TF='?'
 while true
 do
     if read c d s x
@@ -96,11 +95,11 @@ do
 	esac
 	case "$c,$d,$s" in
 	 [Mm][Aa][Nn],,)
-	    TF=man
+	    echo "MANTAGFMT=man"
 	    continue
 	    ;;
 	 [Mm][Dd][Oo][Cc],,)
-	    TF=man
+	    echo "MANTAGFMT=mdoc"
 	    continue
 	    ;;
 	esac
@@ -154,15 +153,6 @@ do
     fi
 done < $LF
 IFS=$oIFS
-
-case "$TF" in
- \?)
-    echo "MANTAGFMT not found!" >&2
-    RC=1
-    ;;
- *) echo "MANTAGFMT=$TF"
-    ;;
-esac
 
 case "$RC" in
  0) echo 'GENLOCINFO=OK' ;;
