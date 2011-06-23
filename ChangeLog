@@ -1,3 +1,4 @@
+(4.2.7p186) 2011/06/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1950] Control installation of event_rpcgen.py.
 * Update .point-changed-filelist for the new man pages.
 * Update the building of OS-specific programs.

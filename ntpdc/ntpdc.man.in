@@ -1,8 +1,8 @@
-.TH ntpdc @NTPDC_MS@ "22 Jun 2011" "4.2.7p184" "User Commands"
+.TH ntpdc @NTPDC_MS@ "23 Jun 2011" "4.2.7p186" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  June 22, 2011 at 04:57:51 AM by AutoGen 5.11.10pre10
+.\"  It has been AutoGen-ed  June 23, 2011 at 11:24:41 AM by AutoGen 5.11.10pre10
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -538,32 +538,4 @@ undecodable without a copy of the driver source in hand.
 .Ss "Runtime Configuration Requests"
 All requests which cause state changes in the server are
 authenticated by the server using a configured NTP key (the
-facility can also be disabled by the server by not configuring a
-key).
-The key number and the corresponding key must also be made
-known to
-.B  .
-This can be done using the
-.Ic keyid
-and
-.Ic passwd
-commands, the latter of which will prompt at the terminal for a
-password to use as the encryption key.
-You will also be prompted
-automatically for both the key number and password the first time a
-command which would result in an authenticated request to the
-server is given.
-Authentication not only provides verification that
-the requester has permission to make such changes, but also gives
-an extra degree of protection again transmission errors.
-.PP
-Authenticated requests always include a timestamp in the packet
-data, which is included in the computation of the authentication
-code.
-This timestamp is compared by the server to its receive time
-stamp.
-If they differ by more than a small amount the request is
-rejected.
-This is done for two reasons.
-First, it makes simple
-replay attacks on the server, by someone who might be able to
+facility can also be disabled by the server by not
