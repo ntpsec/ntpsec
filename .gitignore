@@ -12,10 +12,6 @@
 #*
 .#*
 # Simulated bk default ignores end here
-*.man.in
-*.mdoc.in
-*.1*man
-*.1*mdoc
 *.vcproj.*.user
 */autom4te.cache -prune
 */include/version.def
