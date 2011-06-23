@@ -5,6 +5,7 @@ EXTRA_DIST =			\
 	copyright.def		\
 	debug-opt.def		\
 	homerc.def		\
+	mansec2subst.sed	\
 	ntp.lic			\
 	version.def		\
 	version.texi		\

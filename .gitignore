@@ -52,6 +52,7 @@ firefly.sh
 html/man/*
 html/pic/thumbs.db
 html/thumbs.db
+html-new/*
 include/Makefile.in
 include/isc/Makefile.am.$$$
 include/isc/netaddr.h.$$$

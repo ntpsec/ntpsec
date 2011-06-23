@@ -10,7 +10,7 @@ PATH=$PATH:sntp/libevent/build-aux
 
 RC=0
 
-# Figure out which loc.* file we want to use.
+# Figure out which loc/* file we want to use.
 #
 # Either start parsing them from least- to most-specific,
 # or just grab the one we like best.
@@ -28,7 +28,7 @@ do
     case "$x" in
      '') break ;;
     esac
-    lf=loc.$CVO_OSNAME$x
+    lf=loc/$CVO_OSNAME$x
 ${V}echo "Looking for <$lf>" >&2
     if test -f $lf
     then
@@ -42,7 +42,7 @@ ${V}echo "Looking for <$lf>" >&2
 done
 case "$LF" in
  '')
-    lf=loc.$CVO_OSNAME
+    lf=loc/$CVO_OSNAME
 ${V}echo "Looking for <$lf>" >&2
     if test -f $lf
     then
@@ -50,9 +50,11 @@ ${V}echo "Looking for <$lf>" >&2
     fi
     ;;
 esac
+# This might be a good place to see if uname returns "Linux",
+# and if so, use a generic file for that.
 case "$LF" in
  '')
-    lf=loc.legacy
+    lf=loc/legacy
 ${V}echo "Looking for <$lf>" >&2
     if test -f $lf
     then
@@ -63,7 +65,7 @@ esac
 
 case "$LF" in
  '')
-    echo "No loc.XXX file found!" >&2
+    echo "No loc/XXX file found!" >&2
     exit 1
     ;;
 esac
@@ -76,7 +78,6 @@ echo "GENLOCINFOFILE=$LF"
 oIFS=$IFS
 IFS=","
 
-TF='?'
 while true
 do
     if read c d s x
@@ -94,11 +95,11 @@ do
 	esac
 	case "$c,$d,$s" in
 	 [Mm][Aa][Nn],,)
-	    TF=man
+	    echo "MANTAGFMT=man"
 	    continue
 	    ;;
 	 [Mm][Dd][Oo][Cc],,)
-	    TF=man
+	    echo "MANTAGFMT=mdoc"
 	    continue
 	    ;;
 	esac
@@ -152,7 +153,6 @@ do
     fi
 done < $LF
 IFS=$oIFS
-echo "MANTAGFMT=$TF"
 
 case "$RC" in
  0) echo 'GENLOCINFO=OK' ;;

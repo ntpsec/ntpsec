@@ -1,10 +1,7 @@
 ## adjtimed Makefile.am
 
-if NTP_BINSUBDIR_IS_BIN
-bin_PROGRAMS = @MAKE_ADJTIMED@
-else
-sbin_PROGRAMS =	@MAKE_ADJTIMED@
-endif
+bin_PROGRAMS = $(ADJTIMED_DB)
+sbin_PROGRAMS =	$(ADJTIMED_DS)
 
 BUILT_SOURCES =
 CLEANFILES =

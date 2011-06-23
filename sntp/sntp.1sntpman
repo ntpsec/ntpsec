@@ -1,0 +1,293 @@
+.TH sntp 1sntpman "21 Jun 2011" "4.2.7p184" "User Commands"
+.\"
+.\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
+.\"  
+.\"  It has been AutoGen-ed  June 21, 2011 at 03:45:41 AM by AutoGen 5.11.10pre10
+.\"  From the definitions    sntp-opts.def
+.\"  and the template file   agman-cmd.tpl
+.\"
+.SH NAME
+sntp \- standard Simple Network Time Protocol program
+.SH SYNOPSIS
+.B sntp
+.\" Mixture of short (flag) options and long options
+.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..." [ hostname-or-IP ...]
+.PP
+.SH DESCRIPTION
+.B 
+can be used as a SNTP client to query a NTP or SNTP server and either display
+the time or set the local system's time (given suitable privilege).  It can be
+run as an interactive command or in a
+.Ic cron
+job.
+NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
+are defined and described by RFC 5905.
+.PP
+The default is to write the estimated correct local date and time (i.e. not
+UTC) to the standard output in a format like:
+.Ic "'1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs'"
+where the
+.Ic "'(+0800)'"
+means that to get to UTC from the reported local time one must
+add 8 hours and 0 minutes,
+and the
+.Ic "'+4.567 +/- 0.089 secs'"
+indicates the local clock is 4.567 seconds behind the correct time
+(so 4.567 seconds must be added to the local clock to get it to be correct),
+and the date/time of
+'1996-10-15 20:17:25.123'
+is believed to be correct to within
++/- 0.089
+seconds.
+.SH "OPTIONS"
+.TP
+.BR \-4 ", " -\-ipv4
+Force IPv4 DNS name resolution.
+This option must not appear in combination with any of the following options:
+ipv6.
+.sp
+Force DNS resolution of the following host names on the command line
+to the IPv4 namespace.
+.TP
+.BR \-6 ", " -\-ipv6
+Force IPv6 DNS name resolution.
+This option must not appear in combination with any of the following options:
+ipv4.
+.sp
+Force DNS resolution of the following host names on the command line
+to the IPv6 namespace.
+.TP
+.BR \-a " \fIauth\-keynumber\fP, " \-\-authentication "=" \fIauth\-keynumber\fP
+Enable authentication with the key auth-keynumber.
+This option takes an integer number as its argument.
+.sp
+This option enables authentication using the key specified in this
+option's argument.  The argument of this option is the keyid, a
+number specified in the keyfile as this key's identifier. See the
+keyfile option (-k) for more details.
+.TP
+.BR \-B " \fIseconds\fP, " \-\-bctimeout "=" \fIseconds\fP
+The number of seconds to wait for broadcasts.
+This option takes an integer number as its argument.
+The default \fIseconds\fP for this option is:
+.ti +4
+ 68
+.sp
+When waiting for a broadcast packet SNTP will wait the number
+of seconds specified before giving up.  Default 68 seconds.
+.TP
+.BR \-b " \fIbroadcast\-address\fP, " \-\-broadcast "=" \fIbroadcast\-address\fP
+Listen to the address specified for broadcast time sync.
+This option may appear an unlimited number of times.
+.sp
+If specified SNTP will listen to the specified address
+for NTP broadcasts.  The default maximum wait time,
+68 seconds, can be modified with -B.
+.TP
+.BR \-c " \fIhost\-name\fP, " \-\-concurrent "=" \fIhost\-name\fP
+Concurrently query all IPs returned for host-name.
+This option may appear an unlimited number of times.
+.sp
+Requests from an NTP "client" to a "server" should never be sent
+more rapidly than one every 2 seconds.  By default, any IPs returned
+as part of a DNS lookup are assumed to be for a single instance of
+ntpd, and therefore sntp will send queries to these IPs one after
+another, with a 2-second gap in between each query.
+The -c or --concurrent flag says that any IPs returned for the DNS
+lookup of the supplied host-name are on different machines, so we
+can send concurrent queries.
+.TP
+.BR \-d ", " -\-debug\-level
+Increase debug verbosity level.
+This option may appear an unlimited number of times.
+.sp
+.TP
+.BR \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
+Set the debug verbosity level.
+This option may appear an unlimited number of times.
+.sp
+.TP
+.BR \-h " \fImilliseconds\fP, " \-\-headspace "=" \fImilliseconds\fP
+The gap (in milliseconds) between time requests.
+This option takes an integer number as its argument.
+The default \fImilliseconds\fP for this option is:
+.ti +4
+ 10
+.sp
+Since we're only going to use the first valid response we get and
+there is benefit to specifying a good number of servers to query,
+separate the queries we send out by the specified number of
+milliseconds.
+Default 10 milliseconds.
+.TP
+.BR \-K " \fIfile\-name\fP, " \-\-kod "=" \fIfile\-name\fP
+KoD history filename.
+The default \fIfile\-name\fP for this option is:
+.ti +4
+ /var/db/ntp-kod
+.sp
+Specifies the filename to be used for the persistent history of KoD
+responses received from servers.  The default is
+/var/db/ntp-kod .
+.TP
+.BR \-k " \fIfile\-name\fP, " \-\-keyfile "=" \fIfile\-name\fP
+Look in this file for the key specified with -a.
+.sp
+This option specifies the keyfile.
+SNTP will search for the key specified with -a keyno in this
+file. Key files follow the following format:
+keyid keytype key
+Where	keyid is a number identifying this key
+keytype is one of the following:
+S  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
+N  Key is a 64 Bit hexadecimal number as specified in the NTP standard.
+A  Key is a 1-to-8 character ASCII string.
+M  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
+For more information see ntp.keys(5).
+.TP
+.BR \-l " \fIfile\-name\fP, " \-\-filelog "=" \fIfile\-name\fP
+Log to specified logfile.
+.sp
+This option causes the client to write log messages to the specified
+logfile.
+.TP
+.BR \-M " \fInumber\fP, " \-\-steplimit "=" \fInumber\fP
+Adjustments less than steplimit msec will be slewed.
+This option takes an integer number as its argument.
+The value of \fInumber\fP is constrained to being:
+.in +4
+.nf
+.na
+greater than or equal to 0
+.fi
+.in -4
+.sp
+If the time adjustment is less than steplimit milliseconds, slew the
+amount using adjtime().  Otherwise, step the correction using
+settimeofday(). 
+.TP
+.BR \-o " \fInumber\fP, " \-\-ntpversion "=" \fInumber\fP
+Send <int> as our NTP version.
+This option takes an integer number as its argument.
+The value of \fInumber\fP is constrained to being:
+.in +4
+.nf
+.na
+in the range  0 through 7
+.fi
+.in -4
+The default \fInumber\fP for this option is:
+.ti +4
+ 4
+.sp
+When sending requests to a remote server, tell them we are running
+NTP protocol version <ntpversion> .
+.TP
+.BR \-r ", " -\-usereservedport
+Use the NTP Reserved Port (port 123).
+.sp
+Use port 123, which is reserved for NTP, for our network
+communications.
+.TP
+.BR \-S ", " -\-step
+OK to 'step' the time with settimeofday().
+.sp
+.TP
+.BR \-s ", " -\-slew
+OK to 'slew' the time with adjtime().
+.sp
+.TP
+.BR \-u " \fIseconds\fP, " \-\-uctimeout "=" \fIseconds\fP
+The number of seconds to wait for unicast responses.
+This option takes an integer number as its argument.
+The default \fIseconds\fP for this option is:
+.ti +4
+ 5
+.sp
+When waiting for a unicast reply, SNTP will wait the number
+of seconds specified before giving up.  Default 5 seconds.
+.TP
+.BR \-\-wait, " \fB\-\-no\-wait\fP"
+Wait for pending replies (if not setting the time).
+The \fIno\-wait\fP form will disable the option.
+This option is enabled by default.
+.sp
+If we are not setting the time, wait for all pending responses.
+.TP
+.BR \-? , " \-\-help"
+Display usage information and exit.
+.TP
+.BR \-! , " \-\-more-help"
+Pass the extended usage information through a pager.
+.TP
+.BR \-> " [\fIrcfile\fP]," " \-\-save-opts" "[=\fIrcfile\fP]"
+Save the option state to \fIrcfile\fP.  The default is the \fIlast\fP
+configuration file listed in the \fBOPTION PRESETS\fP section, below.
+.TP
+.BR \-< " \fIrcfile\fP," " \-\-load-opts" "=\fIrcfile\fP," " \-\-no-load-opts"
+Load options from \fIrcfile\fP.
+The \fIno-load-opts\fP form will disable the loading
+of earlier RC/INI files.  \fI\-\-no-load-opts\fP is handled early,
+out of order.
+.TP
+.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
+Output version of program and exit.  The default mode is `v', a simple
+version.  The `c' mode will print copyright information and `n' will
+print the full copyright notice.
+.SH "OPTION PRESETS"
+Any option that is not marked as \fInot presettable\fP may be preset
+by loading values from configuration ("RC" or ".INI") file(s) and values from
+environment variables named:
+.nf
+  \fBSNTP_<option-name>\fP or \fBSNTP\fP
+.fi
+.ad
+The environmental presets take precedence (are processed later than)
+the configuration files.
+The \fIhomerc\fP files are "\fI$HOME\fP", "\fI.\fP", "\fI$HOME\fP", and "\fI.\fP".
+If any of these are directories, then the file \fI.ntprc\fP
+is searched for within those directories.
+.SH USAGE
+.TP
+.BR Li "sntp ntpserver.somewhere"
+is the simplest use of this program
+and can be run as an unprivileged command
+to check the current time and error in the local clock.
+.TP
+.BR Li "sntp -a ntpserver.somewhere"
+With suitable privilege,
+run as a command
+or from a
+.Xr cron 8
+job,
+.Ic "sntp -a"
+will reset the local clock from a synchronized specified server,
+like the (deprecated)
+.Xr ntpdate 1ntpdatemdoc ,
+or
+.Xr rdate 8
+commands.
+.SH "ENVIRONMENT"
+See \fBOPTION PRESETS\fP for configuration environment variables.
+.SH "FILES"
+See \fBOPTION PRESETS\fP for configuration files.
+.SH "EXIT STATUS"
+One of the following exit values will be returned:
+.TP
+.BR 0
+Successful program execution.
+.TP
+.BR 1
+The operation failed or the command syntax was not valid.
+.SH AUTHORS
+.An "Johannes Maximilian Kuehn"
+.An "Harlan Stenn"
+.An "Dave Hart"
+.SH "COPYRIGHT"
+Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others all rights reserved.
+This program is released under the terms of the NTP license, <http://ntp.org/license>.
+.SH BUGS
+Please report bugs to http://bugs.ntp.org .
+.SH "NOTES"
+This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
+option definitions.

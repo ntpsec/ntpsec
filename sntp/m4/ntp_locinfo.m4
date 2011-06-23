@@ -2,7 +2,7 @@ dnl ######################################################################
 dnl Location information:
 dnl - installation directory (*_DB for bin/, *_DS for sbin/)
 dnl - man tag format (man or mdoc)
-dnl - man section (1, 1m, 8)
+dnl - man section (1, 1m, 1M, 8)
 
 AC_DEFUN([NTP_LOCINFO], [
 
@@ -14,6 +14,7 @@ AC_MSG_CHECKING([for installation directory, man sections, and man format])
 case "$GENLOCINFO" in
  OK)
     AC_MSG_RESULT([found in $GENLOCINFOFILE])
+    rm genLocInfo.err genLocInfo.i
     ;;
  *) AC_MSG_ERROR([Problem with genLocInfo!])
     ;;
