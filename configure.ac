@@ -2865,11 +2865,17 @@ case "$host" in
  *) ans=no
     ;;
 esac
-if test "$ans" = "yes"; then
+case "$ans" in
+ yes)
     MAKE_ADJTIMED=adjtimed
     AC_DEFINE([NEED_HPUX_ADJTIME], [1],
 	[Do we need HPUX adjtime() library support?])
-fi
+    ;;
+ *) ADJTIMED_DB=
+    ADJTIMED_DS=
+    ADJTIMED_MS=
+    ;;
+esac
 AC_MSG_RESULT([$ans])
 
 AC_MSG_CHECKING([if we want QNX adjtime support])
@@ -3440,6 +3446,11 @@ case "$ac_cv_make_ntptime" in
  yes)
     MAKE_NTPTIME=ntptime
     ;;
+ *)
+    NTPTIME_DB=
+    NTPTIME_DS=
+    NTPTIME_MS=
+    ;;
 esac
 
 AC_SUBST([MAKE_TICKADJ])
@@ -3484,6 +3495,12 @@ AC_CACHE_CHECK(
 case "$ntp_cv_make_tickadj" in
  yes)
     MAKE_TICKADJ=tickadj
+    ;;
+ *)
+    TICKADJ_DB=
+    TICKADJ_DS=
+    TICKADJ_MS=
+    ;;
 esac
 
 AC_SUBST([MAKE_TIMETRIM])
@@ -3532,6 +3549,12 @@ case "$ans" in
  yes)
     MAKE_NTPDSIM=ntpdsim
     MAKE_LIBNTPSIM=libntpsim.a
+    ;;
+ *)
+    NTPDSIM_DB=
+    NTPDSIM_DS=
+    NTPDSIM_MS=
+    ;;
 esac
 
 case "$build" in
