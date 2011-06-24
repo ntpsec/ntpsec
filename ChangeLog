@@ -1,4 +1,8 @@
 * [Bug 1954] Fix typos in [s]bin_PROGRAMS in ntpd/Makefile.am.
+* Implement --with-locfile=filename configure argument.  If filename is
+  empty we'll look under loc/ for a good fit.  If the filename contains
+  a / character, it will be treated as a "normal" pathname.  Otherwise,
+  that explicit file will be searched for under loc/ .
 (4.2.7p186) 2011/06/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1950] Control installation of event_rpcgen.py.
 * Update .point-changed-filelist for the new man pages.

@@ -6,9 +6,21 @@ dnl - man section (1, 1m, 1M, 8)
 
 AC_DEFUN([NTP_LOCINFO], [
 
+AC_ARG_WITH(
+    [locfile],
+    [AS_HELP_STRING(
+	[--with-locfile],
+	[os-specific or "legacy"]
+    )],
+    [ans=$withval],
+    [ans=]
+)
+# HMS: the following is wrong...
+ntp_cv_locfile=$ans
+
 AC_MSG_CHECKING([for installation directory, man sections, and man format])
 
-( cd $ac_abs_confdir && scripts/genLocInfo ) > genLocInfo.i 2>genLocInfo.err
+( cd $ac_abs_confdir && scripts/genLocInfo -f "$ntp_cv_locfile" ) > genLocInfo.i 2>genLocInfo.err
 . ./genLocInfo.i
 
 case "$GENLOCINFO" in

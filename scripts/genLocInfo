@@ -1,61 +1,29 @@
 #! /bin/sh
 
-case "$1" in
- -v)
-    V= ;;
- *) V=": " ;;
-esac
+args=`getopt f:v $*`
+set -- $args
 
-PATH=$PATH:sntp/libevent/build-aux
-
-RC=0
-
-# Figure out which loc/* file we want to use.
-#
-# Either start parsing them from least- to most-specific,
-# or just grab the one we like best.
-
-set `scripts/cvo.sh @osname@ @osver@` || exit 1
-
-CVO_OSNAME=$1
-CVO_OSVER=$2
-
-x=$CVO_OSVER
 LF=
+RC=0
+V=": "
 
-while true
+for i
 do
-    case "$x" in
-     '') break ;;
-    esac
-    lf=loc/$CVO_OSNAME$x
-${V}echo "Looking for <$lf>" >&2
-    if test -f $lf
-    then
-	LF=$lf
-	break
-    fi
-    case "$x" in
-     *.*) x=`echo $x | sed -e 's/\.[^.]*$//'` ;;
-     *) x= ;;
+    case "$i" in
+     -f) locfile="$2" ; shift ;;
+     -v) V= ; shift ;;
+     --) shift ; break ;;
     esac
 done
-case "$LF" in
- '')
-    lf=loc/$CVO_OSNAME
-${V}echo "Looking for <$lf>" >&2
-    if test -f $lf
-    then
-	LF=$lf
-    fi
+
+case "$locfile" in
+ */*)
+    LF=$locfile
     ;;
-esac
-# This might be a good place to see if uname returns "Linux",
-# and if so, use a generic file for that.
-case "$LF" in
  '')
-    lf=loc/legacy
-${V}echo "Looking for <$lf>" >&2
+    ;;
+ *)
+    lf=loc/$LOCFILE
     if test -f $lf
     then
 	LF=$lf
@@ -63,10 +31,63 @@ ${V}echo "Looking for <$lf>" >&2
     ;;
 esac
 
+# If we have a file to use (ie, LF is not empty) then look for one.
 case "$LF" in
  '')
-    echo "No loc/XXX file found!" >&2
-    exit 1
+    PATH=$PATH:sntp/libevent/build-aux
+    set `scripts/cvo.sh @osname@ @osver@` || exit 1
+
+    CVO_OSNAME=$1
+    CVO_OSVER=$2
+
+    x=$CVO_OSVER
+
+    while true
+    do
+	case "$x" in
+	 '') break ;;
+	esac
+lf=loc/$CVO_OSNAME$x
+${V}echo "Looking for <$lf>" >&2
+	if test -f $lf
+	then
+	    LF=$lf
+	    break
+	fi
+	case "$x" in
+	 *.*) x=`echo $x | sed -e 's/\.[^.]*$//'` ;;
+	 *) x= ;;
+	esac
+    done
+    case "$LF" in
+     '')
+	lf=loc/$CVO_OSNAME
+${V}echo "Looking for <$lf>" >&2
+	if test -f $lf
+	then
+	    LF=$lf
+	fi
+	;;
+    esac
+    # This might be a good place to see if uname returns "Linux",
+    # and if so, use a generic file for that.
+    case "$LF" in
+     '')
+	lf=loc/legacy
+${V}echo "Looking for <$lf>" >&2
+	if test -f $lf
+	then
+	    LF=$lf
+	fi
+	;;
+    esac
+
+    case "$LF" in
+     '')
+	echo "No loc/XXX file found!" >&2
+	exit 1
+	;;
+    esac
     ;;
 esac
 
