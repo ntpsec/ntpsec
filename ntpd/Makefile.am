@@ -1,7 +1,7 @@
 NULL=
 
-bin_PROGRAMS=	$(NTPD_BD) $(NTPDSIM_BD)
-sbin_PROGRAMS=	$(NTPD_BS) $(NTPDSIM_BS)
+bin_PROGRAMS=	$(NTPD_DB) $(NTPDSIM_DB)
+sbin_PROGRAMS=	$(NTPD_DS) $(NTPDSIM_DS)
 
 noinst_LIBRARIES=	libntpd.a
 
