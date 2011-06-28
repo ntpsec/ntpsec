@@ -35,6 +35,7 @@ esac
 case "$LF" in
  '')
     PATH=$PATH:sntp/libevent/build-aux
+    export PATH
     set `scripts/cvo.sh @osname@ @osver@` || exit 1
 
     CVO_OSNAME=$1

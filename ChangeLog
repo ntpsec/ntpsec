@@ -1,3 +1,4 @@
+* [Bug 1958] genLocInfo must export PATH.
 (4.2.7p187) 2011/06/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1954] Fix typos in [s]bin_PROGRAMS in ntpd/Makefile.am.
 * Implement --with-locfile=filename configure argument.  If filename is
