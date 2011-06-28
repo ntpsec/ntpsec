@@ -1,3 +1,4 @@
+(4.2.7p188) 2011/06/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1958] genLocInfo must export PATH.
 * ntp-wait: some versions of ntpd spell "associd" differently.
 (4.2.7p187) 2011/06/24 Released by Harlan Stenn <stenn@ntp.org>

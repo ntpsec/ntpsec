@@ -1,9 +1,9 @@
-.Dd June 24 2011
+.Dd June 28 2011
 .Dt NTP_WAIT 1ntp-waitmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  June 24, 2011 at 07:57:48 AM by AutoGen 5.11.10pre10
+.\"  It has been AutoGen-ed  June 28, 2011 at 06:58:50 AM by AutoGen 5.11.10pre10
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
