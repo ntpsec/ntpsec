@@ -21,7 +21,7 @@ for ($i = 0; $i < $opt_n; ++$i) {
       chomp;
       # the first line should be similar to:
       # associd=0 status=0645 leap_none, sync_ntp, ...
-      if (/^associd=0 status=(\S{4}) (\S+), (\S+),/) {
+      if (/^asso?c?id=0 status=(\S{4}) (\S+), (\S+),/i) {
 	my $status = $1;
 	my $leap = $2;
 	my $sync = $3;
