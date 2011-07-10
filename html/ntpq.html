@@ -21,7 +21,7 @@
 		<script type="text/javascript" language="javascript" src="scripts/manual.txt"></script>
 		<hr>
 		<h4>Synopsis</h4>
-		<tt>ntpq [-inp] [-c <i>command</i>] [<i>host</i>] [...]</tt>
+		<tt>ntpq [-46dinp] [-c <i>command</i>] [<i>host</i>] [...]</tt>
 		<h4>Description</h4>
 		<p>The <tt>ntpq</tt> utility program is used to monitor NTP daemon <tt>ntpd</tt> operations
 			and determine performance. It uses the standard NTP mode 6 control
@@ -81,7 +81,7 @@
 			<dd>Exit <tt>ntpq</tt>.</dd>
 			<dt><tt>raw</tt></dt>
 			<dd>Display server messages as received and without reformatting.</dd>
-			<dt><tt>timeout <i>millseconds</i></tt></dt>
+			<dt><tt>timeout <i>milliseconds</i></tt></dt>
 			<dd>Specify a timeout period for responses to server queries. The default is about 5000 milliseconds. Note that since <tt>ntpq</tt> retries each query once after a timeout, the total waiting time for a timeout will be twice the timeout value set.</dd>
 		</dl>
 		<h4>Control Message Commands</h4>
