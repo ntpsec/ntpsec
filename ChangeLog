@@ -1,6 +1,7 @@
 ---
 
 * [Bug 1134] ntpd fails binding to tentative IPv6 addresses.
+* [Bug 1790] Update config.guess and config.sub to detect AIX6.
 
 ---
 (4.2.6p4-beta2) 2011/05/25 Released by Harlan Stenn <stenn@ntp.org>
