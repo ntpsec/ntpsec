@@ -51,6 +51,10 @@
 #endif
 #include <net/if.h>
 
+#ifdef __linux
+# include <linux/if_addr.h>
+#endif
+
 /* Common utility functions */
 
 /*%
@@ -217,6 +221,13 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 			      "/proc/net/if_inet6:strlen(%s) != 32", address);
 		return (ISC_R_FAILURE);
 	}
+	/*
+	** Ignore DAD addresses --
+	** we can't bind to them until they are resolved
+	*/
+	if (flags & IFA_F_TENTATIVE)
+		return (ISC_R_IGNORE);
+
 	for (i = 0; i < 16; i++) {
 		unsigned char byte;
 		static const char hex[] = "0123456789abcdef";

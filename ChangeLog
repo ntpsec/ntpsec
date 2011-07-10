@@ -1,3 +1,7 @@
+* [Bug 1134] from 4.2.6p4-RC1: ntpd fails binding to tentative IPv6
+  addresses.
+* [Bug 1790] from 4.2.6p4-RC1: Update config.guess and config.sub to
+  detect AIX6.
 (4.2.7p188) 2011/06/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1958] genLocInfo must export PATH.
 * ntp-wait: some versions of ntpd spell "associd" differently.
@@ -1006,6 +1010,11 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Bug 1134] ntpd fails binding to tentative IPv6 addresses.
+* [Bug 1790] Update config.guess and config.sub to detect AIX6.
+
 ---
 (4.2.6p4-beta2) 2011/05/25 Released by Harlan Stenn <stenn@ntp.org>
 
