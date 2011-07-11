@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "28 Jun 2011" "ntp (4.2.7p188)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "11 Jul 2011" "ntp (4.2.7p189)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  June 28, 2011 at 07:05:02 AM by AutoGen 5.11.10pre10
+.\"  It has been AutoGen-ed  July 11, 2011 at 06:25:48 AM by AutoGen 5.12
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -909,9 +909,8 @@ from one to several minutes with modern architectures
 such as UltraSPARC and up to tens of minutes to an hour
 with older architectures such as SPARC IPC.
 .PP
-Please report bugs to http://bugs.ntp.org .
+Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-Portions of this document came from FreeBSD.
-.PP
+Portions of this document came from FreeBSD..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp-keygen\fP
 option definitions.

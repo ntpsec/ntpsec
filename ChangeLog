@@ -1,3 +1,4 @@
+(4.2.7p189) 2011/07/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1134] from 4.2.6p4-RC1: ntpd fails binding to tentative IPv6
   addresses.
 * [Bug 1790] from 4.2.6p4-RC1: Update config.guess and config.sub to
