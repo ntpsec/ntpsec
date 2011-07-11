@@ -1011,9 +1011,12 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p4-RC1) 2011/07/10 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1134] ntpd fails binding to tentative IPv6 addresses.
 * [Bug 1790] Update config.guess and config.sub to detect AIX6.
+* [Bug 1961] html2man needs an update.
+* Update the NEWS file.
 
 ---
 (4.2.6p4-beta2) 2011/05/25 Released by Harlan Stenn <stenn@ntp.org>

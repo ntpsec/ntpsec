@@ -1,3 +1,42 @@
+NTP 4.2.6p4-RC1 (Harlan Stenn <stenn@ntp.org>, 2011/07/10)
+
+Focus: Bug fixes and portability improvements
+
+Severity: Medium
+
+This is a recommended upgrade.
+
+This release includes build infrastructure updates, code
+clean-ups, minor bug fixes, fixes for a number of minor
+ref-clock issues, and documentation revisions.
+
+Portability improvements affect AIX and Linux.
+
+New features / changes in this release:
+
+Build system
+* Update config.guess and config.sub (AIX)
+* autogen/libopts upgrade.
+
+ntpd
+* ntpd fails binding to tentative IPv6 addresses under Linux.
+* WWVB/Spectracom driver timestamps LFs, not CRs.
+* peer may stay selected as system peer after becoming unreachable.
+* LOCAL, ACTS drivers with "prefer" excluded from initial candidate list.
+* orphan parent favored over LOCAL, ACTS drivers.
+* Billboard tally codes sometimes do not match operation, variables.
+* Backport utility routines from ntp-dev: mprintf(), emalloc_zero().
+* Enable tickadj-like taming of wildly off-spec Windows clock using
+  NTPD_TICKADJ_PPM env. var. specifying baseline slew.
+
+ntpdate
+* ntpdate takes longer than necessary.
+* ntpdate doesn't allow timeout > 2s.
+
+Documentation
+* html2man needs an update.  Fix some tags in the .html files.
+
+---
 NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2011/01/03)
 
 Focus: Bug fixes and portability improvements
