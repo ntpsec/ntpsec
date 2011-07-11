@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 01:23:02 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  July 10, 2011 at 10:57:23 PM by AutoGen 5.12
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -17,10 +17,8 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpq copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
- *
- * see html/copyright.html
- * 
+ *  see html/copyright.html
+ *  
  */
 /*
  *  This file contains the programmatic interface to the Automated
@@ -68,8 +66,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    14
-#define NTPQ_VERSION       "4.2.6p4-beta2"
-#define NTPQ_FULL_VERSION  "ntpq 4.2.6p4-beta2"
+#define NTPQ_VERSION       "4.2.6p4-RC1"
+#define NTPQ_FULL_VERSION  "ntpq 4.2.6p4-RC1"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -199,10 +197,10 @@ extern tOptions ntpqOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
-    static inline char* aoGetsText(char const* pz) {
-        if (pz == NULL) return NULL;
-        return (char*)gettext(pz);
-    }
+static inline char* aoGetsText(char const* pz) {
+    if (pz == NULL) return NULL;
+    return (char*)gettext(pz);
+}
 #   define _(s)  aoGetsText(s)
 # endif /* _() */
 

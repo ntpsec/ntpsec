@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  May 25, 2011 at 01:22:50 AM by AutoGen 5.11.9
+ *  It has been AutoGen-ed  July 10, 2011 at 10:56:37 PM by AutoGen 5.12
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -17,10 +17,8 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- * ntpdc copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
- *
- * see html/copyright.html
- * 
+ *  see html/copyright.html
+ *  
  */
 
 #include <sys/types.h>
@@ -39,8 +37,8 @@ extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-static char const zCopyright[45] =
-"ntpdc 4.2.6p4-beta2\n\
+static char const zCopyright[43] =
+"ntpdc 4.2.6p4-RC1\n\
 see html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
@@ -446,8 +444,8 @@ static tOptDesc optDesc[OPTION_CT] = {
  *  Define the Ntpdc Option Environment
  */
 static char const zPROGNAME[6] = "NTPDC";
-static char const zUsageTitle[133] =
-"ntpdc - vendor-specific NTP query program - Ver. 4.2.6p4-beta2\n\
+static char const zUsageTitle[131] =
+"ntpdc - vendor-specific NTP query program - Ver. 4.2.6p4-RC1\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
