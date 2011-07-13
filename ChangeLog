@@ -1,3 +1,5 @@
+* [Bug 1961] from 4.2.6p4: html2man update: distribute ntp-wait.html.
+* Require autogen-5.12.
 (4.2.7p189) 2011/07/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1134] from 4.2.6p4-RC1: ntpd fails binding to tentative IPv6
   addresses.
