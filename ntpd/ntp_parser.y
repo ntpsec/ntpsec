@@ -68,6 +68,7 @@
 %token	<Integer>	T_Age
 %token	<Integer>	T_All
 %token	<Integer>	T_Allan
+%token	<Integer>	T_Allpeers
 %token	<Integer>	T_Auth
 %token	<Integer>	T_Autokey
 %token	<Integer>	T_Automax
@@ -85,6 +86,7 @@
 %token	<Integer>	T_ControlKey
 %token	<Integer>	T_Crypto
 %token	<Integer>	T_Cryptostats
+%token	<Integer>	T_Ctl
 %token	<Integer>	T_Day
 %token	<Integer>	T_Default
 %token	<Integer>	T_Digest
@@ -121,6 +123,7 @@
 %token	<Integer>	T_Integer		/* not a token */
 %token	<Integer>	T_Interface
 %token	<Integer>	T_Intrange		/* not a token */
+%token	<Integer>	T_Io
 %token	<Integer>	T_Ipv4
 %token	<Integer>	T_Ipv4_flag
 %token	<Integer>	T_Ipv6
@@ -148,6 +151,7 @@
 %token	<Integer>	T_Maxdist
 %token	<Integer>	T_Maxmem
 %token	<Integer>	T_Maxpoll
+%token	<Integer>	T_Mem
 %token	<Integer>	T_Minclock
 %token	<Integer>	T_Mindepth
 %token	<Integer>	T_Mindist
@@ -192,6 +196,7 @@
 %token	<Integer>	T_Rawstats
 %token	<Integer>	T_Refid
 %token	<Integer>	T_Requestkey
+%token	<Integer>	T_Reset
 %token	<Integer>	T_Restrict
 %token	<Integer>	T_Revoke
 %token	<Integer>	T_Saveconfigdir
@@ -205,10 +210,12 @@
 %token	<Integer>	T_Stepout
 %token	<Integer>	T_Stratum
 %token	<String>	T_String		/* not a token */
+%token	<Integer>	T_Sys
 %token	<Integer>	T_Sysstats
 %token	<Integer>	T_Tick
 %token	<Integer>	T_Time1
 %token	<Integer>	T_Time2
+%token	<Integer>	T_Timer
 %token	<Integer>	T_Timingstats
 %token	<Integer>	T_Tinker
 %token	<Integer>	T_Tos
@@ -251,6 +258,8 @@
 %type	<Address_fifo>	address_list
 %type	<Integer>	boolean
 %type	<Integer>	client_type
+%type	<Integer>	counter_set_keyword
+%type	<Int_fifo>	counter_set_list
 %type	<Attr_val>	crypto_command
 %type	<Attr_val_fifo>	crypto_command_list
 %type	<Integer>	crypto_str_keyword
@@ -292,6 +301,7 @@
 %type	<Integer>	option_int_keyword
 %type	<Attr_val>	option_str
 %type	<Integer>	option_str_keyword
+%type	<Integer>	reset_command
 %type	<Integer>	stat
 %type	<Int_fifo>	stats_list
 %type	<String_fifo>	string_list
@@ -1032,6 +1042,7 @@ tinker_option_keyword
 
 miscellaneous_command
 	:	interface_command
+	|	reset_command
 	|	misc_cmd_dbl_keyword number
 		{
 			attr_val *av;
@@ -1252,6 +1263,35 @@ nic_rule_action
 	|	T_Ignore
 	|	T_Drop
 	;
+
+reset_command
+	:	T_Reset counter_set_list
+			{ CONCAT_G_FIFOS(cfgt.reset_counters, $2); }
+	;
+
+counter_set_list
+	:	counter_set_list counter_set_keyword
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, create_int_node($2));
+		}
+	|	counter_set_keyword
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, create_int_node($1));
+		}
+	;
+
+counter_set_keyword
+	:	T_Allpeers
+	|	T_Auth
+	|	T_Ctl
+	|	T_Io
+	|	T_Mem
+	|	T_Sys
+	|	T_Timer
+	;
+
 
 
 /* Miscellaneous Rules

@@ -742,9 +742,15 @@ struct reset_flags {
 #define	RESET_FLAG_AUTH		0x20
 #define	RESET_FLAG_CTL		0x40
 
-#define	RESET_ALLFLAGS \
-	(RESET_FLAG_ALLPEERS|RESET_FLAG_IO|RESET_FLAG_SYS \
-	|RESET_FLAG_MEM|RESET_FLAG_TIMER|RESET_FLAG_AUTH|RESET_FLAG_CTL)
+#define	RESET_ALLFLAGS (	\
+	RESET_FLAG_ALLPEERS |	\
+	RESET_FLAG_IO |		\
+	RESET_FLAG_SYS |	\
+	RESET_FLAG_MEM |	\
+	RESET_FLAG_TIMER |	\
+	RESET_FLAG_AUTH |	\
+	RESET_FLAG_CTL		\
+)
 
 /*
  * Structure used to return information concerning the authentication

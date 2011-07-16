@@ -963,7 +963,7 @@ getresponse(
 		}
 
 		TRACE(2, ("Got packet, size = %d\n", n));
-		if ((long)count > (n - CTL_HEADER_LEN)) {
+		if (count > (n - CTL_HEADER_LEN)) {
 			TRACE(1, ("Received count of %u octets, data in packet is %ld\n",
 				  count, (long)n - CTL_HEADER_LEN));
 			continue;

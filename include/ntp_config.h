@@ -251,6 +251,7 @@ struct config_tree_tag {
 	addr_opts_fifo *trap;
 	attr_val_fifo *	vars;
 	nic_rule_fifo *	nic_rules;
+	int_fifo *	reset_counters;
 
 	sim_fifo *	sim_details;
 };

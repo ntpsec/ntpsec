@@ -96,7 +96,6 @@ static	void	trust_key	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	untrust_key	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	do_trustkey	(sockaddr_u *, endpt *, struct req_pkt *, u_long);
 static	void	get_auth_info	(sockaddr_u *, endpt *, struct req_pkt *);
-static	void	reset_auth_stats (void);
 static	void	req_get_traps	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	req_set_trap	(sockaddr_u *, endpt *, struct req_pkt *);
 static	void	req_clr_trap	(sockaddr_u *, endpt *, struct req_pkt *);
@@ -2043,7 +2042,7 @@ get_auth_info(
  * reset_auth_stats - reset the authentication stat counters.  Done here
  *		      to keep ntp-isms out of the authentication module
  */
-static void
+void
 reset_auth_stats(void)
 {
 	authkeylookups = 0;

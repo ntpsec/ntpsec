@@ -144,7 +144,7 @@ struct xcmd opcmds[] = {
 	{ "enable",	set,		{ NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
 	  { "auth|bclient|monitor|pll|kernel|stats", "...", "...", "..." },
 	  "set a system flag (auth, bclient, monitor, pll, kernel, stats)" },
-        { "disable",	sys_clear,      { NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
+	{ "disable",	sys_clear,	{ NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
 	  { "auth|bclient|monitor|pll|kernel|stats", "...", "...", "..." },
 	  "clear a system flag (auth, bclient, monitor, pll, kernel, stats)" },
 	{ "reslist",	reslist,	{OPT|IP_VERSION, NO, NO, NO },
@@ -167,7 +167,7 @@ struct xcmd opcmds[] = {
 	  { "version", "", "", "" },
 	  "display data the server's monitor routines have collected" },
 	{ "reset",	reset,		{ NTP_STR, OPT|NTP_STR, OPT|NTP_STR, OPT|NTP_STR },
-	  { "io|sys|mem|timer|auth|allpeers", "...", "...", "..." },
+	  { "io|sys|mem|timer|auth|ctl|allpeers", "...", "...", "..." },
 	  "reset various subsystem statistics counters" },
 	{ "preset",	preset,		{ NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD, OPT|NTP_ADD },
 	  { "peer_address", "peer2_addr", "peer3_addr", "peer4_addr" },
@@ -2068,15 +2068,16 @@ again:
  * Mapping between command line strings and stat reset flags
  */
 struct statreset {
-  const char *str;
-	int flag;
+	const char * const	str;
+	const int		flag;
 } sreset[] = {
+	{ "allpeers",	RESET_FLAG_ALLPEERS },
 	{ "io",		RESET_FLAG_IO },
 	{ "sys",	RESET_FLAG_SYS },
 	{ "mem",	RESET_FLAG_MEM },
 	{ "timer",	RESET_FLAG_TIMER },
 	{ "auth",	RESET_FLAG_AUTH },
-	{ "allpeers",	RESET_FLAG_ALLPEERS },
+	{ "ctl",	RESET_FLAG_CTL },
 	{ "",		0 }
 };
 
@@ -2102,11 +2103,11 @@ reset(
 	for (res = 0; res < pcmd->nargs; res++) {
 		for (i = 0; sreset[i].flag != 0; i++) {
 			if (STREQ(pcmd->argval[res].string, sreset[i].str))
-			    break;
+				break;
 		}
 		if (sreset[i].flag == 0) {
-			(void) fprintf(fp, "Flag %s unknown\n",
-				       pcmd->argval[res].string);
+			fprintf(fp, "Flag %s unknown\n",
+				pcmd->argval[res].string);
 			err++;
 		} else {
 			rflags.flags |= sreset[i].flag;

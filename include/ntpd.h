@@ -250,6 +250,7 @@ extern	void	init_refclock	(void);
 /* ntp_request.c */
 extern	void	init_request	(void);
 extern	void	process_private (struct recvbuf *, int);
+extern	void	reset_auth_stats(void);
 
 /* ntp_restrict.c */
 extern	void	init_restrict	(void);

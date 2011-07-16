@@ -62,8 +62,8 @@ char **	cmdline_servers;
  * "logconfig" building blocks
  */
 struct masks {
-	const char *	name;
-	unsigned long	mask;
+	const char * const	name;
+	const u_long		mask;
 };
 
 static struct masks logcfg_class[] = {
@@ -229,6 +229,7 @@ static void free_config_vars(config_tree *);
 static void free_config_peers(config_tree *);
 static void free_config_unpeers(config_tree *);
 static void free_config_nic_rules(config_tree *);
+static void free_config_reset_counters(config_tree *);
 #ifdef SIM
 static void free_config_sim(config_tree *);
 #endif
@@ -312,6 +313,7 @@ static void config_fudge(config_tree *);
 static void config_peers(config_tree *);
 static void config_unpeers(config_tree *);
 static void config_nic_rules(config_tree *);
+static void config_reset_counters(config_tree *);
 static u_char get_correct_host_mode(int token);
 static int peerflag_bits(peer_node *);
 #endif	/* !SIM */
@@ -429,6 +431,7 @@ free_config_tree(
 	free_config_peers(ptree);
 	free_config_unpeers(ptree);
 	free_config_nic_rules(ptree);
+	free_config_reset_counters(ptree);
 #ifdef SIM
 	free_config_sim(ptree);
 #endif
@@ -485,6 +488,7 @@ dump_config_tree(
 	nic_rule_node *rule_node;
 	int_node *i_n;
 	int_node *flags;
+	int_node *counter_set;
 	string_node *str_node;
 
 	const char *s;
@@ -945,6 +949,15 @@ dump_config_tree(
 				break;
 			}
 		}
+		fprintf(df, "\n");
+	}
+
+	counter_set = HEAD_PFIFO(ptree->reset_counters);
+	if (counter_set != NULL) {
+		fprintf(df, "reset");
+		for ( ; counter_set != NULL;
+		     counter_set = counter_set->link)
+			fprintf(df, " %s", keyword(counter_set->i));
 		fprintf(df, "\n");
 	}
 
@@ -3975,6 +3988,67 @@ free_config_unpeers(
 #endif	/* FREE_CFG_T */
 
 
+#ifndef SIM
+static void
+config_reset_counters(
+	config_tree *ptree
+	)
+{
+	int_node *counter_set;
+
+	for (counter_set = HEAD_PFIFO(ptree->reset_counters);
+	     counter_set != NULL;
+	     counter_set = counter_set->link) {
+		switch (counter_set->i) {
+		default:
+			DPRINTF(1, ("config_reset_counters %s (%d) invalid\n",
+				    keyword(counter_set->i), counter_set->i));
+			break;
+
+		case T_Allpeers:
+			peer_all_reset();
+			break;
+
+		case T_Auth:
+			reset_auth_stats();
+			break;
+
+		case T_Ctl:
+			ctl_clr_stats();
+			break;
+
+		case T_Io:
+			io_clr_stats();
+			break;
+
+		case T_Mem:
+			peer_clr_stats();
+			break;
+
+		case T_Sys:
+			proto_clr_stats();
+			break;
+
+		case T_Timer:
+			timer_clr_stats();
+			break;
+		}
+	}
+}
+#endif	/* !SIM */
+
+
+#ifdef FREE_CFG_T
+static void
+free_config_reset_counters(
+	config_tree *ptree
+	)
+{
+	FREE_INT_FIFO(ptree->reset_counters);
+}
+#endif	/* FREE_CFG_T */
+
+
 #ifdef SIM
 static void
 config_sim(
@@ -4119,6 +4193,7 @@ config_ntpd(
 	config_unpeers(ptree);
 	config_fudge(ptree);
 	config_qos(ptree);
+	config_reset_counters(ptree);
 
 #ifdef TEST_BLOCKING_WORKER
 	{
