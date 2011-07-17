@@ -72,8 +72,8 @@ NTP_WITHSNTP
 # - which style of macros should be used {man.mdoc}
 #
 # When configure is invoked from the main NTP directory, we will have:
-# - SNTP_DB={bin,}
-# - SNTP_DS={,sbin}
+# - SNTP_DB=sntp (if we are installing sntp in bindir, empty otherwise)
+# - SNTP_DS=sntp (if we are installing sntp in sbindir, empty otherwise)
 # - SNTP_MS={1,1m,1M,8}
 # - MANTAGFMT={man,mdoc}
 
@@ -89,12 +89,12 @@ AC_ARG_WITH(
 )
 case "$use_binsubdir" in
  bin)
-    SNTP_DB=sntp
+    SNTP_DB=$SNTP
     SNTP_DS=
     ;;
  sbin)
     SNTP_DB=
-    SNTP_DS=sntp
+    SNTP_DS=$SNTP
     ;;
  *)
     AC_MSG_ERROR([<$use_binsubdir> is illegal - must be "bin" or "sbin"])
