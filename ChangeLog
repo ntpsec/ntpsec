@@ -1,3 +1,4 @@
+* [Bug 1948] Update man page section layout.
 * [Bug 1964] --without-sntp should not build sntp.
 (4.2.7p190) 2011/07/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1961] from 4.2.6p4: html2man update: distribute ntp-wait.html.
