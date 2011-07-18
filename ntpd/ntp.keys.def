@@ -118,6 +118,10 @@ doc-section	= {
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_FILES
 .Bl -tag -width /etc/ntp.drift -compact
+.It Pa /etc/ntp.keys
+the default name of the configuration file
+.El
+	_END_MDOC_FILES;
 
 doc-section	= {
   ds-type	= 'SEE ALSO';
