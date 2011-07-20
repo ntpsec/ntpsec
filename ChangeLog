@@ -1,5 +1,6 @@
 ---
 
+* [Bug 1970] UNLINK_EXPR_SLIST() causes crash if list is empty.
 * [Bug 1961] html2man update: distribute ntp-wait.html.
 
 ---
