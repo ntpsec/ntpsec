@@ -187,7 +187,7 @@ do {								\
 	ppentry = &(listhead);					\
 								\
 	while (!(expr))						\
-		if ((*ppentry) != NULL &&			\
+		if (*ppentry != NULL &&				\
 		    (*ppentry)->nextlink != NULL) {		\
 			ppentry = &((*ppentry)->nextlink);	\
 		} else {					\
