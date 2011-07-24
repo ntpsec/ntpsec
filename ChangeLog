@@ -1,3 +1,4 @@
+(4.2.7p193) 2011/07/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1970] from 4.2.6p4-RC2: UNLINK_EXPR_SLIST() causes crash if list
   is empty.
 * Update libevent to 2.1 HEAD as of merge of 2.0.13-stable-dev.
