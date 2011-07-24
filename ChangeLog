@@ -1,5 +1,8 @@
 * [Bug 1970] from 4.2.6p4-RC2: UNLINK_EXPR_SLIST() causes crash if list
   is empty.
+* Update libevent to 2.1 HEAD as of merge of 2.0.13-stable-dev.
+* Match addr_eqprefix() sizeof and memcpy destination to make it clear
+  to static analysis that there is no buffer overrun (CID 402).
 (4.2.7p192) 2011/07/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1966] Broken FILES section for ntp.keys.def.
 (4.2.7p191) 2011/07/17 Released by Harlan Stenn <stenn@ntp.org>
