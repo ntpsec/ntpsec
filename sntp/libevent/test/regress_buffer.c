@@ -1037,11 +1037,67 @@ test_evbuffer_readln(void *ptr)
 	free(cp); cp = NULL;
 	evbuffer_validate(evb);
 
-	test_ok = 1;
  end:
 	evbuffer_free(evb);
 	evbuffer_free(evb_tmp);
 	if (cp) free(cp);
+}
+
+static void
+test_evbuffer_search_eol(void *ptr)
+{
+	struct evbuffer *buf = evbuffer_new();
+	struct evbuffer_ptr ptr1, ptr2;
+	const char *s;
+	size_t eol_len;
+
+	s = "string! \r\n\r\nx\n";
+	evbuffer_add(buf, s, strlen(s));
+	eol_len = -1;
+	ptr1 = evbuffer_search_eol(buf, NULL, &eol_len, EVBUFFER_EOL_CRLF);
+	tt_int_op(ptr1.pos, ==, 8);
+	tt_int_op(eol_len, ==, 2);
+
+	eol_len = -1;
+	ptr2 = evbuffer_search_eol(buf, &ptr1, &eol_len, EVBUFFER_EOL_CRLF);
+	tt_int_op(ptr2.pos, ==, 8);
+	tt_int_op(eol_len, ==, 2);
+
+	evbuffer_ptr_set(buf, &ptr1, 1, EVBUFFER_PTR_ADD);
+	eol_len = -1;
+	ptr2 = evbuffer_search_eol(buf, &ptr1, &eol_len, EVBUFFER_EOL_CRLF);
+	tt_int_op(ptr2.pos, ==, 9);
+	tt_int_op(eol_len, ==, 1);
+
+	eol_len = -1;
+	ptr2 = evbuffer_search_eol(buf, &ptr1, &eol_len, EVBUFFER_EOL_CRLF_STRICT);
+	tt_int_op(ptr2.pos, ==, 10);
+	tt_int_op(eol_len, ==, 2);
+
+	eol_len = -1;
+	ptr1 = evbuffer_search_eol(buf, NULL, &eol_len, EVBUFFER_EOL_LF);
+	tt_int_op(ptr1.pos, ==, 9);
+	tt_int_op(eol_len, ==, 1);
+
+	eol_len = -1;
+	ptr2 = evbuffer_search_eol(buf, &ptr1, &eol_len, EVBUFFER_EOL_LF);
+	tt_int_op(ptr2.pos, ==, 9);
+	tt_int_op(eol_len, ==, 1);
+
+	evbuffer_ptr_set(buf, &ptr1, 1, EVBUFFER_PTR_ADD);
+	eol_len = -1;
+	ptr2 = evbuffer_search_eol(buf, &ptr1, &eol_len, EVBUFFER_EOL_LF);
+	tt_int_op(ptr2.pos, ==, 11);
+	tt_int_op(eol_len, ==, 1);
+
+	tt_assert(evbuffer_ptr_set(buf, &ptr1, evbuffer_get_length(buf), EVBUFFER_PTR_SET) == 0);
+	eol_len = -1;
+	ptr2 = evbuffer_search_eol(buf, &ptr1, &eol_len, EVBUFFER_EOL_LF);
+	tt_int_op(ptr2.pos, ==, -1);
+	tt_int_op(eol_len, ==, 0);
+
+end:
+	evbuffer_free(buf);
 }
 
 static void
@@ -1140,6 +1196,15 @@ test_evbuffer_ptr_set(void *ptr)
 	struct evbuffer_ptr pos;
 	struct evbuffer_iovec v[1];
 
+	tt_int_op(evbuffer_get_length(buf), ==, 0);
+
+	tt_assert(evbuffer_ptr_set(buf, &pos, 0, EVBUFFER_PTR_SET) == 0);
+	tt_assert(pos.pos == 0);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 1, EVBUFFER_PTR_ADD) == -1);
+	tt_assert(pos.pos == -1);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 1, EVBUFFER_PTR_SET) == -1);
+	tt_assert(pos.pos == -1);
+
 	/* create some chains */
 	evbuffer_reserve_space(buf, 5000, v, 1);
 	v[0].iov_len = 5000;
@@ -1172,6 +1237,8 @@ test_evbuffer_ptr_set(void *ptr)
 	tt_assert(pos.pos == 10000);
 	tt_assert(evbuffer_ptr_set(buf, &pos, 1000, EVBUFFER_PTR_ADD) == 0);
 	tt_assert(pos.pos == 11000);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 1000, EVBUFFER_PTR_ADD) == 0);
+	tt_assert(pos.pos == 12000);
 	tt_assert(evbuffer_ptr_set(buf, &pos, 1000, EVBUFFER_PTR_ADD) == -1);
 	tt_assert(pos.pos == -1);
 
@@ -1186,6 +1253,18 @@ test_evbuffer_search(void *ptr)
 	struct evbuffer *buf = evbuffer_new();
 	struct evbuffer *tmp = evbuffer_new();
 	struct evbuffer_ptr pos, end;
+
+	pos = evbuffer_search(buf, "x", 1, NULL);
+	tt_int_op(pos.pos, ==, -1);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 0, EVBUFFER_PTR_SET) == 0);
+	pos = evbuffer_search(buf, "x", 1, &pos);
+	tt_int_op(pos.pos, ==, -1);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 0, EVBUFFER_PTR_SET) == 0);
+	pos = evbuffer_search_range(buf, "x", 1, &pos, &pos);
+	tt_int_op(pos.pos, ==, -1);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 0, EVBUFFER_PTR_SET) == 0);
+	pos = evbuffer_search_range(buf, "x", 1, &pos, NULL);
+	tt_int_op(pos.pos, ==, -1);
 
 	/* set up our chains */
 	evbuffer_add_printf(tmp, "hello");  /* 5 chars */
@@ -1228,6 +1307,21 @@ test_evbuffer_search(void *ptr)
 	pos = evbuffer_search_range(buf, "foocatat", 8, NULL, &end);
 	tt_int_op(pos.pos, ==, -1);
 	pos = evbuffer_search_range(buf, "ack", 3, NULL, &end);
+	tt_int_op(pos.pos, ==, -1);
+
+	/* Set "end" after the last byte in the buffer. */
+	tt_assert(evbuffer_ptr_set(buf, &end, 17, EVBUFFER_PTR_SET) == 0);
+
+	pos = evbuffer_search_range(buf, "attack", 6, NULL, &end);
+	tt_int_op(pos.pos, ==, 11);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 11, EVBUFFER_PTR_SET) == 0);
+	pos = evbuffer_search_range(buf, "attack", 6, &pos, &end);
+	tt_int_op(pos.pos, ==, 11);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 17, EVBUFFER_PTR_SET) == 0);
+	pos = evbuffer_search_range(buf, "attack", 6, &pos, &end);
+	tt_int_op(pos.pos, ==, -1);
+	tt_assert(evbuffer_ptr_set(buf, &pos, 17, EVBUFFER_PTR_SET) == 0);
+	pos = evbuffer_search_range(buf, "attack", 6, &pos, NULL);
 	tt_int_op(pos.pos, ==, -1);
 
 end:
@@ -1579,6 +1673,13 @@ test_evbuffer_peek(void *info)
 	tt_iov_eq(&v[0], "Contents of chunk [2]\n");
 	tt_iov_eq(&v[1], "Contents of chunk [3]\n"); /*more than we asked for*/
 
+	/* peek at the end of the buffer */
+	memset(v, 0, sizeof(v));
+	tt_assert(evbuffer_ptr_set(buf, &ptr, evbuffer_get_length(buf), EVBUFFER_PTR_SET) == 0);
+	i = evbuffer_peek(buf, 44, &ptr, v, 20);
+	tt_int_op(i, ==, 0);
+	tt_assert(v[0].iov_base == NULL);
+
 end:
 	if (buf)
 		evbuffer_free(buf);
@@ -1704,6 +1805,7 @@ struct testcase_t evbuffer_testcases[] = {
 	{ "reference", test_evbuffer_reference, 0, NULL, NULL },
 	{ "iterative", test_evbuffer_iterative, 0, NULL, NULL },
 	{ "readln", test_evbuffer_readln, TT_NO_LOGS, &basic_setup, NULL },
+	{ "search_eol", test_evbuffer_search_eol, 0, NULL, NULL },
 	{ "find", test_evbuffer_find, 0, NULL, NULL },
 	{ "ptr_set", test_evbuffer_ptr_set, 0, NULL, NULL },
 	{ "search", test_evbuffer_search, 0, NULL, NULL },
