@@ -183,7 +183,9 @@ eq_debug_entry(const struct event_debug_entry *a,
 int _event_debug_mode_on = 0;
 /* Set if it's too late to enable event_debug_mode. */
 static int event_debug_mode_too_late = 0;
+#ifndef _EVENT_DISABLE_THREAD_SUPPORT
 static void *_event_debug_map_lock = NULL;
+#endif
 static HT_HEAD(event_debug_map, event_debug_entry) global_debug_map =
 	HT_INITIALIZER();
 
@@ -515,8 +517,6 @@ event_enable_debug_mode(void)
 	_event_debug_mode_on = 1;
 
 	HT_INIT(event_debug_map, &global_debug_map);
-
-	EVTHREAD_ALLOC_LOCK(_event_debug_map_lock, 0);
 #endif
 }
 
@@ -546,9 +546,6 @@ event_base_new_with_config(const struct event_config *cfg)
 
 #ifndef _EVENT_DISABLE_DEBUG_MODE
 	event_debug_mode_too_late = 1;
-	if (_event_debug_mode_on && !_event_debug_map_lock) {
-		EVTHREAD_ALLOC_LOCK(_event_debug_map_lock, 0);
-	}
 #endif
 
 	if ((base = mm_calloc(1, sizeof(struct event_base))) == NULL) {
@@ -682,13 +679,19 @@ event_base_free(struct event_base *base)
 	/* XXXX grab the lock? If there is contention when one thread frees
 	 * the base, then the contending thread will be very sad soon. */
 
+	/* event_base_free(NULL) is how to free the current_base if we
+	 * made it with event_init and forgot to hold a reference to it. */
 	if (base == NULL && current_base)
 		base = current_base;
+	/* If we're freeing current_base, there won't be a current_base. */
 	if (base == current_base)
 		current_base = NULL;
-
+	/* Don't actually free NULL. */
+	if (base == NULL) {
+		event_warnx("%s: no base to free", __func__);
+		return;
+	}
 	/* XXX(niels) - check for internal events first */
-	EVUTIL_ASSERT(base);
 
 #ifdef _WIN32
 	event_base_stop_iocp(base);
@@ -2818,3 +2821,18 @@ event_base_del_virtual(struct event_base *base)
 		evthread_notify_base(base);
 	EVBASE_RELEASE_LOCK(base, th_base_lock);
 }
+
+#ifndef _EVENT_DISABLE_THREAD_SUPPORT
+int
+event_global_setup_locks_(const int enable_locks)
+{
+#ifndef _EVENT_DISABLE_DEBUG_MODE
+	EVTHREAD_SETUP_GLOBAL_LOCK(_event_debug_map_lock, 0);
+#endif
+	if (evsig_global_setup_locks_(enable_locks) < 0)
+		return -1;
+	if (evutil_secure_rng_global_setup_locks_(enable_locks) < 0)
+		return -1;
+	return 0;
+}
+#endif

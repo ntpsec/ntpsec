@@ -315,10 +315,12 @@ struct event_config {
 #define	TAILQ_NEXT(elm, field)		((elm)->field.tqe_next)
 #endif
 
+#ifndef TAILQ_FOREACH
 #define TAILQ_FOREACH(var, head, field)					\
 	for ((var) = TAILQ_FIRST(head);					\
 	     (var) != TAILQ_END(head);					\
 	     (var) = TAILQ_NEXT(var, field))
+#endif
 
 #ifndef TAILQ_INSERT_BEFORE
 #define	TAILQ_INSERT_BEFORE(listelm, elm, field) do {			\
@@ -336,6 +338,7 @@ struct event_config {
 int _evsig_set_handler(struct event_base *base, int evsignal,
 			  void (*fn)(int));
 int _evsig_restore_handler(struct event_base *base, int evsignal);
+
 
 void event_active_nolock(struct event *ev, int res, short count);
 
