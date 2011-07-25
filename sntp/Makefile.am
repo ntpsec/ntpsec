@@ -34,6 +34,7 @@ std_def_list =						\
 EXTRA_PROGRAMS = sntp
 
 bin_PROGRAMS =	$(SNTP_DB)
+libexec_PROGRAMS =	$(SNTP_DL)
 sbin_PROGRAMS =	$(SNTP_DS)
 
 ##

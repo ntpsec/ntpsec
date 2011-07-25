@@ -1,6 +1,7 @@
 ## adjtimed Makefile.am
 
 bin_PROGRAMS = $(ADJTIMED_DB)
+libexec_PROGRAMS = $(ADJTIMED_DL)
 sbin_PROGRAMS =	$(ADJTIMED_DS)
 
 BUILT_SOURCES =

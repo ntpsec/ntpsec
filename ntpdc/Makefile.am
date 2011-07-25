@@ -1,6 +1,7 @@
 NULL=
 
 bin_PROGRAMS=	$(NTPDC_DB)
+libexec_PROGRAMS=	$(NTPDC_DL)
 sbin_PROGRAMS=	$(NTPDC_DS)
 
 EXTRA_PROGRAMS=	ntpdc ntpdc-layout
