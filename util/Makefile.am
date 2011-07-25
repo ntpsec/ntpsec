@@ -1,6 +1,7 @@
 NULL=
 
 bin_PROGRAMS=	$(NTP_KEYGEN_DB) $(NTPTIME_DB) $(TICKADJ_DB) $(TIMETRIM_DB)
+libexec_PROGRAMS=	$(NTP_KEYGEN_DL) $(NTPTIME_DL) $(TICKADJ_DL) $(TIMETRIM_DL)
 sbin_PROGRAMS=	$(NTP_KEYGEN_DS) $(NTPTIME_DS) $(TICKADJ_DS) $(TIMETRIM_DS)
 
 EXTRA_PROGRAMS=	audio-pcm byteorder hist jitter kern longsize ntp-keygen \

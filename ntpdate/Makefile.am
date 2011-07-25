@@ -4,6 +4,7 @@ BUILT_SOURCES =
 CLEANFILES =
 
 bin_PROGRAMS = $(NTPDATE_DB)
+libexec_PROGRAMS = $(NTPDATE_DL)
 sbin_PROGRAMS = $(NTPDATE_DS)
 
 EXTRA_PROGRAMS = ntpdate ntptimeset

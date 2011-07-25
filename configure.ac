@@ -2872,6 +2872,7 @@ case "$ans" in
 	[Do we need HPUX adjtime() library support?])
     ;;
  *) ADJTIMED_DB=
+    ADJTIMED_DL=
     ADJTIMED_DS=
     ADJTIMED_MS=
     ;;
@@ -3448,6 +3449,7 @@ case "$ac_cv_make_ntptime" in
     ;;
  *)
     NTPTIME_DB=
+    NTPTIME_DL=
     NTPTIME_DS=
     NTPTIME_MS=
     ;;
@@ -3498,6 +3500,7 @@ case "$ntp_cv_make_tickadj" in
     ;;
  *)
     TICKADJ_DB=
+    TICKADJ_DL=
     TICKADJ_DS=
     TICKADJ_MS=
     ;;
@@ -3526,6 +3529,7 @@ case "$ntp_cv_make_timetrim" in
     MAKE_TIMETRIM=timetrim
     ;;
  *) TIMETRIM_DB=
+    TIMETRIM_DL=
     TIMETRIM_DS=
     TIMETRIM_MS=
     ;;
@@ -3552,6 +3556,7 @@ case "$ans" in
     ;;
  *)
     NTPDSIM_DB=
+    NTPDSIM_DL=
     NTPDSIM_DS=
     NTPDSIM_MS=
     ;;
@@ -3653,6 +3658,7 @@ AC_SUBST([MAKE_NTPSNMPD])
 case "$MAKE_NTPSNMPD" in
  '')
     NTPSNMPD_DB=
+    NTPSNMPD_DL=
     NTPSNMPD_DS=
     NTPSNMPD_MS=
     ;;
@@ -4081,6 +4087,11 @@ AC_CONFIG_FILES([util/Makefile])
 case "$SNTP_DB" in
  '') ;;
  *) ac_configure_args=" --with-binsubdir=bin${ac_configure_args}" ;;
+esac
+
+case "$SNTP_DL" in
+ '') ;;
+ *) ac_configure_args=" --with-binsubdir=libexec${ac_configure_args}" ;;
 esac
 
 case "$SNTP_DS" in

@@ -19,6 +19,7 @@ std_def_list =							\
 
 EXTRA_SCRIPTS =	ntp-wait ntptrace
 bin_SCRIPTS =	$(NTP_WAIT_DB) $(NTPTRACE_DB)
+libexec_SCRIPTS =	$(NTP_WAIT_DL) $(NTPTRACE_DL)
 sbin_SCRIPTS =	$(NTP_WAIT_DS) $(NTPTRACE_DS)
 
 noinst_SCRIPTS =		\

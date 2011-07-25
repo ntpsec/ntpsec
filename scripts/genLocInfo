@@ -127,8 +127,9 @@ do
 	esac
 
 	case "$c,$d,$s" in
-	 *,bin,*)  DB=bin ; DS= ;;
-	 *,sbin,*) DB= ; DS=sbin ;;
+	 *,bin,*)  DB=bin ; DL= ; DS= ;;
+	 *,libexec,*)  DB= ; DL=libexec ; DS= ;;
+	 *,sbin,*) DB= ; DL= ; DS=sbin ;;
 	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
 	    RC=1
 	    continue
@@ -146,15 +147,22 @@ do
 
 	# Should be OK, mostly...
 	C=`echo $c | sed -e 'y/abcdefghijklmnopqrstuvwxyz-/ABCDEFGHIJKLMNOPQRSTUVWXYZ_/'`
-	# echo "c: <$c>, C: <$C>, DB: <$DB>, DS: <$DS>" >&2
+	# echo "c: <$c>, C: <$C>, DB: <$DB>, DL: <$DL>, DS: <$DS>" >&2
 
 	case "$d" in
 	 bin)
 	    eval ${C}_DB=$c
+	    eval ${C}_DL=
+	    eval ${C}_DS=
+	    ;;
+	 libexec)
+	    eval ${C}_DB=
+	    eval ${C}_DL=$c
 	    eval ${C}_DS=
 	    ;;
 	 sbin)
 	    eval ${C}_DB=
+	    eval ${C}_DL=
 	    eval ${C}_DS=$c
 	    ;;
 	 *) echo "$0: GRONK: d" >&2
@@ -165,9 +173,11 @@ do
 
 	# echo "<$c> gets installed in <$d> with a <$s> manpage suffix" >&2
 	# echo "${C}_DB is <`eval echo '$'${C}_DB`>" >&2
+	# echo "${C}_DL is <`eval echo '$'${C}_DL`>" >&2
 	# echo "${C}_DS is <`eval echo '$'${C}_DS`>" >&2
 	# echo "${C}_MS is <`eval echo '$'${C}_MS`>" >&2
 	echo "${C}_DB=`eval echo '$'${C}_DB`"
+	echo "${C}_DL=`eval echo '$'${C}_DL`"
 	echo "${C}_DS=`eval echo '$'${C}_DS`"
 	echo "${C}_MS=`eval echo '$'${C}_MS`"
     else

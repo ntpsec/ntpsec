@@ -1,4 +1,15 @@
 * Added loc/redhat.
+(4.2.7p194) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1608] from 4.2.6p4-RC2: Parse Refclock driver should honor
+  trusttime.
+* Add support for installing programs and scripts to libexec.
+* Added loc/solaris.
+(4.2.7p193) 2011/07/24 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1970] from 4.2.6p4-RC2: UNLINK_EXPR_SLIST() causes crash if list
+  is empty.
+* Update libevent to 2.1 HEAD as of merge of 2.0.13-stable-dev.
+* Match addr_eqprefix() sizeof and memcpy destination to make it clear
+  to static analysis that there is no buffer overrun (CID 402).
 (4.2.7p192) 2011/07/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1966] Broken FILES section for ntp.keys.def.
 (4.2.7p191) 2011/07/17 Released by Harlan Stenn <stenn@ntp.org>
@@ -1023,7 +1034,9 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1608] Parse Refclock driver should honor trusttime.
 * [Bug 1961] html2man update: distribute ntp-wait.html.
+* [Bug 1970] UNLINK_EXPR_SLIST() causes crash if list is empty.
 
 ---
 (4.2.6p4-RC1) 2011/07/10 Released by Harlan Stenn <stenn@ntp.org>

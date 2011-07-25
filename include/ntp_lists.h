@@ -43,7 +43,7 @@
  *	unlink entry where expression expr is nonzero.  expr can refer
  *	to the entry being tested using UNLINK_EXPR_SLIST_CURRENT(),
  *	alias U_E_S_CUR().  See the implementation of UNLINK_SLIST()
- *	below for an example.
+ *	below for an example. U_E_S_CUR() is NULL iff the list is empty.
  *	punlinked is pointed to the removed entry or NULL if none
  *	satisfy expr.
  *
@@ -187,7 +187,8 @@ do {								\
 	ppentry = &(listhead);					\
 								\
 	while (!(expr))						\
-		if ((*ppentry)->nextlink != NULL) {		\
+		if (*ppentry != NULL &&				\
+		    (*ppentry)->nextlink != NULL) {		\
 			ppentry = &((*ppentry)->nextlink);	\
 		} else {					\
 			ppentry = NULL;				\

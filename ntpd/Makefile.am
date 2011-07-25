@@ -1,6 +1,7 @@
 NULL=
 
 bin_PROGRAMS=	$(NTPD_DB) $(NTPDSIM_DB)
+libexec_PROGRAMS=	$(NTPD_DL) $(NTPDSIM_DL)
 sbin_PROGRAMS=	$(NTPD_DS) $(NTPDSIM_DS)
 
 noinst_LIBRARIES=	libntpd.a
