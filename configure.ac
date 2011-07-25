@@ -530,27 +530,28 @@ AC_CACHE_CHECK(
 
 AC_CACHE_CHECK(
     [for struct rtattr],
-    [ntp_cv_struct_rtattr],
+    [ntp_cv_rtattr],
     [AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
 	    [[
 		#include <stddef.h>
+		#include <sys/socket.h>
 		#include <linux/rtnetlink.h>
 	    ]],
 	    [[
 		struct rtattr p;
 	    ]]
 	)],
-	[ntp_cv_struct_rtattr=yes],
-	[ntp_cv_struct_rtattr=no]
+	[ntp_cv_rtattr=yes],
+	[ntp_cv_rtattr=no]
     )]
 )
 
-case "$ntp_cv_struct_rt_msghdr$ntp_cv_struct_rtattr" in
+case "$ntp_cv_struct_rt_msghdr$ntp_cv_rtattr" in
  *yes*)
     AC_DEFINE([HAS_ROUTING_SOCKET], [1],
 	[Do we have a routing socket (rt_msghdr or rtattr)?])
-    case "$ntp_cv_struct_rtattr" in
+    case "$ntp_cv_rtattr" in
      yes)
 	AC_DEFINE([HAVE_RTNETLINK], [1],
 	    [Do we have Linux routing socket?])
