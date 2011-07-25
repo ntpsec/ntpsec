@@ -1,3 +1,4 @@
+(4.2.7p195) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>
 * Added loc/redhat.
 (4.2.7p194) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1608] from 4.2.6p4-RC2: Parse Refclock driver should honor
