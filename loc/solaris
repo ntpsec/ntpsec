@@ -1,0 +1,14 @@
+# Solaris installations and man page suffixes
+MAN
+ntp-keygen,bin,1m
+ntp-wait,sbin,1m
+ntpd,sbin,1m
+ntpdate,bin,1m
+ntpdc,bin,1m
+ntpdsim,sbin,1m
+ntpq,bin,1m
+ntpsnmpd,sbin,1m
+ntptime,bin,1m
+ntptrace,bin,1m
+sntp,sbin,1m
+tickadj,bin,1m

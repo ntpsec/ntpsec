@@ -1,6 +1,7 @@
 * [Bug 1608] from 4.2.6p4-RC2: Parse Refclock driver should honor
   trusttime.
 * Add support for installing programs and scripts to libexec.
+* Added loc/solaris.
 (4.2.7p193) 2011/07/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1970] from 4.2.6p4-RC2: UNLINK_EXPR_SLIST() causes crash if list
   is empty.
