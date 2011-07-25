@@ -1,3 +1,5 @@
+* [Bug 1608] from 4.2.6p4-RC2: Parse Refclock driver should honor
+  trusttime.
 (4.2.7p193) 2011/07/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1970] from 4.2.6p4-RC2: UNLINK_EXPR_SLIST() causes crash if list
   is empty.
@@ -1028,8 +1030,9 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 1970] UNLINK_EXPR_SLIST() causes crash if list is empty.
+* [Bug 1608] Parse Refclock driver should honor trusttime.
 * [Bug 1961] html2man update: distribute ntp-wait.html.
+* [Bug 1970] UNLINK_EXPR_SLIST() causes crash if list is empty.
 
 ---
 (4.2.6p4-RC1) 2011/07/10 Released by Harlan Stenn <stenn@ntp.org>
