@@ -55,8 +55,7 @@ dnl AC_ARG_PROGRAM
 
 NTP_PROG_CC
 
-dnl NTP_LOCINFO
-AC_SUBST([NTPDATE_MS])
+NTP_LOCINFO()
 
 NTP_LIBNTP
 
@@ -220,6 +219,7 @@ NTP_GOOGLETEST
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([include/Makefile])
+AC_CONFIG_FILES([scripts/Makefile])
 AC_CONFIG_FILES([tests/Makefile])
 
 AC_OUTPUT

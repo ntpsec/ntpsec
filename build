@@ -34,17 +34,17 @@ if [ ! -r sntp/libevent/build-aux/config.guess ] ; then
 	echo "Error: bootstrap required." 1>&2 && exit 1
 fi
 
-# scripts/cvo.sh invokes config.guess, and we want it to use the copy
+# sntp/scripts/cvo.sh invokes config.guess, and we want it to use the copy
 # in the build-aux directory if there's not another config.guess earlier
 # on the path, so we invoke it using env to append to the PATH.
 
-CVO=`env PATH="$PATH:./sntp/libevent/build-aux" scripts/cvo.sh @cvo@`
+CVO=`env PATH="$PATH:./sntp/libevent/build-aux" sntp/scripts/cvo.sh @cvo@`
 case "$CVO" in
- *-*-*-*) echo "scripts/cvo.sh returned <$CVO>, which makes no sense to me."
+ *-*-*-*) echo "sntp/scripts/cvo.sh returned <$CVO>, which makes no sense to me."
     exit 1
     ;;
  *-*-*) ;;
- *) echo "scripts/cvo.sh returned <$CVO>, which makes no sense to me."
+ *) echo "sntp/scripts/cvo.sh returned <$CVO>, which makes no sense to me."
     exit 1
     ;;
 esac

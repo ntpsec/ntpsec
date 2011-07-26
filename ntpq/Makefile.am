@@ -68,8 +68,8 @@ $(srcdir)/ntpq-opts.c: $(srcdir)/ntpq-opts.def $(std_def_list)
 $(srcdir)/ntpq.1ntpqman: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntpqman -Tagman-cmd.tpl ntpq-opts.def
 
-$(srcdir)/ntpq.man.in: $(srcdir)/ntpq.1ntpqman $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpq.1ntpqman > $(srcdir)/ntpq.man.in+
+$(srcdir)/ntpq.man.in: $(srcdir)/ntpq.1ntpqman $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntpq.1ntpqman > $(srcdir)/ntpq.man.in+
 	mv $(srcdir)/ntpq.man.in+ $(srcdir)/ntpq.man.in
 
 ###
@@ -77,8 +77,8 @@ $(srcdir)/ntpq.man.in: $(srcdir)/ntpq.1ntpqman $(top_srcdir)/sntp/include/mansec
 $(srcdir)/ntpq.1ntpqmdoc: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntpqmdoc -Tagmdoc-cmd.tpl ntpq-opts.def
 
-$(srcdir)/ntpq.mdoc.in: $(srcdir)/ntpq.1ntpqmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpq.1ntpqmdoc > $(srcdir)/ntpq.mdoc.in+
+$(srcdir)/ntpq.mdoc.in: $(srcdir)/ntpq.1ntpqmdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntpq.1ntpqmdoc > $(srcdir)/ntpq.mdoc.in+
 	mv $(srcdir)/ntpq.mdoc.in+ $(srcdir)/ntpq.mdoc.in
 
 ###

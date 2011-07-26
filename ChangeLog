@@ -1,6 +1,16 @@
 * [Bug 1972] from 4.2.6p4-RC2: checking for struct rtattr fails.
 * [Bug 1973] Widen reference clock mode from 8 to 32 bits.
 * Removed sntp/m4/ntp_bindir.m4 - no longer needed.
+* Move loc/ to sntp/loc/ .
+* Move scripts/cvo.sh to sntp/scripts/cvo.sh .
+* Move scripts/genLocInfo to sntp/scripts/genLocInfo .
+* Give NTP_LOCINFO an optional path-to argument.
+* Remove hacks to get NTP_LOCINFO-related data to snmp/ .
+* Move sntp/include/mansec2subst.sed to sntp/scripts/mansec2subst.sed .
+* If no "more specific" loc file is found for redhat* or fedora*,
+  look for a loc/redhat file.
+* If no "more specific" loc file is found and uname says this is Linux,
+  look for a loc/linux file.
 (4.2.7p195) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>
 * Added loc/redhat.
 (4.2.7p194) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>

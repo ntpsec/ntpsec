@@ -45,10 +45,8 @@ noinst_DATA=				\
 EXTRA_DIST =			\
 	check--help		\
 	checkChangeLog		\
-	cvo.sh			\
 	fixautomakedepsmagic	\
 	genCommitLog		\
-	genLocInfo		\
 	genver			\
 	hpadjtime.sh		\
 	monitoring		\
@@ -77,8 +75,8 @@ EXTRA_DIST =			\
 $(srcdir)/ntp-wait.1ntp-waitman: $(srcdir)/ntp-wait-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntp-waitman -Tagman-cmd.tpl ntp-wait-opts.def
 
-$(srcdir)/ntp-wait.man.in: $(srcdir)/ntp-wait.1ntp-waitman $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-wait.1ntp-waitman > $(srcdir)/ntp-wait.man.in+
+$(srcdir)/ntp-wait.man.in: $(srcdir)/ntp-wait.1ntp-waitman $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp-wait.1ntp-waitman > $(srcdir)/ntp-wait.man.in+
 	mv $(srcdir)/ntp-wait.man.in+ $(srcdir)/ntp-wait.man.in
 
 ###
@@ -86,8 +84,8 @@ $(srcdir)/ntp-wait.man.in: $(srcdir)/ntp-wait.1ntp-waitman $(top_srcdir)/sntp/in
 $(srcdir)/ntp-wait.1ntp-waitmdoc: $(srcdir)/ntp-wait-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntp-waitmdoc -Tagmdoc-cmd.tpl ntp-wait-opts.def
 
-$(srcdir)/ntp-wait.mdoc.in: $(srcdir)/ntp-wait.1ntp-waitmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-wait.1ntp-waitmdoc > $(srcdir)/ntp-wait.mdoc.in+
+$(srcdir)/ntp-wait.mdoc.in: $(srcdir)/ntp-wait.1ntp-waitmdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp-wait.1ntp-waitmdoc > $(srcdir)/ntp-wait.mdoc.in+
 	mv $(srcdir)/ntp-wait.mdoc.in+ $(srcdir)/ntp-wait.mdoc.in
 
 ###

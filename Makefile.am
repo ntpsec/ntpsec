@@ -49,7 +49,6 @@ EXTRA_DIST =			\
 	conf			\
 	html			\
 	lib/isc			\
-	loc			\
 	ports			\
 	\
 	deps-ver		\

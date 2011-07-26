@@ -52,8 +52,8 @@ sbin_PROGRAMS =	$(SNTP_DS)
 ## recursive make dist in sntp including libevent.
 ##
 
-SUBDIRS = include
-DIST_SUBDIRS = include
+SUBDIRS = include scripts
+DIST_SUBDIRS = include scripts
 
 if BUILD_SNTP
 if BUILD_LIBEVENT
@@ -104,6 +104,7 @@ EXTRA_DIST =				\
 	ag-tpl				\
 	deps-ver			\
 	@NTP_FORCE_LIBEVENT_DIST@	\
+	loc				\
 	sntp-opts.def			\
 	sntp-opts.menu			\
 	sntp-opts.texi			\
@@ -238,8 +239,8 @@ $(srcdir)/sntp-opts.c: $(srcdir)/sntp-opts.def $(std_def_list)
 $(srcdir)/sntp.1sntpman: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1sntpman -Tagman-cmd.tpl sntp-opts.def
 
-$(srcdir)/sntp.man.in: $(srcdir)/sntp.1sntpman $(srcdir)/include/mansec2subst.sed
-	sed -f $(srcdir)/include/mansec2subst.sed $(srcdir)/sntp.1sntpman > $(srcdir)/sntp.man.in+
+$(srcdir)/sntp.man.in: $(srcdir)/sntp.1sntpman $(srcdir)/scripts/mansec2subst.sed
+	sed -f $(srcdir)/scripts/mansec2subst.sed $(srcdir)/sntp.1sntpman > $(srcdir)/sntp.man.in+
 	mv $(srcdir)/sntp.man.in+ $(srcdir)/sntp.man.in
 
 ###
@@ -247,8 +248,8 @@ $(srcdir)/sntp.man.in: $(srcdir)/sntp.1sntpman $(srcdir)/include/mansec2subst.se
 $(srcdir)/sntp.1sntpmdoc: $(srcdir)/sntp-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1sntpmdoc -Tagmdoc-cmd.tpl sntp-opts.def
 
-$(srcdir)/sntp.mdoc.in: $(srcdir)/sntp.1sntpmdoc $(srcdir)/include/mansec2subst.sed
-	sed -f $(srcdir)/include/mansec2subst.sed $(srcdir)/sntp.1sntpmdoc > $(srcdir)/sntp.mdoc.in+
+$(srcdir)/sntp.mdoc.in: $(srcdir)/sntp.1sntpmdoc $(srcdir)/scripts/mansec2subst.sed
+	sed -f $(srcdir)/scripts/mansec2subst.sed $(srcdir)/sntp.1sntpmdoc > $(srcdir)/sntp.mdoc.in+
 	mv $(srcdir)/sntp.mdoc.in+ $(srcdir)/sntp.mdoc.in
 
 ###

@@ -67,8 +67,8 @@ $(srcdir)/ntp-keygen-opts.c: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 $(srcdir)/ntp-keygen.1ntp-keygenman: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntp-keygenman -Tagman-cmd.tpl ntp-keygen-opts.def
 
-$(srcdir)/ntp-keygen.man.in: $(srcdir)/ntp-keygen.1ntp-keygenman $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-keygen.1ntp-keygenman > $(srcdir)/ntp-keygen.man.in+
+$(srcdir)/ntp-keygen.man.in: $(srcdir)/ntp-keygen.1ntp-keygenman $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp-keygen.1ntp-keygenman > $(srcdir)/ntp-keygen.man.in+
 	mv $(srcdir)/ntp-keygen.man.in+ $(srcdir)/ntp-keygen.man.in
 
 ###
@@ -76,8 +76,8 @@ $(srcdir)/ntp-keygen.man.in: $(srcdir)/ntp-keygen.1ntp-keygenman $(top_srcdir)/s
 $(srcdir)/ntp-keygen.1ntp-keygenmdoc: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntp-keygenmdoc -Tagmdoc-cmd.tpl ntp-keygen-opts.def
 
-$(srcdir)/ntp-keygen.mdoc.in: $(srcdir)/ntp-keygen.1ntp-keygenmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntp-keygen.1ntp-keygenmdoc > $(srcdir)/ntp-keygen.mdoc.in+
+$(srcdir)/ntp-keygen.mdoc.in: $(srcdir)/ntp-keygen.1ntp-keygenmdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp-keygen.1ntp-keygenmdoc > $(srcdir)/ntp-keygen.mdoc.in+
 	mv $(srcdir)/ntp-keygen.mdoc.in+ $(srcdir)/ntp-keygen.mdoc.in
 
 ###

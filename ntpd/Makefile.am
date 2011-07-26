@@ -261,8 +261,8 @@ $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std
 $(srcdir)/ntpd.1ntpdman: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntpdman -Tagman-cmd.tpl ntpd-opts.def
 
-$(srcdir)/ntpd.man.in: $(srcdir)/ntpd.1ntpdman $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpd.1ntpdman > $(srcdir)/ntpd.man.in+
+$(srcdir)/ntpd.man.in: $(srcdir)/ntpd.1ntpdman $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntpd.1ntpdman > $(srcdir)/ntpd.man.in+
 	mv $(srcdir)/ntpd.man.in+ $(srcdir)/ntpd.man.in
 
 ###
@@ -270,8 +270,8 @@ $(srcdir)/ntpd.man.in: $(srcdir)/ntpd.1ntpdman $(top_srcdir)/sntp/include/mansec
 $(srcdir)/ntpd.1ntpdmdoc: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=1ntpdmdoc -Tagmdoc-cmd.tpl ntpd-opts.def
 
-$(srcdir)/ntpd.mdoc.in: $(srcdir)/ntpd.1ntpdmdoc $(top_srcdir)/sntp/include/mansec2subst.sed
-	sed -f $(top_srcdir)/sntp/include/mansec2subst.sed $(srcdir)/ntpd.1ntpdmdoc > $(srcdir)/ntpd.mdoc.in+
+$(srcdir)/ntpd.mdoc.in: $(srcdir)/ntpd.1ntpdmdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
+	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntpd.1ntpdmdoc > $(srcdir)/ntpd.mdoc.in+
 	mv $(srcdir)/ntpd.mdoc.in+ $(srcdir)/ntpd.mdoc.in
 
 ###

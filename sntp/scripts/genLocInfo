@@ -34,7 +34,7 @@ esac
 # If we have a file to use (ie, LF is not empty) then look for one.
 case "$LF" in
  '')
-    PATH=$PATH:sntp/libevent/build-aux
+    PATH=$PATH:libevent/build-aux
     export PATH
     set `scripts/cvo.sh @osname@ @osver@` || exit 1
 
@@ -70,8 +70,40 @@ ${V}echo "Looking for <$lf>" >&2
 	fi
 	;;
     esac
+    # Handle some "aliases"
+    case "$LF" in
+     '')
+	case "$CVO_OSNAME" in
+	 redhat* | fedora*)
+	    lf=loc/redhat
+${V}echo "Looking for <$lf>" >&2
+	    if test -f $lf
+	    then
+		LF=$lf
+	    fi
+	    ;;
+	esac
+	;;
+    esac
+
     # This might be a good place to see if uname returns "Linux",
     # and if so, use a generic file for that.
+    case "$LF" in
+     '')
+	case "`uname`" in
+	 Linux)
+	    lf=loc/linux
+${V}echo "Looking for <$lf>" >&2
+	    if test -f $lf
+	    then
+		LF=$lf
+	    fi
+	    ;;
+	esac
+	;;
+    esac
+
+    # Finally, 'legacy'
     case "$LF" in
      '')
 	lf=loc/legacy
@@ -97,6 +129,7 @@ echo "GENLOCINFOFILE=$LF"
 
 ###
 
+DIDSOMETHING=0
 oIFS=$IFS
 IFS=","
 
@@ -180,14 +213,15 @@ do
 	echo "${C}_DL=`eval echo '$'${C}_DL`"
 	echo "${C}_DS=`eval echo '$'${C}_DS`"
 	echo "${C}_MS=`eval echo '$'${C}_MS`"
+	DIDSOMETHING=1
     else
 	break
     fi
 done < $LF
 IFS=$oIFS
 
-case "$RC" in
- 0) echo 'GENLOCINFO=OK' ;;
+case "$DIDSOMETHING$RC" in
+ 10) echo 'GENLOCINFO=OK' ;;
 esac
 
 exit $RC
