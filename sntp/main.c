@@ -819,7 +819,7 @@ sock_cb(
 	}
 
 	/* Read in the packet */
-	rpktl = recvdata(fd, &sender, &rbuf, sizeof(rbuf));
+	rpktl = recvdata(fd, &sender, &rbuf.pkt, sizeof(rbuf));
 	if (rpktl < 0) {
 		msyslog(LOG_DEBUG, "recvfrom error %m");
 		return;

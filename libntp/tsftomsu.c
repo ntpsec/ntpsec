@@ -7,13 +7,15 @@
 
 int
 tsftomsu(
-	u_long tsf,
-	int round
+	u_long	tsf,
+	int	round_it
 	)
 {
-	register long val_ui, val_uf;
-	register long tmp_ui, tmp_uf;
-	register int i;
+	long	val_ui;
+	long	val_uf;
+	long	tmp_ui;
+	long	tmp_uf;
+	int	i;
 
 	/*
 	 * Essentially, multiply by 10 three times in l_fp form.
@@ -33,7 +35,8 @@ tsftomsu(
 	/*
 	 * Round the value if need be, then return it.
 	 */
-	if (round && (val_uf & 0x80000000))
-	    val_ui++;
+	if (round_it && (0x80000000 & val_uf))
+		val_ui++;
+
 	return (int)val_ui;
 }

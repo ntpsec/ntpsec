@@ -197,26 +197,27 @@
      T_Trustedkey = 414,
      T_Ttl = 415,
      T_Type = 416,
-     T_Unconfig = 417,
-     T_Unpeer = 418,
-     T_Version = 419,
-     T_WanderThreshold = 420,
-     T_Week = 421,
-     T_Wildcard = 422,
-     T_Xleave = 423,
-     T_Year = 424,
-     T_Flag = 425,
-     T_EOC = 426,
-     T_Simulate = 427,
-     T_Beep_Delay = 428,
-     T_Sim_Duration = 429,
-     T_Server_Offset = 430,
-     T_Duration = 431,
-     T_Freq_Offset = 432,
-     T_Wander = 433,
-     T_Jitter = 434,
-     T_Prop_Delay = 435,
-     T_Proc_Delay = 436
+     T_U_int = 417,
+     T_Unconfig = 418,
+     T_Unpeer = 419,
+     T_Version = 420,
+     T_WanderThreshold = 421,
+     T_Week = 422,
+     T_Wildcard = 423,
+     T_Xleave = 424,
+     T_Year = 425,
+     T_Flag = 426,
+     T_EOC = 427,
+     T_Simulate = 428,
+     T_Beep_Delay = 429,
+     T_Sim_Duration = 430,
+     T_Server_Offset = 431,
+     T_Duration = 432,
+     T_Freq_Offset = 433,
+     T_Wander = 434,
+     T_Jitter = 435,
+     T_Prop_Delay = 436,
+     T_Proc_Delay = 437
    };
 #endif
 /* Tokens.  */
@@ -379,26 +380,27 @@
 #define T_Trustedkey 414
 #define T_Ttl 415
 #define T_Type 416
-#define T_Unconfig 417
-#define T_Unpeer 418
-#define T_Version 419
-#define T_WanderThreshold 420
-#define T_Week 421
-#define T_Wildcard 422
-#define T_Xleave 423
-#define T_Year 424
-#define T_Flag 425
-#define T_EOC 426
-#define T_Simulate 427
-#define T_Beep_Delay 428
-#define T_Sim_Duration 429
-#define T_Server_Offset 430
-#define T_Duration 431
-#define T_Freq_Offset 432
-#define T_Wander 433
-#define T_Jitter 434
-#define T_Prop_Delay 435
-#define T_Proc_Delay 436
+#define T_U_int 417
+#define T_Unconfig 418
+#define T_Unpeer 419
+#define T_Version 420
+#define T_WanderThreshold 421
+#define T_Week 422
+#define T_Wildcard 423
+#define T_Xleave 424
+#define T_Year 425
+#define T_Flag 426
+#define T_EOC 427
+#define T_Simulate 428
+#define T_Beep_Delay 429
+#define T_Sim_Duration 430
+#define T_Server_Offset 431
+#define T_Duration 432
+#define T_Freq_Offset 433
+#define T_Wander 434
+#define T_Jitter 435
+#define T_Prop_Delay 436
+#define T_Proc_Delay 437
 
 
 
@@ -413,6 +415,7 @@ typedef union YYSTYPE
 	char *			String;
 	double			Double;
 	int			Integer;
+	unsigned		U_int;
 	gen_fifo *		Generic_fifo;
 	attr_val *		Attr_val;
 	attr_val_fifo *		Attr_val_fifo;
@@ -429,7 +432,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 433 "ntp_parser.h"
+#line 436 "ntp_parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

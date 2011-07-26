@@ -1053,6 +1053,23 @@ create_attr_ival(
 
 
 attr_val *
+create_attr_uval(
+	int	attr,
+	u_int	value
+	)
+{
+	attr_val *my_val;
+
+	my_val = emalloc_zero(sizeof(*my_val));
+	my_val->attr = attr;
+	my_val->value.u = value;
+	my_val->type = T_U_int;
+
+	return my_val;
+}
+
+
+attr_val *
 create_attr_rangeval(
 	int	attr,
 	int	first,
@@ -1234,12 +1251,7 @@ create_peer_node(
 			break;
 
 		case T_Mode:
-			if (option->value.u >= UCHAR_MAX) {
-				msyslog(LOG_ERR, "mode: invalid argument");
-				errflag = 1;
-			} else {
-				my_node->ttl = (u_char)option->value.u;
-			}
+			my_node->ttl = option->value.u;
 			break;
 
 		case T_Key:

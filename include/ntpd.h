@@ -172,14 +172,14 @@ extern  void	set_peerdstadr	(struct peer *peer,
 				 endpt *interface);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, u_char, u_char,
-				 u_char, u_char, u_int, u_char, u_char,
+				 u_char, u_char, u_int, u_char, u_int32,
 				 keyid_t, const char *);
 extern	void	peer_all_reset	(void);
 extern	void	peer_clr_stats	(void);
 extern	struct peer *peer_config(sockaddr_u *, const char *,
 				 endpt *, u_char, u_char,
-				 u_char, u_char, u_int, u_char, keyid_t,
-				 const char *);
+				 u_char, u_char, u_int, u_int32,
+				 keyid_t, const char *);
 extern	void	peer_reset	(struct peer *);
 extern	void	refresh_all_peerinterfaces(void);
 extern	void	unpeer		(struct peer *);

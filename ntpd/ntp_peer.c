@@ -15,8 +15,8 @@
 #include <ntp_random.h>
 
 /*
- *                  Table of valid association combinations
- *                  ---------------------------------------
+ *		    Table of valid association combinations
+ *		    ---------------------------------------
  *
  *                             packet->mode
  * peer->mode      | UNSPEC  ACTIVE PASSIVE  CLIENT  SERVER  BCAST
@@ -532,7 +532,7 @@ peer_config(
 	u_char		minpoll,
 	u_char		maxpoll,
 	u_int		flags,
-	u_char		ttl,
+	u_int32		ttl,
 	keyid_t		key,
 	const char *	ident		/* autokey group */
 	)
@@ -634,7 +634,7 @@ peer_refresh_interface(
 	niface = select_peerinterface(p, &p->srcadr, NULL);
 
 	DPRINTF(4, (
-	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %d key %08x: new interface: ",
+	    "peer_refresh_interface: %s->%s mode %d vers %d poll %d %d flags 0x%x 0x%x ttl %u key %08x: new interface: ",
 	    p->dstadr == NULL ? "<null>" :
 	    stoa(&p->dstadr->sin), stoa(&p->srcadr), p->hmode,
 	    p->version, p->minpoll, p->maxpoll, p->flags, p->cast_flags,
@@ -711,7 +711,7 @@ newpeer(
 	u_char		maxpoll,
 	u_int		flags,
 	u_char		cast_flags,
-	u_char		ttl,
+	u_int32		ttl,
 	keyid_t		key,
 	const char *	ident
 	)
@@ -841,7 +841,7 @@ newpeer(
 	if (key > NTP_MAXKEY)
 		peer->flags |= FLAG_SKEY;
 #endif	/* AUTOKEY */
-	peer->ttl = (u_char)ttl;
+	peer->ttl = ttl;
 	peer->keyid = key;
 	if (ident != NULL)
 		peer->ident = estrdup(ident);

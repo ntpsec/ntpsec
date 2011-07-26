@@ -30,14 +30,14 @@
 				*/
 
 
-  struct FILE_INFO *ip_file;   /* Pointer to the configuration file stream */
+  struct FILE_INFO *ip_file;	/* configuration file stream */
 
   #define YYMALLOC	emalloc
   #define YYFREE	free
   #define YYERROR_VERBOSE
-  #define YYMAXDEPTH	1000   /* stop the madness sooner */
+  #define YYMAXDEPTH	1000	/* stop the madness sooner */
   void yyerror(const char *msg);
-  extern int input_from_file;  /* 0=input from ntpq :config */
+  extern int input_from_file;	/* else from ntpq :config */
 %}
 
 /* 
@@ -50,6 +50,7 @@
 	char *			String;
 	double			Double;
 	int			Integer;
+	unsigned		U_int;
 	gen_fifo *		Generic_fifo;
 	attr_val *		Attr_val;
 	attr_val_fifo *		Attr_val_fifo;
@@ -224,6 +225,7 @@
 %token	<Integer>	T_Trustedkey
 %token	<Integer>	T_Ttl
 %token	<Integer>	T_Type
+%token	<Integer>	T_U_int			/* Not a token */
 %token	<Integer>	T_Unconfig
 %token	<Integer>	T_Unpeer
 %token	<Integer>	T_Version
@@ -453,6 +455,8 @@ option_flag_keyword
 option_int
 	:	option_int_keyword T_Integer
 			{ $$ = create_attr_ival($1, $2); }
+	|	option_int_keyword T_U_int
+			{ $$ = create_attr_uval($1, $2); }
 	;
 
 option_int_keyword

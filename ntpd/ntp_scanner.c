@@ -283,18 +283,63 @@ is_integer(
 	char *lexeme
 	)
 {
-	int i = 0;
+	int	i;
+	int	is_neg;
+	u_int	u_val;
+	
+	i = 0;
 
 	/* Allow a leading minus sign */
-	if (lexeme[i] == '-')
-		++i;
+	if (lexeme[i] == '-') {
+		i++;
+		is_neg = TRUE;
+	} else {
+		is_neg = FALSE;
+	}
 
 	/* Check that all the remaining characters are digits */
-	for (; lexeme[i]; ++i) {
+	for (; lexeme[i] != '\0'; i++) {
 		if (!isdigit(lexeme[i]))
-			return 0;
+			return FALSE;
 	}
-	return 1;
+
+	if (is_neg)
+		return TRUE;
+
+	/* Reject numbers that fit in unsigned but not in signed int */
+	if (1 == sscanf(lexeme, "%u", &u_val))
+		return (u_val <= INT_MAX);
+	else
+		return FALSE;
+}
+
+
+/* U_int -- assumes is_integer() has returned FALSE */
+static int
+is_u_int(
+	char *lexeme
+	)
+{
+	int	i;
+	int	is_hex;
+	
+	i = 0;
+	if ('0' == lexeme[i] && 'x' == tolower(lexeme[i + 1])) {
+		i += 2;
+		is_hex = TRUE;
+	} else {
+		is_hex = FALSE;
+	}
+
+	/* Check that all the remaining characters are digits */
+	for (; lexeme[i] != '\0'; i++) {
+		if (is_hex && !isxdigit(lexeme[i]))
+			return FALSE;
+		if (!is_hex && !isdigit(lexeme[i]))
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 
@@ -437,11 +482,16 @@ yylex(
 	void
 	)
 {
-	int i, instring = 0;
-	int yylval_was_set = 0;
-	int token;		/* The return value/the recognized token */
-	int ch;
-	static follby followedby = FOLLBY_TOKEN;
+	static follby	followedby = FOLLBY_TOKEN;
+	int		i;
+	int		instring;
+	int		yylval_was_set;
+	int		converted;
+	int		token;		/* The return value */
+	int		ch;
+
+	instring = FALSE;
+	yylval_was_set = FALSE;
 
 	do {
 		/* Ignore whitespace at the beginning */
@@ -520,7 +570,7 @@ yylex(
 		 * XXX - HMS: I'm not sure we want to assume the closing "
 		 */
 		if ('"' == ch) {
-			instring = 1;
+			instring = TRUE;
 			while (EOF != (ch = get_next_char()) &&
 			       ch != '"' && ch != '\n') {
 				yytext[i++] = (char)ch;
@@ -569,23 +619,49 @@ yylex(
 			if (T_Server == token && !old_config_style)
 				followedby = FOLLBY_TOKEN;
 			goto normal_return;
-		}
-		else if (is_integer(yytext)) {
-			yylval_was_set = 1;
+		} else if (is_integer(yytext)) {
+			yylval_was_set = TRUE;
 			errno = 0;
 			if ((yylval.Integer = strtol(yytext, NULL, 10)) == 0
 			    && ((errno == EINVAL) || (errno == ERANGE))) {
 				msyslog(LOG_ERR, 
 					"Integer cannot be represented: %s",
 					yytext);
-				exit(1);
-			} else {
-				token = T_Integer;
-				goto normal_return;
+				if (input_from_file) {
+					exit(1);
+				} else {
+					/* force end of parsing */
+					yylval.Integer = 0;
+					return 0;
+				}
 			}
-		}
-		else if (is_double(yytext)) {
-			yylval_was_set = 1;
+			token = T_Integer;
+			goto normal_return;
+		} else if (is_u_int(yytext)) {
+			yylval_was_set = TRUE;
+			if ('0' == yytext[0] &&
+			    'x' == tolower(yytext[1]))
+				converted = sscanf(&yytext[2], "%x",
+						   &yylval.U_int);
+			else
+				converted = sscanf(yytext, "%u",
+						   &yylval.U_int);
+			if (1 != converted) {
+				msyslog(LOG_ERR, 
+					"U_int cannot be represented: %s",
+					yytext);
+				if (input_from_file) {
+					exit(1);
+				} else {
+					/* force end of parsing */
+					yylval.Integer = 0;
+					return 0;
+				}
+			}
+			token = T_U_int;
+			goto normal_return;
+		} else if (is_double(yytext)) {
+			yylval_was_set = TRUE;
 			errno = 0;
 			if ((yylval.Double = atof(yytext)) == 0 && errno == ERANGE) {
 				msyslog(LOG_ERR,
@@ -598,7 +674,7 @@ yylex(
 			}
 		} else {
 			/* Default: Everything is a string */
-			yylval_was_set = 1;
+			yylval_was_set = TRUE;
 			token = create_string_token(yytext);
 			goto normal_return;
 		}
@@ -636,11 +712,11 @@ yylex(
 		}
 	}
 
-	instring = 0;
+	instring = FALSE;
 	if (FOLLBY_STRING == followedby)
 		followedby = FOLLBY_TOKEN;
 
-	yylval_was_set = 1;
+	yylval_was_set = TRUE;
 	token = create_string_token(yytext);
 
 normal_return:
@@ -659,7 +735,8 @@ lex_too_long:
 	yytext[min(sizeof(yytext) - 1, 50)] = 0;
 	msyslog(LOG_ERR, 
 		"configuration item on line %d longer than limit of %lu, began with '%s'",
-		ip_file->line_no, (u_long)(sizeof(yytext) - 1), yytext);
+		ip_file->line_no, (u_long)min(sizeof(yytext) - 1, 50),
+		yytext);
 
 	/*
 	 * If we hit the length limit reading the startup configuration

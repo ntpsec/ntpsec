@@ -131,7 +131,7 @@ struct peer_node_tag {
 	attr_val_fifo *	peerflags;
 	u_char		minpoll;
 	u_char		maxpoll;
-	u_char		ttl;
+	u_int32		ttl;
 	u_char		peerversion;
 	keyid_t		peerkey;
 	char *		group;
@@ -299,6 +299,7 @@ address_node *create_address_node(char *addr, int type);
 void destroy_address_node(address_node *my_node);
 attr_val *create_attr_dval(int attr, double value);
 attr_val *create_attr_ival(int attr, int value);
+attr_val *create_attr_uval(int attr, u_int value);
 attr_val *create_attr_rangeval(int attr, int first, int last);
 attr_val *create_attr_sval(int attr, char *s);
 filegen_node *create_filegen_node(int filegen_token,

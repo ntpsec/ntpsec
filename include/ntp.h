@@ -266,7 +266,7 @@ struct peer {
 	u_char	cast_flags;	/* additional flags */
 	u_char	last_event;	/* last peer error code */
 	u_char	num_events;	/* number of error events */
-	u_char	ttl;		/* ttl/refclock mode */
+	u_int32	ttl;		/* ttl/refclock mode */
 	char	*ident;		/* group identifier name */
 
 	/*
