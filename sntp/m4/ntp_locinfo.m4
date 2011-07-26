@@ -12,7 +12,7 @@ AC_DEFUN([NTP_LOCINFO], [
 AC_ARG_WITH(
     [locfile],
     [AS_HELP_STRING(
-	[--with-locfile],
+	[--with-locfile=XXX],
 	[os-specific or "legacy"]
     )],
     [],
