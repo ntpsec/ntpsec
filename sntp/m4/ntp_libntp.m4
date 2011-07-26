@@ -142,6 +142,15 @@ typedef union mpinfou {
     esac
 esac
 
+case "$host" in
+ *-linux*)
+    AC_CHECK_HEADERS([linux/if_addr.h], [], [], [
+	#ifdef HAVE_SYS_SOCKET_H
+	# include <sys/socket.h>
+	#endif
+    ])
+esac
+
 AC_CHECK_HEADERS([arpa/nameser.h sys/param.h sys/time.h sys/timers.h])
 # sys/sysctl.h depends on sys/param.h on OpenBSD - Bug 1576
 AC_CHECK_HEADERS([sys/sysctl.h], [], [], [

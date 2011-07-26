@@ -51,7 +51,7 @@
 #endif
 #include <net/if.h>
 
-#ifdef __linux
+#ifdef HAVE_LINUX_IF_ADDR_H
 # include <linux/if_addr.h>
 #endif
 
@@ -225,8 +225,10 @@ linux_if_inet6_current(isc_interfaceiter_t *iter) {
 	** Ignore DAD addresses --
 	** we can't bind to them until they are resolved
 	*/
+#ifdef IFA_F_TENTATIVE
 	if (flags & IFA_F_TENTATIVE)
 		return (ISC_R_IGNORE);
+#endif
 
 	for (i = 0; i < 16; i++) {
 		unsigned char byte;
