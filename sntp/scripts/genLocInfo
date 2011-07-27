@@ -128,7 +128,7 @@ echo "GENLOCINFOFILE=$LF"
 
 ###
 
-rm genLocInfo.rc?
+rm -f genLocInfo.rc?
 
 oIFS=$IFS
 IFS=","
