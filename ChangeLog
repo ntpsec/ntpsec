@@ -1,3 +1,4 @@
+* [Bug 1976] genLocInfo writes to srcdir break 'make distcheck'.
 (4.2.7p196) 2011/07/27 Released by Harlan Stenn <stenn@ntp.org>
 * DEFAULT INSTALLATION DIRECTORY CHANGES ON SOME OSes: to get the old
   behavior, pass --with-locfile=legacy to 'configure'
@@ -8,7 +9,7 @@
 * Move scripts/cvo.sh to sntp/scripts/cvo.sh .
 * Move scripts/genLocInfo to sntp/scripts/genLocInfo .
 * Give NTP_LOCINFO an optional path-to argument.
-* Remove hacks to get NTP_LOCINFO-related data to snmp/ .
+* Remove hacks to get NTP_LOCINFO-related data to sntp/ .
 * Move sntp/include/mansec2subst.sed to sntp/scripts/mansec2subst.sed .
 * If no "more specific" loc file is found for redhat* or fedora*,
   look for a loc/redhat file.

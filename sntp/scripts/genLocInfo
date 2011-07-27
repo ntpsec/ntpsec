@@ -1,6 +1,6 @@
 #! /bin/sh
 
-args=`getopt f:v $*`
+args=`getopt d:f:v $*`
 set -- $args
 
 LF=
@@ -9,11 +9,17 @@ V=": "
 for i
 do
     case "$i" in
-     -f) locfile="$2" ; shift ;;
+     -d) sdir="$2" ; shift 2 ;;
+     -f) locfile="$2" ; shift 2 ;;
      -v) V= ; shift ;;
      --) shift ; break ;;
     esac
 done
+
+case "$sdir" in
+ '')
+    sdir=.
+esac
 
 case "$locfile" in
  */*)
@@ -128,7 +134,7 @@ echo "GENLOCINFOFILE=$LF"
 
 ###
 
-rm genLocInfo.rc?
+rm -f $sdir/genLocInfo.rc?
 
 oIFS=$IFS
 IFS=","
@@ -144,7 +150,7 @@ do
 	case "$x" in
 	 '') ;;
 	 *) echo "Unrecognized input: <$c,$d,$s,$x>" >&2
-	    touch genLocInfo.rc1
+	    touch $sdir/genLocInfo.rc1
 	    continue
 	    ;;
 	esac
@@ -164,7 +170,7 @@ do
 	 *,libexec,*)  DB= ; DL=libexec ; DS= ;;
 	 *,sbin,*) DB= ; DL= ; DS=sbin ;;
 	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
-	    touch genLocInfo.rc1
+	    touch $sdir/genLocInfo.rc1
 	    continue
 	    ;;
 	esac
@@ -174,7 +180,7 @@ do
 	 *,*,1M) ;;
 	 *,*,8) ;;
 	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
-	    touch genLocInfo.rc1
+	    touch $sdir/genLocInfo.rc1
 	    continue
 	    ;;
 	esac
@@ -215,22 +221,22 @@ do
 	echo "${C}_DS=`eval echo '$'${C}_DS`"
 	echo "${C}_MS=`eval echo '$'${C}_MS`"
 
-	touch genLocInfo.rc0
+	touch $sdir/genLocInfo.rc0
     else
 	break
     fi
 done < $LF
 IFS=$oIFS
 
-if test -f genLocInfo.rc1
+if test -f $sdir/genLocInfo.rc1
 then
-    rm genLocInfo.rc?
+    rm $sdir/genLocInfo.rc?
     exit 1
 fi
 
-if test -f genLocInfo.rc0
+if test -f $sdir/genLocInfo.rc0
 then
-    rm genLocInfo.rc?
+    rm $sdir/genLocInfo.rc?
     echo 'GENLOCINFO=OK'
     exit 0
 fi

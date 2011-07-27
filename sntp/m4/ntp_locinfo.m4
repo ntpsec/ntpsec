@@ -7,7 +7,7 @@ dnl - man section (1, 1m, 1M, 8)
 
 AC_DEFUN([NTP_LOCINFO], [
 
-# NTP_LOCINFO: calling AC_ARG_WITH
+AC_MSG_CHECKING([for install dir and man conventions])
 
 AC_ARG_WITH(
     [locfile],
@@ -19,17 +19,19 @@ AC_ARG_WITH(
     [with_locfile=legacy]
 )
 
-AC_MSG_CHECKING([for installation directory, man sections, and man format])
-
-( cd $ac_abs_confdir/$1 && scripts/genLocInfo -f "$with_locfile" ) > genLocInfo.i 2>genLocInfo.err
+( SENTINEL_DIR="$PWD" &&	\
+  cd $srcdir/$1 &&		\
+  scripts/genLocInfo -f "$with_locfile" -d "$SENTINEL_DIR" ) > genLocInfo.i 2> genLocInfo.err
 . ./genLocInfo.i
 
 case "$GENLOCINFO" in
  OK)
-    AC_MSG_RESULT([found in $GENLOCINFOFILE])
+    AC_MSG_RESULT([in file $GENLOCINFOFILE])
     rm genLocInfo.err genLocInfo.i
     ;;
- *) AC_MSG_ERROR([Problem with genLocInfo!])
+ *)
+    AC_MSG_RESULT([failed.])
+    AC_MSG_ERROR([Problem with genLocInfo!])
     ;;
 esac
 
