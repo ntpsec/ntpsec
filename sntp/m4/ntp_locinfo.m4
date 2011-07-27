@@ -16,12 +16,21 @@ AC_ARG_WITH(
 	[os-specific or "legacy"]
     )],
     [],
-    [with_locfile=legacy]
+    [with_locfile=no]
 )
 
-( SENTINEL_DIR="$PWD" &&	\
-  cd $srcdir/$1 &&		\
-  scripts/genLocInfo -f "$with_locfile" -d "$SENTINEL_DIR" ) > genLocInfo.i 2> genLocInfo.err
+(									\
+    SENTINEL_DIR="$PWD" &&						\
+    cd $srcdir/$1 &&							\
+    case "$with_locfile" in						\
+     yes|no|'')								\
+	scripts/genLocInfo -d "$SENTINEL_DIR"				\
+	;;								\
+     *)									\
+	scripts/genLocInfo -d "$SENTINEL_DIR" -f "$with_locfile"	\
+	;;								\
+    esac								\
+) > genLocInfo.i 2> genLocInfo.err
 . ./genLocInfo.i
 
 case "$GENLOCINFO" in
