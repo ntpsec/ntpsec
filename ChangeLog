@@ -1,5 +1,5 @@
 * DEFAULT INSTALLATION DIRECTORY CHANGES ON SOME OSes: to get the old
-  behavior, use: --with-locfile=legacy
+  behavior, pass --with-locfile=legacy to 'configure'
 * [Bug 1972] from 4.2.6p4-RC2: checking for struct rtattr fails.
 * [Bug 1973] Widen reference clock mode from 8 to 32 bits.
 * Removed sntp/m4/ntp_bindir.m4 - no longer needed.
