@@ -1,3 +1,4 @@
+(4.2.7p196) 2011/07/27 Released by Harlan Stenn <stenn@ntp.org>
 * DEFAULT INSTALLATION DIRECTORY CHANGES ON SOME OSes: to get the old
   behavior, pass --with-locfile=legacy to 'configure'
 * [Bug 1972] from 4.2.6p4-RC2: checking for struct rtattr fails.
