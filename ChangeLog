@@ -1,3 +1,5 @@
+* [Bug 1975] from 4.2.6p4-RC2: libntp/mktime.c won't work with 64-bit
+  time_t
 * [Bug 1976] genLocInfo writes to srcdir break 'make distcheck'.
 (4.2.7p196) 2011/07/27 Released by Harlan Stenn <stenn@ntp.org>
 * DEFAULT INSTALLATION DIRECTORY CHANGES ON SOME OSes: to get the old
@@ -1058,6 +1060,7 @@
 * [Bug 1961] html2man update: distribute ntp-wait.html.
 * [Bug 1970] UNLINK_EXPR_SLIST() causes crash if list is empty.
 * [Bug 1972] checking for struct rtattr fails.
+* [Bug 1975] libntp/mktime.c won't work with 64-bit time_t
 
 ---
 (4.2.6p4-RC1) 2011/07/10 Released by Harlan Stenn <stenn@ntp.org>

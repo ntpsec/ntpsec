@@ -64,6 +64,10 @@
 
 #if !defined(HAVE_MKTIME) || !defined(HAVE_TIMEGM)
 
+#if SIZEOF_TIME_T >= 8
+#error libntp supplied mktime()/timegm() do not support 64-bit time_t
+#endif
+
 #ifndef DSTMINUTES
 #define DSTMINUTES 60
 #endif
