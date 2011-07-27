@@ -14,6 +14,7 @@
 * If no "more specific" loc file is found and uname says this is Linux,
   look for a loc/linux file.
 * Improve the help text: --with-locfile=XXX .
+* work around solaris /bin/sh issues for genLocInfo.
 (4.2.7p195) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>
 * Added loc/redhat.
 (4.2.7p194) 2011/07/25 Released by Harlan Stenn <stenn@ntp.org>

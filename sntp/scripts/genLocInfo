@@ -4,7 +4,6 @@ args=`getopt f:v $*`
 set -- $args
 
 LF=
-RC=0
 V=": "
 
 for i
@@ -23,7 +22,7 @@ case "$locfile" in
  '')
     ;;
  *)
-    lf=loc/$LOCFILE
+    lf=loc/$locfile
     if test -f $lf
     then
 	LF=$lf
@@ -129,7 +128,8 @@ echo "GENLOCINFOFILE=$LF"
 
 ###
 
-DIDSOMETHING=0
+rm genLocInfo.rc?
+
 oIFS=$IFS
 IFS=","
 
@@ -144,7 +144,7 @@ do
 	case "$x" in
 	 '') ;;
 	 *) echo "Unrecognized input: <$c,$d,$s,$x>" >&2
-	    RC=1
+	    touch genLocInfo.rc1
 	    continue
 	    ;;
 	esac
@@ -164,16 +164,17 @@ do
 	 *,libexec,*)  DB= ; DL=libexec ; DS= ;;
 	 *,sbin,*) DB= ; DL= ; DS=sbin ;;
 	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
-	    RC=1
+	    touch genLocInfo.rc1
 	    continue
 	    ;;
 	esac
 	case "$c,$d,$s" in
 	 *,*,1) ;;
 	 *,*,1m) ;;
+	 *,*,1M) ;;
 	 *,*,8) ;;
 	 *) echo "Unrecognized input: <$c,$d,$s>" >&2
-	    RC=1
+	    touch genLocInfo.rc1
 	    continue
 	    ;;
 	esac
@@ -198,7 +199,7 @@ do
 	    eval ${C}_DL=
 	    eval ${C}_DS=$c
 	    ;;
-	 *) echo "$0: GRONK: d" >&2
+	 *) echo "$0: installdir <$d> must be bin, sbin, or libexec" >&2
 	    exit 1
 	    ;;
 	esac
@@ -213,15 +214,25 @@ do
 	echo "${C}_DL=`eval echo '$'${C}_DL`"
 	echo "${C}_DS=`eval echo '$'${C}_DS`"
 	echo "${C}_MS=`eval echo '$'${C}_MS`"
-	DIDSOMETHING=1
+
+	touch genLocInfo.rc0
     else
 	break
     fi
 done < $LF
 IFS=$oIFS
 
-case "$DIDSOMETHING$RC" in
- 10) echo 'GENLOCINFO=OK' ;;
-esac
+if test -f genLocInfo.rc1
+then
+    rm genLocInfo.rc?
+    exit 1
+fi
 
-exit $RC
+if test -f genLocInfo.rc0
+then
+    rm genLocInfo.rc?
+    echo 'GENLOCINFO=OK'
+    exit 0
+fi
+
+exit 1
