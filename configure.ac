@@ -516,6 +516,15 @@ typedef union mpinfou {		/* For lint */
     ;;
 esac
 
+case "$host" in
+ *-linux*)
+    AC_CHECK_HEADERS([linux/if_addr.h], [], [], [
+	#ifdef HAVE_SYS_SOCKET_H
+	# include <sys/socket.h>
+	#endif
+    ])
+esac
+
 AC_CHECK_HEADERS([net/if.h], [], [],
 [#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
