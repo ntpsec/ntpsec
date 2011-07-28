@@ -1417,10 +1417,8 @@ getnetnum(
 	int af
 	)
 {
-	int sockaddr_len;
 	struct addrinfo hints, *ai = NULL;
 
-	sockaddr_len = SIZEOF_SOCKADDR(af);
 	ZERO(hints);
 	hints.ai_flags = AI_CANONNAME;
 #ifdef AI_ADDRCONFIG
@@ -1449,11 +1447,10 @@ getnetnum(
 					    0, 0);
 		}
 		return 1;
-	} else {
-		(void) fprintf(stderr, "***Can't find host %s\n", hname);
-		return 0;
 	}
-	/*NOTREACHED*/
+	fprintf(stderr, "***Can't find host %s\n", hname);
+
+	return 0;
 }
 
 

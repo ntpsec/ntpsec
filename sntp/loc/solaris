@@ -1,14 +1,14 @@
 # Solaris installations and man page suffixes
 MAN
-ntp-keygen,bin,1m
-ntp-wait,sbin,1m
-ntpd,sbin,1m
-ntpdate,bin,1m
-ntpdc,bin,1m
+ntp-keygen,sbin,1m
+ntp-wait,libexec,1m
+ntpd,libexec,1m
+ntpdate,sbin,1m
+ntpdc,sbin,1m
 ntpdsim,sbin,1m
-ntpq,bin,1m
-ntpsnmpd,sbin,1m
-ntptime,bin,1m
-ntptrace,bin,1m
-sntp,sbin,1m
-tickadj,bin,1m
+ntpq,sbin,1m
+ntpsnmpd,libexec,1m
+ntptime,sbin,1m
+ntptrace,sbin,1m
+sntp,libexec,1m
+tickadj,sbin,1m

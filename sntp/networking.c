@@ -44,7 +44,7 @@ int
 recvdata(
 	SOCKET		rsock,
 	sockaddr_u *	sender,
-	struct pkt *	rdata,
+	void *		rdata,
 	int		rdata_length
 	)
 {
@@ -52,14 +52,14 @@ recvdata(
 	int recvc;
 
 	slen = sizeof(*sender);
-	recvc = recvfrom(rsock, (void *)rdata, rdata_length, 0,
+	recvc = recvfrom(rsock, rdata, rdata_length, 0,
 			 &sender->sa, &slen);
 	if (recvc < 0)
 		return recvc;
 #ifdef DEBUG
 	if (debug > 2) {
 		printf("Received %d bytes from %s:\n", recvc, sptoa(sender));
-		pkt_output(rdata, recvc, stdout);
+		pkt_output((struct pkt *)rdata, recvc, stdout);
 	}
 #endif
 	return recvc;

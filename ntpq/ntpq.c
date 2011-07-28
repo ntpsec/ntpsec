@@ -1702,7 +1702,7 @@ getnetnum(
 	if (decodenetnum(hname, num)) {
 		if (fullhost != NULL)
 			getnameinfo(&num->sa, SOCKLEN(num), fullhost,
-				    LENHOSTNAME, NULL, 0, 0); 
+				    LENHOSTNAME, NULL, 0, 0);
 		return 1;
 	} else if (getaddrinfo(hname, "ntp", &hints, &ai) == 0) {
 		INSIST(sizeof(*num) >= ai->ai_addrlen);
@@ -1720,6 +1720,7 @@ getnetnum(
 		return 1;
 	}
 	fprintf(stderr, "***Can't find host %s\n", hname);
+
 	return 0;
 }
 

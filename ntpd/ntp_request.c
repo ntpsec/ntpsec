@@ -910,7 +910,7 @@ peer_info (
 		ip->flash = (u_char)pp->flash;
 		ip->flash2 = (u_short)pp->flash;
 		ip->estbdelay = HTONS_FP(DTOFP(pp->delay));
-		ip->ttl = pp->ttl;
+		ip->ttl = (u_char)pp->ttl;
 		ip->associd = htons(pp->associd);
 		ip->rootdelay = HTONS_FP(DTOUFP(pp->rootdelay));
 		ip->rootdispersion = HTONS_FP(DTOUFP(pp->rootdisp));

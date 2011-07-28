@@ -87,7 +87,7 @@ flag = {
     arg-name  = issuer-name;
     descrip   = "set issuer name";
     doc = <<-  _EndOfDoc_
-	Set the subject name to name.  This is used as the subject field
+	Set the issuer name to name.  This is used for the issuer field
 	in certificates and in the file name for host and sign keys.
 	_EndOfDoc_;
 };
@@ -184,7 +184,7 @@ flag = {
     ifdef     = AUTOKEY;
     descrip   = "set subject name";
     doc = <<-  _EndOfDoc_
-	Set the issuer name to name.  This is used for the issuer field
+	Set the subject name to name.  This is used as the subject field
 	in certificates and in the file name for identity files.
 		_EndOfDoc_;
 };
