@@ -1,7 +1,7 @@
 * [Bug 1975] from 4.2.6p4-RC2: libntp/mktime.c won't work with 64-bit
   time_t
 * [Bug 1976] genLocInfo writes to srcdir break 'make distcheck'.
-* [Bug 1977] Mismatch between flag and description in ntp-keygen-opts.def.
+* [Bug 1977] Fix flag/description mismatches in ntp-keygen-opts.def.
 * Do not force "legacy" when --with-locfile is not given, genLocInfo
   will find the correct default for the system.
 * Fix warnings in ntp_request.c ([Bug 1973] oversight) and sntp/main.c
