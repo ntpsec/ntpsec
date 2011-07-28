@@ -7,6 +7,7 @@
 * [Bug 1975] libntp/mktime.c won't work with 64-bit time_t
 * [Bug 1978] [Bug 1134] fix in 4.2.6p4-RC1 doesn't build on older Linux.
 * Backport several fixes for Coverity warnings from ntp-dev.
+* Backport if_nametoindex() check for hpux.
 
 ---
 (4.2.6p4-RC1) 2011/07/10 Released by Harlan Stenn <stenn@ntp.org>

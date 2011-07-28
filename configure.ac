@@ -1577,21 +1577,15 @@ esac])
 #
 # Check for if_nametoindex() for IPv6 scoped addresses support
 #
-AC_CHECK_FUNCS([if_nametoindex])
-case "$ac_cv_func_if_nametoindex" in
- no)
-	case "$host" in
-  	*-hp-hpux*)
-  		AC_CHECK_LIB([ipv6], [if_nametoindex],
-		    [ac_cv_func_if_nametoindex=yes ; LIBS="-lipv6 $LIBS"])
-  	;;
-	esac
+case "$host" in
+ *-hp-hpux*)
+    AC_SEARCH_LIBS([if_nametoindex], [ipv6])
 esac
+AC_CHECK_FUNCS([if_nametoindex])
 case "$ac_cv_func_if_nametoindex" in
  yes)
 	AC_DEFINE([ISC_PLATFORM_HAVEIFNAMETOINDEX], [1],
 	    [ISC: do we have if_nametoindex()?])
-	;;
 esac
 
 AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lsocket -lnsl])
