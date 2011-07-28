@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  July 27, 2011 at 02:24:44 AM by AutoGen 5.12
+# It has been AutoGen-ed  July 28, 2011 at 07:01:41 AM by AutoGen 5.12
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -49,7 +49,7 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p196
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p197
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
@@ -217,7 +217,7 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
-Set the subject name to name.  This is used as the subject field
+Set the issuer name to name.  This is used for the issuer field
 in certificates and in the file name for host and sign keys.
 
 @node ntp-keygen lifetime
@@ -356,7 +356,7 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
-Set the issuer name to name.  This is used for the issuer field
+Set the subject name to name.  This is used as the subject field
 in certificates and in the file name for identity files.
 
 @node ntp-keygen trusted-cert

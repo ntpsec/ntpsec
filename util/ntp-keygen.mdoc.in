@@ -1,9 +1,9 @@
-.Dd July 27 2011
+.Dd July 28 2011
 .Dt NTP_KEYGEN @NTP_KEYGEN_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  July 27, 2011 at 02:24:46 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  July 28, 2011 at 07:01:43 AM by AutoGen 5.12
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -746,7 +746,7 @@ any that may exist.
 .It  \-i " \fIissuer\-name\fP, " \-\-issuer\-name "=" \fIissuer\-name\fP
 set issuer name.
 .sp
-Set the subject name to name.  This is used as the subject field
+Set the issuer name to name.  This is used for the issuer field
 in certificates and in the file name for host and sign keys.
 .It  \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
 set certificate lifetime.
@@ -792,7 +792,7 @@ sign key.
 .It  \-s " \fIhost\fP, " \-\-subject\-name "=" \fIhost\fP
 set subject name.
 .sp
-Set the issuer name to name.  This is used for the issuer field
+Set the subject name to name.  This is used as the subject field
 in certificates and in the file name for identity files.
 .It  \-T ", " -\-trusted\-cert
 trusted certificate (TC scheme).

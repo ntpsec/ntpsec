@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "27 Jul 2011" "ntp (4.2.7p196)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "28 Jul 2011" "ntp (4.2.7p197)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  July 27, 2011 at 02:24:30 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  July 28, 2011 at 07:01:23 AM by AutoGen 5.12
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -764,7 +764,7 @@ any that may exist.
 .BR \-i " \fIissuer\-name\fP, " \-\-issuer\-name "=" \fIissuer\-name\fP
 set issuer name.
 .sp
-Set the subject name to name.  This is used as the subject field
+Set the issuer name to name.  This is used for the issuer field
 in certificates and in the file name for host and sign keys.
 .TP
 .BR \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
@@ -818,7 +818,7 @@ sign key.
 .BR \-s " \fIhost\fP, " \-\-subject\-name "=" \fIhost\fP
 set subject name.
 .sp
-Set the issuer name to name.  This is used for the issuer field
+Set the subject name to name.  This is used as the subject field
 in certificates and in the file name for identity files.
 .TP
 .BR \-T ", " -\-trusted\-cert
