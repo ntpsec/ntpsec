@@ -5,6 +5,7 @@
   will find the correct default for the system.
 * Fix warnings in ntp_request.c ([Bug 1973] oversight) and sntp/main.c
   (CID 159, apparent overrun due to union, actually correct).
+* Update sntp/loc/solaris to conform to stock locations.
 (4.2.7p196) 2011/07/27 Released by Harlan Stenn <stenn@ntp.org>
 * DEFAULT INSTALLATION DIRECTORY CHANGES ON SOME OSes: to get the old
   behavior, pass --with-locfile=legacy to 'configure'
