@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 (4.2.7p198) 2011/07/28 Released by Harlan Stenn <stenn@ntp.org>
 * remove old binsubdir stuff from SNTP, as NTP_LOCINFO does that now.
 (4.2.7p197) 2011/07/28 Released by Harlan Stenn <stenn@ntp.org>
