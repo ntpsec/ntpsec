@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  July 10, 2011 at 10:55:09 PM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 04:46:34 AM by AutoGen 5.12
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -38,7 +38,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[42] =
-"ntpd 4.2.6p4-RC1\n\
+"ntpd 4.2.6p4-RC2\n\
 see html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
@@ -948,7 +948,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "NTPD";
 static char const zUsageTitle[103] =
-"ntpd - NTP daemon program - Ver. 4.2.6p4-RC1\n\
+"ntpd - NTP daemon program - Ver. 4.2.6p4-RC2\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 #define zRcName     NULL
 #define apzHomeList NULL
