@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  August  4, 2011 at 04:46:05 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 03:43:18 PM by AutoGen 5.11.10pre10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -104,21 +104,21 @@ static char const zSyslog_NAME[]             = "SYSLOG";
 static char const zSyslog_Name[]             = "syslog";
 static const int
     aSyslogCantList[] = {
-    INDEX_OPT_FILELOG, NO_EQUIVALENT };
+    INDEX_OPT_LOGFILE, NO_EQUIVALENT };
 #define SYSLOG_FLAGS       (OPTST_DISABLED)
 
 /*
- *  Filelog option description with
+ *  Logfile option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zFilelogText[] =
+static char const zLogfileText[] =
         "Log to specified logfile";
-static char const zFilelog_NAME[]            = "FILELOG";
-static char const zFilelog_Name[]            = "filelog";
+static char const zLogfile_NAME[]            = "LOGFILE";
+static char const zLogfile_Name[]            = "logfile";
 static const int
-    aFilelogCantList[] = {
+    aLogfileCantList[] = {
     INDEX_OPT_SYSLOG, NO_EQUIVALENT };
-#define FILELOG_FLAGS       (OPTST_DISABLED \
+#define LOGFILE_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
@@ -312,16 +312,16 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zSyslogText, zSyslog_NAME, zSyslog_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 5, VALUE_OPT_FILELOG,
-     /* equiv idx, value */ 5, VALUE_OPT_FILELOG,
+  {  /* entry idx, value */ 5, VALUE_OPT_LOGFILE,
+     /* equiv idx, value */ 5, VALUE_OPT_LOGFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ FILELOG_FLAGS, 0,
+     /* opt state flags  */ LOGFILE_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
-     /* must/cannot opts */ NULL, aFilelogCantList,
+     /* must/cannot opts */ NULL, aLogfileCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zFilelogText, zFilelog_NAME, zFilelog_Name,
+     /* desc, NAME, name */ zLogfileText, zLogfile_NAME, zLogfile_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 6, VALUE_OPT_SETTOD,
@@ -466,9 +466,10 @@ static tOptDesc optDesc[OPTION_CT] = {
  *  Define the Sntp Option Environment
  */
 static char const zPROGNAME[5] = "SNTP";
-static char const zUsageTitle[125] =
-"sntp - standard SNTP program - Ver. 4.2.6p4-RC2\n\
-USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... hostname-or-IP ...\n";
+static char const zUsageTitle[156] =
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.6p4-RC2\n\
+USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
+\t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
     "$HOME",
@@ -482,8 +483,8 @@ sntp implements the Simple Network Time Protocol, and is used to query an\n\
 NTP or SNTP server and either display the time or set the local system's\n\
 time (given suitable privilege).\n\n\
 It can be run interactively from the command line or as a cron job.\n\n\
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
-1305.\n";
+NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and\n\
+RFC 1305.\n";
 static char const zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from optcode.tlib near line 515 */
 
@@ -527,7 +528,6 @@ tOptions sntpOptions = {
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
-    + OPTPROC_ARGS_REQ
     + OPTPROC_MISUSE ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,

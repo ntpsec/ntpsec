@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  August  4, 2011 at 04:46:04 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 03:43:18 PM by AutoGen 5.11.10pre10
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -54,7 +54,7 @@ typedef enum {
     INDEX_OPT_NORMALVERBOSE   =  2,
     INDEX_OPT_KOD             =  3,
     INDEX_OPT_SYSLOG          =  4,
-    INDEX_OPT_FILELOG         =  5,
+    INDEX_OPT_LOGFILE         =  5,
     INDEX_OPT_SETTOD          =  6,
     INDEX_OPT_ADJTIME         =  7,
     INDEX_OPT_BROADCAST       =  8,
@@ -125,9 +125,9 @@ typedef enum {
 #  warning undefining SYSLOG due to option name conflict
 #  undef   SYSLOG
 # endif
-# ifdef    FILELOG
-#  warning undefining FILELOG due to option name conflict
-#  undef   FILELOG
+# ifdef    LOGFILE
+#  warning undefining LOGFILE due to option name conflict
+#  undef   LOGFILE
 # endif
 # ifdef    SETTOD
 #  warning undefining SETTOD due to option name conflict
@@ -159,7 +159,7 @@ typedef enum {
 # undef NORMALVERBOSE
 # undef KOD
 # undef SYSLOG
-# undef FILELOG
+# undef LOGFILE
 # undef SETTOD
 # undef ADJTIME
 # undef BROADCAST
@@ -177,7 +177,7 @@ typedef enum {
 #define VALUE_OPT_NORMALVERBOSE  'd'
 #define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_SYSLOG         'p'
-#define VALUE_OPT_FILELOG        'l'
+#define VALUE_OPT_LOGFILE        'l'
 #define VALUE_OPT_SETTOD         's'
 #define VALUE_OPT_ADJTIME        'j'
 #define VALUE_OPT_BROADCAST      'b'
