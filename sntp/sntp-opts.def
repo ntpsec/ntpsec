@@ -163,7 +163,7 @@ flag = {
 };
 
 flag = {
-  name		= filelog;
+  name		= logfile;
   value		= l;
   arg-type	= file;
   arg-name	= "file-name";

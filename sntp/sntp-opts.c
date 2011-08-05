@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  August  4, 2011 at 01:06:06 PM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 10:48:33 PM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -52,7 +52,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[333] =
-"sntp 4.2.7p199\n\
+"sntp 4.2.7p200\n\
 Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -62,14 +62,14 @@ can be seen at:\n\
 static char const zLicenseDescrip[700] =
 "Permission to use, copy, modify, and distribute this software and its\n\
 documentation for any purpose with or without fee is hereby granted,\n\
-provided that the above copyright notice appears in all copies and\n\
-that both the copyright notice and this permission notice appear in\n\
-supporting documentation, and that the name The University of Delaware,\n\
-David L. Mills, and/or others not be used in advertising or publicity\n\
-pertaining to distribution of the software without specific, written\n\
-prior permission. The University of Delaware, David L. Mills, and/or\n\
-others makes no representations about the suitability this software for\n\
-any purpose. It is provided \"as is\" without express or implied warranty.\n";
+provided that the above copyright notice appears in all copies and that\n\
+both the copyright notice and this permission notice appear in supporting\n\
+documentation, and that the name The University of Delaware, David L.\n\
+Mills, and/or others not be used in advertising or publicity pertaining to\n\
+distribution of the software without specific, written prior permission.\n\
+The University of Delaware, David L. Mills, and/or others makes no\n\
+representations about the suitability this software for any purpose. It is\n\
+provided \"as is\" without express or implied warranty.\n";
 
 extern tUsageProc optionUsage;
 
@@ -205,13 +205,13 @@ static char const zKeyfile_Name[]            = "keyfile";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
 /*
- *  Filelog option description:
+ *  Logfile option description:
  */
-static char const zFilelogText[] =
+static char const zLogfileText[] =
         "Log to specified logfile";
-static char const zFilelog_NAME[]            = "FILELOG";
-static char const zFilelog_Name[]            = "filelog";
-#define FILELOG_FLAGS       (OPTST_DISABLED \
+static char const zLogfile_NAME[]            = "LOGFILE";
+static char const zLogfile_Name[]            = "logfile";
+#define LOGFILE_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
 /*
@@ -323,7 +323,7 @@ static char const zNotLoad_Opts_Pfx[]  = "no";
  *  if multiple copies are allowed.
  */
 static tOptProc
-    doOptFilelog,    doOptKeyfile,    doOptKod,        doOptNtpversion,
+    doOptKeyfile,    doOptKod,        doOptLogfile,    doOptNtpversion,
     doOptSteplimit,  doUsageOpt;
 
 /*
@@ -342,7 +342,7 @@ extern tOptProc
     optionStackArg,      optionTimeDate,      optionTimeVal,
     optionUnstackArg,    optionVersionStderr;
 static tOptProc
-    doOptFilelog,         doOptKeyfile,         doOptKod,
+    doOptKeyfile,         doOptKod,             doOptLogfile,
     doOptNtpversion,      doOptSet_Debug_Level, doOptSteplimit,
     doUsageOpt;
 
@@ -496,16 +496,16 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 11, VALUE_OPT_FILELOG,
-     /* equiv idx, value */ 11, VALUE_OPT_FILELOG,
+  {  /* entry idx, value */ 11, VALUE_OPT_LOGFILE,
+     /* equiv idx, value */ 11, VALUE_OPT_LOGFILE,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ FILELOG_FLAGS, 0,
+     /* opt state flags  */ LOGFILE_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ doOptFilelog,
-     /* desc, NAME, name */ zFilelogText, zFilelog_NAME, zFilelog_Name,
+     /* option proc      */ doOptLogfile,
+     /* desc, NAME, name */ zLogfileText, zLogfile_NAME, zLogfile_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 12, VALUE_OPT_STEPLIMIT,
@@ -663,13 +663,11 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p199\n\
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p200\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
-static char const * const apzHomeList[5] = {
-    "$HOME",
-    ".",
+static char const * const apzHomeList[3] = {
     "$HOME",
     ".",
     NULL };
@@ -807,10 +805,10 @@ doOptKeyfile(tOptions* pOptions, tOptDesc* pOptDesc)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   For the filelog option.
+ *   For the logfile option.
  */
 static void
-doOptFilelog(tOptions* pOptions, tOptDesc* pOptDesc)
+doOptLogfile(tOptions* pOptions, tOptDesc* pOptDesc)
 {
     static teOptFileType const  type =
         FTYPE_MODE_MAY_EXIST + FTYPE_MODE_NO_OPEN;

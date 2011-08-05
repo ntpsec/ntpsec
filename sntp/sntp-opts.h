@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  August  4, 2011 at 01:06:06 PM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 10:48:33 PM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -74,7 +74,7 @@ typedef enum {
     INDEX_OPT_GAP              =  8,
     INDEX_OPT_KOD              =  9,
     INDEX_OPT_KEYFILE          = 10,
-    INDEX_OPT_FILELOG          = 11,
+    INDEX_OPT_LOGFILE          = 11,
     INDEX_OPT_STEPLIMIT        = 12,
     INDEX_OPT_NTPVERSION       = 13,
     INDEX_OPT_USERESERVEDPORT  = 14,
@@ -90,8 +90,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    24
-#define SNTP_VERSION       "4.2.7p199"
-#define SNTP_FULL_VERSION  "sntp 4.2.7p199"
+#define SNTP_VERSION       "4.2.7p200"
+#define SNTP_FULL_VERSION  "sntp 4.2.7p200"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -170,9 +170,9 @@ typedef enum {
 #  warning undefining KEYFILE due to option name conflict
 #  undef   KEYFILE
 # endif
-# ifdef    FILELOG
-#  warning undefining FILELOG due to option name conflict
-#  undef   FILELOG
+# ifdef    LOGFILE
+#  warning undefining LOGFILE due to option name conflict
+#  undef   LOGFILE
 # endif
 # ifdef    STEPLIMIT
 #  warning undefining STEPLIMIT due to option name conflict
@@ -214,7 +214,7 @@ typedef enum {
 # undef GAP
 # undef KOD
 # undef KEYFILE
-# undef FILELOG
+# undef LOGFILE
 # undef STEPLIMIT
 # undef NTPVERSION
 # undef USERESERVEDPORT
@@ -245,7 +245,7 @@ typedef enum {
 #define OPT_VALUE_GAP            (DESC(GAP).optArg.argInt)
 #define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_KEYFILE        'k'
-#define VALUE_OPT_FILELOG        'l'
+#define VALUE_OPT_LOGFILE        'l'
 #define VALUE_OPT_STEPLIMIT      'M'
 
 #define OPT_VALUE_STEPLIMIT      (DESC(STEPLIMIT).optArg.argInt)
