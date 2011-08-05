@@ -123,7 +123,7 @@ the aginfo template and the option descriptions for the <span class="command">sn
 <li><a accesskey="5" href="#sntp-concurrent">sntp concurrent</a>:             concurrent option (-c)
 <li><a accesskey="6" href="#sntp-debug_002dlevel">sntp debug-level</a>:            debug-level option (-d)
 <li><a accesskey="7" href="#sntp-filelog">sntp filelog</a>:                filelog option (-l)
-<li><a accesskey="8" href="#sntp-headspace">sntp headspace</a>:              headspace option (-h)
+<li><a accesskey="8" href="#sntp-gap">sntp gap</a>:                    gap option (-g)
 <li><a accesskey="9" href="#sntp-ipv4">sntp ipv4</a>:                   ipv4 option (-4)
 <li><a href="#sntp-ipv6">sntp ipv6</a>:                   ipv6 option (-6)
 <li><a href="#sntp-keyfile">sntp keyfile</a>:                keyfile option (-k)
@@ -170,7 +170,7 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
                                 - may appear multiple times
    -D Str set-debug-level Set the debug verbosity level
                                 - may appear multiple times
-   -h Num headspace      The gap (in milliseconds) between time requests
+   -g Num gap            The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
    -k Fil keyfile        Look in this file for the key specified with -a
    -l Fil filelog        Log to specified logfile
@@ -311,7 +311,7 @@ This is the &ldquo;increase debug verbosity level&rdquo; option.
 
 <div class="node">
 <p><hr>
-<a name="sntp-filelog"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-headspace">sntp headspace</a>,
+<a name="sntp-filelog"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-gap">sntp gap</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-debug_002dlevel">sntp debug-level</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
@@ -326,15 +326,15 @@ logfile.
 
 <div class="node">
 <p><hr>
-<a name="sntp-headspace"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ipv4">sntp ipv4</a>,
+<a name="sntp-gap"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ipv4">sntp ipv4</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-filelog">sntp filelog</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
 </div>
 
-<h4 class="subsection">headspace option (-h)</h4>
+<h4 class="subsection">gap option (-g)</h4>
 
-<p><a name="index-sntp_002dheadspace-10"></a>
+<p><a name="index-sntp_002dgap-10"></a>
 This is the &ldquo;the gap (in milliseconds) between time requests&rdquo; option. 
 Since we're only going to use the first valid response we get and
 there is benefit to specifying a good number of servers to query,
@@ -345,7 +345,7 @@ Default 10 milliseconds.
 <div class="node">
 <p><hr>
 <a name="sntp-ipv4"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-ipv6">sntp ipv6</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-headspace">sntp headspace</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-gap">sntp gap</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
 </div>

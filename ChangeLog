@@ -1,3 +1,8 @@
+* sntp: change -h/--headspace to -g/--gap, and change the default gap
+  from 10 to 50ms
+* [Backward Incompatible] from 4.2.6p4: sntp: -l/--filelog ->
+  -l/--logfile, to be consistent with ntpd.
+* From 4.2.6p4: libopts/file.c fix from Bruce Korb (arg-type=file).
 (4.2.7p200) 2011/08/04 Released by Harlan Stenn <stenn@ntp.org>
 * Sync with 4.2.6p4-RC2.
 (4.2.7p199) 2011/07/29 Released by Harlan Stenn <stenn@ntp.org>
@@ -1067,6 +1072,12 @@
 * [Bug 1414] Enable "make distcheck" success with BSD make.
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
+---
+
+* [Backward Incompatible] sntp: -l/--filelog -> -l/--logfile, to be
+  consistent with ntpd.
+* libopts/file.c fix from Bruce Korb (arg-type=file).
+
 ---
 (4.2.6p4-RC2) 2011/08/04 Released by Harlan Stenn <stenn@ntp.org>
 
