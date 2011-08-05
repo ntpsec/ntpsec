@@ -69,7 +69,7 @@ struct xmt_ctx_tag {
 	sent_pkt *		spkt;
 };
 
-struct timeval	headspace;
+struct timeval	gap;
 xmt_ctx *	xmt_q;
 struct key *	keys = NULL;
 struct timeval	bcst_timeout_tv;
@@ -157,8 +157,8 @@ sntp_main (
 		      : ""));
 	ntpver = OPT_VALUE_NTPVERSION;
 	steplimit = OPT_VALUE_STEPLIMIT / 1e3;
-	headspace.tv_usec = max(0, OPT_VALUE_HEADSPACE * 1000);
-	headspace.tv_usec = min(headspace.tv_usec, 999999);
+	gap.tv_usec = max(0, OPT_VALUE_GAP * 1000);
+	gap.tv_usec = min(gap.tv_usec, 999999);
 
 	if (HAVE_OPT(FILELOG))
 		open_logfile(OPT_ARG(FILELOG));
@@ -629,10 +629,10 @@ xmt_timer_cb(
 			return;
 	}
 	if (xmt_q->sched <= start_cb.tv_sec) {
-		event_add(ev_xmt_timer, &headspace);
-		TRACE(2, ("xmt_timer_cb: at .%6.6u headspace %6.6u\n",
+		event_add(ev_xmt_timer, &gap);
+		TRACE(2, ("xmt_timer_cb: at .%6.6u gap %6.6u\n",
 			  (u_int)start_cb.tv_usec,
-			  (u_int)headspace.tv_usec));
+			  (u_int)gap.tv_usec));
 	} else {
 		delay.tv_sec = xmt_q->sched - start_cb.tv_sec;
 		delay.tv_usec = 0;

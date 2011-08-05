@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  July 29, 2011 at 10:47:37 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 01:06:06 PM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -71,7 +71,7 @@ typedef enum {
     INDEX_OPT_CONCURRENT       =  5,
     INDEX_OPT_DEBUG_LEVEL      =  6,
     INDEX_OPT_SET_DEBUG_LEVEL  =  7,
-    INDEX_OPT_HEADSPACE        =  8,
+    INDEX_OPT_GAP              =  8,
     INDEX_OPT_KOD              =  9,
     INDEX_OPT_KEYFILE          = 10,
     INDEX_OPT_FILELOG          = 11,
@@ -158,9 +158,9 @@ typedef enum {
 #  warning undefining SET_DEBUG_LEVEL due to option name conflict
 #  undef   SET_DEBUG_LEVEL
 # endif
-# ifdef    HEADSPACE
-#  warning undefining HEADSPACE due to option name conflict
-#  undef   HEADSPACE
+# ifdef    GAP
+#  warning undefining GAP due to option name conflict
+#  undef   GAP
 # endif
 # ifdef    KOD
 #  warning undefining KOD due to option name conflict
@@ -211,7 +211,7 @@ typedef enum {
 # undef CONCURRENT
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
-# undef HEADSPACE
+# undef GAP
 # undef KOD
 # undef KEYFILE
 # undef FILELOG
@@ -240,9 +240,9 @@ typedef enum {
 #define VALUE_OPT_CONCURRENT     'c'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
-#define VALUE_OPT_HEADSPACE      'h'
+#define VALUE_OPT_GAP            'g'
 
-#define OPT_VALUE_HEADSPACE      (DESC(HEADSPACE).optArg.argInt)
+#define OPT_VALUE_GAP            (DESC(GAP).optArg.argInt)
 #define VALUE_OPT_KOD            'K'
 #define VALUE_OPT_KEYFILE        'k'
 #define VALUE_OPT_FILELOG        'l'

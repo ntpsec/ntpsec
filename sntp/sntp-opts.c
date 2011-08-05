@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  July 29, 2011 at 10:47:38 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  August  4, 2011 at 01:06:06 PM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -62,14 +62,14 @@ can be seen at:\n\
 static char const zLicenseDescrip[700] =
 "Permission to use, copy, modify, and distribute this software and its\n\
 documentation for any purpose with or without fee is hereby granted,\n\
-provided that the above copyright notice appears in all copies and that\n\
-both the copyright notice and this permission notice appear in supporting\n\
-documentation, and that the name The University of Delaware, David L.\n\
-Mills, and/or others not be used in advertising or publicity pertaining to\n\
-distribution of the software without specific, written prior permission.\n\
-The University of Delaware, David L. Mills, and/or others makes no\n\
-representations about the suitability this software for any purpose. It is\n\
-provided \"as is\" without express or implied warranty.\n";
+provided that the above copyright notice appears in all copies and\n\
+that both the copyright notice and this permission notice appear in\n\
+supporting documentation, and that the name The University of Delaware,\n\
+David L. Mills, and/or others not be used in advertising or publicity\n\
+pertaining to distribution of the software without specific, written\n\
+prior permission. The University of Delaware, David L. Mills, and/or\n\
+others makes no representations about the suitability this software for\n\
+any purpose. It is provided \"as is\" without express or implied warranty.\n";
 
 extern tUsageProc optionUsage;
 
@@ -173,14 +173,14 @@ static char const zSet_Debug_Level_Name[]    = "set-debug-level";
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Headspace option description:
+ *  Gap option description:
  */
-static char const zHeadspaceText[] =
+static char const zGapText[] =
         "The gap (in milliseconds) between time requests";
-static char const zHeadspace_NAME[]          = "HEADSPACE";
-static char const zHeadspace_Name[]          = "headspace";
-#define zHeadspaceDefaultArg         ((char const*)10)
-#define HEADSPACE_FLAGS       (OPTST_DISABLED \
+static char const zGap_NAME[]                = "GAP";
+static char const zGap_Name[]                = "gap";
+#define zGapDefaultArg               ((char const*)50)
+#define GAP_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
@@ -460,16 +460,16 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 8, VALUE_OPT_HEADSPACE,
-     /* equiv idx, value */ 8, VALUE_OPT_HEADSPACE,
+  {  /* entry idx, value */ 8, VALUE_OPT_GAP,
+     /* equiv idx, value */ 8, VALUE_OPT_GAP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ HEADSPACE_FLAGS, 0,
-     /* last opt argumnt */ { zHeadspaceDefaultArg },
+     /* opt state flags  */ GAP_FLAGS, 0,
+     /* last opt argumnt */ { zGapDefaultArg },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zHeadspaceText, zHeadspace_NAME, zHeadspace_Name,
+     /* desc, NAME, name */ zGapText, zGap_NAME, zGap_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 9, VALUE_OPT_KOD,
