@@ -1,4 +1,8 @@
 ---
+
+* libopts/file.c fix from Bruce Korb (arg-type=file).
+
+---
 (4.2.6p4-RC2) 2011/08/04 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1608] Parse Refclock driver should honor trusttime.
