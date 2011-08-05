@@ -1,5 +1,7 @@
 ---
 
+* [Backward Incompatible] sntp: -l/--filelog -> -l/--logfile, to be
+  consistent with ntpd.
 * libopts/file.c fix from Bruce Korb (arg-type=file).
 
 ---

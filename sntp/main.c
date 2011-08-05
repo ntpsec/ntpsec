@@ -57,8 +57,8 @@ sntp_main (
 
 	/* Initialize logging system */
 	init_logging();
-	if (HAVE_OPT(FILELOG))
-		open_logfile(OPT_ARG(FILELOG));
+	if (HAVE_OPT(LOGFILE))
+		open_logfile(OPT_ARG(LOGFILE));
 
 	msyslog(LOG_NOTICE, "Started sntp");
 

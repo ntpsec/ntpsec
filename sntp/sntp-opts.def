@@ -6,19 +6,14 @@ autogen definitions options;
 #include copyright.def
 
 prog-name      = "sntp";
-prog-title     = "standard SNTP program";
-homerc         =  $HOME, ".";
-argument       = 'hostname-or-IP ...';
+prog-title	= "standard Simple Network Time Protocol program";
+argument	= '[ hostname-or-IP ...]';
+
+#include homerc.def
 
 long-opts;
 
 config-header  = "config.h";
-
-#ifndef __windows__
-rcfile         = ".ntprc";
-#else
-rcfile         = "ntp.ini";
-#endif
 
 environrc;
 
@@ -32,7 +27,7 @@ flag = {
     flags-cant = ipv6;
     descrip   = "Force IPv4 DNS name resolution";
     doc = <<-  _EndOfDoc_
-	Force DNS resolution of following host names on the command line
+	Force DNS resolution of the following host names on the command line
 	to the IPv4 namespace.
 	_EndOfDoc_;
 };
@@ -43,7 +38,7 @@ flag = {
     flags-cant = ipv4;
     descrip   = "Force IPv6 DNS name resolution";
     doc = <<-  _EndOfDoc_
-	Force DNS resolution of following host names on the command line
+	Force DNS resolution of the following host names on the command line
 	to the IPv6 namespace.
 	_EndOfDoc_;
 };
@@ -68,7 +63,7 @@ flag = {
     arg-name  = "file-name";
     descrip   = "KoD history filename";
     doc = <<-  _EndOfDoc_
-	Modifies the filename to be used to persist the history of KoD
+	Specifies the filename to be used to persist the history of KoD
 	responses received from servers.  The default is
 	/var/db/ntp-kod.
 	_EndOfDoc_;
@@ -78,7 +73,7 @@ flag = {
 flag = {
 	name	= syslog;
 	value	= p;
-	flags-cant = filelog;
+	flags-cant = logfile;
 	descrip = "Logging with syslog";
 	doc = <<-  _EndOfDoc_
 	When this option is set all logging will be done using syslog.
@@ -86,7 +81,7 @@ flag = {
 };
 
 flag = {
-	name	   = filelog;
+	name	   = logfile;
 	value	   = l;
 	arg-type   = string;
 	arg-name   = "file-name";
