@@ -1,3 +1,4 @@
+(4.2.7p201) 2011/08/05 Released by Harlan Stenn <stenn@ntp.org>
 * sntp: change -h/--headspace to -g/--gap, and change the default gap
   from 10 to 50ms
 * [Backward Incompatible] from 4.2.6p4: sntp: -l/--filelog ->
