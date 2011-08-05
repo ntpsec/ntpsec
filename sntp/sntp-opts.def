@@ -5,9 +5,8 @@ autogen definitions options;
 #include autogen-version.def
 #include copyright.def
 
-prog-name	= "sntp";
+prog-name      = "sntp";
 prog-title	= "standard Simple Network Time Protocol program";
-homerc		= $HOME, ".";
 argument	= '[ hostname-or-IP ...]';
 
 #include homerc.def

@@ -160,8 +160,8 @@ sntp_main (
 	gap.tv_usec = max(0, OPT_VALUE_GAP * 1000);
 	gap.tv_usec = min(gap.tv_usec, 999999);
 
-	if (HAVE_OPT(FILELOG))
-		open_logfile(OPT_ARG(FILELOG));
+	if (HAVE_OPT(LOGFILE))
+		open_logfile(OPT_ARG(LOGFILE));
 
 	if (0 == argc && !HAVE_OPT(BROADCAST) && !HAVE_OPT(CONCURRENT)) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
