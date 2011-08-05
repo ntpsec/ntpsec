@@ -20,7 +20,7 @@ color: #FF0000;
 <img src="pic/alice44.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>Our resident cryptographer; now you see him, now you don't.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->02-Jan-2011  4:45<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->04-Aug-2011  1:13<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -57,20 +57,20 @@ color: #FF0000;
         the algorithm must be ether <tt>SHA</tt> or <tt>SHA1</tt>.</dd>
       <dt><tt>host <i>name</i></tt></dt>
       <dd>Specify the cryptographic media  names for the host, sign and certificate files.   If this option is not specified, the default name is the string returned by the Unix <tt>gethostname()</tt> routine.</dd>
-      <dd><span class="style1">Note: In the latest Autokey version,  this option has no affect other than to change the cryptographic media file names.</span></dd>
+      <dd><span class="style1">Note: In the latest Autokey version,  this option has no effect other than to change the cryptographic media file names.</span></dd>
       <dt><tt>ident <i>group</i></tt></dt>
       <dd>Specify the cryptographic media  names for the identity scheme files. If this option is not specified, the default name is the string returned by the Unix <tt>gethostname()</tt> routine.</dd>
-      <dd><span class="style1">Note: In the latest Autokey version,  this option has no affect other than to change the cryptographic media file names.</span></dd>
+      <dd><span class="style1">Note: In the latest Autokey version,  this option has no effect other than to change the cryptographic media file names.</span></dd>
       <dt><tt>pw <i>password</i></tt></dt>
       <dd>Specifies the password to decrypt files previously encrypted by the <tt>ntp-keygen</tt> program with the <tt>-p</tt> option. If this option is not specified, the default password is the string returned by the Unix <tt>gethostname()</tt> routine. </dd>
       <dt><tt>randfile <i>file</i></tt></dt>
-      <dd>Specifies the location of the random seed file used by the OpenSSL library. The defaults are described on the <tt>ntp-keygen</tt> page.</dd>
+      <dd>Specifies the location of the random seed file used by the OpenSSL library. The defaults are described on the <a href="keygen.html"><tt>ntp-keygen</tt> page</a>.</dd>
     </dl>
   </dd>
-  <dt id="keys"><tt>ident <i>group</i></tt></dt>
+  <dt id="ident"><tt>ident <i>group</i></tt></dt>
   <dd>Specifies the group name for ephemeral associations mobilized by broadcast and symmetric passive modes. See the <a href="autokey.html">Autokey Public-Key Authentication</a> page for further information.</dd>
   <dt id="keys"><tt>keys <i>path</i></tt></dt>
-  <dd>Specifies the complete directory path for the  key file containing the key IDs, key types and keys  used by <tt>ntpd</tt>, <tt>ntpq</tt> and <tt>ntpdc</tt> when operating with symmetric key cryptography. This is the same operation as the <tt>-k </tt>command line option. Note that the directory path for Autokey cryptographic media is specified by the <tt>keysdir</tt> command.</dd>
+  <dd>Specifies the complete directory path for the key file containing the key IDs, key types and keys used by <tt>ntpd</tt>, <tt>ntpq</tt> and <tt>ntpdc</tt> when operating with symmetric key cryptography.  The format of the keyfile is described on the <a href="keygen.html"><tt>ntp-keygen</tt> page</a>.  This is the same operation as the <tt>-k</tt> command line option. Note that the directory path for Autokey cryptographic media is specified by the <tt>keysdir</tt> command.</dd>
   <dt id="keysdir"><tt>keysdir <i>path</i></tt></dt>
   <dd>Specifies the  complete directory path for the Autokey cryptographic keys, parameters and certificates. The default is <tt>/usr/local/etc/</tt>. Note that the path for the symmetric keys file is specified by the <tt>keys</tt> command.</dd>
   <dt id="requestkey"><tt>requestkey <i>keyid</i></tt></dt>
@@ -85,7 +85,7 @@ color: #FF0000;
     authenticating peers with symmetric key cryptography.  Key IDs
     used to authenticate <tt>ntpq</tt> and <tt>ntpdc</tt> operations
     must be listed here and additionally be enabled with <a href="#controlkey">controlkey</a> and/or <a href="#requestkey">requestkey</a>. The authentication
-    procedure for time transfer require that both the local and
+    procedure for time transfer requires that both the local and
     remote NTP servers employ the same key ID and secret for this
     purpose, although different keys IDs may be used with different
     servers. Ranges of trusted key IDs may be specified: <tt>trustedkey (1 ... 19) 1000 (100 ... 199)</tt> enables the

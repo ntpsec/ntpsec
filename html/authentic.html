@@ -20,7 +20,7 @@ color: #FF0000;
 <img src="pic/alice44.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>Our resident cryptographer; now you see him, now you don't.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->31-Oct-2010  4:18<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->03-Aug-2011  19:50<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -52,7 +52,7 @@ required.</p>
   <p><img src="pic/sx5.gif" alt="gif"></p>
   <p>Figure 1. Typical Symmetric Key File</p>
 </div>
-<p>Figure 1 shows a typical keys file used by the reference implementation.  In the case of MD5, the key consists of  16 characters   randomized over the ASCII printing codes The string can be edited later for a password,  for instance as  <tt>2late4Me</tt> for key ID 10. For message digest algorithms other than MD5,   the key is a 20-octet random hex string.</p>
+<p>Figure 1 shows a typical keys file used by the reference implementation.  In the case of MD5, the key consists of  16 characters   randomized over the ASCII printing codes The string can be edited later for a password,  for instance as  <tt>2late4Me</tt> for key ID 10. For message digest algorithms other than MD5,   the key is a 20-octet (40 hex digits) random hex string.</p>
 <h4 id="windows"></h4>
 <p>When <tt>ntpd</tt> is first started, it reads the key file specified by the <tt>keys</tt> command and installs the keys in the key cache. However, individual keys must be activated with the <tt>trustedkey</tt> configuration command before use. This allows, for instance, the installation of possibly several batches of keys and then activating a key remotely using <tt>ntpdc</tt>. The <tt>requestkey</tt> command selects the key ID used as the password for the <tt>ntpdc</tt> utility, while the <tt>controlkey</tt> command selects the key ID used as the password for the <tt>ntpq</tt> utility.</p>
 <p>Microsoft Windows Authentication</p>

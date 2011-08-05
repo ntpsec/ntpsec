@@ -9,6 +9,7 @@ document.write("<p>Miscellaneous Commands and Options</p><ul>\
 <li class='inline'><a href='miscopt.html#logconfig'>logconfig - configure log file</a></li>\
 <li class='inline'><a href='miscopt.html#mru'>mru - control monitor MRU list limits</a></li>\
 <li class='inline'><a href='miscopt.html#phone'>phone - specify modem phone numbers</a></li>\
+<li class='inline'><a href='miscopt.html#reset'>reset - reset groups of counters</a></li>\
 <li class='inline'><a href='miscopt.html#saveconfigdir'>saveconfigdir - specify saveconfig directory</a></li>\
 <li class='inline'><a href='miscopt.html#setvar'>setvar - set system variables</a></li>\
 <li class='inline'><a href='miscopt.html#tinker'>tinker - modify sacred system parameters (dangerous)</a></li>\
