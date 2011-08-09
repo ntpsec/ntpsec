@@ -185,6 +185,13 @@ case "$enable_ipv6" in
 esac
 
 
+dnl [Bug 1984] ntp/libisc fails to compile on OS X 10.7 (Lion)
+case "$host" in
+ *-*-darwin*)
+    AC_DEFINE([__APPLE_USE_RFC_3542], [1], [Are we _special_?])
+esac
+
+
 AC_CACHE_CHECK(
     [for IPv6 structures],
     [isc_cv_found_ipv6],
