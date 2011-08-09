@@ -32,7 +32,7 @@ FILE *	syslog_file;
 char *	syslog_fname;
 char *	syslog_abs_fname;
 
-u_long ntp_syslogmask =  ~(u_long)0;	/* libntp default is all lit */
+u_int32 ntp_syslogmask =  ~(u_int32)0;	/* libntp default is all lit */
 
 extern	char *	progname;
 

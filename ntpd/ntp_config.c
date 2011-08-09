@@ -63,7 +63,7 @@ char **	cmdline_servers;
  */
 struct masks {
 	const char * const	name;
-	const u_long		mask;
+	const u_int32		mask;
 };
 
 static struct masks logcfg_class[] = {
@@ -74,20 +74,28 @@ static struct masks logcfg_class[] = {
 	{ NULL,		0 }
 };
 
-static struct masks logcfg_item[] = {
+/* logcfg_noclass_items[] masks are complete and must not be shifted */
+static struct masks logcfg_noclass_items[] = {
+	{ "allall",		NLOG_SYSMASK | NLOG_PEERMASK | NLOG_CLOCKMASK | NLOG_SYNCMASK },
+	{ "allinfo",		NLOG_SYSINFO | NLOG_PEERINFO | NLOG_CLOCKINFO | NLOG_SYNCINFO },
+	{ "allevents",		NLOG_SYSEVENT | NLOG_PEEREVENT | NLOG_CLOCKEVENT | NLOG_SYNCEVENT },
+	{ "allstatus",		NLOG_SYSSTATUS | NLOG_PEERSTATUS | NLOG_CLOCKSTATUS | NLOG_SYNCSTATUS },
+	{ "allstatistics",	NLOG_SYSSTATIST | NLOG_PEERSTATIST | NLOG_CLOCKSTATIST | NLOG_SYNCSTATIST },
+	/* the remainder are misspellings of clockall, peerall, sysall, and syncall. */
+	{ "allclock",		(NLOG_INFO | NLOG_STATIST | NLOG_EVENT | NLOG_STATUS) << NLOG_OCLOCK },
+	{ "allpeer",		(NLOG_INFO | NLOG_STATIST | NLOG_EVENT | NLOG_STATUS) << NLOG_OPEER },
+	{ "allsys",		(NLOG_INFO | NLOG_STATIST | NLOG_EVENT | NLOG_STATUS) << NLOG_OSYS },
+	{ "allsync",		(NLOG_INFO | NLOG_STATIST | NLOG_EVENT | NLOG_STATUS) << NLOG_OSYNC },
+	{ NULL,			0 }
+};
+
+/* logcfg_class_items[] masks are shiftable by NLOG_O* counts */
+static struct masks logcfg_class_items[] = {
+	{ "all",		NLOG_INFO | NLOG_EVENT | NLOG_STATUS | NLOG_STATIST },
 	{ "info",		NLOG_INFO },
-	{ "allinfo",		NLOG_SYSINFO|NLOG_PEERINFO|NLOG_CLOCKINFO|NLOG_SYNCINFO },
 	{ "events",		NLOG_EVENT },
-	{ "allevents",		NLOG_SYSEVENT|NLOG_PEEREVENT|NLOG_CLOCKEVENT|NLOG_SYNCEVENT },
 	{ "status",		NLOG_STATUS },
-	{ "allstatus",		NLOG_SYSSTATUS|NLOG_PEERSTATUS|NLOG_CLOCKSTATUS|NLOG_SYNCSTATUS },
 	{ "statistics",		NLOG_STATIST },
-	{ "allstatistics",	NLOG_SYSSTATIST|NLOG_PEERSTATIST|NLOG_CLOCKSTATIST|NLOG_SYNCSTATIST },
-	{ "allclock",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OCLOCK },
-	{ "allpeer",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OPEER },
-	{ "allsys",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYS },
-	{ "allsync",		(NLOG_INFO|NLOG_STATIST|NLOG_EVENT|NLOG_STATUS)<<NLOG_OSYNC },
-	{ "all",		NLOG_SYSMASK|NLOG_PEERMASK|NLOG_CLOCKMASK|NLOG_SYNCMASK },
 	{ NULL,			0 }
 };
 
@@ -338,9 +346,9 @@ enum gnn_type {
 
 void ntpd_set_tod_using(const char *);
 static char * normal_dtoa(double);
-static unsigned long get_pfxmatch(char **s, struct masks *m);
-static unsigned long get_match(char *s, struct masks *m);
-static unsigned long get_logmask(char *s);
+static u_int32 get_pfxmatch(const char **, struct masks *);
+static u_int32 get_match(const char *, struct masks *);
+static u_int32 get_logmask(const char *);
 #ifndef SIM
 static int getnetnum(const char *num, sockaddr_u *addr, int complain,
 		     enum gnn_type a_type);
@@ -4522,15 +4530,15 @@ normal_dtoa(
  * get_pfxmatch - find value for prefixmatch
  * and update char * accordingly
  */
-static unsigned long
+static u_int32
 get_pfxmatch(
-	char ** s,
-	struct masks *m
+	const char **	pstr,
+	struct masks *	m
 	)
 {
-	while (m->name) {
-		if (strncmp(*s, m->name, strlen(m->name)) == 0) {
-			*s += strlen(m->name);
+	while (m->name != NULL) {
+		if (strncmp(*pstr, m->name, strlen(m->name)) == 0) {
+			*pstr += strlen(m->name);
 			return m->mask;
 		} else {
 			m++;
@@ -4542,14 +4550,14 @@ get_pfxmatch(
 /*
  * get_match - find logmask value
  */
-static unsigned long
+static u_int32
 get_match(
-	char *s,
-	struct masks *m
+	const char *	str,
+	struct masks *	m
 	)
 {
-	while (m->name) {
-		if (strcmp(s, m->name) == 0)
+	while (m->name != NULL) {
+		if (strcmp(str, m->name) == 0)
 			return m->mask;
 		else
 			m++;
@@ -4560,23 +4568,28 @@ get_match(
 /*
  * get_logmask - build bitmask for ntp_syslogmask
  */
-static unsigned long
+static u_int32
 get_logmask(
-	char *s
+	const char *	str
 	)
 {
-	char *t;
-	unsigned long offset;
-	unsigned long mask;
+	const char *	t;
+	u_int32		offset;
+	u_int32		mask;
 
-	t = s;
+	mask = get_match(str, logcfg_noclass_items);
+	if (mask != 0)
+		return mask;
+
+	t = str;
 	offset = get_pfxmatch(&t, logcfg_class);
-	mask   = get_match(t, logcfg_item);
+	mask   = get_match(t, logcfg_class_items);
 
 	if (mask)
 		return mask << offset;
 	else
-		msyslog(LOG_ERR, "logconfig: illegal argument %s - ignored", s);
+		msyslog(LOG_ERR, "logconfig: '%s' not recognized - ignored",
+			str);
 
 	return 0;
 }
