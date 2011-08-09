@@ -8,6 +8,7 @@
 #include "config.h"
 #endif
 
+#include "ntp.h"
 #include "ntp_machine.h"
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
