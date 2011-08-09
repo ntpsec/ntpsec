@@ -65,6 +65,14 @@ AC_SUBST([LIBTOOL_DEPS])
 
 NTP_WITHSNTP
 
+case "$SNTP" in
+ '')
+    SNTP_DB=
+    SNTP_DL=
+    SNTP_DS=
+    ;;
+esac
+
 ###
 
 # NTP has (so far) been relying on leading-edge autogen.
