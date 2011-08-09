@@ -1,4 +1,4 @@
-* [Bug 1984] ntp/libisc fails to compile on OS X 10.7 (Lion).
+* [Bug 1984] from 4.2.6p4-RC3: ntp/libisc fails to compile on OS X 10.7.
 (4.2.7p201) 2011/08/05 Released by Harlan Stenn <stenn@ntp.org>
 * sntp: change -h/--headspace to -g/--gap, and change the default gap
   from 10 to 50ms
@@ -1077,6 +1077,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
+* [Bug 1984] ntp/libisc fails to compile on OS X 10.7 (Lion).
 * [Backward Incompatible] sntp: -l/--filelog -> -l/--logfile, to be
   consistent with ntpd.
 * libopts/file.c fix from Bruce Korb (arg-type=file).
