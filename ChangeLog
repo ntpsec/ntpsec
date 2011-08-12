@@ -1,3 +1,8 @@
+* Actually use long long for (u_)int64 by correcting spelling of
+  SIZEOF_LONG_LONG in ntp_types.h.
+* Require Visual C++ 2005 or later compilers in Windows port.
+* Force .exe minimum Windows version to 0x0400 to allow NT4 in
+  vs2005/*.vcproj files.
 * Fix make distcheck with --enable-libevent-regress problem with
   unwritable $srcdir.
 * Correct init_logging()'s def_syslogmask type to u_int32 following

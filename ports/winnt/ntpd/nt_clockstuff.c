@@ -2,9 +2,16 @@
  *
  * Created by Sven Dietrich  sven@inter-yacht.com
  *
- * New interpolation scheme by Dave Hart <davehart@davehart.com> February 2009
- * overcomes 500us-1ms inherent jitter with the older scheme, first identified
- * by Peter Rosin (nee Ekberg) <peda@lysator.liu.se> in 2003 [Bug 216].
+ * New interpolation scheme by Dave Hart <davehart@davehart.com> in
+ * February 2009 overcomes 500us-1ms inherent jitter with the older
+ * scheme, first identified by Peter Rosin (nee Ekberg)
+ * <peda@lysator.liu.se> in 2003 [Bug 216].
+ *
+ * Note:  The Windows port of ntpd uses the C99-snprintf replacement for
+ * (v)snprintf(), also used by msyslog(), which does not understand the
+ * printf format specifier %I64d, only the more common %lld.  With the
+ * minimum supported compiler raised to Visual C++ 2005 in ntp-dev in
+ * August 2011, all MS C runtime routines also understand %lld and %llu.
  */
 
 
@@ -217,25 +224,13 @@ do {	\
 } while (0)
 
 /*
- * workaround for VC6 inability to convert unsigned __int64 to double
- */
-#define	LL_HNS	((LONGLONG)HECTONANOSECONDS)
-
-/*
  * NT native time format is 100's of nanoseconds since 1601-01-01.
  * Helpers for converting between "hectonanoseconds" and the 
  * performance counter scale from which interpolated time is
  * derived.
- *
- * Once support for VC6 is dropped, the cast of PerfCtrFreq to
- * LONGLONG can come out of PERF2HNS().  It avoids the VC6 error
- * message:
- * 
- * conversion from unsigned __int64 to double not implemented, use
- * signed __int64
  */
-#define HNS2PERF(hns)	((hns) * PerfCtrFreq / LL_HNS)
-#define PERF2HNS(ctr)	((ctr) * LL_HNS / (LONGLONG)PerfCtrFreq)
+#define HNS2PERF(hns)	((hns) * PerfCtrFreq / HECTONANOSECONDS)
+#define PERF2HNS(ctr)	((ctr) * HECTONANOSECONDS / PerfCtrFreq)
 
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400	/* VS 2005 */
@@ -346,14 +341,14 @@ choose_interp_counter(void)
 	use_pcc = 1;
 	if (ntpd_pcc_freq_text != NULL)
 		sscanf(ntpd_pcc_freq_text, 
-		       "%I64u", 
+		       "%llu", 
 		       &NomPerfCtrFreq);
 
 	NLOG(NLOG_CLOCKINFO)
 		msyslog(LOG_INFO, 
 			"using processor cycle counter "
 			"%.3f MHz", 
-			(LONGLONG)NomPerfCtrFreq / 1e6);
+			NomPerfCtrFreq / 1e6);
 	return;
 }
 
@@ -421,8 +416,11 @@ adj_systime(
 {
 	double dtemp;
 	u_char isneg = 0;
-	int rc;
+	BOOL rc;
 	long TimeAdjustment;
+	SYSTEMTIME st;
+	ULONGLONG this_perf_count;
+	FT_ULL curr_ft;
 
 	/*
 	 * Add the residual from the previous adjustment to the new
@@ -430,8 +428,7 @@ adj_systime(
 	 */
 	dtemp = sys_residual + now;
 	sys_residual = 0;
-	if (dtemp < 0)
-	{
+	if (dtemp < 0) {
 		isneg = 1;
 		dtemp = -dtemp;
 	}
@@ -452,34 +449,31 @@ adj_systime(
 	 * frequency as per suggestion from Harry Pyle,
 	 * and leave the remainder in dtemp
 	 */
-	TimeAdjustment = (long) (dtemp / ppm_per_adjust_unit + (isneg ? -0.5 : 0.5));
-	dtemp -= (double) TimeAdjustment * ppm_per_adjust_unit;	
+	TimeAdjustment = (long)(dtemp / ppm_per_adjust_unit +
+				(isneg)
+				    ? -0.5
+				    : 0.5);
+	dtemp -= (double)TimeAdjustment * ppm_per_adjust_unit;	
 
 
 	/*
 	 * If a leap second is pending then determine the UTC time stamp 
 	 * of when the insertion must take place 
 	 */
-	if (leapsec > 0)
-	{
-		if ( ls_ft.ull == 0 )  /* time stamp has not yet been computed */
-		{
-			SYSTEMTIME st;
-
+	if (leapsec > 0) {
+		if (0 == ls_ft.ull) {  /* time stamp has not yet been computed */
 			GetSystemTime(&st);
 
  			/*
 			 * Accept leap announcement only 1 month in advance,
 			 * for end of March, June, September, or December.
 			 */
-			if ( ( st.wMonth % 3 ) == 0 )
-			{
+			if (0 == (st.wMonth % 3)) {
 				/*
 				 * The comparison time stamp is computed according 
 				 * to 0:00h UTC of the following day 
 				 */
-				if ( ++st.wMonth > 12 )
-				{
+				if (++st.wMonth > 12) {
 					st.wMonth -= 12;
 					st.wYear++;
 				}
@@ -498,17 +492,13 @@ adj_systime(
 					st.wHour, st.wMinute, st.wSecond);
 			}
 		}
-	}
-	else
-	{
-		if ( ls_ft.ull )  /* Leap second has been armed before */
-		{
+	} else {
+		if (ls_ft.ull != 0) {  /* Leap second has been armed before */
 			/*
 			 * Disarm leap second only if the leap second
 			 * is not already in progress.
 			 */
-			if ( !ls_time_adjustment )
-			{
+			if (0 == ls_time_adjustment) {
 				ls_ft.ull = 0;
 				msyslog( LOG_NOTICE, "Leap second announcement disarmed" );
 			}
@@ -520,15 +510,10 @@ adj_systime(
 	 * If the time stamp for the next leap second has been set
 	 * then check if the leap second must be handled
 	 */
-	if ( ls_ft.ull )
-	{
-		ULONGLONG this_perf_count;
-
+	if (ls_ft.ull != 0) {
 		this_perf_count = perf_ctr();
 
-		if ( ls_time_adjustment == 0 ) /* has not yet been scheduled */
-		{
-			FT_ULL curr_ft;
+		if (0 == ls_time_adjustment) { /* has not yet been scheduled */
 
 	 		GetSystemTimeAsFileTime(&curr_ft.ft);   
 			if ( curr_ft.ull >= ls_ft.ull )
@@ -538,17 +523,13 @@ adj_systime(
 				ls_elapsed = 0;
 				msyslog(LOG_NOTICE, "Inserting positive leap second.");
 			}
-		}
-		else  /* leap sec adjustment has been scheduled previously */
-		{
+		} else {  /* leap sec adjustment has been scheduled previously */
 			ls_elapsed = ( this_perf_count - ls_ref_perf_cnt ) 
 				       * HECTONANOSECONDS / PerfCtrFreq;
 		}
 
-		if ( ls_time_adjustment )  /* leap second adjustment is currently active */
-		{
-			if ( ls_elapsed > ( LS_CORR_INTV - LS_CORR_LIMIT ) )
-			{
+		if (ls_time_adjustment != 0) {  /* leap second adjustment is currently active */
+			if (ls_elapsed > (LS_CORR_INTV - LS_CORR_LIMIT)) {
 				ls_time_adjustment = 0;  /* leap second adjustment done */
 				ls_ft.ull = 0;
 			}
@@ -569,10 +550,10 @@ adj_systime(
 		last_Adj = TimeAdjustment;
 		DPRINTF(1, ("SetSystemTimeAdjustment(%+ld)\n", TimeAdjustment));
 		rc = !SetSystemTimeAdjustment(clockperiod + TimeAdjustment, FALSE);
+	} else {
+		rc = FALSE;
 	}
-	else rc = 0;
-	if (rc)
-	{
+	if (rc) {
 		msyslog(LOG_ERR, "Can't adjust time: %m");
 		return 0;
 	}
@@ -614,14 +595,12 @@ init_winnt_time(void)
 	ntservice_init();
 
 	/* Set up the Console Handler */
-	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE))
-	{
+	if (!SetConsoleCtrlHandler(OnConsoleEvent, TRUE)) {
 		msyslog(LOG_ERR, "Can't set console control handler: %m");
 	}
 
 	/* Set the Event-ID message-file name. */
-	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) 
-	{
+	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) {
 		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
 		exit(1);
 	}
@@ -637,7 +616,6 @@ init_winnt_time(void)
 	if (SIZEOF_TIME_T != sizeof(time_t)
 	    || SIZEOF_INT != sizeof(int)
 	    || SIZEOF_SIGNED_CHAR != sizeof(char)) {
-	
 		msyslog(LOG_ERR, "config.h SIZEOF_* macros wrong, fatal");
 		exit(1);
 	}
@@ -650,9 +628,10 @@ init_winnt_time(void)
 	 */
 
 	/* get the current process token handle */
-	if (!OpenProcessToken(GetCurrentProcess(),
-	     TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) 
-	{
+	if (!OpenProcessToken(
+		GetCurrentProcess(),
+		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+		&hToken)) {
 		msyslog(LOG_ERR, "OpenProcessToken failed: %m");
 		exit(-1);
 	}
@@ -667,8 +646,7 @@ init_winnt_time(void)
 
 	/* cannot use return value of AdjustTokenPrivileges. */
 	/* (success does not indicate all privileges were set) */
-	if (GetLastError() != ERROR_SUCCESS) 
-	{
+	if (GetLastError() != ERROR_SUCCESS) {
 		msyslog(LOG_ERR, "AdjustTokenPrivileges failed: %m");
 	 	/* later set time call will probably fail */
 	}
@@ -700,40 +678,31 @@ init_winnt_time(void)
 	 * timer manipulation requested via -M option.
 	 */
 	if (modify_mm_timer) {
-
 		if (timeGetDevCaps(&tc, sizeof(tc)) == TIMERR_NOERROR) {
-
 			wTimerRes = min(max(tc.wPeriodMin, MM_TIMER_INTV), tc.wPeriodMax);
 			timeBeginPeriod(wTimerRes);
 			atexit(atexit_revert_mm_timer);
 			
 			msyslog(LOG_INFO, "MM timer resolution: %u..%u msec, set to %u msec",
 				tc.wPeriodMin, tc.wPeriodMax, wTimerRes );
-		} else
+		} else {
 			msyslog(LOG_ERR, "Multimedia timer unavailable");
+		}
 	}
 	
 	/* get the performance counter ticks per second */
-	if (!QueryPerformanceFrequency(&Freq) || !Freq.QuadPart)
-	{
+	if (!QueryPerformanceFrequency(&Freq) || !Freq.QuadPart) {
 		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
 		exit(-1);
 	}
 
 	NomPerfCtrFreq = PerfCtrFreq = Freq.QuadPart;
-	/*
-	 * the cast to LONGLONG is for VC6 compatibility:
-	 * nt_clockstuff.c(586) : error C2520: conversion from
-	 * unsigned __int64 to double not implemented, use signed 
-	 * __int64
-	 */
 	msyslog(LOG_INFO, 
-		"Performance counter frequency %.3f MHz", 
-		(LONGLONG)PerfCtrFreq / 1e6);
+		"Performance counter frequency %.3f MHz",
+		PerfCtrFreq / 1e6);
 
 	/* Determine the existing system time slewing */
-	if (!GetSystemTimeAdjustment(&adjclockperiod, &clockperiod, &noslew))
-	{
+	if (!GetSystemTimeAdjustment(&adjclockperiod, &clockperiod, &noslew)) {
 		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
 		exit(-1);
 	}
@@ -777,8 +746,7 @@ init_winnt_time(void)
 
 	msyslog(LOG_INFO,
 		"Windows clock precision %.3f msec, min. slew %.3f ppm/s",
-		(LONGLONG)os_clock_precision / 1e4, 
-		ppm_per_adjust_unit);
+		os_clock_precision / 1e4, ppm_per_adjust_unit);
 
 	pch = getenv("NTPD_TICKADJ_PPM");
 	if (pch != NULL && 1 == sscanf(pch, "%lf", &adjppm)) {
@@ -833,7 +801,7 @@ reset_winnt_time(void)
 	 * Verify this will not call SetSystemTimeAdjustment if
 	 * ntpd is running in ntpdate mode.
 	 */
-	if (sys_leap == LEAP_NOTINSYNC || ls_time_adjustment)
+	if (sys_leap == LEAP_NOTINSYNC || ls_time_adjustment != 0)
 		SetSystemTimeAdjustment(0, TRUE);	 
 
 	/*
@@ -873,9 +841,9 @@ GetInterpTimeAsFileTime(
 	now_count.ull = perf_ctr();
 	now_time.ull = interp_time(now_count.ull, TRUE);
 
-	if (last_interp_time <= now_time.ull)
+	if (last_interp_time <= now_time.ull) {
 		last_interp_time = now_time.ull;
-	else {
+	} else {
 		clock_backward = last_interp_time - now_time.ull;
 		if (clock_backward > clock_backward_max) {
 			clock_backward_max = clock_backward;
@@ -924,7 +892,6 @@ TimerApcFunction(
 	 */
 	if (INVALID_HANDLE_VALUE == ctr_freq_timer &&
 	    LEAP_NOTINSYNC != sys_leap)
-
 		start_ctr_freq_timer(now_time);
 }
 
@@ -954,7 +921,7 @@ ClockThread(
 		timer_period_msec = 43;
 	} else if (HZ > 98 && HZ < 102) {
 		timer_period_msec = 27;
-		if (!ntpd_int_int_text)
+		if (NULL == ntpd_int_int_text)
 			msyslog(LOG_WARNING, 
 				"%.3f Hz system clock may benefit from "
 				"custom NTPD_INT_INT env var timer interval "
@@ -962,7 +929,7 @@ ClockThread(
 				HZ);
 	} else {
 		timer_period_msec = (DWORD)(0.5 + (2.752 * clockperiod / 10000));
-		if (!ntpd_int_int_text)
+		if (NULL == ntpd_int_int_text)
 			msyslog(LOG_WARNING, 
 				"unfamiliar %.3f Hz system clock may benefit "
 				"from custom NTPD_INT_INT env var timer "
@@ -971,7 +938,7 @@ ClockThread(
 				HZ);
 	}
 
-	if (ntpd_int_int_text) {
+	if (ntpd_int_int_text != NULL) {
 		timer_period_msec = atoi(ntpd_int_int_text);
 		timer_period_msec = max(9, timer_period_msec);
 		msyslog(LOG_NOTICE, 
@@ -1109,7 +1076,7 @@ lock_thread_to_processor(HANDLE thread)
 		exit(-1);
 	}
 
-	if ( ! winnt_use_interpolation)
+	if (!winnt_use_interpolation)
 		return;
 	
 	if (-1 == lock_interp_threads) {
@@ -1123,7 +1090,7 @@ lock_thread_to_processor(HANDLE thread)
 	 * Calculate the ThreadAffinityMask we'll use once on the
 	 * first invocation.
 	 */
-	if ( ! ProcessAffinityMask) {
+	if (!ProcessAffinityMask) {
 
 		/*
 		 * Choose which processor to nail the main and clock threads to.
@@ -1181,7 +1148,6 @@ lock_thread_to_processor(HANDLE thread)
 
 	if (ThreadAffinityMask && 
 	    !SetThreadAffinityMask(thread, ThreadAffinityMask))
-
 		msyslog(LOG_ERR, 
 			"Unable to wire thread to mask %x: %m\n", 
 			ThreadAffinityMask);
@@ -1231,15 +1197,15 @@ ntp_timestamp_from_counter(
 		Now.ll -= InterpTimestamp;
 		if (debug &&
 		    Now.ll > 60 * HECTONANOSECONDS || 
-		    Now.ll < -60 * (LONGLONG) HECTONANOSECONDS) {
+		    Now.ll < -60 * HECTONANOSECONDS) {
 			DPRINTF(1, ("ntp_timestamp_from_counter interpolated time %.6fs from current\n",
-					Now.ll / (double)LL_HNS));
+					Now.ll / (double)HECTONANOSECONDS));
 			DPRINTF(1, ("interpol time %llx from  %llx\n",
 					InterpTimestamp,
 					Counterstamp));
 			msyslog(LOG_ERR,
 				"ntp_timestamp_from_counter interpolated time %.6fs from current\n",
-				Now.ll / (double)LL_HNS);
+				Now.ll / (double)HECTONANOSECONDS);
 			exit(-1);
 		}
 #endif
@@ -1251,12 +1217,12 @@ ntp_timestamp_from_counter(
 		GetSystemTimeAsFileTime(&Now.ft);
 		Now.ll -= InterpTimestamp;
 		if (Now.ll > 60 * HECTONANOSECONDS || 
-		    Now.ll < -60 * (LONGLONG) HECTONANOSECONDS) {
+		    Now.ll < -60 * HECTONANOSECONDS) {
 			DPRINTF(1, ("ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
-				    Now.ll / (double)LL_HNS));
+				    Now.ll / (double)HECTONANOSECONDS));
 			msyslog(LOG_ERR,
 				"ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
-				Now.ll / (double)LL_HNS);
+				Now.ll / (double)HECTONANOSECONDS);
 			exit(-1);
 		}
 #endif
@@ -1388,12 +1354,10 @@ ctr_freq_timer_fired(
 	now_time.ft.dwHighDateTime = dwTimeHigh;
 
 	if (now_time.ull >= next_period_time) {
-
 		now_count.ull = perf_ctr();
 		tune_ctr_freq(
 			now_count.ull - begin_count.ull,
 			now_time.ull - begin_time.ull);
-
 		next_period_time += (ULONGLONG)tune_ctr_period * HECTONANOSECONDS;
 		begin_count.ull = now_count.ull;
 		begin_time.ull = now_time.ull;
@@ -1402,26 +1366,21 @@ ctr_freq_timer_fired(
 	/* 
 	 * Log clock backward events no more often than 5 minutes.
 	 */
-	if (!report_systemtime) 
-
+	if (!report_systemtime) {
 		report_systemtime = now_time.ull + five_minutes;
-
-	else if (report_systemtime <= now_time.ull) {
-
+	} else if (report_systemtime <= now_time.ull) {
 		report_systemtime +=  five_minutes;
-
 		if (clock_backward_count) {
 			msyslog(LOG_WARNING, 
 				"clock would have gone backward %d times, "
 				"max %.1f usec",
 				clock_backward_count, 
-				(LONGLONG)clock_backward_max / 10.);
+				clock_backward_max / 10.);
 
 			clock_backward_max = CLOCK_BACK_THRESHOLD;
 			clock_backward_count = 0;
 		}
 	}
-
 	reset_ctr_freq_timer(next_period_time, now_time.ull);
 }
 
@@ -1434,7 +1393,6 @@ reset_ctr_freq_timer_abs(
 	FT_ULL	fire_time;
 
 	fire_time.ull = when; 
-
 	SetWaitableTimer(
 		ctr_freq_timer,
 		&fire_time.li,		/* first fire */
@@ -1453,7 +1411,6 @@ reset_ctr_freq_timer(
 {
 	if (when - now > 
 	    (tune_ctr_freq_max_interval * HECTONANOSECONDS + HECTONANOSECONDS))
-
 		when = now + tune_ctr_freq_max_interval * HECTONANOSECONDS;
 
 	reset_ctr_freq_timer_abs(when);
@@ -1468,7 +1425,6 @@ start_ctr_freq_timer(
 	ULONGLONG when;
 
 	ctr_freq_timer = CreateWaitableTimer(NULL, FALSE, NULL);
-
 	when = now_time;
 	ROUND_TO_NEXT_SEC_BOTTOM(when);
 
@@ -1494,19 +1450,18 @@ tune_ctr_freq(
 	static double nom_freq = 0;
 	static LONGLONG diffs[TUNE_CTR_DEPTH] = {0};
 	static LONGLONG sum = 0;
-
 	char ctr_freq_eq[64];
 	LONGLONG delta;
 	LONGLONG deltadiff;
 	ULONGLONG ObsPerfCtrFreq;
 	double freq;
 	double this_freq;
-	int isneg;
+	BOOL isneg;
 
 	/* one-time initialization */
 	if (!report_at_count) {
 		report_at_count = 24 * 60 * 60 / tune_ctr_period;
-		nom_freq = (LONGLONG)NomPerfCtrFreq / 1e6;
+		nom_freq = NomPerfCtrFreq / 1e6;
 	}
 
 	/* delta is the per-second observed frequency this time */
@@ -1516,10 +1471,11 @@ tune_ctr_freq(
 	/* disbelieve any delta more than +/- 976 PPM from nominal */
 	deltadiff = delta - NomPerfCtrFreq;
 	if (0 > deltadiff) {
-		isneg = 1;
+		isneg = TRUE;
 		deltadiff = -deltadiff;
-	} else
-		isneg = 0;
+	} else {
+		isneg = FALSE;
+	}
 
 	if ((ULONGLONG)deltadiff > (NomPerfCtrFreq / 1024)) {
 		disbelieved++;
@@ -1555,7 +1511,7 @@ tune_ctr_freq(
 	/* get rid of ObsPerfCtrFreq when removing the #ifdef */
 	PerfCtrFreq = ObsPerfCtrFreq;
 #endif
-	freq = (LONGLONG)PerfCtrFreq / 1e6;
+	freq = PerfCtrFreq / 1e6;
 
 	/*
 	 * make the performance counter's frequency error from its

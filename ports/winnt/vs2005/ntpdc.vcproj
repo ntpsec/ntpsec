@@ -78,6 +78,7 @@
 				ProgramDatabaseFile="bin/Debug/ntpdc.pdb"
 				SubSystem="1"
 				TargetMachine="1"
+				Version="0x0400"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -169,6 +170,7 @@
 				ProgramDatabaseFile="bin/Release/ntpdc.pdb"
 				SubSystem="1"
 				TargetMachine="1"
+				Version="0x0400"
 			/>
 			<Tool
 				Name="VCALinkTool"

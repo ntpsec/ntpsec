@@ -67,11 +67,6 @@ MISC
 
 int ntp_set_tod (struct timeval *tvp, void *tzp);
 
-#if defined (SYS_CYGWIN32)
-#include <windows.h>
-#define __int64 long long
-#endif
-
 /*casey Tue May 27 15:45:25 SAT 1997*/
 #ifdef SYS_VXWORKS
 

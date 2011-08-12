@@ -77,6 +77,7 @@
 				ProgramDatabaseFile=".\instsrv\Debug/Instsrv.pdb"
 				SubSystem="1"
 				TargetMachine="1"
+				Version="0x0400"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -167,6 +168,7 @@
 				ProgramDatabaseFile=".\instsrv\Release/Instsrv.pdb"
 				SubSystem="1"
 				TargetMachine="1"
+				Version="0x0400"
 			/>
 			<Tool
 				Name="VCALinkTool"

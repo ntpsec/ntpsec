@@ -61,12 +61,13 @@ typedef unsigned long long u_time;
 #include "GRONK: what size has a time_t here?"
 #endif
 
-/* general fractional time stamp formatting.
+/*
+ * general fractional time stamp formatting.
  *
  * secs - integral seconds of time stamp
  * frac - fractional units
  * prec - log10 of units per second (3=milliseconds, 6=microseconds,..)
- *	  or in other words: the number decimal digits required.
+ *	  or in other words: the count of decimal digits required.
  *	  If prec is < 0, abs(prec) is taken for the precision and secs
  *	  is treated as an unsigned value.
  *

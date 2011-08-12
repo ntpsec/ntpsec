@@ -76,6 +76,7 @@
 				ProgramDatabaseFile="bin/Release/ntpq.pdb"
 				SubSystem="1"
 				TargetMachine="1"
+				Version="0x0400"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -169,6 +170,7 @@
 				ProgramDatabaseFile="bin/Debug/ntpq.pdb"
 				SubSystem="1"
 				TargetMachine="1"
+				Version="0x0400"
 			/>
 			<Tool
 				Name="VCALinkTool"

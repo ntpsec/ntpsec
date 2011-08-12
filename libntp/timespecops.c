@@ -11,6 +11,7 @@
 #include "timespecops.h"
 
 #include "timetoa.h"
+#include "ntp_types.h"
 #include "ntp_calendar.h"
 
 /* make sure we have the right definition for NANOSECONDS */
@@ -18,13 +19,13 @@
 #define NANOSECONDS 1000000000
 
 /* conversion between l_fp fractions and nanoseconds */
-#if SIZEOF_LONG >= 8
+#ifdef HAVE_U_INT64
 # define MYFTOTVN(tsf, tvu)						\
 	((tvu) = (int32)						\
-		(((u_long)(tsf) * NANOSECONDS + 0x80000000) >> 32))
+		(((u_int64)(tsf) * NANOSECONDS + 0x80000000) >> 32))
 # define MYTVNTOF(tvu, tsf)						\
 	((tsf) = (u_int32)						\
-		((((u_long)(tvu) << 32) + NANOSECONDS / 2) /		\
+		((((u_int64)(tvu) << 32) + NANOSECONDS / 2) /		\
 		 NANOSECONDS))
 #else
 # define MYFTOTVN(tsf, tvu)						\
