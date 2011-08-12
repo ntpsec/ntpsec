@@ -1,3 +1,5 @@
+* Fix make distcheck with --enable-libevent-regress problem with
+  unwritable $srcdir.
 (4.2.7p202) 2011/08/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1983] --without-sntp build breaks in sntp subdir.
 * [Bug 1984] from 4.2.6p4-RC3: ntp/libisc fails to compile on OS X 10.7.
