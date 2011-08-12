@@ -112,12 +112,17 @@ esac
 
 case "$ntp_use_local_libevent" in
  yes)
-    dnl ac_configure_args is undocumented but widely abused.
+    dnl ac_configure_args is undocumented but widely abused, as here,
+    dnl to modify the defaults of the libevent subpackage, by prefixing
+    dnl our changes to the child configure arguments already assembled.
+    dnl User-supplied contradictory choices should prevail thanks to
+    dnl "last wins".
     ac_configure_args=" --disable-openssl${ac_configure_args}"
     ac_configure_args=" --disable-shared${ac_configure_args}"
     ac_configure_args=" --disable-libevent-regress${ac_configure_args}"
     ac_configure_args=" --disable-libevent-install${ac_configure_args}"
     ac_configure_args=" --enable-silent-rules${ac_configure_args}"
+    ac_configure_args=" --enable-function-sections${ac_configure_args}"
     AC_CONFIG_SUBDIRS([libevent])
     ;;
  *)

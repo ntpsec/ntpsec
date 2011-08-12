@@ -32,7 +32,9 @@ FILE *	syslog_file;
 char *	syslog_fname;
 char *	syslog_abs_fname;
 
-u_int32 ntp_syslogmask =  ~(u_int32)0;	/* libntp default is all lit */
+/* libntp default ntp_syslogmask is all bits lit */
+#define INIT_NTP_SYSLOGMASK	~(u_int32)0
+u_int32 ntp_syslogmask = INIT_NTP_SYSLOGMASK;
 
 extern	char *	progname;
 
@@ -361,7 +363,7 @@ msyslog(
 void
 init_logging(
 	const char *	name,
-	u_long		def_syslogmask,
+	u_int32		def_syslogmask,
 	int		is_daemon
 	)
 {
@@ -378,8 +380,10 @@ init_logging(
 	 * that ntp_syslogmask is still at its default from libntp,
 	 * keeping in mind this function is called in forked children
 	 * where it has already been called in the parent earlier.
+	 * Forked children pass 0 for def_syslogmask.
 	 */
-	if (~(u_long)0 == ntp_syslogmask && 0 != def_syslogmask)
+	if (INIT_NTP_SYSLOGMASK == ntp_syslogmask &&
+	    0 != def_syslogmask)
 		ntp_syslogmask = def_syslogmask; /* set more via logconfig */
 
 	/*
