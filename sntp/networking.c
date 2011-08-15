@@ -4,7 +4,7 @@
 
 
 /* Send a packet */
-void
+int
 sendpkt (
 	SOCKET rsock,
 	sockaddr_u *dest,
@@ -19,23 +19,20 @@ sendpkt (
 		printf("sntp sendpkt: Packet data:\n");
 		pkt_output(pkt, len, stdout);
 	}
-
-	if (debug) {
-		printf("sntp sendpkt: Sending packet to %s ...\n", sptoa(dest));
-	}
 #endif
+	TRACE(1, ("sntp sendpkt: Sending packet to %s ...\n",
+		  sptoa(dest)));
 
-	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, SOCKLEN(dest));
+	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, 
+		    SOCKLEN(dest));
 	if (cc == SOCKET_ERROR) {
-#ifdef DEBUG
-		printf("sntp sendpkt: Socket error: %i. Couldn't send packet!\n", cc);
-#endif
-		if (errno != EWOULDBLOCK && errno != ENOBUFS) {
-			/* oh well */
-		}
-	} else {
-		TRACE(3, ("Packet sent.\n"));
+		msyslog(LOG_ERR, "Send to %s failed, %m\n",
+			sptoa(dest));
+		return FALSE;
 	}
+	TRACE(1, ("Packet sent.\n"));
+
+	return TRUE;
 }
 
 

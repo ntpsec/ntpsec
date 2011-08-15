@@ -146,7 +146,6 @@ sntp_main (
 	argv += optct;
 
 	debug = DESC(DEBUG_LEVEL).optOccCt;
-	TRACE(1, ("%s\n", Version));
 
 	TRACE(2, ("init_lib() done, %s%s\n",
 		  (ipv4_works)
@@ -162,6 +161,8 @@ sntp_main (
 
 	if (HAVE_OPT(LOGFILE))
 		open_logfile(OPT_ARG(LOGFILE));
+
+	msyslog(LOG_INFO, "%s\n", Version);
 
 	if (0 == argc && !HAVE_OPT(BROADCAST) && !HAVE_OPT(CONCURRENT)) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
@@ -659,6 +660,7 @@ xmt(
 	struct timeval	tv_xmt;
 	struct pkt	x_pkt;
 	int		pkt_len;
+	int		sent;
 
 	if (0 != gettimeofday(&tv_xmt, NULL)) {
 		msyslog(LOG_ERR,
@@ -670,20 +672,18 @@ xmt(
 	pkt_len = generate_pkt(&x_pkt, &tv_xmt, dctx->key_id,
 			       dctx->key);
 
-	/* The current sendpkt does not return status */
-	sendpkt(sock, dst, &x_pkt, pkt_len);
-	/* Save the packet we sent... */
-	memcpy(&spkt->x_pkt, &x_pkt, min(sizeof(spkt->x_pkt), pkt_len));
-	spkt->stime = tv_xmt.tv_sec - JAN_1970;
+	sent = sendpkt(sock, dst, &x_pkt, pkt_len);
+	if (sent) {
+		/* Save the packet we sent... */
+		memcpy(&spkt->x_pkt, &x_pkt, min(sizeof(spkt->x_pkt),
+		       pkt_len));
+		spkt->stime = tv_xmt.tv_sec - JAN_1970;
 
-	TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
-		  (u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
-
-	/*
-	** If the send fails:
-	** - decrement n_pending_ntp
-	** - restart the loop
-	*/
+		TRACE(2, ("xmt: %lx.%6.6u %s %s\n", (u_long)tv_xmt.tv_sec,
+			  (u_int)tv_xmt.tv_usec, dctx->name, stoa(dst)));
+	} else {
+		dec_pending_ntp(dctx->name, dst);
+	}
 
 	return;
 }
@@ -729,8 +729,8 @@ void dec_pending_ntp(
 		check_exit_conditions();
 	} else {
 		INSIST(0 == n_pending_ntp);
-		TRACE(1, ("n_pending_ntp reached zero before dec for %s %s\n",
-			  name, stoa(server)));
+		TRACE(1, ("n_pending_ntp reached zero before dec for %s\n",
+			  hostnameaddr(name, server)));
 	}
 }
 
@@ -743,8 +743,8 @@ void timeout_query(
 
 	spkt->done = TRUE;
 	server = &spkt->addr;
-	msyslog(LOG_NOTICE, "%s %s no response after %d seconds",
-		spkt->dctx->name, stoa(server), ucst_timeout);
+	msyslog(LOG_INFO, "%s no response after %d seconds",
+		hostnameaddr(spkt->dctx->name, server), ucst_timeout);
 	dec_pending_ntp(spkt->dctx->name, server);
 }
 
@@ -1104,10 +1104,13 @@ handle_pkt(
 	const char *	hostname
 	)
 {
+	char		disptxt[32];
 	const char *	addrtxt;
 	struct timeval	tv_dst;
+	int		cnt;
 	int		sw_case;
 	int		digits;
+	int		stratum;
 	char *		ref;
 	char *		ts_str;
 	double		offset;
@@ -1190,13 +1193,27 @@ handle_pkt(
 			digits = 6;
 
 		ts_str = tv_to_str(&tv_dst);
-		printf("%s %+.*f", ts_str, digits, offset);
-		if (root_dispersion > 0.)
-			printf(" +/- %f ", root_dispersion);
-		printf(" %s %s%s\n", hostname, stoa(host),
-		       (time_adjusted) 
-			   ? " [excess]"
-			   : "");
+		stratum = rpkt->stratum;
+		if (0 == stratum)
+				stratum = 16;
+
+		if (root_dispersion > 0) {
+			cnt = snprintf(disptxt, sizeof(disptxt),
+				       " +/- %f", root_dispersion);
+			if (cnt >= sizeof(disptxt))
+				snprintf(disptxt, sizeof(disptxt),
+					 "ERROR %d >= %d", cnt,
+					 (int)sizeof(disptxt));
+		} else {
+			disptxt[0] = '\0';
+		}
+
+		msyslog(LOG_INFO, "%s %+.*f%s %s s%d%s\n", ts_str,
+			digits, offset, disptxt,
+			hostnameaddr(hostname, host), stratum,
+			(time_adjusted)
+			    ? " [excess]"
+			    : "");
 		free(ts_str);
 
 		if (p_SNTP_PRETEND_TIME)

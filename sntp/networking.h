@@ -32,9 +32,8 @@
 #define KOD_RATE -5	    /* KOD packet with code RATE, reduce poll intervall */
 #define BROADCAST_FAILED -6
 
-
-/* From ntpdate.c */
-void sendpkt(SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
+/* prototypes */
+int sendpkt(SOCKET rsock, sockaddr_u *dest, struct pkt *pkt, int len);
 int recvdata(SOCKET rsock, sockaddr_u *sender, void *rdata,
 	     int rdata_len);
 int recvpkt(SOCKET rsock, struct pkt *rpkt, unsigned int rsize,

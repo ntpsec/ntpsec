@@ -18,6 +18,8 @@ extern void msyslog();
 
 extern int	syslogit;
 extern int	msyslog_term;	/* duplicate to stdout/err */
+extern int	msyslog_term_pid;
+extern int	msyslog_include_timestamp;
 extern FILE *	syslog_file;	/* if syslogit is FALSE, log to 
 				   this file and not syslog */
 extern char *	syslog_fname;

@@ -174,3 +174,36 @@ tv_to_str(
 	return buf;
 }
 
+
+/*
+ *
+ * hostnameaddr()
+ *
+ * Formats the hostname and resulting numeric IP address into a string,
+ * avoiding duplication if the "hostname" was in fact a numeric address.
+ *
+ */
+const char *
+hostnameaddr(
+	const char *		hostname,
+	const sockaddr_u *	addr
+	)
+{
+	const char *	addrtxt;
+	char *		result;
+	int		cnt;
+
+	addrtxt = stoa(addr);
+	LIB_GETBUF(result);
+	if (strcmp(hostname, addrtxt))
+		cnt = snprintf(result, LIB_BUFLENGTH, "%s %s",
+			       hostname, addrtxt);
+	else
+		cnt = snprintf(result, LIB_BUFLENGTH, "%s", addrtxt);
+	if (cnt >= LIB_BUFLENGTH)
+		snprintf(result, LIB_BUFLENGTH,
+			 "hostnameaddr ERROR have %d (%d needed)",
+			 LIB_BUFLENGTH, cnt + 1);
+
+	return result;
+}

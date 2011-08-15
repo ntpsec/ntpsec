@@ -1,3 +1,5 @@
+* [Bug 1988] Better sntp send failed error message needed.
+* [Bug 1990] sntp output should include stratum.
 (4.2.7p203) 2011/08/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1986] Require Visual C++ 2005 or later compilers in Windows port.
 * Actually use long long for (u_)int64 by correcting spelling of
