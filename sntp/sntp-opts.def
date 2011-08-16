@@ -65,8 +65,8 @@ flag = {
   arg-name	= "seconds";
   arg-default	= 68;
   doc		= <<- _EndOfDoc_
-	When waiting for a broadcast packet SNTP will wait the number
-	of seconds specified before giving up.  Default 68 seconds.
+	When waiting for a broadcast packet @code{sntp} will wait the number
+	of seconds specified before giving up.
 	_EndOfDoc_;
 };
 
@@ -79,9 +79,9 @@ flag = {
   max		 = NOLIMIT;
   stack-arg;
   doc		= <<- _EndOfDoc_
-	If specified SNTP will listen to the specified address
-	for NTP broadcasts.  The default maximum wait time,
-	68 seconds, can be modified with -B.
+	If specified @code{sntp} will listen to the specified address
+	for NTP broadcasts.  The default maximum wait time
+	can be modified with @code{-B}.
 	_EndOfDoc_;
 };
 
@@ -97,7 +97,7 @@ flag = {
 	Requests from an NTP "client" to a "server" should never be sent
 	more rapidly than one every 2 seconds.  By default, any IPs returned
 	as part of a DNS lookup are assumed to be for a single instance of
-	ntpd, and therefore sntp will send queries to these IPs one after
+	ntpd, and therefore @code{sntp} will send queries to these IPs one after
 	another, with a 2-second gap in between each query.
 
 	The -c or --concurrent flag says that any IPs returned for the DNS
@@ -120,7 +120,6 @@ flag = {
 	there is benefit to specifying a good number of servers to query,
 	separate the queries we send out by the specified number of
 	milliseconds.
-	Default 10 milliseconds.
 	_EndOfDoc_;
 };
 
@@ -133,8 +132,7 @@ flag = {
   descrip	= "KoD history filename";
   doc		= <<- _EndOfDoc_
 	Specifies the filename to be used for the persistent history of KoD
-	responses received from servers.  The default is
-	/var/db/ntp-kod .
+	responses received from servers.
 	_EndOfDoc_;
 };
 
@@ -146,7 +144,7 @@ flag = {
   arg-name	= "file-name";
   doc		= <<- _EndOfDoc_
 	This option specifies the keyfile.
-	SNTP will search for the key specified with -a keyno in this
+	@code{sntp} will search for the key specified with -a keyno in this
 	file. Key files follow the following format:
 
 	keyid keytype key
@@ -235,8 +233,8 @@ flag = {
   arg-name	= "seconds";
   arg-default	= 5;
   doc		= <<- _EndOfDoc_
-	When waiting for a unicast reply, SNTP will wait the number
-	of seconds specified before giving up.  Default 5 seconds.
+	When waiting for a unicast reply, @code{sntp} will wait the number
+	of seconds specified before giving up.
 	_EndOfDoc_;
 };
 
@@ -260,7 +258,7 @@ doc-section	= {
   ds-format	= 'mdoc';
   ds-text	= <<- _END_PROG_MDOC_DESCRIP
 .Nm
-can be used as a SNTP client to query a NTP or SNTP server and either display
+can be used as an SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
 run as an interactive command or in a
 .Ic cron
@@ -293,7 +291,7 @@ seconds.
 
 prog-info-descrip = <<- _END_PROG_INFO_DESCRIP
 @code{sntp}
-can be used as a SNTP client to query a NTP or SNTP server and either display
+can be used as an SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
 run as an interactive command or in a
 @code{cron}
