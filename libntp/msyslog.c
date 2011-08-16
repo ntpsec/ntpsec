@@ -26,8 +26,10 @@
 #endif
 
 
-int	syslogit = 1;
+int	syslogit = TRUE;
 int	msyslog_term = FALSE;	/* duplicate to stdout/err */
+int	msyslog_term_pid = TRUE;
+int	msyslog_include_timestamp = TRUE;
 FILE *	syslog_file;
 char *	syslog_fname;
 char *	syslog_abs_fname;
@@ -162,6 +164,7 @@ addto_syslog(
 	FILE *		term_file;
 	int		log_to_term;
 	int		log_to_file;
+	int		pid;
 	const char *	nl_or_empty;
 	const char *	human_time;
 
@@ -194,7 +197,14 @@ addto_syslog(
 		return;
 
 	/* syslog() adds the timestamp, name, and pid */
-	human_time = humanlogtime();
+	if (msyslog_include_timestamp)
+		human_time = humanlogtime();
+	else	/* suppress gcc pot. uninit. warning */
+		human_time = NULL;
+	if (msyslog_term_pid || log_to_file)
+		pid = getpid();
+	else	/* suppress gcc pot. uninit. warning */
+		pid = -1;
 
 	/* syslog() adds trailing \n if not present */
 	if ('\n' != msg[strlen(msg) - 1])
@@ -206,14 +216,19 @@ addto_syslog(
 		term_file = (level <= LOG_ERR)
 				? stderr
 				: stdout;
-		fprintf(term_file, "%s %s[%d]: %s%s", human_time, prog,
-			(int)getpid(), msg, nl_or_empty);
+		if (msyslog_include_timestamp)
+			fprintf(term_file, "%s ", human_time);
+		if (msyslog_term_pid)
+			fprintf(term_file, "%s[%d]: ", prog, pid);
+		fprintf(term_file, "%s%s", msg, nl_or_empty);
 		fflush(term_file);
 	}
 
 	if (log_to_file) {
-		fprintf(syslog_file, "%s %s[%d]: %s%s", human_time,
-			prog, (int)getpid(), msg, nl_or_empty);
+		if (msyslog_include_timestamp)
+			fprintf(syslog_file, "%s ", human_time);
+		fprintf(syslog_file, "%s[%d]: %s%s", prog, pid, msg,
+			nl_or_empty);
 		fflush(syslog_file);
 	}
 }

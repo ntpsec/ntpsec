@@ -35,15 +35,17 @@ socktoa(
 	const sockaddr_u *sock
 	)
 {
+	int		saved_errno;
 	char *		res;
 	char *		addr;
 	u_long		scope;
 
+	saved_errno = socket_errno();
 	LIB_GETBUF(res);
 
-	if (NULL == sock)
+	if (NULL == sock) {
 		strlcpy(res, "(null)", LIB_BUFLENGTH);
-	else {
+	} else {
 		switch(AF(sock)) {
 
 		case AF_INET:
@@ -71,6 +73,8 @@ socktoa(
 				 AF(sock));
 		}
 	}
+	errno = saved_errno;
+
 	return res;
 }
 
@@ -80,9 +84,11 @@ sockporttoa(
 	const sockaddr_u *sock
 	)
 {
+	int		saved_errno;
 	const char *	atext;
 	char *		buf;
 
+	saved_errno = socket_errno();
 	atext = socktoa(sock);
 	LIB_GETBUF(buf);
 	snprintf(buf, LIB_BUFLENGTH,
@@ -90,6 +96,7 @@ sockporttoa(
 		     ? "[%s]:%hu"
 		     : "%s:%hu",
 		 atext, SRCPORT(sock));
+	errno = saved_errno;
 
 	return buf;
 }

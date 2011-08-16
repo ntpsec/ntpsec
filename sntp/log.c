@@ -13,6 +13,8 @@ sntp_init_logging(
 {
 	msyslog_term = TRUE;
 	init_logging(prog, 0, FALSE);
+	msyslog_term_pid = FALSE;
+	msyslog_include_timestamp = FALSE;
 }
 
 
@@ -22,7 +24,6 @@ open_logfile(
 	)
 {
 	change_logfile(logfile, FALSE);
-	msyslog(LOG_NOTICE, "%s\n", Version);
 	atexit(cleanup_log);
 }
 
