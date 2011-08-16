@@ -1,8 +1,8 @@
-.TH sntp 1sntpman "13 Aug 2011" "4.2.7p203" "User Commands"
+.TH sntp 1sntpman "16 Aug 2011" "4.2.7p204" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 13, 2011 at 10:44:54 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  August 16, 2011 at 11:09:18 AM by AutoGen 5.12
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -15,7 +15,7 @@ sntp \- standard Simple Network Time Protocol program
 .PP
 .SH DESCRIPTION
 .B 
-can be used as a SNTP client to query a NTP or SNTP server and either display
+can be used as an SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
 run as an interactive command or in a
 .Ic cron
@@ -73,16 +73,16 @@ The default \fIseconds\fP for this option is:
 .ti +4
  68
 .sp
-When waiting for a broadcast packet SNTP will wait the number
-of seconds specified before giving up.  Default 68 seconds.
+When waiting for a broadcast packet @code{sntp} will wait the number
+of seconds specified before giving up.
 .TP
 .BR \-b " \fIbroadcast\-address\fP, " \-\-broadcast "=" \fIbroadcast\-address\fP
 Listen to the address specified for broadcast time sync.
 This option may appear an unlimited number of times.
 .sp
-If specified SNTP will listen to the specified address
-for NTP broadcasts.  The default maximum wait time,
-68 seconds, can be modified with -B.
+If specified @code{sntp} will listen to the specified address
+for NTP broadcasts.  The default maximum wait time
+can be modified with @code{-B}.
 .TP
 .BR \-c " \fIhost\-name\fP, " \-\-concurrent "=" \fIhost\-name\fP
 Concurrently query all IPs returned for host-name.
@@ -91,7 +91,7 @@ This option may appear an unlimited number of times.
 Requests from an NTP "client" to a "server" should never be sent
 more rapidly than one every 2 seconds.  By default, any IPs returned
 as part of a DNS lookup are assumed to be for a single instance of
-ntpd, and therefore sntp will send queries to these IPs one after
+ntpd, and therefore @code{sntp} will send queries to these IPs one after
 another, with a 2-second gap in between each query.
 The -c or --concurrent flag says that any IPs returned for the DNS
 lookup of the supplied host-name are on different machines, so we
@@ -118,7 +118,6 @@ Since we're only going to use the first valid response we get and
 there is benefit to specifying a good number of servers to query,
 separate the queries we send out by the specified number of
 milliseconds.
-Default 10 milliseconds.
 .TP
 .BR \-K " \fIfile\-name\fP, " \-\-kod "=" \fIfile\-name\fP
 KoD history filename.
@@ -127,14 +126,13 @@ The default \fIfile\-name\fP for this option is:
  /var/db/ntp-kod
 .sp
 Specifies the filename to be used for the persistent history of KoD
-responses received from servers.  The default is
-/var/db/ntp-kod .
+responses received from servers.
 .TP
 .BR \-k " \fIfile\-name\fP, " \-\-keyfile "=" \fIfile\-name\fP
 Look in this file for the key specified with -a.
 .sp
 This option specifies the keyfile.
-SNTP will search for the key specified with -a keyno in this
+@code{sntp} will search for the key specified with -a keyno in this
 file. Key files follow the following format:
 keyid keytype key
 Where	keyid is a number identifying this key
@@ -204,8 +202,8 @@ The default \fIseconds\fP for this option is:
 .ti +4
  5
 .sp
-When waiting for a unicast reply, SNTP will wait the number
-of seconds specified before giving up.  Default 5 seconds.
+When waiting for a unicast reply, @code{sntp} will wait the number
+of seconds specified before giving up.
 .TP
 .BR \-\-wait, " \fB\-\-no\-wait\fP"
 Wait for pending replies (if not setting the time).

@@ -1,3 +1,4 @@
+(4.2.7p204) 2011/08/16 Released by Harlan Stenn <stenn@ntp.org>
 * Added support for Garmin's $PGRMF sentence to NMEA driver
 * [Bug 1988] Better sntp send failed error message needed.
 * [Bug 1989] sntp manual page sometimes refers to SNTP as a program.
