@@ -1,4 +1,5 @@
 * Added support for Garmin's $PGRMF sentence to NMEA driver
+(4.2.7p203) 2011/08/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1986] Require Visual C++ 2005 or later compilers in Windows port.
 * Actually use long long for (u_)int64 by correcting spelling of
   SIZEOF_LONG_LONG in ntp_types.h.
