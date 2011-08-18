@@ -218,6 +218,8 @@
 # endif
 #endif
 
+#include "ntp_stdlib.h"	/* for strlcat(), strlcpy() */
+
 #include <math.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -247,9 +249,6 @@
 #define	M2		(2)				/* IRIG 0 pulse */
 #define	M5		(5)				/* IRIG 1 pulse */
 #define	M8		(8)				/* IRIG PI pulse */
-
-#define	FALSE	(0)
-#define	TRUE	(1)
 
 #define	NUL		(0)
 

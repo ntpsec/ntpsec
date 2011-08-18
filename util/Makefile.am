@@ -15,7 +15,7 @@ AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 # LDADD might need RESLIB and ADJLIB
 LDADD=		../libntp/libntp.a $(LDADD_LIBNTP) $(PTHREAD_LIBS)
-tg2_LDADD=	$(LIBM)
+tg2_LDADD=	../libntp/libntp.a $(LIBM)
 ntp_keygen_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a
 ntp_keygen_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LCRYPTO)
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
