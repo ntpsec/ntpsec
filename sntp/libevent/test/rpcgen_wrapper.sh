@@ -27,7 +27,7 @@ exit_failed() {
 }
 
 srcdir=$1
-srcdir=${srcdir-.}
+srcdir=${srcdir:-.}
 ${srcdir}/../event_rpcgen.py ${srcdir}/regress.rpc
 case "$?" in
  0)
