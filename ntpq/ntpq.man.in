@@ -1,8 +1,8 @@
-.TH ntpq @NTPQ_MS@ "16 Aug 2011" "4.2.7p204" "User Commands"
+.TH ntpq @NTPQ_MS@ "19 Aug 2011" "4.2.7p205" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 16, 2011 at 11:05:56 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  August 19, 2011 at 07:43:13 AM by AutoGen 5.12
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
