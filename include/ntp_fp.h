@@ -265,7 +265,7 @@ typedef u_int32 u_fp;
 			q_tmp = ~(u_int64)ldexp(-d_tmp, 32) + 1; \
 		else \
 			q_tmp = (u_int64)ldexp(d_tmp, 32); \
-		(r_uf) = (u_int32)q_tmp; \
+		(r_uf) = (u_int32)(q_tmp & UINT32_MAX); \
 		(r_ui) = (u_int32)(q_tmp >> 32); \
 	} while(0)
 

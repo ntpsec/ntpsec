@@ -415,7 +415,7 @@ adj_systime(
 	)
 {
 	double dtemp;
-	u_char isneg = 0;
+	u_char isneg;
 	BOOL rc;
 	long TimeAdjustment;
 	SYSTEMTIME st;
@@ -429,8 +429,10 @@ adj_systime(
 	dtemp = sys_residual + now;
 	sys_residual = 0;
 	if (dtemp < 0) {
-		isneg = 1;
+		isneg = TRUE;
 		dtemp = -dtemp;
+	} else {
+		isneg = FALSE;
 	}
 
 	if (dtemp > NTP_MAXFREQ)
@@ -450,10 +452,10 @@ adj_systime(
 	 * and leave the remainder in dtemp
 	 */
 	TimeAdjustment = (long)(dtemp / ppm_per_adjust_unit +
-				(isneg)
-				    ? -0.5
-				    : 0.5);
-	dtemp -= (double)TimeAdjustment * ppm_per_adjust_unit;	
+				((isneg)
+				     ? -0.5
+				     : 0.5));
+	dtemp -= TimeAdjustment * ppm_per_adjust_unit;	
 
 
 	/*
@@ -500,7 +502,7 @@ adj_systime(
 			 */
 			if (0 == ls_time_adjustment) {
 				ls_ft.ull = 0;
-				msyslog( LOG_NOTICE, "Leap second announcement disarmed" );
+				msyslog(LOG_NOTICE, "Leap second announcement disarmed");
 			}
 		}
 	}
@@ -515,17 +517,16 @@ adj_systime(
 
 		if (0 == ls_time_adjustment) { /* has not yet been scheduled */
 
-	 		GetSystemTimeAsFileTime(&curr_ft.ft);   
-			if ( curr_ft.ull >= ls_ft.ull )
-			{
+	 		GetSystemTimeAsFileTime(&curr_ft.ft);
+			if (curr_ft.ull >= ls_ft.ull) {
 				ls_time_adjustment = clockperiod / LS_CORR_INTV_SECS;
 				ls_ref_perf_cnt = this_perf_count;
 				ls_elapsed = 0;
 				msyslog(LOG_NOTICE, "Inserting positive leap second.");
 			}
 		} else {  /* leap sec adjustment has been scheduled previously */
-			ls_elapsed = ( this_perf_count - ls_ref_perf_cnt ) 
-				       * HECTONANOSECONDS / PerfCtrFreq;
+			ls_elapsed = (this_perf_count - ls_ref_perf_cnt) 
+				     * HECTONANOSECONDS / PerfCtrFreq;
 		}
 
 		if (ls_time_adjustment != 0) {  /* leap second adjustment is currently active */
@@ -538,7 +539,7 @@ adj_systime(
 			 * NOTE: While the system time is slewed during the leap second 
 			 * the interpolation function which is based on the performance 
 			 * counter does not account for the slew.
-			*/
+			 */
 			TimeAdjustment -= ls_time_adjustment;
 		}
 	}
@@ -555,16 +556,14 @@ adj_systime(
 	}
 	if (rc) {
 		msyslog(LOG_ERR, "Can't adjust time: %m");
-		return 0;
-	}
-	else {
-		sys_residual = dtemp / 1e6;
+		return FALSE;
 	}
 
-	DPRINTF(6, ("adj_systime: adj %.9f -> remaining residual %.9f\n", 
+	sys_residual = dtemp / 1e6;
+	DPRINTF(4, ("adj_systime: adj %.9f -> remaining residual %.9f\n", 
 		    now, sys_residual));
 
-	return 1;
+	return TRUE;
 }
 
 
@@ -1189,6 +1188,12 @@ ntp_timestamp_from_counter(
 	ULONGLONG	InterpTimestamp;
 
 	if (winnt_use_interpolation) {
+		if (0 == Counterstamp) {
+			DPRINTF(1, ("ntp_timestamp_from_counter rejecting 0 counter.\n"));
+			ZERO(*result);
+			return;
+		}
+
 		InterpTimestamp = interp_time(Counterstamp + QPC_offset, FALSE);
 
 #ifdef DEBUG
@@ -1200,9 +1205,9 @@ ntp_timestamp_from_counter(
 		    Now.ll < -60 * HECTONANOSECONDS) {
 			DPRINTF(1, ("ntp_timestamp_from_counter interpolated time %.6fs from current\n",
 					Now.ll / (double)HECTONANOSECONDS));
-			DPRINTF(1, ("interpol time %llx from  %llx\n",
-					InterpTimestamp,
-					Counterstamp));
+			DPRINTF(1, ("interpol time %llx from  %llx + %llx\n",
+					InterpTimestamp, Counterstamp,
+					QPC_offset));
 			msyslog(LOG_ERR,
 				"ntp_timestamp_from_counter interpolated time %.6fs from current\n",
 				Now.ll / (double)HECTONANOSECONDS);
@@ -1216,7 +1221,8 @@ ntp_timestamp_from_counter(
 		/* sanity check timestamp is within 1 minute of now */
 		GetSystemTimeAsFileTime(&Now.ft);
 		Now.ll -= InterpTimestamp;
-		if (Now.ll > 60 * HECTONANOSECONDS || 
+		if (debug &&
+		    Now.ll > 60 * HECTONANOSECONDS || 
 		    Now.ll < -60 * HECTONANOSECONDS) {
 			DPRINTF(1, ("ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
 				    Now.ll / (double)HECTONANOSECONDS));

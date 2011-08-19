@@ -84,6 +84,11 @@ typedef unsigned int u_int;
 # endif
 #endif	/* !HAVE_UINT32_T && SIZEOF_INT != 4 */
 
+#ifndef UINT32_MAX
+#define UINT32_MAX	0xffffffff
+#endif
+
+
 /*
  * Ugly dance to find out if we have 64bit integer type.
  */
