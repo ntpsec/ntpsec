@@ -1,9 +1,9 @@
-.Dd August 19 2011
+.Dd August 20 2011
 .Dt NTP_WAIT @NTP_WAIT_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  August 19, 2011 at 07:40:21 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  August 20, 2011 at 05:56:33 AM by AutoGen 5.12
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -38,17 +38,21 @@ flag is provided.
 .It  \-n " \fInum\-tries\fP, " \-\- "=" \fInum\-tries\fP
 Number of times to check ntpd.
 This option takes an integer number as its argument.
+The default \fInum\-tries\fP for this option is:
+.ti +4
+ 100
 .sp
 The maximum number of times we will check ntpd to see if it
 has been able to synchronize and stabilize the system clock.
-The default is 100 times.
 .It  \-s " \fIsecs\-between\-tries\fP, " \-\- "=" \fIsecs\-between\-tries\fP
 How long to sleep between tries.
 This option takes an integer number as its argument.
+The default \fIsecs\-between\-tries\fP for this option is:
+.ti +4
+ 6
 .sp
-We will sleep for secs-between-tries after each query of ntpd
+We will sleep for @file{secs-between-tries} after each query of ntpd
 that returns "the time is not yet stable".
-The default is 6 seconds.
 .It  \-v ", " -\-
 Be verbose.
 .sp

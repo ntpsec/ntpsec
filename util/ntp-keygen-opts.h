@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  August 19, 2011 at 07:44:05 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  August 20, 2011 at 06:01:25 AM by AutoGen 5.12
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -90,8 +90,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    24
-#define NTP_KEYGEN_VERSION       "4.2.7p205"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p205"
+#define NTP_KEYGEN_VERSION       "4.2.7p206"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p206"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

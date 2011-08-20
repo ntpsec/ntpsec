@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  August 19, 2011 at 07:34:07 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  August 20, 2011 at 05:47:21 AM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -52,7 +52,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[333] =
-"sntp 4.2.7p205\n\
+"sntp 4.2.7p206\n\
 Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -218,7 +218,7 @@ static char const zLogfile_Name[]            = "logfile";
  *  Steplimit option description:
  */
 static char const zSteplimitText[] =
-        "Adjustments less than steplimit msec will be slewed";
+        "Adjustments less than @file{steplimit} msec will be slewed";
 static char const zSteplimit_NAME[]          = "STEPLIMIT";
 static char const zSteplimit_Name[]          = "steplimit";
 #define STEPLIMIT_FLAGS       (OPTST_DISABLED \
@@ -248,7 +248,7 @@ static char const zUsereservedport_Name[]    = "usereservedport";
  *  Step option description:
  */
 static char const zStepText[] =
-        "OK to 'step' the time with settimeofday()";
+        "OK to 'step' the time with settimeofday(2)";
 static char const zStep_NAME[]               = "STEP";
 static char const zStep_Name[]               = "step";
 #define STEP_FLAGS       (OPTST_DISABLED)
@@ -257,7 +257,7 @@ static char const zStep_Name[]               = "step";
  *  Slew option description:
  */
 static char const zSlewText[] =
-        "OK to 'slew' the time with adjtime()";
+        "OK to 'slew' the time with adjtime(2)";
 static char const zSlew_NAME[]               = "SLEW";
 static char const zSlew_Name[]               = "slew";
 #define SLEW_FLAGS       (OPTST_DISABLED)
@@ -662,8 +662,8 @@ static tOptDesc optDesc[OPTION_CT] = {
  *  Define the Sntp Option Environment
  */
 static char const zPROGNAME[5] = "SNTP";
-static char const zUsageTitle[154] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.7p205\n\
+static char const zUsageTitle[161] =
+"sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p206\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
