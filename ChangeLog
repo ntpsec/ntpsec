@@ -1,4 +1,8 @@
 * [Bug 1993] ntpd Windows port adj_systime() broken in 4.2.7p203.
+* sntp documentation and behavior improvements suggested by
+  Steven Sommars.
+* Have sntp report synchronization distance instead of root dispersion.
+* Clean up ntp-wait-opts.def .
 (4.2.7p205) 2011/08/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1992] util/tg2 doesn't compile, needs libntp.
 (4.2.7p204) 2011/08/16 Released by Harlan Stenn <stenn@ntp.org>
