@@ -1115,7 +1115,7 @@ handle_pkt(
 	char *		ts_str;
 	double		offset;
 	double		precision;
-	double		root_dispersion;
+	double		synch_distance;
 	char *		p_SNTP_PRETEND_TIME;
 	time_t		pretend_time;
 #if SIZEOF_TIME_T == 8
@@ -1184,7 +1184,7 @@ handle_pkt(
 		}
 
 		offset_calculation(rpkt, rpktl, &tv_dst, &offset,
-				   &precision, &root_dispersion);
+				   &precision, &synch_distance);
 		time_derived = TRUE;
 
 		for (digits = 0; (precision *= 10.) < 1.; ++digits)
@@ -1197,9 +1197,9 @@ handle_pkt(
 		if (0 == stratum)
 				stratum = 16;
 
-		if (root_dispersion > 0) {
+		if (synch_distance > 0) {
 			cnt = snprintf(disptxt, sizeof(disptxt),
-				       " +/- %f", root_dispersion);
+				       " +/- %f", synch_distance);
 			if (cnt >= sizeof(disptxt))
 				snprintf(disptxt, sizeof(disptxt),
 					 "ERROR %d >= %d", cnt,
@@ -1237,7 +1237,7 @@ offset_calculation(
 	struct timeval *tv_dst,
 	double *offset,
 	double *precision,
-	double *root_dispersion
+	double *synch_distance
 	)
 {
 	l_fp p_rec, p_xmt, p_ref, p_org, tmp, dst;
@@ -1255,12 +1255,13 @@ offset_calculation(
 	*precision = LOGTOD(rpkt->precision);
 	TRACE(3, ("offset_calculation: precision: %f\n", *precision));
 
-	*root_dispersion = FPTOD(p_rdsp);
+	*synch_distance = (FPTOD(p_rdly) + FPTOD(p_rdsp))/2.0;
 
 #ifdef DEBUG
 	if (debug > 2) {
 		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
-		printf("sntp rootdisp: %f\n", *root_dispersion);
+		printf("sntp rootdisp: %f\n", FPTOD(p_rdsp));
+		printf("sntp syncdist: %f\n", *synch_distance);
 
 		pkt_output(rpkt, rpktl, stdout);
 
@@ -1477,9 +1478,7 @@ gettimeofday_cached(
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
 				timeval_sub(&offset, &systemt, &mono);
-				msyslog(LOG_NOTICE,
-					"Offsetting CLOCK_MONOTONIC times by %+ld.%06ld\n",
-					(long)offset.tv_sec, offset.tv_usec);
+				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times by %.6f\n", progname, offset));
 			}
 		}
 		offset_ready = TRUE;
