@@ -1,6 +1,6 @@
 /* -*- Mode: Text -*- */
 
-autogen definitions options;
+//autogen definitions options;
 
 #include copyright.def
 // #include homerc.def
@@ -55,15 +55,16 @@ doc-section	= {
   ds-type	= 'DESCRIPTION';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_PROG_MDOC_DESCRIP
-.Nm will send at most
+.Nm
+will send at most
 .Ar num-tries
 queries to
-.Xr ntpd 8
-(sleeping for
+.Xr ntpd 8 ,
+sleeping for
 .Ar secs-between-tries
 after each status return that says
 .Xr ntpd 8
-has not yet produced a synchronized and stable system clock).
+has not yet produced a synchronized and stable system clock.
 .Pp
 .Nm
 will do this quietly, unless the

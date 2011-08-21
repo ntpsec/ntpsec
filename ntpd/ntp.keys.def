@@ -1,11 +1,11 @@
 /* -*- Mode: Text -*- */
 
-autogen definitions options;
+//autogen definitions options;
 
 #include copyright.def
 
 prog-name	= "/etc/ntp.keys";
-prog-title	= "NTP daemon key file format";
+prog-title	= "NTP key file format";
 
 /* explain: Additional information whenever the usage routine is invoked */
 explain = <<- _END_EXPLAIN
@@ -15,8 +15,8 @@ doc-section	= {
   ds-type	= 'DESCRIPTION';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_PROG_MDOC_DESCRIP
-Following is a description of the format of NTP key files.
-For a description of the use of these files, see the
+Following is a description of the format of an NTP key file.
+For a description of the use of this type of file, see the
 .Qq Authentication Support
 section of the
 .Xr ntp.conf 5
@@ -117,7 +117,7 @@ doc-section	= {
   ds-type	= 'FILES';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_FILES
-.Bl -tag -width /etc/ntp.drift -compact
+.Bl -tag -width /etc/ntp.keys -compact
 .It Pa /etc/ntp.keys
 the default name of the configuration file
 .El
@@ -128,12 +128,14 @@ doc-section	= {
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_SEE_ALSO
 .Xr ntp.conf 5 ,
-.Xr ntpd 8 ,
-.Xr ntpdate 8 ,
-.Xr ntpdc 8
+.Xr ntpd 1ntpdmdoc ,
+.Xr ntpdate 1ntpdatemdoc ,
+.Xr ntpdc 1ntpdcmdoc ,
+.Xr sntp 1sntpmdoc
 	_END_MDOC_SEE_ALSO;
 };
 
+/*
 doc-section	= {
   ds-type	= 'BUGS';
   ds-format	= 'mdoc';
@@ -147,6 +149,7 @@ were designed more with a busy primary server, rather than a high
 stratum workstation, in mind.
 	_END_MDOC_BUGS;
 };
+*/
 
 doc-section	= {
   ds-type	= 'NOTES';
