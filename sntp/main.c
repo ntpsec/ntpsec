@@ -1478,7 +1478,8 @@ gettimeofday_cached(
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
 				timeval_sub(&offset, &systemt, &mono);
-				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times by %.6f\n", progname, offset));
+				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
+					 (long)offset.tv_sec, offset.tv_usec));
 			}
 		}
 		offset_ready = TRUE;
