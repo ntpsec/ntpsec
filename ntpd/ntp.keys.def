@@ -1,6 +1,6 @@
 /* -*- Mode: Text -*- */
 
-//autogen definitions options;
+autogen definitions options;
 
 #include copyright.def
 
@@ -15,7 +15,7 @@ doc-section	= {
   ds-type	= 'DESCRIPTION';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_PROG_MDOC_DESCRIP
-Following is a description of the format of an NTP key file.
+This document describes the format of an NTP key file.
 For a description of the use of this type of file, see the
 .Qq Authentication Support
 section of the
