@@ -1,9 +1,9 @@
-.Dd August 20 2011
+.Dd August 22 2011
 .Dt NTP_WAIT 1ntp-waitmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  August 20, 2011 at 05:56:33 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  August 22, 2011 at 05:09:00 AM by AutoGen 5.12
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -19,15 +19,16 @@
 All arguments must be options.
 .Pp
 .Sh DESCRIPTION
-.Nm will send at most
+.Nm
+will send at most
 .Ar num-tries
 queries to
-.Xr ntpd 8
-(sleeping for
+.Xr ntpd 8 ,
+sleeping for
 .Ar secs-between-tries
 after each status return that says
 .Xr ntpd 8
-has not yet produced a synchronized and stable system clock).
+has not yet produced a synchronized and stable system clock.
 .Pp
 .Nm
 will do this quietly, unless the

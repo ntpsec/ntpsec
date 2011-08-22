@@ -1,8 +1,8 @@
-.TH ntp-wait 1ntp-waitman "20 Aug 2011" "ntp (4.2.7p206)" "User Commands"
+.TH ntp-wait 1ntp-waitman "22 Aug 2011" "ntp (4.2.7p207)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 20, 2011 at 05:56:15 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  August 22, 2011 at 05:08:57 AM by AutoGen 5.12
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -16,17 +16,18 @@ ntp-wait \- Wait for ntpd to stabilize the system clock
 All arguments must be options.
 .PP
 .SH DESCRIPTION
-.B will send at most
+.B 
+will send at most
 \fInum-tries\fR
 queries to
-.Xr ntpd 8
-(sleeping for
+.Xr ntpd 8 ,
+sleeping for
 \fIsecs-between-tries\fR
 after each status return that says
 .Xr ntpd 8
-has not yet produced a synchronized and stable system clock).
+has not yet produced a synchronized and stable system clock.
 .PP
-.B will
+.B 
 will do this quietly, unless the
 v
 flag is provided.
