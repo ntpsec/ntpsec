@@ -4,7 +4,10 @@ autogen definitions options;
 
 #include copyright.def
 
-prog-name	= "/etc/ntp.keys";
+// We want the synopsis to be "/etc/ntp.keys" but we need the prog-name
+// to be ntp.keys - the latter is also how autogen produces the output
+// file name.
+prog-name	= "ntp.keys";
 prog-title	= "NTP key file format";
 
 /* explain: Additional information whenever the usage routine is invoked */
@@ -122,6 +125,7 @@ doc-section	= {
 the default name of the configuration file
 .El
 	_END_MDOC_FILES;
+};
 
 doc-section	= {
   ds-type	= 'SEE ALSO';
