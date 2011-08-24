@@ -1,3 +1,4 @@
+(4.2.7p208) 2011/08/24 Released by Harlan Stenn <stenn@ntp.org>
 * Fix the CLOCK_MONOTONIC TRACE() message.
 (4.2.7p207) 2011/08/22 Released by Harlan Stenn <stenn@ntp.org>
 * Restore the original CLOCK_MONOTONIC output format in sntp.
