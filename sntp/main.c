@@ -729,7 +729,7 @@ void dec_pending_ntp(
 		check_exit_conditions();
 	} else {
 		INSIST(0 == n_pending_ntp);
-		TRACE(1, ("n_pending_ntp reached zero before dec for %s\n",
+		TRACE(1, ("n_pending_ntp was zero before decrement for %s\n",
 			  hostnameaddr(name, server)));
 	}
 }
@@ -1479,6 +1479,7 @@ gettimeofday_cached(
 				/* older libevent2 using monotonic */
 				timeval_sub(&offset, &systemt, &mono);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
+					 "gettimeofday_cached",
 					 (long)offset.tv_sec, offset.tv_usec));
 			}
 		}

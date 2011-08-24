@@ -1,3 +1,4 @@
+* Fix the CLOCK_MONOTONIC TRACE() message.
 (4.2.7p207) 2011/08/22 Released by Harlan Stenn <stenn@ntp.org>
 * Restore the original CLOCK_MONOTONIC output format in sntp.
 * Cleanups for ntp-wait-opts.def and ntp.keys.def .
