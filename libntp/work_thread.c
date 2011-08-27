@@ -503,10 +503,10 @@ block_thread_signals(
 # ifdef HAVE_SIGNALED_IO
 #  ifdef SIGIO
 	sigaddset(&block, SIGIO);
-#  endif	/* SIGIO */
-#  ifdef SIGIO
+#  endif
+#  ifdef SIGPOLL
 	sigaddset(&block, SIGPOLL);
-#  endif	/* SIGIO */
+#  endif
 # endif	/* HAVE_SIGNALED_IO */
 	sigaddset(&block, SIGALRM);
 	sigaddset(&block, MOREDEBUGSIG);
