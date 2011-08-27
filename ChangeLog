@@ -1,6 +1,8 @@
 * [Bug 2000] ntpd worker threads must block signals expected in main
   thread.
 * [Bug 2001] add ntpq -c timerstats like ntpdc -c timerstats.
+* [Bug 2001] from 4.2.6p4-RC3: ntpdc timerstats reports overruns as
+  handled.
 (4.2.7p208) 2011/08/24 Released by Harlan Stenn <stenn@ntp.org>
 * Fix the CLOCK_MONOTONIC TRACE() message.
 (4.2.7p207) 2011/08/22 Released by Harlan Stenn <stenn@ntp.org>
