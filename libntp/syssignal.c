@@ -29,8 +29,8 @@ signal_no_reset(
 	struct sigaction ovec;
 
 	ZERO(vec);
-	vec.sa_handler = func;
 	sigemptyset(&vec.sa_mask);
+	vec.sa_handler = func;
 
 	/* Added for PPS clocks on Solaris 7 which get EINTR errors */
 # ifdef SIGPOLL

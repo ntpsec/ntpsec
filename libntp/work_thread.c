@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <signal.h>
 #ifndef SYS_WINNT
 #include <pthread.h>
 #endif
@@ -61,6 +62,9 @@ static	void	cleanup_after_child(blocking_child *);
 u_int	WINAPI	blocking_thread(void *);
 #else
 void *		blocking_thread(void *);
+#endif
+#ifndef SYS_WINNT
+static	void	block_thread_signals(sigset_t *);
 #endif
 
 
@@ -407,6 +411,7 @@ start_blocking_thread_internal(
 	int		is_pipe;
 	int		flags;
 	size_t		stacksize;
+	sigset_t	saved_sig_mask;
 
 # ifdef NEED_PTHREAD_INIT
 	/*
@@ -463,9 +468,11 @@ start_blocking_thread_internal(
 	pthread_attr_setscope(&thr_attr, PTHREAD_SCOPE_SYSTEM);
 #endif
 	c->thread_ref = emalloc_zero(sizeof(*c->thread_ref));
+	block_thread_signals(&saved_sig_mask);
 	rc = pthread_create(c->thread_ref, &thr_attr,
 			    &blocking_thread, c);
 	saved_errno = errno;
+	pthread_sigmask(SIG_SETMASK, &saved_sig_mask, NULL);
 	pthread_attr_destroy(&thr_attr);
 	if (0 != rc) {
 		errno = saved_errno;
@@ -474,6 +481,56 @@ start_blocking_thread_internal(
 	}
 }
 #endif
+
+
+/*
+ * block_thread_signals()
+ *
+ * Temporarily block signals used by ntpd main thread, so that signal
+ * mask inherited by child threads leaves them blocked.  Returns prior
+ * active signal mask via pmask, to be restored by the main thread
+ * after pthread_create().
+ */
+#ifndef SYS_WINNT
+void
+block_thread_signals(
+	sigset_t *	pmask
+	)
+{
+	sigset_t	block;
+
+	sigemptyset(&block);
+# ifdef HAVE_SIGNALED_IO
+#  ifdef SIGIO
+	sigaddset(&block, SIGIO);
+#  endif	/* SIGIO */
+#  ifdef SIGIO
+	sigaddset(&block, SIGPOLL);
+#  endif	/* SIGIO */
+# endif	/* HAVE_SIGNALED_IO */
+	sigaddset(&block, SIGALRM);
+	sigaddset(&block, MOREDEBUGSIG);
+	sigaddset(&block, LESSDEBUGSIG);
+# ifdef SIGDIE1
+	sigaddset(&block, SIGDIE1);
+# endif
+# ifdef SIGDIE2
+	sigaddset(&block, SIGDIE2);
+# endif
+# ifdef SIGDIE3
+	sigaddset(&block, SIGDIE3);
+# endif
+# ifdef SIGDIE4
+	sigaddset(&block, SIGDIE4);
+# endif
+# ifdef SIGBUS
+	sigaddset(&block, SIGBUS);
+# endif
+	sigemptyset(pmask);
+	pthread_sigmask(SIG_BLOCK, &block, pmask);
+}
+#endif	/* !SYS_WINNT */
+
 
 /*
  * prepare_child_sems()

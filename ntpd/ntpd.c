@@ -457,6 +457,7 @@ ntpdmain(
 	struct rlimit	rl;
 #  endif
 # endif
+
 # ifdef HAVE_UMASK
 	uv = umask(0);
 	if (uv)
@@ -464,7 +465,6 @@ ntpdmain(
 	else
 		umask(022);
 # endif
-
 	progname = argv[0];
 	initializing = TRUE;		/* mark that we are initializing */
 	parse_cmdline_opts(&argc, &argv);
@@ -953,7 +953,7 @@ getgroup:
 			cap_free(caps);
 		}
 #  endif	/* HAVE_LINUX_CAPABILITIES */
-		root_dropped = 1;
+		root_dropped = TRUE;
 		fork_deferred_worker();
 	}	/* if (droproot) */
 # endif	/* HAVE_DROPROOT */
@@ -966,7 +966,8 @@ getgroup:
 	 * between checking for alarms and doing the select().
 	 * Mostly harmless, I think.
 	 */
-	/* On VMS, I suspect that select() can't be interrupted
+	/*
+	 * On VMS, I suspect that select() can't be interrupted
 	 * by a "signal" either, so I take the easy way out and
 	 * have select() time out after one second.
 	 * System clock updates really aren't time-critical,
@@ -980,74 +981,73 @@ getgroup:
 # else /* normal I/O */
 
 	BLOCK_IO_AND_ALARM();
-	was_alarmed = 0;
-	for (;;)
-	{
+	was_alarmed = FALSE;
+	for (;;) {
 #  ifndef HAVE_SIGNALED_IO
 		fd_set rdfdes;
 		int nfound;
 #  endif
 
-		if (alarm_flag)		/* alarmed? */
-		{
-			was_alarmed = 1;
-			alarm_flag = 0;
+		if (alarm_flag) {	/* alarmed? */
+			was_alarmed = TRUE;
+			alarm_flag = FALSE;
 		}
 
-		if (!was_alarmed && has_full_recv_buffer() == ISC_FALSE)
-		{
+		if (!was_alarmed && !has_full_recv_buffer()) {
 			/*
 			 * Nothing to do.  Wait for something.
 			 */
 #  ifndef HAVE_SIGNALED_IO
 			rdfdes = activefds;
-#   if defined(VMS) || defined(SYS_VXWORKS)
+#   if !defined(VMS) && !defined(SYS_VXWORKS)
+			nfound = select(maxactivefd + 1, &rdfdes, NULL,
+					NULL, NULL);
+#   else	/* VMS, VxWorks */
 			/* make select() wake up after one second */
 			{
 				struct timeval t1;
 
-				t1.tv_sec = 1; t1.tv_usec = 0;
-				nfound = select(maxactivefd+1, &rdfdes, (fd_set *)0,
-						(fd_set *)0, &t1);
+				t1.tv_sec = 1;
+				t1.tv_usec = 0;
+				nfound = select(maxactivefd + 1,
+						&rdfdes, NULL, NULL,
+						&t1);
 			}
-#   else
-			nfound = select(maxactivefd+1, &rdfdes, (fd_set *)0,
-					(fd_set *)0, (struct timeval *)0);
-#   endif /* VMS */
-			if (nfound > 0)
-			{
+#   endif	/* VMS, VxWorks */
+			if (nfound > 0) {
 				l_fp ts;
 
 				get_systime(&ts);
 
-				(void)input_handler(&ts);
-			}
-			else if (nfound == -1 && errno != EINTR)
+				input_handler(&ts);
+			} else if (nfound == -1 && errno != EINTR) {
 				msyslog(LOG_ERR, "select() error: %m");
+			}
 #   ifdef DEBUG
-			else if (debug > 5)
+			  else if (debug > 4) {
 				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
+			} else {
+				DPRINTF(1, ("select() returned %d: %m\n", nfound));
+			}
 #   endif /* DEBUG */
 #  else /* HAVE_SIGNALED_IO */
 
 			wait_for_signal();
 #  endif /* HAVE_SIGNALED_IO */
-			if (alarm_flag)		/* alarmed? */
-			{
-				was_alarmed = 1;
-				alarm_flag = 0;
+			if (alarm_flag) {	/* alarmed? */
+				was_alarmed = TRUE;
+				alarm_flag = FALSE;
 			}
 		}
 
-		if (was_alarmed)
-		{
+		if (was_alarmed) {
 			UNBLOCK_IO_AND_ALARM();
 			/*
 			 * Out here, signals are unblocked.  Call timer routine
 			 * to process expiry.
 			 */
 			timer();
-			was_alarmed = 0;
+			was_alarmed = FALSE;
 			BLOCK_IO_AND_ALARM();
 		}
 
@@ -1063,27 +1063,24 @@ getgroup:
 			tsa = pts;
 # endif
 			rbuf = get_full_recv_buffer();
-			while (rbuf != NULL)
-			{
-				if (alarm_flag)
-				{
-					was_alarmed = 1;
-					alarm_flag = 0;
+			while (rbuf != NULL) {
+				if (alarm_flag) {
+					was_alarmed = TRUE;
+					alarm_flag = FALSE;
 				}
 				UNBLOCK_IO_AND_ALARM();
 
-				if (was_alarmed)
-				{	/* avoid timer starvation during lengthy I/O handling */
+				if (was_alarmed) {
+					/* avoid timer starvation during lengthy I/O handling */
 					timer();
-					was_alarmed = 0;
+					was_alarmed = FALSE;
 				}
 
 				/*
 				 * Call the data procedure to handle each received
 				 * packet.
 				 */
-				if (rbuf->receiver != NULL)	/* This should always be true */
-				{
+				if (rbuf->receiver != NULL) {
 # ifdef DEBUG_TIMING
 					l_fp dts = pts;
 
@@ -1092,9 +1089,9 @@ getgroup:
 					collect_timing(rbuf, "buffer processing delay", 1, &dts);
 					bufcount++;
 # endif
-					(rbuf->receiver)(rbuf);
+					(*rbuf->receiver)(rbuf);
 				} else {
-					msyslog(LOG_ERR, "receive buffer corruption - receiver found to be NULL - ABORTING");
+					msyslog(LOG_ERR, "fatal: receive buffer callback NULL");
 					abort();
 				}
 

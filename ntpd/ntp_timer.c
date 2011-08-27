@@ -105,13 +105,46 @@ static	RETSIGTYPE alarming (int);
 #if !defined(VMS)
 # if !defined SYS_WINNT || defined(SYS_CYGWIN32)
 #  ifdef HAVE_TIMER_CREATE
-	static timer_t timer_id;
-	struct itimerspec itimer;
+static timer_t timer_id;
+typedef struct itimerspec intervaltimer;
+#   define	itv_frac	tv_nsec
 #  else 
-	struct itimerval itimer;
+typedef struct itimerval intervaltimer;
+#   define	itv_frac	tv_usec
 #  endif
+intervaltimer itimer;
 # endif
 #endif
+
+#if !defined(SYS_WINNT) && !defined(VMS)
+void	set_timer_or_die(const intervaltimer *);
+#endif
+
+
+#if !defined(SYS_WINNT) && !defined(VMS)
+void
+set_timer_or_die(
+	const intervaltimer *	ptimer
+	)
+{
+	const char *	setfunc;
+	int		rc;
+
+# ifdef HAVE_TIMER_CREATE
+	setfunc = "timer_settime";
+	rc = timer_settime(timer_id, 0, &itimer, NULL);
+# else
+	setfunc = "setitimer";
+	rc = setitimer(ITIMER_REAL, &itimer, NULL);
+# endif
+	if (-1 == rc) {
+		msyslog(LOG_ERR, "interval timer %s failed, %m\n",
+			setfunc);
+		exit(1);
+	}
+}
+#endif	/* !SYS_WINNT && !VMS */
+
 
 /*
  * reinit_timer - reinitialize interval timer after a clock step.
@@ -120,39 +153,26 @@ void
 reinit_timer(void)
 {
 #if !defined(SYS_WINNT) && !defined(VMS)
-#  ifdef HAVE_TIMER_CREATE
+	ZERO(itimer);
+# ifdef HAVE_TIMER_CREATE
 	timer_gettime(timer_id, &itimer);
-	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
-		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
-	}
-	if (itimer.it_value.tv_nsec < 0 ) {
-		itimer.it_value.tv_nsec = 0;
-	}
-	if (itimer.it_value.tv_sec == 0 && itimer.it_value.tv_nsec == 0) {
-		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
-		itimer.it_value.tv_nsec = 0;
-	}
-	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
-	itimer.it_interval.tv_nsec = 0;
-	timer_settime(timer_id, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
-#  else
+# else
 	getitimer(ITIMER_REAL, &itimer);
-	if (itimer.it_value.tv_sec < 0 || itimer.it_value.tv_sec > (1<<EVENT_TIMEOUT)) {
-		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
-	}
-	if (itimer.it_value.tv_usec < 0 ) {
-		itimer.it_value.tv_usec = 0;
-	}
-	if (itimer.it_value.tv_sec == 0 && itimer.it_value.tv_usec == 0) {
-		itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
-		itimer.it_value.tv_usec = 0;
-	}
-	itimer.it_interval.tv_sec = (1<<EVENT_TIMEOUT);
-	itimer.it_interval.tv_usec = 0;
-	setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
-#  endif
+# endif
+	if (itimer.it_value.tv_sec < 0 ||
+	    itimer.it_value.tv_sec > (1 << EVENT_TIMEOUT))
+		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
+	if (itimer.it_value.itv_frac < 0)
+		itimer.it_value.itv_frac = 0;
+	if (0 == itimer.it_value.tv_sec &&
+	    0 == itimer.it_value.itv_frac)
+		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
+	itimer.it_interval.tv_sec = (1 << EVENT_TIMEOUT);
+	itimer.it_interval.itv_frac = 0;
+	set_timer_or_die(&itimer);
 # endif /* VMS */
 }
+
 
 /*
  * init_timer - initialize the timer data structures
@@ -163,7 +183,7 @@ init_timer(void)
 	/*
 	 * Initialize...
 	 */
-	alarm_flag = 0;
+	alarm_flag = FALSE;
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = HOUR;
@@ -182,20 +202,16 @@ init_timer(void)
 	 */
 # ifndef VMS
 #  ifdef HAVE_TIMER_CREATE
-	if (timer_create(CLOCK_REALTIME, NULL, &timer_id) == TC_ERR) {
-		fprintf (stderr, "timer create FAILED\n");
-		exit (0);
+	if (TC_ERR == timer_create(CLOCK_REALTIME, NULL, &timer_id)) {
+		msyslog(LOG_ERR, "timer_create failed, %m\n");
+		exit(1);
 	}
-	signal_no_reset(SIGALRM, alarming);
-	itimer.it_interval.tv_sec = itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
-	itimer.it_interval.tv_nsec = itimer.it_value.tv_nsec = 0;
-	timer_settime(timer_id, 0 /*!TIMER_ABSTIME*/, &itimer, NULL);
-#  else
-	(void) signal_no_reset(SIGALRM, alarming);
-	itimer.it_interval.tv_sec = itimer.it_value.tv_sec = (1<<EVENT_TIMEOUT);
-	itimer.it_interval.tv_usec = itimer.it_value.tv_usec = 0;
-	setitimer(ITIMER_REAL, &itimer, (struct itimerval *)0);
 #  endif
+	signal_no_reset(SIGALRM, alarming);
+	itimer.it_interval.tv_sec = 
+		itimer.it_value.tv_sec = (1 << EVENT_TIMEOUT);
+	itimer.it_interval.itv_frac = itimer.it_value.itv_frac = 0;
+	set_timer_or_die(&itimer);
 # else	/* VMS follows */
 	vmsinc[0] = 10000000;		/* 1 sec */
 	vmsinc[1] = 0;
@@ -218,10 +234,15 @@ init_timer(void)
 		exit(1);
 	}
 	else {
-		DWORD Period = (1<<EVENT_TIMEOUT) * 1000;
-		LARGE_INTEGER DueTime;
+		DWORD		Period;
+		LARGE_INTEGER	DueTime;
+		BOOL		rc;
+
+		Period = (1 << EVENT_TIMEOUT) * 1000;
 		DueTime.QuadPart = Period * 10000i64;
-		if (!SetWaitableTimer(WaitableTimerHandle, &DueTime, Period, NULL, NULL, FALSE) != NO_ERROR) {
+		rc = SetWaitableTimer(WaitableTimerHandle, &DueTime,
+				      Period, NULL, NULL, FALSE);
+		if (!rc) {
 			msyslog(LOG_ERR, "SetWaitableTimer failed: %m");
 			exit(1);
 		}
@@ -259,8 +280,9 @@ intres_timeout_req(
 void
 timer(void)
 {
-	register struct peer *peer, *next_peer;
-	l_fp	now;
+	struct peer *	p;
+	struct peer *	next_peer;
+	l_fp		now;
 
 	/*
 	 * The basic timerevent is one second.  This is used to adjust the
@@ -272,10 +294,10 @@ timer(void)
 		adjust_timer += 1;
 		adj_host_clock();
 #ifdef REFCLOCK
-		for (peer = peer_list; peer != NULL; peer = next_peer) {
-			next_peer = peer->p_link;
-			if (peer->flags & FLAG_REFCLOCK)
-				refclock_timer(peer);
+		for (p = peer_list; p != NULL; p = next_peer) {
+			next_peer = p->p_link;
+			if (FLAG_REFCLOCK & p->flags)
+				refclock_timer(p);
 		}
 #endif /* REFCLOCK */
 	}
@@ -285,11 +307,10 @@ timer(void)
 	 * careful here, since the peer structure might go away as the
 	 * result of the call.
 	 */
-	for (peer = peer_list; peer != NULL; peer = next_peer) {
-		next_peer = peer->p_link;
-		if (peer->action != NULL && peer->nextaction <=
-		    current_time)
-			(*peer->action)(peer);
+	for (p = peer_list; p != NULL; p = next_peer) {
+		next_peer = p->p_link;
+		if (p->action != NULL && p->nextaction <= current_time)
+			(*p->action)(p);
 
 		/*
 		 * Restrain the non-burst packet rate not more
@@ -297,17 +318,15 @@ timer(void)
 		 * usually tripped using iburst and minpoll of
 		 * 128 s or less.
 		 */
-		if (peer->throttle > 0)
-			peer->throttle--;
-		if (peer->nextdate <= current_time) {
+		if (p->throttle > 0)
+			p->throttle--;
+		if (p->nextdate <= current_time) {
 #ifdef REFCLOCK
-			if (peer->flags & FLAG_REFCLOCK)
-				refclock_transmit(peer);
+			if (FLAG_REFCLOCK & p->flags)
+				refclock_transmit(p);
 			else
-				transmit(peer);
-#else /* REFCLOCK */
-			transmit(peer);
-#endif /* REFCLOCK */
+#endif	/* REFCLOCK */
+				transmit(p);
 		}
 	}
 
@@ -430,23 +449,39 @@ alarming(
 	int sig
 	)
 {
-#if !defined(VMS)
-	if (initializing)
-		return;
-	if (alarm_flag)
-		alarm_overflow++;
-	else
-		alarm_flag++;
-#else /* VMS AST routine */
+#ifdef DEBUG
+	const char *msg = "alarming: initializing TRUE\n";
+#endif
+
 	if (!initializing) {
-		if (alarm_flag) alarm_overflow++;
-		else alarm_flag = 1;	/* increment is no good */
+		if (alarm_flag) {
+			alarm_overflow++;
+#ifdef DEBUG
+			msg = "alarming: overflow\n";
+#endif
+		} else {
+# ifndef VMS
+			alarm_flag++;
+# else
+			/* VMS AST routine, increment is no good */
+			alarm_flag = 1;
+# endif
+#ifdef DEBUG
+			msg = "alarming: normal\n";
+#endif
+		}
 	}
-	lib$addx(&vmsinc,&vmstimer,&vmstimer);
-	sys$setimr(0,&vmstimer,alarming,alarming,0);
-#endif /* VMS */
+# ifdef VMS
+	lib$addx(&vmsinc, &vmstimer, &vmstimer);
+	sys$setimr(0, &vmstimer, alarming, alarming, 0);
+# endif
+#ifdef DEBUG
+	if (debug)
+		write(2, msg, strlen(msg));
+#endif
 }
 #endif /* SYS_WINNT */
+
 
 void
 timer_interfacetimeout(u_long timeout)

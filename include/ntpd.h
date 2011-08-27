@@ -296,6 +296,20 @@ extern	char *	fstostr(time_t);	/* NTP timescale seconds */
 
 /* ntpd.c */
 extern	void	parse_cmdline_opts(int *, char ***);
+/*
+ * Signals we catch for debugging.
+ */
+#define MOREDEBUGSIG	SIGUSR1
+#define LESSDEBUGSIG	SIGUSR2
+/*
+ * Signals which terminate us gracefully.
+ */
+#ifndef SYS_WINNT
+# define SIGDIE1	SIGHUP
+# define SIGDIE3	SIGQUIT
+# define SIGDIE2	SIGINT
+# define SIGDIE4	SIGTERM
+#endif /* SYS_WINNT */
 
 
 /*
