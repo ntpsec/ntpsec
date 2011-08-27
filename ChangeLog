@@ -3,6 +3,8 @@
 * [Bug 2001] add ntpq -c timerstats like ntpdc -c timerstats.
 * [Bug 2001] from 4.2.6p4-RC3: ntpdc timerstats reports overruns as
   handled.
+* Update sntp tests to track the change of root dispersion to
+  synchronization distance.
 (4.2.7p208) 2011/08/24 Released by Harlan Stenn <stenn@ntp.org>
 * Fix the CLOCK_MONOTONIC TRACE() message.
 (4.2.7p207) 2011/08/22 Released by Harlan Stenn <stenn@ntp.org>
