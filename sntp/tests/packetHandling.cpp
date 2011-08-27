@@ -7,8 +7,6 @@ extern "C" {
 #include "ntp.h"
 };
 
-#define CALC_SYNCH_DISTANCE(a, b) ((a + b)/2.0)
-
 class mainTest : public sntptest {
 protected:
 	::testing::AssertionResult LfpEquality(const l_fp &expected, const l_fp &actual) {
@@ -91,8 +89,8 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 
 	rpkt.precision = -16; // 0,000015259
 	rpkt.rootdelay = HTONS_FP(DTOUFP(0.125));
-	rpkt.rootdisp = HTONS_FP(DTOUFP(0.25)); //
-	double x_synchDist = CALC_SYNCH_DISTANCE(0.125, 0.25);
+	rpkt.rootdisp = HTONS_FP(DTOUFP(0.25));
+	// Synch Distance: (0.125+0.25)/2.0 == 0.1875
 	l_fp reftime;
 	get_systime(&reftime);
 	HTONL_FP(&reftime, &rpkt.reftime);
@@ -126,7 +124,7 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 
 	EXPECT_DOUBLE_EQ(1.25, offset);
 	EXPECT_DOUBLE_EQ(1. / ULOGTOD(16), precision);
-	EXPECT_DOUBLE_EQ(CALC_SYNCH_DISTANCE(0.125, 0.25), synch_distance);
+	EXPECT_DOUBLE_EQ(0.1875, synch_distance);
 }
 
 TEST_F(mainTest, OffsetCalculationNegativeOffset) {
@@ -135,7 +133,7 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 	rpkt.precision = -1;
 	rpkt.rootdelay = HTONS_FP(DTOUFP(0.5));
 	rpkt.rootdisp = HTONS_FP(DTOUFP(0.5));
-	double x_synchDist = CALC_SYNCH_DISTANCE(0.5, 0.5);
+	// Synch Distance is (0.5+0.5)/2.0, or 0.5
 	l_fp reftime;
 	get_systime(&reftime);
 	HTONL_FP(&reftime, &rpkt.reftime);
@@ -169,7 +167,7 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 
 	EXPECT_DOUBLE_EQ(-1, offset);
 	EXPECT_DOUBLE_EQ(1. / ULOGTOD(1), precision);
-	EXPECT_DOUBLE_EQ(CALC_SYNCH_DISTANCE(0.5, 0.5), synch_distance);
+	EXPECT_DOUBLE_EQ(0.5, synch_distance);
 }
 
 TEST_F(mainTest, HandleUnusableServer) {
