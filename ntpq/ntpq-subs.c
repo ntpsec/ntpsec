@@ -74,6 +74,7 @@ static	void	sysinfo		(struct parse *, FILE *);
 static	void	kerninfo	(struct parse *, FILE *);
 static	void	monstats	(struct parse *, FILE *);
 static	void	iostats		(struct parse *, FILE *);
+static	void	timerstats	(struct parse *, FILE *);
 
 /*
  * Commands we understand.	Ntpdc imports this.
@@ -193,6 +194,9 @@ struct xcmd opcmds[] = {
 	{ "iostats", iostats, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display network input and output counters" },
+	{ "timerstats", timerstats, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "display interval timer counters" },
 	{ 0,		0,		{ NO, NO, NO, NO },
 	  { "-4|-6", "", "", "" }, "" }
 };
@@ -3453,10 +3457,30 @@ iostats(
 	{ "io_sendfailed",	"packet send failures: ", NTP_STR },
 	{ "io_wakeups",		"input wakeups:        ", NTP_STR },
 	{ "io_goodwakeups",	"useful input wakeups: ", NTP_STR },
-	{ NULL,			NULL,			0	}
+	{ NULL,			NULL,			  0	  }
     };
 
 	collect_display_vdc(0, iostats_vdc, FALSE, fp);
+}
+
+
+/*
+ * timerstats - ntpq -c timerstats - interval timer counters
+ */
+static void
+timerstats(
+	struct parse *pcmd,
+	FILE *fp
+	)
+{
+    static vdc timerstats_vdc[] = {
+	{ "timerstats_reset",	"time since reset:  ", NTP_STR },
+	{ "timer_overruns",	"timer overruns:    ", NTP_STR },
+	{ "timer_xmts",		"calls to transmit: ", NTP_STR },
+	{ NULL,			NULL,		       0       }
+    };
+
+	collect_display_vdc(0, timerstats_vdc, FALSE, fp);
 }
 
 

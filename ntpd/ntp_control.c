@@ -209,7 +209,10 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_IO_SENDFAILED	82
 #define	CS_IO_WAKEUPS		83
 #define	CS_IO_GOODWAKEUPS	84
-#define	CS_MAX_NOAUTOKEY	CS_IO_GOODWAKEUPS
+#define	CS_TIMERSTATS_RESET	85
+#define	CS_TIMER_OVERRUNS	86
+#define	CS_TIMER_XMTS		87
+#define	CS_MAX_NOAUTOKEY	CS_TIMER_XMTS
 #ifdef AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
@@ -400,6 +403,9 @@ static const struct ctl_var sys_var[] = {
 	{ CS_IO_SENDFAILED,	RO, "io_sendfailed" },	/* 82 */
 	{ CS_IO_WAKEUPS,	RO, "io_wakeups" },	/* 83 */
 	{ CS_IO_GOODWAKEUPS,	RO, "io_goodwakeups" },	/* 84 */
+	{ CS_TIMERSTATS_RESET,	RO, "timerstats_reset" },/* 85 */
+	{ CS_TIMER_OVERRUNS,	RO, "timer_overruns" },	/* 86 */
+	{ CS_TIMER_XMTS,	RO, "timer_xmts" },	/* 87 */
 #ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
@@ -410,7 +416,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_IDENT,	RO, "ident" },		/* 7 + CS_MAX_NOAUTOKEY */
 	{ CS_DIGEST,	RO, "digest" },		/* 8 + CS_MAX_NOAUTOKEY */
 #endif	/* AUTOKEY */
-	{ 0,		EOV, "" }		/* 57/65 */
+	{ 0,		EOV, "" }		/* 87/95 */
 };
 
 static struct ctl_var *ext_sys_var = NULL;
@@ -2187,6 +2193,19 @@ ctl_putsys(
 
 	case CS_IO_GOODWAKEUPS:
 		ctl_putuint(sys_var[varid].text, handler_pkts);
+		break;
+
+	case CS_TIMERSTATS_RESET:
+		ctl_putuint(sys_var[varid].text,
+			    current_time - timer_timereset);
+		break;
+
+	case CS_TIMER_OVERRUNS:
+		ctl_putuint(sys_var[varid].text, alarm_overflow);
+		break;
+
+	case CS_TIMER_XMTS:
+		ctl_putuint(sys_var[varid].text, timer_xmtcalls);
 		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:
