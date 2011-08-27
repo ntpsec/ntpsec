@@ -1234,19 +1234,21 @@ io_stats(
  */
 static void
 timer_stats(
-	sockaddr_u *srcadr,
-	endpt *inter,
-	struct req_pkt *inpkt
+	sockaddr_u *		srcadr,
+	endpt *			inter,
+	struct req_pkt *	inpkt
 	)
 {
-	register struct info_timer_stats *ts;
+	struct info_timer_stats *	ts;
+	u_long				sincereset;
 
-	ts = (struct info_timer_stats *)prepare_pkt(srcadr, inter, inpkt,
-						    sizeof(struct info_timer_stats));
+	ts = (struct info_timer_stats *)prepare_pkt(srcadr, inter,
+						    inpkt, sizeof(*ts));
 
-	ts->timereset = htonl((u_int32)(current_time - timer_timereset));
-	ts->alarms = htonl((u_int32)alarm_overflow);
-	ts->overflows = htonl((u_int32)timer_overflows);
+	sincereset = current_time - timer_timereset;
+	ts->timereset = htonl((u_int32)sincereset);
+	ts->alarms = ts->timereset;
+	ts->overflows = htonl((u_int32)alarm_overflow);
 	ts->xmtcalls = htonl((u_int32)timer_xmtcalls);
 
 	(void) more_pkt();

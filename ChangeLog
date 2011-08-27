@@ -1110,6 +1110,7 @@
 
 * [Bug 1984] ntp/libisc fails to compile on OS X 10.7 (Lion).
 * [Bug 1985] "logconfig =allall" rejected.
+* [Bug 2001] ntpdc timerstats reports overruns as handled.
 * [Backward Incompatible] sntp: -l/--filelog -> -l/--logfile, to be
   consistent with ntpd.
 * libopts/file.c fix from Bruce Korb (arg-type=file).
