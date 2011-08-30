@@ -449,16 +449,16 @@ alarming(
 	int sig
 	)
 {
-#ifdef DEBUG
+# ifdef DEBUG
 	const char *msg = "alarming: initializing TRUE\n";
-#endif
+# endif
 
 	if (!initializing) {
 		if (alarm_flag) {
 			alarm_overflow++;
-#ifdef DEBUG
+# ifdef DEBUG
 			msg = "alarming: overflow\n";
-#endif
+# endif
 		} else {
 # ifndef VMS
 			alarm_flag++;
@@ -466,19 +466,19 @@ alarming(
 			/* VMS AST routine, increment is no good */
 			alarm_flag = 1;
 # endif
-#ifdef DEBUG
+# ifdef DEBUG
 			msg = "alarming: normal\n";
-#endif
+# endif
 		}
 	}
 # ifdef VMS
 	lib$addx(&vmsinc, &vmstimer, &vmstimer);
 	sys$setimr(0, &vmstimer, alarming, alarming, 0);
 # endif
-#ifdef DEBUG
-	if (debug)
-		write(2, msg, strlen(msg));
-#endif
+# ifdef DEBUG
+	if (debug >= 4)
+		write(1, msg, strlen(msg));
+# endif
 }
 #endif /* SYS_WINNT */
 
