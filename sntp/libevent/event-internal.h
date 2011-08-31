@@ -148,6 +148,9 @@ struct common_timeout_list {
 	struct event_base *base;
 };
 
+/** Mask used to get the real tv_usec value from a common timeout. */
+#define COMMON_TIMEOUT_MICROSECONDS_MASK       0x000fffff
+
 struct event_change;
 
 /* List of 'changes' since the last call to eventop.dispatch.  Only maintained
@@ -273,6 +276,10 @@ struct event_base {
 	/** Flags that this base was configured with */
 	enum event_base_config_flag flags;
 
+	struct timeval max_dispatch_time;
+	int max_dispatch_callbacks;
+	int limit_callbacks_after_prio;
+
 	/* Notify main thread to wake up break, etc. */
 	/** True if the base already has a pending notify, and we don't need
 	 * to add any more. */
@@ -299,6 +306,9 @@ struct event_config {
 	TAILQ_HEAD(event_configq, event_config_entry) entries;
 
 	int n_cpus_hint;
+	struct timeval max_dispatch_interval;
+	int max_dispatch_callbacks;
+	int limit_callbacks_after_prio;
 	enum event_method_feature require_features;
 	enum event_base_config_flag flags;
 };

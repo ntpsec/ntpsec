@@ -537,6 +537,38 @@ int event_config_set_flag(struct event_config *cfg, int flag);
 int event_config_set_num_cpus_hint(struct event_config *cfg, int cpus);
 
 /**
+ * Record an interval and/or a number of callbacks after which the event base
+ * should check for new events.  By default, the event base will run as many
+ * events are as activated at the higest activated priority before checking
+ * for new events.  If you configure it by setting max_interval, it will check
+ * the time after each callback, and not allow more than max_interval to
+ * elapse before checking for new events.  If you configure it by setting
+ * max_callbacks to a value >= 0, it will run no more than max_callbacks
+ * callbacks before checking for new events.
+ *
+ * This option can decrease the latency of high-priority events, and
+ * avoid priority inversions where multiple low-priority events keep us from
+ * polling for high-priority events, but at the expense of slightly decreasing
+ * the throughput.  Use it with caution!
+ *
+ * @param cfg The event_base configuration object.
+ * @param max_interval An interval after which Libevent should stop running
+ *     callbacks and check for more events, or NULL if there should be
+ *     no such interval.
+ * @param max_callbacks A number of callbacks after which Libevent should
+ *     stop running callbacks and check for more events, or -1 if there
+ *     should be no such limit.
+ * @param min_priority A priority below which max_interval and max_callbacks
+ *     should not be enforced.  If this is set to 0, they are enforced
+ *     for events of every priority; if it's set to 1, they're enforced
+ *     for events of priority 1 and above, and so on.
+ * @return 0 on success, -1 on failure.
+ **/
+int event_config_set_max_dispatch_interval(struct event_config *cfg,
+    const struct timeval *max_interval, int max_callbacks,
+    int min_priority);
+
+/**
   Initialize the event API.
 
   Use event_base_new_with_config() to initialize a new event base, taking

@@ -76,7 +76,7 @@ regress.gen.c regress.gen.h: rpcgen-attempted
 rpcgen-attempted: $(srcdir)/regress.rpc $(srcdir)/../event_rpcgen.py $(srcdir)/rpcgen_wrapper.sh
 	date -u > $@
 	if $(srcdir)/rpcgen_wrapper.sh $(srcdir); then \
-	   echo "HI"; \
+	   echo "rpcgen okay"; \
 	else \
 	   echo "No Python installed; stubbing out RPC test." >&2; \
 	   echo " "> regress.gen.c; \

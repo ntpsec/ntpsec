@@ -39,4 +39,3 @@ case "$?" in
     exit_failed
     ;;
 esac
- 
