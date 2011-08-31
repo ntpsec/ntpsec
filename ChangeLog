@@ -1,3 +1,4 @@
+(4.2.7p210) 2011/08/31 Released by Harlan Stenn <stenn@ntp.org>
 * Require -D4 or higher for ntpd SIGALRM debug trace from [Bug 2000].
 (4.2.7p209) 2011/08/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2000] ntpd worker threads must block signals expected in main

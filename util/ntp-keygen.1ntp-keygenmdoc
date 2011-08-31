@@ -1,9 +1,9 @@
-.Dd August 27 2011
+.Dd August 31 2011
 .Dt NTP_KEYGEN 1ntp-keygenmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  August 27, 2011 at 10:45:14 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  August 31, 2011 at 04:14:38 AM by AutoGen 5.12
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
