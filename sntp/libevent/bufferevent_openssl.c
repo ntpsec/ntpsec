@@ -815,6 +815,9 @@ be_openssl_eventcb(struct bufferevent *bev_base, short what, void *ctx)
 	} else if (what & BEV_EVENT_TIMEOUT) {
 		/* We sure didn't set this.  Propagate it to the user. */
 		event = what;
+	} else if (what & BEV_EVENT_ERROR) {
+		/* An error occurred on the connection.  Propagate it to the user. */
+		event = what;
 	} else if (what & BEV_EVENT_CONNECTED) {
 		/* Ignore it.  We're saying SSL_connect() already, which will
 		   eat it. */
@@ -1165,6 +1168,7 @@ be_openssl_ctrl(struct bufferevent *bev,
 			return -1;
 		data->ptr = bev_ssl->underlying;
 		return 0;
+	case BEV_CTRL_CANCEL_ALL:
 	default:
 		return -1;
 	}
@@ -1246,6 +1250,7 @@ bufferevent_openssl_new_impl(struct event_base *base,
 	}
 
 	if (underlying) {
+		bufferevent_setwatermark(underlying, EV_READ, 0, 0);
 		bufferevent_enable(underlying, EV_READ|EV_WRITE);
 		if (state == BUFFEREVENT_SSL_OPEN)
 			bufferevent_suspend_read(underlying,

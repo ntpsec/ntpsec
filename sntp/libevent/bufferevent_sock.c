@@ -114,8 +114,9 @@ bufferevent_socket_outbuf_cb(struct evbuffer *buf,
 	    !bufev_p->write_suspended) {
 		/* Somebody added data to the buffer, and we would like to
 		 * write, and we were not writing.  So, start writing. */
-		be_socket_add(&bufev->ev_write, &bufev->timeout_write);
-		/* XXXX handle failure from be_socket_add */
+		if (be_socket_add(&bufev->ev_write, &bufev->timeout_write) == -1) {
+		    // Should we log this?
+		}
 	}
 }
 
@@ -685,6 +686,7 @@ be_socket_ctrl(struct bufferevent *bev, enum bufferevent_ctrl_op op,
 		data->fd = event_get_fd(&bev->ev_read);
 		return 0;
 	case BEV_CTRL_GET_UNDERLYING:
+	case BEV_CTRL_CANCEL_ALL:
 	default:
 		return -1;
 	}
