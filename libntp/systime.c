@@ -12,6 +12,9 @@
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
 #include "ntpd.h"		/* for sys_precision */
+#include "timevalops.h"
+#include "timespecops.h"
+#include "ntp_calendar.h"
 
 #ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -25,6 +28,19 @@
 
 
 #define	FUZZ	500e-6		/* fuzz pivot */
+
+#ifndef USE_COMPILETIME_PIVOT
+# define USE_COMPILETIME_PIVOT 1
+#endif
+
+#if defined(HAVE_CLOCK_GETTIME)
+# define GET_SYSTIME_AS_TIMESPEC(tsp) clock_gettime(CLOCK_REALTIME, tsp)
+#elif defined(HAVE_GETCLOCK)
+# define GET_SYSTIME_AS_TIMESPEC(tsp) getclock(TIMEOFDAY, tsp)
+#elif !defined(GETTIMEOFDAY)
+# include "bletch: cannot get system time?"
+#endif
+
 
 /*
  * These routines (get_systime, step_systime, adj_systime) implement an
@@ -65,18 +81,15 @@ get_systime(
 {
 	double	dtemp;
 
-#if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
+#if defined(GET_SYSTIME_AS_TIMESPEC)
+
 	struct timespec ts;	/* seconds and nanoseconds */
 
 	/*
 	 * Convert Unix timespec from seconds and nanoseconds to NTP
 	 * seconds and fraction.
 	 */
-# ifdef HAVE_CLOCK_GETTIME
-	clock_gettime(CLOCK_REALTIME, &ts);
-# else
-	getclock(TIMEOFDAY, &ts);
-# endif
+	GET_SYSTIME_AS_TIMESPEC(&ts);
 	now->l_i = (int32)ts.tv_sec + JAN_1970;
 	dtemp = 0;
 	if (sys_tick > FUZZ)
@@ -93,7 +106,8 @@ get_systime(
 	}
 	now->l_uf = (u_int32)(dtemp * FRAC);
 
-#else /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
+#else /* have GETTIMEOFDAY */
+
 	struct timeval tv;	/* seconds and microseconds */
 
 	/*
@@ -117,7 +131,7 @@ get_systime(
 	}
 	now->l_uf = (u_int32)(dtemp * FRAC);
 
-#endif /* HAVE_CLOCK_GETTIME || HAVE_GETCLOCK */
+#endif /* have GETTIMEOFDAY */
 }
 
 
@@ -178,67 +192,94 @@ adj_systime(
 /*
  * step_systime - step the system clock.
  */
+
 int
 step_systime(
-	double now
+	double step
 	)
 {
-	struct timeval timetv, adjtv, oldtimetv;
-	int isneg = 0;
-	double dtemp;
-#if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
-	struct timespec ts;
-#endif
+	time_t pivot; /* for ntp era unfolding */
+	struct timeval timetv, tvlast, tvdiff;
+	l_fp fp_ofs, fp_sys; /* offset and target system time in FP */
 
-	dtemp = sys_residual + now;
-	if (dtemp < 0) {
-		isneg = 1;
-		dtemp = - dtemp;
-		adjtv.tv_sec = (int32)dtemp;
-		adjtv.tv_usec = (u_int32)((dtemp -
-		    (double)adjtv.tv_sec) * 1e6 + .5);
-	} else {
-		adjtv.tv_sec = (int32)dtemp;
-		adjtv.tv_usec = (u_int32)((dtemp -
-		    (double)adjtv.tv_sec) * 1e6 + .5);
-	}
-#if defined(HAVE_CLOCK_GETTIME) || defined(HAVE_GETCLOCK)
-# ifdef HAVE_CLOCK_GETTIME
-	(void) clock_gettime(CLOCK_REALTIME, &ts);
-# else
-	(void) getclock(TIMEOFDAY, &ts);
-# endif
-	timetv.tv_sec = ts.tv_sec;
-	timetv.tv_usec = ts.tv_nsec / 1000;
-#else /*  not HAVE_GETCLOCK */
-	(void) GETTIMEOFDAY(&timetv, (struct timezone *)0);
-#endif /* not HAVE_GETCLOCK */
+	/* Get pivot time for NTP era unfolding. Since we don't step
+	 * very often, we can afford to do the whole calculation from
+	 * scratch. And we're not in the time-critical path yet.
+	 */
+#if SIZEOF_TIME_T > 4
+	/*
+	 * This code makes sure the resulting time stamp for the new
+	 * system time is in the 2^32 seconds starting at 1970-01-01,
+	 * 00:00:00 UTC.
+	 */
+	pivot = 0x80000000U;
+#if USE_COMPILETIME_PIVOT
+	/*
+	 * Add the compile time minus 10 years to get a possible target
+	 * area of (compile time - 10 years) to (compile time + 126
+	 * years).  This should be sufficient for a given binary of
+	 * NTPD.
+	 */
+	{
+		struct calendar jd;
 
-	oldtimetv = timetv;
-
-#ifdef DEBUG
-	if (debug)
-		printf("step_systime: step %.6f residual %.6f\n", now, sys_residual);
-#endif
-	if (isneg) {
-		timetv.tv_sec -= adjtv.tv_sec;
-		timetv.tv_usec -= adjtv.tv_usec;
-		if (timetv.tv_usec < 0) {
-			timetv.tv_sec--;
-			timetv.tv_usec += 1000000;
-		}
-	} else {
-		timetv.tv_sec += adjtv.tv_sec;
-		timetv.tv_usec += adjtv.tv_usec;
-		if (timetv.tv_usec >= 1000000) {
-			timetv.tv_sec++;
-			timetv.tv_usec -= 1000000;
+		if (ntpcal_get_build_date(&jd)) {
+			jd.year -= 10;
+			pivot += ntpcal_date_to_time(&jd);
+		} else {
+			msyslog(LOG_ERR,
+				"step-systime: assume 1970-01-01 as build date");
 		}
 	}
+#endif /* USE_COMPILETIME_PIVOT */
+#else
+	/* This makes sure the resulting time stamp is on or after
+	 * 1969-12-31/23:59:59 UTC and gives us additional two years,
+	 * from the change of NTP era in 2036 to the UNIX rollover in
+	 * 2038. (Minus one second, but that won't hurt.) We *really*
+	 * need a longer 'time_t' after that!  Or a different baseline,
+	 * but that would cause other serious trouble, too.
+	 */
+	pivot = 0x7FFFFFFFU;
+#endif
+
+	/* get the complete jump distance as l_fp */
+	DTOLFP(sys_residual, &fp_sys);
+	DTOLFP(step,         &fp_ofs);
+	L_ADD(&fp_ofs, &fp_sys);
+
+	/* ---> time-critical path starts ---> */
+
+	/* get the current time as l_fp (without fuzz) and as struct timeval */
+#if defined(GET_SYSTIME_AS_TIMESPEC)
+	{
+		struct timespec timets;
+		(void) GET_SYSTIME_AS_TIMESPEC(&timets);
+		timespec_abstolfp(&fp_sys, &timets);
+		tvlast.tv_sec = timets.tv_sec;
+		tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
+	}
+#else /* have GETTIMEOFDAY */
+	{
+	    (void) GETTIMEOFDAY(&tvlast, NULL);
+	    timeval_abstolfp(&fp_sys, &tvlast);
+	}
+#endif
+
+	/* get the target time as l_fp */
+	L_ADD(&fp_sys, &fp_ofs);
+
+	/* unfold the new system time */
+	timeval_absfromlfp(&timetv, &fp_sys, &pivot);
+
+	/* now set new system time */
 	if (ntp_set_tod(&timetv, NULL) != 0) {
 		msyslog(LOG_ERR, "step-systime: %m");
 		return (0);
 	}
+
+	/* <--- time-critical path ended with 'ntp_set_tod()' <--- */
+
 	sys_residual = 0;
 	if (step_callback)
 		(*step_callback)();
@@ -271,7 +312,9 @@ step_systime(
 	 *
 	 * This might become even Uglier...
 	 */
-	if (oldtimetv.tv_sec != timetv.tv_sec)
+	timeval_sub(&tvdiff, &timetv, &tvlast);
+	timeval_abs(&tvdiff, &tvdiff);
+	if (tvdiff.tv_sec > 0)
 	{
 #ifdef HAVE_UTMP_H
 		struct utmp ut;
@@ -297,7 +340,7 @@ step_systime(
 		utmpname(_PATH_UTMP);
 		ut.ut_type = OLD_TIME;
 		strlcpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
-		ut.ut_time = oldtimetv.tv_sec;
+		ut.ut_time = tvlast.tv_sec;
 		setutent();
 		pututline(&ut);
 		ut.ut_type = NEW_TIME;
@@ -316,7 +359,7 @@ step_systime(
 # ifdef HAVE_PUTUTXLINE
 		utx.ut_type = OLD_TIME;
 		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
-		utx.ut_tv = oldtimetv;
+		utx.ut_tv = tvlast;
 		setutxent();
 		pututxline(&utx);
 		utx.ut_type = NEW_TIME;
@@ -339,7 +382,7 @@ step_systime(
 		utmpname(_PATH_WTMP);
 		ut.ut_type = OLD_TIME;
 		strlcpy(ut.ut_line, OTIME_MSG, sizeof(ut.ut_line));
-		ut.ut_time = oldtimetv.tv_sec;
+		ut.ut_time = tvlast.tv_sec;
 		setutent();
 		pututline(&ut);
 		ut.ut_type = NEW_TIME;
@@ -357,7 +400,7 @@ step_systime(
 #ifdef UPDATE_WTMPX
 # ifdef HAVE_PUTUTXLINE
 		utx.ut_type = OLD_TIME;
-		utx.ut_tv = oldtimetv;
+		utx.ut_tv = tvlast;
 		strlcpy(utx.ut_line, OTIME_MSG, sizeof(utx.ut_line));
 #  ifdef HAVE_UPDWTMPX
 		updwtmpx(WTMPX_FILE, &utx);

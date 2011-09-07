@@ -1,3 +1,5 @@
+* [Bug 1995] add compile time stamp based era unfolding for
+  'step_systime()' and needed support to 'ntp-calendar.c'.
 (4.2.7p212) 2011/09/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2003] from 4.2.6p4-RC3: ntpq_read_assoc_peervars() broken.
 (4.2.7p211) 2011/09/01 Released by Harlan Stenn <stenn@ntp.org>

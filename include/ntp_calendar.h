@@ -110,6 +110,21 @@ extern	void	caljulian	(u_int32, struct calendar *);
 extern	u_int32	caltontp	(const struct calendar *);
 
 /*
+ * Convert between 'time_t' and 'vint64'
+ */
+extern vint64 time_to_vint64(const time_t *);
+extern time_t vint64_to_time(const vint64 *); 
+
+/*
+ * Get the build date & time. ATTENTION: The time zone is not specified!
+ * This depends entirely on the C compilers' capabilities to properly
+ * expand the '__TIME__' and '__DATE__' macros, as required by the C
+ * standard.
+ */
+extern int
+ntpcal_get_build_date(struct calendar * jd);
+
+/*
  * Convert a timestamp in NTP scale to a time_t value in the UN*X
  * scale with proper epoch unfolding around a given pivot or the
  * current system time.
@@ -295,6 +310,9 @@ ntpcal_ntp_to_date(struct calendar *jd,	u_int32 ntp, const time_t *pivot);
 
 extern u_int32
 ntpcal_date_to_ntp(const struct calendar *jd);
+
+extern time_t
+ntpcal_date_to_time(const struct calendar *jd);
 
 /*
  * ISO week-calendar conversions
