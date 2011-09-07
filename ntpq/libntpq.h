@@ -98,7 +98,7 @@ extern int ntpq_get_assoc_number ( associd_t associd );
 extern int ntpq_get_assoc_peervars( associd_t associd );
 extern int ntpq_get_assoc_clockvars( associd_t associd );
 extern int ntpq_get_assoc_allvars( associd_t associd  );
-extern int ntpq_get_assoc_clocktype ( associd_t assoc_number );
+extern int ntpq_get_assoc_clocktype(int assoc_index);
 extern int ntpq_read_assoc_peervars( associd_t associd, char *resultbuf, int maxsize );
 extern int ntpq_read_assoc_clockvars( associd_t associd, char *resultbuf, int maxsize );
 

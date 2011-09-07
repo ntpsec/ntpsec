@@ -405,51 +405,32 @@ int ntpq_get_assoc_number ( associd_t associd )
 
 int
 ntpq_read_assoc_peervars(
-	associd_t associd,
-	char *resultbuf,
-	int maxsize
+	associd_t	associd,
+	char *		resultbuf,
+	int		maxsize
 	)
 {
-	const char *datap;
-	int res;
-	int dsize;
-	u_short rstatus;
-	l_fp rec;
-	l_fp ts;
-	char value[NTPQ_BUFLEN];
-
+	const char *	datap;
+	int		res;
+	int		dsize;
+	u_short		rstatus;
 
 	res = doquery(CTL_OP_READVAR, associd, 0, 0, NULL, &rstatus,
 		      &dsize, &datap);
-
 	if (res != 0)
 		return 0;
-
-	get_systime(&ts);
-
-	if (dsize == 0) {
+	if (dsize <= 0) {
 		if (numhosts > 1)
 			fprintf(stderr, "server=%s ", currenthost);
 		fprintf(stderr,
 			"***No information returned for association %d\n",
 			associd);
+
 		return 0;
-	} else {
-		if ( dsize > maxsize ) 
-			dsize = maxsize;
-		memcpy(resultbuf, datap, dsize);
-		resultbuf[dsize] = '\0';
- 
-		ntpq_getvar(resultbuf, dsize, "rec", value,
-			    sizeof(value));
-
-		if (!decodets(value, &rec))
-			L_CLR(&rec);
-
-		memcpy(resultbuf, value, maxsize);
-		resultbuf[dsize] = '\0';
-		dsize = strlen(resultbuf);
 	}
+	if (dsize > maxsize) 
+		dsize = maxsize;
+	memcpy(resultbuf, datap, dsize);
 
 	return dsize;
 }
@@ -483,7 +464,8 @@ ntpq_read_assoc_peervars(
 size_t
 ntpq_read_sysvars(
 	char *	resultbuf,
-	size_t	maxsize)
+	size_t	maxsize
+	)
 {
 	const char *	datap;
 	int		res;
@@ -563,14 +545,14 @@ ntpq_read_sysvars(
  *			0 (zero) if an error occured and the sysvars
  *			could not be read
  ****************************************************************************/
- int  ntpq_get_sysvars( void )
+int
+ntpq_get_sysvars(void)
 {
-        sysvarlen = ( ntpq_read_sysvars( sysvars, sizeof(sysvars )) );
-        if ( sysvarlen <= 0 ) {
-            return 0;
-        } else {
-            return 1;
-        }
+	sysvarlen = ntpq_read_sysvars(sysvars, sizeof(sysvars));
+	if (sysvarlen <= 0)
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -621,17 +603,21 @@ int ntpq_get_peervar( const char *varname, char *varvalue, int maxlen)
  *			0 (zero) if an error occured and the variable set
  *			could not be read
  ****************************************************************************/
- int  ntpq_get_assoc_peervars( associd_t associd )
+int
+ntpq_get_assoc_peervars(
+	associd_t associd
+	)
 {
-	peervarlen = ntpq_read_assoc_peervars( associd, peervars, 
-					       sizeof(peervars ) );
-	if ( peervarlen <= 0 ) {
+	peervarlen = ntpq_read_assoc_peervars(associd, peervars, 
+					      sizeof(peervars));
+	if (peervarlen <= 0) {
 		peervar_assoc = 0;
+
 		return 0;
-	} else {
-		peervar_assoc = associd;
-		return 1;
 	}
+	peervar_assoc = associd;
+
+	return 1;
 }
 
 
@@ -706,32 +692,36 @@ ntpq_read_assoc_clockvars(
  *  NTP_CLOCKTYPE_MULTICAST Multicast server
  * 
  ****************************************************************************/
-int ntpq_get_assoc_clocktype ( associd_t assoc_number )
+int
+ntpq_get_assoc_clocktype(
+	int assoc_index
+	)
 {
-	int type = 0;
-	int i, rc = 0;
-	sockaddr_u dum_store;
-	char value[LENHOSTNAME];
-	char resultbuf[1024];
+	associd_t	associd;
+	int		i;
+	int		rc;
+	sockaddr_u	dum_store;
+	char		dstadr[LENHOSTNAME];
+	char		resultbuf[NTPQ_BUFLEN];
 
-	if ( assoc_number > numassoc )
+	if (assoc_index < 0 || assoc_index >= numassoc)
 		return -1;
-	if ( peervar_assoc != assoc_cache[assoc_number].assid ) {
-		i = ntpq_read_assoc_peervars(
-		    assoc_cache[assoc_number].assid, resultbuf,
-		    sizeof(resultbuf));
-		if ( i <= 0 )
-			return -1;
-		rc = ntpq_getvar(resultbuf, i, "dstadr", value,
-				 LENHOSTNAME );
+
+	associd = assoc_cache[assoc_index].assid;
+	if (associd == peervar_assoc) {
+		rc = ntpq_get_peervar("dstadr", dstadr, sizeof(dstadr));
 	} else {
-		rc = ntpq_get_peervar("dstadr",value,LENHOSTNAME);
+		i = ntpq_read_assoc_peervars(associd, resultbuf,
+					     sizeof(resultbuf));
+		if (i <= 0)
+			return -1;
+		rc = ntpq_getvar(resultbuf, i, "dstadr", dstadr,
+				 sizeof(dstadr));
 	}
 
-	if (0 != rc && decodenetnum(value, &dum_store)) {
-		type = ntpq_decodeaddrtype(&dum_store);
-		return type;
-	}
+	if (0 != rc && decodenetnum(dstadr, &dum_store))
+		return ntpq_decodeaddrtype(&dum_store);
+
 	return -1;
 }
 
