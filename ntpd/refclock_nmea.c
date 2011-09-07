@@ -22,6 +22,8 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_NMEA)
 
+#define NMEA_WRITE_SUPPORT 0 /* no write support at the moment */
+
 #include <sys/stat.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -38,12 +40,6 @@
 # include "ppsapi_timepps.h"
 # include "refclock_atom.h"
 #endif /* HAVE_PPSAPI */
-
-#ifdef SYS_WINNT
-#undef write	/* ports/winnt/include/config.h: #define write _write */
-extern int async_write(int, const void *, unsigned int);
-#define write(fd, data, octets)	async_write(fd, data, octets)
-#endif
 
 #define MSYSLOG(args) do { NLOG(NLOG_CLOCKINFO) msyslog args; } while (0)
 
@@ -280,7 +276,6 @@ static	void	nmea_control	(int, const struct refclockstat *,
 #define		NMEA_CONTROL	noentry
 #endif /* HAVE_PPSAPI */
 static	void	nmea_timer	(int, struct peer *);
-static	void	gps_send	(int, const char *, struct peer *);
 
 /* parsing helpers */
 static int	field_init	(nmea_data * data, char * cp, int len);
@@ -301,6 +296,21 @@ static int	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
 				 u_short * ccentury);
 
 static int	nmead_open	(const char * device);
+
+/*
+ * If we want the friver to ouput sentences, too: re-enable the send
+ * support functions by defining NMEA_WRITE_SUPPORT to non-zero...
+ */
+#if NMEA_WRITE_SUPPORT
+
+static	void gps_send(int, const char *, struct peer *);
+# ifdef SYS_WINNT
+#  undef write	/* ports/winnt/include/config.h: #define write _write */
+extern int async_write(int, const void *, unsigned int);
+#  define write(fd, data, octets)	async_write(fd, data, octets)
+# endif /* SYS_WINNT */
+
+#endif /* NMEA_WRITE_SUPPORT */
 
 /*
  * -------------------------------------------------------------------
@@ -550,12 +560,20 @@ nmea_timer(
 	struct peer * peer
 	)
 {
+#if NMEA_WRITE_SUPPORT
+    
 	struct refclockproc * const pp = peer->procptr;
 
 	UNUSED_ARG(unit);
 
 	if (-1 != pp->io.fd) /* any mode bits to evaluate here? */
 		gps_send(pp->io.fd, "$PMOTG,RMC,0000*1D\r\n", peer);
+#else
+	
+	UNUSED_ARG(unit);
+	UNUSED_ARG(peer);
+	
+#endif /* NMEA_WRITE_SUPPORT */
 }
 
 #ifdef HAVE_PPSAPI
@@ -1029,6 +1047,7 @@ nmea_poll(
 	}
 }
 
+#if NMEA_WRITE_SUPPORT
 /*
  * -------------------------------------------------------------------
  *  gps_send(fd, cmd, peer)	Sends a command to the GPS receiver.
@@ -1086,6 +1105,7 @@ gps_send(
 	if (write(fd, cmd, len) == -1)
 		refclock_report(peer, CEVNT_FAULT);
 }
+#endif /* NMEA_WRITE_SUPPORT */
 
 /*
  * -------------------------------------------------------------------
