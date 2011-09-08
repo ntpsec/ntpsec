@@ -1,3 +1,4 @@
+(4.2.7p213) 2011/09/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1999] NMEA does not send PMOTG messages any more.
 (4.2.7p212) 2011/09/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2003] from 4.2.6p4-RC3: ntpq_read_assoc_peervars() broken.
