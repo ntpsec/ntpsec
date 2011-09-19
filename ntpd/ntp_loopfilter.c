@@ -136,9 +136,9 @@ static u_int loop_tai;		/* last TAI offset */
 /*
  * Clock state machine control flags
  */
-int	ntp_enable = 1;		/* clock discipline enabled */
+int	ntp_enable = TRUE;	/* clock discipline enabled */
 int	pll_control;		/* kernel support available */
-int	kern_enable = 1;	/* kernel support enabled */
+int	kern_enable = TRUE;	/* kernel support enabled */
 int	pps_enable;		/* kernel PPS discipline enabled */
 int	ext_enable;		/* external clock enabled */
 int	pps_stratum;		/* pps stratum */
@@ -186,7 +186,7 @@ init_loopfilter(void)
 	 */
 	sys_poll = ntp_minpoll;
 	clock_jitter = LOGTOD(sys_precision);
-	freq_cnt = clock_minstep;
+	freq_cnt = (int)clock_minstep;
 }
 
 /*
@@ -220,15 +220,16 @@ local_clock(
 	 * the open-loop response and then go home.
 	 */
 #ifdef LOCKCLOCK
-	return (0);
-
-#else /* LOCKCLOCK */
+	{
+#else
 	if (!ntp_enable) {
+#endif /* LOCKCLOCK */
 		record_loop_stats(fp_offset, drift_comp, clock_jitter,
 		    clock_stability, sys_poll);
 		return (0);
 	}
 
+#ifndef LOCKCLOCK
 	/*
 	 * If the clock is way off, panic is declared. The clock_panic
 	 * defaults to 1000 s; if set to zero, the panic will never
@@ -682,7 +683,8 @@ adj_host_clock(
 	void
 	)
 {
-	double	adjustment;
+	double	offset_adj;
+	double	freq_adj;
 
 	/*
 	 * Update the dispersion since the last update. In contrast to
@@ -694,32 +696,55 @@ adj_host_clock(
 	 */
 	sys_rootdisp += clock_phi;
 #ifndef LOCKCLOCK
-	if (state != EVNT_SYNC)
+	if (!ntp_enable || mode_ntpdate)
 		return;
-	
-	if (freq_cnt > 0)
+	/*
+	 * Determine the phase adjustment. The gain factor (denominator)
+	 * increases with poll interval, so is dominated by the FLL
+	 * above the Allan intercept. Note the reduced time constant at
+	 * startup.
+	 */
+	if (state != EVNT_SYNC) {
+		offset_adj = 0.;
+	} else if (freq_cnt > 0) {
+		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(1));
 		freq_cnt--;
+#ifdef KERNEL_PLL
+	} else if (pll_control && kern_enable) {
+		offset_adj = 0.;
+#endif /* KERNEL_PLL */
+	} else {
+		offset_adj = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
+	}
 
 	/*
-	 * If clock discipline is disabled or if the kernel is enabled,
-	 * get out of Dodge quick.
+	 * If the kernel discipline is enabled the frequency correction
+	 * drift_comp has already been engaged via ntp_adjtime() in
+	 * set_freq().  Otherwise it is a component of the adj_systime()
+	 * offset.
 	 */
-	if (!ntp_enable || mode_ntpdate || (pll_control &&
-	    kern_enable && freq_cnt == 0))
-		return;
-
-	/*
-	 * Implement the phase and frequency adjustments. The gain
-	 * factor (denominator) increases with poll interval, so is
-	 * dominated by the FLL above the Allan intercept. Note the
-	 * reduced time constant at startup.
-	 */
-	if (freq_cnt > 0)
-		adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(1));
+#ifdef KERNEL_PLL
+	if (pll_control && kern_enable)
+		freq_adj = 0.;
 	else
-		adjustment = clock_offset / (CLOCK_PLL * ULOGTOD(sys_poll));
-	clock_offset -= adjustment;
-	adj_systime(adjustment + drift_comp);
+#endif /* KERNEL_PLL */
+		freq_adj = drift_comp;
+
+	/* Bound absolute value of total adjustment to NTP_MAXFREQ. */
+	if (offset_adj + freq_adj > NTP_MAXFREQ)
+		offset_adj = NTP_MAXFREQ - freq_adj;
+	else if (offset_adj + freq_adj < -NTP_MAXFREQ)
+		offset_adj = -NTP_MAXFREQ - freq_adj;
+
+	clock_offset -= offset_adj;
+	/*
+	 * Windows port adj_systime() must be called each second,
+	 * even if the argument is zero, to ease emulation of 
+	 * adjtime() using Windows' slew API which controls the rate
+	 * but does not automatically stop slewing when an offset
+	 * has decayed to zero.
+	 */
+	adj_systime(offset_adj + freq_adj);
 #endif /* LOCKCLOCK */
 }
 
@@ -762,9 +787,9 @@ direct_freq(
 	double	fp_offset
 	)
 {
-	set_freq(fp_offset / (current_time -
-	    clock_epoch));
-	return (drift_comp);
+	set_freq(fp_offset / (current_time - clock_epoch));
+
+	return drift_comp;
 }
 
 
@@ -776,39 +801,28 @@ set_freq(
 	double	freq		/* frequency update */
 	)
 {
-	char	tbuf[80];
+	const char *	loop_desc;
 
 	drift_comp = freq;
-
+	loop_desc = "ntpd";
 #ifdef KERNEL_PLL
-	/*
-	 * If the kernel is enabled, update the kernel frequency.
-	 */
 	if (pll_control && kern_enable) {
-		memset(&ntv,  0, sizeof(ntv));
+		loop_desc = "kernel";
+		ZERO(ntv);
 		ntv.modes = MOD_FREQUENCY;
 		ntv.freq = DTOFREQ(drift_comp);
 		ntp_adjtime(&ntv);
-		snprintf(tbuf, sizeof(tbuf), "kernel %.3f PPM",
-		    drift_comp * 1e6);
-		report_event(EVNT_FSET, NULL, tbuf);
-	} else {
-		snprintf(tbuf, sizeof(tbuf), "ntpd %.3f PPM",
-		    drift_comp * 1e6);
-		report_event(EVNT_FSET, NULL, tbuf);
 	}
-#else /* KERNEL_PLL */
-	snprintf(tbuf, sizeof(tbuf), "ntpd %.3f PPM", drift_comp *
-	    1e6);
-	report_event(EVNT_FSET, NULL, tbuf);
 #endif /* KERNEL_PLL */
+	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
+	    drift_comp * 1e6);
 }
 
 /*
  * huff-n'-puff filter
  */
 void
-huffpuff()
+huffpuff(void)
 {
 	int i;
 

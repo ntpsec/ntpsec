@@ -137,6 +137,18 @@ adj_systime(
 	int	isneg = 0;
 
 	/*
+	 * The Windows port adj_systime() depends on being called each
+	 * second even when there's no additional correction, to allow
+	 * emulation of adjtime() behavior on top of an API that simply
+	 * sets the current rate.  This POSIX implementation needs to
+	 * ignore invocations with zero correction, otherwise ongoing
+	 * EVNT_NSET adjtime() can be aborted by a tiny adjtime()
+	 * triggered by sys_residual.
+	 */
+	if (0. == now)
+		return;
+
+	/*
 	 * Most Unix adjtime() implementations adjust the system clock
 	 * in microsecond quanta, but some adjust in 10-ms quanta. We
 	 * carefully round the adjustment to the nearest quantum, then
