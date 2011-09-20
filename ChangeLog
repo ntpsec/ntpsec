@@ -1,6 +1,7 @@
 * [Bug 1981] Initial offset convergence applies frequency correction 2x
   with kernel discipline.
 * [Bug 2008] Initial offset convergence degraded with 500 PPM adjtime().
+* [Bug 2009] EVNT_NSET adj_systime() mishandled by Windows ntpd.
 (4.2.7p213) 2011/09/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1999] NMEA does not send PMOTG messages any more.
 (4.2.7p212) 2011/09/07 Released by Harlan Stenn <stenn@ntp.org>

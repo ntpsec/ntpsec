@@ -406,7 +406,14 @@ set_mm_timer(
 }
 
 /*
- * adj_systime - called once every second to make system time adjustments.
+ * adj_systime - called once every second to discipline system clock.
+ * Normally, the offset passed in (parameter now) is in the range
+ * [-NTP_MAXFREQ, NTP_MAXFREQ].  However, at EVNT_NSET, a much larger
+ * slew is requested if the initial offset is less than the step
+ * threshold, in the range [-step, step] where step is the step
+ * threshold, 128 msec by default.  For the remainder of the frequency
+ * training interval, adj_systime is called with 0 offset each second
+ * and slew the large offset at 500 PPM (500 usec/sec).
  * Returns 1 if okay, 0 if trouble.
  */
 int
@@ -414,20 +421,22 @@ adj_systime(
 	double now
 	)
 {
-	double dtemp;
-	u_char isneg;
-	BOOL rc;
-	long TimeAdjustment;
-	SYSTEMTIME st;
-	ULONGLONG this_perf_count;
-	FT_ULL curr_ft;
+	static double	adjtime_carry;
+	double		dtemp;
+	u_char		isneg;
+	BOOL		rc;
+	long		TimeAdjustment;
+	SYSTEMTIME	st;
+	ULONGLONG	this_perf_count;
+	FT_ULL		curr_ft;
 
 	/*
 	 * Add the residual from the previous adjustment to the new
 	 * adjustment, bound and round.
 	 */
-	dtemp = sys_residual + now;
-	sys_residual = 0;
+	dtemp = adjtime_carry + sys_residual + now;
+	adjtime_carry = 0.;
+	sys_residual = 0.;
 	if (dtemp < 0) {
 		isneg = TRUE;
 		dtemp = -dtemp;
@@ -435,13 +444,17 @@ adj_systime(
 		isneg = FALSE;
 	}
 
-	if (dtemp > NTP_MAXFREQ)
+	if (dtemp > NTP_MAXFREQ) {
+		adjtime_carry = dtemp - NTP_MAXFREQ;
 		dtemp = NTP_MAXFREQ;
+	}
+
+	if (isneg) {
+		dtemp = -dtemp;
+		adjtime_carry = -adjtime_carry;
+	}
 
 	dtemp = dtemp * 1e6;
-
-	if (isneg)
-		dtemp = -dtemp;
 
 	/* 
 	 * dtemp is in micro seconds. NT uses 100 ns units,
@@ -545,11 +558,16 @@ adj_systime(
 	}
 
 
+	sys_residual = dtemp / 1e6;
+	DPRINTF(3, ("adj_systime: %.9f -> %.9f residual %.9f adjtime %.9f\n", 
+		    now, 1e-6 * (TimeAdjustment * ppm_per_adjust_unit),
+		    sys_residual, adjtime_carry));
+
 	/* only adjust the clock if adjustment changes */
 	TimeAdjustment += wintickadj;
 	if (last_Adj != TimeAdjustment) {
 		last_Adj = TimeAdjustment;
-		DPRINTF(1, ("SetSystemTimeAdjustment(%+ld)\n", TimeAdjustment));
+		DPRINTF(2, ("SetSystemTimeAdjustment(%+ld)\n", TimeAdjustment));
 		rc = !SetSystemTimeAdjustment(clockperiod + TimeAdjustment, FALSE);
 	} else {
 		rc = FALSE;
@@ -558,10 +576,6 @@ adj_systime(
 		msyslog(LOG_ERR, "Can't adjust time: %m");
 		return FALSE;
 	}
-
-	sys_residual = dtemp / 1e6;
-	DPRINTF(4, ("adj_systime: adj %.9f -> remaining residual %.9f\n", 
-		    now, sys_residual));
 
 	return TRUE;
 }
