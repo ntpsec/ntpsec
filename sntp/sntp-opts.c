@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  August  4, 2011 at 03:43:18 PM by AutoGen 5.11.10pre10
+ *  It has been AutoGen-ed  September 23, 2011 at 03:35:46 AM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -37,8 +37,8 @@ extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-static char const zCopyright[42] =
-"sntp 4.2.6p4-RC2\n\
+static char const zCopyright[38] =
+"sntp 4.2.6p4\n\
 see html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
@@ -466,8 +466,8 @@ static tOptDesc optDesc[OPTION_CT] = {
  *  Define the Sntp Option Environment
  */
 static char const zPROGNAME[5] = "SNTP";
-static char const zUsageTitle[156] =
-"sntp - standard Simple Network Time Protocol program - Ver. 4.2.6p4-RC2\n\
+static char const zUsageTitle[152] =
+"sntp - standard Simple Network Time Protocol program - Ver. 4.2.6p4\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";
@@ -483,8 +483,8 @@ sntp implements the Simple Network Time Protocol, and is used to query an\n\
 NTP or SNTP server and either display the time or set the local system's\n\
 time (given suitable privilege).\n\n\
 It can be run interactively from the command line or as a cron job.\n\n\
-NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and\n\
-RFC 1305.\n";
+NTP and SNTP are defined by RFC 5905, which obsoletes RFC 4330 and RFC\n\
+1305.\n";
 static char const zFullVersion[] = SNTP_FULL_VERSION;
 /* extracted from optcode.tlib near line 515 */
 
