@@ -1,40 +1,65 @@
-NTP 4.2.6p4-RC1 (Harlan Stenn <stenn@ntp.org>, 2011/07/10)
-
-Focus: Bug fixes and portability improvements
-
-Severity: Medium
-
-This is a recommended upgrade.
-
-This release includes build infrastructure updates, code
-clean-ups, minor bug fixes, fixes for a number of minor
-ref-clock issues, and documentation revisions.
-
-Portability improvements affect AIX and Linux.
-
-New features / changes in this release:
-
-Build system
-* Update config.guess and config.sub (AIX)
-* autogen/libopts upgrade.
-
-ntpd
-* ntpd fails binding to tentative IPv6 addresses under Linux.
-* WWVB/Spectracom driver timestamps LFs, not CRs.
-* peer may stay selected as system peer after becoming unreachable.
-* LOCAL, ACTS drivers with "prefer" excluded from initial candidate list.
-* orphan parent favored over LOCAL, ACTS drivers.
-* Billboard tally codes sometimes do not match operation, variables.
-* Backport utility routines from ntp-dev: mprintf(), emalloc_zero().
-* Enable tickadj-like taming of wildly off-spec Windows clock using
-  NTPD_TICKADJ_PPM env. var. specifying baseline slew.
-
-ntpdate
-* ntpdate takes longer than necessary.
-* ntpdate doesn't allow timeout > 2s.
-
-Documentation
-* html2man needs an update.  Fix some tags in the .html files.
+--- 
+NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
+ 
+Focus: Bug fixes and portability improvements 
+ 
+Severity: Medium 
+ 
+This is a recommended upgrade. 
+ 
+This release includes build infrastructure updates, code 
+clean-ups, minor bug fixes, fixes for a number of minor 
+ref-clock issues, and documentation revisions. 
+ 
+Portability improvements affect AIX, HP-UX, Linux, OS X and 64-bit time_t. 
+ 
+New features / changes in this release: 
+ 
+Build system 
+ 
+* Fix checking for struct rtattr 
+* Update config.guess and config.sub for AIX 
+* Upgrade required version of autogen and libopts for building 
+  from our source code repository 
+ 
+ntpd 
+ 
+* Backported several fixes for Coverity warnings from ntp-dev 
+* Fix a rare boundry condition in UNLINK_EXPR_SLIST() 
+* Allow "logconfig =allall" configuration directive 
+* Bind tentative IPv6 addresses on Linux 
+* Correct WWVB/Spectracom driver to timestamp CR instead of LF 
+* Improved tally bit handling to prevent incorrect ntpq peer status reports 
+* Exclude the Undisciplined Local Clock and ACTS drivers from the initial 
+  candidate list unless they are designated a "prefer peer" 
+* Prevent the consideration of Undisciplined Local Clock or ACTS drivers for 
+  selection during the 'tos orphanwait' period 
+* Prefer an Orphan Mode Parent over the Undisciplined Local Clock or ACTS 
+  drivers 
+* Improved support of the Parse Refclock trusttime flag in Meinberg mode 
+* Backport utility routines from ntp-dev: mprintf(), emalloc_zero() 
+* Added the NTPD_TICKADJ_PPM environment variable for specifying baseline 
+  clock slew on Microsoft Windows 
+* Code cleanup in libntpq 
+ 
+ntpdc 
+ 
+* Fix timerstats reporting 
+ 
+ntpdate 
+ 
+* Reduce time required to set clock 
+* Allow a timeout greater than 2 seconds 
+ 
+sntp 
+ 
+* Backward incompatible command-line option change: 
+  -l/--filelog changed -l/--logfile (to be consistent with ntpd) 
+ 
+Documentation 
+ 
+* Update html2man. Fix some tags in the .html files 
+* Distribute ntp-wait.html 
 
 ---
 NTP 4.2.6p3 (Harlan Stenn <stenn@ntp.org>, 2011/01/03)

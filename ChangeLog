@@ -1128,6 +1128,7 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p4) 2011/09/22 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1984] ntp/libisc fails to compile on OS X 10.7 (Lion).
 * [Bug 1985] "logconfig =allall" rejected.
