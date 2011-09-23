@@ -91,4 +91,4 @@ betapoint=2
 # - - prerelease is emptied
 # else (not in RC)
 # - rcpoint is empty and unused (for now).
-rcpoint=2
+rcpoint=GO
