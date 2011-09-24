@@ -1,8 +1,8 @@
-.TH ntpsnmpd 1ntpsnmpdman "20 Sep 2011" "4.2.7p214" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "24 Sep 2011" "4.2.7p215" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 20, 2011 at 07:43:06 PM by AutoGen 5.12
+.\"  It has been AutoGen-ed  September 24, 2011 at 02:02:25 AM by AutoGen 5.12
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
