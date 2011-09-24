@@ -1,3 +1,5 @@
+* Use patched mdoc2man script, from Eric Feng.
+* Sync with ntp-4.2.6p4 (a no-op).
 (4.2.7p214) 2011/09/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1981] Initial offset convergence applies frequency correction 2x
   with kernel discipline.
