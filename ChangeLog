@@ -1,3 +1,5 @@
+* sntp documentation tag cleanup.
+* mdoc2man improvements.
 (4.2.7p214) 2011/09/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1981] Initial offset convergence applies frequency correction 2x
   with kernel discipline.

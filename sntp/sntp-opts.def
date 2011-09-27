@@ -46,14 +46,14 @@ flag = {
 flag = {
   name		= authentication;
   value		= a;
-  descrip	= "Enable authentication with the key auth-keynumber";
+  descrip	= "Enable authentication with the key @var{auth-keynumber}";
   arg-type	= number;
   arg-name	= "auth-keynumber";
   doc		= <<- _EndOfDoc_
 	This option enables authentication using the key specified in this
 	option's argument.  The argument of this option is the keyid, a
 	number specified in the keyfile as this key's identifier. See the
-	keyfile option (-k) for more details.
+	keyfile option (@option{-k}) for more details.
 	_EndOfDoc_;
 };
 
@@ -81,7 +81,7 @@ flag = {
   doc		= <<- _EndOfDoc_
 	If specified @code{sntp} will listen to the specified address
 	for NTP broadcasts.  The default maximum wait time
-	can be modified with @code{-B}.
+	can be modified with @option{-B}.
 	_EndOfDoc_;
 };
 
@@ -100,7 +100,7 @@ flag = {
 	ntpd, and therefore @code{sntp} will send queries to these IPs one
 	after another, with a 2-second gap in between each query.
 
-	The @code{-c} or @code{--concurrent} flag says that any IPs
+	The @option{-c} or @option{--concurrent} flag says that any IPs
 	returned for the DNS lookup of the supplied host-name are on
 	different machines, so we can send concurrent queries.
 	_EndOfDoc_;
@@ -139,12 +139,12 @@ flag = {
 flag = {
   name		= keyfile;
   value		= k;
-  descrip	= "Look in this file for the key specified with -a";
+  descrip	= "Look in this file for the key specified with @option{-a}";
   arg-type	= file;
   arg-name	= "file-name";
   doc		= <<- _EndOfDoc_
 	This option specifies the keyfile.
-	@code{sntp} will search for the key specified with @code{-a}
+	@code{sntp} will search for the key specified with @option{-a}
 	@file{keyno} in this file.  Key files follow the following format:
 
 	@file{keyid keytype key}
@@ -156,7 +156,7 @@ flag = {
 			@code{A}  Key is a 1-to-8 character ASCII string.
 			@code{M}  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
-	For more information see ntp.keys(5).
+	For more information see @command{ntp.keys(5)}.
 	_EndOfDoc_;
 };
 
@@ -177,18 +177,18 @@ flag = {
   value		= M;
   arg-type	= number;
   arg-range	= "0->";
-  descrip	= "Adjustments less than @file{steplimit} msec will be slewed";
+  descrip	= "Adjustments less than @var{steplimit} msec will be slewed";
   doc		= <<- _EndOfDoc_
 	If the time adjustment is less than @file{steplimit} milliseconds,
-	slew the amount using adjtime(2).  Otherwise, step the correction
-	using settimeofday(2). 
+	slew the amount using @command{adjtime(2)}.  Otherwise, step the
+	correction using @command{settimeofday(2)}. 
 	_EndOfDoc_;
 };
 
 flag = {
   name		= ntpversion;
   value		= o;
-  descrip	= "Send <int> as our NTP version";
+  descrip	= "Send @var{int} as our NTP version";
   arg-type	= number;
   arg-default	= 4;
   arg-range	= "0->7";
@@ -211,7 +211,7 @@ flag = {
 flag = {
   name		= step;
   value		= S;
-  descrip	= "OK to 'step' the time with settimeofday(2)";
+  descrip	= "OK to 'step' the time with @command{settimeofday(2)}";
   doc		= <<- _EndOfDoc_
 	_EndOfDoc_;
 };
@@ -219,7 +219,7 @@ flag = {
 flag = {
   name		= slew;
   value		= s;
-  descrip	= "OK to 'slew' the time with adjtime(2)";
+  descrip	= "OK to 'slew' the time with @command{adjtime(2)}";
   doc		= <<- _EndOfDoc_
 	_EndOfDoc_;
 };
