@@ -1,6 +1,6 @@
 #! /usr/local/bin/bash
 
-## mdoc2mdoc.sh -- script to convert mdoc-isms to mdoc-isms
+## mdoc2man -- script to convert mdoc-isms to man-isms
 ##
 ## Time-stamp:      "2011-05-30 14:17:42 bkorb"
 ##
@@ -196,19 +196,32 @@ do_optional() {
     local text='['
     while test $# -gt 0
     do
-        case "X$1" in
-        XFl )
-            text="${text} \\fB-$2\\fR"
-            shift 2 || die "Fl command had no argument"
-            ;;
-        XAr )
-            text="${text} \"\\fI$2\\fR\""
-            shift 2 || die "Ar command had no argument"
-            ;;
-        * ) text="${text} \"$2\""
-            shift 2 || die "$1 command had no argument"
-            ;;
-        esac
+	case "X$1" in
+	X... )
+	    text="${text} \"\\fI$1\\fR\""
+	    shift
+	    ;;
+	X\\* )
+	    text="${text} \"\\fI$1\\fR\""
+	    shift
+	    ;;
+	XAr )
+	    text="${text} \"\\fI$2\\fR\""
+	    shift 2 || die "Ar command had no argument"
+	    ;;
+	XCm )
+	    text="${text} \"\\fI$2\\fR\""
+	    shift 2 || die "Cm command had no argument"
+	    ;;
+	XFl )
+	    text="${text} \\fB-$2\\fR"
+	    shift 2 || die "Fl command had no argument"
+	    ;;
+	* ) text="${text} \"$2\""
+	    m1="$1"
+	    shift 2 || die "<${m1}> command had no argument: <$line>"
+	    ;;
+	esac
     done
     echo "${text} ]"
 }
