@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  September 24, 2011 at 01:56:15 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  September 27, 2011 at 10:24:20 AM by AutoGen 5.12
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -52,7 +52,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[333] =
-"sntp 4.2.7p215\n\
+"sntp 4.2.7p216\n\
 Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -116,7 +116,7 @@ static const int
  *  Authentication option description:
  */
 static char const zAuthenticationText[] =
-        "Enable authentication with the key auth-keynumber";
+        "Enable authentication with the key @var{auth-keynumber}";
 static char const zAuthentication_NAME[]     = "AUTHENTICATION";
 static char const zAuthentication_Name[]     = "authentication";
 #define AUTHENTICATION_FLAGS       (OPTST_DISABLED \
@@ -198,7 +198,7 @@ static char const zKodDefaultArg[]             = "/var/db/ntp-kod";
  *  Keyfile option description:
  */
 static char const zKeyfileText[] =
-        "Look in this file for the key specified with -a";
+        "Look in this file for the key specified with @option{-a}";
 static char const zKeyfile_NAME[]            = "KEYFILE";
 static char const zKeyfile_Name[]            = "keyfile";
 #define KEYFILE_FLAGS       (OPTST_DISABLED \
@@ -218,7 +218,7 @@ static char const zLogfile_Name[]            = "logfile";
  *  Steplimit option description:
  */
 static char const zSteplimitText[] =
-        "Adjustments less than @file{steplimit} msec will be slewed";
+        "Adjustments less than @var{steplimit} msec will be slewed";
 static char const zSteplimit_NAME[]          = "STEPLIMIT";
 static char const zSteplimit_Name[]          = "steplimit";
 #define STEPLIMIT_FLAGS       (OPTST_DISABLED \
@@ -228,7 +228,7 @@ static char const zSteplimit_Name[]          = "steplimit";
  *  Ntpversion option description:
  */
 static char const zNtpversionText[] =
-        "Send <int> as our NTP version";
+        "Send @var{int} as our NTP version";
 static char const zNtpversion_NAME[]         = "NTPVERSION";
 static char const zNtpversion_Name[]         = "ntpversion";
 #define zNtpversionDefaultArg        ((char const*)4)
@@ -248,7 +248,7 @@ static char const zUsereservedport_Name[]    = "usereservedport";
  *  Step option description:
  */
 static char const zStepText[] =
-        "OK to 'step' the time with settimeofday(2)";
+        "OK to 'step' the time with @command{settimeofday(2)}";
 static char const zStep_NAME[]               = "STEP";
 static char const zStep_Name[]               = "step";
 #define STEP_FLAGS       (OPTST_DISABLED)
@@ -257,7 +257,7 @@ static char const zStep_Name[]               = "step";
  *  Slew option description:
  */
 static char const zSlewText[] =
-        "OK to 'slew' the time with adjtime(2)";
+        "OK to 'slew' the time with @command{adjtime(2)}";
 static char const zSlew_NAME[]               = "SLEW";
 static char const zSlew_Name[]               = "slew";
 #define SLEW_FLAGS       (OPTST_DISABLED)
@@ -663,7 +663,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "SNTP";
 static char const zUsageTitle[161] =
-"sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p215\n\
+"sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p216\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n";
 static char const zRcName[7] = ".ntprc";

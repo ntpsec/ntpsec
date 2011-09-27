@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  September 24, 2011 at 02:02:48 AM by AutoGen 5.12
+# It has been AutoGen-ed  September 27, 2011 at 10:40:00 AM by AutoGen 5.12
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -91,7 +91,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p215
+sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p216
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -101,7 +101,7 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits these options:
                                 ipv4
-   -a Num authentication Enable authentication with the key auth-keynumber
+   -a Num authentication Enable authentication with the key @@var@{auth-keynumber@}
    -B Num bctimeout      The number of seconds to wait for broadcasts
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
@@ -113,17 +113,17 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                                 - may appear multiple times
    -g Num gap            The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
-   -k Fil keyfile        Look in this file for the key specified with -a
+   -k Fil keyfile        Look in this file for the key specified with @@option@{-a@}
    -l Fil logfile        Log to specified logfile
-   -M Num steplimit      Adjustments less than @@file@{steplimit@} msec will be slewed
+   -M Num steplimit      Adjustments less than @@var@{steplimit@} msec will be slewed
                                 - It must be in the range:
                                   greater than or equal to 0
-   -o Num ntpversion     Send <int> as our NTP version
+   -o Num ntpversion     Send @@var@{int@} as our NTP version
                                 - It must be in the range:
                                   0 to 7
    -r no  usereservedport Use the NTP Reserved Port (port 123)
-   -S no  step           OK to 'step' the time with settimeofday(2)
-   -s no  slew           OK to 'slew' the time with adjtime(2)
+   -S no  step           OK to 'step' the time with @@command@{settimeofday(2)@}
+   -s no  slew           OK to 'slew' the time with @@command@{adjtime(2)@}
    -u Num uctimeout      The number of seconds to wait for unicast responses
       no  wait           Wait for pending replies (if not setting the time)
                                 - disabled as --no-wait
@@ -154,11 +154,11 @@ please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @subsection authentication option (-a)
 @cindex sntp-authentication
 
-This is the ``enable authentication with the key auth-keynumber'' option.
+This is the ``enable authentication with the key @var{auth-keynumber}'' option.
 This option enables authentication using the key specified in this
 option's argument.  The argument of this option is the keyid, a
 number specified in the keyfile as this key's identifier. See the
-keyfile option (-k) for more details.
+keyfile option (@option{-k}) for more details.
 
 @node sntp bctimeout
 @subsection bctimeout option (-B)
@@ -182,7 +182,7 @@ may appear an unlimited number of times.
 
 If specified @code{sntp} will listen to the specified address
 for NTP broadcasts.  The default maximum wait time
-can be modified with @code{-B}.
+can be modified with @option{-B}.
 
 @node sntp concurrent
 @subsection concurrent option (-c)
@@ -202,7 +202,7 @@ as part of a DNS lookup are assumed to be for a single instance of
 ntpd, and therefore @code{sntp} will send queries to these IPs one
 after another, with a 2-second gap in between each query.
 
-The @code{-c} or @code{--concurrent} flag says that any IPs
+The @option{-c} or @option{--concurrent} flag says that any IPs
 returned for the DNS lookup of the supplied host-name are on
 different machines, so we can send concurrent queries.
 
@@ -266,9 +266,9 @@ to the IPv6 namespace.
 @subsection keyfile option (-k)
 @cindex sntp-keyfile
 
-This is the ``look in this file for the key specified with -a'' option.
+This is the ``look in this file for the key specified with @option{-a}'' option.
 This option specifies the keyfile.
-@code{sntp} will search for the key specified with @code{-a}
+@code{sntp} will search for the key specified with @option{-a}
 @file{keyno} in this file.  Key files follow the following format:
 
 @file{keyid keytype key}
@@ -280,7 +280,7 @@ Where	@file{keyid} is a number identifying this key
 @code{A}  Key is a 1-to-8 character ASCII string.
 @code{M}  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
-For more information see ntp.keys(5).
+For more information see @command{ntp.keys(5)}.
 
 @node sntp kod
 @subsection kod option (-K)
@@ -302,7 +302,7 @@ This option causes the client to write log messages to the specified
 @subsection ntpversion option (-o)
 @cindex sntp-ntpversion
 
-This is the ``send <int> as our ntp version'' option.
+This is the ``send @var{int} as our ntp version'' option.
 When sending requests to a remote server, tell them we are running
 NTP protocol version @file{ntpversion} .
 
@@ -324,24 +324,24 @@ may appear an unlimited number of times.
 @subsection slew option (-s)
 @cindex sntp-slew
 
-This is the ``ok to 'slew' the time with adjtime(2)'' option.
+This is the ``ok to 'slew' the time with @command{adjtime(2)}'' option.
 
 
 @node sntp step
 @subsection step option (-S)
 @cindex sntp-step
 
-This is the ``ok to 'step' the time with settimeofday(2)'' option.
+This is the ``ok to 'step' the time with @command{settimeofday(2)}'' option.
 
 
 @node sntp steplimit
 @subsection steplimit option (-M)
 @cindex sntp-steplimit
 
-This is the ``adjustments less than @file{steplimit} msec will be slewed'' option.
+This is the ``adjustments less than @var{steplimit} msec will be slewed'' option.
 If the time adjustment is less than @file{steplimit} milliseconds,
-slew the amount using adjtime(2).  Otherwise, step the correction
-using settimeofday(2). 
+slew the amount using @command{adjtime(2)}.  Otherwise, step the
+correction using @command{settimeofday(2)}. 
 
 @node sntp uctimeout
 @subsection uctimeout option (-u)

@@ -1,8 +1,8 @@
-.TH ntpdc 1ntpdcman "24 Sep 2011" "4.2.7p215" "User Commands"
+.TH ntpdc 1ntpdcman "27 Sep 2011" "4.2.7p216" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 24, 2011 at 02:02:04 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  September 27, 2011 at 10:37:58 AM by AutoGen 5.12
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -586,7 +586,7 @@ The following commands all make authenticated requests.
 .BR Xo Ic addpeer Ar peer_address
 [ "\fIkeyid\fR" ]
 [ "\fIversion\fR" ]
-[ "prefer" ]
+[ "\fIprefer\fR" ]
 .Xc
 Add a configured peer association at the given address and
 operating in symmetric active mode.
@@ -616,7 +616,7 @@ signal.
 .BR Xo Ic addserver Ar peer_address
 [ "\fIkeyid\fR" ]
 [ "\fIversion\fR" ]
-[ "prefer" ]
+[ "\fIprefer\fR" ]
 .Xc
 Identical to the addpeer command, except that the operating
 mode is client.
@@ -624,7 +624,7 @@ mode is client.
 .BR Xo Ic broadcast Ar peer_address
 [ "\fIkeyid\fR" ]
 [ "\fIversion\fR" ]
-[ "prefer" ]
+[ "\fIprefer\fR" ]
 .Xc
 Identical to the addpeer command, except that the operating
 mode is broadcast.
@@ -648,8 +648,8 @@ association may persist in an unconfigured mode if the remote peer
 is willing to continue on in this fashion.
 .TP
 .BR Xo Ic fudge Ar peer_address
-[ "time1" ]
-[ "time2" ]
+[ "\fItime1\fR" ]
+[ "\fItime2\fR" ]
 [ "\fIstratum\fR" ]
 [ "\fIrefid\fR" ]
 .Xc
@@ -750,7 +750,7 @@ configuration file commands of
 Unrestrict the matching entry from the restrict list.
 .TP
 .BR Xo Ic delrestrict Ar address Ar mask
-[ "ntpport" ]
+[ "\fIntpport\fR" ]
 .Xc
 Delete the matching entry from the restrict list.
 .TP

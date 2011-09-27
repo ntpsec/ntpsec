@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p215 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p216 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -162,7 +162,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <p><a name="index-sntp-usage-3"></a>
 This is the automatically generated usage text for sntp:
 
-<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p215
+<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p216
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -172,7 +172,7 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -6 no  ipv6           Force IPv6 DNS name resolution
                                 - prohibits these options:
                                 ipv4
-   -a Num authentication Enable authentication with the key auth-keynumber
+   -a Num authentication Enable authentication with the key @var{auth-keynumber}
    -B Num bctimeout      The number of seconds to wait for broadcasts
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
@@ -184,17 +184,17 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
                                 - may appear multiple times
    -g Num gap            The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
-   -k Fil keyfile        Look in this file for the key specified with -a
+   -k Fil keyfile        Look in this file for the key specified with @option{-a}
    -l Fil logfile        Log to specified logfile
-   -M Num steplimit      Adjustments less than @file{steplimit} msec will be slewed
+   -M Num steplimit      Adjustments less than @var{steplimit} msec will be slewed
                                 - It must be in the range:
                                   greater than or equal to 0
-   -o Num ntpversion     Send &lt;int&gt; as our NTP version
+   -o Num ntpversion     Send @var{int} as our NTP version
                                 - It must be in the range:
                                   0 to 7
    -r no  usereservedport Use the NTP Reserved Port (port 123)
-   -S no  step           OK to 'step' the time with settimeofday(2)
-   -s no  slew           OK to 'slew' the time with adjtime(2)
+   -S no  step           OK to 'step' the time with @command{settimeofday(2)}
+   -s no  slew           OK to 'slew' the time with @command{adjtime(2)}
    -u Num uctimeout      The number of seconds to wait for unicast responses
       no  wait           Wait for pending replies (if not setting the time)
                                 - disabled as --no-wait
@@ -230,11 +230,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">authentication option (-a)</h4>
 
 <p><a name="index-sntp_002dauthentication-4"></a>
-This is the &ldquo;enable authentication with the key auth-keynumber&rdquo; option. 
+This is the &ldquo;enable authentication with the key <var>auth-keynumber</var>&rdquo; option. 
 This option enables authentication using the key specified in this
 option's argument.  The argument of this option is the keyid, a
 number specified in the keyfile as this key's identifier. See the
-keyfile option (-k) for more details.
+keyfile option (<span class="option">-k</span>) for more details.
 
 <div class="node">
 <p><hr>
@@ -271,7 +271,7 @@ This is the &ldquo;listen to the address specified for broadcast time sync&rdquo
 
   <p>If specified <code>sntp</code> will listen to the specified address
 for NTP broadcasts.  The default maximum wait time
-can be modified with <code>-B</code>.
+can be modified with <span class="option">-B</span>.
 
 <div class="node">
 <p><hr>
@@ -297,7 +297,7 @@ as part of a DNS lookup are assumed to be for a single instance of
 ntpd, and therefore <code>sntp</code> will send queries to these IPs one
 after another, with a 2-second gap in between each query.
 
-  <p>The <code>-c</code> or <code>--concurrent</code> flag says that any IPs
+  <p>The <span class="option">-c</span> or <span class="option">--concurrent</span> flag says that any IPs
 returned for the DNS lookup of the supplied host-name are on
 different machines, so we can send concurrent queries.
 
@@ -391,9 +391,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">keyfile option (-k)</h4>
 
 <p><a name="index-sntp_002dkeyfile-12"></a>
-This is the &ldquo;look in this file for the key specified with -a&rdquo; option. 
+This is the &ldquo;look in this file for the key specified with <span class="option">-a</span>&rdquo; option. 
 This option specifies the keyfile. 
-<code>sntp</code> will search for the key specified with <code>-a</code>
+<code>sntp</code> will search for the key specified with <span class="option">-a</span>
 <span class="file">keyno</span> in this file.  Key files follow the following format:
 
   <p><span class="file">keyid keytype key</span>
@@ -405,7 +405,7 @@ This option specifies the keyfile.
 <code>A</code>  Key is a 1-to-8 character ASCII string. 
 <code>M</code>  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
 
-  <p>For more information see ntp.keys(5).
+  <p>For more information see <span class="command">ntp.keys(5)</span>.
 
 <div class="node">
 <p><hr>
@@ -448,7 +448,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">ntpversion option (-o)</h4>
 
 <p><a name="index-sntp_002dntpversion-15"></a>
-This is the &ldquo;send &lt;int&gt; as our ntp version&rdquo; option. 
+This is the &ldquo;send <var>int</var> as our ntp version&rdquo; option. 
 When sending requests to a remote server, tell them we are running
 NTP protocol version <span class="file">ntpversion</span> .
 
@@ -481,7 +481,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">slew option (-s)</h4>
 
 <p><a name="index-sntp_002dslew-17"></a>
-This is the &ldquo;ok to 'slew' the time with adjtime(2)&rdquo; option.
+This is the &ldquo;ok to 'slew' the time with <span class="command">adjtime(2)</span>&rdquo; option.
 
 <div class="node">
 <p><hr>
@@ -494,7 +494,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">step option (-S)</h4>
 
 <p><a name="index-sntp_002dstep-18"></a>
-This is the &ldquo;ok to 'step' the time with settimeofday(2)&rdquo; option.
+This is the &ldquo;ok to 'step' the time with <span class="command">settimeofday(2)</span>&rdquo; option.
 
 <div class="node">
 <p><hr>
@@ -507,10 +507,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <h4 class="subsection">steplimit option (-M)</h4>
 
 <p><a name="index-sntp_002dsteplimit-19"></a>
-This is the &ldquo;adjustments less than <span class="file">steplimit</span> msec will be slewed&rdquo; option. 
+This is the &ldquo;adjustments less than <var>steplimit</var> msec will be slewed&rdquo; option. 
 If the time adjustment is less than <span class="file">steplimit</span> milliseconds,
-slew the amount using adjtime(2).  Otherwise, step the correction
-using settimeofday(2).
+slew the amount using <span class="command">adjtime(2)</span>.  Otherwise, step the
+correction using <span class="command">settimeofday(2)</span>.
 
 <div class="node">
 <p><hr>
