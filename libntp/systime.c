@@ -146,7 +146,7 @@ adj_systime(
 	 * triggered by sys_residual.
 	 */
 	if (0. == now)
-		return;
+		return TRUE;
 
 	/*
 	 * Most Unix adjtime() implementations adjust the system clock
@@ -179,10 +179,10 @@ adj_systime(
 	if (adjtv.tv_sec != 0 || adjtv.tv_usec != 0) {
 		if (adjtime(&adjtv, &oadjtv) < 0) {
 			msyslog(LOG_ERR, "adj_systime: %m");
-			return (0);
+			return FALSE;
 		}
 	}
-	return (1);
+	return TRUE;
 }
 #endif
 

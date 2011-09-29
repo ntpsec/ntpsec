@@ -163,7 +163,7 @@ time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 u_int	fstamp;			/* NTP filestamp */
 char	*hostname = NULL;	/* host name */
 char	*groupname = NULL;	/* group name */
-char	*certname = NULL;	/* certificate subjetc/issuer name */
+char	*certname = NULL;	/* certificate subject/issuer name */
 char	*passwd1 = NULL;	/* input private key password */
 char	*passwd2 = NULL;	/* output private key password */
 char	filename[MAXFILENAME + 1]; /* file name */
@@ -243,6 +243,8 @@ main(
 {
 	struct timeval tv;	/* initialization vector */
 	int	md5key = 0;	/* generate MD5 keys */
+	int	optct;		/* option count */
+	char *	pch;
 #ifdef AUTOKEY
 	X509	*cert = NULL;	/* X509 certificate */
 	X509_EXTENSION *ext;	/* X509v3 extension */
@@ -296,12 +298,9 @@ main(
 	epoch = tv.tv_sec;
 	fstamp = (u_int)(epoch + JAN_1970);
 
-	{
-		int optct = ntpOptionProcess(&ntp_keygenOptions,
-					     argc, argv);
-		argc -= optct;
-		argv += optct;
-	}
+	optct = ntpOptionProcess(&ntp_keygenOptions, argc, argv);
+	argc -= optct;
+	argv += optct;
 
 #ifdef OPENSSL
 	if (SSLeay() == SSLEAY_VERSION_NUMBER)
@@ -350,6 +349,7 @@ main(
 		scheme = OPT_ARG( CERTIFICATE );
 
 	if (HAVE_OPT( SUBJECT_NAME )) {
+		
 		if (*OPT_ARG(SUBJECT_NAME) != '@') {
 			certname = estrdup(OPT_ARG(SUBJECT_NAME));
 		} else {
@@ -359,8 +359,8 @@ main(
 		}
 	}
 
-	if (HAVE_OPT( ISSUER_NAME ))
-		groupname = estrdup(OPT_ARG( ISSUER_NAME ));
+	if (HAVE_OPT( IDENT ))
+		groupname = estrdup(OPT_ARG( IDENT ));
 
 	if (HAVE_OPT( LIFETIME ))
 		lifetime = OPT_VALUE_LIFETIME;
