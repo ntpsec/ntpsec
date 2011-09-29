@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "27 Sep 2011" "ntp (4.2.7p216)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "29 Sep 2011" "ntp (4.2.7p217)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 27, 2011 at 10:39:28 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  September 29, 2011 at 08:06:25 AM by AutoGen 5.12
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -761,11 +761,17 @@ generate IFF parameters.
 Generate parameters for the IFF identification scheme, obsoleting
 any that may exist.
 .TP
-.BR \-i " \fIissuer\-name\fP, " \-\-issuer\-name "=" \fIissuer\-name\fP
-set issuer name.
+.BR \-i " \fIgroup\fP, " \-\-ident "=" \fIgroup\fP
+set Autokey group name.
 .sp
-Set the issuer name to name.  This is used for the issuer field
-in certificates and in the file name for host and sign keys.
+Set the optional Autokey group name to name.  This is used in
+the file name of IFF, GQ, and MV client parameters files.  In
+that role, the default is the host name if this option is not
+provided.  The group name, if specified using -i/--ident or
+using -s/--subject-name following an '@' character, is also a
+part of the self-signed host certificate's subject and issuer
+names in the form host@group and should match the 'crypto ident'
+or 'server ident' configuration in ntpd's configuration file. 
 .TP
 .BR \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
 set certificate lifetime.
@@ -815,11 +821,19 @@ Generate a new sign key of the designated type, obsoleting any
 that may exist.  By default, the program uses the host key as the
 sign key.
 .TP
-.BR \-s " \fIhost\fP, " \-\-subject\-name "=" \fIhost\fP
-set subject name.
+.BR \-s " \fIhost@group\fP, " \-\-subject\-name "=" \fIhost@group\fP
+set host and optionally group name.
 .sp
-Set the subject name to name.  This is used as the subject field
-in certificates and in the file name for identity files.
+Set the Autokey host name, and optionally, group name specified
+following an '@' character.  The host name is used in the file
+name of generated host and signing certificates, without the
+group name.  The host name, and if provided, group name are used
+in host@group form for the host certificate's subject and issuer
+fields.  Specifying '-s @group' is allowed, and results in
+leaving the host name unchanged while appending @group to the
+subject and issuer fields, as with -i group.  The group name, or
+if not provided, the host name are also used in the file names
+of IFF, GQ, and MV client parameter files.
 .TP
 .BR \-T ", " -\-trusted\-cert
 trusted certificate (TC scheme).

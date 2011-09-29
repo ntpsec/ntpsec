@@ -1,3 +1,4 @@
+(4.2.7p217) 2011/09/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2020] ntp-keygen -s no longer sets host in cert file name.
 * [Backward Incompatible] ntp-keygen -i option long name changed from
   misleading --issuer-name to --ident.
