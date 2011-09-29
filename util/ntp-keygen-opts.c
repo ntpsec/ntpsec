@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  September 27, 2011 at 10:39:19 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  September 29, 2011 at 05:16:27 AM by AutoGen 5.12
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -193,21 +193,21 @@ static char const zIffkey_Name[]             = "iffkey";
 #endif  /* AUTOKEY */
 
 /*
- *  Issuer_Name option description:
+ *  Ident option description:
  */
 #ifdef AUTOKEY
-static char const zIssuer_NameText[] =
-        "set issuer name";
-static char const zIssuer_Name_NAME[]        = "ISSUER_NAME";
-static char const zIssuer_Name_Name[]        = "issuer-name";
-#define ISSUER_NAME_FLAGS       (OPTST_DISABLED \
+static char const zIdentText[] =
+        "set Autokey group name";
+static char const zIdent_NAME[]              = "IDENT";
+static char const zIdent_Name[]              = "ident";
+#define IDENT_FLAGS       (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-#else   /* disable Issuer_Name */
-#define ISSUER_NAME_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zIssuer_Name_NAME      NULL
-#define zIssuer_NameText       NULL
-#define zIssuer_Name_Name      NULL
+#else   /* disable Ident */
+#define IDENT_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#define zIdent_NAME      NULL
+#define zIdentText       NULL
+#define zIdent_Name      NULL
 #endif  /* AUTOKEY */
 
 /*
@@ -331,7 +331,7 @@ static char const zSign_Key_Name[]           = "sign-key";
  */
 #ifdef AUTOKEY
 static char const zSubject_NameText[] =
-        "set subject name";
+        "set host and optionally group name";
 static char const zSubject_Name_NAME[]       = "SUBJECT_NAME";
 static char const zSubject_Name_Name[]       = "subject-name";
 #define SUBJECT_NAME_FLAGS       (OPTST_DISABLED \
@@ -563,16 +563,16 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ zIffkeyText, zIffkey_NAME, zIffkey_Name,
      /* disablement strs */ NULL, NULL },
 
-  {  /* entry idx, value */ 7, VALUE_OPT_ISSUER_NAME,
-     /* equiv idx, value */ 7, VALUE_OPT_ISSUER_NAME,
+  {  /* entry idx, value */ 7, VALUE_OPT_IDENT,
+     /* equiv idx, value */ 7, VALUE_OPT_IDENT,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ ISSUER_NAME_FLAGS, 0,
+     /* opt state flags  */ IDENT_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zIssuer_NameText, zIssuer_Name_NAME, zIssuer_Name_Name,
+     /* desc, NAME, name */ zIdentText, zIdent_NAME, zIdent_Name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 8, VALUE_OPT_LIFETIME,

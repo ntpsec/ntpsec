@@ -161,8 +161,10 @@ u_int	lifetime = YEAR;	/* certificate lifetime (days) */
 int	nkeys;			/* MV keys */
 time_t	epoch;			/* Unix epoch (seconds) since 1970 */
 u_int	fstamp;			/* NTP filestamp */
-char	*hostname = NULL;	/* host name */
+char	hostbuf[MAXHOSTNAME + 1];
+char	*hostname = NULL;	/* host, used in cert filenames */
 char	*groupname = NULL;	/* group name */
+char	certnamebuf[2 * sizeof(hostbuf)];
 char	*certname = NULL;	/* certificate subject/issuer name */
 char	*passwd1 = NULL;	/* input private key password */
 char	*passwd2 = NULL;	/* output private key password */
@@ -244,7 +246,6 @@ main(
 	struct timeval tv;	/* initialization vector */
 	int	md5key = 0;	/* generate MD5 keys */
 	int	optct;		/* option count */
-	char *	pch;
 #ifdef AUTOKEY
 	X509	*cert = NULL;	/* X509 certificate */
 	X509_EXTENSION *ext;	/* X509v3 extension */
@@ -263,16 +264,17 @@ main(
 	EVP_PKEY *pkey = NULL;	/* temp key */
 	const EVP_MD *ectx;	/* EVP digest */
 	char	pathbuf[MAXFILENAME + 1];
-	char	str[MAXFILENAME + 1];
 	const char *scheme = NULL; /* digest/signature scheme */
 	char	*exten = NULL;	/* private extension */
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
 	FILE	*fstr = NULL;	/* file handle */
 	char	groupbuf[MAXHOSTNAME + 1];
-#define iffsw   HAVE_OPT(ID_KEY)
+	u_int	temp;
+	BIO *	bp;
+	int	i, cnt;
+	char *	ptr;
 #endif	/* AUTOKEY */
-	char	hostbuf[MAXHOSTNAME + 1];
 
 	progname = argv[0];
 
@@ -290,11 +292,16 @@ main(
 
 	/*
 	 * Process options, initialize host name and timestamp.
+	 * gethostname() won't null-terminate if hostname is exactly the
+	 * length provided for the buffer.
 	 */
-	gethostname(hostbuf, MAXHOSTNAME);
-	hostname = groupname = certname = passwd1 = hostbuf;
+	gethostname(hostbuf, sizeof(hostbuf) - 1);
+	hostbuf[COUNTOF(hostbuf) - 1] = '\0';
+	hostname = hostbuf;
+	groupname = hostbuf;
+	passwd1 = hostbuf;
 	passwd2 = NULL;
-	gettimeofday(&tv, 0);
+	GETTIMEOFDAY(&tv, NULL);
 	epoch = tv.tv_sec;
 	fstamp = (u_int)(epoch + JAN_1970);
 
@@ -311,10 +318,10 @@ main(
 			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 #endif /* OPENSSL */
 
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = DESC( DEBUG_LEVEL ).optOccCt;
+
 	if (HAVE_OPT( MD5KEY ))
 		md5key++;
-
 #ifdef AUTOKEY
 	if (HAVE_OPT( PVT_PASSWD ))
 		passwd1 = estrdup(OPT_ARG( PVT_PASSWD ));
@@ -348,16 +355,8 @@ main(
 	if (HAVE_OPT( CERTIFICATE ))
 		scheme = OPT_ARG( CERTIFICATE );
 
-	if (HAVE_OPT( SUBJECT_NAME )) {
-		
-		if (*OPT_ARG(SUBJECT_NAME) != '@') {
-			certname = estrdup(OPT_ARG(SUBJECT_NAME));
-		} else {
-			strlcpy(str, certname, sizeof(str));
-			strlcat(str, OPT_ARG(SUBJECT_NAME), sizeof(str));
-			certname = estrdup(str);
-		}
-	}
+	if (HAVE_OPT( SUBJECT_NAME ))
+		hostname = estrdup(OPT_ARG( SUBJECT_NAME ));
 
 	if (HAVE_OPT( IDENT ))
 		groupname = estrdup(OPT_ARG( IDENT ));
@@ -372,13 +371,42 @@ main(
 		exten = EXT_KEY_TRUST;
 
 	/*
+	 * Remove the group name from the hostname variable used
+	 * in host and sign certificate file names.
+	 */
+	if (hostname != hostbuf)
+		ptr = strchr(hostname, '@');
+	else
+		ptr = NULL;
+	if (ptr != NULL) {
+		*ptr = '\0';
+		groupname = estrdup(ptr + 1);
+		/* -s @group is equivalent to -i group, host unch. */
+		if (ptr == hostname)
+			hostname = hostbuf;
+	}
+
+	/*
+	 * Derive host certificate issuer/subject names from host name
+	 * and optional group.  If no groupname is provided, the issuer
+	 * and subject is the hostname with no '@group', and the
+	 * groupname variable is pointed to hostname for use in IFF, GQ,
+	 * and MV parameters file names.
+	 */
+	if (groupname == hostbuf) {
+		certname = hostname;
+	} else {
+		snprintf(certnamebuf, sizeof(certnamebuf), "%s@%s",
+			 hostname, groupname);
+		certname = certnamebuf;
+	}
+
+	/*
 	 * Seed random number generator and grow weeds.
 	 */
 	ERR_load_crypto_strings();
 	OpenSSL_add_all_algorithms();
 	if (!RAND_status()) {
-		u_int	temp;
-
 		if (RAND_file_name(pathbuf, sizeof(pathbuf)) == NULL) {
 			fprintf(stderr, "RAND_file_name %s\n",
 			    ERR_error_string(ERR_get_error(), NULL));
@@ -426,10 +454,6 @@ main(
 		 * whether this is a trusted or private certificate.
 		 */
 		if (exten == NULL) {
-			BIO	*bp;
-			int	i, cnt;
-			char	*ptr;
-
 			ptr = strstr(groupbuf, "CN=");
 			cnt = X509_get_ext_count(cert);
 			for (i = 0; i < cnt; i++) {
@@ -447,8 +471,7 @@ main(
 					else if (strcmp(pathbuf,
 					    "Private") == 0)
 						exten = EXT_KEY_PRIVATE;
-					if (certname == NULL)
-						certname = ptr + 3;
+					certname = estrdup(ptr + 3);
 				}
 			}
 		}

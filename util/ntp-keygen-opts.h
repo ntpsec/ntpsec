@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  September 27, 2011 at 10:39:19 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  September 29, 2011 at 05:16:27 AM by AutoGen 5.12
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -70,7 +70,7 @@ typedef enum {
     INDEX_OPT_GQ_PARAMS        =  4,
     INDEX_OPT_HOST_KEY         =  5,
     INDEX_OPT_IFFKEY           =  6,
-    INDEX_OPT_ISSUER_NAME      =  7,
+    INDEX_OPT_IDENT            =  7,
     INDEX_OPT_LIFETIME         =  8,
     INDEX_OPT_MD5KEY           =  9,
     INDEX_OPT_MODULUS          = 10,
@@ -154,9 +154,9 @@ typedef enum {
 #  warning undefining IFFKEY due to option name conflict
 #  undef   IFFKEY
 # endif
-# ifdef    ISSUER_NAME
-#  warning undefining ISSUER_NAME due to option name conflict
-#  undef   ISSUER_NAME
+# ifdef    IDENT
+#  warning undefining IDENT due to option name conflict
+#  undef   IDENT
 # endif
 # ifdef    LIFETIME
 #  warning undefining LIFETIME due to option name conflict
@@ -210,7 +210,7 @@ typedef enum {
 # undef GQ_PARAMS
 # undef HOST_KEY
 # undef IFFKEY
-# undef ISSUER_NAME
+# undef IDENT
 # undef LIFETIME
 # undef MD5KEY
 # undef MODULUS
@@ -235,7 +235,7 @@ typedef enum {
 #define VALUE_OPT_GQ_PARAMS      'G'
 #define VALUE_OPT_HOST_KEY       'H'
 #define VALUE_OPT_IFFKEY         'I'
-#define VALUE_OPT_ISSUER_NAME    'i'
+#define VALUE_OPT_IDENT          'i'
 #define VALUE_OPT_LIFETIME       'l'
 #ifdef AUTOKEY
 
