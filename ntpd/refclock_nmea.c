@@ -41,8 +41,6 @@
 # include "refclock_atom.h"
 #endif /* HAVE_PPSAPI */
 
-#define MSYSLOG(args) do { NLOG(NLOG_CLOCKINFO) msyslog args; } while (0)
-
 
 /*
  * This driver supports NMEA-compatible GPS receivers
@@ -338,21 +336,23 @@ struct refclock refclock_nmea = {
  */
 static int
 nmea_start(
-	int           unit,
-	struct peer * peer
+	int		unit,
+	struct peer *	peer
 	)
 {
-	struct refclockproc * const pp = peer->procptr;
-	nmea_unit	    * const up = emalloc_zero(sizeof(*up));
+	struct refclockproc * const	pp = peer->procptr;
+	nmea_unit * const		up = emalloc_zero(sizeof(*up));
+	char				device[20];
+	size_t				devlen;
+	u_int32				rate;
+	int				baudrate;
+	char *				baudtext;
 
-	char   device[20];
-	size_t devlen;
-	int    baudrate;
-	char * baudtext;
 
+	/* Get baudrate choice from mode byte bits 4/5/6 */
+	rate = (peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT;
 
-	/* Get baudrate value and text from mode byte bit 4/5/6 */
-	switch ((peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT) {
+	switch (rate) {
 	case 0:
 		baudrate = SPEED232;
 		baudtext = "4800";
@@ -406,13 +406,11 @@ nmea_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, 4);
 
-	/* Open serial port. Use CLK line discipline, if available. Use
-	 * baudrate based on the value of bit 4/5/6
-	 */
+	/* Open serial port. Use CLK line discipline, if available. */
 	devlen = snprintf(device, sizeof(device), DEVICE, unit);
 	if (devlen >= sizeof(device)) {
-		MSYSLOG((LOG_ERR, "%s clock device name too long",
-			 refnumtoa(&peer->srcadr)));
+		msyslog(LOG_ERR, "%s clock device name too long",
+			refnumtoa(&peer->srcadr));
 		return FALSE; /* buffer overflow */
 	}
 	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
@@ -421,8 +419,8 @@ nmea_start(
 		if (-1 == pp->io.fd)
 			return FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s serial %s open at %s bps",
-		refnumtoa(&peer->srcadr), device, baudtext);
+	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
+	      refnumtoa(&peer->srcadr), device, baudtext));
 
 	/* succeed if this clock can be added */
 	return io_addclock(&pp->io) != 0;
@@ -504,8 +502,8 @@ nmea_control(
 					     S_IRUSR | S_IWUSR);
 		} else {
 			up->ppsapi_fd = -1;
-			MSYSLOG((LOG_ERR, "%s PPS device name too long",
-				 refnumtoa(&peer->srcadr)));
+			msyslog(LOG_ERR, "%s PPS device name too long",
+				refnumtoa(&peer->srcadr));
 		}
 		if (-1 == up->ppsapi_fd)
 			up->ppsapi_fd = pp->io.fd;	
@@ -514,9 +512,9 @@ nmea_control(
 			/* use the PPS API for our own purposes now. */
 			refclock_params(pp->sloppyclockflag, &up->atom);
 		} else {
-			MSYSLOG((LOG_WARNING,
-				 "%s flag1 1 but PPSAPI fails",
-				 refnumtoa(&peer->srcadr)));
+			msyslog(LOG_WARNING,
+				"%s flag1 1 but PPSAPI fails",
+				refnumtoa(&peer->srcadr));
 		}
 	}
 
@@ -727,13 +725,12 @@ nmea_receive(
 	struct calendar date;	/* to keep & convert the time stamp */
 	struct timespec tofs;	/* offset to full-second reftime */
 	gps_weektm      gpsw;	/* week time storage */
-
 	/* results of sentence/date/time parsing */
-	u_char sentence;	/* sentence tag */
-	int    checkres;
-	char * cp;
-	u_char rc_date;
-	u_char rc_time;
+	u_char		sentence;	/* sentence tag */
+	int		checkres;
+	char *		cp;
+	int		rc_date;
+	int		rc_time;
 
 	/* make sure data has defined pristine state */
 	ZERO(tofs);
@@ -926,8 +923,8 @@ nmea_receive(
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
-		MSYSLOG((LOG_INFO, "%s using GPS time scale",
-			 refnumtoa(&peer->srcadr)));
+		msyslog(LOG_INFO, "%s using GPS time as if it were UTC",
+			refnumtoa(&peer->srcadr));
 		up->gps_time = 1;
 	}
 	
@@ -1555,9 +1552,10 @@ unfold_century(
 
 	ntpcal_ntp_to_date(&rec, rec_ui, NULL);
 	baseyear = (rec.year > 2000) ? (rec.year - 20) : 1980;
-	jd->year = ntpcal_periodic_extend(baseyear, jd->year, 100);
+	jd->year = (u_short)ntpcal_periodic_extend(baseyear, jd->year,
+						   100);
 
-	return (baseyear <= jd->year) && (baseyear + 100 > jd->year);
+	return ((baseyear <= jd->year) && (baseyear + 100 > jd->year));
 }
 
 /*

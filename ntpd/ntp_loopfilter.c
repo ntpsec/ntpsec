@@ -251,7 +251,7 @@ local_clock(
 	/*
 	 * This section simulates ntpdate. If the offset exceeds the
 	 * step threshold (128 ms), step the clock to that time and
-	 * exit. Othewise, slew the clock to that time and exit. Note
+	 * exit. Otherwise, slew the clock to that time and exit. Note
 	 * that the slew will persist and eventually complete beyond the
 	 * life of this program. Note that while ntpdate is active, the
 	 * terminal does not detach, so the termination message prints

@@ -423,7 +423,18 @@ main(
 		    "Random seed file %s %u bytes\n", pathbuf, temp);
 		RAND_add(&epoch, sizeof(epoch), 4.0);
 	}
+#endif	/* AUTOKEY */
 
+	/*
+	 * Create new unencrypted MD5 keys file if requested. If this
+	 * option is selected, ignore all other options.
+	 */
+	if (md5key) {
+		gen_md5("md5");
+		exit (0);
+	}
+
+#ifdef AUTOKEY
 	/*
 	 * Load previous certificate if available.
 	 */
@@ -480,18 +491,7 @@ main(
 		scheme = "RSA-MD5";
 	fprintf(stderr, "Using host %s group %s\n", hostname,
 	    groupname);
-#endif	/* AUTOKEY */
 
-	/*
-	 * Create new unencrypted MD5 keys file if requested. If this
-	 * option is selected, ignore all other options.
-	 */
-	if (md5key) {
-		gen_md5("md5");
-		exit (0);
-	}
-
-#ifdef AUTOKEY
 	/*
 	 * Create a new encrypted RSA host key file if requested;
 	 * otherwise, look for an existing host key file. If not found,

@@ -1613,30 +1613,42 @@ crypto_ident(
 	struct peer *peer	/* peer structure pointer */
 	)
 {
+	char		filename[MAXFILENAME];
+	const char *	scheme_name;
+	u_int		scheme_id;
 
 	/*
-	 * We come here after the trusted host has been found. The name
-	 * of the parameters file is in peer->ident and must be present.
-	 * Search the key cache for all keys matching this name. Use the
-	 * first one available. The identity scheme is supplied by the
-	 * server.
+	 * We come here after the group trusted host has been found; its
+	 * name defines the group name. Search the key cache for all
+	 * keys matching the same group name in order IFF, GQ and MV.
+	 * Use the first one available.
 	 */
-	peer->ident_pkey = crypto_key(peer->ident, NULL, &peer->srcadr);
-	if (peer->ident_pkey == NULL) {
-		report_event(XEVNT_ID, peer, NULL);
-		return (CRYPTO_NULL);
+	scheme_name = NULL;
+	if (peer->crypto & CRYPTO_FLAG_IFF) {
+		scheme_name = "iff";
+		scheme_id = CRYPTO_IFF;
+	} else if (peer->crypto & CRYPTO_FLAG_GQ) {
+		scheme_name = "gq";
+		scheme_id = CRYPTO_GQ;
+	} else if (peer->crypto & CRYPTO_FLAG_MV) {
+		scheme_name = "mv";
+		scheme_id = CRYPTO_MV;
 	}
-	if (peer->crypto & CRYPTO_FLAG_IFF)
-		return (CRYPTO_IFF);
 
-	else if (peer->crypto & CRYPTO_FLAG_GQ)
-		return (CRYPTO_GQ);
+	if (scheme_name != NULL) {
+		snprintf(filename, sizeof(filename), "ntpkey_%spar_%s",
+		    scheme_name, peer->ident);
+		peer->ident_pkey = crypto_key(filename, NULL,
+		    &peer->srcadr);
+		if (peer->ident_pkey != NULL)
+			return scheme_id;
+	}
 
-	else if (peer->crypto & CRYPTO_FLAG_MV)
-		return (CRYPTO_MV);
+	msyslog(LOG_NOTICE,
+	    "crypto_ident: no identity parameters found for group %s",
+	    peer->ident);
 
-	report_event(XEVNT_ID, peer, NULL);
-	return (CRYPTO_NULL);
+	return CRYPTO_NULL;
 }
 
 
@@ -1666,8 +1678,7 @@ crypto_args(
 	len = sizeof(struct exten);
 	if (str != NULL)
 		len += strlen(str);
-	ep = emalloc(len);
-	memset(ep, 0, len);
+	ep = emalloc_zero(len);
 	if (opcode == 0)
 		return (ep);
 
@@ -3231,8 +3242,7 @@ cert_parse(
 	/*
 	 * Extract version, subject name and public key.
 	 */
-	ret = emalloc(sizeof(*ret));
-	memset(ret, 0, sizeof(*ret));
+	ret = emalloc_zero(sizeof(*ret));
 	if ((ret->pkey = X509_get_pubkey(cert)) == NULL) {
 		msyslog(LOG_ERR, "cert_parse: %s",
 		    ERR_error_string(ERR_get_error(), NULL));

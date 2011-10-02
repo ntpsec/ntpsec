@@ -1,3 +1,12 @@
+* ntp-keygen -M is intended to ignore all other defaults and
+  options, so do not attempt to open existing Autokey host certificate
+  before generating symmetric keys and terminating.
+* Restore IFF, MV, and GQ identity parameter filename convention to
+  ntpkey_<scheme>par_<group/host> in ntpd, matching ntp-keygen.
+* Change some error logging to syslog to ignore logconfig mask, such
+  as reporting PPSAPI failure in NMEA and WWVB refclocks.
+* Conditionalize NMEA serial open message under clockevent.
+* Send all peer variables to trappers in report_event().
 (4.2.7p217) 2011/09/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2020] ntp-keygen -s no longer sets host in cert file name.
 * [Backward Incompatible] ntp-keygen -i option long name changed from

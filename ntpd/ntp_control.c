@@ -4330,7 +4330,7 @@ report_event(
 			    " %s", str);
 		}
 		NLOG(NLOG_SYSEVENT)
-		    msyslog(LOG_INFO, "%s", statstr);
+			msyslog(LOG_INFO, "%s", statstr);
 	} else {
 
 		/*
@@ -4362,7 +4362,7 @@ report_event(
 			    " %s", str);
 		}
 		NLOG(NLOG_PEEREVENT)
-		    msyslog(LOG_INFO, "%s", statstr);
+			msyslog(LOG_INFO, "%s", statstr);
 	}
 	record_proto_stats(statstr);
 #if DEBUG
@@ -4389,32 +4389,17 @@ report_event(
 		rpkt.associd = 0;
 		rpkt.status = htons(ctlsysstatus());
 
-		/*
-		 * For now, put everything we know about system
-		 * variables. Don't send crypto strings.
-		 */
-		for (i = 1; i <= CS_MAXCODE; i++) {
-#ifdef AUTOKEY
-			if (i > CS_VARLIST)
-				continue;
-#endif	/* AUTOKEY */
+		/* Include the core system variables and the list. */
+		for (i = 1; i <= CS_VARLIST; i++)
 			ctl_putsys(i);
-		}
 	} else {
 		NTP_INSIST(peer != NULL);
 		rpkt.associd = htons(peer->associd);
 		rpkt.status = htons(ctlpeerstatus(peer));
 
-		/*
-		 * Dump it all. Later, maybe less.
-		 */
-		for (i = 1; i <= CP_MAXCODE; i++) {
-#ifdef AUTOKEY
-			if (i > CP_VARLIST)
-				continue;
-#endif	/* AUTOKEY */
+		/* Dump it all. Later, maybe less. */
+		for (i = 1; i <= CP_MAX_NOAUTOKEY; i++)
 			ctl_putpeer(i, peer);
-		}
 #ifdef REFCLOCK
 		/*
 		 * for clock exception events: add clock variables to
