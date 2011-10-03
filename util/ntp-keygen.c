@@ -173,6 +173,7 @@ char	filename[MAXFILENAME + 1]; /* file name */
 u_int	modulus = PLEN;		/* prime modulus size (bits) */
 u_int	modulus2 = ILEN;	/* identity modulus size (bits) */
 long	d0, d1, d2, d3;		/* callback counters */
+const EVP_CIPHER * cipher = NULL;
 #endif	/* AUTOKEY */
 
 #ifdef SYS_WINNT
@@ -265,6 +266,7 @@ main(
 	const EVP_MD *ectx;	/* EVP digest */
 	char	pathbuf[MAXFILENAME + 1];
 	const char *scheme = NULL; /* digest/signature scheme */
+	const char *ciphername = NULL; /* to encrypt priv. key */
 	char	*exten = NULL;	/* private extension */
 	char	*grpkey = NULL;	/* identity extension */
 	int	nid;		/* X509 digest/signature scheme */
@@ -354,6 +356,9 @@ main(
 
 	if (HAVE_OPT( CERTIFICATE ))
 		scheme = OPT_ARG( CERTIFICATE );
+
+	if (HAVE_OPT( CIPHER ))
+		ciphername = OPT_ARG( CIPHER );
 
 	if (HAVE_OPT( SUBJECT_NAME ))
 		hostname = estrdup(OPT_ARG( SUBJECT_NAME ));
@@ -489,6 +494,13 @@ main(
 	}
 	if (scheme == NULL)
 		scheme = "RSA-MD5";
+	if (ciphername == NULL)
+		ciphername = "des-ede3-cbc";
+	cipher = EVP_get_cipherbyname(ciphername);
+	if (cipher == NULL) {
+		fprintf(stderr, "Unknown cipher %s\n", ciphername);
+		exit(-1);
+	}
 	fprintf(stderr, "Using host %s group %s\n", hostname,
 	    groupname);
 
@@ -513,7 +525,7 @@ main(
 	}
 	if (pkey_host == NULL) {
 		fprintf(stderr, "Generating host key fails\n");
-		exit (-1);
+		exit(-1);
 	}
 
 	/*
@@ -599,7 +611,7 @@ main(
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_RSA(pkey, rsa);
 		PEM_write_PrivateKey(stdout, pkey,
-		    EVP_des_cbc(), NULL, 0, NULL, passwd2);
+		    cipher, NULL, 0, NULL, passwd2);
 		fclose(stdout);
 		if (debug)
 			RSA_print_fp(stderr, rsa, 0);
@@ -662,7 +674,7 @@ main(
 		dsa = pkey_iffkey->pkey.dsa;
 		pkey = EVP_PKEY_new();
 		EVP_PKEY_assign_DSA(pkey, dsa);
-		PEM_write_PrivateKey(stdout, pkey, EVP_des_cbc(), NULL,
+		PEM_write_PrivateKey(stdout, pkey, cipher, NULL,
 		    0, NULL, passwd2);
 		fclose(stdout);
 		if (debug)
@@ -718,7 +730,7 @@ main(
 		fprintf(stdout, "# %s\n# %s\n", filename,
 		    ctime(&epoch));
 		pkey = pkey_mvpar[1];
-		PEM_write_PrivateKey(stdout, pkey, EVP_des_cbc(), NULL,
+		PEM_write_PrivateKey(stdout, pkey, cipher, NULL,
 		    0, NULL, passwd2);
 		fclose(stdout);
 		if (debug)
@@ -738,7 +750,7 @@ main(
 	}
 	x509(pkey_sign, ectx, grpkey, exten, certname);
 #endif	/* AUTOKEY */
-	exit (0);
+	exit(0);
 }
 
 
@@ -929,7 +941,7 @@ gen_rsa(
 		str = fheader("RSAhost", id, hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_RSA(pkey, rsa);
-	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	PEM_write_PrivateKey(str, pkey, cipher, NULL, 0, NULL,
 	    passwd1);
 	fclose(str);
 	if (debug)
@@ -984,7 +996,7 @@ gen_dsa(
 	str = fheader("DSAsign", id, hostname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	PEM_write_PrivateKey(str, pkey, cipher, NULL, 0, NULL,
 	    passwd1);
 	fclose(str);
 	if (debug)
@@ -1151,7 +1163,7 @@ gen_iffkey(
 	str = fheader("IFFkey", id, groupname);
 	pkey = EVP_PKEY_new();
 	EVP_PKEY_assign_DSA(pkey, dsa);
-	PEM_write_PrivateKey(str, pkey, EVP_des_cbc(), NULL, 0, NULL,
+	PEM_write_PrivateKey(str, pkey, cipher, NULL, 0, NULL,
 	    passwd1);
 	fclose(str);
 	if (debug)
