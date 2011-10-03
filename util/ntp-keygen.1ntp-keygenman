@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "29 Sep 2011" "ntp (4.2.7p217)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "03 Oct 2011" "ntp (4.2.7p218)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 29, 2011 at 08:06:25 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  October  3, 2011 at 04:59:49 AM by AutoGen 5.12
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -728,6 +728,14 @@ Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
 this option is RSA-MD5.
 .TP
+.BR \-C " \fIcipher\fP, " \-\-cipher "=" \fIcipher\fP
+privatekey cipher.
+.sp
+Select the cipher which is used to encrypt the files containing
+private keys.  The default is three-key triple DES in CBC mode,
+equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
+available in "openssl -h" output.
+.TP
 .BR \-d ", " -\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
@@ -807,7 +815,7 @@ public certificates.
 output private password.
 .sp
 Encrypt generated files containing private data with the specified
-password and the DES-CBC algorithm.
+password and the cipher selected with -C/--cipher.
 .TP
 .BR \-q " \fIpasswd\fP, " \-\-get\-pvt\-passwd "=" \fIpasswd\fP
 input private password.

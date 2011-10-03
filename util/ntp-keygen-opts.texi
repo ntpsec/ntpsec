@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  September 29, 2011 at 08:06:29 AM by AutoGen 5.12
+# It has been AutoGen-ed  October  3, 2011 at 04:59:52 AM by AutoGen 5.12
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -21,6 +21,7 @@ This software is released under a specialized copyright license.
 @menu
 * ntp-keygen usage::                  ntp-keygen usage help (-?)
 * ntp-keygen certificate::           certificate option (-c)
+* ntp-keygen cipher::                cipher option (-C)
 * ntp-keygen debug-level::           debug-level option (-d)
 * ntp-keygen get-pvt-passwd::        get-pvt-passwd option (-q)
 * ntp-keygen gq-params::             gq-params option (-G)
@@ -49,10 +50,11 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p217
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p218
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
+   -C Str cipher         privatekey cipher
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
    -D Str set-debug-level Set the debug verbosity level
@@ -117,6 +119,23 @@ Select the certificate message digest/signature encryption scheme.
 Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
 this option is RSA-MD5.
+
+@node ntp-keygen cipher
+@subsection cipher option (-C)
+@cindex ntp-keygen-cipher
+
+This is the ``privatekey cipher'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+Select the cipher which is used to encrypt the files containing
+private keys.  The default is three-key triple DES in CBC mode,
+equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
+available in "openssl -h" output.
 
 @node ntp-keygen debug-level
 @subsection debug-level option (-d)
@@ -318,7 +337,7 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Encrypt generated files containing private data with the specified
-password and the DES-CBC algorithm.
+password and the cipher selected with -C/--cipher.
 
 @node ntp-keygen set-debug-level
 @subsection set-debug-level option (-D)
