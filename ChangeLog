@@ -1,4 +1,5 @@
 * [Bug 2019] Allow selection of cipher for private key files.
+* Documentation updates from Dave Mills.
 * ntp-keygen private key cipher default now triple-key triple DES CBC.
 * ntp-keygen -M is intended to ignore all other defaults and
   options, so do not attempt to open existing Autokey host certificate
