@@ -167,7 +167,7 @@ flag = {
     descrip   = "output private password";
     doc = <<-  _EndOfDoc_
 	Encrypt generated files containing private data with the specified
-	password and the DES-CBC algorithm.
+	password and the cipher selected with -C/--cipher.
 	_EndOfDoc_;
 };
 

@@ -1,3 +1,5 @@
+* [Bug 2019] Allow selection of cipher for private key files.
+* ntp-keygen private key cipher default now triple-key triple DES CBC.
 * ntp-keygen -M is intended to ignore all other defaults and
   options, so do not attempt to open existing Autokey host certificate
   before generating symmetric keys and terminating.
@@ -5,6 +7,8 @@
   ntpkey_<scheme>par_<group/host> in ntpd, matching ntp-keygen.
 * Change some error logging to syslog to ignore logconfig mask, such
   as reporting PPSAPI failure in NMEA and WWVB refclocks.
+* ntp-keygen on Windows XP and later systems will now create links
+  expected by ntpd.  They are hardlinks on Windows, soft on POSIX.
 * Conditionalize NMEA serial open message under clockevent.
 * Send all peer variables to trappers in report_event().
 (4.2.7p217) 2011/09/29 Released by Harlan Stenn <stenn@ntp.org>
