@@ -44,7 +44,7 @@ flag = {
     doc = <<-  _EndOfDoc_
 	Select the cipher which is used to encrypt the files containing
 	private keys.  The default is three-key triple DES in CBC mode,
-	equivalent to "-c des-ede3-cbc".  The openssl tool lists ciphers
+	equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
 	available in "openssl -h" output.
 	_EndOfDoc_;
 };
