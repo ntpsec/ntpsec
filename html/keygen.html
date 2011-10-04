@@ -11,7 +11,7 @@
 <p><img src="pic/alice23.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/%7emills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a></p>
 <p>Alice holds the key.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->29-Sep-2011  15:03<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->03-Oct-2011   7:03<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -21,8 +21,6 @@
   <li class="inline"><a href="#synop">Synopsis</a></li>
   <li class="inline"><a href="#descrip">Description</a></li>
   <li class="inline"><a href="#run">Running the program</a></li>
-  <li class="inline"><a href="#trust">Trusted Hosts and Secure Groups</a></li>
-  <li class="inline"><a href="#ident">Identity Schemes</a></li>
   <li class="inline"><a href="#cmd">Command Line Options</a></li>
   <li class="inline"><a href="#rand">Random Seed File</a></li>
   <li class="inline"><a href="#fmt">Cryptographic Data Files</a></li>
@@ -30,11 +28,11 @@
 </ul>
 <hr>
 <h4 id="synop">Synopsis</h4>
-<p id="intro"><tt>ntp-keygen [ -deGHIMPT ] [ -c [RSA-MD2 | RSA-MD5 | RSA-SHA
-  | RSA-SHA1 | RSA-MDC2 | RSA-RIPEMD160 | DSA-SHA | DSA-SHA1 ] ] [
-  -i <i>group</i> ]
-  -l <em>days</em>] [ -m <i>modulus</i> ]  [ -p <i>passwd1</i> ] [ -q <i>passwd2</i> ] [ -S
-  [ RSA | DSA ] ] [ -s <i>host</i> ] [ -V <i>nkeys</i> ]</tt></p>
+<p id="intro"><tt>ntp-keygen [ -deGHIMPT ] [ -c [ RSA-MD2 | RSA-MD5 | RSA-SHA
+  | RSA-SHA1 | RSA-MDC2 | RSA-RIPEMD160 | DSA-SHA | DSA-SHA1 ] ]
+  [ -C <i>cipher</i> ] [-i <i>group</i> ] [ -l <em>days</em>]
+  [ -m <i>modulus</i> ]  [ -p <i>passwd1</i> ] [ -q <i>passwd2</i> ] 
+  [ -S [ RSA | DSA ] ] [ -s <i>host</i> ] [ -V <i>nkeys</i> ]</tt></p>
 <h4 id="descrip">Description</h4>
 <p>This program generates cryptographic data files used by the NTPv4 authentication and identity schemes. It can generate  message digest keys used in symmetric   key cryptography and, if the OpenSSL software library has been installed, it can generate host keys, sign keys, certificates, and identity keys and parameters used by the Autokey public key cryptography. The message digest keys file is generated in a format compatible with NTPv3. All other files are in PEM-encoded printable ASCII format so they can be embedded as MIME attachments in mail to other sites.</p>
 <p>When used to generate message digest keys, the program produces a file containing
@@ -54,6 +52,8 @@
 <dl>
   <dt><tt>-c [ RSA-MD2 | RSA-MD5 | RSA-SHA | RSA-SHA1 | RSA-MDC2 | RSA-RIPEMD160 | DSA-SHA | DSA-SHA1 ]</tt></dt>
   <dd>Select certificate digital signature and message digest scheme. Note that  RSA schemes must be used with an RSA sign key and DSA schemes must be used with a DSA sign key. The default without this option is <tt>RSA-MD5</tt>. If compatibility with FIPS 140-2 is required, either the <tt>DSA-SHA</tt> or <tt>DSA-SHA1</tt> scheme must be used.</dd>
+  <dt><tt>-C <i>cipher</i></tt></dt>
+  <dd>Select the OpenSSL cipher to use for password-protected keys. The <tt>openssl -h</tt> command provided with OpenSSL displays available ciphers. The default without this option is <tt>des-ede3-cbc</tt>.</dd>
   <dt><tt>-d</tt></dt>
   <dd>Enable debugging. This option displays the cryptographic data produced for eye-friendly billboards.</dd>
   <dt><tt>-e</tt></dt>
@@ -63,7 +63,7 @@
   <dt><tt>-H</tt></dt>
   <dd>Generate a new encrypted RSA public/private host key file.</dd>
   <dt><tt>-i <i>group</i></tt></dt>
-  <dd>Set the optional group name to <tt><i>group</i></tt>. This is used in the identity file names. If used, it must match the file name specified in the <tt>ident</tt> option of the <tt>crypto</tt> configuration command.</dd>
+  <dd>Set the optional Autokey group name to <tt><i>group</i></tt>. This is used in the identity scheme parameter file names. In that role, the default is the host name if no group is provided. The group name, if specified using <tt>-i</tt> or using <tt>-s</tt> following an <tt>@</tt> character, is also used in certificate subject and issuer names in the form <tt><i>host</i>@<i>group</i></tt> and should match the group specified via <tt>crypto ident</tt> or <tt>server ident</tt> in ntpd's configuration file.</dd>
   <dt><tt>-I</tt></dt>
   <dd>Generate a new encrypted IFF key file for the Schnorr (IFF) identity scheme. This option is mutually exclusive with the <tt>-G</tt> and <tt>-V</tt> options.</dd>
   <dt><tt>-l <i>days</i></tt></dt>
@@ -83,7 +83,7 @@
     the host key and has the same type. If compatibly with FIPS 140-2 is required,
     the sign key type must be <tt>DSA</tt>.</dd>
   <dt><tt>-s <i>host</i>[@<i>group</i>]</tt></dt>
-  <dd>Specify  the Autokey  host name, where  <em><tt>host</tt></em> is the  host name  and <em><tt>group</tt></em> is the optional  group name. The Autokey host name is also the certificate subject and issuer  names. If  <em><tt>host</tt></em>  is not specified,  the  default host name is the   string returned by the Unix <tt>gethostname()</tt> routine.</dd>
+  <dd>Specify the Autokey host name, where <tt><i>host</i></tt> is the host name and <tt><i>group</i></tt> is the optional group name. The host name, and if provided, group name are used in <tt><i>host</i>@<i>group</i></tt> form as certificate subject and issuer.  Specifying <tt>-s @<i>group</i></tt> is allowed, and results in leaving the host name unchanged, as with <tt>-i <i>group</i></tt>. The group name, or if no group is provided, the host name are also used in the file names of IFF, GQ, and MV identity scheme parameter files. If <tt><i>host</i></tt> is not specified, the default host name is the string returned by the <tt>gethostname()</tt> routine.</dd>
   <dt><tt>-T</tt></dt>
   <dd>Generate a trusted certificate. By default, the program generates nontrusted certificates.</dd>
   <dt><tt>-V <i>nkeys</i></tt></dt>

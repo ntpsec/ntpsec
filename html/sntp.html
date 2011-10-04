@@ -10,12 +10,12 @@
 <img src="pic/dogsnake.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Alice's Adventures in Wonderland</i>, Lewis Carroll</a>
 <p>S is for snakeoil.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->04-Aug-2010  1:38<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->03-Oct-2011  5:33<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <hr>
 <h4>Synopsis</h4>
-<tt>sntp [{--help -?}][{-4 -6}][-a <i>keynum</i>][-b <i>bcaddress</i>][-B <i>bctimeout</i>][-c][-d][-D <i>debug-level</i>][-h <i>delay</i>][-K <i>kodfile</i>][-k <i>keyfile</i>][-l <i>logfile</i>][-M <i>steplimit</i>][-o <i>ntpver</i>][-r][-S][-s][-u <i>uctimeout</i>][--wait][--version][<i>address(es)</i>]</tt>
+<tt>sntp [{--help -?}][{-4 -6}][-a <i>keynum</i>][-b <i>bcaddress</i>][-B <i>bctimeout</i>][-c][-d][-D <i>debug-level</i>][-g <i>delay</i>][-K <i>kodfile</i>][-k <i>keyfile</i>][-l <i>logfile</i>][-M <i>steplimit</i>][-o <i>ntpver</i>][-r][-S][-s][-u <i>uctimeout</i>][--wait][--version][<i>address(es)</i>]</tt>
 <h4>Description</h4>
 <p>This program is a Simple Network Time Protocol (SNTP) client that can be used to query a Network Time Protocol (NTP) server and display the time offset of the system clock relative to the server clock. Run as root it can correct the system clock to this offset as well. It can be run as an interactive command or from a script by a <tt>cron</tt> job. The program implements the SNTP client protocol defined in RFC 5905, including the full on-wire protocol but does not provide the sanity checks, access controls, security functions and mitigation algorithms as in the full NTP version 4 specification, also defined in RFC 5905.</p>
 <p>By default, <tt>sntp</tt> writes the local date and time (i.e., not UTC) to the standard output in the format</p>
@@ -43,8 +43,8 @@
   <dd>Increase debug verbosity level by one.  May be specified multiple times.  See also the <tt>-D, --set-debug-level</tt> option.</dd>
   <dt><tt>-D <i>debug-level</i>, --set-debug-level <i>debug-level</i></tt></dt>
   <dd>Set the debug verbosity level to <i>debug-level</i>.  The default level is zero.  Note that the short option is <tt>-D</tt>, an uppercase letter D.  See also the <tt>-d, --debug-level</tt> option.</dd>
-  <dt><tt>-h <i>delay</i>, --headspace <i>delay</i></tt></dt>
-  <dd>Specify the <i>delay</i> in milliseconds between outgoing queries, defaulting to 10.  <tt>sntp</tt> sends queries to all provided hostnames/addresses in short succession, and by default terminates once the first valid response is received.  With multiple time sources provided, all but one will not be used.  To limit the number of queries whose responses will not be used, each query is separated from the preceding one by <i>delay</i> milliseconds, to allow time for responses to earlier queries to be received.  A larger <i>delay</i> reduces the query load on the time sources, increasing the time to receive a valid response if the first source attempted is slow or unreachable.</dd>
+  <dt><tt>-g <i>delay</i>, --gap <i>delay</i></tt></dt>
+  <dd>Specify the <i>delay</i> in milliseconds between outgoing queries, defaulting to 50.  <tt>sntp</tt> sends queries to all provided hostnames/addresses in short succession, and by default terminates once the first valid response is received.  With multiple time sources provided, all but one will not be used.  To limit the number of queries whose responses will not be used, each query is separated from the preceding one by <i>delay</i> milliseconds, to allow time for responses to earlier queries to be received.  A larger <i>delay</i> reduces the query load on the time sources, increasing the time to receive a valid response if the first source attempted is slow or unreachable.</dd>
   <dt><tt>-K <i>kodfile</i>, --kod <i>kodfile</i></tt></dt>
   <dd>Specifies the filename <i>kodfile</i> to be used for the persistent history of KoD (Kiss Of Death, or rate-limiting) responses received from servers.  The default is <tt>/var/db/ntp-kod</tt>.  Note that the short option is <tt>-K</tt>, an uppercase letter K.</dd>
   <dt><tt>-k <i>keyfile</i>, --keyfile <i>keyfile</i></tt></dt>
