@@ -88,8 +88,8 @@ static HANDLE hHeapHandle = NULL;
 #endif
 
 	HANDLE WaitableExitEventHandle;
-static	HANDLE hIoCompletionPort = NULL;
-static	HANDLE WaitableIoEventHandle = NULL;
+	HANDLE WaitableIoEventHandle;
+static	HANDLE hIoCompletionPort;
 
 #ifdef NTPNEEDNAMEDHANDLE
 #define WAITABLEIOEVENTHANDLE "WaitableIoEventHandle"
@@ -616,7 +616,6 @@ OnSerialReadComplete(
 			if (!consumed) {
 				packets_received++;
 				handler_pkts++;
-				SetEvent(WaitableIoEventHandle);
 			}
 			buff = get_free_recv_buffer_alloc();
 		}
@@ -688,7 +687,6 @@ OnRawSerialReadComplete(
 			rio->recvcount++;
 			packets_received++;
 			handler_pkts++;
-			SetEvent(WaitableIoEventHandle);
 		}
 		rbufp = get_free_recv_buffer_alloc();
 	}

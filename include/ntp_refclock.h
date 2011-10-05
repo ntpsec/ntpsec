@@ -120,6 +120,10 @@ struct refclockbug {
 	l_fp	times[NCLKBUGTIMES]; /* real times */
 };
 
+#ifdef HAVE_IO_COMPLETION_PORT
+extern	HANDLE	WaitableIoEventHandle;
+#endif
+
 /*
  * Structure interface between the reference clock support
  * ntp_refclock.c and the driver utility routines

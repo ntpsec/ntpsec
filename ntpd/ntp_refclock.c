@@ -674,7 +674,9 @@ indicate_refclock_packet(
 		return TRUE;
 	}
 	add_full_recv_buffer(rb);
-
+#ifdef HAVE_IO_COMPLETION_PORT
+	SetEvent(WaitableIoEventHandle);
+#endif
 	return FALSE;
 }
 

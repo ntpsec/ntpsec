@@ -2323,6 +2323,9 @@ local_input(
 					parse->generic->io.recvcount++;
 					packets_received++;
 					add_full_recv_buffer(buf);
+#ifdef HAVE_IO_COMPLETION_PORT
+					SetEvent(WaitableIoEventHandle);
+#endif
 				}
 				parse_iodone(&parse->parseio);
 			}
