@@ -1,9 +1,9 @@
-.Dd October 4 2011
+.Dd October 5 2011
 .Dt NTPQ 1ntpqmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  October  4, 2011 at 10:52:37 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  October  5, 2011 at 09:03:09 AM by AutoGen 5.12
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
