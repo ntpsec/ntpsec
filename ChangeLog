@@ -1,3 +1,4 @@
+* [Bug 2024] Remove unused system event code EVNT_CLKHOP.
 (4.2.7p219) 2011/10/04 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.7p218) 2011/10/03 Released by Harlan Stenn <stenn@ntp.org>
