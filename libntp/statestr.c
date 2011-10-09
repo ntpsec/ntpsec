@@ -316,7 +316,9 @@ decode_bitflags(
 	char *		lim;
 	size_t		b;
 	int		rc;
+	int		saved_errno;	/* for use in DPRINTF with %m */
 
+	saved_errno = errno;
 	LIB_GETBUF(buf);
 	pch = buf;
 	lim = buf + LIB_BUFLENGTH;
@@ -350,6 +352,7 @@ decode_bitflags(
 #endif
 			     "",
 		 bits, (int)LIB_BUFLENGTH);
+	errno = saved_errno;
 
 	return buf;
 }

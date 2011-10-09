@@ -121,6 +121,7 @@ double	clock_stability;	/* frequency stability (wander) (s/s) */
 double	clock_codec;		/* audio codec frequency (samples/s) */
 static u_long clock_epoch;	/* last update */
 u_int	sys_tai;		/* TAI offset from UTC */
+static int loop_started;	/* TRUE after LOOP_DRIFTINIT */
 static void rstclock (int, double); /* transition function */
 static double direct_freq(double); /* direct set frequency */
 static void set_freq(double);	/* set frequency */
@@ -131,6 +132,8 @@ int	pll_status;		/* last kernel status bits */
 #if defined(STA_NANO) && NTP_API == 4
 static u_int loop_tai;		/* last TAI offset */
 #endif /* STA_NANO */
+static	void	start_kern_loop(void);
+static	void	stop_kern_loop(void);
 #endif /* KERNEL_PLL */
 
 /*
@@ -504,7 +507,7 @@ local_clock(
 		 * frequency offsets for jitter and stability values and
 		 * to update the frequency file.
 		 */
-		memset(&ntv,  0, sizeof(ntv));
+		ZERO(ntv);
 		if (ext_enable) {
 			ntv.modes = MOD_STATUS;
 		} else {
@@ -558,9 +561,11 @@ local_clock(
 		 * frequency and jitter.
 		 */
 		if (ntp_adjtime(&ntv) == TIME_ERROR) {
-			if (!(ntv.status & STA_PPSSIGNAL))
+			if (pps_enable && !(ntv.status & STA_PPSSIGNAL))
 				report_event(EVNT_KERN, NULL,
 				    "PPS no signal");
+			DPRINTF(1, ("kernel loop status (%s) %d %m\n",
+				k_st_flags(ntv.status), errno));
 		}
 		pll_status = ntv.status;
 #ifdef STA_NANO
@@ -771,6 +776,7 @@ rstclock(
 	clock_epoch = current_time; 
 }
 
+
 /*
  * calc_freq - calculate frequency directly
  *
@@ -794,7 +800,16 @@ direct_freq(
 
 
 /*
- * set_freq - set clock frequency
+ * set_freq - set clock frequency correction
+ *
+ * Used to step the frequency correction at startup, possibly again once
+ * the frequency is measured (that is, transitioning from EVNT_NSET to
+ * EVNT_FSET), and finally to switch between daemon and kernel loop
+ * discipline at runtime.
+ *
+ * When the kernel loop discipline is available but the daemon loop is
+ * in use, the kernel frequency correction is disabled (set to 0) to
+ * ensure drift_comp is applied by only one of the loops.
  */
 static void
 set_freq(
@@ -806,17 +821,125 @@ set_freq(
 	drift_comp = freq;
 	loop_desc = "ntpd";
 #ifdef KERNEL_PLL
-	if (pll_control && kern_enable) {
-		loop_desc = "kernel";
+	if (pll_control) {
 		ZERO(ntv);
 		ntv.modes = MOD_FREQUENCY;
-		ntv.freq = DTOFREQ(drift_comp);
+		if (kern_enable) {
+			loop_desc = "kernel";
+			ntv.freq = DTOFREQ(drift_comp);
+		}
 		ntp_adjtime(&ntv);
 	}
 #endif /* KERNEL_PLL */
 	mprintf_event(EVNT_FSET, NULL, "%s %.3f PPM", loop_desc,
 	    drift_comp * 1e6);
 }
+
+
+#ifdef KERNEL_PLL
+static void
+start_kern_loop(void)
+{
+	static int atexit_done;
+
+	pll_control = TRUE;
+	ZERO(ntv);
+	ntv.modes = MOD_BITS;
+	ntv.status = STA_PLL;
+	ntv.maxerror = MAXDISPERSE;
+	ntv.esterror = MAXDISPERSE;
+	ntv.constant = sys_poll;
+#ifdef SIGSYS
+	/*
+	 * Use sigsetjmp() to save state and then call ntp_adjtime(); if
+	 * it fails, then pll_trap() will set pll_control FALSE before
+	 * returning control using siglogjmp().
+	 */
+	newsigsys.sa_handler = pll_trap;
+	newsigsys.sa_flags = 0;
+	if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
+		msyslog(LOG_ERR, "sigaction() trap SIGSYS: %m");
+		pll_control = FALSE;
+	} else {
+		if (sigsetjmp(env, 1) == 0)
+			ntp_adjtime(&ntv);
+		if (sigaction(SIGSYS, &sigsys, NULL)) {
+			msyslog(LOG_ERR,
+			    "sigaction() restore SIGSYS: %m");
+			pll_control = FALSE;
+		}
+	}
+#else /* SIGSYS */
+	ntp_adjtime(&ntv);
+#endif /* SIGSYS */
+
+	/*
+	 * Save the result status and light up an external clock
+	 * if available.
+	 */
+	pll_status = ntv.status;
+	if (pll_control) {
+		if (!atexit_done) {
+			atexit_done = TRUE;
+			atexit(&stop_kern_loop);
+		}
+#ifdef STA_NANO
+		if (pll_status & STA_CLK)
+			ext_enable = TRUE;
+#endif /* STA_NANO */
+		report_event(EVNT_KERN, NULL,
+	  	    "kernel time sync enabled");
+	}
+}
+#endif	/* KERNEL_PLL */
+
+
+#ifdef KERNEL_PLL
+static void
+stop_kern_loop(void)
+{
+	if (pll_control && kern_enable) {
+		ZERO(ntv);
+		ntv.modes = MOD_STATUS;
+		ntv.status = STA_UNSYNC;
+		ntp_adjtime(&ntv);
+		report_event(EVNT_KERN, NULL,
+		    "kernel time sync disabled");
+	}
+}
+#endif	/* KERNEL_PLL */
+
+
+/*
+ * select_loop() - choose kernel or daemon loop discipline.
+ */
+void
+select_loop(
+	int	use_kern_loop
+	)
+{
+	if (kern_enable == use_kern_loop)
+		return;
+#ifdef KERNEL_PLL
+	if (pll_control && !use_kern_loop)
+		stop_kern_loop();
+#endif
+	kern_enable = use_kern_loop;
+#ifdef KERNEL_PLL
+	if (pll_control && use_kern_loop)
+		start_kern_loop();
+#endif
+	/*
+	 * If this loop selection change occurs after initial startup,
+	 * call set_freq() to switch the frequency compensation to or
+	 * from the kernel loop.
+	 */
+#ifdef KERNEL_PLL
+	if (pll_control && loop_started)
+		set_freq(drift_comp);
+#endif
+}
+
 
 /*
  * huff-n'-puff filter
@@ -870,51 +993,7 @@ loop_config(
 		if (mode_ntpdate)
 			break;
 
-		pll_control = 1;
-		memset(&ntv, 0, sizeof(ntv));
-		ntv.modes = MOD_BITS;
-		ntv.status = STA_PLL;
-		ntv.maxerror = MAXDISPERSE;
-		ntv.esterror = MAXDISPERSE;
-		ntv.constant = sys_poll;
-#ifdef SIGSYS
-		/*
-		 * Use sigsetjmp() to save state and then call
-		 * ntp_adjtime(); if it fails, then siglongjmp() is used
-		 * to return control
-		 */
-		newsigsys.sa_handler = pll_trap;
-		newsigsys.sa_flags = 0;
-		if (sigaction(SIGSYS, &newsigsys, &sigsys)) {
-			msyslog(LOG_ERR,
-			    "sigaction() fails to save SIGSYS trap: %m");
-			pll_control = 0;
-		}
-		if (sigsetjmp(env, 1) == 0)
-			ntp_adjtime(&ntv);
-		if ((sigaction(SIGSYS, &sigsys,
-		    (struct sigaction *)NULL))) {
-			msyslog(LOG_ERR,
-			    "sigaction() fails to restore SIGSYS trap: %m");
-			pll_control = 0;
-		}
-#else /* SIGSYS */
-		ntp_adjtime(&ntv);
-#endif /* SIGSYS */
-
-		/*
-		 * Save the result status and light up an external clock
-		 * if available.
-		 */
-		pll_status = ntv.status;
-		if (pll_control) {
-#ifdef STA_NANO
-			if (pll_status & STA_CLK)
-				ext_enable = 1;
-#endif /* STA_NANO */
-			report_event(EVNT_KERN, NULL,
- 		  	    "kernel time sync enabled");
-		}
+		start_kern_loop();
 #endif /* KERNEL_PLL */
 
 		/*
@@ -931,6 +1010,7 @@ loop_config(
 			rstclock(EVNT_FSET, 0);
 		else
 			rstclock(EVNT_NSET, 0);
+		loop_started = TRUE;
 #endif /* LOCKCLOCK */
 		break;
 
@@ -943,14 +1023,7 @@ loop_config(
 	case LOOP_KERN_CLEAR:
 #ifndef LOCKCLOCK
 #ifdef KERNEL_PLL
-		if (pll_control && kern_enable) {
-			memset((char *)&ntv, 0, sizeof(ntv));
-			ntv.modes = MOD_STATUS;
-			ntv.status = STA_UNSYNC;
-			ntp_adjtime(&ntv);
-			report_event(EVNT_KERN, NULL,
-			    "kernel time sync disabled");
-		}
+		stop_kern_loop();
 #endif /* KERNEL_PLL */
 #endif /* LOCKCLOCK */
 		break;
@@ -979,7 +1052,7 @@ loop_config(
 		if (freq < HUFFPUFF)
 			freq = HUFFPUFF;
 		sys_hufflen = (int)(freq / HUFFPUFF);
-		sys_huffpuff = (double *)emalloc(sizeof(double) *
+		sys_huffpuff = emalloc(sizeof(sys_huffpuff[0]) *
 		    sys_hufflen);
 		for (i = 0; i < sys_hufflen; i++)
 			sys_huffpuff[i] = 1e9;
@@ -993,7 +1066,7 @@ loop_config(
 	case LOOP_MAX:		/* step threshold (step) */
 		clock_max = freq;
 		if (clock_max == 0 || clock_max > 0.5)
-			kern_enable = 0;
+			select_loop(FALSE);
 		break;
 
 	case LOOP_MINSTEP:	/* stepout threshold (stepout) */
@@ -1025,7 +1098,7 @@ pll_trap(
 	int arg
 	)
 {
-	pll_control = 0;
+	pll_control = FALSE;
 	siglongjmp(env, 1);
 }
 #endif /* KERNEL_PLL && SIGSYS */

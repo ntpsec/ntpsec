@@ -152,7 +152,9 @@ extern	char *	mfptoms		(u_long, u_long, short);
 extern	const char * modetoa	(int);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
+#ifdef KERNEL_PLL
 extern	const char * k_st_flags	(u_int32);
+#endif
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(u_int32);
