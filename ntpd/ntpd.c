@@ -487,11 +487,8 @@ ntpdmain(
 		change_logfile(logfilename, FALSE);
 	} else {
 		logfilename = NULL;
-		if (nofork) {
-			msyslog_term = FALSE;
-			syslogit = FALSE;
-			change_logfile("stderr", FALSE);
-		}
+		if (nofork)
+			msyslog_term = TRUE;
 	}
 	msyslog(LOG_NOTICE, "%s\n", Version);
 
