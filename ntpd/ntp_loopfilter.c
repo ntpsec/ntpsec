@@ -898,14 +898,9 @@ start_kern_loop(void)
 static void
 stop_kern_loop(void)
 {
-	if (pll_control && kern_enable) {
-		ZERO(ntv);
-		ntv.modes = MOD_STATUS;
-		ntv.status = STA_UNSYNC;
-		ntp_adjtime(&ntv);
+	if (pll_control && kern_enable)
 		report_event(EVNT_KERN, NULL,
 		    "kernel time sync disabled");
-	}
 }
 #endif	/* KERNEL_PLL */
 
@@ -1014,18 +1009,7 @@ loop_config(
 #endif /* LOCKCLOCK */
 		break;
 
-	/*
-	 * Disable the kernel at shutdown. The microkernel just abandons
-	 * ship. The nanokernel carefully cleans up so applications can
-	 * see this. Note the last programmed offset and frequency are
-	 * left in place.
-	 */
 	case LOOP_KERN_CLEAR:
-#ifndef LOCKCLOCK
-#ifdef KERNEL_PLL
-		stop_kern_loop();
-#endif /* KERNEL_PLL */
-#endif /* LOCKCLOCK */
 		break;
 
 	/*
