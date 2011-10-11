@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.texi)
 # 
-# It has been AutoGen-ed  October 10, 2011 at 05:57:31 AM by AutoGen 5.12
+# It has been AutoGen-ed  October 11, 2011 at 09:07:59 AM by AutoGen 5.12
 # From the definitions    ntp-wait-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -33,7 +33,19 @@ This is the automatically generated usage text for ntp-wait:
 
 @exampleindent 0
 @example
-ntp-wait is unavailable - no --help
+/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
+running under Perl version 5.8.8.
+
+Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
+
+The following single-character options are accepted:
+        With arguments: -n -s
+        Boolean (without arguments): -v
+
+Options may be merged together.  -- stops processing of options.
+Space is not required between options and their arguments.
+  [Now continuing due to backward compatibility and excessive paranoia.
+   See ``perldoc Getopt::Std'' about $Getopt::Std::STANDARD_HELP_VERSION.]
 @end example
 @exampleindent 4
 
