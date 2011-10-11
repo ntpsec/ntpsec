@@ -307,8 +307,8 @@ extern	void	parse_cmdline_opts(int *, char ***);
  */
 #ifndef SYS_WINNT
 # define SIGDIE1	SIGHUP
-# define SIGDIE3	SIGQUIT
 # define SIGDIE2	SIGINT
+# define SIGDIE3	SIGQUIT
 # define SIGDIE4	SIGTERM
 #endif /* SYS_WINNT */
 

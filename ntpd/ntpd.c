@@ -113,22 +113,6 @@
 #endif
 #endif
 
-/*
- * Signals we catch for debugging.	If not debugging we ignore them.
- */
-#define MOREDEBUGSIG	SIGUSR1
-#define LESSDEBUGSIG	SIGUSR2
-
-/*
- * Signals which terminate us gracefully.
- */
-#ifndef SYS_WINNT
-# define SIGDIE1	SIGHUP
-# define SIGDIE3	SIGQUIT
-# define SIGDIE2	SIGINT
-# define SIGDIE4	SIGTERM
-#endif /* SYS_WINNT */
-
 #ifdef HAVE_DNSREGISTRATION
 #include <dns_sd.h>
 DNSServiceRef mdns;
@@ -150,12 +134,12 @@ int priority_done = 2;		/* 0 - Set priority */
 				/* 2 - Don't set priority */
 				/* 1 and 2 are pretty much the same */
 
-int	listen_to_virtual_ips = 1;
+int listen_to_virtual_ips = TRUE;
 
 /*
  * No-fork flag.  If set, we do not become a background daemon.
  */
-int nofork = 0;			/* Fork by default */
+int nofork;			/* Fork by default */
 
 #ifdef HAVE_DNSREGISTRATION
 /*
@@ -163,16 +147,16 @@ int nofork = 0;			/* Fork by default */
  * after we have synched the first time. If the attempt fails, then try again once per 
  * minute for up to 5 times. After all, we may be starting before mDNS.
  */
-int mdnsreg = 1;
+int mdnsreg = TRUE;
 int mdnstries = 5;
 #endif  /* HAVE_DNSREGISTRATION */
 
 #ifdef HAVE_DROPROOT
 int droproot;
 int root_dropped;
-char *user = NULL;		/* User to switch to */
-char *group = NULL;		/* group to switch to */
-const char *chrootdir = NULL;	/* directory to chroot to */
+char *user;		/* User to switch to */
+char *group;		/* group to switch to */
+const char *chrootdir;	/* directory to chroot to */
 int sw_uid;
 int sw_gid;
 char *endp;
@@ -207,7 +191,7 @@ extern int syscall	(int, ...);
 #endif /* DECL_SYSCALL */
 
 
-#if !defined(SIM) && defined(SIGDIE2)
+#if !defined(SIM) && defined(SIGDIE1)
 static	RETSIGTYPE	finish		(int);
 #endif
 
@@ -489,6 +473,8 @@ ntpdmain(
 		logfilename = NULL;
 		if (nofork)
 			msyslog_term = TRUE;
+		if (HAVE_OPT(SAVECONFIGQUIT))
+			syslogit = FALSE;
 	}
 	msyslog(LOG_NOTICE, "%s\n", Version);
 
@@ -561,7 +547,7 @@ ntpdmain(
 			break;
 		}
 		/* -w requires a fork() even with debug > 0 */
-		nofork = 0;
+		nofork = FALSE;
 		if (pipe(pipe_fds)) {
 			exit_code = (errno) ? errno : -1;
 			msyslog(LOG_ERR,
@@ -614,7 +600,7 @@ ntpdmain(
 		if (syslog_file != NULL) {
 			fclose(syslog_file);
 			syslog_file = NULL;
-			syslogit = 1;
+			syslogit = TRUE;
 		}
 		close_all_except(waitsync_fd_to_close);
 		open("/dev/null", 0);
@@ -741,14 +727,8 @@ ntpdmain(
 	 */
 # ifdef SIGDIE1
 	signal_no_reset(SIGDIE1, finish);
-# endif
-# ifdef SIGDIE2
 	signal_no_reset(SIGDIE2, finish);
-# endif
-# ifdef SIGDIE3
 	signal_no_reset(SIGDIE3, finish);
-# endif
-# ifdef SIGDIE4
 	signal_no_reset(SIGDIE4, finish);
 # endif
 # ifdef SIGBUS
@@ -804,7 +784,7 @@ ntpdmain(
 	getconfig(argc, argv);
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
-	initializing = 0;
+	initializing = FALSE;
 
 # ifdef HAVE_DROPROOT
 	if (droproot) {
@@ -1135,7 +1115,7 @@ getgroup:
 #endif	/* !SIM */
 
 
-#if !defined (SIM) && defined(SIGDIE2)
+#if !defined(SIM) && defined(SIGDIE1)
 /*
  * finish - exit gracefully
  */
@@ -1144,25 +1124,24 @@ finish(
 	int sig
 	)
 {
-	msyslog(LOG_NOTICE, "ntpd exiting on signal %d", sig);
+	const char *sig_desc;
+
+	sig_desc = NULL;
+#ifdef HAVE_STRSIGNAL
+	sig_desc = strsignal(sig);
+#endif
+	if (sig_desc == NULL)
+		sig_desc = "";
+	msyslog(LOG_NOTICE, "%s exiting on signal %d (%s)", progname,
+		sig, sig_desc);
 # ifdef HAVE_DNSREGISTRATION
 	if (mdns != NULL)
 		DNSServiceRefDeallocate(mdns);
 # endif
-	switch (sig) {
-# ifdef SIGBUS
-	case SIGBUS:
-		printf("\nfinish(SIGBUS)\n");
-		exit(0);
-# endif
-	case 0:			/* Should never happen... */
-		return;
-
-	default:
-		exit(0);
-	}
+	exit(0);
 }
-#endif	/* !SIM && SIGDIE2 */
+#endif	/* !SIM && SIGDIE1 */
+
 
 #ifndef SIM
 /*

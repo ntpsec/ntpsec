@@ -1,3 +1,5 @@
+* [Bug 2029] "make check" clutters syslog.
+* Log signal description along with number on ntpd exit.
 (4.2.7p221) 2011/10/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2025] Switching between daemon and kernel loops can doubly-
   correct drift

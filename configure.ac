@@ -755,10 +755,7 @@ AC_CHECK_FUNCS(
     )]
 )
 
-AC_CHECK_FUNCS([getbootfile])
-
-
-AC_CHECK_FUNCS([getuid getrusage])
+AC_CHECK_FUNCS([getbootfile getuid getrusage strsignal])
 
 case "$ac_cv_header_kvm_h" in
  yes)
