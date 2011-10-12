@@ -1,3 +1,4 @@
+(4.2.7p223) 2011/10/12 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.7p222) 2011/10/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2029] "make check" clutters syslog.
