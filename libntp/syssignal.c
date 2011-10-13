@@ -9,6 +9,13 @@
 #include "ntp_syslog.h"
 #include "ntp_stdlib.h"
 
+static ctrl_c_fn	ctrl_c_hook;
+#ifndef SYS_WINNT
+RETSIGTYPE sigint_handler(int);
+#else
+BOOL WINAPI console_event_handler(DWORD);
+#endif
+
 
 #ifdef HAVE_SIGACTION
 
@@ -107,3 +114,75 @@ signal_no_reset(
 }
 
 #endif
+
+#ifndef SYS_WINNT
+/*
+ * POSIX implementation of set_ctrl_c_hook()
+ */
+RETSIGTYPE
+sigint_handler(
+	int	signum
+	)
+{
+	UNUSED_ARG(signum);
+	if (ctrl_c_hook != NULL)
+		(*ctrl_c_hook)();
+}
+
+void
+set_ctrl_c_hook(
+	ctrl_c_fn	c_hook
+	)
+{
+	RETSIGTYPE (*handler)(int);
+
+	if (NULL == c_hook) {
+		handler = SIG_DFL;
+		ctrl_c_hook = NULL;
+	} else {
+		handler = &sigint_handler;
+		ctrl_c_hook = c_hook;
+	}
+	signal_no_reset(SIGINT, handler);
+}
+#else	/* SYS_WINNT follows */
+/*
+ * Windows implementation of set_ctrl_c_hook()
+ */
+BOOL WINAPI 
+console_event_handler(  
+	DWORD	dwCtrlType
+	)
+{
+	BOOL handled;
+
+	if (CTRL_C_EVENT == dwCtrlType && ctrl_c_hook != NULL) {
+		(*ctrl_c_hook)();
+		handled = TRUE;
+	} else {
+		handled = FALSE;
+	}
+
+	return handled;
+}
+void
+set_ctrl_c_hook(
+	ctrl_c_fn	c_hook
+	)
+{
+	BOOL install;
+
+	if (NULL == c_hook) {
+		ctrl_c_hook = NULL;
+		install = FALSE;
+	} else {
+		ctrl_c_hook = c_hook;
+		install = TRUE;
+	}
+	if (!SetConsoleCtrlHandler(&console_event_handler, install))
+		msyslog(LOG_ERR, "Can't %s console control handler: %m",
+			(install)
+			    ? "add"
+			    : "remove");
+}
+#endif	/* SYS_WINNT */

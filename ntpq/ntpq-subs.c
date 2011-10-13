@@ -319,8 +319,9 @@ typedef struct var_display_collection_tag {
 } vdc;
 
 /*
- * other static function prototypes
+ * other local function prototypes
  */
+void		mrulist_ctrl_c_hook(void);
 static mru *	add_mru(mru *);
 static int	collect_mru_list(const char *, l_fp *);
 static int	fetch_nonce(char *, size_t);
@@ -339,6 +340,8 @@ static void	collect_display_vdc(associd_t as, vdc *table,
  * static globals
  */
 static u_int	mru_count;
+static u_int	mru_dupes;
+volatile int	mrulist_interrupted;
 static mru	mru_list;		/* listhead */
 static mru **	hash_table;
 
@@ -2175,11 +2178,11 @@ add_mru(
 				add->last.l_uf, mon->last.l_ui,
 				mon->last.l_uf);
 			exit(1);
-
 		}
 		UNLINK_DLIST(mon, mlink);
 		UNLINK_SLIST(unlinked, hash_table[hash], mon, hlink, mru);
 		NTP_INSIST(unlinked == mon);
+		mru_dupes++;
 		if (debug)
 			fprintf(stderr, "(updated from %08x.%08x) ",
 				mon->last.l_ui,	mon->last.l_uf);
@@ -2216,16 +2219,24 @@ add_mru(
 	} while (0)
 
 
+void
+mrulist_ctrl_c_hook(void)
+{
+	mrulist_interrupted = TRUE;
+}
+
+
 static int
 collect_mru_list(
-	const char *parms,
-	l_fp *	pnow
+	const char *	parms,
+	l_fp *		pnow
 	)
 {
-	const u_int sleep_msecs = 30;
+	const u_int sleep_msecs = 5;
 	static int ntpd_row_limit = MRU_ROW_LIMIT;
 	int c_mru_l_rc;		/* this function's return code */
 	u_char got;		/* MRU_GOT_* bits */
+	time_t next_report;
 	size_t cb;
 	mru *mon;
 	mru *head;
@@ -2279,6 +2290,12 @@ collect_mru_list(
 	mon = emalloc_zero(cb);
 	ZERO(*pnow);
 	ZERO(last_older);
+	mrulist_interrupted = FALSE;
+	set_ctrl_c_hook(&mrulist_ctrl_c_hook);
+	fprintf(stderr,
+		"Ctrl-C will stop MRU retrieval and display partial results.\n");
+	fflush(stderr);
+	next_report = time(NULL) + MRU_REPORT_SECS;
 
 	limit = min(3 * MAXFRAGS, ntpd_row_limit);
 	snprintf(req_buf, sizeof(req_buf), "nonce=%s, limit=%d%s",
@@ -2343,7 +2360,8 @@ collect_mru_list(
 				fprintf(stderr,
 					"Row limit reduced to %d following CERR_BADVALUE.\n",
 				        limit);
-		} else if (ERR_INCOMPLETE == qres) {
+		} else if (ERR_INCOMPLETE == qres ||
+			   ERR_TIMEOUT == qres) {
 			/*
 			 * Reduce the number of rows to minimize effect
 			 * of single lost packets.
@@ -2466,10 +2484,18 @@ collect_mru_list(
 				} else if (1 != sscanf(tag, "last.%d", &si) ||
 					   si != ci || '0' != val[0] ||
 					   'x' != val[1] ||
-					   !hextolfp(val + 2, &mon->last))
+					   !hextolfp(val + 2, &mon->last)) {
 					goto nomatch;
-				else
+				} else {
 					MGOT(MRU_GOT_LAST);
+					/*
+					 * allow interrupted retrieval,
+					 * using most recent retrieved
+					 * entry's last seen timestamp
+					 * as the end of operation.
+					 */
+					*pnow = mon->last;
+				}
 				break;
 
 			case 'f':
@@ -2531,8 +2557,26 @@ collect_mru_list(
 			list_complete = TRUE;
 		if (list_complete) {
 			NTP_INSIST(0 == ri || have_addr_older);
+		}
+		if (mrulist_interrupted) {
+			printf("mrulist retrieval interrupted by operator.\n"
+			       "Displaying partial client list.\n");
+			fflush(stdout);
+		}
+		if (list_complete || mrulist_interrupted) {
+			fprintf(stderr,
+				"\rRetrieved %u unique MRU entries and %u updates.\n",
+				mru_count, mru_dupes);
+			fflush(stderr);
 			break;
 		}
+		if (time(NULL) >= next_report) {
+			next_report += MRU_REPORT_SECS;
+			fprintf(stderr, "\r%u (%u updates) ", mru_count,
+				mru_dupes);
+			fflush(stderr);
+		}
+
 		/*
 		 * Snooze for a bit between queries to let ntpd catch
 		 * up with other duties.
@@ -2592,6 +2636,7 @@ collect_mru_list(
 		}
 	}
 
+	set_ctrl_c_hook(NULL);
 	c_mru_l_rc = TRUE;
 	goto retain_hash_table;
 
