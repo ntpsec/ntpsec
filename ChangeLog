@@ -1,3 +1,4 @@
+(4.2.7p224) 2011/10/14 Released by Harlan Stenn <stenn@ntp.org>
 * ntpq mrulist shows intermediate counts every five seconds while
   retrieving list, and allows Ctrl-C interruption of the retrieval,
   showing the incomplete list as retrieved.  Reduce delay between
