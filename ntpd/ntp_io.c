@@ -721,12 +721,12 @@ addr_eqprefix(
 
 	memset(&isc_sa, 0, sizeof(isc_sa));
 	memcpy(&isc_sa.type.sa, &a->sa, 
-	       min(sizeof(isc_sa.type), sizeof(a)));
+	       min(sizeof(isc_sa.type), sizeof(*a)));
 	isc_netaddr_fromsockaddr(&isc_a, &isc_sa);
 
 	memset(&isc_sa, 0, sizeof(isc_sa));
 	memcpy(&isc_sa.type.sa, &b->sa, 
-	       min(sizeof(isc_sa.type), sizeof(b)));
+	       min(sizeof(isc_sa.type), sizeof(*b)));
 	isc_netaddr_fromsockaddr(&isc_b, &isc_sa);
 
 	return (int)isc_netaddr_eqprefix(&isc_a, &isc_b,
@@ -1355,8 +1355,11 @@ interface_action(
 	int		isloopback;
 	int		iswildcard;
 
-	DPRINTF(4, ("interface_action: interface %s ",
-		    (if_name != NULL) ? if_name : "wildcard"));
+	DPRINTF(4, ("interface_action: %s %s ",
+		    (if_name != NULL)
+			? if_name
+			: "wildcard",
+		    stoa(if_addr)));
 
 	iswildcard = is_wildcard_addr(if_addr);
 
