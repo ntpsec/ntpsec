@@ -1179,7 +1179,7 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 2034] interface ignore fe80::/64 mismatches ::, ::1...
+* [Bug 2034] Listening address configuration with prefix misapplied.
 
 ---
 (4.2.6p4) 2011/09/22 Released by Harlan Stenn <stenn@ntp.org>

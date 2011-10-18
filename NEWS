@@ -1,4 +1,22 @@
 --- 
+NTP 4.2.6p5-RC1 (Harlan Stenn <stenn@ntp.org>, 2011/10/xx) 
+ 
+Focus: Bug fix
+ 
+Severity: Medium 
+ 
+This is a recommended upgrade. 
+
+This release fixes mismatching of address prefixes specified in "nic"
+or "interface" in the ntpd configuration file using the address/prefix
+format, such as "fe80::/64" erroneously matching localhost [::1] and
+wildcard [::].
+
+ntpd
+
+ * Correctly match address prefixes for "nic" and "interface".
+
+--- 
 NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
  
 Focus: Bug fixes and portability improvements 
