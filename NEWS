@@ -1,4 +1,19 @@
 --- 
+NTP 4.2.6pr-RC1 (Harlan Stenn <stenn@ntp.org>, 2011/10/xx) 
+ 
+Focus: Bug fix
+ 
+Severity: Medium 
+ 
+This is a recommended upgrade for users of IPv6. 
+
+This release backports an IPv6 fix from the upcoming 4.2.8 release.
+
+ntpd
+
+ * Fully initialize the IPv6 address structure.
+
+--- 
 NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
  
 Focus: Bug fixes and portability improvements 
