@@ -2183,19 +2183,15 @@ add_mru(
 		UNLINK_SLIST(unlinked, hash_table[hash], mon, hlink, mru);
 		NTP_INSIST(unlinked == mon);
 		mru_dupes++;
-		if (debug)
-			fprintf(stderr, "(updated from %08x.%08x) ",
-				mon->last.l_ui,	mon->last.l_uf);
+		TRACE(2, ("(updated from %08x.%08x) ", mon->last.l_ui,
+		      mon->last.l_uf));
 	}
 	LINK_DLIST(mru_list, add, mlink);
 	LINK_SLIST(hash_table[hash], add, hlink);
-	if (debug)
-		fprintf(stderr,
-			"add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
-			add->last.l_ui, add->last.l_uf, add->count,
-			(int)add->mode, (int)add->ver, (u_int)add->rs,
-			add->first.l_ui, add->first.l_uf,
-			sptoa(&add->addr));
+	TRACE(2, ("add_mru %08x.%08x c %d m %d v %d rest %x first %08x.%08x %s\n",
+	      add->last.l_ui, add->last.l_uf, add->count,
+	      (int)add->mode, (int)add->ver, (u_int)add->rs,
+	      add->first.l_ui, add->first.l_uf, sptoa(&add->addr)));
 	/* if we didn't update an existing entry, alloc replacement */
 	if (NULL == mon) {
 		mon = emalloc(sizeof(*mon));

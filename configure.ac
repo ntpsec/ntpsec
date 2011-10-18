@@ -755,7 +755,7 @@ AC_CHECK_FUNCS(
     )]
 )
 
-AC_CHECK_FUNCS([getbootfile getuid getrusage strsignal])
+AC_CHECK_FUNCS([getbootfile getuid getrusage nanosleep strsignal])
 
 case "$ac_cv_header_kvm_h" in
  yes)
