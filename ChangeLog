@@ -1,4 +1,5 @@
 * [Bug 2035] ntpq -c mrulist sleeps 1 sec between queries, not 5 msec.
+* Documentation updates from Dave Mills.
 (4.2.7p225) 2011/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.7p224) 2011/10/14 Released by Harlan Stenn <stenn@ntp.org>
