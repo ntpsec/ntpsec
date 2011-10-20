@@ -3866,7 +3866,7 @@ proto_config(
 #endif /* REFCLOCK */
 
 	case PROTO_KERNEL:	/* kernel discipline (kernel) */
-		kern_enable = value;
+		select_loop(value);
 		break;
 
 	case PROTO_MONITOR:	/* monitoring (monitor) */

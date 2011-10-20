@@ -2,9 +2,9 @@ ACLOCAL_AMFLAGS = -I sntp/m4 -I sntp/libevent/m4 -I sntp/libopts/m4
 
 NULL =
 
-SUBDIRS = 		\
-	scripts 	\
-	include 	\
+SUBDIRS =		\
+	scripts		\
+	include		\
 	libntp		\
 	libparse	\
 	ntpd		\

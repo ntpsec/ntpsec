@@ -167,10 +167,8 @@ getCmdOpts(
 		} while (--ct > 0);
 	}
 
-	if (HAVE_OPT( SLEW )) {
-		clock_max = 600;
-		kern_enable = 0;
-	}
+	if (HAVE_OPT( SLEW ))
+		loop_config(LOOP_MAX, 600);
 
 	if (HAVE_OPT( UPDATEINTERVAL )) {
 		long val = OPT_VALUE_UPDATEINTERVAL;

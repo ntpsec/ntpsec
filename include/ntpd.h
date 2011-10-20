@@ -148,6 +148,7 @@ extern	void	init_loopfilter(void);
 extern	int 	local_clock(struct peer *, double);
 extern	void	adj_host_clock(void);
 extern	void	loop_config(int, double);
+extern	void	select_loop(int);
 extern	void	huffpuff(void);
 extern	u_long	sys_clocktime;
 extern	u_int	sys_tai;
@@ -306,8 +307,8 @@ extern	void	parse_cmdline_opts(int *, char ***);
  */
 #ifndef SYS_WINNT
 # define SIGDIE1	SIGHUP
-# define SIGDIE3	SIGQUIT
 # define SIGDIE2	SIGINT
+# define SIGDIE3	SIGQUIT
 # define SIGDIE4	SIGTERM
 #endif /* SYS_WINNT */
 

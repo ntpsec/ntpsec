@@ -331,10 +331,23 @@ typedef int ssize_t;		/* ssize is an int */
 #define CLOCK_NMEA
 #define CLOCK_ONCORE
 #define CLOCK_PALISADE		/* from ntpd.mak */
+#define CLOCK_PARSE
+/* parse component drivers */
+#define CLOCK_COMPUTIME
+#define CLOCK_DCF7000
+#define CLOCK_HOPF6021
+#define CLOCK_MEINBERG
+#define CLOCK_RAWDCF
+#define CLOCK_RCC8000
+#define CLOCK_SCHMID
+#define CLOCK_TRIMTAIP
+#define CLOCK_TRIMTSIP
+#define CLOCK_VARITEXT
+#define CLOCK_WHARTON_400A
+/* end parse component drivers */
 /* # define CLOCK_SHM */
 #define CLOCK_SPECTRACOM	/* refclock_wwvb.c */
 #define CLOCK_TRIMBLEDC
-#define CLOCK_TRIMTSIP	1
 #define CLOCK_TRUETIME
 
 #define NTP_LITTLE_ENDIAN		/* from libntp.mak */

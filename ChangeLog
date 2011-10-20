@@ -1,5 +1,64 @@
 * [Bug 1995] add compile time stamp based era unfolding for
-  'step_systime()' and needed support to 'ntp-calendar.c'.
+  'step_systime()' and necessary support to 'ntp-calendar.c'.
+* [Bug 2035] ntpq -c mrulist sleeps 1 sec between queries, not 5 msec.
+* Documentation updates from Dave Mills.
+(4.2.7p225) 2011/10/15 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p224) 2011/10/14 Released by Harlan Stenn <stenn@ntp.org>
+* ntpq mrulist shows intermediate counts every five seconds while
+  retrieving list, and allows Ctrl-C interruption of the retrieval,
+  showing the incomplete list as retrieved.  Reduce delay between
+  successive mrulist retrieval queries from 30 to 5 msec.  Do not
+  give up mrulist retrieval when a single query times out.
+(4.2.7p223) 2011/10/12 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p222) 2011/10/11 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2029] "make check" clutters syslog.
+* Log signal description along with number on ntpd exit.
+(4.2.7p221) 2011/10/10 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2025] Switching between daemon and kernel loops can doubly-
+  correct drift
+* [Bug 2028] ntpd -n (nofork) redirects logging to stderr.
+* Documentation updates from Dave Mills.
+(4.2.7p220) 2011/10/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1945] mbg_gps166.h use of _TM_DEFINED conflicts with MS VC.
+* [Bug 1946] parse_start uses open; does not work on Windows.
+* [Bug 1947] Porting parse-based Wharton refclock driver to Windows.
+* [Bug 2024] Remove unused system event code EVNT_CLKHOP.
+(4.2.7p219) 2011/10/04 Released by Harlan Stenn <stenn@ntp.org>
+* Documentation updates from Dave Mills.
+(4.2.7p218) 2011/10/03 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2019] Allow selection of cipher for private key files.
+* Documentation updates from Dave Mills.
+* ntp-keygen private key cipher default now triple-key triple DES CBC.
+* ntp-keygen -M is intended to ignore all other defaults and
+  options, so do not attempt to open existing Autokey host certificate
+  before generating symmetric keys and terminating.
+* Restore IFF, MV, and GQ identity parameter filename convention to
+  ntpkey_<scheme>par_<group/host> in ntpd, matching ntp-keygen.
+* Change some error logging to syslog to ignore logconfig mask, such
+  as reporting PPSAPI failure in NMEA and WWVB refclocks.
+* ntp-keygen on Windows XP and later systems will now create links
+  expected by ntpd.  They are hardlinks on Windows, soft on POSIX.
+* Conditionalize NMEA serial open message under clockevent.
+* Send all peer variables to trappers in report_event().
+(4.2.7p217) 2011/09/29 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2020] ntp-keygen -s no longer sets host in cert file name.
+* [Backward Incompatible] ntp-keygen -i option long name changed from
+  misleading --issuer-name to --ident.
+(4.2.7p216) 2011/09/27 Released by Harlan Stenn <stenn@ntp.org>
+* sntp documentation tag cleanup.
+* mdoc2man improvements.
+(4.2.7p215) 2011/09/24 Released by Harlan Stenn <stenn@ntp.org>
+* Use patched mdoc2man script, from Eric Feng.
+* Sync with ntp-4.2.6p4 (a no-op).
+(4.2.7p214) 2011/09/20 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1981] Initial offset convergence applies frequency correction 2x
+  with kernel discipline.
+* [Bug 2008] Initial offset convergence degraded with 500 PPM adjtime().
+* [Bug 2009] EVNT_NSET adj_systime() mishandled by Windows ntpd.
+(4.2.7p213) 2011/09/08 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1999] NMEA does not send PMOTG messages any more.
 (4.2.7p212) 2011/09/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2003] from 4.2.6p4-RC3: ntpq_read_assoc_peervars() broken.
 (4.2.7p211) 2011/09/01 Released by Harlan Stenn <stenn@ntp.org>
@@ -1123,6 +1182,12 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p5-RC1) 2011/10/18 Released by Harlan Stenn <stenn@ntp.org>
+
+* [Bug 2034] Listening address configuration with prefix misapplied.
+
+---
+(4.2.6p4) 2011/09/22 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 1984] ntp/libisc fails to compile on OS X 10.7 (Lion).
 * [Bug 1985] "logconfig =allall" rejected.

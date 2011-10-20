@@ -3084,12 +3084,17 @@ fdbits(
  * read it again or go on to the next one if no bytes returned
  */
 static inline int
-read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
+read_refclock_packet(
+	SOCKET			fd,
+	struct refclockio *	rp,
+	l_fp			ts
+	)
 {
-	int i;
-	int buflen;
-	int saved_errno;
-	struct recvbuf *rb;
+	int			i;
+	int			buflen;
+	int			saved_errno;
+	int			consumed;
+	struct recvbuf *	rb;
 
 	rb = get_free_recv_buffer();
 
@@ -3130,25 +3135,13 @@ read_refclock_packet(SOCKET fd, struct refclockio *rp, l_fp ts)
 	rb->recv_time = ts;
 	rb->receiver = rp->clock_recv;
 
-	if (rp->io_input) {
-		/*
-		 * have direct input routine for refclocks
-		 */
-		if (rp->io_input(rb) == 0) {
-			/*
-			 * data was consumed - nothing to pass up
-			 * into block input machine
-			 */
-			freerecvbuf(rb);
-			return (buflen);
-		}
+	consumed = indicate_refclock_packet(rp, rb);
+	if (!consumed) {
+		rp->recvcount++;
+		packets_received++;
 	}
-	
-	add_full_recv_buffer(rb);
 
-	rp->recvcount++;
-	packets_received++;
-	return (buflen);
+	return buflen;
 }
 
 

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  September  7, 2011 at 11:52:04 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  October 15, 2011 at 10:31:57 AM by AutoGen 5.12
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -64,34 +64,35 @@ PFX>Permission to use, copy, modify, and distribute this software and its
  */
 typedef enum {
     INDEX_OPT_CERTIFICATE      =  0,
-    INDEX_OPT_DEBUG_LEVEL      =  1,
-    INDEX_OPT_SET_DEBUG_LEVEL  =  2,
-    INDEX_OPT_ID_KEY           =  3,
-    INDEX_OPT_GQ_PARAMS        =  4,
-    INDEX_OPT_HOST_KEY         =  5,
-    INDEX_OPT_IFFKEY           =  6,
-    INDEX_OPT_ISSUER_NAME      =  7,
-    INDEX_OPT_LIFETIME         =  8,
-    INDEX_OPT_MD5KEY           =  9,
-    INDEX_OPT_MODULUS          = 10,
-    INDEX_OPT_PVT_CERT         = 11,
-    INDEX_OPT_PVT_PASSWD       = 12,
-    INDEX_OPT_GET_PVT_PASSWD   = 13,
-    INDEX_OPT_SIGN_KEY         = 14,
-    INDEX_OPT_SUBJECT_NAME     = 15,
-    INDEX_OPT_TRUSTED_CERT     = 16,
-    INDEX_OPT_MV_PARAMS        = 17,
-    INDEX_OPT_MV_KEYS          = 18,
-    INDEX_OPT_VERSION          = 19,
-    INDEX_OPT_HELP             = 20,
-    INDEX_OPT_MORE_HELP        = 21,
-    INDEX_OPT_SAVE_OPTS        = 22,
-    INDEX_OPT_LOAD_OPTS        = 23
+    INDEX_OPT_CIPHER           =  1,
+    INDEX_OPT_DEBUG_LEVEL      =  2,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  3,
+    INDEX_OPT_ID_KEY           =  4,
+    INDEX_OPT_GQ_PARAMS        =  5,
+    INDEX_OPT_HOST_KEY         =  6,
+    INDEX_OPT_IFFKEY           =  7,
+    INDEX_OPT_IDENT            =  8,
+    INDEX_OPT_LIFETIME         =  9,
+    INDEX_OPT_MD5KEY           = 10,
+    INDEX_OPT_MODULUS          = 11,
+    INDEX_OPT_PVT_CERT         = 12,
+    INDEX_OPT_PVT_PASSWD       = 13,
+    INDEX_OPT_GET_PVT_PASSWD   = 14,
+    INDEX_OPT_SIGN_KEY         = 15,
+    INDEX_OPT_SUBJECT_NAME     = 16,
+    INDEX_OPT_TRUSTED_CERT     = 17,
+    INDEX_OPT_MV_PARAMS        = 18,
+    INDEX_OPT_MV_KEYS          = 19,
+    INDEX_OPT_VERSION          = 20,
+    INDEX_OPT_HELP             = 21,
+    INDEX_OPT_MORE_HELP        = 22,
+    INDEX_OPT_SAVE_OPTS        = 23,
+    INDEX_OPT_LOAD_OPTS        = 24
 } teOptIndex;
 
-#define OPTION_CT    24
-#define NTP_KEYGEN_VERSION       "4.2.7p212"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p212"
+#define OPTION_CT    25
+#define NTP_KEYGEN_VERSION       "4.2.7p225"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p225"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -130,6 +131,10 @@ typedef enum {
 #  warning undefining CERTIFICATE due to option name conflict
 #  undef   CERTIFICATE
 # endif
+# ifdef    CIPHER
+#  warning undefining CIPHER due to option name conflict
+#  undef   CIPHER
+# endif
 # ifdef    DEBUG_LEVEL
 #  warning undefining DEBUG_LEVEL due to option name conflict
 #  undef   DEBUG_LEVEL
@@ -154,9 +159,9 @@ typedef enum {
 #  warning undefining IFFKEY due to option name conflict
 #  undef   IFFKEY
 # endif
-# ifdef    ISSUER_NAME
-#  warning undefining ISSUER_NAME due to option name conflict
-#  undef   ISSUER_NAME
+# ifdef    IDENT
+#  warning undefining IDENT due to option name conflict
+#  undef   IDENT
 # endif
 # ifdef    LIFETIME
 #  warning undefining LIFETIME due to option name conflict
@@ -204,13 +209,14 @@ typedef enum {
 # endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef CERTIFICATE
+# undef CIPHER
 # undef DEBUG_LEVEL
 # undef SET_DEBUG_LEVEL
 # undef ID_KEY
 # undef GQ_PARAMS
 # undef HOST_KEY
 # undef IFFKEY
-# undef ISSUER_NAME
+# undef IDENT
 # undef LIFETIME
 # undef MD5KEY
 # undef MODULUS
@@ -229,13 +235,14 @@ typedef enum {
  *  Interface defines for specific options.
  */
 #define VALUE_OPT_CERTIFICATE    'c'
+#define VALUE_OPT_CIPHER         'C'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
 #define VALUE_OPT_ID_KEY         'e'
 #define VALUE_OPT_GQ_PARAMS      'G'
 #define VALUE_OPT_HOST_KEY       'H'
 #define VALUE_OPT_IFFKEY         'I'
-#define VALUE_OPT_ISSUER_NAME    'i'
+#define VALUE_OPT_IDENT          'i'
 #define VALUE_OPT_LIFETIME       'l'
 #ifdef AUTOKEY
 

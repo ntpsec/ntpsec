@@ -1,6 +1,7 @@
 /*
  * Definitions for the atom driver and its friends
  */
+#undef NANOSECOND	/* some systems define it differently */
 #define NANOSECOND	1000000000 /* one second (ns) */
 
 struct refclock_atom {

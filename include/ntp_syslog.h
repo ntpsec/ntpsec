@@ -73,6 +73,13 @@ extern char *	syslog_abs_fname;
 #define NLOG_SYNCSTATIST	0x00008000 /* sync statistics output */
 
 extern u_int32 ntp_syslogmask;
-#define NLOG(_X_)	if (ntp_syslogmask & (_X_))
+
+#define NLOG(bits)	if (ntp_syslogmask & (bits))
+
+#define LOGIF(nlog_suffix, msl_args)				\
+do {								\
+	NLOG(NLOG_##nlog_suffix)	/* like "if (...) */	\
+		msyslog msl_args;				\
+} while (FALSE)
 
 #endif /* NTP_SYSLOG_H */

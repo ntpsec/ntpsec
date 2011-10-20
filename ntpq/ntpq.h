@@ -105,6 +105,11 @@ struct association {
 #define	MAXASSOC	1024
 
 /*
+ * mrulist terminal status interval
+ */
+#define	MRU_REPORT_SECS	5
+
+/*
  * var_format is used to override cooked formatting for selected vars.
  */
 typedef struct var_format_tag {

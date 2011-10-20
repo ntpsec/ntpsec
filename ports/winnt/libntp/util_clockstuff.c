@@ -9,8 +9,8 @@
 
 int
 gettimeofday(
-	struct timeval *tv,
-	int ignored
+	struct timeval *	tv,
+	void *			ignored
 	)
 {
 	struct timespec ts;

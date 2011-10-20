@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  September  7, 2011 at 11:52:38 AM by AutoGen 5.12
+# It has been AutoGen-ed  October 15, 2011 at 10:32:47 AM by AutoGen 5.12
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -21,13 +21,14 @@ This software is released under a specialized copyright license.
 @menu
 * ntp-keygen usage::                  ntp-keygen usage help (-?)
 * ntp-keygen certificate::           certificate option (-c)
+* ntp-keygen cipher::                cipher option (-C)
 * ntp-keygen debug-level::           debug-level option (-d)
 * ntp-keygen get-pvt-passwd::        get-pvt-passwd option (-q)
 * ntp-keygen gq-params::             gq-params option (-G)
 * ntp-keygen host-key::              host-key option (-H)
 * ntp-keygen id-key::                id-key option (-e)
+* ntp-keygen ident::                 ident option (-i)
 * ntp-keygen iffkey::                iffkey option (-I)
-* ntp-keygen issuer-name::           issuer-name option (-i)
 * ntp-keygen lifetime::              lifetime option (-l)
 * ntp-keygen md5key::                md5key option (-M)
 * ntp-keygen modulus::               modulus option (-m)
@@ -49,10 +50,11 @@ This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p212
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p225
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme
+   -C Str cipher         privatekey cipher
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
    -D Str set-debug-level Set the debug verbosity level
@@ -61,7 +63,7 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -G no  gq-params      Generate GQ parameters and keys
    -H no  host-key       generate RSA host key
    -I no  iffkey         generate IFF parameters
-   -i Str issuer-name    set issuer name
+   -i Str ident          set Autokey group name
    -l Num lifetime       set certificate lifetime
    -M no  md5key         generate MD5 keys
    -m Num modulus        modulus
@@ -71,7 +73,7 @@ USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
    -p Str pvt-passwd     output private password
    -q Str get-pvt-passwd input private password
    -S Str sign-key       generate sign key (RSA or DSA)
-   -s Str subject-name   set subject name
+   -s Str subject-name   set host and optionally group name
    -T no  trusted-cert   trusted certificate (TC scheme)
    -V Num mv-params      generate <num> MV parameters
    -v Num mv-keys        update <num> MV keys
@@ -117,6 +119,23 @@ Select the certificate message digest/signature encryption scheme.
 Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
 this option is RSA-MD5.
+
+@node ntp-keygen cipher
+@subsection cipher option (-C)
+@cindex ntp-keygen-cipher
+
+This is the ``privatekey cipher'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+Select the cipher which is used to encrypt the files containing
+private keys.  The default is three-key triple DES in CBC mode,
+equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
+available in "openssl -h" output.
 
 @node ntp-keygen debug-level
 @subsection debug-level option (-d)
@@ -190,6 +209,27 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 Write the IFF or GQ client keys to the standard output.  This is
 intended for automatic key distribution by mail.
 
+@node ntp-keygen ident
+@subsection ident option (-i)
+@cindex ntp-keygen-ident
+
+This is the ``set autokey group name'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+Set the optional Autokey group name to name.  This is used in
+the file name of IFF, GQ, and MV client parameters files.  In
+that role, the default is the host name if this option is not
+provided.  The group name, if specified using -i/--ident or
+using -s/--subject-name following an '@' character, is also a
+part of the self-signed host certificate's subject and issuer
+names in the form host@group and should match the 'crypto ident'
+or 'server ident' configuration in ntpd's configuration file. 
+
 @node ntp-keygen iffkey
 @subsection iffkey option (-I)
 @cindex ntp-keygen-iffkey
@@ -204,21 +244,6 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 
 Generate parameters for the IFF identification scheme, obsoleting
 any that may exist.
-
-@node ntp-keygen issuer-name
-@subsection issuer-name option (-i)
-@cindex ntp-keygen-issuer-name
-
-This is the ``set issuer name'' option.
-
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-must be compiled in by defining @code{AUTOKEY} during the compilation.
-@end itemize
-
-Set the issuer name to name.  This is used for the issuer field
-in certificates and in the file name for host and sign keys.
 
 @node ntp-keygen lifetime
 @subsection lifetime option (-l)
@@ -312,7 +337,7 @@ must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
 Encrypt generated files containing private data with the specified
-password and the DES-CBC algorithm.
+password and the cipher selected with -C/--cipher.
 
 @node ntp-keygen set-debug-level
 @subsection set-debug-level option (-D)
@@ -348,7 +373,7 @@ sign key.
 @subsection subject-name option (-s)
 @cindex ntp-keygen-subject-name
 
-This is the ``set subject name'' option.
+This is the ``set host and optionally group name'' option.
 
 This option has some usage constraints.  It:
 @itemize @bullet
@@ -356,8 +381,16 @@ This option has some usage constraints.  It:
 must be compiled in by defining @code{AUTOKEY} during the compilation.
 @end itemize
 
-Set the subject name to name.  This is used as the subject field
-in certificates and in the file name for identity files.
+Set the Autokey host name, and optionally, group name specified
+following an '@' character.  The host name is used in the file
+name of generated host and signing certificates, without the
+group name.  The host name, and if provided, group name are used
+in host@group form for the host certificate's subject and issuer
+fields.  Specifying '-s @group' is allowed, and results in
+leaving the host name unchanged while appending @group to the
+subject and issuer fields, as with -i group.  The group name, or
+if not provided, the host name are also used in the file names
+of IFF, GQ, and MV client parameter files.
 
 @node ntp-keygen trusted-cert
 @subsection trusted-cert option (-T)

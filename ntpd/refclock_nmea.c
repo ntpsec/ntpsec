@@ -22,6 +22,8 @@
 
 #if defined(REFCLOCK) && defined(CLOCK_NMEA)
 
+#define NMEA_WRITE_SUPPORT 0 /* no write support at the moment */
+
 #include <sys/stat.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -38,14 +40,6 @@
 # include "ppsapi_timepps.h"
 # include "refclock_atom.h"
 #endif /* HAVE_PPSAPI */
-
-#ifdef SYS_WINNT
-#undef write	/* ports/winnt/include/config.h: #define write _write */
-extern int async_write(int, const void *, unsigned int);
-#define write(fd, data, octets)	async_write(fd, data, octets)
-#endif
-
-#define MSYSLOG(args) do { NLOG(NLOG_CLOCKINFO) msyslog args; } while (0)
 
 
 /*
@@ -280,7 +274,6 @@ static	void	nmea_control	(int, const struct refclockstat *,
 #define		NMEA_CONTROL	noentry
 #endif /* HAVE_PPSAPI */
 static	void	nmea_timer	(int, struct peer *);
-static	void	gps_send	(int, const char *, struct peer *);
 
 /* parsing helpers */
 static int	field_init	(nmea_data * data, char * cp, int len);
@@ -301,6 +294,21 @@ static int	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
 				 u_short * ccentury);
 
 static int	nmead_open	(const char * device);
+
+/*
+ * If we want the friver to ouput sentences, too: re-enable the send
+ * support functions by defining NMEA_WRITE_SUPPORT to non-zero...
+ */
+#if NMEA_WRITE_SUPPORT
+
+static	void gps_send(int, const char *, struct peer *);
+# ifdef SYS_WINNT
+#  undef write	/* ports/winnt/include/config.h: #define write _write */
+extern int async_write(int, const void *, unsigned int);
+#  define write(fd, data, octets)	async_write(fd, data, octets)
+# endif /* SYS_WINNT */
+
+#endif /* NMEA_WRITE_SUPPORT */
 
 /*
  * -------------------------------------------------------------------
@@ -328,21 +336,23 @@ struct refclock refclock_nmea = {
  */
 static int
 nmea_start(
-	int           unit,
-	struct peer * peer
+	int		unit,
+	struct peer *	peer
 	)
 {
-	struct refclockproc * const pp = peer->procptr;
-	nmea_unit	    * const up = emalloc_zero(sizeof(*up));
+	struct refclockproc * const	pp = peer->procptr;
+	nmea_unit * const		up = emalloc_zero(sizeof(*up));
+	char				device[20];
+	size_t				devlen;
+	u_int32				rate;
+	int				baudrate;
+	char *				baudtext;
 
-	char   device[20];
-	size_t devlen;
-	int    baudrate;
-	char * baudtext;
 
+	/* Get baudrate choice from mode byte bits 4/5/6 */
+	rate = (peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT;
 
-	/* Get baudrate value and text from mode byte bit 4/5/6 */
-	switch ((peer->ttl & NMEA_BAUDRATE_MASK) >> NMEA_BAUDRATE_SHIFT) {
+	switch (rate) {
 	case 0:
 		baudrate = SPEED232;
 		baudtext = "4800";
@@ -396,13 +406,11 @@ nmea_start(
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, 4);
 
-	/* Open serial port. Use CLK line discipline, if available. Use
-	 * baudrate based on the value of bit 4/5/6
-	 */
+	/* Open serial port. Use CLK line discipline, if available. */
 	devlen = snprintf(device, sizeof(device), DEVICE, unit);
 	if (devlen >= sizeof(device)) {
-		MSYSLOG((LOG_ERR, "%s clock device name too long",
-			 refnumtoa(&peer->srcadr)));
+		msyslog(LOG_ERR, "%s clock device name too long",
+			refnumtoa(&peer->srcadr));
 		return FALSE; /* buffer overflow */
 	}
 	pp->io.fd = refclock_open(device, baudrate, LDISC_CLK);
@@ -411,8 +419,8 @@ nmea_start(
 		if (-1 == pp->io.fd)
 			return FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s serial %s open at %s bps",
-		refnumtoa(&peer->srcadr), device, baudtext);
+	LOGIF(CLOCKINFO, (LOG_NOTICE, "%s serial %s open at %s bps",
+	      refnumtoa(&peer->srcadr), device, baudtext));
 
 	/* succeed if this clock can be added */
 	return io_addclock(&pp->io) != 0;
@@ -494,8 +502,8 @@ nmea_control(
 					     S_IRUSR | S_IWUSR);
 		} else {
 			up->ppsapi_fd = -1;
-			MSYSLOG((LOG_ERR, "%s PPS device name too long",
-				 refnumtoa(&peer->srcadr)));
+			msyslog(LOG_ERR, "%s PPS device name too long",
+				refnumtoa(&peer->srcadr));
 		}
 		if (-1 == up->ppsapi_fd)
 			up->ppsapi_fd = pp->io.fd;	
@@ -504,9 +512,9 @@ nmea_control(
 			/* use the PPS API for our own purposes now. */
 			refclock_params(pp->sloppyclockflag, &up->atom);
 		} else {
-			MSYSLOG((LOG_WARNING,
-				 "%s flag1 1 but PPSAPI fails",
-				 refnumtoa(&peer->srcadr)));
+			msyslog(LOG_WARNING,
+				"%s flag1 1 but PPSAPI fails",
+				refnumtoa(&peer->srcadr));
 		}
 	}
 
@@ -550,12 +558,20 @@ nmea_timer(
 	struct peer * peer
 	)
 {
+#if NMEA_WRITE_SUPPORT
+    
 	struct refclockproc * const pp = peer->procptr;
 
 	UNUSED_ARG(unit);
 
 	if (-1 != pp->io.fd) /* any mode bits to evaluate here? */
 		gps_send(pp->io.fd, "$PMOTG,RMC,0000*1D\r\n", peer);
+#else
+	
+	UNUSED_ARG(unit);
+	UNUSED_ARG(peer);
+	
+#endif /* NMEA_WRITE_SUPPORT */
 }
 
 #ifdef HAVE_PPSAPI
@@ -709,13 +725,12 @@ nmea_receive(
 	struct calendar date;	/* to keep & convert the time stamp */
 	struct timespec tofs;	/* offset to full-second reftime */
 	gps_weektm      gpsw;	/* week time storage */
-
 	/* results of sentence/date/time parsing */
-	u_char sentence;	/* sentence tag */
-	int    checkres;
-	char * cp;
-	u_char rc_date;
-	u_char rc_time;
+	u_char		sentence;	/* sentence tag */
+	int		checkres;
+	char *		cp;
+	int		rc_date;
+	int		rc_time;
 
 	/* make sure data has defined pristine state */
 	ZERO(tofs);
@@ -908,8 +923,8 @@ nmea_receive(
 
 	/* Check if we must enter GPS time mode; log so if we do */
 	if (!up->gps_time && (sentence == NMEA_GPZDG)) {
-		MSYSLOG((LOG_INFO, "%s using GPS time scale",
-			 refnumtoa(&peer->srcadr)));
+		msyslog(LOG_INFO, "%s using GPS time as if it were UTC",
+			refnumtoa(&peer->srcadr));
 		up->gps_time = 1;
 	}
 	
@@ -1029,6 +1044,7 @@ nmea_poll(
 	}
 }
 
+#if NMEA_WRITE_SUPPORT
 /*
  * -------------------------------------------------------------------
  *  gps_send(fd, cmd, peer)	Sends a command to the GPS receiver.
@@ -1086,6 +1102,7 @@ gps_send(
 	if (write(fd, cmd, len) == -1)
 		refclock_report(peer, CEVNT_FAULT);
 }
+#endif /* NMEA_WRITE_SUPPORT */
 
 /*
  * -------------------------------------------------------------------
@@ -1535,9 +1552,10 @@ unfold_century(
 
 	ntpcal_ntp_to_date(&rec, rec_ui, NULL);
 	baseyear = (rec.year > 2000) ? (rec.year - 20) : 1980;
-	jd->year = ntpcal_periodic_extend(baseyear, jd->year, 100);
+	jd->year = (u_short)ntpcal_periodic_extend(baseyear, jd->year,
+						   100);
 
-	return (baseyear <= jd->year) && (baseyear + 100 > jd->year);
+	return ((baseyear <= jd->year) && (baseyear + 100 > jd->year));
 }
 
 /*

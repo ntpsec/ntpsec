@@ -88,8 +88,8 @@ static HANDLE hHeapHandle = NULL;
 #endif
 
 	HANDLE WaitableExitEventHandle;
-static	HANDLE hIoCompletionPort = NULL;
-static	HANDLE WaitableIoEventHandle = NULL;
+	HANDLE WaitableIoEventHandle;
+static	HANDLE hIoCompletionPort;
 
 #ifdef NTPNEEDNAMEDHANDLE
 #define WAITABLEIOEVENTHANDLE "WaitableIoEventHandle"
@@ -569,6 +569,7 @@ OnSerialReadComplete(
 {
 	recvbuf_t *		buff;
 	l_fp			cr_time;
+	int			consumed;
 
 	if (!rio->active)
 		return FALSE;
@@ -586,14 +587,12 @@ OnSerialReadComplete(
 		buff->receiver = rio->clock_recv;
 		buff->dstadr = NULL;
 		buff->recv_peer = rio->srcclock;
-		packets_received++;
-		handler_pkts++;
 		/*
 		 * Eat the first line of input as it's possibly
 		 * partial and if a PPS is present, it may not 
 		 * have fired since the port was opened.
 		 */
-		if (rio->recvcount++) {
+		if (rio->recvcount++ > 0) {
 			cr_time = buff->recv_time;
 			buff->fd = rio->fd;		/* was handle */
 			add_full_recv_buffer(buff);
@@ -613,11 +612,11 @@ OnSerialReadComplete(
 			buff->receiver = rio->clock_recv;
 			buff->dstadr = NULL;
 			buff->recv_peer = rio->srcclock;
-			add_full_recv_buffer(buff);
-			/*
-			 * Now signal we have something to process
-			 */
-			SetEvent(WaitableIoEventHandle);
+			consumed = indicate_refclock_packet(rio, buff);
+			if (!consumed) {
+				packets_received++;
+				handler_pkts++;
+			}
 			buff = get_free_recv_buffer_alloc();
 		}
 	}
@@ -665,6 +664,7 @@ OnRawSerialReadComplete(
 {
 	recvbuf_t *		rbufp;
 	l_fp			arrival_time;
+	int			consumed;
 
 	get_systime(&arrival_time);
 
@@ -681,13 +681,13 @@ OnRawSerialReadComplete(
 		rbufp->receiver = rio->clock_recv;
 		rbufp->recv_peer = rio->srcclock;
 		rbufp->fd = rio->fd; /* was handle */
-		packets_received++;
-		handler_pkts++;
-		add_full_recv_buffer(rbufp);
-		/*
-		 * Now signal we have something to process
-		 */
-		SetEvent(WaitableIoEventHandle);
+
+		consumed = indicate_refclock_packet(rio, rbufp);
+		if (!consumed) {
+			rio->recvcount++;
+			packets_received++;
+			handler_pkts++;
+		}
 		rbufp = get_free_recv_buffer_alloc();
 	}
 

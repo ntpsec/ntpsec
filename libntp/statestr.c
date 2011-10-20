@@ -126,7 +126,6 @@ static const struct codestring sys_codes[] = {
 	{ EVNT_KERN,		"kern" },
 	{ EVNT_TAI,		"TAI" },
 	{ EVNT_LEAPVAL,		"stale_leapsecond_values" },
-	{ EVNT_CLKHOP,		"clockhop" },
 	{ -1,			"" }
 };
 
@@ -317,7 +316,9 @@ decode_bitflags(
 	char *		lim;
 	size_t		b;
 	int		rc;
+	int		saved_errno;	/* for use in DPRINTF with %m */
 
+	saved_errno = errno;
 	LIB_GETBUF(buf);
 	pch = buf;
 	lim = buf + LIB_BUFLENGTH;
@@ -351,6 +352,7 @@ decode_bitflags(
 #endif
 			     "",
 		 bits, (int)LIB_BUFLENGTH);
+	errno = saved_errno;
 
 	return buf;
 }

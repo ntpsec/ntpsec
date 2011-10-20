@@ -647,6 +647,41 @@ refclock_gtraw(
 
 
 /*
+ * indicate_refclock_packet()
+ *
+ * Passes a fragment of refclock input read from the device to the
+ * driver direct input routine, which may consume it (batch it for
+ * queuing once a logical unit is assembled).  If it is not so
+ * consumed, queue it for the driver's receive entrypoint.
+ *
+ * The return value is TRUE if the data has been consumed as a fragment
+ * and should not be counted as a received packet.
+ */
+int
+indicate_refclock_packet(
+	struct refclockio *	rio,
+	struct recvbuf *	rb
+	)
+{
+	/* Does this refclock use direct input routine? */
+	if (rio->io_input != NULL && (*rio->io_input)(rb) == 0) {
+		/*
+		 * data was consumed - nothing to pass up
+		 * into block input machine
+		 */
+		freerecvbuf(rb);
+
+		return TRUE;
+	}
+	add_full_recv_buffer(rb);
+#ifdef HAVE_IO_COMPLETION_PORT
+	SetEvent(WaitableIoEventHandle);
+#endif
+	return FALSE;
+}
+
+
+/*
  * The following code does not apply to WINNT & VMS ...
  */
 #if !defined(SYS_VXWORKS) && !defined(SYS_WINNT)

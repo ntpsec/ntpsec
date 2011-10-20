@@ -18,7 +18,7 @@ typedef struct timespec {
 
 #define TIMEOFDAY	0	/* getclock() clktyp arg */
 extern int getclock(int, struct timespec *ts);
-extern int gettimeofday(struct timeval *, int);
+extern int gettimeofday(struct timeval *, void *);
 extern int settimeofday(struct timeval *);
 
 #endif /* SYS_TIME_H */

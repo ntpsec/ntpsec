@@ -120,6 +120,7 @@
 #endif
 
 #ifdef HAVE_TERMIOS
+# include <termios.h>
 # define TTY_GETATTR(_FD_, _ARG_) tcgetattr((_FD_), (_ARG_))
 # define TTY_SETATTR(_FD_, _ARG_) tcsetattr((_FD_), TCSANOW, (_ARG_))
 # undef HAVE_SYSV_TTYS
@@ -2312,12 +2313,19 @@ local_input(
 						sizeof(parsetime_t));
 					buf->recv_length  = sizeof(parsetime_t);
 					buf->recv_time    = rbufp->recv_time;
+#ifndef HAVE_IO_COMPLETION_PORT
 					buf->srcadr       = rbufp->srcadr;
+#endif
 					buf->dstadr       = rbufp->dstadr;
 					buf->receiver     = rbufp->receiver;
 					buf->fd           = rbufp->fd;
 					buf->X_from_where = rbufp->X_from_where;
+					parse->generic->io.recvcount++;
+					packets_received++;
 					add_full_recv_buffer(buf);
+#ifdef HAVE_IO_COMPLETION_PORT
+					SetEvent(WaitableIoEventHandle);
+#endif
 				}
 				parse_iodone(&parse->parseio);
 			}
@@ -2721,7 +2729,7 @@ parse_shutdown(
 	}
 #endif
 	if (parse->generic->io.fd != parse->ppsfd && parse->ppsfd != -1)
-		(void)close(parse->ppsfd);  /* close separate PPS source */
+		(void)closeserial(parse->ppsfd);  /* close separate PPS source */
 
 	/*
 	 * print statistics a last time and
@@ -2933,11 +2941,11 @@ parse_start(
 #define O_NOCTTY 0
 #endif
 
-	fd232 = open(parsedev, O_RDWR | O_NOCTTY
+	fd232 = tty_open(parsedev, O_RDWR | O_NOCTTY
 #ifdef O_NONBLOCK
-		     | O_NONBLOCK
+			 | O_NONBLOCK
 #endif
-		     , 0777);
+			 , 0777);
 
 	if (fd232 == -1)
 	{
@@ -2945,9 +2953,7 @@ parse_start(
 		return 0;
 	}
 
-	parse = (struct parseunit *)emalloc(sizeof(struct parseunit));
-
-	memset((char *)parse, 0, sizeof(struct parseunit));
+	parse = emalloc_zero(sizeof(*parse));
 
 	parse->generic = peer->procptr;	 /* link up */
 	parse->generic->unitptr = (caddr_t)parse; /* link down */
@@ -3061,11 +3067,11 @@ parse_start(
 		 * if the PARSEPPSDEVICE can be opened that will be used
 		 * for PPS else PARSEDEVICE will be used
 		 */
-		parse->ppsfd = open(parseppsdev, O_RDWR | O_NOCTTY
+		parse->ppsfd = tty_open(parseppsdev, O_RDWR | O_NOCTTY
 #ifdef O_NONBLOCK
-				    | O_NONBLOCK
+					| O_NONBLOCK
 #endif
-				    , 0777);
+					, 0777);
 
 		if (parse->ppsfd == -1)
 		{

@@ -77,6 +77,8 @@ extern	void	errno_to_str(int, char *, size_t);
 		errno = preserved_errno;		\
 	}
 
+typedef void (*ctrl_c_fn)(void);
+
 /* authkeys.c */
 extern	void	auth_delkeys	(void);
 extern	int	auth_havekey	(keyid_t);
@@ -152,7 +154,9 @@ extern	char *	mfptoms		(u_long, u_long, short);
 extern	const char * modetoa	(int);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
+#ifdef KERNEL_PLL
 extern	const char * k_st_flags	(u_int32);
+#endif
 extern	char *	statustoa	(int, int);
 extern	sockaddr_u * netof	(sockaddr_u *);
 extern	char *	numtoa		(u_int32);
@@ -173,6 +177,7 @@ extern	int	decodenetnum	(const char *, sockaddr_u *);
 extern	const char * FindConfig	(const char *);
 
 extern	void	signal_no_reset (int, RETSIGTYPE (*func)(int));
+extern	void	set_ctrl_c_hook (ctrl_c_fn);
 
 extern	void	getauthkeys 	(const char *);
 extern	void	auth_agekeys	(void);

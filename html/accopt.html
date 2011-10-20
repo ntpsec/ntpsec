@@ -19,7 +19,7 @@ color: #FF0000;
 <img src="pic/pogo6.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>The skunk watches for intruders and sprays.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->11-Sep-2010  16:55<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->14-Oct-2011  18:37<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -72,6 +72,7 @@ color: #FF0000;
       <dd>Decline to provide mode 6 control message trap service to matching hosts. The trap service is a subsystem of the <tt>ntpdc</tt> control message protocol which is intended for use by remote event logging programs.</dd>
       <dt><tt>notrust</tt></dt>
       <dd>Deny packets that are not cryptographically authenticated. Note carefully how this flag interacts with the <tt>auth</tt> option of the <tt>enable</tt> and <tt>disable</tt> commands. If <tt>auth</tt> is enabled, which is the default, authentication is required for all packets that might mobilize  an association. If <tt>auth</tt> is disabled, but the <tt>notrust</tt> flag is not present, an association can be mobilized whether or not authenticated. If <tt>auth</tt> is disabled, but the <tt>notrust</tt> flag is present, authentication is required only for the specified address/mask range. </dd>
+      <dt><tt>ntpport</tt></dt>
       <dd>This is actually a match algorithm modifier, rather than a restriction
         flag. Its presence causes the restriction entry to be matched only if the
         source port in the packet is the standard NTP UDP port (123). A restrict line

@@ -229,8 +229,8 @@ wwvb_shutdown(
 	struct peer *peer
 	)
 {
-	register struct wwvbunit *up;
-	struct refclockproc *pp;
+	struct refclockproc *	pp;
+	struct wwvbunit *	up;
 
 	pp = peer->procptr;
 	up = pp->unitptr;
@@ -395,28 +395,28 @@ wwvb_receive(
 	 */
 	switch (qualchar) {
 
-	    case ' ':
+	case ' ':
 		pp->disp = .001;
 		pp->lastref = pp->lastrec;
 		break;
 
-	    case 'A':
+	case 'A':
 		pp->disp = .01;
 		break;
 
-	    case 'B':
+	case 'B':
 		pp->disp = .1;
 		break;
 
-	    case 'C':
+	case 'C':
 		pp->disp = .5;
 		break;
 
-	    case 'D':
+	case 'D':
 		pp->disp = MAXDISPERSE;
 		break;
 
-	    default:
+	default:
 		pp->disp = MAXDISPERSE;
 		refclock_report(peer, CEVNT_BADREPLY);
 		break;
@@ -591,9 +591,8 @@ wwvb_control(
 		return;
 	}
 
-	NLOG(NLOG_CLOCKINFO)
-		msyslog(LOG_WARNING, "%s flag1 1 but PPSAPI fails",
-			refnumtoa(&peer->srcadr));
+	msyslog(LOG_WARNING, "%s flag1 1 but PPSAPI fails",
+		refnumtoa(&peer->srcadr));
 }
 #endif	/* HAVE_PPSAPI */
 

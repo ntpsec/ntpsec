@@ -2,8 +2,7 @@
 <html><head>
     <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"><title>Generic NMEA GPS Receiver</title>
     
-    <link href="driver20_files/a" type="text/css" rel="stylesheet">
-    
+    <link href="scripts/style.css" type="text/css" rel="stylesheet">
     <style type="text/css">
       table.dlstable { font-size:85%; }
       td.ttf{ font-family:Courier; font-weight:bold; }
@@ -214,22 +213,22 @@
       </tr><tr>
 	<td rowspan="6" align="center">4-6</td>
 	<td align="center">0</td>
-	<td>linespeed 4800bps</td>
+	<td>linespeed 4800 bps</td>
       </tr><tr>
 	<td align="center">16</td>
-	<td>linespeed 9600bps</td>
+	<td>linespeed 9600 bps</td>
       </tr><tr>
 	<td align="center">32</td>
-	<td>linespeed 19200bps</td>
+	<td>linespeed 19200 bps</td>
       </tr><tr>
 	<td align="center">48</td>
-	<td>linespeed 38400bps</td>
+	<td>linespeed 38400 bps</td>
       </tr><tr>
 	<td align="center">64</td>
-	<td>linespeed 57600bps</td>
+	<td>linespeed 57600 bps</td>
       </tr><tr>
 	<td align="center">80</td>
-	<td>linespeed 115200bps</td>
+	<td>linespeed 115200 bps</td>
       </tr><tr>
 	<td align="center">7</td>
 	<td align="center">128</td>
@@ -244,7 +243,7 @@
  
     <p>
       The default (mode 0) is to process all supported sentences at a linespeed
-      of 4800bps, which results in the first one received and recognised in
+      of 4800 bps, which results in the first one received and recognised in
       each cycle being used.&nbsp; If only specific sentences should be
       recognised, then the mode byte must be chosen to enable only the selected
       ones.&nbsp; Multiple sentences may be selected by adding their mode bit
@@ -267,12 +266,12 @@
       increase the precision of the timing device.&nbsp; Higher line speeds are
       not necessarily helpful for the NMEA driver, either.&nbsp; They can be
       used to accomodate for an amount of data that does not fit into a
-      1-second cycle at 4800bps, but high-speed high-volume NMEA data is likely
+      1-second cycle at 4800 bps, but high-speed high-volume NMEA data is likely
       to cause trouble with the serial line driver since NMEA supports no
       protocol handshake.&nbsp; Any device that is exclusively used for time
       synchronisation purposes should be configured to transmit the relevant
       data only, e.g. one <tt>$GPRMC</tt> or <tt>$GPZDA</tt> per second, at a
-      linespeed of 4800bps or eventually 9600bps.
+      linespeed of 4800 bps or 9600 bps.
     </p>
 
     <p>
@@ -285,14 +284,6 @@
       To make a specific setting, select the corresponding decimal values from
       the mode byte table, add them all together and enter the resulting
       decimal value into the clock configuration line.
-    </p>
-
-    <p>
-      The driver will send a <tt>$PMOTG,RMC,0000*1D&lt;cr&gt;&lt;lf&gt;</tt>
-      command each poll interval.&nbsp; This is not needed on most GPS
-      receivers because they automatically send <tt>$GPRMC</tt> every second,
-      but helps a Motorola GPS receiver that is otherwise silent.&nbsp; NMEA
-      devices ignore commands they do not understand.
     </p>
 
     <h4>Setting up the Garmin GPS-25XL</h4>
@@ -337,7 +328,7 @@
     </dl>
 
     <p>Additional Information</p>
-    <p><a href="">Reference Clock Drivers</a></p>
+    <p><a href="../refclock.html">Reference Clock Drivers</a></p>
     <hr>
-    <script type="text/javascript" language="javascript" src="driver20_files/a"></script>
+    <script type="text/javascript" language="javascript" src="scripts/footer.txt"></script>
   </body></html>

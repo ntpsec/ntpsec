@@ -12,7 +12,7 @@
 Walt Kelly</a>
 <p>The chicken is getting configuration advice.</p>
 <p>Last update:
-	<!-- #BeginDate format:En2m -->27-Jul-2011  20:27<!-- #EndDate -->
+	<!-- #BeginDate format:En2m -->14-Oct-2011  19:30<!-- #EndDate -->
 </p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -42,15 +42,15 @@ Walt Kelly</a>
 		<dl>
 			<dt><tt>server</tt></dt>
 			<dd>For type s and r addresses (only), this command mobilizes a persistent client mode association with the specified remote server or local reference clock. If the <tt>preempt</tt> flag is specified, a preemptable client mode association is mobilized instead.</dd>
-			<dt><tt>peer</tt></dt>
+			<dt id="peer"><tt>peer</tt></dt>
 			<dd>For type s addresses (only), this command mobilizes a persistent symmetric-active mode association with the specified remote peer.</dd>
-			<dt><tt>broadcast</tt></dt>
+			<dt id="broadcast"><tt>broadcast</tt></dt>
 			<dd>For type b and m addressees (only), this command mobilizes a broadcast or multicast server mode association. Note that type b messages go only to the interface specified, but type m messages go to all interfaces.</dd>
-		  <dt><tt>manycastclient</tt></dt>
-			<dd>For type m addresses (only), this command mobilizes a preemptable manycast client mode association for the multicast group address specified. In this mode the address must match the address specified on the <tt>manycastserver</tt> command of one or more designated manycast servers. Additional information about this command is on the  <a href="discover.html#pool">Automatic Server Discovery</a> page.</dd>
-			<dt><tt>pool</tt></dt>
+			<dt id="manycastclient"><tt>manycastclient</tt></dt>
+			<dd>For type m addresses (only), this command mobilizes a preemptable manycast client mode association for the multicast group address specified. In this mode the address must match the address specified on the <tt>manycastserver</tt> command of one or more designated manycast servers. Additional information about this command is on the <a href="discover.html#mcst">Automatic Server Discovery</a> page.</dd>
+			<dt id="pool"><tt>pool</tt></dt>
 			<dd>For type s addresses (only) this command mobilizes a preemptable pool client mode association for the DNS name specified. The DNS name must resolve to one or more IPv4 or IPv6 addresses. Additional information about this command is on the  <a href="discover.html#pool">Automatic Server Discovery</a> page. The <a href="http://www.pool.ntp.org/">www.pool.ntp.org</a> page describes a compatible pool of public NTP servers.</dd>
-		  <dt><tt>unpeer</tt></dt>
+			<dt id="unpeer"><tt>unpeer</tt></dt>
 			<dd>This command removes a previously configured association. An address or association ID can be used to identify the association.  Either an IP address or DNS name can be used. This command is most useful when supplied via <tt><a href="ntpq.html">ntpq</a></tt> runtime configuration commands <tt>:config</tt> and <tt>config-from-file</tt>.</dd>
 		</dl></dd>
 </dl>
