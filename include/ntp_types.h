@@ -40,7 +40,10 @@
  * used to quiet compiler warnings
  */
 #ifndef UNUSED_ARG
-#define UNUSED_ARG(arg)	((void)(arg))
+#define UNUSED_ARG(arg)		((void)(arg))
+#endif
+#ifndef UNUSED_LOCAL
+#define UNUSED_LOCAL(arg)	((void)(arg))
 #endif
 
 /*

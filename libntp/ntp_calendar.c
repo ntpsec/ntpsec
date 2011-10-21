@@ -52,48 +52,47 @@ now(void)
  */
 vint64
 time_to_vint64(
-	const time_t * tv
+	const time_t * ptt
 	)
 {
 	vint64 res;
-	time_t tmp;
+	time_t tt;
 
+	tt = *ptt;
+
+#if SIZEOF_TIME_T <= 4
+
+	res.D_s.hi = 0;
+	if (tt < 0) {
+		res.D_s.lo = (u_int32)-tt;
+		M_NEG(res.D_s.hi, res.D_s.lo);
+	} else {
+		res.D_s.lo = (u_int32)tt;
+	}
+
+#elif defined(HAVE_INT64)
+
+	res.q_s = tt;
+
+#else
 	/*
 	 * shifting negative signed quantities is compiler-dependent, so
 	 * we better avoid it and do it all manually. And shifting more
 	 * than the width of a quantity is undefined. Also a don't do!
 	 */
-
-#if SIZEOF_TIME_T <= 4
-
-	res.D_s.hi = 0;
-	if ((tmp = *tv) < 0) {
-		res.D_s.lo = (u_int32) -tmp;
+	if (tt < 0) {
+		tt = -tt;
+		res.D_s.lo = (u_int32)tt;
+		res.D_s.hi = (u_int32)(tt >> 32);
 		M_NEG(res.D_s.hi, res.D_s.lo);
 	} else {
-		res.D_s.lo = (u_int32) tmp;
+		res.D_s.lo = (u_int32)tt;
+		res.D_s.hi = (u_int32)(tt >> 32);
 	}
 
-#elif defined (HAVE_INT64)
-
-	(void)tmp; 	/* touch it to avoid warnings... */
-	res.q_s = *tv;
-
-#else
-	time_t tmp = *tv;
-	if ((tmp = *tv) < 0) {
-		tmp = -tmp;
-		res.D_s.lo = (u_int32)tmp;
-		res.D_s.hi = (u_int32)(tmp >> 32);
-		M_NEG(res.D_s.hi, res.D_s.lo);
-	} else {
-		res.D_s.lo = (u_int32)tmp;
-		res.D_s.hi = (u_int32)(tmp >> 32);
-	}
-    
 #endif
 
-    return res;
+	return res;
 }
 
 
@@ -108,14 +107,14 @@ vint64_to_time(
 
 	res = (time_t)tv->D_s.lo;
 
-#elif defined (HAVE_INT64)
+#elif defined(HAVE_INT64)
 
 	res = (time_t)tv->q_s;
 
 #else
 
 	res = ((time_t)tv->d_s.hi << 32) | tv->D_s.lo;
-    
+
 #endif
 
 	return res;
@@ -156,31 +155,32 @@ ntpcal_get_build_date(
 	 */
 	static const char build[] = __TIME__ "/" __DATE__;
 	static const char mlist[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-	char        month[4];
-	const char *cp;
-	u_short     hour, minute, second, year, day;
-		
-	memset(jd, 0, sizeof(struct calendar));
+	char		  monstr[4];
+	const char *	  cp;
+	u_short		  hour, minute, second, month, day, year;
+	
+	ZERO(jd);
 	jd->year     = 1970;
 	jd->month    = 1;
 	jd->monthday = 1;
 
 	if (6 == sscanf(build, "%hu:%hu:%hu/%3s %hu %hu",
-			&hour, &minute, &second, month, &day, &year)) {
-		cp = strstr(mlist, month);
+			&hour, &minute, &second, monstr, &day, &year)) {
+		cp = strstr(mlist, monstr);
 		if (NULL != cp) {
+			month = (u_short)(cp - mlist) / 3 + 1;
 			jd->year     = year;
-			jd->month    = (cp - mlist) / 3 + 1;
-			jd->monthday = day;
-			jd->hour     = hour;
-			jd->minute   = minute;
-			jd->second   = second;
-			return 1;
-		}
-	}		
+			jd->month    = (u_char)month;
+			jd->monthday = (u_char)day;
+			jd->hour     = (u_char)hour;
+			jd->minute   = (u_char)minute;
+			jd->second   = (u_char)second;
 
-	return 0;
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 
@@ -322,7 +322,8 @@ int32
 ntpcal_periodic_extend(
 	int32 pivot,
 	int32 value,
-	int32 cycle)
+	int32 cycle
+	)
 {
 	u_int32 diff;
 	char	cpl = 0; /* modulo complement flag	   */
@@ -376,26 +377,31 @@ ntpcal_periodic_extend(
  */
 vint64
 ntpcal_ntp_to_time(
-	u_int32	      ntp  ,
-	const time_t *pivot)
+	u_int32		ntp,
+	const time_t *	pivot
+	)
 {
 	vint64 res;
 
 #ifdef HAVE_INT64
 
-	res.q_s = pivot ? *pivot : now();
-	
-	res.Q_s -= 0x80000000u;		/* unshift of half range */
+	res.q_s = (pivot != NULL) 
+		      ? *pivot
+		      : now();	
+	res.Q_s -= 0x80000000;		/* unshift of half range */
 	ntp	-= (u_int32)JAN_1970;	/* warp into UN*X domain */
 	ntp	-= res.D_s.lo;		/* cycle difference	 */
 	res.Q_s += (u_int64)ntp;	/* get expanded time	 */
 
 #else /* no 64bit scalars */
 	
-	time_t tmp = pivot ? *pivot : now();
-
+	time_t tmp;
+	
+	tmp = (pivot != NULL) 
+		  ? *pivot
+		  : now();	
 	res = time_to_vint64(&tmp);
-	M_SUB(res.D_s.hi, res.D_s.lo, 0, 0x80000000u);
+	M_SUB(res.D_s.hi, res.D_s.lo, 0, 0x80000000);
 	ntp -= (u_int32)JAN_1970;	/* warp into UN*X domain */
 	ntp -= res.D_s.lo;		/* cycle difference	 */
 	M_ADD(res.D_s.hi, res.D_s.lo, 0, ntp);
@@ -420,24 +426,29 @@ ntpcal_ntp_to_time(
  */
 vint64
 ntpcal_ntp_to_ntp(
-	u_int32	      ntp  ,
-	const time_t *pivot)
+	u_int32	      ntp,
+	const time_t *pivot
+	)
 {
 	vint64 res;
 
 #ifdef HAVE_INT64
 
-	res.q_s = pivot ? *pivot : now();
-
-	res.Q_s -= 0x80000000u;		/* unshift of half range */
+	res.q_s = (pivot)
+		      ? *pivot
+		      : now();
+	res.Q_s -= 0x80000000;		/* unshift of half range */
 	res.Q_s += (u_int32)JAN_1970;	/* warp into NTP domain	 */
 	ntp	-= res.D_s.lo;		/* cycle difference	 */
 	res.Q_s += (u_int64)ntp;		/* get expanded time	 */
 
 #else /* no 64bit scalars */
 	
-	time_t tmp = pivot ? *pivot : now();
-
+	time_t tmp;
+	
+	tmp = (pivot)
+		  ? *pivot
+		  : now();
 	res = time_to_vint64(&tmp);
 	M_SUB(res.D_s.hi, res.D_s.lo, 0, 0x80000000u);
 	M_ADD(res.D_s.hi, res.D_s.lo, 0, (u_int32)JAN_1970);/*into NTP */
@@ -468,7 +479,8 @@ ntpcal_ntp_to_ntp(
  */
 ntpcal_split
 ntpcal_daysplit(
-	const vint64 *ts)
+	const vint64 *ts
+	)
 {
 	ntpcal_split res;
 
@@ -495,7 +507,8 @@ ntpcal_daysplit(
 
 	memcpy(&op, ts, sizeof(op));
 	/* fix sign */
-	if ((isneg = M_ISNEG(op.D_s.hi, op.D_s.lo)) != 0)
+	isneg = M_ISNEG(op.D_s.hi, op.D_s.lo);
+	if (isneg)
 		M_NEG(op.D_s.hi, op.D_s.lo);
 		
 	/* save remainder of DIV 128, shift for divide */
@@ -510,7 +523,8 @@ ntpcal_daysplit(
 	 * even if we *know* the divider fits into unsigned 16 bits the
 	 * exra code pathes should pay off.
 	 */
-	if ((a = op.D_s.hi) > 675u)
+	a = op.D_s.hi;
+	if (a > 675u)
 		a = a % 675u;
 	if (a) {
 		a = (a << 16) | op.W_s.lh;
@@ -554,7 +568,8 @@ ntpcal_daysplit(
 static int32
 priv_timesplit(
 	int   split[3],
-	int32 ts	    )
+	int32 ts
+	)
 {
 	int32 days = 0;
 
@@ -589,8 +604,9 @@ priv_timesplit(
  */
 ntpcal_split
 ntpcal_split_eradays(
-	int32 days	,
-	int  *isleapyear)
+	int32 days,
+	int  *isleapyear
+	)
 {
 	ntpcal_split res;
 	int32	     n400, n100, n004, n001, yday; /* calendar year cycles */
@@ -647,8 +663,9 @@ ntpcal_split_eradays(
  */
 ntpcal_split
 ntpcal_split_yeardays(
-	int32 eyd	,
-	int   isleapyear)
+	int32 eyd,
+	int   isleapyear
+	)
 {
 	ntpcal_split   res;
 	const u_short *lt;	/* month length table	*/
@@ -661,8 +678,9 @@ ntpcal_split_yeardays(
 		if (lt[res.hi + 1] <= eyd) /* fixup approximative month value  */
 			res.hi += 1;
 		res.lo = eyd - lt[res.hi];
-	} else
+	} else {
 		res.lo = res.hi = -1;
+	}
 
 	return res;
 }
@@ -675,12 +693,15 @@ ntpcal_split_yeardays(
 int
 ntpcal_rd_to_date(
 	struct calendar *jd,
-	int32		 rd)
+	int32		 rd
+	)
 {
 	ntpcal_split split;
-	int	     leaps = 0;
-	int	     retv  = 0;
+	int	     leaps;
+	int	     retv;
 
+	leaps = 0;
+	retv = 0;
 	/* get day-of-week first */
 	jd->weekday = rd % 7;
 	if (jd->weekday >= 7)	/* unsigned! */
@@ -712,11 +733,13 @@ ntpcal_rd_to_date(
 int
 ntpcal_rd_to_tm(
 	struct tm  *utm,
-	int32	    rd )
+	int32	    rd
+	)
 {
 	ntpcal_split split;
-	int	     leaps = 0;
+	int	     leaps;
 
+	leaps = 0;
 	/* get day-of-week first */
 	utm->tm_wday = rd % 7;
 	if (utm->tm_wday < 0)
@@ -744,7 +767,8 @@ ntpcal_rd_to_tm(
 int32
 ntpcal_daysec_to_date(
 	struct calendar *jd,
-	int32		sec)
+	int32		sec
+	)
 {
 	int32 days;
 	int   ts[3];
@@ -766,7 +790,8 @@ ntpcal_daysec_to_date(
 int32
 ntpcal_daysec_to_tm(
 	struct tm *utm,
-	int32	   sec)
+	int32	   sec
+	)
 {
 	int32 days;
 	int   ts[3];
@@ -791,9 +816,10 @@ ntpcal_daysec_to_tm(
  */
 int
 ntpcal_daysplit_to_date(
-	struct calendar	   *jd ,
-	const ntpcal_split *ds ,
-	int32		    dof)
+	struct calendar	   *jd,
+	const ntpcal_split *ds,
+	int32		    dof
+	)
 {
 	dof += ntpcal_daysec_to_date(jd, ds->lo);
 	return ntpcal_rd_to_date(jd, ds->hi + dof);
@@ -813,9 +839,11 @@ int
 ntpcal_daysplit_to_tm(
 	struct tm	   *utm,
 	const ntpcal_split *ds ,
-	int32		    dof)
+	int32		    dof
+	)
 {
 	dof += ntpcal_daysec_to_tm(utm, ds->lo);
+
 	return ntpcal_rd_to_tm(utm, ds->hi + dof);
 }
 
@@ -827,13 +855,15 @@ ntpcal_daysplit_to_tm(
 int
 ntpcal_time_to_date(
 	struct calendar	*jd,
-	const vint64	*ts)
+	const vint64	*ts
+	)
 {
 	ntpcal_split ds;
 
 	ds = ntpcal_daysplit(ts);
 	ds.hi += ntpcal_daysec_to_date(jd, ds.lo);
 	ds.hi += DAY_UNIX_STARTS;
+
 	return ntpcal_rd_to_date(jd, ds.hi);
 }
 
@@ -855,7 +885,8 @@ ntpcal_time_to_date(
 vint64
 ntpcal_dayjoin(
 	int32 days,
-	int32 secs)
+	int32 secs
+	)
 {
 	vint64 res;
 
@@ -870,10 +901,12 @@ ntpcal_dayjoin(
 	u_int32 p1, p2;
 	int	isneg;
 
-	/* res = days *86400 + secs, using manual 16/32 bit
+	/*
+	 * res = days *86400 + secs, using manual 16/32 bit
 	 * multiplications and shifts.
 	 */
-	if ((isneg = (days < 0)) != 0)
+	isneg = (days < 0);
+	if (isneg)
 		days = -days;
 
 	/* assemble days * 675 */
@@ -895,10 +928,10 @@ ntpcal_dayjoin(
 	/* properly add seconds */
 	p2 = 0;
 	if (secs < 0) {
-		p1 = (u_int32) -secs;
+		p1 = (u_int32)-secs;
 		M_NEG(p2, p1);
 	} else {
-		p1 = (u_int32)  secs;
+		p1 = (u_int32)secs;
 	}
 	M_ADD(res.D_s.hi, res.D_s.lo, p2, p1);
 
@@ -921,7 +954,8 @@ ntpcal_dayjoin(
  */
 int32
 ntpcal_days_in_years(
-	int32 years)
+	int32 years
+	)
 {
 	int32 cycle; /* full gregorian cycle */
 
@@ -962,7 +996,8 @@ ntpcal_days_in_years(
  */
 ntpcal_split
 ntpcal_days_in_months(
-	int32 m)
+	int32 m
+	)
 {
 	ntpcal_split res;
 
@@ -1003,9 +1038,10 @@ ntpcal_days_in_months(
  */
 int32
 ntpcal_edate_to_eradays(
-	int32 years  ,
-	int32 mons ,
-	int32 mdays  )
+	int32 years,
+	int32 mons,
+	int32 mdays
+	)
 {
 	ntpcal_split tmp;
 	int32	     res;
@@ -1031,9 +1067,10 @@ ntpcal_edate_to_eradays(
  */
 int32
 ntpcal_edate_to_yeardays(
-	int32 years ,
+	int32 years,
 	int32 mons,
-	int32 mdays )
+	int32 mdays
+	)
 {
 	ntpcal_split tmp;
 
@@ -1046,6 +1083,7 @@ ntpcal_edate_to_yeardays(
 		       + ntpcal_days_in_years(years + tmp.hi)
 		       - ntpcal_days_in_years(years);
 	}
+
 	return mdays;
 }
 
@@ -1061,9 +1099,10 @@ ntpcal_edate_to_yeardays(
  */
 int32
 ntpcal_etime_to_seconds(
-	int32 hours  ,
+	int32 hours,
 	int32 minutes,
-	int32 seconds)
+	int32 seconds
+	)
 {
 	int32 res;
 
@@ -1080,7 +1119,8 @@ ntpcal_etime_to_seconds(
  */
 int32
 ntpcal_tm_to_rd(
-	const struct tm *utm)
+	const struct tm *utm
+	)
 {
 	return ntpcal_edate_to_eradays(utm->tm_year + 1899,
 				       utm->tm_mon,
@@ -1095,7 +1135,8 @@ ntpcal_tm_to_rd(
  */
 int32
 ntpcal_date_to_rd(
-	const struct calendar *jd)
+	const struct calendar *jd
+	)
 {
 	return ntpcal_edate_to_eradays((int32)jd->year - 1,
 				       (int32)jd->month - 1,
@@ -1109,7 +1150,8 @@ ntpcal_date_to_rd(
  */
 int32
 ntpcal_year_to_ystart(
-	int32 year)
+	int32 year
+	)
 {
 	return ntpcal_days_in_years(year - 1) + 1;
 }
@@ -1122,7 +1164,8 @@ ntpcal_year_to_ystart(
  */
 int32
 ntpcal_rd_to_ystart(
-	int32 rd)
+	int32 rd
+	)
 {
 	/*
 	 * Rather simple exercise: split the day number into elapsed
@@ -1139,13 +1182,15 @@ ntpcal_rd_to_ystart(
  */
 int32
 ntpcal_rd_to_mstart(
-	int32 rd)
+	int32 rd
+	)
 {
 	ntpcal_split split;
 	int	     leaps;
 
-	split = ntpcal_split_eradays( rd - 1 , &leaps);
-	split = ntpcal_split_yeardays(split.lo,	 leaps);
+	split = ntpcal_split_eradays(rd - 1, &leaps);
+	split = ntpcal_split_yeardays(split.lo, leaps);
+
 	return rd - split.lo;
 }
 
@@ -1156,9 +1201,11 @@ ntpcal_rd_to_mstart(
  */
 int32
 ntpcal_date_to_daysec(
-	const struct calendar *jd)
+	const struct calendar *jd
+	)
 {
-	return ntpcal_etime_to_seconds(jd->hour, jd->minute, jd->second);
+	return ntpcal_etime_to_seconds(jd->hour, jd->minute,
+				       jd->second);
 }
 
 /*
@@ -1168,9 +1215,11 @@ ntpcal_date_to_daysec(
  */
 int32
 ntpcal_tm_to_daysec(
-	const struct tm *utm)
+	const struct tm *utm
+	)
 {
-	return ntpcal_etime_to_seconds(utm->tm_hour, utm->tm_min, utm->tm_sec);
+	return ntpcal_etime_to_seconds(utm->tm_hour, utm->tm_min,
+				       utm->tm_sec);
 }
 
 /*
@@ -1180,7 +1229,8 @@ ntpcal_tm_to_daysec(
  */
 time_t
 ntpcal_date_to_time(
-	const struct calendar *jd)
+	const struct calendar *jd
+	)
 {
 	vint64 join;
 	int32  days, secs;
@@ -1188,6 +1238,7 @@ ntpcal_date_to_time(
 	days = ntpcal_date_to_rd(jd) - DAY_UNIX_STARTS;
 	secs = ntpcal_date_to_daysec(jd);
 	join = ntpcal_dayjoin(days, secs);
+
 	return vint64_to_time(&join);
 }
 
@@ -1201,9 +1252,10 @@ ntpcal_date_to_time(
  */
 int
 ntpcal_ntp_to_date(
-	struct calendar *jd ,
+	struct calendar *jd,
 	u_int32		 ntp,
-	const time_t	*piv)
+	const time_t	*piv
+	)
 {
 	vint64	     vl;
 	ntpcal_split ds;
@@ -1216,13 +1268,15 @@ ntpcal_ntp_to_date(
 	vl = ntpcal_ntp_to_ntp(ntp, piv);
 	ds = ntpcal_daysplit(&vl);
 	ds.hi += ntpcal_daysec_to_date(jd, ds.lo);
+
 	return ntpcal_rd_to_date(jd, ds.hi + DAY_NTP_STARTS);
 }
 
 
 u_int32
 ntpcal_date_to_ntp(
-	const struct calendar *jd)
+	const struct calendar *jd
+	)
 {
 	/*
 	 * Convert date to NTP. Ignore yearday, use d/m/y only.
@@ -1246,7 +1300,8 @@ ntpcal_date_to_ntp(
 int32
 ntpcal_weekday_gt(
 	int32 rdn,
-	int32 dow)
+	int32 dow
+	)
 {
 	return ntpcal_periodic_extend(rdn+1, dow, 7);
 }
@@ -1254,7 +1309,8 @@ ntpcal_weekday_gt(
 int32
 ntpcal_weekday_ge(
 	int32 rdn,
-	int32 dow)
+	int32 dow
+	)
 {
 	return ntpcal_periodic_extend(rdn, dow, 7);
 }
@@ -1262,7 +1318,8 @@ ntpcal_weekday_ge(
 int32
 ntpcal_weekday_close(
 	int32 rdn,
-	int32 dow)
+	int32 dow
+	)
 {
 	return ntpcal_periodic_extend(rdn-3, dow, 7);
 }
@@ -1270,7 +1327,8 @@ ntpcal_weekday_close(
 int32
 ntpcal_weekday_le(
 	int32 rdn,
-	int32 dow)
+	int32 dow
+	)
 {
 	return ntpcal_periodic_extend(rdn, dow, -7);
 }
@@ -1278,7 +1336,8 @@ ntpcal_weekday_le(
 int32
 ntpcal_weekday_lt(
 	int32 rdn,
-	int32 dow)
+	int32 dow
+	)
 {
 	return ntpcal_periodic_extend(rdn-1, dow, -7);
 }
@@ -1338,13 +1397,13 @@ ntpcal_weekday_lt(
  */
 int32
 isocal_weeks_in_years(
-	int32 years)
+	int32 years
+	)
 {
 	/*
 	 * use: w = (y * 53431 + b[c]) / 1024 as interpolation
 	 */
 	static const int32 bctab[4] = { 449, 157, 889, 597 };
-	
 	int32 cycle; /* full gregorian cycle */
 	int32 cents; /* full centuries	   */
 	int32 weeks; /* accumulated weeks	   */
@@ -1381,14 +1440,13 @@ isocal_weeks_in_years(
  */
 ntpcal_split
 isocal_split_eraweeks(
-	int32 weeks)
+	int32 weeks
+	)
 {
 	/*
 	 * use: y = (w * 157 + b[c]) / 8192 as interpolation
 	 */
-	
 	static const int32 bctab[4] = { 85, 131, 17, 62 };
-	
 	ntpcal_split res;
 	int32	     cents;
 
@@ -1428,9 +1486,10 @@ isocal_split_eraweeks(
  */
 int
 isocal_ntp_to_date(
-	struct isodate *id ,
+	struct isodate *id,
 	u_int32		ntp,
-	const time_t   *piv)
+	const time_t   *piv
+	)
 {
 	vint64	     vl;
 	ntpcal_split ds;
@@ -1473,7 +1532,8 @@ isocal_ntp_to_date(
  */
 u_int32
 isocal_date_to_ntp(
-	const struct isodate *id)
+	const struct isodate *id
+	)
 {
 	int32 weeks, days, secs;
 
@@ -1482,6 +1542,7 @@ isocal_date_to_ntp(
 	days = weeks * 7 + (int32)id->weekday;
 	/* days is RDN of ISO date now */
 	secs = ntpcal_etime_to_seconds(id->hour, id->minute, id->second);
+
 	return ntpcal_dayjoin(days - DAY_NTP_STARTS, secs).d_s.lo;
 }
 

@@ -212,9 +212,12 @@ step_systime(
 {
 	time_t pivot; /* for ntp era unfolding */
 	struct timeval timetv, tvlast, tvdiff;
+	struct timespec timets;
+	struct calendar jd;
 	l_fp fp_ofs, fp_sys; /* offset and target system time in FP */
 
-	/* Get pivot time for NTP era unfolding. Since we don't step
+	/*
+	 * Get pivot time for NTP era unfolding. Since we don't step
 	 * very often, we can afford to do the whole calculation from
 	 * scratch. And we're not in the time-critical path yet.
 	 */
@@ -224,7 +227,7 @@ step_systime(
 	 * system time is in the 2^32 seconds starting at 1970-01-01,
 	 * 00:00:00 UTC.
 	 */
-	pivot = 0x80000000U;
+	pivot = 0x80000000;
 #if USE_COMPILETIME_PIVOT
 	/*
 	 * Add the compile time minus 10 years to get a possible target
@@ -232,19 +235,18 @@ step_systime(
 	 * years).  This should be sufficient for a given binary of
 	 * NTPD.
 	 */
-	{
-		struct calendar jd;
-
-		if (ntpcal_get_build_date(&jd)) {
-			jd.year -= 10;
-			pivot += ntpcal_date_to_time(&jd);
-		} else {
-			msyslog(LOG_ERR,
-				"step-systime: assume 1970-01-01 as build date");
-		}
+	if (ntpcal_get_build_date(&jd)) {
+		jd.year -= 10;
+		pivot += ntpcal_date_to_time(&jd);
+	} else {
+		msyslog(LOG_ERR,
+			"step-systime: assume 1970-01-01 as build date");
 	}
+#else
+	UNUSED_LOCAL(jd);
 #endif /* USE_COMPILETIME_PIVOT */
 #else
+	UNUSED_LOCAL(jd);
 	/* This makes sure the resulting time stamp is on or after
 	 * 1969-12-31/23:59:59 UTC and gives us additional two years,
 	 * from the change of NTP era in 2036 to the UNIX rollover in
@@ -252,7 +254,7 @@ step_systime(
 	 * need a longer 'time_t' after that!  Or a different baseline,
 	 * but that would cause other serious trouble, too.
 	 */
-	pivot = 0x7FFFFFFFU;
+	pivot = 0x7FFFFFFF;
 #endif
 
 	/* get the complete jump distance as l_fp */
@@ -264,18 +266,14 @@ step_systime(
 
 	/* get the current time as l_fp (without fuzz) and as struct timeval */
 #if defined(GET_SYSTIME_AS_TIMESPEC)
-	{
-		struct timespec timets;
-		(void) GET_SYSTIME_AS_TIMESPEC(&timets);
-		timespec_abstolfp(&fp_sys, &timets);
-		tvlast.tv_sec = timets.tv_sec;
-		tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
-	}
+	GET_SYSTIME_AS_TIMESPEC(&timets);
+	timespec_abstolfp(&fp_sys, &timets);
+	tvlast.tv_sec = timets.tv_sec;
+	tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
 #else /* have GETTIMEOFDAY */
-	{
-	    (void) GETTIMEOFDAY(&tvlast, NULL);
-	    timeval_abstolfp(&fp_sys, &tvlast);
-	}
+	UNUSED_LOCAL(timets);
+	GETTIMEOFDAY(&tvlast, NULL);
+	timeval_abstolfp(&fp_sys, &tvlast);
 #endif
 
 	/* get the target time as l_fp */
@@ -287,7 +285,7 @@ step_systime(
 	/* now set new system time */
 	if (ntp_set_tod(&timetv, NULL) != 0) {
 		msyslog(LOG_ERR, "step-systime: %m");
-		return (0);
+		return FALSE;
 	}
 
 	/* <--- time-critical path ended with 'ntp_set_tod()' <--- */
@@ -326,8 +324,7 @@ step_systime(
 	 */
 	timeval_sub(&tvdiff, &timetv, &tvlast);
 	timeval_abs(&tvdiff, &tvdiff);
-	if (tvdiff.tv_sec > 0)
-	{
+	if (tvdiff.tv_sec > 0) {
 #ifdef HAVE_UTMP_H
 		struct utmp ut;
 #endif
@@ -433,7 +430,7 @@ step_systime(
 #endif /* UPDATE_WTMPX */
 
 	}
-	return (1);
+	return TRUE;
 }
 
 #endif	/* !SIM */
