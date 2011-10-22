@@ -117,9 +117,13 @@ errno_to_str(
 #  ifdef STRERROR_R_CHAR_P
 	/*
 	 * For older GNU strerror_r, the return value either points to
-	 * buf, or to static storage.  We want the result always in buf
+	 * buf, or to static storage.  We want the result always in buf.
+	 * On Debian Linux 6.03 with gcc 4.4, strerror_r() returns an
+	 * int despite configure detecting STRERROR_R_CHAR_P.  We are
+	 * careful with the result, but need to cast to (char *) to
+	 * silence gcc on Debian 6.03.
 	 */
-	pstatic = strerror_r(err, buf, bufsiz);
+	pstatic = (char *)strerror_r(err, buf, bufsiz);
 #  else
 	pstatic = strerror(err);
 #  endif

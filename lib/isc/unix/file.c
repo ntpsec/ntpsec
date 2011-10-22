@@ -98,12 +98,12 @@ file_stats(const char *file, struct stat *stats) {
 }
 
 isc_result_t
-isc_file_getmodtime(const char *file, isc_time_t *time) {
+isc_file_getmodtime(const char *file, isc_time_t *itime) {
 	isc_result_t result;
 	struct stat stats;
 
 	REQUIRE(file != NULL);
-	REQUIRE(time != NULL);
+	REQUIRE(itime != NULL);
 
 	result = file_stats(file, &stats);
 
@@ -112,16 +112,16 @@ isc_file_getmodtime(const char *file, isc_time_t *time) {
 		 * XXXDCL some operating systems provide nanoseconds, too,
 		 * such as BSD/OS via st_mtimespec.
 		 */
-		isc_time_set(time, stats.st_mtime, 0);
+		isc_time_set(itime, stats.st_mtime, 0);
 
 	return (result);
 }
 
 isc_result_t
-isc_file_settime(const char *file, isc_time_t *time) {
+isc_file_settime(const char *file, isc_time_t *itime) {
 	struct timeval times[2];
 
-	REQUIRE(file != NULL && time != NULL);
+	REQUIRE(file != NULL && itime != NULL);
 
 	/*
 	 * tv_sec is at least a 32 bit quantity on all platforms we're
@@ -133,7 +133,7 @@ isc_file_settime(const char *file, isc_time_t *time) {
 	 *   * isc_time_seconds is changed to be > 32 bits but long is 32 bits
 	 *      and isc_time_seconds has at least 33 significant bits.
 	 */
-	times[0].tv_sec = times[1].tv_sec = (long)isc_time_seconds(time);
+	times[0].tv_sec = times[1].tv_sec = (long)isc_time_seconds(itime);
 
 	/*
 	 * Here is the real check for the high bit being set.
@@ -149,7 +149,7 @@ isc_file_settime(const char *file, isc_time_t *time) {
 	 * we can at least cast to signed so the IRIX compiler shuts up.
 	 */
 	times[0].tv_usec = times[1].tv_usec =
-		(isc_int32_t)(isc_time_nanoseconds(time) / 1000);
+		(isc_int32_t)(isc_time_nanoseconds(itime) / 1000);
 
 	if (utimes(file, times) < 0)
 		return (isc__errno2result(errno));

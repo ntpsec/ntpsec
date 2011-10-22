@@ -2940,12 +2940,11 @@ parse_start(
 #ifndef O_NOCTTY
 #define O_NOCTTY 0
 #endif
-
-	fd232 = tty_open(parsedev, O_RDWR | O_NOCTTY
-#ifdef O_NONBLOCK
-			 | O_NONBLOCK
+#ifndef O_NONBLOCK
+#define O_NONBLOCK 0
 #endif
-			 , 0777);
+
+	fd232 = tty_open(parsedev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 	if (fd232 == -1)
 	{
@@ -3067,11 +3066,7 @@ parse_start(
 		 * if the PARSEPPSDEVICE can be opened that will be used
 		 * for PPS else PARSEDEVICE will be used
 		 */
-		parse->ppsfd = tty_open(parseppsdev, O_RDWR | O_NOCTTY
-#ifdef O_NONBLOCK
-					| O_NONBLOCK
-#endif
-					, 0777);
+		parse->ppsfd = tty_open(parseppsdev, O_RDWR | O_NOCTTY | O_NONBLOCK, 0777);
 
 		if (parse->ppsfd == -1)
 		{
@@ -3639,7 +3634,7 @@ parse_event(
 
 		if (parse->parse_type->cl_event)
 		    parse->parse_type->cl_event(parse, event);
-      
+
 		if (event == CEVNT_NOMINAL)
 		{
 			NLOG(NLOG_CLOCKSTATUS)
@@ -3663,6 +3658,9 @@ parse_process(
 	l_fp off, rectime, reftime;
 	double fudge;
 	
+	/* silence warning: 'off.Ul_i.Xl_i' may be used uninitialized in this function */
+	ZERO(off);
+
 	/*
 	 * check for changes in conversion status
 	 * (only one for each new status !)
