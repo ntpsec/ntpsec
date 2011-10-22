@@ -1,3 +1,4 @@
+(4.2.7p227) 2011/10/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2036] gcc 2.95.3 preprocessor can't nest #ifdef in macro args.
 * A number of compiler warnings eliminated.
 (4.2.7p226) 2011/10/21 Released by Harlan Stenn <stenn@ntp.org>

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  October 21, 2011 at 06:39:18 PM by AutoGen 5.12
+ *  It has been AutoGen-ed  October 22, 2011 at 10:30:52 AM by AutoGen 5.12
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -52,7 +52,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[333] =
-"ntpd 4.2.7p226\n\
+"ntpd 4.2.7p227\n\
 Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1028,7 +1028,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "NTPD";
 static char const zUsageTitle[133] =
-"ntpd - NTP daemon program - Ver. 4.2.7p226\n\
+"ntpd - NTP daemon program - Ver. 4.2.7p227\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n";
 #define zRcName     NULL
