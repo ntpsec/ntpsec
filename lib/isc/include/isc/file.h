@@ -30,10 +30,10 @@
 ISC_LANG_BEGINDECLS
 
 isc_result_t
-isc_file_settime(const char *file, isc_time_t *time);
+isc_file_settime(const char *file, isc_time_t *itime);
 
 isc_result_t
-isc_file_getmodtime(const char *file, isc_time_t *time);
+isc_file_getmodtime(const char *file, isc_time_t *itime);
 /*!<
  * \brief Get the time of last modification of a file.
  *

@@ -455,7 +455,9 @@ wwvb_timer(
 	register struct wwvbunit *up;
 	struct refclockproc *pp;
 	char	pollchar;	/* character sent to clock */
+#ifdef DEBUG
 	l_fp	now;
+#endif
 
 	/*
 	 * Time to poll the clock. The Spectracom clock responds to a

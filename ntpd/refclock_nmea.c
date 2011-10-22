@@ -1011,7 +1011,9 @@ nmea_poll(
 	)
 {
 	struct refclockproc * const pp = peer->procptr;
+#ifdef HAVE_PPSAPI
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
+#endif
 	
 	/*
 	 * Process median filter samples. If none received, declare a

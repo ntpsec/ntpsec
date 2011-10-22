@@ -46,6 +46,7 @@ static const char *inet_ntop4(const unsigned char *src, char *dst,
 static const char *inet_ntop6(const unsigned char *src, char *dst,
 			      size_t size);
 #endif
+const char *isc_net_ntop(int af, const void *src, char *dst, size_t size);
 
 /*! char *
  * isc_net_ntop(af, src, dst, size)
@@ -92,7 +93,7 @@ inet_ntop4(const unsigned char *src, char *dst, size_t size)
 	int len;
 
 	len = snprintf(tmp, sizeof(tmp), fmt, src[0], src[1], src[2], src[3]);
-	if (len < 0 || len >= size)
+	if (len < 0 || (size_t)len >= size)
 	{
 		errno = ENOSPC;
 		return (NULL);

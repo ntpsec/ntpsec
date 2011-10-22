@@ -297,8 +297,10 @@ static int		cmp_addr_distance(const sockaddr_u *,
  */
 #if !defined(HAVE_IO_COMPLETION_PORT)
 static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
-static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 void			ntpd_addremove_io_fd	(int, int, int);
+#ifdef REFCLOCK
+static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
+#endif
 #endif
 
 
@@ -3078,6 +3080,8 @@ fdbits(
 	return buffer;
 }
 
+
+#ifdef REFCLOCK
 /*
  * Routine to read the refclock packets for a specific interface
  * Return the number of bytes read. That way we know if we should
@@ -3143,6 +3147,7 @@ read_refclock_packet(
 
 	return buflen;
 }
+#endif	/* REFCLOCK */
 
 
 #ifdef HAVE_TIMESTAMP

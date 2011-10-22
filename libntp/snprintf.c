@@ -10,7 +10,7 @@
  * C99-compliant implementations.
  */
 
-/* $Id: snprintf.c 1.11 2011/04/14 02:00:01+00:00 davehart@shiny.ad.hartbrothers.com $ */
+/* $Id: snprintf.c 1.12 2011/10/21 19:10:01+00:00 davehart@shiny.ad.hartbrothers.com $ */
 
 /*
  * Copyright (c) 1995 Patrick Powell.
@@ -545,8 +545,6 @@ static int convert(UINTMAX_T, char *, size_t, int, int);
 static UINTMAX_T cast(LDOUBLE);
 static UINTMAX_T myround(LDOUBLE);
 static LDOUBLE mypow10(int);
-
-extern int errno;
 
 int
 rpl_vsnprintf(char *str, size_t size, const char *format, va_list args);
