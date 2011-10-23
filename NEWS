@@ -1,3 +1,21 @@
+---
+NTP 4.2.8-
+
+Important Changes
+
+The internal counters that track which "era" (range of years) we are in
+rolls over every 136 years'.  The current "era" started at the stroke of
+midnight on 1 Jan 1900, and ends just before the stroke of midnight on
+1 Jan 2036.
+In the past, we have used the "midpoint" of the  range to decide which
+era we were in.  Given the longevity of some products, it became clear
+that it would be more functional to "look back" less, and "look forward"
+more.  We now compile a timestamp into the ntpd executable and when we
+get a timestamp we us the "built-on" to tell us what era we are in.
+This check "looks back" 10 years, and "looks forward" 126 years.
+
+So if you have a system that ...
+
 --- 
 NTP 4.2.6p5-RC1 (Harlan Stenn <stenn@ntp.org>, 2011/10/xx) 
  
