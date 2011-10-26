@@ -1,3 +1,4 @@
+* [Bug 1995] fix wrong use of ZERO() macro in 'ntp_calendar.c'
 (4.2.7p228) 2011/10/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1995] add compile time stamp based era unfolding for
   'step_systime()' and necessary support to 'ntp-calendar.c'.

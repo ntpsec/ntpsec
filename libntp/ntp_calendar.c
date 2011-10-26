@@ -159,7 +159,7 @@ ntpcal_get_build_date(
 	const char *	  cp;
 	u_short		  hour, minute, second, month, day, year;
 	
-	ZERO(jd);
+	ZERO(*jd);
 	jd->year     = 1970;
 	jd->month    = 1;
 	jd->monthday = 1;
