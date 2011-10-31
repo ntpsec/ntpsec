@@ -111,13 +111,13 @@ static const struct ctl_proc control_codes[] = {
 	{ CTL_OP_READCLOCK,	NOAUTH,	read_clockstatus },
 	{ CTL_OP_WRITECLOCK,	NOAUTH,	write_clockstatus },
 	{ CTL_OP_SETTRAP,	NOAUTH,	set_trap },
-	{ CTL_OP_SAVECONFIG,	AUTH,	save_config },
 	{ CTL_OP_CONFIGURE,	AUTH,	configure },
+	{ CTL_OP_SAVECONFIG,	AUTH,	save_config },
 	{ CTL_OP_READ_MRU,	NOAUTH,	read_mru_list },
 	{ CTL_OP_READ_IFSTATS,	AUTH,	read_ifstats },
 	{ CTL_OP_REQ_NONCE,	NOAUTH,	req_nonce },
 	{ CTL_OP_UNSETTRAP,	NOAUTH,	unset_trap },
-	{ NO_REQUEST,		0 }
+	{ NO_REQUEST,		0,	NULL }
 };
 
 /*
@@ -3429,7 +3429,7 @@ send_random_tag_value(
 	int	noise;
 	char	buf[32];
 
-	noise = rand();
+	noise = rand() | (rand() << 16);
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[1] = 'a' + noise % 26;
