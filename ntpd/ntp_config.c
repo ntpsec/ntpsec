@@ -108,7 +108,7 @@ typedef struct peer_resolved_ctx_tag {
 	u_char		version;
 	u_char		minpoll;
 	u_char		maxpoll;
-	u_char		ttl;
+	u_int32		ttl;
 	const char *	group;
 } peer_resolved_ctx;
 
@@ -2798,6 +2798,10 @@ apply_enable_disable(
 
 		case T_Ntp:
 			proto_config(PROTO_NTP, enable, 0., NULL);
+			break;
+
+		case T_Mode7:
+			proto_config(PROTO_MODE7, enable, 0., NULL);
 			break;
 
 		case T_Stats:

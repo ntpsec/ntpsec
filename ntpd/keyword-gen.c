@@ -194,6 +194,7 @@ struct key_tok ntp_keywords[] = {
 { "calibrate",		T_Calibrate,		FOLLBY_TOKEN },
 { "kernel",		T_Kernel,		FOLLBY_TOKEN },
 { "ntp",		T_Ntp,			FOLLBY_TOKEN },
+{ "mode7",		T_Mode7,		FOLLBY_TOKEN },
 { "stats",		T_Stats,		FOLLBY_TOKEN },
 /* tinker_option */
 { "step",		T_Step,			FOLLBY_TOKEN },

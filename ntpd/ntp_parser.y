@@ -160,6 +160,7 @@
 %token	<Integer>	T_Minpoll
 %token	<Integer>	T_Minsane
 %token	<Integer>	T_Mode
+%token	<Integer>	T_Mode7
 %token	<Integer>	T_Monitor
 %token	<Integer>	T_Month
 %token	<Integer>	T_Mru
@@ -309,6 +310,7 @@
 %type	<String_fifo>	string_list
 %type	<Attr_val>	system_option
 %type	<Integer>	system_option_flag_keyword
+%type	<Integer>	system_option_local_flag_keyword
 %type	<Attr_val_fifo>	system_option_list
 %type	<Integer>	t_default_or_zero
 %type	<Integer>	tinker_option_keyword
@@ -982,13 +984,18 @@ system_option_list
 system_option
 	:	system_option_flag_keyword
 			{ $$ = create_attr_ival(T_Flag, $1); }
-	|	T_Stats
+	|	system_option_local_flag_keyword
 		{ 
 			if (input_from_file) {
 				$$ = create_attr_ival(T_Flag, $1);
 			} else {
+				char err_str[128];
+				
 				$$ = NULL;
-				yyerror("enable/disable stats remote configuration ignored");
+				snprintf(err_str, sizeof(err_str),
+					 "enable/disable %s remote configuration ignored",
+					 keyword($1));
+				yyerror(err_str);
 			}
 		}
 	;
@@ -1000,6 +1007,11 @@ system_option_flag_keyword
 	|	T_Kernel
 	|	T_Monitor
 	|	T_Ntp
+	;
+
+system_option_local_flag_keyword
+	:	T_Mode7
+	|	T_Stats
 	;
 
 /* Tinker Commands

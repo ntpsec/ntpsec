@@ -88,6 +88,7 @@ u_long	leap_expire;		/* leap information expiration */
 static int leap_vote;		/* leap consensus */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
+int	ntp_mode7;		/* respond to ntpdc (mode7) */
 int	peer_ntpdate;		/* active peers in ntpdate mode */
 int	sys_survivors;		/* truest of the truechimers */
 char	*sys_ident = NULL;	/* identity scheme */
@@ -191,7 +192,7 @@ transmit(
 			peer_xmit(peer);
 		} else if (sys_survivors < sys_minclock ||
 		    peer_associations < sys_maxclock) {
-			if (peer->ttl < sys_ttlmax)
+			if (peer->ttl < (u_int32)sys_ttlmax)
 				peer->ttl++;
 			peer_xmit(peer);
 		}
@@ -400,7 +401,7 @@ receive(
 		return;				/* ignore everything */
 	}
 	if (hismode == MODE_PRIVATE) {
-		if (restrict_mask & RES_NOQUERY) {
+		if (!ntp_mode7 || (restrict_mask & RES_NOQUERY)) {
 			sys_restricted++;
 			return;			/* no query private */
 		}
@@ -3878,6 +3879,10 @@ proto_config(
 
 	case PROTO_NTP:		/* NTP discipline (ntp) */
 		ntp_enable = value;
+		break;
+
+	case PROTO_MODE7:	/* mode7 management (ntpdc) */
+		ntp_mode7 = value;
 		break;
 
 	case PROTO_PPS:		/* PPS discipline (pps) */
