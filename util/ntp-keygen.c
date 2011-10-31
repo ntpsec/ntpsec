@@ -347,6 +347,7 @@ main(
 	passwd1 = hostbuf;
 	passwd2 = NULL;
 	GETTIMEOFDAY(&tv, NULL);
+	ntp_srandom((u_long)(tv.tv_sec + tv.tv_usec));
 	epoch = tv.tv_sec;
 	fstamp = (u_int)(epoch + JAN_1970);
 
@@ -817,7 +818,6 @@ gen_md5(
 #endif	/* OPENSSL */
 
 	str = fheader("MD5key", id, groupname);
-	ntp_srandom((u_long)epoch);
 	for (i = 1; i <= MD5KEYS; i++) {
 		for (j = 0; j < MD5SIZE; j++) {
 			int temp;

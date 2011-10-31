@@ -764,7 +764,8 @@ static struct ntp_control rpkt;
 static u_char	res_version;
 static u_char	res_opcode;
 static associd_t res_associd;
-static int	res_offset;
+static u_short	res_frags;	/* datagrams in this response */
+static int	res_offset;	/* offset of payload in response */
 static u_char * datapt;
 static u_char * dataend;
 static int	datalinelen;
@@ -778,7 +779,7 @@ static keyid_t	res_keyid;
 
 #define MAXDATALINELEN	(72)
 
-static u_char	res_async;	/* set to 1 if this is async trap response */
+static u_char	res_async;	/* sending async trap response? */
 
 /*
  * Pointers for saving state when decoding request packets
@@ -1035,14 +1036,15 @@ process_control(
 	rpkt.sequence = pkt->sequence;
 	rpkt.associd = pkt->associd;
 	rpkt.status = 0;
+	res_frags = 1;
 	res_offset = 0;
 	res_associd = htons(pkt->associd);
-	res_async = 0;
-	res_authenticate = 0;
+	res_async = FALSE;
+	res_authenticate = FALSE;
 	res_keyid = 0;
-	res_authokay = 0;
+	res_authokay = FALSE;
 	req_count = (int)ntohs(pkt->count);
-	datanotbinflag = 0;
+	datanotbinflag = FALSE;
 	datalinelen = 0;
 	datapt = rpkt.u.data;
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
@@ -1070,7 +1072,7 @@ process_control(
 	if ((rbufp->recv_length & 3) == 0 &&
 	    maclen >= MIN_MAC_LEN && maclen <= MAX_MAC_LEN &&
 	    sys_authenticate) {
-		res_authenticate = 1;
+		res_authenticate = TRUE;
 		pkid = (void *)((char *)pkt + properlen);
 		res_keyid = ntohl(*pkid);
 		DPRINTF(3, ("recv_len %d, properlen %d, wants auth with keyid %08x, MAC length=%d\n",
@@ -1082,7 +1084,7 @@ process_control(
 		else if (authdecrypt(res_keyid, (u_int32 *)pkt,
 				     rbufp->recv_length - maclen,
 				     maclen)) {
-			res_authokay = 1;
+			res_authokay = TRUE;
 			DPRINTF(3, ("authenticated okay\n"));
 		} else {
 			res_keyid = 0;
@@ -1266,9 +1268,10 @@ ctl_flushpkt(
 					     (u_int32 *)&rpkt, totlen);
 			sendpkt(rmt_addr, lcl_inter, -5,
 				(struct pkt *)&rpkt, totlen + maclen);
-		} else
+		} else {
 			sendpkt(rmt_addr, lcl_inter, -6,
 				(struct pkt *)&rpkt, sendlen);
+		}
 		if (more)
 			numctlfrags++;
 		else
@@ -1278,6 +1281,7 @@ ctl_flushpkt(
 	/*
 	 * Set us up for another go around.
 	 */
+	res_frags++;
 	res_offset += dlen;
 	datapt = rpkt.u.data;
 }
@@ -1298,7 +1302,7 @@ ctl_putdata(
 
 	overhead = 0;
 	if (!bin) {
-		datanotbinflag = 1;
+		datanotbinflag = TRUE;
 		overhead = 3;
 		if (datapt != rpkt.u.data) {
 			*datapt++ = ',';
@@ -3414,17 +3418,18 @@ send_mru_entry(
  * and ifstats responses, the first and last rows are spiced with
  * randomly-generated tag names with correct .# index.
  * Make it three characters knowing that none of the currently-used
- * tags have that length, avoiding the need to test for tag collision.
+ * subscripted tags have that length, avoiding the need to test for
+ * tag collision.
  */
 static void
 send_random_tag_value(
 	int	indx
 	)
 {
-	u_long	noise;
+	int	noise;
 	char	buf[32];
 
-	noise = ntp_random();
+	noise = rand();
 	buf[0] = 'a' + noise % 26;
 	noise >>= 5;
 	buf[1] = 'a' + noise % 26;
@@ -3472,14 +3477,18 @@ send_random_tag_value(
  *	nonce=		Regurgitated nonce retrieved by the client
  *			previously using CTL_OP_REQ_NONCE, demonstrating
  *			ability to receive traffic sent to its address.
- *	limit=		Limit on MRU entries returned.  This is the sole
- *			required input parameter.  [1...256]
+ *	frags=		Limit on datagrams (fragments) in response.  Used
+ *			by newer ntpq versions instead of limit= when
+ *			retrieving multiple entries.
+ *	limit=		Limit on MRU entries returned.  One of frags= or
+ *			limit= must be provided.
  *			limit=1 is a special case:  Instead of fetching
  *			beginning with the supplied starting point's
  *			newer neighbor, fetch the supplied entry, and
  *			in that case the #.last timestamp can be zero.
  *			This enables fetching a single entry by IP
- *			address.
+ *			address.  When limit is not one and frags= is
+ *			provided, the fragment limit controls.
  *	mincount=	(decimal) Return entries with count >= mincount.
  *	laddr=		Return entries associated with the server's IP
  *			address given.  No port specification is needed,
@@ -3554,6 +3563,7 @@ static void read_mru_list(
 	)
 {
 	const char		nonce_text[] =		"nonce";
+	const char		frags_text[] =		"frags";
 	const char		limit_text[] =		"limit";
 	const char		mincount_text[] =	"mincount";
 	const char		resall_text[] =		"resall";
@@ -3562,6 +3572,7 @@ static void read_mru_list(
 	const char		laddr_text[] =		"laddr";
 	const char		resaxx_fmt[] =		"0x%hx";
 	u_int			limit;
+	u_short			frags;
 	u_short			resall;
 	u_short			resany;
 	int			mincount;
@@ -3592,6 +3603,7 @@ static void read_mru_list(
 	 */
 	in_parms = NULL;
 	set_var(&in_parms, nonce_text, sizeof(nonce_text), 0);
+	set_var(&in_parms, frags_text, sizeof(frags_text), 0);
 	set_var(&in_parms, limit_text, sizeof(limit_text), 0);
 	set_var(&in_parms, mincount_text, sizeof(mincount_text), 0);
 	set_var(&in_parms, resall_text, sizeof(resall_text), 0);
@@ -3607,6 +3619,7 @@ static void read_mru_list(
 
 	/* decode input parms */
 	pnonce = NULL;
+	frags = 0;
 	limit = 0;
 	mincount = 0;
 	resall = 0;
@@ -3624,19 +3637,21 @@ static void read_mru_list(
 			if (NULL != pnonce)
 				free(pnonce);
 			pnonce = estrdup(val);
-		} else if (!strcmp(limit_text, v->text))
+		} else if (!strcmp(frags_text, v->text)) {
+			sscanf(val, "%hu", &frags);
+		} else if (!strcmp(limit_text, v->text)) {
 			sscanf(val, "%u", &limit);
-		else if (!strcmp(mincount_text, v->text)) {
+		} else if (!strcmp(mincount_text, v->text)) {
 			if (1 != sscanf(val, "%d", &mincount) ||
 			    mincount < 0)
 				mincount = 0;
-		} else if (!strcmp(resall_text, v->text))
+		} else if (!strcmp(resall_text, v->text)) {
 			sscanf(val, resaxx_fmt, &resall);
-		else if (!strcmp(resany_text, v->text))
+		} else if (!strcmp(resany_text, v->text)) {
 			sscanf(val, resaxx_fmt, &resany);
-		else if (!strcmp(maxlstint_text, v->text))
+		} else if (!strcmp(maxlstint_text, v->text)) {
 			sscanf(val, "%u", &maxlstint);
-		else if (!strcmp(laddr_text, v->text)) {
+		} else if (!strcmp(laddr_text, v->text)) {
 			if (decodenetnum(val, &laddr))
 				lcladr = getinterface(&laddr, 0);
 		} else if (1 == sscanf(v->text, last_fmt, &i) &&
@@ -3668,10 +3683,19 @@ static void read_mru_list(
 	if (!nonce_valid)
 		return;
 
-	if (!(0 < limit && limit <= MRU_ROW_LIMIT)) {
+	if ((0 == frags && !(0 < limit && limit <= MRU_ROW_LIMIT)) ||
+	    frags > MRU_FRAGS_LIMIT) {
 		ctl_error(CERR_BADVALUE);
 		return;
 	}
+
+	/*
+	 * If either frags or limit is not given, use the max.
+	 */
+	if (0 != frags && 0 == limit)
+		limit = UINT_MAX;
+	else if (0 != limit && 0 == frags)
+		frags = MRU_FRAGS_LIMIT;
 
 	/*
 	 * Find the starting point if one was provided.
@@ -3711,18 +3735,19 @@ static void read_mru_list(
 		 */
 		if (limit > 1)
 			mon = PREV_DLIST(mon_mru_list, mon, mru);
-	} else		/* start with the oldest */
+	} else {	/* start with the oldest */
 		mon = TAIL_DLIST(mon_mru_list, mru);
+	}
 	
 	/*
-	 * send up to limit= entries
+	 * send up to limit= entries in up to frags= datagrams
 	 */
 	get_systime(&now);
 	generate_nonce(rbufp, buf, sizeof(buf));
 	ctl_putunqstr("nonce", buf, strlen(buf));
 	prior_mon = NULL;
 	for (count = 0;
-	     count < limit && mon != NULL;
+	     mon != NULL && res_frags < frags && count < limit;
 	     mon = PREV_DLIST(mon_mru_list, mon, mru)) {
 
 		if (mon->count < mincount)
@@ -4381,8 +4406,8 @@ report_event(
 	 */
 	res_opcode = CTL_OP_ASYNCMSG;
 	res_offset = 0;
-	res_async = 1;
-	res_authenticate = 0;
+	res_async = TRUE;
+	res_authenticate = FALSE;
 	datapt = rpkt.u.data;
 	dataend = &rpkt.u.data[CTL_MAX_DATA_LEN];
 	if (!(err & PEER_EVENT)) {

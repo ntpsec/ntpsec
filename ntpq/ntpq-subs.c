@@ -2249,6 +2249,8 @@ collect_mru_list(
 	int rsize;
 	const char *rdata;
 	int limit;
+	int frags;
+	int cap_frags;
 	char *tag;
 	char *val;
 	int si;		/* server index in response */
@@ -2280,6 +2282,7 @@ collect_mru_list(
 	c_mru_l_rc = FALSE;
 	list_complete = FALSE;
 	have_now = FALSE;
+	cap_frags = TRUE;
 	got = 0;
 	ri = 0;
 	cb = sizeof(*mon);
@@ -2294,8 +2297,9 @@ collect_mru_list(
 	next_report = time(NULL) + MRU_REPORT_SECS;
 
 	limit = min(3 * MAXFRAGS, ntpd_row_limit);
-	snprintf(req_buf, sizeof(req_buf), "nonce=%s, limit=%d%s",
-		 nonce, limit, parms);
+	frags = MAXFRAGS;
+	snprintf(req_buf, sizeof(req_buf), "nonce=%s, frags=%d%s",
+		 nonce, frags, parms);
 	nonce_uses++;
 
 	while (TRUE) {
@@ -2349,24 +2353,39 @@ collect_mru_list(
 				"CERR_UNKNOWNVAR from ntpd but no priors given.\n");
 			goto cleanup_return;
 		} else if (CERR_BADVALUE == qres) {
-			/* ntpd has lower cap on row limit */
-			ntpd_row_limit--;
-			limit = min(limit, ntpd_row_limit);
-			if (debug)
-				fprintf(stderr,
-					"Row limit reduced to %d following CERR_BADVALUE.\n",
-				        limit);
+			if (cap_frags) {
+				cap_frags = FALSE;
+				if (debug)
+					fprintf(stderr,
+						"Reverted to row limit from fragments limit.\n");
+			} else {
+				/* ntpd has lower cap on row limit */
+				ntpd_row_limit--;
+				limit = min(limit, ntpd_row_limit);
+				if (debug)
+					fprintf(stderr,
+						"Row limit reduced to %d following CERR_BADVALUE.\n",
+						limit);
+			}
 		} else if (ERR_INCOMPLETE == qres ||
 			   ERR_TIMEOUT == qres) {
 			/*
-			 * Reduce the number of rows to minimize effect
-			 * of single lost packets.
+			 * Reduce the number of rows/frags requested by
+			 * half to recover from lost response fragments.
 			 */
-			limit = max(2, limit / 2);
-			if (debug)
-				fprintf(stderr,
-					"Row limit reduced to %d following incomplete response.\n",
-					limit);
+			if (cap_frags) {
+				frags = max(2, frags / 2);
+				if (debug)
+					fprintf(stderr,
+						"Frag limit reduced to %d following incomplete response.\n",
+						frags);
+			} else {
+				limit = max(2, limit / 2);
+				if (debug)
+					fprintf(stderr,
+						"Row limit reduced to %d following incomplete response.\n",
+						limit);
+			}
 		} else if (qres) {
 			show_error_msg(qres, 0);
 			goto cleanup_return;
@@ -2595,9 +2614,16 @@ collect_mru_list(
 		 * no less than 3 rows fit in each packet, capped at 
 		 * our best guess at the server's row limit.
 		 */
-		if (!qres)
-			limit = min3(3 * MAXFRAGS, ntpd_row_limit,
-				     max(limit + 1, limit * 33 / 32));
+		if (!qres) {
+			if (cap_frags) {
+				frags = min(MAXFRAGS, frags + 1);
+			} else {
+				limit = min3(3 * MAXFRAGS,
+					     ntpd_row_limit,
+					     max(limit + 1,
+					         limit * 33 / 32));
+			}
+		}
 		/*
 		 * prepare next query with as many address and last-seen
 		 * timestamps as will fit in a single packet.
@@ -2605,8 +2631,14 @@ collect_mru_list(
 		req = req_buf;
 		req_end = req_buf + sizeof(req_buf);
 #define REQ_ROOM	(req_end - req)
-		snprintf(req, REQ_ROOM, "nonce=%s, limit=%d%s", nonce,
-			 limit, parms);
+		snprintf(req, REQ_ROOM, "nonce=%s, %s=%d%s", nonce,
+			 (cap_frags)
+			     ? "frags"
+			     : "limit",
+			 (cap_frags)
+			     ? frags
+			     : limit,
+			 parms);
 		req += strlen(req);
 		nonce_uses++;
 		if (nonce_uses >= 4) {

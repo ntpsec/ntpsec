@@ -45,7 +45,7 @@ static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
 #endif
 #include <stdio.h>
 
-#include <ntp_types.h>
+#include <l_stdlib.h>
 #include <ntp_random.h>
 #include <ntp_unixtime.h>
 
@@ -261,19 +261,22 @@ ntp_srandom(
 	unsigned long x
 	)
 {
-	register long i;
+	long i;
 
-	if (rand_type == TYPE_0)
+	if (rand_type == TYPE_0) {
 		state[0] = x;
-	else {
+	} else {
 		state[0] = x;
 		for (i = 1; i < rand_deg; i++)
 			state[i] = good_rand(state[i - 1]);
 		fptr = &state[rand_sep];
 		rptr = &state[0];
 		for (i = 0; i < 10 * rand_deg; i++)
-			(void)ntp_random();
+			x = ntp_random();
 	}
+
+	/* seed the likely faster (and poorer) rand() as well */
+	srand((u_int)x);
 }
 
 /*
