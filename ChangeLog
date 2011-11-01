@@ -6,6 +6,7 @@
 * Directly limit the number of datagrams in a mrulist response, rather
   than limiting the number of entries returned to indirectly limit the
   datagram count.
+* Documentation updates from Dave Mills.
 (4.2.7p229) 2011/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1995] fix wrong use of ZERO() macro in 'ntp_calendar.c'
 (4.2.7p228) 2011/10/23 Released by Harlan Stenn <stenn@ntp.org>
