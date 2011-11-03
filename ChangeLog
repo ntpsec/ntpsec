@@ -1,3 +1,4 @@
+* [Bug 1940] ignore auth key if hex decoding fails
 (4.2.7p230) 2011/11/01 Released by Harlan Stenn <stenn@ntp.org>
 * Disable mode 7 (ntpdc) query processing in ntpd by default.  ntpq is
   believed to provide all functionality ntpdc did, and uses a less-
