@@ -154,6 +154,8 @@ extern	char *	mfptoms		(u_long, u_long, short);
 extern	const char * modetoa	(int);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
+extern	const char * res_match_flags(u_short);
+extern	const char * res_access_flags(u_short);
 #ifdef KERNEL_PLL
 extern	const char * k_st_flags	(u_int32);
 #endif
@@ -164,6 +166,7 @@ extern	char *	numtohost	(u_int32);
 extern	const char * socktoa	(const sockaddr_u *);
 extern	const char * sockporttoa(const sockaddr_u *);
 extern	u_short	sock_hash	(const sockaddr_u *);
+extern	int	sockaddr_masktoprefixlen(const sockaddr_u *);
 extern	const char * socktohost	(const sockaddr_u *);
 extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);

@@ -61,7 +61,7 @@ struct ntp_control {
 #define CTL_OP_CONFIGURE	8	/* runtime configuration */
 #define CTL_OP_SAVECONFIG	9	/* save config to file */
 #define CTL_OP_READ_MRU		10	/* retrieve MRU (mrulist) */
-#define CTL_OP_READ_IFSTATS	11	/* interface stats (ifstats) */
+#define CTL_OP_READ_ORDLIST_A	11	/* ordered list req. auth. */
 #define CTL_OP_REQ_NONCE	12	/* request a client nonce */
 #define	CTL_OP_UNSETTRAP	31	/* unset trap */
 
@@ -182,3 +182,11 @@ extern struct ctl_trap ctl_traps[CTL_MAXTRAPS];
 #define	TYPE_SYS	1
 #define	TYPE_PEER	2
 #define	TYPE_CLOCK	3
+
+/*
+ * IFSTATS_FIELDS is the number of fields ntpd supplies for each ifstats
+ * row.  Similarly RESLIST_FIELDS for reslist.
+ */
+#define	IFSTATS_FIELDS	12
+#define	RESLIST_FIELDS	4
+

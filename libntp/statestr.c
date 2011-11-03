@@ -163,6 +163,35 @@ static const struct codestring peer_st_bits[] = {
 	/* not used with getcode(), no terminating entry needed */
 };
 
+/*
+ * Restriction match bits
+ */
+static const struct codestring res_match_bits[] = {
+	{ RESM_NTPONLY,			"ntpport" },
+	{ RESM_INTERFACE,		"interface" },
+	{ RESM_SOURCE,			"source" },
+	/* not used with getcode(), no terminating entry needed */
+};
+
+/*
+ * Restriction access bits
+ */
+static const struct codestring res_access_bits[] = {
+	{ RES_IGNORE,			"ignore" },
+	{ RES_DONTSERVE,		"noserve" },
+	{ RES_DONTTRUST,		"notrust" },
+	{ RES_NOQUERY,			"noquery" },
+	{ RES_NOMODIFY,			"nomodify" },
+	{ RES_NOPEER,			"nopeer" },
+	{ RES_NOTRAP,			"notrap" },
+	{ RES_LPTRAP,			"lptrap" },
+	{ RES_LIMITED,			"limited" },
+	{ RES_VERSION,			"version" },
+	{ RES_KOD,			"kod" },
+	{ RES_FLAKE,			"flake" },
+	/* not used with getcode(), no terminating entry needed */
+};
+
 #ifdef AUTOKEY
 /*
  * Crypto events (cryp)
@@ -365,6 +394,26 @@ peer_st_flags(
 {
 	return decode_bitflags(pst, ", ", peer_st_bits,
 			       COUNTOF(peer_st_bits));
+}
+
+
+const char *
+res_match_flags(
+	u_short mf
+	)
+{
+	return decode_bitflags(mf, " ", res_match_bits,
+			       COUNTOF(res_match_bits));
+}
+
+
+const char *
+res_access_flags(
+	u_short af
+	)
+{
+	return decode_bitflags(af, " ", res_access_bits,
+			       COUNTOF(res_access_bits));
 }
 
 

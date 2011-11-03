@@ -14,13 +14,11 @@
 #include <netinet/in.h>
 #endif
 
-#include <arpa/inet.h>
-
-#ifdef ISC_PLATFORM_NEEDNTOP
-#include <isc/net.h>
-#endif
-
 #include <stdio.h>
+#include <arpa/inet.h>
+#include <isc/result.h>
+#include <isc/netaddr.h>
+#include <isc/sockaddr.h>
 
 #include "ntp_fp.h"
 #include "lib_strbuf.h"
@@ -148,3 +146,25 @@ sock_hash(
 }
 
 
+int
+sockaddr_masktoprefixlen(
+	const sockaddr_u *	psa
+	)
+{
+	isc_netaddr_t	isc_na;
+	isc_sockaddr_t	isc_sa;
+	u_int		pfxlen;
+	isc_result_t	result;
+	int		rc;
+
+	ZERO(isc_sa);
+	memcpy(&isc_sa.type, psa,
+	       min(sizeof(isc_sa.type), sizeof(*psa)));
+	isc_netaddr_fromsockaddr(&isc_na, &isc_sa);
+	result = isc_netaddr_masktoprefixlen(&isc_na, &pfxlen);
+	rc = (ISC_R_SUCCESS == result)
+		 ? (int)pfxlen
+		 : -1;
+
+	return rc;
+}

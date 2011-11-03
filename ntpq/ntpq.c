@@ -165,7 +165,7 @@ int		ntpqmain	(int,	char **);
  * Built in command handler declarations
  */
 static	int	openhost	(const char *);
-
+static	void	dump_hex_printable(const void *, size_t);
 static	int	sendpkt		(void *, size_t);
 static	int	getresponse	(int, int, u_short *, int *, const char **, int);
 static	int	sendrequest	(int, associd_t, int, int, const char *);
@@ -665,6 +665,41 @@ openhost(
 }
 
 
+static void
+dump_hex_printable(
+	const void *	data,
+	size_t		len
+	)
+{
+	const char *	cdata;
+	const char *	rowstart;
+	size_t		idx;
+	size_t		rowlen;
+	u_char		uch;
+
+	cdata = data;
+	while (len > 0) {
+		rowstart = cdata;
+		rowlen = min(16, len);
+		for (idx = 0; idx < rowlen; idx++) {
+			uch = *(cdata++);
+			printf("%02x ", uch);
+		}
+		for ( ; idx < 16 ; idx++)
+			printf("   ");
+		cdata = rowstart;
+		for (idx = 0; idx < rowlen; idx++) {
+			uch = *(cdata++);
+			printf("%c", (isprint(uch))
+					 ? uch
+					 : '.');
+		}
+		printf("\n");
+		len -= rowlen;
+	}
+}
+
+
 /* XXX ELIMINATE sendpkt similar in ntpq.c, ntpdc.c, ntp_io.c, ntptrace.c */
 /*
  * sendpkt - send a packet to the remote host
@@ -684,23 +719,11 @@ sendpkt(
 	}
 
 	if (debug >= 4) {
-		int first = 8;
-		char *cdata = xdata;
-
-		printf("Packet data:\n");
-		while (xdatalen-- > 0) {
-			if (first-- == 0) {
-				printf("\n");
-				first = 7;
-			}
-			printf(" %02x", *cdata++ & 0xff);
-		}
-		printf("\n");
+		printf("Request packet:\n");
+		dump_hex_printable(xdata, xdatalen);
 	}
 	return 0;
 }
-
-
 
 /*
  * getresponse - get a (series of) response packet(s) and return the data
@@ -728,9 +751,6 @@ getresponse(
 	int shouldbesize;
 	fd_set fds;
 	int n;
-	int len;
-	int first;
-	char *data;
 	int errcode;
 
 	/*
@@ -809,19 +829,8 @@ getresponse(
 		}
 
 		if (debug >= 4) {
-			len = n;
-			first = 8;
-			data = (char *)&rpkt;
-
-			printf("Packet data:\n");
-			while (len-- > 0) {
-				if (first-- == 0) {
-					printf("\n");
-					first = 7;
-				}
-				printf(" %02x", *data++ & 0xff);
-			}
-			printf("\n");
+			printf("Response packet:\n");
+			dump_hex_printable(&rpkt, n);
 		}
 
 		/*

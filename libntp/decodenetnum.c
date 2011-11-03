@@ -73,6 +73,7 @@ decodenetnum(
 	if (err != 0)
 		return 0;
 	NTP_INSIST(ai->ai_addrlen <= sizeof(*netnum));
+	ZERO(*netnum);
 	memcpy(netnum, ai->ai_addr, ai->ai_addrlen);
 	freeaddrinfo(ai);
 	if (NULL == port_str || 1 != sscanf(port_str, "%hu", &port))

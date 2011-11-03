@@ -26,6 +26,7 @@
 #include "ntp_crypto.h"
 #include "ntp_assert.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
+#include "lib_strbuf.h"
 #ifdef KERNEL_PLL
 # include "ntp_syscall.h"
 #endif
@@ -93,8 +94,14 @@ static	void	configure	(struct recvbuf *, int);
 static	void	send_mru_entry	(mon_entry *, int);
 static	void	send_random_tag_value(int);
 static	void	read_mru_list	(struct recvbuf *, int);
-static	void	send_ifstats_entry(struct interface *, u_int);
-static	void	read_ifstats	(struct recvbuf *, int);
+static	void	send_ifstats_entry(endpt *, u_int);
+static	void	read_ifstats	(struct recvbuf *);
+static	void	sockaddrs_from_restrict_u(sockaddr_u *,	sockaddr_u *,
+					  restrict_u *, int);
+static	void	send_restrict_entry(restrict_u *, int, u_int);
+static	void	send_restrict_list(restrict_u *, int, u_int *);
+static	void	read_addr_restrictions(struct recvbuf *);
+static	void	read_ordlist	(struct recvbuf *, int);
 static	u_int32	derive_nonce	(sockaddr_u *, u_int32, u_int32);
 static	void	generate_nonce	(struct recvbuf *, char *, size_t);
 static	int	validate_nonce	(const char *, struct recvbuf *);
@@ -104,20 +111,20 @@ static	struct ctl_trap *ctlfindtrap(sockaddr_u *,
 				     struct interface *);
 
 static const struct ctl_proc control_codes[] = {
-	{ CTL_OP_UNSPEC,	NOAUTH,	control_unspec },
-	{ CTL_OP_READSTAT,	NOAUTH,	read_status },
-	{ CTL_OP_READVAR,	NOAUTH,	read_variables },
-	{ CTL_OP_WRITEVAR,	AUTH,	write_variables },
-	{ CTL_OP_READCLOCK,	NOAUTH,	read_clockstatus },
-	{ CTL_OP_WRITECLOCK,	NOAUTH,	write_clockstatus },
-	{ CTL_OP_SETTRAP,	NOAUTH,	set_trap },
-	{ CTL_OP_CONFIGURE,	AUTH,	configure },
-	{ CTL_OP_SAVECONFIG,	AUTH,	save_config },
-	{ CTL_OP_READ_MRU,	NOAUTH,	read_mru_list },
-	{ CTL_OP_READ_IFSTATS,	AUTH,	read_ifstats },
-	{ CTL_OP_REQ_NONCE,	NOAUTH,	req_nonce },
-	{ CTL_OP_UNSETTRAP,	NOAUTH,	unset_trap },
-	{ NO_REQUEST,		0,	NULL }
+	{ CTL_OP_UNSPEC,		NOAUTH,	control_unspec },
+	{ CTL_OP_READSTAT,		NOAUTH,	read_status },
+	{ CTL_OP_READVAR,		NOAUTH,	read_variables },
+	{ CTL_OP_WRITEVAR,		AUTH,	write_variables },
+	{ CTL_OP_READCLOCK,		NOAUTH,	read_clockstatus },
+	{ CTL_OP_WRITECLOCK,		NOAUTH,	write_clockstatus },
+	{ CTL_OP_SETTRAP,		NOAUTH,	set_trap },
+	{ CTL_OP_CONFIGURE,		AUTH,	configure },
+	{ CTL_OP_SAVECONFIG,		AUTH,	save_config },
+	{ CTL_OP_READ_MRU,		NOAUTH,	read_mru_list },
+	{ CTL_OP_READ_ORDLIST_A,	AUTH,	read_ordlist },
+	{ CTL_OP_REQ_NONCE,		NOAUTH,	req_nonce },
+	{ CTL_OP_UNSETTRAP,		NOAUTH,	unset_trap },
+	{ NO_REQUEST,			0,	NULL }
 };
 
 /*
@@ -1364,7 +1371,7 @@ ctl_putstr(
 		cp += len;
 		*cp++ = '"';
 	}
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	ctl_putdata(buffer, (u_int)(cp - buffer), 0);
 }
 
 
@@ -3206,9 +3213,10 @@ static void configure(
 	if (data_count > 0
 	    && '\n' == remote_config.buffer[data_count - 1]) {
 		remote_config.buffer[data_count - 1] = '\0';
-		replace_nl = 1;
-	} else
-		replace_nl = 0;
+		replace_nl = TRUE;
+	} else {
+		replace_nl = FALSE;
+	}
 
 	DPRINTF(1, ("Got Remote Configuration Command: %s\n",
 		remote_config.buffer));
@@ -3337,6 +3345,39 @@ static int validate_nonce(
 
 
 /*
+ * send_random_tag_value - send a randomly-generated three character
+ *			   tag prefix, a '.', an index, a '=' and a
+ *			   random integer value.
+ *
+ * To try to force clients to ignore unrecognized tags in mrulist,
+ * reslist, and ifstats responses, the first and last rows are spiced
+ * with randomly-generated tag names with correct .# index.  Make it
+ * three characters knowing that none of the currently-used subscripted
+ * tags have that length, avoiding the need to test for
+ * tag collision.
+ */
+static void
+send_random_tag_value(
+	int	indx
+	)
+{
+	int	noise;
+	char	buf[32];
+
+	noise = rand() ^ (rand() << 16);
+	buf[0] = 'a' + noise % 26;
+	noise >>= 5;
+	buf[1] = 'a' + noise % 26;
+	noise >>= 5;
+	buf[2] = 'a' + noise % 26;
+	noise >>= 5;
+	buf[3] = '.';
+	snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
+	ctl_putuint(buf, noise);
+}
+
+
+/*
  * Send a MRU list entry in response to a "ntpq -c mrulist" operation.
  *
  * To keep clients honest about not depending on the order of values,
@@ -3363,7 +3404,7 @@ send_mru_entry(
 
 	remaining = COUNTOF(sent);
 	ZERO(sent);
-	noise = (u_int32)ntp_random();
+	noise = (u_int32)(rand() ^ (rand() << 16));
 	while (remaining > 0) {
 		which = (noise & 7) % COUNTOF(sent);
 		noise >>= 3;
@@ -3406,39 +3447,6 @@ send_mru_entry(
 		sent[which] = TRUE;
 		remaining--;
 	}
-}
-
-
-/*
- * send_random_tag_value - send a randomly-generated three character
- *			   tag prefix, a '.', an index, a '=' and a
- *			   random integer value.
- *
- * To try to force clients to ignore unrecognized tags in mrulist
- * and ifstats responses, the first and last rows are spiced with
- * randomly-generated tag names with correct .# index.
- * Make it three characters knowing that none of the currently-used
- * subscripted tags have that length, avoiding the need to test for
- * tag collision.
- */
-static void
-send_random_tag_value(
-	int	indx
-	)
-{
-	int	noise;
-	char	buf[32];
-
-	noise = rand() | (rand() << 16);
-	buf[0] = 'a' + noise % 26;
-	noise >>= 5;
-	buf[1] = 'a' + noise % 26;
-	noise >>= 5;
-	buf[2] = 'a' + noise % 26;
-	noise >>= 5;
-	buf[3] = '.';
-	snprintf(&buf[4], sizeof(buf) - 4, "%d", indx);
-	ctl_putuint(buf, noise);
 }
 
 
@@ -3795,8 +3803,8 @@ static void read_mru_list(
  */
 static void
 send_ifstats_entry(
-	struct interface *	la,
-	u_int			ifnum
+	endpt *	la,
+	u_int	ifnum
 	)
 {
 	const char addr_fmtu[] =	"addr.%u";
@@ -3812,7 +3820,7 @@ send_ifstats_entry(
 	const char pc_fmt[] =		"pc.%u";	/* peer count */
 	const char up_fmt[] =		"up.%u";	/* uptime */
 	char	tag[32];
-	u_char	sent[12]; /* 12 tag=value pairs */
+	u_char	sent[IFSTATS_FIELDS]; /* 12 tag=value pairs */
 	int	noisebits;
 	u_int32 noise;
 	u_int	which;
@@ -3825,7 +3833,7 @@ send_ifstats_entry(
 	noisebits = 0;
 	while (remaining > 0) {
 		if (noisebits < 4) {
-			noise = ntp_random();
+			noise = rand() ^ (rand() << 16);
 			noisebits = 31;
 		}
 		which = (noise & 0xf) % COUNTOF(sent);
@@ -3908,18 +3916,18 @@ send_ifstats_entry(
 	send_random_tag_value((int)ifnum);
 }
 
-	
+
 /*
- * read_ifstats - CTL_OP_READ_IFSTATS for ntpq -c ifstats, modeled on
- *		  ntpdc -c ifstats.
+ * read_ifstats - send statistics for each local address, exposed by
+ *		  ntpq -c ifstats
  */
-static void read_ifstats(
-	struct recvbuf *	rbufp,
-	int			restrict_mask
+static void
+read_ifstats(
+	struct recvbuf *	rbufp
 	)
 {
-	u_int			ifidx;
-	struct interface *	la;
+	u_int	ifidx;
+	endpt *	la;
 
 	/*
 	 * loop over [0..sys_ifnum] searching ep_list for each
@@ -3935,6 +3943,195 @@ static void read_ifstats(
 		send_ifstats_entry(la, ifidx);
 	}
 	ctl_flushpkt(0);
+}
+
+static void
+sockaddrs_from_restrict_u(
+	sockaddr_u *	psaA,
+	sockaddr_u *	psaM,
+	restrict_u *	pres,
+	int		ipv6
+	)
+{
+	ZERO(*psaA);
+	ZERO(*psaM);
+	if (!ipv6) {
+		psaA->sa.sa_family = AF_INET;
+		psaA->sa4.sin_addr.s_addr = htonl(pres->u.v4.addr);
+		psaM->sa.sa_family = AF_INET;
+		psaM->sa4.sin_addr.s_addr = htonl(pres->u.v4.mask);
+	} else {
+		psaA->sa.sa_family = AF_INET6;
+		memcpy(&psaA->sa6.sin6_addr, &pres->u.v6.addr,
+		       sizeof(psaA->sa6.sin6_addr));
+		psaM->sa.sa_family = AF_INET6;
+		memcpy(&psaM->sa6.sin6_addr, &pres->u.v6.mask,
+		       sizeof(psaA->sa6.sin6_addr));
+	}
+}
+
+
+/*
+ * Send a restrict entry in response to a "ntpq -c reslist" request.
+ *
+ * To keep clients honest about not depending on the order of values,
+ * and thereby avoid being locked into ugly workarounds to maintain
+ * backward compatibility later as new fields are added to the response,
+ * the order is random.
+ */
+static void
+send_restrict_entry(
+	restrict_u *	pres,
+	int		ipv6,
+	u_int		idx
+	)
+{
+	const char addr_fmtu[] =	"addr.%u";
+	const char mask_fmtu[] =	"mask.%u";
+	const char hits_fmt[] =		"hits.%u";
+	const char flags_fmt[] =	"flags.%u";
+	char		tag[32];
+	u_char		sent[RESLIST_FIELDS]; /* 4 tag=value pairs */
+	int		noisebits;
+	u_int32		noise;
+	u_int		which;
+	u_int		remaining;
+	sockaddr_u	addr;
+	sockaddr_u	mask;
+	const char *	pch;
+	char *		buf;
+	const char *	match_str;
+	const char *	access_str;
+
+	sockaddrs_from_restrict_u(&addr, &mask, pres, ipv6);
+	remaining = COUNTOF(sent);
+	ZERO(sent);
+	noise = 0;
+	noisebits = 0;
+	while (remaining > 0) {
+		if (noisebits < 2) {
+			noise = rand() ^ (rand() << 16);
+			noisebits = 31;
+		}
+		which = (noise & 0x3) % COUNTOF(sent);
+		noise >>= 2;
+		noisebits -= 2;
+
+		while (sent[which])
+			which = (which + 1) % COUNTOF(sent);
+
+		switch (which) {
+
+		case 0:
+			snprintf(tag, sizeof(tag), addr_fmtu, idx);
+			pch = stoa(&addr);
+			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+
+		case 1:
+			snprintf(tag, sizeof(tag), mask_fmtu, idx);
+			pch = stoa(&mask);
+			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+
+		case 2:
+			snprintf(tag, sizeof(tag), hits_fmt, idx);
+			ctl_putuint(tag, pres->count);
+			break;
+
+		case 3:
+			snprintf(tag, sizeof(tag), flags_fmt, idx);
+			match_str = res_match_flags(pres->mflags);
+			access_str = res_access_flags(pres->flags);
+			if ('\0' == match_str[0]) {
+				pch = access_str;
+			} else {
+				LIB_GETBUF(buf);
+				snprintf(buf, LIB_BUFLENGTH, "%s %s",
+					 match_str, access_str);
+				pch = buf;
+			}
+			ctl_putunqstr(tag, pch, strlen(pch));
+			break;
+		}
+		sent[which] = TRUE;
+		remaining--;
+	}
+	send_random_tag_value((int)idx);
+}
+
+
+static void
+send_restrict_list(
+	restrict_u *	pres,
+	int		ipv6,
+	u_int *		pidx
+	)
+{
+	for ( ; pres != NULL; pres = pres->link) {
+		send_restrict_entry(pres, ipv6, *pidx);
+		(*pidx)++;
+	}
+}
+
+
+/*
+ * read_addr_restrictions - returns IPv4 and IPv6 access control lists
+ */
+static void
+read_addr_restrictions(
+	struct recvbuf *	rbufp
+)
+{
+	u_int idx;
+
+	idx = 0;
+	send_restrict_list(restrictlist4, FALSE, &idx);
+	send_restrict_list(restrictlist6, TRUE, &idx);
+	ctl_flushpkt(0);
+}
+
+
+/*
+ * read_ordlist - CTL_OP_READ_ORDLIST_A for ntpq -c ifstats & reslist
+ */
+static void
+read_ordlist(
+	struct recvbuf *	rbufp,
+	int			restrict_mask
+	)
+{
+	const char ifstats_s[] = "ifstats";
+	const size_t ifstats_chars = COUNTOF(ifstats_s) - 1;
+	const char addr_rst_s[] = "addr_restrictions";
+	const size_t a_r_chars = COUNTOF(addr_rst_s) - 1;
+	struct ntp_control *	cpkt;
+	u_short			qdata_octets;
+
+	/*
+	 * CTL_OP_READ_ORDLIST_A was first named CTL_OP_READ_IFSTATS and
+	 * used only for ntpq -c ifstats.  With the addition of reslist
+	 * the same opcode was generalized to retrieve ordered lists
+	 * which require authentication.  The request data is empty or
+	 * contains "ifstats" (not null terminated) to retrieve local
+	 * addresses and associated stats.  It is "addr_restrictions"
+	 * to retrieve the IPv4 then IPv6 remote address restrictions,
+	 * which are access control lists.  Other request data return
+	 * CERR_UNKNOWNVAR.
+	 */
+	cpkt = (struct ntp_control *)&rbufp->recv_pkt;
+	qdata_octets = ntohs(cpkt->count);
+	if (0 == qdata_octets || (ifstats_chars == qdata_octets &&
+	    !memcmp(ifstats_s, cpkt->u.data, ifstats_chars))) {
+		read_ifstats(rbufp);
+		return;
+	}
+	if (a_r_chars == qdata_octets &&
+	    !memcmp(addr_rst_s, cpkt->u.data, a_r_chars)) {
+		read_addr_restrictions(rbufp);
+		return;
+	}
+	ctl_error(CERR_UNKNOWNVAR);
 }
 
 

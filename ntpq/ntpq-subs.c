@@ -69,6 +69,7 @@ static	void	saveconfig	(struct parse *, FILE *);
 static	void	config_from_file(struct parse *, FILE *);
 static	void	mrulist		(struct parse *, FILE *);
 static	void	ifstats		(struct parse *, FILE *);
+static	void	reslist		(struct parse *, FILE *);
 static	void	sysstats	(struct parse *, FILE *);
 static	void	sysinfo		(struct parse *, FILE *);
 static	void	kerninfo	(struct parse *, FILE *);
@@ -176,6 +177,9 @@ struct xcmd opcmds[] = {
 	{ "ifstats", ifstats, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "show statistics for each local address ntpd is using" },
+	{ "reslist", reslist, { NO, NO, NO, NO },
+	  { "", "", "", "" },
+	  "show ntpd access control list" },
 	{ "sysinfo", sysinfo, { NO, NO, NO, NO },
 	  { "", "", "", "" },
 	  "display system summary" },
@@ -307,6 +311,14 @@ typedef struct ifstats_row_tag {
 	u_int		uptime;
 } ifstats_row;
 
+typedef struct reslist_row_tag {
+	u_int		idx;
+	sockaddr_u	addr;
+	sockaddr_u	mask;
+	u_long		hits;
+	char		flagstr[128];
+} reslist_row;
+
 typedef struct var_display_collection_tag {
 	const char * const tag;		/* system variable */
 	const char * const display;	/* descriptive text */
@@ -331,7 +343,7 @@ static int	qcmp_mru_addr(const void *, const void *);
 static int	qcmp_mru_r_addr(const void *, const void *);
 static int	qcmp_mru_count(const void *, const void *);
 static int	qcmp_mru_r_count(const void *, const void *);
-static void	validate_ifnum(u_int, int, ifstats_row *);
+static void	validate_ifnum(FILE *, u_int, int *, ifstats_row *);
 static void	another_ifstats_field(int *, ifstats_row *, FILE *);
 static void	collect_display_vdc(associd_t as, vdc *table,
 				    int decodestatus, FILE *fp);
@@ -3019,27 +3031,38 @@ cleanup_return:
 
 /*
  * validate_ifnum - helper for ifstats()
+ *
+ * Ensures rows are received in order and complete.
  */
 static void
 validate_ifnum(
+	FILE *		fp,
 	u_int		ifnum,
-	int		fields,
+	int *		pfields,
 	ifstats_row *	prow
 	)
 {
-	if (0 == fields)
+	if (prow->ifnum == ifnum)
+		return;
+	if (prow->ifnum + 1 == ifnum) {
+		if (*pfields < IFSTATS_FIELDS)
+			fprintf(fp, "Warning: incomplete row with %d (of %d) fields",
+				*pfields, IFSTATS_FIELDS);
+		*pfields = 0;
 		prow->ifnum = ifnum;
-	else if (prow->ifnum != ifnum) {
-		fprintf(stderr,
-			"received interface index %u, expecting %u, aborting.\n",
-			ifnum, prow->ifnum);
-		exit(1);
+		return;
 	}
+	fprintf(stderr,
+		"received if index %u, have %d of %d fields for index %u, aborting.\n",
+		ifnum, *pfields, IFSTATS_FIELDS, prow->ifnum);
+	exit(1);
 }
 
 
 /*
  * another_ifstats_field - helper for ifstats()
+ *
+ * If all fields for the row have been received, print it.
  */
 static void
 another_ifstats_field(
@@ -3048,9 +3071,11 @@ another_ifstats_field(
 	FILE *		fp
 	)
 {
+	u_int ifnum;
+
 	(*pfields)++;
 	/* we understand 12 tags */
-	if (12 > *pfields)
+	if (IFSTATS_FIELDS > *pfields)	
 		return;
 	/*
 	"    interface name                                        send\n"
@@ -3069,9 +3094,9 @@ another_ifstats_field(
 		prow->peer_count, prow->uptime, sptoa(&prow->addr));
 	if (!SOCK_UNSPEC(&prow->bcast))
 		fprintf(fp, "    %s\n", sptoa(&prow->bcast));
-
-	*pfields = 0;
+	ifnum = prow->ifnum;
 	ZERO(*prow);
+	prow->ifnum = ifnum;
 }
 
 
@@ -3109,7 +3134,7 @@ ifstats(
 	int		comprende;
 	size_t		len;
 
-	qres = doquery(CTL_OP_READ_IFSTATS, 0, TRUE, 0, NULL, &rstatus,
+	qres = doquery(CTL_OP_READ_ORDLIST_A, 0, TRUE, 0, NULL, &rstatus,
 		       &dsize, &datap);
 	if (qres)	/* message already displayed */
 		return;
@@ -3210,10 +3235,190 @@ ifstats(
 		}
 
 		if (comprende) {
-			validate_ifnum(ui, fields, &row);
+			/* error out if rows out of order */
+			validate_ifnum(fp, ui, &fields, &row);
+			/* if the row is complete, print it */
 			another_ifstats_field(&fields, &row, fp);
 		}
 	}
+	if (fields != IFSTATS_FIELDS)
+		fprintf(fp, "Warning: incomplete row with %d (of %d) fields",
+			fields, IFSTATS_FIELDS);
+
+	fflush(fp);
+}
+
+
+/*
+ * validate_reslist_idx - helper for reslist()
+ *
+ * Ensures rows are received in order and complete.
+ */
+static void
+validate_reslist_idx(
+	FILE *		fp,
+	u_int		idx,
+	int *		pfields,
+	reslist_row *	prow
+	)
+{
+	if (prow->idx == idx)
+		return;
+	if (prow->idx + 1 == idx) {
+		if (*pfields < RESLIST_FIELDS)
+			fprintf(fp, "Warning: incomplete row with %d (of %d) fields",
+				*pfields, RESLIST_FIELDS);
+		*pfields = 0;
+		prow->idx = idx;
+		return;
+	}
+	fprintf(stderr,
+		"received reslist index %u, have %d of %d fields for index %u, aborting.\n",
+		idx, *pfields, RESLIST_FIELDS, prow->idx);
+	exit(1);
+}
+
+
+/*
+ * another_reslist_field - helper for reslist()
+ *
+ * If all fields for the row have been received, print it.
+ */
+static void
+another_reslist_field(
+	int *		pfields,
+	reslist_row *	prow,
+	FILE *		fp
+	)
+{
+	char	addrmaskstr[128];
+	int	prefix;	/* subnet mask as prefix bits count */
+	u_int	idx;
+
+	(*pfields)++;
+	/* we understand 4 tags */
+	if (RESLIST_FIELDS > *pfields)
+		return;
+
+	prefix = sockaddr_masktoprefixlen(&prow->mask);
+	if (prefix >= 0)
+		snprintf(addrmaskstr, sizeof(addrmaskstr), "%s/%d",
+			 stoa(&prow->addr), prefix);
+	else
+		snprintf(addrmaskstr, sizeof(addrmaskstr), "%s %s",
+			 stoa(&prow->addr), stoa(&prow->mask));
+
+	/*
+	"   hits    addr/prefix or addr mask\n"
+	"           restrictions\n"
+	"==============================================================================\n");
+	 */
+	fprintf(fp,
+		"%10lu %s\n"
+		"           %s\n",
+		prow->hits, addrmaskstr, prow->flagstr);
+	idx = prow->idx;
+	ZERO(*prow);
+	prow->idx = idx;
+}
+
+
+/*
+ * reslist - ntpq -c reslist modeled on ntpdc -c reslist.
+ */
+static void 
+reslist(
+	struct parse *	pcmd,
+	FILE *		fp
+	)
+{
+	const char addr_fmtu[] =	"addr.%u";
+	const char mask_fmtu[] =	"mask.%u";
+	const char hits_fmt[] =		"hits.%u";
+	const char flags_fmt[] =	"flags.%u";
+	const char qdata[] =		"addr_restrictions";
+	const int qdata_chars =		COUNTOF(qdata) - 1;
+	const char *	datap;
+	int		qres;
+	int		dsize;
+	u_short		rstatus;
+	char *		tag;
+	char *		val;
+	int		fields;
+	u_int		idx;
+	u_int		ui;
+	reslist_row	row;
+	int		comprende;
+	size_t		len;
+
+	qres = doquery(CTL_OP_READ_ORDLIST_A, 0, TRUE, qdata_chars,
+		       qdata, &rstatus, &dsize, &datap);
+	if (qres)	/* message already displayed */
+		return;
+
+	fprintf(fp,
+		"   hits    addr/prefix or addr mask\n"
+		"           restrictions\n"
+		"==============================================================================\n");
+		/* '=' x 78 */
+
+	ZERO(row);
+	fields = 0;
+	idx = 0;
+	ui = 0;
+	while (nextvar(&dsize, &datap, &tag, &val)) {
+		if (debug > 1)
+			fprintf(stderr, "nextvar gave: %s = %s\n", tag,
+				(NULL == val)
+				    ? ""
+				    : val);
+		comprende = FALSE;
+		switch(tag[0]) {
+
+		case 'a':
+			if (1 == sscanf(tag, addr_fmtu, &ui) &&
+			    decodenetnum(val, &row.addr))
+				comprende = TRUE;
+			break;
+
+		case 'f':
+			if (1 == sscanf(tag, flags_fmt, &ui)) {
+				if (NULL == val) {
+					row.flagstr[0] = '\0';
+					comprende = TRUE;
+				} else {
+					len = strlen(val);
+					memcpy(row.flagstr, val, len);
+					row.flagstr[len] = '\0';
+					comprende = TRUE;
+				}
+			}
+			break;
+
+		case 'h':
+			if (1 == sscanf(tag, hits_fmt, &ui) &&
+			    1 == sscanf(val, "%lu", &row.hits))
+				comprende = TRUE;
+			break;
+
+		case 'm':
+			if (1 == sscanf(tag, mask_fmtu, &ui) &&
+			    decodenetnum(val, &row.mask))
+				comprende = TRUE;
+			break;
+		}
+
+		if (comprende) {
+			/* error out if rows out of order */
+			validate_reslist_idx(fp, ui, &fields, &row);
+			/* if the row is complete, print it */
+			another_reslist_field(&fields, &row, fp);
+		}
+	}
+	if (fields != RESLIST_FIELDS)
+		fprintf(fp, "Warning: incomplete row with %d (of %d) fields",
+			fields, RESLIST_FIELDS);
+
 	fflush(fp);
 }
 
