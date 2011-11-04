@@ -1,8 +1,8 @@
-.TH ntpdc 1ntpdcman "01 Nov 2011" "4.2.7p230" "User Commands"
+.TH ntpdc 1ntpdcman "03 Nov 2011" "4.2.7p231" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  November  1, 2011 at 10:53:18 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  November  3, 2011 at 07:27:23 PM by AutoGen 5.12
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
