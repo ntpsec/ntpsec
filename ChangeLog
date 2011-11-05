@@ -1,3 +1,4 @@
+* Update the NEWS file so we note the default disable of mode 7 requests.
 (4.2.7p231) 2011/11/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1940] ignore auth key if hex decoding fails.
 * Add ntpq reslist command to query access restrictions, similar to
