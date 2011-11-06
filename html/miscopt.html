@@ -10,7 +10,7 @@
 <img src="pic/boom3.gif" alt="gif" align="left"><a href="http://www.eecis.udel.edu/~mills/pictures.html">from <i>Pogo</i>, Walt Kelly</a>
 <p>We have three, now looking for more.</p>
 <p>Last update:
-  <!-- #BeginDate format:En2m -->04-Aug-2011  1:27<!-- #EndDate -->
+  <!-- #BeginDate format:En2m -->01-Nov-2011  00:44<!-- #EndDate -->
   UTC</p>
 <br clear="left">
 <h4>Related Links</h4>
@@ -28,7 +28,7 @@
   <dd>The file format consists of a single line containing a single floating point number, which records the frequency offset measured in parts-per-million (PPM). The file is updated by first writing the current drift value into a temporary file and then renaming this file to replace the old version.</dd>
   <dt id="enable"><tt>enable [auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt><br>
     <tt>disable [auth | bclient | calibrate | kernel | monitor | ntp | pps | stats]</tt></dt>
-  <dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that all of these flags can be controlled remotely using <a href="ntpq.html"><tt>ntpq</tt></a> and <a href="ntpdc.html"><tt>ntpdc</tt></a> utility programs.
+  <dd>Provides a way to enable or disable various system options. Flags not mentioned are unaffected. Note that most of these flags can be modified remotely using <a href="ntpq.html"><tt>ntpq</tt></a> utility program's <tt>:config</tt> and <tt>config-from-file</tt> commands.
     <dl>
       <dt><tt>auth</tt></dt>
       <dd>Enables the server to synchronize with unconfigured peers only if the peer has been correctly authenticated using either public key or private key cryptography. The default for this flag is enable.</dd>
@@ -41,10 +41,12 @@
       <dt><tt>monitor</tt></dt>
       <dd>Enables the monitoring facility. See the <a href="ntpq.html"><tt>ntpq</tt> program</a> and the <tt>monstats</tt> and <tt>mrulist</tt> commands, as well as the <a href="accopt.html#discard">Access Control Options</a> for details.
         The monitoring facility is also enabled by the presence of <a href="accopt.html#limited"><tt>limited</tt></a> in any <tt>restrict</tt> commands. The default for this flag is enable.</dd>
+      <dt><tt>mode7</tt></dt>
+      <dd>Enables processing of NTP mode 7 implementation-specific requests which are used by the deprecated <tt>ntpdc</tt> program. The default for this flag is disable. This flag is excluded from runtime configuration using <tt>ntpq</tt>. The <tt>ntpq</tt> program provides the same capabilities as <tt>ntpdc</tt> using standard mode 6 requests.</dd>
       <dt><tt>ntp</tt></dt>
       <dd>Enables time and frequency discipline. In effect, this switch opens and closes the feedback loop, which is useful for testing. The default for this flag is enable.</dd>
       <dt><tt>stats</tt></dt>
-      <dd>Enables the statistics facility. See the <a href="monopt.html">Monitoring Options</a> page for further information. The default for this flag is enabled.</dd>
+      <dd>Enables the statistics facility. See the <a href="monopt.html">Monitoring Options</a> page for further information. The default for this flag is enabled. This flag is excluded from runtime configuration using <tt>ntpq</tt>.</dd>
     </dl>
   </dd>
   <dt id="includefile"><tt>includefile <i>includefile</i></tt></dt>

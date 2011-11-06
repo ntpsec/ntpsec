@@ -1,3 +1,4 @@
+* Documentation updates from Dave Mills.
 (4.2.7p232) 2011/11/05 Released by Harlan Stenn <stenn@ntp.org>
 * Update the NEWS file so we note the default disable of mode 7 requests.
 * Clean up some bitrotted code in libntp/socket.c.
