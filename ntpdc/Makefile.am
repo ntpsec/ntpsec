@@ -15,8 +15,9 @@ AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 # LDADD might need RESLIB and ADJLIB
-ntpdc_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a
-ntpdc_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(EDITLINE_LIBS)
+ntpdc_LDADD  = version.o $(LIBOPTS_LDADD)
+ntpdc_LDADD  = ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
+ntpdc_LDADD += $(PTHREAD_LIBS) $(EDITLINE_LIBS)
 ntpdc_LDADD += $(LCRYPTO)
 # ntpdc-layout doesn't need any additional libraries at all
 ntpdc_layout_LDADD=

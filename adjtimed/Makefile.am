@@ -13,7 +13,7 @@ AM_CFLAGS = $(CFLAGS_NTP)
 AM_CPPFLAGS  = $(NTP_INCS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
-LDADD = ../libntp/libntp.a $(LDADD_LIBNTP) $(PTHREAD_LIBS)
+LDADD = ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM) $(PTHREAD_LIBS)
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/sntp/check-libntp.mf

@@ -14,9 +14,7 @@ AM_CPPFLAGS += $(CPPFLAGS_NTP)
 LDADD  = version.o
 LDADD += $(LIBOPTS_LDADD)
 LDADD += $(LDADD_LIBEVENT)
-LDADD += $(LIBM)
-LDADD += ../libntp/libntp.a
-LDADD += $(LDADD_LIBNTP)
+LDADD += ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
 LDADD += $(PTHREAD_LIBS)
 LDADD += $(LCRYPTO)
 

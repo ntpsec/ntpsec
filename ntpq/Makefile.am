@@ -12,8 +12,9 @@ AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 # LDADD might need RESLIB and ADJLIB
-ntpq_LDADD  = version.o $(LIBOPTS_LDADD) $(LIBM) ../libntp/libntp.a
-ntpq_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(EDITLINE_LIBS)
+ntpq_LDADD  = version.o $(LIBOPTS_LDADD)
+ntpq_LDADD  = ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
+ntpq_LDADD += $(PTHREAD_LIBS) $(EDITLINE_LIBS)
 ntpq_LDADD += $(LCRYPTO)
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a
