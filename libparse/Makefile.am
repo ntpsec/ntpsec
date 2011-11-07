@@ -120,10 +120,10 @@ kparse_conf.o: $(srcdir)/parse_conf.c
 	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/parse_conf.c -o $@
 
 parsestreams.loadable_module.o: $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a
-	$(LD) -r -o $@ $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
+	$(LD) -r -o $@ $(parsestreams_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 
 parse: $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
-	$(LD) -r -o $@ $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
+	$(LD) -r -o $@ $(parsesolaris_OBJECTS) libparse_kernel.a ../libntp/libntp.a
 
 parsesolaris.o: sys/systm.h
 
