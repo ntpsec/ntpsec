@@ -1,3 +1,4 @@
+(4.2.7p234) 2011/11/07 Released by Harlan Stenn <stenn@ntp.org>
 * Clean up -libm entries regarding libntp.a
 (4.2.7p233) 2011/11/06 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
