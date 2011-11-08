@@ -1,3 +1,4 @@
+* [Bug 2052] Autokey CRYPTO_ASSOC host@group vallen needs checking.
 (4.2.7p234) 2011/11/07 Released by Harlan Stenn <stenn@ntp.org>
 * Clean up -libm entries regarding libntp.a
 (4.2.7p233) 2011/11/06 Released by Harlan Stenn <stenn@ntp.org>

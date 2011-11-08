@@ -479,6 +479,7 @@ receive(
 	while (has_mac != 0) {
 		u_int32	len;
 #ifdef AUTOKEY
+		u_int32	hostlen;
 		struct exten *ep;
 #endif /*AUTOKEY */
 
@@ -499,21 +500,29 @@ receive(
 				return;		/* bad length */
 			}
 #ifdef AUTOKEY
-
 			/*
-			 * Extract calling group name for later.
+			 * Extract calling group name for later.  If
+			 * sys_groupname is non-NULL, there must be
+			 * a group name provided to elicit a response.
 			 */
 			if ((opcode & 0x3fff0000) == CRYPTO_ASSOC &&
 			    sys_groupname != NULL) {
 				ep = (struct exten *)&((u_int32 *)pkt)[authlen / 4];
-				memmove(hostname, &ep->pkt, ntohl(ep->vallen));
-				hostname[ntohl(ep->vallen)] = '\0';
+				hostlen = ntohl(ep->vallen);
+				if (hostlen >= sizeof(hostname) ||
+				    hostlen > len -
+				    offsetof(struct exten, pkt)) {
+					sys_badlength++;
+					return;		/* bad length */
+				}
+				memcpy(hostname, &ep->pkt, hostlen);
+				hostname[hostlen] = '\0';
 				groupname = strchr(hostname, '@');
-				if (groupname == NULL)
+				if (groupname == NULL) {
+					sys_declined++;
 					return;
-
-				else
-					groupname++;
+				}
+				groupname++;
 			}
 #endif /* AUTOKEY */
 			authlen += len;
@@ -554,10 +563,10 @@ receive(
 
 	/*
 	 * We have tossed out as many buggy packets as possible early in
-	 * the game to reduce the exposure to a clogging attack. now we
+	 * the game to reduce the exposure to a clogging attack. Now we
 	 * have to burn some cycles to find the association and
 	 * authenticate the packet if required. Note that we burn only
-	 * MD5 cycles, again to reduce exposure. There may be no
+	 * digest cycles, again to reduce exposure. There may be no
 	 * matching association and that's okay.
 	 *
 	 * More on the autokey mambo. Normally the local interface is
@@ -691,7 +700,7 @@ receive(
 				 * the wildcard interface, game over.
 				 */
 				if (crypto_flags && rbufp->dstadr ==
-				    any_interface) {
+				    ANY_INTERFACE_CHOOSE(&rbufp->recv_srcadr)) {
 					sys_restricted++;
 					return;	     /* no wildcard */
 				}
@@ -805,7 +814,7 @@ receive(
 
 #ifdef AUTOKEY
 		/*
-		 * Do not respond if not the same groupl;
+		 * Do not respond if not the same group.
 		 */
 		if (group_test(groupname, NULL)) {
 			sys_declined++;
@@ -1153,7 +1162,7 @@ receive(
 
 	/*
 	 * If this is a broadcast mode packet, skip further checking. If
-	 * an intial volley, bail out now and let the client do its
+	 * an initial volley, bail out now and let the client do its
 	 * stuff. If the origin timestamp is nonzero, this is an
 	 * interleaved broadcast. so restart the protocol.
 	 */
@@ -1193,7 +1202,7 @@ receive(
 
 	/*
 	 * Check for bogus packet in interleaved symmetric mode. This
-	 * can happen if a packet is lost, duplicat or crossed. If
+	 * can happen if a packet is lost, duplicated or crossed. If
 	 * found, flip and resynchronize.
 	 */
 	} else if (!L_ISZERO(&peer->dst) && !L_ISEQU(&p_org,
@@ -1260,7 +1269,7 @@ receive(
 	/*
 	 * Set the peer ppoll to the maximum of the packet ppoll and the
 	 * peer minpoll. If a kiss-o'-death, set the peer minpoll to
-	 * this maximumn and advance the headway to give the sender some
+	 * this maximum and advance the headway to give the sender some
 	 * headroom. Very intricate.
 	 */
 	peer->ppoll = max(peer->minpoll, pkt->ppoll);
@@ -1313,7 +1322,7 @@ receive(
 	 */
 	if (peer->flags & FLAG_SKEY) {
 		/*
-		 * Decrement remaining audokey hashes. This isn't
+		 * Decrement remaining autokey hashes. This isn't
 		 * perfect if a packet is lost, but results in no harm.
 		 */
 		ap = (struct autokey *)peer->recval.ptr;
@@ -1392,7 +1401,7 @@ receive(
 		/*
 		 * The maximum lifetime of the protocol is about one
 		 * week before restarting the Autokey protocol to
-		 * refreshed certificates and leapseconds values.
+		 * refresh certificates and leapseconds values.
 		 */
 		if (current_time > peer->refresh) {
 			report_event(PEVNT_RESTART, peer,
@@ -3577,7 +3586,7 @@ pool_xmit(
 	 * none		group		0		mobilize *
 	 * group	none		0		mobilize *
 	 * group	group		1		mobilize
-	 * group	different	2		ignore
+	 * group	different	1		ignore
 	 * * ignore if notrust
 	 */
 int group_test(
