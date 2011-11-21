@@ -57,17 +57,23 @@ typedef unsigned int u_int;
 #if (SIZEOF_INT == 4)
 # ifndef int32
 #  define int32 int
+#  define INT32_MIN INT_MIN
+#  define INT32_MAX INT_MAX
 # endif
 # ifndef u_int32
 #  define u_int32 unsigned int
+#  define U_INT32_MAX UINT_MAX
 # endif
 #else /* not sizeof(int) == 4 */
 # if (SIZEOF_LONG == 4)
 #  ifndef int32
 #   define int32 long
+#   define INT32_MIN LONG_MIN
+#   define INT32_MAX LONG_MAX
 #  endif
 #  ifndef u_int32
 #   define u_int32 unsigned long
+#   define U_INT32_MAX ULONG_MAX
 #  endif
 # else /* not sizeof(long) == 4 */
 #  include "Bletch: what's 32 bits on this machine?"

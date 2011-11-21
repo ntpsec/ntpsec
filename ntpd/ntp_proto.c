@@ -2204,7 +2204,7 @@ clock_select(void)
 	double	high, low;
 	double	seljitter;
 	double	synch[NTP_MAXASSOC], error[NTP_MAXASSOC];
-	double	orphdist = 1e10;
+	double	orphmet = 2.0 * U_INT32_MAX; /* 2x is greater than */
 	struct peer *osys_peer = NULL;
 	struct peer *sys_prefer = NULL;	/* prefer peer */
 	struct peer *typesystem = NULL;
@@ -2279,20 +2279,43 @@ clock_select(void)
 				continue;
 
 			/*
-			 * If this is an orphan, choose the one with
-			 * the lowest metric defined as the IPv4 address
-			 * or the first 64 bits of the hashed IPv6 address.
+			 * If this peer is an orphan parent, elect the
+			 * one with the lowest metric defined as the
+			 * IPv4 address or the first 64 bits of the
+			 * hashed IPv6 address.  To ensure convergence
+			 * on the same selected orphan, consider as
+			 * well that this system may have the lowest
+			 * metric and be the orphan parent.  If this
+			 * system wins, sys_peer will be NULL to trigger
+			 * orphan mode in timer().
 			 */
 			if (peer->stratum == sys_orphan) {
-				double	ftemp;
+				u_int32	localmet;
+				u_int32 peermet;
 
-				ftemp = addr2refid(&peer->srcadr);
-				if (ftemp < orphdist) {
+				localmet = peer->dstadr->addr_refid;
+				peermet = addr2refid(&peer->srcadr);
+				if (peermet < localmet &&
+				    peermet < orphmet) {
 					typeorphan = peer;
-					orphdist = ftemp;
+					orphmet = peermet;
 				}
 				continue;
 			}
+
+			/*
+			 * If this peer could have the orphan parent
+			 * as a synchronization ancestor, exclude it
+			 * from selection to avoid forming a 
+			 * synchronization loop within the orphan mesh,
+			 * triggering stratum climb to infinity 
+			 * instability.  Peers at stratum higher than
+			 * the orphan stratum could have the orphan
+			 * parent in ancestry so are excluded.
+			 * See http://bugs.ntp.org/2050
+			 */
+			if (peer->stratum > sys_orphan)
+				continue;
 #ifdef REFCLOCK
 			/*
 			 * The following are special cases. We deal
