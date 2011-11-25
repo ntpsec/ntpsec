@@ -1041,7 +1041,7 @@ refclock_control(
 	clktype = (u_char)REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
 
-	peer = findexistingpeer(srcadr, NULL, -1);
+	peer = findexistingpeer(srcadr, NULL, -1, 0);
 
 	if (NULL == peer || NULL == peer->procptr)
 		return;
@@ -1140,7 +1140,7 @@ refclock_buginfo(
 	clktype = (u_char) REFCLOCKTYPE(srcadr);
 	unit = REFCLOCKUNIT(srcadr);
 
-	peer = findexistingpeer(srcadr, NULL, -1);
+	peer = findexistingpeer(srcadr, NULL, -1, 0);
 
 	if (NULL == peer || NULL == peer->procptr)
 		return;

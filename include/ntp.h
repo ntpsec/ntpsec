@@ -445,6 +445,7 @@ struct peer {
 #define	FLAG_PREEMPT	0x0002	/* preemptable association */
 #define	FLAG_AUTHENTIC	0x0004	/* last message was authentic */
 #define	FLAG_REFCLOCK	0x0008	/* this is actually a reference clock */
+#define	FLAG_BC_VOL	0x0010	/* broadcast client volleying */
 #define	FLAG_PREFER	0x0020	/* prefer peer */
 #define	FLAG_BURST	0x0040	/* burst mode */
 #define	FLAG_PPS	0x0080	/* steered by PPS */

@@ -183,9 +183,10 @@ getmorepeermem(void)
  */
 struct peer *
 findexistingpeer(
-	sockaddr_u *addr,
-	struct peer *start_peer,
-	int mode
+	sockaddr_u *	addr,
+	struct peer *	start_peer,
+	int		mode,
+	u_char		cast_flags
 	)
 {
 	register struct peer *peer;
@@ -193,6 +194,12 @@ findexistingpeer(
 	/*
 	 * start_peer is included so we can locate instances of the
 	 * same peer through different interfaces in the hash table.
+	 * Without MDF_BCLNT, a match requires the same mode and remote
+	 * address.  MDF_BCLNT associations start out as MODE_CLIENT
+	 * if broadcastdelay is not specified, and switch to
+	 * MODE_BCLIENT after estimating the one-way delay.  Duplicate
+	 * associations are expanded in definition to match any other
+	 * MDF_BCLNT with the same srcadr (remote, unicast address).
 	 */
 	if (NULL == start_peer)
 		peer = peer_hash[NTP_HASH_ADDR(addr)];
@@ -200,18 +207,21 @@ findexistingpeer(
 		peer = start_peer->next;
 	
 	while (peer != NULL) {
-		if (SOCK_EQ(addr, &peer->srcadr)
-		    && NSRCPORT(addr) == NSRCPORT(&peer->srcadr)
-		    && (-1 == mode || peer->hmode == mode))
+ 		if (ADDR_PORT_EQ(addr, &peer->srcadr)
+		    && (-1 == mode || peer->hmode == mode ||
+			((MDF_BCLNT & peer->cast_flags) &&
+			 (MDF_BCLNT & cast_flags))))
 			break;
 		peer = peer->next;
 	}
-	return (peer);
+
+	return peer;
 }
 
 
 /*
- * findpeer - find and return a peer in the hash table.
+ * findpeer - find and return a peer match for a received datagram in
+ *	      the peer_hash table.
  */
 struct peer *
 findpeer(
@@ -280,8 +290,11 @@ findpeer(
 		*action = MATCH_ASSOC(NO_PEER, pkt_mode);
 	} else if (p->dstadr != rbufp->dstadr) {
 		set_peerdstadr(p, rbufp->dstadr);
-		DPRINTF(1, ("changed %s local address to match response",
-			    stoa(&p->srcadr)));
+		if (p->dstadr == rbufp->dstadr) {
+			DPRINTF(1, ("Changed %s local address to match response\n",
+				    stoa(&p->srcadr)));
+			return findpeer(rbufp, pkt_mode, action);
+		}
 	}
 	return p;
 }
@@ -538,13 +551,12 @@ set_peerdstadr(
 	if (p->dstadr == dstadr)
 		return;
 
-	if (dstadr != NULL && (MDF_BCLNT & p->cast_flags) &&
-	    (dstadr->flags & INT_MCASTIF) && p->burst) {
-		/*
-		 * don't accept updates to a true multicast
-		 * reception interface while a BCLNT peer is
-		 * running it's unicast protocol
-		 */
+	/*
+	 * Don't accept updates to a separate multicast receive-only
+	 * endpt while a BCLNT peer is running its unicast protocol.
+	 */
+	if (dstadr != NULL && (FLAG_BC_VOL & p->flags) &&
+	    (INT_MCASTIF & dstadr->flags) && MODE_CLIENT == p->hmode) {
 		return;
 	}
 	if (p->dstadr != NULL) {
@@ -754,23 +766,30 @@ newpeer(
 	 * actual interface, because that's what gets put into the peer
 	 * structure.
 	 */
-	peer = findexistingpeer(srcadr, NULL, hmode);
 	if (dstadr != NULL) {
+		peer = findexistingpeer(srcadr, NULL, hmode, cast_flags);
 		while (peer != NULL) {
-			if (peer->dstadr == dstadr)
+			if (peer->dstadr == dstadr ||
+			    ((MDF_BCLNT & cast_flags) &&
+			     (MDF_BCLNT & peer->cast_flags)))
 				break;
 
 			if (dstadr == ANY_INTERFACE_CHOOSE(srcadr) &&
 			    peer->dstadr == findinterface(srcadr))
 				break;
 
-			peer = findexistingpeer(srcadr, peer, hmode);
+			peer = findexistingpeer(srcadr, peer, hmode,
+						cast_flags);
 		}
+	} else {
+		/* no endpt address given */
+		peer = findexistingpeer(srcadr, NULL, hmode, cast_flags);
 	}
 
 	/*
 	 * If a peer is found, this would be a duplicate and we don't
-	 * allow that. This is mostly to avoid duplicate pool
+	 * allow that. This avoids duplicate ephemeral (broadcast/
+	 * multicast) and preemptible (manycast and pool) client
 	 * associations.
 	 */
 	if (peer != NULL)

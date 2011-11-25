@@ -1,6 +1,13 @@
 ---
 
 * [Bug 2050] Orphan mode stratum counting to infinity.
+* [Bug 2059] optional billboard column "server" does not honor -n.
+* [Bug 2066] ntpq lopeers ipv6 "local" column overrun.
+* [Bug 2068] ntpd sends nonprintable stratum 16 refid to ntpq.
+* [Bug 2069] broadcastclient, multicastclient spin up duplicate
+  ephemeral associations without broadcastdelay.
+* Exclude not-yet-determined sys_refid from use in loopback TEST12
+  (from David Mills).  
 
 ---
 (4.2.6p5-RC1) 2011/10/18 Released by Harlan Stenn <stenn@ntp.org>

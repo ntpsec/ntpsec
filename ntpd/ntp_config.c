@@ -3589,7 +3589,7 @@ config_unpeers(
 				DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
 
 				while (!found) {
-					peer = findexistingpeer(&peeraddr, peer, -1);
+					peer = findexistingpeer(&peeraddr, peer, -1, 0);
 					if (!peer)
 						break;
 					if (peer->flags & FLAG_CONFIG)
