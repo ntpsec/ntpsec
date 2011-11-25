@@ -125,6 +125,7 @@ static	void	fast_xmit	(struct recvbuf *, int, keyid_t,
 				    int);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
+static	int	local_refid	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 
 
@@ -309,6 +310,7 @@ receive(
 	u_int32	opcode = 0;		/* extension field opcode */
 	sockaddr_u *dstadr_sin; 	/* active runway */
 	struct peer *peer2;		/* aux peer structure pointer */
+	endpt *	match_ep;		/* newpeer() local address */
 	l_fp	p_org;			/* origin timestamp */
 	l_fp	p_rec;			/* receive timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
@@ -849,6 +851,20 @@ receive(
 #endif /* OPENSSL */
 
 		/*
+		 * Broadcasts received via a multicast address may
+		 * arrive after a unicast volley has begun
+		 * with the same remote address.  newpeer() will not
+		 * find duplicate associations on other local endpoints
+		 * if a non-NULL endpoint is supplied.  multicastclient
+		 * ephemeral associations are unique across all local
+		 * endpoints.
+		 */
+		if (!(INT_MCASTOPEN & rbufp->dstadr->flags))
+			match_ep = rbufp->dstadr;
+		else
+			match_ep = NULL;
+
+		/*
 		 * Determine whether to execute the initial volley.
 		 */
 		if (sys_bdelay != 0) {
@@ -867,10 +883,11 @@ receive(
 			 * Do not execute the volley. Start out in
 			 * broadcast client mode.
 			 */
-			if ((peer = newpeer(&rbufp->recv_srcadr,
-			    rbufp->dstadr, MODE_BCLIENT, hisversion,
-			    pkt->ppoll, pkt->ppoll, 0, 0, 0,
-			    skeyid)) == NULL) {
+			peer = newpeer(&rbufp->recv_srcadr, match_ep,
+			    MODE_BCLIENT, hisversion, pkt->ppoll,
+			    pkt->ppoll, FLAG_PREEMPT, MDF_BCLNT, 0,
+			    skeyid);
+			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
 
@@ -889,10 +906,11 @@ receive(
 		 * packet, normally 6 (64 s) and that the poll interval
 		 * is fixed at this value.
 		 */
-		if ((peer = newpeer(&rbufp->recv_srcadr, rbufp->dstadr,
+		peer = newpeer(&rbufp->recv_srcadr, match_ep,
 		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
-		    FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT, 0,
-		    skeyid)) == NULL) {
+		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
+		    0, skeyid);
+		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
@@ -1495,8 +1513,8 @@ process_packet(
 		 * timestamp. This works for both basic and interleaved
 		 * modes.
 		 */
-		if (peer->cast_flags & MDF_BCLNT) {
-			peer->cast_flags &= ~MDF_BCLNT;
+		if (FLAG_BC_VOL & peer->flags) {
+			peer->flags &= ~FLAG_BC_VOL;
 			peer->delay = (peer->offset - p_offset) * 2;
 		}
 		p_del = peer->delay;
@@ -1602,8 +1620,8 @@ process_packet(
 	 * client mode when the client is fit and the autokey dance is
 	 * complete.
 	 */
-	if ((peer->cast_flags & MDF_BCLNT) && !(peer_unfit(peer) &
-	    TEST11)) {
+	if ((FLAG_BC_VOL & peer->flags) && MODE_CLIENT == peer->hmode &&
+	    !(TEST11 & peer_unfit(peer))) {	/* distance exceeded */
 #ifdef OPENSSL
 		if (peer->flags & FLAG_SKEY) {
 			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
@@ -3390,6 +3408,29 @@ key_expire(
 
 
 /*
+ * local_refid(peer) - check peer refid to avoid selecting peers
+ *		       currently synced to this ntpd.
+ */
+static int
+local_refid(
+	struct peer *	p
+	)
+{
+	endpt *	unicast_ep;
+
+	if (!(INT_MCASTIF & p->dstadr->flags))
+		unicast_ep = p->dstadr;
+	else
+		unicast_ep = findinterface(&p->srcadr);
+
+	if (unicast_ep != NULL && p->refid == unicast_ep->addr_refid)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
+/*
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
@@ -3429,9 +3470,7 @@ peer_unfit(
 	 * server as the local peer but only if the remote peer is
 	 * neither a reference clock nor an orphan.
 	 */
-	if (peer->stratum > 1 && peer->refid != htonl(LOOPBACKADR) &&
-	    (peer->refid == (peer->dstadr ? peer->dstadr->addr_refid :
-	    0) || peer->refid == sys_refid))
+	if (peer->stratum > 1 && local_refid(peer))
 		rval |= TEST12;		/* synchronization loop */
 
 	/*

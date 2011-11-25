@@ -59,7 +59,7 @@ static	void	ctl_putint	(const char *, long);
 static	void	ctl_putts	(const char *, l_fp *);
 static	void	ctl_putadr	(const char *, u_int32,
 				 sockaddr_u *);
-static	void	ctl_putid	(const char *, char *);
+static	void	ctl_putrefid	(const char *, u_int32);
 static	void	ctl_putarray	(const char *, double *, int);
 static	void	ctl_putsys	(int);
 static	void	ctl_putpeer	(int, struct peer *);
@@ -1254,29 +1254,43 @@ ctl_putadr(
 	ctl_putdata(buffer, (unsigned)(cp - buffer), 0);
 }
 
+
 /*
- * ctl_putid - write a tagged clock ID into the response
+ * ctl_putrefid - send a u_int32 refid as printable text
  */
 static void
-ctl_putid(
-	const char *tag,
-	char *id
+ctl_putrefid(
+	const char *	tag,
+	u_int32		refid
 	)
 {
-	register char *cp;
-	register const char *cq;
-	char buffer[200];
+	char	output[16];
+	char *	optr;
+	char *	oplim;
+	char *	iptr;
+	char *	iplim;
+	char *	past_eq;
 
-	cp = buffer;
-	cq = tag;
-	while (*cq != '\0')
-		*cp++ = *cq++;
-
-	*cp++ = '=';
-	NTP_INSIST((cp - buffer) < sizeof(buffer));
-	snprintf(cp, sizeof(buffer) - (cp - buffer), "%.4s", id);
-	cp += strlen(cp);
-	ctl_putdata(buffer, (unsigned)( cp - buffer ), 0);
+	optr = output;
+	oplim = output + sizeof(output);
+	while (optr < oplim && '\0' != *tag)
+		*optr++ = *tag++;
+	if (optr < oplim) {
+		*optr++ = '=';
+		past_eq = optr;
+	}
+	if (!(optr < oplim))
+		return;
+	iptr = (char *)&refid;
+	iplim = iptr + sizeof(refid);
+	for (; optr < oplim && iptr < iplim; iptr++, optr++)
+		if (isprint(*iptr))
+			*optr = *iptr;
+		else
+			*optr = '.';
+	if (!(optr <= oplim))
+		optr = past_eq;
+	ctl_putdata(output, (u_int)(optr - output), FALSE);
 }
 
 
@@ -1353,10 +1367,9 @@ ctl_putsys(
 
 	    case CS_REFID:
 		if (sys_stratum > 1 && sys_stratum < STRATUM_UNSPEC)
-			ctl_putadr(sys_var[CS_REFID].text, sys_refid, NULL);
+			ctl_putadr(sys_var[varid].text, sys_refid, NULL);
 		else
-			ctl_putid(sys_var[CS_REFID].text,
-				  (char *)&sys_refid);
+			ctl_putrefid(sys_var[varid].text, sys_refid);
 		break;
 
 	    case CS_REFTIME:
@@ -1678,18 +1691,17 @@ ctl_putpeer(
 		break;
 
 	    case CP_REFID:
+#ifdef REFCLOCK
 		if (peer->flags & FLAG_REFCLOCK) {
-			ctl_putid(peer_var[CP_REFID].text,
-				  (char *)&peer->refid);
-		} else {
-			if (peer->stratum > 1 && peer->stratum <
-			    STRATUM_UNSPEC)
-				ctl_putadr(peer_var[CP_REFID].text,
-					   peer->refid, NULL);
-			else
-				ctl_putid(peer_var[CP_REFID].text,
-					  (char *)&peer->refid);
+			ctl_putrefid(peer_var[varid].text, peer->refid);
+			break;
 		}
+#endif
+		if (peer->stratum > 1 && peer->stratum < STRATUM_UNSPEC)
+			ctl_putadr(peer_var[varid].text, peer->refid,
+				   NULL);
+		else
+			ctl_putrefid(peer_var[varid].text, peer->refid);
 		break;
 
 	    case CP_REFTIME:
@@ -1923,8 +1935,9 @@ ctl_putclock(
 		break;
 
 	    case CC_FUDGETIME2:
-		if (mustput || (clock_stat->haveflags & CLK_HAVETIME2)) 			ctl_putdbl(clock_var[CC_FUDGETIME2].text,
-													   clock_stat->fudgetime2 * 1e3);
+		if (mustput || (clock_stat->haveflags & CLK_HAVETIME2))
+			ctl_putdbl(clock_var[CC_FUDGETIME2].text,
+				   clock_stat->fudgetime2 * 1e3);
 		break;
 
 	    case CC_FUDGEVAL1:
@@ -1937,10 +1950,10 @@ ctl_putclock(
 		if (mustput || (clock_stat->haveflags & CLK_HAVEVAL2)) {
 			if (clock_stat->fudgeval1 > 1)
 				ctl_putadr(clock_var[CC_FUDGEVAL2].text,
-					   (u_int32)clock_stat->fudgeval2, NULL);
+					   clock_stat->fudgeval2, NULL);
 			else
-				ctl_putid(clock_var[CC_FUDGEVAL2].text,
-					  (char *)&clock_stat->fudgeval2);
+				ctl_putrefid(clock_var[CC_FUDGEVAL2].text,
+					     clock_stat->fudgeval2);
 		}
 		break;
 
