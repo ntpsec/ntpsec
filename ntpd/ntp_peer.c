@@ -115,7 +115,8 @@ static struct peer init_peer_alloc[INIT_PEER_ALLOC]; /* init alloc */
 static struct peer *	findexistingpeer_name(const char *, u_short,
 					      struct peer *, int);
 static struct peer *	findexistingpeer_addr(sockaddr_u *,
-					      struct peer *, int);
+					      struct peer *, int,
+					      u_char);
 static void		free_peer(struct peer *, int);
 static void		getmorepeermem(void);
 static int		score(struct peer *);
@@ -199,7 +200,7 @@ struct peer *
 findexistingpeer_addr(
 	sockaddr_u *	addr,
 	struct peer *	start_peer,
-	int		mode
+	int		mode,
 	u_char		cast_flags
 	)
 {
@@ -760,7 +761,7 @@ newpeer(
 	 * structure.
 	 */
 	if (dstadr != NULL) {
-		peer = findexistingpeer(srcadr, hostname, hmode,
+		peer = findexistingpeer(srcadr, hostname, NULL, hmode,
 					cast_flags);
 		while (peer != NULL) {
 			if (peer->dstadr == dstadr ||
@@ -777,7 +778,8 @@ newpeer(
 		}
 	} else {
 		/* no endpt address given */
-		peer = findexistingpeer(srcadr, hostname, hmode, cast_flags);
+		peer = findexistingpeer(srcadr, hostname, NULL, hmode,
+					cast_flags);
 	}
 
 	/*

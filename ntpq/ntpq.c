@@ -1769,7 +1769,7 @@ nntohost_col(
 {
 	const char *	out;
 
-	if (!showhostnames || SOCK_UNSPEC(netnum)) {
+	if (!showhostnames || SOCK_UNSPEC(addr)) {
 		if (preserve_lowaddrbits)
 			out = trunc_left(stoa(addr), width);
 		else
@@ -2730,7 +2730,7 @@ asciize(
  *	"too long"	->	"too l"
  * Used for hostnames.
  */
-char *
+const char *
 trunc_right(
 	const char *	src,
 	size_t		width
@@ -2758,7 +2758,7 @@ trunc_right(
  *	"too long"	->	"_long"
  * Used for local IPv6 addresses, where low bits differentiate.
  */
-char *
+const char *
 trunc_left(
 	const char *	src,
 	size_t		width

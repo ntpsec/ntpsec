@@ -2404,16 +2404,16 @@ ctl_putpeer(
 
 	case CP_REFID:
 #ifdef REFCLOCK
-		if (peer->flags & FLAG_REFCLOCK) {
-			ctl_putrefid(peer_var[varid].text, peer->refid);
+		if (p->flags & FLAG_REFCLOCK) {
+			ctl_putrefid(peer_var[id].text, p->refid);
 			break;
 		}
 #endif
-		if (peer->stratum > 1 && peer->stratum < STRATUM_UNSPEC)
-			ctl_putadr(peer_var[varid].text, peer->refid,
+		if (p->stratum > 1 && p->stratum < STRATUM_UNSPEC)
+			ctl_putadr(peer_var[id].text, p->refid,
 				   NULL);
 		else
-			ctl_putrefid(peer_var[varid].text, peer->refid);
+			ctl_putrefid(peer_var[id].text, p->refid);
 		break;
 
 	case CP_REFTIME:
@@ -2691,7 +2691,7 @@ ctl_putclock(
 					   pcs->fudgeval2, NULL);
 			else
 				ctl_putrefid(clock_var[id].text,
-					     clock_stat->fudgeval2);
+					     pcs->fudgeval2);
 		}
 		break;
 

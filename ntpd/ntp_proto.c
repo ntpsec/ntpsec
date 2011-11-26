@@ -3582,7 +3582,7 @@ pool_xmit(
 		/* copy_addrinfo_list ai_addr points to a sockaddr_u */
 		rmtadr = (sockaddr_u *)(void *)pool->ai->ai_addr;
 		pool->ai = pool->ai->ai_next;
-		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT);
+		p = findexistingpeer(rmtadr, NULL, NULL, MODE_CLIENT, 0);
 	} while (p != NULL && pool->ai != NULL);
 	if (p != NULL)
 		return;	/* out of addresses, re-query DNS next poll */

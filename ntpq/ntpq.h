@@ -142,5 +142,5 @@ extern	int	decodetime	(char *, l_fp *);
 extern	void	printvars	(int, const char *, int, int, int, FILE *);
 extern	int	decodeint	(char *, long *);
 extern	void	makeascii	(int, const char *, FILE *);
-extern	char *	trunc_left	(const char *, size_t);
-extern	char *	trunc_right	(const char *, size_t);
+extern	const char * trunc_left	(const char *, size_t);
+extern	const char * trunc_right(const char *, size_t);
