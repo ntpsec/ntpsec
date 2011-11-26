@@ -2903,9 +2903,6 @@ clock_select(void)
 }
 
 
-/*
- * clock_combine - compute system offset and jitter from selected peers
- */
 static void
 clock_combine(
 	struct peer **peers,	/* survivor list */
@@ -2913,11 +2910,14 @@ clock_combine(
 	)
 {
 	int	i;
-	double	x, y, z, w;
+	double	d, x, y, z, w;
 
 	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
-		x = max(sys_maxdist - root_distance(peers[i]), sys_mindisp);
+		d = root_distance(peers[i]);
+		if (0. == d)
+			d = 1e-6;	/* hart avoid div by 0 */
+		x = 1. / d;
 		y += x;
 		z += peers[i]->offset * x;
 		w += SQUARE(peers[i]->offset - peers[0]->offset) * x;
