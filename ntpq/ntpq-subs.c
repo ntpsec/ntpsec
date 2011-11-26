@@ -12,6 +12,8 @@
 
 extern char *	chosts[];
 extern char	currenthost[];
+extern int	currenthostisnum;
+extern int	numhosts;
 size_t		maxhostlen;
 
 /*
@@ -1573,10 +1575,12 @@ doprintpeers(
 	sockaddr_u srcadr;
 	sockaddr_u dstadr;
 	sockaddr_u dum_store;
+	sockaddr_u refidadr;
 	long hmode = 0;
 	u_long srcport = 0;
 	u_int32 u32;
 	const char *dstadr_refid = "0.0.0.0";
+	char *serverlocal;
 	size_t drlen;
 	u_long stratum = 0;
 	long ppoll = 0;
@@ -1628,9 +1632,10 @@ doprintpeers(
 		} else if (!strcmp("dstadr", name)) {
 			if (decodenetnum(value, &dum_store)) {
 				type = decodeaddrtype(&dum_store);
+				havevar[HAVE_DSTADR] = 1;
+				dstadr = dum_store;
 				if (pvl == opeervarlist) {
-					dstadr = dum_store;
-					dstadr_refid = stoa(&dstadr);
+					dstadr_refid = trunc_left(stoa(&dstadr), 15);
 				}
 			}
 		} else if (!strcmp("hmode", name)) {
@@ -1644,9 +1649,17 @@ doprintpeers(
 					ZERO(u32);
 					memcpy(&u32, value, drlen);
 					dstadr_refid = refid_str(u32, 1);
-				} else if (decodenetnum(value, &dstadr)) {
-					dstadr_refid =
-					    refnumtoa(&dstadr);
+				} else if (decodenetnum(value, &refidadr)) {
+					if (SOCK_UNSPEC(&refidadr))
+						dstadr_refid = "0.0.0.0";
+					else if (ISREFCLOCKADR(&refidadr))
+						dstadr_refid =
+						    refnumtoa(&refidadr);
+					else
+						dstadr_refid =
+						    stoa(&refidadr);
+				} else {
+					havevar[HAVE_REFID] = 0;
 				}
 			}
 		} else if (!strcmp("stratum", name)) {
@@ -1724,8 +1737,20 @@ doprintpeers(
 		c = flash3[CTL_PEER_STATVAL(rstatus) & 0x7];
 	else
 		c = flash2[CTL_PEER_STATVAL(rstatus) & 0x3];
-	if (numhosts > 1)
-		fprintf(fp, "%-*s ", (int)maxhostlen, currenthost);
+	if (numhosts > 1) {
+		if (peervarlist == pvl && havevar[HAVE_DSTADR]) {
+			serverlocal = nntohost_col(&dstadr,
+			    (size_t)min(LIB_BUFLENGTH - 1, maxhostlen),
+			    TRUE);
+		} else {
+			if (currenthostisnum)
+				serverlocal = trunc_left(currenthost,
+							 maxhostlen);
+			else
+				serverlocal = currenthost;
+		}
+		fprintf(fp, "%-*s ", (int)maxhostlen, serverlocal);
+	}
 	if (AF_UNSPEC == af || AF(&srcadr) == af) {
 		if (!have_srchost)
 			strlcpy(clock_name, nntohost(&srcadr),
@@ -1809,21 +1834,25 @@ dopeers(
 	int af
 	)
 {
-	u_int i;
-	char fullname[LENHOSTNAME];
-	sockaddr_u netnum;
+	int		i;
+	char		fullname[LENHOSTNAME];
+	sockaddr_u	netnum;
+	char *		name_or_num;
+	size_t		sl;
 
 	if (!dogetassoc(fp))
 		return;
 
 	for (i = 0; i < numhosts; ++i) {
-		if (getnetnum(chosts[i], &netnum, fullname, af))
-			if ((int)strlen(fullname) > maxhostlen)
-				maxhostlen = strlen(fullname);
+		if (getnetnum(chosts[i], &netnum, fullname, af)) {
+			name_or_num = nntohost(&netnum);
+			sl = strlen(name_or_num);
+			maxhostlen = max(maxhostlen, (int)sl);
+		}
 	}
 	if (numhosts > 1)
 		fprintf(fp, "%-*.*s ", (int)maxhostlen, (int)maxhostlen,
-			"server");
+			"server (local)");
 	fprintf(fp,
 		"     remote           refid      st t when poll reach   delay   offset  jitter\n");
 	if (numhosts > 1)

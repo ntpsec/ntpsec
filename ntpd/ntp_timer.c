@@ -332,8 +332,8 @@ timer(void)
 
 	/*
 	 * Orphan mode is active when enabled and when no servers less
-	 * than the orphan statum are available. A server with no other
-	 * synchronization source is an orphan It shows offset zero and
+	 * than the orphan stratum are available. A server with no other
+	 * synchronization source is an orphan. It shows offset zero and
 	 * reference ID the loopback address.
 	 */
 	if (sys_orphan < STRATUM_UNSPEC && sys_peer == NULL &&

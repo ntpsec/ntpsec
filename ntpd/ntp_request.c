@@ -848,7 +848,8 @@ peer_info (
 #endif
 		datap += item_sz;
 
-		if ((pp = findexistingpeer(&addr, NULL, NULL, -1)) == 0)
+		pp = findexistingpeer(&addr, NULL, NULL, -1, 0);
+		if (NULL == pp)
 			continue;
 		if (IS_IPV6(srcadr)) {
 			if (pp->dstadr)
@@ -991,7 +992,8 @@ peer_stats (
 
 		datap += item_sz;
 
-		if ((pp = findexistingpeer(&addr, NULL, NULL, -1)) == NULL)
+		pp = findexistingpeer(&addr, NULL, NULL, -1, 0);
+		if (NULL == pp)
 			continue;
 
 		DPRINTF(1, ("peer_stats: found %s\n", stoa(&addr)));
@@ -1421,7 +1423,7 @@ do_unconf(
 		DPRINTF(1, ("searching for %s\n", stoa(&peeraddr)));
 
 		while (!found) {
-			p = findexistingpeer(&peeraddr, NULL, p, -1);
+			p = findexistingpeer(&peeraddr, NULL, p, -1, 0);
 			if (NULL == p)
 				break;
 			if (FLAG_CONFIG & p->flags)
@@ -1463,7 +1465,7 @@ do_unconf(
 		p = NULL;
 
 		while (!found) {
-			p = findexistingpeer(&peeraddr, NULL, p, -1);
+			p = findexistingpeer(&peeraddr, NULL, p, -1, 0);
 			if (NULL == p)
 				break;
 			if (FLAG_CONFIG & p->flags)
@@ -1898,7 +1900,7 @@ reset_peer(
 #ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
-		p = findexistingpeer(&peeraddr, NULL, NULL, -1);
+		p = findexistingpeer(&peeraddr, NULL, NULL, -1, 0);
 		if (NULL == p)
 			bad++;
 		datap += item_sz;
@@ -1929,10 +1931,10 @@ reset_peer(
 #ifdef ISC_PLATFORM_HAVESALEN
 		peeraddr.sa.sa_len = SOCKLEN(&peeraddr);
 #endif
-		p = findexistingpeer(&peeraddr, NULL, NULL, -1);
+		p = findexistingpeer(&peeraddr, NULL, NULL, -1, 0);
 		while (p != NULL) {
 			peer_reset(p);
-			p = findexistingpeer(&peeraddr, NULL, p, -1);
+			p = findexistingpeer(&peeraddr, NULL, p, -1, 0);
 		}
 		datap += item_sz;
 	}
@@ -2396,8 +2398,8 @@ get_clock_info(
 
 	while (items-- > 0) {
 		NSRCADR(&addr) = *clkaddr++;
-		if (!ISREFCLOCKADR(&addr) ||
-		    findexistingpeer(&addr, NULL, NULL, -1) == NULL) {
+		if (!ISREFCLOCKADR(&addr) || NULL ==
+		    findexistingpeer(&addr, NULL, NULL, -1, 0)) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}
@@ -2421,7 +2423,7 @@ get_clock_info(
 		DTOLFP(clock_stat.fudgetime2, &ltmp);
 		HTONL_FP(&ltmp, &ic->fudgetime2);
 		ic->fudgeval1 = htonl((u_int32)clock_stat.fudgeval1);
-		ic->fudgeval2 = htonl((u_int32)clock_stat.fudgeval2);
+		ic->fudgeval2 = htonl(clock_stat.fudgeval2);
 
 		free_varlist(clock_stat.kv_list);
 
@@ -2460,8 +2462,8 @@ set_clock_fudge(
 		addr.sa.sa_len = SOCKLEN(&addr);
 #endif
 		SET_PORT(&addr, NTP_PORT);
-		if (!ISREFCLOCKADR(&addr) ||
-		    findexistingpeer(&addr, NULL, NULL, -1) == 0) {
+		if (!ISREFCLOCKADR(&addr) || NULL ==
+		    findexistingpeer(&addr, NULL, NULL, -1, 0)) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}
@@ -2535,8 +2537,8 @@ get_clkbug_info(
 
 	while (items-- > 0) {
 		NSRCADR(&addr) = *clkaddr++;
-		if (!ISREFCLOCKADR(&addr) ||
-		    findexistingpeer(&addr, NULL, NULL, -1) == 0) {
+		if (!ISREFCLOCKADR(&addr) || NULL ==
+		    findexistingpeer(&addr, NULL, NULL, -1, 0)) {
 			req_ack(srcadr, inter, inpkt, INFO_ERR_NODATA);
 			return;
 		}

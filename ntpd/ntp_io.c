@@ -4290,6 +4290,17 @@ localaddrtoa(
 }
 
 
+const char *
+localaddrtoa(
+	endpt *la
+	)
+{
+	return (NULL == la)
+		   ? "<null>"
+		   : stoa(&la->sin);
+}
+
+
 #ifdef HAS_ROUTING_SOCKET
 # ifndef UPDATE_GRACE
 #  define UPDATE_GRACE	2	/* wait UPDATE_GRACE seconds before scanning */

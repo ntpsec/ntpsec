@@ -167,11 +167,10 @@ extern	void	mon_clearinterface(endpt *interface);
 /* ntp_peer.c */
 extern	void	init_peer	(void);
 extern	struct peer *findexistingpeer(sockaddr_u *, const char *,
-				      struct peer *, int);
+				      struct peer *, int, u_char);
 extern	struct peer *findpeer	(struct recvbuf *, int, int *);
 extern	struct peer *findpeerbyassoc(associd_t);
-extern  void	set_peerdstadr	(struct peer *peer,
-				 endpt *interface);
+extern  void	set_peerdstadr	(struct peer *, endpt *);
 extern	struct peer *newpeer	(sockaddr_u *, const char *,
 				 endpt *, u_char, u_char,
 				 u_char, u_char, u_int, u_char, u_int32,

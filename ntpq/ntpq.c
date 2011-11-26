@@ -314,6 +314,7 @@ struct sock_timeval tvout = { DEFTIMEOUT, 0 };	/* time out for reads */
 struct sock_timeval tvsout = { DEFSTIMEOUT, 0 };/* secondary time out */
 l_fp delay_time;				/* delay time */
 char currenthost[LENHOSTNAME];			/* current host name */
+int currenthostisnum;				/* is prior text from IP? */
 struct sockaddr_in hostaddr = { 0 };		/* host address */
 int showhostnames = 1;				/* show host names by default */
 
@@ -582,10 +583,13 @@ openhost(
 	octets = min(sizeof(addr), ai->ai_addrlen);
 	memcpy(&addr, ai->ai_addr, octets);
 
-	if (ai->ai_canonname == NULL)
+	if (ai->ai_canonname == NULL) {
 		strlcpy(temphost, stoa(&addr), sizeof(temphost));
-	else
+		currenthostisnum = TRUE;
+	} else {
 		strlcpy(temphost, ai->ai_canonname, sizeof(temphost));
+		currenthostisnum = FALSE;
+	}
 
 	if (debug > 2)
 		printf("Opening host %s\n", temphost);
@@ -1743,12 +1747,39 @@ nntohost(
 	sockaddr_u *netnum
 	)
 {
-	if (!showhostnames || SOCK_UNSPEC(netnum))
-		return stoa(netnum);
-	else if (ISREFCLOCKADR(netnum))
-		return refnumtoa(netnum);
-	else
-		return socktohost(netnum);
+	return nntohost_col(netnum, LIB_BUFLENGTH - 1, FALSE);
+}
+
+
+/*
+ * nntohost_col - convert network number to host name in fixed width.
+ *		  This routine enforces the showhostnames setting.
+ *		  When displaying hostnames longer than the width,
+ *		  the first part of the hostname is displayed.  When
+ *		  displaying numeric addresses longer than the width,
+ *		  Such as IPv6 addresses, the caller decides whether
+ *		  the first or last of the numeric address is used.
+ */
+const char *
+nntohost_col(
+	sockaddr_u *	addr,
+	size_t		width,
+	int		preserve_lowaddrbits
+	)
+{
+	const char *	out;
+
+	if (!showhostnames || SOCK_UNSPEC(netnum)) {
+		if (preserve_lowaddrbits)
+			out = trunc_left(stoa(addr), width);
+		else
+			out = trunc_right(stoa(addr), width);
+	} else if (ISREFCLOCKADR(addr)) {
+		out = refnumtoa(addr);
+	} else {
+		out = trunc_right(socktohost(addr), width);
+	}
+	return out;
 }
 
 
@@ -2691,6 +2722,62 @@ asciize(
 {
 	makeascii(length, data, fp);
 	putc('\n', fp);
+}
+
+
+/*
+ * truncate string to fit clipping excess at end.
+ *	"too long"	->	"too l"
+ * Used for hostnames.
+ */
+char *
+trunc_right(
+	const char *	src,
+	size_t		width
+	)
+{
+	size_t	sl;
+	char *	out;
+
+	
+	sl = strlen(src);
+	if (sl > width && LIB_BUFLENGTH - 1 > width && width > 0) {
+		LIB_GETBUF(out);
+		memcpy(out, src, width);
+		out[width] = '\0';
+
+		return out;
+	}
+
+	return src;
+}
+
+
+/*
+ * truncate string to fit by preserving right side and using '_' to hint
+ *	"too long"	->	"_long"
+ * Used for local IPv6 addresses, where low bits differentiate.
+ */
+char *
+trunc_left(
+	const char *	src,
+	size_t		width
+	)
+{
+	size_t	sl;
+	char *	out;
+
+
+	sl = strlen(src);
+	if (sl > width && LIB_BUFLENGTH - 1 > width && width > 1) {
+		LIB_GETBUF(out);
+		out[0] = '_';
+		memcpy(&out[1], &src[sl + 1 - width], width);
+
+		return out;
+	}
+
+	return src;
 }
 
 

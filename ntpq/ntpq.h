@@ -11,6 +11,7 @@
 #include "ntp_malloc.h"
 #include "ntp_assert.h"
 #include "ntp_control.h"
+#include "lib_strbuf.h"
 
 /*
  * Maximum number of arguments
@@ -132,6 +133,7 @@ extern	int	doquery		(int, associd_t, int, int, const char *,
 extern	int	doqueryex	(int, associd_t, int, int, const char *,
 				 u_short *, int *, const char **, int);
 extern	const char * nntohost	(sockaddr_u *);
+extern	const char * nntohost_col (sockaddr_u *, size_t, int);
 extern	const char * nntohostp	(sockaddr_u *);
 extern	int	decodets	(char *, l_fp *);
 extern	int	decodeuint	(char *, u_long *);
@@ -140,3 +142,5 @@ extern	int	decodetime	(char *, l_fp *);
 extern	void	printvars	(int, const char *, int, int, int, FILE *);
 extern	int	decodeint	(char *, long *);
 extern	void	makeascii	(int, const char *, FILE *);
+extern	char *	trunc_left	(const char *, size_t);
+extern	char *	trunc_right	(const char *, size_t);

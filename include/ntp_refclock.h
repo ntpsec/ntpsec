@@ -80,7 +80,7 @@ struct refclockstat {
 	double	fudgetime1;	/* configure fudge time1 */
 	double	fudgetime2;	/* configure fudge time2 */
 	int32	fudgeval1;	/* configure fudge value1 */
-	int32	fudgeval2;	/* configure fudge value2 */
+	u_int32	fudgeval2;	/* configure fudge value2 */
 	u_char	currentstatus;	/* clock status */
 	u_char	lastevent;	/* last exception event */
 	u_char	leap;		/* leap bits */

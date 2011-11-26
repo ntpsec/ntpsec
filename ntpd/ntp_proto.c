@@ -130,6 +130,7 @@ static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	int	default_get_precision (void);
+static	int	local_refid	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 #ifdef AUTOKEY
 static	int	group_test	(char *, char *);
@@ -354,6 +355,7 @@ receive(
 	u_int32	opcode = 0;		/* extension field opcode */
 	sockaddr_u *dstadr_sin; 	/* active runway */
 	struct peer *peer2;		/* aux peer structure pointer */
+	endpt *	match_ep;		/* newpeer() local address */
 	l_fp	p_org;			/* origin timestamp */
 	l_fp	p_rec;			/* receive timestamp */
 	l_fp	p_xmt;			/* transmit timestamp */
@@ -968,6 +970,20 @@ receive(
 #endif	/* AUTOKEY */
 
 		/*
+		 * Broadcasts received via a multicast address may
+		 * arrive after a unicast volley has begun
+		 * with the same remote address.  newpeer() will not
+		 * find duplicate associations on other local endpoints
+		 * if a non-NULL endpoint is supplied.  multicastclient
+		 * ephemeral associations are unique across all local
+		 * endpoints.
+		 */
+		if (!(INT_MCASTOPEN & rbufp->dstadr->flags))
+			match_ep = rbufp->dstadr;
+		else
+			match_ep = NULL;
+
+		/*
 		 * Determine whether to execute the initial volley.
 		 */
 		if (sys_bdelay != 0) {
@@ -986,10 +1002,11 @@ receive(
 			 * Do not execute the volley. Start out in
 			 * broadcast client mode.
 			 */
-			if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
-			    rbufp->dstadr, MODE_BCLIENT, hisversion,
-			    pkt->ppoll, pkt->ppoll, 0, 0, 0,
-			    skeyid, sys_ident)) == NULL) {
+			peer = newpeer(&rbufp->recv_srcadr, NULL,
+			    match_ep, MODE_BCLIENT, hisversion,
+			    pkt->ppoll, pkt->ppoll, FLAG_PREEMPT,
+			    MDF_BCLNT, 0, skeyid, sys_ident);
+			if (NULL == peer) {
 				sys_restricted++;
 				return;		/* ignore duplicate */
 
@@ -1007,10 +1024,11 @@ receive(
 		 * packet, normally 6 (64 s) and that the poll interval
 		 * is fixed at this value.
 		 */
-		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
-		    rbufp->dstadr, MODE_CLIENT, hisversion, pkt->ppoll,
-		    pkt->ppoll, FLAG_IBURST, MDF_BCLNT, 0, skeyid,
-		    sys_ident)) == NULL) {
+		peer = newpeer(&rbufp->recv_srcadr, NULL, match_ep,
+		    MODE_CLIENT, hisversion, pkt->ppoll, pkt->ppoll,
+		    FLAG_BC_VOL | FLAG_IBURST | FLAG_PREEMPT, MDF_BCLNT,
+		    0, skeyid, sys_ident);
+		if (NULL == peer) {
 			sys_restricted++;
 			return;			/* ignore duplicate */
 		}
@@ -1634,8 +1652,8 @@ process_packet(
 		 * timestamp. This works for both basic and interleaved
 		 * modes.
 		 */
-		if (peer->cast_flags & MDF_BCLNT) {
-			peer->cast_flags &= ~MDF_BCLNT;
+		if (FLAG_BC_VOL & peer->flags) {
+			peer->flags &= ~FLAG_BC_VOL;
 			peer->delay = fabs(peer->offset - p_offset) * 2;
 		}
 		p_del = peer->delay;
@@ -1740,8 +1758,8 @@ process_packet(
 	 * client mode when the client is fit and the autokey dance is
 	 * complete.
 	 */
-	if ((peer->cast_flags & MDF_BCLNT) && !(peer_unfit(peer) &
-	    TEST11)) {
+	if ((FLAG_BC_VOL & peer->flags) && MODE_CLIENT == peer->hmode &&
+	    !(TEST11 & peer_unfit(peer))) {	/* distance exceeded */
 #ifdef AUTOKEY
 		if (peer->flags & FLAG_SKEY) {
 			if (!(~peer->crypto & CRYPTO_FLAG_ALL))
@@ -2355,7 +2373,7 @@ clock_select(void)
 	double	d, e, f, g;
 	double	high, low;
 	double	seljitter;
-	double	orphdist = 1e10;
+	double	orphmet = 2.0 * U_INT32_MAX; /* 2x is greater than */
 	struct peer *osys_peer = NULL;
 	struct peer *sys_prefer = NULL;	/* prefer peer */
 	struct peer *typesystem = NULL;
@@ -2432,20 +2450,43 @@ clock_select(void)
 			continue;
 
 		/*
-		 * If this is an orphan, choose the one with
-		 * the lowest metric defined as the IPv4 address
-		 * or the first 64 bits of the hashed IPv6 address.
+		 * If this peer is an orphan parent, elect the
+		 * one with the lowest metric defined as the
+		 * IPv4 address or the first 64 bits of the
+		 * hashed IPv6 address.  To ensure convergence
+		 * on the same selected orphan, consider as
+		 * well that this system may have the lowest
+		 * metric and be the orphan parent.  If this
+		 * system wins, sys_peer will be NULL to trigger
+		 * orphan mode in timer().
 		 */
 		if (peer->stratum == sys_orphan) {
-			double	ftemp;
+			u_int32	localmet;
+			u_int32 peermet;
 
-			ftemp = addr2refid(&peer->srcadr);
-			if (ftemp < orphdist) {
+			localmet = peer->dstadr->addr_refid;
+			peermet = addr2refid(&peer->srcadr);
+			if (peermet < localmet &&
+			    peermet < orphmet) {
 				typeorphan = peer;
-				orphdist = ftemp;
+				orphmet = peermet;
 			}
 			continue;
 		}
+
+		/*
+		 * If this peer could have the orphan parent
+		 * as a synchronization ancestor, exclude it
+		 * from selection to avoid forming a 
+		 * synchronization loop within the orphan mesh,
+		 * triggering stratum climb to infinity 
+		 * instability.  Peers at stratum higher than
+		 * the orphan stratum could have the orphan
+		 * parent in ancestry so are excluded.
+		 * See http://bugs.ntp.org/2050
+		 */
+		if (peer->stratum > sys_orphan)
+			continue;
 #ifdef REFCLOCK
 		/*
 		 * The following are special cases. We deal
@@ -3679,6 +3720,29 @@ key_expire(
 
 
 /*
+ * local_refid(peer) - check peer refid to avoid selecting peers
+ *		       currently synced to this ntpd.
+ */
+static int
+local_refid(
+	struct peer *	p
+	)
+{
+	endpt *	unicast_ep;
+
+	if (!(INT_MCASTIF & p->dstadr->flags))
+		unicast_ep = p->dstadr;
+	else
+		unicast_ep = findinterface(&p->srcadr);
+
+	if (unicast_ep != NULL && p->refid == unicast_ep->addr_refid)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+
+/*
  * Determine if the peer is unfit for synchronization
  *
  * A peer is unfit for synchronization if
@@ -3718,9 +3782,7 @@ peer_unfit(
 	 * server as the local peer but only if the remote peer is
 	 * neither a reference clock nor an orphan.
 	 */
-	if (peer->stratum > 1 && peer->refid != htonl(LOOPBACKADR) &&
-	    (peer->refid == (peer->dstadr ? peer->dstadr->addr_refid :
-	    0) || peer->refid == sys_refid))
+	if (peer->stratum > 1 && local_refid(peer))
 		rval |= TEST12;		/* synchronization loop */
 
 	/*
