@@ -2291,10 +2291,10 @@ clock_select(void)
 			 */
 			if (peer->stratum == sys_orphan) {
 				u_int32	localmet;
-				u_int32 peermet;
+				u_int32	peermet;
 
-				localmet = peer->dstadr->addr_refid;
-				peermet = addr2refid(&peer->srcadr);
+				localmet = ntohl(peer->dstadr->addr_refid);
+				peermet = ntohl(addr2refid(&peer->srcadr));
 				if (peermet < localmet &&
 				    peermet < orphmet) {
 					typeorphan = peer;

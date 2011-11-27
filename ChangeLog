@@ -1,6 +1,7 @@
 ---
 
 * [Bug 2050] Orphan mode stratum counting to infinity.
+* [Bug 2072] Orphan parent selection metric needs ntohl().
 
 ---
 (4.2.6p5-RC1) 2011/10/18 Released by Harlan Stenn <stenn@ntp.org>
