@@ -63,22 +63,22 @@ typedef unsigned int u_int;
 #ifdef HAVE_UINT32_T
 # ifndef HAVE_INT32
    typedef	int32_t		int32;
-#  ifndef INT32_MIN
-#   define INT32_MIN INT32_T_MIN
-#  endif
-#  ifndef INT32_MAX
-#   define INT32_MAX INT32_T_MAX
-#  endif
 # endif
 # ifndef HAVE_U_INT32
    typedef	uint32_t	u_int32;
-#  define U_INT32_MAX UINT32_T_MAX
+#  ifndef U_INT32_MAX
+#   define U_INT32_MAX UINT32_MAX
+#  endif
 # endif
 #elif (SIZEOF_INT == 4)
 # if !defined(HAVE_INT32) && !defined(int32)
    typedef	int		int32;
-#  define INT32_MIN INT_MIN
-#  define INT32_MAX INT_MAX
+#  ifndef INT32_MIN
+#   define INT32_MIN INT_MIN
+#  endif
+#  ifndef INT32_MAX
+#   define INT32_MAX INT_MAX
+#  endif
 # endif
 # if !defined(HAVE_U_INT32) && !defined(u_int32)
    typedef	unsigned	u_int32;
@@ -108,8 +108,8 @@ typedef unsigned int u_int;
 # endif
 #endif	/* !HAVE_UINT32_T && SIZEOF_INT != 4 */
 
-#ifndef UINT32_MAX
-#define UINT32_MAX	0xffffffff
+#ifndef U_INT32_MAX
+#define U_INT32_MAX	0xffffffff
 #endif
 
 
