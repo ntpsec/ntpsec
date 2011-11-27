@@ -6,6 +6,7 @@
 * [Bug 2068] ntpd sends nonprintable stratum 16 refid to ntpq.
 * [Bug 2069] broadcastclient, multicastclient spin up duplicate
   ephemeral associations without broadcastdelay.
+* [Bug 2072] Orphan parent selection metric needs ntohl().
 * Exclude not-yet-determined sys_refid from use in loopback TEST12
   (from David Mills).  
 
