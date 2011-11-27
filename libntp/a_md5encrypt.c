@@ -83,6 +83,7 @@ MD5authdecrypt(
  * Calculate the reference id from the address. If it is an IPv4
  * address, use it as is. If it is an IPv6 address, do a md5 on
  * it and use the bottom 4 bytes.
+ * The result is in network byte order.
  */
 u_int32
 addr2refid(sockaddr_u *addr)

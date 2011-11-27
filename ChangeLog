@@ -6,6 +6,8 @@
   to ntpq.
 * [Bug 2069] from 4.2.6p5-RC2: broadcastclient, multicastclient spin up
   duplicate ephemeral associations without broadcastdelay.
+* [Bug 2072] from 4.2.6p5-RC2: Orphan parent selection metric needs
+  ntohl().
 * from 4.2.6p5-RC2: Exclude not-yet-determined sys_refid from use in
   loopback TEST12 (from Dave Mills).
 * Restore 4.2.6 clock_combine() weighting to ntp-dev, reverting to pre-
@@ -1233,6 +1235,7 @@
 * [Bug 2068] ntpd sends nonprintable stratum 16 refid to ntpq.
 * [Bug 2069] broadcastclient, multicastclient spin up duplicate
   ephemeral associations without broadcastdelay.
+* [Bug 2072] Orphan parent selection metric needs ntohl().
 * Exclude not-yet-determined sys_refid from use in loopback TEST12
   (from David Mills).  
 

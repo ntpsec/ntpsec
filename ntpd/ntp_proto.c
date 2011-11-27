@@ -2464,10 +2464,10 @@ clock_select(void)
 			u_int32	localmet;
 			u_int32 peermet;
 
-			localmet = peer->dstadr->addr_refid;
-			peermet = addr2refid(&peer->srcadr);
-			if (peermet < localmet &&
-			    peermet < orphmet) {
+			localmet = ntohl(peer->dstadr->addr_refid);
+			peermet = ntohl(addr2refid(&peer->srcadr));
+			if (peermet < orphmet &&
+			    (current_time <= orphwait || peermet < localmet)) {
 				typeorphan = peer;
 				orphmet = peermet;
 			}
