@@ -470,8 +470,8 @@ receive(
 	restrict_mask = ntp_monitor(rbufp, restrict_mask);
 	if (restrict_mask & RES_LIMITED) {
 		sys_limitrejected++;
-		if (!(restrict_mask & RES_KOD) || hismode ==
-		    MODE_BROADCAST)
+		if (!(restrict_mask & RES_KOD) || MODE_BROADCAST ==
+		    hismode || MODE_SERVER == hismode)
 			return;			/* rate exceeded */
 
 		if (hismode == MODE_CLIENT)
@@ -3418,7 +3418,7 @@ local_refid(
 {
 	endpt *	unicast_ep;
 
-	if (!(INT_MCASTIF & p->dstadr->flags))
+	if (p->dstadr != NULL && !(INT_MCASTIF & p->dstadr->flags))
 		unicast_ep = p->dstadr;
 	else
 		unicast_ep = findinterface(&p->srcadr);
