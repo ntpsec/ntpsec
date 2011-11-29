@@ -11,7 +11,6 @@
   (from David Mills).
 * Never send KoD rate limiting response to MODE_SERVER response.
 
-
 ---
 (4.2.6p5-RC1) 2011/10/18 Released by Harlan Stenn <stenn@ntp.org>
 
