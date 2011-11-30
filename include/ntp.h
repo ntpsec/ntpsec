@@ -762,7 +762,7 @@ struct mon_data {
 #define	MDF_POOL	0x08	/* pool client solicitor */
 #define MDF_ACAST	0x10	/* manycast client solicitor */
 #define	MDF_BCLNT	0x20	/* eph. broadcast/multicast client */
-#define MDF_UCLNT	0x40	/* eph. manycast or pool client */
+#define MDF_UCLNT	0x40	/* preemptible manycast or pool client */
 /*
  * In the context of struct peer in ntpd, three of the cast_flags bits
  * represent configured associations which never receive packets, and

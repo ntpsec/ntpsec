@@ -312,9 +312,10 @@ transmit(
 				peer_ntpdate--;
 				if (peer_ntpdate == 0) {
 					msyslog(LOG_NOTICE,
-					    "ntpd: no servers found");
-					printf(
 					    "ntpd: no servers found\n");
+					if (!msyslog_term)
+						printf(
+						    "ntpd: no servers found\n");
 					exit (0);
 				}
 			}
@@ -551,8 +552,10 @@ receive(
 		sys_limitrejected++;
 		if (!(restrict_mask & RES_KOD) || hismode ==
 		    MODE_BROADCAST)
+			//if (MODE_SERVER == hismode)
+			//	DPRINTF(1, ("Possibly self-induced rate limiting of MODE_SERVER from %s\n",
+			//		stoa(&rbufp->recv_srcadr)));
 			return;			/* rate exceeded */
-
 		if (hismode == MODE_CLIENT)
 			fast_xmit(rbufp, MODE_SERVER, skeyid,
 			    restrict_mask);
@@ -1079,12 +1082,14 @@ receive(
 		}
 
 		/*
-		 * Do not respond if synchronized and stratum is either
+		 * Do not respond if synchronized and if stratum is
 		 * below the floor or at or above the ceiling. Note,
 		 * this allows an unsynchronized peer to synchronize to
 		 * us. It would be very strange if he did and then was
 		 * nipped, but that could only happen if we were
-		 * operating at the top end of the range.
+		 * operating at the top end of the range.  It also means
+		 * we will spin an ephemeral association in response to
+		 * MODE_ACTIVE KoDs, which will time out eventually.
 		 */
 		if (hisleap != LEAP_NOTINSYNC && (hisstratum <
 		    sys_floor || hisstratum >= sys_ceiling)) {
@@ -1993,7 +1998,7 @@ poll_update(
 	 * sending in a burst, use the earliest time. When not in a
 	 * burst but with a reply pending, send at the earliest time
 	 * unless the next scheduled time has not advanced. This can
-	 * only happen if multiple replies are peinding in the same
+	 * only happen if multiple replies are pending in the same
 	 * response interval. Otherwise, send at the later of the next
 	 * scheduled time and the earliest time.
 	 *
@@ -2466,8 +2471,7 @@ clock_select(void)
 
 			localmet = ntohl(peer->dstadr->addr_refid);
 			peermet = ntohl(addr2refid(&peer->srcadr));
-			if (peermet < orphmet &&
-			    (current_time <= orphwait || peermet < localmet)) {
+			if (peermet < localmet && peermet < orphmet) {
 				typeorphan = peer;
 				orphmet = peermet;
 			}
@@ -2915,8 +2919,6 @@ clock_combine(
 	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
 		d = root_distance(peers[i]);
-		if (0. == d)
-			d = 1e-6;	/* hart avoid div by 0 */
 		x = 1. / d;
 		y += x;
 		z += peers[i]->offset * x;

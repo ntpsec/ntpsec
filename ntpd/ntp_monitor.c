@@ -310,6 +310,7 @@ ntp_monitor(
 	u_short	flags
 	)
 {
+	l_fp		interval_fp;
 	struct pkt *	pkt;
 	mon_entry *	mon;
 	mon_entry *	oldest;
@@ -318,7 +319,6 @@ ntp_monitor(
 	u_short		restrict_mask;
 	u_char		mode;
 	u_char		version;
-	l_fp		interval_fp;
 	int		interval;
 	int		head;		/* headway increment */
 	int		leak;		/* new headway */
@@ -345,6 +345,8 @@ ntp_monitor(
 	if (mon != NULL) {
 		interval_fp = rbufp->recv_time;
 		L_SUB(&interval_fp, &mon->last);
+		/* add one-half second to round up */
+		L_ADDUF(&interval_fp, 0x80000000);
 		interval = interval_fp.l_i;
 		mon->last = rbufp->recv_time;
 		NSRCPORT(&mon->rmtadr) = NSRCPORT(&rbufp->recv_srcadr);
@@ -440,6 +442,8 @@ ntp_monitor(
 		if (oldest != NULL) {
 			interval_fp = rbufp->recv_time;
 			L_SUB(&interval_fp, &oldest->last);
+			/* add one-half second to round up */
+			L_ADDUF(&interval_fp, 0x80000000);
 			oldest_age = interval_fp.l_i;
 		}
 		/* note -1 is legal for mru_maxage (disables) */

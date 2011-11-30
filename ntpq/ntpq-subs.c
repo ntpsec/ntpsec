@@ -1730,8 +1730,12 @@ doprintpeers(
 		break;
 
 	case MODE_ACTIVE:
-		type = 's';		/* symmetric */
-		break;
+		type = 's';		/* symmetric active */
+		break;			/* configured */
+
+	case MODE_PASSIVE:
+		type = 'S';		/* symmetric passive */
+		break;			/* ephemeral */
 	}
 
 	/*

@@ -206,6 +206,13 @@ findexistingpeer_addr(
 {
 	struct peer *peer;
 
+	DPRINTF(2, ("findexistingpeer_addr(%s, %s, %d, 0x%x)\n",
+		sptoa(addr),
+		(start_peer)
+		    ? sptoa(&start_peer->srcadr)
+		    : "NULL",
+		mode, (u_int)cast_flags));
+
 	/*
 	 * start_peer is included so we can locate instances of the
 	 * same peer through different interfaces in the hash table.
@@ -222,11 +229,17 @@ findexistingpeer_addr(
 		peer = start_peer->adr_link;
 	
 	while (peer != NULL) {
+		DPRINTF(3, ("%s %s %d %d 0x%x 0x%x ", sptoa(addr),
+			sptoa(&peer->srcadr), mode, peer->hmode,
+			(u_int)cast_flags, (u_int)peer->cast_flags));
  		if ((-1 == mode || peer->hmode == mode ||
 		     ((MDF_BCLNT & peer->cast_flags) &&
 		      (MDF_BCLNT & cast_flags))) &&
-		    ADDR_PORT_EQ(addr, &peer->srcadr))
+		    ADDR_PORT_EQ(addr, &peer->srcadr)) {
+			DPRINTF(3, ("found.\n"));
 			break;
+		}
+		DPRINTF(3, ("\n"));
 		peer = peer->adr_link;
 	}
 
@@ -788,8 +801,13 @@ newpeer(
 	 * multicast) and preemptible (manycast and pool) client
 	 * associations.
 	 */
-	if (peer != NULL)
+	if (peer != NULL) {
+		DPRINTF(2, ("newpeer(%s) found existing association\n",
+			(hostname)
+			    ? hostname
+			    : stoa(srcadr)));
 		return NULL;
+	}
 
 	/*
 	 * Allocate a new peer structure. Some dirt here, since some of

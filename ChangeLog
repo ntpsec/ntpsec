@@ -8,10 +8,13 @@
   duplicate ephemeral associations without broadcastdelay.
 * [Bug 2072] from 4.2.6p5-RC2: Orphan parent selection metric needs
   ntohl().
+* [Bug 2073] Correct ntpq billboard's MODE_PASSIVE t from 'u' to 'S'.
 * from 4.2.6p5-RC2: Exclude not-yet-determined sys_refid from use in
   loopback TEST12 (from Dave Mills).
 * Restore 4.2.6 clock_combine() weighting to ntp-dev, reverting to pre-
-  4.2.7p70 logic and avoiding divide-by-zero (from Dave Mills).
+  4.2.7p70 method while also avoiding divide-by-zero (from Dave Mills).
+* Round l_fp traffic interval when converting to integer in rate limit
+  and KoD calculation.
 (4.2.7p236) 2011/11/16 Released by Harlan Stenn <stenn@ntp.org>
 * Documentation updates from Dave Mills.
 (4.2.7p235) 2011/11/16 Released by Harlan Stenn <stenn@ntp.org>
