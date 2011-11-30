@@ -11,6 +11,7 @@
 * [Bug 2073] Correct ntpq billboard's MODE_PASSIVE t from 'u' to 'S'.
 * from 4.2.6p5-RC2: Exclude not-yet-determined sys_refid from use in
   loopback TEST12 (from Dave Mills).
+* from 4.2.6p5-RC2: Never send KoD rate limiting response to MODE_SERVER.
 * Restore 4.2.6 clock_combine() weighting to ntp-dev, reverting to pre-
   4.2.7p70 method while also avoiding divide-by-zero (from Dave Mills).
 * Round l_fp traffic interval when converting to integer in rate limit
@@ -1241,6 +1242,7 @@
 * [Bug 2072] Orphan parent selection metric needs ntohl().
 * Exclude not-yet-determined sys_refid from use in loopback TEST12
   (from David Mills).  
+* Never send KoD rate limiting response to MODE_SERVER response.
 
 ---
 (4.2.6p5-RC1) 2011/10/18 Released by Harlan Stenn <stenn@ntp.org>
