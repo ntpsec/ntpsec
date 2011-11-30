@@ -12,6 +12,8 @@
 * from 4.2.6p5-RC2: Exclude not-yet-determined sys_refid from use in
   loopback TEST12 (from Dave Mills).
 * from 4.2.6p5-RC2: Never send KoD rate limiting response to MODE_SERVER.
+* Floor calculation of sys_rootdisp at sys_mindisp in clock_update (from
+  Dave Mills).
 * Restore 4.2.6 clock_combine() weighting to ntp-dev, reverting to pre-
   4.2.7p70 method while also avoiding divide-by-zero (from Dave Mills).
 * Round l_fp traffic interval when converting to integer in rate limit
