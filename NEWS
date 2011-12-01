@@ -52,7 +52,7 @@ operations, please try the ntpq equivalent.  If there's no equivalent,
 please open a bug report at http://bugs.ntp.org./
 
 --- 
-NTP 4.2.6p5-RC1 (Harlan Stenn <stenn@ntp.org>, 2011/10/xx) 
+NTP 4.2.6p5-RC2 (Harlan Stenn <stenn@ntp.org>, 2011/11/xx) 
  
 Focus: Bug fix
  
@@ -60,14 +60,29 @@ Severity: Medium
  
 This is a recommended upgrade. 
 
-This release fixes a mismatch problem with IP addresses specified in
-"nic" or "interface" directives in the ntpd configuration file using
-the address/prefix format, such as "fe80::/64" erroneously matching
-localhost [::1] and wildcard [::].
+This release includes a fix for a mismatch problem with IP addresses
+specified in "nic" or "interface" directives in the ntpd configuration
+file using the address/prefix format, such as "fe80::/64" erroneously
+matching localhost [::1] and wildcard [::].  It also includes fixes
+for orphan mode, extraneous creation of ephemeral associations from
+certain broadcastclient and multicastclient configurations, and some
+display issues with ntpq.
 
 ntpd
 
  * Correctly match IP address prefixes for "nic" and "interface".
+ * Fix orphan mode stratum incorrectly counting to infinity.
+ * Orphan parent selection metric was missing ntohl().
+ * No longer send nonprintable stratum 16 refid to ntpq.
+ * broadcastclient, multicastclient would spin up duplicate
+   ephemeral associations without broadcastdelay.
+ * Exclude not-yet-determined sys_refid from use in loopback TEST12.
+ * Never send KoD rate limiting response to MODE_SERVER response.
+
+ntpq
+
+ * Optional billboard column "server" did not honor -n.
+ * lopeers ipv6 "local" used to overrun its column.
 
 --- 
 NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
