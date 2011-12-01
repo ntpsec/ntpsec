@@ -1,4 +1,5 @@
 ---
+(4.2.6p5-RC2) 2011/11/30 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2050] Orphan mode stratum counting to infinity.
 * [Bug 2059] optional billboard column "server" does not honor -n.

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  October 18, 2011 at 11:14:20 PM by AutoGen 5.12
+ *  It has been AutoGen-ed  November 30, 2011 at 10:06:00 PM by AutoGen 5.12
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -38,7 +38,7 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[42] =
-"ntpq 4.2.6p5-RC1\n\
+"ntpq 4.2.6p5-RC2\n\
 see html/copyright.html\n";
 static char const zLicenseDescrip[25] =
 "see html/copyright.html\n";
@@ -422,7 +422,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[5] = "NTPQ";
 static char const zUsageTitle[123] =
-"ntpq - standard NTP query program - Ver. 4.2.6p5-RC1\n\
+"ntpq - standard NTP query program - Ver. 4.2.6p5-RC2\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {
