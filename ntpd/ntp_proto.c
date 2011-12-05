@@ -2311,7 +2311,10 @@ clock_select(void)
 				u_int32	localmet;
 				u_int32	peermet;
 
-				localmet = ntohl(peer->dstadr->addr_refid);
+				if (peer->dstadr != NULL)
+					localmet = ntohl(peer->dstadr->addr_refid);
+				else
+					localmet = U_INT32_MAX;
 				peermet = ntohl(addr2refid(&peer->srcadr));
 				if (peermet < localmet &&
 				    peermet < orphmet) {

@@ -1,4 +1,9 @@
 ---
+
+* [Bug 2082] 3-char refid sent by ntpd 4.2.6p5-RC2 ends with extra dot.
+* Ensure NULL peer->dstadr is not accessed in orphan parent selection.
+
+---
 (4.2.6p5-RC2) 2011/11/30 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2050] Orphan mode stratum counting to infinity.
