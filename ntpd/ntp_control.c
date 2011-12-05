@@ -1631,7 +1631,8 @@ ctl_putrefid(
 		return;
 	iptr = (char *)&refid;
 	iplim = iptr + sizeof(refid);
-	for (; optr < oplim && iptr < iplim; iptr++, optr++)
+	for ( ; optr < oplim && iptr < iplim && '\0' != *iptr; 
+	     iptr++, optr++)
 		if (isprint(*iptr))
 			*optr = *iptr;
 		else

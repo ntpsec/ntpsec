@@ -1,3 +1,7 @@
+* [Bug 2082] from 4.2.6p5-RC3: 3-char refid sent by ntpd 4.2.6p5-RC2
+  ends with extra dot.
+* from 4.2.6p5-RC3: Ensure NULL peer->dstadr is not accessed in orphan
+  parent selection.
 (4.2.7p237) 2011/12/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2050] from 4.2.6p5-RC2: Orphan mode stratum counting to infinity.
 * [Bug 2059] from 4.2.6p5-RC2: optional billboard column "server" does
@@ -1236,15 +1240,9 @@
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
 
-* [Bug 2050] Orphan mode stratum counting to infinity.
-* [Bug 2059] optional billboard column "server" does not honor -n.
-* [Bug 2066] ntpq lopeers ipv6 "local" column overrun.
-* [Bug 2068] ntpd sends nonprintable stratum 16 refid to ntpq.
-* [Bug 2069] broadcastclient, multicastclient spin up duplicate
-  ephemeral associations without broadcastdelay.
-* [Bug 2072] Orphan parent selection metric needs ntohl().
-* Exclude not-yet-determined sys_refid from use in loopback TEST12
-  (from David Mills).  
+* [Bug 2082] 3-char refid sent by ntpd 4.2.6p5-RC2 ends with extra dot.
+* Ensure NULL peer->dstadr is not accessed in orphan parent selection.
+
 ---
 (4.2.6p5-RC2) 2011/11/30 Released by Harlan Stenn <stenn@ntp.org>
 
