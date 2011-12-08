@@ -2699,8 +2699,8 @@ clock_select(void)
 		if (sys_prefer == NULL) {
 			typesystem->new_status = CTL_PST_SEL_SYSPEER;
 			clock_combine(peer_list, sys_survivors);
-			sys_jitter = SQRT(SQUARE(typesystem->jitter) +
-			    SQUARE(sys_jitter) + SQUARE(seljitter));
+			sys_jitter = SQRT(SQUARE(sys_jitter) +
+			    SQUARE(seljitter));
 		} else {
 			typesystem = sys_prefer;
 			sys_clockhop = 0;

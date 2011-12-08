@@ -3,6 +3,7 @@
 * [Bug 2082] 3-char refid sent by ntpd 4.2.6p5-RC2 ends with extra dot.
 * [Bug 2085] clock_update() sys_rootdisp calculation omits root delay.
 * [Bug 2086] get_systime() should not offset by sys_residual.
+* [Bug 2087] sys_jitter calculation overweights sys.peer jitter.
 * Ensure NULL peer->dstadr is not accessed in orphan parent selection.
 
 ---
