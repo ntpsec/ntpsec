@@ -96,7 +96,7 @@ get_systime(
 		dtemp = ntp_random() * 2. / FRAC * sys_tick * 1e9;
 	else if (sys_tick > 0)
 		dtemp = ntp_random() * 2. / FRAC;
-	dtemp = (ts.tv_nsec + dtemp) * 1e-9 + sys_residual;
+	dtemp = (ts.tv_nsec + dtemp) * 1e-9;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
 		now->l_i++;
@@ -121,7 +121,7 @@ get_systime(
 		dtemp = ntp_random() * 2. / FRAC * sys_tick * 1e6;
 	else if (sys_tick > 0)
 		dtemp = ntp_random() * 2. / FRAC;
-	dtemp = (tv.tv_usec + dtemp) * 1e-6 + sys_residual;
+	dtemp = (tv.tv_usec + dtemp) * 1e-6;
 	if (dtemp >= 1.) {
 		dtemp -= 1.;
 		now->l_i++;
