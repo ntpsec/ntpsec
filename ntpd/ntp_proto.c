@@ -1667,7 +1667,8 @@ clock_update(
 		sys_refid = peer->refid;
 	else
 		sys_refid = addr2refid(&peer->srcadr);
-	dtemp = sys_jitter + fabs(sys_offset) + peer->disp + clock_phi *
+	dtemp = sys_jitter + fabs(sys_offset) + peer->disp +
+	    (peer->delay + peer->rootdelay) / 2 + clock_phi *
 	    (current_time - peer->update);
 	sys_rootdisp = dtemp + peer->rootdisp;
 	sys_rootdelay = peer->delay + peer->rootdelay;
