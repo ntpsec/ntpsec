@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.texi)
 # 
-# It has been AutoGen-ed  November 30, 2011 at 10:06:13 PM by AutoGen 5.12
+# It has been AutoGen-ed  December  8, 2011 at 09:08:46 PM by AutoGen 5.12
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -34,7 +34,7 @@ This is the automatically generated usage text for ntpsnmpd:
 
 @exampleindent 0
 @example
-ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p5-RC2
+ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.6p5-RC3
 USAGE:  ntpsnmpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -n no  nofork         Do not fork
