@@ -1,3 +1,4 @@
+(4.2.7p238) 2011/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2082] from 4.2.6p5-RC3: 3-char refid sent by ntpd 4.2.6p5-RC2
   ends with extra dot.
 * [Bug 2085] from 4.2.6p5-RC3: clock_update() sys_rootdisp calculation

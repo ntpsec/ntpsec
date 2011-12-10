@@ -1,8 +1,8 @@
-.TH ntp-wait 1ntp-waitman "01 Dec 2011" "ntp (4.2.7p237)" "User Commands"
+.TH ntp-wait 1ntp-waitman "09 Dec 2011" "ntp (4.2.7p238)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  December  1, 2011 at 05:27:09 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  December  9, 2011 at 07:17:03 PM by AutoGen 5.12
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
