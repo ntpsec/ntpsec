@@ -52,7 +52,7 @@ operations, please try the ntpq equivalent.  If there's no equivalent,
 please open a bug report at http://bugs.ntp.org./
 
 --- 
-NTP 4.2.6p5-RC2 (Harlan Stenn <stenn@ntp.org>, 2011/11/xx) 
+NTP 4.2.6p5-RC3 (Harlan Stenn <stenn@ntp.org>, 2011/12/xx) 
  
 Focus: Bug fix
  
@@ -78,6 +78,11 @@ ntpd
    ephemeral associations without broadcastdelay.
  * Exclude not-yet-determined sys_refid from use in loopback TEST12.
  * Never send KoD rate limiting response to MODE_SERVER response.
+ * Fix 3-char refid sent by ntpd 4.2.6p5-RC2 that ends with extra dot.
+ * clock_update() sys_rootdisp calculation should include root delay.
+ * get_systime() should not offset by sys_residual.
+ * sys_jitter calculation overweights sys.peer jitter.
+ * Ensure NULL peer->dstadr is not accessed in orphan parent selection.
 
 ntpq
 
