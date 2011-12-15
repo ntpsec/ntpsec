@@ -1,3 +1,4 @@
+(4.2.7p240) 2011/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2092] clock_select() selection jitter miscalculated.
 * [Bug 2093] Reintroduce smaller stratum factor to system peer metric.
 (4.2.7p239) 2011/12/11 Released by Harlan Stenn <stenn@ntp.org>

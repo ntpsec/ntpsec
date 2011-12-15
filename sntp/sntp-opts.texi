@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (sntp-opts.texi)
 # 
-# It has been AutoGen-ed  December 11, 2011 at 11:39:16 AM by AutoGen 5.12
+# It has been AutoGen-ed  December 15, 2011 at 08:50:32 AM by AutoGen 5.12
 # From the definitions    sntp-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -91,7 +91,7 @@ This is the automatically generated usage text for sntp:
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p239
+sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p240
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
