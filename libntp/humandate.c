@@ -9,7 +9,6 @@
 #include "lib_strbuf.h"
 #include "ntp_stdlib.h"
 
-extern const char *months[];	/* prettydate.c */
 
 /* This is used in msyslog.c; we don't want to clutter up the log with
    the year and day of the week, etc.; just the minimal date and time.  */

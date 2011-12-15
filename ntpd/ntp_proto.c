@@ -46,6 +46,17 @@
 #define	POOL_SOLICIT_WINDOW	8
 
 /*
+ * peer_select groups statistics for a peer used by clock_select() and
+ * clock_cluster().
+ */
+typedef struct peer_select_tag {
+	struct peer *	peer;
+	double		synch;	/* sync distance */
+	double		error;	/* jitter */
+	double		seljit;	/* selection jitter */
+} peer_select;
+
+/*
  * System variables are declared here. Unless specified otherwise, all
  * times are in seconds.
  */
@@ -124,7 +135,7 @@ u_long	sys_limitrejected;	/* rate exceeded */
 u_long	sys_kodsent;		/* KoD sent */
 
 static	double	root_distance	(struct peer *);
-static	void	clock_combine	(struct peer **, int);
+static	void	clock_combine	(peer_select *, int, int);
 static	void	peer_xmit	(struct peer *);
 static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
@@ -2378,13 +2389,15 @@ clock_select(void)
 {
 	struct peer *peer;
 	int	i, j, k, n;
-	int	nlist, nl3;
+	int	nlist, nl2;
 	int	allow, osurv;
+	int	speer;
 	double	d, e, f, g;
 	double	high, low;
-	double	seljitter;
+	double	speermet;
 	double	orphmet = 2.0 * U_INT32_MAX; /* 2x is greater than */
-	struct peer *osys_peer = NULL;
+	struct endpoint endp;
+	struct peer *osys_peer;
 	struct peer *sys_prefer = NULL;	/* prefer peer */
 	struct peer *typesystem = NULL;
 	struct peer *typeorphan = NULL;
@@ -2394,13 +2407,9 @@ clock_select(void)
 	struct peer *typepps = NULL;
 #endif /* REFCLOCK */
 	static struct endpoint *endpoint = NULL;
-	static double *synch = NULL;
-	static double *error = NULL;
 	static int *indx = NULL;
-	static struct peer **peers = NULL;
+	static peer_select *peers = NULL;
 	static u_int endpoint_size = 0;
-	static u_int synch_size = 0;
-	static u_int error_size = 0;
 	static u_int peers_size = 0;
 	static u_int indx_size = 0;
 	size_t octets;
@@ -2425,17 +2434,12 @@ clock_select(void)
 	nlist = 1;
 	for (peer = peer_list; peer != NULL; peer = peer->p_link)
 		nlist++;
-	endpoint_size = nlist * 2 * sizeof(struct endpoint);
-	synch_size = ALIGNED_SIZE(nlist * sizeof(double));
-	error_size = ALIGNED_SIZE(nlist * sizeof(double));
-	peers_size = ALIGNED_SIZE(nlist * sizeof(struct peer *));
-	indx_size = ALIGNED_SIZE(nlist * 2 * sizeof(int));
-	octets = endpoint_size + indx_size + peers_size + synch_size +
-	    error_size;
+	endpoint_size = ALIGNED_SIZE(nlist * 2 * sizeof(*endpoint));
+	peers_size = ALIGNED_SIZE(nlist * sizeof(*peers));
+	indx_size = ALIGNED_SIZE(nlist * 2 * sizeof(*indx));
+	octets = endpoint_size + peers_size + indx_size;
 	endpoint = erealloc(endpoint, octets);
-	synch = INC_ALIGNED_PTR(endpoint, endpoint_size);
-	error = INC_ALIGNED_PTR(synch, synch_size);
-	peers = INC_ALIGNED_PTR(error, error_size);
+	peers = INC_ALIGNED_PTR(endpoint, endpoint_size);
 	indx = INC_ALIGNED_PTR(peers, peers_size);
 
 	/*
@@ -2448,7 +2452,7 @@ clock_select(void)
 	 * has dwindled to sys_minclock, the survivors split a million
 	 * bucks and collectively crank the chimes.
 	 */
-	nlist = nl3 = 0;	/* none yet */
+	nlist = nl2 = 0;	/* none yet */
 	for (peer = peer_list; peer != NULL; peer = peer->p_link) {
 		peer->new_status = CTL_PST_SEL_REJECT;
 
@@ -2527,46 +2531,50 @@ clock_select(void)
 		 * idol.
 		 */
 		peer->new_status = CTL_PST_SEL_SANE;
-		peers[nlist++] = peer;
+		f = root_distance(peer);
+		peers[nlist].peer = peer;
+		peers[nlist].error = peer->jitter;
+		peers[nlist].synch = f;
+		nlist++;
 
 		/*
-		 * Insert each interval endpoint on the sorted
-		 * list. This code relies on the endpoints being at
-		 * increasing offsets.
+		 * Insert each interval endpoint on the unsorted
+		 * endpoint[] list.
 		 */
-		e = peer->offset;	 /* upper end */
-		f = root_distance(peer);
-		e = e + f;
-		j = 0;
-		for (i = nl3 - 1; i >= 0; i--) {
-			j = nl3 - 1 + 2;
-			if (e >= endpoint[indx[i]].val)
-				break;
-
-			indx[i + 2] = indx[i];
-		}
-		indx[i + 2] = nl3;
-		endpoint[nl3].type = 1;
-		endpoint[nl3++].val = e;
-
-		e = e - f - f;		/* lower end */
-		for (; i >= 0; i--) {
-			if (e >= endpoint[indx[i]].val)
-				break;
-
-			indx[i + 1] = indx[i];
-		}
-		indx[i + 1] = nl3;
-		endpoint[nl3].type = -1;
-		endpoint[nl3++].val = e;
+		e = peer->offset;
+		endpoint[nl2].type = -1;	/* lower end */
+		endpoint[nl2].val = e - f;
+		nl2++;
+		endpoint[nl2].type = 1;		/* upper end */
+		endpoint[nl2].val = e + f;
+		nl2++;
 	}
-#ifdef DEBUG
-	if (debug > 2)
-		for (i = 0; i < nl3; i++)
-			printf("select: endpoint %2d %.6f\n",
-			   endpoint[indx[i]].type,
-			   endpoint[indx[i]].val);
-#endif
+	/*
+	 * Construct sorted indx[] of endpoint[] indexes ordered by
+	 * offset.
+	 */
+	for (i = 0; i < nl2; i++)
+		indx[i] = i;
+	for (i = 0; i < nl2; i++) {
+		endp = endpoint[indx[i]];
+		e = endp.val;
+		k = i;
+		for (j = i + 1; j < nl2; j++) {
+			endp = endpoint[indx[j]];
+			if (endp.val < e) {
+				e = endp.val;
+				k = j;
+			}
+		}
+		if (k != i) {
+			j = indx[k];
+			indx[k] = indx[i];
+			indx[i] = j;
+		}
+	}
+	for (i = 0; i < nl2; i++)
+		DPRINTF(3, ("select: endpoint %2d %.6f\n",
+			endpoint[indx[i]].type, endpoint[indx[i]].val));
 
 	/*
 	 * This is the actual algorithm that cleaves the truechimers
@@ -2599,14 +2607,14 @@ clock_select(void)
 		 * interval containing points from the most sources.
 		 */
 		n = 0;
-		for (i = 0; i < nl3; i++) {
+		for (i = 0; i < nl2; i++) {
 			low = endpoint[indx[i]].val;
 			n -= endpoint[indx[i]].type;
 			if (n >= nlist - allow)
 				break;
 		}
 		n = 0;
-		for (j = nl3 - 1; j >= 0; j--) {
+		for (j = nl2 - 1; j >= 0; j--) {
 			high = endpoint[indx[j]].val;
 			n += endpoint[indx[j]].type;
 			if (n >= nlist - allow)
@@ -2623,11 +2631,10 @@ clock_select(void)
 	}
 
 	/*
-	 * Clustering algorithm. Construct candidate list in order first
-	 * by stratum then by root distance. Scan the list to find
-	 * falsetickers, who leave the island immediately. The TRUE peer
-	 * is always a truechimer. We must leave at least one peer
-	 * to collect the million bucks.
+	 * Clustering algorithm. Whittle candidate list of falsetickers,
+	 * who leave the island immediately. The TRUE peer is always a
+	 * truechimer. We must leave at least one peer to collect the
+	 * million bucks.
 	 *
 	 * We assert the correct time is contained in the interval, but
 	 * the best offset estimate for the interval might not be
@@ -2639,8 +2646,8 @@ clock_select(void)
 	for (i = 0; i < nlist; i++) {
 		double	h;
 
-		peer = peers[i];
-		h = root_distance(peer);
+		peer = peers[i].peer;
+		h = peers[i].synch;
 		if ((high <= low || peer->offset + h < low ||
 		    peer->offset - h > high) && !(peer->flags & FLAG_TRUE))
 			continue;
@@ -2658,23 +2665,8 @@ clock_select(void)
 		}
 #endif /* REFCLOCK */
 
-		/*
-		 * The metric is the scaled root distance at the next
-		 * poll interval.
-		 */
-		d = root_distance(peer) + clock_phi * (peer->nextdate -
-		    current_time);
-		for (k = j; k > 0; k--) {
-			if (d >= synch[k - 1])
-				break;
-
-			peers[k] = peers[k - 1];
-			error[k] = error[k - 1];
-			synch[k] = synch[k - 1];
-		}
-		peers[k] = peer;
-		error[k] = peer->jitter;
-		synch[k] = d;
+		if (j != i)
+			peers[j] = peers[i];
 		j++;
 	}
 	nlist = j;
@@ -2686,19 +2678,19 @@ clock_select(void)
 	 * Otherwise, give up and leave the island to the rats.
 	 */
 	if (nlist == 0) {
-		error[0] = 0;
-		synch[0] = 0;
+		peers[0].error = 0;
+		peers[0].synch = 0;
 #ifdef REFCLOCK
 		if (typeacts != NULL) {
-			peers[0] = typeacts;
+			peers[0].peer = typeacts;
 			nlist = 1;
 		} else if (typelocal != NULL) {
-			peers[0] = typelocal;
+			peers[0].peer = typelocal;
 			nlist = 1;
 		} else
 #endif /* REFCLOCK */
 		if (typeorphan != NULL) {
-			peers[0] = typeorphan;
+			peers[0].peer = typeorphan;
 			nlist = 1;
 		}
 	}
@@ -2707,107 +2699,114 @@ clock_select(void)
 	 * Mark the candidates at this point as truechimers.
 	 */
 	for (i = 0; i < nlist; i++) {
-		peers[i]->new_status = CTL_PST_SEL_SELCAND;
-#ifdef DEBUG
-		if (debug > 1)
-			printf("select: survivor %s %f\n",
-			    stoa(&peers[i]->srcadr), synch[i]);
-#endif
+		peers[i].peer->new_status = CTL_PST_SEL_SELCAND;
+		DPRINTF(2, ("select: survivor %s %f\n",
+			stoa(&peers[i].peer->srcadr), peers[i].synch));
 	}
 
 	/*
 	 * Now, vote outlyers off the island by select jitter weighted
 	 * by root distance. Continue voting as long as there are more
-	 * than sys_minclock survivors and the minimum select jitter is
-	 * greater than the maximum peer jitter. Stop if we are about to
-	 * discard a TRUE or PREFER  peer, who of course has the
-	 * immunity idol.
+	 * than sys_minclock survivors and the select jitter of the peer
+	 * with the worst metric is greater than the minimum peer
+	 * jitter. Stop if we are about to discard a TRUE or PREFER 
+	 * peer, who of course have the immunity idol.
 	 */
-	seljitter = 0;
 	while (1) {
 		d = 1e9;
 		e = -1e9;
-		f = g = 0;
+		g = 0;
 		k = 0;
 		for (i = 0; i < nlist; i++) {
-			if (error[i] < d)
-				d = error[i];
-			f = 0;
+			if (peers[i].error < d)
+				d = peers[i].error;
+			peers[i].seljit = 0;
 			if (nlist > 1) {
+				f = 0;
 				for (j = 0; j < nlist; j++)
-					f += DIFF(peers[j]->offset,
-					    peers[i]->offset);
-				f = SQRT(f / (nlist - 1));
+					f += DIFF(peers[j].peer->offset,
+					    peers[i].peer->offset);
+				peers[i].seljit = SQRT(f / (nlist - 1));
 			}
-			if (f * synch[i] > e) {
-				g = f;
-				e = f * synch[i];
+			if (peers[i].seljit * peers[i].synch > e) {
+				g = peers[i].seljit;
+				e = peers[i].seljit * peers[i].synch;
 				k = i;
 			}
 		}
-		f = max(f, LOGTOD(sys_precision));
-		if (nlist <= sys_minclock) {
+		g = max(g, LOGTOD(sys_precision));
+		if (nlist <= max(1, sys_minclock) || g <= d ||
+		    ((FLAG_TRUE | FLAG_PREFER) & peers[k].peer->flags))
 			break;
 
-		} else if (f <= d || peers[k]->flags &
-		    (FLAG_TRUE | FLAG_PREFER)) {
-			seljitter = f;
-			break;
-		}
-#ifdef DEBUG
-		if (debug > 2)
-			printf(
-			    "select: drop %s seljit %.6f jit %.6f\n",
-			    ntoa(&peers[k]->srcadr), g, d);
-#endif
+		DPRINTF(3, ("select: drop %s seljit %.6f jit %.6f\n",
+			ntoa(&peers[k].peer->srcadr), g, d));
 		if (nlist > sys_maxclock)
-			peers[k]->new_status = CTL_PST_SEL_EXCESS;
-		for (j = k + 1; j < nlist; j++) {
+			peers[k].peer->new_status = CTL_PST_SEL_EXCESS;
+		for (j = k + 1; j < nlist; j++)
 			peers[j - 1] = peers[j];
-			synch[j - 1] = synch[j];
-			error[j - 1] = error[j];
-		}
 		nlist--;
 	}
 
 	/*
 	 * What remains is a list usually not greater than sys_minclock
-	 * peers. Note that the head of the list is the system peer at
-	 * the lowest stratum and that unsynchronized peers cannot
-	 * survive this far.
+	 * peers. Note that unsynchronized peers cannot survive this
+	 * far.  Count and mark these survivors.
 	 *
 	 * While at it, count the number of leap warning bits found.
 	 * This will be used later to vote the system leap warning bit.
 	 * If a leap warning bit is found on a reference clock, the vote
 	 * is always won.
+	 *
+	 * Choose the system peer using a hybrid metric composed of the
+	 * selection jitter scaled by the root distance augmented by
+	 * stratum scaled by sys_mindisp (.001 by default). The goal of
+	 * the small stratum factor is to avoid clockhop between a
+	 * reference clock and a network peer which has a refclock and
+	 * is using an older ntpd, which does not floor sys_rootdisp at
+	 * sys_mindisp.
+	 *
+	 * In contrast, ntpd 4.2.6 and earlier used stratum primarily
+	 * in selecting the system peer, using a weight of 1 second of
+	 * additional root distance per stratum.  This heavy bias is no
+	 * longer appropriate, as the scaled root distance provides a
+	 * more rational metric carrying the cumulative error budget.
 	 */
+	e = 1e9;
+	speer = 0;
 	leap_vote = 0;
 	for (i = 0; i < nlist; i++) {
-		peer = peers[i];
+		peer = peers[i].peer;
 		peer->unreach = 0;
 		peer->new_status = CTL_PST_SEL_SYNCCAND;
 		sys_survivors++;
 		if (peer->leap == LEAP_ADDSECOND) {
 			if (peer->flags & FLAG_REFCLOCK)
 				leap_vote = nlist;
-			else 
+			else
 				leap_vote++;
 		}
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;
+		speermet = peers[i].seljit * peers[i].synch +
+		    peer->stratum * sys_mindisp;
+		if (speermet < e) {
+			e = speermet;
+			speer = i;
+		}
 	}
 
 	/*
 	 * Unless there are at least sys_misane survivors, leave the
 	 * building dark. Otherwise, do a clockhop dance. Ordinarily,
-	 * use the first survivor on the survivor list. However, if the
-	 * last selection is not first on the list, use it as long as
-	 * it doesn't get too old or too ugly.
+	 * use the selected survivor speer. However, if the current
+	 * system peer is not speer, stay with the current system peer
+	 * as long as it doesn't get too old or too ugly.
 	 */
 	if (nlist > 0 && nlist >= sys_minsane) {
 		double	x;
 
-		typesystem = peers[0];
+		typesystem = peers[speer].peer;
 		if (osys_peer == NULL || osys_peer == typesystem) {
 			sys_clockhop = 0; 
 		} else if ((x = fabs(typesystem->offset -
@@ -2816,11 +2815,8 @@ clock_select(void)
 				sys_clockhop = sys_mindisp;
 			else
 				sys_clockhop *= .5;
-#ifdef DEBUG
-			if (debug)
-				printf("select: clockhop %d %.6f %.6f\n",
-				    j, x, sys_clockhop);
-#endif
+			DPRINTF(1, ("select: clockhop %d %.6f %.6f\n",
+				j, x, sys_clockhop));
 			if (fabs(x) < sys_clockhop)
 				typesystem = osys_peer;
 			else
@@ -2839,9 +2835,7 @@ clock_select(void)
 	if (typesystem != NULL) {
 		if (sys_prefer == NULL) {
 			typesystem->new_status = CTL_PST_SEL_SYSPEER;
-			clock_combine(peers, sys_survivors);
-			sys_jitter = SQRT(SQUARE(sys_jitter) +
-			    SQUARE(seljitter));
+			clock_combine(peers, sys_survivors, speer);
 		} else {
 			typesystem = sys_prefer;
 			sys_clockhop = 0;
@@ -2849,11 +2843,8 @@ clock_select(void)
 			sys_offset = typesystem->offset;
 			sys_jitter = typesystem->jitter;
 		}
-#ifdef DEBUG
-		if (debug)
-			printf("select: combine offset %.9f jitter %.9f\n",
-			    sys_offset, sys_jitter);
-#endif
+		DPRINTF(1, ("select: combine offset %.9f jitter %.9f\n",
+			sys_offset, sys_jitter));
 	}
 #ifdef REFCLOCK
 	/*
@@ -2872,11 +2863,8 @@ clock_select(void)
 		typesystem->new_status = CTL_PST_SEL_PPS;
  		sys_offset = typesystem->offset;
 		sys_jitter = typesystem->jitter;
-#ifdef DEBUG
-		if (debug)
-			printf("select: pps offset %.9f jitter %.9f\n",
-			    sys_offset, sys_jitter);
-#endif
+		DPRINTF(1, ("select: pps offset %.9f jitter %.9f\n",
+			sys_offset, sys_jitter));
 	}
 #endif /* REFCLOCK */
 
@@ -2891,7 +2879,7 @@ clock_select(void)
 				orphwait = current_time + sys_orphwait;
 			report_event(EVNT_NOPEER, NULL, NULL);
 		}
-		sys_peer = NULL;			
+		sys_peer = NULL;
 		for (peer = peer_list; peer != NULL; peer = peer->p_link)
 			peer->status = peer->new_status;
 		return;
@@ -2917,23 +2905,24 @@ clock_select(void)
 
 static void
 clock_combine(
-	struct peer **peers,	/* survivor list */
-	int	npeers		/* number of survivors */
+	peer_select *	peers,	/* survivor list */
+	int		npeers,	/* number of survivors */
+	int		syspeer	/* index of sys.peer */
 	)
 {
 	int	i;
-	double	d, x, y, z, w;
+	double	x, y, z, w;
 
 	y = z = w = 0;
 	for (i = 0; i < npeers; i++) {
-		d = root_distance(peers[i]);
-		x = 1. / d;
+		x = 1. / peers[i].synch;
 		y += x;
-		z += peers[i]->offset * x;
-		w += SQUARE(peers[i]->offset - peers[0]->offset) * x;
+		z += x * peers[i].peer->offset;
+		w += x * DIFF(peers[i].peer->offset,
+		    peers[syspeer].peer->offset);
 	}
 	sys_offset = z / y;
-	sys_jitter = SQRT(w / y);
+	sys_jitter = SQRT(w / y + SQUARE(peers[syspeer].seljit));
 }
 
 
@@ -3435,7 +3424,11 @@ fast_xmit(
 		    PKT_VERSION(rpkt->li_vn_mode), xmode);
 		xpkt.stratum = STRATUM_PKT_UNSPEC;
 		xpkt.ppoll = max(rpkt->ppoll, ntp_minpoll);
+		xpkt.precision = rpkt->precision;
 		memcpy(&xpkt.refid, "RATE", 4);
+		xpkt.rootdelay = rpkt->rootdelay;
+		xpkt.rootdisp = rpkt->rootdisp;
+		xpkt.reftime = rpkt->reftime;
 		xpkt.org = rpkt->xmt;
 		xpkt.rec = rpkt->xmt;
 		xpkt.xmt = rpkt->xmt;

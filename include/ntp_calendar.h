@@ -368,31 +368,33 @@ ntpcal_weekday_lt(int32 rdn, int32 dow);
 #define DAY_UNIX_STARTS 719163
 
 /*
- * Difference between UN*X and NTP epoch
+ * Difference between UN*X and NTP epoch (25567).
  */
 #define NTP_TO_UNIX_DAYS (DAY_UNIX_STARTS - DAY_NTP_STARTS)
-   
-/*
- * The Gregorian calendar is based on a 400 year cycle.	 This is the
- * number of days in each cycle.
- */
-#define	GREGORIAN_CYCLE_DAYS 146097
 
 /*
- * Number of weeks in 400 years
+ * Days in a normal 4 year leap year calendar cycle (1461).
+ */
+#define	GREGORIAN_NORMAL_LEAP_CYCLE_DAYS	(3 * 365 + 366)
+
+/*
+ * Days in a normal 100 year leap year calendar (36524).  We lose a
+ * leap day in years evenly divisible by 100 but not by 400.
+ */
+#define	GREGORIAN_NORMAL_CENTURY_DAYS	\
+			(25 * GREGORIAN_NORMAL_LEAP_CYCLE_DAYS - 1)
+
+/*
+ * The Gregorian calendar is based on a 400 year cycle. This is the
+ * number of days in each cycle (146097).  We gain a leap day in years
+ * divisible by 400 relative to the "normal" century.
+ */
+#define	GREGORIAN_CYCLE_DAYS (4 * GREGORIAN_NORMAL_CENTURY_DAYS + 1)
+
+/*
+ * Number of weeks in 400 years (20871).
  */
 #define	GREGORIAN_CYCLE_WEEKS (GREGORIAN_CYCLE_DAYS / 7)
-
-/*
- * Days in a normal 100 year leap year calendar.  We lose a leap year
- * day in years evenly divisible by 100 but not by 400.
- */
-#define	GREGORIAN_NORMAL_CENTURY_DAYS 36524
-
-/*
- * Days in a normal 4 year leap year calendar cycle.
- */
-#define	GREGORIAN_NORMAL_LEAP_CYCLE_DAYS 1461
 
 #define	is_leapyear(y)	(!((y) % 4) && !(!((y) % 100) && (y) % 400))
 
