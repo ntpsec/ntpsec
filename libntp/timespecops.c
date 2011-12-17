@@ -277,7 +277,7 @@ timespec_test(
 }
 
 /* return LIB buffer ptr to string rep */
-const char*
+const char *
 timespec_tostr(
 	const struct timespec *x
 	)

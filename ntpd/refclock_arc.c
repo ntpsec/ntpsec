@@ -402,7 +402,7 @@ Also note h<cr> command which starts a resync to MSF signal.
 				       (BITSPERCHAR * BITTIME) ) )
 
      /* Allow for UART to accept char half-way through final stop bit. */
-#define INITIALOFFSET (u_int32)(-BITTIME/2)
+#define INITIALOFFSET ((u_int32)(-BITTIME/2))
 
      /*
     charoffsets[x] is the time after the start of the second that byte
