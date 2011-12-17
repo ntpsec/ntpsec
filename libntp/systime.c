@@ -27,20 +27,9 @@
 #endif /* HAVE_UTMPX_H */
 
 
-#define	FUZZ	500e-6		/* fuzz pivot */
-
 #ifndef USE_COMPILETIME_PIVOT
 # define USE_COMPILETIME_PIVOT 1
 #endif
-
-#if defined(HAVE_CLOCK_GETTIME)
-# define GET_SYSTIME_AS_TIMESPEC(tsp) clock_gettime(CLOCK_REALTIME, tsp)
-#elif defined(HAVE_GETCLOCK)
-# define GET_SYSTIME_AS_TIMESPEC(tsp) getclock(TIMEOFDAY, tsp)
-#elif !defined(GETTIMEOFDAY)
-# include "bletch: cannot get system time?"
-#endif
-
 
 /*
  * These routines (get_systime, step_systime, adj_systime) implement an
@@ -51,25 +40,81 @@
  * residues.
  *
  * In order to improve the apparent resolution, provide unbiased
- * rounding and insure that the readings cannot be predicted, the low-
- * order unused portion of the time below the resolution limit is filled
- * with an unbiased random fuzz.
+ * rounding and most importantly ensure that the readings cannot be
+ * predicted, the low-order unused portion of the time below the minimum
+ * time to read the clock is filled with an unbiased random fuzz.
  *
- * The sys_tick variable secifies the system clock tick interval in
- * seconds. For systems that can interpolate between timer interrupts,
- * the resolution is presumed much less than the time to read the system
- * clock, which is the value of sys_tick after the precision has been
- * determined. For those systems that cannot interpolate between timer
- * interrupts, sys_tick will be much larger in the order of 10 ms, so the
- * fuzz should be that value. For Sunses the tick is not interpolated, but
- * the system clock is derived from a 2-MHz oscillator, so the resolution
- * is 500 ns and sys_tick is 500 ns.
+ * The sys_tick variable specifies the system clock tick interval in
+ * seconds, for stepping clocks, defined as those which return times
+ * less than MINSTEP greater than the previous reading. For systems that
+ * use a high-resolution counter such that each clock reading is always
+ * at least MINSTEP greater than the prior, sys_tick is the time to read
+ * the system clock.
+ *
+ * The sys_fuzz variable measures the minimum time to read the system
+ * clock, regardless of its precision.  When reading the system clock
+ * using get_systime() after sys_tick and sys_fuzz have been determined,
+ * ntpd ensures each unprocessed clock reading is no less than sys_fuzz
+ * later than the prior unprocessed reading, and then fuzzes the bits
+ * below sys_fuzz in the timestamp returned, ensuring each of its
+ * resulting readings is strictly later than the previous.
+ *
+ * When slewing the system clock using adj_systime() (with the kernel
+ * loop discipline unavailable or disabled), adjtime() offsets are
+ * quantized to sys_tick, if sys_tick is greater than sys_fuzz, which
+ * is to say if the OS presents a stepping clock.  Otherwise, offsets
+ * are quantized to the microsecond resolution of adjtime()'s timeval
+ * input.  The remaining correction sys_residual is carried into the
+ * next adjtime() and meanwhile is also factored into get_systime()
+ * readings.
  */
-double	sys_tick = 0;		/* precision (time to read the clock) */
+double	sys_tick = 0;		/* tick size or time to read (s) */
+double	sys_fuzz = 0;		/* min. time to read the clock (s) */
+long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
 double	sys_residual = 0;	/* adjustment residue (s) */
 time_stepped_callback	step_callback;
 
+static int lamport_violated;	/* clock was stepped back */
+
+void
+set_sys_fuzz(
+	double	fuzz_val
+	)
+{
+	sys_fuzz = fuzz_val;
+	INSIST(sys_fuzz >= 0);
+	INSIST(sys_fuzz <= 1.0);
+	sys_fuzz_nsec = (long)(sys_fuzz * 1e9 + 0.5);
+}
+
+
 #ifndef SIM	/* ntpsim.c has get_systime() and friends for sim */
+
+static inline void
+get_ostime(
+	struct timespec *	tsp
+	)
+{
+	int rc;
+
+#if defined(HAVE_CLOCK_GETTIME)
+	rc = clock_gettime(CLOCK_REALTIME, tsp);
+#elif defined(HAVE_GETCLOCK)
+	rc = getclock(TIMEOFDAY, tsp);
+#else
+	struct timeval		tv;
+
+	rc = GETTIMEOFDAY(&tv, NULL);
+	tsp->tv_sec = tv.tv_sec;
+	tsp->tv_nsec = tv_tv_usec * 1000;
+#endif
+	if (rc < 0) {
+		msyslog(LOG_ERR, "read system clock failed: %m (%d)",
+			errno);
+		exit(1);
+	}
+}
+
 
 /*
  * get_systime - return system time in NTP timestamp format.
@@ -79,59 +124,91 @@ get_systime(
 	l_fp *now		/* system time */
 	)
 {
-	double	dtemp;
-
-#if defined(GET_SYSTIME_AS_TIMESPEC)
-
+	static struct timespec	ts_prev;	/* prior os time */
+	static l_fp		lfp_prev;	/* prior pre-residual result */
+	static l_fp		lfp_prev_w_resid;/* prior result including sys_residual */
 	struct timespec ts;	/* seconds and nanoseconds */
+	struct timespec ts_min;	/* earliest permissible */
+	struct timespec ts_lam;	/* lamport fictional increment */
+	struct timespec ts_prev_log;	/* for msyslog only */
+	double	dfuzz;
+	double	ddelta;
+	l_fp	result;
+	l_fp	lfpfuzz;
+	l_fp	lfpdelta;
+
+	get_ostime(&ts);
 
 	/*
-	 * Convert Unix timespec from seconds and nanoseconds to NTP
-	 * seconds and fraction.
+	 * After default_get_precision() has set a nonzero sys_fuzz,
+	 * ensure every reading of the OS clock advances by at least
+	 * sys_fuzz over the prior reading, thereby assuring each
+	 * fuzzed result is strictly later than the prior.  Limit the
+	 * necessary fiction to 1 second.
 	 */
-	GET_SYSTIME_AS_TIMESPEC(&ts);
-	now->l_i = (int32)ts.tv_sec + JAN_1970;
-	dtemp = 0;
-	if (sys_tick > FUZZ)
-		dtemp = ntp_random() * 2. / FRAC * sys_tick * 1e9;
-	else if (sys_tick > 0)
-		dtemp = ntp_random() * 2. / FRAC;
-	dtemp = (ts.tv_nsec + dtemp) * 1e-9;
-	if (dtemp >= 1.) {
-		dtemp -= 1.;
-		now->l_i++;
-	} else if (dtemp < 0) {
-		dtemp += 1.;
-		now->l_i--;
+	if (sys_fuzz_nsec > 0 && !lamport_violated) {
+		timespec_addns(&ts_min, &ts_prev, sys_fuzz_nsec);
+		if (timespec_cmp_fast(&ts, &ts_min) < 0) {
+			timespec_sub(&ts_lam, &ts_min, &ts);
+			ts = ts_min;
+			if (ts_lam.tv_sec > 0) {
+				msyslog(LOG_ERR,
+					"get_systime Lamport advance exceeds one second (%.9f)",
+					ts_lam.tv_sec + 1e-9 * ts_lam.tv_nsec);
+				exit(1);
+			}
+		}
 	}
-	now->l_uf = (u_int32)(dtemp * FRAC);
+	ts_prev_log = ts_prev;
+	ts_prev = ts;
 
-#else /* have GETTIMEOFDAY */
-
-	struct timeval tv;	/* seconds and microseconds */
+	/* convert from timespec to l_fp fixed-point */
+	timespec_abstolfp(&result, &ts);
 
 	/*
-	 * Convert Unix timeval from seconds and microseconds to NTP
-	 * seconds and fraction.
+	 * Add in the fuzz.
 	 */
-	GETTIMEOFDAY(&tv, NULL);
-	now->l_i = tv.tv_sec + JAN_1970;
-	dtemp = 0;
-	if (sys_tick > FUZZ)
-		dtemp = ntp_random() * 2. / FRAC * sys_tick * 1e6;
-	else if (sys_tick > 0)
-		dtemp = ntp_random() * 2. / FRAC;
-	dtemp = (tv.tv_usec + dtemp) * 1e-6;
-	if (dtemp >= 1.) {
-		dtemp -= 1.;
-		now->l_i++;
-	} else if (dtemp < 0) {
-		dtemp += 1.;
-		now->l_i--;
+	if (sys_fuzz > 0.) {
+		dfuzz = ntp_random() * 2. / FRAC * sys_fuzz;
+		DTOLFP(dfuzz, &lfpfuzz);
+		L_ADD(&result, &lfpfuzz);
+	} else {
+		dfuzz = 0;
 	}
-	now->l_uf = (u_int32)(dtemp * FRAC);
 
-#endif /* have GETTIMEOFDAY */
+	/*
+	 * Ensure result is strictly greater than prior result (ignoring
+	 * sys_residual's effect for now) once sys_fuzz has been
+	 * determined.
+	 */
+	if (sys_fuzz > 0.) {
+		if (!L_ISZERO(&lfp_prev) && !lamport_violated) {
+			if (!L_ISGTU(&result, &lfp_prev)) {
+				msyslog(LOG_ERR,
+					"%sts_min %s ts_prev %s ts %s",
+					(lamport_violated)
+					    ? "LAMPORT "
+					    : "",
+					timespec_tostr(&ts_min),
+					timespec_tostr(&ts_prev_log),
+					timespec_tostr(&ts));
+				msyslog(LOG_ERR, "sys_fuzz %ld nsec, this fuzz %.9f",
+					sys_fuzz_nsec, dfuzz);
+				lfpdelta = lfp_prev;
+				L_SUB(&lfpdelta, &result);
+				LFPTOD(&lfpdelta, ddelta);
+				msyslog(LOG_ERR,
+					"get_systime prev result 0x%x.%08x is %.9f later than 0x%x.%08x",
+					lfp_prev.l_ui, lfp_prev.l_uf,
+					ddelta, result.l_ui, result.l_uf);
+			}
+		}
+		lfp_prev = result;
+	}
+	if (lamport_violated) 
+		lamport_violated = FALSE;
+
+	*now = result;
 }
 
 
@@ -146,6 +223,7 @@ adj_systime(
 {
 	struct timeval adjtv;	/* new adjustment */
 	struct timeval oadjtv;	/* residual adjustment */
+	double	quant;		/* quantize to multiples of */
 	double	dtemp;
 	long	ticks;
 	int	isneg = 0;
@@ -175,8 +253,12 @@ adj_systime(
 	}
 	adjtv.tv_sec = (long)dtemp;
 	dtemp -= adjtv.tv_sec;
-	ticks = (long)(dtemp / sys_tick + .5);
-	adjtv.tv_usec = (long)(ticks * sys_tick * 1e6);
+	if (sys_tick > sys_fuzz)
+		quant = sys_tick;
+	else
+		quant = 1e-6;
+	ticks = (long)(dtemp / quant + .5);
+	adjtv.tv_usec = (long)(ticks * quant * 1e6);
 	dtemp -= adjtv.tv_usec / 1e6;
 	sys_residual = dtemp;
 
@@ -265,16 +347,10 @@ step_systime(
 	/* ---> time-critical path starts ---> */
 
 	/* get the current time as l_fp (without fuzz) and as struct timeval */
-#if defined(GET_SYSTIME_AS_TIMESPEC)
-	GET_SYSTIME_AS_TIMESPEC(&timets);
+	get_ostime(&timets);
 	timespec_abstolfp(&fp_sys, &timets);
 	tvlast.tv_sec = timets.tv_sec;
 	tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
-#else /* have GETTIMEOFDAY */
-	UNUSED_LOCAL(timets);
-	GETTIMEOFDAY(&tvlast, NULL);
-	timeval_abstolfp(&fp_sys, &tvlast);
-#endif
 
 	/* get the target time as l_fp */
 	L_ADD(&fp_sys, &fp_ofs);
@@ -291,6 +367,7 @@ step_systime(
 	/* <--- time-critical path ended with 'ntp_set_tod()' <--- */
 
 	sys_residual = 0;
+	lamport_violated = (step < 0);
 	if (step_callback)
 		(*step_callback)();
 

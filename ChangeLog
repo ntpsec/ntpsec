@@ -1,3 +1,4 @@
+* [Bug 2037] Fuzzed non-interpolated clock may decrease.
 (4.2.7p240) 2011/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2092] clock_select() selection jitter miscalculated.
 * [Bug 2093] Reintroduce smaller stratum factor to system peer metric.

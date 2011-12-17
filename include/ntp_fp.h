@@ -199,12 +199,16 @@ typedef u_int32 u_fp;
 #define	M_ISNEG(v_i, v_f)		/* v < 0 */ \
 	(((v_i) & 0x80000000u) != 0)
 
+#define	M_ISGTU(a_i, a_f, b_i, b_f)	/* a > b unsigned */ \
+	(((u_int32)(a_i)) > ((u_int32)(b_i)) || \
+	  ((a_i) == (b_i) && ((u_int32)(a_f)) > ((u_int32)(b_f))))
+
 #define	M_ISHIS(a_i, a_f, b_i, b_f)	/* a >= b unsigned */ \
 	(((u_int32)(a_i)) > ((u_int32)(b_i)) || \
 	  ((a_i) == (b_i) && ((u_int32)(a_f)) >= ((u_int32)(b_f))))
 
 #define	M_ISGEQ(a_i, a_f, b_i, b_f)	/* a >= b signed */ \
-	(((u_int32)(a_i) - (u_int32)(b_i) + 0x80000000u > 0x80000000u) || \
+	(((u_int32)(a_i) - (u_int32)(b_i) + 0x80000000 > 0x80000000) || \
 	  ((a_i) == (b_i) && (u_int32)(a_f) >= (u_int32)(b_f)))
 
 #define	M_ISEQU(a_i, a_f, b_i, b_f)	/* a == b unsigned */ \
@@ -226,6 +230,7 @@ typedef u_int32 u_fp;
 
 #define	L_ISNEG(v)	M_ISNEG((v)->l_ui, (v)->l_uf)
 #define L_ISZERO(v)	(((v)->l_ui | (v)->l_uf) == 0)
+#define	L_ISGTU(a, b)	M_ISGTU((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
 #define	L_ISHIS(a, b)	M_ISHIS((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
 #define	L_ISGEQ(a, b)	M_ISGEQ((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
 #define	L_ISEQU(a, b)	M_ISEQU((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
@@ -327,6 +332,7 @@ extern	char *	gmprettydate	(l_fp *);
 extern	char *	uglydate	(l_fp *);
 extern  void	mfp_mul		(int32 *, u_int32 *, int32, u_int32, int32, u_int32);
 
+extern	void	set_sys_fuzz	(double);
 extern	void	get_systime	(l_fp *);
 extern	int	step_systime	(double);
 extern	int	adj_systime	(double);

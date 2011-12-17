@@ -559,9 +559,18 @@ adj_systime(
 
 
 	sys_residual = dtemp / 1e6;
-	DPRINTF(3, ("adj_systime: %.9f -> %.9f residual %.9f adjtime %.9f\n", 
+#if 0
+	msyslog(LOG_NOTICE, "adj_systime: %.9f -> %.9f residual %.9f", 
 		    now, 1e-6 * (TimeAdjustment * ppm_per_adjust_unit),
-		    sys_residual, adjtime_carry));
+		    sys_residual);
+#endif
+	DPRINTF(3, ("adj_systime: %.9f -> %.9f residual %.9f", 
+		    now, 1e-6 * (TimeAdjustment * ppm_per_adjust_unit),
+		    sys_residual));
+	if (0 == adjtime_carry)
+		DPRINTF(3, ("\n"));
+	else
+		DPRINTF(3, (" adjtime %.9f\n", adjtime_carry));
 
 	/* only adjust the clock if adjustment changes */
 	TimeAdjustment += wintickadj;
