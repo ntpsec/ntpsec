@@ -1049,6 +1049,7 @@ tinker_option_keyword
 	|	T_Panic
 	|	T_Step
 	|	T_Stepout
+	|	T_Tick
 	;
 
 

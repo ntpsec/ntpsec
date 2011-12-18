@@ -1060,7 +1060,11 @@ loop_config(
 			clock_minstep = freq; 
 		break;
 
-	case LOOP_LEAP:		/* not used */
+	case LOOP_TICK:		/* tick increment (tick) */
+		set_sys_tick_precision(freq);
+		break;
+
+	case LOOP_LEAP:		/* not used, fall through */
 	default:
 		msyslog(LOG_NOTICE,
 		    "loop_config: unsupported option %d", item);

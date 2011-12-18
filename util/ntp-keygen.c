@@ -114,8 +114,7 @@
 #define	MD5SIZE		20	/* maximum key size */
 #define DAY		((long)60*60*24) /* one day in seconds */
 #define	YEAR		((long)365) /* one year in days */
-#define MAXFILENAME	256	/* max file name length */
-#define MAXHOSTNAME	256	/* max host name length */
+#define MAXFILENAME	MAXHOSTNAME /* max file name length */
 #ifdef AUTOKEY
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	ILEN		256	/* default identity modulus size (bits) */

@@ -1,4 +1,8 @@
+* [Bug 2015] Overriding sys_tick should recalculate sys_precision.
 * [Bug 2037] Fuzzed non-interpolated clock may decrease.
+* [Bug 2068] "tos ceiling" default and cap changed to 15.
+* Floor peer delay using system precision, as with jitter, reflecting
+  inability to measure shorter intervals.
 (4.2.7p240) 2011/12/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2092] clock_select() selection jitter miscalculated.
 * [Bug 2093] Reintroduce smaller stratum factor to system peer metric.

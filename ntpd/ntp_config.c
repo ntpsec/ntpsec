@@ -1942,12 +1942,14 @@ config_tos(
 	config_tree *ptree
 	)
 {
-	attr_val *tos;
-	int item;
+	attr_val *	tos;
+	int		item;
+	double		val;
 
 	item = -1;	/* quiet warning */
 	tos = HEAD_PFIFO(ptree->orphan_cmds);
 	for (; tos != NULL; tos = tos->link) {
+		val = tos->value.d;
 		switch(tos->attr) {
 
 		default:
@@ -1955,6 +1957,12 @@ config_tos(
 			break;
 
 		case T_Ceiling:
+			if (val > STRATUM_UNSPEC - 1) {
+				msyslog(LOG_WARNING,
+					"Using maximum tos ceiling %d, %g requested",
+					STRATUM_UNSPEC - 1, val);
+				val = STRATUM_UNSPEC - 1;
+			}
 			item = PROTO_CEILING;
 			break;
 
@@ -1998,7 +2006,7 @@ config_tos(
 			item = PROTO_BEACON;
 			break;
 		}
-		proto_config(item, 0, tos->value.d, NULL);
+		proto_config(item, 0, val, NULL);
 	}
 }
 
@@ -2579,6 +2587,10 @@ config_tinker(
 
 		case T_Stepout:
 			item = LOOP_MINSTEP;
+			break;
+
+		case T_Tick:
+			item = LOOP_TICK;
 			break;
 		}
 		loop_config(item, tinker->value.d);
@@ -3395,8 +3407,9 @@ config_vars(
 		case T_Broadcastdelay:
 			proto_config(PROTO_BROADDELAY, 0, curr_var->value.d, NULL);
 			break;
+
 		case T_Tick:
-			proto_config(PROTO_ADJ, 0, curr_var->value.d, NULL);
+			loop_config(LOOP_TICK, curr_var->value.d);
 			break;
 
 		case T_Driftfile:

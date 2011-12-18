@@ -3162,51 +3162,56 @@ fetch_timestamp(
 	)
 {
 #ifdef USE_TIMESTAMP_CMSG
-	struct cmsghdr *cmsghdr;
+	struct cmsghdr *	cmsghdr;
+	struct timeval *	tvp;
+	long			ticks;
+	double			fuzz;
+	l_fp			lfpfuzz;
+	l_fp			nts;
+#ifdef DEBUG_TIMING
+	l_fp			dts;
+#endif
 
 	cmsghdr = CMSG_FIRSTHDR(msghdr);
 	while (cmsghdr != NULL) {
 		switch (cmsghdr->cmsg_type)
 		{
 		case SCM_TIMESTAMP:
-		{
-			struct timeval *tvp;
-			double dtemp;
-			l_fp nts;
-
 			tvp = (struct timeval *)CMSG_DATA(cmsghdr);
+			if (sys_tick > measured_tick &&
+			    sys_tick > 1e-6) {
+				ticks = (long)((tvp->tv_usec * 1e-6) /
+					sys_tick);
+				tvp->tv_usec = (long)(ticks * 1e6 *
+						      sys_tick);
+			}
 			DPRINTF(4, ("fetch_timestamp: system network time stamp: %ld.%06ld\n",
 				    tvp->tv_sec, tvp->tv_usec));
-			nts.l_i = tvp->tv_sec + JAN_1970;
-			dtemp = (tvp->tv_usec 
-				 + (ntp_random() * 2. / FRAC)) / 1e6;
-			nts.l_uf = (u_int32)(dtemp * FRAC);
+			timeval_abstolfp(&nts, tvp);
+			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
+			DTOLFP(fuzz, &lfpfuzz);
+			L_ADD(&nts, &lfpfuzz);
 #ifdef DEBUG_TIMING
-			{
-				l_fp dts;
-
-				dts = ts;
-				L_SUB(&dts, &nts);
-				collect_timing(rb, 
-					       "input processing delay",
-					       1, &dts);
-				DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. prec fuzz)\n",
-					    lfptoa(&dts, 9)));
-			}
-#endif
+			dts = ts;
+			L_SUB(&dts, &nts);
+			collect_timing(rb, "input processing delay", 1,
+				       &dts);
+			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. prec fuzz)\n",
+				    lfptoa(&dts, 9)));
+#endif	/* DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;
-		}
+
 		default:
 			DPRINTF(4, ("fetch_timestamp: skipping control message 0x%x\n",
 				    cmsghdr->cmsg_type));
 		}
 		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
 	}
-#endif
+#endif	/* USE_TIMESTAMP_CMSG */
 	return ts;
 }
-#endif
+#endif	/* HAVE_TIMESTAMP */
 
 
 /*

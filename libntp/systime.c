@@ -71,10 +71,13 @@
 double	sys_tick = 0;		/* tick size or time to read (s) */
 double	sys_fuzz = 0;		/* min. time to read the clock (s) */
 long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
+double	measured_tick;		/* non-overridable sys_tick (s) */
 double	sys_residual = 0;	/* adjustment residue (s) */
 time_stepped_callback	step_callback;
 
+#ifndef SIM
 static int lamport_violated;	/* clock was stepped back */
+#endif
 
 void
 set_sys_fuzz(
@@ -95,7 +98,8 @@ get_ostime(
 	struct timespec *	tsp
 	)
 {
-	int rc;
+	int	rc;
+	long	ticks;
 
 #if defined(HAVE_CLOCK_GETTIME)
 	rc = clock_gettime(CLOCK_REALTIME, tsp);
@@ -113,6 +117,11 @@ get_ostime(
 			errno);
 		exit(1);
 	}
+
+	if (sys_tick > measured_tick) {
+		ticks = (long)((tsp->tv_nsec * 1e-9) / sys_tick);
+		tsp->tv_nsec = (long)(ticks * 1e9 * sys_tick);
+	}
 }
 
 
@@ -125,8 +134,7 @@ get_systime(
 	)
 {
 	static struct timespec	ts_prev;	/* prior os time */
-	static l_fp		lfp_prev;	/* prior pre-residual result */
-	static l_fp		lfp_prev_w_resid;/* prior result including sys_residual */
+	static l_fp		lfp_prev;	/* prior result */
 	struct timespec ts;	/* seconds and nanoseconds */
 	struct timespec ts_min;	/* earliest permissible */
 	struct timespec ts_lam;	/* lamport fictional increment */

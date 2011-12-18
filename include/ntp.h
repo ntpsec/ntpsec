@@ -696,7 +696,7 @@ struct pkt {
 #define PROTO_CALLDELAY		20
 #define PROTO_MINDISP		21
 #define PROTO_MAXDIST		22
-#define PROTO_ADJ		23
+	/* available		23 */
 #define	PROTO_MAXHOP		24
 #define	PROTO_BEACON		25
 #define	PROTO_ORPHAN		26
@@ -718,6 +718,7 @@ struct pkt {
 #define LOOP_FREQ		10	/* set initial frequency */
 #define LOOP_CODEC		11	/* set audio codec frequency */
 #define	LOOP_LEAP		12	/* insert leap after second 23:59 */
+#define	LOOP_TICK		13	/* sim. low precision clock */
 
 /*
  * Configuration items for the stats printer

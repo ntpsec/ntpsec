@@ -219,7 +219,8 @@ static const struct ctl_proc control_codes[] = {
 #define	CS_TIMERSTATS_RESET	85
 #define	CS_TIMER_OVERRUNS	86
 #define	CS_TIMER_XMTS		87
-#define	CS_MAX_NOAUTOKEY	CS_TIMER_XMTS
+#define	CS_FUZZ			88
+#define	CS_MAX_NOAUTOKEY	CS_FUZZ
 #ifdef AUTOKEY
 #define	CS_FLAGS		(1 + CS_MAX_NOAUTOKEY)
 #define	CS_HOST			(2 + CS_MAX_NOAUTOKEY)
@@ -413,6 +414,7 @@ static const struct ctl_var sys_var[] = {
 	{ CS_TIMERSTATS_RESET,	RO, "timerstats_reset" },/* 85 */
 	{ CS_TIMER_OVERRUNS,	RO, "timer_overruns" },	/* 86 */
 	{ CS_TIMER_XMTS,	RO, "timer_xmts" },	/* 87 */
+	{ CS_FUZZ,		RO, "fuzz" },		/* 88 */
 #ifdef AUTOKEY
 	{ CS_FLAGS,	RO, "flags" },		/* 1 + CS_MAX_NOAUTOKEY */
 	{ CS_HOST,	RO, "host" },		/* 2 + CS_MAX_NOAUTOKEY */
@@ -679,7 +681,7 @@ int num_ctl_traps;
  * different than CTL_SST_TS_UNSPEC.
  */
 #ifdef REFCLOCK
-static u_char clocktypes[] = {
+static const u_char clocktypes[] = {
 	CTL_SST_TS_NTP, 	/* REFCLK_NONE (0) */
 	CTL_SST_TS_LOCAL,	/* REFCLK_LOCALCLOCK (1) */
 	CTL_SST_TS_UHF, 	/* deprecated REFCLK_GPS_TRAK (2) */
@@ -2231,6 +2233,10 @@ ctl_putsys(
 
 	case CS_TIMER_XMTS:
 		ctl_putuint(sys_var[varid].text, timer_xmtcalls);
+		break;
+
+	case CS_FUZZ:
+		ctl_putdbl(sys_var[varid].text, sys_fuzz * 1e3);
 		break;
 #ifdef AUTOKEY
 	case CS_FLAGS:

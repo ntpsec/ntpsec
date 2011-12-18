@@ -276,6 +276,7 @@ extern char *	ntp_strerror	(int e);
 
 /* systime.c */
 extern double	sys_tick;		/* tick size or time to read */
+extern double	measured_tick;		/* non-overridable sys_tick */
 extern double	sys_fuzz;		/* min clock read latency */
 
 /* version.c */

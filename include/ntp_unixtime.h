@@ -8,6 +8,8 @@
 
 #include "ntp_types.h"	/* picks up time.h via ntp_machine.h */
 #include "ntp_calendar.h"
+#include "timespecops.h"
+#include "timevalops.h"
 
 #ifdef SIM
 #   define GETTIMEOFDAY(a, b) (node_gettime(&ntp_node, a))

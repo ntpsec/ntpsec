@@ -236,6 +236,7 @@ extern	void	poll_update	(struct peer *, u_char);
 extern	void	clear		(struct peer *);
 extern	void	clock_filter	(struct peer *, double, double, double);
 extern	void	init_proto	(void);
+extern	void	set_sys_tick_precision(double);
 extern	void	proto_config	(int, u_long, double, sockaddr_u *);
 extern	void	proto_clr_stats (void);
 
