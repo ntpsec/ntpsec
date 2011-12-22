@@ -1,3 +1,5 @@
+* Include missing html/icons/sitemap.png, reported by Michael Tatarinov.
+* Documentation updates from Dave Mills.
 (4.2.7p241) 2011/12/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2015] Overriding sys_tick should recalculate sys_precision.
 * [Bug 2037] Fuzzed non-interpolated clock may decrease.
