@@ -1,4 +1,4 @@
-* [Bug 2095] ntptrace now needs 'rv' instead pf 'pstat', reported
+* [Bug 2095] ntptrace now needs 'rv' instead of 'pstat', reported
   by Michael Tatarinov.
 (4.2.7p242) 2011/12/21 Released by Harlan Stenn <stenn@ntp.org>
 * Include missing html/icons/sitemap.png, reported by Michael Tatarinov.
