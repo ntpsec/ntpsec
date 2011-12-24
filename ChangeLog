@@ -1,4 +1,7 @@
 ---
+(4.2.6p5) 2011/12/24 Released by Harlan Stenn <stenn@ntp.org>
+
+---
 (4.2.6p5-RC3) 2011/12/08 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2082] 3-char refid sent by ntpd 4.2.6p5-RC2 ends with extra dot.
