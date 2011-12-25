@@ -34,7 +34,8 @@
 # To skip over -stable beta1 directly to -RC1, set prerelease=rc.
 #
 # To skip all -stable prereleases and move from one primary or point 
-#   release directly to the next point release, set rcpoint=GO.
+#   release directly to the next point release, or to go from RC to
+#   release, set rcpoint=GO.
 #
 ##
 #
@@ -91,4 +92,4 @@ betapoint=0
 # - - prerelease is emptied
 # else (not in RC)
 # - rcpoint is empty and unused (for now).
-rcpoint=3
+rcpoint=GO
