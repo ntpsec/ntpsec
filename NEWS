@@ -52,42 +52,44 @@ operations, please try the ntpq equivalent.  If there's no equivalent,
 please open a bug report at http://bugs.ntp.org./
 
 --- 
-NTP 4.2.6p5-RC3 (Harlan Stenn <stenn@ntp.org>, 2011/12/xx) 
+NTP 4.2.6p5 (Harlan Stenn <stenn@ntp.org>, 2011/12/24) 
  
-Focus: Bug fix
+Focus: Bug fixes
  
 Severity: Medium 
  
 This is a recommended upgrade. 
 
-This release includes a fix for a mismatch problem with IP addresses
-specified in "nic" or "interface" directives in the ntpd configuration
-file using the address/prefix format, such as "fe80::/64" erroneously
-matching localhost [::1] and wildcard [::].  It also includes fixes
-for orphan mode, extraneous creation of ephemeral associations from
-certain broadcastclient and multicastclient configurations, and some
-display issues with ntpq.
+This release updates sys_rootdisp and sys_jitter calculations to match the
+RFC specification, fixes a potential IPv6 address matching error for the
+"nic" and "interface" configuration directives, suppresses the creation of
+extraneous ephemeral associations for certain broadcastclient and
+multicastclient configurations, cleans up some ntpq display issues, and
+includes improvements to orphan mode, minor bugs fixes and code clean-ups.
+
+New features / changes in this release:
 
 ntpd
 
- * Correctly match IP address prefixes for "nic" and "interface".
- * Fix orphan mode stratum incorrectly counting to infinity.
- * Orphan parent selection metric was missing ntohl().
- * No longer send nonprintable stratum 16 refid to ntpq.
- * broadcastclient, multicastclient would spin up duplicate
-   ephemeral associations without broadcastdelay.
- * Exclude not-yet-determined sys_refid from use in loopback TEST12.
- * Never send KoD rate limiting response to MODE_SERVER response.
- * Fix 3-char refid sent by ntpd 4.2.6p5-RC2 that ends with extra dot.
- * clock_update() sys_rootdisp calculation should include root delay.
- * get_systime() should not offset by sys_residual.
- * sys_jitter calculation overweights sys.peer jitter.
- * Ensure NULL peer->dstadr is not accessed in orphan parent selection.
+ * Updated "nic" and "interface" IPv6 address handling to prevent 
+   mismatches with localhost [::1] and wildcard [::] which resulted from
+   using the address/prefix format (e.g. fe80::/64)
+ * Fix orphan mode stratum incorrectly counting to infinity
+ * Orphan parent selection metric updated to includes missing ntohl()
+ * Non-printable stratum 16 refid no longer sent to ntp
+ * Duplicate ephemeral associations suppressed for broadcastclient and
+   multicastclient without broadcastdelay
+ * Exclude undetermined sys_refid from use in loopback TEST12
+ * Exclude MODE_SERVER responses from KoD rate limiting
+ * Include root delay in clock_update() sys_rootdisp calculations
+ * get_systime() updated to exclude sys_residual offset (which only
+   affected bits "below" sys_tick, the precision threshold)
+ * sys.peer jitter weighting corrected in sys_jitter calculation
 
 ntpq
 
- * Optional billboard column "server" did not honor -n.
- * lopeers ipv6 "local" used to overrun its column.
+ * -n option extended to include the billboard "server" column
+ * IPv6 addresses in the local column truncated to prevent overruns
 
 --- 
 NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
@@ -115,8 +117,8 @@ Build system
  
 ntpd 
  
-* Backported several fixes for Coverity warnings from ntp-dev 
-* Fix a rare boundry condition in UNLINK_EXPR_SLIST() 
+* Back-ported several fixes for Coverity warnings from ntp-dev 
+* Fix a rare boundary condition in UNLINK_EXPR_SLIST() 
 * Allow "logconfig =allall" configuration directive 
 * Bind tentative IPv6 addresses on Linux 
 * Correct WWVB/Spectracom driver to timestamp CR instead of LF 
@@ -128,7 +130,7 @@ ntpd
 * Prefer an Orphan Mode Parent over the Undisciplined Local Clock or ACTS 
   drivers 
 * Improved support of the Parse Refclock trusttime flag in Meinberg mode 
-* Backport utility routines from ntp-dev: mprintf(), emalloc_zero() 
+* Back-port utility routines from ntp-dev: mprintf(), emalloc_zero() 
 * Added the NTPD_TICKADJ_PPM environment variable for specifying baseline 
   clock slew on Microsoft Windows 
 * Code cleanup in libntpq 
@@ -191,7 +193,7 @@ ntpd
 * NMEA refclock improvements.
 * Oncore debug message cleanup.
 * Palisade refclock now builds under Linux.
-* Give RAWDCF more baudrates.
+* Give RAWDCF more baud rates.
 * Support Truetime Satellite clocks under Windows.
 * Support Arbiter 1093C Satellite clocks under Windows.
 * Make sure that the "filegen" configuration command defaults to "enable".
@@ -318,7 +320,7 @@ THIS IS A STRONGLY RECOMMENDED UPGRADE.
 ---
 ntpd now syncs to refclocks right away.
 
-Backward-Incomatible changes:
+Backward-Incompatible changes:
 
 ntpd no longer accepts '-v name' or '-V name' to define internal variables.
 Use '--var name' or '--dvar name' instead. (Bug 817)

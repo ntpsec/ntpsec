@@ -1263,6 +1263,11 @@
 (4.2.7) 2009/12/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1407] configure.ac: recent GNU Make -v does not include "version".
 ---
+(4.2.6p5) 2011/12/24 Released by Harlan Stenn <stenn@ntp.org>
+
+No changes from 4.2.6p5-RC3.
+
+---
 (4.2.6p5-RC3) 2011/12/08 Released by Harlan Stenn <stenn@ntp.org>
 
 * [Bug 2082] 3-char refid sent by ntpd 4.2.6p5-RC2 ends with extra dot.
@@ -1364,7 +1369,7 @@
 * [Bug 1741] Enable multicast reception on each address (Windows).
 * [Bug 1742] Fix a typo in an error message in the "build" script.
 * [Bug 1743] Display timezone offset when showing time for sntp in the
-  local timezone.
+local timezone.
 * [Bug 1751] Support for Atari FreeMiNT OS.
 * [Bug 1754] --version output should be more verbose.
 * [Bug 1757] oncore snprintf("%m") doesn't expand %m.
@@ -1374,7 +1379,7 @@
 * Upgrade to libopts 34.0.9 from AutoGen 5.11.6pre7.
 * Relax minimum Automake version to 1.10 with updated libopts.m4.
 * Suppress ntp-keygen OpenSSL version display for --help, --version,
-  display both build and runtime OpenSSL versions when they differ.
+display both build and runtime OpenSSL versions when they differ.
 * Clean up m4 quoting in configure.ac, *.m4 files, resolving
   intermittent AC_LANG_PROGRAM possibly undefined errors.
 * Clean up the SNTP documentation.
