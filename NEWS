@@ -1,5 +1,5 @@
 --- 
-NTP 4.2.6p5-RC3 (Harlan Stenn <stenn@ntp.org>, 2011/12/xx) 
+NTP 4.2.6p5 (Harlan Stenn <stenn@ntp.org>, 2011/12/24) 
  
 Focus: Bug fixes
  
@@ -7,32 +7,36 @@ Severity: Medium
  
 This is a recommended upgrade. 
 
-This release includes a fix for a mismatch problem with IP addresses
-specified in "nic" or "interface" directives in the ntpd configuration
-file using the address/prefix format, such as "fe80::/64" erroneously
-matching localhost [::1] and wildcard [::].  It also includes fixes
-for orphan mode, extraneous creation of ephemeral associations from
-certain broadcastclient and multicastclient configurations, and some
-display issues with ntpq.
+This release updates sys_rootdisp and sys_jitter calculations to match the
+RFC specification, fixes a potential IPv6 address matching error for the
+"nic" and "interface" configuration directives, supresses the creation of
+extraneous ephemeral associations for certain broadcastclient and
+multicastclient configurations, cleans up some ntpq display issues, and
+includes improvements to orphan mode, minor bugs fixes and code clean-ups.
+
+New features / changes in this release:
 
 ntpd
 
- * Correctly match IP address prefixes for "nic" and "interface".
- * Fix orphan mode stratum incorrectly counting to infinity.
- * Orphan parent selection metric was missing ntohl().
- * No longer send nonprintable stratum 16 refid to ntpq.
- * broadcastclient, multicastclient would spin up duplicate
-   ephemeral associations without broadcastdelay.
- * Exclude not-yet-determined sys_refid from use in loopback TEST12.
- * Never send KoD rate limiting response to MODE_SERVER response.
- * clock_update() sys_rootdisp calculation now includes root delay.
- * get_systime() is no longer offset by sys_residual.
- * sys_jitter calculation properly weights sys.peer jitter.
+ * Updated "nic" and "interface" IPv6 address handling to prevent 
+   mismatches with localhost [::1] and wildcard [::] which resulted from
+   using the address/prefix format (e.g. fe80::/64)
+ * Fix orphan mode stratum incorrectly counting to infinity
+ * Orphan parent selection metric updated to includes missing ntohl()
+ * Nonprintable stratum 16 refid no longer sent to ntp
+ * Duplicate ephemeral associations suppressed for brodcastclient and
+   multicastclient without broadcastdelay
+ * Exclude undetermined sys_refid from use in loopback TEST12
+ * Exclude MODE_SERVER responses from KoD rate limiting
+ * Include root delay in clock_update() sys_rootdisp calculations
+ * get_systime() updated to exclude sys_residual offset (which only
+   affected bits "below" sys_tick, the precision threshold)
+ * sys.peer jitter weighting corrected in sys_jitter calculation
 
 ntpq
 
- * Optional billboard column "server" now honors -n.
- * lopeers ipv6 "local" no longer overruns its column.
+ * -n option extended to include the billboard "server" column
+ * IPv6 addresses in the local column truncated to prevent overruns
 
 --- 
 NTP 4.2.6p4 (Harlan Stenn <stenn@ntp.org>, 2011/09/22) 
