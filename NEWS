@@ -9,7 +9,7 @@ This is a recommended upgrade.
 
 This release updates sys_rootdisp and sys_jitter calculations to match the
 RFC specification, fixes a potential IPv6 address matching error for the
-"nic" and "interface" configuration directives, supresses the creation of
+"nic" and "interface" configuration directives, suppresses the creation of
 extraneous ephemeral associations for certain broadcastclient and
 multicastclient configurations, cleans up some ntpq display issues, and
 includes improvements to orphan mode, minor bugs fixes and code clean-ups.
@@ -23,8 +23,8 @@ ntpd
    using the address/prefix format (e.g. fe80::/64)
  * Fix orphan mode stratum incorrectly counting to infinity
  * Orphan parent selection metric updated to includes missing ntohl()
- * Nonprintable stratum 16 refid no longer sent to ntp
- * Duplicate ephemeral associations suppressed for brodcastclient and
+ * Non-printable stratum 16 refid no longer sent to ntp
+ * Duplicate ephemeral associations suppressed for broadcastclient and
    multicastclient without broadcastdelay
  * Exclude undetermined sys_refid from use in loopback TEST12
  * Exclude MODE_SERVER responses from KoD rate limiting
@@ -64,8 +64,8 @@ Build system
  
 ntpd 
  
-* Backported several fixes for Coverity warnings from ntp-dev 
-* Fix a rare boundry condition in UNLINK_EXPR_SLIST() 
+* Back-ported several fixes for Coverity warnings from ntp-dev 
+* Fix a rare boundary condition in UNLINK_EXPR_SLIST() 
 * Allow "logconfig =allall" configuration directive 
 * Bind tentative IPv6 addresses on Linux 
 * Correct WWVB/Spectracom driver to timestamp CR instead of LF 
@@ -77,7 +77,7 @@ ntpd
 * Prefer an Orphan Mode Parent over the Undisciplined Local Clock or ACTS 
   drivers 
 * Improved support of the Parse Refclock trusttime flag in Meinberg mode 
-* Backport utility routines from ntp-dev: mprintf(), emalloc_zero() 
+* Back-port utility routines from ntp-dev: mprintf(), emalloc_zero() 
 * Added the NTPD_TICKADJ_PPM environment variable for specifying baseline 
   clock slew on Microsoft Windows 
 * Code cleanup in libntpq 
@@ -140,7 +140,7 @@ ntpd
 * NMEA refclock improvements.
 * Oncore debug message cleanup.
 * Palisade refclock now builds under Linux.
-* Give RAWDCF more baudrates.
+* Give RAWDCF more baud rates.
 * Support Truetime Satellite clocks under Windows.
 * Support Arbiter 1093C Satellite clocks under Windows.
 * Make sure that the "filegen" configuration command defaults to "enable".
@@ -267,7 +267,7 @@ THIS IS A STRONGLY RECOMMENDED UPGRADE.
 ---
 ntpd now syncs to refclocks right away.
 
-Backward-Incomatible changes:
+Backward-Incompatible changes:
 
 ntpd no longer accepts '-v name' or '-V name' to define internal variables.
 Use '--var name' or '--dvar name' instead. (Bug 817)
