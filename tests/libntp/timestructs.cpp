@@ -23,7 +23,7 @@ operator << (std::ostream& os, const timeStruct::l_fp_wrap& val)
 	   << std::setfill('0') << std::setw(8) << val.V.l_uf
 	   << std::dec;
 	// human-readable format
-	os << '[' << dolfptoa(val.V.l_ui, val.V.l_uf, 0, 10, 0) << ']';
+	os << '[' << lfptoa(&val.V, 10) << ']';
 	return os;
 }
 
@@ -122,6 +122,39 @@ AssertTimevalClose::operator()(
 	    << "\nand\n"
 	    << n_expr << " which is " << timeval_wrap(n)
 	    << "\nare not close; diff=" << timeval_wrap(diff);
+}
+
+// Implementation of the timespec closeness predicate
+
+AssertTimespecClose::AssertTimespecClose(
+	time_t hi,
+	int32  lo
+	)
+{
+	limit.tv_sec = hi;
+	limit.tv_nsec = lo;
+}
+
+::testing::AssertionResult
+AssertTimespecClose::operator()(
+	const char* m_expr,
+	const char* n_expr,
+	const struct timespec & m,
+	const struct timespec & n
+	)
+{
+	struct timespec diff;
+
+	timespec_sub(&diff, &m, &n);
+	timespec_abs(&diff, &diff);
+	if (timespec_cmp(&limit, &diff) >= 0)
+		return ::testing::AssertionSuccess();
+
+	return ::testing::AssertionFailure()
+	    << m_expr << " which is " << timespec_wrap(m)
+	    << "\nand\n"
+	    << n_expr << " which is " << timespec_wrap(n)
+	    << "\nare not close; diff=" << timespec_wrap(diff);
 }
 
 } // namespace timeStruct

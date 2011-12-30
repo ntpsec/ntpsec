@@ -1,14 +1,21 @@
 #include "libntptest.h"
+#include "timestructs.h"
 
 extern "C" {
+#include <math.h>
 #include "timespecops.h"
 }
 
 #include <string>
 #include <sstream>
 
+using namespace timeStruct;
+
 class timespecTest : public libntptest {
 protected:
+	static u_int32 my_tick_to_tsf(u_int32 ticks);
+	static u_int32 my_tsf_to_tick(u_int32 tsf);
+
 	static const long NANOSECONDS;
 	// that's it...
 	struct lfpfracdata {
@@ -17,7 +24,41 @@ protected:
 	};
 	static const lfpfracdata fdata[];
 };
+
+u_int32
+timespecTest::my_tick_to_tsf(
+	u_int32 ticks
+	)
+{
+	// convert nanoseconds to l_fp fractional units, using double
+	// precision float calculations or, if available, 64bit integer
+	// arithmetic. This should give the precise fraction, rounded to
+	// the nearest representation.
+#if SIZEOF_LONG >= 8
+	return u_int32(((u_long(ticks) << 32) + 500000000) / 1000000000);
+#else
+	return u_int32(double(ticks) * 4.294967296 + 0.5);
+#endif
+	// And before you ask: if ticks >= 1000000000, the result is
+	// truncated nonsense, so don't use it out-of-bounds.
+}
+
+u_int32
+timespecTest::my_tsf_to_tick(
+	u_int32 tsf
+	)
+{
+	// Inverse operation: converts fraction to microseconds.
+#if SIZEOF_LONG >= 8
+	return u_int32((u_long(tsf) * 1000000000 + 0x80000000) >> 32);
+#else
+	return u_int32(double(tsf) / 4.294967296 + 0.5);
+#endif
+	// Beware: The result might be 10^9 due to rounding!
+}
+
 const long timespecTest::NANOSECONDS = 1000000000;
+
 const timespecTest::lfpfracdata timespecTest::fdata [] = {
 		{	  0, 0x00000000 }, {   2218896, 0x00916ae6 },
 		{  16408100, 0x0433523d }, { 125000000, 0x20000000 },
@@ -35,80 +76,47 @@ const timespecTest::lfpfracdata timespecTest::fdata [] = {
 		{ 956805507, 0xf4f134a9 }, { 982570733, 0xfb89c16c }
 };
 
-class TSPEC {
-public:
-	struct timespec V;
-
-	TSPEC()
-		{ ZERO(V); }
-	TSPEC(time_t hi, long lo)
-		{ V.tv_sec = hi; V.tv_nsec = lo; }
-	bool operator == (const TSPEC& rhs) const
-		{ return timespec_cmp(&V, &rhs.V) == 0; }
-	bool valid() const
-		{ return timespec_isnormal(&V); }
-	operator struct timespec* () 
-		{ return &V; }
-	operator struct timespec& ()
-		{ return V;	}
-	TSPEC& operator = (const TSPEC& rhs)
-		{ V = rhs.V; return *this; }
-	TSPEC& operator = (const struct timespec& rhs)
-		{ V = rhs; return *this; }
-};
-
-static std::ostream&
-operator << (std::ostream& os, const TSPEC& val)
-{
-	os << timespec_tostr(&val.V);
-	return os;
-}
-
-
-class LFP {
-public:
-	l_fp V;
-
-	LFP()
-		{ ZERO(V); }
-	LFP(u_int32 hi, u_int32 lo)
-		{ V.l_ui = hi; V.l_uf = lo; }
-	bool operator == (const LFP& rhs) const
-		{ return L_ISEQU(&V, &rhs.V); }
-	operator l_fp* () 
-		{ return &V; }
-	operator l_fp& ()
-		{ return V; }
-	LFP& operator = (const LFP& rhs)
-		{ V = rhs.V; return *this; }
-	LFP& operator = (const l_fp& rhs)
-		{ V = rhs; return *this; }
-};
-
-std::ostream&
-operator << (std::ostream& os, const LFP &val)
-{
-	os << ulfptoa(&val.V, 10);
-	return os;
-}
-
 
 // ---------------------------------------------------------------------
-// test support stuff
+// test support stuff -- part 1
 // ---------------------------------------------------------------------
+
+TEST_F(timespecTest, Helpers1) {
+	timespec_wrap x;
+
+	for (x.V.tv_sec = -2; x.V.tv_sec < 3; x.V.tv_sec++)
+	{
+		x.V.tv_nsec = -1;
+		ASSERT_FALSE(x.valid());
+		x.V.tv_nsec = 0;
+		ASSERT_TRUE(x.valid());
+		x.V.tv_nsec = 999999999;
+		ASSERT_TRUE(x.valid());
+		x.V.tv_nsec = 1000000000;
+		ASSERT_FALSE(x.valid());
+	}
+}
+
+//----------------------------------------------------------------------
+// test normalisation
+//----------------------------------------------------------------------
 
 TEST_F(timespecTest, Normalise) {
 	for (long ns = -2000000000; ns <= 2000000000; ns += 10000000) {
-		TSPEC x(0, ns);
+		timespec_wrap x(0, ns);
 		timespec_norm(x);
 		ASSERT_TRUE(x.valid());
 	}
 }
 
+//----------------------------------------------------------------------
+// test classification
+//----------------------------------------------------------------------
+
 TEST_F(timespecTest, SignNoFrac) {
 	// sign test, no fraction
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i, 0);
+		timespec_wrap a(i, 0);
 		int E = (i > 0) - (i < 0);
 		int r = timespec_test(a);
 		ASSERT_EQ(E, r);
@@ -118,24 +126,24 @@ TEST_F(timespecTest, SignNoFrac) {
 TEST_F(timespecTest, SignWithFrac) {
 	// sign test, with fraction
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i, 10);
+		timespec_wrap a(i, 10);
 		int E = (i >= 0) - (i < 0);
 		int r = timespec_test(a);
-
 		ASSERT_EQ(E, r);
 	}
 }
 
+//----------------------------------------------------------------------
 // test compare
+//----------------------------------------------------------------------
 TEST_F(timespecTest, CmpFracEQ) {
 	// fractions are equal
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a( i , 200);
-			TSPEC b( j , 200);
+			timespec_wrap a( i , 200);
+			timespec_wrap b( j , 200);
 			int   E = (i > j) - (i < j);
 			int   r = timespec_cmp(a, b);
-
 			ASSERT_EQ(E, r);
 		}
 }
@@ -144,11 +152,10 @@ TEST_F(timespecTest, CmpFracGT) {
 	// fraction a bigger fraction b
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a(i, 999999800);
-			TSPEC b(j, 200);
+			timespec_wrap a(i, 999999800);
+			timespec_wrap b(j, 200);
 			int   E = (i >= j) - (i < j);
 			int   r = timespec_cmp(a, b);
-
 			ASSERT_EQ(E, r);
 		}
 }
@@ -157,24 +164,25 @@ TEST_F(timespecTest, CmpFracLT) {
 	// fraction a less fraction b
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a(i, 200);
-			TSPEC b(j, 999999800);
+			timespec_wrap a(i, 200);
+			timespec_wrap b(j, 999999800);
 			int   E = (i > j) - (i <= j);
 			int   r = timespec_cmp(a, b);
-
 			ASSERT_EQ(E, r);
 		}
 }
 
+//----------------------------------------------------------------------
 // Test addition (sum)
+//----------------------------------------------------------------------
+
 TEST_F(timespecTest, AddFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a(i, 200);
-			TSPEC b(j, 400);
-			TSPEC E(i + j, 200 + 400);
-			TSPEC c;
-
+			timespec_wrap a(i, 200);
+			timespec_wrap b(j, 400);
+			timespec_wrap E(i + j, 200 + 400);
+			timespec_wrap c;
 			timespec_add(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -183,11 +191,10 @@ TEST_F(timespecTest, AddFullNorm) {
 TEST_F(timespecTest, AddFullOflow1) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a(i, 200);
-			TSPEC b(j, 999999900);
-			TSPEC E(i + j + 1, 100);
-			TSPEC c;
-
+			timespec_wrap a(i, 200);
+			timespec_wrap b(j, 999999900);
+			timespec_wrap E(i + j + 1, 100);
+			timespec_wrap c;
 			timespec_add(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -195,10 +202,9 @@ TEST_F(timespecTest, AddFullOflow1) {
 
 TEST_F(timespecTest, AddNsecNorm) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i, 200);
-		TSPEC E(i, 600);
-		TSPEC c;
-
+		timespec_wrap a(i, 200);
+		timespec_wrap E(i, 600);
+		timespec_wrap c;
 		timespec_addns(c, a, 400);
 		ASSERT_EQ(E, c);
 	}
@@ -206,24 +212,25 @@ TEST_F(timespecTest, AddNsecNorm) {
 
 TEST_F(timespecTest, AddNsecOflow1) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i, 200);
-		TSPEC E(i + 1, 100);
-		TSPEC c;
-
+		timespec_wrap a(i, 200);
+		timespec_wrap E(i + 1, 100);
+		timespec_wrap c;
 		timespec_addns(c, a, NANOSECONDS - 100);
 		ASSERT_EQ(E, c);
 	}
 }
 
+//----------------------------------------------------------------------
 // test subtraction (difference)
+//----------------------------------------------------------------------
+
 TEST_F(timespecTest, SubFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a( i , 600);
-			TSPEC b( j , 400);
-			TSPEC E(i-j, 200);
-			TSPEC c;
-
+			timespec_wrap a( i , 600);
+			timespec_wrap b( j , 400);
+			timespec_wrap E(i-j, 200);
+			timespec_wrap c;
 			timespec_sub(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -232,11 +239,10 @@ TEST_F(timespecTest, SubFullNorm) {
 TEST_F(timespecTest, SubFullOflow) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
-			TSPEC a(  i  , 100);
-			TSPEC b(  j  , 999999900);
-			TSPEC E(i-j-1, 200);
-			TSPEC c;
-
+			timespec_wrap a(  i  , 100);
+			timespec_wrap b(  j  , 999999900);
+			timespec_wrap E(i-j-1, 200);
+			timespec_wrap c;
 			timespec_sub(c, a, b);
 			ASSERT_EQ(E, c);
 		}
@@ -244,10 +250,9 @@ TEST_F(timespecTest, SubFullOflow) {
 
 TEST_F(timespecTest, SubNsecNorm) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i, 600);
-		TSPEC E(i, 200);
-		TSPEC c;
-
+		timespec_wrap a(i, 600);
+		timespec_wrap E(i, 200);
+		timespec_wrap c;
 		timespec_subns(c, a, 400);
 		ASSERT_EQ(E, c);
 	}
@@ -255,35 +260,38 @@ TEST_F(timespecTest, SubNsecNorm) {
 
 TEST_F(timespecTest, SubNsecOflow) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a( i , 100);
-		TSPEC E(i-1, 200);
-		TSPEC c;
-
+		timespec_wrap a( i , 100);
+		timespec_wrap E(i-1, 200);
+		timespec_wrap c;
 		timespec_subns(c, a, NANOSECONDS - 100);
 		ASSERT_EQ(E, c);
 	}
 }
 
+//----------------------------------------------------------------------
 // test negation
+//----------------------------------------------------------------------
+
 TEST_F(timespecTest, Neg) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a( i , 100);
-		TSPEC b;
-		TSPEC c;
-
+		timespec_wrap a( i , 100);
+		timespec_wrap b;
+		timespec_wrap c;
 		timespec_neg(b, a);
 		timespec_add(c, a, b);
 		ASSERT_EQ(0, timespec_test(c));
 	}
 }
 
+//----------------------------------------------------------------------
 // test abs value
+//----------------------------------------------------------------------
+
 TEST_F(timespecTest, AbsNoFrac) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i , 0);
-		TSPEC b;
+		timespec_wrap a(i , 0);
+		timespec_wrap b;
 		int   c;
-
 		c = timespec_abs(b, a);
 		ASSERT_EQ((i < 0), c);
 		ASSERT_EQ((i != 0), timespec_test(b));
@@ -292,23 +300,62 @@ TEST_F(timespecTest, AbsNoFrac) {
 
 TEST_F(timespecTest, AbsWithFrac) {
 	for (int i = -4; i <= 4; ++i) {
-		TSPEC a(i , 100);
-		TSPEC b;
-		int   c;
-
+		timespec_wrap a(i , 100);
+		timespec_wrap b;
+		int           c;
 		c = timespec_abs(b, a);
 		ASSERT_EQ((i < 0), c);
 		ASSERT_EQ(1, timespec_test(b));
 	}
 }
 
+// ---------------------------------------------------------------------
+// test support stuff -- part 2
+// ---------------------------------------------------------------------
+
+TEST_F(timespecTest, Helpers2) {
+	AssertTimespecClose isClose(0, 2);
+	timespec_wrap x, y;
+
+	for (x.V.tv_sec = -2; x.V.tv_sec < 3; x.V.tv_sec++)
+		for (x.V.tv_nsec = 1;
+		     x.V.tv_nsec < 1000000000;
+		     x.V.tv_nsec += 499999999)
+		{
+			for (long i = -4; i < 5; i++) {
+				y = x;
+				y.V.tv_nsec += i;
+				if (i >= -2 && i <= 2)
+					ASSERT_PRED_FORMAT2(isClose, x,y);
+				else
+					ASSERT_PRED_FORMAT2(!isClose, x,y);
+			}
+		}
+}
+
+// global predicate instances we're using here
+static AssertFpClose FpClose(0, 1);
+static AssertTimespecClose TimespecClose(0, 2);
+
+//----------------------------------------------------------------------
 // conversion to l_fp
+//----------------------------------------------------------------------
+
+TEST_F(timespecTest, ToLFPbittest) {
+	for (u_int32 i = 0; i < 1000000000; i+=1000) {
+		timespec_wrap a(1, i);
+		l_fp_wrap     E(1, my_tick_to_tsf(i));
+		l_fp_wrap     r;
+		timespec_reltolfp(r, a);
+		ASSERT_PRED_FORMAT2(FpClose, E, r);
+	}
+}
+
 TEST_F(timespecTest, ToLFPrelPos) {
 	for (int i = 0; i < COUNTOF(fdata); i++) {
-		TSPEC a(1, fdata[i].nsec);
-		LFP   E(1, fdata[i].frac);
-		LFP   r;
-
+		timespec_wrap a(1, fdata[i].nsec);
+		l_fp_wrap     E(1, fdata[i].frac);
+		l_fp_wrap     r;
 		timespec_reltolfp(r, a);
 		ASSERT_EQ(E, r);
 	}
@@ -316,10 +363,9 @@ TEST_F(timespecTest, ToLFPrelPos) {
 
 TEST_F(timespecTest, ToLFPrelNeg) {
 	for (int i = 0; i < COUNTOF(fdata); i++) {
-		TSPEC a(-1, fdata[i].nsec);
-		LFP   E(~0, fdata[i].frac);
-		LFP   r;
-
+		timespec_wrap a(-1, fdata[i].nsec);
+		l_fp_wrap     E(~0, fdata[i].frac);
+		l_fp_wrap     r;
 		timespec_reltolfp(r, a);
 		ASSERT_EQ(E, r);
 	}
@@ -327,15 +373,69 @@ TEST_F(timespecTest, ToLFPrelNeg) {
 
 TEST_F(timespecTest, ToLFPabs) {
 	for (int i = 0; i < COUNTOF(fdata); i++) {
-		TSPEC a(1, fdata[i].nsec);
-		LFP   E(1 + JAN_1970, fdata[i].frac);
-		LFP   r;
-
+		timespec_wrap a(1, fdata[i].nsec);
+		l_fp_wrap     E(1 + JAN_1970, fdata[i].frac);
+		l_fp_wrap     r;
 		timespec_abstolfp(r, a);
 		ASSERT_EQ(E, r);
 	}
 }
 
+//----------------------------------------------------------------------
+// conversion from l_fp
+//----------------------------------------------------------------------
+TEST_F(timespecTest, FromLFPbittest) {
+	// Not *exactly* a bittest, because 2**32 tests would take a
+	// really long time even on very fast machines! So we do test
+	// every 1000 fractional units.
+	for (u_int32 tsf = 0; tsf < ~u_int32(1000); tsf += 1000) {
+		timespec_wrap E(1, my_tsf_to_tick(tsf));
+		l_fp_wrap     a(1, tsf);
+		timespec_wrap r;
+		timespec_relfromlfp(r, a);
+		// The conversion might be off by one nanosecond when
+		// comparing to calculated value.
+		ASSERT_PRED_FORMAT2(TimespecClose, E, r);
+	}
+}
+
+TEST_F(timespecTest, FromLFPrelPos) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
+		l_fp_wrap     a(1, fdata[i].frac);
+		timespec_wrap E(1, fdata[i].nsec);
+		timespec_wrap r;
+		timespec_relfromlfp(r, a);
+		ASSERT_PRED_FORMAT2(TimespecClose, E, r);
+	}
+}
+
+TEST_F(timespecTest, FromLFPrelNeg) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
+		l_fp_wrap     a(~0, fdata[i].frac);
+		timespec_wrap E(-1, fdata[i].nsec);
+		timespec_wrap r;
+		timespec_relfromlfp(r, a);
+		ASSERT_PRED_FORMAT2(TimespecClose, E, r);
+	}
+}
+
+
+// nsec -> frac -> nsec roundtrip, using a prime start and increment
+TEST_F(timespecTest, LFProundtrip) {
+	for (int32_t t = -1; t < 2; ++t)
+		for (u_int32 i = 4999; i < 1000000000; i+=10007) {
+			timespec_wrap E(t, i);
+			l_fp_wrap     a;
+			timespec_wrap r;
+			timespec_reltolfp(a, E);
+			timespec_relfromlfp(r, a);
+			ASSERT_EQ(E, r);
+		}
+}
+
+//----------------------------------------------------------------------
+// string formatting
+//----------------------------------------------------------------------
 
 TEST_F(timespecTest, ToString) {
 	static const struct {
@@ -353,10 +453,9 @@ TEST_F(timespecTest, ToString) {
 		{-1,-1, "-1.000000001" },
 	};
 	for (int i = 0; i < COUNTOF(data); i++) {
-		TSPEC a(data[i].sec, data[i].nsec);
+		timespec_wrap a(data[i].sec, data[i].nsec);
 		std::string E(data[i].repr);
 		std::string r(timespec_tostr(a));
-
 		ASSERT_EQ(E, r);
 	}
 }
