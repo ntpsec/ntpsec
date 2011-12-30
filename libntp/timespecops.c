@@ -325,8 +325,8 @@ timespec_relfromlfp(
 	neg = L_ISNEG(&tmp);
 	if (neg != 0)
 		L_NEG(&tmp);	
-	MYFTOTVN(x->l_uf, out.tv_nsec);
-	out.tv_sec = x->l_ui;
+	MYFTOTVN(tmp.l_uf, out.tv_nsec);
+	out.tv_sec = tmp.l_ui;
 	if (neg != 0) {
 		out.tv_sec  = -out.tv_sec;
 		out.tv_nsec = -out.tv_nsec;

@@ -317,8 +317,8 @@ timeval_relfromlfp(
 	neg = L_ISNEG(&tmp);
 	if (neg != 0)
 		L_NEG(&tmp);	
-	MYFTOTVU(x->l_uf, out.tv_usec);
-	out.tv_sec = x->l_ui;
+	MYFTOTVU(tmp.l_uf, out.tv_usec);
+	out.tv_sec = tmp.l_ui;
 	if (neg != 0) {
 		out.tv_sec = -out.tv_sec;
 		out.tv_usec = -out.tv_usec;
