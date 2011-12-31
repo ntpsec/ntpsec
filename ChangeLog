@@ -1,6 +1,7 @@
-* [Bug2100] conversio timespec/timeval <--> l_fp fixed; added tests to
-  expose the bug
+* [Bug2100] conversion problem with timespec/timeval <--> l_fp fixed;
+  added tests to expose the bug.
 (4.2.7p244) 2011/12/25 Released by Harlan Stenn <stenn@ntp.org>
+* Updates from 4.2.6p5.
 (4.2.7p243) 2011/12/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2095] ntptrace now needs 'rv' instead of 'pstat', reported
   by Michael Tatarinov.
