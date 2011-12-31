@@ -1,3 +1,4 @@
+(4.2.7p245) 2011/12/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug2100] conversion problem with timespec/timeval <--> l_fp fixed;
   added tests to expose the bug.
 (4.2.7p244) 2011/12/25 Released by Harlan Stenn <stenn@ntp.org>
