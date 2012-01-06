@@ -663,6 +663,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\include\timespecops.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\include\timevalops.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\sys\wait.h"
 				>
 			</File>

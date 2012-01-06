@@ -31,8 +31,8 @@
 #include "ntp_stdlib.h"
 #include "ntp_worker.h"
 #include "ntp_request.h"
-#include "ntp_unixtime.h"
 #include "ntp_assert.h"
+#include "timevalops.h"
 #include "ntpd-opts.h"
 
 /* Don't include ISC's version of IPv6 variables and structures */
@@ -3187,7 +3187,7 @@ fetch_timestamp(
 			}
 			DPRINTF(4, ("fetch_timestamp: system network time stamp: %ld.%06ld\n",
 				    tvp->tv_sec, tvp->tv_usec));
-			timeval_abstolfp(&nts, tvp);
+			nts = tval_stamp_to_lfp(*tvp);
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
@@ -3196,7 +3196,7 @@ fetch_timestamp(
 			L_SUB(&dts, &nts);
 			collect_timing(rb, "input processing delay", 1,
 				       &dts);
-			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. prec fuzz)\n",
+			DPRINTF(4, ("fetch_timestamp: timestamp delta: %s (incl. fuzz)\n",
 				    lfptoa(&dts, 9)));
 #endif	/* DEBUG_TIMING */
 			ts = nts;  /* network time stamp */

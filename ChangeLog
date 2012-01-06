@@ -1,5 +1,8 @@
+* [Bug 2104] ntpdc fault with oversize -c command.
+* [Bug 2106] Fix warnings when using -Wformat-security.
+* Refactor timespecops.h and timevalops.h into inline functions.
 (4.2.7p245) 2011/12/31 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug2100] conversion problem with timespec/timeval <--> l_fp fixed;
+* [Bug 2100] conversion problem with timespec/timeval <--> l_fp fixed;
   added tests to expose the bug.
 (4.2.7p244) 2011/12/25 Released by Harlan Stenn <stenn@ntp.org>
 * Updates from 4.2.6p5.

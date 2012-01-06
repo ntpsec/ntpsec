@@ -11,6 +11,8 @@
 # include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_DATUM)
 
 /*
@@ -21,7 +23,7 @@
 #include "ntp_io.h"
 #include "ntp_tty.h"
 #include "ntp_refclock.h"
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 #include "ntp_stdlib.h"
 
 #include <stdio.h>
@@ -774,5 +776,5 @@ datum_pts_receive(
 
 }
 #else
-int refclock_datum_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif /* REFCLOCK */

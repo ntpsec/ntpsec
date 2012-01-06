@@ -8,11 +8,9 @@
 #include "timestructs.h"
 
 extern "C" {
-#include "ntp_unixtime.h"
 #include "timetoa.h"
-#include "ntp_fp.h"
-
 #include "timevalops.h"
+#include "timespecops.h"
 }
 
 std::ostream&
@@ -112,9 +110,8 @@ AssertTimevalClose::operator()(
 {
 	struct timeval diff;
 
-	timeval_sub(&diff, &m, &n);
-	timeval_abs(&diff, &diff);
-	if (timeval_cmp(&limit, &diff) >= 0)
+	diff = abs_tval(sub_tval(m, n));
+	if (cmp_tval(limit, diff) >= 0)
 		return ::testing::AssertionSuccess();
 
 	return ::testing::AssertionFailure()
@@ -145,9 +142,8 @@ AssertTimespecClose::operator()(
 {
 	struct timespec diff;
 
-	timespec_sub(&diff, &m, &n);
-	timespec_abs(&diff, &diff);
-	if (timespec_cmp(&limit, &diff) >= 0)
+	diff = abs_tspec(sub_tspec(m, n));
+	if (cmp_tspec(limit, diff) >= 0)
 		return ::testing::AssertionSuccess();
 
 	return ::testing::AssertionFailure()

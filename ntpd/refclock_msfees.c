@@ -4,6 +4,8 @@
 #include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_MSFEES) && defined(PPS)
 
 /* Currently REQUIRES STREAM and PPSCD. CLK and CBREAK modes
@@ -14,8 +16,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
-#include "ntp_unixtime.h"
-#include "ntp_calendar.h"
+#include "timevalops.h"
 
 #include <ctype.h>
 #if defined(HAVE_BSD_TTYS)
@@ -917,9 +918,9 @@ ees_receive(
 		if (pps_step != 1 && pps_step != 2)
 		    fprintf(stderr, "PPS step: %d too far off %ld (%d)\n",
 			    ppsclockev.serial, ees->last_pps_no, pps_step);
-		else if (!buftvtots((char *) &(ppsclockev.tv), &pps_arrvstamp))
-		    fprintf(stderr, "buftvtots failed\n");
-		else {	/* if ((ABS(time difference) - 0.25) < 0)
+		else {
+			pps_arrvstamp = tval_stamp_to_lfp(ppsclockev.tv);
+			/* if ((ABS(time difference) - 0.25) < 0)
 			 * then believe it ...
 			 */
 			l_fp diff;
@@ -1445,5 +1446,5 @@ msfees_poll(
 
 
 #else
-int refclock_msfees_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif /* REFCLOCK */

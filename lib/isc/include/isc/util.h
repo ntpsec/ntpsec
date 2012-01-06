@@ -70,7 +70,7 @@
  * Use this in translation units that would otherwise be empty, to
  * suppress compiler warnings.
  */
-#define EMPTY_TRANSLATION_UNIT static char nonempty_translation_unit;
+#define EMPTY_TRANSLATION_UNIT extern void exit(int);
 
 /*%
  * We use macros instead of calling the routines directly because

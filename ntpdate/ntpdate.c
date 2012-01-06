@@ -14,7 +14,7 @@
 #include "ntp_fp.h"
 #include "ntp.h"
 #include "ntp_io.h"
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 #include "ntpdate.h"
 #include "ntp_string.h"
 #include "ntp_syslog.h"

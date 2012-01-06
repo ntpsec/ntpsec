@@ -25,8 +25,8 @@ protected:
 TEST_F(lfptostrTest, PositiveInteger) {
 	l_fp test = {200, 0}; // exact 200.0000000000
 
-	EXPECT_STREQ("200.0000000000", mfptoa(test.l_i, test.l_f, LFP_MAX_PRECISION));
-	EXPECT_STREQ("200000.0000000", mfptoms(test.l_i, test.l_f, LFP_MAX_PRECISION_MS));
+	EXPECT_STREQ("200.0000000000", mfptoa(test.l_ui, test.l_uf, LFP_MAX_PRECISION));
+	EXPECT_STREQ("200000.0000000", mfptoms(test.l_ui, test.l_uf, LFP_MAX_PRECISION_MS));
 }
 
 TEST_F(lfptostrTest, NegativeInteger) {

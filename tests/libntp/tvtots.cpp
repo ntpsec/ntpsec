@@ -1,7 +1,7 @@
 #include "lfptest.h"
 
 extern "C" {
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 };
 
 // Required on Solaris for ldexp.

@@ -17,8 +17,7 @@
 #define TIMESTRUCTS_H
 
 extern "C" {
-#include "ntp_types.h"
-#include "ntp_fp.h"	
+#include "ntp_fp.h"
 }
 
 namespace timeStruct {
@@ -124,9 +123,9 @@ public:
 // timeval closeness testing predicate
 //
 // CAVEAT: This class uses the timevalops functions
-// - timeval_sub
-// - timeval_abs
-// - timeval_cmp
+// - sub_tval
+// - abs_tval
+// - cmp_tval
 //
 // This creates a dependency loop of sorts. The loop is defused by the
 // fact that these basic operations can be tested by exact value tests,
@@ -149,10 +148,10 @@ public:
 
 // timespec closeness testing predicate
 //
-// CAVEAT: This class uses the timevalops functions
-// - timespec_sub
-// - timespec_abs
-// - timespec_cmp
+// CAVEAT: This class uses the timespecops functions
+// - sub_tspec
+// - abs_tspec
+// - cmp_tspec
 //
 // See the equivalent timeval helper.
 class AssertTimespecClose {

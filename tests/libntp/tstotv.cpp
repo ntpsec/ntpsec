@@ -2,7 +2,7 @@
 
 extern "C" {
 #include "ntp_fp.h"
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 };
 
 class tstotvTest : public libntptest {

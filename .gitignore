@@ -143,3 +143,4 @@ test.kod
 util/Makefile.in
 version
 version.m4
+ports/winnt/vs2008/ntp.suo

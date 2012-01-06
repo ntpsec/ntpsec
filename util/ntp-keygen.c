@@ -89,6 +89,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include "ntp.h"
 #include "ntp_random.h"
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
@@ -114,7 +115,6 @@
 #define	MD5SIZE		20	/* maximum key size */
 #define DAY		((long)60*60*24) /* one day in seconds */
 #define	YEAR		((long)365) /* one year in days */
-#define MAXFILENAME	MAXHOSTNAME /* max file name length */
 #ifdef AUTOKEY
 #define	PLEN		512	/* default prime modulus size (bits) */
 #define	ILEN		256	/* default identity modulus size (bits) */

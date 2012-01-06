@@ -25,7 +25,7 @@ TEST_F(strtolfpTest, NegativeInteger) {
 
 	l_fp expected;
 	expected.l_i = -300;
-	expected.l_f = 0;
+	expected.l_uf = 0;
 
 	l_fp actual, actual_ms;
 
