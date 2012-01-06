@@ -13,17 +13,10 @@ $(DEPDIR)/deps-ver: $(top_srcdir)/deps-ver
 		 .)							\
 		    ./config.status Makefile depfiles			\
 		    ;;							\
-		 ..)							\
-			cd .. &&					\
-			./config.status $(subdir)/Makefile depfiles &&	\
-			cd $(subdir)					\
-		    ;;							\
 		 *)							\
-		    echo 'Fatal: depsver.mf Automake fragment limited'	\
-			 'to immediate subdirectories.'	&&		\
-		    echo "top_builddir:	$(top_builddir)" &&		\
-		    echo "subdir:	$(subdir)" &&			\
-		    exit 1						\
+		    cd "$(top_builddir)" &&				\
+		    ./config.status $(subdir)/Makefile depfiles &&	\
+		    cd $(subdir)					\
 		    ;;							\
 		esac &&							\
 		echo -n "Cleaned $(subdir)/$(DEPDIR) version " &&	\

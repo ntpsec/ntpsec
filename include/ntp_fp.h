@@ -32,16 +32,11 @@ typedef struct {
 		u_int32 Xl_ui;
 		int32 Xl_i;
 	} Ul_i;
-	union {
-		u_int32 Xl_uf;
-		int32 Xl_f;
-	} Ul_f;
+	u_int32	l_uf;
 } l_fp;
 
 #define l_ui	Ul_i.Xl_ui		/* unsigned integral part */
 #define	l_i	Ul_i.Xl_i		/* signed integral part */
-#define	l_uf	Ul_f.Xl_uf		/* unsigned fractional part */
-#define	l_f	Ul_f.Xl_f		/* signed fractional part */
 
 /*
  * Fractional precision (of an l_fp) is actually the number of
@@ -78,23 +73,32 @@ typedef u_int32 u_fp;
  * Byte order conversions
  */
 #define	HTONS_FP(x)	(htonl(x))
-#define	HTONL_FP(h, n)	do { (n)->l_ui = htonl((h)->l_ui); \
-			     (n)->l_uf = htonl((h)->l_uf); } while (0)
 #define	NTOHS_FP(x)	(ntohl(x))
-#define	NTOHL_FP(n, h)	do { (h)->l_ui = ntohl((n)->l_ui); \
-			     (h)->l_uf = ntohl((n)->l_uf); } while (0)
-#define	NTOHL_MFP(ni, nf, hi, hf) \
-	do { (hi) = ntohl(ni); (hf) = ntohl(nf); } while (0)
-#define	HTONL_MFP(hi, hf, ni, nf) \
-	do { (ni) = htonl(hi); (nf) = htonl(hf); } while (0)
 
-/* funny ones.	Converts ts fractions to net order ts */
-#define	HTONL_UF(uf, nts) \
-	do { (nts)->l_ui = 0u; (nts)->l_uf = htonl(uf); } while (0)
-#define	HTONL_F(f, nts) \
-	do { (nts)->l_uf = htonl(f); \
-	     (nts)->l_ui = 0u - ((nts)->l_uf >> 31); \
-	} while (0)
+#define	NTOHL_MFP(ni, nf, hi, hf)				\
+	do {							\
+		(hi) = ntohl(ni);				\
+		(hf) = ntohl(nf);				\
+	} while (FALSE)
+
+#define	HTONL_MFP(hi, hf, ni, nf)				\
+	do {							\
+		(ni) = htonl(hi);				\
+		(nf) = htonl(hf);				\
+	} while (FALSE)
+
+#define HTONL_FP(h, n)						\
+	HTONL_MFP((h)->l_ui, (h)->l_uf, (n)->l_ui, (n)->l_uf)
+
+#define NTOHL_FP(n, h)						\
+	NTOHL_MFP((n)->l_ui, (n)->l_uf, (h)->l_ui, (h)->l_uf)
+
+/* Convert unsigned ts fraction to net order ts */
+#define	HTONL_UF(uf, nts)					\
+	do {							\
+		(nts)->l_ui = 0;				\
+		(nts)->l_uf = htonl(uf);			\
+	} while (FALSE)
 
 /*
  * Conversions between the two fixed point types
@@ -102,7 +106,7 @@ typedef u_int32 u_fp;
 #define	MFPTOFP(x_i, x_f)	(((x_i) >= 0x00010000) ? 0x7fffffff : \
 				(((x_i) <= -0x00010000) ? 0x80000000 : \
 				(((x_i)<<16) | (((x_f)>>16)&0xffff))))
-#define	LFPTOFP(v)		MFPTOFP((v)->l_i, (v)->l_f)
+#define	LFPTOFP(v)		MFPTOFP((v)->l_i, (v)->l_uf)
 
 #define UFPTOLFP(x, v) ((v)->l_ui = (u_fp)(x)>>16, (v)->l_uf = (x)<<16)
 #define FPTOLFP(x, v)  (UFPTOLFP((x), (v)), (x) < 0 ? (v)->l_ui -= 0x10000 : 0)
@@ -120,20 +124,20 @@ typedef u_int32 u_fp;
 	do { \
 		(v_f) = ~(v_f) + 1u; \
 		(v_i) = ~(v_i) + ((v_f) == 0); \
-	} while(0)
+	} while (FALSE)
 
 #define	M_NEGM(r_i, r_f, a_i, a_f)	/* r = -a */ \
 	do { \
 		(r_f) = ~(a_f) + 1u; \
 		(r_i) = ~(a_i) + ((r_f) == 0); \
-	} while(0)
+	} while (FALSE)
 
 #define M_ADD(r_i, r_f, a_i, a_f)	/* r += a */ \
 	do { \
 		u_int32 add_t = (r_f); \
 		(r_f) += (a_f); \
 		(r_i) += (a_i) + ((u_int32)(r_f) < add_t); \
-	} while (0)
+	} while (FALSE)
 
 #define M_ADD3(r_o, r_i, r_f, a_o, a_i, a_f) /* r += a, three word */ \
 	do { \
@@ -147,39 +151,39 @@ typedef u_int32 u_fp;
 		(r_i) += (a_i); \
 		add_c |= ((u_int32)(r_i) < add_t); \
 		(r_o) += (a_o) + add_c; \
-	} while (0)
+	} while (FALSE)
 
 #define M_SUB(r_i, r_f, a_i, a_f)	/* r -= a */ \
 	do { \
 		u_int32 sub_t = (r_f); \
 		(r_f) -= (a_f); \
 		(r_i) -= (a_i) + ((u_int32)(r_f) > sub_t); \
-	} while (0)
+	} while (FALSE)
 
 #define	M_RSHIFTU(v_i, v_f)		/* v >>= 1, v is unsigned */ \
 	do { \
 		(v_f) = ((u_int32)(v_f) >> 1) | ((u_int32)(v_i) << 31);	\
 		(v_i) = ((u_int32)(v_i) >> 1); \
-	} while (0)
+	} while (FALSE)
 
 #define	M_RSHIFT(v_i, v_f)		/* v >>= 1, v is signed */ \
 	do { \
 		(v_f) = ((u_int32)(v_f) >> 1) | ((u_int32)(v_i) << 31);	\
-		(v_i) = ((u_int32)(v_i) >> 1) | ((u_int32)(v_i) & 0x80000000u);	\
-	} while (0)
+		(v_i) = ((u_int32)(v_i) >> 1) | ((u_int32)(v_i) & 0x80000000);	\
+	} while (FALSE)
 
 #define	M_LSHIFT(v_i, v_f)		/* v <<= 1 */ \
 	do { \
 		(v_i) = ((u_int32)(v_i) << 1) | ((u_int32)(v_f) >> 31);	\
 		(v_f) = ((u_int32)(v_f) << 1); \
-	} while (0)
+	} while (FALSE)
 
 #define	M_LSHIFT3(v_o, v_i, v_f)	/* v <<= 1, with overflow */ \
 	do { \
 		(v_o) = ((u_int32)(v_o) << 1) | ((u_int32)(v_i) >> 31);	\
 		(v_i) = ((u_int32)(v_i) << 1) | ((u_int32)(v_f) >> 31);	\
 		(v_f) = ((u_int32)(v_f) << 1); \
-	} while (0)
+	} while (FALSE)
 
 #define	M_ADDUF(r_i, r_f, uf)		/* r += uf, uf is u_int32 fraction */ \
 	M_ADD((r_i), (r_f), 0, (uf))	/* let optimizer worry about it */
@@ -196,8 +200,12 @@ typedef u_int32 u_fp;
 			M_SUB((r_i), (r_f), 0, (uint32)(-add_f)); \
 	} while(0)
 
-#define	M_ISNEG(v_i, v_f)		/* v < 0 */ \
-	(((v_i) & 0x80000000u) != 0)
+#define	M_ISNEG(v_i)			/* v < 0 */ \
+	(((v_i) & 0x80000000) != 0)
+
+#define	M_ISGT(a_i, a_f, b_i, b_f)	/* a > b signed */ \
+	(((int32)(a_i)) > ((int32)(b_i)) || \
+	  ((a_i) == (b_i) && ((u_int32)(a_f)) > ((u_int32)(b_f))))
 
 #define	M_ISGTU(a_i, a_f, b_i, b_f)	/* a > b unsigned */ \
 	(((u_int32)(a_i)) > ((u_int32)(b_i)) || \
@@ -228,8 +236,9 @@ typedef u_int32 u_fp;
 #define	L_LSHIFT(v)	M_LSHIFT((v)->l_ui, (v)->l_uf)
 #define	L_CLR(v)	((v)->l_ui = (v)->l_uf = 0)
 
-#define	L_ISNEG(v)	M_ISNEG((v)->l_ui, (v)->l_uf)
+#define	L_ISNEG(v)	M_ISNEG((v)->l_ui)
 #define L_ISZERO(v)	(((v)->l_ui | (v)->l_uf) == 0)
+#define	L_ISGT(a, b)	M_ISGT((a)->l_i, (a)->l_uf, (b)->l_i, (b)->l_uf)
 #define	L_ISGTU(a, b)	M_ISGTU((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
 #define	L_ISHIS(a, b)	M_ISHIS((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
 #define	L_ISGEQ(a, b)	M_ISGEQ((a)->l_ui, (a)->l_uf, (b)->l_ui, (b)->l_uf)
@@ -238,7 +247,7 @@ typedef u_int32 u_fp;
 /*
  * s_fp/double and u_fp/double conversions
  */
-#define FRIC		65536.0	 		/* 2^16 as a double */
+#define FRIC		65536.0			/* 2^16 as a double */
 #define DTOFP(r)	((s_fp)((r) * FRIC))
 #define DTOUFP(r)	((u_fp)((r) * FRIC))
 #define FPTOD(r)	((double)(r) / FRIC)
@@ -262,27 +271,42 @@ typedef u_int32 u_fp;
 
 #include <math.h>	/* ldexp() */
 
-#define M_DTOLFP(d, r_ui, r_uf)		/* double to l_fp */ \
-	do { \
-		double d_tmp; \
-		u_int64 q_tmp; \
-		if ((d_tmp = (d)) < 0.0) \
-			q_tmp = ~(u_int64)ldexp(-d_tmp, 32) + 1; \
-		else \
-			q_tmp = (u_int64)ldexp(d_tmp, 32); \
-		(r_uf) = (u_int32)(q_tmp & U_INT32_MAX); \
-		(r_ui) = (u_int32)(q_tmp >> 32); \
-	} while(0)
+#define M_DTOLFP(d, r_ui, r_uf)		/* double to l_fp */	\
+	do {							\
+		double	d_tmp;					\
+		u_int64	q_tmp;					\
+		int	M_isneg;					\
+								\
+		d_tmp = (d);					\
+		M_isneg = (d_tmp < 0.);				\
+		if (M_isneg) {					\
+			d_tmp = -d_tmp;				\
+		}						\
+		q_tmp = (u_int64)ldexp(d_tmp, 32);		\
+		if (M_isneg) {					\
+			q_tmp = ~q_tmp + 1;			\
+		}						\
+		(r_uf) = (u_int32)q_tmp;			\
+		(r_ui) = (u_int32)(q_tmp >> 32);		\
+	} while (FALSE)
 
-#define M_LFPTOD(r_ui, r_uf, d) 		/* l_fp to double */ \
-	do { \
-		u_int64 q_tmp; \
-		q_tmp = ((u_int64)(r_ui) << 32) + (u_int64)(r_uf); \
-		if (M_ISNEG((r_ui), (r_uf))) \
-			d = -ldexp((double)(~q_tmp + 1), -32); \
-		else \
-			d = ldexp((double)q_tmp, -32); \
-	} while (0)
+#define M_LFPTOD(r_ui, r_uf, d) 	/* l_fp to double */	\
+	do {							\
+		double	d_tmp;					\
+		u_int64	q_tmp;					\
+		int	M_isneg;				\
+								\
+		q_tmp = ((u_int64)(r_ui) << 32) + (r_uf);	\
+		M_isneg = M_ISNEG(r_ui);			\
+		if (M_isneg) {					\
+			q_tmp = ~q_tmp + 1;			\
+		}						\
+		d_tmp = ldexp((double)q_tmp, -32);		\
+		if (M_isneg) {					\
+			d_tmp = -d_tmp;				\
+		}						\
+		(d) = d_tmp;					\
+	} while (FALSE)
 
 #else /* use only 32 bit unsigned values */
 
@@ -302,7 +326,7 @@ typedef u_int32 u_fp;
 	do { \
 		u_int32 l_thi, l_tlo; \
 		l_thi = (r_ui); l_tlo = (r_uf); \
-		if (M_ISNEG(l_thi, l_tlo)) { \
+		if (M_ISNEG(l_thi)) { \
 			M_NEG(l_thi, l_tlo); \
 			(d) = -((double)l_thi + (double)l_tlo / FRAC); \
 		} else { \

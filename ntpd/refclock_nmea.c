@@ -20,6 +20,8 @@
 #include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_NMEA)
 
 #define NMEA_WRITE_SUPPORT 0 /* no write support at the moment */
@@ -651,7 +653,7 @@ refclock_ppsrelate(
 		return PPS_RELATE_NONE; /* WHICH edge, please?!? */
 
 	/* get delta between receive time and PPS time */
-	timespec_abstolfp(&pp_stamp, &timeout);
+	pp_stamp = tspec_stamp_to_lfp(timeout);
 	pp_delta = *rd_stamp;
 	L_SUB(&pp_delta, &pp_stamp);
 	LFPTOD(&pp_delta, delta);
@@ -934,7 +936,7 @@ nmea_receive(
 	 * timecode timestamp, but only if the PPS is not in control.
 	 * Discard sentence if reference time did not change.
 	 */
-	timespec_reltolfp(&rd_reftime, &tofs);
+	rd_reftime = tspec_intv_to_lfp(tofs);
 	rd_reftime.l_ui += caltontp(&date);
 	if (L_ISEQU(&up->last_reftime, &rd_reftime))
 		return;
@@ -1709,5 +1711,5 @@ nmead_open(
 	return fd;
 }
 #else
-int refclock_nmea_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif /* REFCLOCK && CLOCK_NMEA */

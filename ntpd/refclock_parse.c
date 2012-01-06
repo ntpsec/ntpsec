@@ -48,6 +48,8 @@
 # include "config.h"
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_PARSE)
 
 /*
@@ -96,7 +98,7 @@
 
 #include "ntpd.h"
 #include "ntp_refclock.h"
-#include "ntp_unixtime.h"	/* includes <sys/time.h> */
+#include "timevalops.h"		/* includes <sys/time.h> */
 #include "ntp_control.h"
 #include "ntp_string.h"
 
@@ -1722,29 +1724,6 @@ static bind_t io_bindings[] =
 
 #ifdef STREAM
 
-#define fix_ts(_X_) \
-                        if ((&(_X_))->tv.tv_usec >= 1000000)                \
-                          {                                                 \
-			    (&(_X_))->tv.tv_usec -= 1000000;                \
-			    (&(_X_))->tv.tv_sec  += 1;                      \
-			  }
-
-#define cvt_ts(_X_, _Y_) \
-                        {                                                   \
-			  l_fp ts;				            \
-			  fix_ts((_X_));                                    \
-			  if (!buftvtots((const char *)&(&(_X_))->tv, &ts)) \
-			    {                                               \
-                              ERR(ERR_BADDATA)	 		            \
-                                msyslog(LOG_ERR,"parse: stream_receive: timestamp conversion error (buftvtots) (%s) (%ld.%06ld) ", (_Y_), (long)(&(_X_))->tv.tv_sec, (long)(&(_X_))->tv.tv_usec);\
-			      return;                                       \
-			    }                                               \
-			  else                                              \
-			    {                                               \
-			      (&(_X_))->fp = ts;                            \
-			    }                                               \
-		        }
-
 /*--------------------------------------------------
  * ppsclock STREAM init
  */
@@ -2029,15 +2008,17 @@ stream_receive(
 	 * errors.
 	 */
 
-	cvt_ts(parsetime.parse_stime, "parse_stime");
+	parsetime.parse_stime.fp = tval_stamp_to_lfp(parsetime.parse_stime.tv);
 
 	if (PARSE_TIMECODE(parsetime.parse_state))
 	{
-	    cvt_ts(parsetime.parse_time, "parse_time");
+		parsetime.parse_time.fp = tval_stamp_to_lfp(parsetime.parse_time.tv);
 	}
 
 	if (PARSE_PPS(parsetime.parse_state))
-	    cvt_ts(parsetime.parse_ptime, "parse_ptime");
+	{
+		parsetime.parse_ptime.fp = tval_stamp_to_lfp(parsetime.parse_ptime.tv);
+	}
 
 	parse_process(parse, &parsetime);
 }
@@ -3932,8 +3913,8 @@ parse_process(
 #endif
 		if (PARSE_TIMECODE(parsetime->parse_state))
 		{
-			if (M_ISGEQ(off.l_i, off.l_f, -1, 0x80000000) &&
-			    M_ISGEQ(0, 0x7fffffff, off.l_i, off.l_f))
+			if (M_ISGEQ(off.l_i, off.l_uf, -1, 0x80000000) &&
+			    M_ISGEQ(0, 0x7fffffff, off.l_i, off.l_uf))
 			{
 				fudge = ppsphaseadjust; /* pick PPS fudge factor */
 			
@@ -3944,7 +3925,7 @@ parse_process(
 				if (parse->parse_type->cl_flags & PARSE_F_PPSONSECOND)
 				{
 					reftime = off = offset;
-					if (reftime.l_uf & (unsigned)0x80000000)
+					if (reftime.l_uf & 0x80000000)
 						reftime.l_ui++;
 					reftime.l_uf = 0;
 
@@ -3953,7 +3934,7 @@ parse_process(
 					 * implied on second offset
 					 */
 					off.l_uf = ~off.l_uf; /* map [0.5..1[ -> [-0.5..0[ */
-					off.l_ui = (off.l_f < 0) ? ~0 : 0; /* sign extend */
+					off.l_i = (off.l_uf & 0x8000000) ? -1 : 0; /* sign extend */
 				}
 				else
 				{
@@ -3978,14 +3959,14 @@ parse_process(
 			 */
 			off = offset;
 			reftime = offset;
-			if (reftime.l_uf & (unsigned)0x80000000)
+			if (reftime.l_uf & 0x80000000)
 				reftime.l_ui++;
 			reftime.l_uf = 0;
 			/*
 			 * implied on second offset
 			 */
 			off.l_uf = ~off.l_uf; /* map [0.5..1[ -> [-0.5..0[ */
-			off.l_ui = (off.l_f < 0) ? ~0 : 0; /* sign extend */
+			off.l_i = (off.l_uf & 0x80000000) ? -1 : 0; /* sign extend */
 		}
 	}
 	else
@@ -5856,7 +5837,7 @@ rawdcf_init_2(
 #endif  /* DTR initialisation type */
 
 #else	/* defined(REFCLOCK) && defined(PARSE) */
-int refclock_parse_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif	/* defined(REFCLOCK) && defined(PARSE) */
 
 /*

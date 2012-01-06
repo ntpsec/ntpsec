@@ -117,3 +117,43 @@ dofptoa(
 	*bp = '\0';
 	return buf;
 }
+
+
+char *
+fptoa(
+	s_fp	fpv,
+	short	ndec
+	)
+{
+	u_fp	plusfp;
+	int	neg;
+
+	neg = (fpv < 0);
+	if (neg) {
+		plusfp = (u_fp)(-fpv);
+	} else {
+		plusfp = (u_fp)fpv;
+	}
+
+	return dofptoa(plusfp, neg, ndec, FALSE);
+}
+
+
+char *
+fptoms(
+	s_fp	fpv,
+	short	ndec
+	)
+{
+	u_fp	plusfp;
+	int	neg;
+
+	neg = (fpv < 0);
+	if (neg) {
+		plusfp = (u_fp)(-fpv);
+	} else {
+		plusfp = (u_fp)fpv;
+	}
+
+	return dofptoa(plusfp, neg, ndec, TRUE);
+}

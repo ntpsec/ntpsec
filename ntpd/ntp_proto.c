@@ -141,6 +141,7 @@ static	void	fast_xmit	(struct recvbuf *, int, keyid_t, int);
 static	void	pool_xmit	(struct peer *);
 static	void	clock_update	(struct peer *);
 static	void	measure_precision(void);
+static	double	measure_tick_fuzz(void);
 static	int	local_refid	(struct peer *);
 static	int	peer_unfit	(struct peer *);
 #ifdef AUTOKEY
@@ -3807,7 +3808,7 @@ peer_unfit(
  */
 #define MINSTEP		20e-9	/* minimum clock increment (s) */
 #define MAXSTEP		1	/* maximum clock increment (s) */
-#define MINCHANGES	5	/* minimum number of step samples */
+#define MINCHANGES	12	/* minimum number of step samples */
 #define MAXLOOPS	((int)(1. / MINSTEP))	/* avoid infinite loop */
 
 /*
@@ -3833,40 +3834,61 @@ peer_unfit(
 void
 measure_precision(void)
 {
+	/*
+	 * With sys_fuzz set to zero, get_systime() fuzzing of low bits
+	 * is effectively disabled.  trunc_os_clock is FALSE to disable
+	 * get_ostime() simulation of a low-precision system clock.
+	 */
+	set_sys_fuzz(0.);
+	trunc_os_clock = FALSE;
+	measured_tick = measure_tick_fuzz();
+	set_sys_tick_precision(measured_tick);
+	msyslog(LOG_NOTICE, "proto: precision = %.3f usec (%d)",
+		sys_tick * 1e6, sys_precision);
+	if (sys_fuzz < sys_tick) {
+		msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",
+			sys_fuzz * 1e6);
+	}
+}
+
+
+/*
+ * measure_tick_fuzz()
+ *
+ * measures the minimum time to read the clock (stored in sys_fuzz)
+ * and returns the tick, the larger of the minimum increment observed
+ * between successive clock readings and the time to read the clock.
+ */
+double
+measure_tick_fuzz(void)
+{
+	l_fp	minstep;	/* MINSTEP as l_fp */
 	l_fp	val;		/* current seconds fraction */
 	l_fp	last;		/* last seconds fraction */
-	l_fp	ldiff;		/* difference */
+	l_fp	ldiff;		/* val - last */
 	double	tick;		/* computed tick value */
-	double	diff;		/* scratch */
-	int	i;		/* log2 precision */
-	int	changes;
+	double	diff;
 	long	repeats;
 	long	max_repeats;
+	int	changes;
+	int	i;		/* log2 precision */
 
-	/*
-	 * Loop to find precision value in seconds.  With sys_fuzz set
-	 * to zero, get_systime() disables its fuzzing of low bits.
-	 * measured_tick and sys_tick are zeroed to disable get_ostime()
-	 * low-precision clock simulation.
-	 */
 	tick = MAXSTEP;
-	sys_tick = 0;
-	measured_tick = 0;
-	set_sys_fuzz(0.);
 	max_repeats = 0;
 	repeats = 0;
 	changes = 0;
+	DTOLFP(MINSTEP, &minstep);
 	get_systime(&last);
 	for (i = 0; i < MAXLOOPS && changes < MINCHANGES; i++) {
 		get_systime(&val);
 		ldiff = val;
 		L_SUB(&ldiff, &last);
 		last = val;
-		LFPTOD(&ldiff, diff);
-		if (diff > MINSTEP) {
+		if (L_ISGT(&ldiff, &minstep)) {
 			max_repeats = max(repeats, max_repeats);
 			repeats = 0;
 			changes++;
+			LFPTOD(&ldiff, diff);
 			tick = min(diff, tick);
 		} else {
 			repeats++;
@@ -3876,16 +3898,14 @@ measure_precision(void)
 		msyslog(LOG_ERR, "Fatal error: precision could not be measured (MINSTEP too large?)");
 		exit(1);
 	}
-	measured_tick = tick;
-	set_sys_tick_precision(tick);
+
 	if (0 == max_repeats) {
 		set_sys_fuzz(tick);
 	} else {
 		set_sys_fuzz(tick / max_repeats);
-		msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",
-			sys_fuzz * 1e6);
 	}
 
+	return tick;
 }
 
 
@@ -3907,6 +3927,7 @@ set_sys_tick_precision(
 			tick, measured_tick);
 		return;
 	} else if (tick > measured_tick) {
+		trunc_os_clock = TRUE;
 		msyslog(LOG_NOTICE,
 			"proto: truncating system clock to multiples of %.9f",
 			tick);
@@ -3922,8 +3943,6 @@ set_sys_tick_precision(
 		i++;
 
 	sys_precision = (s_char)i;
-	msyslog(LOG_NOTICE, "proto: precision = %.3f usec (%d)",
-		sys_tick * 1e6, sys_precision);
 }
 
 

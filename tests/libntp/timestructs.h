@@ -17,8 +17,7 @@
 #define TIMESTRUCTS_H
 
 extern "C" {
-#include "ntp_types.h"
-#include "ntp_fp.h"	
+#include "ntp_fp.h"
 }
 
 namespace timeStruct {
@@ -57,6 +56,8 @@ public:
 		{ V.tv_sec = hi; V.tv_usec = lo; }
 	timeval_wrap(const struct timeval & rhs)
 		{ V = rhs; }
+	timeval_wrap(const timeval_wrap & rhs)
+		{ V = rhs.V; }
 	bool operator == (const timeval_wrap& rhs) const
 		{ return V.tv_sec == rhs.V.tv_sec &&
 			 V.tv_usec == rhs.V.tv_usec ; }
@@ -83,6 +84,8 @@ public:
 		{ V.tv_sec = hi; V.tv_nsec = lo; }
 	timespec_wrap(const struct timespec & rhs)
 		{ V = rhs; }
+	timespec_wrap(const timespec_wrap & rhs)
+		{ V = rhs.V; }
 	bool operator == (const timespec_wrap& rhs) const
 		{ return V.tv_sec == rhs.V.tv_sec &&
 			 V.tv_nsec == rhs.V.tv_nsec ; }
@@ -140,6 +143,29 @@ public:
 	::testing::AssertionResult
 	operator()(const char* m_expr, const char* n_expr,
 		   const struct timeval & m, const struct timeval & n);
+};
+
+
+// timespec closeness testing predicate
+//
+// CAVEAT: This class uses the timevalops functions
+// - sub_tspec
+// - abs_tspec
+// - cmp_tspec
+//
+// See the equivalent timeval helper.
+class AssertTimespecClose {
+private:
+	struct timespec limit;
+
+public:
+	// note: (hi,lo) should be a positive normalised timespec;
+	// the constructor does not normalise the values!
+	AssertTimespecClose(time_t hi, int32 lo);
+
+	::testing::AssertionResult
+	operator()(const char* m_expr, const char* n_expr,
+		   const struct timespec & m, const struct timespec & n);
 };
 
 

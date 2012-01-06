@@ -149,8 +149,8 @@ extern	int	hextoint	(const char *, u_long *);
 extern	char *	humanlogtime	(void);
 extern	char *	humantime	(time_t);
 extern	char *	inttoa		(long);
-extern	char *	mfptoa		(u_long, u_long, short);
-extern	char *	mfptoms		(u_long, u_long, short);
+extern	char *	mfptoa		(u_int32, u_int32, short);
+extern	char *	mfptoms		(u_int32, u_int32, short);
 extern	const char * modetoa	(int);
 extern	const char * eventstr	(int);
 extern	const char * ceventstr	(int);
@@ -172,7 +172,6 @@ extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	const char *refnumtoa	(sockaddr_u *);
 extern	const char *refid_str	(u_int32, int);
-extern	int	tsftomsu	(u_long, int);
 extern	char *	uinttoa		(u_long);
 
 extern	int	decodenetnum	(const char *, sockaddr_u *);
@@ -278,6 +277,7 @@ extern char *	ntp_strerror	(int e);
 extern double	sys_tick;		/* tick size or time to read */
 extern double	measured_tick;		/* non-overridable sys_tick */
 extern double	sys_fuzz;		/* min clock read latency */
+extern int	trunc_os_clock;		/* sys_tick > measured_tick */
 
 /* version.c */
 extern const char *Version;		/* version declaration */

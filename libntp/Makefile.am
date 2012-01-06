@@ -61,8 +61,6 @@ libntp_a_SRCS =						\
 	dolfptoa.c					\
 	emalloc.c					\
 	findconfig.c					\
-	fptoa.c						\
-	fptoms.c					\
 	getopt.c					\
 	hextoint.c					\
 	hextolfp.c					\
@@ -72,12 +70,9 @@ libntp_a_SRCS =						\
 	iosignal.c					\
 	lib_strbuf.c					\
 	machines.c					\
-	mfptoa.c					\
-	mfptoms.c					\
 	mktime.c					\
 	modetoa.c					\
 	mstolfp.c					\
-	msutotsf.c					\
 	msyslog.c					\
 	netof.c						\
 	ntp_calendar.c					\
@@ -102,12 +97,8 @@ libntp_a_SRCS =						\
 	strdup.c					\
 	strl_obsd.c					\
 	syssignal.c					\
-	timespecops.c					\
 	timetoa.c					\
 	timevalops.c					\
-	tsftomsu.c					\
-	tstotv.c					\
-	tvtots.c					\
 	uglydate.c					\
 	uinttoa.c					\
 	work_fork.c					\

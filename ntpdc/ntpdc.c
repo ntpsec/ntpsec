@@ -1122,6 +1122,11 @@ docmd(
 	/*
 	 * Tokenize the command line.  If nothing on it, return.
 	 */
+	if (strlen(cmdline) >= MAXLINE) {
+		fprintf(stderr, "***Command ignored, more than %d characters:\n%s\n",
+			MAXLINE - 1, cmdline);
+		return;
+	}
 	tokenize(cmdline, tokens, &ntok);
 	if (ntok == 0)
 	    return;

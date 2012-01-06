@@ -272,10 +272,11 @@ internal_current(isc_interfaceiter_t *iter) {
 
 		return (ISC_R_SUCCESS);
 	} else {
-		printf(isc_msgcat_get(isc_msgcat, ISC_MSGSET_IFITERSYSCTL,
-				      ISC_MSG_UNEXPECTEDTYPE,
-				      "warning: unexpected interface list "
-				      "message type\n"));
+		printf("%s", isc_msgcat_get(isc_msgcat,
+					    ISC_MSGSET_IFITERSYSCTL,
+					    ISC_MSG_UNEXPECTEDTYPE,
+					    "warning: unexpected interface "
+					    "list message type\n"));
 		return (ISC_R_IGNORE);
 	}
 }

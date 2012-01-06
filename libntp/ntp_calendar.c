@@ -507,7 +507,7 @@ ntpcal_daysplit(
 
 	memcpy(&op, ts, sizeof(op));
 	/* fix sign */
-	isneg = M_ISNEG(op.D_s.hi, op.D_s.lo);
+	isneg = M_ISNEG(op.D_s.hi);
 	if (isneg)
 		M_NEG(op.D_s.hi, op.D_s.lo);
 		

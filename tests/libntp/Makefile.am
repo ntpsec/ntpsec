@@ -56,7 +56,6 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		timespecops.cpp		\
 		timestructs.cpp		\
 		timevalops.cpp		\
-		tsftomsu.cpp		\
 		tstotv.cpp		\
 		tvtots.cpp		\
 		uglydate.cpp		\

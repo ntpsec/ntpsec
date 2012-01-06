@@ -6,6 +6,8 @@
 #include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_ARCRON_MSF)
 
 static const char arc_version[] = { "V1.3 2003/02/21" };
@@ -1003,7 +1005,7 @@ arc_receive(
 					diff = up->lastrec;
 					L_SUB(&diff, &timestamp);
 					printf("arc: adjusted timestamp by -%sms.\n",
-					       mfptoms(diff.l_i, diff.l_f, 3));
+					       mfptoms(diff.l_ui, diff.l_uf, 3));
 				}
 #endif
 			}
@@ -1578,5 +1580,5 @@ arc_poll(
 }
 
 #else
-int refclock_arc_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif

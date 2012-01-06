@@ -603,7 +603,7 @@ wait_for_sem(
 		msec = INFINITE;
 	} else {
 		getclock(TIMEOFDAY, &now);
-		timespec_sub(&delta, timeout, &now);
+		delta = sub_tspec(*timeout, now);
 		if (delta.tv_sec < 0) {
 			msec = 0;
 		} else if ((delta.tv_sec + 1) >= (MAXDWORD / 1000)) {

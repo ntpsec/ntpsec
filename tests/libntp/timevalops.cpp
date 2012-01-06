@@ -13,11 +13,9 @@ using namespace timeStruct;
 
 class timevalTest : public libntptest {
 protected:
-
 	static u_int32 my_tick_to_tsf(u_int32 ticks);
 	static u_int32 my_tsf_to_tick(u_int32 tsf);
 
-	static const long MICROSECONDS;
 	// that's it...
 	struct lfpfracdata {
 		long	usec;
@@ -35,10 +33,10 @@ timevalTest::my_tick_to_tsf(
 	// precision float calculations or, if available, 64bit integer
 	// arithmetic. This should give the precise fraction, rounded to
 	// the nearest representation.
-#if SIZEOF_LONG >= 8
-	return (u_int32)((((u_long)ticks << 32) + 500000) / 1000000);
+#ifdef HAVE_U_INT64
+	return u_int32(((u_int64(ticks) << 32) + 500000) / 1000000);
 #else
-	return (u_int32)floor((double)ticks * 4294.967296 + 0.5);
+	return u_int32(double(ticks) * 4294.967296 + 0.5);
 #endif
 	// And before you ask: if ticks >= 1000000, the result is
 	// truncated nonsense, so don't use it out-of-bounds.
@@ -50,16 +48,14 @@ timevalTest::my_tsf_to_tick(
 	)
 {
 	// Inverse operation: converts fraction to microseconds.
-#if SIZEOF_LONG >= 8
-	return (u_int32)(((u_long)tsf * 1000000 + 0x80000000) >> 32);
+#ifdef HAVE_U_INT64
+	return u_int32((u_int64(tsf) * 1000000 + 0x80000000) >> 32);
 #else
-	return (u_int32)floor((double)tsf / 4294.967296 + 0.5);
+	return u_int32(double(tsf) / 4294.967296 + 0.5);
 #endif
 	// Beware: The result might be 10^6 due to rounding!
 }
 
-
-const long timevalTest::MICROSECONDS = 1000000;
 const timevalTest::lfpfracdata timevalTest::fdata [] = {
 	{      0, 0x00000000 }, {   7478, 0x01ea1405 },
 	{  22077, 0x05a6d699 }, { 125000, 0x20000000 },
@@ -78,31 +74,48 @@ const timevalTest::lfpfracdata timevalTest::fdata [] = {
 };
 
 
-// and the global predicate instances we're using here
-
-static AssertFpClose FpClose(0, 1);
-
-static AssertTimevalClose TimevalClose(0, 1);
-
 // ---------------------------------------------------------------------
-// test support stuff
+// test support stuff - part1
 // ---------------------------------------------------------------------
+
+TEST_F(timevalTest, Helpers1) {
+	timeval_wrap x;
+
+	for (x.V.tv_sec = -2; x.V.tv_sec < 3; x.V.tv_sec++) {
+		x.V.tv_usec = -1;
+		ASSERT_FALSE(x.valid());
+		x.V.tv_usec = 0;
+		ASSERT_TRUE(x.valid());
+		x.V.tv_usec = 999999;
+		ASSERT_TRUE(x.valid());
+		x.V.tv_usec = 1000000;
+		ASSERT_FALSE(x.valid());
+	}
+}
+
+//----------------------------------------------------------------------
+// test normalisation
+//----------------------------------------------------------------------
 
 TEST_F(timevalTest, Normalise) {
 	for (long ns = -2000000000; ns <= 2000000000; ns += 10000000) {
 		timeval_wrap x(0, ns);
 
-		timeval_norm(x);
+		x = normalize_tval(x);
 		ASSERT_TRUE(x.valid());
 	}
 }
+
+//----------------------------------------------------------------------
+// test classification
+//----------------------------------------------------------------------
 
 TEST_F(timevalTest, SignNoFrac) {
 	// sign test, no fraction
 	for (int i = -4; i <= 4; ++i) {
 		timeval_wrap a(i, 0);
 		int	     E = (i > 0) - (i < 0);
-		int	     r = timeval_test(a);
+		int	     r = test_tval(a);
 
 		ASSERT_EQ(E, r);
 	}
@@ -113,13 +126,15 @@ TEST_F(timevalTest, SignWithFrac) {
 	for (int i = -4; i <= 4; ++i) {
 		timeval_wrap a(i, 10);
 		int	     E = (i >= 0) - (i < 0);
-		int	     r = timeval_test(a);
+		int	     r = test_tval(a);
 
 		ASSERT_EQ(E, r);
 	}
 }
 
+//----------------------------------------------------------------------
 // test compare
+//----------------------------------------------------------------------
 TEST_F(timevalTest, CmpFracEQ) {
 	// fractions are equal
 	for (int i = -4; i <= 4; ++i)
@@ -127,7 +142,7 @@ TEST_F(timevalTest, CmpFracEQ) {
 			timeval_wrap a(i, 200);
 			timeval_wrap b(j, 200);
 			int	     E = (i > j) - (i < j);
-			int	     r = timeval_cmp(a, b);
+			int	     r = cmp_tval_denorm(a, b);
 
 			ASSERT_EQ(E, r);
 		}
@@ -140,7 +155,7 @@ TEST_F(timevalTest, CmpFracGT) {
 			timeval_wrap a( i , 999800);
 			timeval_wrap b( j , 200);
 			int	     E = (i >= j) - (i < j);
-			int	     r = timeval_cmp(a, b);
+			int	     r = cmp_tval_denorm(a, b);
 
 			ASSERT_EQ(E, r);
 		}
@@ -153,13 +168,16 @@ TEST_F(timevalTest, CmpFracLT) {
 			timeval_wrap a(i, 200);
 			timeval_wrap b(j, 999800);
 			int	     E = (i > j) - (i <= j);
-			int	     r = timeval_cmp(a, b);
+			int	     r = cmp_tval_denorm(a, b);
 
 			ASSERT_EQ(E, r);
 		}
 }
 
+//----------------------------------------------------------------------
 // Test addition (sum)
+//----------------------------------------------------------------------
+
 TEST_F(timevalTest, AddFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
@@ -168,7 +186,7 @@ TEST_F(timevalTest, AddFullNorm) {
 			timeval_wrap E(i + j, 200 + 400);
 			timeval_wrap c;
 
-			timeval_add(c, a, b);
+			c = add_tval(a, b);
 			ASSERT_EQ(E, c);
 		}
 }
@@ -180,7 +198,8 @@ TEST_F(timevalTest, AddFullOflow1) {
 			timeval_wrap b(j, 999900);
 			timeval_wrap E(i + j + 1, 100);
 			timeval_wrap c;
-			timeval_add(c, a, b);
+
+			c = add_tval(a, b);
 			ASSERT_EQ(E, c);
 		}
 }
@@ -191,7 +210,7 @@ TEST_F(timevalTest, AddUsecNorm) {
 		timeval_wrap E(i, 600);
 		timeval_wrap c;
 
-		timeval_addus(c, a, 400);
+		c = add_tval_us(a, 600 - 200);
 		ASSERT_EQ(E, c);
 	}
 }
@@ -202,12 +221,15 @@ TEST_F(timevalTest, AddUsecOflow1) {
 		timeval_wrap E(i + 1, 100);
 		timeval_wrap c;
 
-		timeval_addus(c, a, MICROSECONDS - 100);
+		c = add_tval_us(a, MICROSECONDS - 100);
 		ASSERT_EQ(E, c);
 	}
 }
 
+//----------------------------------------------------------------------
 // test subtraction (difference)
+//----------------------------------------------------------------------
+
 TEST_F(timevalTest, SubFullNorm) {
 	for (int i = -4; i <= 4; ++i)
 		for (int j = -4; j <= 4; ++j) {
@@ -216,7 +238,7 @@ TEST_F(timevalTest, SubFullNorm) {
 			timeval_wrap E(i - j, 600 - 400);
 			timeval_wrap c;
 
-			timeval_sub(c, a, b);
+			c = sub_tval(a, b);
 			ASSERT_EQ(E, c);
 		}
 }
@@ -229,7 +251,7 @@ TEST_F(timevalTest, SubFullOflow) {
 			timeval_wrap E(i - j - 1, 200);
 			timeval_wrap c;
 
-			timeval_sub(c, a, b);
+			c = sub_tval(a, b);
 			ASSERT_EQ(E, c);
 		}
 }
@@ -240,7 +262,7 @@ TEST_F(timevalTest, SubUsecNorm) {
 		timeval_wrap E(i, 200);
 		timeval_wrap c;
 
-		timeval_subus(c, a, 600 - 200);
+		c = sub_tval_us(a, 600 - 200);
 		ASSERT_EQ(E, c);
 	}
 }
@@ -251,34 +273,38 @@ TEST_F(timevalTest, SubUsecOflow) {
 		timeval_wrap E(i - 1, 200);
 		timeval_wrap c;
 
-		timeval_subus(c, a, MICROSECONDS - 100);
+		c = sub_tval_us(a, MICROSECONDS - 100);
 		ASSERT_EQ(E, c);
 	}
 }
 
+//----------------------------------------------------------------------
 // test negation
+//----------------------------------------------------------------------
+
 TEST_F(timevalTest, Neg) {
 	for (int i = -4; i <= 4; ++i) {
 		timeval_wrap a(i, 100);
 		timeval_wrap b;
 		timeval_wrap c;
 
-		timeval_neg(b, a);
-		timeval_add(c, a, b);
-		ASSERT_EQ(0, timeval_test(c));
+		b = neg_tval(a);
+		c = add_tval(a, b);
+		ASSERT_EQ(0, test_tval(c));
 	}
 }
 
+//----------------------------------------------------------------------
 // test abs value
+//----------------------------------------------------------------------
+
 TEST_F(timevalTest, AbsNoFrac) {
 	for (int i = -4; i <= 4; ++i) {
 		timeval_wrap a(i, 0);
 		timeval_wrap b;
-		int	     c;
 
-		c = timeval_abs(b, a);
-		ASSERT_EQ((i < 0), c);
-		ASSERT_EQ((i != 0), timeval_test(b));
+		b = abs_tval(a);
+		ASSERT_EQ((i != 0), test_tval(b));
 	}
 }
 
@@ -286,22 +312,50 @@ TEST_F(timevalTest, AbsWithFrac) {
 	for (int i = -4; i <= 4; ++i) {
 		timeval_wrap a(i, 100);
 		timeval_wrap b;
-		int	     c;
 
-		c = timeval_abs(b, a);
-		ASSERT_EQ((i < 0), c);
-		ASSERT_EQ(1, timeval_test(b));
+		b = abs_tval(a);
+		ASSERT_EQ(1, test_tval(b));
 	}
 }
 
+// ---------------------------------------------------------------------
+// test support stuff -- part 2
+// ---------------------------------------------------------------------
+
+TEST_F(timevalTest, Helpers2) {
+	AssertTimevalClose isClose(0, 2);
+	timeval_wrap x, y;
+
+	for (x.V.tv_sec = -2; x.V.tv_sec < 3; x.V.tv_sec++)
+		for (x.V.tv_usec = 1;
+		     x.V.tv_usec < 1000000;
+		     x.V.tv_usec += 499999) {
+			for (long i = -4; i < 5; i++) {
+				y = x;
+				y.V.tv_usec += i;
+				if (i >= -2 && i <= 2)
+					ASSERT_PRED_FORMAT2(isClose, x, y);
+				else
+					ASSERT_PRED_FORMAT2(!isClose, x, y);
+			}
+		}
+}
+
+// and the global predicate instances we're using here
+static AssertFpClose FpClose(0, 1);
+static AssertTimevalClose TimevalClose(0, 1);
+
+//----------------------------------------------------------------------
 // conversion to l_fp
+//----------------------------------------------------------------------
+
 TEST_F(timevalTest, ToLFPbittest) {
 	for (u_int32 i = 0; i < 1000000; i++) {
 		timeval_wrap a(1, i);
 		l_fp_wrap    E(1, my_tick_to_tsf(i));
 		l_fp_wrap    r;
 
-		timeval_reltolfp(r, a);
+		r = tval_intv_to_lfp(a);
 		ASSERT_PRED_FORMAT2(FpClose, E, r);
 	}
 }
@@ -312,7 +366,7 @@ TEST_F(timevalTest, ToLFPrelPos) {
 		l_fp_wrap    E(1, fdata[i].frac);
 		l_fp_wrap    r;
 
-		timeval_reltolfp(r, a);
+		r = tval_intv_to_lfp(a);
 		ASSERT_PRED_FORMAT2(FpClose, E, r);
 	}
 }
@@ -323,7 +377,7 @@ TEST_F(timevalTest, ToLFPrelNeg) {
 		l_fp_wrap    E(~0, fdata[i].frac);
 		l_fp_wrap    r;
 
-		timeval_reltolfp(r, a);
+		r = tval_intv_to_lfp(a);
 		ASSERT_PRED_FORMAT2(FpClose, E, r);
 	}
 }
@@ -334,12 +388,15 @@ TEST_F(timevalTest, ToLFPabs) {
 		l_fp_wrap    E(1 + JAN_1970, fdata[i].frac);
 		l_fp_wrap    r;
 
-		timeval_abstolfp(r, a);
+		r = tval_stamp_to_lfp(a);
 		ASSERT_PRED_FORMAT2(FpClose, E, r);
 	}
 }
 
+//----------------------------------------------------------------------
 // conversion from l_fp
+//----------------------------------------------------------------------
+
 TEST_F(timevalTest, FromLFPbittest) {
 	// Not *exactly* a bittest, because 2**32 tests would take a
 	// really long time even on very fast machines! So we do test
@@ -349,28 +406,52 @@ TEST_F(timevalTest, FromLFPbittest) {
 		l_fp_wrap    a(1, tsf);
 		timeval_wrap r;
 
-		timeval_relfromlfp(r, a);
-
+		r = lfp_intv_to_tval(a);
 		// The conversion might be off by one microsecond when
-		// comparing to calculated value; the table-driven
-		// conversion does not use all bits from the FP fraction
-		// and this truncation will affect the rounding.
+		// comparing to calculated value.
 		ASSERT_PRED_FORMAT2(TimevalClose, E, r);
 	}
 }
 
-// usec -> frac -> usec roundtrip
-TEST_F(timevalTest, LFProundtrip) {
-	for (u_int32 i = 0; i < 1000000; i++) {
-		timeval_wrap E(1, i);
-		l_fp_wrap    a;
+TEST_F(timevalTest, FromLFPrelPos) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
+		l_fp_wrap    a(1, fdata[i].frac);
+		timeval_wrap E(1, fdata[i].usec);
 		timeval_wrap r;
 
-		timeval_reltolfp(a, E);
-		timeval_relfromlfp(r, a);
-		ASSERT_EQ(E, r);
+		r = lfp_intv_to_tval(a);
+		ASSERT_PRED_FORMAT2(TimevalClose, E, r);
 	}
 }
+
+TEST_F(timevalTest, FromLFPrelNeg) {
+	for (int i = 0; i < COUNTOF(fdata); i++) {
+		l_fp_wrap    a(~0, fdata[i].frac);
+		timeval_wrap E(-1, fdata[i].usec);
+		timeval_wrap r;
+
+		r = lfp_intv_to_tval(a);
+		ASSERT_PRED_FORMAT2(TimevalClose, E, r);
+	}
+}
+
+// usec -> frac -> usec roundtrip, using a prime start and increment
+TEST_F(timevalTest, LFProundtrip) {
+	for (int32_t t = -1; t < 2; ++t)
+		for (u_int32 i = 5; i < 1000000; i+=11) {
+			timeval_wrap E(t, i);
+			l_fp_wrap    a;
+			timeval_wrap r;
+
+			a = tval_intv_to_lfp(E);
+			r = lfp_intv_to_tval(a);
+			ASSERT_EQ(E, r);
+		}
+}
+
+//----------------------------------------------------------------------
+// string formatting
+//----------------------------------------------------------------------
 
 TEST_F(timevalTest, ToString) {
 	static const struct {
@@ -390,7 +471,7 @@ TEST_F(timevalTest, ToString) {
 	for (int i = 0; i < COUNTOF(data); ++i) {
 		timeval_wrap a(data[i].sec, data[i].usec);
 		std::string  E(data[i].repr);
-		std::string  r(timeval_tostr(a));
+		std::string  r(tvaltoa(a));
 
 		ASSERT_EQ(E, r);
 	}

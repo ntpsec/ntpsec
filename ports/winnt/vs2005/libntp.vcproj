@@ -269,14 +269,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\fptoa.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\fptoms.c"
-				>
-			</File>
-			<File
 				RelativePath="..\libntp\getclock.c"
 				>
 			</File>
@@ -349,14 +341,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\mfptoa.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\mfptoms.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\mktime.c"
 				>
 			</File>
@@ -370,10 +354,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\mstolfp.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\msutotsf.c"
 				>
 			</File>
 			<File
@@ -537,27 +517,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\timespecops.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\timetoa.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\timevalops.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\tsftomsu.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\tstotv.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\tvtots.c"
 				>
 			</File>
 			<File

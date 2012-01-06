@@ -54,7 +54,8 @@ dolfptoa(
 	 * Done that, now deal with the problem of the fraction.  First
 	 * determine the number of decimal places.
 	 */
-	if ((dec = ndec) < 0)
+	dec = ndec;
+	if (dec < 0)
 		dec = 0;
 	if (msec) {
 		dec   += 3;
@@ -92,14 +93,14 @@ dolfptoa(
 	} else {
 		/* some bits remain in 'fpv'; do round */
 		u_char *tp    = cpend;
-		int     carry = (fpv & 0x80000000U) != 0;
+		int     carry = ((fpv & 0x80000000) != 0);
 
 		for (dec = tp - cbuf;  carry && dec > 0;  dec--) {
 			*--tp += 1;
 			if (*tp == 10)
 				*tp = 0;
 			else 
-				carry = 0;
+				carry = FALSE;
 		}
 
 		if (tp < cp) /* rounding from 999 to 1000 or similiar? */
@@ -133,3 +134,41 @@ dolfptoa(
 	 */
 	return buf;
 }
+
+
+char *
+mfptoa(
+	u_int32	fpi,
+	u_int32	fpf,
+	short	ndec
+	)
+{
+	int	isneg;
+
+	isneg = M_ISNEG(fpi);
+	if (isneg) {
+		M_NEG(fpi, fpf);
+	}
+
+	return dolfptoa(fpi, fpf, isneg, ndec, FALSE);
+}
+
+
+char *
+mfptoms(
+	u_int32	fpi,
+	u_int32	fpf,
+	short	ndec
+	)
+{
+	int	isneg;
+
+	isneg = M_ISNEG(fpi);
+	if (isneg) {
+		M_NEG(fpi, fpf);
+	}
+
+	return dolfptoa(fpi, fpf, isneg, ndec, TRUE);
+}
+
+

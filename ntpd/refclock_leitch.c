@@ -6,6 +6,8 @@
 # include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_LEITCH)
 
 #include <stdio.h>
@@ -14,7 +16,7 @@
 #include "ntpd.h"
 #include "ntp_io.h"
 #include "ntp_refclock.h"
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 #include "ntp_stdlib.h"
 
 
@@ -594,5 +596,5 @@ leitch_get_time(
 }
 
 #else
-int refclock_leitch_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif /* REFCLOCK */

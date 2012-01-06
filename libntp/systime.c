@@ -8,10 +8,8 @@
 
 #include "ntp.h"
 #include "ntp_syslog.h"
-#include "ntp_unixtime.h"
 #include "ntp_stdlib.h"
 #include "ntp_random.h"
-#include "ntpd.h"		/* for sys_precision */
 #include "timevalops.h"
 #include "timespecops.h"
 #include "ntp_calendar.h"
@@ -73,6 +71,7 @@ double	sys_fuzz = 0;		/* min. time to read the clock (s) */
 long	sys_fuzz_nsec = 0;	/* min. time to read the clock (ns) */
 double	measured_tick;		/* non-overridable sys_tick (s) */
 double	sys_residual = 0;	/* adjustment residue (s) */
+int	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
 #ifndef SIM
@@ -118,7 +117,7 @@ get_ostime(
 		exit(1);
 	}
 
-	if (sys_tick > measured_tick) {
+	if (trunc_os_clock) {
 		ticks = (long)((tsp->tv_nsec * 1e-9) / sys_tick);
 		tsp->tv_nsec = (long)(ticks * 1e9 * sys_tick);
 	}
@@ -154,65 +153,53 @@ get_systime(
 	 * fuzzed result is strictly later than the prior.  Limit the
 	 * necessary fiction to 1 second.
 	 */
-	if (sys_fuzz_nsec > 0 && !lamport_violated) {
-		timespec_addns(&ts_min, &ts_prev, sys_fuzz_nsec);
-		if (timespec_cmp_fast(&ts, &ts_min) < 0) {
-			timespec_sub(&ts_lam, &ts_min, &ts);
-			ts = ts_min;
-			if (ts_lam.tv_sec > 0) {
-				msyslog(LOG_ERR,
-					"get_systime Lamport advance exceeds one second (%.9f)",
-					ts_lam.tv_sec + 1e-9 * ts_lam.tv_nsec);
-				exit(1);
-			}
+	ts_min = add_tspec_ns(ts_prev, sys_fuzz_nsec);
+	if (cmp_tspec(ts, ts_min) < 0) {
+		ts_lam = sub_tspec(ts_min, ts);
+		if (ts_lam.tv_sec > 0 && !lamport_violated) {
+			msyslog(LOG_ERR,
+				"get_systime Lamport advance exceeds one second (%.9f)",
+				ts_lam.tv_sec + 1e-9 * ts_lam.tv_nsec);
+			exit(1);
 		}
+		if (!lamport_violated)
+			ts = ts_min;
 	}
 	ts_prev_log = ts_prev;
 	ts_prev = ts;
 
 	/* convert from timespec to l_fp fixed-point */
-	timespec_abstolfp(&result, &ts);
+	result = tspec_stamp_to_lfp(ts);
 
 	/*
 	 * Add in the fuzz.
 	 */
-	if (sys_fuzz > 0.) {
-		dfuzz = ntp_random() * 2. / FRAC * sys_fuzz;
-		DTOLFP(dfuzz, &lfpfuzz);
-		L_ADD(&result, &lfpfuzz);
-	} else {
-		dfuzz = 0;
-	}
+	dfuzz = ntp_random() * 2. / FRAC * sys_fuzz;
+	DTOLFP(dfuzz, &lfpfuzz);
+	L_ADD(&result, &lfpfuzz);
 
 	/*
 	 * Ensure result is strictly greater than prior result (ignoring
 	 * sys_residual's effect for now) once sys_fuzz has been
 	 * determined.
 	 */
-	if (sys_fuzz > 0.) {
-		if (!L_ISZERO(&lfp_prev) && !lamport_violated) {
-			if (!L_ISGTU(&result, &lfp_prev)) {
-				msyslog(LOG_ERR,
-					"%sts_min %s ts_prev %s ts %s",
-					(lamport_violated)
-					    ? "LAMPORT "
-					    : "",
-					timespec_tostr(&ts_min),
-					timespec_tostr(&ts_prev_log),
-					timespec_tostr(&ts));
-				msyslog(LOG_ERR, "sys_fuzz %ld nsec, this fuzz %.9f",
-					sys_fuzz_nsec, dfuzz);
-				lfpdelta = lfp_prev;
-				L_SUB(&lfpdelta, &result);
-				LFPTOD(&lfpdelta, ddelta);
-				msyslog(LOG_ERR,
-					"get_systime prev result 0x%x.%08x is %.9f later than 0x%x.%08x",
-					lfp_prev.l_ui, lfp_prev.l_uf,
-					ddelta, result.l_ui, result.l_uf);
-			}
+	if (!L_ISZERO(&lfp_prev) && !lamport_violated) {
+		if (!L_ISGTU(&result, &lfp_prev) && sys_fuzz > 0.) {
+			msyslog(LOG_ERR, "ts_min %s ts_prev %s ts %s",
+				tspectoa(ts_min), tspectoa(ts_prev_log),
+				tspectoa(ts));
+			msyslog(LOG_ERR, "sys_fuzz %ld nsec, this fuzz %.9f",
+				sys_fuzz_nsec, dfuzz);
+			lfpdelta = lfp_prev;
+			L_SUB(&lfpdelta, &result);
+			LFPTOD(&lfpdelta, ddelta);
+			msyslog(LOG_ERR,
+				"get_systime prev result 0x%x.%08x is %.9f later than 0x%x.%08x",
+				lfp_prev.l_ui, lfp_prev.l_uf,
+				ddelta, result.l_ui, result.l_uf);
 		}
-		lfp_prev = result;
 	}
+	lfp_prev = result;
 	if (lamport_violated) 
 		lamport_violated = FALSE;
 
@@ -356,7 +343,7 @@ step_systime(
 
 	/* get the current time as l_fp (without fuzz) and as struct timeval */
 	get_ostime(&timets);
-	timespec_abstolfp(&fp_sys, &timets);
+	fp_sys = tspec_stamp_to_lfp(timets);
 	tvlast.tv_sec = timets.tv_sec;
 	tvlast.tv_usec = (timets.tv_nsec + 500) / 1000;
 
@@ -364,7 +351,7 @@ step_systime(
 	L_ADD(&fp_sys, &fp_ofs);
 
 	/* unfold the new system time */
-	timeval_absfromlfp(&timetv, &fp_sys, &pivot);
+	timetv = lfp_stamp_to_tval(fp_sys, &pivot);
 
 	/* now set new system time */
 	if (ntp_set_tod(&timetv, NULL) != 0) {
@@ -407,8 +394,7 @@ step_systime(
 	 *
 	 * This might become even Uglier...
 	 */
-	timeval_sub(&tvdiff, &timetv, &tvlast);
-	timeval_abs(&tvdiff, &tvdiff);
+	tvdiff = abs_tval(sub_tval(timetv, tvlast));
 	if (tvdiff.tv_sec > 0) {
 #ifdef HAVE_UTMP_H
 		struct utmp ut;

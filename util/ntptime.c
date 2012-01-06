@@ -15,7 +15,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include "ntp_fp.h"
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 #include "ntp_syscall.h"
 #include "ntp_stdlib.h"
 
@@ -48,6 +48,13 @@
 
 #define SCALE_FREQ 65536		/* frequency scale */
 
+/*
+ * These constants are used to round the time stamps computed from
+ * a struct timeval to the microsecond (more or less).  This keeps
+ * things neat.
+ */
+#define	TS_MASK		0xfffff000	/* mask to usec, for time stamps */
+#define	TS_ROUNDBIT	0x00000800	/* round at this bit */
 
 /*
  * Function prototypes

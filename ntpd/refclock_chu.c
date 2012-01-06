@@ -5,6 +5,8 @@
 #include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_CHU)
 
 #include "ntpd.h"
@@ -1258,7 +1260,7 @@ chu_a(
 		up->status |= AVALID;
 		up->second = pp->second = 30 + temp;
 		offset.l_ui = 30 + temp;
-		offset.l_f = 0;
+		offset.l_uf = 0;
 		i = 0;
 		if (k < 0)
 			offset = up->charstamp;
@@ -1675,5 +1677,5 @@ chu_gain(
 
 
 #else
-int refclock_chu_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif /* REFCLOCK */

@@ -1459,7 +1459,7 @@ gettimeofday_cached(
 				progname);
 			exit(1);
 		}
-		timeval_sub(&diff, &systemt, &latest);
+		diff = sub_tval(systemt, latest);
 		if (debug > 1)
 			printf("system minus cached %+ld.%06ld\n",
 			       (long)diff.tv_sec, diff.tv_usec);
@@ -1471,13 +1471,13 @@ gettimeofday_cached(
 		} else {
 			mono.tv_sec = ts.tv_sec;
 			mono.tv_usec = ts.tv_nsec / 1000;
-			timeval_sub(&diff, &latest, &mono);
+			diff = sub_tval(latest, mono);
 			if (debug > 1)
 				printf("cached minus monotonic %+ld.%06ld\n",
 				       (long)diff.tv_sec, diff.tv_usec);
 			if (labs((long)diff.tv_sec) < 3600) {
 				/* older libevent2 using monotonic */
-				timeval_sub(&offset, &systemt, &mono);
+				offset = sub_tval(systemt, mono);
 				TRACE(1, ("%s: Offsetting libevent CLOCK_MONOTONIC times  by %+ld.%06ld\n",
 					 "gettimeofday_cached",
 					 (long)offset.tv_sec, offset.tv_usec));
@@ -1485,7 +1485,7 @@ gettimeofday_cached(
 		}
 		offset_ready = TRUE;
 	}
-	timeval_add(&adj_cached, &cached, &offset);
+	adj_cached = add_tval(cached, offset);
 	*caller_tv = adj_cached;
 
 	return 0;

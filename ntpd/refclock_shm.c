@@ -11,6 +11,8 @@
 # include <config.h>
 #endif
 
+#include "ntp_types.h"
+
 #if defined(REFCLOCK) && defined(CLOCK_SHM)
 
 #include "ntpd.h"
@@ -19,7 +21,7 @@
 #undef fileno   
 #include "ntp_refclock.h"
 #undef fileno   
-#include "ntp_unixtime.h"
+#include "timevalops.h"
 #undef fileno   
 #include "ntp_stdlib.h"
 
@@ -404,14 +406,14 @@ void shm_clockstats(
 
 	if (!(pp->sloppyclockflag & CLK_FLAG4)) return;
 
-        snprintf(logbuf, sizeof(logbuf), "%3d %3d %3d %3d %3d",
-                up->ticks, up->good, up->notready, up->bad, up->clash);
-        record_clock_stats(&peer->srcadr, logbuf);
+	snprintf(logbuf, sizeof(logbuf), "%3d %3d %3d %3d %3d",
+		 up->ticks, up->good, up->notready, up->bad, up->clash);
+	record_clock_stats(&peer->srcadr, logbuf);
 
 	up->ticks = up->good = up->notready =up->bad = up->clash = 0;
 
 }
 
 #else
-int refclock_shm_bs;
+NONEMPTY_TRANSLATION_UNIT
 #endif /* REFCLOCK */

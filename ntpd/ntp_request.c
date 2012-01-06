@@ -1130,7 +1130,7 @@ sys_info(
 	if (stats_control)
 		is->flags |= INFO_FLAG_FILEGEN;
 	is->bdelay = HTONS_FP(DTOFP(sys_bdelay));
-	HTONL_UF(sys_authdelay.l_f, &is->authdelay);
+	HTONL_UF(sys_authdelay.l_uf, &is->authdelay);
 	(void) more_pkt();
 	flush_pkt();
 }
