@@ -1,3 +1,5 @@
+* Fix build break triggered by updating deps-ver and libntp/systime.c at
+  the same time by explicitly depending systime_s.c on systime.c.
 (4.2.7p246) 2012/01/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2104] ntpdc fault with oversize -c command.
 * [Bug 2106] Fix warnings when using -Wformat-security.
