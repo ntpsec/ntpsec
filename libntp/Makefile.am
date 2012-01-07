@@ -124,8 +124,8 @@ EXTRA_DIST = README
 # need to rebuild systime_s.o for a newer systime.c without an explicit
 # dependency.
 
-systime_s.c: systime.c
-	-@touch $@
+$(srcdir)/systime_s.c: $(srcdir)/systime.c
+	@: do-nothing action to avoid default SCCS get
 
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf
