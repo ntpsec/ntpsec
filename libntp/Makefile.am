@@ -125,7 +125,7 @@ EXTRA_DIST = README
 # dependency.
 
 systime_s.c: systime.c
-	@touch $@
+	-@touch $@
 
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf
