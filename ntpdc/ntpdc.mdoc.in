@@ -3,7 +3,7 @@
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  6, 2012 at 10:03:01 PM by AutoGen 5.12
+.\"  It has been AutoGen-ed  January  6, 2012 at 07:58:53 PM by AutoGen 5.12
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
