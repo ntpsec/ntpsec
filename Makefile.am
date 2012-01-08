@@ -85,7 +85,7 @@ $(srcdir)/.checkChangeLog: $(srcdir)/ChangeLog $(srcdir)/scripts/checkChangeLog
 	./scripts/checkChangeLog
 
 sntp/built-sources-only: FRC.sntp
-	@cd sntp && $(MAKE) built-sources-only
+	@cd sntp && $(MAKE) $(AM_MAKEFLAGS) built-sources-only
 
 dist-hook:
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf

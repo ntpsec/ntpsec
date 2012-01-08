@@ -11,4 +11,4 @@ check-libopts: libopts/libopts.la
 	@echo stamp > $@
 
 libopts/libopts.la:
-	-cd libopts && $(MAKE) libopts.la
+	-cd libopts && $(MAKE) $(AM_MAKEFLAGS) libopts.la

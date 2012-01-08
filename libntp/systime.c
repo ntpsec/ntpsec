@@ -109,7 +109,7 @@ get_ostime(
 
 	rc = GETTIMEOFDAY(&tv, NULL);
 	tsp->tv_sec = tv.tv_sec;
-	tsp->tv_nsec = tv_tv_usec * 1000;
+	tsp->tv_nsec = tv.tv_usec * 1000;
 #endif
 	if (rc < 0) {
 		msyslog(LOG_ERR, "read system clock failed: %m (%d)",

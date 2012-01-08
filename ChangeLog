@@ -1,3 +1,5 @@
+* [Bug 2109] "make clean check" is broken with gtest available.
+* [Bug 2110] systime.c typo breaks build on microsecond clocks.
 (4.2.7p247) 2012/01/07 Released by Harlan Stenn <stenn@ntp.org>
 * Fix build break triggered by updating deps-ver and libntp/systime.c at
   the same time by explicitly depending systime_s.c on systime.c.

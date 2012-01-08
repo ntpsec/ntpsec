@@ -242,7 +242,7 @@ k-g-u-submake: keyword-gen
 	@echo 'keyword-gen and ntp_keyword.h are up to date.' > $@
 
 $(srcdir)/keyword-gen-utd: $(srcdir)/keyword-gen.c $(srcdir)/ntp_parser.h
-	$(MAKE) k-g-u-submake	# avoid explicit dependency
+	$(MAKE) $(AM_MAKEFLAGS) k-g-u-submake	# avoid explicit dependency
 	grep diff_ignore_line $(srcdir)/ntp_keyword.h > k-g-u
 	mv -f k-g-u $@
 	
@@ -299,13 +299,13 @@ check-saveconfig: $(srcdir)/complete.conf compsave.conf
 	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
 
 ../libntp/libntpsim.a:
-	cd ../libntp && $(MAKE) libntpsim.a
+	cd ../libntp && $(MAKE) $(AM_MAKEFLAGS) libntpsim.a
 
 ../libparse/libparse.a:
-	cd ../libparse && $(MAKE) check-libparse
+	cd ../libparse && $(MAKE) $(AM_MAKEFLAGS) check-libparse
 
 $(top_srcdir)/sntp/scm-rev:
-	cd $(top_srcdir)/sntp && $(MAKE) check-scm-rev
+	cd $(top_srcdir)/sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/sntp/scm-rev
 	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpd

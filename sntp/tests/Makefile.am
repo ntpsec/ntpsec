@@ -6,19 +6,6 @@ if BUILD_SNTP
 check_PROGRAMS += tests
 endif
 
-sntp_objs = ..
-
-sntp_SOURCES_USED =			\
-	$(sntp_objs)/crypto.o		\
-	$(sntp_objs)/kod_management.o	\
-	$(sntp_objs)/log.o		\
-	$(sntp_objs)/main.o		\
-	$(sntp_objs)/networking.o	\
-	$(sntp_objs)/sntp-opts.o	\
-	$(sntp_objs)/utilities.o	\
-	$(sntp_objs)/version.o		\
-	$(NULL)
-
 base_SOURCES =				\
 	$(srcdir)/../tests_main.cpp	\
 	$(NULL)
@@ -68,6 +55,7 @@ CLEANFILES =				\
 	$(NULL)
 
 LDADD =						\
+	../libsntp.a				\
 	$(LIBOPTS_LDADD)			\
 	$(LDADD_LIBEVENT)			\
 	$(top_builddir)/../libntp/libntp.a	\
@@ -75,7 +63,6 @@ LDADD =						\
 	$(LCRYPTO)				\
 	$(GTEST_LDFLAGS)			\
 	$(GTEST_LIBS)				\
-	$(sntp_SOURCES_USED)			\
 	$(NULL)
 
 AM_CFLAGS   = $(CFLAGS_NTP)
@@ -100,6 +87,17 @@ if !NTP_CROSSCOMPILE
 TESTS += $(check_PROGRAMS)
 endif
 
+## ensure ../libsntp.a is built
+
+BUILT_SOURCES	+= check-libsntp
+CLEANFILES	+= check-libsntp
+
+check-libsntp: ../libsntp.a
+	@echo stamp > $@
+
+../libsntp.a:
+	cd .. && $(MAKE) $(AM_MAKEFLAGS) libsntp.a
+
 ## check-libntp.mf - automake fragment
 ## slightly adapted for deeper directory
 
@@ -110,7 +108,7 @@ check-libntp: ../../libntp/libntp.a
 	@echo stamp > $@
 
 ../../libntp/libntp.a:
-	cd ../../libntp && $(MAKE) libntp.a
+	cd ../../libntp && $(MAKE) $(AM_MAKEFLAGS) libntp.a
 
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

@@ -85,7 +85,7 @@ check-libntp: ../../libntp/libntp.a
 	@echo stamp > $@
 
 ../../libntp/libntp.a:
-	cd ../../libntp && $(MAKE) libntp.a
+	cd ../../libntp && $(MAKE) $(AM_MAKEFLAGS) libntp.a
 
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf

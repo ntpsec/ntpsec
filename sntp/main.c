@@ -112,7 +112,6 @@ void sock_cb(evutil_socket_t, short, void *);
 void check_exit_conditions(void);
 void sntp_libevent_log_cb(int, const char *);
 void set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode);
-int  sntp_main(int argc, char **argv);
 int  set_time(double offset);
 void dec_pending_ntp(const char *, sockaddr_u *);
 int  libevent_version_ok(void);
@@ -125,7 +124,8 @@ int  gettimeofday_cached(struct event_base *b, struct timeval *tv);
 int
 sntp_main (
 	int argc,
-	char **argv
+	char **argv,
+	const char *sntpVersion
 	)
 {
 	int			i;
@@ -162,7 +162,7 @@ sntp_main (
 	if (HAVE_OPT(LOGFILE))
 		open_logfile(OPT_ARG(LOGFILE));
 
-	msyslog(LOG_INFO, "%s\n", Version);
+	msyslog(LOG_INFO, "%s\n", sntpVersion);
 
 	if (0 == argc && !HAVE_OPT(BROADCAST) && !HAVE_OPT(CONCURRENT)) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",

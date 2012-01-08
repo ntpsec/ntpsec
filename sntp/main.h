@@ -17,7 +17,7 @@
 #include "crypto.h"
 
 void	set_li_vn_mode(struct pkt *spkt, char leap, char version, char mode); 
-int	sntp_main(int argc, char **argv);
+extern int sntp_main(int argc, char **argv, const char *);
 int	generate_pkt(struct pkt *x_pkt, const struct timeval *tv_xmt,
 				  int key_id, struct key *pkt_key);
 int	handle_pkt(int rpktl, struct pkt *rpkt, sockaddr_u *host,

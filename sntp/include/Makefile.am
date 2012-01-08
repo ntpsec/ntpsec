@@ -13,7 +13,7 @@ EXTRA_DIST =			\
 noinst_HEADERS =
 
 $(srcdir)/version.def: $(srcdir)/../../packageinfo.sh
-	cd .. && $(MAKE) $(abs_top_srcdir)/include/version.def
+	cd .. && $(MAKE) $(AM_MAKEFLAGS) $(abs_top_srcdir)/include/version.def
 
 $(srcdir)/version.texi: $(srcdir)/../../packageinfo.sh
-	cd .. && $(MAKE) $(abs_top_srcdir)/include/version.texi
+	cd .. && $(MAKE) $(AM_MAKEFLAGS) $(abs_top_srcdir)/include/version.texi

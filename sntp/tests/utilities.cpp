@@ -4,6 +4,7 @@
 extern "C" {
 #include "main.h"
 #include "utilities.h"
+const char * Version = "stub unit test Version string";
 };
 
 using std::string;

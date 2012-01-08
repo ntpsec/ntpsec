@@ -12,6 +12,7 @@ AM_CPPFLAGS += $(CPPFLAGS_LIBEVENT)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 LDADD  = version.o
+LDADD += libsntp.a
 LDADD += $(LIBOPTS_LDADD)
 LDADD += $(LDADD_LIBEVENT)
 LDADD += ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
@@ -54,9 +55,13 @@ SUBDIRS = include scripts
 DIST_SUBDIRS = include scripts
 
 if BUILD_SNTP
+noinst_LIBRARIES = libsntp.a
 if BUILD_LIBEVENT
 SUBDIRS += libevent
 DIST_SUBDIRS += libevent
+endif
+if GTEST_AVAILABLE
+SUBDIRS += tests
 endif
 endif
 
@@ -64,30 +69,33 @@ if NEED_LIBOPTS
 SUBDIRS += libopts
 endif
 
-if GTEST_AVAILABLE
-SUBDIRS += tests
-endif
-
 DIST_SUBDIRS += libopts tests
 
+libsntp_a_SOURCES =		\
+	crypto.c		\
+	kod_management.c	\
+	log.c			\
+	main.c			\
+	networking.c		\
+	sntp-opts.c		\
+	utilities.c		\
+	$(NULL)
+
 sntp_SOURCES =		\
-	crypto.c	\
-	crypto.h	\
-	data_formats.h	\
-	header.h	\
-	kod_management.c \
-	kod_management.h \
-	log.c		\
-	log.h		\
-	main.c		\
-	main.h		\
-	networking.c	\
-	networking.h	\
 	sntp.c		\
-	sntp-opts.c	\
-	sntp-opts.h	\
-	utilities.c	\
-	utilities.h	\
+	$(NULL)
+
+noinst_HEADERS =		\
+	crypto.h		\
+	data_formats.h		\
+	header.h		\
+	kod_management.h	\
+	log.h			\
+	main.h			\
+	networking.h		\
+	sntp-opts.h		\
+	tests_main.h		\
+	utilities.h		\
 	$(NULL)
 
 DISTCLEANFILES =			\
@@ -112,7 +120,6 @@ EXTRA_DIST =				\
 	sntp.mdoc.in			\
 	sntp.html			\
 	sntp.texi			\
-	tests_main.h			\
 	$(srcdir)/scm-rev		\
 	$(srcdir)/m4/version.m4		\
 	$(NULL)
@@ -178,7 +185,7 @@ check-autogen-version.def: FRC
 	   fi )
 
 $(srcdir)/autogen-version.def:
-	$(MAKE) check-autogen-version.def
+	$(MAKE) $(AM_MAKEFLAGS) check-autogen-version.def
 
 built-sources-only: $(BUILT_SOURCES)
 	@: do-nothing action to avoid default SCCS get
@@ -210,7 +217,7 @@ $(srcdir)/include/version.texi: $(srcdir)/../packageinfo.sh
 	../scripts/genver include/version.texi
 
 $(srcdir)/../COPYRIGHT:
-	cd .. && $(MAKE) COPYRIGHT-please
+	cd .. && $(MAKE) $(AM_MAKEFLAGS) COPYRIGHT-please
 
 check-COPYRIGHT-submake: $(srcdir)/../COPYRIGHT
 	@cmp -s $(srcdir)/../COPYRIGHT $(srcdir)/COPYRIGHT	\
@@ -221,7 +228,7 @@ check-COPYRIGHT-submake: $(srcdir)/../COPYRIGHT
 check-COPYRIGHT: FRC
 	[ ! -r $(srcdir)/../COPYRIGHT ]					\
 	|| [ check-COPYRIGHT-submake -nt $(srcdir)/../COPYRIGHT ]	\
-	|| $(MAKE) check-COPYRIGHT-submake
+	|| $(MAKE) $(AM_MAKEFLAGS) check-COPYRIGHT-submake
 
 $(srcdir)/COPYRIGHT: check-COPYRIGHT
 	@: do-nothing action to prevent any default

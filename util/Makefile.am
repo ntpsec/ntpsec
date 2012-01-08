@@ -105,7 +105,7 @@ kern.o: kern.c
 $(PROGRAMS): version.o
 
 $(top_srcdir)/sntp/scm-rev:
-	cd $(top_srcdir)/sntp && $(MAKE) check-scm-rev
+	cd $(top_srcdir)/sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntp_keygen_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
 	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntp-keygen
