@@ -1,3 +1,4 @@
+(4.2.7p248) 2012/01/08 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2109] "make clean check" is broken with gtest available.
 * [Bug 2110] systime.c typo breaks build on microsecond clocks.
 (4.2.7p247) 2012/01/07 Released by Harlan Stenn <stenn@ntp.org>
