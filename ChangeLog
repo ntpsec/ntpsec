@@ -1,3 +1,5 @@
+* [Bug 2111] Remove minpoll delay before iburst for pool and
+  manycastclient.
 * Move refclock-specific scheduled timer code under #ifdef REFCLOCK
   and move "action" and "nextaction" data for same from struct peer to
   struct refclockproc.  These provide a way to schedule a callback some

@@ -912,21 +912,16 @@ receive(
 			sys_declined++;
 			return;			/* no help */
 		}
-		if ((peer = newpeer(&rbufp->recv_srcadr, NULL,
-		    rbufp->dstadr, MODE_CLIENT, hisversion, NTP_MINDPOLL,
-		    NTP_MAXDPOLL, FLAG_PREEMPT, MDF_UCAST | MDF_UCLNT, 0,
-		    skeyid, sys_ident)) == NULL) {
+		peer = newpeer(&rbufp->recv_srcadr, NULL, rbufp->dstadr,
+			       MODE_CLIENT, hisversion, peer2->minpoll,
+			       peer2->maxpoll, FLAG_PREEMPT |
+			       (FLAG_IBURST & peer2->flags), MDF_UCAST |
+			       MDF_UCLNT, 0, skeyid, sys_ident);
+		if (NULL == peer) {
 			sys_declined++;
 			return;			/* ignore duplicate  */
 		}
 
-		if (peer2->flags & FLAG_IBURST)
-			peer->flags |= FLAG_IBURST;
-		/*
-		 * We don't need these, but it warms the billboards.
-		 */
-		peer->minpoll = peer2->minpoll;
-		peer->maxpoll = peer2->maxpoll;
 		/*
 		 * After each ephemeral pool association is spun,
 		 * accelerate the next poll for the pool solicitor so
@@ -934,7 +929,15 @@ receive(
 		 */
 		if (peer2->cast_flags & MDF_POOL)
 			peer2->nextdate = current_time + 1;
-		break;
+
+		/*
+		 * Further processing of the solicitation response would
+		 * simply detect its origin timestamp as bogus for the
+		 * brand-new association (it matches the prototype
+		 * association) and tinker with peer->nextdate delaying
+		 * first sync.
+		 */
+		return;		/* solicitation response handled */
 
 	/*
 	 * This is the first packet received from a broadcast server. If
@@ -1980,21 +1983,8 @@ poll_update(
 	 * the poll interval is reduced. We watch out for races here
 	 * between the receive process and the poll process.
 	 *
-	 * First, bracket the poll interval according to the type of
-	 * association and options. If a fixed interval is configured,
-	 * use minpoll. This primarily is for reference clocks, but
-	 * works for any association. Otherwise, clamp the poll interval
-	 * between minpoll and maxpoll.
+	 * Clamp the poll interval between minpoll and maxpoll.
 	 */
-	if (peer->cast_flags & MDF_BCLNT) {
-		/* verify special casing of MDF_BCLNT here is not needed */
-		if (peer->minpoll != peer->maxpoll) {
-			msyslog(LOG_ERR, "FATAL poll_update MDF_BCLNT unexpected minpoll %u maxpoll %u",
-				(u_int)peer->minpoll, (u_int)peer->maxpoll);
-			exit(1);
-		}
-	} 
-
 	hpoll = max(min(peer->maxpoll, mpoll), peer->minpoll);
 
 #ifdef AUTOKEY
@@ -2070,12 +2060,9 @@ poll_update(
 		if (peer->flags & FLAG_REFCLOCK)
 			next = 1 << hpoll;
 		else
+#endif /* REFCLOCK */
 			next = ((0x1000UL | (ntp_random() & 0x0ff)) <<
 			    hpoll) >> 12;
-#else /* REFCLOCK */
-		next = ((0x1000UL | (ntp_random() & 0x0ff)) << hpoll) >>
-		    12;
-#endif /* REFCLOCK */
 		next += peer->outdate;
 		if (next > utemp)
 			peer->nextdate = next;
@@ -2084,14 +2071,11 @@ poll_update(
 		if (peer->throttle > (1 << peer->minpoll))
 			peer->nextdate += ntp_minpkt;
 	}
-#ifdef DEBUG
-	if (debug > 1)
-		printf("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
+	DPRINTF(2, ("poll_update: at %lu %s poll %d burst %d retry %d head %d early %lu next %lu\n",
 		    current_time, ntoa(&peer->srcadr), peer->hpoll,
 		    peer->burst, peer->retry, peer->throttle,
 		    utemp - current_time, peer->nextdate -
-		    current_time);
-#endif
+		    current_time));
 }
 
 
@@ -2153,29 +2137,29 @@ peer_clear(
 	}
 #ifdef REFCLOCK
 	if (!(peer->flags & FLAG_REFCLOCK)) {
+#endif
 		peer->leap = LEAP_NOTINSYNC;
 		peer->stratum = STRATUM_UNSPEC;
 		memcpy(&peer->refid, ident, 4);
+#ifdef REFCLOCK
 	}
-#else
-	peer->leap = LEAP_NOTINSYNC;
-	peer->stratum = STRATUM_UNSPEC;
-	memcpy(&peer->refid, ident, 4);
-#endif /* REFCLOCK */
+#endif
 
 	/*
 	 * During initialization use the association count to spread out
-	 * the polls at one-second intervals. Otherwise, randomize over
-	 * the minimum poll interval in order to avoid broadcast
-	 * implosion.
+	 * the polls at one-second intervals. Passive associations'
+	 * first poll is delayed by the "discard minimum" to avoid rate
+	 * limiting. Other post-startup new or cleared associations
+	 * randomize the first poll over the minimum poll interval to
+	 * avoid implosion.
 	 */
 	peer->nextdate = peer->update = peer->outdate = current_time;
 	if (initializing) {
 		peer->nextdate += peer_associations;
-	} else if (peer->hmode == MODE_PASSIVE) {
+	} else if (MODE_PASSIVE == peer->hmode) {
 		peer->nextdate += ntp_minpkt;
 	} else {
-		peer->nextdate += ntp_random() % peer_associations;
+		peer->nextdate += ntp_random() % peer->minpoll;
 	}
 #ifdef AUTOKEY
 	peer->refresh = current_time + (1 << NTP_REFRESH);
