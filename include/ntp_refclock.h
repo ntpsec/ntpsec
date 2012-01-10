@@ -136,13 +136,16 @@ extern	HANDLE	WaitableIoEventHandle;
 
 
 struct refclockproc {
-	struct	refclockio io;	/* I/O handler structure */
 	void *	unitptr;	/* pointer to unit structure */
+	struct refclock * conf;	/* refclock_conf[type] */
+	struct refclockio io;	/* I/O handler structure */
 	u_char	leap;		/* leap/synchronization code */
 	u_char	currentstatus;	/* clock status */
 	u_char	lastevent;	/* last exception event */
 	u_char	type;		/* clock type */
 	const char *clockdesc;	/* clock description */
+	u_long	nextaction;	/* local activity timeout */
+	void	(*action)(struct peer *); /* timeout callback */
 
 	char	a_lastcode[BMAX]; /* last timecode received */
 	int	lencode;	/* length of last timecode */

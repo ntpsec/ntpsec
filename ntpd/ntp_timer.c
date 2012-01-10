@@ -309,8 +309,6 @@ timer(void)
 	 */
 	for (p = peer_list; p != NULL; p = next_peer) {
 		next_peer = p->p_link;
-		if (p->action != NULL && p->nextaction <= current_time)
-			(*p->action)(p);
 
 		/*
 		 * Restrain the non-burst packet rate not more

@@ -199,6 +199,7 @@ refclock_newpeer(
 	peer->stratum = STRATUM_REFCLOCK;
 	peer->ppoll = peer->maxpoll;
 	pp->type = clktype;
+	pp->conf = refclock_conf[clktype];
 	pp->timestarted = current_time;
 	pp->io.fd = -1;
 
@@ -260,16 +261,19 @@ refclock_unpeer(
  */
 void
 refclock_timer(
-	struct peer *peer	/* peer structure pointer */
+	struct peer *p
 	)
 {
-	u_char clktype;
-	int unit;
+	struct refclockproc *	pp;
+	u_char			clktype;
+	int			unit;
 
-	clktype = peer->refclktype;
-	unit = peer->refclkunit;
-	if (refclock_conf[clktype]->clock_timer != noentry)
-		(refclock_conf[clktype]->clock_timer)(unit, peer);
+	unit = p->refclkunit;
+	pp = p->procptr;
+	if (pp->conf->clock_timer != noentry)
+		(*pp->conf->clock_timer)(unit, p);
+	if (pp->action != NULL && pp->nextaction <= current_time)
+		(*pp->action)(p);
 }
 	
 

@@ -540,9 +540,8 @@ unpeer(
 	if (FLAG_REFCLOCK & peer->flags)
 		refclock_unpeer(peer);
 #endif
-	peer->action = NULL;	/* disable timeout actions */
 
-	free_peer(peer, 1);
+	free_peer(peer, TRUE);
 }
 
 
@@ -950,7 +949,7 @@ newpeer(
 
 
 /*
- * peer_clr_stats - clear peer module statiistics counters
+ * peer_clr_stats - clear peer module statistics counters
  */
 void
 peer_clr_stats(void)

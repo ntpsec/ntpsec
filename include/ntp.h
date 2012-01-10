@@ -377,8 +377,6 @@ struct peer {
 	int	throttle;	/* rate control */
 	u_long	outdate;	/* send time last packet */
 	u_long	nextdate;	/* send time next packet */
-	u_long	nextaction;	/* peer local activity timeout (refclocks) */
-	void (*action) (struct peer *); /* action timeout function */
 
 	/*
 	 * Statistic counters
@@ -411,7 +409,7 @@ struct peer {
  * function. MODE_CONTROL and MODE_PRIVATE can appear in packets,
  * but those never survive to the transition function.
  * is a
- */
+/ */
 #define	MODE_UNSPEC	0	/* unspecified (old version) */
 #define	MODE_ACTIVE	1	/* symmetric active mode */
 #define	MODE_PASSIVE	2	/* symmetric passive mode */

@@ -562,7 +562,7 @@ struct  refclock refclock_arc = {
 /* Queue us up for the next tick. */
 #define ENQUEUE(up) \
 	do { \
-	     peer->nextaction = current_time + QUEUETICK; \
+	     peer->procptr->nextaction = current_time + QUEUETICK; \
 	} while(0)
 
 /* Placeholder event handler---does nothing safely---soaks up loose tick. */
@@ -757,7 +757,7 @@ arc_start(
 	up->quality = MIN_CLOCK_QUALITY;/* Don't trust the clock yet. */
 #endif
 
-	peer->action = arc_event_handler;
+	peer->procptr->action = arc_event_handler;
 
 	ENQUEUE(up);
 
@@ -777,7 +777,7 @@ arc_shutdown(
 	register struct arcunit *up;
 	struct refclockproc *pp;
 
-	peer->action = dummy_event_handler;
+	peer->procptr->action = dummy_event_handler;
 
 	pp = peer->procptr;
 	up = pp->unitptr;

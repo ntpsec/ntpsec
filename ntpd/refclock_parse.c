@@ -4578,7 +4578,7 @@ gps16x_poll(
 		{ GPS_POS_LLA,         0, 0, 0 },
 		{ (unsigned short)~0,  0, 0, 0 }
 	};
-      
+
 	int rtc;
 	unsigned char cmd_buffer[64];
 	unsigned char *outp = cmd_buffer;
@@ -4586,7 +4586,7 @@ gps16x_poll(
 	
 	if (((poll_info_t *)parse->parse_type->cl_data)->rate)
 	{
-		parse->peer->nextaction = current_time + ((poll_info_t *)parse->parse_type->cl_data)->rate;
+		parse->peer->procptr->nextaction = current_time + ((poll_info_t *)parse->parse_type->cl_data)->rate;
 	}
 
 	if (sequence[parse->localstate].gps_cmd == (unsigned short)~0)
@@ -4644,7 +4644,7 @@ gps16x_poll_init(
 {
 	if (((poll_info_t *)parse->parse_type->cl_data)->rate)
 	{
-		parse->peer->action = gps16x_poll;
+		parse->peer->procptr->action = gps16x_poll;
 		gps16x_poll(parse->peer);
 	}
 
@@ -4713,7 +4713,7 @@ poll_poll(
 
 	if (((poll_info_t *)parse->parse_type->cl_data)->rate)
 	{
-		parse->peer->nextaction = current_time + ((poll_info_t *)parse->parse_type->cl_data)->rate;
+		parse->peer->procptr->nextaction = current_time + ((poll_info_t *)parse->parse_type->cl_data)->rate;
 	}
 }
 
@@ -4727,7 +4727,7 @@ poll_init(
 {
 	if (((poll_info_t *)parse->parse_type->cl_data)->rate)
 	{
-		parse->peer->action = poll_poll;
+		parse->peer->procptr->action = poll_poll;
 		poll_poll(parse->peer);
 	}
 
@@ -5155,10 +5155,10 @@ trimbletsip_end(
 	if (t)
 	{
 		free(t);
-		parse->localdata = (void *)0;
+		parse->localdata = NULL;
 	}
-	parse->peer->nextaction = 0;
-	parse->peer->action = (void (*) (struct peer *))0;
+	parse->peer->procptr->nextaction = 0;
+	parse->peer->procptr->action = NULL;
 }
 
 /*--------------------------------------------------
@@ -5192,8 +5192,8 @@ trimbletsip_init(
 		}
 	}
 
-	parse->peer->action     = trimble_check;
-	parse->peer->nextaction = current_time;
+	parse->peer->procptr->action     = trimble_check;
+	parse->peer->procptr->nextaction = current_time;
 
 	/*
 	 * configure terminal line for ICANON mode with VEOL characters
