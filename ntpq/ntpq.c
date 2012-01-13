@@ -525,9 +525,9 @@ openhost(
 	/*
 	 * We need to get by the [] if they were entered
 	 */
-	
+
 	cp = hname;
-	
+
 	if (*cp == '[') {
 		cp++;
 		for (i = 0; *cp && *cp != ']'; cp++, i++)
@@ -564,13 +564,13 @@ openhost(
 #ifdef AI_ADDRCONFIG
 		hints.ai_flags |= AI_ADDRCONFIG;
 #endif
-		a_info = getaddrinfo(hname, svc, &hints, &ai);	
+		a_info = getaddrinfo(hname, svc, &hints, &ai);
 	}
 #ifdef AI_ADDRCONFIG
 	/* Some older implementations don't like AI_ADDRCONFIG. */
 	if (a_info == EAI_BADFLAGS) {
 		hints.ai_flags &= ~AI_ADDRCONFIG;
-		a_info = getaddrinfo(hname, svc, &hints, &ai);	
+		a_info = getaddrinfo(hname, svc, &hints, &ai);
 	}
 #endif
 	if (a_info != 0) {
@@ -639,7 +639,7 @@ openhost(
 		return 0;
 	}
 
-	
+
 #ifdef NEED_RCVBUF_SLOP
 # ifdef SO_RCVBUF
 	{ int rbufsize = DATASIZE + 2048;	/* 2K for slop */
@@ -784,7 +784,7 @@ getresponse(
 			tvo = tvout;
 		else
 			tvo = tvsout;
-		
+
 		FD_SET(sockfd, &fds);
 		n = select(sockfd + 1, &fds, NULL, NULL, &tvo);
 
@@ -1011,8 +1011,8 @@ getresponse(
 		 * Find the position for the fragment relative to any
 		 * previously received.
 		 */
-		for (f = 0; 
-		     f < numfrags && offsets[f] < offset; 
+		for (f = 0;
+		     f < numfrags && offsets[f] < offset;
 		     f++) {
 			/* empty body */ ;
 		}
@@ -1137,7 +1137,7 @@ sendrequest(
 	 */
 	if (!auth && !always_auth) {
 		return sendpkt(&qpkt, pktsize);
-	} 
+	}
 
 	/*
 	 * Pad out packet to a multiple of 8 octets to be sure
@@ -1154,7 +1154,7 @@ sendrequest(
 	if (info_auth_keyid == 0) {
 		key_id = getkeyid("Keyid: ");
 		if (key_id == 0 || key_id > NTP_MAXKEY) {
-			fprintf(stderr, 
+			fprintf(stderr,
 				"Invalid key identifier\n");
 			return 1;
 		}
@@ -1175,7 +1175,7 @@ sendrequest(
 	 * Do the encryption.
 	 */
 	maclen = authencrypt(info_auth_keyid, (void *)&qpkt, pktsize);
-	if (!maclen) {  
+	if (!maclen) {
 		fprintf(stderr, "Key not found\n");
 		return 1;
 	} else if ((size_t)maclen != (info_auth_hashlen + sizeof(keyid_t))) {
@@ -1185,7 +1185,7 @@ sendrequest(
 			(u_long)info_auth_hashlen);
 		return 1;
 	}
-	
+
 	return sendpkt((char *)&qpkt, pktsize + maclen);
 }
 
@@ -1320,7 +1320,7 @@ doqueryex(
 	res = sendrequest(opcode, associd, auth, qsize, qdata);
 	if (res != 0)
 		return res;
-	
+
 	/*
 	 * Get the response.  If we got a standard error, print a message
 	 */
@@ -1410,7 +1410,7 @@ docmd(
 	tokenize(cmdline, tokens, &ntok);
 	if (ntok == 0)
 	    return;
-	
+
 	/*
 	 * Find the appropriate command description.
 	 */
@@ -1424,7 +1424,12 @@ docmd(
 			       tokens[0]);
 		return;
 	}
-	
+
+	/* Warn about ignored extra args */
+	for (i = MAXARGS + 1; i < ntok ; ++i) {
+		fprintf(stderr, "***Extra arg `%s' ignored\n", tokens[i]);
+	}
+
 	/*
 	 * Save the keyword, then walk through the arguments, interpreting
 	 * as we go.
@@ -1486,7 +1491,7 @@ docmd(
 /*
  * tokenize - turn a command line into tokens
  *
- * SK: Modified to allow a quoted string 
+ * SK: Modified to allow a quoted string
  *
  * HMS: If the first character of the first token is a ':' then (after
  * eating inter-token whitespace) the 2nd token is the rest of the line.
@@ -1707,7 +1712,7 @@ getnetnum(
 #ifdef AI_ADDRCONFIG
 	hints.ai_flags |= AI_ADDRCONFIG;
 #endif
-	
+
 	/*
 	 * decodenetnum only works with addresses, but handles syntax
 	 * that getaddrinfo doesn't:  [2001::1]:1234
@@ -1798,7 +1803,7 @@ nntohostp(
 		return sptoa(netnum);
 	else if (ISREFCLOCKADR(netnum))
 		return refnumtoa(netnum);
-	
+
 	hostn = socktohost(netnum);
 	LIB_GETBUF(buf);
 	snprintf(buf, LIB_BUFLENGTH, "%s:%u", hostn, SRCPORT(netnum));
@@ -1851,7 +1856,7 @@ rtdatetolfp(
 
 	if (*cp++ != '-')
 	    return 0;
-	
+
 	for (i = 0; i < 3; i++)
 	    buf[i] = *cp++;
 	buf[3] = '\0';
@@ -1865,7 +1870,7 @@ rtdatetolfp(
 
 	if (*cp++ != '-')
 	    return 0;
-	
+
 	if (!isdigit((int)*cp))
 	    return 0;
 	cal.year = (u_short)(*cp++ - '0');
@@ -2101,7 +2106,7 @@ help(
 		qsort((void *)list, words, sizeof(list[0]), helpsort);
 		col = 0;
 		for (word = 0; word < words; word++) {
-		 	length = strlen(list[word]);
+			length = strlen(list[word]);
 			col = max(col, length);
 		}
 
@@ -2160,6 +2165,8 @@ printusage(
 	)
 {
 	register int i;
+
+	/* XXX: Do we need to warn about extra args here too? */
 
 	(void) fprintf(fp, "usage: %s", xcp->keyword);
 	for (i = 0; i < MAXARGS && xcp->arg[i] != NO; i++) {
@@ -2739,7 +2746,7 @@ trunc_right(
 	size_t	sl;
 	char *	out;
 
-	
+
 	sl = strlen(src);
 	if (sl > width && LIB_BUFLENGTH - 1 > width && width > 0) {
 		LIB_GETBUF(out);
@@ -2819,7 +2826,7 @@ nextvar(
 		cp++;
 	if (cp >= cpend)
 		return 0;
-	
+
 	/*
 	 * Copy name until we hit a ',', an '=', a '\r' or a '\n'.  Backspace
 	 * over any white space and terminate it.
@@ -3052,7 +3059,7 @@ outputarr(
 	 */
 	for (i = (int)strlen(name); i < 11; i++)
 	    *bp++ = ' ';
-	
+
 	for (i = narr; i > 0; i--) {
 		if (i != narr)
 		    *bp++ = ' ';
@@ -3180,7 +3187,7 @@ cookedprint(
 				output(fp, name, stoa(&hval));
 			}
 			break;
-		
+
 		case RF:
 			if (decodenetnum(value, &hval)) {
 				if (ISREFCLOCKADR(&hval))
@@ -3218,7 +3225,7 @@ cookedprint(
 				output(fp, name, b);
 			}
 			break;
-		
+
 		case AR:
 			if (!decodearr(value, &narr, lfparr))
 				output_raw = '?';
@@ -3232,7 +3239,7 @@ cookedprint(
 			else
 				output(fp, name, tstflags(uval));
 			break;
-		
+
 		default:
 			fprintf(stderr, "Internal error in cookedprint, %s=%s, fmt %d\n",
 				name, value, fmt);
@@ -3302,9 +3309,9 @@ ntpq_custom_opt_handler(
 	)
 {
 	switch (pOptDesc->optValue) {
-	
+
 	default:
-		fprintf(stderr, 
+		fprintf(stderr,
 			"ntpq_custom_opt_handler unexpected option '%c' (%d)\n",
 			pOptDesc->optValue, pOptDesc->optValue);
 		exit(-1);
