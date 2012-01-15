@@ -1,4 +1,5 @@
 * [Bug 2113] Warn about ignored extra args in ntpq.
+* Update the copyright year.
 (4.2.7p249) 2012/01/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2111] Remove minpoll delay before iburst for pool and
   manycastclient.

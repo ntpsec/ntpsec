@@ -1,7 +1,7 @@
 /* -*- Mode: Text -*- */
 
 copyright = {
-    date  = "1970-2011";
+    date  = "1970-2012";
     owner = "The University of Delaware, David L. Mills, and/or others";
     eaddr = "http://bugs.ntp.org, bugs@ntp.org";
     type  = ntp;
