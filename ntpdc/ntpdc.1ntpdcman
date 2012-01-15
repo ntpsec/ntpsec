@@ -1,8 +1,8 @@
-.TH ntpdc 1ntpdcman "10 Jan 2012" "4.2.7p249" "User Commands"
+.TH ntpdc 1ntpdcman "15 Jan 2012" "4.2.7p250" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January 10, 2012 at 06:48:18 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  January 15, 2012 at 11:34:43 AM by AutoGen 5.12
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -827,7 +827,7 @@ The operation failed or the command syntax was not valid.
 .SH AUTHORS
 The formatting directives in this document came from FreeBSD.
 .SH "COPYRIGHT"
-Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others all rights reserved.
+Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 The

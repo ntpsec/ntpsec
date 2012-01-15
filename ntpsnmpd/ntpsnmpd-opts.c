@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  January 10, 2012 at 06:48:37 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  January 15, 2012 at 11:35:33 AM by AutoGen 5.12
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -17,7 +17,7 @@
  *
  * This source file is copyrighted and licensed under the following terms:
  *
- *  Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.
+ *  Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
@@ -52,8 +52,8 @@ extern FILE * option_usage_fp;
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
 static char const zCopyright[337] =
-"ntpsnmpd 4.2.7p249\n\
-Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
+"ntpsnmpd 4.2.7p250\n\
+Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
 can be seen at:\n\
@@ -277,7 +277,7 @@ static tOptDesc optDesc[OPTION_CT] = {
  */
 static char const zPROGNAME[9] = "NTPSNMPD";
 static char const zUsageTitle[105] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p249\n\
+"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p250\n\
 USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
 static char const zRcName[7] = ".ntprc";
 static char const * const apzHomeList[3] = {

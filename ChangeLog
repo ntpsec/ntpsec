@@ -1,3 +1,4 @@
+(4.2.7p250) 2012/01/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2113] Warn about ignored extra args in ntpq.
 * Update the copyright year.
 (4.2.7p249) 2012/01/10 Released by Harlan Stenn <stenn@ntp.org>

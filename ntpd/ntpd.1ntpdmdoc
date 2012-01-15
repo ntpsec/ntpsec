@@ -1,9 +1,9 @@
-.Dd January 10 2012
+.Dd January 15 2012
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January 10, 2012 at 06:48:03 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  January 15, 2012 at 11:32:51 AM by AutoGen 5.12
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -858,7 +858,7 @@ A snapshot of this documentation is available in HTML format in
 .Sh "AUTHORS"
 The University of Delaware, David L. Mills, and/or others
 .Sh "COPYRIGHT"
-Copyright (C) 1970-2011 The University of Delaware, David L. Mills, and/or others all rights reserved.
+Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh BUGS
 The
