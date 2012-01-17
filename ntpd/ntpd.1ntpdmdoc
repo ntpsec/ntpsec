@@ -1,9 +1,9 @@
-.Dd January 15 2012
+.Dd January 17 2012
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January 15, 2012 at 11:32:51 AM by AutoGen 5.12
+.\"  It has been AutoGen-ed  January 17, 2012 at 11:33:21 AM by AutoGen 5.12
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
