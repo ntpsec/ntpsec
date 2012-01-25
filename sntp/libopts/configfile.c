@@ -1,7 +1,7 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2011-04-06 09:31:24 bkorb"
+ *  Time-stamp:      "2011-12-17 12:51:30 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
@@ -25,9 +25,6 @@
  *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
  *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
  */
-
-static void
-set_usage_flags(tOptions * opts, char const * flg_txt);
 
 /* = = = START-STATIC-FORWARD = = = */
 static void
@@ -291,7 +288,9 @@ optionFindNextValue(const tOptDesc * pOptDesc, const tOptionValue * pPrevVal,
  *  This routine will find an entry in a nested value option or configurable.
  *  If "valueName" is NULL, then the first entry is returned.  Otherwise,
  *  the first entry with a name that exactly matches the argument will be
- *  returned.
+ *  returned.  If there is no matching value, NULL is returned and errno is
+ *  set to ENOENT. If the provided option value is not a hierarchical value,
+ *  NULL is also returned and errno is set to EINVAL.
  *
  * err:
  *  The returned result is NULL and errno is set:
@@ -304,27 +303,26 @@ optionFindNextValue(const tOptDesc * pOptDesc, const tOptionValue * pPrevVal,
  *  @end itemize
 =*/
 const tOptionValue*
-optionGetValue(const tOptionValue* pOld, char const* pzValName)
+optionGetValue(tOptionValue const * pOld, char const * pzValName)
 {
-    tArgList*     pAL;
-    tOptionValue* pRes = NULL;
+    tArgList *     pAL;
+    tOptionValue * pRes = NULL;
 
     if ((pOld == NULL) || (pOld->valType != OPARG_TYPE_HIERARCHY)) {
         errno = EINVAL;
-        return NULL;
+        return pRes;
     }
     pAL = pOld->v.nestVal;
 
     if (pAL->useCt > 0) {
-        int    ct    = pAL->useCt;
-        void** papOV = (void**)(pAL->apzArgs);
+        int     ct    = pAL->useCt;
+        void ** papOV = (void**)(pAL->apzArgs);
 
         if (pzValName == NULL) {
             pRes = (tOptionValue*)*papOV;
-        }
 
-        else do {
-            tOptionValue* pOV = *(papOV++);
+        } else do {
+            tOptionValue * pOV = *(papOV++);
             if (strcmp(pOV->pzName, pzValName) == 0) {
                 pRes = pOV;
                 break;
@@ -408,7 +406,7 @@ file_preset(tOptions * opts, char const * fname, int dir)
 {
     tmap_info_t   cfgfile;
     tOptState     optst = OPTSTATE_INITIALIZER(PRESET);
-    tAoUL         st_flags = optst.flags;
+    unsigned long st_flags = optst.flags;
     char *        ftext =
         text_mmap(fname, PROT_READ|PROT_WRITE, MAP_PRIVATE, &cfgfile);
 
@@ -961,7 +959,7 @@ handle_struct(tOptions * pOpts, tOptState * pOS, char * pzText, int dir)
  *  (see "optionFileLoad()", the implementation for --load-opts)
  */
 LOCAL void
-internalFileLoad(tOptions* pOpts)
+intern_file_load(tOptions* pOpts)
 {
     uint32_t  svfl;
     int       idx;
@@ -1090,9 +1088,9 @@ internalFileLoad(tOptions* pOpts)
  *       always be returned.
 =*/
 int
-optionFileLoad(tOptions* pOpts, char const* pzProgram)
+optionFileLoad(tOptions * pOpts, char const * pzProgram)
 {
-    if (! SUCCESSFUL(validateOptionsStruct(pOpts, pzProgram)))
+    if (! SUCCESSFUL(validate_struct(pOpts, pzProgram)))
         return -1;
 
     {
@@ -1101,7 +1099,7 @@ optionFileLoad(tOptions* pOpts, char const* pzProgram)
         *pp = pzProgram;
     }
 
-    internalFileLoad(pOpts);
+    intern_file_load(pOpts);
     return 0;
 }
 
@@ -1118,7 +1116,7 @@ optionFileLoad(tOptions* pOpts, char const* pzProgram)
  *  pOptDesc->optArg.argString.
 =*/
 void
-optionLoadOpt(tOptions* pOpts, tOptDesc* pOptDesc)
+optionLoadOpt(tOptions * pOpts, tOptDesc * pOptDesc)
 {
     struct stat sb;
 
@@ -1327,13 +1325,19 @@ skip_unkn(char* pzText)
  *  worry about validity.  (Some entry points are free to assume that
  *  the call is not the first to the library and, thus, that this has
  *  already been called.)
+ *
+ *  Upon successful completion, pzProgName and pzProgPath are set.
+ *
+ *  @param pOpts      program options descriptor
+ *  @param pzProgram  name of program, from argv[]
+ *  @returns SUCCESS or FAILURE
  */
 LOCAL tSuccess
-validateOptionsStruct(tOptions* pOpts, char const* pzProgram)
+validate_struct(tOptions * pOpts, char const * pzProgram)
 {
     if (pOpts == NULL) {
         fputs(zAO_Bad, stderr);
-        exit(EX_CONFIG);
+        return FAILURE;
     }
 
     /*
@@ -1383,9 +1387,15 @@ validateOptionsStruct(tOptions* pOpts, char const* pzProgram)
         char const *  pz = strrchr(pzProgram, DIRCH);
         char const ** pp =
             (char const **)(void **)&(pOpts->pzProgName);
-        if (pz == NULL)
-             *pp = pzProgram;
-        else *pp = pz+1;
+
+        if (pz != NULL) {
+            *pp = pz+1;
+        } else {
+            *pp = pzProgram;
+            pz = pathfind(getenv("PATH"), (char *)pzProgram, "rx");
+            if (pz != NULL)
+                pzProgram = (void *)pz;
+        }
 
         pp  = (char const **)(void **)&(pOpts->pzProgPath);
         *pp = pzProgram;

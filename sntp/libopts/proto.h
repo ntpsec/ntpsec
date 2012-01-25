@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Fri Apr 29 15:44:06 PDT 2011
+ * Generated Thu Dec 29 12:02:41 PST 2011
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -25,25 +25,25 @@ LOCAL char *
 ao_strdup(char const *str);
 
 LOCAL tSuccess
-handle_opt(tOptions* pOpts, tOptState* pOptState);
+handle_opt(tOptions * pOpts, tOptState* pOptState);
 
 LOCAL tSuccess
-longOptionFind(tOptions* pOpts, char* pzOptName, tOptState* pOptState);
+immediate_opts(tOptions * pOpts);
 
 LOCAL tSuccess
-shortOptionFind(tOptions* pOpts, uint_t optValue, tOptState* pOptState);
+regular_opts(tOptions * pOpts);
 
-LOCAL tSuccess
-doImmediateOpts(tOptions* pOpts);
-
-LOCAL tSuccess
-doRegularOpts(tOptions* pOpts);
+/*
+ *  Extracted from check.c
+ */
+LOCAL ag_bool
+is_consistent(tOptions * pOpts);
 
 /*
  *  Extracted from configfile.c
  */
 LOCAL void
-internalFileLoad(tOptions* pOpts);
+intern_file_load(tOptions* pOpts);
 
 LOCAL char*
 parseAttributes(
@@ -53,16 +53,31 @@ parseAttributes(
     tOptionValue*       pType );
 
 LOCAL tSuccess
-validateOptionsStruct(tOptions* pOpts, char const* pzProgram);
+validate_struct(tOptions * pOpts, char const * pzProgram);
 
 /*
- *  Extracted from environment.c
+ *  Extracted from env.c
  */
 LOCAL void
-doPrognameEnv(tOptions* pOpts, teEnvPresetType type);
+doPrognameEnv(tOptions * pOpts, teEnvPresetType type);
 
 LOCAL void
-doEnvPresets(tOptions* pOpts, teEnvPresetType type);
+env_presets(tOptions * pOpts, teEnvPresetType type);
+
+/*
+ *  Extracted from find.c
+ */
+LOCAL tSuccess
+opt_find_long(tOptions * pOpts, char const * opt_name, tOptState * pOptState);
+
+LOCAL tSuccess
+opt_find_short(tOptions* pOpts, uint_t optValue, tOptState* pOptState);
+
+LOCAL tSuccess
+get_opt_arg(tOptions * pOpts, tOptState * pOptState);
+
+LOCAL tSuccess
+find_opt(tOptions * pOpts, tOptState * pOptState);
 
 /*
  *  Extracted from load.c
@@ -104,6 +119,12 @@ optionSort(tOptions* pOpts);
  */
 LOCAL void
 addArgListEntry(void** ppAL, void* entry);
+
+/*
+ *  Extracted from usage.c
+ */
+LOCAL void
+set_usage_flags(tOptions * opts, char const * flg_txt);
 
 #ifdef REDEF_LOCAL
 #  undef LOCAL

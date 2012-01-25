@@ -1,7 +1,7 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2010-12-18 11:46:07 bkorb"
+ *  Time-stamp:      "2011-12-17 12:53:04 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -30,15 +30,15 @@
 
 /* = = = START-STATIC-FORWARD = = = */
 static ag_bool
-insertProgramPath(char * pzBuf, int bufSize, char const * pzName,
-                  char const * pzProgPath);
+add_prog_path(char * pzBuf, int bufSize, char const * pzName,
+              char const * pzProgPath);
 
 static ag_bool
-insertEnvVal(char * pzBuf, int bufSize, char const * pzName,
-             char const * pzProgPath);
+add_env_val(char * pzBuf, int bufSize, char const * pzName,
+            char const * pzProgPath);
 
 static char*
-assembleArgValue(char* pzTxt, tOptionLoadMode mode);
+assemble_arg_val(char* pzTxt, tOptionLoadMode mode);
 /* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  optionMakePath
@@ -127,7 +127,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
         return AG_FALSE;
 
     case '$':
-        if (! insertProgramPath(pzBuf, bufSize, pzName, pzProgPath))
+        if (! add_prog_path(pzBuf, bufSize, pzName, pzProgPath))
             return AG_FALSE;
         break;
 
@@ -141,7 +141,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
         break;
 
     default:
-        if (! insertEnvVal(pzBuf, bufSize, pzName, pzProgPath))
+        if (! add_env_val(pzBuf, bufSize, pzName, pzProgPath))
             return AG_FALSE;
     }
 
@@ -179,10 +179,9 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
     return AG_TRUE;
 }
 
-
 static ag_bool
-insertProgramPath(char * pzBuf, int bufSize, char const * pzName,
-                  char const * pzProgPath)
+add_prog_path(char * pzBuf, int bufSize, char const * pzName,
+              char const * pzProgPath)
 {
     char const*    pzPath;
     char const*    pz;
@@ -243,8 +242,8 @@ insertProgramPath(char * pzBuf, int bufSize, char const * pzName,
 
 
 static ag_bool
-insertEnvVal(char * pzBuf, int bufSize, char const * pzName,
-             char const * pzProgPath)
+add_env_val(char * pzBuf, int bufSize, char const * pzName,
+            char const * pzProgPath)
 {
     char* pzDir = pzBuf;
 
@@ -316,7 +315,7 @@ mungeString(char* pzTxt, tOptionLoadMode mode)
 
 
 static char*
-assembleArgValue(char* pzTxt, tOptionLoadMode mode)
+assemble_arg_val(char* pzTxt, tOptionLoadMode mode)
 {
     static char const zBrk[] = " \t\n:=";
     char* pzEnd = strpbrk(pzTxt, zBrk);
@@ -370,9 +369,9 @@ loadOptionLine(
     while (IS_WHITESPACE_CHAR(*pzLine))  pzLine++;
 
     {
-        char* pzArg = assembleArgValue(pzLine, load_mode);
+        char* pzArg = assemble_arg_val(pzLine, load_mode);
 
-        if (! SUCCESSFUL(longOptionFind(pOpts, pzLine, pOS)))
+        if (! SUCCESSFUL(opt_find_long(pOpts, pzLine, pOS)))
             return;
         if (pOS->flags & OPTST_NO_INIT)
             return;

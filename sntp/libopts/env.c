@@ -2,7 +2,7 @@
 /**
  * \file environment.c
  *
- * Time-stamp:      "2011-04-06 09:35:55 bkorb"
+ * Time-stamp:      "2011-07-19 17:43:34 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -33,17 +33,17 @@
 /* = = = START-STATIC-FORWARD = = = */
 static void
 do_env_opt(tOptState * os, char * env_name,
-            tOptions* pOpts, teEnvPresetType type);
+            tOptions * pOpts, teEnvPresetType type);
 /* = = = END-STATIC-FORWARD = = = */
 
 /*
  *  doPrognameEnv - check for preset values from the ${PROGNAME}
  *  environment variable.  This is accomplished by parsing the text into
  *  tokens, temporarily replacing the arg vector and calling
- *  doImmediateOpts and/or doRegularOpts.
+ *  immediate_opts and/or regular_opts.
  */
 LOCAL void
-doPrognameEnv(tOptions* pOpts, teEnvPresetType type)
+doPrognameEnv(tOptions * pOpts, teEnvPresetType type)
 {
     char const*   pczOptStr = getenv(pOpts->pzPROGNAME);
     token_list_t* pTL;
@@ -87,17 +87,17 @@ doPrognameEnv(tOptions* pOpts, teEnvPresetType type)
 
     switch (type) {
     case ENV_IMM:
-        (void)doImmediateOpts(pOpts);
+        (void)immediate_opts(pOpts);
         break;
 
     case ENV_ALL:
-        (void)doImmediateOpts(pOpts);
+        (void)immediate_opts(pOpts);
         pOpts->curOptIdx = 1;
         pOpts->pzCurOpt  = NULL;
         /* FALLTHROUGH */
 
     case ENV_NON_IMM:
-        (void)doRegularOpts(pOpts);
+        (void)regular_opts(pOpts);
     }
 
     /*
@@ -111,7 +111,7 @@ doPrognameEnv(tOptions* pOpts, teEnvPresetType type)
 
 static void
 do_env_opt(tOptState * os, char * env_name,
-            tOptions* pOpts, teEnvPresetType type)
+            tOptions * pOpts, teEnvPresetType type)
 {
     os->pzOptArg = getenv(env_name);
     if (os->pzOptArg == NULL)
@@ -177,11 +177,11 @@ do_env_opt(tOptState * os, char * env_name,
 }
 
 /*
- *  doEnvPresets - check for preset values from the envrionment
+ *  env_presets - check for preset values from the envrionment
  *  This routine should process in all, immediate or normal modes....
  */
 LOCAL void
-doEnvPresets(tOptions* pOpts, teEnvPresetType type)
+env_presets(tOptions * pOpts, teEnvPresetType type)
 {
     int        ct;
     tOptState  st;

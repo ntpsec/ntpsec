@@ -1,6 +1,6 @@
 
 /*
- * Time-stamp:      "2011-04-22 12:54:28 bkorb"
+ * Time-stamp:      "2011-05-02 12:04:47 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -121,13 +121,20 @@ print_ver(tOptions * pOpts, tOptDesc * pOD, FILE * fp)
     char ch;
 
     /*
-     *  IF the optional argument flag is off, or the argument
-     *  is not provided, then just print the version.
+     *  IF we have an argument for this option, use it
+     *  Otherwise, default to version only or copyright note,
+     *  depending on whether the layout is GNU standard form or not.
      */
-    if (  ((pOD->fOptState & OPTST_ARG_OPTIONAL) == 0)
-       || (pOD->optArg.argString == NULL))
-         ch = 'v';
-    else ch = pOD->optArg.argString[0];
+    if (  (pOD->fOptState & OPTST_ARG_OPTIONAL)
+       && (pOD->optArg.argString != NULL)
+       && (pOD->optArg.argString[0] != NUL))
+
+        ch = pOD->optArg.argString[0];
+
+    else {
+        set_usage_flags(pOpts, NULL);
+        ch = (pOpts->fOptSet & OPTPROC_GNUUSAGE) ? 'c' : 'v';
+    }
 
     switch (ch) {
     case NUL: /* arg provided, but empty */

@@ -2,7 +2,7 @@
 /*
  * \file sort.c
  *
- * Time-stamp:      "2010-07-17 10:34:15 bkorb"
+ * Time-stamp:      "2011-05-24 18:07:14 bkorb"
  *
  *  This module implements argument sorting.
  *
@@ -132,7 +132,7 @@ checkShortOpts(tOptions* pOpts, char* pzArg, tOptState* pOS,
                char** ppzOpts, int* pOptsIdx)
 {
     while (*pzArg != NUL) {
-        if (FAILED(shortOptionFind(pOpts, (tAoUC)*pzArg, pOS)))
+        if (FAILED(opt_find_short(pOpts, (tAoUC)*pzArg, pOS)))
             return FAILURE;
 
         /*
@@ -251,7 +251,7 @@ optionSort(tOptions* pOpts)
                     pOpts->origArgVect[ (pOpts->curOptIdx)++ ];
                 goto restOperands;
             }
-            res = longOptionFind(pOpts, pzArg+2, &os);
+            res = opt_find_long(pOpts, pzArg+2, &os);
             break;
 
         default:
@@ -261,9 +261,9 @@ optionSort(tOptions* pOpts)
              *  short (i.e. single character) option.
              */
             if ((pOpts->fOptSet & OPTPROC_SHORTOPT) == 0) {
-                res = longOptionFind(pOpts, pzArg+1, &os);
+                res = opt_find_long(pOpts, pzArg+1, &os);
             } else {
-                res = shortOptionFind(pOpts, (tAoUC)pzArg[1], &os);
+                res = opt_find_short(pOpts, (tAoUC)pzArg[1], &os);
             }
             break;
         }
