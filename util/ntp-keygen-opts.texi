@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.texi)
 # 
-# It has been AutoGen-ed  January 17, 2012 at 11:35:06 AM by AutoGen 5.12
+# It has been AutoGen-ed  January 25, 2012 at 12:05:07 PM by AutoGen 5.14
 # From the definitions    ntp-keygen-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -44,13 +44,13 @@ This software is released under a specialized copyright license.
 
 @node ntp-keygen usage
 @subsection ntp-keygen usage help (-?)
-@cindex ntp-keygen usage
+@cindex ntp-keygen-usage
 
 This is the automatically generated usage text for ntp-keygen:
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p251
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p252
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -c Str certificate    certificate scheme

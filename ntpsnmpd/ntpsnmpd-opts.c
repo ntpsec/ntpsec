@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  January 17, 2012 at 11:34:28 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  January 25, 2012 at 12:04:37 PM by AutoGen 5.14
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 35:0:10 templates.
+ * Generated from AutoOpts 36:1:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -15,7 +15,8 @@
  *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
  *  for details.
  *
- * This source file is copyrighted and licensed under the following terms:
+ * The ntpsnmpd program is copyrighted and licensed
+ * under the following terms:
  *
  *  Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.
  *  This is free software. It is licensed for use, modification and
@@ -23,8 +24,8 @@
  *  can be seen at:
  *    <http://ntp.org/license>
  *    <http://opensource.org/licenses/NTP>
- *  
-PFX>Permission to use, copy, modify, and distribute this software and its
+ *
+ *  Permission to use, copy, modify, and distribute this software and its
  *  documentation for any purpose with or without fee is hereby granted,
  *  provided that the above copyright notice appears in all copies and that
  *  both the copyright notice and this permission notice appear in
@@ -43,7 +44,6 @@ PFX>Permission to use, copy, modify, and distribute this software and its
 
 #define OPTION_CODE_COMPILE 1
 #include "ntpsnmpd-opts.h"
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -51,25 +51,8 @@ extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-static char const zCopyright[337] =
-"ntpsnmpd 4.2.7p251\n\
-Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
-This is free software. It is licensed for use, modification and\n\
-redistribution under the terms of the NTP License, copies of which\n\
-can be seen at:\n\
-  <http://ntp.org/license>\n\
-  <http://opensource.org/licenses/NTP>\n";
-static char const zLicenseDescrip[700] =
-"Permission to use, copy, modify, and distribute this software and its\n\
-documentation for any purpose with or without fee is hereby granted,\n\
-provided that the above copyright notice appears in all copies and that\n\
-both the copyright notice and this permission notice appear in supporting\n\
-documentation, and that the name The University of Delaware, David L.\n\
-Mills, and/or others not be used in advertising or publicity pertaining to\n\
-distribution of the software without specific, written prior permission.\n\
-The University of Delaware, David L. Mills, and/or others makes no\n\
-representations about the suitability this software for any purpose. It is\n\
-provided \"as is\" without express or implied warranty.\n";
+#define zCopyright      (ntpsnmpd_opt_strs+0)
+#define zLicenseDescrip (ntpsnmpd_opt_strs+337)
 
 extern tUsageProc optionUsage;
 
@@ -78,64 +61,113 @@ extern tUsageProc optionUsage;
 #endif
 
 /*
- *  Nofork option description:
+ *  ntpsnmpd option static const strings
  */
-static char const zNoforkText[] =
-        "Do not fork";
-static char const zNofork_NAME[]             = "NOFORK";
-static char const zNofork_Name[]             = "nofork";
-#define NOFORK_FLAGS       (OPTST_DISABLED)
+static char const ntpsnmpd_opt_strs[1640] =
+/*     0 */ "ntpsnmpd 4.2.7p252\n"
+            "Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n"
+            "This is free software. It is licensed for use, modification and\n"
+            "redistribution under the terms of the NTP License, copies of which\n"
+            "can be seen at:\n"
+            "  <http://ntp.org/license>\n"
+            "  <http://opensource.org/licenses/NTP>\n\0"
+/*   337 */ "Permission to use, copy, modify, and distribute this software and its\n"
+            "documentation for any purpose with or without fee is hereby granted,\n"
+            "provided that the above copyright notice appears in all copies and that\n"
+            "both the copyright notice and this permission notice appear in supporting\n"
+            "documentation, and that the name The University of Delaware, David L.\n"
+            "Mills, and/or others not be used in advertising or publicity pertaining to\n"
+            "distribution of the software without specific, written prior permission.\n"
+            "The University of Delaware, David L. Mills, and/or others makes no\n"
+            "representations about the suitability this software for any purpose. It is\n"
+            "provided \"as is\" without express or implied warranty.\n\0"
+/*  1037 */ "Do not fork\0"
+/*  1049 */ "NOFORK\0"
+/*  1056 */ "nofork\0"
+/*  1063 */ "Log to syslog()\0"
+/*  1079 */ "SYSLOG\0"
+/*  1086 */ "syslog\0"
+/*  1093 */ "The socket address ntpsnmpd uses to connect to net-snmpd\0"
+/*  1150 */ "AGENTXSOCKET\0"
+/*  1163 */ "agentxsocket\0"
+/*  1176 */ "unix:/var/agentx/master\0"
+/*  1200 */ "Display extended usage information and exit\0"
+/*  1244 */ "help\0"
+/*  1249 */ "Extended usage information passed thru pager\0"
+/*  1294 */ "more-help\0"
+/*  1304 */ "Output version information and exit\0"
+/*  1340 */ "version\0"
+/*  1348 */ "Save the option state to a config file\0"
+/*  1387 */ "save-opts\0"
+/*  1397 */ "Load options from a config file\0"
+/*  1429 */ "LOAD_OPTS\0"
+/*  1439 */ "no-load-opts\0"
+/*  1452 */ "no\0"
+/*  1455 */ "NTPSNMPD\0"
+/*  1464 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p252\n"
+            "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
+/*  1569 */ ".ntprc\0"
+/*  1576 */ "$HOME\0"
+/*  1582 */ ".\0"
+/*  1584 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  1618 */ "\n\n\0"
+/*  1621 */ "ntpsnmpd 4.2.7p252";
 
 /*
- *  Syslog option description:
+ *  nofork option description:
  */
-static char const zSyslogText[] =
-        "Log to syslog()";
-static char const zSyslog_NAME[]             = "SYSLOG";
-static char const zSyslog_Name[]             = "syslog";
-#define SYSLOG_FLAGS       (OPTST_DISABLED)
+#define NOFORK_DESC      (ntpsnmpd_opt_strs+1037)
+#define NOFORK_NAME      (ntpsnmpd_opt_strs+1049)
+#define NOFORK_name      (ntpsnmpd_opt_strs+1056)
+#define NOFORK_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Agentxsocket option description:
+ *  syslog option description:
  */
-static char const zAgentxsocketText[] =
-        "The socket address ntpsnmpd uses to connect to net-snmpd";
-static char const zAgentxsocket_NAME[]       = "AGENTXSOCKET";
-static char const zAgentxsocket_Name[]       = "agentxsocket";
-static char const zAgentxsocketDefaultArg[]    = "unix:/var/agentx/master";
-#define AGENTXSOCKET_FLAGS       (OPTST_DISABLED \
+#define SYSLOG_DESC      (ntpsnmpd_opt_strs+1063)
+#define SYSLOG_NAME      (ntpsnmpd_opt_strs+1079)
+#define SYSLOG_name      (ntpsnmpd_opt_strs+1086)
+#define SYSLOG_FLAGS     (OPTST_DISABLED)
+
+/*
+ *  agentXSocket option description:
+ */
+#define AGENTXSOCKET_DESC      (ntpsnmpd_opt_strs+1093)
+#define AGENTXSOCKET_NAME      (ntpsnmpd_opt_strs+1150)
+#define AGENTXSOCKET_name      (ntpsnmpd_opt_strs+1163)
+#define AGENTXSOCKET_DFT_ARG   (ntpsnmpd_opt_strs+1176)
+#define AGENTXSOCKET_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-static char const zHelpText[]          = "Display extended usage information and exit";
-static char const zHelp_Name[]         = "help";
+#define HELP_DESC       (ntpsnmpd_opt_strs+1200)
+#define HELP_name       (ntpsnmpd_opt_strs+1244)
 #ifdef HAVE_WORKING_FORK
-#define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
-static char const zMore_Help_Name[]    = "more-help";
-static char const zMore_HelpText[]     = "Extended usage information passed thru pager";
+#define MORE_HELP_DESC  (ntpsnmpd_opt_strs+1249)
+#define MORE_HELP_name  (ntpsnmpd_opt_strs+1294)
+#define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
-#define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
-#define zMore_Help_Name   NULL
-#define zMore_HelpText    NULL
+#define MORE_HELP_DESC  NULL
+#define MORE_HELP_name  NULL
+#define MORE_HELP_FLAGS (OPTST_OMITTED | OPTST_NO_INIT)
 #endif
 #ifdef NO_OPTIONAL_OPT_ARGS
-#  define OPTST_VERSION_FLAGS   OPTST_IMM | OPTST_NO_INIT
+#  define VER_FLAGS     (OPTST_IMM | OPTST_NO_INIT)
 #else
-#  define OPTST_VERSION_FLAGS   OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
-                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
+#  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
+                         OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-
-static char const zVersionText[]       = "Output version information and exit";
-static char const zVersion_Name[]      = "version";
-static char const zSave_OptsText[]     = "Save the option state to a config file";
-static char const zSave_Opts_Name[]    = "save-opts";
-static char const zLoad_OptsText[]     = "Load options from a config file";
-static char const zLoad_Opts_NAME[]    = "LOAD_OPTS";
-static char const zNotLoad_Opts_Name[] = "no-load-opts";
-static char const zNotLoad_Opts_Pfx[]  = "no";
-#define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
+#define VER_DESC        (ntpsnmpd_opt_strs+1304)
+#define VER_name        (ntpsnmpd_opt_strs+1340)
+#define SAVE_OPTS_DESC  (ntpsnmpd_opt_strs+1348)
+#define SAVE_OPTS_name  (ntpsnmpd_opt_strs+1387)
+#define LOAD_OPTS_DESC     (ntpsnmpd_opt_strs+1397)
+#define LOAD_OPTS_NAME     (ntpsnmpd_opt_strs+1429)
+#define NO_LOAD_OPTS_name  (ntpsnmpd_opt_strs+1439)
+#define LOAD_OPTS_pfx      (ntpsnmpd_opt_strs+1452)
+#define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /*
  *  Declare option callback procedures
  */
@@ -155,14 +187,14 @@ extern tOptProc
     optionBooleanVal,    optionNestedVal,     optionNumericVal,
     optionPagedUsage,    optionPrintVersion,  optionResetOpt,
     optionStackArg,      optionTimeDate,      optionTimeVal,
-    optionUnstackArg,    optionVersionStderr;
+    optionUnstackArg,    optionVendorOption,  optionVersionStderr;
 static tOptProc
     doUsageOpt;
 #endif /* defined(TEST_NTPSNMPD_OPTS) */
 #ifdef TEST_NTPSNMPD_OPTS
-# define DOVERPROC optionVersionStderr
+# define VER_PROC       optionVersionStderr
 #else
-# define DOVERPROC optionPrintVersion
+# define VER_PROC       optionPrintVersion
 #endif /* TEST_NTPSNMPD_OPTS */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -175,11 +207,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NOFORK_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --nofork */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zNoforkText, zNofork_NAME, zNofork_Name,
+     /* desc, NAME, name */ NOFORK_DESC, NOFORK_NAME, NOFORK_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 1, VALUE_OPT_SYSLOG,
@@ -187,11 +219,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SYSLOG_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --syslog */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zSyslogText, zSyslog_NAME, zSyslog_Name,
+     /* desc, NAME, name */ SYSLOG_DESC, SYSLOG_NAME, SYSLOG_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 2, VALUE_OPT_AGENTXSOCKET,
@@ -199,29 +231,29 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ AGENTXSOCKET_FLAGS, 0,
-     /* last opt argumnt */ { zAgentxsocketDefaultArg },
+     /* last opt argumnt */ { AGENTXSOCKET_DFT_ARG },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zAgentxsocketText, zAgentxsocket_NAME, zAgentxsocket_Name,
+     /* desc, NAME, name */ AGENTXSOCKET_DESC, AGENTXSOCKET_NAME, AGENTXSOCKET_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_VERSION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_VERSION_FLAGS, 0,
+     /* opt state flags  */ VER_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ DOVERPROC,
-     /* desc, NAME, name */ zVersionText, NULL, zVersion_Name,
+     /* option proc      */ VER_PROC,
+     /* desc, NAME, name */ VER_DESC, NULL, VER_name,
      /* disablement strs */ NULL, NULL },
 
 
 
   {  /* entry idx, value */ INDEX_OPT_HELP, VALUE_OPT_HELP,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, 0,
@@ -229,23 +261,23 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ doUsageOpt,
-     /* desc, NAME, name */ zHelpText, NULL, zHelp_Name,
+     /* desc, NAME, name */ HELP_DESC, NULL, HELP_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_MORE_HELP, VALUE_OPT_MORE_HELP,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_MORE_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_MORE_HELP_FLAGS, 0,
+     /* opt state flags  */ MORE_HELP_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
      /* option proc      */ optionPagedUsage,
-     /* desc, NAME, name */ zMore_HelpText, NULL, zMore_Help_Name,
+     /* desc, NAME, name */ MORE_HELP_DESC, NULL, MORE_HELP_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_SAVE_OPTS, VALUE_OPT_SAVE_OPTS,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_SAVE_OPTS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
@@ -254,11 +286,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zSave_OptsText, NULL, zSave_Opts_Name,
+     /* desc, NAME, name */ SAVE_OPTS_DESC, NULL, SAVE_OPTS_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_LOAD_OPTS, VALUE_OPT_LOAD_OPTS,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_LOAD_OPTS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
@@ -267,29 +299,27 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionLoadOpt,
-     /* desc, NAME, name */ zLoad_OptsText, zLoad_Opts_NAME, zLoad_Opts_Name,
-     /* disablement strs */ zNotLoad_Opts_Name, zNotLoad_Opts_Pfx }
+     /* desc, NAME, name */ LOAD_OPTS_DESC, LOAD_OPTS_NAME, LOAD_OPTS_name,
+     /* disablement strs */ NO_LOAD_OPTS_name, LOAD_OPTS_pfx }
 };
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  *  Define the Ntpsnmpd Option Environment
  */
-static char const zPROGNAME[9] = "NTPSNMPD";
-static char const zUsageTitle[105] =
-"ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p251\n\
-USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n";
-static char const zRcName[7] = ".ntprc";
+#define zPROGNAME       (ntpsnmpd_opt_strs+1455)
+#define zUsageTitle     (ntpsnmpd_opt_strs+1464)
+#define zRcName         (ntpsnmpd_opt_strs+1569)
 static char const * const apzHomeList[3] = {
-    "$HOME",
-    ".",
+    ntpsnmpd_opt_strs+1576,
+    ntpsnmpd_opt_strs+1582,
     NULL };
-
-static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
-static char const zExplain[] = "\n\n";
-#define zDetail         NULL
-static char const zFullVersion[] = NTPSNMPD_FULL_VERSION;
-/* extracted from optcode.tlib near line 515 */
+#define zBugsAddr       (ntpsnmpd_opt_strs+1584)
+#define zExplain        (ntpsnmpd_opt_strs+1618)
+#define zDetail         (NULL)
+#define zFullVersion    (ntpsnmpd_opt_strs+1621)
+/* extracted from optcode.tlib near line 315 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -300,8 +330,39 @@ static char const zFullVersion[] = NTPSNMPD_FULL_VERSION;
 #endif /* ENABLE_NLS */
 
 
-#define ntpsnmpd_full_usage NULL
-#define ntpsnmpd_short_usage NULL
+#define ntpsnmpd_full_usage (NULL)
+
+#define ntpsnmpd_short_usage (NULL)
+
+/*
+ *  Create the static procedure(s) declared above.
+ */
+static void
+doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
+{
+    (void)pOptions;
+    USAGE(NTPSNMPD_EXIT_SUCCESS);
+}
+/* extracted from optmain.tlib near line 128 */
+
+#if defined(TEST_NTPSNMPD_OPTS) /* TEST MAIN PROCEDURE: */
+
+extern void optionPutShell(tOptions*);
+
+int
+main(int argc, char ** argv)
+{
+    int res = NTPSNMPD_EXIT_SUCCESS;
+    (void)optionProcess(&ntpsnmpdOptions, argc, argv);
+    optionPutShell(&ntpsnmpdOptions);
+    res = ferror(stdout);
+    if (res != 0)
+        fputs("output error writing to stdout\n", stderr);
+    return res;
+}
+#endif  /* defined TEST_NTPSNMPD_OPTS */
+/* extracted from optmain.tlib near line 1148 */
+
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
 #endif
@@ -355,35 +416,6 @@ tOptions ntpsnmpdOptions = {
     NULL, NULL,
     PKGDATADIR, ntpsnmpd_packager_info
 };
-
-/*
- *  Create the static procedure(s) declared above.
- */
-static void
-doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
-{
-    (void)pOptions;
-    USAGE(NTPSNMPD_EXIT_SUCCESS);
-}
-/* extracted from optmain.tlib near line 128 */
-
-#if defined(TEST_NTPSNMPD_OPTS) /* TEST MAIN PROCEDURE: */
-
-extern void optionPutShell(tOptions*);
-
-int
-main(int argc, char ** argv)
-{
-    int res = NTPSNMPD_EXIT_SUCCESS;
-    (void)optionProcess(&ntpsnmpdOptions, argc, argv);
-    optionPutShell(&ntpsnmpdOptions);
-    res = ferror(stdout);
-    if (res != 0)
-        fputs("output error writing to stdout\n", stderr);
-    return res;
-}
-#endif  /* defined TEST_NTPSNMPD_OPTS */
-/* extracted from optcode.tlib near line 666 */
 
 #if ENABLE_NLS
 #include <stdio.h>

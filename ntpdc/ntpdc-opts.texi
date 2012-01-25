@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpdc-opts.texi)
 # 
-# It has been AutoGen-ed  January 17, 2012 at 11:34:08 AM by AutoGen 5.12
+# It has been AutoGen-ed  January 25, 2012 at 12:04:11 PM by AutoGen 5.14
 # From the definitions    ntpdc-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -34,13 +34,13 @@ This software is released under a specialized copyright license.
 
 @node ntpdc usage
 @subsection ntpdc usage help (-?)
-@cindex ntpdc usage
+@cindex ntpdc-usage
 
 This is the automatically generated usage text for ntpdc:
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p251
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p252
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

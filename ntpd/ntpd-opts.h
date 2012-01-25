@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  January 17, 2012 at 11:33:04 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  January 25, 2012 at 12:02:00 PM by AutoGen 5.14
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 35:0:10 templates.
+ * Generated from AutoOpts 36:1:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -15,7 +15,8 @@
  *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
  *  for details.
  *
- * This source file is copyrighted and licensed under the following terms:
+ * The ntpd program is copyrighted and licensed
+ * under the following terms:
  *
  *  Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.
  *  This is free software. It is licensed for use, modification and
@@ -23,8 +24,8 @@
  *  can be seen at:
  *    <http://ntp.org/license>
  *    <http://opensource.org/licenses/NTP>
- *  
-PFX>Permission to use, copy, modify, and distribute this software and its
+ *
+ *  Permission to use, copy, modify, and distribute this software and its
  *  documentation for any purpose with or without fee is hereby granted,
  *  provided that the above copyright notice appears in all copies and that
  *  both the copyright notice and this permission notice appear in
@@ -52,7 +53,7 @@ PFX>Permission to use, copy, modify, and distribute this software and its
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 143360
+#define AO_TEMPLATE_VERSION 147457
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -102,8 +103,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    36
-#define NTPD_VERSION       "4.2.7p251"
-#define NTPD_FULL_VERSION  "ntpd 4.2.7p251"
+#define NTPD_VERSION       "4.2.7p252"
+#define NTPD_FULL_VERSION  "ntpd 4.2.7p252"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -345,7 +346,6 @@ typedef enum {
 #define VALUE_OPT_DVAR           28
 #define VALUE_OPT_WAIT_SYNC      'w'
 #ifdef HAVE_WORKING_FORK
-
 #define OPT_VALUE_WAIT_SYNC      (DESC(WAIT_SYNC).optArg.argInt)
 #endif /* HAVE_WORKING_FORK */
 #define VALUE_OPT_SLEW           'x'
@@ -364,11 +364,12 @@ typedef enum {
                 ntpdOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdOptions.pUsageProc)(&ntpdOptions, c)
-/* extracted from opthead.tlib near line 451 */
+/* extracted from opthead.tlib near line 469 */
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
+
 
 /* * * * * *
  *

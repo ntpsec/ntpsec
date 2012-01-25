@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  January 17, 2012 at 11:34:11 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  January 25, 2012 at 12:04:12 PM by AutoGen 5.14
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 35:0:10 templates.
+ * Generated from AutoOpts 36:1:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -15,7 +15,8 @@
  *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
  *  for details.
  *
- * This source file is copyrighted and licensed under the following terms:
+ * The ntpq program is copyrighted and licensed
+ * under the following terms:
  *
  *  Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.
  *  This is free software. It is licensed for use, modification and
@@ -23,8 +24,8 @@
  *  can be seen at:
  *    <http://ntp.org/license>
  *    <http://opensource.org/licenses/NTP>
- *  
-PFX>Permission to use, copy, modify, and distribute this software and its
+ *
+ *  Permission to use, copy, modify, and distribute this software and its
  *  documentation for any purpose with or without fee is hereby granted,
  *  provided that the above copyright notice appears in all copies and that
  *  both the copyright notice and this permission notice appear in
@@ -43,7 +44,6 @@ PFX>Permission to use, copy, modify, and distribute this software and its
 
 #define OPTION_CODE_COMPILE 1
 #include "ntpq-opts.h"
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -51,32 +51,13 @@ extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-static char const zCopyright[333] =
-"ntpq 4.2.7p251\n\
-Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
-This is free software. It is licensed for use, modification and\n\
-redistribution under the terms of the NTP License, copies of which\n\
-can be seen at:\n\
-  <http://ntp.org/license>\n\
-  <http://opensource.org/licenses/NTP>\n";
-static char const zLicenseDescrip[700] =
-"Permission to use, copy, modify, and distribute this software and its\n\
-documentation for any purpose with or without fee is hereby granted,\n\
-provided that the above copyright notice appears in all copies and that\n\
-both the copyright notice and this permission notice appear in supporting\n\
-documentation, and that the name The University of Delaware, David L.\n\
-Mills, and/or others not be used in advertising or publicity pertaining to\n\
-distribution of the software without specific, written prior permission.\n\
-The University of Delaware, David L. Mills, and/or others makes no\n\
-representations about the suitability this software for any purpose. It is\n\
-provided \"as is\" without express or implied warranty.\n";
+#define zCopyright      (ntpq_opt_strs+0)
+#define zLicenseDescrip (ntpq_opt_strs+333)
 
 extern tUsageProc optionUsage;
-
 /*
  *  global included definitions
- */
-#ifdef __windows
+ */#ifdef __windows
   extern int atoi(const char*);
 #else
 # include <stdlib.h>
@@ -87,135 +68,190 @@ extern tUsageProc optionUsage;
 #endif
 
 /*
- *  Ipv4 option description with
+ *  ntpq option static const strings
+ */
+static char const ntpq_opt_strs[1912] =
+/*     0 */ "ntpq 4.2.7p252\n"
+            "Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n"
+            "This is free software. It is licensed for use, modification and\n"
+            "redistribution under the terms of the NTP License, copies of which\n"
+            "can be seen at:\n"
+            "  <http://ntp.org/license>\n"
+            "  <http://opensource.org/licenses/NTP>\n\0"
+/*   333 */ "Permission to use, copy, modify, and distribute this software and its\n"
+            "documentation for any purpose with or without fee is hereby granted,\n"
+            "provided that the above copyright notice appears in all copies and that\n"
+            "both the copyright notice and this permission notice appear in supporting\n"
+            "documentation, and that the name The University of Delaware, David L.\n"
+            "Mills, and/or others not be used in advertising or publicity pertaining to\n"
+            "distribution of the software without specific, written prior permission.\n"
+            "The University of Delaware, David L. Mills, and/or others makes no\n"
+            "representations about the suitability this software for any purpose. It is\n"
+            "provided \"as is\" without express or implied warranty.\n\0"
+/*  1033 */ "Force IPv4 DNS name resolution\0"
+/*  1064 */ "IPV4\0"
+/*  1069 */ "ipv4\0"
+/*  1074 */ "Force IPv6 DNS name resolution\0"
+/*  1105 */ "IPV6\0"
+/*  1110 */ "ipv6\0"
+/*  1115 */ "run a command and exit\0"
+/*  1138 */ "COMMAND\0"
+/*  1146 */ "command\0"
+/*  1154 */ "Increase debug verbosity level\0"
+/*  1185 */ "DEBUG_LEVEL\0"
+/*  1197 */ "debug-level\0"
+/*  1209 */ "Set the debug verbosity level\0"
+/*  1239 */ "SET_DEBUG_LEVEL\0"
+/*  1255 */ "set-debug-level\0"
+/*  1271 */ "Print a list of the peers\0"
+/*  1297 */ "PEERS\0"
+/*  1303 */ "peers\0"
+/*  1309 */ "Force ntpq to operate in interactive mode\0"
+/*  1351 */ "INTERACTIVE\0"
+/*  1363 */ "interactive\0"
+/*  1375 */ "numeric host addresses\0"
+/*  1398 */ "NUMERIC\0"
+/*  1406 */ "numeric\0"
+/*  1414 */ "Always output status line with readvar\0"
+/*  1453 */ "OLD_RV\0"
+/*  1460 */ "old-rv\0"
+/*  1467 */ "Display extended usage information and exit\0"
+/*  1511 */ "help\0"
+/*  1516 */ "Extended usage information passed thru pager\0"
+/*  1561 */ "more-help\0"
+/*  1571 */ "Output version information and exit\0"
+/*  1607 */ "version\0"
+/*  1615 */ "Save the option state to a config file\0"
+/*  1654 */ "save-opts\0"
+/*  1664 */ "Load options from a config file\0"
+/*  1696 */ "LOAD_OPTS\0"
+/*  1706 */ "no-load-opts\0"
+/*  1719 */ "no\0"
+/*  1722 */ "NTPQ\0"
+/*  1727 */ "ntpq - standard NTP query program - Ver. 4.2.7p252\n"
+            "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
+/*  1848 */ ".ntprc\0"
+/*  1855 */ "$HOME\0"
+/*  1861 */ ".\0"
+/*  1863 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  1897 */ "ntpq 4.2.7p252";
+
+/*
+ *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zIpv4Text[] =
-        "Force IPv4 DNS name resolution";
-static char const zIpv4_NAME[]               = "IPV4";
-static char const zIpv4_Name[]               = "ipv4";
-static const int
-    aIpv4CantList[] = {
+#define IPV4_DESC      (ntpq_opt_strs+1033)
+#define IPV4_NAME      (ntpq_opt_strs+1064)
+#define IPV4_name      (ntpq_opt_strs+1069)
+static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
-#define IPV4_FLAGS       (OPTST_DISABLED)
+#define IPV4_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Ipv6 option description with
+ *  ipv6 option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zIpv6Text[] =
-        "Force IPv6 DNS name resolution";
-static char const zIpv6_NAME[]               = "IPV6";
-static char const zIpv6_Name[]               = "ipv6";
-static const int
-    aIpv6CantList[] = {
+#define IPV6_DESC      (ntpq_opt_strs+1074)
+#define IPV6_NAME      (ntpq_opt_strs+1105)
+#define IPV6_name      (ntpq_opt_strs+1110)
+static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
-#define IPV6_FLAGS       (OPTST_DISABLED)
+#define IPV6_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Command option description:
+ *  command option description:
  */
-static char const zCommandText[] =
-        "run a command and exit";
-static char const zCommand_NAME[]            = "COMMAND";
-static char const zCommand_Name[]            = "command";
-#define COMMAND_FLAGS       (OPTST_DISABLED \
+#define COMMAND_DESC      (ntpq_opt_strs+1115)
+#define COMMAND_NAME      (ntpq_opt_strs+1138)
+#define COMMAND_name      (ntpq_opt_strs+1146)
+#define COMMAND_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Debug_Level option description:
+ *  debug-level option description:
  */
-static char const zDebug_LevelText[] =
-        "Increase debug verbosity level";
-static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
-static char const zDebug_Level_Name[]        = "debug-level";
-#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
+#define DEBUG_LEVEL_DESC      (ntpq_opt_strs+1154)
+#define DEBUG_LEVEL_NAME      (ntpq_opt_strs+1185)
+#define DEBUG_LEVEL_name      (ntpq_opt_strs+1197)
+#define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Set_Debug_Level option description:
+ *  set-debug-level option description:
  */
-static char const zSet_Debug_LevelText[] =
-        "Set the debug verbosity level";
-static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
-static char const zSet_Debug_Level_Name[]    = "set-debug-level";
-#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
+#define SET_DEBUG_LEVEL_DESC      (ntpq_opt_strs+1209)
+#define SET_DEBUG_LEVEL_NAME      (ntpq_opt_strs+1239)
+#define SET_DEBUG_LEVEL_name      (ntpq_opt_strs+1255)
+#define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Peers option description with
+ *  peers option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zPeersText[] =
-        "Print a list of the peers";
-static char const zPeers_NAME[]              = "PEERS";
-static char const zPeers_Name[]              = "peers";
-static const int
-    aPeersCantList[] = {
+#define PEERS_DESC      (ntpq_opt_strs+1271)
+#define PEERS_NAME      (ntpq_opt_strs+1297)
+#define PEERS_name      (ntpq_opt_strs+1303)
+static int const aPeersCantList[] = {
     INDEX_OPT_INTERACTIVE, NO_EQUIVALENT };
-#define PEERS_FLAGS       (OPTST_DISABLED)
+#define PEERS_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Interactive option description with
+ *  interactive option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zInteractiveText[] =
-        "Force ntpq to operate in interactive mode";
-static char const zInteractive_NAME[]        = "INTERACTIVE";
-static char const zInteractive_Name[]        = "interactive";
-static const int
-    aInteractiveCantList[] = {
+#define INTERACTIVE_DESC      (ntpq_opt_strs+1309)
+#define INTERACTIVE_NAME      (ntpq_opt_strs+1351)
+#define INTERACTIVE_name      (ntpq_opt_strs+1363)
+static int const aInteractiveCantList[] = {
     INDEX_OPT_COMMAND,
     INDEX_OPT_PEERS, NO_EQUIVALENT };
-#define INTERACTIVE_FLAGS       (OPTST_DISABLED)
+#define INTERACTIVE_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Numeric option description:
+ *  numeric option description:
  */
-static char const zNumericText[] =
-        "numeric host addresses";
-static char const zNumeric_NAME[]            = "NUMERIC";
-static char const zNumeric_Name[]            = "numeric";
-#define NUMERIC_FLAGS       (OPTST_DISABLED)
+#define NUMERIC_DESC      (ntpq_opt_strs+1375)
+#define NUMERIC_NAME      (ntpq_opt_strs+1398)
+#define NUMERIC_name      (ntpq_opt_strs+1406)
+#define NUMERIC_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Old_Rv option description:
+ *  old-rv option description:
  */
-static char const zOld_RvText[] =
-        "Always output status line with readvar";
-static char const zOld_Rv_NAME[]             = "OLD_RV";
-static char const zOld_Rv_Name[]             = "old-rv";
-#define OLD_RV_FLAGS       (OPTST_DISABLED)
+#define OLD_RV_DESC      (ntpq_opt_strs+1414)
+#define OLD_RV_NAME      (ntpq_opt_strs+1453)
+#define OLD_RV_name      (ntpq_opt_strs+1460)
+#define OLD_RV_FLAGS     (OPTST_DISABLED)
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-static char const zHelpText[]          = "Display extended usage information and exit";
-static char const zHelp_Name[]         = "help";
+#define HELP_DESC       (ntpq_opt_strs+1467)
+#define HELP_name       (ntpq_opt_strs+1511)
 #ifdef HAVE_WORKING_FORK
-#define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
-static char const zMore_Help_Name[]    = "more-help";
-static char const zMore_HelpText[]     = "Extended usage information passed thru pager";
+#define MORE_HELP_DESC  (ntpq_opt_strs+1516)
+#define MORE_HELP_name  (ntpq_opt_strs+1561)
+#define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
-#define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
-#define zMore_Help_Name   NULL
-#define zMore_HelpText    NULL
+#define MORE_HELP_DESC  NULL
+#define MORE_HELP_name  NULL
+#define MORE_HELP_FLAGS (OPTST_OMITTED | OPTST_NO_INIT)
 #endif
 #ifdef NO_OPTIONAL_OPT_ARGS
-#  define OPTST_VERSION_FLAGS   OPTST_IMM | OPTST_NO_INIT
+#  define VER_FLAGS     (OPTST_IMM | OPTST_NO_INIT)
 #else
-#  define OPTST_VERSION_FLAGS   OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
-                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
+#  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
+                         OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-
-static char const zVersionText[]       = "Output version information and exit";
-static char const zVersion_Name[]      = "version";
-static char const zSave_OptsText[]     = "Save the option state to a config file";
-static char const zSave_Opts_Name[]    = "save-opts";
-static char const zLoad_OptsText[]     = "Load options from a config file";
-static char const zLoad_Opts_NAME[]    = "LOAD_OPTS";
-static char const zNotLoad_Opts_Name[] = "no-load-opts";
-static char const zNotLoad_Opts_Pfx[]  = "no";
-#define zLoad_Opts_Name   (zNotLoad_Opts_Name + 3)
+#define VER_DESC        (ntpq_opt_strs+1571)
+#define VER_name        (ntpq_opt_strs+1607)
+#define SAVE_OPTS_DESC  (ntpq_opt_strs+1615)
+#define SAVE_OPTS_name  (ntpq_opt_strs+1654)
+#define LOAD_OPTS_DESC     (ntpq_opt_strs+1664)
+#define LOAD_OPTS_NAME     (ntpq_opt_strs+1696)
+#define NO_LOAD_OPTS_name  (ntpq_opt_strs+1706)
+#define LOAD_OPTS_pfx      (ntpq_opt_strs+1719)
+#define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /*
  *  Declare option callback procedures
  */
@@ -245,7 +281,8 @@ extern tOptProc
     ntpq_custom_opt_handler, optionBooleanVal,        optionNestedVal,
     optionNumericVal,        optionPagedUsage,        optionPrintVersion,
     optionResetOpt,          optionStackArg,          optionTimeDate,
-    optionTimeVal,           optionUnstackArg,        optionVersionStderr;
+    optionTimeVal,           optionUnstackArg,        optionVendorOption,
+    optionVersionStderr;
 static tOptProc
     doOptSet_Debug_Level, doUsageOpt;
 
@@ -261,9 +298,9 @@ static tOptProc
 #define PEERS_OPT_PROC ntpq_custom_opt_handler
 #endif /* defined(TEST_NTPQ_OPTS) */
 #ifdef TEST_NTPQ_OPTS
-# define DOVERPROC optionVersionStderr
+# define VER_PROC       optionVersionStderr
 #else
-# define DOVERPROC optionPrintVersion
+# define VER_PROC       optionPrintVersion
 #endif /* TEST_NTPQ_OPTS */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -276,11 +313,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --ipv4 */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aIpv4CantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
+     /* desc, NAME, name */ IPV4_DESC, IPV4_NAME, IPV4_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
@@ -288,11 +325,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --ipv6 */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aIpv6CantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
+     /* desc, NAME, name */ IPV6_DESC, IPV6_NAME, IPV6_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 2, VALUE_OPT_COMMAND,
@@ -300,11 +337,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ COMMAND_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --command */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ COMMAND_OPT_PROC,
-     /* desc, NAME, name */ zCommandText, zCommand_NAME, zCommand_Name,
+     /* desc, NAME, name */ COMMAND_DESC, COMMAND_NAME, COMMAND_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 3, VALUE_OPT_DEBUG_LEVEL,
@@ -312,11 +349,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
+     /* desc, NAME, name */ DEBUG_LEVEL_DESC, DEBUG_LEVEL_NAME, DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 4, VALUE_OPT_SET_DEBUG_LEVEL,
@@ -324,11 +361,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --set-debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
-     /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
+     /* desc, NAME, name */ SET_DEBUG_LEVEL_DESC, SET_DEBUG_LEVEL_NAME, SET_DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 5, VALUE_OPT_PEERS,
@@ -336,11 +373,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PEERS_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --peers */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aPeersCantList,
      /* option proc      */ PEERS_OPT_PROC,
-     /* desc, NAME, name */ zPeersText, zPeers_NAME, zPeers_Name,
+     /* desc, NAME, name */ PEERS_DESC, PEERS_NAME, PEERS_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 6, VALUE_OPT_INTERACTIVE,
@@ -348,11 +385,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ INTERACTIVE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --interactive */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aInteractiveCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zInteractiveText, zInteractive_NAME, zInteractive_Name,
+     /* desc, NAME, name */ INTERACTIVE_DESC, INTERACTIVE_NAME, INTERACTIVE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 7, VALUE_OPT_NUMERIC,
@@ -360,11 +397,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NUMERIC_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --numeric */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zNumericText, zNumeric_NAME, zNumeric_Name,
+     /* desc, NAME, name */ NUMERIC_DESC, NUMERIC_NAME, NUMERIC_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 8, VALUE_OPT_OLD_RV,
@@ -372,29 +409,29 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OLD_RV_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --old-rv */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zOld_RvText, zOld_Rv_NAME, zOld_Rv_Name,
+     /* desc, NAME, name */ OLD_RV_DESC, OLD_RV_NAME, OLD_RV_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_VERSION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_VERSION_FLAGS, 0,
+     /* opt state flags  */ VER_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ DOVERPROC,
-     /* desc, NAME, name */ zVersionText, NULL, zVersion_Name,
+     /* option proc      */ VER_PROC,
+     /* desc, NAME, name */ VER_DESC, NULL, VER_name,
      /* disablement strs */ NULL, NULL },
 
 
 
   {  /* entry idx, value */ INDEX_OPT_HELP, VALUE_OPT_HELP,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, 0,
@@ -402,23 +439,23 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ doUsageOpt,
-     /* desc, NAME, name */ zHelpText, NULL, zHelp_Name,
+     /* desc, NAME, name */ HELP_DESC, NULL, HELP_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_MORE_HELP, VALUE_OPT_MORE_HELP,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_MORE_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_MORE_HELP_FLAGS, 0,
+     /* opt state flags  */ MORE_HELP_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
      /* option proc      */ optionPagedUsage,
-     /* desc, NAME, name */ zMore_HelpText, NULL, zMore_Help_Name,
+     /* desc, NAME, name */ MORE_HELP_DESC, NULL, MORE_HELP_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_SAVE_OPTS, VALUE_OPT_SAVE_OPTS,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_SAVE_OPTS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
@@ -427,11 +464,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zSave_OptsText, NULL, zSave_Opts_Name,
+     /* desc, NAME, name */ SAVE_OPTS_DESC, NULL, SAVE_OPTS_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_LOAD_OPTS, VALUE_OPT_LOAD_OPTS,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_LOAD_OPTS,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
@@ -440,29 +477,27 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionLoadOpt,
-     /* desc, NAME, name */ zLoad_OptsText, zLoad_Opts_NAME, zLoad_Opts_Name,
-     /* disablement strs */ zNotLoad_Opts_Name, zNotLoad_Opts_Pfx }
+     /* desc, NAME, name */ LOAD_OPTS_DESC, LOAD_OPTS_NAME, LOAD_OPTS_name,
+     /* disablement strs */ NO_LOAD_OPTS_name, LOAD_OPTS_pfx }
 };
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  *  Define the Ntpq Option Environment
  */
-static char const zPROGNAME[5] = "NTPQ";
-static char const zUsageTitle[121] =
-"ntpq - standard NTP query program - Ver. 4.2.7p251\n\
-USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n";
-static char const zRcName[7] = ".ntprc";
+#define zPROGNAME       (ntpq_opt_strs+1722)
+#define zUsageTitle     (ntpq_opt_strs+1727)
+#define zRcName         (ntpq_opt_strs+1848)
 static char const * const apzHomeList[3] = {
-    "$HOME",
-    ".",
+    ntpq_opt_strs+1855,
+    ntpq_opt_strs+1861,
     NULL };
-
-static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
-#define zExplain NULL
-#define zDetail         NULL
-static char const zFullVersion[] = NTPQ_FULL_VERSION;
-/* extracted from optcode.tlib near line 515 */
+#define zBugsAddr       (ntpq_opt_strs+1863)
+#define zExplain        (NULL)
+#define zDetail         (NULL)
+#define zFullVersion    (ntpq_opt_strs+1897)
+/* extracted from optcode.tlib near line 315 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -473,8 +508,53 @@ static char const zFullVersion[] = NTPQ_FULL_VERSION;
 #endif /* ENABLE_NLS */
 
 
-#define ntpq_full_usage NULL
-#define ntpq_short_usage NULL
+#define ntpq_full_usage (NULL)
+
+#define ntpq_short_usage (NULL)
+
+/*
+ *  Create the static procedure(s) declared above.
+ */
+static void
+doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
+{
+    (void)pOptions;
+    USAGE(NTPQ_EXIT_SUCCESS);
+}
+
+#if ! defined(TEST_NTPQ_OPTS)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   For the set-debug-level option.
+ */
+static void
+doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
+{
+    /* extracted from debug-opt.def, line 26 */
+DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
+}
+#endif /* defined(TEST_NTPQ_OPTS) */
+/* extracted from optmain.tlib near line 128 */
+
+#if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
+
+extern void optionPutShell(tOptions*);
+
+int
+main(int argc, char ** argv)
+{
+    int res = NTPQ_EXIT_SUCCESS;
+    (void)optionProcess(&ntpqOptions, argc, argv);
+    optionPutShell(&ntpqOptions);
+    res = ferror(stdout);
+    if (res != 0)
+        fputs("output error writing to stdout\n", stderr);
+    return res;
+}
+#endif  /* defined TEST_NTPQ_OPTS */
+/* extracted from optmain.tlib near line 1148 */
+
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
 #endif
@@ -527,49 +607,6 @@ tOptions ntpqOptions = {
     NULL, NULL,
     PKGDATADIR, ntpq_packager_info
 };
-
-/*
- *  Create the static procedure(s) declared above.
- */
-static void
-doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
-{
-    (void)pOptions;
-    USAGE(NTPQ_EXIT_SUCCESS);
-}
-
-#if ! defined(TEST_NTPQ_OPTS)
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *   For the set-debug-level option.
- */
-static void
-doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
-{
-    /* extracted from debug-opt.def, line 26 */
-DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
-}
-#endif /* defined(TEST_NTPQ_OPTS) */
-/* extracted from optmain.tlib near line 128 */
-
-#if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
-
-extern void optionPutShell(tOptions*);
-
-int
-main(int argc, char ** argv)
-{
-    int res = NTPQ_EXIT_SUCCESS;
-    (void)optionProcess(&ntpqOptions, argc, argv);
-    optionPutShell(&ntpqOptions);
-    res = ferror(stdout);
-    if (res != 0)
-        fputs("output error writing to stdout\n", stderr);
-    return res;
-}
-#endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from optcode.tlib near line 666 */
 
 #if ENABLE_NLS
 #include <stdio.h>

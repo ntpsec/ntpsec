@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.texi)
 # 
-# It has been AutoGen-ed  January 17, 2012 at 11:33:01 AM by AutoGen 5.12
+# It has been AutoGen-ed  January 25, 2012 at 12:01:54 PM by AutoGen 5.14
 # From the definitions    ntp-wait-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -27,7 +27,7 @@ This software is released under a specialized copyright license.
 
 @node ntp-wait usage
 @subsection ntp-wait usage help (-?)
-@cindex ntp-wait usage
+@cindex ntp-wait-usage
 
 This is the automatically generated usage text for ntp-wait:
 

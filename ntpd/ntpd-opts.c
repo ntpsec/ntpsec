@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  January 17, 2012 at 11:33:04 AM by AutoGen 5.12
+ *  It has been AutoGen-ed  January 25, 2012 at 12:02:00 PM by AutoGen 5.14
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 35:0:10 templates.
+ * Generated from AutoOpts 36:1:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -15,7 +15,8 @@
  *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
  *  for details.
  *
- * This source file is copyrighted and licensed under the following terms:
+ * The ntpd program is copyrighted and licensed
+ * under the following terms:
  *
  *  Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.
  *  This is free software. It is licensed for use, modification and
@@ -23,8 +24,8 @@
  *  can be seen at:
  *    <http://ntp.org/license>
  *    <http://opensource.org/licenses/NTP>
- *  
-PFX>Permission to use, copy, modify, and distribute this software and its
+ *
+ *  Permission to use, copy, modify, and distribute this software and its
  *  documentation for any purpose with or without fee is hereby granted,
  *  provided that the above copyright notice appears in all copies and that
  *  both the copyright notice and this permission notice appear in
@@ -43,7 +44,6 @@ PFX>Permission to use, copy, modify, and distribute this software and its
 
 #define OPTION_CODE_COMPILE 1
 #include "ntpd-opts.h"
-
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -51,32 +51,13 @@ extern FILE * option_usage_fp;
 
 /* TRANSLATORS: choose the translation for option names wisely because you
                 cannot ever change your mind. */
-static char const zCopyright[333] =
-"ntpd 4.2.7p251\n\
-Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n\
-This is free software. It is licensed for use, modification and\n\
-redistribution under the terms of the NTP License, copies of which\n\
-can be seen at:\n\
-  <http://ntp.org/license>\n\
-  <http://opensource.org/licenses/NTP>\n";
-static char const zLicenseDescrip[700] =
-"Permission to use, copy, modify, and distribute this software and its\n\
-documentation for any purpose with or without fee is hereby granted,\n\
-provided that the above copyright notice appears in all copies and that\n\
-both the copyright notice and this permission notice appear in supporting\n\
-documentation, and that the name The University of Delaware, David L.\n\
-Mills, and/or others not be used in advertising or publicity pertaining to\n\
-distribution of the software without specific, written prior permission.\n\
-The University of Delaware, David L. Mills, and/or others makes no\n\
-representations about the suitability this software for any purpose. It is\n\
-provided \"as is\" without express or implied warranty.\n";
+#define zCopyright      (ntpd_opt_strs+0)
+#define zLicenseDescrip (ntpd_opt_strs+333)
 
 extern tUsageProc optionUsage;
-
 /*
  *  global included definitions
- */
-#ifdef __windows
+ */#ifdef __windows
   extern int atoi(const char *);
 #else
 # include <stdlib.h>
@@ -87,454 +68,548 @@ extern tUsageProc optionUsage;
 #endif
 
 /*
- *  Ipv4 option description with
+ *  ntpd option static const strings
+ */
+static char const ntpd_opt_strs[3089] =
+/*     0 */ "ntpd 4.2.7p252\n"
+            "Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.\n"
+            "This is free software. It is licensed for use, modification and\n"
+            "redistribution under the terms of the NTP License, copies of which\n"
+            "can be seen at:\n"
+            "  <http://ntp.org/license>\n"
+            "  <http://opensource.org/licenses/NTP>\n\0"
+/*   333 */ "Permission to use, copy, modify, and distribute this software and its\n"
+            "documentation for any purpose with or without fee is hereby granted,\n"
+            "provided that the above copyright notice appears in all copies and that\n"
+            "both the copyright notice and this permission notice appear in supporting\n"
+            "documentation, and that the name The University of Delaware, David L.\n"
+            "Mills, and/or others not be used in advertising or publicity pertaining to\n"
+            "distribution of the software without specific, written prior permission.\n"
+            "The University of Delaware, David L. Mills, and/or others makes no\n"
+            "representations about the suitability this software for any purpose. It is\n"
+            "provided \"as is\" without express or implied warranty.\n\0"
+/*  1033 */ "Force IPv4 DNS name resolution\0"
+/*  1064 */ "IPV4\0"
+/*  1069 */ "ipv4\0"
+/*  1074 */ "Force IPv6 DNS name resolution\0"
+/*  1105 */ "IPV6\0"
+/*  1110 */ "ipv6\0"
+/*  1115 */ "Require crypto authentication\0"
+/*  1145 */ "AUTHREQ\0"
+/*  1153 */ "authreq\0"
+/*  1161 */ "Do not require crypto authentication\0"
+/*  1198 */ "AUTHNOREQ\0"
+/*  1208 */ "authnoreq\0"
+/*  1218 */ "Allow us to sync to broadcast servers\0"
+/*  1256 */ "BCASTSYNC\0"
+/*  1266 */ "bcastsync\0"
+/*  1276 */ "configuration file name\0"
+/*  1300 */ "CONFIGFILE\0"
+/*  1311 */ "configfile\0"
+/*  1322 */ "Increase output debug message level\0"
+/*  1358 */ "DEBUG_LEVEL\0"
+/*  1370 */ "debug-level\0"
+/*  1382 */ "this package was built using 'configure --disable--debug'\0"
+/*  1440 */ "Set the output debug message level\0"
+/*  1475 */ "SET_DEBUG_LEVEL\0"
+/*  1491 */ "set-debug-level\0"
+/*  1507 */ "frequency drift file name\0"
+/*  1533 */ "DRIFTFILE\0"
+/*  1543 */ "driftfile\0"
+/*  1553 */ "Allow the first adjustment to be Big\0"
+/*  1590 */ "PANICGATE\0"
+/*  1600 */ "panicgate\0"
+/*  1610 */ "Jail directory\0"
+/*  1625 */ "JAILDIR\0"
+/*  1633 */ "jaildir\0"
+/*  1641 */ "built without --enable-clockctl or --enable-linuxcaps\0"
+/*  1695 */ "Listen on an interface name or address\0"
+/*  1734 */ "INTERFACE\0"
+/*  1744 */ "interface\0"
+/*  1754 */ "path to symmetric keys\0"
+/*  1777 */ "KEYFILE\0"
+/*  1785 */ "keyfile\0"
+/*  1793 */ "path to the log file\0"
+/*  1814 */ "LOGFILE\0"
+/*  1822 */ "logfile\0"
+/*  1830 */ "Do not listen to virtual interfaces\0"
+/*  1866 */ "NOVIRTUALIPS\0"
+/*  1879 */ "novirtualips\0"
+/*  1892 */ "Modify Multimedia Timer (Windows only)\0"
+/*  1931 */ "MODIFYMMTIMER\0"
+/*  1945 */ "modifymmtimer\0"
+/*  1959 */ "Do not fork\0"
+/*  1971 */ "NOFORK\0"
+/*  1978 */ "nofork\0"
+/*  1985 */ "Run at high priority\0"
+/*  2006 */ "NICE\0"
+/*  2011 */ "nice\0"
+/*  2016 */ "path to the PID file\0"
+/*  2037 */ "PIDFILE\0"
+/*  2045 */ "pidfile\0"
+/*  2053 */ "Process priority\0"
+/*  2070 */ "PRIORITY\0"
+/*  2079 */ "priority\0"
+/*  2088 */ "Set the time and quit\0"
+/*  2110 */ "QUIT\0"
+/*  2115 */ "quit\0"
+/*  2120 */ "Broadcast/propagation delay\0"
+/*  2148 */ "PROPAGATIONDELAY\0"
+/*  2165 */ "propagationdelay\0"
+/*  2182 */ "Save parsed configuration and quit\0"
+/*  2217 */ "SAVECONFIGQUIT\0"
+/*  2232 */ "saveconfigquit\0"
+/*  2247 */ "Statistics file location\0"
+/*  2272 */ "STATSDIR\0"
+/*  2281 */ "statsdir\0"
+/*  2290 */ "Trusted key number\0"
+/*  2309 */ "TRUSTEDKEY\0"
+/*  2320 */ "trustedkey\0"
+/*  2331 */ "Run as userid (or userid:groupid)\0"
+/*  2365 */ "USER\0"
+/*  2370 */ "user\0"
+/*  2375 */ "interval in seconds between scans for new or dropped interfaces\0"
+/*  2439 */ "UPDATEINTERVAL\0"
+/*  2454 */ "updateinterval\0"
+/*  2469 */ "make ARG an ntp variable (RW)\0"
+/*  2499 */ "VAR\0"
+/*  2503 */ "var\0"
+/*  2507 */ "make ARG an ntp variable (RW|DEF)\0"
+/*  2541 */ "DVAR\0"
+/*  2546 */ "dvar\0"
+/*  2551 */ "Seconds to wait for first clock sync\0"
+/*  2588 */ "WAIT_SYNC\0"
+/*  2598 */ "wait-sync\0"
+/*  2608 */ "Slew up to 600 seconds\0"
+/*  2631 */ "SLEW\0"
+/*  2636 */ "slew\0"
+/*  2641 */ "Use CPU cycle counter (Windows only)\0"
+/*  2678 */ "USEPCC\0"
+/*  2685 */ "usepcc\0"
+/*  2692 */ "Force CPU cycle counter use (Windows only)\0"
+/*  2735 */ "PCCFREQ\0"
+/*  2743 */ "pccfreq\0"
+/*  2751 */ "Display extended usage information and exit\0"
+/*  2795 */ "help\0"
+/*  2800 */ "Extended usage information passed thru pager\0"
+/*  2845 */ "more-help\0"
+/*  2855 */ "Output version information and exit\0"
+/*  2891 */ "version\0"
+/*  2899 */ "NTPD\0"
+/*  2904 */ "ntpd - NTP daemon program - Ver. 4.2.7p252\n"
+            "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
+            "\t\t[ <server1> ... <serverN> ]\n\0"
+/*  3037 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  3071 */ "\n\n\0"
+/*  3074 */ "ntpd 4.2.7p252";
+
+/*
+ *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zIpv4Text[] =
-        "Force IPv4 DNS name resolution";
-static char const zIpv4_NAME[]               = "IPV4";
-static char const zIpv4_Name[]               = "ipv4";
-static const int
-    aIpv4CantList[] = {
+#define IPV4_DESC      (ntpd_opt_strs+1033)
+#define IPV4_NAME      (ntpd_opt_strs+1064)
+#define IPV4_name      (ntpd_opt_strs+1069)
+static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
-#define IPV4_FLAGS       (OPTST_DISABLED)
+#define IPV4_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Ipv6 option description with
+ *  ipv6 option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zIpv6Text[] =
-        "Force IPv6 DNS name resolution";
-static char const zIpv6_NAME[]               = "IPV6";
-static char const zIpv6_Name[]               = "ipv6";
-static const int
-    aIpv6CantList[] = {
+#define IPV6_DESC      (ntpd_opt_strs+1074)
+#define IPV6_NAME      (ntpd_opt_strs+1105)
+#define IPV6_name      (ntpd_opt_strs+1110)
+static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
-#define IPV6_FLAGS       (OPTST_DISABLED)
+#define IPV6_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Authreq option description with
+ *  authreq option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zAuthreqText[] =
-        "Require crypto authentication";
-static char const zAuthreq_NAME[]            = "AUTHREQ";
-static char const zAuthreq_Name[]            = "authreq";
-static const int
-    aAuthreqCantList[] = {
+#define AUTHREQ_DESC      (ntpd_opt_strs+1115)
+#define AUTHREQ_NAME      (ntpd_opt_strs+1145)
+#define AUTHREQ_name      (ntpd_opt_strs+1153)
+static int const aAuthreqCantList[] = {
     INDEX_OPT_AUTHNOREQ, NO_EQUIVALENT };
-#define AUTHREQ_FLAGS       (OPTST_DISABLED)
+#define AUTHREQ_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Authnoreq option description with
+ *  authnoreq option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zAuthnoreqText[] =
-        "Do not require crypto authentication";
-static char const zAuthnoreq_NAME[]          = "AUTHNOREQ";
-static char const zAuthnoreq_Name[]          = "authnoreq";
-static const int
-    aAuthnoreqCantList[] = {
+#define AUTHNOREQ_DESC      (ntpd_opt_strs+1161)
+#define AUTHNOREQ_NAME      (ntpd_opt_strs+1198)
+#define AUTHNOREQ_name      (ntpd_opt_strs+1208)
+static int const aAuthnoreqCantList[] = {
     INDEX_OPT_AUTHREQ, NO_EQUIVALENT };
-#define AUTHNOREQ_FLAGS       (OPTST_DISABLED)
+#define AUTHNOREQ_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Bcastsync option description:
+ *  bcastsync option description:
  */
-static char const zBcastsyncText[] =
-        "Allow us to sync to broadcast servers";
-static char const zBcastsync_NAME[]          = "BCASTSYNC";
-static char const zBcastsync_Name[]          = "bcastsync";
-#define BCASTSYNC_FLAGS       (OPTST_DISABLED)
+#define BCASTSYNC_DESC      (ntpd_opt_strs+1218)
+#define BCASTSYNC_NAME      (ntpd_opt_strs+1256)
+#define BCASTSYNC_name      (ntpd_opt_strs+1266)
+#define BCASTSYNC_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Configfile option description:
+ *  configfile option description:
  */
-static char const zConfigfileText[] =
-        "configuration file name";
-static char const zConfigfile_NAME[]         = "CONFIGFILE";
-static char const zConfigfile_Name[]         = "configfile";
-#define CONFIGFILE_FLAGS       (OPTST_DISABLED \
+#define CONFIGFILE_DESC      (ntpd_opt_strs+1276)
+#define CONFIGFILE_NAME      (ntpd_opt_strs+1300)
+#define CONFIGFILE_name      (ntpd_opt_strs+1311)
+#define CONFIGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Debug_Level option description:
+ *  debug-level option description:
  */
 #ifdef DEBUG
-static char const zDebug_LevelText[] =
-        "Increase output debug message level";
-static char const zDebug_Level_NAME[]        = "DEBUG_LEVEL";
-static char const zDebug_Level_Name[]        = "debug-level";
-#define DEBUG_LEVEL_FLAGS       (OPTST_DISABLED)
+#define DEBUG_LEVEL_DESC      (ntpd_opt_strs+1322)
+#define DEBUG_LEVEL_NAME      (ntpd_opt_strs+1358)
+#define DEBUG_LEVEL_name      (ntpd_opt_strs+1370)
+#define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
-#else   /* disable Debug_Level */
-#define DEBUG_LEVEL_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zDebug_Level_NAME      NULL
-static char const zDebug_Level_Name[] = "debug-level";
-static char const zDebug_LevelText[]  = "this package was built using 'configure --disable--debug'";
+#else   /* disable debug-level */
+#define DEBUG_LEVEL_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define DEBUG_LEVEL_NAME      NULL
+#define DEBUG_LEVEL_DESC      (ntpd_opt_strs+1382)
+#define DEBUG_LEVEL_name      (ntpd_opt_strs+1370)
 #endif  /* DEBUG */
 
 /*
- *  Set_Debug_Level option description:
+ *  set-debug-level option description:
  */
 #ifdef DEBUG
-static char const zSet_Debug_LevelText[] =
-        "Set the output debug message level";
-static char const zSet_Debug_Level_NAME[]    = "SET_DEBUG_LEVEL";
-static char const zSet_Debug_Level_Name[]    = "set-debug-level";
-#define SET_DEBUG_LEVEL_FLAGS       (OPTST_DISABLED \
+#define SET_DEBUG_LEVEL_DESC      (ntpd_opt_strs+1440)
+#define SET_DEBUG_LEVEL_NAME      (ntpd_opt_strs+1475)
+#define SET_DEBUG_LEVEL_name      (ntpd_opt_strs+1491)
+#define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-#else   /* disable Set_Debug_Level */
-#define SET_DEBUG_LEVEL_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zSet_Debug_Level_NAME      NULL
-static char const zSet_Debug_Level_Name[] = "set-debug-level";
-static char const zSet_Debug_LevelText[]  = "this package was built using 'configure --disable--debug'";
+#else   /* disable set-debug-level */
+#define SET_DEBUG_LEVEL_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define SET_DEBUG_LEVEL_NAME      NULL
+#define SET_DEBUG_LEVEL_DESC      (ntpd_opt_strs+1382)
+#define SET_DEBUG_LEVEL_name      (ntpd_opt_strs+1491)
 #endif  /* DEBUG */
 
 /*
- *  Driftfile option description:
+ *  driftfile option description:
  */
-static char const zDriftfileText[] =
-        "frequency drift file name";
-static char const zDriftfile_NAME[]          = "DRIFTFILE";
-static char const zDriftfile_Name[]          = "driftfile";
-#define DRIFTFILE_FLAGS       (OPTST_DISABLED \
+#define DRIFTFILE_DESC      (ntpd_opt_strs+1507)
+#define DRIFTFILE_NAME      (ntpd_opt_strs+1533)
+#define DRIFTFILE_name      (ntpd_opt_strs+1543)
+#define DRIFTFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Panicgate option description:
+ *  panicgate option description:
  */
-static char const zPanicgateText[] =
-        "Allow the first adjustment to be Big";
-static char const zPanicgate_NAME[]          = "PANICGATE";
-static char const zPanicgate_Name[]          = "panicgate";
-#define PANICGATE_FLAGS       (OPTST_DISABLED)
+#define PANICGATE_DESC      (ntpd_opt_strs+1553)
+#define PANICGATE_NAME      (ntpd_opt_strs+1590)
+#define PANICGATE_name      (ntpd_opt_strs+1600)
+#define PANICGATE_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Jaildir option description:
+ *  jaildir option description:
  */
 #ifdef HAVE_DROPROOT
-static char const zJaildirText[] =
-        "Jail directory";
-static char const zJaildir_NAME[]            = "JAILDIR";
-static char const zJaildir_Name[]            = "jaildir";
-#define JAILDIR_FLAGS       (OPTST_DISABLED \
+#define JAILDIR_DESC      (ntpd_opt_strs+1610)
+#define JAILDIR_NAME      (ntpd_opt_strs+1625)
+#define JAILDIR_name      (ntpd_opt_strs+1633)
+#define JAILDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-#else   /* disable Jaildir */
-#define JAILDIR_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zJaildir_NAME      NULL
-static char const zJaildir_Name[] = "jaildir";
-static char const zJaildirText[]  = "built without --enable-clockctl or --enable-linuxcaps";
+#else   /* disable jaildir */
+#define JAILDIR_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define JAILDIR_NAME      NULL
+#define JAILDIR_DESC      (ntpd_opt_strs+1641)
+#define JAILDIR_name      (ntpd_opt_strs+1633)
 #endif  /* HAVE_DROPROOT */
 
 /*
- *  Interface option description:
+ *  interface option description:
  */
-static char const zInterfaceText[] =
-        "Listen on an interface name or address";
-static char const zInterface_NAME[]          = "INTERFACE";
-static char const zInterface_Name[]          = "interface";
-#define INTERFACE_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+#define INTERFACE_DESC      (ntpd_opt_strs+1695)
+#define INTERFACE_NAME      (ntpd_opt_strs+1734)
+#define INTERFACE_name      (ntpd_opt_strs+1744)
+#define INTERFACE_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Keyfile option description:
+ *  keyfile option description:
  */
-static char const zKeyfileText[] =
-        "path to symmetric keys";
-static char const zKeyfile_NAME[]            = "KEYFILE";
-static char const zKeyfile_Name[]            = "keyfile";
-#define KEYFILE_FLAGS       (OPTST_DISABLED \
+#define KEYFILE_DESC      (ntpd_opt_strs+1754)
+#define KEYFILE_NAME      (ntpd_opt_strs+1777)
+#define KEYFILE_name      (ntpd_opt_strs+1785)
+#define KEYFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Logfile option description:
+ *  logfile option description:
  */
-static char const zLogfileText[] =
-        "path to the log file";
-static char const zLogfile_NAME[]            = "LOGFILE";
-static char const zLogfile_Name[]            = "logfile";
-#define LOGFILE_FLAGS       (OPTST_DISABLED \
+#define LOGFILE_DESC      (ntpd_opt_strs+1793)
+#define LOGFILE_NAME      (ntpd_opt_strs+1814)
+#define LOGFILE_name      (ntpd_opt_strs+1822)
+#define LOGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Novirtualips option description:
+ *  novirtualips option description:
  */
-static char const zNovirtualipsText[] =
-        "Do not listen to virtual interfaces";
-static char const zNovirtualips_NAME[]       = "NOVIRTUALIPS";
-static char const zNovirtualips_Name[]       = "novirtualips";
-#define NOVIRTUALIPS_FLAGS       (OPTST_DISABLED)
+#define NOVIRTUALIPS_DESC      (ntpd_opt_strs+1830)
+#define NOVIRTUALIPS_NAME      (ntpd_opt_strs+1866)
+#define NOVIRTUALIPS_name      (ntpd_opt_strs+1879)
+#define NOVIRTUALIPS_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Modifymmtimer option description:
+ *  modifymmtimer option description:
  */
 #ifdef SYS_WINNT
-static char const zModifymmtimerText[] =
-        "Modify Multimedia Timer (Windows only)";
-static char const zModifymmtimer_NAME[]      = "MODIFYMMTIMER";
-static char const zModifymmtimer_Name[]      = "modifymmtimer";
-#define MODIFYMMTIMER_FLAGS       (OPTST_DISABLED)
+#define MODIFYMMTIMER_DESC      (ntpd_opt_strs+1892)
+#define MODIFYMMTIMER_NAME      (ntpd_opt_strs+1931)
+#define MODIFYMMTIMER_name      (ntpd_opt_strs+1945)
+#define MODIFYMMTIMER_FLAGS     (OPTST_DISABLED)
 
-#else   /* disable Modifymmtimer */
-#define MODIFYMMTIMER_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zModifymmtimer_NAME      NULL
-#define zModifymmtimerText       NULL
-#define zModifymmtimer_Name      NULL
+#else   /* disable modifymmtimer */
+#define MODIFYMMTIMER_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define MODIFYMMTIMER_NAME      NULL
+#define MODIFYMMTIMER_DESC      NULL
+#define MODIFYMMTIMER_name      NULL
 #endif  /* SYS_WINNT */
 
 /*
- *  Nofork option description with
+ *  nofork option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zNoforkText[] =
-        "Do not fork";
-static char const zNofork_NAME[]             = "NOFORK";
-static char const zNofork_Name[]             = "nofork";
-static const int
-    aNoforkCantList[] = {
+#define NOFORK_DESC      (ntpd_opt_strs+1959)
+#define NOFORK_NAME      (ntpd_opt_strs+1971)
+#define NOFORK_name      (ntpd_opt_strs+1978)
+static int const aNoforkCantList[] = {
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
-#define NOFORK_FLAGS       (OPTST_DISABLED)
+#define NOFORK_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Nice option description:
+ *  nice option description:
  */
-static char const zNiceText[] =
-        "Run at high priority";
-static char const zNice_NAME[]               = "NICE";
-static char const zNice_Name[]               = "nice";
-#define NICE_FLAGS       (OPTST_DISABLED)
+#define NICE_DESC      (ntpd_opt_strs+1985)
+#define NICE_NAME      (ntpd_opt_strs+2006)
+#define NICE_name      (ntpd_opt_strs+2011)
+#define NICE_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Pidfile option description:
+ *  pidfile option description:
  */
-static char const zPidfileText[] =
-        "path to the PID file";
-static char const zPidfile_NAME[]            = "PIDFILE";
-static char const zPidfile_Name[]            = "pidfile";
-#define PIDFILE_FLAGS       (OPTST_DISABLED \
+#define PIDFILE_DESC      (ntpd_opt_strs+2016)
+#define PIDFILE_NAME      (ntpd_opt_strs+2037)
+#define PIDFILE_name      (ntpd_opt_strs+2045)
+#define PIDFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Priority option description:
+ *  priority option description:
  */
-static char const zPriorityText[] =
-        "Process priority";
-static char const zPriority_NAME[]           = "PRIORITY";
-static char const zPriority_Name[]           = "priority";
-#define PRIORITY_FLAGS       (OPTST_DISABLED \
+#define PRIORITY_DESC      (ntpd_opt_strs+2053)
+#define PRIORITY_NAME      (ntpd_opt_strs+2070)
+#define PRIORITY_name      (ntpd_opt_strs+2079)
+#define PRIORITY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
- *  Quit option description with
+ *  quit option description with
  *  "Must also have options" and "Incompatible options":
  */
-static char const zQuitText[] =
-        "Set the time and quit";
-static char const zQuit_NAME[]               = "QUIT";
-static char const zQuit_Name[]               = "quit";
-static const int
-    aQuitCantList[] = {
+#define QUIT_DESC      (ntpd_opt_strs+2088)
+#define QUIT_NAME      (ntpd_opt_strs+2110)
+#define QUIT_name      (ntpd_opt_strs+2115)
+static int const aQuitCantList[] = {
     INDEX_OPT_SAVECONFIGQUIT,
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
-#define QUIT_FLAGS       (OPTST_DISABLED)
+#define QUIT_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Propagationdelay option description:
+ *  propagationdelay option description:
  */
-static char const zPropagationdelayText[] =
-        "Broadcast/propagation delay";
-static char const zPropagationdelay_NAME[]   = "PROPAGATIONDELAY";
-static char const zPropagationdelay_Name[]   = "propagationdelay";
-#define PROPAGATIONDELAY_FLAGS       (OPTST_DISABLED \
+#define PROPAGATIONDELAY_DESC      (ntpd_opt_strs+2120)
+#define PROPAGATIONDELAY_NAME      (ntpd_opt_strs+2148)
+#define PROPAGATIONDELAY_name      (ntpd_opt_strs+2165)
+#define PROPAGATIONDELAY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Saveconfigquit option description with
+ *  saveconfigquit option description with
  *  "Must also have options" and "Incompatible options":
  */
 #ifdef SAVECONFIG
-static char const zSaveconfigquitText[] =
-        "Save parsed configuration and quit";
-static char const zSaveconfigquit_NAME[]     = "SAVECONFIGQUIT";
-static char const zSaveconfigquit_Name[]     = "saveconfigquit";
-static const int
-    aSaveconfigquitCantList[] = {
+#define SAVECONFIGQUIT_DESC      (ntpd_opt_strs+2182)
+#define SAVECONFIGQUIT_NAME      (ntpd_opt_strs+2217)
+#define SAVECONFIGQUIT_name      (ntpd_opt_strs+2232)
+static int const aSaveconfigquitCantList[] = {
     INDEX_OPT_QUIT,
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
-#define SAVECONFIGQUIT_FLAGS       (OPTST_DISABLED \
+#define SAVECONFIGQUIT_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-#else   /* disable Saveconfigquit */
-#define SAVECONFIGQUIT_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#else   /* disable saveconfigquit */
+#define SAVECONFIGQUIT_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
 #define aSaveconfigquitCantList   NULL
-#define zSaveconfigquit_NAME      NULL
-#define zSaveconfigquitText       NULL
-#define zSaveconfigquit_Name      NULL
+#define SAVECONFIGQUIT_NAME      NULL
+#define SAVECONFIGQUIT_DESC      NULL
+#define SAVECONFIGQUIT_name      NULL
 #endif  /* SAVECONFIG */
 
 /*
- *  Statsdir option description:
+ *  statsdir option description:
  */
-static char const zStatsdirText[] =
-        "Statistics file location";
-static char const zStatsdir_NAME[]           = "STATSDIR";
-static char const zStatsdir_Name[]           = "statsdir";
-#define STATSDIR_FLAGS       (OPTST_DISABLED \
+#define STATSDIR_DESC      (ntpd_opt_strs+2247)
+#define STATSDIR_NAME      (ntpd_opt_strs+2272)
+#define STATSDIR_name      (ntpd_opt_strs+2281)
+#define STATSDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Trustedkey option description:
+ *  trustedkey option description:
  */
-static char const zTrustedkeyText[] =
-        "Trusted key number";
-static char const zTrustedkey_NAME[]         = "TRUSTEDKEY";
-static char const zTrustedkey_Name[]         = "trustedkey";
-#define TRUSTEDKEY_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+#define TRUSTEDKEY_DESC      (ntpd_opt_strs+2290)
+#define TRUSTEDKEY_NAME      (ntpd_opt_strs+2309)
+#define TRUSTEDKEY_name      (ntpd_opt_strs+2320)
+#define TRUSTEDKEY_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  User option description:
+ *  user option description:
  */
 #ifdef HAVE_DROPROOT
-static char const zUserText[] =
-        "Run as userid (or userid:groupid)";
-static char const zUser_NAME[]               = "USER";
-static char const zUser_Name[]               = "user";
-#define USER_FLAGS       (OPTST_DISABLED \
+#define USER_DESC      (ntpd_opt_strs+2331)
+#define USER_NAME      (ntpd_opt_strs+2365)
+#define USER_name      (ntpd_opt_strs+2370)
+#define USER_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-#else   /* disable User */
-#define USER_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zUser_NAME      NULL
-static char const zUser_Name[] = "user";
-static char const zUserText[]  = "built without --enable-clockctl or --enable-linuxcaps";
+#else   /* disable user */
+#define USER_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define USER_NAME      NULL
+#define USER_DESC      (ntpd_opt_strs+1641)
+#define USER_name      (ntpd_opt_strs+2370)
 #endif  /* HAVE_DROPROOT */
 
 /*
- *  Updateinterval option description:
+ *  updateinterval option description:
  */
-static char const zUpdateintervalText[] =
-        "interval in seconds between scans for new or dropped interfaces";
-static char const zUpdateinterval_NAME[]     = "UPDATEINTERVAL";
-static char const zUpdateinterval_Name[]     = "updateinterval";
-#define UPDATEINTERVAL_FLAGS       (OPTST_DISABLED \
+#define UPDATEINTERVAL_DESC      (ntpd_opt_strs+2375)
+#define UPDATEINTERVAL_NAME      (ntpd_opt_strs+2439)
+#define UPDATEINTERVAL_name      (ntpd_opt_strs+2454)
+#define UPDATEINTERVAL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
- *  Var option description:
+ *  var option description:
  */
-static char const zVarText[] =
-        "make ARG an ntp variable (RW)";
-static char const zVar_NAME[]                = "VAR";
-static char const zVar_Name[]                = "var";
-#define VAR_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+#define VAR_DESC      (ntpd_opt_strs+2469)
+#define VAR_NAME      (ntpd_opt_strs+2499)
+#define VAR_name      (ntpd_opt_strs+2503)
+#define VAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Dvar option description:
+ *  dvar option description:
  */
-static char const zDvarText[] =
-        "make ARG an ntp variable (RW|DEF)";
-static char const zDvar_NAME[]               = "DVAR";
-static char const zDvar_Name[]               = "dvar";
-#define DVAR_FLAGS       (OPTST_DISABLED | OPTST_STACKED \
+#define DVAR_DESC      (ntpd_opt_strs+2507)
+#define DVAR_NAME      (ntpd_opt_strs+2541)
+#define DVAR_name      (ntpd_opt_strs+2546)
+#define DVAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
- *  Wait_Sync option description with
+ *  wait-sync option description with
  *  "Must also have options" and "Incompatible options":
  */
 #ifdef HAVE_WORKING_FORK
-static char const zWait_SyncText[] =
-        "Seconds to wait for first clock sync";
-static char const zWait_Sync_NAME[]          = "WAIT_SYNC";
-static char const zWait_Sync_Name[]          = "wait-sync";
-static const int
-    aWait_SyncCantList[] = {
+#define WAIT_SYNC_DESC      (ntpd_opt_strs+2551)
+#define WAIT_SYNC_NAME      (ntpd_opt_strs+2588)
+#define WAIT_SYNC_name      (ntpd_opt_strs+2598)
+static int const aWait_SyncCantList[] = {
     INDEX_OPT_NOFORK,
     INDEX_OPT_QUIT,
     INDEX_OPT_SAVECONFIGQUIT, NO_EQUIVALENT };
-#define WAIT_SYNC_FLAGS       (OPTST_DISABLED \
+#define WAIT_SYNC_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-#else   /* disable Wait_Sync */
-#define WAIT_SYNC_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
+#else   /* disable wait-sync */
+#define WAIT_SYNC_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
 #define aWait_SyncCantList   NULL
-#define zWait_Sync_NAME      NULL
-#define zWait_SyncText       NULL
-#define zWait_Sync_Name      NULL
+#define WAIT_SYNC_NAME      NULL
+#define WAIT_SYNC_DESC      NULL
+#define WAIT_SYNC_name      NULL
 #endif  /* HAVE_WORKING_FORK */
 
 /*
- *  Slew option description:
+ *  slew option description:
  */
-static char const zSlewText[] =
-        "Slew up to 600 seconds";
-static char const zSlew_NAME[]               = "SLEW";
-static char const zSlew_Name[]               = "slew";
-#define SLEW_FLAGS       (OPTST_DISABLED)
+#define SLEW_DESC      (ntpd_opt_strs+2608)
+#define SLEW_NAME      (ntpd_opt_strs+2631)
+#define SLEW_name      (ntpd_opt_strs+2636)
+#define SLEW_FLAGS     (OPTST_DISABLED)
 
 /*
- *  Usepcc option description:
+ *  usepcc option description:
  */
 #ifdef SYS_WINNT
-static char const zUsepccText[] =
-        "Use CPU cycle counter (Windows only)";
-static char const zUsepcc_NAME[]             = "USEPCC";
-static char const zUsepcc_Name[]             = "usepcc";
-#define USEPCC_FLAGS       (OPTST_DISABLED)
+#define USEPCC_DESC      (ntpd_opt_strs+2641)
+#define USEPCC_NAME      (ntpd_opt_strs+2678)
+#define USEPCC_name      (ntpd_opt_strs+2685)
+#define USEPCC_FLAGS     (OPTST_DISABLED)
 
-#else   /* disable Usepcc */
-#define USEPCC_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zUsepcc_NAME      NULL
-#define zUsepccText       NULL
-#define zUsepcc_Name      NULL
+#else   /* disable usepcc */
+#define USEPCC_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define USEPCC_NAME      NULL
+#define USEPCC_DESC      NULL
+#define USEPCC_name      NULL
 #endif  /* SYS_WINNT */
 
 /*
- *  Pccfreq option description:
+ *  pccfreq option description:
  */
 #ifdef SYS_WINNT
-static char const zPccfreqText[] =
-        "Force CPU cycle counter use (Windows only)";
-static char const zPccfreq_NAME[]            = "PCCFREQ";
-static char const zPccfreq_Name[]            = "pccfreq";
-#define PCCFREQ_FLAGS       (OPTST_DISABLED \
+#define PCCFREQ_DESC      (ntpd_opt_strs+2692)
+#define PCCFREQ_NAME      (ntpd_opt_strs+2735)
+#define PCCFREQ_name      (ntpd_opt_strs+2743)
+#define PCCFREQ_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-#else   /* disable Pccfreq */
-#define PCCFREQ_FLAGS       (OPTST_OMITTED | OPTST_NO_INIT)
-#define zPccfreq_NAME      NULL
-#define zPccfreqText       NULL
-#define zPccfreq_Name      NULL
+#else   /* disable pccfreq */
+#define PCCFREQ_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define PCCFREQ_NAME      NULL
+#define PCCFREQ_DESC      NULL
+#define PCCFREQ_name      NULL
 #endif  /* SYS_WINNT */
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-static char const zHelpText[]          = "Display extended usage information and exit";
-static char const zHelp_Name[]         = "help";
+#define HELP_DESC       (ntpd_opt_strs+2751)
+#define HELP_name       (ntpd_opt_strs+2795)
 #ifdef HAVE_WORKING_FORK
-#define OPTST_MORE_HELP_FLAGS   (OPTST_IMM | OPTST_NO_INIT)
-static char const zMore_Help_Name[]    = "more-help";
-static char const zMore_HelpText[]     = "Extended usage information passed thru pager";
+#define MORE_HELP_DESC  (ntpd_opt_strs+2800)
+#define MORE_HELP_name  (ntpd_opt_strs+2845)
+#define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
-#define OPTST_MORE_HELP_FLAGS   (OPTST_OMITTED | OPTST_NO_INIT)
-#define zMore_Help_Name   NULL
-#define zMore_HelpText    NULL
+#define MORE_HELP_DESC  NULL
+#define MORE_HELP_name  NULL
+#define MORE_HELP_FLAGS (OPTST_OMITTED | OPTST_NO_INIT)
 #endif
 #ifdef NO_OPTIONAL_OPT_ARGS
-#  define OPTST_VERSION_FLAGS   OPTST_IMM | OPTST_NO_INIT
+#  define VER_FLAGS     (OPTST_IMM | OPTST_NO_INIT)
 #else
-#  define OPTST_VERSION_FLAGS   OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
-                                OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT
+#  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
+                         OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-
-static char const zVersionText[]       = "Output version information and exit";
-static char const zVersion_Name[]      = "version";
+#define VER_DESC        (ntpd_opt_strs+2855)
+#define VER_name        (ntpd_opt_strs+2891)
 /*
  *  Declare option callback procedures
  */
@@ -565,7 +640,7 @@ extern tOptProc
     optionBooleanVal,    optionNestedVal,     optionNumericVal,
     optionPagedUsage,    optionPrintVersion,  optionResetOpt,
     optionStackArg,      optionTimeDate,      optionTimeVal,
-    optionUnstackArg,    optionVersionStderr;
+    optionUnstackArg,    optionVendorOption,  optionVersionStderr;
 static tOptProc
     doUsageOpt;
 
@@ -577,9 +652,9 @@ static tOptProc
 #define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
 #endif /* defined(TEST_NTPD_OPTS) */
 #ifdef TEST_NTPD_OPTS
-# define DOVERPROC optionVersionStderr
+# define VER_PROC       optionVersionStderr
 #else
-# define DOVERPROC optionPrintVersion
+# define VER_PROC       optionPrintVersion
 #endif /* TEST_NTPD_OPTS */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -592,11 +667,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV4_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --ipv4 */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aIpv4CantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zIpv4Text, zIpv4_NAME, zIpv4_Name,
+     /* desc, NAME, name */ IPV4_DESC, IPV4_NAME, IPV4_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 1, VALUE_OPT_IPV6,
@@ -604,11 +679,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ IPV6_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --ipv6 */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aIpv6CantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zIpv6Text, zIpv6_NAME, zIpv6_Name,
+     /* desc, NAME, name */ IPV6_DESC, IPV6_NAME, IPV6_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 2, VALUE_OPT_AUTHREQ,
@@ -616,11 +691,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ AUTHREQ_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --authreq */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aAuthreqCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zAuthreqText, zAuthreq_NAME, zAuthreq_Name,
+     /* desc, NAME, name */ AUTHREQ_DESC, AUTHREQ_NAME, AUTHREQ_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 3, VALUE_OPT_AUTHNOREQ,
@@ -628,11 +703,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ AUTHNOREQ_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --authnoreq */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aAuthnoreqCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zAuthnoreqText, zAuthnoreq_NAME, zAuthnoreq_Name,
+     /* desc, NAME, name */ AUTHNOREQ_DESC, AUTHNOREQ_NAME, AUTHNOREQ_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 4, VALUE_OPT_BCASTSYNC,
@@ -640,11 +715,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ BCASTSYNC_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --bcastsync */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zBcastsyncText, zBcastsync_NAME, zBcastsync_Name,
+     /* desc, NAME, name */ BCASTSYNC_DESC, BCASTSYNC_NAME, BCASTSYNC_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 5, VALUE_OPT_CONFIGFILE,
@@ -652,11 +727,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ CONFIGFILE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --configfile */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zConfigfileText, zConfigfile_NAME, zConfigfile_Name,
+     /* desc, NAME, name */ CONFIGFILE_DESC, CONFIGFILE_NAME, CONFIGFILE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 6, VALUE_OPT_DEBUG_LEVEL,
@@ -664,11 +739,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DEBUG_LEVEL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zDebug_LevelText, zDebug_Level_NAME, zDebug_Level_Name,
+     /* desc, NAME, name */ DEBUG_LEVEL_DESC, DEBUG_LEVEL_NAME, DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 7, VALUE_OPT_SET_DEBUG_LEVEL,
@@ -676,11 +751,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ SET_DEBUG_LEVEL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --set-debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
-     /* desc, NAME, name */ zSet_Debug_LevelText, zSet_Debug_Level_NAME, zSet_Debug_Level_Name,
+     /* desc, NAME, name */ SET_DEBUG_LEVEL_DESC, SET_DEBUG_LEVEL_NAME, SET_DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 8, VALUE_OPT_DRIFTFILE,
@@ -688,11 +763,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ DRIFTFILE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --driftfile */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zDriftfileText, zDriftfile_NAME, zDriftfile_Name,
+     /* desc, NAME, name */ DRIFTFILE_DESC, DRIFTFILE_NAME, DRIFTFILE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 9, VALUE_OPT_PANICGATE,
@@ -700,11 +775,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ PANICGATE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --panicgate */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zPanicgateText, zPanicgate_NAME, zPanicgate_Name,
+     /* desc, NAME, name */ PANICGATE_DESC, PANICGATE_NAME, PANICGATE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 10, VALUE_OPT_JAILDIR,
@@ -712,11 +787,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ JAILDIR_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --jaildir */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zJaildirText, zJaildir_NAME, zJaildir_Name,
+     /* desc, NAME, name */ JAILDIR_DESC, JAILDIR_NAME, JAILDIR_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 11, VALUE_OPT_INTERFACE,
@@ -724,11 +799,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ INTERFACE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --interface */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionStackArg,
-     /* desc, NAME, name */ zInterfaceText, zInterface_NAME, zInterface_Name,
+     /* desc, NAME, name */ INTERFACE_DESC, INTERFACE_NAME, INTERFACE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 12, VALUE_OPT_KEYFILE,
@@ -736,11 +811,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ KEYFILE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --keyfile */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zKeyfileText, zKeyfile_NAME, zKeyfile_Name,
+     /* desc, NAME, name */ KEYFILE_DESC, KEYFILE_NAME, KEYFILE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 13, VALUE_OPT_LOGFILE,
@@ -748,11 +823,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ LOGFILE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --logfile */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zLogfileText, zLogfile_NAME, zLogfile_Name,
+     /* desc, NAME, name */ LOGFILE_DESC, LOGFILE_NAME, LOGFILE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 14, VALUE_OPT_NOVIRTUALIPS,
@@ -760,11 +835,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NOVIRTUALIPS_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --novirtualips */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zNovirtualipsText, zNovirtualips_NAME, zNovirtualips_Name,
+     /* desc, NAME, name */ NOVIRTUALIPS_DESC, NOVIRTUALIPS_NAME, NOVIRTUALIPS_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 15, VALUE_OPT_MODIFYMMTIMER,
@@ -772,11 +847,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ MODIFYMMTIMER_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --modifymmtimer */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zModifymmtimerText, zModifymmtimer_NAME, zModifymmtimer_Name,
+     /* desc, NAME, name */ MODIFYMMTIMER_DESC, MODIFYMMTIMER_NAME, MODIFYMMTIMER_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 16, VALUE_OPT_NOFORK,
@@ -784,11 +859,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NOFORK_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --nofork */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aNoforkCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zNoforkText, zNofork_NAME, zNofork_Name,
+     /* desc, NAME, name */ NOFORK_DESC, NOFORK_NAME, NOFORK_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 17, VALUE_OPT_NICE,
@@ -796,11 +871,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ NICE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --nice */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zNiceText, zNice_NAME, zNice_Name,
+     /* desc, NAME, name */ NICE_DESC, NICE_NAME, NICE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 18, VALUE_OPT_PIDFILE,
@@ -808,11 +883,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PIDFILE_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --pidfile */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zPidfileText, zPidfile_NAME, zPidfile_Name,
+     /* desc, NAME, name */ PIDFILE_DESC, PIDFILE_NAME, PIDFILE_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 19, VALUE_OPT_PRIORITY,
@@ -820,11 +895,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PRIORITY_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --priority */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zPriorityText, zPriority_NAME, zPriority_Name,
+     /* desc, NAME, name */ PRIORITY_DESC, PRIORITY_NAME, PRIORITY_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 20, VALUE_OPT_QUIT,
@@ -832,11 +907,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ QUIT_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --quit */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aQuitCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zQuitText, zQuit_NAME, zQuit_Name,
+     /* desc, NAME, name */ QUIT_DESC, QUIT_NAME, QUIT_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 21, VALUE_OPT_PROPAGATIONDELAY,
@@ -844,11 +919,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PROPAGATIONDELAY_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --propagationdelay */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zPropagationdelayText, zPropagationdelay_NAME, zPropagationdelay_Name,
+     /* desc, NAME, name */ PROPAGATIONDELAY_DESC, PROPAGATIONDELAY_NAME, PROPAGATIONDELAY_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 22, VALUE_OPT_SAVECONFIGQUIT,
@@ -856,11 +931,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SAVECONFIGQUIT_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --saveconfigquit */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aSaveconfigquitCantList,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zSaveconfigquitText, zSaveconfigquit_NAME, zSaveconfigquit_Name,
+     /* desc, NAME, name */ SAVECONFIGQUIT_DESC, SAVECONFIGQUIT_NAME, SAVECONFIGQUIT_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 23, VALUE_OPT_STATSDIR,
@@ -868,11 +943,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ STATSDIR_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --statsdir */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zStatsdirText, zStatsdir_NAME, zStatsdir_Name,
+     /* desc, NAME, name */ STATSDIR_DESC, STATSDIR_NAME, STATSDIR_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 24, VALUE_OPT_TRUSTEDKEY,
@@ -880,11 +955,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ TRUSTEDKEY_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --trustedkey */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionStackArg,
-     /* desc, NAME, name */ zTrustedkeyText, zTrustedkey_NAME, zTrustedkey_Name,
+     /* desc, NAME, name */ TRUSTEDKEY_DESC, TRUSTEDKEY_NAME, TRUSTEDKEY_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 25, VALUE_OPT_USER,
@@ -892,11 +967,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USER_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --user */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zUserText, zUser_NAME, zUser_Name,
+     /* desc, NAME, name */ USER_DESC, USER_NAME, USER_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 26, VALUE_OPT_UPDATEINTERVAL,
@@ -904,11 +979,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ UPDATEINTERVAL_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --updateinterval */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zUpdateintervalText, zUpdateinterval_NAME, zUpdateinterval_Name,
+     /* desc, NAME, name */ UPDATEINTERVAL_DESC, UPDATEINTERVAL_NAME, UPDATEINTERVAL_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 27, VALUE_OPT_VAR,
@@ -916,11 +991,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ VAR_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --var */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionStackArg,
-     /* desc, NAME, name */ zVarText, zVar_NAME, zVar_Name,
+     /* desc, NAME, name */ VAR_DESC, VAR_NAME, VAR_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 28, VALUE_OPT_DVAR,
@@ -928,11 +1003,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ DVAR_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --dvar */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ optionStackArg,
-     /* desc, NAME, name */ zDvarText, zDvar_NAME, zDvar_Name,
+     /* desc, NAME, name */ DVAR_DESC, DVAR_NAME, DVAR_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 29, VALUE_OPT_WAIT_SYNC,
@@ -940,11 +1015,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ WAIT_SYNC_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --wait-sync */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, aWait_SyncCantList,
      /* option proc      */ optionNumericVal,
-     /* desc, NAME, name */ zWait_SyncText, zWait_Sync_NAME, zWait_Sync_Name,
+     /* desc, NAME, name */ WAIT_SYNC_DESC, WAIT_SYNC_NAME, WAIT_SYNC_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 30, VALUE_OPT_SLEW,
@@ -952,11 +1027,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ SLEW_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --slew */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zSlewText, zSlew_NAME, zSlew_Name,
+     /* desc, NAME, name */ SLEW_DESC, SLEW_NAME, SLEW_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 31, VALUE_OPT_USEPCC,
@@ -964,11 +1039,11 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ USEPCC_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --usepcc */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zUsepccText, zUsepcc_NAME, zUsepcc_Name,
+     /* desc, NAME, name */ USEPCC_DESC, USEPCC_NAME, USEPCC_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ 32, VALUE_OPT_PCCFREQ,
@@ -976,29 +1051,29 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ PCCFREQ_FLAGS, 0,
-     /* last opt argumnt */ { NULL },
+     /* last opt argumnt */ { NULL }, /* --pccfreq */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ NULL,
-     /* desc, NAME, name */ zPccfreqText, zPccfreq_NAME, zPccfreq_Name,
+     /* desc, NAME, name */ PCCFREQ_DESC, PCCFREQ_NAME, PCCFREQ_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_VERSION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_VERSION_FLAGS, 0,
+     /* opt state flags  */ VER_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ DOVERPROC,
-     /* desc, NAME, name */ zVersionText, NULL, zVersion_Name,
+     /* option proc      */ VER_PROC,
+     /* desc, NAME, name */ VER_DESC, NULL, VER_name,
      /* disablement strs */ NULL, NULL },
 
 
 
   {  /* entry idx, value */ INDEX_OPT_HELP, VALUE_OPT_HELP,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, 0,
@@ -1006,39 +1081,36 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
      /* option proc      */ doUsageOpt,
-     /* desc, NAME, name */ zHelpText, NULL, zHelp_Name,
+     /* desc, NAME, name */ HELP_DESC, NULL, HELP_name,
      /* disablement strs */ NULL, NULL },
 
   {  /* entry idx, value */ INDEX_OPT_MORE_HELP, VALUE_OPT_MORE_HELP,
-     /* equiv idx value  */ NO_EQUIVALENT, 0,
+     /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_MORE_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_MORE_HELP_FLAGS, 0,
+     /* opt state flags  */ MORE_HELP_FLAGS, 0,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
      /* option proc      */ optionPagedUsage,
-     /* desc, NAME, name */ zMore_HelpText, NULL, zMore_Help_Name,
+     /* desc, NAME, name */ MORE_HELP_DESC, NULL, MORE_HELP_name,
      /* disablement strs */ NULL, NULL }
 };
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
  *  Define the Ntpd Option Environment
  */
-static char const zPROGNAME[5] = "NTPD";
-static char const zUsageTitle[133] =
-"ntpd - NTP daemon program - Ver. 4.2.7p251\n\
-USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
-\t\t[ <server1> ... <serverN> ]\n";
-#define zRcName     NULL
-#define apzHomeList NULL
-
-static char const zBugsAddr[34]    = "http://bugs.ntp.org, bugs@ntp.org";
-static char const zExplain[] = "\n\n";
-#define zDetail         NULL
-static char const zFullVersion[] = NTPD_FULL_VERSION;
-/* extracted from optcode.tlib near line 515 */
+#define zPROGNAME       (ntpd_opt_strs+2899)
+#define zUsageTitle     (ntpd_opt_strs+2904)
+#define zRcName         NULL
+#define apzHomeList     NULL
+#define zBugsAddr       (ntpd_opt_strs+3037)
+#define zExplain        (ntpd_opt_strs+3071)
+#define zDetail         (NULL)
+#define zFullVersion    (ntpd_opt_strs+3074)
+/* extracted from optcode.tlib near line 315 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -1049,8 +1121,55 @@ static char const zFullVersion[] = NTPD_FULL_VERSION;
 #endif /* ENABLE_NLS */
 
 
-#define ntpd_full_usage NULL
-#define ntpd_short_usage NULL
+#define ntpd_full_usage (NULL)
+
+#define ntpd_short_usage (NULL)
+
+/*
+ *  Create the static procedure(s) declared above.
+ */
+static void
+doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
+{
+    (void)pOptions;
+    USAGE(NTPD_EXIT_SUCCESS);
+}
+
+#if ! defined(TEST_NTPD_OPTS)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *   For the set-debug-level option, when DEBUG is #define-d.
+ */
+#ifdef DEBUG
+static void
+doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
+{
+    /* extracted from ntpdbase-opts.def, line 100 */
+DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
+}
+#endif /* defined DEBUG */
+#endif /* defined(TEST_NTPD_OPTS) */
+/* extracted from optmain.tlib near line 128 */
+
+#if defined(TEST_NTPD_OPTS) /* TEST MAIN PROCEDURE: */
+
+extern void optionPutShell(tOptions*);
+
+int
+main(int argc, char ** argv)
+{
+    int res = NTPD_EXIT_SUCCESS;
+    (void)optionProcess(&ntpdOptions, argc, argv);
+    optionPutShell(&ntpdOptions);
+    res = ferror(stdout);
+    if (res != 0)
+        fputs("output error writing to stdout\n", stderr);
+    return res;
+}
+#endif  /* defined TEST_NTPD_OPTS */
+/* extracted from optmain.tlib near line 1148 */
+
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
 #endif
@@ -1103,51 +1222,6 @@ tOptions ntpdOptions = {
     NULL, NULL,
     PKGDATADIR, ntpd_packager_info
 };
-
-/*
- *  Create the static procedure(s) declared above.
- */
-static void
-doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
-{
-    (void)pOptions;
-    USAGE(NTPD_EXIT_SUCCESS);
-}
-
-#if ! defined(TEST_NTPD_OPTS)
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *   For the set-debug-level option, when DEBUG is #define-d.
- */
-#ifdef DEBUG
-static void
-doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
-{
-    /* extracted from ntpdbase-opts.def, line 100 */
-DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
-}
-#endif /* defined DEBUG */
-#endif /* defined(TEST_NTPD_OPTS) */
-/* extracted from optmain.tlib near line 128 */
-
-#if defined(TEST_NTPD_OPTS) /* TEST MAIN PROCEDURE: */
-
-extern void optionPutShell(tOptions*);
-
-int
-main(int argc, char ** argv)
-{
-    int res = NTPD_EXIT_SUCCESS;
-    (void)optionProcess(&ntpdOptions, argc, argv);
-    optionPutShell(&ntpdOptions);
-    res = ferror(stdout);
-    if (res != 0)
-        fputs("output error writing to stdout\n", stderr);
-    return res;
-}
-#endif  /* defined TEST_NTPD_OPTS */
-/* extracted from optcode.tlib near line 666 */
 
 #if ENABLE_NLS
 #include <stdio.h>
