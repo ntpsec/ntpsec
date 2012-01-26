@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "25 Jan 2012" "ntp (4.2.7p252)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "26 Jan 2012" "ntp (4.2.7p253)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January 25, 2012 at 12:05:03 PM by AutoGen 5.14
+.\"  It has been AutoGen-ed  January 26, 2012 at 06:04:29 AM by AutoGen 5.14
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -921,9 +921,9 @@ Successful program execution.
 .BR 1
 The operation failed or the command syntax was not valid.
 .SH "AUTHORS"
-The University of Delaware, David L. Mills, and/or others
+The University of Delaware
 .SH "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others all rights reserved.
+Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 It can take quite a while to generate some cryptographic values,

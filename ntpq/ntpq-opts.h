@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  January 25, 2012 at 12:04:12 PM by AutoGen 5.14
+ *  It has been AutoGen-ed  January 26, 2012 at 06:04:00 AM by AutoGen 5.14
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -18,20 +18,20 @@
  * The ntpq program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others, all rights reserved.
+ *  Copyright (C) 1970-2012 The University of Delaware, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
  *    <http://ntp.org/license>
- *    <http://opensource.org/licenses/NTP>
+ *    <http://opensource.org/licenses/ntp-license.php>
  *
  *  Permission to use, copy, modify, and distribute this software and its
  *  documentation for any purpose with or without fee is hereby granted,
  *  provided that the above copyright notice appears in all copies and that
  *  both the copyright notice and this permission notice appear in
- *  supporting documentation, and that the name The University of Delaware, David L. Mills, and/or others not be used in
+ *  supporting documentation, and that the name The University of Delaware not be used in
  *  advertising or publicity pertaining to distribution of the software
- *  without specific, written prior permission. The University of Delaware, David L. Mills, and/or others makes no
+ *  without specific, written prior permission. The University of Delaware makes no
  *  representations about the suitability this software for any purpose. It
  *  is provided "as is" without express or implied warranty.
  */
@@ -81,8 +81,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    14
-#define NTPQ_VERSION       "4.2.7p252"
-#define NTPQ_FULL_VERSION  "ntpq 4.2.7p252"
+#define NTPQ_VERSION       "4.2.7p253"
+#define NTPQ_FULL_VERSION  "ntpq 4.2.7p253"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED

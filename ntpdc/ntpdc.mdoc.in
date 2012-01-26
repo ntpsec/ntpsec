@@ -1,9 +1,9 @@
-.Dd January 25 2012
+.Dd January 26 2012
 .Dt NTPDC @NTPDC_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January 25, 2012 at 12:04:11 PM by AutoGen 5.14
+.\"  It has been AutoGen-ed  January 26, 2012 at 06:03:59 AM by AutoGen 5.14
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -773,7 +773,7 @@ The operation failed or the command syntax was not valid.
 .Sh AUTHORS
 The formatting directives in this document came from FreeBSD.
 .Sh "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others all rights reserved.
+Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh BUGS
 The

@@ -1,8 +1,8 @@
-.TH ntpsnmpd @NTPSNMPD_MS@ "25 Jan 2012" "4.2.7p252" "User Commands"
+.TH ntpsnmpd @NTPSNMPD_MS@ "26 Jan 2012" "4.2.7p253" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January 25, 2012 at 12:04:43 PM by AutoGen 5.14
+.\"  It has been AutoGen-ed  January 26, 2012 at 06:04:14 AM by AutoGen 5.14
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -83,7 +83,7 @@ The operation failed or the command syntax was not valid.
 .SH AUTHORS
 .An "Heiko Gerstung"
 .SH "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware, David L. Mills, and/or others all rights reserved.
+Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
