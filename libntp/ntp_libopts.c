@@ -15,20 +15,13 @@
 
 extern const char *Version;	/* version.c for each program */
 
-typedef struct options_fv_tag {
-	u_char		padding[offsetof(tOptions, pzFullVersion)];
-	const char *	pzFullVersion;
-} options_fv;
-
-typedef union options_const_trick_tag {
-	tOptions	orig;	/* for alignment */
-	options_fv	fv;
-} options_const_trick;
 
 /*
- * ntpOptionProcess() is a clone of libopts' optionProcess which
- * overrides the --version output, appending detail from version.c
- * which was not available at Autogen time.
+ * ntpOptionProcess() was a clone of libopts' optionProcess which
+ * overrode the --version output, appending detail from version.c
+ * which was not available at Autogen time.  This is now done via
+ * AutoOpts' version-proc = override in copyright.def, so this
+ * routine is a straightforward wrapper of optionProcess().
  */
 int
 ntpOptionProcess(
@@ -37,24 +30,29 @@ ntpOptionProcess(
 	char **		argv
 	)
 {
-	options_const_trick *	pOpts_fv;
-	const char *		pzAutogenFV;
-	char *			pzNewFV;
-	size_t			octets;
-	int			rc;
+	return optionProcess(pOpts, argc, argv);
+}
 
-	pOpts_fv = (void *)pOpts;
-	pzAutogenFV = pOpts_fv->fv.pzFullVersion;
-	octets = strlen(pzAutogenFV) +
-		 1 +	/* '\n' */
-		 strlen(Version) +
-		 1;	/* '\0' */
-	pzNewFV = emalloc(octets);
-	snprintf(pzNewFV, octets, "%s\n%s", pzAutogenFV, Version);
-	pOpts_fv->fv.pzFullVersion = pzNewFV;
-	rc = optionProcess(pOpts, argc, argv);
-	pOpts_fv->fv.pzFullVersion = pzAutogenFV;
-	free(pzNewFV);
 
-	return rc;
+/*
+ * ntpOptionPrintVersion() replaces the stock optionPrintVersion() via
+ * version-proc = ntpOptionPrintVersion; in copyright.def.  It differs
+ * from the stock function by displaying the complete version string,
+ * including compile time which was unknown when Autogen ran.
+ *
+ * Like optionPrintVersion() this function must exit(0) rather than
+ * return.
+ */
+void
+ntpOptionPrintVersion(
+	tOptions *	pOpts,
+	tOptDesc *	pOD
+	)
+{
+	UNUSED_ARG(pOpts);
+	UNUSED_ARG(pOD);
+
+	printf("%s\n", Version);
+	fflush(stdout);
+	exit(EXIT_SUCCESS);
 }

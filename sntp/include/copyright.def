@@ -2,7 +2,7 @@
 
 copyright = {
     date  = "1970-2012";
-    owner = "The University of Delaware, David L. Mills, and/or others";
+    owner = "The University of Delaware";
     eaddr = "http://bugs.ntp.org, bugs@ntp.org";
     type  = ntp;
 };
@@ -11,6 +11,7 @@ long-opts;
 config-header  = config.h;
 environrc;
 no-misuse-usage;
+version-proc = ntpOptionPrintVersion;
 
 version         = `
 eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../sntp/m4/version.m4\`
