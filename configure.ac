@@ -370,11 +370,10 @@ case "$host" in
 esac
 case "$HAVE_ADJTIMEX" in
  '')
-    AC_CHECK_LIB([elf], [nlist])	dnl Only needed for tickadj...
-    dnl AC_CHECK_LIB(kvm, main, , , -lelf)
-    AC_CHECK_LIB([kvm], [main])		dnl We already know about -lelf here...
-    AC_CHECK_LIB([ld], [nlist])
-    AC_CHECK_LIB([mld], [nlist])
+    # nlist stuff is only needed for tickadj.
+    saved_LIBS="$LIBS"
+    AC_SEARCH_LIBS([nlist], [elf ld mld])
+    AC_SEARCH_LIBS([kvm_open], [kvm])	dnl We already know about -lelf here...
     AC_CHECK_HEADERS([nlist.h sys/var.h])
     case "$ac_cv_header_nlist_h" in
      yes)
@@ -402,6 +401,10 @@ case "$HAVE_ADJTIMEX" in
 		[does struct nlist use a name union?])
 	esac
     esac
+    AC_SUBST([LDADD_NLIST])
+    LDADD_NLIST="$LIBS"
+    LIBS="$saved_LIBS"
+    AS_UNSET([saved_LIBS])
 esac
 
 AC_CHECK_HEADERS([sys/proc.h], [], [], [

@@ -1,3 +1,4 @@
+* [Bug 603] Only link with nlist()-related libraries when needed.
 (4.2.7p253) 2012/01/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2126] Compile error on Windows with libopts from Autogen 5.14.
 * Update one of the license URLs.
