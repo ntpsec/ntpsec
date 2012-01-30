@@ -355,6 +355,7 @@ case "$host" in
      yes)
 	AC_DEFINE([ntp_adjtime], [adjtimex], [deviant])
 	AC_DEFINE([HAVE_NTP_ADJTIME], [1], [via adjtimex])
+	have_adjtimex=1
 	;;
      *)
 	AC_CHECK_FUNCS([__adjtimex])
@@ -364,14 +365,16 @@ case "$host" in
 	    AC_DEFINE([HAVE_NTP_ADJTIME], [1], [via __adjtimex])
 	    AC_DEFINE([adjtimex], [__adjtimex], [deviant])
 	    AC_DEFINE([HAVE_ADJTIMEX], [1], [via __adjtimex])
+	    have_adjtimex=1
 	esac
 	;;
     esac
 esac
-case "$HAVE_ADJTIMEX" in
+case "$have_adjtimex" in
  '')
     # nlist stuff is only needed for tickadj.
     saved_LIBS="$LIBS"
+    LIBS=
     AC_SEARCH_LIBS([nlist], [elf ld mld])
     AC_SEARCH_LIBS([kvm_open], [kvm])	dnl We already know about -lelf here...
     AC_CHECK_HEADERS([nlist.h sys/var.h])
@@ -760,11 +763,13 @@ AC_CHECK_FUNCS(
 
 AC_CHECK_FUNCS([getbootfile getuid getrusage nanosleep strsignal])
 
+# kvm_open() is only used by tickadj.  Also see above.
 case "$ac_cv_header_kvm_h" in
  yes)
     AC_CHECK_FUNCS([kvm_open])
     ;;
 esac
+
 case "$host" in
  *-*-sco3.2v5.0.*)
     # Just stubs.  Idiots.
