@@ -1,3 +1,4 @@
+(4.2.7p255) 2012/01/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 603] Only link with nlist()-related libraries when needed:
   More cleanup.
 (4.2.7p254) 2012/01/29 Released by Harlan Stenn <stenn@ntp.org>
