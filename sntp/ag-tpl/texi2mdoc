@@ -1,0 +1,182 @@
+#! /usr/local/bin/bash
+
+## texi2mdoc.sh -- script to convert texi-isms to mdoc-isms
+##
+## Time-stamp:      "2011-03-30 15:13:15 bkorb"
+##
+##  This file is part of AutoOpts, a companion to AutoGen.
+##  AutoOpts is free software.
+##  AutoOpts is Copyright (c) 1992-2011 Bruce Korb - all rights reserved
+##
+##  AutoOpts is available under any one of two licenses.  The license
+##  in use must be one of these two and the choice is under the control
+##  of the user of the license.
+##
+##   The GNU Lesser General Public License, version 3 or later
+##      See the files "COPYING.lgplv3" and "COPYING.gplv3"
+##
+##   The Modified Berkeley Software Distribution License
+##      See the file "COPYING.mbsd"
+##
+##  These files have the following md5sums:
+##
+##  43b91e8ca915626ed3818ffb1b71248b COPYING.gplv3
+##  06a1a2e4760c90ea5e1dad8dfaac4d39 COPYING.lgplv3
+##  66a5cedaf62c4b2637025f049f9b826f COPYING.mbsd
+
+## This "library" converts texi-isms into man-isms.  It gets included
+## by the man page template at the point where texi-isms might start appearing
+## and then "emit-man-text" is invoked when all the text has been assembled.
+##
+## Display the command line prototype,
+## based only on the argument processing type.
+##
+## And run the entire output through "sed" to convert texi-isms
+
+# /bin/sh on Solaris is too horrible for words
+#
+case "$0" in
+/bin/sh ) test -x /usr/xpg4/bin/sh && exec /usr/xpg4/bin/sh ${1+"$@"} ;;
+esac
+
+parent_pid=$$
+prog=`basename $0 .sh`
+
+die() {
+    echo "$prog error:  $*" >&2
+    kill -TERM $parent_pid
+    sleep 1
+    kill -9 $parent_pid
+    sleep 1
+    exit 1
+}
+
+do_example() {
+    echo '.Bd -literal -offset indent'
+    res=0
+
+    while :
+    do
+        IFS='' read -r line || die "incomplete example"
+        case "$line" in
+        '@end '*example ) break ;;
+        esac
+
+        do_line
+    done
+    echo '.Ed'
+    return $res
+}
+
+do_noindent() {
+    return 0
+}
+
+do_enumerate() {
+    echo '.Bl -enum -compact'
+
+    while :
+    do
+        IFS='' read -r line || die "incomplete enumerate"
+        case "$line" in
+        '@end '*enumerate ) break ;;
+        esac
+
+        do_line
+    done
+    echo '.El'
+
+    return $res
+}
+
+do_end() {
+    die "Improper ending:  $line"
+}
+
+do_table() {
+    echo '.Bl -tag -width 8n'
+
+    while :
+    do
+        IFS='' read -r line || die "incomplete table"
+        case "$line" in
+        '@end '*table ) break ;;
+        esac
+
+        do_line
+    done
+    echo '.El'
+
+    return $res
+}
+
+do_itemize() {
+    echo '.Bl -bullet -compact'
+
+    while :
+    do
+        IFS='' read -r line || die "incomplete itemize"
+        case "$line" in
+        '@end '*itemize ) break ;;
+        esac
+
+        do_line
+    done
+    echo '.El'
+
+    return $res
+}
+
+do_item() {
+    echo "$line" | sed 's/@item/.It/'
+}
+
+do_line() {
+    case "${line}" in
+    '@*' ) echo .br ;;
+    ''   ) echo .sp ;;
+    '@'[{}]* ) echo "${line}" | sed 's/@\([{}]\)/\1/g' ;;
+    '@'* )
+        typ=`echo "$line" | egrep '@[a-z]*\{'`
+        test ${#typ} -gt 0 && echo "$line" && return 0
+        typ=`echo "$line" | sed 's/@ *//;s/[^a-z].*//'`
+        eval do_${typ} || die "do_${typ} failed"
+        ;;
+
+    * )
+        echo "$line"
+        ;;
+    esac
+    return 0
+}
+
+fixfont='
+s;@code{\([^}]*\)};\\fB\1\\fP;g
+s;@var{\([^}]*\)};\\fB\1\\fP;g
+s;@samp{\([^}]*\)};\\fB\1\\fP;g
+s;@option{\([^}]*\)};\\fB\1\\fP;g
+s;@i{\([^}]*\)};\\fI\1\\fP;g
+s;@file{\([^}]*\)};\\fI\1\\fP;g
+s;@emph{\([^}]*\)};\\fI\1\\fP;g
+s;@strong{\([^}]*\)};\\fB\1\\fP;g
+s;@pxref{\([^}]*\)};see: \1;g
+s;@xref{\([^}]*\)};see: \1;g
+s/@\([{@}]\)/\1/g
+s,^[@$]\*$,.br,
+s/\*\([a-zA-Z0-9:~=_ -]*\)\*/\\fB\1\\fP/g
+s/``\([a-zA-Z0-9:~+=_ -]*\)'\'\''/\\(lq\1\\(rq/g
+s/\([^\\]\)-/\1\\-/g
+s/\([^\\]\)-/\1\\-/g
+/^\.\(Bl\|Bd\|in\) /s/ \\-/ -/g'"
+s/^'/\\'/
+/^$/d"
+readonly fixfont
+
+{
+    while IFS='' read -r line
+    do
+        do_line
+    done
+} | sed "${fixfont}"
+
+exit 0
