@@ -38,7 +38,7 @@ sub OverStrike ($$$) {
 sub UnderLine ($$$) {
   my ($pre, $src, $post) = @_;
   my @src = split(//, $src);
-  my $tgt;
+  my $tgt = "";
 
   # We don't need to underline any BS chars.
   for my $c ( @src ) {
@@ -62,7 +62,6 @@ sub ProcessToken ($) { #line
 
     $_ = UnderLine($1,$3,$4)
       if (/(.*)@(i|file|emph){([^}]*)}(.*)/);
-    }
 
     $_ = OverStrike($1,$3,$4)
       if (/(.*)@(code|var|option|samp|strong){([^}]*)}(.*)/);
@@ -76,6 +75,5 @@ sub ProcessToken ($) { #line
 
 while (<STDIN>)
 {
-  chomp;
-  print ProcessToken($_)."\n";
+  print ProcessToken($_);
 };
