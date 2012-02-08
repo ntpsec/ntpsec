@@ -148,7 +148,7 @@ AC_DEFUN([HW_FUNC_VSNPRINTF],
   AS_IF([test "$hw_use_rpl_vsnprintf" = yes],
     [AC_DEFINE([HW_WANT_RPL_VSNPRINTF], [1],
       [Define to provide `rpl_vsnprintf' function.])
-    AS_IF([test ${hw_nodef_vsnprintf=yes} = no],
+    AS_IF([test ${hw_nodef_vsnprintf=no} = no],
       [AC_DEFINE([vsnprintf], [rpl_vsnprintf],
         [Define to rpl_vsnprintf if the replacement function should be used.])])
     AC_CHECK_HEADERS([inttypes.h locale.h stddef.h stdint.h])
@@ -204,7 +204,7 @@ AC_DEFUN([HW_FUNC_SNPRINTF],
   AS_IF([test "$hw_use_rpl_snprintf" = yes],
     [AC_DEFINE([HW_WANT_RPL_SNPRINTF], [1],
       [Define to provide `rpl_snprintf' function.])
-    AS_IF([test ${hw_nodef_snprintf=yes} = no],
+    AS_IF([test ${hw_nodef_snprintf=no} = no],
       [AC_DEFINE([snprintf], [rpl_snprintf],
         [Define to rpl_snprintf if the replacement function should be used.])])
     _HW_FUNC_XPRINTF_REPLACE])
@@ -233,7 +233,7 @@ AC_DEFUN([HW_FUNC_VASPRINTF],
   AS_IF([test "$hw_use_rpl_vasprintf" = yes],
     [AC_DEFINE([HW_WANT_RPL_VASPRINTF], [1],
       [Define to provide `rpl_vasprintf' function.])
-    AS_IF([test ${hw_nodef_vasprintf=yes} = no],
+    AS_IF([test ${hw_nodef_vasprintf=no} = no],
       [AC_DEFINE([vasprintf], [rpl_vasprintf],
       [Define to rpl_vasprintf if the replacement function should be used.])])
     AC_CHECK_HEADERS([stdlib.h])
@@ -266,7 +266,7 @@ AC_DEFUN([HW_FUNC_ASPRINTF],
   AS_IF([test "$hw_use_rpl_asprintf" = yes],
     [AC_DEFINE([HW_WANT_RPL_ASPRINTF], [1],
       [Define to provide `rpl_asprintf' function.])
-    AS_IF([test ${hw_nodef_asprintf=yes} = no],
+    AS_IF([test ${hw_nodef_asprintf=no} = no],
       [AC_DEFINE([asprintf], [rpl_asprintf],
       [Define to rpl_asprintf if the replacement function should be used.])])
     _HW_FUNC_XPRINTF_REPLACE])
