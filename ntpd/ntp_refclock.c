@@ -265,7 +265,6 @@ refclock_timer(
 	)
 {
 	struct refclockproc *	pp;
-	u_char			clktype;
 	int			unit;
 
 	unit = p->refclkunit;

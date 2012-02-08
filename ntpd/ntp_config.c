@@ -4352,14 +4352,6 @@ getconfig(
 	 */
 	set_tod_using = &ntpd_set_tod_using;
 
-	/*
-	 * On Windows, the variable has already been set, on the rest,
-	 * initialize it to "UNKNOWN".
-	 */
-#ifndef SYS_WINNT
-	strlcpy(line, "settimeofday=\"UNKNOWN\"", sizeof(line));
-	set_sys_var(line, strlen(line) + 1, RO);
-#endif
 	getCmdOpts(argc, argv);
 	init_syntax_tree(&cfgt);
 	curr_include_level = 0;

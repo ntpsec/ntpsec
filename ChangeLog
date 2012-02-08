@@ -1,3 +1,4 @@
+* [Bug 2131] Set the system variable settimeofday only after clock step.
 * [Bug 2134] --enable-C99-snprintf does not force rpl_snprintf use.
 (4.2.7p255) 2012/01/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 603] Only link with nlist()-related libraries when needed:
