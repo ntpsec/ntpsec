@@ -229,6 +229,7 @@ extern	int	refclock_gtlin	(struct recvbuf *, char *, int, l_fp *);
 extern	int	refclock_gtraw	(struct recvbuf *, char *, int, l_fp *);
 extern	int	indicate_refclock_packet(struct refclockio *,
 					 struct recvbuf *);
+extern	void	process_refclock_packet(struct recvbuf *);
 #endif /* REFCLOCK */
 
 #endif /* NTP_REFCLOCK_H */
