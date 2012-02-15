@@ -1968,6 +1968,7 @@ stream_receive(
 	)
 {
 	struct parseunit * parse;
+	parsetime_t parsetime;
 
 	parse = (struct parseunit *)rbufp->recv_peer->procptr->unitptr;
 	if (!parse->peer)

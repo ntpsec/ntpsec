@@ -681,9 +681,7 @@ indicate_refclock_packet(
 		return TRUE;
 	}
 	add_full_recv_buffer(rb);
-#ifdef HAVE_IO_COMPLETION_PORT
-	SetEvent(WaitableIoEventHandle);
-#endif
+
 	return FALSE;
 }
 
@@ -695,6 +693,7 @@ indicate_refclock_packet(
  * is used (notably Windows). This is acting as a trampoline to make the
  * real calls to the refclock functions.
  */
+#ifdef HAVE_IO_COMPLETION_PORT
 void
 process_refclock_packet(
 	struct recvbuf * rb
@@ -716,6 +715,7 @@ process_refclock_packet(
 		(*rio->clock_recv)(rb);
 	}
 }
+#endif	/* HAVE_IO_COMPLETION_PORT */
 
 
 /*
