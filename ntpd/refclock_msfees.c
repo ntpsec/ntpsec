@@ -534,7 +534,7 @@ msfees_start(
 	ees->timestarted= current_time;
 	ees->ttytype	= 0;
 	ees->io.clock_recv= ees_receive;
-	ees->io.srcclock= ees;
+	ees->io.srcclock= peer;
 	ees->io.datalen	= 0;
 	ees->io.fd	= fd232;
 
@@ -674,7 +674,7 @@ ees_receive(
 #endif
 
 	/* Get the clock this applies to and a pointer to the data */
-	ees = (struct eesunit *)rbufp->recv_srcclock;
+	ees = (struct eesunit *)rbufp->recv_peer->procptr->unitptr;
 	dpt = (u_char *)&rbufp->recv_space;
 	dpend = dpt + rbufp->recv_length;
 	if ((dbg & DB_LOG_AWAITMORE) && (rbufp->recv_length != LENEESCODE))

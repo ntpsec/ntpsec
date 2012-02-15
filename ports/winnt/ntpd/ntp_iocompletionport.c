@@ -584,7 +584,7 @@ OnSerialReadComplete(
 	 */
 	if (!errstatus && Bytes) {
 		buff->recv_length = (int) Bytes;
-		buff->receiver = rio->clock_recv;
+		buff->receiver = process_refclock_packet;
 		buff->dstadr = NULL;
 		buff->recv_peer = rio->srcclock;
 		/*
@@ -609,14 +609,11 @@ OnSerialReadComplete(
 			buff->recv_time = cr_time;
 			buff->recv_length = 0;
 			buff->fd = rio->fd;
-			buff->receiver = rio->clock_recv;
+			buff->receiver = process_refclock_packet;
 			buff->dstadr = NULL;
 			buff->recv_peer = rio->srcclock;
-			consumed = indicate_refclock_packet(rio, buff);
-			if (!consumed) {
-				packets_received++;
-				handler_pkts++;
-			}
+			add_full_recv_buffer(buff);
+			SetEvent(WaitableIoEventHandle);
 			buff = get_free_recv_buffer_alloc();
 		}
 	}
@@ -678,16 +675,12 @@ OnRawSerialReadComplete(
 		rbufp->recv_length = (int)octets;
 		rbufp->dstadr = NULL;
 		rbufp->recv_time = arrival_time;
-		rbufp->receiver = rio->clock_recv;
+		rbufp->receiver = process_refclock_packet;
 		rbufp->recv_peer = rio->srcclock;
 		rbufp->fd = rio->fd; /* was handle */
 
-		consumed = indicate_refclock_packet(rio, rbufp);
-		if (!consumed) {
-			rio->recvcount++;
-			packets_received++;
-			handler_pkts++;
-		}
+		add_full_recv_buffer(rbufp);
+		SetEvent(WaitableIoEventHandle);
 		rbufp = get_free_recv_buffer_alloc();
 	}
 

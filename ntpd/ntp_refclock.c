@@ -580,25 +580,37 @@ refclock_gtlin(
 	l_fp	*tsptr		/* pointer to timestamp returned */
 	)
 {
-	char	s[BMAX];
-	char	*dpt, *dpend, *dp;
+	const char *sp, *spend;
+	char       *dp, *dpend;
+	int         dlen;
 
-	dpt = s;
-	dpend = s + refclock_gtraw(rbufp, s, BMAX - 1, tsptr);
-	if (dpend - dpt > bmax - 1)
-		dpend = dpt + bmax - 1;
-	for (dp = lineptr; dpt < dpend; dpt++) {
-		char	c;
+	if (bmax <= 0)
+		return (0);
 
-		c = *dpt & 0x7f;
+	dp    = lineptr;
+	dpend = dp + bmax - 1; /* leave room for NUL pad */
+	sp    = (const char *)rbufp->recv_buffer;
+	spend = sp + rbufp->recv_length;
+
+	while (sp != spend && dp != dpend) {
+		char c;
+		
+		c = *sp++ & 0x7f;
 		if (c >= 0x20 && c < 0x7f)
 			*dp++ = c;
 	}
-	if (dp == lineptr)
-		return (0);
-
-	*dp = '\0';
-	return (dp - lineptr);
+	/* Get length of data written to the destination buffer. If
+	 * zero, do *not* place a NUL byte to preserve the previous
+	 * buffer content.
+	 */
+	dlen = dp - lineptr;
+	if (dlen)
+	    *dp  = '\0';
+	*tsptr = rbufp->recv_time;
+	DPRINTF(2, ("refclock_gtlin: fd %d time %s timecode %d %s\n",
+		    rbufp->fd, ulfptoa(&rbufp->recv_time, 6), dlen,
+		    lineptr));
+	return (dlen);
 }
 
 
@@ -625,27 +637,19 @@ refclock_gtraw(
 	l_fp	*tsptr		/* pointer to timestamp returned */
 	)
 {
-	char	*dpt, *dpend, *dp;
-	int	i;
+	if (bmax <= 0)
+		return (0);
+	bmax -= 1; /* leave room for trailing NUL */
+	if (bmax > rbufp->recv_length)
+		bmax = rbufp->recv_length;
+	memcpy(lineptr, rbufp->recv_buffer, bmax);
+	lineptr[bmax] = '\0';
 
-	dpt = (char *)rbufp->recv_buffer;
-	dpend = dpt + rbufp->recv_length;
-
-	/*
-	 * Copy the raw buffer to the user string. The string is padded
-	 * with a NUL, which is not included in the character count.
-	 */
-	if (dpend - dpt > bmax - 1)
-		dpend = dpt + bmax - 1;
-	for (dp = lineptr; dpt < dpend; dpt++)
-		*dp++ = *dpt;
-	*dp = '\0';
-	i = dp - lineptr;
 	*tsptr = rbufp->recv_time;
 	DPRINTF(2, ("refclock_gtraw: fd %d time %s timecode %d %s\n",
-		    rbufp->fd, ulfptoa(&rbufp->recv_time, 6), i,
+		    rbufp->fd, ulfptoa(&rbufp->recv_time, 6), bmax,
 		    lineptr));
-	return (i);
+	return (bmax);
 }
 
 
@@ -681,6 +685,36 @@ indicate_refclock_packet(
 	SetEvent(WaitableIoEventHandle);
 #endif
 	return FALSE;
+}
+
+
+/*
+ * process_refclock_packet()
+ *
+ * Used for deferred processing of 'io_input' on systems where threading
+ * is used (notably Windows). This is acting as a trampoline to make the
+ * real calls to the refclock functions.
+ */
+void
+process_refclock_packet(
+	struct recvbuf * rb
+	)
+{
+	struct refclockio * rio;
+
+	/* get the refclockio structure from the receive buffer */
+	rio  = &rb->recv_peer->procptr->io;
+
+	/* call 'clock_recv' if either there is no input function or the
+	 * raw input function tells us to feed the packet to the
+	 * receiver.
+	 */
+	if (rio->io_input == NULL || (*rio->io_input)(rb) != 0) {
+		rio->recvcount++;
+		packets_received++;
+		handler_pkts++;		
+		(*rio->clock_recv)(rb);
+	}
 }
 
 
