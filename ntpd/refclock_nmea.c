@@ -917,7 +917,12 @@ nmea_receive(
 		refclock_report(peer, CEVNT_BADDATE);
 		return;
 	}
-	
+	/* check clock sanity; [bug 2143] */
+	if (pp->leap == LEAP_NOTINSYNC) {	/* no good status? */
+		refclock_report(peer, CEVNT_BADREPLY);
+		return;
+	}
+
 	DPRINTF(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
 		refnumtoa(&peer->srcadr),
 		date.year, date.month, date.monthday,
