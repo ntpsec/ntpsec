@@ -24,3 +24,5 @@ s/1tickadjman/@TICKADJ_MS@/g
 s/1tickadjmdoc/@TICKADJ_MS@/g
 s/1timetrimman/@TIMETRIM_MS@/g
 s/1timetrimmdoc/@TIMETRIM_MS@/g
+s/5man/5/g
+s/5mdoc/5/g
