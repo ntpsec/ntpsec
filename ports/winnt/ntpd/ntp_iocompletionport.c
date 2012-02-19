@@ -50,7 +50,7 @@ Juergen Perlinger (perlinger@ntp.org) Feb 2012
 # include <config.h>
 #endif
 
-#if defined (HAVE_IO_COMPLETION_PORT)
+#ifdef HAVE_IO_COMPLETION_PORT
 
 #include <stddef.h>
 #include <stdio.h>
@@ -119,7 +119,8 @@ struct IoCtx {
 /*
  * local function definitions
  */
-static	void ntpd_addremove_semaphore(HANDLE, int);
+static		void ntpd_addremove_semaphore(HANDLE, int);
+static inline	void set_serial_recv_time    (recvbuf_t *, IoCtx_t *);
 
 /* Initiate/Request async IO operations */
 static	BOOL QueueSerialWait   (struct refclockio *, recvbuf_t *, IoCtx_t *);
@@ -167,15 +168,15 @@ static	HANDLE hHeapHandle;
  * Create a new heap for IO context objects
  */
 static void
-IoCtxPoolInit(size_t initObjs)
+IoCtxPoolInit(
+	size_t	initObjs
+	)
 {
-	hHeapHandle = HeapCreate(0, initObjs*sizeof(IoCtx_t), 0);
-	if (hHeapHandle == NULL)
-	{
+	hHeapHandle = HeapCreate(0, initObjs * sizeof(IoCtx_t), 0);
+	if (hHeapHandle == NULL) {
 		msyslog(LOG_ERR, "Can't initialize Heap: %m");
 		exit(1);
 	}
-
 }
 
 /*
@@ -190,7 +191,7 @@ IoCtxPoolInit(size_t initObjs)
  * track them ourselves if something goes wrong.
  */
 static void
-IoCtxPoolDone()
+IoCtxPoolDone(void)
 {
 	hHeapHandle = NULL;
 }
@@ -205,21 +206,25 @@ IoCtxPoolDone()
 static IoCtx_t *
 IoCtxAlloc(void)
 {
-	IoCtx_t *lpo;
+	IoCtx_t *	lpo;
 
-	if (hHeapHandle)
+	if (hHeapHandle) {
 		lpo = HeapAlloc(hHeapHandle, HEAP_ZERO_MEMORY, sizeof(IoCtx_t));
-	else
+	} else {
 		lpo = NULL;
+	}
 	DPRINTF(3, ("Allocate IO ctx, heap=%p, ptr=%p\n", hHeapHandle, lpo));
-	return (lpo);
+
+	return lpo;
 }
 
 static void
-IoCtxFree(IoCtx_t *lpo)
+IoCtxFree(
+	IoCtx_t *lpo
+	)
 {
 	DPRINTF(3, ("Free IO ctx, heap=%p, ptr=%p\n", hHeapHandle, lpo));
-	if (lpo && hHeapHandle)
+	if (lpo != NULL && hHeapHandle != NULL)
 		HeapFree(hHeapHandle, 0, lpo);
 }
 
@@ -254,7 +259,6 @@ iocompletionthread(void *NotUsed)
 	OVERLAPPED *	pol;
 	IoCtx_t *	lpo;
 
-
 	UNUSED_ARG(NotUsed);
 
 	/*
@@ -283,10 +287,11 @@ iocompletionthread(void *NotUsed)
 					&octets, 
 					&key, 
 					&pol, 
-					INFINITE))
+					INFINITE)) {
 			err = ERROR_SUCCESS;
-		else
+		} else {
 			err = GetLastError();
+		}
 		if (NULL == pol) {
 			DPRINTF(2, ("Overlapped IO Thread Exiting\n"));
 			break; /* fail */
@@ -294,7 +299,7 @@ iocompletionthread(void *NotUsed)
 		lpo = CONTAINEROF(pol, IoCtx_t, ol);
 		get_systime(&lpo->RecvTime);
 		lpo->byteCount = octets;
-		lpo->errCode   = err;
+		lpo->errCode = err;
 		handler_calls++;
 		(*lpo->onIoDone)(key, lpo);
 	}
@@ -307,11 +312,8 @@ iocompletionthread(void *NotUsed)
  * Create/initialise the I/O creation port
  */
 void
-init_io_completion_port(
-	void
-	)
+init_io_completion_port(void)
 {
-
 #ifdef DEBUG
 	atexit(&free_io_completion_port_mem);
 #endif
@@ -320,18 +322,15 @@ init_io_completion_port(
 	IoCtxPoolInit(20);
 
 	/* Create the event used to signal an IO event */
-	WaitableIoEventHandle = CreateEvent(
-		NULL, FALSE, FALSE, NULL);
+	WaitableIoEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (WaitableIoEventHandle == NULL) {
-		msyslog(LOG_ERR,
-		"Can't create I/O event handle: %m - another process may be running - EXITING");
+		msyslog(LOG_ERR, "Can't create I/O event handle: %m");
 		exit(1);
 	}
 	/* Create the event used to signal an exit event */
 	WaitableExitEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (WaitableExitEventHandle == NULL) {
-		msyslog(LOG_ERR,
-		"Can't create exit event handle: %m - EXITING");
+		msyslog(LOG_ERR, "Can't create exit event handle: %m");
 		exit(1);
 	}
 
@@ -342,7 +341,6 @@ init_io_completion_port(
 		msyslog(LOG_ERR, "Can't create I/O completion port: %m");
 		exit(1);
 	}
-
 
 	/* Initialize the Wait Handles table */
 	WaitHandles[0] = WaitableIoEventHandle;
@@ -369,6 +367,7 @@ init_io_completion_port(
 		0, 
 		NULL);
 }
+
 
 /*
  * -------------------------------------------------------------------
@@ -595,19 +594,27 @@ OnSerialWaitComplete(
 	NTP_INSIST((ULONG_PTR)rio == key);
 
 #ifdef DEBUG
-	if (lpo->com_events & ~(EV_RXFLAG | EV_RLSD | EV_RXCHAR)) {
+	if (~(EV_RXFLAG | EV_RLSD | EV_RXCHAR) & lpo->com_events) {
 		msyslog(LOG_ERR, "WaitCommEvent returned unexpected mask %x",
 			lpo->com_events);
 		exit(-1);
 	}
 #endif
-	/* Take note of changes on DCD; 'user space PPS' */
+	/*
+	 * Take note of changes on DCD; 'user mode PPS hack'.
+	 * perlinger@ntp.org suggested a way of solving several problems with
+	 * this code that makes a lot of sense: move to a putative
+	 * dcdpps-ppsapi-provider.dll.
+	 */
 	if (EV_RLSD & lpo->com_events) { 
 		modem_status = 0;
-		GetCommModemStatus((HANDLE)buff->fd, &modem_status);
-		if (modem_status & MS_RLSD_ON) {
+		GetCommModemStatus((HANDLE)_get_osfhandle(rio->fd),
+				   &modem_status);
+		if (MS_RLSD_ON & modem_status) {
 			lpo->DCDSTime = lpo->RecvTime;
 			lpo->flTsDCDS = 1;
+			DPRINTF(2, ("fd %d DCD PPS at %s\n", rio->fd,
+				    lfptoa(&lpo->RecvTime, 6)));
 		}
 	}
 
@@ -689,7 +696,7 @@ OnSerialReadComplete(
 	NTP_INSIST((ULONG_PTR)rio == key);
 
 	/* Offload to worker pool */
-	if (!QueueUserWorkItem(OnSerialReadWorker, lpo, WT_EXECUTEDEFAULT)) {
+	if (!QueueUserWorkItem(&OnSerialReadWorker, lpo, WT_EXECUTEDEFAULT)) {
 		msyslog(LOG_ERR,
 			"Can't offload to worker thread, will skip data: %m");
 		ZERO(*lpo);
@@ -697,6 +704,7 @@ OnSerialReadComplete(
 		QueueSerialWait(rio, buff, lpo);
 	}
 }
+
 
 /*
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -741,40 +749,27 @@ OnSerialReadWorker(void * ctx)
 		{
 			/* get new buffer to store line */
 			obuf = get_free_recv_buffer_alloc();
-			obuf->recv_time   = lpo->RecvTime;
+
+			set_serial_recv_time(obuf, lpo);
 			obuf->recv_length = 0;
 			obuf->fd          = rio->fd;
-			obuf->receiver    = process_refclock_packet;
+			obuf->receiver    = &process_refclock_packet;
 			obuf->dstadr      = NULL;
 			obuf->recv_peer   = rio->srcclock;
 
 			/*
-			 * Time stamp assignment is interesting.  If we
-			 * have a DCD stamp, we use it, otherwise we use
-			 * the FLAG char event time, and if that is also
-			 * not / no longer available we use the arrival
-			 * time.
-			 */
-			if (lpo->flTsDCDS)
-				obuf->recv_time = lpo->DCDSTime;
-			else if (lpo->flTsFlag)
-				obuf->recv_time = lpo->FlagTime;
-			else
-				obuf->recv_time = lpo->RecvTime;
-			lpo->flTsDCDS = lpo->flTsFlag = 0; /* use only once... */
-
-			/*
 			 * Copy data to new buffer, convert CR to LF on
-			 * the fly. Stop after LF.
+			 * the fly.  Stop after either.
 			 */
 			dptr = (char *)obuf->recv_buffer;
 			eol  = FALSE;
 			while (sptr != send && !eol) {
 				ch  = *sptr++;
-				if (ch == '\r')
+				if ('\r' == ch) {
 					ch = '\n';
+				}
 				*dptr++ = ch;
-				eol = (ch == '\n');
+				eol = ('\n' == ch);
 			}
 			obuf->recv_length =
 			    (int)(dptr - (char *)obuf->recv_buffer);
@@ -884,6 +879,31 @@ OnRawSerialReadComplete(
 	buff->recv_length = 0;
 	QueueSerialWait(rio, buff, lpo);
 }
+
+
+static inline void
+set_serial_recv_time(
+	recvbuf_t *	obuf,
+	IoCtx_t *	lpo
+	)
+{
+	/*
+	 * Time stamp assignment is interesting.  If we
+	 * have a DCD stamp, we use it, otherwise we use
+	 * the FLAG char event time, and if that is also
+	 * not / no longer available we use the arrival
+	 * time.
+	 */
+	if (lpo->flTsDCDS)
+		obuf->recv_time = lpo->DCDSTime;
+	else if (lpo->flTsFlag)
+		obuf->recv_time = lpo->FlagTime;
+	else
+		obuf->recv_time = lpo->RecvTime;
+
+	lpo->flTsDCDS = lpo->flTsFlag = 0; /* use only once... */
+}
+
 
 /*
  * -------------------------------------------------------------------
