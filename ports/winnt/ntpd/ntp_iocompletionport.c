@@ -625,6 +625,8 @@ OnSerialWaitComplete(
 		lpo->flTsFlag = 1;
 		QueueSerialRead(rio, buff, lpo);
 	} else if (EV_RXCHAR & lpo->com_events) {	/* raw discipline */
+		lpo->FlagTime = lpo->RecvTime;
+		lpo->flTsFlag = 1;
 		QueueRawSerialRead(rio, buff, lpo);
 	} else {					/* idle... */
 		QueueSerialWait(rio, buff, lpo);
@@ -656,7 +658,7 @@ QueueSerialRead(
 {
 	BOOL   rc;
 
-	lpo->onIoDone = OnSerialReadComplete;
+	lpo->onIoDone = &OnSerialReadComplete;
 	lpo->recv_buf = buff;
 	lpo->flRawMem = 0;
 	lpo->rio      = rio;
@@ -763,6 +765,7 @@ OnSerialReadWorker(void * ctx)
 			obuf->receiver    = &process_refclock_packet;
 			obuf->dstadr      = NULL;
 			obuf->recv_peer   = rio->srcclock;
+			set_serial_recv_time(obuf, lpo);
 
 			/*
 			 * Copy data to new buffer, convert CR to LF on
@@ -875,9 +878,9 @@ OnRawSerialReadComplete(
 	if (lpo->byteCount > 0) {
 		buff->recv_length = (int)lpo->byteCount;
 		buff->dstadr      = NULL;
-		buff->recv_time   = lpo->RecvTime;
 		buff->receiver    = process_refclock_packet;
 		buff->recv_peer   = rio->srcclock;
+		set_serial_recv_time(buff, lpo);
 		add_full_recv_buffer(buff);
 		SetEvent(WaitableIoEventHandle);
 		buff = get_free_recv_buffer_alloc();
