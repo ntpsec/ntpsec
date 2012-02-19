@@ -515,7 +515,8 @@ IoResultCheck(
 
 
 	default:
-		/* We have to resort to the low level error formatting
+		/*
+		 * We have to resort to the low level error formatting
 		 * functions here, since the error code can be an
 		 * overlapped result. Relying the value to be the same
 		 * as the 'GetLastError()' result at this point of
@@ -604,7 +605,8 @@ OnSerialWaitComplete(
 	/* Take note of changes on DCD; 'user space PPS' */
 	if (EV_RLSD & lpo->com_events) { 
 		modem_status = 0;
-		GetCommModemStatus((HANDLE)buff->fd, &modem_status);
+		GetCommModemStatus((HANDLE)_get_osfhandle(rio->fd),
+				   &modem_status);
 		if (modem_status & MS_RLSD_ON) {
 			lpo->DCDSTime = lpo->RecvTime;
 			lpo->flTsDCDS = 1;
@@ -737,12 +739,19 @@ OnSerialReadWorker(void * ctx)
 		send = sptr + buff->recv_length;
 		obuf = NULL;
 		dptr = NULL;
+
+		/* hack #1: eat away leading CR/LF if here is any */
+		while (sptr != send) {
+			ch = *sptr;
+			if (ch != '\n' && ch != '\r')
+				break;
+			sptr++;
+		}
+
 		while (sptr != send)
 		{
 			/* get new buffer to store line */
 			obuf = get_free_recv_buffer_alloc();
-			obuf->recv_time   = lpo->RecvTime;
-			obuf->recv_length = 0;
 			obuf->fd          = rio->fd;
 			obuf->receiver    = process_refclock_packet;
 			obuf->dstadr      = NULL;
@@ -761,7 +770,8 @@ OnSerialReadWorker(void * ctx)
 				obuf->recv_time = lpo->FlagTime;
 			else
 				obuf->recv_time = lpo->RecvTime;
-			lpo->flTsDCDS = lpo->flTsFlag = 0; /* use only once... */
+			/* hack #2: keep timestamp for this whole buffer */
+			/*lpo->flTsDCDS = lpo->flTsFlag = 0;*/ /* use only once... */
 
 			/*
 			 * Copy data to new buffer, convert CR to LF on
@@ -804,10 +814,10 @@ OnSerialReadWorker(void * ctx)
 			buff->recv_length = 0;
 		}
 	} else {
-		ZERO(*lpo);
 		buff->recv_length = 0;
 	}
 
+	ZERO(*lpo);
 	QueueSerialWait(rio, buff, lpo);
 	return 0;
 }
