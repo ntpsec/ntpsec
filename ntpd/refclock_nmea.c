@@ -229,6 +229,11 @@ typedef struct {
 	l_fp	last_reftime;	/* last processed reference stamp */
 	/* per sentence checksum seen flag */
 	u_char	cksum_type[NMEA_ARRAY_SIZE];
+	int	total_nmea;	/* clockstats sentence counts */
+	int	good_nmea;
+	int	bad_nmea;
+	int	filter_nmea;
+	int	pps_used;
 } nmea_unit;
 
 /*
@@ -402,6 +407,8 @@ nmea_start(
 #ifdef HAVE_PPSAPI
 	up->ppsapi_fd = -1;
 #endif
+	up->total_nmea = up->good_nmea = up->bad_nmea =
+	    up->filter_nmea = up->pps_used = 0;
 
 	/* Initialize miscellaneous variables */
 	peer->precision = PRECISION;
@@ -637,7 +644,7 @@ refclock_ppsrelate(
 
 	if (pp->leap == LEAP_NOTINSYNC)
 		return PPS_RELATE_NONE; /* clock is insane, no chance */
-	
+
 	ZERO(timeout);
 	ZERO(pps_info);
 	if (time_pps_fetch(ap->handle, PPS_TSFMT_TSPEC,
@@ -768,6 +775,7 @@ nmea_receive(
 			rd_lastcode));
 		break;
 	}
+	up->total_nmea++;
 	/* 
 	 * --> below this point we have a valid NMEA sentence <--
 	 * Check sentence name. Skip first 2 chars (talker ID), to allow
@@ -799,9 +807,11 @@ nmea_receive(
 	}
 	
 	/* See if I want to process this message type */
-	if ( (peer->ttl & NMEA_MESSAGE_MASK	 ) &&
-	    !(peer->ttl & sentence_mode[sentence])  )
+	if ((peer->ttl & NMEA_MESSAGE_MASK) &&
+	    !(peer->ttl & sentence_mode[sentence])) {
+		up->filter_nmea++;
 		return;
+	}
 
 	/* 
 	 * make sure it came in clean
@@ -917,7 +927,12 @@ nmea_receive(
 		refclock_report(peer, CEVNT_BADDATE);
 		return;
 	}
-	
+	/* check clock sanity; [bug 2143] */
+	if (pp->leap == LEAP_NOTINSYNC) {	/* no good status? */
+		refclock_report(peer, CEVNT_BADREPLY);
+		return;
+	}
+
 	DPRINTF(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
 		refnumtoa(&peer->srcadr),
 		date.year, date.month, date.monthday,
@@ -938,8 +953,10 @@ nmea_receive(
 	 */
 	rd_reftime = tspec_intv_to_lfp(tofs);
 	rd_reftime.l_ui += caltontp(&date);
-	if (L_ISEQU(&up->last_reftime, &rd_reftime))
+	if (L_ISEQU(&up->last_reftime, &rd_reftime)) {
+		up->filter_nmea++;
 		return;
+	}
 	up->last_reftime = rd_reftime;
 	rd_fudge = pp->fudgetime2;
 
@@ -953,6 +970,14 @@ nmea_receive(
 	memcpy(pp->a_lastcode, rd_lastcode, rd_lencode);
 	pp->a_lastcode[rd_lencode] = '\0';
 	pp->lastrec = rd_timestamp;
+
+	if (pp->leap == LEAP_NOTINSYNC) {
+		up->bad_nmea++;
+		return;
+	}
+
+	/* Text looks OK. */
+	up->good_nmea++;
 
 #ifdef HAVE_PPSAPI
 	/* If we have PPS running, we try to associate the sentence
@@ -969,6 +994,7 @@ nmea_receive(
 			peer->flags |= FLAG_PPS;
 			DPRINTF(2, ("%s PPS_RELATE_PHASE\n",
 				    refnumtoa(&peer->srcadr)));
+			up->pps_used++;
 			break;
 			
 		case PPS_RELATE_EDGE:
@@ -1044,7 +1070,19 @@ nmea_poll(
 		pp->polls++;
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
-		record_clock_stats(&peer->srcadr, pp->a_lastcode);
+	}
+	if (up->total_nmea > 0) {
+		/*
+		 * Log counters if any NMEA lines.
+ 		 * May include sample of bad line.
+ 		 */
+		mprintf_clock_stats(&peer->srcadr,
+				    "%s %d %d %d %d %d", pp->a_lastcode,
+				    up->total_nmea, up->good_nmea,
+				    up->bad_nmea, up->filter_nmea,
+				    up->pps_used);
+		up->total_nmea = up->good_nmea = up->bad_nmea =
+		    up->filter_nmea = up->pps_used = 0;
 	}
 }
 
