@@ -85,7 +85,9 @@
 #define NMEA_MESSAGE_MASK	0x0000FF0FU
 #define NMEA_BAUDRATE_MASK	0x00000070U
 #define NMEA_BAUDRATE_SHIFT	4
+
 #define NMEA_DELAYMEAS_MASK	0x80
+#define NMEA_EXTLOG_MASK	0x01000000U
 
 #define NMEA_PROTO_IDLEN	5	/* tag name must be at least 5 chars */
 #define NMEA_PROTO_MINLEN	6	/* min chars in sentence, excluding CS */
@@ -227,6 +229,16 @@ typedef struct {
 	u_char  gps_time;	/* use GPS time, not UTC */
 	u_short century_cache;	/* cached current century */
 	l_fp	last_reftime;	/* last processed reference stamp */
+	/* tally stats, reset each poll cycle */
+	struct
+	{
+		u_int total;
+		u_int good;
+		u_int bad;
+		u_int filtered;
+		u_int pps_used;
+	}	
+		tally;
 	/* per sentence checksum seen flag */
 	u_char	cksum_type[NMEA_ARRAY_SIZE];
 } nmea_unit;
@@ -402,6 +414,7 @@ nmea_start(
 #ifdef HAVE_PPSAPI
 	up->ppsapi_fd = -1;
 #endif
+	ZERO(up->tally);
 
 	/* Initialize miscellaneous variables */
 	peer->precision = PRECISION;
@@ -768,11 +781,14 @@ nmea_receive(
 			rd_lastcode));
 		break;
 	}
+	up->tally.total++;
 	/* 
 	 * --> below this point we have a valid NMEA sentence <--
-	 * Check sentence name. Skip first 2 chars (talker ID), to allow
-	 * for $GLGGA and $GPGGA etc. Since the name field has at least 5
-	 * chars we can simply shift the field start.
+	 *
+	 * Check sentence name. Skip first 2 chars (talker ID) in most
+	 * cases, to allow for $GLGGA and $GPGGA etc. Since the name
+	 * field has at least 5 chars we can simply shift the field
+	 * start.
 	 */
 	cp = field_parse(&rdata, 0);
 	if      (strncmp(cp + 2, "RMC,", 4) == 0)
@@ -790,7 +806,7 @@ nmea_receive(
 	else
 		return;	/* not something we know about */
 
-	/* eventually output delay measurement now. */
+	/* Eventually output delay measurement now. */
 	if (peer->ttl & NMEA_DELAYMEAS_MASK) {
 		mprintf_clock_stats(&peer->srcadr, "delay %0.6f %.*s",
 			 ldexp(rd_timestamp.l_uf, -32),
@@ -800,8 +816,10 @@ nmea_receive(
 	
 	/* See if I want to process this message type */
 	if ( (peer->ttl & NMEA_MESSAGE_MASK	 ) &&
-	    !(peer->ttl & sentence_mode[sentence])  )
+	    !(peer->ttl & sentence_mode[sentence])  ) {
+		up->tally.filtered++;
 		return;
+	}
 
 	/* 
 	 * make sure it came in clean
@@ -826,6 +844,7 @@ nmea_receive(
 		DPRINTF(1, ("%s checksum missing: '%s'\n",
 			refnumtoa(&peer->srcadr), rd_lastcode));
 		refclock_report(peer, CEVNT_BADREPLY);
+		up->tally.bad++;
 		return;
 	}
 
@@ -834,13 +853,16 @@ nmea_receive(
 	 * Once have processed a $GPZDG, do not process any further UTC
 	 * sentences (all but $GPZDG currently).
 	 */ 
-	if (up->gps_time && NMEA_GPZDG != sentence)
+	if (up->gps_time && NMEA_GPZDG != sentence) {
+		up->tally.filtered++;
 		return;
+	}
 
 	DPRINTF(1, ("%s processing %d bytes, timecode '%s'\n",
 		refnumtoa(&peer->srcadr), rd_lencode, rd_lastcode));
 
-	/* Grab fields depending on clock string type and possibly wipe
+	/*
+	 * Grab fields depending on clock string type and possibly wipe
 	 * sensitive data from the last timecode.
 	 */
 	switch (sentence) {
@@ -910,14 +932,22 @@ nmea_receive(
 	/* Check sanity of time-of-day. */
 	if (rc_time == 0) {	/* no time or conversion error? */
 		refclock_report(peer, CEVNT_BADTIME);
+		up->tally.bad++;
 		return;
 	}
 	/* Check sanity of date. */
 	if (rc_date == 0) {	/* no date or conversion error? */
 		refclock_report(peer, CEVNT_BADDATE);
+		up->tally.bad++;
 		return;
 	}
-	
+	/* check clock sanity; [bug 2143] */
+	if (pp->leap == LEAP_NOTINSYNC) {	/* no good status? */
+		refclock_report(peer, CEVNT_BADREPLY);
+		up->tally.bad++;
+		return;
+	}
+
 	DPRINTF(1, ("%s effective timecode: %04u-%02u-%02u %02d:%02d:%02d\n",
 		refnumtoa(&peer->srcadr),
 		date.year, date.month, date.monthday,
@@ -938,13 +968,18 @@ nmea_receive(
 	 */
 	rd_reftime = tspec_intv_to_lfp(tofs);
 	rd_reftime.l_ui += caltontp(&date);
-	if (L_ISEQU(&up->last_reftime, &rd_reftime))
+	if (L_ISEQU(&up->last_reftime, &rd_reftime)) {
+		up->tally.filtered++;
 		return;
+	}
 	up->last_reftime = rd_reftime;
 	rd_fudge = pp->fudgetime2;
 
 	DPRINTF(1, ("%s using '%s'\n",
 		    refnumtoa(&peer->srcadr), rd_lastcode));
+
+	/* Data looks good and will be accepted */
+	up->tally.good++;
 
 	/* Store data for statistical purposes... */
 	if (rd_lencode >= sizeof(pp->a_lastcode))
@@ -955,7 +990,8 @@ nmea_receive(
 	pp->lastrec = rd_timestamp;
 
 #ifdef HAVE_PPSAPI
-	/* If we have PPS running, we try to associate the sentence
+	/*
+	 * If we have PPS running, we try to associate the sentence
 	 * with the last active edge of the PPS signal.
 	 */
 	if (up->ppsapi_lit)
@@ -969,6 +1005,7 @@ nmea_receive(
 			peer->flags |= FLAG_PPS;
 			DPRINTF(2, ("%s PPS_RELATE_PHASE\n",
 				    refnumtoa(&peer->srcadr)));
+			up->tally.pps_used++;
 			break;
 			
 		case PPS_RELATE_EDGE:
@@ -1013,9 +1050,7 @@ nmea_poll(
 	)
 {
 	struct refclockproc * const pp = peer->procptr;
-#ifdef HAVE_PPSAPI
 	nmea_unit	    * const up = (nmea_unit *)pp->unitptr;
-#endif
 	
 	/*
 	 * Process median filter samples. If none received, declare a
@@ -1044,8 +1079,24 @@ nmea_poll(
 		pp->polls++;
 		pp->lastref = pp->lastrec;
 		refclock_receive(peer);
+	}
+	
+	/*
+	 * If extended logging is required, write the tally stats to the
+	 * clockstats file; otherwise just do a normal clock stats
+	 * record. Clear the tally stats anyway.
+	*/
+	if (peer->ttl & NMEA_EXTLOG_MASK) {
+		/* Log & reset counters with extended logging */
+		mprintf_clock_stats(
+		  &peer->srcadr, "%s  %u %u %u %u %u",
+		  pp->a_lastcode,
+		  up->tally.total, up->tally.good, up->tally.bad,
+		  up->tally.filtered, up->tally.pps_used);
+	} else {
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	}
+	ZERO(up->tally);
 }
 
 #if NMEA_WRITE_SUPPORT
