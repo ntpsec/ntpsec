@@ -1,3 +1,4 @@
+(4.2.7p258) 2012/02/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2140] Rework of Windows I/O completion port handling to avoid
   garbling serial input in UNIX line discipline emulation.
 * [Bug 2143] NMEA driver: discard data if quality indication not good,
