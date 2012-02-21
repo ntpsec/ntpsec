@@ -1,3 +1,5 @@
+* [Bug 2143] NMEA 4.2.7p204 uses timecodes indicating lost reception.
+* Increase detail in clockstats for NMEA driver (from Hal Murray).
 (4.2.7p257) 2012/02/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2135] defer calls to 'io_input' to main thread under Windows.
 (4.2.7p256) 2012/02/08 Released by Harlan Stenn <stenn@ntp.org>
