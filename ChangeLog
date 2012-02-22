@@ -1,3 +1,5 @@
+* [Bug 2148] ntpd 4.2.7p258 segfault with 0x0100000 bit in NMEA mode.
+* refclock_nmea.c merge cleanup thanks to Juergen Perlinger.
 (4.2.7p258) 2012/02/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2140] Rework of Windows I/O completion port handling to avoid
   garbling serial input in UNIX line discipline emulation.

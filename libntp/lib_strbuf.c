@@ -7,8 +7,11 @@
 
 #include <isc/net.h>
 #include <isc/result.h>
+
+#include "ntp_fp.h"
 #include "ntp_stdlib.h"
 #include "lib_strbuf.h"
+
 
 /*
  * Storage declarations
@@ -20,6 +23,7 @@ int		ipv4_works;
 int		ipv6_works;
 int		lib_inited;
 
+
 /*
  * initialization routine.  Might be needed if the code is ROMized.
  */
@@ -30,5 +34,6 @@ init_lib(void)
 		return;
 	ipv4_works = (ISC_R_SUCCESS == isc_net_probeipv4());
 	ipv6_works = (ISC_R_SUCCESS == isc_net_probeipv6());
+	init_systime();
 	lib_inited = TRUE;
 }

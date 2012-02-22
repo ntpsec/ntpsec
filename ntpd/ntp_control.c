@@ -2454,7 +2454,13 @@ ctl_putpeer(
 		break;
 
 	case CP_TTL:
-		if (p->ttl)
+#ifdef REFCLOCK
+		if (p->flags & FLAG_REFCLOCK) {
+			ctl_putuint(peer_var[id].text, p->ttl);
+			break;
+		}
+#endif
+		if (p->ttl > 0 && p->ttl < COUNTOF(sys_ttl))
 			ctl_putint(peer_var[id].text,
 				   sys_ttl[p->ttl]);
 		break;

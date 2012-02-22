@@ -241,11 +241,6 @@ typedef struct {
 		tally;
 	/* per sentence checksum seen flag */
 	u_char	cksum_type[NMEA_ARRAY_SIZE];
-	int	total_nmea;	/* clockstats sentence counts */
-	int	good_nmea;
-	int	bad_nmea;
-	int	filter_nmea;
-	int	pps_used;
 } nmea_unit;
 
 /*
@@ -994,14 +989,6 @@ nmea_receive(
 	memcpy(pp->a_lastcode, rd_lastcode, rd_lencode);
 	pp->a_lastcode[rd_lencode] = '\0';
 	pp->lastrec = rd_timestamp;
-
-	if (pp->leap == LEAP_NOTINSYNC) {
-		up->bad_nmea++;
-		return;
-	}
-
-	/* Text looks OK. */
-	up->good_nmea++;
 
 #ifdef HAVE_PPSAPI
 	/*

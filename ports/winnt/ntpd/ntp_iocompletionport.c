@@ -615,7 +615,7 @@ OnSerialWaitComplete(
 			lpo->DCDSTime = lpo->RecvTime;
 			lpo->flTsDCDS = 1;
 			DPRINTF(2, ("fd %d DCD PPS at %s\n", rio->fd,
-				    lfptoa(&lpo->RecvTime, 6)));
+				    ulfptoa(&lpo->RecvTime, 6)));
 		}
 	}
 

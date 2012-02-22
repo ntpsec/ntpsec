@@ -609,7 +609,9 @@ refclock_gtlin(
 	*tsptr = rbufp->recv_time;
 	DPRINTF(2, ("refclock_gtlin: fd %d time %s timecode %d %s\n",
 		    rbufp->fd, ulfptoa(&rbufp->recv_time, 6), dlen,
-		    lineptr));
+		    (dlen != 0)
+			? lineptr
+			: ""));
 	return (dlen);
 }
 

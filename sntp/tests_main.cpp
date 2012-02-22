@@ -3,6 +3,8 @@
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 
+	init_lib();
+
 	// Some tests makes use of extra parameters passed to the tests
 	// executable. Save these params as static members of the base class.
 	if (argc > 1) {

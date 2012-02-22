@@ -558,6 +558,7 @@ ntpdmain(
 	} while (0);				/* 'loop' once */
 # endif	/* HAVE_WORKING_FORK */
 
+	init_lib();
 # ifdef SYS_WINNT
 	/*
 	 * Start interpolation thread, must occur before first
@@ -763,7 +764,6 @@ ntpdmain(
 	init_restrict();
 	init_mon();
 	init_timer();
-	init_lib();
 	init_request();
 	init_control();
 	init_peer();
