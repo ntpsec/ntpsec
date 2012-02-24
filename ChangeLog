@@ -1,3 +1,4 @@
+(4.2.7p260) 2012/02/24 Released by Harlan Stenn <stenn@ntp.org>
 * Fix the check-scm-rev invocation in several Makefile.am's.
 (4.2.7p259) 2012/02/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2148] ntpd 4.2.7p258 segfault with 0x0100000 bit in NMEA mode.
