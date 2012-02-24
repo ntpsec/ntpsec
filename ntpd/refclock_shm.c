@@ -325,7 +325,10 @@ int shm_peek(
 		struct timeval tvr;
 		struct timeval tvt;
 		struct tm *t;
+		char timestr[20];	/* "%Y-%m-%dT%H:%M:%S" + 1 */
+		int c;
 		int ok=1;
+
 		tvr.tv_sec = 0;
 		tvr.tv_usec = 0;
 		tvt.tv_sec = 0;
@@ -350,16 +353,24 @@ int shm_peek(
 		    default:
 			msyslog (LOG_ERR, "SHM: bad mode found in shared memory: %d",shm->mode);
 		}
+
+		/* XXX NetBSD has incompatible tv_sec */
+		t = gmtime((const time_t *)&tvt.tv_sec);
+
+		/* add ntpq -c cv timecode in ISO 8601 format */
+		strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", t);
+		c = snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
+			     "%s.%06ldZ", timestr, (long)tvt.tv_usec);
+		pp->lencode = (c < sizeof(pp->a_lastcode))
+				 ? c
+				 : 0;
+
 		shm->valid=0;
 		if (ok) {
-			time_t help;	/* XXX NetBSD has incompatible tv_sec */
-
 			TVTOTS(&tvr,&pp->lastrec);
 			pp->lastrec.l_ui += JAN_1970;
 			/* pp->lasttime = current_time; */
 			pp->polls++;
-			help = tvt.tv_sec;
-			t = gmtime (&help);
 			pp->day=t->tm_yday+1;
 			pp->hour=t->tm_hour;
 			pp->minute=t->tm_min;
@@ -367,8 +378,7 @@ int shm_peek(
 			pp->nsec=tvt.tv_usec * 1000;
 			peer->precision=shm->precision;
 			pp->leap=shm->leap;
-		} 
-		else {
+		} else {
 			refclock_report(peer, CEVNT_FAULT);
 			msyslog (LOG_NOTICE, "SHM: access clash in shared memory");
 			up->clash++;
