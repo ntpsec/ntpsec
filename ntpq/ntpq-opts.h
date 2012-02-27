@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *  
- *  It has been AutoGen-ed  February 22, 2012 at 12:57:29 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  February 24, 2012 at 11:33:38 AM by AutoGen 5.14
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -81,8 +81,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    14
-#define NTPQ_VERSION       "4.2.7p259"
-#define NTPQ_FULL_VERSION  "ntpq 4.2.7p259"
+#define NTPQ_VERSION       "4.2.7p260"
+#define NTPQ_FULL_VERSION  "ntpq 4.2.7p260"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
