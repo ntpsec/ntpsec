@@ -3,14 +3,14 @@
  *
  * @brief Hunt for options in the option descriptor list
  *
- *  Time-stamp:      "2011-08-07 13:15:45 bkorb"
+ *  Time-stamp:      "2012-01-29 19:07:30 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -44,7 +44,7 @@ parse_opt(char const ** nm_pp, char ** arg_pp, char * buf, size_t bufsz)
         case NUL: return res;
 
         case '=':
-            if (res >= bufsz)
+            if (res >= (int)bufsz)
                 return -1;
 
             memcpy(buf, *nm_pp, res);
@@ -70,7 +70,7 @@ static void
 opt_ambiguities(tOptions * opts, char const * name, int nm_len)
 {
     char const * const hyph =
-        NAMED_OPTS(opts) ? "" : "--";
+        NAMED_OPTS(opts) ? "" : LONG_OPT_MARKER;
 
     tOptDesc * pOD = opts->pOptDesc;
     int        idx = 0;
@@ -183,8 +183,8 @@ opt_set(tOptions * opts, char * arg, int idx, ag_bool disable, tOptState * st)
 
         fprintf(stderr, zDisabledErr, opts->pzProgName, pOD->pz_Name);
         if (pOD->pzText != NULL)
-            fprintf(stderr, " -- %s", pOD->pzText);
-        fputc('\n', stderr);
+            fprintf(stderr, SET_OFF_FMT, pOD->pzText);
+        fputc(NL, stderr);
         (*opts->pUsageProc)(opts, EXIT_FAILURE);
         /* NOTREACHED */
         _exit(EXIT_FAILURE); /* to be certain */
@@ -284,47 +284,37 @@ void
 optionVendorOption(tOptions * pOpts, tOptDesc * pOD)
 {
     tOptState     opt_st   = OPTSTATE_INITIALIZER(PRESET);
-    unsigned long st_flags = opt_st.flags;
-    tSuccess      res;
     char const *  vopt_str = pOD->optArg.argString;
 
-    if ((pOpts->fOptSet & OPTPROC_VENDOR_OPT) == 0)
-        goto illegal;
-
     if ((pOD->fOptState & OPTPROC_IMMEDIATE) == 0)
-        st_flags = OPTST_DEFINED;
-    res = opt_find_long(pOpts, vopt_str, &opt_st);
+        opt_st.flags = OPTST_DEFINED;
 
-    switch (res) {
-    case FAILURE:
-    case PROBLEM:
-    illegal:
+    if (  ((pOpts->fOptSet & OPTPROC_VENDOR_OPT) == 0)
+       || ! SUCCESSFUL(opt_find_long(pOpts, vopt_str, &opt_st))
+       || ! SUCCESSFUL(get_opt_arg(pOpts, &opt_st)) )
+    {
         fprintf(stderr, zIllVendOptStr, vopt_str);
         (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
         /* NOTREACHED */
+    }
 
-    case SUCCESS:
-        if (! SUCCESSFUL(get_opt_arg(pOpts, &opt_st)))
-            goto illegal;
-
+    /*
+     *  See if we are in immediate handling state.
+     */
+    if (pOpts->fOptSet & OPTPROC_IMMEDIATE) {
         /*
-         *  See if we are in immediate handling state.
+         *  See if the enclosed option is okay with that state.
          */
-        if (pOpts->fOptSet & OPTPROC_IMMEDIATE) {
-            /*
-             *  See if the enclosed option is okay with that state.
-             */
-            if (DO_IMMEDIATELY(opt_st.flags))
-                (void)handle_opt(pOpts, &opt_st);
+        if (DO_IMMEDIATELY(opt_st.flags))
+            (void)handle_opt(pOpts, &opt_st);
 
-        } else {
-            /*
-             *  non-immediate direction.
-             *  See if the enclosed option is okay with that state.
-             */
-            if (DO_NORMALLY(opt_st.flags) || DO_SECOND_TIME(opt_st.flags))
-                (void)handle_opt(pOpts, &opt_st);
-        }
+    } else {
+        /*
+         *  non-immediate direction.
+         *  See if the enclosed option is okay with that state.
+         */
+        if (DO_NORMALLY(opt_st.flags) || DO_SECOND_TIME(opt_st.flags))
+            (void)handle_opt(pOpts, &opt_st);
     }
 }
 
@@ -385,8 +375,8 @@ opt_find_short(tOptions* pOpts, uint_t optValue, tOptState* pOptState)
                && (pRes->pz_Name != NULL)) {
                 fprintf(stderr, zDisabledErr, pOpts->pzProgPath, pRes->pz_Name);
                 if (pRes->pzText != NULL)
-                    fprintf(stderr, " -- %s", pRes->pzText);
-                fputc('\n', stderr);
+                    fprintf(stderr, SET_OFF_FMT, pRes->pzText);
+                fputc(NL, stderr);
                 (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
                 /* NOTREACHED */
                 _exit(EXIT_FAILURE); /* to be certain */
@@ -566,3 +556,11 @@ find_opt(tOptions * pOpts, tOptState * pOptState)
 
     return opt_find_long(pOpts, pOpts->pzCurOpt, pOptState);
 }
+
+/*
+ * Local Variables:
+ * mode: C
+ * c-file-style: "stroustrup"
+ * indent-tabs-mode: nil
+ * End:
+ * end of autoopts/find.c */

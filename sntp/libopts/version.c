@@ -1,6 +1,6 @@
 
 /*
- * Time-stamp:      "2011-05-02 12:04:47 bkorb"
+ * Time-stamp:      "2012-01-29 19:44:24 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -9,7 +9,7 @@
 /*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -46,26 +46,41 @@ optionVersion(void)
     return zVersion;
 }
 
+/**
+ * Select among various ways to emit version information.
+ *
+ * @param pOpts the option descriptor
+ * @param fp    the output stream
+ */
 static void
 emit_simple_ver(tOptions * pOpts, FILE * fp)
 {
+    /*
+     *  Use the supplied string
+     */
     if (pOpts->pzFullVersion != NULL)
         fputs(pOpts->pzFullVersion, fp);
 
+    /*
+     *  Extract the interesting part of the copyright string
+     */
     else if (pOpts->pzCopyright != NULL) {
-        char const * pe = strchr(pOpts->pzCopyright, '\n');
+        char const * pe = strchr(pOpts->pzCopyright, NL);
         if (pe == NULL)
             pe = pOpts->pzCopyright + strlen(pOpts->pzCopyright);
         fwrite(pOpts->pzCopyright, 1, pe - pOpts->pzCopyright, fp);
     }
 
+    /*
+     *  Extract the interesting part of the usage title string
+     */
     else {
-        char const * pe = strchr(pOpts->pzUsageTitle, '\n');
+        char const * pe = strchr(pOpts->pzUsageTitle, NL);
         if (pe == NULL)
             pe = pOpts->pzUsageTitle + strlen(pOpts->pzUsageTitle);
-        fwrite(pOpts->pzUsageTitle, 1, pe - pOpts->pzCopyright, fp);
+        fwrite(pOpts->pzUsageTitle, 1, pe - pOpts->pzUsageTitle, fp);
     }
-    fputc('\n', fp);
+    fputc(NL, fp);
 }
 
 static void
@@ -78,13 +93,13 @@ emit_copy_ver(tOptions * pOpts, FILE * fp)
         fputs(pOpts->pzFullVersion, fp);
 
     else {
-        char const * pe = strchr(pOpts->pzUsageTitle, '\n');
+        char const * pe = strchr(pOpts->pzUsageTitle, NL);
         if (pe == NULL)
             pe = pOpts->pzUsageTitle + strlen(pOpts->pzUsageTitle);
         fwrite(pOpts->pzUsageTitle, 1, pe - pOpts->pzCopyright, fp);
     }
 
-    fputc('\n', fp);
+    fputc(NL, fp);
 
     if (HAS_pzPkgDataDir(pOpts) && (pOpts->pzPackager != NULL))
         fputs(pOpts->pzPackager, fp);
@@ -98,12 +113,12 @@ emit_copy_note(tOptions * pOpts, FILE * fp)
 {
     if (pOpts->pzCopyright != NULL) {
         fputs(pOpts->pzCopyright, fp);
-        fputc('\n', fp);
+        fputc(NL, fp);
     }
 
     if (pOpts->pzCopyNotice != NULL) {
         fputs(pOpts->pzCopyNotice, fp);
-        fputc('\n', fp);
+        fputc(NL, fp);
     }
 
     fprintf(fp, zAO_Ver, optionVersion());

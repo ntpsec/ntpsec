@@ -1,10 +1,10 @@
 /*
  *  This file defines the string_tokenize interface
- * Time-stamp:      "2010-07-17 10:40:26 bkorb"
+ * Time-stamp:      "2012-01-29 19:02:51 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -87,11 +87,11 @@ copy_raw(ch_t** ppDest, char const ** ppSrc)
             switch (*pSrc) {
             case NUL:   *ppSrc = NULL; return;
             case '\r':
-                if (*(++pSrc) == '\n')
+                if (*(++pSrc) == NL)
                     ++pSrc;
                 continue;
 
-            case '\n':
+            case NL:
                 ++pSrc;
                 continue;
 
@@ -281,7 +281,7 @@ ao_string_tokenize(char const* str)
 
             default:
                 str++;
-                *(pzDest++) = ch;
+                *(pzDest++) = (unsigned char)ch;
             }
         } copy_done:;
 

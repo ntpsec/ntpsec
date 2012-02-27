@@ -2,11 +2,11 @@
 /**
  * \file numeric.c
  *
- *  Time-stamp:      "2011-03-25 16:26:10 bkorb"
+ *  Time-stamp:      "2012-02-25 12:54:32 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -38,15 +38,11 @@
  *   Show information about a numeric option with range constraints.
 =*/
 void
-optionShowRange(tOptions* pOpts, tOptDesc* pOD, void * rng_table, int rng_ct)
+optionShowRange(tOptions * pOpts, tOptDesc * pOD, void * rng_table, int rng_ct)
 {
-    static char const bullet[] = "\t\t\t\t- ";
-    static char const deepin[] = "\t\t\t\t  ";
-    static char const onetab[] = "\t";
-
     const struct {long const rmin, rmax;} * rng = rng_table;
 
-    char const * pz_indent    = bullet;
+    char const * pz_indent = BULLET_STR;
 
     /*
      * The range is shown only for full usage requests and an error
@@ -55,10 +51,10 @@ optionShowRange(tOptions* pOpts, tOptDesc* pOD, void * rng_table, int rng_ct)
     if (pOpts != OPTPROC_EMIT_USAGE) {
         if (pOpts <= OPTPROC_EMIT_LIMIT)
             return;
-        pz_indent = onetab;
+        pz_indent = ONE_TAB_STR;
 
         fprintf(option_usage_fp, zRangeErr, pOpts->pzProgName,
-                pOD->pz_Name, pOD->optArg.argString);
+                pOD->pz_Name, pOD->optArg.argInt);
         pz_indent = "";
     }
 
@@ -66,7 +62,7 @@ optionShowRange(tOptions* pOpts, tOptDesc* pOD, void * rng_table, int rng_ct)
         fprintf(option_usage_fp, zRangeScaled, pz_indent);
 
     fprintf(option_usage_fp, (rng_ct > 1) ? zRangeLie : zRangeOnly, pz_indent);
-    pz_indent = (pOpts != OPTPROC_EMIT_USAGE) ? onetab : deepin;
+    pz_indent = (pOpts != OPTPROC_EMIT_USAGE) ? ONE_TAB_STR : DEEP_INDENT_STR;
 
     for (;;) {
         if (rng->rmax == LONG_MIN)
@@ -80,7 +76,7 @@ optionShowRange(tOptions* pOpts, tOptDesc* pOD, void * rng_table, int rng_ct)
                     rng->rmax);
 
         if  (--rng_ct <= 0) {
-            fputc('\n', option_usage_fp);
+            fputc(NL, option_usage_fp);
             break;
         }
         fputs(zRangeOr, option_usage_fp);
@@ -125,7 +121,7 @@ optionNumericVal(tOptions* pOpts, tOptDesc* pOD )
 
     if ((pOD->fOptState & OPTST_SCALED_NUM) != 0)
         switch (*(pz++)) {
-        case '\0': pz--; break;
+        case NUL:  pz--; break;
         case 't':  val *= 1000;
         case 'g':  val *= 1000;
         case 'm':  val *= 1000;

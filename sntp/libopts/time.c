@@ -2,11 +2,11 @@
 /**
  * \file time.c
  *
- *  Time-stamp:      "2011-03-06 11:52:23 bkorb"
+ *  Time-stamp:      "2012-01-29 12:52:31 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -55,7 +55,7 @@ optionTimeVal(tOptions * pOpts, tOptDesc * pOD)
         pOD->fOptState &= ~OPTST_ALLOC_ARG;
     }
 
-    pOD->optArg.argInt = val;
+    pOD->optArg.argInt = (unsigned long)val;
 }
 
 /*=export_func  optionTimeDate
