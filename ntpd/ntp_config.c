@@ -1820,6 +1820,7 @@ config_auth(
 	int		first;
 	int		last;
 	int		i;
+	int		count;
 #ifdef AUTOKEY
 	int		item;
 #endif
@@ -1881,6 +1882,29 @@ config_auth(
 	}
 #endif	/* AUTOKEY */
 
+	/*
+	 * Count the number of trusted keys to preallocate storage and
+	 * size the hash table.
+	 */
+	count = 0;
+	my_val = HEAD_PFIFO(ptree->auth.trusted_key_list);
+	for (; my_val != NULL; my_val = my_val->link) {
+		if (T_Integer == my_val->type) {
+			first = my_val->value.i;
+			if (first > 1 && first <= NTP_MAXKEY)
+				count++;
+		} else {
+			REQUIRE(T_Intrange == my_val->type);
+			first = my_val->value.r.first;
+			last = my_val->value.r.last;
+			if (!(first > last || first < 1 ||
+			    last > NTP_MAXKEY)) {
+				count += 1 + last - first;
+			}
+		}
+	}
+	auth_prealloc_symkeys(count);
+
 	/* Keys Command */
 	if (ptree->auth.keys)
 		getauthkeys(ptree->auth.keys);
@@ -1899,18 +1923,28 @@ config_auth(
 	/* Trusted Key Command */
 	my_val = HEAD_PFIFO(ptree->auth.trusted_key_list);
 	for (; my_val != NULL; my_val = my_val->link) {
-		if (T_Integer == my_val->type)
-			authtrust(my_val->value.i, 1);
-		else if (T_Intrange == my_val->type) {
+		if (T_Integer == my_val->type) {
+			first = my_val->value.i;
+			if (first >= 1 && first <= NTP_MAXKEY) {
+				authtrust(first, TRUE);
+			} else {
+				msyslog(LOG_NOTICE,
+					"Ignoring invalid trustedkey %d, min 1 max %d.",
+					first, NTP_MAXKEY);
+			}
+		} else {
 			first = my_val->value.r.first;
 			last = my_val->value.r.last;
-			if (first > last || first < 1 || last > 65534)
+			if (first > last || first < 1 ||
+			    last > NTP_MAXKEY) {
 				msyslog(LOG_NOTICE,
-					"Ignoring invalid trustedkey range %d ... %d, min 1 max 65534.",
-					first, last);
-			else
-				for (i = first; i <= last; i++)
-					authtrust((keyid_t)i, 1);
+					"Ignoring invalid trustedkey range %d ... %d, min 1 max %d.",
+					first, last, NTP_MAXKEY);
+			} else {
+				for (i = first; i <= last; i++) {
+					authtrust(i, TRUE);
+				}
+			}
 		}
 	}
 

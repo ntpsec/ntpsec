@@ -35,7 +35,7 @@ MD5authencrypt(
 	 */
 	INIT_SSL();
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
-	EVP_DigestUpdate(&ctx, key, (u_int)cache_keylen);
+	EVP_DigestUpdate(&ctx, key, cache_secretsize);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
 	memmove((u_char *)pkt + length + 4, digest, len);
@@ -68,7 +68,7 @@ MD5authdecrypt(
 	 */
 	INIT_SSL();
 	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
-	EVP_DigestUpdate(&ctx, key, (u_int)cache_keylen);
+	EVP_DigestUpdate(&ctx, key, cache_secretsize);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
 	if ((u_int)size != len + 4) {
@@ -76,7 +76,7 @@ MD5authdecrypt(
 		    "MAC decrypt: MAC length error");
 		return (0);
 	}
-	return (!memcmp(digest, (char *)pkt + length + 4, len));
+	return !memcmp(digest, (char *)pkt + length + 4, len);
 }
 
 /*

@@ -12,19 +12,15 @@ extern "C" {
 #include "ntp_stdlib.h"
 };
 
-// This declaration does not exist in ntp_stdlib.h
-extern u_short cache_flags;
-
 class authkeysTest : public libntptest {
 protected:
 	static const int KEYTYPE = KEY_TYPE_MD5;
 
 	virtual void SetUp() {
-		init_auth();
-
 		/*
-		 * init_auth() does not initialize global variables like authnumkeys,
-		 * so let's reset them to zero here.
+		 * init_auth() is called by tests_main.cpp earlier.  It
+		 * does not initialize global variables like
+		 * authnumkeys, so let's reset them to zero here.
 		 */
 		authnumkeys = 0;
 
@@ -34,8 +30,8 @@ protected:
 		cache_keyid = 0;
 		cache_type = 0;
 		cache_flags = 0;
-		cache_key = NULL;
-		cache_keylen = 0;
+		cache_secret = NULL;
+		cache_secretsize = 0;
 	}
 
 	void AddTrustedKey(keyid_t keyno) {
@@ -45,11 +41,11 @@ protected:
 		 */
 		MD5auth_setkey(keyno, KEYTYPE, NULL, 0);
 
-		authtrust(keyno, 1);
+		authtrust(keyno, TRUE);
 	}
 
 	void AddUntrustedKey(keyid_t keyno) {
-		authtrust(keyno, 0);
+		authtrust(keyno, FALSE);
 	}
 };
 

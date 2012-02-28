@@ -107,13 +107,14 @@ extern	int	ntp_getopt	(int, char **, const char *);
 extern	void	init_auth	(void);
 extern	void	init_lib	(void);
 extern	struct savekey *auth_findkey (keyid_t);
-extern	int	auth_moremem	(void);
+extern	void	auth_moremem	(int);
+extern	void	auth_prealloc_symkeys(int);
 extern	int	ymd2yd		(int, int, int);
 
 /* a_md5encrypt.c */
 extern	int	MD5authdecrypt	(int, u_char *, u_int32 *, int, int);
 extern	int	MD5authencrypt	(int, u_char *, u_int32 *, int);
-extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, const int);
+extern	void	MD5auth_setkey	(keyid_t, int, const u_char *, int);
 extern	u_int32	addr2refid	(sockaddr_u *);
 
 /* emalloc.c */
@@ -204,9 +205,10 @@ extern int	authnumfreekeys;
  * The key cache. We cache the last key we looked at here.
  */
 extern keyid_t	cache_keyid;		/* key identifier */
-extern u_char *	cache_key;		/* key pointer */
 extern int	cache_type;		/* key type */
-extern u_int	cache_keylen;		/* key length */
+extern u_char *	cache_secret;		/* secret */
+extern u_short	cache_secretsize;	/* secret octets */
+extern u_short	cache_flags;		/* KEY_ bit flags */
 
 /* getopt.c */
 extern char *	ntp_optarg;		/* global argument pointer */
