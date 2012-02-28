@@ -2,14 +2,14 @@
 /**
  * \file stack.c
  *
- *  Time-stamp:      "2010-07-17 10:42:27 bkorb"
+ *  Time-stamp:      "2012-01-29 09:42:12 bkorb"
  *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -47,8 +47,6 @@ optionUnstackArg(
     tOptions*  pOpts,
     tOptDesc*  pOptDesc )
 {
-    int       res;
-
     tArgList* pAL;
 
     if ((pOptDesc->fOptState & OPTST_RESET) != 0)
@@ -81,8 +79,10 @@ optionUnstackArg(
          *  we are keeping a define.
          */
         for (i = 0, dIdx = 0, ct = pAL->useCt; --ct >= 0; i++) {
-            tCC*      pzSrc = pAL->apzArgs[ i ];
-            char*     pzEq  = strchr(pzSrc, '=');
+            char const * pzSrc = pAL->apzArgs[ i ];
+            char *       pzEq  = strchr(pzSrc, '=');
+            int          res;
+
 
             if (pzEq != NULL)
                 *pzEq = NUL;

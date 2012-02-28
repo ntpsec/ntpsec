@@ -2,7 +2,7 @@
 /**
  * \file enumeration.c
  *
- * Time-stamp:      "2011-04-06 10:48:22 bkorb"
+ * Time-stamp:      "2012-01-29 19:07:59 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -11,7 +11,7 @@
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -105,7 +105,7 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
      */
     if (max_len > 35) {
         do  {
-            fprintf(option_usage_fp, "  %s\n", *(paz_names++));
+            fprintf(option_usage_fp, ENUM_ERR_SEP_LINE_FMT, *(paz_names++));
         } while (--ct_down > 0);
     }
 
@@ -118,19 +118,19 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
             fputc(' ', option_usage_fp);
             fputs(*(paz_names++), option_usage_fp);
         } while (--ct_down > 0);
-        fputc('\n', option_usage_fp);
+        fputc(NL, option_usage_fp);
     }
 
     /*
      *  Otherwise, columnize the output
      */
     else {
-        int   ent_no = 0;
+        unsigned int ent_no = 0;
         char  zFmt[16];  /* format for all-but-last entries on a line */
 
-        sprintf(zFmt, "%%-%ds", (int)max_len);
+        sprintf(zFmt, ENUM_ERR_STR_WIDTH_FMT, (int)max_len);
         max_len = 78 / max_len; /* max_len is now max entries on a line */
-        fputs("  ", option_usage_fp);
+        fputs(TWO_SPACES_STR, option_usage_fp);
 
         /*
          *  Loop through all but the last entry
@@ -141,14 +141,14 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
                 /*
                  *  Last entry on a line.  Start next line, too.
                  */
-                fprintf(option_usage_fp, "%s\n  ", *(paz_names++));
+                fprintf(option_usage_fp, NLSTR_SPACE_FMT, *(paz_names++));
                 ent_no = 0;
             }
 
             else
                 fprintf(option_usage_fp, zFmt, *(paz_names++) );
         }
-        fprintf(option_usage_fp, "%s\n", *paz_names);
+        fprintf(option_usage_fp, NLSTR_FMT, *paz_names);
     }
 
     if (pOpts > OPTPROC_EMIT_LIMIT) {
@@ -277,7 +277,7 @@ optionEnumerationVal(tOptions * pOpts, tOptDesc * pOD,
          *  print the name string.
          */
         if (ix >= name_ct)
-            printf("INVALID-%d", ix);
+            printf(INVALID_FMT, ix);
         else
             fputs(paz_names[ ix ], stdout);
 
@@ -286,13 +286,12 @@ optionEnumerationVal(tOptions * pOpts, tOptDesc * pOD,
 
     case (uintptr_t)OPTPROC_RETURN_VALNAME:
     {
-        tSCC zInval[] = "*INVALID*";
         unsigned int ix = pOD->optArg.argEnum;
         /*
          *  Replace the enumeration value with the name string.
          */
         if (ix >= name_ct)
-            return (uintptr_t)zInval;
+            return (uintptr_t)INVALID_STR;
 
         pOD->optArg.argString = paz_names[ix];
         break;
@@ -328,15 +327,15 @@ set_memb_shell(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
     /*
      *  print the name string.
      */
-    int       ix   =  0;
-    uintptr_t bits = (uintptr_t)pOD->optCookie;
-    size_t    len  = 0;
+    unsigned int ix =  0;
+    uintptr_t  bits = (uintptr_t)pOD->optCookie;
+    size_t     len  = 0;
 
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
 
     while (bits != 0) {
         if (bits & 1) {
-            if (len++ > 0) fputs(" | ", stdout);
+            if (len++ > 0) fputs(OR_STR, stdout);
             fputs(paz_names[ix], stdout);
         }
         if (++ix >= name_ct) break;
@@ -348,13 +347,10 @@ static void
 set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
                unsigned int name_ct)
 {
-    static char const none[]  = "none";
-    static char const plus[3] = " + ";
-
-    char *    pz;
-    uintptr_t bits = (uintptr_t)pOD->optCookie;
-    int       ix   = 0;
-    size_t    len  = sizeof(none);
+    char *     pz;
+    uintptr_t  bits = (uintptr_t)pOD->optCookie;
+    unsigned int ix = 0;
+    size_t     len  = NONE_STR_LEN + 1;
 
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
 
@@ -364,20 +360,20 @@ set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
      */
     while (bits != 0) {
         if (bits & 1)
-            len += strlen(paz_names[ix]) + sizeof(plus);
+            len += strlen(paz_names[ix]) + PLUS_STR_LEN + 1;
         if (++ix >= name_ct) break;
         bits >>= 1;
     }
 
-    pOD->optArg.argString = pz = AGALOC(len, "enum name");
+    pOD->optArg.argString = pz = AGALOC(len, "enum");
 
     /*
      *  Start by clearing all the bits.  We want to turn off any defaults
      *  because we will be restoring to current state, not adding to
      *  the default set of bits.
      */
-    memcpy(pz, none, sizeof(none)-1);
-    pz += sizeof(none)-1;
+    memcpy(pz, NONE_STR, NONE_STR_LEN);
+    pz += NONE_STR_LEN;
     bits = (uintptr_t)pOD->optCookie;
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
     ix = 0;
@@ -385,9 +381,9 @@ set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
     while (bits != 0) {
         if (bits & 1) {
             size_t nln = strlen(paz_names[ix]);
-            memcpy(pz, plus, sizeof(plus));
-            memcpy(pz+sizeof(plus), paz_names[ix], nln);
-            pz += strlen(paz_names[ix]) + 3;
+            memcpy(pz, PLUS_STR, PLUS_STR_LEN);
+            memcpy(pz+PLUS_STR_LEN, paz_names[ix], nln);
+            pz += nln + PLUS_STR_LEN;
         }
         if (++ix >= name_ct) break;
         bits >>= 1;
@@ -440,7 +436,7 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
         return;
 
     {
-        char const*      pzArg = pOD->optArg.argString;
+        char const * pzArg = pOD->optArg.argString;
         uintptr_t res;
         if ((pzArg == NULL) || (*pzArg == NUL)) {
             pOD->optCookie = (void*)0;
@@ -449,15 +445,14 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
 
         res = (uintptr_t)pOD->optCookie;
         for (;;) {
-            tSCC zSpn[] = " ,|+\t\r\f\n";
             int  iv, len;
 
-            pzArg += strspn(pzArg, zSpn);
+            pzArg = SPN_SET_SEPARATOR_CHARS(pzArg);
             iv = (*pzArg == '!');
             if (iv)
-                pzArg += strspn(pzArg+1, zSpn) + 1;
+                pzArg = SPN_WHITESPACE_CHARS(pzArg+1);
 
-            len = strcspn(pzArg, zSpn);
+            len = BRK_SET_SEPARATOR_CHARS(pzArg) - pzArg;
             if (len == 0)
                 break;
 
@@ -477,7 +472,7 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
                 if (pz != pzArg + len) {
                     char z[ AO_NAME_SIZE ];
                     char const* p;
-                    int  shift_ct;
+                    unsigned int shift_ct;
 
                     if (*pz != NUL) {
                         if (len >= AO_NAME_LIMIT)

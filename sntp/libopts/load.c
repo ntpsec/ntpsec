@@ -1,7 +1,7 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2011-12-17 12:53:04 bkorb"
+ *  Time-stamp:      "2012-01-29 19:37:15 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -9,7 +9,7 @@
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -37,8 +37,8 @@ static ag_bool
 add_env_val(char * pzBuf, int bufSize, char const * pzName,
             char const * pzProgPath);
 
-static char*
-assemble_arg_val(char* pzTxt, tOptionLoadMode mode);
+static char *
+assemble_arg_val(char * pzTxt, tOptionLoadMode mode);
 /* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  optionMakePath
@@ -98,7 +98,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
 {
     size_t name_len = strlen(pzName);
 
-    if ((bufSize <= name_len) || (name_len == 0))
+    if (((size_t)bufSize <= name_len) || (name_len == 0))
         return AG_FALSE;
 
     /*
@@ -225,7 +225,7 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
      *  Concatenate the file name to the end of the executable path.
      *  The result may be either a file or a directory.
      */
-    if ((pz - pzPath)+1 + strlen(pzName) >= bufSize)
+    if ((pz - pzPath)+1 + strlen(pzName) >= (unsigned)bufSize)
         return AG_FALSE;
 
     memcpy(pzBuf, pzPath, (size_t)((pz - pzPath)+1));
@@ -267,7 +267,7 @@ add_env_val(char * pzBuf, int bufSize, char const * pzName,
     if (pzDir == NULL)
         return AG_FALSE;
 
-    if (strlen(pzDir) + 1 + strlen(pzName) >= bufSize)
+    if (strlen(pzDir) + 1 + strlen(pzName) >= (unsigned)bufSize)
         return AG_FALSE;
 
     sprintf(pzBuf, "%s%s", pzDir, pzName);
@@ -314,11 +314,10 @@ mungeString(char* pzTxt, tOptionLoadMode mode)
 }
 
 
-static char*
-assemble_arg_val(char* pzTxt, tOptionLoadMode mode)
+static char *
+assemble_arg_val(char * pzTxt, tOptionLoadMode mode)
 {
-    static char const zBrk[] = " \t\n:=";
-    char* pzEnd = strpbrk(pzTxt, zBrk);
+    char* pzEnd = strpbrk(pzTxt, ARG_BREAK_STR);
     int   space_break;
 
     /*

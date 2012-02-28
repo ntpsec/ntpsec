@@ -2,7 +2,7 @@
 /*
  * \file usage.c
  *
- * Time-stamp:      "2011-11-22 11:41:18 bkorb"
+ * Time-stamp:      "2012-01-29 09:57:43 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -16,7 +16,7 @@
 /*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -248,12 +248,12 @@ print_usage_details(tOptions * opts, int exit_code)
          */
         if (do_gnu_usage(opts)) {
             int flen = setGnuOptFmts(opts, &pOptTitle);
-            sprintf(zOptFmtLine, zFmtFmt, flen);
-            fputc('\n', option_usage_fp);
+            sprintf(line_fmt_buf, zFmtFmt, flen);
+            fputc(NL, option_usage_fp);
         }
         else {
             int flen = setStdOptFmts(opts, &pOptTitle);
-            sprintf(zOptFmtLine, zFmtFmt, flen);
+            sprintf(line_fmt_buf, zFmtFmt, flen);
 
             /*
              *  When we exit with EXIT_SUCCESS and the first option is a doc
@@ -716,7 +716,7 @@ prt_ini_list(char const * const * papz, ag_bool * pInitIntro,
             }
         }
 
-        fputc('\n', option_usage_fp);
+        fputc(NL, option_usage_fp);
     }
 }
 
@@ -787,7 +787,7 @@ prt_one_usage(tOptions * pOptions, tOptDesc * pOD, arg_types_t * pAT)
         snprintf(z, sizeof(z), pAT->pzOptFmt, pzArgType, pOD->pz_Name,
                  (pOD->optMinCt != 0) ? pAT->pzReq : pAT->pzOpt);
 
-        fprintf(option_usage_fp, zOptFmtLine, z, pOD->pzText);
+        fprintf(option_usage_fp, line_fmt_buf, z, pOD->pzText);
 
         switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
         case OPARG_TYPE_ENUMERATION:
@@ -884,7 +884,7 @@ prt_opt_usage(tOptions * pOpts, int ex_code, char const * pOptTitle)
 
     } while (pOD++, optNo++, (--ct > 0));
 
-    fputc('\n', option_usage_fp);
+    fputc(NL, option_usage_fp);
 }
 
 
@@ -923,7 +923,7 @@ prt_prog_detail(tOptions* pOptions)
         int        optNo  = 0;
         tOptDesc*  pOD    = pOptions->pOptDesc;
 
-        fputc('\n', option_usage_fp);
+        fputc(NL, option_usage_fp);
         fflush(option_usage_fp);
         do  {
             switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
