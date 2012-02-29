@@ -1,3 +1,4 @@
+(4.2.7p262) 2012/02/29 Released by Harlan Stenn <stenn@ntp.org>
 * Improve ntpd scalability for servers with many trusted keys.
 (4.2.7p261) 2012/02/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2048] add the clock variable timecode to SHM refclock.
