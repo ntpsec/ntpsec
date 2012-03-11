@@ -472,10 +472,11 @@ adj_systime(
 
 
 	/*
-	 * If a leap second is pending then determine the UTC time stamp 
-	 * of when the insertion must take place 
+	 * If a leap second is pending for the end of the month,
+	 * determine the UTC time stamp when the insertion must take
+	 * place 
 	 */
-	if (leapsec > 0) {
+	if (0 < leapsec && leapsec < 31 * DAY) {
 		if (0 == ls_ft.ull) {  /* time stamp has not yet been computed */
 			GetSystemTime(&st);
 

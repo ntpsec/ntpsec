@@ -78,10 +78,6 @@ u_long	sys_automax = NTP_AUTOMAX; /* key list timeout (log2 s) */
  */
 volatile u_long alarm_overflow;
 
-#define MINUTE	60
-#define HOUR	(60 * MINUTE)
-#define	DAY	(24 * HOUR)
-
 u_long current_time;		/* seconds since startup */
 
 /*

@@ -77,6 +77,10 @@ extern	void	errno_to_str(int, char *, size_t);
 		errno = preserved_errno;		\
 	}
 
+#define MINUTE	60
+#define HOUR	(60 * MINUTE)
+#define	DAY	(24 * HOUR)
+
 typedef void (*ctrl_c_fn)(void);
 
 /* authkeys.c */
