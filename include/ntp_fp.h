@@ -357,6 +357,7 @@ extern	char *	uglydate	(l_fp *);
 extern  void	mfp_mul		(int32 *, u_int32 *, int32, u_int32, int32, u_int32);
 
 extern	void	set_sys_fuzz	(double);
+extern	void	init_systime	(void);
 extern	void	get_systime	(l_fp *);
 extern	int	step_systime	(double);
 extern	int	adj_systime	(double);
@@ -383,4 +384,33 @@ extern	struct tm * ntp2unix_tm (u_int32 ntp, int local);
  */
 typedef void (*time_stepped_callback)(void);
 extern time_stepped_callback	step_callback;
+
+/*
+ * Multi-thread locking for get_systime()
+ *
+ * On most systems, get_systime() is used solely by the main ntpd
+ * thread, but on Windows it's also used by the dedicated I/O thread.
+ * The [Bug 2037] changes to get_systime() have it keep state between
+ * calls to ensure time moves in only one direction, which means its
+ * use on Windows needs to be protected against simultaneous execution
+ * to avoid falsely detecting Lamport violations by ensuring only one
+ * thread at a time is in get_systime().
+ */
+#ifdef SYS_WINNT
+extern CRITICAL_SECTION get_systime_cs;
+# define INIT_GET_SYSTIME_CRITSEC()				\
+		InitializeCriticalSection(&get_systime_cs)
+# define ENTER_GET_SYSTIME_CRITSEC()				\
+		EnterCriticalSection(&get_systime_cs)
+# define LEAVE_GET_SYSTIME_CRITSEC()				\
+		LeaveCriticalSection(&get_systime_cs)
+#else	/* !SYS_WINNT follows */
+# define INIT_GET_SYSTIME_CRITSEC()			\
+		do {} while (FALSE)
+# define ENTER_GET_SYSTIME_CRITSEC()			\
+		do {} while (FALSE)
+# define LEAVE_GET_SYSTIME_CRITSEC()			\
+		do {} while (FALSE)
+#endif
+
 #endif /* NTP_FP_H */

@@ -1967,9 +1967,10 @@ stream_receive(
 	struct recvbuf *rbufp
 	)
 {
-	struct parseunit *parse = (struct parseunit *)((void *)rbufp->recv_srcclock);
+	struct parseunit * parse;
 	parsetime_t parsetime;
 
+	parse = (struct parseunit *)rbufp->recv_peer->procptr->unitptr;
 	if (!parse->peer)
 	    return;
 
@@ -2115,11 +2116,13 @@ local_input(
 	struct recvbuf *rbufp
 	)
 {
-	struct parseunit *parse = (struct parseunit *)((void *)rbufp->recv_srcclock);
+	struct parseunit * parse;
+
 	int count;
 	unsigned char *s;
 	timestamp_t ts;
 
+	parse = (struct parseunit *)rbufp->recv_peer->procptr->unitptr;
 	if (!parse->peer)
 		return 0;
 
@@ -2332,9 +2335,10 @@ local_receive(
 	struct recvbuf *rbufp
 	)
 {
-	struct parseunit *parse = (struct parseunit *)((void *)rbufp->recv_srcclock);
+	struct parseunit * parse;
 	parsetime_t parsetime;
 
+	parse = (struct parseunit *)rbufp->recv_peer->procptr->unitptr;
 	if (!parse->peer)
 	    return;
 
@@ -3129,7 +3133,7 @@ parse_start(
 	/*
 	 * pick correct input machine
 	 */
-	parse->generic->io.srcclock = (void *)parse;
+	parse->generic->io.srcclock = peer;
 	parse->generic->io.datalen = 0;
 	
 	parse->binding = init_iobinding(parse);

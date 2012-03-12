@@ -305,7 +305,7 @@ check-saveconfig: $(srcdir)/complete.conf compsave.conf
 	cd ../libparse && $(MAKE) $(AM_MAKEFLAGS) check-libparse
 
 $(top_srcdir)/sntp/scm-rev:
-	cd $(top_srcdir)/sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
+	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/sntp/scm-rev
 	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpd

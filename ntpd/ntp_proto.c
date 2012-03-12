@@ -2665,7 +2665,7 @@ clock_select(void)
 	 */
 	if (nlist == 0) {
 		peers[0].error = 0;
-		peers[0].synch = 0;
+		peers[0].synch = sys_mindisp;
 #ifdef REFCLOCK
 		if (typeacts != NULL) {
 			peers[0].peer = typeacts;

@@ -8,6 +8,9 @@
 
 #include <gtest/gtest.h>
 
+extern "C" {
+#include "ntp_stdlib.h"
+}
 
 class ntptest : public ::testing::Test {
 public:

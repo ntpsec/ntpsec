@@ -76,7 +76,18 @@ time_stepped_callback	step_callback;
 
 #ifndef SIM
 static int lamport_violated;	/* clock was stepped back */
+#endif	/* !SIM */
+
+#ifdef DEBUG
+static int systime_init_done;
+# define DONE_SYSTIME_INIT()	systime_init_done = TRUE
+#else
+# define DONE_SYSTIME_INIT()	do {} while (FALSE)
 #endif
+#ifdef SYS_WINNT
+CRITICAL_SECTION get_systime_cs;
+#endif
+
 
 void
 set_sys_fuzz(
@@ -87,6 +98,14 @@ set_sys_fuzz(
 	INSIST(sys_fuzz >= 0);
 	INSIST(sys_fuzz <= 1.0);
 	sys_fuzz_nsec = (long)(sys_fuzz * 1e9 + 0.5);
+}
+
+
+void
+init_systime(void)
+{
+	INIT_GET_SYSTIME_CRITSEC();
+	DONE_SYSTIME_INIT();
 }
 
 
@@ -134,6 +153,7 @@ get_systime(
 {
 	static struct timespec	ts_prev;	/* prior os time */
 	static l_fp		lfp_prev;	/* prior result */
+	static double		dfuzz_prev;	/* prior fuzz */
 	struct timespec ts;	/* seconds and nanoseconds */
 	struct timespec ts_min;	/* earliest permissible */
 	struct timespec ts_lam;	/* lamport fictional increment */
@@ -145,6 +165,8 @@ get_systime(
 	l_fp	lfpdelta;
 
 	get_ostime(&ts);
+	DEBUG_REQUIRE(systime_init_done);
+	ENTER_GET_SYSTIME_CRITSEC();
 
 	/*
 	 * After default_get_precision() has set a nonzero sys_fuzz,
@@ -188,8 +210,8 @@ get_systime(
 			msyslog(LOG_ERR, "ts_min %s ts_prev %s ts %s",
 				tspectoa(ts_min), tspectoa(ts_prev_log),
 				tspectoa(ts));
-			msyslog(LOG_ERR, "sys_fuzz %ld nsec, this fuzz %.9f",
-				sys_fuzz_nsec, dfuzz);
+			msyslog(LOG_ERR, "sys_fuzz %ld nsec, this fuzz %.9f, prior %.9f",
+				sys_fuzz_nsec, dfuzz, dfuzz_prev);
 			lfpdelta = lfp_prev;
 			L_SUB(&lfpdelta, &result);
 			LFPTOD(&lfpdelta, ddelta);
@@ -200,9 +222,11 @@ get_systime(
 		}
 	}
 	lfp_prev = result;
+	dfuzz_prev = dfuzz;
 	if (lamport_violated) 
 		lamport_violated = FALSE;
 
+	LEAVE_GET_SYSTIME_CRITSEC();
 	*now = result;
 }
 

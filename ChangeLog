@@ -1,3 +1,24 @@
+* [Bug 2156] clock instability with LOCAL driver, from Miroslav Lichvar.
+* [Bug 2159] Windows ntpd using leapfile erroneous leap second 20120401.
+(4.2.7p262) 2012/02/29 Released by Harlan Stenn <stenn@ntp.org>
+* Improve ntpd scalability for servers with many trusted keys.
+(4.2.7p261) 2012/02/27 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2048] add the clock variable timecode to SHM refclock.
+(4.2.7p260) 2012/02/24 Released by Harlan Stenn <stenn@ntp.org>
+* Fix the check-scm-rev invocation in several Makefile.am's.
+(4.2.7p259) 2012/02/22 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2148] ntpd 4.2.7p258 segfault with 0x0100000 bit in NMEA mode.
+* refclock_nmea.c merge cleanup thanks to Juergen Perlinger.
+(4.2.7p258) 2012/02/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2140] Rework of Windows I/O completion port handling to avoid
+  garbling serial input in UNIX line discipline emulation.
+* [Bug 2143] NMEA driver: discard data if quality indication not good,
+  add statistic counters (mode bit enabled) to clockstats file.
+(4.2.7p257) 2012/02/17 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2135] defer calls to 'io_input' to main thread under Windows.
+(4.2.7p256) 2012/02/08 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2131] Set the system variable settimeofday only after clock step.
+* [Bug 2134] --enable-C99-snprintf does not force rpl_snprintf use.
 (4.2.7p255) 2012/01/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 603] Only link with nlist()-related libraries when needed:
   More cleanup.

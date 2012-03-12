@@ -92,6 +92,7 @@ static union {
 int droproot;			/* intres imports these */
 int root_dropped;
 #endif
+u_long current_time;		/* libntp/authkeys.c */
 
 void open_sockets(void);
 void handle_lookup(const char *name, int flags);
@@ -140,6 +141,7 @@ sntp_main (
 		exit(EX_SOFTWARE);
 
 	init_lib();
+	init_auth();
 
 	optct = ntpOptionProcess(&sntpOptions, argc, argv);
 	argc -= optct;

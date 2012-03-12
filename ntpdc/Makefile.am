@@ -124,7 +124,7 @@ check-layout: ntpdc-layout $(srcdir)/layout.std layout.here
 $(PROGRAMS): version.o
 
 $(top_srcdir)/sntp/scm-rev:
-	cd $(top_srcdir)/sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
+	cd ../sntp && $(MAKE) $(AM_MAKEFLAGS) check-scm-rev
 
 version.c: $(ntpdc_OBJECTS) ../libntp/libntp.a Makefile $(top_srcdir)/sntp/scm-rev
 	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpdc
