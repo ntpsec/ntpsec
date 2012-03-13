@@ -1,3 +1,4 @@
+(4.2.7p263) 2012/03/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2156] clock instability with LOCAL driver, from Miroslav Lichvar.
 * [Bug 2159] Windows ntpd using leapfile erroneous leap second 20120401.
 (4.2.7p262) 2012/02/29 Released by Harlan Stenn <stenn@ntp.org>
