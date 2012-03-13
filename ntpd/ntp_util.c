@@ -339,6 +339,7 @@ stats_config(
 	const char *value;
 	int	len;
 	double	old_drift;
+	l_fp	now;
 #ifndef VMS
 	const char temp_ext[] = ".TEMP";
 #else
@@ -480,15 +481,21 @@ stats_config(
 			break;
 		}
 
-		if (leap_file(fp) < 0)
+		if (leap_file(fp) < 0) {
 			msyslog(LOG_ERR,
 			    "format error leapseconds file %s",
 			    value);
-		else
+		} else {
+			get_systime(&now);
 			mprintf_event(EVNT_TAI, NULL,
-				      "%d leap %s expire %s", leap_tai,
+				      "%d leap %s %s %s",
+				      leap_tai,
 				      fstostr(leap_sec),
+				      (now.l_ui > leap_expire)
+					  ? "expired"
+					  : "expires",
 				      fstostr(leap_expire));
+		}
 		fclose(fp);
 		break;
 
