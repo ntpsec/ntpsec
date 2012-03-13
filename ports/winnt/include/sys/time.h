@@ -20,5 +20,6 @@ typedef struct timespec {
 extern int getclock(int, struct timespec *ts);
 extern int gettimeofday(struct timeval *, void *);
 extern int settimeofday(struct timeval *);
+extern void init_win_precise_time(void);
 
 #endif /* SYS_TIME_H */

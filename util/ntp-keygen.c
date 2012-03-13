@@ -219,7 +219,7 @@ symlink(
 
 	if (!tried) {
 		tried = TRUE;
-		hDll = LoadLibrary("kernel32.dll");
+		hDll = LoadLibrary("kernel32");
 		pfn = GetProcAddress(hDll, "CreateHardLinkA");
 		pCreateHardLinkA = (PCREATEHARDLINKA)pfn;
 	}

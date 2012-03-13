@@ -105,6 +105,7 @@ void
 init_systime(void)
 {
 	INIT_GET_SYSTIME_CRITSEC();
+	INIT_WIN_PRECISE_TIME();
 	DONE_SYSTIME_INIT();
 }
 

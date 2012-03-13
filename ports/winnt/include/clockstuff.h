@@ -35,8 +35,9 @@ enum {
  * either GetSystemTimeAsFileTime provided by Windows
  * or ntpd's interpolating replacement.
  */
-typedef void (WINAPI *PGSTAFT)(LPFILETIME pft);
+typedef void (WINAPI *PGSTAFT)(LPFILETIME pftResult);
 extern PGSTAFT get_sys_time_as_filetime;
+extern PGSTAFT pGetSystemTimePreciseAsFileTime;
 
 void lock_thread_to_processor(HANDLE);
 

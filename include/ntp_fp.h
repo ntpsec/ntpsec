@@ -404,12 +404,16 @@ extern CRITICAL_SECTION get_systime_cs;
 		EnterCriticalSection(&get_systime_cs)
 # define LEAVE_GET_SYSTIME_CRITSEC()				\
 		LeaveCriticalSection(&get_systime_cs)
+# define INIT_WIN_PRECISE_TIME()				\
+		init_win_precise_time()
 #else	/* !SYS_WINNT follows */
 # define INIT_GET_SYSTIME_CRITSEC()			\
 		do {} while (FALSE)
 # define ENTER_GET_SYSTIME_CRITSEC()			\
 		do {} while (FALSE)
 # define LEAVE_GET_SYSTIME_CRITSEC()			\
+		do {} while (FALSE)
+# define INIT_WIN_PRECISE_TIME()			\
 		do {} while (FALSE)
 #endif
 
