@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  March 13, 2012 at 03:56:37 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  March 14, 2012 at 07:57:39 AM by AutoGen 5.14
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -64,7 +64,7 @@ extern tUsageProc optionUsage;
  *  ntpsnmpd option static const strings
  */
 static char const ntpsnmpd_opt_strs[1559] =
-/*     0 */ "ntpsnmpd 4.2.7p263\n"
+/*     0 */ "ntpsnmpd 4.2.7p264\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -103,14 +103,14 @@ static char const ntpsnmpd_opt_strs[1559] =
 /*  1358 */ "no-load-opts\0"
 /*  1371 */ "no\0"
 /*  1374 */ "NTPSNMPD\0"
-/*  1383 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p263\n"
+/*  1383 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p264\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  1488 */ ".ntprc\0"
 /*  1495 */ "$HOME\0"
 /*  1501 */ ".\0"
 /*  1503 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1537 */ "\n\n\0"
-/*  1540 */ "ntpsnmpd 4.2.7p263";
+/*  1540 */ "ntpsnmpd 4.2.7p264";
 
 /*
  *  nofork option description:
