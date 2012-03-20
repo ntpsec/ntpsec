@@ -67,6 +67,7 @@ NTP_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_YACC
+AC_PROG_CC_C_O
 
 NTP_VPATH_HACK		dnl used only by ntpd/Makefile.am
 
@@ -2422,6 +2423,16 @@ if test "$ntp_ok" = "yes"; then
     AC_DEFINE([CLOCK_ULINK], [1], [Ultralink M320 WWVB receiver?])
 fi
 AC_MSG_RESULT([$ntp_ok])
+
+AC_MSG_CHECKING([Spectracom TSYNC PCI timing board])
+AC_ARG_ENABLE(TSYNCPCI,
+    AC_HELP_STRING([--enable-TSYNCPCI], [+ Spectracom TSYNC timing board]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+if test "$ntp_ok" = "yes"; then
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_TSYNCPCI, 1, [Spectracom TSYNC timing board])
+fi
+AC_MSG_RESULT($ntp_ok)
 
 AC_MSG_CHECKING([WWV receiver])
 AC_ARG_ENABLE(
