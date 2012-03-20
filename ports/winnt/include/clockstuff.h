@@ -41,13 +41,4 @@ extern PGSTAFT pGetSystemTimePreciseAsFileTime;
 
 void lock_thread_to_processor(HANDLE);
 
-#ifdef HAVE_PPSAPI
-/*
- * ntp_timestamp_from_counter provides an interface for 
- * serialpps.sys counterstamps to be converted to 
- * interpolated timestamps.
- */
-extern void ntp_timestamp_from_counter(l_fp *, ULONGLONG, ULONGLONG);
-#endif
-
 #endif

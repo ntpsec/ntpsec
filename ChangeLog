@@ -1,3 +1,6 @@
+* Treat zero counter as indication of precise system time in Windows
+  PPSAPI helper function pps_ntp_timestamp_from_counter(), enabling
+  PPSAPI providers to use the Windows 8 precise clock directly.
 (4.2.7p264) 2012/03/14 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2160] Note if leapseconds file is past its prime.
 * Use GetSystemTimePreciseAsFileTime() on Windows 8.

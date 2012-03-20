@@ -1183,6 +1183,9 @@ lock_thread_to_processor(HANDLE thread)
 
 
 #ifdef HAVE_PPSAPI
+static inline void ntp_timestamp_from_counter(l_fp *, ULONGLONG,
+					      ULONGLONG);
+
 /*
  * helper routine for serial PPS which returns QueryPerformanceCounter
  * timestamp and needs to interpolate it to an NTP timestamp.
@@ -1204,6 +1207,7 @@ pps_ntp_timestamp_from_counter(
 }
 
 
+static inline 
 void 
 ntp_timestamp_from_counter(
 	l_fp *result, 
@@ -1225,27 +1229,9 @@ ntp_timestamp_from_counter(
 		}
 
 		InterpTimestamp = interp_time(Counterstamp + QPC_offset, FALSE);
-
-#ifdef DEBUG
-		/* sanity check timestamp is within 1 minute of now */
-		GetSystemTimeAsFileTime(&Now.ft);
-		Now.ull -= InterpTimestamp;
-		if (debug &&
-		    Now.ll > 60 * HECTONANOSECONDS || 
-		    Now.ll < -60 * HECTONANOSECONDS) {
-			DPRINTF(1, ("ntp_timestamp_from_counter interpolated time %.6fs from current\n",
-					Now.ll / (double)HECTONANOSECONDS));
-			DPRINTF(1, ("interpol time %llx from  %llx + %llx\n",
-					InterpTimestamp, Counterstamp,
-					QPC_offset));
-			msyslog(LOG_ERR,
-				"ntp_timestamp_from_counter interpolated time %.6fs from current\n",
-				Now.ll / (double)HECTONANOSECONDS);
-			exit(-1);
-		}
-#endif
 	} else {  /* ! winnt_use_interpolation */
-		if (NULL != pGetSystemTimePreciseAsFileTime) {
+		if (NULL != pGetSystemTimePreciseAsFileTime &&
+		    0 != Counterstamp) {
 			QueryPerformanceCounter(&Ctr.li);
 			(*pGetSystemTimePreciseAsFileTime)(&Now.ft);
 			CtrDelta = Ctr.ull - Counterstamp;
@@ -1257,23 +1243,6 @@ ntp_timestamp_from_counter(
 			InterpTimestamp = Timestamp;
 			GetSystemTimeAsFileTime(&Now.ft);
 		}
-#ifdef DEBUG
-		/* sanity check timestamp is within 1 minute of now */
-		Now.ull -= InterpTimestamp;
-		if (debug &&
-		    Now.ll > 60 * HECTONANOSECONDS || 
-		    Now.ll < -60 * HECTONANOSECONDS) {
-			DPRINTF(1, ("ntp_timestamp_from_counter serial driver %s time %.6fs from current\n",
-				    (NULL == pGetSystemTimePreciseAsFileTime)
-					? "system"
-					: "counter",
-				    Now.ll / (double)HECTONANOSECONDS));
-			msyslog(LOG_ERR,
-				"ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
-				Now.ll / (double)HECTONANOSECONDS);
-			exit(-1);
-		}
-#endif
 	}
 
 	/* convert from 100ns units to NTP fixed point format */
