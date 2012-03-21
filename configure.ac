@@ -2425,14 +2425,27 @@ fi
 AC_MSG_RESULT([$ntp_ok])
 
 AC_MSG_CHECKING([Spectracom TSYNC PCI timing board])
-AC_ARG_ENABLE(TSYNCPCI,
-    AC_HELP_STRING([--enable-TSYNCPCI], [+ Spectracom TSYNC timing board]),
-    [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
+case "$host" in
+ *-*-*linux*)
+    ntp_ok=$ntp_eac
+    ;;
+ *)
+    ntp_ok=no
+esac
+AC_ARG_ENABLE(
+    [TSYNCPCI],
+    [AS_HELP_STRING(
+	[--enable-TSYNCPCI],
+	[+ Spectracom TSYNC timing board]
+    )],
+    [ntp_ok=$enableval],
+    []
+)
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
-    AC_DEFINE(CLOCK_TSYNCPCI, 1, [Spectracom TSYNC timing board])
+    AC_DEFINE([CLOCK_TSYNCPCI], [1], [Spectracom TSYNC timing board])
 fi
-AC_MSG_RESULT($ntp_ok)
+AC_MSG_RESULT([$ntp_ok])
 
 AC_MSG_CHECKING([WWV receiver])
 AC_ARG_ENABLE(
