@@ -1745,6 +1745,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_tsyncpci.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\refclock_usno.c"
 				>
 				<FileConfiguration

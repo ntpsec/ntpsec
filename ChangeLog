@@ -1,3 +1,13 @@
+* Add refclock_tsyncpci.c (driver 45) supporting Spectracom TSYNC timing
+  boards.
+(4.2.7p265) 2012/03/20 Released by Harlan Stenn <stenn@ntp.org>
+* Treat zero counter as indication of precise system time in Windows
+  PPSAPI helper function pps_ntp_timestamp_from_counter(), enabling
+  PPSAPI providers to use the Windows 8 precise clock directly.
+(4.2.7p264) 2012/03/14 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2160] Note if leapseconds file is past its prime.
+* Use GetSystemTimePreciseAsFileTime() on Windows 8.
+(4.2.7p263) 2012/03/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2156] clock instability with LOCAL driver, from Miroslav Lichvar.
 * [Bug 2159] Windows ntpd using leapfile erroneous leap second 20120401.
 (4.2.7p262) 2012/02/29 Released by Harlan Stenn <stenn@ntp.org>

@@ -113,7 +113,6 @@
  */
 #define	MD5KEYS		10	/* number of keys generated of each type */
 #define	MD5SIZE		20	/* maximum key size */
-#define DAY		((long)60*60*24) /* one day in seconds */
 #define	YEAR		((long)365) /* one year in days */
 #ifdef AUTOKEY
 #define	PLEN		512	/* default prime modulus size (bits) */
@@ -219,7 +218,7 @@ symlink(
 
 	if (!tried) {
 		tried = TRUE;
-		hDll = LoadLibrary("kernel32.dll");
+		hDll = LoadLibrary("kernel32");
 		pfn = GetProcAddress(hDll, "CreateHardLinkA");
 		pCreateHardLinkA = (PCREATEHARDLINKA)pfn;
 	}

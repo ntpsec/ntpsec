@@ -189,7 +189,7 @@ static int lock_interp_threads = -1;
  * ppm_per_adjust_unit is parts per million effect on the OS
  * clock per slewing adjustment unit per second.  Per haps.
  */
-static DOUBLE ppm_per_adjust_unit = 0.0;
+static DOUBLE ppm_per_adjust_unit;
 
 /*
  * wintickadj emulates the functionality provided by unix tickadj,
@@ -689,34 +689,6 @@ init_winnt_time(void)
 	if (-1 == setpriority(PRIO_PROCESS, 0, NTP_PRIO))
 		exit(-1);
 
-	/* 
-	 * before we start looking at clock period, do any multimedia
-	 * timer manipulation requested via -M option.
-	 */
-	if (modify_mm_timer) {
-		if (timeGetDevCaps(&tc, sizeof(tc)) == TIMERR_NOERROR) {
-			wTimerRes = min(max(tc.wPeriodMin, MM_TIMER_INTV), tc.wPeriodMax);
-			timeBeginPeriod(wTimerRes);
-			atexit(atexit_revert_mm_timer);
-			
-			msyslog(LOG_INFO, "MM timer resolution: %u..%u msec, set to %u msec",
-				tc.wPeriodMin, tc.wPeriodMax, wTimerRes );
-		} else {
-			msyslog(LOG_ERR, "Multimedia timer unavailable");
-		}
-	}
-	
-	/* get the performance counter ticks per second */
-	if (!QueryPerformanceFrequency(&Freq) || !Freq.QuadPart) {
-		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
-		exit(-1);
-	}
-
-	NomPerfCtrFreq = PerfCtrFreq = Freq.QuadPart;
-	msyslog(LOG_INFO, 
-		"Performance counter frequency %.3f MHz",
-		PerfCtrFreq / 1e6);
-
 	/* Determine the existing system time slewing */
 	if (!GetSystemTimeAdjustment(&adjclockperiod, &clockperiod, &noslew)) {
 		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
@@ -747,6 +719,58 @@ init_winnt_time(void)
 	 */
 	ppm_per_adjust_unit = 1e6 / clockperiod;
 
+	pch = getenv("NTPD_TICKADJ_PPM");
+	if (pch != NULL && 1 == sscanf(pch, "%lf", &adjppm)) {
+		rawadj = adjppm / ppm_per_adjust_unit;
+		rawadj += (rawadj < 0)
+			      ? -0.5
+			      : 0.5;
+		wintickadj = (long)rawadj;
+		msyslog(LOG_INFO,
+			"Using NTPD_TICKADJ_PPM %+g ppm (%+ld)",
+			adjppm, wintickadj);
+	}
+
+	/* get the performance counter ticks per second */
+	if (!QueryPerformanceFrequency(&Freq) || !Freq.QuadPart) {
+		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
+		exit(-1);
+	}
+
+	NomPerfCtrFreq = PerfCtrFreq = Freq.QuadPart;
+	msyslog(LOG_INFO, 
+		"Performance counter frequency %.3f MHz",
+		PerfCtrFreq / 1e6);
+
+	/*
+	 * With a precise system clock, our interpolation decision is
+	 * a slam dunk.
+	 */
+	if (NULL != pGetSystemTimePreciseAsFileTime) {
+		winnt_use_interpolation = FALSE;
+		winnt_time_initialized = TRUE;
+
+		return;
+	}
+
+	/* 
+	 * Implement any multimedia timer manipulation requested via -M
+	 * option.  This is rumored to be unneeded on Win8 with the
+	 * introduction of the precise (interpolated) system clock.
+	 */
+	if (modify_mm_timer) {
+		if (timeGetDevCaps(&tc, sizeof(tc)) == TIMERR_NOERROR) {
+			wTimerRes = min(max(tc.wPeriodMin, MM_TIMER_INTV), tc.wPeriodMax);
+			timeBeginPeriod(wTimerRes);
+			atexit(atexit_revert_mm_timer);
+			
+			msyslog(LOG_INFO, "MM timer resolution: %u..%u msec, set to %u msec",
+				tc.wPeriodMin, tc.wPeriodMax, wTimerRes );
+		} else {
+			msyslog(LOG_ERR, "Multimedia timer unavailable");
+		}
+	}
+	
 	/*
 	 * Spin on GetSystemTimeAsFileTime to determine its
 	 * granularity.  Prior to Windows Vista this is 
@@ -763,18 +787,6 @@ init_winnt_time(void)
 	msyslog(LOG_INFO,
 		"Windows clock precision %.3f msec, min. slew %.3f ppm/s",
 		os_clock_precision / 1e4, ppm_per_adjust_unit);
-
-	pch = getenv("NTPD_TICKADJ_PPM");
-	if (pch != NULL && 1 == sscanf(pch, "%lf", &adjppm)) {
-		rawadj = adjppm / ppm_per_adjust_unit;
-		rawadj += (rawadj < 0)
-			      ? -0.5
-			      : 0.5;
-		wintickadj = (long)rawadj;
-		msyslog(LOG_INFO,
-			"Using NTPD_TICKADJ_PPM %+g ppm (%+ld)",
-			adjppm, wintickadj);
-	}
 
 	winnt_time_initialized = TRUE;
 
@@ -1171,6 +1183,9 @@ lock_thread_to_processor(HANDLE thread)
 
 
 #ifdef HAVE_PPSAPI
+static inline void ntp_timestamp_from_counter(l_fp *, ULONGLONG,
+					      ULONGLONG);
+
 /*
  * helper routine for serial PPS which returns QueryPerformanceCounter
  * timestamp and needs to interpolate it to an NTP timestamp.
@@ -1192,6 +1207,7 @@ pps_ntp_timestamp_from_counter(
 }
 
 
+static inline 
 void 
 ntp_timestamp_from_counter(
 	l_fp *result, 
@@ -1199,9 +1215,10 @@ ntp_timestamp_from_counter(
 	ULONGLONG Counterstamp
 	)
 {
-#ifdef DEBUG
 	FT_ULL		Now;
-#endif
+	FT_ULL		Ctr;
+	LONGLONG	CtrDelta;
+	double		seconds;
 	ULONGLONG	InterpTimestamp;
 
 	if (winnt_use_interpolation) {
@@ -1212,43 +1229,20 @@ ntp_timestamp_from_counter(
 		}
 
 		InterpTimestamp = interp_time(Counterstamp + QPC_offset, FALSE);
-
-#ifdef DEBUG
-		/* sanity check timestamp is within 1 minute of now */
-		GetSystemTimeAsFileTime(&Now.ft);
-		Now.ll -= InterpTimestamp;
-		if (debug &&
-		    Now.ll > 60 * HECTONANOSECONDS || 
-		    Now.ll < -60 * HECTONANOSECONDS) {
-			DPRINTF(1, ("ntp_timestamp_from_counter interpolated time %.6fs from current\n",
-					Now.ll / (double)HECTONANOSECONDS));
-			DPRINTF(1, ("interpol time %llx from  %llx + %llx\n",
-					InterpTimestamp, Counterstamp,
-					QPC_offset));
-			msyslog(LOG_ERR,
-				"ntp_timestamp_from_counter interpolated time %.6fs from current\n",
-				Now.ll / (double)HECTONANOSECONDS);
-			exit(-1);
-		}
-#endif
 	} else {  /* ! winnt_use_interpolation */
-		/* have to simply use the driver's system time timestamp */
-		InterpTimestamp = Timestamp;
-#ifdef DEBUG
-		/* sanity check timestamp is within 1 minute of now */
-		GetSystemTimeAsFileTime(&Now.ft);
-		Now.ll -= InterpTimestamp;
-		if (debug &&
-		    Now.ll > 60 * HECTONANOSECONDS || 
-		    Now.ll < -60 * HECTONANOSECONDS) {
-			DPRINTF(1, ("ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
-				    Now.ll / (double)HECTONANOSECONDS));
-			msyslog(LOG_ERR,
-				"ntp_timestamp_from_counter serial driver system time %.6fs from current\n",
-				Now.ll / (double)HECTONANOSECONDS);
-			exit(-1);
+		if (NULL != pGetSystemTimePreciseAsFileTime &&
+		    0 != Counterstamp) {
+			QueryPerformanceCounter(&Ctr.li);
+			(*pGetSystemTimePreciseAsFileTime)(&Now.ft);
+			CtrDelta = Ctr.ull - Counterstamp;
+			seconds = (double)CtrDelta / PerfCtrFreq;
+			InterpTimestamp = Now.ull -
+			    (ULONGLONG)(seconds * HECTONANOSECONDS);
+		} else {
+			/* have to simply use the driver's system time timestamp */
+			InterpTimestamp = Timestamp;
+			GetSystemTimeAsFileTime(&Now.ft);
 		}
-#endif
 	}
 
 	/* convert from 100ns units to NTP fixed point format */

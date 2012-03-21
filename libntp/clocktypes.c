@@ -101,6 +101,8 @@ struct clktype clktypes[] = {
 	  "GPS_RIPENCC" },
 	{ REFCLK_NEOCLOCK4X,	"NeoClock4X DCF77 / TDF receiver (44)",
 	  "NEOCLK4X"},
+        { REFCLK_TSYNCPCI,    "Spectracom TSYNC PCI timing board (45)",
+          "PCI_TSYNC"},
 	{ -1,			"", "" }
 };
 

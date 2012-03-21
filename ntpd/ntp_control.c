@@ -727,6 +727,7 @@ static const u_char clocktypes[] = {
 	CTL_SST_TS_UHF,		/* REFCLK_ZYFER (42) */
 	CTL_SST_TS_UHF,		/* REFCLK_RIPENCC (43) */
 	CTL_SST_TS_UHF,		/* REFCLK_NEOCLOCK4X (44) */
+	CTL_SST_TS_UHF,		/* REFCLK_TSYNCPCI (45) */
 };
 #endif  /* REFCLOCK */
 

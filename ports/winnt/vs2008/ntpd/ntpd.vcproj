@@ -923,6 +923,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\..\ntpd\refclock_tsyncpci.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\..\ntpd\refclock_tt560.c"
 				>
 			</File>
