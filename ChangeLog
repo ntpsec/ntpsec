@@ -1,5 +1,6 @@
 * Add refclock_tsyncpci.c (driver 45) supporting Spectracom TSYNC timing
   boards.
+(4.2.7p265) 2012/03/20 Released by Harlan Stenn <stenn@ntp.org>
 * Treat zero counter as indication of precise system time in Windows
   PPSAPI helper function pps_ntp_timestamp_from_counter(), enabling
   PPSAPI providers to use the Windows 8 precise clock directly.
