@@ -1,3 +1,5 @@
+* Initial cut at a basic driver45.html page.
+(4.2.7p266) 2012/03/21 Released by Harlan Stenn <stenn@ntp.org>
 * Add refclock_tsyncpci.c (driver 45) supporting Spectracom TSYNC timing
   boards.
 (4.2.7p265) 2012/03/20 Released by Harlan Stenn <stenn@ntp.org>

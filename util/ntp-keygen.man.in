@@ -1,8 +1,8 @@
-.TH ntp-keygen @NTP_KEYGEN_MS@ "20 Mar 2012" "ntp (4.2.7p265)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "21 Mar 2012" "ntp (4.2.7p266)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  March 20, 2012 at 11:24:36 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  March 21, 2012 at 11:24:22 AM by AutoGen 5.14
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
