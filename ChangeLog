@@ -1,3 +1,5 @@
+(4.2.7p268) 2012/03/24 Released by Harlan Stenn <stenn@ntp.org>
+(4.2.7p267) 2012/03/23 Released by Harlan Stenn <stenn@ntp.org>
 * Initial cut at a basic driver45.html page.
 (4.2.7p266) 2012/03/21 Released by Harlan Stenn <stenn@ntp.org>
 * Add refclock_tsyncpci.c (driver 45) supporting Spectracom TSYNC timing
