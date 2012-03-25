@@ -2436,10 +2436,10 @@ AC_ARG_ENABLE(
     [TSYNCPCI],
     [AS_HELP_STRING(
 	[--enable-TSYNCPCI],
-	[+ Spectracom TSYNC timing board]
+	[s Spectracom TSYNC timing board]
     )],
     [ntp_ok=$enableval],
-    []
+    [ntp_ok=no]
 )
 if test "$ntp_ok" = "yes"; then
     ntp_refclock=yes
