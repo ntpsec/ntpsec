@@ -1,3 +1,4 @@
+(4.2.7p269) 2012/03/25 Released by Harlan Stenn <stenn@ntp.org>
 * Clean up configure.ac.
 * Cleanup configure.ac's TSYNC PCI section.
 (4.2.7p268) 2012/03/24 Released by Harlan Stenn <stenn@ntp.org>
