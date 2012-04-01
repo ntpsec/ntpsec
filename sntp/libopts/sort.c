@@ -8,7 +8,7 @@
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control

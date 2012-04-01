@@ -1,17 +1,22 @@
 /*
- *   Character mapping generated 12/29/11 12:02:33
+ *   Character mapping generated 02/26/12 11:08:40
  *
  *  This file contains the character classifications
  *  used by AutoGen and AutoOpts for identifying tokens.
+ *  The table is static scope, so %guard is empty.
+ *
  *  This file is part of AutoGen.
- *  Copyright (c) 1992-2011 Bruce Korb - all rights reserved
+ *  Copyright (c) 1992-2012 Bruce Korb - all rights reserved
+ *
  *  AutoGen is free software: you can redistribute it and/or modify it under the
  *  terms of the GNU General Public License as published by the Free Software
  *  Foundation, either version 3 of the License, or (at your option) any later
  *  version.
+ *
  *  AutoGen is distributed in the hope that it will be useful, but WITHOUT ANY
  *  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  *  A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ *
  *  You should have received a copy of the GNU General Public License along
  *  with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -20,76 +25,29 @@
 
 #ifdef HAVE_CONFIG_H
 # if defined(HAVE_INTTYPES_H)
-#  include <inttypes.h>
+#   include <inttypes.h>
+
 # elif defined(HAVE_STDINT_H)
-#  include <stdint.h>
+#   include <stdint.h>
 
-# else
-#   ifndef HAVE_INT8_T
-        typedef signed char     int8_t;
-#   endif
-#   ifndef HAVE_UINT8_T
-        typedef unsigned char   uint8_t;
-#   endif
-#   ifndef HAVE_INT16_T
-        typedef signed short    int16_t;
-#   endif
-#   ifndef HAVE_UINT16_T
-        typedef unsigned short  uint16_t;
-#   endif
-#   ifndef HAVE_UINT_T
-        typedef unsigned int    uint_t;
-#   endif
-
-#   ifndef HAVE_INT32_T
-#    if SIZEOF_INT == 4
-        typedef signed int      int32_t;
-#    elif SIZEOF_LONG == 4
-        typedef signed long     int32_t;
-#    endif
-#   endif
-
-#   ifndef HAVE_UINT32_T
-#    if SIZEOF_INT == 4
-        typedef unsigned int    uint32_t;
-#    elif SIZEOF_LONG == 4
-        typedef unsigned long   uint32_t;
-#    endif
+# elif !defined(HAVE_UINT32_T)
+#   if SIZEOF_INT == 4
+      typedef unsigned int    uint32_t;
+#   elif SIZEOF_LONG == 4
+      typedef unsigned long   uint32_t;
 #   endif
 # endif /* HAVE_*INT*_H header */
 
 #else /* not HAVE_CONFIG_H -- */
-# ifdef __sun
-#  include <inttypes.h>
-# else
-#  include <stdint.h>
-# endif
+# include <inttypes.h>
 #endif /* HAVE_CONFIG_H */
 
 #if 0 /* mapping specification source (from autogen.map) */
 // 
-// %guard          autoopts_internal
+// %guard
 // %file           ag-char-map.h
-// %static-table   option-char-category
 // 
-// %comment
-//   This file contains the character classifications
-//   used by AutoGen and AutoOpts for identifying tokens.
-// 
-//   This file is part of AutoGen.
-//   Copyright (c) 1992-2011 Bruce Korb - all rights reserved
-// 
-//   AutoGen is free software: you can redistribute it and/or modify it under the
-//   terms of the GNU General Public License as published by the Free Software
-//   Foundation, either version 3 of the License, or (at your option) any later
-//   version.
-// 
-//   AutoGen is distributed in the hope that it will be useful, but WITHOUT ANY
-//   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-//   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-// 
-//   You should have received a copy of the GNU General Public License along
-//   with this program.  If not, see <http://www.gnu.org/licenses/>.
+// %comment -- see above
 // %
 // 
 // lower-case      "a-z"
@@ -104,7 +62,8 @@
 // option-name     "^-"          +variable-name
 // value-name      ":"           +option-name
 // horiz-white     "\t "
-// compound-name   "[.]"         +value-name   +horiz-white
+// name-sep        "[.]"
+// compound-name   +value-name   +name-sep +horiz-white
 // whitespace      "\v\f\r\n\b"  +horiz-white
 // unquotable      "!-~"         -"\"#(),;<=>[\\]`{}?*'"
 // end-xml-token   "/>"          +whitespace
@@ -117,55 +76,107 @@
 // file-name       "/"           +suffix
 // end-token       "\x00"        +whitespace
 // end-list-entry  ","           +end-token
+// set-separator   "|+"          +end-list-entry
 //
 #endif /* 0 -- mapping spec. source */
 
-typedef uint32_t option_char_category_mask_t;
-static option_char_category_mask_t const option_char_category[128];
 
-static inline int is_option_char_category_char(char ch, option_char_category_mask_t mask) {
-    unsigned int ix = (unsigned char)ch;
-    return ((ix < 128) && ((option_char_category[ix] & mask) != 0)); }
+typedef uint32_t ag_char_map_mask_t;
 
-#define IS_LOWER_CASE_CHAR(_c)      is_option_char_category_char((_c), 0x000001)
-#define IS_UPPER_CASE_CHAR(_c)      is_option_char_category_char((_c), 0x000002)
-#define IS_ALPHABETIC_CHAR(_c)      is_option_char_category_char((_c), 0x000003)
-#define IS_OCT_DIGIT_CHAR(_c)       is_option_char_category_char((_c), 0x000004)
-#define IS_DEC_DIGIT_CHAR(_c)       is_option_char_category_char((_c), 0x00000C)
-#define IS_HEX_DIGIT_CHAR(_c)       is_option_char_category_char((_c), 0x00001C)
-#define IS_ALPHANUMERIC_CHAR(_c)    is_option_char_category_char((_c), 0x00000F)
-#define IS_VAR_FIRST_CHAR(_c)       is_option_char_category_char((_c), 0x000023)
-#define IS_VARIABLE_NAME_CHAR(_c)   is_option_char_category_char((_c), 0x00002F)
-#define IS_OPTION_NAME_CHAR(_c)     is_option_char_category_char((_c), 0x00006F)
-#define IS_VALUE_NAME_CHAR(_c)      is_option_char_category_char((_c), 0x0000EF)
-#define IS_HORIZ_WHITE_CHAR(_c)     is_option_char_category_char((_c), 0x000100)
-#define IS_COMPOUND_NAME_CHAR(_c)   is_option_char_category_char((_c), 0x0003EF)
-#define IS_WHITESPACE_CHAR(_c)      is_option_char_category_char((_c), 0x000500)
-#define IS_UNQUOTABLE_CHAR(_c)      is_option_char_category_char((_c), 0x000800)
-#define IS_END_XML_TOKEN_CHAR(_c)   is_option_char_category_char((_c), 0x001500)
-#define IS_GRAPHIC_CHAR(_c)         is_option_char_category_char((_c), 0x002000)
-#define IS_PLUS_N_SPACE_CHAR(_c)    is_option_char_category_char((_c), 0x004500)
-#define IS_PUNCTUATION_CHAR(_c)     is_option_char_category_char((_c), 0x008000)
-#define IS_SUFFIX_CHAR(_c)          is_option_char_category_char((_c), 0x01000F)
-#define IS_SUFFIX_FMT_CHAR(_c)      is_option_char_category_char((_c), 0x03000F)
-#define IS_FALSE_TYPE_CHAR(_c)      is_option_char_category_char((_c), 0x040000)
-#define IS_FILE_NAME_CHAR(_c)       is_option_char_category_char((_c), 0x09000F)
-#define IS_END_TOKEN_CHAR(_c)       is_option_char_category_char((_c), 0x100500)
-#define IS_END_LIST_ENTRY_CHAR(_c)  is_option_char_category_char((_c), 0x300500)
+#define  IS_LOWER_CASE_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x000001)
+#define SPN_LOWER_CASE_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x000001)
+#define BRK_LOWER_CASE_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x000001)
+#define  IS_UPPER_CASE_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x000002)
+#define SPN_UPPER_CASE_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x000002)
+#define BRK_UPPER_CASE_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x000002)
+#define  IS_ALPHABETIC_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x000003)
+#define SPN_ALPHABETIC_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x000003)
+#define BRK_ALPHABETIC_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x000003)
+#define  IS_OCT_DIGIT_CHAR( _c)        is_ag_char_map_char((char)( _c), 0x000004)
+#define SPN_OCT_DIGIT_CHARS(_s)       spn_ag_char_map_chars((char *)_s, 0x000004)
+#define BRK_OCT_DIGIT_CHARS(_s)       brk_ag_char_map_chars((char *)_s, 0x000004)
+#define  IS_DEC_DIGIT_CHAR( _c)        is_ag_char_map_char((char)( _c), 0x00000C)
+#define SPN_DEC_DIGIT_CHARS(_s)       spn_ag_char_map_chars((char *)_s, 0x00000C)
+#define BRK_DEC_DIGIT_CHARS(_s)       brk_ag_char_map_chars((char *)_s, 0x00000C)
+#define  IS_HEX_DIGIT_CHAR( _c)        is_ag_char_map_char((char)( _c), 0x00001C)
+#define SPN_HEX_DIGIT_CHARS(_s)       spn_ag_char_map_chars((char *)_s, 0x00001C)
+#define BRK_HEX_DIGIT_CHARS(_s)       brk_ag_char_map_chars((char *)_s, 0x00001C)
+#define  IS_ALPHANUMERIC_CHAR( _c)     is_ag_char_map_char((char)( _c), 0x00000F)
+#define SPN_ALPHANUMERIC_CHARS(_s)    spn_ag_char_map_chars((char *)_s, 0x00000F)
+#define BRK_ALPHANUMERIC_CHARS(_s)    brk_ag_char_map_chars((char *)_s, 0x00000F)
+#define  IS_VAR_FIRST_CHAR( _c)        is_ag_char_map_char((char)( _c), 0x000023)
+#define SPN_VAR_FIRST_CHARS(_s)       spn_ag_char_map_chars((char *)_s, 0x000023)
+#define BRK_VAR_FIRST_CHARS(_s)       brk_ag_char_map_chars((char *)_s, 0x000023)
+#define  IS_VARIABLE_NAME_CHAR( _c)    is_ag_char_map_char((char)( _c), 0x00002F)
+#define SPN_VARIABLE_NAME_CHARS(_s)   spn_ag_char_map_chars((char *)_s, 0x00002F)
+#define BRK_VARIABLE_NAME_CHARS(_s)   brk_ag_char_map_chars((char *)_s, 0x00002F)
+#define  IS_OPTION_NAME_CHAR( _c)      is_ag_char_map_char((char)( _c), 0x00006F)
+#define SPN_OPTION_NAME_CHARS(_s)     spn_ag_char_map_chars((char *)_s, 0x00006F)
+#define BRK_OPTION_NAME_CHARS(_s)     brk_ag_char_map_chars((char *)_s, 0x00006F)
+#define  IS_VALUE_NAME_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x0000EF)
+#define SPN_VALUE_NAME_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x0000EF)
+#define BRK_VALUE_NAME_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x0000EF)
+#define  IS_HORIZ_WHITE_CHAR( _c)      is_ag_char_map_char((char)( _c), 0x000100)
+#define SPN_HORIZ_WHITE_CHARS(_s)     spn_ag_char_map_chars((char *)_s, 0x000100)
+#define BRK_HORIZ_WHITE_CHARS(_s)     brk_ag_char_map_chars((char *)_s, 0x000100)
+#define  IS_NAME_SEP_CHAR( _c)         is_ag_char_map_char((char)( _c), 0x000200)
+#define SPN_NAME_SEP_CHARS(_s)        spn_ag_char_map_chars((char *)_s, 0x000200)
+#define BRK_NAME_SEP_CHARS(_s)        brk_ag_char_map_chars((char *)_s, 0x000200)
+#define  IS_COMPOUND_NAME_CHAR( _c)    is_ag_char_map_char((char)( _c), 0x0003EF)
+#define SPN_COMPOUND_NAME_CHARS(_s)   spn_ag_char_map_chars((char *)_s, 0x0003EF)
+#define BRK_COMPOUND_NAME_CHARS(_s)   brk_ag_char_map_chars((char *)_s, 0x0003EF)
+#define  IS_WHITESPACE_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x000500)
+#define SPN_WHITESPACE_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x000500)
+#define BRK_WHITESPACE_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x000500)
+#define  IS_UNQUOTABLE_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x000800)
+#define SPN_UNQUOTABLE_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x000800)
+#define BRK_UNQUOTABLE_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x000800)
+#define  IS_END_XML_TOKEN_CHAR( _c)    is_ag_char_map_char((char)( _c), 0x001500)
+#define SPN_END_XML_TOKEN_CHARS(_s)   spn_ag_char_map_chars((char *)_s, 0x001500)
+#define BRK_END_XML_TOKEN_CHARS(_s)   brk_ag_char_map_chars((char *)_s, 0x001500)
+#define  IS_GRAPHIC_CHAR( _c)          is_ag_char_map_char((char)( _c), 0x002000)
+#define SPN_GRAPHIC_CHARS(_s)         spn_ag_char_map_chars((char *)_s, 0x002000)
+#define BRK_GRAPHIC_CHARS(_s)         brk_ag_char_map_chars((char *)_s, 0x002000)
+#define  IS_PLUS_N_SPACE_CHAR( _c)     is_ag_char_map_char((char)( _c), 0x004500)
+#define SPN_PLUS_N_SPACE_CHARS(_s)    spn_ag_char_map_chars((char *)_s, 0x004500)
+#define BRK_PLUS_N_SPACE_CHARS(_s)    brk_ag_char_map_chars((char *)_s, 0x004500)
+#define  IS_PUNCTUATION_CHAR( _c)      is_ag_char_map_char((char)( _c), 0x008000)
+#define SPN_PUNCTUATION_CHARS(_s)     spn_ag_char_map_chars((char *)_s, 0x008000)
+#define BRK_PUNCTUATION_CHARS(_s)     brk_ag_char_map_chars((char *)_s, 0x008000)
+#define  IS_SUFFIX_CHAR( _c)           is_ag_char_map_char((char)( _c), 0x01000F)
+#define SPN_SUFFIX_CHARS(_s)          spn_ag_char_map_chars((char *)_s, 0x01000F)
+#define BRK_SUFFIX_CHARS(_s)          brk_ag_char_map_chars((char *)_s, 0x01000F)
+#define  IS_SUFFIX_FMT_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x03000F)
+#define SPN_SUFFIX_FMT_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x03000F)
+#define BRK_SUFFIX_FMT_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x03000F)
+#define  IS_FALSE_TYPE_CHAR( _c)       is_ag_char_map_char((char)( _c), 0x040000)
+#define SPN_FALSE_TYPE_CHARS(_s)      spn_ag_char_map_chars((char *)_s, 0x040000)
+#define BRK_FALSE_TYPE_CHARS(_s)      brk_ag_char_map_chars((char *)_s, 0x040000)
+#define  IS_FILE_NAME_CHAR( _c)        is_ag_char_map_char((char)( _c), 0x09000F)
+#define SPN_FILE_NAME_CHARS(_s)       spn_ag_char_map_chars((char *)_s, 0x09000F)
+#define BRK_FILE_NAME_CHARS(_s)       brk_ag_char_map_chars((char *)_s, 0x09000F)
+#define  IS_END_TOKEN_CHAR( _c)        is_ag_char_map_char((char)( _c), 0x100500)
+#define SPN_END_TOKEN_CHARS(_s)       spn_ag_char_map_chars((char *)_s, 0x100500)
+#define BRK_END_TOKEN_CHARS(_s)       brk_ag_char_map_chars((char *)_s, 0x100500)
+#define  IS_END_LIST_ENTRY_CHAR( _c)   is_ag_char_map_char((char)( _c), 0x300500)
+#define SPN_END_LIST_ENTRY_CHARS(_s)  spn_ag_char_map_chars((char *)_s, 0x300500)
+#define BRK_END_LIST_ENTRY_CHARS(_s)  brk_ag_char_map_chars((char *)_s, 0x300500)
+#define  IS_SET_SEPARATOR_CHAR( _c)    is_ag_char_map_char((char)( _c), 0x700500)
+#define SPN_SET_SEPARATOR_CHARS(_s)   spn_ag_char_map_chars((char *)_s, 0x700500)
+#define BRK_SET_SEPARATOR_CHARS(_s)   brk_ag_char_map_chars((char *)_s, 0x700500)
 
-#if 1 /* def AUTOOPTS_INTERNAL */
-static option_char_category_mask_t const option_char_category[128] = {
-  /*x00*/ 0x140000, /*x01*/ 0x000000, /*x02*/ 0x000000, /*x03*/ 0x000000,
-  /*x04*/ 0x000000, /*x05*/ 0x000000, /*x06*/ 0x000000, /*\a */ 0x000000,
-  /*\b */ 0x000400, /*\t */ 0x000100, /*\n */ 0x000400, /*\v */ 0x000400,
-  /*\f */ 0x000400, /*\r */ 0x000400, /*x0E*/ 0x000000, /*x0F*/ 0x000000,
+static ag_char_map_mask_t const ag_char_map_table[128] = {
+  /*NUL*/ 0x140000, /*x01*/ 0x000000, /*x02*/ 0x000000, /*x03*/ 0x000000,
+  /*x04*/ 0x000000, /*x05*/ 0x000000, /*x06*/ 0x000000, /*BEL*/ 0x000000,
+  /* BS*/ 0x000400, /* HT*/ 0x000100, /* NL*/ 0x000400, /* VT*/ 0x000400,
+  /* FF*/ 0x000400, /* CR*/ 0x000400, /*x0E*/ 0x000000, /*x0F*/ 0x000000,
   /*x10*/ 0x000000, /*x11*/ 0x000000, /*x12*/ 0x000000, /*x13*/ 0x000000,
   /*x14*/ 0x000000, /*x15*/ 0x000000, /*x16*/ 0x000000, /*x17*/ 0x000000,
-  /*x18*/ 0x000000, /*x19*/ 0x000000, /*x1A*/ 0x000000, /*x1B*/ 0x000000,
+  /*x18*/ 0x000000, /*x19*/ 0x000000, /*x1A*/ 0x000000, /*ESC*/ 0x000000,
   /*x1C*/ 0x000000, /*x1D*/ 0x000000, /*x1E*/ 0x000000, /*x1F*/ 0x000000,
   /*   */ 0x000100, /* ! */ 0x00A800, /* " */ 0x00A000, /* # */ 0x00A000,
   /* $ */ 0x00A800, /* % */ 0x02A800, /* & */ 0x00A800, /* ' */ 0x00A000,
-  /* ( */ 0x00A000, /* ) */ 0x00A000, /* * */ 0x00A000, /* + */ 0x00E800,
+  /* ( */ 0x00A000, /* ) */ 0x00A000, /* * */ 0x00A000, /* + */ 0x40E800,
   /* , */ 0x20A000, /* - */ 0x01A840, /* . */ 0x01AA00, /* / */ 0x0AB800,
   /* 0 */ 0x042804, /* 1 */ 0x002804, /* 2 */ 0x002804, /* 3 */ 0x002804,
   /* 4 */ 0x002804, /* 5 */ 0x002804, /* 6 */ 0x002804, /* 7 */ 0x002804,
@@ -186,7 +197,26 @@ static option_char_category_mask_t const option_char_category[128] = {
   /* p */ 0x002801, /* q */ 0x002801, /* r */ 0x002801, /* s */ 0x002801,
   /* t */ 0x002801, /* u */ 0x002801, /* v */ 0x002801, /* w */ 0x002801,
   /* x */ 0x002801, /* y */ 0x002801, /* z */ 0x002801, /* { */ 0x00A000,
-  /* | */ 0x00A800, /* } */ 0x00A000, /* ~ */ 0x00A800, /*x7F*/ 0x000000
+  /* | */ 0x40A800, /* } */ 0x00A000, /* ~ */ 0x00A800, /*x7F*/ 0x000000
 };
-#endif /* AUTOOPTS_INTERNAL */
+static inline int
+is_ag_char_map_char(char ch, ag_char_map_mask_t mask)
+{
+    unsigned int ix = (unsigned char)ch;
+    return ((ix < 128) && ((ag_char_map_table[ix] & mask) != 0));
+}
+
+static inline char *
+spn_ag_char_map_chars(char * p, ag_char_map_mask_t mask)
+{
+    while ((*p != '\0') && is_ag_char_map_char(*p, mask))  p++;
+    return p;
+}
+
+static inline char *
+brk_ag_char_map_chars(char * p, ag_char_map_mask_t mask)
+{
+    while ((*p != '\0') && (! is_ag_char_map_char(*p, mask)))  p++;
+    return p;
+}
 #endif /* AG_CHAR_MAP_H_GUARD */

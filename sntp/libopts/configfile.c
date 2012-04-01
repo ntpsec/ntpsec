@@ -1,13 +1,13 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2011-12-17 12:51:30 bkorb"
+ *  Time-stamp:      "2012-02-25 12:54:32 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -97,7 +97,9 @@ skip_unkn(char* pzText);
  *  @code{mmap(2)} or other file system calls, or it may be:
  *  @itemize @bullet
  *  @item
- *  @code{ENOENT} - the file was empty.
+ *  @code{ENOENT} - the file was not found.
+ *  @item
+ *  @code{ENOMSG} - the file was empty.
  *  @item
  *  @code{EINVAL} - the file contents are invalid -- not properly formed.
  *  @item
@@ -463,7 +465,7 @@ file_preset(tOptions * opts, char const * fname, int dir)
             break;
 
         case '#':
-            ftext = strchr(ftext + 1, '\n');
+            ftext = strchr(ftext + 1, NL);
             break;
 
         default:
@@ -501,7 +503,7 @@ static char *
 handle_cfg(tOptions * pOpts, tOptState * pOS, char * pzText, int dir)
 {
     char* pzName = pzText++;
-    char* pzEnd  = strchr(pzText, '\n');
+    char* pzEnd  = strchr(pzText, NL);
 
     if (pzEnd == NULL)
         return pzText + strlen(pzText);
@@ -541,13 +543,13 @@ handle_cfg(tOptions * pOpts, tOptState * pOS, char * pzText, int dir)
             case NUL:
                 pcS = NULL;
 
-            case '\n':
+            case NL:
                 *pcD = NUL;
                 pzEnd = pcS;
                 goto copy_done;
 
             case '\\':
-                if (*pcS == '\n') {
+                if (*pcS == NL) {
                     ch = *(pcS++);
                 }
                 /* FALLTHROUGH */
@@ -700,7 +702,7 @@ handle_section(tOptions * pOpts, char * pzText)
     size_t len = strlen(pOpts->pzPROGNAME);
     if (   (strncmp(pzText+1, pOpts->pzPROGNAME, len) == 0)
         && (pzText[len+1] == ']'))
-        return strchr(pzText + len + 2, '\n');
+        return strchr(pzText + len + 2, NL);
 
     if (len > 16)
         return NULL;
@@ -712,7 +714,7 @@ handle_section(tOptions * pOpts, char * pzText)
     }
 
     if (pzText != NULL)
-        pzText = strchr(pzText, '\n');
+        pzText = strchr(pzText, NL);
     return pzText;
 }
 
@@ -731,7 +733,7 @@ parse_xml_encoding(char ** ppz)
         _xmlNm_(cr,    '\r')    \
         _xmlNm_(vt,    '\v')    \
         _xmlNm_(bel,   '\a')    \
-        _xmlNm_(nl,    '\n')    \
+        _xmlNm_(nl,    NL)      \
         _xmlNm_(space, ' ')     \
         _xmlNm_(quot,  '"')     \
         _xmlNm_(apos,  '\'')
@@ -849,8 +851,8 @@ cook_xml_text(char * pzData)
             return;
 
         case '&':
-            *(pzd++) = \
-                ch = parse_xml_encoding(&pzs);
+            ch = parse_xml_encoding(&pzs);
+            *(pzd++) = (char)ch;
             if (ch == NUL)
                 return;
             break;
@@ -867,7 +869,7 @@ cook_xml_text(char * pzData)
             /* FALLTHROUGH */
 
         default:
-            *(pzd++) = ch;
+            *(pzd++) = (char)ch;
         }
     }
 }
@@ -1367,7 +1369,7 @@ validate_struct(tOptions * pOpts, char const * pzProgram)
           || (pOpts->structVersion < OPTIONS_MINIMUM_VERSION )
        )  )  {
         static char const aover[] =
-            __STR(AO_CURRENT)":"__STR(AO_REVISION)":"__STR(AO_AGE)"\n";
+            STR(AO_CURRENT)":"STR(AO_REVISION)":"STR(AO_AGE)"\n";
 
         fprintf(stderr, zAO_Err, pzProgram, NUM_TO_VER(pOpts->structVersion));
         if (pOpts->structVersion > OPTIONS_STRUCT_VERSION )

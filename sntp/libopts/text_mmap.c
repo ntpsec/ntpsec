@@ -3,11 +3,11 @@
  *
  * Map a text file, ensuring the text always has an ending NUL byte.
  *
- * Time-stamp:      "2011-06-25 11:42:22 bkorb"
+ * Time-stamp:      "2012-01-29 09:40:21 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control

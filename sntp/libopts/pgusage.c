@@ -2,7 +2,7 @@
 /**
  * \file pgusage.c
  *
- * Time-stamp:      "2011-03-25 17:54:41 bkorb"
+ * Time-stamp:      "2012-01-29 16:09:14 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -11,7 +11,7 @@
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -67,9 +67,9 @@ optionPagedUsage(tOptions* pOptions, tOptDesc* pOD)
 
         my_pid  = getpid();
 #ifdef HAVE_SNPRINTF
-        snprintf(zPageUsage, sizeof(zPageUsage), "/tmp/use.%lu", (tAoUL)my_pid);
+        snprintf(zPageUsage, sizeof(zPageUsage), TMP_USAGE_FMT, (tAoUL)my_pid);
 #else
-        sprintf(zPageUsage, "/tmp/use.%lu", (tAoUL)my_pid);
+        sprintf(zPageUsage, TMP_USAGE_FMT, (tAoUL)my_pid);
 #endif
         unlink(zPageUsage);
 
@@ -99,22 +99,21 @@ optionPagedUsage(tOptions* pOptions, tOptDesc* pOD)
 
     case PAGER_STATE_READY:
     {
-        tSCC zPage[]  = "%1$s /tmp/use.%2$lu ; rm -f /tmp/use.%2$lu";
-        tCC* pzPager  = (tCC*)getenv("PAGER");
+        tCC* pzPager  = (tCC*)getenv(PAGER_NAME);
 
         /*
          *  Use the "more(1)" program if "PAGER" has not been defined
          */
         if (pzPager == NULL)
-            pzPager = "more";
+            pzPager = MORE_STR;
 
         /*
          *  Page the file and remove it when done.
          */
 #ifdef HAVE_SNPRINTF
-        snprintf(zPageUsage, sizeof(zPageUsage), zPage, pzPager, (tAoUL)my_pid);
+        snprintf(zPageUsage, sizeof(zPageUsage), PAGE_USAGE_FMT, pzPager, (tAoUL)my_pid);
 #else
-        sprintf(zPageUsage, zPage, pzPager, (tAoUL)my_pid);
+        sprintf(zPageUsage, PAGE_USAGE_FMT, pzPager, (tAoUL)my_pid);
 #endif
         fclose(stderr);
         dup2(STDOUT_FILENO, STDERR_FILENO);

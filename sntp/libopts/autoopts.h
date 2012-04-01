@@ -2,14 +2,14 @@
 /*
  *  \file autoopts.h
  *
- *  Time-stamp:      "2011-03-25 17:51:34 bkorb"
+ *  Time-stamp:      "2012-02-12 09:04:40 bkorb"
  *
  *  This file defines all the global structures and special values
  *  used in the automated option processing library.
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2011 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -69,6 +69,8 @@
 #  define EX_CONFIG             78
 #endif
 
+#define NL '\n'
+
 /*
  *  Convert the number to a list usable in a printf call
  */
@@ -77,7 +79,7 @@
 #define NAMED_OPTS(po) \
         (((po)->fOptSet & (OPTPROC_SHORTOPT | OPTPROC_LONGOPT)) == 0)
 
-#define SKIP_OPT(p)  (((p)->fOptState & (OPTST_DOCUMENT|OPTST_OMITTED)) != 0)
+#define SKIP_OPT(p)  (((p)->fOptState & OPTST_IMMUTABLE_MASK) != 0)
 
 typedef int tDirection;
 #define DIRECTION_PRESET        -1
