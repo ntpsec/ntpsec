@@ -11,11 +11,13 @@ AM_CPPFLAGS  = $(NTP_INCS)
 AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
+AM_LDFLAGS = $(LDFLAGS_NTP)
+
 # LDADD might need RESLIB and ADJLIB
 ntpq_LDADD  = version.o $(LIBOPTS_LDADD)
 ntpq_LDADD += ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
 ntpq_LDADD += $(PTHREAD_LIBS) $(EDITLINE_LIBS)
-ntpq_LDADD += $(LCRYPTO)
+ntpq_LDADD += $(LDADD_NTP)
 noinst_HEADERS=	ntpq.h
 noinst_LIBRARIES=	libntpq.a
 libntpq_a_CFLAGS=	-DNO_MAIN_ALLOWED -DBUILD_AS_LIB

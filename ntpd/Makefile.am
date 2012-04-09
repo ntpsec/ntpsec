@@ -12,6 +12,8 @@ AM_CPPFLAGS  = $(NTP_INCS)
 AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
+AM_LDFLAGS = $(LDFLAGS_NTP)
+
 # LDADD might need RESLIB and ADJLIB.
 LDADD = version.o libntpd.a $(LIBPARSE)
 AM_YFLAGS = -d -t -r all
@@ -85,8 +87,8 @@ man_MANS=	ntpd.$(NTPD_MS)
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
 # longer a reason to have ntpdbase-opts.def split off of ntpd-opts.def.
 
-LDADD_NTPD_COMMON  = @LDADD_LIBNTP@ $(LIBOPTS_LDADD) $(PTHREAD_LIBS)
-LDADD_NTPD_COMMON += $(LIBM) $(LCRYPTO) $(LSCF)
+LDADD_NTPD_COMMON  = $(LDADD_LIBNTP) $(LIBOPTS_LDADD) $(PTHREAD_LIBS)
+LDADD_NTPD_COMMON += $(LIBM) $(LDADD_NTP) $(LSCF)
 ntpd_LDADD = $(LDADD) ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM) $(LDADD_NTPD_COMMON)
 ntpdsim_LDADD = $(LDADD) ../libntp/libntpsim.a $(LDADD_NTPD_COMMON)
 ntpdsim_CPPFLAGS = $(AM_CPPFLAGS) -DSIM

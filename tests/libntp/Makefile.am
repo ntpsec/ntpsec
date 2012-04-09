@@ -8,7 +8,7 @@ LDADD =					\
 	$(top_builddir)/libntp/libntp.a	\
 	$(LDADD_LIBNTP)			\
 	$(PTHREAD_LIBS)			\
-	$(LCRYPTO)			\
+	$(LDADD_NTP)			\
 	$(GTEST_LDFLAGS)		\
 	$(GTEST_LIBS)			\
 	$(NULL)
@@ -20,6 +20,8 @@ AM_CPPFLAGS  = $(NTP_INCS)
 AM_CPPFLAGS += -I$(top_srcdir)/sntp
 AM_CPPFLAGS += $(GTEST_CPPFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
+
+AM_LDFLAGS = $(LDFLAGS_NTP)
 
 tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		libntptest.cpp		\

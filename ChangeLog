@@ -1,3 +1,7 @@
+* [Bug 1122] openssl detection via pkg-config fails when no additional
+  -Idir flags are needed.
+* Avoid overwriting user variable LDFLAGS with OpenSSL flags, instead
+  they are added to LDFLAGS_NTP.
 (4.2.7p270) 2012/03/26 Released by Harlan Stenn <stenn@ntp.org>
 * Update driver45.html page.
 (4.2.7p269) 2012/03/25 Released by Harlan Stenn <stenn@ntp.org>

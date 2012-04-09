@@ -60,7 +60,7 @@ LDADD =						\
 	$(LDADD_LIBEVENT)			\
 	$(top_builddir)/../libntp/libntp.a	\
 	$(LDADD_LIBNTP)				\
-	$(LCRYPTO)				\
+	$(LDADD_NTP)				\
 	$(GTEST_LDFLAGS)			\
 	$(GTEST_LIBS)				\
 	$(NULL)
@@ -75,6 +75,8 @@ AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_LIBEVENT)
 AM_CPPFLAGS += $(GTEST_CPPFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
+
+AM_LDFLAGS = $(LDFLAGS_NTP)
 
 TESTS = 
 

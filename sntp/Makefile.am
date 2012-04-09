@@ -11,13 +11,15 @@ AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_LIBEVENT)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
+AM_LDFLAGS = $(LDFLAGS_NTP)
+
 LDADD  = version.o
 LDADD += libsntp.a
 LDADD += $(LIBOPTS_LDADD)
 LDADD += $(LDADD_LIBEVENT)
 LDADD += ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
 LDADD += $(PTHREAD_LIBS)
-LDADD += $(LCRYPTO)
+LDADD += $(LDADD_NTP)
 
 run_ag =	cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L include -L ag-tpl --writable
