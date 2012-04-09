@@ -68,9 +68,9 @@ case "$with_crypto:${PKG_CONFIG:+notempty}:${with_openssl_libdir-notgiven}:${wit
     if $PKG_CONFIG --exists openssl ; then
 	CPPFLAGS_NTP="$CPPFLAGS_NTP `$PKG_CONFIG --cflags-only-I openssl`"
 	CFLAGS_NTP="$CFLAGS_NTP `$PKG_CONFIG --cflags-only-other openssl`"
-	LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-L openssl`"
-	LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-other openssl`"
+	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-L openssl`"
 	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-l openssl`"
+	LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-other openssl`"
 	ntp_openssl=yes
 	ntp_openssl_from_pkg_config=yes
     fi
@@ -187,10 +187,10 @@ case "$with_crypto:$ntp_openssl" in
 	 /usr/lib)
 	    ;;
 	 *)
-	    LDFLAGS_NTP="$LDFLAGS_NTP -L$openssl_libdir"
+	    LDADD_NTP="$LDADD_NTP -L$openssl_libdir"
 	    case "$need_dash_r" in
 	     1)
-		LDFLAGS="$LDFLAGS -R$openssl_libdir"
+		LDFLAGS_NTP="$LDFLAGS_NTP -R$openssl_libdir"
 	    esac
 	    ;;
 	esac
