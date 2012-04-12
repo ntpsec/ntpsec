@@ -10,7 +10,7 @@ ntpsnmpd_SOURCES= netsnmp_daemonize.c ntpsnmpd.c ntpSnmpSubagentObject.c \
 		ntp_snmp.h
 # HMS: we probably want a version.o file here, too.
 LDADD  = ../ntpq/libntpq.a ../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
-LDADD += $(PTHREAD_LIBS) $(LCRYPTO) $(SNMP_LIBS) $(LIBOPTS_LDADD)
+LDADD += $(PTHREAD_LIBS) $(LDADD_NTP) $(SNMP_LIBS) $(LIBOPTS_LDADD)
 
 AM_CFLAGS = $(SNMP_CFLAGS) $(CFLAGS_NTP)
 
@@ -19,6 +19,8 @@ AM_CPPFLAGS += $(NTP_INCS)
 AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(SNMP_CPPFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
+
+AM_LDFLAGS = $(LDFLAGS_NTP)
 
 EXTRA_DIST=			\
 	ntpsnmpd-opts.def	\

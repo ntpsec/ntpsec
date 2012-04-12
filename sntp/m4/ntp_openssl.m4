@@ -1,238 +1,224 @@
-dnl ######################################################################
+dnl ####################################################################
 dnl OpenSSL support shared by top-level and sntp/configure.ac
+dnl
+dnl Provides command-line option --with-crypto, as well as deprecated
+dnl options --with-openssl-incdir, --with-openssl-libdir, and the
+dnl latter's suboption --with-rpath.
+dnl
+dnl Specifying --with-openssl-libdir or --with-openssl-incdir causes any
+dnl pkg-config openssl information to be ignored in favor of the legacy
+dnl manual search for directories and specified library names.
+dnl
+dnl Output AC_DEFINEs (for config.h)
+dnl	OPENSSL		defined only if using OpenSSL
+dnl
+dnl Output variables:
+dnl	ntp_openssl	yes if using OpenSSL, no otherwise
+dnl
+dnl Output substitutions:
+dnl	CFLAGS_NTP	OpenSSL-specific flags added as needed, and
+dnl			-Wstrict-prototypes for gcc if it does not
+dnl			trigger a flood of warnings for each file
+dnl			including OpenSSL headers.
+dnl	CPPFLAGS_NTP	OpenSSL -Iincludedir flags added as needed.
+dnl	LDADD_NTP	OpenSSL -L and -l flags added as needed.
+dnl	LDFLAGS_NTP	Other OpenSSL link flags added as needed.
+dnl
+dnl ####################################################################
 AC_DEFUN([NTP_OPENSSL], [
 AC_REQUIRE([NTP_PKG_CONFIG])dnl
 
-LCRYPTO=
-AC_SUBST([LCRYPTO])
-
-AC_ARG_WITH(
-    [rpath],
-    [AS_HELP_STRING(
-	[--without-rpath],
-	[s Disable auto-added -R linker paths]
-    )],
-    [ans=$withval],
-    [ans=x]
-)
-need_dash_r=
-case "$ans" in
- yes)
-    need_dash_r=1
-    ;;
- x)
-    case "$host" in
-     *-*-netbsd*)
-	need_dash_r=1
-	;;
-     *-*-solaris*)
-	need_dash_r=1
-	;;
-    esac
-    ;;
-esac
-
-AC_SUBST([OPENSSL])
-AC_SUBST([OPENSSL_INC])
-AC_SUBST([OPENSSL_LIB])
-
-AC_MSG_CHECKING([for openssl library directory])
-AC_ARG_WITH(
-    [openssl-libdir],
-    [AS_HELP_STRING(
-	[--with-openssl-libdir], 
-	[+ =/something/reasonable]
-    )],
-    [ans=$withval],
-    [
-	case "$build" in
-	 $host) ans=yes ;;
-	 *)     ans=no ;;
-	esac
-    ]
-)
-case "$ans" in
- no) 
-    ;;
- yes)
-    case "$PKG_CONFIG" in
-     '')
-	;;
-     *)
-	pkgans=`$PKG_CONFIG --libs-only-L openssl 2>/dev/null`
-	pkgans=`echo $pkgans | sed -e 's/^-L//' | tr -d '\n' | tr -d ' '`
-	if test -f "${pkgans}/pkgconfig/openssl.pc" ; then
-	    ans="$pkgans"
-	fi
-	;;
-    esac
-    ;;
- *) # Look where they said
-    ;;
-esac
-case "$ans" in
- yes)
-    # Look in:
-    ans="/usr/lib /usr/lib/openssl /usr/sfw/lib"
-    ans="$ans /usr/local/lib /usr/local/ssl/lib /lib"
-esac
-case "$ans" in
- no)
-    ;;
- *) # Look for libcrypto.a and libssl.a:
-    for i in $ans no
-    do
-	case "$host" in
-	 *-*-darwin*)
-	    test -f $i/libcrypto.dylib -a -f $i/libssl.dylib && break
-	    ;;
-	 *)
-	    test -f $i/libcrypto.so -a -f $i/libssl.so && break
-	    test -f $i/libcrypto.a -a -f $i/libssl.a && break
-	    ;;
-	esac
-    done
-    case "$i" in
-     no)
-	echo ""
-	echo "did not find libcrypto and libssl in any of $ans"
-	ans=no
-	OPENSSL_LIB=
-	;;
-     *) ans=$i
-	OPENSSL_LIB=$ans
-	;;
-    esac
-    ;;
-esac
-AC_MSG_RESULT([$ans])
-
-AC_MSG_CHECKING([for openssl include directory])
-AC_ARG_WITH(
-    [openssl-incdir],
-    [AS_HELP_STRING(
-	[--with-openssl-incdir],
-	[+ =/something/reasonable]
-    )],
-    [ans=$withval],
-    [
-	case "$build" in
-	 $host) ans=yes ;;
-	 *)     ans=no ;;
-	esac
-    ]
-)
-case "$ans" in
- no)
-    ;;
- yes) # look in:
-    case "$PKG_CONFIG" in
-     '')
-	;;
-     *)
-	pkgans=`$PKG_CONFIG --cflags-only-I openssl 2>/dev/null`
-	pkgans=`echo $pkgans | sed -e 's/^-I//' | tr -d '\n' | tr -d ' '`
-	if test -f "${pkgans}/openssl/evp.h" ; then
-	    ans="$pkgans"
-	fi
-	;;
-    esac
-    ;;
- *) # Look where they said
-    ;;
-esac
-case "$ans" in
- yes)
-    # Look in:
-    ans="/usr/include /usr/sfw/include /usr/local/include"
-    ans="$ans /usr/local/ssl/include"
-esac
-case "$ans" in
- no)
-    ;;
- *) # look for openssl/evp.h:
-    for i in $ans no
-    do
-	test -f $i/openssl/evp.h && break
-    done
-    case "$i" in
-     no)
-	echo ""
-	echo "did not find openssl/evp.h in any of $ans"
-	ans=no
-	OPENSSL_INC=
-	;;
-     *) ans=$i
-	OPENSSL_INC=$ans
-	;;
-    esac
-    ;;
-esac
-AS_UNSET([pkgans])
-AC_MSG_RESULT([$ans])
-
-AC_MSG_CHECKING([if we will use crypto])
 AC_ARG_WITH(
     [crypto],
     [AS_HELP_STRING(
 	[--with-crypto],
 	[+ =openssl]
-    )],
-    [ans=$withval],
-    [ans=yes]
+    )]
 )
-case "$ans" in
- no)
-    ;;
- yes|openssl)
-    if test -z "$OPENSSL_LIB" -o -z "$OPENSSL_INC"
-    then
-	ans=no
-    else
-	ans=yes
+AC_ARG_WITH(
+    [openssl-libdir],
+    [AS_HELP_STRING(
+	[--with-openssl-libdir], 
+	[+ =/something/reasonable]
+    )]
+)
+AC_ARG_WITH(
+    [openssl-incdir],
+    [AS_HELP_STRING(
+	[--with-openssl-incdir],
+	[+ =/something/reasonable]
+    )]
+)
+AC_ARG_WITH(
+    [rpath],
+    [AS_HELP_STRING(
+	[--without-rpath],
+	[s Disable auto-added -R linker paths]
+    )]
+)
+ntp_openssl=no
+ntp_openssl_from_pkg_config=no
+with_crypto=${with_crypto:-yes}
+case "$with_crypto" in
+ openssl)
+    with_crypto=yes
+esac
+case "$with_crypto:${PKG_CONFIG:+notempty}:${with_openssl_libdir-notgiven}:${with_openssl_incdir-notgiven}" in
+ yes:notempty:notgiven:notgiven)
+    if $PKG_CONFIG --exists openssl ; then
+	CPPFLAGS_NTP="$CPPFLAGS_NTP `$PKG_CONFIG --cflags-only-I openssl`"
+	CFLAGS_NTP="$CFLAGS_NTP `$PKG_CONFIG --cflags-only-other openssl`"
+	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-L openssl`"
+	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-l openssl`"
+	LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-other openssl`"
+	ntp_openssl=yes
+	ntp_openssl_from_pkg_config=yes
     fi
 esac
-ntp_openssl=$ans
-AC_MSG_RESULT([$ans])
-
-case "$ntp_openssl" in
- yes)
-    # We have OpenSSL inc/lib - use them.
-    case "$OPENSSL_INC" in
-     /usr/include)
+case "$with_crypto:$ntp_openssl" in
+ yes:no)
+    need_dash_r=
+    case "${with_rpath-notgiven}" in
+     yes)
+	need_dash_r=1
 	;;
-     *)	
-	CPPFLAGS_NTP="$CPPFLAGS_NTP -I$OPENSSL_INC"
-	;;
-    esac
-    case "$OPENSSL_LIB" in
-     /usr/lib)
-	;;
-     *)	
-	LDFLAGS="$LDFLAGS -L$OPENSSL_LIB"
-	case "$need_dash_r" in
-	 1)
-	    LDFLAGS="$LDFLAGS -R$OPENSSL_LIB"
+     notgiven)
+	case "$host" in
+	 *-*-netbsd*)
+	    need_dash_r=1
+	    ;;
+	 *-*-solaris*)
+	    need_dash_r=1
+	    ;;
 	esac
 	;;
     esac
-    LCRYPTO="-lcrypto"
-    AC_DEFINE([OPENSSL], [1], [Use OpenSSL?])
+
+    AC_MSG_CHECKING([for openssl library directory])
+    with_openssl_libdir=${with_openssl_libdir-notgiven}
+    case "$with_openssl_libdir" in
+     notgiven)
+	case "$build" in
+	 $host)
+	    with_openssl_libdir=default
+	    ;;
+	 *)
+	    with_openssl_libdir=no
+	    ;;
+	esac
+    esac
+    case "$with_openssl_libdir" in
+     default)
+	# Look in:
+	with_openssl_libdir="/usr/lib /usr/lib/openssl /usr/sfw/lib"
+	with_openssl_libdir="$with_openssl_libdir /usr/local/lib"
+	with_openssl_libdir="$with_openssl_libdir /usr/local/ssl/lib /lib"
+    esac
+    case "$with_openssl_libdir" in
+     no)
+	;;
+     *) # Look for libcrypto.a and libssl.a:
+	for i in $with_openssl_libdir no
+	do
+	    case "$host" in
+	     *-*-darwin*)
+		test -f $i/libcrypto.dylib -a -f $i/libssl.dylib && break
+		;;
+	     *)
+		test -f $i/libcrypto.so -a -f $i/libssl.so && break
+		test -f $i/libcrypto.a -a -f $i/libssl.a && break
+		;;
+	    esac
+	done
+	openssl_libdir=$i
+	;;
+    esac
+    AC_MSG_RESULT([$openssl_libdir])
+    case "$openssl_libdir" in
+     no)
+	openssl_libdir=
+	AC_MSG_WARN([libcrypto and libssl not found in any of $with_openssl_libdir])
+    esac
+
+    AC_MSG_CHECKING([for openssl include directory])
+    with_openssl_incdir=${with_openssl_incdir-notgiven}
+    case "$with_openssl_incdir" in
+     notgiven)
+	# Look in:
+	with_openssl_incdir="/usr/include /usr/sfw/include"
+	with_openssl_incdir="$with_openssl_incdir /usr/local/include"
+	with_openssl_incdir="$with_openssl_incdir /usr/local/ssl/include"
+    esac
+    case "$with_openssl_incdir" in
+     no)
+	;;
+     *) # look for openssl/evp.h:
+	for i in $with_openssl_incdir no
+	do
+	    test -f $i/openssl/evp.h && break
+	done
+	openssl_incdir=$i
+	;;
+    esac
+    AS_UNSET([i])
+    AC_MSG_RESULT([$openssl_incdir])
+    case "$openssl_incdir" in
+     no)
+	openssl_incdir=
+	AC_MSG_WARN([did not find openssl/evp.h in any of $with_openssl_incdir])
+    esac
+    if test -z "$openssl_libdir" -o -z "$openssl_incdir"
+    then
+	ntp_openssl=no
+    else
+	ntp_openssl=yes
+    fi
+    case "$ntp_openssl" in
+     yes)
+	# We have OpenSSL inc/lib dirs - use them.
+	case "$openssl_incdir" in
+	 /usr/include)
+	    ;;
+	 *)
+	    CPPFLAGS_NTP="$CPPFLAGS_NTP -I$openssl_incdir"
+	    ;;
+	esac
+	case "$openssl_libdir" in
+	 /usr/lib)
+	    ;;
+	 *)
+	    LDADD_NTP="$LDADD_NTP -L$openssl_libdir"
+	    case "$need_dash_r" in
+	     1)
+		LDFLAGS_NTP="$LDFLAGS_NTP -R$openssl_libdir"
+	    esac
+	    ;;
+	esac
+	LDADD_NTP="$LDADD_NTP -lcrypto"
+    esac
+esac
+
+AC_MSG_CHECKING([if we will use crypto])
+AC_MSG_RESULT([$ntp_openssl])
+
+case "$ntp_openssl" in
+ yes)
+    AC_DEFINE([OPENSSL], [], [Use OpenSSL?])
 esac
 
 NTPO_SAVED_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $CPPFLAGS_NTP"
 NTPO_SAVED_LIBS="$LIBS"
 
 #
 # check for linking with -lcrypto failure, and try -lcrypto -lz.
 # Helps m68k-atari-mint
 #
-case "$ntp_openssl" in
- yes)
-    CPPFLAGS="$CPPFLAGS $CPPFLAGS_NTP"
-    LIBS="$NTPO_SAVED_LIBS $LCRYPTO"
+case "$ntp_openssl:$ntp_openssl_from_pkg_config" in
+ yes:no)
+    LIBS="$NTPO_SAVED_LIBS $LDADD_NTP"
     AC_CACHE_CHECK(
-	[if linking with $LCRYPTO alone works],
+	[if linking with -lcrypto alone works],
 	[ntp_cv_bare_lcrypto],
 	[AC_LINK_IFELSE(
 	    [AC_LANG_PROGRAM(
@@ -251,9 +237,9 @@ case "$ntp_openssl" in
     )
     case "$ntp_cv_bare_lcrypto" in
      no)
-	LIBS="$NTPO_SAVED_LIBS $LCRYPTO -lz"
+	LIBS="$NTPO_SAVED_LIBS $LDADD_NTP -lz"
 	AC_CACHE_CHECK(
-	    [if linking with $LCRYPTO -lz works],
+	    [if linking with -lcrypto -lz works],
 	    [ntp_cv_lcrypto_lz],
 	    [AC_LINK_IFELSE(
 		[AC_LANG_PROGRAM(
@@ -272,7 +258,7 @@ case "$ntp_openssl" in
 	)
 	case "$ntp_cv_lcrypto_lz" in
 	 yes)
-	     LCRYPTO="$LCRYPTO -lz"
+	     LDADD_NTP="$LDADD_NTP -lz"
 	esac
     esac
 esac
@@ -291,10 +277,10 @@ esac
 # 
 #
 openssl_triggers_warnings=unknown
-SAVED_CFLAGS="$CFLAGS"
+NTPO_SAVED_CFLAGS="$CFLAGS"
 
-case "$GCC$ntp_openssl" in
- yesyes)
+case "$ntp_openssl:$GCC" in
+ yes:yes)
     CFLAGS="$CFLAGS -Werror"
     AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM(
@@ -342,16 +328,18 @@ case "$GCC$ntp_openssl" in
 	CFLAGS_NTP="$CFLAGS_NTP -Wstrict-prototypes"
     esac
     ;;
- yesno)
+ no:yes)
     # gcc without OpenSSL
     CFLAGS_NTP="$CFLAGS_NTP -Wstrict-prototypes"
 esac
 
-CFLAGS="$SAVED_CFLAGS"
+CFLAGS="$NTPO_SAVED_CFLAGS"
 CPPFLAGS="$NTPO_SAVED_CPPFLAGS"
 LIBS="$NTPO_SAVED_LIBS"
-AS_UNSET([SAVED_CFLAGS])
+AS_UNSET([NTPO_SAVED_CFLAGS])
 AS_UNSET([NTPO_SAVED_CPPFLAGS])
 AS_UNSET([NTPO_SAVED_LIBS])
+AS_UNSET([openssl_triggers_warnings])
+AS_UNSET([ntp_openssl_from_pkg_config])
 ])
 dnl ======================================================================

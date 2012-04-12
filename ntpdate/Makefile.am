@@ -16,10 +16,12 @@ AM_CFLAGS = $(CFLAGS_NTP)
 AM_CPPFLAGS  = $(NTP_INCS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
+AM_LDFLAGS = $(LDFLAGS_NTP)
+
 # LDADD might need RESLIB and ADJLIB
 LDADD = version.o ../libntp/libntp.a
 ntpdate_LDADD  = $(LDADD) $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LIBOPTS_LDADD)
-ntpdate_LDADD += $(LIBM) $(LCRYPTO)
+ntpdate_LDADD += $(LIBM) $(LDADD_NTP)
 DISTCLEANFILES=	.version version.c stamp-v
 noinst_HEADERS=	ntpdate.h
 

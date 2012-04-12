@@ -13,11 +13,13 @@ AM_CPPFLAGS  = $(NTP_INCS)
 AM_CPPFLAGS += $(LIBOPTS_CFLAGS)
 AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
+AM_LDFLAGS = $(LDFLAGS_NTP)
+
 # LDADD might need RESLIB and ADJLIB
 LDADD=		../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM) $(PTHREAD_LIBS)
 tg2_LDADD=	../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM)
 ntp_keygen_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a
-ntp_keygen_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LCRYPTO)
+ntp_keygen_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LDADD_NTP)
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
 
 tickadj_LDADD=	../libntp/libntp.a $(LDADD_LIBNTP) $(LDADD_NLIST)
