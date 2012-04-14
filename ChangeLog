@@ -1,3 +1,5 @@
+* Change the link order for ntpsntpd.
+* Remove extra 'nlist' check from configure.ac.
 (4.2.7p271) 2012/04/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1122] openssl detection via pkg-config fails when no additional
   -Idir flags are needed.
