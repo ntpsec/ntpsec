@@ -35,8 +35,8 @@ noinst_SCRIPTS =		\
 	$(NULL)
 
 noinst_DATA=				\
-	$(srcdir)/ntp-wait-opts.menu	\
-	$(srcdir)/ntp-wait-opts.texi	\
+	$(srcdir)/invoke-ntp-wait.menu	\
+	$(srcdir)/invoke-ntp-wait.texi	\
 	$(srcdir)/ntp-wait.html		\
 	$(srcdir)/ntp-wait.man.in	\
 	$(srcdir)/ntp-wait.mdoc.in	\
@@ -49,6 +49,8 @@ EXTRA_DIST =			\
 	genCommitLog		\
 	genver			\
 	hpadjtime.sh		\
+	invoke-ntp-wait.menu	\
+	invoke-ntp-wait.texi	\
 	monitoring		\
 	ntp-close		\
 	ntp-groper		\
@@ -61,8 +63,6 @@ EXTRA_DIST =			\
 	ntp-wait.html		\
 	ntp-wait.texi		\
 	ntp-wait-opts.def	\
-	ntp-wait-opts.menu	\
-	ntp-wait-opts.texi	\
 	rc1			\
 	rc2			\
 	stats			\
@@ -96,13 +96,13 @@ ntp-wait.$(NTP_WAIT_MS): $(srcdir)/ntp-wait.$(MANTAGFMT).in $(top_builddir)/conf
 
 ###
 
-$(srcdir)/ntp-wait-opts.menu: $(srcdir)/ntp-wait-opts.texi
+$(srcdir)/invoke-ntp-wait.menu: $(srcdir)/invoke-ntp-wait.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/ntp-wait-opts.texi: $(srcdir)/ntp-wait-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-wait-opts.def
+$(srcdir)/invoke-ntp-wait.texi: $(srcdir)/ntp-wait-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp-wait-opts.def
 	-$(top_srcdir)/../scripts/check--help $@
 
-$(srcdir)/ntp-wait.html: $(srcdir)/ntp-wait-opts.menu $(srcdir)/ntp-wait-opts.texi $(srcdir)/ntp-wait.texi $(top_srcdir)/sntp/include/version.texi
+$(srcdir)/ntp-wait.html: $(srcdir)/invoke-ntp-wait.menu $(srcdir)/invoke-ntp-wait.texi $(srcdir)/ntp-wait.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -I ../sntp -o ntp-wait.html ntp-wait.texi || true )
 

@@ -2,7 +2,7 @@
 /**
  * \file autoopts.c
  *
- *  Time-stamp:      "2012-01-29 09:58:30 bkorb"
+ *  Time-stamp:      "2012-03-04 19:44:56 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -37,7 +37,7 @@
 static char const   zNil[] = "";
 static arg_types_t  argTypes             = { NULL };
 static char         line_fmt_buf[32];
-static ag_bool      displayEnum          = AG_FALSE;
+static bool         displayEnum          = false;
 static char const   pkgdatadir_default[] = PKGDATADIR;
 static char const * program_pkgdatadir   = pkgdatadir_default;
 static tOptionLoadMode option_load_mode  = OPTION_LOAD_UNCOOKED;
@@ -50,7 +50,7 @@ static tSuccess
 next_opt_arg_must(tOptions * pOpts, tOptState* pOptState);
 
 static tSuccess
-next_opt_arg_may(tOptions * pOpts, tOptState* pOptState);
+next_opt_arg_may(tOptions * pOpts, tOptState * pOptState);
 
 static tSuccess
 next_opt_arg_none(tOptions * pOpts, tOptState* pOptState);
@@ -295,9 +295,18 @@ next_opt_arg_must(tOptions * pOpts, tOptState* pOptState)
     return SUCCESS;
 }
 
-
+/**
+ * Process an optional option argument.  For short options, it looks at the
+ * character after the option character, or it consumes the next full argument.
+ * For long options, it looks for an '=' character attachment to the long
+ * option name before deciding to take the next command line argument.
+ *
+ * @param pOpts      the option descriptor
+ * @param pOptState  a structure for managing the current processing state
+ * @returns SUCCESS or does not return
+ */
 static tSuccess
-next_opt_arg_may(tOptions * pOpts, tOptState* pOptState)
+next_opt_arg_may(tOptions * pOpts, tOptState * pOptState)
 {
     /*
      *  An option argument is optional.

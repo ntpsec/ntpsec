@@ -64,7 +64,7 @@ and
 the +4.567 +/- 0.089 secs indicates the time offset and
 error bound of the system clock relative to the server clock.
 
-@include ntpdc-opts.texi
+@include invoke-ntpdc.texi
 
 @node Usage
 @comment  node-name,  next,  previous,  up

@@ -1,3 +1,4 @@
+* Upgrade to autogen-5.16 and libopts-36.4.11.
 * Upgrade to autogen-5.15.
 (4.2.7p271) 2012/04/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1122] openssl detection via pkg-config fails when no additional

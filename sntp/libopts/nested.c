@@ -2,7 +2,7 @@
 /**
  * \file nested.c
  *
- *  Time-stamp:      "2012-01-29 07:00:04 bkorb"
+ *  Time-stamp:      "2012-03-04 13:30:07 bkorb"
  *
  *   Automated Options Nested Values module.
  *
@@ -397,7 +397,8 @@ scan_name(char const* pzName, tOptionValue* pRes)
 static char const*
 scan_xml(char const* pzName, tOptionValue* pRes)
 {
-    size_t nameLen = 1, valLen = 0;
+    size_t nameLen;
+    size_t valLen;
     char const*   pzScan = ++pzName;
     char const*   pzVal;
     tOptionValue  valu;
@@ -425,8 +426,8 @@ scan_xml(char const* pzName, tOptionValue* pRes)
         return pzName;
     }
 
-    pzScan++;
-    while (IS_VALUE_NAME_CHAR((int)*pzScan))  { pzScan++; nameLen++; }
+    pzScan  = SPN_VALUE_NAME_CHARS(pzName+1);
+    nameLen = pzScan - pzName;
     if (nameLen > 64)
         return NULL;
     valu.valType = OPARG_TYPE_STRING;
@@ -434,7 +435,7 @@ scan_xml(char const* pzName, tOptionValue* pRes)
     switch (*pzScan) {
     case ' ':
     case '\t':
-        pzScan = parseAttributes(
+        pzScan = parse_attrs(
             NULL, (char*)pzScan, &option_load_mode, &valu );
         if (*pzScan == '>') {
             pzScan++;
@@ -489,7 +490,7 @@ scan_xml(char const* pzName, tOptionValue* pRes)
         }
         valLen = (pzScan - pzVal);
         pzScan += nameLen + 3;
-        while (IS_WHITESPACE_CHAR(*pzScan))  pzScan++;
+        pzScan = SPN_WHITESPACE_CHARS(pzScan);
     }
 
     switch (valu.valType) {

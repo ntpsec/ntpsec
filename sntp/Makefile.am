@@ -111,11 +111,11 @@ EXTRA_DIST =				\
 	$(srcdir)/COPYRIGHT		\
 	ag-tpl				\
 	deps-ver			\
+	invoke-sntp.menu		\
+	invoke-sntp.texi		\
 	@NTP_FORCE_LIBEVENT_DIST@	\
 	loc				\
 	sntp-opts.def			\
-	sntp-opts.menu			\
-	sntp-opts.texi			\
 	sntp.1sntpman			\
 	sntp.1sntpmdoc			\
 	sntp.man.in			\
@@ -148,14 +148,14 @@ man_MANS=	sntp.$(SNTP_MS)
 
 ## HMS: Real Soon Now...
 ##info_TEXINFOS=	sntp.texi
-##sntp_TEXINFOS=	sntp-opts.texi
+##sntp_TEXINFOS=	invoke-sntp.texi
 
 noinst_DATA=				\
+	$(srcdir)/invoke-sntp.menu	\
+	$(srcdir)/invoke-sntp.texi	\
 	$(srcdir)/sntp.html		\
 	$(srcdir)/sntp.man.in		\
 	$(srcdir)/sntp.mdoc.in		\
-	$(srcdir)/sntp-opts.texi	\
-	$(srcdir)/sntp-opts.menu	\
 	$(NULL)
 
 FRC:
@@ -267,14 +267,14 @@ sntp.$(SNTP_MS): $(srcdir)/sntp.$(MANTAGFMT).in $(top_builddir)/config.status
 
 ###
 
-$(srcdir)/sntp-opts.menu: $(srcdir)/sntp-opts.texi
+$(srcdir)/invoke-sntp.menu: $(srcdir)/invoke-sntp.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/sntp-opts.texi: $(srcdir)/sntp-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section sntp-opts.def
+$(srcdir)/invoke-sntp.texi: $(srcdir)/sntp-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section sntp-opts.def
 	$(top_srcdir)/../scripts/check--help $@
 
-$(srcdir)/sntp.html: $(srcdir)/sntp-opts.menu $(srcdir)/sntp-opts.texi $(srcdir)/sntp.texi $(srcdir)/include/version.texi
+$(srcdir)/sntp.html: $(srcdir)/invoke-sntp.menu $(srcdir)/invoke-sntp.texi $(srcdir)/sntp.texi $(srcdir)/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o sntp.html sntp.texi || true )
 
 libtool: $(LIBTOOL_DEPS)

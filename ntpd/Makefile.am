@@ -114,6 +114,8 @@ CLEANFILES =			\
 
 EXTRA_DIST =			\
 	complete.conf		\
+	invoke-ntpd.menu	\
+	invoke-ntpd.texi	\
 	keyword-gen-utd		\
 	ntp.conf.5man		\
 	ntp.conf.5mdoc		\
@@ -124,8 +126,6 @@ EXTRA_DIST =			\
 	ntp.keys.man.in		\
 	ntp.keys.mdoc.in	\
 	ntpd-opts.def		\
-	ntpd-opts.menu		\
-	ntpd-opts.texi		\
 	ntpd.1ntpdman		\
 	ntpd.1ntpdmdoc		\
 	ntpd.man.in		\
@@ -140,12 +140,12 @@ EXTRA_DIST =			\
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k keyword-gen ntpd ntpdsim
 noinst_DATA =				\
+	$(srcdir)/invoke-ntpd.menu	\
+	$(srcdir)/invoke-ntpd.texi	\
 	$(srcdir)/ntp.conf.man.in	\
 	$(srcdir)/ntp.conf.mdoc.in	\
 	$(srcdir)/ntp.keys.man.in	\
 	$(srcdir)/ntp.keys.mdoc.in	\
-	$(srcdir)/ntpd-opts.menu	\
-	$(srcdir)/ntpd-opts.texi	\
 	$(srcdir)/ntpd.man.in		\
 	$(srcdir)/ntpd.mdoc.in		\
 	$(NULL)
@@ -346,11 +346,11 @@ ntp.keys.5: $(srcdir)/ntp.keys.$(MANTAGFMT).in $(top_builddir)/config.status
 
 ###
 
-$(srcdir)/ntpd-opts.menu: $(srcdir)/ntpd-opts.texi
+$(srcdir)/invoke-ntpd.menu: $(srcdir)/invoke-ntpd.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
-$(srcdir)/ntpd-opts.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpd-opts.def
+$(srcdir)/invoke-ntpd.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpd-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
 $(PROGRAMS): $(LDADD)

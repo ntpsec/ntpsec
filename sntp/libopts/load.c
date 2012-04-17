@@ -1,7 +1,7 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2012-01-29 19:37:15 bkorb"
+ *  Time-stamp:      "2012-03-31 13:13:34 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -29,13 +29,12 @@
  */
 
 /* = = = START-STATIC-FORWARD = = = */
-static ag_bool
+static bool
 add_prog_path(char * pzBuf, int bufSize, char const * pzName,
               char const * pzProgPath);
 
-static ag_bool
-add_env_val(char * pzBuf, int bufSize, char const * pzName,
-            char const * pzProgPath);
+static bool
+add_env_val(char * pzBuf, int bufSize, char const * pzName);
 
 static char *
 assemble_arg_val(char * pzTxt, tOptionLoadMode mode);
@@ -50,8 +49,8 @@ assemble_arg_val(char * pzTxt, tOptionLoadMode mode);
  * arg:   + char const* + pzName     + The input name +
  * arg:   + char const* + pzProgPath + The full path of the current program +
  *
- * ret-type: ag_bool
- * ret-desc: AG_TRUE if the name was handled, otherwise AG_FALSE.
+ * ret-type: bool
+ * ret-desc: true if the name was handled, otherwise false.
  *           If the name does not start with ``$'', then it is handled
  *           simply by copying the input name to the output buffer and
  *           resolving the name with either
@@ -77,7 +76,7 @@ assemble_arg_val(char * pzTxt, tOptionLoadMode mode);
  *     @code{pzName} string and must either be the entire string or be followed
  *     by the @code{'/'} (backslash on windows) character.
  *
- * err:  @code{AG_FALSE} is returned if:
+ * err:  @code{false} is returned if:
  *       @*
  *       @bullet{} The input name exceeds @code{bufSize} bytes.
  *       @*
@@ -92,14 +91,14 @@ assemble_arg_val(char * pzTxt, tOptionLoadMode mode);
  *       @bullet{} @code{canonicalize_file_name} or @code{realpath} return
  *                 errors (cannot resolve the resulting path).
 =*/
-ag_bool
+bool
 optionMakePath(char * pzBuf, int bufSize, char const * pzName,
                char const * pzProgPath)
 {
     size_t name_len = strlen(pzName);
 
     if (((size_t)bufSize <= name_len) || (name_len == 0))
-        return AG_FALSE;
+        return false;
 
     /*
      *  IF not an environment variable, just copy the data
@@ -113,7 +112,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
             if ( (*(pzD++) = *(pzS++)) == NUL)
                 break;
             if (--ct <= 0)
-                return AG_FALSE;
+                return false;
         }
     }
 
@@ -124,37 +123,37 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
      */
     else switch (pzName[1]) {
     case NUL:
-        return AG_FALSE;
+        return false;
 
     case '$':
         if (! add_prog_path(pzBuf, bufSize, pzName, pzProgPath))
-            return AG_FALSE;
+            return false;
         break;
 
     case '@':
         if (program_pkgdatadir[0] == NUL)
-            return AG_FALSE;
+            return false;
 
         if (snprintf(pzBuf, bufSize, "%s%s", program_pkgdatadir, pzName + 2)
             >= bufSize)
-            return AG_FALSE;
+            return false;
         break;
 
     default:
-        if (! add_env_val(pzBuf, bufSize, pzName, pzProgPath))
-            return AG_FALSE;
+        if (! add_env_val(pzBuf, bufSize, pzName))
+            return false;
     }
 
 #if defined(HAVE_CANONICALIZE_FILE_NAME)
     {
         char * pz = canonicalize_file_name(pzBuf);
         if (pz == NULL)
-            return AG_FALSE;
+            return false;
 
         name_len = strlen(pz);
-        if (name_len >= bufSize) {
+        if (name_len >= (size_t)bufSize) {
             free(pz);
-            return AG_FALSE;
+            return false;
         }
 
         memcpy(pzBuf, pz, name_len + 1);
@@ -166,20 +165,20 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
         char z[PATH_MAX+1];
 
         if (realpath(pzBuf, z) == NULL)
-            return AG_FALSE;
+            return false;
 
         name_len = strlen(z);
         if (name_len >= bufSize)
-            return AG_FALSE;
+            return false;
 
         memcpy(pzBuf, z, name_len + 1);
     }
 #endif
 
-    return AG_TRUE;
+    return true;
 }
 
-static ag_bool
+static bool
 add_prog_path(char * pzBuf, int bufSize, char const * pzName,
               char const * pzProgPath)
 {
@@ -193,7 +192,7 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
     case NUL:
         break;
     default:
-        return AG_FALSE;
+        return false;
     }
 
     /*
@@ -207,7 +206,7 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
         pzPath = pathfind(getenv("PATH"), (char*)pzProgPath, "rx");
 
         if (pzPath == NULL)
-            return AG_FALSE;
+            return false;
     }
 
     pz = strrchr(pzPath, DIRCH);
@@ -217,7 +216,7 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
      *  THEN we do not have a path name to our executable file.
      */
     if (pz == NULL)
-        return AG_FALSE;
+        return false;
 
     pzName += skip;
 
@@ -226,7 +225,7 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
      *  The result may be either a file or a directory.
      */
     if ((pz - pzPath)+1 + strlen(pzName) >= (unsigned)bufSize)
-        return AG_FALSE;
+        return false;
 
     memcpy(pzBuf, pzPath, (size_t)((pz - pzPath)+1));
     strcpy(pzBuf + (pz - pzPath) + 1, pzName);
@@ -237,15 +236,14 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
      */
     if (pzPath != pzProgPath)
         AGFREE(pzPath);
-    return AG_TRUE;
+    return true;
 }
 
 
-static ag_bool
-add_env_val(char * pzBuf, int bufSize, char const * pzName,
-            char const * pzProgPath)
+static bool
+add_env_val(char * pzBuf, int bufSize, char const * pzName)
 {
-    char* pzDir = pzBuf;
+    char * pzDir = pzBuf;
 
     for (;;) {
         int ch = (int)*++pzName;
@@ -255,7 +253,7 @@ add_env_val(char * pzBuf, int bufSize, char const * pzName,
     }
 
     if (pzDir == pzBuf)
-        return AG_FALSE;
+        return false;
 
     *pzDir = NUL;
 
@@ -265,34 +263,34 @@ add_env_val(char * pzBuf, int bufSize, char const * pzName,
      *  Environment value not found -- skip the home list entry
      */
     if (pzDir == NULL)
-        return AG_FALSE;
+        return false;
 
     if (strlen(pzDir) + 1 + strlen(pzName) >= (unsigned)bufSize)
-        return AG_FALSE;
+        return false;
 
     sprintf(pzBuf, "%s%s", pzDir, pzName);
-    return AG_TRUE;
+    return true;
 }
 
 
 LOCAL void
 mungeString(char* pzTxt, tOptionLoadMode mode)
 {
-    char* pzE;
+    char * pzE;
 
     if (mode == OPTION_LOAD_KEEP)
         return;
 
     if (IS_WHITESPACE_CHAR(*pzTxt)) {
-        char* pzS = pzTxt;
-        char* pzD = pzTxt;
-        while (IS_WHITESPACE_CHAR(*++pzS))  ;
-        while ((*(pzD++) = *(pzS++)) != NUL)   ;
-        pzE = pzD-1;
+        char * pzS = SPN_WHITESPACE_CHARS(pzTxt+1);
+        size_t l   = strlen(pzS) + 1;
+        memmove(pzTxt, pzS, l);
+        pzE = pzTxt + l - 1;
+
     } else
         pzE = pzTxt + strlen(pzTxt);
 
-    while ((pzE > pzTxt) && IS_WHITESPACE_CHAR(pzE[-1]))  pzE--;
+    pzE  = SPN_WHITESPACE_BACK(pzTxt, pzE);
     *pzE = NUL;
 
     if (mode == OPTION_LOAD_UNCOOKED)
@@ -343,9 +341,10 @@ assemble_arg_val(char * pzTxt, tOptionLoadMode mode)
      */
     space_break = IS_WHITESPACE_CHAR(*pzEnd);
     *(pzEnd++) = NUL;
-    while (IS_WHITESPACE_CHAR(*pzEnd))  pzEnd++;
+
+    pzEnd = SPN_WHITESPACE_CHARS(pzEnd);
     if (space_break && ((*pzEnd == ':') || (*pzEnd == '=')))
-        while (IS_WHITESPACE_CHAR(*++pzEnd))  ;
+        pzEnd = SPN_WHITESPACE_CHARS(pzEnd+1);
 
     return pzEnd;
 }
@@ -365,7 +364,7 @@ loadOptionLine(
     tDirection  direction,
     tOptionLoadMode   load_mode )
 {
-    while (IS_WHITESPACE_CHAR(*pzLine))  pzLine++;
+    pzLine = SPN_WHITESPACE_CHARS(pzLine);
 
     {
         char* pzArg = assemble_arg_val(pzLine, load_mode);

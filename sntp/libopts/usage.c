@@ -2,7 +2,7 @@
 /*
  * \file usage.c
  *
- * Time-stamp:      "2012-01-29 09:57:43 bkorb"
+ * Time-stamp:      "2012-03-31 19:19:26 bkorb"
  *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
@@ -38,10 +38,10 @@
 #define OPTPROC_L_N_S  (OPTPROC_LONGOPT | OPTPROC_SHORTOPT)
 
 /* = = = START-STATIC-FORWARD = = = */
-static inline ag_bool
+static inline bool
 do_gnu_usage(tOptions * pOpts);
 
-static inline ag_bool
+static inline bool
 skip_misuse_usage(tOptions * pOpts);
 
 static void
@@ -55,14 +55,14 @@ prt_one_vendor(tOptions * pOptions, tOptDesc * pOD,
                arg_types_t * pAT, char const * usefmt);
 
 static void
-prt_vendor_opts(tOptions * pOpts, arg_types_t * pAT, char const * pOptTitle);
+prt_vendor_opts(tOptions * pOpts, char const * pOptTitle);
 
 static void
 prt_extd_usage(tOptions * pOpts, tOptDesc * pOD,
-               arg_types_t * pAT, char const * pOptTitle);
+               char const * pOptTitle);
 
 static void
-prt_ini_list(char const * const * papz, ag_bool * pInitIntro,
+prt_ini_list(char const * const * papz, bool * pInitIntro,
              char const * pzRc, char const * pzPN);
 
 static void
@@ -116,14 +116,14 @@ set_usage_flags(tOptions * opts, char const * flg_txt)
     };
 #   undef  _aof_
 
-    ao_flags_t flg = 0;
+    unsigned int flg = (ao_flags_t)0;
 
     if (flg_txt == NULL) {
         flg_txt = getenv("AUTOOPTS_USAGE");
         if (flg_txt == NULL) return;
     }
 
-    while (IS_WHITESPACE_CHAR(*flg_txt))  flg_txt++;
+    flg_txt = SPN_WHITESPACE_CHARS(flg_txt);
     if (*flg_txt == NUL)
         return;
 
@@ -147,8 +147,7 @@ set_usage_flags(tOptions * opts, char const * flg_txt)
             return;
 
         flg |= 1 << ix;
-        flg_txt  += fnt->fnm_len;
-        while (IS_WHITESPACE_CHAR(*flg_txt))  flg_txt++;
+        flg_txt = SPN_WHITESPACE_CHARS(flg_txt + fnt->fnm_len);
 
         if (*flg_txt == NUL)
             break;
@@ -157,7 +156,7 @@ set_usage_flags(tOptions * opts, char const * flg_txt)
             /*
              *  skip the comma and following white space
              */
-            while (IS_WHITESPACE_CHAR(*++flg_txt))  ;
+            flg_txt = SPN_WHITESPACE_CHARS(flg_txt + 1);
             if (*flg_txt == NUL)
                 break;
         }
@@ -182,20 +181,20 @@ set_usage_flags(tOptions * opts, char const * flg_txt)
  *  Figure out if we should try to format usage text sort-of like
  *  the way many GNU programs do.
  */
-static inline ag_bool
+static inline bool
 do_gnu_usage(tOptions * pOpts)
 {
-    return (pOpts->fOptSet & OPTPROC_GNUUSAGE) ? AG_TRUE : AG_FALSE;
+    return (pOpts->fOptSet & OPTPROC_GNUUSAGE) ? true : false;
 }
 
 /*
  *  Figure out if we should try to format usage text sort-of like
  *  the way many GNU programs do.
  */
-static inline ag_bool
+static inline bool
 skip_misuse_usage(tOptions * pOpts)
 {
-    return (pOpts->fOptSet & OPTPROC_MISUSE) ? AG_TRUE : AG_FALSE;
+    return (pOpts->fOptSet & OPTPROC_MISUSE) ? true : false;
 }
 
 
@@ -326,16 +325,16 @@ print_usage_details(tOptions * opts, int exit_code)
  *  over-ride this, providing the value of it is set to either "gnu" or
  *  "autoopts".  This routine will @strong{not} return.
  *
- *  If "exitCode" is "EX_USAGE" (normally 64), then output will to to stdout
- *  and the actual exit code will be "EXIT_SUCCESS".
+ *  If "exitCode" is "AO_EXIT_REQ_USAGE" (normally 64), then output will to
+ *  to stdout and the actual exit code will be "EXIT_SUCCESS".
 =*/
 void
 optionUsage(tOptions * pOptions, int usage_exit_code)
 {
-    int exit_code =
-        (usage_exit_code == EX_USAGE) ? EXIT_SUCCESS : usage_exit_code;
+    int exit_code = (usage_exit_code == AO_EXIT_REQ_USAGE)
+        ? EXIT_SUCCESS : usage_exit_code;
 
-    displayEnum = AG_FALSE;
+    displayEnum = false;
 
     /*
      *  Paged usage will preset option_usage_fp to an output file.
@@ -467,7 +466,7 @@ prt_one_vendor(tOptions * pOptions, tOptDesc * pOD,
         default:                     goto bogus_desc;
         }
 
-        while (IS_WHITESPACE_CHAR(*pzArgType))  pzArgType++;
+        pzArgType = SPN_WHITESPACE_CHARS(pzArgType);
         if (*pzArgType == NUL)
             snprintf(z, sizeof(z), "%s", pOD->pz_Name);
         else
@@ -477,7 +476,7 @@ prt_one_vendor(tOptions * pOptions, tOptDesc * pOD,
         switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
         case OPARG_TYPE_ENUMERATION:
         case OPARG_TYPE_MEMBERSHIP:
-            displayEnum = (pOD->pOptProc != NULL) ? AG_TRUE : displayEnum;
+            displayEnum = (pOD->pOptProc != NULL) ? true : displayEnum;
         }
     }
 
@@ -494,10 +493,9 @@ bogus_desc:
  *
  * @param pOptions the program option descriptor
  * @param pOD      the option descriptor
- * @param pAT      names of the option argument types
  */
 static void
-prt_vendor_opts(tOptions * pOpts, arg_types_t * pAT, char const * pOptTitle)
+prt_vendor_opts(tOptions * pOpts, char const * pOptTitle)
 {
     static unsigned int const not_vended_mask =
         OPTST_NO_USAGE_MASK | OPTST_DOCUMENT;
@@ -535,7 +533,7 @@ prt_vendor_opts(tOptions * pOpts, arg_types_t * pAT, char const * pOptTitle)
             continue;
 
         prt_one_vendor(pOpts, pOD, &argTypes, vfmt);
-        prt_extd_usage(pOpts, pOD, &argTypes, pOptTitle);
+        prt_extd_usage(pOpts, pOD, pOptTitle);
 
     } while (pOD++, (--ct > 0));
 }
@@ -549,11 +547,11 @@ prt_vendor_opts(tOptions * pOpts, arg_types_t * pAT, char const * pOptTitle)
  */
 static void
 prt_extd_usage(tOptions * pOpts, tOptDesc * pOD,
-               arg_types_t * pAT, char const * pOptTitle)
+               char const * pOptTitle)
 {
     if (  ((pOpts->fOptSet & OPTPROC_VENDOR_OPT) != 0)
        && (pOD->optActualValue == VENDOR_OPTION_VALUE)) {
-        prt_vendor_opts(pOpts, pAT, pOptTitle);
+        prt_vendor_opts(pOpts, pOptTitle);
         return;
     }
 
@@ -666,7 +664,7 @@ prt_extd_usage(tOptions * pOpts, tOptDesc * pOD,
  *   squishy, but important to tell users how to find these files.
  */
 static void
-prt_ini_list(char const * const * papz, ag_bool * pInitIntro,
+prt_ini_list(char const * const * papz, bool * pInitIntro,
              char const * pzRc, char const * pzPN)
 {
     char zPath[AG_PATH_MAX+1];
@@ -675,7 +673,7 @@ prt_ini_list(char const * const * papz, ag_bool * pInitIntro,
         return;
 
     fputs(zPresetIntro, option_usage_fp);
-    *pInitIntro = AG_FALSE;
+    *pInitIntro = false;
 
     for (;;) {
         char const * pzPath = *(papz++);
@@ -792,7 +790,7 @@ prt_one_usage(tOptions * pOptions, tOptDesc * pOD, arg_types_t * pAT)
         switch (OPTST_GET_ARGTYPE(pOD->fOptState)) {
         case OPARG_TYPE_ENUMERATION:
         case OPARG_TYPE_MEMBERSHIP:
-            displayEnum = (pOD->pOptProc != NULL) ? AG_TRUE : displayEnum;
+            displayEnum = (pOD->pOptProc != NULL) ? true : displayEnum;
         }
     }
 
@@ -880,7 +878,7 @@ prt_opt_usage(tOptions * pOpts, int ex_code, char const * pOptTitle)
          *  THEN print all the extra info
          */
         if (ex_code == EXIT_SUCCESS)
-            prt_extd_usage(pOpts, pOD, &argTypes, pOptTitle);
+            prt_extd_usage(pOpts, pOD, pOptTitle);
 
     } while (pOD++, optNo++, (--ct > 0));
 
@@ -895,7 +893,7 @@ prt_opt_usage(tOptions * pOpts, int ex_code, char const * pOptTitle)
 static void
 prt_prog_detail(tOptions* pOptions)
 {
-    ag_bool  initIntro = AG_TRUE;
+    bool  initIntro = true;
 
     /*
      *  Display all the places we look for config files

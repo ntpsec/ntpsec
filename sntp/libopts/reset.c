@@ -69,7 +69,7 @@ optionResetEverything(tOptions * pOpts)
 void
 optionResetOpt( tOptions* pOpts, tOptDesc* pOD )
 {
-    static ag_bool reset_active = AG_FALSE;
+    static bool reset_active = false;
 
     tOptState opt_state = OPTSTATE_INITIALIZER(DEFINED);
     char const * pzArg = pOD->optArg.argString;
@@ -91,12 +91,12 @@ optionResetOpt( tOptions* pOpts, tOptDesc* pOD )
         assert(0 == 1);
     }
 
-    reset_active = AG_TRUE;
+    reset_active = true;
 
     if (pzArg[1] == NUL) {
         if (*pzArg == '*') {
             optionResetEverything(pOpts);
-            reset_active = AG_FALSE;
+            reset_active = false;
             return;
         }
 
@@ -124,7 +124,7 @@ optionResetOpt( tOptions* pOpts, tOptDesc* pOD )
      *  Finally, clear the reset flag, too.
      */
     optionReset(pOpts, opt_state.pOD);
-    reset_active = AG_FALSE;
+    reset_active = false;
 }
 /*
  * Local Variables:

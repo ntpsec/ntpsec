@@ -2,7 +2,7 @@
 /**
  * \file environment.c
  *
- * Time-stamp:      "2011-07-19 17:43:34 bkorb"
+ * Time-stamp:      "2012-04-01 05:59:15 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -45,11 +45,11 @@ do_env_opt(tOptState * os, char * env_name,
 LOCAL void
 doPrognameEnv(tOptions * pOpts, teEnvPresetType type)
 {
-    char const*   pczOptStr = getenv(pOpts->pzPROGNAME);
+    char const *  pczOptStr = getenv(pOpts->pzPROGNAME);
     token_list_t* pTL;
     int           sv_argc;
     tAoUI         sv_flag;
-    char**        sv_argv;
+    char **       sv_argv;
 
     /*
      *  No such beast?  Then bail now.
@@ -78,7 +78,10 @@ doPrognameEnv(tOptions * pOpts, teEnvPresetType type)
      *  The option scanning code will skip the "program name" at the start
      *  of this list of tokens, so we accommodate this way ....
      */
-    pOpts->origArgVect = (char**)(pTL->tkn_list - 1);
+    {
+        uintptr_t v = (uintptr_t)(pTL->tkn_list);
+        pOpts->origArgVect = (void *)(v - sizeof(char *));
+    }
     pOpts->origArgCt   = pTL->tkn_ct   + 1;
     pOpts->fOptSet    &= ~OPTPROC_ERRSTOP;
 

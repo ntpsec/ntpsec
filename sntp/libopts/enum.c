@@ -2,7 +2,7 @@
 /**
  * \file enumeration.c
  *
- * Time-stamp:      "2012-01-29 19:07:59 bkorb"
+ * Time-stamp:      "2012-03-31 13:22:33 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -166,7 +166,16 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
     }
 }
 
-
+/**
+ * Convert a name or number into a binary number.
+ * "~0" and "-1" will be converted to the largest value in the enumeration.
+ *
+ * @param pzName     the keyword name (number) to convert
+ * @param pOpts      the program's option descriptor
+ * @param pOD        the option descriptor for this option
+ * @param paz_names  the list of keywords for this option
+ * @param name_ct    the count of keywords
+ */
 static uintptr_t
 find_name(char const * pzName, tOptions * pOpts, tOptDesc * pOD,
           char const * const *  paz_names, unsigned int name_ct)
@@ -184,8 +193,17 @@ find_name(char const * pzName, tOptions * pOpts, tOptDesc * pOD,
         unsigned long val = strtoul(pz, &pz, 0);
         if ((*pz == NUL) && (val < name_ct))
             return (uintptr_t)val;
+        pz_enum_err_fmt = zTooLarge;
+        option_usage_fp = stderr;
         enum_err(pOpts, pOD, paz_names, (int)name_ct);
         return name_ct;
+    }
+
+    if (IS_INVERSION_CHAR(*pzName) && (pzName[2] == NUL)) {
+        if (  ((pzName[0] == '~') && (pzName[1] == '0'))
+           || ((pzName[0] == '-') && (pzName[1] == '1')))
+        return (uintptr_t)(name_ct - 1);
+        goto oops;
     }
 
     /*
@@ -197,12 +215,17 @@ find_name(char const * pzName, tOptions * pOpts, tOptDesc * pOD,
             if (paz_names[idx][len] == NUL)
                 return idx;  /* full match */
 
-            res = (res != name_ct) ? ~0 : idx; /* save partial match */
+            if (res == name_ct)
+                res = idx; /* save partial match */
+            else
+                res = ~0;  /* may yet find full match */
         }
     }
 
     if (res < name_ct)
         return res; /* partial match */
+
+oops:
 
     pz_enum_err_fmt = (res == name_ct) ? zNoKey : zAmbigKey;
     option_usage_fp = stderr;
@@ -226,9 +249,9 @@ find_name(char const * pzName, tOptions * pOpts, tOptDesc * pOD,
 char const *
 optionKeywordName(tOptDesc * pOD, unsigned int enum_val)
 {
-    tOptDesc od;
+    tOptDesc od = {
+        .optArg.argEnum = enum_val };
 
-    od.optArg.argEnum = enum_val;
     (*(pOD->pOptProc))(OPTPROC_RETURN_VALNAME, &od );
     return od.optArg.argString;
 }
@@ -317,6 +340,7 @@ set_memb_usage(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
     /*
      *  print the list of enumeration names.
      */
+    (void)pOpts;
     enum_err(OPTPROC_EMIT_USAGE, pOD, paz_names, (int)name_ct );
 }
 
@@ -331,6 +355,7 @@ set_memb_shell(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
     uintptr_t  bits = (uintptr_t)pOD->optCookie;
     size_t     len  = 0;
 
+    (void)pOpts;
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
 
     while (bits != 0) {
@@ -352,6 +377,7 @@ set_memb_names(tOptions * pOpts, tOptDesc * pOD, char const * const * paz_names,
     unsigned int ix = 0;
     size_t     len  = NONE_STR_LEN + 1;
 
+    (void)pOpts;
     bits &= ((uintptr_t)1 << (uintptr_t)name_ct) - (uintptr_t)1;
 
     /*
@@ -494,7 +520,7 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
                 if (iv)
                      res &= ~bit;
                 else res |= bit;
-            } while (0);
+            } while (false);
 
             if (pzArg[len] == NUL)
                 break;

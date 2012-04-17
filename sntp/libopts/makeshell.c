@@ -2,7 +2,7 @@
 /**
  * \file makeshell.c
  *
- * Time-stamp:      "2012-01-29 19:01:07 bkorb"
+ * Time-stamp:      "2012-04-07 09:03:16 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -163,9 +163,11 @@ optionParseShell(tOptions * pOpts)
     else if (ENABLED_GENSHELL_OPT(SHELL))
         printf(SHOW_PROG_ENV, pOpts->pzPROGNAME);
 
-    fflush(stdout);
+#ifdef HAVE_FCHMOD
     fchmod(STDOUT_FILENO, 0755);
+#endif
     fclose(stdout);
+
     if (ferror(stdout)) {
         fputs(zOutputFail, stderr);
         exit(EXIT_FAILURE);
@@ -716,7 +718,7 @@ open_out(char const * pzFile)
          */
         script_trailer = pzScan + END_MARK_LEN;
         script_leader  = pzData;
-    } while (AG_FALSE);
+    } while (false);
 
     if (freopen(pzFile, "w" FOPEN_BINARY_FLAG, stdout) != stdout) {
         fprintf(stderr, zFreopenFail, errno, strerror(errno));

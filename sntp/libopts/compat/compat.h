@@ -3,7 +3,7 @@
 /**
  * \file compat.h --- fake the preprocessor into handlng portability
  *
- *  Time-stamp:      "2012-02-12 09:00:09 bkorb"
+ *  Time-stamp:      "2012-02-28 19:40:44 bkorb"
  *
  *  compat.h is free software.
  *  This file is part of AutoGen.
@@ -181,15 +181,15 @@
 #include <setjmp.h>
 #include <signal.h>
 
-#if defined( HAVE_STDINT_H )
+#if defined(HAVE_STDINT_H)
 #  include <stdint.h>
-#elif defined( HAVE_INTTYPES_H )
+
+#elif defined(HAVE_INTTYPES_H)
 #  include <inttypes.h>
 #endif
 
 #include <stdlib.h>
 #include <string.h>
-
 #include <time.h>
 
 #ifdef HAVE_UTIME_H
@@ -198,6 +198,17 @@
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
+#endif
+
+#ifdef HAVE_STDBOOL_H
+#  include <stdbool.h>
+#else
+   typedef enum { false = 0, true = 1 } _Bool;
+#  define bool _Bool
+
+   /* The other macros must be usable in preprocessor directives.  */
+#  define false 0
+#  define true 1
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

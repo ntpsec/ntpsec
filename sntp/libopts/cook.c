@@ -1,7 +1,7 @@
 /**
  * \file cook.c
  *
- *  Time-stamp:      "2012-02-12 09:00:47 bkorb"
+ *  Time-stamp:      "2012-02-28 19:40:47 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
@@ -28,7 +28,7 @@
  */
 
 /* = = = START-STATIC-FORWARD = = = */
-static ag_bool
+static bool
 contiguous_quote(char ** pps, char * pq, int * lnct_p);
 /* = = = END-STATIC-FORWARD = = = */
 
@@ -130,7 +130,7 @@ ao_string_cook_escape_char(char const* pzIn, char* pRes, uint_t nl)
  *  A quoted string has been found.
  *  Find the end of it and compress any escape sequences.
  */
-static ag_bool
+static bool
 contiguous_quote(char ** pps, char * pq, int * lnct_p)
 {
     char * ps = *pps + 1;
@@ -149,7 +149,7 @@ contiguous_quote(char ** pps, char * pq, int * lnct_p)
         case '\'':
             *pq  = *(ps++);  /* assign new quote character and return */
             *pps = ps;
-            return AG_TRUE;
+            return true;
 
         case '/':
             /*
@@ -158,7 +158,7 @@ contiguous_quote(char ** pps, char * pq, int * lnct_p)
             switch (ps[1]) {
             default:
                 *pps = NULL;
-                return AG_FALSE;
+                return false;
 
             case '/':
                 /*
@@ -167,7 +167,7 @@ contiguous_quote(char ** pps, char * pq, int * lnct_p)
                 ps = strchr(ps, NL);
                 if (ps == NULL) {
                     *pps = NULL;
-                    return AG_FALSE;
+                    return false;
                 }
                 break;
 
@@ -179,7 +179,7 @@ contiguous_quote(char ** pps, char * pq, int * lnct_p)
                  */
                 if (p == NULL) {
                     *pps = NULL;
-                    return AG_FALSE;
+                    return false;
                 }
 
                 while (ps < p) {
@@ -198,7 +198,7 @@ contiguous_quote(char ** pps, char * pq, int * lnct_p)
              *  The series of quoted strings has come to an end.
              */
             *pps = ps;
-            return AG_FALSE;
+            return false;
         }
     }
 }

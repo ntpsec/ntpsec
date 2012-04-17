@@ -4,7 +4,7 @@
 
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
- * Time-stamp:       "2010-07-17 09:50:32 bkorb"
+ * Time-stamp:       "2012-03-31 13:44:42 bkorb"
  */
 
 /* Code: */
@@ -309,7 +309,7 @@ extract_colon_unit( char* pzDir, char const *string, int *p_index )
                 goto copy_done;
             }
 
-            if ((pzDest - pzDir) >= AG_PATH_MAX)
+            if ((unsigned long)(pzDest - pzDir) >= AG_PATH_MAX)
                 break;
         } copy_done:;
 

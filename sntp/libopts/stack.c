@@ -2,7 +2,7 @@
 /**
  * \file stack.c
  *
- *  Time-stamp:      "2012-01-29 09:42:12 bkorb"
+ *  Time-stamp:      "2012-03-31 13:16:41 bkorb"
  *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
@@ -43,11 +43,11 @@
  *  Invoked for options that are equivalenced to stacked options.
 =*/
 void
-optionUnstackArg(
-    tOptions*  pOpts,
-    tOptDesc*  pOptDesc )
+optionUnstackArg(tOptions * pOpts, tOptDesc * pOptDesc)
 {
-    tArgList* pAL;
+    tArgList * pAL;
+
+    (void)pOpts;
 
     if ((pOptDesc->fOptState & OPTST_RESET) != 0)
         return;
@@ -230,11 +230,11 @@ addArgListEntry(void** ppAL, void* entry)
  *  Keep an entry-ordered list of option arguments.
 =*/
 void
-optionStackArg(
-    tOptions*  pOpts,
-    tOptDesc*  pOD )
+optionStackArg(tOptions * pOpts, tOptDesc * pOD)
 {
     char * pz;
+
+    (void)pOpts;
 
     if ((pOD->fOptState & OPTST_RESET) != 0) {
         tArgList* pAL = (void*)pOD->optCookie;

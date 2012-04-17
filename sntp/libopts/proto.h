@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sun Feb 26 11:08:49 PST 2012
+ * Generated Sat Apr  7 12:39:46 PDT 2012
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -36,7 +36,7 @@ regular_opts(tOptions * pOpts);
 /*
  *  Extracted from check.c
  */
-LOCAL ag_bool
+LOCAL bool
 is_consistent(tOptions * pOpts);
 
 /*
@@ -46,11 +46,8 @@ LOCAL void
 intern_file_load(tOptions* pOpts);
 
 LOCAL char*
-parseAttributes(
-    tOptions*           pOpts,
-    char*               pzText,
-    tOptionLoadMode*    pMode,
-    tOptionValue*       pType );
+parse_attrs(tOptions * pOpts, char * pzText, tOptionLoadMode * pMode,
+            tOptionValue * pType);
 
 LOCAL tSuccess
 validate_struct(tOptions * pOpts, char const * pzProgram);

@@ -64,7 +64,7 @@ and
 the +4.567 +/- 0.089 secs indicates the time offset and
 error bound of the system clock relative to the server clock.
 
-@include sntp-opts.texi
+@include invoke-sntp.texi
 
 @node Usage
 @comment  node-name,  next,  previous,  up

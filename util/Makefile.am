@@ -25,9 +25,9 @@ ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
 tickadj_LDADD=	../libntp/libntp.a $(LDADD_LIBNTP) $(LDADD_NLIST)
 
 EXTRA_DIST=				\
+	invoke-ntp-keygen.menu		\
+	invoke-ntp-keygen.texi		\
 	ntp-keygen-opts.def		\
-	ntp-keygen-opts.menu		\
-	ntp-keygen-opts.texi		\
 	ntp-keygen.1ntp-keygenman	\
 	ntp-keygen.1ntp-keygenmdoc	\
 	ntp-keygen.man.in		\
@@ -38,8 +38,8 @@ BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
 DISTCLEANFILES=	.version version.c config.log $(man_MANS)
 noinst_DATA=				\
-	$(srcdir)/ntp-keygen-opts.menu	\
-	$(srcdir)/ntp-keygen-opts.texi	\
+	$(srcdir)/invoke-ntp-keygen.menu	\
+	$(srcdir)/invoke-ntp-keygen.texi	\
 	$(srcdir)/ntp-keygen.man.in	\
 	$(srcdir)/ntp-keygen.mdoc.in	\
 	$(man_MANS)			\
@@ -92,11 +92,11 @@ ntp-keygen.$(NTP_KEYGEN_MS): $(srcdir)/ntp-keygen.$(MANTAGFMT).in $(top_builddir
 
 ###
 
-$(srcdir)/ntp-keygen-opts.menu: $(srcdir)/ntp-keygen-opts.texi
+$(srcdir)/invoke-ntp-keygen.menu: $(srcdir)/invoke-ntp-keygen.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
-$(srcdir)/ntp-keygen-opts.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntp-keygen-opts.def
+$(srcdir)/invoke-ntp-keygen.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp-keygen-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
 

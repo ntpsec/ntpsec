@@ -2,7 +2,7 @@
 /**
  * \file pgusage.c
  *
- * Time-stamp:      "2012-01-29 16:09:14 bkorb"
+ * Time-stamp:      "2012-02-28 19:49:32 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -43,7 +43,7 @@
  *  This is disabled on platforms without a working fork() function.
 =*/
 void
-optionPagedUsage(tOptions* pOptions, tOptDesc* pOD)
+optionPagedUsage(tOptions * pOptions, tOptDesc * pOD)
 {
 #if ! defined(HAVE_WORKING_FORK)
     if ((pOD->fOptState & OPTST_RESET) != 0)
@@ -66,11 +66,7 @@ optionPagedUsage(tOptions* pOptions, tOptDesc* pOD)
             return;
 
         my_pid  = getpid();
-#ifdef HAVE_SNPRINTF
         snprintf(zPageUsage, sizeof(zPageUsage), TMP_USAGE_FMT, (tAoUL)my_pid);
-#else
-        sprintf(zPageUsage, TMP_USAGE_FMT, (tAoUL)my_pid);
-#endif
         unlink(zPageUsage);
 
         /*
@@ -110,11 +106,8 @@ optionPagedUsage(tOptions* pOptions, tOptDesc* pOD)
         /*
          *  Page the file and remove it when done.
          */
-#ifdef HAVE_SNPRINTF
-        snprintf(zPageUsage, sizeof(zPageUsage), PAGE_USAGE_FMT, pzPager, (tAoUL)my_pid);
-#else
-        sprintf(zPageUsage, PAGE_USAGE_FMT, pzPager, (tAoUL)my_pid);
-#endif
+        snprintf(zPageUsage, sizeof(zPageUsage), PAGE_USAGE_FMT, pzPager,
+                 (tAoUL)my_pid);
         fclose(stderr);
         dup2(STDOUT_FILENO, STDERR_FILENO);
 

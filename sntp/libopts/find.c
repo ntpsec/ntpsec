@@ -99,7 +99,7 @@ opt_ambiguities(tOptions * opts, char const * name, int nm_len)
  */
 static int
 opt_match_ct(tOptions * opts, char const * name, int nm_len,
-             int * ixp, ag_bool * disable)
+             int * ixp, bool * disable)
 {
     int   matchCt  = 0;
     int   idx      = 0;
@@ -136,7 +136,7 @@ opt_match_ct(tOptions * opts, char const * name, int nm_len,
         else if (  (pOD->pz_DisableName != NULL)
                 && (strneqvcmp(name, pOD->pz_DisableName, nm_len) == 0)
                 )  {
-            *disable = AG_TRUE;
+            *disable = true;
 
             /*
              *  IF we have a complete match
@@ -173,7 +173,7 @@ opt_match_ct(tOptions * opts, char const * name, int nm_len,
  * @param st        state about current option
  */
 static tSuccess
-opt_set(tOptions * opts, char * arg, int idx, ag_bool disable, tOptState * st)
+opt_set(tOptions * opts, char * arg, int idx, bool disable, tOptState * st)
 {
     tOptDesc * pOD = opts->pOptDesc + idx;
 
@@ -335,7 +335,7 @@ opt_find_long(tOptions * pOpts, char const * opt_name, tOptState * pOptState)
     int     nm_len = parse_opt(&opt_name, &opt_arg, name_buf, sizeof(name_buf));
 
     int     matchIdx = 0;
-    ag_bool disable  = AG_FALSE;
+    bool disable  = false;
     int     match_ct =
         opt_match_ct(pOpts, opt_name, nm_len, &matchIdx, &disable);
 

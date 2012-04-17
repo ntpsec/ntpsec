@@ -1,6 +1,6 @@
 /*
  *  This file defines the string_tokenize interface
- * Time-stamp:      "2012-01-29 19:02:51 bkorb"
+ * Time-stamp:      "2012-03-04 13:23:50 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
@@ -128,7 +128,7 @@ alloc_token_list(char const * str)
      *  Trim leading white space.  Use "ENOENT" and a NULL return to indicate
      *  an empty string was passed.
      */
-    while (IS_WHITESPACE_CHAR(*str))  str++;
+    str = SPN_WHITESPACE_CHARS(str);
     if (*str == NUL)  goto enoent_res;
 
     /*
@@ -137,17 +137,15 @@ alloc_token_list(char const * str)
      *  high and we'll squander the space for a few extra pointers.
      */
     {
-        cc_t* pz = (cc_t*)str;
+        char const * pz = str;
 
         do {
             max_token_ct++;
-            while (! IS_WHITESPACE_CHAR(*++pz))
-                if (*pz == NUL) goto found_nul;
-            while (IS_WHITESPACE_CHAR(*pz))  pz++;
+            pz = BRK_WHITESPACE_CHARS(pz+1);
+            pz = SPN_WHITESPACE_CHARS(pz);
         } while (*pz != NUL);
 
-    found_nul:
-        res = malloc(sizeof(*res) + (pz - (cc_t*)str)
+        res = malloc(sizeof(*res) + (pz - str)
                      + (max_token_ct * sizeof(ch_t*)));
     }
 
@@ -249,7 +247,7 @@ ao_string_tokenize(char const* str)
             int ch = (ch_t)*str;
             if (IS_WHITESPACE_CHAR(ch)) {
             found_white_space:
-                while (IS_WHITESPACE_CHAR(*++str))  ;
+                str = SPN_WHITESPACE_CHARS(str+1);
                 break;
             }
 

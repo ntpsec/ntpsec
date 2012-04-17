@@ -23,9 +23,9 @@ AM_CPPFLAGS += $(CPPFLAGS_NTP)
 AM_LDFLAGS = $(LDFLAGS_NTP)
 
 EXTRA_DIST=			\
+	invoke-ntpsnmpd.menu	\
+	invoke-ntpsnmpd.texi	\
 	ntpsnmpd-opts.def	\
-	ntpsnmpd-opts.menu	\
-	ntpsnmpd-opts.texi	\
 	ntpsnmpd.1ntpsnmpdman	\
 	ntpsnmpd.1ntpsnmpdmdoc	\
 	ntpsnmpd.man.in		\
@@ -37,8 +37,8 @@ BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h
 CLEANFILES=
 DISTCLEANFILES=	config.log $(man_MANS)
 noinst_DATA=				\
-	$(srcdir)/ntpsnmpd-opts.menu	\
-	$(srcdir)/ntpsnmpd-opts.texi	\
+	$(srcdir)/invoke-ntpsnmpd.menu	\
+	$(srcdir)/invoke-ntpsnmpd.texi	\
 	$(srcdir)/ntpsnmpd.man.in	\
 	$(srcdir)/ntpsnmpd.mdoc.in	\
 	$(NULL)
@@ -90,11 +90,11 @@ ntpsnmpd.$(NTPSNMPD_MS): $(srcdir)/ntpsnmpd.$(MANTAGFMT).in $(top_builddir)/conf
 
 ###
 
-$(srcdir)/ntpsnmpd-opts.menu: $(srcdir)/ntpsnmpd-opts.texi
+$(srcdir)/invoke-ntpsnmpd.menu: $(srcdir)/invoke-ntpsnmpd.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
-$(srcdir)/ntpsnmpd-opts.texi: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpsnmpd-opts.def
+$(srcdir)/invoke-ntpsnmpd.texi: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpsnmpd-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
 include $(top_srcdir)/bincheck.mf

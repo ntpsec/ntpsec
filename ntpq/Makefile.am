@@ -25,9 +25,9 @@ CLEANFILES=
 DISTCLEANFILES=	.version version.c config.log $(man_MANS)
 ETAGS_ARGS=	Makefile.am
 EXTRA_DIST=			\
+	invoke-ntpq.menu	\
+	invoke-ntpq.texi	\
 	ntpq-opts.def		\
-	ntpq-opts.menu		\
-	ntpq-opts.texi		\
 	ntpq.1ntpqman		\
 	ntpq.1ntpqmdoc		\
 	ntpq.man.in		\
@@ -36,8 +36,8 @@ EXTRA_DIST=			\
 
 BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h
 noinst_DATA=				\
-	$(srcdir)/ntpq-opts.menu	\
-	$(srcdir)/ntpq-opts.texi	\
+	$(srcdir)/invoke-ntpq.menu	\
+	$(srcdir)/invoke-ntpq.texi	\
 	$(srcdir)/ntpq.man.in		\
 	$(srcdir)/ntpq.mdoc.in		\
 	$(NULL)
@@ -92,11 +92,11 @@ ntpq.$(NTPQ_MS): $(srcdir)/ntpq.$(MANTAGFMT).in $(top_builddir)/config.status
 
 ###
 
-$(srcdir)/ntpq-opts.menu: $(srcdir)/ntpq-opts.texi
+$(srcdir)/invoke-ntpq.menu: $(srcdir)/invoke-ntpq.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
-$(srcdir)/ntpq-opts.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpq-opts.def
+$(srcdir)/invoke-ntpq.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpq-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
 $(PROGRAMS): version.o

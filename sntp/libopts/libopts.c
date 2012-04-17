@@ -1,6 +1,5 @@
-#include "autoopts/project.h"
 #define  AUTOOPTS_INTERNAL 1
-#include "compat/compat.h"
+#include "autoopts/project.h"
 #define  LOCAL static
 #include "ao-strs.h"
 #include "autoopts/options.h"

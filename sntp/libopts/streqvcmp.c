@@ -2,7 +2,7 @@
 /**
  * \file streqvcmp.c
  *
- * Time-stamp:      "2012-01-29 19:03:24 bkorb"
+ * Time-stamp:      "2012-03-31 13:17:39 bkorb"
  *
  *  String Equivalence Comparison
  *
@@ -192,8 +192,8 @@ streqvmap(char From, char To, int ct)
     }
 
     else {
-        int  chTo   = (int)To   & 0xFF;
-        int  chFrom = (int)From & 0xFF;
+        unsigned int chTo   = (int)To   & 0xFF;
+        unsigned int chFrom = (int)From & 0xFF;
 
         do  {
             charmap[chFrom] = (unsigned char)chTo;

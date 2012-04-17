@@ -29,9 +29,11 @@ CLEANFILES=	check-layout layout.here nl.c ntpdc-layout
 noinst_HEADERS=	ntpdc.h
 ETAGS_ARGS= 	Makefile.am
 EXTRA_DIST=			\
+	invoke-ntpdc.menu	\
+	invoke-ntpdc.texi	\
+	layout.std		\
 	nl_in.c			\
 	nl.pl			\
-	layout.std		\
 	ntpdc-opts.def		\
 	ntpdc.1ntpdcman		\
 	ntpdc.1ntpdcmdoc	\
@@ -39,8 +41,6 @@ EXTRA_DIST=			\
 	ntpdc.mdoc.in		\
 	ntpdc.html		\
 	ntpdc.texi		\
-	ntpdc-opts.texi		\
-	ntpdc-opts.menu		\
 	$(NULL)
 
 man1_MANS=
@@ -52,11 +52,11 @@ man_MANS=	ntpdc.$(NTPDC_MS)
 ##ntpdc_TEXINFOS=	ntpdc-opts.texi
 
 noinst_DATA=				\
+	$(srcdir)/invoke-ntpdc.menu	\
+	$(srcdir)/invoke-ntpdc.texi	\
 	$(srcdir)/ntpdc.html		\
 	$(srcdir)/ntpdc.man.in		\
 	$(srcdir)/ntpdc.mdoc.in		\
-	$(srcdir)/ntpdc-opts.texi	\
-	$(srcdir)/ntpdc-opts.menu	\
 	$(NULL)
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
@@ -103,14 +103,14 @@ ntpdc.$(NTPDC_MS): $(srcdir)/ntpdc.$(MANTAGFMT).in $(top_builddir)/config.status
 
 ###
 
-$(srcdir)/ntpdc-opts.menu: $(srcdir)/ntpdc-opts.texi
+$(srcdir)/invoke-ntpdc.menu: $(srcdir)/invoke-ntpdc.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 	
-$(srcdir)/ntpdc-opts.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
-	$(run_ag) -Taginfo.tpl -DLEVEL=section ntpdc-opts.def
+$(srcdir)/invoke-ntpdc.texi: $(srcdir)/ntpdc-opts.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpdc-opts.def
 	$(top_srcdir)/scripts/check--help $@
 
-$(srcdir)/ntpdc.html: $(srcdir)/ntpdc-opts.menu $(srcdir)/ntpdc-opts.texi $(srcdir)/ntpdc.texi $(top_srcdir)/sntp/include/version.texi
+$(srcdir)/ntpdc.html: $(srcdir)/invoke-ntpdc.menu $(srcdir)/invoke-ntpdc.texi $(srcdir)/ntpdc.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -I ../sntp -o ntpdc.html ntpdc.texi || true )
 
 ntpdc_SOURCES = ntpdc.c ntpdc_ops.c ntpdc-opts.c ntpdc-opts.h
