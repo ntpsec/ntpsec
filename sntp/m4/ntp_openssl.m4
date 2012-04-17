@@ -27,6 +27,7 @@ dnl
 dnl ####################################################################
 AC_DEFUN([NTP_OPENSSL], [
 AC_REQUIRE([NTP_PKG_CONFIG])dnl
+AC_REQUIRE([NTP_VER_SUFFIX])dnl
 
 AC_ARG_WITH(
     [crypto],
@@ -71,6 +72,7 @@ case "$with_crypto:${PKG_CONFIG:+notempty}:${with_openssl_libdir-notgiven}:${wit
 	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-L openssl`"
 	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-l openssl`"
 	LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-other openssl`"
+	VER_SUFFIX=o
 	ntp_openssl=yes
 	ntp_openssl_from_pkg_config=yes
     fi
@@ -172,6 +174,7 @@ case "$with_crypto:$ntp_openssl" in
 	ntp_openssl=no
     else
 	ntp_openssl=yes
+	VER_SUFFIX=o
     fi
     case "$ntp_openssl" in
      yes)
@@ -204,6 +207,11 @@ AC_MSG_RESULT([$ntp_openssl])
 case "$ntp_openssl" in
  yes)
     AC_DEFINE([OPENSSL], [], [Use OpenSSL?])
+    case "$VER_SUFFIX" in
+     *o*) ;;
+     *) AC_MSG_ERROR([OPENSSL set but no 'o' in VER_SUFFIX!]) ;;
+    esac
+    ;;
 esac
 
 NTPO_SAVED_CPPFLAGS="$CPPFLAGS"

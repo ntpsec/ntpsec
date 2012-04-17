@@ -804,7 +804,7 @@ case "$host" in
  *) AC_CHECK_FUNCS([mlockall])
     ;;
 esac
-AC_CHECK_FUNCS([nice nlist plock pututline pututxline readlink recvmsg rtprio])
+AC_CHECK_FUNCS([nice plock pututline pututxline readlink recvmsg rtprio])
 case "$host" in
  *-*-aix[[456]]*)
     # Just a stub in AIX 4.  Idiots.

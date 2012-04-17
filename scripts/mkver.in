@@ -10,11 +10,9 @@ case "$CSET" in
  *) ConfStr="$ConfStr@$CSET" ;;
 esac
 
-case "@LCRYPTO@" in
+case "@VER_SUFFIX@" in
  '') ;;
- -lcrypto)
-    ConfStr="${ConfStr}-o" ;;
- *) ConfStr="${ConfStr}-?" ;;
+ *) ConfStr="${ConfStr}-@VER_SUFFIX@" ;;
 esac
 
 ConfStr="$ConfStr `LC_TIME=C TZ=UTC date`"
