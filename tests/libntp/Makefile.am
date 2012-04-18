@@ -39,7 +39,6 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		hextoint.cpp		\
 		hextolfp.cpp		\
 		humandate.cpp		\
-		inttoa.cpp		\
 		lfptostr.cpp		\
 		modetoa.cpp		\
 		msyslog.cpp		\
@@ -61,7 +60,6 @@ tests_SOURCES = $(top_srcdir)/sntp/tests_main.cpp	\
 		tstotv.cpp		\
 		tvtots.cpp		\
 		uglydate.cpp		\
-		uinttoa.cpp		\
 		ymd2yd.cpp		\
 		$(NULL)
 

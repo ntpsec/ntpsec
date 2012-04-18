@@ -1126,7 +1126,6 @@ printassoc(
 	const char *auth;
 	const char *condition = "";
 	const char *last_event;
-	const char *cnt;
 	char buf[128];
 
 	if (numassoc == 0) {
@@ -1281,12 +1280,11 @@ printassoc(
 			last_event = "";
 			break;
 		}
-		cnt = uinttoa(event_count);
 		snprintf(buf, sizeof(buf),
-			 "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2s",
+			 "%3d %5u  %04x   %3.3s  %4s  %4.4s %9.9s %11s %2lu",
 			 i + 1, assoc_cache[i].assid,
 			 assoc_cache[i].status, conf, reach, auth,
-			 condition, last_event, cnt);
+			 condition, last_event, event_count);
 		bp = buf + strlen(buf);
 		while (bp > buf && ' ' == bp[-1])
 			--bp;

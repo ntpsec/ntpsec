@@ -324,10 +324,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\libntp\inttoa.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\libntp\iosignal.c"
 				>
 			</File>
@@ -545,10 +541,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\libntp\uglydate.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\..\libntp\uinttoa.c"
 				>
 			</File>
 			<File
@@ -865,11 +857,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
+				RelativePath="..\..\include\sys\time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\sys\time.h"
+				RelativePath="..\..\..\..\lib\isc\win32\include\isc\time.h"
 				>
 			</File>
 			<File
