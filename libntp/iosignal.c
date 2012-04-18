@@ -311,6 +311,7 @@ sigio_handler(
 void
 set_signal(void)
 {
+	using_sigio = TRUE;
 #  ifdef USE_SIGIO
 	(void) signal_no_reset(SIGIO, sigio_handler);
 # endif
@@ -481,6 +482,7 @@ block_sigio(void)
 void
 set_signal(void)
 {
+	using_sigio = TRUE;
 	(void) signal_no_reset(SIGIO, sigio_handler);
 }
 
