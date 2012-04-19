@@ -177,11 +177,11 @@ auth_moremem(
 #ifdef DEBUG
 	base = sk;
 #endif
+	authnumfreekeys += i;
 
 	for (; i > 0; i--, sk++) {
 		LINK_SLIST(authfreekeys, sk, llink.f);
 	}
-	authnumfreekeys += i;
 
 #ifdef DEBUG
 	allocrec = (void *)sk;
@@ -272,7 +272,7 @@ allocsymkey(
 {
 	symkey *	sk;
 
-	if (0 == authnumfreekeys)
+	if (authnumfreekeys < 1)
 		auth_moremem(-1);
 	UNLINK_HEAD_SLIST(sk, authfreekeys, llink.f);
 	DEBUG_ENSURE(sk != NULL);

@@ -2,6 +2,7 @@
   reentrant when SIGIO is used.  Sanity checks relative to the prior
   get_systime() are disabled in ntpd on systems with signaled I/O, but
   active in sntp and ntpdate.
+* Correct authnumfreekeys accounting broken in 4.2.7p262.
 (4.2.7p272) 2012/04/14 Released by Harlan Stenn <stenn@ntp.org>
 * LCRYPTO is gone - replace with VER_SUFFIX.
 * Change the link order for ntpsntpd.
