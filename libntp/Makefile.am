@@ -117,12 +117,5 @@ AM_CPPFLAGS += $(CPPFLAGS_NTP)
 
 EXTRA_DIST = README
 
-# systime_s.c includes systime.c, and after a deps-ver bump triggers
-# regeneration of dummy .deps/*.Po files, make will be unaware of the
-# need to rebuild systime_s.o for a newer systime.c without an explicit
-# dependency.
-
-systime_s.$(OBJEXT): $(srcdir)/systime.c
-
 include $(top_srcdir)/depsver.mf
 include $(top_srcdir)/includes.mf
