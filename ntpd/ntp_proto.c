@@ -394,18 +394,15 @@ receive(
 	 * reveals a clogging attack.
 	 */
 	sys_received++;
-	if (SRCPORT(&rbufp->recv_srcadr) < NTP_PORT) {
+	if (0 == SRCPORT(&rbufp->recv_srcadr)) {
 		sys_badlength++;
 		return;				/* bogus port */
 	}
 	restrict_mask = restrictions(&rbufp->recv_srcadr);
-#ifdef DEBUG
-	if (debug > 1)
-		printf("receive: at %ld %s<-%s flags %x restrict %03x\n",
+	DPRINTF(2, ("receive: at %ld %s<-%s flags %x restrict %03x\n",
 		    current_time, stoa(&rbufp->dstadr->sin),
 		    stoa(&rbufp->recv_srcadr),
-		    rbufp->dstadr->flags, restrict_mask);
-#endif
+		    rbufp->dstadr->flags, restrict_mask));
 	pkt = &rbufp->recv_pkt;
 	hisversion = PKT_VERSION(pkt->li_vn_mode);
 	hisleap = PKT_LEAP(pkt->li_vn_mode);
