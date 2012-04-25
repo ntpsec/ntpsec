@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  April 19, 2012 at 04:07:31 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  April 25, 2012 at 04:40:16 AM by AutoGen 5.14
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -71,7 +71,7 @@ extern tUsageProc optionUsage;
  *  ntpdc option static const strings
  */
 static char const ntpdc_opt_strs[1860] =
-/*     0 */ "ntpdc 4.2.7p273\n"
+/*     0 */ "ntpdc 4.2.7p274\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -129,14 +129,14 @@ static char const ntpdc_opt_strs[1860] =
 /*  1638 */ "no-load-opts\0"
 /*  1651 */ "no\0"
 /*  1654 */ "NTPDC\0"
-/*  1660 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p273\n"
+/*  1660 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p274\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1792 */ ".ntprc\0"
 /*  1799 */ "$HOME\0"
 /*  1805 */ ".\0"
 /*  1807 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1841 */ "\n\n\0"
-/*  1844 */ "ntpdc 4.2.7p273";
+/*  1844 */ "ntpdc 4.2.7p274";
 
 /*
  *  ipv4 option description with
