@@ -1,3 +1,4 @@
+* [Bug 1744] Remove obsolete ntpdate/ntptime* items.
 (4.2.7p274) 2012/04/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2174] ntpd rejects source UDP ports less than 123 as bogus.
 (4.2.7p273) 2012/04/19 Released by Harlan Stenn <stenn@ntp.org>
