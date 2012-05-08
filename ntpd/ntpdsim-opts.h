@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *  
- *  It has been AutoGen-ed  February 22, 2011 at 12:29:00 AM by AutoGen 5.11.6
+ *  It has been AutoGen-ed  May  1, 2012 at 09:18:07 AM by AutoGen 5.16pre31
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 34:0:9 templates.
+ * Generated from AutoOpts 36:4:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -15,11 +15,25 @@
  *  users discretion, the BSD license.  See the AutoOpts and/or libopts sources
  *  for details.
  *
- * This source file is copyrighted and licensed under the following terms:
+ * The ntpdsim program is copyrighted and licensed
+ * under the following terms:
  *
- * ntpdsim copyright (c) 1970-2011 David L. Mills and/or others - all rights reserved
+ *  Copyright (C) 1970-2012 The University of Delaware, all rights reserved.
+ *  This is free software. It is licensed for use, modification and
+ *  redistribution under the terms of the NTP License, copies of which
+ *  can be seen at:
+ *    <http://ntp.org/license>
+ *    <http://opensource.org/licenses/ntp-license.php>
  *
- * see html/copyright.html
+ *  Permission to use, copy, modify, and distribute this software and its
+ *  documentation for any purpose with or without fee is hereby granted,
+ *  provided that the above copyright notice appears in all copies and that
+ *  both the copyright notice and this permission notice appear in
+ *  supporting documentation, and that the name The University of Delaware not be used in
+ *  advertising or publicity pertaining to distribution of the software
+ *  without specific, written prior permission. The University of Delaware makes no
+ *  representations about the suitability this software for any purpose. It
+ *  is provided "as is" without express or implied warranty.
  */
 /*
  *  This file contains the programmatic interface to the Automated
@@ -39,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 139264
+#define AO_TEMPLATE_VERSION 147460
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -79,19 +93,20 @@ typedef enum {
     INDEX_OPT_UPDATEINTERVAL    = 26,
     INDEX_OPT_VAR               = 27,
     INDEX_OPT_DVAR              = 28,
-    INDEX_OPT_SLEW              = 29,
-    INDEX_OPT_USEPCC            = 30,
-    INDEX_OPT_PCCFREQ           = 31,
-    INDEX_OPT_VERSION           = 32,
-    INDEX_OPT_HELP              = 33,
-    INDEX_OPT_MORE_HELP         = 34,
-    INDEX_OPT_SAVE_OPTS         = 35,
-    INDEX_OPT_LOAD_OPTS         = 36
+    INDEX_OPT_WAIT_SYNC         = 29,
+    INDEX_OPT_SLEW              = 30,
+    INDEX_OPT_USEPCC            = 31,
+    INDEX_OPT_PCCFREQ           = 32,
+    INDEX_OPT_VERSION           = 33,
+    INDEX_OPT_HELP              = 34,
+    INDEX_OPT_MORE_HELP         = 35,
+    INDEX_OPT_SAVE_OPTS         = 36,
+    INDEX_OPT_LOAD_OPTS         = 37
 } teOptIndex;
 
-#define OPTION_CT    37
-#define NTPDSIM_VERSION       "4.2.6p3"
-#define NTPDSIM_FULL_VERSION  "ntpdsim - NTP daemon simulation program - Ver. 4.2.6p3"
+#define OPTION_CT    38
+#define NTPDSIM_VERSION       "4.2.7p272"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p272"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -120,9 +135,10 @@ typedef enum {
  */
 typedef enum {
     NTPDSIM_EXIT_SUCCESS = 0,
-    NTPDSIM_EXIT_FAILURE = 1
+    NTPDSIM_EXIT_FAILURE = 1,
+    NTPDSIM_EXIT_NO_CONFIG_INPUT = 66,
+    NTPDSIM_EXIT_LIBOPTS_FAILURE = 70
 } ntpdsim_exit_code_t;
-
 /*
  *  Make sure there are no #define name conflicts with the option names
  */
@@ -243,6 +259,10 @@ typedef enum {
 #  warning undefining DVAR due to option name conflict
 #  undef   DVAR
 # endif
+# ifdef    WAIT_SYNC
+#  warning undefining WAIT_SYNC due to option name conflict
+#  undef   WAIT_SYNC
+# endif
 # ifdef    SLEW
 #  warning undefining SLEW due to option name conflict
 #  undef   SLEW
@@ -285,6 +305,7 @@ typedef enum {
 # undef UPDATEINTERVAL
 # undef VAR
 # undef DVAR
+# undef WAIT_SYNC
 # undef SLEW
 # undef USEPCC
 # undef PCCFREQ
@@ -327,9 +348,13 @@ typedef enum {
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
 #define VALUE_OPT_VAR            27
 #define VALUE_OPT_DVAR           28
+#define VALUE_OPT_WAIT_SYNC      'w'
+#ifdef HAVE_WORKING_FORK
+#define OPT_VALUE_WAIT_SYNC      (DESC(WAIT_SYNC).optArg.argInt)
+#endif /* HAVE_WORKING_FORK */
 #define VALUE_OPT_SLEW           'x'
-#define VALUE_OPT_USEPCC         30
-#define VALUE_OPT_PCCFREQ        31
+#define VALUE_OPT_USEPCC         31
+#define VALUE_OPT_PCCFREQ        32
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
@@ -349,25 +374,26 @@ typedef enum {
                 ntpdsimOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdsimOptions.pUsageProc)(&ntpdsimOptions, c)
-/* extracted from opthead.tlib near line 435 */
+/* extracted from opthead.tlib near line 484 */
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 
 /* * * * * *
  *
  *  Declare the ntpdsim option descriptor.
  */
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-extern tOptions   ntpdsimOptions;
+extern tOptions ntpdsimOptions;
 
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
-    static inline char* aoGetsText(char const* pz) {
-        if (pz == NULL) return NULL;
-        return (char*)gettext(pz);
-    }
+static inline char* aoGetsText(char const* pz) {
+    if (pz == NULL) return NULL;
+    return (char*)gettext(pz);
+}
 #   define _(s)  aoGetsText(s)
 # endif /* _() */
 

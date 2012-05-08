@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 # 
-# It has been AutoGen-ed  April 14, 2012 at 12:22:51 AM by AutoGen 5.16pre18
+# It has been AutoGen-ed  April 17, 2012 at 02:13:13 AM by AutoGen 5.16pre23
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -44,7 +44,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p272
+ntpq - standard NTP query program - Ver. 4.2.7p271
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
