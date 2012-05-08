@@ -1,5 +1,15 @@
 * Upgrade to autogen-5.16 and libopts-36.4.11.
 * Upgrade to autogen-5.15.
+(4.2.7p275) 2012/04/28 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1744] Remove obsolete ntpdate/ntptime* items.
+(4.2.7p274) 2012/04/25 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2174] ntpd rejects source UDP ports less than 123 as bogus.
+(4.2.7p273) 2012/04/19 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2141] handle_sigio() calls get_systime(), which must be
+  reentrant when SIGIO is used.  Sanity checks relative to the prior
+  get_systime() are disabled in ntpd on systems with signaled I/O, but
+  active in sntp and ntpdate.
+* Correct authnumfreekeys accounting broken in 4.2.7p262.
 (4.2.7p272) 2012/04/14 Released by Harlan Stenn <stenn@ntp.org>
 * LCRYPTO is gone - replace with VER_SUFFIX.
 * Change the link order for ntpsntpd.

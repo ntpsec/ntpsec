@@ -7,9 +7,7 @@ bin_PROGRAMS = $(NTPDATE_DB)
 libexec_PROGRAMS = $(NTPDATE_DL)
 sbin_PROGRAMS = $(NTPDATE_DS)
 
-EXTRA_PROGRAMS = ntpdate ntptimeset
-
-ntptimeset_SOURCES = ntptimeset.c ntptime_config.c
+EXTRA_PROGRAMS = ntpdate
 
 AM_CFLAGS = $(CFLAGS_NTP)
 

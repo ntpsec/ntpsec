@@ -153,7 +153,6 @@ extern	int	atouint		(const char *, u_long *);
 extern	int	hextoint	(const char *, u_long *);
 extern	char *	humanlogtime	(void);
 extern	char *	humantime	(time_t);
-extern	char *	inttoa		(long);
 extern	char *	mfptoa		(u_int32, u_int32, short);
 extern	char *	mfptoms		(u_int32, u_int32, short);
 extern	const char * modetoa	(int);
@@ -177,7 +176,6 @@ extern	int	octtoint	(const char *, u_long *);
 extern	u_long	ranp2		(int);
 extern	const char *refnumtoa	(sockaddr_u *);
 extern	const char *refid_str	(u_int32, int);
-extern	char *	uinttoa		(u_long);
 
 extern	int	decodenetnum	(const char *, sockaddr_u *);
 

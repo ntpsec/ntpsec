@@ -309,10 +309,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\libntp\inttoa.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\libntp\iosignal.c"
 				>
 			</File>
@@ -526,10 +522,6 @@
 			</File>
 			<File
 				RelativePath="..\..\..\libntp\uglydate.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\libntp\uinttoa.c"
 				>
 			</File>
 			<File

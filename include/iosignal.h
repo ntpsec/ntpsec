@@ -33,6 +33,10 @@
 #  endif	/* SIGIO == SIGPOLL */
 # endif		/* USE_SIGIO && USE_SIGPOLL */
 
+#define	USING_SIGIO()	using_sigio
+
+extern int		using_sigio;
+
 extern void		block_sigio	(void);
 extern void		unblock_sigio	(void);
 extern int		init_clock_sig	(struct refclockio *);
@@ -46,6 +50,7 @@ RETSIGTYPE		sigio_handler	(int);
 #else	/* !HAVE_SIGNALED_IO follows */
 # define BLOCKIO()	do {} while (0)
 # define UNBLOCKIO()	do {} while (0)
+# define USING_SIGIO()	FALSE
 #endif
 
 #endif	/* IOSIGNAL_H */
