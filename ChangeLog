@@ -1,3 +1,4 @@
+* [Bug 2179] Remove sntp/header.h.
 (4.2.7p275) 2012/04/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1744] Remove obsolete ntpdate/ntptime* items.
 (4.2.7p274) 2012/04/25 Released by Harlan Stenn <stenn@ntp.org>
