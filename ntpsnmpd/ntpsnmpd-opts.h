@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *  
- *  It has been AutoGen-ed  April 28, 2012 at 06:37:08 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  May 15, 2012 at 06:31:52 AM by AutoGen 5.14
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -75,8 +75,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    8
-#define NTPSNMPD_VERSION       "4.2.7p275"
-#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p275"
+#define NTPSNMPD_VERSION       "4.2.7p276"
+#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p276"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
