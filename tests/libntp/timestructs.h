@@ -169,8 +169,6 @@ public:
 };
 
 
-} // namespace timeStruct
-
 // since googletest wants to string format items, we declare the
 // necessary operators. Since all adaptors have only public members
 // there is need for friend declarations anywhere.
@@ -181,5 +179,7 @@ extern std::ostream& operator << (std::ostream& os,
 				  const timeStruct::timeval_wrap& val);
 extern std::ostream& operator << (std::ostream& os,
 				  const timeStruct::timespec_wrap& val);
+
+} // namespace timeStruct
 
 #endif // TIMESTRUCTS_H
