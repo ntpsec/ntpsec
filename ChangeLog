@@ -1,3 +1,4 @@
+(4.2.7p277) 2012/05/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2193] Building timestruct tests with Clang 3.1 fails.
 (4.2.7p276) 2012/05/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2179] Remove sntp/header.h.

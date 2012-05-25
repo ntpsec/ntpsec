@@ -1,8 +1,8 @@
-.TH ntpd @NTPD_MS@ "15 May 2012" "4.2.7p276" "User Commands"
+.TH ntpd @NTPD_MS@ "25 May 2012" "4.2.7p277" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  May 15, 2012 at 06:31:28 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  May 25, 2012 at 05:06:27 AM by AutoGen 5.14
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
