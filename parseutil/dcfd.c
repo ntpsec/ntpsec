@@ -1325,43 +1325,6 @@ check_y2k( void )
 	    break;
 	}
 
-	if ( year >= YEAR_PIVOT+1900 )
-	{
-	    /* check year % 100 code we put into dcf_to_unixtime() */
-	    ct.year = year % 100;
-	    Flag = 0;
-
-	    Observed = dcf_to_unixtime( &ct, &Flag );
-
-	    if ( Observed != Expected  ||  Flag )
-	    {   /* time difference */
-		fprintf( stdout, 
-"%04d: dcf_to_unixtime(%d,%d) FAILURE: was=%lu s/b=%lu  (%ld)\n",
-		   year, (int)ct.year, (int)Flag, 
-		   (unsigned long)Observed, (unsigned long)Expected,
-		   ((long)Observed - (long)Expected) );
-		Error(year);
-		break;
-	    }
-
-	    /* check year - 1900 code we put into dcf_to_unixtime() */
-	    ct.year = year - 1900;
-	    Flag = 0;
-
-	    Observed = dcf_to_unixtime( &ct, &Flag );
-
-	    if ( Observed != Expected  ||  Flag ) {   /* time difference */
-		    fprintf( stdout, 
-			     "%04d: dcf_to_unixtime(%d,%d) FAILURE: was=%lu s/b=%lu  (%ld)\n",
-			     year, (int)ct.year, (int)Flag, 
-			     (unsigned long)Observed, (unsigned long)Expected,
-			     ((long)Observed - (long)Expected) );
-		    Error(year);
-		break;
-	    }
-
-
-	}
     }
 
     return ( Fatals );
