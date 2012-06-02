@@ -169,7 +169,6 @@ hopfserial_start (
 	 */
 	pp->clockdesc = DESCRIPTION;
 	peer->precision = PRECISION;
-	peer->burst = NSTAGE;
 	memcpy((char *)&pp->refid, REFID, 4);
 
 	up->leap_status = 0;

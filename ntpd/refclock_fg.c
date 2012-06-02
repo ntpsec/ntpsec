@@ -195,15 +195,12 @@ fg_poll(
 	else
 		pp->polls++;
 
-	if (peer->burst > 0)
-		return;
 	/*
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
 	*/
-	peer->burst = NSTAGE;
 
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	

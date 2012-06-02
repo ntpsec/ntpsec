@@ -191,7 +191,6 @@ as2201_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	up->lastptr = up->stats;
@@ -377,14 +376,11 @@ as2201_poll(
 		if (!(pp->sloppyclockflag & CLK_FLAG2))
 			get_systime(&pp->lastrec);
 	}
-	if (peer->burst > 0)
-                return;
         if (pp->coderecv == pp->codeproc) {
                 refclock_report(peer, CEVNT_TIMEOUT);
                 return;
         }
         refclock_receive(peer);
-	peer->burst = NSTAGE;
 }
 
 #else

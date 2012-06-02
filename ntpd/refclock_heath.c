@@ -241,7 +241,6 @@ heath_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy(&pp->refid, REFID, 4);
 	return (1);
@@ -431,8 +430,6 @@ heath_poll(
 	if (write(pp->io.fd, "T", 1) != 1)
 		refclock_report(peer, CEVNT_FAULT);
 	ioctl(pp->io.fd, TIOCMBIS, (char *)&bits);
-	if (peer->burst > 0)
-		return;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
@@ -445,7 +442,6 @@ heath_poll(
 	    printf("heath: timecode %d %s\n", pp->lencode,
 		   pp->a_lastcode);
 #endif
-	peer->burst = MAXSTAGE;
 	pp->polls++;
 }
 
