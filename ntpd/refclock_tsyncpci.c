@@ -338,7 +338,7 @@ static int tsync_start(int unit, struct peer *peer)
     pp                = peer->procptr;
     pp->clockdesc     = DESCRIPTION;
     pp->io.clock_recv = noentry;
-    pp->io.srcclock   = (caddr_t)peer;
+    pp->io.srcclock   = peer;
     pp->io.datalen    = 0;
     peer->precision   = PRECISION;
 
