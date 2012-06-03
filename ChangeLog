@@ -1,3 +1,4 @@
+(4.2.7p278) 2012/06/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2178] refclock_tsyncpci.c reach register fails to shift.
 * [Bug 2191] dcfd -Y y2kcheck on CentOS 6.2 x86_64 breaks make check.
 (4.2.7p277) 2012/05/25 Released by Harlan Stenn <stenn@ntp.org>
