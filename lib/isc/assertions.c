@@ -40,8 +40,7 @@
  * Forward.
  */
 static void
-default_callback(const char *, int, isc_assertiontype_t, const char *)
-	__attribute__ ((__noreturn__));
+default_callback(const char *, int, isc_assertiontype_t, const char *);
 
 static isc_assertioncallback_t isc_assertion_failed_cb = default_callback;
 

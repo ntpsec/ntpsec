@@ -27,25 +27,6 @@
 #include <isc/lang.h>
 #include <isc/platform.h>
 
-/*
- * #define away gcc __attribute__ if unavailable.
- */
-#ifndef __attribute__
-  /* This feature is available in gcc versions 2.5 and later.  */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || (defined(__STRICT_ANSI__))
-#  define __attribute__(Spec) /* empty */
-# endif
-  /*
-   * The __-protected variants of `format' and `printf' attributes are
-   * accepted by gcc versions 2.6.4 (effectively 2.7) and later.
-   */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
-#  define __format__	format
-#  define __printf__	printf
-#  define __noreturn__	noreturn
-# endif
-#endif
-
 ISC_LANG_BEGINDECLS
 
 /*% isc assertion type */
@@ -57,8 +38,7 @@ typedef enum {
 } isc_assertiontype_t;
 
 typedef void (*isc_assertioncallback_t)(const char *, int, isc_assertiontype_t,
-					const char *)
-					__attribute__ ((__noreturn__));
+					const char *);
 
 /* coverity[+kill] */
 ISC_PLATFORM_NORETURN_PRE

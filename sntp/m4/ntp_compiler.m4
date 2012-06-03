@@ -34,6 +34,35 @@ case "$ntp_cv_cpp_warning" in
 	[Should we avoid @%:@warning on option name collisions?])
 esac
 
+AC_CACHE_CHECK(
+    [if $CC supports __attribute__((...))],
+    [ntp_cv_cc_attribute],
+    [AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+	    [[]],
+	    [[void foo(void) __attribute__((__noreturn__));]]
+	    )],
+	[ntp_cv_cc_attribute=yes],
+	[ntp_cv_cc_attribute=no]
+    )]
+)
+case "$ntp_cv_cc_attribute" in
+ yes)
+    AC_DEFINE([HAVE___ATTRIBUTE__], [],
+	[defined if C compiler supports __attribute__((...))])
+esac
+AH_VERBATIM(
+    [HAVE___ATTRIBUTE___VERBATIM],
+    [
+	/* define away __attribute__() if unsupported */
+	#ifndef HAVE___ATTRIBUTE__
+	# define __attribute__(x) /* empty */
+	#endif
+	#define ISC_PLATFORM_NORETURN_PRE
+	#define ISC_PLATFORM_NORETURN_POST __attribute__((__noreturn__))
+    ]
+)
+
 case "$GCC" in
  yes)
     SAVED_CFLAGS="$CFLAGS"

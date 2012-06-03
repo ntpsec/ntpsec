@@ -7,6 +7,8 @@ EXTRA_LIBRARIES = libntpsim.a
 libisc_SRCS =								\
 	$(srcdir)/../lib/isc/assertions.c				\
 	$(srcdir)/../lib/isc/buffer.c					\
+	$(srcdir)/../lib/isc/backtrace-emptytbl.c			\
+	$(srcdir)/../lib/isc/backtrace.c				\
 	$(srcdir)/../lib/isc/$(LIBISC_PTHREADS_NOTHREADS)/condition.c	\
 	$(srcdir)/../lib/isc/unix/dir.c					\
 	$(srcdir)/../lib/isc/error.c					\

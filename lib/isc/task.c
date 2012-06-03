@@ -1359,8 +1359,6 @@ isc__taskmgr_create(isc_mem_t *mctx, unsigned int workers,
 	if (result != ISC_R_SUCCESS)
 		goto cleanup_mgr;
 	LOCK(&manager->lock);
-	manager->magic = TASK_MANAGER_MAGIC;
-	manager->mctx = NULL;
 
 #ifdef USE_WORKER_THREADS
 	manager->workers = 0;
