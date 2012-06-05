@@ -45,14 +45,6 @@ void	addto_syslog	(int, const char *);
 #ifndef VSNPRINTF_PERCENT_M
 void	format_errmsg	(char *, size_t, const char *, int);
 
-/*
- * Work around misdetection by AC_FUNC_STRERROR_R on Debian Linux.
- */
-# if defined(STRERROR_R_CHAR_P) && strerror_r == __xpg_strerror_r
-#  undef STRERROR_R_CHAR_P
-# endif
-
-
 /* format_errmsg() is under #ifndef VSNPRINTF_PERCENT_M above */
 void
 format_errmsg(
@@ -115,15 +107,7 @@ errno_to_str(
 
 	buf[0] = '\0';
 #  ifdef STRERROR_R_CHAR_P
-	/*
-	 * For older GNU strerror_r, the return value either points to
-	 * buf, or to static storage.  We want the result always in buf.
-	 * On Debian Linux 6.03 with gcc 4.4, strerror_r() returns an
-	 * int despite configure detecting STRERROR_R_CHAR_P.  We are
-	 * careful with the result, but need to cast to (char *) to
-	 * silence gcc on Debian 6.03.
-	 */
-	pstatic = (char *)strerror_r(err, buf, bufsiz);
+	pstatic = strerror_r(err, buf, bufsiz);
 #  else
 	pstatic = strerror(err);
 #  endif

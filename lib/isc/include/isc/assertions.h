@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2008  Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) 2004-2009  Internet Systems Consortium, Inc. ("ISC")
  * Copyright (C) 1997-2001  Internet Software Consortium.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
@@ -16,7 +16,7 @@
  */
 
 /*
- * $Id: assertions.h,v 1.26 2008/10/15 23:47:31 tbox Exp $
+ * $Id: assertions.h,v 1.28 2009/09/29 23:48:04 tbox Exp $
  */
 /*! \file isc/assertions.h
  */
@@ -26,25 +26,6 @@
 
 #include <isc/lang.h>
 #include <isc/platform.h>
-
-/*
- * #define away gcc __attribute__ if unavailable.
- */
-#ifndef __attribute__
-  /* This feature is available in gcc versions 2.5 and later.  */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || (defined(__STRICT_ANSI__))
-#  define __attribute__(Spec) /* empty */
-# endif
-  /*
-   * The __-protected variants of `format' and `printf' attributes are
-   * accepted by gcc versions 2.6.4 (effectively 2.7) and later.
-   */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
-#  define __format__	format
-#  define __printf__	printf
-#  define __noreturn__	noreturn
-# endif
-#endif
 
 ISC_LANG_BEGINDECLS
 
@@ -57,11 +38,12 @@ typedef enum {
 } isc_assertiontype_t;
 
 typedef void (*isc_assertioncallback_t)(const char *, int, isc_assertiontype_t,
-					const char *)
-					__attribute__ ((__noreturn__));
+					const char *);
 
 /* coverity[+kill] */
-LIBISC_EXTERNAL_DATA extern isc_assertioncallback_t isc_assertion_failed;
+ISC_PLATFORM_NORETURN_PRE
+void isc_assertion_failed(const char *, int, isc_assertiontype_t,
+			  const char *) ISC_PLATFORM_NORETURN_POST;
 
 void
 isc_assertion_setcallback(isc_assertioncallback_t);

@@ -476,10 +476,16 @@ AC_DEFUN([NTP_BEFORE_HW_FUNC_VSNPRINTF], [
 	hw_force_rpl_snprintf=yes
 	hw_force_rpl_vsnprintf=yes
     esac
-    AH_TOP([
-	#if !defined(_KERNEL) && !defined(PARSESTREAM)
-	# include <stdio.h>	/* before #define vsnprintf rpl_... */
-	#endif
+    AH_VERBATIM(
+	[snprinte],dnl	sorted in config.h just before #define snprintf
+	[
+	    #if !defined(_KERNEL) && !defined(PARSESTREAM)
+	    /*
+	     * stdio.h must be included after _GNU_SOURCE is defined
+	     * but before #define snprintf rpl_snprintf
+	     */
+	    # include <stdio.h>	
+	    #endif
 	])
     AH_BOTTOM([
 	#if !defined(_KERNEL) && !defined(PARSESTREAM)

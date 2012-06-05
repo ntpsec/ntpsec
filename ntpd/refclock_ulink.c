@@ -152,7 +152,6 @@ ulink_start(
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	return (1);
@@ -554,8 +553,6 @@ ulink_poll(
 	else
       	            pp->polls++;
 
-        if (peer->burst > 0)
-                return;
         if (pp->coderecv == pp->codeproc) {
                 refclock_report(peer, CEVNT_TIMEOUT);
                 return;
@@ -563,7 +560,6 @@ ulink_poll(
         pp->lastref = pp->lastrec;
 	refclock_receive(peer);
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
-        peer->burst = NSTAGE;
 
 }
 

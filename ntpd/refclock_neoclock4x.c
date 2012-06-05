@@ -312,7 +312,6 @@ neoclock4x_start(int unit,
    * Initialize miscellaneous variables
    */
   peer->precision = -10;
-  peer->burst = NSTAGE;
   memcpy((char *)&pp->refid, "neol", 4);
 
   up->leap_status = 0;

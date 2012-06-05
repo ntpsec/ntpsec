@@ -338,10 +338,9 @@ static int tsync_start(int unit, struct peer *peer)
     pp                = peer->procptr;
     pp->clockdesc     = DESCRIPTION;
     pp->io.clock_recv = noentry;
-    pp->io.srcclock   = (caddr_t)peer;
+    pp->io.srcclock   = peer;
     pp->io.datalen    = 0;
     peer->precision   = PRECISION;
-    peer->burst       = NSTAGE;
 
     // Allocate and initialize unit structure
     if (!(up = (TsyncUnit*)emalloc(sizeof(TsyncUnit))))
@@ -767,15 +766,8 @@ static void tsync_poll(int unit, struct peer *peer)
         return;
     }
 
-    if (peer->burst > 0) {
-        return;
-    }
-
     record_clock_stats(&peer->srcadr, pp->a_lastcode);
     refclock_receive(peer);
-
-    /* Reset for the next burst of polls */
-    peer->burst = NSTAGE;
 
     /* Increment the number of times the reference has been polled */
     pp->polls++;

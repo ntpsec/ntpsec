@@ -13,6 +13,8 @@ extern "C" {
 #include "timespecops.h"
 }
 
+namespace timeStruct {
+
 std::ostream&
 operator << (std::ostream& os, const timeStruct::l_fp_wrap& val)
 {
@@ -48,8 +50,6 @@ operator << (std::ostream& os, const timeStruct::timespec_wrap& val)
 	   << ']';
 	return os;
 }
-
-namespace timeStruct {
 
 // Implementation of the l_fp closeness predicate
 

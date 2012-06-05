@@ -32,8 +32,9 @@
 #define _WIN32_WINNT 0x0501
 #endif
 
-
+#define __attribute__(x) /* empty */
 #define _CRT_SECURE_NO_DEPRECATE 1
+
 /*
  * ANSI C compliance enabled
  */

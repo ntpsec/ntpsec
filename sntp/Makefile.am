@@ -90,7 +90,6 @@ sntp_SOURCES =		\
 noinst_HEADERS =		\
 	crypto.h		\
 	data_formats.h		\
-	header.h		\
 	kod_management.h	\
 	log.h			\
 	main.h			\

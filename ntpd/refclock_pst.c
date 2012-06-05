@@ -155,7 +155,6 @@ pst_start(
 	peer->precision = PRECISION;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, WWVREFID, 4);
-	peer->burst = MAXSTAGE;
 	return (1);
 }
 
@@ -300,8 +299,6 @@ pst_poll(
 	up->lastptr = pp->a_lastcode;
 	if (write(pp->io.fd, "QTQDQMT", 6) != 6)
 		refclock_report(peer, CEVNT_FAULT);
-	if (peer->burst > 0)
-		return;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
@@ -313,7 +310,6 @@ pst_poll(
 		printf("pst: timecode %d %s\n", pp->lencode,
 		    pp->a_lastcode);
 #endif
-	peer->burst = MAXSTAGE;
 	pp->polls++;
 }
 

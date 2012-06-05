@@ -123,7 +123,6 @@ tt560_start(
 	 * Initialize miscellaneous peer variables
 	 */
 	peer->precision = PRECISION;
-	peer->burst = NSTAGE;
 	pp->clockdesc = DESCRIPTION;
 	memcpy((char *)&pp->refid, REFID, 4);
 	return (1);
@@ -227,15 +226,12 @@ tt560_poll(
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
 	}
-	if (peer->burst > 0)
-		return;
 	if (pp->coderecv == pp->codeproc) {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		return;
 	}
 	record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	refclock_receive(peer);
-	peer->burst = NSTAGE;
 }
 
 /******************************************************************

@@ -484,51 +484,18 @@ AC_ARG_ENABLE(
     [getifaddrs],
     [AS_HELP_STRING(
 	[--enable-getifaddrs],
-	[s Enable the use of getifaddrs() [[yes|no|glibc]].
-glibc: Use getifaddrs() in glibc if you know it supports IPv6.]
+	[+ Enable the use of getifaddrs() [[yes|no]].]
     )],
     [want_getifaddrs="$enableval"],
     [want_getifaddrs="yes"]
 )
 
 case $want_getifaddrs in
- yes|glibc)
-    #
-    # Do we have getifaddrs() ?
-    #
-    case $host in
-     *-*linux*)
-	# Some recent versions of glibc support getifaddrs() which does not
-	# provide AF_INET6 addresses while the function provided by the USAGI
-	# project handles the AF_INET6 case correctly.  We need to avoid
-	# using the former but prefer the latter unless overridden by
-	# --enable-getifaddrs=glibc.
-	case "$want_getifaddrs" in
-	 glibc)
-	    AC_CHECK_FUNCS([getifaddrs])
-	    ;;
-	 *)
-	    save_LIBS="$LIBS"
-	    LIBS="-L/usr/local/v6/lib $LIBS"
-	    AC_CHECK_LIB(
-		[inet6],
-		[getifaddrs],
-		[ans=yes],
-		[ans=no]
-	    )
-	    case "$ans" in
-	     yes)
-		LIBS="$LIBS -linet6"
-		AC_DEFINE([HAVE_GETIFADDRS], [1])
-		;;
-	     *)
-		LIBS=${save_LIBS}
-		;;
-	    esac
-	    ;;
-	esac
-	;;
-    esac
+ no)
+    ;;
+ glibc)
+    AC_MSG_WARN([--enable-getifaddrs=glibc is no longer required])
+    AC_CHECK_FUNCS([getifaddrs])
     ;;
  *)
     AC_CHECK_FUNCS([getifaddrs])

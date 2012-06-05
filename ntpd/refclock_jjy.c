@@ -503,7 +503,6 @@ jjy_start ( int unit, struct peer *peer )
 	 * Initialize miscellaneous variables
 	 */
 	peer->precision = PRECISION ;
-	peer->burst	= 1 ;
 	pp->clockdesc	= DESCRIPTION ;
 	memcpy ( (char*)&pp->refid, REFID, strlen(REFID) ) ;
 

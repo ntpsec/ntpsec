@@ -213,6 +213,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\lib\isc\backtrace-emtpytbl.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\lib\isc\backtrace.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\libntp\buftvtots.c"
 				>
 			</File>

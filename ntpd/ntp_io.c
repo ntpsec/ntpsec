@@ -1893,7 +1893,7 @@ update_interfaces(
 				     "GONE - deleting\n"));
 		remove_interface(ep);
 		refresh_peers = TRUE;
-		DPRINTF(4, ("refreshing peers due to deleted addr %s",
+		DPRINTF(4, ("refreshing peers due to deleted addr %s\n",
 			    stoa(&ep->sin)));
 
 		ifi.action = IFS_DELETED;

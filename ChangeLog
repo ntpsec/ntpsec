@@ -1,5 +1,12 @@
 * Upgrade to autogen-5.16 and libopts-36.4.11.
 * Upgrade to autogen-5.15.
+(4.2.7p278) 2012/06/03 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2178] refclock_tsyncpci.c reach register fails to shift.
+* [Bug 2191] dcfd -Y y2kcheck on CentOS 6.2 x86_64 breaks make check.
+(4.2.7p277) 2012/05/25 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2193] Building timestruct tests with Clang 3.1 fails.
+(4.2.7p276) 2012/05/15 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2179] Remove sntp/header.h.
 (4.2.7p275) 2012/04/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1744] Remove obsolete ntpdate/ntptime* items.
 (4.2.7p274) 2012/04/25 Released by Harlan Stenn <stenn@ntp.org>
