@@ -3887,10 +3887,10 @@ findbcastinter(
 	sockaddr_u *addr
 	)
 {
+	endpt *	iface;
+
+	iface = NULL;
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
-	struct interface *iface;
-	
-	
 	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
@@ -3973,9 +3973,11 @@ findbcastinter(
 		DPRINTF(4, ("No bcast interface found for %s\n",
 			    stoa(addr)));
 		iface = ANY_INTERFACE_CHOOSE(addr);
-	} else
+	} else {
 		DPRINTF(4, ("Found bcast-/mcast- interface index #%d %s\n",
 			    iface->ifnum, iface->name));
+	}
+
 	return iface;
 }
 
