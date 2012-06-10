@@ -1,3 +1,4 @@
+(4.2.7p279) 2012/06/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2211] findbcastinter(): possibly undefined variable iface used.
 * [Bug 2220] Incorrect check for maximum association id in ntpq.
 (4.2.7p278) 2012/06/03 Released by Harlan Stenn <stenn@ntp.org>
