@@ -22,7 +22,7 @@ ntp_keygen_LDADD  = version.o $(LIBOPTS_LDADD) ../libntp/libntp.a
 ntp_keygen_LDADD += $(LDADD_LIBNTP) $(PTHREAD_LIBS) $(LDADD_NTP) $(LIBM)
 ntp_keygen_SOURCES = ntp-keygen.c ntp-keygen-opts.c ntp-keygen-opts.h
 
-tickadj_LDADD=	../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM) $(LDADD_NLIST)
+tickadj_LDADD=	../libntp/libntp.a $(LDADD_LIBNTP) $(LIBM) $(PTHREAD_LIBS) $(LDADD_NLIST)
 
 EXTRA_DIST=				\
 	ntp-keygen-opts.def		\
