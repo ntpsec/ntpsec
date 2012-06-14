@@ -1,3 +1,4 @@
+* U_INT32_MAX cleanup in include/ntp_types.h .
 * When linking, ntp_keygen and tickadj need $(LIBM).
 (4.2.7p280) 2012/06/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2224] Use-after-free in routing socket code after dropping root.
