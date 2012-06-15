@@ -39,7 +39,7 @@ struct event_base;
 #include "mm-internal.h"
 #include "evthread-internal.h"
 
-#if _EVENT_HAVE_PTHREADS < 5		/* HP-UX 10.20 has 4, needs this */
+#if EVENT__HAVE_PTHREADS < 5		/* HP-UX 10.20 has 4, needs this */
 # define pthread_mutex_init(m, a)					\
 	 pthread_mutex_init(m, (a)					\
 				? *(const pthread_mutexattr_t *)(a)	\

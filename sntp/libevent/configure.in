@@ -408,6 +408,9 @@ AC_CHECK_FUNCS([getservbyname])
 # Check for gethostbyname_r in all its glorious incompatible versions.
 #   (This is cut-and-pasted from Tor, which based its logic on
 #   Python's configure.in.)
+AH_TEMPLATE(HAVE_GETHOSTBYNAME_R,
+  [Define this if you have any gethostbyname_r()])
+
 AC_CHECK_FUNC(gethostbyname_r, [
   AC_MSG_CHECKING([how many arguments gethostbyname_r() wants])
   OLD_CFLAGS=$CFLAGS
