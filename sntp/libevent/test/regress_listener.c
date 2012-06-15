@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2009-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "util-internal.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -49,7 +50,6 @@
 #include "regress.h"
 #include "tinytest.h"
 #include "tinytest_macros.h"
-#include "util-internal.h"
 
 static void
 acceptcb(struct evconnlistener *listener, evutil_socket_t fd,
@@ -115,9 +115,9 @@ regress_pick_a_port(void *arg)
 	tt_ptr_op(evconnlistener_get_base(listener2), ==, base);
 
 	fd1 = fd2 = fd3 = -1;
-	evutil_socket_connect(&fd1, (struct sockaddr*)&ss1, slen1);
-	evutil_socket_connect(&fd2, (struct sockaddr*)&ss1, slen1);
-	evutil_socket_connect(&fd3, (struct sockaddr*)&ss2, slen2);
+	evutil_socket_connect_(&fd1, (struct sockaddr*)&ss1, slen1);
+	evutil_socket_connect_(&fd2, (struct sockaddr*)&ss1, slen1);
+	evutil_socket_connect_(&fd3, (struct sockaddr*)&ss2, slen2);
 
 #ifdef _WIN32
 	Sleep(100); /* XXXX this is a stupid stopgap. */

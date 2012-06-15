@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,8 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT2_HTTP_H_
-#define _EVENT2_HTTP_H_
+#ifndef EVENT2_HTTP_H_INCLUDED_
+#define EVENT2_HTTP_H_INCLUDED_
 
 /* For int types. */
 #include <event2/util.h>
@@ -37,6 +37,7 @@ extern "C" {
 /* In case we haven't included the right headers yet. */
 struct evbuffer;
 struct event_base;
+struct bufferevent;
 
 /** @file event2/http.h
  *
@@ -69,6 +70,7 @@ struct evhttp_request;
 struct evkeyvalq;
 struct evhttp_bound_socket;
 struct evconnlistener;
+struct evdns_base;
 
 /**
  * Create a new HTTP server.
@@ -147,6 +149,19 @@ struct evhttp_bound_socket *evhttp_bind_listener(struct evhttp *http, struct evc
  * Return the listener used to implement a bound socket.
  */
 struct evconnlistener *evhttp_bound_socket_get_listener(struct evhttp_bound_socket *bound);
+
+typedef void evhttp_bound_socket_foreach_fn(struct evhttp_bound_socket *, void *);
+/**
+ * Applies the function specified in the first argument to all
+ * evhttp_bound_sockets associated with "http". The user must not
+ * attempt to free or remove any connections, sockets or listeners
+ * in the callback "function".
+ *
+ * @param http pointer to an evhttp object
+ * @param function function to apply to every bound socket
+ * @param argument pointer value passed to function for every socket iterated
+ */
+void evhttp_foreach_bound_socket(struct evhttp *http, evhttp_bound_socket_foreach_fn *function, void *argument);
 
 /**
  * Makes an HTTP server stop accepting connections on the specified socket
@@ -232,6 +247,23 @@ int evhttp_del_cb(struct evhttp *, const char *);
 */
 void evhttp_set_gencb(struct evhttp *http,
     void (*cb)(struct evhttp_request *, void *), void *arg);
+
+/**
+   Set a callback used to create new bufferevents for connections
+   to a given evhttp object.
+
+   You can use this to override the default bufferevent type -- for example,
+   to make this evhttp object use SSL bufferevents rather than unencrypted
+   ones.
+
+   New bufferevents must be allocated with no fd set on them.
+
+   @param http the evhttp server object for which to set the callback
+   @param cb the callback to invoke for incoming connections
+   @param arg an context argument for the callback
+ */
+void evhttp_set_bevcb(struct evhttp *http,
+    struct bufferevent *(*cb)(struct event_base *, void *), void *arg);
 
 /**
    Adds a virtual host to the http server.
@@ -365,7 +397,7 @@ void evhttp_send_reply_start(struct evhttp_request *req, int code,
 void evhttp_send_reply_chunk(struct evhttp_request *req,
     struct evbuffer *databuf);
 /**
-   Complete a chunked reply.
+   Complete a chunked reply, freeing the request as appropriate.
 
    @param req a request object
 */
@@ -398,6 +430,29 @@ enum evhttp_cmd_type {
 enum evhttp_request_kind { EVHTTP_REQUEST, EVHTTP_RESPONSE };
 
 /**
+ * Create and return a connection object that can be used to for making HTTP
+ * requests.  The connection object tries to resolve address and establish the
+ * connection when it is given an http request object.
+ *
+ * @param base the event_base to use for handling the connection
+ * @param dnsbase the dns_base to use for resolving host names; if not
+ *     specified host name resolution will block.
+ * @param bev a bufferevent to use for connecting to the server; if NULL, a
+ *     socket-based bufferevent will be created.  This buffrevent will be freed
+ *     when the connection closes.  It must have no fd set on it.
+ * @param address the address to which to connect
+ * @param port the port to connect to
+ * @return an evhttp_connection object that can be used for making requests
+ */
+struct evhttp_connection *evhttp_connection_base_bufferevent_new(
+	struct event_base *base, struct evdns_base *dnsbase, struct bufferevent* bev, const char *address, unsigned short port);
+
+/**
+ * Return the bufferevent that an evhttp_connection is using.
+ */
+struct bufferevent* evhttp_connection_get_bufferevent(struct evhttp_connection *evcon);
+
+/**
  * Creates a new request object that needs to be filled in with the request
  * parameters.  The callback is executed when the request completed or an
  * error occurred.
@@ -418,12 +473,10 @@ void evhttp_request_set_chunked_cb(struct evhttp_request *,
 /** Frees the request object and removes associated events. */
 void evhttp_request_free(struct evhttp_request *req);
 
-struct evdns_base;
-
 /**
- * A connection object that can be used to for making HTTP requests.  The
- * connection object tries to resolve address and establish the connection
- * when it is given an http request object.
+ * Create and return a connection object that can be used to for making HTTP
+ * requests.  The connection object tries to resolve address and establish the
+ * connection when it is given an http request object.
  *
  * @param base the event_base to use for handling the connection
  * @param dnsbase the dns_base to use for resolving host names; if not
@@ -483,6 +536,13 @@ void evhttp_connection_set_timeout(struct evhttp_connection *evcon,
 /** Sets the timeout for events related to this connection.  Takes a struct
  * timeval. */
 void evhttp_connection_set_timeout_tv(struct evhttp_connection *evcon,
+    const struct timeval *tv);
+
+/** Sets the delay before retrying requests on this connection. This is only
+ * used if evhttp_connection_set_retries is used to make the number of retries
+ * at least one. Each retry after the first is twice as long as the one before
+ * it. */
+void evhttp_connection_set_initial_retry_tv(struct evhttp_connection *evcon,
     const struct timeval *tv);
 
 /** Sets the retry limit for this connection - -1 repeats indefinitely */
@@ -867,4 +927,4 @@ char *evhttp_uri_join(struct evhttp_uri *uri, char *buf, size_t limit);
 }
 #endif
 
-#endif /* _EVENT2_HTTP_H_ */
+#endif /* EVENT2_HTTP_H_INCLUDED_ */

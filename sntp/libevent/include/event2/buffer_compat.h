@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,8 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _EVENT2_BUFFER_COMPAT_H_
-#define _EVENT2_BUFFER_COMPAT_H_
+#ifndef EVENT2_BUFFER_COMPAT_H_INCLUDED_
+#define EVENT2_BUFFER_COMPAT_H_INCLUDED_
 
 /** @file event2/buffer_compat.h
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Niels Provos, Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos, Nick Mathewson
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
  * All rights reserved.
  *
@@ -25,8 +25,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT2_BUFFEREVENT_COMPAT_H_
-#define _EVENT2_BUFFEREVENT_COMPAT_H_
+#ifndef EVENT2_BUFFEREVENT_COMPAT_H_INCLUDED_
+#define EVENT2_BUFFEREVENT_COMPAT_H_INCLUDED_
 
 #define evbuffercb bufferevent_data_cb
 #define everrorcb bufferevent_event_cb

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2003-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "../util-internal.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -35,7 +36,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
@@ -46,7 +47,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #endif
-#ifdef _EVENT_HAVE_NETINET_IN6_H
+#ifdef EVENT__HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
 #ifdef HAVE_NETDB_H
@@ -70,8 +71,6 @@
 #include "log-internal.h"
 #include "regress.h"
 #include "regress_testutils.h"
-
-#include "../util-internal.h"
 
 static int dns_ok = 0;
 static int dns_got_cancel = 0;
@@ -99,7 +98,7 @@ dns_gethostbyname_cb(int result, char type, int count, int ttl,
 
 	switch (type) {
 	case DNS_IPv6_AAAA: {
-#if defined(_EVENT_HAVE_STRUCT_IN6_ADDR) && defined(_EVENT_HAVE_INET_NTOP) && defined(INET6_ADDRSTRLEN)
+#if defined(EVENT__HAVE_STRUCT_IN6_ADDR) && defined(EVENT__HAVE_INET_NTOP) && defined(INET6_ADDRSTRLEN)
 		struct in6_addr *in6_addrs = addresses;
 		char buf[INET6_ADDRSTRLEN+1];
 		int i;
@@ -320,7 +319,7 @@ dns_server_gethostbyname_cb(int result, char type, int count, int ttl,
 		break;
 	}
 	case DNS_IPv6_AAAA: {
-#if defined (_EVENT_HAVE_STRUCT_IN6_ADDR) && defined(_EVENT_HAVE_INET_NTOP) && defined(INET6_ADDRSTRLEN)
+#if defined (EVENT__HAVE_STRUCT_IN6_ADDR) && defined(EVENT__HAVE_INET_NTOP) && defined(INET6_ADDRSTRLEN)
 		struct in6_addr *in6_addrs = addresses;
 		char buf[INET6_ADDRSTRLEN+1];
 		if (memcmp(&in6_addrs[0].s6_addr, "abcdefghijklmnop", 16)
@@ -495,6 +494,9 @@ static struct regress_dns_server_table search_table[] = {
 	{ "host2.a.example.com", "err", "3", 0 },
 	{ "host2.b.example.com", "A", "200.100.0.100", 0 },
 	{ "host2.c.example.com", "err", "3", 0 },
+	{ "hostn.a.example.com", "errsoa", "0", 0 },
+	{ "hostn.b.example.com", "errsoa", "3", 0 },
+	{ "hostn.c.example.com", "err", "0", 0 },
 
 	{ "host", "err", "3", 0 },
 	{ "host2", "err", "3", 0 },
@@ -511,7 +513,7 @@ dns_search_test(void *arg)
 	ev_uint16_t portnum = 0;
 	char buf[64];
 
-	struct generic_dns_callback_result r1, r2, r3, r4, r5;
+	struct generic_dns_callback_result r[8];
 
 	tt_assert(regress_dnsserver(base, &portnum, search_table));
 	evutil_snprintf(buf, sizeof(buf), "127.0.0.1:%d", (int)portnum);
@@ -523,26 +525,35 @@ dns_search_test(void *arg)
 	evdns_base_search_add(dns, "b.example.com");
 	evdns_base_search_add(dns, "c.example.com");
 
-	n_replies_left = 5;
+	n_replies_left = sizeof(r)/sizeof(r[0]);
 	exit_base = base;
 
-	evdns_base_resolve_ipv4(dns, "host", 0, generic_dns_callback, &r1);
-	evdns_base_resolve_ipv4(dns, "host2", 0, generic_dns_callback, &r2);
-	evdns_base_resolve_ipv4(dns, "host", DNS_NO_SEARCH, generic_dns_callback, &r3);
-	evdns_base_resolve_ipv4(dns, "host2", DNS_NO_SEARCH, generic_dns_callback, &r4);
-	evdns_base_resolve_ipv4(dns, "host3", 0, generic_dns_callback, &r5);
+	evdns_base_resolve_ipv4(dns, "host", 0, generic_dns_callback, &r[0]);
+	evdns_base_resolve_ipv4(dns, "host2", 0, generic_dns_callback, &r[1]);
+	evdns_base_resolve_ipv4(dns, "host", DNS_NO_SEARCH, generic_dns_callback, &r[2]);
+	evdns_base_resolve_ipv4(dns, "host2", DNS_NO_SEARCH, generic_dns_callback, &r[3]);
+	evdns_base_resolve_ipv4(dns, "host3", 0, generic_dns_callback, &r[4]);
+	evdns_base_resolve_ipv4(dns, "hostn.a.example.com", DNS_NO_SEARCH, generic_dns_callback, &r[5]);
+	evdns_base_resolve_ipv4(dns, "hostn.b.example.com", DNS_NO_SEARCH, generic_dns_callback, &r[6]);
+	evdns_base_resolve_ipv4(dns, "hostn.c.example.com", DNS_NO_SEARCH, generic_dns_callback, &r[7]);
 
 	event_base_dispatch(base);
 
-	tt_int_op(r1.type, ==, DNS_IPv4_A);
-	tt_int_op(r1.count, ==, 1);
-	tt_int_op(((ev_uint32_t*)r1.addrs)[0], ==, htonl(0x0b16212c));
-	tt_int_op(r2.type, ==, DNS_IPv4_A);
-	tt_int_op(r2.count, ==, 1);
-	tt_int_op(((ev_uint32_t*)r2.addrs)[0], ==, htonl(0xc8640064));
-	tt_int_op(r3.result, ==, DNS_ERR_NOTEXIST);
-	tt_int_op(r4.result, ==, DNS_ERR_NOTEXIST);
-	tt_int_op(r5.result, ==, DNS_ERR_NOTEXIST);
+	tt_int_op(r[0].type, ==, DNS_IPv4_A);
+	tt_int_op(r[0].count, ==, 1);
+	tt_int_op(((ev_uint32_t*)r[0].addrs)[0], ==, htonl(0x0b16212c));
+	tt_int_op(r[1].type, ==, DNS_IPv4_A);
+	tt_int_op(r[1].count, ==, 1);
+	tt_int_op(((ev_uint32_t*)r[1].addrs)[0], ==, htonl(0xc8640064));
+	tt_int_op(r[2].result, ==, DNS_ERR_NOTEXIST);
+	tt_int_op(r[3].result, ==, DNS_ERR_NOTEXIST);
+	tt_int_op(r[4].result, ==, DNS_ERR_NOTEXIST);
+	tt_int_op(r[5].result, ==, DNS_ERR_NODATA);
+	tt_int_op(r[5].ttl, ==, 42);
+	tt_int_op(r[6].result, ==, DNS_ERR_NOTEXIST);
+	tt_int_op(r[6].ttl, ==, 42);
+	tt_int_op(r[7].result, ==, DNS_ERR_NODATA);
+	tt_int_op(r[7].ttl, ==, 0);
 
 end:
 	if (dns)
@@ -672,9 +683,9 @@ dns_retry_test(void *arg)
 
 	dns = evdns_base_new(base, 0);
 	tt_assert(!evdns_base_nameserver_ip_add(dns, buf));
-	tt_assert(! evdns_base_set_option(dns, "timeout", "0.3"));
+	tt_assert(! evdns_base_set_option(dns, "timeout", "0.2"));
 	tt_assert(! evdns_base_set_option(dns, "max-timeouts:", "10"));
-	tt_assert(! evdns_base_set_option(dns, "initial-probe-timeout", "0.5"));
+	tt_assert(! evdns_base_set_option(dns, "initial-probe-timeout", "0.1"));
 
 	evdns_base_resolve_ipv4(dns, "host.example.com", 0,
 	    generic_dns_callback, &r1);
@@ -693,8 +704,8 @@ dns_retry_test(void *arg)
 	/* Now try again, but this time have the server get treated as
 	 * failed, so we can send it a test probe. */
 	drop_count = 4;
-	tt_assert(! evdns_base_set_option(dns, "max-timeouts:", "3"));
-	tt_assert(! evdns_base_set_option(dns, "attempts:", "4"));
+	tt_assert(! evdns_base_set_option(dns, "max-timeouts:", "2"));
+	tt_assert(! evdns_base_set_option(dns, "attempts:", "3"));
 	memset(&r1, 0, sizeof(r1));
 
 	evdns_base_resolve_ipv4(dns, "host.example.com", 0,
@@ -850,6 +861,7 @@ end:
 /* === Test for bufferevent_socket_connect_hostname */
 
 static int total_connected_or_failed = 0;
+static int total_n_accepted = 0;
 static struct event_base *be_connect_hostname_base = NULL;
 
 /* Implements a DNS server for the connect_hostname test and the
@@ -869,6 +881,8 @@ be_getaddrinfo_server_cb(struct evdns_server_request *req, void *data)
 		struct in_addr ans;
 		struct in6_addr ans6;
 		memset(&ans6, 0, sizeof(ans6));
+
+		TT_BLATHER(("Got question about %s, type=%d", qname, qtype));
 
 		if (qtype == EVDNS_TYPE_A &&
 		    qclass == EVDNS_CLASS_INET &&
@@ -970,10 +984,13 @@ be_getaddrinfo_server_cb(struct evdns_server_request *req, void *data)
 			TT_GRIPE(("Got weird request for %s",qname));
 		}
 	}
-	if (added_any)
+	if (added_any) {
+		TT_BLATHER(("answering"));
 		evdns_server_request_respond(req, 0);
-	else
+	} else {
+		TT_BLATHER(("saying nexist."));
 		evdns_server_request_respond(req, 3);
+	}
 }
 
 /* Implements a listener for connect_hostname test. */
@@ -983,7 +1000,11 @@ nil_accept_cb(struct evconnlistener *l, evutil_socket_t fd, struct sockaddr *s,
 {
 	int *p = arg;
 	(*p)++;
+	++total_n_accepted;
 	/* don't do anything with the socket; let it close when we exit() */
+	if (total_n_accepted >= 3 && total_connected_or_failed >= 5)
+		event_base_loopexit(be_connect_hostname_base,
+		    NULL);
 }
 
 struct be_conn_hostname_result {
@@ -1003,14 +1024,14 @@ be_connect_hostname_event_cb(struct bufferevent *bev, short what, void *ctx)
 
 		if ((what & BEV_EVENT_CONNECTED) || (what & BEV_EVENT_ERROR)) {
 			int r;
-			++total_connected_or_failed;
-			TT_BLATHER(("Got %d connections or errors.", total_connected_or_failed));
 			if ((r = bufferevent_socket_get_dns_error(bev))) {
 				got->dnserr = r;
 				TT_BLATHER(("DNS error %d: %s", r,
 					   evutil_gai_strerror(r)));
-			}
-			if (total_connected_or_failed >= 5)
+			}			++total_connected_or_failed;
+			TT_BLATHER(("Got %d connections or errors.", total_connected_or_failed));
+
+			if (total_n_accepted >= 3 && total_connected_or_failed >= 5)
 				event_base_loopexit(be_connect_hostname_base,
 				    NULL);
 		}
@@ -1197,6 +1218,9 @@ test_getaddrinfo_async(void *arg)
 
 	/* for localhost */
 	evdns_base_load_hosts(dns_base, NULL);
+
+	tt_assert(! evdns_base_set_option(dns_base, "timeout", "0.3"));
+	tt_assert(! evdns_base_set_option(dns_base, "getaddrinfo-allow-skew", "0.2"));
 
 	memset(a_out, 0, sizeof(a_out));
 
@@ -1625,6 +1649,130 @@ gaic_launch(struct event_base *base, struct evdns_base *dns_base)
 	++pending;
 }
 
+#ifdef EVENT_SET_MEM_FUNCTIONS_IMPLEMENTED
+/* FIXME: We should move this to regress_main.c if anything else needs it.*/
+
+/* Trivial replacements for malloc/free/realloc to check for memory leaks.
+ * Not threadsafe. */
+static int allocated_chunks = 0;
+
+static void *
+cnt_malloc(size_t sz)
+{
+	allocated_chunks += 1;
+	return malloc(sz);
+}
+
+static void *
+cnt_realloc(void *old, size_t sz)
+{
+	if (!old)
+		allocated_chunks += 1;
+	if (!sz)
+		allocated_chunks -= 1;
+	return realloc(old, sz);
+}
+
+static void
+cnt_free(void *ptr)
+{
+	allocated_chunks -= 1;
+	free(ptr);
+}
+
+struct testleak_env_t {
+	struct event_base *base;
+	struct evdns_base *dns_base;
+	struct evdns_request *req;
+	struct generic_dns_callback_result r;
+};
+
+static void *
+testleak_setup(const struct testcase_t *testcase)
+{
+	struct testleak_env_t *env;
+
+	allocated_chunks = 0;
+	event_set_mem_functions(cnt_malloc, cnt_realloc, cnt_free);
+	event_enable_debug_mode();
+
+	/* not mm_calloc: we don't want to mess with the count. */
+	env = calloc(1, sizeof(struct testleak_env_t));
+	env->base = event_base_new();
+	env->dns_base = evdns_base_new(env->base, 0);
+	env->req = evdns_base_resolve_ipv4(
+		env->dns_base, "example.com", DNS_QUERY_NO_SEARCH,
+		generic_dns_callback, &env->r);
+	return env;
+}
+
+static int
+testleak_cleanup(const struct testcase_t *testcase, void *env_)
+{
+	int ok = 0;
+	struct testleak_env_t *env = env_;
+#ifdef EVENT__DISABLE_DEBUG_MODE
+	tt_int_op(allocated_chunks, ==, 0);
+#else
+	/* FIXME: that's `1' because of event_debug_map_HT_GROW */
+	tt_int_op(allocated_chunks, ==, 1);
+#endif
+	ok = 1;
+end:
+	if (env->dns_base)
+		evdns_base_free(env->dns_base, 0);
+	if (env->base)
+		event_base_free(env->base);
+	if (env)
+		free(env);
+	return ok;
+}
+
+static struct testcase_setup_t testleak_funcs = {
+	testleak_setup, testleak_cleanup
+};
+
+static void
+test_dbg_leak_cancel(void *env_)
+{
+	/* cancel, loop, free/dns, free/base */
+	struct testleak_env_t *env = env_;
+	int send_err_shutdown = 1;
+	evdns_cancel_request(env->dns_base, env->req);
+	env->req = 0;
+
+	/* `req` is freed in callback, that's why one loop is required. */
+	event_base_loop(env->base, EVLOOP_NONBLOCK);
+
+	/* send_err_shutdown means nothing as soon as our request is
+	 * already canceled */
+	evdns_base_free(env->dns_base, send_err_shutdown);
+	env->dns_base = 0;
+	event_base_free(env->base);
+	env->base = 0;
+}
+
+static void
+test_dbg_leak_shutdown(void *env_)
+{
+	/* free/dns, loop, free/base */
+	struct testleak_env_t *env = env_;
+	int send_err_shutdown = 1;
+
+	/* `req` is freed both with `send_err_shutdown` and without it,
+	 * the only difference is `evdns_callback` call */
+	env->req = 0;
+
+	evdns_base_free(env->dns_base, send_err_shutdown);
+	env->dns_base = 0;
+
+	/* `req` is freed in callback, that's why one loop is required */
+	event_base_loop(env->base, EVLOOP_NONBLOCK);
+	event_base_free(env->base);
+	env->base = 0;
+}
+#endif
+
 static void
 test_getaddrinfo_async_cancel_stress(void *ptr)
 {
@@ -1701,6 +1849,11 @@ struct testcase_t dns_testcases[] = {
 	  TT_FORK|TT_NEED_BASE, &basic_setup, (char*)"" },
 	{ "getaddrinfo_cancel_stress", test_getaddrinfo_async_cancel_stress,
 	  TT_FORK, NULL, NULL },
+
+#ifdef EVENT_SET_MEM_FUNCTIONS_IMPLEMENTED
+	{ "leak_shutdown", test_dbg_leak_shutdown, TT_FORK, &testleak_funcs, NULL },
+	{ "leak_cancel", test_dbg_leak_cancel, TT_FORK, &testleak_funcs, NULL },
+#endif
 
 	END_OF_TESTCASES
 };

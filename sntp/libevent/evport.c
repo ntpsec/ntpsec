@@ -1,6 +1,9 @@
 /*
  * Submitted by David Pacheco (dp.spambait@gmail.com)
  *
+ * Copyright 2006-2007 Niels Provos
+ * Copyright 2007-2012 Niels Provos and Nick Mathewson
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -52,6 +55,8 @@
 
 #include "event2/event-config.h"
 #include "evconfig-private.h"
+
+#ifdef EVENT__HAVE_EVENT_PORTS
 
 #include <sys/time.h>
 #include <sys/queue.h>
@@ -153,7 +158,7 @@ evport_init(struct event_base *base)
 		
 	evpd->ed_npending = 0;
 
-	evsig_init(base);
+	evsig_init_(base);
 
 	return (evpd);
 }
@@ -286,12 +291,12 @@ evport_dispatch(struct event_base *base, struct timeval *tv)
 		if (fd != -1) {
 			/* We might have cleared out this event; we need
 			 * to be sure that it's still set. */
-			fdi = evmap_io_get_fdinfo(&base->io, fd);
+			fdi = evmap_io_get_fdinfo_(&base->io, fd);
 		}
 
 		if (fdi != NULL && FDI_HAS_EVENTS(fdi)) {
 			reassociate(epdp, fdi, fd);
-//			epdp->ed_pending[i] = -1;
+			/* epdp->ed_pending[i] = -1; */
 			fdi->pending_idx_plus_1 = 0;
 		}
 	}
@@ -321,7 +326,7 @@ evport_dispatch(struct event_base *base, struct timeval *tv)
 		port_event_t *pevt = &pevtlist[i];
 		int fd = (int) pevt->portev_object;
 		struct fd_info *fdi = pevt->portev_user;
-		//EVUTIL_ASSERT(evmap_io_get_fdinfo(&base->io, fd) == fdi);
+		/*EVUTIL_ASSERT(evmap_io_get_fdinfo_(&base->io, fd) == fdi);*/
 
 		check_evportop(epdp);
 		check_event(pevt);
@@ -348,7 +353,7 @@ evport_dispatch(struct event_base *base, struct timeval *tv)
 		if (pevt->portev_events & (POLLERR|POLLHUP|POLLNVAL))
 			res |= EV_READ|EV_WRITE;
 
-		evmap_io_active(base, fd, res);
+		evmap_io_active_(base, fd, res);
 	} /* end of all events gotten */
 	epdp->ed_npending = nevents;
 
@@ -431,7 +436,7 @@ evport_dealloc(struct event_base *base)
 {
 	struct evport_data *evpd = base->evbase;
 
-	evsig_dealloc(base);
+	evsig_dealloc_(base);
 
 	close(evpd->ed_port);
 
@@ -442,3 +447,5 @@ evport_dealloc(struct event_base *base)
 
 	mm_free(evpd);
 }
+
+#endif /* EVENT__HAVE_EVENT_PORTS */

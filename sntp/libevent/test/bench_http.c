@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010 Niels Provos and Nick Mathewson
+ * Copyright 2008-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -169,10 +169,8 @@ main(int argc, char **argv)
 	evhttp_set_cb(http, "/ind", http_basic_cb, NULL);
 	fprintf(stderr, "/ind - basic content (memory copy)\n");
 
-#ifdef _EVENT2_EVENT_H_
 	evhttp_set_cb(http, "/ref", http_ref_cb, NULL);
 	fprintf(stderr, "/ref - basic content (reference)\n");
-#endif
 
 	fprintf(stderr, "Serving %d bytes on port %d using %s\n",
 	    (int)content_len, port,

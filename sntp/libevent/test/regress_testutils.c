@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2010-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "../util-internal.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -34,7 +35,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
@@ -45,7 +46,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #endif
-#ifdef _EVENT_HAVE_NETINET_IN6_H
+#ifdef EVENT__HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
 #ifdef HAVE_NETDB_H
@@ -67,8 +68,6 @@
 #include "log-internal.h"
 #include "regress.h"
 #include "regress_testutils.h"
-
-#include "../util-internal.h"
 
 /* globals */
 static struct evdns_server_port *dns_port;
@@ -157,6 +156,23 @@ regress_dns_server_cb(struct evdns_server_request *req, void *data)
 
 	if (!strcmp(tab->anstype, "err")) {
 		int err = atoi(tab->ans);
+		tt_assert(! evdns_server_request_respond(req, err));
+		return;
+	} else if (!strcmp(tab->anstype, "errsoa")) {
+		int err = atoi(tab->ans);
+		char soa_record[] =
+			"\x04" "dns1" "\x05" "icann" "\x03" "org" "\0"
+			"\x0a" "hostmaster" "\x05" "icann" "\x03" "org" "\0"
+			"\x77\xde\x5e\xba" /* serial */
+			"\x00\x00\x1c\x20" /* refreshtime = 2h */
+			"\x00\x00\x0e\x10" /* retry = 1h */
+			"\x00\x12\x75\x00" /* expiration = 14d */
+			"\x00\x00\x0e\x10" /* min.ttl = 1h */
+			;
+		evdns_server_request_add_reply(
+			req, EVDNS_AUTHORITY_SECTION,
+			"example.com", EVDNS_TYPE_SOA, EVDNS_CLASS_INET,
+			42, sizeof(soa_record) - 1, 0, soa_record);
 		tt_assert(! evdns_server_request_respond(req, err));
 		return;
 	} else if (!strcmp(tab->anstype, "A")) {

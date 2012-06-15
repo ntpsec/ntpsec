@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2006-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -132,8 +132,8 @@
  * with the next probe.
  */
 
-#ifndef _EVENT2_DNS_H_
-#define _EVENT2_DNS_H_
+#ifndef EVENT2_DNS_H_INCLUDED_
+#define EVENT2_DNS_H_INCLUDED_
 
 #ifdef __cplusplus
 extern "C" {
@@ -166,6 +166,10 @@ extern "C" {
 #define DNS_ERR_SHUTDOWN 68
 /** The request was canceled via a call to evdns_cancel_request */
 #define DNS_ERR_CANCEL 69
+/** There were no answers and no error condition in the DNS packet.
+ * This can happen when you ask for an address that exists, but a record
+ * type that doesn't. */
+#define DNS_ERR_NODATA 70
 
 #define DNS_IPv4_A 1
 #define DNS_PTR 2
@@ -206,7 +210,7 @@ struct event_base;
 
   @param event_base the event base to associate the dns client with
   @param initialize_nameservers 1 if resolve.conf processing should occur
-  @return 0 if successful, or -1 if an error occurred
+  @return evdns_base object if successful, or NULL if an error occurred.
   @see evdns_base_free()
  */
 struct evdns_base * evdns_base_new(struct event_base *event_base, int initialize_nameservers);
@@ -266,7 +270,7 @@ int evdns_base_count_nameservers(struct evdns_base *base);
 /**
   Remove all configured nameservers, and suspend all pending resolves.
 
-  Resolves will not necessarily be re-attempted until evdns_resume() is called.
+  Resolves will not necessarily be re-attempted until evdns_base_resume() is called.
 
   @param base the evdns_base to which to apply this operation
   @return 0 if successful, or -1 if an error occurred
@@ -279,7 +283,7 @@ int evdns_base_clear_nameservers_and_suspend(struct evdns_base *base);
   Resume normal operation and continue any suspended resolve requests.
 
   Re-attempt resolves left in limbo after an earlier call to
-  evdns_clear_nameservers_and_suspend().
+  evdns_base_clear_nameservers_and_suspend().
 
   @param base the evdns_base to which to apply this operation
   @return 0 if successful, or -1 if an error occurred
@@ -597,7 +601,7 @@ struct sockaddr;
 /**
     Get the address that made a DNS request.
  */
-int evdns_server_request_get_requesting_addr(struct evdns_server_request *_req, struct sockaddr *sa, int addr_len);
+int evdns_server_request_get_requesting_addr(struct evdns_server_request *req, struct sockaddr *sa, int addr_len);
 
 /** Callback for evdns_getaddrinfo. */
 typedef void (*evdns_getaddrinfo_cb)(int result, struct evutil_addrinfo *res, void *arg);
@@ -636,4 +640,4 @@ void evdns_getaddrinfo_cancel(struct evdns_getaddrinfo_request *req);
 }
 #endif
 
-#endif  /* !_EVENT2_DNS_H_ */
+#endif  /* !EVENT2_DNS_H_INCLUDED_ */
