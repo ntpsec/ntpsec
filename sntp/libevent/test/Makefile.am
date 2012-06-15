@@ -1,17 +1,45 @@
+# test/Makefile.am for libevent
+# Copyright 2000-2007 Niels Provos
+# Copyright 2007-2012 Niels Provos and Nick Mathewson
+#
+# See LICENSE for copying information.
+
 AUTOMAKE_OPTIONS = foreign
 
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat -I$(top_srcdir)/include -I../include -DTINYTEST_LOCAL
 
-EXTRA_DIST = regress.rpc regress.gen.h regress.gen.c rpcgen_wrapper.sh test.sh
+EXTRA_DIST =					\
+	check-dumpevents.py			\
+	regress.gen.c				\
+	regress.gen.h				\
+	regress.rpc				\
+	rpcgen_wrapper.sh			\
+	test.sh
 
-noinst_PROGRAMS = test-init test-eof test-weof test-time \
-	bench bench_cascade bench_http bench_httpclient test-ratelim \
-	test-changelist
+noinst_PROGRAMS = \
+	bench					\
+	bench_cascade				\
+	bench_http				\
+	bench_httpclient			\
+	test-changelist				\
+	test-dumpevents				\
+	test-eof				\
+	test-fdleak				\
+	test-init				\
+	test-ratelim				\
+	test-time				\
+	test-weof
+
 if BUILD_REGRESS
 noinst_PROGRAMS += regress
 endif
 EXTRA_PROGRAMS = regress
-noinst_HEADERS = tinytest.h tinytest_macros.h regress.h tinytest_local.h
+
+noinst_HEADERS =				\
+	regress.h				\
+	tinytest.h				\
+	tinytest_local.h			\
+	tinytest_macros.h
 
 TESTS = $(top_srcdir)/test/test.sh
 
@@ -22,6 +50,8 @@ endif
 
 test_init_SOURCES = test-init.c
 test_init_LDADD = ../libevent_core.la
+test_dumpevents_SOURCES = test-dumpevents.c
+test_dumpevents_LDADD = ../libevent_core.la
 test_eof_SOURCES = test-eof.c
 test_eof_LDADD = ../libevent_core.la
 test_changelist_SOURCES = test-changelist.c
@@ -32,13 +62,29 @@ test_time_SOURCES = test-time.c
 test_time_LDADD = ../libevent_core.la
 test_ratelim_SOURCES = test-ratelim.c
 test_ratelim_LDADD = ../libevent_core.la -lm
+test_fdleak_SOURCES = test-fdleak.c
+test_fdleak_LDADD = ../libevent_core.la
 
-regress_SOURCES = regress.c regress_buffer.c regress_http.c regress_dns.c \
-	regress_testutils.c regress_testutils.h \
-	regress_rpc.c regress.gen.c regress.gen.h regress_et.c \
-	regress_bufferevent.c regress_listener.c \
-	regress_util.c tinytest.c regress_main.c regress_minheap.c \
-	$(regress_thread_SOURCES) $(regress_zlib_SOURCES)
+regress_SOURCES = 				\
+	regress.c				\
+	regress.gen.c				\
+	regress.gen.h				\
+	regress_buffer.c			\
+	regress_bufferevent.c			\
+	regress_dns.c				\
+	regress_et.c				\
+	regress_http.c				\
+	regress_listener.c			\
+	regress_main.c				\
+	regress_minheap.c			\
+	regress_rpc.c				\
+	regress_testutils.c			\
+	regress_testutils.h			\
+	regress_util.c				\
+	tinytest.c				\
+	$(regress_thread_SOURCES)		\
+	$(regress_zlib_SOURCES)
+
 if PTHREADS
 regress_thread_SOURCES = regress_thread.c
 PTHREAD_LIBS += ../libevent_pthreads.la
@@ -59,7 +105,7 @@ regress_LDFLAGS = $(PTHREAD_CFLAGS)
 
 if OPENSSL
 regress_SOURCES += regress_ssl.c
-regress_LDADD += ../libevent_openssl.la
+regress_LDADD += ../libevent_openssl.la -lssl -lcrypto ${OPENSSL_LIBADD}
 endif
 
 bench_SOURCES = bench.c
@@ -89,4 +135,5 @@ DISTCLEANFILES = *~
 
 verify: check
 
-bench test-init test-eof test-weof test-time test-changelist: ../libevent.la
+bench test-init test-eof test-weof test-time test-changelist \
+	test-fdleak: ../libevent.la

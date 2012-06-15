@@ -1,4 +1,4 @@
-/* tinytest_demo.c -- Copyright 2009-2010 Nick Mathewson
+/* tinytest_demo.c -- Copyright 2009-2012 Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,7 +39,7 @@
 /* ============================================================ */
 
 /* First, let's see if strcmp is working.  (All your test cases should be
- * functions declared to take a single void * as) an argument. */
+ * functions declared to take a single void * as an argument.) */
 void
 test_strcmp(void *data)
 {

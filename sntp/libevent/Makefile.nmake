@@ -1,5 +1,7 @@
-# WATCH OUT!  This makefile is a work in progress.  It is probably missing
-# tons of important things.  DO NOT RELY ON IT TO BUILD A GOOD LIBEVENT.
+# WATCH OUT!  This makefile is a work in progress.
+#
+# I'm not very knowledgeable about MSVC and nmake beyond their most basic
+# aspects.  If anything here looks wrong to you, please let me know.
 
 # Needed for correctness
 CFLAGS=/IWIN32-Code /Iinclude /Icompat /DHAVE_CONFIG_H /I.
@@ -14,7 +16,7 @@ LIBFLAGS=/nologo
 CORE_OBJS=event.obj buffer.obj bufferevent.obj bufferevent_sock.obj \
 	bufferevent_pair.obj listener.obj evmap.obj log.obj evutil.obj \
 	strlcpy.obj signal.obj bufferevent_filter.obj evthread.obj \
-	bufferevent_ratelim.obj evutil_rand.obj
+	bufferevent_ratelim.obj evutil_rand.obj evutil_time.obj
 WIN_OBJS=win32select.obj evthread_win32.obj buffer_iocp.obj \
 	event_iocp.obj bufferevent_async.obj
 EXTRA_OBJS=event_tagging.obj http.obj evdns.obj evrpc.obj

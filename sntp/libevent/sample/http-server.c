@@ -6,6 +6,9 @@
 
  */
 
+/* Compatibility for possible missing IPv6 declarations */
+#include "../util-internal.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,15 +40,12 @@
 #include <event2/util.h>
 #include <event2/keyvalq_struct.h>
 
-#ifdef _EVENT_HAVE_NETINET_IN_H
+#ifdef EVENT__HAVE_NETINET_IN_H
 #include <netinet/in.h>
 # ifdef _XOPEN_SOURCE_EXTENDED
 #  include <arpa/inet.h>
 # endif
 #endif
-
-/* Compatibility for possible missing IPv6 declarations */
-#include "../util-internal.h"
 
 #ifdef _WIN32
 #define stat _stat
@@ -134,7 +134,7 @@ dump_request_cb(struct evhttp_request *req, void *arg)
 		char cbuf[128];
 		n = evbuffer_remove(buf, cbuf, sizeof(buf)-1);
 		if (n > 0)
-		    fwrite(cbuf, 1, n, stdout);
+			(void) fwrite(cbuf, 1, n, stdout);
 	}
 	puts(">>>");
 

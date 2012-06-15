@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,8 +23,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT2_BUFFER_H_
-#define _EVENT2_BUFFER_H_
+#ifndef EVENT2_BUFFER_H_INCLUDED_
+#define EVENT2_BUFFER_H_INCLUDED_
 
 /** @file event2/buffer.h
 
@@ -78,10 +78,10 @@ extern "C" {
 
 #include <event2/event-config.h>
 #include <stdarg.h>
-#ifdef _EVENT_HAVE_SYS_TYPES_H
+#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef _EVENT_HAVE_SYS_UIO_H
+#ifdef EVENT__HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
 #include <event2/util.h>
@@ -93,7 +93,7 @@ extern "C" {
    @see event2/event.h for more information
 */
 struct evbuffer
-#ifdef _EVENT_IN_DOXYGEN
+#ifdef EVENT_IN_DOXYGEN_
 {}
 #endif
 ;
@@ -124,7 +124,7 @@ struct evbuffer_ptr {
 	struct {
 		void *chain;
 		size_t pos_in_chain;
-	} _internal;
+	} internal_;
 };
 
 /** Describes a single extent of memory inside an evbuffer.  Used for
@@ -132,10 +132,10 @@ struct evbuffer_ptr {
 
     @see evbuffer_reserve_space, evbuffer_commit_space, evbuffer_peek
  */
-#ifdef _EVENT_HAVE_SYS_UIO_H
+#ifdef EVENT__HAVE_SYS_UIO_H
 #define evbuffer_iovec iovec
 /* Internal use -- defined only if we are using the native struct iovec */
-#define _EVBUFFER_IOVEC_IS_NATIVE
+#define EVBUFFER_IOVEC_IS_NATIVE_
 #else
 struct evbuffer_iovec {
 	/** The start of the extent of memory. */
@@ -152,7 +152,6 @@ struct evbuffer_iovec {
 	occurred
  */
 struct evbuffer *evbuffer_new(void);
-
 /**
   Deallocate storage for an evbuffer.
 
@@ -185,6 +184,41 @@ void evbuffer_lock(struct evbuffer *buf);
    with evbuffer_enable_locking.
 */
 void evbuffer_unlock(struct evbuffer *buf);
+
+
+/** If this flag is set, then we will not use evbuffer_peek(),
+ * evbuffer_remove(), evbuffer_remove_buffer(), and so on to read bytes
+ * from this buffer: we'll only take bytes out of this buffer by
+ * writing them to the network (as with evbuffer_write_atmost), by
+ * removing them without observing them (as with evbuffer_drain),
+ * or by copying them all out at once (as with evbuffer_add_buffer).
+ *
+ * Using this option allows the implementation to use sendfile-based
+ * operations for evbuffer_add_file(); see that function for more
+ * information.
+ *
+ * This flag is on by default for bufferevents that can take advantage
+ * of it; you should never actually need to set it on a bufferevent's
+ * output buffer.
+ */
+#define EVBUFFER_FLAG_DRAINS_TO_FD 1
+
+/** Change the flags that are set for an evbuffer by adding more.
+ *
+ * @param buffer the evbuffer that the callback is watching.
+ * @param cb the callback whose status we want to change.
+ * @param flags One or more EVBUFFER_FLAG_* options
+ * @return 0 on success, -1 on failure.
+ */
+int evbuffer_set_flags(struct evbuffer *buf, ev_uint64_t flags);
+/** Change the flags that are set for an evbuffer by removing some.
+ *
+ * @param buffer the evbuffer that the callback is watching.
+ * @param cb the callback whose status we want to change.
+ * @param flags One or more EVBUFFER_FLAG_* options
+ * @return 0 on success, -1 on failure.
+ */
+int evbuffer_clear_flags(struct evbuffer *buf, ev_uint64_t flags);
 
 /**
   Returns the total number of bytes stored in the evbuffer
@@ -319,6 +353,20 @@ int evbuffer_remove(struct evbuffer *buf, void *data, size_t datlen);
 ev_ssize_t evbuffer_copyout(struct evbuffer *buf, void *data_out, size_t datlen);
 
 /**
+  Read data from the middle of an evbuffer, and leave the buffer unchanged.
+
+  If more bytes are requested than are available in the evbuffer, we
+  only extract as many bytes as were available.
+
+  @param buf the evbuffer to be read from
+  @param pos the position to start reading from
+  @param data_out the destination buffer to store the result
+  @param datlen the maximum size of the destination buffer
+  @return the number of bytes read, or -1 if we can't drain the buffer.
+ */
+ev_ssize_t evbuffer_copyout_from(struct evbuffer *buf, const struct evbuffer_ptr *pos, void *data_out, size_t datlen);
+
+/**
   Read data from an evbuffer into another evbuffer, draining
   the bytes from the source buffer.  This function avoids copy
   operations to the extent possible.
@@ -353,7 +401,9 @@ enum evbuffer_eol_style {
 	/** An EOL is a CR followed by an LF. */
 	EVBUFFER_EOL_CRLF_STRICT,
 	/** An EOL is a LF. */
-	EVBUFFER_EOL_LF
+	EVBUFFER_EOL_LF,
+	/** An EOL is a NUL character (that is, a single byte with value 0) */
+	EVBUFFER_EOL_NUL
 };
 
 /**
@@ -388,6 +438,22 @@ char *evbuffer_readln(struct evbuffer *buffer, size_t *n_read_out,
 int evbuffer_add_buffer(struct evbuffer *outbuf, struct evbuffer *inbuf);
 
 /**
+  Copy data from one evbuffer into another evbuffer.
+  
+  This is a non-destructive add.  The data from one buffer is copied
+  into the other buffer.  However, no unnecessary memory copies occur.
+  
+  Note that buffers already containing buffer references can't be added
+  to other buffers.
+  
+  @param outbuf the output buffer
+  @param inbuf the input buffer
+  @return 0 if successful, or -1 if an error occurred
+ */
+int evbuffer_add_buffer_reference(struct evbuffer *outbuf,
+    struct evbuffer *inbuf);
+
+/**
    A cleanup function for a piece of memory added to an evbuffer by
    reference.
 
@@ -419,8 +485,9 @@ int evbuffer_add_reference(struct evbuffer *outbuf,
   Copy data from a file into the evbuffer for writing to a socket.
 
   This function avoids unnecessary data copies between userland and
-  kernel.  Where available, it uses sendfile or splice; failing those,
-  it tries to use mmap.
+  kernel.  If sendfile is available and the EVBUFFER_FLAG_DRAINS_TO_FD
+  flag is set, it uses those functions.  Otherwise, it tries to use
+  mmap (or CreateFileMapping on Windows).
 
   The function owns the resulting file descriptor and will close it
   when finished transferring data.
@@ -712,8 +779,10 @@ struct evbuffer_ptr evbuffer_search_eol(struct evbuffer *buffer,
     the buffer does not have as much data as you asked to see).
 
     @param buffer the evbuffer to peek into,
-    @param len the number of bytes to try to peek.  If negative, we
-       will try to fill as much of vec_out as we can.
+    @param len the number of bytes to try to peek.  If len is negative, we
+       will try to fill as much of vec_out as we can.  If len is negative
+       and vec_out is not provided, we return the number of evbuffer_iovecs
+       that would be needed to get all the data in the buffer.
     @param start_at an evbuffer_ptr indicating the point at which we
        should start looking for data.  NULL means, "At the start of the
        buffer."
@@ -915,8 +984,23 @@ struct event_base;
  */
 int evbuffer_defer_callbacks(struct evbuffer *buffer, struct event_base *base);
 
+/**
+  Append data from 1 or more iovec's to an evbuffer
+
+  Calculates the number of bytes needed for an iovec structure and guarantees
+  all data will fit into a single chain. Can be used in lieu of functionality
+  which calls evbuffer_add() constantly before being used to increase
+  performance.
+
+  @param buffer the destination buffer
+  @param vec the source iovec
+  @param n_vec the number of iovec structures.
+  @return the number of bytes successfully written to the output buffer.
+*/
+size_t evbuffer_add_iovec(struct evbuffer * buffer, struct evbuffer_iovec * vec, int n_vec);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _EVENT2_BUFFER_H_ */
+#endif /* EVENT2_BUFFER_H_INCLUDED_ */

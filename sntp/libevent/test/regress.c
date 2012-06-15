@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2003-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,6 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "util-internal.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -34,7 +35,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
@@ -63,8 +64,8 @@
 #include "event2/util.h"
 #include "event-internal.h"
 #include "evthread-internal.h"
-#include "util-internal.h"
 #include "log-internal.h"
+#include "time-internal.h"
 
 #include "regress.h"
 
@@ -87,7 +88,6 @@ static struct timeval tcalled;
 
 
 #define TEST1	"this is a test"
-#define SECONDS	1
 
 #ifndef SHUT_WR
 #define SHUT_WR 1
@@ -233,21 +233,7 @@ multiple_read_cb(evutil_socket_t fd, short event, void *arg)
 static void
 timeout_cb(evutil_socket_t fd, short event, void *arg)
 {
-	struct timeval tv;
-	int diff;
-
 	evutil_gettimeofday(&tcalled, NULL);
-	if (evutil_timercmp(&tcalled, &tset, >))
-		evutil_timersub(&tcalled, &tset, &tv);
-	else
-		evutil_timersub(&tset, &tcalled, &tv);
-
-	diff = tv.tv_sec*1000 + tv.tv_usec/1000 - SECONDS * 1000;
-	if (diff < 0)
-		diff = -diff;
-
-	if (diff < 100)
-		test_ok = 1;
 }
 
 struct both {
@@ -316,7 +302,10 @@ test_simpleread(void)
 	/* Very simple read test */
 	setup_test("Simple read: ");
 
-	write(pair[0], TEST1, strlen(TEST1)+1);
+	if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+		tt_fail_perror("write");
+	}
+
 	shutdown(pair[0], SHUT_WR);
 
 	event_set(&ev, pair[1], EV_READ, simple_read_cb, &ev);
@@ -358,7 +347,10 @@ test_simpleread_multiple(void)
 	/* Very simple read test */
 	setup_test("Simple read to multiple evens: ");
 
-	write(pair[0], TEST1, strlen(TEST1)+1);
+	if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+		tt_fail_perror("write");
+	}
+
 	shutdown(pair[0], SHUT_WR);
 
 	event_set(&one, pair[1], EV_READ, simpleread_multiple_cb, NULL);
@@ -577,14 +569,18 @@ test_simpletimeout(void)
 
 	setup_test("Simple timeout: ");
 
-	tv.tv_usec = 0;
-	tv.tv_sec = SECONDS;
+	tv.tv_usec = 200*1000;
+	tv.tv_sec = 0;
+	evutil_timerclear(&tcalled);
 	evtimer_set(&ev, timeout_cb, NULL);
 	evtimer_add(&ev, &tv);
 
 	evutil_gettimeofday(&tset, NULL);
 	event_dispatch();
+	test_timeval_diff_eq(&tset, &tcalled, 200);
 
+	test_ok = 1;
+end:
 	cleanup_test();
 }
 
@@ -618,6 +614,28 @@ test_persistent_timeout(void)
 
 	event_dispatch();
 
+	event_del(&ev);
+}
+
+static void
+test_persistent_timeout_jump(void *ptr)
+{
+	struct basic_test_data *data = ptr;
+	struct event ev;
+	int count = 0;
+	struct timeval msec100 = { 0, 100 * 1000 };
+	struct timeval msec50 = { 0, 50 * 1000 };
+	struct timeval msec300 = { 0, 300 * 1000 };
+
+	event_assign(&ev, data->base, -1, EV_PERSIST, periodic_timeout_cb, &count);
+	event_add(&ev, &msec100);
+	/* Wait for a bit */
+	evutil_usleep_(&msec300);
+	event_base_loopexit(data->base, &msec50);
+	event_base_dispatch(data->base);
+	tt_int_op(count, ==, 1);
+
+end:
 	event_del(&ev);
 }
 
@@ -671,9 +689,11 @@ test_persistent_active_timeout(void *ptr)
 	tv_exit.tv_usec = 600 * 1000;
 	event_base_loopexit(base, &tv_exit);
 
+	event_base_assert_ok_(base);
 	evutil_gettimeofday(&start, NULL);
 
 	event_base_dispatch(base);
+	event_base_assert_ok_(base);
 
 	tt_int_op(res.n, ==, 3);
 	tt_int_op(res.events[0], ==, EV_READ);
@@ -699,7 +719,7 @@ common_timeout_cb(evutil_socket_t fd, short event, void *arg)
 	struct common_timeout_info *ti = arg;
 	++ti->count;
 	evutil_gettimeofday(&ti->called_at, NULL);
-	if (ti->count >= 6)
+	if (ti->count >= 4)
 		event_del(&ti->ev);
 }
 
@@ -712,7 +732,7 @@ test_common_timeout(void *ptr)
 	int i;
 	struct common_timeout_info info[100];
 
-	struct timeval now;
+	struct timeval start;
 	struct timeval tmp_100_ms = { 0, 100*1000 };
 	struct timeval tmp_200_ms = { 0, 200*1000 };
 
@@ -736,28 +756,40 @@ test_common_timeout(void *ptr)
 		event_assign(&info[i].ev, base, -1, EV_TIMEOUT|EV_PERSIST,
 		    common_timeout_cb, &info[i]);
 		if (i % 2) {
-			event_add(&info[i].ev, ms_100);
+			if ((i%20)==1) {
+				/* Glass-box test: Make sure we survive the
+				 * transition to non-common timeouts. It's
+				 * a little tricky. */
+				event_add(&info[i].ev, ms_200);
+				event_add(&info[i].ev, &tmp_100_ms);
+			} else if ((i%20)==3) {
+				/* Check heap-to-common too. */
+				event_add(&info[i].ev, &tmp_200_ms);
+				event_add(&info[i].ev, ms_100);
+			} else if ((i%20)==5) {
+				/* Also check common-to-common. */
+				event_add(&info[i].ev, ms_200);
+				event_add(&info[i].ev, ms_100);
+			} else {
+				event_add(&info[i].ev, ms_100);
+			}
 		} else {
 			event_add(&info[i].ev, ms_200);
 		}
 	}
 
+	event_base_assert_ok_(base);
+	evutil_gettimeofday(&start, NULL);
 	event_base_dispatch(base);
 
-	evutil_gettimeofday(&now, NULL);
+	event_base_assert_ok_(base);
 
 	for (i=0; i<10; ++i) {
-		struct timeval tmp;
-		int ms_diff;
-		tt_int_op(info[i].count, ==, 6);
-		evutil_timersub(&now, &info[i].called_at, &tmp);
-		ms_diff = tmp.tv_usec/1000 + tmp.tv_sec*1000;
+		tt_int_op(info[i].count, ==, 4);
 		if (i % 2) {
-			tt_int_op(ms_diff, >, 500);
-			tt_int_op(ms_diff, <, 700);
+			test_timeval_diff_eq(&start, &info[i].called_at, 400);
 		} else {
-			tt_int_op(ms_diff, >, -100);
-			tt_int_op(ms_diff, <, 100);
+			test_timeval_diff_eq(&start, &info[i].called_at, 800);
 		}
 	}
 
@@ -807,7 +839,9 @@ test_fork(void)
 	tt_assert(current_base);
 	evthread_make_base_notifiable(current_base);
 
-	write(pair[0], TEST1, strlen(TEST1)+1);
+	if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+		tt_fail_perror("write");
+	}
 
 	event_set(&ev, pair[1], EV_READ, simple_read_cb, &ev);
 	if (event_add(&ev, NULL) == -1)
@@ -816,12 +850,19 @@ test_fork(void)
 	evsignal_set(&sig_ev, SIGCHLD, child_signal_cb, &got_sigchld);
 	evsignal_add(&sig_ev, NULL);
 
-	if ((pid = fork()) == 0) {
+	event_base_assert_ok_(current_base);
+	TT_BLATHER(("Before fork"));
+	if ((pid = regress_fork()) == 0) {
 		/* in the child */
+		TT_BLATHER(("In child, before reinit"));
+		event_base_assert_ok_(current_base);
 		if (event_reinit(current_base) == -1) {
 			fprintf(stdout, "FAILED (reinit)\n");
 			exit(1);
 		}
+		TT_BLATHER(("After reinit"));
+		event_base_assert_ok_(current_base);
+		TT_BLATHER(("After assert-ok"));
 
 		evsignal_del(&sig_ev);
 
@@ -838,14 +879,21 @@ test_fork(void)
 	}
 
 	/* wait for the child to read the data */
-	sleep(1);
+	{
+		const struct timeval tv = { 0, 100000 };
+		evutil_usleep_(&tv);
+	}
 
-	write(pair[0], TEST1, strlen(TEST1)+1);
+	if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+		tt_fail_perror("write");
+	}
 
+	TT_BLATHER(("Before waitpid"));
 	if (waitpid(pid, &status, 0) == -1) {
 		fprintf(stdout, "FAILED (fork)\n");
 		exit(1);
 	}
+	TT_BLATHER(("After waitpid"));
 
 	if (WEXITSTATUS(status) != 76) {
 		fprintf(stdout, "FAILED (exit): %d\n", WEXITSTATUS(status));
@@ -853,7 +901,10 @@ test_fork(void)
 	}
 
 	/* test that the current event loop still works */
-	write(pair[0], TEST1, strlen(TEST1)+1);
+	if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+		fprintf(stderr, "%s: write\n", __func__);
+	}
+
 	shutdown(pair[0], SHUT_WR);
 
 	event_dispatch();
@@ -898,7 +949,8 @@ test_simplesignal(void)
 	evsignal_add(&ev, NULL);
 
 	memset(&itv, 0, sizeof(itv));
-	itv.it_value.tv_sec = 1;
+	itv.it_value.tv_sec = 0;
+	itv.it_value.tv_usec = 100000;
 	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
 		goto skip_simplesignal;
 
@@ -925,7 +977,8 @@ test_multiplesignal(void)
 	evsignal_add(&ev_two, NULL);
 
 	memset(&itv, 0, sizeof(itv));
-	itv.it_value.tv_sec = 1;
+	itv.it_value.tv_sec = 0;
+	itv.it_value.tv_usec = 100000;
 	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
 		goto skip_simplesignal;
 
@@ -1088,12 +1141,12 @@ test_signal_restore(void)
 {
 	struct event ev;
 	struct event_base *base = event_init();
-#ifdef _EVENT_HAVE_SIGACTION
+#ifdef EVENT__HAVE_SIGACTION
 	struct sigaction sa;
 #endif
 
 	test_ok = 0;
-#ifdef _EVENT_HAVE_SIGACTION
+#ifdef EVENT__HAVE_SIGACTION
 	sa.sa_handler = signal_cb_sa;
 	sa.sa_flags = 0x0;
 	sigemptyset(&sa.sa_mask);
@@ -1214,6 +1267,43 @@ end:
 }
 
 static void
+event_selfarg_cb(evutil_socket_t fd, short event, void *arg)
+{
+	struct event *ev = arg;
+	struct event_base *base = event_get_base(ev);
+	event_base_assert_ok_(base);
+	event_base_loopexit(base, NULL);
+	tt_want(ev == event_base_get_running_event(base));
+}
+
+static void
+test_event_new_selfarg(void *ptr)
+{
+	struct basic_test_data *data = ptr;
+	struct event_base *base = data->base;
+	struct event *ev = event_new(base, -1, EV_READ, event_selfarg_cb,
+                                     event_self_cbarg());
+
+	event_active(ev, EV_READ, 1);
+	event_base_dispatch(base);
+
+	event_free(ev);
+}
+
+static void
+test_event_assign_selfarg(void *ptr)
+{
+	struct basic_test_data *data = ptr;
+	struct event_base *base = data->base;
+	struct event ev;
+
+	event_assign(&ev, base, -1, EV_READ, event_selfarg_cb,
+                     event_self_cbarg());
+	event_active(&ev, EV_READ, 1);
+	event_base_dispatch(base);
+}
+
+static void
 test_bad_assign(void *ptr)
 {
 	struct event ev;
@@ -1314,23 +1404,22 @@ test_loopexit(void)
 	evtimer_set(&ev, timeout_cb, NULL);
 	evtimer_add(&ev, &tv);
 
-	tv.tv_usec = 0;
-	tv.tv_sec = 1;
+	tv.tv_usec = 300*1000;
+	tv.tv_sec = 0;
 	event_loopexit(&tv);
 
 	evutil_gettimeofday(&tv_start, NULL);
 	event_dispatch();
 	evutil_gettimeofday(&tv_end, NULL);
-	evutil_timersub(&tv_end, &tv_start, &tv_end);
 
 	evtimer_del(&ev);
 
 	tt_assert(event_base_got_exit(global_base));
 	tt_assert(!event_base_got_break(global_base));
 
-	if (tv.tv_sec < 2)
-		test_ok = 1;
+	test_timeval_diff_eq(&tv_start, &tv_end, 300);
 
+	test_ok = 1;
 end:
 	cleanup_test();
 }
@@ -1338,27 +1427,31 @@ end:
 static void
 test_loopexit_multiple(void)
 {
-	struct timeval tv;
+	struct timeval tv, tv_start, tv_end;
 	struct event_base *base;
 
 	setup_test("Loop Multiple exit: ");
 
 	base = event_base_new();
 
-	tv.tv_usec = 0;
-	tv.tv_sec = 1;
+	tv.tv_usec = 200*1000;
+	tv.tv_sec = 0;
 	event_base_loopexit(base, &tv);
 
 	tv.tv_usec = 0;
-	tv.tv_sec = 2;
+	tv.tv_sec = 3;
 	event_base_loopexit(base, &tv);
 
+	evutil_gettimeofday(&tv_start, NULL);
 	event_base_dispatch(base);
+	evutil_gettimeofday(&tv_end, NULL);
 
 	tt_assert(event_base_got_exit(base));
 	tt_assert(!event_base_got_break(base));
 
 	event_base_free(base);
+
+	test_timeval_diff_eq(&tv_start, &tv_end, 200);
 
 	test_ok = 1;
 
@@ -1413,7 +1506,11 @@ re_add_read_cb(evutil_socket_t fd, short event, void *arg)
 	char buf[256];
 	struct event *ev_other = arg;
 	readd_test_event_last_added = ev_other;
-	(void) read(fd, buf, sizeof(buf));
+
+	if (read(fd, buf, sizeof(buf)) < 0) {
+		tt_fail_perror("read");
+	}
+
 	event_add(ev_other, NULL);
 	++test_ok;
 }
@@ -1426,8 +1523,15 @@ test_nonpersist_readd(void)
 	setup_test("Re-add nonpersistent events: ");
 	event_set(&ev1, pair[0], EV_READ, re_add_read_cb, &ev2);
 	event_set(&ev2, pair[1], EV_READ, re_add_read_cb, &ev1);
-	(void) write(pair[0], "Hello", 5);
-	(void) write(pair[1], "Hello", 5);
+
+	if (write(pair[0], "Hello", 5) < 0) {
+		tt_fail_perror("write(pair[0])");
+	}
+
+	if (write(pair[1], "Hello", 5) < 0) {
+		tt_fail_perror("write(pair[1])\n");
+	}
+
 	if (event_add(&ev1, NULL) == -1 ||
 	    event_add(&ev2, NULL) == -1) {
 		test_ok = 0;
@@ -1542,6 +1646,58 @@ test_priorities(void)
 		test_priorities_impl(3);
 }
 
+/* priority-active-inversion: activate a higher-priority event, and make sure
+ * it keeps us from running a lower-priority event first. */
+static int n_pai_calls = 0;
+static struct event pai_events[3];
+
+static void
+prio_active_inversion_cb(evutil_socket_t fd, short what, void *arg)
+{
+	int *call_order = arg;
+	*call_order = n_pai_calls++;
+	if (n_pai_calls == 1) {
+		/* This should activate later, even though it shares a
+		   priority with us. */
+		event_active(&pai_events[1], EV_READ, 1);
+		/* This should activate next, since its priority is higher,
+		   even though we activated it second. */
+		event_active(&pai_events[2], EV_TIMEOUT, 1);
+	}
+}
+
+static void
+test_priority_active_inversion(void *data_)
+{
+	struct basic_test_data *data = data_;
+	struct event_base *base = data->base;
+	int call_order[3];
+	int i;
+	tt_int_op(event_base_priority_init(base, 8), ==, 0);
+
+	n_pai_calls = 0;
+	memset(call_order, 0, sizeof(call_order));
+
+	for (i=0;i<3;++i) {
+		event_assign(&pai_events[i], data->base, -1, 0,
+		    prio_active_inversion_cb, &call_order[i]);
+	}
+
+	event_priority_set(&pai_events[0], 4);
+	event_priority_set(&pai_events[1], 4);
+	event_priority_set(&pai_events[2], 0);
+
+	event_active(&pai_events[0], EV_WRITE, 1);
+
+	event_base_dispatch(base);
+	tt_int_op(n_pai_calls, ==, 3);
+	tt_int_op(call_order[0], ==, 0);
+	tt_int_op(call_order[1], ==, 2);
+	tt_int_op(call_order[2], ==, 1);
+end:
+	;
+}
+
 
 static void
 test_multiple_cb(evutil_socket_t fd, short event, void *arg)
@@ -1565,7 +1721,11 @@ test_multiple_events_for_same_fd(void)
    event_add(&e2, NULL);
    event_loop(EVLOOP_ONCE);
    event_del(&e2);
-   write(pair[1], TEST1, strlen(TEST1)+1);
+
+   if (write(pair[1], TEST1, strlen(TEST1)+1) < 0) {
+	   tt_fail_perror("write");
+   }
+
    event_loop(EVLOOP_ONCE);
    event_del(&e1);
 
@@ -1592,8 +1752,12 @@ read_once_cb(evutil_socket_t fd, short event, void *arg)
 		test_ok = 0;
 	} else if (len) {
 		/* Assumes global pair[0] can be used for writing */
-		write(pair[0], TEST1, strlen(TEST1)+1);
-		test_ok = 1;
+		if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+			tt_fail_perror("write");
+			test_ok = 0;
+		} else {
+			test_ok = 1;
+		}
 	}
 
 	called++;
@@ -1608,11 +1772,13 @@ test_want_only_once(void)
 	/* Very simple read test */
 	setup_test("Want read only once: ");
 
-	write(pair[0], TEST1, strlen(TEST1)+1);
+	if (write(pair[0], TEST1, strlen(TEST1)+1) < 0) {
+		tt_fail_perror("write");
+	}
 
 	/* Setup the loop termination */
 	evutil_timerclear(&tv);
-	tv.tv_sec = 1;
+	tv.tv_usec = 300*1000;
 	event_loopexit(&tv);
 
 	event_set(&ev, pair[1], EV_READ, read_once_cb, &ev);
@@ -1850,10 +2016,10 @@ end:
 		event_config_free(cfg);
 }
 
-#ifdef _EVENT_HAVE_SETENV
+#ifdef EVENT__HAVE_SETENV
 #define SETENV_OK
-#elif !defined(_EVENT_HAVE_SETENV) && defined(_EVENT_HAVE_PUTENV)
-static void setenv(const char *k, const char *v, int _o)
+#elif !defined(EVENT__HAVE_SETENV) && defined(EVENT__HAVE_PUTENV)
+static void setenv(const char *k, const char *v, int o_)
 {
 	char b[256];
 	evutil_snprintf(b, sizeof(b), "%s=%s",k,v);
@@ -1862,9 +2028,9 @@ static void setenv(const char *k, const char *v, int _o)
 #define SETENV_OK
 #endif
 
-#ifdef _EVENT_HAVE_UNSETENV
+#ifdef EVENT__HAVE_UNSETENV
 #define UNSETENV_OK
-#elif !defined(_EVENT_HAVE_UNSETENV) && defined(_EVENT_HAVE_PUTENV)
+#elif !defined(EVENT__HAVE_UNSETENV) && defined(EVENT__HAVE_PUTENV)
 static void unsetenv(const char *k)
 {
 	char b[256];
@@ -1881,7 +2047,7 @@ methodname_to_envvar(const char *mname, char *buf, size_t buflen)
 	char *cp;
 	evutil_snprintf(buf, buflen, "EVENT_NO%s", mname);
 	for (cp = buf; *cp; ++cp) {
-		*cp = EVUTIL_TOUPPER(*cp);
+		*cp = EVUTIL_TOUPPER_(*cp);
 	}
 }
 #endif
@@ -1902,7 +2068,7 @@ test_base_environ(void *arg)
 	setenv("EVENT_NOWAFFLES", "1", 1);
 	unsetenv("EVENT_NOWAFFLES");
 	if (getenv("EVENT_NOWAFFLES") != NULL) {
-#ifndef _EVENT_HAVE_UNSETENV
+#ifndef EVENT__HAVE_UNSETENV
 		TT_DECLARE("NOTE", ("Can't fake unsetenv; skipping test"));
 #else
 		TT_DECLARE("NOTE", ("unsetenv doesn't work; skipping test"));
@@ -1985,6 +2151,15 @@ end:
 }
 
 static void
+immediate_called_twice_cb(evutil_socket_t fd, short event, void *arg)
+{
+	tt_int_op(event, ==, EV_TIMEOUT);
+	called += 1000;
+end:
+	;
+}
+
+static void
 test_event_once(void *ptr)
 {
 	struct basic_test_data *data = ptr;
@@ -2002,13 +2177,24 @@ test_event_once(void *ptr)
 	tt_int_op(r, ==, 0);
 	r = event_base_once(data->base, -1, 0, NULL, NULL, NULL);
 	tt_int_op(r, <, 0);
+	r = event_base_once(data->base, -1, EV_TIMEOUT,
+	    immediate_called_twice_cb, NULL, NULL);
+	tt_int_op(r, ==, 0);
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	r = event_base_once(data->base, -1, EV_TIMEOUT,
+	    immediate_called_twice_cb, NULL, &tv);
+	tt_int_op(r, ==, 0);
 
-	write(data->pair[1], TEST1, strlen(TEST1)+1);
+	if (write(data->pair[1], TEST1, strlen(TEST1)+1) < 0) {
+		tt_fail_perror("write");
+	}
+
 	shutdown(data->pair[1], SHUT_WR);
 
 	event_base_dispatch(data->base);
 
-	tt_int_op(called, ==, 101);
+	tt_int_op(called, ==, 2101);
 end:
 	;
 }
@@ -2018,7 +2204,7 @@ test_event_pending(void *ptr)
 {
 	struct basic_test_data *data = ptr;
 	struct event *r=NULL, *w=NULL, *t=NULL;
-	struct timeval tv, now, tv2, diff;
+	struct timeval tv, now, tv2;
 
 	tv.tv_sec = 0;
 	tv.tv_usec = 500 * 1000;
@@ -2041,10 +2227,8 @@ test_event_pending(void *ptr)
 	tt_assert( event_pending(t, EV_TIMEOUT, &tv2));
 
 	tt_assert(evutil_timercmp(&tv2, &now, >));
-	evutil_timeradd(&now, &tv, &tv);
-	evutil_timersub(&tv2, &tv, &diff);
-	tt_int_op(diff.tv_sec, ==, 0);
-	tt_int_op(labs(diff.tv_usec), <, 1000);
+
+	test_timeval_diff_eq(&now, &tv2, 500);
 
 end:
 	if (r) {
@@ -2131,17 +2315,17 @@ end:
 }
 #endif
 
-#ifdef _EVENT_DISABLE_MM_REPLACEMENT
+#ifdef EVENT__DISABLE_MM_REPLACEMENT
 static void
 test_mm_functions(void *arg)
 {
-	_tinytest_set_test_skipped();
+	tinytest_set_test_skipped_();
 }
 #else
 static int
-check_dummy_mem_ok(void *_mem)
+check_dummy_mem_ok(void *mem_)
 {
-	char *mem = _mem;
+	char *mem = mem_;
 	mem -= 16;
 	return !memcmp(mem, "{[<guardedram>]}", 16);
 }
@@ -2155,22 +2339,22 @@ dummy_malloc(size_t len)
 }
 
 static void *
-dummy_realloc(void *_mem, size_t len)
+dummy_realloc(void *mem_, size_t len)
 {
-	char *mem = _mem;
+	char *mem = mem_;
 	if (!mem)
 		return dummy_malloc(len);
-	tt_want(check_dummy_mem_ok(_mem));
+	tt_want(check_dummy_mem_ok(mem_));
 	mem -= 16;
 	mem = realloc(mem, len+16);
 	return mem+16;
 }
 
 static void
-dummy_free(void *_mem)
+dummy_free(void *mem_)
 {
-	char *mem = _mem;
-	tt_want(check_dummy_mem_ok(_mem));
+	char *mem = mem_;
+	tt_want(check_dummy_mem_ok(mem_));
 	mem -= 16;
 	free(mem);
 }
@@ -2279,15 +2463,18 @@ struct testcase_t main_testcases[] = {
 	BASIC(free_active_base, TT_FORK|TT_NEED_SOCKETPAIR),
 
 	BASIC(manipulate_active_events, TT_FORK|TT_NEED_BASE),
+	BASIC(event_new_selfarg, TT_FORK|TT_NEED_BASE),
+	BASIC(event_assign_selfarg, TT_FORK|TT_NEED_BASE),
 
 	BASIC(bad_assign, TT_FORK|TT_NEED_BASE|TT_NO_LOGS),
 	BASIC(bad_reentrant, TT_FORK|TT_NEED_BASE|TT_NO_LOGS),
 
-	/* These are still using the old API */
 	LEGACY(persistent_timeout, TT_FORK|TT_NEED_BASE),
+	{ "persistent_timeout_jump", test_persistent_timeout_jump, TT_FORK|TT_NEED_BASE, &basic_setup, NULL },
 	{ "persistent_active_timeout", test_persistent_active_timeout,
 	  TT_FORK|TT_NEED_BASE, &basic_setup, NULL },
 	LEGACY(priorities, TT_FORK|TT_NEED_BASE),
+	BASIC(priority_active_inversion, TT_FORK|TT_NEED_BASE),
 	{ "common_timeout", test_common_timeout, TT_FORK|TT_NEED_BASE,
 	  &basic_setup, NULL },
 

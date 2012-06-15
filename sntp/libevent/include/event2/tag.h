@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,8 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT2_TAG_H_
-#define _EVENT2_TAG_H_
+#ifndef EVENT2_TAG_H_INCLUDED_
+#define EVENT2_TAG_H_INCLUDED_
 
 /** @file event2/tag.h
 
@@ -38,10 +38,10 @@ extern "C" {
 #endif
 
 #include <event2/event-config.h>
-#ifdef _EVENT_HAVE_SYS_TYPES_H
+#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
@@ -121,4 +121,4 @@ int evtag_unmarshal_timeval(struct evbuffer *evbuf, ev_uint32_t need_tag,
 }
 #endif
 
-#endif /* _EVENT2_TAG_H_ */
+#endif /* EVENT2_TAG_H_INCLUDED_ */

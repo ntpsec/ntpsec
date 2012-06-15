@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 Niels Provos and Nick Mathewson
+ * Copyright 2009-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,6 +25,9 @@
  *
  */
 
+/* for EVUTIL_ERR_CONNECT_RETRIABLE macro */
+#include "util-internal.h"
+
 #include <sys/types.h>
 #ifdef _WIN32
 #include <winsock2.h>
@@ -43,9 +46,6 @@
 #include "event2/bufferevent.h"
 #include "event2/buffer.h"
 #include "event2/util.h"
-
-/* for EVUTIL_ERR_CONNECT_RETRIABLE macro */
-#include "util-internal.h"
 
 const char *resource = NULL;
 struct event_base *base = NULL;
