@@ -1,3 +1,5 @@
+* In sntp/m4/ntp_openssl.m4, Support multiple package names for the
+  crypto library.  Add legacy support for -Wl,-rpath.
 (4.2.7p282) 2012/06/15 Released by Harlan Stenn <stenn@ntp.org>
 * tickadj may need to be linked with PTHREAD_LIBS.
 (4.2.7p281) 2012/06/14 Released by Harlan Stenn <stenn@ntp.org>
