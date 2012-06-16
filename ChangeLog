@@ -1,3 +1,4 @@
+(4.2.7p283) 2012/06/16 Released by Harlan Stenn <stenn@ntp.org>
 * In sntp/m4/ntp_openssl.m4, Support multiple package names for the
   crypto library.  Add legacy support for -Wl,-rpath.
 (4.2.7p282) 2012/06/15 Released by Harlan Stenn <stenn@ntp.org>
