@@ -33,7 +33,7 @@ AC_ARG_WITH(
     [crypto],
     [AS_HELP_STRING(
 	[--with-crypto],
-	[+ =openssl]
+	[+ =openssl,libcrypto]
     )]
 )
 AC_ARG_WITH(
@@ -59,33 +59,48 @@ AC_ARG_WITH(
 )
 ntp_openssl=no
 ntp_openssl_from_pkg_config=no
-with_crypto=${with_crypto:-yes}
+with_crypto=${with_crypto:-openssl,libcrypto}
 case "$with_crypto" in
- openssl)
-    with_crypto=yes
+ yes)
+    with_crypto=openssl,libcrypto
 esac
 case "$with_crypto:${PKG_CONFIG:+notempty}:${with_openssl_libdir-notgiven}:${with_openssl_incdir-notgiven}" in
- yes:notempty:notgiven:notgiven)
-    if $PKG_CONFIG --exists openssl ; then
-	CPPFLAGS_NTP="$CPPFLAGS_NTP `$PKG_CONFIG --cflags-only-I openssl`"
-	CFLAGS_NTP="$CFLAGS_NTP `$PKG_CONFIG --cflags-only-other openssl`"
-	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-L openssl`"
-	LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-l openssl`"
-	LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-other openssl`"
-	VER_SUFFIX=o
-	ntp_openssl=yes
-	ntp_openssl_from_pkg_config=yes
-    fi
+ no:*) ;;
+ *:notempty:notgiven:notgiven)
+    for pkg in `echo $with_crypto | sed -e 's/,/ /'`; do
+	AC_MSG_CHECKING([pkg-config for $pkg])
+	if $PKG_CONFIG --exists $pkg ; then
+	    CPPFLAGS_NTP="$CPPFLAGS_NTP `$PKG_CONFIG --cflags-only-I $pkg`"
+	    CFLAGS_NTP="$CFLAGS_NTP `$PKG_CONFIG --cflags-only-other $pkg`"
+	    LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-L $pkg`"
+	    LDADD_NTP="$LDADD_NTP `$PKG_CONFIG --libs-only-l $pkg`"
+	    LDFLAGS_NTP="$LDFLAGS_NTP `$PKG_CONFIG --libs-only-other $pkg`"
+	    VER_SUFFIX=o
+	    ntp_openssl=yes
+	    ntp_openssl_from_pkg_config=yes
+	    AC_MSG_RESULT([yes])
+
+	    break
+	fi
+	AC_MSG_RESULT([no])
+    done
 esac
 case "$with_crypto:$ntp_openssl" in
- yes:no)
+ no:*) ;;
+ *:no)
     need_dash_r=
+    need_dash_Wlrpath=
     case "${with_rpath-notgiven}" in
      yes)
+	# Lame - what to do if we need -Wl... but not -R?
 	need_dash_r=1
 	;;
      notgiven)
 	case "$host" in
+	 *-*-linux*)
+	    # This may really only be true for gcc
+	    need_dash_Wlrpath=1
+	    ;;
 	 *-*-netbsd*)
 	    need_dash_r=1
 	    ;;
@@ -194,6 +209,10 @@ case "$with_crypto:$ntp_openssl" in
 	    case "$need_dash_r" in
 	     1)
 		LDFLAGS_NTP="$LDFLAGS_NTP -R$openssl_libdir"
+	    esac
+	    case "$need_dash_Wlrpath" in
+	     1)
+		LDFLAGS_NTP="$LDFLAGS_NTP -Wl,-rpath,$openssl_libdir"
 	    esac
 	    ;;
 	esac
