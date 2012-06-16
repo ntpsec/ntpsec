@@ -1,3 +1,5 @@
+* [Bug 2225] libevent configure hangs.
+* Update bundled libevent to git master, post libevent 2.1.1-alpha.
 * In sntp/m4/ntp_openssl.m4, Support multiple package names for the
   crypto library.  Add legacy support for -Wl,-rpath.
 (4.2.7p282) 2012/06/15 Released by Harlan Stenn <stenn@ntp.org>
