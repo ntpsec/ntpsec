@@ -190,7 +190,10 @@ epoll_init(struct event_base *base)
 				epollop->timerfd = -1;
 			}
 		} else {
-			event_warn("timerfd_create");
+			if (EINVAL != errno && ENOSYS != errno) {
+				event_warn("timerfd_create");
+			}
+			epollop->timerfd = -1;
 		}
 	} else {
 		epollop->timerfd = -1;
