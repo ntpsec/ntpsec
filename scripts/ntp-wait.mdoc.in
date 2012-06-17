@@ -3,7 +3,7 @@
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  June 16, 2012 at 11:18:28 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  June 16, 2012 at 09:33:19 PM by AutoGen 5.14
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME

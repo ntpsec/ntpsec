@@ -3,7 +3,7 @@
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  June 16, 2012 at 11:21:04 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  June 16, 2012 at 09:35:36 PM by AutoGen 5.14
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
