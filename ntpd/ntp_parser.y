@@ -168,6 +168,7 @@
 %token	<Integer>	T_Nic
 %token	<Integer>	T_Nolink
 %token	<Integer>	T_Nomodify
+%token	<Integer>	T_Nomrulist
 %token	<Integer>	T_None
 %token	<Integer>	T_Nonvolatile
 %token	<Integer>	T_Nopeer
@@ -845,6 +846,7 @@ access_control_flag
 	|	T_Limited
 	|	T_Lowpriotrap
 	|	T_Nomodify
+	|	T_Nomrulist
 	|	T_Nopeer
 	|	T_Noquery
 	|	T_Noserve

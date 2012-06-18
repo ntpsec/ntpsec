@@ -1,3 +1,8 @@
+* [Bug 2227] Enable mrulist access control via "restrict ... nomrulist".
+* Conditionalize msyslog messages about rejected mode 6 requests due to
+  nomodify and nomrulist restrictions under "logconfig +sysinfo".
+* Increment sys_restricted in a few rejection paths due to nomodify
+  restrictions where previosuly overlooked.
 (4.2.7p284) 2012/06/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2225] libevent configure hangs.
 * Update bundled libevent to git master, post libevent 2.1.1-alpha.
