@@ -159,6 +159,7 @@ struct key_tok ntp_keywords[] = {
 { "lowpriotrap",	T_Lowpriotrap,		FOLLBY_TOKEN },
 { "mask",		T_Mask,			FOLLBY_TOKEN },
 { "nomodify",		T_Nomodify,		FOLLBY_TOKEN },
+{ "nomrulist",		T_Nomrulist,		FOLLBY_TOKEN },
 { "nopeer",		T_Nopeer,		FOLLBY_TOKEN },
 { "noquery",		T_Noquery,		FOLLBY_TOKEN },
 { "noserve",		T_Noserve,		FOLLBY_TOKEN },

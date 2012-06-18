@@ -1580,18 +1580,20 @@ getarg(
 		if ('&' == str[0]) {
 			if (!atouint(&str[1], &ul)) {
 				fprintf(stderr,
-					"***Association value `%s' invalid/undecodable\n",
+					"***Association index `%s' invalid/undecodable\n",
 					str);
 				return 0;
 			}
-			if (0 == numassoc)
+			if (0 == numassoc) {
 				dogetassoc(stdout);
-			if (ul > numassoc) {
-				fprintf(stderr,
-					"***Association for `%s' unknown (max &%d)\n",
-					str, numassoc);
-				return 0;
+				if (0 == numassoc) {
+					fprintf(stderr,
+						"***No associations found, `%s' unknown\n",
+						str);
+					return 0;
+				}
 			}
+			ul = min(ul, numassoc);
 			argp->uval = assoc_cache[ul - 1].assid;
 			break;
 		}

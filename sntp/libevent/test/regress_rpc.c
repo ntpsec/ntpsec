@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2003-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,7 +37,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 #include <sys/queue.h>
@@ -590,7 +590,7 @@ done:
 
 /* we just pause the rpc and continue it in the next callback */
 
-struct _rpc_hook_ctx {
+struct rpc_hook_ctx_ {
 	void *vbase;
 	void *ctx;
 };
@@ -600,7 +600,7 @@ static int hook_pause_cb_called=0;
 static void
 rpc_hook_pause_cb(evutil_socket_t fd, short what, void *arg)
 {
-	struct _rpc_hook_ctx *ctx = arg;
+	struct rpc_hook_ctx_ *ctx = arg;
 	++hook_pause_cb_called;
 	evrpc_resume_request(ctx->vbase, ctx->ctx, EVRPC_CONTINUE);
 	free(arg);
@@ -610,7 +610,7 @@ static int
 rpc_hook_pause(void *ctx, struct evhttp_request *req, struct evbuffer *evbuf,
     void *arg)
 {
-	struct _rpc_hook_ctx *tmp = malloc(sizeof(*tmp));
+	struct rpc_hook_ctx_ *tmp = malloc(sizeof(*tmp));
 	struct timeval tv;
 
 	assert(tmp != NULL);
@@ -687,8 +687,8 @@ rpc_client_timeout(void)
 
 	pool = rpc_pool_with_connection(port);
 
-	/* set the timeout to 5 seconds */
-	evrpc_pool_set_timeout(pool, 5);
+	/* set the timeout to 1 second. */
+	evrpc_pool_set_timeout(pool, 1);
 
 	/* set up the basic message */
 	msg = msg_new();

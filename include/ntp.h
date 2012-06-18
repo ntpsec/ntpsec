@@ -830,14 +830,16 @@ struct restrict_u_tag {
 #define	RES_NOTRAP		0x0100	/* mode 6/7 set trap denied */
 #define	RES_LPTRAP		0x0200	/* mode 6/7 low priority trap */
 
-#define RES_KOD			0x0400	/* send kiss of death packet */
+#define	RES_KOD			0x0400	/* send kiss of death packet */
 #define	RES_MSSNTP		0x0800	/* enable MS-SNTP authentication */
-#define RES_FLAKE		0x1000	/* flakeway - drop 10% */
+#define	RES_FLAKE		0x1000	/* flakeway - drop 10% */
+#define	RES_NOMRULIST		0x2000	/* mode 6 mrulist denied */
 
 #define	RES_ALLFLAGS		(RES_FLAGS | RES_NOQUERY |	\
 				 RES_NOMODIFY | RES_NOTRAP |	\
 				 RES_LPTRAP | RES_KOD |		\
-				 RES_MSSNTP | RES_FLAKE)
+				 RES_MSSNTP | RES_FLAKE |	\
+				 RES_NOMRULIST)
 
 /*
  * Match flags

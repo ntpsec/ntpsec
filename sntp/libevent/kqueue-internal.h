@@ -1,6 +1,5 @@
 /*
- * Copyright 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,22 +23,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVHTTP_H_
-#define _EVHTTP_H_
+#ifndef KQUEUE_INTERNAL_H_INCLUDED_
+#define KQUEUE_INTERNAL_H_INCLUDED_
 
-/** @file evhttp.h
+/** Notification function, used to tell an event base to wake up from another
+ * thread.  Only works when event_kq_add_notify_event_() has previously been
+ * called successfully on that base. */
+int event_kq_notify_base_(struct event_base *base);
 
-  An http implementation subsystem for Libevent.
-
-  The <evhttp.h> header is deprecated in Libevent 2.0 and later; please
-  use <event2/http.h> instead.  Depending on what functionality you
-  need, you may also want to include more of the other event2/*.h
-  headers.
+/** Prepare a kqueue-using event base to receive notifications via an internal
+ * EVFILT_USER event.  Return 0 on sucess, -1 on failure.
  */
+int event_kq_add_notify_event_(struct event_base *base);
 
-#include <event.h>
-#include <event2/http.h>
-#include <event2/http_struct.h>
-#include <event2/http_compat.h>
-
-#endif /* _EVHTTP_H_ */
+#endif

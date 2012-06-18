@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,22 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVDNS_H_
-#define _EVDNS_H_
+#ifndef EVENT1_EVRPC_H_INCLUDED_
+#define EVENT1_EVRPC_H_INCLUDED_
 
-/** @file evdns.h
+/** @file evrpc.h
 
-  A dns subsystem for Libevent.
+  An RPC system for Libevent.
 
-  The <evdns.h> header is deprecated in Libevent 2.0 and later; please
-  use <event2/evdns.h> instead.  Depending on what functionality you
-  need, you may also want to include more of the other event2/*.h
+  The <evrpc.h> header is deprecated in Libevent 2.0 and later; please
+  use <event2/rpc.h> instead.  Depending on what functionality you
+  need, you may also want to include more of the other <event2/...>
   headers.
  */
 
 #include <event.h>
-#include <event2/dns.h>
-#include <event2/dns_compat.h>
-#include <event2/dns_struct.h>
+#include <event2/rpc.h>
+#include <event2/rpc_struct.h>
+#include <event2/rpc_compat.h>
 
-#endif /* _EVDNS_H_ */
+#endif /* EVENT1_EVRPC_H_INCLUDED_ */

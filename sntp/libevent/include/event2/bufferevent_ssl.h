@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2009-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,8 +23,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT2_BUFFEREVENT_SSL_H_
-#define _EVENT2_BUFFEREVENT_SSL_H_
+#ifndef EVENT2_BUFFEREVENT_SSL_H_INCLUDED_
+#define EVENT2_BUFFEREVENT_SSL_H_INCLUDED_
 
 /** @file event2/bufferevent_ssl.h
 
@@ -52,7 +52,7 @@ enum bufferevent_ssl_state {
 	BUFFEREVENT_SSL_ACCEPTING = 2
 };
 
-#if defined(_EVENT_HAVE_OPENSSL) || defined(_EVENT_IN_DOXYGEN)
+#if defined(EVENT__HAVE_OPENSSL) || defined(EVENT_IN_DOXYGEN_)
 /**
    Create a new SSL bufferevent to send its data over another bufferevent.
 
@@ -88,6 +88,26 @@ bufferevent_openssl_socket_new(struct event_base *base,
     enum bufferevent_ssl_state state,
     int options);
 
+/** Control how to report dirty SSL shutdowns.
+
+    If the peer (or the network, or an attacker) closes the TCP
+    connection before closing the SSL channel, and the protocol is SSL >= v3,
+    this is a "dirty" shutdown.  If allow_dirty_shutdown is 0 (default),
+    this is reported as BEV_EVENT_ERROR.
+
+    If instead allow_dirty_shutdown=1, a dirty shutdown is reported as
+    BEV_EVENT_EOF.
+
+    (Note that if the protocol is < SSLv3, you will always receive
+    BEV_EVENT_EOF, since SSL 2 and earlier cannot distinguish a secure
+    connection close from a dirty one.  This is one reason (among many)
+    not to use SSL 2.)
+*/
+
+int bufferevent_openssl_get_allow_dirty_shutdown(struct bufferevent *bev);
+void bufferevent_openssl_set_allow_dirty_shutdown(struct bufferevent *bev,
+    int allow_dirty_shutdown);
+
 /** Return the underlying openssl SSL * object for an SSL bufferevent. */
 struct ssl_st *
 bufferevent_openssl_get_ssl(struct bufferevent *bufev);
@@ -104,4 +124,4 @@ unsigned long bufferevent_get_openssl_error(struct bufferevent *bev);
 }
 #endif
 
-#endif /* _EVENT2_BUFFEREVENT_SSL_H_ */
+#endif /* EVENT2_BUFFEREVENT_SSL_H_INCLUDED_ */

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2003-2009 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2009-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2009-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,10 +28,10 @@
 #include "event2/event-config.h"
 #include "evconfig-private.h"
 
-#ifdef _EVENT_HAVE_SYS_TYPES_H
+#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef _EVENT_HAVE_SYS_PARAM_H
+#ifdef EVENT__HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
@@ -45,7 +45,7 @@
 #endif
 
 #include <sys/queue.h>
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
@@ -56,7 +56,7 @@
 #ifndef _WIN32
 #include <syslog.h>
 #endif
-#ifdef _EVENT_HAVE_UNISTD_H
+#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <limits.h>

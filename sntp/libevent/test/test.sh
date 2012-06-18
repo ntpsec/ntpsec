@@ -1,11 +1,9 @@
 #!/bin/sh
 
+BACKENDS="EVPORT KQUEUE EPOLL DEVPOLL POLL SELECT WIN32"
+TESTS="test-eof test-weof test-time test-changelist test-fdleak"
 FAILED=no
-
-if test "x$TEST_OUTPUT_FILE" = "x"
-then
-	TEST_OUTPUT_FILE=/dev/null
-fi
+TEST_OUTPUT_FILE=${TEST_OUTPUT_FILE:-/dev/null}
 
 # /bin/echo is a little more likely to support -n than sh's builtin echo,
 # printf is even more likely
@@ -27,22 +25,24 @@ then
 fi
 
 TEST_DIR=.
+TEST_SRC_DIR=.
 
 T=`echo "$0" | sed -e 's/test.sh$//'`
 if test -x "$T/test-init"
 then
 	TEST_DIR="$T"
 fi
+if test -e "$T/check-dumpevents.py"
+then
+	TEST_SRC_DIR="$T"
+fi
 
 setup () {
-	EVENT_NOKQUEUE=yes; export EVENT_NOKQUEUE
-	EVENT_NODEVPOLL=yes; export EVENT_NODEVPOLL
-	EVENT_NOPOLL=yes; export EVENT_NOPOLL
-	EVENT_NOSELECT=yes; export EVENT_NOSELECT
-	EVENT_NOEPOLL=yes; export EVENT_NOEPOLL
+	for i in $BACKENDS; do
+		eval "EVENT_NO$i=yes; export EVENT_NO$i"
+	done
 	unset EVENT_EPOLL_USE_CHANGELIST
-	EVENT_NOEVPORT=yes; export EVENT_NOEVPORT
-	EVENT_NOWIN32=yes; export EVENT_NOWIN32
+	unset EVENT_PRECISE_TIMER
 }
 
 announce () {
@@ -64,38 +64,31 @@ run_tests () {
 		announce Skipping test
 		return
 	fi
-
-	announce_n " test-eof: "
-	if $TEST_DIR/test-eof >>"$TEST_OUTPUT_FILE" ;
-	then
-		announce OKAY ;
+	for i in $TESTS; do
+		announce_n " $i: "
+		if $TEST_DIR/$i >>"$TEST_OUTPUT_FILE" ;
+		then
+			announce OKAY ;
+		else
+			announce FAILED ;
+			FAILED=yes
+		fi
+	done
+	announce_n " test-dumpevents: "
+	if python -c 'import sys; assert(sys.version_info >= (2, 4))' 2>/dev/null; then
+	    if $TEST_DIR/test-dumpevents | python $TEST_SRC_DIR/check-dumpevents.py >> "$TEST_OUTPUT_FILE" ;
+	    then
+	        announce OKAY ;
+	    else
+	        announce FAILED ;
+	    fi
 	else
-		announce FAILED ;
-		FAILED=yes
-	fi
-	announce_n " test-weof: "
-	if $TEST_DIR/test-weof >>"$TEST_OUTPUT_FILE" ;
-	then
-		announce OKAY ;
-	else
-		announce FAILED ;
-		FAILED=yes
-	fi
-	announce_n " test-time: "
-	if $TEST_DIR/test-time >>"$TEST_OUTPUT_FILE" ;
-	then
-		announce OKAY ;
-	else
-		announce FAILED ;
-		FAILED=yes
-	fi
-	announce_n " test-changelist: "
-	if $TEST_DIR/test-changelist >>"$TEST_OUTPUT_FILE" ;
-	then
-		announce OKAY ;
-	else
-		announce FAILED ;
-		FAILED=yes
+	    # no python
+	    if $TEST_DIR/test-dumpevents >/dev/null; then
+	        announce "OKAY (output not checked)" ;
+	    else
+	        announce "FAILED (output not checked)" ;
+	    fi
 	fi
 	test -x $TEST_DIR/regress || return
 	announce_n " regress: "
@@ -120,21 +113,24 @@ do_test() {
 	unset EVENT_NO$1
 	if test "$2" = "(changelist)" ; then
 	    EVENT_EPOLL_USE_CHANGELIST=yes; export EVENT_EPOLL_USE_CHANGELIST
+	elif test "$2" = "(timerfd)" ; then
+	    EVENT_PRECISE_TIMER=1; export EVENT_PRECISE_TIMER
+	elif test "$2" = "(timerfd+changelist)" ; then
+	    EVENT_EPOLL_USE_CHANGELIST=yes; export EVENT_EPOLL_USE_CHANGELIST
+	    EVENT_PRECISE_TIMER=1; export EVENT_PRECISE_TIMER
         fi
+
 	run_tests
 }
 
 announce "Running tests:"
 
-# Need to do this by hand?
-do_test EVPORT
-do_test KQUEUE
-do_test EPOLL
+do_test EPOLL "(timerfd)"
 do_test EPOLL "(changelist)"
-do_test DEVPOLL
-do_test POLL
-do_test SELECT
-do_test WIN32
+do_test EPOLL "(timerfd+changelist)"
+for i in $BACKENDS; do
+	do_test $i
+done
 
 if test "$FAILED" = "yes"; then
 	exit 1

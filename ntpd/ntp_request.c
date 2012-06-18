@@ -196,8 +196,10 @@ keyid_t info_auth_keyid;
 u_long numrequests;		/* number of requests we've received */
 u_long numresppkts;		/* number of resp packets sent with data */
 
-u_long errorcounter[INFO_ERR_AUTH+1];	/* lazy way to count errors, indexed */
-/* by the error code */
+/*
+ * lazy way to count errors, indexed by the error code
+ */
+u_long errorcounter[MAX_INFO_ERR + 1];
 
 /*
  * A hack.  To keep the authentication module clear of ntp-ism's, we
@@ -613,6 +615,9 @@ process_private(
 				"process_private: failed auth mod_okay %d\n",
 				mod_okay);
 #endif
+			if (!mod_okay) {
+				sys_restricted++;
+			}
 			req_ack(srcadr, inter, inpkt, INFO_ERR_AUTH);
 			return;
 		}

@@ -195,6 +195,7 @@ struct resp_pkt {
 #define	INFO_ERR_FMT	3	/* format error */
 #define	INFO_ERR_NODATA	4	/* no data for this request */
 #define	INFO_ERR_AUTH	7	/* authentication failure */
+#define	MAX_INFO_ERR	INFO_ERR_AUTH
 
 /*
  * Maximum sequence number.

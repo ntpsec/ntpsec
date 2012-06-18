@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2006-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,8 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT2_RPC_COMPAT_H_
-#define _EVENT2_RPC_COMPAT_H_
+#ifndef EVENT2_RPC_COMPAT_H_INCLUDED_
+#define EVENT2_RPC_COMPAT_H_INCLUDED_
 
 /** @file event2/rpc_compat.h
 
@@ -58,4 +58,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _EVENT2_EVENT_COMPAT_H_ */
+#endif /* EVENT2_EVENT_COMPAT_H_INCLUDED_ */

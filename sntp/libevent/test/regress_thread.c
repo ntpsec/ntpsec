@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "util-internal.h"
 
 /* The old tests here need assertions to work. */
 #undef NDEBUG
@@ -33,37 +34,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef _EVENT_HAVE_UNISTD_H
+#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef _EVENT_HAVE_SYS_WAIT_H
+#ifdef EVENT__HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 
-#ifdef _EVENT_HAVE_PTHREADS
+#ifdef EVENT__HAVE_PTHREADS
 #include <pthread.h>
 #elif defined(_WIN32)
 #include <process.h>
 #endif
 #include <assert.h>
-#ifdef _EVENT_HAVE_UNISTD_H
+#ifdef EVENT__HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <time.h>
 
 #include "sys/queue.h"
 
-#include "event2/util.h"
 #include "event2/event.h"
 #include "event2/event_struct.h"
 #include "event2/thread.h"
+#include "event2/util.h"
 #include "evthread-internal.h"
 #include "event-internal.h"
 #include "defer-internal.h"
 #include "regress.h"
 #include "tinytest_macros.h"
+#include "time-internal.h"
 
-#ifdef _EVENT_HAVE_PTHREADS
+#ifdef EVENT__HAVE_PTHREADS
 #define THREAD_T pthread_t
 #define THREAD_FN void *
 #define THREAD_RETURN() return (NULL)
@@ -403,19 +405,22 @@ end:
 #define CB_COUNT 128
 #define QUEUE_THREAD_COUNT 8
 
-#ifdef _WIN32
-#define SLEEP_MS(ms) Sleep(ms)
-#else
-#define SLEEP_MS(ms) usleep((ms) * 1000)
-#endif
+static void
+SLEEP_MS(int ms)
+{
+	struct timeval tv;
+	tv.tv_sec = ms/1000;
+	tv.tv_usec = (ms%1000)*1000;
+	evutil_usleep_(&tv);
+}
 
 struct deferred_test_data {
 	struct deferred_cb cbs[CB_COUNT];
 	struct deferred_cb_queue *queue;
 };
 
-static time_t timer_start = 0;
-static time_t timer_end = 0;
+static struct timeval timer_start = {0,0};
+static struct timeval timer_end = {0,0};
 static unsigned callback_count = 0;
 static THREAD_T load_threads[QUEUE_THREAD_COUNT];
 static struct deferred_test_data deferred_data[QUEUE_THREAD_COUNT];
@@ -434,8 +439,8 @@ load_deferred_queue(void *arg)
 	size_t i;
 
 	for (i = 0; i < CB_COUNT; ++i) {
-		event_deferred_cb_init(&data->cbs[i], deferred_callback, NULL);
-		event_deferred_cb_schedule(data->queue, &data->cbs[i]);
+		event_deferred_cb_init_(&data->cbs[i], deferred_callback, NULL);
+		event_deferred_cb_schedule_(data->queue, &data->cbs[i]);
 		SLEEP_MS(1);
 	}
 
@@ -445,7 +450,7 @@ load_deferred_queue(void *arg)
 static void
 timer_callback(evutil_socket_t fd, short what, void *arg)
 {
-	timer_end = time(NULL);
+	evutil_gettimeofday(&timer_end, NULL);
 }
 
 static void
@@ -463,34 +468,107 @@ static void
 thread_deferred_cb_skew(void *arg)
 {
 	struct basic_test_data *data = arg;
-	struct timeval tv_timer = {4, 0};
+	struct timeval tv_timer = {1, 0};
 	struct deferred_cb_queue *queue;
-	time_t elapsed;
+	struct timeval elapsed;
+	int elapsed_usec;
 	int i;
 
-	queue = event_base_get_deferred_cb_queue(data->base);
+	queue = event_base_get_deferred_cb_queue_(data->base);
 	tt_assert(queue);
 
 	for (i = 0; i < QUEUE_THREAD_COUNT; ++i)
 		deferred_data[i].queue = queue;
 
-	timer_start = time(NULL);
+	evutil_gettimeofday(&timer_start, NULL);
 	event_base_once(data->base, -1, EV_TIMEOUT, timer_callback, NULL,
 			&tv_timer);
 	event_base_once(data->base, -1, EV_TIMEOUT, start_threads_callback,
 			NULL, NULL);
 	event_base_dispatch(data->base);
 
-	elapsed = timer_end - timer_start;
+	evutil_timersub(&timer_end, &timer_start, &elapsed);
 	TT_BLATHER(("callback count, %u", callback_count));
-	TT_BLATHER(("elapsed time, %u", (unsigned)elapsed));
+	elapsed_usec =
+	    (unsigned)(elapsed.tv_sec*1000000 + elapsed.tv_usec);
+	TT_BLATHER(("elapsed time, %u usec", elapsed_usec));
+
 	/* XXX be more intelligent here.  just make sure skew is
-	 * within 2 seconds for now. */
-	tt_assert(elapsed >= 4 && elapsed <= 6);
+	 * within .4 seconds for now. */
+	tt_assert(elapsed_usec >= 600000 && elapsed_usec <= 1400000);
 
 end:
 	for (i = 0; i < QUEUE_THREAD_COUNT; ++i)
 		THREAD_JOIN(load_threads[i]);
+}
+
+static struct event time_events[5];
+static struct timeval times[5];
+static struct event_base *exit_base = NULL;
+static void
+note_time_cb(evutil_socket_t fd, short what, void *arg)
+{
+	evutil_gettimeofday(arg, NULL);
+	if (arg == &times[4]) {
+		event_base_loopbreak(exit_base);
+	}
+}
+static THREAD_FN
+register_events_subthread(void *arg)
+{
+	struct timeval tv = {0,0};
+	SLEEP_MS(100);
+	event_active(&time_events[0], EV_TIMEOUT, 1);
+	SLEEP_MS(100);
+	event_active(&time_events[1], EV_TIMEOUT, 1);
+	SLEEP_MS(100);
+	tv.tv_usec = 100*1000;
+	event_add(&time_events[2], &tv);
+	tv.tv_usec = 150*1000;
+	event_add(&time_events[3], &tv);
+	SLEEP_MS(200);
+	event_active(&time_events[4], EV_TIMEOUT, 1);
+
+	THREAD_RETURN();
+}
+
+static void
+thread_no_events(void *arg)
+{
+	THREAD_T thread;
+	struct basic_test_data *data = arg;
+	struct timeval starttime, endtime;
+	int i;
+	exit_base = data->base;
+
+	memset(times,0,sizeof(times));
+	for (i=0;i<5;++i) {
+		event_assign(&time_events[i], data->base,
+		    -1, 0, note_time_cb, &times[i]);
+	}
+
+	evutil_gettimeofday(&starttime, NULL);
+	THREAD_START(thread, register_events_subthread, data->base);
+	event_base_loop(data->base, EVLOOP_NO_EXIT_ON_EMPTY);
+	evutil_gettimeofday(&endtime, NULL);
+	tt_assert(event_base_got_break(data->base));
+	THREAD_JOIN(thread);
+	for (i=0; i<5; ++i) {
+		struct timeval diff;
+		double sec;
+		evutil_timersub(&times[i], &starttime, &diff);
+		sec = diff.tv_sec + diff.tv_usec/1.0e6;
+		TT_BLATHER(("event %d at %.4f seconds", i, sec));
+	}
+	test_timeval_diff_eq(&starttime, &times[0], 100);
+	test_timeval_diff_eq(&starttime, &times[1], 200);
+	test_timeval_diff_eq(&starttime, &times[2], 400);
+	test_timeval_diff_eq(&starttime, &times[3], 450);
+	test_timeval_diff_eq(&starttime, &times[4], 500);
+	test_timeval_diff_eq(&starttime, &endtime,  500);
+
+end:
+	;
 }
 
 #define TEST(name)							\
@@ -506,6 +584,7 @@ struct testcase_t thread_testcases[] = {
 #endif
 	TEST(conditions_simple),
 	TEST(deferred_cb_skew),
+	TEST(no_events),
 	END_OF_TESTCASES
 };
 

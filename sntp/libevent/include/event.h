@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,8 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef _EVENT_H_
-#define _EVENT_H_
+#ifndef EVENT1_EVENT_H_INCLUDED_
+#define EVENT1_EVENT_H_INCLUDED_
 
 /** @file event.h
 
@@ -42,13 +42,13 @@ extern "C" {
 #endif
 
 #include <event2/event-config.h>
-#ifdef _EVENT_HAVE_SYS_TYPES_H
+#ifdef EVENT__HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef _EVENT_HAVE_SYS_TIME_H
+#ifdef EVENT__HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#ifdef _EVENT_HAVE_STDINT_H
+#ifdef EVENT__HAVE_STDINT_H
 #include <stdint.h>
 #endif
 #include <stdarg.h>
@@ -82,4 +82,4 @@ typedef unsigned short u_short;
 }
 #endif
 
-#endif /* _EVENT_H_ */
+#endif /* EVENT1_EVENT_H_INCLUDED_ */

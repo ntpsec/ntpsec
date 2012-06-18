@@ -3355,7 +3355,8 @@ input_handler(
 	const char *	clk;
 #endif
 #ifdef HAS_ROUTING_SOCKET
-	struct asyncio_reader *asyncio_reader;
+	struct asyncio_reader *	asyncio_reader;
+	struct asyncio_reader *	next_asyncio_reader;
 #endif
 
 	handler_calls++;
@@ -3487,11 +3488,13 @@ input_handler(
 	asyncio_reader = asyncio_reader_list;
 
 	while (asyncio_reader != NULL) {
+		/* callback may unlink and free asyncio_reader */
+		next_asyncio_reader = asyncio_reader->link;
 		if (FD_ISSET(asyncio_reader->fd, &fds)) {
 			++select_count;
-			(asyncio_reader->receiver)(asyncio_reader);
+			(*asyncio_reader->receiver)(asyncio_reader);
 		}
-		asyncio_reader = asyncio_reader->link;
+		asyncio_reader = next_asyncio_reader;
 	}
 #endif /* HAS_ROUTING_SOCKET */
 	
@@ -3887,10 +3890,10 @@ findbcastinter(
 	sockaddr_u *addr
 	)
 {
+	endpt *	iface;
+
+	iface = NULL;
 #if !defined(MPE) && (defined(SIOCGIFCONF) || defined(SYS_WINNT))
-	struct interface *iface;
-	
-	
 	DPRINTF(4, ("Finding broadcast/multicast interface for addr %s in list of addresses\n",
 		    stoa(addr)));
 
@@ -3973,9 +3976,11 @@ findbcastinter(
 		DPRINTF(4, ("No bcast interface found for %s\n",
 			    stoa(addr)));
 		iface = ANY_INTERFACE_CHOOSE(addr);
-	} else
+	} else {
 		DPRINTF(4, ("Found bcast-/mcast- interface index #%d %s\n",
 			    iface->ifnum, iface->name));
+	}
+
 	return iface;
 }
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2005 Niels Provos <provos@citi.umich.edu>
+# Copyright (c) 2005-2007 Niels Provos <provos@citi.umich.edu>
+# Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
 # All rights reserved.
 #
 # Generates marshaling code based on libevent.
@@ -47,7 +48,7 @@ class Struct:
         self._name = name
         self._entries = []
         self._tags = {}
-        print >>sys.stderr, '  Created struct: %s' % name
+        print '  Created struct: %s' % name
 
     def AddEntry(self, entry):
         if self._tags.has_key(entry.Tag()):
@@ -57,7 +58,7 @@ class Struct:
                                     self._tags[entry.Tag()], line_count))
         self._entries.append(entry)
         self._tags[entry.Tag()] = entry.Name()
-        print >>sys.stderr, '    Added entry: %s' % entry.Name()
+        print '    Added entry: %s' % entry.Name()
 
     def Name(self):
         return self._name
@@ -147,7 +148,7 @@ int evtag_unmarshal_%(name)s(struct evbuffer *, ev_uint32_t,
                        ' */\n') % self._name
 
         print >>file, \
-              'static struct %(name)s_access_ __%(name)s_base = {' % \
+              'static struct %(name)s_access_ %(name)s_base__ = {' % \
               { 'name' : self._name }
         for entry in self._entries:
             self.PrintIndented(file, '  ', entry.CodeBase())
@@ -169,7 +170,7 @@ int evtag_unmarshal_%(name)s(struct evbuffer *, ev_uint32_t,
             '    event_warn("%%s: malloc", __func__);\n'
             '    return (NULL);\n'
             '  }\n'
-            '  tmp->base = &__%(name)s_base;\n') % { 'name' : self._name }
+            '  tmp->base = &%(name)s_base__;\n') % { 'name' : self._name }
 
         for entry in self._entries:
             self.PrintIndented(file, '  ', entry.CodeInitialize('tmp'))
@@ -331,11 +332,11 @@ int evtag_unmarshal_%(name)s(struct evbuffer *, ev_uint32_t,
             'evtag_marshal_%(name)s(struct evbuffer *evbuf, ev_uint32_t tag, '
             'const struct %(name)s *msg)\n'
             '{\n'
-            '  struct evbuffer *_buf = evbuffer_new();\n'
-            '  assert(_buf != NULL);\n'
-            '  %(name)s_marshal(_buf, msg);\n'
-            '  evtag_marshal_buffer(evbuf, tag, _buf);\n '
-            '  evbuffer_free(_buf);\n'
+            '  struct evbuffer *buf_ = evbuffer_new();\n'
+            '  assert(buf_ != NULL);\n'
+            '  %(name)s_marshal(buf_, msg);\n'
+            '  evtag_marshal_buffer(evbuf, tag, buf_);\n '
+            '  evbuffer_free(buf_);\n'
             '}\n' ) % { 'name' : self._name }
 
 class Entry:
@@ -1531,7 +1532,7 @@ class CCodeGenerator:
         # Use the complete provided path to the input file, with all
         # non-identifier characters replaced with underscores, to
         # reduce the chance of a collision between guard macros.
-        return '_' + nonident.sub('_', name).upper() + '_'
+        return 'EVENT_RPCOUT_' + nonident.sub('_', name).upper() + '_'
 
     def HeaderPreamble(self, name):
         guard = self.GuardName(name)
@@ -1578,8 +1579,8 @@ class CCodeGenerator:
                  '#include <event2/event.h>\n'
                  '#include <event2/buffer.h>\n'
                  '#include <event2/tag.h>\n\n'
-                 '#ifdef _EVENT___func__\n'
-                 '#define __func__ _EVENT___func__\n'
+                 '#ifdef EVENT____func__\n'
+                 '#define __func__ EVENT____func__\n'
                  '#endif\n\n'
                  )
 
@@ -1667,13 +1668,13 @@ class CommandLine:
         impl_file = self.impl_file
         factory = self.factory
 
-        print >>sys.stderr, 'Reading \"%s\"' % filename
+        print 'Reading \"%s\"' % filename
 
         fp = open(filename, 'r')
         entities = Parse(factory, fp)
         fp.close()
 
-        print >>sys.stderr, '... creating "%s"' % header_file
+        print '... creating "%s"' % header_file
         header_fp = open(header_file, 'w')
         print >>header_fp, factory.HeaderPreamble(filename)
 
@@ -1689,7 +1690,7 @@ class CommandLine:
         print >>header_fp, factory.HeaderPostamble(filename)
         header_fp.close()
 
-        print >>sys.stderr, '... creating "%s"' % impl_file
+        print '... creating "%s"' % impl_file
         impl_fp = open(impl_file, 'w')
         print >>impl_fp, factory.BodyPreamble(filename, header_file)
         for entry in entities:

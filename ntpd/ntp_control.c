@@ -884,9 +884,11 @@ save_config(
 			 "saveconfig prohibited by restrict ... nomodify");
 		ctl_putdata(reply, strlen(reply), 0);
 		ctl_flushpkt(0);
-		msyslog(LOG_NOTICE,
-			"saveconfig from %s rejected due to nomodify restriction",
-			stoa(&rbufp->recv_srcadr));
+		NLOG(NLOG_SYSINFO)
+			msyslog(LOG_NOTICE,
+				"saveconfig from %s rejected due to nomodify restriction",
+				stoa(&rbufp->recv_srcadr));
+		sys_restricted++;
 		return;
 	}
 
@@ -896,9 +898,10 @@ save_config(
 			 "saveconfig prohibited, no saveconfigdir configured");
 		ctl_putdata(reply, strlen(reply), 0);
 		ctl_flushpkt(0);
-		msyslog(LOG_NOTICE,
-			"saveconfig from %s rejected, no saveconfigdir",
-			stoa(&rbufp->recv_srcadr));
+		NLOG(NLOG_SYSINFO)
+			msyslog(LOG_NOTICE,
+				"saveconfig from %s rejected, no saveconfigdir",
+				stoa(&rbufp->recv_srcadr));
 		return;
 	}
 
@@ -3217,16 +3220,18 @@ static void configure(
 		return;
 	}
 
-	if (restrict_mask & RES_NOMODIFY) {
+	if (RES_NOMODIFY & restrict_mask) {
 		snprintf(remote_config.err_msg,
 			 sizeof(remote_config.err_msg),
 			 "runtime configuration prohibited by restrict ... nomodify");
 		ctl_putdata(remote_config.err_msg, 
 			    strlen(remote_config.err_msg), 0);
 		ctl_flushpkt(0);
-		msyslog(LOG_NOTICE,
-			"runtime config from %s rejected due to nomodify restriction",
-			stoa(&rbufp->recv_srcadr));
+		NLOG(NLOG_SYSINFO)
+			msyslog(LOG_NOTICE,
+				"runtime config from %s rejected due to nomodify restriction",
+				stoa(&rbufp->recv_srcadr));
+		sys_restricted++;
 		return;
 	}
 
@@ -3638,6 +3643,15 @@ static void read_mru_list(
 	mon_entry *		prior_mon;
 	l_fp			now;
 
+	if (RES_NOMRULIST & restrict_mask) {
+		ctl_error(CERR_PERMISSION);
+		NLOG(NLOG_SYSINFO)
+			msyslog(LOG_NOTICE,
+				"mrulist from %s rejected due to nomrulist restriction",
+				stoa(&rbufp->recv_srcadr));
+		sys_restricted++;
+		return;
+	}
 	/*
 	 * fill in_parms var list with all possible input parameters.
 	 */

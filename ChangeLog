@@ -1,6 +1,27 @@
-* Upgrade to autogen-5.16 and libopts-36.4.11.
-* Upgrade to autogen-5.15.
+* Upgrade to autogen-5.16.1 and libopts-36.4.11.
+* [Bug 2227] Enable mrulist access control via "restrict ... nomrulist".
+* Conditionalize msyslog messages about rejected mode 6 requests due to
+  nomodify and nomrulist restrictions under "logconfig +sysinfo".
+* Increment sys_restricted in a few rejection paths due to nomodify
+  restrictions where previosuly overlooked.
+(4.2.7p284) 2012/06/16 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2225] libevent configure hangs.
+* Update bundled libevent to git master, post libevent 2.1.1-alpha.
+(4.2.7p283) 2012/06/16 Released by Harlan Stenn <stenn@ntp.org>
+* In sntp/m4/ntp_openssl.m4, Support multiple package names for the
+  crypto library.  Add legacy support for -Wl,-rpath.
+(4.2.7p282) 2012/06/15 Released by Harlan Stenn <stenn@ntp.org>
+* tickadj may need to be linked with PTHREAD_LIBS.
+(4.2.7p281) 2012/06/14 Released by Harlan Stenn <stenn@ntp.org>
+* U_INT32_MAX cleanup in include/ntp_types.h .
+* When linking, ntp_keygen and tickadj need $(LIBM).
+(4.2.7p280) 2012/06/13 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2224] Use-after-free in routing socket code after dropping root.
+(4.2.7p279) 2012/06/10 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2211] findbcastinter(): possibly undefined variable iface used.
+* [Bug 2220] Incorrect check for maximum association id in ntpq.
 (4.2.7p278) 2012/06/03 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2204] Build with --enable-getifaddrs=glibc fails.
 * [Bug 2178] refclock_tsyncpci.c reach register fails to shift.
 * [Bug 2191] dcfd -Y y2kcheck on CentOS 6.2 x86_64 breaks make check.
 (4.2.7p277) 2012/05/25 Released by Harlan Stenn <stenn@ntp.org>

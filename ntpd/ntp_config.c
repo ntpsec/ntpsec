@@ -2415,6 +2415,10 @@ config_access(
 				flags |= RES_NOMODIFY;
 				break;
 
+			case T_Nomrulist:
+				flags |= RES_NOMRULIST;
+				break;
+
 			case T_Nopeer:
 				flags |= RES_NOPEER;
 				break;
