@@ -73,6 +73,12 @@ NTP_VPATH_HACK		dnl used only by ntpd/Makefile.am
 
 NTP_LOCINFO([sntp])	dnl takes over from NTP_BINDIR, in NTP_LIBNTP
 
+dnl AM_PROG_AR req. automake 1.12
+m4_ifdef(
+    [AM_PROG_AR],
+    [AM_PROG_AR]
+)
+
 # So far, the only shared library we might use is libopts.
 # It's a small library - we might as well use a static version of it.
 AC_DISABLE_SHARED

@@ -57,6 +57,12 @@ NTP_PROG_CC
 
 NTP_LOCINFO()
 
+dnl AM_PROG_AR req. automake 1.12
+m4_ifdef(
+    [AM_PROG_AR],
+    [AM_PROG_AR]
+)
+
 NTP_LIBNTP
 
 AC_DISABLE_SHARED

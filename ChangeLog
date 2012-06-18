@@ -1,4 +1,5 @@
 * [Bug 2227] Enable mrulist access control via "restrict ... nomrulist".
+* Automake-1.12 wants us to use AM_PROG_AR.
 * Conditionalize msyslog messages about rejected mode 6 requests due to
   nomodify and nomrulist restrictions under "logconfig +sysinfo".
 * Increment sys_restricted in a few rejection paths due to nomodify
