@@ -1,3 +1,4 @@
+* CID 709169: check return from open("/dev/null", 0) and friends.
 (4.2.7p285) 2012/06/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2227] Enable mrulist access control via "restrict ... nomrulist".
 * Automake-1.12 wants us to use AM_PROG_AR.

@@ -604,9 +604,8 @@ ntpdmain(
 			syslogit = TRUE;
 		}
 		close_all_except(waitsync_fd_to_close);
-		open("/dev/null", 0);
-		dup2(0, 1);
-		dup2(0, 2);
+		INSIST(0 == open("/dev/null", 0) && 1 == dup2(0, 1) \
+			&& 2 == dup2(0, 2));
 
 		init_logging(progname, 0, TRUE);
 		/* we lost our logfile (if any) daemonizing */
