@@ -1,3 +1,4 @@
+* CID 97193: check return from sscanf() in ntp_config.c.
 * CID 709169: check return from open("/dev/null", 0) and friends.
 * CID 709207: Initialize "quality" for ulink_receive.
 (4.2.7p285) 2012/06/18 Released by Harlan Stenn <stenn@ntp.org>
