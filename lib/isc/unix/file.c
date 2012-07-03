@@ -512,6 +512,8 @@ isc_file_splitpath(isc_mem_t *mctx, char *path, char **dirname, char **basename)
 {
 	char *dir, *file, *slash;
 
+	REQUIRE(path != NULL);
+
 	slash = strrchr(path, '/');
 
 	if (slash == path) {

@@ -1,3 +1,4 @@
+* CID 709173: Make sure a libisc function we do not use is called properly.
 (4.2.7p287) 2012/07/03 Released by Harlan Stenn <stenn@ntp.org>
 * Remove 1024 associations-per-server limit from ntpq.
 * Remove blank line between ntpq mreadvar associations.
