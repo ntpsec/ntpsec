@@ -1,8 +1,8 @@
-.TH ntp-wait @NTP_WAIT_MS@ "03 Jul 2012" "ntp (4.2.7p287)" "User Commands"
+.TH ntp-wait @NTP_WAIT_MS@ "03 Jul 2012" "ntp (4.2.7p288)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 01:26:44 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July  3, 2012 at 09:11:29 AM by AutoGen 5.14
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -16,7 +16,22 @@ ntp-wait \- Wait for ntpd to stabilize the system clock
 All arguments must be options.
 .PP
 .SH DESCRIPTION
-#! /usr/local/gnu/bin/cat
+.B 
+will send at most
+\fInum-tries\fR
+queries to
+.Xr ntpd 8 ,
+sleeping for
+\fIsecs-between-tries\fR
+after each status return that says
+.Xr ntpd 8
+has not yet produced a synchronized and stable system clock.
+.PP
+.B 
+will do this quietly, unless the
+v
+flag is provided.
+#! /usr/local/gnu/bin/cat -
 .SH "OPTIONS"
 .TP
 .BR \-n " \fInum\-tries\fP, " \-\- "=" \fInum\-tries\fP
@@ -73,7 +88,8 @@ Successful program execution.
 .BR 1
 The operation failed or the command syntax was not valid.
 .SH AUTHORS
-#! /usr/local/gnu/bin/cat
+.An "Harlan Stenn"
+#! /usr/local/gnu/bin/cat -
 .SH "COPYRIGHT"
 Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.

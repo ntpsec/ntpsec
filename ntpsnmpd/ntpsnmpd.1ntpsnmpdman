@@ -1,8 +1,8 @@
-.TH ntpsnmpd 1ntpsnmpdman "03 Jul 2012" "4.2.7p287" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "03 Jul 2012" "4.2.7p288" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 01:28:19 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July  3, 2012 at 09:12:46 AM by AutoGen 5.14
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -16,7 +16,7 @@ ntpsnmpd \- NTP SNMP MIB agent
 All arguments must be options.
 .PP
 .SH DESCRIPTION
-#! /usr/local/gnu/bin/cat
+#! /usr/local/gnu/bin/cat -
 .SH "OPTIONS"
 .TP
 .BR \-n ", " -\-nofork
@@ -82,7 +82,8 @@ Successful program execution.
 .BR 1
 The operation failed or the command syntax was not valid.
 .SH AUTHORS
-#! /usr/local/gnu/bin/cat
+.An "Heiko Gerstung"
+#! /usr/local/gnu/bin/cat -
 .SH "COPYRIGHT"
 Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
