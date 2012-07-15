@@ -480,6 +480,17 @@ chu_start(
 	 * Open audio device. Don't complain if not there.
 	 */
 	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
+
+	/*
+	** refclock_irig.c and refclock_wwv.c call audio_init() too,
+	** but they tolerate fd == 0.
+	**
+	** This code will leak a file descriptor if it is 0.
+	**
+	** For now...
+	*/
+	INSIST(0 != fd_audio);	/* Coverity 709185 */
+
 #ifdef DEBUG
 	if (fd_audio > 0 && debug)
 		audio_show();
