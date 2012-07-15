@@ -927,6 +927,7 @@ nmea_receive(
 		break;
 		
 	default:
+		INVARIANT(0);	/* Coverity 97123 */
 		return;
 	}
 
