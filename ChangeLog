@@ -1,3 +1,4 @@
+* CID 97377: ntp-keygen.c's followlink() might not NUL-terminate.
 * CID 709185: refclock_chu.c will leak fd==0 (which should be impossible).
 (4.2.7p288) 2012/07/03 Released by Harlan Stenn <stenn@ntp.org>
 * CID 709173: Make sure a libisc function we do not use is called properly.
