@@ -1,8 +1,8 @@
-.TH ntp-keygen @NTP_KEYGEN_MS@ "03 Jul 2012" "ntp (4.2.7p288)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "16 Jul 2012" "ntp (4.2.7p289)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 09:12:55 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July 16, 2012 at 12:20:49 AM by AutoGen 5.14
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -715,7 +715,6 @@ used by the
 and
 .Xr ntpdc 8
 utilities.
-#! /usr/local/gnu/bin/cat -
 .SH "OPTIONS"
 .TP
 .BR \-c " \fIscheme\fP, " \-\-certificate "=" \fIscheme\fP
@@ -909,7 +908,6 @@ and the password is missing or incorrect.
 If an encrypted file is read successfully and
 no write password is specified, the read password is used
 as the write password by default.
-#! /usr/local/gnu/bin/cat -
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
@@ -933,10 +931,8 @@ from one to several minutes with modern architectures
 such as UltraSPARC and up to tens of minutes to an hour
 with older architectures such as SPARC IPC.
 .PP
-Please report bugs to http://bugs.ntp.org .
-#! /usr/local/gnu/bin/cat -Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-Portions of this document came from FreeBSD.
-#! /usr/local/gnu/bin/cat -.Pp
+Portions of this document came from FreeBSD..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp-keygen\fP
 option definitions.

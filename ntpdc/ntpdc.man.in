@@ -1,8 +1,8 @@
-.TH ntpdc @NTPDC_MS@ "03 Jul 2012" "4.2.7p288" "User Commands"
+.TH ntpdc @NTPDC_MS@ "16 Jul 2012" "4.2.7p289" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 09:12:27 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July 16, 2012 at 12:20:14 AM by AutoGen 5.14
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -31,7 +31,6 @@ In addition, nearly all the
 configuration options which can be specified at startup using
 ntpd's configuration file may also be specified at run time using
 .B  .
-#! /usr/local/gnu/bin/cat -
 .SH "OPTIONS"
 .TP
 .BR \-4 ", " -\-ipv4
@@ -805,7 +804,6 @@ for further information.
 .BR Ic reset
 Clear the statistics counters in various modules of the server.
 See the source listing for further information.
-#! /usr/local/gnu/bin/cat -
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
@@ -826,10 +824,8 @@ The operation failed or the command syntax was not valid.
 .%T Network Time Protocol (Version 3)
 .%O RFC1305
 .Re
-#! /usr/local/gnu/bin/cat -
 .SH AUTHORS
 The formatting directives in this document came from FreeBSD.
-#! /usr/local/gnu/bin/cat -
 .SH "COPYRIGHT"
 Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
@@ -845,8 +841,7 @@ to hack in, at great expense to the program's ease of use.
 Despite
 this, the program is occasionally useful.
 .PP
-Please report bugs to http://bugs.ntp.org .
-#! /usr/local/gnu/bin/cat -Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH "NOTES"
 This manual page was \fIAutoGen\fP-erated from the \fBntpdc\fP
 option definitions.

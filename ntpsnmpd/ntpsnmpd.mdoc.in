@@ -1,9 +1,9 @@
-.Dd July 3 2012
+.Dd July 16 2012
 .Dt NTPSNMPD @NTPSNMPD_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 09:12:49 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July 16, 2012 at 12:20:38 AM by AutoGen 5.14
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -19,7 +19,6 @@
 All arguments must be options.
 .Pp
 .Sh DESCRIPTION
-#! /usr/local/gnu/bin/cat -
 .Sh "OPTIONS"
 .Bl -tag
 .It  \-n ", " -\-nofork
@@ -80,7 +79,6 @@ The operation failed or the command syntax was not valid.
 .El
 .Sh AUTHORS
 .An "Heiko Gerstung"
-#! /usr/local/gnu/bin/cat -
 .Sh "COPYRIGHT"
 Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.

@@ -1,8 +1,8 @@
-.TH sntp 1sntpman "03 Jul 2012" "4.2.7p288" "User Commands"
+.TH sntp 1sntpman "16 Jul 2012" "4.2.7p289" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 09:13:09 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July 16, 2012 at 12:21:03 AM by AutoGen 5.14
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -54,7 +54,6 @@ is displayed.
 Finally, the
 .I stratum
 of the host is reported.
-#! /usr/local/gnu/bin/cat -
 .SH "OPTIONS"
 .TP
 .BR \-4 ", " -\-ipv4
@@ -281,7 +280,6 @@ like the (deprecated)
 or
 .Xr rdate 8
 commands.
-#! /usr/local/gnu/bin/cat -
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
@@ -298,13 +296,11 @@ The operation failed or the command syntax was not valid.
 .An "Johannes Maximilian Kuehn"
 .An "Harlan Stenn"
 .An "Dave Hart"
-#! /usr/local/gnu/bin/cat -
 .SH "COPYRIGHT"
 Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
-Please report bugs to http://bugs.ntp.org .
-#! /usr/local/gnu/bin/cat -Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH "NOTES"
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
 option definitions.

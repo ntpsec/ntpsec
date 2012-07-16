@@ -1,9 +1,9 @@
-.Dd July 3 2012
+.Dd July 16 2012
 .Dt NTPQ @NTPQ_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  July  3, 2012 at 09:12:40 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  July 16, 2012 at 12:20:28 AM by AutoGen 5.14
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -261,7 +261,6 @@ Note that since
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
 .El
-#! /usr/local/gnu/bin/cat -
 .Sh "OPTIONS"
 .Bl -tag
 .It  \-4 ", " -\-ipv4
