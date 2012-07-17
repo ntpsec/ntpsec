@@ -481,25 +481,15 @@ chu_start(
 	 */
 	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
 
-	/*
-	** refclock_irig.c and refclock_wwv.c call audio_init() too,
-	** but they tolerate fd == 0.
-	**
-	** This code will leak a file descriptor if it is 0.
-	**
-	** For now...
-	*/
-	INSIST(0 != fd_audio);	/* Coverity 709185 */
-
 #ifdef DEBUG
-	if (fd_audio > 0 && debug)
+	if (fd_audio >= 0 && debug)
 		audio_show();
 #endif
 
 	/*
 	 * If audio is unavailable, Open serial port in raw mode.
 	 */
-	if (fd_audio > 0) {
+	if (fd_audio >= 0) {
 		fd = fd_audio;
 	} else {
 		snprintf(device, sizeof(device), DEVICE, unit);
@@ -513,7 +503,8 @@ chu_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* HAVE_AUDIO */
-	if (fd <= 0)
+
+	if (fd < 0)
 		return (0);
 
 	/*

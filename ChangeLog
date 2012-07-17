@@ -1,3 +1,4 @@
+* CID 709185: refclock_chu.c will leak fd==0 (better fix)
 (4.2.7p289) 2012/07/16 Released by Harlan Stenn <stenn@ntp.org>
 * CID 97123: Future-proof possible change to refclock_nmea.c.
 * CID 97377: ntp-keygen.c's followlink() might not NUL-terminate.
