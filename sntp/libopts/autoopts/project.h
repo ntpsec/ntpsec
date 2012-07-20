@@ -39,8 +39,6 @@ typedef int tSuccess;
 #  define STR(s)        __STR(s)
 #endif
 
-#define STRSIZE(s)      (sizeof(s)-1)
-
 #ifdef DEFINING
 #  define VALUE(s)      = s
 #  define MODE

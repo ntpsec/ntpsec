@@ -10,7 +10,6 @@
 #include "ao-strs.h"
 #include "ag-char-map.h"
 #include "autoopts.h"
-#include "parse-duration.h"
 #include "proto.h"
 #include "parse-duration.c"
 #include "ao-strs.c"
