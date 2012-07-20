@@ -25,6 +25,7 @@ libparse_a_SOURCES = parse.c \
 		     clk_computime.c \
 		     clk_wharton.c \
 		     clk_varitext.c \
+		     clk_sel240x.c \
 		     data_mbg.c \
 		     info_trimble.c \
 		     trim_info.c \
@@ -49,6 +50,7 @@ libparse_kernel_a_LIBADD =	\
 	kclk_trimtsip.o		\
 	kclk_varitext.o		\
 	kclk_wharton.o		\
+	kclk_sel240x$u.o	\
 	kbinio.o		\
 	kieee754io.o		\
 	kmfp_mul.o		\
@@ -112,6 +114,12 @@ kclk_varitext.o: $(srcdir)/clk_varitext.c
 
 kclk_wharton.o: $(srcdir)/clk_wharton.c
 	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/clk_wharton.c -o $@
+
+kclk_sel240x.o: $(srcdir)/clk_sel240x.c
+	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/clk_sel240x.c -o $@
+
+kclk_sel240x.o: $(srcdir)/clk_sel240x.c
+	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/clk_sel240x.c -o $@
 
 kparse.o: $(srcdir)/parse.c
 	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/parse.c -o $@

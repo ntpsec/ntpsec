@@ -2877,6 +2877,22 @@ case "$ntp_ok$ntp_canparse" in
     AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
 esac
 
+AC_MSG_CHECKING(SEL240X clock)
+AC_ARG_ENABLE(SEL240X,
+    AC_HELP_STRING([--enable-SEL240X], [s SEL240X clock]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
+if test "$ntp_ok" = "yes"; then
+    ntp_libparse=yes
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_SEL240X, 1, [SEL240X protocol])
+fi
+AC_MSG_RESULT($ntp_ok)
+case "$ntp_ok$ntp_canparse" in
+ yesno)
+    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    ;;
+esac
+
 AC_SUBST([LIBPARSE])
 AC_SUBST([MAKE_LIBPARSE])
 AC_SUBST([MAKE_LIBPARSE_KERNEL])
