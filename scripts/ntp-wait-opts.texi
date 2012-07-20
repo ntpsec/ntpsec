@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.texi)
 # 
-# It has been AutoGen-ed  July 16, 2012 at 12:18:10 AM by AutoGen 5.14
+# It has been AutoGen-ed  July 20, 2012 at 12:00:01 AM by AutoGen 5.14
 # From the definitions    ntp-wait-opts.def
 # and the template file   aginfo.tpl
 @end ignore
