@@ -280,7 +280,7 @@ struct varlist {
 extern int showhostnames;
 extern int rawmode;
 extern struct servent *server_entry;
-extern struct association assoc_cache[];
+extern struct association *assoc_cache;
 extern u_char pktversion;
 
 typedef struct mru_tag mru;
@@ -1035,8 +1035,6 @@ mreadvar(
 	}
 
 	for (i = from; i <= to; i++) {
-		if (i != from)
-			fprintf(fp, "\n");
 		if (!dolist(pvars, assoc_cache[i].assid, CTL_OP_READVAR,
 			    TYPE_PEER, fp))
 			break;
@@ -1086,22 +1084,27 @@ dogetassoc(
 	}
 
 	numassoc = 0;
+
 	while (dsize > 0) {
+		if (numassoc >= assoc_cache_slots) {
+			grow_assoc_cache();
+		}
 		pus = (const void *)datap;
 		assoc_cache[numassoc].assid = ntohs(*pus);
-		datap += sizeof(u_short);
+		datap += sizeof(*pus);
 		pus = (const void *)datap;
 		assoc_cache[numassoc].status = ntohs(*pus);
-		datap += sizeof(u_short);
-		if (debug)
+		datap += sizeof(*pus);
+		dsize -= 2 * sizeof(*pus);
+		if (debug) {
 			fprintf(stderr, "[%u] ",
 				assoc_cache[numassoc].assid);
-		if (++numassoc >= MAXASSOC)
-			break;
-		dsize -= sizeof(u_short) + sizeof(u_short);
+		}
+		numassoc++;
 	}
-	if (debug)
+	if (debug) {
 		fprintf(stderr, "\n%d associations total\n", numassoc);
+	}
 	sortassoc();
 	return 1;
 }

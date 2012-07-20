@@ -191,13 +191,13 @@ ulink_receive(
 	struct refclockproc *pp;
 	struct peer *peer;
 
-	l_fp	trtmp;		/* arrival timestamp */
-	int	quality;	/* quality indicator */
-	int	temp;		/* int temp */
-	char	syncchar;	/* synchronization indicator */
-	char	leapchar;	/* leap indicator */
-	char	modechar;	/* model 320 mode flag */
-        char	siglchar;	/* model difference between 33x/325 */
+	l_fp	trtmp;			/* arrival timestamp */
+	int	quality = INT_MAX;	/* quality indicator */
+	int	temp;			/* int temp */
+	char	syncchar;		/* synchronization indicator */
+	char	leapchar;		/* leap indicator */
+	char	modechar;		/* model 320 mode flag */
+        char	siglchar;		/* model difference between 33x/325 */
 	char	char_quality[2];	/* temp quality flag */
 
 	/*

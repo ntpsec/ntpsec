@@ -859,6 +859,35 @@ static poll_info_t rcc8000_pollinfo = { RCC_POLLRATE, RCC_POLLCMD, RCC_CMDSIZE }
 #define VARITEXT_SAMPLES     32
 #define VARITEXT_KEEP        20
 
+/*
+ * SEL240x Satellite Sychronized Clock
+ */
+#define SEL240X_POLLRATE	0 /* only true direct polling */
+#define SEL240X_POLLCMD		"BUB8"
+#define SEL240X_CMDSIZE		4
+
+static poll_info_t sel240x_pollinfo = { SEL240X_POLLRATE,
+	                                SEL240X_POLLCMD,
+					SEL240X_CMDSIZE };
+#define SEL240X_FLAGS		(PARSE_F_PPSONSECOND)
+#define SEL240X_POLL		poll_dpoll
+#define SEL240X_INIT		poll_init
+#define SEL240X_END		0
+#define SEL240X_DATA            ((void *)(&sel240x_pollinfo))
+#define SEL240X_ROOTDELAY	0.0
+#define SEL240X_BASEDELAY	0.0
+#define SEL240X_ID		GPS_ID
+#define SEL240X_DESCRIPTION	"SEL240x Satellite Synchronized Clock"
+#define SEL240X_FORMAT		"SEL B8"
+#define SEL240X_MAXUNSYNC	60*60*12 /* only trust clock for 12 hours */
+#define SEL240X_SPEED		(B9600)
+#define SEL240X_CFLAG		(CS8|CREAD|CLOCAL)
+#define SEL240X_IFLAG		(IGNBRK|IGNPAR)
+#define SEL240X_OFLAG		(0)
+#define SEL240X_LFLAG		(0)
+#define SEL240X_SAMPLES		5
+#define SEL240X_KEEP		3
+
 static struct parse_clockinfo
 {
 	u_long  cl_flags;		/* operation flags (PPS interpretation, trust handling) */
@@ -1447,6 +1476,29 @@ static struct parse_clockinfo
 		GPS16X_LFLAG,
 		GPS16X_SAMPLES,
 		GPS16X_KEEP
+	},
+	{				/* mode 24 */
+		SEL240X_FLAGS,
+		SEL240X_POLL,
+		SEL240X_INIT,
+		NO_EVENT,
+		SEL240X_END,
+		NO_MESSAGE,
+		SEL240X_DATA,
+		SEL240X_ROOTDELAY,
+		SEL240X_BASEDELAY,
+		SEL240X_ID,
+		SEL240X_DESCRIPTION,
+		SEL240X_FORMAT,
+		GPS_TYPE,
+		SEL240X_MAXUNSYNC,
+		SEL240X_SPEED,
+		SEL240X_CFLAG,
+		SEL240X_IFLAG,
+		SEL240X_OFLAG,
+		SEL240X_LFLAG,
+		SEL240X_SAMPLES,
+		SEL240X_KEEP
 	},
 };
 

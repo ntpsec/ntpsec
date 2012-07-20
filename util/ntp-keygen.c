@@ -267,9 +267,13 @@ followlink(
 {
 	int len;
 
+	REQUIRE(bufsiz > 0);
+
 	len = readlink(fname, fname, (int)bufsiz);
-	if (len < 0 || bufsiz < 1)
+	if (len < 0 ) {
+		fname[0] = '\0';
 		return;
+	}
 	if (len > (int)bufsiz - 1)
 		len = (int)bufsiz - 1;
 	fname[len] = '\0';

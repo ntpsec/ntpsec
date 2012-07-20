@@ -73,6 +73,12 @@ NTP_VPATH_HACK		dnl used only by ntpd/Makefile.am
 
 NTP_LOCINFO([sntp])	dnl takes over from NTP_BINDIR, in NTP_LIBNTP
 
+dnl AM_PROG_AR req. automake 1.12
+m4_ifdef(
+    [AM_PROG_AR],
+    [AM_PROG_AR]
+)
+
 # So far, the only shared library we might use is libopts.
 # It's a small library - we might as well use a static version of it.
 AC_DISABLE_SHARED
@@ -2869,6 +2875,22 @@ AC_MSG_RESULT([$ntp_ok])
 case "$ntp_ok$ntp_canparse" in
  yesno)
     AC_MSG_ERROR([That's a parse clock and this system doesn't support it!])
+esac
+
+AC_MSG_CHECKING(SEL240X clock)
+AC_ARG_ENABLE(SEL240X,
+    AC_HELP_STRING([--enable-SEL240X], [s SEL240X clock]),
+    [ntp_ok=$enableval], [ntp_ok=$ntp_eapc])
+if test "$ntp_ok" = "yes"; then
+    ntp_libparse=yes
+    ntp_refclock=yes
+    AC_DEFINE(CLOCK_SEL240X, 1, [SEL240X protocol])
+fi
+AC_MSG_RESULT($ntp_ok)
+case "$ntp_ok$ntp_canparse" in
+ yesno)
+    AC_MSG_ERROR(That's a parse clock and this system doesn't support it!)
+    ;;
 esac
 
 AC_SUBST([LIBPARSE])

@@ -480,15 +480,16 @@ chu_start(
 	 * Open audio device. Don't complain if not there.
 	 */
 	fd_audio = audio_init(DEVICE_AUDIO, AUDIO_BUFSIZ, unit);
+
 #ifdef DEBUG
-	if (fd_audio > 0 && debug)
+	if (fd_audio >= 0 && debug)
 		audio_show();
 #endif
 
 	/*
 	 * If audio is unavailable, Open serial port in raw mode.
 	 */
-	if (fd_audio > 0) {
+	if (fd_audio >= 0) {
 		fd = fd_audio;
 	} else {
 		snprintf(device, sizeof(device), DEVICE, unit);
@@ -502,7 +503,8 @@ chu_start(
 	snprintf(device, sizeof(device), DEVICE, unit);
 	fd = refclock_open(device, SPEED232, LDISC_RAW);
 #endif /* HAVE_AUDIO */
-	if (fd <= 0)
+
+	if (fd < 0)
 		return (0);
 
 	/*

@@ -1,5 +1,23 @@
 * Upgrade to autogen-5.16.1 and libopts-36.4.11.
+(4.2.7p290) 2012/07/20 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1454] Add parse clock support for the SEL-240x GPS products.
+* CID 709185: refclock_chu.c will leak fd==0 (better fix)
+(4.2.7p289) 2012/07/16 Released by Harlan Stenn <stenn@ntp.org>
+* CID 97123: Future-proof possible change to refclock_nmea.c.
+* CID 97377: ntp-keygen.c's followlink() might not NUL-terminate.
+* CID 709185: refclock_chu.c will leak fd==0 (which should be impossible).
+(4.2.7p288) 2012/07/03 Released by Harlan Stenn <stenn@ntp.org>
+* CID 709173: Make sure a libisc function we do not use is called properly.
+(4.2.7p287) 2012/07/03 Released by Harlan Stenn <stenn@ntp.org>
+* Remove 1024 associations-per-server limit from ntpq.
+* Remove blank line between ntpq mreadvar associations.
+(4.2.7p286) 2012/06/28 Released by Harlan Stenn <stenn@ntp.org>
+* CID 97193: check return from sscanf() in ntp_config.c.
+* CID 709169: check return from open("/dev/null", 0) and friends.
+* CID 709207: Initialize "quality" for ulink_receive.
+(4.2.7p285) 2012/06/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2227] Enable mrulist access control via "restrict ... nomrulist".
+* Automake-1.12 wants us to use AM_PROG_AR.
 * Conditionalize msyslog messages about rejected mode 6 requests due to
   nomodify and nomrulist restrictions under "logconfig +sysinfo".
 * Increment sys_restricted in a few rejection paths due to nomodify

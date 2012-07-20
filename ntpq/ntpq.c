@@ -340,9 +340,13 @@ u_short sequence;
 long pktdata[DATASIZE/sizeof(long)];
 
 /*
- * Holds association data for use with the &n operator.
+ * assoc_cache[] is a dynamic array which allows references to
+ * associations using &1 ... &N for n associations, avoiding manual
+ * lookup of the current association IDs for a given ntpd.  It also
+ * caches the status word for each association, retrieved incidentally.
  */
-struct association assoc_cache[MAXASSOC];
+struct association *	assoc_cache;
+u_int assoc_cache_slots;/* count of allocated array entries */
 u_int numassoc;		/* number of cached associations */
 
 /*
@@ -3294,6 +3298,28 @@ assoccmp(
 	if (ass1->assid > ass2->assid)
 		return 1;
 	return 0;
+}
+
+
+/*
+ * grow_assoc_cache() - enlarge dynamic assoc_cache array
+ *
+ * The strategy is to add an assumed 4k page size at a time, leaving
+ * room for malloc() bookkeeping overhead equivalent to 4 pointers.
+ */
+void
+grow_assoc_cache(void)
+{
+	static size_t	prior_sz;
+	size_t		new_sz;
+
+	new_sz = prior_sz + 4 * 1024;
+	if (0 == prior_sz) {
+		new_sz -= 4 * sizeof(void *);
+	}
+	assoc_cache = erealloc_zero(assoc_cache, new_sz, prior_sz); 
+	prior_sz = new_sz;
+	assoc_cache_slots = new_sz / sizeof(assoc_cache[0]);
 }
 
 

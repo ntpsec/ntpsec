@@ -2709,9 +2709,9 @@ config_nic_rules(
 				*pchSlash = '\0';
 			if (is_ip_address(if_name, AF_UNSPEC, &addr)) {
 				match_type = MATCH_IFADDR;
-				if (pchSlash != NULL) {
-					sscanf(pchSlash + 1, "%d",
-					    &prefixlen);
+				if (pchSlash != NULL	\
+				    && 1 == sscanf(pchSlash + 1, "%d",
+					    &prefixlen)) {
 					addrbits = 8 *
 					    SIZEOF_INADDR(AF(&addr));
 					prefixlen = max(-1, prefixlen);
