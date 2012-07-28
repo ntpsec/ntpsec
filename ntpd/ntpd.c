@@ -147,7 +147,7 @@ int nofork;			/* Fork by default */
  * after we have synched the first time. If the attempt fails, then try again once per 
  * minute for up to 5 times. After all, we may be starting before mDNS.
  */
-int mdnsreg = TRUE;
+int mdnsreg = FALSE;
 int mdnstries = 5;
 #endif  /* HAVE_DNSREGISTRATION */
 
@@ -504,6 +504,15 @@ ntpdmain(
 	if (HAVE_OPT( MODIFYMMTIMER ))
 		set_mm_timer(MM_TIMER_HIRES);
 # endif
+
+#ifdef HAVE_DNSREGISTRATION
+/*
+ * Enable mDNS registrations?
+ */
+	if (HAVE_OPT( MDNS )) {
+		mdnsreg = TRUE;
+	}
+#endif  /* HAVE_DNSREGISTRATION */
 
 	if (HAVE_OPT( NOVIRTUALIPS ))
 		listen_to_virtual_ips = 0;
@@ -1102,7 +1111,7 @@ getgroup:
 				}
 			} else {
 				msyslog(LOG_INFO, "mDNS service registered.");
-				mdnsreg = 0;
+				mdnsreg = FALSE;
 			}
 		}
 # endif /* HAVE_DNSREGISTRATION */

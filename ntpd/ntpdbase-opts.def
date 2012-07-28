@@ -478,3 +478,14 @@ flag = {
 	given frequency (in Hz).
 	_EndOfDoc_;
 };
+
+flag = {
+    ifdef     = HAVE_DNSREGISTRATION;
+    name      = mdns;
+    value     = m;
+    descrip   = "Register with mDNS as a NTP server";
+    doc = <<-  _EndOfDoc_
+	Registers as an NTP server with the local mDNS server which allows
+	the server to be discovered via mDNS client lookup.
+	_EndOfDoc_;
+};

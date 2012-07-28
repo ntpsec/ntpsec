@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (ntpd-opts.texi)
 # 
-# It has been AutoGen-ed  July 20, 2012 at 12:01:38 AM by AutoGen 5.14
+# It has been AutoGen-ed  July 26, 2012 at 06:19:51 PM by AutoGen 5.14
 # From the definitions    ntpd-opts.def
 # and the template file   aginfo.tpl
 @end ignore
@@ -33,6 +33,7 @@ This software is released under a specialized copyright license.
 * ntpd jaildir::               jaildir option (-i)
 * ntpd keyfile::               keyfile option (-k)
 * ntpd logfile::               logfile option (-l)
+* ntpd mdns::                  mdns option (-m)
 * ntpd modifymmtimer::         modifymmtimer option (-M)
 * ntpd nice::                  nice option (-N)
 * ntpd nofork::                nofork option (-n)
@@ -124,7 +125,7 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                                 quit
                                 saveconfigquit
    -x no  slew           Slew up to 600 seconds
-   -! opt version        Output version information and exit
+   -" opt version        Output version information and exit
    -? no  help           Display extended usage information and exit
    -! no  more-help      Extended usage information passed thru pager
 
@@ -333,6 +334,21 @@ The default is the system log file.
 This is the same operation as the
 logfile logfile
 configuration file directive.
+
+@node ntpd mdns
+@subsection mdns option (-m)
+@cindex ntpd-mdns
+
+This is the ``register with mdns as a ntp server'' option.
+
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{HAVE_DNSREGISTRATION} during the compilation.
+@end itemize
+
+Registers as an NTP server with the local mDNS server which allows
+the server to be discovered via mDNS client lookup.
 
 @node ntpd modifymmtimer
 @subsection modifymmtimer option (-M)

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  July 20, 2012 at 12:00:32 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  July 26, 2012 at 06:17:48 PM by AutoGen 5.14
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -70,7 +70,7 @@ extern tUsageProc optionUsage;
 /*
  *  ntpd option static const strings
  */
-static char const ntpd_opt_strs[3008] =
+static char const ntpd_opt_strs[3053] =
 /*     0 */ "ntpd 4.2.7p290\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
@@ -82,8 +82,8 @@ static char const ntpd_opt_strs[3008] =
             "documentation for any purpose with or without fee is hereby granted,\n"
             "provided that the above copyright notice appears in all copies and that\n"
             "both the copyright notice and this permission notice appear in supporting\n"
-            "documentation, and that the name The University of Delaware not be used in\n"
-            "advertising or publicity pertaining to distribution of the software\n"
+            "documentation, and that the name The University of Delaware not be used\n"
+            "in advertising or publicity pertaining to distribution of the software\n"
             "without specific, written prior permission. The University of Delaware\n"
             "makes no representations about the suitability this software for any\n"
             "purpose. It is provided \"as is\" without express or implied warranty.\n\0"
@@ -188,19 +188,22 @@ static char const ntpd_opt_strs[3008] =
 /*  2611 */ "Force CPU cycle counter use (Windows only)\0"
 /*  2654 */ "PCCFREQ\0"
 /*  2662 */ "pccfreq\0"
-/*  2670 */ "Display extended usage information and exit\0"
-/*  2714 */ "help\0"
-/*  2719 */ "Extended usage information passed thru pager\0"
-/*  2764 */ "more-help\0"
-/*  2774 */ "Output version information and exit\0"
-/*  2810 */ "version\0"
-/*  2818 */ "NTPD\0"
-/*  2823 */ "ntpd - NTP daemon program - Ver. 4.2.7p290\n"
+/*  2670 */ "Register with mDNS as a NTP server\0"
+/*  2705 */ "MDNS\0"
+/*  2710 */ "mdns\0"
+/*  2715 */ "Display extended usage information and exit\0"
+/*  2759 */ "help\0"
+/*  2764 */ "Extended usage information passed thru pager\0"
+/*  2809 */ "more-help\0"
+/*  2819 */ "Output version information and exit\0"
+/*  2855 */ "version\0"
+/*  2863 */ "NTPD\0"
+/*  2868 */ "ntpd - NTP daemon program - Ver. 4.2.7p290\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
-/*  2956 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  2990 */ "\n\n\0"
-/*  2993 */ "ntpd 4.2.7p290";
+/*  3001 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  3035 */ "\n\n\0"
+/*  3038 */ "ntpd 4.2.7p290";
 
 /*
  *  ipv4 option description with
@@ -588,13 +591,29 @@ static int const aWait_SyncCantList[] = {
 #endif  /* SYS_WINNT */
 
 /*
+ *  mdns option description:
+ */
+#ifdef HAVE_DNSREGISTRATION
+#define MDNS_DESC      (ntpd_opt_strs+2670)
+#define MDNS_NAME      (ntpd_opt_strs+2705)
+#define MDNS_name      (ntpd_opt_strs+2710)
+#define MDNS_FLAGS     (OPTST_DISABLED)
+
+#else   /* disable mdns */
+#define MDNS_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define MDNS_NAME      NULL
+#define MDNS_DESC      NULL
+#define MDNS_name      NULL
+#endif  /* HAVE_DNSREGISTRATION */
+
+/*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpd_opt_strs+2670)
-#define HELP_name       (ntpd_opt_strs+2714)
+#define HELP_DESC       (ntpd_opt_strs+2715)
+#define HELP_name       (ntpd_opt_strs+2759)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpd_opt_strs+2719)
-#define MORE_HELP_name  (ntpd_opt_strs+2764)
+#define MORE_HELP_DESC  (ntpd_opt_strs+2764)
+#define MORE_HELP_name  (ntpd_opt_strs+2809)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  NULL
@@ -607,8 +626,8 @@ static int const aWait_SyncCantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpd_opt_strs+2774)
-#define VER_name        (ntpd_opt_strs+2810)
+#define VER_DESC        (ntpd_opt_strs+2819)
+#define VER_name        (ntpd_opt_strs+2855)
 /*
  *  Declare option callback procedures
  */
@@ -1053,6 +1072,18 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ PCCFREQ_DESC, PCCFREQ_NAME, PCCFREQ_name,
      /* disablement strs */ NULL, NULL },
 
+  {  /* entry idx, value */ 33, VALUE_OPT_MDNS,
+     /* equiv idx, value */ 33, VALUE_OPT_MDNS,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ MDNS_FLAGS, 0,
+     /* last opt argumnt */ { NULL }, /* --mdns */
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ MDNS_DESC, MDNS_NAME, MDNS_name,
+     /* disablement strs */ NULL, NULL },
+
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
      /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_VERSION,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -1097,14 +1128,14 @@ static tOptDesc optDesc[OPTION_CT] = {
  *
  *  Define the Ntpd Option Environment
  */
-#define zPROGNAME       (ntpd_opt_strs+2818)
-#define zUsageTitle     (ntpd_opt_strs+2823)
+#define zPROGNAME       (ntpd_opt_strs+2863)
+#define zUsageTitle     (ntpd_opt_strs+2868)
 #define zRcName         NULL
 #define apzHomeList     NULL
-#define zBugsAddr       (ntpd_opt_strs+2956)
-#define zExplain        (ntpd_opt_strs+2990)
+#define zBugsAddr       (ntpd_opt_strs+3001)
+#define zExplain        (ntpd_opt_strs+3035)
 #define zDetail         (NULL)
-#define zFullVersion    (ntpd_opt_strs+2993)
+#define zFullVersion    (ntpd_opt_strs+3038)
 /* extracted from optcode.tlib near line 315 */
 
 #if defined(ENABLE_NLS)
@@ -1212,7 +1243,7 @@ tOptions ntpdOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    36 /* full option count */, 33 /* user option count */,
+    37 /* full option count */, 34 /* user option count */,
     ntpd_full_usage, ntpd_short_usage,
     NULL, NULL,
     PKGDATADIR, ntpd_packager_info
