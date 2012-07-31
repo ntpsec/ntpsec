@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  July 26, 2012 at 06:17:48 PM by AutoGen 5.14
+ *  It has been AutoGen-ed  July 31, 2012 at 11:32:49 AM by AutoGen 5.14
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -71,7 +71,7 @@ extern tUsageProc optionUsage;
  *  ntpd option static const strings
  */
 static char const ntpd_opt_strs[3053] =
-/*     0 */ "ntpd 4.2.7p290\n"
+/*     0 */ "ntpd 4.2.7p291\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -82,8 +82,8 @@ static char const ntpd_opt_strs[3053] =
             "documentation for any purpose with or without fee is hereby granted,\n"
             "provided that the above copyright notice appears in all copies and that\n"
             "both the copyright notice and this permission notice appear in supporting\n"
-            "documentation, and that the name The University of Delaware not be used\n"
-            "in advertising or publicity pertaining to distribution of the software\n"
+            "documentation, and that the name The University of Delaware not be used in\n"
+            "advertising or publicity pertaining to distribution of the software\n"
             "without specific, written prior permission. The University of Delaware\n"
             "makes no representations about the suitability this software for any\n"
             "purpose. It is provided \"as is\" without express or implied warranty.\n\0"
@@ -198,12 +198,12 @@ static char const ntpd_opt_strs[3053] =
 /*  2819 */ "Output version information and exit\0"
 /*  2855 */ "version\0"
 /*  2863 */ "NTPD\0"
-/*  2868 */ "ntpd - NTP daemon program - Ver. 4.2.7p290\n"
+/*  2868 */ "ntpd - NTP daemon program - Ver. 4.2.7p291\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
 /*  3001 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3035 */ "\n\n\0"
-/*  3038 */ "ntpd 4.2.7p290";
+/*  3038 */ "ntpd 4.2.7p291";
 
 /*
  *  ipv4 option description with

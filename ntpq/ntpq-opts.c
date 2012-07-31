@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  July 20, 2012 at 12:01:57 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  July 31, 2012 at 11:33:59 AM by AutoGen 5.14
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -71,7 +71,7 @@ extern tUsageProc optionUsage;
  *  ntpq option static const strings
  */
 static char const ntpq_opt_strs[1831] =
-/*     0 */ "ntpq 4.2.7p290\n"
+/*     0 */ "ntpq 4.2.7p291\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -127,13 +127,13 @@ static char const ntpq_opt_strs[1831] =
 /*  1625 */ "no-load-opts\0"
 /*  1638 */ "no\0"
 /*  1641 */ "NTPQ\0"
-/*  1646 */ "ntpq - standard NTP query program - Ver. 4.2.7p290\n"
+/*  1646 */ "ntpq - standard NTP query program - Ver. 4.2.7p291\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1767 */ ".ntprc\0"
 /*  1774 */ "$HOME\0"
 /*  1780 */ ".\0"
 /*  1782 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1816 */ "ntpq 4.2.7p290";
+/*  1816 */ "ntpq 4.2.7p291";
 
 /*
  *  ipv4 option description with

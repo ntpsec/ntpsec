@@ -1,3 +1,4 @@
+(4.2.7p291) 2012/07/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2241] MDNS registration should only happen if requested.
 (4.2.7p290) 2012/07/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1454] Add parse clock support for the SEL-240x GPS products.
