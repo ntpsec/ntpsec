@@ -1,4 +1,5 @@
 * [Bug 2075] Fix spelling of 'incompatible'.
+* Clean up an exit status in ntpq.c.
 (4.2.7p291) 2012/07/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2241] MDNS registration should only happen if requested.
 (4.2.7p290) 2012/07/20 Released by Harlan Stenn <stenn@ntp.org>
