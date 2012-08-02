@@ -1,3 +1,4 @@
+* [Bug 1872] Remove legacy ppsclock fdpps, #ifdef PPS.
 * [Bug 2075] Fix spelling of 'incompatible'.
 * Clean up an exit status in ntpq.c.
 (4.2.7p291) 2012/07/31 Released by Harlan Stenn <stenn@ntp.org>

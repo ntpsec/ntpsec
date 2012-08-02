@@ -210,16 +210,6 @@ zyfer_receive(
 	int tfom;		/* Time Figure Of Merit */
 	int omode;		/* Operation mode */
 	u_char *p;
-#ifdef PPS
-	struct ppsclockev ppsev;
-	int request;
-#ifdef HAVE_CIOGETEV
-        request = CIOGETEV;
-#endif
-#ifdef HAVE_TIOCGPPSEV
-        request = TIOCGPPSEV;
-#endif
-#endif /* PPS */
 
 	peer = rbufp->recv_peer;
 	pp = peer->procptr;
@@ -292,14 +282,7 @@ zyfer_receive(
 		pp->leap = LEAP_NOTINSYNC;
 		return;
 	}
-#ifdef PPS
-	if(ioctl(fdpps,request,(caddr_t) &ppsev) >=0) {
-		ppsev.tv.tv_sec += (u_int32) JAN_1970;
-		TVTOTS(&ppsev.tv,&up->tstamp);
-	}
-	/* record the last ppsclock event time stamp */
-	pp->lastrec = up->tstamp;
-#endif /* PPS */
+
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
 		return;
