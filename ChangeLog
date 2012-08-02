@@ -1,3 +1,4 @@
+(4.2.7p292) 2012/08/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1545] Note why we are logging the Version string.
 * [Bug 1872] Remove legacy ppsclock fdpps, #ifdef PPS.
 * [Bug 2075] Fix spelling of 'incompatible'.
