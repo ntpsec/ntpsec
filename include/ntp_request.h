@@ -69,7 +69,7 @@
  *		requested wasn't performed.
  *
  *		0 - no error
- *		1 - incompatable implementation number
+ *		1 - incompatible implementation number
  *		2 - unimplemented request code
  *		3 - format error (wrong data items, data size, packet size etc.)
  *		4 - no data available (e.g. request for details on unknown peer)
@@ -190,7 +190,7 @@ struct resp_pkt {
  * Information error codes
  */
 #define	INFO_OKAY	0
-#define	INFO_ERR_IMPL	1	/* incompatable implementation */
+#define	INFO_ERR_IMPL	1	/* incompatible implementation */
 #define	INFO_ERR_REQ	2	/* unknown request code */
 #define	INFO_ERR_FMT	3	/* format error */
 #define	INFO_ERR_NODATA	4	/* no data for this request */
