@@ -476,7 +476,7 @@ ntpdmain(
 		if (HAVE_OPT(SAVECONFIGQUIT))
 			syslogit = FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s\n", Version);
+	msyslog(LOG_NOTICE, "%s: Starting\n", Version);
 
 	/*
 	 * Install trap handlers to log errors and assertion failures.
