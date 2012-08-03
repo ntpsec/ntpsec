@@ -24,12 +24,6 @@ extern	struct refclock	refclock_local;
 #define	refclock_local	refclock_none
 #endif
 
-#if 0 && defined(CLOCK_TRAK) && defined(PPS)
-extern	struct refclock	refclock_trak;
-#else
-#define	refclock_trak	refclock_none
-#endif
-
 #ifdef CLOCK_PST
 extern	struct refclock	refclock_pst;
 #else
