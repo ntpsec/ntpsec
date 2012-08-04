@@ -1,5 +1,6 @@
 * [Bug 2247] (more) Get rid of the TRAK refclock - deprecated since 2006.
 * Documentation cleanup from Mike T.
+* Cleanup kclk_sel240x.o rules in libparse/Makefile.am.
 (4.2.7p292) 2012/08/02 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1545] Note why we are logging the Version string.
 * [Bug 1872] Remove legacy ppsclock fdpps, #ifdef PPS.
