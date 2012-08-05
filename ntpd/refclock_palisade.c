@@ -833,15 +833,15 @@ TSIP_decode (
 			up->polled = -1;
 #ifdef DEBUG
 			if (debug > 1) {
-				if (mb(1) && 0x01)
+				if (mb(1) & 0x01)
 					printf ("Signal Processor Error, reset unit.\n");
-				if (mb(1) && 0x02)
+				if (mb(1) & 0x02)
 					printf ("Alignment error, channel or chip 1, reset unit.\n");
-				if (mb(1) && 0x03)
+				if (mb(1) & 0x03)
 					printf ("Alignment error, channel or chip 2, reset unit.\n");
-				if (mb(1) && 0x04)
+				if (mb(1) & 0x04)
 					printf ("Antenna feed line fault (open or short)\n");
-				if (mb(1) && 0x05)
+				if (mb(1) & 0x05)
 					printf ("Excessive reference frequency error, refer to packet 0x2D and packet 0x4D documentation for further information\n");
 			}
 #endif
