@@ -1,3 +1,4 @@
+* [Bug 2249] Bad operator for 'test' in 'make check' of libevent.
 (4.2.7p293) 2012/08/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2247] (more) Get rid of the TRAK refclock - deprecated since 2006.
 * Documentation cleanup from Mike T.
