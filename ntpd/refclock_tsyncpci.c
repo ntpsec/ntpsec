@@ -423,6 +423,7 @@ static void tsync_poll(int unit, struct peer *peer)
     ioctl_trans_di      *it2;
     l_fp                 offset;
     l_fp                 ltemp;
+    ReferenceObj *	 pRefObj;
 
 
     /* Construct the device name */
@@ -552,9 +553,10 @@ static void tsync_poll(int unit, struct peer *peer)
 
     // Extract reference identifiers from ioctl payload
     memset(timeRef, '\0', sizeof(timeRef));
-    memset(ppsRef,  '\0', sizeof(ppsRef));
-    memcpy(timeRef, ((ReferenceObj*)(it->payloads))->time, TSYNC_REF_LEN);
-    memcpy(ppsRef,  ((ReferenceObj*)(it->payloads))->pps,  TSYNC_REF_LEN);
+    memset(ppsRef, '\0', sizeof(ppsRef));
+    pRefObj = (void *)it->payloads;
+    memcpy(timeRef, pRefObj->time, TSYNC_REF_LEN);
+    memcpy(ppsRef, pRefObj->pps, TSYNC_REF_LEN);
 
     // Extract the Clock Service Time Scale and convert to correct byte order
     memcpy(&tmscl, ((TIME_SCALE*)(it1->payloads)), sizeof(tmscl));
