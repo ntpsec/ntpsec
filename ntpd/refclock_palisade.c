@@ -542,7 +542,7 @@ TSIP_decode (
 
 #ifdef DEBUG
 			if (debug > 1)
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d UTC %02d\n",
+				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02d\n",
 				       up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, 
 				       pp->second, pp->nsec, mb(12), mb(11), pp->year, GPS_UTC_Offset);
 #endif
@@ -618,7 +618,7 @@ TSIP_decode (
 
 #ifdef DEBUG
 			if (debug > 1)
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d UTC %02x %s\n",
+				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d UTC %02x %s\n",
 				       up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, 
 				       pp->second, pp->nsec, mb(15), mb(14), pp->year,
 				       mb(19), *Tracking_Status[st]);
@@ -762,7 +762,7 @@ TSIP_decode (
 
 #ifdef DEBUG
 			if (debug > 1)
-				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%06ld %02d/%02d/%04d ",up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, pp->second, pp->nsec, mb(14), mb(13), pp->year);
+				printf("TSIP_decode: unit %d: %02X #%d %02d:%02d:%02d.%09ld %02d/%02d/%04d ",up->unit, mb(0) & 0xff, event, pp->hour, pp->minute, pp->second, pp->nsec, mb(14), mb(13), pp->year);
 #endif
 			return 1;
 			break;
@@ -910,7 +910,7 @@ palisade_receive (
 #ifdef DEBUG
 	if (debug) 
 		printf(
-			"palisade_receive: unit %d: %4d %03d %02d:%02d:%02d.%06ld\n",
+			"palisade_receive: unit %d: %4d %03d %02d:%02d:%02d.%09ld\n",
 			up->unit, pp->year, pp->day, pp->hour, pp->minute, 
 			pp->second, pp->nsec);
 #endif
@@ -922,7 +922,7 @@ palisade_receive (
 	 */
 
 	snprintf(pp->a_lastcode, sizeof(pp->a_lastcode),
-		 "%4d %03d %02d:%02d:%02d.%06ld",
+		 "%4d %03d %02d:%02d:%02d.%09ld",
 		 pp->year, pp->day,
 		 pp->hour,pp->minute, pp->second, pp->nsec); 
 	pp->lencode = 24;

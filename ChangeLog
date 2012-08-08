@@ -1,3 +1,7 @@
+* [Bug 2242] configure fails to detect getifaddrs function on Solaris.
+* [Bug 2249] Bad operator for 'test' in 'make check' of libevent.
+* [Bug 2252] palisade: formats nanosecs to a 6-char field.
+* Attempt to resolve strict-aliasing violation in refclock_tsyncpci.c.
 * Fix && -> & typo in refclock_palisade.c debug statements.
 (4.2.7p293) 2012/08/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2247] (more) Get rid of the TRAK refclock - deprecated since 2006.
