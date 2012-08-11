@@ -186,6 +186,8 @@ esac
 # HMS: a check for -lnsl used to be here - now being done in NTP_LIBNTP
 AC_SEARCH_LIBS([openlog], [gen syslog])
 
+NTP_FACILITYNAMES
+
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
 dnl so only use one of them.  Linux (glibc-2.1.2 and -2.2.2, at least)

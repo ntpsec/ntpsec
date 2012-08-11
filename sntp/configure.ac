@@ -110,6 +110,7 @@ AC_SEARCH_LIBS([openlog], [gen syslog])
 
 # Checks for header files.
 AC_CHECK_HEADERS([netdb.h string.h strings.h syslog.h])
+NTP_FACILITYNAMES
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
