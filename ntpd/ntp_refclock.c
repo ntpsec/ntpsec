@@ -61,9 +61,6 @@
 #define FUDGEFAC	.1	/* fudge correction factor */
 #define LF		0x0a	/* ASCII LF */
 
-#ifdef PPS	/* fdpps still ref'd by refclock_zyfer.c */
-int	fdpps;			/* ppsclock legacy */
-#endif /* PPS */
 int	cal_enable;		/* enable refclock calibrate */
 
 /*
@@ -805,9 +802,7 @@ refclock_setup(
 {
 	int	i;
 	TTY	ttyb, *ttyp;
-#ifdef PPS		/* fdpps referenced by refclock_zyfer.c */
-	fdpps = fd;		/* ppsclock legacy */
-#endif /* PPS */
+
 	/*
 	 * By default, the serial line port is initialized in canonical
 	 * (line-oriented) mode at specified line speed, 8 bits and no

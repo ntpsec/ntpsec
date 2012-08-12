@@ -32,7 +32,7 @@ AC_CONFIG_AUX_DIR([libevent/build-aux])
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-sntp_configure_cache_version=20110219
+sntp_configure_cache_version=20120806
 
 # When the version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -110,6 +110,7 @@ AC_SEARCH_LIBS([openlog], [gen syslog])
 
 # Checks for header files.
 AC_CHECK_HEADERS([netdb.h string.h strings.h syslog.h])
+NTP_FACILITYNAMES
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

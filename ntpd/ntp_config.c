@@ -2693,7 +2693,7 @@ config_nic_rules(
 			 * other reason.
 			 */
 			match_type = MATCH_ALL;
-			NTP_INSIST(0);
+			INSIST(FALSE);
 			break;
 
 		case 0:
@@ -2703,13 +2703,13 @@ config_nic_rules(
 			 * interface descriptor is either a name or
 			 * address, stored in if_name in either case.
 			 */
-			NTP_INSIST(if_name != NULL);
+			INSIST(if_name != NULL);
 			pchSlash = strchr(if_name, '/');
 			if (pchSlash != NULL)
 				*pchSlash = '\0';
 			if (is_ip_address(if_name, AF_UNSPEC, &addr)) {
 				match_type = MATCH_IFADDR;
-				if (pchSlash != NULL	\
+				if (pchSlash != NULL
 				    && 1 == sscanf(pchSlash + 1, "%d",
 					    &prefixlen)) {
 					addrbits = 8 *
@@ -2751,7 +2751,7 @@ config_nic_rules(
 			 * other reason.
 			 */
 			action = ACTION_LISTEN;
-			NTP_INSIST(0);
+			INSIST(FALSE);
 			break;
 
 		case T_Listen:

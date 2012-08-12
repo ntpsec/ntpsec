@@ -34,7 +34,7 @@ AC_PRESERVE_HELP_ORDER
 # the date YYYYMMDD optionally with -HHMM if there is more than one
 # bump in a day.
 
-ntp_configure_cache_version=20110219
+ntp_configure_cache_version=20120806
 
 # When the cache version of config.cache and configure do not
 # match, NTP_CACHEVERSION will flush the cache.
@@ -185,6 +185,8 @@ esac
 
 # HMS: a check for -lnsl used to be here - now being done in NTP_LIBNTP
 AC_SEARCH_LIBS([openlog], [gen syslog])
+
+NTP_FACILITYNAMES
 
 dnl Digital UNIX V4.0 and Solaris 7 have POSIX.1c functions in -lrt
 dnl Solaris 2.6 only has -lposix4; in Solaris 7, this is a symlink to -lrt,
@@ -2418,17 +2420,6 @@ AC_MSG_RESULT([$ntp_ok])
 case "$ntp_ok$ac_cv_header_sys_tpro" in
  yesno) AC_MSG_WARN([*** But the expected answer is... no ***])
 esac
-
-dnl Bug 342: longstanding unfixed bugs
-dnl AC_MSG_CHECKING([TRAK 8810 GPS receiver])
-dnl AC_ARG_ENABLE([TRAK],
-dnl     [AS_HELP_STRING([--enable-TRAK], [+ TRAK 8810 GPS receiver])],
-dnl     [ntp_ok=$enableval], [ntp_ok=$ntp_eac])
-dnl if test "$ntp_ok" = "yes"; then
-dnl     ntp_refclock=yes
-dnl     AC_DEFINE([CLOCK_TRAK], [1], [TRAK 8810 GPS receiver])
-dnl fi
-dnl AC_MSG_RESULT([$ntp_ok])
 
 # Not on a vax-dec-bsd
 AC_MSG_CHECKING([Kinemetrics/TrueTime receivers])

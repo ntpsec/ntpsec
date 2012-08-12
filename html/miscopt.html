@@ -109,9 +109,9 @@
       <dt><tt>freq <i>freq</i></tt></dt>
       <dd>Specifies the frequency offset in parts-per-million (PPM). This option is mutually exclusive with the driftfile command.</dd>
       <dt><tt>huffpuff <i>huffpuff</i></tt></dt>
-      <dd>Sp edifies the huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 min), but a more reasonable value is 7200 (2 hours).See the <a href="huffpuff.html">Huff-n'-Puff Filter</a> page for further information.</dd>
+      <dd>Specifies the huff-n'-puff filter span, which determines the most recent interval the algorithm will search for a minimum delay. The lower limit is 900 s (15 min), but a more reasonable value is 7200 (2 hours).See the <a href="huffpuff.html">Huff-n'-Puff Filter</a> page for further information.</dd>
       <dt><tt>panic <i>panic</i></tt></dt>
-      <dd>Sp edifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.</dd>
+      <dd>Specifies the panic threshold in seconds with default 1000 s. If set to zero, the panic sanity check is disabled and a clock offset of any value will be accepted.</dd>
       <dt><tt>step <i>step</i></tt></dt>
       <dd>Specifies the step threshold in seconds. The default without this command is 0.128 s. If set to zero, step adjustments will never occur. Note: The kernel time discipline is disabled if the step threshold is set to zero or greater than 0.5
         s. Further details are on the <a href="clock.html">Clock State Machine</a> page.</dd>

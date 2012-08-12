@@ -3343,7 +3343,7 @@ ntpq_custom_opt_handler(
 		fprintf(stderr,
 			"ntpq_custom_opt_handler unexpected option '%c' (%d)\n",
 			pOptDesc->optValue, pOptDesc->optValue);
-		exit(-1);
+		exit(1);
 
 	case 'c':
 		ADDCMD(pOptDesc->pzLastArg);

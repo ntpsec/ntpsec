@@ -57,6 +57,8 @@
   <dd>Specify the name and path of the symmetric key file, default <tt>/etc/ntp.keys</tt>. This is the same operation as the <tt>keys <i>keyfile</i></tt> command.</dd>
   <dt><tt>-l <i>logfile</i></tt></dt>
   <dd>Specify the name and path of the log file. The default is the system log file. This is the same operation as the <tt>logfile <i>logfile</i></tt> command.</dd>
+  <dt id="--mdns"><tt>-m</tt></dt>
+  <dd>Once the system clock is synchronized, register with mDNS as an available server.</dd>
   <dt id="--novirtualips"><tt>-L</tt></dt>
   <dd>Do not listen to virtual interfaces, defined as those with names containing a colon. This option is deprecated. Please consider using the configuration file <a href="miscopt.html#interface">interface</a> command, which is more versatile.</dd>
   <dt><tt>-M</tt></dt>

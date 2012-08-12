@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  July 20, 2012 at 12:00:31 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  August 11, 2012 at 11:30:29 AM by AutoGen 5.14
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -97,14 +97,15 @@ typedef enum {
     INDEX_OPT_SLEW              = 30,
     INDEX_OPT_USEPCC            = 31,
     INDEX_OPT_PCCFREQ           = 32,
-    INDEX_OPT_VERSION           = 33,
-    INDEX_OPT_HELP              = 34,
-    INDEX_OPT_MORE_HELP         = 35
+    INDEX_OPT_MDNS              = 33,
+    INDEX_OPT_VERSION           = 34,
+    INDEX_OPT_HELP              = 35,
+    INDEX_OPT_MORE_HELP         = 36
 } teOptIndex;
 
-#define OPTION_CT    36
-#define NTPD_VERSION       "4.2.7p290"
-#define NTPD_FULL_VERSION  "ntpd 4.2.7p290"
+#define OPTION_CT    37
+#define NTPD_VERSION       "4.2.7p295"
+#define NTPD_FULL_VERSION  "ntpd 4.2.7p295"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -271,6 +272,10 @@ typedef enum {
 #  warning undefining PCCFREQ due to option name conflict
 #  undef   PCCFREQ
 # endif
+# ifdef    MDNS
+#  warning undefining MDNS due to option name conflict
+#  undef   MDNS
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
@@ -305,6 +310,7 @@ typedef enum {
 # undef SLEW
 # undef USEPCC
 # undef PCCFREQ
+# undef MDNS
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -351,6 +357,7 @@ typedef enum {
 #define VALUE_OPT_SLEW           'x'
 #define VALUE_OPT_USEPCC         31
 #define VALUE_OPT_PCCFREQ        32
+#define VALUE_OPT_MDNS           'm'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION

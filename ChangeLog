@@ -1,4 +1,24 @@
-* Upgrade to autogen-5.16.1 and libopts-36.4.11.
+* Upgrade to autogen-5.16.2 and libopts-36.4.11.
+(4.2.7p295) 2012/08/11 Released by Harlan Stenn <stenn@ntp.org>
+* Look for syslog's facilitynames[].
+(4.2.7p294) 2012/08/08 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2242] configure fails to detect getifaddrs function on Solaris.
+* [Bug 2249] Bad operator for 'test' in 'make check' of libevent.
+* [Bug 2252] palisade: formats nanosecs to a 6-char field.
+* Attempt to resolve strict-aliasing violation in refclock_tsyncpci.c.
+* Fix && -> & typo in refclock_palisade.c debug statements.
+(4.2.7p293) 2012/08/04 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2247] (more) Get rid of the TRAK refclock - deprecated since 2006.
+* Documentation cleanup from Mike T.
+* Cleanup kclk_sel240x.o rules in libparse/Makefile.am.
+(4.2.7p292) 2012/08/02 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1545] Note why we are logging the Version string.
+* [Bug 1872] Remove legacy ppsclock fdpps, #ifdef PPS.
+* [Bug 2075] Fix spelling of 'incompatible'.
+* [Bug 2247] Get rid of the TRAK refclock - deprecated since 2006.
+* Clean up an exit status in ntpq.c.
+(4.2.7p291) 2012/07/31 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2241] MDNS registration should only happen if requested.
 (4.2.7p290) 2012/07/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1454] Add parse clock support for the SEL-240x GPS products.
 * CID 709185: refclock_chu.c will leak fd==0 (better fix)

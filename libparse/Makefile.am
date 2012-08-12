@@ -50,7 +50,7 @@ libparse_kernel_a_LIBADD =	\
 	kclk_trimtsip.o		\
 	kclk_varitext.o		\
 	kclk_wharton.o		\
-	kclk_sel240x$u.o	\
+	kclk_sel240x.o		\
 	kbinio.o		\
 	kieee754io.o		\
 	kmfp_mul.o		\
@@ -114,9 +114,6 @@ kclk_varitext.o: $(srcdir)/clk_varitext.c
 
 kclk_wharton.o: $(srcdir)/clk_wharton.c
 	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/clk_wharton.c -o $@
-
-kclk_sel240x.o: $(srcdir)/clk_sel240x.c
-	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/clk_sel240x.c -o $@
 
 kclk_sel240x.o: $(srcdir)/clk_sel240x.c
 	$(COMPILE) $(K_CFLAGS) -c $(srcdir)/clk_sel240x.c -o $@

@@ -132,7 +132,6 @@ EXTRA_DIST =			\
 	ntpd.mdoc.in		\
 	ntpdbase-opts.def	\
 	refclock_msfees.c	\
-	refclock_trak.c		\
 	$(B_S_DIST)		\
 	$(NULL)
 

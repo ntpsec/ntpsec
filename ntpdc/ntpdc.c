@@ -1029,7 +1029,7 @@ again:
 			if (implcode == IMPL_XNTPD)
 				break;
 			(void) fprintf(stderr,
-				       "***Server implementation incompatable with our own\n");
+				       "***Server implementation incompatible with our own\n");
 			break;
 		case INFO_ERR_REQ:
 			(void) fprintf(stderr,

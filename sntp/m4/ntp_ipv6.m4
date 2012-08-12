@@ -491,14 +491,18 @@ AC_ARG_ENABLE(
 )
 
 case $want_getifaddrs in
- no)
-    ;;
  glibc)
     AC_MSG_WARN([--enable-getifaddrs=glibc is no longer required])
-    AC_CHECK_FUNCS([getifaddrs])
+esac
+case $want_getifaddrs in
+ no)
     ;;
  *)
+    SAVED_LIBS="$LIBS"
+    LIBS="$LDADD_LIBNTP $LIBS"
     AC_CHECK_FUNCS([getifaddrs])
+    LIBS="$SAVED_LIBS"
+    AS_UNSET([SAVED_LIBS])
     ;;
 esac
 
