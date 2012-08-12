@@ -1,7 +1,7 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2012-03-31 13:13:34 bkorb"
+ *  Time-stamp:      "2012-08-11 08:20:09 bkorb"
  *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
@@ -34,10 +34,10 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
               char const * pzProgPath);
 
 static bool
-add_env_val(char * pzBuf, int bufSize, char const * pzName);
+add_env_val(char * buf, int buf_sz, char const * name);
 
 static char *
-assemble_arg_val(char * pzTxt, tOptionLoadMode mode);
+assemble_arg_val(char * txt, tOptionLoadMode mode);
 /* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  optionMakePath
@@ -239,64 +239,62 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
     return true;
 }
 
-
 static bool
-add_env_val(char * pzBuf, int bufSize, char const * pzName)
+add_env_val(char * buf, int buf_sz, char const * name)
 {
-    char * pzDir = pzBuf;
+    char * dir_part = buf;
 
     for (;;) {
-        int ch = (int)*++pzName;
+        int ch = (int)*++name;
         if (! IS_VALUE_NAME_CHAR(ch))
             break;
-        *(pzDir++) = (char)ch;
+        *(dir_part++) = (char)ch;
     }
 
-    if (pzDir == pzBuf)
+    if (dir_part == buf)
         return false;
 
-    *pzDir = NUL;
+    *dir_part = NUL;
 
-    pzDir = getenv(pzBuf);
+    dir_part = getenv(buf);
 
     /*
      *  Environment value not found -- skip the home list entry
      */
-    if (pzDir == NULL)
+    if (dir_part == NULL)
         return false;
 
-    if (strlen(pzDir) + 1 + strlen(pzName) >= (unsigned)bufSize)
+    if (strlen(dir_part) + 1 + strlen(name) >= (unsigned)buf_sz)
         return false;
 
-    sprintf(pzBuf, "%s%s", pzDir, pzName);
+    sprintf(buf, "%s%s", dir_part, name);
     return true;
 }
 
-
 LOCAL void
-mungeString(char* pzTxt, tOptionLoadMode mode)
+mungeString(char * txt, tOptionLoadMode mode)
 {
     char * pzE;
 
     if (mode == OPTION_LOAD_KEEP)
         return;
 
-    if (IS_WHITESPACE_CHAR(*pzTxt)) {
-        char * pzS = SPN_WHITESPACE_CHARS(pzTxt+1);
+    if (IS_WHITESPACE_CHAR(*txt)) {
+        char * pzS = SPN_WHITESPACE_CHARS(txt+1);
         size_t l   = strlen(pzS) + 1;
-        memmove(pzTxt, pzS, l);
-        pzE = pzTxt + l - 1;
+        memmove(txt, pzS, l);
+        pzE = txt + l - 1;
 
     } else
-        pzE = pzTxt + strlen(pzTxt);
+        pzE = txt + strlen(txt);
 
-    pzE  = SPN_WHITESPACE_BACK(pzTxt, pzE);
+    pzE  = SPN_WHITESPACE_BACK(txt, pzE);
     *pzE = NUL;
 
     if (mode == OPTION_LOAD_UNCOOKED)
         return;
 
-    switch (*pzTxt) {
+    switch (*txt) {
     default: return;
     case '"':
     case '\'': break;
@@ -308,21 +306,20 @@ mungeString(char* pzTxt, tOptionLoadMode mode)
     case '\'': break;
     }
 
-    (void)ao_string_cook(pzTxt, NULL);
+    (void)ao_string_cook(txt, NULL);
 }
 
-
 static char *
-assemble_arg_val(char * pzTxt, tOptionLoadMode mode)
+assemble_arg_val(char * txt, tOptionLoadMode mode)
 {
-    char* pzEnd = strpbrk(pzTxt, ARG_BREAK_STR);
+    char* pzEnd = strpbrk(txt, ARG_BREAK_STR);
     int   space_break;
 
     /*
      *  Not having an argument to a configurable name is okay.
      */
     if (pzEnd == NULL)
-        return pzTxt + strlen(pzTxt);
+        return txt + strlen(txt);
 
     /*
      *  If we are keeping all whitespace, then the  modevalue starts with the
@@ -349,34 +346,41 @@ assemble_arg_val(char * pzTxt, tOptionLoadMode mode)
     return pzEnd;
 }
 
-
-/*
+/**
  *  Load an option from a block of text.  The text must start with the
  *  configurable/option name and be followed by its associated value.
  *  That value may be processed in any of several ways.  See "tOptionLoadMode"
  *  in autoopts.h.
+ *
+ * @param[in,out] opts       program options descriptor
+ * @param[in,out] opt_state  option processing state
+ * @param[in,out] line       source line with long option name in it
+ * @param[in]     direction  current processing direction (preset or not)
+ * @param[in]     load_mode  option loading mode (OPTION_LOAD_*)
  */
 LOCAL void
 loadOptionLine(
-    tOptions*   pOpts,
-    tOptState*  pOS,
-    char*       pzLine,
+    tOptions *  opts,
+    tOptState * opt_state,
+    char *      line,
     tDirection  direction,
     tOptionLoadMode   load_mode )
 {
-    pzLine = SPN_WHITESPACE_CHARS(pzLine);
+    line = SPN_LOAD_LINE_SKIP_CHARS(line);
 
     {
-        char* pzArg = assemble_arg_val(pzLine, load_mode);
+        char * arg = assemble_arg_val(line, load_mode);
 
-        if (! SUCCESSFUL(opt_find_long(pOpts, pzLine, pOS)))
+        if (! SUCCESSFUL(opt_find_long(opts, line, opt_state)))
             return;
-        if (pOS->flags & OPTST_NO_INIT)
+
+        if (opt_state->flags & OPTST_NO_INIT)
             return;
-        pOS->pzOptArg = pzArg;
+
+        opt_state->pzOptArg = arg;
     }
 
-    switch (pOS->flags & (OPTST_IMM|OPTST_DISABLE_IMM)) {
+    switch (opt_state->flags & (OPTST_IMM|OPTST_DISABLE_IMM)) {
     case 0:
         /*
          *  The selected option has no immediate action.
@@ -394,7 +398,7 @@ loadOptionLine(
              *  immediately for enablement, but normally for disablement.
              *  Therefore, skip if disabled.
              */
-            if ((pOS->flags & OPTST_DISABLED) == 0)
+            if ((opt_state->flags & OPTST_DISABLED) == 0)
                 return;
         } else {
             /*
@@ -402,7 +406,7 @@ loadOptionLine(
              *  immediately for enablement, but normally for disablement.
              *  Therefore, skip if NOT disabled.
              */
-            if ((pOS->flags & OPTST_DISABLED) != 0)
+            if ((opt_state->flags & OPTST_DISABLED) != 0)
                 return;
         }
         break;
@@ -414,7 +418,7 @@ loadOptionLine(
              *  immediately for disablement, but normally for disablement.
              *  Therefore, skip if NOT disabled.
              */
-            if ((pOS->flags & OPTST_DISABLED) != 0)
+            if ((opt_state->flags & OPTST_DISABLED) != 0)
                 return;
         } else {
             /*
@@ -422,7 +426,7 @@ loadOptionLine(
              *  immediately for disablement, but normally for disablement.
              *  Therefore, skip if disabled.
              */
-            if ((pOS->flags & OPTST_DISABLED) == 0)
+            if ((opt_state->flags & OPTST_DISABLED) == 0)
                 return;
         }
         break;
@@ -441,43 +445,42 @@ loadOptionLine(
     /*
      *  Fix up the args.
      */
-    if (OPTST_GET_ARGTYPE(pOS->pOD->fOptState) == OPARG_TYPE_NONE) {
-        if (*pOS->pzOptArg != NUL)
+    if (OPTST_GET_ARGTYPE(opt_state->pOD->fOptState) == OPARG_TYPE_NONE) {
+        if (*opt_state->pzOptArg != NUL)
             return;
-        pOS->pzOptArg = NULL;
+        opt_state->pzOptArg = NULL;
 
-    } else if (pOS->pOD->fOptState & OPTST_ARG_OPTIONAL) {
-        if (*pOS->pzOptArg == NUL)
-             pOS->pzOptArg = NULL;
+    } else if (opt_state->pOD->fOptState & OPTST_ARG_OPTIONAL) {
+        if (*opt_state->pzOptArg == NUL)
+             opt_state->pzOptArg = NULL;
         else {
-            AGDUPSTR(pOS->pzOptArg, pOS->pzOptArg, "option argument");
-            pOS->flags |= OPTST_ALLOC_ARG;
+            AGDUPSTR(opt_state->pzOptArg, opt_state->pzOptArg, "opt arg");
+            opt_state->flags |= OPTST_ALLOC_ARG;
         }
 
     } else {
-        if (*pOS->pzOptArg == NUL)
-             pOS->pzOptArg = zNil;
+        if (*opt_state->pzOptArg == NUL)
+             opt_state->pzOptArg = zNil;
         else {
-            AGDUPSTR(pOS->pzOptArg, pOS->pzOptArg, "option argument");
-            pOS->flags |= OPTST_ALLOC_ARG;
+            AGDUPSTR(opt_state->pzOptArg, opt_state->pzOptArg, "opt arg");
+            opt_state->flags |= OPTST_ALLOC_ARG;
         }
     }
 
     {
         tOptionLoadMode sv = option_load_mode;
         option_load_mode = load_mode;
-        handle_opt(pOpts, pOS);
+        handle_opt(opts, opt_state);
         option_load_mode = sv;
     }
 }
-
 
 /*=export_func  optionLoadLine
  *
  * what:  process a string for an option name and value
  *
- * arg:   tOptions*,   pOpts,  program options descriptor
- * arg:   char const*, pzLine, NUL-terminated text
+ * arg:   tOptions*,   opts,  program options descriptor
+ * arg:   char const*, line,  NUL-terminated text
  *
  * doc:
  *
@@ -488,7 +491,8 @@ loadOptionLine(
  *  When passed a pointer to the option struct and a string, it will find
  *  the option named by the first token on the string and set the option
  *  argument to the remainder of the string.  The caller must NUL terminate
- *  the string.  Any embedded new lines will be included in the option
+ *  the string.  The caller need not skip over any introductory hyphens.
+ *  Any embedded new lines will be included in the option
  *  argument.  If the input looks like one or more quoted strings, then the
  *  input will be "cooked".  The "cooking" is identical to the string
  *  formation used in AutoGen definition files (@pxref{basic expression}),
@@ -498,12 +502,12 @@ loadOptionLine(
  *        will cause a warning to print, but the function should return.
 =*/
 void
-optionLoadLine(tOptions * pOpts, char const * pzLine)
+optionLoadLine(tOptions * opts, char const * line)
 {
     tOptState st = OPTSTATE_INITIALIZER(SET);
     char* pz;
-    AGDUPSTR(pz, pzLine, "user option line");
-    loadOptionLine(pOpts, &st, pz, DIRECTION_PROCESS, OPTION_LOAD_COOKED);
+    AGDUPSTR(pz, line, "user option line");
+    loadOptionLine(opts, &st, pz, DIRECTION_PROCESS, OPTION_LOAD_COOKED);
     AGFREE(pz);
 }
 /*

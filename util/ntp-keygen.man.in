@@ -2,7 +2,7 @@
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:32:50 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:58:44 PM by AutoGen 5.16.2
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -103,13 +103,13 @@ extracts the filestamp from the file itself.
 This allows clients to verify that the file and generation times
 are always current.
 The
-.B 
+.B XXX Program Name
 program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
 recognized in monitoring data.
-.Ss Running the program
+.SS Running the program
 The safest way to run the
-.B 
+.B XXX Program Name
 program is logged in directly as root.
 The recommended procedure is change to the keys directory,
 usually
@@ -221,13 +221,13 @@ extracts the filestamp from the file itself.
 This allows clients to verify that the file and generation times
 are always current.
 The
-.B 
+.B XXX Program Name
 program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
 recognized in monitoring data.
-.Ss Running the program
+.SS Running the program
 The safest way to run the
-.B 
+.B XXX Program Name
 program is logged in directly as root.
 The recommended procedure is change to the keys directory,
 usually
@@ -333,7 +333,7 @@ To insure a fresh fileset, remove all
 .Cm ntpkey
 files.
 Then run
-.B 
+.B XXX Program Name
 T
 to generate keys and a trusted certificate.
 On all other hosts do the same, but leave off the
@@ -346,7 +346,7 @@ throughout the subnet, but setting up the environment is completely automatic.
 .PP
 If it is necessary to use a different sign key or different digest/signature
 scheme than the default, run
-.B 
+.B XXX Program Name
 with the
 S Ar type
 option, where
@@ -358,21 +358,21 @@ or
 The most often need to do this is when a DSA-signed certificate is used.
 If it is necessary to use a different certificate scheme than the default,
 run
-.B 
+.B XXX Program Name
 with the
 c Ar scheme
 option and selected
 \fIscheme\fR
 as needed.
 f
-.B 
+.B XXX Program Name
 is run again without these options, it generates a new certificate
 using the same scheme and sign key.
 .PP
 After setting up the environment it is advisable to update certificates
 from time to time, if only to extend the validity interval.
 Simply run
-.B 
+.B XXX Program Name
 with the same flags as before to generate new certificates
 using existing keys.
 However, if the host or sign key is changed,
@@ -383,7 +383,7 @@ When
 is restarted, it loads any new files and restarts the protocol.
 Other dependent hosts will continue as usual until signatures are refreshed,
 at which time the protocol is restarted.
-.Ss Identity Schemes
+.SS Identity Schemes
 As mentioned on the Autonomous Authentication page,
 the default TC identity scheme is vulnerable to a middleman attack.
 However, there are more secure identity schemes available,
@@ -412,7 +412,7 @@ only as clients have key files that contain only client keys.
 .PP
 The PC scheme supports only one trusted host in the group.
 On trusted host alice run
-.B 
+.B XXX Program Name
 P
 p Ar password
 to generate the host key file
@@ -436,7 +436,7 @@ For the IFF scheme proceed as in the TC scheme to generate keys
 and certificates for all group hosts, then for every trusted host in the group,
 generate the IFF parameter file.
 On trusted host alice run
-.B 
+.B XXX Program Name
 T
 I
 p Ar password
@@ -457,7 +457,7 @@ as a legitimate server and present a middleman threat.
 To eliminate this threat, the client keys can be extracted
 from the parameter file and distributed to all restricted clients.
 After generating the parameter file, on alice run
-.B 
+.B XXX Program Name
 e
 and pipe the output to a file or mail program.
 Copy or mail this file to all restricted clients.
@@ -471,7 +471,7 @@ For the GQ scheme proceed as in the TC scheme to generate keys
 and certificates for all group hosts, then for every trusted host
 in the group, generate the IFF parameter file.
 On trusted host alice run
-.B 
+.B XXX Program Name
 T
 G
 p Ar password
@@ -494,7 +494,7 @@ and certificates for all group hosts.
 For illustration assume trish is the TA, alice one of several trusted hosts
 and bob one of her clients.
 On TA trish run
-.B 
+.B XXX Program Name
 V Ar n
 p Ar password ,
 where
@@ -524,7 +524,7 @@ On client bob install a soft link from generic
 to the client key file.
 As the MV scheme is independent of keys and certificates,
 these files can be refreshed as needed.
-.Ss Command Line Options
+.SS Command Line Options
 .TP
 .BR Fl c Ar scheme
 Select certificate message digest/signature encryption scheme.
@@ -601,14 +601,14 @@ By default, the program generates a non-trusted certificate.
 .TP
 .BR Fl V Ar nkeys
 Generate parameters and keys for the Mu-Varadharajan (MV) identification scheme.
-.Ss Random Seed File
+.SS Random Seed File
 All cryptographically sound key generation schemes must have means
 to randomize the entropy seed used to initialize
 the internal pseudo-random number generator used
 by the library routines.
 The OpenSSL library uses a designated random seed file for this purpose.
 The file must be available when starting the NTP daemon and
-.B 
+.B XXX Program Name
 program.
 If a site supports OpenSSL or its companion OpenSSH,
 it is very likely that means to do this are already available.
@@ -626,7 +626,7 @@ usually called
 .Cm .rnd ,
 which must be available when starting the NTP daemon
 or the
-.B 
+.B XXX Program Name
 program.
 The NTP daemon will first look for the file
 using the path specified by the
@@ -635,7 +635,7 @@ subcommand of the
 .Ic crypto
 configuration command.
 If not specified in this way, or when starting the
-.B 
+.B XXX Program Name
 program,
 the OpenSSL library will look for the file using the path specified
 by the
@@ -651,13 +651,13 @@ file in the user home directory.
 If the file is not available or cannot be written,
 the daemon exits with a message to the system log and the program
 exits with a suitable error message.
-.Ss Cryptographic Data Files
+.SS Cryptographic Data Files
 All other file formats begin with two lines.
 The first contains the file name, including the generated host name
 and filestamp.
 The second contains the datestamp in conventional Unix date format.
 Lines beginning with # are considered comments and ignored by the
-.B 
+.B XXX Program Name
 program and
 .Xr ntpd 8
 daemon.
@@ -695,7 +695,7 @@ and entered by hand, so it is generally appropriate to specify these keys
 in human readable ASCII format.
 .PP
 The
-.B 
+.B XXX Program Name
 program generates a MD5 symmetric keys file
 .Pa ntpkey_MD5key_ Ns Ar hostname.filestamp .
 Since the file contains private shared keys,
@@ -704,7 +704,7 @@ to other subnet hosts.
 The NTP daemon loads the file
 .Pa ntp.keys ,
 so
-.B 
+.B XXX Program Name
 installs a soft link from this name to the generated file.
 Subsequently, similar soft links must be installed by manual
 or automated means on the other subnet hosts.
@@ -734,7 +734,7 @@ privatekey cipher.
 Select the cipher which is used to encrypt the files containing
 private keys.  The default is three-key triple DES in CBC mode,
 equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
-available in "openssl -h" output.
+available in "openssl \-h" output.
 .TP
 .BR \-d ", " -\-debug\-level
 Increase debug verbosity level.
@@ -775,11 +775,11 @@ set Autokey group name.
 Set the optional Autokey group name to name.  This is used in
 the file name of IFF, GQ, and MV client parameters files.  In
 that role, the default is the host name if this option is not
-provided.  The group name, if specified using -i/--ident or
-using -s/--subject-name following an '@' character, is also a
+provided.  The group name, if specified using \-i/--ident or
+using \-s/--subject-name following an '@' character, is also a
 part of the self-signed host certificate's subject and issuer
 names in the form host@group and should match the 'crypto ident'
-or 'server ident' configuration in ntpd's configuration file. 
+or 'server ident' configuration in ntpd's configuration file.
 .TP
 .BR \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
 set certificate lifetime.
@@ -815,7 +815,7 @@ public certificates.
 output private password.
 .sp
 Encrypt generated files containing private data with the specified
-password and the cipher selected with -C/--cipher.
+password and the cipher selected with \-C/--cipher.
 .TP
 .BR \-q " \fIpasswd\fP, " \-\-get\-pvt\-passwd "=" \fIpasswd\fP
 input private password.
@@ -839,7 +839,7 @@ group name.  The host name, and if provided, group name are used
 in host@group form for the host certificate's subject and issuer
 fields.  Specifying '-s @group' is allowed, and results in
 leaving the host name unchanged while appending @group to the
-subject and issuer fields, as with -i group.  The group name, or
+subject and issuer fields, as with \-i group.  The group name, or
 if not provided, the host name are also used in the file names
 of IFF, GQ, and MV client parameter files.
 .TP
@@ -902,7 +902,7 @@ option specifies the write password and
 q Ar password
 option the read password for previously encrypted files.
 The
-.B 
+.B XXX Program Name
 program prompts for the password if it reads an encrypted file
 and the password is missing or incorrect.
 If an encrypted file is read successfully and
@@ -915,11 +915,18 @@ See \fBOPTION PRESETS\fP for configuration files.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
-.BR 0
+.BR 0 " (EXIT_SUCCESS)"
 Successful program execution.
 .TP
-.BR 1
+.BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "AUTHORS"
 The University of Delaware
 .SH "COPYRIGHT"

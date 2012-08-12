@@ -2,7 +2,7 @@
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:32:39 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:58:32 PM by AutoGen 5.16.2
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -75,11 +75,18 @@ See \fBOPTION PRESETS\fP for configuration files.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
-.BR 0
+.BR 0 " (EXIT_SUCCESS)"
 Successful program execution.
 .TP
-.BR 1
+.BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH AUTHORS
 .An "Heiko Gerstung"
 .SH "COPYRIGHT"

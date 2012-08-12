@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.c)
  *  
- *  It has been AutoGen-ed  May  1, 2012 at 09:18:07 AM by AutoGen 5.16pre31
+ *  It has been AutoGen-ed  August 11, 2012 at 08:39:22 PM by AutoGen 5.16.2
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:4:11 templates.
+ * Generated from AutoOpts 36:5:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -36,6 +36,7 @@
  *  is provided "as is" without express or implied warranty.
  */
 
+#ifndef __doxygen__
 #define OPTION_CODE_COMPILE 1
 #include "ntpdsim-opts.h"
 #include <sys/types.h>
@@ -70,8 +71,8 @@ extern FILE * option_usage_fp;
 /*
  *  ntpdsim option static const strings
  */
-static char const ntpdsim_opt_strs[3123] =
-/*     0 */ "ntpdsim 4.2.7p272\n"
+static char const ntpdsim_opt_strs[3168] =
+/*     0 */ "ntpdsim 4.2.7p295\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -188,27 +189,30 @@ static char const ntpdsim_opt_strs[3123] =
 /*  2616 */ "Force CPU cycle counter use (Windows only)\0"
 /*  2659 */ "PCCFREQ\0"
 /*  2667 */ "pccfreq\0"
-/*  2675 */ "Display extended usage information and exit\0"
-/*  2719 */ "help\0"
-/*  2724 */ "Extended usage information passed thru pager\0"
-/*  2769 */ "more-help\0"
-/*  2779 */ "Output version information and exit\0"
-/*  2815 */ "version\0"
-/*  2823 */ "Save the option state to a config file\0"
-/*  2862 */ "save-opts\0"
-/*  2872 */ "Load options from a config file\0"
-/*  2904 */ "LOAD_OPTS\0"
-/*  2914 */ "no-load-opts\0"
-/*  2927 */ "no\0"
-/*  2930 */ "NTPDSIM\0"
-/*  2938 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p272\n"
+/*  2675 */ "Register with mDNS as a NTP server\0"
+/*  2710 */ "MDNS\0"
+/*  2715 */ "mdns\0"
+/*  2720 */ "Display extended usage information and exit\0"
+/*  2764 */ "help\0"
+/*  2769 */ "Extended usage information passed thru pager\0"
+/*  2814 */ "more-help\0"
+/*  2824 */ "Output version information and exit\0"
+/*  2860 */ "version\0"
+/*  2868 */ "Save the option state to a config file\0"
+/*  2907 */ "save-opts\0"
+/*  2917 */ "Load options from a config file\0"
+/*  2949 */ "LOAD_OPTS\0"
+/*  2959 */ "no-load-opts\0"
+/*  2972 */ "no\0"
+/*  2975 */ "NTPDSIM\0"
+/*  2983 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p295\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
-/*  3053 */ "$HOME\0"
-/*  3059 */ ".\0"
-/*  3061 */ ".ntprc\0"
-/*  3068 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  3102 */ "\n\n\0"
-/*  3105 */ "ntpdsim 4.2.7p272";
+/*  3098 */ "$HOME\0"
+/*  3104 */ ".\0"
+/*  3106 */ ".ntprc\0"
+/*  3113 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  3147 */ "\n\n\0"
+/*  3150 */ "ntpdsim 4.2.7p295";
 
 /*
  *  ipv4 option description with
@@ -596,13 +600,29 @@ static int const aWait_SyncCantList[] = {
 #endif  /* SYS_WINNT */
 
 /*
+ *  mdns option description:
+ */
+#ifdef HAVE_DNSREGISTRATION
+#define MDNS_DESC      (ntpdsim_opt_strs+2675)
+#define MDNS_NAME      (ntpdsim_opt_strs+2710)
+#define MDNS_name      (ntpdsim_opt_strs+2715)
+#define MDNS_FLAGS     (OPTST_DISABLED)
+
+#else   /* disable mdns */
+#define MDNS_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
+#define MDNS_NAME      NULL
+#define MDNS_DESC      NULL
+#define MDNS_name      NULL
+#endif  /* HAVE_DNSREGISTRATION */
+
+/*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpdsim_opt_strs+2675)
-#define HELP_name       (ntpdsim_opt_strs+2719)
+#define HELP_DESC       (ntpdsim_opt_strs+2720)
+#define HELP_name       (ntpdsim_opt_strs+2764)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpdsim_opt_strs+2724)
-#define MORE_HELP_name  (ntpdsim_opt_strs+2769)
+#define MORE_HELP_DESC  (ntpdsim_opt_strs+2769)
+#define MORE_HELP_name  (ntpdsim_opt_strs+2814)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  NULL
@@ -615,14 +635,14 @@ static int const aWait_SyncCantList[] = {
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpdsim_opt_strs+2779)
-#define VER_name        (ntpdsim_opt_strs+2815)
-#define SAVE_OPTS_DESC  (ntpdsim_opt_strs+2823)
-#define SAVE_OPTS_name  (ntpdsim_opt_strs+2862)
-#define LOAD_OPTS_DESC     (ntpdsim_opt_strs+2872)
-#define LOAD_OPTS_NAME     (ntpdsim_opt_strs+2904)
-#define NO_LOAD_OPTS_name  (ntpdsim_opt_strs+2914)
-#define LOAD_OPTS_pfx      (ntpdsim_opt_strs+2927)
+#define VER_DESC        (ntpdsim_opt_strs+2824)
+#define VER_name        (ntpdsim_opt_strs+2860)
+#define SAVE_OPTS_DESC  (ntpdsim_opt_strs+2868)
+#define SAVE_OPTS_name  (ntpdsim_opt_strs+2907)
+#define LOAD_OPTS_DESC     (ntpdsim_opt_strs+2917)
+#define LOAD_OPTS_NAME     (ntpdsim_opt_strs+2949)
+#define NO_LOAD_OPTS_name  (ntpdsim_opt_strs+2959)
+#define LOAD_OPTS_pfx      (ntpdsim_opt_strs+2972)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /*
  *  Declare option callback procedures
@@ -666,9 +686,11 @@ static tOptProc
 #endif /* defined(TEST_NTPDSIM_OPTS) */
 #define VER_PROC        ntpOptionPrintVersion
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
  *  Define the ntpdsim Option Descriptions.
+ * This is an array of OPTION_CT entries, one for each
+ * option that the ntpdsim program responds to.
  */
 static tOptDesc optDesc[OPTION_CT] = {
   {  /* entry idx, value */ 0, VALUE_OPT_IPV4,
@@ -1067,6 +1089,18 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* desc, NAME, name */ PCCFREQ_DESC, PCCFREQ_NAME, PCCFREQ_name,
      /* disablement strs */ NULL, NULL },
 
+  {  /* entry idx, value */ 33, VALUE_OPT_MDNS,
+     /* equiv idx, value */ 33, VALUE_OPT_MDNS,
+     /* equivalenced to  */ NO_EQUIVALENT,
+     /* min, max, act ct */ 0, 1, 0,
+     /* opt state flags  */ MDNS_FLAGS, 0,
+     /* last opt argumnt */ { NULL }, /* --mdns */
+     /* arg list/cookie  */ NULL,
+     /* must/cannot opts */ NULL, NULL,
+     /* option proc      */ NULL,
+     /* desc, NAME, name */ MDNS_DESC, MDNS_NAME, MDNS_name,
+     /* disablement strs */ NULL, NULL },
+
   {  /* entry idx, value */ INDEX_OPT_VERSION, VALUE_OPT_VERSION,
      /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_VERSION,
      /* equivalenced to  */ NO_EQUIVALENT,
@@ -1137,18 +1171,18 @@ static tOptDesc optDesc[OPTION_CT] = {
  *
  *  Define the ntpdsim Option Environment
  */
-#define zPROGNAME       (ntpdsim_opt_strs+2930)
-#define zUsageTitle     (ntpdsim_opt_strs+2938)
-#define zRcName         (ntpdsim_opt_strs+3061)
+#define zPROGNAME       (ntpdsim_opt_strs+2975)
+#define zUsageTitle     (ntpdsim_opt_strs+2983)
+#define zRcName         (ntpdsim_opt_strs+3106)
 static char const * const apzHomeList[3] = {
-    ntpdsim_opt_strs+3053,
-    ntpdsim_opt_strs+3059,
+    ntpdsim_opt_strs+3098,
+    ntpdsim_opt_strs+3104,
     NULL };
-#define zBugsAddr       (ntpdsim_opt_strs+3068)
+#define zBugsAddr       (ntpdsim_opt_strs+3113)
 #define zExplain        (NULL)
-#define zDetail         (ntpdsim_opt_strs+3102)
-#define zFullVersion    (ntpdsim_opt_strs+3105)
-/* extracted from optcode.tlib near line 349 */
+#define zDetail         (ntpdsim_opt_strs+3147)
+#define zFullVersion    (ntpdsim_opt_strs+3150)
+/* extracted from optcode.tlib near line 350 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -1162,6 +1196,8 @@ static char const * const apzHomeList[3] = {
 #define ntpdsim_full_usage (NULL)
 
 #define ntpdsim_short_usage (NULL)
+
+#endif /* not defined __doxygen__ */
 
 /*
  *  Create the static procedure(s) declared above.
@@ -1201,7 +1237,7 @@ DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
 }
 #endif /* defined DEBUG */
 #endif /* defined(TEST_NTPDSIM_OPTS) */
-/* extracted from optmain.tlib near line 35 */
+/* extracted from optmain.tlib near line 48 */
 
 #if defined(TEST_NTPDSIM_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -1227,12 +1263,19 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* defined TEST_NTPDSIM_OPTS */
-/* extracted from optmain.tlib near line 1113 */
+/* extracted from optmain.tlib near line 1146 */
 
+/**
+ * The directory containing the data associated with ntpdsim.
+ */
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
 #endif
 
+/**
+ * Information about the person or institution that packaged ntpdsim
+ * for the current distribution.
+ */
 #ifndef  WITH_PACKAGER
 # define ntpdsim_packager_info NULL
 #else
@@ -1248,7 +1291,13 @@ static char const ntpdsim_packager_info[] =
 # endif
     "\n";
 #endif
+#ifndef __doxygen__
 
+#endif /* __doxygen__ */
+/**
+ * The option definitions for ntpdsim.  The one structure that
+ * binds them all.
+ */
 tOptions ntpdsimOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -1277,7 +1326,7 @@ tOptions ntpdsimOptions = {
       NO_EQUIVALENT, /* '-#' option index */
       NO_EQUIVALENT /* index of default opt */
     },
-    38 /* full option count */, 33 /* user option count */,
+    39 /* full option count */, 34 /* user option count */,
     ntpdsim_full_usage, ntpdsim_short_usage,
     NULL, NULL,
     PKGDATADIR, ntpdsim_packager_info
@@ -1293,7 +1342,16 @@ tOptions ntpdsimOptions = {
 static char* AO_gettext(char const* pz);
 static void  coerce_it(void** s);
 
-static char*
+/**
+ * AutoGen specific wrapper function for gettext.
+ * It relies on the macro _() to convert from English to the target
+ * language, then strdup-duplicates the result string.
+ *
+ * @param[in] pz the input text used as a lookup key.
+ * @returns the translated text (if there is one),
+ *   or the original text (if not).
+ */
+static char *
 AO_gettext(char const* pz)
 {
     char* pzRes;
@@ -1313,8 +1371,9 @@ AO_gettext(char const* pz)
 static void coerce_it(void** s) { *s = AO_gettext(*s);
 }
 
-/*
- *  This invokes the translation code (e.g. gettext(3)).
+/**
+ * Translate all the translatable strings in the ntpdsimOptions
+ * structure defined above.  This is done only once.
  */
 static void
 translate_option_strings(void)

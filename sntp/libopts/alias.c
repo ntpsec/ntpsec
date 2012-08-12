@@ -2,7 +2,7 @@
 /**
  * \file alias.c
  *
- * Time-stamp:      "2012-02-12 09:41:42 bkorb"
+ * Time-stamp:      "2012-08-11 08:15:43 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -47,7 +47,7 @@ optionAlias(tOptions * pOpts, tOptDesc * pOldOD, unsigned int alias)
 {
     tOptDesc * pOD;
 
-    if (pOpts == OPTPROC_EMIT_USAGE)
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
         return 0;
 
     pOD = pOpts->pOptDesc + alias;

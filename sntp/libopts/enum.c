@@ -2,7 +2,7 @@
 /**
  * \file enumeration.c
  *
- * Time-stamp:      "2012-03-31 13:22:33 bkorb"
+ * Time-stamp:      "2012-08-11 08:12:58 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -321,6 +321,9 @@ optionEnumerationVal(tOptions * pOpts, tOptDesc * pOD,
     }
 
     default:
+        if ((pOD->fOptState & OPTST_RESET) != 0)
+            break;
+
         res = find_name(pOD->optArg.argString, pOpts, pOD, paz_names, name_ct);
 
         if (pOD->fOptState & OPTST_ALLOC_ARG) {

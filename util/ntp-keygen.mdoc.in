@@ -1,9 +1,9 @@
 .Dd August 11 2012
 .Dt NTP_KEYGEN @NTP_KEYGEN_MS@ User Commands
-.Os SunOS 5.10
+.Os FreeBSD 6.4-STABLE
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:32:54 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:58:39 PM by AutoGen 5.16.2
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -710,26 +710,29 @@ utilities.
 certificate scheme.
 .sp
 scheme is one of
-RSA-MD2, RSA-MD5, RSA-SHA, RSA-SHA1, RSA-MDC2, RSA-RIPEMD160,
-DSA-SHA, or DSA-SHA1.
+RSA\-MD2, RSA\-MD5, RSA\-SHA, RSA\-SHA1, RSA\-MDC2, RSA\-RIPEMD160,
+DSA\-SHA, or DSA\-SHA1.
+.sp
 Select the certificate message digest/signature encryption scheme.
 Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
-this option is RSA-MD5.
+this option is RSA\-MD5.
 .It  \-C " \fIcipher\fP, " \-\-cipher "=" \fIcipher\fP
 privatekey cipher.
 .sp
 Select the cipher which is used to encrypt the files containing
-private keys.  The default is three-key triple DES in CBC mode,
-equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
-available in "openssl -h" output.
+private keys.  The default is three\-key triple DES in CBC mode,
+equivalent to "\-C des\-ede3\-cbc".  The openssl tool lists ciphers
+available in "openssl \-h" output.
 .It  \-d ", " -\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
+.sp
 .It  \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
+.sp
 .sp
 .It  \-e ", " -\-id\-key
 Write IFF or GQ identity keys.
@@ -756,11 +759,11 @@ set Autokey group name.
 Set the optional Autokey group name to name.  This is used in
 the file name of IFF, GQ, and MV client parameters files.  In
 that role, the default is the host name if this option is not
-provided.  The group name, if specified using -i/--ident or
-using -s/--subject-name following an '@' character, is also a
-part of the self-signed host certificate's subject and issuer
+provided.  The group name, if specified using \-i/\-\-ident or
+using \-s/\-\-subject\-name following an '@' character, is also a
+part of the self\-signed host certificate's subject and issuer
 names in the form host@group and should match the 'crypto ident'
-or 'server ident' configuration in ntpd's configuration file. 
+or 'server ident' configuration in ntpd's configuration file.
 .It  \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
 set certificate lifetime.
 This option takes an integer number as its argument.
@@ -791,7 +794,7 @@ public certificates.
 output private password.
 .sp
 Encrypt generated files containing private data with the specified
-password and the cipher selected with -C/--cipher.
+password and the cipher selected with \-C/\-\-cipher.
 .It  \-q " \fIpasswd\fP, " \-\-get\-pvt\-passwd "=" \fIpasswd\fP
 input private password.
 .sp
@@ -810,21 +813,21 @@ following an '@' character.  The host name is used in the file
 name of generated host and signing certificates, without the
 group name.  The host name, and if provided, group name are used
 in host@group form for the host certificate's subject and issuer
-fields.  Specifying '-s @group' is allowed, and results in
+fields.  Specifying '\-s @group' is allowed, and results in
 leaving the host name unchanged while appending @group to the
-subject and issuer fields, as with -i group.  The group name, or
+subject and issuer fields, as with \-i group.  The group name, or
 if not provided, the host name are also used in the file names
 of IFF, GQ, and MV client parameter files.
 .It  \-T ", " -\-trusted\-cert
 trusted certificate (TC scheme).
 .sp
 Generate a trusted certificate.  By default, the program generates
-a non-trusted certificate.
+a non\-trusted certificate.
 .It  \-V " \fInum\fP, " \-\-mv\-params "=" \fInum\fP
 generate <num> MV parameters.
 This option takes an integer number as its argument.
 .sp
-Generate parameters and keys for the Mu-Varadharajan (MV)
+Generate parameters and keys for the Mu\-Varadharajan (MV)
 identification scheme.
 .It  \-v " \fInum\fP, " \-\-mv\-keys "=" \fInum\fP
 update <num> MV keys.
@@ -881,10 +884,15 @@ See \fBOPTION PRESETS\fP for configuration files.
 .Sh "EXIT STATUS"
 One of the following exit values will be returned:
 .Bl -tag
-.It 0
+.It 0 " (EXIT_SUCCESS)"
 Successful program execution.
-.It 1
+.It 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.It 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.It 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .El
 .Sh "AUTHORS"
 The University of Delaware

@@ -2,7 +2,7 @@
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:29:45 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:55:33 PM by AutoGen 5.16.2
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -16,7 +16,7 @@ ntp-wait \- Wait for ntpd to stabilize the system clock
 All arguments must be options.
 .PP
 .SH DESCRIPTION
-.B 
+.B XXX Program Name
 will send at most
 \fInum-tries\fR
 queries to
@@ -27,7 +27,7 @@ after each status return that says
 .Xr ntpd 8
 has not yet produced a synchronized and stable system clock.
 .PP
-.B 
+.B XXX Program Name
 will do this quietly, unless the
 v
 flag is provided.
@@ -50,7 +50,7 @@ The default \fIsecs\-between\-tries\fP for this option is:
 .ti +4
  6
 .sp
-We will sleep for @file{secs-between-tries} after each query of ntpd
+We will sleep for \fIsecs-between-tries\fP after each query of ntpd
 that returns "the time is not yet stable".
 .TP
 .BR \-v ", " -\-
@@ -81,10 +81,10 @@ See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
-.BR 0
+.BR 0 " (EXIT_SUCCESS)"
 Successful program execution.
 .TP
-.BR 1
+.BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
 .SH AUTHORS
 .An "Harlan Stenn"

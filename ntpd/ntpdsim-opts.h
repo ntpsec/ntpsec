@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *  
- *  It has been AutoGen-ed  May  1, 2012 at 09:18:07 AM by AutoGen 5.16pre31
+ *  It has been AutoGen-ed  August 11, 2012 at 08:39:22 PM by AutoGen 5.16.2
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:4:11 templates.
+ * Generated from AutoOpts 36:5:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 147460
+#define AO_TEMPLATE_VERSION 147461
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -97,16 +97,17 @@ typedef enum {
     INDEX_OPT_SLEW              = 30,
     INDEX_OPT_USEPCC            = 31,
     INDEX_OPT_PCCFREQ           = 32,
-    INDEX_OPT_VERSION           = 33,
-    INDEX_OPT_HELP              = 34,
-    INDEX_OPT_MORE_HELP         = 35,
-    INDEX_OPT_SAVE_OPTS         = 36,
-    INDEX_OPT_LOAD_OPTS         = 37
+    INDEX_OPT_MDNS              = 33,
+    INDEX_OPT_VERSION           = 34,
+    INDEX_OPT_HELP              = 35,
+    INDEX_OPT_MORE_HELP         = 36,
+    INDEX_OPT_SAVE_OPTS         = 37,
+    INDEX_OPT_LOAD_OPTS         = 38
 } teOptIndex;
 
-#define OPTION_CT    38
-#define NTPDSIM_VERSION       "4.2.7p272"
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p272"
+#define OPTION_CT    39
+#define NTPDSIM_VERSION       "4.2.7p295"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p295"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -275,6 +276,10 @@ typedef enum {
 #  warning undefining PCCFREQ due to option name conflict
 #  undef   PCCFREQ
 # endif
+# ifdef    MDNS
+#  warning undefining MDNS due to option name conflict
+#  undef   MDNS
+# endif
 #else  /* NO_OPTION_NAME_WARNINGS */
 # undef IPV4
 # undef IPV6
@@ -309,6 +314,7 @@ typedef enum {
 # undef SLEW
 # undef USEPCC
 # undef PCCFREQ
+# undef MDNS
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
 /* * * * * *
@@ -355,6 +361,7 @@ typedef enum {
 #define VALUE_OPT_SLEW           'x'
 #define VALUE_OPT_USEPCC         31
 #define VALUE_OPT_PCCFREQ        32
+#define VALUE_OPT_MDNS           'm'
 #define VALUE_OPT_HELP          '?'
 #define VALUE_OPT_MORE_HELP     '!'
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
@@ -390,6 +397,12 @@ extern tOptions ntpdsimOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
+#   ifndef HAVE_GETTEXT
+      extern char * gettext(char const *);
+#   else
+#     include <libintl.h>
+#   endif
+
 static inline char* aoGetsText(char const* pz) {
     if (pz == NULL) return NULL;
     return (char*)gettext(pz);

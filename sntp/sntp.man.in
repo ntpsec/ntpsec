@@ -2,7 +2,7 @@
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:33:01 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:59:09 PM by AutoGen 5.16.2
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -14,7 +14,7 @@ sntp \- standard Simple Network Time Protocol client program
 .RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..." [ hostname-or-IP ...]
 .PP
 .SH DESCRIPTION
-.B 
+.B XXX Program Name
 can be used as an SNTP client to query a NTP or SNTP server and either display
 the time or set the local system's time (given suitable privilege).  It can be
 run as an interactive command or from a
@@ -73,13 +73,13 @@ Force DNS resolution of the following host names on the command line
 to the IPv6 namespace.
 .TP
 .BR \-a " \fIauth\-keynumber\fP, " \-\-authentication "=" \fIauth\-keynumber\fP
-Enable authentication with the key @var{auth-keynumber}.
+Enable authentication with the key \fBauth-keynumber\fP.
 This option takes an integer number as its argument.
 .sp
 This option enables authentication using the key specified in this
 option's argument.  The argument of this option is the keyid, a
 number specified in the keyfile as this key's identifier. See the
-keyfile option (@option{-k}) for more details.
+keyfile option (\fB-k\fP) for more details.
 .TP
 .BR \-B " \fIseconds\fP, " \-\-bctimeout "=" \fIseconds\fP
 The number of seconds to wait for broadcasts.
@@ -88,16 +88,16 @@ The default \fIseconds\fP for this option is:
 .ti +4
  68
 .sp
-When waiting for a broadcast packet @code{sntp} will wait the number
+When waiting for a broadcast packet \fBsntp\fP will wait the number
 of seconds specified before giving up.
 .TP
 .BR \-b " \fIbroadcast\-address\fP, " \-\-broadcast "=" \fIbroadcast\-address\fP
 Listen to the address specified for broadcast time sync.
 This option may appear an unlimited number of times.
 .sp
-If specified @code{sntp} will listen to the specified address
+If specified \fBsntp\fP will listen to the specified address
 for NTP broadcasts.  The default maximum wait time
-can be modified with @option{-B}.
+can be modified with \fB-B\fP.
 .TP
 .BR \-c " \fIhost\-name\fP, " \-\-concurrent "=" \fIhost\-name\fP
 Concurrently query all IPs returned for host-name.
@@ -106,9 +106,9 @@ This option may appear an unlimited number of times.
 Requests from an NTP "client" to a "server" should never be sent
 more rapidly than one every 2 seconds.  By default, any IPs returned
 as part of a DNS lookup are assumed to be for a single instance of
-ntpd, and therefore @code{sntp} will send queries to these IPs one
+ntpd, and therefore \fBsntp\fP will send queries to these IPs one
 after another, with a 2-second gap in between each query.
-The @option{-c} or @option{--concurrent} flag says that any IPs
+The \fB-c\fP or \fB--concurrent\fP flag says that any IPs
 returned for the DNS lookup of the supplied host-name are on
 different machines, so we can send concurrent queries.
 .TP
@@ -144,28 +144,28 @@ Specifies the filename to be used for the persistent history of KoD
 responses received from servers.
 .TP
 .BR \-k " \fIfile\-name\fP, " \-\-keyfile "=" \fIfile\-name\fP
-Look in this file for the key specified with @option{-a}.
+Look in this file for the key specified with \fB-a\fP.
 .sp
 This option specifies the keyfile.
-@code{sntp} will search for the key specified with @option{-a}
-@file{keyno} in this file.  Key files follow the following format:
-@file{keyid keytype key}
-Where	@file{keyid} is a number identifying this key
-@file{keytype} is one of the following:
-@code{S}  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
-@code{N}  Key is a 64 Bit hexadecimal number as specified in the NTP standard.
-@code{A}  Key is a 1-to-8 character ASCII string.
-@code{M}  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
-For more information see @command{ntp.keys(5)}.
+\fBsntp\fP will search for the key specified with \fB-a\fP
+\fIkeyno\fP in this file.  Key files follow the following format:
+\fIkeyid keytype key\fP
+Where	\fIkeyid\fP is a number identifying this key
+\fIkeytype\fP is one of the following:
+\fBS\fP  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
+\fBN\fP  Key is a 64 Bit hexadecimal number as specified in the NTP standard.
+\fBA\fP  Key is a 1-to-8 character ASCII string.
+\fBM\fP  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
+For more information see \fBntp.keys(5)\fP.
 .TP
 .BR \-l " \fIfile\-name\fP, " \-\-logfile "=" \fIfile\-name\fP
 Log to specified logfile.
 .sp
 This option causes the client to write log messages to the specified
-@file{logfile}.
+\fIlogfile\fP.
 .TP
 .BR \-M " \fInumber\fP, " \-\-steplimit "=" \fInumber\fP
-Adjustments less than @var{steplimit} msec will be slewed.
+Adjustments less than \fBsteplimit\fP msec will be slewed.
 This option takes an integer number as its argument.
 The value of \fInumber\fP is constrained to being:
 .in +4
@@ -175,12 +175,12 @@ greater than or equal to 0
 .fi
 .in -4
 .sp
-If the time adjustment is less than @file{steplimit} milliseconds,
-slew the amount using @command{adjtime(2)}.  Otherwise, step the
-correction using @command{settimeofday(2)}. 
+If the time adjustment is less than \fIsteplimit\fP milliseconds,
+slew the amount using \fBadjtime(2)\fP.  Otherwise, step the
+correction using \fBsettimeofday(2)\fP.
 .TP
 .BR \-o " \fInumber\fP, " \-\-ntpversion "=" \fInumber\fP
-Send @var{int} as our NTP version.
+Send \fBint\fP as our NTP version.
 This option takes an integer number as its argument.
 The value of \fInumber\fP is constrained to being:
 .in +4
@@ -194,7 +194,7 @@ The default \fInumber\fP for this option is:
  4
 .sp
 When sending requests to a remote server, tell them we are running
-NTP protocol version @file{ntpversion} .
+NTP protocol version \fIntpversion\fP .
 .TP
 .BR \-r ", " -\-usereservedport
 Use the NTP Reserved Port (port 123).
@@ -203,11 +203,11 @@ Use port 123, which is reserved for NTP, for our network
 communications.
 .TP
 .BR \-S ", " -\-step
-OK to 'step' the time with @command{settimeofday(2)}.
+OK to 'step' the time with \fBsettimeofday(2)\fP.
 .sp
 .TP
 .BR \-s ", " -\-slew
-OK to 'slew' the time with @command{adjtime(2)}.
+OK to 'slew' the time with \fBadjtime(2)\fP.
 .sp
 .TP
 .BR \-u " \fIseconds\fP, " \-\-uctimeout "=" \fIseconds\fP
@@ -217,7 +217,7 @@ The default \fIseconds\fP for this option is:
 .ti +4
  5
 .sp
-When waiting for a unicast reply, @code{sntp} will wait the number
+When waiting for a unicast reply, \fBsntp\fP will wait the number
 of seconds specified before giving up.
 .TP
 .BR \-\-wait, " \fB\-\-no\-wait\fP"
@@ -287,11 +287,18 @@ See \fBOPTION PRESETS\fP for configuration files.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
-.BR 0
+.BR 0 " (EXIT_SUCCESS)"
 Successful program execution.
 .TP
-.BR 1
+.BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH AUTHORS
 .An "Johannes Maximilian Kuehn"
 .An "Harlan Stenn"

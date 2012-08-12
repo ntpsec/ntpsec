@@ -2,7 +2,7 @@
 /**
  * \file reset.c
  *
- *  Time-stamp:      "2011-05-24 18:07:16 bkorb"
+ *  Time-stamp:      "2012-08-11 08:35:11 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
@@ -74,6 +74,9 @@ optionResetOpt( tOptions* pOpts, tOptDesc* pOD )
     tOptState opt_state = OPTSTATE_INITIALIZER(DEFINED);
     char const * pzArg = pOD->optArg.argString;
     tSuccess     succ;
+
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
+        return;
 
     if (reset_active)
         return;

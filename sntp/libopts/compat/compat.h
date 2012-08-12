@@ -3,7 +3,7 @@
 /**
  * \file compat.h --- fake the preprocessor into handlng portability
  *
- *  Time-stamp:      "2012-02-28 19:40:44 bkorb"
+ *  Time-stamp:      "2012-08-11 08:17:36 bkorb"
  *
  *  compat.h is free software.
  *  This file is part of AutoGen.
@@ -62,7 +62,9 @@
 
 
 #ifndef HAVE_STRSIGNAL
-   char * strsignal( int signo );
+# ifndef HAVE_RAW_DECL_STRSIGNAL
+   char * strsignal(int signo);
+# endif
 #endif
 
 #define  _GNU_SOURCE    1 /* for strsignal in GNU's libc */

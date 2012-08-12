@@ -2,7 +2,7 @@
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:32:31 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:58:21 PM by AutoGen 5.16.2
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -14,7 +14,7 @@ ntpq \- standard NTP query program
 .RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..." [ host ...]
 .SH DESCRIPTION
 The
-.B 
+.B XXX Program Name
 utility program is used to query NTP servers which
 implement the standard NTP mode 6 control message formats defined
 in Appendix B of the NTPv3 specification RFC1305, requesting
@@ -28,28 +28,28 @@ Requests to read and write arbitrary
 variables can be assembled, with raw and pretty-printed output
 options being available.
 The
-.B 
+.B XXX Program Name
 utility can also obtain and print a
 list of peers in a common format by sending multiple queries to the
 server.
 If one or more request options is included on the command line
 when
-.B 
+.B XXX Program Name
 is executed, each of the requests will be sent
 to the NTP servers running on each of the hosts given as command
 line arguments, or on localhost by default.
 If no request options
 are given,
-.B 
+.B XXX Program Name
 will attempt to read commands from the
 standard input and execute these on the NTP server running on the
 first host given on the command line, again defaulting to localhost
 when no other host is specified.
 The
-.B 
+.B XXX Program Name
 utility will prompt for
 commands if the standard input is a terminal device.
-.B 
+.B XXX Program Name
 uses NTP mode 6 packets to communicate with the
 NTP server, and hence can be used to query any compatible server on
 the network which permits it.
@@ -57,7 +57,7 @@ Note that since NTP is a UDP protocol
 this communication will be somewhat unreliable, especially over
 large distances in terms of network topology.
 The
-.B 
+.B XXX Program Name
 utility makes
 one attempt to retransmit requests, and will time requests out if
 the remote host is not heard from within a suitable timeout
@@ -71,10 +71,10 @@ will
 cause the specified query (queries) to be sent to the indicated
 host(s) immediately.
 Otherwise,
-.B 
+.B XXX Program Name
 will attempt to read
 interactive format commands from the standard input.
-.Ss "Internal Commands"
+.SS "Internal Commands"
 Interactive format commands consist of a keyword followed by zero
 to four arguments.
 Only enough characters of the full keyword to
@@ -82,7 +82,7 @@ uniquely identify the command need be typed.
 A
 number of interactive format commands are executed entirely within
 the
-.B 
+.B XXX Program Name
 utility itself and do not result in NTP mode 6
 requests being sent to a server.
 These are described following.
@@ -327,14 +327,14 @@ to the standard output and commands read from the standard input.
 numeric host addresses.
 .sp
 Output all host addresses in dotted-quad numeric format rather than
-converting to the canonical host names. 
+converting to the canonical host names.
 .TP
 .BR \-\-old\-rv
 Always output status line with readvar.
 .sp
 By default, ntpq now suppresses the associd=... line that
 precedes the output of "readvar" (alias "rv") when a single
-variable is requested, such as ntpq -c "rv 0 offset".  This
+variable is requested, such as ntpq \-c "rv 0 offset".  This
 option causes ntpq to include both lines of output for a
 single-variable readvar.  Using an environment variable to
 preset this option in a script will enable both older and
@@ -380,11 +380,18 @@ See \fBOPTION PRESETS\fP for configuration files.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
-.BR 0
+.BR 0 " (EXIT_SUCCESS)"
 Successful program execution.
 .TP
-.BR 1
+.BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "AUTHORS"
 The University of Delaware
 .SH "COPYRIGHT"

@@ -2,7 +2,7 @@
 /**
  * \file makeshell.c
  *
- * Time-stamp:      "2012-04-07 09:03:16 bkorb"
+ * Time-stamp:      "2012-08-11 08:51:32 bkorb"
  *
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
@@ -33,6 +33,7 @@ tOptions * optionParseShellOptions = NULL;
 static char const * shell_prog = NULL;
 static char * script_leader    = NULL;
 static char * script_trailer   = NULL;
+static char * script_text      = NULL;
 
 /* = = = START-STATIC-FORWARD = = = */
 static void
@@ -60,10 +61,13 @@ static void
 emit_match_expr(char const * pzMatchName, tOptDesc* pCurOpt, tOptions* pOpts);
 
 static void
-emitLong(tOptions * pOpts);
+emit_long(tOptions * pOpts);
+
+static char *
+load_old_output(char const * fname);
 
 static void
-open_out(char const * pzFile);
+open_out(char const * fname);
 /* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  optionParseShell
@@ -112,7 +116,7 @@ optionParseShell(tOptions * pOpts)
 
         fputs(LONG_OPT_MARK,    stdout);
         fputs(INIT_LOPT_STR,    stdout);
-        emitLong(pOpts);
+        emit_long(pOpts);
         printf(LOPT_ARG_FMT,    pOpts->pzPROGNAME);
         fputs(END_OPT_SEL_STR,  stdout);
 
@@ -122,7 +126,7 @@ optionParseShell(tOptions * pOpts)
     case 0:
         fputs(ONLY_OPTS_LOOP,   stdout);
         fputs(INIT_LOPT_STR,    stdout);
-        emitLong(pOpts);
+        emit_long(pOpts);
         printf(LOPT_ARG_FMT,    pOpts->pzPROGNAME);
         break;
 
@@ -143,7 +147,7 @@ optionParseShell(tOptions * pOpts)
 
         fputs(LONG_OPT_MARK,    stdout);
         fputs(INIT_LOPT_STR,    stdout);
-        emitLong(pOpts);
+        emit_long(pOpts);
         printf(LOPT_ARG_FMT,    pOpts->pzPROGNAME);
         fputs(END_OPT_SEL_STR,  stdout);
 
@@ -172,6 +176,11 @@ optionParseShell(tOptions * pOpts)
         fputs(zOutputFail, stderr);
         exit(EXIT_FAILURE);
     }
+
+    AGFREE(script_text);
+    script_leader    = NULL;
+    script_trailer   = NULL;
+    script_text      = NULL;
 }
 
 #ifdef HAVE_WORKING_FORK
@@ -609,11 +618,11 @@ emit_match_expr(char const * pzMatchName, tOptDesc* pCurOpt, tOptions* pOpts)
 }
 
 
-/*
- *  Emit GNU-standard long option handling code
+/**
+ *  Emit GNU-standard long option handling code.
  */
 static void
-emitLong(tOptions * pOpts)
+emit_long(tOptions * pOpts)
 {
     tOptDesc* pOD = pOpts->pOptDesc;
     int       ct  = pOpts->optCt;
@@ -645,70 +654,96 @@ emitLong(tOptions * pOpts)
     printf(UNK_OPT_FMT, OPTION_STR, pOpts->pzPROGNAME);
 }
 
-
-static void
-open_out(char const * pzFile)
+/**
+ * Load the previous shell script output file.  We need to preserve any
+ * hand-edited additions outside of the START_MARK and END_MARKs.
+ *
+ * @param[in] fname  the output file name
+ */
+static char *
+load_old_output(char const * fname)
 {
-    FILE* fp;
-    char* pzData = NULL;
+    /*
+     *  IF we cannot stat the file,
+     *  THEN assume we are creating a new file.
+     *       Skip the loading of the old data.
+     */
+    FILE * fp = fopen(fname, "r" FOPEN_BINARY_FLAG);
     struct stat stbf;
+    char * text;
+    char * scan;
+
+    if (fp == NULL)
+        return NULL;
+
+    /*
+     * If we opened it, we should be able to stat it and it needs
+     * to be a regular file
+     */
+    if ((fstat(fileno(fp), &stbf) != 0) || (! S_ISREG(stbf.st_mode))) {
+        fprintf(stderr, zNotFile, fname);
+        exit(EXIT_FAILURE);
+    }
+
+    scan = text = AGALOC(stbf.st_size + 1, "f data");
+
+    /*
+     *  Read in all the data as fast as our OS will let us.
+     */
+    for (;;) {
+        int inct = fread((void*)scan, (size_t)1, stbf.st_size, fp);
+        if (inct == 0)
+            break;
+
+        stbf.st_size -= inct;
+
+        if (stbf.st_size == 0)
+            break;
+
+        scan += inct;
+    }
+
+    *scan = NUL;
+    fclose(fp);
+
+    return text;
+}
+
+/**
+ * Open the specified output file.  If it already exists, load its
+ * contents and save the non-generated (hand edited) portions.
+ * If a "start mark" is found, everything before it is preserved leader.
+ * If not, the entire thing is a trailer.  Assuming the start is found,
+ * then everything after the end marker is the trailer.  If the end
+ * mark is not found, the file is actually corrupt, but we take the
+ * remainder to be the trailer.
+ *
+ * @param[in] fname  the output file name
+ */
+static void
+open_out(char const * fname)
+{
 
     do  {
-        char*    pzScan;
-        size_t sizeLeft;
+        char * txt = script_text = load_old_output(fname);
+        char * scn;
 
-        /*
-         *  IF we cannot stat the file,
-         *  THEN assume we are creating a new file.
-         *       Skip the loading of the old data.
-         */
-        if (stat(pzFile, &stbf) != 0)
+        if (txt == NULL)
             break;
 
-        /*
-         *  The file must be a regular file
-         */
-        if (! S_ISREG(stbf.st_mode)) {
-            fprintf(stderr, zNotFile, pzFile);
-            exit(EXIT_FAILURE);
-        }
-
-        pzData = AGALOC(stbf.st_size + 1, "f data");
-        fp = fopen(pzFile, "r" FOPEN_BINARY_FLAG);
-
-        sizeLeft = (unsigned)stbf.st_size;
-        pzScan   = pzData;
-
-        /*
-         *  Read in all the data as fast as our OS will let us.
-         */
-        for (;;) {
-            int inct = fread((void*)pzScan, (size_t)1, sizeLeft, fp);
-            if (inct == 0)
-                break;
-
-            pzScan   += inct;
-            sizeLeft -= inct;
-
-            if (sizeLeft == 0)
-                break;
-        }
-
-        /*
-         *  NUL-terminate the leader and look for the trailer
-         */
-        *pzScan = NUL;
-        fclose(fp);
-        pzScan  = strstr(pzData, START_MARK);
-        if (pzScan == NULL) {
-            script_trailer = pzData;
+        scn = strstr(txt, START_MARK);
+        if (scn == NULL) {
+            script_trailer = txt;
             break;
         }
 
-        *(pzScan++) = NUL;
-        pzScan  = strstr(pzScan, END_MARK);
-        if (pzScan == NULL) {
-            script_trailer = pzData;
+        *(scn++) = NUL;
+        scn = strstr(scn, END_MARK);
+        if (scn == NULL) {
+            /*
+             * The file is corrupt.
+             */
+            script_trailer = txt + strlen(txt) + START_MARK_LEN + 1;
             break;
         }
 
@@ -716,11 +751,11 @@ open_out(char const * pzFile)
          *  Check to see if the data contains our marker.
          *  If it does, then we will skip over it
          */
-        script_trailer = pzScan + END_MARK_LEN;
-        script_leader  = pzData;
+        script_trailer = scn + END_MARK_LEN;
+        script_leader  = txt;
     } while (false);
 
-    if (freopen(pzFile, "w" FOPEN_BINARY_FLAG, stdout) != stdout) {
+    if (freopen(fname, "w" FOPEN_BINARY_FLAG, stdout) != stdout) {
         fprintf(stderr, zFreopenFail, errno, strerror(errno));
         exit(EXIT_FAILURE);
     }

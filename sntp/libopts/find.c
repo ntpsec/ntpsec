@@ -3,7 +3,7 @@
  *
  * @brief Hunt for options in the option descriptor list
  *
- *  Time-stamp:      "2012-01-29 19:07:30 bkorb"
+ *  Time-stamp:      "2012-08-11 08:36:11 bkorb"
  *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
@@ -44,9 +44,6 @@ parse_opt(char const ** nm_pp, char ** arg_pp, char * buf, size_t bufsz)
         case NUL: return res;
 
         case '=':
-            if (res >= (int)bufsz)
-                return -1;
-
             memcpy(buf, *nm_pp, res);
 
             buf[res] = NUL;
@@ -55,7 +52,8 @@ parse_opt(char const ** nm_pp, char ** arg_pp, char * buf, size_t bufsz)
             return res;
 
         default:
-            res++;
+            if (++res >= (int)bufsz)
+                return -1;
         }
     }
 }
@@ -286,6 +284,12 @@ optionVendorOption(tOptions * pOpts, tOptDesc * pOD)
     tOptState     opt_st   = OPTSTATE_INITIALIZER(PRESET);
     char const *  vopt_str = pOD->optArg.argString;
 
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
+        return;
+
+    if ((pOD->fOptState & OPTST_RESET) != 0)
+        return;
+
     if ((pOD->fOptState & OPTPROC_IMMEDIATE) == 0)
         opt_st.flags = OPTST_DEFINED;
 
@@ -293,9 +297,10 @@ optionVendorOption(tOptions * pOpts, tOptDesc * pOD)
        || ! SUCCESSFUL(opt_find_long(pOpts, vopt_str, &opt_st))
        || ! SUCCESSFUL(get_opt_arg(pOpts, &opt_st)) )
     {
-        fprintf(stderr, zIllVendOptStr, vopt_str);
+        fprintf(stderr, zIllVendOptStr, pOpts->pzProgName, vopt_str);
         (*pOpts->pUsageProc)(pOpts, EXIT_FAILURE);
         /* NOTREACHED */
+        _exit(EXIT_FAILURE); /* to be certain */
     }
 
     /*
@@ -321,31 +326,39 @@ optionVendorOption(tOptions * pOpts, tOptDesc * pOD)
 /**
  *  Find the option descriptor by full name.
  *
- * @param pOpts      option data
- * @param opt_name   name of option to look for
- * @param pOptState  state about current option
+ * @param opts      option data
+ * @param opt_name  name of option to look for
+ * @param state     state about current option
  *
  * @return success status
  */
 LOCAL tSuccess
-opt_find_long(tOptions * pOpts, char const * opt_name, tOptState * pOptState)
+opt_find_long(tOptions * opts, char const * opt_name, tOptState * state)
 {
     char    name_buf[128];
     char *  opt_arg;
     int     nm_len = parse_opt(&opt_name, &opt_arg, name_buf, sizeof(name_buf));
 
-    int     matchIdx = 0;
-    bool disable  = false;
-    int     match_ct =
-        opt_match_ct(pOpts, opt_name, nm_len, &matchIdx, &disable);
+    int     idx = 0;
+    bool    disable  = false;
+    int     ct;
+
+    if (nm_len <= 0) {
+        fprintf(stderr, zInvalOptName, opts->pzProgName, opt_name);
+        (*opts->pUsageProc)(opts, EXIT_FAILURE);
+        /* NOTREACHED */
+        _exit(EXIT_FAILURE); /* to be certain */
+    }
+
+    ct = opt_match_ct(opts, opt_name, nm_len, &idx, &disable);
 
     /*
      *  See if we found one match, no matches or multiple matches.
      */
-    switch (match_ct) {
-    case 1:  return opt_set(pOpts, opt_arg, matchIdx, disable, pOptState);
-    case 0:  return opt_unknown(pOpts, opt_name, opt_arg, pOptState);
-    default: return opt_ambiguous(pOpts, opt_name, match_ct);
+    switch (ct) {
+    case 1:  return opt_set(opts, opt_arg, idx, disable, state);
+    case 0:  return opt_unknown(opts, opt_name, opt_arg, state);
+    default: return opt_ambiguous(opts, opt_name, ct);
     }
 }
 

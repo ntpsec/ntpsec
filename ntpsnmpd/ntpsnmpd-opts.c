@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  August 11, 2012 at 11:32:35 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  August 11, 2012 at 08:39:31 PM by AutoGen 5.16.2
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:1:11 templates.
+ * Generated from AutoOpts 36:5:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -36,14 +36,15 @@
  *  is provided "as is" without express or implied warranty.
  */
 
+#ifndef __doxygen__
+#define OPTION_CODE_COMPILE 1
+#include "ntpsnmpd-opts.h"
 #include <sys/types.h>
 
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define OPTION_CODE_COMPILE 1
-#include "ntpsnmpd-opts.h"
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -54,7 +55,6 @@ extern FILE * option_usage_fp;
 #define zCopyright      (ntpsnmpd_opt_strs+0)
 #define zLicenseDescrip (ntpsnmpd_opt_strs+318)
 
-extern tUsageProc optionUsage;
 
 #ifndef NULL
 #  define NULL 0
@@ -63,7 +63,7 @@ extern tUsageProc optionUsage;
 /*
  *  ntpsnmpd option static const strings
  */
-static char const ntpsnmpd_opt_strs[1559] =
+static char const ntpsnmpd_opt_strs[1561] =
 /*     0 */ "ntpsnmpd 4.2.7p295\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
@@ -76,76 +76,76 @@ static char const ntpsnmpd_opt_strs[1559] =
             "provided that the above copyright notice appears in all copies and that\n"
             "both the copyright notice and this permission notice appear in supporting\n"
             "documentation, and that the name The University of Delaware not be used in\n"
-            "advertising or publicity pertaining to distribution of the software\n"
-            "without specific, written prior permission. The University of Delaware\n"
-            "makes no representations about the suitability this software for any\n"
-            "purpose. It is provided \"as is\" without express or implied warranty.\n\0"
-/*   956 */ "Do not fork\0"
-/*   968 */ "NOFORK\0"
-/*   975 */ "nofork\0"
-/*   982 */ "Log to syslog()\0"
-/*   998 */ "SYSLOG\0"
-/*  1005 */ "syslog\0"
-/*  1012 */ "The socket address ntpsnmpd uses to connect to net-snmpd\0"
-/*  1069 */ "AGENTXSOCKET\0"
-/*  1082 */ "agentxsocket\0"
-/*  1095 */ "unix:/var/agentx/master\0"
-/*  1119 */ "Display extended usage information and exit\0"
-/*  1163 */ "help\0"
-/*  1168 */ "Extended usage information passed thru pager\0"
-/*  1213 */ "more-help\0"
-/*  1223 */ "Output version information and exit\0"
-/*  1259 */ "version\0"
-/*  1267 */ "Save the option state to a config file\0"
-/*  1306 */ "save-opts\0"
-/*  1316 */ "Load options from a config file\0"
-/*  1348 */ "LOAD_OPTS\0"
-/*  1358 */ "no-load-opts\0"
-/*  1371 */ "no\0"
-/*  1374 */ "NTPSNMPD\0"
-/*  1383 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p295\n"
+            "advertising or publicity pertaining to distribution of the software without\n"
+            "specific, written prior permission.  The University of Delaware makes no\n"
+            "representations about the suitability this software for any purpose.  It is\n"
+            "provided \"as is\" without express or implied warranty.\n\0"
+/*   958 */ "Do not fork\0"
+/*   970 */ "NOFORK\0"
+/*   977 */ "nofork\0"
+/*   984 */ "Log to syslog()\0"
+/*  1000 */ "SYSLOG\0"
+/*  1007 */ "syslog\0"
+/*  1014 */ "The socket address ntpsnmpd uses to connect to net-snmpd\0"
+/*  1071 */ "AGENTXSOCKET\0"
+/*  1084 */ "agentxsocket\0"
+/*  1097 */ "unix:/var/agentx/master\0"
+/*  1121 */ "Display extended usage information and exit\0"
+/*  1165 */ "help\0"
+/*  1170 */ "Extended usage information passed thru pager\0"
+/*  1215 */ "more-help\0"
+/*  1225 */ "Output version information and exit\0"
+/*  1261 */ "version\0"
+/*  1269 */ "Save the option state to a config file\0"
+/*  1308 */ "save-opts\0"
+/*  1318 */ "Load options from a config file\0"
+/*  1350 */ "LOAD_OPTS\0"
+/*  1360 */ "no-load-opts\0"
+/*  1373 */ "no\0"
+/*  1376 */ "NTPSNMPD\0"
+/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p295\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
-/*  1488 */ ".ntprc\0"
-/*  1495 */ "$HOME\0"
-/*  1501 */ ".\0"
-/*  1503 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1537 */ "\n\n\0"
-/*  1540 */ "ntpsnmpd 4.2.7p295";
+/*  1490 */ "$HOME\0"
+/*  1496 */ ".\0"
+/*  1498 */ ".ntprc\0"
+/*  1505 */ "http://bugs.ntp.org, bugs@ntp.org\0"
+/*  1539 */ "\n\n\0"
+/*  1542 */ "ntpsnmpd 4.2.7p295";
 
 /*
  *  nofork option description:
  */
-#define NOFORK_DESC      (ntpsnmpd_opt_strs+956)
-#define NOFORK_NAME      (ntpsnmpd_opt_strs+968)
-#define NOFORK_name      (ntpsnmpd_opt_strs+975)
+#define NOFORK_DESC      (ntpsnmpd_opt_strs+958)
+#define NOFORK_NAME      (ntpsnmpd_opt_strs+970)
+#define NOFORK_name      (ntpsnmpd_opt_strs+977)
 #define NOFORK_FLAGS     (OPTST_DISABLED)
 
 /*
  *  syslog option description:
  */
-#define SYSLOG_DESC      (ntpsnmpd_opt_strs+982)
-#define SYSLOG_NAME      (ntpsnmpd_opt_strs+998)
-#define SYSLOG_name      (ntpsnmpd_opt_strs+1005)
+#define SYSLOG_DESC      (ntpsnmpd_opt_strs+984)
+#define SYSLOG_NAME      (ntpsnmpd_opt_strs+1000)
+#define SYSLOG_name      (ntpsnmpd_opt_strs+1007)
 #define SYSLOG_FLAGS     (OPTST_DISABLED)
 
 /*
  *  agentXSocket option description:
  */
-#define AGENTXSOCKET_DESC      (ntpsnmpd_opt_strs+1012)
-#define AGENTXSOCKET_NAME      (ntpsnmpd_opt_strs+1069)
-#define AGENTXSOCKET_name      (ntpsnmpd_opt_strs+1082)
-#define AGENTXSOCKET_DFT_ARG   (ntpsnmpd_opt_strs+1095)
+#define AGENTXSOCKET_DESC      (ntpsnmpd_opt_strs+1014)
+#define AGENTXSOCKET_NAME      (ntpsnmpd_opt_strs+1071)
+#define AGENTXSOCKET_name      (ntpsnmpd_opt_strs+1084)
+#define AGENTXSOCKET_DFT_ARG   (ntpsnmpd_opt_strs+1097)
 #define AGENTXSOCKET_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 /*
  *  Help/More_Help/Version option descriptions:
  */
-#define HELP_DESC       (ntpsnmpd_opt_strs+1119)
-#define HELP_name       (ntpsnmpd_opt_strs+1163)
+#define HELP_DESC       (ntpsnmpd_opt_strs+1121)
+#define HELP_name       (ntpsnmpd_opt_strs+1165)
 #ifdef HAVE_WORKING_FORK
-#define MORE_HELP_DESC  (ntpsnmpd_opt_strs+1168)
-#define MORE_HELP_name  (ntpsnmpd_opt_strs+1213)
+#define MORE_HELP_DESC  (ntpsnmpd_opt_strs+1170)
+#define MORE_HELP_name  (ntpsnmpd_opt_strs+1215)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
 #define MORE_HELP_DESC  NULL
@@ -158,14 +158,14 @@ static char const ntpsnmpd_opt_strs[1559] =
 #  define VER_FLAGS     (OPTST_SET_ARGTYPE(OPARG_TYPE_STRING) | \
                          OPTST_ARG_OPTIONAL | OPTST_IMM | OPTST_NO_INIT)
 #endif
-#define VER_DESC        (ntpsnmpd_opt_strs+1223)
-#define VER_name        (ntpsnmpd_opt_strs+1259)
-#define SAVE_OPTS_DESC  (ntpsnmpd_opt_strs+1267)
-#define SAVE_OPTS_name  (ntpsnmpd_opt_strs+1306)
-#define LOAD_OPTS_DESC     (ntpsnmpd_opt_strs+1316)
-#define LOAD_OPTS_NAME     (ntpsnmpd_opt_strs+1348)
-#define NO_LOAD_OPTS_name  (ntpsnmpd_opt_strs+1358)
-#define LOAD_OPTS_pfx      (ntpsnmpd_opt_strs+1371)
+#define VER_DESC        (ntpsnmpd_opt_strs+1225)
+#define VER_name        (ntpsnmpd_opt_strs+1261)
+#define SAVE_OPTS_DESC  (ntpsnmpd_opt_strs+1269)
+#define SAVE_OPTS_name  (ntpsnmpd_opt_strs+1308)
+#define LOAD_OPTS_DESC     (ntpsnmpd_opt_strs+1318)
+#define LOAD_OPTS_NAME     (ntpsnmpd_opt_strs+1350)
+#define NO_LOAD_OPTS_name  (ntpsnmpd_opt_strs+1360)
+#define LOAD_OPTS_pfx      (ntpsnmpd_opt_strs+1373)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
 /*
  *  Declare option callback procedures
@@ -192,9 +192,11 @@ static tOptProc
 #endif /* defined(TEST_NTPSNMPD_OPTS) */
 #define VER_PROC        ntpOptionPrintVersion
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *  Define the Ntpsnmpd Option Descriptions.
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
+ *  Define the ntpsnmpd Option Descriptions.
+ * This is an array of OPTION_CT entries, one for each
+ * option that the ntpsnmpd program responds to.
  */
 static tOptDesc optDesc[OPTION_CT] = {
   {  /* entry idx, value */ 0, VALUE_OPT_NOFORK,
@@ -301,20 +303,20 @@ static tOptDesc optDesc[OPTION_CT] = {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *  Define the Ntpsnmpd Option Environment
+ *  Define the ntpsnmpd Option Environment
  */
-#define zPROGNAME       (ntpsnmpd_opt_strs+1374)
-#define zUsageTitle     (ntpsnmpd_opt_strs+1383)
-#define zRcName         (ntpsnmpd_opt_strs+1488)
+#define zPROGNAME       (ntpsnmpd_opt_strs+1376)
+#define zUsageTitle     (ntpsnmpd_opt_strs+1385)
+#define zRcName         (ntpsnmpd_opt_strs+1498)
 static char const * const apzHomeList[3] = {
-    ntpsnmpd_opt_strs+1495,
-    ntpsnmpd_opt_strs+1501,
+    ntpsnmpd_opt_strs+1490,
+    ntpsnmpd_opt_strs+1496,
     NULL };
-#define zBugsAddr       (ntpsnmpd_opt_strs+1503)
-#define zExplain        (ntpsnmpd_opt_strs+1537)
+#define zBugsAddr       (ntpsnmpd_opt_strs+1505)
+#define zExplain        (ntpsnmpd_opt_strs+1539)
 #define zDetail         (NULL)
-#define zFullVersion    (ntpsnmpd_opt_strs+1540)
-/* extracted from optcode.tlib near line 315 */
+#define zFullVersion    (ntpsnmpd_opt_strs+1542)
+/* extracted from optcode.tlib near line 350 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -329,21 +331,40 @@ static char const * const apzHomeList[3] = {
 
 #define ntpsnmpd_short_usage (NULL)
 
+#endif /* not defined __doxygen__ */
+
 /*
  *  Create the static procedure(s) declared above.
+ */
+/**
+ * The callout function that invokes the optionUsage function.
+ *
+ * @param pOptions the AutoOpts option description structure
+ * @param pOptDesc the descriptor for the "help" (usage) option.
+ * @noreturn
  */
 static void
 doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 {
+    optionUsage(&ntpsnmpdOptions, NTPSNMPD_EXIT_SUCCESS);
+    /* NOTREACHED */
+    (void)pOptDesc;
     (void)pOptions;
-    USAGE(NTPSNMPD_EXIT_SUCCESS);
 }
-/* extracted from optmain.tlib near line 128 */
+/* extracted from optmain.tlib near line 48 */
 
 #if defined(TEST_NTPSNMPD_OPTS) /* TEST MAIN PROCEDURE: */
 
 extern void optionPutShell(tOptions*);
 
+/**
+ * Generated main procedure.  This will emit text that a Bourne shell can
+ * process to handle its command line arguments.
+ *
+ * @param argc argument count
+ * @param argv argument vector
+ * @returns program exit code
+ */
 int
 main(int argc, char ** argv)
 {
@@ -356,12 +377,19 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* defined TEST_NTPSNMPD_OPTS */
-/* extracted from optmain.tlib near line 1148 */
+/* extracted from optmain.tlib near line 1146 */
 
+/**
+ * The directory containing the data associated with ntpsnmpd.
+ */
 #ifndef  PKGDATADIR
 # define PKGDATADIR ""
 #endif
 
+/**
+ * Information about the person or institution that packaged ntpsnmpd
+ * for the current distribution.
+ */
 #ifndef  WITH_PACKAGER
 # define ntpsnmpd_packager_info NULL
 #else
@@ -377,7 +405,13 @@ static char const ntpsnmpd_packager_info[] =
 # endif
     "\n";
 #endif
+#ifndef __doxygen__
 
+#endif /* __doxygen__ */
+/**
+ * The option definitions for ntpsnmpd.  The one structure that
+ * binds them all.
+ */
 tOptions ntpsnmpdOptions = {
     OPTIONS_STRUCT_VERSION,
     0, NULL,                    /* original argc + argv    */
@@ -422,7 +456,16 @@ tOptions ntpsnmpdOptions = {
 static char* AO_gettext(char const* pz);
 static void  coerce_it(void** s);
 
-static char*
+/**
+ * AutoGen specific wrapper function for gettext.
+ * It relies on the macro _() to convert from English to the target
+ * language, then strdup-duplicates the result string.
+ *
+ * @param[in] pz the input text used as a lookup key.
+ * @returns the translated text (if there is one),
+ *   or the original text (if not).
+ */
+static char *
 AO_gettext(char const* pz)
 {
     char* pzRes;
@@ -442,8 +485,9 @@ AO_gettext(char const* pz)
 static void coerce_it(void** s) { *s = AO_gettext(*s);
 }
 
-/*
- *  This invokes the translation code (e.g. gettext(3)).
+/**
+ * Translate all the translatable strings in the ntpsnmpdOptions
+ * structure defined above.  This is done only once.
  */
 static void
 translate_option_strings(void)

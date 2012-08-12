@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sun Jun 17 15:47:44 PDT 2012
+ * Generated Sat Aug 11 09:41:23 PDT 2012
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -65,7 +65,7 @@ env_presets(tOptions * pOpts, teEnvPresetType type);
  *  Extracted from find.c
  */
 LOCAL tSuccess
-opt_find_long(tOptions * pOpts, char const * opt_name, tOptState * pOptState);
+opt_find_long(tOptions * opts, char const * opt_name, tOptState * state);
 
 LOCAL tSuccess
 opt_find_short(tOptions* pOpts, uint_t optValue, tOptState* pOptState);
@@ -80,13 +80,13 @@ find_opt(tOptions * pOpts, tOptState * pOptState);
  *  Extracted from load.c
  */
 LOCAL void
-mungeString(char* pzTxt, tOptionLoadMode mode);
+mungeString(char * txt, tOptionLoadMode mode);
 
 LOCAL void
 loadOptionLine(
-    tOptions*   pOpts,
-    tOptState*  pOS,
-    char*       pzLine,
+    tOptions *  opts,
+    tOptState * opt_state,
+    char *      line,
     tDirection  direction,
     tOptionLoadMode   load_mode );
 

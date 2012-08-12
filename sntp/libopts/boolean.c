@@ -2,7 +2,7 @@
 /**
  * \file boolean.c
  *
- * Time-stamp:      "2012-03-31 13:46:19 bkorb"
+ * Time-stamp:      "2012-08-11 08:34:39 bkorb"
  *
  *   Automated Options Paged Usage module.
  *
@@ -49,6 +49,9 @@ optionBooleanVal(tOptions * pOpts, tOptDesc * pOD )
     bool  res = true;
 
     (void)pOpts;
+
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
+        return;
 
     if ((pOD->fOptState & OPTST_RESET) != 0)
         return;

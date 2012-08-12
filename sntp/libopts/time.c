@@ -2,7 +2,7 @@
 /**
  * \file time.c
  *
- *  Time-stamp:      "2012-01-29 12:52:31 bkorb"
+ *  Time-stamp:      "2012-08-11 08:34:17 bkorb"
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
@@ -40,6 +40,9 @@ optionTimeVal(tOptions * pOpts, tOptDesc * pOD)
 {
     time_t val;
 
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
+        return;
+
     if ((pOD->fOptState & OPTST_RESET) != 0)
         return;
 
@@ -72,6 +75,9 @@ void
 optionTimeDate(tOptions * pOpts, tOptDesc * pOD)
 {
 #if defined(HAVE_GETDATE_R) && defined(HAVE_PUTENV)
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
+        return;
+
     if ((! HAS_pzPkgDataDir(pOpts)) || (pOpts->pzPkgDataDir == NULL))
         goto default_action;
 

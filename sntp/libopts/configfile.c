@@ -1,7 +1,7 @@
 /**
  * \file configfile.c
  *
- *  Time-stamp:      "2012-03-31 13:56:11 bkorb"
+ *  Time-stamp:      "2012-08-11 08:34:55 bkorb"
  *
  *  configuration/rc/ini file handling.
  *
@@ -542,6 +542,7 @@ handle_cfg(tOptions * pOpts, tOptState * pOS, char * pzText, int dir)
             switch (ch) {
             case NUL:
                 pcS = NULL;
+                /* FALLTHROUGH */
 
             case NL:
                 *pcD = NUL;
@@ -549,9 +550,8 @@ handle_cfg(tOptions * pOpts, tOptState * pOS, char * pzText, int dir)
                 goto copy_done;
 
             case '\\':
-                if (*pcS == NL) {
+                if (*pcS == NL)
                     ch = *(pcS++);
-                }
                 /* FALLTHROUGH */
             default:
                 *(pcD++) = ch;
@@ -1129,6 +1129,9 @@ optionLoadOpt(tOptions * pOpts, tOptDesc * pOptDesc)
 {
     struct stat sb;
 
+    if (pOpts <= OPTPROC_EMIT_LIMIT)
+        return;
+
     /*
      *  IF the option is not being disabled, THEN load the file.  There must
      *  be a file.  (If it is being disabled, then the disablement processing
@@ -1175,6 +1178,7 @@ parse_attrs(tOptions * pOpts, char * pzText, tOptionLoadMode * pMode,
         if (! IS_WHITESPACE_CHAR(*pzText))
             switch (*pzText) {
             case '/': pType->valType = OPARG_TYPE_NONE;
+                      /* FALLTHROUGH */
             case '>': return pzText;
 
             default:

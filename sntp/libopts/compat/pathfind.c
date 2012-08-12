@@ -4,7 +4,7 @@
 
 /*
  * Author:           Gary V Vaughan <gvaughan@oranda.demon.co.uk>
- * Time-stamp:       "2012-03-31 13:44:42 bkorb"
+ * Time-stamp:       "2012-08-11 08:19:39 bkorb"
  */
 
 /* Code: */
@@ -305,6 +305,7 @@ extract_colon_unit( char* pzDir, char const *string, int *p_index )
             switch (ch) {
             case ':':
                 pzDest[-1] = NUL;
+                /* FALLTHROUGH */
             case NUL:
                 goto copy_done;
             }

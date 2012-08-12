@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  August 11, 2012 at 11:22:24 AM by AutoGen 5.14
+ *  It has been AutoGen-ed  August 11, 2012 at 08:39:32 PM by AutoGen 5.16.2
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:1:11 templates.
+ * Generated from AutoOpts 36:5:11 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 147457
+#define AO_TEMPLATE_VERSION 147461
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -121,7 +121,9 @@ typedef enum {
  */
 typedef enum {
     SNTP_EXIT_SUCCESS = 0,
-    SNTP_EXIT_FAILURE = 1
+    SNTP_EXIT_FAILURE = 1,
+    SNTP_EXIT_NO_CONFIG_INPUT = 66,
+    SNTP_EXIT_LIBOPTS_FAILURE = 70
 } sntp_exit_code_t;
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -289,7 +291,7 @@ typedef enum {
                 sntpOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*sntpOptions.pUsageProc)(&sntpOptions, c)
-/* extracted from opthead.tlib near line 469 */
+/* extracted from opthead.tlib near line 484 */
 
 #ifdef  __cplusplus
 extern "C" {
@@ -305,6 +307,12 @@ extern tOptions sntpOptions;
 #if defined(ENABLE_NLS)
 # ifndef _
 #   include <stdio.h>
+#   ifndef HAVE_GETTEXT
+      extern char * gettext(char const *);
+#   else
+#     include <libintl.h>
+#   endif
+
 static inline char* aoGetsText(char const* pz) {
     if (pz == NULL) return NULL;
     return (char*)gettext(pz);

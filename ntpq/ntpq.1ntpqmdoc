@@ -1,9 +1,9 @@
 .Dd August 11 2012
 .Dt NTPQ 1ntpqmdoc User Commands
-.Os SunOS 5.10
+.Os FreeBSD 6.4-STABLE
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:32:34 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:58:17 PM by AutoGen 5.16.2
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -288,9 +288,11 @@ host(s).
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
+.sp
 .It  \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
+.sp
 .sp
 .It  \-p ", " -\-peers
 Print a list of the peers.
@@ -309,16 +311,16 @@ to the standard output and commands read from the standard input.
 .It  \-n ", " -\-numeric
 numeric host addresses.
 .sp
-Output all host addresses in dotted-quad numeric format rather than
-converting to the canonical host names. 
+Output all host addresses in dotted\-quad numeric format rather than
+converting to the canonical host names.
 .It  \-\-old\-rv
 Always output status line with readvar.
 .sp
 By default, ntpq now suppresses the associd=... line that
 precedes the output of "readvar" (alias "rv") when a single
-variable is requested, such as ntpq -c "rv 0 offset".  This
+variable is requested, such as ntpq \-c "rv 0 offset".  This
 option causes ntpq to include both lines of output for a
-single-variable readvar.  Using an environment variable to
+single\-variable readvar.  Using an environment variable to
 preset this option in a script will enable both older and
 newer ntpq to behave identically in this regard.
 .It \-? , " \-\-help"
@@ -358,10 +360,15 @@ See \fBOPTION PRESETS\fP for configuration files.
 .Sh "EXIT STATUS"
 One of the following exit values will be returned:
 .Bl -tag
-.It 0
+.It 0 " (EXIT_SUCCESS)"
 Successful program execution.
-.It 1
+.It 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.It 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.It 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .El
 .Sh "AUTHORS"
 The University of Delaware

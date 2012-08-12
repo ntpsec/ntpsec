@@ -2,7 +2,7 @@
 /**
  * \file environment.c
  *
- * Time-stamp:      "2012-04-01 05:59:15 bkorb"
+ * Time-stamp:      "2012-08-11 08:18:25 bkorb"
  *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
@@ -127,6 +127,8 @@ do_env_opt(tOptState * os, char * env_name,
        && (streqvcmp(os->pzOptArg, os->pOD->pz_DisablePfx) == 0)) {
         os->flags |= OPTST_DISABLED;
         os->pzOptArg = NULL;
+        handle_opt(pOpts, os);
+        return;
     }
 
     switch (type) {

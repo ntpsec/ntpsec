@@ -2,7 +2,7 @@
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 11:32:03 AM by AutoGen 5.14
+.\"  It has been AutoGen-ed  August 11, 2012 at 08:58:05 PM by AutoGen 5.16.2
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -14,7 +14,7 @@ ntpdc \- vendor-specific NTPD control program
 .RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..." [ host ...]
 .PP
 .SH DESCRIPTION
-.B 
+.B XXX Program Name
 is a utility program used to query
 .Xr ntpd 8
 about its
@@ -25,12 +25,12 @@ be run either in interactive mode or controlled using command line
 arguments.
 Extensive state and statistics information is available
 through the
-.B 
+.B XXX Program Name
 interface.
 In addition, nearly all the
 configuration options which can be specified at startup using
 ntpd's configuration file may also be specified at run time using
-.B  .
+.B XXX Program Name .
 .SH "OPTIONS"
 .TP
 .BR \-4 ", " -\-ipv4
@@ -87,7 +87,7 @@ their state. This is equivalent to the 'listpeers' interactive command.
 numeric host addresses.
 .sp
 Output all host addresses in dotted-quad numeric format rather than
-converting to the canonical host names. 
+converting to the canonical host names.
 .TP
 .BR \-p ", " -\-peers
 Print a list of the peers.
@@ -141,24 +141,24 @@ is searched for within those directories.
 .SH USAGE
 If one or more request options are included on the command line
 when
-.B 
+.B XXX Program Name
 is executed, each of the requests will be sent
 to the NTP servers running on each of the hosts given as command
 line arguments, or on localhost by default.
 If no request options
 are given,
-.B 
+.B XXX Program Name
 will attempt to read commands from the
 standard input and execute these on the NTP server running on the
 first host given on the command line, again defaulting to localhost
 when no other host is specified.
 The
-.B 
+.B XXX Program Name
 utility will prompt for
 commands if the standard input is a terminal device.
 .PP
 The
-.B 
+.B XXX Program Name
 utility uses NTP mode 7 packets to communicate with the
 NTP server, and hence can be used to query any compatible server on
 the network which permits it.
@@ -166,21 +166,21 @@ Note that since NTP is a UDP protocol
 this communication will be somewhat unreliable, especially over
 large distances in terms of network topology.
 The
-.B 
+.B XXX Program Name
 utility makes
 no attempt to retransmit requests, and will time requests out if
 the remote host is not heard from within a suitable timeout
 time.
 .PP
 The operation of
-.B 
+.B XXX Program Name
 are specific to the particular
 implementation of the
 .Xr ntpd 8
 daemon and can be expected to
 work only with this and maybe some previous versions of the daemon.
 Requests from a remote
-.B 
+.B XXX Program Name
 utility which affect the
 state of the local server must be authenticated, which requires
 both the remote program and local server share a common key and key
@@ -199,11 +199,11 @@ n
 will cause the specified query (queries) to be sent to
 the indicated host(s) immediately.
 Otherwise,
-.B 
+.B XXX Program Name
 will
 attempt to read interactive format commands from the standard
 input.
-.Ss "Interactive Commands"
+.SS "Interactive Commands"
 Interactive format commands consist of a keyword followed by zero
 to four arguments.
 Only enough characters of the full keyword to
@@ -216,7 +216,7 @@ followed by a file name, to the command line.
 .PP
 A number of interactive format commands are executed entirely
 within the
-.B 
+.B XXX Program Name
 utility itself and do not result in NTP
 mode 7 requests being sent to a server.
 These are described
@@ -298,7 +298,7 @@ Note that since
 .Nm
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
-.Ss "Control Message Commands"
+.SS "Control Message Commands"
 Query commands result in NTP mode 7 packets containing requests for
 information being sent to the server.
 These are read-only commands
@@ -535,14 +535,14 @@ Obtain debugging information for a reference clock driver.
 This
 information is provided only by some clock drivers and is mostly
 undecodable without a copy of the driver source in hand.
-.Ss "Runtime Configuration Requests"
+.SS "Runtime Configuration Requests"
 All requests which cause state changes in the server are
 authenticated by the server using a configured NTP key (the
 facility can also be disabled by the server by not configuring a
 key).
 The key number and the corresponding key must also be made
 known to
-.B  .
+.B XXX Program Name .
 This can be done using the
 .Ic keyid
 and
@@ -811,11 +811,18 @@ See \fBOPTION PRESETS\fP for configuration files.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
-.BR 0
+.BR 0 " (EXIT_SUCCESS)"
 Successful program execution.
 .TP
-.BR 1
+.BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 66 " (EX_NOINPUT)"
+A specified configuration file could not be loaded.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
 .Xr ntp.conf 5 ,
 .Xr ntpd 8
@@ -831,7 +838,7 @@ Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 The
-.B 
+.B XXX Program Name
 utility is a crude hack.
 Much of the information it shows is
 deadly boring and could only be loved by its implementer.
