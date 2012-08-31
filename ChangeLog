@@ -1,5 +1,6 @@
 * Begin support for autogen maintaining ntp.conf and ntp.keys docs.
 * Upgrade to autogen-5.16.2 and libopts-36.5.11.
+* Potential bugfix for agtexi-cmd.tpl.
 (4.2.7p295) 2012/08/11 Released by Harlan Stenn <stenn@ntp.org>
 * Look for syslog's facilitynames[].
 (4.2.7p294) 2012/08/08 Released by Harlan Stenn <stenn@ntp.org>
