@@ -124,6 +124,7 @@ EXTRA_DIST =			\
 	ntp.conf.mdoc.in	\
 	ntp.keys.5man		\
 	ntp.keys.5mdoc		\
+	ntp.keys.def		\
 	ntp.keys.man.in		\
 	ntp.keys.mdoc.in	\
 	ntpd-opts.def		\
