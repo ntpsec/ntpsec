@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  August 11, 2012 at 08:58:03 PM by AutoGen 5.16.2
+# It has been AutoGen-ed  August 30, 2012 at 11:40:30 PM by AutoGen 5.16.2
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -36,7 +36,7 @@ using the @code{agtexi-cmd} template and the option descriptions for the @code{n
 This software is released under the NTP license, <http://ntp.org/license>.
 
 @menu
-* ntpdc usage::                  ntpdc help/usage (-?)
+* ntpdc usage::                  ntpdc help/usage (@option{--help})
 * ntpdc ipv4::                   ipv4 option (-4)
 * ntpdc ipv6::                   ipv6 option (-6)
 * ntpdc command::                command option (-c)
@@ -54,11 +54,13 @@ This software is released under the NTP license, <http://ntp.org/license>.
 @end menu
 
 @node ntpdc usage
-@subsection ntpdc help/usage (-?)
+@subsection ntpdc help/usage (@option{--help})
 @cindex ntpdc help
 
 This is the automatically generated usage text for ntpdc.
-The text printed is the same whether for the @code{help} option (-?) or the @code{more-help} option (-!).  @code{more-help} will print
+
+The text printed is the same whether selected with the @code{help} option
+(@option{--help}) or the @code{more-help} option (@option{--more-help}).  @code{more-help} will print
 the usage text by passing it through a pager program.
 @code{more-help} is disabled on platforms without a working
 @code{fork(2)} function.  The @code{PAGER} environment variable is
@@ -67,7 +69,56 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc is unavailable - no -?
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p296
+USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
+  Flg Arg Option-Name    Description
+   -4 no  ipv4           Force IPv4 DNS name resolution
+                                - prohibits these options:
+                                ipv6
+   -6 no  ipv6           Force IPv6 DNS name resolution
+                                - prohibits these options:
+                                ipv4
+   -c Str command        run a command and exit
+                                - may appear multiple times
+   -d no  debug-level    Increase debug verbosity level
+                                - may appear multiple times
+   -D Str set-debug-level Set the debug verbosity level
+                                - may appear multiple times
+   -i no  interactive    Force ntpq to operate in interactive mode
+                                - prohibits these options:
+                                command
+                                listpeers
+                                peers
+                                showpeers
+   -l no  listpeers      Print a list of the peers
+                                - prohibits these options:
+                                command
+   -n no  numeric        numeric host addresses
+   -p no  peers          Print a list of the peers
+                                - prohibits these options:
+                                command
+   -s no  showpeers      Show a list of the peers
+                                - prohibits these options:
+                                command
+      opt version        Output version information and exit
+   -? no  help           Display extended usage information and exit
+   -! no  more-help      Extended usage information passed thru pager
+   -> opt save-opts      Save the option state to a config file
+   -< Str load-opts      Load options from a config file
+                                - disabled as --no-load-opts
+                                - may appear multiple times
+
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
+
+
+
+The following option preset mechanisms are supported:
+ - reading file $HOME/.ntprc
+ - reading file ./.ntprc
+ - examining environment variables named NTPDC_*
+
+please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
 @exampleindent 4
 

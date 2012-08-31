@@ -1,3 +1,4 @@
+(4.2.7p296) 2012/08/31 Released by Harlan Stenn <stenn@ntp.org>
 * Begin support for autogen maintaining ntp.conf and ntp.keys docs.
 * Upgrade to autogen-5.16.2 and libopts-36.5.11.
 * Potential bugfix for agtexi-cmd.tpl.

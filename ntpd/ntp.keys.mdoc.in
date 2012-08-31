@@ -1,9 +1,9 @@
-.Dd August 11 2012
+.Dd August 30 2012
 .Dt NTP_KEYS 5 File Formats
-.Os FreeBSD 6.4-STABLE
+.Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  August 11, 2012 at 08:57:36 PM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  August 30, 2012 at 11:39:58 PM by AutoGen 5.16.2
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -17,96 +17,6 @@
 All arguments must be options.
 .Pp
 .Sh DESCRIPTION
-This document describes the format of an NTP key file.
-For a description of the use of this type of file, see the
-.Qq Authentication Support
-section of the
-.Xr ntp.conf 5
-page.
-.Pp
-In the case of DES, the keys are 56 bits long with,
-depending on type, a parity check on each byte.
-In the case of MD5, the keys are 64 bits (8 bytes).
-.Xr ntpd 8
-reads its keys from a file specified using the
-.Fl k
-command line option or the
-.Ic keys
-statement in the configuration file.
-While key number 0 is fixed by the NTP standard
-(as 56 zero bits)
-and may not be changed,
-one or more of the keys numbered 1 through 15
-may be arbitrarily set in the keys file.
-.Pp
-The key file uses the same comment conventions
-as the configuration file.
-Key entries use a fixed format of the form
-.Pp
-.D1 Ar keyno type key
-.Pp
-where
-.Ar keyno
-is a positive integer,
-.Ar type
-is a single character which defines the key format,
-and
-.Ar key
-is the key itself.
-.Pp
-The
-.Ar key
-may be given in one of four different formats,
-controlled by the
-.Ar type
-character.
-The four key types, and corresponding formats,
-are listed following.
-.Bl -tag -width X
-.It Li S
-The key is a 64-bit hexadecimal number in the format
-specified in the DES specification;
-that is, the high order seven bits of each octet are used
-to form the 56-bit key
-while the low order bit of each octet is given a value
-such that odd parity is maintained for the octet.
-Leading zeroes must be specified
-(i.e., the key must be exactly 16 hex digits long)
-and odd parity must be maintained.
-Hence a zero key, in standard format, would be given as
-.Ql 0101010101010101 .
-.It Li N
-The key is a 64-bit hexadecimal number in the format
-specified in the NTP standard.
-This is the same as the DES format,
-except the bits in each octet have been rotated one bit right
-so that the parity bit is now the high order bit of the octet.
-Leading zeroes must be specified and odd parity must be maintained.
-A zero key in NTP format would be specified as
-.Ql 8080808080808080 .
-.It Li A
-The key is a 1-to-8 character ASCII string.
-A key is formed from this by using the low order 7 bits
-of each ASCII character in the string,
-with zeroes added on the right
-when necessary to form a full width 56-bit key,
-in the same way that encryption keys are formed from
-.Ux
-passwords.
-.It Li M
-The key is a 1-to-8 character ASCII string,
-using the MD5 authentication scheme.
-Note that both the keys and the authentication schemes (DES or MD5)
-must be identical between a set of peers sharing the same key number.
-.El
-.Pp
-Note that the keys used by the
-.Xr ntpq 8
-and
-.Xr ntpdc 8
-programs are checked against passwords
-requested by the programs and entered by hand,
-so it is generally appropriate to specify these keys in ASCII format.
 .Sh "OPTIONS"
 .Bl -tag
 .It \-\-help
@@ -128,10 +38,6 @@ by loading values from environment variables named:
 .Sh "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .Sh FILES
-.Bl -tag -width /etc/ntp.keys -compact
-.It Pa /etc/ntp.keys
-the default name of the configuration file
-.El
 .Sh "EXIT STATUS"
 One of the following exit values will be returned:
 .Bl -tag
@@ -141,11 +47,6 @@ Successful program execution.
 The operation failed or the command syntax was not valid.
 .El
 .Sh "SEE ALSO"
-.Xr ntp.conf 5 ,
-.Xr ntpd @NTPD_MS@ ,
-.Xr ntpdate @NTPDATE_MS@ ,
-.Xr ntpdc @NTPDC_MS@ ,
-.Xr sntp @SNTP_MS@
 .Sh "AUTHORS"
 The University of Delaware
 .Sh "COPYRIGHT"
@@ -154,6 +55,6 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document is derived from FreeBSD..Pp
+.Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp.keys\fP
 option definitions.

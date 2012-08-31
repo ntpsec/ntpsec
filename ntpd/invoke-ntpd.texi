@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 # 
-# It has been AutoGen-ed  August 11, 2012 at 08:57:43 PM by AutoGen 5.16.2
+# It has been AutoGen-ed  August 30, 2012 at 11:39:54 PM by AutoGen 5.16.2
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -86,7 +86,7 @@ using the @code{agtexi-cmd} template and the option descriptions for the @code{n
 This software is released under the NTP license, <http://ntp.org/license>.
 
 @menu
-* ntpd usage::                  ntpd help/usage (-?)
+* ntpd usage::                  ntpd help/usage (@option{--help})
 * ntpd ipv4::                   ipv4 option (-4)
 * ntpd ipv6::                   ipv6 option (-6)
 * ntpd authreq::                authreq option (-a)
@@ -127,11 +127,13 @@ This software is released under the NTP license, <http://ntp.org/license>.
 @end menu
 
 @node ntpd usage
-@subsection ntpd help/usage (-?)
+@subsection ntpd help/usage (@option{--help})
 @cindex ntpd help
 
 This is the automatically generated usage text for ntpd.
-The text printed is the same whether for the @code{help} option (-?) or the @code{more-help} option (-!).  @code{more-help} will print
+
+The text printed is the same whether selected with the @code{help} option
+(@option{--help}) or the @code{more-help} option (@option{--more-help}).  @code{more-help} will print
 the usage text by passing it through a pager program.
 @code{more-help} is disabled on platforms without a working
 @code{fork(2)} function.  The @code{PAGER} environment variable is
@@ -140,7 +142,80 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd is unavailable - no -?
+ntpd - NTP daemon program - Ver. 4.2.7p296
+USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
+                [ <server1> ... <serverN> ]
+  Flg Arg Option-Name    Description
+   -4 no  ipv4           Force IPv4 DNS name resolution
+                                - prohibits these options:
+                                ipv6
+   -6 no  ipv6           Force IPv6 DNS name resolution
+                                - prohibits these options:
+                                ipv4
+   -a no  authreq        Require crypto authentication
+                                - prohibits these options:
+                                authnoreq
+   -A no  authnoreq      Do not require crypto authentication
+                                - prohibits these options:
+                                authreq
+   -b no  bcastsync      Allow us to sync to broadcast servers
+   -c Str configfile     configuration file name
+   -d no  debug-level    Increase output debug message level
+                                - may appear multiple times
+   -D Str set-debug-level Set the output debug message level
+                                - may appear multiple times
+   -f Str driftfile      frequency drift file name
+   -g no  panicgate      Allow the first adjustment to be Big
+                                - may appear multiple times
+   -i --- jaildir        built without --enable-clockctl or --enable-linuxcaps
+   -I Str interface      Listen on an interface name or address
+                                - may appear multiple times
+   -k Str keyfile        path to symmetric keys
+   -l Str logfile        path to the log file
+   -L no  novirtualips   Do not listen to virtual interfaces
+   -n no  nofork         Do not fork
+                                - prohibits these options:
+                                wait-sync
+   -N no  nice           Run at high priority
+   -p Str pidfile        path to the PID file
+   -P Num priority       Process priority
+   -q no  quit           Set the time and quit
+                                - prohibits these options:
+                                saveconfigquit
+                                wait-sync
+   -r Str propagationdelay Broadcast/propagation delay
+      Str saveconfigquit Save parsed configuration and quit
+                                - prohibits these options:
+                                quit
+                                wait-sync
+   -s Str statsdir       Statistics file location
+   -t Str trustedkey     Trusted key number
+                                - may appear multiple times
+   -u --- user           built without --enable-clockctl or --enable-linuxcaps
+   -U Num updateinterval interval in seconds between scans for new or dropped interfaces
+      Str var            make ARG an ntp variable (RW)
+                                - may appear multiple times
+      Str dvar           make ARG an ntp variable (RW|DEF)
+                                - may appear multiple times
+   -w Num wait-sync      Seconds to wait for first clock sync
+                                - prohibits these options:
+                                nofork
+                                quit
+                                saveconfigquit
+   -x no  slew           Slew up to 600 seconds
+   -" opt version        Output version information and exit
+   -? no  help           Display extended usage information and exit
+   -! no  more-help      Extended usage information passed thru pager
+
+Options are specified by doubled hyphens and their name or by a single
+hyphen and the flag character.
+
+
+
+The following option preset mechanisms are supported:
+ - examining environment variables named NTPD_*
+
+please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
 @exampleindent 4
 
