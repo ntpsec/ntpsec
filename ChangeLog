@@ -1,3 +1,4 @@
+* Fix mdoc2man.
 * Distribute ntp.conf.def.
 (4.2.7p296) 2012/08/31 Released by Harlan Stenn <stenn@ntp.org>
 * Begin support for autogen maintaining ntp.conf and ntp.keys docs.
