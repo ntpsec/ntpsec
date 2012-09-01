@@ -2448,7 +2448,7 @@ config_access(
 		if ((RES_MSSNTP & flags) && !warned_signd) {
 			warned_signd = 1;
 			fprintf(stderr, "%s\n", signd_warning);
-			msyslog(LOG_WARNING, signd_warning);
+			msyslog(LOG_WARNING, "%s", signd_warning);
 		}
 
 		ZERO_SOCK(&addr);
