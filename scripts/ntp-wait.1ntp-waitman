@@ -1,8 +1,8 @@
-.TH ntp-wait 1ntp-waitman "31 Aug 2012" "ntp (4.2.7p296)" "User Commands"
+.TH ntp-wait 1ntp-waitman "01 Sep 2012" "ntp (4.2.7p297)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 31, 2012 at 02:56:56 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  September  1, 2012 at 12:28:27 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -11,31 +11,31 @@ ntp-wait \- Wait for ntpd to stabilize the system clock
 .SH SYNOPSIS
 .B ntp-wait
 .\" Mixture of short (flag) options and long options
-.RB [ \-IflagP " [IvalueP]]... [" \-\-Iopt\-nameP " [[=| ]IvalueP]]..."
+.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..."
 .PP
 All arguments must be options.
 .PP
 .SH DESCRIPTION
 .SH "OPTIONS"
 .TP
-.BR \-n " Inum\-triesP, " \-\- "=" Inum\-triesP
+.BR \-n " \fInum\-tries\fP, " \-\- "=" \fInum\-tries\fP
 Number of times to check ntpd.
 This option takes an integer number as its argument.
-The default Inum\-triesP for this option is:
+The default \fInum\-tries\fP for this option is:
 .ti +4
  100
 .sp
 The maximum number of times we will check ntpd to see if it
 has been able to synchronize and stabilize the system clock.
 .TP
-.BR \-s " Isecs\-between\-triesP, " \-\- "=" Isecs\-between\-triesP
+.BR \-s " \fIsecs\-between\-tries\fP, " \-\- "=" \fIsecs\-between\-tries\fP
 How long to sleep between tries.
 This option takes an integer number as its argument.
-The default Isecs\-between\-triesP for this option is:
+The default \fIsecs\-between\-tries\fP for this option is:
 .ti +4
  6
 .sp
-We will sleep for Isecs-between-triesP after each query of ntpd
+We will sleep for \fIsecs-between-tries\fP after each query of ntpd
 that returns "the time is not yet stable".
 .TP
 .BR \-v ", " -\-
@@ -50,19 +50,19 @@ Display usage information and exit.
 .BR \-! , " \-\-more-help"
 Pass the extended usage information through a pager.
 .TP
-.BR \- " [{Iv|c|nP}]," " \-\-version" "[=I{v|c|n}P]"
+.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .SH "OPTION PRESETS"
-Any option that is not marked as Inot presettableP may be preset
+Any option that is not marked as \fInot presettable\fP may be preset
 by loading values from environment variables named:
 .nf
-  BNTP_WAIT_<option-name>P or BNTP_WAITP
+  \fBNTP_WAIT_<option-name>\fP or \fBNTP_WAIT\fP
 .fi
 .ad
 .SH "ENVIRONMENT"
-See BOPTION PRESETSP for configuration environment variables.
+See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
@@ -78,5 +78,5 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH "NOTES"
-This manual page was IAutoGenP-erated from the Bntp-waitP
+This manual page was \fIAutoGen\fP-erated from the \fBntp-wait\fP
 option definitions.

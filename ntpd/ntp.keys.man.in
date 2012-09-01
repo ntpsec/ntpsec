@@ -1,8 +1,8 @@
-.TH ntp.keys 5 "31 Aug 2012" "4.2.7p296" "File Formats"
+.TH ntp.keys 5 "01 Sep 2012" "4.2.7p297" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"  
-.\"  It has been AutoGen-ed  August 31, 2012 at 02:59:06 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  September  1, 2012 at 12:31:04 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -11,7 +11,7 @@ ntp.keys \- NTP key file format
 .SH SYNOPSIS
 .B ntp.keys
 .\" Long options only
-.RB [ \-\-Iopt\-nameP [ = "| ] IvalueP]]..."
+.RB [ \-\-\fIopt\-name\fP [ = "| ] \fIvalue\fP]]..."
 .PP
 All arguments must be options.
 .PP
@@ -24,19 +24,19 @@ Display usage information and exit.
 .BR \-\-more-help
 Pass the extended usage information through a pager.
 .TP
-.BR \-\-version "[=I{v|c|n}P]"
+.BR \-\-version "[=\fI{v|c|n}\fP]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .SH "OPTION PRESETS"
-Any option that is not marked as Inot presettableP may be preset
+Any option that is not marked as \fInot presettable\fP may be preset
 by loading values from environment variables named:
 .nf
-  BNTP_KEYS_<option-name>P or BNTP_KEYSP
+  \fBNTP_KEYS_<option-name>\fP or \fBNTP_KEYS\fP
 .fi
 .ad
 .SH "ENVIRONMENT"
-See BOPTION PRESETSP for configuration environment variables.
+See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
@@ -56,5 +56,5 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
 .PP
-This manual page was IAutoGenP-erated from the Bntp.keysP
+This manual page was \fIAutoGen\fP-erated from the \fBntp.keys\fP
 option definitions.

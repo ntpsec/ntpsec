@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  August 31, 2012 at 02:57:37 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  September  1, 2012 at 12:29:38 AM by AutoGen 5.16.2
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -72,7 +72,7 @@ extern FILE * option_usage_fp;
  *  ntpd option static const strings
  */
 static char const ntpd_opt_strs[3055] =
-/*     0 */ "ntpd 4.2.7p296\n"
+/*     0 */ "ntpd 4.2.7p297\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -199,12 +199,12 @@ static char const ntpd_opt_strs[3055] =
 /*  2821 */ "Output version information and exit\0"
 /*  2857 */ "version\0"
 /*  2865 */ "NTPD\0"
-/*  2870 */ "ntpd - NTP daemon program - Ver. 4.2.7p296\n"
+/*  2870 */ "ntpd - NTP daemon program - Ver. 4.2.7p297\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
 /*  3003 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3037 */ "\n\n\0"
-/*  3040 */ "ntpd 4.2.7p296";
+/*  3040 */ "ntpd 4.2.7p297";
 
 /*
  *  ipv4 option description with

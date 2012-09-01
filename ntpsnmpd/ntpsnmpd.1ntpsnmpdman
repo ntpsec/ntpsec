@@ -1,8 +1,8 @@
-.TH ntpsnmpd 1ntpsnmpdman "30 Aug 2012" "4.2.7p296" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "01 Sep 2012" "4.2.7p297" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  August 30, 2012 at 11:41:20 PM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  September  1, 2012 at 12:32:36 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -11,7 +11,7 @@ ntpsnmpd \- NTP SNMP MIB agent
 .SH SYNOPSIS
 .B ntpsnmpd
 .\" Mixture of short (flag) options and long options
-.RB [ \-IflagP " [IvalueP]]... [" \-\-Iopt\-nameP " [[=| ]IvalueP]]..."
+.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..."
 .PP
 All arguments must be options.
 .PP
@@ -26,9 +26,9 @@ Do not fork.
 Log to syslog().
 .sp
 .TP
-.BR \-\-agentxsocket "=IstringP"
+.BR \-\-agentxsocket "=\fIstring\fP"
 The socket address ntpsnmpd uses to connect to net-snmpd.
-The default IstringP for this option is:
+The default \fIstring\fP for this option is:
 .ti +4
  unix:/var/agentx/master
 .sp
@@ -41,37 +41,37 @@ Display usage information and exit.
 .BR \-! , " \-\-more-help"
 Pass the extended usage information through a pager.
 .TP
-.BR \-> " [IrcfileP]," " \-\-save-opts" "[=IrcfileP]"
-Save the option state to IrcfileP.  The default is the IlastP
-configuration file listed in the BOPTION PRESETSP section, below.
+.BR \-> " [\fIrcfile\fP]," " \-\-save-opts" "[=\fIrcfile\fP]"
+Save the option state to \fIrcfile\fP.  The default is the \fIlast\fP
+configuration file listed in the \fBOPTION PRESETS\fP section, below.
 .TP
-.BR \-< " IrcfileP," " \-\-load-opts" "=IrcfileP," " \-\-no-load-opts"
-Load options from IrcfileP.
-The Ino-load-optsP form will disable the loading
-of earlier RC/INI files.  I\-\-no-load-optsP is handled early,
+.BR \-< " \fIrcfile\fP," " \-\-load-opts" "=\fIrcfile\fP," " \-\-no-load-opts"
+Load options from \fIrcfile\fP.
+The \fIno-load-opts\fP form will disable the loading
+of earlier RC/INI files.  \fI\-\-no-load-opts\fP is handled early,
 out of order.
 .TP
-.BR \- " [{Iv|c|nP}]," " \-\-version" "[=I{v|c|n}P]"
+.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
 .SH "OPTION PRESETS"
-Any option that is not marked as Inot presettableP may be preset
+Any option that is not marked as \fInot presettable\fP may be preset
 by loading values from configuration ("RC" or ".INI") file(s) and values from
 environment variables named:
 .nf
-  BNTPSNMPD_<option-name>P or BNTPSNMPDP
+  \fBNTPSNMPD_<option-name>\fP or \fBNTPSNMPD\fP
 .fi
 .ad
 The environmental presets take precedence (are processed later than)
 the configuration files.
-The IhomercP files are "I$HOMEP", and "I.P".
-If any of these are directories, then the file I.ntprcP
+The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
+If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .SH "ENVIRONMENT"
-See BOPTION PRESETSP for configuration environment variables.
+See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
-See BOPTION PRESETSP for configuration files.
+See \fBOPTION PRESETS\fP for configuration files.
 .SH "EXIT STATUS"
 One of the following exit values will be returned:
 .TP
@@ -94,5 +94,5 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH "NOTES"
-This manual page was IAutoGenP-erated from the BntpsnmpdP
+This manual page was \fIAutoGen\fP-erated from the \fBntpsnmpd\fP
 option definitions.
