@@ -84,10 +84,12 @@ prog_opt_files=`grep -l '^prog.name' $def_files`
 
 for f in ${prog_opt_files}
 do
-    f=`echo $f | sed -e 's/-opts.def//'`
+    f=`echo $f | sed -e 's/-opts.def//' -e 's/.def//'`
     l=
     lh=
-    for i in `ls -1 $f*`
+    dfi=`dirname $f`
+    dfi=`echo $dfi | sed -e 's:$:/invoke-*:'`
+    for i in `ls -1 $f* $dfi`
     do
 	case "$i" in
 	 *.c|*.h|*.[1-9]*man|*.[1-9]*mdoc|*.man.in|*.mdoc.in|*.texi|*.menu)
