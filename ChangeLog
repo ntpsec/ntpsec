@@ -1,3 +1,4 @@
+(4.2.7p298) 2012/09/01 Released by Harlan Stenn <stenn@ntp.org>
 * Handle additional man page sections in the bootstrap script.
 * Remove extraneous parens.
 * Add a missing "%s" syslog format string.
