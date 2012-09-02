@@ -1,5 +1,5 @@
+* [Bug 2262] Install sntp.html into htmldir.
 * [Bug 2270] Install fails due to repeated man5 page names.
-* Install sntp.html into htmldir.
 * Fix mdoc2man.
 * Distribute ntp.conf.def.
 (4.2.7p296) 2012/08/31 Released by Harlan Stenn <stenn@ntp.org>
