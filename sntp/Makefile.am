@@ -149,13 +149,18 @@ man_MANS=	sntp.$(SNTP_MS)
 ##info_TEXINFOS=	sntp.texi
 ##sntp_TEXINFOS=	invoke-sntp.texi
 
+html_DATA=				\
+	$(srcdir)/sntp.html		\
+	$(NULL)
+
 noinst_DATA=				\
 	$(srcdir)/invoke-sntp.menu	\
 	$(srcdir)/invoke-sntp.texi	\
-	$(srcdir)/sntp.html		\
 	$(srcdir)/sntp.man.in		\
 	$(srcdir)/sntp.mdoc.in		\
 	$(NULL)
+
+install-data-local: install-html
 
 FRC:
 	@: do-nothing action to prevent default SCCS get
