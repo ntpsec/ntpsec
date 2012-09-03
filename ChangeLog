@@ -1,3 +1,5 @@
+* [Bug 2262] Install sntp.html into htmldir.
+* [Bug 2270] Install fails due to repeated man5 page names.
 (4.2.7p299) 2012/09/01 Released by Harlan Stenn <stenn@ntp.org>
 * More cleanup to the bootstrap script.
 (4.2.7p298) 2012/09/01 Released by Harlan Stenn <stenn@ntp.org>

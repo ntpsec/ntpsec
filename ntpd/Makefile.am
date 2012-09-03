@@ -82,7 +82,7 @@ BUILT_SOURCES=		\
 man1_MANS=
 man5_MANS=	ntp.conf.5 ntp.keys.5
 man8_MANS=
-man_MANS=	ntpd.$(NTPD_MS) $(man5_MANS)
+man_MANS=	ntpd.$(NTPD_MS)
 
 # ntpdsim.1 is a remnant along with all the ntpdsim-opts.* files, the
 # simulator currently uses ntpd-opts.[ch].  This also means there is no
