@@ -60,6 +60,8 @@ static	void	ctl_putstr	(const char *, const char *, size_t);
 static	void	ctl_putdblf	(const char *, const char *, double);
 const char ctl_def_dbl_fmt[] = "%.3f";
 #define	ctl_putdbl(tag, d)	ctl_putdblf(tag, ctl_def_dbl_fmt, d)
+const char ctl_def_dbl6_fmt[] = "%.6f";
+#define	ctl_putdbl6(tag, d)	ctl_putdblf(tag, ctl_def_dbl6_fmt, d)
 const char ctl_def_sfp_fmt[] = "%g";
 #define	ctl_putsfp(tag, sfp)	ctl_putdblf(tag, ctl_def_sfp_fmt, \
 					    FPTOD(sfp))
@@ -1789,7 +1791,7 @@ ctl_putsys(
 		break;
 
 	case CS_OFFSET:
-		ctl_putdbl(sys_var[CS_OFFSET].text, last_offset * 1e3);
+		ctl_putdbl6(sys_var[CS_OFFSET].text, last_offset * 1e3);
 		break;
 
 	case CS_DRIFT:
@@ -1797,7 +1799,7 @@ ctl_putsys(
 		break;
 
 	case CS_JITTER:
-		ctl_putdbl(sys_var[CS_JITTER].text, sys_jitter * 1e3);
+		ctl_putdbl6(sys_var[CS_JITTER].text, sys_jitter * 1e3);
 		break;
 
 	case CS_ERROR:
