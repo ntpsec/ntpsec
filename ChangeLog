@@ -1,3 +1,4 @@
+(4.2.7p301) 2012/09/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2164] Greater precision needed for ntpq offset report.
 * Clean the man5_MANS in ntpd/ .
 (4.2.7p300) 2012/09/03 Released by Harlan Stenn <stenn@ntp.org>
