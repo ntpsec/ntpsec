@@ -1,3 +1,4 @@
+* Clean the man5_MANS in ntpd/ .
 (4.2.7p300) 2012/09/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2262] Install sntp.html into htmldir.
 * [Bug 2270] Install fails due to repeated man5 page names.

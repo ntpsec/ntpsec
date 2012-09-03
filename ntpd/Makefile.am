@@ -102,6 +102,7 @@ DISTCLEANFILES =		\
 	.version		\
 	version.c		\
 	config.log		\
+	$(man5_MANS)		\
 	$(man_MANS)		\
 	$(NULL)
 
