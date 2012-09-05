@@ -279,6 +279,7 @@ timer(void)
 	struct peer *	p;
 	struct peer *	next_peer;
 	l_fp		now;
+	static int	leap_warn_log = FALSE;
 
 	/*
 	 * The basic timerevent is one second.  This is used to adjust the
@@ -427,8 +428,15 @@ timer(void)
 		write_stats();
 		if (sys_tai != 0) {
 			get_systime(&now);
-			if (now.l_ui > leap_expire)
+			if (now.l_ui > leap_expire) {
 				report_event(EVNT_LEAPVAL, NULL, NULL);
+				if (leap_warn_log == FALSE) {
+					msyslog(LOG_WARNING,
+						"leapseconds data file has expired.");
+					leap_warn_log = TRUE;
+				}
+			} else
+				leap_warn_log = FALSE;
 		}
 	}
 }
