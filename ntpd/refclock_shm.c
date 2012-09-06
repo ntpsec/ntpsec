@@ -1,5 +1,5 @@
 /*
- * refclock_shm - clock driver for utc via shared memory 
+ * refclock_shm - clock driver for utc via shared memory
  * - under construction -
  * To add new modes: Extend or union the shmTime-struct. Do not
  * extend/shrink size, because otherwise existing implementations
@@ -16,18 +16,18 @@
 #if defined(REFCLOCK) && defined(CLOCK_SHM)
 
 #include "ntpd.h"
-#undef fileno   
+#undef fileno
 #include "ntp_io.h"
-#undef fileno   
+#undef fileno
 #include "ntp_refclock.h"
-#undef fileno   
+#undef fileno
 #include "timevalops.h"
-#undef fileno   
+#undef fileno
 #include "ntp_stdlib.h"
 
-#undef fileno   
+#undef fileno
 #include <ctype.h>
-#undef fileno   
+#undef fileno
 
 #ifndef SYS_WINNT
 # include <sys/ipc.h>
@@ -39,7 +39,7 @@
 
 /*
  * This driver supports a reference clock attached thru shared memory
- */ 
+ */
 
 /* Temp hack to simplify testing of the old mode. */
 #define OLDWAY 0
@@ -77,24 +77,26 @@ struct  refclock refclock_shm = {
 };
 
 struct shmTime {
-	int    mode; /* 0 - if valid set
-		      *       use values, 
+	int    mode; /* 0 - if valid is set:
+		      *       use values,
 		      *       clear valid
-		      * 1 - if valid set 
+		      * 1 - if valid is set:
 		      *       if count before and after read of values is equal,
-		      *         use values 
+		      *         use values
 		      *       clear valid
 		      */
-	int    count;
-	time_t clockTimeStampSec;
-	int    clockTimeStampUSec;
-	time_t receiveTimeStampSec;
-	int    receiveTimeStampUSec;
-	int    leap;
-	int    precision;
-	int    nsamples;
-	int    valid;
-	int    dummy[10]; 
+	volatile int    count;
+	time_t		clockTimeStampSec;
+	int		clockTimeStampUSec;
+	time_t		receiveTimeStampSec;
+	int		receiveTimeStampUSec;
+	int		leap;
+	int		precision;
+	int		nsamples;
+	volatile int    valid;
+	unsigned	clockTimeStampNSec;	/* Unsigned ns timestamps */
+	unsigned	receiveTimeStampNSec;	/* Unsigned ns timestamps */
+	int		dummy[8];
 };
 
 struct shmunit {
@@ -117,17 +119,17 @@ struct shmTime *getShmTime (int unit) {
 
 	/* 0x4e545030 is NTP0.
 	 * Big units will give non-ascii but that's OK
-	 * as long as everybody does it the same way. 
+	 * as long as everybody does it the same way.
 	 */
-	shmid=shmget (0x4e545030+unit, sizeof (struct shmTime), 
-		      IPC_CREAT|(unit<2?0600:0666));
-	if (shmid==-1) { /*error */
+	shmid=shmget (0x4e545030 + unit, sizeof (struct shmTime),
+		      IPC_CREAT | ((unit < 2) ? 0600 : 0666));
+	if (shmid == -1) { /* error */
 		msyslog(LOG_ERR, "SHM shmget (unit %d): %m", unit);
 		return 0;
 	}
 	else { /* no error  */
-		struct shmTime *p=(struct shmTime *)shmat (shmid, 0, 0);
-		if ((int)(long)p==-1) { /* error */
+		struct shmTime *p = (struct shmTime *)shmat (shmid, 0, 0);
+		if (p == (struct shmTime *)-1) { /* error */
 			msyslog(LOG_ERR, "SHM shmat (unit %d): %m", unit);
 			return 0;
 		}
@@ -135,42 +137,44 @@ struct shmTime *getShmTime (int unit) {
 	}
 #else
 	char buf[10];
-	LPSECURITY_ATTRIBUTES psec=0;
-	HANDLE shmid=0;
+	LPSECURITY_ATTRIBUTES psec = 0;
+	HANDLE shmid = 0;
 	SECURITY_DESCRIPTOR sd;
 	SECURITY_ATTRIBUTES sa;
+
 	snprintf(buf, sizeof(buf), "NTP%d", unit);
 	if (unit >= 2) { /* world access */
 		if (!InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION)) {
-			msyslog(LOG_ERR,"SHM InitializeSecurityDescriptor (unit %d): %m",unit);
+			msyslog(LOG_ERR,"SHM InitializeSecurityDescriptor (unit %d): %m", unit);
 			return 0;
 		}
-		if (!SetSecurityDescriptorDacl(&sd,1,0,0)) {
-			msyslog(LOG_ERR,"SHM SetSecurityDescriptorDacl (unit %d): %m",unit);
+		if (!SetSecurityDescriptorDacl(&sd, 1, 0, 0)) {
+			msyslog(LOG_ERR, "SHM SetSecurityDescriptorDacl (unit %d): %m", unit);
 			return 0;
 		}
 		sa.nLength=sizeof (SECURITY_ATTRIBUTES);
-		sa.lpSecurityDescriptor=&sd;
-		sa.bInheritHandle=0;
-		psec=&sa;
+		sa.lpSecurityDescriptor = &sd;
+		sa.bInheritHandle = 0;
+		psec = &sa;
 	}
-	shmid=CreateFileMapping ((HANDLE)0xffffffff, psec, PAGE_READWRITE,
-				 0, sizeof (struct shmTime),buf);
+	shmid = CreateFileMapping ((HANDLE)0xffffffff, psec, PAGE_READWRITE,
+				 0, sizeof (struct shmTime), buf);
 	if (!shmid) { /*error*/
 		char buf[1000];
+
 		FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
 			       0, GetLastError (), 0, buf, sizeof (buf), 0);
-		msyslog(LOG_ERR,"SHM CreateFileMapping (unit %d): %s",unit,buf);
+		msyslog(LOG_ERR, "SHM CreateFileMapping (unit %d): %s", unit, buf);
 		return 0;
-	}
-	else {
-		struct shmTime *p=(struct shmTime *) MapViewOfFile (shmid, 
+	} else {
+		struct shmTime *p = (struct shmTime *) MapViewOfFile (shmid,
 								    FILE_MAP_WRITE, 0, 0, sizeof (struct shmTime));
-		if (p==0) { /*error*/
+		if (p == 0) { /*error*/
 			char buf[1000];
+
 			FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM,
 				       0, GetLastError (), 0, buf, sizeof (buf), 0);
-			msyslog(LOG_ERR,"SHM MapViewOfFile (unit %d): %s",unit,buf);
+			msyslog(LOG_ERR,"SHM MapViewOfFile (unit %d): %s", unit, buf) 
 			return 0;
 		}
 		return p;
@@ -207,12 +211,11 @@ shm_start(
 		pp->unitptr = up;
 		up->shm->precision = PRECISION;
 		peer->precision = up->shm->precision;
-		up->shm->valid=0;
-		up->shm->nsamples=NSAMPLES;
+		up->shm->valid = 0;
+		up->shm->nsamples = NSAMPLES;
 		pp->clockdesc = DESCRIPTION;
-		return (1);
-	}
-	else {
+		return 1;
+	} else {
 		free(up);
 		return 0;
 	}
@@ -237,7 +240,7 @@ shm_shutdown(
 	if (NULL == up)
 		return;
 #ifndef SYS_WINNT
-	/* HMS: shmdt()wants char* or const void * */
+	/* HMS: shmdt() wants char* or const void * */
 	(void) shmdt ((char *)up->shm);
 #else
 	UnmapViewOfFile (up->shm);
@@ -272,10 +275,11 @@ shm_poll(
 	int ok;
 
 	pp = peer->procptr;
-	
+
 	if (OLDWAY) {
 		ok = shm_peek(unit, peer);
-		if (!ok) return;
+		if (!ok)
+			return;
 	}
 
         /*
@@ -319,7 +323,7 @@ int shm_peek(
 	shm = up->shm;
 	if (shm == 0) {
 		refclock_report(peer, CEVNT_FAULT);
-		return(0);
+		return 0;
 	}
 	if (shm->valid) {
 		struct timeval tvr;
@@ -327,31 +331,75 @@ int shm_peek(
 		struct tm *t;
 		char timestr[20];	/* "%Y-%m-%dT%H:%M:%S" + 1 */
 		int c;
-		int ok=1;
+		int ok = 1;
+		unsigned cns_new, rns_new, cns_valid, rns_valid;
+		int cnt;
 
 		tvr.tv_sec = 0;
 		tvr.tv_usec = 0;
 		tvt.tv_sec = 0;
 		tvt.tv_usec = 0;
 		switch (shm->mode) {
-		    case 0: {
-			    tvr.tv_sec=shm->receiveTimeStampSec;
-			    tvr.tv_usec=shm->receiveTimeStampUSec;
-			    tvt.tv_sec=shm->clockTimeStampSec;
-			    tvt.tv_usec=shm->clockTimeStampUSec;
-		    }
-		    break;
-		    case 1: {
-			    int cnt=shm->count;
-			    tvr.tv_sec=shm->receiveTimeStampSec;
-			    tvr.tv_usec=shm->receiveTimeStampUSec;
-			    tvt.tv_sec=shm->clockTimeStampSec;
-			    tvt.tv_usec=shm->clockTimeStampUSec;
-			    ok=(cnt==shm->count);
-		    }
-		    break;
+		    case 0:
+			tvr.tv_sec	= shm->receiveTimeStampSec;
+			tvr.tv_usec	= shm->receiveTimeStampUSec;
+			rns_new		= shm->receiveTimeStampNSec;
+			tvt.tv_sec	= shm->clockTimeStampSec;
+			tvt.tv_usec	= shm->clockTimeStampUSec;
+			cns_new		= shm->clockTimeStampNSec;
+
+			rns_valid	= ((unsigned) tvr.tv_usec) * 1000;
+			cns_valid	= ((unsigned) tvt.tv_usec) * 1000;
+
+			/* Since these comparisons are between unsigned
+			** variables they are always well defined, and any
+			** (signed) underflow will turn into very large
+			** unsigned values, well above the 1000 cutoff
+			*/
+			if (   ((cns_new - cns_valid) < 1000)
+			    && ((rns_new - rns_valid) < 1000)) {
+				cns_valid = cns_new;
+				rns_valid = rns_new;
+			}
+			// At this point [cr]ns_valid contains valid ns-level
+			// timestamps, possibly generated by extending the
+			// old us_level timestamps
+
+			break;
+
+		    case 1:
+			cnt = shm->count;
+
+			tvr.tv_sec	= shm->receiveTimeStampSec;
+			tvr.tv_usec	= shm->receiveTimeStampUSec;
+			rns_new		= shm->receiveTimeStampNSec;
+			tvt.tv_sec	= shm->clockTimeStampSec;
+			tvt.tv_usec	= shm->clockTimeStampUSec;
+			cns_new		= shm->clockTimeStampNSec;
+			ok = (cnt == shm->count);
+
+			rns_valid	= ((unsigned) tvr.tv_usec) * 1000;
+			cns_valid	= ((unsigned) tvt.tv_usec) * 1000;
+
+			/* Since these comparisons are between unsigned
+			** variables they are always well defined, and any
+			** (signed) underflow will turn into very large
+			** unsigned values, well above the 1000 cutoff
+			*/
+			if (   ((cns_new - cns_valid) < 1000)
+			    && ((rns_new - rns_valid) < 1000)) {
+				cns_valid = cns_new;
+				rns_valid = rns_new;
+			}
+			// At this point [cr]ns_valid contains valid ns-level
+			// timestamps, possibly generated by extending the
+			// old us_level timestamps
+
+			break;
+
 		    default:
 			msyslog (LOG_ERR, "SHM: bad mode found in shared memory: %d",shm->mode);
+			return 0;
 		}
 
 		/* XXX NetBSD has incompatible tv_sec */
@@ -365,38 +413,37 @@ int shm_peek(
 				 ? c
 				 : 0;
 
-		shm->valid=0;
+		shm->valid = 0;
 		if (ok) {
 			TVTOTS(&tvr,&pp->lastrec);
 			pp->lastrec.l_ui += JAN_1970;
 			/* pp->lasttime = current_time; */
 			pp->polls++;
-			pp->day=t->tm_yday+1;
-			pp->hour=t->tm_hour;
-			pp->minute=t->tm_min;
-			pp->second=t->tm_sec;
-			pp->nsec=tvt.tv_usec * 1000;
-			peer->precision=shm->precision;
-			pp->leap=shm->leap;
+			pp->day	= t->tm_yday+1;
+			pp->hour = t->tm_hour;
+			pp->minute = t->tm_min;
+			pp->second = t->tm_sec;
+			pp->nsec = cns_valid;
+			peer->precision = shm->precision;
+			pp->leap = shm->leap;
 		} else {
 			refclock_report(peer, CEVNT_FAULT);
 			msyslog (LOG_NOTICE, "SHM: access clash in shared memory");
 			up->clash++;
-			return(0);
+			return 0;
 		}
-	}
-	else {
+	} else {
 		refclock_report(peer, CEVNT_TIMEOUT);
 		up->notready++;
-		return(0);
+		return 0;
 	}
 	if (!refclock_process(pp)) {
 		refclock_report(peer, CEVNT_BADTIME);
 		up->bad++;
-		return(0);
+		return 0;
 	}
 	up->good++;
-	return(1);
+	return 1;
 }
 
 /*
@@ -414,13 +461,14 @@ void shm_clockstats(
 	pp = peer->procptr;
 	up = pp->unitptr;
 
-	if (!(pp->sloppyclockflag & CLK_FLAG4)) return;
+	if (!(pp->sloppyclockflag & CLK_FLAG4))
+		return;
 
 	snprintf(logbuf, sizeof(logbuf), "%3d %3d %3d %3d %3d",
 		 up->ticks, up->good, up->notready, up->bad, up->clash);
 	record_clock_stats(&peer->srcadr, logbuf);
 
-	up->ticks = up->good = up->notready =up->bad = up->clash = 0;
+	up->ticks = up->good = up->notready = up->bad = up->clash = 0;
 
 }
 

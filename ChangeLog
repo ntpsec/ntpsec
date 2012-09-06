@@ -1,3 +1,4 @@
+* [Bug 1232] Add nanosecond support to SHM driver.
 (4.2.7p302) 2012/09/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2160] Log warning about expired leapseconds file.
 (4.2.7p301) 2012/09/03 Released by Harlan Stenn <stenn@ntp.org>
