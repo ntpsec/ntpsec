@@ -1,4 +1,5 @@
 * [Bug 2264] Cleanup SEL240X Refclock.
+* In refclock_wwv.c rename SECOND to WWV_SEC and MINUTE to WWV_MIN.
 (4.2.7p303) 2012/09/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1232] Add nanosecond support to SHM driver.
 (4.2.7p302) 2012/09/05 Released by Harlan Stenn <stenn@ntp.org>
