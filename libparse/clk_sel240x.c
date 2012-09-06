@@ -1,32 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2009 -
+// Copyright (c) 2009,2012 -
 //        Schweitzer Engineering Laboratories, Inc. <opensource@selinc.com>
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//   1. Redistributions of source code must retain the above copyright
-//      notice, this list of conditions and the following disclaimer.
-//   2. Redistributions in binary form must reproduce the above copyright
-//      notice, this list of conditions and the following disclaimer in
-//      the documentation and/or other materials provided with the
-//      distribution.
-//   3. The name of the author may not be used to endorse or promote
-//      products derived from this software without specific prior
-//      written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-// IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-// NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-// THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //////////////////////////////////////////////////////////////////////////////
+
+// Need to have _XOPEN_SOURCE defined for time.h to give the 
+// correct strptime signature.  As per feature_test_macros(7),
+// define this before including any header files.
+
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE
+#endif
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -49,7 +33,6 @@
 # include "sys/parsestreams.h"
 #endif
 
-#define _XOPEN_SOURCE
 #include <time.h>
 
 //////////////////////////////////////////////////////////////////////////////
@@ -92,7 +75,7 @@ static struct format sel240x_fmt =
     {  0, 0 },
     {  0, 0 }
   },
-  "\x01    :   :  :  :   \x0d\x0a",
+  (const unsigned char *)"\x01    :   :  :  :   \x0d\x0a",
   0
 };
 
@@ -156,7 +139,8 @@ cvt_sel240x( unsigned char *buffer,
 	{
 		struct tm ptime;
 		buffer++;
-		buffer = strptime( buffer, "%Y:%j:%H:%M:%S", &ptime );
+		buffer = (unsigned char *) strptime( 
+			(const char *)buffer, "%Y:%j:%H:%M:%S", &ptime );
 		if( *(buffer+1) != '\x0d' )
 		{
 			rc = CVT_FAIL | CVT_BADFMT;
