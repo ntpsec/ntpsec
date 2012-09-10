@@ -905,9 +905,8 @@ newpeer(
 	peer->timereachable = current_time;
 	peer->timereceived = current_time;
 
-#ifdef REFCLOCK
 	if (ISREFCLOCKADR(&peer->srcadr)) {
-
+#ifdef REFCLOCK
 		/*
 		 * We let the reference clock support do clock
 		 * dependent initialization.  This includes setting
@@ -924,8 +923,14 @@ newpeer(
 			free_peer(peer, 0);
 			return NULL;
 		}
+#else /* REFCLOCK */
+		msyslog(LOG_ERR, "refclock %s isn't supported. ntpd was compiled without refclock support.",
+			stoa(&peer->srcadr));
+		set_peerdstadr(peer, NULL);
+		free_peer(peer, 0);
+		return NULL;
+#endif /* REFCLOCK */
 	}
-#endif
 
 	/*
 	 * Put the new peer in the hash tables.

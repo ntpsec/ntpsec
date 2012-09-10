@@ -216,13 +216,9 @@ typedef union {
 #define	REFCLOCK_ADDR	0x7f7f0000	/* 127.127.0.0 */
 #define	REFCLOCK_MASK	0xffff0000	/* 255.255.0.0 */
 
-#ifdef REFCLOCK
 #define	ISREFCLOCKADR(srcadr)					\
 	(IS_IPV4(srcadr) &&					\
 	 (SRCADR(srcadr) & REFCLOCK_MASK) == REFCLOCK_ADDR)
-#else
-#define ISREFCLOCKADR(srcadr)		(0)
-#endif
 
 /*
  * Macro for checking for invalid addresses.  This is really, really
