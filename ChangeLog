@@ -1,3 +1,4 @@
+(4.2.7p305) 2012/09/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 752] Use proper ToS network packet markings for IPv4 and IPv6.
 * [Bug 1232] Convert SHM refclock to use struct timespec.
 * [Bug 2258] Add syslog message about leap insertion.
