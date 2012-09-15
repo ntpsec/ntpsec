@@ -2,6 +2,7 @@
 * [Bug 2263] broadcast server doesn't work for host with
   OS_MISSES_SPECIFIC_ROUTE_UPDATES.
 * [Bug 2271] Decode refclock types when built with --disable-all-clocks.
+* Updates to driver28.html.
 (4.2.7p304) 2012/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2264] Cleanup SEL240X Refclock.
 * In refclock_wwv.c rename SECOND to WWV_SEC and MINUTE to WWV_MIN.
