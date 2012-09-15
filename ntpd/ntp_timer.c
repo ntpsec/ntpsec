@@ -363,14 +363,15 @@ timer(void)
 		if (leapsec == 0) {
 			sys_leap = LEAP_NOWARNING;
 			sys_tai = leap_tai;
-#ifdef KERNEL_PLL
-			if (!(pll_control && kern_enable))
-				step_systime(-1.0);
-#else /* KERNEL_PLL */
 #ifndef SYS_WINNT /* WinNT port has its own leap second handling */
-			step_systime(-1.0);
+# ifdef KERNEL_PLL
+			if (!(pll_control && kern_enable))
+# endif /* KERNEL_PLL */
+			{
+				step_systime(-1.0);
+				msyslog(LOG_NOTICE, "Inserting positive leap second.");
+			}
 #endif /* SYS_WINNT */
-#endif /* KERNEL_PLL */
 			report_event(EVNT_LEAP, NULL, NULL);
 		} else {
 			if (leapsec < DAY)
