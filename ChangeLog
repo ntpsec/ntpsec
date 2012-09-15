@@ -1,4 +1,5 @@
 * [Bug 752] Use proper ToS network packet markings for IPv4 and IPv6.
+* [Bug 1232] Convert SHM refclock to use struct timespec.
 * [Bug 2263] broadcast server doesn't work for host with
   OS_MISSES_SPECIFIC_ROUTE_UPDATES.
 * [Bug 2271] Decode refclock types when built with --disable-all-clocks.
