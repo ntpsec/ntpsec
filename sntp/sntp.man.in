@@ -1,8 +1,8 @@
-.TH sntp @SNTP_MS@ "15 Sep 2012" "4.2.7p305" "User Commands"
+.TH sntp @SNTP_MS@ "15 Sep 2012" "4.2.7p306" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 15, 2012 at 07:20:45 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  September 15, 2012 at 11:25:08 AM by AutoGen 5.16.2
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
