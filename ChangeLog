@@ -4,6 +4,7 @@
 * [Bug 2263] broadcast server doesn't work for host with
   OS_MISSES_SPECIFIC_ROUTE_UPDATES.
 * [Bug 2271] Decode refclock types when built with --disable-all-clocks.
+* [Bug 2276] clk_sel240x.c #define's _XOPEN_SOURCE, breaking QNX6.
 * Updates to driver28.html.
 (4.2.7p304) 2012/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2264] Cleanup SEL240X Refclock.

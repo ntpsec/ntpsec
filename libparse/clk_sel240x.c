@@ -7,9 +7,9 @@
 // correct strptime signature.  As per feature_test_macros(7),
 // define this before including any header files.
 
-#ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE
-#endif
+// #ifndef _XOPEN_SOURCE
+// #define _XOPEN_SOURCE
+// #endif
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
