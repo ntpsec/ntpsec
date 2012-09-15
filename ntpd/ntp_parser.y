@@ -66,6 +66,7 @@
 }
 
 /* TERMINALS (do not appear left of colon) */
+%token	<Integer>	T_Abbrev
 %token	<Integer>	T_Age
 %token	<Integer>	T_All
 %token	<Integer>	T_Allan
@@ -943,6 +944,8 @@ fudge_factor
 			{ $$ = create_attr_ival($1, $2); }
 	|	T_Stratum T_Integer
 			{ $$ = create_attr_ival($1, $2); }
+	|	T_Abbrev T_String
+			{ $$ = create_attr_sval($1, $2); }
 	|	T_Refid T_String
 			{ $$ = create_attr_sval($1, $2); }
 	;

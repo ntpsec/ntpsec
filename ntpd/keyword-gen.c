@@ -181,6 +181,7 @@ struct key_tok ntp_keywords[] = {
 { "maxmem",		T_Maxmem,		FOLLBY_TOKEN },
 { "mru",		T_Mru,			FOLLBY_TOKEN },
 /* fudge_factor */
+{ "abbrev",		T_Abbrev,		FOLLBY_STRING },
 { "flag1",		T_Flag1,		FOLLBY_TOKEN },
 { "flag2",		T_Flag2,		FOLLBY_TOKEN },
 { "flag3",		T_Flag3,		FOLLBY_TOKEN },

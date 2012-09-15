@@ -207,11 +207,12 @@ struct interface {
 #define	INT_LOOPBACK	0x004	/* the loopback interface */
 #define	INT_BROADCAST	0x008	/* can broadcast out this interface */
 #define INT_MULTICAST	0x010	/* can multicast out this interface */
-#define	INT_BCASTOPEN	0x020	/* broadcast socket is open */
+#define	INT_BCASTOPEN	0x020	/* broadcast receive socket is open */
 #define INT_MCASTOPEN	0x040	/* multicasting enabled */
 #define INT_WILDCARD	0x080	/* wildcard interface - usually skipped */
 #define INT_MCASTIF	0x100	/* bound directly to MCAST address */
 #define INT_PRIVACY	0x200	/* RFC 4941 IPv6 privacy address */
+#define INT_BCASTXMIT	0x400   /* socket setup to allow broadcasts */
 
 /*
  * Define flasher bits (tests 1 through 11 in packet procedure)
