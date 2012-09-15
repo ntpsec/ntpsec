@@ -265,33 +265,6 @@ AC_CHECK_HEADERS([net/route.h], [], [], [
     #include <net/if.h>
 ])
 
-# Check for IPTOS_PREC
-AC_CACHE_CHECK(
-    [IPPROTO_IP IP_TOS IPTOS_LOWDELAY],
-    [ntp_cv_ip_tos],
-    [AC_EGREP_CPP(
-	[yes],
-	[
-	    #ifdef HAVE_SYS_TYPES_H
-	    # include <sys/types.h>
-	    #endif
-	    #ifdef HAVE_NETINET_IP_H
-	    # include <netinet/in.h>
-	    # include <netinet/ip.h>
-	    #endif
-	    #if defined(IPPROTO_IP) && defined(IP_TOS) && defined(IPTOS_LOWDELAY)
-		yes
-	    #endif
-	],
-	[ntp_cv_ip_tos=yes],
-	[ntp_cv_ip_tos=no]
-    )]
-)
-case "$ntp_cv_ip_tos" in
- yes)
-    AC_DEFINE([HAVE_IPTOS_SUPPORT], [1], [Do we have IPTOS support?])
-esac
-
 AC_CHECK_HEADERS([netinfo/ni.h])
 case "$ac_cv_header_netinfo_ni_h" in
  yes)

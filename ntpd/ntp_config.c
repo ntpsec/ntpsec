@@ -189,9 +189,6 @@ int	cryptosw;		/* crypto command called */
 extern int sys_maxclock;
 extern char *stats_drift_file;	/* name of the driftfile */
 extern char *leapseconds_file_name; /*name of the leapseconds file */
-#ifdef HAVE_IPTOS_SUPPORT
-extern unsigned int qos;				/* QoS setting */
-#endif /* HAVE_IPTOS_SUPPORT */
 
 #ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
 /*
@@ -228,7 +225,6 @@ static void free_config_tinker(config_tree *);
 static void free_config_system_opts(config_tree *);
 static void free_config_logconfig(config_tree *);
 static void free_config_phone(config_tree *);
-static void free_config_qos(config_tree *);
 static void free_config_setvar(config_tree *);
 static void free_config_ttl(config_tree *);
 static void free_config_trap(config_tree *);
@@ -313,7 +309,6 @@ static void config_other_modes(config_tree *);
 static void config_auth(config_tree *);
 static void config_access(config_tree *);
 static void config_phone(config_tree *);
-static void config_qos(config_tree *);
 static void config_setvar(config_tree *);
 static void config_ttl(config_tree *);
 static void config_trap(config_tree *);
@@ -430,7 +425,6 @@ free_config_tree(
 	free_config_system_opts(ptree);
 	free_config_logconfig(ptree);
 	free_config_phone(ptree);
-	free_config_qos(ptree);
 	free_config_setvar(ptree);
 	free_config_ttl(ptree);
 	free_config_trap(ptree);
@@ -901,14 +895,6 @@ dump_config_tree(
 		fprintf(df, "phone");
 		for ( ; str_node != NULL; str_node = str_node->link)
 			fprintf(df, " \"%s\"", str_node->s);
-		fprintf(df, "\n");
-	}
-
-	atrv = HEAD_PFIFO(ptree->qos);
-	if (atrv != NULL) {
-		fprintf(df, "qos");
-		for (; atrv != NULL; atrv = atrv->link)
-			fprintf(df, " %s", atrv->value.s);
 		fprintf(df, "\n");
 	}
 
@@ -2979,75 +2965,6 @@ free_config_phone(
 
 #ifndef SIM
 static void
-config_qos(
-	config_tree *ptree
-	)
-{
-	attr_val *	my_qc;
-	char *		s;
-#ifdef HAVE_IPTOS_SUPPORT
-	unsigned int	qtos = 0;
-#endif
-
-	my_qc = HEAD_PFIFO(ptree->qos);
-	for (; my_qc != NULL; my_qc = my_qc->link) {
-		s = my_qc->value.s;
-#ifdef HAVE_IPTOS_SUPPORT
-		if (!strcmp(s, "lowdelay"))
-			qtos = CONF_QOS_LOWDELAY;
-		else if (!strcmp(s, "throughput"))
-			qtos = CONF_QOS_THROUGHPUT;
-		else if (!strcmp(s, "reliability"))
-			qtos = CONF_QOS_RELIABILITY;
-		else if (!strcmp(s, "mincost"))
-			qtos = CONF_QOS_MINCOST;
-#ifdef IPTOS_PREC_INTERNETCONTROL
-		else if (!strcmp(s, "routine") || !strcmp(s, "cs0"))
-			qtos = CONF_QOS_CS0;
-		else if (!strcmp(s, "priority") || !strcmp(s, "cs1"))
-			qtos = CONF_QOS_CS1;
-		else if (!strcmp(s, "immediate") || !strcmp(s, "cs2"))
-			qtos = CONF_QOS_CS2;
-		else if (!strcmp(s, "flash") || !strcmp(s, "cs3"))
-			qtos = CONF_QOS_CS3; 	/* overlapping prefix on keyword */
-		if (!strcmp(s, "flashoverride") || !strcmp(s, "cs4"))
-			qtos = CONF_QOS_CS4;
-		else if (!strcmp(s, "critical") || !strcmp(s, "cs5"))
-			qtos = CONF_QOS_CS5;
-		else if(!strcmp(s, "internetcontrol") || !strcmp(s, "cs6"))
-			qtos = CONF_QOS_CS6;
-		else if (!strcmp(s, "netcontrol") || !strcmp(s, "cs7"))
-			qtos = CONF_QOS_CS7;
-#endif  /* IPTOS_PREC_INTERNETCONTROL */
-		if (qtos == 0)
-			msyslog(LOG_ERR, "parse error, qos %s not accepted\n", s);
-		else
-			qos = qtos;
-#endif  /* HAVE IPTOS_SUPPORT */
-		/*
-		 * value is set, but not being effective. Need code to
-		 * change   the current connections to notice. Might
-		 * also  consider logging a message about the action.
-		 * XXX msyslog(LOG_INFO, "QoS %s requested by config\n", s);
-		 */
-	}
-}
-#endif	/* !SIM */
-
-
-#ifdef FREE_CFG_T
-static void
-free_config_qos(
-	config_tree *ptree
-	)
-{
-	FREE_ATTR_VAL_FIFO(ptree->qos);
-}
-#endif	/* FREE_CFG_T */
-
-
-#ifndef SIM
-static void
 config_setvar(
 	config_tree *ptree
 	)
@@ -4267,7 +4184,6 @@ config_ntpd(
 	config_peers(ptree);
 	config_unpeers(ptree);
 	config_fudge(ptree);
-	config_qos(ptree);
 	config_reset_counters(ptree);
 
 #ifdef TEST_BLOCKING_WORKER

@@ -1,3 +1,4 @@
+* [Bug 752] Use proper ToS network packet markings for IPv4 and IPv6.
 * [Bug 2271] Decode refclock types when built with --disable-all-clocks.
 (4.2.7p304) 2012/09/06 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2264] Cleanup SEL240X Refclock.

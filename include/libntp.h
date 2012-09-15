@@ -12,7 +12,5 @@
 #define GETDTABLESIZE()	(FOPEN_MAX + FD_CHUNK)
 #endif
 
-extern unsigned int qos;
-
 extern void	make_socket_nonblocking( SOCKET fd );
 extern SOCKET	move_fd( SOCKET fd );

@@ -2756,6 +2756,11 @@ open_socket(
 	int	on = 1;
 	int	off = 0;
 
+#ifndef IPTOS_DSCP_EF
+#define IPTOS_DSCP_EF 0xb8
+#endif
+	int	qos = IPTOS_DSCP_EF;	/* QoS RFC3246 */
+
 	if (IS_IPV6(addr) && !ipv6_works)
 		return INVALID_SOCKET;
 
@@ -2825,13 +2830,13 @@ open_socket(
 	 * IPv4 specific options go here
 	 */
 	if (IS_IPV4(addr)) {
-#if defined(HAVE_IPTOS_SUPPORT)
-		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char *)&qos,
+#if defined(IPPROTO_IP) && defined(IP_TOS)
+		if (setsockopt(fd, IPPROTO_IP, IP_TOS, (char*)&qos,
 			       sizeof(qos)))
 			msyslog(LOG_ERR,
 				"setsockopt IP_TOS (%02x) fails on address %s: %m",
 				qos, stoa(addr));
-#endif /* HAVE_IPTOS_SUPPORT */
+#endif /* IPPROTO_IP && IP_TOS */
 		if (bcast)
 			socket_broadcast_enable(interf, fd, addr);
 	}
@@ -2840,6 +2845,13 @@ open_socket(
 	 * IPv6 specific options go here
 	 */
 	if (IS_IPV6(addr)) {
+#if defined(IPPROTO_IPV6) && defined(IPV6_TCLASS)
+		if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, (char*)&qos,
+			       sizeof(qos)))
+			msyslog(LOG_ERR,
+				"setsockopt IPV6_TCLASS (%02x) fails on address %s: %m",
+				qos, stoa(addr));
+#endif /* IPPROTO_IPV6 && IPV6_TCLASS */
 #ifdef IPV6_V6ONLY
 		if (isc_net_probe_ipv6only() == ISC_R_SUCCESS
 		    && setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
