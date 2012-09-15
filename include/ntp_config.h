@@ -18,28 +18,6 @@
 # endif /* SYS_WINNT */
 #endif /* not CONFIG_FILE */
 
-#ifdef HAVE_IPTOS_SUPPORT
-/* 
- * "qos" modified keywords 
- */
-#define	CONF_QOS_LOWDELAY		1
-#define CONF_QOS_THROUGHPUT		2
-#define CONF_QOS_RELIABILITY		3
-#define CONF_QOS_MINCOST		4
-
-#ifdef 		IPTOS_PREC_INTERNETCONTROL
-#define CONF_QOS_CS0			5
-#define CONF_QOS_CS1			6
-#define CONF_QOS_CS2			7
-#define CONF_QOS_CS3			8
-#define CONF_QOS_CS4			9
-#define CONF_QOS_CS5			10
-#define CONF_QOS_CS6			11
-#define CONF_QOS_CS7			12
-#endif		/* IPTOS_PREC_INTERNETCONTROL */
-
-#endif	/* HAVE_IPTOS_SUPPORT */
-
 
 /*
  * We keep config trees around for possible saveconfig use.  When
@@ -244,7 +222,6 @@ struct config_tree_tag {
 	auth_node	auth;
 
 	attr_val_fifo *	logconfig;
-	attr_val_fifo *	qos;
 	string_fifo *	phone;
 	setvar_fifo *	setvar;
 	int_fifo *	ttl;

@@ -21,19 +21,6 @@
 #define ioctl(fd, opt, val)  ioctlsocket(fd, opt, (u_long *)(val))
 #endif
 
-/* HMS: Is this the best place to put the qos global? */
-
-#if defined(HAVE_IPTOS_SUPPORT)
-/* set IP_TOS to minimize packet delay */
-unsigned int qos =
-# if defined(IPTOS_PREC_INTERNETCONTROL)
-			IPTOS_PREC_INTERNETCONTROL
-# else
-			IPTOS_LOWDELAY;
-# endif
-			;
-#endif
-
 /*
  * on Unix systems the stdio library typically
  * makes use of file descriptors in the lower

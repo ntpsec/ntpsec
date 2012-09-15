@@ -209,7 +209,6 @@ struct key_tok ntp_keywords[] = {
 /* miscellaneous_command */
 { "port",		T_Port,			FOLLBY_TOKEN },
 { "interface",		T_Interface,		FOLLBY_TOKEN },
-{ "qos",		T_Qos,			FOLLBY_TOKEN },
 { "saveconfigdir",	T_Saveconfigdir,	FOLLBY_STRING },
 /* interface_command (ignore and interface already defined) */
 { "nic",		T_Nic,			FOLLBY_TOKEN },

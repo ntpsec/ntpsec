@@ -195,7 +195,6 @@
 %token	<Integer>	T_Prefer
 %token	<Integer>	T_Protostats
 %token	<Integer>	T_Pw
-%token	<Integer>	T_Qos
 %token	<Integer>	T_Randfile
 %token	<Integer>	T_Rawstats
 %token	<Integer>	T_Refid
@@ -1148,7 +1147,6 @@ misc_cmd_str_keyword
 	:	T_Ident
 	|	T_Leapfile
 	|	T_Pidfile
-	|	T_Qos
 	;
 
 misc_cmd_str_lcl_keyword
