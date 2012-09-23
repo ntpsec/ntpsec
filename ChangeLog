@@ -1,3 +1,4 @@
+* [Bug 2234] Fix incorrect ntptrace html documentation.
 * [Bug 2262] Install html docs in $htmldir.
 (4.2.7p306) 2012/09/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 752] ToS cleanup from Mike Tatarinov.

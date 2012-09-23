@@ -16,7 +16,7 @@
 <br clear="left">
 <hr>
 <h4>Synopsis</h4>
-<tt>ntptrace [ -vdn ] [ -r <i>retries</i> ] [ -t <i>timeout</i> ] [ <i>server</i> ]</tt>
+<tt>ntptrace [ -n ] [ -m <i>max_hosts</i> ] [ <i>server</i> ]</tt>
 <h4>Description</h4>
 <p><tt>ntptrace</tt> is a <tt>perl</tt> script that uses the <tt>ntpq</tt> utility program to follow the chain of NTP&nbsp;servers from a given host back to the primary time source. For <tt>ntptrace</tt> to work properly, each of these servers must implement the NTP&nbsp;Control and Monitoring Protocol specified in RFC 1305 and enable NTP&nbsp;Mode 6 packets.</p>
 <p>If given no arguments, <tt>ntptrace</tt> starts with <tt>localhost</tt>. Here is an example of the output from <tt>ntptrace</tt>:</p>
@@ -29,16 +29,10 @@ usndh.edu: stratum 1, offset 0.0019298, synch distance 0.011993, refid 'WWVB'
 <p>On each line, the fields are (left to right): the host name, the host stratum, the time offset between that host and the local host (as measured by <tt>ntptrace</tt>; this is why it is not always zero for &quot;<tt>localhost</tt>&quot;), the host synchronization distance, and (only for stratum-1 servers) the reference clock ID. All times are given in seconds. Note that the stratum is the server hop count to the primary source, while the synchronization distance is the estimated error relative to the primary source. These terms are precisely defined in RFC-1305.</p>
 <h4>Options</h4>
 <dl>
-  <dt><tt>-d</tt></dt>
-  <dd>Turns on some debugging output.</dd>
+  <dt><tt>-m <i>max_hosts</i></tt></dt>
+  <dd>Sets the upper limit of the number of hosts to check (default: unlimited).</dd>
   <dt><tt>-n</tt></dt>
   <dd>Turns off the printing of host names; instead, host IP addresses are given. This may be useful if a nameserver is down.</dd>
-  <dt><tt>-r <i>retries</i></tt></dt>
-  <dd>Sets the number of retransmission attempts for each host (default = 5).</dd>
-  <dt><tt>-t <i>timeout</i></tt></dt>
-  <dd>Sets the retransmission timeout (in seconds) (default = 2).</dd>
-  <dt><tt>-v</tt></dt>
-  <dd>Prints verbose information about the NTP servers.</dd>
 </dl>
 <h4>Bugs</h4>
 <p>This program makes no attempt to improve accuracy by doing multiple samples.</p>
