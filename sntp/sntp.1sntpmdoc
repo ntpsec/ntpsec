@@ -1,9 +1,9 @@
-.Dd September 15 2012
+.Dd September 28 2012
 .Dt SNTP 1sntpmdoc User Commands
-.Os SunOS 5.10
+.Os Linux 2.6.26-2-686
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  September 15, 2012 at 11:25:16 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  September 28, 2012 at 03:15:06 AM by AutoGen 5.16.2
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -18,6 +18,46 @@
 [ hostname-or-IP ...]
 .Pp
 .Sh DESCRIPTION
+.Nm
+can be used as an SNTP client to query a NTP or SNTP server and either display
+the time or set the local system's time (given suitable privilege).  It can be
+run as an interactive command or from a
+.Ic cron
+job.
+NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
+are defined and described by RFC 5905.
+.PP
+The default is to write the estimated correct local date and time (i.e. not
+UTC) to the standard output in a format like:
+.Ic "'1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 [host] IP sN'"
+where the
+.Ic "'(+0800)'"
+means that to get to UTC from the reported local time one must
+add 8 hours and 0 minutes,
+the
+.Ic "'+4.567'"
+indicates the local clock is 4.567 seconds behind the correct time
+(so 4.567 seconds must be added to the local clock to get it to be correct).
+Note that the number of decimals printed for this value will change
+based on the reported precision of the server.
+.Ic "'+/- 0.089'"
+is the reported
+.Em synchronization distance
+(in seconds), which represents the maximum error due to all causes.
+If the server does not report valid data needed to calculate the
+synchronization distance, this will be reported as
+.Ic "'+/- ?'" .
+If the
+.Em host
+is different from the
+.Em IP ,
+both will be displayed.
+Otherwise, only the 
+.Em IP
+is displayed.
+Finally, the
+.Em stratum
+of the host is reported.
 .Sh "OPTIONS"
 .Bl -tag
 .It  \-4 ", " -\-ipv4
@@ -42,22 +82,13 @@ This option enables authentication using the key specified in this
 option's argument.  The argument of this option is the keyid, a
 number specified in the keyfile as this key's identifier. See the
 keyfile option (\fB\-k\fP) for more details.
-.It  \-B " \fIseconds\fP, " \-\-bctimeout "=" \fIseconds\fP
-The number of seconds to wait for broadcasts.
-This option takes an integer number as its argument.
-The default \fIseconds\fP for this option is:
-.ti +4
- 68
-.sp
-When waiting for a broadcast packet \fBsntp\fP will wait the number
-of seconds specified before giving up.
 .It  \-b " \fIbroadcast\-address\fP, " \-\-broadcast "=" \fIbroadcast\-address\fP
 Listen to the address specified for broadcast time sync.
 This option may appear an unlimited number of times.
 .sp
 If specified \fBsntp\fP will listen to the specified address
 for NTP broadcasts.  The default maximum wait time
-can be modified with \fB\-B\fP.
+can (and probably should) be modified with \fB\-t\fP.
 .It  \-c " \fIhost\-name\fP, " \-\-concurrent "=" \fIhost\-name\fP
 Concurrently query all IPs returned for host\-name.
 This option may appear an unlimited number of times.
@@ -165,15 +196,18 @@ OK to 'step' the time with \fBsettimeofday(2)\fP.
 OK to 'slew' the time with \fBadjtime(2)\fP.
 .sp
 .sp
-.It  \-u " \fIseconds\fP, " \-\-uctimeout "=" \fIseconds\fP
-The number of seconds to wait for unicast responses.
+.It  \-t " \fIseconds\fP, " \-\-timeout "=" \fIseconds\fP
+The number of seconds to wait for responses.
 This option takes an integer number as its argument.
 The default \fIseconds\fP for this option is:
 .ti +4
  5
 .sp
-When waiting for a unicast reply, \fBsntp\fP will wait the number
-of seconds specified before giving up.
+When waiting for a reply, \fBsntp\fP will wait the number
+of seconds specified before giving up.  The default should be
+more than enough for a unicast response.  If \fBsntp\fP is
+only waiting for a broadcast response a longer timeout is
+likely needed.
 .It  \-\-wait, " \fB\-\-no\-wait\fP"
 Wait for pending replies (if not setting the time).
 The \fIno\-wait\fP form will disable the option.
@@ -211,6 +245,25 @@ The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .Sh USAGE
+.Bl -tag -width indent
+.It Li "sntp ntpserver.somewhere"
+is the simplest use of this program
+and can be run as an unprivileged command
+to check the current time and error in the local clock.
+.It Li "sntp -a ntpserver.somewhere"
+With suitable privilege,
+run as a command
+or from a
+.Xr cron 8
+job,
+.Ic "sntp -a"
+will reset the local clock from a synchronized specified server,
+like the (deprecated)
+.Xr ntpdate 1ntpdatemdoc ,
+or
+.Xr rdate 8
+commands.
+.El
 .Sh "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .Sh "FILES"
@@ -229,11 +282,14 @@ libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .El
 .Sh AUTHORS
+.An "Johannes Maximilian Kuehn"
+.An "Harlan Stenn"
+.An "Dave Hart"
 .Sh "COPYRIGHT"
 Copyright (C) 1970-2012 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh BUGS
-Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh "NOTES"
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
 option definitions.

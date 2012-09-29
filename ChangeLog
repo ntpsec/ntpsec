@@ -1,3 +1,4 @@
+* [Bug 1997] Fix sntp broadcast timeouts.
 * [Bug 2234] Fix incorrect ntptrace html documentation.
 * [Bug 2262] Install html docs in $htmldir.
 * Fix typo in html/select.html.

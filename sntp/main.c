@@ -44,6 +44,7 @@ struct dns_ctx {
 	int		flags;
 #define CTX_BCST	0x0001
 #define CTX_UCST	0x0002
+#define CTX_xCST	0x0003
 #define CTX_CONC	0x0004
 #define CTX_unused	0xfffd
 	int		key_id;
@@ -72,10 +73,11 @@ struct xmt_ctx_tag {
 struct timeval	gap;
 xmt_ctx *	xmt_q;
 struct key *	keys = NULL;
-struct timeval	bcst_timeout_tv;
-int		ucst_timeout;
+int		response_timeout;
+struct timeval	response_tv;
+struct timeval	start_tv;
 /* check the timeout at least once per second */
-struct timeval	ucst_wakeup_tv = { 0, 888888 };
+struct timeval	wakeup_tv = { 0, 888888 };
 
 sent_pkt *	fam_listheads[2];
 #define v4_pkts_list	(fam_listheads[0])
@@ -147,6 +149,7 @@ sntp_main (
 	argc -= optct;
 	argv += optct;
 
+
 	debug = DESC(DEBUG_LEVEL).optOccCt;
 
 	TRACE(2, ("init_lib() done, %s%s\n",
@@ -175,13 +178,13 @@ sntp_main (
 
 	/*
 	** Eventually, we probably want:
-	** - separate bcst and ucst timeouts
+	** - separate bcst and ucst timeouts (why?)
 	** - multiple --timeout values in the commandline
 	*/
-	bcst_timeout_tv.tv_sec = OPT_VALUE_BCTIMEOUT;
-	bcst_timeout_tv.tv_usec = 0;
 
-	ucst_timeout = OPT_VALUE_UCTIMEOUT;
+	response_timeout = OPT_VALUE_TIMEOUT;
+	response_tv.tv_sec = response_timeout;
+	response_tv.tv_usec = 0;
 
 	/* IPv6 available? */
 	if (isc_net_probeipv6() != ISC_R_SUCCESS) {
@@ -269,6 +272,7 @@ sntp_main (
 	for (i = 0; i < argc; ++i)
 		handle_lookup(argv[i], CTX_UCST);
 
+	gettimeofday_cached(base, &start_tv);
 	event_base_dispatch(base);
 	event_base_free(base);
 
@@ -325,7 +329,7 @@ open_sockets(
 				"open_sockets: event_new(base, sock4) failed!");
 		} else {
 			one_fam_works = TRUE;
-			event_add(ev_sock4, &ucst_wakeup_tv);
+			event_add(ev_sock4, &wakeup_tv);
 		}
 	}
 
@@ -360,7 +364,7 @@ open_sockets(
 				"open_sockets: event_new(base, sock6) failed!");
 		} else {
 			one_fam_works = TRUE;
-			event_add(ev_sock6, &ucst_wakeup_tv);
+			event_add(ev_sock6, &wakeup_tv);
 		}
 	}
 	
@@ -404,9 +408,7 @@ handle_lookup(
 	memcpy(name_copy, name, name_sz);
 	ctx->name = name_copy;
 	ctx->flags = flags;
-	ctx->timeout = (CTX_BCST & flags)
-			   ? bcst_timeout_tv
-			   : ucst_wakeup_tv;
+	ctx->timeout = response_tv;
 
 	/* The following should arguably be passed in... */
 	if (ENABLED_OPT(AUTHENTICATION) &&
@@ -703,20 +705,50 @@ timeout_queries(void)
 	sent_pkt *	spkt;
 	sent_pkt *	spkt_next;
 	long		age;
+	int didsomething = 0;
+
+	TRACE(3, ("timeout_queries: called to check %d items\n",
+		  COUNTOF(fam_listheads)));
 
 	gettimeofday_cached(base, &start_cb);
 	for (idx = 0; idx < COUNTOF(fam_listheads); idx++) {
 		head = fam_listheads[idx];
 		for (spkt = head; spkt != NULL; spkt = spkt_next) {
+			char xcst;
+
+			didsomething = 1;
+			switch (spkt->dctx->flags & CTX_xCST) {
+			    case CTX_BCST:
+				xcst = 'B';
+				break;
+
+			    case CTX_UCST:
+				xcst = 'U';
+				break;
+
+			    default:
+				INSIST(!"spkt->dctx->flags neither UCST nor BCST");
+				break;
+			}
+
 			spkt_next = spkt->link;
 			if (0 == spkt->stime || spkt->done)
 				continue;
 			age = start_cb.tv_sec - spkt->stime;
-			TRACE(3, ("%s %s age %ld\n", stoa(&spkt->addr),
-				  spkt->dctx->name, age));
-			if (age > ucst_timeout)
+			TRACE(3, ("%s %s %cCST age %ld\n",
+				  stoa(&spkt->addr),
+				  spkt->dctx->name, xcst, age));
+			if (age > response_timeout)
 				timeout_query(spkt);
 		}
+	}
+	// Do we care about didsomething?
+	TRACE(3, ("timeout_queries: didsomething is %d, age is %d\n",
+		  didsomething, start_cb.tv_sec - start_tv.tv_sec));
+	if (start_cb.tv_sec - start_tv.tv_sec > response_timeout) {
+		TRACE(3, ("timeout_queries: bail!\n"));
+		event_base_loopexit(base, NULL);
+		shutting_down = TRUE;
 	}
 }
 
@@ -742,12 +774,29 @@ void timeout_query(
 	)
 {
 	sockaddr_u *	server;
+	char		xcst;
 
+
+	switch (spkt->dctx->flags & CTX_xCST) {
+	    case CTX_BCST:
+		xcst = 'B';
+		break;
+
+	    case CTX_UCST:
+		xcst = 'U';
+		break;
+
+	    default:
+		INSIST(!"spkt->dctx->flags neither UCST nor BCST");
+		break;
+	}
 	spkt->done = TRUE;
 	server = &spkt->addr;
-	msyslog(LOG_INFO, "%s no response after %d seconds",
-		hostnameaddr(spkt->dctx->name, server), ucst_timeout);
+	msyslog(LOG_INFO, "%s no %cCST response after %d seconds",
+		hostnameaddr(spkt->dctx->name, server), xcst,
+		response_timeout);
 	dec_pending_ntp(spkt->dctx->name, server);
+	return;
 }
 
 
@@ -804,7 +853,8 @@ sock_cb(
 	int		rc;
 
 	INSIST(sock4 == fd || sock6 == fd);
-	TRACE(3, ("sock_cb: event on sock%s:%s%s%s%s [UCST]\n",
+
+	TRACE(3, ("sock_cb: event on sock%s:%s%s%s%s\n",
 		  (fd == sock6)
 		      ? "6"
 		      : "4",

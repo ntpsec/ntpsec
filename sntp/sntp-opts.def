@@ -58,19 +58,6 @@ flag = {
 };
 
 flag = {
-  name		= bctimeout;
-  value		= B;
-  descrip	= "The number of seconds to wait for broadcasts";
-  arg-type	= number;
-  arg-name	= "seconds";
-  arg-default	= 68;
-  doc		= <<- _EndOfDoc_
-	When waiting for a broadcast packet @code{sntp} will wait the number
-	of seconds specified before giving up.
-	_EndOfDoc_;
-};
-
-flag = {
   name		= broadcast;
   value		= b;
   descrip	= "Listen to the address specified for broadcast time sync";
@@ -81,7 +68,7 @@ flag = {
   doc		= <<- _EndOfDoc_
 	If specified @code{sntp} will listen to the specified address
 	for NTP broadcasts.  The default maximum wait time
-	can be modified with @option{-B}.
+	can (and probably should) be modified with @option{-t}.
 	_EndOfDoc_;
 };
 
@@ -226,15 +213,18 @@ flag = {
 
 
 flag = {
-  name		= uctimeout;
-  value		= u;
-  descrip	= "The number of seconds to wait for unicast responses";
+  name		= timeout;
+  value		= t;
+  descrip	= "The number of seconds to wait for responses";
   arg-type	= number;
   arg-name	= "seconds";
   arg-default	= 5;
   doc		= <<- _EndOfDoc_
-	When waiting for a unicast reply, @code{sntp} will wait the number
-	of seconds specified before giving up.
+	When waiting for a reply, @code{sntp} will wait the number
+	of seconds specified before giving up.  The default should be
+	more than enough for a unicast response.  If @code{sntp} is
+	only waiting for a broadcast response a longer timeout is
+	likely needed.
 	_EndOfDoc_;
 };
 
