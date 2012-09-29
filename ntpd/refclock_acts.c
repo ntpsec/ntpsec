@@ -404,7 +404,8 @@ acts_message(
 
 		mprintf_event(PEVNT_CLOCK, peer, "DIAL #%d %s",
 			      up->retry, sys_phone[up->retry]);
-		ioctl(pp->io.fd, TIOCMBIS, &dtr);
+		if (ioctl(pp->io.fd, TIOCMBIS, &dtr) < 0)
+			msyslog(LOG_ERR, "acts: ioctl(TIOCMBIS) failed: %m");
 		if (write(pp->io.fd, sys_phone[up->retry],
 		    strlen(sys_phone[up->retry])) < 0)
 			msyslog(LOG_ERR, "acts: write DIAL fails %m");
@@ -607,7 +608,8 @@ acts_close(
 	if (pp->io.fd != -1) {
 		report_event(PEVNT_CLOCK, peer, "close");
 		dtr = TIOCM_DTR;
-		ioctl(pp->io.fd, TIOCMBIC, &dtr);
+		if (ioctl(pp->io.fd, TIOCMBIC, &dtr) < 0)
+			msyslog(LOG_ERR, "acts: ioctl(TIOCMBIC) failed: %m");
 		io_closeclock(&pp->io);
 		pp->io.fd = -1;
 	}

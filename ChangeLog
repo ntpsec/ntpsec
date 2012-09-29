@@ -1,3 +1,4 @@
+* CID 97198: Check return from ioctl() calls in refclock_acts.c.
 (4.2.7p307) 2012/09/29 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1997] Fix sntp broadcast timeouts.
 * [Bug 2234] Fix incorrect ntptrace html documentation.
