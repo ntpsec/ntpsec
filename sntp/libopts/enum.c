@@ -249,9 +249,9 @@ oops:
 char const *
 optionKeywordName(tOptDesc * pOD, unsigned int enum_val)
 {
-    tOptDesc od = {
-        .optArg.argEnum = enum_val };
-
+    tOptDesc od;
+    
+    od.optArg.argEnum = enum_val;
     (*(pOD->pOptProc))(OPTPROC_RETURN_VALNAME, &od );
     return od.optArg.argString;
 }
