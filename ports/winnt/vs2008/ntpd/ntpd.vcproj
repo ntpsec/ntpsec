@@ -915,10 +915,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\ntpd\refclock_trak.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\..\ntpd\refclock_true.c"
 				>
 			</File>
