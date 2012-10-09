@@ -1,5 +1,6 @@
 * Bring libopts/enum.c back to ANSI C compliance.
-* Reflect removal of refclock_trak.c in Windows Makefile equivalents.
+* [Bug 2266] Remove deprecated refclock_trak.c from Windows Makefile
+  equivalents.
 (4.2.7p309) 2012/10/04 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2287] ntpdate returns 0 even if adjtime() call fails.
 (4.2.7p308) 2012/09/29 Released by Harlan Stenn <stenn@ntp.org>
