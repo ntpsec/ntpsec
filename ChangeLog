@@ -1,3 +1,4 @@
+* [Bug 1374] Support SO_TIMESTAMPNS.
 * [Bug 2266] Remove deprecated refclock_trak.c from Windows Makefile
   equivalents.
 * [Bug 2274] Bring libopts/enum.c back to (old) ANSI C compliance.
