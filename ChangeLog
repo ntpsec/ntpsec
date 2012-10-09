@@ -1,3 +1,4 @@
+(4.2.7p310) 2012/10/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1374] Support SO_TIMESTAMPNS.
 * [Bug 2266] Remove deprecated refclock_trak.c from Windows Makefile
   equivalents.
