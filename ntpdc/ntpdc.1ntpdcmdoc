@@ -1,9 +1,9 @@
-.Dd October 9 2012
+.Dd October 10 2012
 .Dt NTPDC 1ntpdcmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  October  9, 2012 at 11:39:42 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  October 10, 2012 at 06:28:49 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -46,9 +46,10 @@ Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
 .sp
-.It  \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
+.It  \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
+This option takes an integer number as its argument.
 .sp
 .sp
 .It  \-i ", " -\-interactive

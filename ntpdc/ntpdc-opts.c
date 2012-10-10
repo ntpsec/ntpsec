@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.c)
  *  
- *  It has been AutoGen-ed  October  9, 2012 at 11:39:31 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  October 10, 2012 at 06:28:34 AM by AutoGen 5.16.2
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -72,7 +72,7 @@ extern FILE * option_usage_fp;
  *  ntpdc option static const strings
  */
 static char const ntpdc_opt_strs[1862] =
-/*     0 */ "ntpdc 4.2.7p310\n"
+/*     0 */ "ntpdc 4.2.7p311\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -130,14 +130,14 @@ static char const ntpdc_opt_strs[1862] =
 /*  1640 */ "no-load-opts\0"
 /*  1653 */ "no\0"
 /*  1656 */ "NTPDC\0"
-/*  1662 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p310\n"
+/*  1662 */ "ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p311\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1794 */ "$HOME\0"
 /*  1800 */ ".\0"
 /*  1802 */ ".ntprc\0"
 /*  1809 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1843 */ "\n\n\0"
-/*  1846 */ "ntpdc 4.2.7p310";
+/*  1846 */ "ntpdc 4.2.7p311";
 
 /*
  *  ipv4 option description with
@@ -185,7 +185,7 @@ static int const aIpv6CantList[] = {
 #define SET_DEBUG_LEVEL_NAME      (ntpdc_opt_strs+1161)
 #define SET_DEBUG_LEVEL_name      (ntpdc_opt_strs+1177)
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
  *  interactive option description with
@@ -285,7 +285,7 @@ static tOptProc
 /*
  *  #define map the "normal" callout procs to the test ones...
  */
-#define SET_DEBUG_LEVEL_OPT_PROC optionStackArg
+#define DEBUG_LEVEL_OPT_PROC optionStackArg
 
 
 #else /* NOT defined TEST_NTPDC_OPTS */
@@ -298,12 +298,12 @@ extern tOptProc
     optionStackArg,        optionTimeDate,        optionTimeVal,
     optionUnstackArg,      optionVendorOption,    optionVersionStderr;
 static tOptProc
-    doOptSet_Debug_Level, doUsageOpt;
+    doOptDebug_Level, doUsageOpt;
 
 /*
  *  #define map the "normal" callout procs
  */
-#define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+#define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
 
 #endif /* defined(TEST_NTPDC_OPTS) */
 #define VER_PROC        ntpOptionPrintVersion
@@ -359,7 +359,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* last opt argumnt */ { NULL }, /* --debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
+     /* option proc      */ DEBUG_LEVEL_OPT_PROC,
      /* desc, NAME, name */ DEBUG_LEVEL_DESC, DEBUG_LEVEL_NAME, DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
@@ -371,7 +371,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* last opt argumnt */ { NULL }, /* --set-debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
+     /* option proc      */ optionNumericVal,
      /* desc, NAME, name */ SET_DEBUG_LEVEL_DESC, SET_DEBUG_LEVEL_NAME, SET_DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
@@ -556,16 +556,17 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
- * Code to handle the set-debug-level option.
+ * Code to handle the debug-level option.
  *
  * @param pOptions the ntpdc options data structure
  * @param pOptDesc the option descriptor for this option.
  */
 static void
-doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
+doOptDebug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from debug-opt.def, line 26 */
-DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
+    /* extracted from debug-opt.def, line 15 */
+OPT_VALUE_SET_DEBUG_LEVEL++;
+    (void)pOptDesc;
     (void)pOptions;
 }
 #endif /* defined(TEST_NTPDC_OPTS) */

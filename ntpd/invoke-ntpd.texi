@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 # 
-# It has been AutoGen-ed  October  9, 2012 at 11:39:14 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  October 10, 2012 at 06:28:18 AM by AutoGen 5.16.2
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -92,8 +92,6 @@ This software is released under the NTP license, <http://ntp.org/license>.
 * ntpd authreq::                authreq option (-a)
 * ntpd authnoreq::              authnoreq option (-A)
 * ntpd configfile::             configfile option (-c)
-* ntpd debug-level::            debug-level option (-d)
-* ntpd set-debug-level::        set-debug-level option (-D)
 * ntpd driftfile::              driftfile option (-f)
 * ntpd panicgate::              panicgate option (-g)
 * ntpd jaildir::                jaildir option (-i)
@@ -142,7 +140,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p310
+ntpd - NTP daemon program - Ver. 4.2.7p311
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -160,9 +158,9 @@ USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                                 authreq
    -b no  bcastsync      Allow us to sync to broadcast servers
    -c Str configfile     configuration file name
-   -d no  debug-level    Increase output debug message level
+   -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the output debug message level
+   -D Num set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -f Str driftfile      frequency drift file name
    -g no  panicgate      Allow the first adjustment to be Big
@@ -294,40 +292,6 @@ This option takes an argument string.
 The name and path of the configuration file,
 /etc/ntp.conf
 by default.
-@node ntpd debug-level
-@subsection debug-level option (-d)
-@cindex ntpd-debug-level
-
-This is the ``increase output debug message level'' option.
-
-@noindent
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-may appear an unlimited number of times.
-@item
-must be compiled in by defining @code{DEBUG} during the compilation.
-@end itemize
-
-Increase the debugging message output level.
-@node ntpd set-debug-level
-@subsection set-debug-level option (-D)
-@cindex ntpd-set-debug-level
-
-This is the ``set the output debug message level'' option.
-This option takes an argument string.
-
-@noindent
-This option has some usage constraints.  It:
-@itemize @bullet
-@item
-may appear an unlimited number of times.
-@item
-must be compiled in by defining @code{DEBUG} during the compilation.
-@end itemize
-
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
 @node ntpd driftfile
 @subsection driftfile option (-f)
 @cindex ntpd-driftfile

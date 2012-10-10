@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 # 
-# It has been AutoGen-ed  October  9, 2012 at 11:39:55 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  October 10, 2012 at 06:29:18 AM by AutoGen 5.16.2
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -328,7 +328,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p310
+ntpq - standard NTP query program - Ver. 4.2.7p311
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -341,7 +341,7 @@ USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
                                 - may appear multiple times
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the debug verbosity level
+   -D Num set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -p no  peers          Print a list of the peers
                                 - prohibits these options:

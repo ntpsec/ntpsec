@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  October  9, 2012 at 11:33:25 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  October 10, 2012 at 06:23:12 AM by AutoGen 5.16.2
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -90,8 +90,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    23
-#define SNTP_VERSION       "4.2.7p310"
-#define SNTP_FULL_VERSION  "sntp 4.2.7p310"
+#define SNTP_VERSION       "4.2.7p311"
+#define SNTP_FULL_VERSION  "sntp 4.2.7p311"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -234,6 +234,8 @@ typedef enum {
 #define VALUE_OPT_CONCURRENT     'c'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
+
+#define OPT_VALUE_SET_DEBUG_LEVEL (DESC(SET_DEBUG_LEVEL).optArg.argInt)
 #define VALUE_OPT_GAP            'g'
 
 #define OPT_VALUE_GAP            (DESC(GAP).optArg.argInt)

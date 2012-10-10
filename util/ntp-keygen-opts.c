@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  October  9, 2012 at 11:40:20 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  October 10, 2012 at 06:29:39 AM by AutoGen 5.16.2
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -75,7 +75,7 @@ extern FILE * option_usage_fp;
  *  ntp-keygen option static const strings
  */
 static char const ntp_keygen_opt_strs[2322] =
-/*     0 */ "ntp-keygen (ntp) 4.2.7p310\n"
+/*     0 */ "ntp-keygen (ntp) 4.2.7p311\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -163,14 +163,14 @@ static char const ntp_keygen_opt_strs[2322] =
 /*  2100 */ "no-load-opts\0"
 /*  2113 */ "no\0"
 /*  2116 */ "NTP_KEYGEN\0"
-/*  2127 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p310\n"
+/*  2127 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p311\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  2243 */ "$HOME\0"
 /*  2249 */ ".\0"
 /*  2251 */ ".ntprc\0"
 /*  2258 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2292 */ "\n\n\0"
-/*  2295 */ "ntp-keygen (ntp) 4.2.7p310";
+/*  2295 */ "ntp-keygen (ntp) 4.2.7p311";
 
 /*
  *  certificate option description:
@@ -221,7 +221,7 @@ static char const ntp_keygen_opt_strs[2322] =
 #define SET_DEBUG_LEVEL_NAME      (ntp_keygen_opt_strs+1126)
 #define SET_DEBUG_LEVEL_name      (ntp_keygen_opt_strs+1142)
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
-        | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
+        | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
 /*
  *  id-key option description:
@@ -528,7 +528,7 @@ static tOptProc
 /*
  *  #define map the "normal" callout procs to the test ones...
  */
-#define SET_DEBUG_LEVEL_OPT_PROC optionStackArg
+#define DEBUG_LEVEL_OPT_PROC optionStackArg
 
 
 #else /* NOT defined TEST_NTP_KEYGEN_OPTS */
@@ -541,12 +541,12 @@ extern tOptProc
     optionStackArg,        optionTimeDate,        optionTimeVal,
     optionUnstackArg,      optionVendorOption,    optionVersionStderr;
 static tOptProc
-    doOptSet_Debug_Level, doUsageOpt;
+    doOptDebug_Level, doUsageOpt;
 
 /*
  *  #define map the "normal" callout procs
  */
-#define SET_DEBUG_LEVEL_OPT_PROC doOptSet_Debug_Level
+#define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
 
 #endif /* defined(TEST_NTP_KEYGEN_OPTS) */
 #define VER_PROC        ntpOptionPrintVersion
@@ -590,7 +590,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* last opt argumnt */ { NULL }, /* --debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ NULL,
+     /* option proc      */ DEBUG_LEVEL_OPT_PROC,
      /* desc, NAME, name */ DEBUG_LEVEL_DESC, DEBUG_LEVEL_NAME, DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
@@ -602,7 +602,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* last opt argumnt */ { NULL }, /* --set-debug-level */
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
-     /* option proc      */ SET_DEBUG_LEVEL_OPT_PROC,
+     /* option proc      */ optionNumericVal,
      /* desc, NAME, name */ SET_DEBUG_LEVEL_DESC, SET_DEBUG_LEVEL_NAME, SET_DEBUG_LEVEL_name,
      /* disablement strs */ NULL, NULL },
 
@@ -919,16 +919,17 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
- * Code to handle the set-debug-level option.
+ * Code to handle the debug-level option.
  *
  * @param pOptions the ntp-keygen options data structure
  * @param pOptDesc the option descriptor for this option.
  */
 static void
-doOptSet_Debug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
+doOptDebug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
-    /* extracted from debug-opt.def, line 26 */
-DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );
+    /* extracted from debug-opt.def, line 15 */
+OPT_VALUE_SET_DEBUG_LEVEL++;
+    (void)pOptDesc;
     (void)pOptions;
 }
 #endif /* defined(TEST_NTP_KEYGEN_OPTS) */

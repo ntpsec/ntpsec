@@ -1,9 +1,9 @@
-.Dd October 9 2012
+.Dd October 10 2012
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  October  9, 2012 at 11:39:21 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  October 10, 2012 at 06:28:24 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -61,16 +61,16 @@ The name and path of the configuration file,
 /etc/ntp.conf
 by default.
 .It  \-d ", " -\-debug\-level
-Increase output debug message level.
+Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
-Increase the debugging message output level.
-.It  \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
-Set the output debug message level.
-This option may appear an unlimited number of times.
 .sp
-Set the output debugging level.  Can be supplied multiple times,
-but each overrides the previous value(s).
+.It  \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
+Set the debug verbosity level.
+This option may appear an unlimited number of times.
+This option takes an integer number as its argument.
+.sp
+.sp
 .It  \-f " \fIstring\fP, " \-\-driftfile "=" \fIstring\fP
 frequency drift file name.
 .sp
