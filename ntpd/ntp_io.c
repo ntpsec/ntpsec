@@ -3248,14 +3248,8 @@ fetch_timestamp(
 #endif	/* DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;
-
-		default:
-			DPRINTF(4, ("fetch_timestamp: skipping control message 0x%x\n",
-				    cmsghdr->cmsg_type));
-		}
-		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
-	}
 #endif	/* HAVE_TIMESTAMP */
+
 #ifdef HAVE_TIMESTAMPNS
 		case SCM_TIMESTAMPNS:
 		{
@@ -3287,9 +3281,16 @@ fetch_timestamp(
 			break;
 		}
 #endif	/* HAVE_TIMESTAMPNS */
+
+		default:
+			DPRINTF(4, ("fetch_timestamp: skipping control message 0x%x\n",
+				    cmsghdr->cmsg_type));
+		}
+		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
+	}
 	return ts;
 }
-#endif	/* HAVE_TIMESTAMP */
+#endif	/* HAVE_PACKET_TIMESTAMP */
 
 
 /*
