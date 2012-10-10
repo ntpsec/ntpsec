@@ -1,3 +1,4 @@
+* [Bug 938] The argument to the -D flag takes a number, not a string.
 * [Bug 1374] Support SO_TIMESTAMPNS.
 * [Bug 1013] ntpdate's HTML page claims wrong default version.
 * [Bug 1374] Support SO_TIMESTAMPNS.
