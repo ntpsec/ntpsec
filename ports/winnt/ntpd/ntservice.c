@@ -109,7 +109,7 @@ int main(
 	    || HAVE_OPT(SAVECONFIGQUIT)
 	    || HAVE_OPT(HELP)
 #ifdef DEBUG
-	    || DESC(DEBUG_LEVEL).optOccCt != 0
+	    || OPT_VALUE_SET_DEBUG_LEVEL != 0
 #endif
 	    || HAVE_OPT(NOFORK))
 		foreground = TRUE;

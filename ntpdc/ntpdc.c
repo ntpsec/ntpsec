@@ -313,7 +313,7 @@ ntpdcmain(
 		}
 	}
 
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 
 	if (HAVE_OPT(INTERACTIVE)) {
 		interactive = 1;

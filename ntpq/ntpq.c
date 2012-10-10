@@ -459,7 +459,7 @@ ntpqmain(
 	 * handled by ntpq_custom_opt_handler().
 	 */
 
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 
 	if (HAVE_OPT(IPV4))
 		ai_fam_templ = AF_INET;

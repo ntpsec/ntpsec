@@ -76,33 +76,7 @@ flag = {
 	_EndOfDoc_;
 };
 
-flag = {
-    name      = debug-level;
-    value     = d;
-    max       = NOLIMIT;
-    ifdef     = DEBUG;
-    nopreset;
-    descrip   = "Increase output debug message level";
-    omitted-usage = "this package was built using 'configure --disable--debug'";
-    doc = <<-  _EndOfDoc_
-	Increase the debugging message output level.
-	_EndOfDoc_;
-};
-
-flag = {
-    name      = set-debug-level;
-    value     = D;
-    arg-type  = string;
-    max       = NOLIMIT;
-    ifdef     = DEBUG;
-    descrip   = "Set the output debug message level";
-    omitted-usage = "this package was built using 'configure --disable--debug'";
-    flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
-    doc = <<-  _EndOfDoc_
-	Set the output debugging level.  Can be supplied multiple times,
-	but each overrides the previous value(s).
-	_EndOfDoc_;
-};
+#include debug-opt.def
 
 flag = {
     name      = driftfile;

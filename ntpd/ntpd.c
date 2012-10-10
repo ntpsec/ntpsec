@@ -255,7 +255,7 @@ main(
 	progname = argv[0];
 	parse_cmdline_opts(&argc, &argv);
 #ifdef DEBUG
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 	DPRINTF(1, ("%s\n", Version));
 #endif
 
@@ -453,7 +453,7 @@ ntpdmain(
 	initializing = TRUE;		/* mark that we are initializing */
 	parse_cmdline_opts(&argc, &argv);
 # ifdef DEBUG
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 # endif
 
 	if (HAVE_OPT(NOFORK) || HAVE_OPT(QUIT)
