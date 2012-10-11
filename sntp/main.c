@@ -152,11 +152,6 @@ sntp_main (
 
 	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 
-printf("sntp: DEBUG_LEVEL is %d\n", debug);
-// OPT_VALUE_SET_DEBUG_LEVEL (DESC(SET_DEBUG_LEVEL).optArg.argInt)
-printf("sntp: SET_DEBUG_LEVEL is %d\n", OPT_VALUE_SET_DEBUG_LEVEL);
-exit(0);
-
 	TRACE(2, ("init_lib() done, %s%s\n",
 		  (ipv4_works)
 		      ? "ipv4_works "

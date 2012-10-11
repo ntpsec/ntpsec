@@ -1,3 +1,4 @@
+* Clean up testing/debugging of fix for [Bug 938] from sntp/main.c .
 (4.2.7p311) 2012/10/10 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 938] The argument to the -D flag takes a number, not a string.
 * [Bug 1013] ntpdate's HTML page claims wrong default version.
