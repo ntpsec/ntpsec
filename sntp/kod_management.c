@@ -151,7 +151,7 @@ write_kod_db(void)
 	}
 
 	if (NULL == db_s) {
-		msyslog(LOG_WARNING, "Can't open KOD db file %s for writing!",
+		msyslog(LOG_WARNING, "Can't open KOD db file %s for writing: %m",
 			kod_db_file);
 
 		return FALSE;

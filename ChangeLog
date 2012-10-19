@@ -1,3 +1,4 @@
+* [Bug 2291] sntp should report why it cannot open file.kod.
 (4.2.7p312) 2012/10/11 Released by Harlan Stenn <stenn@ntp.org>
 * Clean up testing/debugging of fix for [Bug 938] from sntp/main.c .
 (4.2.7p311) 2012/10/10 Released by Harlan Stenn <stenn@ntp.org>
