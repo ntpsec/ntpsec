@@ -1,3 +1,4 @@
+(4.2.7p314) 2012/10/23 Released by Harlan Stenn <stenn@ntp.org>
 * Document a tricky malloc() of dns_ctx in sntp.
 (4.2.7p313) 2012/10/23 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2291] sntp should report why it cannot open file.kod.
