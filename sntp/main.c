@@ -402,11 +402,11 @@ handle_lookup(
 	hints.ai_protocol = IPPROTO_UDP;
 
 	name_sz = 1 + strlen(name);
-	octets = sizeof(*ctx) + name_sz;
-	ctx = emalloc_zero(octets);
-	name_copy = (char *)(ctx + 1);
-	memcpy(name_copy, name, name_sz);
-	ctx->name = name_copy;
+	octets = sizeof(*ctx) + name_sz;	// Space for a ctx and the name
+	ctx = emalloc_zero(octets);		// ctx at ctx[0]
+	name_copy = (char *)(ctx + 1);		// Put the name at ctx[1]
+	memcpy(name_copy, name, name_sz);	// copy the name to ctx[1]
+	ctx->name = name_copy;			// point to it...
 	ctx->flags = flags;
 	ctx->timeout = response_tv;
 
