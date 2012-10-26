@@ -34,7 +34,11 @@ MD5authencrypt(
 	 * was creaded.
 	 */
 	INIT_SSL();
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
+	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
+		msyslog(LOG_ERR,
+		    "MAC encrypt: digest init failed");
+		return (0);
+	}
 	EVP_DigestUpdate(&ctx, key, cache_secretsize);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
@@ -67,7 +71,11 @@ MD5authdecrypt(
 	 * was created.
 	 */
 	INIT_SSL();
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(type));
+	if (!EVP_DigestInit(&ctx, EVP_get_digestbynid(type))) {
+		msyslog(LOG_ERR,
+		    "MAC decrypt: digest init failed");
+		return (0);
+	}
 	EVP_DigestUpdate(&ctx, key, cache_secretsize);
 	EVP_DigestUpdate(&ctx, (u_char *)pkt, (u_int)length);
 	EVP_DigestFinal(&ctx, digest, &len);
@@ -97,7 +105,16 @@ addr2refid(sockaddr_u *addr)
 		return (NSRCADR(addr));
 
 	INIT_SSL();
-	EVP_DigestInit(&ctx, EVP_get_digestbynid(NID_md5));
+	EVP_MD_CTX_init(&ctx);
+#ifdef EVP_MD_CTX_FLAG_NON_FIPS_ALLOW
+	/* MD5 is not used as a crypto hash here. */
+	EVP_MD_CTX_set_flags(&ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW);
+#endif
+	if (!EVP_DigestInit_ex(&ctx, EVP_md5(), NULL)) {
+		msyslog(LOG_ERR,
+		    "MD5 init failed");
+		exit(1);
+	}
 	EVP_DigestUpdate(&ctx, (u_char *)PSOCK_ADDR6(addr),
 	    sizeof(struct in6_addr));
 	EVP_DigestFinal(&ctx, digest, &len);
