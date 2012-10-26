@@ -1,3 +1,4 @@
+(4.2.7p315) 2012/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2294] ntpd crashes in FIPS mode.
 (4.2.7p314) 2012/10/23 Released by Harlan Stenn <stenn@ntp.org>
 * Document a tricky malloc() of dns_ctx in sntp.
