@@ -1,3 +1,4 @@
+(4.2.7p316) 2012/10/27 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2296] Update fix for Bug 2294 to handle --without-crypto.
 (4.2.7p315) 2012/10/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2294] ntpd crashes in FIPS mode.
