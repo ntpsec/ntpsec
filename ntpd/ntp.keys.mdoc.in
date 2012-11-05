@@ -3,7 +3,7 @@
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  November  5, 2012 at 05:59:52 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  November  5, 2012 at 11:26:19 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
