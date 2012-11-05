@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *  
- *  It has been AutoGen-ed  October 27, 2012 at 11:24:41 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  November  5, 2012 at 06:01:10 AM by AutoGen 5.16.2
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -75,7 +75,7 @@ extern FILE * option_usage_fp;
  *  ntp-keygen option static const strings
  */
 static char const ntp_keygen_opt_strs[2322] =
-/*     0 */ "ntp-keygen (ntp) 4.2.7p316\n"
+/*     0 */ "ntp-keygen (ntp) 4.2.7p317\n"
             "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -163,14 +163,14 @@ static char const ntp_keygen_opt_strs[2322] =
 /*  2100 */ "no-load-opts\0"
 /*  2113 */ "no\0"
 /*  2116 */ "NTP_KEYGEN\0"
-/*  2127 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p316\n"
+/*  2127 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p317\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  2243 */ "$HOME\0"
 /*  2249 */ ".\0"
 /*  2251 */ ".ntprc\0"
 /*  2258 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2292 */ "\n\n\0"
-/*  2295 */ "ntp-keygen (ntp) 4.2.7p316";
+/*  2295 */ "ntp-keygen (ntp) 4.2.7p317";
 
 /*
  *  certificate option description:

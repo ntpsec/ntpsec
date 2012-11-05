@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 # 
-# It has been AutoGen-ed  October 27, 2012 at 11:16:48 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  November  5, 2012 at 05:57:58 AM by AutoGen 5.16.2
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -60,7 +60,19 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-wait is unavailable - no --help
+/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
+running under Perl version 5.8.8.
+
+Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
+
+The following single-character options are accepted:
+        With arguments: -n -s
+        Boolean (without arguments): -v
+
+Options may be merged together.  -- stops processing of options.
+Space is not required between options and their arguments.
+  [Now continuing due to backward compatibility and excessive paranoia.
+   See ``perldoc Getopt::Std'' about $Getopt::Std::STANDARD_HELP_VERSION.]
 @end example
 @exampleindent 4
 
