@@ -164,7 +164,7 @@ int		ntpqmain	(int,	char **);
 /*
  * Built in command handler declarations
  */
-static	int	openhost	(const char *);
+static	int	openhost	(const char *, int);
 static	void	dump_hex_printable(const void *, size_t);
 static	int	sendpkt		(void *, size_t);
 static	int	getresponse	(int, int, u_short *, int *, const char **, int);
@@ -359,9 +359,18 @@ const char *ccmds[MAXCMDS];
 /*
  * When multiple hosts are specified.
  */
+
 u_int numhosts;
-const char *chosts[MAXHOSTS];
-#define	ADDHOST(cp)	if (numhosts < MAXHOSTS) chosts[numhosts++] = (cp)
+
+chost chosts[MAXHOSTS];
+#define	ADDHOST(cp)						\
+	do {							\
+		if (numhosts < MAXHOSTS) {			\
+			chosts[numhosts].name = (cp);		\
+			chosts[numhosts].fam = ai_fam_templ;	\
+			numhosts++;				\
+		}						\
+	} while (0)
 
 /*
  * Macro definitions we use
@@ -479,8 +488,26 @@ ntpqmain(
 	if (0 == argc) {
 		ADDHOST(DEFHOST);
 	} else {
-		for (ihost = 0; ihost < (u_int)argc; ihost++)
+		for (ihost = 0; ihost < (u_int)argc; ihost++) {
+			if ('-' == *argv[ihost]) {
+				//
+				// If I really cared I'd also check:
+				// 0 == argv[ihost][2]
+				//
+				// and there are other cases as well...
+				//
+				if ('4' == argv[ihost][1]) {
+					ai_fam_templ = AF_INET;
+					continue;
+				} else if ('6' == argv[ihost][1]) {
+					ai_fam_templ = AF_INET6;
+					continue;
+				} else {
+					// XXX Throw a usage error
+				}
+			}
 			ADDHOST(argv[ihost]);
+		}
 	}
 
 	if (numcmds == 0 && interactive == 0
@@ -494,11 +521,12 @@ ntpqmain(
 #endif /* SYS_WINNT */
 
 	if (numcmds == 0) {
-		(void) openhost(chosts[0]);
+		(void) openhost(chosts[0].name, chosts[0].fam);
 		getcmds();
 	} else {
 		for (ihost = 0; ihost < numhosts; ihost++) {
-			if (openhost(chosts[ihost]))
+			printf("About to call docmd() for <%s> %d\n", chosts[ihost].name, chosts[ihost].fam);
+			if (openhost(chosts[ihost].name, chosts[ihost].fam))
 				for (icmd = 0; icmd < numcmds; icmd++)
 					docmd(ccmds[icmd]);
 		}
@@ -515,7 +543,8 @@ ntpqmain(
  */
 static	int
 openhost(
-	const char *hname
+	const char *hname,
+	int	    fam
 	)
 {
 	const char svc[] = "ntp";
@@ -553,7 +582,7 @@ openhost(
 	 * give it an IPv4 address to lookup.
 	 */
 	ZERO(hints);
-	hints.ai_family = ai_fam_templ;
+	hints.ai_family = fam;
 	hints.ai_protocol = IPPROTO_UDP;
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = Z_AI_NUMERICHOST;
@@ -597,7 +626,14 @@ openhost(
 	}
 
 	if (debug > 2)
-		printf("Opening host %s\n", temphost);
+		printf("Opening host %s (%s)\n",
+			temphost,
+			(ai->ai_family == AF_INET)
+			? "AF_INET"
+			: (ai->ai_family == AF_INET6)
+			  ? "AF_INET6"
+			  : "AF-???"
+			);
 
 	if (havehost == 1) {
 		if (debug > 2)
@@ -655,13 +691,15 @@ openhost(
 # endif
 #endif
 
+	if
 #ifdef SYS_VXWORKS
-	if (connect(sockfd, (struct sockaddr *)&hostaddr,
-		    sizeof(hostaddr)) == -1) {
+	   (connect(sockfd, (struct sockaddr *)&hostaddr,
+		    sizeof(hostaddr)) == -1)
 #else
-	if (connect(sockfd, (struct sockaddr *)ai->ai_addr,
-		    ai->ai_addrlen) == -1) {
+	   (connect(sockfd, (struct sockaddr *)ai->ai_addr,
+		    ai->ai_addrlen) == -1)
 #endif /* SYS_VXWORKS */
+	    {
 		error("connect", "", "");
 		freeaddrinfo(ai);
 		return 0;
@@ -1490,6 +1528,8 @@ docmd(
 		jump = 0;	/* HMS: 961106: was after fclose() */
 		if (i) (void) fclose(current_output);
 	}
+
+	return;
 }
 
 
@@ -2273,7 +2313,7 @@ host(
 			goto no_change;
 		i = 1;
 	}
-	if (openhost(pcmd->argval[i].string)) {
+	if (openhost(pcmd->argval[i].string, ai_fam_templ)) {
 		fprintf(fp, "current host set to %s\n", currenthost);
 	} else {
     no_change:

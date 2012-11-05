@@ -80,7 +80,7 @@ extern struct ntpq_varlist ntpq_varlist[MAXLIST];
  */
 
 /* from libntpq.c */
-extern int ntpq_openhost(char *);
+extern int ntpq_openhost(char *, int);
 extern int ntpq_closehost(void);
 extern int ntpq_queryhost(unsigned short VARSET, associd_t association,
 			  char *resultbuf, int maxlen);

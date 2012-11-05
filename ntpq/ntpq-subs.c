@@ -10,7 +10,6 @@
 #include "ntpq.h"
 #include "ntpq-opts.h"
 
-extern char *	chosts[];
 extern char	currenthost[];
 extern int	currenthostisnum;
 size_t		maxhostlen;
@@ -1858,7 +1857,7 @@ dopeers(
 		return;
 
 	for (u = 0; u < numhosts; u++) {
-		if (getnetnum(chosts[u], &netnum, fullname, af)) {
+		if (getnetnum(chosts[u].name, &netnum, fullname, af)) {
 			name_or_num = nntohost(&netnum);
 			sl = strlen(name_or_num);
 			maxhostlen = max(maxhostlen, sl);
@@ -1954,7 +1953,7 @@ doopeers(
 		return;
 
 	for (i = 0; i < numhosts; ++i) {
-		if (getnetnum(chosts[i], &netnum, fullname, af))
+		if (getnetnum(chosts[i].name, &netnum, fullname, af))
 			if (strlen(fullname) > maxhostlen)
 				maxhostlen = strlen(fullname);
 	}

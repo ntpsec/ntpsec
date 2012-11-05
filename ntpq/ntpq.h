@@ -116,6 +116,14 @@ typedef struct var_format_tag {
 	u_short		fmt;
 } var_format;
 
+typedef struct chost_tag chost;
+struct chost_tag {
+	const char *name;
+	int 	    fam;
+};
+
+extern chost	chosts[];
+
 extern int	interactive;	/* are we prompting? */
 extern int	old_rv;		/* use old rv behavior? --old-rv */
 extern u_int	assoc_cache_slots;/* count of allocated array entries */
