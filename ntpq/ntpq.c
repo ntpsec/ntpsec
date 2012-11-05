@@ -525,7 +525,6 @@ ntpqmain(
 		getcmds();
 	} else {
 		for (ihost = 0; ihost < numhosts; ihost++) {
-			printf("About to call docmd() for <%s> %d\n", chosts[ihost].name, chosts[ihost].fam);
 			if (openhost(chosts[ihost].name, chosts[ihost].fam))
 				for (icmd = 0; icmd < numcmds; icmd++)
 					docmd(ccmds[icmd]);
