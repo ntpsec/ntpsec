@@ -1,3 +1,4 @@
+(4.2.7p319) 2012/11/11 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2296] Fix compile problem with building with old OpenSSL.
 (4.2.7p318) 2012/11/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2301] Remove spurious debug output from ntpq.

@@ -1,8 +1,8 @@
-.TH ntp.keys 5 "05 Nov 2012" "4.2.7p318" "File Formats"
+.TH ntp.keys 5 "11 Nov 2012" "4.2.7p319" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"  
-.\"  It has been AutoGen-ed  November  5, 2012 at 11:26:06 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  November 11, 2012 at 11:35:26 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-cmd.tpl
 .\"
