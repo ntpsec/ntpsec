@@ -1,3 +1,4 @@
+(4.2.7p320) 2012/11/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 969] Clarify ntpdate.html documentation about -u and ntpd.
 * [Bug 1217] libisc/ifiter_sysctl.c:internal_current(): Ignore RTM
   messages with wrong version

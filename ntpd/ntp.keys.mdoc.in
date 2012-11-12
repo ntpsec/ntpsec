@@ -1,9 +1,9 @@
-.Dd November 11 2012
+.Dd November 12 2012
 .Dt NTP_KEYS 5 File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  November 11, 2012 at 11:35:39 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  November 12, 2012 at 11:32:30 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
