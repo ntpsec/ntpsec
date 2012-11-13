@@ -208,6 +208,9 @@ static	RETSIGTYPE	no_debug	(int);
 # endif	/* !DEBUG */
 #endif	/* !SIM && !SYS_WINNT */
 
+int	saved_argc;
+char **	saved_argv;
+
 #ifndef SIM
 int		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
@@ -449,6 +452,8 @@ ntpdmain(
 	else
 		umask(022);
 # endif
+	saved_argc = argc;
+	saved_argv = argv;
 	progname = argv[0];
 	initializing = TRUE;		/* mark that we are initializing */
 	parse_cmdline_opts(&argc, &argv);
@@ -477,6 +482,19 @@ ntpdmain(
 			syslogit = FALSE;
 	}
 	msyslog(LOG_NOTICE, "%s: Starting\n", Version);
+
+	{
+		int i;
+		char buf[4096];
+		char *cp = buf;
+
+		for (i = 0; i < saved_argc ; ++i) {
+			snprintf(cp, sizeof buf - (cp - buf),
+				"%s%s", &" "[(cp == buf)], saved_argv[i]);
+			cp += strlen(cp);
+		}
+		msyslog("Command line: %s", buf);
+	}
 
 	/*
 	 * Install trap handlers to log errors and assertion failures.
