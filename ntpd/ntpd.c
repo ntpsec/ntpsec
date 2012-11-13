@@ -436,11 +436,6 @@ ntpdmain(
 	int		fd;
 	int		zero;
 # endif
-# if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE)
-#  ifdef HAVE_SETRLIMIT
-	struct rlimit	rl;
-#  endif
-# endif
 
 # ifdef HAVE_UMASK
 	uv = umask(0);
@@ -672,16 +667,7 @@ ntpdmain(
 
 # if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE)
 #  ifdef HAVE_SETRLIMIT
-	/*
-	 * Set the stack limit to something smaller, so that we don't lock a lot
-	 * of unused stack memory.
-	 */
-	/* HMS: must make the rlim_cur amount configurable */
-	if (getrlimit(RLIMIT_STACK, &rl) != -1
-	    && (rl.rlim_cur = 50 * 4096) < rl.rlim_max
-	    && setrlimit(RLIMIT_STACK, &rl) == -1)
-		msyslog(LOG_ERR,
-			"Cannot adjust stack limit for mlockall: %m");
+	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096);
 #   ifdef RLIMIT_MEMLOCK
 	/*
 	 * The default RLIMIT_MEMLOCK is very low on Linux systems.
@@ -689,9 +675,7 @@ ntpdmain(
 	 * fail if we drop root privilege.  To be useful the value
 	 * has to be larger than the largest ntpd resident set size.
 	 */
-	rl.rlim_cur = rl.rlim_max = 32 * 1024 * 1024;
-	if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
-		msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
+	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024);
 #   endif	/* RLIMIT_MEMLOCK */
 #  endif	/* HAVE_SETRLIMIT */
 	/*

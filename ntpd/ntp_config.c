@@ -216,24 +216,26 @@ static void apply_enable_disable(attr_val_fifo *q, int enable);
 #ifdef FREE_CFG_T
 static void free_auth_node(config_tree *);
 
-static void free_config_other_modes(config_tree *);
-static void free_config_auth(config_tree *);
-static void free_config_tos(config_tree *);
-static void free_config_monitor(config_tree *);
 static void free_config_access(config_tree *);
-static void free_config_tinker(config_tree *);
-static void free_config_system_opts(config_tree *);
-static void free_config_logconfig(config_tree *);
-static void free_config_phone(config_tree *);
-static void free_config_setvar(config_tree *);
-static void free_config_ttl(config_tree *);
-static void free_config_trap(config_tree *);
+static void free_config_auth(config_tree *);
 static void free_config_fudge(config_tree *);
-static void free_config_vars(config_tree *);
-static void free_config_peers(config_tree *);
-static void free_config_unpeers(config_tree *);
+static void free_config_logconfig(config_tree *);
+static void free_config_monitor(config_tree *);
 static void free_config_nic_rules(config_tree *);
+static void free_config_other_modes(config_tree *);
+static void free_config_peers(config_tree *);
+static void free_config_phone(config_tree *);
 static void free_config_reset_counters(config_tree *);
+static void free_config_rlimit(config_tree *);
+static void free_config_setvar(config_tree *);
+static void free_config_system_opts(config_tree *);
+static void free_config_tinker(config_tree *);
+static void free_config_tos(config_tree *);
+static void free_config_trap(config_tree *);
+static void free_config_ttl(config_tree *);
+static void free_config_unpeers(config_tree *);
+static void free_config_vars(config_tree *);
+
 #ifdef SIM
 static void free_config_sim(config_tree *);
 #endif
@@ -293,12 +295,14 @@ static void destroy_addr_opts_fifo(addr_opts_fifo *);
 		(pf) = NULL;			\
 	} while (0)
 
-static void config_tos(config_tree *);
-static void config_monitor(config_tree *);
-static void config_tinker(config_tree *);
-static void config_system_opts(config_tree *);
 static void config_logconfig(config_tree *);
+static void config_monitor(config_tree *);
+static void config_rlimit(config_tree *);
+static void config_system_opts(config_tree *);
+static void config_tinker(config_tree *);
+static void config_tos(config_tree *);
 static void config_vars(config_tree *);
+
 #ifdef SIM
 static sockaddr_u *get_next_address(address_node *addr);
 static void config_sim(config_tree *);
@@ -422,6 +426,7 @@ free_config_tree(
 	free_config_monitor(ptree);
 	free_config_access(ptree);
 	free_config_tinker(ptree);
+	free_config_rlimit(ptree);
 	free_config_system_opts(ptree);
 	free_config_logconfig(ptree);
 	free_config_phone(ptree);
@@ -689,6 +694,17 @@ dump_config_tree(
 					normal_dtoa(atrv->value.d));
 				break;
 			}
+		}
+		fprintf(df, "\n");
+	}
+
+	atrv = HEAD_PFIFO(ptree->rlimit);
+	if (atrv != NULL) {
+		fprintf(df, "rlimit");
+		for ( ; atrv != NULL; atrv = atrv->link) {
+			NTP_INSIST(T_Integer == atrv->type);
+			fprintf(df, " %s %i", keyword(atrv->attr),
+				atrv->value.i);
 		}
 		fprintf(df, "\n");
 	}
@@ -2569,6 +2585,43 @@ free_config_access(
 
 
 static void
+config_rlimit(
+	config_tree *ptree
+	)
+{
+	attr_val *	rlimit_av;
+	int		item;
+
+	item = -1;	/* quiet warning */
+	rlimit_av = HEAD_PFIFO(ptree->rlimit);
+	for (; rlimit_av != NULL; rlimit_av = rlimit_av->link) {
+		switch (rlimit_av->attr) {
+
+		default:
+			NTP_INSIST(0);
+			break;
+
+		case T_Memlock:
+#if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE) && defined(RLIMIT_MEMLOCK)
+			ntp_rlimit(RLIMIT_MEMLOCK, tinker->value.i * 1024 * 1024);
+#else
+			fprintf(stderr, "Warning: 'rlimit memlock' specified but is not available on this system!\n");
+#endif /* !RLIMIT_MEMLOCK */
+			break;
+
+		case T_Stacksize:
+#if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE) && defined(RLIMIT_STACK)
+			ntp_rlimit(RLIMIT_STACK, tinker->value.i * 4096);
+#else
+			fprintf(stderr, "Warning: 'rlimit stacksize' specified but is not available on this system!\n");
+#endif /* !RLIMIT_STACK */
+			break;
+		}
+	}
+}
+
+
+static void
 config_tinker(
 	config_tree *ptree
 	)
@@ -2623,6 +2676,14 @@ config_tinker(
 
 
 #ifdef FREE_CFG_T
+static void
+free_config_rlimit(
+	config_tree *ptree
+	)
+{
+	FREE_ATTR_VAL_FIFO(ptree->rlimit);
+}
+
 static void
 free_config_tinker(
 	config_tree *ptree
@@ -4173,6 +4234,7 @@ config_ntpd(
 	config_tos(ptree);
 	config_access(ptree);
 	config_tinker(ptree);
+	config_rlimit(ptree);		// May not be needed
 	config_system_opts(ptree);
 	config_logconfig(ptree);
 	config_phone(ptree);
@@ -4218,6 +4280,7 @@ config_ntpdsim(
 	config_tos(ptree);
 	config_monitor(ptree);
 	config_tinker(ptree);
+	config_rlimit(ptree);		// May not be needed
 	config_system_opts(ptree);
 	config_logconfig(ptree);
 	config_vars(ptree);
@@ -4769,3 +4832,49 @@ getnetnum(
 	return 1;
 }
 #endif	/* !SIM */
+
+# if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE) && defined(HAVE_SETRLIMIT)
+void
+ntp_rlimit(
+	int rl_what,
+	int rl_value
+	)
+{
+	struct rlimit	rl;
+
+	switch (rl_what) {
+#ifdef RLIMIT_MEMLOCK
+	    case RLIMIT_MEMLOCK:
+		/*
+		 * The default RLIMIT_MEMLOCK is very low on Linux systems.
+		 * Unless we increase this limit malloc calls are likely to
+		 * fail if we drop root privilege.  To be useful the value
+		 * has to be larger than the largest ntpd resident set size.
+		 */
+		DPRINTF(1, ("ntp_rlimit: MEMLOCK: %d MB\n", rl_value/1024/1024));
+		rl.rlim_cur = rl.rlim_max = rl_value
+		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
+			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
+	    	break;
+#endif /* RLIMIT_MEMLOCK */
+
+	    case RLIMIT_STACK:
+		/*
+		 * Set the stack limit to something smaller, so that we
+		 * don't lock a lot of unused stack memory.
+		 */
+		DPRINTF(1, ("ntp_rlimit: STACK: %d 4k pages\n", rl_value/4096));
+		// Squawk if rl_value > rlim_max ...
+		if (getrlimit(RLIMIT_STACK, &rl) != -1
+		    && (rl.rlim_cur = rl_value) < rl.rlim_max
+		    && setrlimit(RLIMIT_STACK, &rl) == -1)
+			msyslog(LOG_ERR,
+				"Cannot adjust stack limit for mlockall: %m");
+	    	break;
+
+	    default:
+		// XXX
+	    	break;
+	}
+}
+#  endif	/* ... && HAVE_SETRLIMIT */

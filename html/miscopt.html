@@ -119,6 +119,16 @@
       <dd>Specifies the stepout threshold in seconds. The default without this command is 300 s. Since this option also affects the training and startup intervals, it should not be set less than the default. Further details are on the <a href="clock.html">Clock State Machine</a> page.</dd>
     </dl>
   </dd>
+  <dt id="rlimit"><tt>rlimit [memlock <i>Nmegabytes</i> | stacklimit <i>N4kPages</i>]</tt></dt>
+  <dd>This command alters certain process storage allocation limits, and is only available on some operating systems.  Options are are as follows:</dd>
+  <dd>
+    <dl>
+      <dt><tt>memlock <i>Nmegabytes</i></tt></dt>
+      <dd>Specify the number of megabytes of memory that can be allocated.  Probably only available under Linux, this option is useful when dropping root (the <tt>-i</tt> option).   The default is 32  megabytes.</dd>
+      <dt><tt>stacklimit <i>N4kPages</i></tt></dt>
+      <dd>Specifies the maximum size of the process stack on systems with the <tt>mlockall()</tt> function. Defaults to 50 4k pages (200 4k pages in OpenBSD).</dd>
+    </dl>
+  </dd>
   <dt id="tos"><tt>tos [beacon <i>beacon</i> | ceiling <i>ceiling</i> | cohort {0 | 1} | floor <i>floor</i> | maxclock <i>maxclock </i>| maxdist <i>maxdist</i> | minclock <i>minclock</i> | mindist <i>mindist </i>| minsane <i>minsane</i> | orphan <i>stratum</i> | orphanwait <em>delay</em>]</tt></dt>
   <dd>This command alters certain system variables used by the the clock selection and clustering algorithms. The default values of these variables have been carefully optimized for a wide range of network speeds and reliability expectations. Very rarely is it necessary to change the default values; but, some folks can't resist twisting the knobs. It can be used to select the quality and quantity of peers used to synchronize the system clock and is most useful in dynamic server discovery schemes. The options are as follows:</dd>
   <dd>

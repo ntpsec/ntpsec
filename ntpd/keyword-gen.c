@@ -66,6 +66,7 @@ struct key_tok ntp_keywords[] = {
 { "discard",		T_Discard,		FOLLBY_TOKEN },
 { "reset",		T_Reset,		FOLLBY_TOKEN },
 { "restrict",		T_Restrict,		FOLLBY_TOKEN },
+{ "rlimit",		T_Rlimit,		FOLLBY_TOKEN },
 { "server",		T_Server,		FOLLBY_STRING },
 { "setvar",		T_Setvar,		FOLLBY_STRING },
 { "statistics",		T_Statistics,		FOLLBY_TOKEN },
@@ -198,6 +199,9 @@ struct key_tok ntp_keywords[] = {
 { "ntp",		T_Ntp,			FOLLBY_TOKEN },
 { "mode7",		T_Mode7,		FOLLBY_TOKEN },
 { "stats",		T_Stats,		FOLLBY_TOKEN },
+/* rlimit_option */
+{ "memlock",		T_Memlock,		FOLLBY_TOKEN },
+{ "stacksize",		T_Stacksize,		FOLLBY_TOKEN },
 /* tinker_option */
 { "step",		T_Step,			FOLLBY_TOKEN },
 { "panic",		T_Panic,		FOLLBY_TOKEN },
