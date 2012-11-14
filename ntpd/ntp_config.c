@@ -168,7 +168,7 @@ struct netinfo_config_state {
 	ni_id config_dir;	/* ID config dir      */
 	int prop_index;		/* current property   */
 	int val_index;		/* current value      */
-	char **val_list;       	/* value list         */
+	char **val_list;	/* value list         */
 };
 #endif
 
@@ -459,15 +459,15 @@ int
 dump_all_config_trees(
 	FILE *df,
 	int comment
-	) 
+	)
 {
 	config_tree *	cfg_ptr;
 	int		return_value;
 
 	return_value = 0;
 	for (cfg_ptr = cfg_tree_history;
-	     cfg_ptr != NULL; 
-	     cfg_ptr = cfg_ptr->link) 
+	     cfg_ptr != NULL;
+	     cfg_ptr = cfg_ptr->link)
 		return_value |= dump_config_tree(cfg_ptr, df, comment);
 
 	return return_value;
@@ -536,7 +536,7 @@ dump_config_tree(
 			fprintf(df, "%s %s\n", keyword(atrv->attr),
 				normal_dtoa(atrv->value.d));
 			break;
-			
+
 		case T_Integer:
 			fprintf(df, "%s %d\n", keyword(atrv->attr),
 				atrv->value.i);
@@ -573,7 +573,7 @@ dump_config_tree(
 	if (i_n != NULL) {
 		fprintf(df, "statistics");
 		for ( ; i_n != NULL; i_n = i_n->link)
-			fprintf(df, " %s", keyword(i_n->i));	
+			fprintf(df, " %s", keyword(i_n->i));
 		fprintf(df, "\n");
 	}
 
@@ -581,7 +581,7 @@ dump_config_tree(
 	for ( ; fgen_node != NULL; fgen_node = fgen_node->link) {
 		atrv = HEAD_PFIFO(fgen_node->options);
 		if (atrv != NULL) {
-			fprintf(df, "filegen %s", 
+			fprintf(df, "filegen %s",
 				keyword(fgen_node->filegen_token));
 			for ( ; atrv != NULL; atrv = atrv->link) {
 				switch (atrv->attr) {
@@ -684,12 +684,12 @@ dump_config_tree(
 			default:
 				fprintf(df, "\n# dump error:\n"
 					"# unknown tos attr type %d %s\n"
-					"tos", atrv->type, 
+					"tos", atrv->type,
 					token_name(atrv->type));
 				break;
 #endif
 			case T_Double:
-				fprintf(df, " %s %s", 
+				fprintf(df, " %s %s",
 					keyword(atrv->attr),
 					normal_dtoa(atrv->value.d));
 				break;
@@ -703,7 +703,7 @@ dump_config_tree(
 		fprintf(df, "rlimit");
 		for ( ; atrv != NULL; atrv = atrv->link) {
 			NTP_INSIST(T_Integer == atrv->type);
-			fprintf(df, " %s %i", keyword(atrv->attr),
+			fprintf(df, " %s %d", keyword(atrv->attr),
 				atrv->value.i);
 		}
 		fprintf(df, "\n");
@@ -748,7 +748,7 @@ dump_config_tree(
 			break;
 		}
 		fprintf(df, " %s", addr->address);
-		
+
 		if (peern->minpoll != 0)
 			fprintf(df, " minpoll %u", peern->minpoll);
 
@@ -780,7 +780,7 @@ dump_config_tree(
 		}
 
 		fprintf(df, "\n");
-		
+
 		addr_opts = HEAD_PFIFO(ptree->fudge);
 		for ( ; addr_opts != NULL; addr_opts = addr_opts->link) {
 			peer_addr = peern->addr;
@@ -846,7 +846,7 @@ dump_config_tree(
 		fprintf(df, "\n");
 	}
 
-	
+
 	for (unpeern = HEAD_PFIFO(ptree->unpeers);
 	     unpeern != NULL;
 	     unpeern = unpeern->link)
@@ -870,13 +870,13 @@ dump_config_tree(
 		fprintf(df, "\n");
 	}
 
-	
+
 	for (rest_node = HEAD_PFIFO(ptree->restrict_opts);
-	     rest_node != NULL; 
+	     rest_node != NULL;
 	     rest_node = rest_node->link) {
 
 		if (NULL == rest_node->addr) {
-			s = "default";			
+			s = "default";
 			flags = HEAD_PFIFO(rest_node->flags);
 			for ( ; flags != NULL; flags = flags->link)
 				if (T_Source == flags->i) {
@@ -933,7 +933,7 @@ dump_config_tree(
 			fprintf(df, " %d", i_n->i);
 		fprintf(df, "\n");
 	}
-	
+
 	addr_opts = HEAD_PFIFO(ptree->trap);
 	for ( ; addr_opts != NULL; addr_opts = addr_opts->link) {
 		addr = addr_opts->addr;
@@ -974,7 +974,7 @@ dump_config_tree(
 	return 0;
 }
 #endif	/* SAVECONFIG */
-	
+
 
 
 /* generic fifo routines for structs linked by 1st member */
@@ -1123,7 +1123,7 @@ create_int_node(
 	)
 {
 	int_node *i_n;
-	
+
 	i_n = emalloc_zero(sizeof(*i_n));
 	i_n->i = val;
 
@@ -1137,7 +1137,7 @@ create_string_node(
 	)
 {
 	string_node *sn;
-	
+
 	sn = emalloc_zero(sizeof(*sn));
 	sn->s = str;
 
@@ -1154,7 +1154,7 @@ create_address_node(
 	address_node *my_node;
 
 	NTP_REQUIRE(NULL != addr);
-	NTP_REQUIRE(AF_INET == type || 
+	NTP_REQUIRE(AF_INET == type ||
 		    AF_INET6 == type || AF_UNSPEC == type);
 	my_node = emalloc_zero(sizeof(*my_node));
 	my_node->address = addr;
@@ -1233,7 +1233,7 @@ create_peer_node(
 					UCHAR_MAX);
 				my_node->minpoll = NTP_MINPOLL;
 			} else {
-				my_node->minpoll = 
+				my_node->minpoll =
 					(u_char)option->value.u;
 			}
 			break;
@@ -1246,7 +1246,7 @@ create_peer_node(
 					option->value.i, NTP_MAXPOLL);
 				my_node->maxpoll = NTP_MAXPOLL;
 			} else {
-				my_node->maxpoll = 
+				my_node->maxpoll =
 					(u_char)option->value.u;
 			}
 			break;
@@ -1269,7 +1269,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "key: invalid argument");
 				errflag = 1;
 			} else {
-				my_node->peerkey = 
+				my_node->peerkey =
 					(keyid_t)option->value.u;
 			}
 			break;
@@ -1279,7 +1279,7 @@ create_peer_node(
 				msyslog(LOG_ERR, "version: invalid argument");
 				errflag = 1;
 			} else {
-				my_node->peerversion = 
+				my_node->peerversion =
 					(u_char)option->value.u;
 			}
 			break;
@@ -1289,7 +1289,7 @@ create_peer_node(
 			break;
 
 		default:
-			msyslog(LOG_ERR, 
+			msyslog(LOG_ERR,
 				"Unknown peer/server option token %s",
 				token_name(option->attr));
 			errflag = 1;
@@ -1328,7 +1328,7 @@ create_unpeer_node(
 	while (*pch && isdigit(*pch))
 		pch++;
 
-	if (!*pch 
+	if (!*pch
 	    && 1 == sscanf(addr->address, "%u", &u)
 	    && u <= ASSOCID_MAX) {
 		my_node->assocID = (associd_t)u;
@@ -1349,7 +1349,7 @@ create_filegen_node(
 	)
 {
 	filegen_node *my_node;
-	
+
 	my_node = emalloc_zero(sizeof(*my_node));
 	my_node->filegen_token = filegen_token;
 	my_node->options = options;
@@ -1367,7 +1367,7 @@ create_restrict_node(
 	)
 {
 	restrict_node *my_node;
-	
+
 	my_node = emalloc_zero(sizeof(*my_node));
 	my_node->addr = addr;
 	my_node->mask = mask;
@@ -1566,7 +1566,7 @@ create_nic_rule_node(
 	)
 {
 	nic_rule_node *my_node;
-	
+
 	NTP_REQUIRE(match_class != 0 || if_name != NULL);
 
 	my_node = emalloc_zero(sizeof(*my_node));
@@ -1614,7 +1614,7 @@ create_sim_script_info(
 	my_info->proc_delay = PROC_DLY;
 
 	/* Traverse the script_queue and fill out non-default values */
-	
+
 	for (my_attr_val = HEAD_PFIFO(script_queue);
 	     my_attr_val != NULL;
 	     my_attr_val = my_attr_val->link) {
@@ -1666,7 +1666,7 @@ get_next_address(
 	sockaddr_u *final_addr;
 	struct addrinfo *ptr;
 	int gai_err;
-	
+
 	final_addr = emalloc(sizeof(*final_addr));
 
 	if (addr->type == T_String) {
@@ -1722,7 +1722,7 @@ create_sim_node(
 	)
 {
 	sim_node *my_node;
-	
+
 	my_node = emalloc(sizeof(*my_node));
 	my_node->init_opts = init_opts;
 	my_node->servers = servers;
@@ -2194,7 +2194,7 @@ config_monitor(
 					break;
 
 				default:
-					msyslog(LOG_ERR, 
+					msyslog(LOG_ERR,
 						"Unknown filegen flag token %d",
 						my_opts->value.i);
 					exit(1);
@@ -2602,19 +2602,21 @@ config_rlimit(
 			break;
 
 		case T_Memlock:
-#if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE) && defined(RLIMIT_MEMLOCK)
-			ntp_rlimit(RLIMIT_MEMLOCK, tinker->value.i * 1024 * 1024);
+#if defined(HAVE_MLOCKALL) && defined(RLIMIT_MEMLOCK)
+			ntp_rlimit(RLIMIT_MEMLOCK, rlimit_av->value.i * 1024 * 1024);
 #else
-			fprintf(stderr, "Warning: 'rlimit memlock' specified but is not available on this system!\n");
-#endif /* !RLIMIT_MEMLOCK */
+			/* STDERR as well would be fine... */
+			msyslog(LOG_WARNING, "Warning: 'rlimit memlock' specified but is not available on this system!\n");
+#endif /* !(HAVE_MLOCKALL && RLIMIT_MEMLOCK) */
 			break;
 
 		case T_Stacksize:
-#if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE) && defined(RLIMIT_STACK)
-			ntp_rlimit(RLIMIT_STACK, tinker->value.i * 4096);
+#if defined(HAVE_MLOCKALL) && defined(RLIMIT_STACK)
+			ntp_rlimit(RLIMIT_STACK, rlimit_av->value.i * 4096);
 #else
-			fprintf(stderr, "Warning: 'rlimit stacksize' specified but is not available on this system!\n");
-#endif /* !RLIMIT_STACK */
+			/* STDERR as well would be fine... */
+			msyslog(LOG_WARNING, "Warning: 'rlimit stacksize' specified but is not available on this system!\n");
+#endif /* !(HAVE_MLOCKALL && RLIMIT_STACK) */
 			break;
 		}
 	}
@@ -2914,7 +2916,7 @@ apply_enable_disable(
 				pentry++;
 			}
 			if (!pentry->token) {
-				msyslog(LOG_ERR, 
+				msyslog(LOG_ERR,
 					"compat token %d not in bc_list[]",
 					option);
 				continue;
@@ -3044,7 +3046,7 @@ config_setvar(
 		snprintf(str, octets, "%s=%s", my_node->var,
 			 my_node->val);
 		set_sys_var(str, octets, (my_node->isdefault)
-						? DEF 
+						? DEF
 						: 0);
 	}
 	if (str != NULL)
@@ -3128,11 +3130,11 @@ config_trap(
 		curr_opt = HEAD_PFIFO(curr_trap->options);
 		for (; curr_opt != NULL; curr_opt = curr_opt->link) {
 			if (T_Port == curr_opt->attr) {
-				if (curr_opt->value.i < 1 
+				if (curr_opt->value.i < 1
 				    || curr_opt->value.i > USHRT_MAX) {
 					msyslog(LOG_ERR,
 						"invalid port number "
-						"%d, trap ignored", 
+						"%d, trap ignored",
 						curr_opt->value.i);
 					err_flag = 1;
 				}
@@ -3909,7 +3911,7 @@ config_unpeers(
 					stoa(&p->srcadr));
 				peer_clear(p, "GONE");
 				unpeer(p);
-			}	
+			}
 
 			continue;
 		}
@@ -3932,7 +3934,7 @@ config_unpeers(
 
 			continue;
 		}
-		/* 
+		/*
 		 * It's not a numeric IP address, it's a hostname.
 		 * Check for associations with a matching hostname.
 		 */
@@ -3989,7 +3991,7 @@ unpeer_name_resolved(
 	DPRINTF(1, ("unpeer_name_resolved(%s) rescode %d\n", name, rescode));
 
 	if (rescode) {
-		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)", 
+		msyslog(LOG_ERR, "giving up resolving unpeer %s: %s (%d)",
 			name, gai_strerror(rescode), rescode);
 		return;
 	}
@@ -4234,7 +4236,7 @@ config_ntpd(
 	config_tos(ptree);
 	config_access(ptree);
 	config_tinker(ptree);
-	config_rlimit(ptree);		// May not be needed
+	config_rlimit(ptree);
 	config_system_opts(ptree);
 	config_logconfig(ptree);
 	config_phone(ptree);
@@ -4259,7 +4261,7 @@ config_ntpd(
 				     INITIAL_DNS_RETRY,
 				     gai_test_callback, (void *)1);
 		hints.ai_family = AF_INET6;
-		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints, 
+		getaddrinfo_sometime("ipv6.google.com", "ntp", &hints,
 				     INITIAL_DNS_RETRY,
 				     gai_test_callback, (void *)0x600);
 	}
@@ -4280,7 +4282,7 @@ config_ntpdsim(
 	config_tos(ptree);
 	config_monitor(ptree);
 	config_tinker(ptree);
-	config_rlimit(ptree);		// May not be needed
+	/* config_rlimit(ptree);	*//* not needed for the simulator */
 	config_system_opts(ptree);
 	config_logconfig(ptree);
 	config_vars(ptree);
@@ -4410,10 +4412,10 @@ getconfig(
 #endif
 	ip_file = fp[curr_include_level];
 	yyparse();
-	
+
 	DPRINTF(1, ("Finished Parsing!!\n"));
 
-	cfgt.source.attr = CONF_SOURCE_FILE;	
+	cfgt.source.attr = CONF_SOURCE_FILE;
 	cfgt.timestamp = time(NULL);
 
 	save_and_apply_config_tree();
@@ -4444,7 +4446,7 @@ save_and_apply_config_tree(void)
 	ptree = emalloc(sizeof(*ptree));
 	memcpy(ptree, &cfgt, sizeof(*ptree));
 	ZERO(cfgt);
-	
+
 	LINK_TAIL_SLIST(cfg_tree_history, ptree, link, config_tree);
 
 #ifdef SAVECONFIG
@@ -4461,7 +4463,7 @@ save_and_apply_config_tree(void)
 				 OPT_ARG(SAVECONFIGQUIT), err);
 			exit(err);
 		}
-		
+
 		dumpfailed = dump_all_config_trees(dumpfile, 0);
 		if (dumpfailed)
 			fprintf(stderr,
@@ -4713,7 +4715,7 @@ gettokens_netinfo (
 				/* Found the property, but it has no values */
 				if (namelist.ni_namelist_len == 0) continue;
 
-				config->val_list = 
+				config->val_list =
 				    emalloc(sizeof(char*) *
 				    (namelist.ni_namelist_len + 1));
 				val_list = config->val_list;
@@ -4722,7 +4724,7 @@ gettokens_netinfo (
 				     index < namelist.ni_namelist_len;
 				     index++) {
 					char *value;
-					
+
 					value = namelist.ni_namelist_val[index];
 					val_list[index] = estrdup(value);
 				}
@@ -4833,7 +4835,7 @@ getnetnum(
 }
 #endif	/* !SIM */
 
-# if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE) && defined(HAVE_SETRLIMIT)
+# if defined(HAVE_MLOCKALL) && defined(HAVE_SETRLIMIT)
 void
 ntp_rlimit(
 	int rl_what,
@@ -4851,11 +4853,11 @@ ntp_rlimit(
 		 * fail if we drop root privilege.  To be useful the value
 		 * has to be larger than the largest ntpd resident set size.
 		 */
-		DPRINTF(1, ("ntp_rlimit: MEMLOCK: %d MB\n", rl_value/1024/1024));
+		DPRINTF(2, ("ntp_rlimit: MEMLOCK: %d MB\n", rl_value/1024/1024));
 		rl.rlim_cur = rl.rlim_max = rl_value
 		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
-	    	break;
+		break;
 #endif /* RLIMIT_MEMLOCK */
 
 	    case RLIMIT_STACK:
@@ -4863,18 +4865,18 @@ ntp_rlimit(
 		 * Set the stack limit to something smaller, so that we
 		 * don't lock a lot of unused stack memory.
 		 */
-		DPRINTF(1, ("ntp_rlimit: STACK: %d 4k pages\n", rl_value/4096));
-		// Squawk if rl_value > rlim_max ...
+		DPRINTF(2, ("ntp_rlimit: STACK: %d 4k pages\n", rl_value/4096));
+		/* Squawk if rl_value > rlim_max ... */
 		if (getrlimit(RLIMIT_STACK, &rl) != -1
 		    && (rl.rlim_cur = rl_value) < rl.rlim_max
 		    && setrlimit(RLIMIT_STACK, &rl) == -1)
 			msyslog(LOG_ERR,
 				"Cannot adjust stack limit for mlockall: %m");
-	    	break;
+		break;
 
 	    default:
-		// XXX
-	    	break;
+		/* XXX */
+		break;
 	}
 }
 #  endif	/* ... && HAVE_SETRLIMIT */

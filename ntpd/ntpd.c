@@ -687,7 +687,7 @@ ntpdmain(
 	}
 # endif
 
-# if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE)
+# if defined(HAVE_MLOCKALL)
 #  ifdef HAVE_SETRLIMIT
 	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096);
 #   ifdef RLIMIT_MEMLOCK
@@ -706,7 +706,7 @@ ntpdmain(
 	if (!HAVE_OPT(SAVECONFIGQUIT) &&
 	    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 		msyslog(LOG_ERR, "mlockall(): %m");
-# else	/* !HAVE_MLOCKALL || !MCL_CURRENT || !MCL_FUTURE follows */
+# else	/* !HAVE_MLOCKALL follows */
 #  ifdef HAVE_PLOCK
 #   ifdef PROCLOCK
 #    ifdef _AIX
@@ -735,7 +735,7 @@ ntpdmain(
 #    endif	/* !TXTLOCK */
 #   endif	/* !PROCLOCK */
 #  endif	/* HAVE_PLOCK */
-# endif	/* !HAVE_MLOCKALL || !MCL_CURRENT || !MCL_FUTURE */
+# endif	/* !HAVE_MLOCKALL */
 
 	/*
 	 * Set up signals we pay attention to locally.
