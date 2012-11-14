@@ -493,7 +493,7 @@ ntpdmain(
 				"%s%s", &" "[(cp == buf)], saved_argv[i]);
 			cp += strlen(cp);
 		}
-		msyslog("Command line: %s", buf);
+		msyslog(LOG_NOTICE, "Command line: %s", buf);
 	}
 
 	/*
