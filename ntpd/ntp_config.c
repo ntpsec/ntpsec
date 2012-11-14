@@ -2603,19 +2603,25 @@ config_rlimit(
 
 		case T_Memlock:
 #if defined(HAVE_MLOCKALL) && defined(RLIMIT_MEMLOCK)
-			ntp_rlimit(RLIMIT_MEMLOCK, rlimit_av->value.i * 1024 * 1024);
+			ntp_rlimit(RLIMIT_MEMLOCK,
+				   (rlim_t)(rlimit_av->value.i * 1024 * 1024),
+				   1024 * 1024,
+				   "MB");
 #else
 			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "Warning: 'rlimit memlock' specified but is not available on this system!\n");
+			msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.\n");
 #endif /* !(HAVE_MLOCKALL && RLIMIT_MEMLOCK) */
 			break;
 
 		case T_Stacksize:
 #if defined(HAVE_MLOCKALL) && defined(RLIMIT_STACK)
-			ntp_rlimit(RLIMIT_STACK, rlimit_av->value.i * 4096);
+			ntp_rlimit(RLIMIT_STACK,
+				   (rlim_t)(rlimit_av->value.i * 4096),
+				   4096,
+				   "4k");
 #else
 			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "Warning: 'rlimit stacksize' specified but is not available on this system!\n");
+			msyslog(LOG_WARNING, "'rlimit stacksize' specified but is not available on this system.\n");
 #endif /* !(HAVE_MLOCKALL && RLIMIT_STACK) */
 			break;
 		}
@@ -4838,8 +4844,10 @@ getnetnum(
 # if defined(HAVE_MLOCKALL) && defined(HAVE_SETRLIMIT)
 void
 ntp_rlimit(
-	int rl_what,
-	int rl_value
+	int	rl_what,
+	rlim_t	rl_value,
+	int	rl_scale,
+	char *	rl_sstr
 	)
 {
 	struct rlimit	rl;
@@ -4853,8 +4861,9 @@ ntp_rlimit(
 		 * fail if we drop root privilege.  To be useful the value
 		 * has to be larger than the largest ntpd resident set size.
 		 */
-		DPRINTF(2, ("ntp_rlimit: MEMLOCK: %d MB\n", rl_value/1024/1024));
-		rl.rlim_cur = rl.rlim_max = rl_value
+		DPRINTF(2, ("ntp_rlimit: MEMLOCK: %d %s\n",
+			rl_value / rl_scale, rl_sstr));
+		rl.rlim_cur = rl.rlim_max = rl_value;
 		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
 		break;
@@ -4862,20 +4871,31 @@ ntp_rlimit(
 
 	    case RLIMIT_STACK:
 		/*
-		 * Set the stack limit to something smaller, so that we
-		 * don't lock a lot of unused stack memory.
+		 * Provide a way to set the stack limit to something
+		 * smaller, so that we don't lock a lot of unused
+		 * stack memory.
 		 */
-		DPRINTF(2, ("ntp_rlimit: STACK: %d 4k pages\n", rl_value/4096));
-		/* Squawk if rl_value > rlim_max ... */
-		if (getrlimit(RLIMIT_STACK, &rl) != -1
-		    && (rl.rlim_cur = rl_value) < rl.rlim_max
-		    && setrlimit(RLIMIT_STACK, &rl) == -1)
-			msyslog(LOG_ERR,
-				"Cannot adjust stack limit for mlockall: %m");
+		DPRINTF(2, ("ntp_rlimit: STACK: %d %s pages\n",
+			    rl_value / rl_scale, rl_sstr));
+		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
+			msyslog(LOG_ERR, "getrlimit() failed: %m");
+		} else {
+			if (rl_value > rl.rlim_max) {
+				msyslog(LOG_WARNING,
+					"ntp_rlimit: using maximum allowed stack limit %lu instead of %lu.",
+					(u_long)rl.rlim_max,
+					(u_long)rl_value);
+				rl_value = rl.rlim_max;
+			}
+			if (-1 == setrlimit(RLIMIT_STACK, &rl)) {
+				msyslog(LOG_ERR,
+					"ntp_rlimit: Cannot adjust stack limit: %m");
+			}
+		}
 		break;
 
 	    default:
-		/* XXX */
+		ASSERT(!"Unexpected setrlimit() case!");
 		break;
 	}
 }
