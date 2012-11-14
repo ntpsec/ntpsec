@@ -4895,7 +4895,7 @@ ntp_rlimit(
 		break;
 
 	    default:
-		ASSERT(!"Unexpected setrlimit() case!");
+		INSIST(!"Unexpected setrlimit() case!");
 		break;
 	}
 }
