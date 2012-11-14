@@ -2,6 +2,7 @@
   RLIMIT_MEMLOCK.
 * [Bug 1320] Log ntpd's initial command-line parameters. (updated fix)
 * [Bug 2120] no sysexits.h under QNX.
+* [Bug 2123] cleanup to html/leap.html.
 (4.2.7p321) 2012/11/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1320] Log ntpd's initial command-line parameters.
 (4.2.7p320) 2012/11/12 Released by Harlan Stenn <stenn@ntp.org>
