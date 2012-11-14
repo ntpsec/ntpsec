@@ -480,15 +480,19 @@ ntpdmain(
 
 	{
 		int i;
-		char buf[4096];
+		char buf[1024];	/* Secret knowledge of msyslog buf length */
 		char *cp = buf;
 
+		/* Note that every arg has an initial space character */
+		snprintf(cp, sizeof(buf), "Command line:");
+		cp += strlen(cp);
+
 		for (i = 0; i < saved_argc ; ++i) {
-			snprintf(cp, sizeof buf - (cp - buf),
-				"%s%s", &" "[(cp == buf)], saved_argv[i]);
+			snprintf(cp, sizeof(buf) - (cp - buf),
+				" %s", saved_argv[i]);
 			cp += strlen(cp);
 		}
-		msyslog("Command line: %s", buf);
+		msyslog(LOG_NOTICE, "%s", buf);
 	}
 
 	/*
