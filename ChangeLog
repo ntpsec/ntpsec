@@ -1,3 +1,4 @@
+(4.2.7p323) 2012/11/18 Released by Harlan Stenn <stenn@ntp.org>
 * html/ updates from Dave Mills.
 (4.2.7p322) 2012/11/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1223] Allow configurable values for RLIMIT_STACK and
