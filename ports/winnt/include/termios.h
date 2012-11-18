@@ -209,5 +209,6 @@ extern	int	ioctl		(int, int, int *);
 extern	int	tcsetattr	(int, int, const struct termios *);
 extern	int	tcgetattr	(int, struct termios *);
 extern	int	tcflush		(int, int);
+extern	int	isserialhandle	(HANDLE);
 
 #endif	/* NTP_WIN_TERMIOS_H */

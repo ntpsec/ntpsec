@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)-bin\$(ConfigurationName)\"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)-tmp\$(ConfigurationName)\$(TargetName)\"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -39,7 +39,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\ntpq.tlb"
+				TypeLibraryName="$(IntDir)ntpq.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,12 +49,15 @@
 				AdditionalIncludeDirectories="..\..\ntpq,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\sntp\libopts"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release\ntpq.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName="..\bin\Release\ntpq-vc90"
+				PrecompiledHeaderFile="$(IntDir)ntpq.pch"
+				AssemblerListingLocation="$(IntDir)"
+				ObjectFile="$(IntDir)"
+				ProgramDataBaseFileName="$(OutDir)ntpq-vc90"
+				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -74,13 +77,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
-				OutputFile="..\bin\Release\ntpq.exe"
+				OutputFile="$(OutDir)$(ProjectName).exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Release\ntpq.pdb"
+				ProgramDatabaseFile="$(OutDir)$(ProjectName).pdb"
 				SubSystem="1"
 				LinkTimeCodeGeneration="0"
 				RandomizedBaseAddress="1"
@@ -99,7 +102,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release\ntpq.bsc"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -113,8 +116,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)-bin\$(ConfigurationName)\"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)-tmp\$(ConfigurationName)\$(TargetName)\"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -136,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\ntpq.tlb"
+				TypeLibraryName="$(IntDir)ntpq.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -145,13 +148,15 @@
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..\..\ntpq,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\sntp\libopts"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
-				MinimalRebuild="true"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug\ntpq.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName="..\bin\Debug\ntpq-vc90"
+				PrecompiledHeaderFile="$(IntDir)ntpq.pch"
+				AssemblerListingLocation="$(IntDir)"
+				ObjectFile="$(IntDir)"
+				ProgramDataBaseFileName="$(OutDir)ntpq-vc90"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -172,13 +177,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib $(OPENSSL_LIB)\libeay32.lib"
-				OutputFile="..\bin\Debug\ntpq.exe"
+				OutputFile="$(OutDir)$(ProjectName).exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Debug\ntpq.pdb"
+				ProgramDatabaseFile="$(OutDir)$(ProjectName).pdb"
 				SubSystem="1"
 				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
@@ -197,7 +202,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug\ntpq.bsc"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"

@@ -1,3 +1,4 @@
+* [Bug 2306] Added user-mode/loop-back PPS API provider for Win32
 * html/ updates from Dave Mills.
 * [Bug 1223] Allow configurable values for RLIMIT_STACK and
   RLIMIT_MEMLOCK.

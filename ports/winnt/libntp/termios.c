@@ -180,6 +180,24 @@ closeserial(int fd)
 	return close(fd);
 }
 
+/*
+ * isserialhandle() -- check if a handle is a COM port handle
+ */
+int isserialhandle(
+	HANDLE h
+	)
+{
+	size_t	u;
+	size_t	d;
+
+
+	for (u = 0; u < c_hnds; u++)
+		for (d = 0; d < hnds[u].opens; d++)
+			if (hnds[u].dupes[d] == h)
+				return TRUE;
+	return FALSE;
+}
+
 
 /*
  * tty_open - open serial port for refclock special uses
