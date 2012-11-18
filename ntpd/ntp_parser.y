@@ -980,7 +980,7 @@ fudge_factor_bool_keyword
  */
 
 rlimit_command
-	:	T_Tinker rlimit_option_list
+	:	T_Rlimit rlimit_option_list
 			{ CONCAT_G_FIFOS(cfgt.rlimit, $2); }
 	;
 
