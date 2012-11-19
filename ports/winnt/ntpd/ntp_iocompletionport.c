@@ -37,9 +37,12 @@ Some notes on the implementation:
   objects. Leak tracing becomes more interesting, though.
 
 
-The current implementation is based on the work of Danny Mayer who wrote
+The current implementation is based on the work of Danny Mayer who improved
 the original implementation and Dave Hart who improved on the serial I/O
-routines.  This version still provides the 'user space PPS' emulation
+routines. The true roots of this file seem to be shrouded by the mist of time...
+
+
+This version still provides the 'user space PPS' emulation
 feature.
 
 Juergen Perlinger (perlinger@ntp.org) Feb 2012
@@ -76,6 +79,44 @@ Juergen Perlinger (perlinger@ntp.org) Feb 2012
 
 /*
  * ---------------------------------------------------------------------
+ * storage type for PPS data (DCD change counts & times)
+ * ---------------------------------------------------------------------
+ */
+struct PpsData {
+	u_long	cc_assert;
+	u_long	cc_clear;
+	l_fp	ts_assert;
+	l_fp	ts_clear;
+};
+typedef struct PpsData PPSData_t;
+
+struct PpsDataEx {
+	u_long		cov_count;
+	PPSData_t	data;
+};
+typedef volatile struct PpsDataEx PPSDataEx_t;
+
+/*
+ * ---------------------------------------------------------------------
+ * device context; uses reference counting to avoid nasty surprises.
+ * Currently this stores only the PPS time stamps, but it could be
+ * easily extended.
+ * ---------------------------------------------------------------------
+ */
+#define PPS_QUEUE_LEN	8u		  /* must be power of two! */
+#define PPS_QUEUE_MSK	(PPS_QUEUE_LEN-1) /* mask for easy MOD ops */
+
+struct DeviceContext {
+	volatile long	ref_count;
+	volatile u_long	cov_count;
+	PPSData_t	pps_data;
+	PPSDataEx_t	pps_buff[PPS_QUEUE_LEN];
+};
+
+typedef struct DeviceContext DevCtx_t;
+
+/*
+ * ---------------------------------------------------------------------
  * I/O context structure
  *
  * This is an extended overlapped structure. Some fields are only used
@@ -88,8 +129,9 @@ Juergen Perlinger (perlinger@ntp.org) Feb 2012
  * finally needed for the processing of the buffer.
  * ---------------------------------------------------------------------
  */
-struct IoCtx;
-typedef struct IoCtx IoCtx_t;
+//struct IoCtx;
+typedef struct IoCtx      IoCtx_t;
+typedef struct refclockio RIO_t;
 
 typedef void (*IoCompleteFunc)(ULONG_PTR, IoCtx_t *);
 
@@ -98,10 +140,13 @@ struct IoCtx {
 	union {
 		recvbuf_t *	recv_buf;	/* incoming -> buffer structure	*/
 		void *		trans_buf;	/* outgoing -> char array	*/
+		PPSData_t *	pps_buf;	/* for reading PPS seq/stamps	*/
+		HANDLE		ppswake;	/* pps wakeup for attach	*/
 	};
 	IoCompleteFunc		onIoDone;	/* HL callback to execute	*/
-	struct refclockio *	rio;		/* RIO backlink (for offload)	*/
-	l_fp			DCDSTime;	/* timestamp of DCD set         */
+	RIO_t *			rio;		/* RIO backlink (for offload)	*/
+	DevCtx_t *		devCtx;
+	l_fp			DCDSTime;	/* PPS-hack: time of DCD ON	*/
 	l_fp			FlagTime;	/* timestamp of flag/event char */
 	l_fp			RecvTime;	/* timestamp of callback        */
 	DWORD			errCode;	/* error code of last I/O	*/
@@ -123,10 +168,10 @@ static		void ntpd_addremove_semaphore(HANDLE, int);
 static inline	void set_serial_recv_time    (recvbuf_t *, IoCtx_t *);
 
 /* Initiate/Request async IO operations */
-static	BOOL QueueSerialWait   (struct refclockio *, recvbuf_t *, IoCtx_t *);
-static	BOOL QueueSerialRead   (struct refclockio *, recvbuf_t *, IoCtx_t *);
-static	BOOL QueueRawSerialRead(struct refclockio *, recvbuf_t *, IoCtx_t *);
-static  BOOL QueueSocketRecv   (SOCKET             , recvbuf_t *, IoCtx_t *);
+static	BOOL QueueSerialWait   (RIO_t *, recvbuf_t *, IoCtx_t *);
+static	BOOL QueueSerialRead   (RIO_t *, recvbuf_t *, IoCtx_t *);
+static	BOOL QueueRawSerialRead(RIO_t *, recvbuf_t *, IoCtx_t *);
+static  BOOL QueueSocketRecv   (SOCKET , recvbuf_t *, IoCtx_t *);
 
 
 /* High-level IO callback functions */
@@ -198,36 +243,143 @@ IoCtxPoolDone(void)
 
 /*
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * Alloc & Free
+ * Alloc & Free on local heap
  *
  * When the heap handle is NULL, these both will fail; Alloc with a NULL
  * return and Free silently.
  */
-static IoCtx_t *
-IoCtxAlloc(void)
+static void * __fastcall
+LocalPoolAlloc(
+	size_t		size,
+	const char *	desc
+)
 {
-	IoCtx_t *	lpo;
+	void *	ptr;
 
-	if (hHeapHandle) {
-		lpo = HeapAlloc(hHeapHandle, HEAP_ZERO_MEMORY, sizeof(IoCtx_t));
-	} else {
-		lpo = NULL;
-	}
-	DPRINTF(3, ("Allocate IO ctx, heap=%p, ptr=%p\n", hHeapHandle, lpo));
+	/* Windows heaps can't grok zero byte allocation.
+	 * We just get one byte.
+	 */
+	if (size == 0)
+		size = 1;
+	if (hHeapHandle != NULL)
+		ptr = HeapAlloc(hHeapHandle, HEAP_ZERO_MEMORY, size);
+	else
+		ptr = NULL;
+	DPRINTF(3, ("Allocate '%s', heap=%p, ptr=%p\n",
+			desc,  hHeapHandle, ptr));
 
-	return lpo;
+	return ptr;
 }
 
-static void
-IoCtxFree(
-	IoCtx_t *lpo
+static void __fastcall
+LocalPoolFree(
+	void *		ptr,
+	const char *	desc
 	)
 {
-	DPRINTF(3, ("Free IO ctx, heap=%p, ptr=%p\n", hHeapHandle, lpo));
-	if (lpo != NULL && hHeapHandle != NULL)
-		HeapFree(hHeapHandle, 0, lpo);
+	DPRINTF(3, ("Free '%s', heap=%p, ptr=%p\n",
+			desc, hHeapHandle, ptr));
+	if (ptr != NULL && hHeapHandle != NULL)
+		HeapFree(hHeapHandle, 0, ptr);
 }
 
+/*
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Alloc & Free of Device context
+ *
+ * When the heap handle is NULL, these both will fail; Alloc with a NULL
+ * return and Free silently.
+ */
+static DevCtx_t * __fastcall
+DevCtxAlloc(void)
+{
+	DevCtx_t *	devCtx;
+	u_long		slot;
+
+	/* allocate struct and tag all slots as invalid */
+	devCtx = (DevCtx_t *)LocalPoolAlloc(sizeof(DevCtx_t), "DEV ctx");
+	if (devCtx != NULL)
+	{
+		devCtx->cov_count = ~0ul;
+		for (slot = 0; slot < PPS_QUEUE_LEN; slot++)
+			devCtx->pps_buff[slot].cov_count = ~slot;
+	}
+	return devCtx;
+}
+
+static void __fastcall
+DevCtxFree(
+	DevCtx_t *	devCtx
+	)
+{
+	/* this would be the place to get rid of managed ressources. */
+	LocalPoolFree(devCtx, "DEV ctx");
+}
+
+static DevCtx_t * __fastcall
+DevCtxAttach(
+	DevCtx_t *	devCtx
+	)
+{
+	if (devCtx != NULL)
+		InterlockedIncrement(&devCtx->ref_count);
+	return devCtx;
+}
+
+static void __fastcall
+DevCtxDetach(
+	DevCtx_t *	devCtx
+	)
+{
+	if (devCtx && !InterlockedDecrement(&devCtx->ref_count))
+		DevCtxFree(devCtx);
+}
+
+/*
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Alloc & Free of I/O context
+ *
+ * When the heap handle is NULL, these both will fail; Alloc with a NULL
+ * return and Free silently.
+ */
+static IoCtx_t * __fastcall
+IoCtxAlloc(
+	DevCtx_t *	devCtx
+	)
+{
+	IoCtx_t *	ioCtx;
+
+	ioCtx = (IoCtx_t *)LocalPoolAlloc(sizeof(IoCtx_t), "IO ctx");
+	if (ioCtx != NULL)
+		ioCtx->devCtx = DevCtxAttach(devCtx);
+	return ioCtx;
+}
+
+static void __fastcall
+IoCtxFree(
+	IoCtx_t *	ctx
+	)
+{
+	if (ctx)
+		DevCtxDetach(ctx->devCtx);
+	LocalPoolFree(ctx, "IO ctx");
+}
+
+static void __fastcall
+IoCtxReset(
+	IoCtx_t *	ctx
+	)
+{
+	RIO_t *		rio;
+	DevCtx_t *	dev;
+	if (ctx) {
+		rio = ctx->rio;
+		dev = ctx->devCtx;
+		ZERO(*ctx);
+		ctx->rio    = rio;
+		ctx->devCtx = dev;
+	}
+}
 
 /*
  * -------------------------------------------------------------------
@@ -551,9 +703,9 @@ IoResultCheck(
 
 static BOOL
 QueueSerialWait(
-	struct refclockio *	rio,
-	recvbuf_t *		buff,
-	IoCtx_t *		lpo
+	RIO_t *		rio,
+	recvbuf_t *	buff,
+	IoCtx_t *	lpo
 	)
 {
 	BOOL   rc;
@@ -580,19 +732,24 @@ OnSerialWaitComplete(
 	IoCtx_t *	lpo
 	)
 {
-	struct refclockio *	rio;
-	recvbuf_t * 		buff;
-	DWORD 			modem_status;
+	RIO_t *		rio;
+	DevCtx_t *	dev;
+	recvbuf_t * 	buff;
+	PPSDataEx_t *	ppsbuf;
+	DWORD 		modem_status;
+	u_long		covc;
 
 	/* check and bail out if operation failed */
 	if (!IoResultCheck(lpo->errCode, lpo,
-			   "WaitCommEvent failed"))
+		"WaitCommEvent failed"))
 		return;
 
 	/* get & validate context and buffer. */
-	rio  = lpo->rio;
+	rio  = (RIO_t *)key;
 	buff = lpo->recv_buf;
-	NTP_INSIST((ULONG_PTR)rio == key);
+	dev  = lpo->devCtx;
+
+	NTP_INSIST(rio == lpo->rio);
 
 #ifdef DEBUG
 	if (~(EV_RXFLAG | EV_RLSD | EV_RXCHAR) & lpo->com_events) {
@@ -607,15 +764,46 @@ OnSerialWaitComplete(
 	 * this code that makes a lot of sense: move to a putative
 	 * dcdpps-ppsapi-provider.dll.
 	 */
-	if (EV_RLSD & lpo->com_events) { 
+	if ((EV_RLSD & lpo->com_events) && dev) {
 		modem_status = 0;
 		GetCommModemStatus((HANDLE)_get_osfhandle(rio->fd),
 				   &modem_status);
-		if (MS_RLSD_ON & modem_status) {
-			lpo->DCDSTime = lpo->RecvTime;
-			lpo->flTsDCDS = 1;
-			DPRINTF(2, ("fd %d DCD PPS at %s\n", rio->fd,
-				    ulfptoa(&lpo->RecvTime, 6)));
+
+		if (dev != NULL) {
+			/* PPS-context available -- use it! */
+			if (MS_RLSD_ON & modem_status) {
+				dev->pps_data.cc_assert++;
+				dev->pps_data.ts_assert = lpo->RecvTime;
+				DPRINTF(2, ("upps-real: fd %d DCD PPS Rise at %s\n", rio->fd,
+					ulfptoa(&lpo->RecvTime, 6)));
+			} else {
+				dev->pps_data.cc_clear++;
+				dev->pps_data.ts_clear = lpo->RecvTime;
+				DPRINTF(2, ("upps-real: fd %d DCD PPS Fall at %s\n", rio->fd,
+					ulfptoa(&lpo->RecvTime, 6)));
+			}
+			/*
+			** Update PPS buffer, writing from low to high, with index
+			** update as last action. We need barriers to make sure that
+			** the compiler does not shuffle the assignments and that the
+			** data becomes visible to other threads in exactly that order.
+			** The lock-free read/write queue depends on that order!
+			*/
+			covc   = dev->cov_count + 1u;
+			ppsbuf = dev->pps_buff + (covc & PPS_QUEUE_MSK);
+			ppsbuf->cov_count = covc;
+			_WriteBarrier();
+			ppsbuf->data = dev->pps_data;
+			InterlockedExchange((PLONG)&dev->cov_count, covc);
+			/* Note: InterlockedExchange() is a full barrier. */
+		} else {
+			/* backward compat: 'usermode-pps-hack' */
+			if (MS_RLSD_ON & modem_status) {
+				lpo->DCDSTime = lpo->RecvTime;
+				lpo->flTsDCDS = 1;
+				DPRINTF(2, ("upps-hack: fd %d DCD PPS Rise at %s\n", rio->fd,
+					ulfptoa(&lpo->RecvTime, 6)));
+			}
 		}
 	}
 
@@ -632,7 +820,6 @@ OnSerialWaitComplete(
 		QueueSerialWait(rio, buff, lpo);
 	}
 }
-
 
 /*
  * -------------------------------------------------------------------
@@ -651,9 +838,9 @@ OnSerialWaitComplete(
  */
 static BOOL
 QueueSerialRead(
-	struct refclockio *	rio,
-	recvbuf_t *		buff,
-	IoCtx_t *		lpo
+	RIO_t *		rio,
+	recvbuf_t *	buff,
+	IoCtx_t *	lpo
 	)
 {
 	BOOL   rc;
@@ -685,8 +872,8 @@ OnSerialReadComplete(
 	IoCtx_t *	lpo
 	)
 {
-	struct refclockio *	rio;
-	recvbuf_t *		buff;
+	RIO_t *		rio;
+	recvbuf_t *	buff;
 
 	/* check and bail out if operation failed */
 	if (!IoResultCheck(lpo->errCode, lpo,
@@ -702,7 +889,7 @@ OnSerialReadComplete(
 	if (!QueueUserWorkItem(&OnSerialReadWorker, lpo, WT_EXECUTEDEFAULT)) {
 		msyslog(LOG_ERR,
 			"Can't offload to worker thread, will skip data: %m");
-		ZERO(*lpo);
+		IoCtxReset(lpo);
 		buff->recv_length = 0;
 		QueueSerialWait(rio, buff, lpo);
 	}
@@ -722,12 +909,12 @@ OnSerialReadComplete(
 static DWORD WINAPI
 OnSerialReadWorker(void * ctx)
 {
-	IoCtx_t *		lpo;
-	recvbuf_t *		buff, *obuf;
-	struct refclockio *	rio;
-	char                    *sptr, *send, *dptr;
-	BOOL			eol;
-	char                    ch;
+	IoCtx_t *	lpo;
+	recvbuf_t *	buff, *obuf;
+	RIO_t *		rio;
+	char		*sptr, *send, *dptr;
+	BOOL		eol;
+	char		ch;
 
 	/* Get context back */
 	lpo  = (IoCtx_t*)ctx;
@@ -812,7 +999,7 @@ OnSerialReadWorker(void * ctx)
 		buff->recv_length = 0;
 	}
 
-	ZERO(*lpo);
+	IoCtxReset(lpo);
 	QueueSerialWait(rio, buff, lpo);
 	return 0;
 }
@@ -831,9 +1018,9 @@ OnSerialReadWorker(void * ctx)
 
 static BOOL
 QueueRawSerialRead(
-	struct refclockio *	rio,
-	recvbuf_t *		buff,
-	IoCtx_t *		lpo
+	RIO_t *		rio,
+	recvbuf_t *	buff,
+	IoCtx_t *	lpo
 	)
 {
 	BOOL   rc;
@@ -861,8 +1048,8 @@ OnRawSerialReadComplete(
 	IoCtx_t *	lpo
 	)
 {
-	struct refclockio *	rio;
-	recvbuf_t *		buff;
+	RIO_t *		rio;
+	recvbuf_t *	buff;
 
 	/* check and bail out if operation failed */
 	if (!IoResultCheck(lpo->errCode, lpo,
@@ -938,7 +1125,7 @@ async_write(
 	IoCtx_t *	lpo;
 	BOOL		rc;
 
-	lpo  = IoCtxAlloc();
+	lpo  = IoCtxAlloc(NULL);
 	if (lpo == NULL) {
 		DPRINTF(1, ("async_write: out of memory\n"));
 		errno = ENOMEM;
@@ -968,7 +1155,7 @@ OnSerialWriteComplete(
 	)
 {
 	/* set RIO and force silent cleanup if no error */
-	lpo->rio = (struct refclockio *)key;
+	lpo->rio = (RIO_t *)key;
 	if (ERROR_SUCCESS == lpo->errCode)
 		lpo->errCode = ERROR_OPERATION_ABORTED;
 	IoResultCheck(lpo->errCode, lpo,
@@ -976,7 +1163,123 @@ OnSerialWriteComplete(
 }
 
 
+/*
+ * -------------------------------------------------------------------
+ * Serial IO stuff
+ *
+ * Part 5 -- read PPS time stamps
+ *
+ * -------------------------------------------------------------------
+ */
 
+/* The dummy read procedure is used for getting the device context
+ * into the IO completion thread, using the IO completion queue for
+ * transport. There are other ways to accomplish what we need here,
+ * but using the IO machine is handy and avoids a lot of trouble.
+ */
+static void
+OnPpsDummyRead(
+	ULONG_PTR	key,
+	IoCtx_t *	lpo
+	)
+{
+	RIO_t *	rio;
+
+	rio = (RIO_t *)key;
+	lpo->devCtx = DevCtxAttach(rio->device_context);
+	SetEvent(lpo->ppswake);
+}
+
+__declspec(dllexport) void* __stdcall
+ntp_pps_attach_device(
+	HANDLE	hndIo
+	)
+{
+	IoCtx_t		myIoCtx;
+	HANDLE		myEvt;
+	DevCtx_t *	dev;
+	DWORD		rc;
+
+	if (!isserialhandle(hndIo)) {
+		SetLastError(ERROR_INVALID_HANDLE);
+		return NULL;
+	}
+
+	ZERO(myIoCtx);
+	dev   = NULL;
+	myEvt = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (NULL == myEvt)
+		goto done;
+
+	myIoCtx.ppswake   = myEvt;
+	myIoCtx.onIoDone  = OnPpsDummyRead;
+	rc = ReadFile(hndIo, &myIoCtx.byteCount, 0,
+			&myIoCtx.byteCount, &myIoCtx.ol);
+	if (!rc && (GetLastError() != ERROR_IO_PENDING))
+		goto done;
+	if (WaitForSingleObject(myEvt, INFINITE) == WAIT_OBJECT_0)
+		if (NULL == (dev = myIoCtx.devCtx))
+			SetLastError(ERROR_INVALID_HANDLE);
+done:
+	rc = GetLastError();
+	CloseHandle(myEvt);
+	SetLastError(rc);
+	return dev;
+}
+
+__declspec(dllexport) void __stdcall
+ntp_pps_detach_device(
+	DevCtx_t *	dev
+	)
+{
+	DevCtxDetach(dev);
+}
+
+__declspec(dllexport) BOOL __stdcall
+ntp_pps_read(
+	DevCtx_t *	dev,
+	PPSData_t *	data,
+	size_t		dlen
+	)
+{
+	u_long		guard, covc;
+	int		repc;
+	PPSDataEx_t *	ppsbuf;
+
+
+	if (dev == NULL) {
+		SetLastError(ERROR_INVALID_HANDLE);
+		return FALSE;
+	}
+	if (data == NULL || dlen != sizeof(PPSData_t)) {
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	/*
+	** Reading from shared memory in a lock-free fashion can be
+	** a bit tricky, since we have to read the components in the
+	** opposite direction from the write, and the compiler must
+	** not reorder the read sequence.
+	** We use read barriers and a volatile data source to avoid
+	** reordering on compiler and CPU level.
+	*/
+	repc = 3;
+	do {
+		covc = dev->cov_count;
+		_ReadBarrier();
+		ppsbuf = dev->pps_buff + ((covc >> 1) & PPS_QUEUE_MSK);
+		*data = ppsbuf->data;
+		_ReadBarrier();
+		guard = covc ^ ppsbuf->cov_count;
+		_ReadBarrier();
+	} while ((guard != 0u) && ((guard & PPS_QUEUE_MSK) == 0u) && --repc);
+
+	if (guard != 0u) {
+		SetLastError(ERROR_INVALID_DATA);
+		return FALSE;
+	}
+	return TRUE;
+}
 
 /*
  * Add a reference clock data structures I/O handles to
@@ -984,10 +1287,11 @@ OnSerialWriteComplete(
  */  
 int
 io_completion_port_add_clock_io(
-	struct refclockio *rio
+	RIO_t *rio
 	)
 {
 	IoCtx_t *	lpo;
+	DevCtx_t *	dev;
 	recvbuf_t *	buff;
 	HANDLE		h;
 
@@ -1001,7 +1305,13 @@ io_completion_port_add_clock_io(
 		return 1;
 	}
 
-	lpo = IoCtxAlloc();
+	dev = DevCtxAlloc();
+	if (NULL == dev) {
+		msyslog(LOG_ERR, "Can't allocate device context for i/o completion port: %m");
+		return 1;
+	}
+	rio->device_context = DevCtxAttach(dev);
+	lpo = IoCtxAlloc(dev);
 	if (NULL == lpo) {
 		msyslog(LOG_ERR, "Can't allocate heap for completion port: %m");
 		return 1;
@@ -1011,6 +1321,15 @@ io_completion_port_add_clock_io(
 	QueueSerialWait(rio, buff, lpo);
 
 	return 0;
+}
+
+void
+io_completion_port_remove_clock_io(
+	RIO_t *rio
+	)
+{
+	if (rio)
+		DevCtxDetach((DevCtx_t *)rio->device_context);
 }
 
 /*
@@ -1157,7 +1476,7 @@ io_completion_port_add_socket(
 	for (n = 0; n < WINDOWS_RECVS_PER_SOCKET; n++) {
 
 		buff = get_free_recv_buffer_alloc();
-		lpo = IoCtxAlloc();
+		lpo = IoCtxAlloc(NULL);
 		if (lpo == NULL)
 		{
 			msyslog(LOG_ERR

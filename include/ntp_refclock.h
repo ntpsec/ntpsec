@@ -103,6 +103,10 @@ struct refclockio {
 	int	fd;		/* file descriptor */
 	u_long	recvcount;	/* count of receive completions */
 	int	active;		/* nonzero when in use */
+
+#ifdef HAVE_IO_COMPLETION_PORT
+	void *	device_context;	/* device-related data for i/o subsystem */
+#endif
 };
 
 /*
