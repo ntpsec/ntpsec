@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p322 of <code>ntp-wait</code>.
+  <p>This document applies to version 4.2.7p323 of <code>ntp-wait</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -106,6 +106,155 @@ will do this quietly, unless the
 using the <code>agtexi-cmd</code> template and the option descriptions for the <code>ntp-wait</code> program. 
 This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 
+<ul class="menu">
+<li><a accesskey="1" href="#ntp_002dwait-usage">ntp-wait usage</a>:                   ntp-wait help/usage (<span class="option">--help</span>)
+<li><a accesskey="2" href="#ntp_002dwait">ntp-wait </a>:                         option (-n)
+<li><a accesskey="3" href="#ntp_002dwait">ntp-wait </a>:                         option (-s)
+<li><a accesskey="4" href="#ntp_002dwait">ntp-wait </a>:                         option (-v)
+<li><a accesskey="5" href="#ntp_002dwait-config">ntp-wait config</a>:                  presetting/configuring ntp-wait
+<li><a accesskey="6" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>:             exit status
+<li><a accesskey="7" href="#ntp_002dwait-Authors">ntp-wait Authors</a>:                 Authors
+</ul>
+
+<div class="node">
+<p><hr>
+<a name="ntp_002dwait-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait">ntp-wait</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">ntp-wait help/usage (<span class="option">--help</span>)</h4>
+
+<p><a name="index-ntp_002dwait-help-3"></a>
+This is the automatically generated usage text for ntp-wait.
+
+  <p>The text printed is the same whether selected with the <code>help</code> option
+(<span class="option">--help</span>) or the <code>more-help</code> option (<span class="option">--more-help</span>).  <code>more-help</code> will print
+the usage text by passing it through a pager program. 
+<code>more-help</code> is disabled on platforms without a working
+<code>fork(2)</code> function.  The <code>PAGER</code> environment variable is
+used to select the program, defaulting to <span class="file">more</span>.  Both will exit
+with a status code of 0.
+
+<pre class="example">/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
+running under Perl version 5.8.8.
+
+Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
+
+The following single-character options are accepted:
+        With arguments: -n -s
+        Boolean (without arguments): -v
+
+Options may be merged together.  -- stops processing of options.
+Space is not required between options and their arguments.
+  [Now continuing due to backward compatibility and excessive paranoia.
+   See ``perldoc Getopt::Std'' about $Getopt::Std::STANDARD_HELP_VERSION.]
+</pre>
+  <div class="node">
+<p><hr>
+<a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">option (-n)</h4>
+
+<p><a name="index-ntp_002dwait_002d-4"></a>
+This is the &ldquo;number of times to check ntpd&rdquo; option. 
+This option takes an argument number <span class="file">num-tries</span>. 
+The maximum number of times we will check ntpd to see if it
+has been able to synchronize and stabilize the system clock. 
+<div class="node">
+<p><hr>
+<a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">option (-s)</h4>
+
+<p><a name="index-ntp_002dwait_002d-5"></a>
+This is the &ldquo;how long to sleep between tries&rdquo; option. 
+This option takes an argument number <span class="file">secs-between-tries</span>. 
+We will sleep for <span class="file">secs-between-tries</span> after each query of ntpd
+that returns "the time is not yet stable". 
+<div class="node">
+<p><hr>
+<a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">option (-v)</h4>
+
+<p><a name="index-ntp_002dwait_002d-6"></a>
+This is the &ldquo;be verbose&rdquo; option. 
+By default, ntp-wait is silent.  With this option, ntp-wait
+will provide status information.
+
+<div class="node">
+<p><hr>
+<a name="ntp_002dwait-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">presetting/configuring ntp-wait</h4>
+
+<p>Any option that is not marked as <i>not presettable</i> may be preset by
+loading values from environment variables named <code>NTP-WAIT</code> and <code>NTP-WAIT_&lt;OPTION_NAME&gt;</code>.  <code>&lt;OPTION_NAME&gt;</code> must be one of
+the options listed above in upper case and segmented with underscores. 
+The <code>NTP-WAIT</code> variable will be tokenized and parsed like
+the command line.  The remaining variables are tested for existence and their
+values are treated like option arguments.
+
+  <p>The command line options relating to configuration and/or usage help are:
+
+<h5 class="subsubheading">version (-)</h5>
+
+<p>Print the program version to standard out, optionally with licensing
+information, then exit 0.  The optional argument specifies how much licensing
+detail to provide.  The default is to print just the version.  The licensing infomation may be selected with an option argument.  Only the
+first letter of the argument is examined:
+
+     <dl>
+<dt><span class="samp">version</span><dd>Only print the version.  This is the default. 
+<br><dt><span class="samp">copyright</span><dd>Name the copyright usage licensing terms. 
+<br><dt><span class="samp">verbose</span><dd>Print the full copyright usage licensing terms. 
+</dl>
+
+<div class="node">
+<p><hr>
+<a name="ntp_002dwait-exit-status"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-Authors">ntp-wait Authors</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-config">ntp-wait config</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">ntp-wait exit status</h4>
+
+<p>One of the following exit values will be returned:
+     <dl>
+<dt><span class="samp">0 (EXIT_SUCCESS)</span><dd>Successful program execution. 
+<br><dt><span class="samp">1 (EXIT_FAILURE)</span><dd>The operation failed or the command syntax was not valid. 
+</dl>
+  <div class="node">
+<p><hr>
+<a name="ntp_002dwait-Authors"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+<br>
+</div>
+
+<h4 class="subsection">ntp-wait Authors</h4>
+
+<p>.An
+"Harlan
+Stenn"
+
 <div class="node">
 <p><hr>
 <a name="Usage"></a>
@@ -115,19 +264,18 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 <!-- node-name,  next,  previous,  up -->
 <h3 class="section">Usage</h3>
 
-</li></ul>
 <p>The simplest use of this program is as an unprivileged command to
 check the current time, offset, and error in the local clock. 
 For example:
 
-<pre class="example">     ntp-wait ntpserver.somewhere
+<pre class="example">    ntp-wait ntpserver.somewhere
 </pre>
   <p>With suitable privilege, it can be run as a command or in a
 <code>crom</code> job to reset the local clock from a reliable server, like
 the <code>ntpdate</code> and <code>rdate</code> commands. 
 For example:
 
-<pre class="example">     ntp-wait -a ntpserver.somewhere
+<pre class="example">    ntp-wait -a ntpserver.somewhere
 </pre>
   </body></html>
 
