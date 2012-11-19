@@ -361,7 +361,7 @@ compsave.conf: ntpd complete.conf
 	./ntpd --configfile complete.conf --saveconfigquit $@
 
 check-saveconfig: complete.conf compsave.conf
-	-diff complete.conf compsave.conf
+	-diff -u complete.conf compsave.conf
 	cmp complete.conf compsave.conf && echo stamp > $@
 
 ../libntp/libntpsim.a:
