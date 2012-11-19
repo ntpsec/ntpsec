@@ -796,7 +796,16 @@ OnSerialWaitComplete(
 			ppsbuf->data = dev->pps_data;
 			InterlockedExchange((PLONG)&dev->cov_count, covc);
 			/* Note: InterlockedExchange() is a full barrier. */
-		} else {
+		}
+		/* perlinger@ntp.org, 2012-11-19
+		It can be argued that once you have the PPS API active, you can
+		disable the old pps hack. This would give a behaviour that's much
+		more like the behaviour under a UN*Xish OS. On the other hand, it
+		will give a nasty surprise for people which have until now happily
+		taken the pps hack for granted, and after the first complaint, I have
+		decided to keep the old implementation unconditionally. So here it is:
+		/*else*/ 
+		{
 			/* backward compat: 'usermode-pps-hack' */
 			if (MS_RLSD_ON & modem_status) {
 				lpo->DCDSTime = lpo->RecvTime;
