@@ -1,3 +1,4 @@
+* Reinstate doc fix to authentic.html from Mike T.
 * [Bug 1223] cleanup for rlimit changes.
 (4.2.7p323) 2012/11/18 Released by Harlan Stenn <stenn@ntp.org>
 * html/ updates from Dave Mills.
