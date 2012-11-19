@@ -1,5 +1,6 @@
 * Reinstate doc fix to authentic.html from Mike T.
 * [Bug 1223] cleanup for rlimit changes.
+* [Bug 2098] Install DLM's HTML documentation.
 * [Bug 2306] Added user-mode/loop-back PPS API provider for Win32
 (4.2.7p323) 2012/11/18 Released by Harlan Stenn <stenn@ntp.org>
 * html/ updates from Dave Mills.
