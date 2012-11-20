@@ -1,3 +1,4 @@
+(4.2.7p325) 2012/11/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2202] ntpq.html: there is no "acv" billboard.
 * [Bug 2306] keep pps hack for Win32 even if user-mode/loopback
   PPS API is activated on a serial line.
