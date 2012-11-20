@@ -1,3 +1,4 @@
+* [Bug 1214] 'proto: precision = ...' should be at INFO, not NOTICE.
 (4.2.7p324) 2012/11/19 Released by Harlan Stenn <stenn@ntp.org>
 * Reinstate doc fix to authentic.html from Mike T.
 * [Bug 1223] cleanup for rlimit changes.
