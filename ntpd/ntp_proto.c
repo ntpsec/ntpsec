@@ -1948,6 +1948,7 @@ clock_update(
 		} else if (leapsec > 0) {
 			report_event(EVNT_DISARMED, NULL, NULL);
 			leapsec = 0;
+			sys_leap = LEAP_NOWARNING;
 		}
 		break;
 
