@@ -1,4 +1,6 @@
+* [Bug 1214] 'proto: precision = ...' should be at INFO, not NOTICE.
 * [Bug 2202] ntpq.html: there is no "acv" billboard.
+* [Bug 2246] Clear sys_leap when voting says to disarm the leap.
 * [Bug 2306] keep pps hack for Win32 even if user-mode/loopback
   PPS API is activated on a serial line.
 (4.2.7p324) 2012/11/19 Released by Harlan Stenn <stenn@ntp.org>
