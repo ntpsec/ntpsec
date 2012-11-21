@@ -1,3 +1,4 @@
+(4.2.7p326) 2012/11/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1214] 'proto: precision = ...' should be at INFO, not NOTICE.
 * [Bug 2246] Clear sys_leap when voting says to disarm the leap.
 (4.2.7p325) 2012/11/20 Released by Harlan Stenn <stenn@ntp.org>
