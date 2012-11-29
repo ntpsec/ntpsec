@@ -1,9 +1,9 @@
-.Dd November 21 2012
+.Dd November 29 2012
 .Dt NTP_KEYGEN 1ntp-keygenmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  November 21, 2012 at 11:29:34 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  November 29, 2012 at 11:36:08 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -21,6 +21,18 @@ All arguments must be options.
 .Sh DESCRIPTION
 .Sh "OPTIONS"
 .Bl -tag
+.It  \-b " \fIimbits\fP, " \-\-imbits "=" \fIimbits\fP
+identity modulus bits.
+This option takes an integer number as its argument.
+The value of \fIimbits\fP is constrained to being:
+.in +4
+.nf
+.na
+in the range  256 through 2048
+.fi
+.in -4
+.sp
+The number of bits in the identity modulus.  The default is 256.
 .It  \-c " \fIscheme\fP, " \-\-certificate "=" \fIscheme\fP
 certificate scheme.
 .sp

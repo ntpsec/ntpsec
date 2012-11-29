@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 # 
-# It has been AutoGen-ed  November 21, 2012 at 11:29:31 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  November 29, 2012 at 11:36:06 AM by AutoGen 5.16.2
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -881,6 +881,7 @@ This software is released under the NTP license, <http://ntp.org/license>.
 
 @menu
 * ntp-keygen usage::                  ntp-keygen help/usage (@option{--help})
+* ntp-keygen imbits::                 imbits option (-b)
 * ntp-keygen certificate::            certificate option (-c)
 * ntp-keygen cipher::                 cipher option (-C)
 * ntp-keygen id-key::                 id-key option (-e)
@@ -922,9 +923,12 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p326
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p327
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
+   -b Num imbits         identity modulus bits
+                                - It must be in the range:
+                                  256 to 2048
    -c Str certificate    certificate scheme
    -C Str cipher         privatekey cipher
    -d no  debug-level    Increase debug verbosity level
@@ -971,6 +975,21 @@ please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
 @end example
 @exampleindent 4
 
+@node ntp-keygen imbits
+@subsection imbits option (-b)
+@cindex ntp-keygen-imbits
+
+This is the ``identity modulus bits'' option.
+This option takes an argument number @file{imbits}.
+
+@noindent
+This option has some usage constraints.  It:
+@itemize @bullet
+@item
+must be compiled in by defining @code{AUTOKEY} during the compilation.
+@end itemize
+
+The number of bits in the identity modulus.  The default is 256.
 @node ntp-keygen certificate
 @subsection certificate option (-c)
 @cindex ntp-keygen-certificate

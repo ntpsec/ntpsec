@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  November 21, 2012 at 11:29:14 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  November 29, 2012 at 11:35:48 AM by AutoGen 5.16.2
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -64,41 +64,42 @@
  *  Enumeration of each option:
  */
 typedef enum {
-    INDEX_OPT_CERTIFICATE      =  0,
-    INDEX_OPT_CIPHER           =  1,
-    INDEX_OPT_DEBUG_LEVEL      =  2,
-    INDEX_OPT_SET_DEBUG_LEVEL  =  3,
-    INDEX_OPT_ID_KEY           =  4,
-    INDEX_OPT_GQ_PARAMS        =  5,
-    INDEX_OPT_HOST_KEY         =  6,
-    INDEX_OPT_IFFKEY           =  7,
-    INDEX_OPT_IDENT            =  8,
-    INDEX_OPT_LIFETIME         =  9,
-    INDEX_OPT_MD5KEY           = 10,
-    INDEX_OPT_MODULUS          = 11,
-    INDEX_OPT_PVT_CERT         = 12,
-    INDEX_OPT_PVT_PASSWD       = 13,
-    INDEX_OPT_GET_PVT_PASSWD   = 14,
-    INDEX_OPT_SIGN_KEY         = 15,
-    INDEX_OPT_SUBJECT_NAME     = 16,
-    INDEX_OPT_TRUSTED_CERT     = 17,
-    INDEX_OPT_MV_PARAMS        = 18,
-    INDEX_OPT_MV_KEYS          = 19,
-    INDEX_OPT_VERSION          = 20,
-    INDEX_OPT_HELP             = 21,
-    INDEX_OPT_MORE_HELP        = 22,
-    INDEX_OPT_SAVE_OPTS        = 23,
-    INDEX_OPT_LOAD_OPTS        = 24
+    INDEX_OPT_IMBITS           =  0,
+    INDEX_OPT_CERTIFICATE      =  1,
+    INDEX_OPT_CIPHER           =  2,
+    INDEX_OPT_DEBUG_LEVEL      =  3,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  4,
+    INDEX_OPT_ID_KEY           =  5,
+    INDEX_OPT_GQ_PARAMS        =  6,
+    INDEX_OPT_HOST_KEY         =  7,
+    INDEX_OPT_IFFKEY           =  8,
+    INDEX_OPT_IDENT            =  9,
+    INDEX_OPT_LIFETIME         = 10,
+    INDEX_OPT_MD5KEY           = 11,
+    INDEX_OPT_MODULUS          = 12,
+    INDEX_OPT_PVT_CERT         = 13,
+    INDEX_OPT_PVT_PASSWD       = 14,
+    INDEX_OPT_GET_PVT_PASSWD   = 15,
+    INDEX_OPT_SIGN_KEY         = 16,
+    INDEX_OPT_SUBJECT_NAME     = 17,
+    INDEX_OPT_TRUSTED_CERT     = 18,
+    INDEX_OPT_MV_PARAMS        = 19,
+    INDEX_OPT_MV_KEYS          = 20,
+    INDEX_OPT_VERSION          = 21,
+    INDEX_OPT_HELP             = 22,
+    INDEX_OPT_MORE_HELP        = 23,
+    INDEX_OPT_SAVE_OPTS        = 24,
+    INDEX_OPT_LOAD_OPTS        = 25
 } teOptIndex;
 
-#define OPTION_CT    25
-#define NTP_KEYGEN_VERSION       "4.2.7p326"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p326"
+#define OPTION_CT    26
+#define NTP_KEYGEN_VERSION       "4.2.7p327"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p327"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
- *  e.g. HAVE_OPT(CERTIFICATE)
+ *  e.g. HAVE_OPT(IMBITS)
  */
 #define         DESC(n) (ntp_keygenOptions.pOptDesc[INDEX_OPT_## n])
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
@@ -130,6 +131,10 @@ typedef enum {
  *  Make sure there are no #define name conflicts with the option names
  */
 #ifndef     NO_OPTION_NAME_WARNINGS
+# ifdef    IMBITS
+#  warning undefining IMBITS due to option name conflict
+#  undef   IMBITS
+# endif
 # ifdef    CERTIFICATE
 #  warning undefining CERTIFICATE due to option name conflict
 #  undef   CERTIFICATE
@@ -211,6 +216,7 @@ typedef enum {
 #  undef   MV_KEYS
 # endif
 #else  /* NO_OPTION_NAME_WARNINGS */
+# undef IMBITS
 # undef CERTIFICATE
 # undef CIPHER
 # undef DEBUG_LEVEL
@@ -237,6 +243,10 @@ typedef enum {
  *
  *  Interface defines for specific options.
  */
+#define VALUE_OPT_IMBITS         'b'
+#ifdef AUTOKEY
+#define OPT_VALUE_IMBITS         (DESC(IMBITS).optArg.argInt)
+#endif /* AUTOKEY */
 #define VALUE_OPT_CERTIFICATE    'c'
 #define VALUE_OPT_CIPHER         'C'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
