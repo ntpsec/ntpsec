@@ -28,7 +28,7 @@
 </ul>
 <hr>
 <h4 id="synop">Synopsis</h4>
-<p id="intro"><tt>ntp-keygen [ -deGHIMPT ] [ -c [ RSA-MD2 | RSA-MD5 | RSA-SHA
+<p id="intro"><tt>ntp-keygen [ -deGHIMPT ] [ -b <i>modulus</i> ] [ -c [ RSA-MD2 | RSA-MD5 | RSA-SHA
   | RSA-SHA1 | RSA-MDC2 | RSA-RIPEMD160 | DSA-SHA | DSA-SHA1 ] ]
   [ -C <i>cipher</i> ] [-i <i>group</i> ] [ -l <em>days</em>]
   [ -m <i>modulus</i> ]  [ -p <i>passwd1</i> ] [ -q <i>passwd2</i> ] 
@@ -50,6 +50,8 @@
 <p>Additional information on trusted groups and identity schemes is on the <a href="autokey.html">Autokey Public-Key Authentication</a> page.</p>
 <h4 id="cmd">Command Line Options</h4>
 <dl>
+  <dt><tt>-b <i>modulus</i></tt></dt>
+  <dd>Set the modulus for generating identity keys to <i>modulus</i> bits. The modulus defaults to 256, but can be set from 256 (32 octets) to 2048 (256 octets). Use the larger moduli with caution, as this can consume considerable computing resources and increases the size of authenticated packets.</dd>
   <dt><tt>-c [ RSA-MD2 | RSA-MD5 | RSA-SHA | RSA-SHA1 | RSA-MDC2 | RSA-RIPEMD160 | DSA-SHA | DSA-SHA1 ]</tt></dt>
   <dd>Select certificate digital signature and message digest scheme. Note that  RSA schemes must be used with an RSA sign key and DSA schemes must be used with a DSA sign key. The default without this option is <tt>RSA-MD5</tt>. If compatibility with FIPS 140-2 is required, either the <tt>DSA-SHA</tt> or <tt>DSA-SHA1</tt> scheme must be used.</dd>
   <dt><tt>-C <i>cipher</i></tt></dt>
@@ -69,7 +71,7 @@
   <dt><tt>-l <i>days</i></tt></dt>
   <dd>Set the lifetime for certificates to <tt><i>days</i></tt>. The default lifetime is one year (365 d).</dd>
   <dt><tt>-m <i>modulus</i></tt></dt>
-  <dd>Set the modulus for generating files to <i>modulus</i> bits. The modulus defaults to 512, but can be set from 256 (32 octets) to 2048 (256 octets). Use the larger moduli with caution, as this can consume considerable computing resources.</dd>
+  <dd>Set the modulus for generating files to <i>modulus</i> bits. The modulus defaults to 512, but can be set from 256 (32 octets) to 2048 (256 octets). Use the larger moduli with caution, as this can consume considerable computing resources and increases the size of authenticated packets.</dd>
   <dt><tt>-M</tt></dt>
   <dd>Generate a new  keys file containing 10 MD5  keys and 10 SHA  keys. An MD5 key is a string of 20 random printable ASCII characters, while a SHA key is a string of 40 random hex digits. The file can be edited using a text editor to change the key type or key content. This option is mutually exclusive with all other option.</dd>
   <dt><tt>-P</tt></dt>

@@ -16,6 +16,19 @@ include        = '#include <stdlib.h>';
 #include       version.def
 
 flag = {
+    value     = b;
+    name      = imbits;
+    arg-type  = number;
+    arg-name  = imbits;
+    arg-range = '256->2048';
+    ifdef     = AUTOKEY;
+    descrip   = "identity modulus bits";
+    doc = <<-  _EndOfDoc_
+	The number of bits in the identity modulus.  The default is 256.
+	_EndOfDoc_;
+};
+
+flag = {
     value     = c;
     name      = certificate;
     arg-type  = string;
