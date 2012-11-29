@@ -38,15 +38,15 @@
   and optionally to the system log. In addition, if the trap facility is configured,
   events can be reported to a remote program that can page an administrator.</p>
 <p>This page also includes a description of the error messages produced by the Autokey protocol. These messages are normally sent to the <tt>cryptostats</tt> monitoring file.</p>
-<p>In the following tables the Code Field is the status or event code assigned and the Message Field a short string used for display and event reporting. The Description field contains a longer explanation of the status or event. Some messages include additional information useful for error diagnosis and performance assessment.</p>
+<p>In the following tables the Event Field is the status or event code assigned and the Message Field a short string used for display and event reporting. The Description field contains a longer explanation of the status or event. Some messages include additional information useful for error diagnosis and performance assessment.</p>
 <h4 id="sys">System Status Word</h4>
-<p>The system status word consists of four fields LI (0-1), Source (2-7), Count (8-11) and Code (12-15). It is reported in the first line of the <tt>rv</tt> display produced by the <tt>ntpq</tt> program.</p>
+<p>The system status word consists of four fields LI (0-1), Source (2-7), Count (8-11) and Event (12-15). It is reported in the first line of the <tt>rv</tt> display produced by the <tt>ntpq</tt> program.</p>
 <table width="50%" border="1" cellspacing="2" cellpadding="2">
   <tr>
     <td><div align="center">Leap</div></td>
     <td><div align="center">Source</div></td>
     <td><div align="center">Count</div></td>
-    <td><div align="center">Code</div></td>
+    <td><div align="center">Event</div></td>
   </tr>
 </table>
 <p>The Leap Field displays the system leap indicator bits coded as follows:</p>

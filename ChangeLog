@@ -1,3 +1,4 @@
+* [Bug 2024] Identify Events in the system status word in decode.html.'
 * [Bug 2040] Provide a command-line option for the identity key bits.
 * Create loc/darwin for Mac OSX
 (4.2.7p326) 2012/11/21 Released by Harlan Stenn <stenn@ntp.org>
