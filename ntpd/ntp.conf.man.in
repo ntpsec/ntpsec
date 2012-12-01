@@ -1,8 +1,8 @@
-.TH ntp.conf 5 "30 Nov 2012" "4.2.7p328" "File Formats"
+.TH ntp.conf 5 "01 Dec 2012" "4.2.7p329" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"  
-.\"  It has been AutoGen-ed  November 30, 2012 at 11:32:38 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  December  1, 2012 at 11:31:29 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
