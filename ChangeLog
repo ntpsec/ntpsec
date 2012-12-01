@@ -1,5 +1,74 @@
 * [Bug 2278] ACTS flag3 mismatch between code and driver18.html.
 * Use an enum for the ACTS state table.
+* html doc reconciliation with DLM's copy.
+(4.2.7p328) 2012/11/30 Released by Harlan Stenn <stenn@ntp.org>
+* html doc reconciliation with DLM's copy.
+(4.2.7p327) 2012/11/29 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2024] Identify Events in the system status word in decode.html.'
+* [Bug 2040] Provide a command-line option for the identity key bits.
+* Create loc/darwin for Mac OSX
+(4.2.7p326) 2012/11/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1214] 'proto: precision = ...' should be at INFO, not NOTICE.
+* [Bug 2246] Clear sys_leap when voting says to disarm the leap.
+(4.2.7p325) 2012/11/20 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2202] ntpq.html: there is no "acv" billboard.
+* [Bug 2306] keep pps hack for Win32 even if user-mode/loopback
+  PPS API is activated on a serial line.
+(4.2.7p324) 2012/11/19 Released by Harlan Stenn <stenn@ntp.org>
+* Reinstate doc fix to authentic.html from Mike T.
+* [Bug 1223] cleanup for rlimit changes.
+* [Bug 2098] Install DLM's HTML documentation.
+* [Bug 2306] Added user-mode/loop-back PPS API provider for Win32
+(4.2.7p323) 2012/11/18 Released by Harlan Stenn <stenn@ntp.org>
+* html/ updates from Dave Mills.
+(4.2.7p322) 2012/11/15 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1223] Allow configurable values for RLIMIT_STACK and
+  RLIMIT_MEMLOCK.
+* [Bug 1320] Log ntpd's initial command-line parameters. (updated fix)
+* [Bug 2120] no sysexits.h under QNX.
+* [Bug 2123] cleanup to html/leap.html.
+(4.2.7p321) 2012/11/13 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1320] Log ntpd's initial command-line parameters.
+(4.2.7p320) 2012/11/12 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 969] Clarify ntpdate.html documentation about -u and ntpd.
+* [Bug 1217] libisc/ifiter_sysctl.c:internal_current(): Ignore RTM
+  messages with wrong version
+(4.2.7p319) 2012/11/11 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2296] Fix compile problem with building with old OpenSSL.
+(4.2.7p318) 2012/11/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2301] Remove spurious debug output from ntpq.
+(4.2.7p317) 2012/11/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 922] Allow interspersed -4 and -6 flags on the ntpq command line.
+(4.2.7p316) 2012/10/27 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2296] Update fix for Bug 2294 to handle --without-crypto.
+(4.2.7p315) 2012/10/26 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2294] ntpd crashes in FIPS mode.
+(4.2.7p314) 2012/10/23 Released by Harlan Stenn <stenn@ntp.org>
+* Document a tricky malloc() of dns_ctx in sntp.
+(4.2.7p313) 2012/10/23 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2291] sntp should report why it cannot open file.kod.
+* [Bug 2293] add support for SO_BINTIME, refine support for
+  SO_TIMESTAMPNS (bug 1374)
+(4.2.7p312) 2012/10/11 Released by Harlan Stenn <stenn@ntp.org>
+* Clean up testing/debugging of fix for [Bug 938] from sntp/main.c .
+(4.2.7p311) 2012/10/10 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 938] The argument to the -D flag takes a number, not a string.
+* [Bug 1013] ntpdate's HTML page claims wrong default version.
+* [Bug 1374] Support SO_TIMESTAMPNS.
+(4.2.7p310) 2012/10/09 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1374] Support SO_TIMESTAMPNS.
+* [Bug 2266] Remove deprecated refclock_trak.c from Windows Makefile
+  equivalents.
+* [Bug 2274] Bring libopts/enum.c back to (old) ANSI C compliance.
+(4.2.7p309) 2012/10/04 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2287] ntpdate returns 0 even if adjtime() call fails.
+(4.2.7p308) 2012/09/29 Released by Harlan Stenn <stenn@ntp.org>
+* CID 97198: Check return from ioctl() calls in refclock_acts.c.
+(4.2.7p307) 2012/09/29 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1997] Fix sntp broadcast timeouts.
+* [Bug 2234] Fix incorrect ntptrace html documentation.
+* [Bug 2262] Install html docs in $htmldir.
+* Fix typo in html/select.html.
 (4.2.7p306) 2012/09/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 752] ToS cleanup from Mike Tatarinov.
 (4.2.7p305) 2012/09/15 Released by Harlan Stenn <stenn@ntp.org>

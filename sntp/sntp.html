@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p306 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p328 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -163,17 +163,16 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 <li><a accesskey="2" href="#sntp-ipv4">sntp ipv4</a>:                    ipv4 option (-4)
 <li><a accesskey="3" href="#sntp-ipv6">sntp ipv6</a>:                    ipv6 option (-6)
 <li><a accesskey="4" href="#sntp-authentication">sntp authentication</a>:          authentication option (-a)
-<li><a accesskey="5" href="#sntp-bctimeout">sntp bctimeout</a>:               bctimeout option (-B)
-<li><a accesskey="6" href="#sntp-broadcast">sntp broadcast</a>:               broadcast option (-b)
-<li><a accesskey="7" href="#sntp-concurrent">sntp concurrent</a>:              concurrent option (-c)
-<li><a accesskey="8" href="#sntp-gap">sntp gap</a>:                     gap option (-g)
-<li><a accesskey="9" href="#sntp-kod">sntp kod</a>:                     kod option (-K)
-<li><a href="#sntp-keyfile">sntp keyfile</a>:                 keyfile option (-k)
+<li><a accesskey="5" href="#sntp-broadcast">sntp broadcast</a>:               broadcast option (-b)
+<li><a accesskey="6" href="#sntp-concurrent">sntp concurrent</a>:              concurrent option (-c)
+<li><a accesskey="7" href="#sntp-gap">sntp gap</a>:                     gap option (-g)
+<li><a accesskey="8" href="#sntp-kod">sntp kod</a>:                     kod option (-K)
+<li><a accesskey="9" href="#sntp-keyfile">sntp keyfile</a>:                 keyfile option (-k)
 <li><a href="#sntp-logfile">sntp logfile</a>:                 logfile option (-l)
 <li><a href="#sntp-steplimit">sntp steplimit</a>:               steplimit option (-M)
 <li><a href="#sntp-ntpversion">sntp ntpversion</a>:              ntpversion option (-o)
 <li><a href="#sntp-usereservedport">sntp usereservedport</a>:         usereservedport option (-r)
-<li><a href="#sntp-uctimeout">sntp uctimeout</a>:               uctimeout option (-u)
+<li><a href="#sntp-timeout">sntp timeout</a>:                 timeout option (-t)
 <li><a href="#sntp-wait">sntp wait</a>:                    wait option
 <li><a href="#sntp-config">sntp config</a>:                  presetting/configuring sntp
 <li><a href="#sntp-exit-status">sntp exit status</a>:             exit status
@@ -202,7 +201,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p306
+<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p328
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -213,14 +212,13 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
                                 - prohibits these options:
                                 ipv4
    -a Num authentication Enable authentication with the key auth-keynumber
-   -B Num bctimeout      The number of seconds to wait for broadcasts
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
    -c Str concurrent     Concurrently query all IPs returned for host-name
                                 - may appear multiple times
    -d no  debug-level    Increase debug verbosity level
                                 - may appear multiple times
-   -D Str set-debug-level Set the debug verbosity level
+   -D Num set-debug-level Set the debug verbosity level
                                 - may appear multiple times
    -g Num gap            The gap (in milliseconds) between time requests
    -K Fil kod            KoD history filename
@@ -235,7 +233,7 @@ USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -r no  usereservedport Use the NTP Reserved Port (port 123)
    -S no  step           OK to 'step' the time with settimeofday(2)
    -s no  slew           OK to 'slew' the time with adjtime(2)
-   -u Num uctimeout      The number of seconds to wait for unicast responses
+   -t Num timeout        The number of seconds to wait for responses
       no  wait           Wait for pending replies (if not setting the time)
                                 - disabled as --no-wait
                                 - enabled by default
@@ -303,7 +301,7 @@ ipv4.
 to the IPv6 namespace. 
 <div class="node">
 <p><hr>
-<a name="sntp-authentication"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-bctimeout">sntp bctimeout</a>,
+<a name="sntp-authentication"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-broadcast">sntp broadcast</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-ipv6">sntp ipv6</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
@@ -320,30 +318,15 @@ number specified in the keyfile as this key's identifier. See the
 keyfile option (<span class="option">-k</span>) for more details. 
 <div class="node">
 <p><hr>
-<a name="sntp-bctimeout"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-broadcast">sntp broadcast</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-authentication">sntp authentication</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
-<br>
-</div>
-
-<h4 class="subsection">bctimeout option (-B)</h4>
-
-<p><a name="index-sntp_002dbctimeout-7"></a>
-This is the &ldquo;the number of seconds to wait for broadcasts&rdquo; option. 
-This option takes an argument number <span class="file">seconds</span>. 
-When waiting for a broadcast packet <code>sntp</code> will wait the number
-of seconds specified before giving up. 
-<div class="node">
-<p><hr>
 <a name="sntp-broadcast"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-concurrent">sntp concurrent</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-bctimeout">sntp bctimeout</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-authentication">sntp authentication</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
 </div>
 
 <h4 class="subsection">broadcast option (-b)</h4>
 
-<p><a name="index-sntp_002dbroadcast-8"></a>
+<p><a name="index-sntp_002dbroadcast-7"></a>
 This is the &ldquo;listen to the address specified for broadcast time sync&rdquo; option. 
 This option takes an argument string <span class="file">broadcast-address</span>.
 
@@ -354,7 +337,7 @@ This option takes an argument string <span class="file">broadcast-address</span>
 
   <p>If specified <code>sntp</code> will listen to the specified address
 for NTP broadcasts.  The default maximum wait time
-can be modified with <span class="option">-B</span>. 
+can (and probably should) be modified with <span class="option">-t</span>. 
 <div class="node">
 <p><hr>
 <a name="sntp-concurrent"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-gap">sntp gap</a>,
@@ -365,7 +348,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">concurrent option (-c)</h4>
 
-<p><a name="index-sntp_002dconcurrent-9"></a>
+<p><a name="index-sntp_002dconcurrent-8"></a>
 This is the &ldquo;concurrently query all ips returned for host-name&rdquo; option. 
 This option takes an argument string <span class="file">host-name</span>.
 
@@ -393,7 +376,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">gap option (-g)</h4>
 
-<p><a name="index-sntp_002dgap-10"></a>
+<p><a name="index-sntp_002dgap-9"></a>
 This is the &ldquo;the gap (in milliseconds) between time requests&rdquo; option. 
 This option takes an argument number <span class="file">milliseconds</span>. 
 Since we're only going to use the first valid response we get and
@@ -410,7 +393,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">kod option (-K)</h4>
 
-<p><a name="index-sntp_002dkod-11"></a>
+<p><a name="index-sntp_002dkod-10"></a>
 This is the &ldquo;kod history filename&rdquo; option. 
 This option takes an argument file <span class="file">file-name</span>. 
 Specifies the filename to be used for the persistent history of KoD
@@ -425,7 +408,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">keyfile option (-k)</h4>
 
-<p><a name="index-sntp_002dkeyfile-12"></a>
+<p><a name="index-sntp_002dkeyfile-11"></a>
 This is the &ldquo;look in this file for the key specified with <span class="option">-a</span>&rdquo; option. 
 This option takes an argument file <span class="file">file-name</span>. 
 This option specifies the keyfile. 
@@ -452,7 +435,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">logfile option (-l)</h4>
 
-<p><a name="index-sntp_002dlogfile-13"></a>
+<p><a name="index-sntp_002dlogfile-12"></a>
 This is the &ldquo;log to specified logfile&rdquo; option. 
 This option takes an argument file <span class="file">file-name</span>. 
 This option causes the client to write log messages to the specified
@@ -467,7 +450,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">steplimit option (-M)</h4>
 
-<p><a name="index-sntp_002dsteplimit-14"></a>
+<p><a name="index-sntp_002dsteplimit-13"></a>
 This is the &ldquo;adjustments less than <var>steplimit</var> msec will be slewed&rdquo; option. 
 This option takes an argument number. 
 If the time adjustment is less than <span class="file">steplimit</span> milliseconds,
@@ -483,14 +466,14 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">ntpversion option (-o)</h4>
 
-<p><a name="index-sntp_002dntpversion-15"></a>
+<p><a name="index-sntp_002dntpversion-14"></a>
 This is the &ldquo;send <var>int</var> as our ntp version&rdquo; option. 
 This option takes an argument number. 
 When sending requests to a remote server, tell them we are running
 NTP protocol version <span class="file">ntpversion</span> . 
 <div class="node">
 <p><hr>
-<a name="sntp-usereservedport"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-uctimeout">sntp uctimeout</a>,
+<a name="sntp-usereservedport"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-timeout">sntp timeout</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-ntpversion">sntp ntpversion</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
@@ -498,36 +481,39 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">usereservedport option (-r)</h4>
 
-<p><a name="index-sntp_002dusereservedport-16"></a>
+<p><a name="index-sntp_002dusereservedport-15"></a>
 This is the &ldquo;use the ntp reserved port (port 123)&rdquo; option. 
 Use port 123, which is reserved for NTP, for our network
 communications. 
 <div class="node">
 <p><hr>
-<a name="sntp-uctimeout"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-wait">sntp wait</a>,
+<a name="sntp-timeout"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-wait">sntp wait</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-usereservedport">sntp usereservedport</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
 </div>
 
-<h4 class="subsection">uctimeout option (-u)</h4>
+<h4 class="subsection">timeout option (-t)</h4>
 
-<p><a name="index-sntp_002ductimeout-17"></a>
-This is the &ldquo;the number of seconds to wait for unicast responses&rdquo; option. 
+<p><a name="index-sntp_002dtimeout-16"></a>
+This is the &ldquo;the number of seconds to wait for responses&rdquo; option. 
 This option takes an argument number <span class="file">seconds</span>. 
-When waiting for a unicast reply, <code>sntp</code> will wait the number
-of seconds specified before giving up. 
+When waiting for a reply, <code>sntp</code> will wait the number
+of seconds specified before giving up.  The default should be
+more than enough for a unicast response.  If <code>sntp</code> is
+only waiting for a broadcast response a longer timeout is
+likely needed. 
 <div class="node">
 <p><hr>
 <a name="sntp-wait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-config">sntp config</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-uctimeout">sntp uctimeout</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-timeout">sntp timeout</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
 </div>
 
 <h4 class="subsection">wait option</h4>
 
-<p><a name="index-sntp_002dwait-18"></a>
+<p><a name="index-sntp_002dwait-17"></a>
 This is the &ldquo;wait for pending replies (if not setting the time)&rdquo; option.
 
 <p class="noindent">This option has some usage constraints.  It:

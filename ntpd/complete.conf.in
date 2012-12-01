@@ -24,6 +24,7 @@ requestkey 12
 enable auth ntp monitor
 disable bclient calibrate kernel mode7
 tos beacon 3600 ceiling 16 cohort 0 floor 1 maxclock 10 maxdist 1.5 minclock 3 mindist 0.001 minsane 1 orphan 16 orphanwait 300
+rlimit@HAVE_RLIMIT_MEMLOCK@@HAVE_RLIMIT_STACK@
 tinker allan 1500 dispersion 15 freq 0 huffpuff 7200 panic 1000 step 0.128 stepout 900 tick 0.01
 broadcastclient
 server 127.127.1.0 mode 4294967295 prefer true

@@ -22,6 +22,10 @@ bin_SCRIPTS =	$(NTP_WAIT_DB) $(NTPTRACE_DB)
 libexec_SCRIPTS =	$(NTP_WAIT_DL) $(NTPTRACE_DL)
 sbin_SCRIPTS =	$(NTP_WAIT_DS) $(NTPTRACE_DS)
 
+html_DATA=				\
+	$(srcdir)/ntp-wait.html		\
+	$(NULL)
+
 noinst_SCRIPTS =		\
 	calc_tickadj		\
 	checktime		\
@@ -37,10 +41,11 @@ noinst_SCRIPTS =		\
 noinst_DATA=				\
 	$(srcdir)/invoke-ntp-wait.menu	\
 	$(srcdir)/invoke-ntp-wait.texi	\
-	$(srcdir)/ntp-wait.html		\
 	$(srcdir)/ntp-wait.man.in	\
 	$(srcdir)/ntp-wait.mdoc.in	\
 	$(NULL)
+
+install-data-local: install-html
 
 EXTRA_DIST =			\
 	check--help		\

@@ -816,6 +816,62 @@ case "$host" in
     ;;
 esac
 
+NTP_RLIMIT_ITEMS
+
+# HMS: Only if we are doing the MLOCKALL stuff...
+AC_MSG_CHECKING([for the default number of 4k stack pages])
+AC_ARG_WITH(
+    [stack-limit],
+    [AS_HELP_STRING(
+	[--with-stack-limit],
+	[? =50 (200 for openbsd) 4k pages]
+    )],
+    [ans=$withval],
+    [ans=yes]
+)
+case "$ans" in
+ yes | no)
+    case "$host" in
+     *-*-openbsd*)
+	ans=200
+	;;
+     *) ans=50
+        ;;
+    esac
+    ;;
+ [1-9][0-9]*)
+    ;;
+ *) AC_MSG_ERROR(["--with-stack-limit requires an integer argument."])
+    ;;
+esac
+AC_MSG_RESULT([$ans])
+AC_DEFINE_UNQUOTED([DFLT_RLIMIT_STACK], [$ans],
+    [Default number of 4k pages for RLIMIT_STACK])
+
+# HMS: only if we have RLIMIT_MEMLOCK
+AC_MSG_CHECKING([for the default number of megabytes to MEMLOCK])
+AC_ARG_WITH(
+    [memlock],
+    [AS_HELP_STRING(
+	[--with-memlock],
+	[? =32 (megabytes)]
+    )],
+    [ans=$withval],
+    [ans=yes]
+)
+case "$ans" in
+ yes | no)
+    ans=32
+    ;;
+ [1-9][0-9]*) ;;
+ *) AC_MSG_ERROR(["--with-memlock requires an integer argument."])
+     ;;
+esac
+AC_MSG_RESULT([$ans])
+AC_DEFINE_UNQUOTED([DFLT_RLIMIT_MEMLOCK], [$ans],
+    [Default number of megabytes for RLIMIT_MEMLOCK])
+
+
 # some OSes prefer _exit() in forked children to exit()
 AC_CHECK_FUNCS([_exit])
 ntp_worker_child_exit=exit
@@ -4181,6 +4237,7 @@ AC_CONFIG_FILES([kernel/sys/Makefile])
 AC_CONFIG_FILES([libntp/Makefile])
 AC_CONFIG_FILES([libparse/Makefile])
 AC_CONFIG_FILES([ntpd/Makefile])
+AC_CONFIG_FILES([ntpd/complete.conf],	[sed -i.old -e '/^rlimit$/d' ntpd/complete.conf && rm ntpd/complete.conf.old])
 AC_CONFIG_FILES([ntpdate/Makefile])
 AC_CONFIG_FILES([ntpdc/Makefile])
 AC_CONFIG_FILES([ntpdc/nl.pl],		[chmod +x ntpdc/nl.pl])

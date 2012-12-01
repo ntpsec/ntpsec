@@ -2038,7 +2038,7 @@ l_adj_systime(
 	if (adjtv.tv_usec != 0 && !debug) {
 		if (adjtime(&adjtv, &oadjtv) < 0) {
 			msyslog(LOG_ERR, "Can't adjust the time of day: %m");
-			return 0;
+			exit(1);
 		}
 	}
 	return 1;

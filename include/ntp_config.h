@@ -215,6 +215,7 @@ struct config_tree_tag {
 	restrict_fifo *	restrict_opts;
 
 	addr_opts_fifo *fudge;
+	attr_val_fifo *	rlimit;
 	attr_val_fifo *	tinker;
 	attr_val_fifo *	enable_opts;
 	attr_val_fifo *	disable_opts;
@@ -307,5 +308,8 @@ int dump_config_tree(config_tree *ptree, FILE *df, int comment);
 int dump_all_config_trees(FILE *df, int comment);
 #endif
 
+#if defined(HAVE_MLOCKALL) && defined(HAVE_SETRLIMIT)
+void ntp_rlimit(int, rlim_t, int, char *);
+#endif
 
 #endif	/* !defined(NTP_CONFIG_H) */

@@ -90,6 +90,13 @@ sntp/built-sources-only: FRC.sntp
 dist-hook:
 	@find $(distdir) -type d -name SCCS -print | xargs rm -rf
 
+install-data-local:
+	( cd $(srcdir) && tar cf - `find html -type f | grep -v SCCS`) \
+		| ( cd $(DESTDIR)$(htmldir) && tar xvf - )
+
+uninstall-local:
+		rm -rf $(DESTDIR)$(htmldir)/html
+
 .gcc-warning:
 	@echo "Compiling with GCC now generates lots of new warnings."
 	@echo " "

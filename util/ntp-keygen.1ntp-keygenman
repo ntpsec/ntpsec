@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "15 Sep 2012" "ntp (4.2.7p306)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "30 Nov 2012" "ntp (4.2.7p328)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 15, 2012 at 11:24:27 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  November 30, 2012 at 11:34:04 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -17,6 +17,19 @@ All arguments must be options.
 .PP
 .SH DESCRIPTION
 .SH "OPTIONS"
+.TP
+.BR \-b " \fIimbits\fP, " \-\-imbits "=" \fIimbits\fP
+identity modulus bits.
+This option takes an integer number as its argument.
+The value of \fIimbits\fP is constrained to being:
+.in +4
+.nf
+.na
+in the range  256 through 2048
+.fi
+.in -4
+.sp
+The number of bits in the identity modulus.  The default is 256.
 .TP
 .BR \-c " \fIscheme\fP, " \-\-certificate "=" \fIscheme\fP
 certificate scheme.
@@ -42,9 +55,10 @@ Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
 .TP
-.BR \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
+.BR \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
+This option takes an integer number as its argument.
 .sp
 .TP
 .BR \-e ", " -\-id\-key

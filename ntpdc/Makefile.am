@@ -51,13 +51,18 @@ man_MANS=	ntpdc.$(NTPDC_MS)
 ##info_TEXINFOS=	ntpdc.texi
 ##ntpdc_TEXINFOS=	ntpdc-opts.texi
 
+html_DATA=				\
+	$(srcdir)/ntpdc.html		\
+	$(NULL)
+
 noinst_DATA=				\
 	$(srcdir)/invoke-ntpdc.menu	\
 	$(srcdir)/invoke-ntpdc.texi	\
-	$(srcdir)/ntpdc.html		\
 	$(srcdir)/ntpdc.man.in		\
 	$(srcdir)/ntpdc.mdoc.in		\
 	$(NULL)
+
+install-data-local: install-html
 
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable

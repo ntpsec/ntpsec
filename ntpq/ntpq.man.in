@@ -1,8 +1,8 @@
-.TH ntpq @NTPQ_MS@ "15 Sep 2012" "4.2.7p306" "User Commands"
+.TH ntpq @NTPQ_MS@ "30 Nov 2012" "4.2.7p328" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  September 15, 2012 at 11:23:15 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  November 30, 2012 at 11:33:29 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -44,9 +44,10 @@ Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
 .TP
-.BR \-D " \fIstring\fP, " \-\-set\-debug\-level "=" \fIstring\fP
+.BR \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
+This option takes an integer number as its argument.
 .sp
 .TP
 .BR \-p ", " -\-peers

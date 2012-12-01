@@ -47,9 +47,6 @@
 # include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
 #if defined(HAVE_RTPRIO)
-# ifdef HAVE_SYS_RESOURCE_H
-#  include <sys/resource.h>
-# endif
 # ifdef HAVE_SYS_LOCK_H
 #  include <sys/lock.h>
 # endif
@@ -208,6 +205,9 @@ static	RETSIGTYPE	no_debug	(int);
 # endif	/* !DEBUG */
 #endif	/* !SIM && !SYS_WINNT */
 
+int	saved_argc;
+char **	saved_argv;
+
 #ifndef SIM
 int		ntpdmain		(int, char **);
 static void	set_process_priority	(void);
@@ -255,7 +255,7 @@ main(
 	progname = argv[0];
 	parse_cmdline_opts(&argc, &argv);
 #ifdef DEBUG
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 	DPRINTF(1, ("%s\n", Version));
 #endif
 
@@ -436,11 +436,6 @@ ntpdmain(
 	int		fd;
 	int		zero;
 # endif
-# if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE)
-#  ifdef HAVE_SETRLIMIT
-	struct rlimit	rl;
-#  endif
-# endif
 
 # ifdef HAVE_UMASK
 	uv = umask(0);
@@ -449,11 +444,13 @@ ntpdmain(
 	else
 		umask(022);
 # endif
+	saved_argc = argc;
+	saved_argv = argv;
 	progname = argv[0];
 	initializing = TRUE;		/* mark that we are initializing */
 	parse_cmdline_opts(&argc, &argv);
 # ifdef DEBUG
-	debug = DESC(DEBUG_LEVEL).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 # endif
 
 	if (HAVE_OPT(NOFORK) || HAVE_OPT(QUIT)
@@ -477,6 +474,23 @@ ntpdmain(
 			syslogit = FALSE;
 	}
 	msyslog(LOG_NOTICE, "%s: Starting\n", Version);
+
+	{
+		int i;
+		char buf[1024];	/* Secret knowledge of msyslog buf length */
+		char *cp = buf;
+
+		/* Note that every arg has an initial space character */
+		snprintf(cp, sizeof(buf), "Command line:");
+		cp += strlen(cp);
+
+		for (i = 0; i < saved_argc ; ++i) {
+			snprintf(cp, sizeof(buf) - (cp - buf),
+				" %s", saved_argv[i]);
+			cp += strlen(cp);
+		}
+		msyslog(LOG_NOTICE, "%s", buf);
+	}
 
 	/*
 	 * Install trap handlers to log errors and assertion failures.
@@ -670,18 +684,9 @@ ntpdmain(
 	}
 # endif
 
-# if defined(HAVE_MLOCKALL) && defined(MCL_CURRENT) && defined(MCL_FUTURE)
+# if defined(HAVE_MLOCKALL)
 #  ifdef HAVE_SETRLIMIT
-	/*
-	 * Set the stack limit to something smaller, so that we don't lock a lot
-	 * of unused stack memory.
-	 */
-	/* HMS: must make the rlim_cur amount configurable */
-	if (getrlimit(RLIMIT_STACK, &rl) != -1
-	    && (rl.rlim_cur = 50 * 4096) < rl.rlim_max
-	    && setrlimit(RLIMIT_STACK, &rl) == -1)
-		msyslog(LOG_ERR,
-			"Cannot adjust stack limit for mlockall: %m");
+	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096);
 #   ifdef RLIMIT_MEMLOCK
 	/*
 	 * The default RLIMIT_MEMLOCK is very low on Linux systems.
@@ -689,9 +694,7 @@ ntpdmain(
 	 * fail if we drop root privilege.  To be useful the value
 	 * has to be larger than the largest ntpd resident set size.
 	 */
-	rl.rlim_cur = rl.rlim_max = 32 * 1024 * 1024;
-	if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
-		msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
+	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024);
 #   endif	/* RLIMIT_MEMLOCK */
 #  endif	/* HAVE_SETRLIMIT */
 	/*
@@ -700,7 +703,7 @@ ntpdmain(
 	if (!HAVE_OPT(SAVECONFIGQUIT) &&
 	    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
 		msyslog(LOG_ERR, "mlockall(): %m");
-# else	/* !HAVE_MLOCKALL || !MCL_CURRENT || !MCL_FUTURE follows */
+# else	/* !HAVE_MLOCKALL follows */
 #  ifdef HAVE_PLOCK
 #   ifdef PROCLOCK
 #    ifdef _AIX
@@ -729,7 +732,7 @@ ntpdmain(
 #    endif	/* !TXTLOCK */
 #   endif	/* !PROCLOCK */
 #  endif	/* HAVE_PLOCK */
-# endif	/* !HAVE_MLOCKALL || !MCL_CURRENT || !MCL_FUTURE */
+# endif	/* !HAVE_MLOCKALL */
 
 	/*
 	 * Set up signals we pay attention to locally.

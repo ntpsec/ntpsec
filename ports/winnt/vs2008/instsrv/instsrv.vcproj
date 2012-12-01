@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="instsrv"
 	ProjectGUID="{C3534C4D-6DF1-498E-9904-4337878A1515}"
+	RootNamespace="instsrv"
 	TargetFrameworkVersion="0"
 	>
 	<Platforms>
@@ -16,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)-bin\$(ConfigurationName)\"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)-tmp\$(ConfigurationName)\$(TargetName)\"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -38,7 +39,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug\Instsrv.tlb"
+				TypeLibraryName="$(IntDir)Instsrv.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -47,13 +48,15 @@
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="..\..\..\..\include,..\..\include,..\..\instsrv"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
+				StringPooling="true"
 				MinimalRebuild="false"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug\Instsrv.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName="..\bin\Debug\instsrv-vc90"
+				PrecompiledHeaderFile="$(IntDir)Instsrv.pch"
+				AssemblerListingLocation="$(IntDir)"
+				ObjectFile="$(IntDir)"
+				ProgramDataBaseFileName="$(OutDir)instsrv-vc90"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -74,13 +77,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="oldnames.lib"
-				OutputFile="..\bin\Debug\Instsrv.exe"
+				OutputFile="$(OutDir)$(ProjectName).exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Debug\Instsrv.pdb"
+				ProgramDatabaseFile="$(OutDir)$(ProjectName).pdb"
 				SubSystem="1"
 				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
@@ -99,7 +102,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug\Instsrv.bsc"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -113,8 +116,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)-bin\$(ConfigurationName)\"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)-tmp\$(ConfigurationName)\$(TargetName)\"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -135,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release\Instsrv.tlb"
+				TypeLibraryName="$(IntDir)Instsrv.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -145,12 +148,14 @@
 				AdditionalIncludeDirectories="..\..\..\..\include,..\..\include,..\..\instsrv"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;WIN32;_WINDOWS;SYS_WINNT;HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
+				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Release\Instsrv.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName="..\bin\Release\instsrv-vc90"
+				PrecompiledHeaderFile="$(IntDir)Instsrv.pch"
+				AssemblerListingLocation="$(IntDir)"
+				ObjectFile="$(IntDir)"
+				ProgramDataBaseFileName="$(OutDir)instsrv-vc90"
+				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -170,13 +175,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="oldnames.lib"
-				OutputFile="..\bin\Release\Instsrv.exe"
+				OutputFile="$(OutDir)$(ProjectName).exe"
 				Version="0x0400"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\bin\Release\Instsrv.pdb"
+				ProgramDatabaseFile="$(OutDir)$(ProjectName).pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -194,7 +199,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release\Instsrv.bsc"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"

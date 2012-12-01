@@ -114,7 +114,7 @@ CLEANFILES =			\
 	$(NULL)
 
 EXTRA_DIST =			\
-	complete.conf		\
+	complete.conf.in	\
 	invoke-ntpd.menu	\
 	invoke-ntpd.texi	\
 	keyword-gen-utd		\
@@ -357,12 +357,12 @@ $(srcdir)/invoke-ntpd.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def 
 
 $(PROGRAMS): $(LDADD)
 
-compsave.conf: ntpd $(srcdir)/complete.conf
-	./ntpd --configfile $(srcdir)/complete.conf --saveconfigquit $@
+compsave.conf: ntpd complete.conf
+	./ntpd --configfile complete.conf --saveconfigquit $@
 
-check-saveconfig: $(srcdir)/complete.conf compsave.conf
-	-diff $(srcdir)/complete.conf compsave.conf
-	cmp $(srcdir)/complete.conf compsave.conf && echo stamp > $@
+check-saveconfig: complete.conf compsave.conf
+	-diff -u complete.conf compsave.conf
+	cmp complete.conf compsave.conf && echo stamp > $@
 
 ../libntp/libntpsim.a:
 	cd ../libntp && $(MAKE) $(AM_MAKEFLAGS) libntpsim.a

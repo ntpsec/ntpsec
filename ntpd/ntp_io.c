@@ -33,6 +33,7 @@
 #include "ntp_request.h"
 #include "ntp_assert.h"
 #include "timevalops.h"
+#include "timespecops.h"
 #include "ntpd-opts.h"
 
 /* Don't include ISC's version of IPv6 variables and structures */
@@ -87,16 +88,32 @@ struct nic_rule_tag {
 nic_rule *nic_rule_list;
 
 
-#if defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP)
-#if defined(CMSG_FIRSTHDR)
-#define HAVE_TIMESTAMP
-#define USE_TIMESTAMP_CMSG
-#ifndef TIMESTAMP_CTLMSGBUF_SIZE
-#define TIMESTAMP_CTLMSGBUF_SIZE 1536 /* moderate default */
-#endif
+#if defined(SO_BINTIME) && defined(SCM_BINTIME) && defined(CMSG_FIRSTHDR)
+#  define HAVE_PACKET_TIMESTAMP
+#  define HAVE_BINTIME
+#  ifdef BINTIME_CTLMSGBUF_SIZE
+#   define CMSG_BUFSIZE BINTIME_CTLMSGBUF_SIZE
+#  else
+#   define CMSG_BUFSIZE  1536 /* moderate default */
+#  endif
+#elif defined(SO_TIMESTAMPNS) && defined(SCM_TIMESTAMPNS) && defined(CMSG_FIRSTHDR)
+#  define HAVE_PACKET_TIMESTAMP
+#  define HAVE_TIMESTAMPNS
+#  ifdef TIMESTAMPNS_CTLMSGBUF_SIZE
+#   define CMSG_BUFSIZE TIMESTAMPNS_CTLMSGBUF_SIZE
+#  else
+#   define CMSG_BUFSIZE  1536 /* moderate default */
+#  endif
+#elif defined(SO_TIMESTAMP) && defined(SCM_TIMESTAMP) && defined(CMSG_FIRSTHDR)
+#  define HAVE_PACKET_TIMESTAMP
+#  define HAVE_TIMESTAMP
+#  ifdef TIMESTAMP_CTLMSGBUF_SIZE
+#   define CMSG_BUFSIZE TIMESTAMP_CTLMSGBUF_SIZE
+#  else
+#   define CMSG_BUFSIZE  1536 /* moderate default */
+#  endif
 #else
 /* fill in for old/other timestamp interfaces */
-#endif
 #endif
 
 #if defined(SYS_WINNT)
@@ -2943,6 +2960,31 @@ open_socket(
 				    fd, stoa(addr)));
 	}	
 #endif
+#ifdef HAVE_TIMESTAMPNS
+	{
+		if (setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPNS,
+			       (char*)&on, sizeof(on)))
+			msyslog(LOG_DEBUG,
+				"setsockopt SO_TIMESTAMPNS on fails on address %s: %m",
+				stoa(addr));
+		else
+			DPRINTF(4, ("setsockopt SO_TIMESTAMPNS enabled on fd %d address %s\n",
+				    fd, stoa(addr)));
+	}	
+#endif
+#ifdef HAVE_BINTIME
+	{
+		if (setsockopt(fd, SOL_SOCKET, SO_BINTIME,
+			       (char*)&on, sizeof(on)))
+			msyslog(LOG_DEBUG,
+				"setsockopt SO_BINTIME on fails on address %s: %m",
+				stoa(addr));
+		else
+			DPRINTF(4, ("setsockopt SO_BINTIME enabled on fd %d address %s\n",
+				    fd, stoa(addr)));
+	}	
+#endif
+
 	DPRINTF(4, ("bind(%d) AF_INET%s, addr %s%%%d#%d, flags 0x%x\n",
 		   fd, IS_IPV6(addr) ? "6" : "", stoa(addr),
 		   SCOPE(addr), SRCPORT(addr), interf->flags));
@@ -3176,7 +3218,7 @@ read_refclock_packet(
 #endif	/* REFCLOCK */
 
 
-#ifdef HAVE_TIMESTAMP
+#ifdef HAVE_PACKET_TIMESTAMP
 /*
  * extract timestamps from control message buffer
  */
@@ -3187,10 +3229,17 @@ fetch_timestamp(
 	l_fp			ts
 	)
 {
-#ifdef USE_TIMESTAMP_CMSG
 	struct cmsghdr *	cmsghdr;
+#ifdef HAVE_BINTIME
+	struct bintime *	btp;
+#endif
+#ifdef HAVE_TIMESTAMPNS
+	struct timespec *	tsp;
+#endif
+#ifdef HAVE_TIMESTAMP
 	struct timeval *	tvp;
-	long			ticks;
+#endif
+	unsigned long		ticks;
 	double			fuzz;
 	l_fp			lfpfuzz;
 	l_fp			nts;
@@ -3202,18 +3251,66 @@ fetch_timestamp(
 	while (cmsghdr != NULL) {
 		switch (cmsghdr->cmsg_type)
 		{
+#ifdef HAVE_BINTIME
+		case SCM_BINTIME:
+#endif  /* HAVE_BINTIME */
+#ifdef HAVE_TIMESTAMPNS
+		case SCM_TIMESTAMPNS:
+#endif	/* HAVE_TIMESTAMPNS */
+#ifdef HAVE_TIMESTAMP
 		case SCM_TIMESTAMP:
-			tvp = (struct timeval *)CMSG_DATA(cmsghdr);
-			if (sys_tick > measured_tick &&
-			    sys_tick > 1e-6) {
-				ticks = (long)((tvp->tv_usec * 1e-6) /
-					sys_tick);
-				tvp->tv_usec = (long)(ticks * 1e6 *
-						      sys_tick);
+#endif	/* HAVE_TIMESTAMP */
+#if defined(HAVE_BINTIME) || defined (HAVE_TIMESTAMPNS) || defined(HAVE_TIMESTAMP)
+			switch (cmsghdr->cmsg_type)
+			{
+#ifdef HAVE_BINTIME
+			case SCM_BINTIME:
+				btp = (struct bintime *)CMSG_DATA(cmsghdr);
+				/*
+				 * bintime documentation is at http://phk.freebsd.dk/pubs/timecounter.pdf
+				 */
+				nts.l_i = btp->sec + JAN_1970;
+				nts.l_uf = (u_int32)(btp->frac >> 32);
+				if (sys_tick > measured_tick &&
+				    sys_tick > 1e-9) {
+					ticks = (unsigned long)(nts.l_uf / (unsigned long)(sys_tick * FRAC));
+					nts.l_uf = (unsigned long)(ticks * (unsigned long)(sys_tick * FRAC));
+				}
+                                DPRINTF(4, ("fetch_timestamp: system bintime network time stamp: %ld.%09lu\n",
+                                            btp->sec, (unsigned long)((nts.l_uf / FRAC) * 1e9)));
+				break;
+#endif  /* HAVE_BINTIME */
+#ifdef HAVE_TIMESTAMPNS
+			case SCM_TIMESTAMPNS:
+				tsp = (struct timespec *)CMSG_DATA(cmsghdr);
+				if (sys_tick > measured_tick &&
+				    sys_tick > 1e-9) {
+					ticks = (unsigned long)((tsp->tv_nsec * 1e-9) /
+						       sys_tick);
+					tsp->tv_nsec = (long)(ticks * 1e9 *
+							      sys_tick);
+				}
+				DPRINTF(4, ("fetch_timestamp: system nsec network time stamp: %ld.%09ld\n",
+					    tsp->tv_sec, tsp->tv_nsec));
+				nts = tspec_stamp_to_lfp(*tsp);
+				break;
+#endif	/* HAVE_TIMESTAMPNS */
+#ifdef HAVE_TIMESTAMP
+			case SCM_TIMESTAMP:
+				tvp = (struct timeval *)CMSG_DATA(cmsghdr);
+				if (sys_tick > measured_tick &&
+				    sys_tick > 1e-6) {
+					ticks = (unsigned long)((tvp->tv_usec * 1e-6) /
+						       sys_tick);
+					tvp->tv_usec = (long)(ticks * 1e6 *
+							      sys_tick);
+				}
+				DPRINTF(4, ("fetch_timestamp: system usec network time stamp: %ld.%06ld\n",
+					    tvp->tv_sec, tvp->tv_usec));
+				nts = tval_stamp_to_lfp(*tvp);
+				break;
+#endif  /* HAVE_TIMESTAMP */
 			}
-			DPRINTF(4, ("fetch_timestamp: system network time stamp: %ld.%06ld\n",
-				    tvp->tv_sec, tvp->tv_usec));
-			nts = tval_stamp_to_lfp(*tvp);
 			fuzz = ntp_random() * 2. / FRAC * sys_fuzz;
 			DTOLFP(fuzz, &lfpfuzz);
 			L_ADD(&nts, &lfpfuzz);
@@ -3227,6 +3324,7 @@ fetch_timestamp(
 #endif	/* DEBUG_TIMING */
 			ts = nts;  /* network time stamp */
 			break;
+#endif	/* HAVE_BINTIME || HAVE_TIMESTAMPNS || HAVE_TIMESTAMP */
 
 		default:
 			DPRINTF(4, ("fetch_timestamp: skipping control message 0x%x\n",
@@ -3234,10 +3332,9 @@ fetch_timestamp(
 		}
 		cmsghdr = CMSG_NXTHDR(msghdr, cmsghdr);
 	}
-#endif	/* USE_TIMESTAMP_CMSG */
 	return ts;
 }
-#endif	/* HAVE_TIMESTAMP */
+#endif	/* HAVE_PACKET_TIMESTAMP */
 
 
 /*
@@ -3255,10 +3352,10 @@ read_network_packet(
 	GETSOCKNAME_SOCKLEN_TYPE fromlen;
 	int buflen;
 	register struct recvbuf *rb;
-#ifdef HAVE_TIMESTAMP
+#ifdef HAVE_PACKET_TIMESTAMP
 	struct msghdr msghdr;
 	struct iovec iovec;
-	char control[TIMESTAMP_CTLMSGBUF_SIZE];
+	char control[CMSG_BUFSIZE];
 #endif
 
 	/*
@@ -3293,7 +3390,7 @@ read_network_packet(
 
 	fromlen = sizeof(rb->recv_srcadr);
 
-#ifndef HAVE_TIMESTAMP
+#ifndef HAVE_PACKET_TIMESTAMP
 	rb->recv_length = recvfrom(fd, (char *)&rb->recv_space,
 				   sizeof(rb->recv_space), 0,
 				   &rb->recv_srcadr.sa, &fromlen);
@@ -3338,7 +3435,7 @@ read_network_packet(
 	 */
 	rb->dstadr = itf;
 	rb->fd = fd;
-#ifdef HAVE_TIMESTAMP
+#ifdef HAVE_PACKET_TIMESTAMP
 	/* pick up a network time stamp if possible */
 	ts = fetch_timestamp(rb, &msghdr, ts);
 #endif

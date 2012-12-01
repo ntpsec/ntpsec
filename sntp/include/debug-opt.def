@@ -12,6 +12,7 @@ flag = {
     value     = d;
     max       = NOLIMIT;
     nopreset;
+    flag-code = 'OPT_VALUE_SET_DEBUG_LEVEL++;';
     descrip   = "Increase debug verbosity level";
     doc		= <<-  _EndOfDoc_
 	_EndOfDoc_;
@@ -22,8 +23,7 @@ flag = {
     value     = D;
     max       = NOLIMIT;
     descrip   = "Set the debug verbosity level";
-    arg-type  = string;
-    flag-code = 'DESC(DEBUG_LEVEL).optOccCt = atoi( pOptDesc->pzLastArg );';
+    arg-type  = number;
     doc		= <<-  _EndOfDoc_
 	_EndOfDoc_;
 };

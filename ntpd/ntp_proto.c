@@ -1948,6 +1948,7 @@ clock_update(
 		} else if (leapsec > 0) {
 			report_event(EVNT_DISARMED, NULL, NULL);
 			leapsec = 0;
+			sys_leap = LEAP_NOWARNING;
 		}
 		break;
 
@@ -3824,7 +3825,7 @@ measure_precision(void)
 	trunc_os_clock = FALSE;
 	measured_tick = measure_tick_fuzz();
 	set_sys_tick_precision(measured_tick);
-	msyslog(LOG_NOTICE, "proto: precision = %.3f usec (%d)",
+	msyslog(LOG_INFO, "proto: precision = %.3f usec (%d)",
 		sys_tick * 1e6, sys_precision);
 	if (sys_fuzz < sys_tick) {
 		msyslog(LOG_NOTICE, "proto: fuzz beneath %.3f usec",

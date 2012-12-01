@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *  
- *  It has been AutoGen-ed  September 15, 2012 at 11:13:56 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  November 30, 2012 at 11:21:02 AM by AutoGen 5.16.2
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -67,32 +67,31 @@ typedef enum {
     INDEX_OPT_IPV4             =  0,
     INDEX_OPT_IPV6             =  1,
     INDEX_OPT_AUTHENTICATION   =  2,
-    INDEX_OPT_BCTIMEOUT        =  3,
-    INDEX_OPT_BROADCAST        =  4,
-    INDEX_OPT_CONCURRENT       =  5,
-    INDEX_OPT_DEBUG_LEVEL      =  6,
-    INDEX_OPT_SET_DEBUG_LEVEL  =  7,
-    INDEX_OPT_GAP              =  8,
-    INDEX_OPT_KOD              =  9,
-    INDEX_OPT_KEYFILE          = 10,
-    INDEX_OPT_LOGFILE          = 11,
-    INDEX_OPT_STEPLIMIT        = 12,
-    INDEX_OPT_NTPVERSION       = 13,
-    INDEX_OPT_USERESERVEDPORT  = 14,
-    INDEX_OPT_STEP             = 15,
-    INDEX_OPT_SLEW             = 16,
-    INDEX_OPT_UCTIMEOUT        = 17,
-    INDEX_OPT_WAIT             = 18,
-    INDEX_OPT_VERSION          = 19,
-    INDEX_OPT_HELP             = 20,
-    INDEX_OPT_MORE_HELP        = 21,
-    INDEX_OPT_SAVE_OPTS        = 22,
-    INDEX_OPT_LOAD_OPTS        = 23
+    INDEX_OPT_BROADCAST        =  3,
+    INDEX_OPT_CONCURRENT       =  4,
+    INDEX_OPT_DEBUG_LEVEL      =  5,
+    INDEX_OPT_SET_DEBUG_LEVEL  =  6,
+    INDEX_OPT_GAP              =  7,
+    INDEX_OPT_KOD              =  8,
+    INDEX_OPT_KEYFILE          =  9,
+    INDEX_OPT_LOGFILE          = 10,
+    INDEX_OPT_STEPLIMIT        = 11,
+    INDEX_OPT_NTPVERSION       = 12,
+    INDEX_OPT_USERESERVEDPORT  = 13,
+    INDEX_OPT_STEP             = 14,
+    INDEX_OPT_SLEW             = 15,
+    INDEX_OPT_TIMEOUT          = 16,
+    INDEX_OPT_WAIT             = 17,
+    INDEX_OPT_VERSION          = 18,
+    INDEX_OPT_HELP             = 19,
+    INDEX_OPT_MORE_HELP        = 20,
+    INDEX_OPT_SAVE_OPTS        = 21,
+    INDEX_OPT_LOAD_OPTS        = 22
 } teOptIndex;
 
-#define OPTION_CT    24
-#define SNTP_VERSION       "4.2.7p306"
-#define SNTP_FULL_VERSION  "sntp 4.2.7p306"
+#define OPTION_CT    23
+#define SNTP_VERSION       "4.2.7p328"
+#define SNTP_FULL_VERSION  "sntp 4.2.7p328"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -140,10 +139,6 @@ typedef enum {
 # ifdef    AUTHENTICATION
 #  warning undefining AUTHENTICATION due to option name conflict
 #  undef   AUTHENTICATION
-# endif
-# ifdef    BCTIMEOUT
-#  warning undefining BCTIMEOUT due to option name conflict
-#  undef   BCTIMEOUT
 # endif
 # ifdef    BROADCAST
 #  warning undefining BROADCAST due to option name conflict
@@ -197,9 +192,9 @@ typedef enum {
 #  warning undefining SLEW due to option name conflict
 #  undef   SLEW
 # endif
-# ifdef    UCTIMEOUT
-#  warning undefining UCTIMEOUT due to option name conflict
-#  undef   UCTIMEOUT
+# ifdef    TIMEOUT
+#  warning undefining TIMEOUT due to option name conflict
+#  undef   TIMEOUT
 # endif
 # ifdef    WAIT
 #  warning undefining WAIT due to option name conflict
@@ -209,7 +204,6 @@ typedef enum {
 # undef IPV4
 # undef IPV6
 # undef AUTHENTICATION
-# undef BCTIMEOUT
 # undef BROADCAST
 # undef CONCURRENT
 # undef DEBUG_LEVEL
@@ -223,7 +217,7 @@ typedef enum {
 # undef USERESERVEDPORT
 # undef STEP
 # undef SLEW
-# undef UCTIMEOUT
+# undef TIMEOUT
 # undef WAIT
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
@@ -236,13 +230,12 @@ typedef enum {
 #define VALUE_OPT_AUTHENTICATION 'a'
 
 #define OPT_VALUE_AUTHENTICATION (DESC(AUTHENTICATION).optArg.argInt)
-#define VALUE_OPT_BCTIMEOUT      'B'
-
-#define OPT_VALUE_BCTIMEOUT      (DESC(BCTIMEOUT).optArg.argInt)
 #define VALUE_OPT_BROADCAST      'b'
 #define VALUE_OPT_CONCURRENT     'c'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
+
+#define OPT_VALUE_SET_DEBUG_LEVEL (DESC(SET_DEBUG_LEVEL).optArg.argInt)
 #define VALUE_OPT_GAP            'g'
 
 #define OPT_VALUE_GAP            (DESC(GAP).optArg.argInt)
@@ -258,13 +251,13 @@ typedef enum {
 #define VALUE_OPT_USERESERVEDPORT 'r'
 #define VALUE_OPT_STEP           'S'
 #define VALUE_OPT_SLEW           's'
-#define VALUE_OPT_UCTIMEOUT      'u'
+#define VALUE_OPT_TIMEOUT        't'
 
-#define OPT_VALUE_UCTIMEOUT      (DESC(UCTIMEOUT).optArg.argInt)
-#define VALUE_OPT_WAIT           18
+#define OPT_VALUE_TIMEOUT        (DESC(TIMEOUT).optArg.argInt)
+#define VALUE_OPT_WAIT           17
 
 #define SET_OPT_WAIT   STMTS( \
-        DESC(WAIT).optActualIndex = 18; \
+        DESC(WAIT).optActualIndex = 17; \
         DESC(WAIT).optActualValue = VALUE_OPT_WAIT; \
         DESC(WAIT).fOptState &= OPTST_PERSISTENT_MASK; \
         DESC(WAIT).fOptState |= OPTST_SET )

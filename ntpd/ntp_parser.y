@@ -154,6 +154,7 @@
 %token	<Integer>	T_Maxmem
 %token	<Integer>	T_Maxpoll
 %token	<Integer>	T_Mem
+%token	<Integer>	T_Memlock
 %token	<Integer>	T_Minclock
 %token	<Integer>	T_Mindepth
 %token	<Integer>	T_Mindist
@@ -202,10 +203,12 @@
 %token	<Integer>	T_Reset
 %token	<Integer>	T_Restrict
 %token	<Integer>	T_Revoke
+%token	<Integer>	T_Rlimit
 %token	<Integer>	T_Saveconfigdir
 %token	<Integer>	T_Server
 %token	<Integer>	T_Setvar
 %token	<Integer>	T_Source
+%token	<Integer>	T_Stacksize
 %token	<Integer>	T_Statistics
 %token	<Integer>	T_Stats
 %token	<Integer>	T_Statsdir
@@ -306,6 +309,9 @@
 %type	<Attr_val>	option_str
 %type	<Integer>	option_str_keyword
 %type	<Integer>	reset_command
+%type	<Integer>	rlimit_option_keyword
+%type	<Attr_val>	rlimit_option
+%type	<Attr_val_fifo>	rlimit_option_list
 %type	<Integer>	stat
 %type	<Int_fifo>	stats_list
 %type	<String_fifo>	string_list
@@ -377,6 +383,7 @@ command :	/* NULL STATEMENT */
 	|	access_control_command
 	|	orphan_mode_command
 	|	fudge_command
+	|	rlimit_command
 	|	system_option_command
 	|	tinker_command
 	|	miscellaneous_command
@@ -545,7 +552,14 @@ authentication_command
 	|	T_Revoke T_Integer
 			{ cfgt.auth.revoke = $2; }
 	|	T_Trustedkey integer_list_range
-			{ cfgt.auth.trusted_key_list = $2; }
+		{
+			cfgt.auth.trusted_key_list = $2;
+
+			// if (!cfgt.auth.trusted_key_list)
+			// 	cfgt.auth.trusted_key_list = $2;
+			// else
+			// 	LINK_SLIST(cfgt.auth.trusted_key_list, $2, link);
+		}
 	|	T_NtpSignDsocket T_String
 			{ cfgt.auth.ntp_signd_socket = $2; }
 	;
@@ -960,6 +974,39 @@ fudge_factor_bool_keyword
 	|	T_Flag3
 	|	T_Flag4
 	;
+
+/* rlimit Commands
+ * ---------------
+ */
+
+rlimit_command
+	:	T_Rlimit rlimit_option_list
+			{ CONCAT_G_FIFOS(cfgt.rlimit, $2); }
+	;
+
+rlimit_option_list
+	:	rlimit_option_list rlimit_option
+		{
+			$$ = $1;
+			APPEND_G_FIFO($$, $2);
+		}
+	|	rlimit_option
+		{
+			$$ = NULL;
+			APPEND_G_FIFO($$, $1);
+		}
+	;
+
+rlimit_option
+	:	rlimit_option_keyword T_Integer
+			{ $$ = create_attr_ival($1, $2); }
+	;
+
+rlimit_option_keyword
+	:	T_Memlock
+	|	T_Stacksize
+	;
+
 
 /* Command for System Options
  * --------------------------

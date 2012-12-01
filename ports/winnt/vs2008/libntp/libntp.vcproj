@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="$(SolutionDir)$(PlatformName)-bin\$(ConfigurationName)\"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)-tmp\$(ConfigurationName)\$(TargetName)\"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -46,13 +46,15 @@
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\libntp,..\..\include,..\..\..\..\include,..\..\..\..\lib\isc\win32\include,..\..\..\..\lib\isc\include,$(OPENSSL_INC),..\..\..\..\sntp\libopts"
 				PreprocessorDefinitions="_DEBUG;_LIB;WIN32;SYS_WINNT;HAVE_CONFIG_H"
-				MinimalRebuild="true"
+				StringPooling="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				PrecompiledHeaderFile=".\Debug\libntp.pch"
-				AssemblerListingLocation=".\Debug\"
-				ObjectFile=".\Debug\"
-				ProgramDataBaseFileName=".\Debug\"
+				PrecompiledHeaderFile="$(IntDir)libntp.pch"
+				AssemblerListingLocation="$IntDir)"
+				ObjectFile="$(IntDir)"
+				ProgramDataBaseFileName="$(IntDir)"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -72,7 +74,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug\libntp.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -84,7 +85,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug\libntp.bsc"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -95,8 +96,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="$(SolutionDir)$(PlatformName)-bin\$(ConfigurationName)\"
+			IntermediateDirectory="$(SolutionDir)$(PlatformName)-tmp\$(ConfigurationName)\$(TargetName)\"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -128,13 +129,14 @@
 				PreprocessorDefinitions="NDEBUG;_LIB;WIN32;SYS_WINNT;HAVE_CONFIG_H"
 				GeneratePreprocessedFile="0"
 				StringPooling="true"
+				MinimalRebuild="false"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="false"
-				PrecompiledHeaderFile=".\Release\libntp.pch"
-				AssemblerListingLocation=".\Release\"
-				ObjectFile=".\Release\"
-				ProgramDataBaseFileName=".\Release\"
+				PrecompiledHeaderFile="$(IntDir)libntp.pch"
+				AssemblerListingLocation="$(IntDir)"
+				ObjectFile="$(IntDir)"
+				ProgramDataBaseFileName="$(IntDir)"
 				BrowseInformation="1"
 				WarningLevel="4"
 				SuppressStartupBanner="true"
@@ -154,7 +156,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release\libntp.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -166,7 +167,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release\libntp.bsc"
+				OutputFile="$(IntDir)/$(ProjectName).bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"

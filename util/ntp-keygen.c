@@ -366,7 +366,7 @@ main(
 			OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 #endif /* OPENSSL */
 
-	debug = DESC( DEBUG_LEVEL ).optOccCt;
+	debug = OPT_VALUE_SET_DEBUG_LEVEL;
 
 	if (HAVE_OPT( MD5KEY ))
 		md5key++;
@@ -397,6 +397,10 @@ main(
 		mvpar++;
 		nkeys = OPT_VALUE_MV_KEYS;
 	}
+
+	if (HAVE_OPT( IMBITS ))
+		modulus2 = OPT_VALUE_IMBITS;
+
 	if (HAVE_OPT( MODULUS ))
 		modulus = OPT_VALUE_MODULUS;
 
