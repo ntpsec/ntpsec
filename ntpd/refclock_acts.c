@@ -194,10 +194,12 @@ const char *modem_setup = def_modem_setup;
 /*
  * State machine codes
  */
-#define S_IDLE		0	/* wait for poll */
-#define	S_SETUP		1	/* send modem setup */
-#define S_CONNECT	2	/* wait for answer */
-#define S_MSG		3	/* wait for timecode */
+typedef enum {
+	S_IDLE,			/* wait for poll */
+	S_SETUP,		/* send modem setup */
+	S_CONNECT,		/* wait for answer */
+	S_MSG			/* wait for timecode */
+} teModemState;
 
 /*
  * Unit control structure
@@ -222,7 +224,7 @@ static	void	acts_receive	(struct recvbuf *);
 static	void	acts_message	(struct peer *, const char *);
 static	void	acts_timecode	(struct peer *, const char *);
 static	void	acts_poll	(int, struct peer *);
-static	void	acts_timeout	(struct peer *, int);
+static	void	acts_timeout	(struct peer *, teModemState);
 static	void	acts_timer	(int, struct peer *);
 static	void	acts_close	(struct peer *);
 
@@ -458,7 +460,7 @@ acts_message(
 static void
 acts_timeout(
 	struct peer *peer,
-	int	dstate
+	teModemState	dstate
 	)
 {
 	struct actsunit *up;

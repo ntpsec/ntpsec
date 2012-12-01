@@ -1,4 +1,5 @@
 * [Bug 2278] ACTS flag3 mismatch between code and driver18.html.
+* Use an enum for the ACTS state table.
 (4.2.7p306) 2012/09/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 752] ToS cleanup from Mike Tatarinov.
 (4.2.7p305) 2012/09/15 Released by Harlan Stenn <stenn@ntp.org>
