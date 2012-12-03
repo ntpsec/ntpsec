@@ -8,6 +8,7 @@ autogen definitions options;
 // to be ntp.conf - the latter is also how autogen produces the output
 // file name.
 prog-name	= "ntp.conf";
+file-path	= "/etc/ntp.conf";
 prog-title	= "Network Time Protocol (NTP) daemon configuration file format";
 
 /* explain: Additional information whenever the usage routine is invoked */
