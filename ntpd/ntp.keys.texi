@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename ntp.keys.info
 @settitle NTP Symmetric Key
-@include sntp/include/version.texi
+@include ../sntp/include/version.texi
 @paragraphindent 2
 @c %**end of header
 
