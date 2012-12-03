@@ -3,6 +3,7 @@
 autogen definitions options;
 
 #include copyright.def
+#include version.def
 
 // We want the synopsis to be "/etc/ntp.keys" but we need the prog-name
 // to be ntp.keys - the latter is also how autogen produces the output
