@@ -80,6 +80,7 @@ Following these is a section describing
 .Sx Miscellaneous Options .
 While there is a rich set of options available,
 the only required option is one or more
+.Ic pool ,
 .Ic server ,
 .Ic peer ,
 .Ic broadcast
@@ -132,6 +133,14 @@ qualifier forces DNS resolution to the IPv6 namespace.
 See IPv6 references for the
 equivalent classes for that address family.
 .Bl -tag -width indent
+.It Xo Ic pool Ar address
+.Op Cm burst
+.Op Cm iburst
+.Op Cm version Ar version
+.Op Cm prefer
+.Op Cm minpoll Ar minpoll
+.Op Cm maxpoll Ar maxpoll
+.Xc
 .It Xo Ic server Ar address
 .Op Cm key Ar key \&| Cm autokey
 .Op Cm burst
@@ -165,7 +174,7 @@ equivalent classes for that address family.
 .Xc
 .El
 .Pp
-These four commands specify the time server name or address to
+These five commands specify the time server name or address to
 be used and the mode in which to operate.
 The
 .Ar address
@@ -178,6 +187,12 @@ page
 provided in
 .Pa /usr/share/doc/ntp ) .
 .Bl -tag -width indent
+.It Ic pool
+For type s addresses, this command mobilizes a persistent
+client mode association with a number of remote servers.
+In this mode the local clock can synchronized to the
+remote server, but the remote server can never be synchronized to
+the local clock.
 .It Ic server
 For type s and r addresses, this command mobilizes a persistent
 client mode association with the specified remote server or local
