@@ -29,7 +29,7 @@ CHECK_SAVECONFIG=
 endif
 
 #
-# VPHACK and VPHACK_AFTER are enabled on non-GNU makes (such as 
+# VPHACK and VPHACK_AFTER are enabled on non-GNU makes (such as
 # BSD make) to work around issues specific to compiling
 # ntp_parser.y into ntp_parser.h and ntp_parser.c in a VPATH
 # configuration where we would like (for a change) the output
@@ -37,7 +37,7 @@ endif
 # as opposed to the build directory.  This allows a single
 # host of a flock configured with Bison to update ntp_parser.[ch]
 # used by the rest.
-# 
+#
 
 if VPATH_HACK
 VPHACK=	vphack
@@ -54,7 +54,7 @@ vphack:
 #
 # ylwrap script which invokes Bison replaces ntp_parser.h
 # symlink with the updated file, when ntp_parser.h changes.
-# vphack_after detects this and copies the updated file to srcdir 
+# vphack_after detects this and copies the updated file to srcdir
 # and re-creates the ntp_parser.h symlink in its place.
 #
 
@@ -66,15 +66,15 @@ vphack_after:
 
 # BUILT_SOURCES which should also be in EXTRA_DIST
 B_S_DIST=			\
-	$(srcdir)/ntpd-opts.c 	\
-	$(srcdir)/ntpd-opts.h 	\
+	$(srcdir)/ntpd-opts.c	\
+	$(srcdir)/ntpd-opts.h	\
 	$(NULL)
 
 BUILT_SOURCES=		\
-	$(VPHACK) 	\
+	$(VPHACK)	\
 	$(LIBPARSE)	\
-	ntp_parser.c 	\
-	ntp_parser.h 	\
+	ntp_parser.c	\
+	ntp_parser.h	\
 	$(VPHACK_AFTER)	\
 	$(B_S_DIST)	\
 	$(NULL)
@@ -115,6 +115,10 @@ CLEANFILES =			\
 
 EXTRA_DIST =			\
 	complete.conf.in	\
+	invoke-ntp.conf.menu	\
+	invoke-ntp.conf.texi	\
+	invoke-ntp.keys.menu	\
+	invoke-ntp.keys.texi	\
 	invoke-ntpd.menu	\
 	invoke-ntpd.texi	\
 	keyword-gen-utd		\
@@ -123,11 +127,15 @@ EXTRA_DIST =			\
 	ntp.conf.def		\
 	ntp.conf.man.in		\
 	ntp.conf.mdoc.in	\
+	ntp.conf.html		\
+	ntp.conf.texi		\
 	ntp.keys.5man		\
 	ntp.keys.5mdoc		\
 	ntp.keys.def		\
 	ntp.keys.man.in		\
 	ntp.keys.mdoc.in	\
+	ntp.keys.html		\
+	ntp.keys.texi		\
 	ntpd-opts.def		\
 	ntpd.1ntpdman		\
 	ntpd.1ntpdmdoc		\
@@ -141,7 +149,17 @@ EXTRA_DIST =			\
 ###							Y2Kfixes
 check_PROGRAMS = @MAKE_CHECK_Y2K@
 EXTRA_PROGRAMS = check_y2k keyword-gen ntpd ntpdsim
+
+html_DATA=				\
+	$(srcdir)/ntp.conf.html		\
+	$(srcdir)/ntp.keys.html		\
+	$(NULL)
+
 noinst_DATA =				\
+	$(srcdir)/invoke-ntp.conf.menu	\
+	$(srcdir)/invoke-ntp.conf.texi	\
+	$(srcdir)/invoke-ntp.keys.menu	\
+	$(srcdir)/invoke-ntp.keys.texi	\
 	$(srcdir)/invoke-ntpd.menu	\
 	$(srcdir)/invoke-ntpd.texi	\
 	$(srcdir)/ntp.conf.man.in	\
@@ -153,13 +171,16 @@ noinst_DATA =				\
 	$(NULL)
 
 noinst_HEADERS = declcond.h
+
+install-data-local: install-html
+
 run_ag=		cd $(srcdir) &&	env PATH="$(abs_builddir):$(PATH)"	\
 		autogen -L ../sntp/include -L ../sntp/ag-tpl --writable
 std_def_list =							\
 	$(top_srcdir)/sntp/include/debug-opt.def		\
-	$(top_srcdir)/sntp/include/autogen-version.def 		\
-	$(top_srcdir)/sntp/include/copyright.def 		\
-	$(top_srcdir)/sntp/include/homerc.def 			\
+	$(top_srcdir)/sntp/include/autogen-version.def		\
+	$(top_srcdir)/sntp/include/copyright.def		\
+	$(top_srcdir)/sntp/include/homerc.def			\
 	$(top_srcdir)/sntp/include/ntp.lic			\
 	$(top_srcdir)/sntp/include/version.def			\
 	$(NULL)
@@ -178,7 +199,7 @@ ntpd_SOURCES =			\
 	ntpd-opts.c		\
 	ntpd-opts.h		\
 	$(NULL)
-	
+
 ntpdsim_SOURCES =		\
 	$(ntpd_SOURCES)		\
 	ntp_prio_q.c		\
@@ -263,14 +284,14 @@ $(srcdir)/keyword-gen-utd: $(srcdir)/keyword-gen.c $(srcdir)/ntp_parser.h
 	$(MAKE) $(AM_MAKEFLAGS) k-g-u-submake	# avoid explicit dependency
 	grep diff_ignore_line $(srcdir)/ntp_keyword.h > k-g-u
 	mv -f k-g-u $@
-	
+
 $(srcdir)/ntp_keyword.h: $(srcdir)/keyword-gen-utd
 	@: do-nothing action to avoid default SCCS get
 	@: .h updated if needed by k-g-u-submake rule
 
 $(srcdir)/ntpd-opts.h: $(srcdir)/ntpd-opts.c
 	@: do-nothing action to avoid default SCCS get, .h built with .c
-	
+
 $(srcdir)/ntpd-opts.c: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) ntpd-opts.def
 
@@ -300,6 +321,26 @@ ntpd.$(NTPD_MS): $(srcdir)/ntpd.$(MANTAGFMT).in $(top_builddir)/config.status
 
 ###
 
+$(srcdir)/invoke-ntp.conf.menu: $(srcdir)/invoke-ntp.conf.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+
+$(srcdir)/invoke-ntp.conf.texi: $(srcdir)/ntp.conf.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp.conf.def
+
+$(srcdir)/invoke-ntp.keys.menu: $(srcdir)/invoke-ntp.keys.texi
+	@: do-nothing action to avoid default SCCS get, .menu built with .texi
+
+$(srcdir)/invoke-ntp.keys.texi: $(srcdir)/ntp.keys.def $(std_def_list)
+	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp.keys.def
+
+$(srcdir)/ntp.conf.html: $(srcdir)/ntp.conf.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp.conf.html ntp.conf.texi || true )
+
+$(srcdir)/ntp.keys.html: $(srcdir)/ntp.keys.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp.keys.html ntp.keys.texi || true )
+
+###
+
 $(srcdir)/ntp.conf.5man: $(srcdir)/ntp.conf.def $(std_def_list)
 	$(run_ag) -DMAN_SECTION=5man -Tagman-cmd.tpl ntp.conf.def
 
@@ -325,7 +366,7 @@ ntp.conf.5: $(srcdir)/ntp.conf.$(MANTAGFMT).in $(top_builddir)/config.status
 ###
 
 $(srcdir)/ntp.keys.5man: $(srcdir)/ntp.keys.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=5man -Tagman-cmd.tpl ntp.keys.def
+	$(run_ag) -DMAN_SECTION=5man -Tagman-file.tpl ntp.keys.def
 
 $(srcdir)/ntp.keys.man.in: $(srcdir)/ntp.keys.5man $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp.keys.5man > $(srcdir)/ntp.keys.man.in+
@@ -334,7 +375,7 @@ $(srcdir)/ntp.keys.man.in: $(srcdir)/ntp.keys.5man $(top_srcdir)/sntp/scripts/ma
 ###
 
 $(srcdir)/ntp.keys.5mdoc: $(srcdir)/ntp.keys.def $(std_def_list)
-	$(run_ag) -DMAN_SECTION=5mdoc -Tagmdoc-cmd.tpl ntp.keys.def
+	$(run_ag) -DMAN_SECTION=5mdoc -Tagmdoc-file.tpl ntp.keys.def
 
 $(srcdir)/ntp.keys.mdoc.in: $(srcdir)/ntp.keys.5mdoc $(top_srcdir)/sntp/scripts/mansec2subst.sed
 	sed -f $(top_srcdir)/sntp/scripts/mansec2subst.sed $(srcdir)/ntp.keys.5mdoc > $(srcdir)/ntp.keys.mdoc.in+
@@ -350,7 +391,7 @@ ntp.keys.5: $(srcdir)/ntp.keys.$(MANTAGFMT).in $(top_builddir)/config.status
 
 $(srcdir)/invoke-ntpd.menu: $(srcdir)/invoke-ntpd.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
-	
+
 $(srcdir)/invoke-ntpd.texi: $(srcdir)/ntpd-opts.def $(srcdir)/ntpdbase-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpd-opts.def
 	$(top_srcdir)/scripts/check--help $@
@@ -375,7 +416,7 @@ $(top_srcdir)/sntp/scm-rev:
 
 version.c: $(ntpd_OBJECTS) ../libntp/libntp.a @LIBPARSE@ Makefile $(top_srcdir)/sntp/scm-rev
 	env CSET=`cat $(top_srcdir)/sntp/scm-rev` $(top_builddir)/scripts/mkver ntpd
-	
+
 version.o: version.c
 	env CCACHE_DISABLE=1 $(COMPILE) -c version.c -o version.o
 

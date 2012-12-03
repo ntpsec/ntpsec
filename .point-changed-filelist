@@ -1,11 +1,17 @@
 ChangeLog
+ntpd/invoke-ntp.conf.texi
+ntpd/invoke-ntp.keys.texi
 ntpd/invoke-ntpd.texi
 ntpd/ntp.conf.5man
 ntpd/ntp.conf.5mdoc
+ntpd/ntp.conf.html
+ntpd/ntp.conf.texi
 ntpd/ntp.conf.man.in
 ntpd/ntp.conf.mdoc.in
 ntpd/ntp.keys.5man
 ntpd/ntp.keys.5mdoc
+ntpd/ntp.keys.html
+ntpd/ntp.keys.texi
 ntpd/ntp.keys.man.in
 ntpd/ntp.keys.mdoc.in
 ntpd/ntpd-opts.c

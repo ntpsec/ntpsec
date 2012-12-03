@@ -8,7 +8,8 @@ autogen definitions options;
 // to be ntp.keys - the latter is also how autogen produces the output
 // file name.
 prog-name	= "ntp.keys";
-prog-title	= "NTP key file format";
+file-path	= "/etc/ntp.keys";
+prog-title	= "NTP symmetric key file format";
 
 /* explain: Additional information whenever the usage routine is invoked */
 explain = <<- _END_EXPLAIN
@@ -18,16 +19,13 @@ doc-section	= {
   ds-type	= 'DESCRIPTION';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_PROG_MDOC_DESCRIP
-This document describes the format of an NTP key file.
+This document describes the format of an NTP symmetric key file.
 For a description of the use of this type of file, see the
 .Qq Authentication Support
 section of the
 .Xr ntp.conf 5
 page.
 .Pp
-In the case of DES, the keys are 56 bits long with,
-depending on type, a parity check on each byte.
-In the case of MD5, the keys are 64 bits (8 bytes).
 .Xr ntpd 8
 reads its keys from a file specified using the
 .Fl k
@@ -37,7 +35,7 @@ statement in the configuration file.
 While key number 0 is fixed by the NTP standard
 (as 56 zero bits)
 and may not be changed,
-one or more of the keys numbered 1 through 15
+one or more keys numbered between 1 and 65534
 may be arbitrarily set in the keys file.
 .Pp
 The key file uses the same comment conventions
@@ -48,57 +46,51 @@ Key entries use a fixed format of the form
 .Pp
 where
 .Ar keyno
-is a positive integer,
+is a positive integer (between 1 and 65534),
 .Ar type
-is a single character which defines the key format,
+is the message digest algorithm,
 and
 .Ar key
 is the key itself.
 .Pp
 The
 .Ar key
-may be given in one of four different formats,
+may be given in a format
 controlled by the
 .Ar type
-character.
-The four key types, and corresponding formats,
-are listed following.
-.Bl -tag -width X
-.It Li S
-The key is a 64-bit hexadecimal number in the format
-specified in the DES specification;
-that is, the high order seven bits of each octet are used
-to form the 56-bit key
-while the low order bit of each octet is given a value
-such that odd parity is maintained for the octet.
-Leading zeroes must be specified
-(i.e., the key must be exactly 16 hex digits long)
-and odd parity must be maintained.
-Hence a zero key, in standard format, would be given as
-.Ql 0101010101010101 .
-.It Li N
-The key is a 64-bit hexadecimal number in the format
-specified in the NTP standard.
-This is the same as the DES format,
-except the bits in each octet have been rotated one bit right
-so that the parity bit is now the high order bit of the octet.
-Leading zeroes must be specified and odd parity must be maintained.
-A zero key in NTP format would be specified as
-.Ql 8080808080808080 .
-.It Li A
-The key is a 1-to-8 character ASCII string.
-A key is formed from this by using the low order 7 bits
-of each ASCII character in the string,
-with zeroes added on the right
-when necessary to form a full width 56-bit key,
-in the same way that encryption keys are formed from
-.Ux
-passwords.
-.It Li M
-The key is a 1-to-8 character ASCII string,
-using the MD5 authentication scheme.
-Note that both the keys and the authentication schemes (DES or MD5)
-must be identical between a set of peers sharing the same key number.
+field.
+The
+.Ar type
+.Li MD5
+is always supported.
+If
+.Li ntpd
+was built with the OpenSSL library
+then any digest library supported by that library may be specified.
+However, if compliance with FIPS 140-2 is required the
+.Ar type
+must be either
+.Li SHA
+or
+.Li SHA1 .
+.Pp
+What follows are some key types, and corresponding formats:
+.Pp
+.Bl -tag -width RMD160 -compact
+.It Li MD5
+The key is 1 to 16 printable characters terminated by
+an EOL,
+whitespace,
+or
+a
+.Li #
+(which is the "start of comment" character).
+.Pp
+.It Li SHA
+.It Li SHA1
+.It Li RMD160
+The key is a hex-encoded ASCII string of 40 characters,
+which is truncated as necessary.
 .El
 .Pp
 Note that the keys used by the
