@@ -1,8 +1,8 @@
-.TH ntp.conf 5 "01 Dec 2012" "4.2.7p329" "File Formats"
+.TH ntp.conf 5 "03 Dec 2012" "4.2.7p330" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"  
-.\"  It has been AutoGen-ed  December  1, 2012 at 11:31:29 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  December  3, 2012 at 05:26:14 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -16,36 +16,7 @@ ntp.conf \- Network Time Protocol (NTP) daemon configuration file format
 All arguments must be options.
 .PP
 .SH DESCRIPTION
-.SH "OPTIONS"
-.TP
-.BR \-\-help
-Display usage information and exit.
-.TP
-.BR \-\-more-help
-Pass the extended usage information through a pager.
-.TP
-.BR \-\-version "[=\fI{v|c|n}\fP]"
-Output version of program and exit.  The default mode is `v', a simple
-version.  The `c' mode will print copyright information and `n' will
-print the full copyright notice.
-.SH "OPTION PRESETS"
-Any option that is not marked as \fInot presettable\fP may be preset
-by loading values from environment variables named:
-.nf
-  \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
-.fi
-.ad
-.SH "ENVIRONMENT"
-See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES
-.SH "EXIT STATUS"
-One of the following exit values will be returned:
-.TP
-.BR 0 " (EXIT_SUCCESS)"
-Successful program execution.
-.TP
-.BR 1 " (EXIT_FAILURE)"
-The operation failed or the command syntax was not valid.
 .SH "SEE ALSO"
 .SH "AUTHORS"
 The University of Delaware

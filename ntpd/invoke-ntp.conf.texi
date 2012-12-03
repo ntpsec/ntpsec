@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 # 
-# It has been AutoGen-ed  December  3, 2012 at 12:40:11 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  3, 2012 at 05:26:26 AM by AutoGen 5.16.2
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -110,6 +110,9 @@ Options
 While there is a rich set of options available,
 the only required option is one or more
 .Ic
+pool
+,
+.Ic
 server
 ,
 .Ic
@@ -170,6 +173,32 @@ while a
 See IPv6 references for the
 equivalent classes for that address family.
 @table @samp
+@item Xo
+.Op
+Cm
+burst
+.Op
+Cm
+iburst
+.Op
+Cm
+version
+Ar
+version
+.Op
+Cm
+prefer
+.Op
+Cm
+minpoll
+Ar
+minpoll
+.Op
+Cm
+maxpoll
+Ar
+maxpoll
+.Xc
 @item Xo
 .Op
 Cm
@@ -296,7 +325,7 @@ ttl
 
 @end multitable
 
-These four commands specify the time server name or address to
+These five commands specify the time server name or address to
 be used and the mode in which to operate.
 The
 .Ar
@@ -315,6 +344,12 @@ provided in
 )
 .
 @table @samp
+@item Ic
+For type s addresses, this command mobilizes a persistent
+client mode association with a number of remote servers.
+In this mode the local clock can synchronized to the
+remote server, but the remote server can never be synchronized to
+the local clock.
 @item Ic
 For type s and r addresses, this command mobilizes a persistent
 client mode association with the specified remote server or local
