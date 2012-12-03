@@ -33,7 +33,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <p>This document describes the configuration file for the NTP Project's
 <code>ntpd</code> program.
 
-  <p>This document applies to version {No value for `VERSION'} of <code>ntp.conf</code>.
+  <p>This document applies to version 4.2.7p331 of <code>ntp.conf</code>.
 
                                                                                                                           <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -160,6 +160,9 @@ Options
 While there is a rich set of options available,
 the only required option is one or more
 .Ic
+pool
+,
+.Ic
 server
 ,
 .Ic
@@ -221,6 +224,31 @@ See IPv6 references for the
 equivalent classes for that address family.
      <dl>
 <dt><span class="samp">Xo</span><dd>.Op
+Cm
+burst
+.Op
+Cm
+iburst
+.Op
+Cm
+version
+Ar
+version
+.Op
+Cm
+prefer
+.Op
+Cm
+minpoll
+Ar
+minpoll
+.Op
+Cm
+maxpoll
+Ar
+maxpoll
+.Xc
+<br><dt><span class="samp">Xo</span><dd>.Op
 Cm
 key
 Ar
@@ -340,7 +368,7 @@ Ar
 ttl
 .Xc
 
-     <p>These four commands specify the time server name or address to
+     <p>These five commands specify the time server name or address to
 be used and the mode in which to operate. 
 The
 .Ar
@@ -359,7 +387,12 @@ provided in
 )
 .
           <dl>
-<dt><span class="samp">Ic</span><dd>For type s and r addresses, this command mobilizes a persistent
+<dt><span class="samp">Ic</span><dd>For type s addresses, this command mobilizes a persistent
+client mode association with a number of remote servers. 
+In this mode the local clock can synchronized to the
+remote server, but the remote server can never be synchronized to
+the local clock. 
+<br><dt><span class="samp">Ic</span><dd>For type s and r addresses, this command mobilizes a persistent
 client mode association with the specified remote server or local
 radio clock. 
 In this mode the local clock can synchronized to the
