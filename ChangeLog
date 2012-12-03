@@ -1,3 +1,4 @@
+* [Bug 2114] Correctly calculate sntp's synch distance.
 (4.2.7p330) 2012/12/03 Released by Harlan Stenn <stenn@ntp.org>
 * autogen doc cleanup
 (4.2.7p329) 2012/12/01 Released by Harlan Stenn <stenn@ntp.org>

@@ -358,7 +358,7 @@ open_sockets(
 		/* Register an NTP callback for recv/timeout */
 		ev_sock6 = event_new(base, sock6,
 				     EV_TIMEOUT | EV_READ | EV_PERSIST,
-		 		     &sock_cb, NULL);
+				     &sock_cb, NULL);
 		if (NULL == ev_sock6) {
 			msyslog(LOG_ERR,
 				"open_sockets: event_new(base, sock6) failed!");
@@ -694,7 +694,7 @@ xmt(
 
 
 /*
- * timeout_queries()  -- give up on unrequited NTP queries
+ * timeout_queries() -- give up on unrequited NTP queries
  */
 void
 timeout_queries(void)
@@ -1249,7 +1249,7 @@ handle_pkt(
 		if (0 == stratum)
 				stratum = 16;
 
-		if (synch_distance > 0) {
+		if (synch_distance > 0.) {
 			cnt = snprintf(disptxt, sizeof(disptxt),
 				       " +/- %f", synch_distance);
 			if (cnt >= sizeof(disptxt))
@@ -1305,12 +1305,57 @@ offset_calculation(
 	NTOHL_FP(&rpkt->xmt, &p_xmt);
 
 	*precision = LOGTOD(rpkt->precision);
-	TRACE(3, ("offset_calculation: precision: %f\n", *precision));
 
+	TRACE(3, ("offset_calculation: LOGTOD(rpkt->precision): %f\n", *precision));
+
+	/* Compute offset etc. */
+	tmp = p_rec;
+	L_SUB(&tmp, &p_org);
+	LFPTOD(&tmp, t21);
+	TVTOTS(tv_dst, &dst);
+	dst.l_ui += JAN_1970;
+	tmp = p_xmt;
+	L_SUB(&tmp, &dst);
+	LFPTOD(&tmp, t34);
+	*offset = (t21 + t34) / 2.;
+	delta = t21 - t34;
+
+	// synch_distance is:
+	// (peer->delay + peer->rootdelay) / 2 + peer->disp
+	// + peer->rootdisp + clock_phi * (current_time - peer->update)
+	// + peer->jitter;
+	//
+	// and peer->delay = fabs(peer->offset - p_offset) * 2;
+	// and peer->offset needs history, so we're left with
+	// p_offset = (t21 + t34) / 2.;
+	// peer->disp = 0; (we have no history to augment this)
+	// clock_phi = 15e-6; 
+	// peer->jitter = LOGTOD(sys_precision); (we have no history to augment this)
+	// and ntp_proto.c:set_sys_tick_precision() should get us sys_precision.
+	//
+	// so our answer seems to be:
+	//
+	// (fabs(t21 + t34) + peer->rootdelay) / 3.
+	// + 0 (peer->disp)
+	// + peer->rootdisp
+	// + 15e-6 (clock_phi)
+	// + LOGTOD(sys_precision)
+
+	INSIST( FPTOD(p_rdly) >= 0. );
+#if 1
+	*synch_distance = (fabs(t21 + t34) + FPTOD(p_rdly)) / 3.
+		+ 0.
+		+ FPTOD(p_rdsp)
+		+ 15e-6
+		+ 0.	/* LOGTOD(sys_precision) when we can get it */
+		;
+	INSIST( *synch_distance >= 0. );
+#else
 	*synch_distance = (FPTOD(p_rdly) + FPTOD(p_rdsp))/2.0;
+#endif
 
 #ifdef DEBUG
-	if (debug > 2) {
+	if (debug > 3) {
 		printf("sntp rootdelay: %f\n", FPTOD(p_rdly));
 		printf("sntp rootdisp: %f\n", FPTOD(p_rdsp));
 		printf("sntp syncdist: %f\n", *synch_distance);
@@ -1328,21 +1373,11 @@ offset_calculation(
 	}
 #endif
 
-	/* Compute offset etc. */
-	tmp = p_rec;
-	L_SUB(&tmp, &p_org);
-	LFPTOD(&tmp, t21);
-	TVTOTS(tv_dst, &dst);
-	dst.l_ui += JAN_1970;
-	tmp = p_xmt;
-	L_SUB(&tmp, &dst);
-	LFPTOD(&tmp, t34);
-	*offset = (t21 + t34) / 2.;
-	delta = t21 - t34;
-
 	TRACE(3, ("sntp offset_calculation:\trec - org t21: %.6f\n"
 		  "\txmt - dst t34: %.6f\tdelta: %.6f\toffset: %.6f\n",
 		  t21, t34, delta, *offset));
+
+	return;
 }
 
 
