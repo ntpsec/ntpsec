@@ -50,10 +50,10 @@ flag = {
   arg-type	= number;
   arg-name	= "auth-keynumber";
   doc		= <<- _EndOfDoc_
-	This option enables authentication using the key specified in this
-	option's argument.  The argument of this option is the keyid, a
-	number specified in the keyfile as this key's identifier. See the
-	keyfile option (@option{-k}) for more details.
+	Enable authentication using the key specified in this option's
+	argument.  The argument of this option is the @option{keyid}, a
+	number specified in the @option{keyfile} as this key's identifier.
+	See the @option{keyfile} option (@option{-k}) for more details.
 	_EndOfDoc_;
 };
 
@@ -84,8 +84,8 @@ flag = {
 	Requests from an NTP "client" to a "server" should never be sent
 	more rapidly than one every 2 seconds.  By default, any IPs returned
 	as part of a DNS lookup are assumed to be for a single instance of
-	ntpd, and therefore @code{sntp} will send queries to these IPs one
-	after another, with a 2-second gap in between each query.
+	@code{ntpd}, and therefore @code{sntp} will send queries to these IPs
+	one after another, with a 2-second gap in between each query.
 
 	The @option{-c} or @option{--concurrent} flag says that any IPs
 	returned for the DNS lookup of the supplied host-name are on
@@ -132,18 +132,8 @@ flag = {
   doc		= <<- _EndOfDoc_
 	This option specifies the keyfile.
 	@code{sntp} will search for the key specified with @option{-a}
-	@file{keyno} in this file.  Key files follow the following format:
-
-	@file{keyid keytype key}
-
-	Where	@file{keyid} is a number identifying this key
-		@file{keytype} is one of the following:
-			@code{S}  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
-			@code{N}  Key is a 64 Bit hexadecimal number as specified in the NTP standard.
-			@code{A}  Key is a 1-to-8 character ASCII string.
-			@code{M}  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
-
-	For more information see @command{ntp.keys(5)}.
+	@file{keyno} in this file.  See @command{ntp.keys(5)} for more
+	information.
 	_EndOfDoc_;
 };
 
@@ -175,7 +165,7 @@ flag = {
 flag = {
   name		= ntpversion;
   value		= o;
-  descrip	= "Send @var{int} as our NTP version";
+  descrip	= "Send @var{int} as our NTP protocol version";
   arg-type	= number;
   arg-default	= 4;
   arg-range	= "0->7";
@@ -257,7 +247,7 @@ job.
 NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
 are defined and described by RFC 5905.
 
-.PP
+.Pp
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like:
 
@@ -377,9 +367,10 @@ doc-section	= {
 };
 
 doc-section	= {
-  ds-type	= 'BUGS';
+  ds-type	= 'NOTES';
   ds-format	= 'mdoc';
-  ds-text	= <<- _END_MDOC_BUGS
-Please report bugs to http://bugs.ntp.org .
-	_END_MDOC_BUGS;
+  ds-text	= <<- _END_MDOC_NOTES
+This document corresponds to version @VERSION@ of
+.Nm .
+	_END_MDOC_NOTES;
 };

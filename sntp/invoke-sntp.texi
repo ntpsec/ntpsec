@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-sntp.texi)
 # 
-# It has been AutoGen-ed  December  3, 2012 at 11:43:13 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  6, 2012 at 02:11:56 AM by AutoGen 5.16.2
 # From the definitions    sntp-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -24,7 +24,7 @@ job.
 NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
 are defined and described by RFC 5905.
 
-.PP
+
 The default is to write the estimated correct local date and time (i.e. not
 UTC) to the standard output in a format like:
 
@@ -106,7 +106,7 @@ This software is released under the NTP license, <http://ntp.org/license>.
 * sntp exit status::            exit status
 * sntp Usage::                  Usage
 * sntp Authors::                Authors
-* sntp Bugs::                   Bugs
+* sntp Notes::                  Notes
 @end menu
 
 @node sntp usage
@@ -151,7 +151,7 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -M Num steplimit      Adjustments less than steplimit msec will be slewed
                                 - It must be in the range:
                                   greater than or equal to 0
-   -o Num ntpversion     Send int as our NTP version
+   -o Num ntpversion     Send int as our NTP protocol version
                                 - It must be in the range:
                                   0 to 7
    -r no  usereservedport Use the NTP Reserved Port (port 123)
@@ -221,10 +221,10 @@ to the IPv6 namespace.
 
 This is the ``enable authentication with the key @var{auth-keynumber}'' option.
 This option takes an argument number @file{auth-keynumber}.
-This option enables authentication using the key specified in this
-option's argument.  The argument of this option is the keyid, a
-number specified in the keyfile as this key's identifier. See the
-keyfile option (@option{-k}) for more details.
+Enable authentication using the key specified in this option's
+argument.  The argument of this option is the @option{keyid}, a
+number specified in the @option{keyfile} as this key's identifier.
+See the @option{keyfile} option (@option{-k}) for more details.
 @node sntp broadcast
 @subsection broadcast option (-b)
 @cindex sntp-broadcast
@@ -259,8 +259,8 @@ may appear an unlimited number of times.
 Requests from an NTP "client" to a "server" should never be sent
 more rapidly than one every 2 seconds.  By default, any IPs returned
 as part of a DNS lookup are assumed to be for a single instance of
-ntpd, and therefore @code{sntp} will send queries to these IPs one
-after another, with a 2-second gap in between each query.
+@code{ntpd}, and therefore @code{sntp} will send queries to these IPs
+one after another, with a 2-second gap in between each query.
 
 The @option{-c} or @option{--concurrent} flag says that any IPs
 returned for the DNS lookup of the supplied host-name are on
@@ -291,18 +291,8 @@ This is the ``look in this file for the key specified with @option{-a}'' option.
 This option takes an argument file @file{file-name}.
 This option specifies the keyfile.
 @code{sntp} will search for the key specified with @option{-a}
-@file{keyno} in this file.  Key files follow the following format:
-
-@file{keyid keytype key}
-
-Where	@file{keyid} is a number identifying this key
-@file{keytype} is one of the following:
-@code{S}  Key is a 64 Bit hexadecimal number as specified in in the DES specification.
-@code{N}  Key is a 64 Bit hexadecimal number as specified in the NTP standard.
-@code{A}  Key is a 1-to-8 character ASCII string.
-@code{M}  Key is a 1-to-8 character ASCII string using the MD5 authentication scheme.
-
-For more information see @command{ntp.keys(5)}.
+@file{keyno} in this file.  See @command{ntp.keys(5)} for more
+information.
 @node sntp logfile
 @subsection logfile option (-l)
 @cindex sntp-logfile
@@ -324,7 +314,7 @@ correction using @command{settimeofday(2)}.
 @subsection ntpversion option (-o)
 @cindex sntp-ntpversion
 
-This is the ``send @var{int} as our ntp version'' option.
+This is the ``send @var{int} as our ntp protocol version'' option.
 This option takes an argument number.
 When sending requests to a remote server, tell them we are running
 NTP protocol version @file{ntpversion} .
@@ -493,6 +483,7 @@ Stenn"
 .An
 "Dave
 Hart"
-@node sntp Bugs
-@subsection sntp Bugs
-Please report bugs to http://bugs.ntp.org .
+@node sntp Notes
+@subsection sntp Notes
+This document corresponds to version @VERSION@ of
+@code{sntp}.
