@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 # 
-# It has been AutoGen-ed  December  7, 2012 at 09:49:37 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  7, 2012 at 11:26:32 AM by AutoGen 5.16.2
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -61,8 +61,8 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-/home/stenn/ntp-dev/A.psp-fb1/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.06 [paranoid]),
-running under Perl version 5.8.9.
+/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
+running under Perl version 5.8.8.
 
 Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
 
