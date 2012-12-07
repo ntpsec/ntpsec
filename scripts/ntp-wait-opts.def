@@ -90,8 +90,16 @@ doc-section	= {
 doc-section	= {
   ds-type	= 'AUTHORS';
   ds-format	= 'mdoc';
-  ds-text	= <<- _END_MDOC_NOTES
+  ds-text	= <<- _END_MDOC_AUTH
 .An "Harlan Stenn"
+	_END_MDOC_AUTH;
+};
+
+doc-section	= {
+  ds-type	= 'NOTES';
+  ds-format	= 'mdoc';
+  ds-text	= <<- _END_MDOC_NOTES
+This document corresponds to version @VERSION@ of NTP.
 	_END_MDOC_NOTES;
 };
 

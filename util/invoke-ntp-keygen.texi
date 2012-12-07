@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 # 
-# It has been AutoGen-ed  December  6, 2012 at 07:45:38 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  7, 2012 at 09:50:58 AM by AutoGen 5.16.2
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -1391,6 +1391,7 @@ no write password is specified, the read password is used
 as the write password by default.
 @node ntp-keygen Notes
 @subsection ntp-keygen Notes
+This document corresponds to version @VERSION@ of NTP.
 Portions of this document came from FreeBSD.
 @node ntp-keygen Bugs
 @subsection ntp-keygen Bugs

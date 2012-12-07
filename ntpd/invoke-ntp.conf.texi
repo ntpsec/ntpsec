@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 # 
-# It has been AutoGen-ed  December  6, 2012 at 07:44:20 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  7, 2012 at 09:50:18 AM by AutoGen 5.16.2
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -3848,4 +3848,5 @@ These should be obtained via secure directory
 services when they become universally available.
 @node ntp.conf Notes
 @subsection ntp.conf Notes
-This document is derived from FreeBSD.
+This document corresponds to version @VERSION@ of NTP.
+This document was derived from FreeBSD.

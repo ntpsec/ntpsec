@@ -3,7 +3,7 @@
 <title>Ntp-wait User's Manual</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name="description" content="Ntp-wait User's Manual">
-<meta name="generator" content="makeinfo 4.7">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -14,18 +14,20 @@
   pre.smallformat  { font-family:inherit; font-size:smaller }
   pre.smallexample { font-size:smaller }
   pre.smalllisp    { font-size:smaller }
-  span.sc { font-variant:small-caps }
-  span.roman { font-family: serif; font-weight: normal; } 
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
 </head>
 <body>
 <h1 class="settitle">Ntp-wait User's Manual</h1>
 <div class="node">
+<a name="Top"></a>
 <p><hr>
-<a name="Top"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-Description">ntp-wait Description</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-Description">ntp-wait Description</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#dir">(dir)</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
-<br>
+
 </div>
 
 <h2 class="unnumbered">Simple Network Time Protocol User Manual</h2>
@@ -55,9 +57,11 @@ IETF specification.
 </ul>
 
 <div class="node">
-<p><hr>
+<a name="ntp-wait-Description"></a>
 <a name="ntp_002dwait-Description"></a>
-<br>
+<p><hr>
+
+
 </div>
 
 <!-- node-name,  next,  previous,  up -->
@@ -76,9 +80,11 @@ the +4.567 +/- 0.089 secs indicates the time offset and
 error bound of the system clock relative to the server clock.
 
 <div class="node">
-<p><hr>
+<a name="ntp-wait-Invocation"></a>
 <a name="ntp_002dwait-Invocation"></a>
-<br>
+<p><hr>
+
+
 </div>
 
 <h3 class="section">Invoking ntp-wait</h3>
@@ -107,37 +113,40 @@ using the <code>agtexi-cmd</code> template and the option descriptions for the <
 This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 
 <ul class="menu">
-<li><a accesskey="1" href="#ntp_002dwait-usage">ntp-wait usage</a>:                   ntp-wait help/usage (<span class="option">--help</span>)
+<li><a accesskey="1" href="#ntp_002dwait-usage">ntp-wait usage</a>:                   ntp-wait help/usage (<samp><span class="option">--help</span></samp>)
 <li><a accesskey="2" href="#ntp_002dwait">ntp-wait </a>:                         option (-n)
 <li><a accesskey="3" href="#ntp_002dwait">ntp-wait </a>:                         option (-s)
 <li><a accesskey="4" href="#ntp_002dwait">ntp-wait </a>:                         option (-v)
 <li><a accesskey="5" href="#ntp_002dwait-config">ntp-wait config</a>:                  presetting/configuring ntp-wait
 <li><a accesskey="6" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>:             exit status
 <li><a accesskey="7" href="#ntp_002dwait-Authors">ntp-wait Authors</a>:                 Authors
+<li><a accesskey="8" href="#ntp_002dwait-Notes">ntp-wait Notes</a>:                   Notes
 </ul>
 
 <div class="node">
+<a name="ntp-wait-usage"></a>
+<a name="ntp_002dwait-usage"></a>
 <p><hr>
-<a name="ntp_002dwait-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait">ntp-wait</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait">ntp-wait</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
-<h4 class="subsection">ntp-wait help/usage (<span class="option">--help</span>)</h4>
+<h4 class="subsection">ntp-wait help/usage (<samp><span class="option">--help</span></samp>)</h4>
 
 <p><a name="index-ntp_002dwait-help-3"></a>
 This is the automatically generated usage text for ntp-wait.
 
   <p>The text printed is the same whether selected with the <code>help</code> option
-(<span class="option">--help</span>) or the <code>more-help</code> option (<span class="option">--more-help</span>).  <code>more-help</code> will print
+(<samp><span class="option">--help</span></samp>) or the <code>more-help</code> option (<samp><span class="option">--more-help</span></samp>).  <code>more-help</code> will print
 the usage text by passing it through a pager program. 
 <code>more-help</code> is disabled on platforms without a working
 <code>fork(2)</code> function.  The <code>PAGER</code> environment variable is
-used to select the program, defaulting to <span class="file">more</span>.  Both will exit
+used to select the program, defaulting to <samp><span class="file">more</span></samp>.  Both will exit
 with a status code of 0.
 
-<pre class="example">/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
-running under Perl version 5.8.8.
+<pre class="example">/home/stenn/ntp-dev/A.psp-fb1/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.06 [paranoid]),
+running under Perl version 5.8.9.
 
 Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
 
@@ -151,41 +160,47 @@ Space is not required between options and their arguments.
    See ``perldoc Getopt::Std'' about $Getopt::Std::STANDARD_HELP_VERSION.]
 </pre>
   <div class="node">
+<a name="ntp-wait"></a>
+<a name="ntp_002dwait"></a>
 <p><hr>
-<a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">option (-n)</h4>
 
 <p><a name="index-ntp_002dwait_002d-4"></a>
 This is the &ldquo;number of times to check ntpd&rdquo; option. 
-This option takes an argument number <span class="file">num-tries</span>. 
+This option takes an argument number <samp><span class="file">num-tries</span></samp>. 
 The maximum number of times we will check ntpd to see if it
 has been able to synchronize and stabilize the system clock. 
 <div class="node">
+<a name="ntp-wait"></a>
+<a name="ntp_002dwait"></a>
 <p><hr>
-<a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">option (-s)</h4>
 
 <p><a name="index-ntp_002dwait_002d-5"></a>
 This is the &ldquo;how long to sleep between tries&rdquo; option. 
-This option takes an argument number <span class="file">secs-between-tries</span>. 
-We will sleep for <span class="file">secs-between-tries</span> after each query of ntpd
+This option takes an argument number <samp><span class="file">secs-between-tries</span></samp>. 
+We will sleep for <samp><span class="file">secs-between-tries</span></samp> after each query of ntpd
 that returns "the time is not yet stable". 
 <div class="node">
+<a name="ntp-wait"></a>
+<a name="ntp_002dwait"></a>
 <p><hr>
-<a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">option (-v)</h4>
@@ -196,11 +211,13 @@ By default, ntp-wait is silent.  With this option, ntp-wait
 will provide status information.
 
 <div class="node">
+<a name="ntp-wait-config"></a>
+<a name="ntp_002dwait-config"></a>
 <p><hr>
-<a name="ntp_002dwait-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait">ntp-wait</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">presetting/configuring ntp-wait</h4>
@@ -222,31 +239,36 @@ detail to provide.  The default is to print just the version.  The licensing inf
 first letter of the argument is examined:
 
      <dl>
-<dt><span class="samp">version</span><dd>Only print the version.  This is the default. 
-<br><dt><span class="samp">copyright</span><dd>Name the copyright usage licensing terms. 
-<br><dt><span class="samp">verbose</span><dd>Print the full copyright usage licensing terms. 
+<dt>&lsquo;<samp><span class="samp">version</span></samp>&rsquo;<dd>Only print the version.  This is the default. 
+<br><dt>&lsquo;<samp><span class="samp">copyright</span></samp>&rsquo;<dd>Name the copyright usage licensing terms. 
+<br><dt>&lsquo;<samp><span class="samp">verbose</span></samp>&rsquo;<dd>Print the full copyright usage licensing terms. 
 </dl>
 
 <div class="node">
+<a name="ntp-wait-exit-status"></a>
+<a name="ntp_002dwait-exit-status"></a>
 <p><hr>
-<a name="ntp_002dwait-exit-status"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-Authors">ntp-wait Authors</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-Authors">ntp-wait Authors</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-config">ntp-wait config</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp-wait exit status</h4>
 
 <p>One of the following exit values will be returned:
      <dl>
-<dt><span class="samp">0 (EXIT_SUCCESS)</span><dd>Successful program execution. 
-<br><dt><span class="samp">1 (EXIT_FAILURE)</span><dd>The operation failed or the command syntax was not valid. 
+<dt>&lsquo;<samp><span class="samp">0 (EXIT_SUCCESS)</span></samp>&rsquo;<dd>Successful program execution. 
+<br><dt>&lsquo;<samp><span class="samp">1 (EXIT_FAILURE)</span></samp>&rsquo;<dd>The operation failed or the command syntax was not valid. 
 </dl>
   <div class="node">
+<a name="ntp-wait-Authors"></a>
+<a name="ntp_002dwait-Authors"></a>
 <p><hr>
-<a name="ntp_002dwait-Authors"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-Notes">ntp-wait Notes</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-exit-status">ntp-wait exit status</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp-wait Authors</h4>
@@ -254,11 +276,24 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invo
 <p>.An
 "Harlan
 Stenn"
+<div class="node">
+<a name="ntp-wait-Notes"></a>
+<a name="ntp_002dwait-Notes"></a>
+<p><hr>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-Authors">ntp-wait Authors</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>
+
+</div>
+
+<h4 class="subsection">ntp-wait Notes</h4>
+
+<p>This document corresponds to version  of NTP.
 
 <div class="node">
-<p><hr>
 <a name="Usage"></a>
-<br>
+<p><hr>
+
+
 </div>
 
 <!-- node-name,  next,  previous,  up -->

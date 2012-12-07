@@ -3,7 +3,7 @@
 <title>NTP Configuration File User's Manual</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name="description" content="NTP Configuration File User's Manual">
-<meta name="generator" content="makeinfo 4.7">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -14,18 +14,20 @@
   pre.smallformat  { font-family:inherit; font-size:smaller }
   pre.smallexample { font-size:smaller }
   pre.smalllisp    { font-size:smaller }
-  span.sc { font-variant:small-caps }
-  span.roman { font-family: serif; font-weight: normal; } 
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
 </head>
 <body>
 <h1 class="settitle">NTP Configuration File User's Manual</h1>
 <div class="node">
+<a name="Top"></a>
 <p><hr>
-<a name="Top"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Description">ntp.conf Description</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Description">ntp.conf Description</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#dir">(dir)</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
-<br>
+
 </div>
 
 <h2 class="unnumbered">NTP's Configuration File User Manual</h2>
@@ -48,9 +50,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 </ul>
 
 <div class="node">
-<p><hr>
+<a name="ntp.conf-Description"></a>
 <a name="ntp_002econf-Description"></a>
-<br>
+<p><hr>
+
+
 </div>
 
 <!-- node-name,  next,  previous,  up -->
@@ -60,9 +64,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 by default <code>ntp.conf</code>.
 
 <div class="node">
-<p><hr>
+<a name="ntp.conf-Invocation"></a>
 <a name="ntp_002econf-Invocation"></a>
-<br>
+<p><hr>
+
+
 </div>
 
 <h3 class="section">Invoking ntp.conf</h3>
@@ -223,7 +229,7 @@ while a
 See IPv6 references for the
 equivalent classes for that address family.
      <dl>
-<dt><span class="samp">Xo</span><dd>.Op
+<dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 burst
 .Op
@@ -248,7 +254,7 @@ maxpoll
 Ar
 maxpoll
 .Xc
-<br><dt><span class="samp">Xo</span><dd>.Op
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 key
 Ar
@@ -281,7 +287,7 @@ maxpoll
 Ar
 maxpoll
 .Xc
-<br><dt><span class="samp">Xo</span><dd>.Op
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 key
 Ar
@@ -308,7 +314,7 @@ maxpoll
 Ar
 maxpoll
 .Xc
-<br><dt><span class="samp">Xo</span><dd>.Op
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 key
 Ar
@@ -335,7 +341,7 @@ ttl
 Ar
 ttl
 .Xc
-<br><dt><span class="samp">Xo</span><dd>.Op
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 key
 Ar
@@ -387,12 +393,12 @@ provided in
 )
 .
           <dl>
-<dt><span class="samp">Ic</span><dd>For type s addresses, this command mobilizes a persistent
+<dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>For type s addresses, this command mobilizes a persistent
 client mode association with a number of remote servers. 
 In this mode the local clock can synchronized to the
 remote server, but the remote server can never be synchronized to
 the local clock. 
-<br><dt><span class="samp">Ic</span><dd>For type s and r addresses, this command mobilizes a persistent
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>For type s and r addresses, this command mobilizes a persistent
 client mode association with the specified remote server or local
 radio clock. 
 In this mode the local clock can synchronized to the
@@ -403,7 +409,7 @@ This command should
 not
 be used for type
 b or m addresses. 
-<br><dt><span class="samp">Ic</span><dd>For type s addresses (only), this command mobilizes a
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>For type s addresses (only), this command mobilizes a
 persistent symmetric-active mode association with the specified
 remote peer. 
 In this mode the local clock can be synchronized to
@@ -414,7 +420,7 @@ various failure scenarios, either the local or remote peer may be
 the better source of time. 
 This command should NOT be used for type
 b, m or r addresses. 
-<br><dt><span class="samp">Ic</span><dd>For type b and m addresses (only), this
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>For type b and m addresses (only), this
 command mobilizes a persistent broadcast mode association. 
 Multiple
 commands can be used to specify multiple local broadcast interfaces
@@ -443,7 +449,7 @@ or
 multicastclient
 commands
 below. 
-<br><dt><span class="samp">Ic</span><dd>For type m addresses (only), this command mobilizes a
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>For type m addresses (only), this command mobilizes a
 manycast client mode association for the multicast address
 specified. 
 In this case a specific address must be supplied which
@@ -480,14 +486,14 @@ heard.
 
           <p>Options:
                <dl>
-<dt><span class="samp">Cm</span><dd>All packets sent to and received from the server or peer are to
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>All packets sent to and received from the server or peer are to
 include authentication fields encrypted using the autokey scheme
 described in
 .Sx
 Authentication
 Options
 . 
-<br><dt><span class="samp">Cm</span><dd>when the server is reachable, send a burst of eight packets
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>when the server is reachable, send a burst of eight packets
 instead of the usual one. 
 The packet spacing is normally 2 s;
 however, the spacing between the first and second packets
@@ -498,7 +504,7 @@ with the
 .Ic
 server
 command and s addresses. 
-<br><dt><span class="samp">Cm</span><dd>When the server is unreachable, send a burst of eight packets
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>When the server is unreachable, send a burst of eight packets
 instead of the usual one. 
 The packet spacing is normally 2 s;
 however, the spacing between the first two packets can be
@@ -512,14 +518,14 @@ command and s addresses and when
 <code>ntpd(1ntpdmdoc)</code>
 is started with the
 <code>-q</code> option. 
-<br><dt><span class="samp">Cm</span><dd>All packets sent to and received from the server or peer are to
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>All packets sent to and received from the server or peer are to
 include authentication fields encrypted using the specified
 .Ar
 key
 identifier with values from 1 to 65534, inclusive. 
 The
 default is to include no encryption field. 
-<br><dt><span class="samp">Cm</span><br><dt><span class="samp">Cm</span><dd>These options specify the minimum and maximum poll intervals
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>These options specify the minimum and maximum poll intervals
 for NTP messages, as a power of 2 in seconds
 The maximum poll
 interval defaults to 10 (1,024 s), but can be increased by the
@@ -532,9 +538,9 @@ the
 .Cm
 minpoll
 option to a lower limit of 4 (16 s). 
-<br><dt><span class="samp">Cm</span><dd>Marks the server as unused, except for display purposes. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Marks the server as unused, except for display purposes. 
 The server is discarded by the selection algroithm. 
-<br><dt><span class="samp">Cm</span><dd>Marks the server as preferred. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Marks the server as preferred. 
 All other things being equal,
 this host will be chosen for synchronization among a set of
 correctly operating hosts. 
@@ -553,7 +559,7 @@ provided in
 /usr/share/doc/ntp
 )
 for further information. 
-<br><dt><span class="samp">Cm</span><dd>This option is used only with broadcast server and manycast
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This option is used only with broadcast server and manycast
 client modes. 
 It specifies the time-to-live
 .Ar
@@ -567,7 +573,7 @@ client packets.
 Selection of the proper value, which defaults to
 127, is something of a black art and should be coordinated with the
 network administrator. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the version number to be used for outgoing NTP
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the version number to be used for outgoing NTP
 packets. 
 Versions 1-4 are the choices, with version 4 the
 default.
@@ -576,7 +582,7 @@ default.
 Auxiliary
 Commands
                     <dl>
-<dt><span class="samp">Ic</span><dd>This command enables reception of broadcast server messages to
+<dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>This command enables reception of broadcast server messages to
 any local interface (type b) address. 
 Upon receiving a message for
 the first time, the broadcast client measures the nominal server
@@ -591,7 +597,7 @@ authentication as described in
 Authentication
 Options
 . 
-<br><dt><span class="samp">Ic</span><dd>This command enables reception of manycast client messages to
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>This command enables reception of manycast client messages to
 the multicast group address(es) (type m) specified. 
 At least one
 address is required, but the NTP multicast address 224.0.1.1
@@ -606,7 +612,7 @@ authentication as described in
 Authentication
 Options
 . 
-<br><dt><span class="samp">Ic</span><dd>This command enables reception of multicast server messages to
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>This command enables reception of multicast server messages to
 the multicast group address(es) (type m) specified. 
 Upon receiving
 a message for the first time, the multicast client measures the
@@ -1075,7 +1081,7 @@ Other extension fields are ignored.
 Authentication
 Commands
                          <dl>
-<dt><span class="samp">Ic</span><dd>Specifies the interval between regenerations of the session key
+<dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>Specifies the interval between regenerations of the session key
 list used with the Autokey protocol. 
 Note that the size of the key
 list for each association depends on this interval and the current
@@ -1084,7 +1090,7 @@ The default value is 12 (4096 s or about 1.1 hours).
 For poll intervals above the specified interval, a session key list
 with a single entry will be regenerated for every message
 sent. 
-<br><dt><span class="samp">Ic</span><dd>Specifies the key identifier to use with the
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>Specifies the key identifier to use with the
 <code>ntpq(1ntpqmdoc)</code>
 utility, which uses the standard
 protocol defined in RFC-1305. 
@@ -1094,7 +1100,7 @@ key
 argument is
 the key identifier for a trusted key, where the value can be in the
 range 1 to 65,534, inclusive. 
-<br><dt><span class="samp">Xo</span><dd>.Op
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 cert
 Ar
@@ -1163,7 +1169,7 @@ command or default
 . 
 Following are the subcommands:
                               <dl>
-<dt><span class="samp">Cm</span><dd>Specifies the location of the required host public certificate file. 
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the required host public certificate file. 
 This overrides the link
 .Pa
 ntpkey_cert_
@@ -1171,7 +1177,7 @@ Ns
 Ar
 hostname
 in the keys directory. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional GQ parameters file. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the optional GQ parameters file. 
 This
 overrides the link
 .Pa
@@ -1180,7 +1186,7 @@ Ns
 Ar
 hostname
 in the keys directory. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the required host key file. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the required host key file. 
 This overrides
 the link
 .Pa
@@ -1189,7 +1195,7 @@ Ns
 Ar
 hostname
 in the keys directory. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional IFF parameters file.This
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the optional IFF parameters file.This
 overrides the link
 .Pa
 ntpkey_iff_
@@ -1197,12 +1203,12 @@ Ns
 Ar
 hostname
 in the keys directory. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional leapsecond file. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the optional leapsecond file. 
 This overrides the link
 .Pa
 ntpkey_leap
 in the keys directory. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional MV parameters file. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the optional MV parameters file. 
 This
 overrides the link
 .Pa
@@ -1211,14 +1217,14 @@ Ns
 Ar
 hostname
 in the keys directory. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the password to decrypt files containing private keys and
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the password to decrypt files containing private keys and
 identity parameters. 
 This is required only if these files have been
 encrypted. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the random seed file used by the OpenSSL
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the random seed file used by the OpenSSL
 library. 
 The defaults are described in the main text above. 
-<br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional sign key file. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the location of the optional sign key file. 
 This overrides
 the link
 .Pa
@@ -1315,83 +1321,83 @@ Codes
 The following error codes are reported via the NTP control
 and monitoring protocol trap mechanism.
                                    <dl>
-<dt><span class="samp">101</span><dd>.Pq
+<dt>&lsquo;<samp><span class="samp">101</span></samp>&rsquo;<dd>.Pq
 bad
 field
 format
 or
 length
 The packet has invalid version, length or format. 
-<br><dt><span class="samp">102</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">102</span></samp>&rsquo;<dd>.Pq
 bad
 timestamp
 The packet timestamp is the same or older than the most recent received. 
 This could be due to a replay or a server clock time step. 
-<br><dt><span class="samp">103</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">103</span></samp>&rsquo;<dd>.Pq
 bad
 filestamp
 The packet filestamp is the same or older than the most recent received. 
 This could be due to a replay or a key file generation error. 
-<br><dt><span class="samp">104</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">104</span></samp>&rsquo;<dd>.Pq
 bad
 or
 missing
 public
 key
 The public key is missing, has incorrect format or is an unsupported type. 
-<br><dt><span class="samp">105</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">105</span></samp>&rsquo;<dd>.Pq
 unsupported
 digest
 type
 The server requires an unsupported digest/signature scheme. 
-<br><dt><span class="samp">106</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">106</span></samp>&rsquo;<dd>.Pq
 mismatched
 digest
 types
 Not used. 
-<br><dt><span class="samp">107</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">107</span></samp>&rsquo;<dd>.Pq
 bad
 signature
 length
 The signature length does not match the current public key. 
-<br><dt><span class="samp">108</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">108</span></samp>&rsquo;<dd>.Pq
 signature
 not
 verified
 The message fails the signature check. 
 It could be bogus or signed by a
 different private key. 
-<br><dt><span class="samp">109</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">109</span></samp>&rsquo;<dd>.Pq
 certificate
 not
 verified
 The certificate is invalid or signed with the wrong key. 
-<br><dt><span class="samp">110</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">110</span></samp>&rsquo;<dd>.Pq
 certificate
 not
 verified
 The certificate is not yet valid or has expired or the signature could not
 be verified. 
-<br><dt><span class="samp">111</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">111</span></samp>&rsquo;<dd>.Pq
 bad
 or
 missing
 cookie
 The cookie is missing, corrupted or bogus. 
-<br><dt><span class="samp">112</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">112</span></samp>&rsquo;<dd>.Pq
 bad
 or
 missing
 leapseconds
 table
 The leapseconds table is missing, corrupted or bogus. 
-<br><dt><span class="samp">113</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">113</span></samp>&rsquo;<dd>.Pq
 bad
 or
 missing
 certificate
 The certificate is missing, corrupted or bogus. 
-<br><dt><span class="samp">114</span><dd>.Pq
+<br><dt>&lsquo;<samp><span class="samp">114</span></samp>&rsquo;<dd>.Pq
 bad
 or
 missing
@@ -1426,13 +1432,13 @@ automatically summarized and archived for retrospective analysis.
 Monitoring
 Commands
                                         <dl>
-<dt><span class="samp">Ic</span><dd>Enables writing of statistics records. 
+<dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>Enables writing of statistics records. 
 Currently, four kinds of
 .Ar
 name
 statistics are supported.
                                              <dl>
-<dt><span class="samp">Cm</span><dd>Enables recording of clock driver statistics information. 
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables recording of clock driver statistics information. 
 Each update
 received from a clock driver appends a line of the following form to
 the file generation set named
@@ -1455,7 +1461,7 @@ In some clock drivers a good deal of additional information
 can be gathered and displayed as well. 
 See information specific to each
 clock for further details. 
-<br><dt><span class="samp">Cm</span><dd>This option requires the OpenSSL cryptographic software library. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This option requires the OpenSSL cryptographic software library. 
 It
 enables recording of cryptographic public key protocol information. 
 Each message received by the protocol module appends a line of the
@@ -1478,7 +1484,7 @@ See the
 Authentication
 Options
 section for further information. 
-<br><dt><span class="samp">Cm</span><dd>Enables recording of loop filter statistics information. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables recording of loop filter statistics information. 
 Each
 update of the local clock outputs a line of the following form to
 the file generation set named
@@ -1496,7 +1502,7 @@ The next five fields
 show time offset (seconds), frequency offset (parts per million -
 PPM), RMS jitter (seconds), Allan deviation (PPM) and clock
 discipline time constant. 
-<br><dt><span class="samp">Cm</span><dd>Enables recording of peer statistics information. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables recording of peer statistics information. 
 This includes
 statistics records of all peers of a NTP server and of special
 signals, where present and configured. 
@@ -1520,7 +1526,7 @@ The status field is encoded in hex in the format
 described in Appendix A of the NTP specification RFC 1305. 
 The final four fields show the offset,
 delay, dispersion and RMS jitter, all in seconds. 
-<br><dt><span class="samp">Cm</span><dd>Enables recording of raw-timestamp statistics information. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables recording of raw-timestamp statistics information. 
 This
 includes statistics records of all peers of a NTP server and of
 special signals, where present and configured. 
@@ -1545,7 +1551,7 @@ receive, transmit and final NTP timestamps in order.
 The timestamp
 values are as received and before processing by the various data
 smoothing and mitigation algorithms. 
-<br><dt><span class="samp">Cm</span><dd>Enables recording of ntpd statistics counters on a periodic basis. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables recording of ntpd statistics counters on a periodic basis. 
 Each
 hour a line of the following form is appended to the file generation
 set named
@@ -1563,16 +1569,16 @@ The remaining ten fields show
 the statistics counter values accumulated since the last generated
 line.
                                                   <dl>
-<dt><span class="samp">Time</span><dd>Time in hours since the system was last rebooted. 
-<br><dt><span class="samp">Packets</span><dd>Total number of packets received. 
-<br><dt><span class="samp">Packets</span><dd>Number of packets received in response to previous packets sent
-<br><dt><span class="samp">Current</span><dd>Number of packets matching the current NTP version. 
-<br><dt><span class="samp">Previous</span><dd>Number of packets matching the previous NTP version. 
-<br><dt><span class="samp">Bad</span><dd>Number of packets matching neither NTP version. 
-<br><dt><span class="samp">Access</span><dd>Number of packets denied access for any reason. 
-<br><dt><span class="samp">Bad</span><dd>Number of packets with invalid length, format or port number. 
-<br><dt><span class="samp">Bad</span><dd>Number of packets not verified as authentic. 
-<br><dt><span class="samp">Rate</span><dd>Number of packets discarded due to rate limitation.
+<dt>&lsquo;<samp><span class="samp">Time</span></samp>&rsquo;<dd>Time in hours since the system was last rebooted. 
+<br><dt>&lsquo;<samp><span class="samp">Packets</span></samp>&rsquo;<dd>Total number of packets received. 
+<br><dt>&lsquo;<samp><span class="samp">Packets</span></samp>&rsquo;<dd>Number of packets received in response to previous packets sent
+<br><dt>&lsquo;<samp><span class="samp">Current</span></samp>&rsquo;<dd>Number of packets matching the current NTP version. 
+<br><dt>&lsquo;<samp><span class="samp">Previous</span></samp>&rsquo;<dd>Number of packets matching the previous NTP version. 
+<br><dt>&lsquo;<samp><span class="samp">Bad</span></samp>&rsquo;<dd>Number of packets matching neither NTP version. 
+<br><dt>&lsquo;<samp><span class="samp">Access</span></samp>&rsquo;<dd>Number of packets denied access for any reason. 
+<br><dt>&lsquo;<samp><span class="samp">Bad</span></samp>&rsquo;<dd>Number of packets with invalid length, format or port number. 
+<br><dt>&lsquo;<samp><span class="samp">Bad</span></samp>&rsquo;<dd>Number of packets not verified as authentic. 
+<br><dt>&lsquo;<samp><span class="samp">Rate</span></samp>&rsquo;<dd>Number of packets discarded due to rate limitation.
 
                                                   <p>.It
 Cm
@@ -1635,11 +1641,11 @@ produced.)
 <code>ntpdc(1ntpdcmdoc)</code>
 program running at a remote location.
                                                        <dl>
-<dt><span class="samp">Cm</span><dd>This is the type of the statistics records, as shown in the
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This is the type of the statistics records, as shown in the
 .Cm
 statistics
 command. 
-<br><dt><span class="samp">Cm</span><dd>This is the file name for the statistics records. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This is the file name for the statistics records. 
 Filenames of set
 members are built from three concatenated elements
 .Ar
@@ -1655,7 +1661,7 @@ Cm
 suffix
 :
                                                             <dl>
-<dt><span class="samp">Cm</span><dd>This is a constant filename path. 
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This is a constant filename path. 
 It is not subject to
 modifications via the
 .Ar
@@ -1676,7 +1682,7 @@ generation can be configured using the
 .Ar
 statsdir
 option explained above. 
-<br><dt><span class="samp">Cm</span><dd>This string is directly concatenated to the prefix mentioned
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This string is directly concatenated to the prefix mentioned
 above (no intervening
 .Ql
 /
@@ -1696,7 +1702,7 @@ parts outside the filesystem hierarchy denoted by
 .Ar
 prefix
 . 
-<br><dt><span class="samp">Cm</span><dd>This part is reflects individual elements of a file set. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This part is reflects individual elements of a file set. 
 It is
 generated according to the type of a file set.
 
@@ -1709,8 +1715,8 @@ A file generation set is characterized by its type.
 The following
 types are supported:
                                                                  <dl>
-<dt><span class="samp">Cm</span><dd>The file set is actually a single plain file. 
-<br><dt><span class="samp">Cm</span><dd>One element of file set is used per incarnation of a ntpd
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The file set is actually a single plain file. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>One element of file set is used per incarnation of a ntpd
 server. 
 This type does not perform any changes to file set
 members during runtime, however it provides an easy way of
@@ -1730,7 +1736,7 @@ strings, and
 appending the decimal representation of the process ID of the
 <code>ntpd(1ntpdmdoc)</code>
 server process. 
-<br><dt><span class="samp">Cm</span><dd>One file generation set element is created per day. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>One file generation set element is created per day. 
 A day is
 defined as the period between 00:00 and 24:00 UTC. 
 The file set
@@ -1760,7 +1766,7 @@ filename
 Ns
 .19921210
 . 
-<br><dt><span class="samp">Cm</span><dd>Any file set member contains data related to a certain week of
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Any file set member contains data related to a certain week of
 a year. 
 The term week is defined by computing day-of-year
 modulo 7. 
@@ -1779,14 +1785,14 @@ Ns
 Ar
 1992W1
 . 
-<br><dt><span class="samp">Cm</span><dd>One generation file set element is generated per month. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>One generation file set element is generated per month. 
 The
 file name suffix consists of a dot, a 4-digit year number, and
 a 2-digit month. 
-<br><dt><span class="samp">Cm</span><dd>One generation file element is generated per year. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>One generation file element is generated per year. 
 The filename
 suffix consists of a dot and a 4 digit year number. 
-<br><dt><span class="samp">Cm</span><dd>This type of file generation sets changes to a new element of
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This type of file generation sets changes to a new element of
 the file set every 24 hours of server operation. 
 The filename
 suffix consists of a dot, the letter
@@ -1951,7 +1957,7 @@ Access
 Control
 Commands
                                                                       <dl>
-<dt><span class="samp">Xo</span><dd>.Op
+<dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 average
 Ar
@@ -1986,7 +1992,7 @@ The default
 minimum average and minimum are 5 and 2, respectively. 
 The monitor subcommand specifies the probability of discard
 for packets that overflow the rate-control window. 
-<br><dt><span class="samp">Xo</span><dd>.Op
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Op
 Cm
 mask
 Ar
@@ -2047,18 +2053,18 @@ reconfiguration of the server.
 One or more of the following flags
 may be specified:
                                                                            <dl>
-<dt><span class="samp">Cm</span><dd>Deny packets of all kinds, including
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny packets of all kinds, including
 <code>ntpq(1ntpqmdoc)</code>
 and
 <code>ntpdc(1ntpdcmdoc)</code>
 queries. 
-<br><dt><span class="samp">Cm</span><dd>If this flag is set when an access violation occurs, a kiss-o'-death
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>If this flag is set when an access violation occurs, a kiss-o'-death
 (KoD) packet is sent. 
 KoD packets are rate limited to no more than one
 per second. 
 If another KoD packet occurs within one second after the
 last one, the packet is dropped. 
-<br><dt><span class="samp">Cm</span><dd>Deny service if the packet spacing violates the lower limits specified
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny service if the packet spacing violates the lower limits specified
 in the discard command. 
 A history of clients is kept using the
 monitoring capability of
@@ -2068,7 +2074,7 @@ long as there is a restriction entry with the
 .Cm
 limited
 flag. 
-<br><dt><span class="samp">Cm</span><dd>Declare traps set by matching hosts to be low priority. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Declare traps set by matching hosts to be low priority. 
 The
 number of traps a server can maintain is limited (the current limit
 is 3). 
@@ -2077,7 +2083,7 @@ basis, with later trap requestors being denied service.
 This flag
 modifies the assignment algorithm by allowing low priority traps to
 be overridden by later requests for normal priority traps. 
-<br><dt><span class="samp">Cm</span><dd>Deny
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny
 <code>ntpq(1ntpqmdoc)</code>
 and
 <code>ntpdc(1ntpdcmdoc)</code>
@@ -2085,27 +2091,27 @@ queries which attempt to modify the state of the
 server (i.e., run time reconfiguration). 
 Queries which return
 information are permitted. 
-<br><dt><span class="samp">Cm</span><dd>Deny
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny
 <code>ntpq(1ntpqmdoc)</code>
 and
 <code>ntpdc(1ntpdcmdoc)</code>
 queries. 
 Time service is not affected. 
-<br><dt><span class="samp">Cm</span><dd>Deny packets which would result in mobilizing a new association. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny packets which would result in mobilizing a new association. 
 This
 includes broadcast and symmetric active packets when a configured
 association does not exist. 
-<br><dt><span class="samp">Cm</span><dd>Deny all packets except
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny all packets except
 <code>ntpq(1ntpqmdoc)</code>
 and
 <code>ntpdc(1ntpdcmdoc)</code>
 queries. 
-<br><dt><span class="samp">Cm</span><dd>Decline to provide mode 6 control message trap service to matching
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Decline to provide mode 6 control message trap service to matching
 hosts. 
 The trap service is a subsystem of the ntpdq control message
 protocol which is intended for use by remote event logging programs. 
-<br><dt><span class="samp">Cm</span><dd>Deny service unless the packet is cryptographically authenticated. 
-<br><dt><span class="samp">Cm</span><dd>This is actually a match algorithm modifier, rather than a
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny service unless the packet is cryptographically authenticated. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This is actually a match algorithm modifier, rather than a
 restriction flag. 
 Its presence causes the restriction entry to be
 matched only if the source port in the packet is the standard NTP
@@ -2123,7 +2129,7 @@ The
 ntpport
 is considered more specific and
 is sorted later in the list. 
-<br><dt><span class="samp">Cm</span><dd>Deny packets that do not match the current NTP version.
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Deny packets that do not match the current NTP version.
 
                                                                            <p>Default restriction list entries with the flags ignore, interface,
 ntpport, for each of the local host's interface addresses are
@@ -2493,7 +2499,7 @@ from there while collecting all servers in scope.
 Manycast
 Options
                                                                                 <dl>
-<dt><span class="samp">Xo</span><dd>.Oo
+<dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Oo
 .Cm
 ceiling
 Ar
@@ -2526,7 +2532,7 @@ and is most useful in manycast mode.
 The variables operate
 as follows:
                                                                                      <dl>
-<dt><span class="samp">Cm</span><dd>Peers with strata above
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Peers with strata above
 .Cm
 ceiling
 will be discarded if there are at least
@@ -2535,14 +2541,14 @@ minclock
 peers remaining. 
 This value defaults to 15, but can be changed
 to any number from 1 to 15. 
-<br><dt><span class="samp">Cm</span><dd>This is a binary flag which enables (0) or disables (1)
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This is a binary flag which enables (0) or disables (1)
 manycast server replies to manycast clients with the same
 stratum level. 
 This is useful to reduce implosions where
 large numbers of clients with the same stratum level
 are present. 
 The default is to enable these replies. 
-<br><dt><span class="samp">Cm</span><dd>Peers with strata below
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Peers with strata below
 .Cm
 floor
 will be discarded if there are at least
@@ -2551,7 +2557,7 @@ minclock
 peers remaining. 
 This value defaults to 1, but can be changed
 to any number from 1 to 15. 
-<br><dt><span class="samp">Cm</span><dd>The clustering algorithm repeatedly casts out outlyer
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The clustering algorithm repeatedly casts out outlyer
 associations until no more than
 .Cm
 minclock
@@ -2559,7 +2565,7 @@ associations remain.
 This value defaults to 3,
 but can be changed to any number from 1 to the number of
 configured sources. 
-<br><dt><span class="samp">Cm</span><dd>This is the minimum number of candidates available
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>This is the minimum number of candidates available
 to the clock selection algorithm in order to produce
 one or more truechimers for the clustering algorithm. 
 If fewer than this number are available, the clock is
@@ -2825,7 +2831,7 @@ Reference
 Clock
 Commands
                                                                                           <dl>
-<dt><span class="samp">Xo</span><dd>.Sm
+<dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Sm
 off
 .Li
 127.127. 
@@ -2859,7 +2865,7 @@ This command can be used to configure reference clocks in
 special ways. 
 The options are interpreted as follows:
                                                                                                <dl>
-<dt><span class="samp">Cm</span><dd>Marks the reference clock as preferred. 
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Marks the reference clock as preferred. 
 All other things being
 equal, this host will be chosen for synchronization among a set of
 correctly operating hosts. 
@@ -2878,13 +2884,13 @@ provided in
 /usr/share/doc/ntp
 )
 for further information. 
-<br><dt><span class="samp">Cm</span><dd>Specifies a mode number which is interpreted in a
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies a mode number which is interpreted in a
 device-specific fashion. 
 For instance, it selects a dialing
 protocol in the ACTS driver and a device subtype in the
 parse
 drivers. 
-<br><dt><span class="samp">Cm</span><br><dt><span class="samp">Cm</span><dd>These options specify the minimum and maximum polling interval
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>These options specify the minimum and maximum polling interval
 for reference clock messages, as a power of 2 in seconds
 For
 most directly connected reference clocks, both
@@ -2973,7 +2979,7 @@ program.
 The options are interpreted as
 follows:
                                                                                                     <dl>
-<dt><span class="samp">Cm</span><dd>Specifies a constant to be added to the time offset produced by
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies a constant to be added to the time offset produced by
 the driver, a fixed-point decimal number in seconds. 
 This is used
 as a calibration constant to adjust the nominal time offset of a
@@ -3010,7 +3016,7 @@ provided in
 /usr/share/doc/ntp
 )
 . 
-<br><dt><span class="samp">Cm</span><dd>Specifies a fixed-point decimal number in seconds, which is
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies a fixed-point decimal number in seconds, which is
 interpreted in a driver-dependent way. 
 See the descriptions of
 specific drivers in the
@@ -3025,22 +3031,22 @@ provided in
 /usr/share/doc/ntp
 )
 . 
-<br><dt><span class="samp">Cm</span><dd>Specifies the stratum number assigned to the driver, an integer
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies the stratum number assigned to the driver, an integer
 between 0 and 15. 
 This number overrides the default stratum number
 ordinarily assigned by the driver itself, usually zero. 
-<br><dt><span class="samp">Cm</span><dd>Specifies an ASCII string of from one to four characters which
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies an ASCII string of from one to four characters which
 defines the reference identifier used by the driver. 
 This string
 overrides the default identifier ordinarily assigned by the driver
 itself. 
-<br><dt><span class="samp">Cm</span><dd>Specifies a mode number which is interpreted in a
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Specifies a mode number which is interpreted in a
 device-specific fashion. 
 For instance, it selects a dialing
 protocol in the ACTS driver and a device subtype in the
 parse
 drivers. 
-<br><dt><span class="samp">Cm</span><br><dt><span class="samp">Cm</span><br><dt><span class="samp">Cm</span><br><dt><span class="samp">Cm</span><dd>These four flags are used for customizing the clock driver. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>These four flags are used for customizing the clock driver. 
 The
 interpretation of these values, and whether they are used at all,
 is a function of the particular clock driver. 
@@ -3069,7 +3075,7 @@ Options
 Miscellaneous
 Options
                                                                                                          <dl>
-<dt><span class="samp">Ic</span><dd>The broadcast and multicast modes require a special calibration
+<dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>The broadcast and multicast modes require a special calibration
 to determine the network delay between the local and remote
 servers. 
 Ordinarily, this is done automatically by the initial
@@ -3083,10 +3089,10 @@ Typically (for Ethernet), a
 number between 0.003 and 0.007 seconds is appropriate. 
 The default
 when this command is not used is 0.004 seconds. 
-<br><dt><span class="samp">Ic</span><dd>This option controls the delay in seconds between the first and second
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>This option controls the delay in seconds between the first and second
 packets sent in burst or iburst mode to allow additional time for a modem
 or ISDN call to complete. 
-<br><dt><span class="samp">Ic</span><dd>This command specifies the complete path and name of the file used to
+<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>This command specifies the complete path and name of the file used to
 record the frequency of the local clock oscillator. 
 This is the same
 operation as the
@@ -3111,7 +3117,7 @@ This implies that
 must have write permission for the directory the
 drift file is located in, and that file system links, symbolic or
 otherwise, should be avoided. 
-<br><dt><span class="samp">Xo</span><dd>.Oo
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Oo
 .Cm
 auth
 |
@@ -3137,7 +3143,7 @@ Cm
 stats
 .Oc
 .Xc
-<br><dt><span class="samp">Xo</span><dd>.Oo
+<br><dt>&lsquo;<samp><span class="samp">Xo</span></samp>&rsquo;<dd>.Oo
 .Cm
 auth
 |
@@ -3170,14 +3176,14 @@ can be controlled remotely using the
 <code>ntpdc(1ntpdcmdoc)</code>
 utility program.
                                                                                                               <dl>
-<dt><span class="samp">Cm</span><dd>Enables the server to synchronize with unconfigured peers only if the
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the server to synchronize with unconfigured peers only if the
 peer has been correctly authenticated using either public key or
 private key cryptography. 
 The default for this flag is
 .Ic
 enable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables the server to listen for a message from a broadcast or
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the server to listen for a message from a broadcast or
 multicast server, as in the
 .Ic
 multicastclient
@@ -3187,13 +3193,13 @@ The default for this flag is
 .Ic
 disable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables the calibrate feature for reference clocks. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the calibrate feature for reference clocks. 
 The default for
 this flag is
 .Ic
 disable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables the kernel time discipline, if available. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the kernel time discipline, if available. 
 The default for this
 flag is
 .Ic
@@ -3202,7 +3208,7 @@ if support is available, otherwise
 .Ic
 disable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables the monitoring facility. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the monitoring facility. 
 See the
 <code>ntpdc(1ntpdcmdoc)</code>
 program
@@ -3215,7 +3221,7 @@ default for this flag is
 .Ic
 enable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables time and frequency discipline. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables time and frequency discipline. 
 In effect, this switch opens and
 closes the feedback loop, which is useful for testing. 
 The default for
@@ -3223,7 +3229,7 @@ this flag is
 .Ic
 enable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables the pulse-per-second (PPS) signal when frequency and time is
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the pulse-per-second (PPS) signal when frequency and time is
 disciplined by the precision time kernel modifications. 
 See the
 .Qq
@@ -3243,7 +3249,7 @@ The default for this flag is
 .Ic
 disable
 . 
-<br><dt><span class="samp">Cm</span><dd>Enables the statistics facility. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>Enables the statistics facility. 
 See the
 .Sx
 Monitoring
@@ -3512,18 +3518,18 @@ no help from the support group.
 
                                                                                                               <p>The variables operate as follows:
                                                                                                                    <dl>
-<dt><span class="samp">Cm</span><dd>The argument becomes the new value for the minimum Allan
+<dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument becomes the new value for the minimum Allan
 intercept, which is a parameter of the PLL/FLL clock discipline
 algorithm. 
 The value in log2 seconds defaults to 7 (1024 s), which is also the lower
 limit. 
-<br><dt><span class="samp">Cm</span><dd>The argument becomes the new value for the dispersion increase rate,
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument becomes the new value for the dispersion increase rate,
 normally .000015 s/s. 
-<br><dt><span class="samp">Cm</span><dd>The argument becomes the initial value of the frequency offset in
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument becomes the initial value of the frequency offset in
 parts-per-million. 
 This overrides the value in the frequency file, if
 present, and avoids the initial training state if it is not. 
-<br><dt><span class="samp">Cm</span><dd>The argument becomes the new value for the experimental
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument becomes the new value for the experimental
 huff-n'-puff filter span, which determines the most recent interval
 the algorithm will search for a minimum delay. 
 The lower limit is
@@ -3531,11 +3537,11 @@ The lower limit is
 There
 is no default, since the filter is not enabled unless this command
 is given. 
-<br><dt><span class="samp">Cm</span><dd>The argument is the panic threshold, normally 1000 s. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument is the panic threshold, normally 1000 s. 
 If set to zero,
 the panic sanity check is disabled and a clock offset of any value will
 be accepted. 
-<br><dt><span class="samp">Cm</span><dd>The argument is the step threshold, which by default is 0.128 s. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument is the step threshold, which by default is 0.128 s. 
 It can
 be set to any positive number in seconds. 
 If set to zero, step
@@ -3543,7 +3549,7 @@ adjustments will never occur.
 Note: The kernel time discipline is
 disabled if the step threshold is set to zero or greater than the
 default. 
-<br><dt><span class="samp">Cm</span><dd>The argument is the stepout timeout, which by default is 900 s. 
+<br><dt>&lsquo;<samp><span class="samp">Cm</span></samp>&rsquo;<dd>The argument is the stepout timeout, which by default is 900 s. 
 It can
 be set to any positive number in seconds. 
 If set to zero, the stepout
@@ -3600,7 +3606,7 @@ using the <code>agtexi-cmd</code> template and the option descriptions for the <
 This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 
                                                                                                                    <ul class="menu">
-<li><a accesskey="1" href="#ntp_002econf-usage">ntp.conf usage</a>:                   ntp.conf help/usage (<span class="option">--help</span>)
+<li><a accesskey="1" href="#ntp_002econf-usage">ntp.conf usage</a>:                   ntp.conf help/usage (<samp><span class="option">--help</span></samp>)
 <li><a accesskey="2" href="#ntp_002econf-config">ntp.conf config</a>:                  presetting/configuring ntp.conf
 <li><a accesskey="3" href="#ntp_002econf-exit-status">ntp.conf exit status</a>:             exit status
 <li><a accesskey="4" href="#ntp_002econf-Files">ntp.conf Files</a>:                   Files
@@ -3610,33 +3616,37 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 </ul>
 
 <div class="node">
+<a name="ntp.conf-usage"></a>
+<a name="ntp_002econf-usage"></a>
 <p><hr>
-<a name="ntp_002econf-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-config">ntp.conf config</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-config">ntp.conf config</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
-<h4 class="subsection">ntp.conf help/usage (<span class="option">--help</span>)</h4>
+<h4 class="subsection">ntp.conf help/usage (<samp><span class="option">--help</span></samp>)</h4>
 
                                                                                                                    <p><a name="index-ntp_002econf-help-3"></a>
 This is the automatically generated usage text for ntp.conf.
 
                                                                                                                      <p>The text printed is the same whether selected with the <code>help</code> option
-(<span class="option">--help</span>) or the <code>more-help</code> option (<span class="option">--more-help</span>).  <code>more-help</code> will print
+(<samp><span class="option">--help</span></samp>) or the <code>more-help</code> option (<samp><span class="option">--more-help</span></samp>).  <code>more-help</code> will print
 the usage text by passing it through a pager program. 
 <code>more-help</code> is disabled on platforms without a working
 <code>fork(2)</code> function.  The <code>PAGER</code> environment variable is
-used to select the program, defaulting to <span class="file">more</span>.  Both will exit
+used to select the program, defaulting to <samp><span class="file">more</span></samp>.  Both will exit
 with a status code of 0.
 
                                                                                                                    <pre class="example">                                                                                                                   ntp.conf is unavailable - no --help
-                                                                                                              </pre>
+</pre>
                                                                                                                      <div class="node">
+<a name="ntp.conf-config"></a>
+<a name="ntp_002econf-config"></a>
 <p><hr>
-<a name="ntp_002econf-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-exit-status">ntp.conf exit status</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-exit-status">ntp.conf exit status</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-usage">ntp.conf usage</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">presetting/configuring ntp.conf</h4>
@@ -3658,49 +3668,55 @@ detail to provide.  The default is to print just the version.  The licensing inf
 first letter of the argument is examined:
 
                                                                                                                         <dl>
-<dt><span class="samp">version</span><dd>Only print the version.  This is the default. 
-<br><dt><span class="samp">copyright</span><dd>Name the copyright usage licensing terms. 
-<br><dt><span class="samp">verbose</span><dd>Print the full copyright usage licensing terms. 
+<dt>&lsquo;<samp><span class="samp">version</span></samp>&rsquo;<dd>Only print the version.  This is the default. 
+<br><dt>&lsquo;<samp><span class="samp">copyright</span></samp>&rsquo;<dd>Name the copyright usage licensing terms. 
+<br><dt>&lsquo;<samp><span class="samp">verbose</span></samp>&rsquo;<dd>Print the full copyright usage licensing terms. 
 </dl>
 
 <div class="node">
+<a name="ntp.conf-exit-status"></a>
+<a name="ntp_002econf-exit-status"></a>
 <p><hr>
-<a name="ntp_002econf-exit-status"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Files">ntp.conf Files</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Files">ntp.conf Files</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-config">ntp.conf config</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp.conf exit status</h4>
 
                                                                                                                    <p>One of the following exit values will be returned:
                                                                                                                         <dl>
-<dt><span class="samp">0 (EXIT_SUCCESS)</span><dd>Successful program execution. 
-<br><dt><span class="samp">1 (EXIT_FAILURE)</span><dd>The operation failed or the command syntax was not valid. 
+<dt>&lsquo;<samp><span class="samp">0 (EXIT_SUCCESS)</span></samp>&rsquo;<dd>Successful program execution. 
+<br><dt>&lsquo;<samp><span class="samp">1 (EXIT_FAILURE)</span></samp>&rsquo;<dd>The operation failed or the command syntax was not valid. 
 </dl>
                                                                                                                      <div class="node">
+<a name="ntp.conf-Files"></a>
+<a name="ntp_002econf-Files"></a>
 <p><hr>
-<a name="ntp_002econf-Files"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-See-Also">ntp.conf See Also</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-See-Also">ntp.conf See Also</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-exit-status">ntp.conf exit status</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp.conf Files</h4>
 
                                                                                                                         <dl>
-<dt><span class="samp">Pa</span><dd>the default name of the configuration file
-<br><dt><span class="samp">Pa</span><dd>private MD5 keys
-<br><dt><span class="samp">Pa</span><dd>RSA private key
-<br><dt><span class="samp">Pa</span><dd>RSA public key
-<br><dt><span class="samp">Pa</span><dd>Diffie-Hellman agreement parameters
+<dt>&lsquo;<samp><span class="samp">Pa</span></samp>&rsquo;<dd>the default name of the configuration file
+<br><dt>&lsquo;<samp><span class="samp">Pa</span></samp>&rsquo;<dd>private MD5 keys
+<br><dt>&lsquo;<samp><span class="samp">Pa</span></samp>&rsquo;<dd>RSA private key
+<br><dt>&lsquo;<samp><span class="samp">Pa</span></samp>&rsquo;<dd>RSA public key
+<br><dt>&lsquo;<samp><span class="samp">Pa</span></samp>&rsquo;<dd>Diffie-Hellman agreement parameters
 
 <div class="node">
+<a name="ntp.conf-See-Also"></a>
+<a name="ntp_002econf-See-Also"></a>
 <p><hr>
-<a name="ntp_002econf-See-Also"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Bugs">ntp.conf Bugs</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Bugs">ntp.conf Bugs</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-Files">ntp.conf Files</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp.conf See Also</h4>
@@ -3737,11 +3753,13 @@ Protocol
 RFC5905
 .Re
 <div class="node">
+<a name="ntp.conf-Bugs"></a>
+<a name="ntp_002econf-Bugs"></a>
 <p><hr>
-<a name="ntp_002econf-Bugs"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Notes">ntp.conf Notes</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002econf-Notes">ntp.conf Notes</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-See-Also">ntp.conf See Also</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp.conf Bugs</h4>
@@ -3761,10 +3779,12 @@ certificates.
 These should be obtained via secure directory
 services when they become universally available. 
 <div class="node">
+<a name="ntp.conf-Notes"></a>
+<a name="ntp_002econf-Notes"></a>
 <p><hr>
-<a name="ntp_002econf-Notes"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-Bugs">ntp.conf Bugs</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002econf-Bugs">ntp.conf Bugs</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002econf-Invocation">ntp.conf Invocation</a>
-<br>
+
 </div>
 
 <h4 class="subsection">ntp.conf Notes</h4>

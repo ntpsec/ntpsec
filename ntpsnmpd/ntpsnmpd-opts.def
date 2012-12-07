@@ -64,14 +64,13 @@ doc-section	= {
 };
 */
 
-/*
 doc-section	= {
   ds-type	= 'NOTES';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_NOTES
+This document corresponds to version @VERSION@ of NTP.
 	_END_MDOC_NOTES;
 };
-*/
 
 doc-section	= {
   ds-type	= 'AUTHORS';

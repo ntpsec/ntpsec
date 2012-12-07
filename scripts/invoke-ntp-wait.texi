@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 # 
-# It has been AutoGen-ed  December  6, 2012 at 07:42:29 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  7, 2012 at 09:49:37 AM by AutoGen 5.16.2
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -42,6 +42,7 @@ This software is released under the NTP license, <http://ntp.org/license>.
 * ntp-wait config::                 presetting/configuring ntp-wait
 * ntp-wait exit status::            exit status
 * ntp-wait Authors::                Authors
+* ntp-wait Notes::                  Notes
 @end menu
 
 @node ntp-wait usage
@@ -60,8 +61,8 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
-running under Perl version 5.8.8.
+/home/stenn/ntp-dev/A.psp-fb1/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.06 [paranoid]),
+running under Perl version 5.8.9.
 
 Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
 
@@ -145,3 +146,6 @@ The operation failed or the command syntax was not valid.
 .An
 "Harlan
 Stenn"
+@node ntp-wait Notes
+@subsection ntp-wait Notes
+This document corresponds to version @VERSION@ of NTP.

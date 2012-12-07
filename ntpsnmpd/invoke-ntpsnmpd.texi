@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpsnmpd.texi)
 # 
-# It has been AutoGen-ed  December  6, 2012 at 07:45:19 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December  7, 2012 at 09:50:40 AM by AutoGen 5.16.2
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -23,6 +23,7 @@ This software is released under the NTP license, <http://ntp.org/license>.
 * ntpsnmpd agentxsocket::           agentxsocket option
 * ntpsnmpd config::                 presetting/configuring ntpsnmpd
 * ntpsnmpd exit status::            exit status
+* ntpsnmpd Notes::                  Notes
 * ntpsnmpd Authors::                Authors
 @end menu
 
@@ -175,6 +176,9 @@ A specified configuration file could not be loaded.
 libopts had an internal operational error.  Please report
 it to autogen-users@@lists.sourceforge.net.  Thank you.
 @end table
+@node ntpsnmpd Notes
+@subsection ntpsnmpd Notes
+This document corresponds to version @VERSION@ of NTP.
 @node ntpsnmpd Authors
 @subsection ntpsnmpd Authors
 .An
