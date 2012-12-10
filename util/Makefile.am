@@ -32,11 +32,19 @@ EXTRA_DIST=				\
 	ntp-keygen.1ntp-keygenmdoc	\
 	ntp-keygen.man.in		\
 	ntp-keygen.mdoc.in		\
+	ntp-keygen.mdoc.in		\
+	ntp-keygen.html			\
+	ntp-keygen.texi			\
 	$(NULL)
 
 BUILT_SOURCES=	ntp-keygen-opts.c ntp-keygen-opts.h
 CLEANFILES=
 DISTCLEANFILES=	.version version.c config.log $(man_MANS)
+
+html_DATA=				\
+	$(srcdir)/ntp-keygen.html	\
+	$(NULL)
+
 noinst_DATA=				\
 	$(srcdir)/invoke-ntp-keygen.menu	\
 	$(srcdir)/invoke-ntp-keygen.texi	\
@@ -98,6 +106,9 @@ $(srcdir)/invoke-ntp-keygen.menu: $(srcdir)/invoke-ntp-keygen.texi
 $(srcdir)/invoke-ntp-keygen.texi: $(srcdir)/ntp-keygen-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp-keygen-opts.def
 	$(top_srcdir)/scripts/check--help $@
+
+$(srcdir)/ntp-keygen.html: $(srcdir)/ntp-keygen.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp-keygen.html ntp-keygen.texi || true )
 
 
 jitter_SOURCES=	jitter.c jitter.h

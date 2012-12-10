@@ -60,5 +60,6 @@ util/ntp-keygen-opts.c
 util/ntp-keygen-opts.h
 util/ntp-keygen.1ntp-keygenman
 util/ntp-keygen.1ntp-keygenmdoc
+util/ntp-keygen.html
 util/ntp-keygen.man.in
 util/ntp-keygen.mdoc.in
