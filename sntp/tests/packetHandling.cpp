@@ -124,7 +124,8 @@ TEST_F(mainTest, OffsetCalculationPositiveOffset) {
 
 	EXPECT_DOUBLE_EQ(1.25, offset);
 	EXPECT_DOUBLE_EQ(1. / ULOGTOD(16), precision);
-	EXPECT_DOUBLE_EQ(0.1875, synch_distance);
+	// 1.1250150000000001 ?
+	EXPECT_DOUBLE_EQ(1.125015, synch_distance);
 }
 
 TEST_F(mainTest, OffsetCalculationNegativeOffset) {
@@ -167,7 +168,7 @@ TEST_F(mainTest, OffsetCalculationNegativeOffset) {
 
 	EXPECT_DOUBLE_EQ(-1, offset);
 	EXPECT_DOUBLE_EQ(1. / ULOGTOD(1), precision);
-	EXPECT_DOUBLE_EQ(0.5, synch_distance);
+	EXPECT_DOUBLE_EQ(1.3333483333333334, synch_distance);
 }
 
 TEST_F(mainTest, HandleUnusableServer) {
