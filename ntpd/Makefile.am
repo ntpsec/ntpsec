@@ -325,13 +325,13 @@ $(srcdir)/invoke-ntp.conf.menu: $(srcdir)/invoke-ntp.conf.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
 $(srcdir)/invoke-ntp.conf.texi: $(srcdir)/ntp.conf.def $(std_def_list)
-	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp.conf.def
+	$(run_ag) -Tagtexi-file.tpl -DLEVEL=section ntp.conf.def
 
 $(srcdir)/invoke-ntp.keys.menu: $(srcdir)/invoke-ntp.keys.texi
 	@: do-nothing action to avoid default SCCS get, .menu built with .texi
 
 $(srcdir)/invoke-ntp.keys.texi: $(srcdir)/ntp.keys.def $(std_def_list)
-	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntp.keys.def
+	$(run_ag) -Tagtexi-file.tpl -DLEVEL=section ntp.keys.def
 
 $(srcdir)/ntp.conf.html: $(srcdir)/ntp.conf.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp.conf.html ntp.conf.texi || true )
