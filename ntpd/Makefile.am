@@ -141,6 +141,8 @@ EXTRA_DIST =			\
 	ntpd.1ntpdmdoc		\
 	ntpd.man.in		\
 	ntpd.mdoc.in		\
+	ntpd.html		\
+	ntpd.texi		\
 	ntpdbase-opts.def	\
 	refclock_msfees.c	\
 	$(B_S_DIST)		\
@@ -153,6 +155,7 @@ EXTRA_PROGRAMS = check_y2k keyword-gen ntpd ntpdsim
 html_DATA=				\
 	$(srcdir)/ntp.conf.html		\
 	$(srcdir)/ntp.keys.html		\
+	$(srcdir)/ntpd.html		\
 	$(NULL)
 
 noinst_DATA =				\
@@ -338,6 +341,9 @@ $(srcdir)/ntp.conf.html: $(srcdir)/ntp.conf.texi $(top_srcdir)/sntp/include/vers
 
 $(srcdir)/ntp.keys.html: $(srcdir)/ntp.keys.texi $(top_srcdir)/sntp/include/version.texi
 	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntp.keys.html ntp.keys.texi || true )
+
+$(srcdir)/ntpd.html: $(srcdir)/ntpd.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntpd.html ntpd.texi || true )
 
 ###
 

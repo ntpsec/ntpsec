@@ -16,6 +16,7 @@ ntpd/ntpd-opts.c
 ntpd/ntpd-opts.h
 ntpd/ntpd.1ntpdman
 ntpd/ntpd.1ntpdmdoc
+ntpd/ntpd.html
 ntpd/ntpd.man.in
 ntpd/ntpd.mdoc.in
 ntpdc/invoke-ntpdc.texi
