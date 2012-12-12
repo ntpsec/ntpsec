@@ -35,11 +35,11 @@ This document applies to version @value{VERSION} of @code{ntp.conf}.
 @shortcontents
 
 @menu
-* ntp.conf Description::        Description
-* sntp Invocation::		Invoking sntp
+* ntp.conf Description::        
+* ntp.conf Notes::        
 @end menu
 
-@node ntp.conf Description
+@node ntp.conf Description,  , Top, Top
 @comment  node-name,  next,  previous,  up
 @section Description
 

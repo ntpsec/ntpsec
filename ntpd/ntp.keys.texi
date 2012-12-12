@@ -35,11 +35,11 @@ This document applies to version @value{VERSION} of @code{ntp.keys}.
 @shortcontents
 
 @menu
-* ntp.keys Description::        Description
-* ntp.keys Invocation::		Invoking sntp
+* ntp.keys Description::        
+* ntp.keys Notes::        
 @end menu
 
-@node ntp.keys Description
+@node ntp.keys Description,  , Top, Top
 @comment  node-name,  next,  previous,  up
 @section Description
 
