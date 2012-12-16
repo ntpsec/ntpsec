@@ -9,9 +9,9 @@ my ($count,$tableitemcount);
 my ($progName);
 my (@words, $retval,$columnline);
 my ($extArg);
-my (%anchors, $aCount);
+my (%anchor, $aCount);
 
-$acount = 0;
+$aCount = 0;
 
 $optlist = 0;		### 1 = bullet, 2 = enum, 3 = tag, 4 = item/column
 $oldoptlist = 0;
@@ -393,12 +393,29 @@ sub Handle_Op
     # but we can handle that with separate Handle_Oo and Handle_Oc
     # routines.
 
+    my ($op);
+
     print '[';
+    $op = 1;
     do {
-	if
+	if ($op && $words[0] =~ /^(Ar|Cm|Fl|Ic)$/)
+	{
+		$_ = shift @words;
+		Handle_ArCmFlIc();
+	}
+	elsif ($words[0] =~ /^[[:punct:]]$/)
+	{
+		print ']' if ($op);
+		$op = 0;
+		print shift @words;
+	}
+	else
+	{
+		print shift @words;
+	}
     } while (@words > 0);
-    print ']';
-    print "\n";
+    print ']' if ($op);
+    print "\n";			# HMS: We may not want these in many places...
 }
 
 sub Handle_Pa
