@@ -8,9 +8,26 @@ my ($line);
 my ($count,$tableitemcount);
 my ($progName);
 my (@words, $retval,$columnline);
+my ($extArg);
+my (%anchors, $aCount);
 
-$optlist = 0;		### 1 = bullet, 2 = enum, 3 = tag, 4 = item
+$acount = 0;
+
+$optlist = 0;		### 1 = bullet, 2 = enum, 3 = tag, 4 = item/column
 $oldoptlist = 0;
+$extArg = 0;
+
+###
+#
+# We don't know what order we'll see .Sx 
+#
+# Whenever we find one, we look it up.
+# If it doesn't exist we assign it an anchor name.
+# Regardless, we "return" the anchor name, as we're either going
+# to define the anchor point using '@anchor{anchor-1}' or reference
+# the anchor using something like '@xref{anchor-1,,whatever}'
+# 
+###
 
 while ($line = <STDIN>)
 {
@@ -28,6 +45,23 @@ while ($line = <STDIN>)
     $line = ParseMacro($line);
     print($line)
         if (defined $line);
+}
+
+sub Anchor ($)
+{
+    my $string = shift;
+
+    # Look up the provided string.
+    # If it's not there, bump $aCount and "add" the anchor.
+    # Return the anchor.
+
+    if (!exists $anchor{$string})
+    {
+	++$aCount;
+	$anchor{$string} = "anchor-$aCount";
+    }
+
+    return $anchor{$string};
 }
 
 sub Handle_An
@@ -59,7 +93,7 @@ sub Handle_Bl
     {
         if (!$optlist)
         {
-            $optlist = 1;	#bullet
+            $optlist = 1;	# bullet
             $retval .= "\@itemize \@bullet\n" ;
             print "$retval";
             return 1;
@@ -76,7 +110,7 @@ sub Handle_Bl
     {
         if (!$optlist)
         {
-            $optlist = 2; #enum
+            $optlist = 2;	# enum
             $retval .= "\@enumerate\n" ;
             print "$retval";
             return 1;
@@ -91,14 +125,14 @@ sub Handle_Bl
     }
     if ($words[0] eq '-tag')
     {
-        $optlist = 3; #tag
+        $optlist = 3;		# tag
         $retval .= "\@table \@samp\n";
         print "$retval";
         return 1;
     }
     if ($words[0] eq '-column')
     {
-        $optlist = 4; #column
+        $optlist = 4;		# column
         $retval = "\@multitable \@columnfractions ";#\.20 \.20 \.20\n";
         #print $retval;
         $columnline = "\@headitem ";
@@ -131,13 +165,13 @@ sub Handle_Bl
 
 sub Handle_It
 {
-    if ($optlist == 3)
+    if ($optlist == 3)			# tag
     {
         $retval .= "\@item ".$words[0]."\n";
         print $retval;
         return 1;
     }
-    elsif ($optlist == 4 )
+    elsif ($optlist == 4 )		# column/Item list
     {
         if (!$tableitemcount)
         {
@@ -227,7 +261,14 @@ sub Handle_Em
     #
     my ($pa_path);
 
-    print '@emph{', join(' ',@words), "}";
+    print '@emph{';
+    do {
+	print shift @words;
+    } while (@words > 0 || $words[0] =~ /^[[:punct:]]$/);
+    print "}";
+
+    print join('', @words)	if (@words > 0);
+
     print "\n";
 }
 
@@ -248,8 +289,11 @@ sub Handle_ArCmFlIc
     #	.Ic "do while {...}"	do while {...}
     #
     my ($dash, $didOne, $font, $spacing);
-    $dash = (/^.Fl$/) ? "-" : "";
-    $font = (/^.Ar$/) ? "\@kbd{" : "\@code{";
+
+    s/^\.//;
+
+    $dash = (/^Fl$/) ? "-" : "";
+    $font = (/^Ar$/) ? "\@kbd{" : "\@code{";
     $didOne = 0;
     $spacing = 1;
 
@@ -336,6 +380,27 @@ sub Handle_Nm
     print "\n";
 }
 
+sub Handle_Op
+{
+    # Usage: .Op [<option>] ...
+    #	.Op					[]
+    #	.Op Fl k				[-k]
+    #	.Op Fl k ) .				[-k]).
+    #	.Op Fl c Ar objfil Op Ar corfil ,	[ -c objfil [corfil]],
+    #	.Op word1 word2				[word1 word2]
+    #
+    # If we decide to support Oo and Oc this almost becomes recursive,
+    # but we can handle that with separate Handle_Oo and Handle_Oc
+    # routines.
+
+    print '[';
+    do {
+	if
+    } while (@words > 0);
+    print ']';
+    print "\n";
+}
+
 sub Handle_Pa
 {
     # Usage: .Pa [<pathname>] ...
@@ -397,6 +462,46 @@ sub Handle_Q
     print "$rq";
     print join('', @words)	if (@words > 0);
     print "\n";
+}
+
+sub Handle_Sec
+{
+    # Usage: .Sh
+    # Usage: .Ss
+    #	.Sh word(s)
+    #
+    # Might be a quoted string.
+    #
+    # Drops an anchor.
+    my ($a, $sh);
+
+    $sh =~ /Sh/;
+
+    ParseQuote(\@words) if ($words[0] =~ /^"/);
+
+    $a = $words[0];
+
+    print '@node ', "$a\n";
+    print '@', $sh ? "sub" : "", "section $a\n";
+    print "@anchor{$a}\n";
+}
+
+sub Handle_Sx
+{
+    # Usage: .Sx <section reference> ...
+    #	.Sh word(s)
+    #
+    # Might be a quoted string.
+    #
+    # References an anchor
+
+    my ($a);
+
+    ParseQuote(\@words) if ($words[0] =~ /^"/);
+
+    $a = $words[0];
+
+    print '@ref{',"$a","}";
 }
 
 sub Handle_Ux
@@ -516,13 +621,19 @@ sub ParseMacro #line
         elsif (/^\.Ic$/)                { Handle_ArCmFlIc(); }
         elsif ($optlist && /^\.It$/)    { last if (Handle_It()); }
         elsif (/^\.Nm$/)		{ Handle_Nm(); }
+        elsif (/^\.Op$/)                { Handle_Op(); }
         elsif (/^\.Pa$/)                { Handle_Pa(); }
         elsif (/^\.Pp$/)                { print "\n";  }
         elsif (/^\.Pq/)                 { Handle_Q(); }
         elsif (/^\.Ql/)                 { Handle_Q(); }
         elsif (/^\.Qq/)                 { Handle_Q(); }
+        elsif (/^\.Sh/)                 { Handle_Sec(); } # Section Header
         elsif (/^\.Sq/)                 { Handle_Q(); }
+        elsif (/^\.Ss/)                 { Handle_Sec(); } # Sub Section
+        elsif (/^\.Sx/)                 { Handle_Sx(); } # Section xref
         elsif (/^\.Ux/)                 { Handle_Ux(); }
+        elsif (/^\.Xc/)                 { $extArg = 0; }
+        elsif (/^\.Xo/)                 { $extArg = 1; }
         elsif (/^\.Xr/)                 { Handle_Xr(); }
 	else                            { print $_,"\n"; }
     }
