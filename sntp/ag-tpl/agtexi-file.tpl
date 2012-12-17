@@ -82,8 +82,7 @@ coded-prog-name)=] program.[= (name-copyright) =]
 @menu
 [=
   (out-push-new) (out-suspend "menu")
-  (out-push-new)        =][=
-=][=#
+  (out-push-new)        =][=#
 
 @c = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =][=
 
@@ -151,10 +150,14 @@ FOR doc-section                 =][=
   ENDIF                         =][=
 
   (ag-fprintf "menu" menu-entry-fmt (string-append opt-name "::") opt-name)
+				=][=
   (set! label-str (string-append
         down-prog-name " " (string-capitalize opt-name)))
+				=][=
   (print-node opt-name label-str)
+				=][=
   (define cvt-fn (get "ds-format" "texi"))
+				=][=
   (if (not (== cvt-fn "texi"))
       (divert-convert cvt-fn) ) =][=
   (emit (string-append "\n" (get "ds-text") "\n"))
