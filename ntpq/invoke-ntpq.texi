@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 # 
-# It has been AutoGen-ed  December 10, 2012 at 06:40:58 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 18, 2012 at 03:58:14 AM by AutoGen 5.16.2
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -74,9 +74,10 @@ Otherwise,
 @code{ntpq}
 will attempt to read
 interactive format commands from the standard input.
-.Ss
-"Internal
-Commands"
+@node Internal Commands
+@section Internal Commands
+
+Internal Commands
 Interactive format commands consist of a keyword followed by zero
 to four arguments.
 Only enough characters of the full keyword to
@@ -93,14 +94,12 @@ These are described following.
 @item Ic
 @item Ic
 A
-.Ql
-\&?
+@quoteleft{}\&?@quoteright{}
 by itself will print a list of all the command
 keywords known to this incarnation of
 @code{ntpq}.
 A
-.Ql
-\&?
+@quoteleft{}\&?@quoteright{}
 followed by a command keyword will print function and usage
 information about the command.
 This command is probably a better
@@ -109,46 +108,30 @@ source of information about
 than this manual
 page.
 @item Ic
-.Ic
-...
-.Xc
-@item Ic
+... @item Ic
 @item Ic
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
-.Ql
-variable_name=value
-,
+@quoteleft{}variable_name=value,@quoteright{}
 where the
-.Ql
-=value
+@quoteleft{}=value@quoteright{}
 is ignored, and can be omitted,
 in requests to the server to read variables.
 The
 @code{ntpq}
 utility maintains an internal list in which data to be included in control
 messages can be assembled, and sent using the
-.Ic
-readlist
-and
-.Ic
-writelist
-commands described below.
+@code{readlist} and
+@code{writelist} commands described below.
 The
-.Ic
-addvars
-command allows variables and their optional values to be added to
+@code{addvars} command allows variables and their optional values to be added to
 the list.
 If more than one variable is to be added, the list should
 be comma-separated and not contain white space.
 The
-.Ic
-rmvars
-command can be used to remove individual variables from the list,
+@code{rmvars} command can be used to remove individual variables from the list,
 while the
-.Ic
-clearlist
-command removes all variables from the
+@code{clearlist} command removes all variables from the
 list.
 @item Ic
 Normally
@@ -156,9 +139,7 @@ Normally
 does not authenticate requests unless
 they are write requests.
 The command
-.Ql
-authenticate
-yes
+@quoteleft{}authenticateyes@quoteright{}
 causes
 @code{ntpq}
 to send authentication with all requests it
@@ -166,12 +147,9 @@ makes.
 Authenticated requests causes some servers to handle
 requests slightly differently, and can occasionally melt the CPU in
 fuzzballs if you turn authentication on before doing a
-.Ic
-peer
-display.
+@code{peer} display.
 The command
-.Ql
-authenticate
+@quoteleft{}authenticate@quoteright{}
 causes
 @code{ntpq}
 to display whether or not
@@ -187,23 +165,10 @@ Variables which
 @code{ntpq}
 thinks should have a decodable value but didn't are
 marked with a trailing
-.Ql
-\&?
-.
+@quoteleft{}\&?.@quoteright{}
 @item Xo
-.Ic
-debug
-.Oo
-.Cm
-more
-|
-.Cm
-less
-|
-.Cm
-off
-.Oc
-.Xc
+@code{debug} .Oo
+@code{more} | @code{less} | @code{off} .Oc
 With no argument, displays the current debug level.
 Otherwise, the debug level is changed to the indicated level.
 @item Ic
@@ -217,25 +182,16 @@ server does not now require timestamps in authenticated requests,
 so this command may be obsolete.
 @item Ic
 Set the host to which future queries will be sent.
-.Ar
-hostname
-may be either a host name or a numeric address.
+@kbd{hostname} may be either a host name or a numeric address.
 @item Ic
 If
-.Cm
-yes
-is specified, host names are printed in
+@code{yes} is specified, host names are printed in
 information displays.
 If
-.Cm
-no
-is specified, numeric
+@code{no} is specified, numeric
 addresses are printed instead.
 The default is
-.Cm
-yes
-,
-unless
+@code{yes}, unless
 modified using the command line
 @code{-n} switch.
 @item Ic
@@ -245,19 +201,7 @@ This must correspond
 to a key number the server has been configured to use for this
 purpose.
 @item Ic
-.Cm
-1
-|
-.Cm
-2
-|
-.Cm
-3
-|
-.Cm
-4
-.Oc
-.Xc
+@code{1} | @code{2} | @code{3} | @code{4} .Oc
 Sets the NTP version number which
 @code{ntpq}
 claims in
@@ -328,7 +272,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p334
+ntpq - standard NTP query program - Ver. 4.2.7p335
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

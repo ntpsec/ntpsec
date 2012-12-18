@@ -36,17 +36,10 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p334 of <code>ntpdc</code>.
+  <p>This document applies to version 4.2.7p335 of <code>ntpdc</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
-
-                      <div class="shortcontents">
-<h2>Short Contents</h2>
-<ul>
-<a href="#Top">ntpdc: NTPD Control User Manual</a>
-</ul>
-</div>
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpdc-Description">ntpdc Description</a>:             Description
@@ -145,7 +138,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p334
+<pre class="example">ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p335
 USAGE:  ntpdc [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -519,9 +512,15 @@ Otherwise,
 will
 attempt to read interactive format commands from the standard
 input. 
-.Ss
-"Interactive
-Commands"
+<div class="node">
+<p><hr>
+<a name="Interactive-Commands"></a>
+<br>
+</div>
+
+<h3 class="section">Interactive Commands</h3>
+
+<p>Interactive Commands
 Interactive format commands consist of a keyword followed by zero
 to four arguments. 
 Only enough characters of the full keyword to
@@ -529,9 +528,7 @@ uniquely identify the command need be typed.
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-.Ql
-\&amp;&gt;
-,
+\&amp;&gt;,
 followed by a file name, to the command line.
 
   <p>A number of interactive format commands are executed entirely
@@ -543,16 +540,12 @@ These are described
 following.
      <dl>
 <dt><span class="samp">Ic</span><br><dt><span class="samp">Ic</span><dd>A
-.Sq
-Ic
-\&amp;? 
+Ic\&amp;? 
 will print a list of all the command
 keywords known to this incarnation of
 <code>ntpdc</code>. 
 A
-.Sq
-Ic
-\&amp;? 
+Ic\&amp;? 
 followed by a command keyword will print function and usage
 information about the command. 
 This command is probably a better
@@ -572,20 +565,13 @@ so this command may be obsolete.
 Hostname may
 be either a host name or a numeric address. 
 <br><dt><span class="samp">Ic</span><dd>If
-.Cm
-yes
-is specified, host names are printed in
+<code>yes</code> is specified, host names are printed in
 information displays. 
 If
-.Cm
-no
-is specified, numeric
+<code>no</code> is specified, numeric
 addresses are printed instead. 
 The default is
-.Cm
-yes
-,
-unless
+<code>yes</code>, unless
 modified using the command line
 <code>-n</code> switch. 
 <br><dt><span class="samp">Ic</span><dd>This command allows the specification of a key number to be
@@ -609,10 +595,15 @@ Note that since
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
 
-     <p>.Ss
-"Control
-Message
-Commands"
+<div class="node">
+<p><hr>
+<a name="Control-Message-Commands"></a>
+<br>
+</div>
+
+<h3 class="section">Control Message Commands</h3>
+
+     <p>Control Message Commands
 Query commands result in NTP mode 7 packets containing requests for
 information being sent to the server. 
 These are read-only commands
@@ -638,710 +629,20 @@ offset and dispersion of the peer, all in seconds.
           <p>The character in the left margin indicates the mode this peer
 entry is operating in. 
 A
-.Ql
 \&amp;+
 denotes symmetric active, a
-.Ql
 \&amp;-
 indicates symmetric passive, a
-.Ql
 \&amp;=
 means the
 remote server is being polled in client mode, a
-.Ql
 \&amp;^
 indicates that the server is broadcasting to this address, a
-.Ql
 \&amp;~
 denotes that the remote peer is sending broadcasts and a
-.Ql
 \&amp;~
 denotes that the remote peer is sending broadcasts and a
-.Ql
 \&amp;*
 marks the peer the server is currently synchronizing
 to.
-
-          <p>The contents of the host field may be one of four forms. 
-It may
-be a host name, an IP address, a reference clock implementation
-name with its parameter or
-.Fn
-REFCLK
-"implementation_number"
-"parameter"
-. 
-On
-.Ic
-hostnames
-.Cm
-no
-only IP-addresses
-will be displayed. 
-<br><dt><span class="samp">Ic</span><dd>A slightly different peer summary list. 
-Identical to the output
-of the
-.Ic
-peers
-command, except for the character in the
-leftmost column. 
-Characters only appear beside peers which were
-included in the final stage of the clock selection algorithm. 
-A
-.Ql
-\&amp;. 
-indicates that this peer was cast off in the falseticker
-detection, while a
-.Ql
-\&amp;+
-indicates that the peer made it
-through. 
-A
-.Ql
-\&amp;*
-denotes the peer the server is currently
-synchronizing with. 
-<br><dt><span class="samp">Ic</span><dd>Shows a detailed display of the current peer variables for one
-or more peers. 
-Most of these values are described in the NTP
-Version 2 specification. 
-<br><dt><span class="samp">Ic</span><dd>Show per-peer statistic counters associated with the specified
-peer(s). 
-<br><dt><span class="samp">Ic</span><dd>Obtain and print information concerning a peer clock. 
-The
-values obtained provide information on the setting of fudge factors
-and other clock performance information. 
-<br><dt><span class="samp">Ic</span><dd>Obtain and print kernel phase-lock loop operating parameters. 
-This information is available only if the kernel has been specially
-modified for a precision timekeeping function. 
-<br><dt><span class="samp">Ic</span><dd>Print the values of selected loop filter variables. 
-The loop
-filter is the part of NTP which deals with adjusting the local
-system clock. 
-The
-.Sq
-offset
-is the last offset given to the
-loop filter by the packet processing code. 
-The
-.Sq
-frequency
-is the frequency error of the local clock in parts-per-million
-(ppm). 
-The
-.Sq
-time_const
-controls the stiffness of the
-phase-lock loop and thus the speed at which it can adapt to
-oscillator drift. 
-The
-.Sq
-watchdog
-timer
-value is the number
-of seconds which have elapsed since the last sample offset was
-given to the loop filter. 
-The
-.Cm
-oneline
-and
-.Cm
-multiline
-options specify the format in which this
-information is to be printed, with
-.Cm
-multiline
-as the
-default. 
-<br><dt><span class="samp">Ic</span><dd>Print a variety of system state variables, i.e., state related
-to the local server. 
-All except the last four lines are described
-in the NTP Version 3 specification, RFC-1305.
-
-          <p>The
-.Sq
-system
-flags
-show various system flags, some of
-which can be set and cleared by the
-.Ic
-enable
-and
-.Ic
-disable
-configuration commands, respectively. 
-These are
-the
-.Cm
-auth
-,
-.Cm
-bclient
-,
-.Cm
-monitor
-,
-.Cm
-pll
-,
-.Cm
-pps
-and
-.Cm
-stats
-flags. 
-See the
-<code>ntpd(8)</code>
-documentation for the meaning of these flags. 
-There
-are two additional flags which are read only, the
-.Cm
-kernel_pll
-and
-.Cm
-kernel_pps
-. 
-These flags indicate
-the synchronization status when the precision time kernel
-modifications are in use. 
-The
-.Sq
-kernel_pll
-indicates that
-the local clock is being disciplined by the kernel, while the
-.Sq
-kernel_pps
-indicates the kernel discipline is provided by the PPS
-signal.
-
-          <p>The
-.Sq
-stability
-is the residual frequency error remaining
-after the system frequency correction is applied and is intended for
-maintenance and debugging. 
-In most architectures, this value will
-initially decrease from as high as 500 ppm to a nominal value in
-the range .01 to 0.1 ppm. 
-If it remains high for some time after
-starting the daemon, something may be wrong with the local clock,
-or the value of the kernel variable
-.Va
-kern.clockrate.tick
-may be
-incorrect.
-
-          <p>The
-.Sq
-broadcastdelay
-shows the default broadcast delay,
-as set by the
-.Ic
-broadcastdelay
-configuration command.
-
-          <p>The
-.Sq
-authdelay
-shows the default authentication delay,
-as set by the
-.Ic
-authdelay
-configuration command. 
-<br><dt><span class="samp">Ic</span><dd>Print statistics counters maintained in the protocol
-module. 
-<br><dt><span class="samp">Ic</span><dd>Print statistics counters related to memory allocation
-code. 
-<br><dt><span class="samp">Ic</span><dd>Print statistics counters maintained in the input-output
-module. 
-<br><dt><span class="samp">Ic</span><dd>Print statistics counters maintained in the timer/event queue
-support code. 
-<br><dt><span class="samp">Ic</span><dd>Obtain and print the server's restriction list. 
-This list is
-(usually) printed in sorted order and may help to understand how
-the restrictions are applied. 
-<br><dt><span class="samp">Ic</span><dd>Obtain and print traffic counts collected and maintained by the
-monitor facility. 
-The version number should not normally need to be
-specified. 
-<br><dt><span class="samp">Ic</span><dd>Obtain debugging information for a reference clock driver. 
-This
-information is provided only by some clock drivers and is mostly
-undecodable without a copy of the driver source in hand.
-
-          <p>.Ss
-"Runtime
-Configuration
-Requests"
-All requests which cause state changes in the server are
-authenticated by the server using a configured NTP key (the
-facility can also be disabled by the server by not configuring a
-key). 
-The key number and the corresponding key must also be made
-known to
-<code>ntpdc</code>. 
-This can be done using the
-.Ic
-keyid
-and
-.Ic
-passwd
-commands, the latter of which will prompt at the terminal for a
-password to use as the encryption key. 
-You will also be prompted
-automatically for both the key number and password the first time a
-command which would result in an authenticated request to the
-server is given. 
-Authentication not only provides verification that
-the requester has permission to make such changes, but also gives
-an extra degree of protection again transmission errors.
-
-          <p>Authenticated requests always include a timestamp in the packet
-data, which is included in the computation of the authentication
-code. 
-This timestamp is compared by the server to its receive time
-stamp. 
-If they differ by more than a small amount the request is
-rejected. 
-This is done for two reasons. 
-First, it makes simple
-replay attacks on the server, by someone who might be able to
-overhear traffic on your LAN, much more difficult. 
-Second, it makes
-it more difficult to request configuration changes to your server
-from topologically remote hosts. 
-While the reconfiguration facility
-will work well with a server on the local host, and may work
-adequately between time-synchronized hosts on the same LAN, it will
-work very poorly for more distant hosts. 
-As such, if reasonable
-passwords are chosen, care is taken in the distribution and
-protection of keys and appropriate source address restrictions are
-applied, the run time reconfiguration facility should provide an
-adequate level of security.
-
-          <p>The following commands all make authenticated requests.
-               <dl>
-<dt><span class="samp">Xo</span><dd>.Op
-Ar
-keyid
-.Op
-Ar
-version
-.Op
-Cm
-prefer
-.Xc
-Add a configured peer association at the given address and
-operating in symmetric active mode. 
-Note that an existing
-association with the same peer may be deleted when this command is
-executed, or may simply be converted to conform to the new
-configuration, as appropriate. 
-If the optional
-.Ar
-keyid
-is a
-nonzero integer, all outgoing packets to the remote server will
-have an authentication field attached encrypted with this key. 
-If
-the value is 0 (or not given) no authentication will be done. 
-The
-.Ar
-version
-can be 1, 2 or 3 and defaults to 3. 
-The
-.Cm
-prefer
-keyword indicates a preferred peer (and thus will
-be used primarily for clock synchronisation if possible). 
-The
-preferred peer also determines the validity of the PPS signal - if
-the preferred peer is suitable for synchronisation so is the PPS
-signal. 
-<br><dt><span class="samp">Xo</span><dd>.Op
-Ar
-keyid
-.Op
-Ar
-version
-.Op
-Cm
-prefer
-.Xc
-Identical to the addpeer command, except that the operating
-mode is client. 
-<br><dt><span class="samp">Xo</span><dd>.Op
-Ar
-keyid
-.Op
-Ar
-version
-.Op
-Cm
-prefer
-.Xc
-Identical to the addpeer command, except that the operating
-mode is broadcast. 
-In this case a valid key identifier and key are
-required. 
-The
-.Ar
-peer_address
-parameter can be the broadcast
-address of the local network or a multicast group address assigned
-to NTP. 
-If a multicast address, a multicast-capable kernel is
-required. 
-<br><dt><span class="samp">Ic</span><dd>This command causes the configured bit to be removed from the
-specified peer(s). 
-In many cases this will cause the peer
-association to be deleted. 
-When appropriate, however, the
-association may persist in an unconfigured mode if the remote peer
-is willing to continue on in this fashion. 
-<br><dt><span class="samp">Xo</span><dd>.Op
-Cm
-time1
-.Op
-Cm
-time2
-.Op
-Ar
-stratum
-.Op
-Ar
-refid
-.Xc
-This command provides a way to set certain data for a reference
-clock. 
-See the source listing for further information. 
-<br><dt><span class="samp">Xo</span><dd>.Oo
-.Cm
-auth
-|
-Cm
-bclient
-|
-.Cm
-calibrate
-|
-Cm
-kernel
-|
-.Cm
-monitor
-|
-Cm
-ntp
-|
-.Cm
-pps
-|
-Cm
-stats
-.Oc
-.Xc
-<br><dt><span class="samp">Xo</span><dd>.Oo
-.Cm
-auth
-|
-Cm
-bclient
-|
-.Cm
-calibrate
-|
-Cm
-kernel
-|
-.Cm
-monitor
-|
-Cm
-ntp
-|
-.Cm
-pps
-|
-Cm
-stats
-.Oc
-.Xc
-These commands operate in the same way as the
-.Ic
-enable
-and
-.Ic
-disable
-configuration file commands of
-<code>ntpd(8)</code>.
-                    <dl>
-<dt><span class="samp">Cm</span><dd>Enables the server to synchronize with unconfigured peers only
-if the peer has been correctly authenticated using either public key
-or private key cryptography. 
-The default for this flag is enable. 
-<br><dt><span class="samp">Cm</span><dd>Enables the server to listen for a message from a broadcast or
-multicast server, as in the multicastclient command with
-default address. 
-The default for this flag is disable. 
-<br><dt><span class="samp">Cm</span><dd>Enables the calibrate feature for reference clocks. 
-The default for this flag is disable. 
-<br><dt><span class="samp">Cm</span><dd>Enables the kernel time discipline, if available. 
-The default for this flag is enable if support is available, otherwise disable. 
-<br><dt><span class="samp">Cm</span><dd>Enables the monitoring facility. 
-See the
-<code>ntpdc(8)</code>. 
-program and the monlist command or further information. 
-The default for this flag is enable. 
-<br><dt><span class="samp">Cm</span><dd>Enables time and frequency discipline. 
-In effect, this switch opens and closes the feedback loop,
-which is useful for testing. 
-The default for this flag is enable. 
-<br><dt><span class="samp">Cm</span><dd>Enables the pulse-per-second (PPS) signal when frequency
-and time is disciplined by the precision time kernel modifications. 
-See the
-.Qq
-A
-Kernel
-Model
-for
-Precision
-Timekeeping
-(available as part of the HTML documentation
-provided in
-.Pa
-/usr/share/doc/ntp
-)
-page for further information. 
-The default for this flag is disable. 
-<br><dt><span class="samp">Cm</span><dd>Enables the statistics facility. 
-See the
-.Sx
-Monitoring
-Options
-section of
-<code>ntp.conf(5)</code>
-for further information. 
-The default for this flag is disable.
-
-                    <p>.It
-Xo
-Ic
-restrict
-Ar
-address
-Ar
-mask
-.Ar
-flag
-Oo
-Ar
-... 
-Oc
-.Xc
-This command operates in the same way as the
-.Ic
-restrict
-configuration file commands of
-<code>ntpd(8)</code>. 
-.It
-Xo
-Ic
-unrestrict
-Ar
-address
-Ar
-mask
-.Ar
-flag
-Oo
-Ar
-... 
-Oc
-.Xc
-Unrestrict the matching entry from the restrict list. 
-.It
-Xo
-Ic
-delrestrict
-Ar
-address
-Ar
-mask
-.Op
-Cm
-ntpport
-.Xc
-Delete the matching entry from the restrict list. 
-.It
-Ic
-readkeys
-Causes the current set of authentication keys to be purged and
-a new set to be obtained by rereading the keys file (which must
-have been specified in the
-<code>ntpd(8)</code>
-configuration file). 
-This
-allows encryption keys to be changed without restarting the
-server. 
-.It
-Ic
-trustedkey
-Ar
-keyid
-Oo
-Ar
-... 
-Oc
-.It
-Ic
-untrustedkey
-Ar
-keyid
-Oo
-Ar
-... 
-Oc
-These commands operate in the same way as the
-.Ic
-trustedkey
-and
-.Ic
-untrustedkey
-configuration file
-commands of
-<code>ntpd(8)</code>. 
-.It
-Ic
-authinfo
-Returns information concerning the authentication module,
-including known keys and counts of encryptions and decryptions
-which have been done. 
-.It
-Ic
-traps
-Display the traps set in the server. 
-See the source listing for
-further information. 
-.It
-Xo
-Ic
-addtrap
-Ar
-address
-.Op
-Ar
-port
-.Op
-Ar
-interface
-.Xc
-Set a trap for asynchronous messages. 
-See the source listing
-for further information. 
-.It
-Xo
-Ic
-clrtrap
-Ar
-address
-.Op
-Ar
-port
-.Op
-Ar
-interface
-.Xc
-Clear a trap for asynchronous messages. 
-See the source listing
-for further information. 
-.It
-Ic
-reset
-Clear the statistics counters in various modules of the server. 
-See the source listing for further information.
-
-<div class="node">
-<p><hr>
-<a name="ntpdc-See-Also"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpdc-Authors">ntpdc Authors</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpdc-Usage">ntpdc Usage</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#ntpdc-Invocation">ntpdc Invocation</a>
-<br>
-</div>
-
-<h4 class="subsection">ntpdc See Also</h4>
-
-                    <p><code>ntp.conf(5)</code>,
-<code>ntpd(8)</code>
-.Rs
-.%A
-David
-L. 
-Mills
-.%T
-Network
-Time
-Protocol
-(Version
-3)
-.%O
-RFC1305
-.Re
-<div class="node">
-<p><hr>
-<a name="ntpdc-Authors"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpdc-Bugs">ntpdc Bugs</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpdc-See-Also">ntpdc See Also</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#ntpdc-Invocation">ntpdc Invocation</a>
-<br>
-</div>
-
-<h4 class="subsection">ntpdc Authors</h4>
-
-                    <p>The formatting directives in this document came from FreeBSD. 
-<div class="node">
-<p><hr>
-<a name="ntpdc-Bugs"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntpdc-Authors">ntpdc Authors</a>,
-Up:&nbsp;<a rel="up" accesskey="u" href="#ntpdc-Invocation">ntpdc Invocation</a>
-<br>
-</div>
-
-<h4 class="subsection">ntpdc Bugs</h4>
-
-                    <p>The
-<code>ntpdc</code>
-utility is a crude hack. 
-Much of the information it shows is
-deadly boring and could only be loved by its implementer. 
-The
-program was designed so that new (and temporary) features were easy
-to hack in, at great expense to the program's ease of use. 
-Despite
-this, the program is occasionally useful.
-
-                      <p>Please report bugs to http://bugs.ntp.org .
-
-<div class="node">
-<p><hr>
-<a name="Usage"></a>
-<br>
-</div>
-
-                    <!-- node-name,  next,  previous,  up -->
-<h3 class="section">Usage</h3>
-
-                    <p>The simplest use of this program is as an unprivileged command to
-check the current time, offset, and error in the local clock. 
-For example:
-
-                    <pre class="example">                        ntpdc ntpserver.somewhere
-                   </pre>
-                      <p>With suitable privilege, it can be run as a command or in a
-<code>cron</code> job to reset the local clock from a reliable server, like
-the <code>ntpdate</code> and <code>rdate</code> commands. 
-For example:
-
-                    <pre class="example">                        ntpdc -a ntpserver.somewhere
-                   </pre>
-                      </body></html>
 

@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 # 
-# It has been AutoGen-ed  December 10, 2012 at 11:05:29 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 17, 2012 at 11:36:20 AM by AutoGen 5.16.2
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -15,14 +15,10 @@
 
 @code{ntp-wait}
 will send at most
-.Ar
-num-tries
-queries to
+@kbd{num-tries} queries to
 @code{ntpd(8)},
 sleeping for
-.Ar
-secs-between-tries
-after each status return that says
+@kbd{secs-between-tries} after each status return that says
 @code{ntpd(8)}
 has not yet produced a synchronized and stable system clock.
 
@@ -143,9 +139,6 @@ The operation failed or the command syntax was not valid.
 @end table
 @node ntp-wait Authors
 @subsection ntp-wait Authors
-.An
-"Harlan
-Stenn"
 @node ntp-wait Notes
 @subsection ntp-wait Notes
 This document corresponds to version @VERSION@ of NTP.

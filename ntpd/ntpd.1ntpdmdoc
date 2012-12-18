@@ -1,9 +1,9 @@
-.Dd December 10 2012
+.Dd December 18 2012
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  December 10, 2012 at 06:39:56 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  December 18, 2012 at 03:57:36 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -58,7 +58,7 @@ Allow us to sync to broadcast servers.
 configuration file name.
 .sp
 The name and path of the configuration file,
-/etc/ntp.conf
+\fI/etc/ntp.conf\fP
 by default.
 .It  \-d ", " -\-debug\-level
 Increase debug verbosity level.
@@ -75,46 +75,44 @@ This option takes an integer number as its argument.
 frequency drift file name.
 .sp
 The name and path of the frequency file,
-/etc/ntp.drift
+\fI/etc/ntp.drift\fP
 by default.
 This is the same operation as the
-driftfile driftfile
+\fBdriftfile\fP \fIdriftfile\fP
 configuration specification in the 
-/etc/ntp.conf
+\fI/etc/ntp.conf\fP
 file.
 .It  \-g ", " -\-panicgate
 Allow the first adjustment to be Big.
 This option may appear an unlimited number of times.
 .sp
 Normally,
-ntpd
+\fBntpd\fP
 exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that,
-ntpd
+\fBntpd\fP
 will exit with a message to the system log. This option can be used with the
--q
+\fB\-q\fP
 and
--x
+\fB\-x\fP
 options.
 See the
-tinker
+\fBtinker\fP
 configuration file directive for other options.
 .It  \-i " \fIstring\fP, " \-\-jaildir "=" \fIstring\fP
 Jail directory.
 .sp
 Chroot the server to the directory
-jaildir
+\fIjaildir\fP
 .
 This option also implies that the server attempts to drop root privileges at startup.
 You may need to also specify a
--u
+\fB\-u\fP
 option.
 This option is only available if the OS supports adjusting the clock
 without full root privileges.
 This option is supported under NetBSD (configure with
--\-enable\-clockctl
-) and Linux (configure with
--\-enable\-linuxcaps
-).
+\fB\-\-enable\-clockctl\fP) and Linux (configure with
+\fB\-\-enable\-linuxcaps\fP).
 .It  \-I " \fIiface\fP, " \-\-interface "=" \fIiface\fP
 Listen on an interface name or address.
 This option may appear an unlimited number of times.
@@ -123,15 +121,15 @@ Open the network address given, or all the addresses associated with the
 given interface name.  This option may appear multiple times.  This option
 also implies not opening other addresses, except wildcard and localhost.
 This option is deprecated. Please consider using the configuration file
-interface command, which is more versatile.
+\fBinterface\fP command, which is more versatile.
 .It  \-k " \fIstring\fP, " \-\-keyfile "=" \fIstring\fP
 path to symmetric keys.
 .sp
 Specify the name and path of the symmetric key file.
-/etc/ntp.keys
+\fI/etc/ntp.keys\fP
 is the default.
 This is the same operation as the
-keys keyfile
+\fBkeys\fP \fIkeyfile\fP
 configuration file directive.
 .It  \-l " \fIstring\fP, " \-\-logfile "=" \fIstring\fP
 path to the log file.
@@ -139,14 +137,14 @@ path to the log file.
 Specify the name and path of the log file.
 The default is the system log file.
 This is the same operation as the
-logfile logfile
+\fBlogfile\fP \fIlogfile\fP
 configuration file directive.
 .It  \-L ", " -\-novirtualips
 Do not listen to virtual interfaces.
 .sp
 Do not listen to virtual interfaces, defined as those with
 names containing a colon.  This option is deprecated.  Please
-consider using the configuration file interface command, which
+consider using the configuration file \fBinterface\fP command, which
 is more versatile.
 .It  \-M ", " -\-modifymmtimer
 Modify Multimedia Timer (Windows only).
@@ -164,40 +162,40 @@ wait-sync.
 Run at high priority.
 .sp
 To the extent permitted by the operating system, run
-ntpd
+\fBntpd\fP
 at the highest priority.
 .It  \-p " \fIstring\fP, " \-\-pidfile "=" \fIstring\fP
 path to the PID file.
 .sp
 Specify the name and path of the file used to record
-ntpd's
+\fBntpd\fP's
 process ID.
 This is the same operation as the
-pidfile pidfile
+\fBpidfile\fP \fIpidfile\fP
 configuration file directive.
 .It  \-P " \fInumber\fP, " \-\-priority "=" \fInumber\fP
 Process priority.
 This option takes an integer number as its argument.
 .sp
 To the extent permitted by the operating system, run
-ntpd
+\fBntpd\fP
 at the specified
-sched_setscheduler(SCHED_FIFO)
+\fBsched_setscheduler(SCHED_FIFO)\fP
 priority.
 .It  \-q ", " -\-quit
 Set the time and quit.
 This option must not appear in combination with any of the following options:
 saveconfigquit, wait-sync.
 .sp
-ntpd
+\fBntpd\fP
 will not daemonize and will exit after the clock is first
 synchronized.  This behavior mimics that of the
-ntpdate
+\fBntpdate\fP
 program, which will soon be replaced with a shell script.
 The
--g
+\fB\-g\fP
 and
--x
+\fB\-x\fP
 options can be used with this option.
 Note: The kernel time discipline is disabled with this option.
 .It  \-r " \fIstring\fP, " \-\-propagationdelay "=" \fIstring\fP
@@ -209,7 +207,7 @@ Save parsed configuration and quit.
 This option must not appear in combination with any of the following options:
 quit, wait-sync.
 .sp
-Cause ntpd to parse its startup configuration file and save an
+Cause \fBntpd\fP to parse its startup configuration file and save an
 equivalent to the given filename and exit.  This option was
 designed for automated testing.
 .It  \-s " \fIstring\fP, " \-\-statsdir "=" \fIstring\fP
@@ -217,13 +215,13 @@ Statistics file location.
 .sp
 Specify the directory path for files created by the statistics facility.
 This is the same operation as the
-statsdir statsdir
+\fBstatsdir\fP \fIstatsdir\fP
 configuration file directive.
 .It  \-t " \fItkey\fP, " \-\-trustedkey "=" \fItkey\fP
 Trusted key number.
 This option may appear an unlimited number of times.
 .sp
-Add a key number to the trusted key list.
+Add the specified key number to the trusted key list.
 .It  \-u " \fIstring\fP, " \-\-user "=" \fIstring\fP
 Run as userid (or userid:groupid).
 .sp
@@ -231,10 +229,8 @@ Specify a user, and optionally a group, to switch to.
 This option is only available if the OS supports adjusting the clock
 without full root privileges.
 This option is supported under NetBSD (configure with
--\-enable\-clockctl
-) and Linux (configure with
--\-enable\-linuxcaps
-).
+\fB\-\-enable\-clockctl\fP) and Linux (configure with
+\fB\-\-enable\-linuxcaps\fP).
 .It  \-U " \fInumber\fP, " \-\-updateinterval "=" \fInumber\fP
 interval in seconds between scans for new or dropped interfaces.
 This option takes an integer number as its argument.
@@ -259,13 +255,13 @@ This option must not appear in combination with any of the following options:
 nofork, quit, saveconfigquit.
 This option takes an integer number as its argument.
 .sp
-If greater than zero, alters ntpd behavior when forking to
+If greater than zero, alters \fBntpd\fP's behavior when forking to
 daemonize.  Instead of exiting with status 0 immediately after
 the fork, the parent waits up to the specified number of
 seconds for the child to first synchronize the clock.  The exit
 status is zero (success) if the clock was synchronized,
-otherwise it is ETIMEDOUT.
-This provides the option for a script starting ntpd to easily
+otherwise it is \fBETIMEDOUT\fP.
+This provides the option for a script starting \fBntpd\fP to easily
 wait for the first set of the clock before proceeding.
 .It  \-x ", " -\-slew
 Slew up to 600 seconds.
@@ -275,25 +271,25 @@ This option sets the threshold to 600 s, which is well within the accuracy windo
 Note: Since the slew rate of typical Unix kernels is limited to 0.5 ms/s, each second of adjustment requires an amortization interval of 2000 s.
 Thus, an adjustment as much as 600 s will take almost 14 days to complete.
 This option can be used with the
--g
+\fB\-g\fP
 and
--q
+\fB\-q\fP
 options.
 See the
-tinker
+\fBtinker\fP
 configuration file directive for other options.
 Note: The kernel time discipline is disabled with this option.
 .It  \-\-usepcc
 Use CPU cycle counter (Windows only).
 .sp
-Attempt to substitute the CPU counter for QueryPerformanceCounter.
-The CPU counter and QueryPerformanceCounter are compared, and if
+Attempt to substitute the CPU counter for \fBQueryPerformanceCounter\fP.
+The CPU counter and \fBQueryPerformanceCounter\fP are compared, and if
 they have the same frequency, the CPU counter (RDTSC on x86) is
 used directly, saving the overhead of a system call.
 .It  \-\-pccfreq "=\fIstring\fP"
 Force CPU cycle counter use (Windows only).
 .sp
-Force substitution the CPU counter for QueryPerformanceCounter.
+Force substitution the CPU counter for \fBQueryPerformanceCounter\fP.
 The CPU counter (RDTSC on x86) is used unconditionally with the
 given frequency (in Hz).
 .It  \-m ", " -\-mdns

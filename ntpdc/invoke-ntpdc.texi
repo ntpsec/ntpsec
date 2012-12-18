@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  December 10, 2012 at 06:40:27 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 18, 2012 at 03:57:58 AM by AutoGen 5.16.2
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -69,7 +69,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p334
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p335
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -401,9 +401,10 @@ Otherwise,
 will
 attempt to read interactive format commands from the standard
 input.
-.Ss
-"Interactive
-Commands"
+@node Interactive Commands
+@section Interactive Commands
+
+Interactive Commands
 Interactive format commands consist of a keyword followed by zero
 to four arguments.
 Only enough characters of the full keyword to
@@ -411,9 +412,7 @@ uniquely identify the command need be typed.
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-.Ql
-\&>
-,
+@quoteleft{}\&>,@quoteright{}
 followed by a file name, to the command line.
 
 A number of interactive format commands are executed entirely
@@ -427,16 +426,12 @@ following.
 @item Ic
 @item Ic
 A
-.Sq
-Ic
-\&?
+@quoteleft{}Ic\&?@quoteright{}
 will print a list of all the command
 keywords known to this incarnation of
 @code{ntpdc}.
 A
-.Sq
-Ic
-\&?
+@quoteleft{}Ic\&?@quoteright{}
 followed by a command keyword will print function and usage
 information about the command.
 This command is probably a better
@@ -459,20 +454,13 @@ Hostname may
 be either a host name or a numeric address.
 @item Ic
 If
-.Cm
-yes
-is specified, host names are printed in
+@code{yes} is specified, host names are printed in
 information displays.
 If
-.Cm
-no
-is specified, numeric
+@code{no} is specified, numeric
 addresses are printed instead.
 The default is
-.Cm
-yes
-,
-unless
+@code{yes}, unless
 modified using the command line
 @code{-n} switch.
 @item Ic
@@ -501,10 +489,10 @@ retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
 
 @end multitable
-.Ss
-"Control
-Message
-Commands"
+@node Control Message Commands
+@section Control Message Commands
+
+Control Message Commands
 Query commands result in NTP mode 7 packets containing requests for
 information being sent to the server.
 These are read-only commands
@@ -532,27 +520,20 @@ offset and dispersion of the peer, all in seconds.
 The character in the left margin indicates the mode this peer
 entry is operating in.
 A
-.Ql
-\&+
+@quoteleft{}\&+@quoteright{}
 denotes symmetric active, a
-.Ql
-\&-
+@quoteleft{}\&-@quoteright{}
 indicates symmetric passive, a
-.Ql
-\&=
+@quoteleft{}\&=@quoteright{}
 means the
 remote server is being polled in client mode, a
-.Ql
-\&^
+@quoteleft{}\&^@quoteright{}
 indicates that the server is broadcasting to this address, a
-.Ql
-\&~
+@quoteleft{}\&~@quoteright{}
 denotes that the remote peer is sending broadcasts and a
-.Ql
-\&~
+@quoteleft{}\&~@quoteright{}
 denotes that the remote peer is sending broadcasts and a
-.Ql
-\&*
+@quoteleft{}\&*@quoteright{}
 marks the peer the server is currently synchronizing
 to.
 
@@ -566,34 +547,25 @@ REFCLK
 "parameter"
 .
 On
-.Ic
-hostnames
-.Cm
-no
-only IP-addresses
+@code{hostnames} @code{no} only IP-addresses
 will be displayed.
 @item Ic
 A slightly different peer summary list.
 Identical to the output
 of the
-.Ic
-peers
-command, except for the character in the
+@code{peers} command, except for the character in the
 leftmost column.
 Characters only appear beside peers which were
 included in the final stage of the clock selection algorithm.
 A
-.Ql
-\&.
+@quoteleft{}\&.@quoteright{}
 indicates that this peer was cast off in the falseticker
 detection, while a
-.Ql
-\&+
+@quoteleft{}\&+@quoteright{}
 indicates that the peer made it
 through.
 A
-.Ql
-\&*
+@quoteleft{}\&*@quoteright{}
 denotes the peer the server is currently
 synchronizing with.
 @item Ic
@@ -619,39 +591,28 @@ The loop
 filter is the part of NTP which deals with adjusting the local
 system clock.
 The
-.Sq
-offset
+@quoteleft{}offset@quoteright{}
 is the last offset given to the
 loop filter by the packet processing code.
 The
-.Sq
-frequency
+@quoteleft{}frequency@quoteright{}
 is the frequency error of the local clock in parts-per-million
 (ppm).
 The
-.Sq
-time_const
+@quoteleft{}time_const@quoteright{}
 controls the stiffness of the
 phase-lock loop and thus the speed at which it can adapt to
 oscillator drift.
 The
-.Sq
-watchdog
-timer
+@quoteleft{}watchdogtimer@quoteright{}
 value is the number
 of seconds which have elapsed since the last sample offset was
 given to the loop filter.
 The
-.Cm
-oneline
-and
-.Cm
-multiline
-options specify the format in which this
+@code{oneline} and
+@code{multiline} options specify the format in which this
 information is to be printed, with
-.Cm
-multiline
-as the
+@code{multiline} as the
 default.
 @item Ic
 Print a variety of system state variables, i.e., state related
@@ -660,64 +621,34 @@ All except the last four lines are described
 in the NTP Version 3 specification, RFC-1305.
 
 The
-.Sq
-system
-flags
+@quoteleft{}systemflags@quoteright{}
 show various system flags, some of
 which can be set and cleared by the
-.Ic
-enable
-and
-.Ic
-disable
-configuration commands, respectively.
+@code{enable} and
+@code{disable} configuration commands, respectively.
 These are
 the
-.Cm
-auth
-,
-.Cm
-bclient
-,
-.Cm
-monitor
-,
-.Cm
-pll
-,
-.Cm
-pps
-and
-.Cm
-stats
-flags.
+@code{auth}, @code{bclient}, @code{monitor}, @code{pll}, @code{pps} and
+@code{stats} flags.
 See the
 @code{ntpd(8)}
 documentation for the meaning of these flags.
 There
 are two additional flags which are read only, the
-.Cm
-kernel_pll
-and
-.Cm
-kernel_pps
-.
-These flags indicate
+@code{kernel_pll} and
+@code{kernel_pps}. These flags indicate
 the synchronization status when the precision time kernel
 modifications are in use.
 The
-.Sq
-kernel_pll
+@quoteleft{}kernel_pll@quoteright{}
 indicates that
 the local clock is being disciplined by the kernel, while the
-.Sq
-kernel_pps
+@quoteleft{}kernel_pps@quoteright{}
 indicates the kernel discipline is provided by the PPS
 signal.
 
 The
-.Sq
-stability
+@quoteleft{}stability@quoteright{}
 is the residual frequency error remaining
 after the system frequency correction is applied and is intended for
 maintenance and debugging.
@@ -733,22 +664,16 @@ may be
 incorrect.
 
 The
-.Sq
-broadcastdelay
+@quoteleft{}broadcastdelay@quoteright{}
 shows the default broadcast delay,
 as set by the
-.Ic
-broadcastdelay
-configuration command.
+@code{broadcastdelay} configuration command.
 
 The
-.Sq
-authdelay
+@quoteleft{}authdelay@quoteright{}
 shows the default authentication delay,
 as set by the
-.Ic
-authdelay
-configuration command.
+@code{authdelay} configuration command.
 @item Ic
 Print statistics counters maintained in the protocol
 module.
@@ -778,10 +703,10 @@ information is provided only by some clock drivers and is mostly
 undecodable without a copy of the driver source in hand.
 
 @end multitable
-.Ss
-"Runtime
-Configuration
-Requests"
+@node Runtime Configuration Requests
+@section Runtime Configuration Requests
+
+Runtime Configuration Requests
 All requests which cause state changes in the server are
 authenticated by the server using a configured NTP key (the
 facility can also be disabled by the server by not configuring a
@@ -790,12 +715,8 @@ The key number and the corresponding key must also be made
 known to
 @code{ntpdc}.
 This can be done using the
-.Ic
-keyid
-and
-.Ic
-passwd
-commands, the latter of which will prompt at the terminal for a
+@code{keyid} and
+@code{passwd} commands, the latter of which will prompt at the terminal for a
 password to use as the encryption key.
 You will also be prompted
 automatically for both the key number and password the first time a
@@ -832,16 +753,9 @@ adequate level of security.
 The following commands all make authenticated requests.
 @table @samp
 @item Xo
-.Op
-Ar
-keyid
-.Op
-Ar
-version
-.Op
-Cm
-prefer
-.Xc
+[@kbd{keyid} ]
+[@kbd{version} ]
+[@code{prefer} ]
 Add a configured peer association at the given address and
 operating in symmetric active mode.
 Note that an existing
@@ -849,58 +763,36 @@ association with the same peer may be deleted when this command is
 executed, or may simply be converted to conform to the new
 configuration, as appropriate.
 If the optional
-.Ar
-keyid
-is a
+@kbd{keyid} is a
 nonzero integer, all outgoing packets to the remote server will
 have an authentication field attached encrypted with this key.
 If
 the value is 0 (or not given) no authentication will be done.
 The
-.Ar
-version
-can be 1, 2 or 3 and defaults to 3.
+@kbd{version} can be 1, 2 or 3 and defaults to 3.
 The
-.Cm
-prefer
-keyword indicates a preferred peer (and thus will
+@code{prefer} keyword indicates a preferred peer (and thus will
 be used primarily for clock synchronisation if possible).
 The
 preferred peer also determines the validity of the PPS signal - if
 the preferred peer is suitable for synchronisation so is the PPS
 signal.
 @item Xo
-.Op
-Ar
-keyid
-.Op
-Ar
-version
-.Op
-Cm
-prefer
-.Xc
+[@kbd{keyid} ]
+[@kbd{version} ]
+[@code{prefer} ]
 Identical to the addpeer command, except that the operating
 mode is client.
 @item Xo
-.Op
-Ar
-keyid
-.Op
-Ar
-version
-.Op
-Cm
-prefer
-.Xc
+[@kbd{keyid} ]
+[@kbd{version} ]
+[@code{prefer} ]
 Identical to the addpeer command, except that the operating
 mode is broadcast.
 In this case a valid key identifier and key are
 required.
 The
-.Ar
-peer_address
-parameter can be the broadcast
+@kbd{peer_address} parameter can be the broadcast
 address of the local network or a multicast group address assigned
 to NTP.
 If a multicast address, a multicast-capable kernel is
@@ -914,83 +806,22 @@ When appropriate, however, the
 association may persist in an unconfigured mode if the remote peer
 is willing to continue on in this fashion.
 @item Xo
-.Op
-Cm
-time1
-.Op
-Cm
-time2
-.Op
-Ar
-stratum
-.Op
-Ar
-refid
-.Xc
+[@code{time1} ]
+[@code{time2} ]
+[@kbd{stratum} ]
+[@kbd{refid} ]
 This command provides a way to set certain data for a reference
 clock.
 See the source listing for further information.
 @item Xo
 .Oo
-.Cm
-auth
-|
-Cm
-bclient
-|
-.Cm
-calibrate
-|
-Cm
-kernel
-|
-.Cm
-monitor
-|
-Cm
-ntp
-|
-.Cm
-pps
-|
-Cm
-stats
-.Oc
-.Xc
+@code{auth} | @code{Cm} @code{bclient} | @code{calibrate} | @code{Cm} @code{kernel} | @code{monitor} | @code{Cm} @code{ntp} | @code{pps} | @code{Cm} @code{stats} .Oc
 @item Xo
 .Oo
-.Cm
-auth
-|
-Cm
-bclient
-|
-.Cm
-calibrate
-|
-Cm
-kernel
-|
-.Cm
-monitor
-|
-Cm
-ntp
-|
-.Cm
-pps
-|
-Cm
-stats
-.Oc
-.Xc
+@code{auth} | @code{Cm} @code{bclient} | @code{calibrate} | @code{Cm} @code{kernel} | @code{monitor} | @code{Cm} @code{ntp} | @code{pps} | @code{Cm} @code{stats} .Oc
 These commands operate in the same way as the
-.Ic
-enable
-and
-.Ic
-disable
-configuration file commands of
+@code{enable} and
+@code{disable} configuration file commands of
 @code{ntpd(8)}.
 @table @samp
 @item Cm
@@ -1024,25 +855,17 @@ The default for this flag is enable.
 Enables the pulse-per-second (PPS) signal when frequency
 and time is disciplined by the precision time kernel modifications.
 See the
-.Qq
-A
-Kernel
-Model
-for
-Precision
-Timekeeping
+"AKernelModelforPrecisionTimekeeping"
 (available as part of the HTML documentation
 provided in
-.Pa
-/usr/share/doc/ntp
+@file{/usr/share/doc/ntp})
 )
 page for further information.
 The default for this flag is disable.
 @item Cm
 Enables the statistics facility.
 See the
-.Sx
-Monitoring
+@ref{Monitoring}Monitoring
 Options
 section of
 @code{ntp.conf(5)}
@@ -1058,17 +881,8 @@ Ar
 address
 Ar
 mask
-.Ar
-flag
-Oo
-Ar
-...
-Oc
-.Xc
-This command operates in the same way as the
-.Ic
-restrict
-configuration file commands of
+@kbd{flag} @kbd{Oo} @kbd{Ar}... @kbd{Oc} This command operates in the same way as the
+@code{restrict} configuration file commands of
 @code{ntpd(8)}.
 .It
 Xo
@@ -1078,14 +892,7 @@ Ar
 address
 Ar
 mask
-.Ar
-flag
-Oo
-Ar
-...
-Oc
-.Xc
-Unrestrict the matching entry from the restrict list.
+@kbd{flag} @kbd{Oo} @kbd{Ar}... @kbd{Oc} Unrestrict the matching entry from the restrict list.
 .It
 Xo
 Ic
@@ -1094,10 +901,7 @@ Ar
 address
 Ar
 mask
-.Op
-Cm
-ntpport
-.Xc
+[@code{ntpport} ]
 Delete the matching entry from the restrict list.
 .It
 Ic
@@ -1129,12 +933,8 @@ Ar
 ...
 Oc
 These commands operate in the same way as the
-.Ic
-trustedkey
-and
-.Ic
-untrustedkey
-configuration file
+@code{trustedkey} and
+@code{untrustedkey} configuration file
 commands of
 @code{ntpd(8)}.
 .It
@@ -1155,13 +955,8 @@ Ic
 addtrap
 Ar
 address
-.Op
-Ar
-port
-.Op
-Ar
-interface
-.Xc
+[@kbd{port} ]
+[@kbd{interface} ]
 Set a trap for asynchronous messages.
 See the source listing
 for further information.
@@ -1171,13 +966,8 @@ Ic
 clrtrap
 Ar
 address
-.Op
-Ar
-port
-.Op
-Ar
-interface
-.Xc
+[@kbd{port} ]
+[@kbd{interface} ]
 Clear a trap for asynchronous messages.
 See the source listing
 for further information.

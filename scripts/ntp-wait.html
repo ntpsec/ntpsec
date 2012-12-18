@@ -30,16 +30,18 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 
 <h2 class="unnumbered">Simple Network Time Protocol User Manual</h2>
 
-<p>This document describes the use of the NTP Project's <code>ntp-wait</code> program,
-that can be used to query a Network Time Protocol (NTP) server and
-display the time offset of the system clock relative to the server
-clock.  Run as root, it can correct the system clock to this offset as
-well.  It can be run as an interactive command or from a cron job.
+<p>This document describes the use of the NTP Project's <code>ntp-wait</code> program.
 
-  <p>This document applies to version 4.2.7p334 of <code>ntp-wait</code>.
+  <p>If there are time-sensitive applications,
+the proper sequence of events is to
+run <code>ntpd -g</code> as early as possible,
+then invoke all of the non-time-sensitive process,
+run <code>ntp-wait</code> to block
+until the system's time has stabilized and synchronized,
+and only then start any applicaitons (like database servers) that require
+accurate and stable time.
 
-  <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
-IETF specification.
+  <p>This document applies to version 4.2.7p335 of <code>ntp-wait</code>.
 
   <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -51,7 +53,6 @@ IETF specification.
 <ul class="menu">
 <li><a accesskey="1" href="#ntp_002dwait-Description">ntp-wait Description</a>:             Description
 <li><a accesskey="2" href="#ntp_002dwait-Invocation">ntp-wait Invocation</a>: 		Invoking ntp-wait
-<li><a accesskey="3" href="#Usage">Usage</a>:                        Usage
 </ul>
 
 <div class="node">
@@ -63,17 +64,9 @@ IETF specification.
 <!-- node-name,  next,  previous,  up -->
 <h3 class="section">Description</h3>
 
-<p>By default, <code>ntp-wait</code> writes the local data and time (i.e., not UTC) to the
-standard output in the format:
-
-<pre class="example">     1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 secs
-</pre>
-  <p>where
-YYYY-MM-DD HH:MM:SS.SUBSEC is the local date and time,
-(+0800) is the local timezone adjustment (so we would add 8 hours and 0 minutes to convert the reported local time to UTC),
-and
-the +4.567 +/- 0.089 secs indicates the time offset and
-error bound of the system clock relative to the server clock.
+<p>The <code>ntp-wait</code> program blocks until <code>ntpd</code> is in synchronized state. 
+This can be useful at boot time, to delay the boot sequence until after
+<code>ntpd -g</code> has set the time.
 
 <div class="node">
 <p><hr>
@@ -87,14 +80,10 @@ error bound of the system clock relative to the server clock.
 
   <p><code>ntp-wait</code>
 will send at most
-.Ar
-num-tries
-queries to
+<kbd>num-tries</kbd> queries to
 <code>ntpd(8)</code>,
 sleeping for
-.Ar
-secs-between-tries
-after each status return that says
+<kbd>secs-between-tries</kbd> after each status return that says
 <code>ntpd(8)</code>
 has not yet produced a synchronized and stable system clock.
 
@@ -253,9 +242,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invo
 
 <h4 class="subsection">ntp-wait Authors</h4>
 
-<p>.An
-"Harlan
-Stenn"
 <div class="node">
 <p><hr>
 <a name="ntp_002dwait-Notes"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dwait-Authors">ntp-wait Authors</a>,
@@ -267,27 +253,5 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invo
 
 <p>This document corresponds to version  of NTP.
 
-<div class="node">
-<p><hr>
-<a name="Usage"></a>
-<br>
-</div>
-
-<!-- node-name,  next,  previous,  up -->
-<h3 class="section">Usage</h3>
-
-<p>The simplest use of this program is as an unprivileged command to
-check the current time, offset, and error in the local clock. 
-For example:
-
-<pre class="example">    ntp-wait ntpserver.somewhere
-</pre>
-  <p>With suitable privilege, it can be run as a command or in a
-<code>crom</code> job to reset the local clock from a reliable server, like
-the <code>ntpdate</code> and <code>rdate</code> commands. 
-For example:
-
-<pre class="example">    ntp-wait -a ntpserver.somewhere
-</pre>
-  </body></html>
+</body></html>
 

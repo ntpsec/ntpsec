@@ -1,23 +1,21 @@
-@node ntp.keys Invocation
-@section Invoking ntp.keys
+@node ntp.keys Notes
+@section Notes about ntp.keys
 @pindex ntp.keys
 @cindex NTP symmetric key file format
 @ignore
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.keys.texi)
 # 
-# It has been AutoGen-ed  December 10, 2012 at 06:39:49 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 18, 2012 at 03:31:40 AM by AutoGen 5.16.2
 # From the definitions    ntp.keys.def
-# and the template file   agtexi-cmd.tpl
+# and the template file   agtexi-file.tpl
 @end ignore
 
 
 
 This document describes the format of an NTP symmetric key file.
 For a description of the use of this type of file, see the
-.Qq
-Authentication
-Support
+"AuthenticationSupport"
 section of the
 @code{ntp.conf(5)}
 page.
@@ -25,9 +23,7 @@ page.
 @code{ntpd(8)}
 reads its keys from a file specified using the
 @code{-k} command line option or the
-.Ic
-keys
-statement in the configuration file.
+@code{keys} statement in the configuration file.
 While key number 0 is fixed by the NTP standard
 (as 56 zero bits)
 and may not be changed,
@@ -45,29 +41,17 @@ type
 key
 
 where
-.Ar
-keyno
-is a positive integer (between 1 and 65534),
-.Ar
-type
-is the message digest algorithm,
+@kbd{keyno} is a positive integer (between 1 and 65534),
+@kbd{type} is the message digest algorithm,
 and
-.Ar
-key
-is the key itself.
+@kbd{key} is the key itself.
 
 The
-.Ar
-key
-may be given in a format
+@kbd{key} may be given in a format
 controlled by the
-.Ar
-type
-field.
+@kbd{type} field.
 The
-.Ar
-type
-.Li
+@kbd{type} .Li
 MD5
 is always supported.
 If
@@ -76,9 +60,7 @@ ntpd
 was built with the OpenSSL library
 then any digest library supported by that library may be specified.
 However, if compliance with FIPS 140-2 is required the
-.Ar
-type
-must be either
+@kbd{type} must be either
 .Li
 SHA
 or
@@ -120,90 +102,3 @@ using the @code{agtexi-cmd} template and the option descriptions for the @code{n
 This software is released under the NTP license, <http://ntp.org/license>.
 
 @menu
-* ntp.keys usage::                  ntp.keys help/usage (@option{--help})
-* ntp.keys config::                 presetting/configuring ntp.keys
-* ntp.keys exit status::            exit status
-* ntp.keys Files::                  Files
-* ntp.keys See Also::               See Also
-* ntp.keys Notes::                  Notes
-@end menu
-
-@node ntp.keys usage
-@subsection ntp.keys help/usage (@option{--help})
-@cindex ntp.keys help
-
-This is the automatically generated usage text for ntp.keys.
-
-The text printed is the same whether selected with the @code{help} option
-(@option{--help}) or the @code{more-help} option (@option{--more-help}).  @code{more-help} will print
-the usage text by passing it through a pager program.
-@code{more-help} is disabled on platforms without a working
-@code{fork(2)} function.  The @code{PAGER} environment variable is
-used to select the program, defaulting to @file{more}.  Both will exit
-with a status code of 0.
-
-@exampleindent 0
-@example
-ntp.keys is unavailable - no --help
-@end example
-@exampleindent 4
-
-
-
-@node ntp.keys config
-@subsection presetting/configuring ntp.keys
-
-Any option that is not marked as @i{not presettable} may be preset by
-loading values from environment variables named @code{NTP.KEYS} and @code{NTP.KEYS_<OPTION_NAME>}.  @code{<OPTION_NAME>} must be one of
-the options listed above in upper case and segmented with underscores.
-The @code{NTP.KEYS} variable will be tokenized and parsed like
-the command line.  The remaining variables are tested for existence and their
-values are treated like option arguments.
-
-
-The command line options relating to configuration and/or usage help are:
-
-@subsubheading version
-
-Print the program version to standard out, optionally with licensing
-information, then exit 0.  The optional argument specifies how much licensing
-detail to provide.  The default is to print just the version.  The licensing infomation may be selected with an option argument.  Only the
-first letter of the argument is examined:
-
-@table @samp
-@item version
-Only print the version.  This is the default.
-@item copyright
-Name the copyright usage licensing terms.
-@item verbose
-Print the full copyright usage licensing terms.
-@end table
-
-@node ntp.keys exit status
-@subsection ntp.keys exit status
-
-One of the following exit values will be returned:
-@table @samp
-@item 0 (EXIT_SUCCESS)
-Successful program execution.
-@item 1 (EXIT_FAILURE)
-The operation failed or the command syntax was not valid.
-@end table
-@node ntp.keys Files
-@subsection ntp.keys Files
-@table @samp
-@item Pa
-the default name of the configuration file
-
-@end multitable
-@node ntp.keys See Also
-@subsection ntp.keys See Also
-@code{ntp.conf(5)},
-@code{ntpd(1ntpdmdoc)},
-@code{ntpdate(1ntpdatemdoc)},
-@code{ntpdc(1ntpdcmdoc)},
-@code{sntp(1sntpmdoc)}
-@node ntp.keys Notes
-@subsection ntp.keys Notes
-This document corresponds to version @VERSION@ of NTP.
-This document was derived from FreeBSD.
