@@ -12,6 +12,7 @@
 #include "ntp_stdlib.h"
 #include <ntp_random.h>
 
+#include "ntp_config.h"
 #include "ntp_syslog.h"
 #include "ntp_assert.h"
 #include "isc/error.h"
@@ -686,7 +687,7 @@ ntpdmain(
 
 # if defined(HAVE_MLOCKALL)
 #  ifdef HAVE_SETRLIMIT
-	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096);
+	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
 #   ifdef RLIMIT_MEMLOCK
 	/*
 	 * The default RLIMIT_MEMLOCK is very low on Linux systems.
@@ -694,7 +695,7 @@ ntpdmain(
 	 * fail if we drop root privilege.  To be useful the value
 	 * has to be larger than the largest ntpd resident set size.
 	 */
-	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024);
+	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
 #   endif	/* RLIMIT_MEMLOCK */
 #  endif	/* HAVE_SETRLIMIT */
 	/*
