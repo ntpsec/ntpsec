@@ -4865,7 +4865,7 @@ ntp_rlimit(
 		 * has to be larger than the largest ntpd resident set size.
 		 */
 		DPRINTF(2, ("ntp_rlimit: MEMLOCK: %d %s\n",
-			rl_value / rl_scale, rl_sstr));
+			(int)(rl_value / rl_scale), rl_sstr));
 		rl.rlim_cur = rl.rlim_max = rl_value;
 		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
@@ -4879,7 +4879,7 @@ ntp_rlimit(
 		 * stack memory.
 		 */
 		DPRINTF(2, ("ntp_rlimit: STACK: %d %s pages\n",
-			    rl_value / rl_scale, rl_sstr));
+			    (int)(rl_value / rl_scale), rl_sstr));
 		if (-1 == getrlimit(RLIMIT_STACK, &rl)) {
 			msyslog(LOG_ERR, "getrlimit() failed: %m");
 		} else {
