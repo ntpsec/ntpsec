@@ -218,7 +218,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpd - NTP daemon program - Ver. 4.2.7p334
+<pre class="example">ntpd - NTP daemon program - Ver. 4.2.7p335
 USAGE:  ntpd [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ &lt;server1&gt; ... &lt;serverN&gt; ]
   Flg Arg Option-Name    Description
@@ -393,7 +393,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 This is the &ldquo;configuration file name&rdquo; option. 
 This option takes an argument string. 
 The name and path of the configuration file,
-/etc/ntp.conf
+<span class="file">/etc/ntp.conf</span>
 by default. 
 <div class="node">
 <p><hr>
@@ -409,12 +409,12 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 This is the &ldquo;frequency drift file name&rdquo; option. 
 This option takes an argument string. 
 The name and path of the frequency file,
-/etc/ntp.drift
+<span class="file">/etc/ntp.drift</span>
 by default. 
 This is the same operation as the
-driftfile driftfile
+<code>driftfile</code> <kbd>driftfile</kbd>
 configuration specification in the
-/etc/ntp.conf
+<span class="file">/etc/ntp.conf</span>
 file. 
 <div class="node">
 <p><hr>
@@ -435,16 +435,16 @@ This is the &ldquo;allow the first adjustment to be big&rdquo; option.
 </ul>
 
   <p>Normally,
-ntpd
+<code>ntpd</code>
 exits with a message to the system log if the offset exceeds the panic threshold, which is 1000 s by default. This option allows the time to be set to any value without restriction; however, this can happen only once. If the threshold is exceeded after that,
-ntpd
+<code>ntpd</code>
 will exit with a message to the system log. This option can be used with the
--q
+<code>-q</code>
 and
--x
+<code>-x</code>
 options. 
 See the
-tinker
+<code>tinker</code>
 configuration file directive for other options. 
 <div class="node">
 <p><hr>
@@ -466,19 +466,17 @@ This option takes an argument string.
 </ul>
 
   <p>Chroot the server to the directory
-jaildir
+<kbd>jaildir</kbd>
 . 
 This option also implies that the server attempts to drop root privileges at startup. 
 You may need to also specify a
--u
+<code>-u</code>
 option. 
 This option is only available if the OS supports adjusting the clock
 without full root privileges. 
 This option is supported under NetBSD (configure with
-&ndash;enable-clockctl
-) and Linux (configure with
-&ndash;enable-linuxcaps
-). 
+<code>--enable-clockctl</code>) and Linux (configure with
+<code>--enable-linuxcaps</code>). 
 <div class="node">
 <p><hr>
 <a name="ntpd-interface"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpd-keyfile">ntpd keyfile</a>,
@@ -502,7 +500,7 @@ This option takes an argument string <span class="file">iface</span>.
 given interface name.  This option may appear multiple times.  This option
 also implies not opening other addresses, except wildcard and localhost. 
 This option is deprecated. Please consider using the configuration file
-interface command, which is more versatile. 
+<code>interface</code> command, which is more versatile. 
 <div class="node">
 <p><hr>
 <a name="ntpd-keyfile"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpd-logfile">ntpd logfile</a>,
@@ -517,10 +515,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 This is the &ldquo;path to symmetric keys&rdquo; option. 
 This option takes an argument string. 
 Specify the name and path of the symmetric key file. 
-/etc/ntp.keys
+<span class="file">/etc/ntp.keys</span>
 is the default. 
 This is the same operation as the
-keys keyfile
+<code>keys</code> <kbd>keyfile</kbd>
 configuration file directive. 
 <div class="node">
 <p><hr>
@@ -538,7 +536,7 @@ This option takes an argument string.
 Specify the name and path of the log file. 
 The default is the system log file. 
 This is the same operation as the
-logfile logfile
+<code>logfile</code> <kbd>logfile</kbd>
 configuration file directive. 
 <div class="node">
 <p><hr>
@@ -554,7 +552,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 This is the &ldquo;do not listen to virtual interfaces&rdquo; option. 
 Do not listen to virtual interfaces, defined as those with
 names containing a colon.  This option is deprecated.  Please
-consider using the configuration file interface command, which
+consider using the configuration file <code>interface</code> command, which
 is more versatile. 
 <div class="node">
 <p><hr>
@@ -590,7 +588,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 <p><a name="index-ntpd_002dnice-17"></a>
 This is the &ldquo;run at high priority&rdquo; option. 
 To the extent permitted by the operating system, run
-ntpd
+<code>ntpd</code>
 at the highest priority. 
 <div class="node">
 <p><hr>
@@ -606,10 +604,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 This is the &ldquo;path to the pid file&rdquo; option. 
 This option takes an argument string. 
 Specify the name and path of the file used to record
-ntpd's
+<code>ntpd</code>'s
 process ID. 
 This is the same operation as the
-pidfile pidfile
+<code>pidfile</code> <kbd>pidfile</kbd>
 configuration file directive. 
 <div class="node">
 <p><hr>
@@ -625,9 +623,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 This is the &ldquo;process priority&rdquo; option. 
 This option takes an argument number. 
 To the extent permitted by the operating system, run
-ntpd
+<code>ntpd</code>
 at the specified
-sched_setscheduler(SCHED_FIFO)
+<code>sched_setscheduler(SCHED_FIFO)</code>
 priority. 
 <div class="node">
 <p><hr>
@@ -648,15 +646,15 @@ This is the &ldquo;set the time and quit&rdquo; option.
 saveconfigquit, wait-sync. 
 </ul>
 
-  <p>ntpd
+  <p><code>ntpd</code>
 will not daemonize and will exit after the clock is first
 synchronized.  This behavior mimics that of the
-ntpdate
+<code>ntpdate</code>
 program, which will soon be replaced with a shell script. 
 The
--g
+<code>-g</code>
 and
--x
+<code>-x</code>
 options can be used with this option. 
 Note: The kernel time discipline is disabled with this option. 
 <div class="node">
@@ -694,7 +692,7 @@ This option takes an argument string.
 quit, wait-sync. 
 </ul>
 
-  <p>Cause ntpd to parse its startup configuration file and save an
+  <p>Cause <code>ntpd</code> to parse its startup configuration file and save an
 equivalent to the given filename and exit.  This option was
 designed for automated testing. 
 <div class="node">
@@ -712,7 +710,7 @@ This is the &ldquo;statistics file location&rdquo; option.
 This option takes an argument string. 
 Specify the directory path for files created by the statistics facility. 
 This is the same operation as the
-statsdir statsdir
+<code>statsdir</code> <kbd>statsdir</kbd>
 configuration file directive. 
 <div class="node">
 <p><hr>
@@ -733,7 +731,7 @@ This option takes an argument string <span class="file">tkey</span>.
 <li>may appear an unlimited number of times. 
 </ul>
 
-  <p>Add a key number to the trusted key list. 
+  <p>Add the specified key number to the trusted key list. 
 <div class="node">
 <p><hr>
 <a name="ntpd-user"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpd-updateinterval">ntpd updateinterval</a>,
@@ -757,10 +755,8 @@ This option takes an argument string.
 This option is only available if the OS supports adjusting the clock
 without full root privileges. 
 This option is supported under NetBSD (configure with
-&ndash;enable-clockctl
-) and Linux (configure with
-&ndash;enable-linuxcaps
-). 
+<code>--enable-clockctl</code>) and Linux (configure with
+<code>--enable-linuxcaps</code>). 
 <div class="node">
 <p><hr>
 <a name="ntpd-updateinterval"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpd-wait_002dsync">ntpd wait-sync</a>,
@@ -799,13 +795,13 @@ This option takes an argument number.
 nofork, quit, saveconfigquit. 
 </ul>
 
-  <p>If greater than zero, alters ntpd behavior when forking to
+  <p>If greater than zero, alters <code>ntpd</code>'s behavior when forking to
 daemonize.  Instead of exiting with status 0 immediately after
 the fork, the parent waits up to the specified number of
 seconds for the child to first synchronize the clock.  The exit
 status is zero (success) if the clock was synchronized,
-otherwise it is ETIMEDOUT. 
-This provides the option for a script starting ntpd to easily
+otherwise it is <code>ETIMEDOUT</code>. 
+This provides the option for a script starting <code>ntpd</code> to easily
 wait for the first set of the clock before proceeding. 
 <div class="node">
 <p><hr>
@@ -824,12 +820,12 @@ This option sets the threshold to 600 s, which is well within the accuracy windo
 Note: Since the slew rate of typical Unix kernels is limited to 0.5 ms/s, each second of adjustment requires an amortization interval of 2000 s. 
 Thus, an adjustment as much as 600 s will take almost 14 days to complete. 
 This option can be used with the
--g
+<code>-g</code>
 and
--q
+<code>-q</code>
 options. 
 See the
-tinker
+<code>tinker</code>
 configuration file directive for other options. 
 Note: The kernel time discipline is disabled with this option. 
 <div class="node">
@@ -850,8 +846,8 @@ This is the &ldquo;use cpu cycle counter (windows only)&rdquo; option.
 <li>must be compiled in by defining <code>SYS_WINNT</code> during the compilation. 
 </ul>
 
-  <p>Attempt to substitute the CPU counter for QueryPerformanceCounter. 
-The CPU counter and QueryPerformanceCounter are compared, and if
+  <p>Attempt to substitute the CPU counter for <code>QueryPerformanceCounter</code>. 
+The CPU counter and <code>QueryPerformanceCounter</code> are compared, and if
 they have the same frequency, the CPU counter (RDTSC on x86) is
 used directly, saving the overhead of a system call. 
 <div class="node">
@@ -873,7 +869,7 @@ This option takes an argument string.
 <li>must be compiled in by defining <code>SYS_WINNT</code> during the compilation. 
 </ul>
 
-  <p>Force substitution the CPU counter for QueryPerformanceCounter. 
+  <p>Force substitution the CPU counter for <code>QueryPerformanceCounter</code>. 
 The CPU counter (RDTSC on x86) is used unconditionally with the
 given frequency (in Hz). 
 <div class="node">
@@ -954,10 +950,15 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <h4 class="subsection">ntpd Usage</h4>
 
-<p>.Ss
-"How
-NTP
-Operates"
+<div class="node">
+<p><hr>
+<a name="How-NTP-Operates"></a>
+<br>
+</div>
+
+<h3 class="section">How NTP Operates</h3>
+
+<p>How NTP Operates
 The
 <code>ntpd</code>
 utility operates by exchanging messages with
@@ -975,12 +976,8 @@ interval of 64s, several minutes can elapse before the clock is
 set. 
 This initial delay to set the clock
 can be safely and dramatically reduced using the
-.Cm
-iburst
-keyword with the
-.Ic
-server
-configuration
+<code>iburst</code> keyword with the
+<code>server</code> configuration
 command, as described in
 <code>ntp.conf(5)</code>.
 
@@ -1078,23 +1075,18 @@ frequency error is so large that the first sample is outside the
 acceptable range,
 <code>ntpd</code>
 enters the same state as when the
-.Pa
-ntp.drift
+<span class="file">ntp.drift</span>
 file is not present. 
 The intent of this behavior
 is to quickly correct the frequency and restore operation to the
 normal tracking mode. 
 In the most extreme cases
 (the host
-.Cm
-time.ien.it
-comes to mind), there may be occasional
+time.ien.it comes to mind), there may be occasional
 step/slew corrections and subsequent frequency corrections. 
 It
 helps in these cases to use the
-.Cm
-burst
-keyword when
+<code>burst</code> keyword when
 configuring the server, but
 ONLY
 when you have permission to do so from the owner of the target host.
@@ -1109,23 +1101,21 @@ but this was never more than a mediocre hack and is no longer needed.
   <p>There is a way to start
 <code>ntpd(8)</code>
 that often addresses all of the problems mentioned above. 
-.Ss
-"Starting
-NTP
-(Best
-Current
-Practice)"
+<div class="node">
+<p><hr>
+<a name="Starting-NTP-_0028Best-Current-Practice_0029"></a>
+<br>
+</div>
+
+<h3 class="section">Starting NTP (Best Current Practice)</h3>
+
+<p>Starting NTP (Best Current Practice)
 First, use the
-.Cm
-iburst
-option on your
-.Cm
-server
-entries.
+<code>iburst</code> option on your
+<code>server</code> entries.
 
   <p>If you can also keep a good
-.Pa
-ntp.drift
+<span class="file">ntp.drift</span>
 file then
 <code>ntpd(8)</code>
 will effectively "warm-start" and your system's clock will
@@ -1144,9 +1134,7 @@ as much time as possible to get the system's clock synchronized and stable.
 
   <p>Finally,
 if you have processes like
-.Cm
-dovecot
-or database servers
+<code>dovecot</code> or database servers
 that require
 monotonically-increasing time,
 run
@@ -1159,15 +1147,20 @@ and after
 exits successfully
 it is as safe as it will ever be to start any process that require
 stable time. 
-.Ss
-"Frequency
-Discipline"
+<div class="node">
+<p><hr>
+<a name="Frequency-Discipline"></a>
+<br>
+</div>
+
+<h3 class="section">Frequency Discipline</h3>
+
+<p>Frequency Discipline
 The
 <code>ntpd</code>
 behavior at startup depends on whether the
 frequency file, usually
-.Pa
-ntp.drift
+<span class="file">ntp.drift</span>,
 ,
 exists. 
 This file
@@ -1194,22 +1187,25 @@ frequency is initialized from the file and enters normal mode
 immediately. 
 After that the current frequency offset is written to
 the file at hourly intervals. 
-.Ss
-"Operating
-Modes"
+<div class="node">
+<p><hr>
+<a name="Operating-Modes"></a>
+<br>
+</div>
+
+<h3 class="section">Operating Modes</h3>
+
+<p>Operating Modes
 The
 <code>ntpd</code>
 utility can operate in any of several modes, including
 symmetric active/passive, client/server broadcast/multicast and
 manycast, as described in the
-.Qq
-Association
-Management
+"AssociationManagement"
 page
 (available as part of the HTML documentation
 provided in
-.Pa
-/usr/share/doc/ntp
+<span class="file">/usr/share/doc/ntp</span>). 
 )
 . 
 It normally operates continuously while
@@ -1265,12 +1261,8 @@ setting the clock for the first time.
 The procedure for initially
 setting the clock is the same as in continuous mode; most
 applications will probably want to specify the
-.Cm
-iburst
-keyword with the
-.Ic
-server
-configuration command. 
+<code>iburst</code> keyword with the
+<code>server</code> configuration command. 
 With this
 keyword a volley of messages are exchanged to groom the data and
 the clock is set in about 10 s. 
@@ -1302,10 +1294,15 @@ stopped and run in one-time mode as required.
 At each startup, the
 frequency is read from the file and initializes the kernel
 frequency. 
-.Ss
-"Poll
-Interval
-Control"
+<div class="node">
+<p><hr>
+<a name="Poll-Interval-Control"></a>
+<br>
+</div>
+
+<h3 class="section">Poll Interval Control</h3>
+
+<p>Poll Interval Control
 This version of NTP includes an intricate state machine to
 reduce the network load while maintaining a quality of
 synchronization consistent with the observed jitter and wander. 
@@ -1317,16 +1314,10 @@ the consequences of changing the poll adjustment range from the
 default minimum of 64 s to the default maximum of 1,024 s. 
 The
 default minimum can be changed with the
-.Ic
-tinker
-.Cm
-minpoll
-command to a value not less than 16 s. 
+<code>tinker</code> <code>minpoll</code> command to a value not less than 16 s. 
 This value is used for all
 configured associations, unless overridden by the
-.Cm
-minpoll
-option on the configuration command. 
+<code>minpoll</code> option on the configuration command. 
 Note that most device drivers
 will not operate properly if the poll interval is less than 64 s
 and that the broadcast server and manycast client associations will
@@ -1348,18 +1339,22 @@ At a minimum of 1,024
 s, for example, the capture range is only 31 PPM. 
 If the intrinsic
 error is greater than this, the drift file
-.Pa
-ntp.drift
+<span class="file">ntp.drift</span>
 will
 have to be specially tailored to reduce the residual error below
 this limit. 
 Once this is done, the drift file is automatically
 updated once per hour and is available to initialize the frequency
 on subsequent daemon restarts. 
-.Ss
-"The
-huff-n'-puff
-Filter"
+<div class="node">
+<p><hr>
+<a name="The-huff_002dn_0027_002dpuff-Filter"></a>
+<br>
+</div>
+
+<h3 class="section">The huff-n'-puff Filter</h3>
+
+<p>The huff-n'-puff Filter
 In scenarios where a considerable amount of data are to be
 downloaded or uploaded over telephone modems, timekeeping quality
 can be seriously degraded. 
@@ -1388,12 +1383,8 @@ and positive (puff) correction, which depends on the sign of the
 offset.
 
   <p>The filter is activated by the
-.Ic
-tinker
-command and
-.Cm
-huffpuff
-keyword, as described in
+<code>tinker</code> command and
+<code>huffpuff</code> keyword, as described in
 <code>ntp.conf(5)</code>. 
 <div class="node">
 <p><hr>
@@ -1432,8 +1423,7 @@ at
 http://www.ntp.org/
 . 
 A snapshot of this documentation is available in HTML format in
-.Pa
-/usr/share/doc/ntp
+<span class="file">/usr/share/doc/ntp</span>. 
 . 
 .Rs
 .%A
