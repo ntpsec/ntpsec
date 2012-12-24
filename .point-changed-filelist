@@ -32,6 +32,7 @@ ntpq/ntpq-opts.c
 ntpq/ntpq-opts.h
 ntpq/ntpq.1ntpqman
 ntpq/ntpq.1ntpqmdoc
+ntpq/ntpq.html
 ntpq/ntpq.man.in
 ntpq/ntpq.mdoc.in
 ntpsnmpd/invoke-ntpsnmpd.texi

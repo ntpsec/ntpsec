@@ -32,15 +32,24 @@ EXTRA_DIST=			\
 	ntpq.1ntpqmdoc		\
 	ntpq.man.in		\
 	ntpq.mdoc.in		\
+	ntpq.html		\
+	ntpq.texi		\
 	$(NULL)
 
 BUILT_SOURCES=	ntpq-opts.c ntpq-opts.h
+
+html_DATA=				\
+	$(srcdir)/ntpq.html		\
+	$(NULL)
+
 noinst_DATA=				\
 	$(srcdir)/invoke-ntpq.menu	\
 	$(srcdir)/invoke-ntpq.texi	\
 	$(srcdir)/ntpq.man.in		\
 	$(srcdir)/ntpq.mdoc.in		\
 	$(NULL)
+
+install-data-local: install-html
 
 man1_MANS=
 man8_MANS=
@@ -98,6 +107,11 @@ $(srcdir)/invoke-ntpq.menu: $(srcdir)/invoke-ntpq.texi
 $(srcdir)/invoke-ntpq.texi: $(srcdir)/ntpq-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpq-opts.def
 	$(top_srcdir)/scripts/check--help $@
+
+$(srcdir)/ntpq.html: $(srcdir)/ntpq.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntpq.html ntpq.texi || true )
+
+###
 
 $(PROGRAMS): version.o
 
