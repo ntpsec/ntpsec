@@ -57,8 +57,8 @@ flag = {
     doc = <<-  _EndOfDoc_
 	Select the cipher which is used to encrypt the files containing
 	private keys.  The default is three-key triple DES in CBC mode,
-	equivalent to "-C des-ede3-cbc".  The openssl tool lists ciphers
-	available in "openssl -h" output.
+	equivalent to "@code{-C des-ede3-cbc".  The openssl tool lists ciphers
+	available in "@code{openssl -h}" output.
 	_EndOfDoc_;
 };
 
@@ -118,11 +118,12 @@ flag = {
 	Set the optional Autokey group name to name.  This is used in
 	the file name of IFF, GQ, and MV client parameters files.  In
 	that role, the default is the host name if this option is not
-	provided.  The group name, if specified using -i/--ident or
-	using -s/--subject-name following an '@' character, is also a
-	part of the self-signed host certificate's subject and issuer
-	names in the form host@group and should match the 'crypto ident'
-	or 'server ident' configuration in ntpd's configuration file. 
+	provided.  The group name, if specified using @code{-i/--ident} or
+	using @code{-s/--subject-name} following an '@code{@}' character,
+	is also a part of the self-signed host certificate's subject and
+	issuer names in the form @code{host@group} and should match the
+	'@code{crypto ident}' or '@code{server ident}' configuration in
+	@code{ntpd}'s configuration file. 
 	_EndOfDoc_;
 };
 
@@ -180,7 +181,7 @@ flag = {
     descrip   = "output private password";
     doc = <<-  _EndOfDoc_
 	Encrypt generated files containing private data with the specified
-	password and the cipher selected with -C/--cipher.
+	password and the cipher selected with @code{-C/--cipher}.
 	_EndOfDoc_;
 };
 
@@ -219,13 +220,13 @@ flag = {
     descrip   = "set host and optionally group name";
     doc = <<-  _EndOfDoc_
 	Set the Autokey host name, and optionally, group name specified
-	following an '@' character.  The host name is used in the file
+	following an '@code{@}' character.  The host name is used in the file
 	name of generated host and signing certificates, without the
 	group name.  The host name, and if provided, group name are used
-	in host@group form for the host certificate's subject and issuer
-	fields.  Specifying '-s @group' is allowed, and results in
-	leaving the host name unchanged while appending @group to the
-	subject and issuer fields, as with -i group.  The group name, or
+	in @code{host@group} form for the host certificate's subject and issuer
+	fields.  Specifying '@code{-s @group}' is allowed, and results in
+	leaving the host name unchanged while appending @code{@group} to the
+	subject and issuer fields, as with @code{-i group}.  The group name, or
 	if not provided, the host name are also used in the file names
 	of IFF, GQ, and MV client parameter files.
 		_EndOfDoc_;
@@ -296,7 +297,11 @@ digest algorithms.
 The message digest keys file must be distributed and stored
 using secure means beyond the scope of NTP itself.
 Besides the keys used for ordinary NTP associations, additional keys
-can be defined as passwords for the ntpq and ntpdc utility programs.
+can be defined as passwords for the
+.Xr ntpq 1ntpqmdoc
+and
+.Xr ntpdc 1ntpdcmdoc
+utility programs.
 .Pp
 The remaining generated files are compatible with other OpenSSL
 applications and other Public Key Infrastructure (PKI) resources.
@@ -308,9 +313,9 @@ other than Autokey.
 .Pp
 Some files used by this program are encrypted using a private password.
 The
-.Fl -p
+.Fl p
 option specifies the password for local encrypted files and the
-.Fl -q
+.Fl q
 option the password for encrypted files sent to remote sites.
 If no password is specified, the host name returned by the Unix
 .Fn gethostname
@@ -418,7 +423,7 @@ page.
 
 .Pp
 The
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 configuration command
 .Ic crypto pw Ar password
 specifies the read password for previously encrypted files.
@@ -485,7 +490,7 @@ by changing the link.
 If a link is present, ntpd follows it to the file name
 to extract the filestamp.
 If a link is not present,
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 extracts the filestamp from the file itself.
 This allows clients to verify that the file and generation times
 are always current.
@@ -604,7 +609,7 @@ by changing the link.
 If a link is present, ntpd follows it to the file name
 to extract the filestamp.
 If a link is not present,
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 extracts the filestamp from the file itself.
 This allows clients to verify that the file and generation times
 are always current.
@@ -765,10 +770,10 @@ Simply run
 with the same flags as before to generate new certificates
 using existing keys.
 However, if the host or sign key is changed,
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 should be restarted.
 When
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 is restarted, it loads any new files and restarts the protocol.
 Other dependent hosts will continue as usual until signatures are refreshed,
 at which time the protocol is restarted.
@@ -1034,7 +1039,7 @@ The second contains the datestamp in conventional Unix date format.
 Lines beginning with # are considered comments and ignored by the
 .Nm
 program and
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 daemon.
 Cryptographic values are encoded first using ASN.1 rules,
 then encrypted if necessary, and finally written PEM-encoded
@@ -1061,9 +1066,9 @@ in the range 0x21 through 0x7f excluding space and the
 character.
 .Pp
 Note that the keys used by the
-.Xr ntpq 8
+.Xr ntpq 1ntpqmdoc
 and
-.Xr ntpdc 8
+.Xr ntpdc 1ntpdcmdoc
 programs
 are checked against passwords requested by the programs
 and entered by hand, so it is generally appropriate to specify these keys
@@ -1086,9 +1091,9 @@ or automated means on the other subnet hosts.
 While this file is not used with the Autokey Version 2 protocol,
 it is needed to authenticate some remote configuration commands
 used by the
-.Xr ntpq 8
+.Xr ntpq 1ntpqmdoc
 and
-.Xr ntpdc 8
+.Xr ntpdc 1ntpdcmdoc
 utilities.
 	_END_PROG_MDOC_DESCRIP;
 };

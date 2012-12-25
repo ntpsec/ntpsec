@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  December 22, 2012 at 11:53:52 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  December 24, 2012 at 12:08:08 PM by AutoGen 5.16.2
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
