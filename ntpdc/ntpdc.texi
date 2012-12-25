@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename ntpdc.info
 @settitle ntpdc: NTPD Control User's Manual
-@include include/version.texi
+@include ../sntp/include/version.texi
 @paragraphindent 2
 @c %**end of header
 

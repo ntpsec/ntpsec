@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename ntpq.info
 @settitle ntpq: Network Time Protocol Query User's Manual
-@include include/version.texi
+@include ../sntp/include/version.texi
 @paragraphindent 2
 @c %**end of header
 
@@ -26,6 +26,16 @@ querying the state of an NTP server.
 
 @shortcontents
 
+@node Top, ntpq Description, (dir), (dir)
+@top ntpq: Network Time Protocol Query User Manual
+
+The @code{ntpq} utility program is used to
+monitor the operational status
+and determine the performance of
+@code{ntpd}, the NTP daemon.
+
+This document applies to version @value{VERSION} of @code{ntpq}.
+
 @menu
 * ntpq Description::            
 * ntpq Invocation::             Invoking ntpq
@@ -36,20 +46,6 @@ querying the state of an NTP server.
 * System Variables::            
 * Peer Variables::              
 * Clock Variables::             
-@end menu
-
-@node Top, ntpq Description, (dir), (dir)
-@top ntpq: Network Time Protocol Query User Manual
-
-The @code{ntpq} utility program is used to monitor NTP daemon @code{ntpd}
-operations and determine performance.  It uses the standard NTP mode 6 control
-
-This document applies to version @value{VERSION} of @code{ntpq}.
-
-@menu
-* ntpq Description::            Description
-* ntpq Invocation::		Invoking ntpq
-* Usage::                       Usage
 @end menu
 
 @node ntpq Description, Usage, Top, Top
@@ -112,7 +108,7 @@ For examples and usage, see the @url{debug.html, NTP Debugging Techniques} page.
 @tab @code{/usr/local/etc}
 @tab @code{-k}
 @tab @code{keysdir}
-
+@end multitable
 
 @node Internal Commands, Control Message Commands, Usage, Top
 @comment  node-name,  next,  previous,  up
@@ -122,8 +118,8 @@ Interactive format commands consist of a keyword followed by zero to four argume
 
 @table @code
 
-@item @anchor{help} @code{? [@kbd{command_keyword}
-@itemx @code{help [@kbd{command_keyword}]}
+@item @anchor{help} @code{? [}@kbd{command_keyword}@code{]}
+@itemx @code{help [}@kbd{command_keyword}@code{]}
 A @code{?} by itself will print a list of all the command keywords known to @code{ntpq}.  A @code{?} followed by a command keyword will print function and usage information about the command.
 
 @item @anchor{addvars} >@code{addvars @kbd{name} [ = @kbd{value}] [...]}
@@ -218,7 +214,6 @@ which iterate over a range of associations.
 Display a list of mobilized associations in the form:
 @*
 @code{ind assid status conf reach auth condition last_event cnt}
-@end table
 
 @multitable @columnfractions .1 .4
 @headitem Variable @tab Description
@@ -254,7 +249,7 @@ event count (see the @code{count} field of the @url{decode.html#peer, peer statu
 
 @item @anchor{cv} clockvar @kbd{assocID} [@kbd{name} [ = @kbd{value} [...]] [...]]
 @itemx cv @kbd{assocID} [@kbd{name} [ = @kbd{value} [...] ][...]]
-Display a list of @xref{clock,,clock variables} for those associations supporting a reference clock.
+Display a list of @ref{clock,,clock variables} for those associations supporting a reference clock.
 
 @item @anchor{:config} :config [...]
 Send the remainder of the command line, including whitespace, to the server
@@ -466,7 +461,7 @@ If the @code{@kbd{assocID}} is zero, the variables are from the
 The @code{@kbd{assocID}} is required,
 as the same name can occur in both spaces.
 
-@item @anchor{sysinfo">@code{sysinfo}
+@item @anchor{sysinfo} @code{sysinfo}
 Display operational summary.
 
 @item @anchor{sysstats} @code{sysstats}

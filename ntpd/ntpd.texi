@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename ntpd.info
 @settitle ntpd: Network Time Protocol (NTP) Daemon User's Manual
-@include include/version.texi
+@include ../sntp/include/version.texi
 @paragraphindent 2
 @c %**end of header
 

@@ -40,6 +40,7 @@ ntpsnmpd/ntpsnmpd-opts.c
 ntpsnmpd/ntpsnmpd-opts.h
 ntpsnmpd/ntpsnmpd.1ntpsnmpdman
 ntpsnmpd/ntpsnmpd.1ntpsnmpdmdoc
+ntpsnmpd/ntpsnmpd.html
 ntpsnmpd/ntpsnmpd.man.in
 ntpsnmpd/ntpsnmpd.mdoc.in
 packageinfo.sh

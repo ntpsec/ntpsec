@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  December 22, 2012 at 11:53:20 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  December 25, 2012 at 11:01:46 AM by AutoGen 5.16.2
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *

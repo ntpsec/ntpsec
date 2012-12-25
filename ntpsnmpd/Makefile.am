@@ -31,18 +31,27 @@ EXTRA_DIST=			\
 	ntpsnmpd.1ntpsnmpdmdoc	\
 	ntpsnmpd.man.in		\
 	ntpsnmpd.mdoc.in	\
+	ntpsnmpd.html		\
+	ntpsnmpd.texi		\
 	ntpv4-mib.mib		\
 	$(NULL)
 
 BUILT_SOURCES=	ntpsnmpd-opts.c ntpsnmpd-opts.h
 CLEANFILES=
 DISTCLEANFILES=	config.log $(man_MANS)
+
+html_DATA=				\
+	$(srcdir)/ntpsnmpd.html		\
+	$(NULL)
+
 noinst_DATA=				\
 	$(srcdir)/invoke-ntpsnmpd.menu	\
 	$(srcdir)/invoke-ntpsnmpd.texi	\
 	$(srcdir)/ntpsnmpd.man.in	\
 	$(srcdir)/ntpsnmpd.mdoc.in	\
 	$(NULL)
+
+install-data-local: install-html
 
 man1_MANS=
 man8_MANS=
@@ -97,6 +106,9 @@ $(srcdir)/invoke-ntpsnmpd.menu: $(srcdir)/invoke-ntpsnmpd.texi
 $(srcdir)/invoke-ntpsnmpd.texi: $(srcdir)/ntpsnmpd-opts.def $(std_def_list)
 	$(run_ag) -Tagtexi-cmd.tpl -DLEVEL=section ntpsnmpd-opts.def
 	$(top_srcdir)/scripts/check--help $@
+
+$(srcdir)/ntpsnmpd.html: $(srcdir)/ntpsnmpd.texi $(top_srcdir)/sntp/include/version.texi
+	cd $(srcdir) && ( makeinfo --force --html --no-split -o ntpsnmpd.html ntpsnmpd.texi || true )
 
 include $(top_srcdir)/bincheck.mf
 include $(top_srcdir)/sntp/check-libntp.mf
