@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 # 
-# It has been AutoGen-ed  December 22, 2012 at 11:47:38 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 25, 2012 at 11:32:50 AM by AutoGen 5.16.2
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -44,12 +44,11 @@ and text strings.
 
 The rest of this page describes the configuration and control options.
 The
-"NotesonConfiguringNTPandSettingupaNTPSubnet"
+"Notes on Configuring NTP and Setting up a NTP Subnet"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp})
-)
 contains an extended discussion of these options.
 In addition to the discussion of general
 @ref{Configuration}Configuration
@@ -145,53 +144,51 @@ equivalent classes for that address family.
 @item Xo
 [@code{burst} ]
 [@code{iburst} ]
-[@code{version} @code{Ar} @code{version} ]
+[@code{version} @code{version} ]
 [@code{prefer} ]
-[@code{minpoll} @code{Ar} @code{minpoll} ]
-[@code{maxpoll} @code{Ar} @code{maxpoll} ]
+[@code{minpoll} @code{minpoll} ]
+[@code{maxpoll} @code{maxpoll} ]
 @item Xo
-[@code{key} @code{Ar} @code{key}\&| @code{Cm} @code{autokey} ]
+[@code{key} @code{key} @code{\&|} @code{Cm} @code{autokey} ]
 [@code{burst} ]
 [@code{iburst} ]
-[@code{version} @code{Ar} @code{version} ]
+[@code{version} @code{version} ]
 [@code{prefer} ]
-[@code{minpoll} @code{Ar} @code{minpoll} ]
-[@code{maxpoll} @code{Ar} @code{maxpoll} ]
+[@code{minpoll} @code{minpoll} ]
+[@code{maxpoll} @code{maxpoll} ]
 @item Xo
-[@code{key} @code{Ar} @code{key}\&| @code{Cm} @code{autokey} ]
-[@code{version} @code{Ar} @code{version} ]
+[@code{key} @code{key} @code{\&|} @code{Cm} @code{autokey} ]
+[@code{version} @code{version} ]
 [@code{prefer} ]
-[@code{minpoll} @code{Ar} @code{minpoll} ]
-[@code{maxpoll} @code{Ar} @code{maxpoll} ]
+[@code{minpoll} @code{minpoll} ]
+[@code{maxpoll} @code{maxpoll} ]
 @item Xo
-[@code{key} @code{Ar} @code{key}\&| @code{Cm} @code{autokey} ]
-[@code{version} @code{Ar} @code{version} ]
+[@code{key} @code{key} @code{\&|} @code{Cm} @code{autokey} ]
+[@code{version} @code{version} ]
 [@code{prefer} ]
-[@code{minpoll} @code{Ar} @code{minpoll} ]
-[@code{ttl} @code{Ar} @code{ttl} ]
+[@code{minpoll} @code{minpoll} ]
+[@code{ttl} @code{ttl} ]
 @item Xo
-[@code{key} @code{Ar} @code{key}\&| @code{Cm} @code{autokey} ]
-[@code{version} @code{Ar} @code{version} ]
+[@code{key} @code{key} @code{\&|} @code{Cm} @code{autokey} ]
+[@code{version} @code{version} ]
 [@code{prefer} ]
-[@code{minpoll} @code{Ar} @code{minpoll} ]
-[@code{maxpoll} @code{Ar} @code{maxpoll} ]
-[@code{ttl} @code{Ar} @code{ttl} ]
+[@code{minpoll} @code{minpoll} ]
+[@code{maxpoll} @code{maxpoll} ]
+[@code{ttl} @code{ttl} ]
 
 @end multitable
 
 These five commands specify the time server name or address to
 be used and the mode in which to operate.
 The
-@kbd{address} can be
+@code{address} can be
 either a DNS name or an IP address in dotted-quad notation.
 Additional information on association behavior can be found in the
-"AssociationManagement"
+"Association Management"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 @table @samp
 @item Ic
 For type s addresses, this command mobilizes a persistent
@@ -233,7 +230,7 @@ broadcast messages go only to the interface associated with the
 subnet specified, but multicast messages go to all interfaces.
 In broadcast mode the local server sends periodic broadcast
 messages to a client population at the
-@kbd{address} specified, which is usually the broadcast address on (one of) the
+@code{address} specified, which is usually the broadcast address on (one of) the
 local network(s) or a multicast address assigned to NTP.
 The IANA
 has assigned the multicast group address IPv4 224.0.1.1 and
@@ -266,7 +263,7 @@ discovered as the result of broadcast/multicast messages.
 The
 client broadcasts a request message to the group address associated
 with the specified
-@kbd{address} and specifically enabled
+@code{address} and specifically enabled
 servers respond to these messages.
 The client selects the servers
 providing the best time and continues as with the
@@ -311,7 +308,7 @@ is started with the
 @item Cm
 All packets sent to and received from the server or peer are to
 include authentication fields encrypted using the specified
-@kbd{key} identifier with values from 1 to 65534, inclusive.
+@code{key} identifier with values from 1 to 65534, inclusive.
 The
 default is to include no encryption field.
 @item Cm
@@ -334,20 +331,19 @@ All other things being equal,
 this host will be chosen for synchronization among a set of
 correctly operating hosts.
 See the
-"MitigationRulesandthepreferKeyword"
+"Mitigation Rules and the prefer Keyword"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp})
-)
 for further information.
 @item Cm
 This option is used only with broadcast server and manycast
 client modes.
 It specifies the time-to-live
-@kbd{ttl} to
+@code{ttl} to
 use on broadcast server and multicast server and the maximum
-@kbd{ttl} for the expanding ring search with manycast
+@code{ttl} for the expanding ring search with manycast
 client packets.
 Selection of the proper value, which defaults to
 127, is something of a black art and should be coordinated with the
@@ -561,7 +557,6 @@ Keys and
 related information are specified in a key
 file, usually called
 @file{ntp.keys},
-,
 which must be distributed and stored using
 secure means beyond the scope of the NTP protocol itself.
 Besides the keys used
@@ -842,20 +837,20 @@ Specifies the key identifier to use with the
 utility, which uses the standard
 protocol defined in RFC-1305.
 The
-@kbd{key} argument is
+@code{key} argument is
 the key identifier for a trusted key, where the value can be in the
 range 1 to 65,534, inclusive.
 @item Xo
-[@code{cert} @code{Ar} @code{file} ]
-[@code{leap} @code{Ar} @code{file} ]
-[@code{randfile} @code{Ar} @code{file} ]
-[@code{host} @code{Ar} @code{file} ]
-[@code{sign} @code{Ar} @code{file} ]
-[@code{gq} @code{Ar} @code{file} ]
-[@code{gqpar} @code{Ar} @code{file} ]
-[@code{iffpar} @code{Ar} @code{file} ]
-[@code{mvpar} @code{Ar} @code{file} ]
-[@code{pw} @code{Ar} @code{password} ]
+[@code{cert} @code{file} ]
+[@code{leap} @code{file} ]
+[@code{randfile} @code{file} ]
+[@code{host} @code{file} ]
+[@code{sign} @code{file} ]
+[@code{gq} @code{file} ]
+[@code{gqpar} @code{file} ]
+[@code{iffpar} @code{file} ]
+[@code{mvpar} @code{file} ]
+[@code{pw} @code{password} ]
 This command requires the OpenSSL library.
 It activates public key
 cryptography, selects the message digest and signature
@@ -868,42 +863,29 @@ location of a file is relative to the keys directory specified
 in the
 @code{keysdir} command or default
 @file{/usr/local/etc}.
-.
 Following are the subcommands:
 @table @samp
 @item Cm
 Specifies the location of the required host public certificate file.
 This overrides the link
 @file{ntpkey_cert_}NsArhostname
-Ns
-Ar
-hostname
 in the keys directory.
 @item Cm
 Specifies the location of the optional GQ parameters file.
 This
 overrides the link
 @file{ntpkey_gq_}NsArhostname
-Ns
-Ar
-hostname
 in the keys directory.
 @item Cm
 Specifies the location of the required host key file.
 This overrides
 the link
 @file{ntpkey_key_}NsArhostname
-Ns
-Ar
-hostname
 in the keys directory.
 @item Cm
 Specifies the location of the optional IFF parameters file.This
 overrides the link
 @file{ntpkey_iff_}NsArhostname
-Ns
-Ar
-hostname
 in the keys directory.
 @item Cm
 Specifies the location of the optional leapsecond file.
@@ -915,9 +897,6 @@ Specifies the location of the optional MV parameters file.
 This
 overrides the link
 @file{ntpkey_mv_}NsArhostname
-Ns
-Ar
-hostname
 in the keys directory.
 @item Cm
 Specifies the password to decrypt files containing private keys and
@@ -933,9 +912,6 @@ Specifies the location of the optional sign key file.
 This overrides
 the link
 @file{ntpkey_sign_}NsArhostname
-Ns
-Ar
-hostname
 in the keys directory.
 If this file is
 not found, the host key is also the sign key.
@@ -964,7 +940,6 @@ This command specifies the default directory path for
 cryptographic keys, parameters and certificates.
 The default is
 @file{/usr/local/etc/}.
-.
 .It
 Ic
 requestkey
@@ -976,7 +951,7 @@ utility program, which uses a
 proprietary protocol specific to this implementation of
 @code{ntpd(1ntpdmdoc)}.
 The
-@kbd{key} argument is a key identifier
+@code{key} argument is a key identifier
 for the trusted key, where the value can be in the range 1 to
 65,534, inclusive.
 .It
@@ -1012,7 +987,7 @@ and remote servers share the same key and key identifier for this
 purpose, although different keys can be used with different
 servers.
 The
-@kbd{key} arguments are 32-bit unsigned
+@code{key} arguments are 32-bit unsigned
 integers with values from 1 to 65,534.
 
 @end multitable
@@ -1025,51 +1000,51 @@ The following error codes are reported via the NTP control
 and monitoring protocol trap mechanism.
 @table @samp
 @item 101
-(badfieldformatorlength)
+(bad field format or length)
 The packet has invalid version, length or format.
 @item 102
-(badtimestamp)
+(bad timestamp)
 The packet timestamp is the same or older than the most recent received.
 This could be due to a replay or a server clock time step.
 @item 103
-(badfilestamp)
+(bad filestamp)
 The packet filestamp is the same or older than the most recent received.
 This could be due to a replay or a key file generation error.
 @item 104
-(badormissingpublickey)
+(bad or missing public key)
 The public key is missing, has incorrect format or is an unsupported type.
 @item 105
-(unsupporteddigesttype)
+(unsupported digest type)
 The server requires an unsupported digest/signature scheme.
 @item 106
-(mismatcheddigesttypes)
+(mismatched digest types)
 Not used.
 @item 107
-(badsignaturelength)
+(bad signature length)
 The signature length does not match the current public key.
 @item 108
-(signaturenotverified)
+(signature not verified)
 The message fails the signature check.
 It could be bogus or signed by a
 different private key.
 @item 109
-(certificatenotverified)
+(certificate not verified)
 The certificate is invalid or signed with the wrong key.
 @item 110
-(certificatenotverified)
+(certificate not verified)
 The certificate is not yet valid or has expired or the signature could not
 be verified.
 @item 111
-(badormissingcookie)
+(bad or missing cookie)
 The cookie is missing, corrupted or bogus.
 @item 112
-(badormissingleapsecondstable)
+(bad or missing leapseconds table)
 The leapseconds table is missing, corrupted or bogus.
 @item 113
-(badormissingcertificate)
+(bad or missing certificate)
 The certificate is missing, corrupted or bogus.
 @item 114
-(badormissingidentity)
+(bad or missing identity)
 The identity key is missing, corrupt or bogus.
 
 @end multitable
@@ -1105,7 +1080,7 @@ Commands
 @item Ic
 Enables writing of statistics records.
 Currently, four kinds of
-@kbd{name} statistics are supported.
+@code{name} statistics are supported.
 @table @samp
 @item Cm
 Enables recording of clock driver statistics information.
@@ -1264,8 +1239,8 @@ filegen
 Ar
 name
 Xo
-[@code{file} @code{Ar} @code{filename} ]
-[@code{type} @code{Ar} @code{typename} ]
+[@code{file} @code{filename} ]
+[@code{type} @code{typename} ]
 [@code{link} | @code{nolink} ]
 [@code{enable} | @code{disable} ]
 Configures setting of generation file set name.
@@ -1296,35 +1271,35 @@ This is the type of the statistics records, as shown in the
 This is the file name for the statistics records.
 Filenames of set
 members are built from three concatenated elements
-@kbd{Cm} @kbd{prefix}, @kbd{Cm} @kbd{filename} and
-@kbd{Cm} @kbd{suffix}: @table @samp
+@code{Cm} @code{prefix}, @code{Cm} @code{filename} and
+@code{Cm} @code{suffix}: @table @samp
 @item Cm
 This is a constant filename path.
 It is not subject to
 modifications via the
-@kbd{filegen} option.
+@code{filegen} option.
 It is defined by the
 server, usually specified as a compile-time constant.
 It may,
 however, be configurable for individual file generation sets
 via other commands.
 For example, the prefix used with
-@kbd{loopstats} and
-@kbd{peerstats} generation can be configured using the
-@kbd{statsdir} option explained above.
+@code{loopstats} and
+@code{peerstats} generation can be configured using the
+@code{statsdir} option explained above.
 @item Cm
 This string is directly concatenated to the prefix mentioned
 above (no intervening
-@quoteleft{}/).@quoteright{}
+@quoteleft{}/ ) .@quoteright{}
 This can be modified using
 the file argument to the
-@kbd{filegen} statement.
+@code{filegen} statement.
 No
 @file{..}
 elements are
 allowed in this component to prevent filenames referring to
 parts outside the filesystem hierarchy denoted by
-@kbd{prefix}. @item Cm
+@code{prefix}. @item Cm
 This part is reflects individual elements of a file set.
 It is
 generated according to the type of a file set.
@@ -1352,8 +1327,8 @@ server incarnations.
 The set member filename is built by appending a
 @quoteleft{}\&.@quoteright{}
 to concatenated
-@kbd{prefix} and
-@kbd{filename} strings, and
+@code{prefix} and
+@code{filename} strings, and
 appending the decimal representation of the process ID of the
 @code{ntpd(1ntpdmdoc)}
 server process.
@@ -1371,7 +1346,7 @@ the form
 @code{dd} is a two digit day number.
 Thus, all information written at 10 December 1992 would end up
 in a file named
-@kbd{prefix} @kbd{filename} @kbd{Ns}.19921210. @item Cm
+@code{prefix} @code{filename} @code{Ns} @code{.19921210}. @item Cm
 Any file set member contains data related to a certain week of
 a year.
 The term week is defined by computing day-of-year
@@ -1462,13 +1437,11 @@ The list is searched in order with the
 last match found defining the restriction flags associated
 with the entry.
 Additional information and examples can be found in the
-"NotesonConfiguringNTPandSettingupaNTPSubnet"
+"Notes on Configuring NTP and Setting up a NTP Subnet"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 
 The restriction facility was implemented in conformance
 with the access policies for the original NSFnet backbone
@@ -1542,9 +1515,9 @@ Control
 Commands
 @table @samp
 @item Xo
-[@code{average} @code{Ar} @code{avg} ]
-[@code{minimum} @code{Ar} @code{min} ]
-[@code{monitor} @code{Ar} @code{prob} ]
+[@code{average} @code{avg} ]
+[@code{minimum} @code{min} ]
+[@code{monitor} @code{prob} ]
 Set the parameters of the
 @code{limited} facility which protects the server from
 client abuse.
@@ -1559,20 +1532,20 @@ minimum average and minimum are 5 and 2, respectively.
 The monitor subcommand specifies the probability of discard
 for packets that overflow the rate-control window.
 @item Xo
-[@code{mask} @code{Ar} @code{mask} ]
-[@kbd{flag}... ]
+[@code{mask} @code{mask} ]
+[@code{flag} @code{...} ]
 The
-@kbd{address} argument expressed in
+@code{address} argument expressed in
 dotted-quad form is the address of a host or network.
 Alternatively, the
-@kbd{address} argument can be a valid host DNS name.
+@code{address} argument can be a valid host DNS name.
 The
-@kbd{mask} argument expressed in dotted-quad form defaults to
-255.255.255.255, meaning that the
-@kbd{address} is treated as the address of an individual host.
+@code{mask} argument expressed in dotted-quad form defaults to
+@code{255.255.255.255}, meaning that the
+@code{address} is treated as the address of an individual host.
 A default entry (address
-0.0.0.0, mask
-0.0.0.0) is always included and is always the first entry in the list.
+@code{0.0.0.0}, mask
+@code{0.0.0.0}) is always included and is always the first entry in the list.
 Note that text string
 @code{default}, with no mask option, may
 be used to indicate the default entry.
@@ -1980,7 +1953,7 @@ Options
 @table @samp
 @item Xo
 .Oo
-@code{ceiling} @code{Ar} @code{ceiling} | @code{cohort}{ @code{0} | @code{1}} | @code{floor} @code{Ar} @code{floor} | @code{minclock} @code{Ar} @code{minclock} | @code{minsane} @code{Ar} @code{minsane} .Oc
+@code{ceiling} @code{ceiling} | @code{cohort}{ @code{0} | @code{1}} | @code{floor} @code{floor} | @code{minclock} @code{minclock} | @code{minsane} @code{minsane} .Oc
 This command affects the clock selection and clustering
 algorithms.
 It can be used to select the quality and
@@ -2055,45 +2028,37 @@ satellite and modem reference clocks plus a special pseudo-clock
 used for backup or when no other clock source is available.
 Detailed descriptions of individual device drivers and options can
 be found in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 Additional information can be found in the pages linked
 there, including the
-"DebuggingHintsforReferenceClockDrivers"
+"Debugging Hints for Reference Clock Drivers"
 and
-"HowToWriteaReferenceClockDriver"
+"How To Write a Reference Clock Driver"
 pages
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 In addition, support for a PPS
 signal is available as described in the
-"Pulse-per-second(PPS)SignalInterfacing"
+"Pulse-per-second (PPS) Signal Interfacing"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 Many
 drivers support special line discipline/streams modules which can
 significantly improve the accuracy using the driver.
 These are
 described in the
-"LineDisciplinesandStreamsDrivers"
+"Line Disciplines and Streams Drivers"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 
 A reference clock will generally (though not always) be a radio
 timecode receiver which is synchronized to a source of standard
@@ -2133,9 +2098,9 @@ u
 .Sm
 on
 where
-@kbd{t} is an integer
+@code{t} is an integer
 denoting the clock type and
-@kbd{u} indicates the unit
+@code{u} indicates the unit
 number in the range 0-3.
 While it may seem overkill, it is in fact
 sometimes useful to configure multiple reference clocks of the same
@@ -2144,7 +2109,7 @@ type, in which case the unit numbers must be unique.
 The
 @code{server} command is used to configure a reference
 clock, where the
-@kbd{address} argument in that command
+@code{address} argument in that command
 is the clock address.
 The
 @code{key}, @code{version} and
@@ -2158,11 +2123,10 @@ persuade the server to cherish a reference clock with somewhat more
 enthusiasm than other reference clocks or peers.
 Further
 information on this option can be found in the
-"MitigationRulesandthepreferKeyword"
+"Mitigation Rules and the prefer Keyword"
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp})
-)
 page.
 The
 @code{minpoll} and
@@ -2177,7 +2141,7 @@ information for individual clock drivers and normally follows
 immediately after the
 @code{server} command.
 The
-@kbd{address} argument specifies the clock address.
+@code{address} argument specifies the clock address.
 The
 @code{refid} and
 @code{stratum} options can be used to
@@ -2225,9 +2189,9 @@ u
 .Sm
 on
 [@code{prefer} ]
-[@code{mode} @code{Ar} @code{int} ]
-[@code{minpoll} @code{Ar} @code{int} ]
-[@code{maxpoll} @code{Ar} @code{int} ]
+[@code{mode} @code{int} ]
+[@code{minpoll} @code{int} ]
+[@code{maxpoll} @code{int} ]
 This command can be used to configure reference clocks in
 special ways.
 The options are interpreted as follows:
@@ -2238,12 +2202,11 @@ All other things being
 equal, this host will be chosen for synchronization among a set of
 correctly operating hosts.
 See the
-"MitigationRulesandthepreferKeyword"
+"Mitigation Rules and the prefer Keyword"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp})
-)
 for further information.
 @item Cm
 Specifies a mode number which is interpreted in a
@@ -2281,15 +2244,15 @@ Ar
 u
 .Sm
 on
-[@code{time1} @code{Ar} @code{sec} ]
-[@code{time2} @code{Ar} @code{sec} ]
-[@code{stratum} @code{Ar} @code{int} ]
-[@code{refid} @code{Ar} @code{string} ]
-[@code{mode} @code{Ar} @code{int} ]
-[@code{flag1} @code{Cm} @code{0}\&| @code{Cm} @code{1} ]
-[@code{flag2} @code{Cm} @code{0}\&| @code{Cm} @code{1} ]
-[@code{flag3} @code{Cm} @code{0}\&| @code{Cm} @code{1} ]
-[@code{flag4} @code{Cm} @code{0}\&| @code{Cm} @code{1} ]
+[@code{time1} @code{sec} ]
+[@code{time2} @code{sec} ]
+[@code{stratum} @code{int} ]
+[@code{refid} @code{string} ]
+[@code{mode} @code{int} ]
+[@code{flag1} @code{Cm} @code{0} @code{\&|} @code{Cm} @code{1} ]
+[@code{flag2} @code{Cm} @code{0} @code{\&|} @code{Cm} @code{1} ]
+[@code{flag3} @code{Cm} @code{0} @code{\&|} @code{Cm} @code{1} ]
+[@code{flag4} @code{Cm} @code{0} @code{\&|} @code{Cm} @code{1} ]
 This command can be used to configure reference clocks in
 special ways.
 It must immediately follow the
@@ -2325,25 +2288,21 @@ It takes the form of an argument to the
 @ref{Miscellaneous}Miscellaneous
 Options
 page and operates as described in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 @item Cm
 Specifies a fixed-point decimal number in seconds, which is
 interpreted in a driver-dependent way.
 See the descriptions of
 specific drivers in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 @item Cm
 Specifies the stratum number assigned to the driver, an integer
 between 0 and 15.
@@ -2488,11 +2447,10 @@ this flag is
 Enables the pulse-per-second (PPS) signal when frequency and time is
 disciplined by the precision time kernel modifications.
 See the
-"AKernelModelforPrecisionTimekeeping"
+"A Kernel Model for Precision Timekeeping"
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp})
-)
 page for further information.
 The default for this flag is
 @code{disable}. @item Cm
@@ -2531,11 +2489,11 @@ facility or the alternate
 @code{logfile} log file.
 By default, all output is turned on.
 All
-@kbd{configkeyword} keywords can be prefixed with
-@quoteleft{}=,@quoteright{}
+@code{configkeyword} keywords can be prefixed with
+@quoteleft{}= ,@quoteright{}
 @quoteleft{}+@quoteright{}
 and
-@quoteleft{}-,@quoteright{}
+@quoteleft{}- ,@quoteright{}
 where
 @quoteleft{}=@quoteright{}
 sets the
@@ -2667,7 +2625,7 @@ Xo
 Ic
 tinker
 .Oo
-@code{allan} @code{Ar} @code{allan} | @code{dispersion} @code{Ar} @code{dispersion} | @code{freq} @code{Ar} @code{freq} | @code{huffpuff} @code{Ar} @code{huffpuff} | @code{panic} @code{Ar} @code{panic} | @code{step} @code{Ar} @code{srep} | @code{stepout} @code{Ar} @code{stepout} .Oc
+@code{allan} @code{allan} | @code{dispersion} @code{dispersion} | @code{freq} @code{freq} | @code{huffpuff} @code{huffpuff} | @code{panic} @code{panic} | @code{step} @code{srep} | @code{stepout} @code{stepout} .Oc
 This command can be used to alter several system variables in
 very exceptional circumstances.
 It should occur in the
@@ -2738,8 +2696,8 @@ Ic
 trap
 Ar
 host_address
-[@code{port} @code{Ar} @code{port_number} ]
-[@code{interface} @code{Ar} @code{interface_address} ]
+[@code{port} @code{port_number} ]
+[@code{interface} @code{interface_address} ]
 This command configures a trap receiver at the given host
 address and port number for sending messages with the specified
 local interface address.

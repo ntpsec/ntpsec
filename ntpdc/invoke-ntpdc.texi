@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  December 22, 2012 at 11:53:15 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 25, 2012 at 11:34:55 AM by AutoGen 5.16.2
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -69,7 +69,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p337
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p338
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -412,7 +412,7 @@ uniquely identify the command need be typed.
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-@quoteleft{}\&>,@quoteright{}
+@quoteleft{}\&> ,@quoteright{}
 followed by a file name, to the command line.
 
 A number of interactive format commands are executed entirely
@@ -426,12 +426,12 @@ following.
 @item Ic
 @item Ic
 A
-@quoteleft{}Ic\&?@quoteright{}
+@quoteleft{}Ic \&?@quoteright{}
 will print a list of all the command
 keywords known to this incarnation of
 @code{ntpdc}.
 A
-@quoteleft{}Ic\&?@quoteright{}
+@quoteleft{}Ic \&?@quoteright{}
 followed by a command keyword will print function and usage
 information about the command.
 This command is probably a better
@@ -541,11 +541,7 @@ The contents of the host field may be one of four forms.
 It may
 be a host name, an IP address, a reference clock implementation
 name with its parameter or
-.Fn
-REFCLK
-"implementation_number"
-"parameter"
-.
+@code{REFCLK}(@emph{implementation_number}@code{, }@emph{parameter}).
 On
 @code{hostnames} @code{no} only IP-addresses
 will be displayed.
@@ -604,7 +600,7 @@ controls the stiffness of the
 phase-lock loop and thus the speed at which it can adapt to
 oscillator drift.
 The
-@quoteleft{}watchdogtimer@quoteright{}
+@quoteleft{}watchdog timer@quoteright{}
 value is the number
 of seconds which have elapsed since the last sample offset was
 given to the loop filter.
@@ -621,7 +617,7 @@ All except the last four lines are described
 in the NTP Version 3 specification, RFC-1305.
 
 The
-@quoteleft{}systemflags@quoteright{}
+@quoteleft{}system flags@quoteright{}
 show various system flags, some of
 which can be set and cleared by the
 @code{enable} and
@@ -753,8 +749,8 @@ adequate level of security.
 The following commands all make authenticated requests.
 @table @samp
 @item Xo
-[@kbd{keyid} ]
-[@kbd{version} ]
+[@code{keyid} ]
+[@code{version} ]
 [@code{prefer} ]
 Add a configured peer association at the given address and
 operating in symmetric active mode.
@@ -763,13 +759,13 @@ association with the same peer may be deleted when this command is
 executed, or may simply be converted to conform to the new
 configuration, as appropriate.
 If the optional
-@kbd{keyid} is a
+@code{keyid} is a
 nonzero integer, all outgoing packets to the remote server will
 have an authentication field attached encrypted with this key.
 If
 the value is 0 (or not given) no authentication will be done.
 The
-@kbd{version} can be 1, 2 or 3 and defaults to 3.
+@code{version} can be 1, 2 or 3 and defaults to 3.
 The
 @code{prefer} keyword indicates a preferred peer (and thus will
 be used primarily for clock synchronisation if possible).
@@ -778,21 +774,21 @@ preferred peer also determines the validity of the PPS signal - if
 the preferred peer is suitable for synchronisation so is the PPS
 signal.
 @item Xo
-[@kbd{keyid} ]
-[@kbd{version} ]
+[@code{keyid} ]
+[@code{version} ]
 [@code{prefer} ]
 Identical to the addpeer command, except that the operating
 mode is client.
 @item Xo
-[@kbd{keyid} ]
-[@kbd{version} ]
+[@code{keyid} ]
+[@code{version} ]
 [@code{prefer} ]
 Identical to the addpeer command, except that the operating
 mode is broadcast.
 In this case a valid key identifier and key are
 required.
 The
-@kbd{peer_address} parameter can be the broadcast
+@code{peer_address} parameter can be the broadcast
 address of the local network or a multicast group address assigned
 to NTP.
 If a multicast address, a multicast-capable kernel is
@@ -808,8 +804,8 @@ is willing to continue on in this fashion.
 @item Xo
 [@code{time1} ]
 [@code{time2} ]
-[@kbd{stratum} ]
-[@kbd{refid} ]
+[@code{stratum} ]
+[@code{refid} ]
 This command provides a way to set certain data for a reference
 clock.
 See the source listing for further information.
@@ -855,11 +851,10 @@ The default for this flag is enable.
 Enables the pulse-per-second (PPS) signal when frequency
 and time is disciplined by the precision time kernel modifications.
 See the
-"AKernelModelforPrecisionTimekeeping"
+"A Kernel Model for Precision Timekeeping"
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp})
-)
 page for further information.
 The default for this flag is disable.
 @item Cm
@@ -881,7 +876,7 @@ Ar
 address
 Ar
 mask
-@kbd{flag} @kbd{Oo} @kbd{Ar}... @kbd{Oc} This command operates in the same way as the
+@code{flag} @code{Oo} @code{...} @code{Oc} This command operates in the same way as the
 @code{restrict} configuration file commands of
 @code{ntpd(8)}.
 .It
@@ -892,7 +887,7 @@ Ar
 address
 Ar
 mask
-@kbd{flag} @kbd{Oo} @kbd{Ar}... @kbd{Oc} Unrestrict the matching entry from the restrict list.
+@code{flag} @code{Oo} @code{...} @code{Oc} Unrestrict the matching entry from the restrict list.
 .It
 Xo
 Ic
@@ -955,8 +950,8 @@ Ic
 addtrap
 Ar
 address
-[@kbd{port} ]
-[@kbd{interface} ]
+[@code{port} ]
+[@code{interface} ]
 Set a trap for asynchronous messages.
 See the source listing
 for further information.
@@ -966,8 +961,8 @@ Ic
 clrtrap
 Ar
 address
-[@kbd{port} ]
-[@kbd{interface} ]
+[@code{port} ]
+[@code{interface} ]
 Clear a trap for asynchronous messages.
 See the source listing
 for further information.

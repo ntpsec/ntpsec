@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 # 
-# It has been AutoGen-ed  December 24, 2012 at 08:22:53 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 25, 2012 at 11:35:11 AM by AutoGen 5.16.2
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -108,11 +108,11 @@ source of information about
 than this manual
 page.
 @item Ic
-... @item Ic
+@code{...} @item Ic
 @item Ic
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
-@quoteleft{}variable_name=value,@quoteright{}
+@quoteleft{}variable_name=value ,@quoteright{}
 where the
 @quoteleft{}=value@quoteright{}
 is ignored, and can be omitted,
@@ -139,7 +139,7 @@ Normally
 does not authenticate requests unless
 they are write requests.
 The command
-@quoteleft{}authenticateyes@quoteright{}
+@quoteleft{}authenticate yes@quoteright{}
 causes
 @code{ntpq}
 to send authentication with all requests it
@@ -165,7 +165,7 @@ Variables which
 @code{ntpq}
 thinks should have a decodable value but didn't are
 marked with a trailing
-@quoteleft{}\&?.@quoteright{}
+@quoteleft{}\&? .@quoteright{}
 @item Xo
 @code{debug} .Oo
 @code{more} | @code{less} | @code{off} .Oc
@@ -182,7 +182,7 @@ server does not now require timestamps in authenticated requests,
 so this command may be obsolete.
 @item Ic
 Set the host to which future queries will be sent.
-@kbd{hostname} may be either a host name or a numeric address.
+@code{hostname} may be either a host name or a numeric address.
 @item Ic
 If
 @code{yes} is specified, host names are printed in
@@ -272,7 +272,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p337
+ntpq - standard NTP query program - Ver. 4.2.7p338
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

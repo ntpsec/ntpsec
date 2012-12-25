@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 # 
-# It has been AutoGen-ed  December 22, 2012 at 11:52:48 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 25, 2012 at 11:34:26 AM by AutoGen 5.16.2
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -140,7 +140,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p337
+ntpd - NTP daemon program - Ver. 4.2.7p338
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -824,7 +824,7 @@ is to quickly correct the frequency and restore operation to the
 normal tracking mode.
 In the most extreme cases
 (the host
-time.ien.it comes to mind), there may be occasional
+@code{time.ien.it} comes to mind), there may be occasional
 step/slew corrections and subsequent frequency corrections.
 It
 helps in these cases to use the
@@ -893,7 +893,6 @@ The
 behavior at startup depends on whether the
 frequency file, usually
 @file{ntp.drift},
-,
 exists.
 This file
 contains the latest estimate of clock frequency error.
@@ -928,13 +927,11 @@ The
 utility can operate in any of several modes, including
 symmetric active/passive, client/server broadcast/multicast and
 manycast, as described in the
-"AssociationManagement"
+"Association Management"
 page
 (available as part of the HTML documentation
 provided in
 @file{/usr/share/doc/ntp}).
-)
-.
 It normally operates continuously while
 monitoring for small changes in frequency and trimming the clock
 for the ultimate precision.
@@ -1129,7 +1126,6 @@ http://www.ntp.org/
 .
 A snapshot of this documentation is available in HTML format in
 @file{/usr/share/doc/ntp}.
-.
 .Rs
 .%A
 David

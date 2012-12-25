@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.keys.texi)
 # 
-# It has been AutoGen-ed  December 22, 2012 at 11:52:41 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 25, 2012 at 11:34:16 AM by AutoGen 5.16.2
 # From the definitions    ntp.keys.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -15,7 +15,7 @@
 
 This document describes the format of an NTP symmetric key file.
 For a description of the use of this type of file, see the
-"AuthenticationSupport"
+"Authentication Support"
 section of the
 @code{ntp.conf(5)}
 page.
@@ -41,17 +41,17 @@ type
 key
 
 where
-@kbd{keyno} is a positive integer (between 1 and 65534),
-@kbd{type} is the message digest algorithm,
+@code{keyno} is a positive integer (between 1 and 65534),
+@code{type} is the message digest algorithm,
 and
-@kbd{key} is the key itself.
+@code{key} is the key itself.
 
 The
-@kbd{key} may be given in a format
+@code{key} may be given in a format
 controlled by the
-@kbd{type} field.
+@code{type} field.
 The
-@kbd{type} .Li
+@code{type} .Li
 MD5
 is always supported.
 If
@@ -60,7 +60,7 @@ ntpd
 was built with the OpenSSL library
 then any digest library supported by that library may be specified.
 However, if compliance with FIPS 140-2 is required the
-@kbd{type} must be either
+@code{type} must be either
 .Li
 SHA
 or
