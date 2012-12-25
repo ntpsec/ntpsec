@@ -38,7 +38,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p337 of <code>ntpdc</code>.
+  <p>This document applies to version 4.2.7p338 of <code>ntpdc</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -150,7 +150,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <samp><span class="file">more</span></samp>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p337
+<pre class="example">ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p338
 USAGE:  ntpdc [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -552,7 +552,7 @@ uniquely identify the command need be typed.
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-&lsquo;\&amp;&gt;,&rsquo;
+\&amp;&gt; ,
 followed by a file name, to the command line.
 
   <p>A number of interactive format commands are executed entirely
@@ -563,13 +563,13 @@ mode 7 requests being sent to a server.
 These are described
 following.
      <dl>
-<dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<br><dt>&lsquo;<samp><span class="samp">Ic</span></samp>&rsquo;<dd>A
-&lsquo;Ic\&amp;?&rsquo;
+<dt><span class="samp">Ic</span><br><dt><span class="samp">Ic</span><dd>A
+Ic \&amp;? 
 will print a list of all the command
 keywords known to this incarnation of
 <code>ntpdc</code>. 
 A
-&lsquo;Ic\&amp;?&rsquo;
+Ic \&amp;? 
 followed by a command keyword will print function and usage
 information about the command. 
 This command is probably a better
