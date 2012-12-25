@@ -239,6 +239,12 @@ sub Handle_El
             $retval .= "\@end enumerate\n";
             print $retval;
         }
+        elsif ($optlist == 3)
+        {
+            $oldoptlist = 0;
+            $retval .= "\@end table\n";
+            print $retval;
+        }
         elsif ($optlist = 4)
         {
             $count = 0;
@@ -249,6 +255,10 @@ sub Handle_El
             $retval .= "\n\@end multitable\n";
             print $retval;
         }
+	else
+	{
+	    die "optlist <$optlist> was not expected.";
+	}
         $optlist = 0;
     }
 }
@@ -321,7 +331,7 @@ sub Handle_ArCmFlIc
             print " " if $didOne && $spacing;
             print '@code{';
             print $dash if ($dash ne "");	# Do we need this?
-	    ParseQuote(\@words);
+	    parseQuote(\@words);
 	    print $words[0];
             print '}';
 	}
@@ -386,7 +396,7 @@ sub Handle_Fn
 	if ($words[0] =~ /^"/) {
 	    # assert $isOpen == 1
 	    print '@code{, }' if ($didArg);
-	    ParseQuote(\@words);
+	    parseQuote(\@words);
 	    print '@emph{', $words[0], "}";
 	    $didArg = 1;
 	} else {
@@ -530,12 +540,12 @@ sub Handle_Q
     elsif (/^Sq$/)	{ $lq = '@quoteleft{}'; $rq = '@quoteright{}'; }
 
     print "$lq";
-    do {
+    while (@words > 0 && $words[0] !~ /^[[:punct:]]$/) {
 	# print STDERR "Handle_Q: <$words[0]>\n";	# XXX
 	print " " if ($wc);
 	print shift @words;
 	++$wc;
-    } while (@words > 0 || $words[0] =~ /^[[:punct:]]$/);
+    }
     print "$rq";
     print join('', @words)	if (@words > 0);
     print "\n";
@@ -554,7 +564,7 @@ sub Handle_Sec
 
     $sh =~ /Sh/;
 
-    ParseQuote(\@words) if ($words[0] =~ /^"/);
+    parseQuote(\@words) if ($words[0] =~ /^"/);
 
     $a = $words[0];
 
@@ -574,7 +584,7 @@ sub Handle_Sx
 
     my ($a);
 
-    ParseQuote(\@words) if ($words[0] =~ /^"/);
+    parseQuote(\@words) if ($words[0] =~ /^"/);
 
     $a = $words[0];
 
@@ -653,7 +663,7 @@ sub Handle_Xr
     print "\n";
 }
 
-sub ParseQuote # ref to array of words
+sub parseQuote # ref to array of words
 {
     my ($waref) = @_;	# word array reference
     my ($string);

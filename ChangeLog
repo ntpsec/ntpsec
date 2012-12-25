@@ -1,3 +1,4 @@
+* mdoc2texi fixes: parseQuote, closing of list item tables.
 * ntp-wait, ntpd, ntpdc, ntpq, ntpsnmpd autogen documentation updates.
 * mdoc2texi fixes: Handle_ArCmFlIc, Handle_Fn, HandleQ.
 * ntp-keygen autogen documentation updates.
