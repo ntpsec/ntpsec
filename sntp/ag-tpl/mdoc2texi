@@ -259,7 +259,6 @@ sub Handle_Em
     #	.Em word		<italic>word</italic>
     #	.Em or Ap ing		<italic>or</italic>'ing
     #
-    my ($pa_path);
 
     print '@emph{';
     do {
@@ -298,19 +297,27 @@ sub Handle_ArCmFlIc
     $spacing = 1;
 
     do {
-        if ($words[0] eq '' || $words[0] =~ /^[-\w]+$/)
-        {
-            print " " if $didOne && $spacing;
-            print "$font", $dash, $words[0], '}';
-        }
+#print STDERR "Handle_ArCmFlIc: top of loop, seeing <$words[0]>\n";	# XXX
+
+        if (0)
+	{
+	}
         elsif ($words[0] eq '|')
         {
+#print STDERR "Handle_ArCmFlIc: |\n";	# XXX
             print " " if $didOne && $spacing;
             print '@code{', $dash, '} ' if ($dash ne "");
             print "$words[0]";
         }
+        elsif ($words[0] eq '-')
+        {
+#print STDERR "Handle_ArCmFlIc: -\n";	# XXX
+            print " " if $didOne && $spacing;
+            print '@code{', $dash, $words[0], '}';
+        }
 	elsif ($words[0] =~ /^"/)
 	{
+#print STDERR "Handle_ArCmFlIc: Quoted string...\n";	# XXX
             print " " if $didOne && $spacing;
             print '@code{';
             print $dash if ($dash ne "");	# Do we need this?
@@ -320,28 +327,76 @@ sub Handle_ArCmFlIc
 	}
         elsif ($words[0] eq 'Ar')		# Argument
         {
+#print STDERR "Handle_ArCmFlIc: Ar\n";	# XXX
             $font = '@kbd{';			# slanted tty 
         }
         elsif ($words[0] eq 'Ic')		# Interactive/internal command
         {
+#print STDERR "Handle_ArCmFlIc: Ic\n";	# XXX
             $font = '@code{';
         }
         elsif ($words[0] eq 'Xc')
         {
+#print STDERR "Handle_ArCmFlIc: Xc\n";	# XXX
             $spacing = 1;
         }
         elsif ($words[0] eq 'Xo')
         {
+#print STDERR "Handle_ArCmFlIc: Xo\n";	# XXX
             $spacing = 0;
         }
-        else
+	elsif ($words[0] =~ /^[[:punct:]]$/)
         {
-            print "$words[0]";
+#print STDERR 'Handle_ArCmFlIc: punctuation',"\n";	# XXX
+            # print " " if $didOne && $spacing;
+            print $words[0];
+        }
+        else		# Should be empty or a word
+        {
+#print STDERR "Handle_ArCmFlIc: emitting <$words[0]>\n";	# XXX
+            print " " if $didOne && $spacing;
+            print '@code{';
+            print $dash if ($dash ne "");	# Do we need this?
+	    print $words[0];
+            print '}';
         }
         shift @words;
         $didOne = 1;
     } while scalar(@words);
+#print STDERR "Handle_ArCmFlIc: done\n";	# XXX
     print " ";
+}
+
+sub Handle_Fn
+{
+    # Usage: .Fn <function> [<parameter>] ...
+    #	.Fn getchar		<code>getchar</code>()
+    #	.Fn strlen ) ,		<code>strlen</code>()),
+    #	.Fn align "char *pt" ,	<code>align</code(<slant>char *pt<slant>),
+    #
+    my ($didArg, $isOpen);
+
+    print '@code{', $words[0], "}(";
+    $isOpen = 1;
+    shift;
+
+    $didArg = 0;
+    while ($_ = shift @words)
+    {
+	if ($words[0] =~ /^"/) {
+	    # assert $isOpen == 1
+	    print '@code{, }' if ($didArg);
+	    ParseQuote(\@words);
+	    print '@emph{', $words[0], "}";
+	    $didArg = 1;
+	} else {
+	    print ")" if ($isOpen);
+	    $isOpen = 0;
+	    print $words[0];
+	}
+    }
+
+    print "\n";
 }
 
 sub Handle_Nm
@@ -436,7 +491,9 @@ sub Handle_Pa
     }
 
     print '@file{',"$pa_path","}";
-    print join('', @words)	if (@words > 0);
+    while ($_ = shift @words) {
+	print;
+    }
     print "\n";
 }
 
@@ -454,7 +511,8 @@ sub Handle_Q
     #	.Sq ...			Single quote: <lq>...<rq>
     #
 
-    my ($lq,$rq);
+    my ($lq, $rq, $wc);
+    $wc = 0;
 
     # print STDERR "Handle_Q: <", join(' ', @words), ">\n";	# XXX
 
@@ -474,7 +532,9 @@ sub Handle_Q
     print "$lq";
     do {
 	# print STDERR "Handle_Q: <$words[0]>\n";	# XXX
+	print " " if ($wc);
 	print shift @words;
+	++$wc;
     } while (@words > 0 || $words[0] =~ /^[[:punct:]]$/);
     print "$rq";
     print join('', @words)	if (@words > 0);
@@ -635,6 +695,7 @@ sub ParseMacro #line
         elsif (/^\.Em$/)                { Handle_Em(); }
         elsif (/^\.Eq/)                 { Handle_Q(); }
         elsif (/^\.Fl$/)                { Handle_ArCmFlIc(); }
+        elsif (/^\.Fn$/)                { Handle_Fn(); }
         elsif (/^\.Ic$/)                { Handle_ArCmFlIc(); }
         elsif ($optlist && /^\.It$/)    { last if (Handle_It()); }
         elsif (/^\.Nm$/)		{ Handle_Nm(); }

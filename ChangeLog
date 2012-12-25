@@ -1,3 +1,4 @@
+* mdoc2texi fixes: Handle_ArCmFlIc, Handle_Fn, HandleQ.
 * ntp-keygen autogen documentation updates.
 * ntpq autogen docs.
 (4.2.7p337) 2012/12/22 Released by Harlan Stenn <stenn@ntp.org>
