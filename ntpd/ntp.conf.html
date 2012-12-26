@@ -33,7 +33,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <p>This document describes the configuration file for the NTP Project's
 <code>ntpd</code> program.
 
-  <p>This document applies to version 4.2.7p338 of <code>ntp.conf</code>.
+  <p>This document applies to version 4.2.7p339 of <code>ntp.conf</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntp_002econf-Description">ntp.conf Description</a>
@@ -94,12 +94,11 @@ and text strings.
 
   <p>The rest of this page describes the configuration and control options. 
 The
-"NotesonConfiguringNTPandSettingupaNTPSubnet"
+"Notes on Configuring NTP and Setting up a NTP Subnet"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>)
-)
 contains an extended discussion of these options. 
 In addition to the discussion of general
 <a href="#Configuration">Configuration</a>Configuration
@@ -198,47 +197,45 @@ equivalent classes for that address family.
      <dl>
 <dt><span class="samp">Xo</span><dd>[<code>burst</code> ]
 [<code>iburst</code> ]
-[<code>version</code> <code>Ar</code> <code>version</code> ]
+[<code>version</code> <code>version</code> ]
 [<code>prefer</code> ]
-[<code>minpoll</code> <code>Ar</code> <code>minpoll</code> ]
-[<code>maxpoll</code> <code>Ar</code> <code>maxpoll</code> ]
-<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>Ar</code> <code>key</code>\&amp;| <code>Cm</code> <code>autokey</code> ]
+[<code>minpoll</code> <code>minpoll</code> ]
+[<code>maxpoll</code> <code>maxpoll</code> ]
+<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>key</code> <code>\&amp;|</code> <code>Cm</code> <code>autokey</code> ]
 [<code>burst</code> ]
 [<code>iburst</code> ]
-[<code>version</code> <code>Ar</code> <code>version</code> ]
+[<code>version</code> <code>version</code> ]
 [<code>prefer</code> ]
-[<code>minpoll</code> <code>Ar</code> <code>minpoll</code> ]
-[<code>maxpoll</code> <code>Ar</code> <code>maxpoll</code> ]
-<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>Ar</code> <code>key</code>\&amp;| <code>Cm</code> <code>autokey</code> ]
-[<code>version</code> <code>Ar</code> <code>version</code> ]
+[<code>minpoll</code> <code>minpoll</code> ]
+[<code>maxpoll</code> <code>maxpoll</code> ]
+<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>key</code> <code>\&amp;|</code> <code>Cm</code> <code>autokey</code> ]
+[<code>version</code> <code>version</code> ]
 [<code>prefer</code> ]
-[<code>minpoll</code> <code>Ar</code> <code>minpoll</code> ]
-[<code>maxpoll</code> <code>Ar</code> <code>maxpoll</code> ]
-<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>Ar</code> <code>key</code>\&amp;| <code>Cm</code> <code>autokey</code> ]
-[<code>version</code> <code>Ar</code> <code>version</code> ]
+[<code>minpoll</code> <code>minpoll</code> ]
+[<code>maxpoll</code> <code>maxpoll</code> ]
+<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>key</code> <code>\&amp;|</code> <code>Cm</code> <code>autokey</code> ]
+[<code>version</code> <code>version</code> ]
 [<code>prefer</code> ]
-[<code>minpoll</code> <code>Ar</code> <code>minpoll</code> ]
-[<code>ttl</code> <code>Ar</code> <code>ttl</code> ]
-<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>Ar</code> <code>key</code>\&amp;| <code>Cm</code> <code>autokey</code> ]
-[<code>version</code> <code>Ar</code> <code>version</code> ]
+[<code>minpoll</code> <code>minpoll</code> ]
+[<code>ttl</code> <code>ttl</code> ]
+<br><dt><span class="samp">Xo</span><dd>[<code>key</code> <code>key</code> <code>\&amp;|</code> <code>Cm</code> <code>autokey</code> ]
+[<code>version</code> <code>version</code> ]
 [<code>prefer</code> ]
-[<code>minpoll</code> <code>Ar</code> <code>minpoll</code> ]
-[<code>maxpoll</code> <code>Ar</code> <code>maxpoll</code> ]
-[<code>ttl</code> <code>Ar</code> <code>ttl</code> ]
+[<code>minpoll</code> <code>minpoll</code> ]
+[<code>maxpoll</code> <code>maxpoll</code> ]
+[<code>ttl</code> <code>ttl</code> ]
 
      <p>These five commands specify the time server name or address to
 be used and the mode in which to operate. 
 The
-<kbd>address</kbd> can be
+<code>address</code> can be
 either a DNS name or an IP address in dotted-quad notation. 
 Additional information on association behavior can be found in the
-"AssociationManagement"
+"Association Management"
 page
 (available as part of the HTML documentation
 provided in
-<span class="file">/usr/share/doc/ntp</span>). 
-)
-.
+<span class="file">/usr/share/doc/ntp</span>).
           <dl>
 <dt><span class="samp">Ic</span><dd>For type s addresses, this command mobilizes a persistent
 client mode association with a number of remote servers. 
@@ -276,7 +273,7 @@ broadcast messages go only to the interface associated with the
 subnet specified, but multicast messages go to all interfaces. 
 In broadcast mode the local server sends periodic broadcast
 messages to a client population at the
-<kbd>address</kbd> specified, which is usually the broadcast address on (one of) the
+<code>address</code> specified, which is usually the broadcast address on (one of) the
 local network(s) or a multicast address assigned to NTP. 
 The IANA
 has assigned the multicast group address IPv4 224.0.1.1 and
@@ -308,7 +305,7 @@ discovered as the result of broadcast/multicast messages.
 The
 client broadcasts a request message to the group address associated
 with the specified
-<kbd>address</kbd> and specifically enabled
+<code>address</code> and specifically enabled
 servers respond to these messages. 
 The client selects the servers
 providing the best time and continues as with the
@@ -347,7 +344,7 @@ is started with the
 <code>-q</code> option. 
 <br><dt><span class="samp">Cm</span><dd>All packets sent to and received from the server or peer are to
 include authentication fields encrypted using the specified
-<kbd>key</kbd> identifier with values from 1 to 65534, inclusive. 
+<code>key</code> identifier with values from 1 to 65534, inclusive. 
 The
 default is to include no encryption field. 
 <br><dt><span class="samp">Cm</span><br><dt><span class="samp">Cm</span><dd>These options specify the minimum and maximum poll intervals
@@ -366,19 +363,18 @@ All other things being equal,
 this host will be chosen for synchronization among a set of
 correctly operating hosts. 
 See the
-"MitigationRulesandthepreferKeyword"
+"Mitigation Rules and the prefer Keyword"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>)
-)
 for further information. 
 <br><dt><span class="samp">Cm</span><dd>This option is used only with broadcast server and manycast
 client modes. 
 It specifies the time-to-live
-<kbd>ttl</kbd> to
+<code>ttl</code> to
 use on broadcast server and multicast server and the maximum
-<kbd>ttl</kbd> for the expanding ring search with manycast
+<code>ttl</code> for the expanding ring search with manycast
 client packets. 
 Selection of the proper value, which defaults to
 127, is something of a black art and should be coordinated with the
@@ -601,7 +597,6 @@ Keys and
 related information are specified in a key
 file, usually called
 <span class="file">ntp.keys</span>,
-,
 which must be distributed and stored using
 secure means beyond the scope of the NTP protocol itself. 
 Besides the keys used
@@ -905,19 +900,19 @@ sent.
 utility, which uses the standard
 protocol defined in RFC-1305. 
 The
-<kbd>key</kbd> argument is
+<code>key</code> argument is
 the key identifier for a trusted key, where the value can be in the
 range 1 to 65,534, inclusive. 
-<br><dt><span class="samp">Xo</span><dd>[<code>cert</code> <code>Ar</code> <code>file</code> ]
-[<code>leap</code> <code>Ar</code> <code>file</code> ]
-[<code>randfile</code> <code>Ar</code> <code>file</code> ]
-[<code>host</code> <code>Ar</code> <code>file</code> ]
-[<code>sign</code> <code>Ar</code> <code>file</code> ]
-[<code>gq</code> <code>Ar</code> <code>file</code> ]
-[<code>gqpar</code> <code>Ar</code> <code>file</code> ]
-[<code>iffpar</code> <code>Ar</code> <code>file</code> ]
-[<code>mvpar</code> <code>Ar</code> <code>file</code> ]
-[<code>pw</code> <code>Ar</code> <code>password</code> ]
+<br><dt><span class="samp">Xo</span><dd>[<code>cert</code> <code>file</code> ]
+[<code>leap</code> <code>file</code> ]
+[<code>randfile</code> <code>file</code> ]
+[<code>host</code> <code>file</code> ]
+[<code>sign</code> <code>file</code> ]
+[<code>gq</code> <code>file</code> ]
+[<code>gqpar</code> <code>file</code> ]
+[<code>iffpar</code> <code>file</code> ]
+[<code>mvpar</code> <code>file</code> ]
+[<code>pw</code> <code>password</code> ]
 This command requires the OpenSSL library. 
 It activates public key
 cryptography, selects the message digest and signature
@@ -930,38 +925,25 @@ location of a file is relative to the keys directory specified
 in the
 <code>keysdir</code> command or default
 <span class="file">/usr/local/etc</span>. 
-. 
 Following are the subcommands:
                               <dl>
 <dt><span class="samp">Cm</span><dd>Specifies the location of the required host public certificate file. 
 This overrides the link
 <span class="file">ntpkey_cert_</span>NsArhostname
-Ns
-Ar
-hostname
 in the keys directory. 
 <br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional GQ parameters file. 
 This
 overrides the link
 <span class="file">ntpkey_gq_</span>NsArhostname
-Ns
-Ar
-hostname
 in the keys directory. 
 <br><dt><span class="samp">Cm</span><dd>Specifies the location of the required host key file. 
 This overrides
 the link
 <span class="file">ntpkey_key_</span>NsArhostname
-Ns
-Ar
-hostname
 in the keys directory. 
 <br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional IFF parameters file.This
 overrides the link
 <span class="file">ntpkey_iff_</span>NsArhostname
-Ns
-Ar
-hostname
 in the keys directory. 
 <br><dt><span class="samp">Cm</span><dd>Specifies the location of the optional leapsecond file. 
 This overrides the link
@@ -971,9 +953,6 @@ in the keys directory.
 This
 overrides the link
 <span class="file">ntpkey_mv_</span>NsArhostname
-Ns
-Ar
-hostname
 in the keys directory. 
 <br><dt><span class="samp">Cm</span><dd>Specifies the password to decrypt files containing private keys and
 identity parameters. 
@@ -986,9 +965,6 @@ The defaults are described in the main text above.
 This overrides
 the link
 <span class="file">ntpkey_sign_</span>NsArhostname
-Ns
-Ar
-hostname
 in the keys directory. 
 If this file is
 not found, the host key is also the sign key.
@@ -1016,7 +992,6 @@ This command specifies the default directory path for
 cryptographic keys, parameters and certificates. 
 The default is
 <span class="file">/usr/local/etc/</span>. 
-. 
 .It
 Ic
 requestkey
@@ -1028,7 +1003,7 @@ utility program, which uses a
 proprietary protocol specific to this implementation of
 <code>ntpd(1ntpdmdoc)</code>. 
 The
-<kbd>key</kbd> argument is a key identifier
+<code>key</code> argument is a key identifier
 for the trusted key, where the value can be in the range 1 to
 65,534, inclusive. 
 .It
@@ -1064,7 +1039,7 @@ and remote servers share the same key and key identifier for this
 purpose, although different keys can be used with different
 servers. 
 The
-<kbd>key</kbd> arguments are 32-bit unsigned
+<code>key</code> arguments are 32-bit unsigned
 integers with values from 1 to 65,534.
 
 <div class="node">
@@ -1080,38 +1055,38 @@ Codes
 The following error codes are reported via the NTP control
 and monitoring protocol trap mechanism.
                                    <dl>
-<dt><span class="samp">101</span><dd>(badfieldformatorlength)
+<dt><span class="samp">101</span><dd>(bad field format or length)
 The packet has invalid version, length or format. 
-<br><dt><span class="samp">102</span><dd>(badtimestamp)
+<br><dt><span class="samp">102</span><dd>(bad timestamp)
 The packet timestamp is the same or older than the most recent received. 
 This could be due to a replay or a server clock time step. 
-<br><dt><span class="samp">103</span><dd>(badfilestamp)
+<br><dt><span class="samp">103</span><dd>(bad filestamp)
 The packet filestamp is the same or older than the most recent received. 
 This could be due to a replay or a key file generation error. 
-<br><dt><span class="samp">104</span><dd>(badormissingpublickey)
+<br><dt><span class="samp">104</span><dd>(bad or missing public key)
 The public key is missing, has incorrect format or is an unsupported type. 
-<br><dt><span class="samp">105</span><dd>(unsupporteddigesttype)
+<br><dt><span class="samp">105</span><dd>(unsupported digest type)
 The server requires an unsupported digest/signature scheme. 
-<br><dt><span class="samp">106</span><dd>(mismatcheddigesttypes)
+<br><dt><span class="samp">106</span><dd>(mismatched digest types)
 Not used. 
-<br><dt><span class="samp">107</span><dd>(badsignaturelength)
+<br><dt><span class="samp">107</span><dd>(bad signature length)
 The signature length does not match the current public key. 
-<br><dt><span class="samp">108</span><dd>(signaturenotverified)
+<br><dt><span class="samp">108</span><dd>(signature not verified)
 The message fails the signature check. 
 It could be bogus or signed by a
 different private key. 
-<br><dt><span class="samp">109</span><dd>(certificatenotverified)
+<br><dt><span class="samp">109</span><dd>(certificate not verified)
 The certificate is invalid or signed with the wrong key. 
-<br><dt><span class="samp">110</span><dd>(certificatenotverified)
+<br><dt><span class="samp">110</span><dd>(certificate not verified)
 The certificate is not yet valid or has expired or the signature could not
 be verified. 
-<br><dt><span class="samp">111</span><dd>(badormissingcookie)
+<br><dt><span class="samp">111</span><dd>(bad or missing cookie)
 The cookie is missing, corrupted or bogus. 
-<br><dt><span class="samp">112</span><dd>(badormissingleapsecondstable)
+<br><dt><span class="samp">112</span><dd>(bad or missing leapseconds table)
 The leapseconds table is missing, corrupted or bogus. 
-<br><dt><span class="samp">113</span><dd>(badormissingcertificate)
+<br><dt><span class="samp">113</span><dd>(bad or missing certificate)
 The certificate is missing, corrupted or bogus. 
-<br><dt><span class="samp">114</span><dd>(badormissingidentity)
+<br><dt><span class="samp">114</span><dd>(bad or missing identity)
 The identity key is missing, corrupt or bogus.
 
 <div class="node">
@@ -1155,7 +1130,7 @@ Commands
                                         <dl>
 <dt><span class="samp">Ic</span><dd>Enables writing of statistics records. 
 Currently, four kinds of
-<kbd>name</kbd> statistics are supported.
+<code>name</code> statistics are supported.
                                              <dl>
 <dt><span class="samp">Cm</span><dd>Enables recording of clock driver statistics information. 
 Each update
@@ -1297,8 +1272,8 @@ filegen
 Ar
 name
 Xo
-[<code>file</code> <code>Ar</code> <code>filename</code> ]
-[<code>type</code> <code>Ar</code> <code>typename</code> ]
+[<code>file</code> <code>filename</code> ]
+[<code>type</code> <code>typename</code> ]
 [<code>link</code> | <code>nolink</code> ]
 [<code>enable</code> | <code>disable</code> ]
 Configures setting of generation file set name. 
@@ -1327,34 +1302,34 @@ program running at a remote location.
 <br><dt><span class="samp">Cm</span><dd>This is the file name for the statistics records. 
 Filenames of set
 members are built from three concatenated elements
-<kbd>Cm</kbd> <kbd>prefix</kbd>, <kbd>Cm</kbd> <kbd>filename</kbd> and
-<kbd>Cm</kbd> <kbd>suffix</kbd>:
+<code>Cm</code> <code>prefix</code>, <code>Cm</code> <code>filename</code> and
+<code>Cm</code> <code>suffix</code>:
                                                             <dl>
 <dt><span class="samp">Cm</span><dd>This is a constant filename path. 
 It is not subject to
 modifications via the
-<kbd>filegen</kbd> option. 
+<code>filegen</code> option. 
 It is defined by the
 server, usually specified as a compile-time constant. 
 It may,
 however, be configurable for individual file generation sets
 via other commands. 
 For example, the prefix used with
-<kbd>loopstats</kbd> and
-<kbd>peerstats</kbd> generation can be configured using the
-<kbd>statsdir</kbd> option explained above. 
+<code>loopstats</code> and
+<code>peerstats</code> generation can be configured using the
+<code>statsdir</code> option explained above. 
 <br><dt><span class="samp">Cm</span><dd>This string is directly concatenated to the prefix mentioned
 above (no intervening
-/). 
+/ ) . 
 This can be modified using
 the file argument to the
-<kbd>filegen</kbd> statement. 
+<code>filegen</code> statement. 
 No
 <span class="file">..</span>
 elements are
 allowed in this component to prevent filenames referring to
 parts outside the filesystem hierarchy denoted by
-<kbd>prefix</kbd>. <br><dt><span class="samp">Cm</span><dd>This part is reflects individual elements of a file set. 
+<code>prefix</code>. <br><dt><span class="samp">Cm</span><dd>This part is reflects individual elements of a file set. 
 It is
 generated according to the type of a file set.
 
@@ -1378,8 +1353,8 @@ server incarnations.
 The set member filename is built by appending a
 \&amp;. 
 to concatenated
-<kbd>prefix</kbd> and
-<kbd>filename</kbd> strings, and
+<code>prefix</code> and
+<code>filename</code> strings, and
 appending the decimal representation of the process ID of the
 <code>ntpd(1ntpdmdoc)</code>
 server process. 
@@ -1396,7 +1371,7 @@ the form
 <code>dd</code> is a two digit day number. 
 Thus, all information written at 10 December 1992 would end up
 in a file named
-<kbd>prefix</kbd> <kbd>filename</kbd> <kbd>Ns</kbd>.19921210. <br><dt><span class="samp">Cm</span><dd>Any file set member contains data related to a certain week of
+<code>prefix</code> <code>filename</code> <code>Ns</code> <code>.19921210</code>. <br><dt><span class="samp">Cm</span><dd>Any file set member contains data related to a certain week of
 a year. 
 The term week is defined by computing day-of-year
 modulo 7. 
@@ -1482,13 +1457,11 @@ The list is searched in order with the
 last match found defining the restriction flags associated
 with the entry. 
 Additional information and examples can be found in the
-"NotesonConfiguringNTPandSettingupaNTPSubnet"
+"Notes on Configuring NTP and Setting up a NTP Subnet"
 page
 (available as part of the HTML documentation
 provided in
-<span class="file">/usr/share/doc/ntp</span>). 
-)
-.
+<span class="file">/usr/share/doc/ntp</span>).
 
                                                                    <p>The restriction facility was implemented in conformance
 with the access policies for the original NSFnet backbone
@@ -1571,9 +1544,9 @@ It will happen at the server only if the server operator cooperates.
 Control
 Commands
                                                                       <dl>
-<dt><span class="samp">Xo</span><dd>[<code>average</code> <code>Ar</code> <code>avg</code> ]
-[<code>minimum</code> <code>Ar</code> <code>min</code> ]
-[<code>monitor</code> <code>Ar</code> <code>prob</code> ]
+<dt><span class="samp">Xo</span><dd>[<code>average</code> <code>avg</code> ]
+[<code>minimum</code> <code>min</code> ]
+[<code>monitor</code> <code>prob</code> ]
 Set the parameters of the
 <code>limited</code> facility which protects the server from
 client abuse. 
@@ -1587,20 +1560,20 @@ The default
 minimum average and minimum are 5 and 2, respectively. 
 The monitor subcommand specifies the probability of discard
 for packets that overflow the rate-control window. 
-<br><dt><span class="samp">Xo</span><dd>[<code>mask</code> <code>Ar</code> <code>mask</code> ]
-[<kbd>flag</kbd>... ]
+<br><dt><span class="samp">Xo</span><dd>[<code>mask</code> <code>mask</code> ]
+[<code>flag</code> <code>...</code> ]
 The
-<kbd>address</kbd> argument expressed in
+<code>address</code> argument expressed in
 dotted-quad form is the address of a host or network. 
 Alternatively, the
-<kbd>address</kbd> argument can be a valid host DNS name. 
+<code>address</code> argument can be a valid host DNS name. 
 The
-<kbd>mask</kbd> argument expressed in dotted-quad form defaults to
-255.255.255.255, meaning that the
-<kbd>address</kbd> is treated as the address of an individual host. 
+<code>mask</code> argument expressed in dotted-quad form defaults to
+<code>255.255.255.255</code>, meaning that the
+<code>address</code> is treated as the address of an individual host. 
 A default entry (address
-0.0.0.0, mask
-0.0.0.0) is always included and is always the first entry in the list. 
+<code>0.0.0.0</code>, mask
+<code>0.0.0.0</code>) is always included and is always the first entry in the list. 
 Note that text string
 <code>default</code>, with no mask option, may
 be used to indicate the default entry. 
@@ -2012,7 +1985,7 @@ from there while collecting all servers in scope.
 Options
                                                                                 <dl>
 <dt><span class="samp">Xo</span><dd>.Oo
-<code>ceiling</code> <code>Ar</code> <code>ceiling</code> | <code>cohort</code> <code>0</code> | <code>1</code> | <code>floor</code> <code>Ar</code> <code>floor</code> | <code>minclock</code> <code>Ar</code> <code>minclock</code> | <code>minsane</code> <code>Ar</code> <code>minsane</code> .Oc
+<code>ceiling</code> <code>ceiling</code> | <code>cohort</code> <code>0</code> | <code>1</code> | <code>floor</code> <code>floor</code> | <code>minclock</code> <code>minclock</code> | <code>minsane</code> <code>minsane</code> .Oc
 This command affects the clock selection and clustering
 algorithms. 
 It can be used to select the quality and
@@ -2085,45 +2058,37 @@ satellite and modem reference clocks plus a special pseudo-clock
 used for backup or when no other clock source is available. 
 Detailed descriptions of individual device drivers and options can
 be found in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>). 
-)
-. 
 Additional information can be found in the pages linked
 there, including the
-"DebuggingHintsforReferenceClockDrivers"
+"Debugging Hints for Reference Clock Drivers"
 and
-"HowToWriteaReferenceClockDriver"
+"How To Write a Reference Clock Driver"
 pages
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>). 
-)
-. 
 In addition, support for a PPS
 signal is available as described in the
-"Pulse-per-second(PPS)SignalInterfacing"
+"Pulse-per-second (PPS) Signal Interfacing"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>). 
-)
-. 
 Many
 drivers support special line discipline/streams modules which can
 significantly improve the accuracy using the driver. 
 These are
 described in the
-"LineDisciplinesandStreamsDrivers"
+"Line Disciplines and Streams Drivers"
 page
 (available as part of the HTML documentation
 provided in
-<span class="file">/usr/share/doc/ntp</span>). 
-)
-.
+<span class="file">/usr/share/doc/ntp</span>).
 
                                                                                        <p>A reference clock will generally (though not always) be a radio
 timecode receiver which is synchronized to a source of standard
@@ -2163,9 +2128,9 @@ u
 .Sm
 on
 where
-<kbd>t</kbd> is an integer
+<code>t</code> is an integer
 denoting the clock type and
-<kbd>u</kbd> indicates the unit
+<code>u</code> indicates the unit
 number in the range 0-3. 
 While it may seem overkill, it is in fact
 sometimes useful to configure multiple reference clocks of the same
@@ -2174,7 +2139,7 @@ type, in which case the unit numbers must be unique.
                                                                                        <p>The
 <code>server</code> command is used to configure a reference
 clock, where the
-<kbd>address</kbd> argument in that command
+<code>address</code> argument in that command
 is the clock address. 
 The
 <code>key</code>, <code>version</code> and
@@ -2188,11 +2153,10 @@ persuade the server to cherish a reference clock with somewhat more
 enthusiasm than other reference clocks or peers. 
 Further
 information on this option can be found in the
-"MitigationRulesandthepreferKeyword"
+"Mitigation Rules and the prefer Keyword"
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>)
-)
 page. 
 The
 <code>minpoll</code> and
@@ -2207,7 +2171,7 @@ information for individual clock drivers and normally follows
 immediately after the
 <code>server</code> command. 
 The
-<kbd>address</kbd> argument specifies the clock address. 
+<code>address</code> argument specifies the clock address. 
 The
 <code>refid</code> and
 <code>stratum</code> options can be used to
@@ -2259,9 +2223,9 @@ u
 .Sm
 on
 [<code>prefer</code> ]
-[<code>mode</code> <code>Ar</code> <code>int</code> ]
-[<code>minpoll</code> <code>Ar</code> <code>int</code> ]
-[<code>maxpoll</code> <code>Ar</code> <code>int</code> ]
+[<code>mode</code> <code>int</code> ]
+[<code>minpoll</code> <code>int</code> ]
+[<code>maxpoll</code> <code>int</code> ]
 This command can be used to configure reference clocks in
 special ways. 
 The options are interpreted as follows:
@@ -2271,12 +2235,11 @@ All other things being
 equal, this host will be chosen for synchronization among a set of
 correctly operating hosts. 
 See the
-"MitigationRulesandthepreferKeyword"
+"Mitigation Rules and the prefer Keyword"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>)
-)
 for further information. 
 <br><dt><span class="samp">Cm</span><dd>Specifies a mode number which is interpreted in a
 device-specific fashion. 
@@ -2310,15 +2273,15 @@ Ar
 u
 .Sm
 on
-[<code>time1</code> <code>Ar</code> <code>sec</code> ]
-[<code>time2</code> <code>Ar</code> <code>sec</code> ]
-[<code>stratum</code> <code>Ar</code> <code>int</code> ]
-[<code>refid</code> <code>Ar</code> <code>string</code> ]
-[<code>mode</code> <code>Ar</code> <code>int</code> ]
-[<code>flag1</code> <code>Cm</code> <code>0</code>\&amp;| <code>Cm</code> <code>1</code> ]
-[<code>flag2</code> <code>Cm</code> <code>0</code>\&amp;| <code>Cm</code> <code>1</code> ]
-[<code>flag3</code> <code>Cm</code> <code>0</code>\&amp;| <code>Cm</code> <code>1</code> ]
-[<code>flag4</code> <code>Cm</code> <code>0</code>\&amp;| <code>Cm</code> <code>1</code> ]
+[<code>time1</code> <code>sec</code> ]
+[<code>time2</code> <code>sec</code> ]
+[<code>stratum</code> <code>int</code> ]
+[<code>refid</code> <code>string</code> ]
+[<code>mode</code> <code>int</code> ]
+[<code>flag1</code> <code>Cm</code> <code>0</code> <code>\&amp;|</code> <code>Cm</code> <code>1</code> ]
+[<code>flag2</code> <code>Cm</code> <code>0</code> <code>\&amp;|</code> <code>Cm</code> <code>1</code> ]
+[<code>flag3</code> <code>Cm</code> <code>0</code> <code>\&amp;|</code> <code>Cm</code> <code>1</code> ]
+[<code>flag4</code> <code>Cm</code> <code>0</code> <code>\&amp;|</code> <code>Cm</code> <code>1</code> ]
 This command can be used to configure reference clocks in
 special ways. 
 It must immediately follow the
@@ -2353,24 +2316,20 @@ It takes the form of an argument to the
 <a href="#Miscellaneous">Miscellaneous</a>Miscellaneous
 Options
 page and operates as described in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>). 
-)
-. 
 <br><dt><span class="samp">Cm</span><dd>Specifies a fixed-point decimal number in seconds, which is
 interpreted in a driver-dependent way. 
 See the descriptions of
 specific drivers in the
-"ReferenceClockDrivers"
+"Reference Clock Drivers"
 page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>). 
-)
-. 
 <br><dt><span class="samp">Cm</span><dd>Specifies the stratum number assigned to the driver, an integer
 between 0 and 15. 
 This number overrides the default stratum number

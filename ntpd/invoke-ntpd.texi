@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 # 
-# It has been AutoGen-ed  December 25, 2012 at 11:34:26 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 26, 2012 at 04:10:31 AM by AutoGen 5.16.2
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -140,7 +140,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p338
+ntpd - NTP daemon program - Ver. 4.2.7p339
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -1109,8 +1109,7 @@ the default name of the configuration file
 the default name of the drift file
 @item Pa
 the default name of the key file
-
-@end multitable
+@end table
 @node ntpd See Also
 @subsection ntpd See Also
 @code{ntp.conf(5)},

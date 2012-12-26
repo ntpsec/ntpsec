@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.keys.texi)
 # 
-# It has been AutoGen-ed  December 25, 2012 at 11:34:16 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 26, 2012 at 04:09:53 AM by AutoGen 5.16.2
 # From the definitions    ntp.keys.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -86,8 +86,7 @@ a
 @item Li
 The key is a hex-encoded ASCII string of 40 characters,
 which is truncated as necessary.
-
-@end multitable
+@end table
 
 Note that the keys used by the
 @code{ntpq(8)}

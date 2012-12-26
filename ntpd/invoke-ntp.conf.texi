@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 # 
-# It has been AutoGen-ed  December 25, 2012 at 11:32:50 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 25, 2012 at 12:49:13 PM by AutoGen 5.16.2
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -30,7 +30,8 @@ The file format is similar to other
 @sc{UNIX}
 configuration files.
 Comments begin with a
-@quoteleft{}#@quoteright{}
+@quoteleft{}@quoteright{}#
+#
 character and extend to the end of the line;
 blank lines are ignored.
 Configuration commands consist of an initial keyword
@@ -175,8 +176,7 @@ equivalent classes for that address family.
 [@code{minpoll} @code{minpoll} ]
 [@code{maxpoll} @code{maxpoll} ]
 [@code{ttl} @code{ttl} ]
-
-@end multitable
+@end table
 
 These five commands specify the time server name or address to
 be used and the mode in which to operate.
@@ -270,8 +270,7 @@ providing the best time and continues as with the
 @code{server} command.
 The remaining servers are discarded as if never
 heard.
-
-@end multitable
+@end table
 
 Options:
 @table @samp
@@ -353,8 +352,7 @@ Specifies the version number to be used for outgoing NTP
 packets.
 Versions 1-4 are the choices, with version 4 the
 default.
-
-@end multitable
+@end table
 @node Auxiliary
 @section Auxiliary
 
@@ -406,8 +404,7 @@ public-key authentication as described in
 @ref{Authentication}Authentication
 Options
 .
-
-@end multitable
+@end table
 @node Authentication
 @section Authentication
 
@@ -915,8 +912,7 @@ the link
 in the keys directory.
 If this file is
 not found, the host key is also the sign key.
-
-@end multitable
+@end table
 .It
 Ic
 keys
@@ -1046,8 +1042,7 @@ The certificate is missing, corrupted or bogus.
 @item 114
 (bad or missing identity)
 The identity key is missing, corrupt or bogus.
-
-@end multitable
+@end table
 @node Monitoring
 @section Monitoring
 
@@ -1220,8 +1215,7 @@ Number of packets with invalid length, format or port number.
 Number of packets not verified as authentic.
 @item Rate
 Number of packets discarded due to rate limitation.
-
-@end multitable
+@end table
 .It
 Cm
 statsdir
@@ -1290,7 +1284,10 @@ For example, the prefix used with
 @item Cm
 This string is directly concatenated to the prefix mentioned
 above (no intervening
-@quoteleft{}/ ) .@quoteright{}
+@quoteleft{}@quoteright{}/).
+/
+)
+.
 This can be modified using
 the file argument to the
 @code{filegen} statement.
@@ -1303,8 +1300,7 @@ parts outside the filesystem hierarchy denoted by
 This part is reflects individual elements of a file set.
 It is
 generated according to the type of a file set.
-
-@end multitable
+@end table
 .It
 Cm
 type
@@ -1382,8 +1378,7 @@ This number is taken to be the number of seconds the server is
 running at the start of the corresponding 24-hour period.
 Information is only written to a file generation by specifying
 @code{enable}; output is prevented by specifying
-@code{disable}. 
-@end multitable
+@code{disable}. @end table
 .It
 Cm
 link
@@ -1644,8 +1639,7 @@ The
 is sorted later in the list.
 @item Cm
 Deny packets that do not match the current NTP version.
-
-@end multitable
+@end table
 
 Default restriction list entries with the flags ignore, interface,
 ntpport, for each of the local host's interface addresses are
@@ -2001,8 +1995,7 @@ However, according to principles of
 Byzantine agreement,
 @code{minsane} should be at least 4 in order to detect and discard
 a single falseticker.
-
-@end multitable
+@end table
 .It
 Cm
 ttl
@@ -2227,8 +2220,7 @@ For modem reference clocks,
 @code{minpoll} defaults to 10 (17.1 m) and
 @code{maxpoll} defaults to 14 (4.5 h).
 The allowable range is 4 (16 s) to 17 (36.4 h) inclusive.
-
-@end multitable
+@end table
 .It
 Xo
 Ic
@@ -2340,8 +2332,7 @@ Further information on the
 @ref{Monitoring}Monitoring
 Options
 .
-
-@end multitable
+@end table
 
 @end multitable
 @node Miscellaneous
@@ -2460,8 +2451,7 @@ See the
 Options
 section for further information.
 The default for this flag is
-@code{disable}. 
-@end multitable
+@code{disable}. @end table
 .It
 Ic
 includefile
@@ -2490,18 +2480,26 @@ facility or the alternate
 By default, all output is turned on.
 All
 @code{configkeyword} keywords can be prefixed with
-@quoteleft{}= ,@quoteright{}
-@quoteleft{}+@quoteright{}
+@quoteleft{}@quoteright{}=,
+=
+,
+@quoteleft{}@quoteright{}+
++
 and
-@quoteleft{}- ,@quoteright{}
+@quoteleft{}@quoteright{}-,
+-
+,
 where
-@quoteleft{}=@quoteright{}
+@quoteleft{}@quoteright{}=
+=
 sets the
 @code{syslog(3)}
 priority mask,
-@quoteleft{}+@quoteright{}
+@quoteleft{}@quoteright{}+
++
 adds and
-@quoteleft{}-@quoteright{}
+@quoteleft{}@quoteright{}-
+-
 removes
 messages.
 @code{syslog(3)}
@@ -2688,8 +2686,7 @@ It can
 be set to any positive number in seconds.
 If set to zero, the stepout
 pulses will not be suppressed.
-
-@end multitable
+@end table
 .It
 Xo
 Ic

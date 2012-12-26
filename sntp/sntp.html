@@ -36,12 +36,12 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p338 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p339 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
 
-       <div class="shortcontents">
+  <div class="shortcontents">
 <h2>Short Contents</h2>
 <ul>
 <a href="#Top">Simple Network Time Protocol User Manual</a>
@@ -170,7 +170,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p338
+<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p339
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -596,8 +596,8 @@ like the (deprecated)
 <code>ntpdate(1ntpdatemdoc)</code>,
 or
 <code>rdate(8)</code>
-commands.
-
+commands. 
+</dl>
 <div class="node">
 <p><hr>
 <a name="sntp-Authors"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-Notes">sntp Notes</a>,
@@ -608,6 +608,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">sntp Authors</h4>
 
+<p>1<br>1<br>1<br>
 <div class="node">
 <p><hr>
 <a name="sntp-Notes"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-Authors">sntp Authors</a>,
@@ -617,7 +618,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">sntp Notes</h4>
 
-     <p>This document corresponds to version  of
+<p>This document corresponds to version  of
 <code>sntp</code>.
 
 <div class="node">
@@ -626,21 +627,21 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 <br>
 </div>
 
-     <!-- node-name,  next,  previous,  up -->
+<!-- node-name,  next,  previous,  up -->
 <h3 class="section">Usage</h3>
 
-     <p>The simplest use of this program is as an unprivileged command to
+<p>The simplest use of this program is as an unprivileged command to
 check the current time, offset, and error in the local clock. 
 For example:
 
-     <pre class="example">         sntp ntpserver.somewhere
-    </pre>
-       <p>With suitable privilege, it can be run as a command or in a
+<pre class="example">    sntp ntpserver.somewhere
+</pre>
+  <p>With suitable privilege, it can be run as a command or in a
 <code>crom</code> job to reset the local clock from a reliable server, like
 the <code>ntpdate</code> and <code>rdate</code> commands. 
 For example:
 
-     <pre class="example">         sntp -a ntpserver.somewhere
-    </pre>
-       </body></html>
+<pre class="example">    sntp -a ntpserver.somewhere
+</pre>
+  </body></html>
 

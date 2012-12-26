@@ -3,7 +3,7 @@
 <title>Ntp-keygen User's Manual</title>
 <meta http-equiv="Content-Type" content="text/html">
 <meta name="description" content="Ntp-keygen User's Manual">
-<meta name="generator" content="makeinfo 4.13">
+<meta name="generator" content="makeinfo 4.7">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -14,9 +14,8 @@
   pre.smallformat  { font-family:inherit; font-size:smaller }
   pre.smallexample { font-size:smaller }
   pre.smalllisp    { font-size:smaller }
-  span.sc    { font-variant:small-caps }
-  span.roman { font-family:serif; font-weight:normal; } 
-  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+  span.sc { font-variant:small-caps }
+  span.roman { font-family: serif; font-weight: normal; } 
 --></style>
 </head>
 <body>
@@ -32,10 +31,9 @@
 
 
 <div class="node">
-<a name="Top"></a>
 <p><hr>
-Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
-
+<a name="Top"></a>Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
+<br>
 </div>
 
 <h2 class="unnumbered">Top</h2>
@@ -49,12 +47,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 </ul>
 
 <div class="node">
-<a name="Top"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Description">Description</a>,
+<a name="Top"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Description">Description</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#dir">(dir)</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
-
+<br>
 </div>
 
 <h2 class="unnumbered">NTP Key Generation Program User Manual</h2>
@@ -73,15 +70,14 @@ All other files are in PEM-encoded
 printable ASCII format so they can be embedded as MIME attachments in
 mail to other sites.
 
-  <p>This document applies to version 4.2.7p338 of <code>ntp-keygen</code>.
+  <p>This document applies to version 4.2.7p339 of <code>ntp-keygen</code>.
 
 <div class="node">
-<a name="Description"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Running-the-Program">Running the Program</a>,
+<a name="Description"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Running-the-Program">Running the Program</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Top">Top</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-
+<br>
 </div>
 
 <!-- node-name,  next,  previous,  up -->
@@ -154,12 +150,11 @@ generating host and filestamp,
 as described in the <a href="#Cryptographic-Data-Files">Cryptographic Data Files</a> section below.
 
 <div class="node">
-<a name="Running-the-Program"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Random-Seed-File">Random Seed File</a>,
+<a name="Running-the-Program"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Random-Seed-File">Random Seed File</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Description">Description</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-
+<br>
 </div>
 
 <!-- node-name,  next,  previous,  up -->
@@ -211,11 +206,9 @@ certificate should be re-generated.
 Autokey Public-Key Authentication page.
 
 <div class="node">
-<a name="ntp-keygen-Invocation"></a>
-<a name="ntp_002dkeygen-Invocation"></a>
 <p><hr>
-
-
+<a name="ntp_002dkeygen-Invocation"></a>
+<br>
 </div>
 
 <h3 class="section">Invoking ntp-keygen</h3>
@@ -304,10 +297,9 @@ as described in the
 Cryptographic Data Files
 section below. 
 <div class="node">
-<a name="Running"></a>
 <p><hr>
-
-
+<a name="Running"></a>
+<br>
 </div>
 
 <h3 class="section">Running</h3>
@@ -317,7 +309,7 @@ the
 Program
 To test and gain experience with Autokey concepts, log in as root and
 change to the keys directory, usually
-<samp><span class="file">/usr/local/etc</span></samp>
+<span class="file">/usr/local/etc</span>
 When run for the first time, or if all files with names beginning with
 <code>ntpkey</code> have been removed, use the
 <code>ntp-keygen</code>
@@ -435,10 +427,9 @@ program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
 recognized in monitoring data. 
 <div class="node">
-<a name="Running"></a>
 <p><hr>
-
-
+<a name="Running"></a>
+<br>
 </div>
 
 <h3 class="section">Running</h3>
@@ -499,7 +490,7 @@ shared file systems, as NFS clients may not be able to write
 to the shared keys directory, even as root. 
 In this case, NFS clients can specify the files in another
 directory such as
-<samp><span class="file">/etc</span></samp>
+<span class="file">/etc</span>
 using the
 <code>keysdir</code> command. 
 There is no need for one client to read the keys and certificates
@@ -557,10 +548,9 @@ program uses the same timestamp extension for all files generated
 at one time, so each generation is distinct and can be readily
 recognized in monitoring data. 
 <div class="node">
-<a name="Running"></a>
 <p><hr>
-
-
+<a name="Running"></a>
+<br>
 </div>
 
 <h3 class="section">Running</h3>
@@ -621,7 +611,7 @@ shared file systems, as NFS clients may not be able to write
 to the shared keys directory, even as root. 
 In this case, NFS clients can specify the files in another
 directory such as
-<samp><span class="file">/etc</span></samp>
+<span class="file">/etc</span>
 using the
 <code>keysdir</code> command. 
 There is no need for one client to read the keys and certificates
@@ -715,10 +705,9 @@ is restarted, it loads any new files and restarts the protocol.
 Other dependent hosts will continue as usual until signatures are refreshed,
 at which time the protocol is restarted. 
 <div class="node">
-<a name="Identity"></a>
 <p><hr>
-
-
+<a name="Identity"></a>
+<br>
 </div>
 
 <h3 class="section">Identity</h3>
@@ -854,10 +843,9 @@ to the client key file.
 As the MV scheme is independent of keys and certificates,
 these files can be refreshed as needed. 
 <div class="node">
-<a name="Command"></a>
 <p><hr>
-
-
+<a name="Command"></a>
+<br>
 </div>
 
 <h3 class="section">Command</h3>
@@ -866,7 +854,7 @@ these files can be refreshed as needed.
 Line
 Options
      <dl>
-<dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Select certificate message digest/signature encryption scheme. 
+<dt><span class="samp">Fl</span><dd>Select certificate message digest/signature encryption scheme. 
 The
 <code>scheme</code> can be one of the following:
 . 
@@ -889,23 +877,23 @@ or
 <code>DSA-SHA1</code>. Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key. 
 The default without this option is
-<code>RSA-MD5</code>. <br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Enable debugging. 
+<code>RSA-MD5</code>. <br><dt><span class="samp">Fl</span><dd>Enable debugging. 
 This option displays the cryptographic data produced in eye-friendly billboards. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Write the IFF client keys to the standard output. 
+<br><dt><span class="samp">Fl</span><dd>Write the IFF client keys to the standard output. 
 This is intended for automatic key distribution by mail. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate parameters and keys for the GQ identification scheme,
+<br><dt><span class="samp">Fl</span><dd>Generate parameters and keys for the GQ identification scheme,
 obsoleting any that may exist. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate keys for the GQ identification scheme
+<br><dt><span class="samp">Fl</span><dd>Generate keys for the GQ identification scheme
 using the existing GQ parameters. 
 If the GQ parameters do not yet exist, create them first. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate new host keys, obsoleting any that may exist. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate parameters for the IFF identification scheme,
+<br><dt><span class="samp">Fl</span><dd>Generate new host keys, obsoleting any that may exist. 
+<br><dt><span class="samp">Fl</span><dd>Generate parameters for the IFF identification scheme,
 obsoleting any that may exist. 
 <br><dt><span class="samp">Fl</span><dd>Set the suject name to
 <code>name</code>. This is used as the subject field in certificates
 and in the file name for host and sign keys. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate MD5 keys, obsoleting any that may exist. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate a private certificate. 
+<br><dt><span class="samp">Fl</span><dd>Generate MD5 keys, obsoleting any that may exist. 
+<br><dt><span class="samp">Fl</span><dd>Generate a private certificate. 
 By default, the program generates public certificates. 
 <br><dt><span class="samp">Fl</span><dd>Encrypt generated files containing private data with
 <code>password</code> and the DES-CBC algorithm. 
@@ -916,15 +904,14 @@ By default, the program uses the host key as the sign key.
 <br><dt><span class="samp">Fl</span><dd>Set the issuer name to
 <code>name</code>. This is used for the issuer field in certificates
 and in the file name for identity files. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate a trusted certificate. 
+<br><dt><span class="samp">Fl</span><dd>Generate a trusted certificate. 
 By default, the program generates a non-trusted certificate. 
-<br><dt>&lsquo;<samp><span class="samp">Fl</span></samp>&rsquo;<dd>Generate parameters and keys for the Mu-Varadharajan (MV) identification scheme.
+<br><dt><span class="samp">Fl</span><dd>Generate parameters and keys for the Mu-Varadharajan (MV) identification scheme.
 
 <div class="node">
-<a name="Random"></a>
 <p><hr>
-
-
+<a name="Random"></a>
+<br>
 </div>
 
 <h3 class="section">Random</h3>
@@ -980,10 +967,9 @@ If the file is not available or cannot be written,
 the daemon exits with a message to the system log and the program
 exits with a suitable error message. 
 <div class="node">
-<a name="Cryptographic"></a>
 <p><hr>
-
-
+<a name="Cryptographic"></a>
+<br>
 </div>
 
 <h3 class="section">Cryptographic</h3>
@@ -1022,7 +1008,7 @@ where
 which is a printable ASCII string 16 characters or less in length. 
 Each character is chosen from the 93 printable characters
 in the range 0x21 through 0x7f excluding space and the
-&lsquo;#&rsquo;
+#
 character.
 
        <p>Note that the keys used by the
@@ -1061,7 +1047,7 @@ using the <code>agtexi-cmd</code> template and the option descriptions for the <
 This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 
      <ul class="menu">
-<li><a accesskey="1" href="#ntp_002dkeygen-usage">ntp-keygen usage</a>:                   ntp-keygen help/usage (<samp><span class="option">--help</span></samp>)
+<li><a accesskey="1" href="#ntp_002dkeygen-usage">ntp-keygen usage</a>:                   ntp-keygen help/usage (<span class="option">--help</span>)
 <li><a accesskey="2" href="#ntp_002dkeygen-imbits">ntp-keygen imbits</a>:                  imbits option (-b)
 <li><a accesskey="3" href="#ntp_002dkeygen-certificate">ntp-keygen certificate</a>:             certificate option (-c)
 <li><a accesskey="4" href="#ntp_002dkeygen-cipher">ntp-keygen cipher</a>:                  cipher option (-C)
@@ -1089,28 +1075,26 @@ This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
 </ul>
 
 <div class="node">
-<a name="ntp-keygen-usage"></a>
-<a name="ntp_002dkeygen-usage"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-imbits">ntp-keygen imbits</a>,
+<a name="ntp_002dkeygen-usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-imbits">ntp-keygen imbits</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
-<h4 class="subsection">ntp-keygen help/usage (<samp><span class="option">--help</span></samp>)</h4>
+<h4 class="subsection">ntp-keygen help/usage (<span class="option">--help</span>)</h4>
 
      <p><a name="index-ntp_002dkeygen-help-3"></a>
 This is the automatically generated usage text for ntp-keygen.
 
        <p>The text printed is the same whether selected with the <code>help</code> option
-(<samp><span class="option">--help</span></samp>) or the <code>more-help</code> option (<samp><span class="option">--more-help</span></samp>).  <code>more-help</code> will print
+(<span class="option">--help</span>) or the <code>more-help</code> option (<span class="option">--more-help</span>).  <code>more-help</code> will print
 the usage text by passing it through a pager program. 
 <code>more-help</code> is disabled on platforms without a working
 <code>fork(2)</code> function.  The <code>PAGER</code> environment variable is
-used to select the program, defaulting to <samp><span class="file">more</span></samp>.  Both will exit
+used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-     <pre class="example">     ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p337
+     <pre class="example">     ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p338
      USAGE:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]...
        Flg Arg Option-Name    Description
         -b Num imbits         identity modulus bits
@@ -1161,20 +1145,18 @@ with a status code of 0.
      please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
 </pre>
        <div class="node">
-<a name="ntp-keygen-imbits"></a>
-<a name="ntp_002dkeygen-imbits"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-certificate">ntp-keygen certificate</a>,
+<a name="ntp_002dkeygen-imbits"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-certificate">ntp-keygen certificate</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-usage">ntp-keygen usage</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">imbits option (-b)</h4>
 
      <p><a name="index-ntp_002dkeygen_002dimbits-4"></a>
 This is the &ldquo;identity modulus bits&rdquo; option. 
-This option takes an argument number <samp><span class="file">imbits</span></samp>.
+This option takes an argument number <span class="file">imbits</span>.
 
      <p class="noindent">This option has some usage constraints.  It:
           <ul>
@@ -1183,20 +1165,18 @@ This option takes an argument number <samp><span class="file">imbits</span></sam
 
        <p>The number of bits in the identity modulus.  The default is 256. 
 <div class="node">
-<a name="ntp-keygen-certificate"></a>
-<a name="ntp_002dkeygen-certificate"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-cipher">ntp-keygen cipher</a>,
+<a name="ntp_002dkeygen-certificate"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-cipher">ntp-keygen cipher</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-imbits">ntp-keygen imbits</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">certificate option (-c)</h4>
 
      <p><a name="index-ntp_002dkeygen_002dcertificate-5"></a>
 This is the &ldquo;certificate scheme&rdquo; option. 
-This option takes an argument string <samp><span class="file">scheme</span></samp>.
+This option takes an argument string <span class="file">scheme</span>.
 
      <p class="noindent">This option has some usage constraints.  It:
           <ul>
@@ -1212,20 +1192,18 @@ Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
 this option is RSA-MD5. 
 <div class="node">
-<a name="ntp-keygen-cipher"></a>
-<a name="ntp_002dkeygen-cipher"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-id_002dkey">ntp-keygen id-key</a>,
+<a name="ntp_002dkeygen-cipher"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-id_002dkey">ntp-keygen id-key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-certificate">ntp-keygen certificate</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">cipher option (-C)</h4>
 
      <p><a name="index-ntp_002dkeygen_002dcipher-6"></a>
 This is the &ldquo;privatekey cipher&rdquo; option. 
-This option takes an argument string <samp><span class="file">cipher</span></samp>.
+This option takes an argument string <span class="file">cipher</span>.
 
      <p class="noindent">This option has some usage constraints.  It:
           <ul>
@@ -1238,10 +1216,10 @@ equivalent to "<code>-C des-ede3-cbc".  The openssl tool lists ciphers
 available in "openssl -h" output. 
 </code><div class="node">
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-gq_002dparams">ntp-keygen gq-params</a>,
+<a name="ntp_002dkeygen-id_002dkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-gq_002dparams">ntp-keygen gq-params</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-cipher">ntp-keygen cipher</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">id-key option (-e)</h4>
@@ -1257,13 +1235,11 @@ This is the &ldquo;write iff or gq identity keys&rdquo; option.
        <p>Write the IFF or GQ client keys to the standard output.  This is
 intended for automatic key distribution by mail. 
 <div class="node">
-<a name="ntp-keygen-gq-params"></a>
-<a name="ntp_002dkeygen-gq_002dparams"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-host_002dkey">ntp-keygen host-key</a>,
+<a name="ntp_002dkeygen-gq_002dparams"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-host_002dkey">ntp-keygen host-key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-id_002dkey">ntp-keygen id-key</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">gq-params option (-G)</h4>
@@ -1279,13 +1255,11 @@ This is the &ldquo;generate gq parameters and keys&rdquo; option.
        <p>Generate parameters and keys for the GQ identification scheme,
 obsoleting any that may exist. 
 <div class="node">
-<a name="ntp-keygen-host-key"></a>
-<a name="ntp_002dkeygen-host_002dkey"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-iffkey">ntp-keygen iffkey</a>,
+<a name="ntp_002dkeygen-host_002dkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-iffkey">ntp-keygen iffkey</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-gq_002dparams">ntp-keygen gq-params</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">host-key option (-H)</h4>
@@ -1300,13 +1274,11 @@ This is the &ldquo;generate rsa host key&rdquo; option.
 
        <p>Generate new host keys, obsoleting any that may exist. 
 <div class="node">
-<a name="ntp-keygen-iffkey"></a>
-<a name="ntp_002dkeygen-iffkey"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-ident">ntp-keygen ident</a>,
+<a name="ntp_002dkeygen-iffkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-ident">ntp-keygen ident</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-host_002dkey">ntp-keygen host-key</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">iffkey option (-I)</h4>
@@ -1322,20 +1294,18 @@ This is the &ldquo;generate iff parameters&rdquo; option.
        <p>Generate parameters for the IFF identification scheme, obsoleting
 any that may exist. 
 <div class="node">
-<a name="ntp-keygen-ident"></a>
-<a name="ntp_002dkeygen-ident"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-lifetime">ntp-keygen lifetime</a>,
+<a name="ntp_002dkeygen-ident"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-lifetime">ntp-keygen lifetime</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-iffkey">ntp-keygen iffkey</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">ident option (-i)</h4>
 
      <p><a name="index-ntp_002dkeygen_002dident-11"></a>
 This is the &ldquo;set autokey group name&rdquo; option. 
-This option takes an argument string <samp><span class="file">group</span></samp>.
+This option takes an argument string <span class="file">group</span>.
 
      <p class="noindent">This option has some usage constraints.  It:
           <ul>
@@ -1353,10 +1323,10 @@ issuer names in the form host
 ntpd's configuration file. 
 </code><div class="node">
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-md5key">ntp-keygen md5key</a>,
+<a name="ntp_002dkeygen-lifetime"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-md5key">ntp-keygen md5key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-ident">ntp-keygen ident</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">lifetime option (-l)</h4>
@@ -1372,13 +1342,11 @@ This option takes an argument number <span class="file">lifetime</span>.
 
        <p>Set the certificate expiration to lifetime days from now. 
 <div class="node">
-<a name="ntp-keygen-md5key"></a>
-<a name="ntp_002dkeygen-md5key"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-modulus">ntp-keygen modulus</a>,
+<a name="ntp_002dkeygen-md5key"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-modulus">ntp-keygen modulus</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-lifetime">ntp-keygen lifetime</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">md5key option (-M)</h4>
@@ -1387,13 +1355,11 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
 This is the ``generate md5 keys'' option. 
 Generate MD5 keys, obsoleting any that may exist. 
 <div class="node">
-<a name="ntp-keygen-modulus"></a>
-<a name="ntp_002dkeygen-modulus"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-pvt_002dcert">ntp-keygen pvt-cert</a>,
+<a name="ntp_002dkeygen-modulus"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-pvt_002dcert">ntp-keygen pvt-cert</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-md5key">ntp-keygen md5key</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">modulus option (-m)</h4>
@@ -1409,13 +1375,11 @@ This option takes an argument number <span class="file">modulus</span>.
 
        <p>The number of bits in the prime modulus.  The default is 512. 
 <div class="node">
-<a name="ntp-keygen-pvt-cert"></a>
-<a name="ntp_002dkeygen-pvt_002dcert"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-pvt_002dpasswd">ntp-keygen pvt-passwd</a>,
+<a name="ntp_002dkeygen-pvt_002dcert"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-pvt_002dpasswd">ntp-keygen pvt-passwd</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-modulus">ntp-keygen modulus</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">pvt-cert option (-P)</h4>
@@ -1431,13 +1395,11 @@ This is the ``generate pc private certificate'' option.
        <p>Generate a private certificate.  By default, the program generates
 public certificates. 
 <div class="node">
-<a name="ntp-keygen-pvt-passwd"></a>
-<a name="ntp_002dkeygen-pvt_002dpasswd"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-get_002dpvt_002dpasswd">ntp-keygen get-pvt-passwd</a>,
+<a name="ntp_002dkeygen-pvt_002dpasswd"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-get_002dpvt_002dpasswd">ntp-keygen get-pvt-passwd</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-pvt_002dcert">ntp-keygen pvt-cert</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">pvt-passwd option (-p)</h4>
@@ -1454,13 +1416,11 @@ This option takes an argument string <span class="file">passwd</span>.
        <p>Encrypt generated files containing private data with the specified
 password and the cipher selected with <code>-C/--cipher</code>. 
 <div class="node">
-<a name="ntp-keygen-get-pvt-passwd"></a>
-<a name="ntp_002dkeygen-get_002dpvt_002dpasswd"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-sign_002dkey">ntp-keygen sign-key</a>,
+<a name="ntp_002dkeygen-get_002dpvt_002dpasswd"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-sign_002dkey">ntp-keygen sign-key</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-pvt_002dpasswd">ntp-keygen pvt-passwd</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">get-pvt-passwd option (-q)</h4>
@@ -1476,13 +1436,11 @@ This option takes an argument string <span class="file">passwd</span>.
 
        <p>Set the password for reading files to the specified password. 
 <div class="node">
-<a name="ntp-keygen-sign-key"></a>
-<a name="ntp_002dkeygen-sign_002dkey"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-subject_002dname">ntp-keygen subject-name</a>,
+<a name="ntp_002dkeygen-sign_002dkey"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-subject_002dname">ntp-keygen subject-name</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-get_002dpvt_002dpasswd">ntp-keygen get-pvt-passwd</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">sign-key option (-S)</h4>
@@ -1500,13 +1458,11 @@ This option takes an argument string <span class="file">sign</span>.
 that may exist.  By default, the program uses the host key as the
 sign key. 
 <div class="node">
-<a name="ntp-keygen-subject-name"></a>
-<a name="ntp_002dkeygen-subject_002dname"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-trusted_002dcert">ntp-keygen trusted-cert</a>,
+<a name="ntp_002dkeygen-subject_002dname"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-trusted_002dcert">ntp-keygen trusted-cert</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-sign_002dkey">ntp-keygen sign-key</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">subject-name option (-s)</h4>
@@ -1532,10 +1488,10 @@ if not provided, the host name are also used in the file names
 of IFF, GQ, and MV client parameter files. 
 </code><div class="node">
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-mv_002dparams">ntp-keygen mv-params</a>,
+<a name="ntp_002dkeygen-trusted_002dcert"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-mv_002dparams">ntp-keygen mv-params</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-subject_002dname">ntp-keygen subject-name</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">trusted-cert option (-T)</h4>
@@ -1551,13 +1507,11 @@ This is the ``trusted certificate (tc scheme)'' option.
        <p>Generate a trusted certificate.  By default, the program generates
 a non-trusted certificate. 
 <div class="node">
-<a name="ntp-keygen-mv-params"></a>
-<a name="ntp_002dkeygen-mv_002dparams"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-mv_002dkeys">ntp-keygen mv-keys</a>,
+<a name="ntp_002dkeygen-mv_002dparams"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-mv_002dkeys">ntp-keygen mv-keys</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-trusted_002dcert">ntp-keygen trusted-cert</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">mv-params option (-V)</h4>
@@ -1574,13 +1528,11 @@ This option takes an argument number <span class="file">num</span>.
        <p>Generate parameters and keys for the Mu-Varadharajan (MV)
 identification scheme. 
 <div class="node">
-<a name="ntp-keygen-mv-keys"></a>
-<a name="ntp_002dkeygen-mv_002dkeys"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-config">ntp-keygen config</a>,
+<a name="ntp_002dkeygen-mv_002dkeys"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-config">ntp-keygen config</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-mv_002dparams">ntp-keygen mv-params</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">mv-keys option (-v)</h4>
@@ -1594,16 +1546,14 @@ This option takes an argument number <span class="file">num</span>.
 <li>must be compiled in by defining <code>AUTOKEY</code> during the compilation. 
 </ul>
 
-       <p>This option has no &lsquo;<samp><span class="samp">doc</span></samp>&rsquo; documentation.
+       <p>This option has no <span class="samp">doc</span> documentation.
 
 <div class="node">
-<a name="ntp-keygen-config"></a>
-<a name="ntp_002dkeygen-config"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-exit-status">ntp-keygen exit status</a>,
+<a name="ntp_002dkeygen-config"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-exit-status">ntp-keygen exit status</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-mv_002dkeys">ntp-keygen mv-keys</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">presetting/configuring ntp-keygen</h4>
@@ -1621,9 +1571,9 @@ values are treated like option arguments.
 <li>$PWD
 </ul>
        The environment variables <code>HOME</code>, and <code>PWD</code>
-are expanded and replaced when <samp><span class="file">ntp-keygen</span></samp> runs. 
+are expanded and replaced when <span class="file">ntp-keygen</span> runs. 
 For any of these that are plain files, they are simply processed. 
-For any that are directories, then a file named <samp><span class="file">.ntprc</span></samp> is searched for
+For any that are directories, then a file named <span class="file">.ntprc</span> is searched for
 within that directory and processed.
 
        <p>Configuration files may be in a wide variety of formats. 
@@ -1636,10 +1586,10 @@ lines by escaping the newline with a backslash.
 Common options are collected at the top, followed by program specific
 segments.  The segments are separated by lines like:
      <pre class="example">         [NTP-KEYGEN]
-</pre>
+    </pre>
        <p class="noindent">or by
      <pre class="example">         &lt;?program ntp-keygen&gt;
-</pre>
+    </pre>
        <p class="noindent">Do not mix these styles within one configuration file.
 
        <p>Compound values and carefully constructed string values may also be
@@ -1647,10 +1597,10 @@ specified using XML syntax:
      <pre class="example">         &lt;option-name&gt;
             &lt;sub-opt&gt;...&amp;lt;...&amp;gt;...&lt;/sub-opt&gt;
          &lt;/option-name&gt;
-</pre>
+    </pre>
        <p class="noindent">yielding an <code>option-name.sub-opt</code> string value of
      <pre class="example">         "...&lt;...&gt;..."
-</pre>
+    </pre>
        <p><code>AutoOpts</code> does not track suboptions.  You simply note that it is a
 hierarchicly valued option.  <code>AutoOpts</code> does provide a means for searching
 the associated name/value pair list (see: optionFindValue).
@@ -1665,39 +1615,35 @@ detail to provide.  The default is to print just the version.  The licensing inf
 first letter of the argument is examined:
 
           <dl>
-<dt>&lsquo;<samp><span class="samp">version</span></samp>&rsquo;<dd>Only print the version.  This is the default. 
-<br><dt>&lsquo;<samp><span class="samp">copyright</span></samp>&rsquo;<dd>Name the copyright usage licensing terms. 
-<br><dt>&lsquo;<samp><span class="samp">verbose</span></samp>&rsquo;<dd>Print the full copyright usage licensing terms. 
+<dt><span class="samp">version</span><dd>Only print the version.  This is the default. 
+<br><dt><span class="samp">copyright</span><dd>Name the copyright usage licensing terms. 
+<br><dt><span class="samp">verbose</span><dd>Print the full copyright usage licensing terms. 
 </dl>
 
 <div class="node">
-<a name="ntp-keygen-exit-status"></a>
-<a name="ntp_002dkeygen-exit-status"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Usage">ntp-keygen Usage</a>,
+<a name="ntp_002dkeygen-exit-status"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Usage">ntp-keygen Usage</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-config">ntp-keygen config</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">ntp-keygen exit status</h4>
 
      <p>One of the following exit values will be returned:
           <dl>
-<dt>&lsquo;<samp><span class="samp">0 (EXIT_SUCCESS)</span></samp>&rsquo;<dd>Successful program execution. 
-<br><dt>&lsquo;<samp><span class="samp">1 (EXIT_FAILURE)</span></samp>&rsquo;<dd>The operation failed or the command syntax was not valid. 
-<br><dt>&lsquo;<samp><span class="samp">66 (EX_NOINPUT)</span></samp>&rsquo;<dd>A specified configuration file could not be loaded. 
-<br><dt>&lsquo;<samp><span class="samp">70 (EX_SOFTWARE)</span></samp>&rsquo;<dd>libopts had an internal operational error.  Please report
+<dt><span class="samp">0 (EXIT_SUCCESS)</span><dd>Successful program execution. 
+<br><dt><span class="samp">1 (EXIT_FAILURE)</span><dd>The operation failed or the command syntax was not valid. 
+<br><dt><span class="samp">66 (EX_NOINPUT)</span><dd>A specified configuration file could not be loaded. 
+<br><dt><span class="samp">70 (EX_SOFTWARE)</span><dd>libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you. 
 </dl>
        <div class="node">
-<a name="ntp-keygen-Usage"></a>
-<a name="ntp_002dkeygen-Usage"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
+<a name="ntp_002dkeygen-Usage"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-exit-status">ntp-keygen exit status</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">ntp-keygen Usage</h4>
@@ -1713,13 +1659,11 @@ If an encrypted file is read successfully and
 no write password is specified, the read password is used
 as the write password by default. 
 <div class="node">
-<a name="ntp-keygen-Notes"></a>
-<a name="ntp_002dkeygen-Notes"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Bugs">ntp-keygen Bugs</a>,
+<a name="ntp_002dkeygen-Notes"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Bugs">ntp-keygen Bugs</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-Usage">ntp-keygen Usage</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">ntp-keygen Notes</h4>
@@ -1727,12 +1671,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
      <p>This document corresponds to version  of NTP. 
 Portions of this document came from FreeBSD. 
 <div class="node">
-<a name="ntp-keygen-Bugs"></a>
-<a name="ntp_002dkeygen-Bugs"></a>
 <p><hr>
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
+<a name="ntp_002dkeygen-Bugs"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic">Cryptographic</a>
-
+<br>
 </div>
 
 <h4 class="subsection">ntp-keygen Bugs</h4>
@@ -1745,12 +1687,11 @@ with older architectures such as SPARC IPC.
        <p>Please report bugs to http://bugs.ntp.org .
 
 <div class="node">
-<a name="Random-Seed-File"></a>
 <p><hr>
-Next:&nbsp;<a rel="next" accesskey="n" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>,
+<a name="Random-Seed-File"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#Cryptographic-Data-Files">Cryptographic Data Files</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#Running-the-Program">Running the Program</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-
+<br>
 </div>
 
      <!-- node-name,  next,  previous,  up -->
@@ -1778,11 +1719,10 @@ If the file is not available or cannot be written, the program exits
 with a message to the system log.
 
 <div class="node">
-<a name="Cryptographic-Data-Files"></a>
 <p><hr>
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#Random-Seed-File">Random Seed File</a>,
+<a name="Cryptographic-Data-Files"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#Random-Seed-File">Random Seed File</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
-
+<br>
 </div>
 
      <!-- node-name,  next,  previous,  up -->
@@ -1844,7 +1784,7 @@ it can be constructed and edited using an ordinary text editor.
          18 SHA1 b5520c9fadd7ad3fd8bfa061c8821b65d029bb37  # SHA1 key
          19 SHA1 8c74fb440ec80f453ec6aaa62b9baed0ab723b92  # SHA1 key
          20 SHA1 6bc05f734306a189326000970c19b3910f403795  # SHA1 key
-</pre>
+    </pre>
        <p>Figure 1. Typical Symmetric Key File
 
        <p>Figure 1 shows a typical symmetric keys file used by the reference

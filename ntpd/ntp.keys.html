@@ -33,7 +33,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <p>This document describes the symmetric key file for the NTP Project's
 <code>ntpd</code> program.
 
-  <p>This document applies to version 4.2.7p338 of <code>ntp.keys</code>.
+  <p>This document applies to version 4.2.7p339 of <code>ntp.keys</code>.
 
        <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -72,7 +72,7 @@ be specified in a configuration file, by default <code>/etc/ntp.keys</code>.
 
   <p>This document describes the format of an NTP symmetric key file. 
 For a description of the use of this type of file, see the
-"AuthenticationSupport"
+"Authentication Support"
 section of the
 <code>ntp.conf(5)</code>
 page.
@@ -98,17 +98,17 @@ type
 key
 
   <p>where
-<kbd>keyno</kbd> is a positive integer (between 1 and 65534),
-<kbd>type</kbd> is the message digest algorithm,
+<code>keyno</code> is a positive integer (between 1 and 65534),
+<code>type</code> is the message digest algorithm,
 and
-<kbd>key</kbd> is the key itself.
+<code>key</code> is the key itself.
 
   <p>The
-<kbd>key</kbd> may be given in a format
+<code>key</code> may be given in a format
 controlled by the
-<kbd>type</kbd> field. 
+<code>type</code> field. 
 The
-<kbd>type</kbd> .Li
+<code>type</code> .Li
 MD5
 is always supported. 
 If
@@ -117,7 +117,7 @@ ntpd
 was built with the OpenSSL library
 then any digest library supported by that library may be specified. 
 However, if compliance with FIPS 140-2 is required the
-<kbd>type</kbd> must be either
+<code>type</code> must be either
 .Li
 SHA
 or

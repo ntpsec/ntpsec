@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  December 25, 2012 at 11:34:55 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 26, 2012 at 04:11:03 AM by AutoGen 5.16.2
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -69,7 +69,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p338
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p339
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -412,7 +412,8 @@ uniquely identify the command need be typed.
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-@quoteleft{}\&> ,@quoteright{}
+@quoteleft{}\&>@quoteright{},
+,
 followed by a file name, to the command line.
 
 A number of interactive format commands are executed entirely
@@ -487,8 +488,7 @@ Note that since
 @code{ntpdc}
 retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
-
-@end multitable
+@end table
 @node Control Message Commands
 @section Control Message Commands
 
@@ -697,8 +697,7 @@ Obtain debugging information for a reference clock driver.
 This
 information is provided only by some clock drivers and is mostly
 undecodable without a copy of the driver source in hand.
-
-@end multitable
+@end table
 @node Runtime Configuration Requests
 @section Runtime Configuration Requests
 
@@ -866,8 +865,7 @@ section of
 @code{ntp.conf(5)}
 for further information.
 The default for this flag is disable.
-
-@end multitable
+@end table
 .It
 Xo
 Ic
