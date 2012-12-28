@@ -2,8 +2,6 @@
 /**
  * \file enumeration.c
  *
- * Time-stamp:      "2012-08-11 08:12:58 bkorb"
- *
  *   Automated Options Paged Usage module.
  *
  *  This routine will run run-on options through a pager so the
@@ -105,7 +103,7 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
      */
     if (max_len > 35) {
         do  {
-            fprintf(option_usage_fp, ENUM_ERR_SEP_LINE_FMT, *(paz_names++));
+            fprintf(option_usage_fp, ENUM_ERR_LINE, *(paz_names++));
         } while (--ct_down > 0);
     }
 
@@ -128,7 +126,7 @@ enum_err(tOptions * pOpts, tOptDesc * pOD,
         unsigned int ent_no = 0;
         char  zFmt[16];  /* format for all-but-last entries on a line */
 
-        sprintf(zFmt, ENUM_ERR_STR_WIDTH_FMT, (int)max_len);
+        sprintf(zFmt, ENUM_ERR_WIDTH, (int)max_len);
         max_len = 78 / max_len; /* max_len is now max entries on a line */
         fputs(TWO_SPACES_STR, option_usage_fp);
 
@@ -218,14 +216,14 @@ find_name(char const * pzName, tOptions * pOpts, tOptDesc * pOD,
             if (res == name_ct)
                 res = idx; /* save partial match */
             else
-                res = ~0;  /* may yet find full match */
+                res = (uintptr_t)~0;  /* may yet find full match */
         }
     }
 
     if (res < name_ct)
         return res; /* partial match */
 
-oops:
+ oops:
 
     pz_enum_err_fmt = (res == name_ct) ? zNoKey : zAmbigKey;
     option_usage_fp = stderr;
@@ -249,9 +247,9 @@ oops:
 char const *
 optionKeywordName(tOptDesc * pOD, unsigned int enum_val)
 {
-    tOptDesc od;
-    
+    tOptDesc od = { 0 };
     od.optArg.argEnum = enum_val;
+
     (*(pOD->pOptProc))(OPTPROC_RETURN_VALNAME, &od );
     return od.optArg.argString;
 }
@@ -295,7 +293,7 @@ optionEnumerationVal(tOptions * pOpts, tOptDesc * pOD,
 
     case (uintptr_t)OPTPROC_EMIT_SHELL:
     {
-        unsigned int ix = pOD->optArg.argEnum;
+        unsigned int ix = (unsigned int)pOD->optArg.argEnum;
         /*
          *  print the name string.
          */
@@ -309,7 +307,7 @@ optionEnumerationVal(tOptions * pOpts, tOptDesc * pOD,
 
     case (uintptr_t)OPTPROC_RETURN_VALNAME:
     {
-        unsigned int ix = pOD->optArg.argEnum;
+        unsigned int ix = (unsigned int)pOD->optArg.argEnum;
         /*
          *  Replace the enumeration value with the name string.
          */
@@ -481,7 +479,7 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
             if (iv)
                 pzArg = SPN_WHITESPACE_CHARS(pzArg+1);
 
-            len = BRK_SET_SEPARATOR_CHARS(pzArg) - pzArg;
+            len = (int)(BRK_SET_SEPARATOR_CHARS(pzArg) - pzArg);
             if (len == 0)
                 break;
 
@@ -513,7 +511,8 @@ optionSetMembers(tOptions * pOpts, tOptDesc * pOD,
                         p = pzArg;
                     }
 
-                    shift_ct = find_name(p, pOpts, pOD, paz_names, name_ct);
+                    shift_ct = (unsigned int)
+                        find_name(p, pOpts, pOD, paz_names, name_ct);
                     if (shift_ct >= name_ct) {
                         pOD->optCookie = (void*)0;
                         return;

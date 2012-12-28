@@ -2,8 +2,6 @@
 /**
  * \file autoopts.c
  *
- *  Time-stamp:      "2012-06-15 12:31:28 bkorb"
- *
  *  This file contains all of the routines that must be linked into
  *  an executable to use the generated option processing.  The optional
  *  routines are in separately compiled modules so that they will not

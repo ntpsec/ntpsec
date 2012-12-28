@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Sat Aug 11 09:41:23 PDT 2012
+ * Generated Thu Dec 27 12:59:13 PST 2012
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -25,13 +25,13 @@ LOCAL char *
 ao_strdup(char const *str);
 
 LOCAL tSuccess
-handle_opt(tOptions * pOpts, tOptState* pOptState);
+handle_opt(tOptions * pOpts, tOptState * o_st);
 
 LOCAL tSuccess
-immediate_opts(tOptions * pOpts);
+next_opt(tOptions * opts, tOptState * o_st);
 
 LOCAL tSuccess
-regular_opts(tOptions * pOpts);
+regular_opts(tOptions * opts);
 
 /*
  *  Extracted from check.c
@@ -43,14 +43,11 @@ is_consistent(tOptions * pOpts);
  *  Extracted from configfile.c
  */
 LOCAL void
-intern_file_load(tOptions* pOpts);
+intern_file_load(tOptions * opts);
 
 LOCAL char*
-parse_attrs(tOptions * pOpts, char * pzText, tOptionLoadMode * pMode,
+parse_attrs(tOptions * opts, char * txt, tOptionLoadMode * pMode,
             tOptionValue * pType);
-
-LOCAL tSuccess
-validate_struct(tOptions * pOpts, char const * pzProgram);
 
 /*
  *  Extracted from env.c
@@ -71,16 +68,28 @@ LOCAL tSuccess
 opt_find_short(tOptions* pOpts, uint_t optValue, tOptState* pOptState);
 
 LOCAL tSuccess
-get_opt_arg(tOptions * pOpts, tOptState * pOptState);
+get_opt_arg(tOptions * opts, tOptState * o_st);
 
 LOCAL tSuccess
-find_opt(tOptions * pOpts, tOptState * pOptState);
+find_opt(tOptions * opts, tOptState * o_st);
+
+/*
+ *  Extracted from init.c
+ */
+LOCAL tSuccess
+validate_struct(tOptions * opts, char const * pname);
+
+LOCAL tSuccess
+immediate_opts(tOptions * opts);
+
+LOCAL bool
+ao_initialize(tOptions * opts, int a_ct, char ** a_v);
 
 /*
  *  Extracted from load.c
  */
 LOCAL void
-mungeString(char * txt, tOptionLoadMode mode);
+munge_str(char * txt, tOptionLoadMode mode);
 
 LOCAL void
 loadOptionLine(
@@ -94,10 +103,10 @@ loadOptionLine(
  *  Extracted from nested.c
  */
 LOCAL void
-unload_arg_list(tArgList* pAL);
+unload_arg_list(tArgList * arg_list);
 
-LOCAL tOptionValue*
-optionLoadNested(char const* pzTxt, char const* pzName, size_t nameLen);
+LOCAL tOptionValue *
+optionLoadNested(char const * text, char const * name, size_t nm_len);
 
 LOCAL int
 get_special_char(char const ** ppz, int * ct);

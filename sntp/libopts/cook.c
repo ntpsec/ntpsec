@@ -1,8 +1,6 @@
 /**
  * \file cook.c
  *
- *  Time-stamp:      "2012-02-28 19:40:47 bkorb"
- *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
  *
@@ -59,9 +57,9 @@ contiguous_quote(char ** pps, char * pq, int * lnct_p);
  * err:  @code{NULL} is returned if the string is mal-formed.
 =*/
 unsigned int
-ao_string_cook_escape_char(char const* pzIn, char* pRes, uint_t nl)
+ao_string_cook_escape_char(char const * pzIn, char * pRes, uint_t nl)
 {
-    unsigned int  res = 1;
+    unsigned int res = 1;
 
     switch (*pRes = *pzIn++) {
     case NUL:         /* NUL - end of input string */
@@ -91,8 +89,8 @@ ao_string_cook_escape_char(char const* pzIn, char* pRes, uint_t nl)
             do *(pz++) = *(pzIn++);
             while (IS_HEX_DIGIT_CHAR(*pzIn) && (pz < z + 2));
             *pz = NUL;
-            *pRes = (unsigned char)strtoul(z, NULL, 16);
-            res += pz - z;
+            *pRes = (char)strtoul(z, NULL, 16);
+            res += (unsigned int)(pz - z);
         }
         break;
 
@@ -113,8 +111,8 @@ ao_string_cook_escape_char(char const* pzIn, char* pRes, uint_t nl)
         val = strtoul(z, NULL, 8);
         if (val > 0xFF)
             val = 0xFF;
-        *pRes = (unsigned char)val;
-        res = pz - z;
+        *pRes = (char)val;
+        res = (unsigned int)(pz - z);
         break;
     }
 
@@ -282,7 +280,8 @@ ao_string_cook(char * pzScan, int * lnct_p)
              *  THEN we do the full escape character processing
              */
             else if (q != '\'') {
-                int ct = ao_string_cook_escape_char(pzS, pzD-1, (uint_t)NL);
+                unsigned int ct;
+                ct = ao_string_cook_escape_char(pzS, pzD-1, (uint_t)NL);
                 if (ct == 0)
                     return NULL;
 

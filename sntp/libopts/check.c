@@ -3,8 +3,6 @@
  *
  * @brief consistency checks.
  *
- *  Time-stamp:      "2012-03-31 13:46:35 bkorb"
- *
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
  *

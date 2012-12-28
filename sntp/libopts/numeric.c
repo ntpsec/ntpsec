@@ -2,8 +2,6 @@
 /**
  * \file numeric.c
  *
- *  Time-stamp:      "2012-02-25 12:54:32 bkorb"
- *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
@@ -28,7 +26,7 @@
 /*=export_func  optionShowRange
  * private:
  *
- * what:  
+ * what:  Show info about range constraints
  * arg:   + tOptions* + pOpts     + program options descriptor  +
  * arg:   + tOptDesc* + pOptDesc  + the descriptor for this arg +
  * arg:   + void *    + rng_table + the value range tables      +

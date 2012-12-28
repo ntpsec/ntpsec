@@ -2,8 +2,6 @@
 /**
  * \file reset.c
  *
- *  Time-stamp:      "2012-08-11 08:35:11 bkorb"
- *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
@@ -103,7 +101,7 @@ optionResetOpt( tOptions* pOpts, tOptDesc* pOD )
             return;
         }
 
-        succ = opt_find_short(pOpts, (tAoUC)*pzArg, &opt_state);
+        succ = opt_find_short(pOpts, (uint8_t)*pzArg, &opt_state);
         if (! SUCCESSFUL(succ)) {
             fprintf(stderr, zIllOptChr, pOpts->pzProgPath, *pzArg);
             pOpts->pUsageProc(pOpts, EXIT_FAILURE);

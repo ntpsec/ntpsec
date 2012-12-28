@@ -3,8 +3,6 @@
 /**
  * \file compat.h --- fake the preprocessor into handlng portability
  *
- *  Time-stamp:      "2012-08-11 08:17:36 bkorb"
- *
  *  compat.h is free software.
  *  This file is part of AutoGen.
  *

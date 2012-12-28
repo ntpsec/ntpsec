@@ -1,7 +1,5 @@
 
 /*
- * Time-stamp:      "2012-08-11 08:41:53 bkorb"
- *
  *  This module implements the default usage procedure for
  *  Automated Options.  It may be overridden, of course.
  */
@@ -68,7 +66,7 @@ emit_simple_ver(tOptions * opts, FILE * fp)
         char const * pe = strchr(opts->pzCopyright, NL);
         if (pe == NULL)
             pe = opts->pzCopyright + strlen(opts->pzCopyright);
-        fwrite(opts->pzCopyright, 1, pe - opts->pzCopyright, fp);
+        fwrite(opts->pzCopyright, 1, (size_t)(pe - opts->pzCopyright), fp);
     }
 
     /*
@@ -78,7 +76,7 @@ emit_simple_ver(tOptions * opts, FILE * fp)
         char const * pe = strchr(opts->pzUsageTitle, NL);
         if (pe == NULL)
             pe = opts->pzUsageTitle + strlen(opts->pzUsageTitle);
-        fwrite(opts->pzUsageTitle, 1, pe - opts->pzUsageTitle, fp);
+        fwrite(opts->pzUsageTitle, 1, (size_t)(pe - opts->pzUsageTitle), fp);
     }
     fputc(NL, fp);
 }
@@ -96,7 +94,7 @@ emit_copy_ver(tOptions * opts, FILE * fp)
         char const * pe = strchr(opts->pzUsageTitle, NL);
         if (pe == NULL)
             pe = opts->pzUsageTitle + strlen(opts->pzUsageTitle);
-        fwrite(opts->pzUsageTitle, 1, pe - opts->pzCopyright, fp);
+        fwrite(opts->pzUsageTitle, 1, (size_t)(pe - opts->pzCopyright), fp);
     }
 
     fputc(NL, fp);

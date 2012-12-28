@@ -5,8 +5,6 @@ dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 dnl
-dnl Time-stamp:        "2010-12-07 12:57:56 bkorb"
-dnl
 AC_DEFUN([ag_FIND_LIBOPTS],
   [if test "X${ac_cv_header_autoopts_options_h}" = Xno
   then :

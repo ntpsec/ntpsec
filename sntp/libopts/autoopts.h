@@ -2,8 +2,6 @@
 /*
  *  \file autoopts.h
  *
- *  Time-stamp:      "2012-03-04 19:05:01 bkorb"
- *
  *  This file defines all the global structures and special values
  *  used in the automated option processing library.
  *
@@ -56,7 +54,18 @@
 # define DIRCH                  '/'
 #endif
 
-#define AO_EXIT_REQ_USAGE       64
+#ifndef EX_USAGE
+   /**
+    *  Command line usage problem
+    */
+#  define EX_USAGE              64
+#endif
+#ifndef EX_DATAERR
+   /**
+    *  The input data was incorrect in some way.
+    */
+#  define EX_DATAERR            64
+#endif
 #ifndef EX_NOINPUT
    /**
     *  option state was requested from a file that cannot be loaded.
@@ -69,8 +78,30 @@
     */
 #  define EX_SOFTWARE           70
 #endif
+#ifndef EX_OSERR
+   /**
+    *  Command line usage problem
+    */
+#  define EX_OSERR              71
+#endif
 
 #define NL '\n'
+#ifndef C
+/**
+ *  Coercive cast.  Compel an address to be interpreted as the type
+ *  of the first argument.  No complaints, just do it.
+ */
+#define C(_t,_p)  ((_t)(void *)(_p))
+#endif
+
+/* The __attribute__((__warn_unused_result__)) feature
+   is available in gcc versions 3.4 and newer,
+   while the typeof feature has been available since 2.7 at least.  */
+# if __GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 4)
+#  define ignore_val(x) ((void) (x))
+# else
+#  define ignore_val(x) (({ __typeof__ (x) __x = (x); (void) __x; }))
+# endif
 
 /*
  *  Convert the number to a list usable in a printf call
@@ -147,10 +178,10 @@ typedef enum {
 } teOptType;
 
 typedef struct {
-    tOptDesc*  pOD;
-    tCC*       pzOptArg;
-    tAoUL      flags;
-    teOptType  optType;
+    tOptDesc *          pOD;
+    char const *        pzOptArg;
+    opt_state_mask_t    flags;
+    teOptType           optType;
 } tOptState;
 #define OPTSTATE_INITIALIZER(st) \
     { NULL, NULL, OPTST_ ## st, TOPT_UNDEFINED }

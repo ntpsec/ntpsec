@@ -2,8 +2,6 @@
 /**
  * \file boolean.c
  *
- * Time-stamp:      "2012-08-11 08:34:39 bkorb"
- *
  *   Automated Options Paged Usage module.
  *
  *  This routine will run run-on options through a pager so the

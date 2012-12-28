@@ -2,8 +2,6 @@
 /*
  * \file sort.c
  *
- * Time-stamp:      "2011-05-24 18:07:14 bkorb"
- *
  *  This module implements argument sorting.
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
@@ -132,7 +130,7 @@ checkShortOpts(tOptions* pOpts, char* pzArg, tOptState* pOS,
                char** ppzOpts, int* pOptsIdx)
 {
     while (*pzArg != NUL) {
-        if (FAILED(opt_find_short(pOpts, (tAoUC)*pzArg, pOS)))
+        if (FAILED(opt_find_short(pOpts, (uint8_t)*pzArg, pOS)))
             return FAILURE;
 
         /*
@@ -263,7 +261,7 @@ optionSort(tOptions* pOpts)
             if ((pOpts->fOptSet & OPTPROC_SHORTOPT) == 0) {
                 res = opt_find_long(pOpts, pzArg+1, &os);
             } else {
-                res = opt_find_short(pOpts, (tAoUC)pzArg[1], &os);
+                res = opt_find_short(pOpts, (uint8_t)pzArg[1], &os);
             }
             break;
         }
@@ -312,10 +310,11 @@ optionSort(tOptions* pOpts)
 
  joinLists:
     if (optsIdx > 0)
-        memcpy(pOpts->origArgVect + 1, ppzOpts, optsIdx * sizeof(char*));
+        memcpy(pOpts->origArgVect + 1, ppzOpts,
+               (size_t)optsIdx * sizeof(char*));
     if (opdsIdx > 0)
         memcpy(pOpts->origArgVect + 1 + optsIdx, ppzOpds,
-               opdsIdx * sizeof(char*));
+               (size_t)opdsIdx * sizeof(char*));
 
  freeTemps:
     free(ppzOpts);
