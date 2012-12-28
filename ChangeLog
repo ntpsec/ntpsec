@@ -1,3 +1,4 @@
+* [Bug 2081] rawstats now logs everything
 (4.2.7p337) 2012/12/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1223] More final cleanup for rlimit changes.
 (4.2.7p336) 2012/12/21 Released by Harlan Stenn <stenn@ntp.org>
