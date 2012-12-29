@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 # 
-# It has been AutoGen-ed  December 26, 2012 at 04:11:56 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 29, 2012 at 09:29:56 AM by AutoGen 5.16.2
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -792,7 +792,6 @@ which is a printable ASCII string 16 characters or less in length.
 Each character is chosen from the 93 printable characters
 in the range 0x21 through 0x7f excluding space and the
 @quoteleft{}@quoteright{}#
-#
 character.
 
 Note that the keys used by the
@@ -874,7 +873,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p339
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p340
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits

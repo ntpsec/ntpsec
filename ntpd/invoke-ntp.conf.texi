@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 # 
-# It has been AutoGen-ed  December 25, 2012 at 12:49:13 PM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 29, 2012 at 09:07:53 AM by AutoGen 5.16.2
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -31,7 +31,6 @@ The file format is similar to other
 configuration files.
 Comments begin with a
 @quoteleft{}@quoteright{}#
-#
 character and extend to the end of the line;
 blank lines are ignored.
 Configuration commands consist of an initial keyword
@@ -1285,9 +1284,6 @@ For example, the prefix used with
 This string is directly concatenated to the prefix mentioned
 above (no intervening
 @quoteleft{}@quoteright{}/).
-/
-)
-.
 This can be modified using
 the file argument to the
 @code{filegen} statement.
@@ -2481,25 +2477,17 @@ By default, all output is turned on.
 All
 @code{configkeyword} keywords can be prefixed with
 @quoteleft{}@quoteright{}=,
-=
-,
 @quoteleft{}@quoteright{}+
-+
 and
 @quoteleft{}@quoteright{}-,
--
-,
 where
 @quoteleft{}@quoteright{}=
-=
 sets the
 @code{syslog(3)}
 priority mask,
 @quoteleft{}@quoteright{}+
-+
 adds and
 @quoteleft{}@quoteright{}-
--
 removes
 messages.
 @code{syslog(3)}

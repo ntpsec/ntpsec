@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-sntp.texi)
 # 
-# It has been AutoGen-ed  December 26, 2012 at 04:12:19 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 29, 2012 at 09:30:23 AM by AutoGen 5.16.2
 # From the definitions    sntp-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -43,7 +43,7 @@ synchronization distance, this will be reported as
 @code{'+/- ?'}. If the
 @emph{host}
 is different from the
-@emph{IP,}
+@emph{IP},
 both will be displayed.
 Otherwise, only the 
 @emph{IP}
@@ -95,7 +95,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p339
+sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p340
 USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
