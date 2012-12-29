@@ -2,6 +2,8 @@
 
 use strict;
 
+print STDERR "XXX: In the local mdoc2texi\n";	# XXX
+
 my ($optlist,$oldoptlist);
 my ($literal);
 my ($line);
@@ -273,10 +275,13 @@ sub Handle_Em
     print '@emph{';
     do {
 	print shift @words;
-    } while (@words > 0 || $words[0] =~ /^[[:punct:]]$/);
+    } while (@words > 0 && $words[0] !~ /^[[:punct:]]$/);
     print "}";
 
-    print join('', @words)	if (@words > 0);
+    while ($_ = shift @words)
+    {
+        print;
+    }
 
     print "\n";
 }
@@ -541,13 +546,16 @@ sub Handle_Q
 
     print "$lq";
     while (@words > 0 && $words[0] !~ /^[[:punct:]]$/) {
-	# print STDERR "Handle_Q: <$words[0]>\n";	# XXX
+	print STDERR "Handle_Q: <$words[0]>\n";	# XXX
 	print " " if ($wc);
 	print shift @words;
 	++$wc;
     }
     print "$rq";
-    print join('', @words)	if (@words > 0);
+    while ($_ = shift @words)
+    {
+        print;
+    }
     print "\n";
 }
 
@@ -608,7 +616,10 @@ sub Handle_Ux
     }
 
     print '@sc{',"$ux_name","}";
-    print join('', @words)	if (@words > 0);
+    while ($_ = shift @words)
+    {
+        print;
+    }
     print "\n";
 }
 
