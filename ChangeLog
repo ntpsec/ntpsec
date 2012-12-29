@@ -1,3 +1,4 @@
+* Upgrade to autogen-5.17 and libopts-37.0.12.
 * mdoc2texi fixes: trailing punctuation.
 (4.2.7p339) 2012/12/26 Released by Harlan Stenn <stenn@ntp.org>
 * mdoc2texi fixes: parseQuote, closing of list item tables.

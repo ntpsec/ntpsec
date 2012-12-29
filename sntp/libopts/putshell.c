@@ -2,8 +2,6 @@
 /**
  * \file putshell.c
  *
- * Time-stamp:      "2012-03-31 13:14:18 bkorb"
- *
  *  This module will interpret the options set in the tOptions
  *  structure and print them to standard out in a fashion that
  *  will allow them to be interpreted by the Bourne or Korn shells.

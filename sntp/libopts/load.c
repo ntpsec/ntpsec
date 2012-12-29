@@ -1,8 +1,6 @@
 
 /**
  *  \file load.c
- *  Time-stamp:      "2012-08-11 08:20:09 bkorb"
- *
  *  This file contains the routines that deal with processing text strings
  *  for options, either from a NUL-terminated string passed in or from an
  *  rc/ini file.
@@ -30,7 +28,7 @@
 
 /* = = = START-STATIC-FORWARD = = = */
 static bool
-add_prog_path(char * pzBuf, int bufSize, char const * pzName,
+add_prog_path(char * pzBuf, int b_sz, char const * pzName,
               char const * pzProgPath);
 
 static bool
@@ -92,12 +90,12 @@ assemble_arg_val(char * txt, tOptionLoadMode mode);
  *                 errors (cannot resolve the resulting path).
 =*/
 bool
-optionMakePath(char * pzBuf, int bufSize, char const * pzName,
+optionMakePath(char * pzBuf, int b_sz, char const * pzName,
                char const * pzProgPath)
 {
     size_t name_len = strlen(pzName);
 
-    if (((size_t)bufSize <= name_len) || (name_len == 0))
+    if (((size_t)b_sz <= name_len) || (name_len == 0))
         return false;
 
     /*
@@ -106,7 +104,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
     if (*pzName != '$') {
         char const*  pzS = pzName;
         char* pzD = pzBuf;
-        int   ct  = bufSize;
+        int   ct  = b_sz;
 
         for (;;) {
             if ( (*(pzD++) = *(pzS++)) == NUL)
@@ -126,7 +124,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
         return false;
 
     case '$':
-        if (! add_prog_path(pzBuf, bufSize, pzName, pzProgPath))
+        if (! add_prog_path(pzBuf, b_sz, pzName, pzProgPath))
             return false;
         break;
 
@@ -134,13 +132,13 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
         if (program_pkgdatadir[0] == NUL)
             return false;
 
-        if (snprintf(pzBuf, bufSize, "%s%s", program_pkgdatadir, pzName + 2)
-            >= bufSize)
+        if (snprintf(pzBuf, (size_t)b_sz, "%s%s",
+                     program_pkgdatadir, pzName + 2) >= b_sz)
             return false;
         break;
 
     default:
-        if (! add_env_val(pzBuf, bufSize, pzName))
+        if (! add_env_val(pzBuf, b_sz, pzName))
             return false;
     }
 
@@ -151,7 +149,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
             return false;
 
         name_len = strlen(pz);
-        if (name_len >= (size_t)bufSize) {
+        if (name_len >= (size_t)b_sz) {
             free(pz);
             return false;
         }
@@ -168,7 +166,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
             return false;
 
         name_len = strlen(z);
-        if (name_len >= bufSize)
+        if (name_len >= b_sz)
             return false;
 
         memcpy(pzBuf, z, name_len + 1);
@@ -179,7 +177,7 @@ optionMakePath(char * pzBuf, int bufSize, char const * pzName,
 }
 
 static bool
-add_prog_path(char * pzBuf, int bufSize, char const * pzName,
+add_prog_path(char * pzBuf, int b_sz, char const * pzName,
               char const * pzProgPath)
 {
     char const*    pzPath;
@@ -224,7 +222,7 @@ add_prog_path(char * pzBuf, int bufSize, char const * pzName,
      *  Concatenate the file name to the end of the executable path.
      *  The result may be either a file or a directory.
      */
-    if ((pz - pzPath)+1 + strlen(pzName) >= (unsigned)bufSize)
+    if ((unsigned)(pz - pzPath) + 1 + strlen(pzName) >= (unsigned)b_sz)
         return false;
 
     memcpy(pzBuf, pzPath, (size_t)((pz - pzPath)+1));
@@ -271,8 +269,16 @@ add_env_val(char * buf, int buf_sz, char const * name)
     return true;
 }
 
+/**
+ * Trim leading and trailing white space.
+ * If we are cooking the text and the text is quoted, then "cook"
+ * the string.  To cook, the string must be quoted.
+ *
+ * @param[in,out] txt  the input and output string
+ * @param[in]     mode the handling mode (cooking method)
+ */
 LOCAL void
-mungeString(char * txt, tOptionLoadMode mode)
+munge_str(char * txt, tOptionLoadMode mode)
 {
     char * pzE;
 

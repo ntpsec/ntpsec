@@ -2,8 +2,6 @@
 /**
  * \file stack.c
  *
- *  Time-stamp:      "2012-08-11 08:35:28 bkorb"
- *
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
  *
@@ -209,7 +207,7 @@ addArgListEntry(void** ppAL, void* entry)
          *  The base structure contains space for MIN_ARG_ALLOC_CT
          *  pointers.  We subtract it off to find our augment size.
          */
-        sz += sizeof(char*) * (pAL->allocCt - MIN_ARG_ALLOC_CT);
+        sz += sizeof(char*) * ((size_t)pAL->allocCt - MIN_ARG_ALLOC_CT);
         pAL = (tArgList*)AGREALOC((void*)pAL, sz, "expanded opt arg stack");
         if (pAL == NULL)
             return;

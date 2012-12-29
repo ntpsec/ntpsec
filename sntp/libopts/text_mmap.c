@@ -3,8 +3,6 @@
  *
  * Map a text file, ensuring the text always has an ending NUL byte.
  *
- * Time-stamp:      "2012-01-29 09:40:21 bkorb"
- *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
@@ -113,7 +111,7 @@ load_text_file(tmap_info_t * mapinfo, char const * pzFile)
     mapinfo->txt_errno   = 0;
 
 #else /* HAVE mmap */
-    size_t const pgsz = GETPAGESIZE();
+    size_t const pgsz = (size_t)GETPAGESIZE();
     void * map_addr   = NULL;
 
     (void)pzFile;
@@ -189,7 +187,7 @@ validate_mmap(char const * fname, int prot, int flags, tmap_info_t * mapinfo)
             return;
         }
 
-        mapinfo->txt_size = sb.st_size;
+        mapinfo->txt_size = (size_t)sb.st_size;
     }
 
     /*

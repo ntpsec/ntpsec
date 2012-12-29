@@ -2,8 +2,6 @@
 /**
  * \file alias.c
  *
- * Time-stamp:      "2012-08-11 08:15:43 bkorb"
- *
  *   Automated Options Paged Usage module.
  *
  *  This routine will forward an option alias to the correct option code.

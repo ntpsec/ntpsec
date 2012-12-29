@@ -2,8 +2,6 @@
 /**
  * \file file.c
  *
- *  Time-stamp:      "2011-08-06 08:49:35 bkorb"
- *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
@@ -66,7 +64,7 @@ check_existence(teOptFileType ftype, tOptions * pOpts, tOptDesc * pOD)
              */
             break;
 
-        l = p - fname;
+        l = (size_t)(p - fname);
         p = AGALOC(l + 1, "fname");
         memcpy(p, fname, l);
         p[l] = NUL;

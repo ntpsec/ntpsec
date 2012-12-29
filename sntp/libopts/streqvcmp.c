@@ -2,8 +2,6 @@
 /**
  * \file streqvcmp.c
  *
- * Time-stamp:      "2012-03-31 13:17:39 bkorb"
- *
  *  String Equivalence Comparison
  *
  *  These routines allow any character to be mapped to any other
@@ -225,7 +223,7 @@ void
 strequate(char const* s)
 {
     if ((s != NULL) && (*s != NUL)) {
-        unsigned char equiv = (unsigned)*s;
+        unsigned char equiv = (unsigned char)*s;
         while (*s != NUL)
             charmap[ (unsigned)*(s++) ] = equiv;
     }
