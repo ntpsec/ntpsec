@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 # 
-# It has been AutoGen-ed  December 26, 2012 at 04:11:20 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 29, 2012 at 09:29:21 AM by AutoGen 5.16.2
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -113,7 +113,6 @@ page.
 The data carried by NTP mode 6 messages consists of a list of
 items of the form
 @quoteleft{}variable_name=value@quoteright{},
-,
 where the
 @quoteleft{}=value@quoteright{}
 is ignored, and can be omitted,
@@ -167,7 +166,6 @@ Variables which
 thinks should have a decodable value but didn't are
 marked with a trailing
 @quoteleft{}\&?@quoteright{}.
-.
 @item Xo
 @code{debug} .Oo
 @code{more} | @code{less} | @code{off} .Oc
@@ -273,7 +271,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p339
+ntpq - standard NTP query program - Ver. 4.2.7p340
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

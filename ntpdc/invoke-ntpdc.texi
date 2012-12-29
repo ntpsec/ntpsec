@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  December 26, 2012 at 04:11:03 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 29, 2012 at 09:29:06 AM by AutoGen 5.16.2
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -69,7 +69,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p339
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p340
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -413,7 +413,6 @@ The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
 @quoteleft{}\&>@quoteright{},
-,
 followed by a file name, to the command line.
 
 A number of interactive format commands are executed entirely

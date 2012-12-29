@@ -33,7 +33,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <p>This document describes the configuration file for the NTP Project's
 <code>ntpd</code> program.
 
-  <p>This document applies to version 4.2.7p339 of <code>ntp.conf</code>.
+  <p>This document applies to version 4.2.7p340 of <code>ntp.conf</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntp_002econf-Description">ntp.conf Description</a>
@@ -80,6 +80,7 @@ but could be installed elsewhere
 <span class="sc">UNIX</span>
 configuration files. 
 Comments begin with a
+#
 #
 character and extend to the end of the line;
 blank lines are ignored. 
@@ -224,8 +225,9 @@ equivalent classes for that address family.
 [<code>minpoll</code> <code>minpoll</code> ]
 [<code>maxpoll</code> <code>maxpoll</code> ]
 [<code>ttl</code> <code>ttl</code> ]
+</dl>
 
-     <p>These five commands specify the time server name or address to
+  <p>These five commands specify the time server name or address to
 be used and the mode in which to operate. 
 The
 <code>address</code> can be
@@ -236,7 +238,7 @@ page
 (available as part of the HTML documentation
 provided in
 <span class="file">/usr/share/doc/ntp</span>).
-          <dl>
+     <dl>
 <dt><span class="samp">Ic</span><dd>For type s addresses, this command mobilizes a persistent
 client mode association with a number of remote servers. 
 In this mode the local clock can synchronized to the
@@ -311,10 +313,11 @@ The client selects the servers
 providing the best time and continues as with the
 <code>server</code> command. 
 The remaining servers are discarded as if never
-heard.
+heard. 
+</dl>
 
-          <p>Options:
-               <dl>
+  <p>Options:
+     <dl>
 <dt><span class="samp">Cm</span><dd>All packets sent to and received from the server or peer are to
 include authentication fields encrypted using the autokey scheme
 described in
@@ -382,9 +385,9 @@ network administrator.
 <br><dt><span class="samp">Cm</span><dd>Specifies the version number to be used for outgoing NTP
 packets. 
 Versions 1-4 are the choices, with version 4 the
-default.
-
-<div class="node">
+default. 
+</dl>
+  <div class="node">
 <p><hr>
 <a name="Auxiliary"></a>
 <br>
@@ -392,9 +395,9 @@ default.
 
 <h3 class="section">Auxiliary</h3>
 
-               <p>Auxiliary
+<p>Auxiliary
 Commands
-                    <dl>
+     <dl>
 <dt><span class="samp">Ic</span><dd>This command enables reception of broadcast server messages to
 any local interface (type b) address. 
 Upon receiving a message for
@@ -436,9 +439,9 @@ both the server and client should operate using symmetric-key or
 public-key authentication as described in
 <a href="#Authentication">Authentication</a>Authentication
 Options
-.
-
-<div class="node">
+. 
+</dl>
+  <div class="node">
 <p><hr>
 <a name="Authentication"></a>
 <br>
@@ -446,7 +449,7 @@ Options
 
 <h3 class="section">Authentication</h3>
 
-                    <p>Authentication
+<p>Authentication
 Support
 Authentication support allows the NTP client to verify that the
 server is in fact known and trusted and not an intruder intending
@@ -464,7 +467,7 @@ Either algorithm computes a message digest, or one-way hash, which
 can be used to verify the server has the correct private key and
 key identifier.
 
-                      <p>NTPv4 retains the NTPv3 scheme, properly described as symmetric key
+  <p>NTPv4 retains the NTPv3 scheme, properly described as symmetric key
 cryptography and, in addition, provides a new Autokey scheme
 based on public key cryptography. 
 Public key cryptography is generally considered more secure
@@ -479,14 +482,14 @@ which can be provided by commercial services or
 produced by utility programs in the OpenSSL software library
 or the NTPv4 distribution.
 
-                      <p>While the algorithms for symmetric key cryptography are
+  <p>While the algorithms for symmetric key cryptography are
 included in the NTPv4 distribution, public key cryptography
 requires the OpenSSL software library to be installed
 before building the NTP distribution. 
 Directions for doing that
 are on the Building and Installing the Distribution page.
 
-                      <p>Authentication is configured separately for each association
+  <p>Authentication is configured separately for each association
 using the
 <code>key</code> or
 <code>autokey</code> subcommand on the
@@ -500,7 +503,7 @@ options described below specify the locations of the key files,
 if other than default, which symmetric keys are trusted
 and the interval between various operations, if other than default.
 
-                      <p>Authentication is always enabled,
+  <p>Authentication is always enabled,
 although ineffective if not configured as
 described below. 
 If a NTP packet arrives
@@ -519,7 +522,7 @@ preliminary protocol exchange to obtain
 the server certificate, verify its
 credentials and initialize the protocol
 
-                      <p>The
+  <p>The
 <code>auth</code> flag controls whether new associations or
 remote configuration commands require cryptographic authentication. 
 This flag can be set or reset by the
@@ -552,7 +555,7 @@ and remote configuration commands and, in particular,
 the flag has no effect on
 the authentication process itself.
 
-                      <p>An attractive alternative where multicast support is available
+  <p>An attractive alternative where multicast support is available
 is manycast mode, in which clients periodically troll
 for servers as described in the
 <a href="#Automatic">Automatic</a>Automatic
@@ -569,7 +572,7 @@ since the client finds them during regular operation,
 and the configuration
 files for all clients can be identical.
 
-                      <p>The security model and protocol schemes for
+  <p>The security model and protocol schemes for
 both symmetric key and public key
 cryptography are summarized below;
 further details are in the briefings, papers
@@ -585,7 +588,7 @@ http://www.ntp.org/
 
 <h3 class="section">Symmetric-Key</h3>
 
-                    <p>Symmetric-Key
+<p>Symmetric-Key
 Cryptography
 The original RFC-1305 specification allows any one of possibly
 65,534 keys, each distinguished by a 32-bit key identifier, to
@@ -607,7 +610,7 @@ and
 <code>ntpdc(1ntpdcmdoc)</code>
 utility programs.
 
-                      <p>When
+  <p>When
 <code>ntpd(1ntpdmdoc)</code>
 is first started, it reads the key file specified in the
 <code>keys</code> configuration command and installs the keys
@@ -638,7 +641,7 @@ utility.
 
 <h3 class="section">Public</h3>
 
-                    <p>Public
+<p>Public
 Key
 Cryptography
 NTPv4 supports the original NTPv3 symmetric key scheme
@@ -655,7 +658,7 @@ Using all of these schemes provides strong security against
 replay with or without modification, spoofing, masquerade
 and most forms of clogging attacks.
 
-                      <p>The Autokey protocol has several modes of operation
+  <p>The Autokey protocol has several modes of operation
 corresponding to the various NTP modes supported. 
 Most modes use a special cookie which can be
 computed independently by the client and server,
@@ -669,7 +672,7 @@ current status, briefing slides and reading list on the
 Authentication
 page.
 
-                      <p>The specific cryptographic environment used by Autokey servers
+  <p>The specific cryptographic environment used by Autokey servers
 and clients is determined by a set of files
 and soft links generated by the
 <code>ntp-keygen(1ntpkeygenmdoc)</code>
@@ -689,7 +692,7 @@ The current NTP distribution supports
 all the schemes in the OpenSSL library, including
 those based on RSA and DSA digital signatures.
 
-                      <p>NTP secure groups can be used to define cryptographic compartments
+  <p>NTP secure groups can be used to define cryptographic compartments
 and security hierarchies. 
 It is important that every host
 in the group be able to construct a certificate trail to one
@@ -709,7 +712,7 @@ a trail to at least one trusted host.
 
 <h3 class="section">Naming</h3>
 
-                    <p>Naming
+<p>Naming
 and
 Addressing
 It is important to note that Autokey does not use DNS to
@@ -722,7 +725,7 @@ The name appears in the host certificate in either or both
 the subject and issuer fields, so protection against
 DNS compromise is essential.
 
-                      <p>By convention, the name of an Autokey host is the name returned
+  <p>By convention, the name of an Autokey host is the name returned
 by the Unix
 <code>gethostname(2)</code>
 system call or equivalent in other systems. 
@@ -731,7 +734,7 @@ model, there are no provisions to allow alternate names or aliases.
 However, this is not to say that DNS aliases, different names
 for each interface, etc., are constrained in any way.
 
-                      <p>It is also important to note that Autokey verifies authenticity
+  <p>It is also important to note that Autokey verifies authenticity
 using the host name, network address and public keys,
 all of which are bound together by the protocol specifically
 to deflect masquerade attacks. 
@@ -751,7 +754,7 @@ and corporate NTP servers are operated outside firewall perimeters.
 
 <h3 class="section">Operation</h3>
 
-                    <p>Operation
+<p>Operation
 A specific combination of authentication scheme (none,
 symmetric key, public key) and identity scheme is called
 a cryptotype, although not all combinations are compatible. 
@@ -764,7 +767,7 @@ Note however that some cryptotype
 combinations may successfully interoperate with each other,
 but may not represent good security practice.
 
-                      <p>The cryptotype of an association is determined at the time
+  <p>The cryptotype of an association is determined at the time
 of mobilization, either at configuration time or some time
 later when a message of appropriate cryptotype arrives. 
 When mobilized by a
@@ -778,7 +781,7 @@ using the symmetric key ID specified; if the
 <code>autokey</code> subcommand is present, the association is authenticated
 using Autokey.
 
-                      <p>When multiple identity schemes are supported in the Autokey
+  <p>When multiple identity schemes are supported in the Autokey
 protocol, the first message exchange determines which one is used. 
 The client request message contains bits corresponding
 to which schemes it has available. 
@@ -787,7 +790,7 @@ contains bits corresponding to which schemes it has available.
 Both server and client match the received bits with their own
 and select a common scheme.
 
-                      <p>Following the principle that time is a public value,
+  <p>Following the principle that time is a public value,
 a server responds to any client packet that matches
 its cryptotype capabilities. 
 Thus, a server receiving
@@ -801,7 +804,7 @@ with the first packet received.
 By default, unauthenticated associations will not be mobilized
 unless overridden in a decidedly dangerous way.
 
-                      <p>Some examples may help to reduce confusion. 
+  <p>Some examples may help to reduce confusion. 
 Client Alice has no specific cryptotype selected. 
 Server Bob has both a symmetric key file and minimal Autokey files. 
 Alice's unauthenticated messages arrive at Bob, who replies with
@@ -817,13 +820,13 @@ Bob sends Cathy a thing called a crypto-NAK, which tells her
 something broke. 
 She can see the evidence using the ntpq program.
 
-                      <p>Denise has rolled her own host key and certificate. 
+  <p>Denise has rolled her own host key and certificate. 
 She also uses one of the identity schemes as Bob. 
 She sends the first Autokey message to Bob and they
 both dance the protocol authentication and identity steps. 
 If all comes out okay, Denise and Bob continue as described above.
 
-                      <p>It should be clear from the above that Bob can support
+  <p>It should be clear from the above that Bob can support
 all the girls at the same time, as long as he has compatible
 authentication and identity credentials. 
 Now, Bob can act just like the girls in his own choice of servers;
@@ -840,7 +843,7 @@ with one server and no authentication with another might not be wise.
 
 <h3 class="section">Key</h3>
 
-                    <p>Key
+<p>Key
 Management
 The cryptographic values used by the Autokey protocol are
 incorporated as a set of files generated by the
@@ -860,7 +863,7 @@ utility programs.
 The remaining files are necessary only for the
 Autokey protocol.
 
-                      <p>Certificates imported from OpenSSL or public certificate
+  <p>Certificates imported from OpenSSL or public certificate
 authorities have certian limitations. 
 The certificate should be in ASN.1 syntax, X.509 Version 3
 format and encoded in PEM, which is the same format
@@ -883,9 +886,9 @@ contain the value
 
 <h3 class="section">Authentication</h3>
 
-                    <p>Authentication
+<p>Authentication
 Commands
-                         <dl>
+     <dl>
 <dt><span class="samp">Ic</span><dd>Specifies the interval between regenerations of the session key
 list used with the Autokey protocol. 
 Note that the size of the key
@@ -926,7 +929,7 @@ in the
 <code>keysdir</code> command or default
 <span class="file">/usr/local/etc</span>. 
 Following are the subcommands:
-                              <dl>
+          <dl>
 <dt><span class="samp">Cm</span><dd>Specifies the location of the required host public certificate file. 
 This overrides the link
 <span class="file">ntpkey_cert_</span>NsArhostname
@@ -967,9 +970,9 @@ the link
 <span class="file">ntpkey_sign_</span>NsArhostname
 in the keys directory. 
 If this file is
-not found, the host key is also the sign key.
-
-                              <p>.It
+not found, the host key is also the sign key. 
+</dl>
+     .It
 Ic
 keys
 Ar
@@ -1050,11 +1053,11 @@ integers with values from 1 to 65,534.
 
 <h3 class="section">Error</h3>
 
-                              <p>Error
+     <p>Error
 Codes
 The following error codes are reported via the NTP control
 and monitoring protocol trap mechanism.
-                                   <dl>
+          <dl>
 <dt><span class="samp">101</span><dd>(bad field format or length)
 The packet has invalid version, length or format. 
 <br><dt><span class="samp">102</span><dd>(bad timestamp)
@@ -1087,9 +1090,9 @@ The leapseconds table is missing, corrupted or bogus.
 <br><dt><span class="samp">113</span><dd>(bad or missing certificate)
 The certificate is missing, corrupted or bogus. 
 <br><dt><span class="samp">114</span><dd>(bad or missing identity)
-The identity key is missing, corrupt or bogus.
-
-<div class="node">
+The identity key is missing, corrupt or bogus. 
+</dl>
+       <div class="node">
 <p><hr>
 <a name="Monitoring"></a>
 <br>
@@ -1097,7 +1100,7 @@ The identity key is missing, corrupt or bogus.
 
 <h3 class="section">Monitoring</h3>
 
-                                   <p>Monitoring
+     <p>Monitoring
 Support
 <code>ntpd(1ntpdmdoc)</code>
 includes a comprehensive monitoring facility suitable
@@ -1125,13 +1128,13 @@ automatically summarized and archived for retrospective analysis.
 
 <h3 class="section">Monitoring</h3>
 
-                                   <p>Monitoring
+     <p>Monitoring
 Commands
-                                        <dl>
+          <dl>
 <dt><span class="samp">Ic</span><dd>Enables writing of statistics records. 
 Currently, four kinds of
 <code>name</code> statistics are supported.
-                                             <dl>
+               <dl>
 <dt><span class="samp">Cm</span><dd>Enables recording of clock driver statistics information. 
 Each update
 received from a clock driver appends a line of the following form to
@@ -1141,7 +1144,7 @@ the file generation set named
 49213 525.624 127.127.4.1 93 226 00:08:29.606 D
 .Ed
 
-                                             <p>The first two fields show the date (Modified Julian Day) and time
+               <p>The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). 
 The next field shows the
 clock address in dotted-quad notation. 
@@ -1162,7 +1165,7 @@ following form to the file generation set named
 49213 525.624 127.127.4.1 message
 .Ed
 
-                                             <p>The first two fields show the date (Modified Julian Day) and time
+               <p>The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). 
 The next field shows the peer
 address in dotted-quad notation, The final message field includes the
@@ -1180,7 +1183,7 @@ the file generation set named
 50935 75440.031 0.000006019 13.778190 0.000351733 0.0133806
 .Ed
 
-                                             <p>The first two fields show the date (Modified Julian Day) and
+               <p>The first two fields show the date (Modified Julian Day) and
 time (seconds and fraction past UTC midnight). 
 The next five fields
 show time offset (seconds), frequency offset (parts per million -
@@ -1198,7 +1201,7 @@ generation set named
 48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.001424877 0.000958674
 .Ed
 
-                                             <p>The first two fields show the date (Modified Julian Day) and
+               <p>The first two fields show the date (Modified Julian Day) and
 time (seconds and fraction past UTC midnight). 
 The next two fields
 show the peer address in dotted-quad notation and status,
@@ -1219,7 +1222,7 @@ following form to the file generation set named
 50928 2132.543 128.4.1.1 128.4.1.20 3102453281.584327000 3102453281.58622800031 02453332.540806000 3102453332.541458000
 .Ed
 
-                                             <p>The first two fields show the date (Modified Julian Day) and
+               <p>The first two fields show the date (Modified Julian Day) and
 time (seconds and fraction past UTC midnight). 
 The next two fields
 show the remote peer or clock address followed by the local address
@@ -1238,12 +1241,12 @@ set named
 50928 2132.543 36000 81965 0 9546 56 71793 512 540 10 147
 .Ed
 
-                                             <p>The first two fields show the date (Modified Julian Day) and time
+               <p>The first two fields show the date (Modified Julian Day) and time
 (seconds and fraction past UTC midnight). 
 The remaining ten fields show
 the statistics counter values accumulated since the last generated
 line.
-                                                  <dl>
+                    <dl>
 <dt><span class="samp">Time</span><dd>Time in hours since the system was last rebooted. 
 <br><dt><span class="samp">Packets</span><dd>Total number of packets received. 
 <br><dt><span class="samp">Packets</span><dd>Number of packets received in response to previous packets sent
@@ -1253,9 +1256,9 @@ line.
 <br><dt><span class="samp">Access</span><dd>Number of packets denied access for any reason. 
 <br><dt><span class="samp">Bad</span><dd>Number of packets with invalid length, format or port number. 
 <br><dt><span class="samp">Bad</span><dd>Number of packets not verified as authentic. 
-<br><dt><span class="samp">Rate</span><dd>Number of packets discarded due to rate limitation.
-
-                                                  <p>.It
+<br><dt><span class="samp">Rate</span><dd>Number of packets discarded due to rate limitation. 
+</dl>
+               .It
 Cm
 statsdir
 Ar
@@ -1293,10 +1296,10 @@ operations without the risk of disturbing the operation of ntpd.
 (Most important: they can be removed to free space for new data
 produced.)
 
-                                                  <p>Note that this command can be sent from the
+               <p>Note that this command can be sent from the
 <code>ntpdc(1ntpdcmdoc)</code>
 program running at a remote location.
-                                                       <dl>
+                    <dl>
 <dt><span class="samp">Cm</span><dd>This is the type of the statistics records, as shown in the
 <code>statistics</code> command. 
 <br><dt><span class="samp">Cm</span><dd>This is the file name for the statistics records. 
@@ -1304,7 +1307,7 @@ Filenames of set
 members are built from three concatenated elements
 <code>Cm</code> <code>prefix</code>, <code>Cm</code> <code>filename</code> and
 <code>Cm</code> <code>suffix</code>:
-                                                            <dl>
+                         <dl>
 <dt><span class="samp">Cm</span><dd>This is a constant filename path. 
 It is not subject to
 modifications via the
@@ -1320,7 +1323,10 @@ For example, the prefix used with
 <code>statsdir</code> option explained above. 
 <br><dt><span class="samp">Cm</span><dd>This string is directly concatenated to the prefix mentioned
 above (no intervening
-/ ) . 
+/). 
+/
+)
+. 
 This can be modified using
 the file argument to the
 <code>filegen</code> statement. 
@@ -1331,9 +1337,9 @@ allowed in this component to prevent filenames referring to
 parts outside the filesystem hierarchy denoted by
 <code>prefix</code>. <br><dt><span class="samp">Cm</span><dd>This part is reflects individual elements of a file set. 
 It is
-generated according to the type of a file set.
-
-                                                            <p>.It
+generated according to the type of a file set. 
+</dl>
+                    .It
 Cm
 type
 Ar
@@ -1341,7 +1347,7 @@ typename
 A file generation set is characterized by its type. 
 The following
 types are supported:
-                                                                 <dl>
+                         <dl>
 <dt><span class="samp">Cm</span><dd>The file set is actually a single plain file. 
 <br><dt><span class="samp">Cm</span><dd>One element of file set is used per incarnation of a ntpd
 server. 
@@ -1403,8 +1409,8 @@ This number is taken to be the number of seconds the server is
 running at the start of the corresponding 24-hour period. 
 Information is only written to a file generation by specifying
 <code>enable</code>; output is prevented by specifying
-<code>disable</code>. 
-.It
+<code>disable</code>. </dl>
+                    .It
 Cm
 link
 |
@@ -1441,7 +1447,7 @@ Enables or disables the recording function.
 
 <h3 class="section">Access</h3>
 
-                                                                 <p>Access
+                    <p>Access
 Control
 Support
 The
@@ -1463,7 +1469,7 @@ page
 provided in
 <span class="file">/usr/share/doc/ntp</span>).
 
-                                                                   <p>The restriction facility was implemented in conformance
+                      <p>The restriction facility was implemented in conformance
 with the access policies for the original NSFnet backbone
 time servers. 
 Later the facility was expanded to deflect
@@ -1475,7 +1481,7 @@ an alternative to the NTP authentication facilities.
 Source address based restrictions are easily circumvented
 by a determined cracker.
 
-                                                                   <p>Clients can be denied service because they are explicitly
+                      <p>Clients can be denied service because they are explicitly
 included in the restrict list created by the restrict command
 or implicitly as the result of cryptographic or rate limit
 violations. 
@@ -1498,7 +1504,7 @@ the restrictions is by restarting the server.
 
 <h3 class="section">The</h3>
 
-                                                                 <p>The
+                    <p>The
 Kiss-of-Death
 Packet
 Ordinarily, packets denied service are simply dropped with no
@@ -1520,7 +1526,7 @@ the code is "DENY"; if the
 is exceeded, the code is "RATE". 
 Finally, if a cryptographic violation occurs, the code is "CRYP".
 
-                                                                   <p>A client receiving a KoD performs a set of sanity checks to
+                      <p>A client receiving a KoD performs a set of sanity checks to
 minimize security exposure, then updates the stratum and
 reference identifier peer variables, sets the access
 denied (TEST4) bit in the peer flash variable and sends
@@ -1540,10 +1546,10 @@ It will happen at the server only if the server operator cooperates.
 
 <h3 class="section">Access</h3>
 
-                                                                 <p>Access
+                    <p>Access
 Control
 Commands
-                                                                      <dl>
+                         <dl>
 <dt><span class="samp">Xo</span><dd>[<code>average</code> <code>avg</code> ]
 [<code>minimum</code> <code>min</code> ]
 [<code>monitor</code> <code>prob</code> ]
@@ -1590,7 +1596,7 @@ restrict informational queries and attempts to do run-time
 reconfiguration of the server. 
 One or more of the following flags
 may be specified:
-                                                                           <dl>
+                              <dl>
 <dt><span class="samp">Cm</span><dd>Deny packets of all kinds, including
 <code>ntpq(1ntpqmdoc)</code>
 and
@@ -1659,9 +1665,10 @@ be specified.
 The
 <code>ntpport</code> is considered more specific and
 is sorted later in the list. 
-<br><dt><span class="samp">Cm</span><dd>Deny packets that do not match the current NTP version.
+<br><dt><span class="samp">Cm</span><dd>Deny packets that do not match the current NTP version. 
+</dl>
 
-                                                                           <p>Default restriction list entries with the flags ignore, interface,
+                         <p>Default restriction list entries with the flags ignore, interface,
 ntpport, for each of the local host's interface addresses are
 inserted into the table at startup to prevent the server
 from attempting to synchronize to its own time. 
@@ -1678,7 +1685,7 @@ NTP server is unrestricted).
 
 <h3 class="section">Automatic</h3>
 
-                                                                           <p>Automatic
+                         <p>Automatic
 NTP
 Configuration
 Options
@@ -1690,7 +1697,7 @@ Options
 
 <h3 class="section">Manycasting</h3>
 
-                                                                           <p>Manycasting
+                         <p>Manycasting
 Manycasting is a automatic discovery and configuration paradigm
 new to NTPv4. 
 It is intended as a means for a multicast client
@@ -1703,14 +1710,14 @@ client associations with some number of the "best"
 of the nearby manycast servers, yet automatically reconfigures
 to sustain this number of servers should one or another fail.
 
-                                                                             <p>Note that the manycasting paradigm does not coincide
+                           <p>Note that the manycasting paradigm does not coincide
 with the anycast paradigm described in RFC-1546,
 which is designed to find a single server from a clique
 of servers providing the same service. 
 The manycast paradigm is designed to find a plurality
 of redundant servers satisfying defined optimality criteria.
 
-                                                                             <p>Manycasting can be used with either symmetric key
+                           <p>Manycasting can be used with either symmetric key
 or public key cryptography. 
 The public key infrastructure (PKI)
 offers the best protection against compromised keys
@@ -1724,7 +1731,7 @@ http://www.openssl.org/
 The library can also be used with other NTPv4 modes
 as well and is highly recommended, especially for broadcast modes.
 
-                                                                             <p>A persistent manycast client association is configured
+                           <p>A persistent manycast client association is configured
 using the manycastclient command, which is similar to the
 server command but with a multicast (IPv4 class
 <code>D</code> or IPv6 prefix
@@ -1739,7 +1746,7 @@ There can be as many manycast client associations
 as different group address, each one serving as a template
 for a future ephemeral unicast client/server association.
 
-                                                                             <p>Manycast servers configured with the
+                           <p>Manycast servers configured with the
 <code>manycastserver</code> command listen on the specified group address for manycast
 client messages. 
 Note the distinction between manycast client,
@@ -1751,7 +1758,7 @@ to a valid source and operating at a stratum level equal
 to or lower than the manycast client, it replies to the
 manycast client message with an ordinary unicast server message.
 
-                                                                             <p>The manycast client receiving this message mobilizes
+                           <p>The manycast client receiving this message mobilizes
 an ephemeral client/server association according to the
 matching manycast client template, but only if cryptographically
 authenticated and the server stratum is less than or equal
@@ -1773,7 +1780,7 @@ distance.
 The surviving associations then continue
 in ordinary client/server mode.
 
-                                                                             <p>The manycast client polling strategy is designed to reduce
+                           <p>The manycast client polling strategy is designed to reduce
 as much as possible the volume of manycast client messages
 and the effects of implosion due to near-simultaneous
 arrival of manycast server messages. 
@@ -1793,7 +1800,7 @@ the maximum hops specified by this command or a sufficient
 number client associations have been found. 
 Further retransmissions use the same TTL.
 
-                                                                             <p>The quality and reliability of the suite of associations
+                           <p>The quality and reliability of the suite of associations
 discovered by the manycast client is determined by the NTP
 mitigation algorithms and the
 <code>minclock</code> and
@@ -1812,7 +1819,7 @@ For manycast service
 <code>minsane</code> should be explicitly set to 4, assuming at least that
 number of servers are available.
 
-                                                                             <p>If at least
+                           <p>If at least
 <code>minclock</code> servers are found, the manycast poll interval is immediately
 set to eight times
 <code>maxpoll</code>. If less than
@@ -1827,7 +1834,7 @@ Note that while all this is going on,
 each client/server association found is operating normally
 it the system poll interval.
 
-                                                                             <p>Administratively scoped multicast boundaries are normally
+                           <p>Administratively scoped multicast boundaries are normally
 specified by the network router configuration and,
 in the case of IPv6, the link/site scope prefix. 
 By default, the increment for TTL hops is 32 starting
@@ -1835,7 +1842,7 @@ from 31; however, the
 <code>ttl</code> configuration command can be
 used to modify the values to match the scope rules.
 
-                                                                             <p>It is often useful to narrow the range of acceptable
+                           <p>It is often useful to narrow the range of acceptable
 servers which can be found by manycast client associations. 
 Because manycast servers respond only when the client
 stratum is equal to or greater than the server stratum,
@@ -1873,7 +1880,7 @@ depending on the number of servers in range.
 The recommended value for
 <code>maxpoll</code> is 12 (4,096 s).
 
-                                                                             <p>It is possible and frequently useful to configure a host
+                           <p>It is possible and frequently useful to configure a host
 as both manycast client and manycast server. 
 A number of hosts configured this way and sharing a common
 group address will automatically organize themselves
@@ -1891,7 +1898,7 @@ The only exception is that each primary server
 configuration file must include commands for the primary
 reference source such as a GPS receiver.
 
-                                                                             <p>The remaining configuration files for all secondary
+                           <p>The remaining configuration files for all secondary
 servers and clients have the same contents, except for the
 <code>tos</code> command, which is specific for each stratum level. 
 For stratum 1 and stratum 2 servers, that command is
@@ -1901,7 +1908,7 @@ For stratum 3 and above servers the
 Thus, all stratum 3 configuration files are identical,
 all stratum 4 files are identical and so forth.
 
-                                                                             <p>Once operations have stabilized in this scenario,
+                           <p>Once operations have stabilized in this scenario,
 the primary servers will find the primary reference source
 and each other, since they both operate at the same
 stratum (1), but not with any secondary server or client,
@@ -1913,7 +1920,7 @@ it will continue to operate as a client and other clients
 will time out the corresponding association and
 re-associate accordingly.
 
-                                                                             <p>Some administrators prefer to avoid running
+                           <p>Some administrators prefer to avoid running
 <code>ntpd(1ntpdmdoc)</code>
 continuously and run either
 <code>ntpdate(8)</code>
@@ -1940,7 +1947,7 @@ configuration file.
 
 <h3 class="section">Manycast</h3>
 
-                                                                           <p>Manycast
+                         <p>Manycast
 Interactions
 with
 Autokey
@@ -1957,7 +1964,7 @@ but the certificates remain in the local cache.
 It often happens that several complete signing trails
 from the client to the primary servers are collected in this way.
 
-                                                                             <p>About once an hour or less often if the poll interval
+                           <p>About once an hour or less often if the poll interval
 exceeds this, the client regenerates the Autokey key list. 
 This is in general transparent in client/server mode. 
 However, about once per day the server private value
@@ -1981,9 +1988,9 @@ from there while collecting all servers in scope.
 
 <h3 class="section">Manycast</h3>
 
-                                                                           <p>Manycast
+                         <p>Manycast
 Options
-                                                                                <dl>
+                              <dl>
 <dt><span class="samp">Xo</span><dd>.Oo
 <code>ceiling</code> <code>ceiling</code> | <code>cohort</code> <code>0</code> | <code>1</code> | <code>floor</code> <code>floor</code> | <code>minclock</code> <code>minclock</code> | <code>minsane</code> <code>minsane</code> .Oc
 This command affects the clock selection and clustering
@@ -1993,7 +2000,7 @@ quantity of peers used to synchronize the system clock
 and is most useful in manycast mode. 
 The variables operate
 as follows:
-                                                                                     <dl>
+                                   <dl>
 <dt><span class="samp">Cm</span><dd>Peers with strata above
 <code>ceiling</code> will be discarded if there are at least
 <code>minclock</code> peers remaining. 
@@ -2027,9 +2034,9 @@ for legacy purposes.
 However, according to principles of
 Byzantine agreement,
 <code>minsane</code> should be at least 4 in order to detect and discard
-a single falseticker.
-
-                                                                                     <p>.It
+a single falseticker. 
+</dl>
+                              .It
 Cm
 ttl
 Ar
@@ -2050,7 +2057,7 @@ multiples of 32 starting at 31.
 
 <h3 class="section">Reference</h3>
 
-                                                                                     <p>Reference
+                              <p>Reference
 Clock
 Support
 The NTP Version 4 daemon supports some three dozen different radio,
@@ -2090,7 +2097,7 @@ page
 provided in
 <span class="file">/usr/share/doc/ntp</span>).
 
-                                                                                       <p>A reference clock will generally (though not always) be a radio
+                                <p>A reference clock will generally (though not always) be a radio
 timecode receiver which is synchronized to a source of standard
 time such as the services offered by the NRC in Canada and NIST and
 USNO in the US. 
@@ -2106,7 +2113,7 @@ or the hardware port has not been appropriately configured results
 in a scalding remark to the system log file, but is otherwise non
 hazardous.
 
-                                                                                       <p>For the purposes of configuration,
+                                <p>For the purposes of configuration,
 <code>ntpd(1ntpdmdoc)</code>
 treats
 reference clocks in a manner analogous to normal NTP peers as much
@@ -2136,7 +2143,7 @@ While it may seem overkill, it is in fact
 sometimes useful to configure multiple reference clocks of the same
 type, in which case the unit numbers must be unique.
 
-                                                                                       <p>The
+                                <p>The
 <code>server</code> command is used to configure a reference
 clock, where the
 <code>address</code> argument in that command
@@ -2165,7 +2172,7 @@ meaning only for selected clock drivers.
 See the individual clock
 driver document pages for additional information.
 
-                                                                                       <p>The
+                                <p>The
 <code>fudge</code> command is used to provide additional
 information for individual clock drivers and normally follows
 immediately after the
@@ -2181,7 +2188,7 @@ device-dependent time offsets and four flags that can be included
 in the
 <code>fudge</code> command as well.
 
-                                                                                       <p>The stratum number of a reference clock is by default zero. 
+                                <p>The stratum number of a reference clock is by default zero. 
 Since the
 <code>ntpd(1ntpdmdoc)</code>
 daemon adds one to the stratum of each
@@ -2207,10 +2214,10 @@ these options apply to all clock drivers.
 
 <h3 class="section">Reference</h3>
 
-                                                                                     <p>Reference
+                              <p>Reference
 Clock
 Commands
-                                                                                          <dl>
+                                   <dl>
 <dt><span class="samp">Xo</span><dd>.Sm
 off
 .Li
@@ -2229,7 +2236,7 @@ on
 This command can be used to configure reference clocks in
 special ways. 
 The options are interpreted as follows:
-                                                                                               <dl>
+                                        <dl>
 <dt><span class="samp">Cm</span><dd>Marks the reference clock as preferred. 
 All other things being
 equal, this host will be chosen for synchronization among a set of
@@ -2256,9 +2263,9 @@ most directly connected reference clocks, both
 For modem reference clocks,
 <code>minpoll</code> defaults to 10 (17.1 m) and
 <code>maxpoll</code> defaults to 14 (4.5 h). 
-The allowable range is 4 (16 s) to 17 (36.4 h) inclusive.
-
-                                                                                               <p>.It
+The allowable range is 4 (16 s) to 17 (36.4 h) inclusive. 
+</dl>
+                                   .It
 Xo
 Ic
 fudge
@@ -2292,7 +2299,7 @@ is possible at run time using the
 program. 
 The options are interpreted as
 follows:
-                                                                                                    <dl>
+                                        <dl>
 <dt><span class="samp">Cm</span><dd>Specifies a constant to be added to the time offset produced by
 the driver, a fixed-point decimal number in seconds. 
 This is used
@@ -2359,7 +2366,8 @@ Further information on the
 <code>filegen</code> command can be found in
 <a href="#Monitoring">Monitoring</a>Monitoring
 Options
-.
+. 
+</dl>
 
 <div class="node">
 <p><hr>
@@ -2369,9 +2377,9 @@ Options
 
 <h3 class="section">Miscellaneous</h3>
 
-                                                                                                    <p>Miscellaneous
+                                   <p>Miscellaneous
 Options
-                                                                                                         <dl>
+                                        <dl>
 <dt><span class="samp">Ic</span><dd>The broadcast and multicast modes require a special calibration
 to determine the network delay between the local and remote
 servers. 
@@ -2403,7 +2411,7 @@ frequency of zero and creates the file when writing it for the first time.
 If this command is not given, the daemon will always start with an initial
 frequency of zero.
 
-                                                                                                         <p>The file format consists of a single line containing a single
+                                        <p>The file format consists of a single line containing a single
 floating point number, which records the frequency offset measured
 in parts-per-million (PPM). 
 The file is updated by first writing
@@ -2424,3 +2432,320 @@ Note that all of these flags
 can be controlled remotely using the
 <code>ntpdc(1ntpdcmdoc)</code>
 utility program.
+                                             <dl>
+<dt><span class="samp">Cm</span><dd>Enables the server to synchronize with unconfigured peers only if the
+peer has been correctly authenticated using either public key or
+private key cryptography. 
+The default for this flag is
+<code>enable</code>. <br><dt><span class="samp">Cm</span><dd>Enables the server to listen for a message from a broadcast or
+multicast server, as in the
+<code>multicastclient</code> command with default
+address. 
+The default for this flag is
+<code>disable</code>. <br><dt><span class="samp">Cm</span><dd>Enables the calibrate feature for reference clocks. 
+The default for
+this flag is
+<code>disable</code>. <br><dt><span class="samp">Cm</span><dd>Enables the kernel time discipline, if available. 
+The default for this
+flag is
+<code>enable</code> if support is available, otherwise
+<code>disable</code>. <br><dt><span class="samp">Cm</span><dd>Enables the monitoring facility. 
+See the
+<code>ntpdc(1ntpdcmdoc)</code>
+program
+and the
+<code>monlist</code> command or further information. 
+The
+default for this flag is
+<code>enable</code>. <br><dt><span class="samp">Cm</span><dd>Enables time and frequency discipline. 
+In effect, this switch opens and
+closes the feedback loop, which is useful for testing. 
+The default for
+this flag is
+<code>enable</code>. <br><dt><span class="samp">Cm</span><dd>Enables the pulse-per-second (PPS) signal when frequency and time is
+disciplined by the precision time kernel modifications. 
+See the
+"A Kernel Model for Precision Timekeeping"
+(available as part of the HTML documentation
+provided in
+<span class="file">/usr/share/doc/ntp</span>)
+page for further information. 
+The default for this flag is
+<code>disable</code>. <br><dt><span class="samp">Cm</span><dd>Enables the statistics facility. 
+See the
+<a href="#Monitoring">Monitoring</a>Monitoring
+Options
+section for further information. 
+The default for this flag is
+<code>disable</code>. </dl>
+                                        .It
+Ic
+includefile
+Ar
+includefile
+This command allows additional configuration commands
+to be included from a separate file. 
+Include files may
+be nested to a depth of five; upon reaching the end of any
+include file, command processing resumes in the previous
+configuration file. 
+This option is useful for sites that run
+<code>ntpd(1ntpdmdoc)</code>
+on multiple hosts, with (mostly) common options (e.g., a
+restriction list). 
+.It
+Ic
+logconfig
+Ar
+configkeyword
+This command controls the amount and type of output written to
+the system
+<code>syslog(3)</code>
+facility or the alternate
+<code>logfile</code> log file. 
+By default, all output is turned on. 
+All
+<code>configkeyword</code> keywords can be prefixed with
+=,
+=
+,
++
++
+and
+-,
+-
+,
+where
+=
+=
+sets the
+<code>syslog(3)</code>
+priority mask,
++
++
+adds and
+-
+-
+removes
+messages. 
+<code>syslog(3)</code>
+messages can be controlled in four
+classes
+.Po
+<code>clock</code>, <code>peer</code>, <code>sys</code> and
+<code>sync</code> .Pc
+. 
+Within these classes four types of messages can be
+controlled: informational messages
+.Po
+<code>info</code> .Pc
+,
+event messages
+.Po
+<code>events</code> .Pc
+,
+statistics messages
+.Po
+<code>statistics</code> .Pc
+and
+status messages
+.Po
+<code>status</code> .Pc
+.
+
+                                        <p>Configuration keywords are formed by concatenating the message class with
+the event class. 
+The
+<code>all</code> prefix can be used instead of a message class. 
+A
+message class may also be followed by the
+<code>all</code> keyword to enable/disable all
+messages of the respective message class.Thus, a minimal log configuration
+could look like this:
+.Bd
+-literal
+logconfig =syncstatus +sysevents
+.Ed
+
+                                        <p>This would just list the synchronizations state of
+<code>ntpd(1ntpdmdoc)</code>
+and the major system events. 
+For a simple reference server, the
+following minimum message configuration could be useful:
+.Bd
+-literal
+logconfig =syncall +clockall
+.Ed
+
+                                        <p>This configuration will list all clock information and
+synchronization information. 
+All other events and messages about
+peers, system events and so on is suppressed. 
+.It
+Ic
+logfile
+Ar
+logfile
+This command specifies the location of an alternate log file to
+be used instead of the default system
+<code>syslog(3)</code>
+facility. 
+This is the same operation as the -l command line option. 
+.It
+Ic
+setvar
+Ar
+variable
+Op
+Cm
+default
+This command adds an additional system variable. 
+These
+variables can be used to distribute additional information such as
+the access policy. 
+If the variable of the form
+.Sm
+off
+.Va
+name
+=
+Ar
+value
+.Sm
+on
+is followed by the
+<code>default</code> keyword, the
+variable will be listed as part of the default system variables
+.Po
+<code>ntpq(1ntpqmdoc)</code>
+<code>rv</code> command
+.Pc
+)
+. 
+These additional variables serve
+informational purposes only. 
+They are not related to the protocol
+other that they can be listed. 
+The known protocol variables will
+always override any variables defined via the
+<code>setvar</code> mechanism. 
+There are three special variables that contain the names
+of all variable of the same group. 
+The
+.Va
+sys_var_list
+holds
+the names of all system variables. 
+The
+.Va
+peer_var_list
+holds
+the names of all peer variables and the
+.Va
+clock_var_list
+holds the names of the reference clock variables. 
+.It
+Xo
+Ic
+tinker
+.Oo
+<code>allan</code> <code>allan</code> | <code>dispersion</code> <code>dispersion</code> | <code>freq</code> <code>freq</code> | <code>huffpuff</code> <code>huffpuff</code> | <code>panic</code> <code>panic</code> | <code>step</code> <code>srep</code> | <code>stepout</code> <code>stepout</code> .Oc
+This command can be used to alter several system variables in
+very exceptional circumstances. 
+It should occur in the
+configuration file before any other configuration options. 
+The
+default values of these variables have been carefully optimized for
+a wide range of network speeds and reliability expectations. 
+In
+general, they interact in intricate ways that are hard to predict
+and some combinations can result in some very nasty behavior. 
+Very
+rarely is it necessary to change the default values; but, some
+folks cannot resist twisting the knobs anyway and this command is
+for them. 
+Emphasis added: twisters are on their own and can expect
+no help from the support group.
+
+                                        <p>The variables operate as follows:
+                                             <dl>
+<dt><span class="samp">Cm</span><dd>The argument becomes the new value for the minimum Allan
+intercept, which is a parameter of the PLL/FLL clock discipline
+algorithm. 
+The value in log2 seconds defaults to 7 (1024 s), which is also the lower
+limit. 
+<br><dt><span class="samp">Cm</span><dd>The argument becomes the new value for the dispersion increase rate,
+normally .000015 s/s. 
+<br><dt><span class="samp">Cm</span><dd>The argument becomes the initial value of the frequency offset in
+parts-per-million. 
+This overrides the value in the frequency file, if
+present, and avoids the initial training state if it is not. 
+<br><dt><span class="samp">Cm</span><dd>The argument becomes the new value for the experimental
+huff-n'-puff filter span, which determines the most recent interval
+the algorithm will search for a minimum delay. 
+The lower limit is
+900 s (15 m), but a more reasonable value is 7200 (2 hours). 
+There
+is no default, since the filter is not enabled unless this command
+is given. 
+<br><dt><span class="samp">Cm</span><dd>The argument is the panic threshold, normally 1000 s. 
+If set to zero,
+the panic sanity check is disabled and a clock offset of any value will
+be accepted. 
+<br><dt><span class="samp">Cm</span><dd>The argument is the step threshold, which by default is 0.128 s. 
+It can
+be set to any positive number in seconds. 
+If set to zero, step
+adjustments will never occur. 
+Note: The kernel time discipline is
+disabled if the step threshold is set to zero or greater than the
+default. 
+<br><dt><span class="samp">Cm</span><dd>The argument is the stepout timeout, which by default is 900 s. 
+It can
+be set to any positive number in seconds. 
+If set to zero, the stepout
+pulses will not be suppressed. 
+</dl>
+                                        .It
+Xo
+Ic
+trap
+Ar
+host_address
+[<code>port</code> <code>port_number</code> ]
+[<code>interface</code> <code>interface_address</code> ]
+This command configures a trap receiver at the given host
+address and port number for sending messages with the specified
+local interface address. 
+If the port number is unspecified, a value
+of 18447 is used. 
+If the interface address is not specified, the
+message is sent with a source address of the local interface the
+message is sent through. 
+Note that on a multihomed host the
+interface used may vary from time to time with routing changes.
+
+                                        <p>The trap receiver will generally log event messages and other
+information from the server in a log file. 
+While such monitor
+programs may also request their own trap dynamically, configuring a
+trap receiver will ensure that no messages are lost when the server
+is started. 
+.It
+Cm
+hop
+Ar
+... 
+This command specifies a list of TTL values in increasing order, up to 8
+values can be specified. 
+In manycast mode these values are used in turn in
+an expanding-ring search. 
+The default is eight multiples of 32 starting at
+31.
+
+                                        <p>This section was generated by <strong>AutoGen</strong>,
+using the <code>agtexi-cmd</code> template and the option descriptions for the <code>ntp.conf</code> program. 
+This software is released under the NTP license, &lt;http://ntp.org/license&gt;.
+
+</body></html>
+

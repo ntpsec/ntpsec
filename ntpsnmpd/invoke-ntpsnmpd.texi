@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpsnmpd.texi)
 # 
-# It has been AutoGen-ed  December 26, 2012 at 04:11:35 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  December 29, 2012 at 09:29:36 AM by AutoGen 5.16.2
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -47,7 +47,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p339
+ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p340
 USAGE:  ntpsnmpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -n no  nofork         Do not fork
@@ -187,7 +187,6 @@ it to autogen-users@@lists.sourceforge.net.  Thank you.
 @code{ntpsnmpd}
 currently uses a private MIB OID,
 @quoteleft{}enterprises.5597@quoteright{},
-,
 which is the Meinberg top level OEM OID, and
 @quoteleft{}99@quoteright{}
 is the temporary working space for this project. 
