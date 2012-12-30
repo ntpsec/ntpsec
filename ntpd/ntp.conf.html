@@ -33,7 +33,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <p>This document describes the configuration file for the NTP Project's
 <code>ntpd</code> program.
 
-  <p>This document applies to version 4.2.7p340 of <code>ntp.conf</code>.
+  <p>This document applies to version 4.2.7p341 of <code>ntp.conf</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntp_002econf-Description">ntp.conf Description</a>
@@ -80,7 +80,6 @@ but could be installed elsewhere
 <span class="sc">UNIX</span>
 configuration files. 
 Comments begin with a
-#
 #
 character and extend to the end of the line;
 blank lines are ignored. 
@@ -1324,9 +1323,6 @@ For example, the prefix used with
 <br><dt><span class="samp">Cm</span><dd>This string is directly concatenated to the prefix mentioned
 above (no intervening
 /). 
-/
-)
-. 
 This can be modified using
 the file argument to the
 <code>filegen</code> statement. 
@@ -2507,24 +2503,16 @@ By default, all output is turned on.
 All
 <code>configkeyword</code> keywords can be prefixed with
 =,
-=
-,
-+
 +
 and
 -,
--
-,
 where
-=
 =
 sets the
 <code>syslog(3)</code>
 priority mask,
 +
-+
 adds and
--
 -
 removes
 messages. 
