@@ -1,3 +1,4 @@
+(4.2.7p342) 2012/12/31 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2081 - Backward Incompatible] rawstats now logs everything.
 (4.2.7p341) 2012/12/30 Released by Harlan Stenn <stenn@ntp.org>
 (4.2.7p340) 2012/12/29 Released by Harlan Stenn <stenn@ntp.org>
