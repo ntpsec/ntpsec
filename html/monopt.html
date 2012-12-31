@@ -338,8 +338,7 @@
   <dt><tt>rawstats</tt></dt>
   <dd>Record timestamp statistics. Each NTP packet received appends one line to
     the <tt>rawstats</tt> file set:</dd>
-  <dd><tt>50928 2132.543 128.4.1.1 128.4.1.20 3102453281.584327000 3102453281.58622800031
-    02453332.540806000 3102453332.541458000</tt></dd>
+  <dd><tt>56285 54575.160 128.4.1.1 192.168.1.5 3565350574.400229473 3565350574.442385200 3565350574.442436000 3565350575.154505763 0 4 4 1 8 -21 0.000000 0.000320 .PPS.</tt></dd>
   <dd>
     <table width="100%" border="1" cellspacing="2" cellpadding="2">
       <tr>
@@ -348,12 +347,12 @@
         <td>Description</td>
       </tr>
       <tr>
-        <td><tt>50928</tt></td>
+        <td><tt>56285</tt></td>
         <td>MJD</td>
         <td>date</td>
       </tr>
       <tr>
-        <td><tt>2132.543</tt></td>
+        <td><tt>54575.160</tt></td>
         <td>s</td>
         <td>time past midnight</td>
       </tr>
@@ -363,29 +362,74 @@
         <td>source address</td>
       </tr>
       <tr>
-        <td><tt>128.4.1.20</tt></td>
+        <td><tt>192.168.1.5</tt></td>
         <td>IP</td>
         <td>destination address</td>
       </tr>
       <tr>
-        <td><tt>3102453281.584327000</tt></td>
+        <td><tt>3565350574.400229473</tt></td>
         <td>NTP&nbsp;s</td>
         <td>origin timestamp</td>
       </tr>
       <tr>
-        <td><tt>3102453281.586228000</tt></td>
+        <td><tt>3565350574.442385200</tt></td>
         <td>NTP s</td>
         <td>receive timestamp</td>
       </tr>
       <tr>
-        <td><tt>3102453332.540806000 </tt></td>
+        <td><tt>3565350574.442436000</tt></td>
         <td>NTP s</td>
         <td>transmit timestamp</td>
       </tr>
       <tr>
-        <td><tt>3102453332.541458000</tt></td>
+        <td><tt>3565350575.154505763</tt></td>
         <td>NTP&nbsp;s</td>
         <td>destination timestamp</td>
+      </tr>
+      <tr>
+        <td><tt>0</tt></td>
+        <td>0: OK, 1: insert pending,<br>2: delete pending, 3: not synced</td>
+        <td>leap warning indicator</td>
+      </tr>
+      <tr>
+        <td><tt>4</tt></td>
+        <td>4 was current in 2012</td>
+        <td>NTP version</td>
+      </tr>
+      <tr>
+        <td><tt>4</tt></td>
+        <td>3: client, 4: server, 5: broadcast</td>
+        <td>mode</td>
+      </tr>
+      <tr>
+        <td><tt>1</tt></td>
+        <td>1-15, 16: not synced</td>
+        <td>stratum</td>
+      </tr>
+      <tr>
+        <td><tt>8</tt></td>
+        <td>log<sub>2</sub> seconds</td>
+        <td>poll</td>
+      </tr>
+      <tr>
+        <td><tt>-21</tt></td>
+        <td>log<sub>2</sub> seconds</td>
+        <td>precision</td>
+      </tr>
+      <tr>
+        <td><tt>0.000000</tt></td>
+        <td>seconds</td>
+        <td>total roundtrip delay to the primary reference clock</td>
+      </tr>
+      <tr>
+        <td><tt>0.000320</tt></td>
+        <td>seconds</td>
+        <td>total dispersion to the primary reference clock</td>
+      </tr>
+      <tr>
+        <td><tt>PPS.</tt></td>
+        <td>IP or text</td>
+        <td>refid, association ID</td>
       </tr>
     </table>
   </dd>

@@ -431,6 +431,7 @@ stats_config(
 	 * Specify statistics directory.
 	 */
 	case STATS_STATSDIR:
+
 		/* - 1 since value may be missing the DIR_SEP. */
 		if (strlen(value) >= sizeof(statsdir) - 1) {
 			msyslog(LOG_ERR,
@@ -663,7 +664,16 @@ record_raw_stats(
 	l_fp	*t1,		/* originate timestamp */
 	l_fp	*t2,		/* receive timestamp */
 	l_fp	*t3,		/* transmit timestamp */
-	l_fp	*t4		/* destination timestamp */
+	l_fp	*t4,		/* destination timestamp */
+	int	leap,
+	int	version,
+	int	mode,
+	int	stratum,
+	int	poll,
+	int	precision,
+	double	root_delay,	/* seconds */
+	double	root_dispersion,/* seconds */
+	u_int32	refid
 	)
 {
 	l_fp	now;
@@ -677,10 +687,13 @@ record_raw_stats(
 	day = now.l_ui / 86400 + MJD_1900;
 	now.l_ui %= 86400;
 	if (rawstats.fp != NULL) {
-		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s\n", day,
-		    ulfptoa(&now, 3), stoa(srcadr), dstadr ? 
-		    stoa(dstadr) : "-",	ulfptoa(t1, 9), ulfptoa(t2, 9),
-		    ulfptoa(t3, 9), ulfptoa(t4, 9));
+		fprintf(rawstats.fp, "%lu %s %s %s %s %s %s %s %d %d %d %d %d %d %.6f %.6f %s\n",
+		    day, ulfptoa(&now, 3),
+		    stoa(srcadr), dstadr ?  stoa(dstadr) : "-",
+		    ulfptoa(t1, 9), ulfptoa(t2, 9),
+		    ulfptoa(t3, 9), ulfptoa(t4, 9),
+		    leap, version, mode, stratum, poll, precision,
+		    root_delay, root_dispersion, refid_str(refid, stratum));
 		fflush(rawstats.fp);
 	}
 }
