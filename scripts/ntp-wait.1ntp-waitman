@@ -1,8 +1,8 @@
-.TH ntp-wait 1ntp-waitman "31 Dec 2012" "ntp (4.2.7p342)" "User Commands"
+.TH ntp-wait 1ntp-waitman "01 Jan 2013" "ntp (4.2.7p343)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  December 31, 2012 at 09:14:03 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  1, 2013 at 11:31:18 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -73,7 +73,7 @@ Successful program execution.
 The operation failed or the command syntax was not valid.
 .SH AUTHORS
 .SH "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware all rights reserved.
+Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org

@@ -1,7 +1,7 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *  
- *  It has been AutoGen-ed  December 31, 2012 at 09:11:10 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  January  1, 2013 at 11:25:30 AM by AutoGen 5.16.2
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -18,7 +18,7 @@
  * The sntp program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2012 The University of Delaware, all rights reserved.
+ *  Copyright (C) 1970-2013 The University of Delaware, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
@@ -73,8 +73,8 @@ extern FILE * option_usage_fp;
  *  sntp option static const strings
  */
 static char const sntp_opt_strs[2500] =
-/*     0 */ "sntp 4.2.7p342\n"
-            "Copyright (C) 1970-2012 The University of Delaware, all rights reserved.\n"
+/*     0 */ "sntp 4.2.7p343\n"
+            "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
             "can be seen at:\n"
@@ -157,7 +157,7 @@ static char const sntp_opt_strs[2500] =
 /*  2244 */ "LOAD_OPTS\0"
 /*  2254 */ "no-load-opts\0"
 /*  2267 */ "SNTP\0"
-/*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p342\n"
+/*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p343\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ hostname-or-IP ...]\n\0"
 /*  2433 */ "$HOME\0"
@@ -165,7 +165,7 @@ static char const sntp_opt_strs[2500] =
 /*  2441 */ ".ntprc\0"
 /*  2448 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2482 */ "\n\n\0"
-/*  2485 */ "sntp 4.2.7p342";
+/*  2485 */ "sntp 4.2.7p343";
 
 /*
  *  ipv4 option description with

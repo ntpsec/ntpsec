@@ -1,9 +1,9 @@
-.Dd December 31 2012
+.Dd January 2 2013
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  December 31, 2012 at 09:23:39 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  2, 2013 at 02:19:48 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -329,7 +329,7 @@ The operation failed or the command syntax was not valid.
 .Sh "AUTHORS"
 The University of Delaware
 .Sh "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware all rights reserved.
+Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh BUGS
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org

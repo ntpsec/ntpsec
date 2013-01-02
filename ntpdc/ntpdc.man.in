@@ -1,8 +1,8 @@
-.TH ntpdc @NTPDC_MS@ "31 Dec 2012" "4.2.7p342" "User Commands"
+.TH ntpdc @NTPDC_MS@ "02 Jan 2013" "4.2.7p343" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  December 31, 2012 at 09:23:59 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  2, 2013 at 02:20:12 AM by AutoGen 5.16.2
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -145,7 +145,7 @@ it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
 .SH AUTHORS
 .SH "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware all rights reserved.
+Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH BUGS
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org

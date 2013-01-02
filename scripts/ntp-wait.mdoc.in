@@ -1,9 +1,9 @@
-.Dd December 31 2012
+.Dd January 1 2013
 .Dt NTP_WAIT @NTP_WAIT_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  December 31, 2012 at 09:14:09 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  1, 2013 at 11:31:27 AM by AutoGen 5.16.2
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -72,7 +72,7 @@ The operation failed or the command syntax was not valid.
 .El
 .Sh AUTHORS
 .Sh "COPYRIGHT"
-Copyright (C) 1970-2012 The University of Delaware all rights reserved.
+Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
