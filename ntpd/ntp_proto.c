@@ -1487,7 +1487,7 @@ process_packet(
 	double	t34, t21;
 	double	p_offset, p_del, p_disp;
 	l_fp	p_rec, p_xmt, p_org, p_reftime, ci;
-	u_char	pmode, pleap, pstratum;
+	u_char	pmode, pleap, pversion, pstratum;
 	char	statstr[NTP_MAXSTRLEN];
 #ifdef ASSYM
 	int	itemp;
@@ -1505,14 +1505,17 @@ process_packet(
 	NTOHL_FP(&pkt->xmt, &p_xmt);
 	pmode = PKT_MODE(pkt->li_vn_mode);
 	pleap = PKT_LEAP(pkt->li_vn_mode);
+	pversion = PKT_VERSION(pkt->li_vn_mode);
 	pstratum = PKT_TO_STRATUM(pkt->stratum);
 
 	/*
 	 * Capture the header values in the client/peer association..
 	 */
 	record_raw_stats(&peer->srcadr, peer->dstadr ?
-	    &peer->dstadr->sin : NULL, &p_org, &p_rec, &p_xmt,
-	    &peer->dst);
+	    &peer->dstadr->sin : NULL,
+	    &p_org, &p_rec, &p_xmt, &peer->dst,
+	    pleap, pversion, pmode, pstratum, pkt->ppoll, pkt->precision,
+	    p_del, p_disp, pkt->refid);
 	peer->leap = pleap;
 	peer->stratum = min(pstratum, STRATUM_UNSPEC);
 	peer->pmode = pmode;

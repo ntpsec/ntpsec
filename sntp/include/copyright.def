@@ -1,7 +1,7 @@
 /* -*- Mode: Text -*- */
 
 copyright = {
-    date  = "1970-2012";
+    date  = "1970-2013";
     owner = "The University of Delaware";
     eaddr = "http://bugs.ntp.org, bugs@ntp.org";
     type  = ntp;
