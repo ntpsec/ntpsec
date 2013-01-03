@@ -51,7 +51,7 @@ and text strings.
 .Pp
 The rest of this page describes the configuration and control options.
 The
-.Qq Notes on Configuring NTP and Setting up a NTP Subnet
+.Qq Notes on Configuring NTP and Setting up an NTP Subnet
 page
 (available as part of the HTML documentation
 provided in
@@ -760,7 +760,9 @@ authenticated with that key.
 If verification fails,
 Bob sends Cathy a thing called a crypto-NAK, which tells her
 something broke.
-She can see the evidence using the ntpq program.
+She can see the evidence using the
+.Xr ntpq 1ntpqmdoc
+program.
 .Pp
 Denise has rolled her own host key and certificate.
 She also uses one of the identity schemes as Bob.

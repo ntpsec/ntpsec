@@ -1,3 +1,4 @@
+* Cleanup to ntp.conf.def.
 * Upgrade to autogen-5.17 and libopts-37.0.12.
 (4.2.7p343) 2013/01/02 Released by Harlan Stenn <stenn@ntp.org>
 * Update the copyright year.
