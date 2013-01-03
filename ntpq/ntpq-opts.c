@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *  
- *  It has been AutoGen-ed  January  2, 2013 at 02:20:21 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  January  3, 2013 at 01:10:02 PM by AutoGen 5.17.1pre11
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:5:11 templates.
+ * Generated from AutoOpts 37:0:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -72,7 +72,7 @@ extern FILE * option_usage_fp;
  *  ntpq option static const strings
  */
 static char const ntpq_opt_strs[1833] =
-/*     0 */ "ntpq 4.2.7p343\n"
+/*     0 */ "ntpq 4.2.7p344\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -128,13 +128,13 @@ static char const ntpq_opt_strs[1833] =
 /*  1627 */ "no-load-opts\0"
 /*  1640 */ "no\0"
 /*  1643 */ "NTPQ\0"
-/*  1648 */ "ntpq - standard NTP query program - Ver. 4.2.7p343\n"
+/*  1648 */ "ntpq - standard NTP query program - Ver. 4.2.7p344\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1769 */ "$HOME\0"
 /*  1775 */ ".\0"
 /*  1777 */ ".ntprc\0"
 /*  1784 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1818 */ "ntpq 4.2.7p343";
+/*  1818 */ "ntpq 4.2.7p344";
 
 /*
  *  ipv4 option description with
@@ -492,7 +492,7 @@ static char const * const apzHomeList[3] = {
 #define zExplain        (NULL)
 #define zDetail         (NULL)
 #define zFullVersion    (ntpq_opt_strs+1818)
-/* extracted from optcode.tlib near line 350 */
+/* extracted from optcode.tlib near line 353 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -540,13 +540,19 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 static void
 doOptDebug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
 {
+    /*
+     * Be sure the flag-code[0] handles special values for the options pointer
+     * viz. (poptions <= OPTPROC_EMIT_LIMIT) *and also* the special flag bit
+     * ((poptdesc->fOptState & OPTST_RESET) != 0) telling the option to
+     * reset its state.
+     */
     /* extracted from debug-opt.def, line 15 */
 OPT_VALUE_SET_DEBUG_LEVEL++;
     (void)pOptDesc;
     (void)pOptions;
 }
 #endif /* defined(TEST_NTPQ_OPTS) */
-/* extracted from optmain.tlib near line 48 */
+/* extracted from optmain.tlib near line 46 */
 
 #if defined(TEST_NTPQ_OPTS) /* TEST MAIN PROCEDURE: */
 
@@ -572,7 +578,7 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* defined TEST_NTPQ_OPTS */
-/* extracted from optmain.tlib near line 1146 */
+/* extracted from optmain.tlib near line 1188 */
 
 /**
  * The directory containing the data associated with ntpq.
@@ -645,38 +651,60 @@ tOptions ntpqOptions = {
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#ifdef HAVE_DCGETTEXT
+# include <gettext.h>
+#endif
 #include <autoopts/usage-txt.h>
 
-static char* AO_gettext(char const* pz);
-static void  coerce_it(void** s);
+static char * AO_gettext(char const * pz);
+static void   coerce_it(void ** s);
 
 /**
- * AutoGen specific wrapper function for gettext.
- * It relies on the macro _() to convert from English to the target
- * language, then strdup-duplicates the result string.
+ * AutoGen specific wrapper function for gettext.  It relies on the macro _()
+ * to convert from English to the target language, then strdup-duplicates the
+ * result string.  It tries the "libopts" domain first, then whatever has been
+ * set via the \a textdomain(3) call.
  *
  * @param[in] pz the input text used as a lookup key.
  * @returns the translated text (if there is one),
  *   or the original text (if not).
  */
 static char *
-AO_gettext(char const* pz)
+AO_gettext(char const * pz)
 {
-    char* pzRes;
+    char * res;
     if (pz == NULL)
         return NULL;
-    pzRes = _(pz);
-    if (pzRes == pz)
-        return pzRes;
-    pzRes = strdup(pzRes);
-    if (pzRes == NULL) {
+#ifdef HAVE_DCGETTEXT
+    /*
+     * While processing the option_xlateable_txt data, try to use the
+     * "libopts" domain.  Once we switch to the option descriptor data,
+     * do *not* use that domain.
+     */
+    if (option_xlateable_txt.field_ct != 0) {
+        res = dgettext("libopts", pz);
+        if (res == pz)
+            res = (char *)(void *)_(pz);
+    } else
+        res = (char *)(void *)_(pz);
+#else
+    res = (char *)(void *)_(pz);
+#endif
+    if (res == pz)
+        return res;
+    res = strdup(res);
+    if (res == NULL) {
         fputs(_("No memory for duping translated strings\n"), stderr);
         exit(NTPQ_EXIT_FAILURE);
     }
-    return pzRes;
+    return res;
 }
 
-static void coerce_it(void** s) { *s = AO_gettext(*s);
+/**
+ * All the pointers we use are marked "* const", but they are stored in
+ * writable memory.  Coerce the mutability and set the pointer.
+ */
+static void coerce_it(void ** s) { *s = AO_gettext(*s);
 }
 
 /**
@@ -686,49 +714,49 @@ static void coerce_it(void** s) { *s = AO_gettext(*s);
 static void
 translate_option_strings(void)
 {
-    tOptions * const pOpt = &ntpqOptions;
+    tOptions * const opts = &ntpqOptions;
 
     /*
      *  Guard against re-translation.  It won't work.  The strings will have
      *  been changed by the first pass through this code.  One shot only.
      */
-    if (option_usage_text.field_ct != 0) {
+    if (option_xlateable_txt.field_ct != 0) {
         /*
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
          */
-        tOptDesc * pOD = pOpt->pOptDesc;
-        char **    ppz = (char**)(void*)&(option_usage_text);
-        int        ix  = option_usage_text.field_ct;
+        tOptDesc * od = opts->pOptDesc;
+        char **    ppz = (char**)(void*)&(option_xlateable_txt);
+        int        ix  = option_xlateable_txt.field_ct;
 
         do {
-            ppz++;
+            ppz++; /* skip over field_ct */
             *ppz = AO_gettext(*ppz);
         } while (--ix > 0);
+        /* prevent re-translation and disable "libopts" domain lookup */
+        option_xlateable_txt.field_ct = 0;
 
-        coerce_it((void*)&(pOpt->pzCopyright));
-        coerce_it((void*)&(pOpt->pzCopyNotice));
-        coerce_it((void*)&(pOpt->pzFullVersion));
-        coerce_it((void*)&(pOpt->pzUsageTitle));
-        coerce_it((void*)&(pOpt->pzExplain));
-        coerce_it((void*)&(pOpt->pzDetail));
-        coerce_it((void*)&(pOpt->pzPackager));
-        option_usage_text.field_ct = 0;
+        coerce_it((void*)&(opts->pzCopyright));
+        coerce_it((void*)&(opts->pzCopyNotice));
+        coerce_it((void*)&(opts->pzFullVersion));
+        coerce_it((void*)&(opts->pzUsageTitle));
+        coerce_it((void*)&(opts->pzExplain));
+        coerce_it((void*)&(opts->pzDetail));
+        coerce_it((void*)&(opts->pzPackager));
 
-        for (ix = pOpt->optCt; ix > 0; ix--, pOD++)
-            coerce_it((void*)&(pOD->pzText));
+        for (ix = opts->optCt; ix > 0; ix--, od++)
+            coerce_it((void*)&(od->pzText));
     }
 
-    if ((pOpt->fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
-        tOptDesc * pOD = pOpt->pOptDesc;
+    if ((opts->fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
+        tOptDesc * od = opts->pOptDesc;
         int        ix;
 
-        for (ix = pOpt->optCt; ix > 0; ix--, pOD++) {
-            coerce_it((void*)&(pOD->pz_Name));
-            coerce_it((void*)&(pOD->pz_DisableName));
-            coerce_it((void*)&(pOD->pz_DisablePfx));
+        for (ix = opts->optCt; ix > 0; ix--, od++) {
+            coerce_it((void*)&(od->pz_Name));
+            coerce_it((void*)&(od->pz_DisableName));
+            coerce_it((void*)&(od->pz_DisablePfx));
         }
-        /* prevent re-translation */
         ntpqOptions.fOptSet |= OPTPROC_NXLAT_OPT_CFG | OPTPROC_NXLAT_OPT;
     }
 }

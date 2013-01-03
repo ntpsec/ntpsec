@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *  
- *  It has been AutoGen-ed  January  2, 2013 at 02:20:04 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  January  3, 2013 at 01:09:44 PM by AutoGen 5.17.1pre11
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:5:11 templates.
+ * Generated from AutoOpts 37:0:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 147461
+#define AO_TEMPLATE_VERSION 151552
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -82,8 +82,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    15
-#define NTPDC_VERSION       "4.2.7p343"
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p343"
+#define NTPDC_VERSION       "4.2.7p344"
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p344"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -111,10 +111,11 @@ typedef enum {
  *  Enumeration of ntpdc exit codes
  */
 typedef enum {
-    NTPDC_EXIT_SUCCESS = 0,
-    NTPDC_EXIT_FAILURE = 1,
-    NTPDC_EXIT_NO_CONFIG_INPUT = 66,
-    NTPDC_EXIT_LIBOPTS_FAILURE = 70
+    NTPDC_EXIT_SUCCESS              = 0,
+    NTPDC_EXIT_FAILURE              = 1,
+    NTPDC_EXIT_USAGE_ERROR          = 64,
+    NTPDC_EXIT_NO_CONFIG_INPUT      = 66,
+    NTPDC_EXIT_LIBOPTS_FAILURE      = 70
 } ntpdc_exit_code_t;
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -197,7 +198,7 @@ typedef enum {
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
         DESC(SAVE_OPTS).fOptState |= OPTST_SET; \
-        DESC(SAVE_OPTS).optArg.argString = (char const*)(a) )
+        DESC(SAVE_OPTS).optArg.argString = (char const*)(a))
 /*
  *  Interface defines not associated with particular options
  */
@@ -208,7 +209,7 @@ typedef enum {
                 ntpdcOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdcOptions.pUsageProc)(&ntpdcOptions, c)
-/* extracted from opthead.tlib near line 484 */
+/* extracted from opthead.tlib near line 497 */
 
 #ifdef  __cplusplus
 extern "C" {

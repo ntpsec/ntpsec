@@ -1,9 +1,9 @@
-.Dd January 2 2013
+.Dd January 3 2013
 .Dt NTP_KEYS 5mdoc File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  2, 2013 at 02:19:46 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  3, 2013 at 01:09:33 PM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agmdoc-file.tpl
 .Sh NAME
@@ -13,8 +13,98 @@
 .Sy /etc/ntp.keys
 .Pp 
 .Sh DESCRIPTION
+This document describes the format of an NTP symmetric key file.
+For a description of the use of this type of file, see the
+.Qq Authentication Support
+section of the
+.Xr ntp.conf 5
+page.
+.Pp
+.Xr ntpd 8
+reads its keys from a file specified using the
+.Fl k
+command line option or the
+.Ic keys
+statement in the configuration file.
+While key number 0 is fixed by the NTP standard
+(as 56 zero bits)
+and may not be changed,
+one or more keys numbered between 1 and 65534
+may be arbitrarily set in the keys file.
+.Pp
+The key file uses the same comment conventions
+as the configuration file.
+Key entries use a fixed format of the form
+.Pp
+.D1 Ar keyno type key
+.Pp
+where
+.Ar keyno
+is a positive integer (between 1 and 65534),
+.Ar type
+is the message digest algorithm,
+and
+.Ar key
+is the key itself.
+.Pp
+The
+.Ar key
+may be given in a format
+controlled by the
+.Ar type
+field.
+The
+.Ar type
+.Li MD5
+is always supported.
+If
+.Li ntpd
+was built with the OpenSSL library
+then any digest library supported by that library may be specified.
+However, if compliance with FIPS 140-2 is required the
+.Ar type
+must be either
+.Li SHA
+or
+.Li SHA1 .
+.Pp
+What follows are some key types, and corresponding formats:
+.Pp
+.Bl -tag -width RMD160 -compact
+.It Li MD5
+The key is 1 to 16 printable characters terminated by
+an EOL,
+whitespace,
+or
+a
+.Li #
+(which is the "start of comment" character).
+.Pp
+.It Li SHA
+.It Li SHA1
+.It Li RMD160
+The key is a hex-encoded ASCII string of 40 characters,
+which is truncated as necessary.
+.El
+.Pp
+Note that the keys used by the
+.Xr ntpq 8
+and
+.Xr ntpdc 8
+programs are checked against passwords
+requested by the programs and entered by hand,
+so it is generally appropriate to specify these keys in ASCII format.
 .Sh FILES
+.Bl -tag -width /etc/ntp.keys -compact
+.It Pa /etc/ntp.keys
+the default name of the configuration file
+.El
 .Sh "SEE ALSO"
+.Xr ntp.conf 5 ,
+.Xr ntpd 1ntpdmdoc ,
+.Xr ntpdate 1ntpdatemdoc ,
+.Xr ntpdc 1ntpdcmdoc ,
+.Xr sntp 1sntpmdoc
 .Sh "AUTHORS"
 The University of Delaware
 .Sh "COPYRIGHT"
@@ -23,6 +113,8 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
+This document corresponds to version @VERSION@ of NTP.
+This document was derived from FreeBSD.
 .Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp.keys\fP
 option definitions.

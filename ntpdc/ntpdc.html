@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p343 of <code>ntpdc</code>.
+  <p>This document applies to version 4.2.7p344 of <code>ntpdc</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -138,7 +138,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p343
+<pre class="example">ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p344
 USAGE:  ntpdc [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -500,12 +500,16 @@ both the remote program and local server share a common key and key
 identifier.
 
   <p>Note that in contexts where a host name is expected, a
-<code>-4</code> qualifier preceding the host name forces DNS resolution to the IPv4 namespace,
+<code>-4</code>
+qualifier preceding the host name forces DNS resolution to the IPv4 namespace,
 while a
-<code>-6</code> qualifier forces DNS resolution to the IPv6 namespace. 
+<code>-6</code>
+qualifier forces DNS resolution to the IPv6 namespace. 
 Specifying a command line option other than
-<code>-i</code> or
-<code>-n</code> will cause the specified query (queries) to be sent to
+<code>-i</code>
+or
+<code>-n</code>
+will cause the specified query (queries) to be sent to
 the indicated host(s) immediately. 
 Otherwise,
 <code>ntpdc</code>
@@ -520,15 +524,14 @@ input.
 
 <h3 class="section">Interactive Commands</h3>
 
-<p>Interactive Commands
-Interactive format commands consist of a keyword followed by zero
+<p>Interactive format commands consist of a keyword followed by zero
 to four arguments. 
 Only enough characters of the full keyword to
 uniquely identify the command need be typed. 
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-\&amp;&gt;,
+&gt;,
 followed by a file name, to the command line.
 
   <p>A number of interactive format commands are executed entirely
@@ -539,13 +542,13 @@ mode 7 requests being sent to a server.
 These are described
 following.
      <dl>
-<dt><span class="samp">Ic</span><br><dt><span class="samp">Ic</span><dd>A
-Ic \&amp;? 
+<dt><code>?</code> <kbd>command_keyword</kbd><br><dt><code>help</code> <kbd>command_keyword</kbd><dd>A
+<code>?</code>
 will print a list of all the command
 keywords known to this incarnation of
 <code>ntpdc</code>. 
 A
-Ic \&amp;? 
+<code>?</code>
 followed by a command keyword will print function and usage
 information about the command. 
 This command is probably a better
@@ -553,7 +556,7 @@ source of information about
 <code>ntpq(8)</code>
 than this manual
 page. 
-<br><dt><span class="samp">Ic</span><dd>Specify a time interval to be added to timestamps included in
+<br><dt><code>delay</code> <kbd>milliseconds</kbd><dd>Specify a time interval to be added to timestamps included in
 requests which require authentication. 
 This is used to enable
 (unreliable) server reconfiguration over long delay network paths
@@ -561,33 +564,37 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete. 
-<br><dt><span class="samp">Ic</span><dd>Set the host to which future queries will be sent. 
+<br><dt><code>host</code> <kbd>hostname</kbd><dd>Set the host to which future queries will be sent. 
 Hostname may
 be either a host name or a numeric address. 
-<br><dt><span class="samp">Ic</span><dd>If
-<code>yes</code> is specified, host names are printed in
+<br><dt><code>hostnames</code> [<code>yes</code> | <code>Cm</code> <code>no</code>]<dd>If
+<code>yes</code>
+is specified, host names are printed in
 information displays. 
 If
-<code>no</code> is specified, numeric
+<code>no</code>
+is specified, numeric
 addresses are printed instead. 
 The default is
-<code>yes</code>, unless
+<code>yes</code>,
+unless
 modified using the command line
-<code>-n</code> switch. 
-<br><dt><span class="samp">Ic</span><dd>This command allows the specification of a key number to be
+<code>-n</code>
+switch. 
+<br><dt><code>keyid</code> <kbd>keyid</kbd><dd>This command allows the specification of a key number to be
 used to authenticate configuration requests. 
 This must correspond
 to a key number the server has been configured to use for this
 purpose. 
-<br><dt><span class="samp">Ic</span><dd>Exit
+<br><dt><code>quit</code><dd>Exit
 <code>ntpdc</code>. 
-<br><dt><span class="samp">Ic</span><dd>This command prompts you to type in a password (which will not
+<br><dt><code>passwd</code><dd>This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
 requests. 
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful. 
-<br><dt><span class="samp">Ic</span><dd>Specify a timeout period for responses to server queries. 
+<br><dt><code>timeout</code> <kbd>milliseconds</kbd><dd>Specify a timeout period for responses to server queries. 
 The
 default is about 8000 milliseconds. 
 Note that since
@@ -603,20 +610,19 @@ a timeout will be twice the timeout value set.
 
 <h3 class="section">Control Message Commands</h3>
 
-<p>Control Message Commands
-Query commands result in NTP mode 7 packets containing requests for
+<p>Query commands result in NTP mode 7 packets containing requests for
 information being sent to the server. 
 These are read-only commands
 in that they make no modification of the server configuration
 state.
      <dl>
-<dt><span class="samp">Ic</span><dd>Obtains and prints a brief list of the peers for which the
+<dt><code>listpeers</code><dd>Obtains and prints a brief list of the peers for which the
 server is maintaining state. 
 These should include all configured
 peer associations as well as those peers whose stratum is such that
 they are considered by the server to be possible future
 synchronization candidates. 
-<br><dt><span class="samp">Ic</span><dd>Obtains a list of peers for which the server is maintaining
+<br><dt><code>peers</code><dd>Obtains a list of peers for which the server is maintaining
 state, along with a summary of that state. 
 Summary information
 includes the address of the remote peer, the local interface
@@ -629,20 +635,20 @@ offset and dispersion of the peer, all in seconds.
      <p>The character in the left margin indicates the mode this peer
 entry is operating in. 
 A
-\&amp;+
++
 denotes symmetric active, a
-\&amp;-
+-
 indicates symmetric passive, a
-\&amp;=
+=
 means the
 remote server is being polled in client mode, a
-\&amp;^
+^
 indicates that the server is broadcasting to this address, a
-\&amp;~
+~
 denotes that the remote peer is sending broadcasts and a
-\&amp;~
+~
 denotes that the remote peer is sending broadcasts and a
-\&amp;*
+*
 marks the peer the server is currently synchronizing
 to.
 

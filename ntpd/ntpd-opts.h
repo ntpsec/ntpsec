@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *  
- *  It has been AutoGen-ed  January  1, 2013 at 11:32:53 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  January  3, 2013 at 01:07:03 PM by AutoGen 5.17.1pre11
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:5:11 templates.
+ * Generated from AutoOpts 37:0:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 147461
+#define AO_TEMPLATE_VERSION 151552
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -104,8 +104,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    37
-#define NTPD_VERSION       "4.2.7p343"
-#define NTPD_FULL_VERSION  "ntpd 4.2.7p343"
+#define NTPD_VERSION       "4.2.7p344"
+#define NTPD_FULL_VERSION  "ntpd 4.2.7p344"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -133,9 +133,10 @@ typedef enum {
  *  Enumeration of ntpd exit codes
  */
 typedef enum {
-    NTPD_EXIT_SUCCESS = 0,
-    NTPD_EXIT_FAILURE = 1,
-    NTPD_EXIT_LIBOPTS_FAILURE = 70
+    NTPD_EXIT_SUCCESS               = 0,
+    NTPD_EXIT_FAILURE               = 1,
+    NTPD_EXIT_USAGE_ERROR           = 64,
+    NTPD_EXIT_LIBOPTS_FAILURE       = 70
 } ntpd_exit_code_t;
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -374,7 +375,7 @@ typedef enum {
                 ntpdOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdOptions.pUsageProc)(&ntpdOptions, c)
-/* extracted from opthead.tlib near line 484 */
+/* extracted from opthead.tlib near line 497 */
 
 #ifdef  __cplusplus
 extern "C" {

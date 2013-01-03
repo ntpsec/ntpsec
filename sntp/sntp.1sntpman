@@ -1,8 +1,8 @@
-.TH sntp 1sntpman "02 Jan 2013" "4.2.7p343" "User Commands"
+.TH sntp 1sntpman "03 Jan 2013" "4.2.7p344" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  2, 2013 at 02:21:27 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  3, 2013 at 01:11:28 PM by AutoGen 5.17.1pre11
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -11,9 +11,49 @@ sntp \- standard Simple Network Time Protocol client program
 .SH SYNOPSIS
 .B sntp
 .\" Mixture of short (flag) options and long options
-.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..." [ hostname-or-IP ...]
+.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP "[[=| ]\fIvalue\fP]]..." " " "[ hostname-or-IP ...]"
 .PP
 .SH DESCRIPTION
+.B 
+can be used as an SNTP client to query a NTP or SNTP server and either display
+the time or set the local system's time (given suitable privilege).  It can be
+run as an interactive command or from a
+.Ic cron
+job.
+NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
+are defined and described by RFC 5905.
+.PP
+The default is to write the estimated correct local date and time (i.e. not
+UTC) to the standard output in a format like:
+.Ic "'1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 [host] IP sN'"
+where the
+.Ic "'(+0800)'"
+means that to get to UTC from the reported local time one must
+add 8 hours and 0 minutes,
+the
+.Ic "'+4.567'"
+indicates the local clock is 4.567 seconds behind the correct time
+(so 4.567 seconds must be added to the local clock to get it to be correct).
+Note that the number of decimals printed for this value will change
+based on the reported precision of the server.
+.Ic "'+/- 0.089'"
+is the reported
+.I synchronization distance
+(in seconds), which represents the maximum error due to all causes.
+If the server does not report valid data needed to calculate the
+synchronization distance, this will be reported as
+.Ic "'+/- ?'" .
+If the
+.I host
+is different from the
+.I IP ,
+both will be displayed.
+Otherwise, only the 
+.I IP
+is displayed.
+Finally, the
+.I stratum
+of the host is reported.
 .SH "OPTIONS"
 .TP
 .BR \-4 ", " -\-ipv4
@@ -208,6 +248,25 @@ The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .SH USAGE
+.TP
+.BR Li "sntp ntpserver.somewhere"
+is the simplest use of this program
+and can be run as an unprivileged command
+to check the current time and error in the local clock.
+.TP
+.BR Li "sntp -a ntpserver.somewhere"
+With suitable privilege,
+run as a command
+or from a
+.Xr cron 8
+job,
+.Ic "sntp -a"
+will reset the local clock from a synchronized specified server,
+like the (deprecated)
+.Xr ntpdate 1ntpdatemdoc ,
+or
+.Xr rdate 8
+commands.
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
@@ -228,12 +287,17 @@ A specified configuration file could not be loaded.
 libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH AUTHORS
+.An "Johannes Maximilian Kuehn"
+.An "Harlan Stenn"
+.An "Dave Hart"
 .SH "COPYRIGHT"
 Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
+This document corresponds to version @VERSION@ of
+.B  .
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
 option definitions.

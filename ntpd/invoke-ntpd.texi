@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 # 
-# It has been AutoGen-ed  January  2, 2013 at 02:19:42 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  January  3, 2013 at 01:09:28 PM by AutoGen 5.17.1pre11
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -57,7 +57,8 @@ NetInfo if the default
 @code{ntp.conf(5)}
 file cannot be read and no file is
 specified by the
-@code{-c} option.
+@code{-c}
+option.
 
 Various internal
 @code{ntpd}
@@ -140,7 +141,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p343
+ntpd - NTP daemon program - Ver. 4.2.7p344
 USAGE:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -700,7 +701,7 @@ The operation failed or the command syntax was not valid.
 @node How NTP Operates
 @section How NTP Operates
 
-How NTP Operates
+
 The
 @code{ntpd}
 utility operates by exchanging messages with
@@ -718,8 +719,10 @@ interval of 64s, several minutes can elapse before the clock is
 set.
 This initial delay to set the clock
 can be safely and dramatically reduced using the
-@code{iburst} keyword with the
-@code{server} configuration
+@code{iburst}
+keyword with the
+@code{server}
+configuration
 command, as described in
 @code{ntp.conf(5)}.
 
@@ -746,7 +749,8 @@ This causes
 to exit with a panic message to
 the system log.
 The
-@code{-g} option overrides this check and the
+@code{-g}
+option overrides this check and the
 clock will be set to the server time regardless of the chip time
 (up to 68 years in the past or future \(em
 this is a limitation of the NTPv4 protocol).
@@ -790,12 +794,14 @@ in the future relative to the server.
 In some applications, this behavior may be unacceptable.
 There are several solutions, however.
 If the
-@code{-x} option is included on the command line, the clock will
+@code{-x}
+option is included on the command line, the clock will
 never be stepped and only slew corrections will be used.
 But this choice comes with a cost that
 should be carefully explored before deciding to use
 the
-@code{-x} option.
+@code{-x}
+option.
 The maximum slew rate possible is limited
 to 500 parts-per-million (PPM) as a consequence of the correctness
 principles on which the NTP protocol and algorithm design are
@@ -824,11 +830,13 @@ is to quickly correct the frequency and restore operation to the
 normal tracking mode.
 In the most extreme cases
 (the host
-@code{time.ien.it} comes to mind), there may be occasional
+@code{time.ien.it}
+comes to mind), there may be occasional
 step/slew corrections and subsequent frequency corrections.
 It
 helps in these cases to use the
-@code{burst} keyword when
+@code{burst}
+keyword when
 configuring the server, but
 ONLY
 when you have permission to do so from the owner of the target host.
@@ -846,10 +854,12 @@ that often addresses all of the problems mentioned above.
 @node Starting NTP (Best Current Practice)
 @section Starting NTP (Best Current Practice)
 
-Starting NTP (Best Current Practice)
+
 First, use the
-@code{iburst} option on your
-@code{server} entries.
+@code{iburst}
+option on your
+@code{server}
+entries.
 
 If you can also keep a good
 @file{ntp.drift}
@@ -861,8 +871,10 @@ be stable in under 11 seconds' time.
 As soon as possible in the startup sequence, start
 @code{ntpd(8)}
 with at least the
-@code{-g} and perhaps the
-@code{-N} options.
+@code{-g}
+and perhaps the
+@code{-N}
+options.
 Then,
 start the rest of your "normal" processes.
 This will give
@@ -871,14 +883,16 @@ as much time as possible to get the system's clock synchronized and stable.
 
 Finally,
 if you have processes like
-@code{dovecot} or database servers
+@code{dovecot}
+or database servers
 that require
 monotonically-increasing time,
 run
 @code{ntp-wait(8)}
 as late as possible in the boot sequence
 (perhaps with the
-@code{-v} flag)
+@code{-v}
+flag)
 and after
 @code{ntp-wait(8)}
 exits successfully
@@ -887,7 +901,7 @@ stable time.
 @node Frequency Discipline
 @section Frequency Discipline
 
-Frequency Discipline
+
 The
 @code{ntpd}
 behavior at startup depends on whether the
@@ -921,7 +935,7 @@ the file at hourly intervals.
 @node Operating Modes
 @section Operating Modes
 
-Operating Modes
+
 The
 @code{ntpd}
 utility can operate in any of several modes, including
@@ -977,7 +991,8 @@ However, this program does not have the crafted signal
 processing, error checking and mitigation algorithms of
 @code{ntpd}.
 The
-@code{-q} option is intended for this purpose.
+@code{-q}
+option is intended for this purpose.
 Setting this option will cause
 @code{ntpd}
 to exit just after
@@ -985,8 +1000,10 @@ setting the clock for the first time.
 The procedure for initially
 setting the clock is the same as in continuous mode; most
 applications will probably want to specify the
-@code{iburst} keyword with the
-@code{server} configuration command.
+@code{iburst}
+keyword with the
+@code{server}
+configuration command.
 With this
 keyword a volley of messages are exchanged to groom the data and
 the clock is set in about 10 s.
@@ -1000,8 +1017,7 @@ retired.
 
 When kernel support is available to discipline the clock
 frequency, which is the case for stock Solaris, Tru64, Linux and
-.Fx
-,
+Fx,
 a useful feature is available to discipline the clock
 frequency.
 First,
@@ -1021,7 +1037,7 @@ frequency.
 @node Poll Interval Control
 @section Poll Interval Control
 
-Poll Interval Control
+
 This version of NTP includes an intricate state machine to
 reduce the network load while maintaining a quality of
 synchronization consistent with the observed jitter and wander.
@@ -1033,10 +1049,13 @@ the consequences of changing the poll adjustment range from the
 default minimum of 64 s to the default maximum of 1,024 s.
 The
 default minimum can be changed with the
-@code{tinker} @code{minpoll} command to a value not less than 16 s.
+@code{tinker}
+@code{minpoll}
+command to a value not less than 16 s.
 This value is used for all
 configured associations, unless overridden by the
-@code{minpoll} option on the configuration command.
+@code{minpoll}
+option on the configuration command.
 Note that most device drivers
 will not operate properly if the poll interval is less than 64 s
 and that the broadcast server and manycast client associations will
@@ -1068,7 +1087,7 @@ on subsequent daemon restarts.
 @node The huff-n'-puff Filter
 @section The huff-n'-puff Filter
 
-The huff-n'-puff Filter
+
 In scenarios where a considerable amount of data are to be
 downloaded or uploaded over telephone modems, timekeeping quality
 can be seriously degraded.
@@ -1097,17 +1116,20 @@ and positive (puff) correction, which depends on the sign of the
 offset.
 
 The filter is activated by the
-@code{tinker} command and
-@code{huffpuff} keyword, as described in
+@code{tinker}
+command and
+@code{huffpuff}
+keyword, as described in
 @code{ntp.conf(5)}.
 @node ntpd Files
 @subsection ntpd Files
-@table @samp
-@item Pa
+@table @asis
+
+@item @file{/etc/ntp.conf}
 the default name of the configuration file
-@item Pa
+@item @file{/etc/ntp.drift}
 the default name of the drift file
-@item Pa
+@item @file{/etc/ntp.keys}
 the default name of the key file
 @end table
 @node ntpd See Also
@@ -1120,146 +1142,23 @@ the default name of the key file
 In addition to the manual pages provided,
 comprehensive documentation is available on the world wide web
 at
-.Li
-http://www.ntp.org/
-.
+@code{http://www.ntp.org/}.
 A snapshot of this documentation is available in HTML format in
 @file{/usr/share/doc/ntp}.
-.Rs
-.%A
-David
-L.
-Mills
-.%T
-Network
-Time
-Protocol
-(Version
-1)
-.%O
-RFC1059
-.Re
-.Rs
-.%A
-David
-L.
-Mills
-.%T
-Network
-Time
-Protocol
-(Version
-2)
-.%O
-RFC1119
-.Re
-.Rs
-.%A
-David
-L.
-Mills
-.%T
-Network
-Time
-Protocol
-(Version
-3)
-.%O
-RFC1305
-.Re
-.Rs
-.%A
-David
-L.
-Mills
-.%A
-J.
-Martin,
-Ed.
-.%A
-J.
-Burbank
-.%A
-W.
-Kasch
-.%T
-Network
-Time
-Protocol
-Version
-4:
-Protocol
-and
-Algorithms
-Specification
-.%O
-RFC5905
-.Re
-.Rs
-.%A
-David
-L.
-Mills
-.%A
-B.
-Haberman,
-Ed.
-.%T
-Network
-Time
-Protocol
-Version
-4:
-Autokey
-Specification
-.%O
-RFC5906
-.Re
-.Rs
-.%A
-H.
-Gerstung
-.%A
-C.
-Elliott
-.%A
-B.
-Haberman,
-Ed.
-.%T
-Definitions
-of
-Managed
-Objects
-for
-Network
-Time
-Protocol
-Version
-4:
-(NTPv4)
-.%O
-RFC5907
-.Re
-.Rs
-.%A
-R.
-Gayraud
-.%A
-B.
-Lourdelet
-.%T
-Network
-Time
-Protocol
-(NTP)
-Server
-Option
-for
-DHCPv6
-.%O
-RFC5908
-.Re
+@*
+ David L. Mills, @emph{Network Time Protocol (Version 1)},  RFC1059.
+@*
+ David L. Mills, @emph{Network Time Protocol (Version 2)},  RFC1119.
+@*
+ David L. Mills, @emph{Network Time Protocol (Version 3)},  RFC1305.
+@*
+ David L. Mills,  J. Martin, Ed.,  J. Burbank,  W. Kasch, @emph{Network Time Protocol Version 4: Protocol and Algorithms Specification},  RFC5905.
+@*
+ David L. Mills,  B. Haberman, Ed., @emph{Network Time Protocol Version 4: Autokey Specification},  RFC5906.
+@*
+ H. Gerstung,  C. Elliott,  B. Haberman, Ed., @emph{Definitions of Managed Objects for Network Time Protocol Version 4: (NTPv4)},  RFC5907.
+@*
+ R. Gayraud,  B. Lourdelet, @emph{Network Time Protocol (NTP) Server Option for DHCPv6},  RFC5908.
 @node ntpd Bugs
 @subsection ntpd Bugs
 The

@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  January  2, 2013 at 02:20:16 AM by AutoGen 5.16.2
+# It has been AutoGen-ed  January  3, 2013 at 01:09:56 PM by AutoGen 5.17.1pre11
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -69,7 +69,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p343
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p344
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -389,12 +389,16 @@ both the remote program and local server share a common key and key
 identifier.
 
 Note that in contexts where a host name is expected, a
-@code{-4} qualifier preceding the host name forces DNS resolution to the IPv4 namespace,
+@code{-4}
+qualifier preceding the host name forces DNS resolution to the IPv4 namespace,
 while a
-@code{-6} qualifier forces DNS resolution to the IPv6 namespace.
+@code{-6}
+qualifier forces DNS resolution to the IPv6 namespace.
 Specifying a command line option other than
-@code{-i} or
-@code{-n} will cause the specified query (queries) to be sent to
+@code{-i}
+or
+@code{-n}
+will cause the specified query (queries) to be sent to
 the indicated host(s) immediately.
 Otherwise,
 @code{ntpdc}
@@ -404,7 +408,7 @@ input.
 @node Interactive Commands
 @section Interactive Commands
 
-Interactive Commands
+
 Interactive format commands consist of a keyword followed by zero
 to four arguments.
 Only enough characters of the full keyword to
@@ -412,7 +416,7 @@ uniquely identify the command need be typed.
 The output of a
 command is normally sent to the standard output, but optionally the
 output of individual commands may be sent to a file by appending a
-@quoteleft{}\&>@quoteright{},
+@quoteleft{}>,@quoteright{}
 followed by a file name, to the command line.
 
 A number of interactive format commands are executed entirely
@@ -422,16 +426,17 @@ utility itself and do not result in NTP
 mode 7 requests being sent to a server.
 These are described
 following.
-@table @samp
-@item Ic
-@item Ic
+@table @asis
+
+@item @code{?} @kbd{command_keyword}
+@item @code{help} @kbd{command_keyword}
 A
-@quoteleft{}Ic \&?@quoteright{}
+@quoteleft{}@code{?}@quoteright{}
 will print a list of all the command
 keywords known to this incarnation of
 @code{ntpdc}.
 A
-@quoteleft{}Ic \&?@quoteright{}
+@quoteleft{}@code{?}@quoteright{}
 followed by a command keyword will print function and usage
 information about the command.
 This command is probably a better
@@ -439,7 +444,7 @@ source of information about
 @code{ntpq(8)}
 than this manual
 page.
-@item Ic
+@item @code{delay} @kbd{milliseconds}
 Specify a time interval to be added to timestamps included in
 requests which require authentication.
 This is used to enable
@@ -448,38 +453,42 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete.
-@item Ic
+@item @code{host} @kbd{hostname}
 Set the host to which future queries will be sent.
 Hostname may
 be either a host name or a numeric address.
-@item Ic
+@item @code{hostnames} [@code{yes} | @code{Cm} @code{no}]
 If
-@code{yes} is specified, host names are printed in
+@code{yes}
+is specified, host names are printed in
 information displays.
 If
-@code{no} is specified, numeric
+@code{no}
+is specified, numeric
 addresses are printed instead.
 The default is
-@code{yes}, unless
+@code{yes},
+unless
 modified using the command line
-@code{-n} switch.
-@item Ic
+@code{-n}
+switch.
+@item @code{keyid} @kbd{keyid}
 This command allows the specification of a key number to be
 used to authenticate configuration requests.
 This must correspond
 to a key number the server has been configured to use for this
 purpose.
-@item Ic
+@item @code{quit}
 Exit
 @code{ntpdc}.
-@item Ic
+@item @code{passwd}
 This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
 requests.
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful.
-@item Ic
+@item @code{timeout} @kbd{milliseconds}
 Specify a timeout period for responses to server queries.
 The
 default is about 8000 milliseconds.
@@ -491,21 +500,22 @@ a timeout will be twice the timeout value set.
 @node Control Message Commands
 @section Control Message Commands
 
-Control Message Commands
+
 Query commands result in NTP mode 7 packets containing requests for
 information being sent to the server.
 These are read-only commands
 in that they make no modification of the server configuration
 state.
-@table @samp
-@item Ic
+@table @asis
+
+@item @code{listpeers}
 Obtains and prints a brief list of the peers for which the
 server is maintaining state.
 These should include all configured
 peer associations as well as those peers whose stratum is such that
 they are considered by the server to be possible future
 synchronization candidates.
-@item Ic
+@item @code{peers}
 Obtains a list of peers for which the server is maintaining
 state, along with a summary of that state.
 Summary information
@@ -519,20 +529,20 @@ offset and dispersion of the peer, all in seconds.
 The character in the left margin indicates the mode this peer
 entry is operating in.
 A
-@quoteleft{}\&+@quoteright{}
+@quoteleft{}+@quoteright{}
 denotes symmetric active, a
-@quoteleft{}\&-@quoteright{}
+@quoteleft{}-@quoteright{}
 indicates symmetric passive, a
-@quoteleft{}\&=@quoteright{}
+@quoteleft{}=@quoteright{}
 means the
 remote server is being polled in client mode, a
-@quoteleft{}\&^@quoteright{}
+@quoteleft{}^@quoteright{}
 indicates that the server is broadcasting to this address, a
-@quoteleft{}\&~@quoteright{}
+@quoteleft{}~@quoteright{}
 denotes that the remote peer is sending broadcasts and a
-@quoteleft{}\&~@quoteright{}
+@quoteleft{}~@quoteright{}
 denotes that the remote peer is sending broadcasts and a
-@quoteleft{}\&*@quoteright{}
+@quoteleft{}*@quoteright{}
 marks the peer the server is currently synchronizing
 to.
 
@@ -540,47 +550,50 @@ The contents of the host field may be one of four forms.
 It may
 be a host name, an IP address, a reference clock implementation
 name with its parameter or
-@code{REFCLK}(@emph{implementation_number}@code{, }@emph{parameter}).
+@code{REFCLK}(@emph{implementation_number}@code{,} @emph{parameter}).
 On
-@code{hostnames} @code{no} only IP-addresses
+@code{hostnames}
+@code{no}
+only IP-addresses
 will be displayed.
-@item Ic
+@item @code{dmpeers}
 A slightly different peer summary list.
 Identical to the output
 of the
-@code{peers} command, except for the character in the
+@code{peers}
+command, except for the character in the
 leftmost column.
 Characters only appear beside peers which were
 included in the final stage of the clock selection algorithm.
 A
-@quoteleft{}\&.@quoteright{}
+@quoteleft{}.@quoteright{}
 indicates that this peer was cast off in the falseticker
 detection, while a
-@quoteleft{}\&+@quoteright{}
+@quoteleft{}+@quoteright{}
 indicates that the peer made it
 through.
 A
-@quoteleft{}\&*@quoteright{}
+@quoteleft{}*@quoteright{}
 denotes the peer the server is currently
 synchronizing with.
-@item Ic
+@item @code{showpeer} @kbd{peer_address} @kbd{Oo} @kbd{...} @kbd{Oc}
 Shows a detailed display of the current peer variables for one
 or more peers.
 Most of these values are described in the NTP
 Version 2 specification.
-@item Ic
+@item @code{pstats} @kbd{peer_address} @kbd{Oo} @kbd{...} @kbd{Oc}
 Show per-peer statistic counters associated with the specified
 peer(s).
-@item Ic
+@item @code{clockinfo} @kbd{clock_peer_address} @kbd{Oo} @kbd{...} @kbd{Oc}
 Obtain and print information concerning a peer clock.
 The
 values obtained provide information on the setting of fudge factors
 and other clock performance information.
-@item Ic
+@item @code{kerninfo}
 Obtain and print kernel phase-lock loop operating parameters.
 This information is available only if the kernel has been specially
 modified for a precision timekeeping function.
-@item Ic
+@item @code{loopinfo} [@code{oneline} | @code{Cm} @code{multiline}]
 Print the values of selected loop filter variables.
 The loop
 filter is the part of NTP which deals with adjusting the local
@@ -604,12 +617,15 @@ value is the number
 of seconds which have elapsed since the last sample offset was
 given to the loop filter.
 The
-@code{oneline} and
-@code{multiline} options specify the format in which this
+@code{oneline}
+and
+@code{multiline}
+options specify the format in which this
 information is to be printed, with
-@code{multiline} as the
+@code{multiline}
+as the
 default.
-@item Ic
+@item @code{sysinfo}
 Print a variety of system state variables, i.e., state related
 to the local server.
 All except the last four lines are described
@@ -619,19 +635,29 @@ The
 @quoteleft{}system flags@quoteright{}
 show various system flags, some of
 which can be set and cleared by the
-@code{enable} and
-@code{disable} configuration commands, respectively.
+@code{enable}
+and
+@code{disable}
+configuration commands, respectively.
 These are
 the
-@code{auth}, @code{bclient}, @code{monitor}, @code{pll}, @code{pps} and
-@code{stats} flags.
+@code{auth},
+@code{bclient},
+@code{monitor},
+@code{pll},
+@code{pps}
+and
+@code{stats}
+flags.
 See the
 @code{ntpd(8)}
 documentation for the meaning of these flags.
 There
 are two additional flags which are read only, the
-@code{kernel_pll} and
-@code{kernel_pps}. These flags indicate
+@code{kernel_pll}
+and
+@code{kernel_pps}.
+These flags indicate
 the synchronization status when the precision time kernel
 modifications are in use.
 The
@@ -653,8 +679,7 @@ the range .01 to 0.1 ppm.
 If it remains high for some time after
 starting the daemon, something may be wrong with the local clock,
 or the value of the kernel variable
-.Va
-kern.clockrate.tick
+Va kern.clockrate.tick
 may be
 incorrect.
 
@@ -662,36 +687,38 @@ The
 @quoteleft{}broadcastdelay@quoteright{}
 shows the default broadcast delay,
 as set by the
-@code{broadcastdelay} configuration command.
+@code{broadcastdelay}
+configuration command.
 
 The
 @quoteleft{}authdelay@quoteright{}
 shows the default authentication delay,
 as set by the
-@code{authdelay} configuration command.
-@item Ic
+@code{authdelay}
+configuration command.
+@item @code{sysstats}
 Print statistics counters maintained in the protocol
 module.
-@item Ic
+@item @code{memstats}
 Print statistics counters related to memory allocation
 code.
-@item Ic
+@item @code{iostats}
 Print statistics counters maintained in the input-output
 module.
-@item Ic
+@item @code{timerstats}
 Print statistics counters maintained in the timer/event queue
 support code.
-@item Ic
+@item @code{reslist}
 Obtain and print the server's restriction list.
 This list is
 (usually) printed in sorted order and may help to understand how
 the restrictions are applied.
-@item Ic
+@item @code{monlist} [@kbd{version}]
 Obtain and print traffic counts collected and maintained by the
 monitor facility.
 The version number should not normally need to be
 specified.
-@item Ic
+@item @code{clkbug} @kbd{clock_peer_address} @kbd{Oo} @kbd{...} @kbd{Oc}
 Obtain debugging information for a reference clock driver.
 This
 information is provided only by some clock drivers and is mostly
@@ -700,7 +727,7 @@ undecodable without a copy of the driver source in hand.
 @node Runtime Configuration Requests
 @section Runtime Configuration Requests
 
-Runtime Configuration Requests
+
 All requests which cause state changes in the server are
 authenticated by the server using a configured NTP key (the
 facility can also be disabled by the server by not configuring a
@@ -709,8 +736,10 @@ The key number and the corresponding key must also be made
 known to
 @code{ntpdc}.
 This can be done using the
-@code{keyid} and
-@code{passwd} commands, the latter of which will prompt at the terminal for a
+@code{keyid}
+and
+@code{passwd}
+commands, the latter of which will prompt at the terminal for a
 password to use as the encryption key.
 You will also be prompted
 automatically for both the key number and password the first time a
@@ -745,11 +774,9 @@ applied, the run time reconfiguration facility should provide an
 adequate level of security.
 
 The following commands all make authenticated requests.
-@table @samp
-@item Xo
-[@code{keyid} ]
-[@code{version} ]
-[@code{prefer} ]
+@table @asis
+
+@item @code{addpeer} @kbd{peer_address}[@kbd{keyid}][@kbd{version}][@code{prefer}]
 Add a configured peer association at the given address and
 operating in symmetric active mode.
 Note that an existing
@@ -757,41 +784,39 @@ association with the same peer may be deleted when this command is
 executed, or may simply be converted to conform to the new
 configuration, as appropriate.
 If the optional
-@code{keyid} is a
+@kbd{keyid}
+is a
 nonzero integer, all outgoing packets to the remote server will
 have an authentication field attached encrypted with this key.
 If
 the value is 0 (or not given) no authentication will be done.
 The
-@code{version} can be 1, 2 or 3 and defaults to 3.
+@kbd{version}
+can be 1, 2 or 3 and defaults to 3.
 The
-@code{prefer} keyword indicates a preferred peer (and thus will
+@code{prefer}
+keyword indicates a preferred peer (and thus will
 be used primarily for clock synchronisation if possible).
 The
 preferred peer also determines the validity of the PPS signal - if
 the preferred peer is suitable for synchronisation so is the PPS
 signal.
-@item Xo
-[@code{keyid} ]
-[@code{version} ]
-[@code{prefer} ]
+@item @code{addserver} @kbd{peer_address}[@kbd{keyid}][@kbd{version}][@code{prefer}]
 Identical to the addpeer command, except that the operating
 mode is client.
-@item Xo
-[@code{keyid} ]
-[@code{version} ]
-[@code{prefer} ]
+@item @code{broadcast} @kbd{peer_address}[@kbd{keyid}][@kbd{version}][@code{prefer}]
 Identical to the addpeer command, except that the operating
 mode is broadcast.
 In this case a valid key identifier and key are
 required.
 The
-@code{peer_address} parameter can be the broadcast
+@kbd{peer_address}
+parameter can be the broadcast
 address of the local network or a multicast group address assigned
 to NTP.
 If a multicast address, a multicast-capable kernel is
 required.
-@item Ic
+@item @code{unconfig} @kbd{peer_address} @kbd{Oo} @kbd{...} @kbd{Oc}
 This command causes the configured bit to be removed from the
 specified peer(s).
 In many cases this will cause the peer
@@ -799,53 +824,48 @@ association to be deleted.
 When appropriate, however, the
 association may persist in an unconfigured mode if the remote peer
 is willing to continue on in this fashion.
-@item Xo
-[@code{time1} ]
-[@code{time2} ]
-[@code{stratum} ]
-[@code{refid} ]
+@item @code{fudge} @kbd{peer_address}[@code{time1}][@code{time2}][@kbd{stratum}][@kbd{refid}]
 This command provides a way to set certain data for a reference
 clock.
 See the source listing for further information.
-@item Xo
-.Oo
-@code{auth} | @code{Cm} @code{bclient} | @code{calibrate} | @code{Cm} @code{kernel} | @code{monitor} | @code{Cm} @code{ntp} | @code{pps} | @code{Cm} @code{stats} .Oc
-@item Xo
-.Oo
-@code{auth} | @code{Cm} @code{bclient} | @code{calibrate} | @code{Cm} @code{kernel} | @code{monitor} | @code{Cm} @code{ntp} | @code{pps} | @code{Cm} @code{stats} .Oc
+@item @code{enable}Oo@code{auth} | @code{Cm} @code{bclient} |@code{calibrate} | @code{Cm} @code{kernel} |@code{monitor} | @code{Cm} @code{ntp} |@code{pps} | @code{Cm} @code{stats}Oc
+@item @code{disable}Oo@code{auth} | @code{Cm} @code{bclient} |@code{calibrate} | @code{Cm} @code{kernel} |@code{monitor} | @code{Cm} @code{ntp} |@code{pps} | @code{Cm} @code{stats}Oc
 These commands operate in the same way as the
-@code{enable} and
-@code{disable} configuration file commands of
+@code{enable}
+and
+@code{disable}
+configuration file commands of
 @code{ntpd(8)}.
-@table @samp
-@item Cm
+@table @asis
+
+@item @code{auth}
 Enables the server to synchronize with unconfigured peers only
 if the peer has been correctly authenticated using either public key
 or private key cryptography.
 The default for this flag is enable.
-@item Cm
+@item @code{bclient}
 Enables the server to listen for a message from a broadcast or
 multicast server, as in the multicastclient command with
 default address.
 The default for this flag is disable.
-@item Cm
+@item @code{calibrate}
 Enables the calibrate feature for reference clocks.
 The default for this flag is disable.
-@item Cm
+@item @code{kernel}
 Enables the kernel time discipline, if available.
 The default for this flag is enable if support is available, otherwise disable.
-@item Cm
+@item @code{monitor}
 Enables the monitoring facility.
 See the
 @code{ntpdc(8)}.
 program and the monlist command or further information.
 The default for this flag is enable.
-@item Cm
+@item @code{ntp}
 Enables time and frequency discipline.
 In effect, this switch opens and closes the feedback loop,
 which is useful for testing.
 The default for this flag is enable.
-@item Cm
+@item @code{pps}
 Enables the pulse-per-second (PPS) signal when frequency
 and time is disciplined by the precision time kernel modifications.
 See the
@@ -855,49 +875,25 @@ provided in
 @file{/usr/share/doc/ntp})
 page for further information.
 The default for this flag is disable.
-@item Cm
+@item @code{stats}
 Enables the statistics facility.
 See the
-@ref{Monitoring}Monitoring
-Options
+@ref{Monitoring Options}
 section of
 @code{ntp.conf(5)}
 for further information.
 The default for this flag is disable.
 @end table
-.It
-Xo
-Ic
-restrict
-Ar
-address
-Ar
-mask
-@code{flag} @code{Oo} @code{...} @code{Oc} This command operates in the same way as the
-@code{restrict} configuration file commands of
+@item @code{restrict} @kbd{address} @kbd{mask}@kbd{flag} @kbd{Oo} @kbd{...} @kbd{Oc}
+This command operates in the same way as the
+@code{restrict}
+configuration file commands of
 @code{ntpd(8)}.
-.It
-Xo
-Ic
-unrestrict
-Ar
-address
-Ar
-mask
-@code{flag} @code{Oo} @code{...} @code{Oc} Unrestrict the matching entry from the restrict list.
-.It
-Xo
-Ic
-delrestrict
-Ar
-address
-Ar
-mask
-[@code{ntpport} ]
+@item @code{unrestrict} @kbd{address} @kbd{mask}@kbd{flag} @kbd{Oo} @kbd{...} @kbd{Oc}
+Unrestrict the matching entry from the restrict list.
+@item @code{delrestrict} @kbd{address} @kbd{mask}[@code{ntpport}]
 Delete the matching entry from the restrict list.
-.It
-Ic
-readkeys
+@item @code{readkeys}
 Causes the current set of authentication keys to be purged and
 a new set to be obtained by rereading the keys file (which must
 have been specified in the
@@ -906,88 +902,41 @@ configuration file).
 This
 allows encryption keys to be changed without restarting the
 server.
-.It
-Ic
-trustedkey
-Ar
-keyid
-Oo
-Ar
-...
-Oc
-.It
-Ic
-untrustedkey
-Ar
-keyid
-Oo
-Ar
-...
-Oc
+@item @code{trustedkey} @kbd{keyid} @kbd{Oo} @kbd{...} @kbd{Oc}
+@item @code{untrustedkey} @kbd{keyid} @kbd{Oo} @kbd{...} @kbd{Oc}
 These commands operate in the same way as the
-@code{trustedkey} and
-@code{untrustedkey} configuration file
+@code{trustedkey}
+and
+@code{untrustedkey}
+configuration file
 commands of
 @code{ntpd(8)}.
-.It
-Ic
-authinfo
+@item @code{authinfo}
 Returns information concerning the authentication module,
 including known keys and counts of encryptions and decryptions
 which have been done.
-.It
-Ic
-traps
+@item @code{traps}
 Display the traps set in the server.
 See the source listing for
 further information.
-.It
-Xo
-Ic
-addtrap
-Ar
-address
-[@code{port} ]
-[@code{interface} ]
+@item @code{addtrap} @kbd{address}[@kbd{port}][@kbd{interface}]
 Set a trap for asynchronous messages.
 See the source listing
 for further information.
-.It
-Xo
-Ic
-clrtrap
-Ar
-address
-[@code{port} ]
-[@code{interface} ]
+@item @code{clrtrap} @kbd{address}[@kbd{port}][@kbd{interface}]
 Clear a trap for asynchronous messages.
 See the source listing
 for further information.
-.It
-Ic
-reset
+@item @code{reset}
 Clear the statistics counters in various modules of the server.
 See the source listing for further information.
-
-@end multitable
+@end table
 @node ntpdc See Also
 @subsection ntpdc See Also
 @code{ntp.conf(5)},
 @code{ntpd(8)}
-.Rs
-.%A
-David
-L.
-Mills
-.%T
-Network
-Time
-Protocol
-(Version
-3)
-.%O
-RFC1305
-.Re
+@*
+ David L. Mills, @emph{Network Time Protocol (Version 3)},  RFC1305.
 @node ntpdc Authors
 @subsection ntpdc Authors
 The formatting directives in this document came from FreeBSD.

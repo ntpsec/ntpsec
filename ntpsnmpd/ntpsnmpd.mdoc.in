@@ -1,9 +1,9 @@
-.Dd January 2 2013
+.Dd January 3 2013
 .Dt NTPSNMPD @NTPSNMPD_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  2, 2013 at 02:20:51 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  3, 2013 at 01:10:47 PM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -19,6 +19,9 @@
 All arguments must be options.
 .Pp
 .Sh DESCRIPTION
+.Nm
+is an SNMP MIB agent designed to interface with
+.Xr ntpd @NTPD_MS@ .
 .Sh "OPTIONS"
 .Bl -tag
 .It  \-n ", " -\-nofork
@@ -70,6 +73,22 @@ The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .Sh USAGE
+.Nm
+currently uses a private MIB OID,
+.Ql enterprises.5597 ,
+which is the Meinberg top level OEM OID, and
+.Ql 99
+is the temporary working space for this project. 
+The final OID has to be registered with IANA
+and this is done by the RFC Editor
+when the NTPv4 MIB RFC is standardized. 
+.Pp
+If you have
+.Xr snmpwalk 1
+installed you can run
+.Dl % snmpwalk -v2c -c public localhost enterprises.5597.99
+to see a list of all currently supported NTP MIB objects
+and their current values.
 .Sh "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .Sh "FILES"
@@ -88,12 +107,39 @@ libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .El
 .Sh AUTHORS
+.An "Heiko Gerstung"
 .Sh "COPYRIGHT"
 Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
+The following objects are currently supported:
+.Pp
+.Bl -tag -width ".Li ntpEntSoftwareVersionVal" -compact -offset indent
+.It Li ntpEntSoftwareName
+please fill me in...
+.It Li ntpEntSoftwareVersion
+please fill me in...
+.It Li ntpEntSoftwareVersionVal
+please fill me in...
+.It Li ntpEntSoftwareVendor
+please fill me in...
+.It Li ntpEntSystemType
+please fill me in...
+.It Li ntpEntTimeResolution
+please fill me in...
+.It Li ntpEntTimeResolutionVal
+please fill me in...
+.It Li ntpEntTimePrecision
+please fill me in...
+.It Li ntpEntTimePrecisionVal
+please fill me in...
+.It Li ntpEntTimeDistance
+please fill me in...
+.El
+.Pp
+This document corresponds to version @VERSION@ of NTP.
 .Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntpsnmpd\fP
 option definitions.

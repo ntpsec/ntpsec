@@ -1,3 +1,4 @@
+(4.2.7p344) 2013/01/03 Released by Harlan Stenn <stenn@ntp.org>
 * Refactor and enhance mdoc2texi.
 * Make sure agtexi-file.tpl defines label-str.
 * Cleanup to ntp.conf.def.

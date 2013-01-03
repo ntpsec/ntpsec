@@ -1,8 +1,8 @@
-.TH ntpsnmpd 1ntpsnmpdman "02 Jan 2013" "4.2.7p343" "User Commands"
+.TH ntpsnmpd 1ntpsnmpdman "03 Jan 2013" "4.2.7p344" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  2, 2013 at 02:20:45 AM by AutoGen 5.16.2
+.\"  It has been AutoGen-ed  January  3, 2013 at 01:10:41 PM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -11,11 +11,14 @@ ntpsnmpd \- NTP SNMP MIB agent
 .SH SYNOPSIS
 .B ntpsnmpd
 .\" Mixture of short (flag) options and long options
-.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP " [[=| ]\fIvalue\fP]]..."
+.RB [ \-\fIflag\fP " [\fIvalue\fP]]... [" \-\-\fIopt\-name\fP "[[=| ]\fIvalue\fP]]..."
 .PP
 All arguments must be options.
 .PP
 .SH DESCRIPTION
+.B 
+is an SNMP MIB agent designed to interface with
+.Xr ntpd 1ntpdmdoc .
 .SH "OPTIONS"
 .TP
 .BR \-n ", " -\-nofork
@@ -71,6 +74,22 @@ The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
 .SH USAGE
+.B 
+currently uses a private MIB OID,
+.Ql enterprises.5597 ,
+which is the Meinberg top level OEM OID, and
+.Ql 99
+is the temporary working space for this project. 
+The final OID has to be registered with IANA
+and this is done by the RFC Editor
+when the NTPv4 MIB RFC is standardized. 
+.PP
+If you have
+.Xr snmpwalk 1
+installed you can run
+.Dl % snmpwalk -v2c -c public localhost enterprises.5597.99
+to see a list of all currently supported NTP MIB objects
+and their current values.
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"
@@ -91,12 +110,47 @@ A specified configuration file could not be loaded.
 libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH AUTHORS
+.An "Heiko Gerstung"
 .SH "COPYRIGHT"
 Copyright (C) 1970-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
+The following objects are currently supported:
+.PP
+.TP
+.BR Li ntpEntSoftwareName
+please fill me in...
+.TP
+.BR Li ntpEntSoftwareVersion
+please fill me in...
+.TP
+.BR Li ntpEntSoftwareVersionVal
+please fill me in...
+.TP
+.BR Li ntpEntSoftwareVendor
+please fill me in...
+.TP
+.BR Li ntpEntSystemType
+please fill me in...
+.TP
+.BR Li ntpEntTimeResolution
+please fill me in...
+.TP
+.BR Li ntpEntTimeResolutionVal
+please fill me in...
+.TP
+.BR Li ntpEntTimePrecision
+please fill me in...
+.TP
+.BR Li ntpEntTimePrecisionVal
+please fill me in...
+.TP
+.BR Li ntpEntTimeDistance
+please fill me in...
+.PP
+This document corresponds to version @VERSION@ of NTP.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntpsnmpd\fP
 option definitions.

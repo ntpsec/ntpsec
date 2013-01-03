@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *  
- *  It has been AutoGen-ed  January  2, 2013 at 02:20:55 AM by AutoGen 5.16.2
+ *  It has been AutoGen-ed  January  3, 2013 at 01:10:51 PM by AutoGen 5.17.1pre11
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:5:11 templates.
+ * Generated from AutoOpts 37:0:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 147461
+#define AO_TEMPLATE_VERSION 151552
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -93,8 +93,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    26
-#define NTP_KEYGEN_VERSION       "4.2.7p343"
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p343"
+#define NTP_KEYGEN_VERSION       "4.2.7p344"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p344"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -122,8 +122,9 @@ typedef enum {
  *  Enumeration of ntp-keygen exit codes
  */
 typedef enum {
-    NTP_KEYGEN_EXIT_SUCCESS = 0,
-    NTP_KEYGEN_EXIT_FAILURE = 1,
+    NTP_KEYGEN_EXIT_SUCCESS         = 0,
+    NTP_KEYGEN_EXIT_FAILURE         = 1,
+    NTP_KEYGEN_EXIT_USAGE_ERROR     = 64,
     NTP_KEYGEN_EXIT_NO_CONFIG_INPUT = 66,
     NTP_KEYGEN_EXIT_LIBOPTS_FAILURE = 70
 } ntp_keygen_exit_code_t;
@@ -289,7 +290,7 @@ typedef enum {
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
         DESC(SAVE_OPTS).fOptState |= OPTST_SET; \
-        DESC(SAVE_OPTS).optArg.argString = (char const*)(a) )
+        DESC(SAVE_OPTS).optArg.argString = (char const*)(a))
 /*
  *  Interface defines not associated with particular options
  */
@@ -300,7 +301,7 @@ typedef enum {
                 ntp_keygenOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntp_keygenOptions.pUsageProc)(&ntp_keygenOptions, c)
-/* extracted from opthead.tlib near line 484 */
+/* extracted from opthead.tlib near line 497 */
 
 #ifdef  __cplusplus
 extern "C" {
