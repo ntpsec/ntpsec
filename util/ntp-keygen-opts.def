@@ -1098,11 +1098,6 @@ utilities.
 	_END_PROG_MDOC_DESCRIP;
 };
 
-/*
-prog-info-descrip = <<- _END_PROG_INFO_DESCRIP
-	_END_PROG_INFO_DESCRIP;
-*/
-
 doc-section	= {
   ds-type	= 'USAGE';
   ds-format	= 'mdoc';
@@ -1126,7 +1121,7 @@ doc-section	= {
   ds-type	= 'NOTES';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_NOTES
-This document corresponds to version @VERSION@ of NTP.
+This document corresponds to version #VERSION# of NTP.
 Portions of this document came from FreeBSD.
 	_END_MDOC_NOTES;
 };

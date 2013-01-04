@@ -284,52 +284,6 @@ of the host is reported.
 	_END_PROG_MDOC_DESCRIP;
 };
 
-prog-info-descrip = <<- _END_PROG_INFO_DESCRIP
-@code{sntp}
-can be used as an SNTP client to query a NTP or SNTP server and either display
-the time or set the local system's time (given suitable privilege).  It can be
-run as an interactive command or in a
-@code{cron}
-job.
-
-NTP (the Network Time Protocol) and SNTP (the Simple Network Time Protocol)
-are defined and described by RFC 5905.
-
-@indent
-The default is to write the estimated correct local date and time (i.e. not
-UTC) to the standard output in a format like
-@example
-1996-10-15 20:17:25.123 (+0800) +4.567 +/- 0.089 [host] IP sN
-@end example
-where the
-@example
-(+0800)
-@end example
-means that to get to UTC from the reported local time one must
-add 8 hours and 0 minutes,
-the
-@example
-+4.567
-@end example
-indicates the local clock is 4.567 seconds behind the correct time
-(so 4.567 seconds must be added to the local clock to get it to be correct).
-Note that the number of decimals printed for this value will change
-based on the reported precision of the server.
-@example
-+/- 0.089
-@end example
-is the reported @file{synchronization distance} (in seconds),
-which represents the maximum error due to all causes.
-If the server does not report valid data needed to calculate the
-synchronization distance, this will be reported as
-@example
-+/- ?
-@end example
-If the @file{host} is different from the @file{IP}, both will be displayed.
-Otherwise, only the @file{IP} is displayed.
-Finally, the @file{stratum} is reported.
-	_END_PROG_INFO_DESCRIP;
-
 doc-section	= {
   ds-type	= 'USAGE';
   ds-format	= 'mdoc';
@@ -370,7 +324,7 @@ doc-section	= {
   ds-type	= 'NOTES';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_NOTES
-This document corresponds to version @VERSION@ of
+This document corresponds to version #VERSION# of
 .Nm .
 	_END_MDOC_NOTES;
 };

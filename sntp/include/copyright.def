@@ -19,3 +19,8 @@ eval VERSION=\`sed -e 's/.*,\\[//' -e 's/\\].*//' < ../sntp/m4/version.m4\`
 echo $VERSION`;
 
 version-value = '';	/* Don't use -v as a shortcut for --version */
+
+doc-sub = {
+    sub-name = version;
+    sub-text = 's/#VERSION#/<<version>>/g';
+};

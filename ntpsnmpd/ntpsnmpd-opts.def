@@ -112,7 +112,7 @@ please fill me in...
 please fill me in...
 .El
 .Pp
-This document corresponds to version @VERSION@ of NTP.
+This document corresponds to version #VERSION# of NTP.
 	_END_MDOC_NOTES;
 };
 
