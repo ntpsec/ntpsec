@@ -85,9 +85,10 @@ AC_DISABLE_SHARED
 AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
-# NTP has (so far) been relying on leading-edge autogen.
+# NTP has (so far) been relying on leading-edge autogen, which
+# means we need the appropriate corresponding libopts as well.
 # Therefore, by default:
-# - use the version we ship with
+# - use the version of libopts we ship with
 # - do not install it
 # - build a static copy (AC_DISABLE_SHARED - done earlier)
 case "${enable_local_libopts+set}" in
