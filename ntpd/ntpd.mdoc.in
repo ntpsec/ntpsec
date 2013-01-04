@@ -1,9 +1,9 @@
-.Dd January 3 2013
+.Dd January 4 2013
 .Dt NTPD @NTPD_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:09:34 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:03:12 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -14,7 +14,7 @@
 .\" Mixture of short (flag) options and long options
 .Op Fl flags
 .Op Fl flag Ar value
-.Op Fl \-option-name Ar value
+.Op Fl \-option\-name Ar value
 [ <server1> ... <serverN> ]
 .Pp
 .Sh DESCRIPTION
@@ -24,15 +24,15 @@ utility is an operating system daemon which sets
 and maintains the system time of day in synchronism with Internet
 standard time servers.
 It is a complete implementation of the
-Network Time Protocol (NTP) version 4, as defined by RFC-5905,
+Network Time Protocol (NTP) version 4, as defined by RFC\-5905,
 but also retains compatibility with
-version 3, as defined by RFC-1305, and versions 1
-and 2, as defined by RFC-1059 and RFC-1119, respectively.
+version 3, as defined by RFC\-1305, and versions 1
+and 2, as defined by RFC\-1059 and RFC\-1119, respectively.
 .Pp
 The
 .Nm
-utility does most computations in 64-bit floating point
-arithmetic and does relatively clumsy 64-bit fixed point operations
+utility does most computations in 64\-bit floating point
+arithmetic and does relatively clumsy 64\-bit fixed point operations
 only when necessary to preserve the ultimate precision, about 232
 picoseconds.
 While the ultimate precision is not achievable with
@@ -88,21 +88,21 @@ will set the
 to 022.
 .Sh "OPTIONS"
 .Bl -tag
-.It  \-4 ", " -\-ipv4
+.It  \-4 ", " \-\-ipv4
 Force IPv4 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv6.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
-.It  \-6 ", " -\-ipv6
+.It  \-6 ", " \-\-ipv6
 Force IPv6 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv4.
 .sp
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
-.It  \-a ", " -\-authreq
+.It  \-a ", " \-\-authreq
 Require crypto authentication.
 This option must not appear in combination with any of the following options:
 authnoreq.
@@ -110,7 +110,7 @@ authnoreq.
 Require cryptographic authentication for broadcast client,
 multicast client and symmetric passive associations.
 This is the default.
-.It  \-A ", " -\-authnoreq
+.It  \-A ", " \-\-authnoreq
 Do not require crypto authentication.
 This option must not appear in combination with any of the following options:
 authreq.
@@ -118,9 +118,8 @@ authreq.
 Do not require cryptographic authentication for broadcast client,
 multicast client and symmetric passive associations.
 This is almost never a good idea.
-.It  \-b ", " -\-bcastsync
+.It  \-b ", " \-\-bcastsync
 Allow us to sync to broadcast servers.
-.sp
 .sp
 .It  \-c " \fIstring\fP, " \-\-configfile "=" \fIstring\fP
 configuration file name.
@@ -128,16 +127,14 @@ configuration file name.
 The name and path of the configuration file,
 \fI/etc/ntp.conf\fP
 by default.
-.It  \-d ", " -\-debug\-level
+.It  \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
-.sp
 .sp
 .It  \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
 This option takes an integer number as its argument.
-.sp
 .sp
 .It  \-f " \fIstring\fP, " \-\-driftfile "=" \fIstring\fP
 frequency drift file name.
@@ -150,7 +147,7 @@ This is the same operation as the
 configuration specification in the 
 \fI/etc/ntp.conf\fP
 file.
-.It  \-g ", " -\-panicgate
+.It  \-g ", " \-\-panicgate
 Allow the first adjustment to be Big.
 This option may appear an unlimited number of times.
 .sp
@@ -189,7 +186,7 @@ Open the network address given, or all the addresses associated with the
 given interface name.  This option may appear multiple times.  This option
 also implies not opening other addresses, except wildcard and localhost.
 This option is deprecated. Please consider using the configuration file
-\fBinterface\fP command, which is more versatile.
+\fBinterface\fP command, which is more versatile. 
 .It  \-k " \fIstring\fP, " \-\-keyfile "=" \fIstring\fP
 path to symmetric keys.
 .sp
@@ -207,26 +204,25 @@ The default is the system log file.
 This is the same operation as the
 \fBlogfile\fP \fIlogfile\fP
 configuration file directive.
-.It  \-L ", " -\-novirtualips
+.It  \-L ", " \-\-novirtualips
 Do not listen to virtual interfaces.
 .sp
 Do not listen to virtual interfaces, defined as those with
 names containing a colon.  This option is deprecated.  Please
 consider using the configuration file \fBinterface\fP command, which
 is more versatile.
-.It  \-M ", " -\-modifymmtimer
+.It  \-M ", " \-\-modifymmtimer
 Modify Multimedia Timer (Windows only).
 .sp
 Set the Windows Multimedia Timer to highest resolution.  This
 ensures the resolution does not change while ntpd is running,
 avoiding timekeeping glitches associated with changes.
-.It  \-n ", " -\-nofork
+.It  \-n ", " \-\-nofork
 Do not fork.
 This option must not appear in combination with any of the following options:
-wait-sync.
+wait\-sync.
 .sp
-.sp
-.It  \-N ", " -\-nice
+.It  \-N ", " \-\-nice
 Run at high priority.
 .sp
 To the extent permitted by the operating system, run
@@ -250,10 +246,10 @@ To the extent permitted by the operating system, run
 at the specified
 \fBsched_setscheduler(SCHED_FIFO)\fP
 priority.
-.It  \-q ", " -\-quit
+.It  \-q ", " \-\-quit
 Set the time and quit.
 This option must not appear in combination with any of the following options:
-saveconfigquit, wait-sync.
+saveconfigquit, wait\-sync.
 .sp
 \fBntpd\fP
 will not daemonize and will exit after the clock is first
@@ -273,7 +269,7 @@ Specify the default propagation delay from the broadcast/multicast server to thi
 .It  \-\-saveconfigquit "=\fIstring\fP"
 Save parsed configuration and quit.
 This option must not appear in combination with any of the following options:
-quit, wait-sync.
+quit, wait\-sync.
 .sp
 Cause \fBntpd\fP to parse its startup configuration file and save an
 equivalent to the given filename and exit.  This option was
@@ -311,11 +307,9 @@ Use 0 to disable scanning. 60 seconds is the minimum time between scans.
 make ARG an ntp variable (RW).
 This option may appear an unlimited number of times.
 .sp
-.sp
 .It  \-\-dvar "=\fIndvar\fP"
 make ARG an ntp variable (RW|DEF).
 This option may appear an unlimited number of times.
-.sp
 .sp
 .It  \-w " \fInumber\fP, " \-\-wait\-sync "=" \fInumber\fP
 Seconds to wait for first clock sync.
@@ -331,7 +325,7 @@ status is zero (success) if the clock was synchronized,
 otherwise it is \fBETIMEDOUT\fP.
 This provides the option for a script starting \fBntpd\fP to easily
 wait for the first set of the clock before proceeding.
-.It  \-x ", " -\-slew
+.It  \-x ", " \-\-slew
 Slew up to 600 seconds.
 .sp
 Normally, the time is slewed if the offset is less than the step threshold, which is 128 ms by default, and stepped if above the threshold.
@@ -360,14 +354,14 @@ Force CPU cycle counter use (Windows only).
 Force substitution the CPU counter for \fBQueryPerformanceCounter\fP.
 The CPU counter (RDTSC on x86) is used unconditionally with the
 given frequency (in Hz).
-.It  \-m ", " -\-mdns
+.It  \-m ", " \-\-mdns
 Register with mDNS as a NTP server.
 .sp
 Registers as an NTP server with the local mDNS server which allows
 the server to be discovered via mDNS client lookup.
 .It \-? , " \-\-help"
 Display usage information and exit.
-.It \-! , " \-\-more-help"
+.It \-! , " \-\-more\-help"
 Pass the extended usage information through a pager.
 .It \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
 Output version of program and exit.  The default mode is `v', a simple
@@ -378,9 +372,28 @@ print the full copyright notice.
 Any option that is not marked as \fInot presettable\fP may be preset
 by loading values from environment variables named:
 .nf
-  \fBNTPD_<option-name>\fP or \fBNTPD\fP
+  \fBNTPD_<option\-name>\fP or \fBNTPD\fP
 .fi
 .ad
+cvt_prog='/usr/local/gnu/share/autogen/texi2mdoc'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option\-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation\-notes environment files examples exit\-status errors
+        compatibility see\-also conforming\-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end\-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end\-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .Sh USAGE
 .Ss "How NTP Operates"
 The
@@ -408,7 +421,7 @@ command, as described in
 .Xr ntp.conf 5 .
 .Pp
 Most operating systems and hardware of today incorporate a
-time-of-year (TOY) chip to maintain the time during periods when
+time\-of\-year (TOY) chip to maintain the time during periods when
 the power is off.
 When the machine is booted, the chip is used to
 initialize the operating system time.
@@ -448,7 +461,7 @@ small steps so that the timescale is effectively continuous and
 without discontinuities.
 Under conditions of extreme network
 congestion, the roundtrip delay jitter can exceed three seconds and
-the synchronization distance, which is equal to one-half the
+the synchronization distance, which is equal to one\-half the
 roundtrip delay plus error budget terms, can become very large.
 The
 .Nm
@@ -484,7 +497,7 @@ the
 .Fl x
 option.
 The maximum slew rate possible is limited
-to 500 parts-per-million (PPM) as a consequence of the correctness
+to 500 parts\-per\-million (PPM) as a consequence of the correctness
 principles on which the NTP protocol and algorithm design are
 based.
 As a result, the local clock can take a long time to
@@ -497,7 +510,7 @@ correctly synchronized network time.
 .Pp
 In spite of the above precautions, sometimes when large
 frequency errors are present the resulting time offsets stray
-outside the 128-ms range and an eventual step or slew time
+outside the 128\-ms range and an eventual step or slew time
 correction is required.
 If following such a correction the
 frequency error is so large that the first sample is outside the
@@ -543,7 +556,7 @@ If you can also keep a good
 .Pa ntp.drift
 file then
 .Xr ntpd 8
-will effectively "warm-start" and your system's clock will
+will effectively "warm\-start" and your system's clock will
 be stable in under 11 seconds' time.
 .Pp
 As soon as possible in the startup sequence, start
@@ -564,15 +577,15 @@ if you have processes like
 .Cm dovecot
 or database servers
 that require
-monotonically-increasing time,
+monotonically\-increasing time,
 run
-.Xr ntp-wait 8
+.Xr ntp\-wait 8
 as late as possible in the boot sequence
 (perhaps with the
 .Fl v
 flag)
 and after
-.Xr ntp-wait 8
+.Xr ntp\-wait 8
 exits successfully
 it is as safe as it will ever be to start any process that require
 stable time.
@@ -621,12 +634,12 @@ provided in
 It normally operates continuously while
 monitoring for small changes in frequency and trimming the clock
 for the ultimate precision.
-However, it can operate in a one-time
+However, it can operate in a one\-time
 mode where the time is set from an external server and frequency is
 set from a previously recorded frequency file.
 A
 broadcast/multicast or manycast client can discover remote servers,
-compute server-client propagation delay correction factors and
+compute server\-client propagation delay correction factors and
 configure itself automatically.
 This makes it possible to deploy a
 fleet of workstations without specifying configuration details
@@ -702,7 +715,7 @@ the frequency and offset to settle down.
 Then the
 .Nm
 is
-stopped and run in one-time mode as required.
+stopped and run in one\-time mode as required.
 At each startup, the
 frequency is read from the file and initializes the kernel
 frequency.
@@ -753,7 +766,7 @@ this limit.
 Once this is done, the drift file is automatically
 updated once per hour and is available to initialize the frequency
 on subsequent daemon restarts.
-.Ss "The huff-n'-puff Filter"
+.Ss "The huff\-n'\-puff Filter"
 In scenarios where a considerable amount of data are to be
 downloaded or uploaded over telephone modems, timekeeping quality
 can be seriously degraded.
@@ -764,7 +777,7 @@ many cases the apparent time errors are so large as to exceed the
 step threshold and a step correction can occur during and after the
 data transfer is in progress.
 .Pp
-The huff-n'-puff filter is designed to correct the apparent time
+The huff\-n'\-puff filter is designed to correct the apparent time
 offset in these cases.
 It depends on knowledge of the propagation
 delay when no other traffic is present.
@@ -805,6 +818,9 @@ One of the following exit values will be returned:
 Successful program execution.
 .It 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.It 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen\-users@lists.sourceforge.net.  Thank you.
 .El
 .Sh "SEE ALSO"
 .Xr ntp.conf 5 ,
@@ -863,22 +879,21 @@ A snapshot of this documentation is available in HTML format in
 .Sh "AUTHORS"
 The University of Delaware
 .Sh "COPYRIGHT"
-Copyright (C) 1970-2013 The University of Delaware all rights reserved.
+Copyright (C) 1970\-2013 The University of Delaware all rights reserved.
 This program is released under the terms of the NTP license, <http://ntp.org/license>.
 .Sh BUGS
 The
 .Nm
 utility has gotten rather fat.
 While not huge, it has gotten
-larger than might be desirable for an elevated-priority
+larger than might be desirable for an elevated\-priority
 .Nm
 running on a workstation, particularly since many of
 the fancy features which consume the space were designed more with
 a busy primary server, rather than a high stratum workstation in
 mind.Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version @VERSION@ of NTP.
-Portions of this document came from FreeBSD.
-.Pp
-This manual page was \fIAutoGen\fP-erated from the \fBntpd\fP
+This document corresponds to version 4.2.7p345 of NTP.
+Portions of this document came from FreeBSD..Pp
+This manual page was \fIAutoGen\fP\-erated from the \fBntpd\fP
 option definitions.

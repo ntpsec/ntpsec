@@ -1,8 +1,8 @@
-.TH ntpd @NTPD_MS@ "03 Jan 2013" "4.2.7p344" "User Commands"
+.TH ntpd @NTPD_MS@ "04 Jan 2013" "4.2.7p345" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:09:18 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:02:55 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -84,7 +84,7 @@ will set the
 to 022.
 .SH "OPTIONS"
 .TP
-.BR \-4 ", " -\-ipv4
+.BR \-4 ", " \-\-ipv4
 Force IPv4 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv6.
@@ -92,7 +92,7 @@ ipv6.
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
 .TP
-.BR \-6 ", " -\-ipv6
+.BR \-6 ", " \-\-ipv6
 Force IPv6 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv4.
@@ -100,7 +100,7 @@ ipv4.
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 .TP
-.BR \-a ", " -\-authreq
+.BR \-a ", " \-\-authreq
 Require crypto authentication.
 This option must not appear in combination with any of the following options:
 authnoreq.
@@ -109,7 +109,7 @@ Require cryptographic authentication for broadcast client,
 multicast client and symmetric passive associations.
 This is the default.
 .TP
-.BR \-A ", " -\-authnoreq
+.BR \-A ", " \-\-authnoreq
 Do not require crypto authentication.
 This option must not appear in combination with any of the following options:
 authreq.
@@ -118,7 +118,7 @@ Do not require cryptographic authentication for broadcast client,
 multicast client and symmetric passive associations.
 This is almost never a good idea.
 .TP
-.BR \-b ", " -\-bcastsync
+.BR \-b ", " \-\-bcastsync
 Allow us to sync to broadcast servers.
 .sp
 .TP
@@ -129,7 +129,7 @@ The name and path of the configuration file,
 \fI/etc/ntp.conf\fP
 by default.
 .TP
-.BR \-d ", " -\-debug\-level
+.BR \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
@@ -152,7 +152,7 @@ configuration specification in the
 \fI/etc/ntp.conf\fP
 file.
 .TP
-.BR \-g ", " -\-panicgate
+.BR \-g ", " \-\-panicgate
 Allow the first adjustment to be Big.
 This option may appear an unlimited number of times.
 .sp
@@ -193,7 +193,7 @@ Open the network address given, or all the addresses associated with the
 given interface name.  This option may appear multiple times.  This option
 also implies not opening other addresses, except wildcard and localhost.
 This option is deprecated. Please consider using the configuration file
-\fBinterface\fP command, which is more versatile.
+\fBinterface\fP command, which is more versatile. 
 .TP
 .BR \-k " \fIstring\fP, " \-\-keyfile "=" \fIstring\fP
 path to symmetric keys.
@@ -214,7 +214,7 @@ This is the same operation as the
 \fBlogfile\fP \fIlogfile\fP
 configuration file directive.
 .TP
-.BR \-L ", " -\-novirtualips
+.BR \-L ", " \-\-novirtualips
 Do not listen to virtual interfaces.
 .sp
 Do not listen to virtual interfaces, defined as those with
@@ -222,20 +222,20 @@ names containing a colon.  This option is deprecated.  Please
 consider using the configuration file \fBinterface\fP command, which
 is more versatile.
 .TP
-.BR \-M ", " -\-modifymmtimer
+.BR \-M ", " \-\-modifymmtimer
 Modify Multimedia Timer (Windows only).
 .sp
 Set the Windows Multimedia Timer to highest resolution.  This
 ensures the resolution does not change while ntpd is running,
 avoiding timekeeping glitches associated with changes.
 .TP
-.BR \-n ", " -\-nofork
+.BR \-n ", " \-\-nofork
 Do not fork.
 This option must not appear in combination with any of the following options:
 wait-sync.
 .sp
 .TP
-.BR \-N ", " -\-nice
+.BR \-N ", " \-\-nice
 Run at high priority.
 .sp
 To the extent permitted by the operating system, run
@@ -262,7 +262,7 @@ at the specified
 \fBsched_setscheduler(SCHED_FIFO)\fP
 priority.
 .TP
-.BR \-q ", " -\-quit
+.BR \-q ", " \-\-quit
 Set the time and quit.
 This option must not appear in combination with any of the following options:
 saveconfigquit, wait-sync.
@@ -351,7 +351,7 @@ otherwise it is \fBETIMEDOUT\fP.
 This provides the option for a script starting \fBntpd\fP to easily
 wait for the first set of the clock before proceeding.
 .TP
-.BR \-x ", " -\-slew
+.BR \-x ", " \-\-slew
 Slew up to 600 seconds.
 .sp
 Normally, the time is slewed if the offset is less than the step threshold, which is 128 ms by default, and stepped if above the threshold.
@@ -383,7 +383,7 @@ Force substitution the CPU counter for \fBQueryPerformanceCounter\fP.
 The CPU counter (RDTSC on x86) is used unconditionally with the
 given frequency (in Hz).
 .TP
-.BR \-m ", " -\-mdns
+.BR \-m ", " \-\-mdns
 Register with mDNS as a NTP server.
 .sp
 Registers as an NTP server with the local mDNS server which allows
@@ -406,6 +406,25 @@ by loading values from environment variables named:
   \fBNTPD_<option-name>\fP or \fBNTPD\fP
 .fi
 .ad
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH USAGE
 .SS "How NTP Operates"
 The
@@ -832,6 +851,10 @@ Successful program execution.
 .TP
 .BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
 .Xr ntp.conf 5 ,
 .Xr ntpdate 8 ,
@@ -903,8 +926,7 @@ the fancy features which consume the space were designed more with
 a busy primary server, rather than a high stratum workstation in
 mind.Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version @VERSION@ of NTP.
-Portions of this document came from FreeBSD.
-.PP
+This document corresponds to version 4.2.7p345 of NTP.
+Portions of this document came from FreeBSD..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntpd\fP
 option definitions.

@@ -1,3 +1,4 @@
+(4.2.7p345) 2013/01/04 Released by Harlan Stenn <stenn@ntp.org>
 * Update several .def files to use autogen-5.17 feature set.
 (4.2.7p344) 2013/01/03 Released by Harlan Stenn <stenn@ntp.org>
 * Refactor and enhance mdoc2texi.

@@ -1,8 +1,8 @@
-.TH ntp-keygen @NTP_KEYGEN_MS@ "03 Jan 2013" "ntp (4.2.7p344)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "04 Jan 2013" "ntp (4.2.7p345)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:11:02 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:04:36 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -881,7 +881,7 @@ private keys.  The default is three-key triple DES in CBC mode,
 equivalent to "@code{-C des-ede3-cbc".  The openssl tool lists ciphers
 available in "\fBopenssl \-h\fP" output.
 .TP
-.BR \-d ", " -\-debug\-level
+.BR \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
@@ -892,24 +892,24 @@ This option may appear an unlimited number of times.
 This option takes an integer number as its argument.
 .sp
 .TP
-.BR \-e ", " -\-id\-key
+.BR \-e ", " \-\-id\-key
 Write IFF or GQ identity keys.
 .sp
 Write the IFF or GQ client keys to the standard output.  This is
 intended for automatic key distribution by mail.
 .TP
-.BR \-G ", " -\-gq\-params
+.BR \-G ", " \-\-gq\-params
 Generate GQ parameters and keys.
 .sp
 Generate parameters and keys for the GQ identification scheme,
 obsoleting any that may exist.
 .TP
-.BR \-H ", " -\-host\-key
+.BR \-H ", " \-\-host\-key
 generate RSA host key.
 .sp
 Generate new host keys, obsoleting any that may exist.
 .TP
-.BR \-I ", " -\-iffkey
+.BR \-I ", " \-\-iffkey
 generate IFF parameters.
 .sp
 Generate parameters for the IFF identification scheme, obsoleting
@@ -926,7 +926,7 @@ using \fB-s/--subject-name\fP following an '\fB@\fP' character,
 is also a part of the self-signed host certificate's subject and
 issuer names in the form \fBhost@group\fP and should match the
 '\fBcrypto ident\fP' or '\fBserver ident\fP' configuration in
-\fBntpd\fP's configuration file.
+\fBntpd\fP's configuration file. 
 .TP
 .BR \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
 set certificate lifetime.
@@ -934,7 +934,7 @@ This option takes an integer number as its argument.
 .sp
 Set the certificate expiration to lifetime days from now.
 .TP
-.BR \-M ", " -\-md5key
+.BR \-M ", " \-\-md5key
 generate MD5 keys.
 .sp
 Generate MD5 keys, obsoleting any that may exist.
@@ -952,7 +952,7 @@ in the range  256 through 2048
 .sp
 The number of bits in the prime modulus.  The default is 512.
 .TP
-.BR \-P ", " -\-pvt\-cert
+.BR \-P ", " \-\-pvt\-cert
 generate PC private certificate.
 .sp
 Generate a private certificate.  By default, the program generates
@@ -990,7 +990,7 @@ subject and issuer fields, as with \fB-i group\fP.  The group name, or
 if not provided, the host name are also used in the file names
 of IFF, GQ, and MV client parameter files.
 .TP
-.BR \-T ", " -\-trusted\-cert
+.BR \-T ", " \-\-trusted\-cert
 trusted certificate (TC scheme).
 .sp
 Generate a trusted certificate.  By default, the program generates
@@ -1042,6 +1042,25 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH USAGE
 The
 p Ar password
@@ -1087,8 +1106,7 @@ with older architectures such as SPARC IPC.
 .PP
 Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version @VERSION@ of NTP.
-Portions of this document came from FreeBSD.
-.PP
+This document corresponds to version 4.2.7p345 of NTP.
+Portions of this document came from FreeBSD..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp-keygen\fP
 option definitions.

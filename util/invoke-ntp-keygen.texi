@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 # 
-# It has been AutoGen-ed  January  3, 2013 at 01:11:09 PM by AutoGen 5.17.1pre11
+# It has been AutoGen-ed  January  4, 2013 at 09:04:41 AM by AutoGen 5.17.1pre11
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -908,7 +908,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p344
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p345
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
@@ -1336,8 +1336,8 @@ The command line options relating to configuration and/or usage help are:
 
 Print the program version to standard out, optionally with licensing
 information, then exit 0.  The optional argument specifies how much licensing
-detail to provide.  The default is to print just the version.  The licensing infomation may be selected with an option argument.  Only the
-first letter of the argument is examined:
+detail to provide.  The default is to print just the version.  The licensing infomation may be selected with an option argument.
+Only the first letter of the argument is examined:
 
 @table @samp
 @item version
@@ -1379,7 +1379,7 @@ no write password is specified, the read password is used
 as the write password by default.
 @node ntp-keygen Notes
 @subsection ntp-keygen Notes
-This document corresponds to version @VERSION@ of NTP.
+This document corresponds to version 4.2.7p345 of NTP.
 Portions of this document came from FreeBSD.
 @node ntp-keygen Bugs
 @subsection ntp-keygen Bugs

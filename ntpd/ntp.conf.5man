@@ -1,8 +1,8 @@
-.TH ntp.conf 5man "03 Jan 2013" "4.2.7p344" "File Formats"
+.TH ntp.conf 5man "04 Jan 2013" "4.2.7p345" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:09:10 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:02:47 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -1165,7 +1165,7 @@ the file generation set named
 The first two fields show the date (Modified Julian Day) and
 time (seconds and fraction past UTC midnight).
 The next five fields
-show time offset (seconds), frequency offset (parts per million -
+show time offset (seconds), frequency offset (parts per million \-
 PPM), RMS jitter (seconds), Allan deviation (PPM) and clock
 discipline time constant.
 .ti -4
@@ -1181,7 +1181,7 @@ generation set named
 .br
 .in +4
 .nf
-48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.001424877 0.000958674
+48773 10847.650 127.127.4.1 9714 \-0.001605376 0.000000000 0.001424877 0.000958674
 .in -4
 .fi
 .PP
@@ -2618,7 +2618,7 @@ keywords can be prefixed with
 .Ql = ,
 .Ql +
 and
-.Ql - ,
+.Ql \- ,
 where
 .Ql =
 sets the
@@ -2626,7 +2626,7 @@ sets the
 priority mask,
 .Ql +
 adds and
-.Ql -
+.Ql \-
 removes
 messages.
 .Xr syslog 3
@@ -2698,7 +2698,7 @@ This command specifies the location of an alternate log file to
 be used instead of the default system
 .Xr syslog 3
 facility.
-This is the same operation as the -l command line option.
+This is the same operation as the \-l command line option.
 .TP
 .BR Ic setvar Ar variable Op Cm default
 This command adds an additional system variable.
@@ -2850,6 +2850,46 @@ In manycast mode these values are used in turn in
 an expanding-ring search.
 The default is eight multiples of 32 starting at
 31.
+.SH "OPTIONS"
+.TP
+.BR \-\-help
+Display usage information and exit.
+.TP
+.BR \-\-more-help
+Pass the extended usage information through a pager.
+.TP
+.BR \-\-version "[=\fI{v|c|n}\fP]"
+Output version of program and exit.  The default mode is `v', a simple
+version.  The `c' mode will print copyright information and `n' will
+print the full copyright notice.
+.SH "OPTION PRESETS"
+Any option that is not marked as \fInot presettable\fP may be preset
+by loading values from environment variables named:
+.nf
+  \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
+.fi
+.ad
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
+.SH "ENVIRONMENT"
+See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES
 .TP
 .BR Pa /etc/ntp.conf
@@ -2866,6 +2906,18 @@ RSA public key
 .TP
 .BR Pa ntp_dh
 Diffie-Hellman agreement parameters
+.SH "EXIT STATUS"
+One of the following exit values will be returned:
+.TP
+.BR 0 " (EXIT_SUCCESS)"
+Successful program execution.
+.TP
+.BR 1 " (EXIT_FAILURE)"
+The operation failed or the command syntax was not valid.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
 .SH SEE ALSO
 .Xr ntpd 1ntpdmdoc ,
@@ -2900,8 +2952,7 @@ certificates.
 These should be obtained via secure directory
 services when they become universally available.Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version @VERSION@ of NTP.
-This document was derived from FreeBSD.
-.PP
+This document corresponds to version 4.2.7p345 of NTP.
+This document was derived from FreeBSD..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp.conf\fP
 option definitions.

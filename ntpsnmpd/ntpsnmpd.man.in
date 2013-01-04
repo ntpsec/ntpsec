@@ -1,8 +1,8 @@
-.TH ntpsnmpd @NTPSNMPD_MS@ "03 Jan 2013" "4.2.7p344" "User Commands"
+.TH ntpsnmpd @NTPSNMPD_MS@ "04 Jan 2013" "4.2.7p345" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:10:41 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:04:16 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -21,11 +21,11 @@ is an SNMP MIB agent designed to interface with
 .Xr ntpd @NTPD_MS@ .
 .SH "OPTIONS"
 .TP
-.BR \-n ", " -\-nofork
+.BR \-n ", " \-\-nofork
 Do not fork.
 .sp
 .TP
-.BR \-p ", " -\-syslog
+.BR \-p ", " \-\-syslog
 Log to syslog().
 .sp
 .TP
@@ -73,6 +73,25 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH USAGE
 .B 
 currently uses a private MIB OID,
@@ -87,7 +106,7 @@ when the NTPv4 MIB RFC is standardized.
 If you have
 .Xr snmpwalk 1
 installed you can run
-.Dl % snmpwalk -v2c -c public localhost enterprises.5597.99
+.Dl % snmpwalk \-v2c \-c public localhost enterprises.5597.99
 to see a list of all currently supported NTP MIB objects
 and their current values.
 .SH "ENVIRONMENT"
@@ -150,7 +169,6 @@ please fill me in...
 .BR Li ntpEntTimeDistance
 please fill me in...
 .PP
-This document corresponds to version @VERSION@ of NTP.
-.PP
+This document corresponds to version 4.2.7p345 of NTP..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntpsnmpd\fP
 option definitions.

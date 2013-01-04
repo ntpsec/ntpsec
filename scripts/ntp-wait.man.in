@@ -1,8 +1,8 @@
-.TH ntp-wait @NTP_WAIT_MS@ "03 Jan 2013" "ntp (4.2.7p344)" "User Commands"
+.TH ntp-wait @NTP_WAIT_MS@ "04 Jan 2013" "ntp (4.2.7p345)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:06:52 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:00:30 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -53,7 +53,7 @@ The default \fIsecs\-between\-tries\fP for this option is:
 We will sleep for \fIsecs-between-tries\fP after each query of ntpd
 that returns "the time is not yet stable".
 .TP
-.BR \-v ", " -\-
+.BR \-v ", " \-\-
 Be verbose.
 .sp
 By default, ntp-wait is silent.  With this option, ntp-wait
@@ -76,6 +76,25 @@ by loading values from environment variables named:
   \fBNTP_WAIT_<option-name>\fP or \fBNTP_WAIT\fP
 .fi
 .ad
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "EXIT STATUS"
@@ -86,6 +105,10 @@ Successful program execution.
 .TP
 .BR 1 " (EXIT_FAILURE)"
 The operation failed or the command syntax was not valid.
+.TP
+.BR 70 " (EX_SOFTWARE)"
+libopts had an internal operational error.  Please report
+it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH AUTHORS
 .An "Harlan Stenn"
 .SH "COPYRIGHT"
@@ -94,7 +117,6 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version @VERSION@ of NTP.
-.PP
+This document corresponds to version 4.2.7p345 of NTP..Pp
 This manual page was \fIAutoGen\fP-erated from the \fBntp-wait\fP
 option definitions.

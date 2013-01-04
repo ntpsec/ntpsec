@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.keys.texi)
 # 
-# It has been AutoGen-ed  January  3, 2013 at 01:09:27 PM by AutoGen 5.17.1pre11
+# It has been AutoGen-ed  January  4, 2013 at 09:03:03 AM by AutoGen 5.17.1pre11
 # From the definitions    ntp.keys.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -124,5 +124,5 @@ the default name of the configuration file
 @code{sntp(1sntpmdoc)}
 @node ntp.keys Notes
 @subsection ntp.keys Notes
-This document corresponds to version @VERSION@ of NTP.
+This document corresponds to version #VERSION# of NTP.
 This document was derived from FreeBSD.

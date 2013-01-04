@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p344 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p345 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -149,8 +149,10 @@ time.
 
   <p>Specifying a
 command line option other than
-<code>-i</code> or
-<code>-n</code> will
+<code>-i</code>
+or
+<code>-n</code>
+will
 cause the specified query (queries) to be sent to the indicated
 host(s) immediately. 
 Otherwise,
@@ -165,8 +167,7 @@ interactive format commands from the standard input.
 
 <h3 class="section">Internal Commands</h3>
 
-<p>Internal Commands
-Interactive format commands consist of a keyword followed by zero
+<p>Interactive format commands consist of a keyword followed by zero
 to four arguments. 
 Only enough characters of the full keyword to
 uniquely identify the command need be typed.
@@ -179,13 +180,13 @@ utility itself and do not result in NTP mode 6
 requests being sent to a server. 
 These are described following.
      <dl>
-<dt><span class="samp">Ic</span><br><dt><span class="samp">Ic</span><dd>A
-\&amp;? 
+<dt>? [<kbd>command_keyword</kbd>]<br><dt><code>help</code> [<kbd>command_keyword</kbd>]<dd>A
+? 
 by itself will print a list of all the command
 keywords known to this incarnation of
 <code>ntpq</code>. 
 A
-\&amp;? 
+? 
 followed by a command keyword will print function and usage
 information about the command. 
 This command is probably a better
@@ -193,7 +194,11 @@ source of information about
 <code>ntpq</code>
 than this manual
 page. 
-<br><dt><span class="samp">Ic</span><dd><code>...</code> <br><dt><span class="samp">Ic</span><br><dt><span class="samp">Ic</span><dd>The data carried by NTP mode 6 messages consists of a list of
+<br><dt><code>addvars</code> <kbd>variable_name</kbd>[<code>=value</code>]<dd><code>...</code>
+
+     <p>rmvars<kbd>variable_name</kbd><code>...</code>
+clearvars
+The data carried by NTP mode 6 messages consists of a list of
 items of the form
 variable_name=value,
 where the
@@ -204,24 +209,30 @@ The
 <code>ntpq</code>
 utility maintains an internal list in which data to be included in control
 messages can be assembled, and sent using the
-<code>readlist</code> and
-<code>writelist</code> commands described below. 
+<code>readlist</code>
+and
+<code>writelist</code>
+commands described below. 
 The
-<code>addvars</code> command allows variables and their optional values to be added to
+<code>addvars</code>
+command allows variables and their optional values to be added to
 the list. 
 If more than one variable is to be added, the list should
 be comma-separated and not contain white space. 
 The
-<code>rmvars</code> command can be used to remove individual variables from the list,
+<code>rmvars</code>
+command can be used to remove individual variables from the list,
 while the
-<code>clearlist</code> command removes all variables from the
+<code>clearlist</code>
+command removes all variables from the
 list. 
-<br><dt><span class="samp">Ic</span><dd>Normally
+authenticate[yes]|no
+Normally
 <code>ntpq</code>
 does not authenticate requests unless
 they are write requests. 
 The command
-authenticate yes
+authenticateyes
 causes
 <code>ntpq</code>
 to send authentication with all requests it
@@ -229,7 +240,8 @@ makes.
 Authenticated requests causes some servers to handle
 requests slightly differently, and can occasionally melt the CPU in
 fuzzballs if you turn authentication on before doing a
-<code>peer</code> display. 
+<code>peer</code>
+display. 
 The command
 authenticate
 causes
@@ -237,7 +249,8 @@ causes
 to display whether or not
 <code>ntpq</code>
 is currently autheinticating requests. 
-<br><dt><span class="samp">Ic</span><dd>Causes output from query commands to be "cooked", so that
+cooked
+Causes output from query commands to be "cooked", so that
 variables which are recognized by
 <code>ntpq</code>
 will have their
@@ -246,12 +259,12 @@ Variables which
 <code>ntpq</code>
 thinks should have a decodable value but didn't are
 marked with a trailing
-\&amp;?. 
-<br><dt><span class="samp">Xo</span><dd><code>debug</code> .Oo
-<code>more</code> | <code>less</code> | <code>off</code> .Oc
+?. 
+debugOo<code>more</code>|<code>less</code>|<code>off</code>Oc
 With no argument, displays the current debug level. 
 Otherwise, the debug level is changed to the indicated level. 
-<br><dt><span class="samp">Ic</span><dd>Specify a time interval to be added to timestamps included in
+delay<kbd>milliseconds</kbd>
+Specify a time interval to be added to timestamps included in
 requests which require authentication. 
 This is used to enable
 (unreliable) server reconfiguration over long delay network paths
@@ -259,25 +272,39 @@ or between machines whose clocks are unsynchronized.
 Actually the
 server does not now require timestamps in authenticated requests,
 so this command may be obsolete. 
-<br><dt><span class="samp">Ic</span><dd>Set the host to which future queries will be sent. 
-<code>hostname</code> may be either a host name or a numeric address. 
-<br><dt><span class="samp">Ic</span><dd>If
-<code>yes</code> is specified, host names are printed in
+host<kbd>hostname</kbd>
+Set the host to which future queries will be sent. 
+<kbd>hostname</kbd>
+may be either a host name or a numeric address. 
+hostnames[<code>yes</code>|<code>Cm</code><code>no</code>]
+If
+<code>yes</code>
+is specified, host names are printed in
 information displays. 
 If
-<code>no</code> is specified, numeric
+<code>no</code>
+is specified, numeric
 addresses are printed instead. 
 The default is
-<code>yes</code>, unless
+<code>yes</code>,
+unless
 modified using the command line
-<code>-n</code> switch. 
-<br><dt><span class="samp">Ic</span><dd>This command allows the specification of a key number to be
+<code>-n</code>
+switch. 
+keyid<kbd>keyid</kbd>
+This command allows the specification of a key number to be
 used to authenticate configuration requests. 
 This must correspond
 to a key number the server has been configured to use for this
 purpose. 
-<br><dt><span class="samp">Ic</span><dd><code>1</code> | <code>2</code> | <code>3</code> | <code>4</code> .Oc
-Sets the NTP version number which
+ntpversion<code>Oo</code>
+<code>1</code>|
+<code>2</code>|
+<code>3</code>|
+<code>4</code>
+Oc
+
+     <p>Sets the NTP version number which
 <code>ntpq</code>
 claims in
 packets. 
@@ -287,20 +314,24 @@ There appear
 to be no servers left which demand version 1. 
 With no argument, displays the current NTP version that will be used
 when communicating with servers. 
-<br><dt><span class="samp">Ic</span><dd>Exit
+quit
+Exit
 <code>ntpq</code>
-<br><dt><span class="samp">Ic</span><dd>This command prompts you to type in a password (which will not
+passwd
+This command prompts you to type in a password (which will not
 be echoed) which will be used to authenticate configuration
 requests. 
 The password must correspond to the key configured for
 use by the NTP server for this purpose if such requests are to be
 successful. 
-<br><dt><span class="samp">Ic</span><dd>Causes all output from query commands is printed as received
+raw
+Causes all output from query commands is printed as received
 from the remote server. 
 The only formating/interpretation done on
 the data is to transform nonascii data into a printable (but barely
 understandable) form. 
-<br><dt><span class="samp">Ic</span><dd>Specify a timeout period for responses to server queries. 
+timeout<kbd>milliseconds</kbd>
+Specify a timeout period for responses to server queries. 
 The
 default is about 5000 milliseconds. 
 Note that since
@@ -346,7 +377,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p343
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p344
 USAGE:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

@@ -1,8 +1,8 @@
-.TH sntp @SNTP_MS@ "03 Jan 2013" "4.2.7p344" "User Commands"
+.TH sntp @SNTP_MS@ "04 Jan 2013" "4.2.7p345" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  3, 2013 at 01:11:28 PM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  4, 2013 at 09:05:14 AM by AutoGen 5.17.1pre11
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -56,7 +56,7 @@ Finally, the
 of the host is reported.
 .SH "OPTIONS"
 .TP
-.BR \-4 ", " -\-ipv4
+.BR \-4 ", " \-\-ipv4
 Force IPv4 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv6.
@@ -64,7 +64,7 @@ ipv6.
 Force DNS resolution of the following host names on the command line
 to the IPv4 namespace.
 .TP
-.BR \-6 ", " -\-ipv6
+.BR \-6 ", " \-\-ipv6
 Force IPv6 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv4.
@@ -102,7 +102,7 @@ The \fB-c\fP or \fB--concurrent\fP flag says that any IPs
 returned for the DNS lookup of the supplied host-name are on
 different machines, so we can send concurrent queries.
 .TP
-.BR \-d ", " -\-debug\-level
+.BR \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
@@ -161,7 +161,7 @@ greater than or equal to 0
 .sp
 If the time adjustment is less than \fIsteplimit\fP milliseconds,
 slew the amount using \fBadjtime(2)\fP.  Otherwise, step the
-correction using \fBsettimeofday(2)\fP.
+correction using \fBsettimeofday(2)\fP. 
 .TP
 .BR \-o " \fInumber\fP, " \-\-ntpversion "=" \fInumber\fP
 Send \fBint\fP as our NTP protocol version.
@@ -180,17 +180,17 @@ The default \fInumber\fP for this option is:
 When sending requests to a remote server, tell them we are running
 NTP protocol version \fIntpversion\fP .
 .TP
-.BR \-r ", " -\-usereservedport
+.BR \-r ", " \-\-usereservedport
 Use the NTP Reserved Port (port 123).
 .sp
 Use port 123, which is reserved for NTP, for our network
 communications.
 .TP
-.BR \-S ", " -\-step
+.BR \-S ", " \-\-step
 OK to 'step' the time with \fBsettimeofday(2)\fP.
 .sp
 .TP
-.BR \-s ", " -\-slew
+.BR \-s ", " \-\-slew
 OK to 'slew' the time with \fBadjtime(2)\fP.
 .sp
 .TP
@@ -247,6 +247,25 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH USAGE
 .TP
 .BR Li "sntp ntpserver.somewhere"
@@ -254,13 +273,13 @@ is the simplest use of this program
 and can be run as an unprivileged command
 to check the current time and error in the local clock.
 .TP
-.BR Li "sntp -a ntpserver.somewhere"
+.BR Li "sntp \-a ntpserver.somewhere"
 With suitable privilege,
 run as a command
 or from a
 .Xr cron 8
 job,
-.Ic "sntp -a"
+.Ic "sntp \-a"
 will reset the local clock from a synchronized specified server,
 like the (deprecated)
 .Xr ntpdate @NTPDATE_MS@ ,
@@ -296,8 +315,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version @VERSION@ of
-.B  .
-.PP
+This document corresponds to version 4.2.7p345 of
+.B  ..pp
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
 option definitions.
