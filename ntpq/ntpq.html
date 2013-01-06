@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p345 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p346 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -377,7 +377,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p344
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p345
 USAGE:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -622,8 +622,8 @@ the associated name/value pair list (see: optionFindValue).
 
 <p>Print the program version to standard out, optionally with licensing
 information, then exit 0.  The optional argument specifies how much licensing
-detail to provide.  The default is to print just the version.  The licensing infomation may be selected with an option argument.  Only the
-first letter of the argument is examined:
+detail to provide.  The default is to print just the version.  The licensing infomation may be selected with an option argument. 
+Only the first letter of the argument is examined:
 
      <dl>
 <dt><span class="samp">version</span><dd>Only print the version.  This is the default. 

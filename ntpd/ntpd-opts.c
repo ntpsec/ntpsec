@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *  
- *  It has been AutoGen-ed  January  4, 2013 at 09:01:39 AM by AutoGen 5.17.1pre11
+ *  It has been AutoGen-ed  January  6, 2013 at 05:41:26 AM by AutoGen 5.17.1pre14
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 37:0:12 templates.
+ * Generated from AutoOpts 37:1:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -78,7 +78,7 @@ extern FILE * option_usage_fp;
  *  ntpd option static const strings
  */
 static char const ntpd_opt_strs[2987] =
-/*     0 */ "ntpd 4.2.7p345\n"
+/*     0 */ "ntpd 4.2.7p346\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -204,12 +204,12 @@ static char const ntpd_opt_strs[2987] =
 /*  2753 */ "Output version information and exit\0"
 /*  2789 */ "version\0"
 /*  2797 */ "NTPD\0"
-/*  2802 */ "ntpd - NTP daemon program - Ver. 4.2.7p345\n"
+/*  2802 */ "ntpd - NTP daemon program - Ver. 4.2.7p346\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
 /*  2935 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2969 */ "\n\n\0"
-/*  2972 */ "ntpd 4.2.7p345";
+/*  2972 */ "ntpd 4.2.7p346";
 
 /*
  *  ipv4 option description with

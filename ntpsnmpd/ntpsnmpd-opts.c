@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *  
- *  It has been AutoGen-ed  January  4, 2013 at 09:04:08 AM by AutoGen 5.17.1pre11
+ *  It has been AutoGen-ed  January  6, 2013 at 06:45:12 AM by AutoGen 5.17.1pre14
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 37:0:12 templates.
+ * Generated from AutoOpts 37:1:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -64,7 +64,7 @@ extern FILE * option_usage_fp;
  *  ntpsnmpd option static const strings
  */
 static char const ntpsnmpd_opt_strs[1561] =
-/*     0 */ "ntpsnmpd 4.2.7p345\n"
+/*     0 */ "ntpsnmpd 4.2.7p346\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -103,14 +103,14 @@ static char const ntpsnmpd_opt_strs[1561] =
 /*  1360 */ "no-load-opts\0"
 /*  1373 */ "no\0"
 /*  1376 */ "NTPSNMPD\0"
-/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p345\n"
+/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p346\n"
             "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  1490 */ "$HOME\0"
 /*  1496 */ ".\0"
 /*  1498 */ ".ntprc\0"
 /*  1505 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1539 */ "\n\n\0"
-/*  1542 */ "ntpsnmpd 4.2.7p345";
+/*  1542 */ "ntpsnmpd 4.2.7p346";
 
 /*
  *  nofork option description:

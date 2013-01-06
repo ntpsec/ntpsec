@@ -1,8 +1,8 @@
-.TH ntpd 1ntpdman "04 Jan 2013" "4.2.7p345" "User Commands"
+.TH ntpd 1ntpdman "06 Jan 2013" "4.2.7p346" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  4, 2013 at 09:02:55 AM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  6, 2013 at 06:43:55 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -924,9 +924,12 @@ larger than might be desirable for an elevated-priority
 running on a workstation, particularly since many of
 the fancy features which consume the space were designed more with
 a busy primary server, rather than a high stratum workstation in
-mind.Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+mind.
+.PP
+Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p345 of NTP.
-Portions of this document came from FreeBSD..Pp
+This document corresponds to version 4.2.7p346 of NTP.
+Portions of this document came from FreeBSD.
+.PP
 This manual page was \fIAutoGen\fP-erated from the \fBntpd\fP
 option definitions.

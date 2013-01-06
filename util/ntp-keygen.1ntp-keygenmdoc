@@ -1,9 +1,9 @@
-.Dd January 4 2013
+.Dd January 6 2013
 .Dt NTP_KEYGEN 1ntp-keygenmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  4, 2013 at 09:04:43 AM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  6, 2013 at 06:45:49 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -856,6 +856,7 @@ certificate scheme.
 scheme is one of
 RSA\-MD2, RSA\-MD5, RSA\-SHA, RSA\-SHA1, RSA\-MDC2, RSA\-RIPEMD160,
 DSA\-SHA, or DSA\-SHA1.
+.sp
 Select the certificate message digest/signature encryption scheme.
 Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
@@ -1067,9 +1068,12 @@ from one to several minutes with modern architectures
 such as UltraSPARC and up to tens of minutes to an hour
 with older architectures such as SPARC IPC.
 .Pp
-Please report bugs to http://bugs.ntp.org .Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+Please report bugs to http://bugs.ntp.org .
+.Pp
+Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p345 of NTP.
-Portions of this document came from FreeBSD..Pp
+This document corresponds to version 4.2.7p346 of NTP.
+Portions of this document came from FreeBSD.
+.Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp\-keygen\fP
 option definitions.

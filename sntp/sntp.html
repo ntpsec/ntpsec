@@ -36,7 +36,7 @@ display the time offset of the system clock relative to the server
 clock.  Run as root, it can correct the system clock to this offset as
 well.  It can be run as an interactive command or from a cron job.
 
-  <p>This document applies to version 4.2.7p345 of <code>sntp</code>.
+  <p>This document applies to version 4.2.7p346 of <code>sntp</code>.
 
   <p>The program implements the SNTP protocol as defined by RFC 5905, the NTPv4
 IETF specification.
@@ -176,7 +176,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p345
+<pre class="example">sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p346
 USAGE:  sntp [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
@@ -588,23 +588,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">sntp Usage</h4>
 
-     <dl>
-<dt><code>sntp ntpserver.somewhere</code><dd>is the simplest use of this program
-and can be run as an unprivileged command
-to check the current time and error in the local clock. 
-<br><dt><code>sntp -a ntpserver.somewhere</code><dd>With suitable privilege,
-run as a command
-or from a
-<code>cron(8)</code>
-job,
-<code>sntp -a</code>
-will reset the local clock from a synchronized specified server,
-like the (deprecated)
-<code>ntpdate(1ntpdatemdoc)</code>,
-or
-<code>rdate(8)</code>
-commands. 
-</dl>
 <div class="node">
 <p><hr>
 <a name="sntp-Authors"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#sntp-Notes">sntp Notes</a>,
@@ -615,9 +598,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 
 <h4 class="subsection">sntp Authors</h4>
 
-<p>Johannes Maximilian Kuehn<br>
-Harlan Stenn<br>
-Dave Hart<br>
 <div class="node">
 <p><hr>
 <a name="sntp-Notes"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#sntp-Authors">sntp Authors</a>,
@@ -626,9 +606,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#sntp-Invocation">sntp Invocation</a>
 </div>
 
 <h4 class="subsection">sntp Notes</h4>
-
-<p>This document corresponds to version 4.2.7p345 of
-<code>sntp</code>.
 
 <div class="node">
 <p><hr>

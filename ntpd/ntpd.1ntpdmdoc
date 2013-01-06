@@ -1,9 +1,9 @@
-.Dd January 4 2013
+.Dd January 6 2013
 .Dt NTPD 1ntpdmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  4, 2013 at 09:03:12 AM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  6, 2013 at 06:44:12 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -891,9 +891,12 @@ larger than might be desirable for an elevated\-priority
 running on a workstation, particularly since many of
 the fancy features which consume the space were designed more with
 a busy primary server, rather than a high stratum workstation in
-mind.Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
+mind.
+.Pp
+Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p345 of NTP.
-Portions of this document came from FreeBSD..Pp
+This document corresponds to version 4.2.7p346 of NTP.
+Portions of this document came from FreeBSD.
+.Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntpd\fP
 option definitions.

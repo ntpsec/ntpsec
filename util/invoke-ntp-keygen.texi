@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 # 
-# It has been AutoGen-ed  January  4, 2013 at 09:04:41 AM by AutoGen 5.17.1pre11
+# It has been AutoGen-ed  January  6, 2013 at 06:45:47 AM by AutoGen 5.17.1pre14
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -908,7 +908,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p345
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p346
 USAGE:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
@@ -1365,27 +1365,7 @@ it to autogen-users@@lists.sourceforge.net.  Thank you.
 @end table
 @node ntp-keygen Usage
 @subsection ntp-keygen Usage
-The
-@code{-p} @kbd{-password}
-option specifies the write password and
-@code{-q} @kbd{-password}
-option the read password for previously encrypted files.
-The
-@code{ntp-keygen}
-program prompts for the password if it reads an encrypted file
-and the password is missing or incorrect.
-If an encrypted file is read successfully and
-no write password is specified, the read password is used
-as the write password by default.
 @node ntp-keygen Notes
 @subsection ntp-keygen Notes
-This document corresponds to version 4.2.7p345 of NTP.
-Portions of this document came from FreeBSD.
 @node ntp-keygen Bugs
 @subsection ntp-keygen Bugs
-It can take quite a while to generate some cryptographic values,
-from one to several minutes with modern architectures
-such as UltraSPARC and up to tens of minutes to an hour
-with older architectures such as SPARC IPC.
-
-Please report bugs to http://bugs.ntp.org .

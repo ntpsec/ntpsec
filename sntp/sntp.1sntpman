@@ -1,8 +1,8 @@
-.TH sntp 1sntpman "04 Jan 2013" "4.2.7p345" "User Commands"
+.TH sntp 1sntpman "06 Jan 2013" "4.2.7p346" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  4, 2013 at 09:05:14 AM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  6, 2013 at 06:46:06 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -98,6 +98,7 @@ more rapidly than one every 2 seconds.  By default, any IPs returned
 as part of a DNS lookup are assumed to be for a single instance of
 \fBntpd\fP, and therefore \fBsntp\fP will send queries to these IPs
 one after another, with a 2-second gap in between each query.
+.sp
 The \fB-c\fP or \fB--concurrent\fP flag says that any IPs
 returned for the DNS lookup of the supplied host-name are on
 different machines, so we can send concurrent queries.
@@ -315,7 +316,8 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p345 of
-.B  ..pp
+This document corresponds to version 4.2.7p346 of
+.B  .
+.PP
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
 option definitions.

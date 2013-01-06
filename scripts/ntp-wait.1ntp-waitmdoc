@@ -1,9 +1,9 @@
-.Dd January 4 2013
+.Dd January 6 2013
 .Dt NTP_WAIT 1ntp-waitmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  4, 2013 at 09:00:36 AM by AutoGen 5.17.1pre11
+.\"  It has been AutoGen-ed  January  6, 2013 at 04:36:33 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -115,6 +115,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p345 of NTP..Pp
+This document corresponds to version 4.2.7p346 of NTP.
+.Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp\-wait\fP
 option definitions.

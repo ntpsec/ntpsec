@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpsnmpd.texi)
 # 
-# It has been AutoGen-ed  January  4, 2013 at 09:04:19 AM by AutoGen 5.17.1pre11
+# It has been AutoGen-ed  January  6, 2013 at 06:45:24 AM by AutoGen 5.17.1pre14
 # From the definitions    ntpsnmpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -47,7 +47,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p345
+ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p346
 USAGE:  ntpsnmpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -n no  nofork         Do not fork
@@ -184,53 +184,7 @@ it to autogen-users@@lists.sourceforge.net.  Thank you.
 @end table
 @node ntpsnmpd Usage
 @subsection ntpsnmpd Usage
-@code{ntpsnmpd}
-currently uses a private MIB OID,
-@quoteleft{}enterprises.5597,@quoteright{}
-which is the Meinberg top level OEM OID, and
-@quoteleft{}99@quoteright{}
-is the temporary working space for this project. 
-The final OID has to be registered with IANA
-and this is done by the RFC Editor
-when the NTPv4 MIB RFC is standardized. 
-
-If you have
-@code{snmpwalk(1)}
-installed you can run
-@example
-% snmpwalk -v2c -c public localhost enterprises.5597.99 
-@end example
-to see a list of all currently supported NTP MIB objects
-and their current values.
 @node ntpsnmpd Notes
 @subsection ntpsnmpd Notes
-The following objects are currently supported:
-
-@table @asis
-
-@item @code{ntpEntSoftwareName}
-please fill me in...
-@item @code{ntpEntSoftwareVersion}
-please fill me in...
-@item @code{ntpEntSoftwareVersionVal}
-please fill me in...
-@item @code{ntpEntSoftwareVendor}
-please fill me in...
-@item @code{ntpEntSystemType}
-please fill me in...
-@item @code{ntpEntTimeResolution}
-please fill me in...
-@item @code{ntpEntTimeResolutionVal}
-please fill me in...
-@item @code{ntpEntTimePrecision}
-please fill me in...
-@item @code{ntpEntTimePrecisionVal}
-please fill me in...
-@item @code{ntpEntTimeDistance}
-please fill me in...
-@end table
-
-This document corresponds to version 4.2.7p345 of NTP.
 @node ntpsnmpd Authors
 @subsection ntpsnmpd Authors
-Heiko Gerstung@*

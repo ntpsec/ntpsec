@@ -1,11 +1,11 @@
 /*  
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *  
- *  It has been AutoGen-ed  January  4, 2013 at 09:04:08 AM by AutoGen 5.17.1pre11
+ *  It has been AutoGen-ed  January  6, 2013 at 06:45:12 AM by AutoGen 5.17.1pre14
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 37:0:12 templates.
+ * Generated from AutoOpts 37:1:12 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 151552
+#define AO_TEMPLATE_VERSION 151553
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -75,8 +75,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    8
-#define NTPSNMPD_VERSION       "4.2.7p345"
-#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p345"
+#define NTPSNMPD_VERSION       "4.2.7p346"
+#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p346"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
