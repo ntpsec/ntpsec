@@ -31,12 +31,6 @@
 # include <math.h>
 #endif
 
-#ifdef	DOSYNCTODR
-# if !defined(VMS)
-#  include <sys/resource.h>
-# endif /* VMS */
-#endif
-
 #if defined(VMS)
 # include <descrip.h>
 #endif /* VMS */

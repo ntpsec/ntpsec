@@ -26,9 +26,6 @@
 #ifndef SIGCHLD
 # define SIGCHLD SIGCLD
 #endif
-#ifdef HAVE_SYS_RESOURCE_H
-# include <sys/resource.h>
-#endif /* HAVE_SYS_RESOURCE_H */
 #ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>
 #endif

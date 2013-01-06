@@ -44,9 +44,6 @@
 #ifdef HAVE_SYS_IOCTL_H
 # include <sys/ioctl.h>
 #endif /* HAVE_SYS_IOCTL_H */
-#ifdef HAVE_SYS_RESOURCE_H
-# include <sys/resource.h>
-#endif /* HAVE_SYS_RESOURCE_H */
 #if defined(HAVE_RTPRIO)
 # ifdef HAVE_SYS_LOCK_H
 #  include <sys/lock.h>
