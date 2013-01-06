@@ -7,7 +7,7 @@
 /*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -38,10 +38,8 @@
 char const*
 optionVersion(void)
 {
-    static char const zVersion[] =
-        STR(AO_CURRENT.AO_REVISION);
-
-    return zVersion;
+    static char const ver[] = OPTIONS_DOTTED_VERSION;
+    return ver;
 }
 
 /**

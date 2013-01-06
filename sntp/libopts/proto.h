@@ -1,97 +1,91 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Thu Dec 27 12:59:13 PST 2012
+ * Generated Fri Jan  4 16:15:56 PST 2013
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
 
-#ifndef LOCAL
-#  define LOCAL extern
-#  define REDEF_LOCAL 1
-#else
-#  undef  REDEF_LOCAL
-#endif
 /*
  *  Extracted from autoopts.c
  */
-LOCAL void *
+static void *
 ao_malloc(size_t sz);
 
-LOCAL void *
+static void *
 ao_realloc(void *p, size_t sz);
 
-LOCAL char *
+static char *
 ao_strdup(char const *str);
 
-LOCAL tSuccess
+static tSuccess
 handle_opt(tOptions * pOpts, tOptState * o_st);
 
-LOCAL tSuccess
+static tSuccess
 next_opt(tOptions * opts, tOptState * o_st);
 
-LOCAL tSuccess
+static tSuccess
 regular_opts(tOptions * opts);
 
 /*
  *  Extracted from check.c
  */
-LOCAL bool
+static bool
 is_consistent(tOptions * pOpts);
 
 /*
  *  Extracted from configfile.c
  */
-LOCAL void
+static void
 intern_file_load(tOptions * opts);
 
-LOCAL char*
+static char*
 parse_attrs(tOptions * opts, char * txt, tOptionLoadMode * pMode,
             tOptionValue * pType);
 
 /*
  *  Extracted from env.c
  */
-LOCAL void
+static void
 doPrognameEnv(tOptions * pOpts, teEnvPresetType type);
 
-LOCAL void
+static void
 env_presets(tOptions * pOpts, teEnvPresetType type);
 
 /*
  *  Extracted from find.c
  */
-LOCAL tSuccess
+static tSuccess
 opt_find_long(tOptions * opts, char const * opt_name, tOptState * state);
 
-LOCAL tSuccess
+static tSuccess
 opt_find_short(tOptions* pOpts, uint_t optValue, tOptState* pOptState);
 
-LOCAL tSuccess
+static tSuccess
 get_opt_arg(tOptions * opts, tOptState * o_st);
 
-LOCAL tSuccess
+static tSuccess
 find_opt(tOptions * opts, tOptState * o_st);
 
 /*
  *  Extracted from init.c
  */
-LOCAL tSuccess
+static tSuccess
 validate_struct(tOptions * opts, char const * pname);
 
-LOCAL tSuccess
+static tSuccess
 immediate_opts(tOptions * opts);
 
-LOCAL bool
+static bool
 ao_initialize(tOptions * opts, int a_ct, char ** a_v);
 
 /*
  *  Extracted from load.c
  */
-LOCAL void
+static void
 munge_str(char * txt, tOptionLoadMode mode);
 
-LOCAL void
+static void
 loadOptionLine(
     tOptions *  opts,
     tOptState * opt_state,
@@ -102,38 +96,34 @@ loadOptionLine(
 /*
  *  Extracted from nested.c
  */
-LOCAL void
+static void
 unload_arg_list(tArgList * arg_list);
 
-LOCAL tOptionValue *
+static tOptionValue *
 optionLoadNested(char const * text, char const * name, size_t nm_len);
 
-LOCAL int
+static int
 get_special_char(char const ** ppz, int * ct);
 
-LOCAL void
+static void
 emit_special_char(FILE * fp, int ch);
 
 /*
  *  Extracted from sort.c
  */
-LOCAL void
-optionSort(tOptions* pOpts);
+static void
+optionSort(tOptions * opts);
 
 /*
  *  Extracted from stack.c
  */
-LOCAL void
+static void
 addArgListEntry(void** ppAL, void* entry);
 
 /*
  *  Extracted from usage.c
  */
-LOCAL void
+static void
 set_usage_flags(tOptions * opts, char const * flg_txt);
 
-#ifdef REDEF_LOCAL
-#  undef LOCAL
-#  define LOCAL
-#endif
 #endif /* AUTOOPTS_PROTO_H_GUARD */

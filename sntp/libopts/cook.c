@@ -6,7 +6,7 @@
  *
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
- *  AutoOpts is Copyright (c) 1992-2012 by Bruce Korb - all rights reserved
+ *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
  *
  *  AutoOpts is available under any one of two licenses.  The license
  *  in use must be one of these two and the choice is under the control
@@ -84,13 +84,17 @@ ao_string_cook_escape_char(char const * pzIn, char * pRes, uint_t nl)
     case 'x':
     case 'X':         /* HEX Escape       */
         if (IS_HEX_DIGIT_CHAR(*pzIn))  {
-            char z[4], *pz = z;
+            char z[4];
+            unsigned int ct = 0;
 
-            do *(pz++) = *(pzIn++);
-            while (IS_HEX_DIGIT_CHAR(*pzIn) && (pz < z + 2));
-            *pz = NUL;
+            do  {
+                z[ct] = pzIn[ct];
+                if (++ct >= 2)
+                    break;
+            } while (IS_HEX_DIGIT_CHAR(pzIn[ct]));
+            z[ct] = NUL;
             *pRes = (char)strtoul(z, NULL, 16);
-            res += (unsigned int)(pz - z);
+            return ct + 1;
         }
         break;
 
@@ -99,24 +103,29 @@ ao_string_cook_escape_char(char const * pzIn, char * pRes, uint_t nl)
     {
         /*
          *  IF the character copied was an octal digit,
-         *  THEN set the output character to an octal value
+         *  THEN set the output character to an octal value.
+         *  The 3 octal digit result might exceed 0xFF, so check it.
          */
-        char z[4], *pz = z + 1;
+        char z[4];
         unsigned long val;
-        z[0] = *pRes;
+        unsigned int  ct = 0;
 
-        while (IS_OCT_DIGIT_CHAR(*pzIn) && (pz < z + 3))
-            *(pz++) = *(pzIn++);
-        *pz = NUL;
+        z[ct++] = *--pzIn;
+        while (IS_OCT_DIGIT_CHAR(pzIn[ct])) {
+            z[ct] = pzIn[ct];
+            if (++ct >= 3)
+                break;
+        }
+
+        z[ct] = NUL;
         val = strtoul(z, NULL, 8);
         if (val > 0xFF)
             val = 0xFF;
         *pRes = (char)val;
-        res = (unsigned int)(pz - z);
-        break;
+        return ct;
     }
 
-    default: ;
+    default: /* quoted character is result character */;
     }
 
     return res;

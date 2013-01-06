@@ -1,5 +1,5 @@
 /* Parse a time duration and return a seconds count
-   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+   Copyright (C) 2008-2013 Free Software Foundation, Inc.
    Written by Bruce Korb <bkorb@gnu.org>, 2008.
 
    This program is free software: you can redistribute it and/or modify
@@ -113,7 +113,7 @@ parse_hr_min_sec (time_t start, cch_t * pz)
       if (errno != 0)
         return BAD_TIME;
 
-      start = scale_n_add ((time_t)v, start, 60);
+      start = scale_n_add (v, start, 60);
 
       if (errno != 0)
         return BAD_TIME;
@@ -144,7 +144,7 @@ parse_scaled_value (time_t base, cch_t ** ppz, cch_t * endp, int scale)
     return base;
 
   errno = 0;
-  val = (time_t)str_const_to_ul (pz, &pz, 10);
+  val = str_const_to_ul (pz, &pz, 10);
   if (errno != 0)
     return BAD_TIME;
   while (isspace ((unsigned char)*pz))
@@ -550,7 +550,7 @@ parse_non_iso8601 (cch_t * pz)
           break;
         }
 
-      res = scale_n_add (res, (time_t)val, (int)mult);
+      res = scale_n_add (res, val, mult);
 
       pz++;
       while (isspace ((unsigned char)*pz))
