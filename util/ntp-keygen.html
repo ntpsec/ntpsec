@@ -70,7 +70,7 @@ All other files are in PEM-encoded
 printable ASCII format so they can be embedded as MIME attachments in
 mail to other sites.
 
-  <p>This document applies to version 4.2.7p346 of <code>ntp-keygen</code>.
+  <p>This document applies to version 4.2.7p347 of <code>ntp-keygen</code>.
 
 <div class="node">
 <p><hr>
@@ -1120,7 +1120,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p345
+<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p346
 USAGE:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
@@ -1674,18 +1674,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <h4 class="subsection">ntp-keygen Usage</h4>
 
-<p>The
-<code>-p</code> <kbd>-password</kbd>
-option specifies the write password and
-<code>-q</code> <kbd>-password</kbd>
-option the read password for previously encrypted files. 
-The
-<code>ntp-keygen</code>
-program prompts for the password if it reads an encrypted file
-and the password is missing or incorrect. 
-If an encrypted file is read successfully and
-no write password is specified, the read password is used
-as the write password by default. 
 <div class="node">
 <p><hr>
 <a name="ntp_002dkeygen-Notes"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dkeygen-Bugs">ntp-keygen Bugs</a>,
@@ -1696,8 +1684,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <h4 class="subsection">ntp-keygen Notes</h4>
 
-<p>This document corresponds to version 4.2.7p345 of NTP. 
-Portions of this document came from FreeBSD. 
 <div class="node">
 <p><hr>
 <a name="ntp_002dkeygen-Bugs"></a>Previous:&nbsp;<a rel="previous" accesskey="p" href="#ntp_002dkeygen-Notes">ntp-keygen Notes</a>,
@@ -1706,13 +1692,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 </div>
 
 <h4 class="subsection">ntp-keygen Bugs</h4>
-
-<p>It can take quite a while to generate some cryptographic values,
-from one to several minutes with modern architectures
-such as UltraSPARC and up to tens of minutes to an hour
-with older architectures such as SPARC IPC.
-
-  <p>Please report bugs to http://bugs.ntp.org .
 
 <div class="node">
 <p><hr>
