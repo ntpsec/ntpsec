@@ -768,9 +768,10 @@ case "$host" in
  *-*-irix[[45]]*)
     # Just a stub in "old" Irix.  Idiots.
     ;;
- *-*-*linux*)
-    # there, but more trouble than it is worth for now (resolver problems)
-    ;;
+# In the belief that the fix for bug 1223 fixes mlockall() under linux...
+# *-*-*linux*)
+#    # there, but more trouble than it is worth for now (resolver problems)
+#    ;;
  *-*-qnx*)
     # Apparently there but not working in QNX.  Idiots?
     ;;
