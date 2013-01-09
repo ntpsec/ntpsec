@@ -1,3 +1,4 @@
+* [Bug 2327] Rename sntp/ag-tpl/:Old to sntp/ag-tpl/Old.
 * Add a reference to RFC5907 in the ntpsnmpd documentation.
 (4.2.7p347) 2013/01/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2325] Re-enable mlockall() check under Linux post-1223 fix.
