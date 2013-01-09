@@ -124,6 +124,19 @@ doc-section	= {
 	_END_MDOC_AUTHORS;
 };
 
+doc-section     = {
+  ds-type       = 'SEE ALSO';
+  ds-format     = 'mdoc';
+  ds-text       = <<- _END_MDOC_SEE_ALSO
+.Rs
+.%A H. Gerstung
+.%A C. Elliott
+.%A B. Haberman, Ed.
+.%T Definitions of Managed Objects for Network Time Protocol Version 4: (NTPv4)
+.%O RFC5907
+.Re
+        _END_MDOC_SEE_ALSO;
+
 /*
 doc-section	= {
   ds-type	= 'BUGS';
