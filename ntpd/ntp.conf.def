@@ -2659,6 +2659,26 @@ be set to any positive number in seconds.
 If set to zero, the stepout
 pulses will not be suppressed.
 .El
+.It Xo Ic rlimit
+.Oo
+.Cm memlock Ar Nmegabytes |
+.Cm stacklimit Ar N4kPages
+.Oc
+.Xc
+.Bl -tag -width indent
+.It Cm memlock Ar Nmegabytes
+Specify the number of megabytes of memory that can be allocated.
+Probably only available under Linux, this option is useful
+when dropping root (the
+.Fl i
+option).
+The default is 32 megabytes.
+.It Cm stacklimit Ar N4kPages
+Specifies the maximum size of the process stack on systems with the
+.Fn mlockall
+function.
+Defaults to 50 4k pages (200 4k pages in OpenBSD).
+.El
 .It Xo Ic trap Ar host_address
 .Op Cm port Ar port_number
 .Op Cm interface Ar interface_address
@@ -2714,7 +2734,6 @@ doc-section	= {
   ds-type	= 'SEE ALSO';
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_SEE_ALSO
-.Sh SEE ALSO
 .Xr ntpd 1ntpdmdoc ,
 .Xr ntpdc 1ntpdcmdoc ,
 .Xr ntpq 1ntpqmdoc
