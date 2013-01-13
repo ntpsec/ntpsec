@@ -1,4 +1,6 @@
 * [Bug 2327] Rename sntp/ag-tpl/:Old to sntp/ag-tpl/Old.
+* Documentation cleanup to the ntpd, ntpdc, ntpq and ntp-wait
+  .def files.
 * In ntp.conf.def, cleanup SEE ALSO, document 'rlimit' options.
 * Add a reference to RFC5907 in the ntpsnmpd documentation.
 (4.2.7p347) 2013/01/07 Released by Harlan Stenn <stenn@ntp.org>
