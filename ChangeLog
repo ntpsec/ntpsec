@@ -1,4 +1,5 @@
 * [Bug 2327] Rename sntp/ag-tpl/:Old to sntp/ag-tpl/Old.
+* Cleanup to ntpq.texi.
 * Documentation cleanup to the ntpd, ntpdc, ntpq and ntp-wait
   .def files.
 * In ntp.conf.def, cleanup SEE ALSO, document 'rlimit' options.

@@ -832,26 +832,3 @@ The following clock variables appear in the @code{cv} billboard for each associa
 @item @code{flags}
 @tab driver flags
 @end multitable
-
-===
-
-<h4>Synopsis</h4>
-@code{ntpq [-inp] [-c @kbd{command}] [@kbd{host}] [...]}
-
-<p>Command line options are described following.  Specifying a command line option other than @code{-i} or @code{-n} will cause the specified query (queries) to be sent to the indicated host(s) immediately.  Otherwise, @code{ntpq} will attempt to read interactive format commands from the standard input.</p>
-<dl>
-  <dt>@code{-4}</dt>
-  <dd>Force DNS resolution of following host names on the command line to the IPv4 namespace.</dd>
-  <dt>@code{-6}</dt>
-  <dd>Force DNS resolution of following host names on the command line to the IPv6 namespace.</dd>
-  <dt>@code{-c}</dt>
-  <dd>The following argument is interpreted as an interactive format command and is added to the list of commands to be executed on the specified host(s).  Multiple @code{-c} options may be given.</dd>
-  <dt>@code{-d}</dt>
-  <dd>Turn on debugging mode.</dd>
-  <dt>@code{-i}</dt>
-  <dd>Force @code{ntpq} to operate in interactive mode.  Prompts will be written to the standard output and commands read from the standard input.</dd>
-  <dt>@code{-n}</dt>
-  <dd>Output all host addresses in dotted-quad numeric format rather than converting to the canonical host names.</dd>
-  <dt>@code{-p}</dt>
-  <dd>Print a list of the peers known to the server as well as a summary of their state.  This is equivalent to the @code{peers} interactive command.</dd>
-</dl>
