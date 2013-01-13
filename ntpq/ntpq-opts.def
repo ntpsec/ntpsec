@@ -69,8 +69,9 @@ flag = {
     flags-cant = command, peers;
     descrip   = "Force ntpq to operate in interactive mode";
     doc = <<-  _EndOfDoc_
-	Force ntpq to operate in interactive mode.  Prompts will be written
-	to the standard output and commands read from the standard input.
+	Force @code{ntpq} to operate in interactive mode.
+	Prompts will be written to the standard output and
+	commands read from the standard input.
 	_EndOfDoc_;
 };
 
@@ -88,13 +89,15 @@ flag = {
     name      = old-rv;
     descrip   = "Always output status line with readvar";
     doc = <<-  _EndOfDoc_
-	By default, ntpq now suppresses the associd=... line that
-	precedes the output of "readvar" (alias "rv") when a single
-	variable is requested, such as ntpq -c "rv 0 offset".  This
-	option causes ntpq to include both lines of output for a
-	single-variable readvar.  Using an environment variable to
+	By default, @code{ntpq} now suppresses the @code{associd=...}
+	line that precedes the output of @code{readvar}
+	(alias @code{rv}) when a single variable is requested, such as
+	@code{ntpq -c "rv 0 offset"}.
+	This option causes @code{ntpq} to include both lines of output
+	for a single-variable @code{readvar}.
+	Using an environment variable to
 	preset this option in a script will enable both older and
-	newer ntpq to behave identically in this regard.
+	newer @code{ntpq} to behave identically in this regard.
 	_EndOfDoc_;
 };
 

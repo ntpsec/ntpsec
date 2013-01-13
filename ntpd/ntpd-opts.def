@@ -72,9 +72,9 @@ configuration options altered while the
 .Nm
 is running
 using the
-.Xr ntpq 8
+.Xr ntpq 1ntpqmdoc
 and
-.Xr ntpdc 8
+.Xr ntpdc 1ntpdcmdoc
 utility programs.
 .Pp
 When
@@ -235,13 +235,13 @@ when you have permission to do so from the owner of the target host.
 .Pp
 Finally,
 in the past many startup scripts would run
-.Xr ntpdate 8
+.Xr ntpdate 1ntpdatemdoc
 to get the system clock close to correct before starting
-.Xr ntpd 8 ,
+.Xr ntpd 1ntpdmdoc ,
 but this was never more than a mediocre hack and is no longer needed.
 .Pp
 There is a way to start
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 that often addresses all of the problems mentioned above.
 .Ss "Starting NTP (Best Current Practice)"
 First, use the
@@ -253,12 +253,12 @@ entries.
 If you can also keep a good
 .Pa ntp.drift
 file then
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 will effectively "warm-start" and your system's clock will
 be stable in under 11 seconds' time.
 .Pp
 As soon as possible in the startup sequence, start
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 with at least the
 .Fl g
 and perhaps the
@@ -267,7 +267,7 @@ options.
 Then,
 start the rest of your "normal" processes.
 This will give
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 as much time as possible to get the system's clock synchronized and stable.
 .Pp
 Finally,
@@ -277,13 +277,13 @@ or database servers
 that require
 monotonically-increasing time,
 run
-.Xr ntp-wait 8
+.Xr ntp-wait 1ntp-waitmdoc
 as late as possible in the boot sequence
 (perhaps with the
 .Fl v
 flag)
 and after
-.Xr ntp-wait 8
+.Xr ntp-wait 1ntp-waitmdoc
 exits successfully
 it is as safe as it will ever be to start any process that require
 stable time.
@@ -365,7 +365,7 @@ In some cases it may not be practical for
 to run
 continuously.
 A common workaround has been to run the
-.Xr ntpdate 8
+.Xr ntpdate 1ntpdatemdoc
 program from a
 .Xr cron 8
 job at designated
@@ -394,7 +394,7 @@ If nothing is heard after a
 couple of minutes, the daemon times out and exits.
 After a suitable
 period of mourning, the
-.Xr ntpdate 8
+.Xr ntpdate 1ntpdatemdoc
 program may be
 retired.
 .Pp
@@ -521,9 +521,9 @@ doc-section	= {
   ds-format	= 'mdoc';
   ds-text	= <<- _END_MDOC_SEE_ALSO
 .Xr ntp.conf 5 ,
-.Xr ntpdate 8 ,
-.Xr ntpdc 8 ,
-.Xr ntpq 8
+.Xr ntpdate 1ntpdatemdoc ,
+.Xr ntpdc 1ntpdcmdoc ,
+.Xr ntpq 1ntpqmdoc
 .Pp
 In addition to the manual pages provided,
 comprehensive documentation is available on the world wide web

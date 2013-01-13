@@ -21,8 +21,8 @@ flag = {
   arg-default	= 100;
   descrip	= "Number of times to check ntpd";
   doc		= <<-  _EndOfDoc_
-	The maximum number of times we will check ntpd to see if it
-	has been able to synchronize and stabilize the system clock.
+	The maximum number of times we will check @code{ntpd} to see if
+	it has been able to synchronize and stabilize the system clock.
 	_EndOfDoc_;
 };
 
@@ -33,8 +33,8 @@ flag = {
   arg-default	= 6;
   descrip	= "How long to sleep between tries";
   doc		= <<-  _EndOfDoc_
-	We will sleep for @file{secs-between-tries} after each query of ntpd
-	that returns "the time is not yet stable".
+	We will sleep for @file{secs-between-tries} after each query
+	of @code{ntpd} that returns "the time is not yet stable".
 	_EndOfDoc_;
 };
 
@@ -42,8 +42,8 @@ flag = {
   value		= v;
   descrip	= "Be verbose";
   doc		= <<-  _EndOfDoc_
-	By default, ntp-wait is silent.  With this option, ntp-wait
-	will provide status information.
+	By default, @code{ntp-wait} is silent.
+	With this option, @code{ntp-wait} will provide status information.
 	_EndOfDoc_;
 };
 

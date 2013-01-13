@@ -116,7 +116,7 @@ doc-section	= {
   ds-text	= <<-  _END_PROG_MDOC_DESCRIP
 .Nm
 is a utility program used to query
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 about its
 current state and to request changes in that state.
 It uses NTP mode 7 control message formats described in the source code.
@@ -176,7 +176,7 @@ The operation of
 .Nm
 are specific to the particular
 implementation of the
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 daemon and can be expected to
 work only with this and maybe some previous versions of the daemon.
 Requests from a remote
@@ -235,7 +235,7 @@ followed by a command keyword will print function and usage
 information about the command.
 This command is probably a better
 source of information about
-.Xr ntpq 8
+.Xr ntpq 1ntpqmdoc
 than this manual
 page.
 .It Ic delay Ar milliseconds
@@ -440,7 +440,7 @@ and
 .Cm stats
 flags.
 See the
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 documentation for the meaning of these flags.
 There
 are two additional flags which are read only, the
@@ -652,7 +652,7 @@ These commands operate in the same way as the
 and
 .Ic disable
 configuration file commands of
-.Xr ntpd 8 .
+.Xr ntpd 1ntpdmdoc .
 .Bl -tag -width indent
 .It Cm auth
 Enables the server to synchronize with unconfigured peers only
@@ -672,9 +672,9 @@ Enables the kernel time discipline, if available.
 The default for this flag is enable if support is available, otherwise disable.
 .It Cm monitor
 Enables the monitoring facility.
-See the
-.Xr ntpdc 8 .
-program and the monlist command or further information.
+See the documentation here about the
+.Cm monlist
+command or further information.
 The default for this flag is enable.
 .It Cm ntp
 Enables time and frequency discipline.
@@ -706,7 +706,7 @@ The default for this flag is disable.
 This command operates in the same way as the
 .Ic restrict
 configuration file commands of
-.Xr ntpd 8 .
+.Xr ntpd 1ntpdmdoc .
 .It Xo Ic unrestrict Ar address Ar mask
 .Ar flag Oo Ar ... Oc
 .Xc
@@ -719,7 +719,7 @@ Delete the matching entry from the restrict list.
 Causes the current set of authentication keys to be purged and
 a new set to be obtained by rereading the keys file (which must
 have been specified in the
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 configuration file).
 This
 allows encryption keys to be changed without restarting the
@@ -732,7 +732,7 @@ and
 .Ic untrustedkey
 configuration file
 commands of
-.Xr ntpd 8 .
+.Xr ntpd 1ntpdmdoc .
 .It Ic authinfo
 Returns information concerning the authentication module,
 including known keys and counts of encryptions and decryptions
@@ -768,7 +768,7 @@ doc-section	= {
   ds-format     = 'mdoc';
   ds-text       = <<-  _END_MDOC_SEEALSO
 .Xr ntp.conf 5 ,
-.Xr ntpd 8
+.Xr ntpd 1ntpdmdoc
 .Rs
 .%A David L. Mills
 .%T Network Time Protocol (Version 3)
