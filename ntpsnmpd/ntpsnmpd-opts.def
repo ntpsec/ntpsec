@@ -136,6 +136,7 @@ doc-section     = {
 .%O RFC5907
 .Re
         _END_MDOC_SEE_ALSO;
+};
 
 /*
 doc-section	= {
