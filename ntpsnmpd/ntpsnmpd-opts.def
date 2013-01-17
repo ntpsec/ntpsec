@@ -124,6 +124,7 @@ doc-section	= {
 	_END_MDOC_AUTHORS;
 };
 
+/*
 doc-section     = {
   ds-type       = 'SEE ALSO';
   ds-format     = 'mdoc';
@@ -137,6 +138,7 @@ doc-section     = {
 .Re
         _END_MDOC_SEE_ALSO;
 };
+*/
 
 /*
 doc-section	= {
