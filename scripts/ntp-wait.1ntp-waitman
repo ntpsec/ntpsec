@@ -1,8 +1,8 @@
-.TH ntp-wait 1ntp-waitman "07 Jan 2013" "ntp (4.2.7p347)" "User Commands"
+.TH ntp-wait 1ntp-waitman "17 Jan 2013" "ntp (4.2.7p348)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  7, 2013 at 11:35:45 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 17, 2013 at 06:13:07 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -40,8 +40,8 @@ The default \fInum\-tries\fP for this option is:
 .ti +4
  100
 .sp
-The maximum number of times we will check ntpd to see if it
-has been able to synchronize and stabilize the system clock.
+The maximum number of times we will check \fBntpd\fP to see if
+it has been able to synchronize and stabilize the system clock.
 .TP
 .BR \-s " \fIsecs\-between\-tries\fP, " \-\- "=" \fIsecs\-between\-tries\fP
 How long to sleep between tries.
@@ -50,14 +50,14 @@ The default \fIsecs\-between\-tries\fP for this option is:
 .ti +4
  6
 .sp
-We will sleep for \fIsecs-between-tries\fP after each query of ntpd
-that returns "the time is not yet stable".
+We will sleep for \fIsecs-between-tries\fP after each query
+of \fBntpd\fP that returns "the time is not yet stable".
 .TP
 .BR \-v ", " \-\-
 Be verbose.
 .sp
-By default, ntp-wait is silent.  With this option, ntp-wait
-will provide status information.
+By default, \fBntp-wait\fP is silent.
+With this option, \fBntp-wait\fP will provide status information.
 .TP
 .BR \-? , " \-\-help"
 Display usage information and exit.
@@ -117,7 +117,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p347 of NTP.
+This document corresponds to version 4.2.7p348 of NTP.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp-wait\fP
 option definitions.

@@ -41,7 +41,7 @@ until the system's time has stabilized and synchronized,
 and only then start any applicaitons (like database servers) that require
 accurate and stable time.
 
-  <p>This document applies to version 4.2.7p347 of <code>ntp-wait</code>.
+  <p>This document applies to version 4.2.7p348 of <code>ntp-wait</code>.
 
 <div class="shortcontents">
 <h2>Short Contents</h2>
@@ -156,8 +156,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invo
 <p><a name="index-ntp_002dwait_002d-4"></a>
 This is the &ldquo;number of times to check ntpd&rdquo; option. 
 This option takes an argument number <span class="file">num-tries</span>. 
-The maximum number of times we will check ntpd to see if it
-has been able to synchronize and stabilize the system clock. 
+The maximum number of times we will check <code>ntpd</code> to see if
+it has been able to synchronize and stabilize the system clock. 
 <div class="node">
 <p><hr>
 <a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
@@ -171,8 +171,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invo
 <p><a name="index-ntp_002dwait_002d-5"></a>
 This is the &ldquo;how long to sleep between tries&rdquo; option. 
 This option takes an argument number <span class="file">secs-between-tries</span>. 
-We will sleep for <span class="file">secs-between-tries</span> after each query of ntpd
-that returns "the time is not yet stable". 
+We will sleep for <span class="file">secs-between-tries</span> after each query
+of <code>ntpd</code> that returns "the time is not yet stable". 
 <div class="node">
 <p><hr>
 <a name="ntp_002dwait"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntp_002dwait-config">ntp-wait config</a>,
@@ -185,8 +185,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntp_002dwait-Invocation">ntp-wait Invo
 
 <p><a name="index-ntp_002dwait_002d-6"></a>
 This is the &ldquo;be verbose&rdquo; option. 
-By default, ntp-wait is silent.  With this option, ntp-wait
-will provide status information.
+By default, <code>ntp-wait</code> is silent. 
+With this option, <code>ntp-wait</code> will provide status information.
 
 <div class="node">
 <p><hr>

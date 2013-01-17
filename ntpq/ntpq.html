@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p347 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p348 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -377,7 +377,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p346
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p347
 USAGE:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -1411,29 +1411,6 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 <br></td></tr><tr align="left"><td valign="top" width="10%"><code>flags</code>
 </td><td valign="top" width="20%">driver flags
   <br></td></tr></table>
-
-  <p>===
-
-  <p>&lt;h4&gt;Synopsis&lt;/h4&gt;
-<code>ntpq [-inp] [-c </code><kbd>command</kbd><code>] [</code><kbd>host</kbd><code>] [...]</code>
-
-  <p>&lt;p&gt;Command line options are described following.  Specifying a command line option other than <code>-i</code> or <code>-n</code> will cause the specified query (queries) to be sent to the indicated host(s) immediately.  Otherwise, <code>ntpq</code> will attempt to read interactive format commands from the standard input.&lt;/p&gt;
-&lt;dl&gt;
-  &lt;dt&gt;<code>-4</code>&lt;/dt&gt;
-  &lt;dd&gt;Force DNS resolution of following host names on the command line to the IPv4 namespace.&lt;/dd&gt;
-  &lt;dt&gt;<code>-6</code>&lt;/dt&gt;
-  &lt;dd&gt;Force DNS resolution of following host names on the command line to the IPv6 namespace.&lt;/dd&gt;
-  &lt;dt&gt;<code>-c</code>&lt;/dt&gt;
-  &lt;dd&gt;The following argument is interpreted as an interactive format command and is added to the list of commands to be executed on the specified host(s).  Multiple <code>-c</code> options may be given.&lt;/dd&gt;
-  &lt;dt&gt;<code>-d</code>&lt;/dt&gt;
-  &lt;dd&gt;Turn on debugging mode.&lt;/dd&gt;
-  &lt;dt&gt;<code>-i</code>&lt;/dt&gt;
-  &lt;dd&gt;Force <code>ntpq</code> to operate in interactive mode.  Prompts will be written to the standard output and commands read from the standard input.&lt;/dd&gt;
-  &lt;dt&gt;<code>-n</code>&lt;/dt&gt;
-  &lt;dd&gt;Output all host addresses in dotted-quad numeric format rather than converting to the canonical host names.&lt;/dd&gt;
-  &lt;dt&gt;<code>-p</code>&lt;/dt&gt;
-  &lt;dd&gt;Print a list of the peers known to the server as well as a summary of their state.  This is equivalent to the <code>peers</code> interactive command.&lt;/dd&gt;
-&lt;/dl&gt;
 
 </body></html>
 

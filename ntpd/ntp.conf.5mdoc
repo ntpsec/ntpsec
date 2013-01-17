@@ -1,9 +1,9 @@
-.Dd January 7 2013
+.Dd January 17 2013
 .Dt NTP_CONF 5mdoc File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  7, 2013 at 11:40:02 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 17, 2013 at 06:15:23 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -2657,6 +2657,26 @@ be set to any positive number in seconds.
 If set to zero, the stepout
 pulses will not be suppressed.
 .El
+.It Xo Ic rlimit
+.Oo
+.Cm memlock Ar Nmegabytes |
+.Cm stacklimit Ar N4kPages
+.Oc
+.Xc
+.Bl -tag -width indent
+.It Cm memlock Ar Nmegabytes
+Specify the number of megabytes of memory that can be allocated.
+Probably only available under Linux, this option is useful
+when dropping root (the
+.Fl i
+option).
+The default is 32 megabytes.
+.It Cm stacklimit Ar N4kPages
+Specifies the maximum size of the process stack on systems with the
+.Fn mlockall
+function.
+Defaults to 50 4k pages (200 4k pages in OpenBSD).
+.El
 .It Xo Ic trap Ar host_address
 .Op Cm port Ar port_number
 .Op Cm interface Ar interface_address
@@ -2750,7 +2770,6 @@ libopts had an internal operational error.  Please report
 it to autogen\-users@lists.sourceforge.net.  Thank you.
 .El
 .Sh "SEE ALSO"
-.Sh SEE ALSO
 .Xr ntpd 1ntpdmdoc ,
 .Xr ntpdc 1ntpdcmdoc ,
 .Xr ntpq 1ntpqmdoc
@@ -2785,7 +2804,7 @@ services when they become universally available.
 .Pp
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p347 of NTP.
+This document corresponds to version 4.2.7p348 of NTP.
 This document was derived from FreeBSD.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp.conf\fP

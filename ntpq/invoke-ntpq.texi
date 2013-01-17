@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 # 
-# It has been AutoGen-ed  January  7, 2013 at 11:40:58 AM by AutoGen 5.17.1pre14
+# It has been AutoGen-ed  January 17, 2013 at 06:16:01 AM by AutoGen 5.17.1pre14
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -290,7 +290,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p347
+ntpq - standard NTP query program - Ver. 4.2.7p348
 USAGE:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -413,8 +413,9 @@ must not appear in combination with any of the following options:
 command, peers.
 @end itemize
 
-Force ntpq to operate in interactive mode.  Prompts will be written
-to the standard output and commands read from the standard input.
+Force @code{ntpq} to operate in interactive mode.
+Prompts will be written to the standard output and
+commands read from the standard input.
 @node ntpq numeric
 @subsection numeric option (-n)
 @cindex ntpq-numeric
@@ -427,13 +428,15 @@ converting to the canonical host names.
 @cindex ntpq-old-rv
 
 This is the ``always output status line with readvar'' option.
-By default, ntpq now suppresses the associd=... line that
-precedes the output of "readvar" (alias "rv") when a single
-variable is requested, such as ntpq -c "rv 0 offset".  This
-option causes ntpq to include both lines of output for a
-single-variable readvar.  Using an environment variable to
+By default, @code{ntpq} now suppresses the @code{associd=...}
+line that precedes the output of @code{readvar}
+(alias @code{rv}) when a single variable is requested, such as
+@code{ntpq -c "rv 0 offset"}.
+This option causes @code{ntpq} to include both lines of output
+for a single-variable @code{readvar}.
+Using an environment variable to
 preset this option in a script will enable both older and
-newer ntpq to behave identically in this regard.
+newer @code{ntpq} to behave identically in this regard.
 
 
 @node ntpq config

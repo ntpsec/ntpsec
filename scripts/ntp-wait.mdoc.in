@@ -1,9 +1,9 @@
-.Dd January 7 2013
+.Dd January 17 2013
 .Dt NTP_WAIT @NTP_WAIT_MS@ User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January  7, 2013 at 11:36:13 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 17, 2013 at 06:13:12 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -43,8 +43,8 @@ The default \fInum\-tries\fP for this option is:
 .ti +4
  100
 .sp
-The maximum number of times we will check ntpd to see if it
-has been able to synchronize and stabilize the system clock.
+The maximum number of times we will check \fBntpd\fP to see if
+it has been able to synchronize and stabilize the system clock.
 .It  \-s " \fIsecs\-between\-tries\fP, " \-\- "=" \fIsecs\-between\-tries\fP
 How long to sleep between tries.
 This option takes an integer number as its argument.
@@ -52,13 +52,13 @@ The default \fIsecs\-between\-tries\fP for this option is:
 .ti +4
  6
 .sp
-We will sleep for \fIsecs\-between\-tries\fP after each query of ntpd
-that returns "the time is not yet stable".
+We will sleep for \fIsecs\-between\-tries\fP after each query
+of \fBntpd\fP that returns "the time is not yet stable".
 .It  \-v ", " \-\-
 Be verbose.
 .sp
-By default, ntp\-wait is silent.  With this option, ntp\-wait
-will provide status information.
+By default, \fBntp\-wait\fP is silent.
+With this option, \fBntp\-wait\fP will provide status information.
 .It \-? , " \-\-help"
 Display usage information and exit.
 .It \-! , " \-\-more\-help"
@@ -115,7 +115,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p347 of NTP.
+This document corresponds to version 4.2.7p348 of NTP.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp\-wait\fP
 option definitions.

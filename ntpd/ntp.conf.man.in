@@ -1,8 +1,8 @@
-.TH ntp.conf 5 "07 Jan 2013" "4.2.7p347" "File Formats"
+.TH ntp.conf 5 "17 Jan 2013" "4.2.7p348" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"  
-.\"  It has been AutoGen-ed  January  7, 2013 at 11:39:42 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 17, 2013 at 06:15:04 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -2821,6 +2821,29 @@ If set to zero, the stepout
 pulses will not be suppressed.
 .in -4
 .TP
+.BR Xo Ic rlimit
+.Oo
+.Cm memlock Ar Nmegabytes |
+.Cm stacklimit Ar N4kPages
+.Oc
+.Xc
+.in +4
+.ti -4
+.IR Cm memlock Ar Nmegabytes
+Specify the number of megabytes of memory that can be allocated.
+Probably only available under Linux, this option is useful
+when dropping root (the
+i
+option).
+The default is 32 megabytes.
+.ti -4
+.IR Cm stacklimit Ar N4kPages
+Specifies the maximum size of the process stack on systems with the
+.Fn mlockall
+function.
+Defaults to 50 4k pages (200 4k pages in OpenBSD).
+.in -4
+.TP
 .BR Xo Ic trap Ar host_address
 [ "\fIport\fR" "\fIport_number\fR" ]
 [ "\fIinterface\fR" "\fIinterface_address\fR" ]
@@ -2919,7 +2942,6 @@ The operation failed or the command syntax was not valid.
 libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
-.SH SEE ALSO
 .Xr ntpd @NTPD_MS@ ,
 .Xr ntpdc @NTPDC_MS@ ,
 .Xr ntpq @NTPQ_MS@
@@ -2954,7 +2976,7 @@ services when they become universally available.
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p347 of NTP.
+This document corresponds to version 4.2.7p348 of NTP.
 This document was derived from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp.conf\fP

@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
 # 
-# It has been AutoGen-ed  January  7, 2013 at 11:36:08 AM by AutoGen 5.17.1pre14
+# It has been AutoGen-ed  January 17, 2013 at 06:13:10 AM by AutoGen 5.17.1pre14
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -82,23 +82,23 @@ Space is not required between options and their arguments.
 
 This is the ``number of times to check ntpd'' option.
 This option takes an argument number @file{num-tries}.
-The maximum number of times we will check ntpd to see if it
-has been able to synchronize and stabilize the system clock.
+The maximum number of times we will check @code{ntpd} to see if
+it has been able to synchronize and stabilize the system clock.
 @node ntp-wait 
 @subsection  option (-s)
 @cindex ntp-wait-
 
 This is the ``how long to sleep between tries'' option.
 This option takes an argument number @file{secs-between-tries}.
-We will sleep for @file{secs-between-tries} after each query of ntpd
-that returns "the time is not yet stable".
+We will sleep for @file{secs-between-tries} after each query
+of @code{ntpd} that returns "the time is not yet stable".
 @node ntp-wait 
 @subsection  option (-v)
 @cindex ntp-wait-
 
 This is the ``be verbose'' option.
-By default, ntp-wait is silent.  With this option, ntp-wait
-will provide status information.
+By default, @code{ntp-wait} is silent.
+With this option, @code{ntp-wait} will provide status information.
 
 
 @node ntp-wait config

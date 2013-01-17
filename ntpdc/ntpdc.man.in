@@ -1,8 +1,8 @@
-.TH ntpdc @NTPDC_MS@ "07 Jan 2013" "4.2.7p347" "User Commands"
+.TH ntpdc @NTPDC_MS@ "17 Jan 2013" "4.2.7p348" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  7, 2013 at 11:40:23 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 17, 2013 at 06:15:42 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -16,7 +16,7 @@ ntpdc \- vendor-specific NTPD control program
 .SH DESCRIPTION
 .B 
 is a utility program used to query
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 about its
 current state and to request changes in that state.
 It uses NTP mode 7 control message formats described in the source code.
@@ -196,7 +196,7 @@ The operation of
 .B 
 are specific to the particular
 implementation of the
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 daemon and can be expected to
 work only with this and maybe some previous versions of the daemon.
 Requests from a remote
@@ -256,7 +256,7 @@ followed by a command keyword will print function and usage
 information about the command.
 This command is probably a better
 source of information about
-.Xr ntpq 8
+.Xr ntpq @NTPQ_MS@
 than this manual
 page.
 .TP
@@ -475,7 +475,7 @@ and
 .Cm stats
 flags.
 See the
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 documentation for the meaning of these flags.
 There
 are two additional flags which are read only, the
@@ -699,7 +699,7 @@ These commands operate in the same way as the
 and
 .Ic disable
 configuration file commands of
-.Xr ntpd 8 .
+.Xr ntpd @NTPD_MS@ .
 .in +4
 .ti -4
 .IR Cm auth
@@ -724,9 +724,9 @@ The default for this flag is enable if support is available, otherwise disable.
 .ti -4
 .IR Cm monitor
 Enables the monitoring facility.
-See the
-.Xr ntpdc 8 .
-program and the monlist command or further information.
+See the documentation here about the
+.Cm monlist
+command or further information.
 The default for this flag is enable.
 .ti -4
 .IR Cm ntp
@@ -762,7 +762,7 @@ The default for this flag is disable.
 This command operates in the same way as the
 .Ic restrict
 configuration file commands of
-.Xr ntpd 8 .
+.Xr ntpd @NTPD_MS@ .
 .TP
 .BR Xo Ic unrestrict Ar address Ar mask
 \fIflag Oo Ar ... Oc\fR
@@ -778,7 +778,7 @@ Delete the matching entry from the restrict list.
 Causes the current set of authentication keys to be purged and
 a new set to be obtained by rereading the keys file (which must
 have been specified in the
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 configuration file).
 This
 allows encryption keys to be changed without restarting the
@@ -793,7 +793,7 @@ and
 .Ic untrustedkey
 configuration file
 commands of
-.Xr ntpd 8 .
+.Xr ntpd @NTPD_MS@ .
 .TP
 .BR Ic authinfo
 Returns information concerning the authentication module,
@@ -845,7 +845,7 @@ libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
 .Xr ntp.conf 5 ,
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 .Rs
 .%A David L. Mills
 .%T Network Time Protocol (Version 3)

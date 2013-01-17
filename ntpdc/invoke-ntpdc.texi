@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
 # 
-# It has been AutoGen-ed  January  7, 2013 at 11:40:28 AM by AutoGen 5.17.1pre14
+# It has been AutoGen-ed  January 17, 2013 at 06:15:46 AM by AutoGen 5.17.1pre14
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -15,7 +15,7 @@
 
 @code{ntpdc}
 is a utility program used to query
-@code{ntpd(8)}
+@code{ntpd(1ntpdmdoc)}
 about its
 current state and to request changes in that state.
 It uses NTP mode 7 control message formats described in the source code.
@@ -69,7 +69,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p347
+ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p348
 USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution

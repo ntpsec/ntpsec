@@ -6,7 +6,7 @@
 # 
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 # 
-# It has been AutoGen-ed  January  7, 2013 at 11:39:56 AM by AutoGen 5.17.1pre14
+# It has been AutoGen-ed  January 17, 2013 at 06:15:17 AM by AutoGen 5.17.1pre14
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -2631,6 +2631,22 @@ be set to any positive number in seconds.
 If set to zero, the stepout
 pulses will not be suppressed.
 @end table
+@item @code{rlimit}Oo@code{memlock} @kbd{Nmegabytes} |@code{stacklimit} @kbd{N4kPages}Oc
+@table @asis
+
+@item @code{memlock} @kbd{Nmegabytes}
+Specify the number of megabytes of memory that can be allocated.
+Probably only available under Linux, this option is useful
+when dropping root (the
+@code{-i}
+option).
+The default is 32 megabytes.
+@item @code{stacklimit} @kbd{N4kPages}
+Specifies the maximum size of the process stack on systems with the
+@code{mlockall}()
+function.
+Defaults to 50 4k pages (200 4k pages in OpenBSD).
+@end table
 @item @code{trap} @kbd{host_address}[@code{port} @kbd{port_number}][@code{interface} @kbd{interface_address}]
 This command configures a trap receiver at the given host
 address and port number for sending messages with the specified
@@ -2686,10 +2702,6 @@ Diffie-Hellman agreement parameters
 @end table
 @node ntp.conf See Also
 @subsection ntp.conf See Also
-@node SEE ALSO
-@section SEE ALSO
-
-
 @code{ntpd(1ntpdmdoc)},
 @code{ntpdc(1ntpdcmdoc)},
 @code{ntpq(1ntpqmdoc)}

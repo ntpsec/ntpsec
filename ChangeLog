@@ -1,3 +1,4 @@
+(4.2.7p348) 2013/01/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2327] Rename sntp/ag-tpl/:Old to sntp/ag-tpl/Old.
 * Cleanup to ntpsnmpd-opts.def.
 * Cleanup to ntpq.texi.

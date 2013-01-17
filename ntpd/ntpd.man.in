@@ -1,8 +1,8 @@
-.TH ntpd @NTPD_MS@ "07 Jan 2013" "4.2.7p347" "User Commands"
+.TH ntpd @NTPD_MS@ "17 Jan 2013" "4.2.7p348" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  January  7, 2013 at 11:39:51 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 17, 2013 at 06:15:13 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -68,9 +68,9 @@ configuration options altered while the
 .B 
 is running
 using the
-.Xr ntpq 8
+.Xr ntpq @NTPQ_MS@
 and
-.Xr ntpdc 8
+.Xr ntpdc @NTPDC_MS@
 utility programs.
 .PP
 When
@@ -568,13 +568,13 @@ when you have permission to do so from the owner of the target host.
 .PP
 Finally,
 in the past many startup scripts would run
-.Xr ntpdate 8
+.Xr ntpdate @NTPDATE_MS@
 to get the system clock close to correct before starting
-.Xr ntpd 8 ,
+.Xr ntpd @NTPD_MS@ ,
 but this was never more than a mediocre hack and is no longer needed.
 .PP
 There is a way to start
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 that often addresses all of the problems mentioned above.
 .SS "Starting NTP (Best Current Practice)"
 First, use the
@@ -586,12 +586,12 @@ entries.
 If you can also keep a good
 .Pa ntp.drift
 file then
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 will effectively "warm-start" and your system's clock will
 be stable in under 11 seconds' time.
 .PP
 As soon as possible in the startup sequence, start
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 with at least the
 g
 and perhaps the
@@ -600,7 +600,7 @@ options.
 Then,
 start the rest of your "normal" processes.
 This will give
-.Xr ntpd 8
+.Xr ntpd @NTPD_MS@
 as much time as possible to get the system's clock synchronized and stable.
 .PP
 Finally,
@@ -610,13 +610,13 @@ or database servers
 that require
 monotonically-increasing time,
 run
-.Xr ntp-wait 8
+.Xr ntp-wait @NTP_WAIT_MS@
 as late as possible in the boot sequence
 (perhaps with the
 v
 flag)
 and after
-.Xr ntp-wait 8
+.Xr ntp-wait @NTP_WAIT_MS@
 exits successfully
 it is as safe as it will ever be to start any process that require
 stable time.
@@ -698,7 +698,7 @@ In some cases it may not be practical for
 to run
 continuously.
 A common workaround has been to run the
-.Xr ntpdate 8
+.Xr ntpdate @NTPDATE_MS@
 program from a
 .Xr cron 8
 job at designated
@@ -727,7 +727,7 @@ If nothing is heard after a
 couple of minutes, the daemon times out and exits.
 After a suitable
 period of mourning, the
-.Xr ntpdate 8
+.Xr ntpdate @NTPDATE_MS@
 program may be
 retired.
 .PP
@@ -857,9 +857,9 @@ libopts had an internal operational error.  Please report
 it to autogen-users@lists.sourceforge.net.  Thank you.
 .SH "SEE ALSO"
 .Xr ntp.conf 5 ,
-.Xr ntpdate 8 ,
-.Xr ntpdc 8 ,
-.Xr ntpq 8
+.Xr ntpdate @NTPDATE_MS@ ,
+.Xr ntpdc @NTPDC_MS@ ,
+.Xr ntpq @NTPQ_MS@
 .PP
 In addition to the manual pages provided,
 comprehensive documentation is available on the world wide web
@@ -928,7 +928,7 @@ mind.
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p347 of NTP.
+This document corresponds to version 4.2.7p348 of NTP.
 Portions of this document came from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntpd\fP
