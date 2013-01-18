@@ -10,6 +10,18 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+/*
+ * Known predifined MS compiler version codes:
+ *  1700: MSVC++ 11.0 (Visual Studio 2012)
+ *  1600: MSVC++ 10.0 (Visual Studio 2010)
+ *  1500: MSVC++ 9.0  (Visual Studio 2008)
+ *  1400: MSVC++ 8.0  (Visual Studio 2005)
+ *  1310: MSVC++ 7.1  (Visual Studio 2003)
+ *  1300: MSVC++ 7.0
+ *  1200: MSVC++ 6.0  (Visual C++ 6)
+ *  1100: MSVC++ 5.0
+ */
+
 #if defined(_MSC_VER) && _MSC_VER < 1400
 #error Minimum supported Microsoft compiler is Visual C++ 2005.
 #endif
@@ -432,6 +444,40 @@ typedef unsigned long uintptr_t;
 #endif
 
 #define NEED_S_CHAR_TYPEDEF
+
+
+/* C99 exact size integer support. */
+#if defined(_MSC_VER)
+# define MISSING_INTTYPES_H         1  /* not provided by VS2012 and earlier */
+# define MISSING_STDBOOL_H          1  /* not provided by VS2012 and earlier */
+# if _MSC_VER < 1600
+#  define MISSING_STDINT_H          1  /* not provided before VS2010 */
+# endif
+#else
+/* add defines for non-MS compilers here, if required */
+#endif
+
+#if !defined(MISSING_INTTYPES_H)
+# define HAVE_INTTYPES_H            1
+# include <inttypes.h>
+#elif !defined(MISSING_STDINT_H)
+# define HAVE_STDINT_H              1
+# include <stdint.h>
+#elif !defined(ADDED_EXACT_SIZE_INTEGERS)
+# define ADDED_EXACT_SIZE_INTEGERS  1
+  typedef __int8 int8_t;
+  typedef unsigned __int8 uint8_t;
+
+  typedef __int16 int16_t;
+  typedef unsigned __int16 uint16_t;
+
+  typedef __int32 int32_t;
+  typedef unsigned __int32 uint32_t;
+
+  typedef __int64 int64_t;
+  typedef unsigned __int64 uint64_t;
+#endif
+
 
 /* Directory separator, usually / or \ */
 #define	DIR_SEP	'\\'
