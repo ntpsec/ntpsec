@@ -44,7 +44,7 @@ monitor the operational status
 and determine the performance of
 <code>ntpd</code>, the NTP daemon.
 
-  <p>This document applies to version 4.2.7p348 of <code>ntpq</code>.
+  <p>This document applies to version 4.2.7p349 of <code>ntpq</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpq-Description">ntpq Description</a>
@@ -377,7 +377,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p347
+<pre class="example">ntpq - standard NTP query program - Ver. 4.2.7p348
 USAGE:  ntpq [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -523,8 +523,9 @@ This is the &ldquo;force ntpq to operate in interactive mode&rdquo; option.
 command, peers. 
 </ul>
 
-  <p>Force ntpq to operate in interactive mode.  Prompts will be written
-to the standard output and commands read from the standard input. 
+  <p>Force <code>ntpq</code> to operate in interactive mode. 
+Prompts will be written to the standard output and
+commands read from the standard input. 
 <div class="node">
 <p><hr>
 <a name="ntpq-numeric"></a>Next:&nbsp;<a rel="next" accesskey="n" href="#ntpq-old_002drv">ntpq old-rv</a>,
@@ -551,13 +552,15 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Internal-Commands">Internal Commands</
 
 <p><a name="index-ntpq_002dold_002drv-10"></a>
 This is the &ldquo;always output status line with readvar&rdquo; option. 
-By default, ntpq now suppresses the associd=... line that
-precedes the output of "readvar" (alias "rv") when a single
-variable is requested, such as ntpq -c "rv 0 offset".  This
-option causes ntpq to include both lines of output for a
-single-variable readvar.  Using an environment variable to
+By default, <code>ntpq</code> now suppresses the <code>associd=...</code>
+line that precedes the output of <code>readvar</code>
+(alias <code>rv</code>) when a single variable is requested, such as
+<code>ntpq -c "rv 0 offset"</code>. 
+This option causes <code>ntpq</code> to include both lines of output
+for a single-variable <code>readvar</code>. 
+Using an environment variable to
 preset this option in a script will enable both older and
-newer ntpq to behave identically in this regard.
+newer <code>ntpq</code> to behave identically in this regard.
 
 <div class="node">
 <p><hr>

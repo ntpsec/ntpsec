@@ -1,3 +1,4 @@
+(4.2.7p349) 2013/01/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2321] Fixed Windows build, but autogen update still required.
 (4.2.7p348) 2013/01/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2327] Rename sntp/ag-tpl/:Old to sntp/ag-tpl/Old.
