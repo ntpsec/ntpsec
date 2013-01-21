@@ -1,3 +1,4 @@
+(4.2.7p350) 2013/01/21 Released by Harlan Stenn <stenn@ntp.org>
 * Added sntp/loc/netbsd based on info from Christos Zoulas.
 (4.2.7p349) 2013/01/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2321] Fixed Windows build, but autogen update still required.

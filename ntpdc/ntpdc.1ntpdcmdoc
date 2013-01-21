@@ -1,9 +1,9 @@
-.Dd January 20 2013
+.Dd January 21 2013
 .Dt NTPDC 1ntpdcmdoc User Commands
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.mdoc)
 .\"  
-.\"  It has been AutoGen-ed  January 20, 2013 at 11:42:59 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  January 21, 2013 at 11:43:14 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
