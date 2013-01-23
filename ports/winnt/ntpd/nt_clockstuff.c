@@ -129,6 +129,14 @@ static LONGLONG		baseline_times[BASELINES_TOT] = {0};
 static ULONGLONG	clock_backward_max = CLOCK_BACK_THRESHOLD;
 static int		clock_backward_count;
 
+/**
+ * A flag set on Windows versions which ignore small time adjustments.
+ *
+ * Windows Vista and Windows 7 ignore TimeAdjustment less than 16.
+ * @note Has to be checked for Windows Server 2008/2012 and Windows 8.
+ * Ref: http://support.microsoft.com/kb/2537623, bug #2328
+ */
+static BOOL os_ignores_small_adjustment;
 
 /*
  * clockperiod is the period used for SetSystemTimeAdjustment 
@@ -264,6 +272,42 @@ perf_ctr(void)
 	else {
 		QueryPerformanceCounter(&ft.li);
 		return ft.ull;
+	}
+}
+
+
+/*
+ * init_small_adjustment
+ *
+ * Set variable os_ignores_small_adjustment
+ *
+ */
+static void init_small_adjustment(void)
+{
+	OSVERSIONINFO vi;
+	memset(&vi, 0, sizeof(vi));
+	vi.dwOSVersionInfoSize = sizeof(vi);
+
+	if (!GetVersionEx(&vi)) {
+		msyslog(LOG_WARNING, "GetVersionEx failed with error code %d.", GetLastError());
+		os_ignores_small_adjustment = FALSE;
+		return;
+	}
+
+	if (vi.dwMajorVersion == 6 && vi.dwMinorVersion == 1) {
+		// Windows 7 and Windows Server 2008 R2
+		//
+		// Windows 7 is documented as affected.
+		// Windows Server 2008 R2 is assumed affected.
+		os_ignores_small_adjustment = TRUE;
+	} else if (vi.dwMajorVersion == 6 && vi.dwMinorVersion == 0) {
+		// Windows Vista and Windows Server 2008
+		//
+		// Windows Vista is documented as affected.
+		// Windows Server 2008 is assumed affected.
+		os_ignores_small_adjustment = TRUE;
+	} else {
+		os_ignores_small_adjustment = FALSE;
 	}
 }
 
@@ -468,6 +512,18 @@ adj_systime(
 				((isneg)
 				     ? -0.5
 				     : 0.5));
+
+	if (os_ignores_small_adjustment) {
+		/*
+		 * As the OS ignores adjustments smaller than 16, we need to
+		 * leave these small adjustments in sys_residual, causing
+		 * the small values to be averaged over time.
+		 */
+		if (TimeAdjustment > -16 && TimeAdjustment < 16) {
+			TimeAdjustment = 0;
+		}
+	}
+
 	dtemp -= TimeAdjustment * ppm_per_adjust_unit;	
 
 
@@ -638,6 +694,8 @@ init_winnt_time(void)
 #endif
 
 #pragma warning(pop)
+
+	init_small_adjustment();
 
 	/*
 	 * Get privileges needed for fiddling with the clock
