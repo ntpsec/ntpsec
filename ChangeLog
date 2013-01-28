@@ -1,3 +1,4 @@
+(4.2.7p352) 2013/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] Notice when a new leapfile has been installed.
 (4.2.7p351) 2013/01/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2328] Don't apply small time adjustments on Windows versions
