@@ -188,7 +188,7 @@ int	cryptosw;		/* crypto command called */
 
 extern int sys_maxclock;
 extern char *stats_drift_file;	/* name of the driftfile */
-extern char *leapseconds_file_name; /*name of the leapseconds file */
+extern char *leapseconds_file;	/*name of the leapseconds file */
 
 #ifdef BC_LIST_FRAMEWORK_NOT_YET_USED
 /*

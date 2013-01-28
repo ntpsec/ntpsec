@@ -23,6 +23,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#include <sys/stat.h>
 
 #ifdef HAVE_IEEEFP_H
 # include <ieeefp.h>
@@ -53,7 +54,9 @@
  * File names
  */
 static	char *key_file_name;		/* keys file name */
-char	*leapseconds_file_name;		/* leapseconds file name */
+char	*leapseconds_file;		/* leapseconds file name */
+struct stat leapseconds_file_sb1;	/* leapseconds file stat() buffer */
+struct stat leapseconds_file_sb2;	/* leapseconds file stat() buffer */
 char	*stats_drift_file;		/* frequency file name */
 static	char *stats_temp_file;		/* temp frequency file name */
 static double wander_resid;		/* last frequency update */
@@ -470,16 +473,26 @@ stats_config(
 	 * Read leapseconds file.
 	 */
 	case STATS_LEAP_FILE:
-		if ((fp = fopen(value, "r")) == NULL) {
+		if (!value || (len = strlen(value)) == 0)
+			break;
+
+		leapseconds_file = erealloc(leapseconds_file, len + 1);
+		memcpy(leapseconds_file, value, len + 1);
+
+		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
 			msyslog(LOG_ERR, "leapseconds file %s: %m",
-			    value);
+			    leapseconds_file);
 			break;
 		}
 
-		if (leap_file(fp) < 0) {
+		if (-1 == fstat(fileno(fp), &leapseconds_file_sb1)) {
+			msyslog(LOG_ERR,
+			    "leapseconds: stat(%s) failed: %m",
+			    leapseconds_file);
+		} else if (leap_file(fp) < 0) {
 			msyslog(LOG_ERR,
 			    "format error leapseconds file %s",
-			    value);
+			    leapseconds_file);
 		} else {
 			get_systime(&now);
 			mprintf_event(EVNT_TAI, NULL,
@@ -841,6 +854,48 @@ record_timing_stats(
 	}
 }
 #endif
+
+
+/*
+ *
+ */
+void
+check_leap_file(
+	void
+	)
+{
+	struct stat *sp1 = &leapseconds_file_sb1;
+	struct stat *sp2 = &leapseconds_file_sb2;
+
+	if (leapseconds_file) {
+		if (stat(leapseconds_file, &leapseconds_file_sb2)) {
+			msyslog(LOG_ERR,
+			    "check_leap_file: stat(%s): %m",
+			    leapseconds_file);
+			return;
+		}
+		if (   (sp1->st_mtime != sp2->st_mtime)
+		    || (sp1->st_ctime != sp2->st_ctime)) {
+			FILE *fp;
+
+			if ((fp = fopen(leapseconds_file, "r")) == NULL) {
+				msyslog(LOG_ERR,
+				    "check_leap_file: fopen(%s): %m",
+				    leapseconds_file);
+			} else {
+				leapseconds_file_sb1 = leapseconds_file_sb2;
+				if (leap_file(fp) < 0) {
+					msyslog(LOG_ERR,
+					    "format error leapseconds file %s",
+					    leapseconds_file);
+				}
+				fclose(fp);
+			}
+		}
+	}
+
+	return;
+}
 
 
 /*

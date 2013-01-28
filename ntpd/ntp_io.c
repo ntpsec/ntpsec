@@ -151,6 +151,9 @@ volatile u_long handler_calls;	/* number of calls to interrupt handler */
 volatile u_long handler_pkts;	/* number of pkts received by handler */
 u_long io_timereset;		/* time counters were reset */
 
+time_t	check_leapfile;
+#define CHECK_LEAP_EVERY	86400
+
 /*
  * Interface stuff
  */
@@ -423,6 +426,8 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
 void
 init_io(void)
 {
+	check_leapfile = time(NULL) + CHECK_LEAP_EVERY;
+
 	/* Init buffer free list and stat counters */
 	init_recvbuff(RECV_INIT);
 	/* update interface every 5 minutes as default */
@@ -3516,7 +3521,7 @@ input_handler(
 				maxactivefd + 1,
 				fdbits(maxactivefd, &activefds));
 		if (err != EBADF)
-			return;
+			goto ih_return;
 		for (j = 0, prior = 0; j <= maxactivefd; j++) {
 			if (FD_ISSET(j, &activefds)) {
 				if (-1 != read(j, &b, 0)) {
@@ -3531,10 +3536,10 @@ input_handler(
 					maxactivefd = prior;
 			}
 		}
-		return;
+		goto ih_return;
 	}
 	else if (n == 0)
-		return;
+		goto ih_return;
 
 	++handler_pkts;
 
@@ -3644,7 +3649,7 @@ input_handler(
 		if (debug)
 			msyslog(LOG_DEBUG, "input_handler: select() returned 0");
 #endif
-		return;
+		goto ih_return;
 	}
 	/* We've done our work */
 #ifdef DEBUG_TIMING
@@ -3661,7 +3666,12 @@ input_handler(
 			"input_handler: Processed a gob of fd's in %s msec",
 			lfptoms(&ts_e, 6));
 #endif
-	/* just bail. */
+	/* We're done... */
+    ih_return:
+	if (check_leapfile < time(NULL)) {
+		check_leapfile += CHECK_LEAP_EVERY;
+		check_leap_file();
+	}
 	return;
 }
 #endif
