@@ -1,3 +1,4 @@
+(4.2.7p353) 2013/02/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] Check hourly for a new leapfile if the old one expired.
 (4.2.7p352) 2013/01/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] Notice when a new leapfile has been installed.
