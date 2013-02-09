@@ -436,6 +436,13 @@ timer(void)
 						"leapseconds data file has expired.");
 					leap_warn_log = TRUE;
 				}
+				/* If a new file was installed between
+				 * the previous 24 hour check and the
+				 * expiration of this one, we'll squawk
+				 * once.  Better than checking for a
+				 * new file every hour...
+				 */
+				check_leap_file();
 			} else
 				leap_warn_log = FALSE;
 		}

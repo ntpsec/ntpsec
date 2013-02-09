@@ -857,7 +857,7 @@ record_timing_stats(
 
 
 /*
- *
+ * check_leap_file - See if the leapseconds file has been updated.
  */
 void
 check_leap_file(
