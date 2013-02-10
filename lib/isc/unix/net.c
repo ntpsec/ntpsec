@@ -356,7 +356,6 @@ try_ipv6pktinfo(void) {
 		goto close;
 	}
 
-	close(s);
 	ipv6pktinfo_result = ISC_R_SUCCESS;
 
 close:
