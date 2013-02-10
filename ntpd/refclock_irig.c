@@ -457,8 +457,8 @@ irig_receive(
 		sample = fabs(sample);
 		if (sample > up->signal)
 			up->signal = sample;
-			up->signal += (sample - up->signal) /
-			    1000;
+		up->signal += (sample - up->signal) /
+		    1000;
 
 		/*
 		 * Once each second, determine the IRIG format and gain.

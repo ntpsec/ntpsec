@@ -3,6 +3,7 @@
 * CID 739558: Double close.
 * CID 739559: Double close.
 * CID 739713: devmask/recmask copy/paste error.
+* CID 739714: Fix code indentation level.
 * CID 739715: Clean up sockaddr_dump().
 (4.2.7p353) 2013/02/09 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] Check hourly for a new leapfile if the old one expired.
