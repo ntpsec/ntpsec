@@ -319,7 +319,8 @@ audio_init(
 	if (cf_agc[0] != '\0') {
 		int i;
 
-		i = mixer_name(cf_agc, devmask);
+		/* recmask */
+		i = mixer_name(cf_agc, recmask);
 		if (i >= 0)
 			agc = MIXER_WRITE(i);
 		else
