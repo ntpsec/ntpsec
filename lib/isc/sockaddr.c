@@ -220,7 +220,7 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, isc_boolean_t address_only) {
 	case AF_INET6:
 		in6 = &sockaddr->type.sin6.sin6_addr;
 		if (IN6_IS_ADDR_V4MAPPED(in6)) {
-			s = (const unsigned char *)&in6[12];
+			s = (const unsigned char *)&in6 + 12;
 			length = sizeof(sockaddr->type.sin.sin_addr.s_addr);
 		} else {
 			s = (const unsigned char *)in6;
