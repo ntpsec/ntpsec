@@ -1,8 +1,8 @@
-.TH ntpsnmpd @NTPSNMPD_MS@ "09 Feb 2013" "4.2.7p353" "User Commands"
+.TH ntpsnmpd @NTPSNMPD_MS@ "10 Feb 2013" "4.2.7p354" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  February  9, 2013 at 11:30:09 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  February 10, 2013 at 11:48:33 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpsnmpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -169,7 +169,7 @@ please fill me in...
 .BR Li ntpEntTimeDistance
 please fill me in...
 .PP
-This document corresponds to version 4.2.7p353 of NTP.
+This document corresponds to version 4.2.7p354 of NTP.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntpsnmpd\fP
 option definitions.

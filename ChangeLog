@@ -1,3 +1,4 @@
+(4.2.7p354) 2013/02/10 Released by Harlan Stenn <stenn@ntp.org>
 * CID 97194: Check return from setsockopt().
 * CID 739473,739532: Out-of-bounds access/illegal address computation.
 * CID 739558: Double close.

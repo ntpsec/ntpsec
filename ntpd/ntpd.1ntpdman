@@ -1,8 +1,8 @@
-.TH ntpd 1ntpdman "09 Feb 2013" "4.2.7p353" "User Commands"
+.TH ntpd 1ntpdman "10 Feb 2013" "4.2.7p354" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  February  9, 2013 at 11:29:05 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  February 10, 2013 at 11:47:07 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -928,7 +928,7 @@ mind.
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p353 of NTP.
+This document corresponds to version 4.2.7p354 of NTP.
 Portions of this document came from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntpd\fP
