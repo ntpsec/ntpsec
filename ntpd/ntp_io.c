@@ -526,7 +526,8 @@ sockaddr_dump(const sockaddr_u *psau)
 	const u_char *	cp;
 	int		i;
 
-	cp = (const void *)&psau->sa;
+	/* XXX: Should we limit maxsize based on psau->saX.sin_family? */
+	cp = (const void *)&psau->sa6;
 
 	for(i = 0; i < maxsize; i++) {
 		printf("%02x", *cp++);
