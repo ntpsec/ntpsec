@@ -3807,8 +3807,13 @@ findlocalinterface(
 	 */
 	if (bcast) {
 		on = 1;
-		setsockopt(s, SOL_SOCKET, SO_BROADCAST,
-			   (char *)&on, sizeof(on));
+		if (SOCKET_ERROR == setsockopt(s, SOL_SOCKET,
+						SO_BROADCAST,
+						(char *)&on,
+						sizeof(on))) {
+			closesocket(s);
+			return NULL;
+		}
 	}
 
 	rtn = connect(s, &addr->sa, SOCKLEN(addr));
