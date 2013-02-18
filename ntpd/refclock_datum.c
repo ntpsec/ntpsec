@@ -251,7 +251,9 @@ datum_pts_start(
 
 	datum_pts->PTS_fd = fd;
 
-	fcntl(datum_pts->PTS_fd, F_SETFL, 0); /* clear the descriptor flags */
+	if (-1 == fcntl(datum_pts->PTS_fd, F_SETFL, 0)) /* clear the descriptor flags */
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): fcntl(F_SETFL, 0): %m.\n",
+			unit);
 
 #ifdef DEBUG_DATUM_PTC
 	if (debug)
