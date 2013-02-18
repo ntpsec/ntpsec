@@ -660,7 +660,10 @@ arc_start(
 	temp_fd = -1;
 
 #ifndef SYS_WINNT
-	fcntl(fd, F_SETFL, 0); /* clear the descriptor flags */
+	if (-1 == fcntl(fd, F_SETFL, 0)) /* clear the descriptor flags */
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): fcntl(F_SETFL, 0): %m.\n",
+			unit);
+
 #endif
 	DPRINTF(1, ("arc: opened RS232 port with file descriptor %d.\n", fd));
 
