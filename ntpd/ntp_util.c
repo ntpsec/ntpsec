@@ -864,34 +864,34 @@ check_leap_file(
 	void
 	)
 {
+	FILE *fp;
 	struct stat *sp1 = &leapseconds_file_sb1;
 	struct stat *sp2 = &leapseconds_file_sb2;
 
 	if (leapseconds_file) {
-		if (stat(leapseconds_file, &leapseconds_file_sb2)) {
+		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
+			msyslog(LOG_ERR,
+			    "check_leap_file: fopen(%s): %m",
+			    leapseconds_file);
+			return;
+		}
+		if (fstat(fileno(fp), &leapseconds_file_sb2)) {
 			msyslog(LOG_ERR,
 			    "check_leap_file: stat(%s): %m",
 			    leapseconds_file);
+			fclose(fp);
 			return;
 		}
 		if (   (sp1->st_mtime != sp2->st_mtime)
 		    || (sp1->st_ctime != sp2->st_ctime)) {
-			FILE *fp;
-
-			if ((fp = fopen(leapseconds_file, "r")) == NULL) {
+			leapseconds_file_sb1 = leapseconds_file_sb2;
+			if (leap_file(fp) < 0) {
 				msyslog(LOG_ERR,
-				    "check_leap_file: fopen(%s): %m",
+				    "format error leapseconds file %s",
 				    leapseconds_file);
-			} else {
-				leapseconds_file_sb1 = leapseconds_file_sb2;
-				if (leap_file(fp) < 0) {
-					msyslog(LOG_ERR,
-					    "format error leapseconds file %s",
-					    leapseconds_file);
-				}
-				fclose(fp);
 			}
 		}
+		fclose(fp);
 	}
 
 	return;
