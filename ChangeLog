@@ -1,5 +1,6 @@
 * CID 739708: Check return status of fcntl() in refclock_arc.c.
 * CID 739709: Check return status of fcntl() in refclock_datum.c.
+* CID 739710: Check return status of mkdir() in sntp/kod_management.c.
 * CID 739723: Print sizeof as unsigned.
 * CID 971094: Clean up time of check/time of use in check_leap_file().
 (4.2.7p354) 2013/02/10 Released by Harlan Stenn <stenn@ntp.org>
