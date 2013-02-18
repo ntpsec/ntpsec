@@ -2171,7 +2171,7 @@ fheader	(
 	}
 	snprintf(linkname, sizeof(linkname), "ntpkey_%s_%s", ulink,
 	    hostname);
-	remove(linkname);
+	(void)remove(linkname);		/* The symlink() line below matters */
 	temp = symlink(filename, linkname);
 	if (temp < 0)
 		perror(file);
