@@ -1,8 +1,8 @@
-.TH ntp-keygen @NTP_KEYGEN_MS@ "10 Feb 2013" "ntp (4.2.7p354)" "User Commands"
+.TH ntp-keygen @NTP_KEYGEN_MS@ "18 Feb 2013" "ntp (4.2.7p355)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"  
-.\"  It has been AutoGen-ed  February 10, 2013 at 11:48:55 AM by AutoGen 5.17.1pre14
+.\"  It has been AutoGen-ed  February 18, 2013 at 09:25:47 AM by AutoGen 5.17.1pre14
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -1109,7 +1109,7 @@ Please report bugs to http://bugs.ntp.org .
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p354 of NTP.
+This document corresponds to version 4.2.7p355 of NTP.
 Portions of this document came from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp-keygen\fP
