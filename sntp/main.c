@@ -707,7 +707,7 @@ timeout_queries(void)
 	long		age;
 	int didsomething = 0;
 
-	TRACE(3, ("timeout_queries: called to check %d items\n",
+	TRACE(3, ("timeout_queries: called to check %u items\n",
 		  COUNTOF(fam_listheads)));
 
 	gettimeofday_cached(base, &start_cb);
