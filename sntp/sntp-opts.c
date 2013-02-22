@@ -1,11 +1,11 @@
-/*  
+/*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
- *  
- *  It has been AutoGen-ed  February 19, 2013 at 11:33:16 AM by AutoGen 5.17.1pre14
+ *
+ *  It has been AutoGen-ed  February 21, 2013 at 09:25:23 PM by AutoGen 5.17.2pre17
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 37:1:12 templates.
+ * Generated from AutoOpts 38:0:13 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -50,9 +50,6 @@
 extern "C" {
 #endif
 extern FILE * option_usage_fp;
-
-/* TRANSLATORS: choose the translation for option names wisely because you
-                cannot ever change your mind. */
 #define zCopyright      (sntp_opt_strs+0)
 #define zLicenseDescrip (sntp_opt_strs+314)
 
@@ -72,7 +69,7 @@ extern FILE * option_usage_fp;
 /*
  *  sntp option static const strings
  */
-static char const sntp_opt_strs[2500] =
+static char const sntp_opt_strs[2499] =
 /*     0 */ "sntp 4.2.7p356\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
@@ -145,27 +142,27 @@ static char const sntp_opt_strs[2500] =
 /*  1999 */ "WAIT\0"
 /*  2004 */ "no-wait\0"
 /*  2012 */ "no\0"
-/*  2015 */ "Display extended usage information and exit\0"
+/*  2015 */ "display extended usage information and exit\0"
 /*  2059 */ "help\0"
-/*  2064 */ "Extended usage information passed thru pager\0"
+/*  2064 */ "extended usage information passed thru pager\0"
 /*  2109 */ "more-help\0"
-/*  2119 */ "Output version information and exit\0"
+/*  2119 */ "output version information and exit\0"
 /*  2155 */ "version\0"
-/*  2163 */ "Save the option state to a config file\0"
+/*  2163 */ "save the option state to a config file\0"
 /*  2202 */ "save-opts\0"
-/*  2212 */ "Load options from a config file\0"
+/*  2212 */ "load options from a config file\0"
 /*  2244 */ "LOAD_OPTS\0"
 /*  2254 */ "no-load-opts\0"
 /*  2267 */ "SNTP\0"
 /*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p356\n"
-            "USAGE:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
+            "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ hostname-or-IP ...]\n\0"
 /*  2433 */ "$HOME\0"
 /*  2439 */ ".\0"
 /*  2441 */ ".ntprc\0"
 /*  2448 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  2482 */ "\n\n\0"
-/*  2485 */ "sntp 4.2.7p356";
+/*  2482 */ "\n\0"
+/*  2484 */ "sntp 4.2.7p356";
 
 /*
  *  ipv4 option description with
@@ -629,7 +626,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_VERSION,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ VER_FLAGS, 0,
+     /* opt state flags  */ VER_FLAGS, AOUSE_VERSION,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
@@ -643,7 +640,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, 0,
+     /* opt state flags  */ OPTST_IMM | OPTST_NO_INIT, AOUSE_HELP,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
@@ -655,7 +652,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equiv idx value  */ NO_EQUIVALENT, VALUE_OPT_MORE_HELP,
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
-     /* opt state flags  */ MORE_HELP_FLAGS, 0,
+     /* opt state flags  */ MORE_HELP_FLAGS, AOUSE_MORE_HELP,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
@@ -668,7 +665,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
-                          | OPTST_ARG_OPTIONAL | OPTST_NO_INIT, 0,
+                          | OPTST_ARG_OPTIONAL | OPTST_NO_INIT, AOUSE_SAVE_OPTS,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
@@ -681,7 +678,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, NOLIMIT, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
-			  | OPTST_DISABLE_IMM, 0,
+			  | OPTST_DISABLE_IMM, AOUSE_LOAD_OPTS,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL, NULL,
@@ -705,8 +702,8 @@ static char const * const apzHomeList[3] = {
 #define zBugsAddr       (sntp_opt_strs+2448)
 #define zExplain        (sntp_opt_strs+2482)
 #define zDetail         (NULL)
-#define zFullVersion    (sntp_opt_strs+2485)
-/* extracted from optcode.tlib near line 353 */
+#define zFullVersion    (sntp_opt_strs+2484)
+/* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -716,9 +713,7 @@ static char const * const apzHomeList[3] = {
 # define translate_option_strings NULL
 #endif /* ENABLE_NLS */
 
-
 #define sntp_full_usage (NULL)
-
 #define sntp_short_usage (NULL)
 
 #endif /* not defined __doxygen__ */
@@ -934,7 +929,7 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* defined TEST_SNTP_OPTS */
-/* extracted from optmain.tlib near line 1188 */
+/* extracted from optmain.tlib near line 1254 */
 
 /**
  * The directory containing the data associated with sntp.
@@ -1004,6 +999,11 @@ tOptions sntpOptions = {
 };
 
 #if ENABLE_NLS
+/*
+ * This code is designed to translate translatable option text for the
+ * sntp program.  These translations happen upon entry
+ * to optionProcess().
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1082,9 +1082,8 @@ translate_option_strings(void)
          *  Do the translations.  The first pointer follows the field count
          *  field.  The field count field is the size of a pointer.
          */
-        tOptDesc * od = opts->pOptDesc;
-        char **    ppz = (char**)(void*)&(option_xlateable_txt);
-        int        ix  = option_xlateable_txt.field_ct;
+        char ** ppz = (char**)(void*)&(option_xlateable_txt);
+        int     ix  = option_xlateable_txt.field_ct;
 
         do {
             ppz++; /* skip over field_ct */
@@ -1099,27 +1098,432 @@ translate_option_strings(void)
         coerce_it((void*)&(opts->pzUsageTitle));
         coerce_it((void*)&(opts->pzExplain));
         coerce_it((void*)&(opts->pzDetail));
-        coerce_it((void*)&(opts->pzPackager));
-
-        for (ix = opts->optCt; ix > 0; ix--, od++)
-            coerce_it((void*)&(od->pzText));
-    }
-
-    if ((opts->fOptSet & OPTPROC_NXLAT_OPT_CFG) == 0) {
-        tOptDesc * od = opts->pOptDesc;
-        int        ix;
-
-        for (ix = opts->optCt; ix > 0; ix--, od++) {
-            coerce_it((void*)&(od->pz_Name));
-            coerce_it((void*)&(od->pz_DisableName));
-            coerce_it((void*)&(od->pz_DisablePfx));
+        {
+            tOptDesc * od = opts->pOptDesc;
+            for (ix = opts->optCt; ix > 0; ix--, od++)
+                coerce_it((void*)&(od->pzText));
         }
-        sntpOptions.fOptSet |= OPTPROC_NXLAT_OPT_CFG | OPTPROC_NXLAT_OPT;
     }
 }
-
 #endif /* ENABLE_NLS */
 
+#ifdef DO_NOT_COMPILE_THIS_CODE_IT_IS_FOR_GETTEXT
+static void bogus_function(void) {
+  /* TRANSLATORS:
+
+     The following dummy function was crated solely so that xgettext can extract
+     the correct strings.  These strings are actually referenced by a field name
+     in the sntpOptions structure noted in the comments below.  The
+     literal text is defined in sntp_opt_strs.
+   
+     NOTE: the strings below are segmented with respect to the source string
+     sntp_opt_strs.  The strings above are handed off for translation
+     at run time a paragraph at a time.  Consequently, they are presented here
+     for translation a paragraph at a time.
+   
+     ALSO: often the description for an option will reference another option
+     by name.  These are set off with apostrophe quotes (I hope).  Do not
+     translate option names.
+   */
+  /* referenced via sntpOptions.pzCopyright */
+  puts(_("sntp 4.2.7p356\n\
+Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
+This is free software. It is licensed for use, modification and\n\
+redistribution under the terms of the NTP License, copies of which\n\
+can be seen at:\n"));
+  puts(_("  <http://ntp.org/license>\n\
+  <http://opensource.org/licenses/ntp-license.php>\n"));
+
+  /* referenced via sntpOptions.pzCopyNotice */
+  puts(_("Permission to use, copy, modify, and distribute this software and its\n\
+documentation for any purpose with or without fee is hereby granted,\n\
+provided that the above copyright notice appears in all copies and that\n\
+both the copyright notice and this permission notice appear in supporting\n\
+documentation, and that the name The University of Delaware not be used in\n\
+advertising or publicity pertaining to distribution of the software without\n\
+specific, written prior permission.  The University of Delaware makes no\n\
+representations about the suitability this software for any purpose.  It is\n\
+provided \"as is\" without express or implied warranty.\n"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Force IPv4 DNS name resolution"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Force IPv6 DNS name resolution"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Enable authentication with the key auth-keynumber"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Listen to the address specified for broadcast time sync"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Concurrently query all IPs returned for host-name"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Increase debug verbosity level"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Set the debug verbosity level"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("The gap (in milliseconds) between time requests"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("KoD history filename"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Look in this file for the key specified with -a"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Log to specified logfile"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Adjustments less than steplimit msec will be slewed"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Send int as our NTP protocol version"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Use the NTP Reserved Port (port 123)"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("OK to 'step' the time with settimeofday(2)"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("OK to 'slew' the time with adjtime(2)"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("The number of seconds to wait for responses"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("Wait for pending replies (if not setting the time)"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("display extended usage information and exit"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("extended usage information passed thru pager"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("output version information and exit"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("save the option state to a config file"));
+
+  /* referenced via sntpOptions.pOptDesc->pzText */
+  puts(_("load options from a config file"));
+
+  /* referenced via sntpOptions.pzUsageTitle */
+  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p356\n\
+Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
+\t\t[ hostname-or-IP ...]\n"));
+
+  /* referenced via sntpOptions.pzExplain */
+  puts(_("\n"));
+
+  /* referenced via sntpOptions.pzFullVersion */
+  puts(_("sntp 4.2.7p356"));
+
+  /* referenced via sntpOptions.pzFullUsage */
+  puts(_("<<<NOT-FOUND>>>"));
+
+  /* referenced via sntpOptions.pzShortUsage */
+  puts(_("<<<NOT-FOUND>>>"));
+
+  /* LIBOPTS-MESSAGES: */
+#line 60 "../autoopts.c"
+  puts(_("allocation of %d bytes failed\n"));
+#line 86 "../autoopts.c"
+  puts(_("allocation of %d bytes failed\n"));
+#line 53 "../init.c"
+  puts(_("AutoOpts function called without option descriptor\n"));
+#line 89 "../init.c"
+  puts(_("\tThis exceeds the compiled library version:  "));
+#line 87 "../init.c"
+  puts(_("Automated Options Processing Error!\n"
+       "\t%s called AutoOpts function with structure version %d:%d:%d.\n"));
+#line 73 "../autoopts.c"
+  puts(_("realloc of %d bytes at 0x%p failed\n"));
+#line 91 "../init.c"
+  puts(_("\tThis is less than the minimum library version:  "));
+#line 121 "../version.c"
+  puts(_("Automated Options version %s\n"
+       "\tCopyright (C) 1999-2013 by Bruce Korb - all rights reserved\n"));
+#line 310 "../usage.c"
+  puts(_("(AutoOpts bug):  %s.\n"));
+#line 90 "../reset.c"
+  puts(_("optionResetOpt() called, but reset-option not configured"));
+#line 329 "../usage.c"
+  puts(_("could not locate the 'help' option"));
+#line 351 "../autoopts.c"
+  puts(_("optionProcess() was called with invalid data"));
+#line 770 "../usage.c"
+  puts(_("invalid argument type specified"));
+#line 589 "../find.c"
+  puts(_("defaulted to option with optional arg"));
+#line 76 "../alias.c"
+  puts(_("aliasing option is out of range."));
+#line 229 "../enum.c"
+  puts(_("%s error:  the keyword '%s' is ambiguous for %s\n"));
+#line 108 "../find.c"
+  puts(_("  The following options match:\n"));
+#line 290 "../find.c"
+  puts(_("%s: ambiguous option name: %s (matches %d options)\n"));
+#line 161 "../check.c"
+  puts(_("%s: Command line arguments required\n"));
+#line 43 "../alias.c"
+  puts(_("%d %s%s options allowed\n"));
+#line 81 "../makeshell.c"
+  puts(_("%s error %d (%s) calling %s for '%s'\n"));
+#line 293 "../makeshell.c"
+  puts(_("interprocess pipe"));
+#line 168 "../version.c"
+  puts(_("error: version option argument '%c' invalid.  Use:\n"
+       "\t'v' - version only\n"
+       "\t'c' - version and copyright\n"
+       "\t'n' - version and full copyright notice\n"));
+#line 58 "../check.c"
+  puts(_("%s error:  the '%s' and '%s' options conflict\n"));
+#line 214 "../find.c"
+  puts(_("%s: The '%s' option has been disabled."));
+#line 421 "../find.c"
+  puts(_("%s: The '%s' option has been disabled."));
+#line 38 "../alias.c"
+  puts(_("-equivalence"));
+#line 460 "../find.c"
+  puts(_("%s: illegal option -- %c\n"));
+#line 110 "../reset.c"
+  puts(_("%s: illegal option -- %c\n"));
+#line 268 "../find.c"
+  puts(_("%s: illegal option -- %s\n"));
+#line 746 "../find.c"
+  puts(_("%s: illegal option -- %s\n"));
+#line 118 "../reset.c"
+  puts(_("%s: illegal option -- %s\n"));
+#line 332 "../find.c"
+  puts(_("%s: unknown vendor extension option -- %s\n"));
+#line 154 "../enum.c"
+  puts(_("  or an integer from %d through %d\n"));
+#line 164 "../enum.c"
+  puts(_("  or an integer from %d through %d\n"));
+#line 769 "../usage.c"
+  puts(_("%s error:  invalid option descriptor for %s\n"));
+#line 1097 "../usage.c"
+  puts(_("%s error:  invalid option descriptor for %s\n"));
+#line 379 "../find.c"
+  puts(_("%s: invalid option name: %s\n"));
+#line 518 "../find.c"
+  puts(_("%s: The '%s' option requires an argument.\n"));
+#line 171 "../autoopts.c"
+  puts(_("(AutoOpts bug):  Equivalenced option '%s' was equivalenced to both\n"
+       "\t'%s' and '%s'"));
+#line 94 "../check.c"
+  puts(_("%s error:  The %s option is required\n"));
+#line 623 "../find.c"
+  puts(_("%s: The '%s' option cannot have an argument.\n"));
+#line 151 "../check.c"
+  puts(_("%s: Command line arguments are not allowed.\n"));
+#line 531 "../save.c"
+  puts(_("error %d (%s) creating %s\n"));
+#line 229 "../enum.c"
+  puts(_("%s error:  '%s' does not match any %s keywords.\n"));
+#line 93 "../reset.c"
+  puts(_("%s error: The '%s' option requires an argument.\n"));
+#line 184 "../save.c"
+  puts(_("error %d (%s) stat-ing %s\n"));
+#line 238 "../save.c"
+  puts(_("error %d (%s) stat-ing %s\n"));
+#line 143 "../restore.c"
+  puts(_("%s error: no saved option state\n"));
+#line 246 "../autoopts.c"
+  puts(_("'%s' is not a command line option.\n"));
+#line 114 "../time.c"
+  puts(_("%s error:  '%s' is not a recognizable date/time.\n"));
+#line 132 "../save.c"
+  puts(_("'%s' not defined\n"));
+#line 53 "../time.c"
+  puts(_("%s error:  '%s' is not a recognizable time duration.\n"));
+#line 92 "../check.c"
+  puts(_("%s error:  The %s option must appear %d times\n"));
+#line 157 "../numeric.c"
+  puts(_("%s error:  '%s' is not a recognizable number.\n"));
+#line 195 "../enum.c"
+  puts(_("%s error:  %s exceeds %s keyword count\n"));
+#line 366 "../usage.c"
+  puts(_("Try '%s %s' for more information.\n"));
+#line 45 "../alias.c"
+  puts(_("one %s%s option allowed\n"));
+#line 195 "../makeshell.c"
+  puts(_("standard output"));
+#line 930 "../makeshell.c"
+  puts(_("standard output"));
+#line 304 "../usage.c"
+  puts(_("standard output"));
+#line 451 "../usage.c"
+  puts(_("standard output"));
+#line 647 "../usage.c"
+  puts(_("standard output"));
+#line 175 "../version.c"
+  puts(_("standard output"));
+#line 304 "../usage.c"
+  puts(_("standard error"));
+#line 451 "../usage.c"
+  puts(_("standard error"));
+#line 647 "../usage.c"
+  puts(_("standard error"));
+#line 175 "../version.c"
+  puts(_("standard error"));
+#line 195 "../makeshell.c"
+  puts(_("write"));
+#line 930 "../makeshell.c"
+  puts(_("write"));
+#line 303 "../usage.c"
+  puts(_("write"));
+#line 450 "../usage.c"
+  puts(_("write"));
+#line 646 "../usage.c"
+  puts(_("write"));
+#line 174 "../version.c"
+  puts(_("write"));
+#line 60 "../numeric.c"
+  puts(_("%s error:  %s option value %ld is out of range.\n"));
+#line 44 "../check.c"
+  puts(_("%s error:  %s option requires the %s option\n"));
+#line 131 "../save.c"
+  puts(_("%s warning:  cannot save options - %s not regular file\n"));
+#line 183 "../save.c"
+  puts(_("%s warning:  cannot save options - %s not regular file\n"));
+#line 237 "../save.c"
+  puts(_("%s warning:  cannot save options - %s not regular file\n"));
+#line 256 "../save.c"
+  puts(_("%s warning:  cannot save options - %s not regular file\n"));
+#line 530 "../save.c"
+  puts(_("%s warning:  cannot save options - %s not regular file\n"));
+  /* END-LIBOPTS-MESSAGES */
+
+  /* USAGE-TEXT: */
+#line 895 "../usage.c"
+  puts(_("\t\t\t\t- an alternate for '%s'\n"));
+#line 1164 "../usage.c"
+  puts(_("Version, usage and configuration options:"));
+#line 946 "../usage.c"
+  puts(_("\t\t\t\t- default option for unnamed options\n"));
+#line 859 "../usage.c"
+  puts(_("\t\t\t\t- disabled as '--%s'\n"));
+#line 1133 "../usage.c"
+  puts(_(" --- %-14s %s\n"));
+#line 1131 "../usage.c"
+  puts(_("This option has been disabled"));
+#line 886 "../usage.c"
+  puts(_("\t\t\t\t- enabled by default\n"));
+#line 40 "../alias.c"
+  puts(_("%s error:  only "));
+#line 1208 "../usage.c"
+  puts(_(" - examining environment variables named %s_*\n"));
+#line 168 "../file.c"
+  puts(_("\t\t\t\t- file must not pre-exist\n"));
+#line 172 "../file.c"
+  puts(_("\t\t\t\t- file must pre-exist\n"));
+#line 416 "../usage.c"
+  puts(_("Options are specified by doubled hyphens and their name or by a single\n"
+       "hyphen and the flag character.\n"));
+#line 908 "../makeshell.c"
+  puts(_("\n"
+       "= = = = = = = =\n\n"
+       "This incarnation of genshell will produce\n"
+       "a shell script to parse the options for %s:\n\n"));
+#line 161 "../enum.c"
+  puts(_("  or an integer mask with any of the lower %d bits set\n"));
+#line 919 "../usage.c"
+  puts(_("\t\t\t\t- is a set membership option\n"));
+#line 940 "../usage.c"
+  puts(_("\t\t\t\t- must appear between %d and %d times\n"));
+#line 418 "../usage.c"
+  puts(_("Options are specified by single or double hyphens and their name.\n"));
+#line 926 "../usage.c"
+  puts(_("\t\t\t\t- may appear multiple times\n"));
+#line 913 "../usage.c"
+  puts(_("\t\t\t\t- may not be preset\n"));
+#line 1323 "../usage.c"
+  puts(_("   Arg Option-Name    Description\n"));
+#line 1259 "../usage.c"
+  puts(_("  Flg Arg Option-Name    Description\n"));
+#line 1317 "../usage.c"
+  puts(_("  Flg Arg Option-Name    Description\n"));
+#line 1318 "../usage.c"
+  puts(_(" %3s %s"));
+#line 1324 "../usage.c"
+  puts(_(" %3s %s"));
+#line 423 "../usage.c"
+  puts(_("The '-#<number>' option may omit the hash char\n"));
+#line 419 "../usage.c"
+  puts(_("All arguments are named options.\n"));
+#line 993 "../usage.c"
+  puts(_(" - reading file %s"));
+#line 445 "../usage.c"
+  puts(_("\n"
+       "please send bug reports to:  <%s>\n"));
+#line 100 "../version.c"
+  puts(_("\n"
+       "please send bug reports to:  <%s>\n"));
+#line 129 "../version.c"
+  puts(_("\n"
+       "please send bug reports to:  <%s>\n"));
+#line 925 "../usage.c"
+  puts(_("\t\t\t\t- may NOT appear - preset only\n"));
+#line 965 "../usage.c"
+  puts(_("\n"
+       "The following option preset mechanisms are supported:\n"));
+#line 1206 "../usage.c"
+  puts(_("\n"
+       "The following option preset mechanisms are supported:\n"));
+#line 704 "../usage.c"
+  puts(_("prohibits these options:\n"));
+#line 699 "../usage.c"
+  puts(_("prohibits the option '%s'\n"));
+#line 81 "../numeric.c"
+  puts(_("%s%ld to %ld"));
+#line 79 "../numeric.c"
+  puts(_("%sgreater than or equal to %ld"));
+#line 75 "../numeric.c"
+  puts(_("%s%ld exactly"));
+#line 68 "../numeric.c"
+  puts(_("%sit must lie in one of the ranges:\n"));
+#line 68 "../numeric.c"
+  puts(_("%sit must be in the range:\n"));
+#line 88 "../numeric.c"
+  puts(_(", or\n"));
+#line 66 "../numeric.c"
+  puts(_("%sis scalable with a suffix: k/K/m/M/g/G/t/T\n"));
+#line 77 "../numeric.c"
+  puts(_("%sless than or equal to %ld"));
+#line 426 "../usage.c"
+  puts(_("Operands and options may be intermixed.  They will be reordered.\n"));
+#line 674 "../usage.c"
+  puts(_("requires the option '%s'\n"));
+#line 677 "../usage.c"
+  puts(_("requires these options:\n"));
+#line 1335 "../usage.c"
+  puts(_("   Arg Option-Name   Req?  Description\n"));
+#line 1329 "../usage.c"
+  puts(_("  Flg Arg Option-Name   Req?  Description\n"));
+#line 162 "../enum.c"
+  puts(_("or you may use a numeric representation.  Preceding these with a '!'\n"
+       "will clear the bits, specifying 'none' will clear all bits, and 'all'\n"
+       "will set them all.  Multiple entries may be passed as an option\n"
+       "argument list.\n"));
+#line 932 "../usage.c"
+  puts(_("\t\t\t\t- may appear up to %d times\n"));
+#line 72 "../enum.c"
+  puts(_("The valid \"%s\" option keywords are:\n"));
+#line 1168 "../usage.c"
+  puts(_("The next option supports vendor supported extra options:"));
+#line 795 "../usage.c"
+  puts(_("These additional options are:"));
+  /* END-USAGE-TEXT */
+}
+#endif /* uncompilable code */
 #ifdef  __cplusplus
 }
 #endif

@@ -3,10 +3,10 @@
 @pindex sntp
 @cindex standard Simple Network Time Protocol client program
 @ignore
-# 
+#
 # EDIT THIS FILE WITH CAUTION  (invoke-sntp.texi)
-# 
-# It has been AutoGen-ed  February 19, 2013 at 11:40:32 AM by AutoGen 5.17.1pre14
+#
+# It has been AutoGen-ed  February 21, 2013 at 09:27:36 PM by AutoGen 5.17.2pre17
 # From the definitions    sntp-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -102,15 +102,13 @@ with a status code of 0.
 @exampleindent 0
 @example
 sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p356
-USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
+Usage:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ hostname-or-IP ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
-                                - prohibits these options:
-                                ipv6
+                                - prohibits the option 'ipv6'
    -6 no  ipv6           Force IPv6 DNS name resolution
-                                - prohibits these options:
-                                ipv4
+                                - prohibits the option 'ipv4'
    -a Num authentication Enable authentication with the key auth-keynumber
    -b Str broadcast      Listen to the address specified for broadcast time sync
                                 - may appear multiple times
@@ -125,29 +123,28 @@ USAGE:  sntp [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
    -k Fil keyfile        Look in this file for the key specified with -a
    -l Fil logfile        Log to specified logfile
    -M Num steplimit      Adjustments less than steplimit msec will be slewed
-                                - It must be in the range:
+                                - it must be in the range:
                                   greater than or equal to 0
    -o Num ntpversion     Send int as our NTP protocol version
-                                - It must be in the range:
+                                - it must be in the range:
                                   0 to 7
    -r no  usereservedport Use the NTP Reserved Port (port 123)
    -S no  step           OK to 'step' the time with settimeofday(2)
    -s no  slew           OK to 'slew' the time with adjtime(2)
    -t Num timeout        The number of seconds to wait for responses
       no  wait           Wait for pending replies (if not setting the time)
-                                - disabled as --no-wait
+                                - disabled as '--no-wait'
                                 - enabled by default
-      opt version        Output version information and exit
-   -? no  help           Display extended usage information and exit
-   -! no  more-help      Extended usage information passed thru pager
-   -> opt save-opts      Save the option state to a config file
-   -< Str load-opts      Load options from a config file
-                                - disabled as --no-load-opts
+      opt version        output version information and exit
+   -? no  help           display extended usage information and exit
+   -! no  more-help      extended usage information passed thru pager
+   -> opt save-opts      save the option state to a config file
+   -< Str load-opts      load options from a config file
+                                - disabled as '--no-load-opts'
                                 - may appear multiple times
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
-
 
 
 The following option preset mechanisms are supported:
@@ -155,7 +152,7 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named SNTP_*
 
-please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
+please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
 @end example
 @exampleindent 4
 

@@ -3,10 +3,10 @@
 @pindex ntpdc
 @cindex vendor-specific NTPD control program
 @ignore
-# 
+#
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpdc.texi)
-# 
-# It has been AutoGen-ed  February 19, 2013 at 11:39:11 AM by AutoGen 5.17.1pre14
+#
+# It has been AutoGen-ed  February 21, 2013 at 09:26:35 PM by AutoGen 5.17.2pre17
 # From the definitions    ntpdc-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -70,14 +70,12 @@ with a status code of 0.
 @exampleindent 0
 @example
 ntpdc - vendor-specific NTPD control program - Ver. 4.2.7p356
-USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
+Usage:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
-                                - prohibits these options:
-                                ipv6
+                                - prohibits the option 'ipv6'
    -6 no  ipv6           Force IPv6 DNS name resolution
-                                - prohibits these options:
-                                ipv4
+                                - prohibits the option 'ipv4'
    -c Str command        run a command and exit
                                 - may appear multiple times
    -d no  debug-level    Increase debug verbosity level
@@ -91,26 +89,22 @@ USAGE:  ntpdc [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
                                 peers
                                 showpeers
    -l no  listpeers      Print a list of the peers
-                                - prohibits these options:
-                                command
+                                - prohibits the option 'command'
    -n no  numeric        numeric host addresses
    -p no  peers          Print a list of the peers
-                                - prohibits these options:
-                                command
+                                - prohibits the option 'command'
    -s no  showpeers      Show a list of the peers
-                                - prohibits these options:
-                                command
-      opt version        Output version information and exit
-   -? no  help           Display extended usage information and exit
-   -! no  more-help      Extended usage information passed thru pager
-   -> opt save-opts      Save the option state to a config file
-   -< Str load-opts      Load options from a config file
-                                - disabled as --no-load-opts
+                                - prohibits the option 'command'
+      opt version        output version information and exit
+   -? no  help           display extended usage information and exit
+   -! no  more-help      extended usage information passed thru pager
+   -> opt save-opts      save the option state to a config file
+   -< Str load-opts      load options from a config file
+                                - disabled as '--no-load-opts'
                                 - may appear multiple times
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
-
 
 
 The following option preset mechanisms are supported:
@@ -118,7 +112,7 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named NTPDC_*
 
-please send bug reports to:  http://bugs.ntp.org, bugs@@ntp.org
+please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
 @end example
 @exampleindent 4
 

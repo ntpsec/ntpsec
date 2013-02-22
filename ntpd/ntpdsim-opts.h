@@ -1,11 +1,11 @@
-/*  
+/*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
- *  
- *  It has been AutoGen-ed  August 11, 2012 at 08:39:22 PM by AutoGen 5.16.2
+ *
+ *  It has been AutoGen-ed  February 21, 2013 at 09:23:10 PM by AutoGen 5.17.2pre17
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 36:5:11 templates.
+ * Generated from AutoOpts 38:0:13 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -18,7 +18,7 @@
  * The ntpdsim program is copyrighted and licensed
  * under the following terms:
  *
- *  Copyright (C) 1970-2012 The University of Delaware, all rights reserved.
+ *  Copyright (C) 1970-2013 The University of Delaware, all rights reserved.
  *  This is free software. It is licensed for use, modification and
  *  redistribution under the terms of the NTP License, copies of which
  *  can be seen at:
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 147461
+#define AO_TEMPLATE_VERSION 155648
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -106,8 +106,8 @@ typedef enum {
 } teOptIndex;
 
 #define OPTION_CT    39
-#define NTPDSIM_VERSION       "4.2.7p295"
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p295"
+#define NTPDSIM_VERSION       "4.2.7p356"
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p356"
 
 /*
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -135,10 +135,11 @@ typedef enum {
  *  Enumeration of ntpdsim exit codes
  */
 typedef enum {
-    NTPDSIM_EXIT_SUCCESS = 0,
-    NTPDSIM_EXIT_FAILURE = 1,
-    NTPDSIM_EXIT_NO_CONFIG_INPUT = 66,
-    NTPDSIM_EXIT_LIBOPTS_FAILURE = 70
+    NTPDSIM_EXIT_SUCCESS            = 0,
+    NTPDSIM_EXIT_FAILURE            = 1,
+    NTPDSIM_EXIT_USAGE_ERROR        = 64,
+    NTPDSIM_EXIT_NO_CONFIG_INPUT    = 66,
+    NTPDSIM_EXIT_LIBOPTS_FAILURE    = 70
 } ntpdsim_exit_code_t;
 /*
  *  Make sure there are no #define name conflicts with the option names
@@ -329,6 +330,8 @@ typedef enum {
 #define VALUE_OPT_CONFIGFILE     'c'
 #define VALUE_OPT_DEBUG_LEVEL    'd'
 #define VALUE_OPT_SET_DEBUG_LEVEL 'D'
+
+#define OPT_VALUE_SET_DEBUG_LEVEL (DESC(SET_DEBUG_LEVEL).optArg.argInt)
 #define VALUE_OPT_DRIFTFILE      'f'
 #define VALUE_OPT_PANICGATE      'g'
 #define VALUE_OPT_JAILDIR        'i'
@@ -370,7 +373,7 @@ typedef enum {
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
         DESC(SAVE_OPTS).fOptState |= OPTST_SET; \
-        DESC(SAVE_OPTS).optArg.argString = (char const*)(a) )
+        DESC(SAVE_OPTS).optArg.argString = (char const*)(a))
 /*
  *  Interface defines not associated with particular options
  */
@@ -381,7 +384,7 @@ typedef enum {
                 ntpdsimOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdsimOptions.pUsageProc)(&ntpdsimOptions, c)
-/* extracted from opthead.tlib near line 484 */
+/* extracted from opthead.tlib near line 498 */
 
 #ifdef  __cplusplus
 extern "C" {

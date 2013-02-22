@@ -1,11 +1,11 @@
-/*  
+/*
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
- *  
- *  It has been AutoGen-ed  February 19, 2013 at 11:39:31 AM by AutoGen 5.17.1pre14
+ *
+ *  It has been AutoGen-ed  February 21, 2013 at 09:26:54 PM by AutoGen 5.17.2pre17
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 37:1:12 templates.
+ * Generated from AutoOpts 38:0:13 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 151553
+#define AO_TEMPLATE_VERSION 155648
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -158,7 +158,7 @@ typedef enum {
                 ntpsnmpdOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpsnmpdOptions.pUsageProc)(&ntpsnmpdOptions, c)
-/* extracted from opthead.tlib near line 497 */
+/* extracted from opthead.tlib near line 498 */
 
 #ifdef  __cplusplus
 extern "C" {

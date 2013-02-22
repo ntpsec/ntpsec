@@ -3,10 +3,10 @@
 @pindex ntp-wait
 @cindex Wait for ntpd to stabilize the system clock
 @ignore
-# 
+#
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-wait.texi)
-# 
-# It has been AutoGen-ed  February 19, 2013 at 11:36:00 AM by AutoGen 5.17.1pre14
+#
+# It has been AutoGen-ed  February 21, 2013 at 09:25:30 PM by AutoGen 5.17.2pre17
 # From the definitions    ntp-wait-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -60,7 +60,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-/deacon/backroom/snaps/ntp-dev/A.snap/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
+/backroom/ntp-dev/A.deacon/scripts/ntp-wait version [unknown] calling Getopt::Std::getopts (version 1.05 [paranoid]),
 running under Perl version 5.8.8.
 
 Usage: ntp-wait [-OPTIONS [-MORE_OPTIONS]] [--] [PROGRAM_ARG1 ...]
