@@ -70,7 +70,7 @@ All other files are in PEM-encoded
 printable ASCII format so they can be embedded as MIME attachments in
 mail to other sites.
 
-  <p>This document applies to version 4.2.7p356 of <code>ntp-keygen</code>.
+  <p>This document applies to version 4.2.7p357 of <code>ntp-keygen</code>.
 
 <div class="node">
 <p><hr>
@@ -1120,11 +1120,11 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p355
-USAGE:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]...
+<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p356
+Usage:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
-                                - It must be in the range:
+                                - it must be in the range:
                                   256 to 2048
    -c Str certificate    certificate scheme
    -C Str cipher         privatekey cipher
@@ -1140,7 +1140,7 @@ USAGE:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&g
    -l Num lifetime       set certificate lifetime
    -M no  md5key         generate MD5 keys
    -m Num modulus        modulus
-                                - It must be in the range:
+                                - it must be in the range:
                                   256 to 2048
    -P no  pvt-cert       generate PC private certificate
    -p Str pvt-passwd     output private password
@@ -1150,17 +1150,16 @@ USAGE:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&g
    -T no  trusted-cert   trusted certificate (TC scheme)
    -V Num mv-params      generate &lt;num&gt; MV parameters
    -v Num mv-keys        update &lt;num&gt; MV keys
-      opt version        Output version information and exit
-   -? no  help           Display extended usage information and exit
-   -! no  more-help      Extended usage information passed thru pager
-   -&gt; opt save-opts      Save the option state to a config file
-   -&lt; Str load-opts      Load options from a config file
-                                - disabled as --no-load-opts
+      opt version        output version information and exit
+   -? no  help           display extended usage information and exit
+   -! no  more-help      extended usage information passed thru pager
+   -&gt; opt save-opts      save the option state to a config file
+   -&lt; Str load-opts      load options from a config file
+                                - disabled as '--no-load-opts'
                                 - may appear multiple times
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
-
 
 
 The following option preset mechanisms are supported:
@@ -1168,7 +1167,7 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named NTP_KEYGEN_*
 
-please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
+please send bug reports to:  &lt;http://bugs.ntp.org, bugs@ntp.org&gt;
 </pre>
   <div class="node">
 <p><hr>

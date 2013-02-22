@@ -39,7 +39,7 @@ The program can operate in any of several modes, including client/server,
 symmetric and broadcast modes, and with both symmetric-key and public-key
 cryptography.
 
-  <p>This document applies to version 4.2.7p356 of <code>ntpd</code>.
+  <p>This document applies to version 4.2.7p357 of <code>ntpd</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpd-Description">ntpd Description</a>:             Description
@@ -219,22 +219,18 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpd - NTP daemon program - Ver. 4.2.7p355
-USAGE:  ntpd [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
+<pre class="example">ntpd - NTP daemon program - Ver. 4.2.7p356
+Usage:  ntpd [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ &lt;server1&gt; ... &lt;serverN&gt; ]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
-                                - prohibits these options:
-                                ipv6
+                                - prohibits the option 'ipv6'
    -6 no  ipv6           Force IPv6 DNS name resolution
-                                - prohibits these options:
-                                ipv4
+                                - prohibits the option 'ipv4'
    -a no  authreq        Require crypto authentication
-                                - prohibits these options:
-                                authnoreq
+                                - prohibits the option 'authnoreq'
    -A no  authnoreq      Do not require crypto authentication
-                                - prohibits these options:
-                                authreq
+                                - prohibits the option 'authreq'
    -b no  bcastsync      Allow us to sync to broadcast servers
    -c Str configfile     configuration file name
    -d no  debug-level    Increase debug verbosity level
@@ -251,8 +247,7 @@ USAGE:  ntpd [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
    -l Str logfile        path to the log file
    -L no  novirtualips   Do not listen to virtual interfaces
    -n no  nofork         Do not fork
-                                - prohibits these options:
-                                wait-sync
+                                - prohibits the option 'wait-sync'
    -N no  nice           Run at high priority
    -p Str pidfile        path to the PID file
    -P Num priority       Process priority
@@ -280,19 +275,18 @@ USAGE:  ntpd [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ].
                                 quit
                                 saveconfigquit
    -x no  slew           Slew up to 600 seconds
-   -" opt version        Output version information and exit
-   -? no  help           Display extended usage information and exit
-   -! no  more-help      Extended usage information passed thru pager
+   -" opt version        output version information and exit
+   -? no  help           display extended usage information and exit
+   -! no  more-help      extended usage information passed thru pager
 
 Options are specified by doubled hyphens and their name or by a single
 hyphen and the flag character.
 
 
-
 The following option preset mechanisms are supported:
  - examining environment variables named NTPD_*
 
-please send bug reports to:  http://bugs.ntp.org, bugs@ntp.org
+please send bug reports to:  &lt;http://bugs.ntp.org, bugs@ntp.org&gt;
 </pre>
   <div class="node">
 <p><hr>

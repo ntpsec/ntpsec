@@ -1,3 +1,4 @@
+(4.2.7p357) 2013/02/22 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.17.2pre and libopts-38.0.13.
 (4.2.7p356) 2013/02/19 Released by Harlan Stenn <stenn@ntp.org>
 * Added loc/debian.
