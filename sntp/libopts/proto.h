@@ -1,10 +1,16 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Fri Jan  4 16:15:56 PST 2013
+ * Generated Thu Feb 21 12:28:43 PST 2013
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
+
+/*
+ *  Extracted from alias.c
+ */
+static tSuccess
+too_many_occurrences(tOptions * opts, tOptDesc * od);
 
 /*
  *  Extracted from autoopts.c
@@ -19,7 +25,7 @@ static char *
 ao_strdup(char const *str);
 
 static tSuccess
-handle_opt(tOptions * pOpts, tOptState * o_st);
+handle_opt(tOptions * opts, tOptState * o_st);
 
 static tSuccess
 next_opt(tOptions * opts, tOptState * o_st);
@@ -94,6 +100,15 @@ loadOptionLine(
     tOptionLoadMode   load_mode );
 
 /*
+ *  Extracted from makeshell.c
+ */
+static void
+fserr_warn(char const * prog, char const * op, char const * fname);
+
+static void
+fserr_exit(char const * prog, char const * op, char const * fname);
+
+/*
  *  Extracted from nested.c
  */
 static void
@@ -125,5 +140,8 @@ addArgListEntry(void** ppAL, void* entry);
  */
 static void
 set_usage_flags(tOptions * opts, char const * flg_txt);
+
+static void
+ao_bug(char const * msg);
 
 #endif /* AUTOOPTS_PROTO_H_GUARD */

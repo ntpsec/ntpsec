@@ -5,6 +5,10 @@
  *  This module will interpret the options set in the tOptions
  *  structure and create a Bourne shell script capable of parsing them.
  *
+ * @addtogroup autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -19,11 +23,11 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
 tOptions * optionParseShellOptions = NULL;
@@ -65,11 +69,25 @@ static void
 emit_long(tOptions * opts);
 
 static char *
-load_old_output(char const * fname);
+load_old_output(char const * fname, char const * pname);
 
 static void
-open_out(char const * fname);
+open_out(char const * fname, char const * pname);
 /* = = = END-STATIC-FORWARD = = = */
+
+LOCAL void
+fserr_warn(char const * prog, char const * op, char const * fname)
+{
+    fprintf(stderr, zfserr_fmt, prog, errno, strerror(errno),
+            op, fname);
+}
+
+LOCAL void
+fserr_exit(char const * prog, char const * op, char const * fname)
+{
+    fserr_warn(prog, op, fname);
+    exit(EXIT_FAILURE);
+}
 
 /*=export_func  optionParseShell
  * private:
@@ -103,8 +121,8 @@ optionParseShell(tOptions * opts)
      *  Check for a specified output file
      */
     if (HAVE_GENSHELL_OPT(SCRIPT))
-        open_out(GENSHELL_OPT_ARG(SCRIPT));
-
+        open_out(GENSHELL_OPT_ARG(SCRIPT), opts->pzProgName);
+    
     emit_usage(opts);
     emit_setup(opts);
 
@@ -173,10 +191,8 @@ optionParseShell(tOptions * opts)
 #endif
     fclose(stdout);
 
-    if (ferror(stdout)) {
-        fputs(zOutputFail, stderr);
-        exit(EXIT_FAILURE);
-    }
+    if (ferror(stdout))
+        fserr_exit(opts->pzProgName, zwriting, zstdout_name);
 
     AGFREE(script_text);
     script_leader    = NULL;
@@ -185,6 +201,18 @@ optionParseShell(tOptions * opts)
 }
 
 #ifdef HAVE_WORKING_FORK
+/**
+ * Print the value of "var" to a file descriptor.
+ * The "fdin" is the read end of a pipe to a forked process that
+ * is writing usage text to it.  We read that text in and re-emit
+ * to standard out, formatting it so that it is assigned to a
+ * shell variable.
+ *
+ * @param[in] prog  The capitalized, c-variable-formatted program name
+ * @param[in] var   a similarly formatted type name
+ *                  (LONGUSAGE, USAGE or VERSION)
+ * @param[in] fdin  the input end of a pipe
+ */
 static void
 emit_var_text(char const * prog, char const * var, int fdin)
 {
@@ -208,11 +236,11 @@ emit_var_text(char const * prog, char const * var, int fdin)
                 fputc(NL, stdout);
                 nlct--;
             }
-            fputs(apostrophy, stdout);
+            fputs(apostrophe, stdout);
             break;
 
         case EOF:
-            goto endCharLoop;
+            goto done;
 
         default:
             while (nlct > 0) {
@@ -222,7 +250,7 @@ emit_var_text(char const * prog, char const * var, int fdin)
             fputc(ch, stdout);
             break;
         }
-    } endCharLoop:;
+    } done:;
 
     fclose(fp);
 
@@ -230,7 +258,6 @@ emit_var_text(char const * prog, char const * var, int fdin)
 
     fputs(END_SET_TEXT, stdout);
 }
-
 #endif
 
 /**
@@ -262,16 +289,13 @@ text_to_var(tOptions * opts, teTextTo which, tOptDesc * od)
     fflush(stdout);
     fflush(stderr);
 
-    if (pipe(fdpair) != 0) {
-        fprintf(stderr, zBadPipe, errno, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+    if (pipe(fdpair) != 0)
+        fserr_exit(opts->pzProgName, "pipe", zinter_proc_pipe);
 
     switch (fork()) {
     case -1:
-        fprintf(stderr, zForkFail, errno, strerror(errno), opts->pzProgName);
-        exit(EXIT_FAILURE);
-        break;
+        fserr_exit(opts->pzProgName, "fork", opts->pzProgName);
+        /* NOTREACHED */
 
     case 0:
         /*
@@ -314,7 +338,10 @@ text_to_var(tOptions * opts, teTextTo which, tOptDesc * od)
 #endif
 }
 
-
+/**
+ * capture usage text in shell variables.
+ * 
+ */
 static void
 emit_usage(tOptions * opts)
 {
@@ -540,7 +567,6 @@ emit_action(tOptions * opts, tOptDesc * od)
     fputs(zOptionEndSelect, stdout);
 }
 
-
 static void
 emit_inaction(tOptions * opts, tOptDesc * od)
 {
@@ -558,7 +584,12 @@ emit_inaction(tOptions * opts, tOptDesc * od)
     fputs(zOptionEndSelect, stdout);
 }
 
-
+/**
+ * recognize flag options.  These go at the end.
+ * At the end, emit code to handle options we don't recognize.
+ *
+ * @param[in] opts  the program options
+ */
 static void
 emit_flag(tOptions * opts)
 {
@@ -569,100 +600,101 @@ emit_flag(tOptions * opts)
 
     for (;opt_ct > 0; od++, --opt_ct) {
 
-        if (SKIP_OPT(od))
+        if (SKIP_OPT(od) || ! IS_GRAPHIC_CHAR(od->optValue))
             continue;
 
-        if (IS_GRAPHIC_CHAR(od->optValue)) {
-            printf(zOptionFlag, od->optValue);
-            emit_action(opts, od);
-        }
+        printf(zOptionFlag, od->optValue);
+        emit_action(opts, od);
     }
     printf(UNK_OPT_FMT, FLAG_STR, opts->pzPROGNAME);
 }
 
-
-/*
- *  Emit the match text for a long option
+/**
+ *  Emit the match text for a long option.  The passed in \a name may be
+ *  either the enablement name or the disablement name.
+ *
+ * @param[in] name  The current name to check.
+ * @param[in] cod   current option descriptor
+ * @param[in] opts  the program options
  */
 static void
 emit_match_expr(char const * name, tOptDesc * cod, tOptions * opts)
 {
-    tOptDesc *  od  = opts->pOptDesc;
-    int         oCt = opts->optCt;
-    int         min = 1;
-    char        name_bf[ 256 ];
-    char *      pz  = name_bf;
+    char name_bf[32];
+    unsigned int    min_match_ct = 2;
+    unsigned int    max_match_ct = strlen(name) - 1;
 
-    for (;;) {
-        int matchCt = 0;
+    if (max_match_ct >= sizeof(name_bf) - 1)
+        goto leave;
+    
+    {
+        tOptDesc *  od = opts->pOptDesc;
+        int         ct = opts->optCt;
 
-        /*
-         *  Omit the current option, Documentation opts and compiled out opts.
-         */
-        if ((od == cod) || SKIP_OPT(od)){
-            if (--oCt <= 0)
-                break;
-            od++;
-            continue;
+        for (; ct-- > 0; od++) {
+            unsigned int match_ct = 0;
+
+            /*
+             *  Omit the current option, Doc opts and compiled out opts.
+             */
+            if ((od == cod) || SKIP_OPT(od))
+                continue;
+
+            /*
+             *  Check each character of the name case insensitively.
+             *  They must not be the same.  They cannot be, because it would
+             *  not compile correctly if they were.
+             */
+            while (toupper(od->pz_Name[match_ct]) == toupper(name[match_ct]))
+                match_ct++;
+
+            if (match_ct > min_match_ct)
+                min_match_ct = match_ct;
+
+            /*
+             *  Check the disablement name, too.
+             */
+            if (od->pz_DisableName == NULL)
+                continue;
+
+            match_ct = 0;
+            while (  toupper(od->pz_DisableName[match_ct])
+                  == toupper(name[match_ct]))
+                match_ct++;
+            if (match_ct > min_match_ct)
+                min_match_ct = match_ct;
         }
-
-        /*
-         *  Check each character of the name case insensitively.
-         *  They must not be the same.  They cannot be, because it would
-         *  not compile correctly if they were.
-         */
-        while (  toupper(od->pz_Name[matchCt])
-              == toupper(name[matchCt]))
-            matchCt++;
-
-        if (matchCt > min)
-            min = matchCt;
-
-        /*
-         *  Check the disablement name, too.
-         */
-        if (od->pz_DisableName != NULL) {
-            matchCt = 0;
-            while (  toupper(od->pz_DisableName[matchCt])
-                  == toupper(name[matchCt]))
-                matchCt++;
-            if (matchCt > min)
-                min = matchCt;
-        }
-        if (--oCt <= 0)
-            break;
-        od++;
     }
 
     /*
-     *  IF the 'min' is all or one short of the name length,
-     *  THEN the entire string must be matched.
+     *  Don't bother emitting partial matches if there is only one possible
+     *  partial match.
      */
-    if (  (name[min  ] == NUL)
-       || (name[min+1] == NUL) )
-        printf(zOptionFullName, name);
+    if (min_match_ct < max_match_ct) {
+        char *  pz    = name_bf + min_match_ct;
+        int     nm_ix = min_match_ct;
 
-    else {
-        int matchCt = 0;
-        for (; matchCt <= min; matchCt++)
-            *pz++ = name[matchCt];
+        memcpy(name_bf, name, min_match_ct);
 
         for (;;) {
             *pz = NUL;
             printf(zOptionPartName, name_bf);
-            *pz++ = name[matchCt++];
-            if (name[matchCt] == NUL) {
+            *pz++ = name[nm_ix++];
+            if (name[nm_ix] == NUL) {
                 *pz = NUL;
-                printf(zOptionFullName, name_bf);
                 break;
             }
         }
     }
-}
 
+leave:
+    printf(zOptionFullName, name);
+}
 
 /**
  *  Emit GNU-standard long option handling code.
+ *
+ * @param[in] opts  the program options
  */
 static void
 emit_long(tOptions * opts)
@@ -704,7 +736,7 @@ emit_long(tOptions * opts)
  * @param[in] fname  the output file name
  */
 static char *
-load_old_output(char const * fname)
+load_old_output(char const * fname, char const * pname)
 {
     /*
      *  IF we cannot stat the file,
@@ -723,10 +755,8 @@ load_old_output(char const * fname)
      * If we opened it, we should be able to stat it and it needs
      * to be a regular file
      */
-    if ((fstat(fileno(fp), &stbf) != 0) || (! S_ISREG(stbf.st_mode))) {
-        fprintf(stderr, zNotFile, fname);
-        exit(EXIT_FAILURE);
-    }
+    if ((fstat(fileno(fp), &stbf) != 0) || (! S_ISREG(stbf.st_mode)))
+        fserr_exit(pname, "fstat", fname);
 
     scan = text = AGALOC(stbf.st_size + 1, "f data");
 
@@ -764,11 +794,11 @@ load_old_output(char const * fname)
  * @param[in] fname  the output file name
  */
 static void
-open_out(char const * fname)
+open_out(char const * fname, char const * pname)
 {
 
     do  {
-        char * txt = script_text = load_old_output(fname);
+        char * txt = script_text = load_old_output(fname, pname);
         char * scn;
 
         if (txt == NULL)
@@ -784,7 +814,8 @@ open_out(char const * fname)
         scn = strstr(scn, END_MARK);
         if (scn == NULL) {
             /*
-             * The file is corrupt.
+             * The file is corrupt.  Set the trailer to be everything
+             * after the start mark. The user will need to fix it up.
              */
             script_trailer = txt + strlen(txt) + START_MARK_LEN + 1;
             break;
@@ -798,12 +829,9 @@ open_out(char const * fname)
         script_leader  = txt;
     } while (false);
 
-    if (freopen(fname, "w" FOPEN_BINARY_FLAG, stdout) != stdout) {
-        fprintf(stderr, zFreopenFail, errno, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
+    if (freopen(fname, "w" FOPEN_BINARY_FLAG, stdout) != stdout)
+        fserr_exit(pname, "freopen", fname);
 }
-
 
 /*=export_func genshelloptUsage
  * private:
@@ -898,16 +926,15 @@ genshelloptUsage(tOptions * opts, int exit_cd)
     }
 
     fflush(stdout);
-    if (ferror(stdout)) {
-        fputs(zOutputFail, stderr);
-        exit(EXIT_FAILURE);
-    }
+    if (ferror(stdout))
+        fserr_exit(opts->pzProgName, zwriting, zstdout_name);
 
     exit(EXIT_SUCCESS);
 #endif
 }
 
-/*
+/** @}
+ *
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"

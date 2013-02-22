@@ -7,6 +7,10 @@
  *  routines are in separately compiled modules so that they will not
  *  necessarily be linked in.
  *
+ * @addtogroup autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -21,11 +25,11 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
 #ifndef PKGDATADIR
@@ -43,12 +47,17 @@ static tePagerState pagerState           = PAGER_STATE_INITIAL;
 
        FILE *       option_usage_fp      = NULL;
 
+/**
+ * The number of tab characters to skip when printing continuation lines.
+ */
+static unsigned int tab_skip_ct          = 0;
+
 LOCAL void *
 ao_malloc(size_t sz)
 {
     void * res = malloc(sz);
     if (res == NULL) {
-        fprintf(stderr, zAO_Alloc, (int)sz);
+        fprintf(stderr, zalloc_fail, (int)sz);
         exit(EXIT_FAILURE);
     }
     return res;
@@ -61,7 +70,7 @@ ao_realloc(void *p, size_t sz)
 {
     void * res = (p == NULL) ? malloc(sz) : realloc(p, sz);
     if (res == NULL) {
-        fprintf(stderr, zAO_Realloc, (int)sz, p);
+        fprintf(stderr, zrealloc_fail, (int)sz, p);
         exit(EXIT_FAILURE);
     }
     return res;
@@ -74,7 +83,7 @@ ao_strdup(char const *str)
 {
     char * res = strdup(str);
     if (res == NULL) {
-        fprintf(stderr, zAO_Strdup, (int)strlen(str));
+        fprintf(stderr, zalloc_fail, (int)strlen(str));
         exit(EXIT_FAILURE);
     }
     return res;
@@ -111,25 +120,25 @@ ao_strdup(char const *str)
  *  invokes the handler procedure, if any.
  */
 LOCAL tSuccess
-handle_opt(tOptions * pOpts, tOptState * o_st)
+handle_opt(tOptions * opts, tOptState * o_st)
 {
     /*
      *  Save a copy of the option procedure pointer.
      *  If this is an equivalence class option, we still want this proc.
      */
-    tOptDesc* pOD = o_st->pOD;
-    tOptProc* pOP = pOD->pOptProc;
-    if (pOD->fOptState & OPTST_ALLOC_ARG)
-        AGFREE(pOD->optArg.argString);
+    tOptDesc *  od = o_st->pOD;
+    tOptProc *  opt_proc = od->pOptProc;
+    if (od->fOptState & OPTST_ALLOC_ARG)
+        AGFREE(od->optArg.argString);
 
-    pOD->optArg.argString = o_st->pzOptArg;
+    od->optArg.argString = o_st->pzOptArg;
 
     /*
      *  IF we are presetting options, then we will ignore any un-presettable
      *  options.  They are the ones either marked as such.
      */
-    if (  ((pOpts->fOptSet & OPTPROC_PRESETTING) != 0)
-       && ((pOD->fOptState & OPTST_NO_INIT) != 0)
+    if (  ((opts->fOptSet & OPTPROC_PRESETTING) != 0)
+       && ((od->fOptState & OPTST_NO_INIT) != 0)
        )
         return PROBLEM;
 
@@ -137,19 +146,19 @@ handle_opt(tOptions * pOpts, tOptState * o_st)
      *  IF this is an equivalence class option,
      *  THEN
      *      Save the option value that got us to this option
-     *      entry.  (It may not be pOD->optChar[0], if this is an
+     *      entry.  (It may not be od->optChar[0], if this is an
      *      equivalence entry.)
      *      set the pointer to the equivalence class base
      */
-    if (pOD->optEquivIndex != NO_EQUIVALENT) {
-        tOptDesc* p = pOpts->pOptDesc + pOD->optEquivIndex;
+    if (od->optEquivIndex != NO_EQUIVALENT) {
+        tOptDesc * eqv_od = opts->pOptDesc + od->optEquivIndex;
 
         /*
          * IF the current option state has not been defined (set on the
          *    command line), THEN we will allow continued resetting of
          *    the value.  Once "defined", then it must not change.
          */
-        if ((pOD->fOptState & OPTST_DEFINED) != 0) {
+        if ((od->fOptState & OPTST_DEFINED) != 0) {
             /*
              *  The equivalenced-to option has been found on the command
              *  line before.  Make sure new occurrences are the same type.
@@ -158,9 +167,9 @@ handle_opt(tOptions * pOpts, tOptState * o_st)
              *     it was not the same equivalenced-to option,
              *  THEN we have a usage problem.
              */
-            if (p->optActualIndex != pOD->optIndex) {
-                fprintf(stderr, (char*)zMultiEquiv, p->pz_Name, pOD->pz_Name,
-                        (pOpts->pOptDesc + p->optActualIndex)->pz_Name);
+            if (eqv_od->optActualIndex != od->optIndex) {
+                fprintf(stderr, zmultiway_bug, eqv_od->pz_Name, od->pz_Name,
+                        (opts->pOptDesc + eqv_od->optActualIndex)->pz_Name);
                 return FAILURE;
             }
         } else {
@@ -170,61 +179,46 @@ handle_opt(tOptions * pOpts, tOptState * o_st)
              *  never have been selected before, or else it was selected by
              *  some sort of "presetting" mechanism.
              */
-            p->optActualIndex = NO_EQUIVALENT;
+            eqv_od->optActualIndex = NO_EQUIVALENT;
         }
 
-        if (p->optActualIndex != pOD->optIndex) {
+        if (eqv_od->optActualIndex != od->optIndex) {
             /*
              *  First time through, copy over the state
              *  and add in the equivalence flag
              */
-            p->optActualValue = pOD->optValue;
-            p->optActualIndex = pOD->optIndex;
+            eqv_od->optActualValue = od->optValue;
+            eqv_od->optActualIndex = od->optIndex;
             o_st->flags |= OPTST_EQUIVALENCE;
         }
 
         /*
          *  Copy the most recent option argument.  set membership state
-         *  is kept in ``p->optCookie''.  Do not overwrite.
+         *  is kept in 'eqv_od->optCookie'.  Do not overwrite.
          */
-        p->optArg.argString = pOD->optArg.argString;
-        pOD = p;
+        eqv_od->optArg.argString = od->optArg.argString;
+        od = eqv_od;
 
     } else {
-        pOD->optActualValue = pOD->optValue;
-        pOD->optActualIndex = pOD->optIndex;
+        od->optActualValue = od->optValue;
+        od->optActualIndex = od->optIndex;
     }
 
-    pOD->fOptState &= OPTST_PERSISTENT_MASK;
-    pOD->fOptState |= (o_st->flags & ~OPTST_PERSISTENT_MASK);
+    od->fOptState &= OPTST_PERSISTENT_MASK;
+    od->fOptState |= (o_st->flags & ~OPTST_PERSISTENT_MASK);
 
     /*
      *  Keep track of count only for DEFINED (command line) options.
      *  IF we have too many, build up an error message and bail.
      */
-    if (  (pOD->fOptState & OPTST_DEFINED)
-       && (++pOD->optOccCt > pOD->optMaxCt)  )  {
-
-        if ((pOpts->fOptSet & OPTPROC_ERRSTOP) != 0) {
-            char const * pzEqv =
-                (pOD->optEquivIndex != NO_EQUIVALENT) ? zEquiv : zNil;
-
-            fputs(zErrOnly, stderr);
-
-            if (pOD->optMaxCt > 1)
-                fprintf(stderr, zAtMost, pOD->optMaxCt, pOD->pz_Name, pzEqv);
-            else
-                fprintf(stderr, zOnlyOne, pOD->pz_Name, pzEqv);
-        }
-
-        return FAILURE;
-    }
-
+    if (  (od->fOptState & OPTST_DEFINED)
+       && (++od->optOccCt > od->optMaxCt)  )
+        return too_many_occurrences(opts, od);
     /*
      *  If provided a procedure to call, call it
      */
-    if (pOP != NULL)
-        (*pOP)(pOpts, pOD);
+    if (opt_proc != NULL)
+        (*opt_proc)(opts, od);
 
     return SUCCESS;
 }
@@ -354,8 +348,8 @@ int
 optionProcess(tOptions * opts, int a_ct, char ** a_v)
 {
     if (! SUCCESSFUL(validate_struct(opts, a_v[0])))
-        exit(EX_SOFTWARE);
-
+        ao_bug(zbad_data_msg);
+    
     /*
      *  Establish the real program name, the program full path,
      *  and do all the presetting the first time thru only.
@@ -408,7 +402,8 @@ optionProcess(tOptions * opts, int a_ct, char ** a_v)
     return (int)opts->curOptIdx;
 }
 
-/*
+/** @}
+ *
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"

@@ -6,6 +6,10 @@
  *  This file contains the routines that deal with processing quoted strings
  *  into an internal format.
  *
+ * @addtogroup autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -20,11 +24,11 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
 /* = = = START-STATIC-FORWARD = = = */
@@ -101,15 +105,15 @@ opt_ambiguities(tOptions * opts, char const * name, int nm_len)
     tOptDesc * pOD = opts->pOptDesc;
     int        idx = 0;
 
-    fputs(zAmbigList, stderr);
+    fputs(zambig_list_msg, stderr);
     do  {
         if (strneqvcmp(name, pOD->pz_Name, nm_len) == 0)
-            fprintf(stderr, zAmbiguous, hyph, pOD->pz_Name);
+            fprintf(stderr, zambig_file, hyph, pOD->pz_Name);
 
         else if (  (pOD->pz_DisableName != NULL)
                 && (strneqvcmp(name, pOD->pz_DisableName, nm_len) == 0)
                 )
-            fprintf(stderr, zAmbiguous, hyph, pOD->pz_DisableName);
+            fprintf(stderr, zambig_file, hyph, pOD->pz_DisableName);
     } while (pOD++, (++idx < opts->optCt));
 }
 
@@ -283,7 +287,7 @@ static tSuccess
 opt_ambiguous(tOptions * opts, char const * name, int match_ct)
 {
     if ((opts->fOptSet & OPTPROC_ERRSTOP) != 0) {
-        fprintf(stderr, zAmbigOptStr, opts->pzProgPath, name, match_ct);
+        fprintf(stderr, zambig_opt_fmt, opts->pzProgPath, name, match_ct);
         if (match_ct <= 4)
             opt_ambiguities(opts, name, (int)strlen(name));
         (*opts->pUsageProc)(opts, EXIT_FAILURE);
@@ -582,8 +586,7 @@ get_opt_arg_may(tOptions * pOpts, tOptState * o_st)
 
     default:
     case TOPT_DEFAULT:
-        fputs(zAO_Woops, stderr );
-        exit(EX_SOFTWARE);
+        ao_bug(zbad_default_msg);
     }
 
     /*
@@ -642,33 +645,18 @@ get_opt_arg(tOptions * opts, tOptState * o_st)
     o_st->flags |= (o_st->pOD->fOptState & OPTST_PERSISTENT_MASK);
 
     /*
-     *  Figure out what to do about option arguments.  An argument may be
-     *  required, not associated with the option, or be optional.  We detect the
-     *  latter by examining for an option marker on the next possible argument.
-     *  Disabled mode option selection also disables option arguments.
+     * Disabled options and options specified to not have arguments
+     * are handled with the "none" procedure.  Otherwise, check the
+     * optional flag and call either the "may" or "must" function.
      */
-    {
-        enum { ARG_NONE, ARG_MAY, ARG_MUST } arg_type = ARG_NONE;
-
-        if ((o_st->flags & OPTST_DISABLED) != 0)
-            arg_type = ARG_NONE;
-
-        else if (OPTST_GET_ARGTYPE(o_st->flags) == OPARG_TYPE_NONE)
-            arg_type = ARG_NONE;
-
-        else if (o_st->flags & OPTST_ARG_OPTIONAL)
-            arg_type = ARG_MAY;
-
-        else
-            arg_type = ARG_MUST;
-
-        switch (arg_type) {
-        case ARG_MUST: return get_opt_arg_must(opts, o_st);
-        case ARG_MAY:  return get_opt_arg_may( opts, o_st);
-        case ARG_NONE: return get_opt_arg_none(opts, o_st);
-        default: exit(EX_SOFTWARE);
-        }
-    }
+    if (  ((o_st->flags & OPTST_DISABLED) != 0)
+       || (OPTST_GET_ARGTYPE(o_st->flags) == OPARG_TYPE_NONE))
+        return get_opt_arg_none(opts, o_st);
+    
+    if (o_st->flags & OPTST_ARG_OPTIONAL)
+        return get_opt_arg_may( opts, o_st);
+    
+    return get_opt_arg_must(opts, o_st);
 }
 
 /**
@@ -773,7 +761,8 @@ find_opt(tOptions * opts, tOptState * o_st)
     return opt_find_long(opts, opts->pzCurOpt, o_st);
 }
 
-/*
+/** @}
+ *
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"

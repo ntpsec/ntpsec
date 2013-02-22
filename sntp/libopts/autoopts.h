@@ -5,6 +5,10 @@
  *  This file defines all the global structures and special values
  *  used in the automated option processing library.
  *
+ * @group autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -19,11 +23,11 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
 #ifndef AUTOGEN_AUTOOPTS_H
@@ -47,6 +51,17 @@
 
 #undef  EXPORT
 #define EXPORT
+
+#ifndef NUL
+#define NUL                     '\0'
+#endif
+#define BEL                     '\a'
+#define BS                      '\b'
+#define HT                      '\t'
+#define LF                      '\n'
+#define VT                      '\v'
+#define FF                      '\f'
+#define CR                      '\r'
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # define DIRCH                  '\\'
@@ -120,37 +135,39 @@ typedef int tDirection;
 
 #define PROCESSING(d)           ((d)>0)
 #define PRESETTING(d)           ((d)<0)
+#define CALLED(d)               ((d)==0)
 
-/*
+/**
  *  When loading a line (or block) of text as an option, the value can
- *  be processed in any of several modes:
- *
- *  @table @samp
- *  @item keep
- *  Every part of the value between the delimiters is saved.
- *
- *  @item uncooked
- *  Even if the value begins with quote characters, do not do quote processing.
- *
- *  @item cooked
- *  If the value looks like a quoted string, then process it.
- *  Double quoted strings are processed the way strings are in "C" programs,
- *  except they are treated as regular characters if the following character
- *  is not a well-established escape sequence.
- *  Single quoted strings (quoted with apostrophies) are handled the way
- *  strings are handled in shell scripts, *except* that backslash escapes
- *  are honored before backslash escapes and apostrophies.
- *  @end table
+ *  be processed in any of several modes.
  */
 typedef enum {
+    /**
+     *  If the value looks like a quoted string, then process it.  Double
+     *  quoted strings are processed the way strings are in "C" programs,
+     *  except they are treated as regular characters if the following
+     *  character is not a well-established escape sequence.  Single quoted
+     *  strings (quoted with apostrophies) are handled the way strings are
+     *  handled in shell scripts, *except* that backslash escapes are
+     *  honored before backslash escapes and apostrophies.
+     */
     OPTION_LOAD_COOKED,
+
+    /**
+     * Even if the value begins with quote characters, do not do quote
+     * processing.  Strip leading and trailing white space.
+     */
     OPTION_LOAD_UNCOOKED,
+
+    /**
+     * Keep every part of the value between the delimiters.
+     */
     OPTION_LOAD_KEEP
 } tOptionLoadMode;
 
 static tOptionLoadMode option_load_mode;
 
-/*
+/**
  *  The pager state is used by optionPagedUsage() procedure.
  *  When it runs, it sets itself up to be called again on exit.
  *  If, however, a routine needs a child process to do some work
@@ -159,8 +176,16 @@ static tOptionLoadMode option_load_mode;
  *  to run the pager program before its time.
  */
 typedef enum {
-    PAGER_STATE_INITIAL,
+    PAGER_STATE_INITIAL, //@< initial option paging state
+
+    /**
+     * temp file created and optionPagedUsage is scheduled to run at exit
+     */
     PAGER_STATE_READY,
+
+    /**
+     *  This is a child process used in creating shell script usage.
+     */
     PAGER_STATE_CHILD
 } tePagerState;
 
@@ -197,6 +222,10 @@ typedef enum { TEXTTO_TABLE COUNT_TT } teTextTo;
 
 #undef _TT_
 
+/**
+ * option argument types.  Used to create usage information for
+ * particular options.
+ */
 typedef struct {
     char const * pzStr;
     char const * pzReq;
@@ -231,7 +260,7 @@ ao_realloc(void *p, size_t sz);
 static char *
 ao_strdup(char const *str);
 
-/*
+/**
  *  DO option handling?
  *
  *  Options are examined at two times:  at immediate handling time and at
@@ -261,7 +290,8 @@ ao_strdup(char const *str);
     || (   ((_flg) & (OPTST_DISABLED|OPTST_DISABLE_IMM))    \
         == (OPTST_DISABLED|OPTST_DISABLE_IMM)  ))
 
-/*  B) handling at "regular" time because it was not immediate
+/**
+ *  B) handling at "regular" time because it was not immediate
  *
  *  1.  OPTST_DISABLED is not set:
  *      IMM           must *NOT* be set
@@ -282,7 +312,8 @@ ao_strdup(char const *str);
     || (((_flg) & (OPTST_DISABLED|OPTST_DISABLE_IMM))    ==     \
                   OPTST_DISABLED)  )
 
-/*  C)  handling at "regular" time because it is to be handled twice.
+/**
+ *  C)  handling at "regular" time because it is to be handled twice.
  *      The immediate bit was already tested and found to be set:
  *
  *  3.  OPTST_DISABLED is not set:
@@ -340,7 +371,7 @@ extern char* strchr(char const *s, int c);
 extern char* strrchr(char const *s, int c);
 #endif
 
-/*
+/**
  *  Define and initialize all the user visible strings.
  *  We do not do translations.  If translations are to be done, then
  *  the client will provide a callback for that purpose.
@@ -348,16 +379,22 @@ extern char* strrchr(char const *s, int c);
 #undef DO_TRANSLATIONS
 #include "autoopts/usage-txt.h"
 
-/*
+/**
  *  File pointer for usage output
  */
 FILE * option_usage_fp;
+/**
+ *  If provided in the option structure
+ */
 static char const * program_pkgdatadir;
-
+/**
+ * privately exported functions
+ */
 extern tOptProc optionPrintVersion, optionPagedUsage, optionLoadOpt;
 
 #endif /* AUTOGEN_AUTOOPTS_H */
-/*
+/**
+ * @}
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"

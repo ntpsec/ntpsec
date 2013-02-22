@@ -9,6 +9,10 @@
  *  the characters "-", "_" and "^" all need to be equivalent
  *  (because they are treated so by different development environments).
  *
+ * @addtogroup autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -23,11 +27,11 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  *
  * This array is designed for mapping upper and lower case letter
  * together for a case independent comparison.  The mappings are
@@ -96,7 +100,7 @@ static unsigned char charmap[] = {
  * err:  none checked.  Caller responsible for seg faults.
 =*/
 int
-strneqvcmp(tCC* s1, tCC* s2, int ct)
+strneqvcmp(char const * s1, char const * s2, int ct)
 {
     for (; ct > 0; --ct) {
         unsigned char u1 = (unsigned char) *s1++;
@@ -135,7 +139,7 @@ strneqvcmp(tCC* s1, tCC* s2, int ct)
  * err:  none checked.  Caller responsible for seg faults.
 =*/
 int
-streqvcmp(tCC* s1, tCC* s2)
+streqvcmp(char const * s1, char const * s2)
 {
     for (;;) {
         unsigned char u1 = (unsigned char) *s1++;
@@ -155,8 +159,8 @@ streqvcmp(tCC* s1, tCC* s2)
  *
  * what: Set the character mappings for the streqv functions
  *
- * arg:  + char + From + Input character +
- * arg:  + char + To   + Mapped-to character +
+ * arg:  + char + from + Input character +
+ * arg:  + char + to   + Mapped-to character +
  * arg:  + int  + ct   + compare length +
  *
  * doc:
@@ -180,7 +184,7 @@ streqvcmp(tCC* s1, tCC* s2)
  * err:  none.
 =*/
 void
-streqvmap(char From, char To, int ct)
+streqvmap(char from, char to, int ct)
 {
     if (ct == 0) {
         ct = sizeof(charmap) - 1;
@@ -190,14 +194,14 @@ streqvmap(char From, char To, int ct)
     }
 
     else {
-        unsigned int chTo   = (int)To   & 0xFF;
-        unsigned int chFrom = (int)From & 0xFF;
+        unsigned int i_to   = (int)to   & 0xFF;
+        unsigned int i_from = (int)from & 0xFF;
 
         do  {
-            charmap[chFrom] = (unsigned char)chTo;
-            chFrom++;
-            chTo++;
-            if ((chFrom >= sizeof(charmap)) || (chTo >= sizeof(charmap)))
+            charmap[i_from] = (unsigned char)i_to;
+            i_from++;
+            i_to++;
+            if ((i_from >= sizeof(charmap)) || (i_to >= sizeof(charmap)))
                 break;
         } while (--ct > 0);
     }
@@ -256,7 +260,8 @@ strtransform(char* d, char const* s)
     } while (*(s++) != NUL);
 }
 
-/*
+/** @}
+ *
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"

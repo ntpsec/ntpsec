@@ -5,6 +5,10 @@
  *  This is a special option processing routine that will save the
  *  argument to an option in a FIFO queue.
  *
+ * @addtogroup autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -19,11 +23,11 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
 #ifdef WITH_LIBREGEX
@@ -129,8 +133,8 @@ optionUnstackArg(tOptions * pOpts, tOptDesc * pOptDesc)
          *  we are keeping a define.
          */
         for (i = 0, dIdx = 0, ct = pAL->useCt; --ct >= 0; i++) {
-            tCC*      pzSrc = pAL->apzArgs[ i ];
-            char*     pzEq  = strchr(pzSrc, '=');
+            const char ** pzSrc = pAL->apzArgs[ i ];
+            char *        pzEq  = strchr(pzSrc, '=');
 
             if (pzEq != NULL)
                 *pzEq = NUL;
@@ -258,7 +262,8 @@ optionStackArg(tOptions * pOpts, tOptDesc * pOD)
         addArgListEntry(&(pOD->optCookie), (void*)pz);
     }
 }
-/*
+/** @}
+ *
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"

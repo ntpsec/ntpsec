@@ -3,6 +3,10 @@
  *
  *  initialize the libopts data structures.
  *
+ * @addtogroup autoopts
+ * @{
+ */
+/*
  *  This file is part of AutoOpts, a companion to AutoGen.
  *  AutoOpts is free software.
  *  AutoOpts is Copyright (C) 1992-2013 by Bruce Korb - all rights reserved
@@ -17,15 +21,12 @@
  *   The Modified Berkeley Software Distribution License
  *      See the file "COPYING.mbsd"
  *
- *  These files have the following md5sums:
+ *  These files have the following sha256 sums:
  *
- *  43b91e8ca915626ed3818ffb1b71248b pkg/libopts/COPYING.gplv3
- *  06a1a2e4760c90ea5e1dad8dfaac4d39 pkg/libopts/COPYING.lgplv3
- *  66a5cedaf62c4b2637025f049f9b826f pkg/libopts/COPYING.mbsd
+ *  8584710e9b04216a394078dc156b781d0b47e1729104d666658aecef8ee32e95  COPYING.gplv3
+ *  4379e7444a0e2ce2b12dd6f5a52a27a4d02d39d247901d3285c88cf0d37f477b  COPYING.lgplv3
+ *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
-
-static char const ao_ver_string[] =
-    STR(AO_CURRENT)":"STR(AO_REVISION)":"STR(AO_AGE)"\n";
 
 /* = = = START-STATIC-FORWARD = = = */
 static tSuccess
@@ -49,7 +50,7 @@ LOCAL tSuccess
 validate_struct(tOptions * opts, char const * pname)
 {
     if (opts == NULL) {
-        fputs(zAO_Bad, stderr);
+        fputs(zno_opt_arg, stderr);
         return FAILURE;
     }
 
@@ -58,7 +59,8 @@ validate_struct(tOptions * opts, char const * pname)
      *  is available, then go do it.
      */
     if (  ((opts->fOptSet & OPTPROC_TRANSLATE) != 0)
-       && (opts->pTransProc != NULL) ) {
+       && (opts->pTransProc != NULL)
+       && (option_xlateable_txt.field_ct != 0) ) {
         /*
          *  If option names are not to be translated at all, then do not do
          *  it for configuration parsing either.  (That is the bit that really
@@ -67,7 +69,6 @@ validate_struct(tOptions * opts, char const * pname)
         if ((opts->fOptSet & OPTPROC_NO_XLAT_MASK) == OPTPROC_NXLAT_OPT)
             opts->fOptSet |= OPTPROC_NXLAT_OPT_CFG;
         (*opts->pTransProc)();
-        opts->fOptSet &= ~OPTPROC_TRANSLATE;
     }
 
     /*
@@ -80,11 +81,14 @@ validate_struct(tOptions * opts, char const * pname)
           || (opts->structVersion < OPTIONS_MINIMUM_VERSION )
        )  )  {
 
-        fprintf(stderr, zAO_Err, pname, NUM_TO_VER(opts->structVersion));
+        static char const ao_ver_string[] =
+            STR(AO_CURRENT)":"STR(AO_REVISION)":"STR(AO_AGE)"\n";
+
+        fprintf(stderr, zwrong_ver, pname, NUM_TO_VER(opts->structVersion));
         if (opts->structVersion > OPTIONS_STRUCT_VERSION )
-            fputs(zAO_Big, stderr);
+            fputs(ztoo_new, stderr);
         else
-            fputs(zAO_Sml, stderr);
+            fputs(ztoo_old, stderr);
 
         fwrite(ao_ver_string, sizeof(ao_ver_string) - 1, 1, stderr);
         return FAILURE;
@@ -283,7 +287,8 @@ ao_initialize(tOptions * opts, int a_ct, char ** a_v)
     return true;
 }
 
-/*
+/** @}
+ *
  * Local Variables:
  * mode: C
  * c-file-style: "stroustrup"
