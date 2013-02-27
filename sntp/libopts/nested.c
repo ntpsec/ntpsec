@@ -457,8 +457,8 @@ scan_xml_name(char const * name, size_t * nm_len, tOptionValue * val)
         /*
          * There are attributes following the name.  Parse 'em.
          */
-        scan = parse_attrs(NULL, SPN_WHITESPACE_CHARS(scan),
-                           &option_load_mode, val);
+        scan = SPN_WHITESPACE_CHARS(scan);
+        scan = parse_attrs(NULL, scan, &option_load_mode, val);
         if (scan == NULL)
             return NULL; /* oops */
     }
@@ -738,10 +738,6 @@ optionLoadNested(char const * text, char const * name, size_t nm_len)
         return NULL;
     }
     res_val = AGALOC(sizeof(*res_val) + nm_len + 1, "nest args");
-    if (res_val == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
     res_val->valType = OPARG_TYPE_HIERARCHY;
     res_val->pzName  = (char*)(res_val + 1);
     memcpy(res_val->pzName, name, nm_len);
@@ -749,10 +745,6 @@ optionLoadNested(char const * text, char const * name, size_t nm_len)
 
     {
         tArgList * arg_list = AGALOC(sizeof(*arg_list), "nest arg l");
-        if (arg_list == NULL) {
-            AGFREE(res_val);
-            return NULL;
-        }
 
         res_val->v.nestVal = arg_list;
         arg_list->useCt   = 0;

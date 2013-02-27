@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Thu Feb 21 12:28:43 PST 2013
+ * Generated Mon Feb 25 10:02:56 PST 2013
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -45,8 +45,8 @@ is_consistent(tOptions * pOpts);
 static void
 intern_file_load(tOptions * opts);
 
-static char*
-parse_attrs(tOptions * opts, char * txt, tOptionLoadMode * pMode,
+static char const *
+parse_attrs(tOptions * opts, char const * txt, tOptionLoadMode * pMode,
             tOptionValue * pType);
 
 /*
