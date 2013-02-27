@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.h)
  *
- *  It has been AutoGen-ed  February 21, 2013 at 10:46:41 PM by AutoGen 5.17.2pre17
+ *  It has been AutoGen-ed  February 27, 2013 at 11:37:25 AM by AutoGen 5.17.3.pre2
  *  From the definitions    ntpdc-opts.def
  *  and the template file   options
  *
@@ -35,7 +35,7 @@
  *  representations about the suitability this software for any purpose. It
  *  is provided "as is" without express or implied warranty.
  */
-/*
+/**
  *  This file contains the programmatic interface to the Automated
  *  Options generated for the ntpdc program.
  *  These macros are documented in the AutoGen info file in the
@@ -46,7 +46,7 @@
 #include "config.h"
 #include <autoopts/options.h>
 
-/*
+/**
  *  Ensure that the library used for compiling this generated header is at
  *  least as new as the version current when the header template was released
  *  (not counting patch version increments).  Also ensure that the oldest
@@ -60,8 +60,8 @@
   Choke Me.
 #endif
 
-/*
- *  Enumeration of each option:
+/**
+ *  Enumeration of each option type for ntpdc
  */
 typedef enum {
     INDEX_OPT_IPV4             =  0,
@@ -80,34 +80,51 @@ typedef enum {
     INDEX_OPT_SAVE_OPTS        = 13,
     INDEX_OPT_LOAD_OPTS        = 14
 } teOptIndex;
-
+/** count of all options for ntpdc */
 #define OPTION_CT    15
-#define NTPDC_VERSION       "4.2.7p357"
-#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p357"
+/** ntpdc version */
+#define NTPDC_VERSION       "4.2.7p358"
+/** Full ntpdc version text */
+#define NTPDC_FULL_VERSION  "ntpdc 4.2.7p358"
 
-/*
+/**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
  *  e.g. HAVE_OPT(IPV4)
  */
 #define         DESC(n) (ntpdcOptions.pOptDesc[INDEX_OPT_## n])
+/** 'true' if an option has been specified in any way */
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
+/** The string argument to an option. The argument type must be "string". */
 #define      OPT_ARG(n) (DESC(n).optArg.argString)
+/** Mask the option state revealing how an option was specified.
+ *  It will be one and only one of \a OPTST_SET, \a OPTST_PRESET,
+ * \a OPTST_DEFINED, \a OPTST_RESET or zero.
+ */
 #define    STATE_OPT(n) (DESC(n).fOptState & OPTST_SET_MASK)
+/** Count of option's occurrances *on the command line*. */
 #define    COUNT_OPT(n) (DESC(n).optOccCt)
+/** mask of \a OPTST_SET and \a OPTST_DEFINED. */
 #define    ISSEL_OPT(n) (SELECTED_OPT(&DESC(n)))
+/** 'true' if \a HAVE_OPT would yield 'false'. */
 #define ISUNUSED_OPT(n) (UNUSED_OPT(& DESC(n)))
+/** 'true' if OPTST_DISABLED bit not set. */
 #define  ENABLED_OPT(n) (! DISABLED_OPT(& DESC(n)))
+/** number of stacked option arguments.
+ *  Valid only for stacked option arguments. */
 #define  STACKCT_OPT(n) (((tArgList*)(DESC(n).optCookie))->useCt)
+/** stacked argument vector.
+ *  Valid only for stacked option arguments. */
 #define STACKLST_OPT(n) (((tArgList*)(DESC(n).optCookie))->apzArgs)
+/** Reset an option. */
 #define    CLEAR_OPT(n) STMTS( \
                 DESC(n).fOptState &= OPTST_PERSISTENT_MASK;   \
                 if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
 
-/* * * * * *
- *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
  *  Enumeration of ntpdc exit codes
  */
 typedef enum {
@@ -117,7 +134,8 @@ typedef enum {
     NTPDC_EXIT_NO_CONFIG_INPUT      = 66,
     NTPDC_EXIT_LIBOPTS_FAILURE      = 70
 } ntpdc_exit_code_t;
-/*
+/** @} */
+/**
  *  Make sure there are no #define name conflicts with the option names
  */
 #ifndef     NO_OPTION_NAME_WARNINGS
@@ -174,9 +192,10 @@ typedef enum {
 # undef SHOWPEERS
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
-/* * * * * *
- *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
  *  Interface defines for specific options.
+ * @{
  */
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
@@ -190,10 +209,15 @@ typedef enum {
 #define VALUE_OPT_NUMERIC        'n'
 #define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_SHOWPEERS      's'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_HELP          '?'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_SAVE_OPTS     '>'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_LOAD_OPTS     '<'
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
@@ -209,7 +233,7 @@ typedef enum {
                 ntpdcOptions.pzCurOpt  = NULL)
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdcOptions.pUsageProc)(&ntpdcOptions, c)
-/* extracted from opthead.tlib near line 498 */
+/* extracted from opthead.tlib near line 538 */
 
 #ifdef  __cplusplus
 extern "C" {

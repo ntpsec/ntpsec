@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.c)
  *
- *  It has been AutoGen-ed  February 22, 2013 at 03:21:03 AM by AutoGen 5.17.2pre17
+ *  It has been AutoGen-ed  February 27, 2013 at 11:25:07 AM by AutoGen 5.17.3.pre2
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -66,11 +66,11 @@ extern FILE * option_usage_fp;
 #  define NULL 0
 #endif
 
-/*
- *  sntp option static const strings
+/**
+ *  static const strings for sntp options
  */
 static char const sntp_opt_strs[2499] =
-/*     0 */ "sntp 4.2.7p357\n"
+/*     0 */ "sntp 4.2.7p358\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -154,7 +154,7 @@ static char const sntp_opt_strs[2499] =
 /*  2244 */ "LOAD_OPTS\0"
 /*  2254 */ "no-load-opts\0"
 /*  2267 */ "SNTP\0"
-/*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p357\n"
+/*  2272 */ "sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p358\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ hostname-or-IP ...]\n\0"
 /*  2433 */ "$HOME\0"
@@ -162,173 +162,253 @@ static char const sntp_opt_strs[2499] =
 /*  2441 */ ".ntprc\0"
 /*  2448 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2482 */ "\n\0"
-/*  2484 */ "sntp 4.2.7p357";
+/*  2484 */ "sntp 4.2.7p358";
 
-/*
+/**
  *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the ipv4 option */
 #define IPV4_DESC      (sntp_opt_strs+954)
+/** Upper-cased name for the ipv4 option */
 #define IPV4_NAME      (sntp_opt_strs+985)
+/** Name string for the ipv4 option */
 #define IPV4_name      (sntp_opt_strs+990)
+/** Other options that appear in conjunction with the ipv4 option */
 static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
+/** Compiled in flag settings for the ipv4 option */
 #define IPV4_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  ipv6 option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the ipv6 option */
 #define IPV6_DESC      (sntp_opt_strs+995)
+/** Upper-cased name for the ipv6 option */
 #define IPV6_NAME      (sntp_opt_strs+1026)
+/** Name string for the ipv6 option */
 #define IPV6_name      (sntp_opt_strs+1031)
+/** Other options that appear in conjunction with the ipv6 option */
 static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
+/** Compiled in flag settings for the ipv6 option */
 #define IPV6_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  authentication option description:
  */
+/** Descriptive text for the authentication option */
 #define AUTHENTICATION_DESC      (sntp_opt_strs+1036)
+/** Upper-cased name for the authentication option */
 #define AUTHENTICATION_NAME      (sntp_opt_strs+1086)
+/** Name string for the authentication option */
 #define AUTHENTICATION_name      (sntp_opt_strs+1101)
+/** Compiled in flag settings for the authentication option */
 #define AUTHENTICATION_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  broadcast option description:
  */
+/** Descriptive text for the broadcast option */
 #define BROADCAST_DESC      (sntp_opt_strs+1116)
+/** Upper-cased name for the broadcast option */
 #define BROADCAST_NAME      (sntp_opt_strs+1172)
+/** Name string for the broadcast option */
 #define BROADCAST_name      (sntp_opt_strs+1182)
+/** Compiled in flag settings for the broadcast option */
 #define BROADCAST_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  concurrent option description:
  */
+/** Descriptive text for the concurrent option */
 #define CONCURRENT_DESC      (sntp_opt_strs+1192)
+/** Upper-cased name for the concurrent option */
 #define CONCURRENT_NAME      (sntp_opt_strs+1242)
+/** Name string for the concurrent option */
 #define CONCURRENT_name      (sntp_opt_strs+1253)
+/** Compiled in flag settings for the concurrent option */
 #define CONCURRENT_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  debug-level option description:
  */
+/** Descriptive text for the debug-level option */
 #define DEBUG_LEVEL_DESC      (sntp_opt_strs+1264)
+/** Upper-cased name for the debug-level option */
 #define DEBUG_LEVEL_NAME      (sntp_opt_strs+1295)
+/** Name string for the debug-level option */
 #define DEBUG_LEVEL_name      (sntp_opt_strs+1307)
+/** Compiled in flag settings for the debug-level option */
 #define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  set-debug-level option description:
  */
+/** Descriptive text for the set-debug-level option */
 #define SET_DEBUG_LEVEL_DESC      (sntp_opt_strs+1319)
+/** Upper-cased name for the set-debug-level option */
 #define SET_DEBUG_LEVEL_NAME      (sntp_opt_strs+1349)
+/** Name string for the set-debug-level option */
 #define SET_DEBUG_LEVEL_name      (sntp_opt_strs+1365)
+/** Compiled in flag settings for the set-debug-level option */
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  gap option description:
  */
+/** Descriptive text for the gap option */
 #define GAP_DESC      (sntp_opt_strs+1381)
+/** Upper-cased name for the gap option */
 #define GAP_NAME      (sntp_opt_strs+1429)
+/** Name string for the gap option */
 #define GAP_name      (sntp_opt_strs+1433)
+/** The compiled in default value for the gap option argument */
 #define GAP_DFT_ARG   ((char const*)50)
+/** Compiled in flag settings for the gap option */
 #define GAP_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  kod option description:
  */
+/** Descriptive text for the kod option */
 #define KOD_DESC      (sntp_opt_strs+1437)
+/** Upper-cased name for the kod option */
 #define KOD_NAME      (sntp_opt_strs+1458)
+/** Name string for the kod option */
 #define KOD_name      (sntp_opt_strs+1462)
+/** The compiled in default value for the kod option argument */
 #define KOD_DFT_ARG   (sntp_opt_strs+1466)
+/** Compiled in flag settings for the kod option */
 #define KOD_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
-/*
+/**
  *  keyfile option description:
  */
+/** Descriptive text for the keyfile option */
 #define KEYFILE_DESC      (sntp_opt_strs+1482)
+/** Upper-cased name for the keyfile option */
 #define KEYFILE_NAME      (sntp_opt_strs+1530)
+/** Name string for the keyfile option */
 #define KEYFILE_name      (sntp_opt_strs+1538)
+/** Compiled in flag settings for the keyfile option */
 #define KEYFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
-/*
+/**
  *  logfile option description:
  */
+/** Descriptive text for the logfile option */
 #define LOGFILE_DESC      (sntp_opt_strs+1546)
+/** Upper-cased name for the logfile option */
 #define LOGFILE_NAME      (sntp_opt_strs+1571)
+/** Name string for the logfile option */
 #define LOGFILE_name      (sntp_opt_strs+1579)
+/** Compiled in flag settings for the logfile option */
 #define LOGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_FILE))
 
-/*
+/**
  *  steplimit option description:
  */
+/** Descriptive text for the steplimit option */
 #define STEPLIMIT_DESC      (sntp_opt_strs+1587)
+/** Upper-cased name for the steplimit option */
 #define STEPLIMIT_NAME      (sntp_opt_strs+1639)
+/** Name string for the steplimit option */
 #define STEPLIMIT_name      (sntp_opt_strs+1649)
+/** Compiled in flag settings for the steplimit option */
 #define STEPLIMIT_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  ntpversion option description:
  */
+/** Descriptive text for the ntpversion option */
 #define NTPVERSION_DESC      (sntp_opt_strs+1659)
+/** Upper-cased name for the ntpversion option */
 #define NTPVERSION_NAME      (sntp_opt_strs+1696)
+/** Name string for the ntpversion option */
 #define NTPVERSION_name      (sntp_opt_strs+1707)
+/** The compiled in default value for the ntpversion option argument */
 #define NTPVERSION_DFT_ARG   ((char const*)4)
+/** Compiled in flag settings for the ntpversion option */
 #define NTPVERSION_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  usereservedport option description:
  */
+/** Descriptive text for the usereservedport option */
 #define USERESERVEDPORT_DESC      (sntp_opt_strs+1718)
+/** Upper-cased name for the usereservedport option */
 #define USERESERVEDPORT_NAME      (sntp_opt_strs+1755)
+/** Name string for the usereservedport option */
 #define USERESERVEDPORT_name      (sntp_opt_strs+1771)
+/** Compiled in flag settings for the usereservedport option */
 #define USERESERVEDPORT_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  step option description:
  */
+/** Descriptive text for the step option */
 #define STEP_DESC      (sntp_opt_strs+1787)
+/** Upper-cased name for the step option */
 #define STEP_NAME      (sntp_opt_strs+1830)
+/** Name string for the step option */
 #define STEP_name      (sntp_opt_strs+1835)
+/** Compiled in flag settings for the step option */
 #define STEP_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  slew option description:
  */
+/** Descriptive text for the slew option */
 #define SLEW_DESC      (sntp_opt_strs+1840)
+/** Upper-cased name for the slew option */
 #define SLEW_NAME      (sntp_opt_strs+1878)
+/** Name string for the slew option */
 #define SLEW_name      (sntp_opt_strs+1883)
+/** Compiled in flag settings for the slew option */
 #define SLEW_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  timeout option description:
  */
+/** Descriptive text for the timeout option */
 #define TIMEOUT_DESC      (sntp_opt_strs+1888)
+/** Upper-cased name for the timeout option */
 #define TIMEOUT_NAME      (sntp_opt_strs+1932)
+/** Name string for the timeout option */
 #define TIMEOUT_name      (sntp_opt_strs+1940)
+/** The compiled in default value for the timeout option argument */
 #define TIMEOUT_DFT_ARG   ((char const*)5)
+/** Compiled in flag settings for the timeout option */
 #define TIMEOUT_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  wait option description:
  */
+/** Descriptive text for the wait option */
 #define WAIT_DESC      (sntp_opt_strs+1948)
+/** Upper-cased name for the wait option */
 #define WAIT_NAME      (sntp_opt_strs+1999)
+/** disablement name for the wait option */
 #define NOT_WAIT_name  (sntp_opt_strs+2004)
+/** disablement prefix for the wait option */
 #define NOT_WAIT_PFX   (sntp_opt_strs+2012)
+/** Name string for the wait option */
 #define WAIT_name      (NOT_WAIT_name + 3)
+/** Compiled in flag settings for the wait option */
 #define WAIT_FLAGS     (OPTST_INITENABLED)
 
 /*
@@ -360,7 +440,7 @@ static int const aIpv6CantList[] = {
 #define NO_LOAD_OPTS_name  (sntp_opt_strs+2254)
 #define LOAD_OPTS_pfx      (sntp_opt_strs+2012)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
-/*
+/**
  *  Declare option callback procedures
  */
 #if defined(TEST_SNTP_OPTS)
@@ -391,7 +471,7 @@ static tOptProc
     doOptDebug_Level, doOptKeyfile,     doOptKod,         doOptLogfile,
     doOptNtpversion,  doOptSteplimit,   doUsageOpt;
 
-/*
+/**
  *  #define map the "normal" callout procs
  */
 #define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
@@ -688,22 +768,27 @@ static tOptDesc optDesc[OPTION_CT] = {
 };
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *  Define the sntp Option Environment
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/** Reference to the upper cased version of sntp. */
 #define zPROGNAME       (sntp_opt_strs+2267)
+/** Reference to the title line for sntp usage. */
 #define zUsageTitle     (sntp_opt_strs+2272)
+/** sntp configuration file name. */
 #define zRcName         (sntp_opt_strs+2441)
+/** Directories to search for sntp config files. */
 static char const * const apzHomeList[3] = {
     sntp_opt_strs+2433,
     sntp_opt_strs+2439,
     NULL };
+/** The sntp program bug email address. */
 #define zBugsAddr       (sntp_opt_strs+2448)
+/** Clarification/explanation of what sntp does. */
 #define zExplain        (sntp_opt_strs+2482)
+/** Extra detail explaining what sntp does. */
 #define zDetail         (NULL)
+/** The full version string for sntp. */
 #define zFullVersion    (sntp_opt_strs+2484)
-/* extracted from optcode.tlib near line 364 */
+/* extracted from optcode.tlib near line 371 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -724,8 +809,8 @@ static char const * const apzHomeList[3] = {
 /**
  * The callout function that invokes the optionUsage function.
  *
- * @param pOptions the AutoOpts option description structure
- * @param pOptDesc the descriptor for the "help" (usage) option.
+ * @param[in] pOptions the AutoOpts option description structure
+ * @param[in] pOptDesc the descriptor for the "help" (usage) option.
  * @noreturn
  */
 static void
@@ -743,8 +828,8 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 /**
  * Code to handle the debug-level option.
  *
- * @param pOptions the sntp options data structure
- * @param pOptDesc the option descriptor for this option.
+ * @param[in] pOptions the sntp options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptDebug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -765,9 +850,10 @@ OPT_VALUE_SET_DEBUG_LEVEL++;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the kod option.
- *
- * @param pOptions the sntp options data structure
- * @param pOptDesc the option descriptor for this option.
+ * Specifies the filename to be used for the persistent history of KoD
+ * responses received from servers.
+ * @param[in] pOptions the sntp options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptKod(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -789,9 +875,12 @@ doOptKod(tOptions* pOptions, tOptDesc* pOptDesc)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the keyfile option.
- *
- * @param pOptions the sntp options data structure
- * @param pOptDesc the option descriptor for this option.
+ * This option specifies the keyfile.
+ * @code{sntp} will search for the key specified with @option{-a}
+ * @file{keyno} in this file.  See @command{ntp.keys(5)} for more
+ * information.
+ * @param[in] pOptions the sntp options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptKeyfile(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -813,9 +902,10 @@ doOptKeyfile(tOptions* pOptions, tOptDesc* pOptDesc)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the logfile option.
- *
- * @param pOptions the sntp options data structure
- * @param pOptDesc the option descriptor for this option.
+ * This option causes the client to write log messages to the specified
+ * @file{logfile}.
+ * @param[in] pOptions the sntp options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptLogfile(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -837,9 +927,11 @@ doOptLogfile(tOptions* pOptions, tOptDesc* pOptDesc)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the steplimit option.
- *
- * @param pOptions the sntp options data structure
- * @param pOptDesc the option descriptor for this option.
+ * If the time adjustment is less than @file{steplimit} milliseconds,
+ * slew the amount using @command{adjtime(2)}.  Otherwise, step the
+ * correction using @command{settimeofday(2)}.
+ * @param[in] pOptions the sntp options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptSteplimit(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -872,9 +964,10 @@ doOptSteplimit(tOptions* pOptions, tOptDesc* pOptDesc)
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  * Code to handle the ntpversion option.
- *
- * @param pOptions the sntp options data structure
- * @param pOptDesc the option descriptor for this option.
+ * When sending requests to a remote server, tell them we are running
+ * NTP protocol version @file{ntpversion} .
+ * @param[in] pOptions the sntp options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptNtpversion(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -913,8 +1006,8 @@ extern void optionPutShell(tOptions*);
  * Generated main procedure.  This will emit text that a Bourne shell can
  * process to handle its command line arguments.
  *
- * @param argc argument count
- * @param argv argument vector
+ * @param[in] argc argument count
+ * @param[in] argv argument vector
  * @returns program exit code
  */
 int
@@ -945,6 +1038,7 @@ main(int argc, char ** argv)
 #ifndef  WITH_PACKAGER
 # define sntp_packager_info NULL
 #else
+/** Packager information for sntp. */
 static char const sntp_packager_info[] =
     "Packaged by " WITH_PACKAGER
 
@@ -999,7 +1093,7 @@ tOptions sntpOptions = {
 };
 
 #if ENABLE_NLS
-/*
+/**
  * This code is designed to translate translatable option text for the
  * sntp program.  These translations happen upon entry
  * to optionProcess().
@@ -1108,6 +1202,7 @@ translate_option_strings(void)
 #endif /* ENABLE_NLS */
 
 #ifdef DO_NOT_COMPILE_THIS_CODE_IT_IS_FOR_GETTEXT
+/** I18N function strictly for xgettext.  Do not compile. */
 static void bogus_function(void) {
   /* TRANSLATORS:
 
@@ -1126,7 +1221,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via sntpOptions.pzCopyright */
-  puts(_("sntp 4.2.7p357\n\
+  puts(_("sntp 4.2.7p358\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1215,7 +1310,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via sntpOptions.pzUsageTitle */
-  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p357\n\
+  puts(_("sntp - standard Simple Network Time Protocol client program - Ver. 4.2.7p358\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ hostname-or-IP ...]\n"));
 
@@ -1223,7 +1318,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via sntpOptions.pzFullVersion */
-  puts(_("sntp 4.2.7p357"));
+  puts(_("sntp 4.2.7p358"));
 
   /* referenced via sntpOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
@@ -1258,7 +1353,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("could not locate the 'help' option"));
 #line 351 "../autoopts.c"
   puts(_("optionProcess() was called with invalid data"));
-#line 770 "../usage.c"
+#line 783 "../usage.c"
   puts(_("invalid argument type specified"));
 #line 589 "../find.c"
   puts(_("defaulted to option with optional arg"));
@@ -1307,9 +1402,9 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("  or an integer from %d through %d\n"));
 #line 164 "../enum.c"
   puts(_("  or an integer from %d through %d\n"));
-#line 769 "../usage.c"
+#line 782 "../usage.c"
   puts(_("%s error:  invalid option descriptor for %s\n"));
-#line 1097 "../usage.c"
+#line 1110 "../usage.c"
   puts(_("%s error:  invalid option descriptor for %s\n"));
 #line 379 "../find.c"
   puts(_("%s: invalid option name: %s\n"));
@@ -1317,7 +1412,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%s: The '%s' option requires an argument.\n"));
 #line 171 "../autoopts.c"
   puts(_("(AutoOpts bug):  Equivalenced option '%s' was equivalenced to both\n"
-       "\t'%s' and '%s'"));
+       "\t'%s' and '%s'."));
 #line 94 "../check.c"
   puts(_("%s error:  The %s option is required\n"));
 #line 623 "../find.c"
@@ -1345,7 +1440,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 #line 53 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable time duration.\n"));
 #line 92 "../check.c"
-  puts(_("%s error:  The %s option must appear %d times\n"));
+  puts(_("%s error:  The %s option must appear %d times.\n"));
 #line 157 "../numeric.c"
   puts(_("%s error:  '%s' is not a recognizable number.\n"));
 #line 195 "../enum.c"
@@ -1362,7 +1457,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("standard output"));
 #line 451 "../usage.c"
   puts(_("standard output"));
-#line 647 "../usage.c"
+#line 660 "../usage.c"
   puts(_("standard output"));
 #line 175 "../version.c"
   puts(_("standard output"));
@@ -1370,7 +1465,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("standard error"));
 #line 451 "../usage.c"
   puts(_("standard error"));
-#line 647 "../usage.c"
+#line 660 "../usage.c"
   puts(_("standard error"));
 #line 175 "../version.c"
   puts(_("standard error"));
@@ -1382,7 +1477,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("write"));
 #line 450 "../usage.c"
   puts(_("write"));
-#line 646 "../usage.c"
+#line 659 "../usage.c"
   puts(_("write"));
 #line 174 "../version.c"
   puts(_("write"));
@@ -1403,23 +1498,23 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   /* END-LIBOPTS-MESSAGES */
 
   /* USAGE-TEXT: */
-#line 895 "../usage.c"
+#line 908 "../usage.c"
   puts(_("\t\t\t\t- an alternate for '%s'\n"));
-#line 1164 "../usage.c"
+#line 1177 "../usage.c"
   puts(_("Version, usage and configuration options:"));
-#line 946 "../usage.c"
+#line 959 "../usage.c"
   puts(_("\t\t\t\t- default option for unnamed options\n"));
-#line 859 "../usage.c"
+#line 872 "../usage.c"
   puts(_("\t\t\t\t- disabled as '--%s'\n"));
-#line 1133 "../usage.c"
+#line 1146 "../usage.c"
   puts(_(" --- %-14s %s\n"));
-#line 1131 "../usage.c"
+#line 1144 "../usage.c"
   puts(_("This option has been disabled"));
-#line 886 "../usage.c"
+#line 899 "../usage.c"
   puts(_("\t\t\t\t- enabled by default\n"));
 #line 40 "../alias.c"
   puts(_("%s error:  only "));
-#line 1208 "../usage.c"
+#line 1221 "../usage.c"
   puts(_(" - examining environment variables named %s_*\n"));
 #line 168 "../file.c"
   puts(_("\t\t\t\t- file must not pre-exist\n"));
@@ -1435,31 +1530,31 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
        "a shell script to parse the options for %s:\n\n"));
 #line 161 "../enum.c"
   puts(_("  or an integer mask with any of the lower %d bits set\n"));
-#line 919 "../usage.c"
+#line 932 "../usage.c"
   puts(_("\t\t\t\t- is a set membership option\n"));
-#line 940 "../usage.c"
+#line 953 "../usage.c"
   puts(_("\t\t\t\t- must appear between %d and %d times\n"));
 #line 418 "../usage.c"
   puts(_("Options are specified by single or double hyphens and their name.\n"));
-#line 926 "../usage.c"
+#line 939 "../usage.c"
   puts(_("\t\t\t\t- may appear multiple times\n"));
-#line 913 "../usage.c"
+#line 926 "../usage.c"
   puts(_("\t\t\t\t- may not be preset\n"));
-#line 1323 "../usage.c"
+#line 1336 "../usage.c"
   puts(_("   Arg Option-Name    Description\n"));
-#line 1259 "../usage.c"
+#line 1272 "../usage.c"
   puts(_("  Flg Arg Option-Name    Description\n"));
-#line 1317 "../usage.c"
+#line 1330 "../usage.c"
   puts(_("  Flg Arg Option-Name    Description\n"));
-#line 1318 "../usage.c"
+#line 1331 "../usage.c"
   puts(_(" %3s %s"));
-#line 1324 "../usage.c"
+#line 1337 "../usage.c"
   puts(_(" %3s %s"));
 #line 423 "../usage.c"
   puts(_("The '-#<number>' option may omit the hash char\n"));
 #line 419 "../usage.c"
   puts(_("All arguments are named options.\n"));
-#line 993 "../usage.c"
+#line 1006 "../usage.c"
   puts(_(" - reading file %s"));
 #line 445 "../usage.c"
   puts(_("\n"
@@ -1470,17 +1565,17 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 #line 129 "../version.c"
   puts(_("\n"
        "please send bug reports to:  <%s>\n"));
-#line 925 "../usage.c"
+#line 938 "../usage.c"
   puts(_("\t\t\t\t- may NOT appear - preset only\n"));
-#line 965 "../usage.c"
+#line 978 "../usage.c"
   puts(_("\n"
        "The following option preset mechanisms are supported:\n"));
-#line 1206 "../usage.c"
+#line 1219 "../usage.c"
   puts(_("\n"
        "The following option preset mechanisms are supported:\n"));
-#line 704 "../usage.c"
+#line 717 "../usage.c"
   puts(_("prohibits these options:\n"));
-#line 699 "../usage.c"
+#line 712 "../usage.c"
   puts(_("prohibits the option '%s'\n"));
 #line 81 "../numeric.c"
   puts(_("%s%ld to %ld"));
@@ -1500,26 +1595,26 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%sless than or equal to %ld"));
 #line 426 "../usage.c"
   puts(_("Operands and options may be intermixed.  They will be reordered.\n"));
-#line 674 "../usage.c"
+#line 687 "../usage.c"
   puts(_("requires the option '%s'\n"));
-#line 677 "../usage.c"
+#line 690 "../usage.c"
   puts(_("requires these options:\n"));
-#line 1335 "../usage.c"
+#line 1348 "../usage.c"
   puts(_("   Arg Option-Name   Req?  Description\n"));
-#line 1329 "../usage.c"
+#line 1342 "../usage.c"
   puts(_("  Flg Arg Option-Name   Req?  Description\n"));
 #line 162 "../enum.c"
   puts(_("or you may use a numeric representation.  Preceding these with a '!'\n"
        "will clear the bits, specifying 'none' will clear all bits, and 'all'\n"
        "will set them all.  Multiple entries may be passed as an option\n"
        "argument list.\n"));
-#line 932 "../usage.c"
+#line 945 "../usage.c"
   puts(_("\t\t\t\t- may appear up to %d times\n"));
 #line 72 "../enum.c"
   puts(_("The valid \"%s\" option keywords are:\n"));
-#line 1168 "../usage.c"
+#line 1181 "../usage.c"
   puts(_("The next option supports vendor supported extra options:"));
-#line 795 "../usage.c"
+#line 808 "../usage.c"
   puts(_("These additional options are:"));
   /* END-USAGE-TEXT */
 }

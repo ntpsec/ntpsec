@@ -1,3 +1,4 @@
+(4.2.7p358) 2013/02/27 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.17.3pre4 and libopts-38.0.13.
 * [Bug 2357] sntp/libopts/usage.c on NetBSD needs -lintl.
 (4.2.7p357) 2013/02/22 Released by Harlan Stenn <stenn@ntp.org>
