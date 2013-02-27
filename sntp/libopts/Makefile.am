@@ -12,10 +12,10 @@ EXTRA_DIST              = \
     COPYING.gplv3           COPYING.lgplv3          COPYING.mbsd  \
     MakeDefs.inc            README                  ag-char-map.h  \
     alias.c                 ao-strs.c               ao-strs.h  \
-    autoopts/usage-txt.h    autoopts/project.h      autoopts/options.h  \
+    autoopts/options.h      autoopts/usage-txt.h    autoopts/project.h  \
     autoopts.c              autoopts.h              boolean.c  \
-    check.c                 compat/pathfind.c       compat/snprintf.c  \
-    compat/strdup.c         compat/compat.h         compat/windows-config.h  \
+    check.c                 compat/windows-config.h compat/strdup.c  \
+    compat/compat.h         compat/snprintf.c       compat/pathfind.c  \
     compat/strchr.c         configfile.c            cook.c  \
     enum.c                  env.c                   file.c  \
     find.c                  genshell.c              genshell.h  \

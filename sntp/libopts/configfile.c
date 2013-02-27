@@ -62,14 +62,14 @@ cook_xml_text(char * pzData);
 static char *
 handle_struct(tOptions * opts, tOptState * ost, char * txt, int dir);
 
-static char *
-parse_keyword(tOptions * opts, char * txt, tOptionValue * typ);
+static char const *
+parse_keyword(tOptions * opts, char const * txt, tOptionValue * typ);
 
-static char *
-parse_set_mem(tOptions * opts, char * txt, tOptionValue * typ);
+static char const *
+parse_set_mem(tOptions * opts, char const * txt, tOptionValue * typ);
 
-static char *
-parse_value(char * txt, tOptionValue * typ);
+static char const *
+parse_value(char const * txt, tOptionValue * typ);
 /* = = = END-STATIC-FORWARD = = = */
 
 /**
@@ -77,8 +77,8 @@ parse_value(char * txt, tOptionValue * typ);
  *  @param[in] txt   start of skpped text
  *  @returns   character after skipped text
  */
-inline static char *
-skip_unkn(char * txt)
+inline static char const *
+skip_unkn(char const * txt)
 {
     txt = BRK_END_XML_TOKEN_CHARS(txt);
     return (*txt == NUL) ? NULL : txt;
@@ -924,7 +924,8 @@ handle_struct(tOptions * opts, tOptState * ost, char * txt, int dir)
     switch (*txt) {
     case ' ':
     case '\t':
-        txt = parse_attrs(opts, SPN_WHITESPACE_CHARS(txt), &mode, &valu);
+        txt = (void *)parse_attrs(
+            opts, SPN_WHITESPACE_CHARS(txt), &mode, &valu);
         if (txt == NULL)
             return txt;
         if (*txt == '>')
@@ -1191,15 +1192,21 @@ optionLoadOpt(tOptions * opts, tOptDesc * odesc)
  *
  * @returns NULL on failure, otherwise the scan point
  */
-LOCAL char*
-parse_attrs(tOptions * opts, char * txt, tOptionLoadMode * pMode,
+LOCAL char const *
+parse_attrs(tOptions * opts, char const * txt, tOptionLoadMode * pMode,
             tOptionValue * pType)
 {
-    size_t len;
+    size_t len = 0;
 
     for (;;) {
         len = (size_t)(SPN_LOWER_CASE_CHARS(txt) - txt);
 
+        /*
+         * The enumeration used in this switch is derived from this switch
+         * statement itself.  The "find_option_xat_attribute_cmd" function
+         * will return XAT_CMD_MEMBERS for the "txt" string value
+         * "members", etc.
+         */
         switch (find_option_xat_attribute_cmd(txt, len)) {
         case XAT_CMD_TYPE:
             txt = parse_value(txt+len, pType);
@@ -1266,8 +1273,8 @@ parse_attrs(tOptions * opts, char * txt, tOptionLoadMode * pMode,
  *  @param     type  unused value type
  *  @returns   pointer after skipped text
  */
-static char *
-parse_keyword(tOptions * opts, char * txt, tOptionValue * typ)
+static char const *
+parse_keyword(tOptions * opts, char const * txt, tOptionValue * typ)
 {
     (void)opts;
     (void)typ;
@@ -1285,8 +1292,8 @@ parse_keyword(tOptions * opts, char * txt, tOptionValue * typ)
  *  @param     type  unused value type
  *  @returns   pointer after skipped text
  */
-static char *
-parse_set_mem(tOptions * opts, char * txt, tOptionValue * typ)
+static char const *
+parse_set_mem(tOptions * opts, char const * txt, tOptionValue * typ)
 {
     (void)opts;
     (void)typ;
@@ -1302,8 +1309,8 @@ parse_set_mem(tOptions * opts, char * txt, tOptionValue * typ)
  *  @param[out] typ  where to store the type found
  *  @returns    the next byte after the type name
  */
-static char *
-parse_value(char * txt, tOptionValue * typ)
+static char const *
+parse_value(char const * txt, tOptionValue * typ)
 {
     size_t len = 0;
 
@@ -1318,6 +1325,12 @@ parse_value(char * txt, tOptionValue * typ)
         return skip_unkn(txt + len);
     }
 
+    /*
+     * The enumeration used in this switch is derived from this switch
+     * statement itself.  The "find_option_value_type_cmd" function
+     * will return VTP_CMD_INTEGER for the "txt" string value
+     * "integer", etc.
+     */
     switch (find_option_value_type_cmd(txt, len)) {
     default:
     case VTP_INVALID_CMD: goto woops;

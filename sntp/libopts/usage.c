@@ -455,19 +455,23 @@ static void
 print_one_paragraph(char const * text, bool plain, FILE * fp)
 {
     if (plain) {
+#ifdef ENABLE_NLS
 #ifdef HAVE_LIBINTL_H
+#ifdef DEBUG_ENABLED
 #undef gettext
+#endif
         char * buf = dgettext("libopts", text);
         if (buf == text)
             text = gettext(text);
-#endif
+#endif /* HAVE_LIBINTL_H */
+#endif /* ENABLE_NLS */
         fputs(text, fp);
     }
 
     else {
-        text = optionQuoteString(text, LINE_SPLICE);
-        fprintf(fp, PUTS_FMT, text);
-        AGFREE(text);
+        char const * t = optionQuoteString(text, LINE_SPLICE);
+        fprintf(fp, PUTS_FMT, t);
+        AGFREE((void *)t);
     }
 }
  
@@ -491,16 +495,25 @@ print_one_paragraph(char const * text, bool plain, FILE * fp)
  *  with at least one space character but fewer than 8 space characters.
  *  Lines indented with tabs or more than 7 spaces are considered continuation
  *  lines.
+ *
+ *  If 'plain' is true, we are emitting text for a user to see.  So, if it is
+ *  true and NLS is not enabled, then just write the whole thing at once.
 =*/
 void
 optionPrintParagraphs(char const * text, bool plain, FILE * fp)
 {
     size_t len = strlen(text);
     char * buf;
-    if (len < 256) {
+#ifndef ENABLE_NLS
+    if (plain || (len < 256))
+#else
+    if (len < 256)
+#endif
+    {
         print_one_paragraph(text, plain, fp);
         return;
     }
+
     AGDUPSTR(buf, text, "ppara");
     text = buf;
 
