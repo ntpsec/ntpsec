@@ -523,7 +523,7 @@ extern u_int32		conf_file_sum;	/* Simple sum of characters */
 
 /* ntp_signd.c */
 #ifdef HAVE_NTP_SIGND
-extern void send_via_ntp_signd(struct recvbuf, int, keyid_t, int, 
+extern void send_via_ntp_signd(struct recvbuf *, int, keyid_t, int, 
 			       struct pkt *);
 #endif
 
