@@ -1,3 +1,4 @@
+(4.2.7p359) 2013/03/03 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2359] Fix send_via_ntp_signd() prototype.
 (4.2.7p358) 2013/02/27 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.17.3pre4 and libopts-38.0.13.

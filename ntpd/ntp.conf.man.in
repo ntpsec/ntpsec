@@ -1,8 +1,8 @@
-.TH ntp.conf 5 "27 Feb 2013" "4.2.7p358" "File Formats"
+.TH ntp.conf 5 "03 Mar 2013" "4.2.7p359" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  February 27, 2013 at 11:36:47 AM by AutoGen 5.17.3.pre2
+.\"  It has been AutoGen-ed  March  3, 2013 at 11:36:47 AM by AutoGen 5.17.3.pre2
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -2976,7 +2976,7 @@ services when they become universally available.
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p358 of NTP.
+This document corresponds to version 4.2.7p359 of NTP.
 This document was derived from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp.conf\fP

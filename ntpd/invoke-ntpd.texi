@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 #
-# It has been AutoGen-ed  February 27, 2013 at 11:37:04 AM by AutoGen 5.17.3.pre2
+# It has been AutoGen-ed  March  3, 2013 at 11:37:05 AM by AutoGen 5.17.3.pre2
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -141,7 +141,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p358
+ntpd - NTP daemon program - Ver. 4.2.7p359
 Usage:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -208,7 +208,7 @@ hyphen and the flag character.
 The following option preset mechanisms are supported:
  - examining environment variables named NTPD_*
 
-please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
+Please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
 @end example
 @exampleindent 4
 

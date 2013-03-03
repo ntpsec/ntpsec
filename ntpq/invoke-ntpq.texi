@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  February 27, 2013 at 11:38:12 AM by AutoGen 5.17.3.pre2
+# It has been AutoGen-ed  March  3, 2013 at 11:38:06 AM by AutoGen 5.17.3.pre2
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -290,7 +290,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p358
+ntpq - standard NTP query program - Ver. 4.2.7p359
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -327,7 +327,7 @@ The following option preset mechanisms are supported:
  - reading file ./.ntprc
  - examining environment variables named NTPQ_*
 
-please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
+Please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
 @end example
 @exampleindent 4
 
