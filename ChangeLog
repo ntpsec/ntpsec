@@ -1,3 +1,4 @@
+(4.2.7p360) 2013/03/15 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade libevent (coverity fixes, etc.).
 * EEXIST is OK for mkdir() in sntp/kod_management.c.
 (4.2.7p359) 2013/03/03 Released by Harlan Stenn <stenn@ntp.org>
