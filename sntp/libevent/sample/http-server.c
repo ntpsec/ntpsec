@@ -48,11 +48,21 @@
 #endif
 
 #ifdef _WIN32
+#ifndef stat
 #define stat _stat
+#endif
+#ifndef fstat
 #define fstat _fstat
+#endif
+#ifndef open
 #define open _open
+#endif
+#ifndef close
 #define close _close
+#endif
+#ifndef O_RDONLY
 #define O_RDONLY _O_RDONLY
+#endif
 #endif
 
 char uri_root[512];
@@ -132,7 +142,7 @@ dump_request_cb(struct evhttp_request *req, void *arg)
 	while (evbuffer_get_length(buf)) {
 		int n;
 		char cbuf[128];
-		n = evbuffer_remove(buf, cbuf, sizeof(buf)-1);
+		n = evbuffer_remove(buf, cbuf, sizeof(cbuf));
 		if (n > 0)
 			(void) fwrite(cbuf, 1, n, stdout);
 	}
@@ -379,11 +389,9 @@ main(int argc, char **argv)
 		if (ss.ss_family == AF_INET) {
 			got_port = ntohs(((struct sockaddr_in*)&ss)->sin_port);
 			inaddr = &((struct sockaddr_in*)&ss)->sin_addr;
-#ifdef AF_INET6
 		} else if (ss.ss_family == AF_INET6) {
 			got_port = ntohs(((struct sockaddr_in6*)&ss)->sin6_port);
 			inaddr = &((struct sockaddr_in6*)&ss)->sin6_addr;
-#endif
 		} else {
 			fprintf(stderr, "Weird address family %d\n",
 			    ss.ss_family);

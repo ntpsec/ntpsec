@@ -103,7 +103,7 @@ struct evhttp_connection {
 	void (*closecb)(struct evhttp_connection *, void *);
 	void *closecb_arg;
 
-	struct deferred_cb read_more_deferred_cb;
+	struct event_callback read_more_deferred_cb;
 
 	struct event_base *base;
 	struct evdns_base *dns_base;
@@ -196,5 +196,8 @@ void evhttp_start_read_(struct evhttp_connection *);
 /* response sending HTML the data in the buffer */
 void evhttp_response_code_(struct evhttp_request *, int, const char *);
 void evhttp_send_page_(struct evhttp_request *, struct evbuffer *);
+
+int evhttp_decode_uri_internal(const char *uri, size_t length,
+    char *ret, int decode_plus);
 
 #endif /* _HTTP_H */

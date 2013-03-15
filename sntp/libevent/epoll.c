@@ -182,6 +182,7 @@ epoll_init(struct event_base *base)
 		fd = epollop->timerfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK|TFD_CLOEXEC);
 		if (epollop->timerfd >= 0) {
 			struct epoll_event epev;
+			memset(&epev, 0, sizeof(epev));
 			epev.data.fd = epollop->timerfd;
 			epev.events = EPOLLIN;
 			if (epoll_ctl(epollop->epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
@@ -190,7 +191,11 @@ epoll_init(struct event_base *base)
 				epollop->timerfd = -1;
 			}
 		} else {
-			if (EINVAL != errno && ENOSYS != errno) {
+			if (errno != EINVAL && errno != ENOSYS) {
+				/* These errors probably mean that we were
+				 * compiled with timerfd/TFD_* support, but
+				 * we're running on a kernel that lacks those.
+				 */
 				event_warn("timerfd_create");
 			}
 			epollop->timerfd = -1;

@@ -143,7 +143,8 @@ write_kod_db(void)
 		pch = strchr(kod_db_file + 1, DIR_SEP);
 		while (NULL != pch) {
 			*pch = '\0';
-			if (-1 == mkdir(kod_db_file, dirmode)) {
+			if (-1 == mkdir(kod_db_file, dirmode)
+			    && errno != EEXIST) {
 				msyslog(LOG_ERR, "mkdir(%s) failed: %m",
 					kod_db_file);
 				return FALSE;

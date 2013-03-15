@@ -5,17 +5,18 @@ dnl See LICENSE for copying information.
 dnl
 dnl Original version Dug Song <dugsong@monkey.org>
 
+AC_INIT(libevent,2.1.2-alpha-dev)
 AC_PREREQ(2.59)
-AC_INIT(event.c)
+AC_CONFIG_SRCDIR(event.c)
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE(libevent,2.1.1-alpha-dev)
+AM_INIT_AUTOMAKE
 dnl AM_SILENT_RULES req. automake 1.11.  [no] defaults V=1
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
-AM_CONFIG_HEADER(config.h  evconfig-private.h:evconfig-private.h.in)
-AC_DEFINE(NUMERIC_VERSION, 0x02010101, [Numeric representation of the version])
+AC_CONFIG_HEADERS(config.h  evconfig-private.h:evconfig-private.h.in)
+AC_DEFINE(NUMERIC_VERSION, 0x02010201, [Numeric representation of the version])
 
 dnl Initialize prefix.
 if test "$prefix" = "NONE"; then
@@ -45,6 +46,7 @@ dnl the 'host' machine is where the resulting stuff runs.
 
 dnl Checks for programs.
 AM_PROG_CC_C_O
+AC_PROG_SED
 AC_PROG_INSTALL
 AC_PROG_LN_S
 # AC_PROG_MKDIR_P - $(MKDIR_P) should be defined by AM_INIT_AUTOMAKE
@@ -120,7 +122,6 @@ dnl   Uncomment "AC_DISABLE_SHARED" to make shared libraries not get
 dnl   built by default.  You can also turn shared libs on and off from
 dnl   the command line with --enable-shared and --disable-shared.
 dnl AC_DISABLE_SHARED
-
 AC_SUBST(LIBTOOL_DEPS)
 
 AM_CONDITIONAL([BUILD_REGRESS], [test "$enable_libevent_regress" = "yes"])
@@ -218,11 +219,13 @@ AC_CHECK_HEADERS([ \
   sys/select.h \
   sys/sendfile.h \
   sys/socket.h \
+  sys/stat.h \
   sys/time.h \
   sys/timerfd.h \
   sys/uio.h \
   sys/wait.h \
 ])
+
 AC_CHECK_HEADERS(sys/sysctl.h, [], [], [
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -314,27 +317,6 @@ if test x$bwin32 = xtrue; then
    AC_SEARCH_LIBS([getservbyname],[ws2_32])
 fi
 
-# check if we can compile with pthreads
-have_pthreads=no
-if test x$bwin32 != xtrue && test "$enable_thread_support" != "no"; then
-    OL_THREAD_CHECK([
-	have_pthreads=yes
-	PTHREAD_LIBS="$LTHREAD_LIBS"
-	CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-	AC_CHECK_SIZEOF(
-	    [pthread_t],
-	    [],
-	    [
-		AC_INCLUDES_DEFAULT()
-		#include <pthread.h>
-	    ]
-	)
-    ])
-fi
-AC_SUBST([PTHREAD_LIBS])
-AC_SUBST([PTHREAD_CFLAGS])
-AM_CONDITIONAL([PTHREADS], [test "$have_pthreads" != "no" && test "$enable_thread_support" != "no"])
-
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
@@ -377,6 +359,7 @@ AC_CHECK_FUNCS([ \
   strtoll \
   sysctl \
   timerfd_create \
+  umask \
   unsetenv \
   usleep \
   vasprintf \
@@ -698,6 +681,14 @@ AC_CHECK_MEMBERS([struct in6_addr.s6_addr32, struct in6_addr.s6_addr16, struct s
 #endif
 ])
 
+AC_CHECK_TYPES([struct so_linger],
+[#define HAVE_SO_LINGER], ,
+[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+])
+
 AC_MSG_CHECKING([for socklen_t])
 AC_TRY_COMPILE([
  #include <sys/types.h>
@@ -724,6 +715,27 @@ AC_TRY_COMPILE([],
    AC_DEFINE(__func__, __FILE__,
          [Define to appropriate substitue if compiler doesnt have __func__])))
 
+
+# check if we can compile with pthreads
+have_pthreads=no
+if test x$bwin32 != xtrue && test "$enable_thread_support" != "no"; then
+    OL_THREAD_CHECK([
+	have_pthreads=yes
+	PTHREAD_LIBS="$LTHREAD_LIBS"
+	CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+	AC_CHECK_SIZEOF(
+	    [pthread_t],
+	    [],
+	    [
+		AC_INCLUDES_DEFAULT()
+		#include <pthread.h>
+	    ]
+	)
+    ])
+fi
+AC_SUBST([PTHREAD_LIBS])
+AC_SUBST([PTHREAD_CFLAGS])
+AM_CONDITIONAL([PTHREADS], [test "$have_pthreads" != "no" && test "$enable_thread_support" != "no"])
 
 # check if we should compile locking into the library
 if test x$enable_thread_support = xno; then
@@ -862,9 +874,9 @@ if test "$GCC" = yes && test "$enable_function_sections" = yes ; then
 		    ]]
 		)],
 		[
-		    dnl We have to do this invocation manually so that we can
-		    dnl get the output of conftest.err to make sure it doesn't
-		    dnl mention gc-sections.
+                    dnl We have to do this invocation manually so that we can
+                    dnl get the output of conftest.err to make sure it doesn't
+                    dnl mention gc-sections.
 		    if test "X$cross_compiling" = "Xyes" || grep gc-sections conftest.err ; then
 			libevent_cv_gc_sections_runs=no
 		    else
@@ -890,4 +902,4 @@ AC_SUBST([LIBEVENT_GC_SECTIONS])
 AM_CONDITIONAL([INSTALL_LIBEVENT], [test "$enable_libevent_install" = "yes"])
 
 AC_CONFIG_FILES( [libevent.pc libevent_openssl.pc libevent_pthreads.pc] )
-AC_OUTPUT(Makefile include/Makefile test/Makefile sample/Makefile)
+AC_OUTPUT(Makefile)

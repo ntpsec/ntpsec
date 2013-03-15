@@ -39,18 +39,6 @@ struct event_base;
 #include "mm-internal.h"
 #include "evthread-internal.h"
 
-#if EVENT__HAVE_PTHREADS < 5		/* HP-UX 10.20 has 4, needs this */
-# define pthread_mutex_init(m, a)					\
-	 pthread_mutex_init(m, (a)					\
-				? *(const pthread_mutexattr_t *)(a)	\
-				: pthread_mutexattr_default)
-# define pthread_cond_init_def(c)	pthread_cond_init((c), pthread_condattr_default)
-# define PTHREAD_MUTEX_RECURSIVE	MUTEX_RECURSIVE_NP
-# define pthread_mutexattr_settype	pthread_mutexattr_setkind_np
-#else
-# define pthread_cond_init_def(c)	pthread_cond_init((c), NULL)
-#endif
-
 static pthread_mutexattr_t attr_recursive;
 
 static void *
@@ -118,7 +106,7 @@ evthread_posix_cond_alloc(unsigned condflags)
 	pthread_cond_t *cond = mm_malloc(sizeof(pthread_cond_t));
 	if (!cond)
 		return NULL;
-	if (pthread_cond_init_def(cond)) {
+	if (pthread_cond_init(cond, NULL)) {
 		mm_free(cond);
 		return NULL;
 	}

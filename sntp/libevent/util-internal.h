@@ -79,21 +79,33 @@ extern "C" {
 
 #ifndef _WIN32
 
+#if EAGAIN == EWOULDBLOCK
+#define EVUTIL_ERR_IS_EAGAIN(e) \
+	((e) == EAGAIN)
+#else
+#define EVUTIL_ERR_IS_EAGAIN(e) \
+	((e) == EAGAIN || (e) == EWOULDBLOCK)
+#endif
+
 /* True iff e is an error that means a read/write operation can be retried. */
 #define EVUTIL_ERR_RW_RETRIABLE(e)				\
-	((e) == EINTR || (e) == EAGAIN)
+	((e) == EINTR || EVUTIL_ERR_IS_EAGAIN(e))
 /* True iff e is an error that means an connect can be retried. */
 #define EVUTIL_ERR_CONNECT_RETRIABLE(e)			\
 	((e) == EINTR || (e) == EINPROGRESS)
 /* True iff e is an error that means a accept can be retried. */
 #define EVUTIL_ERR_ACCEPT_RETRIABLE(e)			\
-	((e) == EINTR || (e) == EAGAIN || (e) == ECONNABORTED)
+	((e) == EINTR || EVUTIL_ERR_IS_EAGAIN(e) || (e) == ECONNABORTED)
 
 /* True iff e is an error that means the connection was refused */
 #define EVUTIL_ERR_CONNECT_REFUSED(e)					\
 	((e) == ECONNREFUSED)
 
 #else
+/* Win32 */
+
+#define EVUTIL_ERR_IS_EAGAIN(e) \
+	((e) == WSAEWOULDBLOCK || (e) == EAGAIN)
 
 #define EVUTIL_ERR_RW_RETRIABLE(e)					\
 	((e) == WSAEWOULDBLOCK ||					\
@@ -217,6 +229,11 @@ int EVUTIL_ISLOWER_(char c);
 int EVUTIL_ISUPPER_(char c);
 char EVUTIL_TOUPPER_(char c);
 char EVUTIL_TOLOWER_(char c);
+
+/** Remove all trailing horizontal whitespace (space or tab) from the end of a
+ * string */
+void evutil_rtrim_lws_(char *);
+
 
 /** Helper macro.  If we know that a given pointer points to a field in a
     structure, return a pointer to the structure itself.  Used to implement
@@ -390,6 +407,14 @@ HANDLE evutil_load_windows_system_library_(const TCHAR *library_name);
 #define EV_I64_ARG(x) ((long long)(x))
 #define EV_U64_ARG(x) ((unsigned long long)(x))
 #endif
+#endif
+
+#ifdef _WIN32
+#define EV_SOCK_FMT EV_I64_FMT
+#define EV_SOCK_ARG(x) EV_I64_ARG((x))
+#else
+#define EV_SOCK_FMT "%d"
+#define EV_SOCK_ARG(x) (x)
 #endif
 
 #if defined(__STDC__) && defined(__STDC_VERSION__)

@@ -5,8 +5,8 @@
 # See LICENSE for copying information.
 
 # 'foreign' means that we're not enforcing GNU package rules strictly.
-# '1.7' means that we need automake 1.7 or later (and we do).
-AUTOMAKE_OPTIONS = foreign 1.7
+# '1.9' means that we need automake 1.9 or later (and we do).
+AUTOMAKE_OPTIONS = foreign 1.9 subdir-objects
 
 ACLOCAL_AMFLAGS = -I m4
 
@@ -58,9 +58,14 @@ VERSION_INFO = 1:0:0
 #  2.0.15-stable--    2.0        6:3:1 (Forgot to update :( )
 #  2.0.16-stable--    2.0        6:4:1 (No ABI change)
 #  2.0.17-stable--    2.0        6:5:1 (No ABI change)
+#  2.0.18-stable--    2.0        6:6:1 (No ABI change)
+#  2.0.19-stable--    2.0        6:7:1 (No ABI change)
+#  2.0.20-stable--    2.0        6:8:1 (No ABI change)
+#  2.0.21-stable--    2.0        6:9:1 (No ABI change)
 #
 # For Libevent 2.1:
 #  2.1.1-alpha --     2.1        1:0:0
+#  2.1.2-alpha--      2.2        2:0:1 (Backward-compatible)
 
 
 # ABI version history for this package effectively restarts every time
@@ -88,7 +93,7 @@ endif
 pkgconfigdir=$(libdir)/pkgconfig
 LIBEVENT_PKGCONFIG=libevent.pc
 
-# These sources are conditionally added by configure.in or conditionally
+# These sources are conditionally added by configure.ac or conditionally
 # included from other files.
 PLATFORM_DEPENDENT_SRC = \
 	arc4random.c \
@@ -104,7 +109,6 @@ EXTRA_DIST = \
 	event_rpcgen.py \
 	libevent.pc.in \
 	make-event-config.sed \
-	m4/LICENSE-OPENLDAP \
 	whatsnew-2.0.txt \
 	whatsnew-2.1.txt \
 	$(PLATFORM_DEPENDENT_SRC)
@@ -126,7 +130,16 @@ else
 noinst_LTLIBRARIES =  $(LIBEVENT_LIBS_LA)
 endif
 
-SUBDIRS = . include sample test
+EXTRA_SOURCE=
+noinst_HEADERS=
+noinst_PROGRAMS=
+EXTRA_PROGRAMS=
+CLEANFILES=
+DISTCLEANFILES=
+BUILT_SOURCES =
+include include/include.am
+include sample/include.am
+include test/include.am
 
 if BUILD_WIN32
 
@@ -165,12 +178,12 @@ if SIGNAL_SUPPORT
 SYS_SRC += signal.c
 endif
 
-BUILT_SOURCES = include/event2/event-config.h
+BUILT_SOURCES += include/event2/event-config.h
 
 include/event2/event-config.h: config.h make-event-config.sed
-	test -d include/event2 || $(MKDIR_P) include/event2
-	$(SED) -f $(srcdir)/make-event-config.sed < config.h > $@T
-	mv -f $@T $@
+	$(AM_V_GEN)test -d include/event2 || $(MKDIR_P) include/event2
+	$(AM_V_at)$(SED) -f $(srcdir)/make-event-config.sed < config.h > $@T
+	$(AM_V_at)mv -f $@T $@
 
 CORE_SRC =					\
 	buffer.c				\
@@ -190,7 +203,7 @@ CORE_SRC =					\
 	strlcpy.c				\
 	$(SYS_SRC)
 
-EXTRA_SRC =					\
+EXTRAS_SRC =					\
 	evdns.c					\
 	event_tagging.c				\
 	evrpc.c					\
@@ -206,7 +219,7 @@ endif
 
 GENERIC_LDFLAGS = -version-info $(VERSION_INFO) $(RELEASE) $(NO_UNDEFINED)
 
-libevent_la_SOURCES = $(CORE_SRC) $(EXTRA_SRC)
+libevent_la_SOURCES = $(CORE_SRC) $(EXTRAS_SRC)
 libevent_la_LIBADD = @LTLIBOBJS@ $(SYS_LIBS)
 libevent_la_LDFLAGS = $(GENERIC_LDFLAGS)
 
@@ -220,7 +233,7 @@ libevent_pthreads_la_LIBADD = $(MAYBE_CORE)
 libevent_pthreads_la_LDFLAGS = $(GENERIC_LDFLAGS)
 endif
 
-libevent_extra_la_SOURCES = $(EXTRA_SRC)
+libevent_extra_la_SOURCES = $(EXTRAS_SRC)
 libevent_extra_la_LIBADD = $(MAYBE_CORE) $(SYS_LIBS)
 libevent_extra_la_LDFLAGS = $(GENERIC_LDFLAGS)
 
@@ -231,7 +244,7 @@ libevent_openssl_la_LDFLAGS = $(GENERIC_LDFLAGS)
 libevent_openssl_la_CPPFLAGS = $(AM_CPPFLAGS) $(OPENSSL_INCS)
 endif
 
-noinst_HEADERS =				\
+noinst_HEADERS +=				\
 	WIN32-Code/evconfig-private.h		\
 	WIN32-Code/event2/event-config.h	\
 	WIN32-Code/tree.h			\
@@ -281,5 +294,5 @@ doxygen: FORCE
 	doxygen $(srcdir)/Doxyfile
 FORCE:
 
-DISTCLEANFILES = *~ libevent.pc ./include/event2/event-config.h
+DISTCLEANFILES += *~ libevent.pc ./include/event2/event-config.h
 
