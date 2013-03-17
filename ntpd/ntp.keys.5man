@@ -1,8 +1,8 @@
-.TH ntp.keys 5man "15 Mar 2013" "4.2.7p360" "File Formats"
+.TH ntp.keys 5man "17 Mar 2013" "4.2.7p361" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  March 15, 2013 at 07:10:48 AM by AutoGen 5.17.3.pre2
+.\"  It has been AutoGen-ed  March 17, 2013 at 05:04:48 AM by AutoGen 5.17.3.pre6
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-file.tpl
 .\"
@@ -133,7 +133,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p360 of NTP.
+This document corresponds to version 4.2.7p361 of NTP.
 This document was derived from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp.keys\fP

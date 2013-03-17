@@ -1,3 +1,4 @@
+(4.2.7p361) 2013/03/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2357] sntp/libopts/usage.c sometimes needs -lintl.
 * [Bug 2365] "make check" fails in libevent.
 (4.2.7p360) 2013/03/15 Released by Harlan Stenn <stenn@ntp.org>

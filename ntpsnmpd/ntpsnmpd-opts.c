@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.c)
  *
- *  It has been AutoGen-ed  March 15, 2013 at 07:11:44 AM by AutoGen 5.17.3.pre2
+ *  It has been AutoGen-ed  March 17, 2013 at 05:06:08 AM by AutoGen 5.17.3.pre6
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -61,7 +61,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpsnmpd options
  */
 static char const ntpsnmpd_opt_strs[1560] =
-/*     0 */ "ntpsnmpd 4.2.7p360\n"
+/*     0 */ "ntpsnmpd 4.2.7p361\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -100,14 +100,14 @@ static char const ntpsnmpd_opt_strs[1560] =
 /*  1360 */ "no-load-opts\0"
 /*  1373 */ "no\0"
 /*  1376 */ "NTPSNMPD\0"
-/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p360\n"
+/*  1385 */ "ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p361\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  1490 */ "$HOME\0"
 /*  1496 */ ".\0"
 /*  1498 */ ".ntprc\0"
 /*  1505 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  1539 */ "\n\0"
-/*  1541 */ "ntpsnmpd 4.2.7p360";
+/*  1541 */ "ntpsnmpd 4.2.7p361";
 
 /**
  *  nofork option description:
@@ -589,7 +589,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpsnmpdOptions.pzCopyright */
-  puts(_("ntpsnmpd 4.2.7p360\n\
+  puts(_("ntpsnmpd 4.2.7p361\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -633,21 +633,20 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpsnmpdOptions.pzUsageTitle */
-  puts(_("ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p360\n\
+  puts(_("ntpsnmpd - NTP SNMP MIB agent - Ver. 4.2.7p361\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpsnmpdOptions.pzExplain */
   puts(_("\n"));
 
   /* referenced via ntpsnmpdOptions.pzFullVersion */
-  puts(_("ntpsnmpd 4.2.7p360"));
+  puts(_("ntpsnmpd 4.2.7p361"));
 
   /* referenced via ntpsnmpdOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
 
   /* referenced via ntpsnmpdOptions.pzShortUsage */
   puts(_("<<<NOT-FOUND>>>"));
-
   /* LIBOPTS-MESSAGES: */
 #line 60 "../autoopts.c"
   puts(_("allocation of %d bytes failed\n"));
@@ -880,13 +879,13 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_(" - reading file %s"));
 #line 445 "../usage.c"
   puts(_("\n"
-       "please send bug reports to:  <%s>\n"));
+       "Please send bug reports to:  <%s>\n"));
 #line 100 "../version.c"
   puts(_("\n"
-       "please send bug reports to:  <%s>\n"));
+       "Please send bug reports to:  <%s>\n"));
 #line 129 "../version.c"
   puts(_("\n"
-       "please send bug reports to:  <%s>\n"));
+       "Please send bug reports to:  <%s>\n"));
 #line 938 "../usage.c"
   puts(_("\t\t\t\t- may NOT appear - preset only\n"));
 #line 978 "../usage.c"
