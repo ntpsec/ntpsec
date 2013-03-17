@@ -94,6 +94,7 @@ case "${enable_libopts_install+set}" in
  set) ;;
  *) enable_libopts_install=no ;;
 esac
+enable_nls=no
 LIBOPTS_CHECK
 
 AM_COND_IF(

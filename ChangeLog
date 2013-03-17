@@ -1,3 +1,4 @@
+* [Bug 2357] sntp/libopts/usage.c sometimes needs -lintl.
 (4.2.7p360) 2013/03/15 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade libevent (coverity fixes, etc.).
 * EEXIST is OK for mkdir() in sntp/kod_management.c.

@@ -99,6 +99,7 @@ case "${enable_libopts_install+set}" in
  set) ;;
  *) enable_libopts_install=no ;;
 esac
+enable_nls=no
 LIBOPTS_CHECK_NOBUILD([sntp/libopts])
 
 NTP_ENABLE_LOCAL_LIBEVENT
