@@ -38,8 +38,8 @@
  */
 
 #define OPTPROC_L_N_S  (OPTPROC_LONGOPT | OPTPROC_SHORTOPT)
-#ifdef HAVE_LIBINTL_H
-#include <libintl.h>
+#if defined(ENABLE_NLS) && defined(HAVE_LIBINTL_H)
+# include <libintl.h>
 #endif
 
 typedef struct {
@@ -532,7 +532,7 @@ optionPrintParagraphs(char const * text, bool plain, FILE * fp)
         if (scan == NULL)
             goto done;
 
-        if ((scan - buf) < 40) {
+        if ((scan - buf) < 8) {
             scan++;
             goto try_longer;
         }
