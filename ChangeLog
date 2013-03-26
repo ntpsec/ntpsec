@@ -1,3 +1,4 @@
+(4.2.7p363) 2013/03/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2357] sntp/libopts/usage.c sometimes needs -lintl.
 * Upgrade to libopts from 5.17.3pre10.
 (4.2.7p362) 2013/03/19 Released by Harlan Stenn <stenn@ntp.org>
