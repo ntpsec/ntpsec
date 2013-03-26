@@ -1,3 +1,4 @@
-#assert (version-compare > autogen-version "5.17.1")
+#assert (version-compare > autogen-version "5.17.2")
+// we need at least 5.17.3pre10
 // >= is usually what we want.
 guard-option-names;
