@@ -73,9 +73,15 @@ isc_interfaceiter_create(isc_mem_t *mctx, isc_interfaceiter_t **iterp) {
 	 * Only open "/proc/net/if_inet6" if we have never seen a IPv6
 	 * address returned by getifaddrs().
 	 */
-	if (!seenv6)
+	if (!seenv6) {
 		iter->proc = fopen("/proc/net/if_inet6", "r");
-	else
+		if (iter->proc == NULL) {
+			isc__strerror(errno, strbuf, sizeof(strbuf));
+			isc_log_write(isc_lctx, ISC_LOGCATEGORY_GENERAL,
+				      ISC_LOGMODULE_SOCKET, ISC_LOG_WARNING,
+				      "failed to open /proc/net/if_inet6");
+		}
+	} else
 		iter->proc = NULL;
 	iter->valid = ISC_R_FAILURE;
 #endif
