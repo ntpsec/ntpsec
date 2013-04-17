@@ -2594,6 +2594,12 @@ oncore_msg_Bl(
 				     day_lsf-day_now);
 		}
 	}
+
+/*
+ * Reg only wants the following output for "deeper" driver debugging.
+ * See Bug 2142 and Bug 1866
+ */
+#if 0
 	oncore_log_f(instance, LOG_DEBUG,
 		     "dt_ls = %d  dt_lsf = %d  WN = %d  DN = %d  WN_lsf = %d  DNlsf = %d  wn_flg = %d  lsf_flg = %d  Bl_day = %d",
 		     instance->Bl.dt_ls, instance->Bl.dt_lsf,
@@ -2601,6 +2607,7 @@ oncore_msg_Bl(
 		     instance->Bl.WN_lsf, instance->Bl.DN_lsf,
 		     instance->Bl.wn_flg, instance->Bl.lsf_flg,
 		     instance->Bl.Bl_day);
+#endif
 }
 
 
