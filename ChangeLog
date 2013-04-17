@@ -1,3 +1,4 @@
+(4.2.7p366) 2013/04/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1866] Disable some debugging output in refclock_oncore.
 (4.2.7p365) 2013/04/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2149] Log an error message if /proc/net/if_inet6 cannot be opened.

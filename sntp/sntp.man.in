@@ -1,8 +1,8 @@
-.TH sntp @SNTP_MS@ "16 Apr 2013" "4.2.7p365" "User Commands"
+.TH sntp @SNTP_MS@ "17 Apr 2013" "4.2.7p366" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"
-.\"  It has been AutoGen-ed  April 16, 2013 at 09:54:29 AM by AutoGen 5.17.3
+.\"  It has been AutoGen-ed  April 17, 2013 at 11:35:59 AM by AutoGen 5.17.3
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -316,7 +316,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p365 of
+This document corresponds to version 4.2.7p366 of
 .B  .
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP
