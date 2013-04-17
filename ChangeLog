@@ -1,3 +1,4 @@
+* [Bug 1485] Sometimes ntpd crashes
 (4.2.7p366) 2013/04/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1866] Disable some debugging output in refclock_oncore.
 (4.2.7p365) 2013/04/16 Released by Harlan Stenn <stenn@ntp.org>
