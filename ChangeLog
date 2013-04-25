@@ -1,3 +1,4 @@
+(4.2.7p367) 2013/04/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1485] Sometimes ntpd crashes
 * [Bug 2382] Implement LOGTOD using ldexp() instead of shifting.
 (4.2.7p366) 2013/04/17 Released by Harlan Stenn <stenn@ntp.org>
