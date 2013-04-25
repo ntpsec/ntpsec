@@ -156,10 +156,9 @@ typedef char s_char;
 #define SQUARE(x) ((x) * (x))
 #define SQRT(x) (sqrt(x))
 #define DIFF(x, y) (SQUARE((x) - (y)))
-#define LOGTOD(a)	((a) < 0 ? 1. / (1L << -(a)) : \
-			    1L << (int)(a)) /* log2 to double */
+#define LOGTOD(a)	ldexp(1., (int)(a)) /* log2 to double */
 #define UNIVAR(x)	(SQUARE(.28867513 * LOGTOD(x))) /* std uniform distr */
-#define ULOGTOD(a)	(1L << (int)(a)) /* ulog2 to double */
+#define ULOGTOD(a)	ldexp(1., (int)(a)) /* ulog2 to double */
 
 #define	EVENT_TIMEOUT	0	/* one second, that is */
 
