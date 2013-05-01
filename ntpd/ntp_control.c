@@ -1843,26 +1843,39 @@ ctl_putsys(
 		break;
 
 	case CS_VARLIST:
-		snprintf(str, sizeof(str), "%s=\"",
-			 sys_var[CS_VARLIST].text);
-		ctl_putdata(str, strlen(str), TRUE);
+	{
+		char buf[CTL_MAX_DATA_LEN];
+		//buffPointer, firstElementPointer, buffEndPointer
+		register char *buffp, *buffend;
+		register int firstVarName;
+		register const char *ss;
+		register int len;
+		register struct ctl_var *k;
 
-		firstvarname = TRUE;
-		for (k = sys_var; !(EOV & k->flags); k++) {
-			if (PADDING & k->flags)
+		buffp = buf;
+		buffend = buf + sizeof(buf);
+		if (buffp + strlen(sys_var[CS_VARLIST].text) + 4 > buffend)
+			break;	/* really long var name */
+
+		snprintf(buffp, sizeof(buf), "%s=\"",sys_var[CS_VARLIST].text);
+		buffp += strlen(buffp);
+		firstVarName = TRUE;
+		for (k = sys_var; !(k->flags & EOV); k++) {
+			if (k->flags & PADDING)
 				continue;
 			len = strlen(k->text);
-			if (0 == len)
-				continue;
-			if (!firstvarname)
-				ctl_putdata(",", 1, TRUE);
+			if (buffp + len + 1 >= buffend)
+				break;
+			if (!firstVarName)
+				*buffp++ = ',';
 			else
-				firstvarname = FALSE;
-			ctl_putdata(k->text, len, TRUE);
+				firstVarName = FALSE;
+			memcpy(buffp, k->text, len);
+			buffp += len;
 		}
 
-		for (k = ext_sys_var; k && !(EOV & k->flags); k++) {
-			if (PADDING & k->flags)
+		for (k = ext_sys_var; k && !(k->flags & EOV); k++) {
+			if (k->flags & PADDING)
 				continue;
 			if (NULL == k->text)
 				continue;
@@ -1871,13 +1884,25 @@ ctl_putsys(
 				len = strlen(k->text);
 			else
 				len = ss - k->text;
-			ctl_putdata(",", 1, TRUE);
-			ctl_putdata(k->text, len, TRUE);
+			if (buffp + len + 1 >= buffend)
+				break;
+			if (firstVarName) {
+				*buffp++ = ',';
+				firstVarName = FALSE;
+			}
+			memcpy(buffp, k->text,(unsigned)len);
+			buffp += len;
 		}
+		if (buffp + 2 >= buffend)
+			break;
 
-		ctl_putdata("\"", 1, TRUE);
+		*buffp++ = '"';
+		*buffp = '\0';
+
+		ctl_putdata(buf, (unsigned)( buffp - buf ), 0);
 		break;
-
+	}
+    
 	case CS_TAI:
 		if (sys_tai > 0)
 			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
