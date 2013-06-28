@@ -27,7 +27,7 @@ noinst_HEADERS =		\
 	fileHandlingTest.h	\
 	$(NULL)
 
-dist_check_SCRIPTS =	test-driver
+dist_check_SCRIPTS =	tests-runner
 
 EXTRA_DIST =				\
 	data/debug-input-lfp-bin	\
@@ -80,13 +80,8 @@ AM_LDFLAGS = $(LDFLAGS_NTP)
 
 TESTS = 
 
-TEST_INPUT_DIR = $(abs_srcdir)/data
-TEST_OUTPUT_DIR = $(abs_builddir)/data
-
-TESTS_ENVIRONMENT = $(top_srcdir)/tests/test-driver $(TEST_INPUT_DIR) $(TEST_OUTPUT_DIR)
-
 if !NTP_CROSSCOMPILE
-TESTS += $(check_PROGRAMS)
+TESTS += tests-runner
 endif
 
 ## ensure ../libsntp.a is built
