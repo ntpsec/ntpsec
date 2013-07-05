@@ -64,7 +64,7 @@ case "$host" in
     ;;
  *)
     AC_SEARCH_LIBS([clock_gettime], [rt])
-    AC_CHECK_FUNCS([clock_gettime clock_settime])
+    AC_CHECK_FUNCS([clock_getres clock_gettime clock_settime])
     ;;
 esac
 
@@ -81,7 +81,7 @@ dnl  net/if.h.  If that fails, try adding a duplicate definition of
 dnl  mpinfou, and if that helps add it to confdefs.h (used for further
 dnl  configure tests) and config.h.
 #
-AC_CHECK_HEADERS([errno.h sys/socket.h sys/types.h])
+AC_CHECK_HEADERS([errno.h sys/socket.h sys/types.h time.h])
 AC_CHECK_HEADERS([net/if.h], [], [], [
     #ifdef HAVE_SYS_SOCKET_H
     # include <sys/socket.h>

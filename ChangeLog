@@ -1,3 +1,4 @@
+* Have NTP_LIBNTP check for time.h and clock_getres().
 * Fix ntpsweep to use sntp instead of ntpdate, from Oliver Kindernay.
 (4.2.7p368) 2013/05/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2145] ntpq dumps core when displaying sys_var_list and more.
