@@ -1,6 +1,6 @@
 #! @PATH_PERL@ -w
 #
-# $Id: ntpsweep.in 1.3 2007/03/03 19:21:17-05:00 stenn@whimsy.udel.edu $
+# $Id: ntpsweep.in 1.4 2013/07/04 20:43:30-04:00 stenn@psp-deb1.ntp.org $
 #
 # DISCLAIMER
 # 
@@ -26,7 +26,7 @@ my $version = 1.3;
 (my $program = $0) =~ s%.*/(.+?)(.pl)?$%$1%;
 
 # Hardcoded paths/program names
-my $ntpdate = "ntpdate";
+my $sntp = "sntp";
 my $ntpq = "ntpq";
 
 # no STDOUT buffering
@@ -138,18 +138,18 @@ sub scan_host($;$;$) {
     if (&item_in_list($host, @known_hosts)) {
 	$known_host = 1;
     } else {
-	# ntpdate part
-	open(NTPDATE, "$ntpdate -bd $host 2>/dev/null |") ||
-    	die "Cannot open ntpdate pipe: $!\n";
-	while (<NTPDATE>) {
-	    /^stratum\s+(\d+).*$/ && do {
-		$stratum = $1;
-	    };
-	    /^offset\s+([0-9.-]+)$/ && do {
-		$offset = $1;
-	    };
-	}
-	close(NTPDATE);
+	# sntp part
+        open my $sntp_pipe, "$sntp $host 2>/dev/null |" 
+            or die "Cannot open $sntp pipe: $1";
+    
+        while (<$sntp_pipe>) {
+            next if !/^\d{4}-\d\d-\d\d/;
+            my @output = split / /;
+
+            $offset = $output[3];
+            ($stratum = pop @output) =~ s/s(\d{1,2})/$1/;
+        }
+        close $sntp_pipe;
     
 	# got answers ? If so, go on.
 	if ($stratum) {

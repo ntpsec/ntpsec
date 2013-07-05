@@ -1,3 +1,4 @@
+* Fix ntpsweep to use sntp instead of ntpdate, from Oliver Kindernay.
 (4.2.7p368) 2013/05/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2145] ntpq dumps core when displaying sys_var_list and more.
 (4.2.7p367) 2013/04/25 Released by Harlan Stenn <stenn@ntp.org>
