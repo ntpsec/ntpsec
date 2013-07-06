@@ -1,3 +1,4 @@
+* Remove \n's from syslog output strings.
 (4.2.7p369) 2013/07/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2415] RES_LIMITED flags check should use &, not &&.
 * Have NTP_LIBNTP check for time.h and clock_getres().
