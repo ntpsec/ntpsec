@@ -1411,7 +1411,7 @@ ees_process(
 	 * reference time, and lastsampletime as the receive time.
 	 */
 	if (ees->fix_pending) {
-		msyslog(LOG_ERR, "MSF%d: fix_pending=%d -> jump %x.%08x\n",
+		msyslog(LOG_ERR, "MSF%d: fix_pending=%d -> jump %x.%08x",
 			ees->fix_pending, ees->unit, offset.l_i, offset.l_f);
 		ees->fix_pending = 0;
 	}

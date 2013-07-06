@@ -204,7 +204,7 @@ send_blocking_req_internal(
 			"send_blocking_req_internal: pipe write: %m");
 	else
 		msyslog(LOG_ERR,
-			"send_blocking_req_internal: short write %d of %d\n",
+			"send_blocking_req_internal: short write %d of %d",
 			rc, octets);
 
 	exit(1);	/* otherwise would be return -1 */
@@ -231,13 +231,13 @@ receive_blocking_req_internal(
 
 	if (rc < 0) {
 		msyslog(LOG_ERR,
-			"receive_blocking_req_internal: pipe read %m\n");
+			"receive_blocking_req_internal: pipe read %m");
 	} else if (0 == rc) {
 		TRACE(4, ("parent closed request pipe, child %d terminating\n",
 			  c->pid));
 	} else if (rc != sizeof(hdr)) {
 		msyslog(LOG_ERR,
-			"receive_blocking_req_internal: short header read %d of %lu\n",
+			"receive_blocking_req_internal: short header read %d of %lu",
 			rc, (u_long)sizeof(hdr));
 	} else {
 		INSIST(sizeof(hdr) < hdr.octets && hdr.octets < 4 * 1024);
@@ -249,10 +249,10 @@ receive_blocking_req_internal(
 
 		if (rc < 0)
 			msyslog(LOG_ERR,
-				"receive_blocking_req_internal: pipe data read %m\n");
+				"receive_blocking_req_internal: pipe data read %m");
 		else if (rc != octets)
 			msyslog(LOG_ERR,
-				"receive_blocking_req_internal: short read %d of %ld\n",
+				"receive_blocking_req_internal: short read %d of %ld",
 				rc, octets);
 		else if (BLOCKING_REQ_MAGIC != req->magic_sig)
 			msyslog(LOG_ERR,

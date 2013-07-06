@@ -471,7 +471,7 @@ ntpdmain(
 		if (HAVE_OPT(SAVECONFIGQUIT))
 			syslogit = FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s: Starting\n", Version);
+	msyslog(LOG_NOTICE, "%s: Starting", Version);
 
 	{
 		int i;

@@ -449,7 +449,7 @@ get_datumtime(struct vmedate *time_vme)
 			 * the time.
 			 */
 			if(ioctl (fd_vme, SELTIMEFORMAT, TIME_DECIMAL)){	
-					msyslog(LOG_ERR, "Could not set time format\n");
+					msyslog(LOG_ERR, "Could not set time format");
 					return (NULL);	
 			}
 			/* read the time */

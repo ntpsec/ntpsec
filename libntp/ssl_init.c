@@ -53,7 +53,7 @@ ssl_check_version(void)
 {
 	if ((SSLeay() ^ OPENSSL_VERSION_NUMBER) & ~0xff0L) {
 		msyslog(LOG_WARNING,
-		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
+		    "OpenSSL version mismatch. Built against %lx, you have %lx",
 		    (u_long)OPENSSL_VERSION_NUMBER, SSLeay());
 		fprintf(stderr,
 		    "OpenSSL version mismatch. Built against %lx, you have %lx\n",
@@ -118,7 +118,7 @@ keytype_from_text(
 				keytype_name(key_type), digest_len,
 				max_digest_len);
 			msyslog(LOG_ERR,
-				"key type %s %u octet digests are too big, max %lu\n",
+				"key type %s %u octet digests are too big, max %lu",
 				keytype_name(key_type), digest_len,
 				max_digest_len);
 			return 0;

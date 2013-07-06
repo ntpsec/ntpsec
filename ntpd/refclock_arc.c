@@ -651,7 +651,7 @@ arc_start(
 	DPRINTF(1, ("arc: unit %d using tty_open().\n", unit));
 	fd = tty_open(device, OPEN_FLAGS, 0777);
 	if (fd < 0) {
-		msyslog(LOG_ERR, "MSF_ARCRON(%d): failed second open(%s, 0777): %m.\n",
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): failed second open(%s, 0777): %m.",
 			unit, device);
 		close(temp_fd);
 		return 0;
@@ -661,7 +661,7 @@ arc_start(
 
 #ifndef SYS_WINNT
 	if (-1 == fcntl(fd, F_SETFL, 0)) /* clear the descriptor flags */
-		msyslog(LOG_ERR, "MSF_ARCRON(%d): fcntl(F_SETFL, 0): %m.\n",
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): fcntl(F_SETFL, 0): %m.",
 			unit);
 
 #endif
@@ -670,7 +670,7 @@ arc_start(
 #ifdef HAVE_TERMIOS
 
 	if (tcgetattr(fd, &arg) < 0) {
-		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcgetattr(%s): %m.\n",
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcgetattr(%s): %m.",
 			unit, device);
 		close(fd);
 		return 0;
@@ -684,7 +684,7 @@ arc_start(
 	arg.c_cc[VTIME] = 0;
 
 	if (tcsetattr(fd, TCSANOW, &arg) < 0) {
-		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcsetattr(%s): %m.\n",
+		msyslog(LOG_ERR, "MSF_ARCRON(%d): tcsetattr(%s): %m.",
 			unit, device);
 		close(fd);
 		return 0;
