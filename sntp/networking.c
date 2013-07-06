@@ -26,7 +26,7 @@ sendpkt (
 	cc = sendto(rsock, (void *)pkt, len, 0, &dest->sa, 
 		    SOCKLEN(dest));
 	if (cc == SOCKET_ERROR) {
-		msyslog(LOG_ERR, "Send to %s failed, %m\n",
+		msyslog(LOG_ERR, "Send to %s failed, %m",
 			sptoa(dest));
 		return FALSE;
 	}
@@ -246,8 +246,8 @@ unusable:
 		msyslog(LOG_ERR,
 			"%s response org expected to match sent xmt",
 			stoa(sender));
-		msyslog(LOG_ERR, "resp org: %s\n", prettydate(&resp_org));
-		msyslog(LOG_ERR, "sent xmt: %s\n", prettydate(&sent_xmt));
+		msyslog(LOG_ERR, "resp org: %s", prettydate(&resp_org));
+		msyslog(LOG_ERR, "sent xmt: %s", prettydate(&sent_xmt));
 		return PACKET_UNUSEABLE;
 	}
 

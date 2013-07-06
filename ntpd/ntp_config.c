@@ -2609,7 +2609,7 @@ config_rlimit(
 				   "MB");
 #else
 			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.\n");
+			msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
 #endif /* !(HAVE_MLOCKALL && RLIMIT_MEMLOCK) */
 			break;
 
@@ -2621,7 +2621,7 @@ config_rlimit(
 				   "4k");
 #else
 			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "'rlimit stacksize' specified but is not available on this system.\n");
+			msyslog(LOG_WARNING, "'rlimit stacksize' specified but is not available on this system.");
 #endif /* !(HAVE_MLOCKALL && RLIMIT_STACK) */
 			break;
 		}
@@ -3389,7 +3389,7 @@ config_fudge(
 
 			default:
 				msyslog(LOG_ERR,
-					"Unexpected fudge flag %s (%d) for %s\n",
+					"Unexpected fudge flag %s (%d) for %s",
 					token_name(curr_opt->attr),
 					curr_opt->attr, stoa(&addr_sock));
 				exit(curr_opt->attr ? curr_opt->attr : 1);
@@ -3439,7 +3439,7 @@ config_vars(
 		case T_Driftfile:
 			if ('\0' == curr_var->value.s[0]) {
 				stats_drift_file = 0;
-				msyslog(LOG_INFO, "config: driftfile disabled\n");
+				msyslog(LOG_INFO, "config: driftfile disabled");
 			} else
 				stats_config(STATS_FREQ_FILE, curr_var->value.s);
 			break;
@@ -3706,7 +3706,7 @@ config_peers(
 					     (void *)ctx);
 # else	/* !WORKER follows */
 			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use IP address instead.\n",
+				"hostname %s can not be used, please use IP address instead.",
 				curr_peer->addr->address);
 # endif
 		}
@@ -3783,7 +3783,7 @@ config_peers(
 					     &peer_name_resolved, ctx);
 # else	/* !WORKER follows */
 			msyslog(LOG_ERR,
-				"hostname %s can not be used, please use IP address instead.\n",
+				"hostname %s can not be used, please use IP address instead.",
 				curr_peer->addr->address);
 # endif
 		}
@@ -3964,7 +3964,7 @@ config_unpeers(
 				     &unpeer_name_resolved, NULL);
 # else	/* !WORKER follows */
 		msyslog(LOG_ERR,
-			"hostname %s can not be used, please use IP address instead.\n",
+			"hostname %s can not be used, please use IP address instead.",
 			name);
 # endif
 	}
@@ -4351,7 +4351,7 @@ getconfig(
 	temp = CONFIG_FILE;
 	if (!ExpandEnvironmentStringsA(temp, config_file_storage,
 				       sizeof(config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m\n");
+		msyslog(LOG_ERR, "ExpandEnvironmentStrings CONFIG_FILE failed: %m");
 		exit(1);
 	}
 	config_file = config_file_storage;
@@ -4359,7 +4359,7 @@ getconfig(
 	temp = ALT_CONFIG_FILE;
 	if (!ExpandEnvironmentStringsA(temp, alt_config_file_storage,
 				       sizeof(alt_config_file_storage))) {
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m\n");
+		msyslog(LOG_ERR, "ExpandEnvironmentStrings ALT_CONFIG_FILE failed: %m");
 		exit(1);
 	}
 	alt_config_file = alt_config_file_storage;

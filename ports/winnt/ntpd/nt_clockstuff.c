@@ -673,13 +673,13 @@ init_winnt_time(void)
 
 	/* Set the Event-ID message-file name. */
 	if (!GetModuleFileName(NULL, szMsgPath, sizeof(szMsgPath))) {
-		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m\n");
+		msyslog(LOG_ERR, "GetModuleFileName(PGM_EXE_FILE) failed: %m");
 		exit(1);
 	}
 
 	/* Initialize random file before OpenSSL checks */
 	if (!init_randfile())
-		msyslog(LOG_ERR, "Unable to initialize .rnd file\n");
+		msyslog(LOG_ERR, "Unable to initialize .rnd file");
 
 #pragma warning(push)
 #pragma warning(disable: 4127) /* conditional expression is constant */
@@ -749,7 +749,7 @@ init_winnt_time(void)
 
 	/* Determine the existing system time slewing */
 	if (!GetSystemTimeAdjustment(&adjclockperiod, &clockperiod, &noslew)) {
-		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m\n");
+		msyslog(LOG_ERR, "GetSystemTimeAdjustment failed: %m");
 		exit(-1);
 	}
 
@@ -791,7 +791,7 @@ init_winnt_time(void)
 
 	/* get the performance counter ticks per second */
 	if (!QueryPerformanceFrequency(&Freq) || !Freq.QuadPart) {
-		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m\n");
+		msyslog(LOG_ERR, "QueryPerformanceFrequency failed: %m");
 		exit(-1);
 	}
 
@@ -1235,7 +1235,7 @@ lock_thread_to_processor(HANDLE thread)
 	if (ThreadAffinityMask && 
 	    !SetThreadAffinityMask(thread, ThreadAffinityMask))
 		msyslog(LOG_ERR, 
-			"Unable to wire thread to mask %x: %m\n", 
+			"Unable to wire thread to mask %x: %m", 
 			ThreadAffinityMask);
 }
 

@@ -251,7 +251,7 @@ audio_init(
 	 */
 	fd = open(dname, O_RDWR | O_NONBLOCK, 0777);
 	if (fd < 0) {
-		msyslog(LOG_ERR, "audio_init: %s %m\n", dname);
+		msyslog(LOG_ERR, "audio_init: %s %m", dname);
 		return (fd);
 	}
 
@@ -260,7 +260,7 @@ audio_init(
 	 */
 	ctl_fd = open(actl, O_RDWR);
 	if (ctl_fd < 0) {
-		msyslog(LOG_ERR, "audio_init: invalid control device <%s>\n",
+		msyslog(LOG_ERR, "audio_init: invalid control device <%s>",
 		    actl);
 		close(fd);
 		return(ctl_fd);
@@ -349,7 +349,7 @@ audio_init(
 # endif /* HAVE_SYS_AUDIOIO_H */
 	rval = ioctl(ctl_fd, (int)AUDIO_SETINFO, (char *)&info);
 	if (rval < 0) {
-		msyslog(LOG_ERR, "audio: invalid control device parameters\n");
+		msyslog(LOG_ERR, "audio: invalid control device parameters");
 		close(ctl_fd);
 		close(fd);
 		return(rval);

@@ -324,7 +324,7 @@ ntpdatemain (
 	key_file = key_file_storage;
 
 	if (!ExpandEnvironmentStrings(KEYFILE, key_file, MAX_PATH))
-		msyslog(LOG_ERR, "ExpandEnvironmentStrings(KEYFILE) failed: %m\n");
+		msyslog(LOG_ERR, "ExpandEnvironmentStrings(KEYFILE) failed: %m");
 
 	ssl_applink();
 #endif /* SYS_WINNT */
@@ -828,7 +828,7 @@ receive(
 	if (LEAP_NOTINSYNC == PKT_LEAP(rpkt->li_vn_mode) &&
 	    STRATUM_PKT_UNSPEC == rpkt->stratum &&
 	    !memcmp("RATE", &rpkt->refid, 4)) {
-		msyslog(LOG_ERR, "%s rate limit response from server.\n",
+		msyslog(LOG_ERR, "%s rate limit response from server.",
 			stoa(&rbufp->recv_srcadr));
 		server->event_time = 0;
 		complete_servers++;
@@ -1373,13 +1373,13 @@ addserver(
 			   by waiting for resolution of several servers */
 			fprintf(stderr, "Exiting, name server cannot be used: %s (%d)",
 				gai_strerror(error), error);
-			msyslog(LOG_ERR, "name server cannot be used: %s (%d)\n",
+			msyslog(LOG_ERR, "name server cannot be used: %s (%d)",
 				gai_strerror(error), error);
 			exit(1);
 		}
 		fprintf(stderr, "Error resolving %s: %s (%d)\n", serv,
 			gai_strerror(error), error);
-		msyslog(LOG_ERR, "Can't find host %s: %s (%d)\n", serv,
+		msyslog(LOG_ERR, "Can't find host %s: %s (%d)", serv,
 			gai_strerror(error), error);
 		return;
 	}

@@ -26,7 +26,7 @@ ntp_set_tod(
 		(ULONGLONG)tv->tv_usec * 10;
 
 	if (!FileTimeToSystemTime(&t.ft, &st) || !SetSystemTime(&st)) {
-		msyslog(LOG_ERR, "SetSystemTime failed: %m\n");
+		msyslog(LOG_ERR, "SetSystemTime failed: %m");
 		return -1;
 	}
 

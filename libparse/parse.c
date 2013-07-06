@@ -715,7 +715,7 @@ timepacket(
 	default:
 		/* shouldn't happen */
 #ifndef PARSEKERNEL
-		msyslog(LOG_WARNING, "parse: INTERNAL error: bad return code of convert routine \"%s\"\n", clockformats[format]->name);
+		msyslog(LOG_WARNING, "parse: INTERNAL error: bad return code of convert routine \"%s\"", clockformats[format]->name);
 #endif	  
 		return CVT_FAIL|cvtrtc;
 	}

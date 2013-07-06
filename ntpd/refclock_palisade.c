@@ -313,20 +313,20 @@ palisade_start (
 		/* Normal mode, do nothing */
 		break;
 	    case CLK_PRAECIS:
-		msyslog(LOG_NOTICE, "Palisade(%d) Praecis mode enabled\n"
+		msyslog(LOG_NOTICE, "Palisade(%d) Praecis mode enabled"
 			,unit);
 		break;
 	    case CLK_THUNDERBOLT:
-		msyslog(LOG_NOTICE, "Palisade(%d) Thunderbolt mode enabled\n"
+		msyslog(LOG_NOTICE, "Palisade(%d) Thunderbolt mode enabled"
 			,unit);
 		tio.c_cflag = (CS8|CLOCAL|CREAD);
 		break;
 	    case CLK_ACUTIME:
-		msyslog(LOG_NOTICE, "Palisade(%d) Acutime Gold mode enabled\n"
+		msyslog(LOG_NOTICE, "Palisade(%d) Acutime Gold mode enabled"
 			,unit);
 		break;
 	    default:
-		msyslog(LOG_NOTICE, "Palisade(%d) mode unknown\n",unit);
+		msyslog(LOG_NOTICE, "Palisade(%d) mode unknown",unit);
 		break;
 	}
 	if (tcsetattr(fd, TCSANOW, &tio) == -1) {

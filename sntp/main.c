@@ -167,7 +167,7 @@ sntp_main (
 	if (HAVE_OPT(LOGFILE))
 		open_logfile(OPT_ARG(LOGFILE));
 
-	msyslog(LOG_INFO, "%s\n", sntpVersion);
+	msyslog(LOG_INFO, "%s", sntpVersion);
 
 	if (0 == argc && !HAVE_OPT(BROADCAST) && !HAVE_OPT(CONCURRENT)) {
 		printf("%s: Must supply at least one of -b hostname, -c hostname, or hostname.\n",
@@ -1260,7 +1260,7 @@ handle_pkt(
 			disptxt[0] = '\0';
 		}
 
-		msyslog(LOG_INFO, "%s %+.*f%s %s s%d%s\n", ts_str,
+		msyslog(LOG_INFO, "%s %+.*f%s %s s%d%s", ts_str,
 			digits, offset, disptxt,
 			hostnameaddr(hostname, host), stratum,
 			(time_adjusted)

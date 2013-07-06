@@ -386,7 +386,7 @@ start_blocking_thread_internal(
 			&blocking_thread_id);
 
 	if (NULL == blocking_child_thread) {
-		msyslog(LOG_ERR, "start blocking thread failed: %m\n");
+		msyslog(LOG_ERR, "start blocking thread failed: %m");
 		exit(-1);
 	}
 	c->thread_id = blocking_thread_id;
@@ -394,7 +394,7 @@ start_blocking_thread_internal(
 	/* remember the thread priority is only within the process class */
 	if (!SetThreadPriority(blocking_child_thread,
 			       THREAD_PRIORITY_BELOW_NORMAL))
-		msyslog(LOG_ERR, "Error lowering blocking thread priority: %m\n");
+		msyslog(LOG_ERR, "Error lowering blocking thread priority: %m");
 
 	resumed = ResumeThread(blocking_child_thread);
 	DEBUG_INSIST(resumed);

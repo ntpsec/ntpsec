@@ -715,7 +715,7 @@ ripencc_get_pps_ts(
 	l_fp tstmp;
 
 #ifdef DEBUG_PPS
-	msyslog(LOG_INFO,"ripencc_get_pps_ts\n");
+	msyslog(LOG_INFO,"ripencc_get_pps_ts");
 #endif /* DEBUG_PPS */
 
 
@@ -752,8 +752,8 @@ ripencc_get_pps_ts(
 	tstmp.l_uf = (u_int32)dtemp;
 
 #ifdef DEBUG_PPS
-	msyslog(LOG_INFO,"ts.tv_sec: %d\n",(int)ts.tv_sec);
-	msyslog(LOG_INFO,"ts.tv_nsec: %ld\n",ts.tv_nsec);
+	msyslog(LOG_INFO,"ts.tv_sec: %d",(int)ts.tv_sec);
+	msyslog(LOG_INFO,"ts.tv_nsec: %ld",ts.tv_nsec);
 #endif /* DEBUG_PPS */
 
 	*tsptr = tstmp;
@@ -994,11 +994,11 @@ ripencc_receive(struct recvbuf *rbufp)
 					pp->nsec = 0;
 				}
 				else
-					msyslog(LOG_INFO, "%s(): ripencc_get_pps_ts returns failure\n",__FUNCTION__);
+					msyslog(LOG_INFO, "%s(): ripencc_get_pps_ts returns failure",__FUNCTION__);
 
 
 				if (!up->polled) { 
-					msyslog(LOG_INFO, "%s(): unrequested packet\n",__FUNCTION__);
+					msyslog(LOG_INFO, "%s(): unrequested packet",__FUNCTION__);
 					/* unrequested packet */
 					break;
 				}

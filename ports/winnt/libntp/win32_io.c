@@ -39,7 +39,7 @@ InitSockets(
 		SetLastError(err);
 		mfprintf(stderr, "No usable winsock: %m\n");
 		SetLastError(err);
-		msyslog(LOG_ERR, "No usable winsock: %m\n");
+		msyslog(LOG_ERR, "No usable winsock: %m");
 		exit(1);
 	}
 }
