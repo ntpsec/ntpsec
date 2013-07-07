@@ -1,3 +1,4 @@
+* CID 1042586: Check the return value of clock_gettime() in worker_sleep().
 (4.2.7p370) 2013/07/06 Released by Harlan Stenn <stenn@ntp.org>
 * Remove \n's from syslog output strings.
 (4.2.7p369) 2013/07/05 Released by Harlan Stenn <stenn@ntp.org>

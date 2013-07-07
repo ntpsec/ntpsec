@@ -87,9 +87,15 @@ worker_sleep(
 	int		rc;
 
 # ifdef HAVE_CLOCK_GETTIME
-	clock_gettime(CLOCK_REALTIME, &until);
+	if (0 != clock_gettime(CLOCK_REALTIME, &until)) {
+		msyslog(LOG_ERR, "worker_sleep: clock_gettime() failed: %m");
+		return -1;
+	}
 # else
-	getclock(TIMEOFDAY, &until);
+	if (0 != getclock(TIMEOFDAY, &until)) {
+		msyslog(LOG_ERR, "worker_sleep: getclock() failed: %m");
+		return -1;
+	}
 # endif
 	until.tv_sec += seconds;
 	do {
@@ -99,7 +105,7 @@ worker_sleep(
 		return -1;
 	if (-1 == rc && ETIMEDOUT == errno)
 		return 0;
-	msyslog(LOG_ERR, "worker_sleep sem_timedwait %m");
+	msyslog(LOG_ERR, "worker_sleep: sem_timedwait: %m");
 	return -1;
 }
 
