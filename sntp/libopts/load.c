@@ -41,6 +41,9 @@ add_env_val(char * buf, int buf_sz, char const * name);
 
 static char *
 assemble_arg_val(char * txt, tOptionLoadMode mode);
+
+static char *
+trim_quotes(char * arg);
 /* = = = END-STATIC-FORWARD = = = */
 
 /*=export_func  optionMakePath
@@ -323,13 +326,13 @@ munge_str(char * txt, tOptionLoadMode mode)
 static char *
 assemble_arg_val(char * txt, tOptionLoadMode mode)
 {
-    char* pzEnd = strpbrk(txt, ARG_BREAK_STR);
-    int   space_break;
+    char * end = strpbrk(txt, ARG_BREAK_STR);
+    int    space_break;
 
     /*
      *  Not having an argument to a configurable name is okay.
      */
-    if (pzEnd == NULL)
+    if (end == NULL)
         return txt + strlen(txt);
 
     /*
@@ -338,8 +341,8 @@ assemble_arg_val(char * txt, tOptionLoadMode mode)
      *  of which character caused it.
      */
     if (mode == OPTION_LOAD_KEEP) {
-        *(pzEnd++) = NUL;
-        return pzEnd;
+        *(end++) = NUL;
+        return end;
     }
 
     /*
@@ -347,14 +350,25 @@ assemble_arg_val(char * txt, tOptionLoadMode mode)
      *  because we'll have to skip over an immediately following ':' or '='
      *  (and the white space following *that*).
      */
-    space_break = IS_WHITESPACE_CHAR(*pzEnd);
-    *(pzEnd++) = NUL;
+    space_break = IS_WHITESPACE_CHAR(*end);
+    *(end++) = NUL;
 
-    pzEnd = SPN_WHITESPACE_CHARS(pzEnd);
-    if (space_break && ((*pzEnd == ':') || (*pzEnd == '=')))
-        pzEnd = SPN_WHITESPACE_CHARS(pzEnd+1);
+    end = SPN_WHITESPACE_CHARS(end);
+    if (space_break && ((*end == ':') || (*end == '=')))
+        end = SPN_WHITESPACE_CHARS(end+1);
 
-    return pzEnd;
+    return end;
+}
+
+static char *
+trim_quotes(char * arg)
+{
+    switch (*arg) {
+    case '"':
+    case '\'':
+        ao_string_cook(arg, NULL);
+    }
+    return arg;
 }
 
 /**
@@ -370,12 +384,8 @@ assemble_arg_val(char * txt, tOptionLoadMode mode)
  * @param[in]     load_mode  option loading mode (OPTION_LOAD_*)
  */
 LOCAL void
-loadOptionLine(
-    tOptions *  opts,
-    tOptState * opt_state,
-    char *      line,
-    tDirection  direction,
-    tOptionLoadMode   load_mode )
+loadOptionLine(tOptions * opts, tOptState * opt_state, char * line,
+               tDirection direction, tOptionLoadMode load_mode )
 {
     line = SPN_LOAD_LINE_SKIP_CHARS(line);
 
@@ -388,7 +398,7 @@ loadOptionLine(
         if (opt_state->flags & OPTST_NO_INIT)
             return;
 
-        opt_state->pzOptArg = arg;
+        opt_state->pzOptArg = trim_quotes(arg);
     }
 
     switch (opt_state->flags & (OPTST_IMM|OPTST_DISABLE_IMM)) {

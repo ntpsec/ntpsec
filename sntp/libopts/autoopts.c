@@ -32,21 +32,6 @@
  *  13aa749a5b0a454917a944ed8fffc530b784f5ead522b1aacaf4ec8aa55a6239  COPYING.mbsd
  */
 
-#ifndef PKGDATADIR
-#  define PKGDATADIR ""
-#endif
-
-static char const   zNil[] = "";
-static arg_types_t  argTypes             = { NULL };
-static char         line_fmt_buf[32];
-static bool         displayEnum          = false;
-static char const   pkgdatadir_default[] = PKGDATADIR;
-static char const * program_pkgdatadir   = pkgdatadir_default;
-static tOptionLoadMode option_load_mode  = OPTION_LOAD_UNCOOKED;
-static tePagerState pagerState           = PAGER_STATE_INITIAL;
-
-       FILE *       option_usage_fp      = NULL;
-
 /**
  * The number of tab characters to skip when printing continuation lines.
  */
@@ -58,7 +43,7 @@ ao_malloc(size_t sz)
     void * res = malloc(sz);
     if (res == NULL) {
         fprintf(stderr, zalloc_fail, (int)sz);
-        exit(EXIT_FAILURE);
+        option_exits(EXIT_FAILURE);
     }
     return res;
 }
@@ -71,7 +56,7 @@ ao_realloc(void *p, size_t sz)
     void * res = (p == NULL) ? malloc(sz) : realloc(p, sz);
     if (res == NULL) {
         fprintf(stderr, zrealloc_fail, (int)sz, p);
-        exit(EXIT_FAILURE);
+        option_exits(EXIT_FAILURE);
     }
     return res;
 }
@@ -84,7 +69,7 @@ ao_strdup(char const *str)
     char * res = strdup(str);
     if (res == NULL) {
         fprintf(stderr, zalloc_fail, (int)strlen(str));
-        exit(EXIT_FAILURE);
+        option_exits(EXIT_FAILURE);
     }
     return res;
 }
@@ -386,7 +371,7 @@ optionProcess(tOptions * opts, int a_ct, char ** a_v)
 
         if (SELECTED_OPT(od)) {
             optionSaveFile(opts);
-            exit(EXIT_SUCCESS);
+            option_exits(EXIT_SUCCESS);
         }
     }
     }

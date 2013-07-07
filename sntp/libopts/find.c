@@ -500,7 +500,7 @@ get_opt_arg_must(tOptions * opts, tOptState * o_st)
     default:
 #ifdef DEBUG
         fputs("AutoOpts lib error: option type not selected\n", stderr);
-        exit(EXIT_FAILURE);
+        option_exits(EXIT_FAILURE);
 #endif
 
     case TOPT_DEFAULT:
