@@ -1,8 +1,8 @@
-.TH ntp-wait @NTP_WAIT_MS@ "06 Jul 2013" "ntp (4.2.7p370)" "User Commands"
+.TH ntp-wait @NTP_WAIT_MS@ "07 Jul 2013" "ntp (4.2.7p371)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July  6, 2013 at 11:26:09 AM by AutoGen 5.17.3
+.\"  It has been AutoGen-ed  July  7, 2013 at 06:22:10 AM by AutoGen 5.17.5pre10
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -18,11 +18,11 @@ All arguments must be options.
 .SH DESCRIPTION
 .B 
 will send at most
-\fInum-tries\fR
+Inum-triesR
 queries to
 .Xr ntpd 8 ,
 sleeping for
-\fIsecs-between-tries\fR
+Isecs-between-triesR
 after each status return that says
 .Xr ntpd 8
 has not yet produced a synchronized and stable system clock.
@@ -65,7 +65,7 @@ Display usage information and exit.
 .BR \-! , " \-\-more-help"
 Pass the extended usage information through a pager.
 .TP
-.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
+.BR \-\-version "[={\fIv|c|n\fP}]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
@@ -117,7 +117,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p370 of NTP.
+This document corresponds to version 4.2.7p371 of NTP.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp-wait\fP
 option definitions.

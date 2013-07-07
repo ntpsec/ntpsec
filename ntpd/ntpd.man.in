@@ -1,8 +1,8 @@
-.TH ntpd @NTPD_MS@ "06 Jul 2013" "4.2.7p370" "User Commands"
+.TH ntpd @NTPD_MS@ "07 Jul 2013" "4.2.7p371" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpd-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July  6, 2013 at 11:28:35 AM by AutoGen 5.17.3
+.\"  It has been AutoGen-ed  July  7, 2013 at 06:26:14 AM by AutoGen 5.17.5pre10
 .\"  From the definitions    ntpd-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -395,7 +395,7 @@ Display usage information and exit.
 .BR \-! , " \-\-more-help"
 Pass the extended usage information through a pager.
 .TP
-.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
+.BR \-\-version "[={\fIv|c|n\fP}]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
@@ -928,7 +928,7 @@ mind.
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p370 of NTP.
+This document corresponds to version 4.2.7p371 of NTP.
 Portions of this document came from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntpd\fP

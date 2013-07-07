@@ -1,8 +1,8 @@
-.TH ntpdc 1ntpdcman "06 Jul 2013" "4.2.7p370" "User Commands"
+.TH ntpdc 1ntpdcman "07 Jul 2013" "4.2.7p371" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July  6, 2013 at 11:29:06 AM by AutoGen 5.17.3
+.\"  It has been AutoGen-ed  July  7, 2013 at 06:32:42 AM by AutoGen 5.17.5pre10
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -112,17 +112,18 @@ Display usage information and exit.
 .BR \-! , " \-\-more-help"
 Pass the extended usage information through a pager.
 .TP
-.BR \-> " [\fIrcfile\fP]," " \-\-save-opts" "[=\fIrcfile\fP]"
-Save the option state to \fIrcfile\fP.  The default is the \fIlast\fP
+.BR \-> " [\fIcfgfile\fP]," " \-\-save-opts" "[=\fIcfgfile\fP]"
+Save the option state to \fIcfgfile\fP.  The default is the \fIlast\fP
 configuration file listed in the \fBOPTION PRESETS\fP section, below.
+The command will exit after updating the config file.
 .TP
-.BR \-< " \fIrcfile\fP," " \-\-load-opts" "=\fIrcfile\fP," " \-\-no-load-opts"
-Load options from \fIrcfile\fP.
+.BR \-< " \fIcfgfile\fP," " \-\-load-opts" "=\fIcfgfile\fP," " \-\-no-load-opts"
+Load options from \fIcfgfile\fP.
 The \fIno-load-opts\fP form will disable the loading
-of earlier RC/INI files.  \fI\-\-no-load-opts\fP is handled early,
+of earlier config/rc/ini files.  \fI\-\-no-load-opts\fP is handled early,
 out of order.
 .TP
-.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
+.BR \-\-version "[={\fIv|c|n\fP}]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
@@ -615,14 +616,14 @@ association with the same peer may be deleted when this command is
 executed, or may simply be converted to conform to the new
 configuration, as appropriate.
 If the optional
-\fIkeyid\fR
+IkeyidR
 is a
 nonzero integer, all outgoing packets to the remote server will
 have an authentication field attached encrypted with this key.
 If
 the value is 0 (or not given) no authentication will be done.
 The
-\fIversion\fR
+IversionR
 can be 1, 2 or 3 and defaults to 3.
 The
 .Cm prefer
@@ -651,7 +652,7 @@ mode is broadcast.
 In this case a valid key identifier and key are
 required.
 The
-\fIpeer_address\fR
+Ipeer_addressR
 parameter can be the broadcast
 address of the local network or a multicast group address assigned
 to NTP.
@@ -757,7 +758,7 @@ The default for this flag is disable.
 .in -4
 .TP
 .BR Xo Ic restrict Ar address Ar mask
-\fIflag Oo Ar ... Oc\fR
+Iflag Oo Ar ... OcR
 .Xc
 This command operates in the same way as the
 .Ic restrict
@@ -765,7 +766,7 @@ configuration file commands of
 .Xr ntpd 1ntpdmdoc .
 .TP
 .BR Xo Ic unrestrict Ar address Ar mask
-\fIflag Oo Ar ... Oc\fR
+Iflag Oo Ar ... OcR
 .Xc
 Unrestrict the matching entry from the restrict list.
 .TP

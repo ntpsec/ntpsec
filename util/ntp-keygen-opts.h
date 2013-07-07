@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.h)
  *
- *  It has been AutoGen-ed  July  6, 2013 at 11:29:45 AM by AutoGen 5.17.3
+ *  It has been AutoGen-ed  July  7, 2013 at 06:33:43 AM by AutoGen 5.17.5pre10
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 38:0:13 templates.
+ * Generated from AutoOpts 39:0:14 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -53,7 +53,7 @@
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 155648
+#define AO_TEMPLATE_VERSION 159744
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
@@ -94,9 +94,9 @@ typedef enum {
 /** count of all options for ntp-keygen */
 #define OPTION_CT    26
 /** ntp-keygen version */
-#define NTP_KEYGEN_VERSION       "4.2.7p370"
+#define NTP_KEYGEN_VERSION       "4.2.7p371"
 /** Full ntp-keygen version text */
-#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p370"
+#define NTP_KEYGEN_FULL_VERSION  "ntp-keygen (ntp) 4.2.7p371"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -106,7 +106,7 @@ typedef enum {
 #define         DESC(n) (ntp_keygenOptions.pOptDesc[INDEX_OPT_## n])
 /** 'true' if an option has been specified in any way */
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
-/** The string argument to an option. The argument type must be "string". */
+/** The string argument to an option. The argument type must be \"string\". */
 #define      OPT_ARG(n) (DESC(n).optArg.argString)
 /** Mask the option state revealing how an option was specified.
  *  It will be one and only one of \a OPTST_SET, \a OPTST_PRESET,
@@ -133,7 +133,6 @@ typedef enum {
                 if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  *  Enumeration of ntp-keygen exit codes
@@ -144,7 +143,7 @@ typedef enum {
     NTP_KEYGEN_EXIT_USAGE_ERROR     = 64,
     NTP_KEYGEN_EXIT_NO_CONFIG_INPUT = 66,
     NTP_KEYGEN_EXIT_LIBOPTS_FAILURE = 70
-} ntp_keygen_exit_code_t;
+}   ntp_keygen_exit_code_t;
 /** @} */
 /**
  *  Make sure there are no #define name conflicts with the option names
@@ -258,7 +257,6 @@ typedef enum {
 # undef MV_KEYS
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /**
  *  Interface defines for specific options.
  * @{
@@ -322,10 +320,9 @@ typedef enum {
 #define ERRSTOP_OPTERR  STMTS(ntp_keygenOptions.fOptSet |= OPTPROC_ERRSTOP)
 #define RESTART_OPT(n)  STMTS( \
                 ntp_keygenOptions.curOptIdx = (n); \
-                ntp_keygenOptions.pzCurOpt  = NULL)
+                ntp_keygenOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntp_keygenOptions.pUsageProc)(&ntp_keygenOptions, c)
-/* extracted from opthead.tlib near line 538 */
 
 #ifdef  __cplusplus
 extern "C" {
@@ -380,4 +377,5 @@ static inline char* aoGetsText(char const* pz) {
 }
 #endif
 #endif /* AUTOOPTS_NTP_KEYGEN_OPTS_H_GUARD */
+
 /* ntp-keygen-opts.h ends here */

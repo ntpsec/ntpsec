@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpq.texi)
 #
-# It has been AutoGen-ed  July  6, 2013 at 11:29:25 AM by AutoGen 5.17.3
+# It has been AutoGen-ed  July  7, 2013 at 06:33:18 AM by AutoGen 5.17.5pre10
 # From the definitions    ntpq-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -290,7 +290,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpq - standard NTP query program - Ver. 4.2.7p370
+ntpq - standard NTP query program - Ver. 4.2.7p371
 Usage:  ntpq [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... [ host ...]
   Flg Arg Option-Name    Description
    -4 no  ipv4           Force IPv4 DNS name resolution
@@ -328,6 +328,8 @@ The following option preset mechanisms are supported:
  - examining environment variables named NTPQ_*
 
 Please send bug reports to:  <http://bugs.ntp.org, bugs@@ntp.org>
+
+exit 0
 @end example
 @exampleindent 4
 
@@ -460,7 +462,6 @@ are expanded and replaced when @file{ntpq} runs.
 For any of these that are plain files, they are simply processed.
 For any that are directories, then a file named @file{.ntprc} is searched for
 within that directory and processed.
-
 
 Configuration files may be in a wide variety of formats.
 The basic format is an option name followed by a value (argument) on the
