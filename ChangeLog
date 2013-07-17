@@ -1,4 +1,5 @@
 * [Bug 1466] Oncore should set FLAG_PPS.
+* [Bug 2375] AIX 7 doesn't like a libevent validation check.
 (4.2.7p371) 2013/07/07 Released by Harlan Stenn <stenn@ntp.org>
 * CID 1042586: Check the return value of clock_gettime() in worker_sleep().
 * Upgrade to libopts-39.0.14 from 5.17.5pre10.

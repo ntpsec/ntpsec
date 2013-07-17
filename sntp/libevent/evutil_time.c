@@ -184,12 +184,6 @@ evutil_configure_monotonic_time_(struct evutil_monotonic_timer *base,
 	struct timespec	ts;
 
 #ifdef CLOCK_MONOTONIC_COARSE
-#if CLOCK_MONOTONIC_COARSE < 0
-	/* Technically speaking, nothing keeps CLOCK_* from being negative (as
-	 * far as I know). This check and the one below make sure that it's
-	 * safe for us to use -1 as an "unset" value. */
-#error "I didn't expect CLOCK_MONOTONIC_COARSE to be < 0"
-#endif
 	if (! precise && ! fallback) {
 		if (clock_gettime(CLOCK_MONOTONIC_COARSE, &ts) == 0) {
 			base->monotonic_clock = CLOCK_MONOTONIC_COARSE;
@@ -201,10 +195,6 @@ evutil_configure_monotonic_time_(struct evutil_monotonic_timer *base,
 		base->monotonic_clock = CLOCK_MONOTONIC;
 		return 0;
 	}
-
-#if CLOCK_MONOTONIC < 0
-#error "I didn't expect CLOCK_MONOTONIC to be < 0"
-#endif
 
 	base->monotonic_clock = -1;
 	return 0;
