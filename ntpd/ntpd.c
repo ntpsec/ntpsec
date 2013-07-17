@@ -487,7 +487,7 @@ ntpdmain(
 				" %s", saved_argv[i]);
 			cp += strlen(cp);
 		}
-		msyslog(LOG_NOTICE, "%s", buf);
+		msyslog(LOG_INFO, "%s", buf);
 	}
 
 	/*
