@@ -1449,6 +1449,7 @@ do_unconf(
 	 * Now do it in earnest.
 	 */
 
+	items = INFO_NITEMS(inpkt->err_nitems);
 	datap = inpkt->u.data;
 
 	while (items-- > 0) {
