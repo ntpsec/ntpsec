@@ -13,7 +13,6 @@
 #include <pthread.h>
 #endif
 
-#include "iosignal.h"
 #include "ntp_stdlib.h"
 #include "ntp_malloc.h"
 #include "ntp_syslog.h"
@@ -450,9 +449,6 @@ start_blocking_thread_internal(
 			"start_blocking_thread: fcntl(F_SETFL, O_NONBLOCK) %m");
 		exit(1);
 	}
-#if HAVE_SIGNALED_IO
-	init_socket_sig(c->resp_read_pipe);
-#endif
 	(*addremove_io_fd)(c->resp_read_pipe, c->ispipe, FALSE);
 	pthread_attr_init(&thr_attr);
 	pthread_attr_setdetachstate(&thr_attr, PTHREAD_CREATE_DETACHED);
