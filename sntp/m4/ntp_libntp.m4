@@ -235,6 +235,9 @@ case "$ac_cv_search_setsockopt" in
 esac
 AS_UNSET([saved_LIBS])
 
+# Bug 2427 - look for recvmsg here.
+AC_CHECK_FUNCS([recvmsg])
+
 AC_C_INLINE
 
 case "$ac_cv_c_inline" in
