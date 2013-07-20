@@ -447,7 +447,7 @@ init_io(void)
 }
 
 
-void
+static void
 ntpd_addremove_io_fd(
 	int	fd,
 	int	is_pipe,
