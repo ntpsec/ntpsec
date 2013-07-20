@@ -1,3 +1,4 @@
+(4.2.7p373) 2013/07/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2427] configure fails to detect recvmsg() on Solaris.
 (4.2.7p372) 2013/07/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1466] Oncore should set FLAG_PPS.
