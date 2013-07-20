@@ -18,6 +18,7 @@
 #include "isc/error.h"
 #include "isc/strerror.h"
 #include "isc/formatcheck.h"
+#include "iosignal.h"
 
 #ifdef SIM
 # include "ntpsim.h"

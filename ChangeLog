@@ -1,3 +1,5 @@
+* [Bug 2425] setup SIGIO/SIGPOLL for asyncio on the read side
+of a socketpair for the worker thread.
 * [Bug 2427] configure fails to detect recvmsg() on Solaris.
 (4.2.7p372) 2013/07/17 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1466] Oncore should set FLAG_PPS.

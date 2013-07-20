@@ -37,12 +37,14 @@
 
 extern int		using_sigio;
 
+typedef void (input_handler_t)(l_fp *);
+extern	input_handler_t	input_handler;
+
 extern void		block_sigio	(void);
 extern void		unblock_sigio	(void);
 extern int		init_clock_sig	(struct refclockio *);
 extern void		init_socket_sig	(int);
-extern void		set_signal	(void);
-RETSIGTYPE		sigio_handler	(int);
+extern void		set_signal	(input_handler_t *);
 
 # define BLOCKIO()	block_sigio()
 # define UNBLOCKIO()	unblock_sigio()

@@ -442,7 +442,7 @@ init_io(void)
 #endif
 
 #if defined(HAVE_SIGNALED_IO)
-	(void) set_signal();
+	(void) set_signal(input_handler);
 #endif
 }
 
