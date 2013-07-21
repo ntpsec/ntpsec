@@ -42,6 +42,11 @@ then
 elif test -f "./test/check-dumpevents.py"
 then
         TEST_SRC_DIR="./test"
+elif test -f "../../../sntp/libevent/test/check-dumpevents.py-x"
+then    
+        TEST_SRC_DIR="../../../sntp/libevent/test"
+else
+        echo "### Can't find check-dumpevents.py"
 fi
 
 setup () {
@@ -88,6 +93,7 @@ run_tests () {
 	        announce OKAY ;
 	    else
 	        announce FAILED ;
+		FAILED=yes
 	    fi
 	else
 	    # no python
@@ -95,6 +101,7 @@ run_tests () {
 	        announce "OKAY (output not checked)" ;
 	    else
 	        announce "FAILED (output not checked)" ;
+		FAILED=yes
 	    fi
 	fi
 	test -x $TEST_DIR/regress || return
