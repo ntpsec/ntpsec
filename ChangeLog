@@ -1,3 +1,4 @@
+(4.2.7p374) 2013/07/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2368] make check troubles in libevent.
 * [Bug 2413] Fix "make check" with automake >= 1.13.
 * [Bug 2425] setup SIGIO/SIGPOLL for asyncio on the read side
