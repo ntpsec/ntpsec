@@ -173,7 +173,7 @@ psc_poll(
 	if (!up->msg_flag[unit]) {	/* write once to system log	*/
 	    msyslog(LOG_WARNING,
 		"SYNCHRONIZATION LOST on unit %1d, status %02x\n",
-		status, unit);
+		unit, status);
 	    up->msg_flag[unit] = 1;
 	}
 	return;

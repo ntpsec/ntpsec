@@ -1,3 +1,4 @@
+* [Bug 883] log warning arguments swapped in refclock_gpsvme.c.
 * [Bug 2368] Correct bug in previous attempt.
 * [Bug 2413] Fix "make check" with automake >= 1.13.
 * [Bug 2434] Line-buffer (v. block-buffer) stdout.
