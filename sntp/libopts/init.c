@@ -53,6 +53,7 @@ validate_struct(tOptions * opts, char const * pname)
         fputs(zno_opt_arg, stderr);
         return FAILURE;
     }
+    print_exit = ((opts->fOptSet & OPTPROC_SHELL_OUTPUT) != 0);
 
     /*
      *  IF the client has enabled translation and the translation procedure

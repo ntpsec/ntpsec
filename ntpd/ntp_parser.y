@@ -1149,12 +1149,12 @@ miscellaneous_command
 			}
 			if (curr_include_level >= MAXINCLUDELEVEL) {
 				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.\n");
+				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
 			} else {
 				fp[curr_include_level + 1] = F_OPEN(FindConfig($2), "r");
 				if (fp[curr_include_level + 1] == NULL) {
 					fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig($2));
-					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>\n", FindConfig($2));
+					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig($2));
 				} else {
 					ip_file = fp[++curr_include_level];
 				}

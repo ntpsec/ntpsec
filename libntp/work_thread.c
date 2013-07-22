@@ -87,9 +87,15 @@ worker_sleep(
 	int		rc;
 
 # ifdef HAVE_CLOCK_GETTIME
-	clock_gettime(CLOCK_REALTIME, &until);
+	if (0 != clock_gettime(CLOCK_REALTIME, &until)) {
+		msyslog(LOG_ERR, "worker_sleep: clock_gettime() failed: %m");
+		return -1;
+	}
 # else
-	getclock(TIMEOFDAY, &until);
+	if (0 != getclock(TIMEOFDAY, &until)) {
+		msyslog(LOG_ERR, "worker_sleep: getclock() failed: %m");
+		return -1;
+	}
 # endif
 	until.tv_sec += seconds;
 	do {
@@ -99,7 +105,7 @@ worker_sleep(
 		return -1;
 	if (-1 == rc && ETIMEDOUT == errno)
 		return 0;
-	msyslog(LOG_ERR, "worker_sleep sem_timedwait %m");
+	msyslog(LOG_ERR, "worker_sleep: sem_timedwait: %m");
 	return -1;
 }
 
@@ -386,7 +392,7 @@ start_blocking_thread_internal(
 			&blocking_thread_id);
 
 	if (NULL == blocking_child_thread) {
-		msyslog(LOG_ERR, "start blocking thread failed: %m\n");
+		msyslog(LOG_ERR, "start blocking thread failed: %m");
 		exit(-1);
 	}
 	c->thread_id = blocking_thread_id;
@@ -394,7 +400,7 @@ start_blocking_thread_internal(
 	/* remember the thread priority is only within the process class */
 	if (!SetThreadPriority(blocking_child_thread,
 			       THREAD_PRIORITY_BELOW_NORMAL))
-		msyslog(LOG_ERR, "Error lowering blocking thread priority: %m\n");
+		msyslog(LOG_ERR, "Error lowering blocking thread priority: %m");
 
 	resumed = ResumeThread(blocking_child_thread);
 	DEBUG_INSIST(resumed);

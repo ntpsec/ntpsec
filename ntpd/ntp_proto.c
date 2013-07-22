@@ -324,7 +324,7 @@ transmit(
 				peer_ntpdate--;
 				if (peer_ntpdate == 0) {
 					msyslog(LOG_NOTICE,
-					    "ntpd: no servers found\n");
+					    "ntpd: no servers found");
 					if (!msyslog_term)
 						printf(
 						    "ntpd: no servers found\n");
@@ -3603,7 +3603,7 @@ pool_xmit(
 		printf("transmit: at %ld %s->%s pool\n",
 		    current_time, latoa(lcladr), stoa(rmtadr));
 #endif
-	msyslog(LOG_INFO, "Soliciting pool server %s\n", stoa(rmtadr));
+	msyslog(LOG_INFO, "Soliciting pool server %s", stoa(rmtadr));
 #endif	/* WORKER */
 }
 
@@ -3667,7 +3667,7 @@ pool_name_resolved(
 	pool = findpeerbyassoc(assoc);
 	if (NULL == pool) {
 		msyslog(LOG_ERR,
-			"Could not find assoc %u for pool DNS %s\n",
+			"Could not find assoc %u for pool DNS %s",
 			assoc, name);
 		return;
 	}

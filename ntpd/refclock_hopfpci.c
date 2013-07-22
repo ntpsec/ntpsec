@@ -195,7 +195,7 @@ hopfpci_poll(
 
 #ifndef SYS_WINNT
 	if (ioctl(fd, HOPF_CLOCK_GET_UTC, &m_time) < 0)
-		msyslog(LOG_ERR, "HOPF_P(%d): HOPF_CLOCK_GET_UTC: %m\n",
+		msyslog(LOG_ERR, "HOPF_P(%d): HOPF_CLOCK_GET_UTC: %m",
 			unit);
 #else
 	GetHopfSystemTime(&m_time);

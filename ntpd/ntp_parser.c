@@ -1,22 +1,24 @@
-/* A Bison parser, made by GNU Bison 2.4.3.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-   2009, 2010 Free Software Foundation, Inc.
-   
-   This program is free software: you can redistribute it and/or modify
+
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-   
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -27,7 +29,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -45,7 +47,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.4.3"
+#define YYBISON_VERSION "2.3"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -53,73 +55,9 @@
 /* Pure parsers.  */
 #define YYPURE 0
 
-/* Push parsers.  */
-#define YYPUSH 0
-
-/* Pull parsers.  */
-#define YYPULL 1
-
 /* Using locations.  */
 #define YYLSP_NEEDED 0
 
-
-
-/* Copy the first part of user declarations.  */
-
-/* Line 189 of yacc.c  */
-#line 11 "ntp_parser.y"
-
-  #ifdef HAVE_CONFIG_H
-  # include <config.h>
-  #endif
-
-  #include "ntp.h"
-  #include "ntpd.h"
-  #include "ntp_machine.h"
-  #include "ntp_stdlib.h"
-  #include "ntp_filegen.h"
-  #include "ntp_scanner.h"
-  #include "ntp_config.h"
-  #include "ntp_crypto.h"
-
-  #include "ntpsim.h"		/* HMS: Do we really want this all the time? */
-				/* SK: It might be a good idea to always
-				   include the simulator code. That way
-				   someone can use the same configuration file
-				   for both the simulator and the daemon
-				*/
-
-
-  struct FILE_INFO *ip_file;	/* configuration file stream */
-
-  #define YYMALLOC	emalloc
-  #define YYFREE	free
-  #define YYERROR_VERBOSE
-  #define YYMAXDEPTH	1000	/* stop the madness sooner */
-  void yyerror(const char *msg);
-  extern int input_from_file;	/* else from ntpq :config */
-
-
-/* Line 189 of yacc.c  */
-#line 105 "ntp_parser.c"
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 1
-#endif
-
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 1
-#endif
 
 
 /* Tokens.  */
@@ -505,13 +443,62 @@
 
 
 
+/* Copy the first part of user declarations.  */
+#line 11 "ntp_parser.y"
+
+  #ifdef HAVE_CONFIG_H
+  # include <config.h>
+  #endif
+
+  #include "ntp.h"
+  #include "ntpd.h"
+  #include "ntp_machine.h"
+  #include "ntp_stdlib.h"
+  #include "ntp_filegen.h"
+  #include "ntp_scanner.h"
+  #include "ntp_config.h"
+  #include "ntp_crypto.h"
+
+  #include "ntpsim.h"		/* HMS: Do we really want this all the time? */
+				/* SK: It might be a good idea to always
+				   include the simulator code. That way
+				   someone can use the same configuration file
+				   for both the simulator and the daemon
+				*/
+
+
+  struct FILE_INFO *ip_file;	/* configuration file stream */
+
+  #define YYMALLOC	emalloc
+  #define YYFREE	free
+  #define YYERROR_VERBOSE
+  #define YYMAXDEPTH	1000	/* stop the madness sooner */
+  void yyerror(const char *msg);
+  extern int input_from_file;	/* else from ntpq :config */
+
+
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 1
+#endif
+
+/* Enabling verbose error messages.  */
+#ifdef YYERROR_VERBOSE
+# undef YYERROR_VERBOSE
+# define YYERROR_VERBOSE 1
+#else
+# define YYERROR_VERBOSE 0
+#endif
+
+/* Enabling the token table.  */
+#ifndef YYTOKEN_TABLE
+# define YYTOKEN_TABLE 1
+#endif
+
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-{
-
-/* Line 214 of yacc.c  */
 #line 49 "ntp_parser.y"
-
+{
 	char *			String;
 	double			Double;
 	int			Integer;
@@ -528,23 +515,22 @@ typedef union YYSTYPE
 	server_info_fifo *	Sim_server_fifo;
 	script_info *		Sim_script;
 	script_info_fifo *	Sim_script_fifo;
-
-
-
-/* Line 214 of yacc.c  */
-#line 536 "ntp_parser.c"
-} YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
+}
+/* Line 193 of yacc.c.  */
+#line 521 "../../ntpd/ntp_parser.c"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
+
 
 
 /* Copy the second part of user declarations.  */
 
 
-/* Line 264 of yacc.c  */
-#line 548 "ntp_parser.c"
+/* Line 216 of yacc.c.  */
+#line 534 "../../ntpd/ntp_parser.c"
 
 #ifdef short
 # undef short
@@ -619,14 +605,14 @@ typedef short int yytype_int16;
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static int
-YYID (int yyi)
+YYID (int i)
 #else
 static int
-YYID (yyi)
-    int yyi;
+YYID (i)
+    int i;
 #endif
 {
-  return yyi;
+  return i;
 }
 #endif
 
@@ -707,9 +693,9 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss_alloc;
-  YYSTYPE yyvs_alloc;
-};
+  yytype_int16 yyss;
+  YYSTYPE yyvs;
+  };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
@@ -743,12 +729,12 @@ union yyalloc
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
+# define YYSTACK_RELOCATE(Stack)					\
     do									\
       {									\
 	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
-	Stack = &yyptr->Stack_alloc;					\
+	YYCOPY (&yyptr->Stack, Stack, yysize);				\
+	Stack = &yyptr->Stack;						\
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
@@ -1471,18 +1457,9 @@ static const yytype_uint16 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  However,
-   YYFAIL appears to be in use.  Nevertheless, it is formally deprecated
-   in Bison 2.4.2's NEWS entry, where a plan to phase it out is
-   discussed.  */
+   Once GCC version 2 has supplanted version 1, this can go.  */
 
 #define YYFAIL		goto yyerrlab
-#if defined YYFAIL
-  /* This is here to suppress warnings from the GCC cpp's
-     -Wunused-macros.  Normally we don't worry about that warning, but
-     some users do, and we want to make it easy for users to remove
-     YYFAIL uses, which will produce warnings from Bison 2.5.  */
-#endif
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
@@ -1650,20 +1627,17 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
+yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
 #else
 static void
-yy_stack_print (yybottom, yytop)
-    yytype_int16 *yybottom;
-    yytype_int16 *yytop;
+yy_stack_print (bottom, top)
+    yytype_int16 *bottom;
+    yytype_int16 *top;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; yybottom <= yytop; yybottom++)
-    {
-      int yybot = *yybottom;
-      YYFPRINTF (stderr, " %d", yybot);
-    }
+  for (; bottom <= top; ++bottom)
+    YYFPRINTF (stderr, " %d", *bottom);
   YYFPRINTF (stderr, "\n");
 }
 
@@ -1697,11 +1671,11 @@ yy_reduce_print (yyvsp, yyrule)
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
+      fprintf (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
 		       		       );
-      YYFPRINTF (stderr, "\n");
+      fprintf (stderr, "\n");
     }
 }
 
@@ -1981,8 +1955,10 @@ yydestruct (yymsg, yytype, yyvaluep)
 	break;
     }
 }
+
 
 /* Prevent warnings from -Wmissing-prototypes.  */
+
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int yyparse (void *YYPARSE_PARAM);
@@ -1998,10 +1974,11 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-/* The lookahead symbol.  */
+
+/* The look-ahead symbol.  */
 int yychar;
 
-/* The semantic value of the lookahead symbol.  */
+/* The semantic value of the look-ahead symbol.  */
 YYSTYPE yylval;
 
 /* Number of syntax errors so far.  */
@@ -2009,9 +1986,9 @@ int yynerrs;
 
 
 
-/*-------------------------.
-| yyparse or yypush_parse.  |
-`-------------------------*/
+/*----------.
+| yyparse.  |
+`----------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -2035,39 +2012,14 @@ yyparse ()
 #endif
 #endif
 {
-
-
-    int yystate;
-    /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
-
-    /* The stacks and their tools:
-       `yyss': related to states.
-       `yyvs': related to semantic values.
-
-       Refer to the stacks thru separate pointers, to allow yyoverflow
-       to reallocate them elsewhere.  */
-
-    /* The state stack.  */
-    yytype_int16 yyssa[YYINITDEPTH];
-    yytype_int16 *yyss;
-    yytype_int16 *yyssp;
-
-    /* The semantic value stack.  */
-    YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
-
-    YYSIZE_T yystacksize;
-
+  
+  int yystate;
   int yyn;
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
-  int yytoken;
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-
+  /* Number of tokens to shift before error messages enabled.  */
+  int yyerrstatus;
+  /* Look-ahead token as an internal (translated) token number.  */
+  int yytoken = 0;
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
@@ -2075,28 +2027,51 @@ yyparse ()
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
+  /* Three stacks and their tools:
+     `yyss': related to states,
+     `yyvs': related to semantic values,
+     `yyls': related to locations.
+
+     Refer to the stacks thru separate pointers, to allow yyoverflow
+     to reallocate them elsewhere.  */
+
+  /* The state stack.  */
+  yytype_int16 yyssa[YYINITDEPTH];
+  yytype_int16 *yyss = yyssa;
+  yytype_int16 *yyssp;
+
+  /* The semantic value stack.  */
+  YYSTYPE yyvsa[YYINITDEPTH];
+  YYSTYPE *yyvs = yyvsa;
+  YYSTYPE *yyvsp;
+
+
+
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+
+  YYSIZE_T yystacksize = YYINITDEPTH;
+
+  /* The variables used to return semantic value and location from the
+     action routines.  */
+  YYSTYPE yyval;
+
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
-
-  yytoken = 0;
-  yyss = yyssa;
-  yyvs = yyvsa;
-  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY; /* Cause a token to be read.  */
+  yychar = YYEMPTY;		/* Cause a token to be read.  */
 
   /* Initialize stack pointers.
      Waste one element of value and location stack
      so that they stay on the same level as the state stack.
      The wasted elements are never initialized.  */
+
   yyssp = yyss;
   yyvsp = yyvs;
 
@@ -2126,6 +2101,7 @@ yyparse ()
 	YYSTYPE *yyvs1 = yyvs;
 	yytype_int16 *yyss1 = yyss;
 
+
 	/* Each stack pointer address is followed by the size of the
 	   data in use in that stack, in bytes.  This used to be a
 	   conditional around just the two extra args, but that might
@@ -2133,6 +2109,7 @@ yyparse ()
 	yyoverflow (YY_("memory exhausted"),
 		    &yyss1, yysize * sizeof (*yyssp),
 		    &yyvs1, yysize * sizeof (*yyvsp),
+
 		    &yystacksize);
 
 	yyss = yyss1;
@@ -2155,8 +2132,9 @@ yyparse ()
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss_alloc, yyss);
-	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
+	YYSTACK_RELOCATE (yyss);
+	YYSTACK_RELOCATE (yyvs);
+
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -2167,6 +2145,7 @@ yyparse ()
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
+
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
 		  (unsigned long int) yystacksize));
 
@@ -2176,9 +2155,6 @@ yyparse ()
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
-  if (yystate == YYFINAL)
-    YYACCEPT;
-
   goto yybackup;
 
 /*-----------.
@@ -2187,16 +2163,16 @@ yyparse ()
 yybackup:
 
   /* Do appropriate processing given the current state.  Read a
-     lookahead token if we need one and don't already have one.  */
+     look-ahead token if we need one and don't already have one.  */
 
-  /* First try to decide what to do without reference to lookahead token.  */
+  /* First try to decide what to do without reference to look-ahead token.  */
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
 
-  /* Not known => get a lookahead token if don't already have one.  */
+  /* Not known => get a look-ahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
+  /* YYCHAR is either YYEMPTY or YYEOF or a valid look-ahead symbol.  */
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
@@ -2228,16 +2204,20 @@ yybackup:
       goto yyreduce;
     }
 
+  if (yyn == YYFINAL)
+    YYACCEPT;
+
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the lookahead token.  */
+  /* Shift the look-ahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
+  /* Discard the shifted token unless it is eof.  */
+  if (yychar != YYEOF)
+    yychar = YYEMPTY;
 
   yystate = yyn;
   *++yyvsp = yylval;
@@ -2277,8 +2257,6 @@ yyreduce:
   switch (yyn)
     {
         case 5:
-
-/* Line 1464 of yacc.c  */
 #line 364 "ntp_parser.y"
     {
 			/* I will need to incorporate much more fine grained
@@ -2294,8 +2272,6 @@ yyreduce:
     break;
 
   case 20:
-
-/* Line 1464 of yacc.c  */
 #line 399 "ntp_parser.y"
     {
 			peer_node *my_node;
@@ -2306,43 +2282,31 @@ yyreduce:
     break;
 
   case 27:
-
-/* Line 1464 of yacc.c  */
 #line 418 "ntp_parser.y"
     { (yyval.Address_node) = create_address_node((yyvsp[(2) - (2)].String), (yyvsp[(1) - (2)].Integer)); }
     break;
 
   case 28:
-
-/* Line 1464 of yacc.c  */
 #line 423 "ntp_parser.y"
     { (yyval.Address_node) = create_address_node((yyvsp[(1) - (1)].String), AF_UNSPEC); }
     break;
 
   case 29:
-
-/* Line 1464 of yacc.c  */
 #line 428 "ntp_parser.y"
     { (yyval.Integer) = AF_INET; }
     break;
 
   case 30:
-
-/* Line 1464 of yacc.c  */
 #line 430 "ntp_parser.y"
     { (yyval.Integer) = AF_INET6; }
     break;
 
   case 31:
-
-/* Line 1464 of yacc.c  */
 #line 435 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 32:
-
-/* Line 1464 of yacc.c  */
 #line 437 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2351,36 +2315,26 @@ yyreduce:
     break;
 
   case 36:
-
-/* Line 1464 of yacc.c  */
 #line 451 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 45:
-
-/* Line 1464 of yacc.c  */
 #line 467 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 46:
-
-/* Line 1464 of yacc.c  */
 #line 469 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_uval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 53:
-
-/* Line 1464 of yacc.c  */
 #line 483 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 55:
-
-/* Line 1464 of yacc.c  */
 #line 497 "ntp_parser.y"
     {
 			unpeer_node *my_node;
@@ -2392,29 +2346,21 @@ yyreduce:
     break;
 
   case 58:
-
-/* Line 1464 of yacc.c  */
 #line 518 "ntp_parser.y"
     { cfgt.broadcastclient = 1; }
     break;
 
   case 59:
-
-/* Line 1464 of yacc.c  */
 #line 520 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.manycastserver, (yyvsp[(2) - (2)].Address_fifo)); }
     break;
 
   case 60:
-
-/* Line 1464 of yacc.c  */
 #line 522 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.multicastclient, (yyvsp[(2) - (2)].Address_fifo)); }
     break;
 
   case 61:
-
-/* Line 1464 of yacc.c  */
 #line 533 "ntp_parser.y"
     {
 			attr_val *atrv;
@@ -2425,15 +2371,11 @@ yyreduce:
     break;
 
   case 62:
-
-/* Line 1464 of yacc.c  */
 #line 540 "ntp_parser.y"
     { cfgt.auth.control_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 63:
-
-/* Line 1464 of yacc.c  */
 #line 542 "ntp_parser.y"
     { 
 			cfgt.auth.cryptosw++;
@@ -2442,36 +2384,26 @@ yyreduce:
     break;
 
   case 64:
-
-/* Line 1464 of yacc.c  */
 #line 547 "ntp_parser.y"
     { cfgt.auth.keys = (yyvsp[(2) - (2)].String); }
     break;
 
   case 65:
-
-/* Line 1464 of yacc.c  */
 #line 549 "ntp_parser.y"
     { cfgt.auth.keysdir = (yyvsp[(2) - (2)].String); }
     break;
 
   case 66:
-
-/* Line 1464 of yacc.c  */
 #line 551 "ntp_parser.y"
     { cfgt.auth.request_key = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 67:
-
-/* Line 1464 of yacc.c  */
 #line 553 "ntp_parser.y"
     { cfgt.auth.revoke = (yyvsp[(2) - (2)].Integer); }
     break;
 
   case 68:
-
-/* Line 1464 of yacc.c  */
 #line 555 "ntp_parser.y"
     {
 			cfgt.auth.trusted_key_list = (yyvsp[(2) - (2)].Attr_val_fifo);
@@ -2484,22 +2416,16 @@ yyreduce:
     break;
 
   case 69:
-
-/* Line 1464 of yacc.c  */
 #line 564 "ntp_parser.y"
     { cfgt.auth.ntp_signd_socket = (yyvsp[(2) - (2)].String); }
     break;
 
   case 70:
-
-/* Line 1464 of yacc.c  */
 #line 569 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 71:
-
-/* Line 1464 of yacc.c  */
 #line 571 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2508,15 +2434,11 @@ yyreduce:
     break;
 
   case 72:
-
-/* Line 1464 of yacc.c  */
 #line 579 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 73:
-
-/* Line 1464 of yacc.c  */
 #line 581 "ntp_parser.y"
     {
 			(yyval.Attr_val) = NULL;
@@ -2529,15 +2451,11 @@ yyreduce:
     break;
 
   case 79:
-
-/* Line 1464 of yacc.c  */
 #line 606 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.orphan_cmds, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 80:
-
-/* Line 1464 of yacc.c  */
 #line 611 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2546,8 +2464,6 @@ yyreduce:
     break;
 
   case 81:
-
-/* Line 1464 of yacc.c  */
 #line 616 "ntp_parser.y"
     {	
 			(yyval.Attr_val_fifo) = NULL;
@@ -2556,36 +2472,26 @@ yyreduce:
     break;
 
   case 82:
-
-/* Line 1464 of yacc.c  */
 #line 624 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 83:
-
-/* Line 1464 of yacc.c  */
 #line 626 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 84:
-
-/* Line 1464 of yacc.c  */
 #line 628 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (double)(yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 95:
-
-/* Line 1464 of yacc.c  */
 #line 654 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.stats_list, (yyvsp[(2) - (2)].Int_fifo)); }
     break;
 
   case 96:
-
-/* Line 1464 of yacc.c  */
 #line 656 "ntp_parser.y"
     {
 			if (input_from_file) {
@@ -2598,8 +2504,6 @@ yyreduce:
     break;
 
   case 97:
-
-/* Line 1464 of yacc.c  */
 #line 665 "ntp_parser.y"
     {
 			filegen_node *fgn;
@@ -2610,8 +2514,6 @@ yyreduce:
     break;
 
   case 98:
-
-/* Line 1464 of yacc.c  */
 #line 675 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = (yyvsp[(1) - (2)].Int_fifo);
@@ -2620,8 +2522,6 @@ yyreduce:
     break;
 
   case 99:
-
-/* Line 1464 of yacc.c  */
 #line 680 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = NULL;
@@ -2630,15 +2530,11 @@ yyreduce:
     break;
 
   case 108:
-
-/* Line 1464 of yacc.c  */
 #line 699 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 109:
-
-/* Line 1464 of yacc.c  */
 #line 701 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2647,8 +2543,6 @@ yyreduce:
     break;
 
   case 110:
-
-/* Line 1464 of yacc.c  */
 #line 709 "ntp_parser.y"
     {
 			if (input_from_file) {
@@ -2662,8 +2556,6 @@ yyreduce:
     break;
 
   case 111:
-
-/* Line 1464 of yacc.c  */
 #line 719 "ntp_parser.y"
     {
 			if (input_from_file) {
@@ -2676,8 +2568,6 @@ yyreduce:
     break;
 
   case 112:
-
-/* Line 1464 of yacc.c  */
 #line 728 "ntp_parser.y"
     {
 			const char *err;
@@ -2696,15 +2586,11 @@ yyreduce:
     break;
 
   case 113:
-
-/* Line 1464 of yacc.c  */
 #line 743 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 125:
-
-/* Line 1464 of yacc.c  */
 #line 773 "ntp_parser.y"
     {
 			CONCAT_G_FIFOS(cfgt.discard_opts, (yyvsp[(2) - (2)].Attr_val_fifo));
@@ -2712,8 +2598,6 @@ yyreduce:
     break;
 
   case 126:
-
-/* Line 1464 of yacc.c  */
 #line 777 "ntp_parser.y"
     {
 			CONCAT_G_FIFOS(cfgt.mru_opts, (yyvsp[(2) - (2)].Attr_val_fifo));
@@ -2721,8 +2605,6 @@ yyreduce:
     break;
 
   case 127:
-
-/* Line 1464 of yacc.c  */
 #line 781 "ntp_parser.y"
     {
 			restrict_node *rn;
@@ -2734,8 +2616,6 @@ yyreduce:
     break;
 
   case 128:
-
-/* Line 1464 of yacc.c  */
 #line 789 "ntp_parser.y"
     {
 			restrict_node *rn;
@@ -2747,8 +2627,6 @@ yyreduce:
     break;
 
   case 129:
-
-/* Line 1464 of yacc.c  */
 #line 797 "ntp_parser.y"
     {
 			restrict_node *rn;
@@ -2760,8 +2638,6 @@ yyreduce:
     break;
 
   case 130:
-
-/* Line 1464 of yacc.c  */
 #line 805 "ntp_parser.y"
     {
 			restrict_node *rn;
@@ -2780,8 +2656,6 @@ yyreduce:
     break;
 
   case 131:
-
-/* Line 1464 of yacc.c  */
 #line 820 "ntp_parser.y"
     {
 			restrict_node *rn;
@@ -2800,8 +2674,6 @@ yyreduce:
     break;
 
   case 132:
-
-/* Line 1464 of yacc.c  */
 #line 835 "ntp_parser.y"
     {
 			restrict_node *	rn;
@@ -2814,15 +2686,11 @@ yyreduce:
     break;
 
   case 133:
-
-/* Line 1464 of yacc.c  */
 #line 847 "ntp_parser.y"
     { (yyval.Int_fifo) = NULL; }
     break;
 
   case 134:
-
-/* Line 1464 of yacc.c  */
 #line 849 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = (yyvsp[(1) - (2)].Int_fifo);
@@ -2831,8 +2699,6 @@ yyreduce:
     break;
 
   case 150:
-
-/* Line 1464 of yacc.c  */
 #line 875 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2841,8 +2707,6 @@ yyreduce:
     break;
 
   case 151:
-
-/* Line 1464 of yacc.c  */
 #line 880 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -2851,15 +2715,11 @@ yyreduce:
     break;
 
   case 152:
-
-/* Line 1464 of yacc.c  */
 #line 888 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 156:
-
-/* Line 1464 of yacc.c  */
 #line 899 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2868,8 +2728,6 @@ yyreduce:
     break;
 
   case 157:
-
-/* Line 1464 of yacc.c  */
 #line 904 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -2878,15 +2736,11 @@ yyreduce:
     break;
 
   case 158:
-
-/* Line 1464 of yacc.c  */
 #line 912 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 167:
-
-/* Line 1464 of yacc.c  */
 #line 932 "ntp_parser.y"
     {
 			addr_opts_node *aon;
@@ -2897,8 +2751,6 @@ yyreduce:
     break;
 
   case 168:
-
-/* Line 1464 of yacc.c  */
 #line 942 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2907,8 +2759,6 @@ yyreduce:
     break;
 
   case 169:
-
-/* Line 1464 of yacc.c  */
 #line 947 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -2917,50 +2767,36 @@ yyreduce:
     break;
 
   case 170:
-
-/* Line 1464 of yacc.c  */
 #line 955 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 171:
-
-/* Line 1464 of yacc.c  */
 #line 957 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 172:
-
-/* Line 1464 of yacc.c  */
 #line 959 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 173:
-
-/* Line 1464 of yacc.c  */
 #line 961 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 174:
-
-/* Line 1464 of yacc.c  */
 #line 963 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].String)); }
     break;
 
   case 181:
-
-/* Line 1464 of yacc.c  */
 #line 984 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.rlimit, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 182:
-
-/* Line 1464 of yacc.c  */
 #line 989 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -2969,8 +2805,6 @@ yyreduce:
     break;
 
   case 183:
-
-/* Line 1464 of yacc.c  */
 #line 994 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -2979,29 +2813,21 @@ yyreduce:
     break;
 
   case 184:
-
-/* Line 1464 of yacc.c  */
 #line 1002 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 187:
-
-/* Line 1464 of yacc.c  */
 #line 1017 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.enable_opts, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 188:
-
-/* Line 1464 of yacc.c  */
 #line 1019 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.disable_opts, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 189:
-
-/* Line 1464 of yacc.c  */
 #line 1024 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -3010,8 +2836,6 @@ yyreduce:
     break;
 
   case 190:
-
-/* Line 1464 of yacc.c  */
 #line 1029 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3020,15 +2844,11 @@ yyreduce:
     break;
 
   case 191:
-
-/* Line 1464 of yacc.c  */
 #line 1037 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival(T_Flag, (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 192:
-
-/* Line 1464 of yacc.c  */
 #line 1039 "ntp_parser.y"
     { 
 			if (input_from_file) {
@@ -3046,15 +2866,11 @@ yyreduce:
     break;
 
   case 201:
-
-/* Line 1464 of yacc.c  */
 #line 1074 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.tinker, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 202:
-
-/* Line 1464 of yacc.c  */
 #line 1079 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -3063,8 +2879,6 @@ yyreduce:
     break;
 
   case 203:
-
-/* Line 1464 of yacc.c  */
 #line 1084 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3073,15 +2887,11 @@ yyreduce:
     break;
 
   case 204:
-
-/* Line 1464 of yacc.c  */
 #line 1092 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Double)); }
     break;
 
   case 215:
-
-/* Line 1464 of yacc.c  */
 #line 1115 "ntp_parser.y"
     {
 			attr_val *av;
@@ -3092,8 +2902,6 @@ yyreduce:
     break;
 
   case 216:
-
-/* Line 1464 of yacc.c  */
 #line 1122 "ntp_parser.y"
     {
 			attr_val *av;
@@ -3104,8 +2912,6 @@ yyreduce:
     break;
 
   case 217:
-
-/* Line 1464 of yacc.c  */
 #line 1129 "ntp_parser.y"
     {
 			char error_text[64];
@@ -3125,8 +2931,6 @@ yyreduce:
     break;
 
   case 218:
-
-/* Line 1464 of yacc.c  */
 #line 1145 "ntp_parser.y"
     {
 			if (!input_from_file) {
@@ -3135,12 +2939,12 @@ yyreduce:
 			}
 			if (curr_include_level >= MAXINCLUDELEVEL) {
 				fprintf(stderr, "getconfig: Maximum include file level exceeded.\n");
-				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.\n");
+				msyslog(LOG_ERR, "getconfig: Maximum include file level exceeded.");
 			} else {
 				fp[curr_include_level + 1] = F_OPEN(FindConfig((yyvsp[(2) - (3)].String)), "r");
 				if (fp[curr_include_level + 1] == NULL) {
 					fprintf(stderr, "getconfig: Couldn't open <%s>\n", FindConfig((yyvsp[(2) - (3)].String)));
-					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>\n", FindConfig((yyvsp[(2) - (3)].String)));
+					msyslog(LOG_ERR, "getconfig: Couldn't open <%s>", FindConfig((yyvsp[(2) - (3)].String)));
 				} else {
 					ip_file = fp[++curr_include_level];
 				}
@@ -3149,8 +2953,6 @@ yyreduce:
     break;
 
   case 219:
-
-/* Line 1464 of yacc.c  */
 #line 1164 "ntp_parser.y"
     {
 			while (curr_include_level != -1)
@@ -3159,36 +2961,26 @@ yyreduce:
     break;
 
   case 220:
-
-/* Line 1464 of yacc.c  */
 #line 1169 "ntp_parser.y"
     { /* see drift_parm below for actions */ }
     break;
 
   case 221:
-
-/* Line 1464 of yacc.c  */
 #line 1171 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.logconfig, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 222:
-
-/* Line 1464 of yacc.c  */
 #line 1173 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.phone, (yyvsp[(2) - (2)].String_fifo)); }
     break;
 
   case 223:
-
-/* Line 1464 of yacc.c  */
 #line 1175 "ntp_parser.y"
     { APPEND_G_FIFO(cfgt.setvar, (yyvsp[(2) - (2)].Set_var)); }
     break;
 
   case 224:
-
-/* Line 1464 of yacc.c  */
 #line 1177 "ntp_parser.y"
     {
 			addr_opts_node *aon;
@@ -3199,15 +2991,11 @@ yyreduce:
     break;
 
   case 225:
-
-/* Line 1464 of yacc.c  */
 #line 1184 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.ttl, (yyvsp[(2) - (2)].Attr_val_fifo)); }
     break;
 
   case 234:
-
-/* Line 1464 of yacc.c  */
 #line 1206 "ntp_parser.y"
     {
 			attr_val *av;
@@ -3218,8 +3006,6 @@ yyreduce:
     break;
 
   case 235:
-
-/* Line 1464 of yacc.c  */
 #line 1213 "ntp_parser.y"
     {
 			attr_val *av;
@@ -3232,8 +3018,6 @@ yyreduce:
     break;
 
   case 236:
-
-/* Line 1464 of yacc.c  */
 #line 1222 "ntp_parser.y"
     {
 			attr_val *av;
@@ -3244,29 +3028,21 @@ yyreduce:
     break;
 
   case 237:
-
-/* Line 1464 of yacc.c  */
 #line 1232 "ntp_parser.y"
     { (yyval.Set_var) = create_setvar_node((yyvsp[(1) - (4)].String), (yyvsp[(3) - (4)].String), (yyvsp[(4) - (4)].Integer)); }
     break;
 
   case 239:
-
-/* Line 1464 of yacc.c  */
 #line 1238 "ntp_parser.y"
     { (yyval.Integer) = 0; }
     break;
 
   case 240:
-
-/* Line 1464 of yacc.c  */
 #line 1243 "ntp_parser.y"
     { (yyval.Attr_val_fifo) = NULL; }
     break;
 
   case 241:
-
-/* Line 1464 of yacc.c  */
 #line 1245 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -3275,15 +3051,11 @@ yyreduce:
     break;
 
   case 242:
-
-/* Line 1464 of yacc.c  */
 #line 1253 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival((yyvsp[(1) - (2)].Integer), (yyvsp[(2) - (2)].Integer)); }
     break;
 
   case 243:
-
-/* Line 1464 of yacc.c  */
 #line 1255 "ntp_parser.y"
     {
 			(yyval.Attr_val) = create_attr_sval((yyvsp[(1) - (2)].Integer), estrdup((yyvsp[(2) - (2)].Address_node)->address));
@@ -3292,8 +3064,6 @@ yyreduce:
     break;
 
   case 244:
-
-/* Line 1464 of yacc.c  */
 #line 1263 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -3302,8 +3072,6 @@ yyreduce:
     break;
 
   case 245:
-
-/* Line 1464 of yacc.c  */
 #line 1268 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3312,8 +3080,6 @@ yyreduce:
     break;
 
   case 246:
-
-/* Line 1464 of yacc.c  */
 #line 1276 "ntp_parser.y"
     {
 			char	prefix;
@@ -3339,8 +3105,6 @@ yyreduce:
     break;
 
   case 247:
-
-/* Line 1464 of yacc.c  */
 #line 1301 "ntp_parser.y"
     {
 			nic_rule_node *nrn;
@@ -3351,8 +3115,6 @@ yyreduce:
     break;
 
   case 248:
-
-/* Line 1464 of yacc.c  */
 #line 1308 "ntp_parser.y"
     {
 			nic_rule_node *nrn;
@@ -3363,15 +3125,11 @@ yyreduce:
     break;
 
   case 258:
-
-/* Line 1464 of yacc.c  */
 #line 1336 "ntp_parser.y"
     { CONCAT_G_FIFOS(cfgt.reset_counters, (yyvsp[(2) - (2)].Int_fifo)); }
     break;
 
   case 259:
-
-/* Line 1464 of yacc.c  */
 #line 1341 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = (yyvsp[(1) - (2)].Int_fifo);
@@ -3380,8 +3138,6 @@ yyreduce:
     break;
 
   case 260:
-
-/* Line 1464 of yacc.c  */
 #line 1346 "ntp_parser.y"
     {
 			(yyval.Int_fifo) = NULL;
@@ -3390,8 +3146,6 @@ yyreduce:
     break;
 
   case 268:
-
-/* Line 1464 of yacc.c  */
 #line 1370 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -3400,8 +3154,6 @@ yyreduce:
     break;
 
   case 269:
-
-/* Line 1464 of yacc.c  */
 #line 1375 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3410,8 +3162,6 @@ yyreduce:
     break;
 
   case 270:
-
-/* Line 1464 of yacc.c  */
 #line 1383 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (2)].Attr_val_fifo);
@@ -3420,8 +3170,6 @@ yyreduce:
     break;
 
   case 271:
-
-/* Line 1464 of yacc.c  */
 #line 1388 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3430,22 +3178,16 @@ yyreduce:
     break;
 
   case 272:
-
-/* Line 1464 of yacc.c  */
 #line 1396 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_ival('i', (yyvsp[(1) - (1)].Integer)); }
     break;
 
   case 274:
-
-/* Line 1464 of yacc.c  */
 #line 1402 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_rangeval('-', (yyvsp[(2) - (5)].Integer), (yyvsp[(4) - (5)].Integer)); }
     break;
 
   case 275:
-
-/* Line 1464 of yacc.c  */
 #line 1407 "ntp_parser.y"
     {
 			(yyval.String_fifo) = (yyvsp[(1) - (2)].String_fifo);
@@ -3454,8 +3196,6 @@ yyreduce:
     break;
 
   case 276:
-
-/* Line 1464 of yacc.c  */
 #line 1412 "ntp_parser.y"
     {
 			(yyval.String_fifo) = NULL;
@@ -3464,8 +3204,6 @@ yyreduce:
     break;
 
   case 277:
-
-/* Line 1464 of yacc.c  */
 #line 1420 "ntp_parser.y"
     {
 			(yyval.Address_fifo) = (yyvsp[(1) - (2)].Address_fifo);
@@ -3474,8 +3212,6 @@ yyreduce:
     break;
 
   case 278:
-
-/* Line 1464 of yacc.c  */
 #line 1425 "ntp_parser.y"
     {
 			(yyval.Address_fifo) = NULL;
@@ -3484,8 +3220,6 @@ yyreduce:
     break;
 
   case 279:
-
-/* Line 1464 of yacc.c  */
 #line 1433 "ntp_parser.y"
     {
 			if ((yyvsp[(1) - (1)].Integer) != 0 && (yyvsp[(1) - (1)].Integer) != 1) {
@@ -3498,29 +3232,21 @@ yyreduce:
     break;
 
   case 280:
-
-/* Line 1464 of yacc.c  */
 #line 1441 "ntp_parser.y"
     { (yyval.Integer) = 1; }
     break;
 
   case 281:
-
-/* Line 1464 of yacc.c  */
 #line 1442 "ntp_parser.y"
     { (yyval.Integer) = 0; }
     break;
 
   case 282:
-
-/* Line 1464 of yacc.c  */
 #line 1446 "ntp_parser.y"
     { (yyval.Double) = (double)(yyvsp[(1) - (1)].Integer); }
     break;
 
   case 284:
-
-/* Line 1464 of yacc.c  */
 #line 1457 "ntp_parser.y"
     {
 			sim_node *sn;
@@ -3534,15 +3260,11 @@ yyreduce:
     break;
 
   case 285:
-
-/* Line 1464 of yacc.c  */
 #line 1474 "ntp_parser.y"
     { old_config_style = 0; }
     break;
 
   case 286:
-
-/* Line 1464 of yacc.c  */
 #line 1479 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (3)].Attr_val_fifo);
@@ -3551,8 +3273,6 @@ yyreduce:
     break;
 
   case 287:
-
-/* Line 1464 of yacc.c  */
 #line 1484 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3561,15 +3281,11 @@ yyreduce:
     break;
 
   case 288:
-
-/* Line 1464 of yacc.c  */
 #line 1492 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (3)].Integer), (yyvsp[(3) - (3)].Double)); }
     break;
 
   case 291:
-
-/* Line 1464 of yacc.c  */
 #line 1502 "ntp_parser.y"
     {
 			(yyval.Sim_server_fifo) = (yyvsp[(1) - (2)].Sim_server_fifo);
@@ -3578,8 +3294,6 @@ yyreduce:
     break;
 
   case 292:
-
-/* Line 1464 of yacc.c  */
 #line 1507 "ntp_parser.y"
     {
 			(yyval.Sim_server_fifo) = NULL;
@@ -3588,29 +3302,21 @@ yyreduce:
     break;
 
   case 293:
-
-/* Line 1464 of yacc.c  */
 #line 1515 "ntp_parser.y"
     { (yyval.Sim_server) = create_sim_server((yyvsp[(1) - (5)].Address_node), (yyvsp[(3) - (5)].Double), (yyvsp[(4) - (5)].Sim_script_fifo)); }
     break;
 
   case 294:
-
-/* Line 1464 of yacc.c  */
 #line 1520 "ntp_parser.y"
     { (yyval.Double) = (yyvsp[(3) - (4)].Double); }
     break;
 
   case 295:
-
-/* Line 1464 of yacc.c  */
 #line 1525 "ntp_parser.y"
     { (yyval.Address_node) = (yyvsp[(3) - (3)].Address_node); }
     break;
 
   case 296:
-
-/* Line 1464 of yacc.c  */
 #line 1530 "ntp_parser.y"
     {
 			(yyval.Sim_script_fifo) = (yyvsp[(1) - (2)].Sim_script_fifo);
@@ -3619,8 +3325,6 @@ yyreduce:
     break;
 
   case 297:
-
-/* Line 1464 of yacc.c  */
 #line 1535 "ntp_parser.y"
     {
 			(yyval.Sim_script_fifo) = NULL;
@@ -3629,15 +3333,11 @@ yyreduce:
     break;
 
   case 298:
-
-/* Line 1464 of yacc.c  */
 #line 1543 "ntp_parser.y"
     { (yyval.Sim_script) = create_sim_script_info((yyvsp[(3) - (6)].Double), (yyvsp[(5) - (6)].Attr_val_fifo)); }
     break;
 
   case 299:
-
-/* Line 1464 of yacc.c  */
 #line 1548 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = (yyvsp[(1) - (3)].Attr_val_fifo);
@@ -3646,8 +3346,6 @@ yyreduce:
     break;
 
   case 300:
-
-/* Line 1464 of yacc.c  */
 #line 1553 "ntp_parser.y"
     {
 			(yyval.Attr_val_fifo) = NULL;
@@ -3656,16 +3354,13 @@ yyreduce:
     break;
 
   case 301:
-
-/* Line 1464 of yacc.c  */
 #line 1561 "ntp_parser.y"
     { (yyval.Attr_val) = create_attr_dval((yyvsp[(1) - (3)].Integer), (yyvsp[(3) - (3)].Double)); }
     break;
 
 
-
-/* Line 1464 of yacc.c  */
-#line 3669 "ntp_parser.c"
+/* Line 1267 of yacc.c.  */
+#line 3364 "../../ntpd/ntp_parser.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -3675,6 +3370,7 @@ yyreduce:
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
+
 
   /* Now `shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
@@ -3740,7 +3436,7 @@ yyerrlab:
 
   if (yyerrstatus == 3)
     {
-      /* If just tried and failed to reuse lookahead token after an
+      /* If just tried and failed to reuse look-ahead token after an
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
@@ -3757,7 +3453,7 @@ yyerrlab:
 	}
     }
 
-  /* Else will try to reuse lookahead token after shifting the error
+  /* Else will try to reuse look-ahead token after shifting the error
      token.  */
   goto yyerrlab1;
 
@@ -3814,6 +3510,9 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
+  if (yyn == YYFINAL)
+    YYACCEPT;
+
   *++yyvsp = yylval;
 
 
@@ -3838,7 +3537,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#if !defined(yyoverflow) || YYERROR_VERBOSE
+#ifndef yyoverflow
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -3849,7 +3548,7 @@ yyexhaustedlab:
 #endif
 
 yyreturn:
-  if (yychar != YYEMPTY)
+  if (yychar != YYEOF && yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
 		 yytoken, &yylval);
   /* Do not reclaim the symbols of the rule which action triggered
@@ -3875,8 +3574,6 @@ yyreturn:
 }
 
 
-
-/* Line 1684 of yacc.c  */
 #line 1572 "ntp_parser.y"
 
 

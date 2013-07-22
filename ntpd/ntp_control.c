@@ -2883,7 +2883,7 @@ ctl_getitem(
 								if (quiet_until <= current_time) {
 									quiet_until = current_time + 300;
 									msyslog(LOG_WARNING,
-"Possible 'ntpdx' exploit from %s#%u (possibly spoofed)\n", stoa(rmt_addr), SRCPORT(rmt_addr));
+"Possible 'ntpdx' exploit from %s#%u (possibly spoofed)", stoa(rmt_addr), SRCPORT(rmt_addr));
 								}
 							return NULL;
 						}

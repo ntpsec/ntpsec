@@ -437,14 +437,14 @@ static void tsync_poll(int unit, struct peer *peer)
     /* If error opening TSYNC device... */
     if (hBoard.file_descriptor < 0)
     {
-        msyslog(LOG_ERR, "Couldn't open device\n");
+        msyslog(LOG_ERR, "Couldn't open device");
         return;
     }
 
     /* If error while initializing the board... */
     if (ioctl(hBoard.file_descriptor, IOCTL_TPRO_OPEN, &hBoard) < 0)
     {
-        msyslog(LOG_ERR, "Couldn't initialize device\n");
+        msyslog(LOG_ERR, "Couldn't initialize device");
         close(hBoard.file_descriptor);
         return;
     }
@@ -456,7 +456,7 @@ static void tsync_poll(int unit, struct peer *peer)
 
     it = (ioctl_trans_di*)alloca(itAllocationLength);
     if (it == NULL) {
-        msyslog(LOG_ERR, "Couldn't allocate transaction memory - Reference\n");
+        msyslog(LOG_ERR, "Couldn't allocate transaction memory - Reference");
         return;
     }
 
@@ -483,7 +483,7 @@ static void tsync_poll(int unit, struct peer *peer)
 
     it1 = (ioctl_trans_di*)alloca(itAllocationLength1);
     if (it1 == NULL) {
-        msyslog(LOG_ERR, "Couldn't allocate transaction memory - Time Scale\n");
+        msyslog(LOG_ERR, "Couldn't allocate transaction memory - Time Scale");
         return;
     }
 
@@ -510,7 +510,7 @@ static void tsync_poll(int unit, struct peer *peer)
 
     it2 = (ioctl_trans_di*)alloca(itAllocationLength2);
     if (it2 == NULL) {
-        msyslog(LOG_ERR, "Couldn't allocate transaction memory - Leap Second\n");
+        msyslog(LOG_ERR, "Couldn't allocate transaction memory - Leap Second");
         return;
     }
 

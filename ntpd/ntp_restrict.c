@@ -215,7 +215,7 @@ free_res(
 	restrict_u *	unlinked;
 
 	restrictcount--;
-	if (RES_LIMITED && res->flags)
+	if (RES_LIMITED & res->flags)
 		dec_res_limited();
 
 	if (v6)

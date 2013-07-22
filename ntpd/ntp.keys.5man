@@ -1,8 +1,8 @@
-.TH ntp.keys 5man "01 May 2013" "4.2.7p368" "File Formats"
+.TH ntp.keys 5man "21 Jul 2013" "4.2.7p374" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  May  1, 2013 at 11:33:10 AM by AutoGen 5.17.3
+.\"  It has been AutoGen-ed  July 21, 2013 at 11:37:24 AM by AutoGen 5.17.5pre10
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agman-file.tpl
 .\"
@@ -39,22 +39,22 @@ Key entries use a fixed format of the form
 .D1 Ar keyno type key
 .PP
 where
-\fIkeyno\fR
+IkeynoR
 is a positive integer (between 1 and 65534),
-\fItype\fR
+ItypeR
 is the message digest algorithm,
 and
-\fIkey\fR
+IkeyR
 is the key itself.
 .PP
 The
-\fIkey\fR
+IkeyR
 may be given in a format
 controlled by the
-\fItype\fR
+ItypeR
 field.
 The
-\fItype\fR
+ItypeR
 .Li MD5
 is always supported.
 If
@@ -62,7 +62,7 @@ If
 was built with the OpenSSL library
 then any digest library supported by that library may be specified.
 However, if compliance with FIPS 140-2 is required the
-\fItype\fR
+ItypeR
 must be either
 .Li SHA
 or
@@ -133,7 +133,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p368 of NTP.
+This document corresponds to version 4.2.7p374 of NTP.
 This document was derived from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp.keys\fP

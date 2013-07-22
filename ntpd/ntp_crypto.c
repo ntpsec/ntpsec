@@ -3581,13 +3581,13 @@ crypto_cert(
 		return (NULL);
 	}
 	if ((ptr = strrchr(ptr, '.')) == NULL) {
-		msyslog(LOG_ERR, "crypto_cert: no filestamp %s\n",
+		msyslog(LOG_ERR, "crypto_cert: no filestamp %s",
 		    filename);
 		fclose(str);
 		return (NULL);
 	}
 	if (sscanf(++ptr, "%u", &fstamp) != 1) {
-		msyslog(LOG_ERR, "crypto_cert: invalid filestamp %s\n",
+		msyslog(LOG_ERR, "crypto_cert: invalid filestamp %s",
 		    filename);
 		fclose(str);
 		return (NULL);
@@ -3597,7 +3597,7 @@ crypto_cert(
 	 * Read PEM-encoded certificate and install.
 	 */
 	if (!PEM_read(str, &name, &header, &data, &len)) {
-		msyslog(LOG_ERR, "crypto_cert: %s\n",
+		msyslog(LOG_ERR, "crypto_cert: %s",
 		    ERR_error_string(ERR_get_error(), NULL));
 		fclose(str);
 		return (NULL);

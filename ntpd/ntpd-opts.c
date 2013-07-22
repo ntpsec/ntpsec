@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.c)
  *
- *  It has been AutoGen-ed  May  1, 2013 at 11:32:12 AM by AutoGen 5.17.3
+ *  It has been AutoGen-ed  July 21, 2013 at 11:35:07 AM by AutoGen 5.17.5pre10
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 38:0:13 templates.
+ * Generated from AutoOpts 39:0:14 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -75,7 +75,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpd options
  */
 static char const ntpd_opt_strs[2986] =
-/*     0 */ "ntpd 4.2.7p368\n"
+/*     0 */ "ntpd 4.2.7p374\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -201,12 +201,12 @@ static char const ntpd_opt_strs[2986] =
 /*  2753 */ "output version information and exit\0"
 /*  2789 */ "version\0"
 /*  2797 */ "NTPD\0"
-/*  2802 */ "ntpd - NTP daemon program - Ver. 4.2.7p368\n"
+/*  2802 */ "ntpd - NTP daemon program - Ver. 4.2.7p374\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n"
             "\t\t[ <server1> ... <serverN> ]\n\0"
 /*  2935 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2969 */ "\n\0"
-/*  2971 */ "ntpd 4.2.7p368";
+/*  2971 */ "ntpd 4.2.7p374";
 
 /**
  *  ipv4 option description with
@@ -749,8 +749,8 @@ static int const aWait_SyncCantList[] = {
 #define MORE_HELP_name  (ntpd_opt_strs+2743)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
-#define MORE_HELP_DESC  NULL
-#define MORE_HELP_name  NULL
+#define MORE_HELP_DESC  HELP_DESC
+#define MORE_HELP_name  HELP_name
 #define MORE_HELP_FLAGS (OPTST_OMITTED | OPTST_NO_INIT)
 #endif
 #ifdef NO_OPTIONAL_OPT_ARGS
@@ -764,6 +764,8 @@ static int const aWait_SyncCantList[] = {
 /**
  *  Declare option callback procedures
  */
+/* extracted from optmain.tlib near line 745 */
+
 #if defined(TEST_NTPD_OPTS)
 /*
  *  Under test, omit argument processing, or call optionStackArg,
@@ -795,7 +797,7 @@ static tOptProc
  */
 #define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
 
-#endif /* defined(TEST_NTPD_OPTS) */
+#endif /* TEST_NTPD_OPTS */
 #define VER_PROC        ntpOptionPrintVersion
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1270,7 +1272,7 @@ static tOptDesc optDesc[OPTION_CT] = {
 #define zDetail         (NULL)
 /** The full version string for ntpd. */
 #define zFullVersion    (ntpd_opt_strs+2971)
-/* extracted from optcode.tlib near line 371 */
+/* extracted from optcode.tlib near line 364 */
 
 #if defined(ENABLE_NLS)
 # define OPTPROC_BASE OPTPROC_TRANSLATE
@@ -1291,17 +1293,19 @@ static tOptDesc optDesc[OPTION_CT] = {
 /**
  * The callout function that invokes the optionUsage function.
  *
- * @param[in] pOptions the AutoOpts option description structure
- * @param[in] pOptDesc the descriptor for the "help" (usage) option.
+ * @param[in] opts the AutoOpts option description structure
+ * @param[in] od   the descriptor for the "help" (usage) option.
  * @noreturn
  */
 static void
-doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
+doUsageOpt(tOptions * opts, tOptDesc * od)
 {
-    optionUsage(&ntpdOptions, NTPD_EXIT_SUCCESS);
+    int ex_code;
+    ex_code = NTPD_EXIT_SUCCESS;
+    optionUsage(&ntpdOptions, ex_code);
     /* NOTREACHED */
-    (void)pOptDesc;
-    (void)pOptions;
+    (void)opts;
+    (void)od;
 }
 
 #if ! defined(TEST_NTPD_OPTS)
@@ -1330,7 +1334,7 @@ OPT_VALUE_SET_DEBUG_LEVEL++;
 #endif /* defined(TEST_NTPD_OPTS) */
 /* extracted from optmain.tlib near line 46 */
 
-#if defined(TEST_NTPD_OPTS) /* TEST MAIN PROCEDURE: */
+#if defined(TEST_NTPD_OPTS) /* TEST-MAIN-PROCEDURE: */
 
 extern void optionPutShell(tOptions*);
 
@@ -1353,8 +1357,8 @@ main(int argc, char ** argv)
         fputs("output error writing to stdout\n", stderr);
     return res;
 }
-#endif  /* defined TEST_NTPD_OPTS */
-/* extracted from optmain.tlib near line 1254 */
+#endif  /* TEST_NTPD_OPTS END-TEST-MAIN-PROCEDURE */
+/* extracted from optmain.tlib near line 1266 */
 
 /**
  * The directory containing the data associated with ntpd.
@@ -1399,7 +1403,8 @@ tOptions ntpdOptions = {
     + OPTPROC_LONGOPT
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
-    + OPTPROC_MISUSE ),
+    + OPTPROC_MISUSE
+    + OPTPROC_SHELL_OUTPUT ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zLicenseDescrip,
@@ -1552,7 +1557,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdOptions.pzCopyright */
-  puts(_("ntpd 4.2.7p368\n\
+  puts(_("ntpd 4.2.7p374\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1689,7 +1694,7 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("output version information and exit"));
 
   /* referenced via ntpdOptions.pzUsageTitle */
-  puts(_("ntpd - NTP daemon program - Ver. 4.2.7p368\n\
+  puts(_("ntpd - NTP daemon program - Ver. 4.2.7p374\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 \t\t[ <server1> ... <serverN> ]\n"));
 
@@ -1697,7 +1702,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("\n"));
 
   /* referenced via ntpdOptions.pzFullVersion */
-  puts(_("ntpd 4.2.7p368"));
+  puts(_("ntpd 4.2.7p374"));
 
   /* referenced via ntpdOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
@@ -1705,39 +1710,39 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   /* referenced via ntpdOptions.pzShortUsage */
   puts(_("<<<NOT-FOUND>>>"));
   /* LIBOPTS-MESSAGES: */
-#line 60 "../autoopts.c"
+#line 45 "../autoopts.c"
   puts(_("allocation of %d bytes failed\n"));
-#line 86 "../autoopts.c"
+#line 71 "../autoopts.c"
   puts(_("allocation of %d bytes failed\n"));
 #line 53 "../init.c"
   puts(_("AutoOpts function called without option descriptor\n"));
-#line 89 "../init.c"
+#line 90 "../init.c"
   puts(_("\tThis exceeds the compiled library version:  "));
-#line 87 "../init.c"
+#line 88 "../init.c"
   puts(_("Automated Options Processing Error!\n"
        "\t%s called AutoOpts function with structure version %d:%d:%d.\n"));
-#line 73 "../autoopts.c"
+#line 58 "../autoopts.c"
   puts(_("realloc of %d bytes at 0x%p failed\n"));
-#line 91 "../init.c"
+#line 92 "../init.c"
   puts(_("\tThis is less than the minimum library version:  "));
 #line 121 "../version.c"
   puts(_("Automated Options version %s\n"
        "\tCopyright (C) 1999-2013 by Bruce Korb - all rights reserved\n"));
-#line 310 "../usage.c"
+#line 82 "../makeshell.c"
   puts(_("(AutoOpts bug):  %s.\n"));
 #line 90 "../reset.c"
   puts(_("optionResetOpt() called, but reset-option not configured"));
-#line 329 "../usage.c"
+#line 292 "../usage.c"
   puts(_("could not locate the 'help' option"));
-#line 351 "../autoopts.c"
+#line 336 "../autoopts.c"
   puts(_("optionProcess() was called with invalid data"));
-#line 783 "../usage.c"
+#line 747 "../usage.c"
   puts(_("invalid argument type specified"));
 #line 589 "../find.c"
   puts(_("defaulted to option with optional arg"));
 #line 76 "../alias.c"
   puts(_("aliasing option is out of range."));
-#line 229 "../enum.c"
+#line 234 "../enum.c"
   puts(_("%s error:  the keyword '%s' is ambiguous for %s\n"));
 #line 108 "../find.c"
   puts(_("  The following options match:\n"));
@@ -1747,9 +1752,9 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%s: Command line arguments required\n"));
 #line 43 "../alias.c"
   puts(_("%d %s%s options allowed\n"));
-#line 81 "../makeshell.c"
+#line 89 "../makeshell.c"
   puts(_("%s error %d (%s) calling %s for '%s'\n"));
-#line 293 "../makeshell.c"
+#line 301 "../makeshell.c"
   puts(_("interprocess pipe"));
 #line 168 "../version.c"
   puts(_("error: version option argument '%c' invalid.  Use:\n"
@@ -1776,19 +1781,19 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%s: illegal option -- %s\n"));
 #line 332 "../find.c"
   puts(_("%s: unknown vendor extension option -- %s\n"));
-#line 154 "../enum.c"
+#line 159 "../enum.c"
   puts(_("  or an integer from %d through %d\n"));
-#line 164 "../enum.c"
+#line 169 "../enum.c"
   puts(_("  or an integer from %d through %d\n"));
-#line 782 "../usage.c"
+#line 746 "../usage.c"
   puts(_("%s error:  invalid option descriptor for %s\n"));
-#line 1110 "../usage.c"
+#line 1080 "../usage.c"
   puts(_("%s error:  invalid option descriptor for %s\n"));
 #line 379 "../find.c"
   puts(_("%s: invalid option name: %s\n"));
 #line 518 "../find.c"
   puts(_("%s: The '%s' option requires an argument.\n"));
-#line 171 "../autoopts.c"
+#line 156 "../autoopts.c"
   puts(_("(AutoOpts bug):  Equivalenced option '%s' was equivalenced to both\n"
        "\t'%s' and '%s'."));
 #line 94 "../check.c"
@@ -1797,9 +1802,9 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%s: The '%s' option cannot have an argument.\n"));
 #line 151 "../check.c"
   puts(_("%s: Command line arguments are not allowed.\n"));
-#line 531 "../save.c"
+#line 535 "../save.c"
   puts(_("error %d (%s) creating %s\n"));
-#line 229 "../enum.c"
+#line 234 "../enum.c"
   puts(_("%s error:  '%s' does not match any %s keywords.\n"));
 #line 93 "../reset.c"
   puts(_("%s error: The '%s' option requires an argument.\n"));
@@ -1809,7 +1814,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("error %d (%s) stat-ing %s\n"));
 #line 143 "../restore.c"
   puts(_("%s error: no saved option state\n"));
-#line 246 "../autoopts.c"
+#line 231 "../autoopts.c"
   puts(_("'%s' is not a command line option.\n"));
 #line 114 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable date/time.\n"));
@@ -1821,41 +1826,41 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%s error:  The %s option must appear %d times.\n"));
 #line 157 "../numeric.c"
   puts(_("%s error:  '%s' is not a recognizable number.\n"));
-#line 195 "../enum.c"
+#line 200 "../enum.c"
   puts(_("%s error:  %s exceeds %s keyword count\n"));
-#line 366 "../usage.c"
+#line 329 "../usage.c"
   puts(_("Try '%s %s' for more information.\n"));
 #line 45 "../alias.c"
   puts(_("one %s%s option allowed\n"));
-#line 195 "../makeshell.c"
+#line 203 "../makeshell.c"
   puts(_("standard output"));
-#line 930 "../makeshell.c"
+#line 938 "../makeshell.c"
   puts(_("standard output"));
-#line 304 "../usage.c"
+#line 274 "../usage.c"
   puts(_("standard output"));
-#line 451 "../usage.c"
+#line 414 "../usage.c"
   puts(_("standard output"));
-#line 660 "../usage.c"
+#line 624 "../usage.c"
   puts(_("standard output"));
 #line 175 "../version.c"
   puts(_("standard output"));
-#line 304 "../usage.c"
+#line 274 "../usage.c"
   puts(_("standard error"));
-#line 451 "../usage.c"
+#line 414 "../usage.c"
   puts(_("standard error"));
-#line 660 "../usage.c"
+#line 624 "../usage.c"
   puts(_("standard error"));
 #line 175 "../version.c"
   puts(_("standard error"));
-#line 195 "../makeshell.c"
+#line 203 "../makeshell.c"
   puts(_("write"));
-#line 930 "../makeshell.c"
+#line 938 "../makeshell.c"
   puts(_("write"));
-#line 303 "../usage.c"
+#line 273 "../usage.c"
   puts(_("write"));
-#line 450 "../usage.c"
+#line 413 "../usage.c"
   puts(_("write"));
-#line 659 "../usage.c"
+#line 623 "../usage.c"
   puts(_("write"));
 #line 174 "../version.c"
   puts(_("write"));
@@ -1871,70 +1876,70 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%s warning:  cannot save options - %s not regular file\n"));
 #line 256 "../save.c"
   puts(_("%s warning:  cannot save options - %s not regular file\n"));
-#line 530 "../save.c"
+#line 534 "../save.c"
   puts(_("%s warning:  cannot save options - %s not regular file\n"));
   /* END-LIBOPTS-MESSAGES */
 
   /* USAGE-TEXT: */
-#line 908 "../usage.c"
-  puts(_("\t\t\t\t- an alternate for '%s'\n"));
-#line 1177 "../usage.c"
-  puts(_("Version, usage and configuration options:"));
-#line 959 "../usage.c"
-  puts(_("\t\t\t\t- default option for unnamed options\n"));
 #line 872 "../usage.c"
+  puts(_("\t\t\t\t- an alternate for '%s'\n"));
+#line 1147 "../usage.c"
+  puts(_("Version, usage and configuration options:"));
+#line 923 "../usage.c"
+  puts(_("\t\t\t\t- default option for unnamed options\n"));
+#line 836 "../usage.c"
   puts(_("\t\t\t\t- disabled as '--%s'\n"));
-#line 1146 "../usage.c"
+#line 1116 "../usage.c"
   puts(_(" --- %-14s %s\n"));
-#line 1144 "../usage.c"
+#line 1114 "../usage.c"
   puts(_("This option has been disabled"));
-#line 899 "../usage.c"
+#line 863 "../usage.c"
   puts(_("\t\t\t\t- enabled by default\n"));
 #line 40 "../alias.c"
   puts(_("%s error:  only "));
-#line 1221 "../usage.c"
+#line 1193 "../usage.c"
   puts(_(" - examining environment variables named %s_*\n"));
 #line 168 "../file.c"
   puts(_("\t\t\t\t- file must not pre-exist\n"));
 #line 172 "../file.c"
   puts(_("\t\t\t\t- file must pre-exist\n"));
-#line 416 "../usage.c"
+#line 379 "../usage.c"
   puts(_("Options are specified by doubled hyphens and their name or by a single\n"
        "hyphen and the flag character.\n"));
-#line 908 "../makeshell.c"
+#line 916 "../makeshell.c"
   puts(_("\n"
        "= = = = = = = =\n\n"
        "This incarnation of genshell will produce\n"
        "a shell script to parse the options for %s:\n\n"));
-#line 161 "../enum.c"
+#line 166 "../enum.c"
   puts(_("  or an integer mask with any of the lower %d bits set\n"));
-#line 932 "../usage.c"
+#line 896 "../usage.c"
   puts(_("\t\t\t\t- is a set membership option\n"));
-#line 953 "../usage.c"
+#line 917 "../usage.c"
   puts(_("\t\t\t\t- must appear between %d and %d times\n"));
-#line 418 "../usage.c"
+#line 381 "../usage.c"
   puts(_("Options are specified by single or double hyphens and their name.\n"));
-#line 939 "../usage.c"
+#line 903 "../usage.c"
   puts(_("\t\t\t\t- may appear multiple times\n"));
-#line 926 "../usage.c"
+#line 890 "../usage.c"
   puts(_("\t\t\t\t- may not be preset\n"));
-#line 1336 "../usage.c"
+#line 1308 "../usage.c"
   puts(_("   Arg Option-Name    Description\n"));
-#line 1272 "../usage.c"
+#line 1244 "../usage.c"
   puts(_("  Flg Arg Option-Name    Description\n"));
-#line 1330 "../usage.c"
+#line 1302 "../usage.c"
   puts(_("  Flg Arg Option-Name    Description\n"));
-#line 1331 "../usage.c"
+#line 1303 "../usage.c"
   puts(_(" %3s %s"));
-#line 1337 "../usage.c"
+#line 1309 "../usage.c"
   puts(_(" %3s %s"));
-#line 423 "../usage.c"
+#line 386 "../usage.c"
   puts(_("The '-#<number>' option may omit the hash char\n"));
-#line 419 "../usage.c"
+#line 382 "../usage.c"
   puts(_("All arguments are named options.\n"));
-#line 1006 "../usage.c"
+#line 970 "../usage.c"
   puts(_(" - reading file %s"));
-#line 445 "../usage.c"
+#line 408 "../usage.c"
   puts(_("\n"
        "Please send bug reports to:  <%s>\n"));
 #line 100 "../version.c"
@@ -1943,17 +1948,17 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
 #line 129 "../version.c"
   puts(_("\n"
        "Please send bug reports to:  <%s>\n"));
-#line 938 "../usage.c"
+#line 902 "../usage.c"
   puts(_("\t\t\t\t- may NOT appear - preset only\n"));
-#line 978 "../usage.c"
+#line 943 "../usage.c"
   puts(_("\n"
        "The following option preset mechanisms are supported:\n"));
-#line 1219 "../usage.c"
+#line 1191 "../usage.c"
   puts(_("\n"
        "The following option preset mechanisms are supported:\n"));
-#line 717 "../usage.c"
+#line 681 "../usage.c"
   puts(_("prohibits these options:\n"));
-#line 712 "../usage.c"
+#line 676 "../usage.c"
   puts(_("prohibits the option '%s'\n"));
 #line 81 "../numeric.c"
   puts(_("%s%ld to %ld"));
@@ -1971,28 +1976,28 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... \\\n\
   puts(_("%sis scalable with a suffix: k/K/m/M/g/G/t/T\n"));
 #line 77 "../numeric.c"
   puts(_("%sless than or equal to %ld"));
-#line 426 "../usage.c"
+#line 389 "../usage.c"
   puts(_("Operands and options may be intermixed.  They will be reordered.\n"));
-#line 687 "../usage.c"
+#line 651 "../usage.c"
   puts(_("requires the option '%s'\n"));
-#line 690 "../usage.c"
+#line 654 "../usage.c"
   puts(_("requires these options:\n"));
-#line 1348 "../usage.c"
+#line 1320 "../usage.c"
   puts(_("   Arg Option-Name   Req?  Description\n"));
-#line 1342 "../usage.c"
+#line 1314 "../usage.c"
   puts(_("  Flg Arg Option-Name   Req?  Description\n"));
-#line 162 "../enum.c"
+#line 167 "../enum.c"
   puts(_("or you may use a numeric representation.  Preceding these with a '!'\n"
        "will clear the bits, specifying 'none' will clear all bits, and 'all'\n"
        "will set them all.  Multiple entries may be passed as an option\n"
        "argument list.\n"));
-#line 945 "../usage.c"
+#line 909 "../usage.c"
   puts(_("\t\t\t\t- may appear up to %d times\n"));
-#line 72 "../enum.c"
+#line 77 "../enum.c"
   puts(_("The valid \"%s\" option keywords are:\n"));
-#line 1181 "../usage.c"
+#line 1151 "../usage.c"
   puts(_("The next option supports vendor supported extra options:"));
-#line 808 "../usage.c"
+#line 772 "../usage.c"
   puts(_("These additional options are:"));
   /* END-USAGE-TEXT */
 }

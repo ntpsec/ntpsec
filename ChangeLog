@@ -1,4 +1,24 @@
-* [Bug 2413] make check fails to run tests with automake >= 1.13
+* [Bug 2413] Fix "make check" with automake >= 1.13.
+(4.2.7p374) 2013/07/21 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2368] make check troubles in libevent.
+* [Bug 2425] setup SIGIO/SIGPOLL for asyncio on the read side
+  of a socketpair for the worker thread.
+(4.2.7p373) 2013/07/20 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2427] configure fails to detect recvmsg() on Solaris.
+(4.2.7p372) 2013/07/17 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 1466] Oncore should set FLAG_PPS.
+* [Bug 2375] AIX 7 doesn't like a libevent validation check.
+* [Bug 2423] Log command-line args at LOG_INFO.
+* [Bug 2428] do_unconf() should reset 'items' before the 2nd loop.
+(4.2.7p371) 2013/07/07 Released by Harlan Stenn <stenn@ntp.org>
+* CID 1042586: Check the return value of clock_gettime() in worker_sleep().
+* Upgrade to libopts-39.0.14 from 5.17.5pre10.
+(4.2.7p370) 2013/07/06 Released by Harlan Stenn <stenn@ntp.org>
+* Remove \n's from syslog output strings.
+(4.2.7p369) 2013/07/05 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2415] RES_LIMITED flags check should use &, not &&.
+* Have NTP_LIBNTP check for time.h and clock_getres().
+* Fix ntpsweep to use sntp instead of ntpdate, from Oliver Kindernay.
 (4.2.7p368) 2013/05/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2145] ntpq dumps core when displaying sys_var_list and more.
 (4.2.7p367) 2013/04/25 Released by Harlan Stenn <stenn@ntp.org>

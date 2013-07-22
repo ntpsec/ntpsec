@@ -18,6 +18,7 @@
 #include "isc/error.h"
 #include "isc/strerror.h"
 #include "isc/formatcheck.h"
+#include "iosignal.h"
 
 #ifdef SIM
 # include "ntpsim.h"
@@ -471,7 +472,7 @@ ntpdmain(
 		if (HAVE_OPT(SAVECONFIGQUIT))
 			syslogit = FALSE;
 	}
-	msyslog(LOG_NOTICE, "%s: Starting\n", Version);
+	msyslog(LOG_NOTICE, "%s: Starting", Version);
 
 	{
 		int i;
@@ -487,7 +488,7 @@ ntpdmain(
 				" %s", saved_argv[i]);
 			cp += strlen(cp);
 		}
-		msyslog(LOG_NOTICE, "%s", buf);
+		msyslog(LOG_INFO, "%s", buf);
 	}
 
 	/*

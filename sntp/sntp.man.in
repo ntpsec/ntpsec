@@ -1,8 +1,8 @@
-.TH sntp @SNTP_MS@ "01 May 2013" "4.2.7p368" "User Commands"
+.TH sntp @SNTP_MS@ "21 Jul 2013" "4.2.7p374" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (sntp-opts.man)
 .\"
-.\"  It has been AutoGen-ed  May  1, 2013 at 11:34:52 AM by AutoGen 5.17.3
+.\"  It has been AutoGen-ed  July 21, 2013 at 11:39:10 AM by AutoGen 5.17.5pre10
 .\"  From the definitions    sntp-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -221,17 +221,18 @@ Display usage information and exit.
 .BR \-! , " \-\-more-help"
 Pass the extended usage information through a pager.
 .TP
-.BR \-> " [\fIrcfile\fP]," " \-\-save-opts" "[=\fIrcfile\fP]"
-Save the option state to \fIrcfile\fP.  The default is the \fIlast\fP
+.BR \-> " [\fIcfgfile\fP]," " \-\-save-opts" "[=\fIcfgfile\fP]"
+Save the option state to \fIcfgfile\fP.  The default is the \fIlast\fP
 configuration file listed in the \fBOPTION PRESETS\fP section, below.
+The command will exit after updating the config file.
 .TP
-.BR \-< " \fIrcfile\fP," " \-\-load-opts" "=\fIrcfile\fP," " \-\-no-load-opts"
-Load options from \fIrcfile\fP.
+.BR \-< " \fIcfgfile\fP," " \-\-load-opts" "=\fIcfgfile\fP," " \-\-no-load-opts"
+Load options from \fIcfgfile\fP.
 The \fIno-load-opts\fP form will disable the loading
-of earlier RC/INI files.  \fI\-\-no-load-opts\fP is handled early,
+of earlier config/rc/ini files.  \fI\-\-no-load-opts\fP is handled early,
 out of order.
 .TP
-.BR \- " [{\fIv|c|n\fP}]," " \-\-version" "[=\fI{v|c|n}\fP]"
+.BR \-\-version "[={\fIv|c|n\fP}]"
 Output version of program and exit.  The default mode is `v', a simple
 version.  The `c' mode will print copyright information and `n' will
 print the full copyright notice.
@@ -316,7 +317,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p368 of
+This document corresponds to version 4.2.7p374 of
 .B  .
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBsntp\fP

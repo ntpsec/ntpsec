@@ -317,7 +317,7 @@ static int		cmp_addr_distance(const sockaddr_u *,
  */
 #if !defined(HAVE_IO_COMPLETION_PORT)
 static inline int	read_network_packet	(SOCKET, struct interface *, l_fp);
-void			ntpd_addremove_io_fd	(int, int, int);
+static void		ntpd_addremove_io_fd	(int, int, int);
 #ifdef REFCLOCK
 static inline int	read_refclock_packet	(SOCKET, struct refclockio *, l_fp);
 #endif
@@ -442,12 +442,12 @@ init_io(void)
 #endif
 
 #if defined(HAVE_SIGNALED_IO)
-	(void) set_signal();
+	(void) set_signal(input_handler);
 #endif
 }
 
 
-void
+static void
 ntpd_addremove_io_fd(
 	int	fd,
 	int	is_pipe,
@@ -455,6 +455,11 @@ ntpd_addremove_io_fd(
 	)
 {
 	UNUSED_ARG(is_pipe);
+
+#ifdef HAVE_SIGNALED_IO
+	init_socket_sig(fd);
+#endif /* not HAVE_SIGNALED_IO */
+
 	maintain_activefds(fd, remove_it);
 }
 
