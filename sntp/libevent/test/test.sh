@@ -42,7 +42,7 @@ then
 elif test -f "./test/check-dumpevents.py"
 then
         TEST_SRC_DIR="./test"
-elif test -f "../../../sntp/libevent/test/check-dumpevents.py-x"
+elif test -f "../../../sntp/libevent/test/check-dumpevents.py"
 then    
         TEST_SRC_DIR="../../../sntp/libevent/test"
 else
