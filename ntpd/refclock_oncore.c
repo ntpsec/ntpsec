@@ -3050,11 +3050,9 @@ oncore_msg_Cj_init(
 		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Az));	/* 6,8,12 */
 
 			/* PPS offset in ns */
-		if (instance->offset) {
-			memcpy(Cmd, oncore_cmd_Ay, (size_t) sizeof(oncore_cmd_Ay));	/* some have it, some don't */
-			w32_buf(&Cmd[-2+4], instance->offset);			/* will check for hw response */
-			oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ay));
-		}
+		memcpy(Cmd, oncore_cmd_Ay, (size_t) sizeof(oncore_cmd_Ay));	/* some have it, some don't */
+		w32_buf(&Cmd[-2+4], instance->offset);			/* will check for hw response */
+		oncore_sendmsg(instance, Cmd,  sizeof(oncore_cmd_Ay));
 
 		/* Satellite mask angle */
 

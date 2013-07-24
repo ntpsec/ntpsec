@@ -1,3 +1,4 @@
+* [Bug 2322] Oncore driver should send 0 PPS offset to GPS.
 (4.2.7p375) 2013/07/22 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 883] log warning arguments swapped in refclock_gpsvme.c.
 * [Bug 2368] Correct bug in previous attempt.
