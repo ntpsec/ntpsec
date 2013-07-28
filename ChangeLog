@@ -1,3 +1,4 @@
+* [Bug 2397] License/copyright cleanup.
 * [Bug 2439] Fix check of EscapeCommFunction() in ports/winnt/libntp/termios.c.
 (4.2.7p376) 2013/07/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2322] Oncore driver should send 0 PPS offset to GPS.
