@@ -439,7 +439,7 @@ ioctl_tiocmset(
 	BOOL	failed;
 	int	result;
 	
-	failed = EscapeCommFunction(
+	failed = !EscapeCommFunction(
 			h, 
 			(*pi & TIOCM_RTS) 
 			    ? SETRTS
@@ -447,7 +447,7 @@ ioctl_tiocmset(
 			);
 
 	if (!failed)
-		failed = EscapeCommFunction(
+		failed = !EscapeCommFunction(
 				h, 
 				(*pi & TIOCM_DTR) 
 				    ? SETDTR
