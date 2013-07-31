@@ -17,6 +17,9 @@
 # undef USE_SIGIO
 #endif
 
+/* type of input handler function - only shared between iosignal.c and ntp_io.c */
+typedef void (input_handler_t)(l_fp *);
+
 #if defined(HAVE_SIGNALED_IO)
 # if defined(USE_TTY_SIGPOLL) || defined(USE_UDP_SIGPOLL)
 #  define USE_SIGPOLL
@@ -36,9 +39,6 @@
 #define	USING_SIGIO()	using_sigio
 
 extern int		using_sigio;
-
-typedef void (input_handler_t)(l_fp *);
-extern	input_handler_t	input_handler;
 
 extern void		block_sigio	(void);
 extern void		unblock_sigio	(void);

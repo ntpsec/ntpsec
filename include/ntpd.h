@@ -117,7 +117,7 @@ extern	endpt *	findbcastinter		(sockaddr_u *);
 extern	void	enable_broadcast	(endpt *, sockaddr_u *);
 extern	void	enable_multicast_if	(endpt *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
-
+extern  void    io_handler              (void);
 extern	void	init_io 	(void);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
@@ -378,8 +378,6 @@ extern u_long	io_timereset;		/* time counters were reset */
 
 /* ntp_io.c */
 extern  int	disable_dynamic_updates;
-extern fd_set	activefds;
-extern int	maxactivefd;
 extern u_int	sys_ifnum;		/* next .ifnum to assign */
 extern endpt *	any_interface;		/* IPv4 wildcard */
 extern endpt *	any6_interface;		/* IPv6 wildcard */

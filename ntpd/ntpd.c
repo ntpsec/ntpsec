@@ -948,22 +948,6 @@ getgroup:
 	}	/* if (droproot) */
 # endif	/* HAVE_DROPROOT */
 
-	/*
-	 * Use select() on all on all input fd's for unlimited
-	 * time.  select() will terminate on SIGALARM or on the
-	 * reception of input.	Using select() means we can't do
-	 * robust signal handling and we get a potential race
-	 * between checking for alarms and doing the select().
-	 * Mostly harmless, I think.
-	 */
-	/*
-	 * On VMS, I suspect that select() can't be interrupted
-	 * by a "signal" either, so I take the easy way out and
-	 * have select() time out after one second.
-	 * System clock updates really aren't time-critical,
-	 * and - lacking a hardware reference clock - I have
-	 * yet to learn about anything else that is.
-	 */
 # ifdef HAVE_IO_COMPLETION_PORT
 
 	for (;;) {
@@ -972,12 +956,8 @@ getgroup:
 
 	BLOCK_IO_AND_ALARM();
 	was_alarmed = FALSE;
-	for (;;) {
-#  ifndef HAVE_SIGNALED_IO
-		fd_set rdfdes;
-		int nfound;
-#  endif
 
+	for (;;) {
 		if (alarm_flag) {	/* alarmed? */
 			was_alarmed = TRUE;
 			alarm_flag = FALSE;
@@ -987,47 +967,12 @@ getgroup:
 			/*
 			 * Nothing to do.  Wait for something.
 			 */
-#  ifndef HAVE_SIGNALED_IO
-			rdfdes = activefds;
-#   if !defined(VMS) && !defined(SYS_VXWORKS)
-			nfound = select(maxactivefd + 1, &rdfdes, NULL,
-					NULL, NULL);
-#   else	/* VMS, VxWorks */
-			/* make select() wake up after one second */
-			{
-				struct timeval t1;
+			io_handler();
+		}
 
-				t1.tv_sec = 1;
-				t1.tv_usec = 0;
-				nfound = select(maxactivefd + 1,
-						&rdfdes, NULL, NULL,
-						&t1);
-			}
-#   endif	/* VMS, VxWorks */
-			if (nfound > 0) {
-				l_fp ts;
-
-				get_systime(&ts);
-
-				input_handler(&ts);
-			} else if (nfound == -1 && errno != EINTR) {
-				msyslog(LOG_ERR, "select() error: %m");
-			}
-#   ifdef DEBUG
-			  else if (debug > 4) {
-				msyslog(LOG_DEBUG, "select(): nfound=%d, error: %m", nfound);
-			} else {
-				DPRINTF(1, ("select() returned %d: %m\n", nfound));
-			}
-#   endif /* DEBUG */
-#  else /* HAVE_SIGNALED_IO */
-
-			wait_for_signal();
-#  endif /* HAVE_SIGNALED_IO */
-			if (alarm_flag) {	/* alarmed? */
-				was_alarmed = TRUE;
-				alarm_flag = FALSE;
-			}
+		if (alarm_flag) {	/* alarmed? */
+			was_alarmed = TRUE;
+			alarm_flag = FALSE;
 		}
 
 		if (was_alarmed) {
