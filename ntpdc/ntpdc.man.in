@@ -1,8 +1,8 @@
-.TH ntpdc @NTPDC_MS@ "28 Jul 2013" "4.2.7p377" "User Commands"
+.TH ntpdc @NTPDC_MS@ "01 Aug 2013" "4.2.7p377" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpdc-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July 28, 2013 at 11:39:21 AM by AutoGen 5.17.5pre10
+.\"  It has been AutoGen-ed  August  1, 2013 at 02:32:19 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntpdc-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -33,7 +33,7 @@ ntpd's configuration file may also be specified at run time using
 .B  .
 .SH "OPTIONS"
 .TP
-.BR \-4 ", " \-\-ipv4
+.BR  \-4 ", " \-\-ipv4
 Force IPv4 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv6.
@@ -41,7 +41,7 @@ ipv6.
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
 .TP
-.BR \-6 ", " \-\-ipv6
+.BR  \-6 ", " \-\-ipv6
 Force IPv6 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv4.
@@ -49,7 +49,7 @@ ipv4.
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 .TP
-.BR \-c " \fIcmd\fP, " \-\-command "=" \fIcmd\fP
+.BR  \-c " \fIcmd\fP, " \-\-command "=" \fIcmd\fP
 run a command and exit.
 This option may appear an unlimited number of times.
 .sp
@@ -57,18 +57,18 @@ The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified
 host(s).
 .TP
-.BR \-d ", " \-\-debug\-level
+.BR  \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
 .TP
-.BR \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
+.BR  \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
 This option takes an integer number as its argument.
 .sp
 .TP
-.BR \-i ", " \-\-interactive
+.BR  \-i ", " \-\-interactive
 Force ntpq to operate in interactive mode.
 This option must not appear in combination with any of the following options:
 command, listpeers, peers, showpeers.
@@ -76,7 +76,7 @@ command, listpeers, peers, showpeers.
 Force ntpq to operate in interactive mode.  Prompts will be written
 to the standard output and commands read from the standard input.
 .TP
-.BR \-l ", " \-\-listpeers
+.BR  \-l ", " \-\-listpeers
 Print a list of the peers.
 This option must not appear in combination with any of the following options:
 command.
@@ -84,13 +84,13 @@ command.
 Print a list of the peers known to the server as well as a summary of
 their state. This is equivalent to the 'listpeers' interactive command.
 .TP
-.BR \-n ", " \-\-numeric
+.BR  \-n ", " \-\-numeric
 numeric host addresses.
 .sp
 Output all host addresses in dotted-quad numeric format rather than
 converting to the canonical host names. 
 .TP
-.BR \-p ", " \-\-peers
+.BR  \-p ", " \-\-peers
 Print a list of the peers.
 This option must not appear in combination with any of the following options:
 command.
@@ -98,7 +98,7 @@ command.
 Print a list of the peers known to the server as well as a summary
 of their state. This is equivalent to the 'peers' interactive command.
 .TP
-.BR \-s ", " \-\-showpeers
+.BR  \-s ", " \-\-showpeers
 Show a list of the peers.
 This option must not appear in combination with any of the following options:
 command.
@@ -140,25 +140,6 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH USAGE
 If one or more request options are included on the command line
 when
@@ -208,15 +189,15 @@ both the remote program and local server share a common key and key
 identifier.
 .PP
 Note that in contexts where a host name is expected, a
-4
+ 4
 qualifier preceding the host name forces DNS resolution to the IPv4 namespace,
 while a
-6
+ 6
 qualifier forces DNS resolution to the IPv6 namespace.
 Specifying a command line option other than
-i
+ i
 or
-n
+ n
 will cause the specified query (queries) to be sent to
 the indicated host(s) immediately.
 Otherwise,
@@ -289,7 +270,7 @@ The default is
 .Cm yes ,
 unless
 modified using the command line
-n
+ n
 switch.
 .TP
 .BR Ic keyid Ar keyid

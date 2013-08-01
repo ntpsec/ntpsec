@@ -1,8 +1,8 @@
-.TH ntpq @NTPQ_MS@ "28 Jul 2013" "4.2.7p377" "User Commands"
+.TH ntpq @NTPQ_MS@ "01 Aug 2013" "4.2.7p377" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntpq-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July 28, 2013 at 11:39:37 AM by AutoGen 5.17.5pre10
+.\"  It has been AutoGen-ed  August  1, 2013 at 02:32:30 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntpq-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -64,9 +64,9 @@ the remote host is not heard from within a suitable timeout
 time.
 Specifying a
 command line option other than
-i
+ i
 or
-n
+ n
 will
 cause the specified query (queries) to be sent to the indicated
 host(s) immediately.
@@ -87,7 +87,7 @@ utility itself and do not result in NTP mode 6
 requests being sent to a server.
 These are described following.
 .TP
-.BR Ic ? Op Ar command_keyword
+.BR Ic ? Op  Ar command_keyword
 .TP
 .BR Ic help Op Ar command_keyword
 A
@@ -216,7 +216,7 @@ The default is
 .Cm yes ,
 unless
 modified using the command line
-n
+ n
 switch.
 .TP
 .BR Ic keyid Ar keyid
@@ -273,7 +273,7 @@ retries each query once after a timeout, the total waiting time for
 a timeout will be twice the timeout value set.
 .SH "OPTIONS"
 .TP
-.BR \-4 ", " \-\-ipv4
+.BR  \-4 ", " \-\-ipv4
 Force IPv4 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv6.
@@ -281,7 +281,7 @@ ipv6.
 Force DNS resolution of following host names on the command line
 to the IPv4 namespace.
 .TP
-.BR \-6 ", " \-\-ipv6
+.BR  \-6 ", " \-\-ipv6
 Force IPv6 DNS name resolution.
 This option must not appear in combination with any of the following options:
 ipv4.
@@ -289,7 +289,7 @@ ipv4.
 Force DNS resolution of following host names on the command line
 to the IPv6 namespace.
 .TP
-.BR \-c " \fIcmd\fP, " \-\-command "=" \fIcmd\fP
+.BR  \-c " \fIcmd\fP, " \-\-command "=" \fIcmd\fP
 run a command and exit.
 This option may appear an unlimited number of times.
 .sp
@@ -297,18 +297,18 @@ The following argument is interpreted as an interactive format command
 and is added to the list of commands to be executed on the specified
 host(s).
 .TP
-.BR \-d ", " \-\-debug\-level
+.BR  \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
 .TP
-.BR \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
+.BR  \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
 This option takes an integer number as its argument.
 .sp
 .TP
-.BR \-p ", " \-\-peers
+.BR  \-p ", " \-\-peers
 Print a list of the peers.
 This option must not appear in combination with any of the following options:
 interactive.
@@ -316,7 +316,7 @@ interactive.
 Print a list of the peers known to the server as well as a summary
 of their state. This is equivalent to the 'peers' interactive command.
 .TP
-.BR \-i ", " \-\-interactive
+.BR  \-i ", " \-\-interactive
 Force ntpq to operate in interactive mode.
 This option must not appear in combination with any of the following options:
 command, peers.
@@ -325,13 +325,13 @@ Force \fBntpq\fP to operate in interactive mode.
 Prompts will be written to the standard output and
 commands read from the standard input.
 .TP
-.BR \-n ", " \-\-numeric
+.BR  \-n ", " \-\-numeric
 numeric host addresses.
 .sp
 Output all host addresses in dotted-quad numeric format rather than
 converting to the canonical host names. 
 .TP
-.BR \-\-old\-rv
+.BR  \-\-old\-rv
 Always output status line with readvar.
 .sp
 By default, \fBntpq\fP now suppresses the \fBassocid=...\fP
@@ -378,25 +378,6 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "FILES"

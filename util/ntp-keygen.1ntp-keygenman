@@ -1,8 +1,8 @@
-.TH ntp-keygen 1ntp-keygenman "28 Jul 2013" "ntp (4.2.7p377)" "User Commands"
+.TH ntp-keygen 1ntp-keygenman "01 Aug 2013" "ntp (4.2.7p377)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July 28, 2013 at 11:40:10 AM by AutoGen 5.17.5pre10
+.\"  It has been AutoGen-ed  August  1, 2013 at 02:32:53 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp-keygen-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -56,9 +56,9 @@ other than Autokey.
 .PP
 Some files used by this program are encrypted using a private password.
 The
-p
+ p
 option specifies the password for local encrypted files and the
-q
+ q
 option the password for encrypted files sent to remote sites.
 If no password is specified, the host name returned by the Unix
 .Fn gethostname
@@ -126,7 +126,7 @@ Run the command on as many hosts as necessary.
 Designate one of them as the trusted host (TH) using
 .B 
 with the
-T
+ T
 option and configure it to synchronize from reliable Internet servers.
 Then configure the other hosts to synchronize to the TH directly or
 indirectly.
@@ -140,13 +140,13 @@ RSA type.
 By default, the host key is also the sign key used to encrypt
 signatures.
 A different sign key can be assigned using the
-S
+ S
 option and this can be either RSA or DSA type.
 By default, the signature
 message digest type is MD5, but any combination of sign key type and
 message digest type supported by the OpenSSL library can be specified
 using the
-c
+ c
 option.
 The rules say cryptographic media should be generated with proventic
 filestamps, which means the host should already be synchronized before
@@ -466,10 +466,10 @@ To insure a fresh fileset, remove all
 files.
 Then run
 .B 
-T
+ T
 to generate keys and a trusted certificate.
 On all other hosts do the same, but leave off the
-T
+ T
 flag to generate keys and nontrusted certificates.
 When complete, start the NTP daemons beginning at the lowest stratum
 and working up the tree.
@@ -480,7 +480,7 @@ If it is necessary to use a different sign key or different digest/signature
 scheme than the default, run
 .B 
 with the
-S Ar type
+ S Ar type
 option, where
 ItypeR
 is either
@@ -492,7 +492,7 @@ If it is necessary to use a different certificate scheme than the default,
 run
 .B 
 with the
-c Ar scheme
+ c Ar scheme
 option and selected
 IschemeR
 as needed.
@@ -545,8 +545,8 @@ only as clients have key files that contain only client keys.
 The PC scheme supports only one trusted host in the group.
 On trusted host alice run
 .B 
-P
-p Ar password
+ P
+ p Ar password
 to generate the host key file
 .Pa ntpkey_RSAkey_ Ns Ar alice.filestamp
 and trusted private certificate file
@@ -569,9 +569,9 @@ and certificates for all group hosts, then for every trusted host in the group,
 generate the IFF parameter file.
 On trusted host alice run
 .B 
-T
-I
-p Ar password
+ T
+ I
+ p Ar password
 to produce her parameter file
 .Pa ntpkey_IFFpar_ Ns Ar alice.filestamp ,
 which includes both server and client keys.
@@ -590,7 +590,7 @@ To eliminate this threat, the client keys can be extracted
 from the parameter file and distributed to all restricted clients.
 After generating the parameter file, on alice run
 .B 
-e
+ e
 and pipe the output to a file or mail program.
 Copy or mail this file to all restricted clients.
 On these clients install a soft link from the generic
@@ -604,9 +604,9 @@ and certificates for all group hosts, then for every trusted host
 in the group, generate the IFF parameter file.
 On trusted host alice run
 .B 
-T
-G
-p Ar password
+ T
+ G
+ p Ar password
 to produce her parameter file
 .Pa ntpkey_GQpar_ Ns Ar alice.filestamp ,
 which includes both server and client keys.
@@ -627,8 +627,8 @@ For illustration assume trish is the TA, alice one of several trusted hosts
 and bob one of her clients.
 On TA trish run
 .B 
-V Ar n
-p Ar password ,
+ V Ar n
+ p Ar password ,
 where
 InR
 is the number of revokable keys (typically 5) to produce
@@ -849,7 +849,7 @@ and
 utilities.
 .SH "OPTIONS"
 .TP
-.BR \-b " \fIimbits\fP, " \-\-imbits "=" \fIimbits\fP
+.BR  \-b " \fIimbits\fP, " \-\-imbits "=" \fIimbits\fP
 identity modulus bits.
 This option takes an integer number as its argument.
 The value of \fIimbits\fP is constrained to being:
@@ -862,7 +862,7 @@ in the range  256 through 2048
 .sp
 The number of bits in the identity modulus.  The default is 256.
 .TP
-.BR \-c " \fIscheme\fP, " \-\-certificate "=" \fIscheme\fP
+.BR  \-c " \fIscheme\fP, " \-\-certificate "=" \fIscheme\fP
 certificate scheme.
 .sp
 scheme is one of
@@ -874,7 +874,7 @@ Note that RSA schemes must be used with a RSA sign key and DSA
 schemes must be used with a DSA sign key.  The default without
 this option is RSA-MD5.
 .TP
-.BR \-C " \fIcipher\fP, " \-\-cipher "=" \fIcipher\fP
+.BR  \-C " \fIcipher\fP, " \-\-cipher "=" \fIcipher\fP
 privatekey cipher.
 .sp
 Select the cipher which is used to encrypt the files containing
@@ -882,41 +882,41 @@ private keys.  The default is three-key triple DES in CBC mode,
 equivalent to "@code{-C des-ede3-cbc".  The openssl tool lists ciphers
 available in "\fBopenssl \-h\fP" output.
 .TP
-.BR \-d ", " \-\-debug\-level
+.BR  \-d ", " \-\-debug\-level
 Increase debug verbosity level.
 This option may appear an unlimited number of times.
 .sp
 .TP
-.BR \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
+.BR  \-D " \fInumber\fP, " \-\-set\-debug\-level "=" \fInumber\fP
 Set the debug verbosity level.
 This option may appear an unlimited number of times.
 This option takes an integer number as its argument.
 .sp
 .TP
-.BR \-e ", " \-\-id\-key
+.BR  \-e ", " \-\-id\-key
 Write IFF or GQ identity keys.
 .sp
 Write the IFF or GQ client keys to the standard output.  This is
 intended for automatic key distribution by mail.
 .TP
-.BR \-G ", " \-\-gq\-params
+.BR  \-G ", " \-\-gq\-params
 Generate GQ parameters and keys.
 .sp
 Generate parameters and keys for the GQ identification scheme,
 obsoleting any that may exist.
 .TP
-.BR \-H ", " \-\-host\-key
+.BR  \-H ", " \-\-host\-key
 generate RSA host key.
 .sp
 Generate new host keys, obsoleting any that may exist.
 .TP
-.BR \-I ", " \-\-iffkey
+.BR  \-I ", " \-\-iffkey
 generate IFF parameters.
 .sp
 Generate parameters for the IFF identification scheme, obsoleting
 any that may exist.
 .TP
-.BR \-i " \fIgroup\fP, " \-\-ident "=" \fIgroup\fP
+.BR  \-i " \fIgroup\fP, " \-\-ident "=" \fIgroup\fP
 set Autokey group name.
 .sp
 Set the optional Autokey group name to name.  This is used in
@@ -929,18 +929,18 @@ issuer names in the form \fBhost@group\fP and should match the
 '\fBcrypto ident\fP' or '\fBserver ident\fP' configuration in
 \fBntpd\fP's configuration file. 
 .TP
-.BR \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
+.BR  \-l " \fIlifetime\fP, " \-\-lifetime "=" \fIlifetime\fP
 set certificate lifetime.
 This option takes an integer number as its argument.
 .sp
 Set the certificate expiration to lifetime days from now.
 .TP
-.BR \-M ", " \-\-md5key
+.BR  \-M ", " \-\-md5key
 generate MD5 keys.
 .sp
 Generate MD5 keys, obsoleting any that may exist.
 .TP
-.BR \-m " \fImodulus\fP, " \-\-modulus "=" \fImodulus\fP
+.BR  \-m " \fImodulus\fP, " \-\-modulus "=" \fImodulus\fP
 modulus.
 This option takes an integer number as its argument.
 The value of \fImodulus\fP is constrained to being:
@@ -953,31 +953,31 @@ in the range  256 through 2048
 .sp
 The number of bits in the prime modulus.  The default is 512.
 .TP
-.BR \-P ", " \-\-pvt\-cert
+.BR  \-P ", " \-\-pvt\-cert
 generate PC private certificate.
 .sp
 Generate a private certificate.  By default, the program generates
 public certificates.
 .TP
-.BR \-p " \fIpasswd\fP, " \-\-pvt\-passwd "=" \fIpasswd\fP
+.BR  \-p " \fIpasswd\fP, " \-\-pvt\-passwd "=" \fIpasswd\fP
 output private password.
 .sp
 Encrypt generated files containing private data with the specified
 password and the cipher selected with \fB-C/--cipher\fP.
 .TP
-.BR \-q " \fIpasswd\fP, " \-\-get\-pvt\-passwd "=" \fIpasswd\fP
+.BR  \-q " \fIpasswd\fP, " \-\-get\-pvt\-passwd "=" \fIpasswd\fP
 input private password.
 .sp
 Set the password for reading files to the specified password.
 .TP
-.BR \-S " \fIsign\fP, " \-\-sign\-key "=" \fIsign\fP
+.BR  \-S " \fIsign\fP, " \-\-sign\-key "=" \fIsign\fP
 generate sign key (RSA or DSA).
 .sp
 Generate a new sign key of the designated type, obsoleting any
 that may exist.  By default, the program uses the host key as the
 sign key.
 .TP
-.BR \-s " \fIhost@group\fP, " \-\-subject\-name "=" \fIhost@group\fP
+.BR  \-s " \fIhost@group\fP, " \-\-subject\-name "=" \fIhost@group\fP
 set host and optionally group name.
 .sp
 Set the Autokey host name, and optionally, group name specified
@@ -991,20 +991,20 @@ subject and issuer fields, as with \fB-i group\fP.  The group name, or
 if not provided, the host name are also used in the file names
 of IFF, GQ, and MV client parameter files.
 .TP
-.BR \-T ", " \-\-trusted\-cert
+.BR  \-T ", " \-\-trusted\-cert
 trusted certificate (TC scheme).
 .sp
 Generate a trusted certificate.  By default, the program generates
 a non-trusted certificate.
 .TP
-.BR \-V " \fInum\fP, " \-\-mv\-params "=" \fInum\fP
+.BR  \-V " \fInum\fP, " \-\-mv\-params "=" \fInum\fP
 generate <num> MV parameters.
 This option takes an integer number as its argument.
 .sp
 Generate parameters and keys for the Mu-Varadharajan (MV)
 identification scheme.
 .TP
-.BR \-v " \fInum\fP, " \-\-mv\-keys "=" \fInum\fP
+.BR  \-v " \fInum\fP, " \-\-mv\-keys "=" \fInum\fP
 update <num> MV keys.
 This option takes an integer number as its argument.
 .sp
@@ -1044,30 +1044,11 @@ the configuration files.
 The \fIhomerc\fP files are "\fI$HOME\fP", and "\fI.\fP".
 If any of these are directories, then the file \fI.ntprc\fP
 is searched for within those directories.
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH USAGE
 The
-p Ar password
+ p Ar password
 option specifies the write password and
-q Ar password
+ q Ar password
 option the read password for previously encrypted files.
 The
 .B 

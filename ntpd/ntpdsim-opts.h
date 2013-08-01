@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.h)
  *
- *  It has been AutoGen-ed  February 21, 2013 at 09:23:10 PM by AutoGen 5.17.2pre17
+ *  It has been AutoGen-ed  August  1, 2013 at 02:05:43 AM by AutoGen 5.18.1pre3
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 38:0:13 templates.
+ * Generated from AutoOpts 40:1:15 templates.
  *
  *  AutoOpts is a copyrighted work.  This header file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -35,7 +35,7 @@
  *  representations about the suitability this software for any purpose. It
  *  is provided "as is" without express or implied warranty.
  */
-/*
+/**
  *  This file contains the programmatic interface to the Automated
  *  Options generated for the ntpdsim program.
  *  These macros are documented in the AutoGen info file in the
@@ -46,22 +46,22 @@
 #include "config.h"
 #include <autoopts/options.h>
 
-/*
+/**
  *  Ensure that the library used for compiling this generated header is at
  *  least as new as the version current when the header template was released
  *  (not counting patch version increments).  Also ensure that the oldest
  *  tolerable version is at least as old as what was current when the header
  *  template was released.
  */
-#define AO_TEMPLATE_VERSION 155648
+#define AO_TEMPLATE_VERSION 163841
 #if (AO_TEMPLATE_VERSION < OPTIONS_MINIMUM_VERSION) \
  || (AO_TEMPLATE_VERSION > OPTIONS_STRUCT_VERSION)
 # error option template version mismatches autoopts/options.h header
   Choke Me.
 #endif
 
-/*
- *  Enumeration of each option:
+/**
+ *  Enumeration of each option type for ntpdsim
  */
 typedef enum {
     INDEX_OPT_IPV4              =  0,
@@ -104,44 +104,61 @@ typedef enum {
     INDEX_OPT_SAVE_OPTS         = 37,
     INDEX_OPT_LOAD_OPTS         = 38
 } teOptIndex;
-
+/** count of all options for ntpdsim */
 #define OPTION_CT    39
-#define NTPDSIM_VERSION       "4.2.7p356"
-#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p356"
+/** ntpdsim version */
+#define NTPDSIM_VERSION       "4.2.7p377"
+/** Full ntpdsim version text */
+#define NTPDSIM_FULL_VERSION  "ntpdsim 4.2.7p377"
 
-/*
+/**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
  *  option name (as in the teOptIndex enumeration above).
  *  e.g. HAVE_OPT(IPV4)
  */
 #define         DESC(n) (ntpdsimOptions.pOptDesc[INDEX_OPT_## n])
+/** 'true' if an option has been specified in any way */
 #define     HAVE_OPT(n) (! UNUSED_OPT(& DESC(n)))
+/** The string argument to an option. The argument type must be \"string\". */
 #define      OPT_ARG(n) (DESC(n).optArg.argString)
+/** Mask the option state revealing how an option was specified.
+ *  It will be one and only one of \a OPTST_SET, \a OPTST_PRESET,
+ * \a OPTST_DEFINED, \a OPTST_RESET or zero.
+ */
 #define    STATE_OPT(n) (DESC(n).fOptState & OPTST_SET_MASK)
+/** Count of option's occurrances *on the command line*. */
 #define    COUNT_OPT(n) (DESC(n).optOccCt)
+/** mask of \a OPTST_SET and \a OPTST_DEFINED. */
 #define    ISSEL_OPT(n) (SELECTED_OPT(&DESC(n)))
+/** 'true' if \a HAVE_OPT would yield 'false'. */
 #define ISUNUSED_OPT(n) (UNUSED_OPT(& DESC(n)))
+/** 'true' if OPTST_DISABLED bit not set. */
 #define  ENABLED_OPT(n) (! DISABLED_OPT(& DESC(n)))
+/** number of stacked option arguments.
+ *  Valid only for stacked option arguments. */
 #define  STACKCT_OPT(n) (((tArgList*)(DESC(n).optCookie))->useCt)
+/** stacked argument vector.
+ *  Valid only for stacked option arguments. */
 #define STACKLST_OPT(n) (((tArgList*)(DESC(n).optCookie))->apzArgs)
+/** Reset an option. */
 #define    CLEAR_OPT(n) STMTS( \
                 DESC(n).fOptState &= OPTST_PERSISTENT_MASK;   \
                 if ((DESC(n).fOptState & OPTST_INITENABLED) == 0) \
                     DESC(n).fOptState |= OPTST_DISABLED; \
                 DESC(n).optCookie = NULL )
-
-/* * * * * *
- *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/**
  *  Enumeration of ntpdsim exit codes
  */
 typedef enum {
-    NTPDSIM_EXIT_SUCCESS            = 0,
-    NTPDSIM_EXIT_FAILURE            = 1,
-    NTPDSIM_EXIT_USAGE_ERROR        = 64,
-    NTPDSIM_EXIT_NO_CONFIG_INPUT    = 66,
-    NTPDSIM_EXIT_LIBOPTS_FAILURE    = 70
-} ntpdsim_exit_code_t;
-/*
+    NTPDSIM_EXIT_SUCCESS         = 0,
+    NTPDSIM_EXIT_FAILURE         = 1,
+    NTPDSIM_EXIT_USAGE_ERROR     = 64,
+    NTPDSIM_EXIT_NO_CONFIG_INPUT = 66,
+    NTPDSIM_EXIT_LIBOPTS_FAILURE = 70
+}   ntpdsim_exit_code_t;
+/** @} */
+/**
  *  Make sure there are no #define name conflicts with the option names
  */
 #ifndef     NO_OPTION_NAME_WARNINGS
@@ -318,9 +335,9 @@ typedef enum {
 # undef MDNS
 #endif  /*  NO_OPTION_NAME_WARNINGS */
 
-/* * * * * *
- *
+/**
  *  Interface defines for specific options.
+ * @{
  */
 #define VALUE_OPT_IPV4           '4'
 #define VALUE_OPT_IPV6           '6'
@@ -365,10 +382,15 @@ typedef enum {
 #define VALUE_OPT_USEPCC         31
 #define VALUE_OPT_PCCFREQ        32
 #define VALUE_OPT_MDNS           'm'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_HELP          '?'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_SAVE_OPTS     '>'
+/** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_LOAD_OPTS     '<'
 #define SET_OPT_SAVE_OPTS(a)   STMTS( \
         DESC(SAVE_OPTS).fOptState &= OPTST_PERSISTENT_MASK; \
@@ -381,10 +403,9 @@ typedef enum {
 #define ERRSTOP_OPTERR  STMTS(ntpdsimOptions.fOptSet |= OPTPROC_ERRSTOP)
 #define RESTART_OPT(n)  STMTS( \
                 ntpdsimOptions.curOptIdx = (n); \
-                ntpdsimOptions.pzCurOpt  = NULL)
+                ntpdsimOptions.pzCurOpt  = NULL )
 #define START_OPT       RESTART_OPT(1)
 #define USAGE(c)        (*ntpdsimOptions.pUsageProc)(&ntpdsimOptions, c)
-/* extracted from opthead.tlib near line 498 */
 
 #ifdef  __cplusplus
 extern "C" {
@@ -439,4 +460,5 @@ static inline char* aoGetsText(char const* pz) {
 }
 #endif
 #endif /* AUTOOPTS_NTPDSIM_OPTS_H_GUARD */
+
 /* ntpdsim-opts.h ends here */

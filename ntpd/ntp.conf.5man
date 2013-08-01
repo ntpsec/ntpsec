@@ -1,8 +1,8 @@
-.TH ntp.conf 5man "28 Jul 2013" "4.2.7p377" "File Formats"
+.TH ntp.conf 5man "01 Aug 2013" "4.2.7p377" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  July 28, 2013 at 11:38:39 AM by AutoGen 5.17.5pre10
+.\"  It has been AutoGen-ed  August  1, 2013 at 02:32:02 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -27,7 +27,7 @@ Usually, it is installed in the
 directory,
 but could be installed elsewhere
 (see the daemon's
-c
+ c
 command line option).
 .PP
 The file format is similar to other
@@ -133,11 +133,11 @@ with the exception of reference clock addresses,
 which are always IPv4.
 .PP
 Note that in contexts where a host name is expected, a
-4
+ 4
 qualifier preceding
 the host name forces DNS resolution to the IPv4 namespace,
 while a
-6
+ 6
 qualifier forces DNS resolution to the IPv6 namespace.
 See IPv6 references for the
 equivalent classes for that address family.
@@ -324,7 +324,7 @@ acquisition with the
 command and s addresses and when
 .Xr ntpd 1ntpdmdoc
 is started with the
-q
+ q
 option.
 .TP
 .BR Cm key Ar key
@@ -959,7 +959,7 @@ and
 .Xr ntpdc 1ntpdcmdoc
 when operating with symmetric key cryptography.
 This is the same operation as the
-k
+ k
 command line option.
 .TP
 .BR Ic keysdir Ar path
@@ -1995,7 +1995,7 @@ continuously and run either
 .Xr ntpdate 8
 or
 .Xr ntpd 1ntpdmdoc
-q
+ q
 as a cron job.
 In either case the servers must be
 configured in advance and the program fails if none are
@@ -2003,7 +2003,7 @@ available when the cron job runs.
 A really slick
 application of manycast is with
 .Xr ntpd 1ntpdmdoc
-q .
+ q .
 The program wakes up, scans the local landscape looking
 for the usual suspects, selects the best from among
 the rascals, sets the clock and then departs.
@@ -2473,7 +2473,7 @@ This command specifies the complete path and name of the file used to
 record the frequency of the local clock oscillator.
 This is the same
 operation as the
-f
+ f
 command line option.
 If the file exists, it is read at
 startup in order to set the initial frequency and then updated once per
@@ -2833,7 +2833,7 @@ pulses will not be suppressed.
 Specify the number of megabytes of memory that can be allocated.
 Probably only available under Linux, this option is useful
 when dropping root (the
-i
+ i
 option).
 The default is 32 megabytes.
 .ti -4
@@ -2892,25 +2892,6 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES

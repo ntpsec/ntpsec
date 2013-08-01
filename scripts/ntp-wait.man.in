@@ -1,8 +1,8 @@
-.TH ntp-wait @NTP_WAIT_MS@ "28 Jul 2013" "ntp (4.2.7p377)" "User Commands"
+.TH ntp-wait @NTP_WAIT_MS@ "01 Aug 2013" "ntp (4.2.7p377)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"
-.\"  It has been AutoGen-ed  July 28, 2013 at 11:36:15 AM by AutoGen 5.17.5pre10
+.\"  It has been AutoGen-ed  August  1, 2013 at 02:31:29 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -29,11 +29,11 @@ has not yet produced a synchronized and stable system clock.
 .PP
 .B 
 will do this quietly, unless the
-v
+ v
 flag is provided.
 .SH "OPTIONS"
 .TP
-.BR \-n " \fInum\-tries\fP, " \-\- "=" \fInum\-tries\fP
+.BR  \-n " \fInum\-tries\fP, " \-\- "=" \fInum\-tries\fP
 Number of times to check ntpd.
 This option takes an integer number as its argument.
 The default \fInum\-tries\fP for this option is:
@@ -43,7 +43,7 @@ The default \fInum\-tries\fP for this option is:
 The maximum number of times we will check \fBntpd\fP to see if
 it has been able to synchronize and stabilize the system clock.
 .TP
-.BR \-s " \fIsecs\-between\-tries\fP, " \-\- "=" \fIsecs\-between\-tries\fP
+.BR  \-s " \fIsecs\-between\-tries\fP, " \-\- "=" \fIsecs\-between\-tries\fP
 How long to sleep between tries.
 This option takes an integer number as its argument.
 The default \fIsecs\-between\-tries\fP for this option is:
@@ -53,7 +53,7 @@ The default \fIsecs\-between\-tries\fP for this option is:
 We will sleep for \fIsecs-between-tries\fP after each query
 of \fBntpd\fP that returns "the time is not yet stable".
 .TP
-.BR \-v ", " \-\-
+.BR  \-v ", " \-\-
 Be verbose.
 .sp
 By default, \fBntp-wait\fP is silent.
@@ -76,25 +76,6 @@ by loading values from environment variables named:
   \fBNTP_WAIT_<option-name>\fP or \fBNTP_WAIT\fP
 .fi
 .ad
-cvt_prog='/usr/local/gnu/share/autogen/texi2man'
-cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
-         `/`basename "$cvt_prog"`
-cd $tmp_dir
-test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
-{
-    list='synopsis description options option-presets'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list name
-    list='implementation-notes environment files examples exit-status errors
-        compatibility see-also conforming-to history authors copyright bugs
-        notes'
-    for f in $list ; do cat $f ; echo ; done > .end-doc
-    rm \-f $list
-    list=`ls \-1 *`' .end-doc'
-    for f in $list ; do cat $f ; echo ; done
-    rm \-f $list
-} 1>.doc 2>/dev/null
-sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH "EXIT STATUS"

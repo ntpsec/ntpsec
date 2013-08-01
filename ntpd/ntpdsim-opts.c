@@ -1,11 +1,11 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpdsim-opts.c)
  *
- *  It has been AutoGen-ed  February 21, 2013 at 09:23:11 PM by AutoGen 5.17.2pre17
+ *  It has been AutoGen-ed  August  1, 2013 at 02:05:43 AM by AutoGen 5.18.1pre3
  *  From the definitions    ntpdsim-opts.def
  *  and the template file   options
  *
- * Generated from AutoOpts 38:0:13 templates.
+ * Generated from AutoOpts 40:1:15 templates.
  *
  *  AutoOpts is a copyrighted work.  This source file is not encumbered
  *  by AutoOpts licensing, but is provided under the licensing terms chosen
@@ -71,11 +71,11 @@ extern FILE * option_usage_fp;
 #  define NULL 0
 #endif
 
-/*
- *  ntpdsim option static const strings
+/**
+ *  static const strings for ntpdsim options
  */
 static char const ntpdsim_opt_strs[3099] =
-/*     0 */ "ntpdsim 4.2.7p356\n"
+/*     0 */ "ntpdsim 4.2.7p377\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -207,169 +207,238 @@ static char const ntpdsim_opt_strs[3099] =
 /*  2891 */ "no-load-opts\0"
 /*  2904 */ "no\0"
 /*  2907 */ "NTPDSIM\0"
-/*  2915 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p356\n"
+/*  2915 */ "ntpdsim - NTP daemon simulation program - Ver. 4.2.7p377\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  3030 */ "$HOME\0"
 /*  3036 */ ".\0"
 /*  3038 */ ".ntprc\0"
 /*  3045 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  3079 */ "\n\0"
-/*  3081 */ "ntpdsim 4.2.7p356";
+/*  3081 */ "ntpdsim 4.2.7p377";
 
-/*
+/**
  *  ipv4 option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the ipv4 option */
 #define IPV4_DESC      (ntpdsim_opt_strs+957)
+/** Upper-cased name for the ipv4 option */
 #define IPV4_NAME      (ntpdsim_opt_strs+988)
+/** Name string for the ipv4 option */
 #define IPV4_name      (ntpdsim_opt_strs+993)
+/** Other options that appear in conjunction with the ipv4 option */
 static int const aIpv4CantList[] = {
     INDEX_OPT_IPV6, NO_EQUIVALENT };
+/** Compiled in flag settings for the ipv4 option */
 #define IPV4_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  ipv6 option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the ipv6 option */
 #define IPV6_DESC      (ntpdsim_opt_strs+998)
+/** Upper-cased name for the ipv6 option */
 #define IPV6_NAME      (ntpdsim_opt_strs+1029)
+/** Name string for the ipv6 option */
 #define IPV6_name      (ntpdsim_opt_strs+1034)
+/** Other options that appear in conjunction with the ipv6 option */
 static int const aIpv6CantList[] = {
     INDEX_OPT_IPV4, NO_EQUIVALENT };
+/** Compiled in flag settings for the ipv6 option */
 #define IPV6_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  authreq option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the authreq option */
 #define AUTHREQ_DESC      (ntpdsim_opt_strs+1039)
+/** Upper-cased name for the authreq option */
 #define AUTHREQ_NAME      (ntpdsim_opt_strs+1069)
+/** Name string for the authreq option */
 #define AUTHREQ_name      (ntpdsim_opt_strs+1077)
+/** Other options that appear in conjunction with the authreq option */
 static int const aAuthreqCantList[] = {
     INDEX_OPT_AUTHNOREQ, NO_EQUIVALENT };
+/** Compiled in flag settings for the authreq option */
 #define AUTHREQ_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  authnoreq option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the authnoreq option */
 #define AUTHNOREQ_DESC      (ntpdsim_opt_strs+1085)
+/** Upper-cased name for the authnoreq option */
 #define AUTHNOREQ_NAME      (ntpdsim_opt_strs+1122)
+/** Name string for the authnoreq option */
 #define AUTHNOREQ_name      (ntpdsim_opt_strs+1132)
+/** Other options that appear in conjunction with the authnoreq option */
 static int const aAuthnoreqCantList[] = {
     INDEX_OPT_AUTHREQ, NO_EQUIVALENT };
+/** Compiled in flag settings for the authnoreq option */
 #define AUTHNOREQ_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  bcastsync option description:
  */
+/** Descriptive text for the bcastsync option */
 #define BCASTSYNC_DESC      (ntpdsim_opt_strs+1142)
+/** Upper-cased name for the bcastsync option */
 #define BCASTSYNC_NAME      (ntpdsim_opt_strs+1180)
+/** Name string for the bcastsync option */
 #define BCASTSYNC_name      (ntpdsim_opt_strs+1190)
+/** Compiled in flag settings for the bcastsync option */
 #define BCASTSYNC_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  configfile option description:
  */
+/** Descriptive text for the configfile option */
 #define CONFIGFILE_DESC      (ntpdsim_opt_strs+1200)
+/** Upper-cased name for the configfile option */
 #define CONFIGFILE_NAME      (ntpdsim_opt_strs+1224)
+/** Name string for the configfile option */
 #define CONFIGFILE_name      (ntpdsim_opt_strs+1235)
+/** Compiled in flag settings for the configfile option */
 #define CONFIGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  debug-level option description:
  */
+/** Descriptive text for the debug-level option */
 #define DEBUG_LEVEL_DESC      (ntpdsim_opt_strs+1246)
+/** Upper-cased name for the debug-level option */
 #define DEBUG_LEVEL_NAME      (ntpdsim_opt_strs+1277)
+/** Name string for the debug-level option */
 #define DEBUG_LEVEL_name      (ntpdsim_opt_strs+1289)
+/** Compiled in flag settings for the debug-level option */
 #define DEBUG_LEVEL_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  set-debug-level option description:
  */
+/** Descriptive text for the set-debug-level option */
 #define SET_DEBUG_LEVEL_DESC      (ntpdsim_opt_strs+1301)
+/** Upper-cased name for the set-debug-level option */
 #define SET_DEBUG_LEVEL_NAME      (ntpdsim_opt_strs+1331)
+/** Name string for the set-debug-level option */
 #define SET_DEBUG_LEVEL_name      (ntpdsim_opt_strs+1347)
+/** Compiled in flag settings for the set-debug-level option */
 #define SET_DEBUG_LEVEL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  driftfile option description:
  */
+/** Descriptive text for the driftfile option */
 #define DRIFTFILE_DESC      (ntpdsim_opt_strs+1363)
+/** Upper-cased name for the driftfile option */
 #define DRIFTFILE_NAME      (ntpdsim_opt_strs+1389)
+/** Name string for the driftfile option */
 #define DRIFTFILE_name      (ntpdsim_opt_strs+1399)
+/** Compiled in flag settings for the driftfile option */
 #define DRIFTFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  panicgate option description:
  */
+/** Descriptive text for the panicgate option */
 #define PANICGATE_DESC      (ntpdsim_opt_strs+1409)
+/** Upper-cased name for the panicgate option */
 #define PANICGATE_NAME      (ntpdsim_opt_strs+1446)
+/** Name string for the panicgate option */
 #define PANICGATE_name      (ntpdsim_opt_strs+1456)
+/** Compiled in flag settings for the panicgate option */
 #define PANICGATE_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  jaildir option description:
  */
 #ifdef HAVE_DROPROOT
+/** Descriptive text for the jaildir option */
 #define JAILDIR_DESC      (ntpdsim_opt_strs+1466)
+/** Upper-cased name for the jaildir option */
 #define JAILDIR_NAME      (ntpdsim_opt_strs+1481)
+/** Name string for the jaildir option */
 #define JAILDIR_name      (ntpdsim_opt_strs+1489)
+/** Compiled in flag settings for the jaildir option */
 #define JAILDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable jaildir */
 #define JAILDIR_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
 #define JAILDIR_NAME      NULL
+/** Descriptive text for the jaildir option */
 #define JAILDIR_DESC      (ntpdsim_opt_strs+1497)
 #define JAILDIR_name      (ntpdsim_opt_strs+1489)
 #endif  /* HAVE_DROPROOT */
 
-/*
+/**
  *  interface option description:
  */
+/** Descriptive text for the interface option */
 #define INTERFACE_DESC      (ntpdsim_opt_strs+1551)
+/** Upper-cased name for the interface option */
 #define INTERFACE_NAME      (ntpdsim_opt_strs+1590)
+/** Name string for the interface option */
 #define INTERFACE_name      (ntpdsim_opt_strs+1600)
+/** Compiled in flag settings for the interface option */
 #define INTERFACE_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  keyfile option description:
  */
+/** Descriptive text for the keyfile option */
 #define KEYFILE_DESC      (ntpdsim_opt_strs+1610)
+/** Upper-cased name for the keyfile option */
 #define KEYFILE_NAME      (ntpdsim_opt_strs+1633)
+/** Name string for the keyfile option */
 #define KEYFILE_name      (ntpdsim_opt_strs+1641)
+/** Compiled in flag settings for the keyfile option */
 #define KEYFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  logfile option description:
  */
+/** Descriptive text for the logfile option */
 #define LOGFILE_DESC      (ntpdsim_opt_strs+1649)
+/** Upper-cased name for the logfile option */
 #define LOGFILE_NAME      (ntpdsim_opt_strs+1670)
+/** Name string for the logfile option */
 #define LOGFILE_name      (ntpdsim_opt_strs+1678)
+/** Compiled in flag settings for the logfile option */
 #define LOGFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  novirtualips option description:
  */
+/** Descriptive text for the novirtualips option */
 #define NOVIRTUALIPS_DESC      (ntpdsim_opt_strs+1686)
+/** Upper-cased name for the novirtualips option */
 #define NOVIRTUALIPS_NAME      (ntpdsim_opt_strs+1722)
+/** Name string for the novirtualips option */
 #define NOVIRTUALIPS_name      (ntpdsim_opt_strs+1735)
+/** Compiled in flag settings for the novirtualips option */
 #define NOVIRTUALIPS_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  modifymmtimer option description:
  */
 #ifdef SYS_WINNT
+/** Descriptive text for the modifymmtimer option */
 #define MODIFYMMTIMER_DESC      (ntpdsim_opt_strs+1748)
+/** Upper-cased name for the modifymmtimer option */
 #define MODIFYMMTIMER_NAME      (ntpdsim_opt_strs+1787)
+/** Name string for the modifymmtimer option */
 #define MODIFYMMTIMER_name      (ntpdsim_opt_strs+1801)
+/** Compiled in flag settings for the modifymmtimer option */
 #define MODIFYMMTIMER_FLAGS     (OPTST_DISABLED)
 
 #else   /* disable modifymmtimer */
@@ -379,75 +448,106 @@ static int const aAuthnoreqCantList[] = {
 #define MODIFYMMTIMER_name      NULL
 #endif  /* SYS_WINNT */
 
-/*
+/**
  *  nofork option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the nofork option */
 #define NOFORK_DESC      (ntpdsim_opt_strs+1815)
+/** Upper-cased name for the nofork option */
 #define NOFORK_NAME      (ntpdsim_opt_strs+1827)
+/** Name string for the nofork option */
 #define NOFORK_name      (ntpdsim_opt_strs+1834)
+/** Other options that appear in conjunction with the nofork option */
 static int const aNoforkCantList[] = {
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
+/** Compiled in flag settings for the nofork option */
 #define NOFORK_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  nice option description:
  */
+/** Descriptive text for the nice option */
 #define NICE_DESC      (ntpdsim_opt_strs+1841)
+/** Upper-cased name for the nice option */
 #define NICE_NAME      (ntpdsim_opt_strs+1862)
+/** Name string for the nice option */
 #define NICE_name      (ntpdsim_opt_strs+1867)
+/** Compiled in flag settings for the nice option */
 #define NICE_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  pidfile option description:
  */
+/** Descriptive text for the pidfile option */
 #define PIDFILE_DESC      (ntpdsim_opt_strs+1872)
+/** Upper-cased name for the pidfile option */
 #define PIDFILE_NAME      (ntpdsim_opt_strs+1893)
+/** Name string for the pidfile option */
 #define PIDFILE_name      (ntpdsim_opt_strs+1901)
+/** Compiled in flag settings for the pidfile option */
 #define PIDFILE_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  priority option description:
  */
+/** Descriptive text for the priority option */
 #define PRIORITY_DESC      (ntpdsim_opt_strs+1909)
+/** Upper-cased name for the priority option */
 #define PRIORITY_NAME      (ntpdsim_opt_strs+1926)
+/** Name string for the priority option */
 #define PRIORITY_name      (ntpdsim_opt_strs+1935)
+/** Compiled in flag settings for the priority option */
 #define PRIORITY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  quit option description with
  *  "Must also have options" and "Incompatible options":
  */
+/** Descriptive text for the quit option */
 #define QUIT_DESC      (ntpdsim_opt_strs+1944)
+/** Upper-cased name for the quit option */
 #define QUIT_NAME      (ntpdsim_opt_strs+1966)
+/** Name string for the quit option */
 #define QUIT_name      (ntpdsim_opt_strs+1971)
+/** Other options that appear in conjunction with the quit option */
 static int const aQuitCantList[] = {
     INDEX_OPT_SAVECONFIGQUIT,
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
+/** Compiled in flag settings for the quit option */
 #define QUIT_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  propagationdelay option description:
  */
+/** Descriptive text for the propagationdelay option */
 #define PROPAGATIONDELAY_DESC      (ntpdsim_opt_strs+1976)
+/** Upper-cased name for the propagationdelay option */
 #define PROPAGATIONDELAY_NAME      (ntpdsim_opt_strs+2004)
+/** Name string for the propagationdelay option */
 #define PROPAGATIONDELAY_name      (ntpdsim_opt_strs+2021)
+/** Compiled in flag settings for the propagationdelay option */
 #define PROPAGATIONDELAY_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  saveconfigquit option description with
  *  "Must also have options" and "Incompatible options":
  */
 #ifdef SAVECONFIG
+/** Descriptive text for the saveconfigquit option */
 #define SAVECONFIGQUIT_DESC      (ntpdsim_opt_strs+2038)
+/** Upper-cased name for the saveconfigquit option */
 #define SAVECONFIGQUIT_NAME      (ntpdsim_opt_strs+2073)
+/** Name string for the saveconfigquit option */
 #define SAVECONFIGQUIT_name      (ntpdsim_opt_strs+2088)
+/** Other options that appear in conjunction with the saveconfigquit option */
 static int const aSaveconfigquitCantList[] = {
     INDEX_OPT_QUIT,
     INDEX_OPT_WAIT_SYNC, NO_EQUIVALENT };
+/** Compiled in flag settings for the saveconfigquit option */
 #define SAVECONFIGQUIT_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
@@ -459,80 +559,110 @@ static int const aSaveconfigquitCantList[] = {
 #define SAVECONFIGQUIT_name      NULL
 #endif  /* SAVECONFIG */
 
-/*
+/**
  *  statsdir option description:
  */
+/** Descriptive text for the statsdir option */
 #define STATSDIR_DESC      (ntpdsim_opt_strs+2103)
+/** Upper-cased name for the statsdir option */
 #define STATSDIR_NAME      (ntpdsim_opt_strs+2128)
+/** Name string for the statsdir option */
 #define STATSDIR_name      (ntpdsim_opt_strs+2137)
+/** Compiled in flag settings for the statsdir option */
 #define STATSDIR_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  trustedkey option description:
  */
+/** Descriptive text for the trustedkey option */
 #define TRUSTEDKEY_DESC      (ntpdsim_opt_strs+2146)
+/** Upper-cased name for the trustedkey option */
 #define TRUSTEDKEY_NAME      (ntpdsim_opt_strs+2165)
+/** Name string for the trustedkey option */
 #define TRUSTEDKEY_name      (ntpdsim_opt_strs+2176)
+/** Compiled in flag settings for the trustedkey option */
 #define TRUSTEDKEY_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  user option description:
  */
 #ifdef HAVE_DROPROOT
+/** Descriptive text for the user option */
 #define USER_DESC      (ntpdsim_opt_strs+2187)
+/** Upper-cased name for the user option */
 #define USER_NAME      (ntpdsim_opt_strs+2221)
+/** Name string for the user option */
 #define USER_name      (ntpdsim_opt_strs+2226)
+/** Compiled in flag settings for the user option */
 #define USER_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
 #else   /* disable user */
 #define USER_FLAGS     (OPTST_OMITTED | OPTST_NO_INIT)
 #define USER_NAME      NULL
+/** Descriptive text for the user option */
 #define USER_DESC      (ntpdsim_opt_strs+1497)
 #define USER_name      (ntpdsim_opt_strs+2226)
 #endif  /* HAVE_DROPROOT */
 
-/*
+/**
  *  updateinterval option description:
  */
+/** Descriptive text for the updateinterval option */
 #define UPDATEINTERVAL_DESC      (ntpdsim_opt_strs+2231)
+/** Upper-cased name for the updateinterval option */
 #define UPDATEINTERVAL_NAME      (ntpdsim_opt_strs+2295)
+/** Name string for the updateinterval option */
 #define UPDATEINTERVAL_name      (ntpdsim_opt_strs+2310)
+/** Compiled in flag settings for the updateinterval option */
 #define UPDATEINTERVAL_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
-/*
+/**
  *  var option description:
  */
+/** Descriptive text for the var option */
 #define VAR_DESC      (ntpdsim_opt_strs+2325)
+/** Upper-cased name for the var option */
 #define VAR_NAME      (ntpdsim_opt_strs+2355)
+/** Name string for the var option */
 #define VAR_name      (ntpdsim_opt_strs+2359)
+/** Compiled in flag settings for the var option */
 #define VAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  dvar option description:
  */
+/** Descriptive text for the dvar option */
 #define DVAR_DESC      (ntpdsim_opt_strs+2363)
+/** Upper-cased name for the dvar option */
 #define DVAR_NAME      (ntpdsim_opt_strs+2397)
+/** Name string for the dvar option */
 #define DVAR_name      (ntpdsim_opt_strs+2402)
+/** Compiled in flag settings for the dvar option */
 #define DVAR_FLAGS     (OPTST_DISABLED | OPTST_STACKED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
-/*
+/**
  *  wait-sync option description with
  *  "Must also have options" and "Incompatible options":
  */
 #ifdef HAVE_WORKING_FORK
+/** Descriptive text for the wait-sync option */
 #define WAIT_SYNC_DESC      (ntpdsim_opt_strs+2407)
+/** Upper-cased name for the wait-sync option */
 #define WAIT_SYNC_NAME      (ntpdsim_opt_strs+2444)
+/** Name string for the wait-sync option */
 #define WAIT_SYNC_name      (ntpdsim_opt_strs+2454)
+/** Other options that appear in conjunction with the wait-sync option */
 static int const aWait_SyncCantList[] = {
     INDEX_OPT_NOFORK,
     INDEX_OPT_QUIT,
     INDEX_OPT_SAVECONFIGQUIT, NO_EQUIVALENT };
+/** Compiled in flag settings for the wait-sync option */
 #define WAIT_SYNC_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_NUMERIC))
 
@@ -544,21 +674,29 @@ static int const aWait_SyncCantList[] = {
 #define WAIT_SYNC_name      NULL
 #endif  /* HAVE_WORKING_FORK */
 
-/*
+/**
  *  slew option description:
  */
+/** Descriptive text for the slew option */
 #define SLEW_DESC      (ntpdsim_opt_strs+2464)
+/** Upper-cased name for the slew option */
 #define SLEW_NAME      (ntpdsim_opt_strs+2487)
+/** Name string for the slew option */
 #define SLEW_name      (ntpdsim_opt_strs+2492)
+/** Compiled in flag settings for the slew option */
 #define SLEW_FLAGS     (OPTST_DISABLED)
 
-/*
+/**
  *  usepcc option description:
  */
 #ifdef SYS_WINNT
+/** Descriptive text for the usepcc option */
 #define USEPCC_DESC      (ntpdsim_opt_strs+2497)
+/** Upper-cased name for the usepcc option */
 #define USEPCC_NAME      (ntpdsim_opt_strs+2534)
+/** Name string for the usepcc option */
 #define USEPCC_name      (ntpdsim_opt_strs+2541)
+/** Compiled in flag settings for the usepcc option */
 #define USEPCC_FLAGS     (OPTST_DISABLED)
 
 #else   /* disable usepcc */
@@ -568,13 +706,17 @@ static int const aWait_SyncCantList[] = {
 #define USEPCC_name      NULL
 #endif  /* SYS_WINNT */
 
-/*
+/**
  *  pccfreq option description:
  */
 #ifdef SYS_WINNT
+/** Descriptive text for the pccfreq option */
 #define PCCFREQ_DESC      (ntpdsim_opt_strs+2548)
+/** Upper-cased name for the pccfreq option */
 #define PCCFREQ_NAME      (ntpdsim_opt_strs+2591)
+/** Name string for the pccfreq option */
 #define PCCFREQ_name      (ntpdsim_opt_strs+2599)
+/** Compiled in flag settings for the pccfreq option */
 #define PCCFREQ_FLAGS     (OPTST_DISABLED \
         | OPTST_SET_ARGTYPE(OPARG_TYPE_STRING))
 
@@ -585,13 +727,17 @@ static int const aWait_SyncCantList[] = {
 #define PCCFREQ_name      NULL
 #endif  /* SYS_WINNT */
 
-/*
+/**
  *  mdns option description:
  */
 #ifdef HAVE_DNSREGISTRATION
+/** Descriptive text for the mdns option */
 #define MDNS_DESC      (ntpdsim_opt_strs+2607)
+/** Upper-cased name for the mdns option */
 #define MDNS_NAME      (ntpdsim_opt_strs+2642)
+/** Name string for the mdns option */
 #define MDNS_name      (ntpdsim_opt_strs+2647)
+/** Compiled in flag settings for the mdns option */
 #define MDNS_FLAGS     (OPTST_DISABLED)
 
 #else   /* disable mdns */
@@ -611,8 +757,8 @@ static int const aWait_SyncCantList[] = {
 #define MORE_HELP_name  (ntpdsim_opt_strs+2746)
 #define MORE_HELP_FLAGS (OPTST_IMM | OPTST_NO_INIT)
 #else
-#define MORE_HELP_DESC  NULL
-#define MORE_HELP_name  NULL
+#define MORE_HELP_DESC  HELP_DESC
+#define MORE_HELP_name  HELP_name
 #define MORE_HELP_FLAGS (OPTST_OMITTED | OPTST_NO_INIT)
 #endif
 #ifdef NO_OPTIONAL_OPT_ARGS
@@ -630,9 +776,11 @@ static int const aWait_SyncCantList[] = {
 #define NO_LOAD_OPTS_name  (ntpdsim_opt_strs+2891)
 #define LOAD_OPTS_pfx      (ntpdsim_opt_strs+2904)
 #define LOAD_OPTS_name     (NO_LOAD_OPTS_name + 3)
-/*
+/**
  *  Declare option callback procedures
  */
+/* extracted from optmain.tlib near line 745 */
+
 #if defined(TEST_NTPDSIM_OPTS)
 /*
  *  Under test, omit argument processing, or call optionStackArg,
@@ -659,12 +807,12 @@ extern tOptProc
 static tOptProc
     doOptDebug_Level, doUsageOpt;
 
-/*
+/**
  *  #define map the "normal" callout procs
  */
 #define DEBUG_LEVEL_OPT_PROC doOptDebug_Level
 
-#endif /* defined(TEST_NTPDSIM_OPTS) */
+#endif /* TEST_NTPDSIM_OPTS */
 #define VER_PROC        ntpOptionPrintVersion
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1125,7 +1273,7 @@ static tOptDesc optDesc[OPTION_CT] = {
      /* equivalenced to  */ NO_EQUIVALENT,
      /* min, max, act ct */ 0, 1, 0,
      /* opt state flags  */ OPTST_SET_ARGTYPE(OPARG_TYPE_STRING)
-                          | OPTST_ARG_OPTIONAL | OPTST_NO_INIT, AOUSE_SAVE_OPTS,
+                       | OPTST_ARG_OPTIONAL | OPTST_NO_INIT, AOUSE_SAVE_OPTS,
      /* last opt argumnt */ { NULL },
      /* arg list/cookie  */ NULL,
      /* must/cannot opts */ NULL,  NULL,
@@ -1148,20 +1296,25 @@ static tOptDesc optDesc[OPTION_CT] = {
 };
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- *  Define the ntpdsim Option Environment
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/** Reference to the upper cased version of ntpdsim. */
 #define zPROGNAME       (ntpdsim_opt_strs+2907)
+/** Reference to the title line for ntpdsim usage. */
 #define zUsageTitle     (ntpdsim_opt_strs+2915)
+/** ntpdsim configuration file name. */
 #define zRcName         (ntpdsim_opt_strs+3038)
+/** Directories to search for ntpdsim config files. */
 static char const * const apzHomeList[3] = {
     ntpdsim_opt_strs+3030,
     ntpdsim_opt_strs+3036,
     NULL };
+/** The ntpdsim program bug email address. */
 #define zBugsAddr       (ntpdsim_opt_strs+3045)
+/** Clarification/explanation of what ntpdsim does. */
 #define zExplain        (NULL)
+/** Extra detail explaining what ntpdsim does. */
 #define zDetail         (ntpdsim_opt_strs+3079)
+/** The full version string for ntpdsim. */
 #define zFullVersion    (ntpdsim_opt_strs+3081)
 /* extracted from optcode.tlib near line 364 */
 
@@ -1184,17 +1337,19 @@ static char const * const apzHomeList[3] = {
 /**
  * The callout function that invokes the optionUsage function.
  *
- * @param pOptions the AutoOpts option description structure
- * @param pOptDesc the descriptor for the "help" (usage) option.
+ * @param[in] opts the AutoOpts option description structure
+ * @param[in] od   the descriptor for the "help" (usage) option.
  * @noreturn
  */
 static void
-doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
+doUsageOpt(tOptions * opts, tOptDesc * od)
 {
-    optionUsage(&ntpdsimOptions, NTPDSIM_EXIT_SUCCESS);
+    int ex_code;
+    ex_code = NTPDSIM_EXIT_SUCCESS;
+    optionUsage(&ntpdsimOptions, ex_code);
     /* NOTREACHED */
-    (void)pOptDesc;
-    (void)pOptions;
+    (void)opts;
+    (void)od;
 }
 
 #if ! defined(TEST_NTPDSIM_OPTS)
@@ -1203,8 +1358,8 @@ doUsageOpt(tOptions * pOptions, tOptDesc * pOptDesc)
 /**
  * Code to handle the debug-level option.
  *
- * @param pOptions the ntpdsim options data structure
- * @param pOptDesc the option descriptor for this option.
+ * @param[in] pOptions the ntpdsim options data structure
+ * @param[in,out] pOptDesc the option descriptor for this option.
  */
 static void
 doOptDebug_Level(tOptions* pOptions, tOptDesc* pOptDesc)
@@ -1223,7 +1378,7 @@ OPT_VALUE_SET_DEBUG_LEVEL++;
 #endif /* defined(TEST_NTPDSIM_OPTS) */
 /* extracted from optmain.tlib near line 46 */
 
-#if defined(TEST_NTPDSIM_OPTS) /* TEST MAIN PROCEDURE: */
+#if defined(TEST_NTPDSIM_OPTS) /* TEST-MAIN-PROCEDURE: */
 
 extern void optionPutShell(tOptions*);
 
@@ -1231,8 +1386,8 @@ extern void optionPutShell(tOptions*);
  * Generated main procedure.  This will emit text that a Bourne shell can
  * process to handle its command line arguments.
  *
- * @param argc argument count
- * @param argv argument vector
+ * @param[in] argc argument count
+ * @param[in] argv argument vector
  * @returns program exit code
  */
 int
@@ -1246,8 +1401,8 @@ main(int argc, char ** argv)
         fputs("output error writing to stdout\n", stderr);
     return res;
 }
-#endif  /* defined TEST_NTPDSIM_OPTS */
-/* extracted from optmain.tlib near line 1254 */
+#endif  /* TEST_NTPDSIM_OPTS END-TEST-MAIN-PROCEDURE */
+/* extracted from optmain.tlib near line 1266 */
 
 /**
  * The directory containing the data associated with ntpdsim.
@@ -1263,6 +1418,7 @@ main(int argc, char ** argv)
 #ifndef  WITH_PACKAGER
 # define ntpdsim_packager_info NULL
 #else
+/** Packager information for ntpdsim. */
 static char const ntpdsim_packager_info[] =
     "Packaged by " WITH_PACKAGER
 
@@ -1292,7 +1448,8 @@ tOptions ntpdsimOptions = {
     + OPTPROC_NO_REQ_OPT
     + OPTPROC_ENVIRON
     + OPTPROC_NO_ARGS
-    + OPTPROC_MISUSE ),
+    + OPTPROC_MISUSE
+    + OPTPROC_SHELL_OUTPUT ),
     0, NULL,                    /* current option index, current option */
     NULL,         NULL,         zPROGNAME,
     zRcName,      zCopyright,   zLicenseDescrip,
@@ -1317,7 +1474,7 @@ tOptions ntpdsimOptions = {
 };
 
 #if ENABLE_NLS
-/*
+/**
  * This code is designed to translate translatable option text for the
  * ntpdsim program.  These translations happen upon entry
  * to optionProcess().
@@ -1426,13 +1583,14 @@ translate_option_strings(void)
 #endif /* ENABLE_NLS */
 
 #ifdef DO_NOT_COMPILE_THIS_CODE_IT_IS_FOR_GETTEXT
+/** I18N function strictly for xgettext.  Do not compile. */
 static void bogus_function(void) {
   /* TRANSLATORS:
 
-     The following dummy function was crated solely so that xgettext can extract
-     the correct strings.  These strings are actually referenced by a field name
-     in the ntpdsimOptions structure noted in the comments below.  The
-     literal text is defined in ntpdsim_opt_strs.
+     The following dummy function was crated solely so that xgettext can
+     extract the correct strings.  These strings are actually referenced
+     by a field name in the ntpdsimOptions structure noted in the
+     comments below.  The literal text is defined in ntpdsim_opt_strs.
    
      NOTE: the strings below are segmented with respect to the source string
      ntpdsim_opt_strs.  The strings above are handed off for translation
@@ -1444,7 +1602,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpdsimOptions.pzCopyright */
-  puts(_("ntpdsim 4.2.7p356\n\
+  puts(_("ntpdsim 4.2.7p377\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1587,67 +1745,66 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpdsimOptions.pzUsageTitle */
-  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p356\n\
+  puts(_("ntpdsim - NTP daemon simulation program - Ver. 4.2.7p377\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntpdsimOptions.pzDetail */
   puts(_("\n"));
 
   /* referenced via ntpdsimOptions.pzFullVersion */
-  puts(_("ntpdsim 4.2.7p356"));
+  puts(_("ntpdsim 4.2.7p377"));
 
   /* referenced via ntpdsimOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
 
   /* referenced via ntpdsimOptions.pzShortUsage */
   puts(_("<<<NOT-FOUND>>>"));
-
   /* LIBOPTS-MESSAGES: */
-#line 60 "../autoopts.c"
+#line 67 "../autoopts.c"
   puts(_("allocation of %d bytes failed\n"));
-#line 86 "../autoopts.c"
+#line 93 "../autoopts.c"
   puts(_("allocation of %d bytes failed\n"));
 #line 53 "../init.c"
   puts(_("AutoOpts function called without option descriptor\n"));
-#line 89 "../init.c"
+#line 90 "../init.c"
   puts(_("\tThis exceeds the compiled library version:  "));
-#line 87 "../init.c"
+#line 88 "../init.c"
   puts(_("Automated Options Processing Error!\n"
        "\t%s called AutoOpts function with structure version %d:%d:%d.\n"));
-#line 73 "../autoopts.c"
+#line 80 "../autoopts.c"
   puts(_("realloc of %d bytes at 0x%p failed\n"));
-#line 91 "../init.c"
+#line 92 "../init.c"
   puts(_("\tThis is less than the minimum library version:  "));
 #line 121 "../version.c"
   puts(_("Automated Options version %s\n"
        "\tCopyright (C) 1999-2013 by Bruce Korb - all rights reserved\n"));
-#line 310 "../usage.c"
+#line 82 "../makeshell.c"
   puts(_("(AutoOpts bug):  %s.\n"));
 #line 90 "../reset.c"
   puts(_("optionResetOpt() called, but reset-option not configured"));
-#line 329 "../usage.c"
+#line 292 "../usage.c"
   puts(_("could not locate the 'help' option"));
-#line 351 "../autoopts.c"
+#line 336 "../autoopts.c"
   puts(_("optionProcess() was called with invalid data"));
-#line 770 "../usage.c"
+#line 748 "../usage.c"
   puts(_("invalid argument type specified"));
-#line 589 "../find.c"
+#line 598 "../find.c"
   puts(_("defaulted to option with optional arg"));
 #line 76 "../alias.c"
   puts(_("aliasing option is out of range."));
-#line 229 "../enum.c"
+#line 234 "../enum.c"
   puts(_("%s error:  the keyword '%s' is ambiguous for %s\n"));
 #line 108 "../find.c"
   puts(_("  The following options match:\n"));
-#line 290 "../find.c"
+#line 293 "../find.c"
   puts(_("%s: ambiguous option name: %s (matches %d options)\n"));
 #line 161 "../check.c"
   puts(_("%s: Command line arguments required\n"));
 #line 43 "../alias.c"
   puts(_("%d %s%s options allowed\n"));
-#line 81 "../makeshell.c"
+#line 89 "../makeshell.c"
   puts(_("%s error %d (%s) calling %s for '%s'\n"));
-#line 293 "../makeshell.c"
+#line 301 "../makeshell.c"
   puts(_("interprocess pipe"));
 #line 168 "../version.c"
   puts(_("error: version option argument '%c' invalid.  Use:\n"
@@ -1656,48 +1813,48 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
        "\t'n' - version and full copyright notice\n"));
 #line 58 "../check.c"
   puts(_("%s error:  the '%s' and '%s' options conflict\n"));
-#line 214 "../find.c"
+#line 217 "../find.c"
   puts(_("%s: The '%s' option has been disabled."));
-#line 421 "../find.c"
+#line 430 "../find.c"
   puts(_("%s: The '%s' option has been disabled."));
 #line 38 "../alias.c"
   puts(_("-equivalence"));
-#line 460 "../find.c"
+#line 469 "../find.c"
   puts(_("%s: illegal option -- %c\n"));
 #line 110 "../reset.c"
   puts(_("%s: illegal option -- %c\n"));
-#line 268 "../find.c"
+#line 271 "../find.c"
   puts(_("%s: illegal option -- %s\n"));
-#line 746 "../find.c"
+#line 755 "../find.c"
   puts(_("%s: illegal option -- %s\n"));
 #line 118 "../reset.c"
   puts(_("%s: illegal option -- %s\n"));
-#line 332 "../find.c"
+#line 335 "../find.c"
   puts(_("%s: unknown vendor extension option -- %s\n"));
-#line 154 "../enum.c"
+#line 159 "../enum.c"
   puts(_("  or an integer from %d through %d\n"));
-#line 164 "../enum.c"
+#line 169 "../enum.c"
   puts(_("  or an integer from %d through %d\n"));
-#line 769 "../usage.c"
+#line 747 "../usage.c"
   puts(_("%s error:  invalid option descriptor for %s\n"));
-#line 1097 "../usage.c"
+#line 1081 "../usage.c"
   puts(_("%s error:  invalid option descriptor for %s\n"));
-#line 379 "../find.c"
+#line 385 "../find.c"
   puts(_("%s: invalid option name: %s\n"));
-#line 518 "../find.c"
+#line 527 "../find.c"
   puts(_("%s: The '%s' option requires an argument.\n"));
-#line 171 "../autoopts.c"
+#line 156 "../autoopts.c"
   puts(_("(AutoOpts bug):  Equivalenced option '%s' was equivalenced to both\n"
-       "\t'%s' and '%s'"));
+       "\t'%s' and '%s'."));
 #line 94 "../check.c"
   puts(_("%s error:  The %s option is required\n"));
-#line 623 "../find.c"
+#line 632 "../find.c"
   puts(_("%s: The '%s' option cannot have an argument.\n"));
 #line 151 "../check.c"
   puts(_("%s: Command line arguments are not allowed.\n"));
-#line 531 "../save.c"
+#line 535 "../save.c"
   puts(_("error %d (%s) creating %s\n"));
-#line 229 "../enum.c"
+#line 234 "../enum.c"
   puts(_("%s error:  '%s' does not match any %s keywords.\n"));
 #line 93 "../reset.c"
   puts(_("%s error: The '%s' option requires an argument.\n"));
@@ -1707,7 +1864,7 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("error %d (%s) stat-ing %s\n"));
 #line 143 "../restore.c"
   puts(_("%s error: no saved option state\n"));
-#line 246 "../autoopts.c"
+#line 231 "../autoopts.c"
   puts(_("'%s' is not a command line option.\n"));
 #line 114 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable date/time.\n"));
@@ -1716,44 +1873,44 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 #line 53 "../time.c"
   puts(_("%s error:  '%s' is not a recognizable time duration.\n"));
 #line 92 "../check.c"
-  puts(_("%s error:  The %s option must appear %d times\n"));
+  puts(_("%s error:  The %s option must appear %d times.\n"));
 #line 157 "../numeric.c"
   puts(_("%s error:  '%s' is not a recognizable number.\n"));
-#line 195 "../enum.c"
+#line 200 "../enum.c"
   puts(_("%s error:  %s exceeds %s keyword count\n"));
-#line 366 "../usage.c"
+#line 330 "../usage.c"
   puts(_("Try '%s %s' for more information.\n"));
 #line 45 "../alias.c"
   puts(_("one %s%s option allowed\n"));
-#line 195 "../makeshell.c"
+#line 203 "../makeshell.c"
   puts(_("standard output"));
-#line 930 "../makeshell.c"
+#line 938 "../makeshell.c"
   puts(_("standard output"));
-#line 304 "../usage.c"
+#line 274 "../usage.c"
   puts(_("standard output"));
-#line 451 "../usage.c"
+#line 415 "../usage.c"
   puts(_("standard output"));
-#line 647 "../usage.c"
+#line 625 "../usage.c"
   puts(_("standard output"));
 #line 175 "../version.c"
   puts(_("standard output"));
-#line 304 "../usage.c"
+#line 274 "../usage.c"
   puts(_("standard error"));
-#line 451 "../usage.c"
+#line 415 "../usage.c"
   puts(_("standard error"));
-#line 647 "../usage.c"
+#line 625 "../usage.c"
   puts(_("standard error"));
 #line 175 "../version.c"
   puts(_("standard error"));
-#line 195 "../makeshell.c"
+#line 203 "../makeshell.c"
   puts(_("write"));
-#line 930 "../makeshell.c"
+#line 938 "../makeshell.c"
   puts(_("write"));
-#line 303 "../usage.c"
+#line 273 "../usage.c"
   puts(_("write"));
-#line 450 "../usage.c"
+#line 414 "../usage.c"
   puts(_("write"));
-#line 646 "../usage.c"
+#line 624 "../usage.c"
   puts(_("write"));
 #line 174 "../version.c"
   puts(_("write"));
@@ -1769,89 +1926,89 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("%s warning:  cannot save options - %s not regular file\n"));
 #line 256 "../save.c"
   puts(_("%s warning:  cannot save options - %s not regular file\n"));
-#line 530 "../save.c"
+#line 534 "../save.c"
   puts(_("%s warning:  cannot save options - %s not regular file\n"));
   /* END-LIBOPTS-MESSAGES */
 
   /* USAGE-TEXT: */
-#line 895 "../usage.c"
+#line 873 "../usage.c"
   puts(_("\t\t\t\t- an alternate for '%s'\n"));
-#line 1164 "../usage.c"
+#line 1148 "../usage.c"
   puts(_("Version, usage and configuration options:"));
-#line 946 "../usage.c"
+#line 924 "../usage.c"
   puts(_("\t\t\t\t- default option for unnamed options\n"));
-#line 859 "../usage.c"
+#line 837 "../usage.c"
   puts(_("\t\t\t\t- disabled as '--%s'\n"));
-#line 1133 "../usage.c"
+#line 1117 "../usage.c"
   puts(_(" --- %-14s %s\n"));
-#line 1131 "../usage.c"
+#line 1115 "../usage.c"
   puts(_("This option has been disabled"));
-#line 886 "../usage.c"
+#line 864 "../usage.c"
   puts(_("\t\t\t\t- enabled by default\n"));
 #line 40 "../alias.c"
   puts(_("%s error:  only "));
-#line 1208 "../usage.c"
+#line 1194 "../usage.c"
   puts(_(" - examining environment variables named %s_*\n"));
 #line 168 "../file.c"
   puts(_("\t\t\t\t- file must not pre-exist\n"));
 #line 172 "../file.c"
   puts(_("\t\t\t\t- file must pre-exist\n"));
-#line 416 "../usage.c"
+#line 380 "../usage.c"
   puts(_("Options are specified by doubled hyphens and their name or by a single\n"
        "hyphen and the flag character.\n"));
-#line 908 "../makeshell.c"
+#line 916 "../makeshell.c"
   puts(_("\n"
        "= = = = = = = =\n\n"
        "This incarnation of genshell will produce\n"
        "a shell script to parse the options for %s:\n\n"));
-#line 161 "../enum.c"
+#line 166 "../enum.c"
   puts(_("  or an integer mask with any of the lower %d bits set\n"));
-#line 919 "../usage.c"
+#line 897 "../usage.c"
   puts(_("\t\t\t\t- is a set membership option\n"));
-#line 940 "../usage.c"
+#line 918 "../usage.c"
   puts(_("\t\t\t\t- must appear between %d and %d times\n"));
-#line 418 "../usage.c"
+#line 382 "../usage.c"
   puts(_("Options are specified by single or double hyphens and their name.\n"));
-#line 926 "../usage.c"
+#line 904 "../usage.c"
   puts(_("\t\t\t\t- may appear multiple times\n"));
-#line 913 "../usage.c"
+#line 891 "../usage.c"
   puts(_("\t\t\t\t- may not be preset\n"));
-#line 1323 "../usage.c"
+#line 1309 "../usage.c"
   puts(_("   Arg Option-Name    Description\n"));
-#line 1259 "../usage.c"
+#line 1245 "../usage.c"
   puts(_("  Flg Arg Option-Name    Description\n"));
-#line 1317 "../usage.c"
+#line 1303 "../usage.c"
   puts(_("  Flg Arg Option-Name    Description\n"));
-#line 1318 "../usage.c"
+#line 1304 "../usage.c"
   puts(_(" %3s %s"));
-#line 1324 "../usage.c"
+#line 1310 "../usage.c"
   puts(_(" %3s %s"));
-#line 423 "../usage.c"
+#line 387 "../usage.c"
   puts(_("The '-#<number>' option may omit the hash char\n"));
-#line 419 "../usage.c"
+#line 383 "../usage.c"
   puts(_("All arguments are named options.\n"));
-#line 993 "../usage.c"
+#line 971 "../usage.c"
   puts(_(" - reading file %s"));
-#line 445 "../usage.c"
+#line 409 "../usage.c"
   puts(_("\n"
-       "please send bug reports to:  <%s>\n"));
+       "Please send bug reports to:  <%s>\n"));
 #line 100 "../version.c"
   puts(_("\n"
-       "please send bug reports to:  <%s>\n"));
+       "Please send bug reports to:  <%s>\n"));
 #line 129 "../version.c"
   puts(_("\n"
-       "please send bug reports to:  <%s>\n"));
-#line 925 "../usage.c"
+       "Please send bug reports to:  <%s>\n"));
+#line 903 "../usage.c"
   puts(_("\t\t\t\t- may NOT appear - preset only\n"));
-#line 965 "../usage.c"
+#line 944 "../usage.c"
   puts(_("\n"
        "The following option preset mechanisms are supported:\n"));
-#line 1206 "../usage.c"
+#line 1192 "../usage.c"
   puts(_("\n"
        "The following option preset mechanisms are supported:\n"));
-#line 704 "../usage.c"
+#line 682 "../usage.c"
   puts(_("prohibits these options:\n"));
-#line 699 "../usage.c"
+#line 677 "../usage.c"
   puts(_("prohibits the option '%s'\n"));
 #line 81 "../numeric.c"
   puts(_("%s%ld to %ld"));
@@ -1869,28 +2026,28 @@ Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
   puts(_("%sis scalable with a suffix: k/K/m/M/g/G/t/T\n"));
 #line 77 "../numeric.c"
   puts(_("%sless than or equal to %ld"));
-#line 426 "../usage.c"
+#line 390 "../usage.c"
   puts(_("Operands and options may be intermixed.  They will be reordered.\n"));
-#line 674 "../usage.c"
+#line 652 "../usage.c"
   puts(_("requires the option '%s'\n"));
-#line 677 "../usage.c"
+#line 655 "../usage.c"
   puts(_("requires these options:\n"));
-#line 1335 "../usage.c"
+#line 1321 "../usage.c"
   puts(_("   Arg Option-Name   Req?  Description\n"));
-#line 1329 "../usage.c"
+#line 1315 "../usage.c"
   puts(_("  Flg Arg Option-Name   Req?  Description\n"));
-#line 162 "../enum.c"
+#line 167 "../enum.c"
   puts(_("or you may use a numeric representation.  Preceding these with a '!'\n"
        "will clear the bits, specifying 'none' will clear all bits, and 'all'\n"
        "will set them all.  Multiple entries may be passed as an option\n"
        "argument list.\n"));
-#line 932 "../usage.c"
+#line 910 "../usage.c"
   puts(_("\t\t\t\t- may appear up to %d times\n"));
-#line 72 "../enum.c"
+#line 77 "../enum.c"
   puts(_("The valid \"%s\" option keywords are:\n"));
-#line 1168 "../usage.c"
+#line 1152 "../usage.c"
   puts(_("The next option supports vendor supported extra options:"));
-#line 795 "../usage.c"
+#line 773 "../usage.c"
   puts(_("These additional options are:"));
   /* END-USAGE-TEXT */
 }

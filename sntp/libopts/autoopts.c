@@ -37,6 +37,28 @@
  */
 static unsigned int tab_skip_ct          = 0;
 
+#ifndef HAVE_PATHFIND
+#  define  pathfind(_p, _n, _m) option_pathfind(_p, _n, _m)
+#  include "compat/pathfind.c"
+#endif
+
+#ifndef HAVE_SNPRINTF
+#  define vsnprintf       option_vsnprintf
+#  define snprintf        option_snprintf
+#  include "compat/snprintf.c"
+#endif
+
+#ifndef HAVE_STRDUP
+#  define  strdup(_s)     option_strdup(_s)
+#  include "compat/strdup.c"
+#endif
+
+#ifndef HAVE_STRCHR
+#  define strrchr(_s, _c) option_strrchr(_s, _c)
+#  define strchr(_s, _c)  option_strchr(_s, _c)
+#  include "compat/strchr.c"
+#endif
+
 LOCAL void *
 ao_malloc(size_t sz)
 {
@@ -75,28 +97,6 @@ ao_strdup(char const *str)
 }
 #undef  strdup
 #define strdup(_p)        ao_strdup(_p)
-
-#ifndef HAVE_PATHFIND
-#  define  pathfind(_p, _n, _m) option_pathfind(_p, _n, _m)
-#  include "compat/pathfind.c"
-#endif
-
-#ifndef HAVE_SNPRINTF
-#  define vsnprintf       option_vsnprintf
-#  define snprintf        option_snprintf
-#  include "compat/snprintf.c"
-#endif
-
-#ifndef HAVE_STRDUP
-#  define  strdup(_s)     option_strdup(_s)
-#  include "compat/strdup.c"
-#endif
-
-#ifndef HAVE_STRCHR
-#  define strrchr(_s, _c) option_strrchr(_s, _c)
-#  define strchr(_s, _c)  option_strchr(_s, _c)
-#  include "compat/strchr.c"
-#endif
 
 /**
  *  handle an option.

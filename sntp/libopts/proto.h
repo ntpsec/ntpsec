@@ -1,7 +1,7 @@
 /* -*- buffer-read-only: t -*- vi: set ro:
  *
  * Prototypes for autoopts
- * Generated Fri Jul  5 20:32:50 PDT 2013
+ * Generated Sun Jul 28 08:25:30 PDT 2013
  */
 #ifndef AUTOOPTS_PROTO_H_GUARD
 #define AUTOOPTS_PROTO_H_GUARD 1
@@ -92,8 +92,8 @@ static void
 munge_str(char * txt, tOptionLoadMode mode);
 
 static void
-loadOptionLine(tOptions * opts, tOptState * opt_state, char * line,
-               tDirection direction, tOptionLoadMode load_mode );
+load_opt_line(tOptions * opts, tOptState * opt_state, char * line,
+              tDirection direction, tOptionLoadMode load_mode );
 
 /*
  *  Extracted from makeshell.c
