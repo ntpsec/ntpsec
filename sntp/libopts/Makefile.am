@@ -7,20 +7,20 @@ noinst_LTLIBRARIES      = libopts.la
 endif
 libopts_la_SOURCES      = libopts.c
 libopts_la_CPPFLAGS     = -I$(top_srcdir)
-libopts_la_LDFLAGS      = -version-info  39:0:14
+libopts_la_LDFLAGS      = -version-info  40:1:15
 EXTRA_DIST              = \
     COPYING.gplv3           COPYING.lgplv3          COPYING.mbsd  \
     MakeDefs.inc            README                  ag-char-map.h  \
     alias.c                 ao-strs.c               ao-strs.h  \
-    autoopts/options.h      autoopts/project.h      autoopts/usage-txt.h  \
+    autoopts/usage-txt.h    autoopts/project.h      autoopts/options.h  \
     autoopts.c              autoopts.h              boolean.c  \
-    check.c                 compat/compat.h         compat/snprintf.c  \
-    compat/pathfind.c       compat/strdup.c         compat/windows-config.h  \
-    compat/strchr.c         configfile.c            cook.c  \
+    check.c                 compat/windows-config.h compat/pathfind.c  \
+    compat/snprintf.c       compat/strchr.c         compat/compat.h  \
+    compat/strdup.c         configfile.c            cook.c  \
     enum.c                  env.c                   file.c  \
     find.c                  genshell.c              genshell.h  \
     gettext.h               init.c                  load.c  \
-    m4/libopts.m4           m4/liboptschk.m4        makeshell.c  \
+    m4/liboptschk.m4        m4/libopts.m4           makeshell.c  \
     nested.c                numeric.c               option-value-type.c  \
     option-value-type.h     option-xat-attribute.c  option-xat-attribute.h  \
     parse-duration.c        parse-duration.h        pgusage.c  \

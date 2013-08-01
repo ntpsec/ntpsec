@@ -129,8 +129,19 @@
 #define SKIP_OPT(p)  (((p)->fOptState & OPTST_IMMUTABLE_MASK) != 0)
 
 typedef int tDirection;
+/**
+ * handling option presets.  Start with command line and work through
+ * config settings in reverse order.
+ */
 #define DIRECTION_PRESET        -1
+/**
+ * handling normal options.  Start with first config file, then environment
+ * variables and finally the command line.
+ */
 #define DIRECTION_PROCESS       1
+/**
+ * An initialzation phase or an option being loaded from program sources.
+ */
 #define DIRECTION_CALLED        0
 
 #define PROCESSING(d)           ((d)>0)
