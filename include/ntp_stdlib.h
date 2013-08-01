@@ -17,19 +17,20 @@
 #include "ntp_string.h"
 #include "ntp_syslog.h"
 
+#ifdef __GNUC__
+#define NTP_PRINTF(fmt, args) __attribute__((__format__(__printf__, fmt, args)))
+#else
+#define NTP_PRINTF(fmt, args)
+#endif
 
-extern	int	mprintf(const char *, ...)
-			__attribute__((__format__(__printf__, 1, 2)));
-extern	int	mfprintf(FILE *, const char *, ...)
-			__attribute__((__format__(__printf__, 2, 3)));
-extern	int	mvfprintf(FILE *, const char *, va_list)
-			__attribute__((__format__(__printf__, 2, 0)));
+extern	int	mprintf(const char *, ...) NTP_PRINTF(1, 2);
+extern	int	mfprintf(FILE *, const char *, ...) NTP_PRINTF(2, 3);
+extern	int	mvfprintf(FILE *, const char *, va_list) NTP_PRINTF(2, 0);
 extern	int	mvsnprintf(char *, size_t, const char *, va_list)
-			__attribute__((__format__(__printf__, 3, 0)));
+			NTP_PRINTF(3, 0);
 extern	int	msnprintf(char *, size_t, const char *, ...)
-			__attribute__((__format__(__printf__, 3, 4)));
-extern	void	msyslog(int, const char *, ...)
-			__attribute__((__format__(__printf__, 2, 3)));
+			NTP_PRINTF(3, 4);
+extern	void	msyslog(int, const char *, ...) NTP_PRINTF(2, 3);
 extern	void	init_logging	(const char *, u_int32, int);
 extern	int	change_logfile	(const char *, int);
 extern	void	setup_logfile	(const char *);

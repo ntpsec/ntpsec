@@ -25,8 +25,8 @@ typedef enum blocking_work_req_tag {
 typedef void (*blocking_work_callback)(blocking_work_req, void *, size_t, void *);
 
 typedef enum blocking_magic_sig_e {
-	BLOCKING_REQ_MAGIC  = 0xb10c7ecf,
-	BLOCKING_RESP_MAGIC = 0xb10c7e54,
+	BLOCKING_REQ_MAGIC  = 0x510c7ecf,
+	BLOCKING_RESP_MAGIC = 0x510c7e54,
 } blocking_magic_sig;
 
 /*

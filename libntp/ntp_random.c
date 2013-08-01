@@ -156,7 +156,7 @@ static char sccsid[] = "@(#)random.c	8.2 (Berkeley) 5/19/95";
  *	MAX_TYPES * (rptr - state) + TYPE_3 == TYPE_3.
  */
 
-static long randtbl[DEG_3 + 1] = {
+static unsigned long randtbl[DEG_3 + 1] = {
 	TYPE_3,
 #ifdef  USE_WEAK_SEEDING
 /* Historic implementation compatibility */
@@ -191,8 +191,8 @@ static long randtbl[DEG_3 + 1] = {
  * in the initialization of randtbl) because the state table pointer is set
  * to point to randtbl[1] (as explained below).
  */
-static long *fptr = &randtbl[SEP_3 + 1];
-static long *rptr = &randtbl[1];
+static long *fptr = (long *)&randtbl[SEP_3 + 1];
+static long *rptr = (long *)&randtbl[1];
 
 /*
  * The following things are the pointer to the state information table, the
@@ -204,11 +204,11 @@ static long *rptr = &randtbl[1];
  * this is more efficient than indexing every time to find the address of
  * the last element to see if the front and rear pointers have wrapped.
  */
-static long *state = &randtbl[1];
+static long *state = (long *)&randtbl[1];
 static long rand_type = TYPE_3;
 static long rand_deg = DEG_3;
 static long rand_sep = SEP_3;
-static long *end_ptr = &randtbl[DEG_3 + 1];
+static long *end_ptr = (long *)&randtbl[DEG_3 + 1];
 
 static inline long good_rand (long);
 

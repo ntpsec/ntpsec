@@ -1,5 +1,6 @@
 * [Bug 2425] move part of input handler code from ntpd.c to ntp_io.c
   and fix select()-only platforms calling input_handler directly.
+* [Bug 2446] Quiet warnings from Oracle's Studio compiler.
 * Upgrade to AutoGen-5.18.1pre3
 * Upgrade to libopts-40.1.15.
 (4.2.7p377) 2013/07/28 Released by Harlan Stenn <stenn@ntp.org>

@@ -68,7 +68,7 @@ extern	void	init_control	(void);
 extern	void	process_control (struct recvbuf *, int);
 extern	void	report_event	(int, struct peer *, const char *);
 extern	int	mprintf_event	(int, struct peer *, const char *, ...)
-			__attribute__((__format__(__printf__, 3, 4)));
+			NTP_PRINTF(3, 4);
 
 /* ntp_control.c */
 /*
@@ -285,7 +285,7 @@ extern	void	record_proto_stats (char *);
 extern	void	record_loop_stats (double, double, double, double, int);
 extern	void	record_clock_stats (sockaddr_u *, const char *);
 extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...)
-			__attribute__((__format__(__printf__, 2, 3)));
+			NTP_PRINTF(2, 3);
 extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int poll, int precision, double root_delay, double root_dispersion, u_int32 refid);
 extern	void	check_leap_file	(void);
 extern	u_long	leap_month(u_long);
