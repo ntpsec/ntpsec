@@ -1,3 +1,4 @@
+* Upgrade to AutoGen-5.18.1pre3
 * Upgrade to libopts-40.1.15.
 (4.2.7p377) 2013/07/28 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2397] License/copyright cleanup.
