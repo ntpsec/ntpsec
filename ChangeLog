@@ -1,3 +1,4 @@
+(4.2.7p378) 2013/08/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2425] move part of input handler code from ntpd.c to ntp_io.c
   and fix select()-only platforms calling input_handler directly.
 * [Bug 2446] Quiet warnings from Oracle's Studio compiler.

@@ -1,8 +1,8 @@
-.TH ntp.conf 5 "01 Aug 2013" "4.2.7p377" "File Formats"
+.TH ntp.conf 5 "01 Aug 2013" "4.2.7p378" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  August  1, 2013 at 02:32:02 AM by AutoGen 5.18.1pre3
+.\"  It has been AutoGen-ed  August  1, 2013 at 06:37:37 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -2892,6 +2892,25 @@ by loading values from environment variables named:
   \fBNTP_CONF_<option-name>\fP or \fBNTP_CONF\fP
 .fi
 .ad
+cvt_prog='/usr/local/gnu/share/autogen/texi2man'
+cvt_prog=`cd \`dirname "$cvt_prog"\` >/dev/null && pwd
+         `/`basename "$cvt_prog"`
+cd $tmp_dir
+test \-x "$cvt_prog" || die "'$cvt_prog' is not executable"
+{
+    list='synopsis description options option-presets'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list name
+    list='implementation-notes environment files examples exit-status errors
+        compatibility see-also conforming-to history authors copyright bugs
+        notes'
+    for f in $list ; do cat $f ; echo ; done > .end-doc
+    rm \-f $list
+    list=`ls \-1 *`' .end-doc'
+    for f in $list ; do cat $f ; echo ; done
+    rm \-f $list
+} 1>.doc 2>/dev/null
+sed \-f .cmds .doc | /usr/local/gnu/bin/grep \-E \-v '^[ 	]*$' | $cvt_prog
 .SH "ENVIRONMENT"
 See \fBOPTION PRESETS\fP for configuration environment variables.
 .SH FILES
@@ -2957,7 +2976,7 @@ services when they become universally available.
 .PP
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p377 of NTP.
+This document corresponds to version 4.2.7p378 of NTP.
 This document was derived from FreeBSD.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp.conf\fP
