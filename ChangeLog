@@ -1,3 +1,4 @@
+* CID 739724: Fix printf arg mismatch in a debug line.
 * [Bug 2425] compile io_handler() in ntp_io.c unconditionally
 * [Bug 2448] Fix checks for configure --with-stack-limit and --with-memlock
   values.
