@@ -842,7 +842,7 @@ case "$ans" in
         ;;
     esac
     ;;
- [1-9][0-9]*)
+ [[1-9]][[0-9]]*)
     ;;
  *) AC_MSG_ERROR(["--with-stack-limit requires an integer argument."])
     ;;
@@ -866,7 +866,7 @@ case "$ans" in
  yes | no)
     ans=32
     ;;
- [1-9][0-9]*) ;;
+ [[1-9]][[0-9]]*) ;;
  *) AC_MSG_ERROR(["--with-memlock requires an integer argument."])
      ;;
 esac

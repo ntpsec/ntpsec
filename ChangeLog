@@ -1,3 +1,5 @@
+* [Bug 2448] Fix checks for configure --with-stack-limit and --with-memlock
+  values.
 (4.2.7p378) 2013/08/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2425] move part of input handler code from ntpd.c to ntp_io.c
   and fix select()-only platforms calling input_handler directly.
