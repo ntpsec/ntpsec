@@ -744,7 +744,7 @@ timeout_queries(void)
 	}
 	// Do we care about didsomething?
 	TRACE(3, ("timeout_queries: didsomething is %d, age is %ld\n",
-		  didsomething, start_cb.tv_sec - start_tv.tv_sec));
+		  didsomething, (long) (start_cb.tv_sec - start_tv.tv_sec)));
 	if (start_cb.tv_sec - start_tv.tv_sec > response_timeout) {
 		TRACE(3, ("timeout_queries: bail!\n"));
 		event_base_loopexit(base, NULL);
