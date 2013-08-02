@@ -4620,6 +4620,13 @@ init_async_notifications()
 		"Listening on routing socket on fd #%d for interface updates",
 		fd);
 }
+#else
+/* HAS_ROUTING_SOCKET not defined */
+static void
+init_async_notifications(void)
+{
+}
+#endif
 
 void
 io_handler(void)
@@ -4682,11 +4689,3 @@ io_handler(void)
 #  endif /* HAVE_SIGNALED_IO */
 }
 
-
-#else
-/* HAS_ROUTING_SOCKET not defined */
-static void
-init_async_notifications(void)
-{
-}
-#endif
