@@ -1,9 +1,9 @@
-.Dd August 1 2013
+.Dd August 2 2013
 .Dt NTP_KEYS 5mdoc File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"
-.\"  It has been AutoGen-ed  August  1, 2013 at 02:40:47 AM by AutoGen 5.18.1pre3
+.\"  It has been AutoGen-ed  August  2, 2013 at 11:35:10 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp.keys.def
 .\"  and the template file   agmdoc-file.tpl
 .Sh NAME
@@ -163,7 +163,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .Sh "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .Sh NOTES
-This document corresponds to version 4.2.7p378 of NTP.
+This document corresponds to version 4.2.7p379 of NTP.
 This document was derived from FreeBSD.
 .Pp
 This manual page was \fIAutoGen\fP\-erated from the \fBntp.keys\fP
