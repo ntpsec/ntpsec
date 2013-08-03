@@ -1,3 +1,4 @@
+(4.2.7p380) 2013/08/03 Released by Harlan Stenn <stenn@ntp.org>
 * CID 984511: Some systems have different printf needs for sizeof.
 (4.2.7p379) 2013/08/02 Released by Harlan Stenn <stenn@ntp.org>
 * CID 739724: Fix printf arg mismatch in a debug line.
