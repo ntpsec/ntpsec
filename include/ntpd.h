@@ -117,7 +117,9 @@ extern	endpt *	findbcastinter		(sockaddr_u *);
 extern	void	enable_broadcast	(endpt *, sockaddr_u *);
 extern	void	enable_multicast_if	(endpt *, sockaddr_u *);
 extern	void	interface_update	(interface_receiver_t, void *);
+#ifndef HAVE_IO_COMPLETION_PORT
 extern  void    io_handler              (void);
+#endif
 extern	void	init_io 	(void);
 extern	void	io_open_sockets	(void);
 extern	void	io_clr_stats	(void);
