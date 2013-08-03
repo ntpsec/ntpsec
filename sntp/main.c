@@ -708,7 +708,7 @@ timeout_queries(void)
 	int didsomething = 0;
 
 	TRACE(3, ("timeout_queries: called to check %u items\n",
-		  COUNTOF(fam_listheads)));
+		  (unsigned)COUNTOF(fam_listheads)));
 
 	gettimeofday_cached(base, &start_cb);
 	for (idx = 0; idx < COUNTOF(fam_listheads); idx++) {

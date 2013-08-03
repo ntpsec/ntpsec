@@ -1,3 +1,4 @@
+* CID 984511: Some systems have different printf needs for sizeof.
 (4.2.7p379) 2013/08/02 Released by Harlan Stenn <stenn@ntp.org>
 * CID 739724: Fix printf arg mismatch in a debug line.
 * [Bug 2425] compile io_handler() in ntp_io.c unconditionally
