@@ -202,6 +202,7 @@ struct key_tok ntp_keywords[] = {
 /* rlimit_option */
 { "memlock",		T_Memlock,		FOLLBY_TOKEN },
 { "stacksize",		T_Stacksize,		FOLLBY_TOKEN },
+{ "filenum",		T_Filenum,		FOLLBY_TOKEN },
 /* tinker_option */
 { "step",		T_Step,			FOLLBY_TOKEN },
 { "panic",		T_Panic,		FOLLBY_TOKEN },

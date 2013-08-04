@@ -686,6 +686,7 @@ ntpdmain(
 	}
 # endif
 
+	/* Setup stack size in preparation for locking pages in memory. */
 # if defined(HAVE_MLOCKALL)
 #  ifdef HAVE_SETRLIMIT
 	ntp_rlimit(RLIMIT_STACK, DFLT_RLIMIT_STACK * 4096, 4096, "4k");
@@ -699,12 +700,6 @@ ntpdmain(
 	ntp_rlimit(RLIMIT_MEMLOCK, DFLT_RLIMIT_MEMLOCK * 1024 * 1024, 1024 * 1024, "MB");
 #   endif	/* RLIMIT_MEMLOCK */
 #  endif	/* HAVE_SETRLIMIT */
-	/*
-	 * lock the process into memory
-	 */
-	if (!HAVE_OPT(SAVECONFIGQUIT) &&
-	    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
-		msyslog(LOG_ERR, "mlockall(): %m");
 # else	/* !HAVE_MLOCKALL follows */
 #  ifdef HAVE_PLOCK
 #   ifdef PROCLOCK
@@ -717,22 +712,7 @@ ntpdmain(
 		msyslog(LOG_ERR,
 			"Cannot adjust stack limit for plock: %m");
 #    endif	/* _AIX */
-	/*
-	 * lock the process into memory
-	 */
-	if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(PROCLOCK))
-		msyslog(LOG_ERR, "plock(PROCLOCK): %m");
-#   else	/* !PROCLOCK follows  */
-#    ifdef TXTLOCK
-	/*
-	 * Lock text into ram
-	 */
-	if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(TXTLOCK))
-		msyslog(LOG_ERR, "plock(TXTLOCK) error: %m");
-#    else	/* !TXTLOCK follows */
-	msyslog(LOG_ERR, "plock() - don't know what to lock!");
-#    endif	/* !TXTLOCK */
-#   endif	/* !PROCLOCK */
+#   endif	/* PROCLOCK */
 #  endif	/* HAVE_PLOCK */
 # endif	/* !HAVE_MLOCKALL */
 
@@ -795,6 +775,38 @@ ntpdmain(
 	 * since this will definitely be different for the gizmo board.
 	 */
 	getconfig(argc, argv);
+
+	if (do_memlock) {
+# if defined(HAVE_MLOCKALL)
+		/*
+		 * lock the process into memory
+		 */
+		if (!HAVE_OPT(SAVECONFIGQUIT) &&
+		    0 != mlockall(MCL_CURRENT|MCL_FUTURE))
+			msyslog(LOG_ERR, "mlockall(): %m");
+# else	/* !HAVE_MLOCKALL follows */
+#  ifdef HAVE_PLOCK
+#   ifdef PROCLOCK
+		/*
+		 * lock the process into memory
+		 */
+		if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(PROCLOCK))
+			msyslog(LOG_ERR, "plock(PROCLOCK): %m");
+#   else	/* !PROCLOCK follows  */
+#    ifdef TXTLOCK
+		/*
+		 * Lock text into ram
+		 */
+		if (!HAVE_OPT(SAVECONFIGQUIT) && 0 != plock(TXTLOCK))
+			msyslog(LOG_ERR, "plock(TXTLOCK) error: %m");
+#    else	/* !TXTLOCK follows */
+		msyslog(LOG_ERR, "plock() - don't know what to lock!");
+#    endif	/* !TXTLOCK */
+#   endif	/* !PROCLOCK */
+#  endif	/* HAVE_PLOCK */
+# endif	/* !HAVE_MLOCKALL */
+	}
+
 	loop_config(LOOP_DRIFTINIT, 0);
 	report_event(EVNT_SYSRESTART, NULL, NULL);
 	initializing = FALSE;

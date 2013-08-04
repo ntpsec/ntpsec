@@ -13,6 +13,7 @@ document.write("<p>Miscellaneous Commands and Options</p><ul>\
 <li class='inline'><a href='miscopt.html#saveconfigdir'>saveconfigdir - specify saveconfig directory</a></li>\
 <li class='inline'><a href='miscopt.html#setvar'>setvar - set system variables</a></li>\
 <li class='inline'><a href='miscopt.html#tinker'>tinker - modify sacred system parameters (dangerous)</a></li>\
+<li class='inline'><a href='miscopt.html#rlimit'>rlimit - alters certain process storage allocation limits</a></li>\
 <li class='inline'><a href='miscopt.html#tos'>tos - modify service parameters</a></li>\
 <li class='inline'><a href='miscopt.html#trap'>trap - set trap address</a></li>\
 <li class='inline'><a href='miscopt.html#ttl'>ttl - set time to live</a></li>\
