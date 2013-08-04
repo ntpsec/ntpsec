@@ -1,8 +1,8 @@
-.TH ntp.conf 5man "03 Aug 2013" "4.2.7p380" "File Formats"
+.TH ntp.conf 5man "04 Aug 2013" "4.2.7p380" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  August  3, 2013 at 11:32:51 AM by AutoGen 5.18.1pre3
+.\"  It has been AutoGen-ed  August  4, 2013 at 12:26:06 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -2825,6 +2825,7 @@ pulses will not be suppressed.
 .Oo
 .Cm memlock Ar Nmegabytes |
 .Cm stacklimit Ar N4kPages
+.Cm filenum Ar Nfiledescriptors
 .Oc
 .Xc
 .in +4
@@ -2835,10 +2836,13 @@ Probably only available under Linux, this option is useful
 when dropping root (the
  i
 option).
-The default is 32 megabytes.
+The default is 32 megabytes. Setting this to zero will prevent any attemp to lock memory.
 .ti -4
 .IR Cm stacklimit Ar N4kPages
 Specifies the maximum size of the process stack on systems with the
+.ti -4
+.IR Cm filenum Ar Nfiledescriptors
+Specifies the maximum number of file descriptors ntpd may have open at once. Defaults to the system default.
 .Fn mlockall
 function.
 Defaults to 50 4k pages (200 4k pages in OpenBSD).
