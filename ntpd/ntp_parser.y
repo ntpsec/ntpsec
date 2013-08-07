@@ -104,6 +104,7 @@
 %token	<Integer>	T_False
 %token	<Integer>	T_File
 %token	<Integer>	T_Filegen
+%token	<Integer>	T_Filenum
 %token	<Integer>	T_Flag1
 %token	<Integer>	T_Flag2
 %token	<Integer>	T_Flag3
@@ -1005,6 +1006,7 @@ rlimit_option
 rlimit_option_keyword
 	:	T_Memlock
 	|	T_Stacksize
+	|	T_Filenum
 	;
 
 

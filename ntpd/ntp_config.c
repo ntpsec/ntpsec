@@ -58,6 +58,9 @@
 int	cmdline_server_count;
 char **	cmdline_servers;
 
+/* set to zero if admin doesn't want memory locked */
+int	do_memlock = 1;
+
 /*
  * "logconfig" building blocks
  */
@@ -2602,15 +2605,19 @@ config_rlimit(
 			break;
 
 		case T_Memlock:
+			if (rlimit_av->value.i != 0) {
 #if defined(HAVE_MLOCKALL) && defined(RLIMIT_MEMLOCK)
-			ntp_rlimit(RLIMIT_MEMLOCK,
-				   (rlim_t)(rlimit_av->value.i * 1024 * 1024),
-				   1024 * 1024,
-				   "MB");
+				ntp_rlimit(RLIMIT_MEMLOCK,
+					   (rlim_t)(rlimit_av->value.i * 1024 * 1024),
+					   1024 * 1024,
+					   "MB");
 #else
-			/* STDERR as well would be fine... */
-			msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
+				/* STDERR as well would be fine... */
+				msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
 #endif /* !(HAVE_MLOCKALL && RLIMIT_MEMLOCK) */
+			} else {
+				do_memlock = 0;
+			}
 			break;
 
 		case T_Stacksize:
@@ -2624,6 +2631,19 @@ config_rlimit(
 			msyslog(LOG_WARNING, "'rlimit stacksize' specified but is not available on this system.");
 #endif /* !(HAVE_MLOCKALL && RLIMIT_STACK) */
 			break;
+
+		case T_Filenum:
+#if defined(RLIMIT_NOFILE)
+			ntp_rlimit(RLIMIT_NOFILE,
+				  (rlim_t)(rlimit_av->value.i),
+				  1,
+				  "");
+#else
+			/* STDERR as well would be fine... */
+			msyslog(LOG_WARNING, "'rlimit filenum' specified but is not available on this system.");
+#endif /* !(RLIMIT_NOFILE) */
+			break;
+
 		}
 	}
 }
@@ -4868,6 +4888,20 @@ ntp_rlimit(
 			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
 		break;
 #endif /* RLIMIT_MEMLOCK */
+
+#ifdef RLIMIT_NOFILE
+	    case RLIMIT_NOFILE:
+		/*
+		 * For large systems the default file descriptor limit may
+		 * not be enough.  
+		 */
+		DPRINTF(2, ("ntp_rlimit: NOFILE: %d %s\n",
+			(int)(rl_value / rl_scale), rl_sstr));
+		rl.rlim_cur = rl.rlim_max = rl_value;
+		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
+			msyslog(LOG_ERR, "Cannot set RLIMIT_NOFILE: %m");
+		break;
+#endif /* RLIMIT_NOFILE */
 
 	    case RLIMIT_STACK:
 		/*
