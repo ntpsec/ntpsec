@@ -54,7 +54,7 @@ dnl the 'build' machine is where we run configure and compile
 dnl the 'host' machine is where the resulting stuff runs.
 AC_DEFINE_UNQUOTED([STR_SYSTEM], ["$host"],
     [canonical system (cpu-vendor-os) of where we should run])
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 dnl AC_ARG_PROGRAM
 
 ntp_atom_ok=${ntp_atom_ok=no}

@@ -4,6 +4,7 @@
   non HAVE_IO_COMPLETION_PORT platforms
 * [Bug 2453] Need a way to avoid calling mlockall. 
 * [Bug 2454] Need way to set file descriptor limit. 
+* [Bug 2458] AM_CONFIG_HEADER is obsolete.
 (4.2.7p380) 2013/08/03 Released by Harlan Stenn <stenn@ntp.org>
 * CID 984511: Some systems have different printf needs for sizeof.
 (4.2.7p379) 2013/08/02 Released by Harlan Stenn <stenn@ntp.org>
