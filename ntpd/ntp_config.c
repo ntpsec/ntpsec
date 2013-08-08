@@ -2606,7 +2606,7 @@ config_rlimit(
 
 		case T_Memlock:
 			if (rlimit_av->value.i != 0) {
-#if defined(HAVE_MLOCKALL) && defined(RLIMIT_MEMLOCK)
+#if defined(RLIMIT_MEMLOCK)
 				ntp_rlimit(RLIMIT_MEMLOCK,
 					   (rlim_t)(rlimit_av->value.i * 1024 * 1024),
 					   1024 * 1024,
@@ -2614,14 +2614,14 @@ config_rlimit(
 #else
 				/* STDERR as well would be fine... */
 				msyslog(LOG_WARNING, "'rlimit memlock' specified but is not available on this system.");
-#endif /* !(HAVE_MLOCKALL && RLIMIT_MEMLOCK) */
+#endif /* RLIMIT_MEMLOCK */
 			} else {
 				do_memlock = 0;
 			}
 			break;
 
 		case T_Stacksize:
-#if defined(HAVE_MLOCKALL) && defined(RLIMIT_STACK)
+#if defined(RLIMIT_STACK)
 			ntp_rlimit(RLIMIT_STACK,
 				   (rlim_t)(rlimit_av->value.i * 4096),
 				   4096,
@@ -2629,7 +2629,7 @@ config_rlimit(
 #else
 			/* STDERR as well would be fine... */
 			msyslog(LOG_WARNING, "'rlimit stacksize' specified but is not available on this system.");
-#endif /* !(HAVE_MLOCKALL && RLIMIT_STACK) */
+#endif /* RLIMIT_STACK */
 			break;
 
 		case T_Filenum:
@@ -2641,7 +2641,7 @@ config_rlimit(
 #else
 			/* STDERR as well would be fine... */
 			msyslog(LOG_WARNING, "'rlimit filenum' specified but is not available on this system.");
-#endif /* !(RLIMIT_NOFILE) */
+#endif /* RLIMIT_NOFILE */
 			break;
 
 		}
@@ -4861,7 +4861,7 @@ getnetnum(
 }
 #endif	/* !SIM */
 
-# if defined(HAVE_MLOCKALL) && defined(HAVE_SETRLIMIT)
+#if defined(HAVE_SETRLIMIT)
 void
 ntp_rlimit(
 	int	rl_what,
@@ -4873,7 +4873,7 @@ ntp_rlimit(
 	struct rlimit	rl;
 
 	switch (rl_what) {
-#ifdef RLIMIT_MEMLOCK
+# ifdef RLIMIT_MEMLOCK
 	    case RLIMIT_MEMLOCK:
 		/*
 		 * The default RLIMIT_MEMLOCK is very low on Linux systems.
@@ -4887,9 +4887,9 @@ ntp_rlimit(
 		if (setrlimit(RLIMIT_MEMLOCK, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_MEMLOCK: %m");
 		break;
-#endif /* RLIMIT_MEMLOCK */
+# endif /* RLIMIT_MEMLOCK */
 
-#ifdef RLIMIT_NOFILE
+# ifdef RLIMIT_NOFILE
 	    case RLIMIT_NOFILE:
 		/*
 		 * For large systems the default file descriptor limit may
@@ -4901,8 +4901,9 @@ ntp_rlimit(
 		if (setrlimit(RLIMIT_NOFILE, &rl) == -1)
 			msyslog(LOG_ERR, "Cannot set RLIMIT_NOFILE: %m");
 		break;
-#endif /* RLIMIT_NOFILE */
+# endif /* RLIMIT_NOFILE */
 
+# ifdef RLIMIT_STACK
 	    case RLIMIT_STACK:
 		/*
 		 * Provide a way to set the stack limit to something
@@ -4927,10 +4928,11 @@ ntp_rlimit(
 			}
 		}
 		break;
+# endif /* RLIMIT_STACK */
 
 	    default:
 		INSIST(!"Unexpected setrlimit() case!");
 		break;
 	}
 }
-#  endif	/* ... && HAVE_SETRLIMIT */
+#endif	/* HAVE_SETRLIMIT */

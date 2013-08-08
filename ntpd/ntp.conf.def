@@ -2662,7 +2662,7 @@ pulses will not be suppressed.
 .It Xo Ic rlimit
 .Oo
 .Cm memlock Ar Nmegabytes |
-.Cm stacklimit Ar N4kPages
+.Cm stacksize Ar N4kPages
 .Cm filenum Ar Nfiledescriptors
 .Oc
 .Xc
@@ -2674,7 +2674,7 @@ when dropping root (the
 .Fl i
 option).
 The default is 32 megabytes. Setting this to zero will prevent any attemp to lock memory.
-.It Cm stacklimit Ar N4kPages
+.It Cm stacksize Ar N4kPages
 Specifies the maximum size of the process stack on systems with the
 .It Cm filenum Ar Nfiledescriptors
 Specifies the maximum number of file descriptors ntpd may have open at once. Defaults to the system default.

@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp.conf.texi)
 #
-# It has been AutoGen-ed  August  7, 2013 at 11:41:56 AM by AutoGen 5.18.1pre3
+# It has been AutoGen-ed  August  8, 2013 at 04:15:35 AM by AutoGen 5.18.1pre3
 # From the definitions    ntp.conf.def
 # and the template file   agtexi-file.tpl
 @end ignore
@@ -2631,7 +2631,7 @@ be set to any positive number in seconds.
 If set to zero, the stepout
 pulses will not be suppressed.
 @end table
-@item @code{rlimit}Oo@code{memlock} @kbd{Nmegabytes} |@code{stacklimit} @kbd{N4kPages}@code{filenum} @kbd{Nfiledescriptors}Oc
+@item @code{rlimit}Oo@code{memlock} @kbd{Nmegabytes} |@code{stacksize} @kbd{N4kPages}@code{filenum} @kbd{Nfiledescriptors}Oc
 @table @asis
 
 @item @code{memlock} @kbd{Nmegabytes}
@@ -2641,7 +2641,7 @@ when dropping root (the
 @code{-i}
 option).
 The default is 32 megabytes. Setting this to zero will prevent any attemp to lock memory.
-@item @code{stacklimit} @kbd{N4kPages}
+@item @code{stacksize} @kbd{N4kPages}
 Specifies the maximum size of the process stack on systems with the
 @item @code{filenum} @kbd{Nfiledescriptors}
 Specifies the maximum number of file descriptors ntpd may have open at once. Defaults to the system default.

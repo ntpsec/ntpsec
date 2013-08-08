@@ -1,10 +1,11 @@
+* [Bug 2454] Need way to set file descriptor limit - cleanup.
 (4.2.7p381) 2013/08/07 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2451] rlimit command is missing from the table of contents in
   miscopt.html .
 * [Bug 2452] provide io_handler/input_handler only on
   non HAVE_IO_COMPLETION_PORT platforms
-* [Bug 2453] Need a way to avoid calling mlockall. 
-* [Bug 2454] Need way to set file descriptor limit. 
+* [Bug 2453] Need a way to avoid calling mlockall.
+* [Bug 2454] Need way to set file descriptor limit.
 * [Bug 2458] AM_CONFIG_HEADER is obsolete.
 (4.2.7p380) 2013/08/03 Released by Harlan Stenn <stenn@ntp.org>
 * CID 984511: Some systems have different printf needs for sizeof.
@@ -1306,15 +1307,15 @@
 * Documentation nit cleanup.
 * Documentation updates from Dave Mills.
 (4.2.7p62) 2010/10/12 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 750] from 4.2.6p3-RC3: Non-existing device causes coredump with 
+* [Bug 750] from 4.2.6p3-RC3: Non-existing device causes coredump with
   RIPE-NCC driver.
 * [Bug 1567] from 4.2.6p3-RC3: Support Arbiter 1093C Satellite Clock on
   Windows.
 * [Bug 1581] from 4.2.6p3-RC3: printf format string mismatch leftover.
 * [Bug 1659] from 4.2.6p3-RC3: Support Truetime Satellite Clocks on
-  Windows. 
+  Windows.
 * [Bug 1660] from 4.2.6p3-RC3: On some systems, test is in /usr/bin, not
-  /bin. 
+  /bin.
 * [Bug 1661] from 4.2.6p3-RC3: Re-indent refclock_ripencc.c.
 * Lose peer_count from ntp_peer.c and ntp_proto.c (Dave Mills).
 * Documentation updates from Dave Mills.
@@ -1478,7 +1479,7 @@
 (4.2.7p25) 2010/04/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1528] from 4.2.6p2-RC2: Remove --with-arlib from br-flock.
 * [Bug 1503] [Bug 1504] [Bug 1518] [Bug 1522] from 4.2.6p2-RC2:
-  all of which were fixed in 4.2.7 previously. 
+  all of which were fixed in 4.2.7 previously.
 (4.2.7p24) 2010/04/13 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1390] Control PPS on the Oncore M12.
 * [Bug 1518] Windows ntpd should lock to one processor more
@@ -1608,7 +1609,7 @@
 * [Bug 1479] from 4.2.6p1-RC5: not finding readline headers.
 * [Bug 1484] from 4.2.6p1-RC5: ushort is not defined in QNX6.
 (4.2.7p18) 2010/02/07 Released by Harlan Stenn <stenn@ntp.org>
-* [Bug 1480] from 4.2.6p1-RC5: snprintf() cleanup caused 
+* [Bug 1480] from 4.2.6p1-RC5: snprintf() cleanup caused
   unterminated refclock IDs.
 * Stop using getaddrinfo() to convert numeric address strings to on-wire
   addresses in favor of is_ip_address() alone.
@@ -2273,7 +2274,7 @@ display both build and runtime OpenSSL versions when they differ.
 * add wildcard match class for interface/nic rules.
 * fix mistaken carryover of prefixlen from one rule to the next.
 * Ensure IPv6 localhost address ::1 is included in libisc's Windows IPv6
-  address enumeration, allowing ntpq and ntpdc's hardcoding to 127.0.0.1 
+  address enumeration, allowing ntpq and ntpdc's hardcoding to 127.0.0.1
   on Windows to end.
 (4.2.5p218) 2009/09/21 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1314] saveconfig emits -4 and -6 on when not given.
@@ -2384,7 +2385,7 @@ display both build and runtime OpenSSL versions when they differ.
 (4.2.5p193) 2009/07/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1261] CID 34: simulate_server() rbuf.msg_flags uninitialized.
 * [Bug 1262] CID 35: xpkt.mac uninitialized in simulate_server().
-* [Bug 1263] CID 37: CID 38: CID 40: CID 43: multiple refclocks 
+* [Bug 1263] CID 37: CID 38: CID 40: CID 43: multiple refclocks
   uninitialized tm_zone (arc, chronolog, dumbclock, pcf).
 * [Bug 1264] CID 64: gsoc_sntp on_wire() frees wrong ptr receiving KoD.
 * [Bug 1265] CID 65: CID 66: gsoc_sntp on_wire() leaks x_pkt, r_pkt.
@@ -2401,7 +2402,7 @@ display both build and runtime OpenSSL versions when they differ.
 * [Bug 1250] CID 53: kod_init_kod_db() overruns kod_db malloc'd buffer.
 * [Bug 1251] CID 68: search_entry() mishandles dst argument.
 * [Bug 1252] CID 32: Quiet Coverity warning with assertion.
-* [Bug 1253] CID 50: gsoc_sntp/crypto.c auth_init() always returns a 
+* [Bug 1253] CID 50: gsoc_sntp/crypto.c auth_init() always returns a
   list with one entry.
 * [Bug 1254] CID 56: tv_to_str() leaks a struct tm each call.
 * [Bug 1255] CID 55: pkt_output() leaks a copy of each packet.
@@ -2880,7 +2881,7 @@ display both build and runtime OpenSSL versions when they differ.
 ---
 (4.2.4p6) 2009/01/08 Released by Harlan Stenn <stenn@ntp.org>
 
-* [Bug 1113] Fixed build errors with recent versions of openSSL. 
+* [Bug 1113] Fixed build errors with recent versions of openSSL.
 * [Sec 1111] Fix incorrect check of EVP_VerifyFinal()'s return value.
 * Update the copyright year.
 
@@ -2949,9 +2950,9 @@ display both build and runtime OpenSSL versions when they differ.
 * Update bugreport URL.
 * Update -I documentation.
 * [Bug 713] Fix bug reporting information.
-* A bug in the application of the negative-sawtooth for 12 channel receivers. 
+* A bug in the application of the negative-sawtooth for 12 channel receivers.
 * The removal of unneeded startup code used for the original LinuxPPS, it now
-  conforms to the PPSAPI and does not need special code.  
+  conforms to the PPSAPI and does not need special code.
 * ntp-keygen.c: Coverity fixes [CID 33,47].
 * Volley cleanup from Dave Mills.
 * Fuzz cleanup from Dave Mills.
@@ -2959,7 +2960,7 @@ display both build and runtime OpenSSL versions when they differ.
 * ntpsim.c: add missing protypes and fix [CID 34], a nit.
 * Upgraded bison at UDel.
 * Update br-flock and flock-build machine lists.
-* [Bug 752] QoS: add parse/config handling code. 
+* [Bug 752] QoS: add parse/config handling code.
 * Fix the #include order in tickadj.c for picky machines.
 * [Bug 752] QoS: On some systems, netinet/ip.h needs netinet/ip_systm.h.
 * [Bug 752] Update the QoS tagging (code only - configuration to follow).

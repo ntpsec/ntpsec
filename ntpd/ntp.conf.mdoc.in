@@ -1,9 +1,9 @@
-.Dd August 7 2013
+.Dd August 8 2013
 .Dt NTP_CONF 5 File Formats
 .Os SunOS 5.10
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.mdoc)
 .\"
-.\"  It has been AutoGen-ed  August  7, 2013 at 11:42:01 AM by AutoGen 5.18.1pre3
+.\"  It has been AutoGen-ed  August  8, 2013 at 04:15:37 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agmdoc-cmd.tpl
 .Sh NAME
@@ -2660,7 +2660,7 @@ pulses will not be suppressed.
 .It Xo Ic rlimit
 .Oo
 .Cm memlock Ar Nmegabytes |
-.Cm stacklimit Ar N4kPages
+.Cm stacksize Ar N4kPages
 .Cm filenum Ar Nfiledescriptors
 .Oc
 .Xc
@@ -2672,7 +2672,7 @@ when dropping root (the
 .Fl i
 option).
 The default is 32 megabytes. Setting this to zero will prevent any attemp to lock memory.
-.It Cm stacklimit Ar N4kPages
+.It Cm stacksize Ar N4kPages
 Specifies the maximum size of the process stack on systems with the
 .It Cm filenum Ar Nfiledescriptors
 Specifies the maximum number of file descriptors ntpd may have open at once. Defaults to the system default.

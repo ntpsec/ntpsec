@@ -120,15 +120,15 @@
       <dd>Specifies the stepout threshold in seconds. The default without this command is 300 s. Since this option also affects the training and startup intervals, it should not be set less than the default. Further details are on the <a href="clock.html">Clock State Machine</a> page.</dd>
     </dl>
   </dd>
-  <dt id="rlimit"><tt>rlimit [memlock <i>Nmegabytes</i> | stacklimit <i>N4kPages</i>]</tt></dt>
+  <dt id="rlimit"><tt>rlimit [memlock <i>Nmegabytes</i> | stacksize <i>N4kPages</i> | filenum <i>Nfiledescriptors</i>]</tt></dt>
   <dd>This command alters certain process storage allocation limits, and is only available on some operating systems.  Options are are as follows:</dd>
   <dd>
     <dl>
       <dt><tt>memlock <i>Nmegabytes</i></tt></dt>
       <dd>Specify the number of megabytes of memory that can be allocated.  Probably only available under Linux, this option is useful when dropping root (the <tt>-i</tt> option).   The default is 32  megabytes. Setting this to zero will prevent any attemp to lock memory.</dd>
-      <dt><tt>stacklimit <i>N4kPages</i></tt></dt>
+      <dt><tt>stacksize <i>N4kPages</i></tt></dt>
       <dd>Specifies the maximum size of the process stack on systems with the <tt>mlockall()</tt> function. Defaults to 50 4k pages (200 4k pages in OpenBSD).</dd>
-      <dt><tt>filenum <i>N4kPages</i></tt></dt>
+      <dt><tt>filenum <i>Nfiledescriptors</i></tt></dt>
       <dd>Specifies the maximum number of file descriptors ntp may have open at the same time. Defaults to system default.</dd>
     </dl>
   </dd>

@@ -1,8 +1,8 @@
-.TH ntp.conf 5man "07 Aug 2013" "4.2.7p381" "File Formats"
+.TH ntp.conf 5man "08 Aug 2013" "4.2.7p381" "File Formats"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp.man)
 .\"
-.\"  It has been AutoGen-ed  August  7, 2013 at 11:41:41 AM by AutoGen 5.18.1pre3
+.\"  It has been AutoGen-ed  August  8, 2013 at 04:15:29 AM by AutoGen 5.18.1pre3
 .\"  From the definitions    ntp.conf.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -2824,7 +2824,7 @@ pulses will not be suppressed.
 .BR Xo Ic rlimit
 .Oo
 .Cm memlock Ar Nmegabytes |
-.Cm stacklimit Ar N4kPages
+.Cm stacksize Ar N4kPages
 .Cm filenum Ar Nfiledescriptors
 .Oc
 .Xc
@@ -2838,7 +2838,7 @@ when dropping root (the
 option).
 The default is 32 megabytes. Setting this to zero will prevent any attemp to lock memory.
 .ti -4
-.IR Cm stacklimit Ar N4kPages
+.IR Cm stacksize Ar N4kPages
 Specifies the maximum size of the process stack on systems with the
 .ti -4
 .IR Cm filenum Ar Nfiledescriptors
