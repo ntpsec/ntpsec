@@ -1591,6 +1591,7 @@
 * Do not reference peer_node/unpeer_node after freeing when built with
   --disable-saveconfig and using DNS.
 (4.2.7p21) 2010/03/31 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2399] Reset sys_kodsent in proto_clr_stats().
 * [Bug 1514] from 4.2.6p1-RC6: Typo in ntp_proto.c: fabs(foo < .4)
   should be fabs(foo) < .4.
 * [Bug 1464] from 4.2.6p1-RC6: synchronization source wrong for
