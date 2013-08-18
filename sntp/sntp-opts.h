@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (sntp-opts.h)
  *
- *  It has been AutoGen-ed  August 10, 2013 at 11:21:12 AM by AutoGen 5.18.1pre3
+ *  It has been AutoGen-ed  August 18, 2013 at 11:33:05 AM by AutoGen 5.18.1pre5
  *  From the definitions    sntp-opts.def
  *  and the template file   options
  *
@@ -91,9 +91,9 @@ typedef enum {
 /** count of all options for sntp */
 #define OPTION_CT    23
 /** sntp version */
-#define SNTP_VERSION       "4.2.7p383"
+#define SNTP_VERSION       "4.2.7p384"
 /** Full sntp version text */
-#define SNTP_FULL_VERSION  "sntp 4.2.7p383"
+#define SNTP_FULL_VERSION  "sntp 4.2.7p384"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -272,7 +272,7 @@ typedef enum {
 #define VALUE_OPT_TIMEOUT        't'
 
 #define OPT_VALUE_TIMEOUT        (DESC(TIMEOUT).optArg.argInt)
-#define VALUE_OPT_WAIT           17
+#define VALUE_OPT_WAIT           0x1001
 
 #define SET_OPT_WAIT   STMTS( \
         DESC(WAIT).optActualIndex = 17; \
@@ -288,7 +288,7 @@ typedef enum {
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
 /** option flag (value) for " (get "val-name") " option */
-#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+#define VALUE_OPT_VERSION       0x1002
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_SAVE_OPTS     '>'
 /** option flag (value) for " (get "val-name") " option */

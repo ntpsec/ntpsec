@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpsnmpd-opts.h)
  *
- *  It has been AutoGen-ed  August 10, 2013 at 11:32:45 AM by AutoGen 5.18.1pre3
+ *  It has been AutoGen-ed  August 18, 2013 at 11:39:36 AM by AutoGen 5.18.1pre5
  *  From the definitions    ntpsnmpd-opts.def
  *  and the template file   options
  *
@@ -76,9 +76,9 @@ typedef enum {
 /** count of all options for ntpsnmpd */
 #define OPTION_CT    8
 /** ntpsnmpd version */
-#define NTPSNMPD_VERSION       "4.2.7p383"
+#define NTPSNMPD_VERSION       "4.2.7p384"
 /** Full ntpsnmpd version text */
-#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p383"
+#define NTPSNMPD_FULL_VERSION  "ntpsnmpd 4.2.7p384"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -155,13 +155,13 @@ typedef enum {
  */
 #define VALUE_OPT_NOFORK         'n'
 #define VALUE_OPT_SYSLOG         'p'
-#define VALUE_OPT_AGENTXSOCKET   2
+#define VALUE_OPT_AGENTXSOCKET   0x1001
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_HELP          '?'
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
 /** option flag (value) for " (get "val-name") " option */
-#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+#define VALUE_OPT_VERSION       0x1002
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_SAVE_OPTS     '>'
 /** option flag (value) for " (get "val-name") " option */
