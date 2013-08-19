@@ -1,6 +1,7 @@
 * CID 975596: Copy/paste error: vallen should be siglen.
 * CID 1009579: Check return status of X509_add_ext().
 * [2085] Fix root distance and root dispersion calculations.
+* [Bug 2426] Possibly uninitialized data in crypto_send() - CID 975596.
 (4.2.7p384) 2013/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2450] --version has bogus short option.
 (4.2.7p383) 2013/08/10 Released by Harlan Stenn <stenn@ntp.org>
