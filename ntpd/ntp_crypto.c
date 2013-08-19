@@ -1751,7 +1751,7 @@ crypto_send(
 	 */
 	ep->pkt[i++] = vp->siglen;
 	if (siglen > 0 && vp->sig != NULL) {
-		j = vallen / 4;
+		j = siglen / 4;
 		if (j * 4 < (int)siglen)
 			ep->pkt[i + j++] = 0;
 		memcpy(&ep->pkt[i], vp->sig, siglen);
