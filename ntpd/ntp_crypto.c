@@ -2992,7 +2992,7 @@ cert_sign(
 	temp = X509_get_ext_count(req);
 	for (i = 0; i < temp; i++) {
 		ext = X509_get_ext(req, i);
-		X509_add_ext(cert, ext, -1);
+		INSIST(X509_add_ext(cert, ext, -1));
 	}
 	X509_free(req);
 
