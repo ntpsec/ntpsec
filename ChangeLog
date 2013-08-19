@@ -1,3 +1,4 @@
+* [2085] Fix root distance and root dispersion calculations.
 (4.2.7p384) 2013/08/18 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2450] --version has bogus short option.
 (4.2.7p383) 2013/08/10 Released by Harlan Stenn <stenn@ntp.org>

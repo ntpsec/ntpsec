@@ -1827,9 +1827,30 @@ clock_update(
 		sys_refid = peer->refid;
 	else
 		sys_refid = addr2refid(&peer->srcadr);
-	dtemp = fabs(sys_offset) + peer->disp + peer->rootdisp +
-	    (peer->delay + peer->rootdelay) / 2 + clock_phi *
-	    (current_time - peer->update) + sys_jitter;
+	/*
+	 * Root Dispersion (E) is defined (in RFC 5905) as:
+	 *
+	 * E = p.epsilon_r + p.epsilon + p.psi + PHI*(s.t - p.t) + |THETA|
+	 *
+	 * where:
+	 *  p.epsilon_r is the PollProc's root dispersion
+	 *  p.epsilon   is the PollProc's dispersion
+	 *  p.psi       is the PollProc's jitter
+	 *  THETA       is the combined offset
+	 *
+	 * NB: Think Hard about where these numbers come from and
+	 * what they mean.  When did peer->update happen?  Has anything
+	 * interesting happened since then?  What values are the most
+	 * defensible?  Why?
+	 *
+	 * DLM thinks this equation is probably the best of all worse choices.
+	 */
+	dtemp	= peer->rootdisp
+		+ peer->disp
+		+ sys_jitter
+		+ clock_phi * (current_time - peer->update)
+		+ fabs(sys_offset);
+
 	if (dtemp > sys_mindisp)
 		sys_rootdisp = dtemp;
 	else
@@ -2924,15 +2945,36 @@ root_distance(
 	double	dtemp;
 
 	/*
+	 * Root Distance (LAMBDA) is defined as:
+	 * (delta + DELTA)/2 + epsilon + EPSILON + phi
+	 *
+	 * where:
+	 *  delta   is the round-trip delay
+	 *  DELTA   is the root delay
+	 *  epsilon is the remote server precision + local precision
+	 *	    + (15 usec each second)
+	 *  EPSILON is the root dispersion
+	 *  phi     is the peer jitter statistic
+	 *
+	 * NB: Think hard about why we are using these values, and what
+	 * the alternatives are, and the various pros/cons.
+	 *
+	 * DLM thinks these are probably the best choices from any of the
+	 * other worse choices.
+	 */
+	dtemp = (peer->delay + peer->rootdelay) / 2
+		+ LOGTOD(peer->precision)
+		  + LOGTOD(sys_precision)
+		  + clock_phi * (current_time - peer->update)
+		+ peer->rootdisp
+		+ peer->jitter;
+	/*
 	 * Careful squeak here. The value returned must be greater than
 	 * the minimum root dispersion in order to avoid clockhop with
 	 * highly precise reference clocks. Note that the root distance
 	 * cannot exceed the sys_maxdist, as this is the cutoff by the
 	 * selection algorithm.
 	 */
-	dtemp = (peer->delay + peer->rootdelay) / 2 + peer->disp +
-	    peer->rootdisp + clock_phi * (current_time - peer->update) +
-	    peer->jitter;
 	if (dtemp < sys_mindisp)
 		dtemp = sys_mindisp;
 	return (dtemp);
