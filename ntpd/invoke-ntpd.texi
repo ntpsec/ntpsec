@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 #
-# It has been AutoGen-ed  August 10, 2013 at 11:32:01 AM by AutoGen 5.18.1pre3
+# It has been AutoGen-ed  August 19, 2013 at 03:46:23 AM by AutoGen 5.18.1pre5
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -141,7 +141,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p383
+ntpd - NTP daemon program - Ver. 4.2.7p385
 Usage:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -197,7 +197,7 @@ Usage:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                                 quit
                                 saveconfigquit
    -x no  slew           Slew up to 600 seconds
-   -" opt version        output version information and exit
+      opt version        output version information and exit
    -? no  help           display extended usage information and exit
    -! no  more-help      extended usage information passed thru pager
 

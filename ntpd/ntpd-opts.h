@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpd-opts.h)
  *
- *  It has been AutoGen-ed  August 10, 2013 at 11:29:50 AM by AutoGen 5.18.1pre3
+ *  It has been AutoGen-ed  August 19, 2013 at 03:45:09 AM by AutoGen 5.18.1pre5
  *  From the definitions    ntpd-opts.def
  *  and the template file   options
  *
@@ -105,9 +105,9 @@ typedef enum {
 /** count of all options for ntpd */
 #define OPTION_CT    37
 /** ntpd version */
-#define NTPD_VERSION       "4.2.7p383"
+#define NTPD_VERSION       "4.2.7p385"
 /** Full ntpd version text */
-#define NTPD_FULL_VERSION  "ntpd 4.2.7p383"
+#define NTPD_FULL_VERSION  "ntpd 4.2.7p385"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -362,29 +362,29 @@ typedef enum {
 #define OPT_VALUE_PRIORITY       (DESC(PRIORITY).optArg.argInt)
 #define VALUE_OPT_QUIT           'q'
 #define VALUE_OPT_PROPAGATIONDELAY 'r'
-#define VALUE_OPT_SAVECONFIGQUIT 22
+#define VALUE_OPT_SAVECONFIGQUIT 0x1001
 #define VALUE_OPT_STATSDIR       's'
 #define VALUE_OPT_TRUSTEDKEY     't'
 #define VALUE_OPT_USER           'u'
 #define VALUE_OPT_UPDATEINTERVAL 'U'
 
 #define OPT_VALUE_UPDATEINTERVAL (DESC(UPDATEINTERVAL).optArg.argInt)
-#define VALUE_OPT_VAR            27
-#define VALUE_OPT_DVAR           28
+#define VALUE_OPT_VAR            0x1002
+#define VALUE_OPT_DVAR           0x1003
 #define VALUE_OPT_WAIT_SYNC      'w'
 #ifdef HAVE_WORKING_FORK
 #define OPT_VALUE_WAIT_SYNC      (DESC(WAIT_SYNC).optArg.argInt)
 #endif /* HAVE_WORKING_FORK */
 #define VALUE_OPT_SLEW           'x'
-#define VALUE_OPT_USEPCC         31
-#define VALUE_OPT_PCCFREQ        32
+#define VALUE_OPT_USEPCC         0x1004
+#define VALUE_OPT_PCCFREQ        0x1005
 #define VALUE_OPT_MDNS           'm'
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_HELP          '?'
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
 /** option flag (value) for " (get "val-name") " option */
-#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+#define VALUE_OPT_VERSION       0x1006
 /*
  *  Interface defines not associated with particular options
  */

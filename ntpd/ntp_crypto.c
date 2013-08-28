@@ -1751,7 +1751,7 @@ crypto_send(
 	 */
 	ep->pkt[i++] = vp->siglen;
 	if (siglen > 0 && vp->sig != NULL) {
-		j = vallen / 4;
+		j = siglen / 4;
 		if (j * 4 < (int)siglen)
 			ep->pkt[i + j++] = 0;
 		memcpy(&ep->pkt[i], vp->sig, siglen);
@@ -2992,7 +2992,7 @@ cert_sign(
 	temp = X509_get_ext_count(req);
 	for (i = 0; i < temp; i++) {
 		ext = X509_get_ext(req, i);
-		X509_add_ext(cert, ext, -1);
+		INSIST(X509_add_ext(cert, ext, -1));
 	}
 	X509_free(req);
 

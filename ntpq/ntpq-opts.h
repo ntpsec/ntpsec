@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.h)
  *
- *  It has been AutoGen-ed  August 10, 2013 at 11:32:30 AM by AutoGen 5.18.1pre3
+ *  It has been AutoGen-ed  August 19, 2013 at 03:46:53 AM by AutoGen 5.18.1pre5
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -82,9 +82,9 @@ typedef enum {
 /** count of all options for ntpq */
 #define OPTION_CT    14
 /** ntpq version */
-#define NTPQ_VERSION       "4.2.7p383"
+#define NTPQ_VERSION       "4.2.7p385"
 /** Full ntpq version text */
-#define NTPQ_FULL_VERSION  "ntpq 4.2.7p383"
+#define NTPQ_FULL_VERSION  "ntpq 4.2.7p385"
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -199,13 +199,13 @@ typedef enum {
 #define VALUE_OPT_PEERS          'p'
 #define VALUE_OPT_INTERACTIVE    'i'
 #define VALUE_OPT_NUMERIC        'n'
-#define VALUE_OPT_OLD_RV         8
+#define VALUE_OPT_OLD_RV         0x1001
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_HELP          '?'
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_MORE_HELP     '!'
 /** option flag (value) for " (get "val-name") " option */
-#define VALUE_OPT_VERSION       INDEX_OPT_VERSION
+#define VALUE_OPT_VERSION       0x1002
 /** option flag (value) for " (get "val-name") " option */
 #define VALUE_OPT_SAVE_OPTS     '>'
 /** option flag (value) for " (get "val-name") " option */
