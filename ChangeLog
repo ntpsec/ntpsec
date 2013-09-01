@@ -1,3 +1,4 @@
+* [Bug 2473] NTPD exits after clock is stepped backwards externally
 (4.2.7p385) 2013/08/19 Released by Harlan Stenn <stenn@ntp.org>
 * CID 975596: Copy/paste error: vallen should be siglen.
 * CID 1009579: Check return status of X509_add_ext().

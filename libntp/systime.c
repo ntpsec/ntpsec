@@ -158,6 +158,7 @@ get_systime(
 	l_fp *now		/* system time */
 	)
 {
+        static struct timespec  ts_last;        /* last sampled os time */
 	static struct timespec	ts_prev;	/* prior os time */
 	static l_fp		lfp_prev;	/* prior result */
 	static double		dfuzz_prev;	/* prior fuzz */
@@ -174,6 +175,15 @@ get_systime(
 	get_ostime(&ts);
 	DEBUG_REQUIRE(systime_init_done);
 	ENTER_GET_SYSTIME_CRITSEC();
+
+        /* First check if here was a Lamport violation, that is, two
+         * successive calls to 'get_ostime()' resulted in negative
+         * time difference. Use a few milliseconds of permissible
+         * tolerance -- being too sharp can hurt here.
+         */
+        if (cmp_tspec(ts, sub_tspec_ns(ts_last, 50000000)) < 0)
+                lamport_violated = 1;
+        ts_last = ts;
 
 	/*
 	 * After default_get_precision() has set a nonzero sys_fuzz,
