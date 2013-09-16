@@ -1,8 +1,8 @@
-.TH ntp-wait 1ntp-waitman "19 Aug 2013" "ntp (4.2.7p385)" "User Commands"
+.TH ntp-wait 1ntp-waitman "01 Sep 2013" "ntp (4.2.7p386)" "User Commands"
 .\"
 .\"  EDIT THIS FILE WITH CAUTION  (ntp-wait-opts.man)
 .\"
-.\"  It has been AutoGen-ed  August 19, 2013 at 03:44:13 AM by AutoGen 5.18.1pre5
+.\"  It has been AutoGen-ed  September  1, 2013 at 11:34:20 AM by AutoGen 5.18.1pre5
 .\"  From the definitions    ntp-wait-opts.def
 .\"  and the template file   agman-cmd.tpl
 .\"
@@ -117,7 +117,7 @@ This program is released under the terms of the NTP license, <http://ntp.org/lic
 .SH "BUGS"
 Please send bug reports to: http://bugs.ntp.org, bugs@ntp.org
 .SH NOTES
-This document corresponds to version 4.2.7p385 of NTP.
+This document corresponds to version 4.2.7p386 of NTP.
 .PP
 This manual page was \fIAutoGen\fP-erated from the \fBntp-wait\fP
 option definitions.

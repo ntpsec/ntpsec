@@ -1,3 +1,5 @@
+(4.2.7p386) 2013/09/01 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2472] (WinXP) Avoid self-termination of IO thread during exit().
 (4.2.7p385) 2013/08/19 Released by Harlan Stenn <stenn@ntp.org>
 * CID 975596: Copy/paste error: vallen should be siglen.
 * CID 1009579: Check return status of X509_add_ext().

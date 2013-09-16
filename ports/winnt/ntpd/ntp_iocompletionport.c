@@ -391,6 +391,7 @@ IoCtxReset(
  * -------------------------------------------------------------------
  */
 static HANDLE hIoCompletionThread;
+static UINT   tidCompletionThread;
 
 /*
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -517,7 +518,7 @@ init_io_completion_port(void)
 		iocompletionthread, 
 		NULL, 
 		0, 
-		NULL);
+		&tidCompletionThread);
 }
 
 
@@ -530,6 +531,8 @@ uninit_io_completion_port(
 	void
 	)
 {
+        DWORD rc;
+
 	/* do noting if completion port already gone. */
 	if (NULL == hIoCompletionPort)
 		return;
@@ -538,16 +541,19 @@ uninit_io_completion_port(
 	 * Service thread seems running. Terminate him with grace
 	 * first and force later...
 	 */
-
-	/* post exit request for thread. */
-	PostQueuedCompletionStatus(hIoCompletionPort, 0, 0, 0);
-	IoCtxPoolDone(); /* stop using the memory pool */
-
-	if (WAIT_TIMEOUT == WaitForSingleObject(hIoCompletionThread, 5000)) {
-		/* Everything is lost. Kill off with TerminateThread. */
-		msyslog(LOG_ERR, "IO completion thread refuses to terminate");
-		TerminateThread(hIoCompletionThread, ~0UL);
+        if (tidCompletionThread != GetCurrentThreadId()) {
+	        PostQueuedCompletionStatus(hIoCompletionPort, 0, 0, 0);
+                rc = WaitForSingleObject(hIoCompletionThread, 5000);
+                if (rc == WAIT_TIMEOUT) {
+		        /* Thread lost. Kill off with TerminateThread. */
+		        msyslog(LOG_ERR,
+                                "IO completion thread refuses to terminate");
+		        TerminateThread(hIoCompletionThread, ~0UL);
+                }
 	}
+
+         /* stop using the memory pool */
+	IoCtxPoolDone();
 
 	/* now reap all handles... */
 	CloseHandle(hIoCompletionThread);
