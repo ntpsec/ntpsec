@@ -1,3 +1,4 @@
+(4.2.7p387) 2013/09/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1642] ntpdsim can't find simnulate block in config file.
 (4.2.7p386) 2013/09/01 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2472] (WinXP) Avoid self-termination of IO thread during exit().
