@@ -37,15 +37,15 @@
 <h4 id="configuration">Configuration</h4>
 <p>The ntpdsim program is configured by providing a configuration file at startup. The crux of the simulator configuration is specified using a <tt>simulate</tt> command, the syntax of which is given below. Note that all time quantities are in seconds and all frequency quantities are in parts per million (PPM):</p>
 <p>&lt;<i>simulate_command</i>&gt; ::= <tt>simulate</tt> { &lt;<i>init_statement_list</i>&gt; &lt;<i>server_list</i>&gt; }<br>
-  &lt;<i>init_statement_list</i>&gt; ::= &lt;init_statement_list&gt; &lt;init_statement&gt; | &lt;init_statement&gt;<br>
+  &lt;<i>init_statement_list</i>&gt; ::= &lt;init_statement_list&gt; &lt;init_statement&gt; ; | &lt;init_statement&gt; ;<br>
   &lt;<i>init_statement</i>&gt; ::= <tt>beep_delay</tt> = &lt;number&gt; | <tt>simulation_duration</tt> = &lt;number&gt;<br>
   &lt;<i>server_list</i>&gt; ::= &lt;<i>server_list</i>&gt; &lt;server&gt; | &lt;server&gt;<br>
-  &lt;<i>server_list</i>&gt; ::= <tt>server</tt> = &lt;address&gt; { <tt>server_offset</tt> = &lt;number&gt; &lt;act_list&gt; }<br>
+  &lt;<i>server_list</i>&gt; ::= <tt>server</tt> = &lt;address&gt; { <tt>server_offset</tt> = &lt;number&gt; ; &lt;act_list&gt; }<br>
   &lt;<i>act_list</i>&gt; ::= &lt;<i>act_list</i>&gt; &lt;<i>act</i>&gt; | &lt;<i>act</i>&gt;<br>
   &lt;<i>act</i>&gt; ::= <tt>duration</tt> = &lt;number&gt; { &lt;<i>act_stmt_list</i>&gt; }<br>
-  &lt;<i>act_stmt_list</i>&gt; ::= &lt;<i>act_stmt_list</i>&gt; &lt;<i>act_stmt</i>&gt; | &lt;<i>act_stmt</i>&gt;<br>
+  &lt;<i>act_stmt_list</i>&gt; ::= &lt;<i>act_stmt_list</i>&gt; &lt;<i>act_stmt</i>&gt; ; | &lt;<i>act_stmt</i>&gt; ;<br>
   &lt;<i>act_stmt</i>&gt; ::= <tt>freq_offset</tt> = &lt;number&gt; | <tt>wander</tt> = &lt;number&gt; | <tt>jitter</tt> = &lt;number&gt; | <tt>prop_delay</tt> = &lt;number&gt; | <tt>proc_delay</tt> = &lt;number&gt;</p>
-<p>In addition to the simulate command, other standard NTP configuration commands can be specified. These commands have the same meaning as in the ntpd configuration. Note that newlines are <b>not</b> significant within the simulate command even though they are used to mark the end of a normal NTP configuration command.</p>
+<p>In addition to the <tt>simulate</tt> command, other standard NTP configuration commands can be specified. These commands have the same meaning as in the ntpd configuration. Note that newlines are <b>not</b> significant within the <tt>simulate</tt> command even though they are used to mark the end of a normal NTP configuration command.  While a newline is an "end of command" terminator for other configuration commands, in the <tt>simulate</tt> stanza <tt>;</tt> (the semicolon) is the "end of command" terminator.</p>
 <h4 id="sample">Sample Configuration File</h4>
 <p>A sample ntpdsim configuration file is given below. It specifies two simulated servers, each of which has two acts.</p>
 <pre>
@@ -59,44 +59,44 @@
 
     # Simulation configuration
     simulate {
-        simulation_duration = 86400
-        beep_delay = 3600
+        simulation_duration = 86400;
+        beep_delay = 3600;
 
         # Server 1
 	server = louie.udel.edu {
-	    server_offset = 0 
+	    server_offset = 0;
             duration = 50000 {
-		freq_offset = 400
-		wander = 1.0
-		jitter = 0.001
-		prop_delay = 0.001
-		proc_delay = 0.001
+		freq_offset = 400;
+		wander = 1.0;
+		jitter = 0.001;
+		prop_delay = 0.001;
+		proc_delay = 0.001;
 	    }
             duration = 6400 {
-		freq_offset = 200
-		wander = 1.0
-		jitter = 0.001
-		prop_delay = 0.001
-		proc_delay = 0.001
+		freq_offset = 200;
+		wander = 1.0;
+		jitter = 0.001;
+		prop_delay = 0.001;
+		proc_delay = 0.001;
 	    }
 	}
 
         # Server 2
 	server = baldwin.udel.edu {
-	    server_offset = 0.02
+	    server_offset = 0.02;
 	    duration = 10000 {
-		freq_offset = 400
-		wander = 1.0
-		jitter = 0.001
-		prop_delay = 0.5
-		proc_delay = 0.001
+		freq_offset = 400;
+		wander = 1.0;
+		jitter = 0.001;
+		prop_delay = 0.5;
+		proc_delay = 0.001;
 	    }
 	    duration = 60000 {
-		freq_offset = 200
-		wander = 1.0
-		jitter = 0.05
-		prop_delay = 0.005
-		proc_delay = 0.001
+		freq_offset = 200;
+		wander = 1.0;
+		jitter = 0.05;
+		prop_delay = 0.005;
+		proc_delay = 0.001;
 	    }
 	}
  }
