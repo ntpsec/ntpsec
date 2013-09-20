@@ -76,6 +76,11 @@ int	trunc_os_clock;		/* sys_tick > measured_tick */
 time_stepped_callback	step_callback;
 
 #ifndef SIM
+/* perlinger@ntp.org: As 'get_sysime()' does it's own check for clock
+ * backstepping, this could probably become a local variable in
+ * 'get_systime()' and the cruft associated with communicating via a
+ * static value could be removed after the v4.2.8 release.
+ */
 static int lamport_violated;	/* clock was stepped back */
 #endif	/* !SIM */
 
@@ -179,9 +184,12 @@ get_systime(
         /* First check if here was a Lamport violation, that is, two
          * successive calls to 'get_ostime()' resulted in negative
          * time difference. Use a few milliseconds of permissible
-         * tolerance -- being too sharp can hurt here.
+         * tolerance -- being too sharp can hurt here. (This is intented
+         * for the Win32 target, where the HPC interpolation might
+         * introduce small steps backward. It should not be an issue on
+         * systems where get_ostime() results in a true syscall.)
          */
-        if (cmp_tspec(ts, sub_tspec_ns(ts_last, 50000000)) < 0)
+        if (cmp_tspec(add_tspec_ns(ts, 50000000), ts_last) < 0)
                 lamport_violated = 1;
         ts_last = ts;
 
