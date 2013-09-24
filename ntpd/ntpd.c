@@ -831,7 +831,9 @@ ntpdmain(
 			exit(-1);
 		}
 #  elif HAVE_SOLARIS_PRIVS
+#   ifdef PRIV_AWARE_RESET
 		(void) setpflags(PRIV_AWARE_RESET, 1);
+#   endif
 #  else
 		/* we need a user to switch to */
 		if (user == NULL) {
