@@ -78,6 +78,7 @@
 # include <apollo/base.h>
 #endif /* SYS_DOMAINOS */
 
+
 #include "recvbuff.h"
 #include "ntp_cmdargs.h"
 
@@ -106,8 +107,11 @@
 #ifdef HAVE_LINUX_CAPABILITIES
 # include <sys/capability.h>
 # include <sys/prctl.h>
-#endif
-#endif
+#endif /* HAVE_LINUX_CAPABILITIES */
+#if defined(HAVE_PRIV_H) && defined(HAVE_SOLARIS_PRIVS)
+# include <priv.h>
+#endif /* HAVE_PRIV_H */
+#endif /* HAVE_DROPROOT */
 
 #ifdef HAVE_DNSREGISTRATION
 #include <dns_sd.h>
@@ -120,6 +124,11 @@ DNSServiceRef mdns;
 #define ntp_setpgrp(x, y)	setpgrp(x, y)
 #endif
 
+#ifdef HAVE_SOLARIS_PRIVS
+#define LOWPRIVS "basic,sys_time,net_privaddr,proc_setid,!proc_info,!proc_session,!proc_exec"
+static priv_set_t *lowprivs = NULL;
+static priv_set_t *highprivs = NULL;
+#endif /* HAVE_SOLARIS_PRIVS */
 /*
  * Scheduling priority we run at
  */
@@ -821,13 +830,15 @@ ntpdmain(
 			msyslog( LOG_ERR, "prctl( PR_SET_KEEPCAPS, 1L ) failed: %m" );
 			exit(-1);
 		}
+#  elif HAVE_SOLARIS_PRIVS
+		(void) setpflags(PRIV_AWARE_RESET, 1);
 #  else
 		/* we need a user to switch to */
 		if (user == NULL) {
 			msyslog(LOG_ERR, "Need user name to drop root privileges (see -u flag!)" );
 			exit(-1);
 		}
-#  endif	/* HAVE_LINUX_CAPABILITIES */
+#  endif	/* HAVE_LINUX_CAPABILITIES || HAVE_SOLARIS_PRIVS */
 
 		if (user != NULL) {
 			if (isdigit((unsigned char)*user)) {
@@ -892,6 +903,22 @@ getgroup:
 				exit (-1);
 			}
 		}
+#  ifdef HAVE_SOLARIS_PRIVS
+		if ((lowprivs = priv_str_to_set(LOWPRIVS, ",", NULL)) == NULL) {
+			msyslog(LOG_ERR, "priv_str_to_set() failed:%m");
+			exit(-1);
+		}
+		if ((highprivs = priv_allocset()) == NULL) {
+			msyslog(LOG_ERR, "priv_allocset() failed:%m");
+			exit(-1);
+		}
+		(void) getppriv(PRIV_PERMITTED, highprivs);
+		(void) priv_intersect(highprivs, lowprivs);
+		if (setppriv(PRIV_SET, PRIV_PERMITTED, lowprivs) == -1) {
+			msyslog(LOG_ERR, "setppriv() failed:%m");
+			exit(-1);
+		}
+#  endif /* HAVE_SOLARIS_PRIVS */
 		if (user && initgroups(user, sw_gid)) {
 			msyslog(LOG_ERR, "Cannot initgroups() to user `%s': %m", user);
 			exit (-1);
@@ -913,14 +940,14 @@ getgroup:
 			exit (-1);
 		}
 
-#  ifndef HAVE_LINUX_CAPABILITIES
+#  if !defined(HAVE_LINUX_CAPABILITIES) && !defined(HAVE_SOLARIS_PRIVS)
 		/*
 		 * for now assume that the privilege to bind to privileged ports
 		 * is associated with running with uid 0 - should be refined on
 		 * ports that allow binding to NTP_PORT with uid != 0
 		 */
 		disable_dynamic_updates |= (sw_uid != 0);  /* also notifies routing message listener */
-#  endif
+#  endif /* !HAVE_LINUX_CAPABILITIES && !HAVE_SOLARIS_PRIVS */
 
 		if (disable_dynamic_updates && interface_interval) {
 			interface_interval = 0;
@@ -955,6 +982,18 @@ getgroup:
 			cap_free(caps);
 		}
 #  endif	/* HAVE_LINUX_CAPABILITIES */
+#  ifdef HAVE_SOLARIS_PRIVS
+		if (priv_delset(lowprivs, "proc_setid") == -1) {
+			msyslog(LOG_ERR, "priv_delset() failed:%m");
+			exit(-1);
+		}
+		if (setppriv(PRIV_SET, PRIV_PERMITTED, lowprivs) == -1) {
+			msyslog(LOG_ERR, "setppriv() failed:%m");
+			exit(-1);
+		}
+		priv_freeset(lowprivs);
+		priv_freeset(highprivs);
+#  endif /* HAVE_SOLARIS_PRIVS */
 		root_dropped = TRUE;
 		fork_deferred_worker();
 	}	/* if (droproot) */

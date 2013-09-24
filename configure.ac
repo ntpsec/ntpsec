@@ -4159,17 +4159,6 @@ case "$ac_cv_header_libscf_h" in
 esac
 AC_SUBST([LSCF])
 
-AC_CHECK_FUNC(
-    [setppriv],
-    [ans=yes],
-    [ans=no]
-)
-case "$ans" in
- yes)
-    AC_DEFINE([HAVE_SOLARIS_PRIVS], [1],
-	[Are Solaris privileges available?])
-esac
-
 NTP_IPV6
 
 
