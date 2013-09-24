@@ -1,3 +1,4 @@
+(4.2.7p389) 2013/09/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2473] revisited: NTPD exits after clock is stepped backwards
   Avoid possible unsigned underrun for startup condition when testing
   for clock backstep.
