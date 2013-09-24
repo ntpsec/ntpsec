@@ -134,9 +134,12 @@ getCmdOpts(
 		user = estrdup(OPT_ARG( USER ));
 		group = strrchr(user, ':');
 		if (group != NULL) {
+			size_t	len;
+
 			*group++ = '\0'; /* get rid of the ':' */
+			len = group - user;
 			group = estrdup(group);
-			user = erealloc(user, group - user);
+			user = erealloc(user, len);
 		}
 	}
 #endif

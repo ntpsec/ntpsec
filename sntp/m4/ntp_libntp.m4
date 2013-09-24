@@ -639,7 +639,43 @@ case "$ntp_have_linuxcaps" in
     ;;
 esac
 
-case "$ntp_use_dev_clockctl$ntp_have_linuxcaps" in
+
+AC_CHECK_HEADERS([priv.h])
+
+AC_MSG_CHECKING([if we have solaris privileges])
+
+case "$ac_cv_header_priv_h" in
+ yes)
+    case "$host" in 
+     *-solaris*)
+	AC_CHECK_FUNC(
+    	    [setppriv],
+    	    [ntp_have_solarisprivs=yes],
+    	    [ntp_have_solarisprivs=no]
+	)
+	;;
+    esac
+esac
+
+AC_ARG_ENABLE(
+    [solarisprivs],
+    [AS_HELP_STRING(
+	[--enable-solarisprivs],
+	[+ Use Solaris privileges for non-root clock control]
+    )],
+    [ntp_have_solarisprivs=$enableval]
+)
+
+
+case "$ntp_have_solarisprivs" in
+ yes)
+    AC_DEFINE([HAVE_SOLARIS_PRIVS], [1],
+	[Are Solaris privileges available?])
+esac
+
+AC_MSG_RESULT([$ntp_have_solarisprivs])
+
+case "$ntp_use_dev_clockctl$ntp_have_linuxcaps$ntp_have_solarisprivs" in
  *yes*)
     AC_DEFINE([HAVE_DROPROOT], [1],
 	[Can we drop root privileges?])

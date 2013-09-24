@@ -122,7 +122,7 @@ flag = {
     value     = i;
     arg-type  = string;
     descrip   = "Jail directory";
-    omitted-usage = "built without --enable-clockctl or --enable-linuxcaps";
+    omitted-usage = "built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs";
     doc = <<-  _EndOfDoc_
 	Chroot the server to the directory
 	@kbd{jaildir}
@@ -134,8 +134,8 @@ flag = {
 	This option is only available if the OS supports adjusting the clock
 	without full root privileges.
 	This option is supported under NetBSD (configure with
-	@code{--enable-clockctl}) and Linux (configure with
-	@code{--enable-linuxcaps}).
+	@code{--enable-clockctl}) or Linux (configure with
+	@code{--enable-linuxcaps}) or Solaris (configure with @code{--enable-solarisprivs}).
 	_EndOfDoc_;
 };
 
@@ -335,14 +335,14 @@ flag = {
     value     = u;
     arg-type  = string;
     descrip   = "Run as userid (or userid:groupid)";
-    omitted-usage = "built without --enable-clockctl or --enable-linuxcaps";
+    omitted-usage = "built without --enable-clockctl or --enable-linuxcaps or --enable-solarisprivs";
     doc = <<-  _EndOfDoc_
 	Specify a user, and optionally a group, to switch to.
 	This option is only available if the OS supports adjusting the clock
 	without full root privileges.
 	This option is supported under NetBSD (configure with
-	@code{--enable-clockctl}) and Linux (configure with
-	@code{--enable-linuxcaps}).
+	@code{--enable-clockctl}) or Linux (configure with
+	@code{--enable-linuxcaps}) or Solaris (configure with @code{--enable-solarisprivs}).
 	_EndOfDoc_;
 };
 
