@@ -1,9 +1,10 @@
+* [Bug 2482] Cleanup of droproot and jail support for Solaris.
 (4.2.7p389) 2013/09/24 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2473] revisited: NTPD exits after clock is stepped backwards
   Avoid possible unsigned underrun for startup condition when testing
   for clock backstep.
 * [Bug 2481] ntpd aborts when both user and group are specified with -u.
-* [Bug 2482] Add droproot ahd jail support for Solaris.
+* [Bug 2482] Add droproot and jail support for Solaris.
 (4.2.7p388) 2013/09/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2473] NTPD exits after clock is stepped backwards externally
 (4.2.7p387) 2013/09/16 Released by Harlan Stenn <stenn@ntp.org>
