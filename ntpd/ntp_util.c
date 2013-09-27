@@ -12,6 +12,7 @@
 #include "ntp_stdlib.h"
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
+#include "ntp_leapsec.h"
 #include "lib_strbuf.h"
 
 #include <stdio.h>
@@ -98,7 +99,6 @@ static double prev_drift_comp;		/* last frequency update */
 /*
  * Function prototypes
  */
-static	int	leap_file(FILE *);
 static	void	record_sys_stats(void);
 	void	ntpd_time_stepped(void);
 
@@ -489,20 +489,23 @@ stats_config(
 			msyslog(LOG_ERR,
 			    "leapseconds: stat(%s) failed: %m",
 			    leapseconds_file);
-		} else if (leap_file(fp) < 0) {
+		} else if (!leapsec_load_file(fp, TRUE)) {
 			msyslog(LOG_ERR,
-			    "format error leapseconds file %s",
-			    leapseconds_file);
+				"format error leapseconds file %s",
+				leapseconds_file);
 		} else {
+			leap_signature_t lsig;
+
+			leapsec_getsig(&lsig);
 			get_systime(&now);
 			mprintf_event(EVNT_TAI, NULL,
 				      "%d leap %s %s %s",
-				      leap_tai,
-				      fstostr(leap_sec),
-				      (now.l_ui > leap_expire)
+				      lsig.taiof,
+				      fstostr(lsig.ttime),
+				      leapsec_expired(now.l_ui, NULL)
 					  ? "expired"
 					  : "expires",
-				      fstostr(leap_expire));
+				      fstostr(lsig.etime));
 		}
 		fclose(fp);
 		break;
@@ -867,6 +870,7 @@ check_leap_file(
 	FILE *fp;
 	struct stat *sp1 = &leapseconds_file_sb1;
 	struct stat *sp2 = &leapseconds_file_sb2;
+	leap_table_t * plt;
 
 	if (leapseconds_file) {
 		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
@@ -885,119 +889,19 @@ check_leap_file(
 		if (   (sp1->st_mtime != sp2->st_mtime)
 		    || (sp1->st_ctime != sp2->st_ctime)) {
 			leapseconds_file_sb1 = leapseconds_file_sb2;
-			if (leap_file(fp) < 0) {
+			plt = leapsec_get_table(TRUE);
+			if (!leapsec_load(plt, (leapsec_reader)getc, fp, TRUE)) {
 				msyslog(LOG_ERR,
 				    "format error leapseconds file %s",
 				    leapseconds_file);
+			} else {
+				leapsec_set_table(plt);
 			}
 		}
 		fclose(fp);
 	}
 
 	return;
-}
-
-
-/*
- * leap_file - read leapseconds file
- *
- * Read the ERTS leapsecond file in NIST text format and extract the
- * NTP seconds of the latest leap and TAI offset after the leap.
- */
-static int
-leap_file(
-	FILE	*fp		/* file handle */
-	)
-{
-	char	buf[NTP_MAXSTRLEN]; /* file line buffer */
-	u_long	leap;		/* NTP time at leap */
-	u_long	expire;		/* NTP time when file expires */
-	int	offset;		/* TAI offset at leap (s) */
-	int	i;
-
-	/*
-	 * Read and parse the leapseconds file. Empty lines and comments
-	 * are ignored. A line beginning with #@ contains the file
-	 * expiration time in NTP seconds. Other lines begin with two
-	 * integers followed by junk or comments. The first integer is
-	 * the NTP seconds at the leap, the second is the TAI offset
-	 * after the leap.
-	 */
-	offset = 0;
-	leap = 0;
-	expire = 0;
-	i = 10;
-	while (fgets(buf, NTP_MAXSTRLEN - 1, fp) != NULL) {
-		if (strlen(buf) < 1)
-			continue;
-
-		if (buf[0] == '#') {
-			if (strlen(buf) < 3)
-				continue;
-
-			/*
-			 * Note the '@' flag was used only in the 2006
-			 * table; previious to that the flag was '$'.
-			 */
-			if (buf[1] == '@' || buf[1] == '$') {
-				if (sscanf(&buf[2], "%lu", &expire) !=
-				    1)
-					return (-1);
-
-				continue;
-			}
-		}
-		if (sscanf(buf, "%lu %d", &leap, &offset) == 2) {
-
-			/*
-			 * Valid offsets must increase by one for each
-			 * leap.
-			 */
-			if (i++ != offset)
-				return (-1);
-		}
-	}
-
-	/*
-	 * There must be at least one leap.
-	 */
-	if (i == 10)
-		return (-1);
-
-	leap_tai = offset;
-	leap_sec = leap;
-	leap_expire = expire;
-	return (0);
-}
-
-
-/*
- * leap_month - returns seconds until the end of the month.
- */
-u_long
-leap_month(
-	u_long	sec		/* current NTP second */
-	)
-{
-	int	     leap;
-	int32	     year, month;
-	u_int32	     ndays;
-	ntpcal_split tmp;
-	vint64	     tvl;
-
-	/* --*-- expand time and split to days */
-	tvl   = ntpcal_ntp_to_ntp(sec, NULL);
-	tmp   = ntpcal_daysplit(&tvl);
-	/* --*-- split to years and days in year */
-	tmp   = ntpcal_split_eradays(tmp.hi + DAY_NTP_STARTS - 1, &leap);
-	year  = tmp.hi;
-	/* --*-- split days of year to month */
-	tmp   = ntpcal_split_yeardays(tmp.lo, leap);
-	month = tmp.hi;
-	/* --*-- get nominal start of next month */
-	ndays = ntpcal_edate_to_eradays(year, month+1, 0) + 1 - DAY_NTP_STARTS;
-	
-	return (u_int32)(ndays*SECSPERDAY - sec);
 }
 
 
@@ -1066,21 +970,17 @@ char * fstostr(
 	time_t	ntp_stamp
 	)
 {
-	char	*	buf;
-	struct tm *	tm;
-	time_t		unix_stamp;
+	char *		buf;
+	struct calendar tm;
 
 	LIB_GETBUF(buf);
-	unix_stamp = ntp_stamp - JAN_1970;
-	tm = gmtime(&unix_stamp);
-	if (NULL == tm)
-		msnprintf(buf, LIB_BUFLENGTH, "gmtime(%ld): %m",
-			  (long)unix_stamp);
+	if (ntpcal_ntp_to_date(&tm, (u_int32)ntp_stamp, NULL) < 0)
+		snprintf(buf, LIB_BUFLENGTH, "ntpcal_ntp_to_date: %ld: range error",
+			 (long)ntp_stamp);
 	else
 		snprintf(buf, LIB_BUFLENGTH, "%04d%02d%02d%02d%02d",
-			 tm->tm_year + 1900, tm->tm_mon + 1,
-			 tm->tm_mday, tm->tm_hour, tm->tm_min);
-
+			 tm.year, tm.month, tm.monthday,
+			 tm.hour, tm.minute);
 	return buf;
 }
 
