@@ -4261,6 +4261,7 @@ AC_CONFIG_FILES([scripts/plot_summary],	[chmod +x scripts/plot_summary])
 AC_CONFIG_FILES([scripts/summary],	[chmod +x scripts/summary])
 AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([tests/libntp/Makefile])
+AC_CONFIG_FILES([tests/ntpd/Makefile])
 AC_CONFIG_FILES([util/Makefile])
 
 AC_CONFIG_SUBDIRS([sntp])

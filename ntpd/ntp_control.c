@@ -25,6 +25,7 @@
 #include "ntp_config.h"
 #include "ntp_crypto.h"
 #include "ntp_assert.h"
+#include "ntp_leapsec.h"
 #include "ntp_md5.h"	/* provides OpenSSL digest API */
 #include "lib_strbuf.h"
 #ifdef KERNEL_PLL
@@ -1707,13 +1708,13 @@ ctl_putsys(
 #ifdef KERNEL_PLL
 	static struct timex ntx;
 	static u_long ntp_adjtime_time;
-	const double tscale =
+	static const double tscale =
 # ifdef STA_NANO
 				1e-9;
 # else
 				1e-6;
 # endif
-	const double to_ms = 1e3 * tscale;
+	static const double to_ms = 1e3 * tscale;
 
 	/*
 	 * CS_K_* variables depend on up-to-date output of ntp_adjtime()
@@ -1907,18 +1908,24 @@ ctl_putsys(
 		if (sys_tai > 0)
 			ctl_putuint(sys_var[CS_TAI].text, sys_tai);
 		break;
-
+		
 	case CS_LEAPTAB:
-		if (leap_sec > 0)
-			ctl_putfs(sys_var[CS_LEAPTAB].text,
-			    leap_sec);
+	{
+		leap_signature_t lsig;
+		leapsec_getsig(&lsig);
+		if (lsig.ttime > 0)
+			ctl_putfs(sys_var[CS_LEAPTAB].text, lsig.ttime);
 		break;
-
+	}
+		
 	case CS_LEAPEND:
-		if (leap_expire > 0)
-			ctl_putfs(sys_var[CS_LEAPEND].text,
-			    leap_expire);
+	{
+		leap_signature_t lsig;
+		leapsec_getsig(&lsig);
+		if (lsig.etime > 0)
+			ctl_putfs(sys_var[CS_LEAPEND].text, lsig.etime);
 		break;
+	}
 
 	case CS_RATE:
 		ctl_putuint(sys_var[CS_RATE].text, ntp_minpoll);

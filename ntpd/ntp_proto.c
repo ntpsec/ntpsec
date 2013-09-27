@@ -13,6 +13,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_control.h"
 #include "ntp_string.h"
+#include "ntp_leapsec.h"
 
 #include <stdio.h>
 #ifdef HAVE_LIBSCF_H
@@ -92,11 +93,8 @@ double	sys_maxdist = MAXDISTANCE; /* selection threshold */
 double	sys_jitter;		/* system jitter */
 u_long	sys_epoch;		/* last clock update time */
 static	double sys_clockhop;	/* clockhop threshold */
-int	leap_tai;		/* TAI at next next leap */
-u_long	leap_sec;		/* next scheduled leap from file */
-u_long	leap_peers;		/* next scheduled leap from peers */
-u_long	leap_expire;		/* leap information expiration */
-static int leap_vote;		/* leap consensus */
+static int leap_vote_ins;	/* leap consensus for insert */
+static int leap_vote_del;	/* leap consensus for delete */
 keyid_t	sys_private;		/* private value for session seed */
 int	sys_manycastserver;	/* respond to manycast client pkts */
 int	ntp_mode7;		/* respond to ntpdc (mode7) */
@@ -1941,38 +1939,24 @@ clock_update(
 		}
 
 		/*
-		 * If the leapseconds values are from file or network
-		 * and the leap is in the future, schedule a leap at the
-		 * given epoch. Otherwise, if the number of survivor
-		 * leap bits is greater than half the number of
-		 * survivors, schedule a leap for the end of the current
-		 * month.
+		 * If there is no leap second pending and the number of
+		 * survivor leap bits is greater than half the number of
+		 * survivors, try to schedule a leap for the end of the
+		 * current month. (This only works if no leap second for
+		 * that range is in the table, so doing this more than
+		 * once is mostly harmless.)
 		 */
-		get_systime(&now);
-		if (leap_sec > 0) {
-			if (leap_sec > now.l_ui) {
-				sys_tai = leap_tai - 1;
-				if (leapsec == 0)
-					report_event(EVNT_ARMED, NULL,
-					    NULL);
-				leapsec = leap_sec - now.l_ui;
-			} else {
-				sys_tai = leap_tai;
+		if (leapsec == LSPROX_NOWARN) {
+			if (leap_vote_ins > leap_vote_del
+			    && leap_vote_ins > sys_survivors / 2) {
+				get_systime(&now);
+				leapsec_add_dyn(now.l_ui, TRUE, NULL);
 			}
-			break;
-
-		} else if (leap_vote > sys_survivors / 2) {
-			leap_peers = now.l_ui + leap_month(now.l_ui);
-			if (leap_peers > now.l_ui) {
-				if (leapsec == 0)
-					report_event(PEVNT_ARMED, peer,
-					    NULL);
-				leapsec = leap_peers - now.l_ui;
+			if (leap_vote_del > leap_vote_ins
+			    && leap_vote_del > sys_survivors / 2) {
+				get_systime(&now);
+				leapsec_add_dyn(now.l_ui, FALSE, NULL);
 			}
-		} else if (leapsec > 0) {
-			report_event(EVNT_DISARMED, NULL, NULL);
-			leapsec = 0;
-			sys_leap = LEAP_NOWARNING;
 		}
 		break;
 
@@ -2782,7 +2766,8 @@ clock_select(void)
 	 */
 	e = 1e9;
 	speer = 0;
-	leap_vote = 0;
+	leap_vote_ins = 0;
+	leap_vote_del = 0;
 	for (i = 0; i < nlist; i++) {
 		peer = peers[i].peer;
 		peer->unreach = 0;
@@ -2790,9 +2775,15 @@ clock_select(void)
 		sys_survivors++;
 		if (peer->leap == LEAP_ADDSECOND) {
 			if (peer->flags & FLAG_REFCLOCK)
-				leap_vote = nlist;
-			else
-				leap_vote++;
+				leap_vote_ins = nlist;
+			else if (leap_vote_ins < nlist)
+				leap_vote_ins++;
+		}
+		if (peer->leap == LEAP_DELSECOND) {
+			if (peer->flags & FLAG_REFCLOCK)
+				leap_vote_del = nlist;
+			else if (leap_vote_del < nlist)
+				leap_vote_del++;
 		}
 		if (peer->flags & FLAG_PREFER)
 			sys_prefer = peer;

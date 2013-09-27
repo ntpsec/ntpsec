@@ -19,6 +19,7 @@
 #include "ntp_random.h"
 #include "ntp_assert.h"
 #include "ntp_calendar.h"
+#include "ntp_leapsec.h"
 
 #include "openssl/asn1_mac.h"
 #include "openssl/bn.h"
@@ -938,7 +939,6 @@ crypto_recv(
 		 * via the kernel to other applications.
 		 */
 		case CRYPTO_LEAP | CRYPTO_RESP:
-
 			/*
 			 * Discard the message if invalid. We can't
 			 * compare the value timestamps here, as they
@@ -953,18 +953,22 @@ crypto_recv(
 			 * than the stored ones, install the new leap
 			 * values and recompute the signatures.
 			 */
-			if (ntohl(ep->pkt[2]) > leap_expire) {
+			if (leapsec_add_fix(ntohl(ep->pkt[1]),
+					    ntohl(ep->pkt[2]),
+					    ntohl(ep->pkt[0]),
+					    NULL))
+			{
+				leap_signature_t lsig;
+
+				leapsec_getsig(&lsig);
 				tai_leap.tstamp = ep->tstamp;
 				tai_leap.fstamp = ep->fstamp;
 				tai_leap.vallen = ep->vallen;
-				leap_tai = ntohl(ep->pkt[0]);
-				leap_sec = ntohl(ep->pkt[1]);
-				leap_expire = ntohl(ep->pkt[2]);
 				crypto_update();
 				mprintf_event(EVNT_TAI, peer,
-				    "%d leap %s expire %s", leap_tai,
-				    fstostr(leap_sec),
-				    fstostr(leap_expire));
+				    "%d leap %s expire %s", lsig.taiof,
+				    fstostr(lsig.ttime),
+				    fstostr(lsig.etime));
 			}
 			peer->crypto |= CRYPTO_FLAG_LEAP;
 			peer->flash &= ~TEST8;
@@ -1789,6 +1793,7 @@ crypto_update(void)
 	char	statstr[NTP_MAXSTRLEN]; /* statistics for filegen */
 	u_int32	*ptr;
 	u_int	len;
+	leap_signature_t lsig;
 
 	hostval.tstamp = htonl(crypto_time());
 	if (hostval.tstamp == 0)
@@ -1842,9 +1847,10 @@ crypto_update(void)
 		tai_leap.ptr = emalloc(len);
 	tai_leap.vallen = htonl(len);
 	ptr = (u_int32 *)tai_leap.ptr;
-	ptr[0] = htonl(leap_tai);
-	ptr[1] = htonl(leap_sec);
-	ptr[2] = htonl(leap_expire);
+	leapsec_getsig(&lsig);
+	ptr[0] = htonl(lsig.taiof);
+	ptr[1] = htonl(lsig.ttime);
+	ptr[2] = htonl(lsig.etime);
 	if (tai_leap.sig == NULL)
 		tai_leap.sig = emalloc(sign_siglen);
 	EVP_SignInit(&ctx, sign_digest);
@@ -1852,7 +1858,7 @@ crypto_update(void)
 	EVP_SignUpdate(&ctx, tai_leap.ptr, len);
 	if (EVP_SignFinal(&ctx, tai_leap.sig, &len, sign_pkey))
 		tai_leap.siglen = htonl(sign_siglen);
-	if (leap_sec > 0)
+	if (lsig.ttime > 0)
 		crypto_flags |= CRYPTO_FLAG_TAI;
 	snprintf(statstr, sizeof(statstr), "signature update ts %u",
 	    ntohl(hostval.tstamp)); 

@@ -222,11 +222,7 @@ extern	void	peer_clear	(struct peer *, char *);
 extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 
-extern	int	leap_tai;	/* TAI at next leap */
-extern	u_long	leap_sec;	/* next scheduled leap from file */
-extern	u_long	leap_peers;	/* next scheduled leap from peers */
-extern	u_long	leapsec;	/* seconds to next leap */
-extern	u_long	leap_expire;	/* leap information expiration */
+extern	u_long	leapsec;	/* seconds to next leap (proximity class) */
 extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;
@@ -290,7 +286,6 @@ extern	int	mprintf_clock_stats(sockaddr_u *, const char *, ...)
 			NTP_PRINTF(2, 3);
 extern	void	record_raw_stats (sockaddr_u *srcadr, sockaddr_u *dstadr, l_fp *t1, l_fp *t2, l_fp *t3, l_fp *t4, int leap, int version, int mode, int stratum, int poll, int precision, double root_delay, double root_dispersion, u_int32 refid);
 extern	void	check_leap_file	(void);
-extern	u_long	leap_month(u_long);
 extern	void	record_crypto_stats (sockaddr_u *, const char *);
 #ifdef DEBUG
 extern	void	record_timing_stats (const char *);

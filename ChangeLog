@@ -1,3 +1,4 @@
+* [Bug 2250] Rework of leap second handling machine
 (4.2.7p388) 2013/09/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2473] NTPD exits after clock is stepped backwards externally
 (4.2.7p387) 2013/09/16 Released by Harlan Stenn <stenn@ntp.org>

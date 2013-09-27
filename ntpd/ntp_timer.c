@@ -8,6 +8,7 @@
 #include "ntp_machine.h"
 #include "ntpd.h"
 #include "ntp_stdlib.h"
+#include "ntp_leapsec.h"
 
 #if defined(HAVE_IO_COMPLETION_PORT)
 # include "ntp_iocompletionport.h"
@@ -38,6 +39,8 @@
 #else
 #define	TC_ERR	(-1)
 #endif
+
+static void check_leapsec(u_int32, const time_t*);
 
 /*
  * These routines provide support for the event timer.  The timer is
@@ -279,6 +282,7 @@ timer(void)
 	struct peer *	p;
 	struct peer *	next_peer;
 	l_fp		now;
+	time_t          tnow;
 	static int	leap_warn_log = FALSE;
 
 	/*
@@ -350,35 +354,15 @@ timer(void)
 		sys_rootdisp = 0;
 	}
 
+	get_systime(&now);
+	time(&tnow);
+
 	/*
-	 * Leapseconds. If a leap is pending, decrement the time
-	 * remaining. If less than one day remains, set the leap bits.
-	 * When no time remains, clear the leap bits and increment the
-	 * TAI. If kernel suppport is not available, do the leap
-	 * crudely. Note a leap cannot be pending unless the clock is
-	 * set.
+	 * Leapseconds. Get time and defer to worker if either something
+	 * is imminent or every 8th second.
 	 */
-	if (leapsec > 0) {
-		leapsec--;
-		if (leapsec == 0) {
-			sys_leap = LEAP_NOWARNING;
-			sys_tai = leap_tai;
-#ifndef SYS_WINNT /* WinNT port has its own leap second handling */
-# ifdef KERNEL_PLL
-			if (!(pll_control && kern_enable))
-# endif /* KERNEL_PLL */
-			{
-				step_systime(-1.0);
-				msyslog(LOG_NOTICE, "Inserting positive leap second.");
-			}
-#endif /* SYS_WINNT */
-			report_event(EVNT_LEAP, NULL, NULL);
-		} else {
-			if (leapsec < DAY)
-				sys_leap = LEAP_ADDSECOND;
-			if (leap_tai > 0)
-				sys_tai = leap_tai - 1;
-		}
+	if (leapsec > LSPROX_NOWARN || 0 == (now.l_ui & 7)) {
+		check_leapsec(now.l_ui, &tnow);
 	}
 
 	/*
@@ -427,25 +411,22 @@ timer(void)
 	if (stats_timer <= current_time) {
 		stats_timer += HOUR;
 		write_stats();
-		if (sys_tai != 0) {
-			get_systime(&now);
-			if (now.l_ui > leap_expire) {
-				report_event(EVNT_LEAPVAL, NULL, NULL);
-				if (leap_warn_log == FALSE) {
-					msyslog(LOG_WARNING,
-						"leapseconds data file has expired.");
-					leap_warn_log = TRUE;
-				}
-				/* If a new file was installed between
-				 * the previous 24 hour check and the
-				 * expiration of this one, we'll squawk
-				 * once.  Better than checking for a
-				 * new file every hour...
-				 */
-				check_leap_file();
-			} else
-				leap_warn_log = FALSE;
-		}
+		if (sys_tai != 0 && leapsec_expired(now.l_ui, &tnow)) {
+			report_event(EVNT_LEAPVAL, NULL, NULL);
+			if (leap_warn_log == FALSE) {
+				msyslog(LOG_WARNING,
+					"leapseconds data file has expired.");
+				leap_warn_log = TRUE;
+			}
+			/* If a new file was installed between
+			 * the previous 24 hour check and the
+			 * expiration of this one, we'll squawk
+			 * once.  Better than checking for a
+			 * new file every hour...
+			 */
+			check_leap_file();
+		} else
+			leap_warn_log = FALSE;
 	}
 }
 
@@ -511,3 +492,78 @@ timer_clr_stats(void)
 	timer_timereset = current_time;
 }
 
+static void
+check_leapsec(
+	u_int32        now ,
+	const time_t * tpiv)
+{
+	leap_result_t lsdata;
+	u_int32       lsprox;
+	
+#if defined(SYS_WINNT)
+	leapsec_electric(1); /* WinNT port has its own leap second handling */
+#elif defined(KERNEL_PLL)
+	leapsec_electric(pll_control && kern_enable);
+#else
+	leapsec_electric(0);
+#endif
+	
+	if (sys_leap == LEAP_NOTINSYNC)	{
+		lsprox = LSPROX_NOWARN;
+		leapsec_reset_frame();
+		memset(&lsdata, 0, sizeof(lsdata));
+	
+	} else if (leapsec_query(&lsdata, now, tpiv)) {
+		/* Full hit. Eventually step the clock, but always
+		 * announce the leap event has happened.
+		 */
+		if (lsdata.warped < 0) {
+			step_systime(lsdata.warped);
+			msyslog(LOG_NOTICE, "Inserting positive leap second.");
+		} else 	if (lsdata.warped > 0) {
+			step_systime(lsdata.warped);
+			msyslog(LOG_NOTICE, "Inserting negative leap second.");
+		}
+		report_event(EVNT_LEAP, NULL, NULL);
+		lsprox  = LSPROX_NOWARN;
+		leapsec = LSPROX_NOWARN;
+		sys_tai = lsdata.tai_offs;
+	} else {
+		lsprox  = lsdata.proximity;
+		sys_tai = lsdata.tai_offs;
+	}
+
+	/* We guard against panic alarming during the red alert phase.
+	 * Strange and evil things might happen if we go from stone cold
+	 * to piping hot in one step. If things are already that wobbly,
+	 * we let the normal clock correction take over, even if a jump
+	 * is involved.
+	 */
+	if (  (leapsec > 0 || lsprox < LSPROX_ALERT)
+	    && leapsec < lsprox                     ) {
+		if (lsprox >= LSPROX_SCHEDULE) {
+			if (lsdata.dynamic)
+				report_event(PEVNT_ARMED, sys_peer, NULL);
+			else
+				report_event(EVNT_ARMED, NULL, NULL);
+		}
+		leapsec = lsprox;
+	}
+	if (leapsec > lsprox) {
+		if (lsprox < LSPROX_SCHEDULE) {
+			report_event(EVNT_DISARMED, NULL, NULL);
+		}
+		leapsec = lsprox;
+	}
+
+	if (sys_leap != LEAP_NOTINSYNC) {
+		if (leapsec < LSPROX_ANNOUNCE)
+			lsdata.tai_diff = 0;
+		if (lsdata.tai_diff > 0)
+			sys_leap = LEAP_ADDSECOND;
+		else if (lsdata.tai_diff < 0)
+			sys_leap = LEAP_DELSECOND;
+		else
+			sys_leap = LEAP_NOWARNING;
+	}
+}

@@ -173,7 +173,10 @@ noinst_DATA =				\
 	$(srcdir)/ntpd.mdoc.in		\
 	$(NULL)
 
-noinst_HEADERS = declcond.h
+noinst_HEADERS =			\
+	declcond.h			\
+	ntp_leapsec.h			\
+	$(NULL)
 
 install-data-local: install-html
 
@@ -217,6 +220,7 @@ libntpd_a_SOURCES =		\
 	ntp_control.c		\
 	ntp_crypto.c		\
 	ntp_filegen.c		\
+	ntp_leapsec.c		\
 	ntp_loopfilter.c	\
 	ntp_monitor.c		\
 	ntp_peer.c		\

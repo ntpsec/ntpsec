@@ -1,6 +1,9 @@
+NULL =
 SUBDIRS = 
 
 if GTEST_AVAILABLE
-SUBDIRS += libntp
+SUBDIRS +=	libntp	\
+		ntpd	\
+		$(NULL)
 endif
 
