@@ -19,10 +19,11 @@
 #include "ntp_leapsec.h"
 #include "ntp.h"
 
-
 /* ---------------------------------------------------------------------
- * GCC is rather sticky with its 'const' attribute. We have to it more
- * explicit than with a cast...
+ * GCC is rather sticky with its 'const' attribute. We have to do it more
+ * explicit than with a cast if we want to get rid of a CONST qualifier.
+ * Greetings from the PASCAL world, where casting was only possible via
+ * untagged unions...
  */
 static void* noconst(const void* ptr)
 {
@@ -65,9 +66,8 @@ strtouv64(
 	if (base == 0) {
 		base = 10;
 		if (*src == '0') {
-			src++;
 			base = 8;
-			if (toupper(*src) == 'X') {
+			if (toupper(*++src) == 'X') {
 				src++;
 				base = 16;
 			}
@@ -347,7 +347,7 @@ leapsec_electric(
 	if (on < 0)
 		return res;
 
-	_electric = on != 0;
+	_electric = (on != 0);
 	if (_electric == res)
 		return res;
 
@@ -521,25 +521,25 @@ leapsec_query(
 
 	qr->tai_offs = pt->head.this_tai;
 
-	/* If before the next schedulung alert, we're done. */
+	/* If before the next scheduling alert, we're done. */
 	if (ucmpv64(&ts64, &pt->head.stime) < 0)
 		return fired;
 
 	/* now start to collect the remaing data */
 	when32 = pt->head.when.D_s.lo;
 
-	qr->tai_diff = pt->head.next_tai - pt->head.this_tai;
-	qr->when     = pt->head.when;
-	qr->dist     = when32 - ts32;
-	qr->dynamic  = pt->head.dynls;
-	qr->proximity= LSPROX_SCHEDULE;
+	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;
+	qr->when      = pt->head.when;
+	qr->dist      = when32 - ts32;
+	qr->dynamic   = pt->head.dynls;
+	qr->proximity = LSPROX_SCHEDULE;
 
 	/* if not in the last day before transition, we're done. */
-	if (!betweenu32(when32-SECSPERDAY, ts32, when32))
+	if (!betweenu32(when32 - SECSPERDAY, ts32, when32))
 		return fired;
-
+	
 	qr->proximity = LSPROX_ANNOUNCE;
-	if (!betweenu32(when32-10, ts32, when32))
+	if (!betweenu32(when32 - 10, ts32, when32))
 		return fired;
 
 	qr->proximity = LSPROX_ALERT;
@@ -642,8 +642,10 @@ leapsec_add_dyn(
  * internal helpers
  */
 
-/* Reset / init the time window in the leap processor to force reload on
- * next query.
+/* [internal] Reset / init the time window in the leap processor to
+ * force reload on next query. Since a leap transition cannot take place
+ * at an odd second, the value chosen avoids spurious leap transition
+ * triggers. Making all three times equal forces a reload.
  */
 static void
 reset_times(
@@ -733,6 +735,11 @@ skipws(
  * is where the real work is done when it comes to table lookup and
  * evaluation. Some care has been taken to have correct code for dealing
  * with boundary conditions and empty tables.
+ *
+ * In electric mode, transition and trip time are the same. In dumb
+ * mode, the difference of the TAI offsets must be taken into account
+ * and trip time and transition time become different. The difference
+ * becomes the warping distance when the trip time is reached.
  */
 static void
 reload_limits(
@@ -766,7 +773,7 @@ reload_limits(
 		pt->head.dynls    = pt->info[idx].dynls;
 		pt->head.ttime    = pt->info[idx].ttime;
 
-		if (!_electric)
+		if ( ! _electric)
 			pt->head.when = addv64i32(
 				&pt->head.ttime,
 				pt->head.next_tai - pt->head.this_tai);
