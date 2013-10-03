@@ -38,7 +38,8 @@ typedef struct leap_table leap_table_t;
  * step forward untill *we* (that is, this module) tells the client app
  * to step at the right time. This needs a slightly different type of
  * processing, so switching between those two modes should not be done
- * close to a leap second. The transition might be lost in that case.
+ * too close to a leap second. The transition might be lost in that
+ * case. (The limit is actual 2 sec before transition.)
  *
  * OTOH, this is a system characteristic, so it's expected to be set
  * properly somewhere after system start and retain the value.
@@ -51,23 +52,26 @@ extern int/*BOOL*/ leapsec_electric(int/*BOOL*/ on);
 
 
 /* Query result for a leap second schedule
- * 'when' tells the transition point in full time scale, but only if
- *	'tai_diff' is not zero. 
- * 'dist' is the distance to the transition, in clock seconds.
- *	Only valid if 'tai_diff' not zero. To get the true (elapsed
- *	time) difference, add 'tai_diff' to that value.
- * 'tai_offs' is the CURRENT distance from clock (UTC) to TAI.
+ * 'ttime' is the transition point in full time scale, but only if
+ *	'tai_diff' is not zero. Nominal UTC time when the next leap
+ *      era starts.
+ * 'ddist' is the distance to the transition, in clock seconds.
+ *      This is the distance to the due time, which is different
+ *      from the transition time if the mode is non-electric.
+ *	Only valid if 'tai_diff' not zero.
+ * 'tai_offs' is the CURRENT distance from clock (UTC) to TAI. Always valid.
  * 'tai_diff' is the change in TAI offset after the next leap
- *	transition. Zero if nothing is pending.
+ *	transition. Zero if nothing is pending or too far ahead.
  * 'warped' is set only once, when the the leap second occurred between
- *	two queries.
- * 'proximity' is a proximity warning. See definitions below. This might
- *	be more useful than an absolute difference to the leap second.
+ *	two queries. Always zero in electric mode. If non-zero,
+ *      immediately step the clock.
+ * 'proximity' is a proximity warning. See definitions below. This is
+ *	more useful than an absolute difference to the leap second.
  * 'dynamic' != 0 if entry was requested by clock/peer
  */ 
 struct leap_result {
-	vint64	        when;
-	u_int32         dist;
+	vint64	        ttime;
+	u_int32         ddist;
 	short           tai_offs;
 	short           tai_diff;
 	short           warped;
@@ -94,11 +98,12 @@ typedef struct leap_signature leap_signature_t;
  * subsequently modified.
  */
 extern leap_table_t *leapsec_get_table(int alternate);
+
 /* Set the current leap table. Accepts only return values from
  * 'leapsec_get_table()', so it's hard to do something wrong. Returns
- * TRUE if the table was exchanged.
+ * TRUE if the current table is the requested one.
  */
-extern int/*BOOL*/ leapsec_set_table(leap_table_t*);
+extern int/*BOOL*/ leapsec_set_table(leap_table_t *);
 
 /* Clear all leap second data. Use it for init & cleanup */
 extern void leapsec_clear(leap_table_t*);
@@ -111,22 +116,36 @@ extern int/*BOOL*/ leapsec_is_expired(leap_table_t*, u_int32 when,
 
 /* Load a leap second file. If 'blimit' is set, do not store (but
  * register with their TAI offset) leap entries before the build date.
+ * Update the leap signature data on the fly.
  */
 extern int/*BOOL*/ leapsec_load(leap_table_t*, leapsec_reader,
 				void*, int blimit);
-
 
 /* Dump the current leap table in readable format, using the provided
  * dump formatter function.
  */
 extern void leapsec_dump(const leap_table_t*, leapsec_dumper func, void *farg);
 
-/* Glue to integrate this easier into existing code */
-extern int/*BOOL*/ leapsec_load_file(FILE*, int blimit);
+/* Read a leap second file. This is a convenience wrapper around the
+ * generic load function, 'leapsec_load()'.
+ */
+extern int/*BOOL*/ leapsec_load_file(FILE * fp, int blimit);
+
+/* Get the current leap data signature. This consists of the last
+ * ransition, the table expiration, and the total TAI difference at the
+ * last transition. This is valid even if the leap transition itself was
+ * culled due to the build date limit.
+ */
 extern void        leapsec_getsig(leap_signature_t * psig);
+
+/* Check if the leap table is expired at the given time.
+ */
 extern int/*BOOL*/ leapsec_expired(u_int32 when, const time_t * pivot);
 
-/* Reset the current leap frame */
+/* Reset the current leap frame, so the next query will do proper table
+ * lookup from fresh. Suppresses a possible leap era transition detection
+ * for the next query.
+ */
 extern void leapsec_reset_frame(void);
 
 /* Given a transition time, the TAI offset valid after that and an
@@ -134,7 +153,7 @@ extern void leapsec_reset_frame(void);
  * works if the existing table is extended. On success, updates the
  * signature data.
  */
-extern int/*BOOL*/ leapsec_add_fix(u_int32 ttime, u_int32 etime, int total,
+extern int/*BOOL*/ leapsec_add_fix(int offset, u_int32 ttime, u_int32 etime,
 				   const time_t * pivot);
 
 /* Take a time stamp and create a leap second frame for it. This will
@@ -149,17 +168,29 @@ extern int/*BOOL*/ leapsec_add_fix(u_int32 ttime, u_int32 etime, int total,
  * 'ntp_now' is subject to era unfolding. The entry is marked
  * dynamic. The leap signature is NOT updated.
  */
-extern int/*BOOL*/ leapsec_add_dyn(u_int32 ntp_now, int insert,
+extern int/*BOOL*/ leapsec_add_dyn(int insert, u_int32 ntp_now,
 				   const time_t * pivot);
 
 /* Take a time stamp and get the associated leap information. The time
  * stamp is subject to era unfolding around the pivot or the current
  * system time if pivot is NULL. Sets the information in '*qr' and
  * returns TRUE if a leap second era boundary was crossed between the
- * last and the current query. In that case, qr.warped contains the
- * required clock stepping. (Which is zero in electric mode...)
+ * last and the current query. In that case, qr->warped contains the
+ * required clock stepping, which is always zero in electric mode.
  */
 extern int/*BOOL*/ leapsec_query(leap_result_t *qr, u_int32 ntpts,
 				 const time_t * pivot);
+
+/* Get the current leap frame info. Returns TRUE if the result contains
+ * useable data, FALSE if there is currently no leap second frame.
+ * This merely replicates some results from a previous query, but since
+ * it does not check the current time, only the following entries are
+ * meaningful:
+ *  qr->ttime;
+ *  qr->tai_offs;
+ *  qr->tai_diff;
+ *  qr->dynamic;
+ */
+extern int/*BOOL*/ leapsec_frame(leap_result_t *qr);
 
 #endif /* !defined(NTP_LEAPSEC_H) */

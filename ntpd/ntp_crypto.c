@@ -953,9 +953,9 @@ crypto_recv(
 			 * than the stored ones, install the new leap
 			 * values and recompute the signatures.
 			 */
-			if (leapsec_add_fix(ntohl(ep->pkt[1]),
+			if (leapsec_add_fix(ntohl(ep->pkt[0]),
+					    ntohl(ep->pkt[1]),
 					    ntohl(ep->pkt[2]),
-					    ntohl(ep->pkt[0]),
 					    NULL))
 			{
 				leap_signature_t lsig;

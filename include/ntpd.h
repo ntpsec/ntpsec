@@ -223,6 +223,7 @@ extern	void 	process_packet	(struct peer *, struct pkt *, u_int);
 extern	void	clock_select	(void);
 
 extern	u_long	leapsec;	/* seconds to next leap (proximity class) */
+extern  int     leapdif;        /* TAI difference step at next leap second*/
 extern	int	sys_orphan;
 extern	double	sys_mindisp;
 extern	double	sys_maxdist;

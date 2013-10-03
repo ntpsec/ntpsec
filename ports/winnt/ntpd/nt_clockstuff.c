@@ -40,6 +40,7 @@
 #include "ntp_unixtime.h"
 #include "ntp_timer.h"
 #include "ntp_assert.h"
+#include "ntp_leapsec.h"
 #include "clockstuff.h"
 #include "ntservice.h"
 #include "ntpd.h"
@@ -465,6 +466,9 @@ adj_systime(
 	double now
 	)
 {
+        /* ntp time scale origin as ticks since 1601-01-01 */
+        static const ULONGLONG HNS_JAN_1900 = 94354848000000000ull;
+
 	static double	adjtime_carry;
 	double		dtemp;
 	u_char		isneg;
@@ -473,6 +477,7 @@ adj_systime(
 	SYSTEMTIME	st;
 	ULONGLONG	this_perf_count;
 	FT_ULL		curr_ft;
+        leap_result_t   lsi;
 
 	/*
 	 * Add the residual from the previous adjustment to the new
@@ -527,56 +532,45 @@ adj_systime(
 	dtemp -= TimeAdjustment * ppm_per_adjust_unit;	
 
 
-	/*
-	 * If a leap second is pending for the end of the month,
-	 * determine the UTC time stamp when the insertion must take
-	 * place 
+	/* If a piping-hot close leap second is pending for the end
+         * of this day, determine the UTC time stamp when the transition
+         * must take place. (Calculated in the current leap era!) 
 	 */
-	if (0 < leapsec && leapsec < 31 * DAY) {
-		if (0 == ls_ft.ull) {  /* time stamp has not yet been computed */
-			GetSystemTime(&st);
-
- 			/*
-			 * Accept leap announcement only 1 month in advance,
-			 * for end of March, June, September, or December.
-			 */
-			if (0 == (st.wMonth % 3)) {
-				/*
-				 * The comparison time stamp is computed according 
-				 * to 0:00h UTC of the following day 
-				 */
-				if (++st.wMonth > 12) {
-					st.wMonth -= 12;
-					st.wYear++;
-				}
-				
-				st.wDay = 1;
-				st.wHour = 0;
-				st.wMinute = 0;
-				st.wSecond = 0;
-				st.wMilliseconds = 0;
-
-				SystemTimeToFileTime(&st, &ls_ft.ft);
-				msyslog(LOG_NOTICE,
-					"Detected positive leap second announcement "
-					"for %04d-%02d-%02d %02d:%02d:%02d UTC",
-					st.wYear, st.wMonth, st.wDay,
-					st.wHour, st.wMinute, st.wSecond);
-			}
-		}
-	} else {
-		if (ls_ft.ull != 0) {  /* Leap second has been armed before */
-			/*
-			 * Disarm leap second only if the leap second
-			 * is not already in progress.
-			 */
-			if (0 == ls_time_adjustment) {
-				ls_ft.ull = 0;
-				msyslog(LOG_NOTICE, "Leap second announcement disarmed");
-			}
+	if (leapsec >= LSPROX_ALERT) {
+                if (0 == ls_ft.ull && leapsec_frame(&lsi)) {
+                        if (lsi.tai_diff > 0) {
+                                /* A leap second insert is scheduled at the end
+                                 * of the day. Since we have not yet computed the
+                                 * time stamp, do it now. Signal electric mode
+                                 * for this insert.
+                                 */
+                                ls_ft.ull = lsi.ttime.Q_s * HECTONANOSECONDS
+                                          + HNS_JAN_1900;
+                                FileTimeToSystemTime(&ls_ft.ft, &st);
+			        msyslog(LOG_NOTICE,
+				        "Detected positive leap second announcement "
+				        "for %04d-%02d-%02d %02d:%02d:%02d UTC",
+				        st.wYear, st.wMonth, st.wDay,
+				        st.wHour, st.wMinute, st.wSecond);
+                                leapsec_electric(TRUE);
+                        } else if (lsi.tai_diff < 0) {
+                                /* Do not handle negative leap seconds here. If this
+                                 * happens, let the system step.
+                                 */
+                                leapsec_electric(FALSE);
+                        }
+                }
+        } else {
+                /* The leap second announcement is gone. Happens primarily after
+                 * the leap transition, but can also be due to a clock step.
+                 * Disarm the leap second, but only if there is one scheduled
+                 * and not currently in progress!
+                 */
+		if (ls_ft.ull != 0 && ls_time_adjustment == 0) {
+			ls_ft.ull = 0;
+			msyslog(LOG_NOTICE, "Leap second announcement disarmed");
 		}
 	}
-
 
 	/*
 	 * If the time stamp for the next leap second has been set
@@ -696,6 +690,7 @@ init_winnt_time(void)
 #pragma warning(pop)
 
 	init_small_adjustment();
+        leapsec_electric(TRUE);
 
 	/*
 	 * Get privileges needed for fiddling with the clock

@@ -870,7 +870,6 @@ check_leap_file(
 	FILE *fp;
 	struct stat *sp1 = &leapseconds_file_sb1;
 	struct stat *sp2 = &leapseconds_file_sb2;
-	leap_table_t * plt;
 
 	if (leapseconds_file) {
 		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
@@ -889,13 +888,10 @@ check_leap_file(
 		if (   (sp1->st_mtime != sp2->st_mtime)
 		    || (sp1->st_ctime != sp2->st_ctime)) {
 			leapseconds_file_sb1 = leapseconds_file_sb2;
-			plt = leapsec_get_table(TRUE);
-			if (!leapsec_load(plt, (leapsec_reader)getc, fp, TRUE)) {
+			if (!leapsec_load_file(fp, TRUE)) {
 				msyslog(LOG_ERR,
 				    "format error leapseconds file %s",
 				    leapseconds_file);
-			} else {
-				leapsec_set_table(plt);
 			}
 		}
 		fclose(fp);

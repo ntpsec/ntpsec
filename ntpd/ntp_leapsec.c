@@ -50,17 +50,16 @@ strtouv64(
 	int     sig, num;
 	const u_char *src;
 	
-	num = 0;
+	num = sig = 0;
 	src = (const u_char*)begp;
-	while (*src && isspace(*src))
+	while (isspace(*src))
 		src++;
 
 	if (*src == '-') {
 		src++;
 		sig = 1;
-	} else {
-		sig = 0;
-		src += (*src == '+');
+	} else  if (*src == '+') {
+		src++;
 	}
 
 	if (base == 0) {
@@ -84,11 +83,11 @@ strtouv64(
 	memset(&res, 0, sizeof(res));
 	while (*src) {
 		if (isdigit(*src))
-			digit = (u_char)*src - '0';
+			digit = *src - '0';
 		else if (isupper(*src))
-			digit = (u_char)*src - 'A' + 10;
+			digit = *src - 'A' + 10;
 		else if (islower(*src))
-			digit = (u_char)*src - 'a' + 10;
+			digit = *src - 'a' + 10;
 		else
 			break;
 		if (digit >= base)
@@ -267,22 +266,22 @@ ntpcal_date_to_ntp64(
 struct leap_info {
 	vint64  ttime;	/* transition time (after the step, ntp scale)	*/
 	u_int32 stime;	/* schedule limit (a month before transition)	*/
-	short   total;	/* accumulated leap seconds from that point	*/
+	short   taiof;	/* TAI offset on and after the transition       */
 	u_short dynls;	/* dynamic: inserted on peer/clock request	*/
 };
 typedef struct leap_info leap_info_t;
 
 struct leap_head {
-	vint64  expire;	/* table expiration time          */
-	u_short	size;	/* number of infos in table	  */
-	int32   total;	/* total leaps before first entry */
-	vint64  when;	/* begin of next leap era         */
-	vint64  ttime;	/* nominal transition time        */
-	vint64  stime;	/* announce leapsec 1 month ahead */
-	vint64  base;	/* base of this leap era          */
-	short   this_tai;	/* current TAI offset	  */
-	short   next_tai;	/* TAI offset after 'when'*/
-	short   dynls;	/* next leap is dynamic		  */
+	vint64  expire;	/* table expiration time                       */
+	u_short	size;	/* number of infos in table	               */
+	short   base_tai;	/* total leaps before first entry      */
+	short   this_tai;	/* current TAI offset	               */
+	short   next_tai;	/* TAI offset after 'when'             */
+	vint64  dtime;	/* due time (current era end)                  */
+	vint64  ttime;	/* nominal transition time (next era start)    */
+	vint64  stime;	/* schedule time (when we take notice)         */
+	vint64  ebase;	/* base time of this leap era                  */
+	short   dynls;	/* next leap is dynamic (by peer request)      */
 };
 typedef struct leap_head leap_head_t;
 
@@ -300,6 +299,7 @@ static int/*BOOL*/  _electric;
 static int    add_range(leap_table_t*, const leap_info_t*);
 static char * get_line(leapsec_reader, void*, char*, size_t);
 static char * skipws(const char*);
+static int    parsefail(const char * cp, const char * ep);
 static void   reload_limits(leap_table_t*, const vint64*);
 static int    betweenu32(u_int32, u_int32, u_int32);
 static void   reset_times(leap_table_t*);
@@ -399,8 +399,8 @@ leapsec_load(
 	int            use_build_limit)
 {
 	char   *cp, *ep, linebuf[50];
-	vint64 tt, limit;
-	int    al;
+	vint64 ttime, limit;
+	long   taiof;
 	struct calendar build;
 
 	leapsec_clear(pt);
@@ -410,33 +410,34 @@ leapsec_load(
 		memset(&limit, 0, sizeof(limit));
 
 	while (get_line(func, farg, linebuf, sizeof(linebuf))) {
-		cp = skipws(linebuf);
+		cp = linebuf;
 		if (*cp == '#') {
 			cp++;
 			if (*cp == '@' || *cp == '$') {
 				cp = skipws(cp+1);
 				pt->head.expire = strtouv64(cp, &ep, 10);
-				if (ep == cp || *ep > ' ')
+				if (parsefail(cp, ep))
 					goto fail_read;
 				pt->lsig.etime = pt->head.expire.D_s.lo;
 			}		    
-		} else if (isdigit(*cp)) {
-			tt = strtouv64(cp, &ep, 10);
-			if (ep == cp || *ep > ' ')
+		} else if (isdigit((u_char)*cp)) {
+			ttime = strtouv64(cp, &ep, 10);
+			if (parsefail(cp, ep))
 				goto fail_read;
 			cp = skipws(ep);
-			al = strtol(cp, &ep, 10);
-			if (ep == cp || *ep > ' ')
+			taiof = strtol(cp, &ep, 10);
+			if (   parsefail(cp, ep)
+			    || taiof > SHRT_MAX || taiof < SHRT_MIN)
 				goto fail_read;
-			cp = skipws(ep);
-			if (ucmpv64(&tt, &limit) >= 0) {
-				if (!leapsec_raw(pt, &tt, al, FALSE))
+			if (ucmpv64(&ttime, &limit) >= 0) {
+				if (!leapsec_raw(pt, &ttime,
+						 taiof, FALSE))
 					goto fail_insn;
 			} else {
-				pt->head.total = al;
+				pt->head.base_tai = (short)taiof;
 			}
-			pt->lsig.ttime = tt.D_s.lo;
-			pt->lsig.taiof = al;
+			pt->lsig.ttime = ttime.D_s.lo;
+			pt->lsig.taiof = (short)taiof;
 		}
 	}
 	return TRUE;
@@ -477,7 +478,7 @@ leapsec_dump(
 			ttb.year, ttb.month, ttb.monthday,
 			"-*"[pt->info[idx].dynls != 0],
 			atb.year, atb.month, atb.monthday,
-			pt->info[idx].total);
+			pt->info[idx].taiof);
 	}
 }
 
@@ -492,8 +493,8 @@ leapsec_query(
 	const time_t *  pivot)
 {
 	leap_table_t *   pt;
-	vint64           ts64, last;
-	u_int32          when32;
+	vint64           ts64, last, next;
+	u_int32          due32;
 	int              fired;
 
 	/* preset things we use later on... */
@@ -502,21 +503,33 @@ leapsec_query(
 	pt    = leapsec_get_table(FALSE);
 	memset(qr, 0, sizeof(leap_result_t));
 
-	if (ucmpv64(&ts64, &pt->head.base) < 0) {
-		/* Ooops? Clock step backward? Oh, well... */ 
+	if (ucmpv64(&ts64, &pt->head.ebase) < 0) {
+		/* Most likely after leap frame reset. Could also be a
+		 * backstep of the system clock. Anyway, get the new
+		 * leap era frame.
+		 */
 		reload_limits(pt, &ts64);
-	} else if (ucmpv64(&ts64, &pt->head.when) >= 0)	{
+	} else if (ucmpv64(&ts64, &pt->head.dtime) >= 0)	{
 		/* Boundary crossed in forward direction. This might
 		 * indicate a leap transition, so we prepare for that
 		 * case.
+		 *
+		 * Some operations below are actually NOPs in electric
+		 * mode, but having only one code path that works for
+		 * both modes is easier to maintain.
 		 */
 		last = pt->head.ttime;
-		qr->warped = last.D_s.lo - pt->head.when.D_s.lo;
-		reload_limits(pt, &ts64);
-		if (ucmpv64(&pt->head.base, &last) == 0)
-			fired = TRUE;
-		else
+		qr->warped = (short)(last.D_s.lo -
+                                        pt->head.dtime.D_s.lo);
+		next = addv64i32(&ts64, qr->warped);
+		reload_limits(pt, &next);
+		fired = ucmpv64(&pt->head.ebase, &last) == 0;
+		if (fired) {
+			ts64 = next;
+			ts32 = next.D_s.lo;
+		} else {
 			qr->warped = 0;
+		}
 	}
 
 	qr->tai_offs = pt->head.this_tai;
@@ -526,24 +539,45 @@ leapsec_query(
 		return fired;
 
 	/* now start to collect the remaing data */
-	when32 = pt->head.when.D_s.lo;
+	due32 = pt->head.dtime.D_s.lo;
 
 	qr->tai_diff  = pt->head.next_tai - pt->head.this_tai;
-	qr->when      = pt->head.when;
-	qr->dist      = when32 - ts32;
+	qr->ttime     = pt->head.ttime;
+	qr->ddist     = due32 - ts32;
 	qr->dynamic   = pt->head.dynls;
 	qr->proximity = LSPROX_SCHEDULE;
 
 	/* if not in the last day before transition, we're done. */
-	if (!betweenu32(when32 - SECSPERDAY, ts32, when32))
+	if (!betweenu32(due32 - SECSPERDAY, ts32, due32))
 		return fired;
 	
 	qr->proximity = LSPROX_ANNOUNCE;
-	if (!betweenu32(when32 - 10, ts32, when32))
+	if (!betweenu32(due32 - 10, ts32, due32))
 		return fired;
 
+	/* The last 10s before the transition. Prepare for action! */
 	qr->proximity = LSPROX_ALERT;
 	return fired;
+}
+
+/* ------------------------------------------------------------------ */
+int/*BOOL*/
+leapsec_frame(
+        leap_result_t *qr)
+{
+	const leap_table_t * pt;
+
+        memset(qr, 0, sizeof(leap_result_t));
+	pt = leapsec_get_table(FALSE);
+	if (ucmpv64(&pt->head.ttime, &pt->head.stime) <= 0)
+                return FALSE;
+
+	qr->tai_offs = pt->head.this_tai;
+	qr->tai_diff = pt->head.next_tai - pt->head.this_tai;
+	qr->ttime    = pt->head.ttime;
+	qr->dynamic  = pt->head.dynls;
+
+        return TRUE;
 }
 
 /* ------------------------------------------------------------------ */
@@ -590,9 +624,9 @@ leapsec_expired(
 /* ------------------------------------------------------------------ */
 int/*BOOL*/
 leapsec_add_fix(
+	int            total,
 	u_int32        ttime,
 	u_int32        etime,
-	int            total,
 	const time_t * pivot)
 {
 	time_t         tpiv;
@@ -608,14 +642,13 @@ leapsec_add_fix(
 	tt64 = ntpcal_ntp_to_ntp(ttime, pivot);
 	pt   = leapsec_get_table(TRUE);
 
-	if (ucmpv64(&et64, &pt->head.expire) <= 0)
-		return FALSE;
-	if ( ! leapsec_raw(pt, &tt64, total, FALSE))
+	if (   ucmpv64(&et64, &pt->head.expire) <= 0
+	   || !leapsec_raw(pt, &tt64, total, FALSE) )
 		return FALSE;
 
 	pt->lsig.etime = etime;
 	pt->lsig.ttime = ttime;
-	pt->lsig.taiof = total;
+	pt->lsig.taiof = (short)total;
 
 	pt->head.expire = et64;
 
@@ -625,8 +658,8 @@ leapsec_add_fix(
 /* ------------------------------------------------------------------ */
 int/*BOOL*/
 leapsec_add_dyn(
-	u_int32        ntpnow,
 	int            insert,
+	u_int32        ntpnow,
 	const time_t * pivot )
 {
 	leap_table_t * pt;
@@ -645,17 +678,18 @@ leapsec_add_dyn(
 /* [internal] Reset / init the time window in the leap processor to
  * force reload on next query. Since a leap transition cannot take place
  * at an odd second, the value chosen avoids spurious leap transition
- * triggers. Making all three times equal forces a reload.
+ * triggers. Making all three times equal forces a reload. Using the
+ * maximum value for unsigned 64 bits makes finding the next leap frame
+ * a bit easier.
  */
 static void
 reset_times(
 	leap_table_t * pt)
 {
-	pt->head.base.D_s.hi = 0;
-	pt->head.base.D_s.lo = 1;
-	pt->head.stime = pt->head.base;
-	pt->head.ttime = pt->head.base;
-	pt->head.when  = pt->head.base;
+	memset(&pt->head.ebase, 0xFF, sizeof(vint64));
+	pt->head.stime = pt->head.ebase;
+	pt->head.ttime = pt->head.ebase;
+	pt->head.dtime = pt->head.ebase;
 }
 
 /* [internal] Add raw data to the table, removing old entries on the
@@ -670,8 +704,8 @@ add_range(
 	 * entry. But remember the accumulated leap seconds!
 	 */
 	if (pt->head.size >= MAX_HIST) {
-		pt->head.size  = MAX_HIST - 1;
-		pt->head.total = pt->info[pt->head.size].total;
+		pt->head.size     = MAX_HIST - 1;
+		pt->head.base_tai = pt->info[pt->head.size].taiof;
 	}
 
 	/* make room in lower end and insert item */
@@ -706,15 +740,22 @@ get_line(
 	size_t         size)
 {
 	int   ch;
-	char *ptr = buff;
+	char *ptr;
+	
+	/* if we cannot even store the delimiter, declare failure */
+	if (buff == NULL || size == 0)
+		return NULL;
 
+	ptr = buff;
 	while (EOF != (ch = (*func)(farg)) && '\n' != ch)
 		if (size > 1) {
 			size--;
 			*ptr++ = (char)ch;
 		}
-	if (size)
-		*ptr = '\0';
+	/* discard trailing whitespace */
+	while (ptr != buff && isspace((u_char)ptr[-1]))
+		ptr--;
+	*ptr = '\0';
 	return (ptr == buff && ch == EOF) ? NULL : buff;
 }
 
@@ -723,12 +764,21 @@ static char *
 skipws(
 	const char *ptr)
 {
-	const u_char * src;
+	while (isspace((u_char)*ptr))
+		ptr++;
+	return (char*)noconst(ptr);
+}
 
-	src = (const u_char*)ptr;
-	while (isspace(*src))
-		src++;
-	return (char*)noconst(src);
+/* [internal] check if a strtoXYZ ended at EOL or whistespace and
+ * converted something at all. Return TRUE if something went wrong.
+ */
+static int/*BOOL*/
+parsefail(
+	const char * cp,
+	const char * ep)
+{
+	return (cp == ep)
+	    || (*ep && *ep != '#' && !isspace((u_char)*ep));
 }
 
 /* [internal] reload the table limits around the given time stamp. This
@@ -762,23 +812,23 @@ reload_limits(
 	 * empty -- no undefined condition must arise from this code.
 	 */
 	if (idx >= pt->head.size) {
-		memset(&pt->head.base, 0x00, sizeof(vint64));
-		pt->head.this_tai = pt->head.total;
+		memset(&pt->head.ebase, 0x00, sizeof(vint64));
+		pt->head.this_tai = pt->head.base_tai;
 	} else {
-		pt->head.base     = pt->info[idx].ttime;
-		pt->head.this_tai = pt->info[idx].total;
+		pt->head.ebase    = pt->info[idx].ttime;
+		pt->head.this_tai = pt->info[idx].taiof;
 	}
 	if (--idx >= 0) {
-		pt->head.next_tai = pt->info[idx].total;
+		pt->head.next_tai = pt->info[idx].taiof;
 		pt->head.dynls    = pt->info[idx].dynls;
 		pt->head.ttime    = pt->info[idx].ttime;
 
-		if ( ! _electric)
-			pt->head.when = addv64i32(
+		if (_electric)
+			pt->head.dtime = pt->head.ttime;
+                else
+			pt->head.dtime = addv64i32(
 				&pt->head.ttime,
 				pt->head.next_tai - pt->head.this_tai);
-		else
-			pt->head.when = pt->head.ttime;
 		
 		pt->head.stime = subv64u32(
 			&pt->head.ttime, pt->info[idx].stime);
@@ -786,7 +836,7 @@ reload_limits(
 	} else {
 		memset(&pt->head.ttime, 0xFF, sizeof(vint64));
 		pt->head.stime    = pt->head.ttime;
-		pt->head.when     = pt->head.ttime;
+		pt->head.dtime    = pt->head.ttime;
 		pt->head.next_tai = pt->head.this_tai;
 		pt->head.dynls    = 0;
 	}
@@ -842,7 +892,7 @@ leapsec_add(
 
 	li.ttime = ttime;
 	li.stime = ttime.D_s.lo - stime.D_s.lo;
-	li.total = (pt->head.size ? pt->info[0].total : pt->head.total)
+	li.taiof = (pt->head.size ? pt->info[0].taiof : pt->head.base_tai)
 	         + (insert ? 1 : -1);
 	li.dynls = 1;
 	return add_range(pt, &li);
@@ -857,7 +907,7 @@ int/*BOOL*/
 leapsec_raw(
 	leap_table_t * pt,
 	const vint64 * ttime,
-	int            total,
+	int            taiof,
 	int            dynls)
 {
 	vint64		stime;
@@ -880,7 +930,7 @@ leapsec_raw(
 	stime    = ntpcal_date_to_ntp64(&fts);
 	li.ttime = *ttime;
 	li.stime = ttime->D_s.lo - stime.D_s.lo;
-	li.total = (short)total;
+	li.taiof = (short)taiof;
 	li.dynls = (dynls != 0);
 	return add_range(pt, &li);
 }

@@ -1905,7 +1905,7 @@ clock_update(
 		sys_rootdisp = 0;
 		L_CLR(&sys_reftime);
 		sys_jitter = LOGTOD(sys_precision);
-		leapsec = 0;
+		leapsec_reset_frame();
 		break;
 
 	/*
@@ -1950,12 +1950,12 @@ clock_update(
 			if (leap_vote_ins > leap_vote_del
 			    && leap_vote_ins > sys_survivors / 2) {
 				get_systime(&now);
-				leapsec_add_dyn(now.l_ui, TRUE, NULL);
+				leapsec_add_dyn(TRUE, now.l_ui, NULL);
 			}
 			if (leap_vote_del > leap_vote_ins
 			    && leap_vote_del > sys_survivors / 2) {
 				get_systime(&now);
-				leapsec_add_dyn(now.l_ui, FALSE, NULL);
+				leapsec_add_dyn(FALSE, now.l_ui, NULL);
 			}
 		}
 		break;

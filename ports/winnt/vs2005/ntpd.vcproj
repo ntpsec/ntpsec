@@ -385,6 +385,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\ntpd\ntp_leapsec.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\ntpd\ntp_loopfilter.c"
 				>
 				<FileConfiguration
@@ -819,6 +823,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\include\ntp_io.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\ntpd\ntp_leapsec.h"
 				>
 			</File>
 			<File

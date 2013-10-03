@@ -40,7 +40,7 @@
 #define	TC_ERR	(-1)
 #endif
 
-static void check_leapsec(u_int32, const time_t*);
+static void check_leapsec(u_int32, const time_t*, int/*BOOL*/);
 
 /*
  * These routines provide support for the event timer.  The timer is
@@ -67,7 +67,8 @@ static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 static	u_long worker_idle_timer;/* next check for idle intres */
-u_long	leapsec;		/* leapseconds countdown */
+u_long	leapsec;	        /* seconds to next leap (proximity class) */
+int     leapdif;                /* TAI difference step at next leap second*/
 u_long	orphwait; 		/* orphan wait time */
 #ifdef AUTOKEY
 static	u_long revoke_timer;	/* keys revoke timer */
@@ -361,8 +362,18 @@ timer(void)
 	 * Leapseconds. Get time and defer to worker if either something
 	 * is imminent or every 8th second.
 	 */
-	if (leapsec > LSPROX_NOWARN || 0 == (now.l_ui & 7)) {
-		check_leapsec(now.l_ui, &tnow);
+	if (leapsec > LSPROX_NOWARN || 0 == (current_time & 7))
+		check_leapsec(now.l_ui, &tnow,
+                                (sys_leap == LEAP_NOTINSYNC));
+        if (sys_leap != LEAP_NOTINSYNC) {
+                if (leapsec >= LSPROX_ANNOUNCE && leapdif) {
+		        if (leapdif > 0)
+			        sys_leap = LEAP_ADDSECOND;
+		        else
+			        sys_leap = LEAP_DELSECOND;
+                } else {
+                        sys_leap = LEAP_NOWARNING;
+                }
 	}
 
 	/*
@@ -494,25 +505,24 @@ timer_clr_stats(void)
 
 static void
 check_leapsec(
-	u_int32        now ,
-	const time_t * tpiv)
+	u_int32        now  ,
+	const time_t * tpiv ,
+        int/*BOOL*/    reset)
 {
 	leap_result_t lsdata;
 	u_int32       lsprox;
 	
-#if defined(SYS_WINNT)
-	leapsec_electric(1); /* WinNT port has its own leap second handling */
-#elif defined(KERNEL_PLL)
+#ifndef SYS_WINNT  /* WinNT port has its own leap second handling */
+# ifdef KERNEL_PLL
 	leapsec_electric(pll_control && kern_enable);
-#else
+# else
 	leapsec_electric(0);
-#endif
-	
-	if (sys_leap == LEAP_NOTINSYNC)	{
+# endif
+#endif	
+	if (reset)	{
 		lsprox = LSPROX_NOWARN;
 		leapsec_reset_frame();
 		memset(&lsdata, 0, sizeof(lsdata));
-	
 	} else if (leapsec_query(&lsdata, now, tpiv)) {
 		/* Full hit. Eventually step the clock, but always
 		 * announce the leap event has happened.
@@ -538,10 +548,13 @@ check_leapsec(
 	 * to piping hot in one step. If things are already that wobbly,
 	 * we let the normal clock correction take over, even if a jump
 	 * is involved.
-	 */
+         * Also make sure the alarming events are edge-triggered, that is,
+         * ceated only when the threshold is crossed.
+         */
 	if (  (leapsec > 0 || lsprox < LSPROX_ALERT)
 	    && leapsec < lsprox                     ) {
-		if (lsprox >= LSPROX_SCHEDULE) {
+		if (  leapsec < LSPROX_SCHEDULE
+                   && lsprox >= LSPROX_SCHEDULE) {
 			if (lsdata.dynamic)
 				report_event(PEVNT_ARMED, sys_peer, NULL);
 			else
@@ -550,20 +563,15 @@ check_leapsec(
 		leapsec = lsprox;
 	}
 	if (leapsec > lsprox) {
-		if (lsprox < LSPROX_SCHEDULE) {
+		if (  leapsec >= LSPROX_SCHEDULE
+                   && lsprox   < LSPROX_SCHEDULE) {
 			report_event(EVNT_DISARMED, NULL, NULL);
 		}
 		leapsec = lsprox;
 	}
 
-	if (sys_leap != LEAP_NOTINSYNC) {
-		if (leapsec < LSPROX_ANNOUNCE)
-			lsdata.tai_diff = 0;
-		if (lsdata.tai_diff > 0)
-			sys_leap = LEAP_ADDSECOND;
-		else if (lsdata.tai_diff < 0)
-			sys_leap = LEAP_DELSECOND;
-		else
-			sys_leap = LEAP_NOWARNING;
-	}
+        if (leapsec >= LSPROX_SCHEDULE)
+                leapdif = lsdata.tai_diff;
+        else
+                leapdif = 0;
 }
