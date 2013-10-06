@@ -1,3 +1,5 @@
+* [Bug 2419] [rc-nmea] Improve clockstats reporting when receiver sends
+  data without valid GPS fix.
 (4.2.7p390) 2013/09/26 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2482] Cleanup of droproot and jail support for Solaris.
 (4.2.7p389) 2013/09/24 Released by Harlan Stenn <stenn@ntp.org>

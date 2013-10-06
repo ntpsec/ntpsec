@@ -308,9 +308,11 @@ static int	gpsfix_century	(struct calendar * jd, const gps_weektm * wd,
 				 u_short * ccentury);
 
 static int	nmead_open	(const char * device);
+static void     save_ltc        (struct refclockproc * const, const char * const,
+				 size_t);
 
 /*
- * If we want the friver to ouput sentences, too: re-enable the send
+ * If we want the driver to ouput sentences, too: re-enable the send
  * support functions by defining NMEA_WRITE_SUPPORT to non-zero...
  */
 #if NMEA_WRITE_SUPPORT
@@ -869,7 +871,7 @@ nmea_receive(
 	switch (sentence) {
 
 	case NMEA_GPRMC:
-		/*Check quality byte, fetch data & time */
+		/* Check quality byte, fetch data & time */
 		rc_time	 = parse_time(&date, &tofs.tv_nsec, &rdata, 1);
 		pp->leap = parse_qual(&rdata, 2, 'A', 0);
 		rc_date	 = parse_date(&date, &rdata, 9, DATE_1_DDMMYY)
@@ -932,20 +934,20 @@ nmea_receive(
 	}
 
 	/* Check sanity of time-of-day. */
-	if (rc_time == 0) {	/* no time or conversion error? */
-		refclock_report(peer, CEVNT_BADTIME);
-		up->tally.bad++;
-		return;
-	}
+	if (rc_time == 0)	/* no time or conversion error? */
+		checkres = CEVNT_BADTIME;
 	/* Check sanity of date. */
-	if (rc_date == 0) {	/* no date or conversion error? */
-		refclock_report(peer, CEVNT_BADDATE);
-		up->tally.bad++;
-		return;
-	}
+	else if (rc_date == 0)	/* no date or conversion error? */
+		checkres = CEVNT_BADDATE;
 	/* check clock sanity; [bug 2143] */
-	if (pp->leap == LEAP_NOTINSYNC) {	/* no good status? */
-		refclock_report(peer, CEVNT_BADREPLY);
+	else if (pp->leap == LEAP_NOTINSYNC)	/* no good status? */
+		checkres = CEVNT_BADREPLY;
+	else
+		checkres = -1;
+
+	if (checkres != -1) {
+		save_ltc(pp, rd_lastcode, rd_lencode);
+		refclock_report(peer, checkres);
 		up->tally.bad++;
 		return;
 	}
@@ -971,6 +973,7 @@ nmea_receive(
 	rd_reftime = tspec_intv_to_lfp(tofs);
 	rd_reftime.l_ui += caltontp(&date);
 	if (L_ISEQU(&up->last_reftime, &rd_reftime)) {
+		/* Do not touch pp->a_lastcode on purpose! */
 		up->tally.filtered++;
 		return;
 	}
@@ -980,15 +983,9 @@ nmea_receive(
 	DPRINTF(1, ("%s using '%s'\n",
 		    refnumtoa(&peer->srcadr), rd_lastcode));
 
-	/* Data looks good and will be accepted */
+	/* Data will be accepted. Update stats & log data. */
 	up->tally.good++;
-
-	/* Store data for statistical purposes... */
-	if (rd_lencode >= sizeof(pp->a_lastcode))
-		rd_lencode = sizeof(pp->a_lastcode) - 1;
-	pp->lencode = (u_short)rd_lencode;
-	memcpy(pp->a_lastcode, rd_lastcode, rd_lencode);
-	pp->a_lastcode[rd_lencode] = '\0';
+	save_ltc(pp, rd_lastcode, rd_lencode);
 	pp->lastrec = rd_timestamp;
 
 #ifdef HAVE_PPSAPI
@@ -1099,6 +1096,25 @@ nmea_poll(
 		record_clock_stats(&peer->srcadr, pp->a_lastcode);
 	}
 	ZERO(up->tally);
+}
+
+/*
+ * -------------------------------------------------------------------
+ * Save the last timecode string, making sure it's properly truncated
+ * if necessary and NUL terminated in any case.
+ */
+static void
+save_ltc(
+	struct refclockproc * const pp,
+	const char * const          tc,
+	size_t                      len
+	)
+{
+	if (len >= sizeof(pp->a_lastcode))
+		len = sizeof(pp->a_lastcode) - 1;
+	pp->lencode = (u_short)len;
+	memcpy(pp->a_lastcode, tc, len);
+	pp->a_lastcode[len] = '\0';
 }
 
 
