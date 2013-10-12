@@ -1,3 +1,4 @@
+(4.2.7p391) 2013/10/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2250] Rework of leap second handling machine.
 * [Bug 2419] [rc-nmea] Improve clockstats reporting when receiver sends
   data without valid GPS fix.
