@@ -187,6 +187,7 @@ esac
 
 # HMS: a check for -lnsl used to be here - now being done in NTP_LIBNTP
 AC_SEARCH_LIBS([openlog], [gen syslog])
+# XXX library list will be in ac_cv_search_openlog
 
 NTP_FACILITYNAMES
 
@@ -207,6 +208,9 @@ case "$host" in
     # HMS: Make sure we check for -lrt for clock_* before this...
     AC_CHECK_LIB([rt], [sched_setscheduler], [],
 	[AC_CHECK_LIB([posix4], [sched_setscheduler])])
+    # XXX: Should we convert the above to AC_SEARCH_LIBS()?
+    # results of AC_CHECK_LIB in ac_cv_lib_rt_sched_setscheduler
+    # and ac_cv_lib_posix4_sched_setscheduler
     ;;
 esac
 
@@ -223,6 +227,7 @@ AC_CHECK_HEADER(
 case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
  yes)
     LIBS="-ldns_sd $LIBS"
+    # XXX
 esac
 AC_CHECK_HEADERS([fcntl.h ieeefp.h inttypes.h kvm.h math.h])
 
@@ -360,7 +365,9 @@ case "$have_adjtimex" in
     saved_LIBS="$LIBS"
     LIBS=
     AC_SEARCH_LIBS([nlist], [elf ld mld])
+    # XXX ac_cv_search_nlist will be 'none required', 'no', or '-l...'
     AC_SEARCH_LIBS([kvm_open], [kvm])	dnl We already know about -lelf here...
+    # XXX ac_cv_search_kvm_open will be 'none required', 'no', or '-l...'
     AC_CHECK_HEADERS([nlist.h sys/var.h])
     case "$ac_cv_header_nlist_h" in
      yes)
@@ -709,6 +716,7 @@ esac
 saved_LIBS="$LIBS"
 LIBS="$LIBS $LDADD_LIBNTP"
 AC_CHECK_FUNCS([daemon])
+# XXX if we keep everything in LIBS and also keep separate lists, this simplifies.
 LIBS="$saved_LIBS"
 AS_UNSET([saved_LIBS])
 
@@ -721,6 +729,7 @@ AC_CHECK_FUNCS(
 	[
 	    AC_MSG_CHECKING([for isfinite with <math.h>])
 	    _libs=$LIBS
+	    # XXX
 	    LIBS="$LIBS -lm"
 	    AC_LINK_IFELSE(
 		[AC_LANG_PROGRAM(

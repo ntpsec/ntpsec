@@ -107,7 +107,9 @@ AM_COND_IF(
 
 dnl NTP_LIBNTP checks for inet_XtoY
 dnl AC_SEARCH_LIBS([inet_pton], [nsl])
-AC_SEARCH_LIBS([openlog], [gen syslog])
+
+dnl AC_SEARCH_LIBS([openlog], [gen syslog])
+HMS_SEARCH_LIBS([LIB_SYSLOG], [openlog], [gen syslog])
 
 # Checks for header files.
 AC_CHECK_HEADERS([netdb.h string.h strings.h syslog.h])
@@ -133,6 +135,9 @@ AC_CHECK_FUNCS([socket])
 # HMS: if we don't find c++ we should not look for gtest.
 AC_PROG_CXX
 NTP_GOOGLETEST
+
+# All libraries should be in various LIB_* variables now. 
+LIBS=
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([include/Makefile])
