@@ -756,7 +756,7 @@ esac
 
 case "$host" in
  *-*-sco3.2v5.0.*)
-    # Just stubs.  Idiots.
+    # Just stubs.  Sigh.
     ;;
  *) AC_CHECK_FUNCS([mkstemp])
     ;;
@@ -764,20 +764,20 @@ esac
 AC_CHECK_FUNCS([mktime])
 case "$host" in
  *-*-aix[[456]]*)
-    # Just a stub.  Idiots.
+    # Just a stub.  Sigh.
     ;;
  *-*-irix[[45]]*)
-    # Just a stub in "old" Irix.  Idiots.
+    # Just a stub in "old" Irix.  Sigh.
     ;;
 # In the belief that the fix for bug 1223 fixes mlockall() under linux...
 # *-*-*linux*)
 #    # there, but more trouble than it is worth for now (resolver problems)
 #    ;;
  *-*-qnx*)
-    # Apparently there but not working in QNX.  Idiots?
+    # Apparently there but not working in QNX.  Sigh?
     ;;
  *-*-sco3.2v5.0.*)
-    # Just a stub.  Idiots.
+    # Just a stub.  Sigh.
     ;;
  alpha*-dec-osf4*|alpha*-dec-osf5*)
     # mlockall is there, as a #define calling memlk via <sys/mman.h>
@@ -791,10 +791,10 @@ esac
 AC_CHECK_FUNCS([nice plock pututline pututxline readlink rtprio])
 case "$host" in
  *-*-aix[[456]]*)
-    # Just a stub in AIX 4.  Idiots.
+    # Just a stub in AIX 4.  Sigh.
     ;;
  *-*-solaris2.5*)
-    # Just stubs in solaris2.5.  Idiots.
+    # Just stubs in solaris2.5.  Sigh.
     ;;
  *) AC_CHECK_FUNCS([sched_setscheduler])
     ;;
@@ -803,16 +803,16 @@ AC_CHECK_FUNCS([setlinebuf setpgid setpriority setsid setvbuf])
 AC_CHECK_FUNCS([strdup strerror setrlimit strchr])
 case "$host" in
  *-*-aix[[456]]*)
-    # Just stubs.  Idiots.
+    # Just stubs.  Sigh.
     ;;
  *-*-netbsd1*)
-    # Just stubs.  Idiots.
+    # Just stubs.  Sigh.
     ;;
  *-*-netbsdelf1*)
-    # Just stubs.  Idiots.
+    # Just stubs.  Sigh.
     ;;
  *-*-openbsd*)
-    # Just stubs.  Idiots.
+    # Just stubs.  Sigh.
     ;;
  *)
     AC_CHECK_FUNCS([timer_create])
@@ -1229,7 +1229,7 @@ AC_CACHE_CHECK(
     [ntp_cv_func_ctty_for_f_setown],
     [
 	case "$host" in
-	 *-*-bsdi[23]*)
+	 *-*-bsdi[[23]]*)
 	    ans=yes
 	    ;;
 	 *-*-freebsd*)
@@ -1239,10 +1239,10 @@ AC_CACHE_CHECK(
 	# while later versions will fail a ioctl(TIOCSCTTY, 0) call in
 	# some cases and so should not have USE_FSETOWNCTTY.  "netbsd"
 	# in $host may be followed by "aout", "ecoff", or "elf".
-	 *-*-netbsd*[a-z]3.[0-8]*|*-*-netbsd*[a-z][0-2].*|*-*-netbsd*[a-z]3.99.[0-7])
+	 *-*-netbsd*[[a-z]]3.[[0-8]]*|*-*-netbsd*[[a-z]][[0-2]].*|*-*-netbsd*[[a-z]]3.99.[[0-7]])
 	    ans=yes
 	    ;;
-	 *-*-netbsd3.[0-8]*|*-*-netbsd[0-2].*|*-*-netbsd3.99.[0-7])
+	 *-*-netbsd3.[[0-8]]*|*-*-netbsd[[0-2]].*|*-*-netbsd3.99.[[0-7]])
 	    ans=yes
 	    ;;
 	 *-*-openbsd*)
