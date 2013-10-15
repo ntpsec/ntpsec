@@ -763,7 +763,8 @@ case "$host" in
 esac
 AC_CHECK_FUNCS([mktime])
 case "$host" in
- *-*-aix[[456]]*)
+ *-*-aix[[4-9]]*)
+    # XXX only verified thru AIX6.
     # Just a stub.  Sigh.
     ;;
  *-*-irix[[45]]*)
@@ -790,7 +791,8 @@ case "$host" in
 esac
 AC_CHECK_FUNCS([nice plock pututline pututxline readlink rtprio])
 case "$host" in
- *-*-aix[[456]]*)
+ *-*-aix[[4-9]]*)
+    # XXX only verified thru AIX6.
     # Just a stub in AIX 4.  Sigh.
     ;;
  *-*-solaris2.5*)
@@ -802,7 +804,8 @@ esac
 AC_CHECK_FUNCS([setlinebuf setpgid setpriority setsid setvbuf])
 AC_CHECK_FUNCS([strdup strerror setrlimit strchr])
 case "$host" in
- *-*-aix[[456]]*)
+ *-*-aix[[4-9]]*)
+    # XXX only verified thru AIX6.
     # Just stubs.  Sigh.
     ;;
  *-*-netbsd1*)
@@ -3142,7 +3145,8 @@ case "$host" in
  *-fujitsu-uxp*)
     ans=yes
     ;;
- *-ibm-aix[[456]]*)
+ *-ibm-aix[[4-9]]*)
+    # XXX only verified thru AIX6.
     ans=yes
     ;;
  *-*-*linux*)
@@ -3199,7 +3203,8 @@ AC_CACHE_CHECK(
 	 *-hp-hpux*)
 	    ans=old_tick
 	    ;;
-	 *-ibm-aix[[3456]]*)
+	 *-ibm-aix[[3-9]]*)
+	    # XXX only verified thru AIX6.
 	    ans=no
 	    ;;
 	 *-*-mpeix*)
