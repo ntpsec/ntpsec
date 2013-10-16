@@ -10,24 +10,24 @@
 
 /* gregorian calendar date */
 struct calendar {
-	u_short year;		/* year (A.D.) */
-	u_short yearday;	/* day of year, 1 = January 1 */
-	u_char month;		/* month, 1 = January */
-	u_char monthday;	/* day of month */
-	u_char hour;		/* hour of day, midnight = 0 */
-	u_char minute;		/* minute of hour */
-	u_char second;		/* second of minute */
-	u_char weekday;		/* 0..7, 0=Sunday */
+	uint16_t year;		/* year (A.D.) */
+	uint16_t yearday;	/* day of year, 1 = January 1 */
+	uint8_t month;		/* month, 1 = January */
+	uint8_t monthday;	/* day of month */
+	uint8_t hour;		/* hour of day, midnight = 0 */
+	uint8_t minute;		/* minute of hour */
+	uint8_t second;		/* second of minute */
+	uint8_t weekday;	/* 0..7, 0=Sunday */
 };
 
 /* ISO week calendar date */
 struct isodate {
-	u_short year;		/* year (A.D.) */
-	u_char	week;		/* 1..53, week in year */
-	u_char	weekday;	/* 1..7, 1=Monday */
-	u_char	hour;		/* hour of day, midnight = 0 */
-	u_char	minute;		/* minute of hour */
-	u_char	second;		/* second of minute */
+	uint16_t	year;	/* year (A.D.) */
+	uint8_t	week;		/* 1..53, week in year */
+	uint8_t	weekday;	/* 1..7, 1=Monday */
+	uint8_t	hour;		/* hour of day, midnight = 0 */
+	uint8_t	minute;		/* minute of hour */
+	uint8_t	second;		/* second of minute */
 };
 
 /* general split representation */

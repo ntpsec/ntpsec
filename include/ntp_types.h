@@ -1,5 +1,10 @@
 /*
  *  ntp_types.h - defines how int32 and u_int32 are treated.
+ *
+ * New style: Make sure C99 fixed width integer types are available:
+ * intN_t and uintN_t
+
+ * Old style: defines how int32 and u_int32 are treated.
  *  For 64 bit systems like the DEC Alpha, they have to be defined
  *  as int and u_int.
  *  For 32 bit systems, define them as long and u_long
@@ -164,10 +169,10 @@ typedef unsigned long long u_int64;
 typedef union {
 #   ifdef WORDS_BIGENDIAN
 	struct {
-		short	hh; u_short hl; u_short lh; u_short ll;
+		int16_t	hh; uint16_t hl; uint16_t lh; uint16_t ll;
 	} w_s;
 	struct {
-		u_short	hh; u_short hl; u_short lh; u_short ll;
+		uint16_t hh; uint16_t hl; uint16_t lh; uint16_t ll;
 	} W_s;
 	struct {
 		  int32 hi; u_int32 lo;
@@ -177,10 +182,10 @@ typedef union {
 	} D_s;
 #   else
 	struct {
-		u_short ll; u_short lh; u_short hl;   short hh;
+		uint16_t ll; uint16_t lh; uint16_t hl;   int16_t hh;
 	} w_s;
 	struct {
-		u_short ll; u_short lh; u_short hl; u_short hh;
+		uint16_t ll; uint16_t lh; uint16_t hl; uint16_t hh;
 	} W_s;
 	struct {
 		u_int32 lo;   int32 hi;
@@ -197,13 +202,13 @@ typedef union {
 } vint64; /* variant int 64 */
 
 
-typedef u_char		ntp_u_int8_t;
-typedef u_short		ntp_u_int16_t;
-typedef u_int32		ntp_u_int32_t;
+typedef uint8_t		ntp_u_int8_t;
+typedef uint16_t	ntp_u_int16_t;
+typedef uint32_t	ntp_u_int32_t;
 
 typedef struct ntp_uint64_t { u_int32 val[2]; } ntp_uint64_t;
 
-typedef u_short		associd_t; /* association ID */
+typedef uint16_t	associd_t; /* association ID */
 #define ASSOCID_MAX	USHRT_MAX
 typedef u_int32 keyid_t;	/* cryptographic key ID */
 #define KEYID_T_MAX	(0xffffffff)
