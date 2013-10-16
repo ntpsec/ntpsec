@@ -1,3 +1,4 @@
+(4.2.7p393) 2013/10/16 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2272] Use C99 integer types. ntp_calendar.h and ntp_types.h .
 (4.2.7p392) 2013/10/15 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2375] Improve AIX compatibility.
