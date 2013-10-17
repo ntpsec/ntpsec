@@ -55,7 +55,8 @@ case "$ac_busted_vpath_in_make$srcdir" in
 esac
 
 case "$host" in
- *-*-aix[[456]]*)
+ *-*-aix[[4-9]]*)
+	# XXX only verified thru AIX6
 	# (prr) aix 4.1 doesn't have clock_settime, but in aix 4.3 it's a stub
 	# (returning ENOSYS).  I didn't check 4.2.  If, in the future,
 	# IBM pulls its thumbs out long enough to implement clock_settime,
@@ -952,7 +953,8 @@ case "$ntp_cv_hdr_def_sigpoll" in
      *-sni-sysv*)
 	ans=no
 	;;
-     *-*-aix[[456]]*)
+     *-*-aix[[4-9]]*)
+	# XXX Only verified thru AIX6
 	ans=no
 	;;
      *-*-hpux*)
@@ -1010,7 +1012,8 @@ case "$ntp_cv_hdr_def_sigpoll" in
      *-sni-sysv*)
 	ans=no
 	;;
-     *-*-aix[[456]]*)
+     *-*-aix[[4-9]]*)
+	# XXX Only verified thru AIX6
 	ans=no
 	;;
      *-*-hpux*)

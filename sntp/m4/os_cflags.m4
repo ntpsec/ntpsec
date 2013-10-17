@@ -21,8 +21,13 @@ AC_DEFUN([NTP_OS_CFLAGS], [
 	    ntp_os_cflags="${ntp_os_cflags} -D_USE_IRS -D_MSGQSUPPORT"
 	    ;;
 	 aix*)
+	    # XXX Only verified thru AIX6.
+	    # aix7 seems to need a different XOPEN_SOURCE_EXTENDED thing.
 	    # avoid circular dependencies in yp headers
-	    ntp_os_cflags="-DHAVE_BAD_HEADERS -D_XOPEN_EXTENDED_SOURCE"
+	    # _XOPEN_SOURCE=500 = X/Open 5: POSIX 1995
+	    # _XOPEN_SOURCE=600 = X/Open 6: POSIX 2004
+	    # _XOPEN_SOURCE=700 = X/Open 7: POSIX 2008
+	    ntp_os_cflags="-DHAVE_BAD_HEADERS -D_XOPEN_SOURCE=600"
 	    ntp_os_cflags="${ntp_os_cflags} -D_USE_IRS"
 	    ;;
 	 amigaos)

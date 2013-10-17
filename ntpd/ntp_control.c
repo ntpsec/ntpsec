@@ -1708,13 +1708,13 @@ ctl_putsys(
 #ifdef KERNEL_PLL
 	static struct timex ntx;
 	static u_long ntp_adjtime_time;
-	static const double tscale =
+
+	static const double to_ms =
 # ifdef STA_NANO
-				1e-9;
+	    	1.0e-6; /* nsec to msec */
 # else
-				1e-6;
+		1.0e-3; /* usec to msec */
 # endif
-	static const double to_ms = 1e3 * tscale;
 
 	/*
 	 * CS_K_* variables depend on up-to-date output of ntp_adjtime()

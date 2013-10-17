@@ -1,4 +1,9 @@
 * [Bug 2256] Improve configure's function searches in libraries.
+(4.2.7p393) 2013/10/16 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2272] Use C99 integer types. ntp_calendar.h and ntp_types.h .
+(4.2.7p392) 2013/10/15 Released by Harlan Stenn <stenn@ntp.org>
+* [Bug 2375] Improve AIX compatibility.
+* [Bug 2490] Fixed non-const initializer coming from [Bug 2250] fix.
 (4.2.7p391) 2013/10/12 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2250] Rework of leap second handling machine.
 * [Bug 2419] [rc-nmea] Improve clockstats reporting when receiver sends
