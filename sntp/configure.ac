@@ -109,6 +109,8 @@ dnl NTP_LIBNTP checks for inet_XtoY
 dnl AC_SEARCH_LIBS([inet_pton], [nsl])
 
 dnl AC_SEARCH_LIBS([openlog], [gen syslog])
+LIB_SYSLOG=''
+AC_SUBST([LIB_SYSLOG])
 HMS_SEARCH_LIBS([LIB_SYSLOG], [openlog], [gen syslog])
 
 # Checks for header files.

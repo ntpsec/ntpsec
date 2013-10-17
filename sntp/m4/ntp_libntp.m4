@@ -63,7 +63,7 @@ case "$host" in
 	# instead to try to set the time to itself and check errno.
     ;;
  *)
-    AC_SEARCH_LIBS([clock_gettime], [rt])
+    HMS_SEARCH_LIBS([LDADD_LIBNTP], [clock_gettime], [rt])
     AC_CHECK_FUNCS([clock_getres clock_gettime clock_settime])
     ;;
 esac
@@ -209,8 +209,8 @@ AC_CHECK_HEADERS([netinet/ip.h netinet/in_var.h], [], [], [
 ])
 
 # HMS: Do we need to check for -lsocket before or after these tests?
-AC_SEARCH_LIBS([inet_pton], [nsl])
-AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lnsl])
+HMS_SEARCH_LIBS([LDADD_LIBNTP], [inet_pton], [nsl])
+HMS_SEARCH_LIBS([LDADD_LIBNTP], [inet_ntop], [resolv], , , [-lnsl])
 
 # [Bug 1628] On Solaris, we need -lxnet -lsocket.  Generalize this to
 # avoid keying on the OS name:  If we find socket functions in
@@ -219,11 +219,15 @@ AC_SEARCH_LIBS([inet_ntop], [resolv], , , [-lnsl])
 # functions there and never add libsocket.  See also [Bug 660]
 # http://bugs.ntp.org/show_bug.cgi?id=660#c9
 saved_LIBS=$LIBS
-AC_SEARCH_LIBS([setsockopt], [socket])
+HMS_SEARCH_LIBS([LDADD_LIBNTP], [setsockopt], [socket])
 case "$ac_cv_search_setsockopt" in
  -lsocket)
     LIBS="$saved_LIBS"
-    AC_SEARCH_LIBS([getsockopt], [xnet])
+    HMS_SEARCH_LIBS([LDADD_LIBNTP], [getsockopt], [xnet])
+    # XXX Possible trouble here - reading the comments above and looking at the
+    # code below I wonder if we'll add -lxnet when we don't need it.
+    # Also, do we need to add -lxnet to LDADD_LIBNTP, or perhaps see if it's
+    # there when it is not needed?
     case "$ac_cv_search_getsockopt" in
      -lxnet)
 	LIBS="-lxnet -lsocket $saved_LIBS"
