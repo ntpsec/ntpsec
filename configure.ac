@@ -206,29 +206,23 @@ case "$host" in
  *-*-osf5*) ;;
  *)
     # HMS: Make sure we check for -lrt for clock_* before this...
-    AC_CHECK_LIB([rt], [sched_setscheduler], [],
-	[AC_CHECK_LIB([posix4], [sched_setscheduler])])
-    # XXX: Should we convert the above to AC_SEARCH_LIBS()?
-    # results of AC_CHECK_LIB in ac_cv_lib_rt_sched_setscheduler
-    # and ac_cv_lib_posix4_sched_setscheduler
+    case "$ac_cv_search_clock_gettime" in
+     '') AC_MSG_ERROR([Internal Error: Haven't looed for clock_gettime() yet!]) ;;
+    esac
+    AC_SEARCH_LIBS([sched_setscheduler], [rt posix4])
     ;;
 esac
 
 AC_CHECK_HEADERS([bstring.h])
 AC_CHECK_HEADER(
     [dns_sd.h],
-    [AC_CHECK_LIB(
-	[dns_sd],
+    [AC_SEARCH_LIBS(
 	[DNSServiceRegister],
+	[dns_sd],
 	[AC_DEFINE([HAVE_DNSREGISTRATION], [1],
 	    [Use Rendezvous/DNS-SD registration])]
     )]
 )
-case "$ac_cv_lib_dns_sd_DNSServiceRegister" in
- yes)
-    LIBS="-ldns_sd $LIBS"
-    # XXX
-esac
 AC_CHECK_HEADERS([fcntl.h ieeefp.h inttypes.h kvm.h math.h])
 
 AC_CHECK_HEADERS([memory.h netdb.h poll.h])
