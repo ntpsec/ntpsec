@@ -139,7 +139,9 @@ AC_PROG_CXX
 NTP_GOOGLETEST
 
 # All libraries should be in various LIB_* variables now. 
-LIBS=
+#LIBS=
+# Sadly not.  There is a gettext() check somewhere, and on Solaris this pulls
+# in -lintl -lgen, outside our "scope".
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([include/Makefile])
