@@ -20,7 +20,7 @@
 
 void
 caljulian(
-	u_int32			ntp,
+	uint32_t		ntp,
 	struct calendar *	jt
 	)
 {

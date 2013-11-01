@@ -450,19 +450,14 @@ typedef unsigned long uintptr_t;
 #if defined(_MSC_VER)
 # define MISSING_INTTYPES_H         1  /* not provided by VS2012 and earlier */
 # define MISSING_STDBOOL_H          1  /* not provided by VS2012 and earlier */
-# if _MSC_VER < 1600
-#  define MISSING_STDINT_H          1  /* not provided before VS2010 */
-# endif
 #else
 /* add defines for non-MS compilers here, if required */
 #endif
 
 #if !defined(MISSING_INTTYPES_H)
 # define HAVE_INTTYPES_H            1
-# include <inttypes.h>
 #elif !defined(MISSING_STDINT_H)
 # define HAVE_STDINT_H              1
-# include <stdint.h>
 #elif !defined(ADDED_EXACT_SIZE_INTEGERS)
 # define ADDED_EXACT_SIZE_INTEGERS  1
   typedef __int8 int8_t;
