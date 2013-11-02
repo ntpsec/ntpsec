@@ -300,7 +300,10 @@ DevCtxAlloc(void)
 	devCtx = (DevCtx_t *)LocalPoolAlloc(sizeof(DevCtx_t), "DEV ctx");
 	if (devCtx != NULL)
 	{
-		devCtx->cov_count = ~0ul;
+		/* The initial COV values make sure there is no busy
+		 * loop on unused/empty slots.
+		 */
+		devCtx->cov_count = 0;
 		for (slot = 0; slot < PPS_QUEUE_LEN; slot++)
 			devCtx->pps_buff[slot].cov_count = ~slot;
 	}
@@ -770,7 +773,7 @@ OnSerialWaitComplete(
 	 * this code that makes a lot of sense: move to a putative
 	 * dcdpps-ppsapi-provider.dll.
 	 */
-	if ((EV_RLSD & lpo->com_events) && dev) {
+	if (EV_RLSD & lpo->com_events) {
 		modem_status = 0;
 		GetCommModemStatus((HANDLE)_get_osfhandle(rio->fd),
 				   &modem_status);
@@ -790,18 +793,17 @@ OnSerialWaitComplete(
 			}
 			/*
 			** Update PPS buffer, writing from low to high, with index
-			** update as last action. We need barriers to make sure that
-			** the compiler does not shuffle the assignments and that the
-			** data becomes visible to other threads in exactly that order.
-			** The lock-free read/write queue depends on that order!
+			** update as last action. We use interlocked ops and a
+			** volatile data destination to avoid reordering on compiler
+			** and CPU level. The interlocked instruction act as full
+			** barriers -- we need only release semantics, but we don't
+			** have them before VS2010.
 			*/
 			covc   = dev->cov_count + 1u;
 			ppsbuf = dev->pps_buff + (covc & PPS_QUEUE_MSK);
-			ppsbuf->cov_count = covc;
-			_WriteBarrier();
+			InterlockedExchange((PLONG)&ppsbuf->cov_count, covc);
 			ppsbuf->data = dev->pps_data;
 			InterlockedExchange((PLONG)&dev->cov_count, covc);
-			/* Note: InterlockedExchange() is a full barrier. */
 		}
 		/* perlinger@ntp.org, 2012-11-19
 		It can be argued that once you have the PPS API active, you can
@@ -810,15 +812,13 @@ OnSerialWaitComplete(
 		will give a nasty surprise for people which have until now happily
 		taken the pps hack for granted, and after the first complaint, I have
 		decided to keep the old implementation unconditionally. So here it is:
-		/*else*/ 
-		{
-			/* backward compat: 'usermode-pps-hack' */
-			if (MS_RLSD_ON & modem_status) {
-				lpo->DCDSTime = lpo->RecvTime;
-				lpo->flTsDCDS = 1;
-				DPRINTF(2, ("upps-hack: fd %d DCD PPS Rise at %s\n", rio->fd,
-					ulfptoa(&lpo->RecvTime, 6)));
-			}
+
+		/* backward compat: 'usermode-pps-hack' */
+		if (MS_RLSD_ON & modem_status) {
+			lpo->DCDSTime = lpo->RecvTime;
+			lpo->flTsDCDS = 1;
+			DPRINTF(2, ("upps-hack: fd %d DCD PPS Rise at %s\n", rio->fd,
+				ulfptoa(&lpo->RecvTime, 6)));
 		}
 	}
 
@@ -1275,21 +1275,21 @@ ntp_pps_read(
 	** a bit tricky, since we have to read the components in the
 	** opposite direction from the write, and the compiler must
 	** not reorder the read sequence.
-	** We use read barriers and a volatile data source to avoid
-	** reordering on compiler and CPU level.
+	** We use interlocked ops and a volatile data source to avoid
+	** reordering on compiler and CPU level. The interlocked
+	** instruction act as full barriers -- we need only aquire
+	** semantics, but we don't have them before VS2010.
 	*/
 	repc = 3;
 	do {
-		covc = dev->cov_count;
-		_ReadBarrier();
-		ppsbuf = dev->pps_buff + ((covc >> 1) & PPS_QUEUE_MSK);
+		InterlockedExchange((PLONG)&covc, dev->cov_count);
+		ppsbuf = dev->pps_buff + (covc & PPS_QUEUE_MSK);
 		*data = ppsbuf->data;
-		_ReadBarrier();
-		guard = covc ^ ppsbuf->cov_count;
-		_ReadBarrier();
-	} while ((guard != 0u) && ((guard & PPS_QUEUE_MSK) == 0u) && --repc);
+		InterlockedExchange((PLONG)&guard, ppsbuf->cov_count);
+		guard ^= covc;
+	} while (guard && ~guard && --repc);
 
-	if (guard != 0u) {
+	if (guard) {
 		SetLastError(ERROR_INVALID_DATA);
 		return FALSE;
 	}
