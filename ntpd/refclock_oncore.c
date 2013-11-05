@@ -3196,6 +3196,11 @@ oncore_msg_Gj(
 	size_t len
 	)
 {
+	static const char * insrem[2] = {
+		"removed",
+		"inserted"
+	};
+
 	int dt;
 	char *cp;
 
@@ -3213,12 +3218,24 @@ oncore_msg_Gj(
 		         (buf[13] + 256 * (buf[12] + 256 * buf[11]))),
 		     buf[15], buf[16], buf[17]);
 
+	/* There seems to be eternal confusion about when a leap second
+	 * takes place. It's the second *before* the new TAI offset
+	 * becomes effective. But since the ONCORE receiver tells us
+	 * just that, we would have to do some time/date calculations to
+	 * get the actual leap second -- that is, the one that is
+	 * deleted or inserted.
+	 *
+	 * Going through all this for a simple log is probably overkill,
+	 * so for fixing bug#1050 the message output is changed to
+	 * reflect the fact that it tells the second after the leap
+	 * second.
+	 */
 	if (dt)
 		oncore_log_f(instance, LOG_NOTICE,
-			     "Leap second (%d) scheduled for %d%s%d at %d:%d:%d",
-			      dt, buf[9], months[buf[8] - 1],
-			      256 * buf[6] + buf[7], buf[15], buf[16],
-			      buf[17]);
+			     "Leap second %s (%d) before %04u-%02u-%02u/%02u:%02u:%02u",
+			     insrem[(dt > 0)], dt,
+			     256u * buf[6] + buf[7], buf[8], buf[9],
+			     buf[15], buf[16], buf[17]);
 
 	/* Only raise warning within a month of the leap second */
 
