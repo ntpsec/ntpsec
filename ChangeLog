@@ -1,3 +1,4 @@
+(4.2.7p394) 2013/11/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1050] Change ONCORE log message for leap second announcement
   to avoid misunderstandings.
 * [Bug 2499] Win32 user-space/loopback ppsapi provider drops samples.
