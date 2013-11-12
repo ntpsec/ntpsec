@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntp-keygen.texi)
 #
-# It has been AutoGen-ed  November  5, 2013 at 11:36:26 AM by AutoGen 5.18.1pre5
+# It has been AutoGen-ed  November 12, 2013 at 11:29:47 AM by AutoGen 5.18.3pre5
 # From the definitions    ntp-keygen-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -908,7 +908,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p394
+ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p395
 Usage:  ntp-keygen [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
@@ -966,7 +966,7 @@ exit 0
 @cindex ntp-keygen-imbits
 
 This is the ``identity modulus bits'' option.
-This option takes an argument number @file{imbits}.
+This option takes a number argument @file{imbits}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -981,7 +981,7 @@ The number of bits in the identity modulus.  The default is 256.
 @cindex ntp-keygen-certificate
 
 This is the ``certificate scheme'' option.
-This option takes an argument string @file{scheme}.
+This option takes a string argument @file{scheme}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1003,7 +1003,7 @@ this option is RSA-MD5.
 @cindex ntp-keygen-cipher
 
 This is the ``privatekey cipher'' option.
-This option takes an argument string @file{cipher}.
+This option takes a string argument @file{cipher}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1080,7 +1080,7 @@ any that may exist.
 @cindex ntp-keygen-ident
 
 This is the ``set autokey group name'' option.
-This option takes an argument string @file{group}.
+This option takes a string argument @file{group}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1103,7 +1103,7 @@ issuer names in the form @code{host@group} and should match the
 @cindex ntp-keygen-lifetime
 
 This is the ``set certificate lifetime'' option.
-This option takes an argument number @file{lifetime}.
+This option takes a number argument @file{lifetime}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1124,7 +1124,7 @@ Generate MD5 keys, obsoleting any that may exist.
 @cindex ntp-keygen-modulus
 
 This is the ``modulus'' option.
-This option takes an argument number @file{modulus}.
+This option takes a number argument @file{modulus}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1154,7 +1154,7 @@ public certificates.
 @cindex ntp-keygen-pvt-passwd
 
 This is the ``output private password'' option.
-This option takes an argument string @file{passwd}.
+This option takes a string argument @file{passwd}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1170,7 +1170,7 @@ password and the cipher selected with @code{-C/--cipher}.
 @cindex ntp-keygen-get-pvt-passwd
 
 This is the ``input private password'' option.
-This option takes an argument string @file{passwd}.
+This option takes a string argument @file{passwd}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1185,7 +1185,7 @@ Set the password for reading files to the specified password.
 @cindex ntp-keygen-sign-key
 
 This is the ``generate sign key (rsa or dsa)'' option.
-This option takes an argument string @file{sign}.
+This option takes a string argument @file{sign}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1202,7 +1202,7 @@ sign key.
 @cindex ntp-keygen-subject-name
 
 This is the ``set host and optionally group name'' option.
-This option takes an argument string @file{host@@group}.
+This option takes a string argument @file{host@@group}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1241,7 +1241,7 @@ a non-trusted certificate.
 @cindex ntp-keygen-mv-params
 
 This is the ``generate <num> mv parameters'' option.
-This option takes an argument number @file{num}.
+This option takes a number argument @file{num}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -1257,7 +1257,7 @@ identification scheme.
 @cindex ntp-keygen-mv-keys
 
 This is the ``update <num> mv keys'' option.
-This option takes an argument number @file{num}.
+This option takes a number argument @file{num}.
 
 @noindent
 This option has some usage constraints.  It:

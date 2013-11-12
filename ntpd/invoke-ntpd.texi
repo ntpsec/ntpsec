@@ -6,7 +6,7 @@
 #
 # EDIT THIS FILE WITH CAUTION  (invoke-ntpd.texi)
 #
-# It has been AutoGen-ed  November  5, 2013 at 11:34:41 AM by AutoGen 5.18.1pre5
+# It has been AutoGen-ed  November 12, 2013 at 11:28:33 AM by AutoGen 5.18.3pre5
 # From the definitions    ntpd-opts.def
 # and the template file   agtexi-cmd.tpl
 @end ignore
@@ -141,7 +141,7 @@ with a status code of 0.
 
 @exampleindent 0
 @example
-ntpd - NTP daemon program - Ver. 4.2.7p394
+ntpd - NTP daemon program - Ver. 4.2.7p395
 Usage:  ntpd [ -<flag> [<val>] | --<name>[@{=| @}<val>] ]... \
                 [ <server1> ... <serverN> ]
   Flg Arg Option-Name    Description
@@ -285,7 +285,7 @@ This is almost never a good idea.
 @cindex ntpd-configfile
 
 This is the ``configuration file name'' option.
-This option takes an argument string.
+This option takes a string argument.
 The name and path of the configuration file,
 @file{/etc/ntp.conf}
 by default.
@@ -294,7 +294,7 @@ by default.
 @cindex ntpd-driftfile
 
 This is the ``frequency drift file name'' option.
-This option takes an argument string.
+This option takes a string argument.
 The name and path of the frequency file,
 @file{/etc/ntp.drift}
 by default.
@@ -333,7 +333,7 @@ configuration file directive for other options.
 @cindex ntpd-jaildir
 
 This is the ``jail directory'' option.
-This option takes an argument string.
+This option takes a string argument.
 
 @noindent
 This option has some usage constraints.  It:
@@ -359,7 +359,7 @@ This option is supported under NetBSD (configure with
 @cindex ntpd-interface
 
 This is the ``listen on an interface name or address'' option.
-This option takes an argument string @file{iface}.
+This option takes a string argument @file{iface}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -378,7 +378,7 @@ This option is deprecated. Please consider using the configuration file
 @cindex ntpd-keyfile
 
 This is the ``path to symmetric keys'' option.
-This option takes an argument string.
+This option takes a string argument.
 Specify the name and path of the symmetric key file.
 @file{/etc/ntp.keys}
 is the default.
@@ -390,7 +390,7 @@ configuration file directive.
 @cindex ntpd-logfile
 
 This is the ``path to the log file'' option.
-This option takes an argument string.
+This option takes a string argument.
 Specify the name and path of the log file.
 The default is the system log file.
 This is the same operation as the
@@ -434,7 +434,7 @@ at the highest priority.
 @cindex ntpd-pidfile
 
 This is the ``path to the pid file'' option.
-This option takes an argument string.
+This option takes a string argument.
 Specify the name and path of the file used to record
 @code{ntpd}'s
 process ID.
@@ -446,7 +446,7 @@ configuration file directive.
 @cindex ntpd-priority
 
 This is the ``process priority'' option.
-This option takes an argument number.
+This option takes a number argument.
 To the extent permitted by the operating system, run
 @code{ntpd}
 at the specified
@@ -482,14 +482,14 @@ Note: The kernel time discipline is disabled with this option.
 @cindex ntpd-propagationdelay
 
 This is the ``broadcast/propagation delay'' option.
-This option takes an argument string.
+This option takes a string argument.
 Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol.
 @node ntpd saveconfigquit
 @subsection saveconfigquit option
 @cindex ntpd-saveconfigquit
 
 This is the ``save parsed configuration and quit'' option.
-This option takes an argument string.
+This option takes a string argument.
 
 @noindent
 This option has some usage constraints.  It:
@@ -509,7 +509,7 @@ designed for automated testing.
 @cindex ntpd-statsdir
 
 This is the ``statistics file location'' option.
-This option takes an argument string.
+This option takes a string argument.
 Specify the directory path for files created by the statistics facility.
 This is the same operation as the
 @code{statsdir} @kbd{statsdir}
@@ -519,7 +519,7 @@ configuration file directive.
 @cindex ntpd-trustedkey
 
 This is the ``trusted key number'' option.
-This option takes an argument string @file{tkey}.
+This option takes a string argument @file{tkey}.
 
 @noindent
 This option has some usage constraints.  It:
@@ -534,7 +534,7 @@ Add the specified key number to the trusted key list.
 @cindex ntpd-user
 
 This is the ``run as userid (or userid:groupid)'' option.
-This option takes an argument string.
+This option takes a string argument.
 
 @noindent
 This option has some usage constraints.  It:
@@ -554,7 +554,7 @@ This option is supported under NetBSD (configure with
 @cindex ntpd-updateinterval
 
 This is the ``interval in seconds between scans for new or dropped interfaces'' option.
-This option takes an argument number.
+This option takes a number argument.
 Give the time in seconds between two scans for new or dropped interfaces.
 For systems with routing socket support the scans will be performed shortly after the interface change
 has been detected by the system.
@@ -564,7 +564,7 @@ Use 0 to disable scanning. 60 seconds is the minimum time between scans.
 @cindex ntpd-wait-sync
 
 This is the ``seconds to wait for first clock sync'' option.
-This option takes an argument number.
+This option takes a number argument.
 
 @noindent
 This option has some usage constraints.  It:
@@ -624,7 +624,7 @@ used directly, saving the overhead of a system call.
 @cindex ntpd-pccfreq
 
 This is the ``force cpu cycle counter use (windows only)'' option.
-This option takes an argument string.
+This option takes a string argument.
 
 @noindent
 This option has some usage constraints.  It:

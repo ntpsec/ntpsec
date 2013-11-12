@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntp-keygen-opts.c)
  *
- *  It has been AutoGen-ed  November  5, 2013 at 11:36:09 AM by AutoGen 5.18.1pre5
+ *  It has been AutoGen-ed  November 12, 2013 at 11:29:34 AM by AutoGen 5.18.3pre5
  *  From the definitions    ntp-keygen-opts.def
  *  and the template file   options
  *
@@ -72,7 +72,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntp-keygen options
  */
 static char const ntp_keygen_opt_strs[2357] =
-/*     0 */ "ntp-keygen (ntp) 4.2.7p394\n"
+/*     0 */ "ntp-keygen (ntp) 4.2.7p395\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -163,14 +163,14 @@ static char const ntp_keygen_opt_strs[2357] =
 /*  2136 */ "no-load-opts\0"
 /*  2149 */ "no\0"
 /*  2152 */ "NTP_KEYGEN\0"
-/*  2163 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p394\n"
+/*  2163 */ "ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p395\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n\0"
 /*  2279 */ "$HOME\0"
 /*  2285 */ ".\0"
 /*  2287 */ ".ntprc\0"
 /*  2294 */ "http://bugs.ntp.org, bugs@ntp.org\0"
 /*  2328 */ "\n\0"
-/*  2330 */ "ntp-keygen (ntp) 4.2.7p394";
+/*  2330 */ "ntp-keygen (ntp) 4.2.7p395";
 
 /**
  *  imbits option description:
@@ -623,7 +623,7 @@ static char const ntp_keygen_opt_strs[2357] =
 #else /* not AUTOKEY */
 # define doOptModulus NULL
 #endif /* def/not AUTOKEY */
-/* extracted from optmain.tlib near line 745 */
+/* extracted from optmain.tlib near line 723 */
 
 #if defined(TEST_NTP_KEYGEN_OPTS)
 /*
@@ -1036,6 +1036,7 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
     ex_code = NTP_KEYGEN_EXIT_SUCCESS;
     optionUsage(&ntp_keygenOptions, ex_code);
     /* NOTREACHED */
+    exit(1);
     (void)opts;
     (void)od;
 }
@@ -1164,7 +1165,7 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* TEST_NTP_KEYGEN_OPTS END-TEST-MAIN-PROCEDURE */
-/* extracted from optmain.tlib near line 1266 */
+/* extracted from optmain.tlib near line 1245 */
 
 /**
  * The directory containing the data associated with ntp-keygen.
@@ -1364,7 +1365,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntp_keygenOptions.pzCopyright */
-  puts(_("ntp-keygen (ntp) 4.2.7p394\n\
+  puts(_("ntp-keygen (ntp) 4.2.7p395\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -1462,14 +1463,14 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntp_keygenOptions.pzUsageTitle */
-  puts(_("ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p394\n\
+  puts(_("ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p395\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]...\n"));
 
   /* referenced via ntp_keygenOptions.pzExplain */
   puts(_("\n"));
 
   /* referenced via ntp_keygenOptions.pzFullVersion */
-  puts(_("ntp-keygen (ntp) 4.2.7p394"));
+  puts(_("ntp-keygen (ntp) 4.2.7p395"));
 
   /* referenced via ntp_keygenOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));

@@ -1,7 +1,7 @@
 /*
  *  EDIT THIS FILE WITH CAUTION  (ntpq-opts.c)
  *
- *  It has been AutoGen-ed  November  5, 2013 at 11:35:20 AM by AutoGen 5.18.1pre5
+ *  It has been AutoGen-ed  November 12, 2013 at 11:29:03 AM by AutoGen 5.18.3pre5
  *  From the definitions    ntpq-opts.def
  *  and the template file   options
  *
@@ -69,7 +69,7 @@ extern FILE * option_usage_fp;
  *  static const strings for ntpq options
  */
 static char const ntpq_opt_strs[1833] =
-/*     0 */ "ntpq 4.2.7p394\n"
+/*     0 */ "ntpq 4.2.7p395\n"
             "Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n"
             "This is free software. It is licensed for use, modification and\n"
             "redistribution under the terms of the NTP License, copies of which\n"
@@ -125,13 +125,13 @@ static char const ntpq_opt_strs[1833] =
 /*  1627 */ "no-load-opts\0"
 /*  1640 */ "no\0"
 /*  1643 */ "NTPQ\0"
-/*  1648 */ "ntpq - standard NTP query program - Ver. 4.2.7p394\n"
+/*  1648 */ "ntpq - standard NTP query program - Ver. 4.2.7p395\n"
             "Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n\0"
 /*  1769 */ "$HOME\0"
 /*  1775 */ ".\0"
 /*  1777 */ ".ntprc\0"
 /*  1784 */ "http://bugs.ntp.org, bugs@ntp.org\0"
-/*  1818 */ "ntpq 4.2.7p394";
+/*  1818 */ "ntpq 4.2.7p395";
 
 /**
  *  ipv4 option description with
@@ -292,7 +292,7 @@ static int const aInteractiveCantList[] = {
 /**
  *  Declare option callback procedures
  */
-/* extracted from optmain.tlib near line 745 */
+/* extracted from optmain.tlib near line 723 */
 
 #if defined(TEST_NTPQ_OPTS)
 /*
@@ -568,6 +568,7 @@ doUsageOpt(tOptions * opts, tOptDesc * od)
     ex_code = NTPQ_EXIT_SUCCESS;
     optionUsage(&ntpqOptions, ex_code);
     /* NOTREACHED */
+    exit(1);
     (void)opts;
     (void)od;
 }
@@ -622,7 +623,7 @@ main(int argc, char ** argv)
     return res;
 }
 #endif  /* TEST_NTPQ_OPTS END-TEST-MAIN-PROCEDURE */
-/* extracted from optmain.tlib near line 1266 */
+/* extracted from optmain.tlib near line 1245 */
 
 /**
  * The directory containing the data associated with ntpq.
@@ -821,7 +822,7 @@ static void bogus_function(void) {
      translate option names.
    */
   /* referenced via ntpqOptions.pzCopyright */
-  puts(_("ntpq 4.2.7p394\n\
+  puts(_("ntpq 4.2.7p395\n\
 Copyright (C) 1970-2013 The University of Delaware, all rights reserved.\n\
 This is free software. It is licensed for use, modification and\n\
 redistribution under the terms of the NTP License, copies of which\n\
@@ -883,11 +884,11 @@ provided \"as is\" without express or implied warranty.\n"));
   puts(_("load options from a config file"));
 
   /* referenced via ntpqOptions.pzUsageTitle */
-  puts(_("ntpq - standard NTP query program - Ver. 4.2.7p394\n\
+  puts(_("ntpq - standard NTP query program - Ver. 4.2.7p395\n\
 Usage:  %s [ -<flag> [<val>] | --<name>[{=| }<val>] ]... [ host ...]\n"));
 
   /* referenced via ntpqOptions.pzFullVersion */
-  puts(_("ntpq 4.2.7p394"));
+  puts(_("ntpq 4.2.7p395"));
 
   /* referenced via ntpqOptions.pzFullUsage */
   puts(_("<<<NOT-FOUND>>>"));
