@@ -1,3 +1,4 @@
+* Upgrade to autogen-5.18.3pre5 and libopts-40.1.15.
 (4.2.7p394) 2013/11/05 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 1050] Change ONCORE log message for leap second announcement
   to avoid misunderstandings.
