@@ -3739,7 +3739,7 @@ input_handler(
     ih_return:
 	if (check_leapfile < time(NULL)) {
 		check_leapfile += CHECK_LEAP_EVERY;
-		check_leap_file();
+		(void)check_leap_file();
 	}
 	return;
 }

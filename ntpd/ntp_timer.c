@@ -423,19 +423,27 @@ timer(void)
 		stats_timer += HOUR;
 		write_stats();
 		if (sys_tai != 0 && leapsec_expired(now.l_ui, &tnow)) {
-			report_event(EVNT_LEAPVAL, NULL, NULL);
-			if (leap_warn_log == FALSE) {
+			int clf = check_leap_file();
+
+			/*
+			** check_leap_file() returns -1 on a problem,
+			** 0 on an expired leapsecond file, or the number
+			** of days until the leapsecond file expires.
+			*/
+			if (-1 == clf) {
+				/* nothing to do */
+			} else if (0 == clf) {
+				report_event(EVNT_LEAPVAL, NULL, NULL);
+				if (leap_warn_log == FALSE) {
+					msyslog(LOG_WARNING,
+						"leapseconds data file has expire!.");
+					leap_warn_log = TRUE;
+				}
+			} else if (clf < 31) {
 				msyslog(LOG_WARNING,
-					"leapseconds data file has expired.");
-				leap_warn_log = TRUE;
+					"leapseconds data file will expire in about %d days' time!", clf);
+				/* squawk that leapfile will expire */
 			}
-			/* If a new file was installed between
-			 * the previous 24 hour check and the
-			 * expiration of this one, we'll squawk
-			 * once.  Better than checking for a
-			 * new file every hour...
-			 */
-			check_leap_file();
 		} else
 			leap_warn_log = FALSE;
 	}

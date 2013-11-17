@@ -861,8 +861,13 @@ record_timing_stats(
 
 /*
  * check_leap_file - See if the leapseconds file has been updated.
+ *
+ * Returns:
+ *	-1 if there was a problem,
+ *	 0 if the leapfile has expired
+ *	>0 # of days until the leapfile expires
  */
-void
+int
 check_leap_file(
 	void
 	)
@@ -870,20 +875,21 @@ check_leap_file(
 	FILE *fp;
 	struct stat *sp1 = &leapseconds_file_sb1;
 	struct stat *sp2 = &leapseconds_file_sb2;
+	int rc;
 
 	if (leapseconds_file) {
 		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
 			msyslog(LOG_ERR,
 			    "check_leap_file: fopen(%s): %m",
 			    leapseconds_file);
-			return;
+			return -1;
 		}
 		if (fstat(fileno(fp), &leapseconds_file_sb2)) {
 			msyslog(LOG_ERR,
 			    "check_leap_file: stat(%s): %m",
 			    leapseconds_file);
 			fclose(fp);
-			return;
+			return -1;
 		}
 		if (   (sp1->st_mtime != sp2->st_mtime)
 		    || (sp1->st_ctime != sp2->st_ctime)) {
@@ -892,12 +898,17 @@ check_leap_file(
 				msyslog(LOG_ERR,
 				    "format error leapseconds file %s",
 				    leapseconds_file);
+				rc = -1;
+			} else {
+				rc = 1;	/* XXX: 0 or days til expire */
 			}
+		} else {
+			rc = 0;	/* XXX: 0 or days til expire */
 		}
 		fclose(fp);
 	}
 
-	return;
+	return rc;
 }
 
 
