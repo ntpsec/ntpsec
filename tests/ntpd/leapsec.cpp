@@ -103,8 +103,8 @@ static const char leap3 [] =
     "#\n";
 
 
-static u_int32 lsec2009 = 3439756800u; // 1 Jan 2009, 00:00:00 utc
-static u_int32 lsec2012 = 3550089600u; // 1 Jul 2012, 00:00:00 utc
+static uint32_t lsec2009 = 3439756800u; // 1 Jan 2009, 00:00:00 utc
+static uint32_t lsec2012 = 3550089600u; // 1 Jul 2012, 00:00:00 utc
 
 int stringreader(void* farg)
 {
@@ -415,7 +415,7 @@ TEST_F(leapsecTest, addDynamic) {
 	int            rc;
 	leap_result_t  qr;
 
-	static const u_int32 insns[] = {
+	static const uint32_t insns[] = {
 		2982009600,	//	29	# 1 Jul 1994
 		3029443200,	//	30	# 1 Jan 1996
 		3076704000,	//	31	# 1 Jul 1997
@@ -445,7 +445,7 @@ TEST_F(leapsecTest, addFixed) {
 	int            rc;
 	leap_result_t  qr;
 
-	static const struct { u_int32 tt; int of; } insns[] = {
+	static const struct { uint32_t tt; int of; } insns[] = {
 		{2982009600, 29},//	# 1 Jul 1994
 		{3029443200, 30},//	# 1 Jan 1996
 		{3076704000, 31},//	# 1 Jul 1997
