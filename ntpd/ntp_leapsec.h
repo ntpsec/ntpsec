@@ -58,7 +58,7 @@ extern int/*BOOL*/ leapsec_electric(int/*BOOL*/ on);
  * 'ddist' is the distance to the transition, in clock seconds.
  *      This is the distance to the due time, which is different
  *      from the transition time if the mode is non-electric.
- *	Only valid if 'tai_diff' not zero.
+ *	Only valid if 'tai_diff' is not zero.
  * 'tai_offs' is the CURRENT distance from clock (UTC) to TAI. Always valid.
  * 'tai_diff' is the change in TAI offset after the next leap
  *	transition. Zero if nothing is pending or too far ahead.
@@ -70,20 +70,20 @@ extern int/*BOOL*/ leapsec_electric(int/*BOOL*/ on);
  * 'dynamic' != 0 if entry was requested by clock/peer
  */ 
 struct leap_result {
-	vint64	        ttime;
-	u_int32         ddist;
-	short           tai_offs;
-	short           tai_diff;
-	short           warped;
-	u_short         proximity;
-	short		dynamic;
+	vint64   ttime;
+	uint32_t ddist;
+	int16_t  tai_offs;
+	int16_t  tai_diff;
+	int16_t  warped;
+	uint8_t  proximity;
+	uint8_t  dynamic;
 };
 typedef struct leap_result leap_result_t;
 
 struct leap_signature {
-	u_int32	etime;	/* expiration time	*/
-	u_int32 ttime;	/* transition time	*/
-	short   taiof;	/* total offset to TAI	*/
+	uint32_t etime;	/* expiration time	*/
+	uint32_t ttime;	/* transition time	*/
+	int16_t  taiof;	/* total offset to TAI	*/
 };
 typedef struct leap_signature leap_signature_t;
 
@@ -93,7 +93,7 @@ typedef struct leap_signature leap_signature_t;
 #define LSPROX_ANNOUNCE	2	/* less than 1 day to target  */
 #define LSPROX_ALERT	3	/* less than 10 sec to target */
 
-/* Get the current or alternate table ponter. Getting the alternate
+/* Get the current or alternate table pointer. Getting the alternate
  * pointer will automatically copy the primary table, so it can be
  * subsequently modified.
  */
@@ -107,12 +107,6 @@ extern int/*BOOL*/ leapsec_set_table(leap_table_t *);
 
 /* Clear all leap second data. Use it for init & cleanup */
 extern void leapsec_clear(leap_table_t*);
-
-/* Check if a table is expired at a given point in time. 'when' is
- * subject to NTP era unfolding.
- */
-extern int/*BOOL*/ leapsec_is_expired(leap_table_t*, u_int32 when, 
-				      const time_t * pivot);
 
 /* Load a leap second file. If 'blimit' is set, do not store (but
  * register with their TAI offset) leap entries before the build date.
@@ -140,7 +134,13 @@ extern void        leapsec_getsig(leap_signature_t * psig);
 
 /* Check if the leap table is expired at the given time.
  */
-extern int/*BOOL*/ leapsec_expired(u_int32 when, const time_t * pivot);
+extern int/*BOOL*/ leapsec_expired(uint32_t when, const time_t * pivot);
+
+/* Get the distance to expiration in days.
+ * Returns negative values if expired, zero if there are less than 24hrs
+ * left, and positive numbers otherwise.
+ */
+extern int32_t leapsec_daystolive(uint32_t when, const time_t * pivot);
 
 /* Reset the current leap frame, so the next query will do proper table
  * lookup from fresh. Suppresses a possible leap era transition detection
@@ -153,7 +153,7 @@ extern void leapsec_reset_frame(void);
  * works if the existing table is extended. On success, updates the
  * signature data.
  */
-extern int/*BOOL*/ leapsec_add_fix(int offset, u_int32 ttime, u_int32 etime,
+extern int/*BOOL*/ leapsec_add_fix(int offset, uint32_t ttime, uint32_t etime,
 				   const time_t * pivot);
 
 /* Take a time stamp and create a leap second frame for it. This will
@@ -168,7 +168,7 @@ extern int/*BOOL*/ leapsec_add_fix(int offset, u_int32 ttime, u_int32 etime,
  * 'ntp_now' is subject to era unfolding. The entry is marked
  * dynamic. The leap signature is NOT updated.
  */
-extern int/*BOOL*/ leapsec_add_dyn(int insert, u_int32 ntp_now,
+extern int/*BOOL*/ leapsec_add_dyn(int/*BOOL*/ insert, uint32_t ntp_now,
 				   const time_t * pivot);
 
 /* Take a time stamp and get the associated leap information. The time
@@ -178,7 +178,7 @@ extern int/*BOOL*/ leapsec_add_dyn(int insert, u_int32 ntp_now,
  * last and the current query. In that case, qr->warped contains the
  * required clock stepping, which is always zero in electric mode.
  */
-extern int/*BOOL*/ leapsec_query(leap_result_t *qr, u_int32 ntpts,
+extern int/*BOOL*/ leapsec_query(leap_result_t *qr, uint32_t ntpts,
 				 const time_t * pivot);
 
 /* Get the current leap frame info. Returns TRUE if the result contains

@@ -864,8 +864,8 @@ record_timing_stats(
  *
  * Returns:
  *	-1 if there was a problem,
- *	 0 if the leapfile has expired
- *	>0 # of days until the leapfile expires
+ *	 0 if the leapfile has expired or less than 24hrs remaining TTL
+ *	>0 # of full days until the leapfile expires
  */
 int
 check_leap_file(
@@ -875,37 +875,39 @@ check_leap_file(
 	FILE *fp;
 	struct stat *sp1 = &leapseconds_file_sb1;
 	struct stat *sp2 = &leapseconds_file_sb2;
-	int rc;
+	int          rc  = INT_MAX; /* assume not expired for long a time */
+	l_fp         now;
+
 
 	if (leapseconds_file) {
+		get_systime(&now);
 		if ((fp = fopen(leapseconds_file, "r")) == NULL) {
 			msyslog(LOG_ERR,
-			    "check_leap_file: fopen(%s): %m",
-			    leapseconds_file);
-			return -1;
-		}
-		if (fstat(fileno(fp), &leapseconds_file_sb2)) {
+				"check_leap_file: fopen(%s): %m",
+				leapseconds_file);
+			rc = -1;
+		} else if (fstat(fileno(fp), &leapseconds_file_sb2)) {
 			msyslog(LOG_ERR,
-			    "check_leap_file: stat(%s): %m",
-			    leapseconds_file);
-			fclose(fp);
-			return -1;
-		}
-		if (   (sp1->st_mtime != sp2->st_mtime)
-		    || (sp1->st_ctime != sp2->st_ctime)) {
+				"check_leap_file: stat(%s): %m",
+				leapseconds_file);
+			rc = -1;
+		} else if (  (sp1->st_mtime != sp2->st_mtime)
+			  || (sp1->st_ctime != sp2->st_ctime)) {
 			leapseconds_file_sb1 = leapseconds_file_sb2;
 			if (!leapsec_load_file(fp, TRUE)) {
 				msyslog(LOG_ERR,
-				    "format error leapseconds file %s",
-				    leapseconds_file);
+					"format error leapseconds file %s",
+					leapseconds_file);
 				rc = -1;
-			} else {
-				rc = 1;	/* XXX: 0 or days til expire */
 			}
-		} else {
-			rc = 0;	/* XXX: 0 or days til expire */
 		}
-		fclose(fp);
+		if (rc >= 0) {
+			rc = leapsec_daystolive(now.l_ui, NULL);
+			if (rc < 0)
+				rc = 0;
+		}
+		if (fp != NULL)
+			fclose(fp);
 	}
 
 	return rc;

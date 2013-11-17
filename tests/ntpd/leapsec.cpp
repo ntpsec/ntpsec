@@ -256,7 +256,7 @@ TEST_F(leapsecTest, tableSelect) {
 	EXPECT_NE(pt2, pt3);
 }
 
-// load file & checl expiration
+// load file & check expiration
 TEST_F(leapsecTest, loadFileExpire) {
 	const char *cp = leap1;
 	int rc;
@@ -269,6 +269,33 @@ TEST_F(leapsecTest, loadFileExpire) {
 	EXPECT_EQ(0, rc);
 	rc = leapsec_expired(3610569601, NULL);
 	EXPECT_EQ(1, rc);
+}
+
+// load file & check time-to-live
+TEST_F(leapsecTest, loadFileTTL) {
+	const char *cp = leap1;
+	int rc;
+	leap_table_t * pt = leapsec_get_table(0);
+	time_t         pivot = 0x70000000;
+
+	const uint32_t limit = 3610569600u;
+
+	rc =   leapsec_load(pt, stringreader, &cp, FALSE)
+	    && leapsec_set_table(pt);
+	ASSERT_EQ(1, rc);
+
+	// exactly 1 day to live
+	rc = leapsec_daystolive(limit - 86400, &pivot);
+	EXPECT_EQ( 1, rc);	
+	// less than 1 day to live
+	rc = leapsec_daystolive(limit - 86399, &pivot);
+	EXPECT_EQ( 0, rc);	
+	// hit expiration exactly
+	rc = leapsec_daystolive(limit, &pivot);
+	EXPECT_EQ( 0, rc);	
+	// expired since 1 sec
+	rc = leapsec_daystolive(limit + 1, &pivot);
+	EXPECT_EQ(-1, rc);	
 }
 
 // ad-hoc jump: leap second at 2009.01.01 -60days

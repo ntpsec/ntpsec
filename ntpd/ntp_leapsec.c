@@ -100,12 +100,12 @@ strtouv64(
 		 * multiplication. Slow but portable.
 		 */ 
 		{
-			u_int32 accu;
-			accu       = (u_int32)res.W_s.ll * base;
-			res.W_s.ll = (u_short)accu;
+			uint32_t accu;
+			accu       = (uint32_t)res.W_s.ll * base;
+			res.W_s.ll = (uint16_t)accu;
 			accu       = (accu >> 16)
-			           + (u_int32)res.W_s.lh * base;
-			res.W_s.lh = (u_short)accu;
+			           + (uint32_t)res.W_s.lh * base;
+			res.W_s.lh = (uint16_t)accu;
 			/* the upper bits can be done in one step: */
 			res.D_s.hi = res.D_s.hi * base + (accu >> 16);
 		}
@@ -162,10 +162,44 @@ int ucmpv64(
 	return res;
 }
 
+#if 0
+static vint64
+addv64(
+    const vint64 *lhs,
+    const vint64 *rhs)
+{
+	vint64 res;
+
+#if defined(HAVE_INT64)
+	res.Q_s = lhs->Q_s + rhs->Q_s;
+#else
+	res = *lhs;
+	M_ADD(res.D_s.hi, res.D_s.lo, rhs->D_s.hi, rhs->D_s.lo);
+#endif
+	return res;
+}
+#endif
+
+static vint64
+subv64(
+    const vint64 *lhs,
+    const vint64 *rhs)
+{
+	vint64 res;
+
+#if defined(HAVE_INT64)
+	res.Q_s = lhs->Q_s - rhs->Q_s;
+#else
+	res = *lhs;
+	M_SUB(res.D_s.hi, res.D_s.lo, rhs->D_s.hi, rhs->D_s.lo);
+#endif
+	return res;
+}
+
 static vint64
 addv64i32(
 	const vint64 * lhs,
-	int32          rhs)
+	int32_t        rhs)
 {
 	vint64 res;
 
@@ -182,7 +216,7 @@ addv64i32(
 static vint64
 subv64i32(
 	const vint64 * lhs,
-	int32          rhs)
+	int32_t        rhs)
 {
 	vint64 res;
 
@@ -200,7 +234,7 @@ subv64i32(
 static vint64
 addv64u32(
 	const vint64 * lhs,
-	u_int32        rhs)
+	uint32_t       rhs)
 {
 	vint64 res;
 
@@ -217,7 +251,7 @@ addv64u32(
 static vint64
 subv64u32(
 	const vint64 * lhs,
-	u_int32        rhs)
+	uint32_t       rhs)
 {
 	vint64 res;
 
@@ -264,24 +298,25 @@ ntpcal_date_to_ntp64(
 #define MAX_HIST 10	/* history of leap seconds */
 
 struct leap_info {
-	vint64  ttime;	/* transition time (after the step, ntp scale)	*/
-	u_int32 stime;	/* schedule limit (a month before transition)	*/
-	short   taiof;	/* TAI offset on and after the transition       */
-	u_short dynls;	/* dynamic: inserted on peer/clock request	*/
+	vint64   ttime;	/* transition time (after the step, ntp scale) */
+	uint32_t stime;	/* schedule limit (a month before transition)  */
+	int16_t  taiof;	/* TAI offset on and after the transition      */
+	uint8_t  dynls; /* dynamic: inserted on peer/clock request     */
 };
 typedef struct leap_info leap_info_t;
 
 struct leap_head {
-	vint64  expire;	/* table expiration time                       */
-	u_short	size;	/* number of infos in table	               */
-	short   base_tai;	/* total leaps before first entry      */
-	short   this_tai;	/* current TAI offset	               */
-	short   next_tai;	/* TAI offset after 'when'             */
-	vint64  dtime;	/* due time (current era end)                  */
-	vint64  ttime;	/* nominal transition time (next era start)    */
-	vint64  stime;	/* schedule time (when we take notice)         */
-	vint64  ebase;	/* base time of this leap era                  */
-	short   dynls;	/* next leap is dynamic (by peer request)      */
+	vint64   update; /* time of information update                 */
+	vint64   expire; /* table expiration time                      */
+	uint16_t size;	 /* number of infos in table	               */
+	int16_t  base_tai;	/* total leaps before first entry      */
+	int16_t  this_tai;	/* current TAI offset	               */
+	int16_t  next_tai;	/* TAI offset after 'when'             */
+	vint64   dtime;	 /* due time (current era end)                 */
+	vint64   ttime;	 /* nominal transition time (next era start)   */
+	vint64   stime;	 /* schedule time (when we take notice)        */
+	vint64   ebase;	 /* base time of this leap era                 */
+	uint8_t  dynls;	 /* next leap is dynamic (by peer request)     */
 };
 typedef struct leap_head leap_head_t;
 
@@ -301,7 +336,7 @@ static char * get_line(leapsec_reader, void*, char*, size_t);
 static char * skipws(const char*);
 static int    parsefail(const char * cp, const char * ep);
 static void   reload_limits(leap_table_t*, const vint64*);
-static int    betweenu32(u_int32, u_int32, u_int32);
+static int    betweenu32(uint32_t, uint32_t, uint32_t);
 static void   reset_times(leap_table_t*);
 static int    leapsec_add(leap_table_t*, const vint64*, int);
 static int    leapsec_raw(leap_table_t*, const vint64 *, int, int);
@@ -374,21 +409,6 @@ leapsec_clear(
 }
 
 /* ---------------------------------------------------------------------
- * Check if expired at a given time
- */
-int/*BOOL*/
-leapsec_is_expired(
-	leap_table_t * pt  ,
-	u_int32        when,
-	const time_t * tpiv)
-{
-	vint64 limit;
-
-	limit = ntpcal_ntp_to_ntp(when, tpiv);
-	return ucmpv64(&limit, &pt->head.expire) >= 0;
-}
-
-/* ---------------------------------------------------------------------
  * Load a leap second file and check expiration on the go
  */
 int/*BOOL*/
@@ -413,12 +433,17 @@ leapsec_load(
 		cp = linebuf;
 		if (*cp == '#') {
 			cp++;
-			if (*cp == '@' || *cp == '$') {
+			if (*cp == '@') {
 				cp = skipws(cp+1);
 				pt->head.expire = strtouv64(cp, &ep, 10);
 				if (parsefail(cp, ep))
 					goto fail_read;
 				pt->lsig.etime = pt->head.expire.D_s.lo;
+			} else if (*cp == '$') {
+				cp = skipws(cp+1);
+				pt->head.update = strtouv64(cp, &ep, 10);
+				if (parsefail(cp, ep))
+					goto fail_read;
 			}		    
 		} else if (isdigit((u_char)*cp)) {
 			ttime = strtouv64(cp, &ep, 10);
@@ -434,10 +459,10 @@ leapsec_load(
 						 taiof, FALSE))
 					goto fail_insn;
 			} else {
-				pt->head.base_tai = (short)taiof;
+				pt->head.base_tai = (int16_t)taiof;
 			}
 			pt->lsig.ttime = ttime.D_s.lo;
-			pt->lsig.taiof = (short)taiof;
+			pt->lsig.taiof = (int16_t)taiof;
 		}
 	}
 	return TRUE;
@@ -489,12 +514,12 @@ leapsec_dump(
 int/*BOOL*/
 leapsec_query(
 	leap_result_t * qr   ,
-	u_int32         ts32 ,
+	uint32_t        ts32 ,
 	const time_t *  pivot)
 {
 	leap_table_t *   pt;
 	vint64           ts64, last, next;
-	u_int32          due32;
+	uint32_t         due32;
 	int              fired;
 
 	/* preset things we use later on... */
@@ -519,8 +544,8 @@ leapsec_query(
 		 * both modes is easier to maintain.
 		 */
 		last = pt->head.ttime;
-		qr->warped = (short)(last.D_s.lo -
-                                        pt->head.dtime.D_s.lo);
+		qr->warped = (int16_t)(last.D_s.lo -
+				       pt->head.dtime.D_s.lo);
 		next = addv64i32(&ts64, qr->warped);
 		reload_limits(pt, &next);
 		fired = ucmpv64(&pt->head.ebase, &last) == 0;
@@ -615,18 +640,38 @@ leapsec_getsig(
 /* ------------------------------------------------------------------ */
 int/*BOOL*/
 leapsec_expired(
-	u_int32        when,
+	uint32_t       when,
 	const time_t * tpiv)
 {
-	return leapsec_is_expired(leapsec_get_table(FALSE), when, tpiv);
+	const leap_table_t * pt;
+	vint64 limit;
+
+	pt = leapsec_get_table(FALSE);
+	limit = ntpcal_ntp_to_ntp(when, tpiv);
+	return ucmpv64(&limit, &pt->head.expire) >= 0;
+}
+
+/* ------------------------------------------------------------------ */
+int32_t
+leapsec_daystolive(
+	uint32_t       when,
+	const time_t * tpiv)
+{
+	const leap_table_t * pt;
+	vint64 limit;
+
+	pt = leapsec_get_table(FALSE);
+	limit = ntpcal_ntp_to_ntp(when, tpiv);
+	limit = subv64(&pt->head.expire, &limit);
+	return ntpcal_daysplit(&limit).hi;
 }
 
 /* ------------------------------------------------------------------ */
 int/*BOOL*/
 leapsec_add_fix(
 	int            total,
-	u_int32        ttime,
-	u_int32        etime,
+	uint32_t       ttime,
+	uint32_t       etime,
 	const time_t * pivot)
 {
 	time_t         tpiv;
@@ -648,7 +693,7 @@ leapsec_add_fix(
 
 	pt->lsig.etime = etime;
 	pt->lsig.ttime = ttime;
-	pt->lsig.taiof = (short)total;
+	pt->lsig.taiof = (int16_t)total;
 
 	pt->head.expire = et64;
 
@@ -659,7 +704,7 @@ leapsec_add_fix(
 int/*BOOL*/
 leapsec_add_dyn(
 	int            insert,
-	u_int32        ntpnow,
+	uint32_t       ntpnow,
 	const time_t * pivot )
 {
 	leap_table_t * pt;
@@ -930,7 +975,7 @@ leapsec_raw(
 	stime    = ntpcal_date_to_ntp64(&fts);
 	li.ttime = *ttime;
 	li.stime = ttime->D_s.lo - stime.D_s.lo;
-	li.taiof = (short)taiof;
+	li.taiof = (int16_t)taiof;
 	li.dynls = (dynls != 0);
 	return add_range(pt, &li);
 }
@@ -941,9 +986,9 @@ leapsec_raw(
  */
 static int/*BOOL*/
 betweenu32(
-	u_int32 lo,
-	u_int32 x,
-	u_int32 hi)
+	uint32_t lo,
+	uint32_t x,
+	uint32_t hi)
 {
 	int rc;
 	if (lo <= hi)
