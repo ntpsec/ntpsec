@@ -70,7 +70,7 @@ All other files are in PEM-encoded
 printable ASCII format so they can be embedded as MIME attachments in
 mail to other sites.
 
-  <p>This document applies to version 4.2.7p395 of <code>ntp-keygen</code>.
+  <p>This document applies to version 4.2.7p396 of <code>ntp-keygen</code>.
 
 <div class="node">
 <p><hr>
@@ -1120,7 +1120,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p394
+<pre class="example">ntp-keygen (ntp) - Create a NTP host key - Ver. 4.2.7p395
 Usage:  ntp-keygen [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]...
   Flg Arg Option-Name    Description
    -b Num imbits         identity modulus bits
@@ -1183,7 +1183,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dimbits-4"></a>
 This is the &ldquo;identity modulus bits&rdquo; option. 
-This option takes an argument number <span class="file">imbits</span>.
+This option takes a number argument <span class="file">imbits</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1203,7 +1203,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dcertificate-5"></a>
 This is the &ldquo;certificate scheme&rdquo; option. 
-This option takes an argument string <span class="file">scheme</span>.
+This option takes a string argument <span class="file">scheme</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1230,7 +1230,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dcipher-6"></a>
 This is the &ldquo;privatekey cipher&rdquo; option. 
-This option takes an argument string <span class="file">cipher</span>.
+This option takes a string argument <span class="file">cipher</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1332,7 +1332,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dident-11"></a>
 This is the &ldquo;set autokey group name&rdquo; option. 
-This option takes an argument string <span class="file">group</span>.
+This option takes a string argument <span class="file">group</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1360,7 +1360,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dlifetime-12"></a>
 This is the ``set certificate lifetime'' option. 
-This option takes an argument number <span class="file">lifetime</span>.
+This option takes a number argument <span class="file">lifetime</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1393,7 +1393,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dmodulus-14"></a>
 This is the ``modulus'' option. 
-This option takes an argument number <span class="file">modulus</span>.
+This option takes a number argument <span class="file">modulus</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1433,7 +1433,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dpvt_002dpasswd-16"></a>
 This is the ``output private password'' option. 
-This option takes an argument string <span class="file">passwd</span>.
+This option takes a string argument <span class="file">passwd</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1454,7 +1454,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dget_002dpvt_002dpasswd-17"></a>
 This is the ``input private password'' option. 
-This option takes an argument string <span class="file">passwd</span>.
+This option takes a string argument <span class="file">passwd</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1474,7 +1474,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dsign_002dkey-18"></a>
 This is the ``generate sign key (rsa or dsa)'' option. 
-This option takes an argument string <span class="file">sign</span>.
+This option takes a string argument <span class="file">sign</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1496,7 +1496,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dsubject_002dname-19"></a>
 This is the ``set host and optionally group name'' option. 
-This option takes an argument string <span class="file">host@group</span>.
+This option takes a string argument <span class="file">host@group</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1545,7 +1545,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dmv_002dparams-21"></a>
 This is the ``generate &lt;num&gt; mv parameters'' option. 
-This option takes an argument number <span class="file">num</span>.
+This option takes a number argument <span class="file">num</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -1566,7 +1566,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Cryptographic-Data-Files">Cryptographi
 
 <p><a name="index-ntp_002dkeygen_002dmv_002dkeys-22"></a>
 This is the ``update &lt;num&gt; mv keys'' option. 
-This option takes an argument number <span class="file">num</span>.
+This option takes a number argument <span class="file">num</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>

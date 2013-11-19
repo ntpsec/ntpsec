@@ -39,7 +39,7 @@ The program can operate in any of several modes, including client/server,
 symmetric and broadcast modes, and with both symmetric-key and public-key
 cryptography.
 
-  <p>This document applies to version 4.2.7p395 of <code>ntpd</code>.
+  <p>This document applies to version 4.2.7p396 of <code>ntpd</code>.
 
 <ul class="menu">
 <li><a accesskey="1" href="#ntpd-Description">ntpd Description</a>:             Description
@@ -219,7 +219,7 @@ the usage text by passing it through a pager program.
 used to select the program, defaulting to <span class="file">more</span>.  Both will exit
 with a status code of 0.
 
-<pre class="example">ntpd - NTP daemon program - Ver. 4.2.7p394
+<pre class="example">ntpd - NTP daemon program - Ver. 4.2.7p395
 Usage:  ntpd [ -&lt;flag&gt; [&lt;val&gt;] | --&lt;name&gt;[{=| }&lt;val&gt;] ]... \
                 [ &lt;server1&gt; ... &lt;serverN&gt; ]
   Flg Arg Option-Name    Description
@@ -388,7 +388,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dconfigfile-8"></a>
 This is the &ldquo;configuration file name&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 The name and path of the configuration file,
 <span class="file">/etc/ntp.conf</span>
 by default. 
@@ -404,7 +404,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002ddriftfile-9"></a>
 This is the &ldquo;frequency drift file name&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 The name and path of the frequency file,
 <span class="file">/etc/ntp.drift</span>
 by default. 
@@ -455,7 +455,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002djaildir-11"></a>
 This is the &ldquo;jail directory&rdquo; option. 
-This option takes an argument string.
+This option takes a string argument.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -486,7 +486,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dinterface-12"></a>
 This is the &ldquo;listen on an interface name or address&rdquo; option. 
-This option takes an argument string <span class="file">iface</span>.
+This option takes a string argument <span class="file">iface</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -510,7 +510,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dkeyfile-13"></a>
 This is the &ldquo;path to symmetric keys&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 Specify the name and path of the symmetric key file. 
 <span class="file">/etc/ntp.keys</span>
 is the default. 
@@ -529,7 +529,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dlogfile-14"></a>
 This is the &ldquo;path to the log file&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 Specify the name and path of the log file. 
 The default is the system log file. 
 This is the same operation as the
@@ -599,7 +599,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dpidfile-18"></a>
 This is the &ldquo;path to the pid file&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 Specify the name and path of the file used to record
 <code>ntpd</code>'s
 process ID. 
@@ -618,7 +618,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dpriority-19"></a>
 This is the &ldquo;process priority&rdquo; option. 
-This option takes an argument number. 
+This option takes a number argument. 
 To the extent permitted by the operating system, run
 <code>ntpd</code>
 at the specified
@@ -666,7 +666,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dpropagationdelay-21"></a>
 This is the &ldquo;broadcast/propagation delay&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 Specify the default propagation delay from the broadcast/multicast server to this client. This is necessary only if the delay cannot be computed automatically by the protocol. 
 <div class="node">
 <p><hr>
@@ -680,7 +680,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dsaveconfigquit-22"></a>
 This is the &ldquo;save parsed configuration and quit&rdquo; option. 
-This option takes an argument string.
+This option takes a string argument.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -704,7 +704,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dstatsdir-23"></a>
 This is the &ldquo;statistics file location&rdquo; option. 
-This option takes an argument string. 
+This option takes a string argument. 
 Specify the directory path for files created by the statistics facility. 
 This is the same operation as the
 <code>statsdir</code> <kbd>statsdir</kbd>
@@ -721,7 +721,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dtrustedkey-24"></a>
 This is the &ldquo;trusted key number&rdquo; option. 
-This option takes an argument string <span class="file">tkey</span>.
+This option takes a string argument <span class="file">tkey</span>.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -741,7 +741,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002duser-25"></a>
 This is the &ldquo;run as userid (or userid:groupid)&rdquo; option. 
-This option takes an argument string.
+This option takes a string argument.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -766,7 +766,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dupdateinterval-26"></a>
 This is the &ldquo;interval in seconds between scans for new or dropped interfaces&rdquo; option. 
-This option takes an argument number. 
+This option takes a number argument. 
 Give the time in seconds between two scans for new or dropped interfaces. 
 For systems with routing socket support the scans will be performed shortly after the interface change
 has been detected by the system. 
@@ -783,7 +783,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dwait_002dsync-27"></a>
 This is the &ldquo;seconds to wait for first clock sync&rdquo; option. 
-This option takes an argument number.
+This option takes a number argument.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>
@@ -859,7 +859,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ntpd-Invocation">ntpd Invocation</a>
 
 <p><a name="index-ntpd_002dpccfreq-30"></a>
 This is the &ldquo;force cpu cycle counter use (windows only)&rdquo; option. 
-This option takes an argument string.
+This option takes a string argument.
 
 <p class="noindent">This option has some usage constraints.  It:
      <ul>

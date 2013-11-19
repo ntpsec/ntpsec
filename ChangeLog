@@ -1,3 +1,4 @@
+(4.2.7p396) 2013/11/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] Improve stale leapsecond notifications.
 (4.2.7p395) 2013/11/12 Released by Harlan Stenn <stenn@ntp.org>
 * Upgrade to autogen-5.18.3pre5 and libopts-40.1.15.
