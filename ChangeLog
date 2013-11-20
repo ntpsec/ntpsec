@@ -1,3 +1,4 @@
+(4.2.7p397) 2013/11/20 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] More leapsecond file notification cleanup.
 (4.2.7p396) 2013/11/19 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] Improve stale leapsecond notifications.
