@@ -436,13 +436,12 @@ timer(void)
 				report_event(EVNT_LEAPVAL, NULL, NULL);
 				if (leap_warn_log == FALSE) {
 					msyslog(LOG_WARNING,
-						"leapseconds data file has expire!.");
+						"timer: leapseconds data file has expired!");
 					leap_warn_log = TRUE;
 				}
 			} else if (clf < 31) {
 				msyslog(LOG_WARNING,
-					"leapseconds data file will expire in about %d days' time!", clf);
-				/* squawk that leapfile will expire */
+					"timer: leapseconds data file will expire in about %d days' time!", clf);
 			}
 		} else
 			leap_warn_log = FALSE;

@@ -3738,8 +3738,14 @@ input_handler(
 	/* We're done... */
     ih_return:
 	if (check_leapfile < time(NULL)) {
+		int rc;
+
 		check_leapfile += CHECK_LEAP_EVERY;
-		(void)check_leap_file();
+		rc = check_leap_file();
+
+		if (rc < 31)
+			msyslog(LOG_DEBUG,
+				"input_handler: check_leap_file() returned %d.' time!", rc);
 	}
 	return;
 }
