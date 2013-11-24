@@ -3717,7 +3717,7 @@ input_handler(
 #ifdef DEBUG
 		if (debug)
 			msyslog(LOG_DEBUG, "input_handler: select() returned 0");
-#endif
+#endif /* DEBUG */
 		goto ih_return;
 	}
 	/* We've done our work */
@@ -3734,22 +3734,39 @@ input_handler(
 		msyslog(LOG_DEBUG,
 			"input_handler: Processed a gob of fd's in %s msec",
 			lfptoms(&ts_e, 6));
-#endif
+#endif /* DEBUG_TIMING */
 	/* We're done... */
     ih_return:
 	if (check_leapfile < time(NULL)) {
-		int rc;
+		int clf;
 
 		check_leapfile += CHECK_LEAP_EVERY;
-		rc = check_leap_file();
+		clf = check_leap_file();
 
-		if (rc < 31)
-			msyslog(LOG_DEBUG,
-				"input_handler: check_leap_file() returned %d.' time!", rc);
+		/*
+		** check_leap_file() returns -1 on a problem,
+		** 0 on an expired leapsecond file, or the number
+		** of days until the leapsecond file expires.
+		*/
+		if (-1 == clf) {
+			/* nothing to do */
+		} else if (0 == clf) {
+			/* XXX: Do we want to report_event() here? */
+			// report_event(EVNT_LEAPVAL, NULL, NULL);
+			if (leap_warn_log == FALSE) {
+				msyslog(LOG_WARNING,
+					"input_handler: leapseconds data file <%s> has expired!",
+					leapseconds_file);
+				leap_warn_log = TRUE;
+			}
+		} else if (clf < 31) {
+			msyslog(LOG_WARNING,
+				"input_handler: leapseconds data file <%s> will expire in less than %d days' time.", leapseconds_file, clf);
+		}
 	}
 	return;
 }
-#endif /* HAVE_IO_COMPLETION_PORT */
+#endif /* !HAVE_IO_COMPLETION_PORT */
 
 
 /*
