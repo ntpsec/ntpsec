@@ -199,7 +199,7 @@ kod_init_kod_db(
 	db_s = fopen(db_file, "r");
 
 	if (NULL == db_s) {
-		msyslog(LOG_WARNING, "kod_init_kod_db(): Cannot open KoD db file %s",
+		msyslog(LOG_WARNING, "kod_init_kod_db(): Cannot open KoD db file %s: %m",
 			db_file);
 
 		return;
