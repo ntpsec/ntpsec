@@ -1,3 +1,4 @@
+(4.2.7p398) 2013/11/25 Released by Harlan Stenn <stenn@ntp.org>
 * [Bug 2326] More leapsecond file notification cleanup.
 * Improve sntp KoD data file fopen() error message.
 (4.2.7p397) 2013/11/20 Released by Harlan Stenn <stenn@ntp.org>
