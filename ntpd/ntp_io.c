@@ -151,9 +151,6 @@ volatile u_long handler_calls;	/* number of calls to interrupt handler */
 volatile u_long handler_pkts;	/* number of pkts received by handler */
 u_long io_timereset;		/* time counters were reset */
 
-time_t	check_leapfile;
-#define CHECK_LEAP_EVERY	86400
-
 /*
  * Interface stuff
  */
@@ -427,8 +424,6 @@ collect_timing(struct recvbuf *rb, const char *tag, int count, l_fp *dts)
 void
 init_io(void)
 {
-	check_leapfile = time(NULL) + CHECK_LEAP_EVERY;
-
 	/* Init buffer free list and stat counters */
 	init_recvbuff(RECV_INIT);
 	/* update interface every 5 minutes as default */
@@ -3737,33 +3732,6 @@ input_handler(
 #endif /* DEBUG_TIMING */
 	/* We're done... */
     ih_return:
-	if (check_leapfile < time(NULL)) {
-		int clf;
-
-		check_leapfile += CHECK_LEAP_EVERY;
-		clf = check_leap_file();
-
-		/*
-		** check_leap_file() returns -1 on a problem,
-		** 0 on an expired leapsecond file, or the number
-		** of days until the leapsecond file expires.
-		*/
-		if (-1 == clf) {
-			/* nothing to do */
-		} else if (0 == clf) {
-			/* XXX: Do we want to report_event() here? */
-			// report_event(EVNT_LEAPVAL, NULL, NULL);
-			if (leap_warn_log == FALSE) {
-				msyslog(LOG_WARNING,
-					"input_handler: leapseconds data file <%s> has expired!",
-					leapseconds_file);
-				leap_warn_log = TRUE;
-			}
-		} else if (clf < 31) {
-			msyslog(LOG_WARNING,
-				"input_handler: leapseconds data file <%s> will expire in less than %d days' time.", leapseconds_file, clf);
-		}
-	}
 	return;
 }
 #endif /* !HAVE_IO_COMPLETION_PORT */

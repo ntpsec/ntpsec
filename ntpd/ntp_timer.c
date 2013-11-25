@@ -40,6 +40,8 @@
 #define	TC_ERR	(-1)
 #endif
 
+extern char *leapseconds_file;	/*name of the leapseconds file */
+
 static void check_leapsec(u_int32, const time_t*, int/*BOOL*/);
 
 /*
@@ -65,6 +67,8 @@ volatile int alarm_flag;
 static  u_long interface_timer;	/* interface update timer */
 static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
+time_t	check_leapfile = 0;	/* Report leapfile problems once/day */
+#define CHECK_LEAP_EVERY	86400
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
@@ -284,7 +288,6 @@ timer(void)
 	struct peer *	next_peer;
 	l_fp		now;
 	time_t          tnow;
-	static int	leap_warn_log = FALSE;
 
 	/*
 	 * The basic timerevent is one second.  This is used to adjust the
@@ -417,7 +420,8 @@ timer(void)
 		worker_idle_timer_fired();
 
 	/*
-	 * Finally, write hourly stats.
+	 * Finally, write hourly stats and do the hourly
+	 * and daily leapfile checks.
 	 */
 	if (stats_timer <= current_time) {
 		stats_timer += HOUR;
@@ -429,23 +433,24 @@ timer(void)
 			** check_leap_file() returns -1 on a problem,
 			** 0 on an expired leapsecond file, or the number
 			** of days until the leapsecond file expires.
+			**
+			** We only want to log stuff once/day.
 			*/
-			if (-1 == clf) {
-				/* nothing to do */
-			} else if (0 == clf) {
-				report_event(EVNT_LEAPVAL, NULL, NULL);
-				if (leap_warn_log == FALSE) {
+			if (check_leapfile < current_time) {
+				check_leapfile += CHECK_LEAP_EVERY;
+				if (-1 == clf) {
+					/* nothing to do */
+				} else if (0 == clf) {
+					report_event(EVNT_LEAPVAL, NULL, NULL);
 					msyslog(LOG_WARNING,
 						"timer: leapseconds data file <%s> has expired!",
 						leapseconds_file);
-					leap_warn_log = TRUE;
+				} else if (clf < 31) {
+					msyslog(LOG_WARNING,
+						"timer: leapseconds data file <%s> will expire in less than %d days' time.", leapseconds_file, clf);
 				}
-			} else if (clf < 31) {
-				msyslog(LOG_WARNING,
-					"timer: leapseconds data file <%s> will expire in less than %d days' time.", leapseconds_file, clf);
 			}
-		} else
-			leap_warn_log = FALSE;
+		}
 	}
 }
 
