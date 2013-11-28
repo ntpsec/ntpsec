@@ -1699,7 +1699,6 @@ update_interfaces(
 	isc_result_t		result;
 	isc_interface_t		isc_if;
 	int			new_interface_found;
-	int			refresh_peers;
 	unsigned int		family;
 	endpt			enumep;
 	endpt *			ep;
@@ -1714,7 +1713,6 @@ update_interfaces(
 	 */
 
 	new_interface_found = FALSE;
-	refresh_peers = FALSE;
 	iter = NULL;
 	result = isc_interfaceiter_create(mctx, &iter);
 
@@ -1750,6 +1748,8 @@ update_interfaces(
 
 		convert_isc_if(&isc_if, &enumep, port);
 
+		DPRINT_INTERFACE(4, (&enumep, "examining ", "\n"));
+
 		/* 
 		 * Check if and how we are going to use the interface.
 		 */
@@ -1757,18 +1757,22 @@ update_interfaces(
 					 enumep.flags)) {
 
 		case ACTION_IGNORE:
+			DPRINTF(4, ("ignoring interface %s (%s) - by nic rules\n",
+				    enumep.name, stoa(&enumep.sin)));
 			continue;
 
 		case ACTION_LISTEN:
+			DPRINTF(4, ("listen interface %s (%s) - by nic rules\n",
+				    enumep.name, stoa(&enumep.sin)));
 			enumep.ignore_packets = ISC_FALSE;
 			break;
 
 		case ACTION_DROP:
+			DPRINTF(4, ("drop on interface %s (%s) - by nic rules\n",
+				    enumep.name, stoa(&enumep.sin)));
 			enumep.ignore_packets = ISC_TRUE;
 			break;
 		}
-
-		DPRINT_INTERFACE(4, (&enumep, "examining ", "\n"));
 
 		 /* interfaces must be UP to be usable */
 		if (!(enumep.flags & INT_UP)) {
@@ -1812,15 +1816,8 @@ update_interfaces(
 				 */
 				strlcpy(ep->name, enumep.name,
 					sizeof(ep->name));
-				if (ep->ignore_packets !=
-				    enumep.ignore_packets) {
-					ep->ignore_packets = 
+				ep->ignore_packets = 
 					    enumep.ignore_packets;
-					refresh_peers = TRUE;
-					DPRINTF(4, ("refreshing peers due to %s ignore_packets change to %d\n",
-					    stoa(&ep->sin),
-					    ep->ignore_packets));
-				}
 			} else {
 				/* name collision - rename interface */
 				strlcpy(ep->name, "*multiple*",
@@ -1885,9 +1882,6 @@ update_interfaces(
 					(*receiver)(data, &ifi);
 
 				new_interface_found = TRUE;
-				refresh_peers = TRUE;
-				DPRINTF(4, ("refreshing peers due to new addr %s\n",
-					stoa(&ep->sin)));
 				DPRINT_INTERFACE(3,
 					(ep, "updating ",
 					 " new - created\n"));
@@ -1927,9 +1921,6 @@ update_interfaces(
 		DPRINT_INTERFACE(3, (ep, "updating ",
 				     "GONE - deleting\n"));
 		remove_interface(ep);
-		refresh_peers = TRUE;
-		DPRINTF(4, ("refreshing peers due to deleted addr %s\n",
-			    stoa(&ep->sin)));
 
 		ifi.action = IFS_DELETED;
 		ifi.ep = ep;
@@ -1951,16 +1942,15 @@ update_interfaces(
 	}
 
 	/*
-	 * phase 3 - re-configure as the world has changed if necessary
+	 * phase 3 - re-configure as the world has possibly changed
+	 *
+	 * never ever make this conditional again - it is needed to track
+	 * routing updates. see bug #2506
 	 */
+	refresh_all_peerinterfaces();
 
 	if (broadcast_client_enabled)
 		io_setbclient();
-	
-	if (refresh_peers) {
-		refresh_all_peerinterfaces();
-		msyslog(LOG_INFO, "peers refreshed");
-	}
 
 	return new_interface_found;
 }
