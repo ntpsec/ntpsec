@@ -40,7 +40,7 @@
 #define	TC_ERR	(-1)
 #endif
 
-extern char *leapseconds_file;	/*name of the leapseconds file */
+extern char *leapseconds_file;	/* name of the leapseconds file */
 
 static void check_leapsec(u_int32, const time_t*, int/*BOOL*/);
 
@@ -67,8 +67,7 @@ volatile int alarm_flag;
 static  u_long interface_timer;	/* interface update timer */
 static	u_long adjust_timer;	/* second timer */
 static	u_long stats_timer;	/* stats timer */
-time_t	check_leapfile = 0;	/* Report leapfile problems once/day */
-#define CHECK_LEAP_EVERY	86400
+static	u_long check_leapfile;	/* Report leapfile problems once/day */
 static	u_long huffpuff_timer;	/* huff-n'-puff timer */
 static	u_long worker_idle_timer;/* next check for idle intres */
 u_long	leapsec;	        /* seconds to next leap (proximity class) */
@@ -191,6 +190,7 @@ init_timer(void)
 	alarm_overflow = 0;
 	adjust_timer = 1;
 	stats_timer = HOUR;
+	check_leapfile = 0;
 	huffpuff_timer = 0;
 	interface_timer = 0;
 	current_time = 0;
@@ -437,7 +437,7 @@ timer(void)
 			** We only want to log stuff once/day.
 			*/
 			if (check_leapfile < current_time) {
-				check_leapfile += CHECK_LEAP_EVERY;
+				check_leapfile += DAY;
 				if (-1 == clf) {
 					/* nothing to do */
 				} else if (0 == clf) {
